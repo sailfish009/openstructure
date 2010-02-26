@@ -1,0 +1,391 @@
+set(OST_GUI_PANEL_BAR_HEADERS
+button_bar.hh
+drop_box.hh
+panels.hh
+panel_bar.hh
+bottom_bar.hh
+button_box.hh
+event_button.hh
+panel_widget_container.hh
+panel_bar_widget_holder.hh
+side_bar.hh
+splitter_panel_bar.hh
+tabbed_panel_bar.hh
+)
+set(OST_GUI_SEQUENCE_VIEWER_HEADERS
+sequence_item.hh
+sequence_viewer_base.hh
+sequence_viewer.hh
+sequence_scene.hh
+sequence_search_bar.hh
+)
+set(OST_GUI_TOOLS_HEADERS
+tool.hh
+tool_option_group.hh
+tool_options.hh
+tool_bar.hh
+selection_tool.hh
+measure_tool.hh
+tool_option.hh
+tool_manager.hh
+tool_options_widget.hh
+manipulator.hh
+tool_options_win.hh
+mouse_event.hh
+)
+set(OST_GUI_PYTHON_SHELL_HEADERS
+main_thread_runner.hh
+output_redirector.hh
+completer_base.hh
+dir_model.hh
+gutter.hh
+path_completer.hh
+python_context_parser.hh
+python_completer.hh
+python_shell.hh
+python_shell_fw.hh
+python_shell_widget.hh
+python_tokenizer.hh
+python_syntax_highlighter.hh
+text_logger.hh
+python_interpreter.hh
+python_interpreter_proxy.hh
+python_shell_text_document_layout.hh
+shell_history.hh
+)
+
+set(OST_GUI_SCENE_WIN_HEADERS
+gfx_scene_node.hh
+root_node.hh
+scene_node.hh
+scene_win.hh
+scene_win_model.hh
+)
+
+set(OST_GUI_PLOT_VIEWER_HEADERS
+plot_axis_base.hh
+plot_axis_horizontal.hh
+plot_axis_vertical.hh
+plot_data.hh
+plot_data_base.hh
+plot_data_entry.hh
+plot_data_graphics_item.hh
+plot_data_graphics_item_base.hh
+plot_data_info.hh
+plot_data_info_fw.hh
+plot_function.hh
+plot_function_info.hh
+plot_function_graphics_item.hh
+plot_graphics_cross_item.hh
+plot_graphics_diagonal_cross_item.hh
+plot_graphics_ellipse_item.hh
+plot_graphics_rectangle_item.hh
+plot_group_graphics_item.hh
+plot_group_info.hh
+plot_group.hh
+plot_info_base.hh
+plot_legend_panel.hh
+plot_ticker.hh
+plot_ticker_fw.hh
+plot_types.hh
+plot_viewer.hh
+plot_viewer_panel.hh
+plot_viewer_proxy.hh
+plot_viewer_proxy_fw.hh
+)
+
+if (ENABLE_IPLT)
+  set(OST_GUI_DATA_VIEWER_HEADERS
+  argand.hh
+  data_viewer.hh
+  data_viewer_panel.hh
+  data_viewer_panel_base.hh
+  draw_overlay.hh
+  drawing_functions.hh
+  fft_panel.hh
+  info_panel.hh
+  iplt2qt.hh
+  mask_overlay.hh
+  null_overlay.hh
+  overlay.hh
+  overlay_base.hh
+  overlay_base_fw.hh
+  overlay_manager.hh
+  overlay_manager_fw.hh
+  overlay_manager_gui.hh
+  overlay_manager_observer.hh
+  pointlist_overlay.hh
+  pointlist_overlay_base.hh
+  strategies.hh
+  strategies_fw.hh
+  viewer_normalizer.hh
+  IN_DIR data_viewer
+  )
+endif()
+
+set(OST_GUI_HEADERS
+change_process_name.hh
+file_browser.hh
+remote_loader.hh
+gl_canvas.hh
+gl_win.hh
+scene_menu.hh
+gosty_app.hh
+main.hh
+main_area.hh
+mdi_sub_window.hh
+module_config.hh
+perspective.hh
+query_dialog.hh
+remote_site_loader.hh
+scene_selection.hh
+main_window.hh
+dock_widget.hh
+main_window.hh
+dock_widget.hh
+thin_splitter.hh
+widget.hh
+widget_geom_handler.hh
+widget_pool.hh
+widget_registry.hh
+widget_state_saver.hh
+file_loader.hh
+loader_manager.hh
+)
+
+set(OST_GUI_SOURCES
+thin_splitter.cc
+perspective.cc
+widget_registry.cc
+file_browser.cc
+remote_loader.cc
+main.cc
+mdi_sub_window.cc
+gl_canvas.cc
+dock_widget.cc
+main_window.cc
+gl_win.cc
+scene_menu.cc
+widget.cc
+widget_pool.cc
+remote_site_loader.cc
+sequence_viewer/sequence_item.cc
+sequence_viewer/sequence_viewer_base.cc
+sequence_viewer/sequence_viewer.cc
+sequence_viewer/sequence_scene.cc
+sequence_viewer/sequence_search_bar.cc
+gosty_app.cc
+change_process_name.cc
+main_area.cc
+query_dialog.cc
+widget_state_saver.cc
+scene_selection.cc
+widget_geom_handler.cc
+file_loader.cc
+loader_manager.cc
+panel_bar/button_bar.cc
+panel_bar/drop_box.cc
+panel_bar/panel_bar.cc
+panel_bar/bottom_bar.cc
+panel_bar/button_box.cc
+panel_bar/event_button.cc
+panel_bar/panels.cc
+panel_bar/panel_widget_container.cc
+panel_bar/panel_bar_widget_holder.cc
+panel_bar/side_bar.cc
+panel_bar/splitter_panel_bar.cc
+panel_bar/tabbed_panel_bar.cc
+tools/tool_option_group.cc
+tools/tool_options.cc
+tools/tool_option.cc
+tools/tool_manager.cc
+tools/tool_options_win.cc
+tools/tool.cc
+tools/mouse_event.cc
+tools/manipulator.cc
+tools/tool_options_widget.cc
+tools/tool_bar.cc
+tools/selection_tool.cc
+tools/measure_tool.cc
+plot_viewer/plot_axis_base.cc
+plot_viewer/plot_axis_vertical.cc
+plot_viewer/plot_axis_horizontal.cc
+plot_viewer/plot_data_graphics_item.cc
+plot_viewer/plot_data_graphics_item_base.cc
+plot_viewer/plot_graphics_ellipse_item.cc
+plot_viewer/plot_graphics_rectangle_item.cc
+plot_viewer/plot_graphics_diagonal_cross_item.cc
+plot_viewer/plot_graphics_cross_item.cc
+plot_viewer/plot_data.cc
+plot_viewer/plot_data_base.cc
+plot_viewer/plot_data_info.cc
+plot_viewer/plot_function.cc
+plot_viewer/plot_function_graphics_item.cc
+plot_viewer/plot_function_info.cc
+plot_viewer/plot_info_base.cc
+plot_viewer/plot_group.cc
+plot_viewer/plot_group_info.cc
+plot_viewer/plot_group_graphics_item.cc
+plot_viewer/plot_ticker.cc
+plot_viewer/plot_viewer.cc
+plot_viewer/plot_viewer_proxy.cc
+plot_viewer/plot_viewer_panel.cc
+plot_viewer/plot_legend_panel.cc
+python_shell/gutter.cc
+python_shell/main_thread_runner.cc
+python_shell/output_redirector.cc
+python_shell/completer_base.cc
+python_shell/dir_model.cc
+python_shell/path_completer.cc
+python_shell/python_context_parser.cc
+python_shell/python_completer.cc
+python_shell/python_interpreter.cc
+python_shell/python_interpreter_proxy.cc
+python_shell/python_namespace_tree_model.cc
+python_shell/python_namespace_tree_item.cc
+python_shell/python_shell.cc
+python_shell/python_shell_widget.cc
+python_shell/python_shell_text_document_layout.cc
+python_shell/python_tokenizer.cc
+python_shell/python_syntax_highlighter.cc
+python_shell/shell_history.cc
+python_shell/string_literal_positions.cc
+python_shell/text_logger.cc
+scene_win/scene_node.cc
+scene_win/gfx_scene_node.cc
+scene_win/root_node.cc
+scene_win/scene_win.cc
+scene_win/scene_win_model.cc
+)
+
+set(HEADERS_TO_BE_MOCCED
+file_browser.hh
+remote_loader.hh
+gl_canvas.hh
+gl_win.hh
+scene_menu.hh
+gosty_app.hh
+main.hh
+main_area.hh
+mdi_sub_window.hh
+perspective.hh
+query_dialog.hh
+dock_widget.hh
+main_window.hh
+scene_selection.hh
+widget.hh
+widget_geom_handler.hh
+widget_pool.hh
+sequence_viewer/sequence_item.hh
+sequence_viewer/sequence_viewer_base.hh
+sequence_viewer/sequence_viewer.hh
+sequence_viewer/sequence_scene.hh
+sequence_viewer/sequence_search_bar.hh
+plot_viewer/plot_axis_base.hh
+plot_viewer/plot_data_graphics_item_base.hh
+plot_viewer/plot_function_info.hh
+plot_viewer/plot_info_base.hh
+plot_viewer/plot_viewer_panel.hh
+plot_viewer/plot_legend_panel.hh
+python_shell/main_thread_runner.hh
+python_shell/completer_base.hh
+python_shell/gutter.hh
+python_shell/path_completer.hh
+python_shell/python_completer.hh
+python_shell/python_interpreter.hh
+python_shell/python_namespace_tree_model.hh
+python_shell/python_shell.hh
+python_shell/python_shell_widget.hh
+python_shell/text_logger.hh
+panel_bar/button_bar.hh
+panel_bar/drop_box.hh
+panel_bar/panel_bar.hh
+panel_bar/panels.hh
+panel_bar/bottom_bar.hh
+panel_bar/button_box.hh
+panel_bar/event_button.hh
+panel_bar/panel_widget_container.hh
+panel_bar/panel_bar_widget_holder.hh
+panel_bar/side_bar.hh
+panel_bar/splitter_panel_bar.hh
+panel_bar/tabbed_panel_bar.hh
+scene_win/gfx_scene_node.hh
+scene_win/root_node.hh
+scene_win/scene_node.hh
+scene_win/scene_win.hh
+scene_win/scene_win_model.hh
+tools/tool.hh
+tools/tool_option_group.hh
+tools/tool_options.hh
+tools/tool_bar.hh
+tools/tool_option.hh
+tools/tool_manager.hh
+tools/tool_options_widget.hh
+tools/tool_options_win.hh
+)
+if (ENABLE_IPLT)
+  list(APPEND OST_GUI_TOOLS_HEADERS map_tool.hh)
+  list(APPEND OST_GUI_SOURCES
+       tools/map_tool.cc
+       data_viewer/argand.cc
+       data_viewer/data_viewer.cc
+       data_viewer/data_viewer_panel.cc
+       data_viewer/data_viewer_panel_base.cc
+       data_viewer/draw_overlay.cc
+       data_viewer/drawing_functions.cc
+       data_viewer/fft_panel.cc
+       data_viewer/info_panel.cc
+       data_viewer/iplt2qt.cc
+       data_viewer/mask_overlay.cc
+       data_viewer/null_overlay.cc
+       data_viewer/overlay_base.cc
+       data_viewer/overlay_manager.cc
+       data_viewer/overlay_manager_gui.cc
+       data_viewer/pointlist_overlay.cc
+       data_viewer/pointlist_overlay_base.cc
+       data_viewer/strategies.cc
+       data_viewer/viewer_normalizer.cc)
+  list(APPEND HEADERS_TO_BE_MOCCED
+    data_viewer/argand.hh
+    data_viewer/fft_panel.hh
+    data_viewer/info_panel.hh
+    data_viewer/data_viewer.hh
+    data_viewer/overlay_manager_gui.hh
+    data_viewer/data_viewer_panel_base.hh
+    data_viewer/null_overlay.hh
+    data_viewer/overlay_base.hh
+    data_viewer/pointlist_overlay_base.hh
+  )
+endif()
+
+set(QT_USE_QTOPENGL 1)
+set(QT_USE_QTNETWORK 1)
+include(${QT_USE_FILE})
+qt4_wrap_cpp(OST_GUI_MOCS "${HEADERS_TO_BE_MOCCED}")
+module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
+       HEADERS ${OST_GUI_TOOLS_HEADERS} IN_DIR tools
+               ${OST_GUI_PLOT_VIEWER_HEADERS} IN_DIR plot_viewer
+               ${OST_GUI_SEQUENCE_VIEWER_HEADERS} IN_DIR sequence_viewer
+               ${OST_GUI_PYTHON_SHELL_HEADERS} IN_DIR python_shell
+               ${OST_GUI_PANEL_BAR_HEADERS} IN_DIR panel_bar
+               ${OST_GUI_SCENE_WIN_HEADERS} IN_DIR scene_win
+               ${OST_GUI_DATA_VIEWER_HEADERS}
+               ${OST_GUI_HEADERS}
+       DEPENDS_ON gfx io mol_alg
+       LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
+include_directories(${PYTHON_INCLUDE_PATH})
+qt4_add_resources(OST_QT_RESOURCE dngr.qrc)
+qt4_wrap_cpp(OST_GOSTY_MOC "gosty.hh")
+# if someone has ANY idea why windows already has the boost program options
+# symbols defined, please talk to Marco and Juergen. You will be rewarded with
+# dogfood for a lifetime!
+if (NOT WIN32)
+  set(LINK LINK ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
+endif()
+
+executable(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
+           DEPENDS_ON gui ${LINK})
+#if (APPLE)
+#  set_source_files_properties(change_process_name.cc
+#                              PROPERTIES COMPILE_FLAGS "-ObjC++")
+#endif()

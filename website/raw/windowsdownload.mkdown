@@ -1,0 +1,16 @@
+title: Download/Installation Instructions for the Windows platform 
+
+# Download - Windows
+ 
+OpenStructure is released under the  <a target="extern" href="http://www.gnu.org/licenses/lgpl-3.0-standalone.html">LGPL Version 3</a> license.
+
+## Installation
+ 1. [Download](downloads/OSTcurrent_windows.zip) the complete OpenStructure package for windows. 
+ * Extract the zip archive to your desired folder.  
+## Starting DNG - The Graphical User Interface to OpenStructure
+ * Simply start DNG by double clicking ***dng.bat*** in the bin directory.
+ * Located in the same directory is also ***ost.bat*** a command line interface to the openstructure framework.
+
+## Supported Windows Platforms
+Currently we only truely support Windows XP.
+

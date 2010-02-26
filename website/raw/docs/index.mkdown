@@ -1,0 +1,34 @@
+title: Documentation
+[TOC]
+# Documentation
+
+## New to OpenStructure?
+
+Newcomers might want to have a look at our gentle [introduction to the framework](docs/tut/intro.html) and the [features list](features.html). 
+
+For a conceptual overview of the framework, we have prepared a few [tutorials](docs/tutorials.html). You can also find [code examples](docs/examples.html) with a short description.
+
+
+## For Those Who Know
+
+The following links provide direct access to the API documentation.
+
+### Molecular Structures
+ * dox[ost::mol::EntityHandle|EntityHandle] | dox[ost::mol::EntityView|EntityView] | [Queries](dox/html/query.html) | [Conop](dox/html/module_conop.html)
+
+### Sequence
+
+ * [Overview](dox/html/module_seq.html)
+
+### Reading and writing files
+
+ * [io](dox/html/module_io.html)
+
+### Graphics
+
+ * dox[ost::gfx::Scene|Scene] | [Graphical Entity](dox/html/gfx_ent.html)
+
+### Global Data Structure Index
+ * [Data Structure index](dox/html/classes.html)
+
+

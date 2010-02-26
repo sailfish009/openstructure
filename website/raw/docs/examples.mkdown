@@ -1,0 +1,34 @@
+title: Examples
+[TOC]
+# Examples
+
+Below you find a list of examples that should illustrate various aspects of interaction with OpenStructure itself and proteins in particular. Feel free to browse the [alphabetical examples list](dox/html/examples.html).
+
+## Examples by Topic
+
+### Graphics
+ * ex[load_and_display.py|Loading And Displaying an Entity]
+ * ex[rendermodes.py|Render Modes]
+ * ex[primitives.py|Adding Lines and Quads] | ex[random_lines.py|Random Lines]
+ * ex[bbox.py|Displaying a Bounding Box]
+ * ex[gfx_symmetry.py|Drawing Symmetry Equivalents]
+ * ex[gradient.py|Gradients]
+ * ex[gfx_selection.py|Graphical Selection]
+ * ex[color_by_property.py|Color Entity By Property]
+ 
+### GUI
+ * ex[menubar_example.py|Adding a Menu]
+ * ex[color_tool.py|Write a Tool in Python]
+ * ex[widget_example.py|Add a custom Widget]
+ * ex[mdi_example.py|Add a Widget to MDI]
+ 
+### Molecular Entities
+ * ex[roll_helix.py|Modifying Protein Backbone Torsion Angles] 
+ * ex[bbox.py|Calculating an Oriented Bounding Box]
+
+### Image Processing
+ * ex[create_split_image.py|Creating a Split Image from Several Images]
+ * ex[fft_li.py|Load Images and Show Fourier Transforms]
+ * ex[modulate_image.py|Load and Modulate Image by a Sine]
+ * ex[spoke_pattern.py|Create a Spoke Pattern Image]
+ * ex[view_phase_diff.py|Display Phase Difference of Two Images]

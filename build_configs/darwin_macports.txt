@@ -1,0 +1,6 @@
+# this file contains a list of settings to be used on MacOS X with
+# the dependencies installed over MacPorts
+set(BOOST_ROOT "/opt/local" CACHE PATH "prefix for the boost")
+set(PYTHON_ROOT "/opt/local" CACHE PATH "prefix for python")
+set(QT_QMAKE_EXECUTABLE "/opt/local/bin/qmake-mac" CACHE PATH 
+    "absolute path to qt executable")

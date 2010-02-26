@@ -1,0 +1,47 @@
+set(OST_CONFIG_HEADERS
+base.hh
+config.hh
+dllexport.hh
+version.hh
+)
+
+
+set(animations_enabled 0)
+if (USE_SHADER)
+  set(shader_support 1)
+else()
+  set(shader_support 0)
+endif()
+
+if (PROFILE)
+  set(profiling_enabled 1)
+else()
+  set(profiling_enabled 0)
+endif()
+if (ENABLE_IPLT)
+  set(iplt_enabled 1)
+else()
+  set(iplt_enabled 0)
+endif()
+if (_DOUBLE_PREC)
+  set(double_prec 1)
+else()
+  set(double_prec 0)
+endif()
+if (_DOUBLE_PREC)
+  set(double_prec 1)
+else()
+  set(double_prec 0)
+endif()
+if (_STATICPROPS)
+  set(static_props 1)
+else()
+  set(static_props 0)
+endif()
+
+set(config_hh_generator "CMake")
+set(CONFIG_HH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/config.hh")
+configure_file(config.hh.in ${CONFIG_HH_FILE})
+add_custom_target(ost_config)
+stage_headers("${OST_CONFIG_HEADERS}" "ost" 
+              "ost_config" "")

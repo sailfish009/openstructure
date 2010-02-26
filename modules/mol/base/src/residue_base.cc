@@ -1,0 +1,176 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
+#include "residue_base.hh"
+#include <ost/mol/impl/residue_impl.hh>
+#include <ost/mol/torsion_handle.hh>
+#include <ost/invalid_handle.hh>
+
+namespace ost { namespace mol {
+
+ResidueBase::ResidueBase()
+{ }
+
+ResidueBase::ResidueBase(const ResidueBase& rhs):
+  impl_(rhs.impl_) 
+{}
+
+ResidueBase::ResidueBase(const impl::ResidueImplPtr& impl):
+  impl_(impl) 
+{}
+
+GenericPropertyContainerImpl* ResidueBase::GpImpl()
+{
+  return Impl().get();
+}
+
+const GenericPropertyContainerImpl* ResidueBase::GpImpl() const
+{
+  return Impl().get();
+}
+
+
+const ResNum& ResidueBase::GetNumber() const {
+  this->CheckValidity();
+  return impl_->GetNumber();
+}
+
+const ResidueKey& ResidueBase::GetKey() const {
+  this->CheckValidity();
+  return impl_->GetKey();
+}
+
+const String& ResidueBase::GetName() const {
+  this->CheckValidity();
+  return impl_->GetName();
+}
+
+String ResidueBase::GetQualifiedName() const {
+  this->CheckValidity();
+  return impl_->GetQualifiedName();
+}
+
+ResidueBase::operator bool() const {
+  return impl_.get()!=0;
+}
+
+bool ResidueBase::IsValid() const {
+  return impl_;
+}
+
+bool ResidueBase::IsPeptideLinking() const 
+{
+  return this->GetChemClass().IsPeptideLinking();
+}
+
+bool ResidueBase::IsNucleotideLinking() const 
+{
+  return this->GetChemClass().IsNucleotideLinking();
+}
+
+ChemClass ResidueBase::GetChemClass() const 
+{
+  this->CheckValidity();
+  return Impl()->GetChemClass();
+};
+
+void ResidueBase::SetChemClass(ChemClass cc) 
+{
+  this->CheckValidity();
+  Impl()->SetChemClass(cc);
+}
+
+SecStructure ResidueBase::GetSecStructure() const 
+{
+  this->CheckValidity();
+  return impl_->GetSecStructure();
+}
+
+void ResidueBase::SetSecStructure(SecStructure ss) 
+{
+  this->CheckValidity();
+  impl_->SetSecStructure(ss);
+}
+
+TorsionHandle ResidueBase::GetPhiTorsion() const 
+{
+  this->CheckValidity();
+  return impl_->GetPhiTorsion();
+}
+
+TorsionHandle ResidueBase::GetPsiTorsion() const 
+{
+  this->CheckValidity();
+  return impl_->GetPsiTorsion();
+}
+
+impl::ResidueImplPtr& ResidueBase::Impl() 
+{
+  return impl_;
+}
+
+const impl::ResidueImplPtr& ResidueBase::Impl() const 
+{
+  return impl_;
+}
+
+void ResidueBase::CheckValidity() const 
+{
+  if (!impl_)
+    throw InvalidHandle();
+}
+
+DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os, 
+                                            const ResidueBase& residue) {
+   os << residue.GetQualifiedName();  
+   return os;                                                                              
+}
+
+char ResidueBase::GetOneLetterCode() const 
+{
+  this->CheckValidity();
+  return Impl()->GetOneLetterCode();
+}
+
+void ResidueBase::SetOneLetterCode(char olc)  
+{
+  this->CheckValidity();
+  Impl()->SetOneLetterCode(olc);
+}
+
+String ResidueBase::GetStringProperty(Prop::ID prop_id) const
+{
+  this->CheckValidity();
+  return Impl()->GetStringProperty(prop_id);
+}
+                      
+
+Real ResidueBase::GetFloatProperty(Prop::ID prop_id) const
+{
+  this->CheckValidity();
+  return Impl()->GetFloatProperty(prop_id);
+}
+
+int ResidueBase::GetIntProperty(Prop::ID prop_id) const
+{
+  this->CheckValidity();
+  return Impl()->GetIntProperty(prop_id);
+}
+
+}}
+

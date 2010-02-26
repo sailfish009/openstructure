@@ -1,0 +1,9 @@
+title: FAQ - Frequently Answered Questions
+
+#FAQ - Frequently Answered Questions
+
+ 1. **Which licensing does Openstructure come with?**  
+    Openstructure is released under GNU-LGPL license 
+ 
+ *  **Why another molecular Viewer?**  
+    Openstructure is not aiming to be a Viewer, but more a molecular modelling platform, a toolkit. It features nice graphics, though!  

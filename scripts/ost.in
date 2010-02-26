@@ -1,0 +1,76 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+# This file is part of the OpenStructure project <www.openstructure.org>
+#
+# Copyright (C) 2008-2010 by the OpenStructure authors
+#
+# This library is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#------------------------------------------------------------------------------
+
+#
+# convenience wrapper for non-gui openstructure interface 'ost'
+#
+# Self detect important directories
+SCRIPT_NAME=$0
+BIN_DIR=`dirname "$SCRIPT_NAME"`
+export DNG_ROOT="$BIN_DIR/.."
+export PATH=$PATH:"$BIN_DIR"
+export DYLD_FRAMEWORK_PATH="$BIN_DIR/../lib:${DYLD_FRAMEWORK_PATH}"
+export DYLD_LIBRARY_PATH="$BIN_DIR/../lib:${DYLD_LIBRARY_PATH}"
+# set ld_library_path and pythonhome for bundle (commented except in linux bundles)
+
+#export LD_LIBRARY_PATH=$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH
+#export PYTHONHOME=$DNG_ROOT
+#export QT_PLUGIN_PATH="$BIN_DIR/plugins"
+
+# retrieve absolute path to python executable
+pyexec=""
+if [ -z "$DNG_ATTACH_VALGRIND" ]; then
+  pyexec="@PYTHON_BINARY@"
+else
+  pyexec="valgrind --leak-check=full @PYTHON_BINARY@"
+fi
+
+if [ ! -f "$pyexec" ]; then 
+  echo "Error: Python executable '$pyexec' not found!"
+  exit
+fi
+
+set -o noglob
+
+# decide whether to start interactively or not
+# interactive mode can be forced by setting -i as a ost_cl option
+interactive=""
+if [ $# == 0 ];then
+  interactive="-i"
+else
+  opts=""
+  for argument in "$@";do 
+    if [ "$argument" == "-i" ] ;then
+      interactive="-i"
+    else
+      if [ -n "$opts" ]; then
+        opts=$opts"#""$argument"
+      else  
+        opts="$argument"
+      fi  
+    fi
+  done
+fi
+# finally pass control to python instance
+IFS="#"
+exec $pyexec $interactive "$DNG_ROOT/lib/openstructure/init_cl.py" $opts
+IFS=$' \t\n'
+
+

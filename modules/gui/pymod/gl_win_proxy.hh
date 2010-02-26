@@ -1,0 +1,50 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
+#ifndef OST_GUI_GL_WIN_PROXY_HH
+#define OST_GUI_GL_WIN_PROXY_HH
+
+#include <ost/gui/gl_win.hh>
+
+#include "sip_handler.hh"
+
+namespace ost { namespace gui {
+
+class  GLWinProxy : public SipHandler<GLWin> {
+public:
+  GLWinProxy(GLWin* gl_win=NULL):
+    SipHandler<GLWin>(gl_win)
+  { }
+  
+  void Show()  
+  {
+    return Me()->show();
+  }
+  void Hide()  
+  {
+    return Me()->hide();
+  }  
+  void StatusMessage(const String& message)  
+  {
+    Me()->StatusMessage(message);
+  }  
+};
+
+}}
+
+#endif

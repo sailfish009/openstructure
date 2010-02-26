@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <base href="%(BASE)s/">
+    <title>%(TITLE)s</title>
+    <link rel="stylesheet" type="text/css" href="css/ost.css" media="screen,print" title="Stylesheet" charset="utf-8">
+
+</head>
+<body>
+    <div id="content-holder">
+        <div id="toc-box">
+        <div id="menu">    
+            <a class="toc-title" >Site Navigation</a>
+	        <div class="toc-sep">
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="docs/tut/intro.html">Getting Started</a></li>
+                <li><a href="features.html">Features</a></li>
+                <li><a href="download.html">Download</a></li>                
+                <li><a href="gallery.html">Gallery</a></li>                
+                <li><a href="docs/index.html">Documentation</a></li>
+                <ul>
+                  <li><a href="docs/tutorials.html">Tutorials</a></li>
+                  <li><a href="docs/examples.html">Examples</a></li>
+                  <li><a href="dox/html/classes.html">Class List</a></li>
+                </ul>
+                <li><a href="FAQ.html">Frequently Answered Questions</a></li>
+
+                <li>
+                    <a href="ack.html">Acknowledgements</a>
+                </li>
+                <li>
+                    <a href="contact.html">Contact</a>
+                </li>
+            </ul>
+			</div>
+            <a class="toc-title" >Table of Contents</a> 
+            <div class="toc-sep" >
+                  %(SITE_NAV)s
+            </div> <!--toc-sep-->
+        </div><!--menu-->
+        </div><!--toc-box-->
+        <div id="content" >
+            %(CONTENT)s
+            <div id="footer">
+                Copyright 2008-2010 by the OpenStructure authors
+            </div>            
+        </div>        
+        </div>  
+</body>
+</html>

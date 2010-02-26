@@ -1,0 +1,216 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
+
+/*
+  Author: Marco Biasini
+ */
+#include <ost/invalid_handle.hh>
+#include <ost/seq/alignment_handle.hh>
+#include <ost/seq/impl/sequence_list_impl.hh>
+#include <ost/seq/sequence_list.hh>
+#include <ost/seq/aligned_region.hh>
+#include <ost/seq/aligned_column_iterator.hh>
+
+namespace ost { namespace seq {
+
+AlignmentHandle CreateAlignment()
+{
+  return AlignmentHandle(impl::SequenceListImplPtr(new impl::SequenceListImpl));
+}
+
+AlignmentHandle::AlignmentHandle():
+  impl_()
+{
+}
+
+AlignmentHandle::AlignmentHandle(const impl::SequenceListImplPtr& impl):
+  impl_(impl)
+{ }
+
+
+int AlignmentHandle::GetPos(int seq_index, int residue_index) const
+{
+  this->CheckValidity();
+  return impl_->GetPos(seq_index, residue_index);  
+}
+
+int AlignmentHandle::GetResidueIndex(int seq_index, int pos) const
+{
+  this->CheckValidity();
+  return impl_->GetResidueIndex(seq_index, pos);  
+}
+
+
+void AlignmentHandle::AddSequence(const ConstSequenceHandle& sequence)
+{
+  this->CheckValidity();  
+  if (impl_->GetCount()>0 && 
+      impl_->GetSequence(0)->GetLength()!=sequence.GetLength()) {
+    throw InvalidAlignment();        
+  }
+  return impl_->AddSequence(sequence.Impl());  
+}
+
+ConstSequenceHandle AlignmentHandle::GetSequence(int seq_id) const
+{
+  this->CheckValidity();
+  return impl_->GetSequence(seq_id);
+}
+
+
+String AlignmentHandle::ToString(int width) const
+{
+  this->CheckValidity();
+  return impl_->ToString(width);  
+}
+
+int AlignmentHandle::GetLength() const
+{
+  this->CheckValidity();
+  if (impl_->GetCount()==0) {
+    return 0;
+  } else {
+    return impl_->GetSequence(0)->GetLength();
+  }
+}
+
+
+AlignmentHandle AlignmentHandle::Copy() const
+{
+  this->CheckValidity();
+  return impl_->Copy();
+}
+
+bool AlignmentHandle::operator==(const AlignmentHandle& rhs) const
+{
+  return rhs.impl_==impl_;
+}
+
+bool AlignmentHandle::operator!=(const AlignmentHandle& rhs) const
+{
+    return rhs.impl_!=impl_;
+}
+
+void AlignmentHandle::CheckValidity() const
+{
+  if (!impl_) {
+    throw InvalidHandle();
+  }
+}
+
+int AlignmentHandle::GetCount() const
+{
+  this->CheckValidity();
+  return impl_->GetCount();
+}
+
+AlignmentHandle AlignmentFromSequenceList(const SequenceList& seq_list)
+{
+  if (seq_list.SequencesHaveEqualLength()) {
+    return AlignmentHandle(seq_list.Impl());
+  }
+  throw InvalidAlignment();
+}
+
+ConstSequenceList AlignmentHandle::GetSequences() const
+{
+  this->CheckValidity();
+  return ConstSequenceList(impl_);
+}
+
+
+void AlignmentHandle::AttachView(int seq_index, const mol::EntityView& view)
+{
+  this->CheckValidity();
+  impl_->GetSequence(seq_index)->AttachView(view);
+}
+
+void AlignmentHandle::AttachView(int seq_index, const mol::EntityView& view, 
+                                 const String& chain_name)
+{
+  this->CheckValidity();
+  impl_->GetSequence(seq_index)->AttachView(view, chain_name);
+}
+
+ConstSequenceHandle AlignmentHandle::FindSequence(const String& name) const
+{
+  this->CheckValidity();
+  return ConstSequenceHandle(impl_->FindSequence(name));
+}
+
+
+void AlignmentHandle::Cut(int start, int end)
+{
+  this->CheckValidity();
+  for (impl::SequenceListImpl::Iterator i=impl_->Begin(), 
+       e=impl_->End(); i!=e; ++i) {
+    (*i)->Cut(start, end-start);
+  }
+}
+  
+
+void AlignmentHandle::ShiftRegion(int start, int end, int amount, 
+                                  int master)
+{
+  this->CheckValidity();
+  int cnt=0;
+  for (impl::SequenceListImpl::Iterator i=impl_->Begin(), 
+       e=impl_->End(); i!=e; ++i, ++cnt) {
+    if (master==-1 || cnt==master) {
+      (*i)->ShiftRegion(start, end, amount);
+    }
+  }
+}
+
+AlignedRegion AlignmentHandle::MakeRegion(int start, int n, int master) const
+{
+  this->CheckValidity();
+  return AlignedRegion(*this, start, start+n, master);
+}
+
+mol::ResidueView AlignmentHandle::GetResidue(int seq_index, int pos) const
+{
+  this->CheckValidity();
+  return impl_->GetSequence(seq_index)->GetResidue(pos);
+}
+
+char AlignmentHandle::GetOneLetterCode(int seq_index, int pos) const
+{
+  this->CheckValidity();
+  return impl_->GetSequence(seq_index)->GetOneLetterCode(pos);
+}
+
+AlignedColumnIterator AlignmentHandle::begin() const
+{
+  // no need to check for validity here  
+  return AlignedColumnIterator(*this, 0, this->GetLength());
+}
+
+AlignedColumnIterator AlignmentHandle::end() const
+{
+  // no need to check for validity here
+  return AlignedColumnIterator(*this, this->GetLength(), this->GetLength());
+}
+
+AlignedColumn AlignmentHandle::operator[](int index)
+{
+  return AlignedColumn(*this, index);
+}
+
+}}

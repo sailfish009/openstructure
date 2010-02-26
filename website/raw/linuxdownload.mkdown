@@ -1,0 +1,52 @@
+title: Download - Linux
+
+[TOC]
+
+# Download - Linux
+
+OpenStructure is released under the  <a target="extern" href="http://www.gnu.org/licenses/lgpl-3.0-standalone.html">LGPL Version 3</a> license.
+
+ * [OpenStructure Linux Bundle](downloads/OSTcurrent_linux.tgz)
+
+This archive file contains a stand-alone self-contained version of OpenStructure for the Linux platform. .
+
+To run it, follow this simple instructions:
+
+1. Unpack the archive. If you are using a graphical desktop manager (like Gnome or KDE), this can be done by
+clicking on the file and selecting the appropriate option in the archiving tool application. If you are using
+a command line terminal, type:
+
+        :::bash
+        tar xvfz <archive name>
+ 
+2. Open a terminal, move to the package directory and then to the 'bin' subdirectory:
+
+        :::bash
+        cd <directory name>
+        cd bin
+    
+3. Launch the graphical front end 'DNG':
+
+        :::bash
+        ./dng
+    
+    Or the OpenStructure console 'ost'
+    
+        :::bash
+        ./ost
+        
+Note
+:   The package has been created on a 32bit machine (but should work also on 64 bit machines).
+The following Linux distributions are supported:
+
+* Ubuntu 9.10
+* Ubuntu 9.04
+* Ubuntu 8.10
+* Fedora Core 12
+* Fedora Core 11
+* Fedora Core 10
+* OpenSUSE 11.2
+
+The package does not contain drivers for the graphic card on your machine. In order to fully appreciate
+the OpenStructure experience, you have to install the graphic drivers yourself and activate 3D acceleration.
+This procedure in distribution and architecture specific, so it can not be described in details here.

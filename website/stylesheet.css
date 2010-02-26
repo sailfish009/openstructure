@@ -1,0 +1,299 @@
+/*
+  alternatives: 005F6A, B84433
+ */
+* {
+   font-family:Verdana, sans-serif;
+   font-size:10pt;
+   line-height:14pt;
+}
+body {
+    width:100%;
+    height:100%;
+}
+#content-holder {
+    margin-top:1cm;
+    margin-left:auto;
+    margin-right:auto;
+    width:25cm;
+    padding-left:0.2cm;
+    background-color:white;
+    border-color:#aaa;
+    margin-bottom:0.2cm;
+    padding-bottom:0.1cm;
+}
+#content {
+    border-color:#dddddd;
+    border-left-style:solid;
+    border-width:1px;
+    padding-left:10px;             
+    float:right;
+    width:18cm;    
+    min-height:20cm;
+}
+code {
+    font-family:Inconsolata, monospace;
+    border-color:#eeeeee;
+    border-width:1px;
+    margin:0px;
+    background-color:#fafafa;
+}
+
+a[href] {
+    color:#B84433;
+    font-style:italic;
+}
+
+h1 {
+   font-size:200%;
+   font-weight:normal;
+   color:#B84433;
+}
+
+h1 a {
+  font-size:100%;
+  font-weight:normal;
+  color:#B84433;
+}
+
+h2 {
+    font-family:Georgia, serif;
+    padding-top:10pt;
+    font-size:150%;
+    color:#333333;
+    font-weight:normal;
+    font-style:italic;
+}
+
+h2 a {
+  font-family:Georgia, serif;
+  padding-top:10pt;
+  font-size:100%;
+  color:#333333;
+  font-weight:normal;
+  font-style:italic;
+}
+
+h1, h2, h3 {
+  width:15cm;
+}
+#menu {
+    /*text-align:right;*/
+    padding-top:10px;
+    float:left;
+    width:6.4cm;
+    background: #fff url('../loops.png') no-repeat +26px right;
+}
+#menu a {
+  font-style:normal;
+}
+#menu li {
+    list-style-type:none;
+    padding-bottom:5px;
+}
+#menu ul {
+  padding-left:10px;
+}
+table {
+    padding:20px;
+    margin:0px;
+    width:70%;
+}
+.toc {
+}
+.toc ul {
+    padding-left:20px;
+    /*padding-bottom:5px;*/
+}
+.toc li {
+    padding-top:5px;
+    list-style-type:none;
+}
+.linenos {
+   vertical-align:top;
+    font-family:Inconsolata, monospace;
+    background-color:#dddddd;
+    color:#333333;
+    width:20px;
+    text-align:right;
+    padding-right:2px;
+    margin:0px;
+    border-width:0px;
+}
+.code {
+    font-family:Inconsolata, monospace;  
+    border-color:#eeeeee;
+    border-style:solid;
+    border-width:1px;
+    border-color:#dddddd;
+    display:block;
+    padding-left:10px;
+    margin:0px;
+    background-color:#fafafa;
+    width:13cm;
+}
+#footer {
+ font-size:8pt;
+ color:#333;
+ border-color:#dddddd; 
+ border-width:1px;
+ border-top-style:solid;
+ vertical-align:bottom;
+}
+
+.code .s {
+    color:#B84433;
+}
+
+.code .p {
+    color:black;
+}
+
+.code .k {
+  color:#4433B8;
+}
+
+
+
+.code .kn {
+  color:#4433B8;
+}
+
+.code .n {
+  color:#333;
+}
+
+.code .ow {
+  color:#4433B8;
+}
+
+.el, .memItemLeft, .memItemRight, .memname, .paramtype, .paramname {
+  font-family:Inconsolata, monospace;
+}
+
+.memproto {
+  border-top-style:dotted;
+  border-top-width:1px;
+  border-top-color:#999;
+  margin-top:20px;
+}
+
+/* tabs styles, based on http://www.alistapart.com/articles/slidingdoors */
+
+
+DIV.tabs
+{
+  height:35px;
+  padding:0px;
+	padding-left:10px;
+	color:black;
+	text-align:left;
+	margin:0px;
+	/*background-color:#2471BF;*/
+	border-color:#A5ABB9;
+	display:block;
+	float:none;
+	width:15cm;
+}
+
+DIV.tabs UL
+{
+   margin           : 0px;
+   padding:0px;
+   /*padding-left     : 10px;*/
+   list-style       : none;
+}
+DIV.tabs LI {
+  margin:0px;
+  padding:0px;
+}
+
+DIV.tabs LI, DIV.tabs
+{
+   float: left;
+   margin           : 0px;
+   padding          : 0px;
+}
+
+DIV.tabs FORM
+{
+   float            : right;
+}
+
+DIV.tabs A
+{
+	border-width:1px;
+	border-style:solid;
+	margin:0px;
+	border-color:#A5ABB9;
+	padding:3px 5px 3px 5px;
+	color:#2471BF;
+	background-color:#e8e8e8;
+	position:relative;
+	text-decoration:none;	
+	top:-2px;
+}
+
+DIV.tabs A:hover
+{
+   background-position: 100% -150px;
+}
+
+DIV.tabs A:link, DIV.tabs A:visited,
+DIV.tabs A:active, DIV.tabs A:hover
+{
+       color: #1A419D;
+}
+
+DIV.tabs TD
+{
+   font-size        : 80%;
+   font-weight      : bold;
+   text-decoration  : none;
+   margin:0px;
+}
+
+
+
+/* Commented Backslash Hack hides rule from IE5-Mac \*/
+DIV.tabs SPAN {float : none;}
+/* End IE5-Mac hack */
+
+DIV.tabs A:hover SPAN
+{
+   background-position: 0% -150px;
+}
+
+DIV.tabs LI.current A
+{
+	border-width:1px 1px 1px 1px;
+	border-style:solid;
+	border-color:#A5ABB9;
+	text-decoration:none;
+	font-style:normal;
+	padding:5px 5px 5px 5px;
+	margin:0px;
+	color:#2471BF;
+	background-color:#fff;
+	position:relative;
+	top:-4px;
+	/*font-weight:bold;*/
+}
+
+DIV.tabs LI.current SPAN
+{
+   background-position: 0% -150px;
+   padding-bottom   : 6px;
+}
+
+.navpath .el {
+   text-decoration:none;
+}
+DIV.navpath
+{
+   background       : none;
+   border           : none;
+   border-bottom    : 1px solid #DDD;
+   text-align       : left;
+   margin           : 0px;
+   padding          : 2px;
+}

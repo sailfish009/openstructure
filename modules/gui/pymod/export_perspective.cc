@@ -1,0 +1,79 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
+#include <boost/python.hpp>
+
+#include <QMdiArea>
+
+#include <ost/gui/perspective.hh>
+#include <ost/gui/main_area.hh>
+
+#include "menu_bar_proxy.hh"
+#include "menu_proxy.hh"
+
+#include "sip_handler.hh"
+
+using namespace boost::python;
+using namespace ost;
+using namespace ost::gui;
+
+object app_get_menu_bar(Perspective* pers)
+{
+  static object sip_module=import("sip");
+  static object pyqt4_module=import("PyQt4.QtGui");
+  object obj(MenuBarProxy(pers->GetMenuBar()));
+  object sip_handle=obj.attr("GetSipHandle")();
+  object qmenubar = pyqt4_module.attr("QMenuBar");
+  object menu_bar = sip_module.attr("wrapinstance")(sip_handle, qmenubar);
+
+  return menu_bar;
+}
+
+object app_get_menu(Perspective* pers, const QString& name)
+{
+  static object sip_module=import("sip");
+  static object pyqt4_module=import("PyQt4.QtGui");
+  object obj(MenuProxy(pers->GetMenu(name)));
+  object sip_handle=obj.attr("GetSipHandle")();
+  object qmenu = pyqt4_module.attr("QMenu");
+  object menu = sip_module.attr("wrapinstance")(sip_handle, qmenu);
+
+  return menu;
+}
+
+void export_Perspective()
+{
+  class_<Perspective, std::auto_ptr<Perspective>,
+         boost::noncopyable>("Perspective", no_init)
+    .def("GetPanels", &Perspective::GetPanels,
+         return_value_policy<reference_existing_object>())
+    .def("GetMainArea", &Perspective::GetMainArea,
+         return_value_policy<reference_existing_object>())
+    .def("GetMenuBar", &app_get_menu_bar)
+    .def("GetMenu", &app_get_menu)
+    .def("HideAllBars", &Perspective::HideAllBars)
+    .def("StatusMessage", &Perspective::StatusMessage)
+    .def("Restore", &Perspective::Restore)
+    .def("Save", &Perspective::Save)
+    .add_property("main_area", make_function(&Perspective::GetMainArea, 
+                  return_value_policy<reference_existing_object>()))
+    .add_property("panels", make_function(&Perspective::GetPanels,
+                  return_value_policy<reference_existing_object>()))
+  ;
+}
+

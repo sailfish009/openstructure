@@ -1,0 +1,16 @@
+title: Contact
+
+# Contact 
+
+## Community
+
+For general user inquiries and support: [openstructure-users mailing list](https://www.maillist.unibas.ch/mailman/listinfo/openstructure-users)
+
+Where the developers of OpenStructure discuss new features: [openstructure-devel mailing list](https://www.maillist.unibas.ch/mailman/listinfo/openstructure-devel) 
+
+## Address
+Prof. Torsten Schwede  
+SIB Swiss Institute of Bioinformatics  
+Biozentrum University of Basel  
+Klingelbergstrasse 50/70  
+CH-4056 Basel / Switzerland  

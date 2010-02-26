@@ -1,0 +1,179 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
+#include <iostream>
+
+#include <QApplication>
+#include <QMainWindow>
+
+#include <QMenuBar>
+#include <QDesktopWidget>
+
+#include <ost/gui/mdi_sub_window.hh>
+#include <ost/gui/python_shell/python_shell.hh>
+#include <ost/gui/gl_win.hh>
+#include <ost/gui/tools/tool_options_win.hh>
+#include <ost/gui/python_shell/text_logger.hh>
+#include <ost/gui/perspective.hh>
+#include <ost/gui/main_area.hh>
+
+#include "gosty_app.hh"
+
+/*
+  Author: Marco Biasini, Andreas Schenk, Stefan Scheuber
+ */
+
+namespace ost { namespace gui {
+
+
+GostyApp* GostyApp::app_=NULL;
+
+
+GostyApp::GostyApp():
+  py_shell_(NULL), w_py_shell_(NULL), gl_win_(NULL), w_gl_win_(NULL),
+  scene_win_(NULL), w_scene_win_(NULL), seq_viewer_(NULL), tool_options_win_(NULL),
+  w_tool_options_(NULL), main_(new GostyMainWindow), 
+  perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>())
+{
+  assert(GostyApp::app_==NULL);
+  GostyApp::app_=this;
+  main_->show();
+}
+
+GostyApp* GostyApp::Instance() {
+  if (!GostyApp::app_) {
+    GostyApp::app_=new GostyApp;
+  }
+  return GostyApp::app_;
+}
+
+void GostyApp::SetAppTitle(const QString& app_title)
+{
+  main_->setWindowTitle(app_title);
+}
+
+
+void GostyApp::OnQuit()
+{
+  QMapIterator<QString, WidgetGeomHandler *> i(external_widgets_);
+  while (i.hasNext()) {
+    i.next();
+    i.value()->SaveGeom("ui/external_widgets/");
+  }
+}
+
+ToolOptionsWin* GostyApp::GetToolOptionsWin()
+{
+  if (tool_options_win_==NULL) {
+    tool_options_win_=new ToolOptionsWin;
+    tool_options_win_->SetDestroyOnClose(false);
+  }
+  return tool_options_win_;  
+}
+
+SceneWin* GostyApp::GetSceneWin()
+{
+  if (scene_win_==NULL) {
+    scene_win_=new SceneWin;
+    scene_win_->SetDestroyOnClose(false);    
+  }
+  return scene_win_;  
+}
+
+SequenceViewer* GostyApp::GetSequenceViewer()
+{
+  if (seq_viewer_==NULL) {
+  seq_viewer_=new SequenceViewer;
+  seq_viewer_->SetDestroyOnClose(false);
+  }
+  return seq_viewer_;
+}
+
+#if OST_IPLT_ENABLED
+ost::iplt::gui::DataViewer* GostyApp::CreateDataViewer(const ost::iplt::Data& d, const QString& name)
+{
+  return new ost::iplt::gui::DataViewer(main_,d,name);
+}
+#endif
+
+void GostyApp::ReadLoggerSettings(const QString& group_name, TextLogger* logger)
+{
+  QSettings settings;
+  settings.beginGroup("logging");
+  settings.beginGroup(group_name);
+  logger->SetCodeLogging(settings.value("log_code",QVariant(false)).toBool());
+  logger->SetOutputLogging(settings.value("log_output",QVariant(true)).toBool());
+  logger->SetErrorLogging(settings.value("log_error",QVariant(true)).toBool());
+  settings.endGroup();
+  settings.endGroup();
+}
+  
+void GostyApp::SetupPyShellLogging()
+{
+  TextLogger* console_logger=new TextLogger(stdout);
+  this->ReadLoggerSettings("console", console_logger);
+  py_shell_->AddLogger(console_logger);  
+  // TODO: Setup file logging
+}
+
+PythonShell* GostyApp::GetPyShell()
+{
+  if (py_shell_==NULL) {
+    py_shell_=new PythonShell;
+    this->SetupPyShellLogging();             
+    py_shell_->SetDestroyOnClose(false);                 
+  }
+  return py_shell_;
+}
+
+GLWin*  GostyApp::GetGLWin()
+{
+  if (gl_win_==NULL) {
+    gl_win_=new GLWin(main_);
+    gl_win_->SetDestroyOnClose(false);    
+  }
+  return gl_win_;  
+}
+
+void GostyApp::ProcessEvents()
+{
+  QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents,100);
+}
+
+Perspective* GostyApp::GetPerspective()
+{
+  if (perspective_==NULL) {
+    perspective_=new Perspective(main_);
+  }
+  return perspective_;
+}
+
+void GostyApp::AddWidgetToApp(const QString& ident, QWidget* widget)
+{
+  external_widgets_[ident] = new WidgetGeomHandler(ident,widget);
+  external_widgets_[ident]->LoadGeom("ui/external_widgets/");
+}
+
+void GostyApp::RemoveWidgetFromApp(const QString& ident){
+  if(external_widgets_.contains(ident)){
+    external_widgets_[ident]->SaveGeom("ui/external_widgets/");
+    external_widgets_.remove(ident);
+  }
+}
+
+}}

@@ -1,0 +1,160 @@
+[TOC]
+# Exercises
+
+## Queries and Views
+
+First load myo.pdb. This can be done by either loading it in the file browser, or by loading it manually in the python shell. 
+
+## Loading manually
+
+    
+    myo=io.LoadPDB(‘myo.pdb’)
+    myo_go=gfx.Entity(‘Myo’, myo)
+    scene.Add(myo_go)
+    scene.SetCener(myo_go.GetCenter())
+    
+## Loading in the file browser
+
+Double click the file in the file browser. Now we have to get our hands on the myo object from the python shell:
+
+    myo_go=scene[‘myo’]
+    myo=myo_go.view.GetHandle()
+
+To display your views as a halo around the myo object, use
+    
+    myo_go.current_selection=whatever_view
+    # or
+    myo_go.SetCurrentSelection(whatever_view)
+
+
+Now go ahead and try to create the following selections. Not all of them can be solved by using selection statements. 1-4 and 7 can be solved by using selection statements alone, but 5 and 6 require you to create views manually.
+
+* Select all atoms of the HEM residue
+* Select carbon atoms of the HEM residue
+* Select the atoms within 8.0A of the HEM by using a selection statement.
+* Select all atoms of residues for which at least one atom is within 8.0A 
+  of the HEM
+* Select the atoms within 8.0A of the HEM by using EntityHandle.FindWithin().
+  This method takes a position and a radius and returns a list of atoms that are
+  within the given distance of the point. These have then to be assembled into a
+  view by populating an initially empty view as described in “Manually 
+  Constructing Views”.
+* Assemble a view that contains C-beta atoms for residues that have a CB and CA
+  for residues that don't have a CB. To find out, if a certain residue has an
+  atom, call residue.FindAtom(atom_name) and check if the returned atom is
+  valid,i.e 
+    
+    ca=residue.FindAtom(‘CA’)
+    if ca.IsValid():
+      print ca
+    else:
+      print residue, ‘does not have a CA’
+    
+* Select sidechains of residues for which at least one atom is within 8.0A of
+  the HEM
+  
+## Writing a Parser for your own file format
+
+
+In this exercise you will learn how to build and entity from the ground up by writing a parser for a custom file format. The skeleton of the parser can be found in 02_conop.py. Your task is to fill-in the missing parts. To do so, you will be first creating an empty entity (mol.CreateEntity()) and then assemble the entity with an XCSEditor.
+
+But first some background on what editors are:
+
+## Editors
+
+The structure, topology and connectivity of entities is edited via editors. This includes operations such as changing atom positions, connecting atoms with bonds as well as adding and removing chains, residues and atoms. To insert a new chain, append a residue or insert an atom, use EditorBase.InsertChain, EditorBase.AppendResidue or EditorBase.InsertAtom, respectively.
+
+You can create an editor by calling
+
+    edi=ent.RequestXCSEditor()
+
+on your entity. Adding chains, residues and atoms is pretty straigh-forward:
+
+    chain=edi.InsertChain(chain_name)
+    gly=edi.AppendResidue(chain, “GLY”)
+    edi.InsertAtom(gly, “N”, geom.Vec3())
+    edi.InsertAtom(gly, “CA”, geom.Vec3())
+    edi.InsertAtom(gly, “C”, geom.Vec3())
+    edi.InsertAtom(gly, “O”, geom.Vec3())
+
+You might have noticed that the above code snippet does not add any bonds, nor does it fill any atom properties such as element, radius and so on. OpenStructure has a module dedicated to only do that: The conop module. After importing it, a single call is sufficient to connect the atoms, fill in residue and atom properties:
+
+    conop.ConnectAll(ent)
+
+### Editor for external coordinate system
+
+The XCSEditor defines the interface for manipulating the external coordinate system. The external coordinate system directly operates on atom positions in euclidian space. A specific atom position can be changed with XCSEditor.SetAtomPos. XCSEditor.ApplyTransform applies a transformation to all atoms.
+
+###Editor for internal coordinate system
+
+The ICSEditor is used to manipulate the internal coordinate system that is defined by bond lengths and angles. By default the internal coordinate system is not calculates. However, upon requesting an ICSEditor for the first time, the internal coordinate system is initialized. This involves the build-up of a directed-graph for the bond network as well as calculating the internal coordinate matrices.
+
+The use XCSEditor and ICSEditor are mutually exlusive. This means that whenever a XCSEditor has pending changes, the results of using an ICSEditor is undefined and vice versa.
+
+
+## Processing of Density Maps
+
+In this exercise you will learn how to do basic processing of density map data. For the exercise you will use real experimental data coming from a single particle reconstruction of the YscC protein from Yersinia entercolitica. 
+
+The first step to the processing of density data in OpenStructure is the loading of the ‘iplt’ and ‘iplt.alg’ module.
+Go ahead and load the module in the OpenStructure python shell.
+
+The second step consists in loading the density data into memory. OpenStructure provides a LoadMap function in the ‘io’ module that can be used, not surprisingly, to load a density map.
+map=io.LoadMap(‘YscC.spi')The file is in Spider format( Spider is one of the most celebrated software packages for single particle reconstruction).
+
+The dataset is very big and is stored in a large density map. It will take a few seconds to load. To find out how large the density map is, you can use the interface of the ImageHandle object used to store the image. The interfaces provides functions to get several items of information about the map:
+
+    print map.GetSize()
+    print map.GetAbsoluteOrigin()
+    print map.GetSpatialOrigin()
+    print map.GetSpatialSampling()
+    print map.GetExtent()
+
+This last command returns an Extent object containing additional information about the extent of the map. Its interface can be used to learn even more.
+
+    print map.GetExtent().GetStart()
+    print map.GetExtent().GetEnd()
+    print map.GetExtent().GetCenter()
+
+You will notice that the GetSpatialSampling method shows that the map has a pixel sampling of 1 Angstrom in all directions. This is not correct. The correct pixel sampling information was not saved on disk. Let’s go ahead and set it manually: it is 2 Angstrom in all directions, so:
+
+    map.SetSpatialSampling(2.0*Units.A)
+
+The map is way too large to be manipulated and visualized comfortably. Since the data have low resolution anyway, we will shrink the map using the DiscreteShrink algorithm.
+
+First, go ahead and import the `iplt.alg` module.
+
+Then let’s create an instance of the DiscreteShrink algorithm. Let’s pass it a size parameter of 4x4x4. The map will be shrunk by a factor of 4 in all directions.
+Let’s now apply the algorithm to the map. We apply it in place, because we want to overwrite the original data
+map.ApplyIP(shrink_alg)Now go ahead and try to recover the information about the spatial sampling from the map. Verify that the pixel sampling has been adjusted to reflect the shrinking.
+shrink_alg=iplt.alg.DiscreteShrink(iplt.Size(4,4,4))
+
+Now, let’s use another algorithm to normalize the density values of the map between the 0 and 1
+norm=iplt.alg.CreateLinearRangeNormalizer(map,0.0,1.0)When you create an instance of this algorithm, you need to pass it information about the map it will be applied to (map) and the lowest and highest value of the normalization range(0.0 and 1.0)
+
+The algorithm can then be applied to the map. Go ahead and apply it in place, overwriting the original data.
+
+In order to visualize the map, we are now going to create an iso-surface graphical object
+map_go=gfx.MapIso(“map”,map,0.5)This will create a an iso-surface graphical object based on the object “map”, drawing the iso-surface at a threshold level of 0.5. The object will appear in the scene menu with the name “map”.
+
+The graphical object needs to be now added to the scene and center the scene on the object
+scene.Add(map_go)
+scene.SetCenter(map_go.GetCenter())Tah-da! There it is on the screen! If you now select the “map” object in the scene menu, and press the “M” button beside the scene view, you can change the iso-surface threshold interactively. You do this by keeping the ‘command’ key on Mac Computers (or the ‘Control’ key on Linux) and moving the mouse to the left or to the right.
+
+You can always get value of the current iso-surface threshold level using the interface of the graphical object:
+print map_go.GetLevel()
+Finally, let’s create a low-pass-filtered version of the map and display it on the screen.
+We use the LowPassFilter algorithm:
+
+filter=iplt.alg.LowPassFilter(4.0*Units.nm)
+
+We pass to the algorithm the resolution threshold for the filtering. Please notice that we pass it in nanometers, because we have been working with electron tomography in the past, so it comes easier to us to think in terms of nanometers as opposed to Angstrom. OpenStructure does the necessary conversion internally.
+
+Now let’s apply the algorithm, but this time let’s do it out of place to create a new map.
+
+filtered_map=map.Apply(filter)
+
+Please now go ahead and create a graphical object for this map, give it an appropriate threshold, the name “filtered_map” and add it to the scene. Then play with the iso-surface.
+
+Congratulations, you have completed the exercise!
+

@@ -1,0 +1,7 @@
+<!DOCTYPE EMDataInfo>
+<EMDataInfo>
+ <GenericLoaders>
+  <GenericLoader ExtName="pdbredo" Name="pdbredo" Url="http://www.cmbi.ru.nl/pdb_redo/ak/${ID}/${ID}_besttls.pdb" />
+  <GenericLoader ExtName="pdborg" Name="pdb.org" Url="http://www.pdb.org/pdb/files/${ID}.pdb" />
+ </GenericLoaders>
+</EMDataInfo>

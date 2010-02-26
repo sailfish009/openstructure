@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://inkscape.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="192.00000px"
+   height="192.00000px"
+   id="svg2"
+   sodipodi:version="0.32"
+   inkscape:version="0.42.2"
+   sodipodi:docbase="/home/ansgar/projects/dng/modules/gui/src/xpm"
+   sodipodi:docname="angle_transform.svg"
+   inkscape:export-filename="/home/ansgar/projects/dng/modules/gui/src/xpm/angle_transform.png"
+   inkscape:export-xdpi="150.00000"
+   inkscape:export-ydpi="150.00000">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient2201">
+      <stop
+         style="stop-color:#00addd;stop-opacity:1.0000000;"
+         offset="0.0000000"
+         id="stop2203" />
+      <stop
+         style="stop-color:#5b009e;stop-opacity:1.0000000;"
+         offset="1.0000000"
+         id="stop2205" />
+    </linearGradient>
+    <marker
+       inkscape:stockid="Arrow2Send"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow2Send"
+       style="overflow:visible;">
+      <path
+         sodipodi:nodetypes="cccc"
+         id="path2167"
+         style="font-size:12.0;fill-rule:evenodd;stroke-width:0.62500000;stroke-linejoin:round;"
+         d="M 8.7185878,4.0337352 L -2.2072895,0.016013256 L 8.7185884,-4.0017078 C 6.9730900,-1.6296469 6.9831476,1.6157441 8.7185878,4.0337352 z "
+         transform="scale(0.3) rotate(180) translate(-5,0)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Sstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Sstart"
+       style="overflow:visible">
+      <path
+         sodipodi:nodetypes="ccccc"
+         id="path983"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none"
+         transform="scale(0.2)" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         sodipodi:nodetypes="ccccc"
+         id="path2181"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none"
+         transform="scale(0.8)" />
+    </marker>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2201"
+       id="radialGradient2209"
+       cx="100.00000"
+       cy="92.000000"
+       fx="100.00000"
+       fy="92.000000"
+       r="70.000000"
+       gradientTransform="matrix(1.000000,0.000000,0.000000,0.885714,0.000000,10.51429)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.3330956"
+     inkscape:cx="102.63800"
+     inkscape:cy="98.912863"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     gridspacingy="8.0000000px"
+     gridspacingx="8.0000000px"
+     gridoriginy="0.0000000px"
+     gridoriginx="0.0000000px"
+     inkscape:window-width="1104"
+     inkscape:window-height="1058"
+     inkscape:window-x="448"
+     inkscape:window-y="34"
+     inkscape:grid-points="true"
+     gridtolerance="5.0000000px"
+     gridempspacing="8" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="opacity:1.0000000;fill:#ffffd2;fill-opacity:1.0000000;stroke:none;stroke-width:6.0000000;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4.0000000;stroke-dasharray:none;stroke-dashoffset:0.0000000;stroke-opacity:1.0000000"
+       id="rect3703"
+       width="192.00000"
+       height="192.00000"
+       x="0.0000000"
+       y="0.0000000" />
+    <path
+       style="fill:none;fill-opacity:0.75000000;fill-rule:evenodd;stroke:url(#radialGradient2209);stroke-width:20.000000;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1.0000000;stroke-miterlimit:4.0000000;stroke-dasharray:none"
+       d="M 40.000000,176.00000 L 96.000000,152.00000 L 96.000000,88.000000 L 40.000000,40.000000 L 96.000000,88.000000 L 136.00000,24.000000"
+       id="path1330"
+       sodipodi:nodetypes="cccccc" />
+    <path
+       sodipodi:type="arc"
+       style="opacity:0.87640446;fill:none;fill-opacity:1.0000000;stroke:#000000;stroke-width:15.000366;stroke-linecap:round;stroke-linejoin:round;marker-start:none;marker-end:url(#Arrow2Send);stroke-miterlimit:4.0000000;stroke-dasharray:none;stroke-dashoffset:0.0000000;stroke-opacity:1.0000000"
+       id="path1332"
+       sodipodi:cx="-48.000000"
+       sodipodi:cy="-40.000000"
+       sodipodi:rx="56.000000"
+       sodipodi:ry="56.000000"
+       d="M -17.181239,6.7568600 A 56.000000,56.000000 0 1 1 -17.222051,-86.783735"
+       sodipodi:start="0.98803089"
+       sodipodi:end="5.2942818"
+       sodipodi:open="true"
+       transform="matrix(0.000000,-0.339866,-1.060131,0.000000,57.46286,59.68643)" />
+    <path
+       sodipodi:type="arc"
+       style="opacity:0.87640446;fill:none;fill-opacity:1.0000000;stroke:#000000;stroke-width:12.164391;stroke-linecap:round;stroke-linejoin:round;marker-start:none;marker-end:url(#Arrow2Send);stroke-miterlimit:4.0000000;stroke-dasharray:none;stroke-dashoffset:0.0000000;stroke-opacity:1.0000000"
+       id="path2211"
+       sodipodi:cx="-48.000000"
+       sodipodi:cy="-40.000000"
+       sodipodi:rx="56.000000"
+       sodipodi:ry="56.000000"
+       d="M -83.651328,3.1854465 A 56.000000,56.000000 0 0 1 -98.498247,-64.205930"
+       sodipodi:start="2.2609178"
+       sodipodi:end="3.5885777"
+       transform="matrix(0.000000,0.846977,-0.577903,0.000000,62.70787,108.1404)"
+       sodipodi:open="true" />
+  </g>
+</svg>

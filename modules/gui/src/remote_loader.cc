@@ -1,0 +1,161 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
+#include <vector>
+
+#include <QNetworkReply>
+#include <QHBoxLayout>
+#include <QDir>
+
+#include <ost/platform.hh>
+
+#include <ost/gui/file_loader.hh>
+#include <ost/gui/loader_manager.hh>
+
+#include "widget_registry.hh"
+#include "remote_loader.hh"
+
+namespace ost { namespace gui {
+
+RemoteLoader::RemoteLoader(QWidget* parent):
+ Widget(NULL, parent)
+{
+  line_edit_ = new QLineEdit(this);
+  button_ = new QPushButton("Load",this);
+  progress_bar_ = new QProgressBar(this);
+  progress_bar_->setVisible(false);
+  progress_bar_->setRange(0,0);
+
+  QHBoxLayout* l=new QHBoxLayout(this);
+  l->addWidget(line_edit_);
+  l->addWidget(button_);
+  l->addWidget(progress_bar_);
+  l->setMargin(0);
+  l->setSpacing(0);
+
+  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  this->setMinimumHeight(progress_bar_->height());
+  this->setMaximumHeight(progress_bar_->height());
+  connect(button_, SIGNAL(clicked()), this,
+          SLOT(Clicked()));
+
+  QDir icon_path(GetSharedDataPath().c_str());
+  icon_path.cd("gui");
+  icon_path.cd("icons");
+  site_loader_menu_ = new QMenu(this);
+  site_actions_ = new QActionGroup(site_loader_menu_);
+
+  site_loader_menu_ = new QMenu(this);
+  site_actions_ = new QActionGroup(site_loader_menu_);
+
+  QAction* select_url_action = new QAction(this);
+  select_url_action->setText("URL");
+  select_url_action->setToolTip("Select remote URL");
+  select_url_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("site_icon.png")));
+  action_list_.append(select_url_action);
+
+  connect(select_url_action, SIGNAL(triggered(bool)), this, SLOT(UrlClick()));
+}
+
+void RemoteLoader::UrlClick()
+{
+  this->BuildMenu();
+  site_loader_menu_->exec(QCursor::pos());
+}
+
+void RemoteLoader::BuildMenu()
+{
+  String selected_site_loader;
+  if(site_actions_->checkedAction()!=NULL){
+    selected_site_loader=site_actions_->checkedAction()->text().toStdString();
+  }
+  site_loader_menu_->clear();
+  QList<QAction*> actions = site_actions_->actions();
+  for(int i=0;i<actions.size();i++){
+    site_actions_->removeAction(actions[i]);
+  }
+  std::vector<String> site_loaders = FileLoader::GetSiteLoaderIdents();
+  for(unsigned int i=0; i<site_loaders.size(); i++){
+    QAction* action = new QAction(QString(site_loaders[i].c_str()),site_loader_menu_);
+    action->setCheckable(true);
+    site_actions_->addAction(action);
+    if(site_actions_->checkedAction()==NULL ||selected_site_loader==site_loaders[i] ){
+      action->setChecked(true);
+    }
+    site_loader_menu_->addAction(action);
+  }
+}
+
+ActionList RemoteLoader::GetActions()
+{
+  return action_list_;
+}
+
+bool RemoteLoader::Save(const QString& prefix)
+{
+  return true;
+}
+
+bool RemoteLoader::Restore(const QString& prefix)
+{
+  return true;
+}
+
+void RemoteLoader::Clicked()
+{
+  this->BuildMenu();
+  if(!line_edit_->text().isEmpty() && site_actions_->checkedAction()){
+    RemoteSiteLoader* loader = FileLoader::GetLoaderManager()->GetRemoteSiteLoader(site_actions_->checkedAction()->text());
+    QNetworkReply* network_reply = loader->ById(line_edit_->text());
+    if(network_reply){
+      progress_bar_->reset();
+      connect(network_reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(UpdateProgress(qint64,qint64)));
+      connect(network_reply, SIGNAL(finished()), this, SLOT(DownloadFinished()));
+      this->ShowProgressBar(true);
+    }
+    line_edit_->setText("");
+    line_edit_->setFocus();
+  }
+}
+
+void RemoteLoader::keyPressEvent(QKeyEvent* event){
+  if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
+    this->Clicked();
+  }
+}
+
+void RemoteLoader::ShowProgressBar(bool visibility){
+  button_->setVisible(!visibility);
+  line_edit_->setVisible(!visibility);
+  progress_bar_->setVisible(visibility);
+}
+
+void RemoteLoader::UpdateProgress(qint64 read, qint64 total){
+  progress_bar_->setMaximum(total);
+  progress_bar_->setValue(read);
+
+}
+
+void RemoteLoader::DownloadFinished(){
+  this->ShowProgressBar(false);
+}
+
+OST_REGISTER_WIDGET_WITH_DEFAULT_FACTORY(ost::gui, RemoteLoader, "Remote Loader");
+
+}}
+

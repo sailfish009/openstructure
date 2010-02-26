@@ -1,0 +1,9 @@
+set(OST_IPLT_RASTER_IMAGE_SOURCES 
+raster_image.cc
+PARENT_SCOPE
+)
+
+set(OST_IPLT_RASTER_IMAGE_HEADERS
+raster_image.hh
+PARENT_SCOPE
+)

@@ -1,0 +1,349 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
+/*
+ *  Authors: Marco Biasini, Juergen Haas
+ */
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#include <ost/mol/query.hh>
+#include <ost/mol/mol.hh>
+#include <ost/mol/entity_view.hh>
+
+using namespace ost;
+using namespace ost::mol;
+
+void test_query_parse_properties() {
+  BOOST_CHECK(Query("rname=Ala").IsValid());
+  BOOST_CHECK(Query("ele=C").IsValid());
+  BOOST_CHECK(Query("aname=X").IsValid());
+  BOOST_CHECK(Query("rnum=3").IsValid());
+  BOOST_CHECK(Query("cname=A").IsValid());
+  BOOST_CHECK(Query("occ=50").IsValid());
+  BOOST_CHECK(Query("occ=50").IsValid());
+  BOOST_CHECK(Query("rtype=H").IsValid());
+  BOOST_CHECK(Query("x=3").IsValid());
+  BOOST_CHECK(Query("y=4").IsValid());
+  BOOST_CHECK(Query("z=6").IsValid());
+  BOOST_CHECK(Query("gatest=7").IsValid());
+  BOOST_CHECK(Query("grtest=8").IsValid());
+  BOOST_CHECK(Query("gctest=9").IsValid());
+  BOOST_CHECK(Query("gatest:1=7").IsValid());
+  BOOST_CHECK(Query("grtest:2=8").IsValid());
+  BOOST_CHECK(Query("gctest:3.0=9").IsValid());
+  BOOST_CHECK(Query("anita=3").IsValid()==false);
+}
+
+void test_query_parse_value_type() {
+
+  BOOST_CHECK(Query("rnum<=3").IsValid());
+  BOOST_CHECK(Query("rnum>=3").IsValid());
+  BOOST_CHECK(Query("rnum<3").IsValid());
+  BOOST_CHECK(Query("rnum>3").IsValid());
+  BOOST_CHECK(Query("rnum!=3").IsValid());
+
+  BOOST_CHECK(Query("rnum=3:10").IsValid());
+  BOOST_CHECK(Query("rnum!=3:10").IsValid());
+  BOOST_CHECK(Query("rnum!=3:10").IsValid());
+  BOOST_CHECK(Query("rnum>=30:40").IsValid()==false);
+  BOOST_CHECK(Query("rnum>30:40").IsValid()==false);
+  BOOST_CHECK(Query("rnum<=30:40").IsValid()==false);
+  BOOST_CHECK(Query("rnum<30:40").IsValid()==false);
+
+  BOOST_CHECK(Query("rnum=1,2").IsValid());
+  BOOST_CHECK(Query("rnum=1,2,3,4").IsValid());
+  BOOST_CHECK(Query("rnum>1,2,3,4").IsValid()==false);
+
+  BOOST_CHECK(Query("rnum=WTF").IsValid()==false);
+  BOOST_CHECK(Query("rnum=WTF").IsValid()==false);
+  BOOST_CHECK(Query("rnum=3.0").IsValid()==false);
+  BOOST_CHECK(Query("ele>=XXX").IsValid()==false);
+
+}
+
+void test_query_parse_logical_op() {
+
+  BOOST_CHECK(Query("rnum=3 and rnum=5").IsValid());
+  BOOST_CHECK(Query("rnum=3 or rnum=5").IsValid());
+  BOOST_CHECK(Query("not rnum=3").IsValid());
+  BOOST_CHECK(Query("not rnum=3").IsValid());
+  BOOST_CHECK(Query("not rnum=3 and not rnum=5").IsValid());
+  BOOST_CHECK(Query("not not rnum=3").IsValid()==false);
+}
+
+void test_query_parse_unexpected() {
+  BOOST_CHECK(Query("cname").IsValid()==false);
+  BOOST_CHECK(Query("cname=").IsValid()==false);
+  BOOST_CHECK(Query("not").IsValid()==false);
+  BOOST_CHECK(Query("(rnum=3").IsValid()==false);
+  BOOST_CHECK(Query("(rnum=3").IsValid()==false);
+  BOOST_CHECK(Query("(rnum=3").IsValid()==false);
+  BOOST_CHECK(Query("(not").IsValid()==false);
+  BOOST_CHECK(Query("()").IsValid()==false);
+  BOOST_CHECK(Query("(rnum)").IsValid()==false);
+  BOOST_CHECK(Query("(rnum=)").IsValid()==false);
+  BOOST_CHECK(Query("gatest:=5").IsValid()==false);
+  BOOST_CHECK(Query("gatest:5.0=").IsValid()==false);
+  BOOST_CHECK(Query("gatest:=").IsValid()==false);
+}
+
+void test_query_parse_within() {
+  BOOST_CHECK(Query("5 <> {0,0,0.0}").IsValid());
+  BOOST_CHECK(Query("5 <> {0}").IsValid()==false);
+  BOOST_CHECK(Query("5 <> {0").IsValid()==false);
+  BOOST_CHECK(Query("5 <> {0,}").IsValid()==false);
+  BOOST_CHECK(Query("5 <> {0,0.}").IsValid()==false);
+}
+
+void test_query_parse() {
+  test_query_parse_properties();
+  test_query_parse_value_type();
+  test_query_parse_unexpected();
+  test_query_parse_logical_op();
+  test_query_parse_within();
+}
+
+EntityHandle make_query_test_entity()
+{
+  EntityHandle eh = CreateEntity();
+  XCSEditor e=eh.RequestXCSEditor();
+  ChainHandle chain = e.InsertChain("A");
+  chain.SetGenericFloatProperty("testpropc", 1.0);
+  ResidueHandle res = e.AppendResidue(chain, "MET");
+  res.SetGenericFloatProperty("testpropr", 1.0);
+  AtomProp c_atom;
+  c_atom.element="C";
+  c_atom.radius=1.0;
+
+  AtomProp o_atom;
+  o_atom.element="O";
+  o_atom.radius=1.0;
+  AtomProp n_atom;
+  n_atom.element="N";
+  n_atom.radius=1.0;
+
+  AtomProp s_atom;
+  s_atom.element="S";
+  s_atom.radius=1.0;
+  AtomHandle ah=e.InsertAtom(res, "N",geom::Vec3(21.609,35.384,56.705), n_atom);
+  ah.SetGenericFloatProperty("testpropa", 1.0);
+  e.InsertAtom(res, "CA",geom::Vec3(20.601,35.494,57.793), c_atom);
+  e.InsertAtom(res, "C",geom::Vec3(19.654,34.300,57.789), c_atom);
+  e.InsertAtom(res, "O",geom::Vec3(18.447,34.456,57.595), o_atom);
+  e.InsertAtom(res, "CB",geom::Vec3(19.789,36.783,57.639), c_atom);
+  e.InsertAtom(res, "CG",geom::Vec3(20.629,38.055,57.606), c_atom);
+  e.InsertAtom(res, "SD",geom::Vec3(21.638,38.325,59.084), s_atom);
+  e.InsertAtom(res, "CE",geom::Vec3(23.233,37.697,58.529), c_atom);
+
+  res = e.AppendResidue(chain, "ARG");
+  e.InsertAtom(res, "N",geom::Vec3(20.202,33.112,58.011), n_atom);
+  e.InsertAtom(res, "CA",geom::Vec3(19.396,31.903,58.033), c_atom);
+  e.InsertAtom(res, "C",geom::Vec3(18.608,31.739,59.328), c_atom);
+  e.InsertAtom(res, "O",geom::Vec3(17.651,30.965,59.381), o_atom);
+  e.InsertAtom(res, "CB",geom::Vec3(20.284,30.681,57.801), c_atom);
+  e.InsertAtom(res, "CG",geom::Vec3(20.665,30.488,56.342), c_atom);
+  e.InsertAtom(res, "CD",geom::Vec3(21.557,29.281,56.154), c_atom);
+  e.InsertAtom(res, "NE",geom::Vec3(22.931,29.557,56.551), n_atom);
+  e.InsertAtom(res, "CZ",geom::Vec3(23.901,28.653,56.528), c_atom);
+  e.InsertAtom(res, "NH1",geom::Vec3(23.640,27.417,56.130), n_atom);
+  e.InsertAtom(res, "NH2",geom::Vec3(25.132,28.980,56.893), n_atom);
+
+  res = e.AppendResidue(chain, "LEU");
+  e.InsertAtom(res, "N",geom::Vec3(19.003,32.473,60.366), n_atom);
+  e.InsertAtom(res, "CA",geom::Vec3(18.330,32.402,61.664), c_atom);
+  e.InsertAtom(res, "C",geom::Vec3(17.884,33.787,62.117), c_atom);
+  e.InsertAtom(res, "O",geom::Vec3(17.853,34.091,63.308), o_atom);
+  e.InsertAtom(res, "CB",geom::Vec3(19.269,31.793,62.710), c_atom);
+  e.InsertAtom(res, "CG",geom::Vec3(19.695,30.340,62.501), c_atom);
+  e.InsertAtom(res, "CD1",geom::Vec3(20.585,29.897,63.648), c_atom);
+  e.InsertAtom(res, "CD2",geom::Vec3(18.461,29.459,62.420), c_atom);
+  return eh;
+}
+
+void ensure_counts(EntityHandle e, const String& qs, int cc, int rc, int ac) {
+  EntityView v;
+  BOOST_CHECK_NO_THROW(v=e.Select(qs));
+  BOOST_CHECK_MESSAGE(v.GetChainCount()==cc,
+                      "wrong chain count " << v.GetChainCount()
+                      << " for query String " << qs);
+  BOOST_CHECK_MESSAGE(v.GetResidueCount()==rc,
+                      "wrong residue count " << v.GetResidueCount() <<
+                      " for query String " << qs);
+  BOOST_CHECK_MESSAGE(v.GetAtomCount()==ac,
+                      "wrong atom count " << v.GetAtomCount() <<
+                      " for query String " << qs);
+}
+
+void ensure_counts_v(EntityView src, const String& qs,
+                     int cc, int rc, int ac) {
+  EntityView v;
+  BOOST_CHECK_NO_THROW(v=src.Select(qs));
+  BOOST_CHECK_MESSAGE(v.GetChainCount()==cc,
+                      "wrong chain count " << v.GetChainCount()
+                      << " for query String " << qs);
+  BOOST_CHECK_MESSAGE(v.GetResidueCount()==rc,
+                      "wrong residue count " << v.GetResidueCount() <<
+                      " for query String " << qs);
+  BOOST_CHECK_MESSAGE(v.GetAtomCount()==ac,
+                      "wrong atom count " << v.GetAtomCount() <<
+                      " for query String " << qs);
+}
+
+void test_query_eval() {
+  EntityHandle e=make_query_test_entity();
+
+  ensure_counts(e, "", 1, 3, 27);
+  ensure_counts(e, "cname=B", 0, 0, 0);
+  ensure_counts(e, "cname=A", 1, 3, 27);
+  ensure_counts(e, "aname=CA", 1, 3, 3);
+  ensure_counts(e, "aname=SD", 1, 1, 1);
+  ensure_counts(e, "rnum=1:2", 1, 2, 19);
+  ensure_counts(e, "rnum=1,2", 1, 2, 19);
+  ensure_counts(e, "rnum>3", 0, 0, 0);
+  ensure_counts(e, "rnum<1", 0, 0, 0);
+  ensure_counts(e, "ele=S", 1, 1, 1);
+  ensure_counts(e, "rname=GLY", 0, 0, 0);
+  ensure_counts(e, "not rname=GLY", 1, 3, 27);
+  ensure_counts(e, "not rname!=GLY", 0, 0, 0);
+  ensure_counts(e, "aname=CA and not aname=CA", 0, 0, 0);
+  ensure_counts(e, "rtype=H", 0, 0, 0);
+  ensure_counts(e, "rtype=C", 1, 3, 27);
+  ensure_counts(e, "not (aname=CA and not aname=CA)", 1, 3, 27);
+  ensure_counts(e, "3 <> {21.5,35,57.0}", 1, 2, 5);
+  ensure_counts(e, "1 <> {0,0,0}", 0, 0, 0);
+  ensure_counts(e, "gatestpropa:0=1", 1, 1, 1);
+  ensure_counts(e, "gatestpropa:1.0=1", 1, 3, 27);
+  ensure_counts(e, "gatestpropa:2.0=2", 1, 3, 26);
+  ensure_counts(e, "grtestpropr:0=1", 1, 1, 8);
+  ensure_counts(e, "grtestpropr:1.0=1", 1, 3, 27);
+  ensure_counts(e, "grtestpropr:2.0=2", 1, 2, 19);
+  ensure_counts(e, "gctestpropc:0=1", 1, 3, 27);
+  ensure_counts(e, "gctestpropc:1.0=1", 1, 3, 27);
+  ensure_counts(e, "gctestpropc:2.0=2", 0, 0, 0);
+}
+
+void test_query_eval_on_view() {
+  EntityHandle e=make_query_test_entity();
+  EntityView v=e.CreateFullView();
+  ensure_counts_v(v, "", 1, 3, 27);
+  ensure_counts_v(v, "cname=B", 0, 0, 0);
+  ensure_counts_v(v, "cname=A", 1, 3, 27);
+  ensure_counts_v(v, "aname=CA", 1, 3, 3);
+  ensure_counts_v(v, "aname=SD", 1, 1, 1);
+  ensure_counts_v(v, "ele=S", 1, 1, 1);
+  ensure_counts_v(v, "rname=GLY", 0, 0, 0);
+  ensure_counts_v(v, "not rname=GLY", 1, 3, 27);
+  ensure_counts_v(v, "not rname!=GLY", 0, 0, 0);
+  ensure_counts_v(v, "aname=CA and not aname=CA", 0, 0, 0);
+  ensure_counts_v(v, "rtype=H", 0, 0, 0);
+  ensure_counts_v(v, "rtype=C", 1, 3, 27);
+  ensure_counts_v(v, "not (aname=CA and not aname=CA)", 1, 3, 27);
+  ensure_counts_v(v, "rnum=1:2", 1, 2, 19);
+  ensure_counts_v(v, "rnum=1,2", 1, 2, 19);
+  ensure_counts_v(v, "rnum>3", 0, 0, 0);
+  ensure_counts_v(v, "rnum<1", 0, 0, 0);
+  ensure_counts_v(v, "gatestpropa:0=1", 1, 1, 1);
+  ensure_counts_v(v, "gatestpropa:1.0=1", 1, 3, 27);
+  ensure_counts_v(v, "gatestpropa:2.0=2", 1, 3, 26);
+  ensure_counts_v(v, "grtestpropr:0=1", 1, 1, 8);
+  ensure_counts_v(v, "grtestpropr:1.0=1", 1, 3, 27);
+  ensure_counts_v(v, "grtestpropr:2.0=2", 1, 2, 19);
+  ensure_counts_v(v, "gctestpropc:0=1", 1, 3, 27);
+  ensure_counts_v(v, "gctestpropc:1.0=1", 1, 3, 27);
+  ensure_counts_v(v, "gctestpropc:2.0=2", 0, 0, 0);
+}
+
+void test_query_throw() {
+  EntityHandle e=make_query_test_entity();
+  BOOST_CHECK_NO_THROW(e.Select("gatestpropa:0=1"));
+  BOOST_CHECK_NO_THROW(e.Select("gatestpropa:1=1"));
+  BOOST_CHECK_THROW(e.Select("gatestpropa=1"), std::exception);
+  BOOST_CHECK_NO_THROW(e.Select("grtestpropr:0=1"));
+  BOOST_CHECK_NO_THROW(e.Select("grtestpropr:1=1"));
+  BOOST_CHECK_THROW(e.Select("grtestpropr=1"), std::exception);
+  BOOST_CHECK_NO_THROW(e.Select("gctestpropc:0=1"));
+  BOOST_CHECK_NO_THROW(e.Select("gctestpropc:1=1"));
+  BOOST_CHECK_THROW(e.Select("ganotsetprop=1"), std::exception);
+  BOOST_CHECK_THROW(e.Select("grnotsetprop=1"), std::exception);
+  BOOST_CHECK_THROW(e.Select("gcnotsetprop=1"), std::exception);
+  BOOST_CHECK_NO_THROW(e.Select("ganotsetprop:0=1"));
+  BOOST_CHECK_NO_THROW(e.Select("grnotsetprop:0=1"));
+  BOOST_CHECK_NO_THROW(e.Select("gcnotsetprop:0=1"));
+
+}
+
+void test_query() {
+  test_query_parse();
+  test_query_eval();
+  test_query_eval_on_view();
+  test_query_throw();
+}
+
+BOOST_AUTO_TEST_SUITE( mol_base )
+
+BOOST_AUTO_TEST_CASE(test_query_parse_properties) 
+{
+  test_query_parse_properties();
+}
+
+BOOST_AUTO_TEST_CASE(test_query_parse_value_type) 
+{
+  test_query_parse_value_type();
+}
+
+BOOST_AUTO_TEST_CASE(test_query_parse_logical_op) 
+{
+  test_query_parse_logical_op();
+}
+
+BOOST_AUTO_TEST_CASE(test_query_parse_unexpected) 
+{
+  test_query_parse_unexpected();
+}
+
+BOOST_AUTO_TEST_CASE(test_query_parse_within) 
+{
+  test_query_parse_within();
+}
+
+BOOST_AUTO_TEST_CASE(test_query_parse) 
+{
+  test_query_parse();
+}
+
+BOOST_AUTO_TEST_CASE(test_query_eval) 
+{
+  test_query_eval();
+}
+
+BOOST_AUTO_TEST_CASE(test_query_eval_on_view) 
+{
+  test_query_eval_on_view();
+}
+
+BOOST_AUTO_TEST_CASE(test_query_throw) 
+{
+  test_query_throw();
+}
+
+BOOST_AUTO_TEST_CASE(test_query) 
+{
+  test_query();
+}
+
+BOOST_AUTO_TEST_SUITE_END()

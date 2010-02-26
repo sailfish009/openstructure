@@ -1,0 +1,22 @@
+<!DOCTYPE EMDataInfo>
+<EMDataInfo>
+ <Presets>
+  <Preset Name="Secondary Structure" >
+   <ColorOp ClassName="UniformColorOp" Index="0">
+    <ColorOp>2 rtype=helix</ColorOp>0	1	0	1</ColorOp>
+   <ColorOp ClassName="UniformColorOp" Index="1">
+    <ColorOp>2 rtype=ext</ColorOp>1	0	0	1</ColorOp>
+   <ColorOp ClassName="UniformColorOp" Index="2">
+    <ColorOp>2 rtype!=ext,helix</ColorOp>0.5  0.5	0.5	1</ColorOp>
+   <ColorOp ClassName="UniformColorOp" Index="3">
+    <ColorOp>1 rtype=helix</ColorOp>0.7 1.0 0.8 1</ColorOp>
+   <ColorOp ClassName="UniformColorOp" Index="4">
+    <ColorOp>1 rtype!=ext,helix</ColorOp>1.0 0.8 0.2 1</ColorOp>
+  </Preset>
+  <Preset Name="Highlight Ligand (Carbon)" >
+   <ColorOp ClassName="ByElementColorOp" Index="0" >3 </ColorOp>
+   <ColorOp ClassName="UniformColorOp" Index="1">
+    <ColorOp>2 ishetatm=1 and ele=C</ColorOp>0     1       0       1</ColorOp>
+  </Preset>
+ </Presets>
+</EMDataInfo>

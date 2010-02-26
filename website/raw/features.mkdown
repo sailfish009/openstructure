@@ -1,0 +1,59 @@
+title: Features
+
+# Features
+
+## General Features
+
+ * Cleanly designed API available in both <a target="extern" href="http://www.python.org">Python</a> an C++
+ * command line interface for batch processing
+ * graphical user interface that is completely scriptable from Python.
+
+## License
+  
+  OpenStructure is released under the <a target="extern" href="http://www.gnu.org/licenses/lgpl-3.0-standalone.html">LGPL Version 3</a> license.
+ 
+## Supported Platforms
+
+ * [Windows XP](windowsdownload.html)
+ * [MacOS X 10.5 and 10.6](macdownload.html)
+ * [Linux](linuxdownload.html)
+
+## Macromolecules
+
+ * Rich understanding of macromolecular structure datasets.  
+ * Support for common file formats.
+   
+## 2D Images and Density Maps
+
+ * Image processing tools for both 2-dimensional images and 3-dimensional density maps (Masks,
+   real and Fourier space filters, correlation).
+ * Support for the most common formats
+   used in the fields of x-ray, electron crystallography, and atomic force microscopy.
+
+## Supported File Formats
+
+### Molecules
+
+ * Brookhaven Database <a target="extern" href="http://www.wwpdb.org/docs.html">PDB</a>
+ * <a target="extern" href="http://www.poissonboltzmann.org/file-formats/biomolecular-structurw/pqr">PQR</a>
+ * Structure Data File <a target="extern" href="http://www.symyx.com/solutions/white_papers/ctfile_formats.jsp">SDF</a>
+
+### Image/Map Formats
+
+ * <a target="extern" href="http://www.libtiff.org/">TIFF</a>
+ * <a target="extern" href="http://www.libpng.org/">PNG</a>
+ * <a target="extern" href="http://ami.scripps.edu/software/mrctools/mrc_specification.php">MRC</a>/<a target="extern" href="http://2dx.org/">2dx</a>[]()
+ * <a target="extern" href="http://www.ccp4.ac.uk/">CCP4</a>
+ * <a target="extern" href="http://situs.biomachina.org/">Situs</a>
+ * <a target="extern" href="http://www.wadsworth.org/spider_doc/spider/docs/spider.html">Spider</a>
+ * <a target="extern" href="http://www.jpk.com/index.2.en.html">JPK</a>
+ * <a target="extern" href="http://www.gatan.com/imaging/dig_micrograph.php">Digital Micrograph</a>
+ * <a target="extern" href="http://www.veeco.com/">Nanoscope</a>
+
+ Binary formats can be read and saved in both little and big endianness.
+
+### Sequence/Alignment Formats
+
+ * <a target="extern" href="http://mcast.sdsc.edu/doc/clustalw-format.html">ClustalW</a>
+ * <a target="extern" href="http://en.wikipedia.org/wiki/FASTA_format">Fasta</a>
+ * Promod (Swiss PDB-Viewer)
