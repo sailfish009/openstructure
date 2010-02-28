@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen, Johan Hebert, Andreas Schenk
 */
 
-#include <ost/iplt/alg/norm.hh>
-#include <ost/iplt/alg/stat_min_max.hh>
+#include <ost/img/alg/norm.hh>
+#include <ost/img/alg/stat_min_max.hh>
 
 //#include "bitmaps/move.xpm"
 //#include "bitmaps/crosshair.xpm"
@@ -37,12 +37,12 @@
 #include <QPixmapCache>
 #include <ost/message.hh>
 
-#include "iplt2qt.hh"
+#include "img2qt.hh"
 #include "data_viewer_panel_base.hh"
 
 #define USE_PIXMAP_CACHE
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   QWidget(parent),
@@ -801,7 +801,7 @@ void DataViewerPanelBase::extract_ri()
             std::min(w,std::max(0,br.x()-1)),std::min(h,std::max(0,br.y()-1)));
   }else{
     if(zoom_level_==0) {
-      iplt2qt(GetObservedData(),image_,
+      img2qt(GetObservedData(),image_,
               zoom_level_,
               geom::Vec3(center_x_+offset_x_, center_y_+offset_y_, 0.0),
               slab_,

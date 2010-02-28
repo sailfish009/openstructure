@@ -38,9 +38,9 @@
 #include <ost/gfx/color_ops/gradient_level_color_op.hh>
 #include <ost/gfx/color_ops/entity_view_color_op.hh>
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 #include <ost/gfx/color_ops/map_handle_color_op.hh>
-#endif //OST_IPLT_ENABLED
+#endif //OST_IMG_ENABLED
 
 namespace ost { namespace gfx {
 
@@ -69,12 +69,12 @@ public:
   virtual void ColorBy(const mol::EntityView& ev, 
                        const String& prop,
                        const Gradient& g, float minv, float maxv);
-#if OST_IPLT_ENABLED                       
+#if OST_IMG_ENABLED                       
   // GfxObj property interface
-  virtual void ColorBy(const iplt::MapHandle& mh,
+  virtual void ColorBy(const img::MapHandle& mh,
                        const String& prop,
                        const Gradient& g,float minv, float maxv);
-#endif //OST_IPLT_ENABLED
+#endif //OST_IMG_ENABLED
 
   // map property to color gradient from minv to maxv
   void ColorBy(const String& prop, 
@@ -103,7 +103,7 @@ public:
   void Apply(const gfx::BasicGradientColorOp& op, bool store=true);
   void Apply(const gfx::GradientLevelColorOp& op, bool store=true);
   void Apply(const gfx::EntityViewColorOp& op, bool store=true);
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   void Apply(const gfx::MapHandleColorOp& op, bool store=true);
 #endif
 

@@ -26,7 +26,7 @@
 #include <vector>
 
 #include <ost/geom/geom.hh>
-#include <ost/iplt/map.hh>
+#include <ost/img/map.hh>
 
 #include <ost/gfx/map_iso_prop.hh>
 #include "map_iso_gen.hh" // for AddLFList
@@ -42,7 +42,7 @@ public:
 
   IsosurfaceGeneratorS();
 
-  void Generate(const iplt::MapHandle& mh, IndexedVertexArray& va, float level);
+  void Generate(const img::MapHandle& mh, IndexedVertexArray& va, float level);
  private:
 
   uint slab_tex_[2];

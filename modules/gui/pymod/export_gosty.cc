@@ -33,9 +33,9 @@ using namespace boost::python;
 #include "gl_win_proxy.hh"
 #include "scene_win_proxy.hh"
 #include "sequence_viewer_proxy.hh"
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 #include "data_viewer_proxy.hh"
-using namespace ost::iplt::gui;
+using namespace ost::img::gui;
 #endif
 
 using namespace ost;
@@ -68,12 +68,12 @@ SequenceViewerProxy app_get_seq_viewer(GostyApp* app)
   return SequenceViewerProxy(app->GetSequenceViewer());
 }
 
-#if OST_IPLT_ENABLED
-DataViewerProxyPtr app_create_data_viewer1(GostyApp* app, const ost::iplt::Data& d, const QString& name)
+#if OST_IMG_ENABLED
+DataViewerProxyPtr app_create_data_viewer1(GostyApp* app, const ost::img::Data& d, const QString& name)
 {
   return DataViewerProxyPtr(new DataViewerProxy(app->CreateDataViewer(d,name)));
 }
-DataViewerProxyPtr app_create_data_viewer2(GostyApp* app, const ost::iplt::Data& d)
+DataViewerProxyPtr app_create_data_viewer2(GostyApp* app, const ost::img::Data& d)
 {
   return DataViewerProxyPtr(new DataViewerProxy(app->CreateDataViewer(d)));
 }
@@ -107,7 +107,7 @@ void export_Gosty()
     .add_property("seq_viewer", &app_get_seq_viewer)
     .def("GetToolOptionsWin", &app_get_tool_options_win)
     .add_property("tool_options_win", &app_get_tool_options_win)     
-     #if OST_IPLT_ENABLED
+     #if OST_IMG_ENABLED
     .def("CreateDataViewer", &app_create_data_viewer1)
     .def("CreateDataViewer", &app_create_data_viewer2)
     #endif

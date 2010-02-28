@@ -25,12 +25,12 @@
 #ifndef IPLT_GUI_DRAW_OVERLAY_H
 #define IPLT_GUI_DRAW_OVERLAY_H
 
-#include <ost/iplt/image_handle.hh>
+#include <ost/img/image_handle.hh>
 
 #include <ost/gui/module_config.hh>
 #include "overlay_base.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 // fw decl
 class DataViewerPanel;

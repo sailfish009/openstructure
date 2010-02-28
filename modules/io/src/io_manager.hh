@@ -29,8 +29,8 @@
 #include <ost/io/seq/sequence_io_handler.hh>
 #include <ost/io/mol/surface_io_handler.hh>
 
-#if OST_IPLT_ENABLED
-#  include <ost/io/iplt/map_io_handler.hh>
+#if OST_IMG_ENABLED
+#  include <ost/io/img/map_io_handler.hh>
 #endif
 
 #include <ost/io/io_exception.hh>
@@ -42,7 +42,7 @@ class DLLEXPORT_OST_IO IOManager {
   typedef std::vector<SequenceIOHandlerFactoryBasePtr> AlignmentIOFList;  
   typedef std::vector<SurfaceIOHandlerFactoryBasePtr> SurfaceIOFList;  
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   typedef std::vector<MapIOHandlerFactoryBasePtr> MapIOFList;  
 #endif
 
@@ -96,7 +96,7 @@ public:
   /// \sa adding_io_handler
   void RegisterFactory(const SurfaceIOHandlerFactoryBasePtr&);  
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   /// \name Image/Map IO
   //@{
   /// \brief register map io handle factory
@@ -129,7 +129,7 @@ private:
   AlignmentIOFList alignment_io_list_;
   SurfaceIOFList surface_io_list_;
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   MapIOFList map_io_list_;
 #endif
 };

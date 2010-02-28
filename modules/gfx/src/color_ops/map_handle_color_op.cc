@@ -29,12 +29,12 @@ MapHandleColorOp::MapHandleColorOp() : GradientColorOp(), mh_(){
 
 }
 
-MapHandleColorOp::MapHandleColorOp(const String& selection, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const iplt::MapHandle& mh) :
+MapHandleColorOp::MapHandleColorOp(const String& selection, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh) :
   GradientColorOp(selection, property, gradient, minv, maxv), mh_(mh){
 
 }
 
-MapHandleColorOp::MapHandleColorOp(const String& selection, int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const iplt::MapHandle& mh) :
+MapHandleColorOp::MapHandleColorOp(const String& selection, int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh) :
   GradientColorOp(selection, mask, property, gradient, minv, maxv), mh_(mh){
 
 }
@@ -59,11 +59,11 @@ void MapHandleColorOp::ApplyTo(GfxObjP& objP) const{
   }
 }
 
-void MapHandleColorOp::SetMapHandle(const iplt::MapHandle& mh){
+void MapHandleColorOp::SetMapHandle(const img::MapHandle& mh){
   mh_ = mh;
 }
 
-const iplt::MapHandle& MapHandleColorOp::GetMapHandle() const{
+const img::MapHandle& MapHandleColorOp::GetMapHandle() const{
   return mh_;
 }
 
@@ -87,7 +87,7 @@ gfx::MapHandleColorOp MapHandleColorOp::FromInfo(info::InfoGroup& group){
   float minv = gop.GetMinV();
   float maxv = gop.GetMaxV();
   //TODO load map handle
-  return gfx::MapHandleColorOp(selection, mask, property, gradient, minv, maxv, iplt::MapHandle());
+  return gfx::MapHandleColorOp(selection, mask, property, gradient, minv, maxv, img::MapHandle());
 }
 
 }}

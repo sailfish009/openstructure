@@ -34,9 +34,9 @@
 #include "povray.hh"
 #include "impl/mapped_property.hh"
 
-#if OST_IPLT_ENABLED
-#  include <ost/iplt/alg/stat.hh>
-#endif // OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
+#  include <ost/img/alg/stat.hh>
+#endif // OST_IMG_ENABLED
 
 namespace ost { namespace gfx {
 
@@ -622,15 +622,15 @@ void GfxObj::ColorBy(const mol::EntityView& ev,
   this->ColorBy(ev,prop,g,minv,maxv);
 }
 
-#if OST_IPLT_ENABLED
-void GfxObj::ColorBy(const iplt::MapHandle& mh,
+#if OST_IMG_ENABLED
+void GfxObj::ColorBy(const img::MapHandle& mh,
                       const String& prop,
                       const Gradient& g, float minv, float maxv)
 {
   LOGN_VERBOSE("ColorBy not implemented for this gfx object");
 }
 
-void GfxObj::ColorBy(const iplt::MapHandle& mh,
+void GfxObj::ColorBy(const img::MapHandle& mh,
                       const String& prop,
                       const Color& c1, const Color& c2, float minv, float maxv)
 {
@@ -640,11 +640,11 @@ void GfxObj::ColorBy(const iplt::MapHandle& mh,
   this->ColorBy(mh,prop,g,minv,maxv);
 }
 
-void GfxObj::ColorBy(const iplt::MapHandle& mh,
+void GfxObj::ColorBy(const img::MapHandle& mh,
                       const String& prop,
                       const Gradient& g)
 {
-  ost::iplt::alg::Stat stat;
+  ost::img::alg::Stat stat;
   mh.Apply(stat);
   float min = static_cast<float>(stat.GetMinimum());
   float max = static_cast<float>(stat.GetMaximum());
@@ -652,11 +652,11 @@ void GfxObj::ColorBy(const iplt::MapHandle& mh,
   this->ColorBy(mh,prop,g,minmax.first, minmax.second);
 }
 
-void GfxObj::ColorBy(const iplt::MapHandle& mh,
+void GfxObj::ColorBy(const img::MapHandle& mh,
                       const String& prop,
                       const Color& c1, const Color& c2)
 {
-  ost::iplt::alg::Stat stat;
+  ost::img::alg::Stat stat;
   mh.Apply(stat);
   float min = static_cast<float>(stat.GetMinimum());
   float max = static_cast<float>(stat.GetMaximum());
@@ -664,7 +664,7 @@ void GfxObj::ColorBy(const iplt::MapHandle& mh,
   this->ColorBy(mh,prop,c1,c2,minmax.first, minmax.second);
 }
 
-#endif //OST_IPLT_ENABLED
+#endif //OST_IMG_ENABLED
 
 void GfxObj::ColorBy(const mol::EntityHandle& eh, 
                       const String& prop,

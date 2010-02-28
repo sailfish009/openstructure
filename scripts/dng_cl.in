@@ -72,7 +72,7 @@ else:
      
 from dng import io, mol, seq, gfx, SetPrefixPath
 try: 
-  from dng import iplt
+  from dng import img
 except ImportError:
   pass
 SetPrefixPath(os.getenv('DNG_ROOT'))

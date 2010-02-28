@@ -3,7 +3,7 @@ set(OST_IO_PYMOD_SOURCES
   export_pdb_io.cc
 )
 
-if (ENABLE_IPLT)
+if (ENABLE_IMG)
   set(OST_IO_PYMOD_SOURCES ${OST_IO_PYMOD_SOURCES} export_map_io.cc)
 endif()
 

@@ -27,10 +27,10 @@
 
 #include "data_viewer_proxy.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 DataViewerProxy::DataViewerProxy(DataViewer* v):
-  ost::gui::SipHandler<ost::iplt::gui::DataViewer>(v)
+  ost::gui::SipHandler<ost::img::gui::DataViewer>(v)
 {}
 
 

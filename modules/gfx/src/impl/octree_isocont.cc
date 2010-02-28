@@ -25,18 +25,18 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-void OctreeIsocont::VisitLeaf(iplt::RealSpatialImageState* map, 
-                              const iplt::Point& point) 
+void OctreeIsocont::VisitLeaf(img::RealSpatialImageState* map, 
+                              const img::Point& point) 
 {
   // if we get here we already know that we have to isocontour the damn 
   // thing.
-  iplt::Point end=map->GetExtent().GetEnd();
+  img::Point end=map->GetExtent().GetEnd();
   if (point[0]>=end[0] || point[1]>=end[1] || point[2]>=end[2]) {
     return;
   }
   uint8_t pattern=0;
   for (int i=0; i<8; ++i) {
-    iplt::Point p=point+POINT_OFFSETS[i];
+    img::Point p=point+POINT_OFFSETS[i];
     if (map->Value(p)<level_) {
       pattern|=1<<i;
     }
@@ -71,11 +71,11 @@ void OctreeIsocont::VisitLeaf(iplt::RealSpatialImageState* map,
 
 }
 
-VertexID OctreeIsocont::GetOrGenVert(iplt::RealSpatialImageState* map, 
-                                     const iplt::Point& p, 
+VertexID OctreeIsocont::GetOrGenVert(img::RealSpatialImageState* map, 
+                                     const img::Point& p, 
                                      EdgeDesc* desc)
 {
-  iplt::Extent ext=map->GetExtent();
+  img::Extent ext=map->GetExtent();
   uint32_t key=desc->GetKey(p, ext);
   EdgeMap::iterator k=edge_map_.find(key);
   if (k!=edge_map_.end()) {
@@ -85,8 +85,8 @@ VertexID OctreeIsocont::GetOrGenVert(iplt::RealSpatialImageState* map,
     }
     return id;
   }
-  iplt::Point p1=p+OctreeIsocont::POINT_OFFSETS[desc->c1];
-  iplt::Point p2=p+OctreeIsocont::POINT_OFFSETS[desc->c2];  
+  img::Point p1=p+OctreeIsocont::POINT_OFFSETS[desc->c1];
+  img::Point p2=p+OctreeIsocont::POINT_OFFSETS[desc->c2];  
   geom::Vec3 vert1=map->IndexToCoord(p1);
   geom::Vec3 vert2=map->IndexToCoord(p2);
   float val1=map->Value(p1);
@@ -99,24 +99,24 @@ VertexID OctreeIsocont::GetOrGenVert(iplt::RealSpatialImageState* map,
 }
 
 EdgeDesc OctreeIsocont::EDGE_DESC[12]={
-  EdgeDesc(1, iplt::Point(0, 0, 0), 0, 1, true),
-  EdgeDesc(2, iplt::Point(1, 0, 0), 1, 2, false),
-  EdgeDesc(1, iplt::Point(0, 1, 0), 2, 3, false),
-  EdgeDesc(2, iplt::Point(0, 0, 0), 3, 0, true),
-  EdgeDesc(1, iplt::Point(0, 0, 1), 4, 5, false),
-  EdgeDesc(2, iplt::Point(1, 0, 1), 5, 6, false),
-  EdgeDesc(1, iplt::Point(0, 1, 1), 6, 7, false),
-  EdgeDesc(2, iplt::Point(0, 0, 1), 7, 4, false),
-  EdgeDesc(3, iplt::Point(0, 0, 0), 0, 4, true),
-  EdgeDesc(3, iplt::Point(1, 0, 0), 1, 5, false),
-  EdgeDesc(3, iplt::Point(1, 1, 0), 2, 6, false),
-  EdgeDesc(3, iplt::Point(0, 1, 0), 3, 7, false),
+  EdgeDesc(1, img::Point(0, 0, 0), 0, 1, true),
+  EdgeDesc(2, img::Point(1, 0, 0), 1, 2, false),
+  EdgeDesc(1, img::Point(0, 1, 0), 2, 3, false),
+  EdgeDesc(2, img::Point(0, 0, 0), 3, 0, true),
+  EdgeDesc(1, img::Point(0, 0, 1), 4, 5, false),
+  EdgeDesc(2, img::Point(1, 0, 1), 5, 6, false),
+  EdgeDesc(1, img::Point(0, 1, 1), 6, 7, false),
+  EdgeDesc(2, img::Point(0, 0, 1), 7, 4, false),
+  EdgeDesc(3, img::Point(0, 0, 0), 0, 4, true),
+  EdgeDesc(3, img::Point(1, 0, 0), 1, 5, false),
+  EdgeDesc(3, img::Point(1, 1, 0), 2, 6, false),
+  EdgeDesc(3, img::Point(0, 1, 0), 3, 7, false),
 };
 
-iplt::Point OctreeIsocont::POINT_OFFSETS[]={
-  iplt::Point(0, 0, 0), iplt::Point(1, 0, 0), iplt::Point(1, 1, 0),
-  iplt::Point(0, 1, 0), iplt::Point(0, 0, 1), iplt::Point(1, 0, 1),
-  iplt::Point(1, 1, 1), iplt::Point(0, 1, 1)
+img::Point OctreeIsocont::POINT_OFFSETS[]={
+  img::Point(0, 0, 0), img::Point(1, 0, 0), img::Point(1, 1, 0),
+  img::Point(0, 1, 0), img::Point(0, 0, 1), img::Point(1, 0, 1),
+  img::Point(1, 1, 1), img::Point(0, 1, 1)
 };
 
 int8_t OctreeIsocont::TRIANGLES[256][16]={

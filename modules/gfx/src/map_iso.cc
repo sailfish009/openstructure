@@ -24,7 +24,7 @@
 #include <ost/profile.hh>
 #include <ost/profile.hh>
 #include <ost/base.hh>
-#include <ost/iplt/alg/stat.hh>
+#include <ost/img/alg/stat.hh>
 
 #include "gl_helper.hh"
 #include "glext_include.hh"
@@ -45,7 +45,7 @@ namespace ost {
 
 namespace gfx {
 
-MapIso::MapIso(const String& name, const iplt::MapHandle& mh, float level):
+MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
   GfxObj(name),
   mh_(mh),
   octree_(mh),
@@ -65,7 +65,7 @@ MapIso::MapIso(const String& name, const iplt::MapHandle& mh, float level):
   Rebuild();
 }
 
-MapIso::MapIso(const String& name, const iplt::MapHandle& mh, 
+MapIso::MapIso(const String& name, const img::MapHandle& mh, 
                float level, uint a):
   GfxObj(name),
   mh_(mh),
@@ -138,7 +138,7 @@ struct OctreeDebugger {
     level_(level), scale_(scale) 
   { }
   bool VisitNode(const impl::OctreeNode& node, uint8_t level, 
-                 const iplt::Extent& ext)
+                 const img::Extent& ext)
   {
     if (node.GetMin()>level_ || node.GetMax()<level_) {
       return false;
@@ -185,8 +185,8 @@ struct OctreeDebugger {
     glEnd();
   }
   
-  void VisitLeaf(iplt::RealSpatialImageState* map, 
-                 const iplt::Point& point) 
+  void VisitLeaf(img::RealSpatialImageState* map, 
+                 const img::Point& point) 
   {
     glColor3f(1.0, 1.0, 0.0);
     geom::Vec3 s=CompMultiply(point.ToVec3(), scale_);
@@ -211,8 +211,8 @@ void MapIso::CustomRenderGL(RenderPass pass)
     case STANDARD_RENDER_PASS:
       va_.RenderGL();
       if (debug_octree_) {
-        OctreeDebugger d(level_, mh_.IndexToCoord(iplt::Point(1,1,1))-
-                         mh_.IndexToCoord(iplt::Point(0,0,0)));
+        OctreeDebugger d(level_, mh_.IndexToCoord(img::Point(1,1,1))-
+                         mh_.IndexToCoord(img::Point(0,0,0)));
         glPushAttrib(GL_ENABLE_BIT);
         glDisable(GL_LIGHTING);
         octree_.VisitDF(d);
@@ -264,14 +264,14 @@ float MapIso::GetLevel() const
 
 float MapIso::GetStdDev() const
 {
-  iplt::alg::Stat stat;
+  img::alg::Stat stat;
   mh_.Apply(stat);
   return stat.GetStandardDeviation();
 }
 
 float MapIso::GetMean() const
 {
-  iplt::alg::Stat stat;
+  img::alg::Stat stat;
   mh_.Apply(stat);
   return static_cast<float>(stat.GetMean());
 }

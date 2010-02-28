@@ -94,7 +94,7 @@ plot_viewer_proxy.hh
 plot_viewer_proxy_fw.hh
 )
 
-if (ENABLE_IPLT)
+if (ENABLE_IMG)
   set(OST_GUI_DATA_VIEWER_HEADERS
   argand.hh
   data_viewer.hh
@@ -104,7 +104,7 @@ if (ENABLE_IPLT)
   drawing_functions.hh
   fft_panel.hh
   info_panel.hh
-  iplt2qt.hh
+  img2qt.hh
   mask_overlay.hh
   null_overlay.hh
   overlay.hh
@@ -323,7 +323,7 @@ tools/tool_manager.hh
 tools/tool_options_widget.hh
 tools/tool_options_win.hh
 )
-if (ENABLE_IPLT)
+if (ENABLE_IMG)
   list(APPEND OST_GUI_TOOLS_HEADERS map_tool.hh)
   list(APPEND OST_GUI_SOURCES
        tools/map_tool.cc
@@ -335,7 +335,7 @@ if (ENABLE_IPLT)
        data_viewer/drawing_functions.cc
        data_viewer/fft_panel.cc
        data_viewer/info_panel.cc
-       data_viewer/iplt2qt.cc
+       data_viewer/img2qt.cc
        data_viewer/mask_overlay.cc
        data_viewer/null_overlay.cc
        data_viewer/overlay_base.cc

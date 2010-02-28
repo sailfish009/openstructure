@@ -29,9 +29,9 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <ost/iplt/point.hh>
-#include <ost/iplt/extent.hh>
-#include <ost/iplt/normalizer_impl.hh>
+#include <ost/img/point.hh>
+#include <ost/img/extent.hh>
+#include <ost/img/normalizer_impl.hh>
 
 #include <ost/gui/data_viewer/overlay_base_fw.hh>
 #include <ost/gui/data_viewer/overlay_manager_fw.hh>
@@ -43,7 +43,7 @@
 class QWidget;
 class QString;
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 // fw decl
 class DataViewer;

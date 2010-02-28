@@ -28,11 +28,11 @@
 #include <QVBoxLayout>
 #include <QGroupBox>
 
-#include <ost/iplt/image.hh>
+#include <ost/img/image.hh>
 
 #include "info_panel.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 InfoPanelLabel::InfoPanelLabel(const QString& t, QWidget* parent):
   QLabel(t,parent)

@@ -23,13 +23,13 @@
 */
 
 #include <QInputDialog>
-#include <ost/iplt/alg/fft.hh>   
+#include <ost/img/alg/fft.hh>   
 #include "fft_panel.hh"
 
 
 
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
     
 FFTPanel::FFTPanel(const Data& parent_data, QWidget* parent):
   DataViewerPanelBase(parent_data,parent),

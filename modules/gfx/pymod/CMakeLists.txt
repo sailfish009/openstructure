@@ -12,7 +12,7 @@ set(OST_GFX_PYMOD_SOURCES
   export_color_ops.cc
 )
 
-if (ENABLE_IPLT)
+if (ENABLE_IMG)
   set(OST_GFX_PYMOD_SOURCES ${OST_GFX_PYMOD_SOURCES} export_map.cc)
 endif()
 

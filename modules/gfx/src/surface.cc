@@ -183,8 +183,8 @@ void Surface::ColorBy(const mol::EntityView& ev,
   EntityViewColorOp evop = EntityViewColorOp(prop, g,minv,maxv,ev);
   this->Apply(evop);
 }
-#if OST_IPLT_ENABLED
-void Surface::ColorBy(const iplt::MapHandle& mh,
+#if OST_IMG_ENABLED
+void Surface::ColorBy(const img::MapHandle& mh,
                       const String& prop,
                       const Gradient& g,float minv, float maxv)
 {
@@ -192,7 +192,7 @@ void Surface::ColorBy(const iplt::MapHandle& mh,
   this->Apply(mhop);
 }
 
-#endif //OST_IPLT_ENABLED
+#endif //OST_IMG_ENABLED
 
 
 namespace {
@@ -333,13 +333,13 @@ void Surface::Apply(const gfx::EntityViewColorOp& op, bool store){
   FlagRefresh();
 }
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 void Surface::Apply(const gfx::MapHandleColorOp& op, bool store){
   if(store){
     MapHandleColorOp* op_ptr = new MapHandleColorOp(op);
     this->AppendColorOp(op_ptr);
   }
-  const iplt::MapHandle& mh = op.GetMapHandle();
+  const img::MapHandle& mh = op.GetMapHandle();
   const String& prop = op.GetProperty();
   const Gradient& g = op.GetGradient();
   float minv = op.GetMinV();
@@ -349,7 +349,7 @@ void Surface::Apply(const gfx::MapHandleColorOp& op, bool store){
   }
   FlagRefresh();
 }
-#endif //OST_IPLT_ENABLED
+#endif //OST_IMG_ENABLED
 
 void Surface::CleanColorOps(){
   GfxObj::CleanColorOps();

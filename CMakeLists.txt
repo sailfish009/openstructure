@@ -19,7 +19,7 @@ option(ENABLE_GUI "whether the graphical user interface should be enabled"
        ON)
 option(ENABLE_GFX "whether graphics support should be enabled"
       ON)
-option(ENABLE_IPLT "whether the image processing module should be compiled"
+option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
 option(USE_DOUBLE_PRECISION "whether to compile in double precision" 
        OFF)
@@ -72,10 +72,10 @@ else()
   set(_SHADER OFF)
 endif()
 
-if (ENABLE_IPLT)
-  set(_IPLT ON)
+if (ENABLE_IMG)
+  set(_IMG ON)
 else()
-  set(_IPLT OFF)
+  set(_IMG OFF)
 endif()
 
 if (COMPOUND_LIB)
@@ -184,7 +184,7 @@ find_package(PNG REQUIRED)
 find_package(Eigen 2.0.0 REQUIRED)
 find_package(Python 2.2.1 REQUIRED)
 
-if (ENABLE_IPLT)
+if (ENABLE_IMG)
   find_package(FFTW REQUIRED)
   find_package(TIFF REQUIRED)
 endif()
@@ -216,7 +216,7 @@ message(STATUS
         "OpenStructure will be built with the following options:\n"
         "   Graphical interface         (-DENABLE_UI) : ${_UI}\n"
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   Image Processing support  (-DENABLE_IPLT) : ${_IPLT}\n"        
+        "   Image Processing support  (-DENABLE_IMG) : ${_IMG}\n"        
         "   Shader support             (-DUSE_SHADER) : ${_SHADER}\n"
         "   Optimize                     (-DOPTIMIZE) : ${_OPT}\n"
         "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"

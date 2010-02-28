@@ -41,8 +41,8 @@
 #include <ost/mol/transform.hh>
 
 
-#if OST_IPLT_ENABLED
-#  include <ost/iplt/map.hh>
+#if OST_IMG_ENABLED
+#  include <ost/img/map.hh>
 #endif
 
 #include "gfx_object_fw.hh"
@@ -234,21 +234,21 @@ public:
   void ColorBy(const mol::EntityHandle& ev, 
                const String& prop,
                const Color& c1, const Color& c2);
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   // convenience method
-  void ColorBy(const iplt::MapHandle& mh,
+  void ColorBy(const img::MapHandle& mh,
                const String& prop,
                const Gradient& g);
   // convenience method
-  void ColorBy(const iplt::MapHandle& mh,
+  void ColorBy(const img::MapHandle& mh,
                const String& prop,
                const Color& c1, const Color& c2);
   // dito for maps
-  virtual void ColorBy(const iplt::MapHandle& mh,
+  virtual void ColorBy(const img::MapHandle& mh,
                        const String& prop,
                        const Gradient& g,float minv, float maxv);
   // convenience method
-  void ColorBy(const iplt::MapHandle& mh,
+  void ColorBy(const img::MapHandle& mh,
                const String& prop,
                const Color& c1, const Color& c2, float minv, float maxv);  
 #endif

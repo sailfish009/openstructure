@@ -23,7 +23,7 @@
 #include <ost/gui/module_config.hh>
 #include "data_viewer_panel_base.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 class DLLEXPORT_OST_GUI DataViewerPanel: public DataViewerPanelBase
 {

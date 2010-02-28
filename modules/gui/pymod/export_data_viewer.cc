@@ -29,9 +29,9 @@
 #include <ost/gui/data_viewer/overlay_manager.hh>
 
 using namespace boost::python;
-using namespace ost::iplt;
+using namespace ost::img;
 using namespace ost;
-using namespace ost::iplt::gui;
+using namespace ost::img::gui;
 
 namespace {
 

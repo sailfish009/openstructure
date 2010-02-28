@@ -26,14 +26,14 @@
 #define IPLT_GUI_MASK_OVERLAY_HH_
 
 #include <ost/geom/geom.hh>
-#include <ost/iplt/image_handle.hh>
-#include <ost/iplt/mask.hh>
+#include <ost/img/image_handle.hh>
+#include <ost/img/mask.hh>
 
 #include <ost/gui/module_config.hh>
 
 #include "overlay_base.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 // fw decl
 class DataViewerPanel;

@@ -26,7 +26,7 @@
 #include "data_viewer_panel.hh"
 #include "draw_overlay.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 DrawOverlay::DrawOverlay(ImageHandle imagehandle):
   Overlay("DrawOverlay"),

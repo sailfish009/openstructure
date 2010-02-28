@@ -27,7 +27,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 class Overlay;
 

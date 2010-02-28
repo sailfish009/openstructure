@@ -35,9 +35,9 @@
 #include <QVBoxLayout>
 
 
-#include <ost/iplt/point.hh>
+#include <ost/img/point.hh>
 
-#include <ost/iplt/point.hh>
+#include <ost/img/point.hh>
 #include <ost/gui/module_config.hh>
 #include <ost/gui/data_viewer/overlay_base.hh>
 
@@ -45,7 +45,7 @@
 
 
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 class DLLEXPORT_OST_GUI PointlistOverlayBaseSettings: public QDialog
 {

@@ -45,18 +45,18 @@
 #include <ost/gui/python_shell/python_interpreter.hh>
 #include <ost/gui/main_area.hh>
 
-#if OST_IPLT_ENABLED
-  #include <ost/io/iplt/load_map.hh>
+#if OST_IMG_ENABLED
+  #include <ost/io/img/load_map.hh>
   #include <ost/gfx/map_iso.hh>
-  #include <ost/iplt/extent.hh>
+  #include <ost/img/extent.hh>
 #endif
 
 namespace ost { namespace gui {
 
 LoaderManagerPtr FileLoader::loader_manager_ = LoaderManagerPtr();
 
-#if OST_IPLT_ENABLED
-  QList<iplt::ImageHandle> FileLoader::loaded_images_;
+#if OST_IMG_ENABLED
+  QList<img::ImageHandle> FileLoader::loaded_images_;
 #endif
 
 FileLoader::FileLoader(){}
@@ -166,9 +166,9 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename)
 gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename) throw(io::IOException)
 {
 //TODO IMPROVE CODE
-#if OST_IPLT_ENABLED
-  iplt::ImageHandle map=io::LoadMap(filename.toStdString());
-  ost::iplt::Extent ext = map.GetExtent();
+#if OST_IMG_ENABLED
+  img::ImageHandle map=io::LoadMap(filename.toStdString());
+  ost::img::Extent ext = map.GetExtent();
   if(ext.GetSize().GetDepth()>1){
     QFileInfo file_info(filename);
     gfx::MapIsoP map_iso(new gfx::MapIso(file_info.baseName().toStdString(),
@@ -180,7 +180,7 @@ gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename) throw(io::IOExcepti
     //FIXME ImageHandle should not be destroyed at the end of method
     //therefore hack with list
     loaded_images_.append(map);
-    ost::iplt::gui::DataViewer* viewer = GostyApp::Instance()->CreateDataViewer(loaded_images_.last());
+    ost::img::gui::DataViewer* viewer = GostyApp::Instance()->CreateDataViewer(loaded_images_.last());
     gui::GostyApp::Instance()->GetPerspective()->GetMainArea()->AddWidget(filename,viewer);
   }
 #else

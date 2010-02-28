@@ -44,7 +44,7 @@ void export_FileLoader();
 void export_Widget();
 
 
-#ifdef OST_IPLT_ENABLED
+#ifdef OST_IMG_ENABLED
 void export_data_viewer();
 #endif
 
@@ -116,7 +116,7 @@ BOOST_PYTHON_MODULE(_gui)
   export_FileLoader();
   export_Widget();
 
-  #if OST_IPLT_ENABLED
+  #if OST_IMG_ENABLED
   export_data_viewer();
   #endif
 }

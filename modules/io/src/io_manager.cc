@@ -24,17 +24,17 @@
 #include <ost/io/seq/promod_io_handler.hh>
 #include <ost/io/mol/surface_io_msms_handler.hh>
 #include  <ost/io/seq/clustal_io_handler.hh>
-#if OST_IPLT_ENABLED
-#  include  <ost/io/iplt/map_io_dx_handler.hh>
-#  include  <ost/io/iplt/map_io_spi_handler.hh>
-#  include  <ost/io/iplt/map_io_mrc_handler.hh>
-#  include  <ost/io/iplt/map_io_dm3_handler.hh>
-#  include  <ost/io/iplt/map_io_situs_handler.hh>
-#  include  <ost/io/iplt/map_io_tiff_handler.hh>
-#  include  <ost/io/iplt/map_io_png_handler.hh>
-#  include  <ost/io/iplt/map_io_dat_handler.hh>
-#  include  <ost/io/iplt/map_io_jpk_handler.hh>
-#  include  <ost/io/iplt/map_io_nanoscope_handler.hh>
+#if OST_IMG_ENABLED
+#  include  <ost/io/img/map_io_dx_handler.hh>
+#  include  <ost/io/img/map_io_spi_handler.hh>
+#  include  <ost/io/img/map_io_mrc_handler.hh>
+#  include  <ost/io/img/map_io_dm3_handler.hh>
+#  include  <ost/io/img/map_io_situs_handler.hh>
+#  include  <ost/io/img/map_io_tiff_handler.hh>
+#  include  <ost/io/img/map_io_png_handler.hh>
+#  include  <ost/io/img/map_io_dat_handler.hh>
+#  include  <ost/io/img/map_io_jpk_handler.hh>
+#  include  <ost/io/img/map_io_nanoscope_handler.hh>
 #endif
 namespace ost { namespace io {
 
@@ -47,7 +47,7 @@ IOManager::IOManager()
   RegisterFactory(SequenceIOHandlerFactoryBasePtr(new ClustalIOHandlerFactory));  
   RegisterFactory(SequenceIOHandlerFactoryBasePtr(new PromodIOHandlerFactory));    
   RegisterFactory(SurfaceIOHandlerFactoryBasePtr(new SurfaceIOMSMSHandlerFactory));
-#if OST_IPLT_ENABLED  
+#if OST_IMG_ENABLED  
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIODxHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOSpiHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOSitusHandlerFactory));
@@ -128,7 +128,7 @@ SurfaceIOHandlerPtr IOManager::FindSurfaceImportHandler(const String& filename,
   throw IOException("no suitable surface io handler found for "+filename);
 }
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::path& loc,
                                                     const ImageFormatBase& formatstruct)
 {
@@ -246,7 +246,7 @@ void IOManager::RegisterFactory(const MapIOHandlerFactoryBasePtr& f)
   map_io_list_.push_back(f);
 }
 
-#endif //OST_IPLT_ENABLED
+#endif //OST_IMG_ENABLED
 
 void IOManager::RegisterFactory(const EntityIOHandlerFactoryBaseP& f) 
 {

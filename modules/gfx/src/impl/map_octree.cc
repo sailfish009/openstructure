@@ -25,7 +25,7 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-MapOctree::MapOctree(const iplt::ImageHandle& map):
+MapOctree::MapOctree(const img::ImageHandle& map):
   map_(map)
 {
   this->BuildOctree();
@@ -33,7 +33,7 @@ MapOctree::MapOctree(const iplt::ImageHandle& map):
 
 uint32_t MapOctree::GetNumNodesForLevel(uint8_t level) const
 {
-  iplt::Size size=map_.GetExtent().GetSize();
+  img::Size size=map_.GetExtent().GetSize();
   OcRangeVector range_vec(size[0]-1, size[1]-1, size[2]-1);
   uint16_t mask=0;
   for (unsigned char i=0; i<level; ++i) {
@@ -45,24 +45,24 @@ uint32_t MapOctree::GetNumNodesForLevel(uint8_t level) const
 
 void MapOctree::BuildOctree()
 {
-  iplt::Size size=map_.GetExtent().GetSize();
+  img::Size size=map_.GetExtent().GetSize();
   OcRangeVector range_vec(size[0]-1, size[1]-1, size[2]-1);
-  iplt::RealSpatialImageState* p=NULL;
-  p=dynamic_cast<iplt::RealSpatialImageState*>(map_.ImageStatePtr().get());
+  img::RealSpatialImageState* p=NULL;
+  p=dynamic_cast<img::RealSpatialImageState*>(map_.ImageStatePtr().get());
   assert(p && "Octree only supports real spatial images");
   OctreeNode dummy;
   this->BuildOctreeRec(range_vec, 0, p, map_.GetExtent(), dummy);
 }
 std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
                                                  uint16_t level,
-                                                 iplt::RealSpatialImageState* map,
-                                                 const iplt::Extent& ext,
+                                                 img::RealSpatialImageState* map,
+                                                 const img::Extent& ext,
                                                  OctreeNode& parent)
 {
-  static iplt::Point OFFSET[]={ 
-    iplt::Point(0, 0, 1), iplt::Point(0, 1, 1), iplt::Point(1, 0, 1),
-    iplt::Point(1, 1, 1), iplt::Point(1, 1, 0), iplt::Point(0, 1, 0),
-    iplt::Point(1, 0, 0)
+  static img::Point OFFSET[]={ 
+    img::Point(0, 0, 1), img::Point(0, 1, 1), img::Point(1, 0, 1),
+    img::Point(1, 1, 1), img::Point(1, 1, 0), img::Point(0, 1, 0),
+    img::Point(1, 0, 0)
   };
   // determine highest-order bit in all 3 directions
   char highest_order_bit=-1;
@@ -76,11 +76,11 @@ std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
 
   if (highest_order_bit==-1) {
     parent.SetLeaf();
-    iplt::Point mend=map->GetExtent().GetEnd();
+    img::Point mend=map->GetExtent().GetEnd();
     float val=map->Value(ext.GetStart());
     std::pair<float, float> minmax(val, val);
     for (int i=0; i<7; ++i) {
-      iplt::Point p=OFFSET[i]+ext.GetStart();
+      img::Point p=OFFSET[i]+ext.GetStart();
       if (mend[0]>=p[0] && mend[1]>=p[1] && mend[2]>=p[2]) {
         val=map->Value(p);
         if (val<minmax.first) {
@@ -147,9 +147,9 @@ std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
     for (int j=0; j<=int(branch_y); ++j) {
       for (int k=0; k<=int(branch_z); ++k) {        
         std::pair<float, float> local_minmax;
-        iplt::Extent ext(iplt::Point(range_x[i][0], range_y[j][0], 
+        img::Extent ext(img::Point(range_x[i][0], range_y[j][0], 
                                      range_z[k][0]),
-                         iplt::Point(range_x[i][1], range_y[j][1], 
+                         img::Point(range_x[i][1], range_y[j][1], 
                                      range_z[k][1]));
 #if !defined(NDEBUG)                                     
         if (!map_.GetExtent().Contains(ext)) {

@@ -74,7 +74,7 @@ def SavePDB(models, filename):
     writer.Write(model)
 
 try:
-  from ost import iplt
+  from ost import img
   LoadMap = LoadImage
   SaveMap = SaveImage  
 except ImportError:
@@ -83,7 +83,7 @@ except ImportError:
  ## loads several images and puts them in an ImageList
  # \sa \ref fft_li.py "View Fourier Transform Example"
 def LoadImageList (files):
-  image_list=iplt.ImageList()
+  image_list=img.ImageList()
   for file in files:
     image=LoadImage(file)
     image_list.append(image)

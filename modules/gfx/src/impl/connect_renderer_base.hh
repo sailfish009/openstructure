@@ -46,7 +46,7 @@ public:
 
   virtual void PickAtom(const geom::Line3& line, Real line_width,
                         mol::AtomHandle& picked_atom);
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   virtual void Apply(const gfx::MapHandleColorOp& op);
 #endif
 

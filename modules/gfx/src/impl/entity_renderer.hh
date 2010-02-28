@@ -38,9 +38,9 @@
 #include <ost/gfx/color_ops/uniform_color_op.hh>
 #include <ost/gfx/color_ops/gradient_level_color_op.hh>
 #include <ost/gfx/color_ops/entity_view_color_op.hh>
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 #include <ost/gfx/color_ops/map_handle_color_op.hh>
-#endif //OST_IPLT_ENABLED
+#endif //OST_IMG_ENABLED
 #include <ost/gfx/impl/entity_renderer_fw.hh>
 
 namespace ost { namespace gfx { namespace impl {
@@ -135,7 +135,7 @@ public:
   virtual void Apply(const gfx::UniformColorOp& op)=0;
   virtual void Apply(const gfx::GradientLevelColorOp& op)=0;
   virtual void Apply(const gfx::EntityViewColorOp& op)=0;
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   virtual void Apply(const gfx::MapHandleColorOp& op)=0;
 #endif
 

@@ -30,7 +30,7 @@
 #include "overlay_manager.hh"
 #include "overlay.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 ////////////////////////////
 

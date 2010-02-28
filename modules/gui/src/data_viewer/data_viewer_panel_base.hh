@@ -37,17 +37,17 @@
 
 
 #include <ost/base.hh>
-#include <ost/iplt/extent.hh>
-#include <ost/iplt/normalizer_impl.hh>
-#include <ost/iplt/raster_image/raster_image.hh>
+#include <ost/img/extent.hh>
+#include <ost/img/normalizer_impl.hh>
+#include <ost/img/raster_image/raster_image.hh>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/data_viewer/viewer_normalizer.hh>
 
-#include <ost/iplt/normalizer_impl.hh>
+#include <ost/img/normalizer_impl.hh>
 
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
     
 class DLLEXPORT_OST_GUI DataViewerPanelBase: public QWidget, 

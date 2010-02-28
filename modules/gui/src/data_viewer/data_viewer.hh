@@ -28,9 +28,9 @@
 #include <map>
 
 #include <ost/base.hh>
-#include <ost/iplt/data.hh>
-#include <ost/iplt/data_observer.hh>
-#include <ost/iplt/alg/norm.hh>   
+#include <ost/img/data.hh>
+#include <ost/img/data_observer.hh>
+#include <ost/img/alg/norm.hh>   
 
 #include <ost/gui/main_window.hh>
 
@@ -51,7 +51,7 @@ namespace gui {
 class GostyApp;
 } //ns
 
-namespace iplt { namespace gui {
+namespace img { namespace gui {
 
 //fw decl
 class DataViewerPanel;

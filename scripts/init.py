@@ -6,7 +6,7 @@ import optparse
 from ost import io, mol, seq, geom, conop
 import ost
 try: 
-  from ost import iplt
+  from ost import img
 except ImportError:
   pass
 import httplib

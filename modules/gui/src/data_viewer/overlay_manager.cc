@@ -28,7 +28,7 @@
 #include "overlay_base.hh"
 #include "data_viewer_panel.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 OverlayManager::OverlayManager(QWidget* ref):
   ref_(ref),ov_list_(),next_id_(0),active_ov_(),obs_list_()

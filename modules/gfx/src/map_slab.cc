@@ -23,7 +23,7 @@
 
 #include <ost/log.hh>
 #include <ost/profile.hh>
-#include <ost/iplt/alg/stat.hh>
+#include <ost/img/alg/stat.hh>
 
 #include "gl_helper.hh"
 
@@ -33,7 +33,7 @@
 
 namespace {
 
-  float InterpolatedValue(const ost::iplt::ImageHandle& mh, const geom::Vec3& xyz)
+  float InterpolatedValue(const ost::img::ImageHandle& mh, const geom::Vec3& xyz)
   {
     geom::Vec3 uvw=mh.CoordToIndex(xyz);
     float x=fmod(float(uvw[0]), float(1.0));
@@ -45,14 +45,14 @@ namespace {
 
     float value=0.0;
     if(u<mh.GetSize()[0]-1 && v<mh.GetSize()[1]-1 && w<mh.GetSize()[2]-1) {
-     value=mh.GetReal(ost::iplt::Point(u,v,w))*(1.0-x)*(1.0-y)*(1.0-z)+
-       mh.GetReal(ost::iplt::Point(u+1,v,w))*(x)*(1.0-y)*(1.0-z)+
-       mh.GetReal(ost::iplt::Point(u,v+1,w))*(1.0-x)*(y)*(1.0-z)+
-       mh.GetReal(ost::iplt::Point(u,v,w+1))*(1.0-x)*(1.0-y)*(z)+
-       mh.GetReal(ost::iplt::Point(u+1,v,w+1))*(x)*(1.0-y)*(z)+
-       mh.GetReal(ost::iplt::Point(u,v+1,w+1))*(1.0-x)*(y)*(z)+
-       mh.GetReal(ost::iplt::Point(u+1,v+1,w))*(x)*(y)*(1.0-z)+
-       mh.GetReal(ost::iplt::Point(u+1,v+1,w+1))*(x)*(y)*(z);
+     value=mh.GetReal(ost::img::Point(u,v,w))*(1.0-x)*(1.0-y)*(1.0-z)+
+       mh.GetReal(ost::img::Point(u+1,v,w))*(x)*(1.0-y)*(1.0-z)+
+       mh.GetReal(ost::img::Point(u,v+1,w))*(1.0-x)*(y)*(1.0-z)+
+       mh.GetReal(ost::img::Point(u,v,w+1))*(1.0-x)*(1.0-y)*(z)+
+       mh.GetReal(ost::img::Point(u+1,v,w+1))*(x)*(1.0-y)*(z)+
+       mh.GetReal(ost::img::Point(u,v+1,w+1))*(1.0-x)*(y)*(z)+
+       mh.GetReal(ost::img::Point(u+1,v+1,w))*(x)*(y)*(1.0-z)+
+       mh.GetReal(ost::img::Point(u+1,v+1,w+1))*(x)*(y)*(z);
     }
     return static_cast<float>(value);
   }
@@ -62,7 +62,7 @@ namespace ost {
 
 namespace gfx {
 
-MapSlab::MapSlab(const String& name, const iplt::MapHandle& mh, const geom::Plane& p):
+MapSlab::MapSlab(const String& name, const img::MapHandle& mh, const geom::Plane& p):
   GfxObj(name),
   mh_(mh),
   plane_(p),
@@ -78,7 +78,7 @@ MapSlab::MapSlab(const String& name, const iplt::MapHandle& mh, const geom::Plan
   grad_.SetColorAt(0.0, Color(0,0,0));
   grad_.SetColorAt(1.0, Color(1,1,1));
   Rebuild();
-  iplt::alg::Stat stat;
+  img::alg::Stat stat;
   mh_.Apply(stat);
   minv_ = stat.GetMinimum();
   maxv_ = stat.GetMaximum();
@@ -155,7 +155,7 @@ void MapSlab::ColorBy(const Gradient& g, float minv, float maxv)
 void MapSlab::ColorBy(const Gradient& g)
 {
   grad_=g;
-  ost::iplt::alg::Stat stat;
+  ost::img::alg::Stat stat;
   mh_.Apply(stat);
   minv_=stat.GetMinimum();
   maxv_=stat.GetMaximum();

@@ -26,7 +26,7 @@
 #include <deque>
 #include "drawing_functions.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 using namespace geom;
 

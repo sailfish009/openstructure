@@ -23,12 +23,12 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#include <ost/iplt/mask_visitor.hh>
+#include <ost/img/mask_visitor.hh>
 
 #include "data_viewer_panel.hh"
 #include "mask_overlay.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 MaskOverlay::MaskOverlay():
   Overlay("MaskOverlay"),

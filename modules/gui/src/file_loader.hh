@@ -45,8 +45,8 @@ private:
 
   static LoaderManagerPtr loader_manager_;
 
-#if OST_IPLT_ENABLED
-  static QList<iplt::ImageHandle> loaded_images_;
+#if OST_IMG_ENABLED
+  static QList<img::ImageHandle> loaded_images_;
 #endif
 
 public:

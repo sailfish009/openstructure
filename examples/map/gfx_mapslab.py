@@ -1,15 +1,15 @@
 import math,random
-from ost import iplt
+from ost import img
 vmax=-10000.0
 vmin=+10000.0
-mh=iplt.CreateMap(iplt.Size(32,32,32))
-for p in iplt.ExtentIterator(mh.GetExtent()):
+mh=img.CreateMap(img.Size(32,32,32))
+for p in img.ExtentIterator(mh.GetExtent()):
   val=5*math.sin(0.4*math.sqrt(p[0]*p[0]+p[1]*p[1]))+7*math.cos(0.6*math.sqrt(p[2]*p[2]+p[1]*p[1]))
   mh.SetReal(p,val)
   vmin=min(vmin,val)
   vmax=max(vmax,val)
 print vmin, vmax
-for p in iplt.ExtentIterator(mh.GetExtent()):
+for p in img.ExtentIterator(mh.GetExtent()):
   mh.SetReal(p,(mh.GetReal(p)-vmin)/(vmax-vmin))
 
 pl = gfx.PrimList("box")

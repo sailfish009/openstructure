@@ -25,7 +25,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <ost/iplt/map.hh>
+#include <ost/img/map.hh>
 #include <ost/gfx/impl/map_octree.hh>
 #include "gfx_object.hh"
 #include "map_iso_prop.hh"
@@ -35,7 +35,7 @@ namespace ost { namespace gfx {
 class MapIso;
 typedef boost::shared_ptr<MapIso> MapIsoP;
 
-/// \brief isocontour rendering for \ref iplt::ImageHandle "3D image data"
+/// \brief isocontour rendering for \ref img::ImageHandle "3D image data"
 /// 
 /// Two render modes are supported: gfx::RenderMode::SIMPLE renders the map in
 /// wireframe mode, gfx::RenderMode::FILL renders a shaded isocontoured map.
@@ -43,9 +43,9 @@ typedef boost::shared_ptr<MapIso> MapIsoP;
 /// \sa gfx::MapSlab
 class DLLEXPORT_OST_GFX MapIso: public GfxObj {
 public:
-  MapIso(const ost::String& name, const iplt::MapHandle& mh,float level);
+  MapIso(const ost::String& name, const img::MapHandle& mh,float level);
 
-  MapIso(const ost::String& name, const iplt::MapHandle& mh,
+  MapIso(const ost::String& name, const img::MapHandle& mh,
          float level, uint a);
 
   virtual geom::AlignedCuboid GetBoundingBox() const;
@@ -82,7 +82,7 @@ protected:
   virtual void CustomPreRenderGL(bool flag);
 
 private:
-  iplt::MapHandle  mh_;
+  img::MapHandle  mh_;
   impl::MapOctree  octree_;
   float level_;
   bool normals_calculated_;

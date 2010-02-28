@@ -39,7 +39,7 @@
 #include <map>
 #include "overlay_manager_observer.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 class OverlayCustomActCheckBox: public QRadioButton
 {

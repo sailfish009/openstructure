@@ -26,6 +26,6 @@ except ImportError:
   
   
 try:
-  from ost import iplt
+  from ost import img
 except ImportError:
   pass

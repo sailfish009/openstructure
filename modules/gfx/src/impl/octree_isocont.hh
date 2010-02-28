@@ -24,8 +24,8 @@
  */
 #include <boost/unordered_map.hpp>  
 
-#include <ost/iplt/image_handle.hh>
-#include <ost/iplt/image_state.hh>
+#include <ost/img/image_handle.hh>
+#include <ost/img/image_state.hh>
 #include <ost/gfx/module_config.hh>
 #include <ost/gfx/vertex_array.hh>
 #include <ost/gfx/impl/map_octree.hh>
@@ -33,17 +33,17 @@
 namespace ost { namespace gfx { namespace impl {
   
 struct EdgeDesc {
-  EdgeDesc(uint8_t d, const iplt::Point& o, 
+  EdgeDesc(uint8_t d, const img::Point& o, 
            uint8_t ac1, uint8_t ac2, bool l):
            dir(d), off(o), c1(ac1), c2(ac2), lv(l)
   { }
-  uint32_t GetKey(const iplt::Point& p, iplt::Extent& ext)
+  uint32_t GetKey(const img::Point& p, img::Extent& ext)
   {
-    iplt::Point k=p+off;
+    img::Point k=p+off;
     return 4*ext.Point2Offset(k)+dir;
   }
   uint8_t      dir;
-  iplt::Point  off;  
+  img::Point  off;  
   uint8_t      c1;
   uint8_t      c2;
   bool         lv;
@@ -54,7 +54,7 @@ struct EdgeDesc {
 struct DLLEXPORT_OST_GFX OctreeIsocont {
 private:
   static uint16_t EDGE_FLAGS[];
-  static iplt::Point POINT_OFFSETS[];
+  static img::Point POINT_OFFSETS[];
   static int8_t TRIANGLES[256][16];
   static EdgeDesc EDGE_DESC[12];
 public:
@@ -63,14 +63,14 @@ public:
    va_(va), level_(level), triangles_(triangles)
   { }
   bool VisitNode(const impl::OctreeNode& node, uint8_t level, 
-                 const iplt::Extent& ext)
+                 const img::Extent& ext)
   {
     return (node.GetMin()<level_ && level_<=node.GetMax());
   }
-  void VisitLeaf(iplt::RealSpatialImageState* map, 
-                 const iplt::Point& point);
+  void VisitLeaf(img::RealSpatialImageState* map, 
+                 const img::Point& point);
   
-  VertexID GetOrGenVert(iplt::RealSpatialImageState* map, const iplt::Point& p, 
+  VertexID GetOrGenVert(img::RealSpatialImageState* map, const img::Point& p, 
                         EdgeDesc* desc);
 private:
   IndexedVertexArray& va_;

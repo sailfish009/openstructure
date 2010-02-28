@@ -104,10 +104,10 @@ SequenceViewer* GostyApp::GetSequenceViewer()
   return seq_viewer_;
 }
 
-#if OST_IPLT_ENABLED
-ost::iplt::gui::DataViewer* GostyApp::CreateDataViewer(const ost::iplt::Data& d, const QString& name)
+#if OST_IMG_ENABLED
+ost::img::gui::DataViewer* GostyApp::CreateDataViewer(const ost::img::Data& d, const QString& name)
 {
-  return new ost::iplt::gui::DataViewer(main_,d,name);
+  return new ost::img::gui::DataViewer(main_,d,name);
 }
 #endif
 

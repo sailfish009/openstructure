@@ -36,7 +36,7 @@ IsosurfaceGeneratorO& IsosurfaceGeneratorO::Instance()
 IsosurfaceGeneratorO::IsosurfaceGeneratorO()
 {}
 
-void IsosurfaceGeneratorO::Generate(const iplt::MapHandle& mh,
+void IsosurfaceGeneratorO::Generate(const img::MapHandle& mh,
                                    IndexedVertexArray& va, float level)
 {
 }

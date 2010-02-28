@@ -33,7 +33,7 @@
 #include <ost/gui/sequence_viewer/sequence_viewer.hh>
 #include <ost/gui/main.hh>
 #include <ost/gui/widget_geom_handler.hh>
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   #include <ost/gui/data_viewer/data_viewer.hh>
 #endif
 
@@ -99,10 +99,10 @@ public:
   /// All subsequent calls will return the same SceneWin instance.  
   ToolOptionsWin* GetToolOptionsWin();
   
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   /// \brief create new DataViewer
   /// 
-  ost::iplt::gui::DataViewer* CreateDataViewer(const ost::iplt::Data& d, const QString& name="");
+  ost::img::gui::DataViewer* CreateDataViewer(const ost::img::Data& d, const QString& name="");
 #endif
 
   /// \brief give the application time to run the mainloop and process events

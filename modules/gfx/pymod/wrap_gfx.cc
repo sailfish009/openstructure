@@ -32,7 +32,7 @@ extern void export_GfxObj();
 extern void export_Entity();
 extern void export_Surface();
 extern void export_primitives();
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   extern void export_Map();
 #endif
 extern void export_SymmetryNode();
@@ -71,7 +71,7 @@ BOOST_PYTHON_MODULE(_gfx)
   export_Entity();
   export_Surface();
   export_RenderOptions();
-#if OST_IPLT_ENABLED  
+#if OST_IMG_ENABLED  
   export_Map();
 #endif  
   export_SymmetryNode();

@@ -27,7 +27,7 @@
 #include <ost/log.hh>
 #include <ost/geom/geom.hh>
 
-#include <ost/iplt/image_state.hh>
+#include <ost/img/image_state.hh>
 
 //#define MAP_ISO_DEBUG
 
@@ -87,35 +87,35 @@ IsosurfaceGenerator::IsosurfaceGenerator():
 */
 namespace {
 
-inline uint gen_vertex_0(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_1(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_2(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_3(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_4(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_5(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_6(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_7(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_8(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_9(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_A(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
-inline uint gen_vertex_B(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_0(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_1(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_2(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_3(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_4(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_5(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_6(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_7(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_8(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_9(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_A(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
+inline uint gen_vertex_B(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level);
 
 
 }
 
-void IsosurfaceGenerator::Generate(const iplt::MapHandle& mh, IndexedVertexArray& va, float level)
+void IsosurfaceGenerator::Generate(const img::MapHandle& mh, IndexedVertexArray& va, float level)
 {
 #ifdef MAP_ISO_DEBUG
   va.Add(geom::Vec3(0.0,0.0,0.0),geom::Vec3(),Color(1.0,1.0,1.0));
 #endif
-  iplt::ImageStateBasePtr is=mh.ImageStatePtr();
-  iplt::RealSpatialImageState* rsis=dynamic_cast<iplt::RealSpatialImageState*>(is.get());
+  img::ImageStateBasePtr is=mh.ImageStatePtr();
+  img::RealSpatialImageState* rsis=dynamic_cast<img::RealSpatialImageState*>(is.get());
   assert(rsis);
   // TODO: use *start to *end instead 0 to *count
   int ucount=mh.GetSize()[0];
   int vcount=mh.GetSize()[1];
   int wcount=mh.GetSize()[2];
-  iplt::Point s=mh.GetExtent().GetStart();
+  img::Point s=mh.GetExtent().GetStart();
   uint vertex_id[12];
   
   // storage for vertex ids for the last xy plane
@@ -181,17 +181,17 @@ void IsosurfaceGenerator::Generate(const iplt::MapHandle& mh, IndexedVertexArray
         int us=s[0]+u, vs=s[1]+v, ws=s[2]+w;
         // determine cube bitpattern
         unsigned int pattern = 0;
-        if(static_cast<float>(rsis->Value(iplt::Point(us,vs,ws)))<level) pattern|=1<<0;
-        if(static_cast<float>(rsis->Value(iplt::Point(us,vs+1,ws)))<level) pattern|=1<<1;
-        if(static_cast<float>(rsis->Value(iplt::Point(us+1,vs+1,ws)))<level) pattern|=1<<2;
-        if(static_cast<float>(rsis->Value(iplt::Point(us+1,vs,ws)))<level) pattern|=1<<3;
-        if(static_cast<float>(rsis->Value(iplt::Point(us,vs,ws+1)))<level) pattern|=1<<4;
-        if(static_cast<float>(rsis->Value(iplt::Point(us,vs+1,ws+1)))<level) pattern|=1<<5;
-        if(static_cast<float>(rsis->Value(iplt::Point(us+1,vs+1,ws+1)))<level) pattern|=1<<6;
-        if(static_cast<float>(rsis->Value(iplt::Point(us+1,vs,ws+1)))<level) pattern|=1<<7;
+        if(static_cast<float>(rsis->Value(img::Point(us,vs,ws)))<level) pattern|=1<<0;
+        if(static_cast<float>(rsis->Value(img::Point(us,vs+1,ws)))<level) pattern|=1<<1;
+        if(static_cast<float>(rsis->Value(img::Point(us+1,vs+1,ws)))<level) pattern|=1<<2;
+        if(static_cast<float>(rsis->Value(img::Point(us+1,vs,ws)))<level) pattern|=1<<3;
+        if(static_cast<float>(rsis->Value(img::Point(us,vs,ws+1)))<level) pattern|=1<<4;
+        if(static_cast<float>(rsis->Value(img::Point(us,vs+1,ws+1)))<level) pattern|=1<<5;
+        if(static_cast<float>(rsis->Value(img::Point(us+1,vs+1,ws+1)))<level) pattern|=1<<6;
+        if(static_cast<float>(rsis->Value(img::Point(us+1,vs,ws+1)))<level) pattern|=1<<7;
         String msg;
         std::stringstream msgs(msg);
-        msgs << u << " " << v << " " << w << ": " << pattern << " " << mh.GetReal(iplt::Point(u,v,w)) << std::endl;
+        msgs << u << " " << v << " " << w << ": " << pattern << " " << mh.GetReal(img::Point(u,v,w)) << std::endl;
         LOG_VERBOSE(msgs);
         
         /*
@@ -256,10 +256,10 @@ static Color def_color(1.0,1.0,1.0);
 
 
 
-uint gen_vertex_0(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_0(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u,v,w))); 
-  float v1=static_cast<float>(mh->Value(iplt::Point(u,v+1,w)));
+  float v0=static_cast<float>(mh->Value(img::Point(u,v,w))); 
+  float v1=static_cast<float>(mh->Value(img::Point(u,v+1,w)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u),
                                         static_cast<float>(v)+static_cast<float>((level-v0)/(v1-v0)),
@@ -269,10 +269,10 @@ uint gen_vertex_0(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
 
-uint gen_vertex_1(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_1(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u,v+1,w))); 
-  float v1=static_cast<float>(mh->Value(iplt::Point(u+1,v+1,w)));
+  float v0=static_cast<float>(mh->Value(img::Point(u,v+1,w))); 
+  float v1=static_cast<float>(mh->Value(img::Point(u+1,v+1,w)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u)+static_cast<float>((level-v0)/(v1-v0)),
                                         static_cast<float>(v+1),
@@ -282,10 +282,10 @@ uint gen_vertex_1(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
 
-uint gen_vertex_2(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_2(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u+1,v,w))); 
-  float v1=static_cast<float>(mh->Value(iplt::Point(u+1,v+1,w)));
+  float v0=static_cast<float>(mh->Value(img::Point(u+1,v,w))); 
+  float v1=static_cast<float>(mh->Value(img::Point(u+1,v+1,w)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u+1),
                                         static_cast<float>(v)+static_cast<float>((level-v0)/(v1-v0)),
@@ -295,9 +295,9 @@ uint gen_vertex_2(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
 
-uint gen_vertex_3(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_3(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u,v,w))); float v1=static_cast<float>(mh->Value(iplt::Point(u+1,v,w)));
+  float v0=static_cast<float>(mh->Value(img::Point(u,v,w))); float v1=static_cast<float>(mh->Value(img::Point(u+1,v,w)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u)+static_cast<float>((level-v0)/(v1-v0)),
                                         static_cast<float>(v),
@@ -307,9 +307,9 @@ uint gen_vertex_3(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
 
-uint gen_vertex_4(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_4(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u,v,w))); float v1=static_cast<float>(mh->Value(iplt::Point(u,v,w+1)));
+  float v0=static_cast<float>(mh->Value(img::Point(u,v,w))); float v1=static_cast<float>(mh->Value(img::Point(u,v,w+1)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u),
                                         static_cast<float>(v),
@@ -319,9 +319,9 @@ uint gen_vertex_4(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
 
-uint gen_vertex_5(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_5(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u,v+1,w))); float v1=static_cast<float>(mh->Value(iplt::Point(u,v+1,w+1)));
+  float v0=static_cast<float>(mh->Value(img::Point(u,v+1,w))); float v1=static_cast<float>(mh->Value(img::Point(u,v+1,w+1)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u),
                                         static_cast<float>(v+1),
@@ -331,9 +331,9 @@ uint gen_vertex_5(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
 
-uint gen_vertex_6(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_6(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u+1,v+1,w))); float v1 = static_cast<float>(mh->Value(iplt::Point(u+1,v+1,w+1)));
+  float v0=static_cast<float>(mh->Value(img::Point(u+1,v+1,w))); float v1 = static_cast<float>(mh->Value(img::Point(u+1,v+1,w+1)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u+1),
                                         static_cast<float>(v+1),
@@ -343,9 +343,9 @@ uint gen_vertex_6(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
 
-uint gen_vertex_7(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_7(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u+1,v,w))); float v1=static_cast<float>(mh->Value(iplt::Point(u+1,v,w+1)));
+  float v0=static_cast<float>(mh->Value(img::Point(u+1,v,w))); float v1=static_cast<float>(mh->Value(img::Point(u+1,v,w+1)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u+1),
                                         static_cast<float>(v),
@@ -355,9 +355,9 @@ uint gen_vertex_7(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
 
-uint gen_vertex_8(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_8(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u,v,w+1))); float v1=static_cast<float>(mh->Value(iplt::Point(u,v+1,w+1)));
+  float v0=static_cast<float>(mh->Value(img::Point(u,v,w+1))); float v1=static_cast<float>(mh->Value(img::Point(u,v+1,w+1)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u),
                                         static_cast<float>(v)+static_cast<float>((level-v0)/(v1-v0)),
@@ -367,9 +367,9 @@ uint gen_vertex_8(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
 
-uint gen_vertex_9(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_9(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u,v+1,w+1))); float v1=static_cast<float>(mh->Value(iplt::Point(u+1,v+1,w+1)));
+  float v0=static_cast<float>(mh->Value(img::Point(u,v+1,w+1))); float v1=static_cast<float>(mh->Value(img::Point(u+1,v+1,w+1)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u)+static_cast<float>((level-v0)/(v1-v0)),
                                         static_cast<float>(v+1),
@@ -379,9 +379,9 @@ uint gen_vertex_9(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
 
-uint gen_vertex_A(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_A(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u+1,v,w+1))); float v1=static_cast<float>(mh->Value(iplt::Point(u+1,v+1,w+1)));
+  float v0=static_cast<float>(mh->Value(img::Point(u+1,v,w+1))); float v1=static_cast<float>(mh->Value(img::Point(u+1,v+1,w+1)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u+1),
                                         static_cast<float>(v)+static_cast<float>((level-v0)/(v1-v0)),
@@ -391,9 +391,9 @@ uint gen_vertex_A(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u
   return 0;
 }
   
-uint gen_vertex_B(iplt::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
+uint gen_vertex_B(img::RealSpatialImageState* mh, IndexedVertexArray& va, int u, int v, int w, float level)
 {
-  float v0=static_cast<float>(mh->Value(iplt::Point(u,v,w+1))); float v1=static_cast<float>(mh->Value(iplt::Point(u+1,v,w+1)));
+  float v0=static_cast<float>(mh->Value(img::Point(u,v,w+1))); float v1=static_cast<float>(mh->Value(img::Point(u+1,v,w+1)));
   if((level>v0 && level<=v1) || (level>v1 && level<=v0)) {
     return va.Add(mh->FractionalIndexToCoord(geom::Vec3(static_cast<float>(u)+static_cast<float>((level-v0)/(v1-v0)),
                                         static_cast<float>(v),

@@ -55,7 +55,7 @@ loader_manager_widget.py
 immutable_loader_info_handler.py
 line_trace_widget.py
 )
-if (ENABLE_IPLT)
+if (ENABLE_IMG)
   list(APPEND OST_GUI_PYMOD_SOURCES
   data_viewer_proxy.cc
   export_data_viewer.cc

@@ -19,7 +19,7 @@
 //------------------------------------------------------------------------------
 #include "data_viewer_panel.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 DataViewerPanel::DataViewerPanel(const Data& d, QWidget* p):
   DataViewerPanelBase(d,p)

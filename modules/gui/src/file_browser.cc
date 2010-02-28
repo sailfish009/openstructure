@@ -41,9 +41,9 @@
 
 #include <ost/gui/python_shell/python_interpreter.hh>
 
-#if OST_IPLT_ENABLED
-#  include <ost/iplt/image_handle.hh>
-#  include <ost/io/iplt/load_map.hh>
+#if OST_IMG_ENABLED
+#  include <ost/img/image_handle.hh>
+#  include <ost/io/img/load_map.hh>
 #  include <ost/gfx/map_iso.hh>
 #endif
 

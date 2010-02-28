@@ -1,7 +1,7 @@
 import math,random
-from ost import iplt
-mh=iplt.CreateMap(iplt.Size(100, 25, 25))
-for p in iplt.ExtentIterator(mh.GetExtent()):
+from ost import img
+mh=img.CreateMap(img.Size(100, 25, 25))
+for p in img.ExtentIterator(mh.GetExtent()):
   val=5*math.sin(0.4*math.sqrt(p[0]*p[0]+p[1]*p[1]))+7*math.cos(0.6*math.sqrt(p[2]*p[2]+p[1]*p[1]))
   mh.SetReal(p,val*(1.0+0.0*random.random()))
 

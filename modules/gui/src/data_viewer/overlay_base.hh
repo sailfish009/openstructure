@@ -37,7 +37,7 @@
 #include <ost/gui/module_config.hh>
 #include "overlay_base_fw.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 // fw decl
 class DataViewerPanel;

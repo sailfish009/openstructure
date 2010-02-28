@@ -28,12 +28,12 @@
 
 
 #include <boost/shared_ptr.hpp>
-#include <ost/iplt/normalizer_impl.hh>
+#include <ost/img/normalizer_impl.hh>
 
 #include <ost/gui/module_config.hh>
 
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 class DLLEXPORT_OST_GUI ViewerNormalizer: public NormalizerImpl, 
                                           public RangeHandler

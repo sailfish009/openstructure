@@ -25,7 +25,7 @@
 
 #include "overlay_base.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 
 Overlay::Overlay(const String& name):

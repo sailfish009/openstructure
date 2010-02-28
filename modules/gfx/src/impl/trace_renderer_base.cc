@@ -217,11 +217,11 @@ void TraceRendererBase::PickBond(const geom::Line3& line, Real line_width,
   // don't to anything
 }
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 void TraceRendererBase::Apply(const gfx::MapHandleColorOp& op)
 {
   this->UpdateViews();  
-  iplt::MapHandle mh = op.GetMapHandle();
+  img::MapHandle mh = op.GetMapHandle();
   gfx::Gradient g = op.GetGradient();
   const String& prop = op.GetProperty();
   float minv = op.GetMinV();

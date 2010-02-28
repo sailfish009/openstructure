@@ -27,7 +27,7 @@
 
 #include "overlay_manager_fw.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 //! Abstract observer base class for the OverlayManager
 class OverlayManagerObserver {

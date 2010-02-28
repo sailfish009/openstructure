@@ -7,7 +7,7 @@ else:
 from ost import io, mol, seq, gfx, conop
 import ost
 try: 
-  from ost import iplt
+  from ost import img
 except ImportError:
   pass
 ost.SetPrefixPath(os.getenv('DNG_ROOT'))

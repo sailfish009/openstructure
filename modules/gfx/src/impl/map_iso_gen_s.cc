@@ -22,7 +22,7 @@
 
 #include <ost/profile.hh>
 
-#include <ost/iplt/image_state.hh>
+#include <ost/img/image_state.hh>
 
 #include <ost/gfx/glext_include.hh>
 #include <ost/gfx/map_iso_prop.hh>
@@ -67,13 +67,13 @@ typedef boost::shared_array<float> XYSlab;
 typedef boost::shared_array<unsigned char> CSlab;
 typedef boost::shared_array<uint> VSlab;
 
-void set_slab(iplt::RealSpatialImageState* mh, XYSlab& slab, uint ucount, 
+void set_slab(img::RealSpatialImageState* mh, XYSlab& slab, uint ucount, 
               uint vcount, uint w)
 {
   for(uint v=0;v<vcount-1;++v) {
     uint off=v*ucount;
     for(uint u=0;u<ucount-1;++u,++off) {
-      slab[off]=mh->Value(iplt::Point(u,v,w));
+      slab[off]=mh->Value(img::Point(u,v,w));
     }
     slab[off]=0.0;
   }
@@ -154,7 +154,7 @@ BSlab process_edges(const XYSlab& slab1, const XYSlab& slab2,
   return bslab;
 }
 
-void process_vids(const iplt::MapHandle& mh, IndexedVertexArray& va,
+void process_vids(const img::MapHandle& mh, IndexedVertexArray& va,
                   const BSlab& bslab, VSlab& vidu, VSlab& vidv, VSlab& vidw,
                   uint ucount, uint vcount, uint w)
 {
@@ -232,7 +232,7 @@ void assign_lf(IndexedVertexArray& va, const BSlab& bslab,
 
 } // anon ns
 
-void IsosurfaceGeneratorS::Generate(const iplt::MapHandle& mh,
+void IsosurfaceGeneratorS::Generate(const img::MapHandle& mh,
                                    IndexedVertexArray& va, float level)
 {
   uint ucount=mh.GetSize()[0]+1;
@@ -313,8 +313,8 @@ void IsosurfaceGeneratorS::Generate(const iplt::MapHandle& mh,
     } // profile
     
 #endif
-    iplt::ImageStateBasePtr is=mh.ImageStatePtr();
-    iplt::RealSpatialImageState* rsis=dynamic_cast<iplt::RealSpatialImageState*>(is.get());
+    img::ImageStateBasePtr is=mh.ImageStatePtr();
+    img::RealSpatialImageState* rsis=dynamic_cast<img::RealSpatialImageState*>(is.get());
     assert(rsis);
     set_slab(rsis,slab2,ucount,vcount,0);
     set_slab(rsis,slab1,ucount,vcount,1);

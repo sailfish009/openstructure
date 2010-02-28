@@ -37,7 +37,7 @@
 #include "pointlist_overlay_base.hh"
 #include "strategies.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 PointlistOverlayBaseSettings::PointlistOverlayBaseSettings(const QColor& ac, const QColor& pc, int s1, int s2, QWidget* p):
   QDialog(p),

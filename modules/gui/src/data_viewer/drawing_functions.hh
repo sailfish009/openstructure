@@ -31,7 +31,7 @@
 
 #include <ost/geom/geom.hh>
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 DLLEXPORT void DrawDiagonalCross(QPainter& pnt, const QPoint& p, int s);
 DLLEXPORT void DrawCross(QPainter& pnt, const QPoint& p, int s);

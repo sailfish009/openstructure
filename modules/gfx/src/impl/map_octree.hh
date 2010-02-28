@@ -19,8 +19,8 @@
 #ifndef OST_GFX_IMPL_MAP_OCTREE_HH
 #define OST_GFX_IMPL_MAP_OCTREE_HH
 
-#include <ost/iplt/image_handle.hh>
-#include <ost/iplt/image_state.hh>
+#include <ost/img/image_handle.hh>
+#include <ost/img/image_state.hh>
 #include <ost/gfx/module_config.hh>
 /*
   Author: Marco Biasini
@@ -107,7 +107,7 @@ typedef std::vector<OctreeNode> OcNodeList;
 /// maximum value of the voxels it encloses.
 class DLLEXPORT_OST_GFX MapOctree {
 public:
-  MapOctree(const iplt::ImageHandle& map);
+  MapOctree(const img::ImageHandle& map);
   uint32_t GetNumNodesForLevel(uint8_t level) const;
   
   /// \brief depth-first visit of octree nodes
@@ -117,9 +117,9 @@ public:
     if (levels_.empty()) {
       return;
     }
-    iplt::Extent ext=map_.GetExtent();
-    iplt::RealSpatialImageState* map=NULL;
-    map=dynamic_cast<iplt::RealSpatialImageState*>(map_.ImageStatePtr().get());
+    img::Extent ext=map_.GetExtent();
+    img::RealSpatialImageState* map=NULL;
+    map=dynamic_cast<img::RealSpatialImageState*>(map_.ImageStatePtr().get());
     assert(levels_[0].size()==1);
     if (f.VisitNode(levels_[0][0], 0, ext)) {
       this->VisitDFRec<F>(levels_[0][0], f, 1, ext, map);
@@ -140,8 +140,8 @@ protected:
 
   template <typename F>
   void VisitDFRec(const OctreeNode& node, F& f, uint8_t level, 
-                  const iplt::Extent& ext, 
-                  iplt::RealSpatialImageState* map) const
+                  const img::Extent& ext, 
+                  img::RealSpatialImageState* map) const
   {
     if (node.GetChildCount()==0) { return; }
     uint32_t c=node.GetFirstChild();    
@@ -189,13 +189,13 @@ protected:
       for (int j=0; j<cy; ++j) {
         for (int k=0; k<cz; ++k, ++c) {
           if (node.IsLeaf()) {
-            f.VisitLeaf(map, iplt::Point(range_x[i][0], range_y[j][0], 
+            f.VisitLeaf(map, img::Point(range_x[i][0], range_y[j][0], 
                                          range_z[k][0]));
            } else {
             const OctreeNode& cn=levels_[level][c];
-            iplt::Extent ext(iplt::Point(range_x[i][0], range_y[j][0], 
+            img::Extent ext(img::Point(range_x[i][0], range_y[j][0], 
                                          range_z[k][0]),
-                             iplt::Point(range_x[i][1], range_y[j][1], 
+                             img::Point(range_x[i][1], range_y[j][1], 
                                          range_z[k][1]));
             if (f.VisitNode(cn, level, ext)) {
               this->VisitDFRec<F>(cn, f, level+1, ext, map);
@@ -209,11 +209,11 @@ private:
   void BuildOctree();
   std::pair<float, float> BuildOctreeRec(const OcRangeVector& range_vec,
                                          uint16_t level,
-                                         iplt::RealSpatialImageState* map,
-                                         const iplt::Extent& ext,
+                                         img::RealSpatialImageState* map,
+                                         const img::Extent& ext,
                                          OctreeNode& parent);
 
-  iplt::ImageHandle            map_;
+  img::ImageHandle            map_;
   std::vector<OcNodeList>      levels_;
 };
 

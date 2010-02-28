@@ -655,15 +655,15 @@ void Entity::ColorBy(const mol::EntityView& ev,
   this->Apply(evop);
 }
 
-#if OST_IPLT_ENABLED
-void Entity::ColorBy(const iplt::MapHandle& mh,
+#if OST_IMG_ENABLED
+void Entity::ColorBy(const img::MapHandle& mh,
                      const String& prop,
                      const Gradient& g,float minv, float maxv)
 {
   MapHandleColorOp mhop = MapHandleColorOp("",prop,g,minv,maxv,mh);
   this->Apply(mhop);
 }
-#endif //OST_IPLT_ENABLED
+#endif //OST_IMG_ENABLED
 
 void Entity::ColorBy(const String& prop,
                      const Gradient& gradient,
@@ -825,7 +825,7 @@ void Entity::Apply(const gfx::EntityViewColorOp& op, bool store)
   FlagRebuild();
 }
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 void Entity::Apply(const gfx::MapHandleColorOp& op, bool store)
 {
   if(store){

@@ -30,7 +30,7 @@
 
 #include "null_overlay.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 NullOverlay::NullOverlay():
   Overlay("Null")

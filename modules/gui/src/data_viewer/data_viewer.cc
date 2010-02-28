@@ -37,10 +37,10 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-//#include <ost/iplt/io/io_manager.hh>
+//#include <ost/img/io/io_manager.hh>
 #include <ost/message.hh>
-//#include <ost/iplt/alg/fft.hh>   
-#include <ost/iplt/alg/norm.hh>   
+//#include <ost/img/alg/fft.hh>   
+#include <ost/img/alg/norm.hh>   
 #include <ost/gui/dock_widget.hh>
 
 #include "data_viewer.hh"
@@ -48,7 +48,7 @@
 #include "overlay_base.hh"
 #include "overlay_manager.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 namespace {
 int ipow(int base, unsigned int exponent){

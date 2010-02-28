@@ -23,10 +23,10 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 namespace {
 
-float InterpolatedValue(const iplt::ImageHandle& mh, const geom::Vec3& xyz)
+float InterpolatedValue(const img::ImageHandle& mh, const geom::Vec3& xyz)
 {
   geom::Vec3 uvw=mh.CoordToIndex(xyz);
   float x=fmod(float(uvw[0]), float(1.0));
@@ -38,14 +38,14 @@ float InterpolatedValue(const iplt::ImageHandle& mh, const geom::Vec3& xyz)
 
   float value=0.0;
   if(u<mh.GetSize()[0]-1 && v<mh.GetSize()[1]-1 && w<mh.GetSize()[2]-1) {
-   value=mh.GetReal(ost::iplt::Point(u,v,w))*(1.0-x)*(1.0-y)*(1.0-z)+
-     mh.GetReal(ost::iplt::Point(u+1,v,w))*(x)*(1.0-y)*(1.0-z)+
-     mh.GetReal(ost::iplt::Point(u,v+1,w))*(1.0-x)*(y)*(1.0-z)+
-     mh.GetReal(ost::iplt::Point(u,v,w+1))*(1.0-x)*(1.0-y)*(z)+
-     mh.GetReal(ost::iplt::Point(u+1,v,w+1))*(x)*(1.0-y)*(z)+
-     mh.GetReal(ost::iplt::Point(u,v+1,w+1))*(1.0-x)*(y)*(z)+
-     mh.GetReal(ost::iplt::Point(u+1,v+1,w))*(x)*(y)*(1.0-z)+
-     mh.GetReal(ost::iplt::Point(u+1,v+1,w+1))*(x)*(y)*(z);
+   value=mh.GetReal(ost::img::Point(u,v,w))*(1.0-x)*(1.0-y)*(1.0-z)+
+     mh.GetReal(ost::img::Point(u+1,v,w))*(x)*(1.0-y)*(1.0-z)+
+     mh.GetReal(ost::img::Point(u,v+1,w))*(1.0-x)*(y)*(1.0-z)+
+     mh.GetReal(ost::img::Point(u,v,w+1))*(1.0-x)*(1.0-y)*(z)+
+     mh.GetReal(ost::img::Point(u+1,v,w+1))*(x)*(1.0-y)*(z)+
+     mh.GetReal(ost::img::Point(u,v+1,w+1))*(1.0-x)*(y)*(z)+
+     mh.GetReal(ost::img::Point(u+1,v+1,w))*(x)*(y)*(1.0-z)+
+     mh.GetReal(ost::img::Point(u+1,v+1,w+1))*(x)*(y)*(z);
   }
   return static_cast<float>(value);
 }  
@@ -84,15 +84,15 @@ Color DLLEXPORT_OST_GFX MappedProperty(const mol::EntityView& ev,
   return nrvo;
 }
 
-#if OST_IPLT_ENABLED                          
-float DLLEXPORT_OST_GFX MappedProperty(const iplt::MapHandle& mh, 
+#if OST_IMG_ENABLED                          
+float DLLEXPORT_OST_GFX MappedProperty(const img::MapHandle& mh, 
                                        const String& prop,
                                        const geom::Vec3& pos)
 {
   return InterpolatedValue(mh,pos);
 }
 
-Color DLLEXPORT_OST_GFX MappedProperty(const iplt::MapHandle& mh, 
+Color DLLEXPORT_OST_GFX MappedProperty(const img::MapHandle& mh, 
                                        const String& prop,
                                        const Gradient& g, float minv, float maxv,
                                        const geom::Vec3& pos)

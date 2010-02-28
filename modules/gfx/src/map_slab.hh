@@ -28,7 +28,7 @@
 
 #include <ost/geom/geom.hh>
 
-#include <ost/iplt/map.hh>
+#include <ost/img/map.hh>
 #include <ost/gfx/gl_include.hh>
 
 #include "gfx_object.hh"
@@ -38,9 +38,9 @@ namespace ost { namespace gfx {
 class MapSlab;
 typedef boost::shared_ptr<MapSlab> MapSlabP;
 
-/// \brief Render slice of \ref iplt::ImageHandle "3d image"
+/// \brief Render slice of \ref img::ImageHandle "3d image"
 /// 
-/// A slab is a planar slice through a \ref iplt::ImageHandle "3D map". Its 
+/// A slab is a planar slice through a \ref img::ImageHandle "3D map". Its 
 /// orientation is defined by a \ref geom::Plane "plane". The value range and 
 /// coloring of the slab can be adjusted with the ColorBy() methods.
 class DLLEXPORT_OST_GFX MapSlab: public GfxObj {
@@ -59,7 +59,7 @@ public:
   /// \param name is the name of the object
   /// \param mh is a 3D image
   /// \param p is the plane that is intersected with \a mh
-  MapSlab(const ost::String& name, const iplt::MapHandle& mh, 
+  MapSlab(const ost::String& name, const img::MapHandle& mh, 
           const geom::Plane& p);
 
   virtual geom::AlignedCuboid GetBoundingBox() const;
@@ -94,7 +94,7 @@ protected:
   void Rebuild();
 
 private:
-  iplt::MapHandle mh_;
+  img::MapHandle mh_;
   geom::Plane plane_;
   uint usize_;
   uint vsize_;

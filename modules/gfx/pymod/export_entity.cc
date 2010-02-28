@@ -160,14 +160,14 @@ void ent_apply_52(Entity* e, GradientLevelColorOp& glco){
   e->Apply(glco);
 }
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 void ent_apply_61(Entity* e, MapHandleColorOp& mhco, bool store){
   e->Apply(mhco,store);
 }
 void ent_apply_62(Entity* e, MapHandleColorOp& mhco){
   e->Apply(mhco);
 }
-#endif //OST_IPLT_ENABLED
+#endif //OST_IMG_ENABLED
 
 template<class T1, class T2>
 struct PairToTupleConverter {
@@ -276,10 +276,10 @@ void export_Entity()
     .def("Apply",&ent_apply_42)
     .def("Apply",&ent_apply_51)
     .def("Apply",&ent_apply_52)
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
     .def("Apply",&ent_apply_61)
     .def("Apply",&ent_apply_62)
-#endif //OST_IPLT_ENABLED
+#endif //OST_IMG_ENABLED
   ;
   //register_ptr_to_python<EntityP>();
   

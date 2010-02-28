@@ -17,39 +17,39 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
-#include  <ost/io/iplt/map_io_dx_handler.hh>
-#include  <ost/io/iplt/map_io_spi_handler.hh>
-#include  <ost/io/iplt/map_io_mrc_handler.hh>
-#include  <ost/io/iplt/map_io_dm3_handler.hh>
-#include  <ost/io/iplt/map_io_situs_handler.hh>
-#include  <ost/io/iplt/map_io_tiff_handler.hh>
-#include  <ost/io/iplt/map_io_png_handler.hh>
-#include  <ost/io/iplt/map_io_dat_handler.hh>
-#include  <ost/io/iplt/map_io_jpk_handler.hh>
-#include  <ost/io/iplt/map_io_nanoscope_handler.hh>
-#include  <ost/io/iplt/image_format.hh>
-#include  <ost/io/iplt/load_map.hh>
+#include  <ost/io/img/map_io_dx_handler.hh>
+#include  <ost/io/img/map_io_spi_handler.hh>
+#include  <ost/io/img/map_io_mrc_handler.hh>
+#include  <ost/io/img/map_io_dm3_handler.hh>
+#include  <ost/io/img/map_io_situs_handler.hh>
+#include  <ost/io/img/map_io_tiff_handler.hh>
+#include  <ost/io/img/map_io_png_handler.hh>
+#include  <ost/io/img/map_io_dat_handler.hh>
+#include  <ost/io/img/map_io_jpk_handler.hh>
+#include  <ost/io/img/map_io_nanoscope_handler.hh>
+#include  <ost/io/img/image_format.hh>
+#include  <ost/io/img/load_map.hh>
 
 using namespace boost::python;
 using namespace ost;
 using namespace ost::io;
 
-void  save_image1(const iplt::ImageHandle& image,const boost::filesystem::path& loc)
+void  save_image1(const img::ImageHandle& image,const boost::filesystem::path& loc)
 {
   SaveImage(image,loc);
 }
 
-void  save_image2(const iplt::ImageHandle& image,const boost::filesystem::path& loc, const ImageFormatBase& formatstruct)
+void  save_image2(const img::ImageHandle& image,const boost::filesystem::path& loc, const ImageFormatBase& formatstruct)
 {
   SaveImage(image,loc,formatstruct);
 }
 
-iplt::ImageHandle  load_image1(const boost::filesystem::path& loc)
+img::ImageHandle  load_image1(const boost::filesystem::path& loc)
 {
   return LoadImage(loc);
 }
 
-iplt::ImageHandle  load_image2(const boost::filesystem::path& loc, const ImageFormatBase& formatstruct)
+img::ImageHandle  load_image2(const boost::filesystem::path& loc, const ImageFormatBase& formatstruct)
 {
   return LoadImage(loc,formatstruct);
 }

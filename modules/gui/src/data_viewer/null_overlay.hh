@@ -24,7 +24,7 @@
 
 #include "overlay_base.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 class DLLEXPORT NullOverlay: public Overlay
 {

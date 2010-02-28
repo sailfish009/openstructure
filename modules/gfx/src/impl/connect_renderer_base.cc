@@ -262,14 +262,14 @@ void ConnectRendererBase::Apply(const gfx::EntityViewColorOp& op)
   state_|=DIRTY_VA;
 }
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 void ConnectRendererBase::Apply(const gfx::MapHandleColorOp& op)
 {
   if ((op.GetMask() & MAIN_COLOR)==0) {
     return;
   }  
   this->UpdateViews();  
-  iplt::MapHandle mh = op.GetMapHandle();
+  img::MapHandle mh = op.GetMapHandle();
   gfx::Gradient g = op.GetGradient();
   const String& prop = op.GetProperty();
   float minv = op.GetMinV();

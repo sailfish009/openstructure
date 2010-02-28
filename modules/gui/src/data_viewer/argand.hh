@@ -29,13 +29,13 @@
 #include <QPixmap>
 
 #include <ost/base.hh>
-#include <ost/iplt/data.hh>
-#include <ost/iplt/data_observer.hh>
-#include <ost/iplt/extent.hh>
+#include <ost/img/data.hh>
+#include <ost/img/data_observer.hh>
+#include <ost/img/extent.hh>
 
 #include <ost/gui/module_config.hh>
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 class DLLEXPORT_OST_GUI Argand: public QWidget, public DataObserver 
 {

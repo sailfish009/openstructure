@@ -72,7 +72,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_charmm_trj_ov,
 }
 
 void export_pdb_io();
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 void export_map_io();
 #endif
 BOOST_PYTHON_MODULE(_io)
@@ -114,7 +114,7 @@ BOOST_PYTHON_MODULE(_io)
   def("LoadCHARMMTraj",LoadCHARMMTraj,load_charmm_trj_ov());
   def("SaveCHARMMTraj",SaveCHARMMTraj,save_charmm_trj_ov());
   export_pdb_io();
-#if OST_IPLT_ENABLED  
+#if OST_IMG_ENABLED  
   export_map_io();
 #endif
 }

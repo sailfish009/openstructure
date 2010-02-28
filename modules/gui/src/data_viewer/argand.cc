@@ -29,7 +29,7 @@
 
 #include "argand.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 Argand::Argand(const Data& data, QWidget* p):
   QWidget(p),

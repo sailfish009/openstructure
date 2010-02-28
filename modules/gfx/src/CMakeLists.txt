@@ -79,7 +79,7 @@ tabulated_trig.hh
 )
 
 
-if (ENABLE_IPLT)
+if (ENABLE_IMG)
   list(APPEND OST_GFX_HEADERS color_ops/map_handle_color_op.hh)
 endif()
 
@@ -139,7 +139,7 @@ render_options/cartoon_render_options.cc
 render_options/trace_render_options.cc
 )
 
-if (ENABLE_IPLT)
+if (ENABLE_IMG)
   set(OST_GFX_MAP_IMPL_HEADERS
   map_iso_gen.hh
   map_iso_gen_s.hh
@@ -185,8 +185,8 @@ if (USE_SHADER)
 endif()
 
 set(OST_GFX_DEPENDENCIES "conop;seq")
-if (ENABLE_IPLT)
-  set(OST_GFX_DEPENDENCIES "${OST_GFX_DEPENDENCIES};iplt;iplt_alg")
+if (ENABLE_IMG)
+  set(OST_GFX_DEPENDENCIES "${OST_GFX_DEPENDENCIES};img;img_alg")
 endif()
 
 module(NAME gfx SOURCES ${OST_GFX_SOURCES} ${OST_GFX_MAP_SOURCES} 

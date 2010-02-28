@@ -25,13 +25,13 @@
 #ifndef IPLT_POINTLIST_OVERLAY_HH
 #define IPLT_POINTLIST_OVERLAY_HH
 
-#include <ost/iplt/point_list.hh>
+#include <ost/img/point_list.hh>
 
 #include <ost/gui/module_config.hh>
 
 #include "pointlist_overlay_base.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 class DLLEXPORT_OST_GUI PointlistOverlay: public PointlistOverlayBase
 {

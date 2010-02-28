@@ -27,11 +27,11 @@
 #include <limits>
 
 #include <ost/message.hh>
-#include <ost/iplt/alg/stat.hh>
+#include <ost/img/alg/stat.hh>
 
 #include "viewer_normalizer.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 ViewerNormalizer::ViewerNormalizer():
   NormalizerImpl(),

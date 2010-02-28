@@ -28,7 +28,7 @@
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 #  include <ost/gui/tools/map_tool.hh>
 #endif
 
@@ -82,7 +82,7 @@ GLWin::GLWin(QWidget* p):
   ToolManager::Instance().AddTool(new SelectionTool);
   ToolManager::Instance().AddTool(new Manipulator);
   ToolManager::Instance().AddTool(new MeasureTool);
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   ToolManager::Instance().AddTool(new MapTool);
 #endif
   QBoxLayout* l=new QVBoxLayout(this);

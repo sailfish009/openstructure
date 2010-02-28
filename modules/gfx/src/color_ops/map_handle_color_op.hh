@@ -23,7 +23,7 @@
 
 #include <ost/info/info_fw.hh>
 
-#include <ost/iplt/map.hh>
+#include <ost/img/map.hh>
 
 #include <ost/gfx/color_ops/gradient_color_op.hh>
 
@@ -37,20 +37,20 @@ namespace ost { namespace gfx {
 class DLLEXPORT_OST_GFX MapHandleColorOp: public GradientColorOp {
 public:
   MapHandleColorOp();
-  MapHandleColorOp(const String& selection, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const iplt::MapHandle& mh);
-  MapHandleColorOp(const String& selection, int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const iplt::MapHandle& mh);
+  MapHandleColorOp(const String& selection, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh);
+  MapHandleColorOp(const String& selection, int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh);
 
   virtual bool CanApplyTo(const GfxObjP& obj) const;
   virtual void ApplyTo(GfxObjP& obj) const;
 
-  virtual void SetMapHandle(const iplt::MapHandle& mh);
-  virtual const iplt::MapHandle& GetMapHandle() const;
+  virtual void SetMapHandle(const img::MapHandle& mh);
+  virtual const img::MapHandle& GetMapHandle() const;
 
   virtual void ToInfo(info::InfoGroup& group) const;
   static gfx::MapHandleColorOp FromInfo(info::InfoGroup& group);
 
 private:
-  iplt::MapHandle mh_;
+  img::MapHandle mh_;
 };
 
 }}

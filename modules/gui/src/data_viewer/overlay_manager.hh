@@ -41,7 +41,7 @@
 #include "overlay_manager_fw.hh"
 #include "overlay_manager_observer.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 class DataViewerPanel;
 

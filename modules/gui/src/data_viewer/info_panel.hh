@@ -29,13 +29,13 @@
 #include <QLabel>
 #include <QMenu>
 
-#include <ost/iplt/data_types.hh>
-#include <ost/iplt/extent.hh>
-#include <ost/iplt/image_fw.hh>
+#include <ost/img/data_types.hh>
+#include <ost/img/extent.hh>
+#include <ost/img/image_fw.hh>
 
 #include <ost/gui/module_config.hh>
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 class DLLEXPORT_OST_GUI InfoPanelLabel: public QLabel
 {

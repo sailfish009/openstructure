@@ -24,8 +24,8 @@
  */
 
 #include <ost/mol/mol.hh>
-#if OST_IPLT_ENABLED
-#include <ost/iplt/map.hh>
+#if OST_IMG_ENABLED
+#include <ost/img/map.hh>
 #endif
 
 #include <ost/gfx/module_config.hh>
@@ -50,11 +50,11 @@ Color DLLEXPORT_OST_GFX MappedProperty(const mol::EntityView& ev,
                                        const String& prop,
                                        const Gradient& g, float minv, float maxv,
                                        const geom::Vec3& pos);
-#if OST_IPLT_ENABLED                          
-float DLLEXPORT_OST_GFX MappedProperty(const iplt::MapHandle& mh, 
+#if OST_IMG_ENABLED                          
+float DLLEXPORT_OST_GFX MappedProperty(const img::MapHandle& mh, 
                                        const String& prop,
                                        const geom::Vec3& pos);
-Color DLLEXPORT_OST_GFX MappedProperty(const iplt::MapHandle& mh, 
+Color DLLEXPORT_OST_GFX MappedProperty(const img::MapHandle& mh, 
                                        const String& prop,
                                        const Gradient& g, float minv, float maxv,
                                        const geom::Vec3& pos);

@@ -50,7 +50,7 @@ public:
   virtual void Apply(const gfx::UniformColorOp& op);
   virtual void Apply(const gfx::GradientLevelColorOp& op);
   virtual void Apply(const gfx::EntityViewColorOp& op);
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
   virtual void Apply(const gfx::MapHandleColorOp& op);
 #endif  
 

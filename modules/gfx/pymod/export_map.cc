@@ -51,7 +51,7 @@ void ms_color_by_04(MapSlab *s, const Color& c1, const Color& c2)
 void export_Map()
 {
   class_<MapIso, bases<GfxObj>, boost::shared_ptr<MapIso>,
-         boost::noncopyable>("MapIso", init<const String&, const ::iplt::MapHandle&, float, optional<uint> >())
+         boost::noncopyable>("MapIso", init<const String&, const ::img::MapHandle&, float, optional<uint> >())
     .def("SetLevel",&MapIso::SetLevel)
     .def("GetLevel",&MapIso::GetLevel)
     .def("GetMean", &MapIso::GetMean)
@@ -61,7 +61,7 @@ void export_Map()
   ;
 
   class_<MapSlab, bases<GfxObj>, boost::shared_ptr<MapSlab>,
-         boost::noncopyable>("MapSlab",init<const String&,const ::iplt::MapHandle&, const geom::Plane>())
+         boost::noncopyable>("MapSlab",init<const String&,const ::img::MapHandle&, const geom::Plane>())
     .def("SetPlane",&MapSlab::SetPlane)
     .def("GetPlane",&MapSlab::GetPlane)
     .def("ColorBy", ms_color_by_01)

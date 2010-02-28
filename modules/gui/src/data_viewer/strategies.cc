@@ -25,7 +25,7 @@
 
 #include "strategies.hh"
 
-namespace ost { namespace iplt { namespace gui {
+namespace ost { namespace img { namespace gui {
 
 //////////////////////////////
 // base

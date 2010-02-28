@@ -27,7 +27,7 @@ using namespace ost::gfx;
 
 namespace ost_gfx {
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 inline void color_by_01(GfxObj* go,
                 const mol::EntityView& ev, 
                 const String& prop,
@@ -37,7 +37,7 @@ inline void color_by_01(GfxObj* go,
 }
 
 inline void color_by_02(GfxObj* go,
-                const ::iplt::MapHandle& mh, 
+                const ::img::MapHandle& mh, 
                 const String& prop,
                 const Gradient& g, float minv, float maxv)
 {
@@ -46,7 +46,7 @@ inline void color_by_02(GfxObj* go,
 
 
 inline void color_by_11(GfxObj* go,
-                 const ::iplt::MapHandle& mh, 
+                 const ::img::MapHandle& mh, 
                  const String& prop,
                  const Gradient& g)
 {
@@ -54,7 +54,7 @@ inline void color_by_11(GfxObj* go,
 }
 
 inline void color_by_12(GfxObj* go,
-                 const ::iplt::MapHandle& mh, 
+                 const ::img::MapHandle& mh, 
                  const String& prop,
                  const Color& c1, const Color& c2)
 {
@@ -63,7 +63,7 @@ inline void color_by_12(GfxObj* go,
 
 
 inline void color_by_04(GfxObj* go,
-                const ::iplt::MapHandle& mh, 
+                const ::img::MapHandle& mh, 
                 const String& prop,
                 const Color& c1, const Color& c2, float minv, float maxv)
 {
@@ -140,7 +140,7 @@ inline void color_by_10(GfxObj* go,
     .def("ColorBy",ost_gfx::color_by_09)\
     .def("ColorBy",ost_gfx::color_by_10)
 
-#if OST_IPLT_ENABLED
+#if OST_IMG_ENABLED
 #  define COLOR_BY_DEF_MAP() \
     .def("ColorBy",ost_gfx::color_by_01)\
     .def("ColorBy",ost_gfx::color_by_02)\
