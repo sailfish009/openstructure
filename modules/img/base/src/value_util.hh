@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_VALUE_UTIL_H
-#define IPLT_VALUE_UTIL_H
+#ifndef IMG_VALUE_UTIL_H
+#define IMG_VALUE_UTIL_H
 
 #include <time.h>
 #include <boost/random.hpp>

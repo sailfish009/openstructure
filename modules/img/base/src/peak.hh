@@ -22,8 +22,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_ALG_PEAK_LIST_HH
-#define IPLT_ALG_PEAK_LIST_HH
+#ifndef IMG_ALG_PEAK_LIST_HH
+#define IMG_ALG_PEAK_LIST_HH
 
 #include <vector>
 

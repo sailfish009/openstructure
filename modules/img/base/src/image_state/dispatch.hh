@@ -22,8 +22,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_STATE_DISPATCH_HH
-#define IPLT_IMAGE_STATE_DISPATCH_HH
+#ifndef IMG_IMAGE_STATE_DISPATCH_HH
+#define IMG_IMAGE_STATE_DISPATCH_HH
 
 #include <ost/message.hh>
 #include <string>

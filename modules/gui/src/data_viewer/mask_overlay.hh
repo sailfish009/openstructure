@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_GUI_MASK_OVERLAY_HH_
-#define IPLT_GUI_MASK_OVERLAY_HH_
+#ifndef IMG_GUI_MASK_OVERLAY_HH_
+#define IMG_GUI_MASK_OVERLAY_HH_
 
 #include <ost/geom/geom.hh>
 #include <ost/img/image_handle.hh>

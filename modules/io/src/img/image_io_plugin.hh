@@ -25,8 +25,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_IMAGE_IO_PLUGIN
-#define IPLT_IMAGE_IO_PLUGIN
+#ifndef IMG_IMAGE_IO_PLUGIN
+#define IMG_IMAGE_IO_PLUGIN
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/shared_ptr.hpp>

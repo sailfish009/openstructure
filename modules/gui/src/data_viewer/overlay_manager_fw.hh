@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen
 */
 
-#ifndef IPLT_GUI_OVERLAY_MANAGER_FW_HH
-#define IPLT_GUI_OVERLAY_MANAGER_FW_HH
+#ifndef IMG_GUI_OVERLAY_MANAGER_FW_HH
+#define IMG_GUI_OVERLAY_MANAGER_FW_HH
 
 #include <boost/shared_ptr.hpp>
 

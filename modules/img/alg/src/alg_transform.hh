@@ -18,8 +18,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef IPLT_ALG_TRANSFORM_ALG_TRANSFORM_HH
-#define IPLT_ALG_TRANSFORM_ALG_TRANSFORM__HH
+#ifndef IMG_ALG_TRANSFORM_ALG_TRANSFORM_HH
+#define IMG_ALG_TRANSFORM_ALG_TRANSFORM__HH
 
 #include <ost/img/image_state.hh>
 #include <ost/img/value_util.hh>

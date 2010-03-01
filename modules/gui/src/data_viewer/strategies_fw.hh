@@ -18,8 +18,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef IPLT_GUI_STRATEGIES_FW_H
-#define IPLT_GUI_STRATEGIES_FW_HH
+#ifndef IMG_GUI_STRATEGIES_FW_H
+#define IMG_GUI_STRATEGIES_FW_HH
 
 #include <boost/shared_ptr.hpp>
 

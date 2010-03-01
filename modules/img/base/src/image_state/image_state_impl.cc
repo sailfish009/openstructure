@@ -29,7 +29,7 @@
 */
 
 
-#ifndef IPLT_IMAGE_STATE_INST_H
+#ifndef IMG_IMAGE_STATE_INST_H
 #error "image_state_impl.cc must be included from image_state_inst.hh"
 #endif
 

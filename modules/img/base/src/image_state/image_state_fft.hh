@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_STATE_FFT_H
-#define IPLT_IMAGE_STATE_FFT_H
+#ifndef IMG_IMAGE_STATE_FFT_H
+#define IMG_IMAGE_STATE_FFT_H
 
 #include <ost/message.hh>
 

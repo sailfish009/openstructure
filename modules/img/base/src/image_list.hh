@@ -22,8 +22,8 @@
   Author:Andreas Schenk
 */
 
-#ifndef IPLT_IMAGE_LIST_HH
-#define IPLT_IMAGE_LIST_HH
+#ifndef IMG_IMAGE_LIST_HH
+#define IMG_IMAGE_LIST_HH
 
 
 #include <ost/img/image.hh>

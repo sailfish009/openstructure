@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_STATE_INST_H
-#define IPLT_IMAGE_STATE_INST_H
+#ifndef IMG_IMAGE_STATE_INST_H
+#define IMG_IMAGE_STATE_INST_H
 
 /*
   At this point the various template instantiations

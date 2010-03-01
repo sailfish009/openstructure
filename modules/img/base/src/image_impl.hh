@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_IMPL_H
-#define IPLT_IMAGE_IMPL_H
+#ifndef IMG_IMAGE_IMPL_H
+#define IMG_IMAGE_IMPL_H
 
 #include <boost/shared_ptr.hpp>
 

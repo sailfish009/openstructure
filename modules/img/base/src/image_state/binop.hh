@@ -22,8 +22,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_STATE_BINOP_HH
-#define IPLT_IMAGE_STATE_BINOP_HH
+#ifndef IMG_IMAGE_STATE_BINOP_HH
+#define IMG_IMAGE_STATE_BINOP_HH
 
 #include "dispatch.hh"
 

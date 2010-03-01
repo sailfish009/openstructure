@@ -22,8 +22,8 @@
   Authors: Andreas Schenk, Ansgar Philippsen
 */
 
-#ifndef IPLT_MASK_HH_
-#define IPLT_MASK_HH_
+#ifndef IMG_MASK_HH_
+#define IMG_MASK_HH_
 
 #include <ost/message.hh> 
 #include "polygon_mask.hh" 

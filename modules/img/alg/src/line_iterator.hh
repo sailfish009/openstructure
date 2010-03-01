@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen, Giani Signorell
 */
 
-#ifndef IPLT_ALG_FILTER_LINE_ITERATOR_H
-#define IPLT_ALG_FILTER_LINE_ITERATOR_H
+#ifndef IMG_ALG_FILTER_LINE_ITERATOR_H
+#define IMG_ALG_FILTER_LINE_ITERATOR_H
 
 #include <ost/img/alg/module_config.hh>
 #include <ost/img/extent.hh>

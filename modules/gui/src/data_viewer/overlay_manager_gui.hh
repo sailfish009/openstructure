@@ -23,8 +23,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_OV_GUI_OVDIALOG_H
-#define IPLT_OV_GUI_OVDIALOG_H
+#ifndef IMG_OV_GUI_OVDIALOG_H
+#define IMG_OV_GUI_OVDIALOG_H
 
 #include <QWidget>
 #include <QRadioButton>

@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_GUI_DRAW_OVERLAY_H
-#define IPLT_GUI_DRAW_OVERLAY_H
+#ifndef IMG_GUI_DRAW_OVERLAY_H
+#define IMG_GUI_DRAW_OVERLAY_H
 
 #include <ost/img/image_handle.hh>
 

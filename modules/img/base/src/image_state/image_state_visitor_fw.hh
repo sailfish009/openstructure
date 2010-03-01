@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_STATE_VISITOR_FW_H
-#define IPLT_IMAGE_STATE_VISITOR_FW_H
+#ifndef IMG_IMAGE_STATE_VISITOR_FW_H
+#define IMG_IMAGE_STATE_VISITOR_FW_H
 
 namespace ost { namespace img { namespace image_state {
 

@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_PIXEL_SAMPLING_H
-#define IPLT_PIXEL_SAMPLING_H
+#ifndef IMG_PIXEL_SAMPLING_H
+#define IMG_PIXEL_SAMPLING_H
 
 #include <ost/img/module_config.hh>
 #include <ost/img/data_types.hh>

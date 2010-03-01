@@ -26,8 +26,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_FUNCTION_H
-#define IPLT_FUNCTION_H
+#ifndef IMG_FUNCTION_H
+#define IMG_FUNCTION_H
 
 #include "function_base.hh"
 #include "function_impl.hh"

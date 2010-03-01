@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_FUNCTION_BASE_H
-#define IPLT_FUNCTION_BASE_H
+#ifndef IMG_FUNCTION_BASE_H
+#define IMG_FUNCTION_BASE_H
 
 #include "data.hh"
 #include "data_observer.hh"

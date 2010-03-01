@@ -19,8 +19,8 @@
 /*
 Author: Juergen Haas
 */
-#ifndef IPLT_ALG_FFTW_HELPER_HH
-#define IPLT_ALG_FFTW_HELPER_HH
+#ifndef IMG_ALG_FFTW_HELPER_HH
+#define IMG_ALG_FFTW_HELPER_HH
 
 #include <ost/config.hh>
 

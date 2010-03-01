@@ -24,7 +24,7 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_ALG_TRANSFORM_FW_H
-#define IPLT_ALG_TRANSFORM_FW_H
+#ifndef IMG_ALG_TRANSFORM_FW_H
+#define IMG_ALG_TRANSFORM_FW_H
 
 #endif

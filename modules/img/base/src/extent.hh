@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_EXTENT_H
-#define IPLT_EXTENT_H
+#ifndef IMG_EXTENT_H
+#define IMG_EXTENT_H
 
 #include <ost/message.hh>
 #include <iosfwd>

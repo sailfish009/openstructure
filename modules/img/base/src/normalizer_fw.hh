@@ -22,8 +22,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_NORMALIZER_FW_HH
-#define IPLT_NORMALIZER_FW_HH
+#ifndef IMG_NORMALIZER_FW_HH
+#define IMG_NORMALIZER_FW_HH
 
 #include <boost/shared_ptr.hpp>
 

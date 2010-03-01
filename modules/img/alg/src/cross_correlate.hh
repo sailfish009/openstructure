@@ -21,8 +21,8 @@
 /*
   author: Andreas Schenk
 */
-#ifndef IPLT_ALG_CROSS_CORRELATE_HH
-#define IPLT_ALG_CROSS_CORRELATE_HH
+#ifndef IMG_ALG_CROSS_CORRELATE_HH
+#define IMG_ALG_CROSS_CORRELATE_HH
 
 #include <ost/img/algorithm.hh>
 #include <ost/img/alg/module_config.hh>

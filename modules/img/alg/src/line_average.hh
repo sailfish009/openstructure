@@ -17,8 +17,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef IPLT_ALG_LINE_AVERAGE_HH
-#define IPLT_ALG_LINE_AVERAGE_HH
+#ifndef IMG_ALG_LINE_AVERAGE_HH
+#define IMG_ALG_LINE_AVERAGE_HH
 
 #include <ost/img/extent.hh>
 #include <ost/img/image_state.hh>

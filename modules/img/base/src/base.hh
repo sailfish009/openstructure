@@ -26,8 +26,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_BASE_H
-#define IPLT_BASE_H
+#ifndef IMG_BASE_H
+#define IMG_BASE_H
 
 #include <string>
 #include <cmath>

@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_DATA_H
-#define IPLT_DATA_H
+#ifndef IMG_DATA_H
+#define IMG_DATA_H
 
 #include <cmath>
 

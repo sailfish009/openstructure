@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_CUSTOM_TRANSFORMER_IMPL_HH
-#define IPLT_CUSTOM_TRANSFORMER_IMPL_HH
+#ifndef IMG_CUSTOM_TRANSFORMER_IMPL_HH
+#define IMG_CUSTOM_TRANSFORMER_IMPL_HH
 
 #include <ost/message.hh>
 

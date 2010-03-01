@@ -17,8 +17,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef IPLT_PHYSICS_UNITS_HH
-#define IPLT_PHYSICS_UNITS_HH
+#ifndef IMG_PHYSICS_UNITS_HH
+#define IMG_PHYSICS_UNITS_HH
 
 #include <boost/mpl/vector_c.hpp>
 #include<boost/mpl/placeholders.hpp>

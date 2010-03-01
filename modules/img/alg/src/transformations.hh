@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_TRANSFORMATION_IMPL_HH
-#define IPLT_TRANSFORMATION_IMPL_HH
+#ifndef IMG_TRANSFORMATION_IMPL_HH
+#define IMG_TRANSFORMATION_IMPL_HH
 
 #include <ost/img/alg/module_config.hh>
 #include "transformation_base.hh"

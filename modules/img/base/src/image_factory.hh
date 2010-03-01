@@ -25,8 +25,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_FACTORY_HH
-#define IPLT_IMAGE_FACTORY_HH
+#ifndef IMG_IMAGE_FACTORY_HH
+#define IMG_IMAGE_FACTORY_HH
 
 #include <ost/img/module_config.hh>
 #include "extent.hh"

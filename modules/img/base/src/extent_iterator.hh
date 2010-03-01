@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_EXTENT_ITERATOR_H
-#define IPLT_EXTENT_ITERATOR_H
+#ifndef IMG_EXTENT_ITERATOR_H
+#define IMG_EXTENT_ITERATOR_H
 
 #include "point.hh"
 #include "data.hh"

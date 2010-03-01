@@ -22,8 +22,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_TEST_UTILS
-#define IPLT_TEST_UTILS
+#ifndef IMG_TEST_UTILS
+#define IMG_TEST_UTILS
 
 #include <iostream>
 

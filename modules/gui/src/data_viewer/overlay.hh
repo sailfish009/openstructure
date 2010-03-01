@@ -23,8 +23,8 @@
 */
 
 
-#ifndef IPLT_GUI_OVERLAY_HH
-#define IPLT_GUI_OVERLAY_HH
+#ifndef IMG_GUI_OVERLAY_HH
+#define IMG_GUI_OVERLAY_HH
 
 #include "overlay_base.hh"
 #include "overlay_manager.hh"

@@ -22,8 +22,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_DEBUG_H
-#define IPLT_DEBUG_H
+#ifndef IMG_DEBUG_H
+#define IMG_DEBUG_H
 
 #include <iostream>
 #include <ctime>

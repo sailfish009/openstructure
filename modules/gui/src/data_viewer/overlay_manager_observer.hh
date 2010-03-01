@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen
 */
 
-#ifndef IPLT_GUI_OVERLAY_MANAGER_OBSERVER_H
-#define IPLT_GUI_OVERLAY_MANAGER_OBSERVER_H
+#ifndef IMG_GUI_OVERLAY_MANAGER_OBSERVER_H
+#define IMG_GUI_OVERLAY_MANAGER_OBSERVER_H
 
 #include "overlay_manager_fw.hh"
 

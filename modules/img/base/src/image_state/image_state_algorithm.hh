@@ -22,8 +22,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_STATE_ALGORITHM_HH
-#define IPLT_IMAGE_STATE_ALGORITHM_HH
+#ifndef IMG_IMAGE_STATE_ALGORITHM_HH
+#define IMG_IMAGE_STATE_ALGORITHM_HH
 
 #include <ost/img/image.hh>
 #include <ost/img/data_algorithm.hh>

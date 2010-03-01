@@ -22,8 +22,8 @@
   Authors: Andreas Schenk, Ansgar Philippsen
 */
 
-#ifndef IPLT_POINTLIST_OVERLAY_HH
-#define IPLT_POINTLIST_OVERLAY_HH
+#ifndef IMG_POINTLIST_OVERLAY_HH
+#define IMG_POINTLIST_OVERLAY_HH
 
 #include <ost/img/point_list.hh>
 

@@ -23,8 +23,8 @@
 */
 
 
-#ifndef IPLT_ALG_FILTER_FOURIER_FILTERS_H
-#define IPLT_ALG_FILTER_FOURIER_FILTERS_H
+#ifndef IMG_ALG_FILTER_FOURIER_FILTERS_H
+#define IMG_ALG_FILTER_FOURIER_FILTERS_H
 
 #include <ost/img/algorithm.hh>
 #include <ost/img/image_state.hh>

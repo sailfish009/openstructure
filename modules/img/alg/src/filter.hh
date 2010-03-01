@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_ALG_FILTER_H
-#define IPLT_ALG_FILTER_H
+#ifndef IMG_ALG_FILTER_H
+#define IMG_ALG_FILTER_H
 
 #include "gaussian.hh"
 #include "gaussian_gradient_magnitude.hh"

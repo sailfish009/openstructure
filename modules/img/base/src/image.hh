@@ -25,8 +25,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_H
-#define IPLT_IMAGE_H
+#ifndef IMG_IMAGE_H
+#define IMG_IMAGE_H
 
 
 #include <ost/img/module_config.hh>

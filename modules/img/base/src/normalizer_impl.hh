@@ -24,8 +24,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_NORMALIZER_IMPL_H
-#define IPLT_NORMALIZER_IMPL_H
+#ifndef IMG_NORMALIZER_IMPL_H
+#define IMG_NORMALIZER_IMPL_H
 
 #include <boost/shared_ptr.hpp>
 

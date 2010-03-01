@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_GUI_DATAVIEWER_INFO_PANEL_H_
-#define IPLT_GUI_DATAVIEWER_INFO_PANEL_H_
+#ifndef IMG_GUI_DATAVIEWER_INFO_PANEL_H_
+#define IMG_GUI_DATAVIEWER_INFO_PANEL_H_
 
 #include <QWidget>
 #include <QLabel>

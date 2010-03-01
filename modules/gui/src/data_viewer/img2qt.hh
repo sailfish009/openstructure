@@ -23,8 +23,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_GUI_IMG2QT_HH
-#define IPLT_GUI_IMG2QT_HH
+#ifndef IMG_GUI_IMG2QT_HH
+#define IMG_GUI_IMG2QT_HH
 
 #include <ost/geom/geom.hh>
 #include <ost/img/normalizer_impl.hh>

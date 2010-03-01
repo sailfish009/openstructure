@@ -17,8 +17,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef IPLT_DATA_VIEWER_PANEL_HH
-#define IPLT_DATA_VIEWER_PANEL_HH
+#ifndef IMG_DATA_VIEWER_PANEL_HH
+#define IMG_DATA_VIEWER_PANEL_HH
 
 #include <ost/gui/module_config.hh>
 #include "data_viewer_panel_base.hh"

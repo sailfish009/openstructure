@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_STATE_FACTORY_H
-#define IPLT_IMAGE_STATE_FACTORY_H
+#ifndef IMG_IMAGE_STATE_FACTORY_H
+#define IMG_IMAGE_STATE_FACTORY_H
 
 #include <ost/img/data_types.hh>
 #include <ost/img/extent.hh>

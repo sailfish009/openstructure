@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_NULL_FUNCTION_H
-#define IPLT_NULL_FUNCTION_H
+#ifndef IMG_NULL_FUNCTION_H
+#define IMG_NULL_FUNCTION_H
 
 #include "function_base.hh"
 

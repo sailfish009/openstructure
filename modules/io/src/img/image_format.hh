@@ -24,8 +24,8 @@
   Author: Andreas Schenk
 */
 
-#ifndef IPLT_IMAGE_FORMAT_H
-#define IPLT_IMAGE_FORMAT_H
+#ifndef IMG_IMAGE_FORMAT_H
+#define IMG_IMAGE_FORMAT_H
 
 #include <ost/img/data_types.hh>
 #include <ost/base.hh>

@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_DATA_TYPES_H
-#define IPLT_DATA_TYPES_H
+#ifndef IMG_DATA_TYPES_H
+#define IMG_DATA_TYPES_H
 
 #include <ost/base.hh>
 

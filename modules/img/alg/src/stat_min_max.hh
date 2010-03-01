@@ -22,8 +22,8 @@
   Authors: Andreas Schenk, Ansgar Philippsen
 */
 
-#ifndef IPLT_ALG_STAT_MIN_MAX_H
-#define IPLT_ALG_STAT_MIN_MAX_H
+#ifndef IMG_ALG_STAT_MIN_MAX_H
+#define IMG_ALG_STAT_MIN_MAX_H
 
 #include <iosfwd>
 

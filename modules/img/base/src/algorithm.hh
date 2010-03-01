@@ -25,8 +25,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_ALGORITHM_H
-#define IPLT_ALGORITHM_H
+#ifndef IMG_ALGORITHM_H
+#define IMG_ALGORITHM_H
 
 #include <ost/img/module_config.hh>
 #include "data.hh"

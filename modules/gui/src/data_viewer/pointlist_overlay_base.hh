@@ -23,8 +23,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_POINTLIST_OVERLAY_BASE_HH
-#define IPLT_POINTLIST_OVERLAY_BASE_HH
+#ifndef IMG_POINTLIST_OVERLAY_BASE_HH
+#define IMG_POINTLIST_OVERLAY_BASE_HH
 
 #include <QColor>
 #include <QAction>

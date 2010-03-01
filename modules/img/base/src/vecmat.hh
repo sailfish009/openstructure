@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_VECMAT_H
-#define IPLT_VECMAT_H
+#ifndef IMG_VECMAT_H
+#define IMG_VECMAT_H
 
 #include <cmath>
 #include <vector>

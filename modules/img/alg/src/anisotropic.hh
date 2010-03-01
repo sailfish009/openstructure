@@ -22,8 +22,8 @@
   authors: Giani Signorell, Ansgar Philippsen
 */
 
-#ifndef IPLT_ALG_FILTER_ANISOTROPIC_H
-#define IPLT_ALG_FILTER_ANISOTROPIC_H
+#ifndef IMG_ALG_FILTER_ANISOTROPIC_H
+#define IMG_ALG_FILTER_ANISOTROPIC_H
 
 #include "gaussian.hh"
 

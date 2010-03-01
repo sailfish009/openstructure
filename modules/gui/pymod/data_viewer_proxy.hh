@@ -24,8 +24,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_GUI_DATA_VIEWER_PROXY_H
-#define IPLT_GUI_DATA_VIEWER_PROXY_H
+#ifndef IMG_GUI_DATA_VIEWER_PROXY_H
+#define IMG_GUI_DATA_VIEWER_PROXY_H
 
 #include <boost/shared_ptr.hpp>
 

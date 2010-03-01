@@ -17,8 +17,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef IPLT_ALG_POLAR_HH
-#define IPLT_ALG_POLAR_HH
+#ifndef IMG_ALG_POLAR_HH
+#define IMG_ALG_POLAR_HH
 
 #include <ost/base.hh>
 #include <ost/img/algorithm.hh>

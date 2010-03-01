@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_SIZE_H
-#define IPLT_SIZE_H
+#ifndef IMG_SIZE_H
+#define IMG_SIZE_H
 
 #include <iosfwd>
 

@@ -28,8 +28,8 @@
   TODO: use boost operator
 */
 
-#ifndef IPLT_POINT_H
-#define IPLT_POINT_H
+#ifndef IMG_POINT_H
+#define IMG_POINT_H
 
 #include <vector>
 #include <iosfwd>

@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_INDEX_H
-#define IPLT_INDEX_H
+#ifndef IMG_INDEX_H
+#define IMG_INDEX_H
 
 #include <iosfwd>
 

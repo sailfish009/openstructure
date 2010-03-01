@@ -22,8 +22,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_NORM_IMPL_H
-#define IPLT_NORM_IMPL_H
+#ifndef IMG_NORM_IMPL_H
+#define IMG_NORM_IMPL_H
 
 // TODO: apply actual normalization to image
 

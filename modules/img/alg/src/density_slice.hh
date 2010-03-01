@@ -22,8 +22,8 @@
   Author: Andreas Schenk
 */
 
-#ifndef IPLT_ALG_DENSITY_SLICE_HH
-#define IPLT_ALG_DENSITY_SLICE_HH
+#ifndef IMG_ALG_DENSITY_SLICE_HH
+#define IMG_ALG_DENSITY_SLICE_HH
 
 #include <ost/img/image_state.hh>
 #include <ost/img/image_state/image_state_algorithm.hh>

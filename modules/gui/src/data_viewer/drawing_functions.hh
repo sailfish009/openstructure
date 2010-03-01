@@ -22,8 +22,8 @@
   Authors: Andreas Schenk, Ansgar Philippsen
 */
 
-#ifndef IPLT_GUI_DRAWING_FUNCTIONS_HH_
-#define IPLT_GUI_DRAWING_FUNCTIONS_HH_
+#ifndef IMG_GUI_DRAWING_FUNCTIONS_HH_
+#define IMG_GUI_DRAWING_FUNCTIONS_HH_
 
 #include <QPainter>
 #include <QPoint>

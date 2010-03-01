@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_GUI_OVERLAY_MANAGER_HH
-#define IPLT_GUI_OVERLAY_MANAGER_HH
+#ifndef IMG_GUI_OVERLAY_MANAGER_HH
+#define IMG_GUI_OVERLAY_MANAGER_HH
 
 #include <vector>
 #include <list>

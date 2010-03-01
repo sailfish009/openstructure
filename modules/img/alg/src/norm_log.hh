@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_NORM_LOG_H
-#define IPLT_NORM_LOG_H
+#ifndef IMG_NORM_LOG_H
+#define IMG_NORM_LOG_H
 
 #include <ost/img/normalizer_impl.hh>
 #include <ost/img/alg/module_config.hh>

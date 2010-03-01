@@ -22,7 +22,7 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_UTIL_H
+#ifndef IMG_UTIL_H
 #error "util.cc must be included from util.hh"
 #endif
 

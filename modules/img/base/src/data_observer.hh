@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_DATA_OBSERVER
-#define IPLT_DATA_OBSERVER
+#ifndef IMG_DATA_OBSERVER
+#define IMG_DATA_OBSERVER
 
 #include <boost/ref.hpp>
 

@@ -24,7 +24,7 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_FORMAT_H
+#ifndef IMG_IMAGE_FORMAT_H
 #error "image_format_conversion.cc must be included from image_format.hh"
 #endif
 

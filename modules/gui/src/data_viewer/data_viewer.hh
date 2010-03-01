@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_GUI_DATA_VIEWER_H
-#define IPLT_GUI_DATA_VIEWER_H
+#ifndef IMG_GUI_DATA_VIEWER_H
+#define IMG_GUI_DATA_VIEWER_H
 
 #include <map>
 

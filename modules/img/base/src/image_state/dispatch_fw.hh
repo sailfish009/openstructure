@@ -18,8 +18,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#ifndef IPLT_IMAGE_STATE_DISPATCH_FW_HH
-#define IPLT_IMAGE_STATE_DISPATCH_FW_HH
+#ifndef IMG_IMAGE_STATE_DISPATCH_FW_HH
+#define IMG_IMAGE_STATE_DISPATCH_FW_HH
 
 namespace ost { namespace img { namespace image_state { namespace dispatch {
 

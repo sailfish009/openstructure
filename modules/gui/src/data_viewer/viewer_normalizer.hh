@@ -23,8 +23,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_GUI_VIEWER_NORMALIZER_HH
-#define IPLT_GUI_VIEWER_NORMALIZER_HH
+#ifndef IMG_GUI_VIEWER_NORMALIZER_HH
+#define IMG_GUI_VIEWER_NORMALIZER_HH
 
 
 #include <boost/shared_ptr.hpp>

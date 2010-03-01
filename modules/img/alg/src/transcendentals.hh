@@ -28,15 +28,15 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_ALG_TRANS_HH
-#define IPLT_ALG_TRANS_HH
+#ifndef IMG_ALG_TRANS_HH
+#define IMG_ALG_TRANS_HH
 
 #include <ost/img/image.hh>
 #include <ost/img/image_state.hh>
 #include <ost/img/alg/module_config.hh>
 
 
-#define IPLT_ALG_TRANSCENDENTALS_BLOCK(FF,NN,SS)                               \
+#define IMG_ALG_TRANSCENDENTALS_BLOCK(FF,NN,SS)                               \
 struct FF {					                                                           \
   FF() {}                                                                      \
   ~FF() {}                                                                     \
@@ -60,13 +60,13 @@ typedef ImageStateConstModIPAlgorithm<FF> NN;
 
 namespace ost { namespace img { namespace alg {
 
-IPLT_ALG_TRANSCENDENTALS_BLOCK(CosFnc,Cos,std::cos)
-IPLT_ALG_TRANSCENDENTALS_BLOCK(ExpFnc,Exp,std::exp)
-IPLT_ALG_TRANSCENDENTALS_BLOCK(LogFnc,Log,std::log)
-IPLT_ALG_TRANSCENDENTALS_BLOCK(Log10Fnc,Log10,std::log)
-IPLT_ALG_TRANSCENDENTALS_BLOCK(SinFnc,Sin,std::sin)
-IPLT_ALG_TRANSCENDENTALS_BLOCK(SqrtFnc,Sqrt,std::sqrt)
-IPLT_ALG_TRANSCENDENTALS_BLOCK(TanFnc,Tan,std::tan)
+IMG_ALG_TRANSCENDENTALS_BLOCK(CosFnc,Cos,std::cos)
+IMG_ALG_TRANSCENDENTALS_BLOCK(ExpFnc,Exp,std::exp)
+IMG_ALG_TRANSCENDENTALS_BLOCK(LogFnc,Log,std::log)
+IMG_ALG_TRANSCENDENTALS_BLOCK(Log10Fnc,Log10,std::log)
+IMG_ALG_TRANSCENDENTALS_BLOCK(SinFnc,Sin,std::sin)
+IMG_ALG_TRANSCENDENTALS_BLOCK(SqrtFnc,Sqrt,std::sqrt)
+IMG_ALG_TRANSCENDENTALS_BLOCK(TanFnc,Tan,std::tan)
 
 
 struct PowFnc {
@@ -90,7 +90,7 @@ typedef ImageStateConstModIPAlgorithm<PowFnc> Pow;
 
 }}} // ns
 
-#undef IPLT_ALG_TRANSCENDENTALS_BLOCK
+#undef IMG_ALG_TRANSCENDENTALS_BLOCK
 
 
 #endif

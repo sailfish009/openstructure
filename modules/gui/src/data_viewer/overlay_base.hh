@@ -22,8 +22,8 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_GUI_OVERLAY_BASE_H
-#define IPLT_GUI_OVERLAY_BASE_H
+#ifndef IMG_GUI_OVERLAY_BASE_H
+#define IMG_GUI_OVERLAY_BASE_H
 
 #include <QObject>
 #include <QEvent>

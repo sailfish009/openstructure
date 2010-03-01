@@ -25,8 +25,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_FUNCTION_IMPL_H
-#define IPLT_FUNCTION_IMPL_H
+#ifndef IMG_FUNCTION_IMPL_H
+#define IMG_FUNCTION_IMPL_H
 
 #include <ost/img/module_config.hh>
 #include "function_base.hh"

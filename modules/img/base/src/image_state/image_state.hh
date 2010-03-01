@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_IMAGE_STATE_DETAIL_H
-#define IPLT_IMAGE_STATE_DETAIL_H
+#ifndef IMG_IMAGE_STATE_DETAIL_H
+#define IMG_IMAGE_STATE_DETAIL_H
 
 #include "image_state_base.hh"
 #include "image_state_impl.hh"

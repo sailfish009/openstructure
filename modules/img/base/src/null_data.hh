@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_NULL_DATA_H
-#define IPLT_NULL_DATA_H
+#ifndef IMG_NULL_DATA_H
+#define IMG_NULL_DATA_H
 
 #include "data.hh"
 #include "pixel_sampling.hh"

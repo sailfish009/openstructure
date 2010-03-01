@@ -22,8 +22,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_TEST_POINT_H
-#define IPLT_TEST_POINT_H
+#ifndef IMG_TEST_POINT_H
+#define IMG_TEST_POINT_H
 
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;

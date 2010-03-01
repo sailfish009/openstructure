@@ -22,8 +22,8 @@
   Authors: Andreas Schenk, Ansgar Philippsen
 */
 
-#ifndef IPLT_ALG_STAT_H
-#define IPLT_ALG_STAT_H
+#ifndef IMG_ALG_STAT_H
+#define IMG_ALG_STAT_H
 
 #include <iosfwd>
 

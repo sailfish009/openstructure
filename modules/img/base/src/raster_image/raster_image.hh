@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen, Andreas Schenk
 */
 
-#ifndef IPLT_RASTER_IMAGE_H
-#define IPLT_RASTER_IMAGE_H
+#ifndef IMG_RASTER_IMAGE_H
+#define IMG_RASTER_IMAGE_H
 
 #include <ost/base.hh>
 #include <ost/img/vecmat.hh>

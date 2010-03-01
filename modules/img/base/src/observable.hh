@@ -24,8 +24,8 @@
   Author: Ansgar Philippsen
 */
 
-#ifndef IPLT_OBSERVABLE_H
-#define IPLT_OBSERVABLE_H
+#ifndef IMG_OBSERVABLE_H
+#define IMG_OBSERVABLE_H
 
 #include <list>
 #include "extent.hh" 

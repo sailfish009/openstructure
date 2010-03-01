@@ -22,8 +22,8 @@
   Authors: Giani Signorell, Ansgar Philippsen, Valerio Mariani
 */
 
-#ifndef IPLT_ALG_FILTER_GAUSSIAN_LAPLACIAN_H
-#define IPLT_ALG_FILTER_GAUSSIAN_LAPLACIAN_H
+#ifndef IMG_ALG_FILTER_GAUSSIAN_LAPLACIAN_H
+#define IMG_ALG_FILTER_GAUSSIAN_LAPLACIAN_H
 
 #include <ost/img/algorithm.hh>
 #include <ost/img/image_state.hh>
