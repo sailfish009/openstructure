@@ -216,7 +216,7 @@ message(STATUS
         "OpenStructure will be built with the following options:\n"
         "   Graphical interface         (-DENABLE_UI) : ${_UI}\n"
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   Image Processing support  (-DENABLE_IMG) : ${_IMG}\n"        
+        "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"        
         "   Shader support             (-DUSE_SHADER) : ${_SHADER}\n"
         "   Optimize                     (-DOPTIMIZE) : ${_OPT}\n"
         "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
