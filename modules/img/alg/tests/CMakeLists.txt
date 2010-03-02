@@ -1,5 +1,4 @@
 set(IPLT_ALG_UNIT_TESTS
-test_circular_mask.cc
 test_clear.cc
 test_conj.cc
 test_convolute.cc

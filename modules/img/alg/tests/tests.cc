@@ -36,7 +36,6 @@ extern test_suite* CreateMirrorTest();
 extern test_suite* CreateTransformTest();
 extern test_suite* CreateDiscreteShrinkTest();
 extern test_suite* CreateFillTest();
-extern test_suite* CreatePeakSearchTest();
 extern test_suite* CreateStatTest();
 extern test_suite* CreateClearTest();
 extern test_suite* CreateFFTTest();
@@ -49,8 +48,7 @@ bool init_ost_img_alg_unit_tests() {
     framework::master_test_suite().add(CreateMirrorTest()); 
     framework::master_test_suite().add(CreateTransformTest()); 
     framework::master_test_suite().add(CreateDiscreteShrinkTest()); 
-    framework::master_test_suite().add(CreateFillTest()); 
-    framework::master_test_suite().add(CreatePeakSearchTest());    
+    framework::master_test_suite().add(CreateFillTest());
     framework::master_test_suite().add(CreateStatTest()); 
     framework::master_test_suite().add(CreateConjugateTest()); 
     framework::master_test_suite().add(CreateClearTest());      
