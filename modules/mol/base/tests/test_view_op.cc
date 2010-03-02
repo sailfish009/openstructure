@@ -65,13 +65,13 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 
 BOOST_AUTO_TEST_CASE(test_difference)
 {
-  std::cout << "TEST DIFFERENCE!" << std::endl;
+
   EntityHandle ent=mk_test_ent();
   EntityView full=ent.CreateFullView();
   EntityView v1=ent.Select("aname=A,B,C");
   EntityView diff_view=mol::Difference(full, v1);
 
-  BOOST_CHECK_EQUAL(diff_view.GetBondCount(), 4);
+  BOOST_CHECK_EQUAL(diff_view.GetBondCount(), 5);
   BOOST_CHECK_EQUAL(diff_view.GetAtomCount(), 5);
   BOOST_CHECK_EQUAL(diff_view.GetResidueCount(), 3);
   BOOST_CHECK_EQUAL(diff_view.GetChainCount(), 2);
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(test_difference)
   BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "B"),
                          ent.FindAtom("A", mol::ResNum(2), "C"),
                          bonds));
-  BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(2), "C"),
+  BOOST_CHECK(find_bond(ent.FindAtom("A", mol::ResNum(2), "C"),
                          ent.FindAtom("A", mol::ResNum(2), "D"),
                          bonds));
   BOOST_CHECK(find_bond(ent.FindAtom("B", mol::ResNum(1), "E"),

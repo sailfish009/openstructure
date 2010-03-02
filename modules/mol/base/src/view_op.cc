@@ -108,42 +108,60 @@ mol::EntityView Difference(const mol::EntityView& ev1,
   Profile diff_time("mol::Difference");
   if (ev1.GetHandle()!=ev2.GetHandle()) {
     throw IntegrityError(combining_not_allowed);
-  }  
-  mol::EntityView diff=ev1.Copy();
-  mol::ChainViewList::const_iterator c_it=ev2.GetChainList().begin();
-  for ( ; c_it!=ev2.GetChainList().end(); ++c_it) {
+  }
+  mol::EntityView diff=ev1.CreateEmptyView();
+  mol::ChainViewList::const_iterator c_it=ev1.GetChainList().begin();
+  for ( ; c_it!=ev1.GetChainList().end(); ++c_it) {
     mol::ChainView cv=*c_it;
-    mol::ChainView cv2=diff.FindChain(cv.GetHandle());
+    mol::ChainView cv2=ev2.FindChain(cv.GetHandle());
     if (!cv2) {
-      continue;
+      diff.AddChain(cv,mol::ViewAddFlag::INCLUDE_ALL);
     } else {
+      bool chain_added = false;
       mol::ResidueViewList::const_iterator r_it=cv.GetResidueList().begin();
       for (; r_it!=cv.GetResidueList().end(); ++r_it) {
         mol::ResidueView rv=*r_it;
         mol::ResidueView rv2=cv2.FindResidue(rv.GetHandle());
         if (!rv2) {
-          continue;
+          if(!chain_added){
+            diff.AddChain(cv);
+            chain_added = true;
+          }
+          diff.AddResidue(rv,mol::ViewAddFlag::INCLUDE_ALL);
         } else {
+          bool residue_added = false;
           mol::AtomViewList::const_iterator a_it=rv.GetAtomList().begin();
           for (; a_it!=rv.GetAtomList().end(); ++a_it) {
-            if (mol::AtomView av=rv2.FindAtom((*a_it).GetHandle())) {
-              rv2.RemoveAtom(av);
+            if (!rv2.FindAtom((*a_it).GetHandle())) {
+              if(!residue_added){
+                diff.AddResidue(rv);
+                residue_added = true;
+              }
+              diff.AddAtom((*a_it).GetHandle(),mol::ViewAddFlag::INCLUDE_ALL);
             }
-          }
-          if (rv2.GetAtomList().empty()) {
-            cv2.RemoveResidue(rv2);
           }
         }
       }
-      if (cv2.GetResidueList().empty()) {
-        diff.RemoveChain(cv2);
-      }
     }
   }
-  BondHandleList bonds=ev2.GetBondList();
-  for (BondHandleList::const_iterator i=bonds.begin(), 
+
+  BondSet bond_set;
+  // prepare for bond insertion
+  BondHandleList bonds=ev1.GetBondList();
+  for (BondHandleList::const_iterator i=bonds.begin(),
        e=bonds.end(); i!=e; ++i) {
-    diff.RemoveBond(*i);
+    bond_set.insert(*i);
+  }
+
+  BondHandleList bond_ev2 = ev2.GetBondList();
+  for (BondHandleList::const_iterator i=bond_ev2.begin(),
+         e=bond_ev2.end(); i!=e; ++i) {
+    bond_set.erase(*i);
+  }
+
+  for (BondSet::const_iterator i=bond_set.begin(),
+       e=bond_set.end(); i!=e; ++i) {
+    diff.AddBond(*i);
   }
   return diff;
 }
