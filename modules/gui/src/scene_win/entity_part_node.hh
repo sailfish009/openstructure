@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2009 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -16,56 +16,45 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_SCENE_WIN_SCENE_WIN_HH
-#define OST_GUI_SCENE_WIN_SCENE_WIN_HH
+#ifndef OST_GUI_SCENE_WIN_ENTITY_PART_NODE_HH
+#define OST_GUI_SCENE_WIN_ENTITY_PART_NODE_HH
 
-#include <QTreeView>
-#include <QItemSelection>
+#include <QObject>
+#include <QVariant>
+#include <QModelIndex>
 
-#include <ost/gfx/gfx_node_fw.hh>
+#include <ost/gfx/entity_fw.hh>
 
+#include <ost/mol/query_view_wrapper.hh>
 #include <ost/gui/module_config.hh>
-#include <ost/gui/widget.hh>
-#include <ost/gui/scene_win/scene_win_model.hh>
+#include <ost/gui/scene_win/scene_node.hh>
 
 /*
-  Authors: Marco Biasini, Ansgar Philippsen, Stefan Scheuber
-*/
+  Author: Stefan Scheuber
+ */
 
 namespace ost { namespace gui {
 
-// the display window for all graphical objects
-class DLLEXPORT_OST_GUI SceneWin: public Widget
-{
-  Q_OBJECT;
+class DLLEXPORT_OST_GUI EntityPartNode : public SceneNode {
+  Q_OBJECT
 public:
-  SceneWin(QWidget* parent=NULL);
-  ~SceneWin();
+  EntityPartNode(QString name, gfx::EntityP entity, mol::QueryViewWrapper part, SceneNode* node_parent );
 
-signals:
-  void ActiveNodesChanged(gfx::NodePtrList nodes);
+  virtual QVariant GetData(int column, int role);
+  virtual bool SetData(int column, const QVariant& value, int role);
+  virtual Qt::ItemFlags Flags(int column) const;
+  virtual int GetColumnCount() const;
 
-public:
-  virtual bool Save(const QString& prefix) { return true; }
-  virtual bool Restore(const QString& prefix) { return true; }
-
-public slots:
-  void OnSelectionChange(const QItemSelection& sel, const QItemSelection& desel);
-
-  void ContextMenuRequested(const QPoint& pos);
-
-  SceneWinModel* GetModel();
-
-  void Update();
-
-private slots:
-  void RowsInserted(const QModelIndex & parent, int start, int end);
+  virtual void SetQueryView(mol::QueryViewWrapper part);
+  virtual mol::QueryViewWrapper GetQueryView() const;
 
 private:
-  SceneWinModel* model_;
-  QTreeView* view_;
+  QString name_;
+  gfx::EntityP entity_;
+  mol::QueryViewWrapper query_view_;
+  bool visible_;
 };
 
-}} // ns
+}}
 
 #endif

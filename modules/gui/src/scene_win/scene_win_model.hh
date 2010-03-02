@@ -45,6 +45,10 @@ public:
 
   virtual void Update();
 
+  bool AddNode(SceneNode* parent, SceneNode* child);
+
+  QModelIndex GetIndexOf(SceneNode* node);
+
   // abstract item model interface
   QModelIndex index(int row, int col, const QModelIndex& parent = QModelIndex()) const;
 
@@ -71,6 +75,8 @@ public:
 
 private:
   SceneNode* GetItem(const QModelIndex &index) const;
+
+  QModelIndex GetIndex(SceneNode* node, QModelIndex index);
 
   SceneNode* root_node_;
   SceneNode* scene_node_;

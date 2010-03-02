@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2009 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -16,56 +16,30 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_SCENE_WIN_SCENE_WIN_HH
-#define OST_GUI_SCENE_WIN_SCENE_WIN_HH
-
-#include <QTreeView>
-#include <QItemSelection>
+#ifndef OST_GUI_SCENE_WIN_ENTITY_NODE_HH
+#define OST_GUI_SCENE_WIN_ENTITY_NODE_HH
 
 #include <ost/gfx/gfx_node_fw.hh>
+#include <ost/gfx/gfx_node.hh>
+
+#include <ost/gfx/entity_fw.hh>
+#include <ost/gfx/entity.hh>
 
 #include <ost/gui/module_config.hh>
-#include <ost/gui/widget.hh>
-#include <ost/gui/scene_win/scene_win_model.hh>
+#include <ost/gui/scene_win/gfx_scene_node.hh>
 
 /*
-  Authors: Marco Biasini, Ansgar Philippsen, Stefan Scheuber
-*/
+  Author: Stefan Scheuber
+ */
 
 namespace ost { namespace gui {
 
-// the display window for all graphical objects
-class DLLEXPORT_OST_GUI SceneWin: public Widget
-{
-  Q_OBJECT;
+class DLLEXPORT_OST_GUI EntityNode : public GfxSceneNode {
+  Q_OBJECT
 public:
-  SceneWin(QWidget* parent=NULL);
-  ~SceneWin();
-
-signals:
-  void ActiveNodesChanged(gfx::NodePtrList nodes);
-
-public:
-  virtual bool Save(const QString& prefix) { return true; }
-  virtual bool Restore(const QString& prefix) { return true; }
-
-public slots:
-  void OnSelectionChange(const QItemSelection& sel, const QItemSelection& desel);
-
-  void ContextMenuRequested(const QPoint& pos);
-
-  SceneWinModel* GetModel();
-
-  void Update();
-
-private slots:
-  void RowsInserted(const QModelIndex & parent, int start, int end);
-
-private:
-  SceneWinModel* model_;
-  QTreeView* view_;
+  EntityNode(gfx::EntityP& entity, SceneNode* node_parent);
 };
 
-}} // ns
+}}
 
 #endif

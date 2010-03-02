@@ -43,7 +43,7 @@ void SceneNode::RemoveChild(SceneNode* node){
 
 int SceneNode::GetChildRow(const SceneNode* node) const{
   for(int i = 0; i < nodes_.size(); i++){
-    if(this == node)return i;
+    if(nodes_[i] == node)return i;
   }
   return -1;
 }
