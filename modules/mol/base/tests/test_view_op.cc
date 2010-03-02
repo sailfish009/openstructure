@@ -61,8 +61,11 @@ bool find_bond(AtomHandle a, AtomHandle b, const BondHandleList& bonds)
   return std::find(bonds.begin(), bonds.end(), a.FindBondToAtom(b))!=bonds.end();
 }
 
-void test_difference() 
+BOOST_AUTO_TEST_SUITE( mol_base )
+
+BOOST_AUTO_TEST_CASE(test_difference)
 {
+  std::cout << "TEST DIFFERENCE!" << std::endl;
   EntityHandle ent=mk_test_ent();
   EntityView full=ent.CreateFullView();
   EntityView v1=ent.Select("aname=A,B,C");
@@ -75,21 +78,21 @@ void test_difference()
   // check chains
   BOOST_CHECK(diff_view.FindChain("A"));
   BOOST_CHECK(diff_view.FindChain("B"));
-    
+
   // check residues
   BOOST_CHECK(!diff_view.FindResidue(ent.FindResidue("A", mol::ResNum(1))));
-  BOOST_CHECK(diff_view.FindResidue(ent.FindResidue("A", mol::ResNum(2))));  
+  BOOST_CHECK(diff_view.FindResidue(ent.FindResidue("A", mol::ResNum(2))));
   BOOST_CHECK(diff_view.FindResidue(ent.FindResidue("B", mol::ResNum(1))));
-  BOOST_CHECK(diff_view.FindResidue(ent.FindResidue("B", mol::ResNum(2))));  
-  
+  BOOST_CHECK(diff_view.FindResidue(ent.FindResidue("B", mol::ResNum(2))));
+
   // check atoms
   BOOST_CHECK(!diff_view.FindAtom(ent.FindAtom("A", mol::ResNum(1), "A")));
-  BOOST_CHECK(!diff_view.FindAtom(ent.FindAtom("A", mol::ResNum(1), "B"))); 
+  BOOST_CHECK(!diff_view.FindAtom(ent.FindAtom("A", mol::ResNum(1), "B")));
   BOOST_CHECK(!diff_view.FindAtom(ent.FindAtom("A", mol::ResNum(2), "C")));
   BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("A", mol::ResNum(2), "D")));
-  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(1), "E"))); 
-  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(1), "F")));  
-  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(2), "G"))); 
+  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(1), "E")));
+  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(1), "F")));
+  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(2), "G")));
   BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(2), "H")));
 
   // check bonds
@@ -97,15 +100,15 @@ void test_difference()
   BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "A"),
                          ent.FindAtom("A", mol::ResNum(1), "B"),
                          bonds));
- BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "B"),
-                        ent.FindAtom("A", mol::ResNum(2), "C"),
-                        bonds));
+  BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "B"),
+                         ent.FindAtom("A", mol::ResNum(2), "C"),
+                         bonds));
   BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(2), "C"),
                          ent.FindAtom("A", mol::ResNum(2), "D"),
-                         bonds));                       
+                         bonds));
   BOOST_CHECK(find_bond(ent.FindAtom("B", mol::ResNum(1), "E"),
                         ent.FindAtom("B", mol::ResNum(1), "F"),
-                        bonds));                       
+                        bonds));
   BOOST_CHECK(find_bond(ent.FindAtom("B", mol::ResNum(1), "F"),
                         ent.FindAtom("B", mol::ResNum(2), "G"),
                         bonds));
@@ -114,8 +117,7 @@ void test_difference()
                         bonds));
 }
 
-
-void test_union_a()
+BOOST_AUTO_TEST_CASE(test_union_a)
 {
   EntityHandle ent=mk_test_ent();
   EntityView v1=ent.Select("aname=B,C");
@@ -167,7 +169,7 @@ void test_union_a()
                           bonds));
 }
 
-void test_union_b()
+BOOST_AUTO_TEST_CASE(test_union_b)
 {
   EntityHandle ent=mk_test_ent();
   EntityView v1=ent.Select("aname=B,C");
@@ -221,13 +223,7 @@ void test_union_b()
                           bonds));
 }
 
-void test_union()
-{
-  test_union_a();
-  test_union_b();
-}
-
-void test_intersection_a()
+BOOST_AUTO_TEST_CASE(test_intersection_a)
 {
   EntityHandle ent=mk_test_ent();
   EntityView v1=ent.Select("aname=B,C,F,G");
@@ -259,30 +255,30 @@ void test_intersection_a()
   
   BOOST_CHECK(is.FindAtom(ent.FindAtom("B", mol::ResNum(2), "G")));
   BOOST_CHECK(!is.FindAtom(ent.FindAtom("B", mol::ResNum(2), "H")));
-  
+
   // bonds
-   BondHandleList bonds=is.GetBondList();
-   BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "A"),
-                          ent.FindAtom("A", mol::ResNum(1), "B"),
-                          bonds));
+  BondHandleList bonds=is.GetBondList();
+  BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "A"),
+                         ent.FindAtom("A", mol::ResNum(1), "B"),
+                         bonds));
   BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "B"),
-                         ent.FindAtom("A", mol::ResNum(2), "C"),
+                        ent.FindAtom("A", mol::ResNum(2), "C"),
                          bonds));
-   BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(2), "C"),
-                          ent.FindAtom("A", mol::ResNum(2), "D"),
-                          bonds));                       
-   BOOST_CHECK(!find_bond(ent.FindAtom("B", mol::ResNum(1), "E"),
-                          ent.FindAtom("B", mol::ResNum(1), "F"),
-                          bonds));                       
-   BOOST_CHECK(find_bond(ent.FindAtom("B", mol::ResNum(1), "F"),
-                         ent.FindAtom("B", mol::ResNum(2), "G"),
+  BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(2), "C"),
+                         ent.FindAtom("A", mol::ResNum(2), "D"),
                          bonds));
-   BOOST_CHECK(!find_bond(ent.FindAtom("B", mol::ResNum(2), "G"),
-                          ent.FindAtom("B", mol::ResNum(2), "H"),
-                          bonds));
+  BOOST_CHECK(!find_bond(ent.FindAtom("B", mol::ResNum(1), "E"),
+                         ent.FindAtom("B", mol::ResNum(1), "F"),
+                         bonds));
+  BOOST_CHECK(find_bond(ent.FindAtom("B", mol::ResNum(1), "F"),
+                        ent.FindAtom("B", mol::ResNum(2), "G"),
+                        bonds));
+  BOOST_CHECK(!find_bond(ent.FindAtom("B", mol::ResNum(2), "G"),
+                         ent.FindAtom("B", mol::ResNum(2), "H"),
+                         bonds));
 }
 
-void test_intersection_b()
+BOOST_AUTO_TEST_CASE(test_intersection_b)
 {
   EntityHandle ent=mk_test_ent();
   EntityView v1=ent.Select("aname=B,C,F,G");
@@ -316,68 +312,25 @@ void test_intersection_b()
   BOOST_CHECK(!is.FindAtom(ent.FindAtom("B", mol::ResNum(2), "H")));
   
   // bonds
-   BondHandleList bonds=is.GetBondList();
-   BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "A"),
-                          ent.FindAtom("A", mol::ResNum(1), "B"),
-                          bonds));
-   BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "B"),
-                          ent.FindAtom("A", mol::ResNum(2), "C"),
-                          bonds));
-   BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(2), "C"),
-                          ent.FindAtom("A", mol::ResNum(2), "D"),
-                          bonds));                       
-   BOOST_CHECK(!find_bond(ent.FindAtom("B", mol::ResNum(1), "E"),
-                          ent.FindAtom("B", mol::ResNum(1), "F"),
-                          bonds));                       
-   BOOST_CHECK(find_bond(ent.FindAtom("B", mol::ResNum(1), "F"),
-                         ent.FindAtom("B", mol::ResNum(2), "G"),
+  BondHandleList bonds=is.GetBondList();
+  BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "A"),
+                         ent.FindAtom("A", mol::ResNum(1), "B"),
                          bonds));
-   BOOST_CHECK(!find_bond(ent.FindAtom("B", mol::ResNum(2), "G"),
-                          ent.FindAtom("B", mol::ResNum(2), "H"),
-                          bonds));
-}
-
-void test_intersection()
-{
-  test_intersection_a();
-  test_intersection_b();  
-}
-
-BOOST_AUTO_TEST_SUITE( mol_base )
-
-BOOST_AUTO_TEST_CASE(test_difference) 
-{
-  test_difference();
-}
-
-BOOST_AUTO_TEST_CASE(test_union_a) 
-{
-  test_union_a();
-}
-
-BOOST_AUTO_TEST_CASE(test_union_b) 
-{
-  test_union_b();
-}
-
-BOOST_AUTO_TEST_CASE(test_union) 
-{
-  test_union();
-}
-
-BOOST_AUTO_TEST_CASE(test_intersection_a) 
-{
-  test_intersection_a();
-}
-
-BOOST_AUTO_TEST_CASE(test_intersection_b) 
-{
-  test_intersection_b();
-}
-
-BOOST_AUTO_TEST_CASE(test_intersection) 
-{
-  test_intersection();
+  BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(1), "B"),
+                         ent.FindAtom("A", mol::ResNum(2), "C"),
+                         bonds));
+  BOOST_CHECK(!find_bond(ent.FindAtom("A", mol::ResNum(2), "C"),
+                         ent.FindAtom("A", mol::ResNum(2), "D"),
+                         bonds));
+  BOOST_CHECK(!find_bond(ent.FindAtom("B", mol::ResNum(1), "E"),
+                         ent.FindAtom("B", mol::ResNum(1), "F"),
+                         bonds));
+  BOOST_CHECK(find_bond(ent.FindAtom("B", mol::ResNum(1), "F"),
+                        ent.FindAtom("B", mol::ResNum(2), "G"),
+                        bonds));
+  BOOST_CHECK(!find_bond(ent.FindAtom("B", mol::ResNum(2), "G"),
+                         ent.FindAtom("B", mol::ResNum(2), "H"),
+                         bonds));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
