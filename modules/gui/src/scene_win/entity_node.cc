@@ -42,7 +42,7 @@ EntityNode::EntityNode(gfx::EntityP& entity, SceneNode* parent):
   SceneNode* quick_selection = new LabelNode("Quick Selection",this);
   model->AddNode(this, quick_selection);
 
-  SceneNode* node = new EntityPartNode("Backbone", entity, mol::QueryViewWrapper(entity->GetView().Select("aname=CA,C,N,CO")), quick_selection);
+  SceneNode* node = new EntityPartNode("Backbone", entity, mol::QueryViewWrapper(entity->GetView().Select("aname=CA,C,N,CO,O")), quick_selection);
   model->AddNode(quick_selection, node);
   node = new EntityPartNode("Ligands", entity, mol::QueryViewWrapper(entity->GetView().Select("ishetatm=1 and ele=C")), quick_selection);
   model->AddNode(quick_selection, node);
