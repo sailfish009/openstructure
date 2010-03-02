@@ -22,6 +22,7 @@
  */
 
 #include <iostream>
+#include <ost/profile.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/impl/entity_impl.hh>
 #include <ost/mol/impl/chain_impl.hh>
@@ -54,6 +55,7 @@ typedef std::map<BondHandle,bool, BondCmp> BondMap;
   
 mol::EntityView Union(const mol::EntityView& ev1, const mol::EntityView& ev2) 
 {
+  Profile union_time("mol::Union");
   if (ev1.GetHandle()!=ev2.GetHandle()) {
     throw IntegrityError(combining_not_allowed);
   }
@@ -103,6 +105,7 @@ mol::EntityView Union(const mol::EntityView& ev1, const mol::EntityView& ev2)
 mol::EntityView Difference(const mol::EntityView& ev1, 
                            const mol::EntityView& ev2) 
 {
+  Profile diff_time("mol::Difference");
   if (ev1.GetHandle()!=ev2.GetHandle()) {
     throw IntegrityError(combining_not_allowed);
   }  
@@ -149,6 +152,7 @@ mol::EntityView Difference(const mol::EntityView& ev1,
 mol::EntityView Intersection(const mol::EntityView& ev1, 
                              const mol::EntityView& ev2) 
 {
+  Profile intersection_time("mol::Intersection");
   if (ev1.GetHandle()!=ev2.GetHandle()) {
     throw IntegrityError(combining_not_allowed);
   }
@@ -369,6 +373,7 @@ private:
 EntityHandle CreateEntityFromView(const EntityView& view,
                                   bool include_exlusive_atoms)
 {
+  Profile create_time("mol::CreateEntityFromView");
   EntityHandle ent=CreateEntity();
   Replicator replicator(ent.Impl(), view, include_exlusive_atoms);
   TorsionAdder adder(replicator, ent.Impl(), view);
