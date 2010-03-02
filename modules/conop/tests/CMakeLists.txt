@@ -1,6 +1,5 @@
 set(OST_CONOP_UNIT_TESTS
   test_heuristic_builder.cc
-  test_conop.cc
   tests.cc
   test_builder.cc
 )

@@ -25,8 +25,9 @@ using boost::unit_test_framework::test_suite;
 using namespace ost;
 using namespace ost::io;
 
+BOOST_AUTO_TEST_SUITE( io )
 
-void test_pdb()
+BOOST_AUTO_TEST_CASE(test_io_pdb) 
 {
   const String fname("testfiles/test_in.pdb");
 
@@ -42,13 +43,6 @@ void test_pdb()
   BOOST_CHECK(EntityIOPDBHandler::ProvidesExport("test_in.PDB"));
     
   pdbh.Import(eh,"testfiles/test_in.pdb");
-}
-
-BOOST_AUTO_TEST_SUITE( io )
-
-BOOST_AUTO_TEST_CASE(test_io_pdb) 
-{
-  test_pdb();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

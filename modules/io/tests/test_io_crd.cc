@@ -24,7 +24,11 @@
 using namespace ost;
 using namespace ost::io;
 
-void test_crd()
+
+BOOST_AUTO_TEST_SUITE( io )
+
+
+BOOST_AUTO_TEST_CASE(test_io_crd) 
 {
   const String fname("testfiles/test_in.crd");
 
@@ -33,14 +37,6 @@ void test_crd()
 
   crdr.Import(eh);
   std::vector<mol::AtomHandle> alist = crdr.GetSequentialAtoms();
-}
-
-BOOST_AUTO_TEST_SUITE( io )
-
-
-BOOST_AUTO_TEST_CASE(test_io_crd) 
-{
-  test_crd();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -25,21 +25,15 @@ using boost::unit_test_framework::test_suite;
 using namespace ost;
 using namespace ost::io;
 
-void test_manager()
+BOOST_AUTO_TEST_SUITE( io )
+
+
+BOOST_AUTO_TEST_CASE(io_manager) 
 {
   IOManager& iom = IOManager::Instance();
   BOOST_CHECK(iom.FindEntityImportHandler("model.pdb"));
   BOOST_CHECK(iom.FindEntityImportHandler("model.PDB"));
-  BOOST_CHECK(iom.FindEntityImportHandler("model.ent"));  
-}
-
-
-BOOST_AUTO_TEST_SUITE( io )
-
-
-BOOST_AUTO_TEST_CASE(test_io_manager) 
-{
-  test_manager();
+  BOOST_CHECK(iom.FindEntityImportHandler("model.ent"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -26,7 +26,10 @@
 using namespace ost;
 using namespace ost::io;
 
-void test_sdf()
+BOOST_AUTO_TEST_SUITE( io )
+
+
+BOOST_AUTO_TEST_CASE(test_io_sdf) 
 {
   const String fname("testfiles/test_in.sdf");
 
@@ -55,15 +58,6 @@ void test_sdf()
   BOOST_CHECK_EQUAL(boost::lexical_cast<Real>(boost::trim_copy
                      (ch.GetGenericStringProperty("r_i_glide_rmsd"))),
                      0.543804f);
-
-}
-
-BOOST_AUTO_TEST_SUITE( io )
-
-
-BOOST_AUTO_TEST_CASE(test_io_sdf) 
-{
-  test_sdf();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

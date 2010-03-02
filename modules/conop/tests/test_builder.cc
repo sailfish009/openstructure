@@ -27,17 +27,6 @@ using namespace ost;
 using namespace ost::conop;
 using namespace ost::mol;
 
-
-// namespace boost {
-// namespace unit_test {
-// #ifdef BOOST_TEST_ALTERNATIVE_INIT_API
-// typedef bool        (*init_unit_test_func)();
-// #else
-// typedef test_suite* (*init_unit_test_func)( int, char* [] );
-// #endif
-// }
-// }
-
 BOOST_AUTO_TEST_SUITE( conop )
 
 
@@ -54,12 +43,5 @@ BOOST_AUTO_TEST_CASE( test_builder )
   
   BOOST_CHECK_EQUAL(Builder::GuessAtomElement("CA", true), "CA");
 }
-
-// test_suite* test_builder()
-// {
-  // test_suite* ts=BOOST_TEST_SUITE("builder");
-  // ts->add(BOOST_TEST_CASE(&test_guess_atom_element));
-  // return ts;
-// }
 
 BOOST_AUTO_TEST_SUITE_END()

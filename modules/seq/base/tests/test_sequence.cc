@@ -26,9 +26,9 @@
 using namespace ost;
 using namespace ost::seq;
 
+BOOST_AUTO_TEST_SUITE( seq )
 
-
-void test_sequence_trivial() 
+BOOST_AUTO_TEST_CASE(seq_triv) 
 {
   BOOST_CHECK_NO_THROW(CreateSequence("S1", "-afbcdefghijkLMNOPQRSTUV-"));
   BOOST_CHECK_THROW(CreateSequence("S1", "1"), InvalidSequence);
@@ -36,7 +36,7 @@ void test_sequence_trivial()
   BOOST_CHECK_THROW(CreateSequence("S1", " "), InvalidSequence);
 }
 
-void test_sequence_get_number() 
+BOOST_AUTO_TEST_CASE(seq_getnum) 
 {
   SequenceHandle s=CreateSequence("S1", "-afc--de-f");
   BOOST_CHECK_THROW(s.GetResidueIndex(0), Error);
@@ -50,7 +50,7 @@ void test_sequence_get_number()
   BOOST_CHECK_THROW(s.GetResidueIndex(10), Error);
 }
 
-void test_sequence_get_pos() 
+BOOST_AUTO_TEST_CASE(seq_getpos) 
 {
   SequenceHandle s=CreateSequence("S1", "-afc--de-f");
 
@@ -60,23 +60,6 @@ void test_sequence_get_pos()
   BOOST_CHECK(s.GetPos(3)==6);
   BOOST_CHECK(s.GetPos(4)==7);
   BOOST_CHECK(s.GetPos(5)==9);
-}
-
-BOOST_AUTO_TEST_SUITE( seq )
-
-BOOST_AUTO_TEST_CASE(seq_triv) 
-{
-  test_sequence_trivial();
-}
-
-BOOST_AUTO_TEST_CASE(seq_getnum) 
-{
-  test_sequence_get_number();
-}
-
-BOOST_AUTO_TEST_CASE(seq_getpos) 
-{
-  test_sequence_get_pos();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

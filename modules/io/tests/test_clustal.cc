@@ -32,7 +32,10 @@ const static String MOUSE="MFQAFPGDYDSGSRCSSSPSAESQYLSSVDSFGSPPTAAASQECAGLGEMPGS
 const static String HUMAN="MFQAFPGDYDSGSRCSSSPSAESQYLSSVDSFGSPPTAAASQECAGLGEMPGSFVPTVTAITTSQDLQWLVQPTLISSMAQSQGQPLASQPPVVDPYDMPGTSYSTPGMSGYSSGGASGS";
 
 
-void test_clustal()
+BOOST_AUTO_TEST_SUITE( io )
+
+
+BOOST_AUTO_TEST_CASE(clustal) 
 {
   BOOST_CHECK(ClustalIOHandler::ProvidesImport("","clustal"));
   BOOST_CHECK(ClustalIOHandler::ProvidesImport("alignment.aln"));
@@ -44,15 +47,6 @@ void test_clustal()
                     aln.GetSequence(1).GetString());  
   BOOST_CHECK_EQUAL(aln.GetSequence(0).GetString(), MOUSE);
   BOOST_CHECK_EQUAL(aln.GetSequence(1).GetString(), HUMAN);
-}
-
-
-BOOST_AUTO_TEST_SUITE( io )
-
-
-BOOST_AUTO_TEST_CASE(test_io_clustal) 
-{
-  test_clustal();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

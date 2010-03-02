@@ -28,7 +28,7 @@ using namespace ost;
 
 BOOST_AUTO_TEST_SUITE( base )
 
-void test_strref()
+BOOST_AUTO_TEST_CASE( test_string_ref)
 {
   StringRef sr("12345", 5);
   BOOST_CHECK_EQUAL(sr.length(), size_t(5));
@@ -83,14 +83,7 @@ void test_strref()
   r2=StringRef("12.3.4", 6).to_float();
   BOOST_CHECK(r2.first==false);
   r2=StringRef("12.34.", 6).to_float();
-  BOOST_CHECK(r2.first==false);  
-}
-
-
-
-BOOST_AUTO_TEST_CASE( test_string_ref)
-{
-  test_strref();
+  BOOST_CHECK(r2.first==false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

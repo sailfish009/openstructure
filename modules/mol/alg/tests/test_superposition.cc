@@ -81,7 +81,10 @@ struct Fixture {
 
 };
 
-void test_superpositionSVD() {
+BOOST_AUTO_TEST_SUITE( mol_alg )
+
+BOOST_AUTO_TEST_CASE(superposition_svd) 
+{
   Fixture f1, f2;
   EntityView ev1 = f1.e.CreateFullView();
   XCSEditor ed=f1.e.RequestXCSEditor();
@@ -100,13 +103,6 @@ void test_superpositionSVD() {
   SuperpositionResult res;
   res=SuperposeSVD(ev1, ev2, true);
   BOOST_CHECK(abs(res.rmsd)<0.0001);
-}
-
-BOOST_AUTO_TEST_SUITE( mol_alg )
-
-BOOST_AUTO_TEST_CASE(test_superpositionSVD) 
-{
-  test_superpositionSVD();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

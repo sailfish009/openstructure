@@ -26,8 +26,7 @@ using namespace ost::mol;
 
 BOOST_AUTO_TEST_SUITE( base )
 
-
-void test()
+BOOST_AUTO_TEST_CASE( test_generic_property )
 {
   EntityHandle eh=CreateEntity();
   XCSEditor editor=eh.RequestXCSEditor();  
@@ -61,12 +60,6 @@ void test()
   BOOST_CHECK(chv.GetGenericFloatProperty("b")==1.5);
   BOOST_CHECK(resv.GetGenericIntProperty("c")==123);
   BOOST_CHECK(atomv.GetGenericBoolProperty("d")==true);
-}
-
-
-BOOST_AUTO_TEST_CASE( test_generic_property )
-{
-  test();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

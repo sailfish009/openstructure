@@ -140,31 +140,11 @@ void verify_connectivity(const ResidueHandle& res)
   }
 }
 
-void test_distance_based_connect() {
+BOOST_AUTO_TEST_SUITE( conop )
 
-  EntityHandle e=CreateEntity();
-  ChainHandle c=e.RequestXCSEditor().InsertChain("A");
-  ResidueHandle ile=make_leu(c);
-  ResidueHandle arg=make_arg(c);
-  AtomHandleList atoms=arg.GetAtomList();
-  // fake the atom names. so we have to rely solely on distance based
-  // information.
-  for (size_t i=0; i<atoms.size(); ++i) {
-    atoms[i].SetName("X"+atoms[i].GetName());
-  }
-  atoms=ile.GetAtomList();
-  for (size_t i=0; i<atoms.size(); ++i) {
-    atoms[i].SetName("X"+atoms[i].GetName());
-  }
-  HeuristicBuilder heuristic_builder;
-  heuristic_builder.ConnectAtomsOfResidue(arg);
-  verify_connectivity_x(arg);
 
-  heuristic_builder.ConnectAtomsOfResidue(ile);
-  verify_connectivity_x(ile);
-}
-
-void test_name_based_connect() {
+BOOST_AUTO_TEST_CASE(name_based_connect) 
+{
   EntityHandle e=CreateEntity();
   ChainHandle c=e.RequestXCSEditor().InsertChain("A");
   ResidueHandle ile=make_leu(c);
@@ -182,17 +162,6 @@ void test_name_based_connect() {
   verify_connectivity(ile);
 }
 
-
-BOOST_AUTO_TEST_SUITE( conop )
-
-
-BOOST_AUTO_TEST_CASE(test_heuristic_connect) 
-{
-  test_name_based_connect();
-  // uncommented for now, does not seem to work that nicely.
-  // test_distance_based_connect();
-  Logger::Instance().PopVerbosityLevel();
-}
 BOOST_AUTO_TEST_CASE(test_assign_torsions){
   EntityHandle e=CreateEntity();
   ChainHandle c=e.RequestXCSEditor().InsertChain("A");
