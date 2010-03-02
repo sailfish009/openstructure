@@ -17,9 +17,9 @@ title: Tutorials
  * [Storing Custom Data in an Entity](docs/tut/genericprop.html)
 
 ### Images and Density Maps
- * [Images / Density Maps - An Introduction](docs/tut/ipltintro.html)
- * [Algorithms for Images and Density Maps](docs/tut/ipltalg.html)
- * [The Data Viewer](docs/tut/ipltdataviewer.html) 
+ * [Images / Density Maps - An Introduction](docs/tut/imgintro.html)
+ * [Algorithms for Images and Density Maps](docs/tut/imgalg.html)
+ * [The Data Viewer](docs/tut/imgdataviewer.html) 
 
  
 ## For Developers

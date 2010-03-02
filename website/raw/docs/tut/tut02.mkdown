@@ -96,7 +96,7 @@ The use XCSEditor and ICSEditor are mutually exlusive. This means that whenever 
 
 In this exercise you will learn how to do basic processing of density map data. For the exercise you will use real experimental data coming from a single particle reconstruction of the YscC protein from Yersinia entercolitica. 
 
-The first step to the processing of density data in OpenStructure is the loading of the ‘iplt’ and ‘iplt.alg’ module.
+The first step to the processing of density data in OpenStructure is the loading of the ‘img’ and ‘img.alg’ module.
 Go ahead and load the module in the OpenStructure python shell.
 
 The second step consists in loading the density data into memory. OpenStructure provides a LoadMap function in the ‘io’ module that can be used, not surprisingly, to load a density map.
@@ -122,15 +122,15 @@ You will notice that the GetSpatialSampling method shows that the map has a pixe
 
 The map is way too large to be manipulated and visualized comfortably. Since the data have low resolution anyway, we will shrink the map using the DiscreteShrink algorithm.
 
-First, go ahead and import the `iplt.alg` module.
+First, go ahead and import the `img.alg` module.
 
 Then let’s create an instance of the DiscreteShrink algorithm. Let’s pass it a size parameter of 4x4x4. The map will be shrunk by a factor of 4 in all directions.
 Let’s now apply the algorithm to the map. We apply it in place, because we want to overwrite the original data
 map.ApplyIP(shrink_alg)Now go ahead and try to recover the information about the spatial sampling from the map. Verify that the pixel sampling has been adjusted to reflect the shrinking.
-shrink_alg=iplt.alg.DiscreteShrink(iplt.Size(4,4,4))
+shrink_alg=img.alg.DiscreteShrink(img.Size(4,4,4))
 
 Now, let’s use another algorithm to normalize the density values of the map between the 0 and 1
-norm=iplt.alg.CreateLinearRangeNormalizer(map,0.0,1.0)When you create an instance of this algorithm, you need to pass it information about the map it will be applied to (map) and the lowest and highest value of the normalization range(0.0 and 1.0)
+norm=img.alg.CreateLinearRangeNormalizer(map,0.0,1.0)When you create an instance of this algorithm, you need to pass it information about the map it will be applied to (map) and the lowest and highest value of the normalization range(0.0 and 1.0)
 
 The algorithm can then be applied to the map. Go ahead and apply it in place, overwriting the original data.
 
@@ -146,7 +146,7 @@ print map_go.GetLevel()
 Finally, let’s create a low-pass-filtered version of the map and display it on the screen.
 We use the LowPassFilter algorithm:
 
-filter=iplt.alg.LowPassFilter(4.0*Units.nm)
+filter=img.alg.LowPassFilter(4.0*Units.nm)
 
 We pass to the algorithm the resolution threshold for the filtering. Please notice that we pass it in nanometers, because we have been working with electron tomography in the past, so it comes easier to us to think in terms of nanometers as opposed to Angstrom. OpenStructure does the necessary conversion internally.
 

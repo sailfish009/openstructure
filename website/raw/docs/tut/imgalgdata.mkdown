@@ -4,7 +4,7 @@ title: Data Algorithms - An Algorithm Tutorial
 
 # Data Algorithms - An Algorithm Tutorial
 
-This tutorial shows how to create custom high level dox[ost::iplt::ImageHandle|ImageHandle] algorithms and
+This tutorial shows how to create custom high level dox[ost::img::ImageHandle|ImageHandle] algorithms and
 embed them into the OpenStructure build system. As an example, two very simple algorithm will be written:
 The first will count all values in an image or function that are larger than a certain threshold. Since this
 algorithm only needs to read values, it will be implemented by deriving it from ConstAlgorithm. The second algorithm
@@ -102,14 +102,14 @@ algorithm needs to be included from its header. These are the two 'include'
 statements we want to add, along with the 'namespace' code:
 
     :::cpp
-    #include <ost/iplt/image.hh>
+    #include <ost/img/image.hh>
     #include <ost/thres/thres_count.hh>
 
-    using namespace ost::iplt;
+    using namespace ost::img;
     using namespace ost::thres;
     
     
-The first 'include' line and the 'ost::iplt' 'namespace' directive are needed
+The first 'include' line and the 'ost::img' 'namespace' directive are needed
 for creating and handling an ImageHandle. They use elements which are part of
 the standard OpensStructure distribution. The others lines are required for our
 particular algorithm class.
@@ -126,7 +126,7 @@ to be created, with which the functionality of the algorithm can be tested:
     ImageHandle ih = CreateImage(Extent((Size(4,4))));
 
 The factory method CreateImage() from the standard OpenStructure
-distribution takes care of this. The dox[ost::iplt::ImageHandle|ImageHandle]
+distribution takes care of this. The dox[ost::img::ImageHandle|ImageHandle]
 'ih' now referes to a 4x4 real, spatial image, with all values set to zero. To
 populate the image with values, the following code is used:
 
@@ -146,7 +146,7 @@ Note
 threshold, and it makes only sense that this threshold is given upon instantiation;
 we will need to remember this once we implement the constructor.
 As the next step, the algorithm is applied to the image, using the appropriate
-method from dox[ost::iplt::ImageHandle|ImageHandle]:
+method from dox[ost::img::ImageHandle|ImageHandle]:
 
     :::cpp 
     ih.Apply(a);
@@ -170,9 +170,9 @@ Here is the finished file 'test\_thres\_count.cc'.
     :::cpp
     #include "test_thres_count.hh"
 
-    #include <ost/iplt/image.hh>
+    #include <ost/img/image.hh>
     #include <ost/thres_count.hh>
-    using namespace ost::iplt;
+    using namespace ost::img;
     using namespace ost::thres;
 
     namespace test_thres_count {
@@ -238,9 +238,9 @@ Here is the final test file 'test\_thres\_set'.cc:
     :::cpp
     #include "test_thres_set.hh"
 
-    #include <ost/iplt/image.hh>
+    #include <ost/img/image.hh>
     #include <ost/thres/thres_set.hh>
-    using namespace ost::iplt;
+    using namespace ost::img;
     using namespace ost::thres;
 
     namespace test_thres_set {
@@ -277,7 +277,7 @@ Here is the final test file 'test\_thres\_set'.cc:
 
 Obviously, all files need to be added to the 'CMakeLists.txt' file in 'thres/tests.'
 Also, all the module dependencies must be added. In our example the dependencies are
-the 'ost\_iplt' and 'ost\_iplt\_alg' module, plus the 'ost\_thres' moudle itself.
+the 'ost\_img' and 'ost\_img\_alg' module, plus the 'ost\_thres' moudle itself.
 
 ## Coding Algorithm
 
@@ -293,7 +293,7 @@ Here is 'thres\_count.hh:
     #ifndef OST_TRES_THRES_COUNT_H
     #define OST_TRES_THRES_COUNT_H
 
-    #include <ost/iplt/algorithm.hh>
+    #include <ost/img/algorithm.hh>
   
     namespace ost { namespace thres {
 
@@ -326,7 +326,7 @@ And here is 'thres\_count.cc':
     :::cpp
     #include "thres_count.hh"
 
-    using namespace ost::iplt;
+    using namespace ost::img;
     using namespace ost::thres;
 
     ThresCount::ThresCount(Real thres):
@@ -363,7 +363,7 @@ And here is 'thres\_count.cc':
     }
 
 Note
-:   The polymorphic separation into  'dox[ost::iplt::ConstImageHandle|ConstImageHandle]' and
+:   The polymorphic separation into  'dox[ost::img::ConstImageHandle|ConstImageHandle]' and
 'Function' is not utilized in this example, since both 'Visit()' methods just call
 'VisitData()' to perform the actual calculation. The method body of 'VisitData()'
 is the actual algorithm implementation, using the private member variables 'thres\_'
@@ -375,7 +375,7 @@ Here is the 'thres\_set.hh' file:
     #ifndef OST_THRES_THRES_SET_H
     #define OST_THRES_THRES_SET_H
 
-    #include <ost/iplt/algorithm.hh>
+    #include <ost/img/algorithm.hh>
 
     namespace ost { namespace thres {
 
@@ -401,7 +401,7 @@ And here is 'thres_set.cc':
     :::cpp
     #include "thres_set.hh"
 
-    using namespace ost::iplt;
+    using namespace ost::img;
     using namespace ost::thres;
 
     ThresSet::ThresSet(Real thres):
@@ -420,8 +420,8 @@ And here is 'thres_set.cc':
 
 Once again, all the files must be added to the 'CMakeLists.txt' file, this time in
 'thres/src'. This will make sure that all the headers and the newly created shared libraries
-are staged correctly. The 'DEPENDS ON' directive in the file should include the 'iplt'
-and 'iplt_alg' modules, since those are the modules 'thres' depends on.
+are staged correctly. The 'DEPENDS ON' directive in the file should include the 'img'
+and 'img_alg' modules, since those are the modules 'thres' depends on.
 
 ## Python Wrapper
 
@@ -435,7 +435,7 @@ the 'thres' module. Let's put the following 'wrap\_thres.cc' file in the 'src/py
     #include <ost/thres/thres_count.hh>
     #include <ost/thres/thres_set.hh>
 
-    using namespace ost::iplt;
+    using namespace ost::img;
     using namespace ost::thres;
 
     BOOST_PYTHON_MODULE(_tres)

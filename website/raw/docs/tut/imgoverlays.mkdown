@@ -3,7 +3,7 @@
 # Overlays
 
 The DataViewer may be extended by an arbitrary amount overlays. These are
-classes derived from 'ost::iplt::gui::Overlay', either directly in Python or
+classes derived from 'ost::img::gui::Overlay', either directly in Python or
 written in C++ and then exported to Python. They are added dynamically to each
 viewer by means of the DataViewer::AddOverlay method.
 
@@ -15,7 +15,7 @@ is given below, and can also be found in `modules/gui/src/data_viewer/null_overl
     :::cpp
     #include <ost/gui/data_viewer/overlay_base.hh>
 
-    class NullOverlay: public ost::iplt::gui::Overlay
+    class NullOverlay: public ost::img::gui::Overlay
     {
      public:
       // the ctor must initialize the Overlay base class with a name
@@ -31,7 +31,7 @@ is given below, and can also be found in `modules/gui/src/data_viewer/null_overl
       // This method is called for each redraw of the image viewer, after the image itself
       // has been rendered in the view widget. The device context as well as the data viewer
       // panel are passed
-      virtual void OnDraw(wxDC& dc, const iplt::gui::DataViewerPanel* dvp, bool is_active)
+      virtual void OnDraw(wxDC& dc, const img::gui::DataViewerPanel* dvp, bool is_active)
       {
       }
 

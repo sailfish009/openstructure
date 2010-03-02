@@ -15,7 +15,7 @@ OpenStructure uses a bunch of OpenSource libraries. If you haven't already insta
  * [Python](http://python.org)
  * [Qt](http://qt.nokia.com/)
 
-When you enable IPLT support, you will need:
+When you enable support for image processing, you will need:
 
  * [FFTW3](http://fftw.org). By default, OpenStructure is compiled with single precision and thus also requires FFTW to be compiled with single precision. Most platforms offer this as a second package. If you are compiling manually, use the `--enable-single` option.
 
@@ -75,7 +75,7 @@ By default, [CMake] searches the standard directories for dependencies. However,
 ### Flags that control the build
 
  * `ENABLE_UI` controls whether to build the graphical user interface module. By default it is set to true. 
- * `ENABLE_IPLT` controls whether to build the image processing module. This will enable support for density maps, and general image processing in 1, 2 an 3 dimensions. By default it is set to true. 
+ * `ENABLE_IMG` controls whether to build the image processing module. This will enable support for density maps, and general image processing in 1, 2 an 3 dimensions. By default it is set to true. 
  * `ENABLE_GFX` controls whether to build the graphics module. By default, this is set to true. If set to none, this implies `ENABLE_UI=NO`.
  * Shader support is controlled with `USE_SHADER`. By default, no shaders are used.
  * If `OPTIMIZE` is set to 1, an optimized version of OpenStructure is built.

@@ -9,7 +9,7 @@ title: Data Viewer
 The Data Viewer can display a single real or reciprocal space image with adjustable
 contrast. Phases in reciprocal space images can be visualized using the phase color mode.
 The data viewer can be created and also be controlled via the Python/C++ interface.
-Extension of the data viewer is possible using additional [overlays](docs/tut/ipltoverlays.html).
+Extension of the data viewer is possible using additional [overlays](docs/tut/imgoverlays.html).
 
 The DataViewer shows several  panels. In each several actions can be performed using
 the keyboard and mouse interface, as described below. A status bar is also present in
@@ -114,7 +114,7 @@ Following python code loads an image and creates a new viewer for it.
     im=io.LoadImage("...")
     v=gui.GostyApp.Instance().CreateDataViewer(im)
 
-The viewer instance v provides following methods. See the dox[ost::iplt::gui::DataViewer|DataViewer]
+The viewer instance v provides following methods. See the dox[ost::img::gui::DataViewer|DataViewer]
 class documentation.
 
 

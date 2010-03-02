@@ -39,7 +39,7 @@ This is an example of a NonMod algorithm
 
       // entry point for image state visitor
       template<typename T, class D>
-      void VisitState(const iplt::image_state::ImageStateImpl<T,D>& isi);
+      void VisitState(const img::image_state::ImageStateImpl<T,D>& isi);
 
       // entry point for function visitor
       void VisitFunction(const Funcion& f);

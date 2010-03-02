@@ -11,9 +11,9 @@ To allow various image manipulation routines that are decoupled from the actual
 image implementations, an extensive set of algorithm base classes is provided to facilitate
 the implementation of novel algorithms.
 
-The 'iplt' module is using the concept of algorithm objects: In order to apply an algorithm
+The 'img' module is using the concept of algorithm objects: In order to apply an algorithm
 to an image, an instance of that particular algorithm class must be created, which
-is then passed to one of the various Apply methods of the dox[ost::iplt::ImageHandle|ImageHandle] 
+is then passed to one of the various Apply methods of the dox[ost::img::ImageHandle|ImageHandle] 
 interface. This extends the possibilities of algorithms beyond what is possible with simple
 function calls.
 
@@ -23,36 +23,36 @@ Five different types of algorithms can be identified:
 
 ### NonMod
 An algorithm that will not modify the values in the image, but rather gather
-some data. Example: a histogram. Implemented as dox[ost::iplt::NonModAlgorithm|NonModAlgorithm].
+some data. Example: a histogram. Implemented as dox[ost::img::NonModAlgorithm|NonModAlgorithm].
 
 ### ModIP
 An algorithm that will modify the image values directly in place; in addition,
 it may choose to write to its internal state during application of the algorithm.
-Implemented as dox[ost::iplt::ModIPAlgorithm|ModIPAlgorithm]. 
+Implemented as dox[ost::img::ModIPAlgorithm|ModIPAlgorithm]. 
 
 ### ConstModIP
 Similar to ModIP, this algorithm will modify the values directly in place.
 However, it does not need to store information itself beyond the application of the algorithm
 itself. Example: setting all image values to zero. Implemented as 
-dox[ost::iplt::ConstModIPAlgorithm|ConstModIPAlgorithm].
+dox[ost::img::ConstModIPAlgorithm|ConstModIPAlgorithm].
 
 ### ModOP
 An algorithm that will return a new, modified version of the image, while
 leaving the original untouched. Again, the algorithm can store information to be available
-after it has been applied. Implemented as dox[ost::iplt::ModOPAlgorithm|ModOPAlgorithm].
+after it has been applied. Implemented as dox[ost::img::ModOPAlgorithm|ModOPAlgorithm].
 
 ### ConstModOP
 Similar to ModOP, except that no information can be stored beyond the
 application of the algorithm itself. Example: rotation around an arbitrary angle. Implemented
-as dox[ost::iplt::ConstModOPAlgorithm|ConstModOPAlgorithm].
+as dox[ost::img::ConstModOPAlgorithm|ConstModOPAlgorithm].
 
 ## Custom Algorithms
 
-Writing custom algorithms for the 'iplt' module is fairly straightforward, in view of the fact that the final
+Writing custom algorithms for the 'img' module is fairly straightforward, in view of the fact that the final
 algorithm will integrate seamlessly into the build environment, both at the C++ and Python runtime
 levels. Information on how to write custom algorithms can be found at the
-[Algorithm Tutorial page](docs/tut/ipltalgdata.html).
+[Algorithm Tutorial page](docs/tut/imgalgdata.html).
 
 There are two fundamental types of algorithms, those that operate on high level
-ImageHandle instances, [Data Algorithms](docs/tut/ipltalgdata.html), and those that
-operate on the low level ImageState instances, [ImageState Algorithms](docs/tut/ipltalgdistate.html).
+ImageHandle instances, [Data Algorithms](docs/tut/imgalgdata.html), and those that
+operate on the low level ImageState instances, [ImageState Algorithms](docs/tut/imgalgdistate.html).

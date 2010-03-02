@@ -7,8 +7,8 @@ title: Images / Density Maps - An Introduction
 ## Introduction : The ImageHandle
 
 OpenStructure offers extensive processing capabilities for planar 2d images and
-3d maps using the iplt module. Images are manipulated through the use of
-dox[ost::iplt::ImageHandle|ImageHandles].
+3d maps using the img module. Images are manipulated through the use of
+dox[ost::img::ImageHandle|ImageHandles].
 
 ImageHandles provide a clean and efficient interface to interact
 with images and maps. An ImageHandle can store an image in either real
@@ -35,7 +35,7 @@ to 0.
 As a first step, enter the following lines in the OpenStructure python console:
 
     :::python
-    im=iplt.CreateImage(iplt.Size(200,200))
+    im=img.CreateImage(img.Size(200,200))
 
 
 This will create an empty, 2D image, with a height and width of 200 pixels, whose
@@ -52,7 +52,7 @@ The inner area of the white frame is the image, which is empty.
 Let us fill the image with random values.
 
     :::python
-    rand_alg = iplt.alg.Randomize() # create algorithm object
+    rand_alg = img.alg.Randomize() # create algorithm object
     im.ApplyIP( rand_alg ) # apply algorithm object in-place
 
 As you can see, applying an algorithm is conceptually a two-step process. First,
@@ -66,7 +66,7 @@ Now that we have some (noisy) data present, let us run another algorithm, this t
 a Gaussian filter with a sigma of 4 pixel.
 
     :::python
-    im.ApplyIP( iplt.alg.GaussianFilter(4.0) ) # apply temporary algorithm object in-place
+    im.ApplyIP( img.alg.GaussianFilter(4.0) ) # apply temporary algorithm object in-place
 
 As you can see, it is not always necessary to create an independent algorithm instance first,
 in many cases a temporary object will suffice (this applies to the randomization
@@ -76,7 +76,7 @@ is applied. This can be important if the algorithm stores some values that need 
 recovered later. For example:
 
     :::python
-    stat=iplt.alg.Stat()
+    stat=img.alg.Stat()
     im.ApplyIP(stat)
     mean=stat.GetMean()
     
@@ -89,17 +89,17 @@ information would be lost.
 
 ## Applying a Fourier Transform
 
-An image is Fourier-transformed using the 'iplt.alg.FFT()' algorithm object:
+An image is Fourier-transformed using the 'img.alg.FFT()' algorithm object:
 
     :::python
     im=io.LoadImage("imagename.tif") # load the image
     # create an instance of the fft algorithm object
-    fft=iplt.alg.FFT() 
+    fft=img.alg.FFT() 
     # do the actual Fourier transformation
     im_ft=im.Apply(fft) 
     # back-transform
     im2 = im_ft.Apply(fft) 
-    # if this is run from within giplt, open viewers to look at the images
+    # if this is run from within the dng graphical frontend, open viewers to look at the images
     gui.CreateDataViewer(im)
     gui.CreateDataViewer(im_ft)
     gui.CreateDataViewer(im2)
@@ -128,9 +128,9 @@ An image can be extracted and pasted into another image using the 'Extract()' an
     # load the image
     im=io.LoadImage("imagename.tif")
     # generate a subimage from the region going from (10,10) to (30,30)
-    im2=im.Extract(iplt.Extent(iplt.Point(10,10),iplt.Point(30,30)))
+    im2=im.Extract(img.Extent(img.Point(10,10),img.Point(30,30)))
     # generate an empty image with the same size as the original image
-    im3=iplt.CreateImage(im.GetExtent())
+    im3=img.CreateImage(im.GetExtent())
     # paste the subimage into the empty image
     im3.Paste(im2)
 
@@ -142,7 +142,7 @@ region where the pasted-to and the pasted-in image overlap will be affected.
 
 |                                                   |                                                                     |                                                                          |
 |:-------------------------------------------------:|:-------------------------------------------------------------------:|:------------------------------------------------------------------------:|
-|![Empty Image] (docs/tut/giplt1.jpg "Empty Image") | ![After Randomization] (docs/tut/giplt2.jpg "After Randomization")  | ![After Gaussian Filtering] (docs/tut/giplt3.jpg "After Randomization")  |
+|![Empty Image] (docs/tut/dv1.jpg "Empty Image")    | ![After Randomization] (docs/tut/dv2.jpg "After Randomization")     | ![After Gaussian Filtering] (docs/tut/dv3.jpg "After Randomization")  |
 |Empty Image                                        | After Randomization                                                 | After Gaussian Filtering                                                 |
 
 
