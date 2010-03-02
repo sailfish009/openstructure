@@ -50,7 +50,9 @@ struct Fixture {
   AtomHandle ad;
 };
 
-void test_GenerateFullView()
+BOOST_AUTO_TEST_SUITE( mol_base )
+
+BOOST_AUTO_TEST_CASE(gen_full_view) 
 {
   Fixture f;
 
@@ -75,13 +77,6 @@ void test_GenerateFullView()
   BOOST_CHECK_EQUAL(avl[1].GetBondCount(),2);
   BOOST_CHECK_EQUAL(avl[2].GetBondCount(),2);
   BOOST_CHECK_EQUAL(avl[3].GetBondCount(),1);
-}
-
-BOOST_AUTO_TEST_SUITE( mol_base )
-
-BOOST_AUTO_TEST_CASE(test_GenerateFullView) 
-{
-  test_GenerateFullView();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

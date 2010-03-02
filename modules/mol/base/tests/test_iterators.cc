@@ -28,26 +28,6 @@
 using namespace ost;
 using namespace ost::mol;
 
-void test_chain_handle_iterator() {
-  EntityHandle ent=CreateEntity();
-  XCSEditor editor=ent.RequestXCSEditor();  
-  ChainHandle ch1=editor.InsertChain("A");
-  ChainHandle ch2=editor.InsertChain("B");
-  ChainHandle ch3=editor.InsertChain("C");
-  ChainHandleIter ch_it=ent.ChainsBegin();
-  ChainHandleIter ch_end=ent.ChainsEnd();
-  BOOST_CHECK(ch_it!=ch_end);
-  BOOST_CHECK_EQUAL((*ch_it).GetName(), "A");
-  ++ch_it;
-  BOOST_CHECK(ch_it!=ch_end);  
-  BOOST_CHECK_EQUAL((*ch_it).GetName(), "B");
-  ++ch_it;
-  BOOST_CHECK(ch_it!=ch_end);  
-  BOOST_CHECK_EQUAL((*ch_it).GetName(), "C");
-  ++ch_it;
-  BOOST_CHECK(ch_it==ch_end);
-}
-
 template <typename HANDLE, typename ITER>
 void test_res_handle_iterator_b(HANDLE ch) {
   ITER r1=ch.ResiduesBegin();
@@ -97,38 +77,6 @@ void test_res_handle_iterator_a(HANDLE eh) {
   BOOST_CHECK(r1==r2);
 }
 
-void test_res_handle_iterator() {
-  EntityHandle eh=CreateEntity();
-  XCSEditor editor=eh.RequestXCSEditor();  
-  ChainHandle ch1=editor.InsertChain("A");
-  editor.AppendResidue(ch1, "A");
-  editor.AppendResidue(ch1, "B");
-  editor.AppendResidue(ch1, "C");  
-  
-  // make sure the iterator knows how to deal with empty chains
-  ChainHandle ch3=editor.InsertChain("B");
-  
-  ChainHandle ch2=editor.InsertChain("C");
-  editor.AppendResidue(ch2, "D");
-  editor.AppendResidue(ch2, "E");
-  editor.AppendResidue(ch2, "F");  
-  EntityView v1=eh.CreateFullView();
-  test_res_handle_iterator_b<ChainHandle, ResidueHandleIter>(ch2);
-  test_res_handle_iterator_a<EntityHandle, ResidueHandleIter>(eh);
-  test_res_handle_iterator_a<EntityView, ResidueViewIter>(v1);  
-  // make the sure the iterator knows how to deal with an empty chain at 
-  // the end
-  ChainHandle ch4=editor.InsertChain("D");
-  test_res_handle_iterator_a<EntityHandle, ResidueHandleIter>(eh);  
-  EntityView v2=eh.CreateFullView();  
-  test_res_handle_iterator_a<EntityView, ResidueViewIter>(v2);    
-  test_res_handle_iterator_b<ChainHandle, ResidueHandleIter>(ch2);    
-  editor.AppendResidue(ch4, "D");
-  editor.AppendResidue(ch4, "E");
-  editor.AppendResidue(ch4, "F");  
-  test_res_handle_iterator_b<ChainHandle, ResidueHandleIter>(ch2);
-
-}
 template <typename HANDLE, typename ITER>
 void test_atom_handle_iterator_c(HANDLE en) {
   ITER a1=en.AtomsBegin();
@@ -173,7 +121,78 @@ void test_atom_handle_iterator_a(HANDLE ch) {
   BOOST_CHECK(a1==a2);
 }
 
-void test_empty_iterators() {
+template <typename HANDLE, typename ITER>
+void test_atom_handle_iterator_b(HANDLE rr) {
+  ITER a1=rr.AtomsBegin();
+  ITER a2=rr.AtomsEnd();  
+  BOOST_CHECK(a1!=a2);
+  BOOST_CHECK_EQUAL((*a1).GetName(), "X");
+  ++a1;
+  BOOST_CHECK(a1!=a2);  
+  BOOST_CHECK_EQUAL((*a1).GetName(), "Y");
+  
+  ++a1;
+  BOOST_CHECK(a1==a2); 
+}
+
+BOOST_AUTO_TEST_SUITE( mol_base )
+
+BOOST_AUTO_TEST_CASE(chain_handle_iterator) 
+{
+  EntityHandle ent=CreateEntity();
+  XCSEditor editor=ent.RequestXCSEditor();  
+  ChainHandle ch1=editor.InsertChain("A");
+  ChainHandle ch2=editor.InsertChain("B");
+  ChainHandle ch3=editor.InsertChain("C");
+  ChainHandleIter ch_it=ent.ChainsBegin();
+  ChainHandleIter ch_end=ent.ChainsEnd();
+  BOOST_CHECK(ch_it!=ch_end);
+  BOOST_CHECK_EQUAL((*ch_it).GetName(), "A");
+  ++ch_it;
+  BOOST_CHECK(ch_it!=ch_end);  
+  BOOST_CHECK_EQUAL((*ch_it).GetName(), "B");
+  ++ch_it;
+  BOOST_CHECK(ch_it!=ch_end);  
+  BOOST_CHECK_EQUAL((*ch_it).GetName(), "C");
+  ++ch_it;
+  BOOST_CHECK(ch_it==ch_end);
+}
+
+BOOST_AUTO_TEST_CASE(test_res_handle_iterator) 
+{
+  EntityHandle eh=CreateEntity();
+  XCSEditor editor=eh.RequestXCSEditor();  
+  ChainHandle ch1=editor.InsertChain("A");
+  editor.AppendResidue(ch1, "A");
+  editor.AppendResidue(ch1, "B");
+  editor.AppendResidue(ch1, "C");  
+  
+  // make sure the iterator knows how to deal with empty chains
+  ChainHandle ch3=editor.InsertChain("B");
+  
+  ChainHandle ch2=editor.InsertChain("C");
+  editor.AppendResidue(ch2, "D");
+  editor.AppendResidue(ch2, "E");
+  editor.AppendResidue(ch2, "F");  
+  EntityView v1=eh.CreateFullView();
+  test_res_handle_iterator_b<ChainHandle, ResidueHandleIter>(ch2);
+  test_res_handle_iterator_a<EntityHandle, ResidueHandleIter>(eh);
+  test_res_handle_iterator_a<EntityView, ResidueViewIter>(v1);  
+  // make the sure the iterator knows how to deal with an empty chain at 
+  // the end
+  ChainHandle ch4=editor.InsertChain("D");
+  test_res_handle_iterator_a<EntityHandle, ResidueHandleIter>(eh);  
+  EntityView v2=eh.CreateFullView();  
+  test_res_handle_iterator_a<EntityView, ResidueViewIter>(v2);    
+  test_res_handle_iterator_b<ChainHandle, ResidueHandleIter>(ch2);    
+  editor.AppendResidue(ch4, "D");
+  editor.AppendResidue(ch4, "E");
+  editor.AppendResidue(ch4, "F");  
+  test_res_handle_iterator_b<ChainHandle, ResidueHandleIter>(ch2);
+}
+
+BOOST_AUTO_TEST_CASE(test_empty_iterators) 
+{
   EntityHandle eh=CreateEntity();
   BOOST_CHECK(eh.ChainsBegin()==eh.ChainsEnd());
   BOOST_CHECK(eh.ResiduesBegin()==eh.ResiduesEnd());  
@@ -203,24 +222,12 @@ void test_empty_iterators() {
   }
   BOOST_CHECK(ev.AtomsBegin()==ev.AtomsEnd());
   BOOST_CHECK(ev.GetAtomList().empty());
-  //BOOST_CHECK(ev.FindChain("A").AtomsBegin()==ev.FindChain("A").AtomsEnd());  
+  //BOOST_CHECK(ev.FindChain("A").AtomsBegin()==ev.FindChain("A").AtomsEnd());
 }
 
-template <typename HANDLE, typename ITER>
-void test_atom_handle_iterator_b(HANDLE rr) {
-  ITER a1=rr.AtomsBegin();
-  ITER a2=rr.AtomsEnd();  
-  BOOST_CHECK(a1!=a2);
-  BOOST_CHECK_EQUAL((*a1).GetName(), "X");
-  ++a1;
-  BOOST_CHECK(a1!=a2);  
-  BOOST_CHECK_EQUAL((*a1).GetName(), "Y");
-  
-  ++a1;
-  BOOST_CHECK(a1==a2); 
-}
 
-void test_atom_handle_iterator() {
+BOOST_AUTO_TEST_CASE(test_atom_handle_iterator) 
+{
   EntityHandle eh=CreateEntity();
   XCSEditor editor=eh.RequestXCSEditor();  
   ChainHandle ch1=editor.InsertChain("A");
@@ -245,53 +252,6 @@ void test_atom_handle_iterator() {
   EntityView v=eh.CreateFullView();
   test_atom_handle_iterator_c<EntityHandle, AtomHandleIter>(eh);  
 
-  test_atom_handle_iterator_c<EntityView, AtomViewIter>(v);  
-}
-
-BOOST_AUTO_TEST_SUITE( mol_base )
-
-BOOST_AUTO_TEST_CASE(test_chain_handle_iterator) 
-{
-  test_chain_handle_iterator();
-}
-
-BOOST_AUTO_TEST_CASE(test_res_handle_iterator_b) 
-{
-  test_res_handle_iterator_b();
-}
-
-BOOST_AUTO_TEST_CASE(test_res_handle_iterator_a) 
-{
-  test_res_handle_iterator_a();
-}
-
-BOOST_AUTO_TEST_CASE(test_res_handle_iterator) 
-{
-  test_res_handle_iterator();
-}
-
-BOOST_AUTO_TEST_CASE(test_atom_handle_iterator_c) 
-{
-  test_atom_handle_iterator_c();
-}
-
-BOOST_AUTO_TEST_CASE(test_atom_handle_iterator_a) 
-{
-  test_atom_handle_iterator_a();
-}
-
-BOOST_AUTO_TEST_CASE(test_empty_iterators) 
-{
-  test_empty_iterators();
-}
-
-BOOST_AUTO_TEST_CASE(test_atom_handle_iterator_b) 
-{
-  test_atom_handle_iterator_b();
-}
-
-BOOST_AUTO_TEST_CASE(test_atom_handle_iterator) 
-{
-  test_atom_handle_iterator();
+  test_atom_handle_iterator_c<EntityView, AtomViewIter>(v);
 }
 BOOST_AUTO_TEST_SUITE_END()

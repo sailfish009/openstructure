@@ -59,7 +59,22 @@ struct Structure {
   AtomHandle    a5;
 };
 
-void test_ics_angle_trivia() {
+const static Real EPSILON=0.000001;
+
+Real angle_xcs(AtomHandle a1, AtomHandle a2, AtomHandle a3) {
+  return acos(Dot(geom::Normalize(a1.GetPos()-a2.GetPos()),
+              geom::Normalize(a3.GetPos()-a2.GetPos())));
+}
+
+bool test_angle(Real a, Real e) {
+  return std::abs(fmod(float(a-e), float(M_PI/2)))<EPSILON;
+}
+
+BOOST_AUTO_TEST_SUITE( mol_base )
+
+
+BOOST_AUTO_TEST_CASE(ics_angle_trivia) 
+{
   Structure s;
   ICSEditor e=s.e.RequestICSEditor();
   BOOST_CHECK(!e.SetAngle(s.a1, s.a3, s.a2, 0));
@@ -75,18 +90,8 @@ void test_ics_angle_trivia() {
   BOOST_CHECK_NO_THROW(s.e.GetAngle(s.a1, s.a2, s.a3));
 }
 
-const static Real EPSILON=0.000001;
-
-Real angle_xcs(AtomHandle a1, AtomHandle a2, AtomHandle a3) {
-  return acos(Dot(geom::Normalize(a1.GetPos()-a2.GetPos()),
-              geom::Normalize(a3.GetPos()-a2.GetPos())));
-}
-
-bool test_angle(Real a, Real e) {
-  return std::abs(fmod(float(a-e), float(M_PI/2)))<EPSILON;
-}
-
-void test_ics_set_angle_sec() {
+BOOST_AUTO_TEST_CASE(ics_set_angle_sec) 
+{
   Structure s;
   // test for set angle of two secondary connectors
   ICSEditor e=s.e.RequestICSEditor();  
@@ -102,7 +107,8 @@ void test_ics_set_angle_sec() {
   BOOST_CHECK(geom::IsInPlane(p, s.a4.GetPos(), EPSILON));
 }
 
-void test_ics_set_angle_prim() {
+BOOST_AUTO_TEST_CASE(ics_set_angle_prim) 
+{
   Structure s;
   // test for set angle of two secondary connectors
   ICSEditor e=s.e.RequestICSEditor();    
@@ -118,13 +124,8 @@ void test_ics_set_angle_prim() {
   BOOST_CHECK(geom::IsInPlane(p, s.a4.GetPos(), EPSILON));
 }
 
-void test_ics_set_angle() {
-  //Logger::Instance().PushVerbosityLevel(Logger::DUMP);
-  test_ics_set_angle_sec();
-  test_ics_set_angle_prim();
-}
-
-void test_ics_get_angle() {
+BOOST_AUTO_TEST_CASE(ics_get_angle) 
+{
   Structure s;
   // test for get angle with secondary connectors only
   Real a=s.e.GetAngle(s.a3, s.a2, s.a4);
@@ -144,50 +145,6 @@ void test_ics_get_angle() {
   BOOST_CHECK_MESSAGE(test_angle(a, e),
                       "expected " << e << " but " << a
                       << " found");
-}
-
-void test_ics() {
-  // test trivial things first
-  test_ics_angle_trivia();
-  test_ics_get_angle();
-  test_ics_set_angle();
-}
-
-BOOST_AUTO_TEST_SUITE( mol_base )
-
-BOOST_AUTO_TEST_CASE(test_ics_angle_trivia) 
-{
-  test_ics_angle_trivia();
-}
-
-BOOST_AUTO_TEST_CASE(test_angle) 
-{
-  test_angle();
-}
-
-BOOST_AUTO_TEST_CASE(test_ics_set_angle_sec) 
-{
-  test_ics_set_angle_sec();
-}
-
-BOOST_AUTO_TEST_CASE(test_ics_set_angle_prim) 
-{
-  test_ics_set_angle_prim();
-}
-
-BOOST_AUTO_TEST_CASE(test_ics_set_angle) 
-{
-  test_ics_set_angle();
-}
-
-BOOST_AUTO_TEST_CASE(test_ics_get_angle) 
-{
-  test_ics_get_angle();
-}
-
-BOOST_AUTO_TEST_CASE(test_ics) 
-{
-  test_ics();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

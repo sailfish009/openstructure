@@ -26,7 +26,10 @@
 using namespace ost;
 using namespace ost::mol;
 
-void test_connect() {
+BOOST_AUTO_TEST_SUITE( mol_base )
+
+BOOST_AUTO_TEST_CASE(connect) 
+{
   EntityHandle e=CreateEntity();
   XCSEditor editor=e.RequestXCSEditor();  
   ChainHandle c=editor.InsertChain("A");
@@ -51,14 +54,6 @@ void test_connect() {
   BOOST_CHECK(n.GetBondCount()==1);
   BOOST_CHECK(o.GetBondCount()==2);
   BOOST_CHECK(n.GetBondCount()==1);
-
-}
-
-BOOST_AUTO_TEST_SUITE( mol_base )
-
-BOOST_AUTO_TEST_CASE(test_connect) 
-{
-  test_connect();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

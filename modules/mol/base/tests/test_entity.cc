@@ -73,7 +73,9 @@ EntityHandle make_test_entity()
   return eh;
 }
 
-void test_entity_creator()
+BOOST_AUTO_TEST_SUITE( mol_base )
+
+BOOST_AUTO_TEST_CASE(entity_creator) 
 {
   EntityHandle eh = CreateEntity();
   XCSEditor e=eh.RequestXCSEditor();
@@ -104,10 +106,9 @@ void test_entity_creator()
   
   EntityVisitor v;
   eh.Apply(v);
-
 }
 
-void test_spatial_organizer() 
+BOOST_AUTO_TEST_CASE(spatial_organizer) 
 {
   EntityHandle eh=CreateEntity();
   XCSEditor e=eh.RequestXCSEditor();  
@@ -128,7 +129,7 @@ void test_spatial_organizer()
   BOOST_CHECK_EQUAL(std::count(ahv.begin(), ahv.end(), a5), 1);
 }
 
-void test_transformation()
+BOOST_AUTO_TEST_CASE(transformation) 
 {
   EntityHandle eh = CreateEntity();
   XCSEditor e=eh.RequestXCSEditor();
@@ -292,8 +293,7 @@ void test_transformation()
   CHECK_ALTERNATE_ATOM_POSITION(atom4,orig_atom4,"Set1");
 }
 
-
-void test_copy()
+BOOST_AUTO_TEST_CASE(copy) 
 {
   EntityHandle eh=make_test_entity();
   EntityHandle cp=eh.Copy();
@@ -314,29 +314,6 @@ void test_copy()
   BOOST_CHECK(mol::BondExists(r2.FindAtom("CA"), r2.FindAtom("C")));
   BOOST_CHECK(mol::BondExists(r2.FindAtom("C"), r2.FindAtom("O")));
   BOOST_CHECK(r2.GetPhiTorsion());
-}
-
-
-BOOST_AUTO_TEST_SUITE( mol_base )
-
-BOOST_AUTO_TEST_CASE(test_entity_creator) 
-{
-  test_entity_creator();
-}
-
-BOOST_AUTO_TEST_CASE(test_spatial_organizer) 
-{
-  test_spatial_organizer();
-}
-
-BOOST_AUTO_TEST_CASE(test_transformation) 
-{
-  test_transformation();
-}
-
-BOOST_AUTO_TEST_CASE(test_copy) 
-{
-  test_copy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

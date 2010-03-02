@@ -28,96 +28,6 @@
 using namespace ost;
 using namespace ost::mol;
 
-void test_query_parse_properties() {
-  BOOST_CHECK(Query("rname=Ala").IsValid());
-  BOOST_CHECK(Query("ele=C").IsValid());
-  BOOST_CHECK(Query("aname=X").IsValid());
-  BOOST_CHECK(Query("rnum=3").IsValid());
-  BOOST_CHECK(Query("cname=A").IsValid());
-  BOOST_CHECK(Query("occ=50").IsValid());
-  BOOST_CHECK(Query("occ=50").IsValid());
-  BOOST_CHECK(Query("rtype=H").IsValid());
-  BOOST_CHECK(Query("x=3").IsValid());
-  BOOST_CHECK(Query("y=4").IsValid());
-  BOOST_CHECK(Query("z=6").IsValid());
-  BOOST_CHECK(Query("gatest=7").IsValid());
-  BOOST_CHECK(Query("grtest=8").IsValid());
-  BOOST_CHECK(Query("gctest=9").IsValid());
-  BOOST_CHECK(Query("gatest:1=7").IsValid());
-  BOOST_CHECK(Query("grtest:2=8").IsValid());
-  BOOST_CHECK(Query("gctest:3.0=9").IsValid());
-  BOOST_CHECK(Query("anita=3").IsValid()==false);
-}
-
-void test_query_parse_value_type() {
-
-  BOOST_CHECK(Query("rnum<=3").IsValid());
-  BOOST_CHECK(Query("rnum>=3").IsValid());
-  BOOST_CHECK(Query("rnum<3").IsValid());
-  BOOST_CHECK(Query("rnum>3").IsValid());
-  BOOST_CHECK(Query("rnum!=3").IsValid());
-
-  BOOST_CHECK(Query("rnum=3:10").IsValid());
-  BOOST_CHECK(Query("rnum!=3:10").IsValid());
-  BOOST_CHECK(Query("rnum!=3:10").IsValid());
-  BOOST_CHECK(Query("rnum>=30:40").IsValid()==false);
-  BOOST_CHECK(Query("rnum>30:40").IsValid()==false);
-  BOOST_CHECK(Query("rnum<=30:40").IsValid()==false);
-  BOOST_CHECK(Query("rnum<30:40").IsValid()==false);
-
-  BOOST_CHECK(Query("rnum=1,2").IsValid());
-  BOOST_CHECK(Query("rnum=1,2,3,4").IsValid());
-  BOOST_CHECK(Query("rnum>1,2,3,4").IsValid()==false);
-
-  BOOST_CHECK(Query("rnum=WTF").IsValid()==false);
-  BOOST_CHECK(Query("rnum=WTF").IsValid()==false);
-  BOOST_CHECK(Query("rnum=3.0").IsValid()==false);
-  BOOST_CHECK(Query("ele>=XXX").IsValid()==false);
-
-}
-
-void test_query_parse_logical_op() {
-
-  BOOST_CHECK(Query("rnum=3 and rnum=5").IsValid());
-  BOOST_CHECK(Query("rnum=3 or rnum=5").IsValid());
-  BOOST_CHECK(Query("not rnum=3").IsValid());
-  BOOST_CHECK(Query("not rnum=3").IsValid());
-  BOOST_CHECK(Query("not rnum=3 and not rnum=5").IsValid());
-  BOOST_CHECK(Query("not not rnum=3").IsValid()==false);
-}
-
-void test_query_parse_unexpected() {
-  BOOST_CHECK(Query("cname").IsValid()==false);
-  BOOST_CHECK(Query("cname=").IsValid()==false);
-  BOOST_CHECK(Query("not").IsValid()==false);
-  BOOST_CHECK(Query("(rnum=3").IsValid()==false);
-  BOOST_CHECK(Query("(rnum=3").IsValid()==false);
-  BOOST_CHECK(Query("(rnum=3").IsValid()==false);
-  BOOST_CHECK(Query("(not").IsValid()==false);
-  BOOST_CHECK(Query("()").IsValid()==false);
-  BOOST_CHECK(Query("(rnum)").IsValid()==false);
-  BOOST_CHECK(Query("(rnum=)").IsValid()==false);
-  BOOST_CHECK(Query("gatest:=5").IsValid()==false);
-  BOOST_CHECK(Query("gatest:5.0=").IsValid()==false);
-  BOOST_CHECK(Query("gatest:=").IsValid()==false);
-}
-
-void test_query_parse_within() {
-  BOOST_CHECK(Query("5 <> {0,0,0.0}").IsValid());
-  BOOST_CHECK(Query("5 <> {0}").IsValid()==false);
-  BOOST_CHECK(Query("5 <> {0").IsValid()==false);
-  BOOST_CHECK(Query("5 <> {0,}").IsValid()==false);
-  BOOST_CHECK(Query("5 <> {0,0.}").IsValid()==false);
-}
-
-void test_query_parse() {
-  test_query_parse_properties();
-  test_query_parse_value_type();
-  test_query_parse_unexpected();
-  test_query_parse_logical_op();
-  test_query_parse_within();
-}
-
 EntityHandle make_query_test_entity()
 {
   EntityHandle eh = CreateEntity();
@@ -204,7 +114,94 @@ void ensure_counts_v(EntityView src, const String& qs,
                       " for query String " << qs);
 }
 
-void test_query_eval() {
+BOOST_AUTO_TEST_SUITE( mol_base )
+
+BOOST_AUTO_TEST_CASE(test_query_parse_properties) 
+{
+  BOOST_CHECK(Query("rname=Ala").IsValid());
+  BOOST_CHECK(Query("ele=C").IsValid());
+  BOOST_CHECK(Query("aname=X").IsValid());
+  BOOST_CHECK(Query("rnum=3").IsValid());
+  BOOST_CHECK(Query("cname=A").IsValid());
+  BOOST_CHECK(Query("occ=50").IsValid());
+  BOOST_CHECK(Query("occ=50").IsValid());
+  BOOST_CHECK(Query("rtype=H").IsValid());
+  BOOST_CHECK(Query("x=3").IsValid());
+  BOOST_CHECK(Query("y=4").IsValid());
+  BOOST_CHECK(Query("z=6").IsValid());
+  BOOST_CHECK(Query("gatest=7").IsValid());
+  BOOST_CHECK(Query("grtest=8").IsValid());
+  BOOST_CHECK(Query("gctest=9").IsValid());
+  BOOST_CHECK(Query("gatest:1=7").IsValid());
+  BOOST_CHECK(Query("grtest:2=8").IsValid());
+  BOOST_CHECK(Query("gctest:3.0=9").IsValid());
+  BOOST_CHECK(Query("anita=3").IsValid()==false);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_parse_value_type) 
+{
+  BOOST_CHECK(Query("rnum<=3").IsValid());
+  BOOST_CHECK(Query("rnum>=3").IsValid());
+  BOOST_CHECK(Query("rnum<3").IsValid());
+  BOOST_CHECK(Query("rnum>3").IsValid());
+  BOOST_CHECK(Query("rnum!=3").IsValid());
+
+  BOOST_CHECK(Query("rnum=3:10").IsValid());
+  BOOST_CHECK(Query("rnum!=3:10").IsValid());
+  BOOST_CHECK(Query("rnum!=3:10").IsValid());
+  BOOST_CHECK(Query("rnum>=30:40").IsValid()==false);
+  BOOST_CHECK(Query("rnum>30:40").IsValid()==false);
+  BOOST_CHECK(Query("rnum<=30:40").IsValid()==false);
+  BOOST_CHECK(Query("rnum<30:40").IsValid()==false);
+
+  BOOST_CHECK(Query("rnum=1,2").IsValid());
+  BOOST_CHECK(Query("rnum=1,2,3,4").IsValid());
+  BOOST_CHECK(Query("rnum>1,2,3,4").IsValid()==false);
+
+  BOOST_CHECK(Query("rnum=WTF").IsValid()==false);
+  BOOST_CHECK(Query("rnum=WTF").IsValid()==false);
+  BOOST_CHECK(Query("rnum=3.0").IsValid()==false);
+  BOOST_CHECK(Query("ele>=XXX").IsValid()==false);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_parse_logical_op) 
+{
+  BOOST_CHECK(Query("rnum=3 and rnum=5").IsValid());
+  BOOST_CHECK(Query("rnum=3 or rnum=5").IsValid());
+  BOOST_CHECK(Query("not rnum=3").IsValid());
+  BOOST_CHECK(Query("not rnum=3").IsValid());
+  BOOST_CHECK(Query("not rnum=3 and not rnum=5").IsValid());
+  BOOST_CHECK(Query("not not rnum=3").IsValid()==false);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_parse_unexpected) 
+{
+  BOOST_CHECK(Query("cname").IsValid()==false);
+  BOOST_CHECK(Query("cname=").IsValid()==false);
+  BOOST_CHECK(Query("not").IsValid()==false);
+  BOOST_CHECK(Query("(rnum=3").IsValid()==false);
+  BOOST_CHECK(Query("(rnum=3").IsValid()==false);
+  BOOST_CHECK(Query("(rnum=3").IsValid()==false);
+  BOOST_CHECK(Query("(not").IsValid()==false);
+  BOOST_CHECK(Query("()").IsValid()==false);
+  BOOST_CHECK(Query("(rnum)").IsValid()==false);
+  BOOST_CHECK(Query("(rnum=)").IsValid()==false);
+  BOOST_CHECK(Query("gatest:=5").IsValid()==false);
+  BOOST_CHECK(Query("gatest:5.0=").IsValid()==false);
+  BOOST_CHECK(Query("gatest:=").IsValid()==false);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_parse_within) 
+{
+  BOOST_CHECK(Query("5 <> {0,0,0.0}").IsValid());
+  BOOST_CHECK(Query("5 <> {0}").IsValid()==false);
+  BOOST_CHECK(Query("5 <> {0").IsValid()==false);
+  BOOST_CHECK(Query("5 <> {0,}").IsValid()==false);
+  BOOST_CHECK(Query("5 <> {0,0.}").IsValid()==false);
+}
+
+BOOST_AUTO_TEST_CASE(test_query_eval) 
+{
   EntityHandle e=make_query_test_entity();
 
   ensure_counts(e, "", 1, 3, 27);
@@ -237,7 +234,8 @@ void test_query_eval() {
   ensure_counts(e, "gctestpropc:2.0=2", 0, 0, 0);
 }
 
-void test_query_eval_on_view() {
+BOOST_AUTO_TEST_CASE(test_query_eval_on_view) 
+{
   EntityHandle e=make_query_test_entity();
   EntityView v=e.CreateFullView();
   ensure_counts_v(v, "", 1, 3, 27);
@@ -268,7 +266,8 @@ void test_query_eval_on_view() {
   ensure_counts_v(v, "gctestpropc:2.0=2", 0, 0, 0);
 }
 
-void test_query_throw() {
+BOOST_AUTO_TEST_CASE(test_query_throw) 
+{
   EntityHandle e=make_query_test_entity();
   BOOST_CHECK_NO_THROW(e.Select("gatestpropa:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("gatestpropa:1=1"));
@@ -284,66 +283,6 @@ void test_query_throw() {
   BOOST_CHECK_NO_THROW(e.Select("ganotsetprop:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("grnotsetprop:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("gcnotsetprop:0=1"));
-
-}
-
-void test_query() {
-  test_query_parse();
-  test_query_eval();
-  test_query_eval_on_view();
-  test_query_throw();
-}
-
-BOOST_AUTO_TEST_SUITE( mol_base )
-
-BOOST_AUTO_TEST_CASE(test_query_parse_properties) 
-{
-  test_query_parse_properties();
-}
-
-BOOST_AUTO_TEST_CASE(test_query_parse_value_type) 
-{
-  test_query_parse_value_type();
-}
-
-BOOST_AUTO_TEST_CASE(test_query_parse_logical_op) 
-{
-  test_query_parse_logical_op();
-}
-
-BOOST_AUTO_TEST_CASE(test_query_parse_unexpected) 
-{
-  test_query_parse_unexpected();
-}
-
-BOOST_AUTO_TEST_CASE(test_query_parse_within) 
-{
-  test_query_parse_within();
-}
-
-BOOST_AUTO_TEST_CASE(test_query_parse) 
-{
-  test_query_parse();
-}
-
-BOOST_AUTO_TEST_CASE(test_query_eval) 
-{
-  test_query_eval();
-}
-
-BOOST_AUTO_TEST_CASE(test_query_eval_on_view) 
-{
-  test_query_eval_on_view();
-}
-
-BOOST_AUTO_TEST_CASE(test_query_throw) 
-{
-  test_query_throw();
-}
-
-BOOST_AUTO_TEST_CASE(test_query) 
-{
-  test_query();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

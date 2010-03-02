@@ -28,7 +28,9 @@
 using namespace ost;
 using namespace ost::mol;
 
-void test_coord_group()
+BOOST_AUTO_TEST_SUITE( io )
+
+BOOST_AUTO_TEST_CASE(coord_group) 
 {
   EntityHandle e=CreateEntity();
   XCSEditor editor=e.RequestXCSEditor();  
@@ -77,13 +79,6 @@ void test_coord_group()
   BOOST_CHECK(ab.GetPos()==geom::Vec3(-14,-15,-16));
   BOOST_CHECK(ac.GetPos()==geom::Vec3(-17,-18,-19));
   BOOST_CHECK(ad.GetPos()==geom::Vec3(9,10,11));
-}
-
-BOOST_AUTO_TEST_SUITE( io )
-
-BOOST_AUTO_TEST_CASE(test_coord_group) 
-{
-  test_coord_group();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

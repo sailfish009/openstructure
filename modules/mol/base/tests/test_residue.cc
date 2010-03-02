@@ -29,7 +29,10 @@
 using namespace ost;
 using namespace ost::mol;
 
-void test_in_sequence() {
+BOOST_AUTO_TEST_SUITE( mol_base )
+
+BOOST_AUTO_TEST_CASE(test_in_sequence) 
+{
   EntityHandle eh=CreateEntity();
   XCSEditor e=eh.RequestXCSEditor();
   ChainHandle ch1=e.InsertChain("A");
@@ -40,13 +43,6 @@ void test_in_sequence() {
   BOOST_CHECK(!InSequence(rA,rB));
   BOOST_CHECK(!InSequence(rB,rC));
   BOOST_CHECK(!InSequence(rA,rC));
-}
-
-BOOST_AUTO_TEST_SUITE( mol_base )
-
-BOOST_AUTO_TEST_CASE(test_in_sequence) 
-{
-  test_in_sequence();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

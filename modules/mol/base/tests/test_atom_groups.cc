@@ -29,7 +29,10 @@
 using namespace ost;
 using namespace ost::mol;
 
-void test_switch_pos() {
+BOOST_AUTO_TEST_SUITE(mol_base)
+
+BOOST_AUTO_TEST_CASE(switch_pos) 
+{
   test::DummyEnt ent;
   geom::Vec3 y=geom::Vec3(0.0, 1.0, 0.0);
   geom::Vec3 z=geom::Vec3(0.0, 0.0, 1.0);  
@@ -49,8 +52,8 @@ void test_switch_pos() {
   BOOST_CHECK(ent.r.SwitchAtomPos("A"));    
   BOOST_CHECK_EQUAL(xx.GetPos(), geom::Vec3(0.0, 0.0, 0.0));
 }
-
-void test_delete_atom() {
+BOOST_AUTO_TEST_CASE(delete_atom) 
+{
   test::DummyEnt ent;
   XCSEditor editor=ent.e.RequestXCSEditor();       
   AtomHandle xx=editor.InsertAltAtom(ent.r, "ZZ", "A", geom::Vec3(), 
@@ -67,9 +70,8 @@ void test_delete_atom() {
   BOOST_CHECK_EQUAL(ent.r.GetCurrentAltGroupName(), "");
   BOOST_CHECK(ent.r.HasAltAtoms()==false);
 }
-
-
-void test_atom_group_trivial() {
+BOOST_AUTO_TEST_CASE(atom_group_triv) 
+{
   test::DummyEnt ent;
   BOOST_CHECK(ent.r.HasAltAtoms()==false);
   BOOST_CHECK(ent.r.HasAltAtomGroup("")==false);
@@ -84,21 +86,6 @@ void test_atom_group_trivial() {
   names=ent.r.GetAltAtomGroupNames();  
   BOOST_CHECK_EQUAL(names.size(), size_t(2));
   BOOST_CHECK_EQUAL(names[0], "B");
-}
-
-BOOST_AUTO_TEST_SUITE( mol_base )
-
-BOOST_AUTO_TEST_CASE(switch_pos) 
-{
-  test_switch_pos();
-}
-BOOST_AUTO_TEST_CASE(delete_atom) 
-{
-  test_delete_atom();
-}
-BOOST_AUTO_TEST_CASE(atom_group_triv) 
-{
-  test_atom_group_trivial();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
