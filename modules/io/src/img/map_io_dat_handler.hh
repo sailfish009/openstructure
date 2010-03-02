@@ -51,9 +51,9 @@ class DLLEXPORT_OST_IO DAT: public ImageFormatBase
 class DLLEXPORT_OST_IO MapIODatHandler: public MapIOHandler
 {
   public:
-    /// \brief Map IO handler to read/write Spider map files
+    /// \brief Map IO handler to read/write Dat map files
     ///
-    /// This map IO handler reads and writes Spider formatted map files.
+    /// This map IO handler reads and writes Dat formatted map files.
     virtual void Import(img::MapHandle& sh, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct );
     virtual void Import(img::MapHandle& sh, std::istream& loc, const ImageFormatBase& formatstruct);
     virtual void Export(const img::MapHandle& sh, const boost::filesystem::path& loc, const ImageFormatBase& formatstruct) const;
@@ -61,6 +61,8 @@ class DLLEXPORT_OST_IO MapIODatHandler: public MapIOHandler
     static bool MatchContent(unsigned char* header);
     static bool MatchType(const ImageFormatBase& type);
     static bool MatchSuffix(const String& suffix);
+    static String GetFormatName() { return String("Dat"); }
+    static String GetFormatDescription() {return String("Simple binary format for square images");}
 };
 
 typedef MapIOHandlerFactory<MapIODatHandler> MapIODatHandlerFactory;

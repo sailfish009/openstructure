@@ -43,6 +43,9 @@ public:
                              
   virtual bool RequiresBuilder() const;
 
+  static String GetFormatName() { return String("Sdf"); }
+  static String GetFormatDescription() { return String("Structure-data format from Molecular Design Limited"); }
+
 private:
   void ClearState();
 

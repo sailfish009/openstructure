@@ -41,6 +41,8 @@ public:
   virtual bool ProvidesImport(const boost::filesystem::path& loc, const String& type) const = 0;
   virtual bool ProvidesExport(const boost::filesystem::path& loc, const String& type) const = 0;
   virtual SurfaceIOHandlerPtr Create() const = 0;
+  virtual String GetFormatName() const =0;
+  virtual String GetFormatDescription() const =0;
 };
 
 typedef boost::shared_ptr<SurfaceIOHandlerFactoryBase> SurfaceIOHandlerFactoryBasePtr;
@@ -59,6 +61,15 @@ class SurfaceIOHandlerFactory: public SurfaceIOHandlerFactoryBase
   virtual SurfaceIOHandlerPtr Create() const {
     return SurfaceIOHandlerPtr(new HANDLER);
   }
+
+  virtual String GetFormatName() const {
+     return HANDLER::GetFormatName();
+  }
+
+  virtual String GetFormatDescription() const {
+     return HANDLER::GetFormatDescription();
+  }
+
 };
 
 

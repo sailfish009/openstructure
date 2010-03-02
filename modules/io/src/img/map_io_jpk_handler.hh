@@ -30,6 +30,8 @@ class DLLEXPORT_OST_IO JPK: public TIF
  public:
   JPK(boost::logic::tribool normalize_on_save = true, Format bit_depth = OST_DEFAULT_FORMAT, bool sign = false, bool phasecolor = false, int subimage = -1);
   static String FORMAT_STRING;
+  static String FORMAT_NAME_STRING;
+  static String FORMAT_DESCRIPTION_STRING;
 };
 
 
@@ -47,6 +49,9 @@ class DLLEXPORT_OST_IO MapIOJpkHandler: public MapIOTiffHandler
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
   static bool MatchSuffix(const String& suffix);
+  static String GetFormatName() { return String("Jpk");}
+  static String GetFormatDescription() { return String("Format used by JPK Instruments AG's software (Customized Tiff format)"); }
+
 };
 
 typedef MapIOHandlerFactory<MapIOJpkHandler> MapIOJpkHandlerFactory;

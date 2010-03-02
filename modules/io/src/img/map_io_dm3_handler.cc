@@ -44,7 +44,7 @@
 
 namespace ost { namespace io {
 
-String DM3::FORMAT_STRING = "defined_spider";
+String DM3::FORMAT_STRING = "defined_dm3";
 
 DM3::DM3():
   ImageFormatBase(FORMAT_STRING)

@@ -47,6 +47,9 @@ public:
   virtual bool MatchType(const ImageFormatBase& type) const = 0;
   virtual bool MatchSuffix(const String& suffix) const =0 ;
   virtual MapIOHandlerPtr Create() const = 0 ;
+  virtual String GetFormatName() const =0;
+  virtual String GetFormatDescription() const =0;
+
 };
 
 typedef boost::shared_ptr<MapIOHandlerFactoryBase> MapIOHandlerFactoryBasePtr;
@@ -65,6 +68,14 @@ class MapIOHandlerFactory: public MapIOHandlerFactoryBase
 
   virtual bool MatchSuffix(const String& suffix) const {
     return HANDLER::MatchSuffix(suffix);
+  }
+
+  virtual String GetFormatName() const {
+     return HANDLER::GetFormatName();
+  }
+
+  virtual String GetFormatDescription() const {
+     return HANDLER::GetFormatDescription();
   }
 
   virtual MapIOHandlerPtr Create() const {

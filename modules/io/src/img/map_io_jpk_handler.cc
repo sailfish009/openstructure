@@ -42,7 +42,7 @@ namespace ost { namespace io {
 
 String JPK::FORMAT_STRING = "defined_jpk";
 
-    JPK::JPK(boost::logic::tribool normalize_on_save, Format bit_depth, bool sign, bool phasecolor, int subimage):
+JPK::JPK(boost::logic::tribool normalize_on_save, Format bit_depth, bool sign, bool phasecolor, int subimage):
   TIF(FORMAT_STRING,normalize_on_save,bit_depth,sign,phasecolor,subimage)
 {}
 

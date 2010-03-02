@@ -34,6 +34,8 @@ class DLLEXPORT_OST_IO SurfaceIOMSMSHandler: public SurfaceIOHandler
                              const String& format="auto");
   static bool ProvidesExport(const boost::filesystem::path& loc, 
                              const String& format="auto");
+  static String GetFormatName() { return String("Msms"); }
+  static String GetFormatDescription() { return String("Format used by the MSMS program"); }
 };
 
 typedef SurfaceIOHandlerFactory<SurfaceIOMSMSHandler> SurfaceIOMSMSHandlerFactory;

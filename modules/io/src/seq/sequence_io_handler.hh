@@ -59,6 +59,8 @@ public:
   virtual bool ProvidesExport(const boost::filesystem::path& loc, 
                               const String& type) const = 0;
   virtual SequenceIOHandlerPtr Create() const = 0;
+  virtual String GetFormatName() const =0;
+  virtual String GetFormatDescription() const =0;
 };
 
 typedef boost::shared_ptr<SequenceIOHandlerFactoryBase> SequenceIOHandlerFactoryBasePtr;
@@ -78,6 +80,15 @@ class SequenceIOHandlerFactory: public SequenceIOHandlerFactoryBase {
   virtual SequenceIOHandlerPtr Create() const {
     return SequenceIOHandlerPtr(new HANDLER);
   }
+
+  virtual String GetFormatName() const {
+     return HANDLER::GetFormatName();
+  }
+
+  virtual String GetFormatDescription() const {
+     return HANDLER::GetFormatDescription();
+  }
+
 };
 
 

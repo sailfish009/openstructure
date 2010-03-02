@@ -61,6 +61,8 @@ public:
   virtual bool ProvidesImport(const boost::filesystem::path& loc, const String& type) const = 0;
   virtual bool ProvidesExport(const boost::filesystem::path& loc, const String& type) const = 0;
   virtual EntityIOHandlerP Create() const = 0;
+  virtual String GetFormatName() const =0;
+  virtual String GetFormatDescription() const =0;
 };
 
 typedef boost::shared_ptr<EntityIOHandlerFactoryBase> EntityIOHandlerFactoryBaseP;
@@ -74,6 +76,14 @@ class EntityIOHandlerFactory: public EntityIOHandlerFactoryBase
 
   virtual bool ProvidesExport(const boost::filesystem::path& loc, const String& type) const {
     return HANDLER::ProvidesExport(loc,type);
+  }
+
+  virtual String GetFormatName() const {
+     return HANDLER::GetFormatName();
+  }
+
+  virtual String GetFormatDescription() const {
+     return HANDLER::GetFormatDescription();
   }
 
   virtual EntityIOHandlerP Create() const {

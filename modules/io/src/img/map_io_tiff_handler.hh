@@ -61,6 +61,7 @@ class DLLEXPORT_OST_IO TIF: public  ImageFormatBase
 
   static String FORMAT_STRING;
 
+
  protected:
 
   TIF(String format_string, boost::logic::tribool normalize_on_save = boost::logic::indeterminate, Format bit_depth = OST_DEFAULT_FORMAT, bool sign = false, bool phasecolor = false, int subimage = -1);
@@ -87,10 +88,11 @@ class DLLEXPORT_OST_IO MapIOTiffHandler: public MapIOHandler
     virtual void Import(img::MapHandle& sh, std::istream& loc,const ImageFormatBase& formatstruct);
     virtual void Export(const img::MapHandle& sh, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct) const;
     virtual void Export(const img::MapHandle& sh, std::ostream& loc,const ImageFormatBase& formatstruct) const;
-
     static bool MatchContent(unsigned char* header);
     static bool MatchType(const ImageFormatBase& type);
     static bool MatchSuffix(const String& suffix);
+    static String GetFormatName() { return String( "Tiff"); }
+    static String GetFormatDescription() { return String("Tagged Image File Format"); }
 
   protected:
 

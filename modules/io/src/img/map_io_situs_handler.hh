@@ -33,6 +33,8 @@ class DLLEXPORT_OST_IO Situs: public ImageFormatBase
   bool GetNormalizeOnSave() const;
   void SetNormalizeOnSave(bool normalize_on_save);
   static String FORMAT_STRING;
+  static String FORMAT_NAME_STRING;
+  static String FORMAT_ALIGNMENT_STRING;
 
  private:
 
@@ -53,6 +55,8 @@ class DLLEXPORT_OST_IO MapIOSitusHandler: public MapIOHandler
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
   static bool MatchSuffix(const String& suffix);
+  static String GetFormatName() { return "Situs"; };
+  static String GetFormatDescription() { return "Format used by the Situs software package"; };
 };
 
 typedef MapIOHandlerFactory<MapIOSitusHandler> MapIOSitusHandlerFactory;

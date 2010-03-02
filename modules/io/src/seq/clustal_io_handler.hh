@@ -44,6 +44,9 @@ public:
                              const String& format="auto");
   static bool ProvidesExport(const boost::filesystem::path& loc, 
                              const String& format="auto");
+  static String GetFormatName() { return String("Clustal"); }
+  static String GetFormatDescription() { return String("Format used by the ClustalW2 software package"); }
+
 };
 
 typedef SequenceIOHandlerFactory<ClustalIOHandler> ClustalIOHandlerFactory; 

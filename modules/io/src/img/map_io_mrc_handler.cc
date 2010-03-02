@@ -84,6 +84,7 @@ namespace ost { namespace io {
 
 String MRC::FORMAT_STRING = "defined_mrc";
 
+
 MRC::MRC(bool normalize_on_save, Subformat subformat,Endianess endianess_on_save):
   ImageFormatBase(FORMAT_STRING)
 {

@@ -34,6 +34,8 @@ class DLLEXPORT_OST_IO DX: public ImageFormatBase
   bool GetNormalizeOnSave() const;
   void SetNormalizeOnSave(bool normalize_on_save);
   static String FORMAT_STRING;
+  static String FORMAT_NAME_STRING;
+  static String FORMAT_DESCRIPTION_STRING;
 
  private:
 
@@ -61,6 +63,9 @@ class DLLEXPORT_OST_IO MapIODxHandler: public MapIOHandler
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
   static bool MatchSuffix(const String& suffix);
+  static String GetFormatName() { return String("Dx"); };
+  static String GetFormatDescription()  { return String("Format used by the OpenDX software package"); };
+
 };
 
 typedef MapIOHandlerFactory<MapIODxHandler> MapIODxHandlerFactory;

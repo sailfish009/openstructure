@@ -75,6 +75,8 @@ public:
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
   static bool MatchSuffix(const String& suffix);
+  static String GetFormatName() { return String("Mrc"); };
+  static String GetFormatDescription() { return String("Format used by the MRC software package"); };
 
 private:
 

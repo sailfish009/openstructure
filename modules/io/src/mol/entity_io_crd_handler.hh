@@ -39,6 +39,7 @@ public:
   void Import(mol::EntityHandle& ent);
 
   std::vector<mol::AtomHandle> GetSequentialAtoms() const;
+
 private:
 
   void ParseAndAddAtom(const String& line, mol::EntityHandle& h);
@@ -69,6 +70,9 @@ public:
   static bool ProvidesExport(const boost::filesystem::path& loc, 
                              const String& format="auto");
   virtual bool RequiresBuilder() const;
+
+  static String GetFormatName() { return String("Crd"); }
+  static String GetFormatDescription() { return String("CARD format file used by the Charmm software package"); }
 };
 
 

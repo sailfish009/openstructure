@@ -45,7 +45,7 @@ namespace ost { namespace io {
 
 String TIF::FORMAT_STRING="defined_tiff";
 
-    TIF::TIF(boost::logic::tribool normalize_on_save, Format bit_depth, bool sign, bool phasecolor, int subimage):
+ TIF::TIF(boost::logic::tribool normalize_on_save, Format bit_depth, bool sign, bool phasecolor, int subimage):
     ImageFormatBase(FORMAT_STRING)
 {
   normalize_on_save_ = normalize_on_save;

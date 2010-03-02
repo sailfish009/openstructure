@@ -39,9 +39,9 @@ class DLLEXPORT_OST_IO DM3: public ImageFormatBase
 class DLLEXPORT_OST_IO MapIODm3Handler: public MapIOHandler
 {
   public:
-    /// \brief Map IO handler to read/write Spider map files
+    /// \brief Map IO handler to read/write Dm3 map files
     ///
-    /// This map IO handler reads and writes Spider formatted map files.
+    /// This map IO handler reads and writes Dm3 formatted map files (Digital Micrograph).
     virtual void Import(img::MapHandle& sh, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct);
     virtual void Import(img::MapHandle& sh, std::istream& loc, const ImageFormatBase& formatstruct);
     virtual void Export(const img::MapHandle& sh, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct) const;
@@ -49,6 +49,9 @@ class DLLEXPORT_OST_IO MapIODm3Handler: public MapIOHandler
     static bool MatchContent(unsigned char* header);
     static bool MatchType(const ImageFormatBase& type);
     static bool MatchSuffix(const String& suffix);
+    static String GetFormatName() { return String("Dm3"); }
+    static String GetFormatDescription() {return String("Format used by Gatan Inc.'s  Digital Micrograph software");}
+
 };
 
 typedef MapIOHandlerFactory<MapIODm3Handler> MapIODm3HandlerFactory;

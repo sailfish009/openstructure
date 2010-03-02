@@ -43,6 +43,8 @@ class DLLEXPORT_OST_IO Spider: public ImageFormatBase
   void SetEndianessOnSave(Endianess end);
 
   static String FORMAT_STRING;
+  static String FORMAT_NAME_STRING;
+  static String FORMAT_DESCRIPTION_STRING;
 
  private:
 
@@ -63,6 +65,9 @@ class DLLEXPORT_OST_IO MapIOSpiHandler: public MapIOHandler
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
   static bool MatchSuffix(const String& suffix);
+  static String GetFormatName() { return String("Spider"); };
+  static String GetFormatDescription() { return String("Format sued by the Spider software package"); };
+
 protected:
   void do_import(img::MapHandle& sh, std::istream& loc,const ImageFormatBase& formatstruct);
 };

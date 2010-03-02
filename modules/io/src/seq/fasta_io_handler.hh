@@ -44,6 +44,9 @@ public:
                              const String& format="auto");
   static bool ProvidesExport(const boost::filesystem::path& loc, 
                              const String& format="auto");
+  static String GetFormatName() { return String("Fasta"); }
+  static String GetFormatDescription() { return String("Sequence format originally used by the Fasta suite of programs"); }
+
 private:                             
 };
 
