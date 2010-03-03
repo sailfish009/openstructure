@@ -23,6 +23,7 @@
   Author: Stefan Scheuber, Marco Biasini, Ansgar Philippsen
  */
 
+#include <QMap>
 #include <QAbstractItemModel>
 
 #include <ost/gfx/gfx_node_fw.hh>
@@ -30,8 +31,12 @@
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/scene_win/scene_node.hh>
+#include <ost/gui/scene_win/render_modes_node.hh>
 
 namespace ost { namespace gui {
+
+
+
 
 /// \brief data model for scene win
 class DLLEXPORT_OST_GUI SceneWinModel : public QAbstractItemModel,
@@ -46,6 +51,9 @@ public:
   virtual void Update();
 
   bool AddNode(SceneNode* parent, SceneNode* child);
+
+  void AttachRenderModeObserver(RenderModesNode* node);
+  void DetachRenderModeObserver(RenderModesNode* node);
 
   QModelIndex GetIndexOf(SceneNode* node);
 
@@ -72,6 +80,8 @@ public:
   // scene observer interface
   virtual void NodeAdded(const gfx::GfxNodeP& node);
   virtual void NodeRemoved(const gfx::GfxNodeP& node);
+  virtual void SelectionChanged(const gfx::GfxObjP& obj, const mol::EntityView& sel);
+  virtual void RenderModeChanged(const gfx::GfxNodeP& node);
 
 private:
   SceneNode* GetItem(const QModelIndex &index) const;
@@ -80,6 +90,8 @@ private:
 
   SceneNode* root_node_;
   SceneNode* scene_node_;
+
+  QMap<gfx::GfxNodeP, RenderModesNode*> render_observers_;
 };
 
 }}

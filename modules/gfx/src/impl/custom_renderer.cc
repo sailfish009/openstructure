@@ -29,6 +29,7 @@ using namespace impl;
 
 CustomRenderer::CustomRenderer(): options_(new CustomRenderOptions()) 
 {
+  this->SetName("Ball & Stick");
   this->SetFixedPickRadius(0.2);
 }
 

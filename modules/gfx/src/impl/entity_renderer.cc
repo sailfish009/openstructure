@@ -36,12 +36,30 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-EntityRenderer::EntityRenderer(){}
+EntityRenderer::EntityRenderer():name_(""),enabled_(true){}
 
 void EntityRenderer::FlagPositionsDirty()
 {
   state_|=DIRTY_VA;
   sel_state_|=DIRTY_VA;
+}
+
+const String& EntityRenderer::GetName() const{
+  return name_;
+}
+
+void EntityRenderer::SetName(const String& name)
+{
+  name_=name;
+}
+
+void EntityRenderer::SetEnabled(bool enabled){
+  enabled_=enabled;
+}
+
+bool EntityRenderer::IsEnabled() const
+{
+  return enabled_;
 }
 
 const Color& EntityRenderer::GetSelectionColor() const

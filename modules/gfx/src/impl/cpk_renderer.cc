@@ -32,7 +32,9 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-CPKRenderer::CPKRenderer(): options_(new CPKRenderOptions()) {}
+CPKRenderer::CPKRenderer(): options_(new CPKRenderOptions()) {
+  this->SetName("Spheres");
+}
 
 void CPKRenderer::PrepareRendering()
 {

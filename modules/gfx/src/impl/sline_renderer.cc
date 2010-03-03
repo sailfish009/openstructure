@@ -24,7 +24,9 @@ namespace ost { namespace gfx { namespace impl {
 
 SlineRenderer::SlineRenderer(BackboneTrace& trace): 
   TraceRendererBase(trace, 3), options_(new SlineRenderOptions()) 
-{}
+{
+  this->SetName("Fast Spline");
+}
 
 void SlineRenderer::PrepareRendering()
 {

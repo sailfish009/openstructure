@@ -52,7 +52,8 @@ struct BlurQuadEntryLess
   
 SimpleRenderer::SimpleRenderer(): options_(new SimpleRenderOptions()) 
 {
-    this->SetFixedPickRadius(0.2);
+  this->SetName("Fast Bonds");
+  this->SetFixedPickRadius(0.2);
 }
 
 bool SimpleRenderer::CanSetOptions(RenderOptionsPtr& render_options)

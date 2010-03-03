@@ -34,7 +34,9 @@ using namespace impl;
 using namespace mol;
 
 DebugRenderer::DebugRenderer(BackboneTrace& trace): 
-  TraceRendererBase(trace, 2), options_(new SlineRenderOptions()) {}
+  TraceRendererBase(trace, 2), options_(new SlineRenderOptions()) {
+  this->SetName("Debug");
+}
 
 void DebugRenderer::PrepareRendering() 
 {

@@ -66,6 +66,12 @@ public:
   
   virtual bool HasDataToRender() const;
   
+  virtual const String& GetName() const;
+
+  void SetEnabled(bool enabled=true);
+
+  bool IsEnabled() const;
+
   /// \brief whether the renderer has a non-empty selection
   bool HasSelection() const;
   
@@ -143,6 +149,11 @@ public:
   
   void FlagPositionsDirty();
 protected:
+  virtual void SetName(const String& name);
+
+  String                name_;
+  bool                  enabled_;
+
   mol::EntityView       full_view_;
   mol::EntityView       effective_view_;
   mol::EntityView       hidden_view_;

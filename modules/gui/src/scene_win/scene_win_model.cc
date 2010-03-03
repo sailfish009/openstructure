@@ -17,7 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 /*
-  Authors: Marco Biasini, Ansgar Philippsen
+  Authors: Marco Biasini, Ansgar Philippsen, Stefan Scheuber
 */
 
 #include "scene_win_model.hh"
@@ -197,6 +197,17 @@ void SceneWinModel::NodeRemoved(const gfx::GfxNodeP& node)
   }
 }
 
+void SceneWinModel::SelectionChanged(const gfx::GfxObjP& obj, const mol::EntityView& sel)
+{
+}
+
+void SceneWinModel::RenderModeChanged(const gfx::GfxNodeP& node)
+{
+  if(render_observers_.contains(node)){
+    render_observers_[node]->RenderModeChanged();
+  }
+}
+
 SceneNode* SceneWinModel::GetItem(const QModelIndex &index) const
 {
   if (index.isValid()) {
@@ -217,6 +228,16 @@ bool SceneWinModel::AddNode(SceneNode* parent, SceneNode* child){
   return false;
 }
 
+void SceneWinModel::AttachRenderModeObserver(RenderModesNode* node){
+  render_observers_.insert(node->GetGfxNode(),node);
+}
+
+void SceneWinModel::DetachRenderModeObserver(RenderModesNode* node){
+  if(render_observers_.contains(node->GetGfxNode())){
+    render_observers_.remove(node->GetGfxNode());
+  }
+}
+
 QModelIndex SceneWinModel::GetIndexOf(SceneNode* node){
   return GetIndex(node,index(0,0,QModelIndex()));
 }
@@ -235,6 +256,7 @@ QModelIndex SceneWinModel::GetIndex(SceneNode* node, QModelIndex parent){
       if (found.isValid()) {
         return found;
       }
+      i--;
     }
   }
   return QModelIndex();

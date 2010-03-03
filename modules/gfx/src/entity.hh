@@ -22,6 +22,8 @@
 /*
   Author: Ansgar Philippsen, Marco Biasini
 */
+#include <vector>
+
 #include <boost/ptr_container/ptr_map.hpp>
 
 #include <ost/geom/geom.hh>
@@ -46,6 +48,8 @@
 #include "impl/entity_detail.hh"
 
 namespace ost { namespace gfx {
+
+typedef std::vector<RenderMode::Type> RenderModeTypes;
 
 /// \brief graphical rendering of \ref mol::EntityHandle entites
 ///
@@ -114,11 +118,21 @@ public:
 
   virtual void OnRenderModeChange();
   
+  const String GetRenderModeName(RenderMode::Type mode);
+
+  void SetEnableRenderMode(RenderMode::Type mode, bool enable);
+
+  bool IsRenderModeEnabled(RenderMode::Type mode);
+
+  RenderModeTypes GetLoadedRenderModes();
+
   void SetRenderMode(RenderMode::Type mode, const mol::EntityView& view, 
                      bool keep=false);
   
   virtual void SetRenderMode(RenderMode::Type mode);  
   
+  mol::EntityView GetRenderView(RenderMode::Type mode);
+
   virtual void SetVisible(const mol::EntityView& view, bool visible);
 
   virtual void OptionsChanged(RenderMode::Type mode);

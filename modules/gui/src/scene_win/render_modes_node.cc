@@ -19,43 +19,46 @@
 #include <boost/pointer_cast.hpp>
 
 #include <QFont>
-#include <QString>
+
+#include <ost/gfx/scene.hh>
+#include <ost/gfx/gfx_node.hh>
 
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_win/scene_win.hh>
-#include <ost/mol/query_view_wrapper.hh>
 
-#include "current_selection_node.hh"
-#include "entity_part_node.hh"
-#include "label_node.hh"
 #include "render_modes_node.hh"
-
-#include "entity_node.hh"
-
-
+#include "render_mode_node.hh"
 
 namespace ost { namespace gui {
 
-EntityNode::EntityNode(gfx::EntityP& entity, SceneNode* parent):
-    GfxSceneNode(entity,parent){
+RenderModesNode::RenderModesNode(gfx::EntityP entity, SceneNode* parent):LabelNode("Render Modes",parent),node_(entity){
   SceneWinModel* model = GostyApp::Instance()->GetSceneWin()->GetModel();
   model->AddNode(parent, this);
 
-  new RenderModesNode(entity, this);
+  this->Update();
 
-  SceneNode* quick_selection = new LabelNode("Quick Selection",this);
-  model->AddNode(this, quick_selection);
+  GostyApp::Instance()->GetSceneWin()->GetModel()->AttachRenderModeObserver(this);
+}
 
-  SceneNode* node = new EntityPartNode("Backbone", entity, mol::QueryViewWrapper(entity->GetView().Select("aname=CA,C,N,O and peptide=true")), quick_selection);
-  model->AddNode(quick_selection, node);
-  node = new EntityPartNode("Ligands", entity, mol::QueryViewWrapper(entity->GetView().Select("ishetatm=1 and ele=C")), quick_selection);
-  model->AddNode(quick_selection, node);
+void RenderModesNode::RenderModeChanged(){
+  this->Update();
+}
 
-  node = new EntityPartNode("Full View", entity, mol::QueryViewWrapper(entity->GetView()), this);
-  model->AddNode(this, node);
+void RenderModesNode::Update(){
+  SceneWinModel* model = GostyApp::Instance()->GetSceneWin()->GetModel();
+  gfx::EntityP entity = boost::dynamic_pointer_cast<gfx::Entity>(this->GetGfxNode());
+  gfx::RenderModeTypes render_modes =  entity->GetLoadedRenderModes();
+  for(unsigned int i=0; i<render_modes.size();i++){
+    if(!render_types_.contains(render_modes[i])){
+      RenderModeNode* node = new RenderModeNode(entity, render_modes[i],this);
+      model->AddNode(this, node);
+      render_types_.insert(render_modes[i]);
+    }
+  }
+}
 
-  node = new CurrentSelectionNode(entity, this);
-  model->AddNode(this, node);
+gfx::GfxNodeP RenderModesNode::GetGfxNode(){
+  return node_;
 }
 
 }}

@@ -26,7 +26,9 @@ namespace ost { namespace gfx { namespace impl {
 
 TraceRenderer::TraceRenderer(BackboneTrace& trace): 
   TraceRendererBase(trace, 1), options_(new TraceRenderOptions())
-{}
+{
+  this->SetName("Trace");
+}
 
 void TraceRenderer::PrepareRendering() 
 {

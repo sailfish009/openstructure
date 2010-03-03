@@ -270,7 +270,7 @@ void Entity::CacheBoundingBox() const
   for (RendererMap::const_iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     const impl::EntityRenderer* r=i->second;
-    if (r->HasDataToRender()) {
+    if (r->IsEnabled() && r->HasDataToRender()) {
       if (!has_data) {
         coord_limits=r->GetBoundingBox();          
         has_data=true;
@@ -311,16 +311,18 @@ void Entity::CustomRenderGL(RenderPass pass)
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
-    switch(pass) {
-      case STANDARD_RENDER_PASS:
-      case OPAQUE_RENDER_PASS:
-        r->Render(pass);
-        break;
-      case GLOW_RENDER_PASS:
-        if (r->HasSelection()) {
+    if(r->IsEnabled()){
+      switch(pass) {
+        case STANDARD_RENDER_PASS:
+        case OPAQUE_RENDER_PASS:
           r->Render(pass);
-        }
-        break;
+          break;
+        case GLOW_RENDER_PASS:
+          if (r->HasSelection()) {
+            r->Render(pass);
+          }
+          break;
+      }
     }
   }
   geom::AlignedCuboid bbox=this->GetBoundingBox();
@@ -374,7 +376,9 @@ void Entity::CustomRenderGL(RenderPass pass)
 void Entity::CustomRenderPov(PovState& pov)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    it->second->RenderPov(pov,GetName());
+    if(it->second->IsEnabled()){
+      it->second->RenderPov(pov,GetName());
+    }
   }
 }
 
@@ -557,6 +561,46 @@ void Entity::OnRenderModeChange()
   this->FlagRebuild();
 }
 
+const String Entity::GetRenderModeName(RenderMode::Type mode){
+  RendererMap::iterator i=renderer_.find(mode);
+  String name = "";
+  if(i!=renderer_.end()) {
+    impl::EntityRenderer* renderer=i->second;
+    name = renderer->GetName();
+  }
+  return name;
+}
+
+void Entity::SetEnableRenderMode(RenderMode::Type mode, bool enable){
+  RendererMap::iterator i=renderer_.find(mode);
+  if(i!=renderer_.end()) {
+    impl::EntityRenderer* renderer=i->second;
+    if(renderer->IsEnabled() != enable){
+      renderer->SetEnabled(enable);
+      this->FlagRebuild();
+    }
+  }
+}
+
+bool Entity::IsRenderModeEnabled(RenderMode::Type mode){
+  RendererMap::iterator i=renderer_.find(mode);
+  if(i!=renderer_.end()) {
+    impl::EntityRenderer* renderer=i->second;
+    return renderer->IsEnabled();
+  }
+  return false;
+}
+
+
+RenderModeTypes Entity::GetLoadedRenderModes(){
+  std::vector<RenderMode::Type> render_modes;
+  for (RendererMap::iterator i=renderer_.begin(),
+         e=renderer_.end(); i!=e; ++i) {
+       render_modes.push_back(i->first);
+  }
+  return render_modes;
+}
+
 void Entity::SetRenderMode(RenderMode::Type mode, 
                            const mol::EntityView& view, bool keep)
 {
@@ -578,6 +622,13 @@ void Entity::SetRenderMode(RenderMode::Type mode,
   }
   this->ReapplyColorOps();
   this->FlagRebuild();
+  Scene::Instance().RenderModeChanged(GetName());
+}
+
+mol::EntityView Entity::GetRenderView(RenderMode::Type mode)
+{
+  EntityRenderer* rend = this->GetOrCreateRenderer(mode);
+  return rend->GetFullView();
 }
 
 void Entity::SetRenderMode(RenderMode::Type mode)
@@ -592,6 +643,7 @@ void Entity::SetVisible(const mol::EntityView& view, bool visible){
     renderer->SetVisible(view, visible);
     renderer->UpdateViews();
   }
+  this->ReapplyColorOps();
   this->FlagRebuild();
 }
 

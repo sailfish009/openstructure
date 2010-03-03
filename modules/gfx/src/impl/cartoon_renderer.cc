@@ -33,7 +33,14 @@ using namespace impl;
 CartoonRenderer::CartoonRenderer(BackboneTrace& trace, bool force_tube): 
   TraceRendererBase(trace, 3),   force_tube_(force_tube),
   options_(new CartoonRenderOptions())
-{ }
+{
+if(force_tube){
+  this->SetName("Smooth Tube");
+}
+else{
+  this->SetName("Helix & Strand Cartoon");
+}
+}
 
 void CartoonRenderer::SetForceTube(bool force_tube)
 {

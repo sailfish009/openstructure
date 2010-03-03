@@ -24,7 +24,9 @@ namespace ost { namespace gfx { namespace impl {
 
 LineTraceRenderer::LineTraceRenderer(BackboneTrace& trace): 
   TraceRendererBase(trace, 1), options_(new LineTraceRenderOptions())
-{}
+{
+  this->SetName("Fast Trace");
+}
 
 void LineTraceRenderer::PrepareRendering() 
 {

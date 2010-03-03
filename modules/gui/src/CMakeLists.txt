@@ -55,11 +55,14 @@ shell_history.hh
 )
 
 set(OST_GUI_SCENE_WIN_HEADERS
+current_selection_node.hh
 entity_node.hh
 entity_part_node.hh
 gfx_scene_node.hh
 label_node.hh
 root_node.hh
+render_mode_node.hh
+render_modes_node.hh
 scene_node.hh
 scene_win.hh
 scene_win_model.hh
@@ -254,11 +257,14 @@ python_shell/python_syntax_highlighter.cc
 python_shell/shell_history.cc
 python_shell/string_literal_positions.cc
 python_shell/text_logger.cc
+scene_win/current_selection_node.cc
 scene_win/scene_node.cc
 scene_win/label_node.cc
 scene_win/entity_node.cc
 scene_win/entity_part_node.cc
 scene_win/gfx_scene_node.cc
+scene_win/render_mode_node.cc
+scene_win/render_modes_node.cc
 scene_win/root_node.cc
 scene_win/scene_win.cc
 scene_win/scene_win_model.cc
@@ -315,10 +321,13 @@ panel_bar/panel_bar_widget_holder.hh
 panel_bar/side_bar.hh
 panel_bar/splitter_panel_bar.hh
 panel_bar/tabbed_panel_bar.hh
+scene_win/current_selection_node.hh
 scene_win/gfx_scene_node.hh
 scene_win/label_node.hh
 scene_win/entity_node.hh
 scene_win/entity_part_node.hh
+scene_win/render_mode_node.hh
+scene_win/render_modes_node.hh
 scene_win/root_node.hh
 scene_win/scene_node.hh
 scene_win/scene_win.hh

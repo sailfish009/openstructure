@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
 #include <ost/gfx/entity.hh>
@@ -236,8 +237,12 @@ void export_Entity()
     .add_property("selection", &Entity::GetSelection, 
                   &Entity::SetSelection)
     .def("GetView", &Entity::GetView)
+    .def("GetRenderModeName", &Entity::GetRenderModeName)
+    .def("GetLoadedRenderModes", &Entity::GetLoadedRenderModes)
     .def("SetRenderMode", set_rm1, arg("keep")=false)
     .def("SetRenderMode", set_rm2)
+    .def("SetEnableRenderMode", &Entity::SetEnableRenderMode)
+    .def("IsRenderModeEnabled", &Entity::IsRenderModeEnabled)
     .add_property("view", &Entity::GetView)
     .def("SetVisible", &Entity::SetVisible)
     .def("ColorBy", color_by_01)
@@ -286,4 +291,6 @@ void export_Entity()
   to_python_converter<std::pair<GfxObjP, mol::AtomHandle>, 
                       PairToTupleConverter<GfxObjP, mol::AtomHandle> >();
 
+  class_<RenderModeTypes>("RenderModeTypes", init<>())
+    .def(vector_indexing_suite<RenderModeTypes, true >());
 }
