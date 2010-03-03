@@ -46,7 +46,7 @@ public:
   static bool ProvidesExport(const boost::filesystem::path& loc, 
                              const String& format="auto");
 
-  static String GetFormatName() { return String("Fasta"); }
+  static String GetFormatName() { return String("ProMod"); }
   static String GetFormatDescription() { return String("Format used by the SwissModel modeling server"); }
 };
 
