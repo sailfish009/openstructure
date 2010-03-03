@@ -220,13 +220,29 @@ SceneNode* SceneWinModel::GetItem(const QModelIndex &index) const
 bool SceneWinModel::AddNode(SceneNode* parent, SceneNode* child){
   QModelIndex parent_index = GetIndexOf(parent);
   if(parent_index.isValid()){
-    this->beginInsertRows(parent_index,0,0);
+    int row = parent->GetChildCount();
+    this->beginInsertRows(parent_index,row,row);
     parent->AddChild(child);
     this->endInsertRows();
     return true;
   }
   return false;
 }
+
+bool SceneWinModel::RemoveNode(SceneNode* node){
+  QModelIndex index = GetIndexOf(node);
+  SceneNode* parent = node->GetParent();
+  if(parent && index.isValid()){
+    QModelIndex parent_index = GetIndexOf(parent);
+    int row = node->GetRow();
+    this->beginRemoveRows(parent_index,row,row);
+    parent->RemoveChild(node);
+    this->endRemoveRows();
+    return true;
+  }
+  return false;
+}
+
 
 void SceneWinModel::AttachRenderModeObserver(RenderModesNode* node){
   render_observers_.insert(node->GetGfxNode(),node);

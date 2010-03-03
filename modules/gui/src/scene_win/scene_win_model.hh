@@ -51,6 +51,7 @@ public:
   virtual void Update();
 
   bool AddNode(SceneNode* parent, SceneNode* child);
+  bool RemoveNode(SceneNode* node);
 
   void AttachRenderModeObserver(RenderModesNode* node);
   void DetachRenderModeObserver(RenderModesNode* node);

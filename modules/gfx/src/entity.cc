@@ -534,7 +534,7 @@ void Entity::ApplyRenderOptions(RenderMode::Type render_mode,
 
 void Entity::OptionsChanged(RenderMode::Type render_mode)
 {
-  impl::EntityRenderer* entity_renderer=this->GetOrCreateRenderer(render_mode_);
+  impl::EntityRenderer* entity_renderer=this->GetOrCreateRenderer(render_mode);
   entity_renderer->RenderOptionsChanged();
   FlagRebuild();
   Scene::Instance().ObjectChanged(this->GetName());
@@ -542,7 +542,6 @@ void Entity::OptionsChanged(RenderMode::Type render_mode)
 
 void Entity::OnRenderModeChange()
 {
-  GfxObj::OnRenderModeChange();
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     i->second->ClearViews();
@@ -559,6 +558,7 @@ void Entity::OnRenderModeChange()
   }  
   this->ReapplyColorOps();
   this->FlagRebuild();
+  GfxObj::OnRenderModeChange();
 }
 
 const String Entity::GetRenderModeName(RenderMode::Type mode){
@@ -592,11 +592,13 @@ bool Entity::IsRenderModeEnabled(RenderMode::Type mode){
 }
 
 
-RenderModeTypes Entity::GetLoadedRenderModes(){
+RenderModeTypes Entity::GetNotEmptyRenderModes(){
   std::vector<RenderMode::Type> render_modes;
   for (RendererMap::iterator i=renderer_.begin(),
          e=renderer_.end(); i!=e; ++i) {
-       render_modes.push_back(i->first);
+    if(i->second->HasDataToRender()){
+      render_modes.push_back(i->first);
+    }
   }
   return render_modes;
 }

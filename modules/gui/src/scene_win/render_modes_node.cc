@@ -47,14 +47,28 @@ void RenderModesNode::RenderModeChanged(){
 void RenderModesNode::Update(){
   SceneWinModel* model = GostyApp::Instance()->GetSceneWin()->GetModel();
   gfx::EntityP entity = boost::dynamic_pointer_cast<gfx::Entity>(this->GetGfxNode());
-  gfx::RenderModeTypes render_modes =  entity->GetLoadedRenderModes();
+  gfx::RenderModeTypes render_modes =  entity->GetNotEmptyRenderModes();
   for(unsigned int i=0; i<render_modes.size();i++){
     if(!render_types_.contains(render_modes[i])){
       RenderModeNode* node = new RenderModeNode(entity, render_modes[i],this);
       model->AddNode(this, node);
-      render_types_.insert(render_modes[i]);
+      render_types_.insert(render_modes[i],node);
     }
   }
+  QSet<gfx::RenderMode::Type> types_to_delete;
+  QMap<gfx::RenderMode::Type,RenderModeNode*>::iterator type;
+  for (type = render_types_.begin(); type != render_types_.end(); ++type){
+    if(find(render_modes.begin(), render_modes.end(), type.key()) == render_modes.end()){
+      model->RemoveNode(type.value());
+      types_to_delete.insert(type.key());
+    }
+  }
+
+  QSet<gfx::RenderMode::Type>::iterator to_delete;
+  for(to_delete = types_to_delete.begin(); to_delete != types_to_delete.end(); ++to_delete){
+    render_types_.remove(*to_delete);
+  }
+
 }
 
 gfx::GfxNodeP RenderModesNode::GetGfxNode(){

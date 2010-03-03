@@ -34,6 +34,8 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/scene_win/label_node.hh>
 
+#include "render_mode_node.hh"
+
 /*
   Author: Stefan Scheuber
  */
@@ -52,7 +54,7 @@ private:
   void Update();
 
   gfx::GfxNodeP node_;
-  QSet<gfx::RenderMode::Type> render_types_;
+  QMap<gfx::RenderMode::Type,RenderModeNode*> render_types_;
 };
 
 }}

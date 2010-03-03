@@ -124,7 +124,7 @@ public:
 
   bool IsRenderModeEnabled(RenderMode::Type mode);
 
-  RenderModeTypes GetLoadedRenderModes();
+  RenderModeTypes GetNotEmptyRenderModes();
 
   void SetRenderMode(RenderMode::Type mode, const mol::EntityView& view, 
                      bool keep=false);
