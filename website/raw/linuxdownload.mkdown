@@ -36,7 +36,8 @@ a command line terminal, type:
         ./ost
         
 Note
-:   The package has been created on a 32bit machine (but should work also on 64 bit machines).
+:   The package has been created on a 32bit machine (but should work also on 64 bit machines, provided
+that the correct 32-bit compatibility libraries are installed).
 The following Linux distributions are supported:
 
 * Ubuntu 9.10
