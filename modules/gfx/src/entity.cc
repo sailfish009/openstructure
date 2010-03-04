@@ -385,21 +385,30 @@ void Entity::CustomRenderPov(PovState& pov)
 mol::AtomHandle Entity::PickAtom(const geom::Line3& line, Real line_width)
 {
   mol::AtomHandle picked_atom;
+  if (!this->IsVisible())
+    return picked_atom;  
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
-    r->PickAtom(line, line_width, picked_atom);
+    if (r->HasDataToRender() && r->IsEnabled()) {
+      r->PickAtom(line, line_width, picked_atom);      
+    }
   }
   return picked_atom;
 }
 
 mol::BondHandle Entity::PickBond(const geom::Line3& line, Real line_width)
 {
+
   mol::BondHandle picked_bond;
+  if (!this->IsVisible())
+    return picked_bond;  
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
-    r->PickBond(line, line_width, picked_bond);
+    if (r->HasDataToRender() && r->IsEnabled()) {
+      r->PickBond(line, line_width, picked_bond);      
+    }
   }
   return picked_bond;
 }
