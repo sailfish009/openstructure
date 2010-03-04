@@ -102,12 +102,17 @@ def _load_files():
         graphical_objects.append(g)
         gfx.Scene().Add(g)
         c+=e.geometric_center
-      else:
+      else:       
         m=io.LoadMap(f[0])
-        miso=gfx.MapIso(m, 10.0, os.path.basename(f[0]))
-        c+=miso.center
-        graphical_objects.append(miso)
-        scene.Add(miso)
+        if m.GetExtent().GetDepth()==1:
+          images.append(m)  
+          v=gui.CreateDataViewer(m)
+          viewers.append(v)
+        else:
+          miso=gfx.MapIso(m, 10.0, os.path.basename(f[0]))
+          c+=miso.center
+          graphical_objects.append(miso)
+          scene.Add(miso)
     step_size=0.0
     if len(input_files)>1:
       step_size=1.0/(len(input_files)-1)
@@ -172,7 +177,9 @@ gradient.SetColorAt(1.00, gfx.DARKMAGENTA)
 
 loading_list=[]
 script_argv=[]
-usage = 'usage: dng [options] [file to load | script to execute [script args]]'
+images=[]
+viewers=[]
+usage = 'usage: dng [options] [files to load]'
 class OstOptionParser(optparse.OptionParser):
   def __init__(self, **kwargs):
     optparse.OptionParser.__init__(self, **kwargs)
@@ -188,26 +195,18 @@ parser.add_option("-s", "--script", action="callback", default=[], dest="script"
 parser.add_option("-p", "--pdb_id", dest="pdb_ids", default=[],action="append", help="PDB file ID. The file will be retrieved from PDB")
 parser.add_option("-b", "--builder", dest="builder", default="HEURISTIC", help="Type of builder used by the progam (either RULE_BASED or HEURISTIC) [default: %default]")
 parser.add_option("-c", "--compound_library", dest="complib", default="compounds.chemlib", help="Compound library for the RULE_BASED builder (only used if --builder option is set to RULE_BASED, otherwise ignored [default: %default]")
-parser.add_option("-l", "--load", dest="files", default=[],action="append", help="File to load")
 parser.add_option("-q", "--query", dest="query", default="", help="Selection query to be highlighted automatically upon loading (only used together with -p option or when a PDB file is loaded, otherwise ignored [default: None]")
 parser.disable_interspersed_args()
 (options, args) = parser.parse_args()
 
 if len(parser.rargs)!=0:
-  arg_string=parser.rargs[0]
-  if arg_string.find('.py')>=0 and arg_string.find('.py')==len(arg_string)-3:
-    script_argv=parser.rargs
-  else:
-    if   len(parser.rargs)==1:
-      loading_list.append(arg_string)
+  for rargs_string in parser.rargs:
+    if not rargs_string.endswith('.py'):  
+      loading_list.append(rargs_string)
     else:
-      print 'Error:  multiple files to load are not allowed\n',usage
+      print 'Error:  one of the files to load is a Python script, use -s flag to execute it\n'
       QtGui.QApplication.instance().exit()
-      sys.exit(-1)
-     
-if len(options.files)!=0:
- for file_string in options.files:
-   loading_list.append(file_string)
+      sys.exit(-1)    
 
 if len(options.script)!=0:
   script_argv=options.script
