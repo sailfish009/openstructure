@@ -382,6 +382,11 @@ ResidueImplPtr EntityImpl::CreateResidue(const ChainImplPtr& cp,
 
 ChainImplPtr EntityImpl::InsertChain(const String& cname)
 {
+  ChainImplMap::iterator i=chain_map_.find(cname);
+  if (i!=chain_map_.end()) {
+    throw IntegrityError("Can't insert chain. A chain with name '"+cname+
+                         "' already exists");
+  }
 #if MAKE_SHARED_AVAILABLE
   ChainImplPtr cp=boost::make_shared<ChainImpl>(shared_from_this(), cname);
 #else
