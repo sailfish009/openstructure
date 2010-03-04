@@ -157,7 +157,8 @@ void export_EntityView()
   def("CreateViewFromAtoms", create_view_1);
   def("CreateViewFromAtoms", create_view_2);
   
-  def("CreateEntityFromView", &CreateEntityFromView);
+  def("CreateEntityFromView", &CreateEntityFromView, 
+      arg("handle")=EntityHandle());
   class_<EntityViewList>("EntityViewList", init<>())
     .def(vector_indexing_suite<EntityViewList>())
   ;

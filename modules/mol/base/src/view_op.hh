@@ -26,7 +26,7 @@
 #include <ost/mol/view_type_fw.hh>
 #include <ost/mol/handle_type_fw.hh>
 #include <ost/integrity_error.hh>
-
+#include <ost/mol/entity_handle.hh>
 namespace ost { namespace mol {
   
 
@@ -87,8 +87,12 @@ CompareViews(const EntityView& view1, const EntityView& view2);
 /// \param view is the view to be converted to a handle
 /// \param include_exlusive_atoms if true, atoms that are part of an exclusive
 ///     bond will also be included in the new entity handle.
-EntityHandle DLLEXPORT_OST_MOL CreateEntityFromView(const EntityView& view,
-                                                    bool include_exlusive_atoms);
+/// \param handle If invalid a new entity will be created. If valid, the atoms, 
+///     residues, chains, bonds and torsions will be added to handle. This is 
+///     useful to combine several entities into one.
+EntityHandle DLLEXPORT_OST_MOL 
+CreateEntityFromView(const EntityView& view, bool include_exlusive_atoms,
+                     EntityHandle handle=EntityHandle());
 
 }} // ns
 #endif

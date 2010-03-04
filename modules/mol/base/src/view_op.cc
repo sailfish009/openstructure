@@ -389,13 +389,16 @@ private:
 }
 
 EntityHandle CreateEntityFromView(const EntityView& view,
-                                  bool include_exlusive_atoms)
+                                  bool include_exlusive_atoms,
+                                  EntityHandle handle)
 {
   Profile create_time("mol::CreateEntityFromView");
-  EntityHandle ent=CreateEntity();
-  Replicator replicator(ent.Impl(), view, include_exlusive_atoms);
-  TorsionAdder adder(replicator, ent.Impl(), view);
-  return ent;
+  if (!handle.IsValid()) {
+    handle=CreateEntity();
+  }
+  Replicator replicator(handle.Impl(), view, include_exlusive_atoms);
+  TorsionAdder adder(replicator, handle.Impl(), view);
+  return handle;
 }
 
 }} // ns
