@@ -36,6 +36,7 @@ QVariant LabelNode::GetData(int column, int role){
       return QVariant(name_);
     } else if(role==Qt::FontRole) {
       QFont f("Helvetica");
+      f.setBold(true);
       return QVariant(f);
     }
   }

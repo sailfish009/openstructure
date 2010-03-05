@@ -114,11 +114,6 @@ void ContextMenu::ShowMenu(const QPoint& pos)
       connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Hide()));
     }
 
-    if((all_gfx_objects || all_custom_views) && indexes.size()==2){
-      action = menu->addAction("Rename");
-      connect(action, SIGNAL(triggered()), this, SLOT(Rename()));
-    }
-
     if(all_entity_views){
       action = menu->addAction("Show");
       connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(MakeVisible()));
@@ -135,13 +130,23 @@ void ContextMenu::ShowMenu(const QPoint& pos)
       action = menu->addAction("Create Custom View");
       connect(action, SIGNAL(triggered()), this, SLOT(AddView()));
 
+    }
+
+    if(all_entity_views){
       if(all_custom_views){
         action = menu->addAction("Delete");
         connect(action, SIGNAL(triggered()), this, SLOT(DeleteView()));
       }
     }
 
-  menu->popup(pos);
+    if((all_gfx_objects || all_custom_views) && indexes.size()==2){
+      action = menu->addAction("Rename");
+      connect(action, SIGNAL(triggered()), this, SLOT(Rename()));
+    }
+
+    if(menu->actions().size()>0){
+      menu->popup(pos);
+    }
   }
 }
 
