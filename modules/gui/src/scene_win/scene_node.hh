@@ -52,7 +52,6 @@ public:
   virtual bool SetData(int column, const QVariant& value, int role);
   virtual Qt::ItemFlags Flags(int column) const;
   virtual int GetColumnCount() const;
-
 private:
   SceneNode* parent_;
   SceneNodeList nodes_;

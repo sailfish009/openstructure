@@ -18,33 +18,34 @@
 //------------------------------------------------------------------------------
 #include <QFont>
 
-#include <ost/mol/query_view_wrapper.hh>
+#include "custom_part_node.hh"
 
-#include <ost/gfx/scene.hh>
+#include "entity_part_node.hh"
+
+#include <ost/gfx/entity.hh>
 #include <ost/gfx/gfx_node.hh>
-
-#include <ost/gui/gosty_app.hh>
-#include <ost/gui/scene_win/scene_win.hh>
-
-#include "current_selection_node.hh"
 
 namespace ost { namespace gui {
 
-CurrentSelectionNode::CurrentSelectionNode(gfx::EntityP entity, SceneNode* parent):EntityPartNode("Current Selection",entity,mol::QueryViewWrapper(entity->GetSelection()),parent),wrapper_(mol::QueryViewWrapper(entity->GetSelection())){
+CustomPartNode::CustomPartNode(QString name, gfx::EntityP entity, mol::QueryViewWrapper part, SceneNode* parent):EntityPartNode(name,entity,part,parent){
 }
 
-void CurrentSelectionNode::SetQueryView(mol::QueryViewWrapper part)
-{
-  //Do Nothing
-}
-
-mol::QueryViewWrapper CurrentSelectionNode::GetQueryView() const
-{
-  if(this->GetEntity()->GetSelection()!=wrapper_.GetEntityView()){
-    wrapper_ = mol::QueryViewWrapper(this->GetEntity()->GetSelection());
+bool CustomPartNode::SetData(int column, const QVariant& value, int role){
+  if (column==1 && role == Qt::EditRole) {
+    this->SetName(value.toString());
+    return true;
   }
+  return false;
+}
 
-  return wrapper_;
+Qt::ItemFlags CustomPartNode::Flags(int column) const{
+  if(column==0){
+    return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
+  }
+  else if(column==1){
+    return Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsEditable;
+  }
+  return Qt::NoItemFlags;
 }
 
 }}

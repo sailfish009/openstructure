@@ -34,7 +34,7 @@
 #include <ost/gfx/gfx_object_fw.hh>
 
 #include <ost/gui/module_config.hh>
-#include <ost/gui/scene_win/gfx_scene_node.hh>
+#include <ost/gui/scene_win/entity_part_node.hh>
 
 /*
   Author: Stefan Scheuber
@@ -42,7 +42,7 @@
 
 namespace ost { namespace gui {
 
-class DLLEXPORT_OST_GUI RenderModeNode : public GfxSceneNode {
+class DLLEXPORT_OST_GUI RenderModeNode : public EntityPartNode {
   Q_OBJECT
 public:
   RenderModeNode(gfx::EntityP entity, gfx::RenderMode::Type render_mode, SceneNode* node_parent );
@@ -54,7 +54,10 @@ public:
 
   gfx::RenderMode::Type GetRenderMode() const;
 
+  virtual void SetQueryView(mol::QueryViewWrapper part);
+
 private:
+  gfx::EntityP entity_;
   gfx::RenderMode::Type render_mode_;
 };
 

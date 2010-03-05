@@ -55,7 +55,9 @@ shell_history.hh
 )
 
 set(OST_GUI_SCENE_WIN_HEADERS
+context_menu.hh
 current_selection_node.hh
+custom_part_node.hh
 entity_node.hh
 entity_part_node.hh
 gfx_scene_node.hh
@@ -257,7 +259,9 @@ python_shell/python_syntax_highlighter.cc
 python_shell/shell_history.cc
 python_shell/string_literal_positions.cc
 python_shell/text_logger.cc
+scene_win/context_menu.cc
 scene_win/current_selection_node.cc
+scene_win/custom_part_node.cc
 scene_win/scene_node.cc
 scene_win/label_node.cc
 scene_win/entity_node.cc
@@ -321,7 +325,9 @@ panel_bar/panel_bar_widget_holder.hh
 panel_bar/side_bar.hh
 panel_bar/splitter_panel_bar.hh
 panel_bar/tabbed_panel_bar.hh
+scene_win/context_menu.hh
 scene_win/current_selection_node.hh
+scene_win/custom_part_node.hh
 scene_win/gfx_scene_node.hh
 scene_win/label_node.hh
 scene_win/entity_node.hh

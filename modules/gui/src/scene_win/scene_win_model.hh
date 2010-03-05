@@ -26,6 +26,9 @@
 #include <QMap>
 #include <QAbstractItemModel>
 
+#include <ost/mol/view_type_fw.hh>
+#include <ost/mol/query_view_wrapper.hh>
+
 #include <ost/gfx/gfx_node_fw.hh>
 #include <ost/gfx/scene_observer.hh>
 
@@ -47,8 +50,15 @@ public:
   ~SceneWinModel();
 
   gfx::NodePtrList GetGfxNodes(QModelIndexList indexes);
+  mol::QueryViewWrapperList GetQueryViewsList(QModelIndexList indexes);
+  gfx::EntityP GetEntityOfViews(QModelIndexList indexes);
 
   virtual void Update();
+
+  SceneNode* GetItem(const QModelIndex &index) const;
+
+  SceneNode* FindGfxNode(gfx::GfxNodeP node) const;
+
 
   bool AddNode(SceneNode* parent, SceneNode* child);
   bool RemoveNode(SceneNode* node);
@@ -56,7 +66,7 @@ public:
   void AttachRenderModeObserver(RenderModesNode* node);
   void DetachRenderModeObserver(RenderModesNode* node);
 
-  QModelIndex GetIndexOf(SceneNode* node);
+  QModelIndex GetIndexOf(SceneNode* node, int column=0);
 
   // abstract item model interface
   QModelIndex index(int row, int col, const QModelIndex& parent = QModelIndex()) const;
@@ -85,9 +95,7 @@ public:
   virtual void RenderModeChanged(const gfx::GfxNodeP& node);
 
 private:
-  SceneNode* GetItem(const QModelIndex &index) const;
-
-  QModelIndex GetIndex(SceneNode* node, QModelIndex index);
+  QModelIndex GetIndex(SceneNode* node, QModelIndex index,int column);
 
   SceneNode* root_node_;
   SceneNode* scene_node_;

@@ -38,6 +38,11 @@ class DLLEXPORT_OST_GUI EntityNode : public GfxSceneNode {
   Q_OBJECT
 public:
   EntityNode(gfx::EntityP& entity, SceneNode* node_parent);
+
+  SceneNode* GetCustomViewNode();
+
+private:
+  SceneNode* custom_view_;
 };
 
 }}

@@ -23,6 +23,9 @@
 #include <QMenu>
 #include <QPoint>
 
+#include <ost/mol/query_view_wrapper.hh>
+
+#include <ost/gfx/entity.hh>
 #include <ost/gfx/gfx_node_fw.hh>
 #include <ost/gui/module_config.hh>
 
@@ -34,7 +37,8 @@ public:
   static SceneSelection* Instance();
   gfx::GfxNodeP GetActiveNode(unsigned int pos);
   int GetActiveNodeCount();
-  void ShowMenu(const QPoint & p);
+  int GetActiveViewCount();
+  gfx::EntityP GetViewEntity();
 
 public slots:
   void CenterOnObjects();
@@ -43,13 +47,20 @@ public slots:
   void Select();
   void Show();
   void Hide();
+  void MakeVisible();
+  void MakeHidden();
+  void ShowExclusive();
+  void HideExclusive();
+  mol::EntityView GetViewUnion();
 
 private slots:
-  void SetActiveNodes(gfx::NodePtrList nodes);
+  void SetActiveNodes(gfx::NodePtrList nodes, gfx::EntityP entity, mol::QueryViewWrapperList views);
 
 private:
   SceneSelection();
   gfx::NodePtrList nodes_;
+  gfx::EntityP view_entity_;
+  mol::QueryViewWrapperList views_;
   static SceneSelection* scene_selection_;
   QMenu* menu_;
 };

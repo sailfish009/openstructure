@@ -37,7 +37,7 @@
 namespace ost { namespace gui {
 
 EntityNode::EntityNode(gfx::EntityP& entity, SceneNode* parent):
-    GfxSceneNode(entity,parent){
+    GfxSceneNode(entity,parent),custom_view_(NULL){
   SceneWinModel* model = GostyApp::Instance()->GetSceneWin()->GetModel();
   model->AddNode(parent, this);
 
@@ -51,11 +51,18 @@ EntityNode::EntityNode(gfx::EntityP& entity, SceneNode* parent):
   node = new EntityPartNode("Ligands", entity, mol::QueryViewWrapper(entity->GetView().Select("ishetatm=1 and ele=C")), quick_selection);
   model->AddNode(quick_selection, node);
 
+  custom_view_ = new LabelNode("Custom Views", this);
+  model->AddNode(this, custom_view_);
+
   node = new EntityPartNode("Full View", entity, mol::QueryViewWrapper(entity->GetView()), this);
   model->AddNode(this, node);
 
   node = new CurrentSelectionNode(entity, this);
   model->AddNode(this, node);
+}
+
+SceneNode* EntityNode::GetCustomViewNode(){
+  return custom_view_;
 }
 
 }}

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2009 by the OpenStructure authors
+// Copyright (C) 2008-2010 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -16,36 +16,50 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QFont>
+#ifndef OST_GUI_SCENE_WIN_CONTEXT_MENU_HH
+#define OST_GUI_SCENE_WIN_CONTEXT_MENU_HH
 
-#include <ost/mol/query_view_wrapper.hh>
+/*
+  Author: Stefan Scheuber
+ */
 
-#include <ost/gfx/scene.hh>
-#include <ost/gfx/gfx_node.hh>
+#include <QMap>
+#include <QAbstractItemModel>
+#include <QTreeView>
 
-#include <ost/gui/gosty_app.hh>
-#include <ost/gui/scene_win/scene_win.hh>
-
-#include "current_selection_node.hh"
+#include <ost/gui/module_config.hh>
+#include <ost/gui/scene_win/scene_win_model.hh>
 
 namespace ost { namespace gui {
 
-CurrentSelectionNode::CurrentSelectionNode(gfx::EntityP entity, SceneNode* parent):EntityPartNode("Current Selection",entity,mol::QueryViewWrapper(entity->GetSelection()),parent),wrapper_(mol::QueryViewWrapper(entity->GetSelection())){
-}
+enum ContextMenuType {
+  GFX_OBJECTS = 1,
+  ENTITIES,
+  ENTITY_VIEWS,
+  MIX
+};
 
-void CurrentSelectionNode::SetQueryView(mol::QueryViewWrapper part)
-{
-  //Do Nothing
-}
 
-mol::QueryViewWrapper CurrentSelectionNode::GetQueryView() const
-{
-  if(this->GetEntity()->GetSelection()!=wrapper_.GetEntityView()){
-    wrapper_ = mol::QueryViewWrapper(this->GetEntity()->GetSelection());
-  }
+class DLLEXPORT_OST_GUI ContextMenu : public QObject {
+  Q_OBJECT
+public:
+  ContextMenu(QTreeView* view, SceneWinModel* model);
+  ~ContextMenu(){};
 
-  return wrapper_;
-}
+  void ShowMenu(const QPoint& pos);
+  void Rename(QModelIndex index);
+
+private slots:
+  void AddView();
+  void Rename();
+
+private:
+  gui::ContextMenuType GetType();
+
+  QTreeView* view_;
+  SceneWinModel* model_;
+};
 
 }}
 
+#endif

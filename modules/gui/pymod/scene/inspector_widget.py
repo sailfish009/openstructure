@@ -48,7 +48,7 @@ class InspectorWidget(ToolBarOptionsWidget):
     app=gui.GostyApp.Instance()
     self.scene_selection_ = gui.SceneSelection.Instance()
     scenewin = sip.wrapinstance(app.GetSceneWin().GetSipHandle(),QtGui.QWidget)
-    QtCore.QObject.connect(scenewin,QtCore.SIGNAL("ActiveNodesChanged(gfx::NodePtrList)"),
+    QtCore.QObject.connect(scenewin,QtCore.SIGNAL("ActiveNodesChanged(gfx::NodePtrList,gfx::EntityP,mol::QueryViewWrapperList)"),
                            self.EntitySelectionChanged)     
     
     self.setMinimumSize(250,215)

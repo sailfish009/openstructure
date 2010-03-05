@@ -59,9 +59,6 @@ bool GfxSceneNode::SetData(int column, const QVariant& value, int role){
      gfx_node_->Show();
     } else {
      gfx_node_->Hide();
-     for(int i = 0; i<this->GetChildCount(); i++){
-       this->GetChild(i)->SetData(0,value,Qt::CheckStateRole);
-     }
     }
     return true;
   }

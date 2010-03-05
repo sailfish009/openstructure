@@ -21,6 +21,8 @@
 #include <ost/geom/vec3.hh>
 #include <ost/geom/vecmat3_op.hh>
 
+#include <ost/mol/view_op.hh>
+
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gfx/entity.hh>
@@ -35,15 +37,17 @@
 namespace ost { namespace gui {
 SceneSelection* SceneSelection::scene_selection_ = NULL;
 
-SceneSelection::SceneSelection():nodes_()
+SceneSelection::SceneSelection():nodes_(),views_()
 {
   SceneWin* scene_win = GostyApp::Instance()->GetSceneWin();
-  QObject::connect(scene_win, SIGNAL(ActiveNodesChanged(gfx::NodePtrList)),
-               this, SLOT(SetActiveNodes(gfx::NodePtrList)));
+  QObject::connect(scene_win, SIGNAL(ActiveNodesChanged(gfx::NodePtrList,gfx::EntityP,mol::QueryViewWrapperList)),
+               this, SLOT(SetActiveNodes(gfx::NodePtrList,gfx::EntityP,mol::QueryViewWrapperList)));
 }
 
-void SceneSelection::SetActiveNodes(gfx::NodePtrList nodes){
+void SceneSelection::SetActiveNodes(gfx::NodePtrList nodes, gfx::EntityP entity, mol::QueryViewWrapperList views){
   nodes_ = nodes;
+  view_entity_ = entity;
+  views_ = views;
 }
 
 gfx::GfxNodeP SceneSelection::GetActiveNode(unsigned int pos){
@@ -57,6 +61,10 @@ gfx::GfxNodeP SceneSelection::GetActiveNode(unsigned int pos){
 
 int SceneSelection::GetActiveNodeCount(){
   return nodes_.size();
+}
+
+int SceneSelection::GetActiveViewCount(){
+  return views_.size();
 }
 
 SceneSelection* SceneSelection::Instance() {
@@ -176,46 +184,42 @@ void SceneSelection::Hide() {
   }
 }
 
-void SceneSelection::ShowMenu(const QPoint & p){
-  QMenu* menu = new QMenu();
-  bool all_visible = true;
-  bool all_not_scene = true;
-  bool all_hidden = true;
-  bool all_entities = true;
-  bool all_gfx_objects = true;
-  for(unsigned int i = 0; i < nodes_.size(); i++){
-    if(nodes_[i]){
-      if(nodes_[i]->IsVisible()){all_hidden=false;}
-      else{all_visible=false;}
-      if(nodes_[i]->GetType()==0){all_not_scene = false;}
-      if(!dynamic_cast<gfx::GfxObj*> (nodes_[i].get())){all_gfx_objects = false;}
-      if(!dynamic_cast<gfx::Entity*> (nodes_[i].get())){all_entities = false;}
+mol::EntityView SceneSelection::GetViewUnion() {
+  mol::EntityView view;
+  if(views_.size()>0){
+    view = views_[0].GetEntityView().Copy();
+    for(unsigned int i = 1; i < views_.size(); i++){
+      view = mol::Union(view,views_[i].GetEntityView());
     }
   }
-  QAction* action;
-  if(all_gfx_objects){
-    action = menu->addAction("Center on Object");
-    connect(action, SIGNAL(triggered()), this, SLOT(CenterOnObjects()));
-  }
-  if(all_entities){
-    action = menu->addAction("Copy");
-    connect(action, SIGNAL(triggered()), this, SLOT(CopyViews()));
-    action = menu->addAction("Select");
-    connect(action, SIGNAL(triggered()), this, SLOT(Select()));
-  }
-  if(all_not_scene){
-    action = menu->addAction("Delete");
-    connect(action, SIGNAL(triggered()), this, SLOT(Delete()));
-  }
-  if(!all_visible){
-    action = menu->addAction("Show");
-    connect(action, SIGNAL(triggered()), this, SLOT(Show()));
-  }
-  if(!all_hidden){
-    action = menu->addAction("Hide");
-    connect(action, SIGNAL(triggered()), this, SLOT(Hide()));
-  }
-  menu->popup(p);
+  return view;
 }
+
+void SceneSelection::ShowExclusive(){
+  view_entity_->SetVisible(view_entity_->GetView(),false);
+  this->MakeVisible();
+}
+
+void SceneSelection::HideExclusive(){
+  view_entity_->SetVisible(view_entity_->GetView(),true);
+  this->MakeHidden();
+}
+
+void SceneSelection::MakeVisible(){
+  for(unsigned int i= 0; i < views_.size(); i++){
+    view_entity_->SetVisible(views_[i].GetEntityView(),true);
+  }
+}
+
+void SceneSelection::MakeHidden(){
+  for(unsigned int i= 0; i < views_.size(); i++){
+    view_entity_->SetVisible(views_[i].GetEntityView(),false);
+  }
+}
+
+gfx::EntityP SceneSelection::GetViewEntity(){
+  return view_entity_;
+}
+
 }}
 

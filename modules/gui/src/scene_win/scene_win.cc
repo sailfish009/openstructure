@@ -50,6 +50,7 @@ SceneWin::SceneWin(QWidget* parent) :
   layout->setSpacing(0);
   model_ = new SceneWinModel(this);
   view_ = new QTreeView(this);
+  context_menu_ = new ContextMenu(view_,model_);
   view_->setAttribute(Qt::WA_MacShowFocusRect, false);
   view_->header()->hide();
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -57,6 +58,7 @@ SceneWin::SceneWin(QWidget* parent) :
   view_->setSelectionBehavior(QAbstractItemView::SelectRows);
   view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
   view_->expandAll();
+
   layout->addWidget(view_);
   connect(view_->selectionModel(),
       SIGNAL(selectionChanged(const QItemSelection&,
@@ -70,7 +72,7 @@ SceneWin::SceneWin(QWidget* parent) :
 
 void SceneWin::ContextMenuRequested(const QPoint& pos) {
   if (view_->indexAt(pos).isValid()) {
-    SceneSelection::Instance()->ShowMenu(view_->viewport()->mapToGlobal(pos));
+    context_menu_->ShowMenu(view_->viewport()->mapToGlobal(pos));
   }
 }
 
@@ -79,7 +81,12 @@ void SceneWin::OnSelectionChange(const QItemSelection& sel,
   QItemSelectionModel* model = view_->selectionModel();
   QModelIndexList indexes = model->selection().indexes();
   gfx::NodePtrList selected_nodes = model_->GetGfxNodes(indexes);
-  emit this->ActiveNodesChanged(selected_nodes);
+  mol::QueryViewWrapperList selected_views = model_->GetQueryViewsList(indexes);
+  gfx::EntityP entity = model_->GetEntityOfViews(indexes);
+  if(entity)
+    emit this->ActiveNodesChanged(selected_nodes,entity,selected_views);
+  else
+    emit this->ActiveNodesChanged(selected_nodes,entity,mol::QueryViewWrapperList());
 }
 
 SceneWinModel* SceneWin::GetModel(){
@@ -97,6 +104,11 @@ void SceneWin::RowsInserted(const QModelIndex & parent, int start, int end){
   if(indexes.isEmpty()){
     model->select(parent.child(start,0),QItemSelectionModel::ClearAndSelect|QItemSelectionModel::Rows);
   }
+}
+
+
+void SceneWin::AddView(gfx::EntityP entity, mol::EntityView view){
+
 }
 
 

@@ -16,8 +16,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_SCENE_WIN_ENTITY_PART_NODE_HH
-#define OST_GUI_SCENE_WIN_ENTITY_PART_NODE_HH
+#ifndef OST_GUI_SCENE_WIN_CUSTOM_PART_NODE_HH
+#define OST_GUI_SCENE_WIN_CUSTOM_PART_NODE_HH
 
 #include <QObject>
 #include <QVariant>
@@ -30,38 +30,20 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/scene_win/scene_node.hh>
 
+#include "entity_part_node.hh"
 /*
   Author: Stefan Scheuber
  */
 
 namespace ost { namespace gui {
 
-class DLLEXPORT_OST_GUI EntityPartNode : public SceneNode {
+class DLLEXPORT_OST_GUI CustomPartNode : public EntityPartNode {
   Q_OBJECT
 public:
-  EntityPartNode(QString name, gfx::EntityP entity, mol::QueryViewWrapper part, SceneNode* node_parent );
+  CustomPartNode(QString name, gfx::EntityP entity, mol::QueryViewWrapper part, SceneNode* node_parent );
 
-  virtual QVariant GetData(int column, int role);
+  virtual bool SetData(int column, const QVariant& value, int role);
   virtual Qt::ItemFlags Flags(int column) const;
-  virtual int GetColumnCount() const;
-
-  virtual void SetQueryView(mol::QueryViewWrapper part);
-  virtual mol::QueryViewWrapper GetQueryView() const;
-
-  virtual gfx::EntityP GetEntity() const;
-
-  virtual void SetName(QString name);
-  virtual const QString& GetName() const;
-
-protected:
-  virtual void SetVisible(bool visible);
-  virtual bool GetVisible();
-
-private:
-  QString name_;
-  gfx::EntityP entity_;
-  mol::QueryViewWrapper query_view_;
-  bool visible_;
 };
 
 }}

@@ -68,6 +68,43 @@ gfx::NodePtrList SceneWinModel::GetGfxNodes(QModelIndexList indexes){
   return selected_nodes;
 }
 
+mol::QueryViewWrapperList SceneWinModel::GetQueryViewsList(QModelIndexList indexes){
+  mol::QueryViewWrapperList selected_views;
+  for(int i = 0; i < indexes.size(); i++){
+    if(indexes[i].column()==0){
+      EntityPartNode* part_node = qobject_cast<EntityPartNode*>(GetItem(indexes[i]));
+      if(part_node){
+        mol::QueryViewWrapper node = part_node->GetQueryView();
+        selected_views.push_back(node);
+      }
+    }
+  }
+  return selected_views;
+}
+
+gfx::EntityP SceneWinModel::GetEntityOfViews(QModelIndexList indexes){
+  mol::QueryViewWrapperList selected_views;
+  gfx::EntityP entity;
+  bool entity_set = false;
+  for(int i = 0; i < indexes.size(); i++){
+    if(indexes[i].column()==0){
+      EntityPartNode* part_node = qobject_cast<EntityPartNode*>(GetItem(indexes[i]));
+      if(part_node){
+        if(entity_set){
+          if (entity != part_node->GetEntity()){
+            return gfx::EntityP();
+          }
+        }
+        else{
+          entity = part_node->GetEntity();
+          entity_set = true;
+        }
+      }
+    }
+  }
+  return entity;
+}
+
 void SceneWinModel::Update(){
   emit this->dataChanged(QModelIndex(),QModelIndex());
 }
@@ -163,37 +200,21 @@ bool SceneWinModel::setData(const QModelIndex& index,
 
 void SceneWinModel::NodeAdded(const gfx::GfxNodeP& node)
 {
-  QModelIndex scene_node_model_index = this->index(0,0,QModelIndex());
-
-  SceneNode* scene_node = NULL;
   gfx::EntityP e=boost::dynamic_pointer_cast<gfx::Entity>(node);
   if(e){
-    scene_node = new EntityNode(e,scene_node_);
+    new EntityNode(e,scene_node_);
   }
   else{
-    scene_node = new GfxSceneNode(node, scene_node_);
+    SceneNode* scene_node = new GfxSceneNode(node, scene_node_);
     this->AddNode(scene_node_,scene_node);
   }
 }
 
 void SceneWinModel::NodeRemoved(const gfx::GfxNodeP& node)
 {
-  int i=0;
-  SceneNode* found = NULL;
-  while(!found && i<scene_node_->GetChildCount()){
-    GfxSceneNode* gfx_scene_node = qobject_cast<GfxSceneNode*>(scene_node_->GetChild(i));
-    if(gfx_scene_node && node==gfx_scene_node->GetGfxNode()){
-      found = gfx_scene_node;
-    }
-    else{
-      i++;
-    }
-  }
-  if(found){
-    QModelIndex scene_node_model_index = this->index(0,0,QModelIndex());
-    this->beginRemoveRows(scene_node_model_index,i,i);
-    scene_node_->RemoveChild(found);
-    this->endRemoveRows();
+  SceneNode* scene_node = this->FindGfxNode(node);
+  if(scene_node->GetParent()){
+    this->RemoveNode(scene_node);
   }
 }
 
@@ -254,11 +275,11 @@ void SceneWinModel::DetachRenderModeObserver(RenderModesNode* node){
   }
 }
 
-QModelIndex SceneWinModel::GetIndexOf(SceneNode* node){
-  return GetIndex(node,index(0,0,QModelIndex()));
+QModelIndex SceneWinModel::GetIndexOf(SceneNode* node, int column){
+  return GetIndex(node,index(0,0,QModelIndex()),column);
 }
 
-QModelIndex SceneWinModel::GetIndex(SceneNode* node, QModelIndex parent){
+QModelIndex SceneWinModel::GetIndex(SceneNode* node, QModelIndex parent, int column){
   if(parent.isValid()){
     SceneNode* parent_node =reinterpret_cast<SceneNode*>(parent.internalPointer());
     if(parent_node == node)return parent;
@@ -266,9 +287,12 @@ QModelIndex SceneWinModel::GetIndex(SceneNode* node, QModelIndex parent){
     while(i>=0){
       SceneNode* child = parent_node->GetChild(i);
       if(child == node){
-        return index(i,0,parent);
+        if(column<child->GetColumnCount())
+          return index(i,column,parent);
+        else
+          return QModelIndex();
       }
-      QModelIndex found = GetIndex(node, index(i,0,parent));
+      QModelIndex found = GetIndex(node, index(i,0,parent),column);
       if (found.isValid()) {
         return found;
       }
@@ -276,6 +300,20 @@ QModelIndex SceneWinModel::GetIndex(SceneNode* node, QModelIndex parent){
     }
   }
   return QModelIndex();
+}
+
+SceneNode* SceneWinModel::FindGfxNode(gfx::GfxNodeP node) const{
+  int i=0;
+  while(i<scene_node_->GetChildCount()){
+    GfxSceneNode* gfx_scene_node = qobject_cast<GfxSceneNode*>(scene_node_->GetChild(i));
+    if(gfx_scene_node && node==gfx_scene_node->GetGfxNode()){
+      return gfx_scene_node;
+    }
+    else{
+      i++;
+    }
+  }
+  return root_node_;
 }
 
 }} // ns

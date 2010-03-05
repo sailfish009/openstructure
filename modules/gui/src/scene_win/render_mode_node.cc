@@ -18,29 +18,25 @@
 //------------------------------------------------------------------------------
 #include <QFont>
 
-#include <ost/gfx/scene.hh>
-#include <ost/gfx/gfx_node.hh>
-
-#include <ost/gui/gosty_app.hh>
-#include <ost/gui/scene_win/scene_win.hh>
+#include <ost/mol/query_view_wrapper.hh>
 
 #include "render_mode_node.hh"
 
 namespace ost { namespace gui {
 
-RenderModeNode::RenderModeNode(gfx::EntityP entity, gfx::RenderMode::Type render_mode, SceneNode* parent):GfxSceneNode(entity,parent),render_mode_(render_mode){
+RenderModeNode::RenderModeNode(gfx::EntityP entity, gfx::RenderMode::Type render_mode, SceneNode* parent):EntityPartNode(entity->GetRenderModeName(render_mode).c_str(),entity,mol::QueryViewWrapper(entity->GetRenderView(render_mode)),parent),
+    entity_(entity),
+    render_mode_(render_mode){
 }
 
 QVariant RenderModeNode::GetData(int column, int role){
   if(column<0 || column > 2)return QVariant();
 
   if (role==Qt::CheckStateRole && column==0) {
-    gfx::EntityP entity =boost::dynamic_pointer_cast<gfx::Entity>(this->GetGfxNode());
-    return QVariant(entity->IsRenderModeEnabled(render_mode_) ? Qt::Checked : Qt::Unchecked);
+    return QVariant(entity_->IsRenderModeEnabled(render_mode_) ? Qt::Checked : Qt::Unchecked);
   } else if(column==1) {
     if (role==Qt::DisplayRole) {
-      gfx::EntityP entity =boost::dynamic_pointer_cast<gfx::Entity>(this->GetGfxNode());
-      String name = entity->GetRenderModeName(render_mode_);
+      String name = entity_->GetRenderModeName(render_mode_);
       return QVariant(name.c_str());
     } else if(role==Qt::FontRole) {
       QFont f("Helvetica");
@@ -56,12 +52,11 @@ int RenderModeNode::GetColumnCount() const{
 
 bool RenderModeNode::SetData(int column, const QVariant& value, int role){
   if (column==0 && role == Qt::CheckStateRole) {
-    gfx::EntityP entity =boost::dynamic_pointer_cast<gfx::Entity>(this->GetGfxNode());
     if (value.toBool()) {
       this->GetParent()->SetData(0,value,Qt::CheckStateRole);
-      entity->SetEnableRenderMode(render_mode_, true);
+      entity_->SetEnableRenderMode(render_mode_, true);
     } else {
-      entity->SetEnableRenderMode(render_mode_, false);
+      entity_->SetEnableRenderMode(render_mode_, false);
     }
     return true;
   }
@@ -80,6 +75,11 @@ Qt::ItemFlags RenderModeNode::Flags(int column) const{
 
 gfx::RenderMode::Type RenderModeNode::GetRenderMode() const {
   return render_mode_;
+}
+
+void RenderModeNode::SetQueryView(mol::QueryViewWrapper part)
+{
+  //Do Nothing
 }
 
 }}

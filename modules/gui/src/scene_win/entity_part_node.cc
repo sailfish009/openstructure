@@ -30,10 +30,7 @@ EntityPartNode::EntityPartNode(QString name, gfx::EntityP entity, mol::QueryView
 
 QVariant EntityPartNode::GetData(int column, int role){
   if(column<0 || column > 2)return QVariant();
-
-  if (role==Qt::CheckStateRole && column==0) {
-    return QVariant(visible_ ? Qt::Checked : Qt::Unchecked);
-  } else if(column==1) {
+  if(column==1) {
     if (role==Qt::DisplayRole) {
       return QVariant(name_);
     } else if(role==Qt::FontRole) {
@@ -48,24 +45,9 @@ int EntityPartNode::GetColumnCount() const{
   return 2;
 }
 
-bool EntityPartNode::SetData(int column, const QVariant& value, int role){
-  if (column==0 && role == Qt::CheckStateRole) {
-    if (value.toBool()) {
-      this->GetParent()->SetData(0,value,Qt::CheckStateRole);
-      entity_->SetVisible(query_view_.GetEntityView(), true);
-      visible_=true;
-    } else {
-      entity_->SetVisible(query_view_.GetEntityView(), false);
-      visible_=false;
-    }
-    return true;
-  }
-  return false;
-}
-
 Qt::ItemFlags EntityPartNode::Flags(int column) const{
   if(column==0){
-    return Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled;
+    return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
   }
   else if(column==1){
     return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
@@ -79,6 +61,26 @@ void EntityPartNode::SetQueryView(mol::QueryViewWrapper part){
 
 mol::QueryViewWrapper EntityPartNode::GetQueryView() const{
   return query_view_;
+}
+
+void EntityPartNode::SetVisible(bool visible){
+  visible_ = visible;
+}
+
+bool EntityPartNode::GetVisible(){
+  return visible_;
+}
+
+gfx::EntityP EntityPartNode::GetEntity() const{
+  return entity_;
+}
+
+void EntityPartNode::SetName(QString name){
+  name_ = name;
+}
+
+const QString& EntityPartNode::GetName() const{
+  return name_;
 }
 
 }}

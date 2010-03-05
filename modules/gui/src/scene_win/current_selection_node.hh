@@ -28,12 +28,9 @@
 
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/entity_fw.hh>
-#include <ost/gfx/scene_observer.hh>
-#include <ost/gfx/gfx_object.hh>
-#include <ost/gfx/gfx_object_fw.hh>
 
 #include <ost/gui/module_config.hh>
-#include <ost/gui/scene_win/gfx_scene_node.hh>
+#include <ost/gui/scene_win/entity_part_node.hh>
 
 /*
   Author: Stefan Scheuber
@@ -41,21 +38,16 @@
 
 namespace ost { namespace gui {
 
-class DLLEXPORT_OST_GUI CurrentSelectionNode : public GfxSceneNode {
+class DLLEXPORT_OST_GUI CurrentSelectionNode : public EntityPartNode {
   Q_OBJECT
 public:
   CurrentSelectionNode(gfx::EntityP entity, SceneNode* node_parent );
 
-  virtual QVariant GetData(int column, int role);
-  virtual bool SetData(int column, const QVariant& value, int role);
-  virtual Qt::ItemFlags Flags(int column) const;
-  virtual int GetColumnCount() const;
-
-  //Scene Observer interface
-  virtual void SelectionChanged();
+  virtual void SetQueryView(mol::QueryViewWrapper part);
+  virtual mol::QueryViewWrapper GetQueryView() const;
 
 private:
-  bool visible_;
+  mutable mol::QueryViewWrapper wrapper_;
 };
 
 }}

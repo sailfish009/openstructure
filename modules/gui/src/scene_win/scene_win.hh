@@ -22,11 +22,14 @@
 #include <QTreeView>
 #include <QItemSelection>
 
+#include <ost/mol/query_view_wrapper.hh>
+
 #include <ost/gfx/gfx_node_fw.hh>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
 #include <ost/gui/scene_win/scene_win_model.hh>
+#include <ost/gui/scene_win/context_menu.hh>
 
 /*
   Authors: Marco Biasini, Ansgar Philippsen, Stefan Scheuber
@@ -43,11 +46,13 @@ public:
   ~SceneWin();
 
 signals:
-  void ActiveNodesChanged(gfx::NodePtrList nodes);
+  void ActiveNodesChanged(gfx::NodePtrList nodes, gfx::EntityP entity, mol::QueryViewWrapperList views);
 
 public:
   virtual bool Save(const QString& prefix) { return true; }
   virtual bool Restore(const QString& prefix) { return true; }
+
+  void AddView(gfx::EntityP entity, mol::EntityView view);
 
 public slots:
   void OnSelectionChange(const QItemSelection& sel, const QItemSelection& desel);
@@ -64,6 +69,7 @@ private slots:
 private:
   SceneWinModel* model_;
   QTreeView* view_;
+  ContextMenu* context_menu_;
 };
 
 }} // ns
