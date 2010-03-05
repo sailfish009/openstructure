@@ -108,6 +108,10 @@ def _load_files():
           images.append(m)  
           v=gui.CreateDataViewer(m)
           viewers.append(v)
+          app=gui.GostyApp.Instance()
+          widget=gui.BPQtHandle(v.GetSipHandle())
+          main_area=app.perspective.main_area
+          main_area.AddWidget(f[0], widget)          
         else:
           miso=gfx.MapIso(m, 10.0, os.path.basename(f[0]))
           c+=miso.center
