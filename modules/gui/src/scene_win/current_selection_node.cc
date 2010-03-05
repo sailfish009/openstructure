@@ -40,10 +40,7 @@ void CurrentSelectionNode::SetQueryView(mol::QueryViewWrapper part)
 
 mol::QueryViewWrapper CurrentSelectionNode::GetQueryView() const
 {
-  if(this->GetEntity()->GetSelection()!=wrapper_.GetEntityView()){
-    wrapper_ = mol::QueryViewWrapper(this->GetEntity()->GetSelection());
-  }
-
+  wrapper_ = mol::QueryViewWrapper(this->GetEntity()->GetSelection());
   return wrapper_;
 }
 
