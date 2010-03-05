@@ -251,7 +251,7 @@ void Scene::InitGL()
   Shader::Instance().Setup();
   Shader::Instance().Activate("fraglight");
 
-  glGenTextures(1,texture_id_);
+  glGenTextures(1,&texture_id_);
 #endif
 
   prep_glyphs();
@@ -1427,7 +1427,7 @@ void Scene::prep_shadow_map()
 
   // now get the shadow map
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture_id_[0]);
+  glBindTexture(GL_TEXTURE_2D, texture_id_);
 
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
                    0,0, smap_size,smap_size, 0);
