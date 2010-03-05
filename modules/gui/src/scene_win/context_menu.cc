@@ -91,16 +91,17 @@ void ContextMenu::ShowMenu(const QPoint& pos)
     if(all_gfx_objects){
       action = menu->addAction("Center on Object");
       connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(CenterOnObjects()));
-    }
-    if(all_entities){
-      action = menu->addAction("Copy");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(CopyViews()));
-      action = menu->addAction("Select");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Select()));
+
+      if(all_entities){
+        action = menu->addAction("Copy");
+        connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(CopyViews()));
+        action = menu->addAction("Select");
+        connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Select()));
+      }
 
       if(all_not_scene){
-            action = menu->addAction("Delete");
-            connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Delete()));
+                  action = menu->addAction("Delete");
+                  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Delete()));
       }
     }
 
@@ -133,6 +134,11 @@ void ContextMenu::ShowMenu(const QPoint& pos)
 
       action = menu->addAction("Create Custom View");
       connect(action, SIGNAL(triggered()), this, SLOT(AddView()));
+
+      if(all_custom_views){
+        action = menu->addAction("Delete");
+        connect(action, SIGNAL(triggered()), this, SLOT(DeleteView()));
+      }
     }
 
   menu->popup(pos);
@@ -164,6 +170,15 @@ void ContextMenu::Rename(){
   if(indexes.size() == 2)
   {
     this->Rename(indexes[1]);
+  }
+}
+
+void ContextMenu::DeleteView(){
+  QModelIndexList indexes = view_->selectionModel()->selection().indexes();
+  for(int i = 0; i < indexes.size(); i++){
+    if(indexes[i].column()==0){
+      model_->RemoveNode(model_->GetItem(indexes[i]));
+    }
   }
 }
 

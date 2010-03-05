@@ -52,6 +52,8 @@ public:
 private slots:
   void AddView();
   void Rename();
+  void DeleteView();
+
 
 private:
   gui::ContextMenuType GetType();
