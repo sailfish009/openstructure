@@ -56,7 +56,7 @@ public:
 protected:
   void SetFixedPickRadius(float radius) { pick_radius_=radius;}    
   bool HasFixedPickRadius() const { return pick_radius_!=0.0; }
-  bool GetFixedPickRadius() const { return pick_radius_; }
+  float GetFixedPickRadius() const { return pick_radius_; }
 
 protected:
  float     pick_radius_;

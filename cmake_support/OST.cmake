@@ -1,5 +1,5 @@
 #-------------------------------------------------------------------------------
-# Author: Marco Biasini
+# Author: Marco Biasini, Juergen Haas
 #
 # This file contains a bunch of useful macros to facilitate the build-system
 # configuration for the modules.
@@ -489,8 +489,13 @@ macro(ost_unittest MODULE SOURCE_FILES)
       endif()
     endif()
     foreach(py_test ${PY_TESTS})
+      if(WIN32)
+        set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost.bat")
+      else()
+        set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost.bat")
+      endif()
       add_custom_target("${py_test}_run"
-                  COMMAND ${EXECUTABLE_OUTPUT_PATH}/ost ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo
+                  COMMAND ${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                   COMMENT "running checks  ${py_test}" VERBATIM)
       add_dependencies("${py_test}_run" ost_scripts "_${MODULE}")

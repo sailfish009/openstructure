@@ -375,7 +375,7 @@ private:
   Color fog_color_;
   bool shadow_flag_;
   int shadow_quality_;
-  GLuint texture_id_[1];
+  GLuint texture_id_;
   bool auto_autoslab_;
 
   bool offscreen_flag_;

@@ -22,6 +22,7 @@
 #include <ost/img/image_handle.hh>
 #include <ost/img/image_state.hh>
 #include <ost/gfx/module_config.hh>
+#include <ost/stdint.hh>
 /*
   Author: Marco Biasini
  */

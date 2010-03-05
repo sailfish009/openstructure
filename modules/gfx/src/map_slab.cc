@@ -188,8 +188,8 @@ std::pair<float, float> calc_sr(float ax, float ay,
                                   float cx, float cy)
 {
   float det = ax*by-ay*bx;
-  if(std::abs(det)<1e-10) {
-    return std::make_pair(0.0,0.0);
+  if(std::abs(det)<1e-10f) {
+    return std::make_pair(0.0f,0.0f);
   }
   return std::make_pair((cx*by-cy*bx)/det,
                         (ax*cy-ay*cx)/det);
