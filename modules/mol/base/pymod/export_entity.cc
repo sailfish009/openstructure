@@ -102,6 +102,7 @@ void export_Entity()
     .add_property("residues", &EntityHandle::GetResidueList)
     .add_property("atoms", &EntityHandle::GetAtomList)
     .add_property("chains", &EntityHandle::GetChainList)
+    .add_property("bonds", &EntityHandle::GetBondList)    
     .def("RequestICSEditor", &EntityHandle::RequestICSEditor,
          X_ics_editor_overloads(args("mode")))
     .def("RequestXCSEditor", &EntityHandle::RequestXCSEditor,
