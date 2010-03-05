@@ -47,6 +47,7 @@ public:
 
 signals:
   void ActiveNodesChanged(gfx::NodePtrList nodes, gfx::EntityP entity, mol::QueryViewWrapperList views);
+  void ActiveNodesChanged();
 
 public:
   virtual bool Save(const QString& prefix) { return true; }

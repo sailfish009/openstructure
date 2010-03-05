@@ -87,6 +87,8 @@ void SceneWin::OnSelectionChange(const QItemSelection& sel,
     emit this->ActiveNodesChanged(selected_nodes,entity,selected_views);
   else
     emit this->ActiveNodesChanged(selected_nodes,entity,mol::QueryViewWrapperList());
+
+  emit this->ActiveNodesChanged();
 }
 
 SceneWinModel* SceneWin::GetModel(){
