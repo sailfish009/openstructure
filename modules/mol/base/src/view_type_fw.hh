@@ -48,6 +48,9 @@ typedef boost::shared_ptr<EntityViewData> EntityViewDataPtr;
 typedef boost::weak_ptr<EntityViewData> EntityViewDataWeakPtr;
 typedef std::vector<EntityView> EntityViewList;
 
+class QueryViewWrapper;
+typedef std::vector<QueryViewWrapper> QueryViewWrapperList;
+
 /// \brief Flags to control the behaviour when adding handles to views.
 struct ViewAddFlag {
   typedef enum {

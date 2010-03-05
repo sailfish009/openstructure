@@ -19,6 +19,7 @@
 #ifndef OST_QUERY_VIEW_WRAPPER_HH
 #define OST_QUERY_VIEW_WRAPPER_HH
 
+#include <ost/mol/view_type_fw.hh>
 #include <ost/mol/module_config.hh>
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/entity_handle.hh>

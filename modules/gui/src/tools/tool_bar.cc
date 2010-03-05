@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <QActionGroup>
 
-
+#include <ost/mol/query_view_wrapper.hh>
 #include <ost/gui/tools/tool_manager.hh>
 #include <ost/gui/gosty_app.hh>
 #include "tool_bar.hh"
@@ -37,7 +37,7 @@ ToolBar::ToolBar(QWidget* parent):
           SLOT(ActivateTool(QAction*)));  
   connect(this, SIGNAL(actionTriggered(QAction*)),
           this,SLOT(OnAction(QAction*)));
-  connect(scene_win, SIGNAL(ActiveNodesChanged(gfx::NodePtrList)),
+  connect(scene_win, SIGNAL(ActiveNodesChanged(gfx::NodePtrList,gfx::EntityP,mol::QueryViewWrapperList)),
           this,SLOT(OnActiveGfxNodeChanged(gfx::NodePtrList)));
   connect(&ToolManager::Instance(), SIGNAL(ToolAdded(const Tool*&)),
           this, SLOT(OnToolAdded(const Tool*&)));          

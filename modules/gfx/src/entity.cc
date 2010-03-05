@@ -674,7 +674,7 @@ void Entity::SetDetailColor(const Color& col, const String& selection)
 /// \brief set selection
 void Entity::SetSelection(const mol::EntityView& view)
 {
-  if (!sel_.IsValid()) {
+  if (!view.IsValid()) {
     sel_=this->GetView().CreateEmptyView();
   } else {
     sel_=view;

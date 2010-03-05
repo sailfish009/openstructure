@@ -109,7 +109,9 @@ mol::EntityView Difference(const mol::EntityView& ev1,
   if (ev1.GetHandle()!=ev2.GetHandle()) {
     throw IntegrityError(combining_not_allowed);
   }
+  if(ev2.GetChainCount()==0 && ev2.GetResidueCount()==0 && ev2.GetAtomCount()==0)return ev1.Copy();
   mol::EntityView diff=ev1.CreateEmptyView();
+  if(ev1.GetChainCount()==0 && ev1.GetResidueCount()==0 && ev1.GetAtomCount()==0)return diff;
   mol::ChainViewList::const_iterator c_it=ev1.GetChainList().begin();
   for ( ; c_it!=ev1.GetChainList().end(); ++c_it) {
     mol::ChainView cv=*c_it;
