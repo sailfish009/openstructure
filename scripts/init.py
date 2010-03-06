@@ -113,7 +113,7 @@ def _load_files():
           main_area=app.perspective.main_area
           main_area.AddWidget(f[0], widget)          
         else:
-          miso=gfx.MapIso(m, 10.0, os.path.basename(f[0]))
+          miso=gfx.MapIso(os.path.basename(f[0]), m)
           c+=miso.center
           graphical_objects.append(miso)
           scene.Add(miso)
