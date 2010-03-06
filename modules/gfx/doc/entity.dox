@@ -55,13 +55,13 @@ It is also possible to only change the color of certain parts:
  
  The \ref RenderMode::HSC "cartoon" render mode uses two colors to color the
  secondary structure elements. The main color affects the top and bottom of
- extended  and the outside of helical elements. The detail color is used for the
- inner side of helices and the rim of extended elements. This color is changed
- with Entity::SetDetailColor(). 
+ extended  and the outside of helical elements. The %detail color is used for
+ the inner side of helices and the rim of extended elements. This color is
+ changed with Entity::SetDetailColor(). 
  
 \section gfx_rm Render Modes
 
-Render modes broadly fall into categories: Render modes at full connectivity level such as the \ref RenderMode::SIMPLE "simple", \ref RenderMode::CPK "spheres" and  \ref RenderMode::CUSTOM "balls & sticks" render modes and render modes that simplify the geometry of molecular entities. The latter class is represented by the \ref RenderMode::LINE_TRACE "trace", \ref RenderMode::SLINE "smooth line", \ref RenderMode::TUBE "tube" and \ref RenderMode::HSC "cartoon" render modes. Each of the entities can have more than one render mode at the same time, for example rendering one part at full connectivity level and one part at reduced detail level. The following Python code snippet shows how to display an entity with a smooth backbone and showing sidechains that are close to the bound HEM at full connectivity. This example makes heavy use of the query language, for reference \ref query "see here".
+Render modes broadly fall into categories: Render modes at full connectivity level such as the \ref RenderMode::SIMPLE "simple", \ref RenderMode::CPK "spheres" and  \ref RenderMode::CUSTOM "balls & sticks" render modes and render modes that simplify the geometry of molecular entities. The latter class is represented by the \ref RenderMode::LINE_TRACE "trace", \ref RenderMode::SLINE "smooth line", \ref RenderMode::TUBE "tube" and \ref RenderMode::HSC "cartoon" render modes. Each of the entities can have more than one render mode at the same time, for example rendering one part at full connectivity level and one part at reduced %detail level. The following Python code snippet shows how to display an entity with a smooth backbone and showing sidechains that are close to the bound HEM at full connectivity. This example makes heavy use of the query language, for reference \ref query "see here".
 
 \code
 myo_go.SetRenderMode(gfx.SLINE)
