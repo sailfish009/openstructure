@@ -30,7 +30,6 @@ namespace ost { namespace gfx {
 namespace RenderMode {
 
 enum Type {
-  DEFAULT=0,     // for all
   DEBUG,         // for all
   DEBUG2,        // for all
   TEST,          // for all

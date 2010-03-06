@@ -79,7 +79,6 @@ BOOST_PYTHON_MODULE(_gfx)
   export_ColorOps();
 
   enum_<RenderMode::Type>("RenderMode")
-    .value("DEFAULT",RenderMode::DEFAULT)
     .value("SIMPLE",RenderMode::SIMPLE)
     .value("DEBUG",RenderMode::DEBUG)
     .value("DEBUG2",RenderMode::DEBUG2)
