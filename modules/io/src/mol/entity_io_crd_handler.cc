@@ -244,11 +244,12 @@ mol::CoordGroupHandle LoadCHARMMTraj(const String& crd_fn,
 {
   Profile profile_load("LoadCHARMMTraj");
 
-  bool skip_flag = !(flags&0x1);
-  bool gap_flag = !(flags&0x2);
+  bool gap_flag = true;
 
   boost::filesystem::path crd_f(crd_fn);
   boost::filesystem::path trj_f(trj_fn);
+
+  
 
   // first the coordinate reference file
   conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
@@ -293,6 +294,20 @@ mol::CoordGroupHandle LoadCHARMMTraj(const String& crd_fn,
       LOGN_MESSAGE("LoadCHARMMTraj: byte-swapping");
       swap_flag=true;
     }
+  }
+
+  bool skip_flag=false;
+
+  if(header.icntrl[19]!=0) { // CHARMM format
+    skip_flag=(header.icntrl[10]!=0);
+    if(skip_flag) {
+      LOGN_VERBOSE("LoadCHARMMTraj: using CHARMM format with per-frame header");
+    } else {
+      LOGN_VERBOSE("LoadCHARMMTraj: using CHARMM format");
+    }
+  } else {
+    // XPLOR format
+    LOGN_VERBOSE("LoadCHARMMTraj: using XPLOR format");
   }
 
   if(gap_flag) ff.read(dummy,sizeof(dummy));

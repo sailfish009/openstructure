@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include <ost/gfx/entity.hh>
+#include <ost/gfx/povray.hh>
 
 #include "trace_renderer.hh"
 
@@ -188,6 +189,35 @@ void TraceRenderer::ConnectProfiles(VertexID prof0, VertexID prof1, int n,
     va.AddTriN(i1, i2, i3);
     va.AddTriN(i2, i3, i4);
   }
+}
+
+void TraceRenderer::RenderPov(PovState& pov, const std::string& name)
+{
+  pov.write_merge_or_union(name);
+
+  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
+    const NodeListSubset& nl=trace_subset_[node_list];
+
+    geom::Vec3 p0=nl[0].atom.GetPos();
+    float rad0=0.2;
+    Color col0=nl[0].color1;
+    pov.write_sphere(p0,rad0,col0,name);
+    for (int i=1; i<nl.GetSize();++i) {
+      const NodeEntry& entry=nl[i];
+      geom::Vec3 p1=nl[i].atom.GetPos();
+      float rad1=0.2;
+      Color col1=nl[i].color1;
+      pov.write_sphere(p1,rad1,col1,name);
+      geom::Vec3 pm=(p0+p1)*0.5;
+      pov.write_cyl(p0,pm,rad0,col0,name,true);
+      pov.write_cyl(pm,p1,rad1,col1,name,true);
+      p0=p1;
+      rad0=rad1;
+      col0=col1;
+    }
+  }
+
+  pov.inc() << " }\n";
 }
 
 void TraceRenderer::Render()

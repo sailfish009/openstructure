@@ -43,6 +43,7 @@ public:
   virtual void PrepareRendering(TraceSubset& trace_subset, 
                                 IndexedVertexArray& va, bool is_sel);
   virtual void Render();
+  virtual void RenderPov(PovState& pov, const std::string& name);
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);
   virtual void SetOptions(RenderOptionsPtr& render_options);
