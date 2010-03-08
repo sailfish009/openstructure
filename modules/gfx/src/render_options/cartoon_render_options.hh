@@ -33,7 +33,7 @@ namespace ost { namespace gfx {
 
 class DLLEXPORT_OST_GFX CartoonRenderOptions: public ost::gfx::RenderOptions {
 public:
-  CartoonRenderOptions();
+  CartoonRenderOptions(bool force_tube=false);
 
   virtual RenderMode::Type GetRenderMode();
 
@@ -76,6 +76,7 @@ public:
   virtual ~CartoonRenderOptions();
 
 private:
+  bool force_tube_;
   uint spline_detail_;
   uint poly_mode_;
   uint arc_detail_;

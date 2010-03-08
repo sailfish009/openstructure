@@ -26,7 +26,8 @@ namespace ost {
 
 namespace gfx {
 
-CartoonRenderOptions::CartoonRenderOptions(): 
+CartoonRenderOptions::CartoonRenderOptions(bool force_tube):
+  force_tube_(force_tube),
   spline_detail_(6),
   poly_mode_(2),
   arc_detail_(4),
@@ -41,10 +42,14 @@ CartoonRenderOptions::CartoonRenderOptions():
   strand_ecc_(0.3) {}
 
 RenderMode::Type CartoonRenderOptions::GetRenderMode(){
- return RenderMode::HSC;
+  if(force_tube_)
+    return RenderMode::TUBE;
+  return RenderMode::HSC;
 }
 
 bool CartoonRenderOptions::CanApplyRenderOptions(RenderOptionsPtr render_options){
+  if(force_tube_)
+    return render_options.get()->GetRenderMode()==RenderMode::TUBE;
   return render_options.get()->GetRenderMode()==RenderMode::HSC;
 }
 

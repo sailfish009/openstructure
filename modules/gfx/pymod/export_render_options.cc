@@ -79,6 +79,7 @@ void export_RenderOptions()
   ;
 
   class_<CartoonRenderOptions, boost::shared_ptr<CartoonRenderOptions>, bases<RenderOptions>, boost::noncopyable>("CartoonRenderOptions")
+    .def(init<optional<bool> >())
     .def("SetSplineDetail", &CartoonRenderOptions::SetSplineDetail)
     .def("GetSplineDetail", &CartoonRenderOptions::GetSplineDetail)
     .def("SetPolyMode", &CartoonRenderOptions::SetPolyMode)

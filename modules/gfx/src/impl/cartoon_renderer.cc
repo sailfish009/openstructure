@@ -32,7 +32,7 @@ using namespace impl;
 
 CartoonRenderer::CartoonRenderer(BackboneTrace& trace, bool force_tube): 
   TraceRendererBase(trace, 3),   force_tube_(force_tube),
-  options_(new CartoonRenderOptions())
+  options_(new CartoonRenderOptions(force_tube))
 {
 if(force_tube){
   this->SetName("Smooth Tube");
