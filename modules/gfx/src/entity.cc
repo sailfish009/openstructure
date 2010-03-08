@@ -559,7 +559,7 @@ void Entity::OnRenderModeChange()
   r->AddView(this->GetView());
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
-     mol::EntityView rv=i->second->GetEffectiveView();
+     mol::EntityView rv=i->second->GetFullView();
      if (rv.IsValid() && rv.GetAtomCount()>0) {
        i->second->SetSelection(mol::Intersection(sel_, rv));
      }         
@@ -625,7 +625,7 @@ void Entity::SetRenderMode(RenderMode::Type mode,
      if (!keep && i->first!=mode) {
        renderer->SubstractView(view);
      }
-     mol::EntityView rv=renderer->GetEffectiveView();
+     mol::EntityView rv=renderer->GetFullView();
      if (rv.IsValid()) {
        renderer->SetSelection(mol::Intersection(sel_, rv));
      }
@@ -691,7 +691,7 @@ void Entity::UpdateSelection()
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* renderer=i->second;
     if (renderer->HasDataToRender()) {
-      renderer->SetSelection(mol::Intersection(renderer->GetEffectiveView(), sel_));
+      renderer->SetSelection(mol::Intersection(renderer->GetFullView(), sel_));
       renderer->UpdateViews();
     }
   }  

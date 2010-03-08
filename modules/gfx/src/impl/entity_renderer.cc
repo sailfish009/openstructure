@@ -153,9 +153,11 @@ bool EntityRenderer::HasSelection() const
 
 void EntityRenderer::SetSelection(const mol::EntityView& sel)
 {
-  full_sel_=sel;
-  sel_=full_sel_;
-  sel_state_=DIRTY_VIEW|DIRTY_VA;
+  if(sel.IsValid()){
+    full_sel_=sel;
+    sel_=(hidden_view_.IsValid())? mol::Difference(full_sel_,hidden_view_) : full_sel_;
+    sel_state_=DIRTY_VIEW|DIRTY_VA;
+  }
 }
 
 void EntityRenderer::SetVisible(const mol::EntityView& view, bool visible)
@@ -169,7 +171,7 @@ void EntityRenderer::SetVisible(const mol::EntityView& view, bool visible)
     hidden_view_=hidden_view_.IsValid() ? Union(hidden_view_, view) : view.Copy();
   }
 
-  sel_=(full_sel_.IsValid()&& hidden_view_.IsValid())? mol::Difference(full_sel_,hidden_view_) : sel_;
+  sel_= hidden_view_.IsValid() ? mol::Difference(full_sel_,hidden_view_) : sel_;
 
   if(full_view_.IsValid()){
     effective_view_=hidden_view_.IsValid() ? mol::Difference(full_view_,hidden_view_): full_view_;
