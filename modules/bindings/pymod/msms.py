@@ -8,8 +8,8 @@ This module is for calculating MSMS surfaces as well as surface areas
 
 How To Use This Module:
  1. Import it (e.g. as "from ost.bindings import msms")
- 2. Use it (e.g. as "surface = MSMS.CalculateSurface(entity)"
-                    "(sesa,sasa)= MSMS.CalculateSurfaceArea(entity)")
+ 2. Use it (e.g. as "surfaces_list = msms.CalculateSurface(entity)"
+                    "(sesa,sasa) = msms.CalculateSurfaceArea(entity)")
 
 Requirement:
  - MSMS installed
