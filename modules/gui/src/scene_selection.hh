@@ -35,10 +35,11 @@ class DLLEXPORT_OST_GUI SceneSelection : public QObject {
   Q_OBJECT
 public:
   static SceneSelection* Instance();
-  gfx::GfxNodeP GetActiveNode(unsigned int pos);
-  int GetActiveNodeCount();
-  int GetActiveViewCount();
-  gfx::EntityP GetViewEntity();
+  int GetActiveNodeCount() const;
+  gfx::GfxNodeP GetActiveNode(unsigned int pos) const;
+  int GetActiveViewCount() const;
+  mol::EntityView GetActiveView(unsigned int pos) const;
+  gfx::EntityP GetViewEntity() const;
 
 public slots:
   void CenterOnObjects();

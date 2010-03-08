@@ -55,7 +55,7 @@ public:
 
 protected:
   virtual void SetVisible(bool visible);
-  virtual bool GetVisible();
+  virtual bool GetVisible() const;
 
 private:
   QString name_;

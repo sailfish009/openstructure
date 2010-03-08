@@ -71,7 +71,7 @@ void RenderModesNode::Update(){
 
 }
 
-gfx::GfxNodeP RenderModesNode::GetGfxNode(){
+gfx::GfxNodeP RenderModesNode::GetGfxNode() const{
   return node_;
 }
 

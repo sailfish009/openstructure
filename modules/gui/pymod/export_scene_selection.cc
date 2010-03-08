@@ -30,7 +30,9 @@ void export_SceneSelection()
   class_<SceneSelection, boost::noncopyable>("SceneSelection",no_init)
     .def("Instance", &SceneSelection::Instance,
      return_value_policy<reference_existing_object>()).staticmethod("Instance")
-    .def("GetActiveNode",&SceneSelection::GetActiveNode)
     .def("GetActiveNodeCount",&SceneSelection::GetActiveNodeCount)
+    .def("GetActiveNode",&SceneSelection::GetActiveNode)
+    .def("GetActiveViewCount", &SceneSelection::GetActiveViewCount)
+    .def("GetActiveView", &SceneSelection::GetActiveView)
     ;
 }

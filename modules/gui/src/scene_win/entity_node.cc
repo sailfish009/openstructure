@@ -61,7 +61,7 @@ EntityNode::EntityNode(gfx::EntityP& entity, SceneNode* parent):
   model->AddNode(this, node);
 }
 
-SceneNode* EntityNode::GetCustomViewNode(){
+SceneNode* EntityNode::GetCustomViewNode() const{
   return custom_view_;
 }
 

@@ -60,7 +60,7 @@ public slots:
 
   void ContextMenuRequested(const QPoint& pos);
 
-  SceneWinModel* GetModel();
+  SceneWinModel* GetModel() const;
 
   void Update();
 

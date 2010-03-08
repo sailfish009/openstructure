@@ -91,7 +91,7 @@ void SceneWin::OnSelectionChange(const QItemSelection& sel,
   emit this->ActiveNodesChanged();
 }
 
-SceneWinModel* SceneWin::GetModel(){
+SceneWinModel* SceneWin::GetModel() const{
   return model_;
 }
 

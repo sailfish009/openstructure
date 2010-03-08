@@ -32,14 +32,6 @@
 
 namespace ost { namespace gui {
 
-enum ContextMenuType {
-  GFX_OBJECTS = 1,
-  ENTITIES,
-  ENTITY_VIEWS,
-  MIX
-};
-
-
 class DLLEXPORT_OST_GUI ContextMenu : public QObject {
   Q_OBJECT
 public:
@@ -56,8 +48,6 @@ private slots:
 
 
 private:
-  gui::ContextMenuType GetType();
-
   QTreeView* view_;
   SceneWinModel* model_;
 };

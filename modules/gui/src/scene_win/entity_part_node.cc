@@ -67,7 +67,7 @@ void EntityPartNode::SetVisible(bool visible){
   visible_ = visible;
 }
 
-bool EntityPartNode::GetVisible(){
+bool EntityPartNode::GetVisible() const{
   return visible_;
 }
 

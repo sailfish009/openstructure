@@ -48,7 +48,7 @@ public:
   RenderModesNode(gfx::EntityP entity, SceneNode* node_parent );
 
   virtual void RenderModeChanged();
-  gfx::GfxNodeP GetGfxNode();
+  gfx::GfxNodeP GetGfxNode() const;
 
 private:
   void Update();

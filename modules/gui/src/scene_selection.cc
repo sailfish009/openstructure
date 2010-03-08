@@ -50,7 +50,7 @@ void SceneSelection::SetActiveNodes(gfx::NodePtrList nodes, gfx::EntityP entity,
   views_ = views;
 }
 
-gfx::GfxNodeP SceneSelection::GetActiveNode(unsigned int pos){
+gfx::GfxNodeP SceneSelection::GetActiveNode(unsigned int pos) const{
   if(pos >= 0 && pos < nodes_.size()){
     return nodes_[pos];
   }
@@ -59,13 +59,23 @@ gfx::GfxNodeP SceneSelection::GetActiveNode(unsigned int pos){
   }
 }
 
-int SceneSelection::GetActiveNodeCount(){
+int SceneSelection::GetActiveNodeCount() const{
   return nodes_.size();
 }
 
-int SceneSelection::GetActiveViewCount(){
+int SceneSelection::GetActiveViewCount() const{
   return views_.size();
 }
+
+mol::EntityView SceneSelection::GetActiveView(unsigned int pos) const{
+  if(pos >=0 && pos < views_.size()){
+    return views_[pos].GetEntityView();
+  }
+  else{
+    throw Error("Index out of bounds: There is no active vies at the given position");
+  }
+}
+
 
 SceneSelection* SceneSelection::Instance() {
   if (!SceneSelection::scene_selection_) {
@@ -217,7 +227,7 @@ void SceneSelection::MakeHidden(){
   }
 }
 
-gfx::EntityP SceneSelection::GetViewEntity(){
+gfx::EntityP SceneSelection::GetViewEntity() const{
   return view_entity_;
 }
 
