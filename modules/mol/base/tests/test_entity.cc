@@ -49,6 +49,8 @@ EntityHandle make_test_entity()
   ChainHandle chain = e.InsertChain("A");
   ResidueHandle res1 = e.AppendResidue(chain, "MET");
 
+  eh.SetName("TestEntity");
+
   e.InsertAtom(res1, "N",geom::Vec3(21.609,35.384,56.705));
   e.InsertAtom(res1, "CA",geom::Vec3(20.601,35.494,57.793));
   e.InsertAtom(res1, "C",geom::Vec3(19.654,34.300,57.789));
@@ -78,6 +80,9 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 BOOST_AUTO_TEST_CASE(entity_creator) 
 {
   EntityHandle eh = CreateEntity();
+  eh.SetName("TestEntity");
+  BOOST_CHECK(eh.GetName()=="TestEntity");
+
   XCSEditor e=eh.RequestXCSEditor();
   ChainHandle chain = e.InsertChain("C");
   BOOST_CHECK(chain.GetName()=="C");
@@ -297,6 +302,8 @@ BOOST_AUTO_TEST_CASE(copy)
 {
   EntityHandle eh=make_test_entity();
   EntityHandle cp=eh.Copy();
+  BOOST_CHECK_EQUAL(cp.GetName(),eh.GetName());
+
   ResidueHandle x2=eh.FindResidue("A", mol::ResNum(2));
   BOOST_CHECK_EQUAL(cp.GetAtomCount(),eh.GetAtomCount());
   BOOST_CHECK_EQUAL(cp.GetResidueCount(),eh.GetResidueCount());

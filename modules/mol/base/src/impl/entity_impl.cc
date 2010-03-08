@@ -227,6 +227,7 @@ void EntityImpl::DoCopy(EntityImplPtr dest)
 {
   // first copy the chain - residue - atom hierarchy before replicating the 
   // bond network and the torsions
+  dest->SetName(this->GetName());
   this->ReplicateHierarchy(dest);
   this->DoCopyBondsAndTorsions(dest);
 }

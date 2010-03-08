@@ -398,6 +398,7 @@ EntityHandle CreateEntityFromView(const EntityView& view,
   if (!handle.IsValid()) {
     handle=CreateEntity();
   }
+  handle.SetName(view.GetName());
   Replicator replicator(handle.Impl(), view, include_exlusive_atoms);
   TorsionAdder adder(replicator, handle.Impl(), view);
   return handle;

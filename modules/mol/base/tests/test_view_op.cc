@@ -30,6 +30,7 @@ using namespace ost::mol;
 EntityHandle mk_test_ent()
 {
   EntityHandle ent=CreateEntity();
+  ent.SetName("TestEntity");
   XCSEditor edi=ent.RequestXCSEditor();
   ChainHandle chain_a=edi.InsertChain("A");
   ResidueHandle res_a=edi.AppendResidue(chain_a, "A");
@@ -331,6 +332,19 @@ BOOST_AUTO_TEST_CASE(test_intersection_b)
   BOOST_CHECK(!find_bond(ent.FindAtom("B", mol::ResNum(2), "G"),
                          ent.FindAtom("B", mol::ResNum(2), "H"),
                          bonds));
+}
+
+BOOST_AUTO_TEST_CASE(entity_from_view) {
+  EntityHandle ent=mk_test_ent();
+  EntityView v1=ent.Select("aname=B,C,F,G");
+  EntityHandle ent_fv=mol::CreateEntityFromView(v1, false);
+
+  BOOST_CHECK_EQUAL(ent.GetName(), ent_fv.GetName());
+  BOOST_CHECK_EQUAL(ent_fv.GetBondCount(),2);
+  BOOST_CHECK_EQUAL(ent_fv.GetAtomCount(), 4);
+  BOOST_CHECK_EQUAL(ent_fv.GetResidueCount(), 4);
+  BOOST_CHECK_EQUAL(ent_fv.GetChainCount(), 2);
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()
