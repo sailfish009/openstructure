@@ -171,7 +171,9 @@ void EntityRenderer::SetVisible(const mol::EntityView& view, bool visible)
     hidden_view_=hidden_view_.IsValid() ? Union(hidden_view_, view) : view.Copy();
   }
 
-  sel_= hidden_view_.IsValid() ? mol::Difference(full_sel_,hidden_view_) : sel_;
+  if(sel_.IsValid()){
+    sel_= hidden_view_.IsValid() ? mol::Difference(full_sel_,hidden_view_) : sel_;
+  }
 
   if(full_view_.IsValid()){
     effective_view_=hidden_view_.IsValid() ? mol::Difference(full_view_,hidden_view_): full_view_;
