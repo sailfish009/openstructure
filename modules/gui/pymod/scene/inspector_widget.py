@@ -35,12 +35,12 @@ class InspectorWidget(ToolBarOptionsWidget):
     ToolBarOptionsWidget.__init__(self, parent)
     app=gui.GostyApp.Instance()
     options = [
-                [InspectorWidget.ICONS_PATH+"render_icon.png",RenderOptionsWidget(self)], 
-                [InspectorWidget.ICONS_PATH+"color_icon.png",ColorOptionsWidget(self)],
-                [InspectorWidget.ICONS_PATH+"tool_icon.png",sip.wrapinstance(app.GetToolOptionsWin().GetSipHandle(),QtGui.QWidget)]
+                [InspectorWidget.ICONS_PATH+"render_icon.png",RenderOptionsWidget(self),None], 
+                [InspectorWidget.ICONS_PATH+"color_icon.png",ColorOptionsWidget(self),None],
+                [InspectorWidget.ICONS_PATH+"tool_icon.png",sip.wrapinstance(app.GetToolOptionsWin().GetSipHandle(),QtGui.QWidget),"Tool Options"]
               ]
     for o in options:
-      ToolBarOptionsWidget.AddWidget(self,o[0], o[1])
+      ToolBarOptionsWidget.AddWidget(self,o[0], o[1], o[2])
     
     self.obs = SceneObserverImpl()
     self.obs.AttachObserver(self)

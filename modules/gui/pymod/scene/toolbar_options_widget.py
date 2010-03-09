@@ -67,7 +67,7 @@ class ToolBarOptionsWidget(QtGui.QWidget):
       widget.Update()
   
     
-  def AddWidget(self, ident, widget):
+  def AddWidget(self, ident, widget, text=None):
     """Adds a Widget to this Options Widget.
     
      The Widget must have a identifier. If another Widget has the same identifier,
@@ -75,7 +75,9 @@ class ToolBarOptionsWidget(QtGui.QWidget):
      Returns True, if widget is added. Otherwise it returns False
     """
     if isinstance(widget, QtGui.QWidget) and ident is not None:
-      if hasattr(widget, "GetText"):
+      if text is not None:
+        string = QtCore.QString(text)
+      elif hasattr(widget, "GetText"):
         string = QtCore.QString(widget.GetText())
       else:
         string = QtCore.QString(ident)
@@ -83,6 +85,7 @@ class ToolBarOptionsWidget(QtGui.QWidget):
       self.stackedWidget.addWidget(widget)
       action = self.tool_bar_.addAction(ident)
       action.setIcon(QtGui.QIcon(ident))
+      action.setToolTip(string)
       pair = ident, widget
       action.setData(QtCore.QVariant(pair))
       action.setCheckable(True);
