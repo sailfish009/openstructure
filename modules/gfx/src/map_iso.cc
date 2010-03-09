@@ -119,6 +119,7 @@ void MapIso::OnRenderModeChange()
     render_mode_=RenderMode::SIMPLE;
     va_.SetLighting(false);
     va_.SetCullFace(false);
+    va_.SetLineWidth(this->GetLineWidth());
     va_.SetMode(0x2); // only lines
     va_.SetTwoSided(true);
   }
