@@ -58,7 +58,6 @@ class InspectorWidget(ToolBarOptionsWidget):
         
   #Observer Methods    
   def NodeRemoved(self, node):
-    self.SetEntities(None)
     ToolBarOptionsWidget.Update(self)  
   
   def RenderModeChanged(self, node):
