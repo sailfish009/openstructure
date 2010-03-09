@@ -39,6 +39,16 @@ class RenderOptionsWidget(ComboOptionsWidget):
     #Title
     self.text_ = "Render Options"
     
+    self.keep_action_ = QtGui.QAction("K",self)
+    self.keep_action_.setCheckable(True);
+    self.keep_action_.setChecked(False)
+    self.keep_action_.setToolTip("Keep rendermodes and add current")
+    self.keep_button_ = QtGui.QToolButton(self)
+    self.keep_button_.setDefaultAction(self.keep_action_)
+    
+    self.grid_layout_.addWidget(self.keep_button_, 0, 1, 1, 1)
+    self.grid_layout_.addWidget(self.stacked_widget_, 1, 0, 1, 2)
+    
     #Add options to menu    
     ComboOptionsWidget.AddWidget(self, "", EmptyMode())
     ComboOptionsWidget.AddWidget(self, gfx.RenderMode.SIMPLE, SimpleWidget(self))
@@ -59,7 +69,7 @@ class RenderOptionsWidget(ComboOptionsWidget):
       if isinstance(node, gfx.Entity):
         render_mode = item.GetRenderMode()
         if render_mode is not None:
-          node.SetRenderMode(render_mode)
+          node.SetRenderMode(render_mode)     
     
     if(scene_selection.GetActiveViewCount() > 0):
       entity = scene_selection.GetViewEntity()
@@ -67,18 +77,22 @@ class RenderOptionsWidget(ComboOptionsWidget):
         view = scene_selection.GetActiveView(i)
         render_mode = item.GetRenderMode()
         if render_mode is not None:
-          entity.SetRenderMode(item.GetRenderMode(),view,False)
+          entity.SetRenderMode(item.GetRenderMode(),view,self.keep_action_.isChecked())
         
     item.Update()
     self.DoResize()
   
   def Update(self):
+    if hasattr(self, "keep_button_"):
+      self.keep_button_.setEnabled(True)
     scene_selection = gui.SceneSelection.Instance()
     if scene_selection.GetActiveNodeCount() == 0 and scene_selection.GetActiveViewCount() == 0:
       ComboOptionsWidget.setEnabled(self,False)
       return
     
     if scene_selection.GetActiveNodeCount() > 0 :
+      if hasattr(self, "keep_button_"):
+        self.keep_button_.setEnabled(False)
       render_mode_valid = True
       render_mode = None
       for i in range(0,scene_selection.GetActiveNodeCount()):

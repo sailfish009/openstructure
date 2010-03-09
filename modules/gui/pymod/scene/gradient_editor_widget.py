@@ -59,7 +59,7 @@ class GradientEditor(QtGui.QWidget):
     grid.addWidget(self.gradient_preset_, 5, 0, 1, 1)
     self.setLayout(grid)
     
-    QtCore.QObject.connect(self.prop_combo_box_, QtCore.SIGNAL("currentIndexChanged(int)"), self.ChangeColor)
+    QtCore.QObject.connect(self.prop_combo_box_, QtCore.SIGNAL("currentIndexChanged(int)"), self.Update)
     QtCore.QObject.connect(self.gradient_edit_, QtCore.SIGNAL("gradientUpdated"), self.Update)
     QtCore.QObject.connect(self.gradient_preset_, QtCore.SIGNAL("gradientSelected"), self.gradient_edit_.LoadGradient)
     

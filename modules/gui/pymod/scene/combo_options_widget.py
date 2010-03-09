@@ -48,9 +48,6 @@ class ComboOptionsWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.combo_box_, QtCore.SIGNAL("activated(int)"), self.__UpdateView)
     
     self.setEnabled(False)
-    
-    #Entity
-    self.entities_ = None
        
     self.Update()
     
@@ -58,10 +55,8 @@ class ComboOptionsWidget(QtGui.QWidget):
     """Updates the ComboOptionsWidget and the active widget of the show area.
     
      This method calls the Update method of the active widget. 
-     If no entity is set, the ComboOptionsWidget will be disabled
     """
-    if hasattr(self, "entities_") and isinstance(self.entities_, list):
-      self.__GetCurrentPair()[1].Update()
+    self.__GetCurrentPair()[1].Update()
     
   def AddWidget(self, ident, widget):
     """Adds a Widget to this Options Widget.
