@@ -23,6 +23,9 @@
 
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/scene.hh>
+#include <ost/gfx/gfx_node_visitor.hh>
+#include <ost/gfx/gfx_node.hh>
+#include <ost/gfx/gfx_object.hh>
 
 #include <ost/gui/widget_registry.hh>
 #include <ost/gui/gosty_app.hh>
@@ -31,6 +34,15 @@
 
 
 namespace ost { namespace gui {
+
+struct GetNodesVisitor: public gfx::GfxNodeVisitor {
+  GetNodesVisitor(): nodes_() {}
+  virtual void VisitObject(gfx::GfxObj* o, const Stack& st) {
+    nodes_.push_back(o->shared_from_this());
+  }
+  gfx::NodePtrList nodes_;
+  gfx::NodePtrList GetNodes(){return nodes_;}
+};
 
 class SequenceViewerFactory: public WidgetFactory {
 public:
@@ -50,6 +62,14 @@ SequenceViewer::SequenceViewer(QWidget* parent):
 {
   gfx::Scene::Instance().AttachObserver(this);
   this->SetDisplayStyle(SequenceViewer::LOOSE);
+
+  gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
+  GetNodesVisitor gnv;
+  gfx::Scene::Instance().Apply(gnv);
+  gfx::NodePtrList list = gnv.GetNodes();
+  for(unsigned int i=0; i<list.size();i++){
+    this->NodeAdded(list[i]);
+  }
 }
 
 SequenceViewer::~SequenceViewer()
