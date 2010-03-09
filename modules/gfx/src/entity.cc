@@ -521,7 +521,7 @@ void Entity::SetOptions(RenderMode::Type render_mode,
   }
 }
 
-void Entity::ApplyRenderOptions(RenderMode::Type render_mode, 
+void Entity::ApplyOptions(RenderMode::Type render_mode,
                                 RenderOptionsPtr& render_options)
 {
   RendererMap::iterator i=renderer_.find(render_mode);  

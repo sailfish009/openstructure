@@ -247,7 +247,7 @@ public:
   RenderOptionsPtr GetOptions(RenderMode::Type render_mode);
   void SetOptions(RenderMode::Type render_mode, 
                   RenderOptionsPtr& render_options);
-  void ApplyRenderOptions(RenderMode::Type render_mode, 
+  void ApplyOptions(RenderMode::Type render_mode,
                           RenderOptionsPtr& render_options);
   bool HasSelection() const;
 protected:
