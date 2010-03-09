@@ -19,12 +19,15 @@
 /*
   Authors: Stefan Scheuber
 */
+#include <boost/pointer_cast.hpp>
+
 #include <QAction>
 #include <QMenu>
 #include <QItemSelection>
 #include <QItemSelectionModel>
 
 #include <ost/gui/scene_selection.hh>
+#include <ost/gui/query_dialog.hh>
 
 #include "custom_part_node.hh"
 #include "entity_node.hh"
@@ -95,8 +98,12 @@ void ContextMenu::ShowMenu(const QPoint& pos)
       if(all_entities){
         action = menu->addAction("Copy");
         connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(CopyViews()));
-        action = menu->addAction("Select");
+        action = menu->addAction("Create Custom View");
+        connect(action, SIGNAL(triggered()), this, SLOT(AddViewFromEntity()));
+        action = menu->addAction("Select..");
         connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Select()));
+        action = menu->addAction("Deselect");
+        connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Deselect()));
       }
 
       if(all_not_scene){
@@ -127,6 +134,15 @@ void ContextMenu::ShowMenu(const QPoint& pos)
       action = menu->addAction("Hide Exclusive");
       connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(HideExclusive()));
 
+      action = menu->addAction("Select All");
+      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(SelectAllViews()));
+
+      action = menu->addAction("Deselect All");
+      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(DeselectAllViews()));
+
+      action = menu->addAction("Select..");
+      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(SelectViews()));
+
       action = menu->addAction("Create Custom View");
       connect(action, SIGNAL(triggered()), this, SLOT(AddView()));
 
@@ -146,6 +162,30 @@ void ContextMenu::ShowMenu(const QPoint& pos)
 
     if(menu->actions().size()>0){
       menu->popup(pos);
+    }
+  }
+}
+
+void ContextMenu::AddViewFromEntity() {
+  QueryDialog d;
+  if (d.exec() == QDialog::Accepted) {
+    QString query = d.GetQueryString();
+    int node_count = SceneSelection::Instance()->GetActiveNodeCount();
+    for(int i = 0; i < node_count; i++){
+      gfx::GfxNodeP node = SceneSelection::Instance()->GetActiveNode(i);
+      if (node) {
+        EntityNode* ent_node = qobject_cast<EntityNode*>(model_->FindGfxNode(node));
+        if (ent_node) {
+          mol::Query q(query.toStdString());
+          if (q.IsValid()) {
+            gfx::EntityP entity = boost::dynamic_pointer_cast<gfx::Entity>(ent_node->GetGfxNode());
+            if(entity){
+              CustomPartNode* child_node = new CustomPartNode("New View", entity, mol::QueryViewWrapper(q,entity->GetView()),ent_node->GetCustomViewNode());
+              model_->AddNode(ent_node->GetCustomViewNode(),child_node);
+            }
+          }
+        }
+     }
     }
   }
 }

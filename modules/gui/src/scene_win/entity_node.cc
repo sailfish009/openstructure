@@ -48,8 +48,11 @@ EntityNode::EntityNode(gfx::EntityP& entity, SceneNode* parent):
 
   SceneNode* node = new EntityPartNode("Backbone", entity, mol::QueryViewWrapper(entity->GetView().Select("aname=CA,C,N,O and peptide=true")), quick_selection);
   model->AddNode(quick_selection, node);
+  node = new EntityPartNode("Sidechains", entity, mol::QueryViewWrapper(entity->GetView().Select("aname!=CA,C,N,O and peptide=true")), quick_selection);
+  model->AddNode(quick_selection, node);
   node = new EntityPartNode("Ligands", entity, mol::QueryViewWrapper(entity->GetView().Select("ishetatm=1 and ele=C")), quick_selection);
   model->AddNode(quick_selection, node);
+
 
   custom_view_ = new LabelNode("Custom Views", this);
   model->AddNode(this, custom_view_);

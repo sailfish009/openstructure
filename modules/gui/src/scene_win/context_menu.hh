@@ -42,6 +42,7 @@ public:
   void Rename(QModelIndex index);
 
 private slots:
+  void AddViewFromEntity();
   void AddView();
   void Rename();
   void DeleteView();

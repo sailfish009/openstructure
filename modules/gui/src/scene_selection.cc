@@ -30,7 +30,6 @@
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_win/scene_win.hh>
 #include <ost/gui/query_dialog.hh>
-#include <ost/gui/query_dialog.hh>
 
 #include "scene_selection.hh"
 
@@ -147,6 +146,18 @@ void SceneSelection::Select() {
   }
 }
 
+void SceneSelection::Deselect(){
+  for(unsigned int i = 0; i < nodes_.size(); i++){
+    gfx::GfxNodeP node = nodes_[i];
+    if (node) {
+      gfx::Entity* obj = dynamic_cast<gfx::Entity*> (node.get());
+      if (obj) {
+        obj->SetSelection(obj->GetView().CreateEmptyView());
+      }
+    }
+  }
+}
+
 void SceneSelection::CopyViews() {
   QueryDialog d;
   QList<gfx::GfxObjP> objects_to_add;
@@ -224,6 +235,34 @@ void SceneSelection::MakeVisible(){
 void SceneSelection::MakeHidden(){
   for(unsigned int i= 0; i < views_.size(); i++){
     view_entity_->SetVisible(views_[i].GetEntityView(),false);
+  }
+}
+
+void SceneSelection::SelectAllViews(){
+  mol::EntityView union_view = this->GetViewUnion();
+  if(union_view.IsValid()){
+    view_entity_->SetSelection(union_view);
+  }
+}
+
+void SceneSelection::DeselectAllViews(){
+  mol::EntityView sel = view_entity_->GetSelection();
+  if(sel.IsValid()){
+    for(unsigned int i= 0; i < views_.size(); i++){
+      sel = mol::Difference(sel, views_[i].GetEntityView());
+    }
+  }
+}
+
+void SceneSelection::SelectViews(){
+  QueryDialog d;
+  if (d.exec() == QDialog::Accepted) {
+    QString query = d.GetQueryString();
+    mol::Query q(query.toStdString());
+    mol::EntityView union_view = this->GetViewUnion();
+    if(union_view.IsValid() && q.IsValid()){
+      view_entity_->SetSelection(union_view.Select(q));
+    }
   }
 }
 
