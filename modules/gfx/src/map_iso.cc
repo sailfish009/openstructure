@@ -53,7 +53,8 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
   normals_calculated_(false),
   alg_(0),
   smoothf_(0.2),
-  debug_octree_(false)
+  debug_octree_(false),
+  color_(Color::WHITE)
 {
   // TODO replace with def mat for this gfx obj type
 
@@ -73,7 +74,8 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   level_(level),
   normals_calculated_(false),
   alg_(a),
-  debug_octree_(false)
+  debug_octree_(false),
+  color_(Color::WHITE)
 {
   // TODO replace with def mat for this gfx obj type
   SetMat(0.0,1.0,0.1,32.0);
@@ -239,7 +241,7 @@ void MapIso::Rebuild()
   va_.SetMode(0x2);
   normals_calculated_=false;
   bool triangles=this->GetRenderMode()!=gfx::RenderMode::SIMPLE;
-  impl::OctreeIsocont cont(va_, level_, triangles);
+  impl::OctreeIsocont cont(va_, level_, triangles, color_);
   octree_.VisitDF(cont);
   // for normal debugging
 #if 0  

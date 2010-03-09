@@ -57,6 +57,8 @@ void export_Map()
     .def("GetMean", &MapIso::GetMean)
     .def("Rebuild", &MapIso::Rebuild)
     .def("SetNSF",&MapIso::SetNSF)
+    .def("SetColor", &MapIso::SetColor)
+    .def("GetColor", &MapIso::GetColor, return_value_policy<copy_const_reference>())
     .def("SetDebugOctree", &MapIso::SetDebugOctree)    
   ;
 

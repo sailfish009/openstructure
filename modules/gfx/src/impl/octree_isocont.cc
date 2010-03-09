@@ -93,7 +93,7 @@ VertexID OctreeIsocont::GetOrGenVert(img::RealSpatialImageState* map,
   float val2=map->Value(p2);
   float t=(level_-val1)/(val2-val1);
   VertexID id=va_.Add(vert1*(1.0f-t)+vert2*t, geom::Vec3(1,0,0), 
-                      gfx::Color::RED);
+                      color_);
   edge_map_.insert(std::make_pair(key, id));
   return id;
 }

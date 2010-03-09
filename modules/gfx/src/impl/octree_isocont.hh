@@ -59,8 +59,9 @@ private:
   static EdgeDesc EDGE_DESC[12];
 public:
   typedef boost::unordered_map<uint32_t, VertexID> EdgeMap;
-  OctreeIsocont(IndexedVertexArray& va, float level, bool triangles): 
-   va_(va), level_(level), triangles_(triangles)
+  OctreeIsocont(IndexedVertexArray& va, float level, bool triangles, 
+                const Color& color): 
+   va_(va), level_(level), triangles_(triangles), color_(color)
   { }
   bool VisitNode(const impl::OctreeNode& node, uint8_t level, 
                  const img::Extent& ext)
@@ -77,6 +78,7 @@ private:
   float               level_;
   EdgeMap             edge_map_;
   bool                triangles_;
+  Color               color_;
 };
 
 

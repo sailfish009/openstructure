@@ -75,24 +75,37 @@ public:
   
   /// \brief get std dev of map.
   float GetStdDev() const;
-
+  
+  /// \brief set  color
+  /// 
+  /// By default, the color is white.
+  /// \sa GetColor()
+  void SetColor(const Color& color) 
+  { 
+    color_=color; 
+    this->FlagRebuild(); 
+  }
+  /// \brief get color
+  /// \sa SetColor()
+  const Color& GetColor() const { return color_; }
   void SetNSF(float smoothf);
   void SetDebugOctree(bool flag) { debug_octree_=flag; }
 protected:
   virtual void CustomPreRenderGL(bool flag);
 
 private:
-  img::MapHandle  mh_;
+  img::MapHandle   mh_;
   impl::MapOctree  octree_;
-  float level_;
-  bool normals_calculated_;
-  uint alg_;
-  float smoothf_;
-  float min_;
-  float max_;
-  float std_dev_;
-  float min_max_;
-  bool debug_octree_;
+  float            level_;
+  bool             normals_calculated_;
+  uint             alg_;
+  float            smoothf_;
+  float            min_;
+  float            max_;
+  float            std_dev_;
+  float            min_max_;
+  bool             debug_octree_;
+  Color            color_; 
 
 };
 
