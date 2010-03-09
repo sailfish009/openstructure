@@ -182,5 +182,5 @@ Type
 to save the full view. To save only the backbone atoms, we can first select the backbone atoms and then save it:
 
      ::::python
-     io.SavePDB(fragment.Select('aname=CA,C,N,O), 'backbone.pdb')
+     io.SavePDB(fragment.Select('aname=CA,C,N,O'), 'backbone.pdb')
 
