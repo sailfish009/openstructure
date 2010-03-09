@@ -76,15 +76,18 @@ class ComboOptionsWidget(QtGui.QWidget):
       else:
         string = QtCore.QString(ident)
       
-      index = self.__GetIndex(ident)
-      if(index >= 0):
-        self.stacked_widget_.removeWidget(self.combo_box_.itemData(index).toPyObject()[1])
-        self.combo_box_.removeItem(index)
+      self.RemoveWidget(ident)
       self.stacked_widget_.addWidget(widget)
       qpair = ident, widget
       self.combo_box_.addItem(string, QtCore.QVariant(qpair))
       return True
     return False
+  
+  def RemoveWidget(self,ident):
+    index = self.__GetIndex(ident)
+    if(index >= 0):
+      self.stacked_widget_.removeWidget(self.combo_box_.itemData().toPyObject()[1])
+      self.combo_box_.removeItem(index)
   
   def DoSomething(self, item):
     """This abstract method is called whenever the View is updated.
@@ -93,16 +96,7 @@ class ComboOptionsWidget(QtGui.QWidget):
      It can be used to do something ;-) whenever the combobox changes its value.
     """
     raise NotImplementedError, "Subclasses must define DoSomething()"
-  
-  def SetEntities(self, entities):
-    """Set entity.
     
-     This method sets the given entity as current entity. If no entity is set, the Options Widget is disabled.
-    """
-    self.entities_ = entities
-    for i in range(self.combo_box_.count()):
-      self.combo_box_.itemData(i).toPyObject()[1].SetEntities(self.entities_)
-  
   def ChangeSelectedItem(self, ident):
     """Change Current Selected Item.
     

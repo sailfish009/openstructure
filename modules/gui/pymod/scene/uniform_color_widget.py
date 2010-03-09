@@ -54,24 +54,22 @@ class UniformColorWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.color_select_widget_, QtCore.SIGNAL("colorChanged"), self.Update)
     
     self.setMinimumSize(250,150)
-    
-  def ChangeColor(self):
-    self.Update()
-  
-  def Update(self):
-    if hasattr(self, "entities_") and isinstance(self.entities_, list):
-      color = self.color_select_widget_.GetColor()
-      gfxColor = gfx.Color(color.redF(), 
-                         color.greenF(),
-                         color.blueF())
-      for entity in self.entities_:
-        if isinstance(entity, gfx.Entity) or isinstance(entity, gfx.Surface):
-          entity.CleanColorOps()
-          entity.SetColor(gfxColor,"")
-      
-  def SetEntities(self, entities):
-    self.entities_ = entities
 
+  def Update(self):
+    scene_selection = gui.SceneSelection.Instance()
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      node = scene_selection.GetActiveNode(i)
+      self.ChangeColor(node)
+
+  def ChangeColor(self, node):
+    color = self.color_select_widget_.GetColor()
+    gfxColor = gfx.Color(color.redF(), 
+                       color.greenF(),
+                       color.blueF())
+    if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
+      node.CleanColorOps()
+      node.SetColor(gfxColor,"")
+  
   def resizeEvent(self, event):
     self.color_select_widget_.SetSize(self.width()/2,self.height()/2)
     

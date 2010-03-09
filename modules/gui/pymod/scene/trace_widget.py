@@ -21,18 +21,18 @@
 from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
+from render_mode_widget import RenderModeWidget
 
-
-#Tube Render Options
-class TraceWidget(QtGui.QWidget):
+#Trace Render Options
+class TraceWidget(RenderModeWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    RenderModeWidget.__init__(self, parent)
     
     #Title
     self.text_ = "Trace"
      
     #Set Render Mode
-    self.mode = gfx.RenderMode.TRACE
+    self.mode_ = gfx.RenderMode.TRACE
         
     min_arc_detail = 1
     max_arc_detail = 20
@@ -73,7 +73,6 @@ class TraceWidget(QtGui.QWidget):
     grid.setRowStretch(15,1)
     self.setLayout(grid)
     
-    self.options_ = gfx.CartoonRenderOptions()
     QtCore.QObject.connect(self.arc_spinbox_, QtCore.SIGNAL("valueChanged(int)"), 
                            self.UpdateArcDetail)
     
@@ -84,36 +83,33 @@ class TraceWidget(QtGui.QWidget):
                            QtCore.SIGNAL("valueChanged(int)"), 
                            self.UpdateSliderTubeRadius)
     
-    self.setMinimumSize(250,420) #14*30
+    self.setMinimumSize(250,60) #2*30
     ########/UI########
+  def UpdateGui(self,options):
+    self.arc_spinbox_.setValue(options.GetArcDetail())
     
-  def SetEntities(self, entities):
-    self.entities_ = entities
-  
-  def Update(self):
-    new_options = self.entities_[0].GetOptions(gfx.TRACE)
-    if self.options_ != new_options:
-      self.options_ = new_options
-    self.arc_spinbox_.setValue(self.options_.GetArcDetail())
-    
-    self.UpdateTubeRadiusGui(self.options_.GetTubeRadius())
+    self.UpdateTubeRadiusGui(options.GetTubeRadius())
     
   def UpdatePolyMode(self, value):
-    self.options_.SetPolyMode(value)
+    self.GetOptions().SetPolyMode(value)
         
   def UpdateArcDetail(self, value):
-    self.options_.SetArcDetail(value)
+    self.GetOptions().SetArcDetail(value)
     
   def UpdateTubeRadius(self, value):
-    self.options_.SetTubeRadius(value)
+    self.GetOptions().SetTubeRadius(value)
     
   def UpdateSliderTubeRadius(self, value):
-    self.options_.SetTubeRadius(value/10.0)
+    self.GetOptions().SetTubeRadius(value/10.0)
 
 
   def UpdateTubeRadiusGui(self,value):
     if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_spinbox_.singleStep()):
       self.width_tube_slider_.setValue(value*10.0)
     self.width_tube_spinbox_.setValue(value)
+  
   def GetText(self):
     return self.text_
+
+  def GetRenderMode(self):
+    return self.mode_

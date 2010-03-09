@@ -37,7 +37,7 @@ class ColorOptionsWidget(ComboOptionsWidget):
     #Add options to menu
     options = {
                "Color by Property":GradientEditor(self),
-               "Color by Element":LabelWithMode("Color by Element"),
+               "Color by Element":ByElementWidget("Color by Element"),
                "Uniform":UniformColorWidget(self),
                "Presets":PresetWidget(self)
                }
@@ -48,27 +48,31 @@ class ColorOptionsWidget(ComboOptionsWidget):
     self.setMinimumSize(250,200)
     
   def DoSomething(self, item):
-    if hasattr(self, "entities_") and isinstance(self.entities_, list):
-      item.ChangeColor()
+    scene_selection = gui.SceneSelection.Instance()
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      node = scene_selection.GetActiveNode(i)
+      item.ChangeColor(node)
     self.DoResize()
     
     
   def Update(self):
-    enable = False
-    if hasattr(self, "entities_") and isinstance(self.entities_, list):
-      for entity in self.entities_:
-        if isinstance(entity, gfx.Entity) or isinstance(entity, gfx.Surface):
-          enable = True
-        else:
-          enable = False
-          break
-    ComboOptionsWidget.setEnabled(self,enable)  
+    ComboOptionsWidget.setEnabled(self,True)
+    scene_selection = gui.SceneSelection.Instance()
+    if scene_selection.GetActiveNodeCount() == 0:
+      ComboOptionsWidget.setEnabled(self,False)
+      return
     
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      node = scene_selection.GetActiveNode(i)
+      if not isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
+        ComboOptionsWidget.setEnabled(self,False)
+        return
+
   def GetText(self):
     return self.text_
   
-#Helper Class which contains the rendering mode
-class LabelWithMode(QtGui.QWidget):
+
+class ByElementWidget(QtGui.QWidget):
   def __init__(self, text, parent=None):
     QtGui.QLabel.__init__(self, parent)
     
@@ -88,17 +92,12 @@ class LabelWithMode(QtGui.QWidget):
     self.setMinimumSize(250,60)
     
   def Update(self):
-   True #Do Nothing
+   pass #Do Nothing
     
-  def SetEntities(self,entities):
-    self.entities_ = entities
-
-  def ChangeColor(self):
-    if self.text_ == "Color by Element":
-      for entity in self.entities_:
-        if isinstance(entity, gfx.Entity):
-          entity.CleanColorOps()
-          entity.ColorByElement()
+  def ChangeColor(self, node):
+    if isinstance(node, gfx.Entity):
+      node.CleanColorOps()
+      node.ColorByElement()
       
   def GetText(self):
     return self.text_

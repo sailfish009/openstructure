@@ -21,11 +21,12 @@
 from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
+from render_mode_widget import RenderModeWidget
 
 #Custom Render Options
-class CustomWidget(QtGui.QWidget):
+class CustomWidget(RenderModeWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    RenderModeWidget.__init__(self, parent)
     
     #Title
     self.text_ = "Ball & Stick"
@@ -38,7 +39,7 @@ class CustomWidget(QtGui.QWidget):
     max_arc_detail = 20
     
     #Set Render Mode
-    self.mode = gfx.RenderMode.CUSTOM
+    self.mode_ = gfx.RenderMode.CUSTOM
         
     #Create Ui elements
     
@@ -63,27 +64,25 @@ class CustomWidget(QtGui.QWidget):
     grid.setRowStretch(3,1)
     self.setLayout(grid)
   
-    self.options_ = gfx.CustomRenderOptions()
     QtCore.QObject.connect(self.sphere_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSphereDetail)
     QtCore.QObject.connect(self.arc_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateArcDetail)
     
     self.setMinimumSize(250,90)
     
   def UpdateSphereDetail(self, value):
-    self.options_.SetSphereDetail(value)
+    self.GetOptions().SetSphereDetail(value)
+    self.ApplyOptions()
     
   def UpdateArcDetail(self, value):
-    self.options_.SetArcDetail(value)
+    self.GetOptions().SetArcDetail(value)
+    self.ApplyOptions()
 
-  def Update(self):
-    new_options = self.entities_[0].GetOptions(gfx.CUSTOM)
-    if self.options_ != new_options:
-      self.options_ = new_options
-    self.sphere_spinbox_.setValue(self.options_.GetSphereDetail())    
-    self.arc_spinbox_.setValue(self.options_.GetArcDetail())
-
-  def SetEntities(self, entities):
-    self.entities_ = entities
+  def UpdateGui(self,options):
+    self.sphere_spinbox_.setValue(options.GetSphereDetail())    
+    self.arc_spinbox_.setValue(options.GetArcDetail())
 
   def GetText(self):
     return self.text_
+
+  def GetRenderMode(self):
+    return self.mode_

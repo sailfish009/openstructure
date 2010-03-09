@@ -21,15 +21,16 @@
 from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
+from render_mode_widget import RenderModeWidget
 
 #Simple Render Options
-class SimpleWidget(QtGui.QWidget):
+class SimpleWidget(RenderModeWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    RenderModeWidget.__init__(self, parent)
     
     #Title
     self.text_ = "Fast Bonds"
-    
+        
     #Defaults
     min_line_width = 0.01
     max_line_width = 20
@@ -37,7 +38,7 @@ class SimpleWidget(QtGui.QWidget):
     max_bo_dist = 0.20
     
     #Set Render Mode
-    self.mode = gfx.RenderMode.SIMPLE
+    self.mode_ = gfx.RenderMode.SIMPLE
         
     #Create Ui elements
     self.aa_rendering_cb_ = QtGui.QCheckBox()
@@ -75,8 +76,7 @@ class SimpleWidget(QtGui.QWidget):
     grid.addWidget(self.bo_distance_spinbox_, 4,2,1,1)
     grid.setRowStretch(5,1)
     self.setLayout(grid)
-  
-    self.options_ = gfx.SimpleRenderOptions()
+    
     QtCore.QObject.connect(self.radius_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateLineWidth)
     QtCore.QObject.connect(self.aa_rendering_cb_, QtCore.SIGNAL("stateChanged(int)"), self.UpdateAA)
     QtCore.QObject.connect(self.bo_distance_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateBODistance)
@@ -86,28 +86,29 @@ class SimpleWidget(QtGui.QWidget):
     self.setMinimumSize(250,140)
     
   def UpdateAA(self, value):
-    self.options_.SetAALines(value)
+    self.GetOptions().SetAALines(value)
+    self.ApplyOptions()
+    
   def UpdateLineWidth(self, value):
-    self.options_.SetLineWidth(value)
+    self.GetOptions().SetLineWidth(value)
+    self.ApplyOptions()
 
   def UpdateBO(self, value):
-    self.options_.SetBondOrderFlag(value)
+    self.GetOptions().SetBondOrderFlag(value)
+    self.ApplyOptions()
     
   def UpdateBODistance(self, value):
-    self.options_.SetBondOrderDistance(value)
+    self.GetOptions().SetBondOrderDistance(value)
+    self.ApplyOptions()
 
-  def Update(self):
-    new_options = self.entities_[0].GetOptions(gfx.SIMPLE)
-    if self.options_ != new_options:
-      self.options_ = new_options
-    self.aa_rendering_cb_.setChecked(self.options_.GetAALines())    
-    self.radius_spinbox_.setValue(self.options_.GetLineWidth())
-    self.bo_rendering_cb_.setChecked(self.options_.GetBondOrderFlag())    
-    self.bo_distance_spinbox_.setValue(self.options_.GetBondOrderDistance())
-
-  def SetEntities(self, entities):
-    self.entities_ = entities
-
+  def UpdateGui(self,options):
+    self.aa_rendering_cb_.setChecked(options.GetAALines())    
+    self.radius_spinbox_.setValue(options.GetLineWidth())
+    self.bo_rendering_cb_.setChecked(options.GetBondOrderFlag())    
+    self.bo_distance_spinbox_.setValue(options.GetBondOrderDistance())
 
   def GetText(self):
     return self.text_
+
+  def GetRenderMode(self):
+    return self.mode_

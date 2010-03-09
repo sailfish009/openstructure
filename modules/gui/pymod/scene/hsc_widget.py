@@ -21,18 +21,18 @@
 from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
-
+from render_mode_widget import RenderModeWidget
 
 #Tube Render Options
-class HSCWidget(QtGui.QWidget):
+class HSCWidget(RenderModeWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    RenderModeWidget.__init__(self, parent)
     
     #Title
     self.text_ = "Helix & Strand Cartoon"
      
     #Set Render Mode
-    self.mode = gfx.RenderMode.HSC
+    self.mode_ = gfx.RenderMode.HSC
     
     #Defaults
     min_spline_detail = 1
@@ -240,7 +240,6 @@ class HSCWidget(QtGui.QWidget):
     grid.setRowStretch(15,1)
     self.setLayout(grid)
     
-    self.options_ = gfx.CartoonRenderOptions()
     QtCore.QObject.connect(self.spline_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSplineDetail)
     QtCore.QObject.connect(self.arc_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateArcDetail)
     QtCore.QObject.connect(self.poly_mode_cb_, QtCore.SIGNAL("currentIndexChanged(int)"), self.UpdatePolyMode)
@@ -266,83 +265,77 @@ class HSCWidget(QtGui.QWidget):
     
     self.setMinimumSize(250,420) #14*30
     ########/UI########
-    
-  def SetEntities(self, entities):
-    self.entities_ = entities
   
-  def Update(self):
-    new_options = self.entities_[0].GetOptions(gfx.HSC)
-    if self.options_ != new_options:
-      self.options_ = new_options
-    self.poly_mode_cb_.setCurrentIndex(self.options_.GetPolyMode())
-    self.spline_spinbox_.setValue(self.options_.GetSplineDetail())
-    self.arc_spinbox_.setValue(self.options_.GetArcDetail())
+  def UpdateGui(self,options):
+    self.poly_mode_cb_.setCurrentIndex(options.GetPolyMode())
+    self.spline_spinbox_.setValue(options.GetSplineDetail())
+    self.arc_spinbox_.setValue(options.GetArcDetail())
     
-    self.UpdateTubeRadiusGui(self.options_.GetTubeRadius())
-    self.UpdateTubeRatioGui(self.options_.GetTubeRatio())
-    self.UpdateHelixWidthGui(self.options_.GetHelixWidth())
-    self.UpdateHelixThicknessGui(self.options_.GetHelixThickness())
-    self.UpdateHelixEccGui(self.options_.GetHelixEcc())
-    self.UpdateStrandWidthGui(self.options_.GetStrandWidth())
-    self.UpdateStrandThicknessGui(self.options_.GetStrandThickness())
-    self.UpdateStrandEccGui(self.options_.GetStrandEcc())
+    self.UpdateTubeRadiusGui(options.GetTubeRadius())
+    self.UpdateTubeRatioGui(options.GetTubeRatio())
+    self.UpdateHelixWidthGui(options.GetHelixWidth())
+    self.UpdateHelixThicknessGui(options.GetHelixThickness())
+    self.UpdateHelixEccGui(options.GetHelixEcc())
+    self.UpdateStrandWidthGui(options.GetStrandWidth())
+    self.UpdateStrandThicknessGui(options.GetStrandThickness())
+    self.UpdateStrandEccGui(options.GetStrandEcc())
     
   def UpdatePolyMode(self, value):
-    self.options_.SetPolyMode(value)
+    self.GetOptions().SetPolyMode(value)
     
   def UpdateSplineDetail(self, value):
-    self.options_.SetSplineDetail(value)
+    self.GetOptions().SetSplineDetail(value)
     
   def UpdateArcDetail(self, value):
-    self.options_.SetArcDetail(value)
+    self.GetOptions().SetArcDetail(value)
     
   def UpdateTubeRadius(self, value):
-    self.options_.SetTubeRadius(value)
+    self.GetOptions().SetTubeRadius(value)
     
   def UpdateSliderTubeRadius(self, value):
-    self.options_.SetTubeRadius(value/10.0)
+    self.GetOptions().SetTubeRadius(value/10.0)
 
   def UpdateTubeRatio(self, value):
-    self.options_.SetTubeRatio(value)
+    self.GetOptions().SetTubeRatio(value)
 
   def UpdateSliderTubeRatio(self, value):
-    self.options_.SetTubeRatio(value/10.0)
+    self.GetOptions().SetTubeRatio(value/10.0)
     
   def UpdateHelixWidth(self, value):
-    self.options_.SetHelixWidth(value) 
+    self.GetOptions().SetHelixWidth(value) 
     
   def UpdateSliderHelixWidth(self, value):
-    self.options_.SetHelixWidth(value/10.0)
+    self.GetOptions().SetHelixWidth(value/10.0)
     
   def UpdateHelixThickness(self, value):
-    self.options_.SetHelixThickness(value)
+    self.GetOptions().SetHelixThickness(value)
 
   def UpdateSliderHelixThickness(self, value):
-    self.options_.SetHelixThickness(value/10.0)
+    self.GetOptions().SetHelixThickness(value/10.0)
     
   def UpdateHelixEcc(self, value):
-    self.options_.SetHelixEcc(value)
+    self.GetOptions().SetHelixEcc(value)
     
   def UpdateSliderHelixEcc(self, value):
-    self.options_.SetHelixEcc(value/10.0)
+    self.GetOptions().SetHelixEcc(value/10.0)
     
   def UpdateStrandWidth(self, value):
-    self.options_.SetStrandWidth(value)
+    self.GetOptions().SetStrandWidth(value)
 
   def UpdateSliderStrandWidth(self, value):
-    self.options_.SetStrandWidth(value/10.0)
+    self.GetOptions().SetStrandWidth(value/10.0)
     
   def UpdateStrandThickness(self, value):
-    self.options_.SetStrandThickness(value)
+    self.GetOptions().SetStrandThickness(value)
     
   def UpdateSliderStrandThickness(self, value):
-    self.options_.SetStrandThickness(value/10.0)
+    self.GetOptions().SetStrandThickness(value/10.0)
     
   def UpdateStrandEcc(self, value):
-    self.options_.SetStrandEcc(value)
+    self.GetOptions().SetStrandEcc(value)
     
   def UpdateSliderStrandEcc(self, value):
-    self.options_.SetStrandEcc(value/10.0)
+    self.GetOptions().SetStrandEcc(value/10.0)
 
   def UpdateTubeRadiusGui(self,value):
     if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_spinbox_.singleStep()):
@@ -386,3 +379,6 @@ class HSCWidget(QtGui.QWidget):
 
   def GetText(self):
     return self.text_
+
+  def GetRenderMode(self):
+    return self.mode_

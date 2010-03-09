@@ -66,21 +66,17 @@ class GradientEditor(QtGui.QWidget):
     self.setMinimumSize(250,300)
         
   def Update(self):
-    if hasattr(self, "entities_") and isinstance(self.entities_, list):
-      for entity in self.entities_:
-        if isinstance(entity, gfx.Entity) or isinstance(entity, gfx.Surface):
-          entity.CleanColorOps()
-          entity.ColorBy(self.props[self.prop_combo_box_.currentIndex()],
-                         self.gradient_edit_.GetGfxGradient())
+    scene_selection = gui.SceneSelection.Instance()
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      node = scene_selection.GetActiveNode(i)
+      self.ChangeColor(node)
   
-  def ChangeColor(self):
-    self.Update()
+  def ChangeColor(self,node):
+    if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
+      node.CleanColorOps()
+      node.ColorBy(self.props[self.prop_combo_box_.currentIndex()],
+                     self.gradient_edit_.GetGfxGradient())
   
-  def SetEntities(self, entities):
-    self.entities_ = entities
-
-
-
 #Gradient Preview
 class GradientPreview(QtGui.QWidget):
   def __init__(self, parent=None):
@@ -112,9 +108,6 @@ class GradientPreview(QtGui.QWidget):
                        size.width() - 2 * self.border_offset_,
                        self.preview_height_)
         paint.end()
-
-  def __del__(self):
-    print "Deconstruct Preview"
     
 #Gradient Edit
 class GradientEdit(QtGui.QWidget):
@@ -220,9 +213,6 @@ class GradientEdit(QtGui.QWidget):
         s.SetPos(s.GetPos() * factor)
       self.UpdateGradient()
       self.width_ = event.size().width()
-
-  def __del__(self):
-    print "Deconstruct Edit"
     
 #Gradient Stop  
 class GradientStop(ColorSelectWidget):

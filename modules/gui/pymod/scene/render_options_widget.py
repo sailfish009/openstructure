@@ -31,6 +31,7 @@ from sline_widget import SlineWidget
 from hsc_widget import HSCWidget
 from trace_widget import TraceWidget
 from line_trace_widget import LineTraceWidget
+
 class RenderOptionsWidget(ComboOptionsWidget):
   def __init__(self, parent=None):
     ComboOptionsWidget.__init__(self, parent)
@@ -39,6 +40,7 @@ class RenderOptionsWidget(ComboOptionsWidget):
     self.text_ = "Render Options"
     
     #Add options to menu    
+    ComboOptionsWidget.AddWidget(self, "", EmptyMode())
     ComboOptionsWidget.AddWidget(self, gfx.RenderMode.SIMPLE, SimpleWidget(self))
     ComboOptionsWidget.AddWidget(self, gfx.RenderMode.CUSTOM, CustomWidget(self))
     ComboOptionsWidget.AddWidget(self, gfx.RenderMode.CPK, CPKWidget(self))
@@ -49,60 +51,69 @@ class RenderOptionsWidget(ComboOptionsWidget):
     ComboOptionsWidget.AddWidget(self, gfx.RenderMode.HSC, HSCWidget(self))
 
     self.setMinimumSize(250,200)
+    
   def DoSomething(self, item):
-    if hasattr(self, "entities_") and isinstance(self.entities_, list):
-      for entity in self.entities_:
-        if isinstance(entity, gfx.Entity):
-          entity.SetRenderMode(item.mode)
+    scene_selection = gui.SceneSelection.Instance()
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      node = scene_selection.GetActiveNode(i)
+      if isinstance(node, gfx.Entity):
+        render_mode = item.GetRenderMode()
+        if render_mode is not None:
+          node.SetRenderMode(render_mode)
+    
+    if(scene_selection.GetActiveViewCount() > 0):
+      entity = scene_selection.GetViewEntity()
+      for i in range(0,scene_selection.GetActiveViewCount()):
+        view = scene_selection.GetActiveView(i)
+        render_mode = item.GetRenderMode()
+        if render_mode is not None:
+          entity.SetRenderMode(item.GetRenderMode(),view,False)
+        
+    item.Update()
     self.DoResize()
   
   def Update(self):
-    enable = False
-    if hasattr(self, "entities_") and isinstance(self.entities_, list):
-      entity = self.entities_[0];
-      if isinstance(entity, gfx.Entity):
-        mode = entity.GetRenderMode()
-        ComboOptionsWidget.ChangeSelectedItem(self,mode)
-        self.GetCurrentWidget().Update()
-      for entity in self.entities_:
-        if isinstance(entity, gfx.Entity):
-          enable = True
+    scene_selection = gui.SceneSelection.Instance()
+    if scene_selection.GetActiveNodeCount() == 0 and scene_selection.GetActiveViewCount() == 0:
+      ComboOptionsWidget.setEnabled(self,False)
+      return
+    
+    if scene_selection.GetActiveNodeCount() > 0 :
+      render_mode_valid = True
+      render_mode = None
+      for i in range(0,scene_selection.GetActiveNodeCount()):
+        entity = scene_selection.GetActiveNode(i)
+        if isinstance(scene_selection.GetActiveNode(i), gfx.Entity):
+          if render_mode is None:
+            render_mode = entity.GetRenderMode()
+          elif render_mode != entity.GetRenderMode():
+            render_mode_valid = False
+            break
         else:
-          enable = False
-          break
-    ComboOptionsWidget.setEnabled(self,enable)  
+          ComboOptionsWidget.setEnabled(self,False)
+          return
+      if(render_mode_valid):
+        ComboOptionsWidget.ChangeSelectedItem(self,render_mode)
+      else:
+        ComboOptionsWidget.ChangeSelectedItem(self,"")
+    
+    self.GetCurrentWidget().Update()
+    
+    ComboOptionsWidget.setEnabled(self,True)
   
   def GetText(self):
     return self.text_
         
-#Helper Class which contains the rendering mode and a beautiful label
-class LabelWithMode(QtGui.QWidget):
-  def __init__(self, text, mode, parent=None):
+class EmptyMode(QtGui.QWidget):
+  def __init__(self, parent=None):
     QtGui.QLabel.__init__(self, parent)
-    
-    #Title
-    self.text_ = text
-    
-    #Mode
-    self.mode = mode
-    
-    #UI
-    textLabel = QtGui.QLabel(text)
-    font = textLabel.font()
-    font.setBold(True)
-    
-    grid = QtGui.QGridLayout()
-    grid.addWidget(textLabel,0,0,1,1)
-    grid.addWidget(QtGui.QLabel("No Settings available"), 1, 0, 1, 3)
-    grid.setRowStretch(2,1)
-    self.setLayout(grid)
-
-  def SetEntities(self, entities):
-    self.entities_ = entities
-    
+    self.setMinimumSize(250,30)
+  
   def Update(self):
    True #Do Nothing
 
   def GetText(self):
-    return self.text_
+    return ""
 
+  def GetRenderMode(self):
+    return None

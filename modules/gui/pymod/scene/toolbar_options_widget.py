@@ -53,25 +53,19 @@ class ToolBarOptionsWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.tool_bar_, QtCore.SIGNAL("actionTriggered(QAction*)"), self.ChangeSelectedItem)
     
     self.setEnabled(False)
-    
-    #Entities
-    self.entities_ = None
-       
+           
     self.Update()
   
   def Update(self):
-    """Updates the ToolBarOptionsWidget and the active widget of the show area.
+    """Updates the active widget of the show area.
     
-     This method calls the Update method of the active widget. 
-     If no entity is set, the ToolBarOptionsWidget will be disabled
+     This method calls the Update method of the active widget.
     """
-    if hasattr(self, "entities_") and isinstance(self.entities_, list):
-      widget = self.__GetCurrentWidget()
-      if hasattr(widget, "Update"):
-        self.__GetCurrentWidget().Update()
-      self.setEnabled(True)
-    else:
-      self.setEnabled(False)
+    self.setEnabled(True)
+    widget = self.__GetCurrentWidget()
+    if hasattr(widget, "Update"):
+      widget.Update()
+  
     
   def AddWidget(self, ident, widget):
     """Adds a Widget to this Options Widget.
@@ -117,17 +111,6 @@ class ToolBarOptionsWidget(QtGui.QWidget):
     self.setMinimumSize(width,self.tool_bar_.height()+height)
     if(hasattr(self.parent_,"DoResize")):
       self.parent_.DoResize()
-  
-  def SetEntities(self, entities):
-    """Set entities.
-    
-     This method sets the given entity as current entity. If no entity is set, the Options Widget is disabled.
-    """
-    self.entities_ = entities
-    for a in self.actions_:
-      widget = a.data().toPyObject()[1]
-      if hasattr(widget, "SetEntities"):
-        widget.SetEntities(self.entities_)
   
   def ChangeSelectedItem(self, action):
     """Change Current Selected Item.

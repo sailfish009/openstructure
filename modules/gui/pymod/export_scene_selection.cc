@@ -32,6 +32,7 @@ void export_SceneSelection()
      return_value_policy<reference_existing_object>()).staticmethod("Instance")
     .def("GetActiveNodeCount",&SceneSelection::GetActiveNodeCount)
     .def("GetActiveNode",&SceneSelection::GetActiveNode)
+    .def("GetViewEntity", &SceneSelection::GetViewEntity)
     .def("GetActiveViewCount", &SceneSelection::GetActiveViewCount)
     .def("GetActiveView", &SceneSelection::GetActiveView)
     ;

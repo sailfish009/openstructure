@@ -21,17 +21,18 @@
 from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
+from render_mode_widget import RenderModeWidget
 
 #Simple Render Options
-class LineTraceWidget(QtGui.QWidget):
+class LineTraceWidget(RenderModeWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    RenderModeWidget.__init__(self, parent)
     
     #Title
     self.text_ = "Fast Trace"
     
     #Set Render Mode
-    self.mode = gfx.RenderMode.LINE_TRACE
+    self.mode_ = gfx.RenderMode.LINE_TRACE
     
     #Defaults
     min_line_width = 0.01
@@ -60,7 +61,6 @@ class LineTraceWidget(QtGui.QWidget):
     grid.setRowStretch(3,1)
     self.setLayout(grid)
 
-    self.options_ = gfx.LineTraceRenderOptions()
     QtCore.QObject.connect(self.radius_spinbox_, 
                            QtCore.SIGNAL("valueChanged(double)"), 
                            self.UpdateLineWidth)
@@ -71,20 +71,17 @@ class LineTraceWidget(QtGui.QWidget):
     self.setMinimumSize(250,90)
     
   def UpdateAA(self, value):
-    self.options_.SetAALines(value)
+    self.GetOptions().SetAALines(value)
     
   def UpdateLineWidth(self, value):
-    self.options_.SetLineWidth(value)
+    self.GetOptions().SetLineWidth(value)
     
-  def Update(self):
-    new_options = self.entities_[0].GetOptions(gfx.LINE_TRACE)
-    if self.options_ != new_options:
-      self.options_ = new_options
-    self.aa_rendering_cb_.setChecked(self.options_.GetAALines())    
-    self.radius_spinbox_.setValue(self.options_.GetLineWidth())
-
-  def SetEntities(self, entities):
-    self.entities_ = entities
+  def UpdateGui(self,options):
+    self.aa_rendering_cb_.setChecked(options.GetAALines())    
+    self.radius_spinbox_.setValue(options.GetLineWidth())
 
   def GetText(self):
     return self.text_
+
+  def GetRenderMode(self):
+    return self.mode_

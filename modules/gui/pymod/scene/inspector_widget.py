@@ -49,7 +49,7 @@ class InspectorWidget(ToolBarOptionsWidget):
     self.scene_selection_ = gui.SceneSelection.Instance()
     scenewin = sip.wrapinstance(app.GetSceneWin().GetSipHandle(),QtGui.QWidget)
     QtCore.QObject.connect(scenewin,QtCore.SIGNAL("ActiveNodesChanged()"),
-                           self.EntitySelectionChanged)     
+                           self.ActiveNodesChanged)     
     
     self.setMinimumSize(250,215)
   #ToolBarOptionsWidget Method
@@ -67,14 +67,8 @@ class InspectorWidget(ToolBarOptionsWidget):
   def NodeChanged(self, node):
     ToolBarOptionsWidget.Update(self)
 
-  def EntitySelectionChanged(self):
-    node_count = self.scene_selection_.GetActiveNodeCount()
-    if(node_count > 0):
-      entities = list();
-      for i in range(node_count):
-        entities.append(self.scene_selection_.GetActiveNode(i))
-      self.SetEntities(entities)
-      ToolBarOptionsWidget.Update(self)
+  def ActiveNodesChanged(self):
+    ToolBarOptionsWidget.Update(self)
 
 class InspectorDialog(QtGui.QDialog):
   def __init__(self, parent=None):

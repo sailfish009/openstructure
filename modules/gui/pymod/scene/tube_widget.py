@@ -21,18 +21,18 @@
 from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
-
+from render_mode_widget import RenderModeWidget
 
 #Tube Render Options
-class TubeWidget(QtGui.QWidget):
+class TubeWidget(RenderModeWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    RenderModeWidget.__init__(self, parent)
     
     #Title
     self.text_ = "Smooth Tube"
     
     #Set Render Mode
-    self.mode = gfx.RenderMode.TUBE
+    self.mode_ = gfx.RenderMode.TUBE
         
     #Defaults
     min_spline_detail = 1
@@ -115,7 +115,6 @@ class TubeWidget(QtGui.QWidget):
     grid.setRowStretch(6,1)
     self.setLayout(grid)
     
-    self.options_ = gfx.CartoonRenderOptions()
     QtCore.QObject.connect(self.spline_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSplineDetail)
     QtCore.QObject.connect(self.arc_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateArcDetail)
     QtCore.QObject.connect(self.poly_mode_cb_, QtCore.SIGNAL("currentIndexChanged(int)"), self.UpdatePolyMode)
@@ -125,40 +124,34 @@ class TubeWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.ratio_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderRatio)
   
     self.setMinimumSize(250,200)
-        
-  def SetEntities(self, entities):
-    self.entities_ = entities
    
-  def Update(self):
-    new_options = self.entities_[0].GetOptions(gfx.TUBE)
-    if self.options_ != new_options:
-      self.options_ = new_options
-    self.poly_mode_cb_.setCurrentIndex(self.options_.GetPolyMode())
-    self.spline_spinbox_.setValue(self.options_.GetSplineDetail())
-    self.arc_spinbox_.setValue(self.options_.GetArcDetail())
-    self.UpdateRadiusGui(self.options_.GetTubeRadius())
-    self.UpdateRatioGui(self.options_.GetTubeRatio())
+  def UpdateGui(self,options):
+    self.poly_mode_cb_.setCurrentIndex(options.GetPolyMode())
+    self.spline_spinbox_.setValue(options.GetSplineDetail())
+    self.arc_spinbox_.setValue(options.GetArcDetail())
+    self.UpdateRadiusGui(options.GetTubeRadius())
+    self.UpdateRatioGui(options.GetTubeRatio())
    
   def UpdatePolyMode(self, value):
-    self.options_.SetPolyMode(value)
+    self.GetOptions().SetPolyMode(value)
     
   def UpdateSplineDetail(self, value):
-    self.options_.SetSplineDetail(value)
+    self.GetOptions().SetSplineDetail(value)
     
   def UpdateArcDetail(self, value):
-    self.options_.SetArcDetail(value)
+    self.GetOptions().SetArcDetail(value)
 
   def UpdateRadius(self, value):
-    self.options_.SetTubeRadius(value)
+    self.GetOptions().SetTubeRadius(value)
     
   def UpdateSliderRadius(self, value):
-    self.options_.SetTubeRadius(value/10.0)
+    self.GetOptions().SetTubeRadius(value/10.0)
 
   def UpdateRatio(self, value):
-    self.options_.SetTubeRatio(value)
+    self.GetOptions().SetTubeRatio(value)
     
   def UpdateSliderRatio(self, value):
-    self.options_.SetTubeRatio(value/10.0)
+    self.GetOptions().SetTubeRatio(value/10.0)
 
   def UpdateRadiusGui(self,value):
     if(abs(value*10.0 - self.radius_slider_.value())>=self.radius_spinbox_.singleStep()):
@@ -172,3 +165,6 @@ class TubeWidget(QtGui.QWidget):
 
   def GetText(self):
     return self.text_
+
+  def GetRenderMode(self):
+    return self.mode_

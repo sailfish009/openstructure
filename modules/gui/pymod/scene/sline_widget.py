@@ -21,17 +21,18 @@
 from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
+from render_mode_widget import RenderModeWidget
 
 #Simple Render Options
-class SlineWidget(QtGui.QWidget):
+class SlineWidget(RenderModeWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    RenderModeWidget.__init__(self, parent)
     
     #Title
     self.text_ = "Fast Spline"
     
     #Set Render Mode
-    self.mode = gfx.RenderMode.SLINE
+    self.mode_ = gfx.RenderMode.SLINE
     
     #Defaults
     min_detail = 1
@@ -70,7 +71,6 @@ class SlineWidget(QtGui.QWidget):
     grid.setRowStretch(4,1)
     self.setLayout(grid)
 
-    self.options_ = gfx.SlineRenderOptions()
     QtCore.QObject.connect(self.detail_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateDetail)
     QtCore.QObject.connect(self.aa_rendering_cb_, QtCore.SIGNAL("stateChanged(int)"), self.UpdateAA)
     QtCore.QObject.connect(self.radius_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateLineWidth)
@@ -78,25 +78,21 @@ class SlineWidget(QtGui.QWidget):
     self.setMinimumSize(250,120)
   
   def UpdateDetail(self, value):
-    self.options_.SetSplineDetail(value)
+    self.GetOptions().SetSplineDetail(value)
   
   def UpdateAA(self, value):
-    self.options_.SetAALines(value)
+    self.GetOptions().SetAALines(value)
     
   def UpdateLineWidth(self, value):
-    self.options_.SetLineWidth(value)
+    self.GetOptions().SetLineWidth(value)
     
-  def Update(self):
-    new_options = self.entities_[0].GetOptions(gfx.SLINE)
-    if self.options_ != new_options:
-      self.options_ = new_options
-    self.detail_spinbox_.setValue(self.options_.GetSplineDetail())
-    self.aa_rendering_cb_.setChecked(self.options_.GetAALines())    
-    self.radius_spinbox_.setValue(self.options_.GetLineWidth())
-    
-
-  def SetEntities(self, entities):
-    self.entities_ = entities
+  def UpdateGui(self,options):
+    self.detail_spinbox_.setValue(options.GetSplineDetail())
+    self.aa_rendering_cb_.setChecked(options.GetAALines())    
+    self.radius_spinbox_.setValue(options.GetLineWidth())
 
   def GetText(self):
     return self.text_
+
+  def GetRenderMode(self):
+    return self.mode_

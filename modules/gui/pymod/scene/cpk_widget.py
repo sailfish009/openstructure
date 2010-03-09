@@ -21,11 +21,12 @@
 from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
+from render_mode_widget import RenderModeWidget
 
 #CPK Render Options
-class CPKWidget(QtGui.QWidget):
+class CPKWidget(RenderModeWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
+    RenderModeWidget.__init__(self, parent)
     
     #Title
     self.text_ = "Spheres"
@@ -35,7 +36,7 @@ class CPKWidget(QtGui.QWidget):
     max_sphere_detail = 20
     
     #Set Render Mode
-    self.mode = gfx.RenderMode.CPK
+    self.mode_ = gfx.RenderMode.CPK
         
     #Create Ui elements
     
@@ -54,22 +55,18 @@ class CPKWidget(QtGui.QWidget):
     grid.setRowStretch(2,1)
     self.setLayout(grid)
   
-    self.options_ = gfx.CPKRenderOptions()
     QtCore.QObject.connect(self.sphere_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSphereDetail)
     
     self.setMinimumSize(250,60)
     
   def UpdateSphereDetail(self, value):
-    self.options_.SetSphereDetail(value)
+    self.GetOptions().SetSphereDetail(value)
     
-  def Update(self):
-    new_options = self.entities_[0].GetOptions(gfx.CPK)
-    if self.options_ != new_options:
-      self.options_ = new_options
-    self.sphere_spinbox_.setValue(self.options_.GetSphereDetail())
-
-  def SetEntities(self, entities):
-    self.entities_ = entities
+  def UpdateGui(self,options):
+    self.sphere_spinbox_.setValue(options.GetSphereDetail())
 
   def GetText(self):
     return self.text_
+
+  def GetRenderMode(self):
+    return self.mode_
