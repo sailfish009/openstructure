@@ -58,7 +58,7 @@ void CustomRenderer::PrepareRendering(GfxView& view,
     // draw all spheres
     for (AtomEntryMap::const_iterator it=view.atom_map.begin();it!=view.atom_map.end();++it) {
       va.AddSphere(SpherePrim(it->second.atom.GetPos(),
-                              options_->GetSphereRad(),
+                              options_->GetSphereRad()+plus,
                               it->second.color),
                               options_->GetSphereDetail());
     }
@@ -67,9 +67,9 @@ void CustomRenderer::PrepareRendering(GfxView& view,
       const geom::Vec3& p0=it->bond.GetFirst().GetPos();
       const geom::Vec3& p2=it->bond.GetSecond().GetPos();
       geom::Vec3 p1=(p0+p2)*0.5;
-      va.AddCylinder(CylinderPrim(p0,p1,options_->GetBondRad(),it->atom1->color),
+      va.AddCylinder(CylinderPrim(p0,p1,options_->GetBondRad()+plus,it->atom1->color),
                      options_->GetArcDetail());
-      va.AddCylinder(CylinderPrim(p1,p2,options_->GetBondRad(),it->atom2->color),
+      va.AddCylinder(CylinderPrim(p1,p2,options_->GetBondRad()+plus,it->atom2->color),
                      options_->GetArcDetail());
     }
   }
@@ -92,8 +92,8 @@ void CustomRenderer::RenderPov(PovState& pov, const std::string& name)
     const geom::Vec3& p0=it->bond.GetFirst().GetPos();
     const geom::Vec3& p2=it->bond.GetSecond().GetPos();
     geom::Vec3 p1=(p0+p2)*0.5;
-    pov.write_cyl(p0,p1,options_->GetArcDetail(),it->atom1->color,name,true);
-    pov.write_cyl(p1,p2,options_->GetArcDetail(),it->atom2->color,name,true);
+    pov.write_cyl(p0,p1,options_->GetBondRad(),it->atom1->color,name,true);
+    pov.write_cyl(p1,p2,options_->GetBondRad(),it->atom2->color,name,true);
   }
   pov.inc() << " }\n";
 }
