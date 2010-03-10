@@ -7,7 +7,10 @@ from ost import io, mol, seq, geom, conop
 import ost
 try: 
   from ost import img
+  import ost.img.alg
+  _img_present=True
 except ImportError:
+  _img_present=False
   pass
 import httplib
 
@@ -102,27 +105,38 @@ def _load_files():
         graphical_objects.append(g)
         gfx.Scene().Add(g)
         c+=e.geometric_center
-      else:       
-        m=io.LoadMap(f[0])
-        if m.GetExtent().GetDepth()==1:
-          images.append(m)  
-          v=gui.CreateDataViewer(m)
-          viewers.append(v)
-          app=gui.GostyApp.Instance()
-          widget=gui.BPQtHandle(v.GetSipHandle())
-          main_area=app.perspective.main_area
-          main_area.AddWidget(f[0], widget)          
+      else: 
+        if _img_present:
+          m=io.LoadMap(f[0])
+          if m.GetExtent().GetDepth()==1:
+            images.append(m)  
+            v=gui.CreateDataViewer(m)
+            viewers.append(v)
+            app=gui.GostyApp.Instance()
+            widget=gui.BPQtHandle(v.GetSipHandle())
+            main_area=app.perspective.main_area
+            main_area.AddWidget(f[0], widget)          
+          else:
+            stat=ost.img.alg.Stat()
+            m.Apply(stat)
+            miso=gfx.MapIso(os.path.basename(f[0]), m,stat.GetMean())
+            c+=miso.center
+            graphical_objects.append(miso)
+            scene.Add(miso)
         else:
-          miso=gfx.MapIso(os.path.basename(f[0]), m)
-          c+=miso.center
-          graphical_objects.append(miso)
-          scene.Add(miso)
+          raise Exception("unknown file type:"+f[0])
     step_size=0.0
     if len(input_files)>1:
       step_size=1.0/(len(input_files)-1)
     for i, go in enumerate(graphical_objects):
       if hasattr(go, 'SetColor'):
-        go.SetColor(gradient.GetColorAt(step_size*i), 'aname=CA')
+        if _img_present:
+          if type(go)==gfx.MapIso:
+            go.SetColor(gradient.GetColorAt(step_size*i))
+          else:
+            go.SetColor(gradient.GetColorAt(step_size*i), 'aname=CA')
+        else:
+          go.SetColor(gradient.GetColorAt(step_size*i), 'aname=CA')
       scene.center=c/index
   except:
     QtGui.QApplication.instance().exit()
