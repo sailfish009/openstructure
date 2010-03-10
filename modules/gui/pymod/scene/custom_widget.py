@@ -38,6 +38,12 @@ class CustomWidget(RenderModeWidget):
     min_arc_detail = 1
     max_arc_detail = 20
     
+    min_rad = 0.05
+    max_bond_rad = 0.5
+    max_sphere_rad = 1
+    
+    
+    
     #Set Render Mode
     self.mode_ = gfx.RenderMode.CUSTOM
         
@@ -48,6 +54,33 @@ class CustomWidget(RenderModeWidget):
     
     self.arc_spinbox_ = QtGui.QSpinBox()
     self.arc_spinbox_.setRange(min_arc_detail, max_arc_detail)
+  
+    #Bond Radius
+    radius_bond_label = QtGui.QLabel("Bond Radius")
+    
+    self.radius_bond_spinbox_ = QtGui.QDoubleSpinBox()
+    self.radius_bond_spinbox_.setRange(min_rad, max_bond_rad)
+    self.radius_bond_spinbox_.setDecimals(2)
+    self.radius_bond_spinbox_.setSingleStep(0.05)
+    
+    self.radius_bond_slider_ = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+    self.radius_bond_slider_.setRange(min_rad*100.0, max_bond_rad*100.0)
+    self.radius_bond_slider_.setTickPosition(QtGui.QSlider.NoTicks)
+    self.radius_bond_slider_.setTickInterval(5)
+    
+    
+    #Sphere Radius
+    radius_sphere_label = QtGui.QLabel("Sphere Radius")
+    
+    self.radius_sphere_spinbox_ = QtGui.QDoubleSpinBox()
+    self.radius_sphere_spinbox_.setRange(min_rad, max_sphere_rad)
+    self.radius_sphere_spinbox_.setDecimals(2)
+    self.radius_sphere_spinbox_.setSingleStep(0.05)
+    
+    self.radius_sphere_slider_ = QtGui.QSlider(QtCore.Qt.Horizontal, self)
+    self.radius_sphere_slider_.setRange(min_rad*100.0, max_sphere_rad*100.0)
+    self.radius_sphere_slider_.setTickPosition(QtGui.QSlider.NoTicks)
+    self.radius_sphere_slider_.setTickInterval(5)
     
     custom_label = QtGui.QLabel(self.text_)
     font = custom_label.font()
@@ -61,13 +94,36 @@ class CustomWidget(RenderModeWidget):
     grid.addWidget(self.sphere_spinbox_, 1, 2, 1, 1)
     grid.addWidget(arc_label,2,0,1,3)
     grid.addWidget(self.arc_spinbox_,2,2,1,1)
+    
+    grid.addWidget(radius_bond_label, 3, 0, 1, 1)
+    grid.addWidget(self.radius_bond_slider_, 3, 1, 1, 3)
+    grid.addWidget(self.radius_bond_spinbox_, 3, 4, 1, 1)
+    
+    grid.addWidget(radius_sphere_label, 4, 0, 1, 1)
+    grid.addWidget(self.radius_sphere_slider_, 4, 1, 1, 3)
+    grid.addWidget(self.radius_sphere_spinbox_, 4, 4, 1, 1)
+    
     grid.setRowStretch(3,1)
     self.setLayout(grid)
   
     QtCore.QObject.connect(self.sphere_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSphereDetail)
     QtCore.QObject.connect(self.arc_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateArcDetail)
     
-    self.setMinimumSize(250,90)
+    QtCore.QObject.connect(self.radius_bond_spinbox_, 
+                           QtCore.SIGNAL("valueChanged(double)"), 
+                           self.UpdateBondRadius)
+    QtCore.QObject.connect(self.radius_bond_slider_, 
+                           QtCore.SIGNAL("valueChanged(int)"), 
+                           self.UpdateSliderBondRadius)
+    
+    QtCore.QObject.connect(self.radius_sphere_spinbox_, 
+                           QtCore.SIGNAL("valueChanged(double)"), 
+                           self.UpdateSphereRadius)
+    QtCore.QObject.connect(self.radius_sphere_slider_, 
+                           QtCore.SIGNAL("valueChanged(int)"), 
+                           self.UpdateSliderSphereRadius)
+    
+    self.setMinimumSize(250,150)
     
   def UpdateSphereDetail(self, value):
     self.GetOptions().SetSphereDetail(value)
@@ -77,9 +133,38 @@ class CustomWidget(RenderModeWidget):
     self.GetOptions().SetArcDetail(value)
     self.ApplyOptions()
 
+  def UpdateBondRadius(self, value):
+    self.GetOptions().SetBondRad(value)
+    if(self.GetOptions().GetSphereRad()<self.GetOptions().GetBondRad()):
+      self.GetOptions().SetSphereRad(value)
+    
+  def UpdateSliderBondRadius(self, value):
+    self.GetOptions().SetBondRad(value/100.0)
+
+  def UpdateSphereRadius(self, value):
+    self.GetOptions().SetSphereRad(value)
+    if(self.GetOptions().GetSphereRad()<self.GetOptions().GetBondRad()):
+      self.GetOptions().SetBondRad(value)
+    
+  def UpdateSliderSphereRadius(self, value):
+    self.GetOptions().SetSphereRad(value/100.0)
+
+  def UpdateSphereRadiusGui(self,value):
+    if(abs(value*100.0 - self.radius_sphere_slider_.value())>=self.radius_sphere_spinbox_.singleStep()):
+      self.radius_sphere_slider_.setValue(value*100.0)
+    self.radius_sphere_spinbox_.setValue(value)
+
+  def UpdateBondRadiusGui(self,value):
+    if(abs(value*100.0 - self.radius_bond_slider_.value())>=self.radius_bond_spinbox_.singleStep()):
+      self.radius_bond_slider_.setValue(value*100.0)
+    self.radius_bond_spinbox_.setValue(value)
+
   def UpdateGui(self,options):
     self.sphere_spinbox_.setValue(options.GetSphereDetail())    
     self.arc_spinbox_.setValue(options.GetArcDetail())
+    
+    self.UpdateBondRadiusGui(options.GetBondRad())
+    self.UpdateSphereRadiusGui(options.GetSphereRad())
 
   def GetText(self):
     return self.text_
