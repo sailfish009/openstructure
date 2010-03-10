@@ -129,7 +129,8 @@ void export_sequence()
   class_<SequenceHandle, bases<ConstSequenceHandle> >("SequenceHandle", init<>())
     .def("SetSequenceOffset", &SequenceHandle::SetSequenceOffset)
     .def("AttachView", attach_one)
-    .def("AttachView", attach_two)         
+    .def("AttachView", attach_two)
+    .def("SetString", &SequenceHandle::SetString)
     .add_property("string",
                   make_function(&SequenceHandle::GetString,
                                 return_value_policy<copy_const_reference>()),
