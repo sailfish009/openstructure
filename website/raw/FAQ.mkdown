@@ -10,7 +10,7 @@ Openstructure is released under GNU-LGPL license
 
 Openstructure is not aiming to be a Viewer, but more a molecular modelling platform, a toolkit. It features nice graphics, though!  
 
-**How to I load all PDB files in a directory?**
+**How do I load all PDB files in a directory?**
 
 The python glob module can be used to match files in a certain directory against a glob pattern. Then use LoadPDB as you normally would.
 
