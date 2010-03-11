@@ -42,6 +42,8 @@ extern void export_RenderOptions();
 
 extern void export_ColorOps();
 
+extern void export_GLWinBase();
+
 using namespace ost;
 using namespace ost::gfx;
 
@@ -77,6 +79,7 @@ BOOST_PYTHON_MODULE(_gfx)
   export_SymmetryNode();
   export_SceneObserver();
   export_ColorOps();
+  export_GLWinBase();
 
   enum_<RenderMode::Type>("RenderMode")
     .value("SIMPLE",RenderMode::SIMPLE)
