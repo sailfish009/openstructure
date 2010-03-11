@@ -207,6 +207,7 @@ void export_sequence()
   def("SequenceToInfo", &SequenceToInfo);
   def("SequenceListToInfo", &SequenceListToInfo);
   def("SequenceFromInfo", &SequenceFromInfo);
+  def("CreateAlignment", &CreateAlignment);
   def("AlignmentFromSequenceList", &AlignmentFromSequenceList);
   def("SequenceListFromInfo", &SequenceListFromInfo);  
 }

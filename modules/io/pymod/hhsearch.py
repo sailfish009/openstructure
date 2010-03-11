@@ -115,7 +115,7 @@ class HHSearchResult:
         q_seq+=re.split('\s+', line)[3]
       if line.startswith('T'):
         t_seq+=re.split('\s+', line)[3]        
-    ali=seq.MultiSeqAlignment()
+    ali=seq.AlignmentHandle()
     ali.AddSequence(seq.Sequence.FromString('query', q_seq))
     ali.AddSequence(seq.Sequence.FromString('target', t_seq))    
     return ali
