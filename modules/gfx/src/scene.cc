@@ -447,6 +447,8 @@ void Scene::RenderGL()
 
   if(stereo_==2 || stereo_==3) {
     render_interlaced_stereo();
+  } else if (stereo_==1) {
+    this->render_quad_buffered_stereo();
   } else {
     this->render_scene_with_glow();
   }
@@ -1047,13 +1049,14 @@ void Scene::SetFogOffsets(float no, float fo)
 void Scene::Stereo(unsigned int m)
 {
   if(m==1) {
-    // unsupported quad-buffer stereo
-    LOGN_ERROR("quad buffer stereo not supported");
-    stereo_=0;
+    stereo_=m;
+    if(win_) win_->SetStereo(true);
   } else if(m==2 || m==3) {
     stereo_=m;
+    if(win_) win_->SetStereo(false);
   } else {
     stereo_=0;
+    if(win_) win_->SetStereo(false);
   }
   RequestRedraw();
 }
@@ -1728,6 +1731,18 @@ void Scene::render_interlaced_stereo()
   glPopAttrib();
 }
 
-
+void Scene::render_quad_buffered_stereo()
+{
+  glDrawBuffer(GL_BACK);
+  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+  glDrawBuffer(GL_BACK_LEFT);
+  glClear(GL_DEPTH_BUFFER_BIT);
+  stereo_projection(stereo_==1 ? 1: 2);
+  this->render_scene_with_glow();
+  glDrawBuffer(GL_BACK_RIGHT);
+  glClear(GL_DEPTH_BUFFER_BIT);
+  stereo_projection(stereo_==1 ? 2 : 1);
+  this->render_scene_with_glow();
+}
 
 }} // ns

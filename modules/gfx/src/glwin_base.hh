@@ -36,6 +36,8 @@ public:
   virtual void DoRefresh() = 0;
 
   virtual void StatusMessage(const String& m) = 0;
+
+  virtual void SetStereo(bool s) = 0;
 };
 
 }}

@@ -53,6 +53,7 @@ public:
   // gfx::GLWinBase interface
   virtual void DoRefresh();
   virtual void StatusMessage(const String& m);
+  virtual void SetStereo(bool s);
 
   // central point for sending input to the gfx layer
   void OnTransform(gfx::InputCommand, int indx, 

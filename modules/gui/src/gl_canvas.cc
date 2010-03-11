@@ -71,6 +71,12 @@ void GLCanvas::StatusMessage(const String& m)
   glwin_->StatusMessage(m);
 }
 
+void GLCanvas::SetStereo(bool s)
+{
+  QGLFormat f=this->format();
+  f.setStereo(s);
+  this->setFormat(f);
+}
 
 void GLCanvas::OnTransform(gfx::InputCommand com, int indx, 
                            gfx::TransformTarget trg, Real val)

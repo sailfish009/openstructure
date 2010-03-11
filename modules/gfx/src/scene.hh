@@ -405,6 +405,7 @@ private:
   void prep_blur();
   void stereo_projection(unsigned int view);
   void render_interlaced_stereo();
+  void render_quad_buffered_stereo();
   void render_scene_with_glow();
   bool IsNameAvailable(String name);
 };
