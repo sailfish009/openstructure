@@ -47,6 +47,30 @@ origin (ie the pixel with the coordinates <0,0>) is in the top-left corner.
 A viewer window will pop up (see below), showing a white frame on a black background.
 The inner area of the white frame is the image, which is empty.
 
+## Reading and writing into an image
+
+Data can be read and written from and into an image using the following commands:
+
+    ::python
+    # writes the real value 23.4 into pixel 10,10
+    im.SetReal(img.Point(10,10),23.4)
+    # reads the value in pixel 10,10
+    val=im.GetReal(img.Point(10,10))
+    
+The complex equivalents are also available    
+
+    ::python
+    # writes the complex value value 2+3j into pixel 10,10
+    im.SetComplex(img.Point(10,10),2+3j)
+    # reads the value in pixel 10,10
+    val=im.GetComplex(img.Point(10,10))
+
+The image knows in which domain it is, and will adjust the type of data being written
+accordingly. For example, if one writes a complex value in a 'SPATIAL' image, the value
+will be automatically converted to a real one by taking the amplitude of the complex number
+On the other hand, if one writes a real value in a 'FREQUENCY' image, the value is automatically
+converted to complex by setting the imaginary part to 0.
+
 ## Applying algorithms
 
 Let us fill the image with random values.
