@@ -128,9 +128,7 @@ An image is Fourier-transformed using the 'img.alg.FFT()' algorithm object:
     gui.CreateDataViewer(im_ft)
     gui.CreateDataViewer(im2)
  
-It is not really necessary to create the 'fft' instance, a temporary object can be used,
-since the 'FFT' algorithm object is stateless. In addition, the algorithm can be applied
-in-place to avoid the creation of a second image:
+It is not really necessary to use the 'fft' variable to store the 'im.alg.FFT()' instance, a temporary object can be used, since the 'FFT' algorithm object is stateless. In addition, the algorithm can be applied in-place to avoid the creation of a second image:
 
     :::python
     im=io.LoadImage("imagename.tif") # load the image

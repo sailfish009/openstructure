@@ -112,7 +112,7 @@ Following python code loads an image and creates a new viewer for it.
 
     ::::python
     im=io.LoadImage("...")
-    v=gui.GostyApp.Instance().CreateDataViewer(im)
+    v=gui.CreateDataViewer(im)
 
 The viewer instance v provides following methods. See the dox[ost::img::gui::DataViewer|DataViewer]
 class documentation.
