@@ -4,11 +4,16 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4.QtOpenGL import *
 
+TRANS_VAL = 20
+
 class DokkGLCanvas(QGLWidget):
+    
   def __init__(self, format, parent=None):
     QGLWidget.__init__(self, format, parent)
     self.last_pos_=QPoint()
     self.setAutoFillBackground(False)
+    self.setAttribute(Qt.WA_KeyCompression,True)
+    
   def initializeGL(self):
     gfx.Scene().InitGL()
 
@@ -45,6 +50,32 @@ class DokkGLCanvas(QGLWidget):
                         False)
     self.update()
 
+  def wheelEvent(self, event):
+    self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0,gfx.TRANSFORM_VIEW,
+              0.1*(-event.delta()))
+
+
+  def OnTransform(self,com, indx, trg, val):
+    gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
+                                     com, indx,trg,val*0.5),False)
+    self.update()
+    
+  def keyReleaseEvent(self, event):
+    if event.key() == Qt.Key_Left or event.key() == Qt.Key_A:
+      self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
+      
+    if event.key() == Qt.Key_Right or event.key() == Qt.Key_D:
+      self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
+      
+    if event.key() == Qt.Key_Down or event.key() == Qt.Key_S:
+      self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
+      
+    if event.key() == Qt.Key_Up or event.key() == Qt.Key_W:
+      self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
+      
+    if event.key() == Qt.Key_Escape:
+      QApplication.exit()
+    
 class DokkGLWin(gfx.GLWinBase):
     def _CreateFormat(self):
       fmt=QGLFormat()
