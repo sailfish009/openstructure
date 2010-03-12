@@ -10,15 +10,17 @@ class DokkGLCanvas(QGLWidget):
     
   def __init__(self, format, parent=None):
     QGLWidget.__init__(self, format, parent)
-    self.last_pos_=QPoint()
+    self.last_pos_=QPoint()    
     self.setAutoFillBackground(False)
-    self.setAttribute(Qt.WA_KeyCompression,True)
-    
+    #self.setAttribute(Qt.WA_KeyCompression,True)
+    self.resize(800, 800)
   def initializeGL(self):
     gfx.Scene().InitGL()
 
   def paintGL(self):
     gfx.Scene().RenderGL()
+  def SetLevel(self, level):
+    self.level_=level
   def paintEvent(self, event):
     gfx.Scene().RenderGL()
     painter=QPainter(self)
@@ -30,7 +32,7 @@ class DokkGLCanvas(QGLWidget):
     painter.drawRect(QRect(QPoint(0, 0), QSize(self.width(), 25)))
     painter.setPen(QPen(QColor(255,255,255), Qt.SolidLine))
     painter.setFont(QFont("Verdana"))
-    painter.drawText(QPoint(10, 20), "Test Message")
+    painter.drawText(QPoint(10, 20), "You are %.1f away from the solution" % self.level_.GetRMSD())
   def resizeGL(self, w, h):
     gfx.Scene().Resize(w, h)
 
@@ -40,16 +42,33 @@ class DokkGLCanvas(QGLWidget):
   def mouseMoveEvent(self, event):
     delta=QPoint(event.x(), event.y())-self.last_point_
     self.last_point_=QPoint(event.x(), event.y())
-    if delta.y()!=0:
-      gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
-                                       gfx.INPUT_COMMAND_ROTX, delta.y()*0.5), 
-                        False)
-    if delta.x()!=0:
-      gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
-                                       gfx.INPUT_COMMAND_ROTY, delta.x()*0.5), 
-                        False)
-    self.update()
-
+    if event.button() & Qt.LeftButton:
+      tf=gfx.Scene().GetTransform()      
+      if event.modifiers() & Qt.ShiftModifier:
+        if event.modifiers() & Qt.AltModifier:
+          self.level_.Shift(tf.GetRot().GetRow(2)*delta.y()*0.1)          
+        else:
+         self.level_.Shift((tf.GetRot().GetRow(0)*delta.x()
+                           -tf.GetRot().GetRow(1)*delta.y())*0.1)
+      else:
+        if delta.y()!=0:
+          self.level_.RotateAxis(tf.GetRot().GetRow(0), delta.y()*0.005)
+        if delta.x()!=0:
+          self.level_.RotateAxis(tf.GetRot().GetRow(1), delta.x()*0.005)
+      self.level_.UpdateScores()
+      self.update()
+    elif event.button() & Qt.RightButton:
+      if delta.y()!=0:
+        gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
+                                         gfx.INPUT_COMMAND_ROTX, delta.y()*0.5),
+                          False)
+      if delta.x()!=0:
+        gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
+                                         gfx.INPUT_COMMAND_ROTY, delta.x()*0.5),
+                          False)
+      self.update()
+  def mouseDoubleClickEvent(self, event):
+    self.level_.SetPivot(event.x(), self.height()-event.y())
   def wheelEvent(self, event):
     self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0,gfx.TRANSFORM_VIEW,
               0.1*(-event.delta()))
@@ -86,7 +105,8 @@ class DokkGLWin(gfx.GLWinBase):
         self.canvas_=DokkGLCanvas(self._CreateFormat())
     def DoRefresh(self):
       self.refresh_=True
-      
+    def SetLevel(self, level):
+      self.canvas_.SetLevel(level)
     def Show(self, fullscreen):
       if fullscreen:
         self.canvas_.showFullScreen()

@@ -74,5 +74,7 @@ void export_Mat3()
     .def("__getitem__",Mat3_getslice)
     .def("__setitem__",Mat3_setitem)
     .def("__setitem__",Mat3_setslice)
+    .def("GetCol", &Mat3::GetCol)
+    .def("GetRow", &Mat3::GetRow)    
   ;
 }

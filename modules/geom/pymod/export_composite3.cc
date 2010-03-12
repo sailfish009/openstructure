@@ -133,6 +133,9 @@ scope PlaneScope =
          return_value_policy<copy_const_reference>())                  
     .def("GetHalfExtents", &Cuboid::GetHalfExtents)
   ;
-
+  class_<AlignedCuboid>("AlignedCuboid", init<geom::Vec3, geom::Vec3>())
+    .def("GetMin", &AlignedCuboid::GetMin, return_value_policy<copy_const_reference>())
+    .def("GetMax", &AlignedCuboid::GetMax, return_value_policy<copy_const_reference>())
+  ;
 }
 
