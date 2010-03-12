@@ -64,7 +64,9 @@ EntityNode::EntityNode(gfx::EntityP& entity, SceneNode* parent):
   model->AddNode(quick_selection, node);
   node = new EntityPartNode("Sidechains", entity, mol::QueryViewWrapper(entity->GetView().Select("aname!=CA,C,N,O and peptide=true")), quick_selection);
   model->AddNode(quick_selection, node);
-  node = new EntityPartNode("Ligands", entity, mol::QueryViewWrapper(entity->GetView().Select("ishetatm=1 and ele=C")), quick_selection);
+  node = new EntityPartNode("Ligands", entity, mol::QueryViewWrapper(entity->GetView().Select("ishetatm=1 and rname!=HOH,WAT")), quick_selection);
+  model->AddNode(quick_selection, node);
+  node = new EntityPartNode("Water", entity, mol::QueryViewWrapper(entity->GetView().Select("rname=HOH,WAT")), quick_selection);
   model->AddNode(quick_selection, node);
 
 
