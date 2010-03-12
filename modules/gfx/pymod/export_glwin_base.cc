@@ -29,7 +29,7 @@ using namespace ost::gfx;
 
 void export_GLWinBase()
 {
-  class_<GLWinBase, GLWinBaseProxy, boost::noncopyable>("GLWinBase", no_init)
+  class_<GLWinBase, GLWinBaseProxy, boost::noncopyable>("GLWinBase")
     .def("DoRefresh",&GLWinBase::DoRefresh)
     .def("StatusMessage",&GLWinBase::StatusMessage)
   ;
