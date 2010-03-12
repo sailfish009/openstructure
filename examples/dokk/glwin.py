@@ -22,9 +22,12 @@ class DokkGLCanvas(QGLWidget):
   def SetLevel(self, level):
     self.level_=level
   def paintEvent(self, event):
-    gfx.Scene().RenderGL()
-    painter=QPainter(self)
-    self.RenderHUD(painter)
+    self.makeCurrent()
+    self.paintGL()
+    #painter=QPainter(self)
+    #self.RenderHUD(painter)
+    print "%.3f"%self.level_.GetRMSD()
+    self.swapBuffers()
 
   def RenderHUD(self, painter):
     painter.setPen(QColor(100, 100, 100, 50))
@@ -42,7 +45,7 @@ class DokkGLCanvas(QGLWidget):
   def mouseMoveEvent(self, event):
     delta=QPoint(event.x(), event.y())-self.last_point_
     self.last_point_=QPoint(event.x(), event.y())
-    if event.button() & Qt.LeftButton:
+    if event.buttons() & Qt.LeftButton:
       tf=gfx.Scene().GetTransform()      
       if event.modifiers() & Qt.ShiftModifier:
         if event.modifiers() & Qt.AltModifier:
