@@ -60,7 +60,7 @@ class DokkGLCanvas(QGLWidget):
           self.level_.RotateAxis(tf.GetRot().GetRow(1), delta.x()*0.005)
       self.level_.UpdateScores()
       self.update()
-    elif event.button() & Qt.RightButton:
+    elif event.buttons() & Qt.RightButton:
       if delta.y()!=0:
         gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
                                          gfx.INPUT_COMMAND_ROTX, delta.y()*0.5),
