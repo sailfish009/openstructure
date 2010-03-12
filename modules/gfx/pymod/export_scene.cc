@@ -32,7 +32,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(scene_autoslab_overloads,
                                        Scene::Autoslab, 0, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(scene_export_pov_overloads,
                                        Scene::ExportPov, 1,2)
-
+void (Scene::*apply)(const InputEvent&, bool)=&Scene::Apply;
 namespace {
 
 Scene* get_scene()
@@ -105,6 +105,7 @@ void export_Scene()
     .def("GetFOV",&Scene::GetFOV)
     .def("SetFogOffsets",&Scene::SetFogOffsets)
     .def("Stereo",&Scene::Stereo)
+    .def("Apply", apply)
     .def("SetStereoEye",&Scene::SetStereoEye)
     .def("SetLightDir",&Scene::SetLightDir)
     .def("SetLightProp",set_light_prop1)
