@@ -129,6 +129,7 @@ BOOST_PYTHON_MODULE(_gfx)
    .export_values()
   ;
   class_<InputEvent>("InputEvent", init<InputDevice, InputCommand, float>())
+   .def(init<InputDevice,InputCommand,int,int,float>())
   ;
   class_<PrimList, bases<GfxObj>, PrimListP, boost::noncopyable>("PrimList", init<const String& >())
     .def("Clear",&PrimList::Clear)
