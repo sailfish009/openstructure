@@ -35,15 +35,11 @@ class ColorOptionsWidget(ComboOptionsWidget):
     self.text_ = "Color Options"
     
     #Add options to menu
-    options = {
-               "Color by Property":GradientEditor(self),
-               "Color by Element":ByElementWidget("Color by Element"),
-               "Uniform":UniformColorWidget(self),
-               "Presets":PresetWidget(self)
-               }
-    
-    for k, v in options.iteritems():
-      ComboOptionsWidget.AddWidget(self, k, v)
+    self.AddWidget("Presets", PresetWidget(self))
+    self.AddWidget("Color by Element", ByElementWidget("Color by Element"))
+    self.AddWidget("Color by Chain", ByChainWidget("Color by Chain"))
+    self.AddWidget("Color by Property", GradientEditor(self))
+    self.AddWidget("Uniform",UniformColorWidget(self))
   
     self.setMinimumSize(250,200)
     
@@ -98,6 +94,37 @@ class ByElementWidget(QtGui.QWidget):
     if isinstance(node, gfx.Entity):
       node.CleanColorOps()
       node.ColorByElement()
+      
+  def GetText(self):
+    return self.text_
+  
+  
+class ByChainWidget(QtGui.QWidget):
+  def __init__(self, text, parent=None):
+    QtGui.QLabel.__init__(self, parent)
+    
+    #Title
+    self.text_ = text
+    
+    #UI
+    text_label = QtGui.QLabel(text)
+    font = text_label.font()
+    font.setBold(True)
+    
+    grid = QtGui.QGridLayout()
+    grid.addWidget(text_label,0,0,1,1)
+    grid.addWidget(QtGui.QLabel("No Settings available"), 1, 0, 1, 3)
+    grid.setRowStretch(2,1)
+    self.setLayout(grid)
+    self.setMinimumSize(250,60)
+    
+  def Update(self):
+   pass #Do Nothing
+    
+  def ChangeColor(self, node):
+    if isinstance(node, gfx.Entity):
+      node.CleanColorOps()
+      node.ColorByChain()
       
   def GetText(self):
     return self.text_

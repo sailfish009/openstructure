@@ -31,6 +31,7 @@ from preset_editor_list_model import PresetEditorListModel
 from immutable_gradient_info_handler import ImmutableGradientInfoHandler
 from ost.mol import Prop
 from ost.gfx import ByElementColorOp
+from ost.gfx import ByChainColorOp
 from ost.gfx import GradientLevelColorOp
 from ost.gfx import UniformColorOp
 from preset import Preset
@@ -51,9 +52,11 @@ class PresetEditor(QtGui.QDialog):
     self.ufcow_=UniformColorOpWidget(self)
     self.glcow_=GradientLevelColorOpWidget(self)
     self.beow_=ByElementColorOpWidget(self)
+    self.bcow_=ByChainColorOpWidget(self)
     self.combo_box_.addItem("Uniform Color Operation", QtCore.QVariant(self.ufcow_))
     self.combo_box_.addItem("Gradient Operation", QtCore.QVariant(self.glcow_))
     self.combo_box_.addItem("By Element Operation", QtCore.QVariant(self.beow_))
+    self.combo_box_.addItem("By Chain Operation", QtCore.QVariant(self.bcow_))
     
     self.add_button_ = QtGui.QPushButton("Add")
     
@@ -133,6 +136,10 @@ class PresetEditor(QtGui.QDialog):
        self.beow_.SetColorOp(color_op)
        if self.beow_.exec_():
          self.list_model_.SetItem(current_index, self.beow_.GetColorOp())
+    elif isinstance(color_op, gfx.ByChainColorOp):
+       self.bcow_.SetColorOp(color_op)
+       if self.bcow_.exec_():
+         self.list_model_.SetItem(current_index, self.bcow_.GetColorOp())
     
   def Remove(self):
     current_index = self.list_view_.currentIndex()
@@ -443,6 +450,63 @@ class ByElementColorOpWidget(QtGui.QDialog):
     for i in range(0,self.detail_selection_cb_.count()):
       mask = self.detail_selection_cb_.itemData(i).toPyObject()
       if mask == beco.GetMask():
+        self.detail_selection_cb_.setCurrentIndex(i)
+        found = True
+        break
+    if not found:
+      self.detail_selection_cb_.setCurrentIndex(0)
+  
+  def Ok(self):
+    self.accept()
+    
+  def Cancel(self):
+    self.reject()
+    
+    
+class ByChainColorOpWidget(QtGui.QDialog):
+  def __init__(self, parent=None):
+    QtGui.QDialog.__init__(self, parent)
+    selection_label = QtGui.QLabel("Selection")
+    self.selection_edit_ = QtGui.QLineEdit()
+
+    detail_label = QtGui.QLabel("Parts")
+    self.detail_selection_cb_ = QtGui.QComboBox()
+    self.detail_selection_cb_.addItem("Main and Detail",QtCore.QVariant(3))
+    self.detail_selection_cb_.addItem("Main",QtCore.QVariant(2))
+    self.detail_selection_cb_.addItem("Detail",QtCore.QVariant(1))
+  
+    self.hbox_ = QtGui.QHBoxLayout()
+    self.ok_button_ = QtGui.QPushButton("OK")
+    self.cancel_button_ = QtGui.QPushButton("Cancel")
+    self.hbox_.addWidget(self.ok_button_)
+    self.hbox_.addStretch()
+    self.hbox_.addWidget(self.cancel_button_)
+    
+    grid = QtGui.QGridLayout()
+    grid.setContentsMargins(0,5,0,0)
+    grid.addWidget(selection_label, 0, 0, 1, 1)
+    grid.addWidget(self.selection_edit_, 0, 1, 1, 1)
+    grid.addWidget(detail_label, 1, 0, 1, 1)
+    grid.addWidget(self.detail_selection_cb_, 1, 1, 1, 1)
+    grid.addLayout(self.hbox_,2,0,1,2)
+    grid.setRowStretch(1, 1)
+    self.setLayout(grid)
+    
+    QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
+    QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
+    
+  def GetColorOp(self):
+    detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
+    selection = str(self.selection_edit_.text())
+    bcco = ByChainColorOp(selection, detail)
+    return bcco
+
+  def SetColorOp(self, bcco):
+    self.selection_edit_.setText(bcco.GetSelection())
+    found=False
+    for i in range(0,self.detail_selection_cb_.count()):
+      mask = self.detail_selection_cb_.itemData(i).toPyObject()
+      if mask == bcco.GetMask():
         self.detail_selection_cb_.setCurrentIndex(i)
         found = True
         break
