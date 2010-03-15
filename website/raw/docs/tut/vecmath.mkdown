@@ -12,8 +12,8 @@ You can add them together, multiply them by scalar values or calculate the inner
 product. This short code snippet gives an idea of how you can use vectors.
 
     :::python
-    a=Vec2(1,0)
-    b=Vec2(0,1)
+    a=geom.Vec2(1,0)
+    b=geom.Vec2(0,1)
     # print the vectors
     print a,b
 
@@ -23,7 +23,7 @@ Here is another example:
     # create a new vector by using components of both a and b.
     # The components of a vector can be accessed by using the 
     # array subscript notation:
-    c=Vec2(a[0],b[1])
+    c=geom.Vec2(a[0],b[1])
     # print length of vector a and b
     print Length(a), Length(b)
 
@@ -56,8 +56,8 @@ are several helper classes in OpenStructure that encapsulate the logic of rotati
 
     :::python
     # define rotation around x axis by 180 degrees (PI radians)
-    rot=Rotation3(math.pi,0,0) 
-    v=Vec3(0,1,0)
+    rot=geom.Rotation3(math.pi,0,0) 
+    v=geom.Vec3(0,1,0)
     # rotate v by rot
     print rot.GetRotationMatrix()*v
 
@@ -65,7 +65,7 @@ In two dimensions, the 'Rotate' function can be used to rotate a vector by a cer
 
     :::python
     #rotate by 90 degrees (PI/2 radians)
-    print Rotate(Vec2(1,0),math.pi/2)
+    print geom.Rotate(geom.Vec2(1,0),math.pi/2)
 
 
 ### Scaling
@@ -75,8 +75,8 @@ scalar factor. For non-uniform scaling you can use a 3x3 matrix with all but the
 main diagonal elements set to zero.
 
     :::python
-    scale=Mat3(1.0,0.0,0.0,
-              0.0,2.0,0.0,
-              0.0,0.0,4.0)
+    scale=geom.Mat3(1.0,0.0,0.0,
+                    0.0,2.0,0.0,
+                    0.0,0.0,4.0)
 
-    print scale*Vec3(1,1,1)
+    print scale*geom.Vec3(1,1,1)
