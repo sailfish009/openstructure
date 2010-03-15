@@ -710,6 +710,12 @@ void Entity::ColorByElement()
   this->Apply(cop);
 }
 
+void Entity::ColorByChain()
+{
+  ByChainColorOp cop = ByChainColorOp();
+  this->Apply(cop);
+}
+
 void Entity::ColorBy(const mol::EntityView& ev,
                      const String& prop,
                      const Gradient& g, float minv, float maxv)
@@ -872,6 +878,16 @@ void Entity::Apply(const gfx::ByElementColorOp& op, bool store)
 {
   if(store){
     ByElementColorOp* op_ptr = new ByElementColorOp(op);
+    this->AppendColorOp(op_ptr);
+  }
+  apply_color_op_to_renderer_list(renderer_.begin(), renderer_.end(), op);
+  FlagRebuild();
+}
+
+void Entity::Apply(const gfx::ByChainColorOp& op, bool store)
+{
+  if(store){
+    ByChainColorOp* op_ptr = new ByChainColorOp(op);
     this->AppendColorOp(op_ptr);
   }
   apply_color_op_to_renderer_list(renderer_.begin(), renderer_.end(), op);

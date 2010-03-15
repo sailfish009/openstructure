@@ -32,6 +32,7 @@
 #include <ost/gfx/render_options/render_options.hh>
 #include <ost/gfx/color_ops/color_op.hh>
 #include <ost/gfx/color_ops/by_element_color_op.hh>
+#include <ost/gfx/color_ops/by_chain_color_op.hh>
 #include <ost/gfx/color_ops/uniform_color_op.hh>
 #include <ost/gfx/color_ops/gradient_level_color_op.hh>
 #include <ost/gfx/color_ops/entity_view_color_op.hh>
@@ -156,6 +157,9 @@ public:
   /// \brief color by element
   void ColorByElement();
   
+  /// \brief color by chain
+  void ColorByChain();
+
   /// \brief get view
   mol::EntityView GetView() const;
 
@@ -222,6 +226,7 @@ public:
   void ResetRadiusBy();
 
   void Apply(const gfx::ByElementColorOp& op, bool store=true);
+  void Apply(const gfx::ByChainColorOp& op, bool store=true);
   void Apply(const gfx::UniformColorOp& op, bool store=true);
 
   void Apply(const gfx::GradientLevelColorOp& op, bool store=true);

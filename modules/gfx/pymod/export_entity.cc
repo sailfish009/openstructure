@@ -147,6 +147,13 @@ void ent_apply_22(Entity* e, ByElementColorOp& beco){
   e->Apply(beco);
 }
 
+void ent_apply_31(Entity* e, ByChainColorOp& beco, bool store){
+  e->Apply(beco,store);
+}
+void ent_apply_32(Entity* e, ByChainColorOp& beco){
+  e->Apply(beco);
+}
+
 void ent_apply_41(Entity* e, EntityViewColorOp& evco, bool store){
   e->Apply(evco,store);
 }
@@ -263,6 +270,7 @@ void export_Entity()
     .def("PickAtom", &Entity::PickAtom)
     .def("PickBond", &Entity::PickBond)
     .def("ColorByElement",&Entity::ColorByElement)
+    .def("ColorByChain",&Entity::ColorByChain)
     .def("CleanColorOps", &Entity::CleanColorOps)
     .def("ReapplyColorOps", &Entity::ReapplyColorOps)
     .def("GetOptions", &Entity::GetOptions)
@@ -279,6 +287,8 @@ void export_Entity()
     .def("Apply",&ent_apply_12)
     .def("Apply",&ent_apply_21)
     .def("Apply",&ent_apply_22)
+    .def("Apply",&ent_apply_31)
+    .def("Apply",&ent_apply_32)
     .def("Apply",&ent_apply_41)
     .def("Apply",&ent_apply_42)
     .def("Apply",&ent_apply_51)

@@ -207,6 +207,22 @@ void ConnectRendererBase::Apply(const gfx::ByElementColorOp& op)
   state_|=DIRTY_VA;
 }
 
+void ConnectRendererBase::Apply(const gfx::ByChainColorOp& op)
+{
+  if ((op.GetMask() & MAIN_COLOR)==0) {
+    return;
+  }
+  this->UpdateViews();
+  mol::Query q(op.GetSelection());
+  for (AtomEntryMap::iterator it=view_.atom_map.begin();
+       it!=view_.atom_map.end();++it) {
+    if (q.IsAtomSelected(it->second.atom)) {
+      it->second.color=op.GetColor(it->second.atom.GetResidue().GetChain().GetName());
+    }
+  }
+  state_|=DIRTY_VA;
+}
+
 void ConnectRendererBase::Apply(const gfx::UniformColorOp& op)
 {
   if ((op.GetMask() & MAIN_COLOR)==0) {

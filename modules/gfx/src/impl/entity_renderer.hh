@@ -35,6 +35,7 @@
 
 #include <ost/gfx/color_ops/color_op.hh>
 #include <ost/gfx/color_ops/by_element_color_op.hh>
+#include <ost/gfx/color_ops/by_chain_color_op.hh>
 #include <ost/gfx/color_ops/uniform_color_op.hh>
 #include <ost/gfx/color_ops/gradient_level_color_op.hh>
 #include <ost/gfx/color_ops/entity_view_color_op.hh>
@@ -138,6 +139,7 @@ public:
   virtual ~EntityRenderer(){}
 
   virtual void Apply(const gfx::ByElementColorOp& op)=0;
+  virtual void Apply(const gfx::ByChainColorOp& op)=0;
   virtual void Apply(const gfx::UniformColorOp& op)=0;
   virtual void Apply(const gfx::GradientLevelColorOp& op)=0;
   virtual void Apply(const gfx::EntityViewColorOp& op)=0;

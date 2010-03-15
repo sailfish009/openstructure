@@ -40,6 +40,7 @@ public:
   virtual geom::AlignedCuboid GetBoundingBox() const;
   
   virtual void Apply(const gfx::ByElementColorOp& op);
+  virtual void Apply(const gfx::ByChainColorOp& op);
   virtual void Apply(const gfx::UniformColorOp& op);
   virtual void Apply(const gfx::GradientLevelColorOp& op);
   virtual void Apply(const gfx::EntityViewColorOp& op);

@@ -23,6 +23,7 @@
 #include <ost/gfx/color_ops/color_op.hh>
 #include <ost/gfx/color_ops/basic_gradient_color_op.hh>
 #include <ost/gfx/color_ops/by_element_color_op.hh>
+#include <ost/gfx/color_ops/by_chain_color_op.hh>
 #include <ost/gfx/color_ops/uniform_color_op.hh>
 #include <ost/gfx/color_ops/gradient_color_op.hh>
 #include <ost/gfx/color_ops/gradient_level_color_op.hh>
@@ -62,6 +63,12 @@ void export_ColorOps()
   class_<ByElementColorOp, bases<ColorOp> >("ByElementColorOp", init<>())
     .def(init<const String&, int>())
     .def("FromInfo",&ByElementColorOp::FromInfo)
+    .staticmethod("FromInfo")
+  ;
+
+  class_<ByChainColorOp, bases<ColorOp> >("ByChainColorOp", init<>())
+    .def(init<const String&, int>())
+    .def("FromInfo",&ByChainColorOp::FromInfo)
     .staticmethod("FromInfo")
   ;
 

@@ -39,6 +39,7 @@ povray.hh
 set(OST_GFX_COLOR_OPS_HEADERS
 color_op.hh
 by_element_color_op.hh
+by_chain_color_op.hh
 uniform_color_op.hh
 gradient_color_op.hh
 entity_view_color_op.hh
@@ -108,6 +109,7 @@ material.cc
 povray.cc
 color_ops/color_op.cc
 color_ops/by_element_color_op.cc
+color_ops/by_chain_color_op.cc
 color_ops/uniform_color_op.cc
 color_ops/gradient_color_op.cc
 color_ops/entity_view_color_op.cc

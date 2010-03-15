@@ -94,6 +94,23 @@ void TraceRendererBase::Apply(const gfx::ByElementColorOp& op)
   state_|=DIRTY_VA;
 }
 
+void TraceRendererBase::Apply(const gfx::ByChainColorOp& op)
+{
+  this->UpdateViews();
+  mol::Query q(op.GetSelection());
+  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
+    NodeListSubset& nl=trace_subset_[node_list];
+    for (int i=0; i<nl.GetSize();++i) {
+      if (q.IsAtomSelected(nl[i].atom)) {
+        Color clr =op.GetColor(nl[i].atom.GetResidue().GetChain().GetName());
+        this->set_node_entry_color(nl[i],op.GetMask(),clr);
+      }
+    }
+  }
+  state_|=DIRTY_VA;
+}
+
+
 void TraceRendererBase::Apply(const gfx::UniformColorOp& op)
 {
   this->UpdateViews();  
