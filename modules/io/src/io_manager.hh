@@ -36,16 +36,16 @@
 #include <ost/io/io_exception.hh>
 namespace ost { namespace io {
 
-/// \brief Central registry for input/output handlers
-class DLLEXPORT_OST_IO IOManager {
-  typedef std::vector<EntityIOHandlerFactoryBaseP> EntityIOHFList;
-  typedef std::vector<SequenceIOHandlerFactoryBasePtr> AlignmentIOFList;  
-  typedef std::vector<SurfaceIOHandlerFactoryBasePtr> SurfaceIOFList;  
+typedef std::vector<EntityIOHandlerFactoryBaseP> EntityIOHFList;
+typedef std::vector<SequenceIOHandlerFactoryBasePtr> AlignmentIOFList;
+typedef std::vector<SurfaceIOHandlerFactoryBasePtr> SurfaceIOFList;
 
 #if OST_IMG_ENABLED
   typedef std::vector<MapIOHandlerFactoryBasePtr> MapIOFList;  
 #endif
 
+/// \brief Central registry for input/output handlers
+class DLLEXPORT_OST_IO IOManager {
 public:
   /// \brief get entity io handler that is able to import the given file.
   ///
@@ -96,6 +96,15 @@ public:
   /// \sa adding_io_handler
   void RegisterFactory(const SurfaceIOHandlerFactoryBasePtr&);  
 
+  /// \brief Get a list with all available EntityHandler
+  EntityIOHFList GetAvailableEntityHandler() const;
+
+  /// \brief Get a list with all available AlignmentHandler
+  AlignmentIOFList GetAvailableAlignmentHandler() const;
+
+  /// \brief Get a list with all available SurfaceHandler
+  SurfaceIOFList GetAvailableSurfaceHandler() const;
+
 #if OST_IMG_ENABLED
   /// \name Image/Map IO
   //@{
@@ -114,6 +123,8 @@ public:
 
   MapIOHandlerPtr FindMapExportHandlerStream(std::istream& stream,
                                              const ImageFormatBase& format);
+
+  MapIOFList GetAvailableMapHandler() const;
   //@}
 #endif
 
