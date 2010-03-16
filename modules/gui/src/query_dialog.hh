@@ -37,8 +37,13 @@ class DLLEXPORT_OST_GUI QueryDialog : public QDialog {
 public:
   QueryDialog(QWidget* parent=NULL);
   QString GetQueryString() const;
+
 public slots:
   void OnTextChanged();
+
+protected:
+  virtual void keyPressEvent(QKeyEvent* event);
+
 private:
   
   void Colorize();

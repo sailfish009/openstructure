@@ -18,11 +18,14 @@
 //------------------------------------------------------------------------------
 #include "query_dialog.hh"
 
-#include <ost/mol/query.hh>
-
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QKeyEvent>
+
+#include <iostream>
+
+#include <ost/mol/query.hh>
 
 namespace ost { namespace gui {
 
@@ -92,4 +95,11 @@ QString QueryDialog::GetQueryString() const
 {
   return edit_->toPlainText();
 }
+
+void QueryDialog::keyPressEvent(QKeyEvent* event){
+  if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
+    this->accept();
+  }
+}
+
 }}
