@@ -25,10 +25,17 @@
 #include <QMap>
 
 #include <ost/gfx/gfx_object.hh>
+
 #include <ost/gui/module_config.hh>
 #include <ost/gui/remote_site_loader.hh>
 #include <ost/gui/loader_manager.hh>
+
 #include <ost/io/io_exception.hh>
+#include <ost/io/entity_io_handler.hh>
+#include <ost/io/surface_io_handler.hh>
+#if OST_IMG_ENABLED
+#include <ost/io/map_io_handler.hh>
+#endif
 
 namespace ost { namespace gui {
 
@@ -36,11 +43,14 @@ class DLLEXPORT_OST_GUI FileLoader {
 private:
   FileLoader();
   static void HandleError(Message m, gfx::GfxObjP obj);
-  static gfx::GfxObjP TryLoadEntity(const QString& filename);
-  static gfx::GfxObjP TryLoadMap(const QString& filename) throw(io::IOException);
-  static gfx::GfxObjP TryLoadSurface(const QString& filename);
+  static gfx::GfxObjP TryLoadEntity(const QString& file_name, io::EntityIOHandlerP handler=io::EntityIOHandlerP());
+#if OST_IMG_ENABLED
+  static gfx::GfxObjP TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler=io::MapIOHandlerPtr()) throw(io::IOException);
+#endif
+  static gfx::GfxObjP TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler=io::SurfaceIOHandlerPtr());
   static void RunScript(const QString& filename);
   static void LoadPDB(const QString& filename);
+  static gfx::GfxObjP NoHandlerFound(const QString& filename);
   virtual ~FileLoader();
 
   static LoaderManagerPtr loader_manager_;

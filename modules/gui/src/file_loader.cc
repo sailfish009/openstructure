@@ -30,9 +30,11 @@
 #include <ost/mol/mol.hh>
 #include <ost/mol/surface.hh>
 
+#include <ost/io/io_manager.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/mol/load_entity.hh>
 #include <ost/io/mol/load_surface.hh>
+#include <ost/io/mol/entity_io_pdb_handler.hh>
 
 #include <ost/conop/conop.hh>
 
@@ -44,6 +46,7 @@
 #include <ost/gui/perspective.hh>
 #include <ost/gui/python_shell/python_interpreter.hh>
 #include <ost/gui/main_area.hh>
+#include <ost/gui/file_type_dialog.hh>
 
 #if OST_IMG_ENABLED
   #include <ost/io/img/load_map.hh>
@@ -75,22 +78,22 @@ void FileLoader::LoadObject(const QString& file_name)
   }
   else{
     obj=FileLoader::TryLoadEntity(file_name);
+#if OST_IMG_ENABLED
     if (!obj)  {
       try{
         obj=FileLoader::TryLoadMap(file_name);
-        if (!obj) return;
       } catch (io::IOException&) {
-        obj = gfx::GfxObjP();
+        return;
       }
     }
+#endif
     if (!obj) {
       obj=FileLoader::TryLoadSurface(file_name);
     }
     if (!obj) {
-      QMessageBox messageBox(QMessageBox::Warning, "Error while Loading Entity", 
-                             "Could not Open file. No suitable io handler found!");
-      messageBox.setStandardButtons( QMessageBox::Ok);
-      messageBox.exec();
+      obj = FileLoader::NoHandlerFound(file_name);
+    }
+    if (!obj){
       return;
     }
     try{
@@ -103,6 +106,25 @@ void FileLoader::LoadObject(const QString& file_name)
       gfx::Scene::Instance().SetCenter(obj->GetCenter());
     }
   }
+}
+
+gfx::GfxObjP FileLoader::NoHandlerFound(const QString& filename){
+  FileTypeDialog dialog(filename);
+  if(dialog.exec()){
+    if(dialog.GetEntityHandler()){
+      return TryLoadEntity(filename, dialog.GetEntityHandler());
+    }
+    if(dialog.GetSurfaceHandler()){
+      return TryLoadSurface(filename,dialog.GetSurfaceHandler());
+    }
+#if OST_IMG_ENABLED
+    if(dialog.GetMapHandler()){
+      return TryLoadMap(filename,dialog.GetMapHandler());
+    }
+#endif
+  }
+
+  return gfx::GfxObjP();
 }
 
 void FileLoader::LoadFrom(const QString& id, const QString& site)
@@ -150,60 +172,114 @@ void FileLoader::HandleError(Message m, gfx::GfxObjP obj){
   }
 }
 
-gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename)
+gfx::GfxObjP FileLoader::TryLoadEntity(const QString& file_name, io::EntityIOHandlerP handler)
 {
-  try {
-    mol::EntityHandle ent=io::LoadEntity(filename.toStdString());
-    QFileInfo file_info(filename);
-    gfx::EntityP gfx_ent(new gfx::Entity(file_info.baseName().toStdString(),
-                                         ent));
-    return gfx_ent;
-  } catch (io::IOException& e) {
-    return gfx::GfxObjP();
+  if(!handler){
+    try{
+      handler = io::IOManager::Instance().FindEntityImportHandler(file_name.toStdString());
+    }
+    catch(io::IOException e){
+      handler = io::EntityIOHandlerP();
+    }
   }
-}
-
-gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename) throw(io::IOException)
-{
-//TODO IMPROVE CODE
-#if OST_IMG_ENABLED
-  img::ImageHandle map=io::LoadMap(filename.toStdString());
-  ost::img::Extent ext = map.GetExtent();
-  if(ext.GetSize().GetDepth()>1){
-    QFileInfo file_info(filename);
-    gfx::MapIsoP map_iso(new gfx::MapIso(file_info.baseName().toStdString(),
-                                         map, 0.0));
-    map_iso->SetLevel(map_iso->GetMean());
-    return map_iso;
+  if(handler){
+    if(dynamic_cast<io::EntityIOPDBHandler*>(handler.get())){
+      FileLoader::LoadPDB(file_name);
+    }
+    else{
+      QFileInfo file_info(file_name);
+      mol::EntityHandle eh=mol::CreateEntity();
+      mol::XCSEditor xcs_lock=eh.RequestXCSEditor(mol::BUFFERED_EDIT);
+      try{
+        handler->Import(eh,file_name.toStdString());
+        if(handler->RequiresBuilder()) {
+            conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();
+            conop::Conopology::Instance().ConnectAll(builder,eh,0);
+        }
+        gfx::GfxObjP obj(new gfx::Entity(file_info.baseName().toStdString(),eh));
+        return obj;
+      }
+      catch(io::IOException e){
+        QMessageBox messageBox(QMessageBox::Warning,
+                    "Error while loading file", e._mesg.c_str());
+              messageBox.setStandardButtons( QMessageBox::Ok);
+              messageBox.exec();
+      }
+    }
   }
-  else if(ext.GetSize().GetDepth()==1){
-    //FIXME ImageHandle should not be destroyed at the end of method
-    //therefore hack with list
-    loaded_images_.append(map);
-    ost::img::gui::DataViewer* viewer = GostyApp::Instance()->CreateDataViewer(loaded_images_.last());
-    gui::GostyApp::Instance()->GetPerspective()->GetMainArea()->AddWidget(filename,viewer);
-  }
-#else
-  throw io::IOException("No IPLT Available");
-#endif
   return gfx::GfxObjP();
 }
 
-gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename)
+#if OST_IMG_ENABLED
+gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler) throw(io::IOException)
 {
-  try {
-  QFileInfo fi(filename);
-  QString path = fi.absolutePath().append(QDir::separator()).append(fi.completeBaseName());
-  mol::EntityHandle ent = io::LoadEntity(path.toStdString() + ".pdb");
-  mol::SurfaceHandle surf= io::LoadSurface(path.toStdString(),"msms");
-  surf.Attach(ent,5.0);
-  gfx::SurfaceP gfx_surf(new gfx::Surface(fi.baseName().toStdString(),surf));
-
-  return gfx_surf;
-  }catch (io::IOException&) {
-    return gfx::GfxObjP();
+  if(!handler){
+    try{
+      handler = io::IOManager::Instance().FindMapImportHandlerFile(filename.toStdString(),io::UndefinedImageFormat());
+    }
+    catch(io::IOException e){
+      handler = io::MapIOHandlerPtr();
+    }
   }
+  if(handler){
+    img::ImageHandle map = CreateImage(img::Extent(),img::REAL,img::SPATIAL);
+    try{
+      handler->Import(map,filename.toStdString(),io::UndefinedImageFormat());
+      ost::img::Extent ext = map.GetExtent();
+      if(ext.GetSize().GetDepth()>1){
+        QFileInfo file_info(filename);
+        gfx::MapIsoP map_iso(new gfx::MapIso(file_info.baseName().toStdString(),
+                                             map, 0.0));
+        map_iso->SetLevel(map_iso->GetMean());
+        return map_iso;
+      }
+      else if(ext.GetSize().GetDepth()==1){
+        //FIXME ImageHandle should not be destroyed at the end of method
+        //therefore hack with list
+        loaded_images_.append(map);
+        ost::img::gui::DataViewer* viewer = GostyApp::Instance()->CreateDataViewer(loaded_images_.last());
+        gui::GostyApp::Instance()->GetPerspective()->GetMainArea()->AddWidget(filename,viewer);
+        throw io::IOException("File already loaded");
+      }
+    }catch(io::IOException e){
+      QMessageBox messageBox(QMessageBox::Warning,
+                  "Error while loading file", e._mesg.c_str());
+            messageBox.setStandardButtons( QMessageBox::Ok);
+            messageBox.exec();
+    }
+  }
+  return gfx::GfxObjP();
+}
+#endif
 
+gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler)
+{
+  if(!handler){
+    try{
+      handler = io::IOManager::Instance().FindSurfaceImportHandler(filename.toStdString(),"msms");
+    }
+    catch(io::IOException e){
+      handler = io::SurfaceIOHandlerPtr();
+    }
+  }
+  if(handler){
+    try {
+    QFileInfo fi(filename);
+    QString path = fi.absolutePath().append(QDir::separator()).append(fi.completeBaseName());
+    mol::SurfaceHandle sh = mol::CreateSurface();
+    handler->Import(sh,filename.toStdString());
+    QString pdb_path(path + ".pdb");
+    if(QFile::exists(pdb_path)){
+      mol::EntityHandle ent = io::LoadEntity(pdb_path.toStdString());
+      sh.Attach(ent,5.0);
+      gfx::SurfaceP gfx_surf(new gfx::Surface(fi.baseName().toStdString(),sh));
+      return gfx_surf;
+    }
+    }catch (io::IOException&) {
+      return gfx::GfxObjP();
+    }
+  }
+  return gfx::GfxObjP();
 }
 
 void FileLoader::RunScript(const QString& filename)
@@ -259,7 +335,6 @@ void FileLoader::LoadPDB(const QString& filename)
     }
   }
 }
-
 FileLoader::~FileLoader(){}
 
 } }
