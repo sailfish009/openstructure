@@ -35,7 +35,7 @@ using namespace ost::img::gui;
 
 namespace {
 
-void add_dock1(DataViewerProxy* p, QWidget* w, const ost::String& name) 
+void add_dock1(DataViewerProxy* p, QWidget* w, const String& name) 
 {
   p->AddDockWidget(w,QString::fromStdString(name));
 }
@@ -45,7 +45,7 @@ void add_dock2(DataViewerProxy* p, QWidget* w, const QString& name)
   p->AddDockWidget(w,name);
 }
 
-void add_dock3(DataViewerProxy* p, QWidget* w, const ost::String& name, bool s) 
+void add_dock3(DataViewerProxy* p, QWidget* w, const String& name, bool s) 
 {
   p->AddDockWidget(w,QString::fromStdString(name),s);
 }

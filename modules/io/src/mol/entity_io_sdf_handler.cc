@@ -191,7 +191,7 @@ void EntityIOSDFHandler::ParseAndAddAtom(const String& line, int line_num,
   }
 
   String ele=boost::trim_copy(s_ele);
-  String aname=boost::lexical_cast<ost::String>(anum);
+  String aname=boost::lexical_cast<String>(anum);
 
   mol::AtomProp aprop;
   aprop.element=ele;

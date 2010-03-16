@@ -282,7 +282,7 @@ void PDBReader::ParseAndAddAtom(const String& line, int line_num,
   mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
   char ins_c, alt_loc;
   char res_key[5], c_name;
-  ost::String a_name;
+  String a_name;
   std::pair<bool, Real> charge, radius;
   std::pair<bool, Real> occ, temp;
   geom::Vec3 apos;

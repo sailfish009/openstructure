@@ -33,10 +33,10 @@ namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI OutputRedirector {
 public:
-  void Write(const ost::String& str);
+  void Write(const String& str);
   static QString GetOutput();
 private:
-    static ost::String  buffer_; 
+    static String  buffer_; 
 };
 
 }}//ns

@@ -35,19 +35,19 @@ namespace geom {
 */
 class DLLEXPORT_OST_GEOM GeomException: public std::runtime_error {
 public:
-  GeomException(const ost::String& m):
+  GeomException(const String& m):
     std::runtime_error(m) {}
 };
 
 class DLLEXPORT_OST_GEOM DivideByZeroException: public GeomException {
 public:
-  DivideByZeroException(const ost::String& m="Divide By Zero"):
+  DivideByZeroException(const String& m="Divide By Zero"):
     GeomException(m) {}
 };
 
 class DLLEXPORT_OST_GEOM OutOfRangeException: public GeomException {
 public:
-  OutOfRangeException(const ost::String& m="Out Of Range"):
+  OutOfRangeException(const String& m="Out Of Range"):
     GeomException(m) {}
 };
 

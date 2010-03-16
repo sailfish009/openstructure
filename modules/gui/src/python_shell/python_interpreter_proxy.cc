@@ -32,7 +32,7 @@ PythonInterpreterProxy::PythonInterpreterProxy(PythonInterpreter* interpreter): 
 {
 }
 
-bp::object PythonInterpreterProxy::Run(const ost::String& widget)
+bp::object PythonInterpreterProxy::Run(const String& widget)
 {
   return interpreter_->RunInMainThread(widget.c_str());
 }

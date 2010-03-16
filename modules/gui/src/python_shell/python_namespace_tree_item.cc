@@ -94,14 +94,14 @@ void PythonNamespaceTreeItem::FetchMore()
   bp::list keys=bp::extract<bp::list>(dir(namespace_)); 
   unsigned int dict_length=bp::len(keys);
   for (unsigned int i=0;i<dict_length;++i) {
-    QString child_name=QString::fromStdString(bp::extract<ost::String>(keys[i]));
+    QString child_name=QString::fromStdString(bp::extract<String>(keys[i]));
     if(child_name.startsWith("__")){
       continue;
     }
     bp::object child_namespace;
     bool found=false;
     try{
-      String keystring=bp::extract<ost::String>(keys[i]);
+      String keystring=bp::extract<String>(keys[i]);
       child_namespace=namespace_.attr(keystring.c_str());
       if (bp::len(dir(child_namespace))>0) {
         found=true;

@@ -27,7 +27,7 @@
 
 namespace ost { namespace gui {
 
-void OutputRedirector::Write( ost::String const& str )
+void OutputRedirector::Write( String const& str )
 {
   buffer_.append(str);
 }
@@ -38,7 +38,7 @@ QString OutputRedirector::GetOutput()
   buffer_.clear();
   return ret;
 }
-ost::String  OutputRedirector::buffer_; 
+String  OutputRedirector::buffer_; 
 
 
 

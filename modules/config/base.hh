@@ -45,6 +45,15 @@ typedef unsigned int uint;
   typedef float Real;
 #endif
 
+#ifdef Complex
+  // undef Complex from xorg X.h to avoid clash with our definition
+  #undef Complex
+#endif
+typedef std::complex<Real> Complex;
+typedef unsigned short Word;
+
+
+
 #ifndef round_function
 #define round_function
 #ifndef round
@@ -96,10 +105,7 @@ inline double log2( double n )
 #endif
 
 
-namespace ost {
-
 typedef std::string String;
 
-}//ns
 
 #endif

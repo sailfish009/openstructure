@@ -36,7 +36,7 @@ class PythonInterpreter;
 class DLLEXPORT_OST_GUI PythonInterpreterProxy {
 public:
   PythonInterpreterProxy(PythonInterpreter* interpreter);
-  bp::object Run(const ost::String& widget);
+  bp::object Run(const String& widget);
 protected:
  PythonInterpreter* interpreter_;
 };

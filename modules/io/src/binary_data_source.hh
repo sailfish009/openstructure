@@ -90,7 +90,7 @@ inline void RawSerialize(BinaryDataSource& sink,
     sink.Stream().read(value, size);
 }
 
-inline void Serialize(BinaryDataSource& source, ost::String& str)
+inline void Serialize(BinaryDataSource& source, String& str)
 {
   static char tmp_buf[1024];
   size_t str_len;

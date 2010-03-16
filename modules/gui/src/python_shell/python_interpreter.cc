@@ -253,7 +253,7 @@ bool PythonInterpreter::RunCommand(const QString& command)
         bp::object repr=main_module_.attr("__builtins__").attr("repr");
         bp::object result=bp::eval(bp::str(command.toStdString()),
                                    main_namespace_, main_namespace_);
-        ost::String rstring=bp::extract<ost::String>(repr(result));
+        String rstring=bp::extract<String>(repr(result));
         if(rstring!="None"){
           output_redirector_.Write(rstring);
           output_redirector_.Write("\n");
@@ -313,7 +313,7 @@ CodeBlockStatus PythonInterpreter::GetCodeBlockStatus(const QString& command)
       try {
         bp::object result=compile_command_(bp::str(cmd));
         try {
-          String doc=bp::extract<ost::String>(result.attr("__doc__"));
+          String doc=bp::extract<String>(result.attr("__doc__"));
           complete=true;
           status=CODE_BLOCK_COMPLETE;
         } catch(bp::error_already_set) {

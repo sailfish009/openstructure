@@ -59,7 +59,7 @@ public:
   /// \param name is the name of the object
   /// \param mh is a 3D image
   /// \param p is the plane that is intersected with \a mh
-  MapSlab(const ost::String& name, const img::MapHandle& mh, 
+  MapSlab(const String& name, const img::MapHandle& mh, 
           const geom::Plane& p);
 
   virtual geom::AlignedCuboid GetBoundingBox() const;

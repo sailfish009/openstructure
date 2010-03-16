@@ -665,7 +665,7 @@ void complex_dumper(BinaryOStream<CONVERSIONTYPE>& f,
       pnt[mapr]=header.nr/2-sr;
       for(int sc=0;sc<header.nc-1;++sc) {
         pnt[mapc]=-sc;
-        img::Complex val = conj(norm.Convert(isc->Value(pnt)));
+        Complex val = conj(norm.Convert(isc->Value(pnt)));
         f << static_cast<B>(val.real()) << static_cast<B>(val.imag());
         LOG_DEBUG(" " << pnt  << " " << val << std::endl);
       }
@@ -678,12 +678,12 @@ void complex_dumper(BinaryOStream<CONVERSIONTYPE>& f,
       int sc=0;
       for(;sc<header.nc-1;++sc) {
         pnt[mapc]=sc;
-        img::Complex  val =norm.Convert(isc->Value(pnt));
+        Complex  val =norm.Convert(isc->Value(pnt));
         f << static_cast<B>(val.real()) << static_cast<B>(val.imag());
         LOG_DEBUG(" " << pnt << " " << val << std::endl);
       }
       pnt[mapc]=sc;
-      img::Complex  val = norm.Convert(conj(isc->Value(pnt)));
+      Complex  val = norm.Convert(conj(isc->Value(pnt)));
       f << static_cast<B>(val.real()) << static_cast<B>(val.imag());
       LOG_DEBUG(" " << pnt << " " << val << std::endl);
       Progress::Instance().AdvanceProgress(&this_dummy);
@@ -746,7 +746,7 @@ void import_helper(img::MapHandle& image, std::istream& in, const MRC& formatmrc
       throw IOException("internal error in MRC/CCP4 io: expected RealSpatialImageState");
     }
   } else {
-    ::ost::String message_string;
+    ::String message_string;
     std::ostringstream mesg(message_string);
     mesg << "MRC/CCP4 import: unknown data type: " << header.mode;
     throw IOException(mesg.str());

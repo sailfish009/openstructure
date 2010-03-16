@@ -339,32 +339,32 @@ void MapIOTiffHandler::do_export(const img::MapHandle& image,TIFF* tfile,TIF& fo
     case OST_BIT8_FORMAT:
       fmt=SAMPLEFORMAT_COMPLEXINT;
       bpp=16;
-      fsc=detail::do_tiff_write<img::Complex,std::complex<int8>,img::image_state::ComplexSpatialImageState>;
+      fsc=detail::do_tiff_write<Complex,std::complex<int8>,img::image_state::ComplexSpatialImageState>;
       break;
     case OST_BIT16_FORMAT:
       fmt=SAMPLEFORMAT_COMPLEXINT;
       bpp=32;
-      fsc=detail::do_tiff_write<img::Complex,std::complex<int16>,img::image_state::ComplexSpatialImageState>;
+      fsc=detail::do_tiff_write<Complex,std::complex<int16>,img::image_state::ComplexSpatialImageState>;
       break;
     case OST_BIT32_FORMAT:
       fmt=SAMPLEFORMAT_COMPLEXINT;
       bpp=64;
-      fsc=detail::do_tiff_write<img::Complex,std::complex<int32_t>,img::image_state::ComplexSpatialImageState>;
+      fsc=detail::do_tiff_write<Complex,std::complex<int32_t>,img::image_state::ComplexSpatialImageState>;
       break;
     case OST_FLOAT_FORMAT:
       fmt=SAMPLEFORMAT_COMPLEXIEEEFP;
       bpp=64;
-      fsc=detail::do_tiff_write<img::Complex,std::complex<float>,img::image_state::ComplexSpatialImageState>;
+      fsc=detail::do_tiff_write<Complex,std::complex<float>,img::image_state::ComplexSpatialImageState>;
       break;
     case OST_DOUBLE_FORMAT:
       fmt=SAMPLEFORMAT_COMPLEXIEEEFP;
       bpp=128;
-      fsc=detail::do_tiff_write<img::Complex,img::Complex,img::image_state::ComplexSpatialImageState>;
+      fsc=detail::do_tiff_write<Complex,Complex,img::image_state::ComplexSpatialImageState>;
       break;
     case OST_DEFAULT_FORMAT:
       fmt=SAMPLEFORMAT_COMPLEXIEEEFP;
       bpp=128;
-      fsc=detail::do_tiff_write<img::Complex,img::Complex,img::image_state::ComplexSpatialImageState>;
+      fsc=detail::do_tiff_write<Complex,Complex,img::image_state::ComplexSpatialImageState>;
       break;
     }
   } else if(image.GetType()==img::WORD) {
@@ -656,7 +656,7 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
         }else if(fmt==SAMPLEFORMAT_UINT){
           detail::do_tiff_read<uint16,Real,img::image_state::RealSpatialImageState>(buf,rowcount,width,isr,current_row,spp);
         }else if(fmt==SAMPLEFORMAT_COMPLEXINT){
-          detail::do_tiff_read<detail::complexint8,img::Complex,img::image_state::ComplexSpatialImageState>(buf,rowcount,width,isc,current_row,spp);
+          detail::do_tiff_read<detail::complexint8,Complex,img::image_state::ComplexSpatialImageState>(buf,rowcount,width,isc,current_row,spp);
         }else{
           std::ostringstream ostrs;
           ostrs << "TIFF images with "<<bpp << " bits per pixel and sample format "<< fmt<< " are not supported.";
@@ -671,7 +671,7 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
         }else if(fmt==SAMPLEFORMAT_IEEEFP){
           detail::do_tiff_read<float,Real,img::image_state::RealSpatialImageState>(buf,rowcount,width,isr,current_row,spp);
         }else if(fmt==SAMPLEFORMAT_COMPLEXINT){
-          detail::do_tiff_read<detail::complexint16,img::Complex,img::image_state::ComplexSpatialImageState>(buf,rowcount,width,isc,current_row,spp);
+          detail::do_tiff_read<detail::complexint16,Complex,img::image_state::ComplexSpatialImageState>(buf,rowcount,width,isc,current_row,spp);
         }else{
           std::ostringstream ostrs;
           ostrs << "TIFF images with "<<bpp << " bits per pixel and sample format "<< fmt<< " are not supported.";
@@ -682,9 +682,9 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
         if(fmt==SAMPLEFORMAT_IEEEFP){
           detail::do_tiff_read<Real,Real,img::image_state::RealSpatialImageState>(buf,rowcount,width,isr,current_row,spp);
         }else if(fmt==SAMPLEFORMAT_COMPLEXINT){
-          detail::do_tiff_read<detail::complexint32_t,img::Complex,img::image_state::ComplexSpatialImageState>(buf,rowcount,width,isc,current_row,spp);
+          detail::do_tiff_read<detail::complexint32_t,Complex,img::image_state::ComplexSpatialImageState>(buf,rowcount,width,isc,current_row,spp);
         }else if(fmt==SAMPLEFORMAT_COMPLEXIEEEFP){
-          detail::do_tiff_read<std::complex<float>,img::Complex,img::image_state::ComplexSpatialImageState>(buf,rowcount,width,isc,current_row,spp);
+          detail::do_tiff_read<std::complex<float>,Complex,img::image_state::ComplexSpatialImageState>(buf,rowcount,width,isc,current_row,spp);
         }else{
           std::ostringstream ostrs;
           ostrs << "TIFF images with "<<bpp << " bits per pixel and sample format "<< fmt<< " are not supported.";
@@ -694,7 +694,7 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
         uint rowcount = cread/(width*16*spp);
         if(fmt==SAMPLEFORMAT_COMPLEXIEEEFP){
           // std::complex<double> refers to the dataformat used in the tiff file and is independend of single/double precision compilation
-          detail::do_tiff_read<std::complex<double>,img::Complex,img::image_state::ComplexSpatialImageState>(buf,rowcount,width,isc,current_row,spp);
+          detail::do_tiff_read<std::complex<double>,Complex,img::image_state::ComplexSpatialImageState>(buf,rowcount,width,isc,current_row,spp);
         }else{
           std::ostringstream ostrs;
           ostrs << "TIFF images with "<<bpp << " bits per pixel and sample format "<< fmt<< " are not supported.";

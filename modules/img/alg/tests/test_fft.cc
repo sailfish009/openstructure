@@ -524,7 +524,7 @@ struct test_memalloc_fnc {
     }
   }
 
-  ost::String GetAlgorithmName() const {return "";}
+  String GetAlgorithmName() const {return "";}
 };
 
 typedef ImageStateModIPAlgorithm<test_memalloc_fnc> test_memalloc_alg;

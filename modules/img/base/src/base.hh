@@ -65,7 +65,7 @@ namespace ost { namespace img {
 #ifndef String
   typedef std::basic_string<char> String;
 #else
-  using ost::String
+  using String
 #endif
 
 

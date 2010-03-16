@@ -30,16 +30,9 @@
 #include <ost/base.hh>
 
 
-
 namespace ost { namespace img {
 
 
-#ifdef Complex
-  // undef Complex from xorg X.h to avoid clash with our definition
-  #undef Complex
-#endif
-typedef std::complex<Real> Complex;
-typedef unsigned short Word;
 
 enum DataType {REAL=0,
                COMPLEX,

@@ -39,7 +39,7 @@ BOOST_PYTHON_MODULE(_base)
   export_Range();
   export_Units();
   
-  class_<std::vector<ost::String> >("StringList", init<>())
-    .def(vector_indexing_suite<std::vector<ost::String> >())
+  class_<std::vector<String> >("StringList", init<>())
+    .def(vector_indexing_suite<std::vector<String> >())
   ;  
 }

@@ -89,7 +89,7 @@ inline void RawSerialize(BinaryDataSink& sink, char* value, size_t size)
     sink.Stream().write(reinterpret_cast<char*>(value), size);
 }
 
-inline void Serialize(BinaryDataSink& sink, const ost::String& str) {
+inline void Serialize(BinaryDataSink& sink, const String& str) {
   size_t str_len=str.length();
   sink.Stream().write(reinterpret_cast<char*>(&str_len), sizeof(size_t));
   sink.Stream().write(str.c_str(), str.length());

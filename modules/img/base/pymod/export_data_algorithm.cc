@@ -36,7 +36,7 @@ public:
   PyNonModAlgorithm(const PyNonModAlgorithm& a):
     NonModAlgorithm(a) {}
 
-  PyNonModAlgorithm(const ost::String& s):
+  PyNonModAlgorithm(const String& s):
     NonModAlgorithm(s) {}
 
   virtual void Visit(const ConstImageHandle& ih) {VisitImage(ih);}
@@ -73,7 +73,7 @@ public:
   PyModIPAlgorithm(const PyModIPAlgorithm& a):
     ModIPAlgorithm(a) {}
 
-  PyModIPAlgorithm(const ost::String& s):
+  PyModIPAlgorithm(const String& s):
     ModIPAlgorithm(s) {}
 
   virtual void Visit(ImageHandle& ih) {VisitImage(ih);}
@@ -102,7 +102,7 @@ public:
   PyConstModIPAlgorithm(const PyConstModIPAlgorithm& a):
     ConstModIPAlgorithm(a) {}
 
-  PyConstModIPAlgorithm(const ost::String& s):
+  PyConstModIPAlgorithm(const String& s):
     ConstModIPAlgorithm(s) {}
 
   virtual void Visit(ImageHandle& ih) const {VisitImage(ih);}
@@ -132,7 +132,7 @@ public:
   PyModOPAlgorithm(const PyModOPAlgorithm& a):
     ModOPAlgorithm(a) {}
 
-  PyModOPAlgorithm(const ost::String& s):
+  PyModOPAlgorithm(const String& s):
     ModOPAlgorithm(s) {}
 
   virtual ImageHandle Visit(const ConstImageHandle& ih) {return VisitImage(ih);}
@@ -161,7 +161,7 @@ public:
   PyConstModOPAlgorithm(const PyConstModOPAlgorithm& a):
     ConstModOPAlgorithm(a) {}
 
-  PyConstModOPAlgorithm(const ost::String& s):
+  PyConstModOPAlgorithm(const String& s):
     ConstModOPAlgorithm(s) {}
 
   virtual ImageHandle Visit(const ConstImageHandle& ih) const {return VisitImage(ih);}
@@ -199,22 +199,22 @@ void export_DataAlgorithm()
 
   class_<NonModAlgorithm, boost::noncopyable>("NonModAlgorithmBase", no_init);
 
-  class_<PyNonModAlgorithm, WrapPyNonModAlgorithm, bases<NonModAlgorithm>, boost::noncopyable>("NonModAlgorithm", init<const ost::String&>() );
+  class_<PyNonModAlgorithm, WrapPyNonModAlgorithm, bases<NonModAlgorithm>, boost::noncopyable>("NonModAlgorithm", init<const String&>() );
 
 
   class_<ModIPAlgorithm, boost::noncopyable>("ModIPAlgorithmBase", no_init);
 
-  class_<PyModIPAlgorithm, WrapPyModIPAlgorithm, bases<ModIPAlgorithm>, boost::noncopyable>("ModIPAlgorithm", init<const ost::String&>() );
+  class_<PyModIPAlgorithm, WrapPyModIPAlgorithm, bases<ModIPAlgorithm>, boost::noncopyable>("ModIPAlgorithm", init<const String&>() );
 
   class_<ConstModIPAlgorithm, boost::noncopyable>("ConstModIPAlgorithmBase", no_init);
 
-  class_<PyConstModIPAlgorithm, WrapPyConstModIPAlgorithm, bases<ConstModIPAlgorithm>, boost::noncopyable>("ConstModIPAlgorithm", init<const ost::String&>() );
+  class_<PyConstModIPAlgorithm, WrapPyConstModIPAlgorithm, bases<ConstModIPAlgorithm>, boost::noncopyable>("ConstModIPAlgorithm", init<const String&>() );
 
   class_<ModOPAlgorithm, boost::noncopyable>("ModOPAlgorithmBase", no_init);
 
-  class_<PyModOPAlgorithm, WrapPyModOPAlgorithm, bases<ModOPAlgorithm>, boost::noncopyable>("ModOPAlgorithm", init<const ost::String&>() );
+  class_<PyModOPAlgorithm, WrapPyModOPAlgorithm, bases<ModOPAlgorithm>, boost::noncopyable>("ModOPAlgorithm", init<const String&>() );
 
   class_<ConstModOPAlgorithm, boost::noncopyable>("ConstModOPAlgorithmBase", no_init);
 
-  class_<PyConstModOPAlgorithm, WrapPyConstModOPAlgorithm, bases<ConstModOPAlgorithm>, boost::noncopyable>("ConstModOPAlgorithm", init<const ost::String&>() );
+  class_<PyConstModOPAlgorithm, WrapPyConstModOPAlgorithm, bases<ConstModOPAlgorithm>, boost::noncopyable>("ConstModOPAlgorithm", init<const String&>() );
 }

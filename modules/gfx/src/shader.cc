@@ -273,7 +273,7 @@ void Shader::Setup()
 void Shader::Activate(const String& name)
 {
   if(!name.empty()) {
-    std::map<ost::String, GLuint>::iterator it = shader_program_map_.find(name);
+    std::map<String, GLuint>::iterator it = shader_program_map_.find(name);
     if(it!=shader_program_map_.end()) {
       LOGN_DUMP("switching to shader [" << name << "]");
       glUseProgram(it->second);

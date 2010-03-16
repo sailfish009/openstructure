@@ -62,8 +62,8 @@ private:
 
   std::stack<String> program_stack_;
 
-  std::map<ost::String,GLuint> shader_code_map_;
-  std::map<ost::String,GLuint> shader_program_map_;
+  std::map<String,GLuint> shader_code_map_;
+  std::map<String,GLuint> shader_program_map_;
 };
 
 }} // ns

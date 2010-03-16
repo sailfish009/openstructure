@@ -37,7 +37,7 @@ namespace ost { namespace img { namespace image_state {
 
 class DispatchException: public Error {
 public:
-  DispatchException(const ost::String& m):
+  DispatchException(const String& m):
     Error(m)
   {}
 };

@@ -62,7 +62,7 @@ public:
     }
   }
 
-  static ost::String GetAlgorithmName() {return "LP"; }
+  static String GetAlgorithmName() {return "LP"; }
 
 private:
   Real limit_;
@@ -95,7 +95,7 @@ public:
     }
   }
 
-  static ost::String GetAlgorithmName() {return "HP"; }
+  static String GetAlgorithmName() {return "HP"; }
 
 private:
   Real limit_;
@@ -127,7 +127,7 @@ public:
     }
   }
 
-  static ost::String GetAlgorithmName() {return "GaussianLP"; }
+  static String GetAlgorithmName() {return "GaussianLP"; }
 
 private:
   Real limit_;
@@ -159,7 +159,7 @@ public:
     }
   }
 
-  static ost::String GetAlgorithmName() {return "GaussianHP"; }
+  static String GetAlgorithmName() {return "GaussianHP"; }
 
 private:
   Real limit_;
@@ -200,7 +200,7 @@ public:
     }
   }
 
-  static ost::String GetAlgorithmName() {return "FermiLP"; }
+  static String GetAlgorithmName() {return "FermiLP"; }
 
 private:
   Real limit_;
@@ -239,7 +239,7 @@ public:
     }
   }
 
-  static ost::String GetAlgorithmName() {return "ButterworthLP"; }
+  static String GetAlgorithmName() {return "ButterworthLP"; }
 
 private:
   Real limit_;
