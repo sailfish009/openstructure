@@ -44,12 +44,12 @@ void  save_image2(const img::ImageHandle& image,const boost::filesystem::path& l
   SaveImage(image,loc,formatstruct);
 }
 
-img::ImageHandle  load_image1(const boost::filesystem::path& loc)
+img::ImageHandle  load_image1(const String& loc)
 {
   return LoadImage(loc);
 }
 
-img::ImageHandle  load_image2(const boost::filesystem::path& loc, const ImageFormatBase& formatstruct)
+img::ImageHandle  load_image2(const String& loc, const ImageFormatBase& formatstruct)
 {
   return LoadImage(loc,formatstruct);
 }
