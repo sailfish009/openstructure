@@ -97,13 +97,13 @@ public:
   void RegisterFactory(const SurfaceIOHandlerFactoryBasePtr&);  
 
   /// \brief Get a list with all available EntityHandler
-  EntityIOHFList GetAvailableEntityHandler() const;
+  const EntityIOHFList& GetAvailableEntityHandler() const;
 
   /// \brief Get a list with all available AlignmentHandler
-  AlignmentIOFList GetAvailableAlignmentHandler() const;
+  const AlignmentIOFList& GetAvailableAlignmentHandler() const;
 
   /// \brief Get a list with all available SurfaceHandler
-  SurfaceIOFList GetAvailableSurfaceHandler() const;
+  const SurfaceIOFList& GetAvailableSurfaceHandler() const;
 
 #if OST_IMG_ENABLED
   /// \name Image/Map IO
@@ -124,7 +124,7 @@ public:
   MapIOHandlerPtr FindMapExportHandlerStream(std::istream& stream,
                                              const ImageFormatBase& format);
 
-  MapIOFList GetAvailableMapHandler() const;
+  const MapIOFList& GetAvailableMapHandler() const;
   //@}
 #endif
 

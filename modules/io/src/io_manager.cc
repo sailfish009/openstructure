@@ -246,7 +246,7 @@ void IOManager::RegisterFactory(const MapIOHandlerFactoryBasePtr& f)
   map_io_list_.push_back(f);
 }
 
-MapIOFList IOManager::GetAvailableMapHandler() const
+const MapIOFList& IOManager::GetAvailableMapHandler() const
 {
   return map_io_list_;
 }
@@ -268,17 +268,17 @@ void IOManager::RegisterFactory(const SurfaceIOHandlerFactoryBasePtr& f)
   surface_io_list_.push_back(f);
 }
 
-EntityIOHFList IOManager::GetAvailableEntityHandler() const
+const EntityIOHFList& IOManager::GetAvailableEntityHandler() const
 {
   return entity_iohf_list_;
 }
 
-AlignmentIOFList IOManager::GetAvailableAlignmentHandler() const
+const AlignmentIOFList& IOManager::GetAvailableAlignmentHandler() const
 {
   return alignment_io_list_;
 }
 
-SurfaceIOFList IOManager::GetAvailableSurfaceHandler() const
+const SurfaceIOFList& IOManager::GetAvailableSurfaceHandler() const
 {
   return surface_io_list_;
 }
