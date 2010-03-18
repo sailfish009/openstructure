@@ -105,22 +105,20 @@ void frac_shift5(FractionalShift* s, const Vec3& v)
 {
   s->SetShift(v);
 }
-/*  
-Real real_spatial_cross_correlation_1 (const ConstImageHandle& image1, const ConstImageHandle& image2)
-{
-  return ost::img::alg::RealSpatialCrossCorrelation(image1,image2);
-}
-Real real_spatial_cross_correlation_1 (const ConstImageHandle& image1, const ConstImageHandle& image2)
+  
+Real real_spatial_cross_correlation_1(const ConstImageHandle& image1, 
+                                      const ConstImageHandle& image2)
 {
   return RealSpatialCrossCorrelation(image1,image2);
 }
 
-Real real_spatial_cross_correlation_2(const ConstImageHandle& image1, const ConstImageHandle& image2, const Extent& extent)
-{
-  return ost::img::alg::RealSpatialCrossCorrelation(image1,image2,extent);
-}
 
-*/
+Real real_spatial_cross_correlation_2(const ConstImageHandle& image1, 
+                                      const ConstImageHandle& image2, 
+                                      const Extent& extent)
+{
+  return RealSpatialCrossCorrelation(image1,image2,extent);
+}
 
 } //anon ns
 
@@ -256,8 +254,8 @@ BOOST_PYTHON_MODULE(_img_alg)
     .def("GetGeometry",&LineAverage::GetGeometry)
     .def("SetGeometry",&LineAverage::SetGeometry)
   ;
-//  def("RealSpatialCrossCorrelation",real_spatial_cross_correlation_1);
-//  def("RealSpatialCrossCorrelation",real_spatial_cross_correlation_2);
+  def("RealSpatialCrossCorrelation",real_spatial_cross_correlation_1);
+  def("RealSpatialCrossCorrelation",real_spatial_cross_correlation_2);
 
   class_<HighestPeakSearch3D, bases<NonModAlgorithm> >("HighestPeakSearch3D" ,init<int,int,Real>())
     .def(init<int,int>())
