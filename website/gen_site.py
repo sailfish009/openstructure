@@ -32,7 +32,10 @@ p.add_option('--run_doxygen','-r',help='run doxygen with Doxyfile given as'+
              'argument')
 opts, args=p.parse_args()
 
-
+if os.path.exists('../modules/scratch') or \
+   os.path.exists('../modules/dng_scratch'):
+  print '\nERROR ...exiting!\n\nPlease generate webpage from public checkout\n'
+  os._exit(-1)
 if not opts.base_url:
   opts.base_url='file://%s' % os.path.abspath(opts.output_dir)
 scaffold_file=codecs.open('raw/scaffold.html', mode='r', 
