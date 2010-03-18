@@ -26,6 +26,7 @@ message.hh
 platform.hh
 string_ref.hh
 pod_vector.hh
+fixed_string.hh
 )
 
 module(NAME base SOURCES ${OST_BASE_SOURCES} 
