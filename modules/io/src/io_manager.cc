@@ -246,7 +246,10 @@ void IOManager::RegisterFactory(const MapIOHandlerFactoryBasePtr& f)
   map_io_list_.push_back(f);
 }
 
-#endif //OST_IMG_ENABLED
+const MapIOFList& IOManager::GetAvailableMapHandler() const
+{
+  return map_io_list_;
+}
 
 void IOManager::RegisterFactory(const EntityIOHandlerFactoryBaseP& f) 
 {
@@ -261,6 +264,21 @@ void IOManager::RegisterFactory(const SequenceIOHandlerFactoryBasePtr& f)
 void IOManager::RegisterFactory(const SurfaceIOHandlerFactoryBasePtr& f) 
 {
   surface_io_list_.push_back(f);
+}
+
+const EntityIOHFList& IOManager::GetAvailableEntityHandler() const
+{
+  return entity_iohf_list_;
+}
+
+const AlignmentIOFList& IOManager::GetAvailableAlignmentHandler() const
+{
+  return alignment_io_list_;
+}
+
+const SurfaceIOFList& IOManager::GetAvailableSurfaceHandler() const
+{
+  return surface_io_list_;
 }
 
 }} // ns

@@ -96,6 +96,15 @@ public:
   /// \sa adding_io_handler
   void RegisterFactory(const SurfaceIOHandlerFactoryBasePtr&);  
 
+  /// \brief Get a list with all available EntityHandler
+  const EntityIOHFList& GetAvailableEntityHandler() const;
+
+  /// \brief Get a list with all available AlignmentHandler
+  const AlignmentIOFList& GetAvailableAlignmentHandler() const;
+
+  /// \brief Get a list with all available SurfaceHandler
+  const SurfaceIOFList& GetAvailableSurfaceHandler() const;
+
 #if OST_IMG_ENABLED
   /// \name Image/Map IO
   //@{
@@ -114,6 +123,9 @@ public:
 
   MapIOHandlerPtr FindMapExportHandlerStream(std::istream& stream,
                                              const ImageFormatBase& format);
+
+  const MapIOFList& GetAvailableMapHandler() const;
+
   //@}
 #endif
 
