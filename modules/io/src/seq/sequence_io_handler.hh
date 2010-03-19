@@ -25,6 +25,7 @@
 
 #include <ost/io/module_config.hh>
 #include <ost/seq/sequence_list.hh>
+#include <ost/io/io_utils.hh>
 
 namespace ost { namespace io {
 

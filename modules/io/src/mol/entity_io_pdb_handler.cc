@@ -76,9 +76,8 @@ namespace {
 bool pdb_handler_is_responsible_for(const boost::filesystem::path& loc,
                                     const String& type) {
   if(type=="auto") {
-    String ext=extension(loc);
-    if(boost::iequals(ext,".pdb") || boost::iequals(ext, ".ent")||
-       boost::iequals(ext, ".gz") || boost::iequals(ext, ".pqr")) {
+    if(detail::FilenameEndsWith(loc.string(),".pdb") || detail::FilenameEndsWith(loc.string(),".ent") ||
+       detail::FilenameEndsWith(loc.string(),".pdb.gz") || detail::FilenameEndsWith(loc.string(),".par") ){
       return true;
     }
 

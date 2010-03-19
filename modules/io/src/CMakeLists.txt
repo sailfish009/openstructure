@@ -9,6 +9,7 @@ binary_data_source.hh
 module_config.hh
 container_serialization.hh	
 swap_util.hh
+io_utils.hh
 io_exception.hh
 convert.hh
 converting_streams.hh
@@ -17,6 +18,7 @@ converting_streams.hh
 set(OST_IO_SOURCES
 io_manager.cc
 convert.cc
+io_utils.cc
 )
 
 
@@ -47,7 +49,6 @@ foreach(fname ${OST_IO_SEQ_HEADERS})
 endforeach(fname ${OST_IO_SEQ_HEADERS})
 
 
-
 set(OST_IO_DEPENDENCIES base;conop;seq)
 if (ENABLE_IMG)
   set(OST_IO_DEPENDENCIES ${OST_IO_DEPENDENCIES};img;img_alg)
@@ -55,8 +56,8 @@ endif()
 module(NAME io SOURCES "${OST_IO_SOURCES}" 
        HEADERS ${OST_IO_MOL_HEADERS} IN_DIR mol
                ${OST_IO_IMG_HEADERS} IN_DIR img
-               ${OST_IO_SEQ_HEADERS} IN_DIR seq
-               ${OST_IO_HEADERS}
+               ${OST_IO_SEQ_HEADERS} IN_DIR seq            
+               ${OST_IO_HEADERS} 
        DEPENDS_ON ${OST_IO_DEPENDENCIES})
 if (NOT WIN32)
   # see note in modules/gui/src/CMakeLists.txt

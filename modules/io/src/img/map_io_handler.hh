@@ -26,6 +26,7 @@
 #include <ost/img/map.hh>
 #include <ost/img/alg/normalizer.hh>
 #include <ost/io/img/image_format.hh>
+#include <ost/io/io_utils.hh>
 
 namespace ost { namespace io {
 
@@ -45,7 +46,7 @@ public:
   virtual ~MapIOHandlerFactoryBase() {}
   virtual bool MatchContent(unsigned char* header) const = 0;
   virtual bool MatchType(const ImageFormatBase& type) const = 0;
-  virtual bool MatchSuffix(const String& suffix) const =0 ;
+  virtual bool MatchSuffix(const boost::filesystem::path& loc) const =0 ;
   virtual MapIOHandlerPtr Create() const = 0 ;
   virtual String GetFormatName() const =0;
   virtual String GetFormatDescription() const =0;
@@ -66,8 +67,8 @@ class MapIOHandlerFactory: public MapIOHandlerFactoryBase
     return HANDLER::MatchType(type);
   }
 
-  virtual bool MatchSuffix(const String& suffix) const {
-    return HANDLER::MatchSuffix(suffix);
+  virtual bool MatchSuffix(const boost::filesystem::path& loc) const {
+    return HANDLER::MatchSuffix(loc);
   }
 
   virtual String GetFormatName() const {

@@ -74,9 +74,9 @@ bool MapIODatHandler::MatchType(const ImageFormatBase& type)
   return false;
 }
 
-bool MapIODatHandler::MatchSuffix(const String& suffix)
+bool MapIODatHandler::MatchSuffix(const boost::filesystem::path& loc)
 {
-    if(suffix==".dat" || suffix==".img") {
+    if(detail::FilenameEndsWith(loc.string(),".dat") || detail::FilenameEndsWith(loc.string(),".img") ) {
       return true;
     }
     return false;

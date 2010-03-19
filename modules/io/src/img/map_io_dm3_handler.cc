@@ -636,9 +636,9 @@ bool MapIODm3Handler::MatchType(const ImageFormatBase& type)
   }
   return false;
 }
-bool MapIODm3Handler::MatchSuffix(const String& suffix)
+bool MapIODm3Handler::MatchSuffix(const boost::filesystem::path& loc)
 {
-    if(suffix==".dm3") {
+	if(detail::FilenameEndsWith(loc.string(),".dm3") ) {
       return true;
     }
     return false;

@@ -51,8 +51,7 @@ void ClustalIOHandler::Export(const seq::ConstSequenceList& msa,
 bool ClustalIOHandler::ProvidesImport(const boost::filesystem::path& loc, 
                                     const String& format) {
   if (format=="auto") {
-   String ext=extension(loc);
-   if (boost::iequals(ext,".aln")) {
+   if (detail::FilenameEndsWith(loc.string(),".aln")) {
      return true;
    }
   } else if(format=="clustal") {

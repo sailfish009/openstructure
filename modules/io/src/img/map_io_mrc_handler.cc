@@ -57,10 +57,16 @@ u v w x . . .     d*c*b*a b c d   3
 #include <cstdio>
 #include <iostream>
 #include <sstream>
+#include <streambuf>
 
 #include <boost/scoped_array.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/device/array.hpp>
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 #include <boost/format.hpp>
 
 #include <ost/base.hh>
@@ -76,6 +82,7 @@ u v w x . . .     d*c*b*a b c d   3
 #include <ost/io/img/image_format.hh>
 #include <ost/io/swap_util.hh>
 #include <ost/io/converting_streams.hh>
+#include <ost/io/io_utils.hh>
 
 
 #include "map_io_mrc_handler.hh"
@@ -131,6 +138,67 @@ CCP4::CCP4(bool normalize_on_save, Endianess endianess_on_save):
 
 
 namespace detail{
+
+class ptristream : public std::istream
+{
+  class ptrinbuf : public std::streambuf
+  {
+  protected:
+    char *      ptr;
+    std::size_t len;
+
+  public:
+    ptrinbuf(char * _ptr, std::size_t _len) : ptr(_ptr), len(_len) {
+      assert(ptr);
+      if (*ptr && len == 0)
+        len = std::strlen(ptr);
+
+      setg(ptr,               // beginning of putback area
+           ptr,               // read position
+           ptr+len);          // end position
+    }
+
+  protected:
+    virtual int_type underflow() {
+      // is read position before end of buffer?
+      if (gptr() < egptr())
+        return traits_type::to_int_type(*gptr());
+      else
+        return EOF;
+    }
+
+    virtual pos_type seekoff(off_type off, ios_base::seekdir way,
+                             ios_base::openmode mode =
+                             ios_base::in | ios_base::out)
+    {
+      switch (way) {
+      case std::ios::cur:
+        setg(ptr, gptr()+off, ptr+len);
+        break;
+      case std::ios::beg:
+        setg(ptr, ptr+off, ptr+len);
+        break;
+      case std::ios::end:
+        setg(ptr, egptr()+off, ptr+len);
+        break;
+
+      default:
+        assert(false);
+        break;
+      }
+      return pos_type(gptr() - ptr);
+    }
+  };
+
+protected:
+  ptrinbuf buf;
+public:
+ ptristream(char * ptr, std::size_t len = 0)
+    : std::istream(0), buf(ptr, len) {
+    rdbuf(&buf);
+  }
+};
+
 
 class header_base {
 public:
@@ -331,8 +399,9 @@ BinaryOStream<CONVERSIONTYPE>& operator<< (BinaryOStream<CONVERSIONTYPE>& out, c
 template<int CONVERSIONTYPE>
 BinaryIStream<CONVERSIONTYPE>& operator>> (BinaryIStream<CONVERSIONTYPE>& in, mrc_header& h)
 {
+  char dummy[116];
   h.ReadCommonData(in);
-  in.seekg(116,std::ios::cur);
+  in.read(dummy,116);
   in >> h.xorigin >> h.yorigin;
   h.ReadLabel(in);
 
@@ -342,7 +411,9 @@ BinaryIStream<CONVERSIONTYPE>& operator>> (BinaryIStream<CONVERSIONTYPE>& in, mr
 
   // skip symm info, seek to start of actual data
   if(h.nsymbt>0){
-    in.seekg(h.nsymbt,std::ios::cur);
+	for (int counter=0;counter<h.nsymbt;++counter){
+	  in.read(dummy,1);
+	}
   }
   return in;
 }
@@ -382,39 +453,39 @@ public:
     arms = 0.1;
   }
 
-static int DetermineDataFormat( std::istream& f)
-{
-  char machst[4];
-  // from the ccp4 documentation
-  // The machine stamp is a 32-bit quantity containing a set of four `nibbles'
-  // (half-bytes)---only half the space is used. Each nibble is a number
-  // specifying the representation of (in C terms) double (d) , float (f),
-  // int (i) and unsigned char (c) types. Thus each stamp is of the form
-  // 0xdfic0000. The values for the floating point nibbles may be taken from the
-  // list (following HDF):
-  // 1        Big-endian ieee
-  // 2        VAX
-  // 3        Cray
-  // 4        Little-endian ieee
-  // 5        Convex native
-  // 6        Fijitsu VP
-  f.seekg(53*4,std::ios::beg); // seek to machine stamp
-  f.read(machst,4);
-  f.seekg(0,std::ios::beg); // seek to beginning
-  char float_machst= machst[0] & 0x0f;
-  if(float_machst == 1){
-    LOGN_DEBUG("CCP4Import: reading big endian data");
-    return OST_BIG_ENDIAN;
-  }else if(float_machst == 2){
-    LOGN_DEBUG("CCP4Import: reading vax data");
-    return OST_VAX_DATA;
-  }else if(float_machst == 4){
-    LOGN_DEBUG("CCP4Import: reading little endian data");
-    return OST_LITTLE_ENDIAN;
-  } else{
-    throw(IOException("CCP4Import: Cray, Convex native and Fijitsu VP formats are not supported."));
+  static int DetermineDataFormat(std::istream& f)
+  {
+    char machst[4];
+    // from the ccp4 documentation
+    // The machine stamp is a 32-bit quantity containing a set of four `nibbles'
+    // (half-bytes)---only half the space is used. Each nibble is a number
+    // specifying the representation of (in C terms) double (d) , float (f),
+    // int (i) and unsigned char (c) types. Thus each stamp is of the form
+    // 0xdfic0000. The values for the floating point nibbles may be taken from the
+    // list (following HDF):
+    // 1        Big-endian ieee
+    // 2        VAX
+    // 3        Cray
+    // 4        Little-endian ieee
+    // 5        Convex native
+    // 6        Fijitsu VP
+    f.seekg(53*4,std::ios::beg); // seek to machine stamp
+    f.read(machst,4);
+    f.seekg(0,std::ios::beg); // seek to beginning
+    char float_machst= machst[0] & 0x0f;
+    if(float_machst == 1){
+      LOGN_DEBUG("CCP4Import: reading big endian data");
+      return OST_BIG_ENDIAN;
+    }else if(float_machst == 2){
+      LOGN_DEBUG("CCP4Import: reading vax data");
+      return OST_VAX_DATA;
+    }else if(float_machst == 4){
+      LOGN_DEBUG("CCP4Import: reading little endian data");
+      return OST_LITTLE_ENDIAN;
+    } else{
+      throw(IOException("CCP4Import: Cray, Convex native and Fijitsu VP formats are not supported."));
+    }
   }
-}
 
 	
   void Print()
@@ -440,15 +511,16 @@ static int DetermineDataFormat( std::istream& f)
 template <int CONVERSIONTYPE>
 BinaryIStream<CONVERSIONTYPE>& operator>> (BinaryIStream<CONVERSIONTYPE>& in, ccp4_header& header)
 {
+  char dummy[48];
   header.ReadCommonData(in);
   in >> header.lskflag;
   in >> header.skwmat[0] >> header.skwmat[1] >> header.skwmat[2];
   in >> header.skwmat[3] >> header.skwmat[4] >> header.skwmat[5];
   in >> header.skwmat[6] >> header.skwmat[7] >> header.skwmat[8];
   in >> header.skwtrn[0] >> header.skwtrn[1] >> header.skwtrn[2];
-  in.seekg(48,std::ios::cur);
+  in.read(dummy,48);
   in >> header.ox >> header.oy >> header.oz;
-  in.seekg(8,std::ios::cur); // skip map and machst
+  in.read(dummy,8);
   in >> header.arms;
   header.ReadLabel(in);
 
@@ -457,8 +529,11 @@ BinaryIStream<CONVERSIONTYPE>& operator>> (BinaryIStream<CONVERSIONTYPE>& in, cc
   if(header.nz<1) header.nz=1;
 
   // skip symm info, seek to start of actual data
-  if(header.nsymbt>0)
-    in.seekg(header.nsymbt,std::ios::cur);
+  if(header.nsymbt>0) {
+	for (int counter=0;counter<header.nsymbt;++counter){
+      in.read(dummy,1);
+	}
+  }
   return in;
 }
 template <int CONVERSIONTYPE>
@@ -693,7 +768,7 @@ void complex_dumper(BinaryOStream<CONVERSIONTYPE>& f,
 }
 
 template<class HEADER,int CONVERSIONTYPE>
-void import_helper(img::MapHandle& image, std::istream& in, const MRC& formatmrc)
+void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
 {
   BinaryIStream<CONVERSIONTYPE> f(in);
   HEADER header;
@@ -756,9 +831,10 @@ void import_helper(img::MapHandle& image, std::istream& in, const MRC& formatmrc
 template<class HEADER>
 void import_endianess_switcher(img::MapHandle& image,
                              std::istream& f,
+                             std::istream& header_str,
                              const MRC& formatmrc)
 {
-  switch(HEADER::DetermineDataFormat(f)){
+  switch(HEADER::DetermineDataFormat(header_str)){
   case OST_BIG_ENDIAN:
    import_helper<HEADER,OST_BIG_ENDIAN>(image,f,formatmrc);
    break;
@@ -799,8 +875,7 @@ void export_endianess_switcher(const img::MapHandle& image,
                                 std::ostream& f,
                                 const MRC& formatmrc)
 {
-
-switch(formatmrc.GetEndianessOnSave()){
+  switch(formatmrc.GetEndianessOnSave()){
   case OST_BIG_ENDIAN:
     export_helper<HEADER,OST_BIG_ENDIAN>(image,f,formatmrc);
     break;
@@ -819,15 +894,22 @@ namespace bf = boost::filesystem;
 
 void MapIOMrcHandler::Import(img::MapHandle& sh, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct )
 {
-  boost::filesystem::
-  ifstream infile(loc, std::ios::binary);
+  boost::filesystem::ifstream infile(loc, std::ios::binary);
   if(!infile)
   {
     throw IOException("could not open "+loc.string());
   }
+  boost::iostreams::filtering_stream<boost::iostreams::input> in;
+  if (detail::FilenameEndsWith(loc.string(),".map.gz")) {
+    in.push(boost::iostreams::gzip_decompressor());
+  }
+  in.push(boost::iostreams::file_source(loc.string()));
+  in.read(reinterpret_cast<char*>(&header_),256);
+  in.pop();
+  in.push(boost::iostreams::file_source(loc.string()));
   is_file_=true;
-  extension_=extension(loc);
-  this->Import(sh,infile,formatstruct);
+  filename_=loc.string();
+  this->Import(sh,in,formatstruct);
   infile.close();
 }
 
@@ -840,26 +922,32 @@ void MapIOMrcHandler::Import(img::MapHandle& sh, std::istream& loc, const ImageF
    } else {
      assert (formatstruct.GetFormatString()==UndefinedImageFormat::FORMAT_STRING);
    }
-
+   if (is_file_ == false){
+     loc.read(reinterpret_cast<char*>(&header_),256);
+     loc.seekg(0,std::ios::beg);
+   }
+   char* headerptr=(char*)&header_;
+   boost::iostreams::filtering_streambuf<boost::iostreams::input> head_strbuf;
+   std::istream head_str(&head_strbuf);
+   head_strbuf.push(boost::iostreams::basic_array_source<char>(headerptr,sizeof(header_)));
    if (formatmrc.GetSubformat()==MRC_OLD_FORMAT) {
      LOGN_DEBUG("mrc io: importing old style format");
-     detail::import_endianess_switcher<detail::mrc_header>(sh,loc,formatmrc);
+     detail::import_endianess_switcher<detail::mrc_header>(sh,loc,head_str,formatmrc);
    } else if (formatmrc.GetSubformat()==MRC_NEW_FORMAT) {
      LOGN_DEBUG("mrc io: importing new style format");
-     detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,formatmrc);
-   } else if (is_file_ && ( extension_==".ccp4" || extension_==".map")) {
+     detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);
+   } else if (is_file_ && (detail::FilenameEndsWith(filename_,".ccp4") || detail::FilenameEndsWith(filename_,".map") || detail::FilenameEndsWith(filename_,".map.gz"))) {
      LOGN_DEBUG("mrc io: importing new style format");
-     detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,formatmrc);
+     detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);
    } else {
-     unsigned char header[256];
-     loc.read(reinterpret_cast<char*>(&header),256);
-     loc.seekg(0, std::ios::beg);
-     if (MatchContent(header) == true) {
+	 unsigned char header_content[256];
+	 memcpy(&header_content,&header_,256*sizeof(char));
+     if (MatchContent(header_content) == true) {
        LOGN_DEBUG("mrc io: importing new style format");
-       detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,formatmrc);
+       detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);
      } else {
        LOGN_DEBUG("mrc io: importing old style format");
-       detail::import_endianess_switcher<detail::mrc_header>(sh,loc,formatmrc);
+       detail::import_endianess_switcher<detail::mrc_header>(sh,loc,head_str,formatmrc);
      }
   }
 }
@@ -873,7 +961,7 @@ void MapIOMrcHandler::Export(const img::MapHandle& image,
     throw IOException("could not open "+loc.string());
   }
   is_file_=true;
-  extension_=extension(loc);
+  filename_=loc.string();
   Export(image,outfile,formatstruct);
   outfile.close();
 }
@@ -915,10 +1003,11 @@ bool MapIOMrcHandler::MatchType(const ImageFormatBase& type)
   return false;
 }
 
-bool MapIOMrcHandler::MatchSuffix(const String& suffix)
+bool MapIOMrcHandler::MatchSuffix(const boost::filesystem::path& loc)
 {
-  if(suffix==".mrc" || suffix==".map" || suffix==".ccp4") {
-    return true;
+  if(detail::FilenameEndsWith(loc.string(),".mrc") || detail::FilenameEndsWith(loc.string(),".map") ||
+     detail::FilenameEndsWith(loc.string(),".ccp4") || detail::FilenameEndsWith(loc.string(),".map.gz")) {
+     return true;
   }
   return false;
 }

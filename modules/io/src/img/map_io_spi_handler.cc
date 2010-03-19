@@ -512,9 +512,9 @@ bool MapIOSpiHandler::MatchType(const ImageFormatBase& type)
   }
   return false;
 }
-bool MapIOSpiHandler::MatchSuffix(const String& suffix)
+bool MapIOSpiHandler::MatchSuffix(const boost::filesystem::path& loc)
 {
-    if(suffix==".spi") {
+    if (detail::FilenameEndsWith(loc.string(),".spi") ) {
       return true;
     }
     return false;

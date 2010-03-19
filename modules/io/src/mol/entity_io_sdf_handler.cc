@@ -409,8 +409,7 @@ namespace {
 bool sdf_handler_is_responsible_for(const boost::filesystem::path& loc,
                                     const String& type) {
   if(type=="auto") {
-    String ext=extension(loc);
-    if(boost::iequals(ext,".sdf")) {
+    if(detail::FilenameEndsWith(loc.string(),".sdf")) {
       return true;
     }
 

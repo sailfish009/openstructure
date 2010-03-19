@@ -62,7 +62,7 @@ class DLLEXPORT_OST_IO MapIODxHandler: public MapIOHandler
                       std::ostream& loc, const ImageFormatBase& formatstruct) const;
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
-  static bool MatchSuffix(const String& suffix);
+  static bool MatchSuffix(const boost::filesystem::path& locx);
   static String GetFormatName() { return String("Dx"); };
   static String GetFormatDescription()  { return String("Format used by the OpenDX software package"); };
 

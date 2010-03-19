@@ -62,7 +62,7 @@ public:
 
   MapIOMrcHandler():
    is_file_(false),
-   extension_("") {}
+   filename_("") {}
 
   /// \brief Map IO handler to read/write mrc and ccp4 map files
   ///
@@ -74,14 +74,15 @@ public:
   virtual void Export(const img::MapHandle& sh, std::ostream& loc,const ImageFormatBase& formatstruct) const;
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
-  static bool MatchSuffix(const String& suffix);
+  static bool MatchSuffix(const boost::filesystem::path& loc);
   static String GetFormatName() { return String("Mrc"); };
   static String GetFormatDescription() { return String("Format used by the MRC software package"); };
 
 private:
 
   mutable bool is_file_;
-  mutable String extension_;
+  mutable String filename_;
+  char header_[256];
 
 };
 

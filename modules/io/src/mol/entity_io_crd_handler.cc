@@ -181,8 +181,7 @@ namespace {
 bool crd_handler_is_responsible_for(const boost::filesystem::path& loc,
                                     const String& type) {
   if(type=="auto") {
-    String ext=extension(loc);
-    if(boost::iequals(ext,".crd") || boost::iequals(ext, ".crd.gz")) {
+    if( detail::FilenameEndsWith(loc.string(),".crd") || detail::FilenameEndsWith(loc.string(),".crd.gz") ) {
       return true;
     }
   } else if(type=="crd") {

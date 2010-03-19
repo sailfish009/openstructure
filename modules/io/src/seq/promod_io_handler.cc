@@ -52,8 +52,7 @@ void PromodIOHandler::Export(const seq::ConstSequenceList& msa,
 bool PromodIOHandler::ProvidesImport(const boost::filesystem::path& loc, 
                                     const String& format) {
   if (format=="auto") {
-   String ext=extension(loc);
-   if (boost::iequals(ext,".ali")) {
+   if (detail::FilenameEndsWith(loc.string(),".ali")) {
      return true;
    }
   } else if(format=="promod") {

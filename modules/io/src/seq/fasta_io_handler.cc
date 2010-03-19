@@ -56,11 +56,12 @@ void FastaIOHandler::Export(const seq::ConstSequenceList& msa,
 bool FastaIOHandler::ProvidesImport(const boost::filesystem::path& loc, 
                                     const String& format) {
   if (format=="auto") {
-   String ext=extension(loc);
-   if (boost::iequals(ext,".fasta") || boost::iequals(ext, ".fa") ||
-       boost::iequals(ext, ".fna") || boost::iequals(ext, ".fsa") || 
-       boost::iequals(ext, ".fas")) {
-     return true;
+
+
+   if (detail::FilenameEndsWith(loc.string(),".fasta") || detail::FilenameEndsWith(loc.string(),".fa") ||
+       detail::FilenameEndsWith(loc.string(),".fnaa") || detail::FilenameEndsWith(loc.string(),".fsa") ||
+       detail::FilenameEndsWith(loc.string(),".fas") )  {
+	return true;
    }
   } else if(format=="fasta") {
     return true;

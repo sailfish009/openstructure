@@ -234,9 +234,9 @@ bool MapIONanoscopeHandler::MatchType(const ImageFormatBase& type)
   return false;
 }
 
-bool MapIONanoscopeHandler::MatchSuffix(const String& suffix)
+bool MapIONanoscopeHandler::MatchSuffix(const boost::filesystem::path& loc)
 {
-    if(suffix==".mod") {
+    if(detail::FilenameEndsWith(loc.string(),".mod") ) {
       return true;
     }
     return false;

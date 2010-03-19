@@ -140,16 +140,9 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
     }
     throw IOException("Unsupported type in FindMapImportHandle.");
   }else{
-    String filename = loc.string();
-    String::size_type pos = filename.rfind(".");
-    String::size_type spos = filename.rfind("/");
-    if (pos != String::npos && (spos==String::npos || spos<pos)){
-      String ext=filename.substr(pos);
-      std::transform(ext.begin(),ext.end(),ext.begin(),tolower);
-      for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-        if((*it)->MatchSuffix(ext)) {
-          return (*it)->Create();
-        }
+    for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
+      if((*it)->MatchSuffix(loc)) {
+        return (*it)->Create();
       }
     }
     unsigned char header[256];
@@ -167,7 +160,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
         return (*it)->Create();
       }
     }
-    throw IOException("No file suffix given for " + filename+", and could not detect automatically, please indicate file type.");    
+    throw IOException("No file suffix given for " + loc.string()+", and could not detect automatically, please indicate file type.");
   }
   return MapIOHandlerPtr();  // removes warning
 }
@@ -213,10 +206,8 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerFile(const boost::filesystem::pat
     if (pos == String::npos){
       throw IOException("No file suffix given for " + filename+", please indicate file type.");
     }
-    String ext=filename.substr(pos);
-    std::transform(ext.begin(),ext.end(),ext.begin(),tolower);
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchSuffix(ext)) {
+      if((*it)->MatchSuffix(loc)) {
         return(*it)->Create();
       }
     }

@@ -264,9 +264,9 @@ bool MapIODxHandler::MatchType(const ImageFormatBase& formatstruct)
   }
   return false;
 }
-bool MapIODxHandler::MatchSuffix(const String& suffix)
+bool MapIODxHandler::MatchSuffix(const boost::filesystem::path& loc)
 {
-    if(suffix==".dx") {
+	if(detail::FilenameEndsWith(loc.string(),".dx") ) {
       return true;
     }
     return false;

@@ -90,7 +90,7 @@ class DLLEXPORT_OST_IO MapIOTiffHandler: public MapIOHandler
     virtual void Export(const img::MapHandle& sh, std::ostream& loc,const ImageFormatBase& formatstruct) const;
     static bool MatchContent(unsigned char* header);
     static bool MatchType(const ImageFormatBase& type);
-    static bool MatchSuffix(const String& suffix);
+    static bool MatchSuffix(const boost::filesystem::path& loc);
     static String GetFormatName() { return String( "Tiff"); }
     static String GetFormatDescription() { return String("Tagged Image File Format"); }
 
