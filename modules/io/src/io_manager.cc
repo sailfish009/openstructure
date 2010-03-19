@@ -17,13 +17,13 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <ost/io/io_manager.hh>
-#include  <ost/io/mol/entity_io_pdb_handler.hh>
+#include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/mol/entity_io_crd_handler.hh>
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/seq/fasta_io_handler.hh>
 #include <ost/io/seq/promod_io_handler.hh>
 #include <ost/io/mol/surface_io_msms_handler.hh>
-#include  <ost/io/seq/clustal_io_handler.hh>
+#include <ost/io/seq/clustal_io_handler.hh>
 #if OST_IMG_ENABLED
 #  include  <ost/io/img/map_io_dx_handler.hh>
 #  include  <ost/io/img/map_io_spi_handler.hh>
@@ -250,6 +250,8 @@ const MapIOFList& IOManager::GetAvailableMapHandler() const
 {
   return map_io_list_;
 }
+
+#endif //OST_IMG_ENABLED
 
 void IOManager::RegisterFactory(const EntityIOHandlerFactoryBaseP& f) 
 {
