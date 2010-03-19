@@ -183,6 +183,12 @@ void FileBrowser::LoadObject(const QModelIndex& index){
   }
 }
 
+void FileBrowser::keyPressEvent(QKeyEvent* event){
+  if (event->key() == Qt::Key_F5) {
+    model_->refresh();
+  }
+}
+
 OST_REGISTER_WIDGET_WITH_DEFAULT_FACTORY(ost::gui, FileBrowser, "File Browser");  
 
 

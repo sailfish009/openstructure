@@ -42,6 +42,10 @@ public:
   virtual ActionList GetActions();
   virtual bool Save(const QString& prefix);
   virtual bool Restore(const QString& prefix);
+
+protected:
+  virtual void keyPressEvent(QKeyEvent* event);
+
 private slots:
   void Init(QString& path);
   void DoubleClicked(const QModelIndex& index);
