@@ -36,6 +36,7 @@ from ost.gfx import GradientLevelColorOp
 from ost.gfx import UniformColorOp
 from preset import Preset
 from render_op import RenderOp
+from visibility_op import VisibilityOp
 
 #Preset Editor
 class PresetEditor(QtGui.QDialog):
@@ -54,11 +55,13 @@ class PresetEditor(QtGui.QDialog):
     self.beow_=ByElementColorOpWidget(self)
     self.bcow_=ByChainColorOpWidget(self)
     self.row_=RenderOpWidget(self)
+    self.vow_=VisibilityOpWidget(self)
     self.combo_box_.addItem("Uniform Color Operation", QtCore.QVariant(self.ufcow_))
     self.combo_box_.addItem("Gradient Operation", QtCore.QVariant(self.glcow_))
     self.combo_box_.addItem("By Element Operation", QtCore.QVariant(self.beow_))
     self.combo_box_.addItem("By Chain Operation", QtCore.QVariant(self.bcow_))
     self.combo_box_.addItem("RenderMode Operation", QtCore.QVariant(self.row_))
+    self.combo_box_.addItem("Visibility Operation", QtCore.QVariant(self.vow_))
     
     self.add_button_ = QtGui.QPushButton("Add")
     
@@ -146,6 +149,10 @@ class PresetEditor(QtGui.QDialog):
        self.row_.SetOp(op)
        if self.row_.exec_():
          self.list_model_.SetItem(current_index, self.row_.GetOp())
+    elif isinstance(op, VisibilityOp):
+       self.vow_.SetOp(op)
+       if self.vow_.exec_():
+         self.list_model_.SetItem(current_index, self.vow_.GetOp())
     
   def Remove(self):
     current_index = self.list_view_.currentIndex()
@@ -570,7 +577,7 @@ class RenderOpWidget(QtGui.QDialog):
   def GetOp(self):
     selection = str(self.selection_edit_.text())
     render_mode = self.render_modes_.itemData(self.render_modes_.currentIndex()).toPyObject()
-    ro = RenderOp(gfx.RenderMode(render_mode), selection, self.keep_.isChecked(), self)
+    ro = RenderOp(gfx.RenderMode(render_mode), selection, self.keep_.isChecked())
     return ro
 
   def SetOp(self, ro):
@@ -584,6 +591,50 @@ class RenderOpWidget(QtGui.QDialog):
         break
     if not found:
       self.render_modes_.setCurrentIndex(0)
+    self.keep_.setChecked(ro.IsKept())
+    
+  def Ok(self):
+    self.accept()
+    
+  def Cancel(self):
+    self.reject()
+    
+class VisibilityOpWidget(QtGui.QDialog):
+  def __init__(self, parent=None):
+    QtGui.QDialog.__init__(self, parent)
+    selection_label = QtGui.QLabel("Selection")
+    self.selection_edit_ = QtGui.QLineEdit()
+  
+    self.visible_ = QtGui.QCheckBox("Visible")
+    self.visible_.setChecked(True)
+    
+    self.hbox_ = QtGui.QHBoxLayout()
+    self.ok_button_ = QtGui.QPushButton("OK")
+    self.cancel_button_ = QtGui.QPushButton("Cancel")
+    self.hbox_.addWidget(self.ok_button_)
+    self.hbox_.addStretch()
+    self.hbox_.addWidget(self.cancel_button_)
+    
+    grid = QtGui.QGridLayout()
+    grid.setContentsMargins(0,5,0,0)
+    grid.addWidget(selection_label, 0, 0, 1, 1)
+    grid.addWidget(self.selection_edit_, 0, 1, 1, 1)
+    grid.addWidget(self.visible_, 1, 1, 1, 1)
+    grid.addLayout(self.hbox_,2,0,1,2)
+    grid.setRowStretch(1, 1)
+    self.setLayout(grid)
+    
+    QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
+    QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
+    
+  def GetOp(self):
+    selection = str(self.selection_edit_.text())
+    vo = VisibilityOp(selection, self.visible_.isChecked())
+    return vo
+
+  def SetOp(self, ro):
+    self.selection_edit_.setText(ro.GetSelection())
+    self.visible_.setChecked(ro.IsVisible())
   
   def Ok(self):
     self.accept()

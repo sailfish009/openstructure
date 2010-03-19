@@ -22,7 +22,7 @@ from ost import info
 from ost import gfx
 from PyQt4 import QtGui
 
-from render_op import RenderOp
+from ost.gfx import ColorOp
 
 #Rendering Preset
 class Preset():
@@ -31,8 +31,7 @@ class Preset():
   CLASS_NAME_ATTRIBUTE_NAME = "ClassName"
   INDEX_ATTRIBUTE_NAME = "Index"
   
-  MODULE_NAME = "ost.gfx"
-  RENDERMODE_MODULE_NAME = "ost.gui.scene.render_op"
+  MODULE_NAMES = ["ost.gfx","ost.gui.scene.visibility_op","ost.gui.scene.render_op"]
   
   def __init__(self, name, parent=None):    
     self.name_ = name
@@ -71,10 +70,10 @@ class Preset():
   def ApplyOn(self, entity):
     if (entity is not None) and isinstance(entity, gfx.Entity):
       for op in self.ops_:
-        if(isinstance(op, RenderOp)):
-          op.ApplyOn(entity)
-        else:
+        if isinstance(op,ColorOp):
           entity.Apply(op)
+        else:
+          op.ApplyOn(entity)
   
   def ToInfo(self,group):
     group.SetAttribute(Preset.NAME_ATTRIBUTE_NAME, self.name_)
@@ -98,13 +97,12 @@ class Preset():
           class_name = op_group.GetAttribute(Preset.CLASS_NAME_ATTRIBUTE_NAME)
           index = int(op_group.GetAttribute(Preset.INDEX_ATTRIBUTE_NAME))
           op_class = None
-          try:
-            op_class = Preset.__get_op_class("%s.%s"%(Preset.MODULE_NAME,class_name))
-          except AttributeError:
+          for module in Preset.MODULE_NAMES:
             try:
-              op_class = Preset.__get_op_class("%s.%s"%(Preset.RENDERMODE_MODULE_NAME,class_name))
-            except:
-              print "op can not be loaded"
+              op_class = Preset.__get_op_class("%s.%s"%(module,class_name))
+              break
+            except AttributeError:
+              pass
           if op_class is not None:
             op = op_class.FromInfo(op_group)
             class_order_dict[index]=op

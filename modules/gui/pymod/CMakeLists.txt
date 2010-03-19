@@ -50,6 +50,7 @@ toolbar_options_widget.py
 trace_widget.py
 tube_widget.py
 uniform_color_widget.py
+visibility_op.py
 file_loader.py
 loader_info_handler.py
 loader_list_model.py

@@ -22,49 +22,38 @@ from ost import info
 from ost import gfx
 from PyQt4 import QtGui
 
-class RenderOp():
-  RENDERMODE_ATTRIBUTE_NAME = "RenderMode"
-  KEEP_ATTRIBUTE_NAME = "Keep"
+class VisibilityOp():
+  VISIBLE_ATTRIBUTE_NAME = "Visible"
     
-  def __init__(self, render_mode, selection, keep=False):    
-    self.render_mode_ = render_mode
+  def __init__(self, selection, visible=False):    
     self.selection_ = selection
-    self.keep_ = keep
+    self.visible_ = visible
     
-  def SetRenderMode(self, render_mode):
-    self.render_mode_ = render_mode
-    
-  def GetRenderMode(self):
-    return self.render_mode_
- 
   def SetSelection(self, selection):
     self.selection_ = selection
     
   def GetSelection(self):
     return self.selection_
 
-  def SetKeep(self, keep):
-    self.keep_ = keep
+  def SetVisible(self, visible):
+    self.visible_ = visible
 
-  def IsKept(self):
-    return self.keep_
+  def IsVisible(self):
+    return self.visible_
 
   def ApplyOn(self, entity):
     if (entity is not None) and isinstance(entity, gfx.Entity):
-      entity.SetRenderMode(self.GetRenderMode(),entity.view.Select(self.GetSelection()),self.IsKept())
+      entity.SetVisible(entity.view.Select(self.GetSelection()),self.IsVisible())
   
   def ToInfo(self,group):
-      group.SetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME, str(int(self.GetRenderMode())))
-      group.SetAttribute(RenderOp.KEEP_ATTRIBUTE_NAME, str(int(self.IsKept())))
+      group.SetAttribute(VisibilityOp.VISIBLE_ATTRIBUTE_NAME, str(int(self.IsVisible())))
       group.SetTextData(str(self.GetSelection()))
     
   @staticmethod
   def FromInfo(group):
-    render_op = None
-    if (group.HasAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME) 
-    and  group.HasAttribute(RenderOp.KEEP_ATTRIBUTE_NAME)):
-      render_mode = gfx.RenderMode(int(group.GetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME)))
-      keep = bool(int(group.GetAttribute(RenderOp.KEEP_ATTRIBUTE_NAME)))
+    visible_op = None
+    if group.HasAttribute(VisibilityOp.VISIBLE_ATTRIBUTE_NAME):
+      visible = bool(int(group.GetAttribute(VisibilityOp.VISIBLE_ATTRIBUTE_NAME)))
       selection = group.GetTextData()
-      render_op = RenderOp(render_mode,selection,keep)
-    return render_op
+      visible_op = VisibilityOp(selection,visible)
+    return visible_op
