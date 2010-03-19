@@ -4,6 +4,7 @@ set(OST_CONOP_PYMOD_SOURCES
   export_compound.cc
   export_sanitizer.cc
   export_conop.cc
+  export_ring_finder.cc
 )
 
 pymod(NAME conop CPP ${OST_CONOP_PYMOD_SOURCES} PY __init__.py)

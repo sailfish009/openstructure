@@ -8,6 +8,7 @@ sanitizer.hh
 compound_lib.hh
 module_config.hh
 rule_based_builder.hh
+ring_finder.hh
 )
 
 set(OST_CONOP_SOURCES
@@ -18,6 +19,7 @@ compound.cc
 sanitizer.cc
 compound_lib.cc
 rule_based_builder.cc
+ring_finder.cc
 )
 
 module(NAME conop SOURCES ${OST_CONOP_SOURCES}

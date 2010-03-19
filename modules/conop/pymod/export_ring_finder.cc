@@ -17,18 +17,20 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
+#include <ost/conop/ring_finder.hh>
+#include <ost/mol/mol.hh>
 
-void export_Builder();
-void export_Compound();
-void export_Sanitizer();
-void export_Conop();
-void export_RingFinder();
-BOOST_PYTHON_MODULE(_conop)
-{
-  export_Builder();
-  export_Conop();
-  export_Compound();
-  export_Sanitizer();
-  export_RingFinder();
+using namespace ost::conop;
+
+void export_RingFinder() {
+  class_<RingFinder, boost::noncopyable>("RingFinder", init<ost::mol::EntityHandle&>())
+    .def("PerceiveRings", &RingFinder::PerceiveRings)
+    .def("GetRings", &RingFinder::GetRings)
+    .def("GetRingAtomCount", &RingFinder::GetRingAtomCount)
+    .def("GetRingBondCount", &RingFinder::GetRingBondCount)
+    .def("RingsPerceived", &RingFinder::RingsPerceived)
+    ;
 }
