@@ -92,13 +92,17 @@ void RemoteLoader::BuildMenu()
   }
   std::vector<String> site_loaders = FileLoader::GetSiteLoaderIdents();
   for(unsigned int i=0; i<site_loaders.size(); i++){
-    QAction* action = new QAction(QString(site_loaders[i].c_str()),site_loader_menu_);
-    action->setCheckable(true);
-    site_actions_->addAction(action);
-    if(site_actions_->checkedAction()==NULL ||selected_site_loader==site_loaders[i] ){
-      action->setChecked(true);
+    QString loader_ident(site_loaders[i].c_str());
+    RemoteSiteLoader* loader = FileLoader::GetLoaderManager()->GetRemoteSiteLoader(loader_ident);
+    if(loader && ((loader->IsImg() && img_support_) || !loader->IsImg())){
+      QAction* action = new QAction(loader_ident,site_loader_menu_);
+      action->setCheckable(true);
+      site_actions_->addAction(action);
+      if(site_actions_->checkedAction()==NULL ||selected_site_loader==loader_ident.toStdString() ){
+        action->setChecked(true);
+      }
+      site_loader_menu_->addAction(action);
     }
-    site_loader_menu_->addAction(action);
   }
 }
 

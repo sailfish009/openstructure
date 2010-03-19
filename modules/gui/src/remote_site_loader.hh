@@ -38,6 +38,7 @@ public:
   virtual QNetworkReply* ById(const QString& id);
   virtual void LoadById(const QString& id);
   virtual QString GetRemoteSiteName();
+  virtual bool IsImg() const;
   virtual ~RemoteSiteLoader(){};
 };
 

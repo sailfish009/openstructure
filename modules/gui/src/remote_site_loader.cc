@@ -24,5 +24,5 @@ namespace ost { namespace gui {
   void RemoteSiteLoader::LoadById(const QString& id){this->ById(id);}
   QNetworkReply* RemoteSiteLoader::ById(const QString& id){return NULL;}
   QString RemoteSiteLoader::GetRemoteSiteName(){return QString();}
-
+  bool RemoteSiteLoader::IsImg() const { return false; }
 }}

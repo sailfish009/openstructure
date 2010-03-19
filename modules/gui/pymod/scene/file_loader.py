@@ -56,6 +56,9 @@ class BaseRemoteLoader(gui.RemoteSiteLoader):
       return sip.unwrapinstance(reply)
     return 0
     
+  def IsImg(self):
+    return False
+    
   def GetRemoteSiteName(self):
     pass  
   
@@ -85,12 +88,14 @@ class GenericLoader(BaseRemoteLoader):
   UP_CASE_ATTRIBUTE_NAME = "UpCase"
   FILE_TYPE_ATTRIBUTE_NAME = "FileType"
   TMP_URL_ATTRIBUTE_NAME= "TmpUrl"
+  IMG_ATTRIBUTE_NAME= "Img"
   
-  def __init__(self, name, url, up_case, file_type, tmp_url=None):
+  def __init__(self, name, url, up_case, file_type, tmp_url=None, img=False):
     BaseRemoteLoader.__init__(self)
     self.name_ = QtCore.QString(name)
     self.url_ = QtCore.QString(url)
     self.up_case_ = up_case
+    self.img_ = img
     if file_type is not None:
       self.file_type_ = QtCore.QString(file_type)
     else:
@@ -101,6 +106,9 @@ class GenericLoader(BaseRemoteLoader):
     else:
       self.tmp_url_ = tmp_url
     
+  def IsImg(self):
+    return self.img_    
+
   def GetRemoteSiteName(self):
     return self.name_
   
@@ -148,6 +156,8 @@ class GenericLoader(BaseRemoteLoader):
       group.SetAttribute(GenericLoader.FILE_TYPE_ATTRIBUTE_NAME, str(self.file_type_))
     if self.tmp_url_ is not None:
       group.SetAttribute(GenericLoader.TMP_URL_ATTRIBUTE_NAME, str(self.tmp_url_))
+    if self.img_ is not None:
+      group.SetAttribute(GenericLoader.IMG_ATTRIBUTE_NAME, str(int(self.img_)))
       
   @staticmethod
   def FromInfo(group):
@@ -156,6 +166,7 @@ class GenericLoader(BaseRemoteLoader):
     up_case = False
     file_type = None
     tmp_url = None
+    img = False
     
     if group.HasAttribute(GenericLoader.EXT_NAME_ATTRIBUTE_NAME):
       name = QtCore.QString(group.GetAttribute(GenericLoader.EXT_NAME_ATTRIBUTE_NAME))
@@ -172,4 +183,7 @@ class GenericLoader(BaseRemoteLoader):
     if group.HasAttribute(GenericLoader.TMP_URL_ATTRIBUTE_NAME):
       tmp_url = QtCore.QString(group.GetAttribute(GenericLoader.TMP_URL_ATTRIBUTE_NAME))
     
-    return GenericLoader(name, url, up_case, file_type, tmp_url)
+    if group.HasAttribute(GenericLoader.IMG_ATTRIBUTE_NAME):
+      img = bool(int(group.GetAttribute(GenericLoader.IMG_ATTRIBUTE_NAME)))
+
+    return GenericLoader(name, url, up_case, file_type, tmp_url, img)

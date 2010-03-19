@@ -45,6 +45,10 @@ struct WrappedRemoteSiteLoader : public RemoteSiteLoader
       return call_method<QString>(self, "GetRemoteSiteName");
     }
 
+    virtual bool IsImg() const{
+      return call_method<bool>(self, "IsImg");
+    }
+
     virtual QNetworkReply* ById(const QString& id){
       //This hackish code will be changed soon(er or later)
       unsigned long addr=call_method<unsigned long, std::string>(self, "ByIdAddr", id.toStdString());
@@ -64,6 +68,7 @@ void export_RemoteSiteLoader()
   class_<RemoteSiteLoader, WrappedRemoteSiteLoader, boost::noncopyable>("RemoteSiteLoader")
     .def("LoadById",&WrappedRemoteSiteLoader::LoadById)
     .def("GetRemoteSiteName", &WrappedRemoteSiteLoader::GetRemoteSiteName)
+    .def("IsImg", &WrappedRemoteSiteLoader::IsImg)
   ;
 
 }
