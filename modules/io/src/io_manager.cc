@@ -17,13 +17,13 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <ost/io/io_manager.hh>
-#include <ost/io/mol/entity_io_pdb_handler.hh>
+#include  <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/mol/entity_io_crd_handler.hh>
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/seq/fasta_io_handler.hh>
 #include <ost/io/seq/promod_io_handler.hh>
 #include <ost/io/mol/surface_io_msms_handler.hh>
-#include <ost/io/seq/clustal_io_handler.hh>
+#include  <ost/io/seq/clustal_io_handler.hh>
 #if OST_IMG_ENABLED
 #  include  <ost/io/img/map_io_dx_handler.hh>
 #  include  <ost/io/img/map_io_spi_handler.hh>
@@ -246,11 +246,6 @@ void IOManager::RegisterFactory(const MapIOHandlerFactoryBasePtr& f)
   map_io_list_.push_back(f);
 }
 
-const MapIOFList& IOManager::GetAvailableMapHandler() const
-{
-  return map_io_list_;
-}
-
 #endif //OST_IMG_ENABLED
 
 void IOManager::RegisterFactory(const EntityIOHandlerFactoryBaseP& f) 
@@ -266,21 +261,6 @@ void IOManager::RegisterFactory(const SequenceIOHandlerFactoryBasePtr& f)
 void IOManager::RegisterFactory(const SurfaceIOHandlerFactoryBasePtr& f) 
 {
   surface_io_list_.push_back(f);
-}
-
-const EntityIOHFList& IOManager::GetAvailableEntityHandler() const
-{
-  return entity_iohf_list_;
-}
-
-const AlignmentIOFList& IOManager::GetAvailableAlignmentHandler() const
-{
-  return alignment_io_list_;
-}
-
-const SurfaceIOFList& IOManager::GetAvailableSurfaceHandler() const
-{
-  return surface_io_list_;
 }
 
 }} // ns
