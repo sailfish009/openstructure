@@ -61,6 +61,7 @@ private:
   ActionList action_list_;
   QMenu* site_loader_menu_;
   QActionGroup* site_actions_;
+  bool img_support_;
 };
 
 }}

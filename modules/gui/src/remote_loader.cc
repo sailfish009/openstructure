@@ -35,6 +35,7 @@ namespace ost { namespace gui {
 RemoteLoader::RemoteLoader(QWidget* parent):
  Widget(NULL, parent)
 {
+  img_support_=OST_IMG_ENABLED;
   line_edit_ = new QLineEdit(this);
   button_ = new QPushButton("Load",this);
   progress_bar_ = new QProgressBar(this);
@@ -158,4 +159,5 @@ void RemoteLoader::DownloadFinished(){
 OST_REGISTER_WIDGET_WITH_DEFAULT_FACTORY(ost::gui, RemoteLoader, "Remote Loader");
 
 }}
+
 
