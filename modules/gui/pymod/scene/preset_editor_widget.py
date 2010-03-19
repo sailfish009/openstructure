@@ -35,7 +35,7 @@ from ost.gfx import ByChainColorOp
 from ost.gfx import GradientLevelColorOp
 from ost.gfx import UniformColorOp
 from preset import Preset
-
+from render_op import RenderOp
 
 #Preset Editor
 class PresetEditor(QtGui.QDialog):
@@ -53,10 +53,12 @@ class PresetEditor(QtGui.QDialog):
     self.glcow_=GradientLevelColorOpWidget(self)
     self.beow_=ByElementColorOpWidget(self)
     self.bcow_=ByChainColorOpWidget(self)
+    self.row_=RenderOpWidget(self)
     self.combo_box_.addItem("Uniform Color Operation", QtCore.QVariant(self.ufcow_))
     self.combo_box_.addItem("Gradient Operation", QtCore.QVariant(self.glcow_))
     self.combo_box_.addItem("By Element Operation", QtCore.QVariant(self.beow_))
     self.combo_box_.addItem("By Chain Operation", QtCore.QVariant(self.bcow_))
+    self.combo_box_.addItem("RenderMode Operation", QtCore.QVariant(self.row_))
     
     self.add_button_ = QtGui.QPushButton("Add")
     
@@ -118,28 +120,32 @@ class PresetEditor(QtGui.QDialog):
     dialog = self.combo_box_.itemData(self.combo_box_.currentIndex()).toPyObject()
     if(dialog.exec_()):
       row = self.list_model_.rowCount()
-      color_op = dialog.GetColorOp()
-      self.list_model_.AddItem(color_op, row)
+      op = dialog.GetOp()
+      self.list_model_.AddItem(op, row)
   
   def Edit(self):
     current_index = self.list_view_.currentIndex()
-    color_op = self.list_model_.GetColorOp(current_index)
-    if isinstance(color_op, gfx.UniformColorOp):
-       self.ufcow_.SetColorOp(color_op)
+    op = self.list_model_.GetOp(current_index)
+    if isinstance(op, gfx.UniformColorOp):
+       self.ufcow_.SetOp(op)
        if self.ufcow_.exec_():
-         self.list_model_.SetItem(current_index, self.ufcow_.GetColorOp())
-    elif isinstance(color_op, gfx.GradientLevelColorOp):
-       self.glcow_.SetColorOp(color_op)
+         self.list_model_.SetItem(current_index, self.ufcow_.GetOp())
+    elif isinstance(op, gfx.GradientLevelColorOp):
+       self.glcow_.SetOp(op)
        if self.glcow_.exec_():
-         self.list_model_.SetItem(current_index, self.glcow_.GetColorOp())
-    elif isinstance(color_op, gfx.ByElementColorOp):
-       self.beow_.SetColorOp(color_op)
+         self.list_model_.SetItem(current_index, self.glcow_.GetOp())
+    elif isinstance(op, gfx.ByElementColorOp):
+       self.beow_.SetOp(op)
        if self.beow_.exec_():
-         self.list_model_.SetItem(current_index, self.beow_.GetColorOp())
-    elif isinstance(color_op, gfx.ByChainColorOp):
-       self.bcow_.SetColorOp(color_op)
+         self.list_model_.SetItem(current_index, self.beow_.GetOp())
+    elif isinstance(op, gfx.ByChainColorOp):
+       self.bcow_.SetOp(op)
        if self.bcow_.exec_():
-         self.list_model_.SetItem(current_index, self.bcow_.GetColorOp())
+         self.list_model_.SetItem(current_index, self.bcow_.GetOp())
+    elif isinstance(op, RenderOp):
+       self.row_.SetOp(op)
+       if self.row_.exec_():
+         self.list_model_.SetItem(current_index, self.row_.GetOp())
     
   def Remove(self):
     current_index = self.list_view_.currentIndex()
@@ -148,16 +154,16 @@ class PresetEditor(QtGui.QDialog):
   def MoveDown(self):
     current_index = self.list_view_.currentIndex()
     if self.list_model_.GetLastRow != current_index.row():
-      color_op = self.list_model_.GetColorOp(current_index)
+      op = self.list_model_.GetOp(current_index)
       self.list_model_.RemoveItem(current_index.row())
-      self.list_model_.AddItem(color_op, current_index.row()+1)
+      self.list_model_.AddItem(op, current_index.row()+1)
  
   def MoveUp(self):
     current_index = self.list_view_.currentIndex()
     if self.list_model_.GetLastRow != 0:
-      color_op = self.list_model_.GetColorOp(current_index)
+      op = self.list_model_.GetOp(current_index)
       self.list_model_.RemoveItem(current_index.row())
-      self.list_model_.AddItem(color_op, current_index.row()-1)
+      self.list_model_.AddItem(op, current_index.row()-1)
            
   def Ok(self):
     self.accept()
@@ -203,7 +209,7 @@ class UniformColorOpWidget(QtGui.QDialog):
     QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
     QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
     
-  def GetColorOp(self):
+  def GetOp(self):
     ufco = UniformColorOp("",gfx.Color(1,1,1,1))
     
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
@@ -214,7 +220,7 @@ class UniformColorOpWidget(QtGui.QDialog):
     ufco.SetSelection(str(self.selection_edit_.text()))
     return ufco
 
-  def SetColorOp(self, ufco):
+  def SetOp(self, ufco):
     self.selection_edit_.setText(ufco.GetSelection())
     found=False
     for i in range(0,self.detail_selection_cb_.count()):
@@ -330,7 +336,7 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
     
     self.UpdateGui()
     
-  def GetColorOp(self):
+  def GetOp(self):
     gradient = self.gradient_edit_.GetGfxGradient()
     
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
@@ -351,7 +357,7 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
       return GradientLevelColorOp(selection, detail, prop, gradient, minv, maxv, level)
       
     
-  def SetColorOp(self, glco):
+  def SetOp(self, glco):
     self.selection_edit_.setText(glco.GetSelection())
     found=False
     for i in range(0,self.detail_selection_cb_.count()):
@@ -438,13 +444,13 @@ class ByElementColorOpWidget(QtGui.QDialog):
     QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
     QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
     
-  def GetColorOp(self):
+  def GetOp(self):
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
     selection = str(self.selection_edit_.text())
     beco = ByElementColorOp(selection, detail)
     return beco
 
-  def SetColorOp(self, beco):
+  def SetOp(self, beco):
     self.selection_edit_.setText(beco.GetSelection())
     found=False
     for i in range(0,self.detail_selection_cb_.count()):
@@ -495,13 +501,13 @@ class ByChainColorOpWidget(QtGui.QDialog):
     QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
     QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
     
-  def GetColorOp(self):
+  def GetOp(self):
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
     selection = str(self.selection_edit_.text())
     bcco = ByChainColorOp(selection, detail)
     return bcco
 
-  def SetColorOp(self, bcco):
+  def SetOp(self, bcco):
     self.selection_edit_.setText(bcco.GetSelection())
     found=False
     for i in range(0,self.detail_selection_cb_.count()):
@@ -512,6 +518,72 @@ class ByChainColorOpWidget(QtGui.QDialog):
         break
     if not found:
       self.detail_selection_cb_.setCurrentIndex(0)
+  
+  def Ok(self):
+    self.accept()
+    
+  def Cancel(self):
+    self.reject()
+
+
+class RenderOpWidget(QtGui.QDialog):
+  def __init__(self, parent=None):
+    QtGui.QDialog.__init__(self, parent)
+    selection_label = QtGui.QLabel("Selection")
+    self.selection_edit_ = QtGui.QLineEdit()
+  
+    self.keep_ = QtGui.QCheckBox("Keep")
+    self.keep_.setChecked(False)
+    
+    render_label = QtGui.QLabel("Rendermode")
+    self.render_modes_ = QtGui.QComboBox()
+    self.render_modes_.addItem("Fast Bonds",QtCore.QVariant(gfx.RenderMode.SIMPLE))
+    self.render_modes_.addItem("Ball & Stick",QtCore.QVariant(gfx.RenderMode.CUSTOM))
+    self.render_modes_.addItem("Spheres",QtCore.QVariant(gfx.RenderMode.CPK))
+    self.render_modes_.addItem("Fast Trace",QtCore.QVariant(gfx.RenderMode.LINE_TRACE))
+    self.render_modes_.addItem("Trace",QtCore.QVariant(gfx.RenderMode.TRACE))
+    self.render_modes_.addItem("Fast Spline",QtCore.QVariant(gfx.RenderMode.SLINE))
+    self.render_modes_.addItem("Smooth Tube",QtCore.QVariant(gfx.RenderMode.TUBE))
+    self.render_modes_.addItem("Helix & Strand Cartoon",QtCore.QVariant(gfx.RenderMode.HSC))
+    
+    self.hbox_ = QtGui.QHBoxLayout()
+    self.ok_button_ = QtGui.QPushButton("OK")
+    self.cancel_button_ = QtGui.QPushButton("Cancel")
+    self.hbox_.addWidget(self.ok_button_)
+    self.hbox_.addStretch()
+    self.hbox_.addWidget(self.cancel_button_)
+    
+    grid = QtGui.QGridLayout()
+    grid.setContentsMargins(0,5,0,0)
+    grid.addWidget(selection_label, 0, 0, 1, 1)
+    grid.addWidget(self.selection_edit_, 0, 1, 1, 1)
+    grid.addWidget(self.keep_, 1, 1, 1, 1)
+    grid.addWidget(render_label,2,0,1,1)
+    grid.addWidget(self.render_modes_,2,1,1,1)
+    grid.addLayout(self.hbox_,3,0,1,2)
+    grid.setRowStretch(1, 1)
+    self.setLayout(grid)
+    
+    QtCore.QObject.connect(self.ok_button_, QtCore.SIGNAL("clicked()"), self.Ok)
+    QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
+    
+  def GetOp(self):
+    selection = str(self.selection_edit_.text())
+    render_mode = self.render_modes_.itemData(self.render_modes_.currentIndex()).toPyObject()
+    ro = RenderOp(gfx.RenderMode(render_mode), selection, self.keep_.isChecked(), self)
+    return ro
+
+  def SetOp(self, ro):
+    self.selection_edit_.setText(ro.GetSelection())
+    found=False
+    for i in range(0,self.render_modes_.count()):
+      render_mode = self.render_modes_.itemData(i).toPyObject()
+      if render_mode == ro.GetRenderMode():
+        self.render_modes_.setCurrentIndex(i)
+        found = True
+        break
+    if not found:
+      self.render_modes_.setCurrentIndex(0)
   
   def Ok(self):
     self.accept()

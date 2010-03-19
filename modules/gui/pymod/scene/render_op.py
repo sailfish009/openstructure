@@ -1,0 +1,70 @@
+#------------------------------------------------------------------------------
+# This file is part of the OpenStructure project <www.openstructure.org>
+#
+# Copyright (C) 2008-2010 by the OpenStructure authors
+#
+# This library is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3.0 of the License, or (at your option)
+# any later version.
+# This library is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this library; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+#------------------------------------------------------------------------------
+# -*- coding: utf-8 -*-
+
+from ost import info
+from ost import gfx
+from PyQt4 import QtGui
+
+class RenderOp():
+  RENDERMODE_ATTRIBUTE_NAME = "RenderMode"
+  KEEP_ATTRIBUTE_NAME = "Keep"
+    
+  def __init__(self, render_mode, selection, keep=False, parent=None):    
+    self.render_mode_ = render_mode
+    self.selection_ = selection
+    self.keep_ = keep
+    
+  def SetRenderMode(self, render_mode):
+    self.render_mode_ = render_mode
+    
+  def GetRenderMode(self):
+    return self.render_mode_
+ 
+  def SetSelection(self, selection):
+    self.selection_ = selection
+    
+  def GetSelection(self):
+    return self.selection_
+
+  def SetKeep(self, keep):
+    self.keep_ = keep
+
+  def IsKept(self):
+    return self.keep_
+
+  def ApplyOn(self, entity):
+    if (entity is not None) and isinstance(entity, gfx.Entity):
+      entity.SetRenderMode(self.GetRenderMode(),entity.view.Select(self.GetSelection()),self.IsKept())
+  
+  def ToInfo(self,group):
+      group.SetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME, str(int(self.GetRenderMode())))
+      group.SetAttribute(RenderOp.KEEP_ATTRIBUTE_NAME, str(int(self.IsKept())))
+      group.SetTextData(str(self.GetSelection()))
+    
+  @staticmethod
+  def FromInfo(group):
+    render_op = None
+    if (group.HasAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME) 
+    and  group.HasAttribute(RenderOp.KEEP_ATTRIBUTE_NAME)):
+      render_mode = gfx.RenderMode(int(group.GetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME)))
+      keep = bool(int(group.GetAttribute(RenderOp.KEEP_ATTRIBUTE_NAME)))
+      selection = group.GetTextData()
+      render_op = RenderOp(render_mode,selection,keep)
+    return render_op

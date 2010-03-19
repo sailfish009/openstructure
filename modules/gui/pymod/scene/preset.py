@@ -22,18 +22,21 @@ from ost import info
 from ost import gfx
 from PyQt4 import QtGui
 
-#Gradient Editor
+from render_op import RenderOp
+
+#Rendering Preset
 class Preset():
   NAME_ATTRIBUTE_NAME = "Name"
-  COLOR_OP_GROUP_NAME = "ColorOp"
+  OP_GROUP_NAME = "Op"
   CLASS_NAME_ATTRIBUTE_NAME = "ClassName"
   INDEX_ATTRIBUTE_NAME = "Index"
   
   MODULE_NAME = "ost.gfx"
+  RENDERMODE_MODULE_NAME = "ost.gui.scene.render_op"
   
   def __init__(self, name, parent=None):    
     self.name_ = name
-    self.color_ops_ = list()
+    self.ops_ = list()
     
   def SetName(self, name):
     self.name_ = name
@@ -41,42 +44,45 @@ class Preset():
   def GetName(self):
     return self.name_
     
-  def InsertColorOp(self, index, color_op):
-    self.color_ops_.insert(index, color_op)
+  def InsertOp(self, index, op):
+    self.ops_.insert(index, op)
     
-  def RemoveColorOp(self, color_op):
-    self.color_ops_.remove(color_op)
+  def RemoveOp(self, op):
+    self.ops_.remove(op)
   
-  def RemoveColorOpAt(self, index):
-    del(self.color_ops_[index])
+  def RemoveOpAt(self, index):
+    del(self.ops_[index])
     
-  def GetColorOp(self, index):
-    return self.color_ops_[index]
+  def GetOp(self, index):
+    return self.ops_[index]
   
-  def GetColorOpCount(self):
-    return len(self.color_ops_)
+  def GetOpCount(self):
+    return len(self.ops_)
   
-  def SetColorOp(self, index, color_op):
-    self.color_ops_[index] = color_op
+  def SetOp(self, index, op):
+    self.ops_[index] = op
   
-  def AddColorOp(self, color_op):
-    self.color_ops_.append(color_op)
+  def AddOp(self, op):
+    self.ops_.append(op)
   
-  def GetColorOps(self):
-    return self.color_ops_
+  def GetOps(self):
+    return self.ops_
   
   def ApplyOn(self, entity):
     if (entity is not None) and isinstance(entity, gfx.Entity):
-      for color_op in self.color_ops_:
-        entity.Apply(color_op)
+      for op in self.ops_:
+        if(isinstance(op, RenderOp)):
+          op.ApplyOn(entity)
+        else:
+          entity.Apply(op)
   
   def ToInfo(self,group):
     group.SetAttribute(Preset.NAME_ATTRIBUTE_NAME, self.name_)
-    for i in range(0,len(self.color_ops_)):
-      co_op_group = group.CreateGroup(Preset.COLOR_OP_GROUP_NAME)
-      co_op_group.SetAttribute(Preset.INDEX_ATTRIBUTE_NAME, str(i))
-      co_op_group.SetAttribute(Preset.CLASS_NAME_ATTRIBUTE_NAME, "%s"%(self.color_ops_[i].__class__.__name__))
-      self.color_ops_[i].ToInfo(co_op_group)
+    for i in range(0,len(self.ops_)):
+      op_group = group.CreateGroup(Preset.OP_GROUP_NAME)
+      op_group.SetAttribute(Preset.INDEX_ATTRIBUTE_NAME, str(i))
+      op_group.SetAttribute(Preset.CLASS_NAME_ATTRIBUTE_NAME, "%s"%(self.ops_[i].__class__.__name__))
+      self.ops_[i].ToInfo(op_group)
     
   @staticmethod
   def FromInfo(group):
@@ -84,23 +90,31 @@ class Preset():
     if group.HasAttribute(Preset.NAME_ATTRIBUTE_NAME):
       name = group.GetAttribute(Preset.NAME_ATTRIBUTE_NAME)
       preset = Preset(name)
-      group_list = group.GetGroups(Preset.COLOR_OP_GROUP_NAME)
+      group_list = group.GetGroups(Preset.OP_GROUP_NAME)
       
       class_order_dict = dict()
-      for co_group in group_list:
-        if(co_group.HasAttribute(Preset.CLASS_NAME_ATTRIBUTE_NAME) and co_group.HasAttribute(Preset.INDEX_ATTRIBUTE_NAME)):
-          class_name = co_group.GetAttribute(Preset.CLASS_NAME_ATTRIBUTE_NAME)
-          index = int(co_group.GetAttribute(Preset.INDEX_ATTRIBUTE_NAME))
-          color_op_class = Preset.__get_color_op_class("%s.%s"%(Preset.MODULE_NAME,class_name))
-          color_op = color_op_class.FromInfo(co_group)
-          class_order_dict[index]=color_op
+      for op_group in group_list:
+        if(op_group.HasAttribute(Preset.CLASS_NAME_ATTRIBUTE_NAME) and op_group.HasAttribute(Preset.INDEX_ATTRIBUTE_NAME)):
+          class_name = op_group.GetAttribute(Preset.CLASS_NAME_ATTRIBUTE_NAME)
+          index = int(op_group.GetAttribute(Preset.INDEX_ATTRIBUTE_NAME))
+          op_class = None
+          try:
+            op_class = Preset.__get_op_class("%s.%s"%(Preset.MODULE_NAME,class_name))
+          except AttributeError:
+            try:
+              op_class = Preset.__get_op_class("%s.%s"%(Preset.RENDERMODE_MODULE_NAME,class_name))
+            except:
+              print "op can not be loaded"
+          if op_class is not None:
+            op = op_class.FromInfo(op_group)
+            class_order_dict[index]=op
     for i in range(0, len(class_order_dict)):
       if(class_order_dict.has_key(i)):
-        preset.AddColorOp(class_order_dict[i])
+        preset.AddOp(class_order_dict[i])
     return preset
     
   @staticmethod
-  def __get_color_op_class( cls ):
+  def __get_op_class( cls ):
     parts = cls.split('.')
     module = ".".join(parts[:-1])
     m = __import__( module )

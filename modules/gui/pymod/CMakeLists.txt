@@ -41,6 +41,7 @@ preset_info_handler.py
 preset_list_model.py
 preset_widget.py
 render_mode_widget.py
+render_op.py
 render_options_widget.py
 scene_observer_impl.py
 simple_widget.py
