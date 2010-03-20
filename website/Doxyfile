@@ -100,7 +100,7 @@ FILE_PATTERNS          = *.hh \
                          *.py
 RECURSIVE              = YES
 EXCLUDE_SYMLINKS       = NO
-EXCLUDE_PATTERNS       = *CMakeFiles* *src* *pymod* *tests*
+EXCLUDE_PATTERNS       = *CMakeFiles* *src* *pymod* *tests* *impl*
 EXCLUDE_SYMBOLS        = 
 EXAMPLE_PATH           = ../examples
 EXAMPLE_PATTERNS       = *
