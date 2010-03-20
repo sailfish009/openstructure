@@ -28,7 +28,7 @@ def CreateClassIndex(ifile, ofile):
   if not doxrelpath.endswith('/'):
     doxrelpath=doxrelpath+'/'
   for link in Links(ifile):
-    m=re.search('(.*classost.*)',link.get('href'),re.I)
+    m=re.search('(.*class(ost|geom).*)',link.get('href'),re.I)
     if m:
       m2=re.search(r'class([^_]*)',m.group(0))
       if m2:
