@@ -64,8 +64,8 @@ public:
   bool RingsPerceived();
 
 private:
-  std::map<long int,bool> VisitNext(mol::AtomHandle &curr,
-                                    mol::AtomHandle &prev);
+  int VisitNext(mol::AtomHandle &curr, mol::AtomHandle &prev,
+                std::map<long int,bool> &ring_closings);
   mol::EntityHandle ent_;
   mol::EntityView ring_view_;
   bool rings_perceived_;

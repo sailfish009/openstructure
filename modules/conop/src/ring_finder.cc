@@ -31,7 +31,8 @@ namespace ost { namespace conop {
         if (! i->HasGenericProperty("RFvisited")) {
           // start ring search from each unvisited atom (e.g. if there are
           // multiple unconnected fragments)
-          VisitNext((*i), (*i));
+          std::map<long int,bool> ring_closings;
+          VisitNext((*i), (*i), ring_closings);
         }
       }
     }
@@ -83,11 +84,10 @@ namespace ost { namespace conop {
     return ring_view_;
   }
   
-  std::map<long int,bool> RingFinder::VisitNext(mol::AtomHandle &curr,
-                                            mol::AtomHandle &prev)
+  int RingFinder::VisitNext(mol::AtomHandle &curr, mol::AtomHandle &prev,
+                            std::map<long int,bool> &ring_closings)
   {
-    std::map<long int,bool> ring_closings; // map for atom hashcode
-
+    int num_rings_start=ring_closings.size();
     curr.SetGenericBoolProperty("RFvisited",true);
     mol::AtomHandleList bp=curr.GetBondPartners();
     for (mol::AtomHandleList::iterator i=bp.begin(); i!=bp.end(); ++i) {
@@ -107,20 +107,19 @@ namespace ost { namespace conop {
         b.SetGenericBoolProperty("RFinring", true);
       } else {
         // no ring yet - continue to next atom
-        std::map<long int,bool> next_ring_closings=VisitNext((*i),curr);
+        int num_found=VisitNext((*i),curr,ring_closings);
         // back from the recursion
-        if (next_ring_closings.size()>0) {
+        if (num_found>0) {
           b.SetGenericBoolProperty("RFinring", true);
-          ring_closings.insert(next_ring_closings.begin(),next_ring_closings.end());
         }
       }
     }
-    if (ring_closings.size()>0) {
+    if (ring_closings.size()-num_rings_start>0) {
       // if current atom is in the ring closing list, remove it
       curr.SetGenericBoolProperty("RFinring", true);
       ring_closings.erase(curr.GetHashCode());
     }
-    return ring_closings;
+    return ring_closings.size()-num_rings_start;
   }
 
 }}
