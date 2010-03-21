@@ -492,7 +492,7 @@ macro(ost_unittest MODULE SOURCE_FILES)
       if(WIN32)
         set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost.bat")
       else()
-        set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost.bat")
+        set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost")
       endif()
       add_custom_target("${py_test}_run"
                   COMMAND ${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo
