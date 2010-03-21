@@ -77,7 +77,8 @@ bool pdb_handler_is_responsible_for(const boost::filesystem::path& loc,
                                     const String& type) {
   if(type=="auto") {
     if(detail::FilenameEndsWith(loc.string(),".pdb") || detail::FilenameEndsWith(loc.string(),".ent") ||
-       detail::FilenameEndsWith(loc.string(),".pdb.gz") || detail::FilenameEndsWith(loc.string(),".par") ){
+       detail::FilenameEndsWith(loc.string(),".pdb.gz") || detail::FilenameEndsWith(loc.string(),".pqr") ||
+       detail::FilenameEndsWith(loc.string(),".ent.gz")){
       return true;
     }
 

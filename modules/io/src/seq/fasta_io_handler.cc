@@ -59,7 +59,7 @@ bool FastaIOHandler::ProvidesImport(const boost::filesystem::path& loc,
 
 
    if (detail::FilenameEndsWith(loc.string(),".fasta") || detail::FilenameEndsWith(loc.string(),".fa") ||
-       detail::FilenameEndsWith(loc.string(),".fnaa") || detail::FilenameEndsWith(loc.string(),".fsa") ||
+       detail::FilenameEndsWith(loc.string(),".fna") || detail::FilenameEndsWith(loc.string(),".fsa") ||
        detail::FilenameEndsWith(loc.string(),".fas") )  {
 	return true;
    }

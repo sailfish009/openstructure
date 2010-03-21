@@ -66,7 +66,7 @@ class DLLEXPORT_OST_IO MapIOSpiHandler: public MapIOHandler
   static bool MatchType(const ImageFormatBase& type);
   static bool MatchSuffix(const String& loc);
   static String GetFormatName() { return String("Spider"); };
-  static String GetFormatDescription() { return String("Format sued by the Spider software package"); };
+  static String GetFormatDescription() { return String("Format used by the Spider software package"); };
 
 protected:
   void do_import(img::MapHandle& sh, std::istream& loc,const ImageFormatBase& formatstruct);

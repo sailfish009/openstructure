@@ -905,6 +905,9 @@ void MapIOMrcHandler::Import(img::MapHandle& sh, const boost::filesystem::path& 
   }
   in.push(boost::iostreams::file_source(loc.string()));
   in.read(reinterpret_cast<char*>(&header_),256);
+  // seekg does not work on compressed streams
+  // the only way to rewind is closing and reopening the stream
+  // by popping out the file source and pushing it in again
   in.pop();
   in.push(boost::iostreams::file_source(loc.string()));
   is_file_=true;
@@ -941,7 +944,7 @@ void MapIOMrcHandler::Import(img::MapHandle& sh, std::istream& loc, const ImageF
      detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);
    } else {
 	 unsigned char header_content[256];
-	 memcpy(&header_content,&header_,256*sizeof(char));
+	 memcpy(&header_content[0],&header_,256*sizeof(char));
      if (MatchContent(header_content) == true) {
        LOGN_DEBUG("mrc io: importing new style format");
        detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);

@@ -20,11 +20,13 @@
 #ifndef OST_IO_UTIL_HH
 #define OST_IO_UTIL_HH
 
+#include <ost/io/module_config.hh>
 #include <ost/base.hh>
+
 
 namespace ost { namespace io { namespace detail {
 
-bool FilenameEndsWith(const String& target,const String& probe);
+bool DLLEXPORT_OST_IO FilenameEndsWith(const String& target,const String& probe);
 
 }}} // ns
 
