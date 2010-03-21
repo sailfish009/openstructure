@@ -72,6 +72,12 @@ bool compare_files(const String& test, const String& gold_standard)
   return true;
 }
 
+// The GfxView uses a std::map for efficient access to atoms. This however has 
+// implications for the POV export. In general we can't assume that the atoms 
+// are written in any particular order. That's why we first filter out all 
+// cylinder and sphere objects and sort them before we compare them against 
+// the gold standard. For the trace-based renderers this is no problem as we 
+// always get cylinders and spheres sorted form N- to C-term.
 bool compare_sphere_cyl_entries(const String& test, 
                                 const String& gold_standard)
 {
