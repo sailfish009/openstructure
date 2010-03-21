@@ -36,7 +36,7 @@ void DLLEXPORT_OST_IO SaveEntity(const mol::EntityView& en,
   EntityIOHandlerP ent_io=manager.FindEntityExportHandler(filename, format);
 
   if (!ent_io) {
-    throw IOException("No IO handler for file='"+filename+"', format='"+
+    throw IOUnknownFormatException("No IO handler for file='"+filename+"', format='"+
                       format+"' found.");
   }
   LOG_DUMP("calling export on entity io handle" << std::endl);

@@ -45,7 +45,7 @@ private:
   static void HandleError(Message m, gfx::GfxObjP obj);
   static gfx::GfxObjP TryLoadEntity(const QString& file_name, io::EntityIOHandlerP handler=io::EntityIOHandlerP());
 #if OST_IMG_ENABLED
-  static gfx::GfxObjP TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler=io::MapIOHandlerPtr()) throw(io::IOException);
+  static gfx::GfxObjP TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler=io::MapIOHandlerPtr()) throw(io::IOException,io::IOUnknownFormatException);
 #endif
   static gfx::GfxObjP TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler=io::SurfaceIOHandlerPtr());
   static void RunScript(const QString& filename);

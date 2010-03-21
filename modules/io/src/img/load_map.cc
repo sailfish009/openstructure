@@ -44,7 +44,7 @@ DLLEXPORT_OST_IO img::ImageHandle LoadImage(const boost::filesystem::path& loc, 
   MapIOHandlerPtr map_io = IOManager::Instance().FindMapImportHandlerFile(loc,formatstruct);
 
   if(!map_io) {
-    throw IOException("could not find io-plugin for " + loc.string());
+    throw IOUnknownFormatException("could not find io-plugin for " + loc.string());
   }
 
   img::ImageHandle ih = CreateImage(img::Extent(),img::REAL,img::SPATIAL);
@@ -70,7 +70,7 @@ DLLEXPORT_OST_IO void SaveImage(const img::ImageHandle& image, const boost::file
   MapIOHandlerPtr map_io = IOManager::Instance().FindMapExportHandlerFile(loc,formatstruct);
 
   if(!map_io) {
-    throw IOException("could not find io-plugin for " + loc.string());
+    throw IOUnknownFormatException("could not find io-plugin for " + loc.string());
   }
   LOG_DUMP("calling export on map io handle" << std::endl);
   map_io->Export(image, loc,formatstruct);

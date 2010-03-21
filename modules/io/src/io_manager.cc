@@ -77,7 +77,7 @@ EntityIOHandlerP IOManager::FindEntityImportHandler(const String& filename,
     }
   }
 
-  throw IOException("no suitable entity io handler found for "+filename);
+  throw IOUnknownFormatException("no suitable entity io handler found for "+filename);
 }
 
 EntityIOHandlerP IOManager::FindEntityExportHandler(const String& filename,
@@ -89,7 +89,7 @@ EntityIOHandlerP IOManager::FindEntityExportHandler(const String& filename,
       return (*it)->Create();
     }
   }
-  throw IOException("no suitable handler found for "+filename);
+  throw IOUnknownFormatException("no suitable handler found for "+filename);
 }
 
 SequenceIOHandlerPtr IOManager::FindAlignmentImportHandler(const String& filename,
@@ -100,7 +100,7 @@ SequenceIOHandlerPtr IOManager::FindAlignmentImportHandler(const String& filenam
       return (*it)->Create();
     }
   }
-  throw IOException("no suitable alignment io handler found for "+filename);
+  throw IOUnknownFormatException("no suitable alignment io handler found for "+filename);
 }
 
 SequenceIOHandlerPtr IOManager::FindAlignmentExportHandler(const String& filename,
@@ -112,7 +112,7 @@ SequenceIOHandlerPtr IOManager::FindAlignmentExportHandler(const String& filenam
       return (*it)->Create();
     }
   }
-  throw IOException("no suitable alignment io handler found for "+filename);
+  throw IOUnknownFormatException("no suitable alignment io handler found for "+filename);
 }
 
 SurfaceIOHandlerPtr IOManager::FindSurfaceImportHandler(const String& filename,
@@ -125,7 +125,7 @@ SurfaceIOHandlerPtr IOManager::FindSurfaceImportHandler(const String& filename,
     }
   }
 
-  throw IOException("no suitable surface io handler found for "+filename);
+  throw IOUnknownFormatException("no suitable surface io handler found for "+filename);
 }
 
 #if OST_IMG_ENABLED
@@ -138,7 +138,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
         return (*it)->Create();
       }
     }
-    throw IOException("Unsupported type in FindMapImportHandle.");
+    throw IOUnknownFormatException("Unsupported type in FindMapImportHandle.");
   }else{
 	String match_suf_string=loc.string();
 	std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
@@ -161,7 +161,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
         return (*it)->Create();
       }
     }
-    throw IOException("No file suffix given for " + loc.string()+", and could not detect automatically, please indicate file type.");
+    throw IOUnknownFormatException("No file suffix given for " + loc.string()+", and could not detect automatically, please indicate file type.");
   }
   return MapIOHandlerPtr();  // removes warning
 }
@@ -175,7 +175,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerStream(std::istream& stream,
         return (*it)->Create();;
       }
     }
-    throw IOException("Unsuspported type in FindMapImportHandle.");
+    throw IOUnknownFormatException("Unsuspported type in FindMapImportHandle.");
   }else{
     unsigned char header[256];
     stream.read(reinterpret_cast<char*>(&header),256);
@@ -186,7 +186,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerStream(std::istream& stream,
         return (*it)->Create();;
       }
     }
-    throw IOException("No type given for stream, and could not detect automatically, please indicate file type.");    
+    throw IOUnknownFormatException("No type given for stream, and could not detect automatically, please indicate file type.");
   }
   return MapIOHandlerPtr(); //removes warning
 }
@@ -200,12 +200,12 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerFile(const boost::filesystem::pat
         return (*it)->Create();
       }
     }
-    throw IOException("Unsupported type in FindMapExportHandle.");
+    throw IOUnknownFormatException("Unsupported type in FindMapExportHandle.");
   }else{
     String filename=loc.string();
     String::size_type pos = filename.rfind(".");
     if (pos == String::npos){
-      throw IOException("No file suffix given for " + filename+", please indicate file type.");
+      throw IOUnknownFormatException("No file suffix given for " + filename+", please indicate file type.");
     }
 	String match_suf_string=loc.string();
 	std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
@@ -214,7 +214,7 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerFile(const boost::filesystem::pat
         return(*it)->Create();
       }
     }
-    throw IOException("could not find io-plugin for " + filename);
+    throw IOUnknownFormatException("could not find io-plugin for " + filename);
   }
   return MapIOHandlerPtr(); // removes the warning
 }
@@ -227,9 +227,9 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerStream(std::istream& stream, cons
         return (*it)->Create();
       }
     }
-    throw IOException("Unsupported type in FindMapExportHandlerStream");
+    throw IOUnknownFormatException("Unsupported type in FindMapExportHandlerStream");
     } else {
-    throw IOException("No type given. Please indicate stream type");    
+    throw IOUnknownFormatException("No type given. Please indicate stream type");
   }
   return MapIOHandlerPtr(); // removes the warning
 }

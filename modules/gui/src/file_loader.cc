@@ -82,7 +82,7 @@ void FileLoader::LoadObject(const QString& file_name)
     if (!obj)  {
       try{
         obj=FileLoader::TryLoadMap(file_name);
-      } catch (io::IOException&) {
+      } catch (io::IOUnknownFormatException&) {
         return;
       }
     }
@@ -178,7 +178,7 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& file_name, io::EntityIOHan
     try{
       handler = io::IOManager::Instance().FindEntityImportHandler(file_name.toStdString());
     }
-    catch(io::IOException e){
+    catch(io::IOUnknownFormatException e){
       handler = io::EntityIOHandlerP();
     }
   }
@@ -211,13 +211,13 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& file_name, io::EntityIOHan
 }
 
 #if OST_IMG_ENABLED
-gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler) throw(io::IOException)
+gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler) throw(io::IOException,io::IOUnknownFormatException)
 {
   if(!handler){
     try{
       handler = io::IOManager::Instance().FindMapImportHandlerFile(filename.toStdString(),io::UndefinedImageFormat());
     }
-    catch(io::IOException e){
+    catch(io::IOUnknownFormatException e){
       handler = io::MapIOHandlerPtr();
     }
   }
@@ -258,7 +258,7 @@ gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHa
     try{
       handler = io::IOManager::Instance().FindSurfaceImportHandler(filename.toStdString(),"msms");
     }
-    catch(io::IOException e){
+    catch(io::IOUnknownFormatException e){
       handler = io::SurfaceIOHandlerPtr();
     }
   }
