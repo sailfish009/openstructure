@@ -45,7 +45,7 @@ public:
   
   virtual void Render(RenderPass pass);
   virtual ~SimpleRenderer();
-  
+  virtual void RenderPov(PovState& pov, const std::string& name);
   void BlurSnapshot();
 private:
   void RenderBlur();

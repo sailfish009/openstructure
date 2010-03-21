@@ -24,7 +24,7 @@
 #include <ost/gfx/gl_helper.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/entity.hh>
-
+#include <ost/gfx/povray.hh>
 #include "simple_renderer.hh"
 
 namespace ost { namespace gfx { namespace impl {
@@ -314,6 +314,30 @@ void SimpleRenderer::Render(RenderPass pass)
 SimpleRenderer::~SimpleRenderer() 
 {
 
+}
+
+void SimpleRenderer::RenderPov(PovState& pov, const std::string& name)
+{
+  pov.write_merge_or_union(name);
+  
+  for (AtomEntryMap::const_iterator it=view_.atom_map.begin();
+       it!=view_.atom_map.end();++it) {
+    pov.write_sphere(it->second.atom.GetPos(),
+                     options_->GetLineWidth()*0.05,
+                     it->second.color,
+                     name);
+  }
+
+  for(BondEntryList::const_iterator it=view_.bond_list.begin();it!=view_.bond_list.end();++it) {
+    const geom::Vec3& p0=it->bond.GetFirst().GetPos();
+    const geom::Vec3& p2=it->bond.GetSecond().GetPos();
+    geom::Vec3 p1=(p0+p2)*0.5;
+    pov.write_cyl(p0,p1,options_->GetLineWidth()*0.05,
+                  it->atom1->color,name,true);
+    pov.write_cyl(p1,p2,options_->GetLineWidth()*0.05,
+                  it->atom2->color,name,true);
+  }
+  pov.inc() << " }\n";
 }
 
 }}}
