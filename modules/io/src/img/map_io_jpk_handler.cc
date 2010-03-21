@@ -300,9 +300,9 @@ bool MapIOJpkHandler::MatchType(const ImageFormatBase& formatstruct)
   return false;
 }
 
-bool MapIOJpkHandler::MatchSuffix(const boost::filesystem::path& loc)
+bool MapIOJpkHandler::MatchSuffix(const String& loc)
 {
-    if(detail::FilenameEndsWith(loc.string(),".jpk") ) {
+    if(detail::FilenameEndsWith(loc,".jpk") ) {
       return true;
     }
     return false;

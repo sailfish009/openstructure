@@ -311,9 +311,9 @@ bool MapIOPngHandler::MatchType(const ImageFormatBase& type)
   }
   return false;
 }
-bool MapIOPngHandler::MatchSuffix(const boost::filesystem::path& loc)
+bool MapIOPngHandler::MatchSuffix(const String& loc)
 {
-    if(detail::FilenameEndsWith(loc.string(),".png") ) {
+    if(detail::FilenameEndsWith(loc,".png") ) {
       return true;
     }
     return false;

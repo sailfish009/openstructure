@@ -46,7 +46,7 @@ public:
   virtual ~MapIOHandlerFactoryBase() {}
   virtual bool MatchContent(unsigned char* header) const = 0;
   virtual bool MatchType(const ImageFormatBase& type) const = 0;
-  virtual bool MatchSuffix(const boost::filesystem::path& loc) const =0 ;
+  virtual bool MatchSuffix(const String& loc) const =0 ;
   virtual MapIOHandlerPtr Create() const = 0 ;
   virtual String GetFormatName() const =0;
   virtual String GetFormatDescription() const =0;
@@ -67,7 +67,7 @@ class MapIOHandlerFactory: public MapIOHandlerFactoryBase
     return HANDLER::MatchType(type);
   }
 
-  virtual bool MatchSuffix(const boost::filesystem::path& loc) const {
+  virtual bool MatchSuffix(const String& loc) const {
     return HANDLER::MatchSuffix(loc);
   }
 

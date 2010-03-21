@@ -427,9 +427,9 @@ bool MapIOTiffHandler::MatchType(const ImageFormatBase& type)
   return (type.GetFormatString()=="defined_tiff");
 }
 
-bool MapIOTiffHandler::MatchSuffix(const boost::filesystem::path& loc)
+bool MapIOTiffHandler::MatchSuffix(const String& loc)
 {
-  return (detail::FilenameEndsWith(loc.string(),".tif") || detail::FilenameEndsWith(loc.string(),".tiff") );
+  return (detail::FilenameEndsWith(loc,".tif") || detail::FilenameEndsWith(loc,".tiff") );
 }
 
 

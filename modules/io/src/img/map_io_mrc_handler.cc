@@ -1003,10 +1003,10 @@ bool MapIOMrcHandler::MatchType(const ImageFormatBase& type)
   return false;
 }
 
-bool MapIOMrcHandler::MatchSuffix(const boost::filesystem::path& loc)
+bool MapIOMrcHandler::MatchSuffix(const String& loc)
 {
-  if(detail::FilenameEndsWith(loc.string(),".mrc") || detail::FilenameEndsWith(loc.string(),".map") ||
-     detail::FilenameEndsWith(loc.string(),".ccp4") || detail::FilenameEndsWith(loc.string(),".map.gz")) {
+  if(detail::FilenameEndsWith(loc,".mrc") || detail::FilenameEndsWith(loc,".map") ||
+     detail::FilenameEndsWith(loc,".ccp4") || detail::FilenameEndsWith(loc,".map.gz")) {
      return true;
   }
   return false;

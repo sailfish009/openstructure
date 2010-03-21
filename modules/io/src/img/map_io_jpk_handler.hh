@@ -48,7 +48,7 @@ class DLLEXPORT_OST_IO MapIOJpkHandler: public MapIOTiffHandler
   void Export(const img::MapHandle& image, std::ostream& loc,const ImageFormatBase& formatstruct) const;
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
-  static bool MatchSuffix(const boost::filesystem::path& loc);
+  static bool MatchSuffix(const String& loc);
   static String GetFormatName() { return String("Jpk");}
   static String GetFormatDescription() { return String("Format used by JPK Instruments AG's software (Customized Tiff format)"); }
 

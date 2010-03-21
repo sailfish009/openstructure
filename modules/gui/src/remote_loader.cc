@@ -164,4 +164,3 @@ OST_REGISTER_WIDGET_WITH_DEFAULT_FACTORY(ost::gui, RemoteLoader, "Remote Loader"
 
 }}
 
-

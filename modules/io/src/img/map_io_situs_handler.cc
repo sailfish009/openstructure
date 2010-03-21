@@ -272,9 +272,9 @@ bool MapIOSitusHandler::MatchType(const ImageFormatBase& type)
   return false;
 }
 
-bool MapIOSitusHandler::MatchSuffix(const boost::filesystem::path& loc)
+bool MapIOSitusHandler::MatchSuffix(const String& loc)
 {
-  if(detail::FilenameEndsWith(loc.string(),".situs") || detail::FilenameEndsWith(loc.string(),".sit") ) {
+  if(detail::FilenameEndsWith(loc,".situs") || detail::FilenameEndsWith(loc,".sit") ) {
     return true;
   }
   return false;

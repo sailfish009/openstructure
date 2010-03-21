@@ -74,7 +74,7 @@ public:
   virtual void Export(const img::MapHandle& sh, std::ostream& loc,const ImageFormatBase& formatstruct) const;
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
-  static bool MatchSuffix(const boost::filesystem::path& loc);
+  static bool MatchSuffix(const String& loc);
   static String GetFormatName() { return String("Mrc"); };
   static String GetFormatDescription() { return String("Format used by the MRC software package"); };
 
