@@ -76,9 +76,11 @@ namespace {
 bool pdb_handler_is_responsible_for(const boost::filesystem::path& loc,
                                     const String& type) {
   if(type=="auto") {
-    if(detail::FilenameEndsWith(loc.string(),".pdb") || detail::FilenameEndsWith(loc.string(),".ent") ||
-       detail::FilenameEndsWith(loc.string(),".pdb.gz") || detail::FilenameEndsWith(loc.string(),".pqr") ||
-       detail::FilenameEndsWith(loc.string(),".ent.gz")){
+	String match_suf_string=loc.string();
+    std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
+    if(detail::FilenameEndsWith(match_suf_string,".pdb") || detail::FilenameEndsWith(match_suf_string,".ent") ||
+       detail::FilenameEndsWith(match_suf_string,".pdb.gz") || detail::FilenameEndsWith(match_suf_string,".pqr") ||
+       detail::FilenameEndsWith(match_suf_string,".ent.gz")){
       return true;
     }
 
