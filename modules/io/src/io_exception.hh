@@ -32,6 +32,12 @@ public:
     Error(m) {}
 };
 
+class IOUnknownFormatException: public Error {
+public:
+  IOUnknownFormatException(const String& m):
+    Error(m) {}
+};
+
 }} // ns
 
 #endif
