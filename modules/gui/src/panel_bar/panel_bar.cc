@@ -114,6 +114,7 @@ bool PanelBar::Save(const QString& prefix)
       settings.setArrayIndex(i);
       settings.setValue("class_name", widget_states_.at(i).name);
       settings.setValue("show", widget_states_.at(i).visible);
+      widget_states_.at(i).widget->Save(settings.group());
       ++index;
     }
   }
@@ -167,6 +168,13 @@ bool PanelBar::Restore(const QString& prefix)
     PanelWidgetContainer* pwc = modes[i]->data().value<PanelWidgetContainer*>();
     if(pwc){
       pwc->Restore(prefix);
+    }
+  }
+
+  for (int i = 0; i < widget_states_.size(); ++i) {
+    if (widget_states_.at(i).widget) {
+      QString path = prefix + "/items/" + QString::number(i+1);
+      widget_states_.at(i).widget->Restore(path);
     }
   }
   settings.endGroup();
