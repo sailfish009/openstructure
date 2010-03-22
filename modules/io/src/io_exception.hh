@@ -38,6 +38,12 @@ public:
     Error(m) {}
 };
 
+class IOFileAlreadyLoadedException: public Error {
+public:
+  IOFileAlreadyLoadedException(const String& m):
+    Error(m) {}
+};
+
 }} // ns
 
 #endif
