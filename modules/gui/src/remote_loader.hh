@@ -47,7 +47,7 @@ protected:
   virtual void keyPressEvent(QKeyEvent* event);
 private:
   void ShowProgressBar(bool visiblility);
-  void BuildMenu();
+  void BuildMenu(String active_loader=String());
 private slots:
   void Clicked();
   void UrlClick();
@@ -61,6 +61,7 @@ private:
   ActionList action_list_;
   QMenu* site_loader_menu_;
   QActionGroup* site_actions_;
+  String selected_site_loader_;
   bool img_support_;
 };
 

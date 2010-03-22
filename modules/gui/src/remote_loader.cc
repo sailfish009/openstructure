@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #include <vector>
 
+#include <QSettings>
 #include <QNetworkReply>
 #include <QHBoxLayout>
 #include <QDir>
@@ -79,11 +80,13 @@ void RemoteLoader::UrlClick()
   site_loader_menu_->exec(QCursor::pos());
 }
 
-void RemoteLoader::BuildMenu()
+void RemoteLoader::BuildMenu(String active_loader)
 {
-  String selected_site_loader;
-  if(site_actions_->checkedAction()!=NULL){
-    selected_site_loader=site_actions_->checkedAction()->text().toStdString();
+  if(active_loader.size()>0){
+    selected_site_loader_ = active_loader;
+  }
+  else if(site_actions_->checkedAction()!=NULL){
+    selected_site_loader_=site_actions_->checkedAction()->text().toStdString();
   }
   site_loader_menu_->clear();
   QList<QAction*> actions = site_actions_->actions();
@@ -98,7 +101,7 @@ void RemoteLoader::BuildMenu()
       QAction* action = new QAction(loader_ident,site_loader_menu_);
       action->setCheckable(true);
       site_actions_->addAction(action);
-      if(site_actions_->checkedAction()==NULL ||selected_site_loader==loader_ident.toStdString() ){
+      if(site_actions_->checkedAction()==NULL ||selected_site_loader_==loader_ident.toStdString() ){
         action->setChecked(true);
       }
       site_loader_menu_->addAction(action);
@@ -113,11 +116,21 @@ ActionList RemoteLoader::GetActions()
 
 bool RemoteLoader::Save(const QString& prefix)
 {
+  this->BuildMenu();
+  QSettings settings;
+  settings.beginGroup(prefix);
+  settings.setValue("loader", site_actions_->checkedAction()->text());
+  settings.endGroup();
   return true;
 }
 
 bool RemoteLoader::Restore(const QString& prefix)
 {
+  QSettings settings;
+  settings.beginGroup(prefix);
+  if (settings.contains("loader")) {
+    this->BuildMenu(settings.value("loader").toString().toStdString());
+  }
   return true;
 }
 
