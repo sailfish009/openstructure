@@ -37,12 +37,16 @@ Here is another example:
 In the same tokens, you can use 3 and 4-dimensional vectors. If you want to
 calculate the angle between two vectors, you can use the properties of the
 inner product: Calculating the inner product of two unit-length vectors is
-identical to the cosine of the angle between the two vectors.
+identical to the cosine of the angle between the two vectors. But the 'geom'
+library also offers a function to directly compute the Angle between two vectors.
+Here are examples of both approaches:
 
     :::python 
     # the standard python math module defines the pi constant and the acos function
     import math
     angle= math.acos(Normalize(c),Normalize(d))*180.0/math.pi
+    # computing the angle using the geom.Angle function
+    angle2=geom.Angle(c,d)
 
 ## Linear Transforms
 
@@ -52,11 +56,21 @@ Linear transforms, such as scaling and rotation of vectors, can be achieved easi
 
 Rotations are usually carried out using quaternions or rotation matrices. There
 are several helper classes in OpenStructure that encapsulate the logic of rotation.The
-'Rotation3' class represents a rotation in 3D space defined by 3 Euler angles.
+'Rotation3' class represents a rotation in 3D space defined by 3 Euler angles. Please
+notice that although the class requires to be initialized with radiants, one can use
+the Units function to express the value using any homogenous unit (for example, degrees)
+and the conversion will be done automatically. The Units function is available in all OpenStructure modules.
 
     :::python
     # define rotation around x axis by 180 degrees (PI radians)
-    rot=geom.Rotation3(math.pi,0,0) 
+    rot=geom.Rotation3(math.pi,0,0)
+    # define the same rotation explicitly using radiant units
+    # this is equivalent to the line above
+    rot=geom.Rotation3(math.pi*Units.rad,0,0)
+    # define the same rotation using angle units (again equivalent)
+    rot=geom.Rotation3(180.0*Units.deg,0,0)
+    rot=geom.Rotation3(math.pi)
+    # define the same rotation using the Units 
     v=geom.Vec3(0,1,0)
     # rotate v by rot
     print rot.GetRotationMatrix()*v
