@@ -544,14 +544,23 @@ class RenderOpWidget(QtGui.QDialog):
     
     render_label = QtGui.QLabel("Rendermode")
     self.render_modes_ = QtGui.QComboBox()
-    self.render_modes_.addItem("Fast Bonds",QtCore.QVariant(gfx.RenderMode.SIMPLE))
-    self.render_modes_.addItem("Ball & Stick",QtCore.QVariant(gfx.RenderMode.CUSTOM))
-    self.render_modes_.addItem("Spheres",QtCore.QVariant(gfx.RenderMode.CPK))
-    self.render_modes_.addItem("Fast Trace",QtCore.QVariant(gfx.RenderMode.LINE_TRACE))
-    self.render_modes_.addItem("Trace",QtCore.QVariant(gfx.RenderMode.TRACE))
-    self.render_modes_.addItem("Fast Spline",QtCore.QVariant(gfx.RenderMode.SLINE))
-    self.render_modes_.addItem("Smooth Tube",QtCore.QVariant(gfx.RenderMode.TUBE))
-    self.render_modes_.addItem("Helix & Strand Cartoon",QtCore.QVariant(gfx.RenderMode.HSC))
+    self.render_modes_.addItem("Fast Bonds")
+    self.render_modes_.addItem("Ball & Stick")
+    self.render_modes_.addItem("Spheres")
+    self.render_modes_.addItem("Fast Trace")
+    self.render_modes_.addItem("Trace")
+    self.render_modes_.addItem("Fast Spline")
+    self.render_modes_.addItem("Smooth Tube")
+    self.render_modes_.addItem("Helix & Strand Cartoon")
+    
+    self.render_modes_list_ = [gfx.RenderMode.SIMPLE,
+                               gfx.RenderMode.CUSTOM,
+                               gfx.RenderMode.CPK,
+                               gfx.RenderMode.LINE_TRACE,
+                               gfx.RenderMode.TRACE,
+                               gfx.RenderMode.SLINE,
+                               gfx.RenderMode.TUBE,
+                               gfx.RenderMode.HSC]
     
     self.hbox_ = QtGui.QHBoxLayout()
     self.ok_button_ = QtGui.QPushButton("OK")
@@ -576,15 +585,15 @@ class RenderOpWidget(QtGui.QDialog):
     
   def GetOp(self):
     selection = str(self.selection_edit_.text())
-    render_mode = self.render_modes_.itemData(self.render_modes_.currentIndex()).toPyObject()
-    ro = RenderOp(gfx.RenderMode(render_mode), selection, self.keep_.isChecked())
+    render_mode = self.render_modes_list_[self.render_modes_.currentIndex()]
+    ro = RenderOp(render_mode, selection, self.keep_.isChecked())
     return ro
 
   def SetOp(self, ro):
     self.selection_edit_.setText(ro.GetSelection())
     found=False
     for i in range(0,self.render_modes_.count()):
-      render_mode = self.render_modes_.itemData(i).toPyObject()
+      render_mode = self.render_modes_list_[i]
       if render_mode == ro.GetRenderMode():
         self.render_modes_.setCurrentIndex(i)
         found = True

@@ -26,7 +26,7 @@ class RenderOp():
   RENDERMODE_ATTRIBUTE_NAME = "RenderMode"
   KEEP_ATTRIBUTE_NAME = "Keep"
     
-  def __init__(self, render_mode, selection, keep=False):    
+  def __init__(self, render_mode, selection, keep=False):
     self.render_mode_ = render_mode
     self.selection_ = selection
     self.keep_ = keep
@@ -54,16 +54,16 @@ class RenderOp():
       entity.SetRenderMode(self.GetRenderMode(),entity.view.Select(self.GetSelection()),self.IsKept())
   
   def ToInfo(self,group):
-      group.SetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME, str(int(self.GetRenderMode())))
-      group.SetAttribute(RenderOp.KEEP_ATTRIBUTE_NAME, str(int(self.IsKept())))
-      group.SetTextData(str(self.GetSelection()))
+    group.SetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME, str(self.GetRenderMode().name))
+    group.SetAttribute(RenderOp.KEEP_ATTRIBUTE_NAME, str(int(self.IsKept())))
+    group.SetTextData(str(self.GetSelection()))
     
   @staticmethod
   def FromInfo(group):
     render_op = None
     if (group.HasAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME) 
     and  group.HasAttribute(RenderOp.KEEP_ATTRIBUTE_NAME)):
-      render_mode = gfx.RenderMode(int(group.GetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME)))
+      render_mode = getattr(gfx.RenderMode, group.GetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME))
       keep = bool(int(group.GetAttribute(RenderOp.KEEP_ATTRIBUTE_NAME)))
       selection = group.GetTextData()
       render_op = RenderOp(render_mode,selection,keep)

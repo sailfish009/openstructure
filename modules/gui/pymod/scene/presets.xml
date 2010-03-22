@@ -15,8 +15,8 @@
     <ColorOp>1 rtype!=ext,helix</ColorOp>1.0 0.8 0.2 1</Op>
   </Preset>
   <Preset Name="Highlight Ligand (Carbon)" >
-   <Op Keep="0" RenderMode="11" ClassName="RenderOp" Index="0" ></Op>
-   <Op Keep="0" RenderMode="5" ClassName="RenderOp" Index="1" >ishetatm=1 and not rname==HOH</Op>
+   <Op Keep="0" RenderMode="HSC" ClassName="RenderOp" Index="0" ></Op>
+   <Op Keep="0" RenderMode="CUSTOM" ClassName="RenderOp" Index="1" >ishetatm=1 and not rname==HOH</Op>
    <Op ClassName="ByElementColorOp" Index="2" >3 </Op>
    <Op ClassName="UniformColorOp" Index="3">
     <ColorOp>2 ishetatm=1 and ele=C</ColorOp>0     1       0       1</Op>
