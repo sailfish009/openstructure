@@ -27,6 +27,7 @@
 #include <Eigen/SVD>
 #include <Eigen/LU>
 
+#include <iostream>
 #include <ost/base.hh>
 #include <ost/geom/vec3.hh>
 #include <ost/mol/alg/svd_superpose.hh>
@@ -108,19 +109,54 @@ SuperposerSVD::SuperposerSVD(int natoms, bool alloc_atoms):
 }
 
 geom::Vec3 SuperposerSVD::EigenVec3ToVec3(const EVec3 &vec){
+#if  defined _MSC_VER
+  geom::Vec3 myvec3;
+  for (int i=0; i<3; ++i) {
+      myvec3[i]=vec[i]; 
+  }
+  return myvec3;
+#else
   return *reinterpret_cast<const geom::Vec3*>(&vec);
+#endif
 }
 
 geom::Mat3 SuperposerSVD::EigenMat3ToMat3(const EMat3 &mat){
+#if  defined _MSC_VER
+  geom::Mat3 mymat3;
+  for (int i=0; i<3; ++i) {
+    for (int j=0; j<3; ++j) {    
+      mymat3(j,i)=mat(i,j); 
+    }
+  }
+  return mymat3;
+#else
   return *reinterpret_cast<const geom::Mat3*>(&mat);
+#endif
+
 }
 
 EVec3 SuperposerSVD::Vec3ToEigenRVec(const geom::Vec3 &vec){
+#if  defined _MSC_VER
+  EVec3 myvec3=EVec3::Zero();
+  for (int counter=0; counter<3; ++counter) {
+    myvec3[counter]=vec[counter];
+  }
+  return myvec3;
+#else
   return *reinterpret_cast<const ERVec3*>(&vec);
+#endif
 }
 
 EVec3 SuperposerSVD::Vec3ToEigenVec(const geom::Vec3 &vec){
-  return *reinterpret_cast<const EVec3*>(&vec);
+#if  defined _MSC_VER
+  EVec3 myvec3=EVec3::Zero();
+  for (int counter=0; counter<3; ++counter) {
+    myvec3[counter]=vec[counter];
+  }
+  return myvec3;
+#else
+  return *reinterpret_cast<const EVec3*>(&vec);  
+#endif
 }
 
 EMatX SuperposerSVD::SubtractVecFromMatrixRows(EMatX Mat,
@@ -165,6 +201,7 @@ SuperpositionResult SuperposerSVD::DoSuperposition()
   atoms1_=this->SuperposerSVD::SubtractVecFromMatrixRows(atoms1_, avg1_);
   atoms2_=this->SuperposerSVD::SubtractVecFromMatrixRows(atoms2_, avg2_);
   EMatX atoms2=atoms2_.transpose();
+
   //single value decomposition
   Eigen::SVD<EMat3> svd(atoms2*atoms1_);
 
