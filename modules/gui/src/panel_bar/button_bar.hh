@@ -33,7 +33,7 @@
 namespace ost { namespace gui {
 
 /// \brief button box
-class ButtonBar : public Widget {
+class DLLEXPORT_OST_GUI ButtonBar : public Widget {
   Q_OBJECT
 public:
   ButtonBar(QWidget* parent=NULL);

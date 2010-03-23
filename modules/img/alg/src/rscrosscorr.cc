@@ -1,7 +1,29 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
 #include <ost/img/image_state.hh>
+#include <ost/img/alg/rscrosscorr.hh>
 
 namespace ost { namespace img { namespace alg {
-Real RealSpatialCrossCorrelation(const img::ConstImageHandle& image1, const img::ConstImageHandle& image2, const img::Extent& extent)
+
+Real RealSpatialCrossCorrelation(const ConstImageHandle& image1,
+                                 const ConstImageHandle& image2,
+                                 const Extent& extent)
 {
   img::Extent image1_overlap=Overlap(image1.GetExtent(),extent);
   img::Extent image2_overlap=Overlap(image2.GetExtent(),extent);
@@ -44,7 +66,8 @@ Real RealSpatialCrossCorrelation(const img::ConstImageHandle& image1, const img:
   }
 }
 
-Real RealSpatialCrossCorrelation(const img::ConstImageHandle& image1, const img::ConstImageHandle& image2)
+Real RealSpatialCrossCorrelation(const ConstImageHandle& image1,
+                                 const ConstImageHandle& image2)
 {
   return RealSpatialCrossCorrelation(image1, image2, image2.GetExtent());
 }

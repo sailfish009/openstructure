@@ -29,7 +29,7 @@ namespace ost {
 
 #if OST_PROFILING_ENABLED==0 || defined(WIN32)
 
-class Profile {
+class DLLEXPORT_OST_BASE Profile {
 public:
   Profile(const String&) {}
   ~Profile() {}
@@ -37,7 +37,7 @@ public:
 
 #else
 
-class Profile {
+class DLLEXPORT_OST_BASE Profile {
 public:
   Profile(const String& msg);
   ~Profile();
