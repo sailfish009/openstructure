@@ -93,8 +93,12 @@ bool WithinParam::HasValidRef() const {
 WithinParam::WithinParam()
   : center_(geom::Vec3(0,0,0)), radius_(0.0), lazily_bound_ref_(-1) {
 }
+
 bool WithinParam::operator==(const WithinParam& p) const {
-  return center_ == p.center_ && p.radius_==radius_;
+  if (lazily_bound_ref_>-1) {
+    return lazily_bound_ref_==p.lazily_bound_ref_ && p.radius_==radius_;
+  }
+  return center_==p.center_;
 }
 
 float WithinParam::GetRadiusSquare() const {

@@ -988,7 +988,7 @@ Node* QueryImpl::ParseWithinExpr(QueryLexer& lexer) {
     // index of the query for later access.
     QueryImplP q(new QueryImpl(rhs));
     bracketed_expr_.push_back(q);
-    ParamType pt(WithinParam(bracketed_expr_.size()-1, rv*rv));
+    ParamType pt(WithinParam(bracketed_expr_.size()-1, rv*rv));    
     inversion_stack_.pop_back();    
     CompOP comp_op= COP_LE;
     if (inversion_stack_.back())
