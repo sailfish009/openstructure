@@ -33,7 +33,7 @@
 
 namespace ost { namespace img { namespace alg {
 
-class DLLEXPORT_IMG_ALG CustomTransformerException: public Error {
+class DLLEXPORT CustomTransformerException: public Error {
 public:
   virtual ~CustomTransformerException() throw() {}
   CustomTransformerException(const String& s):

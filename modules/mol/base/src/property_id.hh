@@ -86,7 +86,7 @@ Prop::ID DLLEXPORT_OST_MOL PropertyIDFromString(const String& prop);
 Prop DLLEXPORT_OST_MOL PropertyFromString(const String& prop);
 
 
-struct DLLEXPORT_OST_MOL PropertyError: public std::exception
+struct DLLEXPORT PropertyError: public std::exception
 {
   PropertyError(ost::mol::Prop::ID prop):
     prop_(prop)

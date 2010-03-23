@@ -33,19 +33,19 @@ namespace geom {
   code may choose to catch exceptions from
   the geom library undifferentiatedly
 */
-class DLLEXPORT_OST_GEOM GeomException: public std::runtime_error {
+class DLLEXPORT GeomException: public std::runtime_error {
 public:
   GeomException(const String& m):
     std::runtime_error(m) {}
 };
 
-class DLLEXPORT_OST_GEOM DivideByZeroException: public GeomException {
+class DLLEXPORT DivideByZeroException: public GeomException {
 public:
   DivideByZeroException(const String& m="Divide By Zero"):
     GeomException(m) {}
 };
 
-class DLLEXPORT_OST_GEOM OutOfRangeException: public GeomException {
+class DLLEXPORT OutOfRangeException: public GeomException {
 public:
   OutOfRangeException(const String& m="Out Of Range"):
     GeomException(m) {}

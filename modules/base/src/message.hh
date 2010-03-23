@@ -31,7 +31,7 @@
 
 namespace ost {
 
-struct DLLEXPORT_OST_BASE Message: public std::exception {
+struct DLLEXPORT Message: public std::exception {
   Message(const String& mesg,const String& prefix=""):
     _prefix(prefix), _mesg(mesg) {}
   virtual ~Message() throw() {}
@@ -45,7 +45,7 @@ struct DLLEXPORT_OST_BASE Message: public std::exception {
   String _mesg;
 };
 
-struct DLLEXPORT_OST_BASE Error: public Message {
+struct DLLEXPORT Error: public Message {
   Error(const String& m): Message(m,"Error") {}
 };
 

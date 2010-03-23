@@ -81,7 +81,7 @@ private:
   sqlite3_stmt* statement_;
 };
 
-class DLLEXPORT_OST_DB DatabaseError : public Error {
+class DLLEXPORT DatabaseError : public Error {
 public:
   DatabaseError(const String& msg):
     Error(msg)

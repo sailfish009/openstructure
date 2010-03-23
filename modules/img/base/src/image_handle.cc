@@ -43,10 +43,6 @@
 
 namespace ost { namespace img {
 
-InvalidImageHandle::InvalidImageHandle():
-  Error("Attempt to use invalid ImageHandle")
-{}
-
 // ImageHandle
 
 // construction/deconstruction/assignement

@@ -72,9 +72,9 @@ class ModOPAlgorithm;
 class ConstModOPAlgorithm;
 
 //! Exception thrown upon invalid image handle usage
-class DLLEXPORT_OST_IMG_BASE InvalidImageHandle: public Error {
+class DLLEXPORT InvalidImageHandle: public Error {
 public:
-  InvalidImageHandle();
+  InvalidImageHandle(): Error("Attempt to use invalid ImageHandle") {}
 };
 
 // fw

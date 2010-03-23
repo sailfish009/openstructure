@@ -22,14 +22,14 @@
 #define OST_PTR_OBSERVER_HH
 
 #include <ost/message.hh>
-
+#include <ost/module_config.hh>
 /*
   ptr observer concept
 
   Author: Ansgar Philippsen
 */
 
-class DLLEXPORT InvalidatedPointer: public ost::Error {
+class DLLEXPORT_OST_BASE InvalidatedPointer: public ost::Error {
 public:
   InvalidatedPointer():
     ost::Error("access attempt on invalidated Pointer")
@@ -37,7 +37,7 @@ public:
 };
 
 template <class T>
-class DLLEXPORT PtrObserver {
+class TEMPLATE_EXPORT PtrObserver {
 public:
   PtrObserver(T* t):
     observed_(t),

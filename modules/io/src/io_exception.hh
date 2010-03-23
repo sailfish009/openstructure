@@ -26,19 +26,19 @@
 
 namespace ost { namespace io {
 
-class IOException: public Error {
+class DLLEXPORT IOException: public Error {
 public:
   IOException(const String& m):
     Error(m) {}
 };
 
-class IOUnknownFormatException: public Error {
+class DLLEXPORT IOUnknownFormatException: public Error {
 public:
   IOUnknownFormatException(const String& m):
     Error(m) {}
 };
 
-class IOFileAlreadyLoadedException: public Error {
+class DLLEXPORT IOFileAlreadyLoadedException: public Error {
 public:
   IOFileAlreadyLoadedException(const String& m):
     Error(m) {}

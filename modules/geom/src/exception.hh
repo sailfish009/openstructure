@@ -19,13 +19,12 @@
 #ifndef GEOM_EXCEPTION_HH
 #define GEOM_EXCEPTION_HH
 
-#include <ost/message.hh>
 #include <string>
 #include <ost/message.hh>
 
 namespace geom {
 
-class GeomException: public Error
+class DLLEXPORT GeomException: public Error
 {
 public:
   GeomException(const String& m):

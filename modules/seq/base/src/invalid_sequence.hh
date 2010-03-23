@@ -25,14 +25,14 @@
 #include <ost/seq/module_config.hh>
 namespace ost { namespace seq {
 
-class DLLEXPORT_OST_SEQ InvalidSequence : public Error {
+class DLLEXPORT InvalidSequence : public Error {
 public:
   InvalidSequence()
     : Error("Sequence String contains illegal characters. Must "
                          "be one of [A-Za-z?-].") { }
 };
 
-class DLLEXPORT_OST_SEQ InvalidAlignment : public Error {
+class DLLEXPORT InvalidAlignment : public Error {
 public:
   InvalidAlignment()
     : Error("Sequences have different lengths") { }

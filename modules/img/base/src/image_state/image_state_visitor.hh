@@ -32,7 +32,7 @@
 namespace ost { namespace img { namespace image_state {
 
 //! ImageStateVisitor general exception
-class DLLEXPORT_OST_IMG_BASE InvalidImageStateVisitor: public Error {
+class DLLEXPORT InvalidImageStateVisitor: public Error {
 public:
   InvalidImageStateVisitor(const String& m): Error(m) {}
 };

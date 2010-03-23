@@ -35,7 +35,7 @@
 
 namespace ost { namespace img { namespace image_state { 
 
-class DispatchException: public Error {
+class DLLEXPORT DispatchException: public Error {
 public:
   DispatchException(const String& m):
     Error(m)

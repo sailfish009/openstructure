@@ -26,10 +26,11 @@
 #ifndef OST_INFO_ERROR_HH
 #define OST_INFO_ERROR_HH
 
-#include <ost/message.hh>
-
 #include <ost/base.hh>
 #include <ost/message.hh>
+#include <ost/info/module_config.hh>
+
+
 
 namespace ost { namespace info {
 

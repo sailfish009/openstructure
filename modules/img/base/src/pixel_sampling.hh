@@ -38,7 +38,7 @@ namespace ost { namespace img {
 class Extent;
 class Point;
 
-class DLLEXPORT_OST_IMG_BASE InvalidSampling: public Error {
+class DLLEXPORT InvalidSampling: public Error {
 public:
   InvalidSampling():
     Error("invalid sampling value used, must be >0")

@@ -27,12 +27,10 @@
 #include <ost/img/image_state.hh>
 #include <ost/img/image_state/image_state_algorithm.hh>
 #include <ost/img/value_util.hh>
-#include <ost/message.hh>
-
 
 namespace ost { namespace img { namespace alg {
 
-struct FFTException: public Error {
+struct DLLEXPORT FFTException: public Error {
   FFTException(const String& m): Error(m) {}
 };
 
