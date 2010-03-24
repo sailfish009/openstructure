@@ -59,7 +59,27 @@ def _SetupFiles(entity, selection):
   tmp_file_handle.close()
   
   return (tmp_dir_name, tmp_file_name)
+## \brief Reads Area file (-af) and attach sasa and sesa per atom to an entitiy
+#
+# \param entity   EntityHandle or EntityView for attaching sasa and sesa on atom level
+# \param file     Filename of area file
+# \param property Name of the float property
+# \exception RuntimeError if number of atoms in file != number of atoms in entity 
 
+def _ParseAreaFile(entity,file, property):
+    area_fh = open(file)
+    area_lines = area_fh.readlines()
+    area_fh.close()
+    # shift first line
+    area_lines = area_lines[1:]
+    if entity.GetAtomCount() != len(area_lines):
+        raise RuntimeError, "Atom count (%d) unequeal to number of atoms in area file (%d)" % (entity.GetAtomCount(), len(area_lines))
+    for l in area_lines:
+        atom_no, sesa, sasa = l.split()
+        a = entity.atoms[int(atom_no)] 
+        a.SetGenericFloatProperty(property, float(sasa))
+    
+    
 ## \brief Method which recursively deletes a directory
 #
 # \warning This method removes also non-empty directories without asking, so
@@ -109,7 +129,8 @@ def _RunMSMS(command):
 # \return              Touplet of lists for (SES, SAS)
 def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
                          no_hydrogens=False, selection="",
-                         msms_exe=None, msms_env=None, keep_files=False):
+                         msms_exe=None, msms_env=None, keep_files=False, 
+                         attach_asa = None):
   import re 
 
   # check if msms executable is specified
@@ -127,10 +148,15 @@ def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
           (msms_executable, msms_data_file, msms_data_file, density, radius)
   if all_surf:
     command+=" -all"
-
+  if attach_asa != None:
+      command+=" -af %s" % os.path.join(msms_data_dir, "asa_atom")
   # run msms
   stdout_value=_RunMSMS(command)
-
+  
+  # add sesa and asa to entity if attach_asa is specified
+  if attach_asa != None:
+      _ParseAreaFile(entity, os.path.join(msms_data_dir, "asa_atom.area"), attach_asa)
+  
   # parse MSMS output
   msms_ases=[]
   msms_asas=[]
@@ -185,7 +211,7 @@ def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
     selection+=" and ele!=H"
 
   # setup files for msms
-  print selection
+  
   (msms_data_dir, msms_data_file)=_SetupFiles(entity, selection)
 
   # set command line
