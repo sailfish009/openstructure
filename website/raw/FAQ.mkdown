@@ -19,3 +19,10 @@ The python glob module can be used to match files in a certain directory against
     pdbs=[]
     for pdb_file in glob.glob(os.path.join(dir_path, '*.pdb')):
       pdbs.append(io.LoadPDB(os.path.join(dir_path, pdb_file)))
+
+**How do I load a crappy PDB file?**
+
+The easiest way is to use the `fault_tolerant` option of LoadPDB. If you set the value to true, it will load the structure and just skip erroneus records:
+
+    ::::python
+    ent=io.LoadPDB('pdb_with_errors.pdb', fault_tolerant=True)
