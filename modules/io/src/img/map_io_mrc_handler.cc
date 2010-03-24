@@ -903,17 +903,23 @@ void MapIOMrcHandler::Import(img::MapHandle& sh, const boost::filesystem::path& 
   if (detail::FilenameEndsWith(loc.string(),".map.gz")) {
     in.push(boost::iostreams::gzip_decompressor());
   }
-  in.push(boost::iostreams::file_source(loc.string()));
+  in.push(infile);
   in.read(reinterpret_cast<char*>(&header_),256);
   // seekg does not work on compressed streams
   // the only way to rewind is closing and reopening the stream
   // by popping out the file source and pushing it in again
   in.pop();
-  in.push(boost::iostreams::file_source(loc.string()));
+  infile.close();
+  boost::filesystem::ifstream infile2(loc, std::ios::binary);
+  if(!infile2)
+  {
+    throw IOException("could not open "+loc.string());
+  }
+  in.push(infile2);
   is_file_=true;
   filename_=loc.string();
   this->Import(sh,in,formatstruct);
-  infile.close();
+  infile2.close();
 }
 
 void MapIOMrcHandler::Import(img::MapHandle& sh, std::istream& loc, const ImageFormatBase& formatstruct)
