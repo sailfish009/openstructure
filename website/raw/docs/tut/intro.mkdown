@@ -35,9 +35,9 @@ Now we will enter commands in the [python shell](docs/tut/pythonshell.html) (in 
 
     ::::python
     # get list of methods of EntityView
-    help(EntityView)
+    help(mol.EntityView)
     # get help for method Select
-    help(EntityView.Select)
+    help(mol.EntityView.Select)
     
 ## Loading and inspecting a protein structure
 
