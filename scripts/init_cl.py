@@ -4,7 +4,7 @@ if platform.machine()=='x86_64':
 else:
   sys.path.insert(0,os.getenv('DNG_ROOT')+'/lib/openstructure')
      
-from ost import io, mol, seq, gfx, conop
+from ost import io, mol, seq, gfx, conop, geom
 import ost
 try: 
   from ost import img

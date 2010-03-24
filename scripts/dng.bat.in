@@ -26,6 +26,6 @@ set BIN_DIR=%~dp0
 echo Starting DNG in %BIN_DIR%
 
 set DNG_ROOT=%BIN_DIR%\..
-set PATH=%BIN_DIR%;%DNG_ROOT%\lib\Release;%DNG_ROOT%\lib;%DNG_ROOT%\bin\Release;%PATH%
-REM type %DNG_ROOT%\lib\openstructure\init.py | %BIN_DIR%@BUILD_TYPE@\gosty.exe ost %*
-type "%DNG_ROOT%\lib\openstructure\init.py" | "%BIN_DIR%Release\gosty.exe" ost %*
+set PATH=%BIN_DIR%;%DNG_ROOT%\@LIBDIR@\Release;%DNG_ROOT%\@LIBDIR@;%DNG_ROOT%\bin\Release;%PATH%
+REM type %DNG_ROOT%\@LIBDIR@\openstructure\init.py | %BIN_DIR%@BUILD_TYPE@\gosty.exe ost %*
+type "%DNG_ROOT%\@LIBDIR@\openstructure\init.py" | "%BIN_DIR%Release\gosty.exe" ost %*

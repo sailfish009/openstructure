@@ -26,8 +26,8 @@ SCRIPT_NAME=$0
 BIN_DIR=`dirname "$SCRIPT_NAME"`
 export DNG_ROOT="$BIN_DIR/.."
 export PATH=$PATH:"$BIN_DIR"
-export DYLD_FRAMEWORK_PATH="$BIN_DIR/../lib:${DYLD_FRAMEWORK_PATH}"
-export DYLD_LIBRARY_PATH="$BIN_DIR/../lib:${DYLD_LIBRARY_PATH}"
+export DYLD_FRAMEWORK_PATH="$BIN_DIR/../@LIBDIR@:${DYLD_FRAMEWORK_PATH}"
+export DYLD_LIBRARY_PATH="$BIN_DIR/../@LIBDIR@:${DYLD_LIBRARY_PATH}"
 # set ld_library_path and pythonhome for bundle (commented except in linux bundles)
 
 #export LD_LIBRARY_PATH=$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH
@@ -70,7 +70,7 @@ else
 fi
 # finally pass control to python instance
 IFS="#"
-exec $pyexec $interactive "$DNG_ROOT/lib/openstructure/init_cl.py" $opts
+exec $pyexec $interactive "$DNG_ROOT/@LIBDIR@/openstructure/init_cl.py" $opts
 IFS=$' \t\n'
 
 

@@ -35,4 +35,4 @@ export PATH=$BIN_DIR:$PATH
 # line. If the HERE documnt is fed directly into gosty, the backtrace shows the 
 # full command in case of a segfault which is very confusing and not helpful 
 # at all
-cat $DNG_ROOT/lib/openstructure/init_img.py| gosty img $@
+cat $DNG_ROOT/@LIBDIR@/openstructure/init_img.py| gosty img $@
