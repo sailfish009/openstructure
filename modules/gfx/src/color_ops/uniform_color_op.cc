@@ -41,6 +41,17 @@ UniformColorOp::UniformColorOp(const String& selection, int mask,
   ColorOp(selection,mask), color_(color){
 }
 
+UniformColorOp::UniformColorOp(const mol::QueryViewWrapper& query_view,
+                               const gfx::Color& color):
+  ColorOp(query_view), color_(color){
+
+}
+
+UniformColorOp::UniformColorOp(const mol::QueryViewWrapper& query_view,
+                               int mask, const gfx::Color& color):
+  ColorOp(query_view,mask), color_(color){
+}
+
 bool UniformColorOp::CanApplyTo(const GfxObjP& obj) const
 {
   return dynamic_cast<Entity*>(obj.get()) || dynamic_cast<Surface*>(obj.get());

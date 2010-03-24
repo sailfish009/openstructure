@@ -71,7 +71,7 @@ mol::EntityView SceneSelection::GetActiveView(unsigned int pos) const{
     return views_[pos].GetEntityView();
   }
   else{
-    throw Error("Index out of bounds: There is no active vies at the given position");
+    throw Error("Index out of bounds: There is no active view at the given position");
   }
 }
 

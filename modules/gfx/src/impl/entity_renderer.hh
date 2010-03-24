@@ -27,11 +27,16 @@
 
 #include <ost/mol/query_view_wrapper.hh>
 #include <ost/mol/entity_view.hh>
+#include <ost/mol/atom_handle.hh>
+#include <ost/mol/entity_property_mapper.hh>
 
+#include <ost/gfx/color.hh>
+#include <ost/gfx/gfx_object.hh>
 #include <ost/gfx/module_config.hh>
 #include <ost/gfx/render_pass.hh>
 #include <ost/gfx/vertex_array.hh>
 #include <ost/gfx/render_options/render_options.hh>
+#include <ost/gfx/impl/mapped_property.hh>
 
 #include <ost/gfx/color_ops/color_op.hh>
 #include <ost/gfx/color_ops/by_element_color_op.hh>
@@ -168,6 +173,82 @@ protected:
   DirtyFlags            sel_state_;
   DirtyFlags            state_;
 };
+
+//Simplify color ops
+struct ByElementGetCol {
+  Color ColorOfAtom(mol::AtomHandle& atom) const{
+    return GfxObj::Ele2Color(atom.GetProp().element);
+  }
+};
+
+struct ByChainGetCol {
+  ByChainGetCol(const ByChainColorOp& op):op_(op){}
+  Color ColorOfAtom(mol::AtomHandle& atom) const{
+    return op_.GetColor(atom.GetResidue().GetChain().GetName());
+  }
+  const ByChainColorOp& op_;
+};
+
+struct UniformGetCol {
+  UniformGetCol(const Color& col):col_(col){ }
+  Color ColorOfAtom(mol::AtomHandle& atom) const{
+    return col_;
+  }
+  const Color& col_;
+};
+
+struct GradientLevelGetCol {
+  GradientLevelGetCol(const GradientLevelColorOp& op):property_(op.GetProperty()),
+      epm_(property_, op.GetLevel()),
+      gradient_(op.GetGradient()),
+      minv_(op.GetMinV()),
+      maxv_(op.GetMaxV()){}
+  Color ColorOfAtom(mol::AtomHandle& atom) const{
+    try{
+      float n=Normalize(epm_.Get(atom), minv_, maxv_);
+      return gradient_.GetColorAt(n);
+    }catch(std::exception&){
+      LOGN_DEBUG("property " << property_ << " not found");
+      return Color();
+    }
+  }
+  String property_;
+  mol::EntityPropertyMapper epm_;
+  Gradient gradient_;
+  float minv_, maxv_;
+};
+
+struct EntityViewGetCol {
+  EntityViewGetCol(const EntityViewColorOp& op):property_(op.GetProperty()),
+      ev_(op.GetEntityView()),
+      gradient_(op.GetGradient()),
+      minv_(op.GetMinV()),
+      maxv_(op.GetMaxV()){}
+  Color ColorOfAtom(mol::AtomHandle& atom) const{
+    return MappedProperty(ev_,property_,gradient_,minv_,maxv_,atom.GetPos());
+  }
+  String property_;
+  mol::EntityView ev_;
+  Gradient gradient_;
+  float minv_, maxv_;
+};
+
+#if OST_IMG_ENABLED
+struct MapHandleGetCol {
+  MapHandleGetCol(const MapHandleColorOp& op):property_(op.GetProperty()),
+      mh_(op.GetMapHandle()),
+      gradient_(op.GetGradient()),
+      minv_(op.GetMinV()),
+      maxv_(op.GetMaxV()){}
+  Color ColorOfAtom(mol::AtomHandle& atom) const{
+    return MappedProperty(mh_,property_,gradient_,minv_,maxv_,atom.GetPos());
+  }
+  String property_;
+  img::MapHandle mh_;
+  Gradient gradient_;
+  float minv_, maxv_;
+};
+#endif
 
 }}} //ns
 

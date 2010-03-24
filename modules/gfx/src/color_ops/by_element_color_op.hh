@@ -36,9 +36,8 @@ class DLLEXPORT_OST_GFX ByElementColorOp: public ColorOp {
 public:
   ByElementColorOp();
 
-  ByElementColorOp(const String& selection);
-
-  ByElementColorOp(const String& selection, int mask);
+  ByElementColorOp(const mol::QueryViewWrapper& query_view, int mask=DETAIL_COLOR|MAIN_COLOR);
+  ByElementColorOp(const String& selection, int mask=DETAIL_COLOR|MAIN_COLOR);
 
 
   virtual bool CanApplyTo(const GfxObjP& obj) const;

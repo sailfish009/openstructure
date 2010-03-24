@@ -52,6 +52,20 @@ public:
   GradientLevelColorOp(const String& selection, int mask, const String& property, const gfx::Gradient& gradient,
                        mol::Prop::Level level=mol::Prop::UNSPECIFIED);
 
+  GradientLevelColorOp(const mol::QueryViewWrapper& query_view, const String& property, const gfx::Gradient& gradient,
+                       float minv, float maxv,
+                       mol::Prop::Level level=mol::Prop::UNSPECIFIED);
+
+  GradientLevelColorOp(const mol::QueryViewWrapper& query_view, int mask, const String& property, const gfx::Gradient& gradient,
+                       float minv, float maxv,
+                       mol::Prop::Level level=mol::Prop::UNSPECIFIED);
+
+  GradientLevelColorOp(const mol::QueryViewWrapper& query_view, const String& property, const gfx::Gradient& gradient,
+                       mol::Prop::Level level=mol::Prop::UNSPECIFIED);
+
+  GradientLevelColorOp(const mol::QueryViewWrapper& query_view, int mask, const String& property, const gfx::Gradient& gradient,
+                       mol::Prop::Level level=mol::Prop::UNSPECIFIED);
+
   virtual bool CanApplyTo(const GfxObjP& obj) const;
   virtual void ApplyTo(GfxObjP& obj) const;
 

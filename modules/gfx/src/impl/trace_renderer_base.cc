@@ -17,15 +17,55 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <ost/mol/entity_property_mapper.hh>
 #include <ost/gfx/scene.hh>
-
-#include "mapped_property.hh"
 
 #include "trace_renderer_base.hh"
 
 
 namespace ost { namespace gfx { namespace impl {
+
+namespace {
+
+void set_node_entry_color(NodeEntry& e, ColorMask mask,
+                                             const Color& c)
+{
+  if (mask & MAIN_COLOR) e.color1=c;
+  if (mask & DETAIL_COLOR) e.color2=c;
+}
+
+template <typename T1>
+inline void apply_color_op(TraceRendererBase* rend, TraceSubset& trace_subset, T1 get_col, const ColorOp& op)
+{
+  rend->UpdateViews();
+  ColorMask mask = op.GetMask();
+  if(op.IsSelectionOnly()){
+    mol::Query q(op.GetSelection());
+    for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
+      NodeListSubset& nl=trace_subset[node_list];
+      for (int i=0; i<nl.GetSize();++i) {
+        if (q.IsAtomSelected(nl[i].atom)) {
+          Color clr =get_col.ColorOfAtom(nl[i].atom);
+          set_node_entry_color(nl[i],mask,clr);
+        }
+      }
+    }
+  }
+  else{
+    mol::EntityView view = op.GetView();
+    for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
+      NodeListSubset& nl=trace_subset[node_list];
+      for (int i=0; i<nl.GetSize();++i) {
+        if(view.FindAtom(nl[i].atom)){
+          Color clr =get_col.ColorOfAtom(nl[i].atom);
+          set_node_entry_color(nl[i],mask,clr);
+        }
+      }
+    }
+  }
+};
+
+
+} //ns
 
 TraceRendererBase::TraceRendererBase(BackboneTrace& trace, int n):
   trace_(trace), trace_subset_(trace, n), sel_subset_(trace, n)
@@ -80,90 +120,32 @@ geom::AlignedCuboid TraceRendererBase::GetBoundingBox() const
 
 void TraceRendererBase::Apply(const gfx::ByElementColorOp& op)
 {
-  this->UpdateViews();
-  mol::Query q(op.GetSelection());
-  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
-    NodeListSubset& nl=trace_subset_[node_list];
-    for (int i=0; i<nl.GetSize();++i) {
-      if (q.IsAtomSelected(nl[i].atom)) {
-        Color clr=GfxObj::Ele2Color(nl[i].atom.GetProp().element);
-        this->set_node_entry_color(nl[i], op.GetMask(), clr);
-      }
-    } 
-  }  
+  apply_color_op(this,trace_subset_,ByElementGetCol(),op);
   state_|=DIRTY_VA;
 }
 
 void TraceRendererBase::Apply(const gfx::ByChainColorOp& op)
 {
-  this->UpdateViews();
-  mol::Query q(op.GetSelection());
-  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
-    NodeListSubset& nl=trace_subset_[node_list];
-    for (int i=0; i<nl.GetSize();++i) {
-      if (q.IsAtomSelected(nl[i].atom)) {
-        Color clr =op.GetColor(nl[i].atom.GetResidue().GetChain().GetName());
-        this->set_node_entry_color(nl[i],op.GetMask(),clr);
-      }
-    }
-  }
+  apply_color_op(this,trace_subset_,ByChainGetCol(op),op);
   state_|=DIRTY_VA;
 }
 
 
 void TraceRendererBase::Apply(const gfx::UniformColorOp& op)
 {
-  this->UpdateViews();  
-  mol::Query q(op.GetSelection());
-  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
-    NodeListSubset& nl=trace_subset_[node_list];
-    for (int i=0; i<nl.GetSize();++i) {
-      if (q.IsAtomSelected(nl[i].atom)) {
-        this->set_node_entry_color(nl[i], op.GetMask(), op.GetColor());
-      }
-    }
-  }
+  apply_color_op(this,trace_subset_,UniformGetCol(op.GetColor()),op);
   state_|=DIRTY_VA;
 }
 
 void TraceRendererBase::Apply(const gfx::GradientLevelColorOp& op)
 {
-  this->UpdateViews();
-  mol::Query q(op.GetSelection());
-  mol::EntityPropertyMapper epm(op.GetProperty(), op.GetLevel());
-  gfx::Gradient gradient = op.GetGradient();  
-  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
-    NodeListSubset& nl=trace_subset_[node_list];
-    for (int i=0; i<nl.GetSize();++i) {
-      try {
-        if (q.IsAtomSelected(nl[i].atom)) {
-          float n=Normalize(epm.Get(nl[i].atom), op.GetMinV(), op.GetMaxV());
-          this->set_node_entry_color(nl[i], op.GetMask(), gradient.GetColorAt(n));
-        }
-      } catch (std::exception&) {
-        LOGN_DEBUG("property " << op.GetProperty() << " not found");
-      }
-    }
-  }
+  apply_color_op(this,trace_subset_,GradientLevelGetCol(op),op);
   state_|=DIRTY_VA;
 }
 
 void TraceRendererBase::Apply(const gfx::EntityViewColorOp& op)
 {
-  this->UpdateViews();
-  mol::EntityView ev = op.GetEntityView();
-  gfx::Gradient g = op.GetGradient();
-  const String prop = op.GetProperty();
-  float minv = op.GetMinV();
-  float maxv = op.GetMaxV();  
-  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
-    NodeListSubset& nl=trace_subset_[node_list];
-    for (int i=0; i<nl.GetSize();++i) {
-        Color clr=MappedProperty(ev,prop,g,minv,maxv,
-                                 nl[i].atom.GetPos());      
-        this->set_node_entry_color(nl[i], op.GetMask(), clr);
-    }
-  }
+  apply_color_op(this,trace_subset_,EntityViewGetCol(op),op);
   state_|=DIRTY_VA;
 }
 
@@ -237,19 +219,7 @@ void TraceRendererBase::PickBond(const geom::Line3& line, Real line_width,
 #if OST_IMG_ENABLED
 void TraceRendererBase::Apply(const gfx::MapHandleColorOp& op)
 {
-  this->UpdateViews();  
-  img::MapHandle mh = op.GetMapHandle();
-  gfx::Gradient g = op.GetGradient();
-  const String& prop = op.GetProperty();
-  float minv = op.GetMinV();
-  float maxv = op.GetMaxV();  
-  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
-    NodeListSubset& nl=trace_subset_[node_list];
-    for (int i=0; i<nl.GetSize();++i) {
-      set_node_entry_color(nl[i], 0xff, MappedProperty(mh,prop,g,minv,maxv,
-                                                       nl[i].atom.GetPos()));
-    }
-  }
+  apply_color_op(this,trace_subset_,MapHandleGetCol(op),op);
   state_|=DIRTY_VA;
 }
 #endif

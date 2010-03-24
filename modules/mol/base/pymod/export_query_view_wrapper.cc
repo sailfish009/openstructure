@@ -19,22 +19,30 @@
 #include <boost/python.hpp>
 using namespace boost::python;
 
-#include <ost/gui/scene_selection.hh>
-#include <ost/gfx/gfx_node.hh>
+#include <ost/mol/entity_view.hh>
+#include <ost/mol/query.hh>
+#include <ost/mol/query_view_wrapper.hh>
+
 
 using namespace ost;
-using namespace ost::gui;
+using namespace ost::mol;
 
-void export_SceneSelection()
+void export_QueryViewWrapper()
 {
-  class_<SceneSelection, boost::noncopyable>("SceneSelection",no_init)
-    .def("Instance", &SceneSelection::Instance,
-     return_value_policy<reference_existing_object>()).staticmethod("Instance")
-    .def("GetActiveNodeCount",&SceneSelection::GetActiveNodeCount)
-    .def("GetActiveNode",&SceneSelection::GetActiveNode)
-    .def("GetViewEntity", &SceneSelection::GetViewEntity)
-    .def("GetActiveViewCount", &SceneSelection::GetActiveViewCount)
-    .def("GetActiveView", &SceneSelection::GetActiveView)
-    .def("GetViewUnion", &SceneSelection::GetViewUnion)
-    ;
+  class_<QueryViewWrapper>("QueryViewWrapper", init<>())
+    .def(init<const EntityHandle&>())
+    .def(init<const EntityView&>())
+    .def(init<const Query&, const EntityHandle&>())
+    .def(init<const Query&, const EntityView&>())
+    .def("GetEntityView",&QueryViewWrapper::GetEntityView)
+    .def("DependsOnQuery",&QueryViewWrapper::DependsOnQuery)
+    .def("IsDataValid", &QueryViewWrapper::IsDataValid)
+    .def("SetQuery", &QueryViewWrapper::SetQuery)
+    .def("GetQuery", &QueryViewWrapper::GetQuery
+        ,return_value_policy<copy_const_reference>())
+    .add_property("entity_view", &QueryViewWrapper::GetEntityView)
+    .add_property("query", make_function(&QueryViewWrapper::GetQuery
+        ,return_value_policy<copy_const_reference>()))
+  ;
+
 }

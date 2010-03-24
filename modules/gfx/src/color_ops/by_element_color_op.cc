@@ -27,9 +27,9 @@ namespace ost { namespace gfx {
 
 ByElementColorOp::ByElementColorOp() : ColorOp(){}
 
-ByElementColorOp::ByElementColorOp(const String& selection) : ColorOp(selection){}
-
 ByElementColorOp::ByElementColorOp(const String& selection, int mask) : ColorOp(selection,mask){}
+
+ByElementColorOp::ByElementColorOp(const mol::QueryViewWrapper& query_view, int mask) : ColorOp(query_view,mask){}
 
 bool ByElementColorOp::CanApplyTo(const GfxObjP& obj) const{
   if(dynamic_cast<Entity*>(obj.get()))

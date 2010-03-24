@@ -37,13 +37,16 @@ public:
   GradientColorOp();
   GradientColorOp(const String& selection, const String& property, const gfx::Gradient& gradient,
                   float minv, float maxv);
-
   GradientColorOp(const String& selection, int mask, const String& property, const gfx::Gradient& gradient,
                     float minv, float maxv);
-
   GradientColorOp(const String& selection, const String& property, const gfx::Gradient& gradient);
-
   GradientColorOp(const String& selection, int mask, const String& property, const gfx::Gradient& gradient);
+  GradientColorOp(const mol::QueryViewWrapper& query_view, const String& property, const gfx::Gradient& gradient,
+                  float minv, float maxv);
+  GradientColorOp(const mol::QueryViewWrapper& query_view, int mask, const String& property, const gfx::Gradient& gradient,
+                    float minv, float maxv);
+  GradientColorOp(const mol::QueryViewWrapper& query_view, const String& property, const gfx::Gradient& gradient);
+  GradientColorOp(const mol::QueryViewWrapper& query_view, int mask, const String& property, const gfx::Gradient& gradient);
 
   virtual void SetProperty(const String& property);
   virtual String GetProperty() const;

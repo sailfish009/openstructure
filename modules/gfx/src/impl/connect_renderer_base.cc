@@ -20,12 +20,7 @@
 /*
   Authors: Ansgar Philippsen, Marco Biasini
  */
-#include <ost/mol/mol.hh>
-
-#include <ost/mol/entity_property_mapper.hh>
-
 #include <ost/gfx/scene.hh>
-#include <ost/gfx/impl/mapped_property.hh>
 #include <ost/gfx/impl/connect_renderer_base.hh>
 
 namespace ost { namespace gfx { namespace impl {
@@ -135,6 +130,32 @@ private:
   bool af_,bf_;
 };
 
+template <typename T1>
+inline void apply_color_op(ConnectRendererBase* rend, GfxView* v, T1 get_col, const ColorOp& op)
+{
+  if ((op.GetMask() & MAIN_COLOR)==0) {
+    return;
+  }
+  rend->UpdateViews();
+  if(op.IsSelectionOnly()){
+    mol::Query q(op.GetSelection());
+    for (AtomEntryMap::iterator it=v->atom_map.begin();
+         it!=v->atom_map.end();++it) {
+      if (q.IsAtomSelected(it->second.atom)) {
+        it->second.color=get_col.ColorOfAtom(it->second.atom);
+      }
+    }
+  }
+  else{
+    mol::EntityView view = op.GetView();
+    for(AtomEntryMap::iterator it=v->atom_map.begin();it!=v->atom_map.end();++it){
+      if(view.FindAtom(it->second.atom)){
+        it->second.color=get_col.ColorOfAtom(it->second.atom);
+      }
+    }
+  }
+};
+
 } // anon ns
   
 ConnectRendererBase::ConnectRendererBase(): pick_radius_(0.0)
@@ -193,108 +214,38 @@ geom::AlignedCuboid ConnectRendererBase::GetBoundingBox() const
 
 void ConnectRendererBase::Apply(const gfx::ByElementColorOp& op)
 {
-  if ((op.GetMask() & MAIN_COLOR)==0) {
-    return;
-  }  
-  this->UpdateViews();
-  mol::Query q(op.GetSelection());
-  for (AtomEntryMap::iterator it=view_.atom_map.begin();
-       it!=view_.atom_map.end();++it) {
-    if (q.IsAtomSelected(it->second.atom)) {
-      it->second.color=GfxObj::Ele2Color(it->second.atom.GetProp().element);
-    }
-  }
+  apply_color_op(this,&view_,ByElementGetCol(),op);
   state_|=DIRTY_VA;
 }
 
 void ConnectRendererBase::Apply(const gfx::ByChainColorOp& op)
 {
-  if ((op.GetMask() & MAIN_COLOR)==0) {
-    return;
-  }
-  this->UpdateViews();
-  mol::Query q(op.GetSelection());
-  for (AtomEntryMap::iterator it=view_.atom_map.begin();
-       it!=view_.atom_map.end();++it) {
-    if (q.IsAtomSelected(it->second.atom)) {
-      it->second.color=op.GetColor(it->second.atom.GetResidue().GetChain().GetName());
-    }
-  }
+  apply_color_op(this,&view_,ByChainGetCol(op),op);
   state_|=DIRTY_VA;
 }
 
 void ConnectRendererBase::Apply(const gfx::UniformColorOp& op)
 {
-  if ((op.GetMask() & MAIN_COLOR)==0) {
-    return;
-  }  
-  this->UpdateViews();
-  mol::Query q(op.GetSelection());
-  for (AtomEntryMap::iterator it=view_.atom_map.begin();
-       it!=view_.atom_map.end();++it) {
-    if (q.IsAtomSelected(it->second.atom)) {
-      it->second.color=op.GetColor();
-    }
-  }
+  apply_color_op(this,&view_,UniformGetCol(op.GetColor()),op);
   state_|=DIRTY_VA;
 }
 
 void ConnectRendererBase::Apply(const gfx::GradientLevelColorOp& op)
 {
-  if ((op.GetMask() & MAIN_COLOR)==0) {
-    return;
-  }  
-  this->UpdateViews();
-  mol::EntityPropertyMapper epm(op.GetProperty(), op.GetLevel());
-  gfx::Gradient gradient = op.GetGradient();  
-  for (AtomEntryMap::iterator it=view_.atom_map.begin();
-       it!=view_.atom_map.end();++it) {
-    try {
-      float n=Normalize(epm.Get(it->second.atom), op.GetMinV(), op.GetMaxV());
-      it->second.color=gradient.GetColorAt(n);
-    } catch (std::exception&) {
-      LOGN_DEBUG("property " << op.GetProperty() << " not found");
-    }
-  }
-  state_|=DIRTY_VA;  
+  apply_color_op(this,&view_,GradientLevelGetCol(op),op);
+  state_|=DIRTY_VA;
 }
 
 void ConnectRendererBase::Apply(const gfx::EntityViewColorOp& op)
 {
-  if ((op.GetMask() & MAIN_COLOR)==0) {
-    return;
-  }  
-  this->UpdateViews();  
-  mol::EntityView ev = op.GetEntityView();
-  gfx::Gradient g = op.GetGradient();
-  const String prop = op.GetProperty();
-  float minv = op.GetMinV();
-  float maxv = op.GetMaxV();  
-  for (AtomEntryMap::iterator it=view_.atom_map.begin();
-       it!=view_.atom_map.end();++it) {
-    it->second.color = MappedProperty(ev,prop,g,minv,maxv,
-                                      it->second.atom.GetPos());
-  }
+  apply_color_op(this,&view_,EntityViewGetCol(op),op);
   state_|=DIRTY_VA;
 }
 
 #if OST_IMG_ENABLED
 void ConnectRendererBase::Apply(const gfx::MapHandleColorOp& op)
 {
-  if ((op.GetMask() & MAIN_COLOR)==0) {
-    return;
-  }  
-  this->UpdateViews();  
-  img::MapHandle mh = op.GetMapHandle();
-  gfx::Gradient g = op.GetGradient();
-  const String& prop = op.GetProperty();
-  float minv = op.GetMinV();
-  float maxv = op.GetMaxV();    
-  for (AtomEntryMap::iterator it=view_.atom_map.begin();
-       it!=view_.atom_map.end();++it) {
-    it->second.color=MappedProperty(mh,prop,g,minv,maxv,
-                                    it->second.atom.GetPos());
-  }
+  apply_color_op(this,&view_,MapHandleGetCol(op),op);
   state_|=DIRTY_VA;
 }
 #endif

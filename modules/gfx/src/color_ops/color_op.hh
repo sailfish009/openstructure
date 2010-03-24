@@ -20,6 +20,9 @@
 #define OST_COLOR_OPS_COLOR_OP_HH
 
 #include <string>
+
+#include <ost/mol/query_view_wrapper.hh>
+
 #include <ost/gfx/gfx_object_fw.hh>
 #include <ost/gfx/module_config.hh>
 
@@ -33,8 +36,8 @@
 namespace ost { namespace gfx {
 
 typedef enum {
-  DETAIL_COLOR =1,
-  MAIN_COLOR   =2
+  DETAIL_COLOR = 1,
+  MAIN_COLOR = 2
 } ColorBit;
 
 typedef unsigned char ColorMask;
@@ -44,6 +47,7 @@ public:
   ColorOp();
   virtual ~ColorOp() {}
   ColorOp(const String& selection, int mask=DETAIL_COLOR|MAIN_COLOR);
+  ColorOp(const mol::QueryViewWrapper& query_view, int mask=DETAIL_COLOR|MAIN_COLOR);
   virtual bool CanApplyTo(const GfxObjP& obj) const;
   virtual void ApplyTo(GfxObjP& obj) const;
 
@@ -54,10 +58,15 @@ public:
   virtual void SetSelection(const String& selection);
   virtual String GetSelection() const;
 
+  virtual bool IsSelectionOnly() const;
+  virtual void SetView(const mol::EntityView& view);
+  virtual mol::EntityView GetView() const;
+
   virtual void ToInfo(info::InfoGroup& group) const;
   static gfx::ColorOp FromInfo(info::InfoGroup& group);
 private:
-  String    selection_;
+  mol::QueryViewWrapper query_view_;
+  mol::EntityView view_;
   ColorMask mask_;
 };
 

@@ -143,7 +143,19 @@ class PresetWidget(QtGui.QWidget):
   def ChangeColor(self,node):
     self.LoadCurrentIndex()
   
+  def Update(self):
+    self.setEnabled(True)
+    scene_selection = gui.SceneSelection.Instance()
+    if scene_selection.GetActiveNodeCount() == 0:
+      self.setEnabled(False)
+      return
     
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      entity = scene_selection.GetActiveNode(i)
+      if not isinstance(scene_selection.GetActiveNode(i), gfx.Entity):
+        self.setEnabled(False)
+        return
+
   def Rename(self):
     if(self.list_view_.currentIndex().isValid()):
       self.list_view_.edit(self.list_view_.currentIndex())

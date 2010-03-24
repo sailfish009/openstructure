@@ -63,6 +63,39 @@ GradientLevelColorOp::GradientLevelColorOp(const String& selection, int mask,
 
 }
 
+GradientLevelColorOp::GradientLevelColorOp(const mol::QueryViewWrapper& query_view,
+                                            const String& property,
+                                            const gfx::Gradient& gradient,
+                                            float minv,
+                                            float maxv, mol::Prop::Level level):
+  GradientColorOp(query_view, property, gradient, minv, maxv), level_(level){
+
+}
+
+GradientLevelColorOp::GradientLevelColorOp(const mol::QueryViewWrapper& query_view, int mask,
+                                            const String& property,
+                                            const gfx::Gradient& gradient,
+                                            float minv,
+                                            float maxv, mol::Prop::Level level):
+  GradientColorOp(query_view, mask, property, gradient, minv, maxv), level_(level){
+
+}
+
+GradientLevelColorOp::GradientLevelColorOp(const mol::QueryViewWrapper& query_view,
+                                            const String& property,
+                                            const gfx::Gradient& gradient,
+                                            mol::Prop::Level level):
+  GradientColorOp(query_view, property, gradient), level_(level){
+
+}
+
+GradientLevelColorOp::GradientLevelColorOp(const mol::QueryViewWrapper& query_view, int mask,
+                                            const String& property,
+                                            const gfx::Gradient& gradient,
+                                            mol::Prop::Level level):
+  GradientColorOp(query_view, mask, property, gradient), level_(level){
+
+}
 
 bool GradientLevelColorOp::CanApplyTo(const GfxObjP& obj) const{
   if(dynamic_cast<Entity*>(obj.get()))

@@ -22,6 +22,12 @@
 
 namespace ost { namespace mol {
 
+QueryViewWrapper::QueryViewWrapper():
+        view_set_(false),
+        entity_handle_(),
+        entity_view_(),
+        query_(){}
+
 QueryViewWrapper::QueryViewWrapper(const EntityHandle& entity_handle):
     view_set_(false),
     entity_handle_(entity_handle),
@@ -55,8 +61,26 @@ EntityView QueryViewWrapper::GetEntityView() const
   if(view_set_) {
     return query_.MatchAll() ? entity_view_ : entity_view_.Select(query_);
   } else {
-    return entity_handle_.Select(query_);
+    if(entity_handle_.IsValid()){
+      return entity_handle_.Select(query_);
+    }
+    return entity_view_;
   }
+}
+
+const Query& QueryViewWrapper::GetQuery() const{
+  return query_;
+}
+
+void QueryViewWrapper::SetQuery(const Query& query){
+  query_ = query;
+}
+
+bool QueryViewWrapper::IsDataValid() const{
+  if(view_set_){
+    return entity_view_.IsValid();
+  }
+  return entity_handle_.IsValid();
 }
 
 bool QueryViewWrapper::DependsOnQuery() const

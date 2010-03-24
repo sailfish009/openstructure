@@ -21,14 +21,17 @@
 
 namespace ost { namespace gfx {
 
-ColorOp::ColorOp(): selection_(), mask_(DETAIL_COLOR|MAIN_COLOR) 
+ColorOp::ColorOp(): query_view_(), mask_(DETAIL_COLOR|MAIN_COLOR)
 { }
 
 
 ColorOp::ColorOp(const String& selection, int mask):
-  selection_(selection), mask_(mask)
+    query_view_(mol::Query(selection),mol::EntityView() ), mask_(mask)
 { }
 
+ColorOp::ColorOp(const mol::QueryViewWrapper& query_view, int mask):
+    query_view_(query_view), mask_(mask)
+{ }
 
 bool ColorOp::CanApplyTo(const GfxObjP& obj) const
 {
@@ -42,18 +45,33 @@ void ColorOp::ApplyTo(GfxObjP& obj) const
 
 void ColorOp::SetSelection(const String& selection)
 {
-  selection_ = selection;
+  query_view_.SetQuery(selection);
 }
 
 String ColorOp::GetSelection() const
 {
-  return selection_;
+  return query_view_.GetQuery().GetQueryString();
+}
+
+bool ColorOp::IsSelectionOnly() const
+{
+  return !query_view_.IsDataValid();
+}
+
+mol::EntityView ColorOp::GetView() const
+{
+  return query_view_.GetEntityView();
+}
+
+void ColorOp::SetView(const mol::EntityView& view)
+{
+  query_view_ = mol::QueryViewWrapper(query_view_.GetQuery(),view);
 }
 
 void ColorOp::ToInfo(info::InfoGroup& group) const
 {
   std::ostringstream ss;
-  ss << (int)mask_ << "\t" << selection_;
+  ss << (int)mask_ << "\t" << query_view_.GetQuery().GetQueryString();
   group.SetTextData(ss.str());
 }
 

@@ -85,6 +85,7 @@ install(FILES ${PRESET_FILES} DESTINATION "share/openstructure/scene")
 
 set(INSPECTOR_ICONS
   scene/icons/color_icon.png
+  scene/icons/preset_icon.png  
   scene/icons/render_icon.png
   scene/icons/tool_icon.png
 )

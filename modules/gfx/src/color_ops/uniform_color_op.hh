@@ -36,6 +36,8 @@ namespace ost { namespace gfx {
 class DLLEXPORT_OST_GFX UniformColorOp: public ColorOp {
 public:
   UniformColorOp();
+  UniformColorOp(const mol::QueryViewWrapper& query_view, const gfx::Color& color);
+  UniformColorOp(const mol::QueryViewWrapper& query_view, int mask, const gfx::Color& color);
   UniformColorOp(const String& selection, const gfx::Color& color);
   UniformColorOp(const String& selection, int mask, const gfx::Color& color);
 

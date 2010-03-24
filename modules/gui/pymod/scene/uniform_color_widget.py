@@ -20,6 +20,7 @@
 
 from ost import gui
 from ost import gfx
+from ost import mol
 from PyQt4 import QtCore, QtGui
 from color_select_widget import ColorSelectWidget
 
@@ -60,15 +61,27 @@ class UniformColorWidget(QtGui.QWidget):
     for i in range(0,scene_selection.GetActiveNodeCount()):
       node = scene_selection.GetActiveNode(i)
       self.ChangeColor(node)
-
+      
+    if(scene_selection.GetActiveViewCount() > 0):
+      entity = scene_selection.GetViewEntity()
+      view = scene_selection.GetViewUnion()
+      self.ChangeViewColor(entity,view)
+        
   def ChangeColor(self, node):
-    color = self.color_select_widget_.GetColor()
-    gfxColor = gfx.Color(color.redF(), 
-                       color.greenF(),
-                       color.blueF())
     if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
+      gfx_color = self.GetGfxColor()
       node.CleanColorOps()
-      node.SetColor(gfxColor,"")
+      node.SetColor(gfx_color,"")
+  
+  def ChangeViewColor(self, entity, view):
+    if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
+      gfx_color = self.GetGfxColor()
+      ufco=gfx.UniformColorOp(mol.QueryViewWrapper(view),gfx_color)
+      entity.Apply(ufco)
+  
+  def GetGfxColor(self):
+    color = self.color_select_widget_.GetColor()
+    return gfx.Color(color.redF(), color.greenF(), color.blueF())
   
   def resizeEvent(self, event):
     self.color_select_widget_.SetSize(self.width()/2,self.height()/2)

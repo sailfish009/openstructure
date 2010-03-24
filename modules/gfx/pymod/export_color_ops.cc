@@ -41,6 +41,7 @@ using namespace ost::gfx;
 void export_ColorOps()
 {
   class_<ColorOp>("ColorOp", init<const String& >())
+    .def(init<const mol::QueryViewWrapper&, int>())
     .def("CanApplyTo",&ColorOp::CanApplyTo)
     .def("SetSelection",&ColorOp::SetSelection)
     .def("GetSelection",&ColorOp::GetSelection)
@@ -61,27 +62,39 @@ void export_ColorOps()
   ;
 
   class_<ByElementColorOp, bases<ColorOp> >("ByElementColorOp", init<>())
+    .def(init<const String&>())
+    .def(init<const mol::QueryViewWrapper&>())
     .def(init<const String&, int>())
+    .def(init<const mol::QueryViewWrapper&, int>())
     .def("FromInfo",&ByElementColorOp::FromInfo)
     .staticmethod("FromInfo")
   ;
 
   class_<ByChainColorOp, bases<ColorOp> >("ByChainColorOp", init<>())
+    .def(init<const String&>())
+    .def(init<const mol::QueryViewWrapper&>())
     .def(init<const String&, int>())
+    .def(init<const mol::QueryViewWrapper&, int>())
     .def("FromInfo",&ByChainColorOp::FromInfo)
     .staticmethod("FromInfo")
   ;
 
-  class_<UniformColorOp, bases<ColorOp> >("UniformColorOp", init<const String&, const gfx::Color&>())
+  class_<UniformColorOp, bases<ColorOp> >("UniformColorOp", init<>())
+    .def(init<const String&, const gfx::Color&>())
     .def(init<const String&, int, const gfx::Color&>())
+    .def(init<const mol::QueryViewWrapper&, const gfx::Color&>())
+    .def(init<const mol::QueryViewWrapper&, int, const gfx::Color&>())
     .def("SetColor",&UniformColorOp::SetColor)
     .def("GetColor",&UniformColorOp::GetColor)
     .def("FromInfo",&UniformColorOp::FromInfo)
     .staticmethod("FromInfo")
   ;
 
-  class_<GradientColorOp, bases<ColorOp> >("GradientColorOp", init<const String&, const String&, const gfx::Gradient&, float, float>())
+  class_<GradientColorOp, bases<ColorOp> >("GradientColorOp", init<>())
+    .def(init<const String&, const String&, const gfx::Gradient&, float, float>())
     .def(init<const String&, int, const String&, const gfx::Gradient&, float, float>())
+    .def(init<const mol::QueryViewWrapper&, const String&, const gfx::Gradient&, float, float>())
+    .def(init<const mol::QueryViewWrapper&, int, const String&, const gfx::Gradient&, float, float>())
     .def("SetProperty",&GradientColorOp::SetProperty)
     .def("GetProperty",&GradientColorOp::GetProperty)
     .def("SetGradient",&GradientColorOp::SetGradient)
@@ -95,10 +108,15 @@ void export_ColorOps()
     .staticmethod("FromInfo")
   ;
 
-  class_<GradientLevelColorOp, bases<GradientColorOp> >("GradientLevelColorOp", init<const String&, const String&, const gfx::Gradient&, float, float, mol::Prop::Level>())
+  class_<GradientLevelColorOp, bases<GradientColorOp> >("GradientLevelColorOp", init<>())
+    .def(init<const String&, const String&, const gfx::Gradient&, float, float, mol::Prop::Level>())
     .def(init<const String&, int, const String&, const gfx::Gradient&, float, float, mol::Prop::Level>())
     .def(init<const String&, const String&, const gfx::Gradient&, mol::Prop::Level>())
     .def(init<const String&, int, const String&, const gfx::Gradient&, mol::Prop::Level>())
+    .def(init<const mol::QueryViewWrapper&, const String&, const gfx::Gradient&, float, float, mol::Prop::Level>())
+    .def(init<const mol::QueryViewWrapper&, int, const String&, const gfx::Gradient&, float, float, mol::Prop::Level>())
+    .def(init<const mol::QueryViewWrapper&, const String&, const gfx::Gradient&, mol::Prop::Level>())
+    .def(init<const mol::QueryViewWrapper&, int, const String&, const gfx::Gradient&, mol::Prop::Level>())
     .def("SetLevel",&GradientLevelColorOp::SetLevel)
     .def("GetLevel",&GradientLevelColorOp::GetLevel)
     .def("FromInfo",&GradientLevelColorOp::FromInfo)
@@ -106,19 +124,23 @@ void export_ColorOps()
   ;
 
 
-  class_<EntityViewColorOp, bases<GradientColorOp> >("EntityViewColorOp", init<const String&, const gfx::Gradient&, float, float, const mol::EntityView&>())
+  class_<EntityViewColorOp, bases<GradientColorOp> >("EntityViewColorOp", init<>())
+    .def(init<const String&, const gfx::Gradient&, float, float, const mol::EntityView&>())
     .def(init<int, const String&, const gfx::Gradient&, float, float, const mol::EntityView&>())
     .def("SetEntityView",&EntityViewColorOp::SetEntityView)
-    //.def("GetEntityView",&EntityViewColorOp::GetEntityView)
+    .def("GetEntityView",&EntityViewColorOp::GetEntityView,return_value_policy<copy_const_reference>())
     .def("FromInfo",&EntityViewColorOp::FromInfo)
     .staticmethod("FromInfo")
   ;
 
 #if OST_IMG_ENABLED
-  class_<MapHandleColorOp, bases<GradientColorOp> >("MapHandleColorOp", init<const String&, const String&, const gfx::Gradient&, float, float, const img::MapHandle&>())
+  class_<MapHandleColorOp, bases<GradientColorOp> >("MapHandleColorOp", init<>())
+    .def(init<const String&, const String&, const gfx::Gradient&, float, float, const img::MapHandle&>())
     .def(init<const String&, int, const String&, const gfx::Gradient&, float, float, const img::MapHandle&>())
+    .def(init<const mol::QueryViewWrapper&, const String&, const gfx::Gradient&, float, float, const img::MapHandle&>())
+    .def(init<const mol::QueryViewWrapper&, int, const String&, const gfx::Gradient&, float, float, const img::MapHandle&>())
     .def("SetMapHandle",&MapHandleColorOp::SetMapHandle)
-    //.def("GetMapHandle",&MapHandleColorOp::GetMapHandle)
+    .def("GetMapHandle",&MapHandleColorOp::GetMapHandle,return_value_policy<copy_const_reference>())
     .def("FromInfo",&MapHandleColorOp::FromInfo)
     .staticmethod("FromInfo")
   ;

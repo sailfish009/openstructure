@@ -35,8 +35,8 @@ namespace ost { namespace gfx {
 class DLLEXPORT_OST_GFX ByChainColorOp: public ColorOp {
 public:
   ByChainColorOp();
-  ByChainColorOp(const String& selection);
-  ByChainColorOp(const String& selection, int mask);
+  ByChainColorOp(const String& selection, int mask=DETAIL_COLOR|MAIN_COLOR);
+  ByChainColorOp(const mol::QueryViewWrapper& query_view, int mask=DETAIL_COLOR|MAIN_COLOR);
 
   virtual bool CanApplyTo(const GfxObjP& obj) const;
   virtual void ApplyTo(GfxObjP& obj) const;

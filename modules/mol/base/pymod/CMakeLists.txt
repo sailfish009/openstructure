@@ -14,6 +14,7 @@ export_residue.cc
 export_residue_view.cc
 export_surface.cc
 export_bounding_box.cc
+export_query_view_wrapper.cc
 export_torsion.cc
 export_visitor.cc
 wrap_mol.cc

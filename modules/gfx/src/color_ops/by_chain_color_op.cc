@@ -28,9 +28,9 @@ namespace ost { namespace gfx {
 
 ByChainColorOp::ByChainColorOp() : ColorOp(){this->init();}
 
-ByChainColorOp::ByChainColorOp(const String& selection) : ColorOp(selection){this->init();}
-
 ByChainColorOp::ByChainColorOp(const String& selection, int mask) : ColorOp(selection,mask){this->init();}
+
+ByChainColorOp::ByChainColorOp(const mol::QueryViewWrapper& query_view, int mask) : ColorOp(query_view,mask){this->init();}
 
 void ByChainColorOp::init(){
   color_grad_.SetColorAt(0,Color(1,1,0));

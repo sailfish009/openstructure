@@ -31,11 +31,16 @@ class DLLEXPORT_OST_MOL QueryViewWrapper {
 public:
   explicit QueryViewWrapper(const EntityHandle& entity_handle);
   explicit QueryViewWrapper(const EntityView& entity_view);
+  QueryViewWrapper();
   QueryViewWrapper(const Query& query, const EntityHandle& handle);
   QueryViewWrapper(const Query& query, const EntityView& view);  
   EntityView GetEntityView() const;
-  
   bool DependsOnQuery() const;
+  bool IsDataValid() const;
+
+  void SetQuery(const Query& query);
+  const Query& GetQuery() const;
+
 private:
   bool view_set_;
   EntityHandle entity_handle_;

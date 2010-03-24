@@ -39,6 +39,8 @@ public:
   MapHandleColorOp();
   MapHandleColorOp(const String& selection, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh);
   MapHandleColorOp(const String& selection, int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh);
+  MapHandleColorOp(const mol::QueryViewWrapper& query_view, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh);
+  MapHandleColorOp(const mol::QueryViewWrapper& query_view, int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh);
 
   virtual bool CanApplyTo(const GfxObjP& obj) const;
   virtual void ApplyTo(GfxObjP& obj) const;

@@ -28,6 +28,7 @@ from toolbar_options_widget import ToolBarOptionsWidget
 from render_options_widget import RenderOptionsWidget
 from color_options_widget import ColorOptionsWidget
 from ost.gui.scene.scene_observer_impl import SceneObserverImpl
+from preset_widget import PresetWidget
 
 class InspectorWidget(ToolBarOptionsWidget):
   ICONS_PATH = os.path.join(ost.GetSharedDataPath(), "scene", "icons/")
@@ -37,6 +38,7 @@ class InspectorWidget(ToolBarOptionsWidget):
     options = [
                 [InspectorWidget.ICONS_PATH+"render_icon.png",RenderOptionsWidget(self),None], 
                 [InspectorWidget.ICONS_PATH+"color_icon.png",ColorOptionsWidget(self),None],
+                [InspectorWidget.ICONS_PATH+"preset_icon.png", PresetWidget(self),None],
                 [InspectorWidget.ICONS_PATH+"tool_icon.png",sip.wrapinstance(app.GetToolOptionsWin().GetSipHandle(),QtGui.QWidget),"Tool Options"]
               ]
     for o in options:

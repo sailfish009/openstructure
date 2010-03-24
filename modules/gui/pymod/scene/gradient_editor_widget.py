@@ -20,6 +20,7 @@
 
 from ost import gui
 from ost import gfx
+from ost import mol
 from PyQt4 import QtCore, QtGui
 from color_select_widget import ColorSelectWidget
 from gradient_preset_widget import GradientPresetWidget
@@ -70,6 +71,11 @@ class GradientEditor(QtGui.QWidget):
     for i in range(0,scene_selection.GetActiveNodeCount()):
       node = scene_selection.GetActiveNode(i)
       self.ChangeColor(node)
+      
+    if(scene_selection.GetActiveViewCount() > 0):
+      entity = scene_selection.GetViewEntity()
+      view = scene_selection.GetViewUnion()
+      self.ChangeViewColor(entity,view)
   
   def ChangeColor(self,node):
     if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
@@ -77,6 +83,11 @@ class GradientEditor(QtGui.QWidget):
       node.ColorBy(self.props[self.prop_combo_box_.currentIndex()],
                      self.gradient_edit_.GetGfxGradient())
   
+  def ChangeViewColor(self, entity, view):
+    if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
+      glco=gfx.GradientLevelColorOp(mol.QueryViewWrapper(view),self.props[self.prop_combo_box_.currentIndex()],self.gradient_edit_.GetGfxGradient(),mol.Prop.Level.UNSPECIFIED)
+      entity.Apply(glco)
+      
 #Gradient Preview
 class GradientPreview(QtGui.QWidget):
   def __init__(self, parent=None):
