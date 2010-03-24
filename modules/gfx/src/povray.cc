@@ -70,12 +70,12 @@ void PovState::write_postamble()
     pov_ << "  // in camera coordinates\n";
     pov_ << "  plane {z 0}\n";
     pov_ << "  // object transformation\n";
-    pov_ << boost::format("  //translate <%f,%f,%f>\n") % -tra[0] % -tra[1] % 0.0;
-    pov_ << boost::format("  matrix <%f,%f,%f,\n"
-                          "          %f,%f,%f,\n"
-                          "          %f,%f,%f,\n"
+    pov_ << boost::format("  //translate <%.4f,%.4f,%.4f>\n") % -tra[0] % -tra[1] % 0.0;
+    pov_ << boost::format("  matrix <%.4f,%.4f,%.4f,\n"
+                          "          %.4f,%.4f,%.4f,\n"
+                          "          %.4f,%.4f,%.4f,\n"
                           "          0,0,0>\n") % rot(0,0) % rot(0,1) % rot(0,2) % rot(1,0) % rot(1,1) % rot(1,2) % rot(2,0) % rot(2,1) % rot(2,2);
-    pov_ << boost::format(" translate <%f,%f,%f>\n") % cen[0] % cen[1] % cen[2];
+    pov_ << boost::format(" translate <%.4f,%.4f,%.4f>\n") % cen[0] % cen[1] % cen[2];
     pov_ << " }\n */\n\n";
     
     
@@ -87,19 +87,19 @@ void PovState::write_postamble()
     pov_ << "   2. apply rotation matrix\n";
     pov_ << "   3. apply xy translation (z component is in camera)\n";
     pov_ << " */\n";
-    pov_ << boost::format(" translate <%f,%f,%f>\n") % -cen[0] % -cen[1] % -cen[2];
-    pov_ << boost::format(" matrix <%f,%f,%f,\n"
-                          "         %f,%f,%f,\n"
-                          "         %f,%f,%f,\n"
+    pov_ << boost::format(" translate <%.4f,%.4f,%.4f>\n") % -cen[0] % -cen[1] % -cen[2];
+    pov_ << boost::format(" matrix <%.4f,%.4f,%.4f,\n"
+                          "         %.4f,%.4f,%.4f,\n"
+                          "         %.4f,%.4f,%.4f,\n"
                           "         0,0,0>\n") % rot(0,0) % rot(1,0) % rot(2,0) % rot(0,1) % rot(1,1) % rot(2,1) % rot(0,2) % rot(1,2) % rot(2,2);
-    pov_ << boost::format(" //translate <%f,%f,%f>\n") % tra[0] % tra[1] % 0.0;
+    pov_ << boost::format(" //translate <%.4f,%.4f,%.4f>\n") % tra[0] % tra[1] % 0.0;
   }
   pov_ << "}\n\n";
 }
 
 void PovState::write_background(const Color& c)
 {
-  pov_ << boost::format("background {color rgb <%3f,%3f,%3f>}\n\n") % c[0] % c[1] % c[2];
+  pov_ << boost::format("background {color rgb <%.4f,%.4f,%.4f>}\n\n") % c[0] % c[1] % c[2];
 }
 
 void PovState::write_camera(float fov, float zdist)
@@ -114,14 +114,14 @@ void PovState::write_camera(float fov, float zdist)
    "  the screen towards the viewer) from the origin to the\n"
    "  camera\n"
    "*/\n\n"
-   "#declare ori_dist = %4f;\n\n"
+   "#declare ori_dist = %.4f;\n\n"
    "camera {\n"
    " perspective\n"
    " location <0,0,0>\n"
    " direction <0,0,-1>\n"
    " up <0,1,0>\n"
    " right <1,0,0>\n"
-   " angle %3f\n"
+   " angle %.4f\n"
    " translate <0,0,ori_dist>\n"
    "}\n\n"
    ) % zdist % fov;
@@ -147,9 +147,9 @@ void PovState::write_fog(float zdist, float znear, float zfar, const Color& c,bo
   pov_ << boost::format(
    "fog {\n"
    " fog_type 2\n"
-   " distance %3f\n"
-   " color rgb <%3f,%3f,%3f>\n"
-   " fog_offset %3f\n"
+   " distance %.4f\n"
+   " color rgb <%.4f,%.4f,%.4f>\n"
+   " fog_offset %.4f\n"
    " fog_alt 0.01\n"
    " up <0,0,1>\n"
    "}\n"
@@ -171,8 +171,8 @@ void PovState::start_obj(const std::string& name, float tp, float lw, float ps)
    " }\n"
    "}\n"
    "#declare _%s_mat = material {texture {_%s_tex}}\n"
-   "#declare _%s_tp = %3f;  // transparency in pigment color\n"
-   "#declare _%s_fi = %3f;  // filter in pigment color\n"
+   "#declare _%s_tp = %.4f;  // transparency in pigment color\n"
+   "#declare _%s_fi = %.4f;  // filter in pigment color\n"
    "#declare _%s_rf = 1.0; // multiplier for sphere and cyl radius\n"
    "#declare _%s_merge = 0; // use merge for objects, union otherwise (if applicable)\n"
    "\n\n"
@@ -198,22 +198,22 @@ void PovState::write_obj_tex(const std::string& name)
       float fg=static_cast<float>(g)/7.0;
       for(unsigned int b=0;b<8;++b) {
         float fb=static_cast<float>(b)/7.0;
-        inc_ << boost::format("#declare _%s_tex_%1d%1d%1d = texture {_%s_tex pigment {color rgbft <%f,%f,%f,_%s_fi,_%s_tp>}}\n") % name % r % g % b % name % fr % fg % fb % name % name ;
+        inc_ << boost::format("#declare _%s_tex_%1d%1d%1d = texture {_%s_tex pigment {color rgbft <%.4f,%.4f,%.4f,_%s_fi,_%s_tp>}}\n") % name % r % g % b % name % fr % fg % fb % name % name ;
       }
     }
   }
 }
 void PovState::write_sphere(const geom::Vec3& p, float r, const Color& c, const std::string& name)
 {
-  inc_ << boost::format(" sphere {%s, _%s_rf*%f") % write_coord(p) % name % r;
-  inc_ << boost::format(" texture { _%s_tex pigment {color rgbft <%f,%f,%f,_%s_fi,_%s_tp>}}}\n") % name % c[0] % c[1] % c[2] % name % name;
+  inc_ << boost::format(" sphere {%s, _%s_rf*%.4f") % write_coord(p) % name % r;
+  inc_ << boost::format(" texture { _%s_tex pigment {color rgbft <%.4f,%.4f,%.4f,_%s_fi,_%s_tp>}}}\n") % name % c[0] % c[1] % c[2] % name % name;
 }
 
 void PovState::write_cyl(const geom::Vec3& p1, const geom::Vec3& p2, float r, const Color& c, const std::string& name, bool open)
 {
-  inc_ << boost::format(" cylinder {%s, %s, _%s_rf*%f") % write_coord(p1) % write_coord(p2) % name % r;
+  inc_ << boost::format(" cylinder {%s, %s, _%s_rf*%.4f") % write_coord(p1) % write_coord(p2) % name % r;
   if(open) inc_ << " open";
-  inc_ << boost::format(" texture { _%s_tex pigment {color rgbft <%f,%f,%f,_%s_fi,_%s_tp>}}}\n") % name % c[0] % c[1] % c[2] % name % name;
+  inc_ << boost::format(" texture { _%s_tex pigment {color rgbft <%.4f,%.4f,%.4f,_%s_fi,_%s_tp>}}}\n") % name % c[0] % c[1] % c[2] % name % name;
 }
 
 void PovState::write_merge_or_union(const std::string& name)
@@ -229,7 +229,7 @@ std::string PovState::write_coord(const geom::Vec3& c)
 {
   geom::Vec3 t = (use_tf) ? tf.Apply(c) : c;
   std::ostringstream s;
-  s << boost::format("<%4f,%4f,%4f>") % t[0] % t[1] % t[2];
+  s << boost::format("<%.4f,%.4f,%.4f>") % t[0] % t[1] % t[2];
   return s.str();
 }
 
@@ -242,7 +242,7 @@ std::string PovState::write_norm(const geom::Vec3& c)
 {
   geom::Vec3 t = (use_tf) ? tf.GetRot()*c : c;
   std::ostringstream s;
-  s << boost::format("<%4f,%4f,%4f>") % t[0] % t[1] % t[2];
+  s << boost::format("<%.4f,%.4f,%.4f>") % t[0] % t[1] % t[2];
   return s.str();
 }
 

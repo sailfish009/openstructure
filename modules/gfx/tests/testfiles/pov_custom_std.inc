@@ -4,207 +4,207 @@
 #else
  union {
 #end
- sphere {<20.817999,21.098000,88.432999>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<19.945000,21.644001,89.473000>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<18.631001,22.188000,88.916000>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<18.615000,23.184999,88.193993>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<17.527000,21.546001,89.274994>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<16.217001,21.962000,88.793991>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<15.943999,23.448000,89.020996>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<15.393001,24.129002,88.158005>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<16.329000,23.954998,90.187004>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<16.097000,25.362000,90.505997>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<16.796001,26.271000,89.505997>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<16.200001,27.223001,89.000999>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<18.062000,25.976000,89.226997>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<18.843000,26.772001,88.283997>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<18.215000,26.692001,86.893997>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<18.210001,27.664999,86.143997>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<17.674000,25.523001,86.567001>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<17.037001,25.306000,85.277000>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<15.785000,26.169001,85.133995>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<15.634000,26.889999,84.147003>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<14.893001,26.108000,86.117004>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.664001,26.894999,86.059006>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.936999,28.400000,86.059006>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.202000,29.176001,85.442001>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<14.985000,28.819000,86.758003>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<15.316000,30.231001,86.795990>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<15.752000,30.657000,85.408005>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<15.227000,31.623001,84.852005>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<16.712002,29.917999,84.856003>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<17.252001,30.191000,83.530998>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<16.169001,30.403000,82.474998>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<16.150000,31.422001,81.782997>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<15.265000,29.438000,82.361000>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<14.189000,29.507000,81.384003>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.238000,30.673000,81.619003>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<12.861001,31.368999,80.679001>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<12.843000,30.880999,82.868004>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<11.933999,31.969000,83.200996>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<12.553000,33.334999,82.885002>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<11.873000,34.232998,82.393997>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.844000,33.483002,83.159996>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<14.533999,34.741001,82.913002>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<14.619000,35.072998,81.427002>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<14.327001,36.200001,81.017006>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<15.021001,34.094002,80.621994>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<15.134000,34.288002,79.182999>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.766000,34.551998,78.573997>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.641001,35.312996,77.612999>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<12.738000,33.925003,79.134995>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<11.384000,34.124001,78.639000>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<10.957000,35.577999,78.779999>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<10.205999,36.089001,77.953003>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<11.431999,36.243000,79.830002>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<11.075999,37.636997,80.051003>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<11.948000,38.558998,79.219002>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<11.502000,39.622997,78.803001>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.189000,38.151997,78.972000>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<14.096000,38.966003,78.169998>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.787000,38.836998,76.680000>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.929999,39.801998,75.931999>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.367001,37.648998,76.250000>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<13.073000,37.420002,74.834999>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<11.604000,37.230999,74.487007>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<11.191001,37.531998,73.372002>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<10.817000,36.722000,75.427002>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- sphere {<9.413000,36.492001,75.148003>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<9.199000,35.091000,74.605995>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- sphere {<8.073000,34.602997,74.550003>, _Helix_rf*0.250000 texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<19.945000,21.644001,89.473000>, <19.288000,21.916000,89.194504>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<19.288000,21.916000,89.194504>, <18.631001,22.188000,88.916000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.631001,22.188000,88.916000>, <18.623001,22.686501,88.554993>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.623001,22.686501,88.554993>, <18.615000,23.184999,88.193993>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<20.817999,21.098000,88.432999>, <20.381500,21.371000,88.953003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<20.381500,21.371000,88.953003>, <19.945000,21.644001,89.473000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.217001,21.962000,88.793991>, <16.080500,22.705000,88.907494>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.080500,22.705000,88.907494>, <15.943999,23.448000,89.020996>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.943999,23.448000,89.020996>, <15.668500,23.788502,88.589500>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.668500,23.788502,88.589500>, <15.393001,24.129002,88.158005>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.631001,22.188000,88.916000>, <18.079000,21.867001,89.095497>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.079000,21.867001,89.095497>, <17.527000,21.546001,89.274994>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<17.527000,21.546001,89.274994>, <16.872002,21.754002,89.034492>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.872002,21.754002,89.034492>, <16.217001,21.962000,88.793991>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.329000,23.954998,90.187004>, <16.213001,24.658499,90.346497>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.213001,24.658499,90.346497>, <16.097000,25.362000,90.505997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.943999,23.448000,89.020996>, <16.136499,23.701500,89.604004>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.136499,23.701500,89.604004>, <16.329000,23.954998,90.187004>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.097000,25.362000,90.505997>, <16.446501,25.816500,90.005997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.446501,25.816500,90.005997>, <16.796001,26.271000,89.505997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.796001,26.271000,89.505997>, <16.498001,26.747002,89.253494>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.498001,26.747002,89.253494>, <16.200001,27.223001,89.000999>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.062000,25.976000,89.226997>, <18.452499,26.374001,88.755493>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.452499,26.374001,88.755493>, <18.843000,26.772001,88.283997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.843000,26.772001,88.283997>, <18.528999,26.732002,87.588997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.528999,26.732002,87.588997>, <18.215000,26.692001,86.893997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<17.674000,25.523001,86.567001>, <17.355499,25.414501,85.921997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<17.355499,25.414501,85.921997>, <17.037001,25.306000,85.277000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.215000,26.692001,86.893997>, <18.212502,27.178501,86.518997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.212502,27.178501,86.518997>, <18.210001,27.664999,86.143997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.796001,26.271000,89.505997>, <17.429001,26.123501,89.366501>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<17.429001,26.123501,89.366501>, <18.062000,25.976000,89.226997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<17.037001,25.306000,85.277000>, <16.410999,25.737499,85.205498>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.410999,25.737499,85.205498>, <15.785000,26.169001,85.133995>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<18.215000,26.692001,86.893997>, <17.944500,26.107502,86.730499>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<17.944500,26.107502,86.730499>, <17.674000,25.523001,86.567001>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.664001,26.894999,86.059006>, <13.800500,27.647499,86.059006>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.800500,27.647499,86.059006>, <13.936999,28.400000,86.059006>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.785000,26.169001,85.133995>, <15.709499,26.529499,84.640503>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.709499,26.529499,84.640503>, <15.634000,26.889999,84.147003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.893001,26.108000,86.117004>, <14.278501,26.501499,86.088005>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.278501,26.501499,86.088005>, <13.664001,26.894999,86.059006>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.712002,29.917999,84.856003>, <16.982002,30.054501,84.193497>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.982002,30.054501,84.193497>, <17.252001,30.191000,83.530998>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<17.252001,30.191000,83.530998>, <16.710501,30.297001,83.002998>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.710501,30.297001,83.002998>, <16.169001,30.403000,82.474998>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.936999,28.400000,86.059006>, <13.569500,28.788000,85.750504>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.569500,28.788000,85.750504>, <13.202000,29.176001,85.442001>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.985000,28.819000,86.758003>, <15.150499,29.525002,86.776993>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.150499,29.525002,86.776993>, <15.316000,30.231001,86.795990>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.316000,30.231001,86.795990>, <15.534000,30.444000,86.101997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.534000,30.444000,86.101997>, <15.752000,30.657000,85.408005>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.785000,26.169001,85.133995>, <15.339001,26.138500,85.625504>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.339001,26.138500,85.625504>, <14.893001,26.108000,86.117004>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.752000,30.657000,85.408005>, <15.489500,31.139999,85.130005>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.489500,31.139999,85.130005>, <15.227000,31.623001,84.852005>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.936999,28.400000,86.059006>, <14.460999,28.609501,86.408508>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.460999,28.609501,86.408508>, <14.985000,28.819000,86.758003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.752000,30.657000,85.408005>, <16.232000,30.287498,85.132004>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.232000,30.287498,85.132004>, <16.712002,29.917999,84.856003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.265000,29.438000,82.361000>, <14.727000,29.472500,81.872498>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.727000,29.472500,81.872498>, <14.189000,29.507000,81.384003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.169001,30.403000,82.474998>, <16.159500,30.912500,82.128998>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.159500,30.912500,82.128998>, <16.150000,31.422001,81.782997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.189000,29.507000,81.384003>, <13.713500,30.090000,81.501503>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.713500,30.090000,81.501503>, <13.238000,30.673000,81.619003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<12.843000,30.880999,82.868004>, <12.388500,31.424999,83.034500>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<12.388500,31.424999,83.034500>, <11.933999,31.969000,83.200996>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<16.169001,30.403000,82.474998>, <15.717001,29.920500,82.417999>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.717001,29.920500,82.417999>, <15.265000,29.438000,82.361000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.238000,30.673000,81.619003>, <13.049500,31.021000,81.149002>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.049500,31.021000,81.149002>, <12.861001,31.368999,80.679001>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.844000,33.483002,83.159996>, <14.188999,34.112000,83.036499>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.188999,34.112000,83.036499>, <14.533999,34.741001,82.913002>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.933999,31.969000,83.200996>, <12.243500,32.652000,83.042999>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<12.243500,32.652000,83.042999>, <12.553000,33.334999,82.885002>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<12.553000,33.334999,82.885002>, <12.213000,33.783997,82.639496>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<12.213000,33.783997,82.639496>, <11.873000,34.232998,82.393997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.619000,35.072998,81.427002>, <14.473001,35.636497,81.222000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.473001,35.636497,81.222000>, <14.327001,36.200001,81.017006>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.238000,30.673000,81.619003>, <13.040501,30.777000,82.243500>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.040501,30.777000,82.243500>, <12.843000,30.880999,82.868004>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.533999,34.741001,82.913002>, <14.576500,34.906998,82.169998>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.576500,34.906998,82.169998>, <14.619000,35.072998,81.427002>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<12.553000,33.334999,82.885002>, <13.198500,33.409000,83.022499>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.198500,33.409000,83.022499>, <13.844000,33.483002,83.159996>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.766000,34.551998,78.573997>, <13.703501,34.932495,78.093498>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.703501,34.932495,78.093498>, <13.641001,35.312996,77.612999>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.134000,34.288002,79.182999>, <14.450000,34.419998,78.878494>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.450000,34.419998,78.878494>, <13.766000,34.551998,78.573997>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.619000,35.072998,81.427002>, <14.820001,34.583500,81.024498>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.820001,34.583500,81.024498>, <15.021001,34.094002,80.621994>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<12.738000,33.925003,79.134995>, <12.061000,34.024502,78.886993>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<12.061000,34.024502,78.886993>, <11.384000,34.124001,78.639000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.021001,34.094002,80.621994>, <15.077500,34.191002,79.902496>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<15.077500,34.191002,79.902496>, <15.134000,34.288002,79.182999>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.384000,34.124001,78.639000>, <11.170500,34.850998,78.709503>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.170500,34.850998,78.709503>, <10.957000,35.577999,78.779999>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.766000,34.551998,78.573997>, <13.252000,34.238503,78.854492>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.252000,34.238503,78.854492>, <12.738000,33.925003,79.134995>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.948000,38.558998,79.219002>, <11.725000,39.090996,79.011002>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.725000,39.090996,79.011002>, <11.502000,39.622997,78.803001>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<10.957000,35.577999,78.779999>, <10.581499,35.833500,78.366501>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<10.581499,35.833500,78.366501>, <10.205999,36.089001,77.953003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.431999,36.243000,79.830002>, <11.254000,36.939999,79.940506>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.254000,36.939999,79.940506>, <11.075999,37.636997,80.051003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<14.096000,38.966003,78.169998>, <13.941500,38.901501,77.425003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.941500,38.901501,77.425003>, <13.787000,38.836998,76.680000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.948000,38.558998,79.219002>, <12.568501,38.355499,79.095505>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<12.568501,38.355499,79.095505>, <13.189000,38.151997,78.972000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.367001,37.648998,76.250000>, <13.220000,37.534500,75.542496>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.220000,37.534500,75.542496>, <13.073000,37.420002,74.834999>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.075999,37.636997,80.051003>, <11.511999,38.098000,79.635002>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.511999,38.098000,79.635002>, <11.948000,38.558998,79.219002>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.787000,38.836998,76.680000>, <13.858500,39.319496,76.306000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.858500,39.319496,76.306000>, <13.929999,39.801998,75.931999>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<10.957000,35.577999,78.779999>, <11.194500,35.910500,79.305000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.194500,35.910500,79.305000>, <11.431999,36.243000,79.830002>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.189000,38.151997,78.972000>, <13.642500,38.558998,78.570999>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.642500,38.558998,78.570999>, <14.096000,38.966003,78.169998>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.604000,37.230999,74.487007>, <11.397501,37.381500,73.929504>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.397501,37.381500,73.929504>, <11.191001,37.531998,73.372002>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<10.817000,36.722000,75.427002>, <10.115000,36.607002,75.287506>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<10.115000,36.607002,75.287506>, <9.413000,36.492001,75.148003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.073000,37.420002,74.834999>, <12.338500,37.325500,74.661003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<12.338500,37.325500,74.661003>, <11.604000,37.230999,74.487007>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.787000,38.836998,76.680000>, <13.577000,38.242996,76.464996>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<13.577000,38.242996,76.464996>, <13.367001,37.648998,76.250000>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<9.413000,36.492001,75.148003>, <9.306000,35.791500,74.876999>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<9.306000,35.791500,74.876999>, <9.199000,35.091000,74.605995>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<9.199000,35.091000,74.605995>, <8.636000,34.847000,74.578003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<8.636000,34.847000,74.578003>, <8.073000,34.602997,74.550003>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.604000,37.230999,74.487007>, <11.210501,36.976501,74.957001>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.830000,0.970000,0.970000,_Helix_fi,_Helix_tp>}}}
- cylinder {<11.210501,36.976501,74.957001>, <10.817000,36.722000,75.427002>, _Helix_rf*0.250000 open texture { _Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}}
+ sphere {<19.9450,21.6440,89.4730>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<18.6310,22.1880,88.9160>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<18.6150,23.1850,88.1940>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<17.5270,21.5460,89.2750>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<16.2170,21.9620,88.7940>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<15.9440,23.4480,89.0210>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<15.3930,24.1290,88.1580>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<16.3290,23.9550,90.1870>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<16.0970,25.3620,90.5060>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<16.7960,26.2710,89.5060>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<16.2000,27.2230,89.0010>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<18.0620,25.9760,89.2270>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<18.8430,26.7720,88.2840>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<18.2150,26.6920,86.8940>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<18.2100,27.6650,86.1440>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<17.6740,25.5230,86.5670>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<17.0370,25.3060,85.2770>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<15.7850,26.1690,85.1340>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<15.6340,26.8900,84.1470>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<14.8930,26.1080,86.1170>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.6640,26.8950,86.0590>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.9370,28.4000,86.0590>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.2020,29.1760,85.4420>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<14.9850,28.8190,86.7580>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<15.3160,30.2310,86.7960>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<15.7520,30.6570,85.4080>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<15.2270,31.6230,84.8520>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<16.7120,29.9180,84.8560>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<17.2520,30.1910,83.5310>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<16.1690,30.4030,82.4750>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<16.1500,31.4220,81.7830>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<15.2650,29.4380,82.3610>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<14.1890,29.5070,81.3840>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.2380,30.6730,81.6190>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<12.8610,31.3690,80.6790>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<12.8430,30.8810,82.8680>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<11.9340,31.9690,83.2010>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<12.5530,33.3350,82.8850>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<11.8730,34.2330,82.3940>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.8440,33.4830,83.1600>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<14.5340,34.7410,82.9130>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<14.6190,35.0730,81.4270>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<14.3270,36.2000,81.0170>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<15.0210,34.0940,80.6220>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<15.1340,34.2880,79.1830>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.7660,34.5520,78.5740>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.6410,35.3130,77.6130>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<12.7380,33.9250,79.1350>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<11.3840,34.1240,78.6390>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<10.9570,35.5780,78.7800>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<10.2060,36.0890,77.9530>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<11.4320,36.2430,79.8300>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<11.0760,37.6370,80.0510>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<11.9480,38.5590,79.2190>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<11.5020,39.6230,78.8030>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.1890,38.1520,78.9720>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<14.0960,38.9660,78.1700>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.7870,38.8370,76.6800>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.9300,39.8020,75.9320>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.3670,37.6490,76.2500>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<13.0730,37.4200,74.8350>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<11.6040,37.2310,74.4870>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<11.1910,37.5320,73.3720>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<10.8170,36.7220,75.4270>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<9.4130,36.4920,75.1480>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<9.1990,35.0910,74.6060>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ sphere {<8.0730,34.6030,74.5500>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ sphere {<20.8180,21.0980,88.4330>, _Helix_rf*0.2500 texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<20.8180,21.0980,88.4330>, <20.3815,21.3710,88.9530>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<20.3815,21.3710,88.9530>, <19.9450,21.6440,89.4730>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.9440,23.4480,89.0210>, <15.6685,23.7885,88.5895>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.6685,23.7885,88.5895>, <15.3930,24.1290,88.1580>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<19.9450,21.6440,89.4730>, <19.2880,21.9160,89.1945>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<19.2880,21.9160,89.1945>, <18.6310,22.1880,88.9160>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.6310,22.1880,88.9160>, <18.6230,22.6865,88.5550>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.6230,22.6865,88.5550>, <18.6150,23.1850,88.1940>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.2170,21.9620,88.7940>, <16.0805,22.7050,88.9075>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.0805,22.7050,88.9075>, <15.9440,23.4480,89.0210>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<17.5270,21.5460,89.2750>, <16.8720,21.7540,89.0345>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.8720,21.7540,89.0345>, <16.2170,21.9620,88.7940>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.6310,22.1880,88.9160>, <18.0790,21.8670,89.0955>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.0790,21.8670,89.0955>, <17.5270,21.5460,89.2750>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.3290,23.9550,90.1870>, <16.2130,24.6585,90.3465>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.2130,24.6585,90.3465>, <16.0970,25.3620,90.5060>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.0970,25.3620,90.5060>, <16.4465,25.8165,90.0060>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.4465,25.8165,90.0060>, <16.7960,26.2710,89.5060>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.9440,23.4480,89.0210>, <16.1365,23.7015,89.6040>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.1365,23.7015,89.6040>, <16.3290,23.9550,90.1870>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.7960,26.2710,89.5060>, <16.4980,26.7470,89.2535>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.4980,26.7470,89.2535>, <16.2000,27.2230,89.0010>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.0620,25.9760,89.2270>, <18.4525,26.3740,88.7555>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.4525,26.3740,88.7555>, <18.8430,26.7720,88.2840>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.8430,26.7720,88.2840>, <18.5290,26.7320,87.5890>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.5290,26.7320,87.5890>, <18.2150,26.6920,86.8940>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.7960,26.2710,89.5060>, <17.4290,26.1235,89.3665>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<17.4290,26.1235,89.3665>, <18.0620,25.9760,89.2270>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<17.6740,25.5230,86.5670>, <17.3555,25.4145,85.9220>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<17.3555,25.4145,85.9220>, <17.0370,25.3060,85.2770>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.2150,26.6920,86.8940>, <18.2125,27.1785,86.5190>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.2125,27.1785,86.5190>, <18.2100,27.6650,86.1440>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<17.0370,25.3060,85.2770>, <16.4110,25.7375,85.2055>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.4110,25.7375,85.2055>, <15.7850,26.1690,85.1340>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<18.2150,26.6920,86.8940>, <17.9445,26.1075,86.7305>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<17.9445,26.1075,86.7305>, <17.6740,25.5230,86.5670>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.6640,26.8950,86.0590>, <13.8005,27.6475,86.0590>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.8005,27.6475,86.0590>, <13.9370,28.4000,86.0590>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.7850,26.1690,85.1340>, <15.7095,26.5295,84.6405>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.7095,26.5295,84.6405>, <15.6340,26.8900,84.1470>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.8930,26.1080,86.1170>, <14.2785,26.5015,86.0880>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.2785,26.5015,86.0880>, <13.6640,26.8950,86.0590>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.7850,26.1690,85.1340>, <15.3390,26.1385,85.6255>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.3390,26.1385,85.6255>, <14.8930,26.1080,86.1170>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.9850,28.8190,86.7580>, <15.1505,29.5250,86.7770>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.1505,29.5250,86.7770>, <15.3160,30.2310,86.7960>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.3160,30.2310,86.7960>, <15.5340,30.4440,86.1020>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.5340,30.4440,86.1020>, <15.7520,30.6570,85.4080>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.9370,28.4000,86.0590>, <13.5695,28.7880,85.7505>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.5695,28.7880,85.7505>, <13.2020,29.1760,85.4420>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.7520,30.6570,85.4080>, <15.4895,31.1400,85.1300>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.4895,31.1400,85.1300>, <15.2270,31.6230,84.8520>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.9370,28.4000,86.0590>, <14.4610,28.6095,86.4085>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.4610,28.6095,86.4085>, <14.9850,28.8190,86.7580>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.7120,29.9180,84.8560>, <16.9820,30.0545,84.1935>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.9820,30.0545,84.1935>, <17.2520,30.1910,83.5310>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<17.2520,30.1910,83.5310>, <16.7105,30.2970,83.0030>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.7105,30.2970,83.0030>, <16.1690,30.4030,82.4750>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.7520,30.6570,85.4080>, <16.2320,30.2875,85.1320>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.2320,30.2875,85.1320>, <16.7120,29.9180,84.8560>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.2650,29.4380,82.3610>, <14.7270,29.4725,81.8725>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.7270,29.4725,81.8725>, <14.1890,29.5070,81.3840>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.1690,30.4030,82.4750>, <16.1595,30.9125,82.1290>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.1595,30.9125,82.1290>, <16.1500,31.4220,81.7830>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.1890,29.5070,81.3840>, <13.7135,30.0900,81.5015>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.7135,30.0900,81.5015>, <13.2380,30.6730,81.6190>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<16.1690,30.4030,82.4750>, <15.7170,29.9205,82.4180>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.7170,29.9205,82.4180>, <15.2650,29.4380,82.3610>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<12.8430,30.8810,82.8680>, <12.3885,31.4250,83.0345>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<12.3885,31.4250,83.0345>, <11.9340,31.9690,83.2010>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.2380,30.6730,81.6190>, <13.0495,31.0210,81.1490>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.0495,31.0210,81.1490>, <12.8610,31.3690,80.6790>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.2380,30.6730,81.6190>, <13.0405,30.7770,82.2435>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.0405,30.7770,82.2435>, <12.8430,30.8810,82.8680>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.9340,31.9690,83.2010>, <12.2435,32.6520,83.0430>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<12.2435,32.6520,83.0430>, <12.5530,33.3350,82.8850>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<12.5530,33.3350,82.8850>, <12.2130,33.7840,82.6395>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<12.2130,33.7840,82.6395>, <11.8730,34.2330,82.3940>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.8440,33.4830,83.1600>, <14.1890,34.1120,83.0365>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.1890,34.1120,83.0365>, <14.5340,34.7410,82.9130>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.5340,34.7410,82.9130>, <14.5765,34.9070,82.1700>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.5765,34.9070,82.1700>, <14.6190,35.0730,81.4270>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.6190,35.0730,81.4270>, <14.4730,35.6365,81.2220>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.4730,35.6365,81.2220>, <14.3270,36.2000,81.0170>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.1340,34.2880,79.1830>, <14.4500,34.4200,78.8785>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.4500,34.4200,78.8785>, <13.7660,34.5520,78.5740>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<12.5530,33.3350,82.8850>, <13.1985,33.4090,83.0225>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.1985,33.4090,83.0225>, <13.8440,33.4830,83.1600>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.0210,34.0940,80.6220>, <15.0775,34.1910,79.9025>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<15.0775,34.1910,79.9025>, <15.1340,34.2880,79.1830>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<12.7380,33.9250,79.1350>, <12.0610,34.0245,78.8870>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<12.0610,34.0245,78.8870>, <11.3840,34.1240,78.6390>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.0760,37.6370,80.0510>, <11.5120,38.0980,79.6350>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.5120,38.0980,79.6350>, <11.9480,38.5590,79.2190>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.7660,34.5520,78.5740>, <13.7035,34.9325,78.0935>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.7035,34.9325,78.0935>, <13.6410,35.3130,77.6130>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.3840,34.1240,78.6390>, <11.1705,34.8510,78.7095>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.1705,34.8510,78.7095>, <10.9570,35.5780,78.7800>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.6190,35.0730,81.4270>, <14.8200,34.5835,81.0245>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.8200,34.5835,81.0245>, <15.0210,34.0940,80.6220>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.7660,34.5520,78.5740>, <13.2520,34.2385,78.8545>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.2520,34.2385,78.8545>, <12.7380,33.9250,79.1350>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<10.9570,35.5780,78.7800>, <10.5815,35.8335,78.3665>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<10.5815,35.8335,78.3665>, <10.2060,36.0890,77.9530>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.4320,36.2430,79.8300>, <11.2540,36.9400,79.9405>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.2540,36.9400,79.9405>, <11.0760,37.6370,80.0510>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<10.9570,35.5780,78.7800>, <11.1945,35.9105,79.3050>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.1945,35.9105,79.3050>, <11.4320,36.2430,79.8300>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.1890,38.1520,78.9720>, <13.6425,38.5590,78.5710>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.6425,38.5590,78.5710>, <14.0960,38.9660,78.1700>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<14.0960,38.9660,78.1700>, <13.9415,38.9015,77.4250>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.9415,38.9015,77.4250>, <13.7870,38.8370,76.6800>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.9480,38.5590,79.2190>, <11.7250,39.0910,79.0110>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.7250,39.0910,79.0110>, <11.5020,39.6230,78.8030>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.7870,38.8370,76.6800>, <13.8585,39.3195,76.3060>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.8585,39.3195,76.3060>, <13.9300,39.8020,75.9320>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.9480,38.5590,79.2190>, <12.5685,38.3555,79.0955>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<12.5685,38.3555,79.0955>, <13.1890,38.1520,78.9720>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.3670,37.6490,76.2500>, <13.2200,37.5345,75.5425>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.2200,37.5345,75.5425>, <13.0730,37.4200,74.8350>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.0730,37.4200,74.8350>, <12.3385,37.3255,74.6610>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<12.3385,37.3255,74.6610>, <11.6040,37.2310,74.4870>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.6040,37.2310,74.4870>, <11.3975,37.3815,73.9295>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.3975,37.3815,73.9295>, <11.1910,37.5320,73.3720>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<10.8170,36.7220,75.4270>, <10.1150,36.6070,75.2875>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<10.1150,36.6070,75.2875>, <9.4130,36.4920,75.1480>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.7870,38.8370,76.6800>, <13.5770,38.2430,76.4650>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<13.5770,38.2430,76.4650>, <13.3670,37.6490,76.2500>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<9.4130,36.4920,75.1480>, <9.3060,35.7915,74.8770>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<9.3060,35.7915,74.8770>, <9.1990,35.0910,74.6060>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<9.1990,35.0910,74.6060>, <8.6360,34.8470,74.5780>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<8.6360,34.8470,74.5780>, <8.0730,34.6030,74.5500>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.6040,37.2310,74.4870>, <11.2105,36.9765,74.9570>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.8300,0.9700,0.9700,_Helix_fi,_Helix_tp>}}}
+ cylinder {<11.2105,36.9765,74.9570>, <10.8170,36.7220,75.4270>, _Helix_rf*0.2500 open texture { _Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}}
  }
 }

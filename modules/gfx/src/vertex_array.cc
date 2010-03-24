@@ -535,7 +535,7 @@ void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
       float fg=static_cast<float>(g)/7.0;
       for(unsigned int b=0;b<8;++b) {
         float fb=static_cast<float>(b)/7.0;
-        pov.inc() << boost::format("  texture {_%s_tex pigment {color rgbft <%f,%f,%f,_%s_fi,_%s_tp>}}") % name % fr % fg % fb % name %name ;
+        pov.inc() << boost::format("  texture {_%s_tex pigment {color rgbft <%.4f,%.4f,%.4f,_%s_fi,_%s_tp>}}") % name % fr % fg % fb % name %name ;
         pov.inc() << ((r<7 && g<7 && b<7) ? ",\n" : "\n");
       }
     }

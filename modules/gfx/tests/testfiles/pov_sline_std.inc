@@ -1,716 +1,716 @@
 #declare _Helix = object {
 mesh2 {
  vertex_vectors { 97,
-  <19.945000,21.644001,89.473000>,
-  <19.212208,21.550982,89.215630>,
-  <18.498526,21.482994,88.982986>,
-  <17.823057,21.465073,88.799782>,
-  <17.204908,21.522243,88.690727>,
-  <16.663185,21.679543,88.680565>,
-  <16.217001,21.962000,88.793991>,
-  <15.883054,22.383884,89.042091>,
-  <15.668437,22.916412,89.381317>,
-  <15.577835,23.520033,89.754501>,
-  <15.615936,24.155205,90.104462>,
-  <15.787430,24.782375,90.374031>,
-  <16.097000,25.362000,90.505997>,
-  <16.538811,25.859833,90.457443>,
-  <17.064920,26.262840,90.242447>,
-  <17.616861,26.563292,89.889290>,
-  <18.136166,26.753456,89.426292>,
-  <18.564367,26.825602,88.881760>,
-  <18.843000,26.772001,88.283997>,
-  <18.927195,26.593853,87.661835>,
-  <18.826479,26.328085,87.046181>,
-  <18.563974,26.020559,86.468452>,
-  <18.162809,25.717127,85.960060>,
-  <17.646109,25.463655,85.552437>,
-  <17.037001,25.306000,85.277000>,
-  <16.362896,25.280550,85.155441>,
-  <15.668392,25.385822,85.170563>,
-  <15.002369,25.610855,85.295410>,
-  <14.413705,25.944704,85.503067>,
-  <13.951289,26.376400,85.766571>,
-  <13.664001,26.894999,86.059006>,
-  <13.586650,27.484972,86.352890>,
-  <13.697765,28.112516,86.618584>,
-  <13.961802,28.739262,86.825905>,
-  <14.343219,29.326839,86.944702>,
-  <14.806465,29.836874,86.944786>,
-  <15.316000,30.231001,86.795990>,
-  <15.835805,30.480930,86.479446>,
-  <16.327951,30.598709,86.021568>,
-  <16.754045,30.606474,85.460068>,
-  <17.075684,30.526354,84.832649>,
-  <17.254469,30.380487,84.177063>,
-  <17.252001,30.191000,83.530998>,
-  <17.043346,29.980629,82.929482>,
-  <16.657429,29.774504,82.396751>,
-  <16.136644,29.598349,81.954308>,
-  <15.523381,29.477896,81.623688>,
-  <14.860037,29.438868,81.426407>,
-  <14.189000,29.507000,81.384003>,
-  <13.550619,29.700432,81.506943>,
-  <12.977076,30.006983,81.761520>,
-  <12.498507,30.406879,82.102966>,
-  <12.145045,30.880363,82.486549>,
-  <11.946831,31.407660,82.867470>,
-  <11.933999,31.969000,83.200996>,
-  <12.123243,32.543678,83.447983>,
-  <12.477486,33.107201,83.591728>,
-  <12.946202,33.634125,83.621178>,
-  <13.478876,34.099030,83.525253>,
-  <14.024983,34.476467,83.292892>,
-  <14.533999,34.741001,82.913002>,
-  <14.960752,34.875328,82.385025>,
-  <15.281425,34.894634,81.750366>,
-  <15.477555,34.822239,81.060944>,
-  <15.530673,34.681458,80.368622>,
-  <15.422310,34.495605,79.725342>,
-  <15.134000,34.288002,79.182999>,
-  <14.660203,34.083042,78.782761>,
-  <14.047105,33.909420,78.522934>,
-  <13.353824,33.796928,78.391068>,
-  <12.639467,33.775337,78.374756>,
-  <11.963153,33.874443,78.461533>,
-  <11.384000,34.124001,78.639000>,
-  <10.951005,34.540794,78.890717>,
-  <10.672736,35.089504,79.184326>,
-  <10.547647,35.721806,79.483513>,
-  <10.574193,36.389374,79.751907>,
-  <10.750826,37.043880,79.953186>,
-  <11.075999,37.636997,80.051003>,
-  <11.539078,38.128578,80.017075>,
-  <12.093057,38.511162,79.855331>,
-  <12.681831,38.785477,79.577774>,
-  <13.249315,38.952244,79.196365>,
-  <13.739404,39.012177,78.723114>,
-  <14.096000,38.966003,78.169998>,
-  <14.275891,38.818695,77.553589>,
-  <14.287378,38.592247,76.908768>,
-  <14.151648,38.312904,76.275040>,
-  <13.889884,38.006920,75.691841>,
-  <13.523272,37.700539,75.198677>,
-  <13.073000,37.420002,74.834999>,
-  <12.558451,37.185741,74.629021>,
-  <11.991838,36.994896,74.563843>,
-  <11.383575,36.838783,74.611320>,
-  <10.744071,36.708717,74.743279>,
-  <10.083740,36.596020,74.931557>,
-  <9.413000,36.492001,75.148003>
+  <19.9450,21.6440,89.4730>,
+  <19.2122,21.5510,89.2156>,
+  <18.4985,21.4830,88.9830>,
+  <17.8231,21.4651,88.7998>,
+  <17.2049,21.5222,88.6907>,
+  <16.6632,21.6795,88.6806>,
+  <16.2170,21.9620,88.7940>,
+  <15.8831,22.3839,89.0421>,
+  <15.6684,22.9164,89.3813>,
+  <15.5778,23.5200,89.7545>,
+  <15.6159,24.1552,90.1045>,
+  <15.7874,24.7824,90.3740>,
+  <16.0970,25.3620,90.5060>,
+  <16.5388,25.8598,90.4574>,
+  <17.0649,26.2628,90.2424>,
+  <17.6169,26.5633,89.8893>,
+  <18.1362,26.7535,89.4263>,
+  <18.5644,26.8256,88.8818>,
+  <18.8430,26.7720,88.2840>,
+  <18.9272,26.5939,87.6618>,
+  <18.8265,26.3281,87.0462>,
+  <18.5640,26.0206,86.4685>,
+  <18.1628,25.7171,85.9601>,
+  <17.6461,25.4637,85.5524>,
+  <17.0370,25.3060,85.2770>,
+  <16.3629,25.2806,85.1554>,
+  <15.6684,25.3858,85.1706>,
+  <15.0024,25.6109,85.2954>,
+  <14.4137,25.9447,85.5031>,
+  <13.9513,26.3764,85.7666>,
+  <13.6640,26.8950,86.0590>,
+  <13.5866,27.4850,86.3529>,
+  <13.6978,28.1125,86.6186>,
+  <13.9618,28.7393,86.8259>,
+  <14.3432,29.3268,86.9447>,
+  <14.8065,29.8369,86.9448>,
+  <15.3160,30.2310,86.7960>,
+  <15.8358,30.4809,86.4794>,
+  <16.3280,30.5987,86.0216>,
+  <16.7540,30.6065,85.4601>,
+  <17.0757,30.5264,84.8326>,
+  <17.2545,30.3805,84.1771>,
+  <17.2520,30.1910,83.5310>,
+  <17.0433,29.9806,82.9295>,
+  <16.6574,29.7745,82.3968>,
+  <16.1366,29.5983,81.9543>,
+  <15.5234,29.4779,81.6237>,
+  <14.8600,29.4389,81.4264>,
+  <14.1890,29.5070,81.3840>,
+  <13.5506,29.7004,81.5069>,
+  <12.9771,30.0070,81.7615>,
+  <12.4985,30.4069,82.1030>,
+  <12.1450,30.8804,82.4865>,
+  <11.9468,31.4077,82.8675>,
+  <11.9340,31.9690,83.2010>,
+  <12.1232,32.5437,83.4480>,
+  <12.4775,33.1072,83.5917>,
+  <12.9462,33.6341,83.6212>,
+  <13.4789,34.0990,83.5253>,
+  <14.0250,34.4765,83.2929>,
+  <14.5340,34.7410,82.9130>,
+  <14.9608,34.8753,82.3850>,
+  <15.2814,34.8946,81.7504>,
+  <15.4776,34.8222,81.0609>,
+  <15.5307,34.6815,80.3686>,
+  <15.4223,34.4956,79.7253>,
+  <15.1340,34.2880,79.1830>,
+  <14.6602,34.0830,78.7828>,
+  <14.0471,33.9094,78.5229>,
+  <13.3538,33.7969,78.3911>,
+  <12.6395,33.7753,78.3748>,
+  <11.9632,33.8744,78.4615>,
+  <11.3840,34.1240,78.6390>,
+  <10.9510,34.5408,78.8907>,
+  <10.6727,35.0895,79.1843>,
+  <10.5476,35.7218,79.4835>,
+  <10.5742,36.3894,79.7519>,
+  <10.7508,37.0439,79.9532>,
+  <11.0760,37.6370,80.0510>,
+  <11.5391,38.1286,80.0171>,
+  <12.0931,38.5112,79.8553>,
+  <12.6818,38.7855,79.5778>,
+  <13.2493,38.9522,79.1964>,
+  <13.7394,39.0122,78.7231>,
+  <14.0960,38.9660,78.1700>,
+  <14.2759,38.8187,77.5536>,
+  <14.2874,38.5922,76.9088>,
+  <14.1516,38.3129,76.2750>,
+  <13.8899,38.0069,75.6918>,
+  <13.5233,37.7005,75.1987>,
+  <13.0730,37.4200,74.8350>,
+  <12.5585,37.1857,74.6290>,
+  <11.9918,36.9949,74.5638>,
+  <11.3836,36.8388,74.6113>,
+  <10.7441,36.7087,74.7433>,
+  <10.0837,36.5960,74.9316>,
+  <9.4130,36.4920,75.1480>
  }
  normal_vectors { 97,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>,
-  <0.000000,0.000000,0.000000>
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>,
+  <0.0000,0.0000,0.0000>
  }
  texture_list { 512,
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.000000,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.000000,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.000000,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.000000,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.000000,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.000000,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.142857,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.142857,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.142857,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.142857,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.142857,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.142857,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.142857,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.142857,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.285714,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.285714,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.285714,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.285714,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.285714,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.285714,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.285714,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.285714,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.428571,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.428571,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.428571,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.428571,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.428571,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.428571,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.428571,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.428571,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.571429,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.571429,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.571429,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.571429,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.571429,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.571429,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.571429,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.571429,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.714286,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.714286,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.714286,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.714286,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.714286,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.714286,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.714286,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.714286,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.857143,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.857143,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.857143,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.857143,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.857143,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.857143,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.857143,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.000000,0.857143,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,1.000000,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,1.000000,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,1.000000,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,1.000000,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,1.000000,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,1.000000,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,1.000000,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.000000,1.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.000000,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.000000,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.000000,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.000000,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.000000,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.000000,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.000000,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.142857,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.142857,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.142857,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.142857,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.142857,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.142857,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.142857,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.142857,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.285714,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.285714,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.285714,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.285714,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.285714,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.285714,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.285714,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.285714,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.428571,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.428571,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.428571,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.428571,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.428571,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.428571,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.428571,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.428571,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.571429,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.571429,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.571429,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.571429,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.571429,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.571429,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.571429,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.571429,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.714286,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.714286,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.714286,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.714286,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.714286,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.714286,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.714286,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.714286,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.857143,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.857143,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.857143,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.857143,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.857143,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.857143,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.857143,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.142857,0.857143,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,1.000000,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,1.000000,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,1.000000,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,1.000000,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,1.000000,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,1.000000,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,1.000000,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.142857,1.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.000000,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.000000,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.000000,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.000000,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.000000,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.000000,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.000000,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.142857,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.142857,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.142857,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.142857,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.142857,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.142857,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.142857,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.142857,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.285714,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.285714,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.285714,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.285714,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.285714,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.285714,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.285714,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.285714,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.428571,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.428571,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.428571,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.428571,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.428571,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.428571,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.428571,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.428571,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.571429,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.571429,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.571429,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.571429,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.571429,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.571429,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.571429,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.571429,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.714286,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.714286,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.714286,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.714286,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.714286,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.714286,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.714286,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.714286,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.857143,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.857143,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.857143,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.857143,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.857143,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.857143,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.857143,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.285714,0.857143,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,1.000000,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,1.000000,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,1.000000,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,1.000000,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,1.000000,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,1.000000,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,1.000000,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.285714,1.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.000000,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.000000,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.000000,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.000000,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.000000,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.000000,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.000000,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.142857,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.142857,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.142857,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.142857,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.142857,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.142857,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.142857,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.142857,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.285714,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.285714,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.285714,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.285714,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.285714,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.285714,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.285714,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.285714,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.428571,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.428571,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.428571,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.428571,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.428571,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.428571,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.428571,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.428571,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.571429,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.571429,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.571429,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.571429,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.571429,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.571429,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.571429,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.571429,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.714286,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.714286,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.714286,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.714286,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.714286,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.714286,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.714286,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.714286,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.857143,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.857143,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.857143,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.857143,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.857143,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.857143,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.857143,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.428571,0.857143,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,1.000000,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,1.000000,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,1.000000,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,1.000000,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,1.000000,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,1.000000,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,1.000000,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.428571,1.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.000000,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.000000,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.000000,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.000000,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.000000,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.000000,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.000000,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.142857,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.142857,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.142857,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.142857,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.142857,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.142857,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.142857,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.142857,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.285714,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.285714,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.285714,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.285714,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.285714,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.285714,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.285714,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.285714,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.428571,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.428571,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.428571,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.428571,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.428571,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.428571,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.428571,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.428571,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.571429,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.571429,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.571429,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.571429,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.571429,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.571429,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.571429,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.571429,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.714286,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.714286,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.714286,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.714286,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.714286,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.714286,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.714286,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.714286,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.857143,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.857143,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.857143,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.857143,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.857143,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.857143,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.857143,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.571429,0.857143,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,1.000000,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,1.000000,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,1.000000,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,1.000000,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,1.000000,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,1.000000,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,1.000000,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.571429,1.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.000000,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.000000,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.000000,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.000000,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.000000,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.000000,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.000000,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.142857,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.142857,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.142857,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.142857,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.142857,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.142857,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.142857,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.142857,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.285714,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.285714,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.285714,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.285714,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.285714,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.285714,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.285714,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.285714,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.428571,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.428571,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.428571,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.428571,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.428571,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.428571,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.428571,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.428571,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.571429,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.571429,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.571429,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.571429,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.571429,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.571429,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.571429,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.571429,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.714286,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.714286,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.714286,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.714286,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.714286,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.714286,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.714286,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.714286,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.857143,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.857143,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.857143,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.857143,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.857143,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.857143,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.857143,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.714286,0.857143,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,1.000000,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,1.000000,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,1.000000,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,1.000000,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,1.000000,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,1.000000,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,1.000000,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.714286,1.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.000000,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.000000,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.000000,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.000000,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.000000,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.000000,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.000000,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.142857,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.142857,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.142857,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.142857,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.142857,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.142857,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.142857,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.142857,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.285714,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.285714,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.285714,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.285714,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.285714,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.285714,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.285714,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.285714,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.428571,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.428571,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.428571,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.428571,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.428571,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.428571,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.428571,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.428571,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.571429,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.571429,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.571429,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.571429,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.571429,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.571429,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.571429,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.571429,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.714286,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.714286,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.714286,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.714286,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.714286,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.714286,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.714286,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.714286,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.857143,0.000000,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.857143,0.142857,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.857143,0.285714,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.857143,0.428571,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.857143,0.571429,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.857143,0.714286,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.857143,0.857143,_Helix_fi,_Helix_tp>}},
-  texture {_Helix_tex pigment {color rgbft <0.857143,0.857143,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,1.000000,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,1.000000,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,1.000000,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,1.000000,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,1.000000,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,1.000000,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,1.000000,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <0.857143,1.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.000000,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.000000,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.000000,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.000000,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.000000,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.000000,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.000000,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.000000,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.142857,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.142857,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.142857,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.142857,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.142857,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.142857,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.142857,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.142857,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.285714,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.285714,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.285714,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.285714,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.285714,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.285714,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.285714,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.285714,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.428571,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.428571,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.428571,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.428571,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.428571,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.428571,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.428571,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.428571,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.571429,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.571429,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.571429,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.571429,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.571429,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.571429,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.571429,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.571429,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.714286,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.714286,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.714286,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.714286,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.714286,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.714286,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.714286,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.714286,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.857143,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.857143,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.857143,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.857143,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.857143,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.857143,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.857143,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,0.857143,1.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,1.000000,0.000000,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,1.000000,0.142857,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,1.000000,0.285714,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,1.000000,0.428571,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,1.000000,0.571429,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,1.000000,0.714286,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,1.000000,0.857143,_Helix_fi,_Helix_tp>}}
-  texture {_Helix_tex pigment {color rgbft <1.000000,1.000000,1.000000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.0000,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.0000,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.0000,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.0000,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.0000,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.0000,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.1429,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.1429,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.1429,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.1429,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.1429,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.1429,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.1429,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.1429,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.2857,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.2857,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.2857,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.2857,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.2857,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.2857,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.2857,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.2857,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.4286,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.4286,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.4286,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.4286,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.4286,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.4286,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.4286,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.4286,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.5714,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.5714,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.5714,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.5714,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.5714,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.5714,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.5714,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.5714,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.7143,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.7143,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.7143,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.7143,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.7143,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.7143,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.7143,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.7143,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.8571,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.8571,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.8571,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.8571,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.8571,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.8571,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.8571,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.0000,0.8571,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,1.0000,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,1.0000,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,1.0000,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,1.0000,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,1.0000,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,1.0000,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,1.0000,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.0000,1.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.0000,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.0000,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.0000,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.0000,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.0000,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.0000,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.0000,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.1429,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.1429,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.1429,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.1429,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.1429,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.1429,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.1429,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.1429,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.2857,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.2857,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.2857,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.2857,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.2857,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.2857,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.2857,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.2857,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.4286,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.4286,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.4286,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.4286,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.4286,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.4286,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.4286,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.4286,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.5714,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.5714,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.5714,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.5714,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.5714,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.5714,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.5714,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.5714,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.7143,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.7143,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.7143,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.7143,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.7143,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.7143,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.7143,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.7143,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.8571,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.8571,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.8571,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.8571,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.8571,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.8571,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.8571,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.1429,0.8571,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,1.0000,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,1.0000,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,1.0000,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,1.0000,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,1.0000,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,1.0000,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,1.0000,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.1429,1.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.0000,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.0000,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.0000,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.0000,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.0000,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.0000,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.0000,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.1429,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.1429,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.1429,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.1429,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.1429,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.1429,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.1429,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.1429,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.2857,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.2857,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.2857,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.2857,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.2857,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.2857,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.2857,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.2857,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.4286,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.4286,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.4286,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.4286,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.4286,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.4286,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.4286,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.4286,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.5714,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.5714,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.5714,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.5714,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.5714,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.5714,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.5714,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.5714,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.7143,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.7143,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.7143,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.7143,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.7143,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.7143,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.7143,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.7143,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.8571,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.8571,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.8571,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.8571,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.8571,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.8571,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.8571,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.2857,0.8571,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,1.0000,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,1.0000,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,1.0000,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,1.0000,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,1.0000,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,1.0000,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,1.0000,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.2857,1.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.0000,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.0000,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.0000,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.0000,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.0000,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.0000,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.0000,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.1429,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.1429,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.1429,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.1429,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.1429,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.1429,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.1429,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.1429,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.2857,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.2857,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.2857,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.2857,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.2857,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.2857,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.2857,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.2857,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.4286,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.4286,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.4286,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.4286,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.4286,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.4286,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.4286,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.4286,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.5714,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.5714,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.5714,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.5714,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.5714,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.5714,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.5714,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.5714,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.7143,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.7143,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.7143,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.7143,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.7143,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.7143,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.7143,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.7143,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.8571,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.8571,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.8571,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.8571,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.8571,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.8571,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.8571,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.4286,0.8571,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,1.0000,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,1.0000,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,1.0000,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,1.0000,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,1.0000,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,1.0000,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,1.0000,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.4286,1.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.0000,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.0000,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.0000,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.0000,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.0000,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.0000,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.0000,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.1429,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.1429,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.1429,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.1429,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.1429,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.1429,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.1429,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.1429,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.2857,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.2857,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.2857,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.2857,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.2857,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.2857,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.2857,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.2857,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.4286,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.4286,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.4286,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.4286,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.4286,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.4286,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.4286,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.4286,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.5714,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.5714,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.5714,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.5714,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.5714,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.5714,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.5714,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.5714,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.7143,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.7143,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.7143,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.7143,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.7143,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.7143,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.7143,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.7143,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.8571,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.8571,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.8571,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.8571,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.8571,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.8571,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.8571,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.5714,0.8571,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,1.0000,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,1.0000,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,1.0000,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,1.0000,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,1.0000,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,1.0000,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,1.0000,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.5714,1.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.0000,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.0000,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.0000,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.0000,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.0000,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.0000,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.0000,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.1429,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.1429,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.1429,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.1429,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.1429,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.1429,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.1429,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.1429,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.2857,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.2857,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.2857,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.2857,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.2857,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.2857,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.2857,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.2857,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.4286,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.4286,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.4286,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.4286,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.4286,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.4286,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.4286,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.4286,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.5714,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.5714,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.5714,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.5714,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.5714,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.5714,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.5714,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.5714,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.7143,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.7143,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.7143,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.7143,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.7143,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.7143,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.7143,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.7143,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.8571,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.8571,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.8571,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.8571,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.8571,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.8571,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.8571,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.7143,0.8571,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,1.0000,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,1.0000,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,1.0000,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,1.0000,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,1.0000,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,1.0000,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,1.0000,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.7143,1.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.0000,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.0000,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.0000,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.0000,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.0000,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.0000,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.0000,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.1429,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.1429,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.1429,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.1429,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.1429,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.1429,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.1429,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.1429,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.2857,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.2857,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.2857,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.2857,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.2857,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.2857,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.2857,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.2857,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.4286,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.4286,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.4286,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.4286,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.4286,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.4286,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.4286,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.4286,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.5714,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.5714,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.5714,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.5714,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.5714,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.5714,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.5714,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.5714,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.7143,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.7143,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.7143,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.7143,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.7143,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.7143,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.7143,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.7143,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.8571,0.0000,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.8571,0.1429,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.8571,0.2857,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.8571,0.4286,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.8571,0.5714,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.8571,0.7143,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.8571,0.8571,_Helix_fi,_Helix_tp>}},
+  texture {_Helix_tex pigment {color rgbft <0.8571,0.8571,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,1.0000,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,1.0000,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,1.0000,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,1.0000,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,1.0000,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,1.0000,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,1.0000,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <0.8571,1.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.0000,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.0000,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.0000,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.0000,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.0000,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.0000,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.0000,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.0000,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.1429,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.1429,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.1429,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.1429,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.1429,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.1429,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.1429,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.1429,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.2857,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.2857,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.2857,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.2857,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.2857,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.2857,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.2857,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.2857,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.4286,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.4286,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.4286,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.4286,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.4286,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.4286,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.4286,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.4286,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.5714,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.5714,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.5714,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.5714,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.5714,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.5714,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.5714,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.5714,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.7143,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.7143,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.7143,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.7143,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.7143,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.7143,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.7143,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.7143,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.8571,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.8571,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.8571,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.8571,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.8571,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.8571,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.8571,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,0.8571,1.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,1.0000,0.0000,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,1.0000,0.1429,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,1.0000,0.2857,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,1.0000,0.4286,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,1.0000,0.5714,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,1.0000,0.7143,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,1.0000,0.8571,_Helix_fi,_Helix_tp>}}
+  texture {_Helix_tex pigment {color rgbft <1.0000,1.0000,1.0000,_Helix_fi,_Helix_tp>}}
  }
  face_indices { 0
  }
