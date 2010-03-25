@@ -69,8 +69,12 @@ def _load_files():
   graphical_objects=[]
   try:
     for f in input_files:
-      e=os.path.splitext(f[0])[1]
-      if e in ['.pdb', '.ent', '.ent.gz', '.pdb.gz']:
+      is_pdb_file=False
+      for ext in ['.pdb', '.ent', '.ent.gz', '.pdb.gz']:
+        if f[0].endswith(ext):
+          is_pdb_file=True
+          break
+      if is_pdb_file:
         es=io.LoadPDB(f[0], load_multi=True)
         for i, e in enumerate(es):
           index+=1
