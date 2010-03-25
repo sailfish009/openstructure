@@ -127,7 +127,7 @@ public:
   int GetBondCount() const;
 
   /// \brief  Find torsion by name
-  /// \note   For the PHI and PSI torsions of the backbone use the designated
+  /// \note   For the PHI, ISP and PSI torsions of the backbone use the designated
   ///         GetPhiTorsion and GetPsiTorsion methods, respectively.
   /// \param torsion_name
   ///         is the name of the torsion you are looking for. Torsions are named
@@ -137,7 +137,7 @@ public:
   /// \sa     ResidueBase::GetPhiTorsion, ResidueBase::GetPsiTorsion
   TorsionHandle FindTorsion(const String& torsion_name) const;
 
-  /// \brief   Get list of all torsion of this residue
+  /// \brief   Get list of all torsion angles of this residue
   TorsionHandleList GetTorsionList() const;
 
   /// \brief Get position of residue in chain.

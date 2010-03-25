@@ -25,6 +25,7 @@
 #include "heuristic_connect_table.hh"
 #include <ost/mol/residue_handle.hh>
 
+
 namespace ost { namespace conop {
 
 namespace detail {
@@ -172,8 +173,11 @@ HeuristicBuilder::HeuristicBuilder():
           tor_nam[cid]="-";
         } else if (tor_id[cid]==-3) {
           tor_nam[cid]="+";
+        } else if (tor_id[cid]==-4) {
+          tor_nam[cid]=":";
         }
       }
+
       entry.AddTors(tor_nam[0],tor_nam[1],tor_nam[2],tor_nam[3],tor_nam2);
     }
 
@@ -345,13 +349,25 @@ void HeuristicBuilder::AssignTorsionsToResidue(const mol::ResidueHandle& res)
               flag=true;
             }
           }
-        } else if (tel[ti].a[ahi]=="-") {
+        } else if (cur_name=="-") {
           mol::ResidueHandle prev=res.GetPrev();
           if (Builder::AreResiduesConsecutive(prev, res)) {
             centry2=LookupResEntry(prev.GetKey());
             if (centry2.second) {
               cur_name=centry2.first.GetNext();
               search_in=prev;
+              flag=true;
+            }
+          }
+        } else if (cur_name==":") {
+          mol::ResidueHandle next=res.GetNext();
+          if (Builder::AreResiduesConsecutive(res,next)) {
+            centry2=LookupResEntry(next.GetKey());
+            if (centry2.second) {
+            //force CA since only N can be accessed by using centry2.first.GetNext();
+            //TODO refactor using hardcoded torsions from heuristic and place in base class.
+              cur_name="CA";
+              search_in=next;
               flag=true;
             }
           }

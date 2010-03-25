@@ -103,11 +103,17 @@ public:
   /// TorsionImplP will be returned.
   TorsionImplP GetPhiTorsion() const;
 
-  /// \brief Get isp torsion between this and the next residue
+  /// \brief Get isp torsion between this and the prev residue
   ///
   /// If no isp torsion has been assigned to this residue an invalid
   /// TorsionImplP will be returned.
   TorsionImplP GetIspTorsion() const;
+
+  /// \brief Get omega torsion between this and the prev residue
+  ///
+  /// If no isp torsion has been assigned to this residue an invalid
+  /// TorsionImplP will be returned.
+  TorsionImplP ResidueImpl::GetOmegaTorsion() const;
   /// \brief Get psi torsion
   ///
   /// If no psi torsion has been assigned to this residue an invalid

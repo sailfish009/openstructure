@@ -306,6 +306,32 @@ TorsionImplP ResidueImpl::FindTorsion(const String& torsion_name) const {
   return TorsionImplP();
 }
 
+
+TorsionImplP ResidueImpl::GetOmegaTorsion() const {
+  ChainImplPtr chain=this->GetChain();
+  ResidueImplPtr self=const_cast<ResidueImpl*>(this)->shared_from_this();
+  ResidueImplPtr next=chain->GetNext(self);
+  if (!next || !InSequence(self, next))
+    return TorsionImplP();
+
+  AtomImplPtr calpha=this->FindAtom("CA");
+  AtomImplPtr c=this->FindAtom("C");
+  AtomImplPtr nne=next->FindAtom("N");
+  AtomImplPtr calphane=next->FindAtom("CA");
+  TorsionImplList::const_iterator i=torsion_list_.begin();
+
+  for (;i!=torsion_list_.end(); ++i) {
+    TorsionImplP t=*i;
+    if (t->Matches(calpha, c, nne,  calphane))
+      return t;
+  }
+
+  LOGN_DUMP("Can't find torsion Omega for " <<
+           this->GetKey() << this->GetNumber());
+  return TorsionImplP();
+}
+
+
 TorsionImplP ResidueImpl::GetPhiTorsion() const {
   ChainImplPtr chain=this->GetChain();
   ResidueImplPtr self=const_cast<ResidueImpl*>(this)->shared_from_this();
