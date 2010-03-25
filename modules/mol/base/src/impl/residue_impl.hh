@@ -113,7 +113,7 @@ public:
   ///
   /// If no isp torsion has been assigned to this residue an invalid
   /// TorsionImplP will be returned.
-  TorsionImplP ResidueImpl::GetOmegaTorsion() const;
+  TorsionImplP GetOmegaTorsion() const;
   /// \brief Get psi torsion
   ///
   /// If no psi torsion has been assigned to this residue an invalid
