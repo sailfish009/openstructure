@@ -1,0 +1,2 @@
+#!/bin/sh
+cat harmony.py | gosty Harmony $@
