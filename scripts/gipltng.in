@@ -26,9 +26,8 @@ BIN_DIR=`dirname $SCRIPT_NAME`
 export DNG_ROOT=$BIN_DIR/..
 export PATH=$BIN_DIR:$PATH
 
-# set ld_library_path and pythonhome for bundle (commented except in linux bundles)
-
-#export LD_LIBRARY_PATH=$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH
+# set pythonhome for bundle (commented except in linux bundles)
 #export PYTHONHOME=$DNG_ROOT
 
 # store code in shell variable. Reduces the actuall call to gosty to just one 

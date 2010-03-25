@@ -28,9 +28,9 @@ export DNG_ROOT="$BIN_DIR/.."
 export PATH=$PATH:"$BIN_DIR"
 export DYLD_FRAMEWORK_PATH="$BIN_DIR/../@LIBDIR@:${DYLD_FRAMEWORK_PATH}"
 export DYLD_LIBRARY_PATH="$BIN_DIR/../@LIBDIR@:${DYLD_LIBRARY_PATH}"
-# set ld_library_path and pythonhome for bundle (commented except in linux bundles)
 
-#export LD_LIBRARY_PATH=$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH
+# set QT_PLUGIN_PATH and pythonhome for bundle (commented except in linux bundles)
 #export PYTHONHOME=$DNG_ROOT
 #export QT_PLUGIN_PATH="$BIN_DIR/plugins"
 
