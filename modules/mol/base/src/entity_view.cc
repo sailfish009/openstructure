@@ -582,6 +582,7 @@ EntityView EntityView::Copy() const
 ChainView EntityView::AddChain(const ChainView& chain_view,
                                ViewAddFlags flags) 
 {
+  this->CheckValidity();
   ChainView cv;
   if (flags & ViewAddFlag::CHECK_DUPLICATES &&
      (cv=this->FindChain(chain_view.GetHandle()))) {
@@ -623,6 +624,7 @@ AtomViewList EntityView::FindWithin(const geom::Vec3& center, Real radius) const
   // could use some heuristic here to decide whether it is useful
   // to use the FindWithin method of the handle or do a full search of
   // all atoms included in the view.
+  this->CheckValidity();
   AtomHandleList ahl=this->GetHandle().FindWithin(center, radius);
   AtomViewList avl;
   for (AtomHandleList::iterator i=ahl.begin(), e=ahl.end(); i!=e; ++i) {

@@ -115,12 +115,21 @@ public:
   ///
   /// \sa EntityHandle::GetResidueCount()
   int GetResidueCount() const;
-
+  
+  /// \brief Retrieve atoms of this chain as a list
+  ///
+  /// The atoms are ordered by atom number in ascending order. If you only
+  /// want to determine the number of atoms, use the dedicated
+  /// \c ChainHandle::GetAtomCount  
+  
+  
+  AtomHandleList GetAtomList() const;
+  
   /// \brief Get residues of this chain as a list
   ///
   /// The residues are ordered by residue number in ascending order. If you only
   /// want to determine the number of residues, use the dedicated
-  /// \c ResidueHandle::GetResidueCount
+  /// \c ChainHandle::GetResidueCount
   ResidueHandleList GetResidueList() const;
 
   /// \brief  Get iterator pointing to begin of residues

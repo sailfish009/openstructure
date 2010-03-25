@@ -23,6 +23,10 @@
   Author: Stefan Scheuber, Marco Biasini
 */
 
+
+#if defined(GetProp)
+#undef GetProp
+#endif
 #include <vector>
 
 #include <ost/mol/query_view_wrapper.hh>

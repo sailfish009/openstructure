@@ -92,6 +92,14 @@ AtomHandle ChainHandle::FindAtom(const ResNum& num,
 }
 
 
+AtomHandleList ChainHandle::GetAtomList() const
+{
+  this->CheckValidity();
+  AtomHandleList atoms;
+  std::copy(AtomsBegin(), AtomsEnd(), std::back_inserter(atoms));
+  return atoms;
+}
+
 ResidueHandleList ChainHandle::GetResidueList() const
 {
   ResidueHandleList reslist;

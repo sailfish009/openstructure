@@ -53,6 +53,8 @@ void export_Chain()
   ;
   generic_prop_def<ChainBase>(chain_base);
   class_<ChainHandle, bases<ChainBase> >("ChainHandle", init<>())
+    .def("GetAtomList", &ChainHandle::GetAtomList)
+    .add_property("atoms", &ChainHandle::GetAtomList)
     .def("GetResidueList", &ChainHandle::GetResidueList)
     .add_property("residues", &ChainHandle::GetResidueList)   
     .add_property("entity", &ChainHandle::GetEntity) 
