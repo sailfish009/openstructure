@@ -17,7 +17,7 @@ class DokkGLCanvas(QGLWidget):
     self.atom=mol.AtomHandle()
   def initializeGL(self):
     gfx.Scene().InitGL()
-    self.startTimer(20)
+    self.startTimer(10)
   def paintGL(self):
     gfx.Scene().RenderGL()
   def paintEvent(self, event):

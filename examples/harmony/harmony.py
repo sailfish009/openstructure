@@ -31,18 +31,29 @@ class World:
         break
   def Update(self):
     last_atom=mol.AtomHandle()
-    for index, atom in enumerate(self.atom_string.atoms):
+    atoms=self.atom_string.atoms
+    for index, atom in enumerate(atoms):
       if last_atom.IsValid():
         diff=last_atom.pos-atom.pos
         length=geom.Length(diff)
         diff/=length
-        force=(1.0-length)**2*diff
+        force=(length-1)**2*diff*100
+        if length<1.0:
+          force*=-1
         self.forces[index-1]-=force
         self.forces[index]+=force
       last_atom=atom
+    for i in range(len(atoms)):
+      for j in range(i+2, len(atoms)):
+        diff=atoms[i].pos-atoms[j].pos
+        length=geom.Length(diff)
+        diff/=length
+        force=((1.0/length)**12-(1.0/length)**6)*diff
+        self.forces[i]+=force
+        self.forces[j]-=force
     edi=self.atom_string.RequestXCSEditor(mol.EditMode.BUFFERED_EDIT)
     for force, atom in zip(self.forces, self.atom_string.atoms):
-      edi.SetAtomPos(atom, atom.pos+force*0.01)
+      edi.SetAtomPos(atom, atom.pos+force*0.004)
     self.go.Rebuild()
     for i in range(len(self.last_positions)):
       self.forces[i]=geom.Vec3()
