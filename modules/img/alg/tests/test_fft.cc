@@ -53,7 +53,22 @@ void Test_C2C_1D_calc(int N)
     ComplexSpatialImageState in=ComplexSpatialImageState( Extent(Size(N)),PixelSampling() );
     ComplexFrequencyImageState ref=ComplexFrequencyImageState( Extent(Size(N)),PixelSampling() );
 
-    Randomize(in);
+    int step;
+
+    if (N==64) {
+      step=4;
+    } else {
+      step=3;
+    }
+
+    int sum =0;
+
+    for (ExtentIterator ex_it(in.GetExtent());!ex_it.AtEnd();++ex_it) {
+      if (ex_it[0] % step == 0) {
+        in.Value(ex_it)=Complex(4.0,0.0);
+        sum=sum+4;
+      }
+    }
 
     ImageStateBasePtr out_base;
 
@@ -63,37 +78,17 @@ void Test_C2C_1D_calc(int N)
 
     BOOST_REQUIRE(out_state!=0);
 
+    //std::cout << "FFT" << std::endl;
+    //for (ExtentIterator ex_it(out_state->GetExtent());!ex_it.AtEnd();++ex_it) {
+    //  std::cout << ex_it[0] << " " << out_state->Value(ex_it) << std::endl;
+    //}
+
     BOOST_CHECK(out_state->GetExtent()==Extent(Size(N),Point(0)));
 
-    // fft by hand
-    for(int u=0;u<N;++u) {
-      Real uu=Real(u);
-      Complex res(0.0,0.0);
-      for(int x=0;x<N;++x) {
-        Real xx = Real(x)/Real(N);
-        Real ex = -Real(2.0)*Real(M_PI)*(uu*xx);
-        res += in.Value(Index(x,0,0)) * Complex(std::cos(ex),std::sin(ex));
-      }
-      ref.Value(Index(u,0,0))=res;
-    }
-
-    BOOST_REQUIRE(CheckEqualStates(ref,*out_state));
-
-    // bw tf
-    ImageStateBasePtr out_rev_base;
-
-    out_rev_base = out_state->Apply(alg::FFT());
-
-    ComplexSpatialImageState* out_rev = dynamic_cast<ComplexSpatialImageState*>(out_rev_base.get());
-
-    BOOST_REQUIRE(out_rev!=0);
-
-    BOOST_REQUIRE(CheckEqualStates(in, *out_rev, 1e-4));
-
-    std::ostringstream msg;
-    msg << in.GetExtent() << " != " << out_rev->GetExtent();
-
-    BOOST_CHECK_MESSAGE(in.GetExtent()==out_rev->GetExtent(),msg.str());
+    Point peak(N/step,0);
+    Complex peak_value = out_state->Value(peak);
+    Complex calc_peak_value = Complex(sum,0.0);
+    BOOST_REQUIRE(peak_value == calc_peak_value);
 
   } catch (alg::FFTException& e) {
     BOOST_ERROR("FFT Exception caught!");
@@ -112,12 +107,19 @@ void Test_C2C_1D_odd_calc()
 
 void Test_C2C_3D_calc()
 {
-  int N=8;
+  int N=16;
   try {
     ComplexSpatialImageState in( Extent(Size(N,N,N)),PixelSampling() );
     ComplexFrequencyImageState ref( Extent(Size(N,N,N)),PixelSampling() );
 
-    Randomize(in);
+    int step = 4;
+    int sum = 0;
+    for (ExtentIterator ex_it(in.GetExtent());!ex_it.AtEnd();++ex_it) {
+      if (ex_it[0] % step == 0 && ex_it[1] % step == 0 && ex_it[2] % step == 0) {
+         in.Value(ex_it)=Complex(4.0,0.0);
+         sum=sum+4;
+      }
+    }
 
     ImageStateBasePtr out_base;
 
@@ -129,44 +131,18 @@ void Test_C2C_3D_calc()
 
     BOOST_CHECK(out_state->GetExtent()==Extent(Size(N,N,N),Point(0,0,0)));
 
-    // fft by hand
-    for(int u=0;u<N;++u) {
-      Real uu=Real(u);
-      for(int v=0;v<N;++v) {
-        Real vv=Real(v);
-        for(int w=0;w<N;++w) {
-          Real ww=Real(w);
-          Complex res(0.0,0.0);
-          for(int x=0;x<N;++x) {
-            Real xx = Real(x)/Real(N);
-            for(int y=0;y<N;++y) {
-              Real yy = Real(y)/Real(N);
-              for(int z=0;z<N;++z) {
-                Real zz = Real(z)/Real(N);
-                Real ex = -Real(2.0)*Real(M_PI)*(uu*xx+vv*yy+ww*zz);
-                res += in.Value(Index(x,y,z)) * Complex(std::cos(ex),std::sin(ex));
-              }
-            }
-          }
-          ref.Value(Index(u,v,w))=res;
-        }
-      }
-    }
-
-    BOOST_REQUIRE(CheckEqualStates(ref,*out_state));
-
-    // bw tf
-    ImageStateBasePtr out_rev_base;
-
-    out_rev_base = out_state->Apply(alg::FFT());
-
-    ComplexSpatialImageState* out_rev = dynamic_cast<ComplexSpatialImageState*>(out_rev_base.get());
-
-    BOOST_REQUIRE(out_rev!=0);
-
-    BOOST_REQUIRE(CheckEqualStates(in, *out_rev, 1e-4));
-
-    BOOST_CHECK(in.GetExtent()==out_rev->GetExtent());
+    Point peak(N/step,0,0);
+    Complex peak_value = out_state->Value(peak);
+    Complex calc_peak_value = Complex(sum,0.0);
+    BOOST_REQUIRE(peak_value == calc_peak_value);
+    Point peak2(0,N/step,0);
+    Complex peak_value2 = out_state->Value(peak2);
+    Complex calc_peak_value2 = Complex(sum,0.0);
+    BOOST_REQUIRE(peak_value2 == calc_peak_value2);
+    Point peak3(0,0,N/step);
+    Complex peak_value3 = out_state->Value(peak3);
+    Complex calc_peak_value3 = Complex(sum,0.0);
+    BOOST_REQUIRE(peak_value3 == calc_peak_value3);
 
   } catch (alg::FFTException& e) {
     BOOST_ERROR("FFT Exception caught!");
@@ -180,7 +156,22 @@ void Test_R2H_1D_calc(int N)
     RealSpatialImageState in=RealSpatialImageState( Extent(Size(N)),PixelSampling() );
     ComplexHalfFrequencyImageState ref=ComplexHalfFrequencyImageState( Extent(Size(N)),PixelSampling() );
 
-    Randomize(in);
+    int step;
+
+    if (N==64) {
+      step=4;
+    } else {
+      step=3;
+    }
+
+    int sum =0;
+
+    for (ExtentIterator ex_it(in.GetExtent());!ex_it.AtEnd();++ex_it) {
+      if (ex_it[0] % step == 0) {
+        in.Value(ex_it)=4.0;
+        sum=sum+4;
+      }
+    }
 
     ImageStateBasePtr out_base;
 
@@ -193,33 +184,19 @@ void Test_R2H_1D_calc(int N)
     BOOST_CHECK(out_state->GetExtent()==Extent(Point(0),Size(N/2+1)));
     BOOST_CHECK(out_state->GetLogicalExtent()==Extent(Size(N),Point(0)));
 
-    // fft by hand
-    for(int u=0;u<=N/2;++u) {
-      Real uu=Real(u);
-      Complex res(0.0,0.0);
-      for(int x=0;x<N;++x) {
-        Real xx = Real(x)/Real(N);
-        Real ex = -Real(2.0)*Real(M_PI)*(uu*xx);
-        Real val = in.Value(Index(x,0,0));
-        res+=Complex(val*std::cos(ex),val*std::sin(ex));
-      }
-      ref.Value(Index(u,0,0))=res;
-    }
-    
-    BOOST_REQUIRE(CheckEqualStates(ref,*out_state,1e-4));
+    //std::cout << "FFT" << std::endl;
+    //for (ExtentIterator ex_it(out_state->GetExtent());!ex_it.AtEnd();++ex_it) {
+    //  std::cout << ex_it[0] << " " << out_state->Value(ex_it) << std::endl;
+    //}
 
-    // bw tf
-    ImageStateBasePtr out_rev_base;
+    BOOST_CHECK(out_state->GetExtent()==Extent(Point(0),Size(N/2+1)));
+    BOOST_CHECK(out_state->GetLogicalExtent()==Extent(Size(N),Point(0)));
 
-    out_rev_base = out_state->Apply(alg::FFT());
-    
-    RealSpatialImageState* out_rev = dynamic_cast<RealSpatialImageState*>(out_rev_base.get());
+    Point peak(N/step);
+    Complex peak_value = out_state->Value(peak);
+    Complex calc_peak_value = Complex(sum,0.0);
 
-    BOOST_REQUIRE(out_rev!=0);
-
-    BOOST_REQUIRE(CheckEqualStates(in, *out_rev, 1e-4));
-
-    BOOST_CHECK(in.GetExtent()==out_rev->GetExtent());
+    BOOST_REQUIRE(peak_value == calc_peak_value);
 
   } catch (alg::FFTException& e) {
     BOOST_ERROR("FFT Exception caught in Test_R2H_1D_explicit!");
@@ -309,12 +286,19 @@ void Test_R2H_2D_explicit()
 
 void Test_R2H_2D_calc()
 {
-  int N=8;
+  int N=16;
   try {
     RealSpatialImageState in( (Extent(Point(-2,-3),Size(N,N))),PixelSampling() );
     ComplexHalfFrequencyImageState ref( Extent(Size(N,N)),PixelSampling() );
 
-    Randomize(in);
+    int step = 4;
+    int sum = 0;
+    for (ExtentIterator ex_it(in.GetExtent());!ex_it.AtEnd();++ex_it) {
+      if (ex_it[0] % step == 0 && ex_it[1] % step == 0) {
+         in.Value(ex_it)=4.0;
+         sum=sum+4;
+      }
+    }
 
     ImageStateBasePtr out_base;
 
@@ -329,40 +313,15 @@ void Test_R2H_2D_calc()
     Point pst(st[0],0);
     BOOST_CHECK(out_state->GetExtent()==Extent(pst,Size(N,N/2+1)));
 
-    // fft by hand
-    for(int u=0;u<N;++u) {
-      Real uu=Real(u);
-      for(int v=0;v<=N/2;++v) {
-        Real vv=Real(v);
-        Complex res(0.0,0.0);
-        for(int x=0;x<N;++x) {
-          Real xx = Real(x)/Real(N);
-          for(int y=0;y<N;++y) {
-            Real yy = Real(y)/Real(N);
-            Real ex = -Real(2.0)*Real(M_PI)*(uu*xx+vv*yy);
-            Real val = in.Value(Index(x,y,0));
-            res+=Complex(val*std::cos(ex),val*std::sin(ex));
-          }
-        }
-        ref.Value(Index(u,v,0))=res;
-      }
-    }
+    Point peak(N/step,0);
+    Complex peak_value = out_state->Value(peak);
+    Complex calc_peak_value = Complex(-sum,0.0);
+    BOOST_REQUIRE(peak_value == calc_peak_value);
+    Point peak2(0,N/step);
+    Complex peak_value2 = out_state->Value(peak2);
+    Complex calc_peak_value2 = Complex(0,sum);
 
-    BOOST_REQUIRE(CheckEqualStates(ref,*out_state, 1e-4));
-
-    ImageStateBasePtr out_rev_base;
-
-    out_rev_base = out_state->Apply(alg::FFT());
-
-    RealSpatialImageState* out_rev = dynamic_cast<RealSpatialImageState*>(out_rev_base.get());
-
-    BOOST_REQUIRE(out_rev!=0);
-
-    BOOST_REQUIRE(CheckEqualStates(in, *out_rev, 1e-4));
-
-    std::ostringstream msg;
-    msg << in.GetExtent() << " != " << out_rev->GetExtent();
-    BOOST_CHECK_MESSAGE(in.GetExtent()==out_rev->GetExtent(),msg.str());
+    BOOST_REQUIRE(peak_value2 == calc_peak_value2);
 
   } catch (alg::FFTException& e) {
     BOOST_ERROR("FFT Exception caught in Test_R2H_2D_explicit!");
@@ -371,12 +330,19 @@ void Test_R2H_2D_calc()
 
 void Test_R2H_3D_calc()
 {
-  int N=8;
+  int N=16;
   try {
     RealSpatialImageState in=RealSpatialImageState( Extent(Size(N,N,N),Point(0,0,0)),PixelSampling() );
     ComplexHalfFrequencyImageState ref=ComplexHalfFrequencyImageState( Extent(Size(N,N,N)),PixelSampling() );
 
-    Randomize(in);
+    int step = 4;
+    int sum = 0;
+    for (ExtentIterator ex_it(in.GetExtent());!ex_it.AtEnd();++ex_it) {
+      if (ex_it[0] % step == 0 && ex_it[1] % step == 0 && ex_it[2] % step == 0) {
+         in.Value(ex_it)=4.0;
+         sum=sum+4;
+      }
+    }
 
     ImageStateBasePtr out_base;
 
@@ -391,45 +357,19 @@ void Test_R2H_3D_calc()
     Point pst(st[0],st[1],0);
     BOOST_CHECK(out_state->GetExtent()==Extent(pst,Size(N,N,N/2+1)));
 
-    // fft by hand
-    for(int u=0;u<N;++u) {
-      Real uu=Real(u);
-      for(int v=0;v<N;++v) {
-        Real vv=Real(v);
-        for(int w=0;w<=N/2;++w) {
-          Real ww=Real(w);
-          Complex res(0.0,0.0);
-          for(int x=0;x<N;++x) {
-            Real xx = Real(x)/Real(N);
-            for(int y=0;y<N;++y) {
-              Real yy = Real(y)/Real(N);
-              for(int z=0;z<N;++z) {
-                Real zz = Real(z)/Real(N);
-                Real ex = -Real(2.0)*Real(M_PI)*(uu*xx+vv*yy+ww*zz);
-                Real val = in.Value(Index(x,y,z));
-                res+=Complex(val*std::cos(ex),val*std::sin(ex));
-              }
-            }
-          }
-          ref.Value(Index(u,v,w))=res;
-        }
-      }
-    }
-
-    BOOST_REQUIRE(CheckEqualStates(ref,*out_state, 1e-4));
-
-    ImageStateBasePtr out_rev_base;
-
-    out_rev_base = out_state->Apply(alg::FFT());
-
-    RealSpatialImageState* out_rev = dynamic_cast<RealSpatialImageState*>(out_rev_base.get());
-
-    BOOST_REQUIRE(out_rev!=0);
+    Point peak(N/step,0,0);
+    Complex peak_value = out_state->Value(peak);
+    Complex calc_peak_value = Complex(0.0,sum);
+    BOOST_REQUIRE(peak_value == calc_peak_value);
+    Point peak2(0,N/step,0);
+    Complex peak_value2 = out_state->Value(peak2);
+    Complex calc_peak_value2 = Complex(0.0,sum);
+    BOOST_REQUIRE(peak_value2 == calc_peak_value2);
+    Point peak3(0,0,N/step);
+    Complex peak_value3 = out_state->Value(peak3);
+    Complex calc_peak_value3 = Complex(0.0,sum);
+    BOOST_REQUIRE(peak_value3 == calc_peak_value3);
     
-    BOOST_REQUIRE(CheckEqualStates(in, *out_rev, 1e-4));
-
-    BOOST_CHECK(in.GetExtent()==out_rev->GetExtent());
-
   } catch (alg::FFTException& e) {
     BOOST_ERROR("FFT Exception caught in Test_R2H_3D_explicit!");
   }
