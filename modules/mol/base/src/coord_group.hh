@@ -55,7 +55,7 @@ public:
   /// \brief assign positions to the given frame - order and count must match 
   ///      initial atomlist
   void SetFramePositions(uint frame, const std::vector<geom::Vec3>& clist);
-  
+
   /// \brief copy atom positions of given frame to stored atoms in entity
   void CopyFrame(uint frame);
   
@@ -68,6 +68,12 @@ public:
   /// \brief add frame 
   void AddFrame(const std::vector<geom::Vec3>& clist);
 
+  /// \brief set an indidivial atom position in the given frame
+  void SetAtomPos(uint frame, AtomHandle atom, const geom::Vec3& pos);
+
+  /// \brief retrieve an indidivial atom position in the given frame
+  geom::Vec3 GetAtomPos(uint frame, AtomHandle atom) const;
+  
   /// \brief check for handle validity
   bool IsValid() const;
 

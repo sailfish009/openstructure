@@ -100,6 +100,18 @@ void CoordGroupHandle::CheckValidity() const
   }
 }
 
+void CoordGroupHandle::SetAtomPos(uint frame, AtomHandle atom, const geom::Vec3& pos)
+{
+  this->CheckValidity();
+  source_->SetAtomPos(frame,atom,pos);
+}
+
+geom::Vec3 CoordGroupHandle::GetAtomPos(uint frame, AtomHandle atom) const
+{
+  this->CheckValidity();
+  return source_->GetAtomPos(frame,atom);
+}
+
 CoordFramePtr CoordGroupHandle::GetFrame(uint frame) const
 {
   this->CheckValidity();

@@ -40,7 +40,7 @@ public:
   
   virtual uint GetFrameCount();
   
-  virtual CoordFramePtr GetFrame(uint frame_id);
+  virtual CoordFramePtr GetFrame(uint frame_id) const;
   
   void AddFrame(const CoordFramePtr& frame);
   virtual void AddFrame(const std::vector<geom::Vec3>& coords);

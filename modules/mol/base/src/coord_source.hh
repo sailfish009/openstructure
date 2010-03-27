@@ -49,13 +49,18 @@ public:
   
   virtual uint GetFrameCount()=0;
   
-  virtual CoordFramePtr GetFrame(uint frame_id)=0;
+  virtual CoordFramePtr GetFrame(uint frame_id) const = 0;
  
   int GetAtomCount() const;
   
   EntityHandle GetEntity() const;
   
   const AtomHandleList& GetAtomList() const;
+
+  void SetAtomPos(uint frame, AtomHandle atom, const geom::Vec3& pos);
+
+  geom::Vec3 GetAtomPos(uint frame, AtomHandle atom) const;
+
   /// \brief assign the coordinates in the given frame to the atoms
   void CopyFrame(uint frame);
   bool IsMutable() const;
@@ -70,6 +75,7 @@ private:
   AtomHandleList atoms_;
   EntityHandle   entity_;
   bool           mutable_;
+  std::map<long,uint> atom_dict_;
 };
 
 }}

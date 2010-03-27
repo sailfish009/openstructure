@@ -31,10 +31,16 @@ namespace ost { namespace mol {
   
 
 CoordSource::CoordSource(const AtomHandleList& atoms):
-  atoms_(atoms), mutable_(false)
+  atoms_(atoms), 
+  entity_(),
+  mutable_(false),
+  atom_dict_()
 {
   if (!atoms_.empty()) {
     entity_=atoms_.front().GetEntity();
+  }
+  for(uint n=0;n<atoms_.size();++n) {
+    atom_dict_[atoms_[n].GetHashCode()]=n;
   }
 }
 
@@ -105,8 +111,6 @@ CoordSourcePtr CoordSource::Extract(int start, int stop, int step)
   return in_mem_source;
 }
 
-
-
 EntityHandle CoordSource::GetEntity() const
 {
   return entity_;
@@ -132,4 +136,25 @@ const AtomHandleList& CoordSource::GetAtomList() const
   return atoms_;
 }
 
-}}  
+void CoordSource::SetAtomPos(uint frame, AtomHandle atom, const geom::Vec3& pos)
+{
+  if(!atom.IsValid()) return;
+  std::map<long,uint>::iterator it = atom_dict_.find(atom.GetHashCode());
+  if(it!=atom_dict_.end()) {
+    CoordFrame& fp=*(GetFrame(frame));
+    fp[it->second]=pos;
+  }
+}
+
+geom::Vec3 CoordSource::GetAtomPos(uint frame, AtomHandle atom) const
+{
+  if(!atom.IsValid()) return geom::Vec3();
+  std::map<long,uint>::const_iterator it = atom_dict_.find(atom.GetHashCode());
+  if(it!=atom_dict_.end()) {
+    const CoordFrame& fp=*(GetFrame(frame));
+    return fp[it->second];
+  }
+  return geom::Vec3();
+}
+
+}} // ns

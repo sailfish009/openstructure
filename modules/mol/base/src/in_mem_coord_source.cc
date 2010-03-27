@@ -14,7 +14,7 @@ uint InMemCoordSource::GetFrameCount()
   return frames_.size();
 }
 
-CoordFramePtr InMemCoordSource::GetFrame(uint frame_id)
+CoordFramePtr InMemCoordSource::GetFrame(uint frame_id) const
 {
   
   return frame_id>=frames_.size() ? CoordFramePtr() : frames_[frame_id];
