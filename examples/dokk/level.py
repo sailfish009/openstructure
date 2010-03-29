@@ -3,6 +3,7 @@ from ost import io, gfx, qa, geom
 from ligand import Ligand
 from surface import Surface
 from protein import Protein
+from score_updater import ScoreUpdater
 
 class Level:
   def __init__(self, name):
@@ -20,7 +21,8 @@ class Level:
     self.surface.handle.Attach(self.protein.handle, 5.0)
     gfx.Scene().SetCenter(self.ligand.GetCenter())
     print 'Done Loading'
-    self.UpdateScores()
+    self.su = ScoreUpdater(self)
+    
   def RotateAxis(self, axis, angle):
     self.ligand.RotateAxis(axis, angle)
   def SetPivot(self, x, y):
@@ -32,13 +34,9 @@ class Level:
     
   def Shift(self, vec):
     self.ligand.Shift(vec)
+    
   def UpdateScores(self):
-    prot_within=self.protein.handle.FindWithin(self.ligand.GetCenter(), 
-                                               self.ligand.radius)
-    lig_view=self.ligand.handle.CreateFullView()
-    for a in prot_within:
-      score=qa.ClashScore(a, lig_view)
-      a.SetGenericFloatProperty('clash', score)
-    self.surface.go.ReapplyColorOps()
+    self.su.UpdateScores()
+    
   def GetRMSD(self):
     return self.ligand.RMSDToSolution()

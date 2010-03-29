@@ -3,6 +3,9 @@ from ost import gfx
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4.QtOpenGL import *
+import OpenGL.GL as ogl
+
+from spnav_input import SpnavInputDevice
 
 TRANS_VAL = 20
 
@@ -14,20 +17,30 @@ class DokkGLCanvas(QGLWidget):
     self.setAutoFillBackground(False)
     #self.setAttribute(Qt.WA_KeyCompression,True)
     self.resize(800, 800)
+    self.spnav_input = SpnavInputDevice(self)
+
   def initializeGL(self):
     gfx.Scene().InitGL()
 
   def paintGL(self):
+    ogl.glMatrixMode(ogl.GL_MODELVIEW);
+    ogl.glPushMatrix();
     gfx.Scene().RenderGL()
+    ogl.glMatrixMode(ogl.GL_MODELVIEW);
+    ogl.glPopMatrix();
+
   def SetLevel(self, level):
     self.level_=level
+    self.spnav_input.SetLevel(level)
+
   def paintEvent(self, event):
     self.makeCurrent()
     self.paintGL()
-    #painter=QPainter(self)
-    #self.RenderHUD(painter)
+    painter=QPainter(self)
+    painter.setRenderHint(QPainter.Antialiasing);
+    self.RenderHUD(painter)
     print "%.3f"%self.level_.GetRMSD()
-    self.swapBuffers()
+
 
   def RenderHUD(self, painter):
     painter.setPen(QColor(100, 100, 100, 50))
@@ -36,6 +49,7 @@ class DokkGLCanvas(QGLWidget):
     painter.setPen(QPen(QColor(255,255,255), Qt.SolidLine))
     painter.setFont(QFont("Verdana"))
     painter.drawText(QPoint(10, 20), "You are %.1f away from the solution" % self.level_.GetRMSD())
+
   def resizeGL(self, w, h):
     gfx.Scene().Resize(w, h)
 
@@ -43,6 +57,7 @@ class DokkGLCanvas(QGLWidget):
     self.last_point_=QPoint(event.x(), event.y())
 
   def mouseMoveEvent(self, event):
+    print "MOUSE MOVE"
     delta=QPoint(event.x(), event.y())-self.last_point_
     self.last_point_=QPoint(event.x(), event.y())
     if event.buttons() & Qt.LeftButton:
@@ -51,7 +66,7 @@ class DokkGLCanvas(QGLWidget):
         if event.modifiers() & Qt.AltModifier:
           self.level_.Shift(tf.GetRot().GetRow(2)*delta.y()*0.1)          
         else:
-         self.level_.Shift((tf.GetRot().GetRow(0)*delta.x()
+          self.level_.Shift((tf.GetRot().GetRow(0)*delta.x()
                            -tf.GetRot().GetRow(1)*delta.y())*0.1)
       else:
         if delta.y()!=0:
