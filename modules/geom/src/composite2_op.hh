@@ -38,10 +38,10 @@ bool DLLEXPORT_OST_GEOM EqualPosition(const Line2& l1, const Line2& l2,Real ephi
 
 bool DLLEXPORT_OST_GEOM AreParallel(const Line2& l1, const Line2& l2,Real ephilon=EPSILON);
 
-DLLEXPORT bool IsInPolygon(const Polygon2& p, const Vec2& v);
-DLLEXPORT Polygon2 SimplifyPolygon(const Polygon2& p);
-DLLEXPORT bool IsInRectangle(const Rectangle2& r, const Vec2& v);
-DLLEXPORT bool IsInCircle(const Circle2& c, const Vec2& v);
+DLLEXPORT_OST_GEOM bool IsInPolygon(const Polygon2& p, const Vec2& v);
+DLLEXPORT_OST_GEOM Polygon2 SimplifyPolygon(const Polygon2& p);
+DLLEXPORT_OST_GEOM bool IsInRectangle(const Rectangle2& r, const Vec2& v);
+DLLEXPORT_OST_GEOM bool IsInCircle(const Circle2& c, const Vec2& v);
 
 } // ns
 

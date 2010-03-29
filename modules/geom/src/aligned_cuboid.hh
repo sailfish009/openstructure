@@ -24,6 +24,7 @@
  */
 
 #include "vec3.hh"
+#include "module_config.hh"
 
 namespace geom {
 
@@ -31,7 +32,7 @@ namespace geom {
 /// \brief axis-aligned cuboid
 /// 
 /// For an arbitrarily oriented cuboid see \ref Cuboid
-class DLLEXPORT AlignedCuboid {
+class DLLEXPORT_OST_GEOM AlignedCuboid {
 public:
   AlignedCuboid(const Vec3& mmin, const Vec3& mmax);
   
@@ -47,7 +48,7 @@ private:
   Vec3 max_;
 };
 
-AlignedCuboid DLLEXPORT Union(const AlignedCuboid& lhs, const AlignedCuboid& rhs);
+AlignedCuboid DLLEXPORT_OST_GEOM Union(const AlignedCuboid& lhs, const AlignedCuboid& rhs);
 
 }
 

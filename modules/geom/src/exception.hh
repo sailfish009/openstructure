@@ -21,10 +21,11 @@
 
 #include <string>
 #include <ost/message.hh>
+#include "module_config.hh"
 
 namespace geom {
 
-class DLLEXPORT GeomException: public Error
+class DLLEXPORT_OST_GEOM GeomException: public Error
 {
 public:
   GeomException(const String& m):

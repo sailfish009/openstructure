@@ -158,8 +158,21 @@ void FileBrowser::UpdateMenu(const QString path){
   QDir directory = QDir(path);
   AddItem(directory);
   while(directory.cdUp()){
-    AddItem(directory);
+# if defined(_MSC_VER)
+  QDir temp=directory;
+  if (temp.cdUp()){
+    AddItem(directory);    
   }
+# else
+    AddItem(directory);
+# endif
+  }
+# if defined(_MSC_VER)  
+  QFileInfoList drive_list=QDir::drives();
+  for (int i=0;i<drive_list.size();++i) {
+    AddItem(drive_list[i].dir(), drive_list[i].path());
+  }
+#endif
 }
 
 void FileBrowser::Split(){
@@ -169,10 +182,14 @@ void FileBrowser::Split(){
   panels->MoveNextTo(qobject_cast<Widget*>(this), new_file_browser);
 }
 
-void FileBrowser::AddItem(const QDir directory){
+void FileBrowser::AddItem(const QDir directory, QString mypath){
   QVariant variant = QVariant(directory.path());
   QIcon icon = model_->fileIcon(model_->index(variant.toString()));
-  menu_->addItem(icon, directory.dirName(),variant);
+  if (mypath!=""){
+    menu_->addItem(icon, mypath,variant);
+  } else {
+    menu_->addItem(icon, directory.dirName(),variant);
+  }
 }
 
 void FileBrowser::LoadObject(const QModelIndex& index){

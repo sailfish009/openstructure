@@ -30,7 +30,7 @@
 namespace geom {
 
 //! Line2
-class DLLEXPORT Line2 {
+class DLLEXPORT_OST_GEOM Line2 {
 public:
   Line2();
   Line2(const Vec2& from, const Vec2& to);
@@ -42,7 +42,7 @@ private:
   Vec2 ori_,dir_;
 };
 
-class DLLEXPORT Rectangle2{
+class DLLEXPORT_OST_GEOM Rectangle2{
 public:
   Rectangle2();
   Rectangle2(Vec2 topleft, Vec2 bottomright);
@@ -62,7 +62,7 @@ private:
 
 //! Polygon2
 ///\sa \ref create_split_image.py "Create Split Image Example"
-class DLLEXPORT Polygon2: public std::vector<Vec2>
+class DLLEXPORT_OST_GEOM Polygon2: public std::vector<Vec2>
 {
 public:
   typedef const_circular_iter<Polygon2> const_circular_iterator;
@@ -92,7 +92,7 @@ private:
         ;
 };
 
-class DLLEXPORT Ellipse2
+class DLLEXPORT_OST_GEOM Ellipse2
 {
 public:
   Ellipse2();
@@ -117,7 +117,7 @@ private:
   Real gamma_;
 };
 
-class DLLEXPORT Hyperbola2
+class DLLEXPORT_OST_GEOM Hyperbola2
 {
 public:
   Hyperbola2();
@@ -138,7 +138,7 @@ private:
   Real gamma_;
 };
 
-class DLLEXPORT Circle2
+class DLLEXPORT_OST_GEOM Circle2
 {
 public:
   Circle2();
