@@ -23,6 +23,8 @@ option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
 option(USE_DOUBLE_PRECISION "whether to compile in double precision" 
        OFF)
+option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
+      OFF)
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
 option(DEPLOYMENT "switch on deployment settings" OFF)
 
@@ -192,11 +194,16 @@ if (ENABLE_GUI)
   ost_find_python_module(PyQt4)
 endif()
 
+if (ENABLE_SPNAV)
+  find_package(SpNav REQUIRED)
+endif()
+
 # basic environment
 include_directories(${Boost_INCLUDE_DIRS} 
                     ${FFTW_INCLUDE_PATH} 
                     ${EIGEN2_INCLUDE_DIR}
                     ${TIFF_INCLUDE_DIR}
+                    ${SPNAV_INCLUDE_DIR}
                     )
 
 

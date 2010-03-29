@@ -70,6 +70,14 @@ scene_win.hh
 scene_win_model.hh
 )
 
+
+if (ENABLE_SPNAV)
+set(OST_GUI_INPUT_HEADERS
+spnav_input.hh
+  IN_DIR input
+)
+endif()
+
 set(OST_GUI_PLOT_VIEWER_HEADERS
 plot_axis_base.hh
 plot_axis_horizontal.hh
@@ -385,6 +393,15 @@ if (ENABLE_IMG)
   )
 endif()
 
+if (ENABLE_SPNAV)
+  list(APPEND OST_GUI_SOURCES
+      input/spnav_input.cc
+  )
+  list(APPEND HEADERS_TO_BE_MOCCED
+      input/spnav_input.hh
+  )
+endif()
+
 set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTNETWORK 1)
 include(${QT_USE_FILE})
@@ -396,10 +413,11 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
                ${OST_GUI_PYTHON_SHELL_HEADERS} IN_DIR python_shell
                ${OST_GUI_PANEL_BAR_HEADERS} IN_DIR panel_bar
                ${OST_GUI_SCENE_WIN_HEADERS} IN_DIR scene_win
+               ${OST_GUI_INPUT_HEADERS}
                ${OST_GUI_DATA_VIEWER_HEADERS}
                ${OST_GUI_HEADERS}
        DEPENDS_ON gfx io mol_alg
-       LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
+       LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES} ${SPNAV_LIBRARIES})
 include_directories(${PYTHON_INCLUDE_PATH})
 qt4_add_resources(OST_QT_RESOURCE dngr.qrc)
 qt4_wrap_cpp(OST_GOSTY_MOC "gosty.hh")

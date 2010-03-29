@@ -43,6 +43,9 @@ void export_RemoteSiteLoader();
 void export_FileLoader();
 void export_Widget();
 
+#if OST_SPNAV_ENABLED
+void export_Input();
+#endif
 
 #ifdef OST_IMG_ENABLED
 void export_data_viewer();
@@ -115,6 +118,10 @@ BOOST_PYTHON_MODULE(_gui)
   export_RemoteSiteLoader();
   export_FileLoader();
   export_Widget();
+
+  #if OST_SPNAV_ENABLED
+  export_Input();
+  #endif
 
   #if OST_IMG_ENABLED
   export_data_viewer();
