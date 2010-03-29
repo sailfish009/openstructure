@@ -122,12 +122,6 @@ public:
   /// will be returned.
   TorsionHandle GetPsiTorsion() const;
 
-   /// \brief Get isp torsion
-  ///
-  /// If no isp torsion has been assigned to this residue an invalid TorsionHandle
-  /// will be returned.
-  TorsionHandle GetIspTorsion() const;
-
   /// \brief Get omega torsion
   ///
   /// If no omega torsion has been assigned to this residue an invalid TorsionHandle

@@ -359,18 +359,6 @@ void HeuristicBuilder::AssignTorsionsToResidue(const mol::ResidueHandle& res)
               flag=true;
             }
           }
-        } else if (cur_name==":") {
-          mol::ResidueHandle next=res.GetNext();
-          if (Builder::AreResiduesConsecutive(res,next)) {
-            centry2=LookupResEntry(next.GetKey());
-            if (centry2.second) {
-            //force CA since only N can be accessed by using centry2.first.GetNext();
-            //TODO refactor using hardcoded torsions from heuristic and place in base class.
-              cur_name="CA";
-              search_in=next;
-              flag=true;
-            }
-          }
         } else {
           flag=true;
         }
@@ -404,10 +392,13 @@ void HeuristicBuilder::AssignTorsions(const mol::ChainHandle& chain)
   if (chain.GetResidueCount()==0)
     return;
   std::vector<mol::ResidueHandle> rlist = chain.GetResidueList();
-  mol::AtomHandleList atom_list = rlist[0].GetAtomList();
   for(unsigned int ri=0;ri<rlist.size();++ri) {
     mol::ResidueHandle res=rlist[ri];
     this->AssignTorsionsToResidue(res);
+    if (!res.IsPeptideLinking()) {
+      return;
+    }
+    Builder::AssignBackBoneTorsionsToResidue(res);
   }
 }
 

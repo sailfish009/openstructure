@@ -203,34 +203,6 @@ void RuleBasedBuilder::ConnectResidueToNext(const mol::ResidueHandle& rh,
   }
 }
 
-void RuleBasedBuilder::AssignBackBoneTorsionsToResidue(const mol::ResidueHandle& res)
-{
-
-  mol::ResidueHandle prev=res.GetPrev();
-  mol::ResidueHandle next=res.GetNext();
-  mol::XCSEditor e=res.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
-  if (next.IsValid() && next.IsPeptideLinking()){
-    mol::AtomHandle ca_this=res.FindAtom("CA");
-    mol::AtomHandle n_this=res.FindAtom("N");
-    mol::AtomHandle c_this=res.FindAtom("C");
-    mol::AtomHandle n_next=next.FindAtom("N");
-    if ((ca_this && n_this && c_this && n_next &&  BondExists(c_this, n_next))
-        && !res.GetPsiTorsion()) {
-      e.AddTorsion("PSI", n_this, ca_this, c_this, n_next);
-    }
-  };
-  if (prev.IsValid() && prev.IsPeptideLinking()) {
-    mol::AtomHandle c_prev=prev.FindAtom("C");
-    mol::AtomHandle n_this=res.FindAtom("N");
-    mol::AtomHandle ca_this=res.FindAtom("CA");
-    mol::AtomHandle c_this=res.FindAtom("C");
-    if ((c_prev && n_this && ca_this && c_this && BondExists(c_prev, n_this))
-        && !res.GetPhiTorsion()) {
-      e.AddTorsion("PHI", c_prev, n_this, ca_this, c_this);
-    }
-  }
-}
-
 
 void RuleBasedBuilder::AssignTorsions(const mol::ChainHandle& chain) {
   if (chain.GetResidueCount()==0)
@@ -247,15 +219,14 @@ void RuleBasedBuilder::AssignTorsionsToResidue(const mol::ResidueHandle& residue
   /// The only components having named torsions are the standard set of amino
   /// acids, plus some of compounds derived from them such as selenium
   /// methionine. Things are simplified a lot by only storing the torsions
-  /// of the side chains in the database. PHI and PSI torsions are checked
-  /// without a lookup in the database.
+  /// of the side chains in the database. PHI, PSI and OMEGA torsions are    checked without a lookup in the database.
   LookupCompound(residue);
   if (!last_compound_)
     return;  
   if (!last_compound_->IsPeptideLinking()) {
     return;
   }
-  AssignBackBoneTorsionsToResidue(residue);
+  Builder::AssignBackBoneTorsionsToResidue(residue);
 }
 
 bool RuleBasedBuilder::IsResidueComplete(const mol::ResidueHandle& residue)

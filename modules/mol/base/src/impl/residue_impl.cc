@@ -246,29 +246,6 @@ const AtomImplList& ResidueImpl::GetAtomList() const
   return atom_list_;
 }
 
-TorsionImplP ResidueImpl::GetIspTorsion() const {
-  ChainImplPtr chain=this->GetChain();
-  ResidueImplPtr self=const_cast<ResidueImpl*>(this)->shared_from_this();
-  ResidueImplPtr next=chain->GetNext(self);
-  if (!next || !InSequence(self, next))
-    return TorsionImplP();
-  AtomImplPtr calpha=this->FindAtom("CA");
-  AtomImplPtr c=this->FindAtom("C");
-  AtomImplPtr n=next->FindAtom("N");
-  AtomImplPtr ca_po=next->FindAtom("CA");
-  TorsionImplList::const_iterator i=torsion_list_.begin();
-  for (;i!=torsion_list_.end(); ++i) {
-    TorsionImplP t=*i;
-    if (t->Matches(calpha, c, n, ca_po))
-      return t;
-  }
-
-  LOGN_DUMP("Can't find torsion ISP for " <<
-            this->GetKey() << this->GetNumber());
-  return TorsionImplP();
-
-}
-
 TorsionImplP ResidueImpl::GetPsiTorsion() const {
   ChainImplPtr chain=this->GetChain();
   ResidueImplPtr self=const_cast<ResidueImpl*>(this)->shared_from_this();
@@ -310,19 +287,19 @@ TorsionImplP ResidueImpl::FindTorsion(const String& torsion_name) const {
 TorsionImplP ResidueImpl::GetOmegaTorsion() const {
   ChainImplPtr chain=this->GetChain();
   ResidueImplPtr self=const_cast<ResidueImpl*>(this)->shared_from_this();
-  ResidueImplPtr next=chain->GetNext(self);
-  if (!next || !InSequence(self, next))
+  ResidueImplPtr prev=chain->GetPrev(self);
+  if (!prev || !InSequence(prev, self))
     return TorsionImplP();
 
+  AtomImplPtr calpha_prev=prev->FindAtom("CA");
+  AtomImplPtr c_prev=prev->FindAtom("C");
+  AtomImplPtr n=this->FindAtom("N");
   AtomImplPtr calpha=this->FindAtom("CA");
-  AtomImplPtr c=this->FindAtom("C");
-  AtomImplPtr nne=next->FindAtom("N");
-  AtomImplPtr calphane=next->FindAtom("CA");
   TorsionImplList::const_iterator i=torsion_list_.begin();
 
   for (;i!=torsion_list_.end(); ++i) {
     TorsionImplP t=*i;
-    if (t->Matches(calpha, c, nne,  calphane))
+    if (t->Matches(calpha_prev, c_prev, n,  calpha))
       return t;
   }
 

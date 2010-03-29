@@ -159,6 +159,49 @@ bool Builder::AreResiduesConsecutive(const mol::ResidueHandle& r1,
          r2.GetNumber().GetInsCode()==r1.GetNumber().NextInsertionCode().GetInsCode();
 }
 
+void Builder::AssignBackBoneTorsionsToResidue(const mol::ResidueHandle& res)
+{
+
+  mol::ResidueHandle prev=res.GetPrev();
+  mol::ResidueHandle next=res.GetNext();
+  mol::XCSEditor e=res.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
+  //psi
+  if (next.IsValid() && next.IsPeptideLinking()){
+    mol::AtomHandle ca_this=res.FindAtom("CA");
+    mol::AtomHandle n_this=res.FindAtom("N");
+    mol::AtomHandle c_this=res.FindAtom("C");
+    mol::AtomHandle n_next=next.FindAtom("N");
+    if ((ca_this && n_this && c_this && n_next &&  BondExists(c_this, n_next))
+        && !res.GetPsiTorsion()) {
+      e.AddTorsion("PSI", n_this, ca_this, c_this, n_next);
+    }
+  };
+  //phi
+  if (prev.IsValid() && prev.IsPeptideLinking()) {
+    mol::AtomHandle c_prev=prev.FindAtom("C");
+    mol::AtomHandle n_this=res.FindAtom("N");
+    mol::AtomHandle ca_this=res.FindAtom("CA");
+    mol::AtomHandle c_this=res.FindAtom("C");
+    if ((c_prev && n_this && ca_this && c_this && BondExists(c_prev, n_this))
+        && !res.GetPhiTorsion()) {
+      e.AddTorsion("PHI", c_prev, n_this, ca_this, c_this);
+    }
+  }
+  //omega
+  if (prev.IsValid() && prev.IsPeptideLinking()) {
+    mol::AtomHandle ca_prev=prev.FindAtom("CA");
+    mol::AtomHandle c_prev=prev.FindAtom("C");
+    mol::AtomHandle n=res.FindAtom("N");
+    mol::AtomHandle ca=res.FindAtom("CA");
+    if ((ca_prev && c_prev && n && ca && BondExists(c_prev, n))
+        && !res.GetOmegaTorsion()) {
+      e.AddTorsion("OMEGA",ca_prev , c_prev, n, ca);
+    }
+  }
+}
+
+
+
 void Builder::DistanceBasedConnect(const mol::AtomHandle& atom)
 {
   mol::EntityHandle ent=atom.GetEntity();

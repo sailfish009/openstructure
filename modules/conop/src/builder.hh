@@ -99,6 +99,9 @@ public:
   /// \brief assign named torsions to single residue
   virtual void AssignTorsionsToResidue(const mol::ResidueHandle& residue);
   
+  /// \brief assign Backbone torsions to single residue  
+  void AssignBackBoneTorsionsToResidue(const mol::ResidueHandle& res);
+  
   /// \brief  Check if peptide bond is formed between the two atoms.
   /// 
   /// This method is called by ConnectResidueWithNext() after making sure that

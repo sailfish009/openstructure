@@ -119,12 +119,6 @@ TorsionHandle ResidueBase::GetPsiTorsion() const
   return impl_->GetPsiTorsion();
 }
 
-TorsionHandle ResidueBase::GetIspTorsion() const 
-{
-  this->CheckValidity();
-  return impl_->GetIspTorsion();
-}
-
 TorsionHandle ResidueBase::GetOmegaTorsion() const
 {
   this->CheckValidity();
