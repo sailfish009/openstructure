@@ -58,11 +58,11 @@ private:
   std::ostream null_;
 };
 
-#define PUSH_VERBOSITY(n) Logger::Instance().PushVerbosityLevel(n)
-#define POP_VERBOSITY(n) Logger::Instance().PopVerbosityLevel()
+#define PUSH_VERBOSITY(n) ::ost::Logger::Instance().PushVerbosityLevel(n)
+#define POP_VERBOSITY(n) ::ost::Logger::Instance().PopVerbosityLevel()
 
-#define LOG_ERROR(m) Logger::Instance()(Logger::QUIET) << m;
-#define LOGN_ERROR(m) Logger::Instance()(Logger::QUIET) << m << std::endl;
+#define LOG_ERROR(m) ::ost::Logger::Instance()(::ost::Logger::QUIET) << m;
+#define LOGN_ERROR(m) ::ost::Logger::Instance()(::ost::Logger::QUIET) << m << std::endl;
 
 #define LOG_MESSAGE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::NORMAL) {(::ost::Logger::Instance()(::ost::Logger::NORMAL)) << m ;}
 #define LOGN_MESSAGE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::NORMAL) {(::ost::Logger::Instance()(::ost::Logger::NORMAL)) << m << std::endl;}
@@ -70,8 +70,8 @@ private:
 #define LOG_VERBOSE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::VERBOSE) {(::ost::Logger::Instance()(::ost::Logger::VERBOSE)) << m ;}
 #define LOGN_VERBOSE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::VERBOSE) {(::ost::Logger::Instance()(::ost::Logger::VERBOSE)) << m << std::endl;}
 
-#define LOG_DEBUG(m) if(Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {(::ost::Logger::Instance()(::ost::Logger::DEBUG)) << m ;}
-#define LOGN_DEBUG(m) if(Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {(::ost::Logger::Instance()(::ost::Logger::DEBUG)) << m << std::endl;}
+#define LOG_DEBUG(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {(::ost::Logger::Instance()(::ost::Logger::DEBUG)) << m ;}
+#define LOGN_DEBUG(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {(::ost::Logger::Instance()(::ost::Logger::DEBUG)) << m << std::endl;}
 
 #ifdef NDEBUG
 

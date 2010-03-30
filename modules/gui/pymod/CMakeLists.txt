@@ -62,6 +62,7 @@ if (ENABLE_IMG)
   list(APPEND OST_GUI_PYMOD_SOURCES
   data_viewer_proxy.cc
   export_data_viewer.cc
+  export_overlay.cc
   )
 endif()
 

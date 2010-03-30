@@ -49,6 +49,7 @@ void export_Input();
 
 #ifdef OST_IMG_ENABLED
 void export_data_viewer();
+void export_overlay();
 #endif
 
 #include <boost/python/to_python_converter.hpp>
@@ -125,5 +126,6 @@ BOOST_PYTHON_MODULE(_gui)
 
   #if OST_IMG_ENABLED
   export_data_viewer();
+  export_overlay();
   #endif
 }
