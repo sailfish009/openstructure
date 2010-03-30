@@ -54,7 +54,7 @@ private slots:
 private:
   void LoadObject(const QModelIndex& index);
   void UpdateMenu(const QString path);
-void FileBrowser::AddItem(const QDir directory, QString mypath="");
+  void AddItem(const QDir directory, QString mypath="");
   QComboBox* menu_;
   QDirModel* model_;
   QListView* view_;
