@@ -18,6 +18,11 @@
 #------------------------------------------------------------------------------
 from _base import *
 
+from ost import geom
+from ost import io
+from ost import mol
+from ost import seq
+
 try:
   from ost import gfx
   scene = gfx.Scene()
@@ -29,3 +34,4 @@ try:
   from ost import img
 except ImportError:
   pass
+

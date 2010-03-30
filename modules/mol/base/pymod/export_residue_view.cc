@@ -57,6 +57,7 @@ void export_ResidueView()
     .def("GetChain",&ResidueView::GetChain)
     .def("GetAtomList", &ResidueView::GetAtomList,
          return_value_policy<copy_const_reference>())
+    .def("GetAtomCount", &ResidueView::GetAtomCount)
     .add_property("atoms",
                   make_function(&ResidueView::GetAtomList,
                                 return_value_policy<copy_const_reference>()))
