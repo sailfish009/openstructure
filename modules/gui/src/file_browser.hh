@@ -37,7 +37,7 @@ class FileBrowser : public Widget {
   Q_OBJECT
 public:
   FileBrowser(QWidget* parent=NULL);
-  FileBrowser(QString& path, QWidget* parent=NULL);
+  FileBrowser(const QString& path, QWidget* parent=NULL);
   
   virtual ActionList GetActions();
   virtual bool Save(const QString& prefix);
@@ -47,14 +47,14 @@ protected:
   virtual void keyPressEvent(QKeyEvent* event);
 
 private slots:
-  void Init(QString& path);
+  void Init(const QString& path);
   void DoubleClicked(const QModelIndex& index);
   void ChangeToParentDirectory(int index);
   void Split();
 private:
   void LoadObject(const QModelIndex& index);
-  void UpdateMenu(const QString path);
-  void AddItem(const QDir directory, QString mypath="");
+  void UpdateMenu(const QString& path);
+  void AddItem(const QDir& directory, const QString& mypath="");
   QComboBox* menu_;
   QDirModel* model_;
   QListView* view_;

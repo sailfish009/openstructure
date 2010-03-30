@@ -76,13 +76,13 @@ FileBrowser::FileBrowser(QWidget* parent):
   this->Init(path);
 }
 
-FileBrowser::FileBrowser(QString& path, QWidget* parent):
+FileBrowser::FileBrowser(const QString& path, QWidget* parent):
  Widget(NULL, parent)
 {
   this->Init(path);
 }
 
-void FileBrowser::Init(QString& path)
+void FileBrowser::Init(const QString& path)
 {
   model_=new QDirModel;
   model_->setSorting(QDir::Name|QDir::DirsFirst|QDir::IgnoreCase);
@@ -153,7 +153,7 @@ void FileBrowser::ChangeToParentDirectory(int index){
   view_->viewport()->update();
 }
 
-void FileBrowser::UpdateMenu(const QString path){
+void FileBrowser::UpdateMenu(const QString& path){
   menu_->clear();
   QDir directory = QDir(path);
   AddItem(directory);
@@ -182,7 +182,7 @@ void FileBrowser::Split(){
   panels->MoveNextTo(qobject_cast<Widget*>(this), new_file_browser);
 }
 
-void FileBrowser::AddItem(const QDir directory, QString mypath){
+void FileBrowser::AddItem(const QDir& directory, const QString& mypath){
   QVariant variant = QVariant(directory.path());
   QIcon icon = model_->fileIcon(model_->index(variant.toString()));
   if (mypath!=""){
