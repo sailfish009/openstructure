@@ -24,7 +24,7 @@
 
 #include <boost/operators.hpp>
 
-#include <ost/module_config.hh>
+#include <ost/geom/module_config.hh>
 #include <ost/config.hh>
 
 namespace geom {
