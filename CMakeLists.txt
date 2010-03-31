@@ -13,6 +13,8 @@ project(OpenStructure CXX C)
 
 option(USE_SHADER "whether to compile with shader support"
        OFF)
+option(COMPILE_TMTOOLS "whether to compile the tmalign and tmscore programs"
+       OFF)
 option(PROFILE "whether to compile with profiling support"
        OFF)       
 option(ENABLE_GUI "whether the graphical user interface should be enabled"
