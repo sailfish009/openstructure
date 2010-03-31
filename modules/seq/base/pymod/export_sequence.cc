@@ -183,6 +183,7 @@ void export_sequence()
     .def("GetMaster", &AlignedRegion::GetMaster)
     .add_property("master", &AlignedRegion::GetMaster, 
                   &AlignedRegion::SetMaster)
+    .def("__getitem__", &AlignedRegion::operator[])                  
     .def("__len__", &AlignedRegion::GetLength)
     .def("__iter__", iterator<AlignedRegion>())
     .add_property("start", &AlignedRegion::GetStart)
