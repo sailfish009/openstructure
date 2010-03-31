@@ -77,6 +77,9 @@ public:
   /// \brief Set sequence String
   void SetString(const String& seq);
 
+  /// \brief replace substring starting from start to end
+  void Replace(const String& str,int start, int end);
+
   /// \brief Get sequence as String ignoring gaps
   String GetGaplessString() const;
 

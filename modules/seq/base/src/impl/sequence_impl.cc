@@ -265,6 +265,12 @@ void SequenceImpl::Cut(int start, int n)
   this->ShiftsFromSequence();
 }
 
+void SequenceImpl::Replace(const String& str,int start, int end)
+{
+  seq_string_.replace(start, end-start, str);
+  this->ShiftsFromSequence();
+}
+
 void SequenceImpl::ShiftRegion(int start, int end, int amount)
 {
   String str1=seq_string_.substr(start, end-start);

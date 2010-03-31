@@ -50,6 +50,11 @@ void AlignedRegion::Delete()
   end_=start_;
 }
 
+void AlignedRegion::Replace(const AlignedRegion& aln_r)
+{
+  aln_.Replace(aln_r,start_, end_);
+  end_=start_+end_;
+}
 
 void AlignedRegion::ShiftLeft(int n)
 {
@@ -116,6 +121,11 @@ void AlignedRegion::SetMaster(int master)
 int AlignedRegion::GetLength() const
 {
   return end_-start_;
+}
+
+AlignmentHandle AlignedRegion::GetAlignmentHandle() const
+{
+  return aln_;
 }
 
 }}

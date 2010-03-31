@@ -23,9 +23,11 @@
 #include <ost/invalid_handle.hh>
 #include <ost/seq/alignment_handle.hh>
 #include <ost/seq/impl/sequence_list_impl.hh>
+#include <ost/seq/impl/sequence_impl.hh>
 #include <ost/seq/sequence_list.hh>
 #include <ost/seq/aligned_region.hh>
 #include <ost/seq/aligned_column_iterator.hh>
+#include <ost/integrity_error.hh>
 
 namespace ost { namespace seq {
 
@@ -47,24 +49,24 @@ AlignmentHandle::AlignmentHandle(const impl::SequenceListImplPtr& impl):
 int AlignmentHandle::GetPos(int seq_index, int residue_index) const
 {
   this->CheckValidity();
-  return impl_->GetPos(seq_index, residue_index);  
+  return impl_->GetPos(seq_index, residue_index);
 }
 
 int AlignmentHandle::GetResidueIndex(int seq_index, int pos) const
 {
   this->CheckValidity();
-  return impl_->GetResidueIndex(seq_index, pos);  
+  return impl_->GetResidueIndex(seq_index, pos);
 }
 
 
 void AlignmentHandle::AddSequence(const ConstSequenceHandle& sequence)
 {
-  this->CheckValidity();  
+  this->CheckValidity();
   if (impl_->GetCount()>0 && 
       impl_->GetSequence(0)->GetLength()!=sequence.GetLength()) {
-    throw InvalidAlignment();        
+    throw InvalidAlignment();
   }
-  return impl_->AddSequence(sequence.Impl());  
+  return impl_->AddSequence(sequence.Impl());
 }
 
 ConstSequenceHandle AlignmentHandle::GetSequence(int seq_id) const
@@ -77,7 +79,7 @@ ConstSequenceHandle AlignmentHandle::GetSequence(int seq_id) const
 String AlignmentHandle::ToString(int width) const
 {
   this->CheckValidity();
-  return impl_->ToString(width);  
+  return impl_->ToString(width);
 }
 
 int AlignmentHandle::GetLength() const
@@ -163,7 +165,23 @@ void AlignmentHandle::Cut(int start, int end)
     (*i)->Cut(start, end-start);
   }
 }
-  
+
+void AlignmentHandle::Replace(const AlignedRegion& aln_r, int start, int end){
+  this->CheckValidity();
+  //check that alignment handle and aligned region contain same number of sequences
+  if (impl_->GetCount() != aln_r.GetAlignmentHandle().GetCount()) {
+    throw IntegrityError("alignment handle and aligned region are required "\
+                         "to share the same number of sequences");
+  }
+  int aln_rStart=aln_r.GetStart();
+  int aln_rEnd=aln_r.GetEnd();
+  AlignmentHandle aln=aln_r.GetAlignmentHandle();
+  //iterate over sequences and replace part of sequences with the substrings
+  //from aligned region
+  for (int i=0;i<impl_->GetCount() ;++i) {
+    this->GetSequence(i).Impl()->Replace(aln.GetSequence(i).GetString().substr(aln_rStart,aln_rEnd), start, end);
+  }
+}
 
 void AlignmentHandle::ShiftRegion(int start, int end, int amount, 
                                   int master)

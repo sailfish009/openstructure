@@ -138,6 +138,8 @@ public:
   /// \brief cut out half-closed interval start, end
   void Cut(int start, int end);
   
+  ///\brief Replace part of an alignment
+  void Replace(const AlignedRegion& rhs, int start, int end);
   /// \brief shift half-closed interval by amount
   /// 
   /// if master is -1, all sequences of the alignment will be shifted. Otherwise
