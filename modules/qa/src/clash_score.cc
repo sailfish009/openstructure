@@ -48,12 +48,12 @@ Real do_clash_score(const T& ent_a, const mol::EntityView& ent_b)
   for (I i=ent_a.AtomsBegin(), e=ent_a.AtomsEnd(); i!=e; ++i) {
     
     mol::AtomViewList clashees=ent_b.FindWithin((*i).GetPos(), 
-                                                (*i).GetProp().radius+2.0);
+                                                (*i).GetProp().radius+1.7);
 
     for (mol::AtomViewList::iterator j=clashees.begin(), 
          e2=clashees.end(); j!=e2; ++j) {
-         energy+=StericEnergy((*j).GetPos(), (*j).GetProp().radius,
-                              (*i).GetPos(), (*i).GetProp().radius);           
+         energy+=StericEnergy((*j).GetPos(), (*j).GetProp().radius-0.25,
+                              (*i).GetPos(), (*i).GetProp().radius-0.25);           
     }
   }
   return energy;  
