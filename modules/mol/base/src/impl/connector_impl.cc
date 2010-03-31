@@ -52,7 +52,7 @@ namespace {
 // onto the given vector. it is assumed that the vector has unit length.
 geom::Mat3 find_rotation(const geom::Vec3& d) {
   // assume the vectors are already normalized
-  if (std::abs(1.0-Length(d))>0.00001) {
+  if (std::abs(Real(1.0-Length(d)))>0.00001) {
     LOGN_DEBUG("connector find_rotation() has faulty length: " << Length(d));
     assert(0 && "error is big");
   }
