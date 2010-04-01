@@ -49,8 +49,10 @@ public:
   void SetMaster(int master);
   /// \brief delete interval and update length of AlignedRegion
   void Delete();
-  ///\brief replace region with content of AlignedRegion and set length to length of \p aln_r
+  /// \brief replace region with content of AlignedRegion and set length to 
+  ///       length of \p aln_r
   void Replace(const AlignedRegion& aln_r);
+  
   /// \brief shift the aligned region of the master sequence to the left by
   ///        n characters.
   void ShiftLeft(int n);

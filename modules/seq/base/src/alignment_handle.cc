@@ -231,4 +231,11 @@ AlignedColumn AlignmentHandle::operator[](int index)
   return AlignedColumn(*this, index);
 }
 
+void AlignmentHandle::SetSequenceName(int seq_index, const String& name)
+
+{
+  this->CheckValidity();
+  impl_->GetSequence(seq_index)->SetName(name);
+}
+
 }}

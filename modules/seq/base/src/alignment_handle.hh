@@ -104,7 +104,10 @@ public:
   /// \sa SequenceHandle::AttachView(const mol::EntityView&, const String&)  
   void AttachView(int seq_index, const mol::EntityView& view, 
                   const String& chain_name);
-
+                  
+  /// \brief set name of sequence
+  void SetSequenceName(int seq_index, const String& name);
+  
   /// \brief Get list of sequences (read-only)
   ConstSequenceList GetSequences() const;
   
