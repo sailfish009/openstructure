@@ -31,22 +31,18 @@
 
 namespace ost {
 
-struct DLLEXPORT Message: public std::exception {
-  Message(const String& mesg,const String& prefix=""):
-    _prefix(prefix), _mesg(mesg) {}
-  virtual ~Message() throw() {}
+struct DLLEXPORT_OST_BASE Message: public std::exception {
+  Message(const String& mesg,const String& prefix="");
+  virtual ~Message() throw();
   // exception interface
-  virtual const char* what() const throw() {
-    String msg = _prefix + ": " +_mesg;
-    return msg.c_str();
-  }
+  virtual const char* what() const throw();
 
   String _prefix;
   String _mesg;
 };
 
-struct DLLEXPORT Error: public Message {
-  Error(const String& m): Message(m,"Error") {}
+struct DLLEXPORT_OST_BASE Error: public Message {
+  Error(const String& m);
 };
 
 } // namespace

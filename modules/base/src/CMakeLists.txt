@@ -7,6 +7,7 @@ profile.cc
 units.cc
 string_ref.cc
 platform.cc
+message.cc
 )
 
 set(OST_BASE_HEADERS
