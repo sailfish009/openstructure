@@ -259,7 +259,7 @@ mol::CoordGroupHandle LoadCHARMMTraj(const String& crd_fn,
   std::vector<mol::AtomHandle> alist;
   if(boost::filesystem::extension(crd_f)==".pdb") {
     PDBReader reader(crd_f);
-    reader.CollectSequentialAtoms(true);
+    reader.SetFlags(PDB::SEQUENTIAL_ATOM_IMPORT);
     LOGN_MESSAGE("importing coordinate data");
     reader.Import(ent);
     alist = reader.GetSequentialAtoms();

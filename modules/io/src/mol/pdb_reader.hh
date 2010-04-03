@@ -49,8 +49,14 @@ public:
   void Import(mol::EntityHandle& ent,
               const String& restrict_chains="");
   void SetFlags(PDBFlags flags);
-  // these two are needed for synchronizing with a traj import
-  void CollectSequentialAtoms(bool f);
+  
+  /// \brief get list of atoms
+  /// 
+  /// The atom handles reflect the order of atom records in the PDb files. This 
+  /// is used to synchronize PDB and coordgroup io.
+  /// 
+  /// By default, the atom list is empty, The PDB::SEQUENTIAL_ATOM_IMPORT flag
+  /// must be set.
   std::vector<mol::AtomHandle> GetSequentialAtoms() const;
 
 private:
@@ -76,7 +82,6 @@ private:
   std::istream& instream_;
   boost::iostreams::filtering_stream<boost::iostreams::input>  in_;
   String curr_line_;
-  bool collect_sequential_atoms_;
   std::vector<mol::AtomHandle> sequential_atom_list_;
   PDBFlags flags_;
   // this needs to be set to true for reading pqr

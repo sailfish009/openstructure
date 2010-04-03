@@ -146,8 +146,6 @@ void PDBReader::Init(const boost::filesystem::path& loc)
   in_.push(instream_);
   if(!infile_) throw IOException("could not open "+loc.string());
   line_num_=0;
-  collect_sequential_atoms_=false;
-
   if(boost::iequals(boost::filesystem::extension(loc), ".pqr")) {
     is_pqr_=true;
   } else {
@@ -259,11 +257,6 @@ void PDBReader::ClearState()
   helix_list_.clear();
   strand_list_.clear();
   sequential_atom_list_.clear();
-}
-
-void PDBReader::CollectSequentialAtoms(bool f)
-{
-  collect_sequential_atoms_=f;
 }
 
 std::vector<mol::AtomHandle> PDBReader::GetSequentialAtoms() const
@@ -501,14 +494,14 @@ void PDBReader::ParseAndAddAtom(const String& line, int line_num,
     } else {
       mol::AtomHandle ah=editor.InsertAltAtom(curr_residue_, aname,
                                               String(1, alt_loc), apos, aprop);
-      if (collect_sequential_atoms_) {
+      if (flags_ & PDB::SEQUENTIAL_ATOM_IMPORT) {
         sequential_atom_list_.push_back(ah);
       }
       ++atom_count_;
     }
   } else {
     mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, aprop);
-    if (collect_sequential_atoms_) {
+    if (flags_ & PDB::SEQUENTIAL_ATOM_IMPORT) {
       sequential_atom_list_.push_back(ah);
     }
     ++atom_count_;

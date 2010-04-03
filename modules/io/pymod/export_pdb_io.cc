@@ -38,12 +38,14 @@ void export_pdb_io()
     .value("SKIP_FAULTY_RECORDS", PDB::SKIP_FAULTY_RECORDS)
     .value("WRITE_MULTIPLE_MODELS", PDB::WRITE_MULTIPLE_MODELS)
     .value("JOIN_SPREAD_ATOM_RECORDS", PDB::JOIN_SPREAD_ATOM_RECORDS)
+    .value("SEQUENTIAL_ATOM_IMPORT", PDB::SEQUENTIAL_ATOM_IMPORT)
   ;
   class_<PDBReader, boost::noncopyable>("PDBReader", init<String>())
     .def("HasNext", &PDBReader::HasNext)
     .def("Import", &PDBReader::Import, 
          X_import(args("entity", "restrict_chains")))
     .def("SetFlags", &PDBReader::SetFlags)
+    .def("GetSequentialAtoms", &PDBReader::GetSequentialAtoms)
   ;
   
   class_<PDBWriter, boost::noncopyable>("PDBWriter", init<String>())

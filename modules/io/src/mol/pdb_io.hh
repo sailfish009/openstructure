@@ -57,7 +57,14 @@ struct PDB {
     /// 
     /// By default, the atom 550 will start a new residue instead of being
     /// joined with atoms 43-48 into one residue.
-    JOIN_SPREAD_ATOM_RECORDS=16
+    JOIN_SPREAD_ATOM_RECORDS=16,
+    //// \brief keep track of the order of atom records
+    /// 
+    /// This option is mostly useful in combination with 
+    /// PDB::JOIN_SPREAD_ATOM_RECORDS and CoordGroups.
+    /// 
+    /// The atoms are accessible via PDBReader::GetSequentialAtoms()
+    SEQUENTIAL_ATOM_IMPORT=32
   } Type; 
 };
 
