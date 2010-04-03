@@ -37,6 +37,7 @@ void export_pdb_io()
     .value("NO_HETATMS", PDB::NO_HETATMS)
     .value("SKIP_FAULTY_RECORDS", PDB::SKIP_FAULTY_RECORDS)
     .value("WRITE_MULTIPLE_MODELS", PDB::WRITE_MULTIPLE_MODELS)
+    .value("JOIN_SPREAD_ATOM_RECORDS", PDB::JOIN_SPREAD_ATOM_RECORDS)
   ;
   class_<PDBReader, boost::noncopyable>("PDBReader", init<String>())
     .def("HasNext", &PDBReader::HasNext)

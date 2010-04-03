@@ -20,7 +20,8 @@ from _io import *
 from ost import mol,conop
 
 def LoadPDB(filename, restrict_chains="", no_hetatms=False,
-            fault_tolerant=False, load_multi=False):
+            fault_tolerant=False, load_multi=False, 
+            join_spread_atom_records=False):
   """
   Load PDB file from disk.
   
@@ -35,6 +36,10 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
   
   If load_multi is set to true, a list of entities will be returned instead
   of only the first.
+  
+  If join_spread_atom_records is set to true, atom records belonging to the 
+  same residue are joined, even if they do not appear sequentially in the PDB
+  file.
   """          
   conop_inst=conop.Conopology.Instance()
   builder=conop_inst.GetBuilder("DEFAULT")
@@ -45,6 +50,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
     flags=PDB.SKIP_FAULTY_RECORDS
   if no_hetatms:
     flags|=PDB.NO_HETATMS
+  if join_spread_atom_records:
+    flags|=PDB.JOIN_SPREAD_ATOM_RECORDS
   reader.SetFlags(flags)
   if load_multi:
     ent_list=[]

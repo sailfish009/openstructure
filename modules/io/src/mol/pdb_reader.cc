@@ -446,14 +446,21 @@ void PDBReader::ParseAndAddAtom(const String& line, int line_num,
       ++chain_count_;
     }
   }
-
   if(update_residue) {
-    LOGN_DUMP("new residue " << rkey << " " << rnum);
-    curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+    if (flags_ & PDB::JOIN_SPREAD_ATOM_RECORDS) {
+      curr_residue_=curr_chain_.FindResidue(rnum);
+      if (!curr_residue_.IsValid()) {
+        LOGN_DUMP("new residue " << rkey << " " << rnum);      
+        curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+        ++residue_count_; 
+      }
+    } else {
+      LOGN_DUMP("new residue " << rkey << " " << rnum);      
+      curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+      ++residue_count_;      
+    }
     assert(curr_residue_.IsValid());
-    ++residue_count_;
   }
-
   // finally add atom
   LOGN_DUMP("adding atom " << aname << " (" << s_ele << ") @" << apos);
   mol::AtomProp aprop;

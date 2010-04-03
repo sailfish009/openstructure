@@ -35,6 +35,29 @@ struct PDB {
     WRITE_MULTIPLE_MODELS=4,
     /// \brief enable for PQR
     PQR_FORMAT=8,
+    /// \brief Join atom records into one residue, even if the atom records
+    ///     are not sequential.
+    /// 
+    /// This is useful in the following case:
+    /// 
+    /// \verbatim
+    /// ATOM     43  N  AALA P   4
+    /// ATOM     45  CA AALA P   4 
+    /// ATOM     47  C  AALA P   4
+    /// ATOM     48  O  AALA P   4
+    /// ATOM     49  N  APRO P   5
+    /// ATOM     50  CD APRO P   5
+    /// ATOM     53  CA APRO P   5
+    /// ATOM     55  CB APRO P   5
+    /// ATOM     58  CG APRO P   5
+    /// ATOM     61  C  APRO P   5
+    /// ATOM     62  O  APRO P   5
+    /// ATOM    550  CB AALA P   4
+    /// \endverbatim
+    /// 
+    /// By default, the atom 550 will start a new residue instead of being
+    /// joined with atoms 43-48 into one residue.
+    JOIN_SPREAD_ATOM_RECORDS=16
   } Type; 
 };
 
