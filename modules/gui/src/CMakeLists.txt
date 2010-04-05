@@ -325,6 +325,7 @@ plot_viewer/plot_legend_panel.hh
 python_shell/main_thread_runner.hh
 python_shell/completer_base.hh
 python_shell/gutter.hh
+python_shell/output_redirector.hh
 python_shell/path_completer.hh
 python_shell/python_completer.hh
 python_shell/python_interpreter.hh

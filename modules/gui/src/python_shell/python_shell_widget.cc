@@ -502,12 +502,11 @@ void PythonShellWidget::Complete(bool inline_completion)
 
 bool PythonShellWidget::handle_custom_commands_(QKeyEvent* event)
 {
-  /* deactivated until fix found
   if ((event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) && 
       event->key() == Qt::Key_H) {
     set_output_visible_(!output_visible_);
     return true;
-  }*/
+  }
 
   if ((event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) && 
       event->key() == Qt::Key_W) {
@@ -673,8 +672,12 @@ void PythonShellWidget::set_output_visible_(bool flag)
   for (QTextBlock i=document()->begin(); i!=document()->end(); i=i.next()) {
     if(i.userState()==BLOCKTYPE_ERROR || i.userState()==BLOCKTYPE_OUTPUT){
       i.setVisible(flag);
+      i.setLineCount(flag ? qMax(1, i.layout()->lineCount()) : 0);
     }
   }
+  dynamic_cast<PythonShellTextDocumentLayout*>(document()->documentLayout())->requestUpdate();
+  dynamic_cast<PythonShellTextDocumentLayout*>(document()->documentLayout())->EmitSizeChange();
+  ensureCursorVisible();
   repaint();
   gutter_->update();
   viewport()->update();
