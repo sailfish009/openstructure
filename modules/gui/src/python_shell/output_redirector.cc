@@ -27,16 +27,17 @@
 
 namespace ost { namespace gui {
 
+OutputRedirector::OutputRedirector():
+ QObject()
+{
+}
+
+
 void OutputRedirector::Write( String const& str )
 {
-  buffer_.append(str);
-}
-QString OutputRedirector::GetOutput()
-{
-  QString  ret=QString::fromStdString(buffer_);
-  ret.chop(1); // chop off additional newline
-  buffer_.clear();
-  return ret;
+  //buffer_.append(str);
+  emit OnOutput(QString::fromStdString(str));
+
 }
 String  OutputRedirector::buffer_; 
 

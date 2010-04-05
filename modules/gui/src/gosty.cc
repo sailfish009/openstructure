@@ -52,7 +52,7 @@ DelayedScriptExecutor::DelayedScriptExecutor()
 void DelayedScriptExecutor::Exec()
 {
   PythonInterpreter& interp=PythonInterpreter::Instance();  
-  interp.ExecRelease();
+  interp.Start();
 }
 
 }}}
@@ -127,9 +127,7 @@ int setup_resources(QApplication& app)
 int init_python_interpreter()
 {
   // the order of these two calls is important!
-  PythonInterpreter::Instance(true);
-  // following command would instanciate a multithreaded python interpreter.
-  // Untested, use at your own risk!! PythonInterpreter::Instance(true,true);
+  PythonInterpreter::Instance();
   reclaim_signals();
   //
   PythonInterpreter& py=PythonInterpreter::Instance();
@@ -179,11 +177,10 @@ int main(int argc, char** argv)
     return r;
   }
   PythonInterpreter& py_int=PythonInterpreter::Instance();
-  py_int.ExecWait();  
-  py_int.RunInitRC();
+  // todo remove RunInitRC and replace with general call to run script (with dngrc as argument)
+  //py_int.RunInitRC();
+  prepare_scripts(argc,argv,py_int);
   //  delay all execution of python scripts after app.exec() has been called.
   ost::gui::detail::DelayedScriptExecutor delayed_executor;
-
-  prepare_scripts(argc,argv,py_int);
   return app.exec();
 }

@@ -25,6 +25,7 @@
   Author: Andreas Schenk
 */
 
+#include <boost/python.hpp>
 #include <ost/gui/module_config.hh>
 
 namespace ost { namespace gui {

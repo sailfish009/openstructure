@@ -17,8 +17,21 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 from _gui import *
+import sip
+
 
 ## \brief Opens a DataViewer 
 # \sa \ref fft_li.py "View Fourier Transform Example" \sa \ref modulate_image.py "Modulate Image Example"
-def CreateDataViewer(ih):
-      return GostyApp.Instance().CreateDataViewer(ih)
+def _close_event_override_(event):
+  print "close event"
+def _set_data_override_(data):
+  print "set data"
+
+def CreateDataViewer(ih,flag=True):
+      viewer=GostyApp.Instance().CreateDataViewer(ih)
+      if flag:
+        viewer.image_=ih
+        sip_viewer=sip.warpinstance(viewer.GetSipHandle())
+        sip_viewer.closeEvent=_close_event_override_
+        sip_viewer.setData=_set_data_override_
+      return viewer

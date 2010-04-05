@@ -89,6 +89,8 @@ bool PythonNamespaceTreeItem::CanFetchMore() const
 
 void PythonNamespaceTreeItem::FetchMore()
 {
+  // todo should imediately return if worker thread is working
+  // todo fix completion for builtins
   initialized_=true;  
   bp::object dir=bp::import("__main__").attr("__builtins__").attr("dir");  
   bp::list keys=bp::extract<bp::list>(dir(namespace_)); 

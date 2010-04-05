@@ -27,14 +27,19 @@
 */
 
 #include <QString>
+#include <QObject>
 #include <ost/gui/module_config.hh>
 
 namespace ost { namespace gui {
 
-class DLLEXPORT_OST_GUI OutputRedirector {
+class DLLEXPORT_OST_GUI OutputRedirector: public QObject {
+Q_OBJECT
+
 public:
+  OutputRedirector();
   void Write(const String& str);
-  static QString GetOutput();
+signals:
+  void OnOutput(const QString& output);
 private:
     static String  buffer_; 
 };
