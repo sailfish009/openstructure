@@ -64,6 +64,20 @@ AtomHandle BondHandle::GetSecond() const
   return nrvo;
 }
 
+AtomHandle BondHandle::GetOther(const AtomHandle& a) const
+{
+  this->CheckValidity();
+  if(a.IsValid()) {
+    if(a.Impl()==impl_->GetFirst()) {
+      return GetSecond();
+    } else {
+      return GetFirst();
+    }
+  }
+  AtomHandle nrvo(impl_->GetFirst());
+  return nrvo;
+}
+
 geom::Vec3 BondHandle::GetPos() const
 {
   this->CheckValidity();  

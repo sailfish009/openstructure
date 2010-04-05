@@ -73,6 +73,11 @@ public:
   /// \brief get second atom
   /// In python also available as the property second
   AtomHandle GetSecond() const;
+
+  /// \brief get other atom
+  /// Returns one of the two atoms that does not match the given one.
+  /// In python also available as the property other
+  AtomHandle GetOther(const AtomHandle& a) const;
   //@}
 
   /// \brief return midpoint between the two atoms (transformed coordinates)
