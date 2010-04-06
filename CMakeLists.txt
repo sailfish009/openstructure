@@ -242,8 +242,8 @@ message(STATUS
         "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}")
         
 # doc target to create HTML documentation
-set(SPHINX sphinx-build)
-set(SPHINX_OPTIONS -c doc/conf -b html -d doc/html/doctrees)
-add_custom_target(doc COMMAND 
-                  ${SPHINX} ${SPHINX_OPTIONS} modules doc/html
-                  VERBATIM)
+#set(SPHINX sphinx-build)
+#set(SPHINX_OPTIONS -c doc/conf -b html -d doc/html/doctrees)
+#add_custom_target(doc COMMAND 
+#                  ${SPHINX} ${SPHINX_OPTIONS} modules doc/html
+#                  VERBATIM)
