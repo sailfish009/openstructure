@@ -24,9 +24,7 @@
 #include <ost/mol/entity_handle.hh>
 #include "builder_fw.hh"
 
-namespace ost {
-
-namespace conop {
+namespace ost { namespace conop {
 
 class DLLEXPORT_OST_CONOP Conopology {
   typedef std::map<String,BuilderP> BuilderMap;

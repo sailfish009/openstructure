@@ -19,11 +19,7 @@
 #ifndef OST_CONOP_HEURISTIC_CONNECT_H
 #define OST_CONOP_HEURISTIC_CONNECT_H
 
-namespace ost {
-
-class EntityHandle;
-
-namespace conop {
+namespace ost { namespace conop {
 
 void HeuristicConnect(EntityHandle& eh);
 
