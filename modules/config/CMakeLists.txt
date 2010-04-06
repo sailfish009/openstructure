@@ -49,4 +49,4 @@ set(CONFIG_HH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/config.hh")
 configure_file(config.hh.in ${CONFIG_HH_FILE})
 add_custom_target(ost_config)
 stage_headers("${OST_CONFIG_HEADERS}" "ost" 
-              "ost_config" "")
+              "ost_config" "" "ost")
