@@ -26,9 +26,6 @@
 
 namespace ost {
 
-// fw decl;
-class EntityHandle;
-
 namespace conop {
 
 class DLLEXPORT_OST_CONOP Conopology {
