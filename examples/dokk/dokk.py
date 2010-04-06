@@ -8,5 +8,6 @@ dokk_win=glwin.DokkGLWin()
 
 level=Level('thrombin')
 dokk_win.SetLevel(level)
+
 dokk_win.Show(fullscreen=('--fullscreen' in sys.argv))
 

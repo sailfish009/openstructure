@@ -57,7 +57,6 @@ class DokkGLCanvas(QGLWidget):
     self.last_point_=QPoint(event.x(), event.y())
 
   def mouseMoveEvent(self, event):
-    print "MOUSE MOVE"
     delta=QPoint(event.x(), event.y())-self.last_point_
     self.last_point_=QPoint(event.x(), event.y())
     if event.buttons() & Qt.LeftButton:

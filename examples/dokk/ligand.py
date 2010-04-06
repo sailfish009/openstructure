@@ -2,7 +2,7 @@ from ost import gfx, geom
 from ost.mol import alg
 from ost import mol
 class Ligand:
-  def __init__(self, ligand):
+  def __init__(self, ligand, config=None):
     self.handle=ligand
     self.the_solution_=ligand.Copy().CreateFullView()
     self.go=gfx.Entity("Ligand", gfx.CUSTOM, self.handle)
@@ -12,7 +12,16 @@ class Ligand:
     bbox=self.go.GetBoundingBox()
     self.radius=geom.Length(bbox.GetMax()-bbox.GetMin())+3.0
     self.pivot_=mol.AtomHandle()
-
+    self.start_tf_=geom.Mat4()
+    self.config = config
+    self.box_max = geom.Vec3(float(self.config.Box["XMAX"]),
+                            float(self.config.Box["YMAX"]),
+                            float(self.config.Box["ZMAX"]))
+    self.box_min = geom.Vec3(float(self.config.Box["XMIN"]),
+                            float(self.config.Box["YMIN"]),
+                            float(self.config.Box["ZMIN"]))
+    self.Reset()
+    
   def SetPivot(self, pivot):
     self.pivot_=pivot
 
@@ -34,11 +43,12 @@ class Ligand:
     self.go.UpdatePositions()
 
   def Shift(self, vec):
-    trans=geom.Mat4()
-    trans.PasteTranslation(vec)
-    edi=self.handle.RequestXCSEditor()    
-    edi.ApplyTransform(trans)
-    self.go.UpdatePositions()
+    if self.__IsInside(self.GetCenter()+vec):
+      trans=geom.Mat4()
+      trans.PasteTranslation(vec)
+      edi=self.handle.RequestXCSEditor()    
+      edi.ApplyTransform(trans)
+      self.go.UpdatePositions()
   
   def SetTF(self, tf):
     edi=self.handle.RequestXCSEditor()
@@ -49,7 +59,11 @@ class Ligand:
       center=self.pivot_.GetPos()
     trans.PasteTranslation(-center)
     trans2=geom.Mat4()
-    trans2.PasteTranslation(center+tf.GetTrans())
+    trans2_vec = center+((tf.GetTrans())*gfx.Scene().GetTransform().GetRot())
+    if self.__IsInside(trans2_vec):
+      trans2.PasteTranslation(trans2_vec)
+    else:
+      trans2.PasteTranslation(center)
     full_tf = trans2*rot*trans
     edi.ApplyTransform(full_tf)
     self.go.UpdatePositions()
@@ -62,3 +76,29 @@ class Ligand:
   def RMSDToSolution(self):
     return alg.CalculateRMSD(self.handle.CreateFullView(), 
                              self.the_solution_)
+
+  def Solve(self):
+    edi=self.handle.RequestXCSEditor()
+    edi.SetTransform(self.start_tf_)
+    self.go.UpdatePositions()
+    
+  def Reset(self):
+    if self.config is not None:
+      edi=self.handle.RequestXCSEditor()
+      shift_vec = geom.Vec3(float(self.config.start["POSX"]),
+                            float(self.config.start["POSY"]),
+                            float(self.config.start["POSZ"]))
+      transf = mol.Transform()
+      transf.SetTrans(shift_vec)
+      edi.SetTransform(transf.GetMatrix())
+      self.RotateAxis(geom.Vec3(1,0,0), float(self.config.start["ROTX"]))
+      self.RotateAxis(geom.Vec3(0,1,0), float(self.config.start["ROTY"]))
+      self.RotateAxis(geom.Vec3(0,0,1), float(self.config.start["ROTZ"]))
+      self.go.UpdatePositions()
+    
+  def __IsInside(self, vec):
+    if vec[0]< self.box_max[0] and vec[0]> self.box_min[0] and \
+     vec[1]< self.box_max[1] and vec[1]> self.box_min[1] and \
+     vec[2]< self.box_max[2] and vec[2]> self.box_min[2] :
+      return True
+    return False
