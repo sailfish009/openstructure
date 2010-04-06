@@ -27,4 +27,4 @@ echo %BIN_DIR%
 
 set DNG_ROOT=%BIN_DIR%\..
 set PATH=%BIN_DIR%;%DNG_ROOT%\@LIBDIR@\Release;%DNG_ROOT%\@LIBDIR@;%DNG_ROOT%\bin\Release;%PATH%
-type "%DNG_ROOT%\@LIBDIR@\openstructure\init_iplt.py" | "%BIN_DIR%Release\gosty.exe" ost %*
+"%BIN_DIR%Release\gosty.exe" "%DNG_ROOT%\@LIBDIR@\openstructure\init_iplt.py" ost %*

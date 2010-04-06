@@ -30,4 +30,4 @@ export LD_LIBRARY_PATH=$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH
 #export PYTHONHOME=$DNG_ROOT
 #export QT_PLUGIN_PATH=$BIN_DIR/plugins
 
-cat "$DNG_ROOT/@LIBDIR@/openstructure/init.py" | gosty ost $@
+gosty $DNG_ROOT/@LIBDIR@/openstructure/init.py ost $@

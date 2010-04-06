@@ -248,3 +248,5 @@ if len(loading_list)!=0 or len(options.pdb_ids)!=0:
   scene.Autoslab()
 if len(script_argv)!=0:
   _execute_script()
+
+a=2

@@ -31,6 +31,7 @@
 
 #include <boost/filesystem/convenience.hpp>
 
+#include <QFile>
 #include <QDebug>
 #include <QApplication>
 #include <QThread>
@@ -196,25 +197,13 @@ void PythonInterpreter::ExecRelease()
 
 void PythonInterpreter::RunScript(const String& fname)
 {
-  std::ifstream script(fname.c_str());
-  if(!script) {
+    QFile file(QString::fromStdString(fname));
+  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
     LOGN_ERROR("could not open " << fname);
     return;
   }
-
-  String line;
-  QString command("");
-  while(std::getline(script,line)) {
-    command.append(QString::fromStdString(line));
-    command.append('\n');
-    if(this->GetCodeBlockStatus(command)!=CODE_BLOCK_INCOMPLETE) {
-      if(!RunCommand(command)) break;
-      command=QString("");
-    }
-  }
-  command.append('\n');
-  command.append('\n');
-  RunCommand(command);
+  QTextStream in(&file);
+  RunCommand(in.readAll());
 }
 
 bool PythonInterpreter::IsSimpleExpression(const QString& expr)
