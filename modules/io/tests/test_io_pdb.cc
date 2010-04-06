@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(join_spread_records_off)
   PDBReader reader(fname);
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
-  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 2);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 3);
   mol::ResidueHandle res1=ent.FindResidue("A", mol::ResNum(1));
   BOOST_CHECK(res1.IsValid());
   BOOST_CHECK_EQUAL(res1.GetAtomCount(), 1);
