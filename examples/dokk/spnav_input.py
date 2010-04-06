@@ -11,7 +11,6 @@ class SpnavInputDevice(QtCore.QObject):
     self.spnav = gui.SpnavInput.GetQThread()
     self.spnav.start()
     self.gfx_win = gfx_win
-    self.level = None
     QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceTransformed(int,int,int,int,int,int)"), self.InputChanged)
     QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceButtonPressed(int)"), self.ToggleInputMode)     
     
@@ -65,7 +64,7 @@ class SpnavInputDevice(QtCore.QObject):
     elif button == 2:
       self.level.Begin()
     elif button == 4:
-      Dokk().NextLevel()
+      self.gfx_win.dokk.NextLevel()
     elif button == 6:
       QtGui.QApplication.exit()
     elif button == 10:
