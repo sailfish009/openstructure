@@ -17,21 +17,21 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef DX_IO_TIFF_IO_PLUGIN_OST_HH
-#define DX_IO_TIFF_IO_PLUGIN_OST_HH
+#ifndef DX_IO_tiff_IO_PLUGIN_OST_HH
+#define DX_IO_tiff_IO_PLUGIN_OST_HH
 
 /*
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
 #include <boost/logic/tribool.hpp>
-#include "tiff_util.hh"
 
 #include "map_io_handler.hh"
 
 
 
-
+struct tiff;
+    
 namespace ost { namespace io {
 
 class DLLEXPORT_OST_IO TIF: public  ImageFormatBase
@@ -65,7 +65,7 @@ class DLLEXPORT_OST_IO TIF: public  ImageFormatBase
  protected:
 
   TIF(String format_string, boost::logic::tribool normalize_on_save = boost::logic::indeterminate, Format bit_depth = OST_DEFAULT_FORMAT, bool sign = false, bool phasecolor = false, int subimage = -1);
-  void do_export(const img::MapHandle& image,TIFF* tfile,const TIF& formattif) const;
+  void do_export(const img::MapHandle& image,tiff* tfile,const TIF& formattif) const;
 
  private:
 
@@ -84,10 +84,15 @@ class DLLEXPORT_OST_IO MapIOTiffHandler: public MapIOHandler
     /// \brief Map IO handler to read/write Tiff files
     ///
     /// This map IO handler reads and writes tiff-formatted files.
-    virtual void Import(img::MapHandle& sh, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct);
-    virtual void Import(img::MapHandle& sh, std::istream& loc,const ImageFormatBase& formatstruct);
-    virtual void Export(const img::MapHandle& sh, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct) const;
-    virtual void Export(const img::MapHandle& sh, std::ostream& loc,const ImageFormatBase& formatstruct) const;
+    virtual void Import(img::MapHandle& sh, const boost::filesystem::path& loc,
+                        const ImageFormatBase& formatstruct);
+    virtual void Import(img::MapHandle& sh, std::istream& loc,
+                        const ImageFormatBase& formatstruct);
+    virtual void Export(const img::MapHandle& sh, 
+                        const boost::filesystem::path& loc,
+                        const ImageFormatBase& formatstruct) const;
+    virtual void Export(const img::MapHandle& sh, std::ostream& loc,
+                        const ImageFormatBase& formatstruct) const;
     static bool MatchContent(unsigned char* header);
     static bool MatchType(const ImageFormatBase& type);
     static bool MatchSuffix(const String& loc);
@@ -96,10 +101,13 @@ class DLLEXPORT_OST_IO MapIOTiffHandler: public MapIOHandler
 
   protected:
 
-    TIFF* open_subimage_file(const boost::filesystem::path& location,const TIF& formattif);
-    TIFF* open_subimage_stream(std::istream& location,const TIF& formattif);
-    void load_image_data(TIFF* tfile, img::ImageHandle& image,  const TIF& formattif);
-    virtual void do_export(const img::MapHandle& sh,TIFF* tfile,TIF& formatstruct) const;
+    tiff* open_subimage_file(const boost::filesystem::path& location,
+                             const TIF& formattif);
+    tiff* open_subimage_stream(std::istream& location,const TIF& formattif);
+    void load_image_data(tiff* tfile, img::ImageHandle& image,
+                         const TIF& formattif);
+    virtual void do_export(const img::MapHandle& sh,tiff* tfile,
+                           TIF& formatstruct) const;
 
 };
 

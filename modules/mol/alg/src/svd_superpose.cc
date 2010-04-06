@@ -21,13 +21,15 @@
  * Author Juergen Haas
  */
 #include <stdexcept>
-
+#include <iostream>
 #include <boost/bind.hpp>
 
+#include <Eigen/Core>
+#include <Eigen/Array>
 #include <Eigen/SVD>
 #include <Eigen/LU>
 
-#include <iostream>
+
 #include <ost/base.hh>
 #include <ost/geom/vec3.hh>
 #include <ost/mol/alg/svd_superpose.hh>
@@ -36,7 +38,13 @@
 
 namespace ost { namespace mol { namespace alg {
 
+
 using boost::bind;
+typedef Eigen::Matrix<Real,3,1> EVec3;
+typedef Eigen::Matrix<Real,3,3> EMat3;
+typedef Eigen::Matrix<Real,1,3> ERVec3;
+typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> EMatX;
+typedef Eigen::Matrix<Real,1,Eigen::Dynamic> ERVecX;
 
 Real CalculateRMSD(const mol::EntityView& ev1,
                    const mol::EntityView& ev2,
@@ -93,22 +101,55 @@ Real calc_rmsd_for_atom_lists(const mol::AtomViewList& atoms1,
   return rmsd;
 }
 
+class SuperposerSVDImpl {
+public:
+  SuperposerSVDImpl(int natoms, bool alloc_atoms):
+    natoms_(natoms), alloc_atoms_(alloc_atoms)
+  {
 
-SuperposerSVD::SuperposerSVD(int natoms, bool alloc_atoms):
-  natoms_(natoms), alloc_atoms_(alloc_atoms)
-{
+    ERVec3 avg1_=EVec3::Zero();
+    ERVec3 avg2_=EVec3::Zero();
 
-  ERVec3 avg1_=EVec3::Zero();
-  ERVec3 avg2_=EVec3::Zero();
+    if (alloc_atoms_) {
+      atoms1_=EMatX::Zero(natoms,3);
+      atoms2_=EMatX::Zero(natoms,3);
+    }
 
-  if (alloc_atoms_) {
-    atoms1_=EMatX::Zero(natoms,3);
-    atoms2_=EMatX::Zero(natoms,3);
   }
+private:
+  int natoms_;
+  bool alloc_atoms_;
+  EMatX atoms1_;
+  EMatX atoms2_;
+public:  
+  void EntToMatrices(const mol::EntityView& ev1, const mol::EntityView& ev2);
+  geom::Vec3 EigenVec3ToVec3(const EVec3 &vec);
+  geom::Mat3 EigenMat3ToMat3(const EMat3 &mat);
+  EVec3 Vec3ToEigenRVec(const geom::Vec3 &vec);
+  EVec3 Vec3ToEigenVec(const geom::Vec3 &vec);
+  EMatX SubtractVecFromMatrixRows(EMatX Mat,
+                                  ERVecX Vec);
+  SuperpositionResult Run(const mol::AtomViewList& atoms1,          
+                          const mol::AtomViewList& atoms2);
+  SuperpositionResult DoSuperposition();
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW //needed only if *fixed* sized matrices are
+                                    //members of classes  
+};
 
+SuperposerSVD::~SuperposerSVD()
+{
+  assert(impl_);
+  delete impl_;
 }
 
-geom::Vec3 SuperposerSVD::EigenVec3ToVec3(const EVec3 &vec){
+
+SuperposerSVD::SuperposerSVD(int natoms, bool alloc_atoms):
+  impl_(new SuperposerSVDImpl(natoms, alloc_atoms))
+{
+  
+}
+
+geom::Vec3 SuperposerSVDImpl::EigenVec3ToVec3(const EVec3 &vec){
 #if  defined _MSC_VER
   geom::Vec3 myvec3;
   for (int i=0; i<3; ++i) {
@@ -120,7 +161,8 @@ geom::Vec3 SuperposerSVD::EigenVec3ToVec3(const EVec3 &vec){
 #endif
 }
 
-geom::Mat3 SuperposerSVD::EigenMat3ToMat3(const EMat3 &mat){
+geom::Mat3 SuperposerSVDImpl::EigenMat3ToMat3(const EMat3 &mat)
+{
 #if  defined _MSC_VER
   geom::Mat3 mymat3;
   for (int i=0; i<3; ++i) {
@@ -135,7 +177,8 @@ geom::Mat3 SuperposerSVD::EigenMat3ToMat3(const EMat3 &mat){
 
 }
 
-EVec3 SuperposerSVD::Vec3ToEigenRVec(const geom::Vec3 &vec){
+EVec3 SuperposerSVDImpl::Vec3ToEigenRVec(const geom::Vec3 &vec)
+{
 #if  defined _MSC_VER
   EVec3 myvec3=EVec3::Zero();
   for (int counter=0; counter<3; ++counter) {
@@ -147,7 +190,8 @@ EVec3 SuperposerSVD::Vec3ToEigenRVec(const geom::Vec3 &vec){
 #endif
 }
 
-EVec3 SuperposerSVD::Vec3ToEigenVec(const geom::Vec3 &vec){
+EVec3 SuperposerSVDImpl::Vec3ToEigenVec(const geom::Vec3 &vec)
+{
 #if  defined _MSC_VER
   EVec3 myvec3=EVec3::Zero();
   for (int counter=0; counter<3; ++counter) {
@@ -159,8 +203,9 @@ EVec3 SuperposerSVD::Vec3ToEigenVec(const geom::Vec3 &vec){
 #endif
 }
 
-EMatX SuperposerSVD::SubtractVecFromMatrixRows(EMatX Mat,
-                                               ERVecX Vec){
+EMatX SuperposerSVDImpl::SubtractVecFromMatrixRows(EMatX Mat,
+                                               ERVecX Vec)
+{
 
   for (int row=0;  row<Mat.rows();++row) {
     Mat.row(row)-=Vec;
@@ -168,8 +213,8 @@ EMatX SuperposerSVD::SubtractVecFromMatrixRows(EMatX Mat,
   return Mat;
 }
 
-void SuperposerSVD::EntToMatrices(const mol::EntityView& ev1,
-                                   const mol::EntityView& ev2)
+void SuperposerSVDImpl::EntToMatrices(const mol::EntityView& ev1,
+                                      const mol::EntityView& ev2)
 {
   //Now iterate over atoms in entities and extract coords into Nx3 matrices
   //for superposition
@@ -183,23 +228,23 @@ void SuperposerSVD::EntToMatrices(const mol::EntityView& ev1,
   for (int counter=0; a_ev1_end!=a_ev1; ++a_ev1, ++a_ev2, ++counter) {
   av1=*a_ev1;
   pos=av1.GetPos();
-  e=SuperposerSVD::Vec3ToEigenVec(pos);
+  e=SuperposerSVDImpl::Vec3ToEigenVec(pos);
   atoms1_.row(counter)=e ;
   av2=*a_ev2;
   pos=av2.GetPos();
-  e=SuperposerSVD::Vec3ToEigenVec(pos);
+  e=SuperposerSVDImpl::Vec3ToEigenVec(pos);
   atoms2_.row(counter)=e;
   }
 }
 
 
-SuperpositionResult SuperposerSVD::DoSuperposition()
+SuperpositionResult SuperposerSVDImpl::DoSuperposition()
 {
   ERVec3 avg1_=atoms1_.colwise().sum()/atoms1_.rows();
   ERVec3 avg2_=atoms2_.colwise().sum()/atoms2_.rows();
   //center the structures
-  atoms1_=this->SuperposerSVD::SubtractVecFromMatrixRows(atoms1_, avg1_);
-  atoms2_=this->SuperposerSVD::SubtractVecFromMatrixRows(atoms2_, avg2_);
+  atoms1_=this->SubtractVecFromMatrixRows(atoms1_, avg1_);
+  atoms2_=this->SubtractVecFromMatrixRows(atoms2_, avg2_);
   EMatX atoms2=atoms2_.transpose();
 
   //single value decomposition
@@ -221,9 +266,9 @@ SuperpositionResult SuperposerSVD::DoSuperposition()
 
   SuperpositionResult res;
   //  prepare rmsd calculation
-  geom::Vec3 shift=SuperposerSVD::EigenVec3ToVec3(avg2_);
-  geom::Vec3 com_vec=-SuperposerSVD::EigenVec3ToVec3(avg1_);
-  geom::Mat3 rot=SuperposerSVD::EigenMat3ToMat3(ERot.transpose());
+  geom::Vec3 shift=SuperposerSVDImpl::EigenVec3ToVec3(avg2_);
+  geom::Vec3 com_vec=-SuperposerSVDImpl::EigenVec3ToVec3(avg1_);
+  geom::Mat3 rot=SuperposerSVDImpl::EigenMat3ToMat3(ERot.transpose());
   geom::Mat4 mat4_com, mat4_rot, mat4_shift;
   mat4_rot.PasteRotation(rot);
   mat4_shift.PasteTranslation(shift);
@@ -238,14 +283,20 @@ SuperpositionResult SuperposerSVD::DoSuperposition()
 SuperpositionResult SuperposerSVD::Run(const mol::EntityView& ev1,
                                         const mol::EntityView& ev2)
 {
-  this->EntToMatrices(ev1, ev2);
-  SuperpositionResult r=this->DoSuperposition();
+  impl_->EntToMatrices(ev1, ev2);
+  SuperpositionResult r=impl_->DoSuperposition();
   r.rmsd=CalculateRMSD(ev1, ev2, r.transformation);
   return r;
 }
 
 SuperpositionResult SuperposerSVD::Run(const mol::AtomViewList& atoms1,
                                        const mol::AtomViewList& atoms2)
+{
+  return impl_->Run(atoms1, atoms2);
+}
+
+SuperpositionResult SuperposerSVDImpl::Run(const mol::AtomViewList& atoms1,
+                                           const mol::AtomViewList& atoms2)
 {
    mol::AtomViewList::const_iterator a_ev1=atoms1.begin();
    mol::AtomViewList::const_iterator a_ev1_end=atoms1.end();
@@ -254,23 +305,17 @@ SuperpositionResult SuperposerSVD::Run(const mol::AtomViewList& atoms1,
   for (int counter=0; a_ev1_end!=a_ev1; ++a_ev1, ++a_ev2, ++counter) {
     mol::AtomView av=*a_ev1;
     geom::Vec3 pos=av.GetPos();
-    ERVec3 e=SuperposerSVD::Vec3ToEigenVec(pos);
+    ERVec3 e=SuperposerSVDImpl::Vec3ToEigenVec(pos);
     atoms1_.row(counter)=e ;
     av=*a_ev2;
     pos=av.GetPos();
-    e=SuperposerSVD::Vec3ToEigenVec(pos);
+    e=SuperposerSVDImpl::Vec3ToEigenVec(pos);
     atoms2_.row(counter)=e;
   }
   return this->DoSuperposition();
 }
 
-SuperpositionResult SuperposerSVD::Run(EMatX atoms1,
-                                       EMatX atoms2)
-{
-  atoms1_=atoms1;
-  atoms2_=atoms2;
-  return this->DoSuperposition();
-}
+
 
 SuperpositionResult SuperposeAtoms(const mol::AtomViewList& atoms1,
                                    const mol::AtomViewList& atoms2,

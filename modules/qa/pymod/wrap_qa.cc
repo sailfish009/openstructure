@@ -21,13 +21,11 @@
 void export_Torsion();
 void export_Interaction();
 void export_Packing();
-void export_CaDistance();
 void export_Clash();
 BOOST_PYTHON_MODULE(_qa)
 {
   export_Torsion();
   export_Interaction();
-  export_Packing();  
-  export_CaDistance();
+  export_Packing();
   export_Clash();
 }

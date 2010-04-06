@@ -10,7 +10,6 @@ solis_torsion_potential.hh
 interaction_statistics.hh
 all_atom_potential.hh
 packing_statistics.hh
-ca_distance.hh
 atom_types.hh
 packing_potential.hh
 clash_score.hh
@@ -24,7 +23,6 @@ solis_torsion_statistics.cc
 solis_torsion_potential.cc
 interaction_statistics.cc
 packing_statistics.cc
-ca_distance.cc
 amino_acids.cc
 atom_types.cc
 all_atom_potential.cc
