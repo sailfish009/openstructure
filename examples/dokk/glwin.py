@@ -6,19 +6,27 @@ from PyQt4.QtOpenGL import *
 import OpenGL.GL as ogl
 
 from spnav_input import SpnavInputDevice
+from hud import HUD
+from hud import HUDObject
 
+
+UPDATE_INTERVAL = 20
 TRANS_VAL = 20
 
 class DokkGLCanvas(QGLWidget):
     
-  def __init__(self, format, parent=None):
+  def __init__(self, format, dokk, parent=None):
     QGLWidget.__init__(self, format, parent)
     self.last_pos_=QPoint()    
     self.setAutoFillBackground(False)
     #self.setAttribute(Qt.WA_KeyCompression,True)
     self.resize(800, 800)
+    self.dokk = dokk
     self.spnav_input = SpnavInputDevice(self)
-
+    self.update_timer = QTimer()
+    self.update_timer.start(UPDATE_INTERVAL)
+    QObject.connect(self.update_timer, SIGNAL("timeout()"), self.update)
+        
   def initializeGL(self):
     gfx.Scene().InitGL()
 
@@ -31,15 +39,15 @@ class DokkGLCanvas(QGLWidget):
 
   def SetLevel(self, level):
     self.level_=level
+    self.hud = HUD(level)
     self.spnav_input.SetLevel(level)
-
+    
   def paintEvent(self, event):
     self.makeCurrent()
     self.paintGL()
     painter=QPainter(self)
     painter.setRenderHint(QPainter.Antialiasing);
     self.RenderHUD(painter)
-    print "%.3f"%self.level_.GetRMSD()
 
 
   def RenderHUD(self, painter):
@@ -49,7 +57,9 @@ class DokkGLCanvas(QGLWidget):
     painter.setPen(QPen(QColor(255,255,255), Qt.SolidLine))
     painter.setFont(QFont("Verdana"))
     painter.drawText(QPoint(10, 20), "You are %.1f away from the solution" % self.level_.GetRMSD())
-
+    if self.hud is not None:
+      self.hud.Paint(painter)
+      
   def resizeGL(self, w, h):
     gfx.Scene().Resize(w, h)
 
@@ -117,9 +127,9 @@ class DokkGLWin(gfx.GLWinBase):
       fmt=QGLFormat()
       fmt.setAlpha(True)
       return fmt
-    def __init__(self):
+    def __init__(self,dokk):
         gfx.GLWinBase.__init__(self)
-        self.canvas_=DokkGLCanvas(self._CreateFormat())
+        self.canvas_=DokkGLCanvas(self._CreateFormat(),dokk)
     def DoRefresh(self):
       self.refresh_=True
     def SetLevel(self, level):
@@ -131,3 +141,9 @@ class DokkGLWin(gfx.GLWinBase):
         self.canvas_.show()
     def SetStereo():
       pass
+    
+    def Width(self):
+      return self.canvas_.width()
+    
+    def Height(self):
+      return self.canvas_.height()

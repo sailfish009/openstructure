@@ -50,7 +50,7 @@ class Ligand:
       edi.ApplyTransform(trans)
       self.go.UpdatePositions()
   
-  def SetTF(self, tf):
+  def ApplyTF(self, tf):
     edi=self.handle.RequestXCSEditor()
     rot = geom.Mat4(tf.GetRot())
     trans=geom.Mat4()
@@ -67,11 +67,6 @@ class Ligand:
     full_tf = trans2*rot*trans
     edi.ApplyTransform(full_tf)
     self.go.UpdatePositions()
-
-  def UpdateScores(self):
-    for a in self.b.view.atoms:
-      score=qa.ClashScore(a.handle, self.a.view)
-      a.SetGenericFloatProperty('clash', score)
 
   def RMSDToSolution(self):
     return alg.CalculateRMSD(self.handle.CreateFullView(), 
@@ -95,6 +90,10 @@ class Ligand:
       self.RotateAxis(geom.Vec3(0,1,0), float(self.config.start["ROTY"]))
       self.RotateAxis(geom.Vec3(0,0,1), float(self.config.start["ROTZ"]))
       self.go.UpdatePositions()
+    
+  def Close(self):
+    gfx.Scene().Remove(self.go)
+    del(self.go)
     
   def __IsInside(self, vec):
     if vec[0]< self.box_max[0] and vec[0]> self.box_min[0] and \

@@ -5,11 +5,17 @@ from surface import Surface
 from protein import Protein
 from score_updater import ScoreUpdater
 from config import Config
+from dokk import Dokk
+from level_intro import LevelIntro
 
 class Level:
   def __init__(self, name):
     self.name_=name
     self.Load()
+    self.hud = None
+    dokk = Dokk()
+    self.li = LevelIntro(self)
+        
   def Load(self):
     level_dir=os.path.join('datafiles', self.name_)
     self.config = Config(os.path.join(level_dir, 'level.ini'))
@@ -28,6 +34,7 @@ class Level:
     
   def RotateAxis(self, axis, angle):
     self.ligand.RotateAxis(axis, angle)
+    
   def SetPivot(self, x, y):
     v1=gfx.Scene().UnProject(geom.Vec3(x, y, 0.0));
     v2=gfx.Scene().UnProject(geom.Vec3(x, y, 1.0));    
@@ -57,3 +64,14 @@ class Level:
     gfx.Scene().SetCenter(self.surface.go.GetCenter())
     gfx.Scene().RequestRedraw()
     self.su.UpdateScores()
+    
+  def AddHUDObject(self, hud_object):
+    self.hud.Add(hud_object)
+    
+  def Begin(self):
+    self.li.Start()
+    
+  def Close(self):
+    self.surface.Close()
+    self.protein.Close()
+    self.ligand.Close()
