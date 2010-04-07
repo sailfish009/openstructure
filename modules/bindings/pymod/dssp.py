@@ -147,10 +147,10 @@ def LoadDSSP(file_name, model, extract_burial_status_flag=0,
            relative_sa=_CalcRelativeSA(amino_acid,solvent_accessibility)
            residue.SetGenericFloatProperty("relative_solvent_accessibility", 
                                            relative_sa)
-         if relative_sa < 0.25:
-           residue.SetGenericStringProperty("burial_status", 'b')
-         else:
-           residue.SetGenericStringProperty("burial_status", 'e')
+           if relative_sa < 0.25:
+             residue.SetGenericStringProperty("burial_status", 'b')
+           else:
+             residue.SetGenericStringProperty("burial_status", 'e')
       except Exception, e:
         print "ERROR:",e
         continue
