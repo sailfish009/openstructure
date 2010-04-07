@@ -26,7 +26,7 @@ set SCRIPT_NAME=%0%
 set BIN_DIR=%~dp0
 set DNG_ROOT=%BIN_DIR%\..
 
-set PATH=%BIN_DIR%;%DNG_ROOT%\@LIBDIR@\Release;%DNG_ROOT%\@LIBDIR@;%DNG_ROOT%\bin\Release;%PATH%
+set PATH=%BIN_DIR%;%DNG_ROOT%\@LIBDIR@\@BUILD_TYPE@;%DNG_ROOT%\@LIBDIR@;%DNG_ROOT%\bin\@BUILD_TYPE@;%PATH%
 
 REM retrieve absolute path to python executable
 set pyexec=%BIN_DIR%\python.exe
