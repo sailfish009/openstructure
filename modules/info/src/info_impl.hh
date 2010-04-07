@@ -59,6 +59,10 @@ public:
   String GetName() const;
   void SetName(const String& n);
 
+  // get full path
+  String GetPath() const;
+
+
   // attribute access
   void SetAttribute(const String& name, const String& value);
   String GetAttribute(const String& name) const;
@@ -130,7 +134,7 @@ class InfoImpl {
 public:
   InfoImpl();
   InfoImpl(const String& file);
-  InfoImpl(bool dummy,const String& dtdfile);
+  InfoImpl(bool dummy,const String& text);
 
   RootPtr Copy() const;
 

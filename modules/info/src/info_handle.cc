@@ -37,9 +37,9 @@ InfoHandle CreateInfo()
 {
   return InfoHandle(RootPtr(new detail::InfoImpl()));
 }
-InfoHandle CreateInfo(const String& dtdfile)
+InfoHandle CreateInfo(const String& text)
 {
-  return InfoHandle(RootPtr(new detail::InfoImpl(true,dtdfile)));
+  return InfoHandle(RootPtr(new detail::InfoImpl(true,text)));
 }
 
 InfoHandle LoadInfo(const String& file)
@@ -133,5 +133,115 @@ InfoItem InfoHandle::GetDefaultItem(const InfoPath& p) const
   }
   throw InfoError("default item not found");
 }
+
+InfoGroup InfoHandle::GetParent()  const
+{
+  return Root().GetParent();
+}
+
+void InfoHandle::SetName(const String& name)
+{
+  Root().SetName(name);
+}
+
+String InfoHandle::GetName()  const
+{
+  return Root().GetName();
+}
+
+InfoGroup InfoHandle::GetGroup(const InfoPath& path, bool use_defaults)  const
+{
+  return Root().GetGroup(path,use_defaults);
+}
+
+InfoGroup InfoHandle::CreateGroup(const String& name)
+{
+  return Root().CreateGroup(name);
+}
+
+bool InfoHandle::HasGroup(const InfoPath& name, bool use_defaults)  const
+{
+  return Root().HasGroup(name,use_defaults);
+}
+
+InfoGroup InfoHandle::RetrieveGroup(const InfoPath& path, bool use_defaults)
+{
+  return Root().RetrieveGroup(path,use_defaults);
+}
+
+InfoItem InfoHandle::GetItem(const InfoPath& path, bool use_defaults)  const
+{
+  return Root().GetItem(path,use_defaults);
+}
+
+InfoItem InfoHandle::CreateItem(const String& name, const String& value)
+{
+  return Root().CreateItem(name,value);
+}
+
+bool InfoHandle::HasItem(const InfoPath& path, bool use_defaults)  const
+{
+  return Root().HasItem(path,use_defaults);
+}
+
+InfoItem InfoHandle::RetrieveItem(const InfoPath& path, bool use_defaults)
+{
+  return Root().RetrieveItem(path,use_defaults);
+}
+
+void InfoHandle::Remove(const InfoPath& path, bool remove_defaults)
+{
+  return Root().Remove(path,remove_defaults);
+}
+void InfoHandle::Remove(const InfoGroup& group)
+{
+  return Root().Remove(group);
+}
+
+String InfoHandle::GetAttribute(const String& name)  const
+{
+  return Root().GetAttribute(name);
+}
+
+void InfoHandle::SetAttribute(const String& name, const String& value)
+{
+  Root().SetAttribute(name,value);
+}
+
+bool InfoHandle::HasAttribute(const String& name)  const
+{
+  return Root().HasAttribute(name);
+}
+
+void InfoHandle::RemoveAttribute(const String& name)
+{
+  Root().RemoveAttribute(name);
+}
+
+std::vector<String> InfoHandle::GetAttributeList()  const
+{
+  return Root().GetAttributeList();
+}
+
+String InfoHandle::GetTextData()  const
+{
+  return Root().GetTextData();
+}
+
+void InfoHandle::SetTextData(const String& td)
+{
+  Root().SetTextData(td);
+}
+
+void InfoHandle::Apply(InfoVisitor& v, bool visit_this)
+{
+  Root().Apply(v,visit_this);
+}
+
+void InfoHandle::Apply(InfoConstVisitor& v, bool visit_this)  const
+{
+  Root().Apply(v,visit_this);
+}
+
 
 }} // ns

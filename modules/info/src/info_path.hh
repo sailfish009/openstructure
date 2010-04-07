@@ -42,6 +42,7 @@ namespace ost { namespace info {
   slash denotes a local path.
 */
 class DLLEXPORT_OST_INFO InfoPath {
+friend InfoPath operator+(const InfoPath& p1, const InfoPath& p2);
 public:
   //! initialize with String
   InfoPath(const String& p);
@@ -69,5 +70,6 @@ private:
 };
 
 DLLEXPORT_OST_INFO std::ostream& operator<<(std::ostream&, const InfoPath& p);
+DLLEXPORT_OST_INFO InfoPath operator+(const InfoPath& p1, const InfoPath& p2);
 
 }} // ns

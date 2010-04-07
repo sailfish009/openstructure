@@ -93,4 +93,11 @@ InfoPath InfoPath::Strip() const
   }
 }
 
+InfoPath operator+(const InfoPath& p1, const InfoPath& p2)
+{
+  std::vector<String> pathlist(p1.list_.begin(),p1.list_.end());
+  pathlist.insert(pathlist.end(),p2.list_.begin(),p2.list_.end());
+  return InfoPath(pathlist,p1.IsRelative());
+}
+
 }} // ns

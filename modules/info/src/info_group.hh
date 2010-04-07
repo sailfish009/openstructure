@@ -50,26 +50,29 @@ public:
   //! retrieve name
   String GetName() const;
 
-  InfoGroup GetGroup(const InfoPath& path) const;
+  //! retrieve path
+  InfoPath GetPath() const;
+
+  InfoGroup GetGroup(const InfoPath& path, bool use_defaults=true) const;
   
   InfoGroupList GetGroups(const InfoPath& path) const;
   
   InfoItemList GetItems(const InfoPath& path) const;
   
   InfoGroup CreateGroup(const String& name);
-  bool HasGroup(const InfoPath& name) const;
-  InfoGroup RetrieveGroup(const InfoPath& path);
+  bool HasGroup(const InfoPath& name, bool use_defaults=true) const;
+  InfoGroup RetrieveGroup(const InfoPath& path, bool use_defaults=true);
 
-  InfoItem GetItem(const InfoPath& path) const;
+  InfoItem GetItem(const InfoPath& path, bool use_defaults=true) const;
   InfoItem CreateItem(const String& name, const String& value);
   InfoItem CreateItem(const String& name, Real value);
   InfoItem CreateItem(const String& name, bool value);  
   InfoItem CreateItem(const String& name, int value);  
   InfoItem CreateItem(const String& name, const geom::Vec3& vector);
-  bool HasItem(const InfoPath& path) const;
-  InfoItem RetrieveItem(const InfoPath& path);
+  bool HasItem(const InfoPath& path, bool use_defaults=true) const;
+  InfoItem RetrieveItem(const InfoPath& path, bool use_defaults=true);
 
-  void Remove(const InfoPath& path);
+  void Remove(const InfoPath& path, bool use_defaults=false);
   void Remove(const InfoGroup& group);
 
 

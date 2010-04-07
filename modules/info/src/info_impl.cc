@@ -84,16 +84,13 @@ InfoImpl::InfoImpl():
   document_.appendChild(document_.createElement("EMDataInfo"));
 }
 
-InfoImpl::InfoImpl(bool dummy,const String& dtdfile):
+InfoImpl::InfoImpl(bool dummy,const String& text):
   document_("EMDataInfo"),
   def_list_()
 {
-  QFile file(QS(dtdfile));
-  if (!document_.setContent(&file)) {
-    file.close();
+  if (!document_.setContent(QString::fromStdString(text))) {
     throw(InfoError("QDomDocument.setContent failed"));
   }
-  file.close();
 }
 
 InfoImpl::InfoImpl(const String& fname):
@@ -186,6 +183,16 @@ String EleImpl::GetName() const
 void EleImpl::SetName(const String& n)
 {
   ele_.setTagName(QS(n));
+}
+
+String EleImpl::GetPath() const
+{
+  QDomNode p = ele_.parentNode();
+  if(p.isNull()|| GetName()=="EMDataInfo") {
+    return "/";
+  } else {
+    return EleImpl(p.toElement()).GetPath()+"/"+GetName();
+  }
 }
 
 QDomElement& EleImpl::GetElement()
@@ -386,7 +393,7 @@ bool EleImpl::operator==(const EleImpl& ref) const
   return ele_==ref.ele_;
 }
 
-void EleImpl::SetStringRepr(const String& repr, bool settype) 
+void EleImpl::SetStringRepr(const String& repr, bool settype)
 {
   String_repr_=repr;
   SetAttribute("value",repr);
