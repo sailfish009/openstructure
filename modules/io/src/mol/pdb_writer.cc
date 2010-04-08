@@ -93,12 +93,18 @@ void write_atom(std::ostream& ostr, const mol::AtomHandle& atom, int atomnum,
 class PDBWriterImpl : public mol::EntityVisitor {
 public:
   PDBWriterImpl(std::ostream& ostream)
-    : ostr_(ostream), counter_(0), is_pqr_(false) {
+    : ostr_(ostream), counter_(0), is_pqr_(false), last_chain_() {
   }
 private:
 public:
   virtual bool VisitAtom(const mol::AtomHandle& atom) {
     counter_++;
+    if (last_chain_!=atom.GetResidue().GetChain()) {
+      if (last_chain_.IsValid()) {
+        ostr_ << "TER" << std::endl;
+      }
+      last_chain_=atom.GetResidue().GetChain();
+    }    
     write_atom(ostr_, atom, counter_, is_pqr_);
     return true;
   }
@@ -106,9 +112,10 @@ public:
     is_pqr_=t;
   }
 private:
-  std::ostream& ostr_;
-  int           counter_;
-  bool          is_pqr_;
+  std::ostream&    ostr_;
+  int              counter_;
+  bool             is_pqr_;
+  mol::ChainHandle last_chain_;
 };
 
 
@@ -182,8 +189,16 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
 {
   this->WriteModelLeader();
   int counter=1;
+  mol::ChainHandle last_chain;
   for (mol::AtomHandleList::const_iterator i=atoms.begin(),
        e=atoms.end(); i!=e; ++i, ++counter) {
+
+    if (last_chain!=(*i).GetResidue().GetChain()) {
+      if (last_chain.IsValid()) {
+        outstream_ << "TER" << std::endl;
+      }
+      last_chain=(*i).GetResidue().GetChain();
+    }
     write_atom(outstream_, *i, counter, flags_ & PDB::PQR_FORMAT);      
   }
   this->WriteModelTrailer();
