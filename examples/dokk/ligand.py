@@ -5,7 +5,7 @@ class Ligand:
   def __init__(self, ligand, config=None):
     self.handle=ligand
     self.the_solution_=ligand.Copy().CreateFullView()
-    self.go=gfx.Entity("Ligand", gfx.CUSTOM, self.handle)
+    self.go=gfx.Entity("Ligand", gfx.CPK, self.handle)
     self.go.SetColor(gfx.GREEN, 'ele=C')
     gfx.Scene().Add(self.go)
     gfx.Scene().SetCenter(self.go.center)

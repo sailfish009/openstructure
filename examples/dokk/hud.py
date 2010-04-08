@@ -6,10 +6,8 @@ from PyQt4.QtCore import *
 from PyQt4.QtOpenGL import *
 
 class HUD(QObject):
-  def __init__(self, level, parent=None):
+  def __init__(self, parent=None):
     QObject.__init__(self,parent)
-    self.level = level
-    level.hud = self
     self.objects = list()
     
   def Add(self, hud_object):
@@ -27,6 +25,9 @@ class HUD(QObject):
   def Paint(self, painter):
     for hud_object in self.objects:
       hud_object.Paint(painter)
+  
+  def Clear(self):
+    del(self.objects[:])
   
 class HUDObject(QObject):
   def __init__(self, time, parent=None):
@@ -62,15 +63,6 @@ class TextHUDObject(HUDObject):
     self.color = color
     self.font = font
   
-  #def __init__(self, text, rect, time, align=Qt.AlignCenter, color=QColor(255,255,255), font=QFont("Verdana"), parent=None):
-   # HUDObject.__init__(self,time,parent)
-    #self.text = text
-    #self.pos = None
-    #self.rect = rect
-    #self.align = align
-    #self.color = color
-    #self.font = font
-    
   def Paint(self, painter):
     rem_time = (self.endtime-float(time.time()))*1000.0
     if rem_time > 0:

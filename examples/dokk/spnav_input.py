@@ -1,3 +1,4 @@
+import dokk
 from PyQt4 import QtCore, QtGui
 from hud import TextHUDObject
 from ost import mol, geom, gfx, gui
@@ -17,20 +18,22 @@ class SpnavInputDevice(QtCore.QObject):
     self.trans = True
     self.rot = True
     
+    self._lock_input = False
+    
     self.score_scip = 0
   def SetLevel(self, level):
     self.level=level
     self.trans_hud = TextHUDObject("Translation Enabled: %s"%self.trans, QtCore.QPoint(10,50), 0)
     self.rot_hud = TextHUDObject("Rotation Enabled: %s"%self.rot, QtCore.QPoint(10,70), 0)
-    self.level.AddHUDObject(self.trans_hud)
-    self.level.AddHUDObject(self.rot_hud)
+    dokk.Dokk().gl_win.AddHUDObject(self.trans_hud)
+    dokk.Dokk().gl_win.AddHUDObject(self.rot_hud)
     try:
       self.refresh_rate_ = int(level.config.Score["FRAMESKIP"])
     except:
       pass
 
   def InputChanged(self, tx,ty,tz,rx,ry,rz):
-    if self.level is not None:
+    if (not self._lock_input) and (self.level is not None):
       ligand = self.level.ligand
       transf = mol.Transform()
       if(self.trans):
@@ -49,26 +52,35 @@ class SpnavInputDevice(QtCore.QObject):
       self.score_scip += 1
       gfx.Scene().RequestRedraw()
 
+  def SetLockInput(self, lock):
+    self._lock_input = lock
+
   def ToggleInputMode(self, button):
-    print button
-    if button == 0:
-      self.trans = not self.trans
-      self.trans_hud.text= "Translation Enabled: %s"%self.trans
-      self.trans_hud.time = 2000
-      self.trans_hud.Reset()
-    elif button == 1:
-      self.rot = not self.rot
-      self.rot_hud.text= "Rotation Enabled: %s"%self.rot
-      self.rot_hud.time = 2000
-      self.rot_hud.Reset()
-    elif button == 2:
+    if button == 2:
       self.level.Begin()
+    elif button == 3:
+      dokk.Dokk().PreviousLevel()
     elif button == 4:
-      self.gfx_win.dokk.NextLevel()
+      dokk.Dokk().NextLevel()
     elif button == 6:
       QtGui.QApplication.exit()
-    elif button == 10:
-      self.level.Reset()
-    elif button == 11:
-      self.level.Solve()
-    
+        
+    if (not self._lock_input):
+      if button == 0:
+        self.trans = not self.trans
+        self.trans_hud.text= "Translation Enabled: %s"%self.trans
+        self.trans_hud.time = 2000
+        self.trans_hud.Reset()
+      elif button == 1:
+        self.rot = not self.rot
+        self.rot_hud.text= "Rotation Enabled: %s"%self.rot
+        self.rot_hud.time = 2000
+        self.rot_hud.Reset()
+      elif button == 10:
+        self.level.Finished()
+      elif button == 11:
+        self.level.Finished()
+      elif button == 12:
+        self.level.Solve()
+      elif button == 13:
+        self.level.Reset()
