@@ -36,12 +36,14 @@ class HUDObject(QObject):
     self.timer = QTimer()
     self.timer.setSingleShot(True)
     self.hud = None
+    self.endtime = None
     QObject.connect(self.timer, SIGNAL("timeout()"), self.Timeout)
     
   def Appended(self, hud):
     self.hud = hud
-    self.timer.start(self.time)
-    self.endtime = float(time.time()+(self.time)/1000.0)
+    if self.time >= 0:
+      self.timer.start(self.time)
+      self.endtime = float(time.time()+(self.time)/1000.0)
     
   def Timeout(self):
     self.timer.stop()
@@ -64,9 +66,10 @@ class TextHUDObject(HUDObject):
     self.font = font
   
   def Paint(self, painter):
-    rem_time = (self.endtime-float(time.time()))*1000.0
-    if rem_time > 0:
-      self.color.setAlpha((rem_time/self.time)*255)
+    if self.endtime is not None:
+      rem_time = (self.endtime-float(time.time()))*1000.0
+      if rem_time > 0:
+        self.color.setAlpha((rem_time/self.time)*255)
     painter.setPen(QPen(self.color, Qt.SolidLine))
     painter.setFont(self.font)
     if self.pos is not None:
@@ -84,9 +87,10 @@ class RectTextHUDObject(HUDObject):
     self.font = font
     
   def Paint(self, painter):
-    rem_time = (self.endtime-float(time.time()))*1000.0
-    if rem_time > 0:
-      self.color.setAlpha((rem_time/self.time)*255)
+    if self.endtime is not None:
+      rem_time = (self.endtime-float(time.time()))*1000.0
+      if rem_time > 0:
+        self.color.setAlpha((rem_time/self.time)*255)
     painter.setPen(QPen(self.color, Qt.SolidLine))
     painter.setFont(self.font)
     painter.drawText(self.rect, self.align, self.text)
@@ -100,11 +104,12 @@ class RectHUDObject(HUDObject):
     self.border_color = border_color
 
   def Paint(self, painter):
-    rem_time = (self.endtime-float(time.time()))*1000.0
-    if self.fade and rem_time > 0:
-      alpha = (rem_time/self.time)*255
-      self.bg_color.setAlpha(alpha)
-      self.border_color.setAlpha(alpha)
+    if self.fade:
+      rem_time = (self.endtime-float(time.time()))*1000.0
+      if rem_time >0:
+        alpha = (rem_time/self.time)*255
+        self.bg_color.setAlpha(alpha)
+        self.border_color.setAlpha(alpha)
     painter.setPen(self.border_color)
     painter.setBrush(self.bg_color)
     painter.drawRect(self.rect)
