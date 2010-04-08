@@ -238,4 +238,10 @@ void AlignmentHandle::SetSequenceName(int seq_index, const String& name)
   impl_->GetSequence(seq_index)->SetName(name);
 }
 
+void AlignmentHandle::SetSequenceOffset(int seq_index, int offset)
+{
+  this->CheckValidity();
+  impl_->GetSequence(seq_index)->SetSequenceOffset(offset);
+}
+
 }}

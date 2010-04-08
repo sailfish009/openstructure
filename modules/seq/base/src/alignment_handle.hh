@@ -108,6 +108,7 @@ public:
   /// \brief set name of sequence
   void SetSequenceName(int seq_index, const String& name);
   
+  void SetSequenceOffset(int seq_index, int offset);
   /// \brief Get list of sequences (read-only)
   ConstSequenceList GetSequences() const;
   

@@ -170,6 +170,7 @@ void export_sequence()
     .def("__iter__", iterator<AlignmentHandle>())
     .add_property("sequences", &AlignmentHandle::GetSequences)
     .def("SetSequenceName",  &AlignmentHandle::SetSequenceName)
+    .def("SetSequenceOffset", &AlignmentHandle::SetSequenceOffset)
   ;
   class_<AlignedColumn>("AlignedColumn", no_init)
     .def("GetIndex", &AlignedColumn::GetIndex)
