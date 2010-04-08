@@ -29,6 +29,10 @@
 #include <ost/gui/scene_selection.hh>
 #include <ost/gui/query_dialog.hh>
 
+#if OST_IMG_ENABLED
+#include <ost/gfx/map_iso.hh>
+#endif // OST_IMG_ENABLED
+
 #include "custom_part_node.hh"
 #include "entity_node.hh"
 #include "entity_part_node.hh"
@@ -55,6 +59,7 @@ void ContextMenu::ShowMenu(const QPoint& pos)
   bool all_gfx_objects = true;
   bool all_entity_views = true;
   bool all_custom_views = true;
+  bool all_maps = true;
 
   if(indexes.size()>0){
     for(int i = 0; i < indexes.size(); i++){
@@ -67,6 +72,7 @@ void ContextMenu::ShowMenu(const QPoint& pos)
           if(gfx_node->GetType()==0){all_not_scene = false;}
           if(!dynamic_cast<gfx::GfxObj*> (gfx_node.get())){all_gfx_objects = false;}
           if(!dynamic_cast<gfx::Entity*> (gfx_node.get())){all_entities = false;}
+          if(!dynamic_cast<gfx::MapIso*> (gfx_node.get())){all_maps = false;}
         }
         else{
           all_gfx_objects = false;
@@ -147,6 +153,16 @@ void ContextMenu::ShowMenu(const QPoint& pos)
       connect(action, SIGNAL(triggered()), this, SLOT(AddView()));
 
     }
+
+    #if OST_IMG_ENABLED
+
+    if(all_maps){
+      action = menu->addAction("View Density Slices");
+      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(ViewDensitySlices()));
+    }
+
+    #endif // OST_IMG_ENABLED
+
 
     if(all_entity_views){
       if(all_custom_views){

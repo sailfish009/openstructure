@@ -27,6 +27,14 @@
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gfx/entity.hh>
 
+#if OST_IMG_ENABLED
+
+#include <ost/gfx/map_iso.hh>
+#include <ost/gui/main_area.hh>
+#include <ost/gui/perspective.hh>
+
+#endif
+
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_win/scene_win.hh>
 #include <ost/gui/query_dialog.hh>
@@ -125,6 +133,28 @@ void SceneSelection::Delete() {
       gfx::Scene::Instance().Remove(selected_objects[i]);
   }
 }
+
+#if OST_IMG_ENABLED
+
+void SceneSelection::ViewDensitySlices() {
+  for(unsigned int i = 0; i < nodes_.size(); i++){
+    gfx::GfxNodeP node = nodes_[i];
+    if (node) {
+      gfx::MapIsoP obj = dyn_cast<gfx::MapIso> (node);
+      if (obj) {
+    	// The following is a hack. I need to pass a reference to an ImagHandle
+    	// that never goes out of scope, so I get a reference from the MapIso using
+    	// GetMap and pass it to the CreateDataViewer
+    	img::gui::DataViewer* dv = GostyApp::Instance()->CreateDataViewer(obj->GetMap());
+        MainArea* ma = GostyApp::Instance()->GetPerspective()->GetMainArea();
+        ma->AddWidget(QString(obj->GetName().c_str()), dv) ;
+    	dv->show();
+      }
+    }
+  }
+}
+
+#endif // OST_IMG_ENABLED
 
 void SceneSelection::Select() {
   QueryDialog d;

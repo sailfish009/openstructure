@@ -272,6 +272,12 @@ float MapIso::GetStdDev() const
   return stat.GetStandardDeviation();
 }
 
+img::ImageHandle& MapIso::GetMap()
+{
+  return mh_;
+}
+
+
 float MapIso::GetMean() const
 {
   img::alg::Stat stat;

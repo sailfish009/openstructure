@@ -76,6 +76,11 @@ public:
   /// \brief get std dev of map.
   float GetStdDev() const;
   
+  /// \brief get the map handle
+  // The following is a hack. For the DataViewer I need to pass a reference to an ImagHandle
+  // that never goes out of scope, so I get a reference from here
+  img::ImageHandle& GetMap();
+
   /// \brief set  color
   /// 
   /// By default, the color is white.

@@ -44,6 +44,7 @@ public:
 public slots:
   void CenterOnObjects();
   void Delete();
+  void ViewDensitySlices();
   void CopyViews();
   void Select();
   void Deselect();
