@@ -3,6 +3,6 @@
  <GenericLoaders>
   <GenericLoader ExtName="pdbredo" Name="pdbredo" Url="http://www.cmbi.ru.nl/pdb_redo/ak/${ID}/${ID}_besttls.pdb" />
   <GenericLoader ExtName="pdborg" Name="pdb.org" Url="http://www.pdb.org/pdb/files/${ID}.pdb" />
-  <GenericLoader ExtName="emdb" Name="emdb" Url="ftp://ftp.ebi.ac.uk/pub/databases/emdb/structures/EMD-${ID}/map/emd_${ID}.map.gz" FileType="map.gz" Img="1"/>  
+  <GenericLoader ExtName="emdb" Name="emdb" Url="ftp://emdb.rutgers.edu/structures/EMD-${ID}/map/emd_${ID}.map.gz" FileType="map.gz" Img="1"/>  
  </GenericLoaders>
 </EMDataInfo>
