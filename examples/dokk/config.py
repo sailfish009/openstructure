@@ -96,3 +96,11 @@ class TopTen():
           break
         name = old_name
         score = old_score
+
+  def GetData(self, rank):
+    try:
+      name = self._config.Get(str(rank))["NAME"]
+      score = self._config.Get(str(rank))["SCORE"]
+      return [name, score]
+    except AttributeError:
+      return None
