@@ -25,6 +25,10 @@ class DokkGLCanvas(QGLWidget):
     self.spnav_input = SpnavInputDevice(self)
     self.update_timer = QTimer()
     self.update_timer.start(UPDATE_INTERVAL)
+    
+    self.hud = HUD()
+        
+    self._lock_input = False
     QObject.connect(self.update_timer, SIGNAL("timeout()"), self.update)
         
   def initializeGL(self):
@@ -38,8 +42,6 @@ class DokkGLCanvas(QGLWidget):
     ogl.glPopMatrix();
 
   def SetLevel(self, level):
-    self.level_=level
-    self.hud = HUD(level)
     self.spnav_input.SetLevel(level)
     
   def paintEvent(self, event):
@@ -56,7 +58,8 @@ class DokkGLCanvas(QGLWidget):
     painter.drawRect(QRect(QPoint(0, 0), QSize(self.width(), 25)))
     painter.setPen(QPen(QColor(255,255,255), Qt.SolidLine))
     painter.setFont(QFont("Verdana"))
-    painter.drawText(QPoint(10, 20), "You are %.1f away from the solution" % self.level_.GetRMSD())
+    painter.drawText(QPoint(10, 20), "You are %.1f away from the solution" % self.dokk.GetLevel().GetRMSD())
+    painter.drawText(QPoint(self.width()-100, 20), "%.0f seconds left" % self.dokk.GetLevel().GetRemainingTime())
     if self.hud is not None:
       self.hud.Paint(painter)
       
@@ -67,38 +70,41 @@ class DokkGLCanvas(QGLWidget):
     self.last_point_=QPoint(event.x(), event.y())
 
   def mouseMoveEvent(self, event):
-    delta=QPoint(event.x(), event.y())-self.last_point_
-    self.last_point_=QPoint(event.x(), event.y())
-    if event.buttons() & Qt.LeftButton:
-      tf=gfx.Scene().GetTransform()      
-      if event.modifiers() & Qt.ShiftModifier:
-        if event.modifiers() & Qt.AltModifier:
-          self.level_.Shift(tf.GetRot().GetRow(2)*delta.y()*0.1)          
+    if not self._lock_input:
+      delta=QPoint(event.x(), event.y())-self.last_point_
+      self.last_point_=QPoint(event.x(), event.y())
+      if event.buttons() & Qt.LeftButton:
+        tf=gfx.Scene().GetTransform()      
+        if event.modifiers() & Qt.ShiftModifier:
+          if event.modifiers() & Qt.AltModifier:
+            self.dokk.GetLevel().Shift(tf.GetRot().GetRow(2)*delta.y()*0.1)          
+          else:
+            self.dokk.GetLevel().Shift((tf.GetRot().GetRow(0)*delta.x()
+                             -tf.GetRot().GetRow(1)*delta.y())*0.1)
         else:
-          self.level_.Shift((tf.GetRot().GetRow(0)*delta.x()
-                           -tf.GetRot().GetRow(1)*delta.y())*0.1)
-      else:
+          if delta.y()!=0:
+            self.dokk.GetLevel().RotateAxis(tf.GetRot().GetRow(0), delta.y()*0.005)
+          if delta.x()!=0:
+            self.dokk.GetLevel().RotateAxis(tf.GetRot().GetRow(1), delta.x()*0.005)
+        self.dokk.GetLevel().UpdateScores()
+        self.update()
+      elif event.buttons() & Qt.RightButton:
         if delta.y()!=0:
-          self.level_.RotateAxis(tf.GetRot().GetRow(0), delta.y()*0.005)
+          gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
+                                           gfx.INPUT_COMMAND_ROTX, delta.y()*0.5),
+                            False)
         if delta.x()!=0:
-          self.level_.RotateAxis(tf.GetRot().GetRow(1), delta.x()*0.005)
-      self.level_.UpdateScores()
-      self.update()
-    elif event.buttons() & Qt.RightButton:
-      if delta.y()!=0:
-        gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
-                                         gfx.INPUT_COMMAND_ROTX, delta.y()*0.5),
-                          False)
-      if delta.x()!=0:
-        gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
-                                         gfx.INPUT_COMMAND_ROTY, delta.x()*0.5),
-                          False)
-      self.update()
+          gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
+                                           gfx.INPUT_COMMAND_ROTY, delta.x()*0.5),
+                            False)
+        self.update()
   def mouseDoubleClickEvent(self, event):
-    self.level_.SetPivot(event.x(), self.height()-event.y())
+    if not self._lock_input:
+      self.dokk.GetLevel().SetPivot(event.x(), self.height()-event.y())
   def wheelEvent(self, event):
-    self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0,gfx.TRANSFORM_VIEW,
-              0.1*(-event.delta()))
+    if not self._lock_input:
+      self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0,gfx.TRANSFORM_VIEW,
+                0.1*(-event.delta()))
 
 
   def OnTransform(self,com, indx, trg, val):
@@ -107,43 +113,65 @@ class DokkGLCanvas(QGLWidget):
     self.update()
     
   def keyReleaseEvent(self, event):
-    if event.key() == Qt.Key_Left or event.key() == Qt.Key_A:
-      self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
-      
-    if event.key() == Qt.Key_Right or event.key() == Qt.Key_D:
-      self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
-      
-    if event.key() == Qt.Key_Down or event.key() == Qt.Key_S:
-      self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
-      
-    if event.key() == Qt.Key_Up or event.key() == Qt.Key_W:
-      self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
-      
     if event.key() == Qt.Key_Escape:
       QApplication.exit()
     
+    if not self._lock_input:
+      if event.key() == Qt.Key_Left or event.key() == Qt.Key_A:
+        self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
+        
+      if event.key() == Qt.Key_Right or event.key() == Qt.Key_D:
+        self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
+        
+      if event.key() == Qt.Key_Down or event.key() == Qt.Key_S:
+        self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
+        
+      if event.key() == Qt.Key_Up or event.key() == Qt.Key_W:
+        self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
+    
+  def SetLockInput(self, lock):
+    self._lock_input = lock
+    self.spnav_input.SetLockInput(lock)
+
 class DokkGLWin(gfx.GLWinBase):
     def _CreateFormat(self):
       fmt=QGLFormat()
       fmt.setAlpha(True)
       return fmt
+    
     def __init__(self,dokk):
         gfx.GLWinBase.__init__(self)
         self.canvas_=DokkGLCanvas(self._CreateFormat(),dokk)
+        
     def DoRefresh(self):
       self.refresh_=True
+      
     def SetLevel(self, level):
       self.canvas_.SetLevel(level)
+      
     def Show(self, fullscreen):
       if fullscreen:
         self.canvas_.showFullScreen()
       else:
         self.canvas_.show()
+        
     def SetStereo():
       pass
+    
+    def SetLockInput(self, lock):
+      self.canvas_.SetLockInput(lock)
     
     def Width(self):
       return self.canvas_.width()
     
     def Height(self):
       return self.canvas_.height()
+    
+    def ClearHUDObjects(self):
+      self.canvas_.hud.Clear()
+    
+    def RemoveHUDObject(self, hud_object):
+      self.canvas_.hud.Remove(hud_object)
+      
+    def AddHUDObject(self, hud_object):
+      self.canvas_.hud.Add(hud_object)

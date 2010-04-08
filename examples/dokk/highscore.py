@@ -14,18 +14,17 @@ class HighScore(QtCore.QObject):
     return self.ne.GetName()
   
   def Start(self):
-    rect = QtCore.QRect(QtCore.QPoint(60, 60), QtCore.QSize(dokk.Dokk().gl_win.Width()/3, dokk.Dokk().gl_win.Height()-120))
-    self.bg = RectHUDObject(-1,rect, bg_color=QtGui.QColor(128,128,128,200))
-    dokk.Dokk().gl_win.AddHUDObject(self.bg)
-
     topten=self.level.topten
-    text = "%4s %5s\n"%("Name","Score")
+    text = "%2s %4s %5s\n"%("#", "Name","Score")
     i=1
     while(topten.GetData(i)):
        data = topten.GetData(i)
-       text += "%4s %1.2f\n"%(data[0],float(data[1]))
+       text += "%2i %4s %1.2f\n"%(i, data[0],float(data[1]))
        i += 1
-    self.hud_text = RectTextHUDObject(text, rect=rect, time=-1,font = QtGui.QFont("Verdana",20))
+    rect = QtCore.QRect(QtCore.QPoint(60, 60), QtCore.QSize(dokk.Dokk().gl_win.Width()/5, (i+1)*30))
+    self.bg = RectHUDObject(-1,rect, bg_color=QtGui.QColor(128,128,128,200))
+    dokk.Dokk().gl_win.AddHUDObject(self.bg)
+    self.hud_text = RectTextHUDObject(text, rect=rect, time=-1, font=QtGui.QFont("Verdana",20))
     dokk.Dokk().gl_win.AddHUDObject(self.hud_text)
                   
   def Finish(self):

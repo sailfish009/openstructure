@@ -1,2 +1,2 @@
 #!/bin/sh
-cat start_dokk.py | gosty Dokk $@
+gosty start_dokk.py Dokk $@
