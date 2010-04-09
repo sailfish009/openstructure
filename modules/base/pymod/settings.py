@@ -2,14 +2,17 @@ import os
 import __main__
  
 
-def GetValue(val_key,val_default=None):
+def GetValue(val_key,val_default=None,prefix='OST'):
   '''
   Returns the value of the variable val_key if defined, otherwise returns the 
   default value provided by the user (if provided). Search order: 
-  1) environment variable called OST_val_key 
+  1) environment variable called $prefix_$val_key 
   2) variable called val_key in .dngrc file
   '''
-  env_var_name='OST_'+val_key
+  if prefix:
+    env_var_name='%s_%s' % (prefix, val_key)
+  else:
+    env_var_name=val_key
   env_value=os.getenv(env_var_name)
   if env_value:
     return env_value
