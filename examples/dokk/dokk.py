@@ -44,6 +44,5 @@ class Dokk(object):
   def _LoadLevel(self):
     if self._current_level is not None:
       self._current_level.Close()
-    self.gl_win.ClearHUDObjects()
     self._current_level = level.Level(self.levels_[self._current_index])
     self.gl_win.SetLevel(self._current_level)

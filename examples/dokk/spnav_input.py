@@ -75,6 +75,8 @@ class SpnavInputDevice(QtCore.QObject):
         self.rot_hud.text= "Rotation Enabled: %s"%self.rot
         self.rot_hud.time = 2000
         self.rot_hud.Reset()
+      elif button == 7:
+        self.level.Reset()
       elif button == 10:
         self.level.Finished()
       elif button == 11:
@@ -82,4 +84,4 @@ class SpnavInputDevice(QtCore.QObject):
       elif button == 12:
         self.level.Solve()
       elif button == 13:
-        self.level.Reset()
+        self.level.ResetPos()

@@ -1,12 +1,12 @@
 import os
 import time
 from PyQt4 import QtCore, QtGui
-from ost import io, gfx, qa, geom
+from ost import io, gfx, geom
 from ligand import Ligand
 from surface import Surface
 from protein import Protein
 from score_updater import ScoreUpdater
-from config import *
+from config import Config, TopTen
 from dokk import Dokk
 from level_messages import LevelIntro
 from level_messages import LevelEnd
@@ -17,20 +17,17 @@ class Level(QtCore.QObject):
   def __init__(self, name, parent=None):
     QtCore.QObject.__init__(self,parent)
     self.name_=name
-    self.Load()
-    self.hud = None
     
     self.endtime = 0
     self.stop_time = 0
+
+    self.Load()    
+    self.LoadHUD()
     
     self.timer = QtCore.QTimer()
     self.timer.setSingleShot(True)
     self.connect(self.timer,QtCore.SIGNAL("timeout()"),self.Finished)
-    self.li = LevelIntro(self.config)
-    self.connect(self.li,QtCore.SIGNAL("Finished()"),self._IntroEnd)
-    self.le = None
-    self.hni = None
-    self.level_info = LevelInfo(self)
+        
     Dokk().gl_win.SetLockInput(True)
     self._started = False
     self.emit(QtCore.SIGNAL("Stopped()"))
@@ -51,6 +48,17 @@ class Level(QtCore.QObject):
     print 'Done Loading'
     self.su = ScoreUpdater(self)
     self.transform_ = gfx.Scene().GetTransform()
+    
+  def LoadHUD(self):
+    self.hud_level_intro = LevelIntro(self.config)
+    self.connect(self.hud_level_intro,QtCore.SIGNAL("Finished()"),self._IntroEnd)
+    self.hud_level_end_tt = LevelEnd(self.config.TT)
+    self.connect(self.hud_level_end_tt,QtCore.SIGNAL("Finished()"),self._FinishEnd)
+    self.hud_level_end_ntt = LevelEnd(self.config.NTT)
+    self.connect(self.hud_level_end_ntt,QtCore.SIGNAL("Finished()"),self._FinishEnd)
+    self.hud_name_input = HUDNameInput()
+    self.connect(self.hud_name_input,QtCore.SIGNAL("Finished()"),self._FinishEnterName)
+    self.level_info = LevelInfo(self)
     
   def RotateAxis(self, axis, angle):
     self.ligand.RotateAxis(axis, angle)
@@ -103,24 +111,30 @@ class Level(QtCore.QObject):
   def Reset(self):
     self.endtime = 0
     self.stop_time = 0
+    self.CleanHUD()
+    self.ResetPos()
+    self.emit(QtCore.SIGNAL("Stopped()"))
+  
+  def CleanHUD(self):
+    self.hud_level_end_tt.Stop()
+    self.hud_level_end_ntt.Stop()
+    self.hud_level_intro.Stop()
+    self.hud_name_input.Stop()
     Dokk().gl_win.ClearHUDObjects()
-    if self.le is not None:
-      self.le.Stop()
-    self.li.Stop()
-    self.hni = None
-    
+  
+  def ResetPos(self):
     self.ligand.Reset()
     gfx.Scene().SetTransform(self.transform_)
     gfx.Scene().SetCenter(self.surface.go.GetCenter())
     gfx.Scene().RequestRedraw()
-    self.su.UpdateScores()
+    self.UpdateScores()
     
   def Solve(self):
     self.ligand.Solve()
     gfx.Scene().SetTransform(self.transform_)
     gfx.Scene().SetCenter(self.surface.go.GetCenter())
     gfx.Scene().RequestRedraw()
-    self.su.UpdateScores()
+    self.UpdateScores()
   
   def Finished(self):
     self._started = False
@@ -128,26 +142,22 @@ class Level(QtCore.QObject):
     self.stop_time = time.time()
     Dokk().gl_win.SetLockInput(True)
     if self.GetRank() > 0:
-      self.le = LevelEnd(self.config.TT)
+      self.hud_level_end_tt.Start()
     else:
-      self.le = LevelEnd(self.config.NTT)
-    self.connect(self.le,QtCore.SIGNAL("Finished()"),self._FinishEnd)
-    self.le.Start()
-        
+      self.hud_level_end_ntt.Start()
+
   def Begin(self):
     self.Reset()
-    self.su.UpdateScores()
-    self.li.Start()
+    self.UpdateScores()
+    self.hud_level_intro.Start()
     self._started = True
-    self.emit(QtCore.SIGNAL("Started()"))
+    self.emit(QtCore.SIGNAL("Started()"))    
     
   def Close(self):
     gfx.Scene().SetTransform(self.transform_)
     self.emit(QtCore.SIGNAL("Closed()"))
-    if self.le is not None:
-      self.le.Stop()
-    self.li.Stop()
     self._started = False
+    self.CleanHUD()
     self.surface.Close()
     self.protein.Close()
     self.ligand.Close()
@@ -157,16 +167,15 @@ class Level(QtCore.QObject):
       Dokk().gl_win.SetLockInput(False)
       self.timer.start(int(self.config.Level["TIME"]))
       self.endtime = float(time.time()+(int(self.config.Level["TIME"]))/1000.0)
+      self.emit(QtCore.SIGNAL("Started()"))
       
   def _FinishEnd(self):
     if bool(int(self.config.Level["SAVE"])) and self.GetRank()>0:
-      self.hni = HUDNameInput()
-      self.connect(self.hni,QtCore.SIGNAL("Finished()"),self._FinishEnterName)
+      self.hud_name_input.Start()
     else:
       self.Reset()
       self.emit(QtCore.SIGNAL("Stopped()"))
       
   def _FinishEnterName(self):
-    self.topten.SetValue(self.hni.GetName(),self.GetScore())
+    self.topten.SetValue(self.hud_name_input.GetName(),self.GetScore())
     self.Reset()
-    self.emit(QtCore.SIGNAL("Stopped()"))

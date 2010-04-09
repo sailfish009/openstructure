@@ -13,9 +13,10 @@ class NameEnter(QtCore.QObject):
     QtCore.QObject.__init__(self, parent)
     self.spnav = gui.SpnavInput.GetQThread()
     self.spnav.start()
-    QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceTransformed(int,int,int,int,int,int)"), self.InputChanged)
-    QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceButtonPressed(int)"), self.ToggleInputMode)     
-
+    
+    self.Reset()
+    
+  def Reset(self):
     self.letter_pos = 0
     self.al_len = len(ALPHABET)
     self.letter_score = 0
@@ -24,8 +25,6 @@ class NameEnter(QtCore.QObject):
     self.name_pos = 0
     self.name_len = len(self.name)
     self.name_score = 0
-    
-    self.int = 0
     
   def InputChanged(self, tx,ty,tz,rx,ry,rz):
     if(abs(tx) > abs(tz)):
@@ -52,6 +51,15 @@ class NameEnter(QtCore.QObject):
   def GetName(self):
     return self.name
   
+  def Start(self):
+    self.Reset()
+    QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceTransformed(int,int,int,int,int,int)"), self.InputChanged)
+    QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceButtonPressed(int)"), self.ToggleInputMode)     
+    
+  def Stop(self):
+    QtCore.QObject.disconnect(self.spnav,QtCore.SIGNAL("deviceTransformed(int,int,int,int,int,int)"), self.InputChanged)
+    QtCore.QObject.disconnect(self.spnav,QtCore.SIGNAL("deviceButtonPressed(int)"), self.ToggleInputMode)
+      
   def __SetLetterPos(self):
     self.letter_pos = self.letter_pos % self.al_len
     self.__SetName()
@@ -74,9 +82,15 @@ class HUDNameInput(QtCore.QObject):
     QtCore.QObject.__init__(self, parent)
     self.ne = NameEnter()
     self.connect(self.ne,QtCore.SIGNAL("Changed()"),self.Update)
-    self.connect(self.ne,QtCore.SIGNAL("Finished()"),self.Finished)
+    self.connect(self.ne,QtCore.SIGNAL("Finished()"),self.Finish)
     self.huds = list()
-        
+
+    self.hud_text = None
+    self.bg = None
+      
+  def Start(self):
+    self.ne.Start()
+    del(self.huds[:])
     rect = QtCore.QRect(QtCore.QPoint(60, 60), QtCore.QSize(dokk.Dokk().gl_win.Width()-120, 220))
     self.bg = RectHUDObject(-1,rect, bg_color=QtGui.QColor(128,128,128,200))
     dokk.Dokk().gl_win.AddHUDObject(self.bg)
@@ -106,9 +120,15 @@ class HUDNameInput(QtCore.QObject):
       else:
         self.huds[i].color = QtGui.QColor(255,255,255)
         
-  def Finished(self):
+  def Stop(self):
+    self.ne.Stop()
     for hud in self.huds:
       dokk.Dokk().gl_win.RemoveHUDObject(hud)
-    dokk.Dokk().gl_win.RemoveHUDObject(self.hud_text)
-    dokk.Dokk().gl_win.RemoveHUDObject(self.bg)
+    if self.hud_text:
+      dokk.Dokk().gl_win.RemoveHUDObject(self.hud_text)
+    if self.bg:
+      dokk.Dokk().gl_win.RemoveHUDObject(self.bg)
+      
+  def Finish(self):
+    self.Stop()
     self.emit(QtCore.SIGNAL("Finished()"))
