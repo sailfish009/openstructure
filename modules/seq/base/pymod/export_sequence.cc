@@ -88,6 +88,38 @@ AlignedRegion slice_aln(const AlignmentHandle& aln, slice sl) {
   return aln.MakeRegion(start, end-start);
 }
 
+
+struct RegionRangeIter {
+  RegionRangeIter(AlignedColumnIterator b, 
+                  AlignedColumnIterator e):
+    b_(b), e_(e)
+  { }
+  
+  AlignedColumn next()
+  {
+    if (b_==e_) {
+      boost::python::objects::stop_iteration_error();
+    }
+    AlignedColumn col=*b_;
+    ++b_;
+    return col;
+  }
+private:
+  AlignedColumnIterator b_;
+  AlignedColumnIterator e_;
+};
+
+
+RegionRangeIter iter_range1(AlignmentHandle& aln)
+{
+  return RegionRangeIter(aln.begin(), aln.end());
+}
+
+RegionRangeIter iter_range2(AlignedRegion& aln_region)
+{
+  return RegionRangeIter(aln_region.begin(), aln_region.end());
+}
+
 }
 
 void export_sequence()
@@ -148,6 +180,9 @@ void export_sequence()
   /*class_<SequenceHandleList>("SequenceHandleList", init<>())
     .def(vector_indexing_suite<SequenceHandleList>())
   ;*/
+  class_<RegionRangeIter>("RegionRangeIter", no_init)
+    .def("next", &RegionRangeIter::next)
+  ;
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)
     .add_property("sequence_count", &AlignmentHandle::GetCount)
@@ -167,7 +202,7 @@ void export_sequence()
     .def("Replace",&AlignmentHandle::Replace)
     .def("__getitem__", &slice_aln)
     .def("__getitem__", &AlignmentHandle::operator[])
-    .def("__iter__", iterator<AlignmentHandle>())
+    .def("__iter__", iter_range1)
     .add_property("sequences", &AlignmentHandle::GetSequences)
     .def("SetSequenceName",  &AlignmentHandle::SetSequenceName)
     .def("SetSequenceOffset", &AlignmentHandle::SetSequenceOffset)
@@ -193,7 +228,7 @@ void export_sequence()
                   &AlignedRegion::SetMaster)
     .def("__getitem__", &AlignedRegion::operator[])                  
     .def("__len__", &AlignedRegion::GetLength)
-    .def("__iter__", iterator<AlignedRegion>())
+    .def("__iter__", iter_range2)
     .add_property("start", &AlignedRegion::GetStart)
     .add_property("end", &AlignedRegion::GetEnd)    
   ;
