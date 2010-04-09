@@ -113,21 +113,40 @@ class DokkGLCanvas(QGLWidget):
     self.update()
     
   def keyReleaseEvent(self, event):
+    self.emit(SIGNAL("KeyPressed"),event)
     if event.key() == Qt.Key_Escape:
       QApplication.exit()
+    elif event.key() == Qt.Key_P:
+      self.dokk.PreviousLevel()
+    elif event.key() == Qt.Key_N:
+      self.dokk.NextLevel()
+    elif event.key() == Qt.Key_Space:
+      self.dokk.GetLevel().Begin()
     
     if not self._lock_input:
       if event.key() == Qt.Key_Left or event.key() == Qt.Key_A:
         self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
         
-      if event.key() == Qt.Key_Right or event.key() == Qt.Key_D:
+      elif event.key() == Qt.Key_Right or event.key() == Qt.Key_D:
         self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
         
-      if event.key() == Qt.Key_Down or event.key() == Qt.Key_S:
+      elif event.key() == Qt.Key_Down or event.key() == Qt.Key_S:
         self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
         
-      if event.key() == Qt.Key_Up or event.key() == Qt.Key_W:
+      elif event.key() == Qt.Key_Up or event.key() == Qt.Key_W:
         self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
+
+      elif event.key() == Qt.Key_Backspace:
+        self.dokk.GetLevel().Reset()
+    
+      elif event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
+        self.dokk.GetLevel().Finished()
+        
+      elif event.key() == Qt.Key_E:
+        self.dokk.GetLevel().Solve()
+        
+      elif event.key() == Qt.Key_R:
+        self.dokk.GetLevel().ResetPos()
     
   def SetLockInput(self, lock):
     self._lock_input = lock
@@ -140,38 +159,38 @@ class DokkGLWin(gfx.GLWinBase):
       return fmt
     
     def __init__(self,dokk):
-        gfx.GLWinBase.__init__(self)
-        self.canvas_=DokkGLCanvas(self._CreateFormat(),dokk)
+      gfx.GLWinBase.__init__(self)
+      self.canvas=DokkGLCanvas(self._CreateFormat(),dokk)
         
     def DoRefresh(self):
       self.refresh_=True
       
     def SetLevel(self, level):
-      self.canvas_.SetLevel(level)
+      self.canvas.SetLevel(level)
       
     def Show(self, fullscreen):
       if fullscreen:
-        self.canvas_.showFullScreen()
+        self.canvas.showFullScreen()
       else:
-        self.canvas_.show()
+        self.canvas.show()
         
     def SetStereo():
       pass
     
     def SetLockInput(self, lock):
-      self.canvas_.SetLockInput(lock)
+      self.canvas.SetLockInput(lock)
     
     def Width(self):
-      return self.canvas_.width()
+      return self.canvas.width()
     
     def Height(self):
-      return self.canvas_.height()
+      return self.canvas.height()
     
     def ClearHUDObjects(self):
-      self.canvas_.hud.Clear()
+      self.canvas.hud.Clear()
     
     def RemoveHUDObject(self, hud_object):
-      self.canvas_.hud.Remove(hud_object)
+      self.canvas.hud.Remove(hud_object)
       
     def AddHUDObject(self, hud_object):
-      self.canvas_.hud.Add(hud_object)
+      self.canvas.hud.Add(hud_object)

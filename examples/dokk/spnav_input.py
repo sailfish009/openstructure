@@ -9,11 +9,14 @@ class SpnavInputDevice(QtCore.QObject):
   def __init__(self, gfx_win, parent=None):
     QtCore.QObject.__init__(self, parent)
     self.refresh_rate_ = DEFAULT_REFRESHRATE
-    self.spnav = gui.SpnavInput.GetQThread()
-    self.spnav.start()
-    self.gfx_win = gfx_win
-    QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceTransformed(int,int,int,int,int,int)"), self.InputChanged)
-    QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceButtonPressed(int)"), self.ToggleInputMode)     
+    try:
+      self.spnav = gui.SpnavInput.GetQThread()
+      self.spnav.start()
+      self.gfx_win = gfx_win
+      QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceTransformed(int,int,int,int,int,int)"), self.InputChanged)
+      QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceButtonPressed(int)"), self.ToggleInputMode)     
+    except AttributeError:
+      pass #No SpaceNav Support
     
     self.trans = True
     self.rot = True

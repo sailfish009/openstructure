@@ -11,9 +11,13 @@ NAME_BREAK = 8000
 class NameEnter(QtCore.QObject):
   def __init__(self, parent=None):
     QtCore.QObject.__init__(self, parent)
-    self.spnav = gui.SpnavInput.GetQThread()
-    self.spnav.start()
-    
+    try:
+      self._spnav = gui.SpnavInput.GetQThread()
+      self._spnav.start()
+    except AttributeError:
+      self._spnav = None
+      
+        
     self.Reset()
     
   def Reset(self):
@@ -43,6 +47,22 @@ class NameEnter(QtCore.QObject):
       elif(self.letter_score < -LETTER_BREAK):
         self.letter_pos -=1
         self.__SetLetterPos()
+    
+  def KeyPressed(self, event):
+    if event.key() == Qt.Key_Right:
+      self.name_pos +=1
+      self.__SetNamePos()
+    elif event.key() == Qt.Key_Left:
+      self.name_pos -=1
+      self.__SetNamePos()
+    elif event.key() == Qt.Key_Up:
+      self.letter_pos +=1
+      self.__SetLetterPos()
+    elif event.key() == Qt.Key_Down:
+      self.letter_pos -=1
+      self.__SetLetterPos()
+    elif event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
+      self.emit(QtCore.SIGNAL("Finished()"))
         
   def ToggleInputMode(self, button):
     if button == 10:
@@ -53,13 +73,17 @@ class NameEnter(QtCore.QObject):
   
   def Start(self):
     self.Reset()
-    QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceTransformed(int,int,int,int,int,int)"), self.InputChanged)
-    QtCore.QObject.connect(self.spnav,QtCore.SIGNAL("deviceButtonPressed(int)"), self.ToggleInputMode)     
+    if self._spnav:
+      QtCore.QObject.connect(self._spnav,QtCore.SIGNAL("deviceTransformed(int,int,int,int,int,int)"), self.InputChanged)
+      QtCore.QObject.connect(self._spnav,QtCore.SIGNAL("deviceButtonPressed(int)"), self.ToggleInputMode)     
+    self.connect(dokk.Dokk().gl_win.canvas, QtCore.SIGNAL("KeyPressed"),self.KeyPressed)
     
   def Stop(self):
-    QtCore.QObject.disconnect(self.spnav,QtCore.SIGNAL("deviceTransformed(int,int,int,int,int,int)"), self.InputChanged)
-    QtCore.QObject.disconnect(self.spnav,QtCore.SIGNAL("deviceButtonPressed(int)"), self.ToggleInputMode)
-      
+    if self._spnav:
+      QtCore.QObject.disconnect(self._spnav,QtCore.SIGNAL("deviceTransformed(int,int,int,int,int,int)"), self.InputChanged)
+      QtCore.QObject.disconnect(self._spnav,QtCore.SIGNAL("deviceButtonPressed(int)"), self.ToggleInputMode)
+    self.disconnect(dokk.Dokk().gl_win.canvas, QtCore.SIGNAL("KeyPressed"),self.KeyPressed)
+    
   def __SetLetterPos(self):
     self.letter_pos = self.letter_pos % self.al_len
     self.__SetName()
