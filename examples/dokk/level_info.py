@@ -49,7 +49,7 @@ class HighScore(QtCore.QObject):
        text += "\n%-2s%5s%-6s%5s%+6s"%(str("%-2i"%i), "", data[0],"", str("%3.2f"%float(data[1])))
        i += 1
        data = self.topten.GetData(i)
-    rect = QtCore.QRect(QtCore.QPoint(60, 120), QtCore.QSize(24*20, (i+2)*30))
+    rect = QtCore.QRect(QtCore.QPoint(60, 200), QtCore.QSize(24*20, (i+2)*30))
     self.bg = RectHUDObject(-1,rect, bg_color=QtGui.QColor(128,128,128,200))
     dokk.Dokk().gl_win.AddHUDObject(self.bg)
     self.hud_text = RectTextHUDObject(text, rect=rect, time=-1, font=QtGui.QFont("Courier",20))
