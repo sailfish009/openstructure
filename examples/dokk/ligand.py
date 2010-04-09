@@ -7,6 +7,7 @@ class Ligand:
     self.the_solution_=ligand.Copy().CreateFullView()
     self.go=gfx.Entity("Ligand", gfx.CPK, self.handle)
     self.go.SetColor(gfx.GREEN, 'ele=C')
+    self.go.cpk_options.SetSphereDetail(7)
     gfx.Scene().Add(self.go)
     gfx.Scene().SetCenter(self.go.center)
     bbox=self.go.GetBoundingBox()

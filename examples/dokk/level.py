@@ -111,6 +111,7 @@ class Level(QtCore.QObject):
   def Reset(self):
     self.endtime = 0
     self.stop_time = 0
+    self.timer.stop()
     self.CleanHUD()
     self.ResetPos()
     self.emit(QtCore.SIGNAL("Stopped()"))
