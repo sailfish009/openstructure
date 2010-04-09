@@ -11,7 +11,7 @@ from dokk import Dokk
 from level_messages import LevelIntro
 from level_messages import LevelEnd
 from name_enter import HUDNameInput
-from highscore import HighScore
+from level_info import LevelInfo
 
 class Level(QtCore.QObject):
   def __init__(self, name, parent=None):
@@ -30,7 +30,7 @@ class Level(QtCore.QObject):
     self.connect(self.li,QtCore.SIGNAL("Finished()"),self._IntroEnd)
     self.le = None
     self.hni = None
-    self.highscore = HighScore(self)
+    self.level_info = LevelInfo(self)
     Dokk().gl_win.SetLockInput(True)
     self._started = False
     self.emit(QtCore.SIGNAL("Stopped()"))
@@ -142,6 +142,8 @@ class Level(QtCore.QObject):
     self.emit(QtCore.SIGNAL("Started()"))
     
   def Close(self):
+    gfx.Scene().SetTransform(self.transform_)
+    self.emit(QtCore.SIGNAL("Closed()"))
     if self.le is not None:
       self.le.Stop()
     self.li.Stop()

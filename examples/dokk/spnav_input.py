@@ -37,14 +37,13 @@ class SpnavInputDevice(QtCore.QObject):
       ligand = self.level.ligand
       transf = mol.Transform()
       if(self.trans):
-        scene_rot = geom.Mat4(gfx.Scene().GetTransform().GetRot())
-        center = gfx.Scene().GetCenter()
         delta = geom.Vec3 (tx/480.0, ty/480.0, -tz/480.0)
         transf.SetTrans(delta)
       if(self.rot):
-        transf.ApplyXAxisRotation(rx/480.0)
-        transf.ApplyYAxisRotation(ry/480.0)
-        transf.ApplyZAxisRotation(rz/480.0)
+        rot=gfx.Scene().GetTransform().GetRot()
+        transf.ApplyAxisRotation(rx/480.0, rot.GetRow(0))
+        transf.ApplyAxisRotation(ry/480.0, rot.GetRow(1))
+        transf.ApplyAxisRotation(-rz/480.0, rot.GetRow(2))
       ligand.ApplyTF(transf)
       if self.score_scip >= self.refresh_rate_:
         self.level.UpdateScores()
