@@ -63,13 +63,12 @@ def _CalcRelativeSA(residue_type, absolute_sa):
 
 def AssignDSSP(ent, pdb_path="", extract_burial_status_flag=0, tmp_dir=None):
   entity_saved_flag = 0
-  if pdb_path=="":
-    # use of mktemp is a safty problem (use mkstemp and provide file handle to 
-    # subsequent process
-    pdb_path=tempfile.mktemp(suffix=".pdb",prefix="temp_entity", 
-                             dir=tmp_dir)
-    io.SaveEntity(ent, pdb_path)
-    entity_saved_flag = 1
+  # use of mktemp is a safty problem (use mkstemp and provide file handle to 
+  # subsequent process
+  pdb_path=tempfile.mktemp(suffix=".pdb",prefix="temp_entity", 
+			    dir=tmp_dir)
+  io.SaveEntity(ent, pdb_path)
+  entity_saved_flag = 1
 
   #TODO: exception handling (currently errors occuring here
   # are handled in the parser LoadDSSP)
