@@ -126,10 +126,13 @@ long AtomBase::GetHashCode() const
   return reinterpret_cast<long>(Impl().get());
 }
 
-std::ostream& operator<<(std::ostream& os, 
-                         const AtomBase& atom) 
+std::ostream& operator<<(std::ostream& os, const AtomBase& atom) 
 {
-  os << atom.GetQualifiedName();
+  if (atom.IsValid()) {
+    os << atom.GetQualifiedName();
+  } else {
+    os << "invalid atom";
+  }
   return os;
 }
 

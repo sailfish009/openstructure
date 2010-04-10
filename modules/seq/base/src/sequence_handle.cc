@@ -219,7 +219,12 @@ SequenceHandle SequenceFromInfo(info::InfoGroup& group)
 
 std::ostream& operator<<(std::ostream& os, const ConstSequenceHandle& sequence)
 {
-  os << sequence.GetName() << ": " << sequence.GetString();
+  if (sequence.IsValid()) {
+    os << sequence.GetName() << ": " << sequence.GetString();    
+  } else {
+    os << "invalid";
+  }
+
   return os;
 }
 

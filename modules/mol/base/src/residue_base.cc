@@ -70,7 +70,7 @@ ResidueBase::operator bool() const {
 }
 
 bool ResidueBase::IsValid() const {
-  return impl_;
+  return impl_.get()!=0;
 }
 
 bool ResidueBase::IsPeptideLinking() const 
@@ -141,9 +141,12 @@ void ResidueBase::CheckValidity() const
     throw InvalidHandle();
 }
 
-DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os, 
-                                            const ResidueBase& residue) {
-   os << residue.GetQualifiedName();  
+std::ostream& operator<<(std::ostream& os, const ResidueBase& residue) {
+  if (residue.IsValid()) {
+    os << residue.GetQualifiedName();
+  } else {
+    os << "invalid residue"; 
+  }
    return os;                                                                              
 }
 
