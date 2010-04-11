@@ -68,8 +68,9 @@ private:
 
   void PrepareRendering(TraceSubset& subset, IndexedVertexArray& va, 
                         SplineEntryListList& spline_list_list, bool is_sel);
-  static TraceProfile GetCircProfile(unsigned int detail, float rx, float ry, 
-                                     float ex);
+
+  TraceProfile GetCircProfile(unsigned int detail, float rx, float ry, unsigned int type, float ecc);
+
   bool force_tube_;
   CartoonRenderOptionsPtr options_;
   SplineEntryListList    spline_list_list_;

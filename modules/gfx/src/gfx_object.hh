@@ -252,6 +252,9 @@ public:
                const String& prop,
                const Color& c1, const Color& c2, float minv, float maxv);  
 #endif
+
+  unsigned int& Debug() {return debug_flags_;}
+
  protected:
   
   void PreRenderGL(bool flag);
@@ -270,6 +273,7 @@ public:
 
   IndexedVertexArray va_;
   RenderMode::Type render_mode_;
+  unsigned int debug_flags_;
  
  private: 
   mol::Transform transform_;
@@ -295,6 +299,7 @@ public:
 
   TextPrimList labels_;
   void render_labels() const;
+
 };
 
 }} //ns

@@ -52,6 +52,9 @@ class HSCWidget(RenderModeWidget):
     
     min_ecc = 0.1
     max_ecc = 5
+
+    min_profile=0
+    max_profile=4
     
     #########UI##########
     
@@ -105,8 +108,13 @@ class HSCWidget(RenderModeWidget):
     self.thickness_tube_slider_.setRange(min_tube_ratio*10.0, max_tube_ratio*10)
     self.thickness_tube_slider_.setTickPosition(QtGui.QSlider.NoTicks)
     self.thickness_tube_slider_.setTickInterval(1)
+
+    # Tube Profile Type
+    tube_profile_label = QtGui.QLabel("Tube Profile Type")
+    self.tube_profile_spinbox_ = QtGui.QSpinBox()
+    self.tube_profile_spinbox_.setRange(min_profile, max_profile)
     
-    #Helifx
+    # Helix
     helix_label = QtGui.QLabel("Helix")
     font = helix_label.font()
     font.setBold(True)
@@ -152,6 +160,10 @@ class HSCWidget(RenderModeWidget):
     self.ecc_helix_slider_.setTickPosition(QtGui.QSlider.NoTicks)
     self.ecc_helix_slider_.setTickInterval(1)
     
+    # Helix Profile Type
+    helix_profile_label = QtGui.QLabel("Helix Profile Type")
+    self.helix_profile_spinbox_ = QtGui.QSpinBox()
+    self.helix_profile_spinbox_.setRange(min_profile, max_profile)
     
     #Strand
     strand_label = QtGui.QLabel("Strand")
@@ -199,45 +211,70 @@ class HSCWidget(RenderModeWidget):
     self.ecc_strand_slider_.setTickPosition(QtGui.QSlider.NoTicks)
     self.ecc_strand_slider_.setTickInterval(1)  
     
+    # Strand Profile Type
+    strand_profile_label = QtGui.QLabel("Strand Profile Type")
+    self.strand_profile_spinbox_ = QtGui.QSpinBox()
+    self.strand_profile_spinbox_.setRange(min_profile, max_profile)
+
+    row=1
     grid = QtGui.QGridLayout()
-    grid.addWidget(poly_mode_label,1,0,1,1)
-    grid.addWidget(self.poly_mode_cb_,1,3,1,2)
-    grid.addWidget(spline_label, 2, 0, 1, 3)
-    grid.addWidget(self.spline_spinbox_, 2, 4, 1, 1)
-    grid.addWidget(arc_label,3,0,1,3)
-    grid.addWidget(self.arc_spinbox_,3,4,1,1)
+    grid.addWidget(poly_mode_label,row,0,1,1)
+    grid.addWidget(self.poly_mode_cb_,row,3,1,2)
+    row+=1
+    grid.addWidget(spline_label, row, 0, 1, 3)
+    grid.addWidget(self.spline_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(arc_label,row,0,1,3)
+    grid.addWidget(self.arc_spinbox_,row,4,1,1)
+    row+=1
+    grid.addWidget(tube_label, row, 0, 1, 3)
+    row+=1
+    grid.addWidget(radius_tube_label, row, 0, 1, 1)
+    grid.addWidget(self.width_tube_slider_, row, 1, 1, 3)
+    grid.addWidget(self.width_tube_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(ratio_tube_label, row, 0, 1, 1)
+    grid.addWidget(self.thickness_tube_slider_, row, 1, 1, 3)
+    grid.addWidget(self.thickness_tube_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(tube_profile_label, row, 0, 1, 3)
+    grid.addWidget(self.tube_profile_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(helix_label, row, 0, 1, 3)
+    row+=1
+    grid.addWidget(radius_helix_label, row, 0, 1, 1)
+    grid.addWidget(self.width_helix_slider_, row, 1, 1, 3)
+    grid.addWidget(self.width_helix_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(ratio_helix_label, row, 0, 1, 1)
+    grid.addWidget(self.thickness_helix_slider_, row, 1, 1, 3)
+    grid.addWidget(self.thickness_helix_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(ecc_helix_label, row, 0, 1, 1)
+    grid.addWidget(self.ecc_helix_slider_, row, 1, 1, 3)
+    grid.addWidget(self.ecc_helix_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(helix_profile_label, row, 0, 1, 3)
+    grid.addWidget(self.helix_profile_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(strand_label, row, 0, 1, 3)
+    row+=1
+    grid.addWidget(radius_strand_label, row, 0, 1, 1)
+    grid.addWidget(self.width_strand_slider_, row, 1, 1, 3)
+    grid.addWidget(self.width_strand_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(ratio_strand_label, row, 0, 1, 1)
+    grid.addWidget(self.thickness_strand_slider_, row, 1, 1, 3)
+    grid.addWidget(self.thickness_strand_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(ecc_strand_label, row, 0, 1, 1)
+    grid.addWidget(self.ecc_strand_slider_, row, 1, 1, 3)
+    grid.addWidget(self.ecc_strand_spinbox_, row, 4, 1, 1)
+    row+=1
+    grid.addWidget(strand_profile_label, row, 0, 1, 3)
+    grid.addWidget(self.strand_profile_spinbox_, row, 4, 1, 1)
     
-    grid.addWidget(tube_label, 4, 0, 1, 3)
-    grid.addWidget(radius_tube_label, 5, 0, 1, 1)
-    grid.addWidget(self.width_tube_slider_, 5, 1, 1, 3)
-    grid.addWidget(self.width_tube_spinbox_, 5, 4, 1, 1)
-    grid.addWidget(ratio_tube_label, 6, 0, 1, 1)
-    grid.addWidget(self.thickness_tube_slider_, 6, 1, 1, 3)
-    grid.addWidget(self.thickness_tube_spinbox_, 6, 4, 1, 1)
-    
-    grid.addWidget(helix_label, 7, 0, 1, 3)
-    grid.addWidget(radius_helix_label, 8, 0, 1, 1)
-    grid.addWidget(self.width_helix_slider_, 8, 1, 1, 3)
-    grid.addWidget(self.width_helix_spinbox_, 8, 4, 1, 1)
-    grid.addWidget(ratio_helix_label, 9, 0, 1, 1)
-    grid.addWidget(self.thickness_helix_slider_, 9, 1, 1, 3)
-    grid.addWidget(self.thickness_helix_spinbox_, 9, 4, 1, 1)
-    grid.addWidget(ecc_helix_label, 10, 0, 1, 1)
-    grid.addWidget(self.ecc_helix_slider_, 10, 1, 1, 3)
-    grid.addWidget(self.ecc_helix_spinbox_, 10, 4, 1, 1)
-   
-    grid.addWidget(strand_label, 11, 0, 1, 3)
-    grid.addWidget(radius_strand_label, 12, 0, 1, 1)
-    grid.addWidget(self.width_strand_slider_, 12, 1, 1, 3)
-    grid.addWidget(self.width_strand_spinbox_, 12, 4, 1, 1)
-    grid.addWidget(ratio_strand_label, 13, 0, 1, 1)
-    grid.addWidget(self.thickness_strand_slider_, 13, 1, 1, 3)
-    grid.addWidget(self.thickness_strand_spinbox_, 13, 4, 1, 1)
-    grid.addWidget(ecc_strand_label, 14, 0, 1, 1)
-    grid.addWidget(self.ecc_strand_slider_, 14, 1, 1, 3)
-    grid.addWidget(self.ecc_strand_spinbox_, 14, 4, 1, 1)
-    
-    grid.setRowStretch(15,1)
+    grid.setRowStretch(row+1,1)
     self.setLayout(grid)
     
     QtCore.QObject.connect(self.spline_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSplineDetail)
@@ -248,6 +285,7 @@ class HSCWidget(RenderModeWidget):
     QtCore.QObject.connect(self.width_tube_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderTubeRadius)
     QtCore.QObject.connect(self.thickness_tube_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateTubeRatio)
     QtCore.QObject.connect(self.thickness_tube_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderTubeRatio)
+    QtCore.QObject.connect(self.tube_profile_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateTubeProfileType)
     
     QtCore.QObject.connect(self.width_helix_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateHelixWidth)
     QtCore.QObject.connect(self.width_helix_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderHelixWidth)
@@ -255,6 +293,7 @@ class HSCWidget(RenderModeWidget):
     QtCore.QObject.connect(self.thickness_helix_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderHelixThickness)
     QtCore.QObject.connect(self.ecc_helix_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateHelixEcc)
     QtCore.QObject.connect(self.ecc_helix_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderHelixEcc)
+    QtCore.QObject.connect(self.helix_profile_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateHelixProfileType)
 
     QtCore.QObject.connect(self.width_strand_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateStrandWidth)
     QtCore.QObject.connect(self.width_strand_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderStrandWidth)
@@ -262,6 +301,7 @@ class HSCWidget(RenderModeWidget):
     QtCore.QObject.connect(self.thickness_strand_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderStrandThickness)
     QtCore.QObject.connect(self.ecc_strand_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateStrandEcc)
     QtCore.QObject.connect(self.ecc_strand_slider_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSliderStrandEcc)    
+    QtCore.QObject.connect(self.strand_profile_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateStrandProfileType)
     
     self.setMinimumSize(250,420) #14*30
     ########/UI########
@@ -273,12 +313,15 @@ class HSCWidget(RenderModeWidget):
     
     self.UpdateTubeRadiusGui(options.GetTubeRadius())
     self.UpdateTubeRatioGui(options.GetTubeRatio())
+    self.tube_profile_spinbox_.setValue(options.GetTubeProfileType())
     self.UpdateHelixWidthGui(options.GetHelixWidth())
     self.UpdateHelixThicknessGui(options.GetHelixThickness())
     self.UpdateHelixEccGui(options.GetHelixEcc())
+    self.helix_profile_spinbox_.setValue(options.GetHelixProfileType())
     self.UpdateStrandWidthGui(options.GetStrandWidth())
     self.UpdateStrandThicknessGui(options.GetStrandThickness())
     self.UpdateStrandEccGui(options.GetStrandEcc())
+    self.strand_profile_spinbox_.setValue(options.GetStrandProfileType())
     
   def UpdatePolyMode(self, value):
     self.GetOptions().SetPolyMode(value)
@@ -300,6 +343,9 @@ class HSCWidget(RenderModeWidget):
 
   def UpdateSliderTubeRatio(self, value):
     self.GetOptions().SetTubeRatio(value/10.0)
+
+  def UpdateTubeProfileType(self, value):
+    self.GetOptions().SetTubeProfileType(value)
     
   def UpdateHelixWidth(self, value):
     self.GetOptions().SetHelixWidth(value) 
@@ -316,6 +362,9 @@ class HSCWidget(RenderModeWidget):
   def UpdateHelixEcc(self, value):
     self.GetOptions().SetHelixEcc(value)
     
+  def UpdateHelixProfileType(self, value):
+    self.GetOptions().SetHelixProfileType(value)
+
   def UpdateSliderHelixEcc(self, value):
     self.GetOptions().SetHelixEcc(value/10.0)
     
@@ -336,6 +385,9 @@ class HSCWidget(RenderModeWidget):
     
   def UpdateSliderStrandEcc(self, value):
     self.GetOptions().SetStrandEcc(value/10.0)
+
+  def UpdateStrandProfileType(self, value):
+    self.GetOptions().SetStrandProfileType(value)
 
   def UpdateTubeRadiusGui(self,value):
     if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_spinbox_.singleStep()):

@@ -482,7 +482,7 @@ void IndexedVertexArray::RenderGL()
   }
 
   if(draw_normals_) {
-    glColor3f(1,0,0);
+    //glColor3f(1,0,0);
     glBegin(GL_LINES);
     for(EntryList::const_iterator it=entry_list_.begin();it!=entry_list_.end();++it) {
       glNormal3fv(it->n);

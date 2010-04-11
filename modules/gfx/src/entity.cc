@@ -303,6 +303,10 @@ void Entity::CustomPreRenderGL(bool update)
 {
   if (update) {
     this->UpdateIfNeeded();
+    for (RendererMap::iterator i=renderer_.begin(), 
+	   e=renderer_.end(); i!=e; ++i) {
+      i->second->Debug()=Debug();
+    }
   }
 }
 

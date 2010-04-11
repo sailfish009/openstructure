@@ -143,25 +143,31 @@ void CartoonRenderer::RebuildSplineObj(const SplineEntryList& l,
   std::vector<TraceProfile> profiles;
   float factor=is_sel ? 0.2 : 0.0;
   profiles.push_back(GetCircProfile(detail,
-      options_->GetTubeRadius()*options_->GetTubeRatio()+factor,
-      options_->GetTubeRadius()+factor, 1.0)); // tube
+				    options_->GetTubeRadius()*options_->GetTubeRatio()+factor,
+				    options_->GetTubeRadius()+factor, 
+				    options_->GetTubeProfileType(),
+				    1.0)); // tube
   if (!force_tube_) {
     profiles.push_back(GetCircProfile(detail,
-        options_->GetHelixWidth()+factor,
-        options_->GetHelixThickness()+factor,
-        options_->GetHelixEcc()+factor)); // helix
+				      options_->GetHelixWidth()+factor,
+				      options_->GetHelixThickness()+factor,
+				      options_->GetHelixProfileType(),
+				      options_->GetHelixEcc())); // helix
     profiles.push_back(GetCircProfile(detail,
-        options_->GetStrandWidth()+factor,
-        options_->GetStrandThickness()+factor,
-        options_->GetStrandEcc()+factor)); // strand
+				      options_->GetStrandWidth()+factor,
+				      options_->GetStrandThickness()+factor,
+				      options_->GetStrandProfileType(),
+				      options_->GetStrandEcc())); // strand
     profiles.push_back(GetCircProfile(detail,
-        0.1*options_->GetStrandWidth()+factor,
-        options_->GetStrandThickness()+factor,
-        options_->GetStrandEcc()+factor)); // arrow end
+				      0.1*options_->GetStrandWidth()+factor,
+				      options_->GetStrandThickness()+factor,
+				      options_->GetTubeProfileType(),
+				      1.0)); // arrow end, tube profile
     profiles.push_back(GetCircProfile(detail,
-        1.7*options_->GetStrandWidth()+factor,
-        1.1*options_->GetStrandThickness()+factor,
-        options_->GetStrandEcc()+factor)); // arrow start    
+				      1.7*options_->GetStrandWidth()+factor,
+				      1.1*options_->GetStrandThickness()+factor,
+				      options_->GetStrandProfileType(),
+				      options_->GetStrandEcc())); // arrow start
   }
 
   // iterate over all spline segments
@@ -266,6 +272,7 @@ void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
 {
   // determine rotational offset with a heuristic routine
   int best_off=0;
+#if 0
   uint i1=0;
   uint i2=prof1.size()/4;
   uint i3=prof1.size()/2;
@@ -285,6 +292,7 @@ void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
       best_off=oo;
     }
   }
+#endif
 
   // assume both profiles have the same size
   for(unsigned int i1=0;i1<prof1.size();++i1) {
@@ -292,9 +300,12 @@ void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
     unsigned int i3=(i1+best_off)%prof1.size();
     unsigned int i4=(i1+best_off+1)%prof1.size();
 
+#if 1
     va.AddTri(prof1[i1].id,prof1[i2].id,prof2[i3].id);
     va.AddTri(prof1[i2].id,prof2[i4].id,prof2[i3].id);
-    // curvature induces bow-tie artefacts with quads, hence triangles
+#else
+    va.AddQuad(prof1[i1].id,prof1[i2].id,prof2[i4].id,prof2[i3].id);
+#endif
   }
 }
 
@@ -302,46 +313,130 @@ void CartoonRenderer::CapProfile(const impl::TraceProfile& p,
                                  const impl::SplineEntry& se,
                                  bool flipn, IndexedVertexArray& va)
 {
-  VertexID pi0 = va.Add(se.position,flipn ? -se.direction : se.direction, se.color1);
+  geom::Vec3 norm=flipn ? -se.direction : se.direction;
+  VertexID pi0 = va.Add(se.position,norm, se.color1);
+  std::vector<VertexID> vertices(p.size());
+  for(unsigned int i=0;i<p.size();++i) {
+    vertices[i]=va.Add(p[i].v,norm,se.color1);
+  }
   for(unsigned int i1=0;i1<p.size();++i1) {
     unsigned int i2=(i1+1)%p.size();
     if(flipn) {
-      va.AddTri(pi0,p[i2].id,p[i1].id);
+      va.AddTri(pi0,vertices[i2],vertices[i1]);
     } else {
-      va.AddTri(pi0,p[i1].id,p[i2].id);
+      va.AddTri(pi0,vertices[i1],vertices[i2]);
     }
   }
 }
 
-TraceProfile CartoonRenderer::GetCircProfile(unsigned int detail, float rx, 
-                                             float ry, float ex)
-{
-  TraceProfile prof;
+namespace {
 
-  if(prof.empty()) {
-    prof=TraceProfile(detail*4);
+  template<unsigned int TYPE>
+  void circle_profile(TraceProfile& prof, float ecc);
+
+  // algorithm to get a square x-section
+  template<>
+  void circle_profile<1>(TraceProfile& prof, float ecc)
+  {
+    unsigned int detail=prof.size()/4;
     for(unsigned int i=0;i<detail;++i) {
       float ang=0.5*M_PI*static_cast<float>(i)/static_cast<float>(detail);
-      float ca=TabCos(ang);
-      float sa=TabSin(ang);
-      float px=pow(ca,ex);
-      float py=pow(sa,ex);
+      float ca=cos(ang);
+      float sa=sin(ang);
+      float px=std::pow(ca,ecc);
+      float py=std::pow(sa,ecc);
       prof[i]=TraceProfileEntry(geom::Vec3(px,py,0),geom::Vec3());
       prof[detail+i]=TraceProfileEntry(geom::Vec3(-py,px,0),geom::Vec3());
       prof[2*detail+i]=TraceProfileEntry(geom::Vec3(-px,-py,0),geom::Vec3());
       prof[3*detail+i]=TraceProfileEntry(geom::Vec3(py,-px,0),geom::Vec3());
     }
-    unsigned int d4=detail*4;
-    for(unsigned int i=0;i<d4;++i) {
-      prof[i].v=geom::CompMultiply(prof[i].v,geom::Vec3(rx,ry,1.0));
+  }
+
+  // different algorithm for square x-section
+  template<>
+  void circle_profile<2>(TraceProfile& prof, float ecc)
+  {
+    unsigned int detail=prof.size()/4;
+    for(unsigned int i=0;i<detail;++i) {
+      float ang=0.5*M_PI*static_cast<float>(i)/static_cast<float>(detail);
+      float ca=cos(ang);
+      float sa=sin(ang);
+      float rad=ecc+(1.0f-ecc)/std::max(ca,sa);
+      float px=rad*ca;
+      float py=rad*sa;
+      prof[i]=TraceProfileEntry(geom::Vec3(px,py,0),geom::Vec3());
+      prof[detail+i]=TraceProfileEntry(geom::Vec3(-py,px,0),geom::Vec3());
+      prof[2*detail+i]=TraceProfileEntry(geom::Vec3(-px,-py,0),geom::Vec3());
+      prof[3*detail+i]=TraceProfileEntry(geom::Vec3(py,-px,0),geom::Vec3());
     }
-    for(unsigned int i=0;i<d4;++i) {
-      unsigned int p1=(d4+i-1)%d4;
-      unsigned int p2=(i+1)%d4;
-      float dx=prof[p2].v[0]-prof[p1].v[0];
-      float dy=prof[p2].v[1]-prof[p1].v[1];
-      prof[i].n=geom::Normalize(geom::Vec3(dy,-dx,0.0));
+  }
+
+  template<>
+  void circle_profile<3>(TraceProfile& prof, float ecc)
+  {
+    unsigned int detail=prof.size()/4;
+    for(unsigned int i=0;i<detail;++i) {
+      float ang=0.5*M_PI*static_cast<float>(i)/static_cast<float>(detail);
+      float ca=cos(ang);
+      float sa=sin(ang);
+      float sa2=sin(2.0*ang);
+      float rad=1.0+std::abs(1.0-ecc)*0.5*sa2*sa2*sa2;
+      float px=rad*ca;
+      float py=rad*sa;
+      prof[i]=TraceProfileEntry(geom::Vec3(px,py,0),geom::Vec3());
+      prof[detail+i]=TraceProfileEntry(geom::Vec3(-py,px,0),geom::Vec3());
+      prof[2*detail+i]=TraceProfileEntry(geom::Vec3(-px,-py,0),geom::Vec3());
+      prof[3*detail+i]=TraceProfileEntry(geom::Vec3(py,-px,0),geom::Vec3());
     }
+  }
+
+  // default - plain circular
+  template<unsigned int TYPE>
+  void circle_profile(TraceProfile& prof, float ecc)
+  {
+    unsigned int detail=prof.size()/4;
+    for(unsigned int i=0;i<detail;++i) {
+      float ang=0.5*M_PI*static_cast<float>(i)/static_cast<float>(detail);
+      float px=cos(ang);
+      float py=sin(ang);
+      prof[i]=TraceProfileEntry(geom::Vec3(px,py,0),geom::Vec3());
+      prof[detail+i]=TraceProfileEntry(geom::Vec3(-py,px,0),geom::Vec3());
+      prof[2*detail+i]=TraceProfileEntry(geom::Vec3(-px,-py,0),geom::Vec3());
+      prof[3*detail+i]=TraceProfileEntry(geom::Vec3(py,-px,0),geom::Vec3());
+    }
+  }
+}
+
+  TraceProfile CartoonRenderer::GetCircProfile(unsigned int detail, float rx, float ry, unsigned int type, float ecc)
+{
+  unsigned int d4=detail*4;
+  TraceProfile prof(d4);
+
+  if(type==1) {
+    circle_profile<1>(prof,ecc);
+  } else if(type==2) {
+    circle_profile<2>(prof,ecc);
+  } else if(type==3) {
+    circle_profile<3>(prof,ecc);
+  } else if(type==4) {
+    circle_profile<4>(prof,ecc);
+  } else {
+    circle_profile<0>(prof,ecc);
+  }
+
+  // adjust axis rations
+  for(unsigned int i=0;i<d4;++i) {
+    prof[i].v[0]*=rx;
+    prof[i].v[1]*=ry;
+  }
+  
+  // calculate normals
+  for(unsigned int i=0;i<d4;++i) {
+    unsigned int p1=(d4+i-1)%d4;
+    unsigned int p2=(i+1)%d4;
+    float dx=prof[p2].v[0]-prof[p1].v[0];
+    float dy=prof[p2].v[1]-prof[p1].v[1];
+    prof[i].n=geom::Normalize(geom::Vec3(dy,-dx,0.0));
   }
   return prof;
 }

@@ -44,6 +44,7 @@ GfxObj::GfxObj(const String& name):
   GfxNode(name),
   va_(),
   render_mode_(RenderMode::SIMPLE),
+  debug_flags_(0),
   transform_(),
   rebuild_(true),
   refresh_(false),
@@ -59,7 +60,9 @@ GfxObj::GfxObj(const String& name):
   mat_update_(true),
   opacity_(1.0),
   smoothf_(0.0),
-  omode_(0)
+  omode_(0),
+  c_ops_(),
+  labels_()
 {
 }
 
@@ -150,6 +153,8 @@ void GfxObj::RefreshVA(IndexedVertexArray& va)
   va.SetPolyMode(GetPolyMode());
   va.SetAALines(GetAALines());
   va.SetLineHalo(GetLineHalo());
+  va.DrawNormals(debug_flags_&0x1);
+  va.SetPolyMode(debug_flags_&0x2 ? 1 : 2);
   va.FlagRefresh();
 }
 

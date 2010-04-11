@@ -25,6 +25,10 @@ using namespace ost::gfx;
 
 #include "color_by_def.hh"
 
+namespace {
+  void set_debug(GfxObj* o, unsigned int d) {o->Debug()=d;}
+  unsigned int get_debug(GfxObj* o) {return o->Debug();}
+}
 
 void export_GfxObj()
 {
@@ -76,6 +80,7 @@ void export_GfxObj()
     .def("SetOutlineExpandFactor",&GfxObj::SetOutlineExpandFactor)
     .def("SetOutlineExpandColor",&GfxObj::SetOutlineExpandColor)
     .def("SmoothVertices",&GfxObj::SmoothVertices)
+    .add_property("debug",get_debug,set_debug)
     .add_property("center", &GfxObj::GetCenter)
     COLOR_BY_DEF()
     ;
