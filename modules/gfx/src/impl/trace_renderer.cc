@@ -56,27 +56,26 @@ void TraceRenderer::PrepareRendering(TraceSubset& trace_subset,
     va.SetColorMaterial(true);
     va.SetTwoSided(false);
     for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
-      NodeListSubset& nl=trace_subset[node_list];
-      
-      mol::AtomHandle& a1=nl[0].atom;
+      const NodeListSubset& nl=trace_subset[node_list];
+      mol::AtomHandle a1=nl[0].atom;
       va.AddSphere(SpherePrim(a1.GetPos(),
-			      options_->GetTubeRadius()+plus,
-			      is_sel ? sel_clr : nl[0].color1),
-		   options_->GetArcDetail());
+                              options_->GetTubeRadius()+plus,
+                              is_sel ? sel_clr : nl[0].color1),
+                   options_->GetArcDetail());
       for(int i=1;i<nl.GetSize();++i) {
-	mol::AtomHandle& a2=nl[i].atom;
-	va.AddSphere(SpherePrim(a2.GetPos(),
-				options_->GetTubeRadius()+plus,
-				is_sel ? sel_clr : nl[i].color1),
-		     options_->GetArcDetail());
-	const geom::Vec3& p0=a1.GetPos();
-	const geom::Vec3& p2=a2.GetPos();
-	geom::Vec3 p1=(p0+p2)*0.5;
-	va.AddCylinder(CylinderPrim(p0,p1,options_->GetTubeRadius()+plus,nl[i-1].color1),
-		       options_->GetArcDetail());
-	va.AddCylinder(CylinderPrim(p1,p2,options_->GetTubeRadius()+plus,nl[i].color1),
-		       options_->GetArcDetail());
-	a1=a2;
+        mol::AtomHandle a2=nl[i].atom;
+        va.AddSphere(SpherePrim(a2.GetPos(),
+                                options_->GetTubeRadius()+plus,
+                                is_sel ? sel_clr : nl[i].color1),
+                     options_->GetArcDetail());
+        const geom::Vec3& p0=a1.GetPos();
+        const geom::Vec3& p2=a2.GetPos();
+        geom::Vec3 p1=(p0+p2)*0.5;
+        va.AddCylinder(CylinderPrim(p0,p1,options_->GetTubeRadius()+plus,nl[i-1].color1),
+                       options_->GetArcDetail());
+        va.AddCylinder(CylinderPrim(p1,p2,options_->GetTubeRadius()+plus,nl[i].color1),
+                       options_->GetArcDetail());
+        a1=a2;
       }
     }
   }

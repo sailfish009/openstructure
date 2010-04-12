@@ -1165,8 +1165,8 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
 
     if(use_ambient_) {
       if(!ambient_data_.empty()) {
-	glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_AMBIENT_BUFFER]);
-	glTexCoordPointer(4,GL_FLOAT,0,NULL);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_AMBIENT_BUFFER]);
+        glTexCoordPointer(4,GL_FLOAT,0,NULL);
       }
     }
     glBindBuffer(GL_ARRAY_BUFFER,0);
@@ -1211,11 +1211,10 @@ void IndexedVertexArray::draw_p(bool use_buff)
   if(use_buff && !Scene::Instance().InOffscreenMode()) {
 #if OST_SHADER_SUPPORT_ENABLED
     glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_VERTEX_BUFFER]);
-    glVertexPointer(3, GL_FLOAT, sizeof(Entry), NULL);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_NORMAL_BUFFER]);
-    glNormalPointer(GL_FLOAT, sizeof(Entry), NULL);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_COLOR_BUFFER]);
-    glColorPointer(4, GL_FLOAT, sizeof(Entry), NULL);
+    glVertexPointer(3, GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*7));
+    glNormalPointer(GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*4));
+    glColorPointer(4, GL_FLOAT, sizeof(Entry), 0);
+    glDrawArrays(GL_POINTS,0,entry_list_.size());
 #endif
   } else {
     LOGN_TRACE("calling vertex array");
