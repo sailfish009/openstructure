@@ -72,12 +72,6 @@ if (ENABLE_SPNAV)
   )
 endif()
 
-if (ENABLE_SPNAV)
-  list( APPEND OST_GUI_PYMOD_SOURCES
-  export_input.cc
-  )
-endif()
-
 set(OST_GUI_PYMOD_MODULES
   __init__.py
   init_menubar.py
