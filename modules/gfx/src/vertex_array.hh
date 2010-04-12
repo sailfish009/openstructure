@@ -46,7 +46,7 @@ typedef unsigned int LineID;
 typedef unsigned int TriID;
 typedef unsigned int QuadID;
 class DLLEXPORT_OST_GFX IndexedVertexArray {
-
+ public:
   struct Entry {
     Entry();
     Entry(const geom::Vec3& vv, const geom::Vec3& nn, const Color& cc);
@@ -74,7 +74,6 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   typedef std::vector<NormalizerVertexEntry> NVEntryList;
   typedef std::vector<NormalizerTriEntry> NTEntryList;
 
-public:
   IndexedVertexArray();
   ~IndexedVertexArray();
 
@@ -167,7 +166,17 @@ public:
   void NPatch();
   // experimental, do not use
   void SmoothVertices(float smoothf);
+  // experimental, do not use
+  void UseAmbient(bool f);
 
+  const EntryList& GetEntries() const {return entry_list_;}
+  const IndexList& GetQuadIndices() const {return quad_index_list_;}
+  const IndexList& GetTriIndices() const {return tri_index_list_;}
+  const IndexList& GetLineIndices() const {return line_index_list_;}
+
+  Color GetAmbientColor(VertexID id) const;
+  void SetAmbientColor(VertexID id, const Color& col);
+  
  private:
   bool initialized_;
   
@@ -200,7 +209,11 @@ public:
 
   bool draw_normals_;
 
-  unsigned int buffer_id_[4];
+  unsigned int buffer_id_[7]; // magic number related to the .cc buffer use
+
+  bool use_ambient_;
+  bool ambient_dirty_;
+  std::vector<float> ambient_data_;
 
   void copy(const IndexedVertexArray& va);
   bool prep_buff();
@@ -208,6 +221,7 @@ public:
   void draw_p(bool use_buff);
   void draw_aalines();
   void draw_line_halo(bool use_buff);
+  void recalc_ambient_occlusion();
 };
 
 }} // ns

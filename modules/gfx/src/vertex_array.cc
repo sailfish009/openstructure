@@ -31,6 +31,8 @@
 #include "vertex_array_helper.hh"
 #include "povray.hh"
 
+#include "impl/calc_ambient.hh"
+
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
 #endif
@@ -47,6 +49,15 @@ namespace ost {
 using namespace geom;
 
 namespace gfx {
+
+// the header and this file contain several magic number 7 uses related to the max buffer
+static const int VA_VERTEX_BUFFER=0;
+static const int VA_LINEINDEX_BUFFER=1;
+static const int VA_TRIINDEX_BUFFER=2;
+static const int VA_QUADINDEX_BUFFER=3;
+static const int VA_AMBIENT_BUFFER=4;
+static const int VA_NORMAL_BUFFER=5;
+static const int VA_COLOR_BUFFER=6;
 
 IndexedVertexArray::Entry::Entry()
 {
@@ -96,7 +107,7 @@ void IndexedVertexArray::Cleanup()
   if(initialized_) {
     glDeleteLists(outline_mat_dlist_,1);
 #if OST_SHADER_SUPPORT_ENABLED
-    glDeleteBuffers(4,buffer_id_);
+    glDeleteBuffers(7,buffer_id_);
 #endif
     initialized_=false;
   }
@@ -329,7 +340,7 @@ void IndexedVertexArray::RenderGL()
   if(!initialized_) {
     LOGN_DUMP("initializing vertex array lists");
 #if OST_SHADER_SUPPORT_ENABLED
-    glGenBuffers(4,buffer_id_);
+    glGenBuffers(7,buffer_id_);
 #endif
     outline_mat_dlist_=glGenLists(1);
     initialized_=true;
@@ -338,6 +349,11 @@ void IndexedVertexArray::RenderGL()
   if(dirty_) {
     dirty_=false;
 #if OST_SHADER_SUPPORT_ENABLED
+    if(use_ambient_) {
+      LOGN_DUMP("re-calculating ambient occlusion terms");
+      recalc_ambient_occlusion();
+    }
+
     LOGN_DUMP("checking buffer object availability");
     if(mode_&0x2 && aalines_flag_) {
       use_buff=false;
@@ -396,6 +412,7 @@ void IndexedVertexArray::RenderGL()
       glDisable(GL_BLEND);
     }
   } else {
+    // not in outline mode
     if(lighting_) {
       glEnable(GL_LIGHTING); 
     } else {
@@ -416,6 +433,11 @@ void IndexedVertexArray::RenderGL()
     } else { 
       glDisable(GL_CULL_FACE); 
     }
+#if OST_SHADER_SUPPORT_ENABLED
+    if(use_ambient_ && !ambient_data_.empty()) {
+      glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"occlusion_flag"),1);
+    }
+#endif
   }
   
   if(mode_&0x1) {
@@ -480,6 +502,12 @@ void IndexedVertexArray::RenderGL()
 #endif
     }
   }
+
+#if OST_SHADER_SUPPORT_ENABLED
+  if(use_ambient_) {
+    glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"occlusion_flag"),0);
+  }
+#endif
 
   if(draw_normals_) {
     //glColor3f(1,0,0);
@@ -596,6 +624,9 @@ void IndexedVertexArray::Clear()
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
   draw_normals_=false;
+  use_ambient_=false;
+  ambient_dirty_=true;
+  ambient_data_.clear();
 }
 
 void IndexedVertexArray::FlagRefresh()
@@ -868,6 +899,35 @@ void IndexedVertexArray::SmoothVertices(float smoothf)
   }
 }
 
+void IndexedVertexArray::UseAmbient(bool f)
+{
+  if(use_ambient_==f) return;
+  use_ambient_=f;
+  FlagRefresh();
+}
+
+Color IndexedVertexArray::GetAmbientColor(VertexID id) const
+{
+  Color nrvo;
+  if(id*4>=ambient_data_.size()) return nrvo;
+  unsigned int offset=id*4;
+  nrvo = Color(ambient_data_[offset+0],
+               ambient_data_[offset+1],
+               ambient_data_[offset+2],
+               ambient_data_[offset+3]);
+  return nrvo;
+} 
+
+void IndexedVertexArray::SetAmbientColor(VertexID id, const Color& c) 
+{
+  if(id*4>=ambient_data_.size()) return;
+  unsigned int offset=id*4;
+  ambient_data_[offset+0]=c[0];
+  ambient_data_[offset+1]=c[1];
+  ambient_data_[offset+2]=c[2];
+  ambient_data_[offset+3]=c[3];
+}
+
 
 namespace {
 
@@ -991,43 +1051,91 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   outline_exp_factor_=va.outline_exp_factor_;
   outline_exp_color_=va.outline_exp_color_;
   draw_normals_=va.draw_normals_;
+  use_ambient_=va.use_ambient_;
+  ambient_dirty_=va.ambient_dirty_;
+  ambient_data_=va.ambient_data_;
 }
   
 bool IndexedVertexArray::prep_buff()
 {
 #if OST_SHADER_SUPPORT_ENABLED
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_COLOR_ARRAY);
+  glEnableClientState(GL_INDEX_ARRAY);
+
   int glerr=glGetError(); // clear error flag
-  glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[0]);
-  VERTEX_ARRAY_CHECK_GL_ERROR("bind buf0");
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_VERTEX_BUFFER]);
+  VERTEX_ARRAY_CHECK_GL_ERROR("bind vertex buf");
   glBufferData(GL_ARRAY_BUFFER, 
                sizeof(Entry) * entry_list_.size(),
                &entry_list_[0],
                GL_STATIC_DRAW);
-  VERTEX_ARRAY_CHECK_GL_ERROR("set buf0");
-  
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[1]);
+  VERTEX_ARRAY_CHECK_GL_ERROR("set vertex buf");
+
+  // this will be used later, when refactoring v,c,n to live in separate lists
+  /*
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_COLOR_BUFFER]);
   VERTEX_ARRAY_CHECK_GL_ERROR("bind buf1");
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
-               sizeof(unsigned int) * line_index_list_.size(),
-               &line_index_list_[0],
+  glBufferData(GL_ARRAY_BUFFER, 
+               sizeof(Entry) * entry_list_.size(),
+               &entry_list_[0].c[0],
                GL_STATIC_DRAW);
   VERTEX_ARRAY_CHECK_GL_ERROR("set buf1");
-  
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[2]);
+
+  glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_NORMAL_BUFFER]);
   VERTEX_ARRAY_CHECK_GL_ERROR("bind buf2");
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
-               sizeof(unsigned int) * tri_index_list_.size(),
-               &tri_index_list_[0],
+  glBufferData(GL_ARRAY_BUFFER, 
+               sizeof(Entry) * entry_list_.size(),
+               &entry_list_[0].n[0],
                GL_STATIC_DRAW);
   VERTEX_ARRAY_CHECK_GL_ERROR("set buf2");
-  
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[3]);
-  VERTEX_ARRAY_CHECK_GL_ERROR("bind buf3");
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
-               sizeof(unsigned int) * quad_index_list_.size(),
-               &quad_index_list_[0],
-               GL_STATIC_DRAW);
-  VERTEX_ARRAY_CHECK_GL_ERROR("set buf3");
+  */
+
+  if(!line_index_list_.empty()) {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[VA_LINEINDEX_BUFFER]);
+    VERTEX_ARRAY_CHECK_GL_ERROR("bind lindex buf");
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+		 sizeof(unsigned int) * line_index_list_.size(),
+		 &line_index_list_[0],
+		 GL_STATIC_DRAW);
+    VERTEX_ARRAY_CHECK_GL_ERROR("set lindex buf");
+  }
+
+  if(!tri_index_list_.empty()) {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[VA_TRIINDEX_BUFFER]);
+    VERTEX_ARRAY_CHECK_GL_ERROR("bind tindex buf");
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+		 sizeof(unsigned int) * tri_index_list_.size(),
+		 &tri_index_list_[0],
+		 GL_STATIC_DRAW);
+    VERTEX_ARRAY_CHECK_GL_ERROR("set tindex buf");
+  }
+
+  if(!quad_index_list_.empty()) {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[VA_QUADINDEX_BUFFER]);
+    VERTEX_ARRAY_CHECK_GL_ERROR("bind qindex buf");
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+		 sizeof(unsigned int) * quad_index_list_.size(),
+		 &quad_index_list_[0],
+		 GL_STATIC_DRAW);
+    VERTEX_ARRAY_CHECK_GL_ERROR("set qindex buf");
+  }
+
+  if(use_ambient_) {
+    if(ambient_data_.empty()) {
+      LOGN_VERBOSE("ambient data empty");
+    } else {
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+      glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_AMBIENT_BUFFER]);
+      VERTEX_ARRAY_CHECK_GL_ERROR("bind ambient buf");
+      glBufferData(GL_ARRAY_BUFFER,
+		   sizeof(float) * ambient_data_.size(),
+		   &ambient_data_[0],
+		   GL_STATIC_DRAW);
+      VERTEX_ARRAY_CHECK_GL_ERROR("set ambient buf");
+    }
+  }
   
   return true;
 #else
@@ -1039,29 +1147,43 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
 {
   if(use_buff && !Scene::Instance().InOffscreenMode()) {
 #if OST_SHADER_SUPPORT_ENABLED
-    LOGN_TRACE("binding vertex array buffer");
-    glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[0]);
-    LOGN_TRACE("setting up vertex array");
+#if 1
+    /*
+      for now, since v,n,c live in a packed format (formerly used
+      with glInterleavedArrays), only a single buffer is
+      used, with the gl*Pointer calls giving the byte offset
+      in place of the absolute pointer
+    */
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_VERTEX_BUFFER]);
+    glVertexPointer(3, GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*7));
+    glNormalPointer(GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*4));
+    glColorPointer(4, GL_FLOAT, sizeof(Entry), 0);
+#else
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_VERTEX_BUFFER]);
     glInterleavedArrays(GetFormat(),sizeof(Entry),NULL);
-    
+#endif
+
+    if(use_ambient_) {
+      if(!ambient_data_.empty()) {
+	glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_AMBIENT_BUFFER]);
+	glTexCoordPointer(4,GL_FLOAT,0,NULL);
+      }
+    }
+    glBindBuffer(GL_ARRAY_BUFFER,0);
+
     if(!tri_index_list_.empty() && (mode_ & 0x4)) {
-      LOGN_TRACE("binding and rendering vertex array tris");
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[2]);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[VA_TRIINDEX_BUFFER]);
       glDrawElements(GL_TRIANGLES,tri_index_list_.size(),GL_UNSIGNED_INT,NULL);
     }
     if(!quad_index_list_.empty() && (mode_ & 0x4)) {
-      LOGN_TRACE("binding and rendering vertex arras quads");
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[3]);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[VA_QUADINDEX_BUFFER]);
       glDrawElements(GL_QUADS,quad_index_list_.size(),GL_UNSIGNED_INT,NULL);
     }
     if(!line_index_list_.empty() && (mode_ & 0x2)) {
-      LOGN_TRACE("binding and rendering vertex array lines");
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[1]);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer_id_[VA_LINEINDEX_BUFFER]);
       glDrawElements(GL_LINES,line_index_list_.size(),GL_UNSIGNED_INT,NULL);
     }
     
-    LOGN_TRACE("unbinding vertex array buffer");
-    glBindBuffer(GL_ARRAY_BUFFER,0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 #endif
   } else {
@@ -1088,11 +1210,12 @@ void IndexedVertexArray::draw_p(bool use_buff)
 {
   if(use_buff && !Scene::Instance().InOffscreenMode()) {
 #if OST_SHADER_SUPPORT_ENABLED
-    LOGN_TRACE("binding vertex array buffer");
-    glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[0]);
-    LOGN_TRACE("calling vertex array");
-    glInterleavedArrays(GetFormat(),sizeof(Entry),NULL);
-    glDrawArrays(GL_POINTS,0,entry_list_.size());
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_VERTEX_BUFFER]);
+    glVertexPointer(3, GL_FLOAT, sizeof(Entry), NULL);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_NORMAL_BUFFER]);
+    glNormalPointer(GL_FLOAT, sizeof(Entry), NULL);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_COLOR_BUFFER]);
+    glColorPointer(4, GL_FLOAT, sizeof(Entry), NULL);
 #endif
   } else {
     LOGN_TRACE("calling vertex array");
@@ -1275,6 +1398,13 @@ void IndexedVertexArray::draw_line_halo(bool use_buff)
   glPopAttrib();
   glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
   glLineWidth(line_width_);
+}
+
+void IndexedVertexArray::recalc_ambient_occlusion()
+{
+  ambient_data_.resize(4*entry_list_.size());
+  CalcAmbientTerms(*this);
+  std::cerr << ambient_data_[0] << "," << ambient_data_[1] << "," << ambient_data_[2] << "," << ambient_data_[3] << std::endl;
 }
 
 }} // ns

@@ -1,3 +1,5 @@
+uniform bool occlusion_flag;
+
 void main()
 {
   // transformed position
@@ -11,6 +13,10 @@ void main()
   // since a directional light is used, the position is not needed
   gl_TexCoord[0].stp=normal;
 
+  if(occlusion_flag) {
+    // ambient color
+    gl_TexCoord[2] = gl_MultiTexCoord0;
+  }
   gl_FrontColor=gl_Color;
   gl_BackColor=gl_Color;
 }

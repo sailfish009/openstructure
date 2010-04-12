@@ -1,6 +1,7 @@
 uniform bool lighting_flag;
 uniform bool two_sided_flag;
 uniform bool fog_flag;
+uniform bool occlusion_flag;
 
 // copy from basic_fl_vs !
 bool DirectionalLight(in vec3 normal,
@@ -49,6 +50,10 @@ void main()
 
   } else {
     gl_FragColor = gl_Color;
+  }
+
+  if(occlusion_flag) {
+    gl_FragColor.rgb = mix(gl_TexCoord[2].stp,gl_FragColor.rgb, gl_TexCoord[2].q);
   }
 
   if(fog_flag) {

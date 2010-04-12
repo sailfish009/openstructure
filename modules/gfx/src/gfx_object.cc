@@ -62,7 +62,8 @@ GfxObj::GfxObj(const String& name):
   smoothf_(0.0),
   omode_(0),
   c_ops_(),
-  labels_()
+  labels_(),
+  use_occlusion_(false)
 {
 }
 
@@ -155,6 +156,7 @@ void GfxObj::RefreshVA(IndexedVertexArray& va)
   va.SetLineHalo(GetLineHalo());
   va.DrawNormals(debug_flags_&0x1);
   va.SetPolyMode(debug_flags_&0x2 ? 1 : 2);
+  va.UseAmbient(use_occlusion_);
   va.FlagRefresh();
 }
 
@@ -607,6 +609,13 @@ void GfxObj::SmoothVertices(float smoothf)
 {
   va_.SmoothVertices(smoothf);
   FlagRefresh();
+}
+
+void GfxObj::AmbientOcclusion(bool f)
+{
+  use_occlusion_=f;
+  va_.UseAmbient(f);
+  //  FlagRefresh();
 }
 
 void GfxObj::ColorBy(const mol::EntityView& ev, 

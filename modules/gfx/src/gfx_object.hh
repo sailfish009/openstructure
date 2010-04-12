@@ -195,8 +195,11 @@ public:
   void SetOutlineExpandFactor(float f);
   void SetOutlineExpandColor(const Color& c);
 
+  // experimental, don't use
   void SmoothVertices(float smoothf);
-  
+  // experimental, don't use
+  void AmbientOcclusion(bool f);
+ 
   void GLCleanup();
 
   /// \brief color each component based on the gradient-mapped property of 
@@ -300,6 +303,7 @@ public:
   TextPrimList labels_;
   void render_labels() const;
 
+  bool use_occlusion_;
 };
 
 }} //ns
