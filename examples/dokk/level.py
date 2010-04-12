@@ -111,6 +111,7 @@ class Level(QtCore.QObject):
   def Reset(self):
     self.endtime = 0
     self.stop_time = 0
+    self._started = False
     self.timer.stop()
     self.CleanHUD()
     self.ResetPos()
@@ -164,6 +165,14 @@ class Level(QtCore.QObject):
     self.protein.Close()
     self.ligand.Close()
 
+  def CheckSolved(self):
+    goal = float(self.config.Level["GOAL"])
+    if self.GetRMSD()< goal:
+      self.Finished()
+    
+  def IsStarted(self):
+    return self._started
+  
   def _IntroEnd(self):
     if self._started:
       Dokk().gl_win.SetLockInput(False)

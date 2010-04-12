@@ -66,7 +66,11 @@ class SpnavInputDevice(QtCore.QObject):
       dokk.Dokk().NextLevel()
     elif button == 6:
       QtGui.QApplication.exit()
-        
+    elif button == 13:
+      self.level.ResetPos()
+    elif button == 12 and not self.level.IsStarted():
+      self.level.Solve()
+    
     if (not self._lock_input):
       if button == 0:
         self.trans = not self.trans
@@ -84,7 +88,3 @@ class SpnavInputDevice(QtCore.QObject):
         self.level.Finished()
       elif button == 11:
         self.level.Finished()
-      elif button == 12:
-        self.level.Solve()
-      elif button == 13:
-        self.level.ResetPos()

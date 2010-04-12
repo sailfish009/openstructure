@@ -11,7 +11,10 @@ class LevelInfo(QtCore.QObject):
     self.timer = QtCore.QTimer()
     self.timer.setSingleShot(True)
     
-    self.highscore = HighScore(level.topten)
+    if bool(int(level.config.Level["SAVE"])):
+      self.highscore = HighScore(level.topten)
+    else:
+      self.highscore = None
     self.level_info = LevelDetails(level.config.Level["NAME"],level.config.Level["DIFFICULTY"])
     self.connect(level,QtCore.SIGNAL("Started()"),self.Finish)
     self.connect(level,QtCore.SIGNAL("Stopped()"),self.Start)
@@ -25,12 +28,14 @@ class LevelInfo(QtCore.QObject):
     
   def Finish(self):
     self.start = False
-    self.highscore.Finish()
+    if self.highscore:
+      self.highscore.Finish()
     self.level_info.Finish()
     
   def Timeout(self):
     if self.start:
-      self.highscore.Start()
+      if self.highscore:
+        self.highscore.Start()
       self.level_info.Start()
    
       

@@ -62,6 +62,7 @@ class DokkGLCanvas(QGLWidget):
     painter.drawText(QPoint(self.width()-100, 20), "%.0f seconds left" % self.dokk.GetLevel().GetRemainingTime())
     if self.hud is not None:
       self.hud.Paint(painter)
+    self.dokk.GetLevel().CheckSolved()
       
   def resizeGL(self, w, h):
     gfx.Scene().Resize(w, h)
@@ -70,9 +71,9 @@ class DokkGLCanvas(QGLWidget):
     self.last_point_=QPoint(event.x(), event.y())
 
   def mouseMoveEvent(self, event):
+    delta=QPoint(event.x(), event.y())-self.last_point_
+    self.last_point_=QPoint(event.x(), event.y())
     if not self._lock_input:
-      delta=QPoint(event.x(), event.y())-self.last_point_
-      self.last_point_=QPoint(event.x(), event.y())
       if event.buttons() & Qt.LeftButton:
         tf=gfx.Scene().GetTransform()      
         if event.modifiers() & Qt.ShiftModifier:
@@ -88,23 +89,22 @@ class DokkGLCanvas(QGLWidget):
             self.dokk.GetLevel().RotateAxis(tf.GetRot().GetRow(1), delta.x()*0.005)
         self.dokk.GetLevel().UpdateScores()
         self.update()
-      elif event.buttons() & Qt.RightButton:
-        if delta.y()!=0:
-          gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
-                                           gfx.INPUT_COMMAND_ROTX, delta.y()*0.5),
-                            False)
-        if delta.x()!=0:
-          gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
-                                           gfx.INPUT_COMMAND_ROTY, delta.x()*0.5),
-                            False)
-        self.update()
+    if event.buttons() & Qt.RightButton:
+      if delta.y()!=0:
+        gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
+                                         gfx.INPUT_COMMAND_ROTX, delta.y()*0.5),
+                          False)
+      if delta.x()!=0:
+        gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE,
+                                         gfx.INPUT_COMMAND_ROTY, delta.x()*0.5),
+                          False)
+      self.update()
   def mouseDoubleClickEvent(self, event):
     if not self._lock_input:
       self.dokk.GetLevel().SetPivot(event.x(), self.height()-event.y())
   def wheelEvent(self, event):
-    if not self._lock_input:
-      self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0,gfx.TRANSFORM_VIEW,
-                0.1*(-event.delta()))
+    self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0,gfx.TRANSFORM_VIEW,
+              0.1*(-event.delta()))
 
 
   def OnTransform(self,com, indx, trg, val):
