@@ -138,14 +138,15 @@ class Level(QtCore.QObject):
     self.UpdateScores()
   
   def Finished(self):
-    self._started = False
     self.timer.stop()
     self.stop_time = time.time()
     Dokk().gl_win.SetLockInput(True)
-    if self.GetRank() > 0:
-      self.hud_level_end_tt.Start()
-    else:
-      self.hud_level_end_ntt.Start()
+    if self._started:
+      if self.GetRank() > 0:
+        self.hud_level_end_tt.Start()
+      else:
+        self.hud_level_end_ntt.Start()
+    self._started = False
 
   def Begin(self):
     self.Reset()
