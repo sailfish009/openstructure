@@ -219,7 +219,7 @@ namespace {
 
 	// largest opening angle from reference entry to corners
 	float a0 = std::min(geom::Dot(dir0,dir1),std::min(geom::Dot(dir0,dir2),geom::Dot(dir0,dir3)));
-	if(eit->type==4) a0=std::min(a0,geom::Dot(dir0,dir4));
+	if(eit->type==4) a0=std::min(a0,static_cast<float>(geom::Dot(dir0,dir4)));
 	for(std::vector<RayEntry>::iterator rit=rays_.begin();rit!=rays_.end();++rit) {
 	  /*
 	    this _should_ be <0.0, and it should
@@ -276,14 +276,14 @@ namespace {
 	  //std::cerr << " " << hit_count << " / " << rays_.size() << std::endl;
 
 	  if(lit->type==3) {
-	    entry_accum[tlist[lit->id+0]]+=geom::Vec4(ratio,ratio,ratio,1.0);
-	    entry_accum[tlist[lit->id+1]]+=geom::Vec4(ratio,ratio,ratio,1.0);
-	    entry_accum[tlist[lit->id+2]]+=geom::Vec4(ratio,ratio,ratio,1.0);
+	    entry_accum[tlist[lit->id+0]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
+	    entry_accum[tlist[lit->id+1]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
+	    entry_accum[tlist[lit->id+2]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
 	  } else if(lit->type==4) {
-	    entry_accum[qlist[lit->id+0]]+=geom::Vec4(ratio,ratio,ratio,1.0);
-	    entry_accum[qlist[lit->id+1]]+=geom::Vec4(ratio,ratio,ratio,1.0);
-	    entry_accum[qlist[lit->id+2]]+=geom::Vec4(ratio,ratio,ratio,1.0);
-	    entry_accum[qlist[lit->id+3]]+=geom::Vec4(ratio,ratio,ratio,1.0);
+	    entry_accum[qlist[lit->id+0]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
+	    entry_accum[qlist[lit->id+1]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
+	    entry_accum[qlist[lit->id+2]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
+	    entry_accum[qlist[lit->id+3]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
 	  }
 	}
       }
