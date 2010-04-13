@@ -1,10 +1,16 @@
 uniform bool lighting_flag;
 uniform bool two_sided;
+uniform bool occlusion_flag;
 
 void main()
 {    
   vec4 ground_color=0.2*gl_Color;
   vec4 sky_color=1.0*gl_Color;
+
+  if(occlusion_flag) {
+    ground_color.rgb=0.2*gl_MultiTexCoord0.xyz;
+    sky_color.rgb=1.0*gl_MultiTexCoord0.xyz;
+  }
 
   gl_Position = ftransform();
 

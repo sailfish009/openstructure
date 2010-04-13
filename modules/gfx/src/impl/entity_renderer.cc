@@ -47,6 +47,12 @@ void EntityRenderer::FlagPositionsDirty()
   sel_state_|=DIRTY_VA;
 }
 
+ void EntityRenderer::Debug(unsigned int flags)
+ {
+   debug_flags_=flags;
+   va_.DrawNormals(debug_flags_&0x1);
+ }
+
 const String& EntityRenderer::GetName() const{
   return name_;
 }

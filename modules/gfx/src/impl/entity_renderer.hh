@@ -159,7 +159,7 @@ public:
   
   void FlagPositionsDirty();
 
-  unsigned int& Debug() {return debug_flags_;}
+  void Debug(unsigned int flags);
 protected:
   virtual void SetName(const String& name);
 
@@ -177,7 +177,7 @@ protected:
   
   DirtyFlags            sel_state_;
   DirtyFlags            state_;
-  unsigned int debug_flags_;
+  unsigned int          debug_flags_;
 };
 
 //Simplify color ops

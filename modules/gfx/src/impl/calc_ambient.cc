@@ -38,6 +38,10 @@ namespace {
   typedef IndexedVertexArray::EntryList EntryList;
   typedef IndexedVertexArray::IndexList IndexList;
   
+  geom::Vec3 abs(const geom::Vec3& v) {
+    geom::Vec3 nrvo(std::abs(v[0]),std::abs(v[1]),std::abs(v[2]));
+    return nrvo;
+  }
 
   std::pair<geom::Vec3, geom::Vec3> calc_limits(const EntryList& elist)
   {
@@ -69,19 +73,65 @@ namespace {
   };
 
   struct CEntry {
-    CEntry(): id(0), v(),n(),c() {}
-    CEntry(unsigned int ii, const geom::Vec3& vv, const geom::Vec3& nn, const Color& cc): id(ii), v(vv), n(nn), c(cc) {}
-    unsigned int id;
-    geom::Vec3 v;
-    geom::Vec3 n;
-    Color c;
+    CEntry(): id(0), type(0) {}
+    CEntry(unsigned int ii, const geom::Vec3& vv1, const geom::Vec3& vv2, const geom::Vec3& vv3, const geom::Vec4& cc):
+      id(ii), type(3), 
+      v0(1.0f/3.0f*(vv1+vv2+vv3)), 
+      v1(vv1), v2(vv2), v3(vv3), v4(), 
+      n(geom::Normalize(geom::Cross(v1-v2,v1-v3))),
+      c(cc) {}
+    CEntry(unsigned int ii, const geom::Vec3& vv1, const geom::Vec3& vv2, const geom::Vec3& vv3, const geom::Vec3& vv4, const geom::Vec4& cc):
+      id(ii), type(3), 
+      v0(1.0f/4.0f*(vv1+vv2+vv3+vv4)), 
+      v1(vv1), v2(vv2), v3(vv3), v4(vv4),
+      n(geom::Normalize(geom::Cross(v1-v2,v1-v3))),
+      c(cc) {}
+
+    unsigned int id;   // original entry id
+    unsigned int type; // type 
+    geom::Vec3 v0;     // center position
+    geom::Vec3 v1;     // edge positions
+    geom::Vec3 v2;     // edge positions
+    geom::Vec3 v3;     // edge positions
+    geom::Vec3 v4;     // edge positions
+    geom::Vec3 n;      // face normal
+    geom::Vec4 c;      // average color
   };
 
-  typedef std::map<CIndex,std::vector<CEntry> > CMap;
+  struct RayEntry {
+    RayEntry(): v(), d2(0.0), c() {}
+    RayEntry(const geom::Vec3& vv, float dd): v(vv), d2(dd), c() {}
+    geom::Vec3 v;
+    float d2;
+    geom::Vec4 c;
+    bool hit;
+  };
+
+  typedef std::vector<CEntry> CList;
+  typedef std::map<CIndex,CList > CMap;
 
   class AmbientOcclusionBuilder {
   public:
-    AmbientOcclusionBuilder(IndexedVertexArray& va): va_(va), cmap_(), bsize_(5.0), weight_(0.2), cutoff2_(25.0) {}
+    AmbientOcclusionBuilder(IndexedVertexArray& va):
+      va_(va), cmap_(), bsize_(5.0), weight_(0.5), cutoff_(bsize_), rays_(), density_(20) 
+    {
+      float delta=2.0*M_PI/static_cast<float>(density_);
+      for(unsigned int s=0;s<density_/2;++s) {
+        float a=s*delta;
+        float z=std::cos(a);
+        float x=std::sin(a);
+        unsigned int tmp_subdiv=static_cast<unsigned int>(round(2.0*M_PI*std::abs(x)/delta));
+        if(tmp_subdiv==0) {
+          rays_.push_back(RayEntry(geom::Vec3(0,0,z),cutoff_*cutoff_));
+        } else {
+          float tmp_delta=2.0*M_PI/static_cast<float>(tmp_subdiv);
+          for(unsigned int t=0;t<tmp_subdiv;++t) {
+            float b=t*tmp_delta;
+            rays_.push_back(RayEntry(geom::Normalize(geom::Vec3(x*std::cos(b),x*std::sin(b),z)),cutoff_*cutoff_));
+          }
+        }
+      }
+    }
 
     CIndex coord_to_index(const geom::Vec3& v) 
     {
@@ -96,130 +146,165 @@ namespace {
       const IndexList& qlist = va_.GetQuadIndices();
 
       cmap_.clear();
-      
+      float inv3 = 1.0f/3.0;
       for(unsigned int c=0;c<tlist.size();c+=3) {
-	const float* v0=elist[tlist[c+0]].v;
-	const float* v1=elist[tlist[c+1]].v;
-	const float* v2=elist[tlist[c+2]].v;
-	const float* n0=elist[tlist[c+0]].n;
-	const float* n1=elist[tlist[c+1]].n;
-	const float* n2=elist[tlist[c+2]].n;
-	const float* c0=elist[tlist[c+0]].c;
-	const float* c1=elist[tlist[c+1]].c;
-	const float* c2=elist[tlist[c+2]].c;
-	add_to_cmap(c,
-		    geom::Vec3((v0[0]+v1[0]+v2[0])/3.0,
-			       (v0[1]+v1[1]+v2[1])/3.0,
-			       (v0[2]+v1[2]+v2[2])/3.0),
-		    geom::Normalize(geom::Vec3((n0[0]+n1[0]+n2[0]),
-					       (n0[1]+n1[1]+n2[1]),
-					       (n0[2]+n1[2]+n2[2]))),
-		    Color((c0[0]+c1[0]+c2[0])/3.0,
-			  (c0[1]+c1[1]+c2[1])/3.0,
-			  (c0[2]+c1[2]+c2[2])/3.0,
-			  (c0[3]+c1[3]+c2[3])/3.0));
+	geom::Vec4 c0(elist[tlist[c+0]].c);
+	geom::Vec4 c1(elist[tlist[c+1]].c);
+	geom::Vec4 c2(elist[tlist[c+2]].c);
+	CEntry ce = add_to_cmap(c,geom::Vec3(elist[tlist[c+0]].v),geom::Vec3(elist[tlist[c+1]].v),geom::Vec3(elist[tlist[c+2]].v),inv3*(c0+c1+c2));
+	//std::cerr << geom::Dot(ce.n,geom::Vec3(elist[tlist[c+0]].n)) << " ";
+	//std::cerr << geom::Dot(ce.n,geom::Vec3(elist[tlist[c+1]].n)) << " ";
+	//std::cerr << geom::Dot(ce.n,geom::Vec3(elist[tlist[c+2]].n)) << std::endl;
       }
+      float inv4 = 1.0f/4.0;
       for(unsigned int c=0;c<qlist.size();c+=4) {
-	const float* v0=elist[tlist[c+0]].v;
-	const float* v1=elist[tlist[c+1]].v;
-	const float* v2=elist[tlist[c+2]].v;
-	const float* v3=elist[tlist[c+3]].v;
-	const float* n0=elist[tlist[c+0]].n;
-	const float* n1=elist[tlist[c+1]].n;
-	const float* n2=elist[tlist[c+2]].n;
-	const float* n3=elist[tlist[c+3]].n;
-	const float* c0=elist[tlist[c+0]].c;
-	const float* c1=elist[tlist[c+1]].c;
-	const float* c2=elist[tlist[c+2]].c;
-	const float* c3=elist[tlist[c+3]].c;
-	add_to_cmap(c,
-		    geom::Vec3((v0[0]+v1[0]+v2[0]+v3[0])/4.0,
-			       (v0[1]+v1[1]+v2[1]+v3[1])/4.0,
-			       (v0[2]+v1[2]+v2[2]+v3[2])/4.0),
-		    geom::Normalize(geom::Vec3((n0[0]+n1[0]+n2[0]+n3[0]),
-					       (n0[1]+n1[1]+n2[1]+n3[1]),
-					       (n0[2]+n1[2]+n2[2]+n3[2]))),
-		    Color((c0[0]+c1[0]+c2[0]+c3[0])/4.0,
-			  (c0[1]+c1[1]+c2[1]+c3[1])/4.0,
-			  (c0[2]+c1[2]+c2[2]+c3[2])/4.0,
-			  (c0[3]+c1[3]+c2[3]+c3[3])/4.0));
+	geom::Vec4 c0(elist[qlist[c+0]].c);
+	geom::Vec4 c1(elist[qlist[c+1]].c);
+	geom::Vec4 c2(elist[qlist[c+2]].c);
+	geom::Vec4 c3(elist[qlist[c+3]].c);
+	add_to_cmap(c,geom::Vec3(elist[qlist[c+0]].v),geom::Vec3(elist[qlist[c+1]].v),geom::Vec3(elist[qlist[c+2]].v),geom::Vec3(elist[qlist[c+3]].v),inv4*(c0+c1+c2+c3));
       }
     }
-
-    void add_to_cmap(unsigned int id, const geom::Vec3& v, const geom::Vec3& n, const Color& c) 
+    
+    CEntry add_to_cmap(unsigned int id, const geom::Vec3& v1, const geom::Vec3& v2, const geom::Vec3& v3, const geom::Vec4& c) 
     {
-      CIndex cindex=coord_to_index(v);
+      CEntry ce(id,v1,v2,v3,c);
+      CIndex cindex=coord_to_index(ce.v0);
       CMap::iterator it=cmap_.find(cindex);
       if(it==cmap_.end()) {
-	std::vector<CEntry> tmplist(1);
-	tmplist[0]=CEntry(id,v,n,c);
-	cmap_[cindex]=tmplist;
+        std::vector<CEntry> tmplist(1);
+        tmplist[0]=ce;
+        cmap_[cindex]=tmplist;
       } else {
-	it->second.push_back(CEntry(id,v,n,c));
+        it->second.push_back(ce);
       }
+      return ce;
     }
 
-    void accumulate(unsigned int eid, const CIndex& cindex, const geom::Vec3& epos, const geom::Vec3& enorm, Color& color, float& factor)
+    CEntry add_to_cmap(unsigned int id, const geom::Vec3& v1, const geom::Vec3& v2, const geom::Vec3& v3, const geom::Vec3& v4, const geom::Vec4& c) 
     {
-      CMap::iterator cit=cmap_.find(cindex);
-      if(cit==cmap_.end()) return;
-      std::vector<CEntry>::const_iterator eit2=cit->second.end();
-      for(std::vector<CEntry>::const_iterator eit=cit->second.begin();eit!=eit2;++eit) {
-	geom::Vec3 diff=(eit->v-epos);
-	float l2=geom::Length2(diff);
-	if(l2<cutoff2_) {
-	  // angle between vertex normal and direction to close face
-	  float cw1=geom::Dot(geom::Normalize(diff),enorm);
-	  // only consider those that are "in front"
-	  if(cw1>0.0) {
-	    // angle between direction and close face normal
-	    float cw2=1.0-geom::Dot(diff,eit->n);
-	    // only consider those that point towards each other
-	    if(cw2>0.0) {
-	      cw2*=cw1;
-	      color[0]+=cw2*eit->c[0];
-	      color[1]+=cw2*eit->c[1];
-	      color[2]+=cw2*eit->c[2];
-	      factor+=1.0;
-	    }
+      CEntry ce(id,v1,v2,v3,v4,c);
+      CIndex cindex=coord_to_index(ce.v0);
+      CMap::iterator it=cmap_.find(cindex);
+      if(it==cmap_.end()) {
+        std::vector<CEntry> tmplist(1);
+        tmplist[0]=ce;
+        cmap_[cindex]=tmplist;
+      } else {
+        it->second.push_back(ce);
+      }
+      return ce;
+    }
+
+    void accumulate(const CIndex& cindex, const CEntry& ce)
+    {
+      unsigned int stat0=0;
+      unsigned int stat1=0;
+      unsigned int stat2=0;
+
+      float cutoff2=cutoff_*cutoff_;
+      CMap::iterator mit=cmap_.find(cindex);
+      if(mit==cmap_.end()) return;
+      for(std::vector<CEntry>::const_iterator eit=mit->second.begin();eit!=mit->second.end();++eit) {
+	
+	geom::Vec3 dir0=(eit->v0-ce.v0); // vector from reference entry to current entry
+	float l2=geom::Length2(dir0);
+	if(l2>cutoff2) {++stat0; continue;} // too far away
+	dir0=geom::Normalize(dir0);
+
+	geom::Vec3 dir1=geom::Normalize(eit->v1-ce.v0); // vector from reference entry to corner 1
+	geom::Vec3 dir2=geom::Normalize(eit->v2-ce.v0); // vector from reference entry to corner 2
+	geom::Vec3 dir3=geom::Normalize(eit->v3-ce.v0); // vector from reference entry to corner 3
+	geom::Vec3 dir4=geom::Normalize(eit->v4-ce.v0); // vector from reference entry to corner 4
+
+	// largest opening angle from reference entry to corners
+	float a0 = std::min(geom::Dot(dir0,dir1),std::min(geom::Dot(dir0,dir2),geom::Dot(dir0,dir3)));
+	if(eit->type==4) a0=std::min(a0,geom::Dot(dir0,dir4));
+	for(std::vector<RayEntry>::iterator rit=rays_.begin();rit!=rays_.end();++rit) {
+	  /*
+	    this _should_ be <0.0, and it should
+	    count as a hit... why this isnt the case
+	    is a mystery to me... all normal and
+	    difference vector directions appear ok
+	  */
+	  if(geom::Dot(eit->n,rit->v)>0.0) {
+	    // backside, counts as hit
+	    //rit->d2=0.0;
+	    //rit->c=ce.c;
+	    //rit->hit=true;
+	    continue;
 	  }
+	  if(geom::Dot(dir0,rit->v)<a0) {++stat1; continue;} // outside corners
+	  if(rit->d2<l2) {++stat2; continue;} // a closer one was already recorded
+	  rit->d2=l2;
+	  rit->c=eit->c;
+	  rit->hit=true;
 	}
       }
+      //std::cerr << " " << stat0 << " " << stat1 << " " << stat2 << std::endl;
     }
 
     void calc_all() {
       const EntryList& elist = va_.GetEntries();
+      const IndexList& tlist = va_.GetTriIndices();
+      const IndexList& qlist = va_.GetQuadIndices();
+      float cutoff2=cutoff_*cutoff_;
 
-      for(unsigned int c=0;c<elist.size();++c) {
-	geom::Vec3 epos(elist[c].v[0],elist[c].v[1],elist[c].v[2]);
-	geom::Vec3 enorm(elist[c].n[0],elist[c].n[1],elist[c].n[2]);
-	CIndex cindex0=coord_to_index(epos);
-	Color color;
-	float factor;
-
-	for(int w=-1;w<=1;++w) {
-	  for(int v=-1;v<=1;++v) {
-	    for(int u=-1;u<=1;++u) {
-	      accumulate(c,CIndex(cindex0.u+u,cindex0.v+v,cindex0.w+w),epos,enorm,color,factor);
+      std::vector<geom::Vec4> entry_accum(elist.size());
+      
+      for(CMap::iterator mit=cmap_.begin();mit!=cmap_.end();++mit) {
+	for(CList::iterator lit=mit->second.begin();lit!=mit->second.end();++lit) {
+	  // reset rays
+	  for(std::vector<RayEntry>::iterator rit=rays_.begin();rit!=rays_.end();++rit) {
+	    rit->d2=cutoff2;
+	    rit->hit=false;
+	  }
+	  // visit all 27 quadrants
+	  for(int w=-1;w<=1;++w) {
+	    for(int v=-1;v<=1;++v) {
+	      for(int u=-1;u<=1;++u) {
+		accumulate(CIndex(mit->first.u+u,mit->first.v+v,mit->first.w+w),*lit);
+	      }
 	    }
 	  }
+
+	  unsigned int hit_count=0;
+	  for(std::vector<RayEntry>::iterator rit=rays_.begin();rit!=rays_.end();++rit) {
+	    if(rit->hit) ++hit_count;
+	  }
+	  float ratio=std::min(1.0,1.5-static_cast<float>(hit_count)/static_cast<float>(rays_.size()));
+	  //std::cerr << " " << hit_count << " / " << rays_.size() << std::endl;
+
+	  if(lit->type==3) {
+	    entry_accum[tlist[lit->id+0]]+=geom::Vec4(ratio,ratio,ratio,1.0);
+	    entry_accum[tlist[lit->id+1]]+=geom::Vec4(ratio,ratio,ratio,1.0);
+	    entry_accum[tlist[lit->id+2]]+=geom::Vec4(ratio,ratio,ratio,1.0);
+	  } else if(lit->type==4) {
+	    entry_accum[qlist[lit->id+0]]+=geom::Vec4(ratio,ratio,ratio,1.0);
+	    entry_accum[qlist[lit->id+1]]+=geom::Vec4(ratio,ratio,ratio,1.0);
+	    entry_accum[qlist[lit->id+2]]+=geom::Vec4(ratio,ratio,ratio,1.0);
+	    entry_accum[qlist[lit->id+3]]+=geom::Vec4(ratio,ratio,ratio,1.0);
+	  }
 	}
-
-	color[0]/=factor;
-	color[1]/=factor;
-	color[2]/=factor;
-	color[3]=weight_;
-	va_.SetAmbientColor(c,color);
       }
-
+      for(unsigned int i=0;i<elist.size();++i) {
+	float fact = entry_accum[i][3]==0.0 ? 1.0f : 1.0f/entry_accum[i][3];
+	//va_.SetAmbientColor(i,Color(entry_accum[i][0]*fact,entry_accum[i][1]*fact,entry_accum[i][2]*fact,weight_));
+	va_.SetAmbientColor(i,Color(elist[i].c[0]*entry_accum[i][0]*fact,
+				    elist[i].c[1]*entry_accum[i][1]*fact,
+				    elist[i].c[2]*entry_accum[i][2]*fact,
+				    weight_));
+      }
     }
-
+    
   private:
     IndexedVertexArray& va_;
     CMap cmap_;
     float bsize_;
     float weight_;
-    float cutoff2_;
+    float cutoff_;
+    std::vector<RayEntry> rays_;
+    unsigned int density_;
   };
   
 } // ns

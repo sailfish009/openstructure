@@ -256,7 +256,7 @@ public:
                const Color& c1, const Color& c2, float minv, float maxv);  
 #endif
 
-  unsigned int& Debug() {return debug_flags_;}
+  void Debug(unsigned int flags) {debug_flags_=flags; RefreshVA();}
 
  protected:
   
@@ -264,6 +264,8 @@ public:
   virtual void CustomPreRenderGL(bool flag);
 
   void RefreshVA(IndexedVertexArray& va);
+
+  virtual void RefreshVA() {RefreshVA(va_);}
   
  private:
   GfxObj(const GfxObj& o);

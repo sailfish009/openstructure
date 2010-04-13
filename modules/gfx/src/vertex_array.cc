@@ -1403,7 +1403,6 @@ void IndexedVertexArray::recalc_ambient_occlusion()
 {
   ambient_data_.resize(4*entry_list_.size());
   CalcAmbientTerms(*this);
-  std::cerr << ambient_data_[0] << "," << ambient_data_[1] << "," << ambient_data_[2] << "," << ambient_data_[3] << std::endl;
 }
 
 }} // ns

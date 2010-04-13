@@ -16,7 +16,12 @@ void main()
   if(occlusion_flag) {
     // ambient color
     gl_TexCoord[2] = gl_MultiTexCoord0;
+    gl_FrontColor.rgb = gl_MultiTexCoord0.xyz;
+    gl_BackColor.rgb = gl_MultiTexCoord0.xyz;
+    gl_FrontColor.a = gl_Color.a;
+    gl_BackColor.a = gl_Color.a;
+  } else {
+    gl_FrontColor=gl_Color;
+    gl_BackColor=gl_Color;
   }
-  gl_FrontColor=gl_Color;
-  gl_BackColor=gl_Color;
 }

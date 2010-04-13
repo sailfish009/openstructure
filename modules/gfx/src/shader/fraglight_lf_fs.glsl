@@ -30,7 +30,7 @@ void main()
     vec4 diff = vec4(0.0);
     vec4 spec = vec4(0.0);
     vec4 color = vec4(0.0);
-    
+
     if(DirectionalLight(normal, gl_FrontMaterial.shininess, amb, diff, spec)) {
     
         color  = gl_FrontLightModelProduct.sceneColor  +
@@ -50,10 +50,6 @@ void main()
 
   } else {
     gl_FragColor = gl_Color;
-  }
-
-  if(occlusion_flag) {
-    gl_FragColor.rgb = mix(gl_TexCoord[2].stp,gl_FragColor.rgb, gl_TexCoord[2].q);
   }
 
   if(fog_flag) {
