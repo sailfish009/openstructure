@@ -54,7 +54,8 @@ class TopTen():
   def IsTopTen(self,score):
     self._config.UpdateValues()
     try:
-      if score < float(self._config.str(10)["SCORE"]):
+      print score, float(self._config.Get(str(10))["SCORE"])
+      if score < float(self._config.Get(str(10))["SCORE"]):
         return True
     except AttributeError:
       return True

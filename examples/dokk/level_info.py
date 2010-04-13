@@ -1,7 +1,7 @@
 import dokk
 from PyQt4 import QtCore, QtGui
 from hud import *
-from ost import gui
+from ost import mol, geom
 
 class LevelInfo(QtCore.QObject):
   def __init__(self, level, parent=None):
@@ -16,6 +16,7 @@ class LevelInfo(QtCore.QObject):
     else:
       self.highscore = None
     self.level_info = LevelDetails(level.config.Level["NAME"],level.config.Level["DIFFICULTY"])
+    self.demo_cam = DemoCam(self)
     self.connect(level,QtCore.SIGNAL("Started()"),self.Finish)
     self.connect(level,QtCore.SIGNAL("Stopped()"),self.Start)
     self.connect(level,QtCore.SIGNAL("Closed()"),self.Finish)
@@ -30,6 +31,7 @@ class LevelInfo(QtCore.QObject):
     self.start = False
     if self.highscore:
       self.highscore.Finish()
+    self.demo_cam.Finish()
     self.level_info.Finish()
     
   def Timeout(self):
@@ -37,6 +39,7 @@ class LevelInfo(QtCore.QObject):
       if self.highscore:
         self.highscore.Start()
       self.level_info.Start()
+      self.demo_cam.Start()
    
       
 class HighScore(QtCore.QObject):
@@ -94,3 +97,20 @@ class LevelDetails(QtCore.QObject):
     dokk.Dokk().gl_win.RemoveHUDObject(self.hud_diffi_text)
     dokk.Dokk().gl_win.RemoveHUDObject(self.hud_name_text)
     dokk.Dokk().gl_win.RemoveHUDObject(self.hud_bg)
+    
+
+class DemoCam(QtCore.QTimer):
+  def __init__(self, parent=None):
+    QtCore.QTimer.__init__(self)
+    QtCore.QObject.connect(self, QtCore.SIGNAL("timeout()"), self.OnTimer)
+        
+  def Start(self):
+    dokk.Dokk().GetLevel().Solve()
+    self.start(10)
+     
+  def Finish(self):
+    self.stop()
+  
+  def OnTimer(self):
+    gfx.Scene().Apply(gfx.InputEvent(gfx.INPUT_DEVICE_MOUSE, gfx.INPUT_COMMAND_ROTY, 0.25), False)      
+      

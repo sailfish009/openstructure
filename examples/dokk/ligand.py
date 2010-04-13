@@ -4,7 +4,7 @@ from ost import mol
 class Ligand:
   def __init__(self, ligand, config=None):
     self.handle=ligand
-    self.the_solution_=ligand.Copy().CreateFullView()
+    self.solution=ligand.Copy().CreateFullView()
     self.go=gfx.Entity("Ligand", gfx.CPK, self.handle)
     self.go.SetColor(gfx.GREEN, 'ele=C')
     self.go.cpk_options.SetSphereDetail(7)
@@ -71,7 +71,7 @@ class Ligand:
 
   def RMSDToSolution(self):
     return alg.CalculateRMSD(self.handle.CreateFullView(), 
-                             self.the_solution_)
+                             self.solution)
 
   def Solve(self):
     edi=self.handle.RequestXCSEditor()

@@ -84,7 +84,10 @@ class Level(QtCore.QObject):
     return rmsd + self.GetTimeMalus()
   
   def GetRank(self):
-    return self.topten.GetRank(self.GetScore())
+    score = self.GetScore()
+    if self.topten.IsTopTen(self.GetScore()):
+      return self.topten.GetRank(self.GetScore())
+    return -1
   
   def GetTTDiff(self):
     return self.topten.GetDiff(self.GetScore())
@@ -143,7 +146,7 @@ class Level(QtCore.QObject):
     self.stop_time = time.time()
     Dokk().gl_win.SetLockInput(True)
     if self._started:
-      if self.GetRank() > 0:
+      if self.GetRank() > 0 or self.GetRMSD()<= float(self.config.Level["GOAL"]):
         self.hud_level_end_tt.Start()
       else:
         self.hud_level_end_ntt.Start()

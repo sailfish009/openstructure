@@ -3,11 +3,9 @@ from ost import gfx
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4.QtOpenGL import *
-import OpenGL.GL as ogl
 
 from spnav_input import SpnavInputDevice
-from hud import HUD
-from hud import HUDObject
+from hud import HUD, HUDObject
 
 
 UPDATE_INTERVAL = 20
@@ -35,11 +33,7 @@ class DokkGLCanvas(QGLWidget):
     gfx.Scene().InitGL()
 
   def paintGL(self):
-    ogl.glMatrixMode(ogl.GL_MODELVIEW);
-    ogl.glPushMatrix();
     gfx.Scene().RenderGL()
-    ogl.glMatrixMode(ogl.GL_MODELVIEW);
-    ogl.glPopMatrix();
 
   def SetLevel(self, level):
     self.spnav_input.SetLevel(level)
