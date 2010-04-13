@@ -53,12 +53,21 @@ namespace {
 		    -std::numeric_limits<float>::max());
 
     for(EntryList::const_iterator it=elist.begin();it!=elist.end();++it) {
-      minc[0]=std::min(it->v[0],static_cast<float>(minc[0]));
-      minc[1]=std::min(it->v[1],static_cast<float>(minc[1]));
-      minc[2]=std::min(it->v[2],static_cast<float>(minc[2]));
-      maxc[0]=std::max(it->v[0],static_cast<float>(maxc[0]));
-      maxc[1]=std::max(it->v[1],static_cast<float>(maxc[1]));
-      maxc[2]=std::max(it->v[2],static_cast<float>(maxc[2]));
+#if OST_DOUBLE_PRECISION
+      minc[0]=std::min(static_cast<double>(it->v[0]),minc[0]);
+      minc[1]=std::min(static_cast<double>(it->v[1]),minc[1]);
+      minc[2]=std::min(static_cast<double>(it->v[2]),minc[2]);
+      maxc[0]=std::max(static_cast<double>(it->v[0]),maxc[0]);
+      maxc[1]=std::max(static_cast<double>(it->v[1]),maxc[1]);
+      maxc[2]=std::maxstatic_cast<double>((it->v[2]),maxc[2]);
+#else
+      minc[0]=std::min(it->v[0],minc[0]);
+      minc[1]=std::min(it->v[1],minc[1]);
+      minc[2]=std::min(it->v[2],minc[2]);
+      maxc[0]=std::max(it->v[0],maxc[0]);
+      maxc[1]=std::max(it->v[1],maxc[1]);
+      maxc[2]=std::max(it->v[2],maxc[2]);
+#endif
     }
     return std::make_pair(minc,maxc);
   }
@@ -201,15 +210,15 @@ namespace {
       unsigned int stat0=0;
       unsigned int stat1=0;
       unsigned int stat2=0;
+      unsigned int stat3=0;
 
       float cutoff2=cutoff_*cutoff_;
       CMap::iterator mit=cmap_.find(cindex);
       if(mit==cmap_.end()) return;
       for(std::vector<CEntry>::const_iterator eit=mit->second.begin();eit!=mit->second.end();++eit) {
-	
 	geom::Vec3 dir0=(eit->v0-ce.v0); // vector from reference entry to current entry
 	float l2=geom::Length2(dir0);
-	if(l2>cutoff2) {++stat0; continue;} // too far away
+	if(l2>cutoff2 || l2<0.1) {++stat0; continue;} // too far away or too close
 	dir0=geom::Normalize(dir0);
 
 	geom::Vec3 dir1=geom::Normalize(eit->v1-ce.v0); // vector from reference entry to corner 1
@@ -221,27 +230,14 @@ namespace {
 	float a0 = std::min(geom::Dot(dir0,dir1),std::min(geom::Dot(dir0,dir2),geom::Dot(dir0,dir3)));
 	if(eit->type==4) a0=std::min(a0,static_cast<float>(geom::Dot(dir0,dir4)));
 	for(std::vector<RayEntry>::iterator rit=rays_.begin();rit!=rays_.end();++rit) {
-	  /*
-	    this _should_ be <0.0, and it should
-	    count as a hit... why this isnt the case
-	    is a mystery to me... all normal and
-	    difference vector directions appear ok
-	  */
-	  if(geom::Dot(eit->n,rit->v)>0.0) {
-	    // backside, counts as hit
-	    //rit->d2=0.0;
-	    //rit->c=ce.c;
-	    //rit->hit=true;
-	    continue;
-	  }
-	  if(geom::Dot(dir0,rit->v)<a0) {++stat1; continue;} // outside corners
-	  if(rit->d2<l2) {++stat2; continue;} // a closer one was already recorded
+	  if(geom::Dot(ce.n,rit->v)<0.0) { ++stat1; continue;} // facing back
+	  if(geom::Dot(dir0,rit->v)<a0) {++stat2; continue;} // outside corners
+	  if(rit->d2<l2) {++stat3; continue;}
 	  rit->d2=l2;
 	  rit->c=eit->c;
 	  rit->hit=true;
 	}
       }
-      //std::cerr << " " << stat0 << " " << stat1 << " " << stat2 << std::endl;
     }
 
     void calc_all() {
@@ -272,18 +268,20 @@ namespace {
 	  for(std::vector<RayEntry>::iterator rit=rays_.begin();rit!=rays_.end();++rit) {
 	    if(rit->hit) ++hit_count;
 	  }
-	  float ratio=std::min(1.0,1.5-static_cast<float>(hit_count)/static_cast<float>(rays_.size()));
+	  float ratio=1.0-static_cast<float>(hit_count)/static_cast<float>(rays_.size());
 	  //std::cerr << " " << hit_count << " / " << rays_.size() << std::endl;
 
 	  if(lit->type==3) {
-	    entry_accum[tlist[lit->id+0]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
-	    entry_accum[tlist[lit->id+1]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
-	    entry_accum[tlist[lit->id+2]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
+	    // please provide a Vec explicit float ctor in double-precision mode
+	    // instead of typecasting here
+	    entry_accum[tlist[lit->id+0]]+=geom::Vec4(ratio,ratio,ratio,1.0f);
+	    entry_accum[tlist[lit->id+1]]+=geom::Vec4(ratio,ratio,ratio,1.0f);
+	    entry_accum[tlist[lit->id+2]]+=geom::Vec4(ratio,ratio,ratio,1.0f);
 	  } else if(lit->type==4) {
-	    entry_accum[qlist[lit->id+0]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
-	    entry_accum[qlist[lit->id+1]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
-	    entry_accum[qlist[lit->id+2]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
-	    entry_accum[qlist[lit->id+3]]+=geom::Vec4(static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(ratio),static_cast<Real>(1.0));
+	    entry_accum[qlist[lit->id+0]]+=geom::Vec4(ratio,ratio,ratio,1.0f);
+	    entry_accum[qlist[lit->id+1]]+=geom::Vec4(ratio,ratio,ratio,1.0f);
+	    entry_accum[qlist[lit->id+2]]+=geom::Vec4(ratio,ratio,ratio,1.0f);
+	    entry_accum[qlist[lit->id+3]]+=geom::Vec4(ratio,ratio,ratio,1.0f);
 	  }
 	}
       }
@@ -314,6 +312,8 @@ namespace {
 void ost::gfx::CalcAmbientTerms(IndexedVertexArray& va)
 {
   AmbientOcclusionBuilder aob(va);
+  LOGN_VERBOSE("building component map");
   aob.build_cmap();
+  LOGN_VERBOSE("calculating ambient terms");
   aob.calc_all();
 }

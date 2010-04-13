@@ -142,6 +142,7 @@ VertexID IndexedVertexArray::Add(const Vec3& vert,
                                  const Color& col) 
 {
   dirty_=true;
+  ambient_dirty_=true;
   entry_list_.push_back(Entry(vert,norm,col));
   return entry_list_.size()-1;
 }
@@ -162,6 +163,7 @@ LineID IndexedVertexArray::AddLine(VertexID id0, VertexID id1)
 {
   assert(id0<entry_list_.size() && id1<entry_list_.size());
   dirty_=true;
+  ambient_dirty_=true;
   line_index_list_.push_back(id0);
   line_index_list_.push_back(id1);
   return line_index_list_.size()-2;
@@ -171,6 +173,7 @@ TriID IndexedVertexArray::AddTri(VertexID id0, VertexID id1, VertexID id2)
 {
   assert(id0<entry_list_.size() && id1<entry_list_.size() && id2<entry_list_.size());
   dirty_=true;
+  ambient_dirty_=true;
   tri_index_list_.push_back(id0);
   tri_index_list_.push_back(id1);
   tri_index_list_.push_back(id2);
@@ -200,6 +203,7 @@ QuadID IndexedVertexArray::AddQuad(VertexID id0, VertexID id1, VertexID id2, Ver
 {
   assert(id0<entry_list_.size() && id1<entry_list_.size() && id2<entry_list_.size() && id3<entry_list_.size());
   dirty_=true;
+  ambient_dirty_=true;
   quad_index_list_.push_back(id0);
   quad_index_list_.push_back(id1);
   quad_index_list_.push_back(id2);
@@ -210,6 +214,7 @@ QuadID IndexedVertexArray::AddQuad(VertexID id0, VertexID id1, VertexID id2, Ver
 void IndexedVertexArray::AddSphere(const SpherePrim& prim, unsigned int detail) 
 {
   dirty_=true;
+  ambient_dirty_=true;
 
   unsigned int level= std::min(VA_SPHERE_MAX_DETAIL,detail);
 
@@ -230,6 +235,7 @@ void IndexedVertexArray::AddSphere(const SpherePrim& prim, unsigned int detail)
 void IndexedVertexArray::AddIcoSphere(const SpherePrim& prim, unsigned int detail) 
 {
   dirty_=true;
+  ambient_dirty_=true;
   
   unsigned int level= std::min(VA_ICO_SPHERE_MAX_DETAIL,detail);
   
@@ -246,6 +252,7 @@ void IndexedVertexArray::AddIcoSphere(const SpherePrim& prim, unsigned int detai
 void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail)
 {
   dirty_=true;
+  ambient_dirty_=true;
   
   unsigned int level = std::min(VA_CYL_MAX_DETAIL,detail);
   
@@ -349,9 +356,10 @@ void IndexedVertexArray::RenderGL()
   if(dirty_) {
     dirty_=false;
 #if OST_SHADER_SUPPORT_ENABLED
-    if(use_ambient_) {
+    if(ambient_dirty_ && use_ambient_) {
       LOGN_DUMP("re-calculating ambient occlusion terms");
       recalc_ambient_occlusion();
+      ambient_dirty_=false;
     }
 
     LOGN_DUMP("checking buffer object availability");
@@ -602,6 +610,7 @@ void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
 void IndexedVertexArray::Clear() 
 {
   dirty_=true;
+  ambient_dirty_=true;
   entry_list_.clear();
   quad_index_list_.clear();
   tri_index_list_.clear();
@@ -625,7 +634,6 @@ void IndexedVertexArray::Clear()
   outline_exp_color_=Color(0,0,0);
   draw_normals_=false;
   use_ambient_=false;
-  ambient_dirty_=true;
   ambient_data_.clear();
 }
 
@@ -1034,6 +1042,7 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   line_index_list_=va.line_index_list_;
   ntentry_list_=va.ntentry_list_;
   dirty_=true;
+  ambient_dirty_=va.ambient_dirty_;
   mode_=va.mode_;
   poly_mode_=va.poly_mode_;
   lighting_=va.lighting_;
@@ -1052,7 +1061,6 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   outline_exp_color_=va.outline_exp_color_;
   draw_normals_=va.draw_normals_;
   use_ambient_=va.use_ambient_;
-  ambient_dirty_=va.ambient_dirty_;
   ambient_data_=va.ambient_data_;
 }
   
@@ -1125,6 +1133,7 @@ bool IndexedVertexArray::prep_buff()
   if(use_ambient_) {
     if(ambient_data_.empty()) {
       LOGN_VERBOSE("ambient data empty");
+      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     } else {
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
       glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_AMBIENT_BUFFER]);
@@ -1135,6 +1144,8 @@ bool IndexedVertexArray::prep_buff()
 		   GL_STATIC_DRAW);
       VERTEX_ARRAY_CHECK_GL_ERROR("set ambient buf");
     }
+  } else {
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   }
   
   return true;
