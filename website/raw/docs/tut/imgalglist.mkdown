@@ -2,7 +2,9 @@ title: List of image algorithms
 
 [TOC]
 
-# General Algorithms
+# List of image algorithms
+
+## General Algorithms
 
 * dox[ost::img::alg::Clear|Clear]
 * dox[ost::img::alg::Fill|Fill]
@@ -22,14 +24,14 @@ title: List of image algorithms
 * dox[ost::img::alg::LineAverage|LineAverage]
 * dox[ost::img::alg::LineIterator|LineIterator]
 
-# Fourier Transforms
+## Fourier Transforms
 
 * dox[ost::img::alg::FFT|FFT]
 * dox[ost::img::alg::DFT|DFT]
 * dox[ost::img::alg::PowerSpectrum|PowerSpectrum]
 
 
-# Transformations
+## Transformations
 
 * dox[ost::img::alg::Mirror|Mirror]
 * dox[ost::img::alg::Shift|Shift]
@@ -38,20 +40,20 @@ title: List of image algorithms
 * dox[ost::img::alg::DiscreteShrink|DiscreteShrink]
 
 
-# Masking
+## Masking
 
 * dox[ost::img::alg::MaskImage|MaskImage]
 * dox[ost::img::alg::SmoothMaskImage|SmoothMaskImage]
 
 
-# Normalizer
+## Normalizer
 
 * dox[ost::img::alg::LinearNormalizer|LinearNormalizer]
 * dox[ost::img::alg::LogNormalizer|LogNormalizer]
 * dox[ost::img::alg::ODNormalizer|ODNormalizer]
 
 
-# Thresholding
+## Thresholding
 
 * dox[ost::img::alg::ClipMinMax|ClipMinMax]
 * dox[ost::img::alg::DensitySlice|DensitySlice]
@@ -59,7 +61,7 @@ title: List of image algorithms
 * dox[ost::img::alg::LocalSigmaThreshold|LocalSigmaThreshold]
 
 
-# General filters
+## General filters
 
 * dox[ost::img::alg::Anisotropic|Anisotropic]
 * dox[ost::img::alg::Gaussian|Gaussian]
@@ -67,7 +69,7 @@ title: List of image algorithms
 * dox[ost::img::alg::GaussianLaplacian|GaussianLaplacian]
 
 
-# High/low pass filters
+## High/low pass filters
 
 * dox[ost::img::alg::LowPassFilter|LowPassFilter]
 * dox[ost::img::alg::HighPassFilter|HighPassFilter]
