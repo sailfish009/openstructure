@@ -156,6 +156,7 @@ class DokkGLWin(gfx.GLWinBase):
     def _CreateFormat(self):
       fmt=QGLFormat()
       fmt.setAlpha(True)
+      fmt.setStereo(True)
       return fmt
     
     def __init__(self,dokk):
@@ -174,8 +175,8 @@ class DokkGLWin(gfx.GLWinBase):
       else:
         self.canvas.show()
         
-    def SetStereo():
-      pass
+    def SetStereo(self, mode):
+      gfx.Scene().Stereo(mode)
     
     def SetLockInput(self, lock):
       self.canvas.SetLockInput(lock)

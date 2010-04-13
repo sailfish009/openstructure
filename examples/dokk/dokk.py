@@ -40,6 +40,8 @@ class Dokk(object):
   def Start(self, args):
     self.NextLevel()
     self.gl_win.Show(fullscreen=('--fullscreen' in args))
+    if '--stereo' in args:
+      self.gl_win.SetStereo(1)
 
   def _LoadLevel(self):
     if self._current_level is not None:
