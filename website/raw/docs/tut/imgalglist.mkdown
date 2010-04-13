@@ -1,0 +1,80 @@
+title: List of image algorithms
+
+[TOC]
+
+# General Algorithms
+
+* dox[ost::img::alg::Clear|Clear]
+* dox[ost::img::alg::Fill|Fill]
+* dox[ost::img::alg::Stat|Stat]
+* dox[ost::img::alg::StatMinMax|StatMinMax]
+* dox[ost::img::alg::Negate|Negate]
+* dox[ost::img::alg::Polar|Polar]
+* dox[ost::img::alg::Randomize|Randomize]
+* dox[ost::img::alg::AutoCorrelate|AutoCorrelate]
+* dox[ost::img::alg::Conjugate|Conjugate]
+* dox[ost::img::alg::Convolute|Convolute]
+* dox[ost::img::alg::Correlate|Correlate]
+* dox[ost::img::alg::CrossCorrelate|CrossCorrelate]
+* dox[ost::img::alg::HighestPeakSearch3D|HighestPeakSearch3D]
+* dox[ost::img::alg::Histogram|Histogram]
+* dox[ost::img::alg::RsCrosscorr|RsCrosscorr]
+* dox[ost::img::alg::LineAverage|LineAverage]
+* dox[ost::img::alg::LineIterator|LineIterator]
+
+# Fourier Transforms
+
+* dox[ost::img::alg::FFT|FFT]
+* dox[ost::img::alg::DFT|DFT]
+* dox[ost::img::alg::PowerSpectrum|PowerSpectrum]
+
+
+# Transformations
+
+* dox[ost::img::alg::Mirror|Mirror]
+* dox[ost::img::alg::Shift|Shift]
+* dox[ost::img::alg::Transform|Transform]
+* dox[ost::img::alg::FractionalShift|FractionalShift]
+* dox[ost::img::alg::DiscreteShrink|DiscreteShrink]
+
+
+# Masking
+
+* dox[ost::img::alg::MaskImage|MaskImage]
+* dox[ost::img::alg::SmoothMaskImage|SmoothMaskImage]
+
+
+# Normalizer
+
+* dox[ost::img::alg::LinearNormalizer|LinearNormalizer]
+* dox[ost::img::alg::LogNormalizer|LogNormalizer]
+* dox[ost::img::alg::ODNormalizer|ODNormalizer]
+
+
+# Thresholding
+
+* dox[ost::img::alg::ClipMinMax|ClipMinMax]
+* dox[ost::img::alg::DensitySlice|DensitySlice]
+* dox[ost::img::alg::Threshold|Threshold]
+* dox[ost::img::alg::LocalSigmaThreshold|LocalSigmaThreshold]
+
+
+# General filters
+
+* dox[ost::img::alg::Anisotropic|Anisotropic]
+* dox[ost::img::alg::Gaussian|Gaussian]
+* dox[ost::img::alg::GaussianGradientMagnitude|GaussianGradientMagnitude]
+* dox[ost::img::alg::GaussianLaplacian|GaussianLaplacian]
+
+
+# High/low pass filters
+
+* dox[ost::img::alg::LowPassFilter|LowPassFilter]
+* dox[ost::img::alg::HighPassFilter|HighPassFilter]
+* dox[ost::img::alg::GaussianLowPassFilter|GaussianLowPassFilter]
+* dox[ost::img::alg::GaussianHighPassFilter|GaussianHighPassFilter]
+* dox[ost::img::alg::FermiLowPassFilter|FermiLowPassFilter]
+* dox[ost::img::alg::FermiHighPassFilter|FermiHighPassFilter]
+* dox[ost::img::alg::ButterworthLowPassFilter|ButterworthLowPassFilter]
+* dox[ost::img::alg::ButterworthHighPassFilter|ButterworthHighPassFilter]
+
