@@ -53,12 +53,12 @@ namespace {
 		    -std::numeric_limits<float>::max());
 
     for(EntryList::const_iterator it=elist.begin();it!=elist.end();++it) {
-      minc[0]=std::min(it->v[0],minc[0]);
-      minc[1]=std::min(it->v[1],minc[1]);
-      minc[2]=std::min(it->v[2],minc[2]);
-      maxc[0]=std::max(it->v[0],maxc[0]);
-      maxc[1]=std::max(it->v[1],maxc[1]);
-      maxc[2]=std::max(it->v[2],maxc[2]);
+      minc[0]=std::min(it->v[0],static_cast<float>(minc[0]));
+      minc[1]=std::min(it->v[1],static_cast<float>(minc[1]));
+      minc[2]=std::min(it->v[2],static_cast<float>(minc[2]));
+      maxc[0]=std::max(it->v[0],static_cast<float>(maxc[0]));
+      maxc[1]=std::max(it->v[1],static_cast<float>(maxc[1]));
+      maxc[2]=std::max(it->v[2],static_cast<float>(maxc[2]));
     }
     return std::make_pair(minc,maxc);
   }
