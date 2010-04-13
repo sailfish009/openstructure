@@ -49,11 +49,11 @@ class DokkGLCanvas(QGLWidget):
   def RenderHUD(self, painter):
     painter.setPen(QColor(100, 100, 100, 50))
     painter.setBrush(QColor(200, 200, 200, 50))
-    painter.drawRect(QRect(QPoint(0, 0), QSize(self.width(), 25)))
+    painter.drawRect(QRect(QPoint(0, 0), QSize(self.width(), 35)))
     painter.setPen(QPen(QColor(255,255,255), Qt.SolidLine))
-    painter.setFont(QFont("Verdana"))
-    painter.drawText(QPoint(10, 20), "You are %.1f away from the solution" % self.dokk.GetLevel().GetRMSD())
-    painter.drawText(QPoint(self.width()-100, 20), "%.0f seconds left" % self.dokk.GetLevel().GetRemainingTime())
+    painter.setFont(QFont("Verdana",20))
+    painter.drawText(QPoint(10, 25), "You are %.1f away from the solution" % self.dokk.GetLevel().GetRMSD())
+    painter.drawText(QPoint(self.width()-200, 25), "%.0f seconds left" % self.dokk.GetLevel().GetRemainingTime())
     if self.hud is not None:
       self.hud.Paint(painter)
     self.dokk.GetLevel().CheckSolved()
