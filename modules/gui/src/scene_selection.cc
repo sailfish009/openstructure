@@ -278,9 +278,8 @@ void SceneSelection::SelectAllViews(){
 void SceneSelection::DeselectAllViews(){
   mol::EntityView sel = view_entity_->GetSelection();
   if(sel.IsValid()){
-    for(unsigned int i= 0; i < views_.size(); i++){
-      sel = mol::Difference(sel, views_[i].GetEntityView());
-    }
+    sel = mol::Difference(sel, this->GetViewUnion());
+    view_entity_->SetSelection(sel);
   }
 }
 

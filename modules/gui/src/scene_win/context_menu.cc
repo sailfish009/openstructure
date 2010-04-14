@@ -72,11 +72,16 @@ void ContextMenu::ShowMenu(const QPoint& pos)
           if(gfx_node->GetType()==0){all_not_scene = false;}
           if(!dynamic_cast<gfx::GfxObj*> (gfx_node.get())){all_gfx_objects = false;}
           if(!dynamic_cast<gfx::Entity*> (gfx_node.get())){all_entities = false;}
+#if OST_IMG_ENABLED
           if(!dynamic_cast<gfx::MapIso*> (gfx_node.get())){all_maps = false;}
+#else
+          all_maps = false;
+#endif // OST_IMG_ENABLED
         }
         else{
           all_gfx_objects = false;
           all_entities = false;
+          all_maps = false;
           all_visible = true;
           all_hidden = true;
         }
@@ -154,14 +159,12 @@ void ContextMenu::ShowMenu(const QPoint& pos)
 
     }
 
-    #if OST_IMG_ENABLED
-
+#if OST_IMG_ENABLED
     if(all_maps){
       action = menu->addAction("View Density Slices");
       connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(ViewDensitySlices()));
     }
-
-    #endif // OST_IMG_ENABLED
+#endif // OST_IMG_ENABLED
 
 
     if(all_entity_views){
