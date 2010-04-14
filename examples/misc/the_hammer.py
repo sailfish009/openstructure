@@ -1,6 +1,6 @@
 from PyQt4 import QtCore
 import math
-import qa
+from ost import qa
 class Anim(QtCore.QTimer):
     def __init__(self, a, b):
         QtCore.QTimer.__init__(self)
