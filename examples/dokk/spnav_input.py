@@ -22,6 +22,7 @@ class SpnavInputDevice(QtCore.QObject):
     self.rot = True
     
     self._lock_input = False
+    self._trans_factor = 0.5
     
     self.score_scip = 0
   def SetLevel(self, level):
@@ -40,7 +41,7 @@ class SpnavInputDevice(QtCore.QObject):
       ligand = self.level.ligand
       transf = mol.Transform()
       if(self.trans):
-        delta = geom.Vec3 (tx/480.0, ty/480.0, -tz/480.0)
+        delta = geom.Vec3 ((tx/480.0)*self._trans_factor, (ty/480.0)*self._trans_factor, (-tz/480.0)*self._trans_factor)
         transf.SetTrans(delta)
       if(self.rot):
         rot=gfx.Scene().GetTransform().GetRot()
