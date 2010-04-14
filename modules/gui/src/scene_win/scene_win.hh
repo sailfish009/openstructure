@@ -66,6 +66,7 @@ public slots:
 
 private slots:
   void RowsInserted(const QModelIndex & parent, int start, int end);
+  void DoubleClicked(const QModelIndex & index);
 
 private:
   SceneWinModel* model_;

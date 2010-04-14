@@ -57,6 +57,7 @@ SceneWin::SceneWin(QWidget* parent) :
   view_->setModel(model_);
   view_->setSelectionBehavior(QAbstractItemView::SelectRows);
   view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  view_->setEditTriggers(QAbstractItemView::EditKeyPressed);
   view_->expandAll();
 
   layout->addWidget(view_);
@@ -67,6 +68,8 @@ SceneWin::SceneWin(QWidget* parent) :
               const QItemSelection&)));
   connect(view_, SIGNAL(customContextMenuRequested(const QPoint&)), this,
       SLOT(ContextMenuRequested(const QPoint&)));
+  connect(view_, SIGNAL(doubleClicked(const QModelIndex &)), this,
+	  SLOT(DoubleClicked(const QModelIndex &)));
   connect(model_, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(RowsInserted(const QModelIndex&, int, int)));
 }
 
@@ -108,6 +111,9 @@ void SceneWin::RowsInserted(const QModelIndex & parent, int start, int end){
   }
 }
 
+void SceneWin::DoubleClicked(const QModelIndex & index){
+  SceneSelection::Instance()->CenterOnObjects();
+}
 
 void SceneWin::AddView(gfx::EntityP entity, mol::EntityView view){
 
