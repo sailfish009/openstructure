@@ -123,6 +123,7 @@ void MapIso::OnRenderModeChange()
     va_.SetMode(0x2); // only lines
     va_.SetTwoSided(true);
   }
+  GfxObj::OnRenderModeChange();
 }
 
 void MapIso::CustomPreRenderGL(bool flag)

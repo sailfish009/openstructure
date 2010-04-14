@@ -7,12 +7,15 @@ void DirectionalLight(in vec3 normal,
                       inout vec4 diffuse,
                       inout vec4 specular)
 {
-  float n_vp = max(0.0, dot(normal, normalize(vec3(gl_LightSource[0].position))));
-  float n_hv = max(0.0, dot(normal, vec3(gl_LightSource[0].halfVector)));
-  float pf = n_vp>0.0 ? pow(n_hv, shin) : 0.0;
+  float n_vp = max(0.0, dot(normal, normalize(gl_LightSource[0].position.xyz)));
+  float pf = 0.0;
+  if(n_vp>0.0 && shin>0.0) {
+    float n_hv = max(0.0, dot(normal, normalize(gl_LightSource[0].halfVector.xyz)));
+    pf=pow(n_hv, shin);
+  }
 
   ambient  += gl_LightSource[0].ambient;
-  diffuse  += gl_LightSource[0].diffuse*n_vp;
+  diffuse  += gl_LightSource[0].diffuse * n_vp;
   specular += gl_LightSource[0].specular * pf;
 }
 

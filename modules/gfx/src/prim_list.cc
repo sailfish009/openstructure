@@ -28,12 +28,15 @@ namespace ost { namespace gfx {
 
 PrimList::PrimList(const String& name):
   GfxObj(name),
+  points_(),
   lines_(),
-  diameter_(0.1)
+  radius_(0.5),
+  diameter_(0.5)
 {}
 
 void PrimList::Clear()
 {
+  points_.clear();
   lines_.clear();
   Scene::Instance().RequestRedraw();
 }
@@ -41,6 +44,11 @@ void PrimList::Clear()
 void PrimList::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
                              const mol::Transform& tf) const
 {
+  for(PointEntryList::const_iterator it=points_.begin();it!=points_.end();++it) {
+    geom::Vec3 tpos = tf.Apply(it->pos);
+    minc=geom::Min(minc,tpos);
+    maxc=geom::Max(maxc,tpos);
+  }
   for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
     geom::Vec3 tpos = tf.Apply(it->pos1);
     minc=geom::Min(minc,tpos);
@@ -49,24 +57,44 @@ void PrimList::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc,
     minc=geom::Min(minc,tpos);
     maxc=geom::Max(maxc,tpos);
   }
+  minc-=1.0;
+  maxc+=1.0;
 }
 
 geom::Vec3 PrimList::GetCenter() const
 {
   geom::Vec3 cen;
-  for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
-    cen+=it->pos1+it->pos2;
+  for(PointEntryList::const_iterator it=points_.begin();it!=points_.end();++it) {
+    cen+=it->pos;
   }
-  if(!lines_.empty()) {
-    cen*=0.5/static_cast<float>(lines_.size());
+  for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
+    cen+=0.5*(it->pos1+it->pos2);
+  }
+  if(!lines_.empty() || !points_.empty()) {
+    cen/=static_cast<float>(points_.size()+lines_.size());
   }
   return cen;
+}
+
+void PrimList::OnRenderModeChange()
+{
+  if(GetRenderMode()==RenderMode::CUSTOM) {
+    render_custom();
+  } else {
+    render_simple();
+  }
+  // this does not work
+  //GfxObj::OnRenderModeChange();
 }
 
 void PrimList::CustomPreRenderGL(bool flag)
 {
   if(flag) {
-    render_simple();
+    if(GetRenderMode()==RenderMode::CUSTOM) {
+      render_custom();
+    } else {
+      render_simple();
+    }
   } else {
     RefreshVA(va_);
   }
@@ -109,6 +137,13 @@ void PrimList::CustomRenderPov(PovState& pov)
 {
 }
 
+void PrimList::AddPoint(geom::Vec3& p, const Color& col)
+{
+  points_.push_back(PointEntry(p,col));
+  Scene::Instance().RequestRedraw();
+  FlagRebuild();
+}
+
 void PrimList::AddLine(geom::Vec3& p1, geom::Vec3& p2, const Color& col)
 {
   lines_.push_back(LineEntry(p1,p2,col));
@@ -119,6 +154,12 @@ void PrimList::AddLine(geom::Vec3& p1, geom::Vec3& p2, const Color& col)
 void PrimList::SetDiameter(float d)
 {
   diameter_=d;
+  Scene::Instance().RequestRedraw();
+}
+
+void PrimList::SetRadius(float r)
+{
+  radius_=r;
   Scene::Instance().RequestRedraw();
 }
 
@@ -140,14 +181,41 @@ void PrimList::render_simple()
   va_.SetLighting(false);
   va_.SetCullFace(false);
   va_.SetColorMaterial(false);
-  va_.SetMode(0x2);
+  va_.SetMode(0x3);
   va_.SetTwoSided(true);
   va_.SetAALines(GetAALines());
+
+  for(PointEntryList::const_iterator it=points_.begin();it!=points_.end();++it) {
+    va_.Add(it->pos,geom::Vec3(),it->color);
+  }
 
   for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
     VertexID id0 = va_.Add(it->pos1,geom::Vec3(),it->color);
     VertexID id1 = va_.Add(it->pos2,geom::Vec3(),it->color);
     va_.AddLine(id0,id1);
+  }
+}
+
+void PrimList::render_custom()
+{
+  va_.Clear();
+  va_.SetLighting(true);
+  va_.SetCullFace(true);
+  va_.SetColorMaterial(true);
+  va_.SetMode(0x4);
+
+  for(PointEntryList::const_iterator it=points_.begin();it!=points_.end();++it) {
+    va_.AddSphere(SpherePrim(it->pos, radius_, it->color),
+                  GetSphereDetail());
+  }
+
+  for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
+    va_.AddSphere(SpherePrim(it->pos1, diameter_/2.0, it->color),
+                  GetSphereDetail());
+    va_.AddSphere(SpherePrim(it->pos2, diameter_/2.0, it->color),
+                  GetSphereDetail());
+    va_.AddCylinder(CylinderPrim(it->pos1,it->pos2,diameter_/2.0,it->color),
+                    GetArcDetail());
   }
 }
 

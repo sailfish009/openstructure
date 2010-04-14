@@ -1,4 +1,5 @@
 uniform bool occlusion_flag;
+varying vec4 ambient_color;
 
 void main()
 {
@@ -14,14 +15,13 @@ void main()
   gl_TexCoord[0].stp=normal;
 
   if(occlusion_flag) {
-    // ambient color
-    gl_TexCoord[2] = gl_MultiTexCoord0;
-    gl_FrontColor.rgb = gl_MultiTexCoord0.xyz;
-    gl_BackColor.rgb = gl_MultiTexCoord0.xyz;
-    gl_FrontColor.a = gl_Color.a;
-    gl_BackColor.a = gl_Color.a;
+    // ambient occlusion and color terms
+    ambient_color = gl_MultiTexCoord0;
   } else {
-    gl_FrontColor=gl_Color;
-    gl_BackColor=gl_Color;
+    ambient_color.rgb = gl_Color;
+    ambient_color.a = 1.0;
   }
+  gl_FrontColor=gl_Color;
+  gl_BackColor=gl_Color;
 }
+

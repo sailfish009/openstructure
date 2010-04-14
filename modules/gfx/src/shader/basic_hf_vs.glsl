@@ -8,8 +8,8 @@ void main()
   vec4 sky_color=1.0*gl_Color;
 
   if(occlusion_flag) {
-    ground_color.rgb=0.2*gl_MultiTexCoord0.xyz;
-    sky_color.rgb=1.0*gl_MultiTexCoord0.xyz;
+    ground_color.rgb*=gl_MultiTexCoord0.w;
+    sky_color.rgb*=gl_MultiTexCoord0.w;
   }
 
   gl_Position = ftransform();

@@ -23,14 +23,19 @@ bool DirectionalLight(in vec3 normal,
                       inout vec4 specular,
                       inout bool lflag)
 {
-  float n_vp = max(0.0, dot(normal, normalize(vec3(gl_LightSource[0].position))));
-  float n_hv = max(0.0, dot(normal, vec3(gl_LightSource[0].halfVector)));
+  float n_vp = max(0.0, dot(normal, normalize(gl_LightSource[0].position.xyz)));
+
   lflag = n_vp>0.0;
   if(n_vp==0.0 && two_sided_flag) return false;
-  float pf = lflag ? pow(n_hv, shin) : 0.0;
+
+  float pf = 0.0;
+  if(n_vp>0.0 && shin>0.0) {
+    float n_hv = max(0.0, dot(normal, normalize(gl_LightSource[0].halfVector.xyz)));
+    pf=pow(n_hv, shin);
+  }
 
   ambient  += gl_LightSource[0].ambient;
-  diffuse  += gl_LightSource[0].diffuse*n_vp;
+  diffuse  += gl_LightSource[0].diffuse * n_vp;
   specular += gl_LightSource[0].specular * pf;
 
   return true;

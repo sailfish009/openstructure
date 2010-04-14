@@ -615,7 +615,7 @@ void GfxObj::AmbientOcclusion(bool f)
 {
   use_occlusion_=f;
   va_.UseAmbient(f);
-  //  FlagRefresh();
+  Scene::Instance().RequestRedraw();
 }
 
 void GfxObj::ColorBy(const mol::EntityView& ev, 
