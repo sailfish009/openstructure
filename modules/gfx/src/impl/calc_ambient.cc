@@ -59,7 +59,7 @@ namespace {
       minc[2]=std::min(static_cast<double>(it->v[2]),minc[2]);
       maxc[0]=std::max(static_cast<double>(it->v[0]),maxc[0]);
       maxc[1]=std::max(static_cast<double>(it->v[1]),maxc[1]);
-      maxc[2]=std::maxstatic_cast<double>((it->v[2]),maxc[2]);
+      maxc[2]=std::max(static_cast<double>(it->v[2]),maxc[2]);
 #else
       minc[0]=std::min(it->v[0],minc[0]);
       minc[1]=std::min(it->v[1],minc[1]);
