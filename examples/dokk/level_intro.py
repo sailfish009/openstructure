@@ -56,7 +56,6 @@ class LevelIntro(QtCore.QObject):
       self.text.color=self.text_list[self.cur_text][2]
       self.text.font.setPointSize(self.text_list[self.cur_text][3])
       self.text.Reset()
-      print (dokk.gl_win.Width()/2.0) - (len(self.text.text)*10)
     else:
       self.cur_text = -1
     self.cur_text+=1

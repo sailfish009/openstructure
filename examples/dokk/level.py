@@ -112,6 +112,7 @@ class Level(QtCore.QObject):
     return 1
   
   def Reset(self):
+    Dokk().gl_win.SetLockInput(True)
     self.endtime = 0
     self.stop_time = 0
     self._started = False
@@ -157,7 +158,14 @@ class Level(QtCore.QObject):
     self.UpdateScores()
     self.hud_level_intro.Start()
     self._started = True
-    self.emit(QtCore.SIGNAL("Started()"))    
+    self.emit(QtCore.SIGNAL("Started()"))
+    
+  def QuickBegin(self):
+    self.Reset()
+    self.UpdateScores()
+    self.hud_level_intro.QuickStart()
+    self._started = True
+    self.emit(QtCore.SIGNAL("Started()"))
     
   def Close(self):
     gfx.Scene().SetTransform(self.transform_)

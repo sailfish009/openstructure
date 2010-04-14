@@ -34,6 +34,10 @@ class Dokk(object):
     else:
       self._current_index +=1
   
+  def Restart(self):
+    self._current_index = -1
+    self.NextLevel()
+  
   def GetLevel(self):
     return self._current_level
   

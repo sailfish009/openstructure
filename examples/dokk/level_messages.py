@@ -39,12 +39,21 @@ class LevelMessages(QtCore.QObject):
 
   def Start(self):
     self.Reset()
+    self._Begin()
+    
+  def _Begin(self):
+    time = 0
+    if self.cur_text == 0:
+      time = self.total_time
+    else:
+      for i in range(self.cur_text,len(self.text_list)):
+        time += self.text_list[i][1]
     dokk = Dokk()
     font = QtGui.QFont("Verdana", 15);
     rect = QtCore.QRect(QtCore.QPoint(60, 60), QtCore.QSize(dokk.gl_win.Width()-120, dokk.gl_win.Height()-120))
     self.text = RectTextHUDObject(text="", rect=rect, time=0, font=font)
     QtCore.QObject.connect(self.text, QtCore.SIGNAL("Finished()"), self.NextMessage)
-    self.bg = RectHUDObject(self.total_time,rect, bg_color=QtGui.QColor(128,128,128,200))
+    self.bg = RectHUDObject(time,rect, bg_color=QtGui.QColor(128,128,128,200))
     dokk.gl_win.AddHUDObject(self.bg)
     dokk.gl_win.AddHUDObject(self.text)
   
@@ -70,7 +79,15 @@ class LevelMessages(QtCore.QObject):
 class LevelIntro(LevelMessages):
   def __init__(self, config, parent=None):
     LevelMessages.__init__(self,config.INTRO, parent)
+    try:
+      self.quick_start = int(config.INTRO["TEXT_QUICKSTART"])-1
+    except:
+      self.quick_start = 0
 
+  def QuickStart(self):
+    self.cur_text = self.quick_start
+    self._Begin()
+    
 class LevelEnd(LevelMessages):
   def __init__(self, messages, parent=None):
     LevelMessages.__init__(self,messages, parent)
