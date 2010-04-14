@@ -192,55 +192,58 @@ The img module was originally developed as part of the Image Processing Library 
 
 Before using the load functionality for an image, you have to import the io module. This is done by typing the following command in the python shell:
 
-    ::::python
-    from ost import io
+     ::::python
+     from ost import io
 
 To load a density map, type
 
-    map=io.LoadImage('OST_INSTALLATION_PATH/share/openstructure/examples/map/1ppt.map')
+     ::::python
+     map=io.LoadImage('OST_INSTALLATION_PATH/share/openstructure/examples/map/1ppt.map')
 
 This will load the fragment density map from the specified file 'fragment.map' and store the result in fragment_map.
 
 Now let's inspect what we just loaded:
 
     ::::python
-    print map.GetSampling()
-    # todo add more
-
-We can see that the sampling is set to X Angstroem in all three dimensions.
+    print map.GetPixelSampling()
+    
+We can see that the sampling is set to 1.0 Angstroems in all three dimensions.
 
 ## Manipulating  images and density maps
 
 The algorithms used for manipulation of an image are found in the img module. Therefore before using an algorithm we first have to import the img module.
 
     ::::python
-    from ost import img
+    from ost import img
 
 
 The img module provides a wide range of algorithm to manipulate image data. Here for the example we use a LowPassFilter to restrict the resolution of the density map.
 
-    map_filtered=map.Apply(img.alg.LowPassFilter(3.0))
+     ::::python
+     map_filtered=map.Apply(img.alg.LowPassFilter(3.0))
 
-The filtered map is stored in a new variable called fragment_map_filtered.
+The filtered map is stored in a new variable called fragment\_map\_filtered.
 
 
 ## Displaying images and density maps
 
+Now that we have a filtered map it's time to have a look at it. There are fundamentally two ways to visualize 3-dimensional density maps.
+One is by drawing isosurfaces. These are conceputally similar to contour lines used in cartography: every point on an isosurface has the same
+density value. Isosurfaces are easy to create in OpenStructure:
 
-Now that we have a filtered map it's time to have a look at it.
+     ::::python
+     go=gfx.MapIso("filtered", map_filtered,0.5)
+     scene.Add(go)
 
-todo: explain iso contouring
-
-    ::::python
-    go=gfx.MapIso("filtered", map_filtered,0.5)
-    scene.Add(go)
-
-
-
-todo: explain data viewer
+The other way to visualize a 3-dimensional map is by showing one 2-dimensional density slice at a time, allowing
+the user to move through the slices. In OpenStructure this is achieved using a DataViewer docs/tut/imgdataviewer.html). A DataViewer showing the
+filtered map is created using the following command:
 
     ::::python
     gui.CreateDataViewer(map_filtered)
 
+This command displays a panel showing one slice of the density map lying on a particular (x,y) plane in the coordinate reference system.
+The 'z' and 'x' keys can be used to move to slices lying at a lower or higher coordinate along the 'z' axis, allowing the examination of
+the full 3-dimensional volume.
 
-Are more detailed explanation of the img module can be found in the tutorial section for [images and density maps](tut/imgintro.html).
+Are more detailed explanation of the img module can be found in the tutorial section for [images and density maps](docs/tut/imgintro.html).
