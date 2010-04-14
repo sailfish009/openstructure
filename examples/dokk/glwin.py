@@ -116,29 +116,28 @@ class DokkGLCanvas(QGLWidget):
       self.dokk.NextLevel()
     elif event.key() == Qt.Key_Space:
       self.dokk.GetLevel().Begin()
-    
-    if not self._lock_input:
-      if event.key() == Qt.Key_Left or event.key() == Qt.Key_A:
+    elif event.key() == Qt.Key_Left or event.key() == Qt.Key_A:
         self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
         
-      elif event.key() == Qt.Key_Right or event.key() == Qt.Key_D:
-        self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
-        
-      elif event.key() == Qt.Key_Down or event.key() == Qt.Key_S:
-        self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
-        
-      elif event.key() == Qt.Key_Up or event.key() == Qt.Key_W:
-        self.OnTransform(gfx.INPUT_COMMAND_TRANSZ,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
-
-      elif event.key() == Qt.Key_Backspace:
+    elif event.key() == Qt.Key_Right or event.key() == Qt.Key_D:
+      self.OnTransform(gfx.INPUT_COMMAND_TRANSX,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
+      
+    elif event.key() == Qt.Key_Down or event.key() == Qt.Key_S:
+      self.OnTransform(gfx.INPUT_COMMAND_TRANSY,0, gfx.TRANSFORM_VIEW, -TRANS_VAL)
+      
+    elif event.key() == Qt.Key_Up or event.key() == Qt.Key_W:
+      self.OnTransform(gfx.INPUT_COMMAND_TRANSY,0, gfx.TRANSFORM_VIEW, TRANS_VAL)
+    
+    elif event.key() == Qt.Key_E and self._lock_input:
+      self.dokk.GetLevel().Solve()
+    
+    if not self._lock_input:
+      if event.key() == Qt.Key_Backspace:
         self.dokk.GetLevel().Reset()
     
       elif event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
         self.dokk.GetLevel().Finished()
-        
-      elif event.key() == Qt.Key_E:
-        self.dokk.GetLevel().Solve()
-        
+                
       elif event.key() == Qt.Key_R:
         self.dokk.GetLevel().ResetPos()
     
