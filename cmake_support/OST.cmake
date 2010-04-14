@@ -431,11 +431,11 @@ macro(pymod)
           endforeach()
           install(FILES ${_ABS_PY_FILES} DESTINATION
                   "${LIB_DIR}/${PYMOD_DIR}/${_DIR}")
-          set(_D "${_HEADER_OUTPUT_DIR}/${_DIR}")
-          add_custom_target("${_ARG_NAME}_${_DIR}_pymod" ALL)
+          string(REPLACE "/" "_" _DIR_NO_SLASH "${_DIR}")
+          add_custom_target("${_ARG_NAME}_${_DIR_NO_SLASH}_pymod" ALL)
           copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}" 
                             "${_ABS_PY_FILES}" "TARGETS"
-                            "${_ARG_NAME}_${_DIR}_pymod")
+                            "${_ARG_NAME}_${_DIR_NO_SLASH}_pymod")
           set(_PY_FILES)
         else()
           list(APPEND _PY_FILES "${_PY_FILE}")
