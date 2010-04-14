@@ -81,7 +81,7 @@ class LevelDetails(QtCore.QObject):
     self.hud_bg = None
     
   def Start(self):
-    name_len = len(self.name)
+    name_len = max(len(self.name),len(self.difficulty)/2)
     xpos = dokk.Dokk().gl_win.Width()/2 - (name_len*30)/2
     rect = QtCore.QRect(QtCore.QPoint(xpos, 55), QtCore.QSize(name_len*30, 105))
     self.hud_bg = RectHUDObject(-1,rect, bg_color=QtGui.QColor(128,128,128,200))

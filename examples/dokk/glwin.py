@@ -55,7 +55,12 @@ class DokkGLCanvas(QGLWidget):
     painter.setPen(QPen(QColor(255,255,255), Qt.SolidLine))
     painter.setFont(QFont("Verdana",20))
     painter.drawText(QPoint(10, 25), "Sie sind %.1f von der Lösung entfernt" % self.dokk.GetLevel().GetRMSD())
-    painter.drawText(QPoint(self.width()-230, 25), "noch %.0f sekuden" % self.dokk.GetLevel().GetRemainingTime())
+    if self.dokk.GetLevel().IsStarted():
+      time_col=self.dokk.GetLevel().GetRemainingTime()/10
+      if time_col>1:
+        time_col=1
+      painter.setPen(QPen(QColor(255,255*time_col,255*time_col), Qt.SolidLine))
+    painter.drawText(QPoint(self.width()-250, 25), "noch %.0f Sekunden" % self.dokk.GetLevel().GetRemainingTime())
     if self.hud is not None:
       self.hud.Paint(painter)
     self.dokk.GetLevel().CheckSolved()
