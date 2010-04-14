@@ -1,3 +1,5 @@
+# -*- coding: iso-8859-15 -*-
+
 import math
 from ost import gfx
 from PyQt4.QtGui import *
@@ -52,8 +54,8 @@ class DokkGLCanvas(QGLWidget):
     painter.drawRect(QRect(QPoint(0, 0), QSize(self.width(), 35)))
     painter.setPen(QPen(QColor(255,255,255), Qt.SolidLine))
     painter.setFont(QFont("Verdana",20))
-    painter.drawText(QPoint(10, 25), "You are %.1f away from the solution" % self.dokk.GetLevel().GetRMSD())
-    painter.drawText(QPoint(self.width()-230, 25), "%.0f seconds left" % self.dokk.GetLevel().GetRemainingTime())
+    painter.drawText(QPoint(10, 25), "Sie sind %.1f von der Lösung entfernt" % self.dokk.GetLevel().GetRMSD())
+    painter.drawText(QPoint(self.width()-230, 25), "noch %.0f sekuden" % self.dokk.GetLevel().GetRemainingTime())
     if self.hud is not None:
       self.hud.Paint(painter)
     self.dokk.GetLevel().CheckSolved()
