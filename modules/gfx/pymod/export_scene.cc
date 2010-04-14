@@ -72,7 +72,6 @@ void export_Scene()
   void (Scene::*center_on1)(const String&) = &Scene::CenterOn;
   void (Scene::*center_on2)(const GfxObjP&) = &Scene::CenterOn;
 
-
   class_<Scene, boost::noncopyable>("SceneSingleton",no_init)
     .def("Add", &Scene::Add, 
          scene_add_overloads())
@@ -106,6 +105,7 @@ void export_Scene()
     .def("GetFOV",&Scene::GetFOV)
     .def("SetFogOffsets",&Scene::SetFogOffsets)
     .def("Stereo",&Scene::Stereo)
+    .def("SetStereoInverted",&Scene::SetStereoInverted)
     .def("Apply", apply)
     .def("SetStereoEye",&Scene::SetStereoEye)
     .def("SetLightDir",&Scene::SetLightDir)

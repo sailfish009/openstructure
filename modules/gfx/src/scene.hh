@@ -155,11 +155,15 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief switch stereo mode
   /*
     0=off
-    1=quad-buffered (unsupported)
+    1=quad-buffered
     2=interlaced variant #1
     3=interlaced variant #2
   */
   void Stereo(unsigned int);
+
+  /// \brief invert stereo eyes for stereo mode=0
+  void SetStereoInverted(bool f);
+
   /// \brief eye mode, 0=center, 1=left, 2=right
   void SetStereoEye(unsigned int);
 
@@ -393,6 +397,7 @@ private:
   std::vector<boost::shared_array<unsigned char> > blur_buffer_;
   GLuint  glow_tex_;
   unsigned int stereo_;
+  bool stereo_inverted_;
   unsigned int stereo_eye_;
   float stereo_eye_dist_,stereo_eye_offset_;
 

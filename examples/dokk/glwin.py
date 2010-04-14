@@ -169,6 +169,7 @@ class DokkGLWin(gfx.GLWinBase):
         self.canvas.show()
         
     def SetStereo(self, mode):
+      gfx.Scene().SetStereoInverted(True)
       gfx.Scene().Stereo(mode)
     
     def SetLockInput(self, lock):
