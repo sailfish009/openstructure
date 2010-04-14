@@ -246,7 +246,6 @@ void TraceRenderer::RenderPov(PovState& pov, const std::string& name)
     Color col0=nl[0].color1;
     pov.write_sphere(p0,rad0,col0,name);
     for (int i=1; i<nl.GetSize();++i) {
-      const NodeEntry& entry=nl[i];
       geom::Vec3 p1=nl[i].atom.GetPos();
       float rad1=0.2;
       Color col1=nl[i].color1;
