@@ -40,8 +40,6 @@ def _InitSpaceNav(parent):
   try:
     spnav = gui.SpnavInput.GetQThread()
     spnav.start()
-    snc=SpacenavControl(spnav,parent)
-    gfx.Scene().AutoAutoslab(False)
-    gfx.Scene().SetNearFar(1,10000)
+    SpacenavControl(spnav,parent)
   except AttributeError:
     pass
