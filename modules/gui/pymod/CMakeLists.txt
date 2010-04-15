@@ -75,6 +75,7 @@ endif()
 set(OST_GUI_PYMOD_MODULES
   __init__.py
   init_menubar.py
+  init_spacenav.py
 )
 
 pymod(NAME gui CPP ${OST_GUI_PYMOD_SOURCES} 

@@ -85,6 +85,17 @@ object panels_get_menu(Panels* panels)
   return menu;
 }
 
+object panels_get_qwidget(Panels* panels)
+{
+  static object sip_module=import("sip");
+  static object pyqt4_module=import("PyQt4.QtGui");
+  object sip_handle((size_t)panels);
+  object qwidget = pyqt4_module.attr("QWidget");
+  object widget = sip_module.attr("wrapinstance")(sip_handle, qwidget);
+
+  return widget;
+}
+
 void panel_bar_add_widget(PanelBar * pb, const SipHandlerBase& sh, bool hidden)
 {
   pb->AddWidget(reinterpret_cast<Widget*>(sh.GetSipHandle()),hidden);
@@ -111,11 +122,13 @@ void export_PanelBar()
     .def("RemoveWidget", &panels_remove_widget_a)
     .def("RemoveWidget", &panels_remove_widget_b)
     .def("GetMenu", &panels_get_menu)
+    .def("GetQWidget", &panels_get_qwidget)
     .def("AddWidgetToPool", &panels_add_widget_to_pool_a)
     .def("AddWidgetToPool", &panels_add_widget_to_pool_b)
     .def("Save", &Panels::Save)
     .def("Restore", &Panels::Restore)
     .add_property("menu", &panels_get_menu)
+    .add_property("qwidget", &panels_get_qwidget)
   ;
 
   class_<PanelBar, boost::noncopyable>("PanelBar", no_init)

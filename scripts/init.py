@@ -17,6 +17,7 @@ import httplib
 from PyQt4 import QtGui, QtCore
 from ost.gui.scene.init_inspector import _InitInspector
 from ost.gui.init_menubar import _InitMenuBar
+from ost.gui.init_spacenav import _InitSpaceNav
 
 def _InitRuleBasedBuilder():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
@@ -50,6 +51,7 @@ def _InitFrontEnd():
   main_area=app.perspective.main_area
   _InitPanels(app, app.perspective.panels)
   _InitMenuBar(app.perspective.GetMenuBar())
+  _InitSpaceNav(app.perspective.panels.qwidget)
   main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win, int(QtCore.Qt.WindowMaximized))
   app.perspective.Restore()
   additional_modules=getattr(__main__, 'ADDITIONAL_GUI_MODULES', [])
