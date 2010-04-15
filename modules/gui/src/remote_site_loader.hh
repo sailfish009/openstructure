@@ -35,8 +35,8 @@ class DLLEXPORT_OST_GUI RemoteSiteLoader{
 
 public:
   RemoteSiteLoader();
-  virtual QNetworkReply* ById(const QString& id);
-  virtual void LoadById(const QString& id);
+  virtual QNetworkReply* ById(const QString& id, const QString& selection=QString());
+  virtual void LoadById(const QString& id, const QString& selection=QString());
   virtual QString GetRemoteSiteName();
   virtual bool IsImg() const;
   virtual ~RemoteSiteLoader(){};
