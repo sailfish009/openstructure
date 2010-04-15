@@ -44,7 +44,7 @@ class Ligand:
     self.go.UpdatePositions()
 
   def Shift(self, vec):
-    if self.__IsInside(self.GetCenter()+vec):
+    if self.__IsInside(vec):
       trans=geom.Mat4()
       trans.PasteTranslation(vec)
       edi=self.handle.RequestXCSEditor()    
@@ -60,14 +60,14 @@ class Ligand:
       center=self.pivot_.GetPos()
     trans.PasteTranslation(-center)
     trans2=geom.Mat4()
-    trans2_vec = center+((tf.GetTrans())*gfx.Scene().GetTransform().GetRot())
+    trans2_vec = ((tf.GetTrans())*gfx.Scene().GetTransform().GetRot())
     if self.__IsInside(trans2_vec):
+      trans2_vec = center + trans2_vec
       trans2.PasteTranslation(trans2_vec)
-    else:
-      trans2.PasteTranslation(center)
-    full_tf = trans2*rot*trans
-    edi.ApplyTransform(full_tf)
-    self.go.UpdatePositions()
+      full_tf = trans2*rot*trans
+      edi.ApplyTransform(full_tf)
+      self.go.UpdatePositions()
+
 
   def RMSDToSolution(self):
     return alg.CalculateRMSD(self.handle.CreateFullView(), 
@@ -97,8 +97,10 @@ class Ligand:
     del(self.go)
     
   def __IsInside(self, vec):
-    if vec[0]< self.box_max[0] and vec[0]> self.box_min[0] and \
-     vec[1]< self.box_max[1] and vec[1]> self.box_min[1] and \
-     vec[2]< self.box_max[2] and vec[2]> self.box_min[2] :
+    center = self.GetCenter()
+    rad = 1
+    if center[0] + rad + vec[0] < self.box_max[0] and center[0] - rad + vec[0] > self.box_min[0] and \
+     center[1] + rad + vec[1] < self.box_max[1] and center[1] - rad + vec[1] > self.box_min[1] and \
+     center[2] + rad + vec[2] < self.box_max[2] and center[2] - rad + vec[2] > self.box_min[2] :
       return True
     return False

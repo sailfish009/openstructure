@@ -34,9 +34,7 @@ class LevelMessages(QtCore.QObject):
         size = default_size
       
       try:
-        print "TEST IMG"
         img = config_map["TEXTIMG%s"%i]
-        print img
       except:
         img = None
       
@@ -82,7 +80,6 @@ class LevelMessages(QtCore.QObject):
       self.text.font.setPointSize(self.text_list[self.cur_text][3])
       self.text.Reset()
       
-      print self.text_list[self.cur_text][4]
       if(self.text_list[self.cur_text][4]):
         self.img.img = QtGui.QImage(self.text_list[self.cur_text][4])
         hw=self.img.img.width()/2.0
