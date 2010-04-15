@@ -30,6 +30,7 @@ class Level(QtCore.QObject):
         
     Dokk().gl_win.SetLockInput(True)
     self._started = False
+    self._intro_done = False
     self.emit(QtCore.SIGNAL("Stopped()"))
     
   def Load(self):
@@ -116,6 +117,7 @@ class Level(QtCore.QObject):
     self.endtime = 0
     self.stop_time = 0
     self._started = False
+    self._intro_done = False
     self.timer.stop()
     self.CleanHUD()
     self.ResetPos()
@@ -152,6 +154,7 @@ class Level(QtCore.QObject):
       else:
         self.hud_level_end_ntt.Start()
     self._started = False
+    self._intro_done = False
 
   def Begin(self):
     self.Reset()
@@ -183,12 +186,16 @@ class Level(QtCore.QObject):
     
   def IsStarted(self):
     return self._started
+
+  def IsIntroDone(self):
+    return self._intro_done
   
   def _IntroEnd(self):
     if self._started:
       Dokk().gl_win.SetLockInput(False)
       self.timer.start(int(self.config.Level["TIME"]))
       self.endtime = float(time.time()+(int(self.config.Level["TIME"]))/1000.0)
+      self._intro_done = True
       self.emit(QtCore.SIGNAL("Started()"))
       
   def _FinishEnd(self):
