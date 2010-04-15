@@ -131,7 +131,7 @@ void MapIso::CustomPreRenderGL(bool flag)
   if(flag) {
     Rebuild();
   } else {
-    RefreshVA(va_);
+    //RefreshVA(va_);
   }
 }
 

@@ -306,6 +306,7 @@ void Scene::SetCenter(const Vec3& cen)
   float delta_z = tcen[2]-transform_.GetTrans()[2];
 
   transform_.SetCenter(cen);
+  transform_.SetTrans(Vec3(0,0,transform_.GetTrans()[2]));
   SetNearFar(znear_+delta_z,zfar_+delta_z);
   RequestRedraw();  
 }

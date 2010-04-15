@@ -213,57 +213,34 @@ namespace {
       CMap::iterator mit=cmap_.find(cindex);
       if(mit==cmap_.end()) return;
       for(std::vector<CEntry>::const_iterator eit=mit->second.begin();eit!=mit->second.end();++eit) {
-        //std::cerr << " comparing with v=" << eit->v0 << std::endl;
         geom::Vec3 dir0=(eit->v0-ce.v0); // vector from reference entry to current entry
         float l2=geom::Length2(dir0);
-        if(l2>cutoff2 || l2<0.01) {
-          //std::cerr << "  MISS: l2 failed: " << l2 << std::endl;
-          continue;
-        }
+        if(l2>cutoff2 || l2<0.01) continue;
+
         dir0=geom::Normalize(dir0);
 
-        //std::cerr << "  dir0=" << dir0 << " dot=" << geom::Dot(dir0,ce.n) << std::endl;
-
-        if(geom::Dot(dir0,ce.n)<1e-6) { 
-          //std::cerr << "  MISS: dir0 points to back" << std::endl;
-          continue;
-        }
-
-        geom::Vec3 dir1=geom::Normalize(eit->v1-ce.v0); // vector from reference entry to corner 1
-        geom::Vec3 dir2=geom::Normalize(eit->v2-ce.v0); // vector from reference entry to corner 2
-        geom::Vec3 dir3=geom::Normalize(eit->v3-ce.v0); // vector from reference entry to corner 3
-        geom::Vec3 dir4=geom::Normalize(eit->v4-ce.v0); // vector from reference entry to corner 4
-
-        //std::cerr << "  v1=" << eit->v1 << std::endl;
-        //std::cerr << "  v2=" << eit->v2 << std::endl;
-        //std::cerr << "  v3=" << eit->v3 << std::endl;
-        //std::cerr << "  v4=" << eit->v4 << std::endl;
+        if(geom::Dot(dir0,ce.n)<1e-6) continue;
 
         // largest opening angle from reference entry to corners
         float a0=1.0;
         if(eit->type==3) {
-          a0 = (geom::Dot(dir0,dir1)+geom::Dot(dir0,dir2)+geom::Dot(dir0,dir3))/3.0;
+          a0 = (geom::Dot(dir0,geom::Normalize(eit->v1-ce.v0))+
+                geom::Dot(dir0,geom::Normalize(eit->v2-ce.v0))+
+                geom::Dot(dir0,geom::Normalize(eit->v3-ce.v0)))/3.0;
         } else if(eit->type==4) {
-          a0 = (geom::Dot(dir0,dir1)+geom::Dot(dir0,dir2)+geom::Dot(dir0,dir3)+geom::Dot(dir0,dir4))/4.0;
+          a0 = (geom::Dot(dir0,geom::Normalize(eit->v1-ce.v0))+
+                geom::Dot(dir0,geom::Normalize(eit->v2-ce.v0))+
+                geom::Dot(dir0,geom::Normalize(eit->v3-ce.v0))+
+                geom::Dot(dir0,geom::Normalize(eit->v4-ce.v0)))/4.0;
         }
-        //std::cerr << "  a0=" << a0 << std::endl;
+
         for(std::vector<RayEntry>::iterator rit=rays_.begin();rit!=rays_.end();++rit) {
-          //std::cerr << "   ray " << rit->v << std::endl;
-          if(rit->back) {
-            //std::cerr << "    MISS: points to back" << std::endl;
-            continue;
-          }
+          if(rit->back) continue;
           if(geom::Dot(ce.n,rit->v)<1e-6) {
             rit->back=true;
-            //std::cerr << "    MISS: points to back" << std::endl;
             continue;
           }
-          //std::cerr << "    dot(dir0,ray)=" << geom::Dot(dir0,rit->v) << std::endl;
-          if(geom::Dot(dir0,rit->v)<a0) {
-            //std::cerr << "    MISS: outside" << std::endl;
-            continue;
-          }
-          //std::cerr << "    HIT" << std::endl;
+          if(geom::Dot(dir0,rit->v)<a0) continue;
           if(rit->d2<l2) continue;
           rit->d2=l2;
           rit->c=eit->c;
@@ -277,16 +254,12 @@ namespace {
       const IndexList& tlist = va_.GetTriIndices();
       const IndexList& qlist = va_.GetQuadIndices();
       float cutoff2=cutoff_*cutoff_;
+      float isig2 = 1.0/(2.0*2.0*cutoff_/3.0*cutoff_/3.0);
 
       std::vector<std::pair<geom::Vec4, int> > entry_accum(elist.size());
       
       for(CMap::iterator mit=cmap_.begin();mit!=cmap_.end();++mit) {
         for(CList::iterator lit=mit->second.begin();lit!=mit->second.end();++lit) {
-          //std::cerr << "working on v=" << lit->v0 << " n=" << lit->n << std::endl;
-          //std::cerr << " v1=" << lit->v1 << std::endl;
-          //std::cerr << " v2=" << lit->v2 << std::endl;
-          //std::cerr << " v3=" << lit->v3 << std::endl;
-          //std::cerr << " v4=" << lit->v4 << std::endl;
           // reset rays
           for(std::vector<RayEntry>::iterator rit=rays_.begin();rit!=rays_.end();++rit) {
             rit->d2=cutoff2;
@@ -302,51 +275,55 @@ namespace {
             }
           }
 
-          float kA=0.0;
-          float kS=0.0;
-          geom::Vec3 col(0.0,0.0,0.0);
-          unsigned int miss_count=0;
-          unsigned int back_count=0;
-          unsigned int hit_count=0;
+          // sum up ray contributions
+          float occl=0.0;
+          float occl_sum=0.0;
+          geom::Vec4 col(0.0,0.0,0.0,0.0);
+          float col_weight_sum=0.0;
           for(std::vector<RayEntry>::iterator rit=rays_.begin();rit!=rays_.end();++rit) {
             if(!rit->back) {
-              float ca=geom::Dot(rit->v,lit->n);
-              kS += ca;
+              float ca=std::max(Real(0.0),geom::Dot(rit->v,lit->n));
+              occl_sum += ca;
               if(!rit->hit) {
-                kA += ca;
-                col[0] += rit->c[0];
-                col[1] += rit->c[1];
-                col[2] += rit->c[2];
-                ++miss_count;
+                occl += ca;
+                float col_weight=exp(-rit->d2*isig2);
+                col[0] += col_weight*rit->c[0];
+                col[1] += col_weight*rit->c[1];
+                col[2] += col_weight*rit->c[2];
+                col_weight_sum+=col_weight;
               }
             }
-            if(rit->back) ++back_count;
-            if(rit->hit) ++hit_count;
           }
-          float amb=kA/kS;
-          if(miss_count>0) {
-            col*=1.0f/static_cast<float>(miss_count);
-          }
-          //std::cerr << " hits=" << hit_count << ", miss=" << miss_count << ", back=" << back_count << " (" << rays_.size() << "), kA= " << kA << ", kS=" << kS << ", amb=" << amb << std::endl;
+          if(occl_sum>0.0) occl/=occl_sum;
+          if(col_weight_sum>0.0) col/=col_weight_sum;
 
+          col[3]=occl;
           if(lit->type==3) {
-            // please provide a Vec explicit float ctor in double-precision mode
-            // instead of typecasting here
-            entry_accum[tlist[lit->id+0]].first+=geom::Vec4(col[0],col[1],col[2],amb);
-            entry_accum[tlist[lit->id+1]].first+=geom::Vec4(col[0],col[1],col[2],amb);
-            entry_accum[tlist[lit->id+2]].first+=geom::Vec4(col[0],col[1],col[2],amb);
-            ++entry_accum[tlist[lit->id+0]].second;
-            ++entry_accum[tlist[lit->id+1]].second;
-            ++entry_accum[tlist[lit->id+2]].second;
+            unsigned int litid=lit->id;
+            /*
+            entry_accum[tlist[litid+0]].first+=col;
+            entry_accum[tlist[litid+0]].second+=1;
+            entry_accum[tlist[litid+1]].first+=col;
+            entry_accum[tlist[litid+1]].second+=1;
+            entry_accum[tlist[litid+2]].first+=col;
+            entry_accum[tlist[litid+2]].second+=1;
+            */
+            std::pair<geom::Vec4,int>* e=&entry_accum[tlist[litid++]];
+            e->first+=col; ++e->second;
+            e=&entry_accum[tlist[litid++]];
+            e->first+=col; ++e->second;
+            e=&entry_accum[tlist[litid++]];
+            e->first+=col; ++e->second;
           } else if(lit->type==4) {
-            entry_accum[qlist[lit->id+0]].first+=geom::Vec4(col[0],col[1],col[2],amb);
-            entry_accum[qlist[lit->id+1]].first+=geom::Vec4(col[0],col[1],col[2],amb);
-            entry_accum[qlist[lit->id+2]].first+=geom::Vec4(col[0],col[1],col[2],amb);
-            entry_accum[qlist[lit->id+3]].first+=geom::Vec4(col[0],col[1],col[2],amb);
-            ++entry_accum[qlist[lit->id+0]].second;
-            ++entry_accum[qlist[lit->id+1]].second;
-            ++entry_accum[qlist[lit->id+2]].second;
-            ++entry_accum[qlist[lit->id+3]].second;
+            unsigned int litid=lit->id;
+            std::pair<geom::Vec4,int>* e=&entry_accum[qlist[litid++]];
+            e->first+=col; ++e->second;
+            e=&entry_accum[qlist[litid++]];
+            e->first+=col; ++e->second;
+            e=&entry_accum[qlist[litid++]];
+            e->first+=col; ++e->second;
+            e=&entry_accum[qlist[litid++]];
+            e->first+=col; ++e->second;
           }
         }
       }

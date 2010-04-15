@@ -87,64 +87,15 @@ void GfxView::AddBond(const BondHandle& b)
 }
 
 
-void SplineEntry::ToQuat()
-{
-  // assert orthonormal system
-  // TODO: this seems broken
-  geom::Vec3 dir = geom::Normalize(direction);
-  geom::Vec3 norm0 = geom::Normalize(normal);
-  geom::Vec3 norm2 = geom::Cross(dir,norm0);
-  geom::Vec3 norm1 = geom::Cross(norm2,dir);
-  geom::Mat3 rmat(dir[0],norm1[0],norm2[0],
-                  dir[1],norm1[1],norm2[1],
-                  dir[2],norm1[2],norm2[2]);
-  
-  geom::Quat quat(rmat);
-  quat_value[0]=quat.w;
-  quat_value[1]=quat.x;
-  quat_value[2]=quat.y;
-  quat_value[3]=quat.z;
-}
-
-void SplineEntry::FromQuat() 
-{
-  /* 
-     assert orthornormal system since direction was
-     probably adjusted for curvature
-  */
-  // TODO: this seems broken
-  geom::Quat quat(quat_value[0],quat_value[1],quat_value[2],quat_value[3]);
-  geom::Mat3 rmat = quat.ToRotationMatrix();
-  geom::Vec3 norm0 = geom::Normalize(geom::Vec3(rmat(0,1),rmat(1,1),rmat(2,1)));
-  geom::Vec3 dir = geom::Normalize(direction);
-  geom::Vec3 norm2 = geom::Normalize(geom::Cross(dir,norm0));
-  normal = geom::Normalize(geom::Cross(norm2,dir));
-}
-
 ////////////////////////////
 
-
-Spline::Spline():
-  entry_list_()
-{}
-
-
-SplineEntry& Spline::AddEntry(const geom::Vec3& pos, const geom::Vec3& dir, const geom::Vec3& normal, float rad, const Color& c1, const Color& c2, int type)
-{
-  entry_list_.push_back(SplineEntry(pos,
-                                    geom::Normalize(dir),
-                                    geom::Normalize(normal),
-                                    rad,c1,c2,type));
-  entry_list_.back().ToQuat();
-  return entry_list_.back();
-}
 
 static int bsplineGen(float *x,float *y, int n, float yp1, float ypn, float *y2);
 static int bsplineGet(float *xa, float *ya, float *y2a, int n, float x, float *y);
 
 #define SPLINE_ENTRY_INTERPOLATE(COMPONENT)             \
     for(int c=0;c<size;++c) {                           \
-      yc[c]=entry_list_[c]. COMPONENT ;                 \
+      yc[c]=entry_list[c]. COMPONENT ;                 \
     }                                                   \
     bsplineGen(xp,yp,size,1.0e30,1.0e30,y2p);           \
     for(int c=0;c<size;++c) {                           \
@@ -156,14 +107,14 @@ static int bsplineGet(float *xa, float *ya, float *y2a, int n, float x, float *y
       }                                                 \
     }                                                   
 
-SplineEntryList Spline::Generate(int nsub) const
+SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
 {
   if(nsub<=0) {
-    return entry_list_;
+    return entry_list;
   }
-  int size=entry_list_.size();
+  int size=entry_list.size();
   if (size==0) {
-    return entry_list_;
+    return entry_list;
   }
   int ipsize=(size)*nsub;
   float i_nsub=1.0/static_cast<float>(nsub);
@@ -184,9 +135,8 @@ SplineEntryList Spline::Generate(int nsub) const
   // create sublist with enough entries
   SplineEntryList sublist(ipsize);
 
-  // interpolate internal quaternion and color
+  // interpolate color
   for(int k=0;k<4;++k) {
-    SPLINE_ENTRY_INTERPOLATE(quat_value[k]);
     SPLINE_ENTRY_INTERPOLATE(color1[k]);
     SPLINE_ENTRY_INTERPOLATE(color2[k]);
   }
@@ -263,21 +213,21 @@ SplineEntryList Spline::Generate(int nsub) const
   // finally the non-interpolated type
   // with some tweaks for proper strand rendering
   for(int c=0;c<size;++c) {
+    int type1=entry_list[c].type;
+    int type2=entry_list[std::min(c+1,size-1)].type;
+    //int type0=entry_list[std::max(0,c-1)].type;
+    if(type1==2 && type2==3) {
+      type1=2;
+      type2=2;
+    } else if(type1==3) {
+      type1=4;
+      // uncommenting this causes the strand arrows
+      // to blend into a tip instead of the n+1
+      // profile - gives visual artefacts
+      //type2=3;
+    }
     for(int d=0;d<nsub;++d) {
-      sublist[c*nsub+d].type=entry_list_[c].type;
-      int type1=entry_list_[c].type;
-      int type2=entry_list_[std::min(c+1,size-1)].type;
-      //int type0=entry_list_[std::max(0,c-1)].type;
-      if(type1==2 && type2==3) {
-        type1=2;
-        type2=2;
-      } else if(type1==3) {
-        type1=4;
-        // uncommenting this causes the strand arrows
-        // to blend into a tip instead of the n+1
-        // profile - gives visual artefacts
-        //type2=3;
-      }
+      sublist[c*nsub+d].type=entry_list[c].type;
       sublist[c*nsub+d].type1=type1;
       sublist[c*nsub+d].type2=type2;
       sublist[c*nsub+d].frac=float(d)/float(nsub);

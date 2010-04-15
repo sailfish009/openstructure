@@ -50,8 +50,9 @@ public:
   
   void SetView(const mol::EntityView& ent);
   
-  // used internally
   void AddNodeList(const NodeEntryList& entries);  
+
+  static void PrepList(NodeEntryList& nelist);
   
   void Rebuild();
   

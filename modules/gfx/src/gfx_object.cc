@@ -148,8 +148,12 @@ void GfxObj::CustomPreRenderGL(bool flag) {}
 
 void GfxObj::CustomRenderPov(PovState& pov) {}
 
+/* 
+  this should not be necessary anymore
+
 void GfxObj::RefreshVA(IndexedVertexArray& va)
 {
+
   va.SetLineWidth(GetLineWidth());
   va.SetPolyMode(GetPolyMode());
   va.SetAALines(GetAALines());
@@ -159,6 +163,7 @@ void GfxObj::RefreshVA(IndexedVertexArray& va)
   va.UseAmbient(use_occlusion_);
   va.FlagRefresh();
 }
+*/
 
 void GfxObj::OnInput(const InputEvent& e) 
 {
@@ -276,6 +281,7 @@ void GfxObj::OnRenderModeChange()
 
 void GfxObj::SetLineWidth(float w)
 {
+  va_.SetLineWidth(w);
   line_width_=std::max(float(0.01),w);
   FlagRefresh();
   Scene::Instance().RenderModeChanged(GetName());
@@ -326,6 +332,7 @@ void GfxObj::SetPolyMode(unsigned int m)
 {
   if(m==poly_mode_) return;
   poly_mode_=std::min((unsigned int)2,m);
+  va_.SetPolyMode(poly_mode_);
   FlagRefresh();
 }
 
@@ -337,6 +344,7 @@ unsigned int GfxObj::GetPolyMode() const
 void GfxObj::SetAALines(bool f)
 {
   if(f==aalines_flag_) return;
+  va_.SetAALines(f);
   aalines_flag_=f;
   FlagRefresh();
 }
@@ -348,6 +356,7 @@ bool GfxObj::GetAALines() const
 
 void GfxObj::SetLineHalo(float f)
 {
+  va_.SetLineHalo(f);
   line_halo_=f;
   FlagRefresh();
 }
@@ -613,8 +622,19 @@ void GfxObj::SmoothVertices(float smoothf)
 
 void GfxObj::AmbientOcclusion(bool f)
 {
-  use_occlusion_=f;
   va_.UseAmbient(f);
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::AmbientLocalWeight(float w)
+{
+  va_.AmbientLocalWeight(w);
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::AmbientOcclusionWeight(float w)
+{
+  va_.AmbientOcclusionWeight(w);
   Scene::Instance().RequestRedraw();
 }
 
@@ -759,6 +779,11 @@ void GfxObj::AppendColorOp(gfx::ColorOp* op){
 
 void GfxObj::CleanColorOps(){
   c_ops_.release();
+}
+
+void GfxObj::Debug(unsigned int flags)
+{
+  va_.DrawNormals(flags & 0x1);
 }
 
 }} // ns

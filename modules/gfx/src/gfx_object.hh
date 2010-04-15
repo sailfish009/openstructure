@@ -195,10 +195,18 @@ public:
   void SetOutlineExpandFactor(float f);
   void SetOutlineExpandColor(const Color& c);
 
+  /// \brief ambient occlusion rendering
+  /// results are cached, but may be very slow on first call 
+  void AmbientOcclusion(bool f);
+  
+  /// \brief blending weight of local color to fragment color
+  void AmbientLocalWeight(float w);
+
+  /// \brief blending weight of occlusion factor
+  void AmbientOcclusionWeight(float w);
+
   // experimental, don't use
   void SmoothVertices(float smoothf);
-  // experimental, don't use
-  void AmbientOcclusion(bool f);
  
   void GLCleanup();
 
@@ -256,16 +264,15 @@ public:
                const Color& c1, const Color& c2, float minv, float maxv);  
 #endif
 
-  void Debug(unsigned int flags) {debug_flags_=flags; RefreshVA();}
+  void Debug(unsigned int flags);
 
  protected:
   
   void PreRenderGL(bool flag);
   virtual void CustomPreRenderGL(bool flag);
 
-  void RefreshVA(IndexedVertexArray& va);
-
-  virtual void RefreshVA() {RefreshVA(va_);}
+  //void RefreshVA(IndexedVertexArray& va);
+  //virtual void RefreshVA() {RefreshVA(va_);}
   
  private:
   GfxObj(const GfxObj& o);

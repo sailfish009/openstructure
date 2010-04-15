@@ -18,6 +18,10 @@
 //------------------------------------------------------------------------------
 #include "cartoon_renderer.hh"
 
+#include <Eigen/Core>
+#include <Eigen/Array>
+#include <Eigen/SVD>
+#include <Eigen/LU>
 
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/impl/tabulated_trig.hh>
@@ -34,18 +38,84 @@ CartoonRenderer::CartoonRenderer(BackboneTrace& trace, bool force_tube):
   TraceRendererBase(trace, 3),   force_tube_(force_tube),
   options_(new CartoonRenderOptions(force_tube))
 {
-if(force_tube){
-  this->SetName("Smooth Tube");
-}
-else{
-  this->SetName("Helix & Strand Cartoon");
-}
+  this->SetName(force_tube ? "Smooth Tube" : "Helix & Strand Cartoon");
 }
 
 void CartoonRenderer::SetForceTube(bool force_tube)
 {
   force_tube_ = force_tube;
 }
+
+namespace {
+
+  void smooth_strands(SplineEntryList& spl)
+  {
+    for(unsigned int i=0;i<spl.size();++i) {
+      if(spl[i].type==2 || spl[i].type==3 || spl[i].type==4) {
+	unsigned int kstart = i++;
+	//kstart = std::max<unsigned int>(0,kstart-1);
+	for(;(spl[i].type==2 || spl[i].type==3 || spl[i].type==4) && i<spl.size();++i);
+	unsigned int kend = i;
+	//kend = std::min<unsigned int>(spl.size(),kend+2);
+	
+	if(kend>kstart) {
+	  SplineEntry& xstart=spl[kstart];
+	  SplineEntry& xend=spl[kend];
+	  
+	  xstart.direction = geom::Normalize(xend.position-xstart.position);
+	  xend.direction=xstart.direction;
+	  float invf=1.0/static_cast<float>(kend-kstart);
+	  for(unsigned int k=kstart;k<kend;++k) {
+	    float f = static_cast<float>(k-kstart)*invf;
+	    spl[k].position=xstart.position+f*(xend.position-xstart.position);
+	    spl[k].direction=xstart.direction;
+	    geom::Vec3 tmpn=geom::Normalize(xstart.normal+f*(xend.normal-xstart.normal));
+	    geom::Vec3 tmpx=geom::Normalize(geom::Cross(xstart.direction,tmpn));
+	    spl[k].normal=geom::Normalize(geom::Cross(tmpx,xstart.direction));
+	  }
+	}        
+      }
+    }
+  }
+  
+  typedef Eigen::Matrix<Real,3,1> EVec3;
+  typedef Eigen::Matrix<Real,3,3> EMat3;
+  typedef Eigen::Matrix<Real,1,3> ERVec3;
+  typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> EMatX;
+  typedef Eigen::Matrix<Real,1,Eigen::Dynamic> ERVecX;
+
+  ERVec3 to_eigen(const geom::Vec3& v)
+  {
+    EVec3 nrvo=EVec3::Zero();
+    nrvo[0]=v[0]; nrvo[1]=v[1]; nrvo[2]=v[2];
+    return nrvo;
+  }
+  
+  std::pair<geom::Vec3,geom::Vec3> fit_helix(const std::vector<geom::Vec3>& points)
+  {
+    if(points.size()<4) {
+      return std::make_pair(points.front(),points.back());
+    }
+    geom::Vec3 cen(0.0,0.0,0.0);
+    for(unsigned int i=0;i<points.size();++i) cen+=points[i];
+    cen/=static_cast<float>(points.size());
+
+    EMatX A=EMatX::Zero(points.size(),3);
+    for(unsigned int i=0;i<points.size();++i) {
+      A.row(i)=to_eigen(points[i]-cen);
+    }
+
+    Eigen::SVD<EMatX> svd(A);
+    EMatX V=svd.matrixV();
+    geom::Vec3 ax(V(0,0),V(1,0),V(2,0));
+
+    geom::Vec3 p1=cen+ax*(-geom::Dot(cen,ax)+geom::Dot(points.front(),ax))/geom::Length2(ax);
+    geom::Vec3 p2=cen+ax*(-geom::Dot(cen,ax)+geom::Dot(points.back(),ax))/geom::Length2(ax);
+
+    return std::make_pair(p1,p2);
+  }
+  
+} // ns
 
 void CartoonRenderer::PrepareRendering(TraceSubset& subset, 
                                        IndexedVertexArray& va,
@@ -64,8 +134,9 @@ void CartoonRenderer::PrepareRendering(TraceSubset& subset,
     spline_list_list.clear();
     for (int node_list=0; node_list<subset.GetSize(); ++node_list) {
       // first build the spline
-      Spline spl;
+      SplineEntryList spl;
       const NodeListSubset& nl=subset[node_list];
+      int prev_type=0;
       for (int i=0; i<nl.GetSize();++i) {      
         int type=0;
         const NodeEntry& entry=nl[i];
@@ -78,28 +149,55 @@ void CartoonRenderer::PrepareRendering(TraceSubset& subset,
             sst2=resh2.GetSecStructure();
           }
           if(sst.IsHelical()) {
-            type=1;
+            if(options_->GetHelixMode()==1) {
+              if(prev_type==5) {
+                type=5; // cylindrical helix
+              } else {
+                type=prev_type;
+              }
+              prev_type=5;
+            } else {
+              if(prev_type==1) {
+                type=1;
+              } else {
+                type=prev_type;
+              }
+              prev_type=1;
+            }
           } else if(sst.IsExtended()) {
             if(!sst2.IsExtended()) {
               type=3; // end of strand
             } else {
-              type=2;
+              if(prev_type==2) {
+                type=2;
+              } else {
+                type=prev_type;
+              }
             }
+            prev_type=2;
+          } else {
+            prev_type=type;
           }
         }
-        SplineEntry& ee = spl.AddEntry(entry.atom.GetPos(),entry.direction,
-                                       entry.normal, entry.rad, 
-                                       is_sel ? sel_clr : entry.color1, 
-                                       is_sel ? sel_clr : entry.color2, type);
+        SplineEntry ee(entry.atom.GetPos(),entry.direction,
+                       entry.normal, entry.rad, 
+                       is_sel ? sel_clr : entry.color1, 
+                       is_sel ? sel_clr : entry.color2, type);
         ee.v1 = entry.v1;
+        spl.push_back(ee);
       }
-      spline_list_list.push_back(spl.Generate(spline_detail));
-      // now create the shape around the interpolated pathway
+      if(!spl.empty()) {
+        if(options_->GetStrandMode()==1) {
+          smooth_strands(spl);
+        }
+        spline_list_list.push_back(Spline::Generate(spl,spline_detail));
+      }
     }
-    RebuildSplineObj(spline_list_list.back(), va, spline_list_list, subset, is_sel);    
+    RebuildSplineObj(va, spline_list_list, subset, is_sel);    
     va.SmoothNormals(options_->GetNormalSmoothFactor());
   }  
 }
+
 void CartoonRenderer::PrepareRendering()
 {
   TraceRendererBase::PrepareRendering();
@@ -131,8 +229,7 @@ RenderOptionsPtr CartoonRenderer::GetOptions()
  return options_;
 }
 
-void CartoonRenderer::RebuildSplineObj(const SplineEntryList& l, 
-                                       IndexedVertexArray& va,
+void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
                                        SplineEntryListList& spline_list_list,
                                        const TraceSubset& subset, bool is_sel)
 {
@@ -168,6 +265,7 @@ void CartoonRenderer::RebuildSplineObj(const SplineEntryList& l,
 				      1.1*options_->GetStrandThickness()+factor,
 				      options_->GetStrandProfileType(),
 				      options_->GetStrandEcc())); // arrow start
+    profiles.push_back(profiles[0]); // cylindrical helix start+end == tube
   }
 
   // iterate over all spline segments
@@ -203,11 +301,50 @@ void CartoonRenderer::RebuildSplineObj(const SplineEntryList& l,
         tprof2=TransformAndAddProfile(profiles,se, va);
         AssembleProfile(tprof1,tprof2,va);
         tprof1=tprof2;
-        tprof2=TransformAndAddProfile(profiles,slist[sc], va);
-        last_se=slist[sc];
-      } else {
-        tprof2=TransformAndAddProfile(profiles,slist[sc], va);
+        // and continue with the normal profiles
+      } else if(slist[sc].type==5) {
+        // this profile is a helix in cylinder mode
+        SplineEntry& hstart = slist[sc];
+	int istart = sc;
+        // skip over all helical ones
+        while(slist[sc].type==5 && sc<send) ++sc;
+        if(sc==send) sc-=1; // hack for helix at end of trace
+	SplineEntry& hend = slist[sc-1];
+
+	// fit helix into ca points
+	std::vector<geom::Vec3> points;
+	for(int i=istart;i<sc;++i) points.push_back(slist[i].position);
+	std::pair<geom::Vec3,geom::Vec3> cyl=fit_helix(points);
+
+	// extend end of current trace to beginning of cylinder
+	// and then cap it
+	SplineEntry tmp_se(slist[istart]);
+	tmp_se.position=cyl.first;
+	//tmp_se.direction=geom::Normalize(cyl.second-cyl.first);
+	//tmp_se.normal=geom::Normalize(geom::Cross(tmp_se.direction,geom::Normalize(geom::Cross(tmp_se.normal,tmp_se.direction))));
+        tprof2=TransformAndAddProfile(profiles,tmp_se, va);
+        AssembleProfile(tprof1,tprof2,va);
+        CapProfile(tprof2,tmp_se,false,va);
+        // add the cylinder
+        va.AddCylinder(CylinderPrim(cyl.first,cyl.second,
+                                    options_->GetHelixWidth(),
+                                    hstart.color1,
+                                    hend.color1),
+                       options_->GetArcDetail(),true);
+
+        // restart with a new cap and another extended profile
+	SplineEntry tmp_se2(slist[sc-1]);
+	tmp_se2.position=cyl.second;
+	//tmp_se2.direction=geom::Normalize(cyl.first-cyl.second);
+	//tmp_se2.normal=geom::Normalize(geom::Cross(tmp_se2.direction,geom::Normalize(geom::Cross(tmp_se2.normal,tmp_se2.direction))));
+        tprof1=TransformAndAddProfile(profiles,tmp_se2, va);
+        CapProfile(tprof1,tmp_se2,true,va);
+        tprof2=TransformAndAddProfile(profiles,hend, va);
+        AssembleProfile(tprof1,tprof2,va);
+	tprof1=tprof2;
+        // and continue with the normal profiles
       }
+      tprof2=TransformAndAddProfile(profiles,slist[sc], va);
       AssembleProfile(tprof1,tprof2,va);
       tprof1=tprof2;
       last_se=slist[sc];

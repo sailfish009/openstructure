@@ -95,8 +95,6 @@ void PrimList::CustomPreRenderGL(bool flag)
     } else {
       render_simple();
     }
-  } else {
-    RefreshVA(va_);
   }
 }
 

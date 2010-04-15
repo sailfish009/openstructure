@@ -50,7 +50,7 @@ public:
   virtual ~CartoonRenderer();
   
 private:
-  void RebuildSplineObj(const SplineEntryList& l, IndexedVertexArray& va,
+  void RebuildSplineObj(IndexedVertexArray& va,
                         SplineEntryListList& spline_list_list,
                         const TraceSubset& subset, bool is_sel);
   

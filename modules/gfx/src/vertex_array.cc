@@ -77,7 +77,7 @@ IndexedVertexArray::Entry::Entry(const Vec3& vv, const Vec3& nn, const Color& cc
 IndexedVertexArray::IndexedVertexArray()
 {
   initialized_=false;
-  Clear(); // replaces ctor initialization list
+  Reset(); // replaces ctor initialization list
 }
 
 IndexedVertexArray::~IndexedVertexArray()
@@ -249,7 +249,7 @@ void IndexedVertexArray::AddIcoSphere(const SpherePrim& prim, unsigned int detai
   }
 }
 
-void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail)
+void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail,bool cap)
 {
   dirty_=true;
   ambient_dirty_=true;
@@ -259,33 +259,54 @@ void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int deta
   const std::vector<Vec3>& vlist = detail::GetPrebuildCyl(level);
   
   Vec3 off(0.0,0.0,prim.length);
+
+  Vec3 cn0 = cap ? prim.rotmat* geom::Vec3(0.0,0.0,-1.0) : Vec3();
+  Vec3 cn1 = -cn0;
+  VertexID cid0 = cap ? Add(prim.start, cn0 , prim.color1) : 0;
+  VertexID cid7 = cap ? Add(prim.rotmat * off + prim.start, cn1, prim.color2) : 0;
   
   // prepare first vertices to add
   std::vector<Vec3>::const_iterator it=vlist.begin();
   Vec3 v0 = (*it);
   Vec3 n0 = prim.rotmat * v0; 
   v0*=prim.radius;
-  VertexID id1 = Add(prim.rotmat * v0 + prim.start, n0, prim.color);
-  VertexID id2 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color);
+  VertexID id1 = Add(prim.rotmat * v0 + prim.start, n0, prim.color1);
+  VertexID id2 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color2);
+  VertexID cid1 = cap ? Add(prim.rotmat * v0 + prim.start, cn0, prim.color1) : 0;
+  VertexID cid2 = cap ? Add(prim.rotmat * (v0+off) + prim.start, cn1, prim.color2) : 0;
   
   // now for the loop around the circle
   VertexID id3=id1;
   VertexID id4=id2;
+  VertexID cid3=cid1;
+  VertexID cid4=cid2;
   ++it;
   for(;it!=vlist.end();++it) {
     v0 = (*it);
     n0 = prim.rotmat * v0; 
     v0 *= prim.radius;
-    VertexID id5 = Add(prim.rotmat * v0 + prim.start, n0, prim.color);
-    VertexID id6 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color);
+    VertexID id5 = Add(prim.rotmat * v0 + prim.start, n0, prim.color1);
+    VertexID id6 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color2);
     AddTri(id3,id5,id4);
     AddTri(id5,id6,id4);
+    if(cap) {
+      VertexID cid5 = Add(prim.rotmat * v0 + prim.start, cn0, prim.color1);
+      VertexID cid6 = Add(prim.rotmat * (v0+off) + prim.start, cn1, prim.color2);
+      AddTri(cid0,cid5,cid3);
+      AddTri(cid7,cid4,cid6);
+      cid3=cid5;
+      cid4=cid6;
+    }
     id3=id5;
     id4=id6;
   }
   // and finally close the circle
   AddTri(id3,id1,id4);
   AddTri(id1,id2,id4);
+  if(cap) {
+    AddTri(cid0,cid1,cid3);
+    AddTri(cid7,cid4,cid2);
+  }
 }
 
 Vec3 IndexedVertexArray::GetVert(VertexID id) const
@@ -444,6 +465,11 @@ void IndexedVertexArray::RenderGL()
 #if OST_SHADER_SUPPORT_ENABLED
     if(use_ambient_ && !ambient_data_.empty()) {
       glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"occlusion_flag"),1);
+      glUniform2f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"ambient_weight"),
+                  local_ambient_weight_,
+                  ambient_occlusion_weight_);
+    } else {
+      glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"occlusion_flag"),0);
     }
 #endif
   }
@@ -510,12 +536,6 @@ void IndexedVertexArray::RenderGL()
 #endif
     }
   }
-
-#if OST_SHADER_SUPPORT_ENABLED
-  if(use_ambient_) {
-    glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"occlusion_flag"),0);
-  }
-#endif
 
   if(draw_normals_) {
     //glColor3f(1,0,0);
@@ -607,7 +627,7 @@ void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
   pov.inc() << "}\n";
 }
 
-void IndexedVertexArray::Clear() 
+void IndexedVertexArray::Clear()
 {
   dirty_=true;
   ambient_dirty_=true;
@@ -616,6 +636,13 @@ void IndexedVertexArray::Clear()
   tri_index_list_.clear();
   line_index_list_.clear();
   ntentry_list_.clear();
+  ambient_data_.clear();
+  use_ambient_=false;
+} 
+
+void IndexedVertexArray::Reset() 
+{
+  Clear();
   mode_=0x4;
   poly_mode_=2;
   lighting_=true;
@@ -633,8 +660,8 @@ void IndexedVertexArray::Clear()
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
   draw_normals_=false;
-  use_ambient_=false;
-  ambient_data_.clear();
+  local_ambient_weight_=0.3;
+  ambient_occlusion_weight_=1.0;
 }
 
 void IndexedVertexArray::FlagRefresh()
@@ -1062,6 +1089,8 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   draw_normals_=va.draw_normals_;
   use_ambient_=va.use_ambient_;
   ambient_data_=va.ambient_data_;
+  local_ambient_weight_=va.local_ambient_weight_;
+  ambient_occlusion_weight_=va.ambient_occlusion_weight_;
 }
   
 bool IndexedVertexArray::prep_buff()

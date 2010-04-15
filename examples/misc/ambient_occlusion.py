@@ -8,17 +8,26 @@ def test1():
     scene["surf"].SetColor(gfx.BLUE,"ele=N")
     scene.CenterOn("surf")
     scene.SetFog(False)
-    # blend the ambient occlusion 40% into the surface
-    # hence reduce diffuse to 60%
-    # give 100% to specular
-    scene.SetLightProp(0.6,0.4,1)
-    # blend the local color 25% percent into the surface
-    # keep diffuse at max
-    # add specular component at 80% with a strong hilight
-    scene["surf"].SetMat(0.25,1,0.8,128)
+    # turn on full contribution from light
+    scene.SetLightProp(1,1,1)
+    
+    # use a material with 10% global ambient light,
+    # 90% diffuse light, and full specular with small
+    # hilights
+    scene["surf"].SetMat(0.1,0.9,1,128)
+
+    # turn on ambient occlusion
+    # this may take seconds to calculate
+    scene["surf"].AmbientOcclusion(True)
+
+    # blend the ambient occlusion 100% into the surface,
+    # reducing the color intensity
+    scene["surf"].AmbientOcclusionWeight(1)
+    # blend the local color 30% percent into the surface
+    scene["surf"].AmbientLocalWeight(0.3)
+
     scene.AutoAutoslab(False)
     scene.Autoslab()
-    scene["surf"].AmbientOcclusion(True)
 
 def test2():
     global plist

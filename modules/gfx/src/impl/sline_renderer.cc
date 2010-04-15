@@ -58,18 +58,19 @@ void SlineRenderer::PrepareRendering(TraceSubset& trace_subset,
     va.SetAALines(options_->GetAALines());
     for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
       // first build the spline
-      Spline spl;
+      SplineEntryList spl;
       const NodeListSubset& nl=trace_subset[node_list];
       assert(nl.GetSize() && "node list subset with zero eles encountered!");
       for (int i=0; i<nl.GetSize();++i) {
         const NodeEntry& entry=nl[i];
-        SplineEntry& ee = spl.AddEntry(entry.atom.GetPos(), entry.direction,
-                                       entry.normal, entry.rad, 
-                                       is_sel ? sel_clr : entry.color1, 
-                                       is_sel ? sel_clr : entry.color2, 0);
+        SplineEntry ee(entry.atom.GetPos(), entry.direction,
+                       entry.normal, entry.rad, 
+                       is_sel ? sel_clr : entry.color1, 
+                       is_sel ? sel_clr : entry.color2, 0);
         ee.v1 = entry.v1;
+        spl.push_back(ee);
       }
-      SplineEntryList sel = spl.Generate(spline_detail);      
+      SplineEntryList sel = Spline::Generate(spl,spline_detail);      
       SplineEntryList::const_iterator sit=sel.begin(), 
                                      send=sel.end()-spline_detail+1;
       if (nl.AtStart()>0) {
