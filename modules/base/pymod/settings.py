@@ -49,6 +49,10 @@ def Locate(file_name, explicit_file_name=None, search_paths=[],
   containing a detail description why Locate failed. The error message is
   formatted in such a way that it can directly be presented to the user.
   """
+  if type(file_name) is str:
+    file_names=[file_name]
+  else:
+    file_names=file_name
   env_var_inexistent='env variable %s points to inexistent file %s'
   epxl_inexistent='explicitly set file "%s" does not exist'
   set_env_var='set the environment variable %s to the absolute path to %s or '
@@ -67,21 +71,23 @@ def Locate(file_name, explicit_file_name=None, search_paths=[],
                            env_var_inexistent % (env_name, file_env_name))
   searched=list(search_paths)
   for search_path in search_paths:
-    full_file_name=os.path.join(search_path, file_name)
-    if os.path.exists(full_file_name):
-      return full_file_name
+    for file_name in file_names:
+      full_file_name=os.path.join(search_path, file_name)
+      if os.path.exists(full_file_name):
+        return full_file_name
 
   if search_system_paths:
     paths=os.getenv('PATH')
     searched+=paths.split(':')
     for path in searched:
-      full_file_name=os.path.join(path, file_name)
-      if os.path.exists(full_file_name):
-        return full_file_name
+      for file_name in file_names:
+        full_file_name=os.path.join(path, file_name)
+        if os.path.exists(full_file_name):
+          return full_file_name
   msg=''        
   if len(searched)>0:
     msg='searched in \n%s\n' % ( '\n'.join([' - %s' % s for s in searched]))
   if env_name:
-    msg+=set_env_var % (env_name, file_name)
-  msg+='put %s into one of the search paths' % file_name
+    msg+=set_env_var % (env_name, ', ' % file_names)
+  msg+='put %s into one of the search paths' % ', '.join(file_names)
   raise FileNotFound(file_name, msg)
