@@ -57,8 +57,8 @@ T do_slice(const T& t, slice& sl) {
   try {
     end=extract<int>(sl.stop());
   } catch(error_already_set) {
-    PyErr_Clear();    
-  }  
+    PyErr_Clear();
+  }
   return t.Slice(start, end-start);
 }
 
@@ -83,18 +83,38 @@ AlignedRegion slice_aln(const AlignmentHandle& aln, slice sl) {
   try {
     end=extract<int>(sl.stop());
   } catch(error_already_set) {
-    PyErr_Clear();    
-  }  
+    PyErr_Clear();
+  }
   return aln.MakeRegion(start, end-start);
 }
 
 
+struct RevRegionRangeIter {
+  RevRegionRangeIter(AlignedColumnIterator b,
+                     AlignedColumnIterator e):
+    b_(b), e_(e)
+  { }
+
+  AlignedColumn next()
+  {
+    if (b_==e_) {
+      boost::python::objects::stop_iteration_error();
+    }
+    AlignedColumn col=*e_;
+    --e_;
+    return col;
+  }
+private:
+  AlignedColumnIterator b_;
+  AlignedColumnIterator e_;
+};
+
 struct RegionRangeIter {
-  RegionRangeIter(AlignedColumnIterator b, 
+  RegionRangeIter(AlignedColumnIterator b,
                   AlignedColumnIterator e):
     b_(b), e_(e)
   { }
-  
+
   AlignedColumn next()
   {
     if (b_==e_) {
@@ -120,6 +140,11 @@ RegionRangeIter iter_range2(AlignedRegion& aln_region)
   return RegionRangeIter(aln_region.begin(), aln_region.end());
 }
 
+RevRegionRangeIter iter_range3(AlignedRegion& aln_region)
+{
+  return RevRegionRangeIter(aln_region.begin(), aln_region.end());
+}
+
 }
 
 void export_sequence()
@@ -131,12 +156,12 @@ void export_sequence()
     .def("GetResidue", &ConstSequenceHandle::GetResidue)
     .def("GetOneLetterCode", &ConstSequenceHandle::GetOneLetterCode)
     .def("__getitem__", &ConstSequenceHandle::GetOneLetterCode)
-    .def("GetSequenceOffset", &ConstSequenceHandle::GetSequenceOffset)    
+    .def("GetSequenceOffset", &ConstSequenceHandle::GetSequenceOffset)
     .def("Copy", &ConstSequenceHandle::Copy)
     .def("GetFirstNonGap", &ConstSequenceHandle::GetFirstNonGap)
-    .def("GetLastNonGap", &ConstSequenceHandle::GetLastNonGap)    
+    .def("GetLastNonGap", &ConstSequenceHandle::GetLastNonGap)
     .add_property("first_non_gap", &SequenceHandle::GetFirstNonGap)
-    .add_property("last_non_gap", &SequenceHandle::GetLastNonGap)    
+    .add_property("last_non_gap", &SequenceHandle::GetLastNonGap)
     .def("GetAttachedView", &ConstSequenceHandle::GetAttachedView)
     .def("GetGaplessString", &ConstSequenceHandle::GetGaplessString)
     .def("GetString", &ConstSequenceHandle::GetString,
@@ -145,7 +170,7 @@ void export_sequence()
               return_value_policy<copy_const_reference>())
     .def("HasAttachedView", &ConstSequenceHandle::HasAttachedView)
     .def("__len__", &SequenceHandle::GetLength)
-    .add_property("length", &SequenceHandle::GetLength)    
+    .add_property("length", &SequenceHandle::GetLength)
     .add_property("attached_view", &ConstSequenceHandle::GetAttachedView)
     .add_property("name",
                   make_function(&ConstSequenceHandle::GetName,
@@ -155,10 +180,10 @@ void export_sequence()
     .add_property("string",
                   make_function(&ConstSequenceHandle::GetString,
                                 return_value_policy<copy_const_reference>()))
-    .def("__str__", &ConstSequenceHandle::GetString, 
+    .def("__str__", &ConstSequenceHandle::GetString,
          return_value_policy<copy_const_reference>())
-  ;    
-  
+  ;
+
   class_<SequenceHandle, bases<ConstSequenceHandle> >("SequenceHandle", init<>())
     .def("SetSequenceOffset", &SequenceHandle::SetSequenceOffset)
     .def("AttachView", attach_one)
@@ -174,7 +199,7 @@ void export_sequence()
                                 return_value_policy<copy_const_reference>()),
                   &SequenceHandle::SetName)
     .add_property("sequence_offset", &SequenceHandle::GetSequenceOffset,
-                  &SequenceHandle::SetSequenceOffset)    
+                  &SequenceHandle::SetSequenceOffset)
   ;
   def("CreateSequence", &CreateSequence);
   /*class_<SequenceHandleList>("SequenceHandleList", init<>())
@@ -182,6 +207,9 @@ void export_sequence()
   ;*/
   class_<RegionRangeIter>("RegionRangeIter", no_init)
     .def("next", &RegionRangeIter::next)
+  ;
+    class_<RevRegionRangeIter>("RevRegionRangeIter", no_init)
+    .def("next", &RevRegionRangeIter::next)
   ;
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)
@@ -199,6 +227,7 @@ void export_sequence()
     .def("AttachView", attach_view_a)
     .def("AttachView", attach_view_b)
     .def("Cut", &AlignmentHandle::Cut)
+    .def("MakeRegion", &AlignmentHandle::MakeRegion)
     .def("Replace",&AlignmentHandle::Replace)
     .def("__getitem__", &slice_aln)
     .def("__getitem__", &AlignmentHandle::operator[])
@@ -224,13 +253,14 @@ void export_sequence()
     .def("SetMaster", &AlignedRegion::SetMaster)
     .def("GetMaster", &AlignedRegion::GetMaster)
     .def("GetAlignmentHandle",&AlignedRegion::GetAlignmentHandle)
-    .add_property("master", &AlignedRegion::GetMaster, 
+    .add_property("master", &AlignedRegion::GetMaster,
                   &AlignedRegion::SetMaster)
-    .def("__getitem__", &AlignedRegion::operator[])                  
+    .def("__getitem__", &AlignedRegion::operator[])
     .def("__len__", &AlignedRegion::GetLength)
     .def("__iter__", iter_range2)
+    //~ .def("__iter__", iter_range3)
     .add_property("start", &AlignedRegion::GetStart)
-    .add_property("end", &AlignedRegion::GetEnd)    
+    .add_property("end", &AlignedRegion::GetEnd)
   ;
   class_<ConstSequenceList>("ConstSequenceList", init<>())
     CONST_SEQ_LIST_DEF(ConstSequenceList)
@@ -238,20 +268,20 @@ void export_sequence()
   ;
   class_<SequenceList>("SequenceList", init<>())
     CONST_SEQ_LIST_DEF(SequenceList)
-    .def("__getitem__", &do_slice_b)    
-  ;  
+    .def("__getitem__", &do_slice_b)
+  ;
   class_<AlignmentList>("AlignmentList", init<>())
     .def(vector_indexing_suite<AlignmentList>())
-    .def("__getitem__", &do_slice_b)    
-  ;  
+    .def("__getitem__", &do_slice_b)
+  ;
   implicitly_convertible<SequenceList, ConstSequenceList>();
   def("CreateSequenceList", &CreateSequenceList);
   def("SequenceFromChain", seq_from_chain_a);
-  def("SequenceFromChain", seq_from_chain_b);    
+  def("SequenceFromChain", seq_from_chain_b);
   def("SequenceToInfo", &SequenceToInfo);
   def("SequenceListToInfo", &SequenceListToInfo);
   def("SequenceFromInfo", &SequenceFromInfo);
   def("CreateAlignment", &CreateAlignment);
   def("AlignmentFromSequenceList", &AlignmentFromSequenceList);
-  def("SequenceListFromInfo", &SequenceListFromInfo);  
+  def("SequenceListFromInfo", &SequenceListFromInfo);
 }
