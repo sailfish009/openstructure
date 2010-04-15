@@ -2,6 +2,7 @@ from PyQt4 import QtCore, QtGui
 from dokk import Dokk
 from hud import RectHUDObject
 from hud import RectTextHUDObject
+from hud import ImgHUDObject
 
 class LevelMessages(QtCore.QObject):
   def __init__(self, config_map, parent=None):
@@ -32,7 +33,14 @@ class LevelMessages(QtCore.QObject):
       except:
         size = default_size
       
-      self.text_list.append([config_map["TEXT%s"%i], time, color, size])
+      try:
+        print "TEST IMG"
+        img = config_map["TEXTIMG%s"%i]
+        print img
+      except:
+        img = None
+      
+      self.text_list.append([config_map["TEXT%s"%i], time, color, size, img])
       self.total_time += time
         
     self.cur_text = 0
@@ -52,10 +60,12 @@ class LevelMessages(QtCore.QObject):
     font = QtGui.QFont("Verdana", 15);
     rect = QtCore.QRect(QtCore.QPoint(60, 60), QtCore.QSize(dokk.gl_win.Width()-120, dokk.gl_win.Height()-120))
     self.text = RectTextHUDObject(text="", rect=rect, time=0, font=font)
+    self.img = ImgHUDObject(time=0,pos=QtCore.QPoint(dokk.gl_win.Width()/2, dokk.gl_win.Height()-600))
     QtCore.QObject.connect(self.text, QtCore.SIGNAL("Finished()"), self.NextMessage)
     self.bg = RectHUDObject(time,rect, bg_color=QtGui.QColor(128,128,128,200))
     dokk.gl_win.AddHUDObject(self.bg)
     dokk.gl_win.AddHUDObject(self.text)
+    dokk.gl_win.AddHUDObject(self.img)
   
   def Stop(self):
     self.cur_text = -1
@@ -71,6 +81,14 @@ class LevelMessages(QtCore.QObject):
       self.text.color=self.text_list[self.cur_text][2]
       self.text.font.setPointSize(self.text_list[self.cur_text][3])
       self.text.Reset()
+      
+      print self.text_list[self.cur_text][4]
+      if(self.text_list[self.cur_text][4]):
+        self.img.img = QtGui.QImage(self.text_list[self.cur_text][4])
+        hw=self.img.img.width()/2.0
+        self.img.time = self.text_list[self.cur_text][1]
+        self.img.pos = QtCore.QPoint((dokk.gl_win.Width()/2)-hw, dokk.gl_win.Height()/2+70)
+        self.img.Reset()
     else:
       self.emit(QtCore.SIGNAL('Finished()')) 
       self.cur_text = -1

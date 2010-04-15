@@ -114,3 +114,13 @@ class RectHUDObject(HUDObject):
     painter.setBrush(self.bg_color)
     painter.drawRect(self.rect)
     painter.setPen(QPen(self.border_color, Qt.SolidLine))
+
+class ImgHUDObject(HUDObject):
+  def __init__(self, time, pos, img_loc="", parent=None):
+    HUDObject.__init__(self,time,parent)
+    self.pos = pos
+    self.img = QImage(img_loc)
+
+  def Paint(self, painter):
+    painter.drawImage(self.pos, self.img)
+  
