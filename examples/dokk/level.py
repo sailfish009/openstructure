@@ -201,10 +201,12 @@ class Level(QtCore.QObject):
   def _FinishEnd(self):
     if bool(int(self.config.Level["SAVE"])) and self.GetRank()>0:
       self.hud_name_input.Start()
+    elif self.GetRMSD()<= float(self.config.Level["GOAL"]):
+      Dokk().NextLevel()      
     else:
       self.Reset()
       self.emit(QtCore.SIGNAL("Stopped()"))
       
   def _FinishEnterName(self):
     self.topten.SetValue(self.hud_name_input.GetName(),self.GetScore())
-    self.Reset()
+    Dokk().NextLevel()
