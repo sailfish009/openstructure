@@ -21,18 +21,24 @@ class Dokk(object):
       self.levels_ = levels
         
   def NextLevel(self):
-    self._current_index += 1
-    if(self._current_index < len(self.levels_)):
+    if self.HasNextLevel():
+      self._current_index += 1
       self._LoadLevel()
-    else:
-      self._current_index -=1
   
   def PreviousLevel(self):
-    self._current_index -= 1
-    if(self._current_index >= 0):
+    if self.HasPreviousLevel():
+      self._current_index -= 1
       self._LoadLevel()
-    else:
-      self._current_index +=1
+  
+  def HasNextLevel(self):
+    if(self._current_index < len(self.levels_)-1):
+      return True
+    return False
+  
+  def HasPreviousLevel(self):
+    if(self._current_index > 0):
+      return True
+    return False
   
   def Restart(self):
     self._current_index = -1

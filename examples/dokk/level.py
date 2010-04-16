@@ -8,8 +8,7 @@ from protein import Protein
 from score_updater import ScoreUpdater
 from config import Config, TopTen
 from dokk import Dokk
-from level_messages import LevelIntro
-from level_messages import LevelEnd
+from level_messages import LevelMessages, LevelIntro, LevelEnd
 from name_enter import HUDNameInput
 from level_info import LevelInfo
 
@@ -209,4 +208,8 @@ class Level(QtCore.QObject):
       
   def _FinishEnterName(self):
     self.topten.SetValue(self.hud_name_input.GetName(),self.GetScore())
-    Dokk().NextLevel()
+    if (Dokk().HasNextLevel()):
+      Dokk().NextLevel()
+    else:
+      hud_end_message = LevelMessages(self.config.End,self)
+      hud_end_message.Start()
