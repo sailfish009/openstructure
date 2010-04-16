@@ -135,7 +135,7 @@ public:
   /// This method does not throw any exception. Upon accessing methods of the 
   /// aligned column, exceptions might be thrown when the index is out of 
   /// bounds.
-  AlignedColumn operator[](int index);
+  AlignedColumn operator[](int index) const;
   
   AlignmentHandle(const impl::SequenceListImplPtr& impl);  
   

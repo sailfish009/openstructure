@@ -226,7 +226,7 @@ AlignedColumnIterator AlignmentHandle::end() const
   return AlignedColumnIterator(*this, this->GetLength(), this->GetLength());
 }
 
-AlignedColumn AlignmentHandle::operator[](int index)
+AlignedColumn AlignmentHandle::operator[](int index) const
 {
   return AlignedColumn(*this, index);
 }
