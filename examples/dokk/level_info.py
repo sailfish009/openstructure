@@ -79,13 +79,15 @@ class LevelDetails(QtCore.QObject):
     self.hud_name_text = None
     self.hud_diffi_text = None
     self.hud_bg = None
-    
+    self.hud_image = None
   def Start(self):
     name_len = max(len(self.name),len(self.difficulty)/2)
     xpos = dokk.Dokk().gl_win.Width()/2 - (name_len*30)/2
     rect = QtCore.QRect(QtCore.QPoint(xpos, 55), QtCore.QSize(name_len*30, 105))
     self.hud_bg = RectHUDObject(-1,rect, bg_color=QtGui.QColor(128,128,128,200))
     dokk.Dokk().gl_win.AddHUDObject(self.hud_bg)
+    self.hud_image = ImgHUDObject(-1,QtCore.QPoint(dokk.Dokk().gl_win.Width()-300, dokk.Dokk().gl_win.Height()-100),"images/openstructure.png")
+    dokk.Dokk().gl_win.AddHUDObject(self.hud_image)
     text = "%s\n"%self.name
     self.hud_name_text = RectTextHUDObject(text, rect=rect, time=-1, font=QtGui.QFont("Verdana",30))
     text = "%s"%self.difficulty
@@ -97,7 +99,7 @@ class LevelDetails(QtCore.QObject):
     dokk.Dokk().gl_win.RemoveHUDObject(self.hud_diffi_text)
     dokk.Dokk().gl_win.RemoveHUDObject(self.hud_name_text)
     dokk.Dokk().gl_win.RemoveHUDObject(self.hud_bg)
-    
+    dokk.Dokk().gl_win.RemoveHUDObject(self.hud_image)
 
 class DemoCam(QtCore.QTimer):
   def __init__(self, parent=None):
