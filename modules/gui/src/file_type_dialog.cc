@@ -66,7 +66,7 @@ FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
   for(unsigned int i = 0 ; i < entity_handler.size() ; i++){
     QVariant handler = QVariant();
     handler.setValue(entity_handler[i]);
-    this->AddRow(i,entity_handler[i]->GetFormatName().c_str(),entity_handler[i]->GetFormatDescription().c_str(),handler);
+    this->AddRow(list_->rowCount(),entity_handler[i]->GetFormatName().c_str(),entity_handler[i]->GetFormatDescription().c_str(),handler);
   }
 
 #if OST_IMG_ENABLED
@@ -74,14 +74,14 @@ FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
   for(unsigned int i = 0 ; i < map_handler.size() ; i++){
     QVariant handler = QVariant();
     handler.setValue(map_handler[i]);
-    this->AddRow(i,map_handler[i]->GetFormatName().c_str(),map_handler[i]->GetFormatDescription().c_str(),handler);
+    this->AddRow(list_->rowCount(),map_handler[i]->GetFormatName().c_str(),map_handler[i]->GetFormatDescription().c_str(),handler);
   }
 #endif
   io::SurfaceIOFList surf_handler = io::IOManager::Instance().GetAvailableSurfaceHandler();
   for(unsigned int i = 0 ; i < surf_handler.size() ; i++){
     QVariant handler = QVariant();
     handler.setValue(surf_handler[i]);
-    this->AddRow(i,surf_handler[i]->GetFormatName().c_str(),surf_handler[i]->GetFormatDescription().c_str(),handler);
+    this->AddRow(list_->rowCount(),surf_handler[i]->GetFormatName().c_str(),surf_handler[i]->GetFormatDescription().c_str(),handler);
   }
 }
 
