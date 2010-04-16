@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #include <vector>
 
+#include <QString>
 #include <QSettings>
 #include <QNetworkReply>
 #include <QHBoxLayout>
@@ -139,7 +140,20 @@ void RemoteLoader::Clicked()
   this->BuildMenu();
   if(!line_edit_->text().isEmpty() && site_actions_->checkedAction()){
     RemoteSiteLoader* loader = FileLoader::GetLoaderManager()->GetRemoteSiteLoader(site_actions_->checkedAction()->text());
-    QNetworkReply* network_reply = loader->ById(line_edit_->text());
+
+    QString text = line_edit_->text();
+    QString id = text;
+    QString selection = "";
+    int pos = text.indexOf('[');
+    if(pos >= 0){
+      id = text.left(pos);
+      selection = text.right(text.size()-(pos+1));
+      pos = selection.lastIndexOf(']');
+      if(pos>=0){
+        selection = selection.left(pos);
+      }
+    }
+    QNetworkReply* network_reply = loader->ById(id,selection);
     if(network_reply){
       progress_bar_->reset();
       connect(network_reply, SIGNAL(downloadProgress(qint64,qint64)), this, SLOT(UpdateProgress(qint64,qint64)));
