@@ -15,6 +15,12 @@ class LevelInfo(QtCore.QObject):
       self.highscore = HighScore(level.topten)
     else:
       self.highscore = None
+      
+    try:
+      self.level_descr = LevelDescr(level.config.INFO["TEXT"])
+    except:
+      self.level_descr = None
+    
     self.level_info = LevelDetails(level.config.Level["NAME"],level.config.Level["DIFFICULTY"])
     self.demo_cam = DemoCam(self)
     self.connect(level,QtCore.SIGNAL("Started()"),self.Finish)
@@ -31,6 +37,8 @@ class LevelInfo(QtCore.QObject):
     self.start = False
     if self.highscore:
       self.highscore.Finish()
+    if self.level_descr:
+      self.level_descr.Finish()
     self.demo_cam.Finish()
     self.level_info.Finish()
     
@@ -38,6 +46,8 @@ class LevelInfo(QtCore.QObject):
     if self.start:
       if self.highscore:
         self.highscore.Start()
+      if self.level_descr:
+        self.level_descr.Start()
       self.level_info.Start()
       self.demo_cam.Start()
    
@@ -100,6 +110,27 @@ class LevelDetails(QtCore.QObject):
     dokk.Dokk().gl_win.RemoveHUDObject(self.hud_name_text)
     dokk.Dokk().gl_win.RemoveHUDObject(self.hud_bg)
     dokk.Dokk().gl_win.RemoveHUDObject(self.hud_image)
+
+class LevelDescr(QtCore.QObject):
+  def __init__(self, descr, parent=None):
+    QtCore.QObject.__init__(self, parent)
+    self.descr = descr
+  
+    self.hud_descr_text = None
+    self.hud_bg = None
+
+  def Start(self):
+    descr_len = len(self.descr)
+    xpos = dokk.Dokk().gl_win.Width()/2 - (descr_len*30)/2
+    rect = QtCore.QRect(QtCore.QPoint(xpos, dokk.Dokk().gl_win.Height()-400), QtCore.QSize(descr_len*30, 105))
+    self.hud_bg = RectHUDObject(-1,rect, bg_color=QtGui.QColor(128,128,128,200))
+    dokk.Dokk().gl_win.AddHUDObject(self.hud_bg)
+    self.hud_descr_text = RectTextHUDObject(self.descr, rect=rect, time=-1, font=QtGui.QFont("Verdana",20))
+    dokk.Dokk().gl_win.AddHUDObject(self.hud_descr_text)
+                  
+  def Finish(self):
+    dokk.Dokk().gl_win.RemoveHUDObject(self.hud_bg)
+    dokk.Dokk().gl_win.RemoveHUDObject(self.hud_descr_text)
 
 class DemoCam(QtCore.QTimer):
   def __init__(self, parent=None):
