@@ -142,13 +142,13 @@ void SceneSelection::ViewDensitySlices() {
     if (node) {
       gfx::MapIsoP obj = dyn_cast<gfx::MapIso> (node);
       if (obj) {
-    	// The following is a hack. I need to pass a reference to an ImagHandle
-    	// that never goes out of scope, so I get a reference from the MapIso using
-    	// GetMap and pass it to the CreateDataViewer
-    	img::gui::DataViewer* dv = GostyApp::Instance()->CreateDataViewer(obj->GetMap());
-        MainArea* ma = GostyApp::Instance()->GetPerspective()->GetMainArea();
-        ma->AddWidget(QString(obj->GetName().c_str()), dv) ;
-    	dv->show();
+        // The following is a hack. I need to pass a reference to an ImagHandle
+        // that never goes out of scope, so I get a reference from the MapIso using
+        // GetMap and pass it to the CreateDataViewer
+        img::gui::DataViewer* dv = GostyApp::Instance()->CreateDataViewer(obj->GetMap());
+          MainArea* ma = GostyApp::Instance()->GetPerspective()->GetMainArea();
+          ma->AddWidget(QString(obj->GetName().c_str()), dv) ;
+        dv->show();
       }
     }
   }
@@ -294,6 +294,7 @@ void SceneSelection::SelectViews(){
     }
   }
 }
+
 
 gfx::EntityP SceneSelection::GetViewEntity() const{
   return view_entity_;
