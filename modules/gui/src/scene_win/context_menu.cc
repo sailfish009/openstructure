@@ -68,10 +68,10 @@ ContextMenu::ContextMenu(QTreeView* view, SceneWinModel* model):
 
   action = new QAction("Show",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Show()));
-  this->AddAction(action, NOT_VISIBLE);
+  this->AddAction(action, GFX_OBJECT|NOT_VISIBLE);
   action = new QAction("Hide",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Hide()));
-  this->AddAction(action, NOT_HIDDEN);
+  this->AddAction(action, GFX_OBJECT|NOT_HIDDEN);
 
   action = new QAction("Show",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(MakeVisible()));
