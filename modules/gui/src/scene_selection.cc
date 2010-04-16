@@ -46,9 +46,7 @@ SceneSelection* SceneSelection::scene_selection_ = NULL;
 
 SceneSelection::SceneSelection():nodes_(),views_()
 {
-  SceneWin* scene_win = GostyApp::Instance()->GetSceneWin();
-  QObject::connect(scene_win, SIGNAL(ActiveNodesChanged(gfx::NodePtrList,gfx::EntityP,mol::QueryViewWrapperList)),
-               this, SLOT(SetActiveNodes(gfx::NodePtrList,gfx::EntityP,mol::QueryViewWrapperList)));
+
 }
 
 void SceneSelection::SetActiveNodes(gfx::NodePtrList nodes, gfx::EntityP entity, mol::QueryViewWrapperList views){

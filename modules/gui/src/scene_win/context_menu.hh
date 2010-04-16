@@ -23,6 +23,7 @@
   Author: Stefan Scheuber
  */
 
+#include <QFlags>
 #include <QMap>
 #include <QAbstractItemModel>
 #include <QTreeView>
@@ -31,6 +32,23 @@
 #include <ost/gui/scene_win/scene_win_model.hh>
 
 namespace ost { namespace gui {
+
+enum ContextActionType
+{
+  GFX_OBJECT=0x1,
+  ENTITY=0x2,
+  ENTITY_VIEW=0x4,
+  CUSTOM_VIEW=0x8,
+  NOT_VISIBLE=0x10,
+  NOT_HIDDEN=0x20,
+  NOT_SCENE=0x40,
+  SINGLE=0x80
+#if OST_IMG_ENABLED
+  ,MAP=0x100
+#endif
+};
+Q_DECLARE_FLAGS(ContextActionTypes, ContextActionType)
+
 
 class DLLEXPORT_OST_GUI ContextMenu : public QObject {
   Q_OBJECT
@@ -41,18 +59,23 @@ public:
   void ShowMenu(const QPoint& pos);
   void Rename(QModelIndex index);
 
+  void AddAction(QAction* action,ContextActionTypes type);
+
 private slots:
   void AddViewFromEntity();
   void AddView();
   void Rename();
   void DeleteView();
 
-
 private:
+  QMap<QAction*, ContextActionTypes> actions_;
+
   QTreeView* view_;
   SceneWinModel* model_;
 };
 
 }}
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(ost::gui::ContextActionTypes)
 
 #endif

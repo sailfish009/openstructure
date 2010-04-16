@@ -24,8 +24,6 @@
 #include <QTableWidgetItem>
 #include <QHeaderView>
 
-#include <iostream>
-
 #include <ost/io/io_manager.hh>
 #include <ost/io/io_exception.hh>
 
@@ -77,6 +75,7 @@ FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
     this->AddRow(list_->rowCount(),map_handler[i]->GetFormatName().c_str(),map_handler[i]->GetFormatDescription().c_str(),handler);
   }
 #endif
+
   io::SurfaceIOFList surf_handler = io::IOManager::Instance().GetAvailableSurfaceHandler();
   for(unsigned int i = 0 ; i < surf_handler.size() ; i++){
     QVariant handler = QVariant();

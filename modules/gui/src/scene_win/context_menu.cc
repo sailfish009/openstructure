@@ -45,21 +45,84 @@ namespace ost { namespace gui {
 ContextMenu::ContextMenu(QTreeView* view, SceneWinModel* model):
   QObject(model),view_(view),model_(model)
 {
+  QAction* action = new QAction("Center on Object",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(CenterOnObjects()));
+  this->AddAction(action, GFX_OBJECT);
+
+  action = new QAction("Copy",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(CopyViews()));
+  this->AddAction(action, ENTITY);
+  action = new QAction("Create Custom View",this);
+  connect(action, SIGNAL(triggered()), this, SLOT(AddViewFromEntity()));
+  this->AddAction(action, ENTITY);
+  action = new QAction("Select..", this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Select()));
+  this->AddAction(action, ENTITY);
+  action = new QAction("Deselect",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Deselect()));
+  this->AddAction(action, ENTITY);
+
+  action = new QAction("Delete",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Delete()));
+  this->AddAction(action, GFX_OBJECT|NOT_SCENE);
+
+  action = new QAction("Show",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Show()));
+  this->AddAction(action, NOT_VISIBLE);
+  action = new QAction("Hide",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Hide()));
+  this->AddAction(action, NOT_HIDDEN);
+
+  action = new QAction("Show",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(MakeVisible()));
+  this->AddAction(action, ENTITY_VIEW);
+  action = new QAction("Hide",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(MakeHidden()));
+  this->AddAction(action, ENTITY_VIEW);
+  action = new QAction("Show Exclusive",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(ShowExclusive()));
+  this->AddAction(action, ENTITY_VIEW);
+  action = new QAction("Hide Exclusive",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(HideExclusive()));
+  this->AddAction(action, ENTITY_VIEW);
+  action = new QAction("Select All",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(SelectAllViews()));
+  this->AddAction(action, ENTITY_VIEW);
+  action = new QAction("Deselect All",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(DeselectAllViews()));
+  this->AddAction(action, ENTITY_VIEW);
+  action = new QAction("Select..",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(SelectViews()));
+  this->AddAction(action, ENTITY_VIEW);
+  action = new QAction("Create Custom View",this);
+  connect(action, SIGNAL(triggered()), this, SLOT(AddView()));
+  this->AddAction(action, ENTITY_VIEW);
+
+  action = new QAction("Delete",this);
+  connect(action, SIGNAL(triggered()), this, SLOT(DeleteView()));
+  this->AddAction(action, ENTITY_VIEW | CUSTOM_VIEW);
+
+  action = new QAction("Rename",this);
+  connect(action, SIGNAL(triggered()), this, SLOT(Rename()));
+  this->AddAction(action, GFX_OBJECT | SINGLE);
+
+  action = new QAction("Rename",this);
+  connect(action, SIGNAL(triggered()), this, SLOT(Rename()));
+  this->AddAction(action, ENTITY_VIEW | SINGLE);
+
+#if OST_IMG_ENABLED
+  action = new QAction("View Density Slices",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(ViewDensitySlices()));
+  this->AddAction(action, MAP);
+#endif // OST_IMG_ENABLED
 
 }
 
 void ContextMenu::ShowMenu(const QPoint& pos)
 {
   QModelIndexList indexes = view_->selectionModel()->selection().indexes();
-
-  bool all_visible = true;
-  bool all_not_scene = true;
-  bool all_hidden = true;
-  bool all_entities = true;
-  bool all_gfx_objects = true;
-  bool all_entity_views = true;
-  bool all_custom_views = true;
-  bool all_maps = true;
+  ContextActionTypes flags;
+  flags = ~flags;
 
   if(indexes.size()>0){
     for(int i = 0; i < indexes.size(); i++){
@@ -67,122 +130,59 @@ void ContextMenu::ShowMenu(const QPoint& pos)
         GfxSceneNode* gfx_scene_node = qobject_cast<GfxSceneNode*>(model_->GetItem(indexes[i]));
         if(gfx_scene_node){
           gfx::GfxNodeP gfx_node = gfx_scene_node->GetGfxNode();
-          if(gfx_node->IsVisible()){all_hidden=false;}
-          else{all_visible=false;}
-          if(gfx_node->GetType()==0){all_not_scene = false;}
-          if(!dynamic_cast<gfx::GfxObj*> (gfx_node.get())){all_gfx_objects = false;}
-          if(!dynamic_cast<gfx::Entity*> (gfx_node.get())){all_entities = false;}
+          if(gfx_node->IsVisible()){
+            flags &= ~NOT_HIDDEN;
+          }
+          else{
+            flags &= ~NOT_VISIBLE;
+          }
+          if(gfx_node->GetType()==0){flags &= ~NOT_SCENE;}
+          if(!dynamic_cast<gfx::GfxObj*> (gfx_node.get())){flags &= ~GFX_OBJECT;}
+          if(!dynamic_cast<gfx::Entity*> (gfx_node.get())){flags &= ~ENTITY;}
 #if OST_IMG_ENABLED
-          if(!dynamic_cast<gfx::MapIso*> (gfx_node.get())){all_maps = false;}
-#else
-          all_maps = false;
+          if(!dynamic_cast<gfx::MapIso*> (gfx_node.get())){flags &= ~MAP;}
 #endif // OST_IMG_ENABLED
         }
         else{
-          all_gfx_objects = false;
-          all_entities = false;
-          all_maps = false;
-          all_visible = true;
-          all_hidden = true;
+          flags &= ~(GFX_OBJECT | ENTITY
+#if OST_IMG_ENABLED
+              | MAP
+#endif
+          );
+          flags &= ~(NOT_VISIBLE | NOT_HIDDEN);
         }
         EntityPartNode* entity_part_node = qobject_cast<EntityPartNode*>(model_->GetItem(indexes[i]));
         if(!entity_part_node){
-          all_entity_views = false;
-          all_custom_views = false;
+          flags &= ~(ENTITY_VIEW | CUSTOM_VIEW);
         }
         else{
           CustomPartNode* custom_part_node = qobject_cast<CustomPartNode*>(entity_part_node);
           if(!custom_part_node){
-            all_custom_views = false;
+            flags &= ~CUSTOM_VIEW;
           }
         }
       }
     }
 
     QMenu* menu = new QMenu();
-
-    QAction* action;
-    if(all_gfx_objects){
-      action = menu->addAction("Center on Object");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(CenterOnObjects()));
-
-      if(all_entities){
-        action = menu->addAction("Copy");
-        connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(CopyViews()));
-        action = menu->addAction("Create Custom View");
-        connect(action, SIGNAL(triggered()), this, SLOT(AddViewFromEntity()));
-        action = menu->addAction("Select..");
-        connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Select()));
-        action = menu->addAction("Deselect");
-        connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Deselect()));
-      }
-
-      if(all_not_scene){
-                  action = menu->addAction("Delete");
-                  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Delete()));
-      }
-    }
-
-    if(!all_visible){
-      action = menu->addAction("Show");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Show()));
-    }
-    if(!all_hidden){
-      action = menu->addAction("Hide");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Hide()));
-    }
-
-    if(all_entity_views){
-      action = menu->addAction("Show");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(MakeVisible()));
-
-      action = menu->addAction("Hide");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(MakeHidden()));
-
-      action = menu->addAction("Show Exclusive");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(ShowExclusive()));
-
-      action = menu->addAction("Hide Exclusive");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(HideExclusive()));
-
-      action = menu->addAction("Select All");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(SelectAllViews()));
-
-      action = menu->addAction("Deselect All");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(DeselectAllViews()));
-
-      action = menu->addAction("Select..");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(SelectViews()));
-
-      action = menu->addAction("Create Custom View");
-      connect(action, SIGNAL(triggered()), this, SLOT(AddView()));
-
-    }
-
-#if OST_IMG_ENABLED
-    if(all_maps){
-      action = menu->addAction("View Density Slices");
-      connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(ViewDensitySlices()));
-    }
-#endif // OST_IMG_ENABLED
-
-
-    if(all_entity_views){
-      if(all_custom_views){
-        action = menu->addAction("Delete");
-        connect(action, SIGNAL(triggered()), this, SLOT(DeleteView()));
-      }
-    }
-
-    if((all_gfx_objects || all_custom_views) && indexes.size()==2){
-      action = menu->addAction("Rename");
-      connect(action, SIGNAL(triggered()), this, SLOT(Rename()));
+    QMapIterator<QAction*, ContextActionTypes> i(actions_);
+    flags ^= NOT_VISIBLE;
+    flags ^= NOT_HIDDEN;
+    while (i.hasNext()) {
+        i.next();
+        if (i.value() == (i.value() & flags)){
+          menu->addAction(i.key());
+        }
     }
 
     if(menu->actions().size()>0){
       menu->popup(pos);
     }
   }
+}
+
+void ContextMenu::AddAction(QAction* action,ContextActionTypes type){
+  actions_[action] = type;
 }
 
 void ContextMenu::AddViewFromEntity() {

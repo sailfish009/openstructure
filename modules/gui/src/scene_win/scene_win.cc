@@ -71,6 +71,9 @@ SceneWin::SceneWin(QWidget* parent) :
   connect(view_, SIGNAL(doubleClicked(const QModelIndex &)), this,
 	  SLOT(DoubleClicked(const QModelIndex &)));
   connect(model_, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(RowsInserted(const QModelIndex&, int, int)));
+
+  QObject::connect(this, SIGNAL(ActiveNodesChanged(gfx::NodePtrList,gfx::EntityP,mol::QueryViewWrapperList)),
+               SceneSelection::Instance(), SLOT(SetActiveNodes(gfx::NodePtrList,gfx::EntityP,mol::QueryViewWrapperList)));
 }
 
 void SceneWin::ContextMenuRequested(const QPoint& pos) {
