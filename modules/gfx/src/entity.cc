@@ -325,16 +325,15 @@ void Entity::CustomRenderGL(RenderPass pass)
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
     if(r->IsEnabled()){
-      switch(pass) {
-        case STANDARD_RENDER_PASS:
-        case OPAQUE_RENDER_PASS:
+      if(pass==STANDARD_RENDER_PASS || pass==OPAQUE_RENDER_PASS) {
+        r->Render(pass);
+        if(pass==STANDARD_RENDER_PASS && omode_>0) {
+          r->VA().SetOutlineMode(omode_);
           r->Render(pass);
-          break;
-        case GLOW_RENDER_PASS:
-          if (r->HasSelection()) {
-            r->Render(pass);
-          }
-          break;
+          r->VA().SetOutlineMode(0);
+        }
+      } else if(pass==GLOW_RENDER_PASS && r->HasSelection()) {
+        r->Render(pass);
       }
     }
   }

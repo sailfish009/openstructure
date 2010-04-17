@@ -50,9 +50,14 @@ public:
   virtual ~CartoonRenderer();
   
 private:
+  void PrepareRendering(const TraceSubset& subset, IndexedVertexArray& va, 
+                        SplineEntryListList& spline_list_list, bool is_sel);
+
+  void FudgeSplineObj(IndexedVertexArray&, SplineEntryListList&);
+
   void RebuildSplineObj(IndexedVertexArray& va,
-                        SplineEntryListList& spline_list_list,
-                        const TraceSubset& subset, bool is_sel);
+                        const SplineEntryListList& spline_list_list,
+                        bool is_sel);
   
   void CapProfile(const impl::TraceProfile& p, 
                   const impl::SplineEntry& se, 
@@ -65,9 +70,6 @@ private:
   TraceProfile TransformAndAddProfile(const std::vector<TraceProfile>& profiles, 
                                       const SplineEntry& se, 
                                       IndexedVertexArray& va);
-
-  void PrepareRendering(TraceSubset& subset, IndexedVertexArray& va, 
-                        SplineEntryListList& spline_list_list, bool is_sel);
 
   TraceProfile GetCircProfile(unsigned int detail, float rx, float ry, unsigned int type, float ecc);
 

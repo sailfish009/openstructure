@@ -42,7 +42,6 @@
 #include "gl_helper.hh"
 
 #include <ost/config.hh>
-#include "offscreen_buffer.hh"
 #include "scene.hh"
 #include "input.hh"
 #include "gfx_node.hh"
@@ -51,6 +50,7 @@
 #include "bitmap_io.hh"
 #include "entity.hh"
 #include "povray.hh"
+#include "offscreen_buffer.hh"
 
 #if OST_SHADER_SUPPORT_ENABLED
 # include "shader.hh"
@@ -115,6 +115,7 @@ Scene::Scene():
   texture_id_(),
   auto_autoslab_(true),
   offscreen_flag_(false),
+  main_offscreen_buffer_(0),
   selection_mode_(1),
   test_flag_(false),
   tmp_tex_(),
@@ -143,12 +144,22 @@ void Scene::SetFog(bool f)
   RequestRedraw();
 }
 
+bool Scene::GetFog() const
+{
+  return fog_flag_;
+}
+
 void Scene::SetFogColor(const Color& c)
 {
   GLfloat fogc[]={c.Red(),c.Green(),c.Blue(),1.0};
   glFogfv(GL_FOG_COLOR,fogc);
   fog_color_=c;
   RequestRedraw();
+}
+
+Color Scene::GetFogColor() const
+{
+  return fog_color_;
 }
 
 void Scene::SetShadow(bool f)
@@ -181,9 +192,10 @@ void set_light_dir(Vec3 ld)
 
 void Scene::InitGL()
 {
-  LOG_DEBUG("scene: initializing GL state" << std::endl);
+  LOGN_DEBUG("scene: initializing GL state");
 
 #if OST_SHADER_SUPPORT_ENABLED
+  LOGN_DEBUG("scene: shader pre-gl");
   Shader::Instance().PreGLInit();
 #endif
 
@@ -234,9 +246,29 @@ void Scene::InitGL()
   glShadeModel(GL_SMOOTH);
 
   // line and point anti-aliasing
+
+#if OST_SHADER_SUPPORT_ENABLED
+  GLint mbufs,msamples;
+  glGetIntegerv(GL_SAMPLE_BUFFERS, &mbufs);
+  glGetIntegerv(GL_SAMPLES, &msamples);
+
+  if(mbufs>0 && msamples>0) {
+    LOGN_VERBOSE("enabling multisampling with: " << msamples << " samples");
+    glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_POINT_SMOOTH);
+    glDisable(GL_POLYGON_SMOOTH);
+    glEnable(GL_MULTISAMPLE);
+  } else {
+    glEnable(GL_LINE_SMOOTH);
+    glDisable(GL_POINT_SMOOTH);
+    glDisable(GL_POLYGON_SMOOTH);
+  }
+#else
   glEnable(GL_LINE_SMOOTH);
   glDisable(GL_POINT_SMOOTH);
   glDisable(GL_POLYGON_SMOOTH);
+#endif
+
   // rendering hints
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glHint(GL_FOG_HINT, GL_NICEST);
@@ -249,6 +281,7 @@ void Scene::InitGL()
   // glDrawBuffer(GL_BACK);
   // initialize shaders
 #if OST_SHADER_SUPPORT_ENABLED
+  LOGN_DEBUG("scene: shader setup");
   Shader::Instance().Setup();
   Shader::Instance().Activate("fraglight");
 
@@ -276,6 +309,11 @@ void Scene::SetBackground(const Color& c)
   background_=c;
   SetFogColor(c);
   RequestRedraw();
+}
+
+Color Scene::GetBackground() const
+{
+  return background_;
 }
 
 Viewport Scene::GetViewport() const
@@ -1124,25 +1162,6 @@ uint Scene::GetSelectionMode() const
   return selection_mode_;
 }
 
-namespace {
-
-struct OffscreenSwitcher
-{
-  OffscreenSwitcher()
-  {
-    LOGN_TRACE("offscreen begin");
-    OffscreenBuffer::Instance().Begin();
-  }
-
-  ~OffscreenSwitcher()
-  {
-    LOGN_TRACE("offscreen end");
-    OffscreenBuffer::Instance().End();
-  }
-};
-
-} // anon ns
-
 void Scene::Export(const String& fname, unsigned int width,
                    unsigned int height, bool transparent)
 {
@@ -1157,37 +1176,47 @@ void Scene::Export(const String& fname, unsigned int width,
     return;
   }
 
-  offscreen_flag_=true;
-  LOGN_TRACE("offscreen resize");
-  OffscreenBuffer::Instance().Resize(width, height);
+  LOGN_DEBUG("switching to offscreen rendering");
+  bool old_flag=offscreen_flag_;
+  GLint old_vp[4];
+  glGetIntegerv(GL_VIEWPORT,old_vp);
   try {
-    // ensures that context is switched back when this goes out of scope
-    OffscreenSwitcher offscreen_switch;
+    OffscreenBuffer ob(width,height,OffscreenBufferFormat(),true);
 
+    if(!ob.IsValid()) {
+      LOGN_ERROR("error during offscreen buffer creation");
+      return;
+    }
+
+    ob.MakeActive();
+    offscreen_flag_=true;
+    root_node_->ContextSwitch();
+#if 1
 #if OST_SHADER_SUPPORT_ENABLED
     String shader_name = Shader::Instance().GetCurrentName();
 #endif
-    LOGN_TRACE("initializing GL");
+    LOGN_DEBUG("initializing GL");
     this->InitGL();
-    LOGN_TRACE("setting viewport");
+    LOGN_DEBUG("setting viewport");
     SetViewport(width,height);
-    LOGN_TRACE("reseting projection");
+    LOGN_DEBUG("reseting projection");
     ResetProjection();
-    LOGN_TRACE("updating fog settings");
+    LOGN_DEBUG("updating fog settings");
     update_fog();
     glDrawBuffer(GL_FRONT);
     //this->flag_all_dirty();
 #if OST_SHADER_SUPPORT_ENABLED
-    LOGN_TRACE("activating shader");
+    LOGN_DEBUG("activating shader");
     Shader::Instance().Activate(shader_name);
 #endif
-    LOGN_TRACE("doing rendering");
+#endif
+    LOGN_DEBUG("doing rendering");
     this->RenderGL();
     // make sure drawing operations are finished
     glFinish();
     boost::shared_array<uchar> img_data(new uchar[width*height*4]);
 
-    LOGN_TRACE("setting background transparency");
+    LOGN_DEBUG("setting background transparency");
     if (transparent) {
       glPixelTransferf(GL_ALPHA_BIAS, 0.0);
     } else {
@@ -1195,18 +1224,31 @@ void Scene::Export(const String& fname, unsigned int width,
       glPixelTransferf(GL_ALPHA_BIAS, 1.0);
     }
 
-    LOGN_TRACE("reading framebuffer pixels");
+    LOGN_DEBUG("reading framebuffer pixels");
     glReadBuffer(GL_FRONT);
     glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
 
     LOGN_DEBUG("calling bitmap export");
     BitmapExport(fname,ext,width,height,img_data.get());
-  } catch (...) {
+  } catch (std::exception& e) {
+    LOGN_ERROR("exception during offscreen rendering: " << e.what());
+    throw;
     // noop
-  } // offscreen_switch goes out of scope
-  offscreen_flag_=false;
+  }
+  LOGN_DEBUG("switching back to main context");
+  if(main_offscreen_buffer_) {
+    main_offscreen_buffer_->MakeActive();
+  } else if (win_) {
+    win_->MakeActive();
+  } else {
+    LOGN_ERROR("erm, no context to fall back to");
+    return;
+  }
+  Scene::Instance().SetViewport(old_vp[2],old_vp[3]);
+  offscreen_flag_=old_flag;
+  root_node_->ContextSwitch();
   glDrawBuffer(GL_BACK);
-  LOGN_TRACE("updating fog");
+  LOGN_DEBUG("updating fog");
   update_fog();
 }
 
@@ -1552,7 +1594,17 @@ bool Scene::InOffscreenMode() const
 
 void Scene::SetOffscreenMode()
 {
-  OffscreenBuffer::Instance().Begin();
+  if(main_offscreen_buffer_) return;
+  main_offscreen_buffer_ = new OffscreenBuffer(1000,1000,OffscreenBufferFormat(),false);
+  if(main_offscreen_buffer_->IsValid()) {
+    LOGN_DEBUG("activating offscreen buffer");
+    main_offscreen_buffer_->MakeActive();
+    offscreen_flag_=true;
+    InitGL();
+  } else {
+    LOGN_DEBUG("offscreen buffer is not valid");
+    delete main_offscreen_buffer_;
+  }
 }
 
 float Scene::ElapsedTime() const

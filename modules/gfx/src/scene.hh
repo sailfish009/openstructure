@@ -46,6 +46,7 @@
 namespace ost { namespace gfx {
 
 class InputEvent;
+class OffscreenBuffer;
 
 typedef std::vector<SceneObserver*>  SceneObserverList;
 
@@ -92,8 +93,14 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief turn fog on or off
   void SetFog(bool f);
 
+  /// \brief check fog status
+  bool GetFog() const;
+
   /// \brief set the fog color
   void SetFogColor(const Color& c);
+
+  /// \brief get the fog color
+  Color GetFogColor() const;
 
   /// \brief turn shadow on and off
   void SetShadow(bool f);
@@ -225,6 +232,9 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief set background color
   void SetBackground(const Color& c);
 
+  /// \brief get background color
+  Color GetBackground() const;
+
   /// \brief center rotation on the given point
   void SetCenter(const geom::Vec3& cen);
   
@@ -312,7 +322,7 @@ class DLLEXPORT_OST_GFX Scene {
   bool InOffscreenMode() const;
 
   /// \brief internal use
-  static void SetOffscreenMode();
+  void SetOffscreenMode();
 
   /// \brief switch into test mode (internal use)
   void SetTestMode(bool t);
@@ -383,6 +393,7 @@ private:
   bool auto_autoslab_;
 
   bool offscreen_flag_;
+  OffscreenBuffer* main_offscreen_buffer_;
 
   uint selection_mode_;
 

@@ -215,6 +215,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
   for(int c=0;c<size;++c) {
     int type1=entry_list[c].type;
     int type2=entry_list[std::min(c+1,size-1)].type;
+# if 0
     //int type0=entry_list[std::max(0,c-1)].type;
     if(type1==2 && type2==3) {
       type1=2;
@@ -226,6 +227,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
       // profile - gives visual artefacts
       //type2=3;
     }
+#endif
     for(int d=0;d<nsub;++d) {
       sublist[c*nsub+d].type=entry_list[c].type;
       sublist[c*nsub+d].type1=type1;

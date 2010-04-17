@@ -16,34 +16,44 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GFX_GLWIN_BASE_HH
-#define OST_GFX_GLWIN_BASE_HH
+#ifndef OST_GFX_WGL_OFFSCREEN_BUFFER_HH
+#define OST_GFX_WGL_OFFSCREEN_BUFFER_HH
 
-/*
-  abstract base class for use in the GUI
-
-  Author: Ansgar Philippsen
-*/
-
-#include <ost/gfx/module_config.hh>
+#include <ost/gfx/GL/wglew.h>
 
 namespace ost { namespace gfx {
 
-class DLLEXPORT_OST_GFX GLWinBase {
+/*
+  wgl implementation for offscreen buffers
+*/
+
+class WGLOffscreenBuffer: public OffscreenBuffer
+{
 public:
-  virtual ~GLWinBase() {}
+  WGLOffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared=true);
 
-  virtual void MakeActive() {}
+  bool Resize(unsigned int w, unsigned int h);
 
-  virtual void DoRefresh() = 0;
+  bool MakeActive();
 
-  virtual void StatusMessage(const String& m) = 0;
+  bool IsActive() {return active_;}
 
-  virtual void SetStereo(bool s) = 0;
+  bool IsValid() {return valid_;}
 
-  virtual bool HasMultisample() const = 0;
+private:
+  int width_;
+  int height_;
+  bool valid_;
+  bool active_;
+
+  HPBUFFERARB        pbuffer_;
+  HGLRC              context_; //rendering context
+  HGLRC              old_context_;
+  
+  HDC                dev_context_;//device context
+  HDC                old_dev_context_;
 };
 
-}}
+}} // ns
 
 #endif

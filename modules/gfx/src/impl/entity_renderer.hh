@@ -160,6 +160,8 @@ public:
   void FlagPositionsDirty();
 
   void Debug(unsigned int flags);
+
+  IndexedVertexArray& VA() {return va_;}
 protected:
   virtual void SetName(const String& name);
 

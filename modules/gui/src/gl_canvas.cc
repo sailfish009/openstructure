@@ -46,7 +46,7 @@ namespace ost { namespace gui {
 using gfx::Scene;
 
 GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QGLFormat& f):
-  QGLWidget(f, parent),
+  QGLWidget(f,parent),
   glwin_(gl_win)
 {
   if(!isValid()) return;
@@ -59,6 +59,11 @@ GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QGLFormat& f):
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
           SLOT(RequestContextMenu(const QPoint&)));
+}
+
+void GLCanvas::MakeActive()
+{
+  makeCurrent();
 }
 
 void GLCanvas::DoRefresh()

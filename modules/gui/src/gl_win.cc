@@ -56,7 +56,7 @@ GLWin::GLWin(QWidget* p):
     if(gl_canvas_->isValid()) {
       break; // format is fine
     } else {
-      delete gl_canvas_; // delete this canvas and try less sophisticated format
+      delete gl_canvas_; // delete this canvas and try a less sophisticated format
     }
   }
 
@@ -68,12 +68,14 @@ GLWin::GLWin(QWidget* p):
   this->SetInternalWidget(main);
   gfx::Scene::Instance().AttachObserver(this);
   QGLFormat format = gl_canvas_->format();
-  LOGN_MESSAGE("GLCanvas created with rbits=" << format.redBufferSize() 
-                << " gbits=" << format.greenBufferSize() << " bbits=" 
-                << format.blueBufferSize() << " abits=" 
-                << format.alphaBufferSize() << " dbits=" 
-                << format.depthBufferSize() << " accumbits=" 
-                << format.accumBufferSize());
+  LOGN_VERBOSE("GLCanvas created with rbits=" << format.redBufferSize() 
+               << " gbits=" << format.greenBufferSize() 
+               << " bbits=" << format.blueBufferSize() 
+               << " abits=" << format.alphaBufferSize() 
+               << " dbits=" << format.depthBufferSize()
+               << " accumbits=" << format.accumBufferSize()
+               << " multisample=" << format.sampleBuffers()
+               << " with samples=" << format.samples());
   main->setCentralWidget(gl_canvas_);
   connect(gl_canvas_, SIGNAL(ReleaseFocus()), this, SIGNAL(ReleaseFocus()));
   connect(&ToolManager::Instance(), SIGNAL(ActiveToolChanged(Tool*)), this, SLOT(ActiveToolChanged(Tool*)));

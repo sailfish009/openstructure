@@ -16,34 +16,47 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GFX_GLWIN_BASE_HH
-#define OST_GFX_GLWIN_BASE_HH
+#ifndef OST_GFX_GLX_OFFSCREEN_BUFFER_HH
+#define OST_GFX_GLX_OFFSCREEN_BUFFER_HH
+
+#include <stack>
+#include <ost/gfx/glext_include.hh>
+#include <GL/glx.h>
+
+namespace ost { namespace gfx {
 
 /*
-  abstract base class for use in the GUI
+  glx implementation for offscreen buffers
 
   Author: Ansgar Philippsen
 */
 
-#include <ost/gfx/module_config.hh>
-
-namespace ost { namespace gfx {
-
-class DLLEXPORT_OST_GFX GLWinBase {
+class OffscreenBuffer
+{
 public:
-  virtual ~GLWinBase() {}
+  OffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared=true);
+  ~OffscreenBuffer();
 
-  virtual void MakeActive() {}
+  bool Resize(unsigned int w, unsigned int h);
 
-  virtual void DoRefresh() = 0;
+  bool MakeActive();
 
-  virtual void StatusMessage(const String& m) = 0;
+  bool IsActive() {return active_;}
 
-  virtual void SetStereo(bool s) = 0;
+  bool IsValid() {return valid_;}
 
-  virtual bool HasMultisample() const = 0;
+private:
+  int width_;
+  int height_;
+  bool valid_;
+  bool active_;
+
+  Display*    dpy_;
+  GLXFBConfig* fbconfig_;
+  GLXPbuffer  pbuffer_;
+  GLXContext  context_;
 };
 
-}}
+}} // ns
 
 #endif

@@ -16,34 +16,17 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GFX_GLWIN_BASE_HH
-#define OST_GFX_GLWIN_BASE_HH
 
-/*
-  abstract base class for use in the GUI
-
-  Author: Ansgar Philippsen
-*/
-
-#include <ost/gfx/module_config.hh>
+#include <ost/gfx/offscreen_buffer.hh>
 
 namespace ost { namespace gfx {
 
-class DLLEXPORT_OST_GFX GLWinBase {
-public:
-  virtual ~GLWinBase() {}
+WGLOffscreenBuffer::WGLOffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared=true):
+  width_(width), height_(height), valid_(false), active_(false)
+{}
 
-  virtual void MakeActive() {}
+bool WGLOffscreenBuffer::Resize(unsigned int w, unsigned int h) {return false;}
 
-  virtual void DoRefresh() = 0;
+bool WGLOffscreenBuffer::MakeActive() {return false;}
 
-  virtual void StatusMessage(const String& m) = 0;
-
-  virtual void SetStereo(bool s) = 0;
-
-  virtual bool HasMultisample() const = 0;
-};
-
-}}
-
-#endif
+}} // ns

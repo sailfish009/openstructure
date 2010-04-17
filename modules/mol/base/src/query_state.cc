@@ -215,10 +215,12 @@ boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
           bool b=false;
           if (p=="helix") {
             b=r->GetSecStructure().IsHelical();
-          } else if (p=="ext") {
+          } else if (p=="ext" || p=="strand") {
             b=r->GetSecStructure().IsExtended();
           } else if (p=="coil") {
             b=r->GetSecStructure().IsCoil();
+          } else if (p=="*") {
+            b=true;
           }
           s_[*i]=ss.comp_op==COP_EQ ? b : !b;          
         } else {

@@ -4,16 +4,10 @@ if platform.machine()=='x86_64':
 else:
   sys.path.insert(0,os.getenv('DNG_ROOT')+'/lib/openstructure')
      
-from ost import io, mol, seq, conop, geom
+#from ost import io, mol, seq, conop, geom
+from ost import *
 import ost
-try: 
-  from ost import img
-except ImportError:
-  pass
-try:
-  from ost import gfx
-except ImportError:
-  pass
+
 ost.SetPrefixPath(os.getenv('DNG_ROOT'))
 def _InitRuleBasedBuilder():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
@@ -31,7 +25,7 @@ HistoryFile=os.path.expanduser('~/.ost_history')
 InGUIMode=False
 
   
-#gfx.set_offscreen_mode()
+gfx.set_offscreen_mode()
 sys.ps1='ost> '
 sys.ps2='..... '
 print ''

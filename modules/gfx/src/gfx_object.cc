@@ -148,6 +148,12 @@ void GfxObj::CustomPreRenderGL(bool flag) {}
 
 void GfxObj::CustomRenderPov(PovState& pov) {}
 
+void GfxObj::ContextSwitch()
+{
+  FlagRebuild();
+  GfxNode::ContextSwitch();
+}
+
 /* 
   this should not be necessary anymore
 

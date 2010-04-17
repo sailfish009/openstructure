@@ -368,7 +368,9 @@ void IndexedVertexArray::RenderGL()
   if(!initialized_) {
     LOGN_DUMP("initializing vertex array lists");
 #if OST_SHADER_SUPPORT_ENABLED
-    glGenBuffers(7,buffer_id_);
+    if(!Scene::Instance().InOffscreenMode()) {
+      glGenBuffers(7,buffer_id_);
+    }
 #endif
     outline_mat_dlist_=glGenLists(1);
     initialized_=true;
@@ -390,6 +392,7 @@ void IndexedVertexArray::RenderGL()
       use_buff=prep_buff();
     }
     if(!use_buff) {
+      LOGN_DUMP("buffer not available");
       glBindBuffer(GL_ARRAY_BUFFER,0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
     } else {
@@ -1095,6 +1098,7 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   
 bool IndexedVertexArray::prep_buff()
 {
+  if(Scene::Instance().InOffscreenMode()) return false;
 #if OST_SHADER_SUPPORT_ENABLED
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);

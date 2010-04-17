@@ -122,6 +122,8 @@ public:
   virtual void OnRenderModeChange();
   virtual void OnGLCleanup();
 
+  virtual void ContextSwitch();
+
   /// \brief change render mode
   virtual void SetRenderMode(RenderMode::Type m);
   /// \brief current render mode
@@ -152,6 +154,8 @@ public:
 
   void SetLineHalo(float f);
   float GetLineHalo() const;
+
+  void SetOutline(unsigned int m);
 
   // add a label at the given position
   void AddLabel(const String& s, const geom::Vec3& pos, const Color& col, float psize);
@@ -287,7 +291,6 @@ public:
   RenderMode::Type render_mode_;
   unsigned int debug_flags_;
  
- private: 
   mol::Transform transform_;
   bool rebuild_;
   bool refresh_;
