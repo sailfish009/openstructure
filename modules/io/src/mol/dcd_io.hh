@@ -16,23 +16,47 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SAVE_DCD_HH
-#define OST_SAVE_DCD_HH
+#ifndef OST_IO_ENTITY_DCD_IO_HH
+#define OST_IO_ENTITY_DCD_IO_HH
 
 /*
-  Author: Marco Biasini
+  CHARMM trajectory IO
+  Authors: Ansgar Philippsen, Marco Biasini
  */
- 
+
 #include <ost/io/module_config.hh>
 #include <ost/mol/coord_group.hh>
 
 namespace ost { namespace io {
-  
-/// \brief export coord group as PDB file and DCD trajectory
+
+/*! \brief import a CHARMM trajectory in dcd format
+    requires the coordinate and the trajectory file; the format
+    of the coordinate file will be automatically deduced from the extension
+    the optional stride parameter will cause only every nth frame to be loaded
+*/
+mol::CoordGroupHandle DLLEXPORT_OST_IO LoadCHARMMTraj(const String& coord,
+						      const String& trj,
+						      unsigned int stride=1);
+
+/*! \brief import a CHARMM trajectory in dcd format with an existing entity
+    requires the existing entity and the trajectory file - obviously the
+    atom layout of the entity must match the trajectory file
+*/
+mol::CoordGroupHandle DLLEXPORT_OST_IO LoadCHARMMTraj(const mol::EntityHandle& e,
+						      const String& trj,
+						      unsigned int stride=1);
+
+
+/*! \brief export coord group as PDB file and DCD trajectory
+    if the pdb filename is an empty string, it won't be exported
+    the optional stride parameter will cause every nth frame to be exported
+ */
 void DLLEXPORT_OST_IO SaveCHARMMTraj(const mol::CoordGroupHandle& coord_group, 
                                      const String& pdb_filename, 
                                      const String& dcd_filename,
-                                     unsigned int stepsize=1);
-}}
+                                     unsigned int stride=1);
+
+
+}} // ns
 
 #endif

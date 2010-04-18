@@ -8,14 +8,14 @@ save_entity.cc
 load_entity.cc
 surface_io_msms_handler.cc
 load_surface.cc
-save_dcd.cc
+dcd_io.cc
 star_parser.cc
 PARENT_SCOPE
 )
 
 set(OST_IO_MOL_HEADERS
 star_parser.hh
-save_dcd.hh
+dcd_io.hh
 entity_io_crd_handler.hh	
 pdb_io.hh
 entity_io_handler.hh		

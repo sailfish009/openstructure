@@ -25,8 +25,6 @@
  */
 #include <ost/io/mol/entity_io_handler.hh>
 
-#include <ost/mol/coord_group.hh>
-
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -79,14 +77,6 @@ public:
 typedef EntityIOHandlerFactory<EntityIOCRDHandler> EntityIOCRDHandlerFactory;
 
 mol::EntityHandle DLLEXPORT_OST_IO LoadCRD(const String& file_name);
-
-/*
-  the flag can tweak the behavior of the importer; right now, the zero bit
-  can be used to switch old format compatibility on
-*/
-mol::CoordGroupHandle DLLEXPORT_OST_IO LoadCHARMMTraj(const String& crd,
-                                                 const String& trj,
-                                                 int flags=0);
 
 }} // ns
 
