@@ -24,7 +24,7 @@
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem/fstream.hpp>
-
+#include <ost/string_ref.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/io/module_config.hh>
@@ -61,12 +61,19 @@ public:
 
 private:
   void ClearState();
+  void AssignSecStructure(mol::EntityHandle ent);
+  void ParseAndAddAtom(const StringRef& line, int line_num,
+                       mol::EntityHandle& h, const StringRef& record_type);
 
-  void ParseAndAddAtom(const String& line, int line_num,
-                       mol::EntityHandle& h, const String& record_type);
-
-  void ParseHelixEntry(const String& line);
-  void ParseStrandEntry(const String& line);
+  /// \brief parses the common part of ATOM, HETATM and ANISOU records
+  bool ParseAtomIdent(const StringRef& line, int line_num, 
+                      char& chain_name, StringRef& res, 
+                      mol::ResNum& resnum, StringRef& atom_name, char& alt_loc,
+                      const StringRef& record_type);
+  void ParseAnisou(const StringRef& line, int line_num,
+                   mol::EntityHandle& h);
+  void ParseHelixEntry(const StringRef& line);
+  void ParseStrandEntry(const StringRef& line);
   void Init(const boost::filesystem::path& loc);
   mol::ChainHandle curr_chain_;
   mol::ResidueHandle curr_residue_;

@@ -41,76 +41,17 @@ using boost::format;
 
 namespace {
 
-std::pair<bool, Real> my_strtof(const char* start, int len)
+bool IEquals(const StringRef& a, const StringRef& b)
 {
-
-  Real n=0;
-  bool empty=true;
-  int sig=1;
-  bool after_dot=false;
-  Real factor=0.1;
-  // skip empty characters... at beginning
-  for (const char* c=start;*c!=0 && ((c-start)<len); ++c) {
-    if (empty && (*c)==' ') {
-      continue;
-    }
-    if (*c=='-' && empty) {
-      empty=false;
-      sig=-1;
-      continue;
-    }
-    if (*c=='.') {
-      if (after_dot==true) {
-        return std::make_pair(false, 0.0);
-      }
-      after_dot=true;
-      continue;
-    }
-    if (*c>='0' && *c<='9') {
-      empty=false;
-      if (after_dot==true) {
-        n+=factor*int(*c-'0');
-        factor*=0.1;
-      } else {
-        n=n*10+int(*c-'0');
-      }
-      continue;
-    }
-    return std::make_pair(false, 0.0);
+  if (a.size()!=b.size()) {
+    return false;
   }
-  if (empty) {
-    return std::make_pair(false, 0.0);
-  }
-  return std::make_pair(true, sig*n);
-}
-
-std::pair<bool, int> my_strtoi(const char* start, int len)
-{
-
-  int n=0;
-  bool empty=true;
-  int sig=1;
-  // skip empty characters... at beginning
-  for (const char* c=start;*c!=0 && ((c-start)<len); ++c) {
-    if (empty && (*c)==' ') {
-      continue;
+  for (size_t i=0; i<a.size(); ++i) {
+    if (toupper(a[i])!=toupper(b[i])) {
+      return false;
     }
-    if (*c=='-' && empty) {
-      empty=false;
-      sig=-1;
-      continue;
-    }
-    if (*c>='0' && *c<='9') {
-      empty=false;
-      n=n*10+int(*c-'0');
-      continue;
-    }
-    return std::make_pair(false, 0);
   }
-  if (empty) {
-    return std::make_pair(false, 0);
-  }
-  return std::make_pair(true, sig*n);
+  return true;
 }
 
 mol::ResNum to_res_num(int num, char ins_code)
@@ -159,14 +100,15 @@ bool PDBReader::HasNext()
   // since helix and sheet have to appear before any atom/hetatm records
   // a HELIX/SHEET entry implies a next model.
   while (std::getline(in_, curr_line_) && ++line_num_) {
-     if (boost::iequals(curr_line_.substr(0, 4),"ATOM") ||
+     StringRef curr_line(curr_line_.c_str(), curr_line_.length());
+     if (IEquals(curr_line.substr(0, 6), StringRef("ATOM  ", 6)) ||
          (!(flags_ & PDB::NO_HETATMS) &&
-          boost::iequals(curr_line_.substr(0, 6),"HETATM")) ||
-          boost::iequals(curr_line_.substr(0, 6),"ANISOU") ||
-         boost::iequals(curr_line_.substr(0, 5), "SHEET") ||
-         boost::iequals(curr_line_.substr(0, 5), "HELIX")) {
+          IEquals(curr_line.substr(0, 6),StringRef("HETATM ", 6))) ||
+          IEquals(curr_line.substr(0, 6),StringRef("ANISOU ", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6))) {
        return true;
-     } else if (boost::iequals(curr_line_, "END")) {
+     } else if (IEquals(curr_line, StringRef("END", 3))) {
        return false;
      }
   }
@@ -180,28 +122,67 @@ void PDBReader::Import(mol::EntityHandle& ent,
   this->ClearState();
   // first read curr_line and then read next...
   restrict_chains_=restrict_chains;
+  bool go_on=true;
   do {
-    if (boost::iequals(curr_line_.substr(0, 4), "ATOM")) {
-      LOGN_TRACE("processing ATOM entry");
-      ParseAndAddAtom(curr_line_, line_num_, ent, "ATOM");
-    } else if(boost::iequals(curr_line_.substr(0, 6), "HETATM")) {
-      if (flags_ & PDB::NO_HETATMS)
-        continue;
-      LOGN_TRACE("processing HETATM entry");
-      ParseAndAddAtom(curr_line_, line_num_, ent, "HETATM");
-    } else if(boost::iequals(curr_line_.substr(0, 6), "ANISOU")) {
-      if (flags_ & PDB::NO_HETATMS)
-        continue;
-      LOGN_TRACE("processing ANISOU entry");
-      ParseAndAddAtom(curr_line_, line_num_, ent, "ANISOU");
-    }else if (boost::iequals(curr_line_.substr(0, 6), "ENDMDL")) {
-      break;
-    } else if (boost::iequals(curr_line_, "END")) {
-      break;
-    } else if(boost::iequals(curr_line_.substr(0, 5),"HELIX")) {
-      ParseHelixEntry(curr_line_);
-    } else if(boost::iequals(curr_line_.substr(0, 5),"SHEET")) {
-      ParseStrandEntry(curr_line_);
+    if (curr_line_.empty()) {
+      continue;
+    }    
+    StringRef curr_line(curr_line_.c_str(), curr_line_.size());
+    switch(curr_line[0]) {
+      case 'A':
+      case 'a':
+        if (curr_line.size()<6) {
+          continue;
+        }
+        if (IEquals(curr_line.substr(0, 6), StringRef("ATOM  ", 6))) {
+          LOGN_TRACE("processing ATOM entry");
+          this->ParseAndAddAtom(curr_line, line_num_, ent, 
+                                StringRef("ATOM", 4));
+        } else if (IEquals(curr_line.substr(0, 6), StringRef("ANISOU", 6))) {
+          LOGN_TRACE("processing ANISOU entry");
+          this->ParseAnisou(curr_line, line_num_, ent);
+        }
+        break;
+      case 'E':
+      case 'e':
+        if (curr_line.size()<3) {
+          continue;
+        }
+        if (IEquals(curr_line.substr(0, 3), StringRef("END", 3))) {
+          go_on=false;
+          break;
+        }
+        if (curr_line.size()<6) {
+          continue;
+        }
+        if (IEquals(curr_line.substr(0, 6), StringRef("ENDMDL", 6))) {
+          go_on=false;
+          break;
+        }
+      case 'H':
+      case 'h':
+        if (curr_line.size()<6) {
+          continue;
+        }
+        if (IEquals(curr_line.substr(0, 6), StringRef("HETATM", 6))) {
+          if (flags_ & PDB::NO_HETATMS)
+            continue;
+          LOGN_TRACE("processing HETATM entry");
+          this->ParseAndAddAtom(curr_line, line_num_, ent, 
+                                StringRef("HETATM", 6));
+        } else if (IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6))) {
+          this->ParseHelixEntry(curr_line);
+        }
+      case 'S':
+      case 's':
+        if (curr_line.size()<6) {
+          continue;
+        }
+        if (IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6))) {
+          this->ParseStrandEntry(curr_line);
+        }
+      default:
+        break;
     }
   }  while (std::getline(in_, curr_line_) && ++line_num_);
   LOGN_MESSAGE("imported "
@@ -210,6 +191,12 @@ void PDBReader::Import(mol::EntityHandle& ent,
                << atom_count_ << " atoms; with "
                << helix_list_.size() << " helices and "
                << strand_list_.size() << " strands");
+  this->AssignSecStructure(ent);
+}
+
+
+void PDBReader::AssignSecStructure(mol::EntityHandle ent)
+{
   // and now for the fun part, assigning the strands/helices to residues
   for (HSList::const_iterator i=helix_list_.begin(), e=helix_list_.end();
        i!=e; ++i) {
@@ -269,124 +256,131 @@ void PDBReader::SetFlags(PDBFlags flags)
   flags_=flags;
 }
 
-void PDBReader::ParseAndAddAtom(const String& line, int line_num,
-                                mol::EntityHandle& ent, const String& record_type)
+bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num, 
+                               char& chain_name,  StringRef& res_name,
+                               mol::ResNum& resnum, StringRef& atom_name, 
+                               char& alt_loc, const StringRef& record_type)
 {
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
-  char ins_c, alt_loc;
-  char res_key[5], c_name;
-  String a_name;
-  std::pair<bool, Real> charge, radius;
-  std::pair<bool, Real> occ, temp;
-  geom::Vec3 apos;
-  double anisou[6];
-  c_name=line[21];
+  chain_name=line[21];
   if (restrict_chains_.size()>0 &&
-      restrict_chains_.find(c_name)==String::npos) {
-    return;
+    restrict_chains_.find(chain_name)==String::npos) {
+    return false;
   }
-  memset(anisou, 0, sizeof(anisou));
-  memset(res_key, 0, sizeof(res_key));
-  char buf[6];
 
-  std::pair<bool, int> a_num=my_strtoi(line.c_str()+6, 5);
+  std::pair<bool, int> a_num=line.substr(6, 5).ltrim().to_int();
   if (!a_num.first) {
     if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
-      return;
+      return false;
     }
     throw IOException(str(format("invalid atom number on line %d") %line_num));
   }
-  a_name.assign(line.c_str()+12, 4);
-  boost::algorithm::trim(a_name);
+  atom_name=line.substr(12, 4).trim();
   alt_loc=line[16];
-  strncpy(res_key, line.c_str()+17, 3);
-  res_key[4]='\0';
-  buf[4]='\0';
-  std::pair<bool, int> res_num=my_strtoi(line.c_str()+22, 4);
+  res_name=line.substr(17, 3).trim();
+  std::pair<bool, int> res_num=line.substr(22, 4).ltrim().to_int();;
   if (!res_num.first) {
     if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
-      return;
+      return false;
     }
     throw IOException(str(format("invalid res number on line %d") % line_num));
   }
-  ins_c=line[26];
-  if (record_type=="ANISOU") {
-    for (int i=0;i<6; ++i) {
-      std::pair<bool, double> result=my_strtoi(line.c_str()+29+i*7, 6);
-      if (!result.first) {
-        if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
-          return;
-        }
-        throw IOException(str(format("invalid ANISOU record on line %d")%line_num));
-      }
-      anisou[i]=result.second;
-    }
-  }else {
-    for (int i=0;i<3; ++i) {
-      std::pair<bool, double> result=my_strtof(line.c_str()+30+i*8, 8);
-      if (!result.first) {
-        if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
-          return;
-        }
-        throw IOException(str(format("invalid coordinate on line %d")%line_num));
-      }
-      apos[i]=result.second;
-    }
+  char  ins_c=line[26];  
+  resnum=to_res_num(res_num.second, ins_c);
+  return true;
+}
+
+void PDBReader::ParseAnisou(const StringRef& line, int line_num, 
+                            mol::EntityHandle& ent)
+{
+  char chain_name=0;
+  char alt_loc=0;
+  StringRef res_name, atom_name;
+  mol::ResNum res_num(0);
+  if (!this->ParseAtomIdent(line, line_num, chain_name, res_name, res_num, 
+                            atom_name, alt_loc, StringRef("ANISOU", 6))) {
+    return;                            
   }
-  if (record_type=="ANISOU") {
-    String aname(a_name);
-    if (!curr_residue_.IsValid()) {
+  double anisou[6]={0.0, 0.0, 0.0, 0.0, 0.0, 0.0};  
+  for (int i=0;i<6; ++i) {
+    std::pair<bool, int> result=line.substr(29+i*7, 6).to_int();
+    if (!result.first) {
       if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
         return;
-      } 
-      const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
-      throw IOException(str(format(fmt_str) % line_num));      
+      }
+      throw IOException(str(format("invalid ANISOU record on line %d")%line_num));
     }
-    mol::AtomHandle atom=curr_residue_.FindAtom(aname);
-    if (!atom.IsValid()) {
+    anisou[i]=result.second;
+  }
+  String aname(atom_name.str());
+  if (!curr_residue_.IsValid()) {
+    if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
+      return;
+    } 
+    const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
+    throw IOException(str(format(fmt_str) % line_num));      
+  }
+  mol::AtomHandle atom=curr_residue_.FindAtom(aname);
+  if (!atom.IsValid()) {
+    if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
+      return;
+    } 
+    const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
+    throw IOException(str(format(fmt_str) % line_num));      
+  }
+  //get properties which are already set and extend them by adding the ANISOU info
+  mol::AtomProp aprop=atom.GetProp();
+  geom::Mat3 mat(anisou[0], anisou[3], anisou[4],
+                 anisou[3], anisou[1], anisou[5],
+                 anisou[4], anisou[5], anisou[2]);
+  aprop.anisou=mat;
+  //divide by 10**4 to actually reflect the real values
+  aprop.anisou/=10000;
+  aprop.has_anisou=true;
+  atom.SetProp(aprop);
+  return;  
+}
+
+void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
+                                mol::EntityHandle& ent, 
+                                const StringRef& record_type)
+{
+  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  char alt_loc=0;
+  char chain_name=0;
+  StringRef res_name, atom_name;
+  mol::ResNum res_num(0);
+  if (!this->ParseAtomIdent(line, line_num, chain_name, res_name, res_num, 
+                            atom_name, alt_loc, record_type)) {
+    return;                            
+  }
+  std::pair<bool, Real> charge, radius;
+  std::pair<bool, Real> occ, temp;
+  geom::Vec3 apos;
+
+  for (int i=0;i<3; ++i) {
+    std::pair<bool, float> result=line.substr(30+i*8, 8).ltrim().to_float();
+    if (!result.first) {
       if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
         return;
-      } 
-      const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
-      throw IOException(str(format(fmt_str) % line_num));      
+      }
+      throw IOException(str(format("invalid coordinate on line %d")%line_num));
     }
-    //get properties which are already set and extend them by adding the ANISOU info
-    mol::AtomProp aprop=atom.GetProp();
-    geom::Mat3 mat(anisou[0],
-                  anisou[3],
-                  anisou[4],
-                  anisou[3],
-                  anisou[1],
-                  anisou[5],
-                  anisou[4],
-                  anisou[5],
-                  anisou[2]);
-    aprop.anisou=mat;
-    //divide by 10**4 to actually reflect the real values
-    aprop.anisou/=10000;
-    aprop.has_anisou=true;
-    atom.SetProp(aprop);
-    return;
+    apos[i]=result.second;
   }
   // b-factors and occ are replaced by radius and charge if PQR file format
   if(is_pqr_) {
     occ=std::make_pair(true, 1.0);
     temp=std::make_pair(true, 0.0);
-    charge=my_strtof(line.c_str()+54,6);
-    radius=my_strtof(line.c_str()+60, 6);
+    charge=line.substr(54,6).ltrim().to_float();
+    radius=line.substr(60, 6).ltrim().to_float();
   } else {
-    occ=my_strtof(line.c_str()+54,6);
-    temp=my_strtof(line.c_str()+60, 6);
+    occ=line.substr(54,6).ltrim().to_float();
+    temp=line.substr(60, 6).ltrim().to_float();
   }
   LOGN_TRACE( "line: [" << line << "]" );
   String s_ele;
-  String s_chain(1, c_name);
-  String aname(a_name);
-  const char* rk=res_key;
-  while(*rk==' ') {
-    ++rk;
-  }
-  mol::ResidueKey rkey(rk);
+  String s_chain(1, chain_name);
+  String aname(atom_name.str());
   // determine element from element column (77-78, right justified) if present
   // otherwise set to empty String. It is up to the builder to determine the
   // correct element in that case.
@@ -397,12 +391,12 @@ void PDBReader::ParseAndAddAtom(const String& line, int line_num,
                                                     // empty
       if(line[76]==' ' && line[77]!=' ') {          // single character element,
                                                     // right justified
-        s_ele=line.substr(77,1);
+        s_ele=line.substr(77,1).str();
       } else if(line[76]!=' ' && line[77]==' ') {   // single character element,
                                                     // left justified
-        s_ele=line.substr(76,1);
+        s_ele=line.substr(76,1).str();
       } else {                                      // Real character element
-        s_ele=line.substr(76,2);
+        s_ele=line.substr(76,2).str();
       }
     }
   }
@@ -411,9 +405,7 @@ void PDBReader::ParseAndAddAtom(const String& line, int line_num,
   }
 
   // some postprocessing
-  LOGN_TRACE( "s_chain: [" << c_name << "]" );
-
-  mol::ResNum rnum(to_res_num(res_num.second, ins_c));
+  LOGN_TRACE( "s_chain: [" << chain_name << "]" );
 
   // determine chain and residue update
   bool update_chain=false;
@@ -428,7 +420,7 @@ void PDBReader::ParseAndAddAtom(const String& line, int line_num,
 
   if(!curr_residue_) {
     update_residue=true;
-  } else if(curr_residue_.GetNumber()!=rnum) {
+  } else if(curr_residue_.GetNumber()!=res_num) {
     update_residue=true;
   }
 
@@ -441,15 +433,15 @@ void PDBReader::ParseAndAddAtom(const String& line, int line_num,
   }
   if(update_residue) {
     if (flags_ & PDB::JOIN_SPREAD_ATOM_RECORDS) {
-      curr_residue_=curr_chain_.FindResidue(rnum);
+      curr_residue_=curr_chain_.FindResidue(res_num);
       if (!curr_residue_.IsValid()) {
-        LOGN_DUMP("new residue " << rkey << " " << rnum);      
-        curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+        LOGN_DUMP("new residue " << res_name << " " << res_num);
+        curr_residue_=editor.AppendResidue(curr_chain_, res_name.str(), res_num);
         ++residue_count_; 
       }
     } else {
-      LOGN_DUMP("new residue " << rkey << " " << rnum);      
-      curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+      LOGN_DUMP("new residue " << res_name << " " << res_num);
+      curr_residue_=editor.AppendResidue(curr_chain_, res_name.str(), res_num);
       ++residue_count_;      
     }
     assert(curr_residue_.IsValid());
@@ -478,7 +470,7 @@ void PDBReader::ParseAndAddAtom(const String& line, int line_num,
     aprop.charge=charge.second;
   }
 
-  aprop.is_hetatm=record_type=="HETATM" ? true : false;
+  aprop.is_hetatm=record_type[0]=='H' ? true : false;
 
   if (alt_loc!=' ') {
     // Check if there is already a atom with the same name.
@@ -508,17 +500,18 @@ void PDBReader::ParseAndAddAtom(const String& line, int line_num,
   }
 }
 
-void PDBReader::ParseHelixEntry(const String& line)
+void PDBReader::ParseHelixEntry(const StringRef& line)
 {
-  std::pair<bool, int>  start_num=my_strtoi(line.c_str()+21, 4);
-  std::pair<bool, int>  end_num=my_strtoi(line.c_str()+33, 4);
+  std::pair<bool, int>  start_num=line.substr(21, 4).ltrim().to_int();
+  std::pair<bool, int>  end_num=line.substr(33, 4).ltrim().to_int();
   if (!start_num.first || !end_num.first) {
-    throw IOException(str(format("invalid helix entry on line") % line_num_));
+    throw IOException(str(format("invalid helix entry on line %d") % line_num_));
   }
-  LOGN_DEBUG("making helix entry: " << start_num.second << ", " << line[25] << " " << end_num.second << " " << line[37]);
+  LOGN_DEBUG("making helix entry: " << start_num.second << ", " 
+             << line[25] << " " << end_num.second << " " << line[37]);
   HSEntry hse = {to_res_num(start_num.second, line[25]),
                  to_res_num(end_num.second, line[37]),
-                 line.substr(19,1)};
+                 line.substr(19,1).str()};
   if (restrict_chains_.size()==0 ||
       restrict_chains_.find(hse.chain)!=String::npos) {
     helix_list_.push_back(hse);
@@ -526,17 +519,17 @@ void PDBReader::ParseHelixEntry(const String& line)
 
 }
 
-void PDBReader::ParseStrandEntry(const String& line)
+void PDBReader::ParseStrandEntry(const StringRef& line)
 {
-  std::pair<bool, int>  start_num=my_strtoi(line.c_str()+22, 4);
-  std::pair<bool, int>  end_num=my_strtoi(line.c_str()+33, 4);
+  std::pair<bool, int>  start_num=line.substr(22, 4).ltrim().to_int();
+  std::pair<bool, int>  end_num=line.substr(33, 4).ltrim().to_int();
   if (!start_num.first || !end_num.first) {
-    throw IOException(str(format("invalid strand entry on line") % line_num_));
+    throw IOException(str(format("invalid strand entry on line %d") % line_num_));
   }
   LOGN_DEBUG("making strand entry: " << start_num.second << ", " << line[26] << " " << end_num.second << " " << line[37]);
   HSEntry hse = {to_res_num(start_num.second, line[26]),
                  to_res_num(end_num.second, line[37]),
-                 line.substr(21,1)};
+                 line.substr(21,1).str()};
   if (restrict_chains_.size()==0 ||
      restrict_chains_.find(hse.chain)!=String::npos) {
    strand_list_.push_back(hse);
