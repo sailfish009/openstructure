@@ -28,7 +28,8 @@ using namespace ost::io;
 
 BOOST_AUTO_TEST_SUITE( io )
 
-BOOST_AUTO_TEST_CASE(test_io_pdb) 
+
+BOOST_AUTO_TEST_CASE(test_pdb_import_handler) 
 {
   String fname("testfiles/test_in.pdb");
 
@@ -44,6 +45,38 @@ BOOST_AUTO_TEST_CASE(test_io_pdb)
   BOOST_CHECK(EntityIOPDBHandler::ProvidesExport("test_in.PDB"));
     
   pdbh.Import(eh,"testfiles/pdb/simple.pdb");
+}
+
+BOOST_AUTO_TEST_CASE(atom_record)
+{
+  String fname("testfiles/pdb/atom.pdb");
+  PDBReader reader(fname); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_REQUIRE_EQUAL(ent.GetChainCount(), 2);
+  BOOST_REQUIRE_EQUAL(ent.GetResidueCount(), 2);
+  BOOST_REQUIRE_EQUAL(ent.GetAtomCount(), 2);
+  mol::AtomHandle a1=ent.FindChain("A").GetAtomList()[0];
+  BOOST_CHECK_EQUAL(a1.GetName(), "N");
+  BOOST_CHECK_EQUAL(a1.GetResidue().GetName(), "MET");
+  BOOST_CHECK_EQUAL(a1.GetResidue().GetChain().GetName(), "A");  
+  
+  BOOST_CHECK_EQUAL(a1.GetPos(), geom::Vec3(16.0, 64.0, 8.0));
+  BOOST_CHECK_EQUAL(a1.GetProp().b_factor, 1.0);
+  BOOST_CHECK_EQUAL(a1.GetProp().occupancy, 0.5);  
+  BOOST_CHECK_EQUAL(a1.GetProp().element, "N");
+  BOOST_CHECK_EQUAL(a1.GetProp().is_hetatm, false);
+  mol::AtomHandle a2=ent.FindChain(" ").GetAtomList()[0];
+  BOOST_CHECK_EQUAL(a2.GetName(), "CA");
+  BOOST_CHECK_EQUAL(a2.GetResidue().GetName(), "MET");
+  BOOST_CHECK_EQUAL(a2.GetResidue().GetChain().GetName(), " ");  
+  
+  BOOST_CHECK_EQUAL(a2.GetPos(), geom::Vec3(32.0, -128.0, -2.5));
+  BOOST_CHECK_EQUAL(a2.GetProp().b_factor, 128.0);
+  BOOST_CHECK_EQUAL(a2.GetProp().occupancy, 1.0);  
+  BOOST_CHECK_EQUAL(a2.GetProp().element, "C");
+  BOOST_CHECK_EQUAL(a2.GetProp().is_hetatm, true);
+  
 }
 
 BOOST_AUTO_TEST_CASE(join_spread_records_on)
