@@ -27,10 +27,11 @@ namespace ost { namespace gfx {
   wgl implementation for offscreen buffers
 */
 
-class WGLOffscreenBuffer: public OffscreenBuffer
+class OffscreenBuffer
 {
 public:
-  WGLOffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared=true);
+  OffscreenBuffer(unsigned int width, unsigned int height, 
+                  const OffscreenBufferFormat& f, bool shared=true);
 
   bool Resize(unsigned int w, unsigned int h);
 

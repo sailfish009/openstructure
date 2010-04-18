@@ -21,12 +21,12 @@
 
 namespace ost { namespace gfx {
 
-WGLOffscreenBuffer::WGLOffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared=true):
+OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared=true):
   width_(width), height_(height), valid_(false), active_(false)
 {}
 
-bool WGLOffscreenBuffer::Resize(unsigned int w, unsigned int h) {return false;}
+bool OffscreenBuffer::Resize(unsigned int w, unsigned int h) {return false;}
 
-bool WGLOffscreenBuffer::MakeActive() {return false;}
+bool OffscreenBuffer::MakeActive() {return false;}
 
 }} // ns

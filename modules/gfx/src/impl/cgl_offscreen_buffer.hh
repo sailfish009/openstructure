@@ -29,10 +29,11 @@ namespace ost { namespace gfx {
   Author: Marco Biasini
 */
 
-class CGLOffscreenBuffer
+class OffscreenBuffer
 {
 public:
-  CGLOffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared=true);
+  OffscreenBuffer(unsigned int width, unsigned int height, 
+                  const OffscreenBufferFormat& f, bool shared=true);
 
   bool Resize(unsigned int w, unsigned int h);
 

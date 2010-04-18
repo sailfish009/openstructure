@@ -28,10 +28,10 @@
 
 namespace ost { namespace gfx {
 
-OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared):
+OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, 
+                                 const OffscreenBufferFormat& f, bool shared):
   width_(width), height_(height), valid_(false), active_(false)
 {
-#if 0
   CGLPixelFormatAttribute attributes[]={
     kCGLPFAPBuffer,
     kCGLPFAColorSize, CGLPixelFormatAttribute(f.cbits),
@@ -48,10 +48,11 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
   }
   // if a context exists, share resources such as shader programs and display
   // lists.
-
-  // TODO: honor if shared?
-
-  err=CGLCreateContext(pix_format_, CGLGetCurrentContext(), &context_);
+  if (shared) {
+    err=CGLCreateContext(pix_format_, CGLGetCurrentContext(), &context_);    
+  } else {
+    err=CGLCreateContext(pix_format, NULL, &context_);
+  }
   if(err) {
     LOGN_ERROR("error creating offscreen rendering context. "
                "CGLCreateContext failed" << CGLErrorString(err));
@@ -73,14 +74,11 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
     return;
   }
 
-
   valid_=true;
-#endif
 }
 
-bool OffscreenBuffer::Resize(unsigned int w, unsigned int h)
+bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
 {
-#if 0
   CGLPBufferObj      new_pbuffer;  
   CGLError err=CGLCreatePBuffer(width, height, GL_TEXTURE_RECTANGLE_EXT,
                                 GL_RGBA, 0,  &new_pbuffer);
@@ -106,14 +104,11 @@ bool OffscreenBuffer::Resize(unsigned int w, unsigned int h)
 
   width_=width;
   height_=height;
-#else
-  return false;
-#endif
+  return true;
 }
 
 bool OffscreenBuffer::MakeActive()
 {
-#if 0
   if(active_) return true;
 
   if (CGLError err=CGLSetCurrentContext(context_)) {
@@ -122,10 +117,6 @@ bool OffscreenBuffer::MakeActive()
     return false;
   }
   return true;
-#else
-  return false;
-#endif
-
 }
 
 }} // ns
