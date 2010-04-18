@@ -51,7 +51,7 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height,
   if (shared) {
     err=CGLCreateContext(pix_format_, CGLGetCurrentContext(), &context_);    
   } else {
-    err=CGLCreateContext(pix_format, NULL, &context_);
+    err=CGLCreateContext(pix_format_, NULL, &context_);
   }
   if(err) {
     LOGN_ERROR("error creating offscreen rendering context. "
