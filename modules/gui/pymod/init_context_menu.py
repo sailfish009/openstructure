@@ -13,9 +13,8 @@ class SelectRefDialog(QtGui.QDialog):
     self.setWindowTitle("Select Reference Object")
     self.label = QtGui.QLabel("Please Select the Reference Object")
     self.list = QtGui.QTableWidget(self)
+    self.list.horizontalHeader().setStretchLastSection(True)
     self.list.setColumnCount(2)
-    self.list.setColumnWidth(0, 30)
-    self.list.setColumnWidth(1,220)
     self.list.verticalHeader().setVisible(False)
     self.list.horizontalHeader().setVisible(False)
     self.list.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
@@ -47,6 +46,8 @@ class SelectRefDialog(QtGui.QDialog):
       self.list.setItem(row, 1, new_item)
       row += 1  
 
+    self.list.resizeColumnsToContents()
+    
   def Select(self):
     items = self.list.selectedItems()
     for item in items:
@@ -68,9 +69,10 @@ class ShowResultDialog(QtGui.QDialog):
     self.setWindowTitle("Alignment result")
     self.label = QtGui.QLabel("Alignment results with %s as reference"%ent_list[0].GetName())
     self.list = QtGui.QTableWidget(self)
-    self.list.setColumnCount(3)
+    self.list.horizontalHeader().setStretchLastSection(True)
+    self.list.setColumnCount(4)
     self.list.verticalHeader().setVisible(False)
-    self.list.setHorizontalHeaderLabels (["Name","RMSD","TMScore"])
+    self.list.setHorizontalHeaderLabels (["Name","RMSD","TMScore",""])
     self.list.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
     vb.addWidget(self.label)
     vb.addWidget(self.list)
@@ -94,6 +96,11 @@ class ShowResultDialog(QtGui.QDialog):
       new_item = QtGui.QTableWidgetItem("%i"%res_list[i].tm_score)
       new_item.setFlags(QtCore.Qt.ItemIsEnabled)
       self.list.setItem(i, 2, new_item)
+      new_item = QtGui.QTableWidgetItem()
+      new_item.setFlags(QtCore.Qt.ItemIsEnabled)
+      self.list.setItem(i, 3, new_item)
+          
+    self.list.resizeColumnsToContents()
 
 class AlignmentContextMenu(QtCore.QObject):
   def __init__(self, context_menu):
