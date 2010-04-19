@@ -81,6 +81,7 @@ private:
   int residue_count_;
   int atom_count_;
   int line_num_;
+  bool hard_end_;
   String restrict_chains_;
   HSList helix_list_;
   HSList strand_list_;

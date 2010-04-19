@@ -76,7 +76,15 @@ BOOST_AUTO_TEST_CASE(atom_record)
   BOOST_CHECK_EQUAL(a2.GetProp().occupancy, 1.0);  
   BOOST_CHECK_EQUAL(a2.GetProp().element, "C");
   BOOST_CHECK_EQUAL(a2.GetProp().is_hetatm, true);
-  
+}
+
+BOOST_AUTO_TEST_CASE(end_record)
+{
+  String fname("testfiles/pdb/end.pdb");
+  PDBReader reader(fname); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(join_spread_records_on)

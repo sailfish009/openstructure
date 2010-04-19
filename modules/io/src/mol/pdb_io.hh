@@ -64,7 +64,9 @@ struct PDB {
     /// PDB::JOIN_SPREAD_ATOM_RECORDS and CoordGroups.
     /// 
     /// The atoms are accessible via PDBReader::GetSequentialAtoms()
-    SEQUENTIAL_ATOM_IMPORT=32
+    SEQUENTIAL_ATOM_IMPORT=32,
+    /// \brief only import C-alpha atoms
+    CALPHA_ONLY=64
   } Type; 
 };
 

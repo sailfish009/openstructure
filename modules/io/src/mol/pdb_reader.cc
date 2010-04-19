@@ -92,11 +92,15 @@ void PDBReader::Init(const boost::filesystem::path& loc)
   } else {
     is_pqr_=false;
   }
+  hard_end_=false;
 }
 
 
 bool PDBReader::HasNext()
 {
+  if (hard_end_) {
+    return false;
+  }
   // since helix and sheet have to appear before any atom/hetatm records
   // a HELIX/SHEET entry implies a next model.
   while (std::getline(in_, curr_line_) && ++line_num_) {
@@ -108,7 +112,8 @@ bool PDBReader::HasNext()
          IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6))) {
        return true;
-     } else if (IEquals(curr_line, StringRef("END", 3))) {
+     } else if (IEquals(curr_line.substr(0, 3), StringRef("END", 3))) {
+       hard_end_=true;
        return false;
      }
   }
@@ -149,6 +154,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
           continue;
         }
         if (IEquals(curr_line.substr(0, 3), StringRef("END", 3))) {
+          hard_end_=true;
           go_on=false;
           break;
         }
@@ -184,7 +190,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
       default:
         break;
     }
-  }  while (std::getline(in_, curr_line_) && ++line_num_);
+  }  while (std::getline(in_, curr_line_) && ++line_num_ && go_on);
   LOGN_MESSAGE("imported "
                << chain_count_ << " chains, "
                << residue_count_ << " residues, "
@@ -241,6 +247,7 @@ void PDBReader::ClearState()
   chain_count_=0;
   residue_count_=0;
   atom_count_=0;
+  hard_end_=false;
   helix_list_.clear();
   strand_list_.clear();
   sequential_atom_list_.clear();
