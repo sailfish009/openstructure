@@ -40,6 +40,11 @@ public:
   {
     return Me()->hide();
   }
+
+  ContextMenu* GetContextMenu()
+  {
+    return Me()->GetContextMenu();
+  }
 };
 
 }}

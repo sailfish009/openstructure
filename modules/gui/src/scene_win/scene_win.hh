@@ -55,6 +55,8 @@ public:
 
   void AddView(gfx::EntityP entity, mol::EntityView view);
 
+  ContextMenu* GetContextMenu();
+
 public slots:
   void OnSelectionChange(const QItemSelection& sel, const QItemSelection& desel);
 

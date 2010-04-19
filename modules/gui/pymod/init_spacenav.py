@@ -1,9 +1,6 @@
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore
 
-from ost import geom, gfx, gui
-
-import sys, random
-import sip
+from ost import gfx, gui
 
 class SpacenavControl(QtCore.QObject):
   def __init__(self, spnav,

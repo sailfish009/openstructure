@@ -122,6 +122,9 @@ void SceneWin::AddView(gfx::EntityP entity, mol::EntityView view){
 
 }
 
+ContextMenu* SceneWin::GetContextMenu(){
+  return context_menu_;
+}
 
 SceneWin::~SceneWin() {
 }

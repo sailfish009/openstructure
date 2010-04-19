@@ -74,6 +74,7 @@ endif()
 
 set(OST_GUI_PYMOD_MODULES
   __init__.py
+  init_context_menu.py
   init_menubar.py
   init_spacenav.py
 )
