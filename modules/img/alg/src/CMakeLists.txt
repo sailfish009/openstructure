@@ -93,9 +93,9 @@ line_average.hh
 rscrosscorr.hh
 )
 
-
+include(${QT_USE_FILE})
 module(NAME img_alg SOURCES "${OST_IMG_ALG_SOURCES}" 
        HEADERS "${OST_IMG_ALG_HEADERS}" 
        HEADER_OUTPUT_DIR ost/img/alg
        DEPENDS_ON img
-       LINK ${FFTW_LIBRARIES})
+       LINK ${FFTW_LIBRARIES} ${QT_QTCORE_LIBRARY})

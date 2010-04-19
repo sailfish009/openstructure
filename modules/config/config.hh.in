@@ -30,4 +30,5 @@
 #define OST_DOUBLE_PRECISION @double_prec@
 #define OST_STATIC_PROPERTY_WORKAROUND @static_props@
 #define OST_SPNAV_ENABLED @spnav_enabled@
+#define OST_FFT_USE_THREADS @fftw_use_threads@
 #endif

@@ -155,7 +155,7 @@ LineIterator LineIterator::operator++(int)
 {
   LineIterator tmp(*this);
   this->operator++();
-  return tmp;;
+  return tmp;
 }
 
 ExtentIterator LineIterator::GetNextLine() 
