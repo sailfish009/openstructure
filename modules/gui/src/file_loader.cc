@@ -288,6 +288,10 @@ gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHa
       gfx::SurfaceP gfx_surf(new gfx::Surface(fi.baseName().toStdString(),sh));
       return gfx_surf;
     }
+    else{
+      gfx::SurfaceP gfx_surf(new gfx::Surface(fi.baseName().toStdString(),sh));
+      return gfx_surf;
+    }
   }
   return gfx::GfxObjP();
 }
