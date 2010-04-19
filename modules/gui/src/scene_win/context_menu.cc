@@ -124,9 +124,11 @@ void ContextMenu::ShowMenu(const QPoint& pos)
   ContextActionTypes flags;
   flags = ~flags;
 
+  int cnt = 0;
   if(indexes.size()>0){
     for(int i = 0; i < indexes.size(); i++){
       if(indexes[i].column()==0){
+        cnt++;
         GfxSceneNode* gfx_scene_node = qobject_cast<GfxSceneNode*>(model_->GetItem(indexes[i]));
         if(gfx_scene_node){
           gfx::GfxNodeP gfx_node = gfx_scene_node->GetGfxNode();
@@ -164,6 +166,12 @@ void ContextMenu::ShowMenu(const QPoint& pos)
       }
     }
 
+    if(cnt==1){
+      flags &= ~MULTI;
+    }
+    else{
+      flags &= ~SINGLE;
+    }
     QMenu* menu = new QMenu();
     QMapIterator<QAction*, ContextActionTypes> i(actions_);
     flags ^= NOT_VISIBLE;

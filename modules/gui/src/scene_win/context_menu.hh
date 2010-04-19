@@ -42,9 +42,10 @@ enum ContextActionType
   NOT_VISIBLE=0x10,
   NOT_HIDDEN=0x20,
   NOT_SCENE=0x40,
-  SINGLE=0x80
+  SINGLE=0x80,
+  MULTI=0x100
 #if OST_IMG_ENABLED
-  ,MAP=0x100
+  ,MAP=0x200
 #endif
 };
 Q_DECLARE_FLAGS(ContextActionTypes, ContextActionType)

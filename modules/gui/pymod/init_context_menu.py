@@ -12,7 +12,8 @@ class AlignmentContextMenu(QtCore.QObject):
 
       self.action = QtGui.QAction("Align", self)
       QtCore.QObject.connect(self.action,QtCore.SIGNAL("triggered()"), self.Align)
-      context_menu.AddAction(self.action, gui.ContextActionType.ENTITY)
+      print gui.ContextActionType.ENTITY | gui.ContextActionType.MULTI
+      context_menu.AddAction(self.action, gui.ContextActionType.ENTITY | gui.ContextActionType.MULTI)
     except FileNotFound:
       return
     
