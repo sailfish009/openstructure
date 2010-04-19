@@ -82,7 +82,7 @@ DataViewerProxyPtr app_create_data_viewer2(GostyApp* app, const ost::img::Data& 
 }
 
 void app_add_widget_to_app_a(GostyApp* app, const QString& ident,
-                               QObject* object)
+                               QWidget* object)
 {
   if(QWidget* widget = dynamic_cast<QWidget*>(object)){
     TransferOwnership(widget);
