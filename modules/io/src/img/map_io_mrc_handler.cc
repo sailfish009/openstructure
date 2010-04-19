@@ -808,7 +808,6 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
       LOG_MESSAGE("Suspicious dell dimensions found. Cannot set sampling.");
     }
     LOG_MESSAGE("resulting image extent: " << image.GetExtent() << std::endl);
-    image.Reset(img::Extent(mstart,msize),img::REAL,img::SPATIAL);
     if(img::image_state::RealSpatialImageState *rs=dynamic_cast<img::image_state::RealSpatialImageState*>(image.ImageStatePtr().get())) {
       if(header.mode==0) {
         detail::real_filler<uchar,CONVERSIONTYPE>(*rs,f,header);
