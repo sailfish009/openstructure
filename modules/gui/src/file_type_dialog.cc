@@ -39,9 +39,8 @@ FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
   QVBoxLayout* vb=new QVBoxLayout(this);
   label_ = new QLabel("The file format could not be recognized, please select the type of the file from the list:");
   list_ = new QTableWidget(this);
+  list_->horizontalHeader()->setStretchLastSection(true);
   list_->setColumnCount(2);
-  list_->setColumnWidth(0, 50);
-  list_->setColumnWidth(1,525);
   list_->verticalHeader()->setVisible(false);
   list_->horizontalHeader()->setVisible(false);
   list_->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -82,6 +81,8 @@ FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
     handler.setValue(surf_handler[i]);
     this->AddRow(list_->rowCount(),surf_handler[i]->GetFormatName().c_str(),surf_handler[i]->GetFormatDescription().c_str(),handler);
   }
+
+  list_->resizeColumnsToContents();
 }
 
 void FileTypeDialog::AddRow(int row, const QString& format_name, const QString& format_descr, QVariant& variant){
