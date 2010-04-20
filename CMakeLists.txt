@@ -192,7 +192,7 @@ set(BOOST_REGEX_LIBRARIES ${Boost_LIBRARIES})
 #find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS math REQUIRED)
 #set(BOOST_MATH_LIBRARIES ${Boost_LIBRARIES})
 
-find_package(Qt4 4.4.3 REQUIRED)
+find_package(Qt4 4.5.0 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Eigen 2.0.0 REQUIRED)
