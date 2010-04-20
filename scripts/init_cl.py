@@ -24,8 +24,10 @@ import os.path
 HistoryFile=os.path.expanduser('~/.ost_history')
 InGUIMode=False
 
-  
-gfx.set_offscreen_mode()
+try:  
+  gfx.set_offscreen_mode()
+except NameError:
+  pass
 sys.ps1='ost> '
 sys.ps2='..... '
 print ''
