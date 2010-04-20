@@ -105,14 +105,15 @@ bool PDBReader::HasNext()
   // a HELIX/SHEET entry implies a next model.
   while (std::getline(in_, curr_line_) && ++line_num_) {
      StringRef curr_line(curr_line_.c_str(), curr_line_.length());
-     if (IEquals(curr_line.substr(0, 6), StringRef("ATOM  ", 6)) ||
+     if (curr_line.size()>5 && 
+         (IEquals(curr_line.substr(0, 6), StringRef("ATOM  ", 6)) ||
          (!(flags_ & PDB::NO_HETATMS) &&
           IEquals(curr_line.substr(0, 6),StringRef("HETATM ", 6))) ||
           IEquals(curr_line.substr(0, 6),StringRef("ANISOU ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
-         IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6))) {
+         IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6)))) {
        return true;
-     } else if (IEquals(curr_line.substr(0, 3), StringRef("END", 3))) {
+     } else if (IEquals(curr_line.rtrim(), StringRef("END", 3))) {
        hard_end_=true;
        return false;
      }
@@ -153,7 +154,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
         if (curr_line.size()<3) {
           continue;
         }
-        if (IEquals(curr_line.substr(0, 3), StringRef("END", 3))) {
+        if (IEquals(curr_line.rtrim(), StringRef("END", 3))) {
           hard_end_=true;
           go_on=false;
           break;

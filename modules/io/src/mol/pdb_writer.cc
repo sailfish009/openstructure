@@ -207,7 +207,7 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
   
 PDBWriter::~PDBWriter()
 {
-  outstream_ << "END";
+  outstream_ << "END   ";
 }
 
 }}
