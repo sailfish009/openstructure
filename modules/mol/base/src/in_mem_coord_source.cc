@@ -27,8 +27,8 @@ void InMemCoordSource::AddFrame(const CoordFramePtr& frame)
 
 void InMemCoordSource::AddFrame(const std::vector<geom::Vec3>& coords)
 {
-  CoordFramePtr fp(new CoordFrame(coords));
-  frames_.push_back(fp);
+  frames_.push_back(CoordFramePtr(new CoordFrame(0.0)));
+  frames_.back()->insert(frames_.back()->end(), coords.begin(), coords.end());
 }
 
 }}

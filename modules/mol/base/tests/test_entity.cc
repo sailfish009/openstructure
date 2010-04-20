@@ -95,12 +95,10 @@ BOOST_AUTO_TEST_CASE(entity_creator)
   AtomHandle atom1 = e.InsertAtom(res, "X1",geom::Vec3());
   BOOST_CHECK(res==atom1.GetResidue());
   BOOST_CHECK(atom1.GetName()=="X1");
-  BOOST_CHECK(atom1.GetIndex()==0);
 
   AtomHandle atom2 = e.InsertAtom(res, "X2",geom::Vec3());
   BOOST_CHECK(res==atom2.GetResidue());
   BOOST_CHECK(atom2.GetName()=="X2");
-  BOOST_CHECK(atom2.GetIndex()==1);
 
   BondHandle bond = e.Connect(atom1, atom2);
 

@@ -31,38 +31,26 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(load_PDB_ov, LoadPDB, 1, 2)
 
 void (PDBWriter::*write_a)(const mol::EntityHandle&)=&PDBWriter::Write;
 void (PDBWriter::*write_b)(const mol::EntityView&)=&PDBWriter::Write;
-
-namespace {
-  void push_flags(unsigned int x) {PDB::PushFlags(x);}
-  unsigned int flags() {return PDB::Flags();}
-  void pop_flags() {PDB::PopFlags();}
-}
-
 void export_pdb_io()
 {
-  {
-    scope pdb_scope=class_<PDB>("PDB",no_init)
-      .def("PushFlags",&PDB::PushFlags)
-      .staticmethod("PushFlags")
-      .def("Flags",&PDB::Flags)
-      .staticmethod("Flags")
-      .def("PopFlags",&PDB::PopFlags)
-      .staticmethod("PopFlags")
-      ;
-    pdb_scope.attr("NO_HETATMS")=PDB::NO_HETATMS;
-    pdb_scope.attr("SKIP_FAULTY_RECORDS")=PDB::SKIP_FAULTY_RECORDS;
-    pdb_scope.attr("WRITE_MULTIPLE_MODELS")=PDB::WRITE_MULTIPLE_MODELS;
-    pdb_scope.attr("JOIN_SPREAD_ATOM_RECORDS")=PDB::JOIN_SPREAD_ATOM_RECORDS;
-  }
-
+  enum_<PDB::Type>("PDB")
+    .value("NO_HETATMS", PDB::NO_HETATMS)
+    .value("SKIP_FAULTY_RECORDS", PDB::SKIP_FAULTY_RECORDS)
+    .value("WRITE_MULTIPLE_MODELS", PDB::WRITE_MULTIPLE_MODELS)
+    .value("JOIN_SPREAD_ATOM_RECORDS", PDB::JOIN_SPREAD_ATOM_RECORDS)
+    .value("SEQUENTIAL_ATOM_IMPORT", PDB::SEQUENTIAL_ATOM_IMPORT)
+  ;
   class_<PDBReader, boost::noncopyable>("PDBReader", init<String>())
     .def("HasNext", &PDBReader::HasNext)
     .def("Import", &PDBReader::Import, 
          X_import(args("entity", "restrict_chains")))
+    .def("SetFlags", &PDBReader::SetFlags)
+    .def("GetSequentialAtoms", &PDBReader::GetSequentialAtoms)
   ;
   
   class_<PDBWriter, boost::noncopyable>("PDBWriter", init<String>())
     .def("Write", write_a)
     .def("Write", write_b)    
+    .def("SetFlags", &PDBWriter::SetFlags)
   ;
 }

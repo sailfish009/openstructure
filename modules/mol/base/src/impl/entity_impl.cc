@@ -76,8 +76,7 @@ EntityImpl::EntityImpl():
   xcs_editor_count_(0),
   ics_editor_count_(0),  
   dirty_flags_(DisableICS),
-  name_(""),
-  next_index_(0L)
+  name_("")
 {    
 }
 
@@ -351,9 +350,9 @@ AtomImplPtr EntityImpl::CreateAtom(const ResidueImplPtr& rp,
 {
 #if MAKE_SHARED_AVAILABLE
   AtomImplPtr ap=boost::make_shared<AtomImpl>(shared_from_this(), rp, name, 
-                                              pos, prop,next_index_++);
+                                              pos, prop);
 #else
-  AtomImplPtr ap(new AtomImpl(shared_from_this(), rp, name, pos, prop,next_index_++));
+  AtomImplPtr ap(new AtomImpl(shared_from_this(), rp, name, pos, prop));
 #endif
   if (identity_transf_ == false) {
     geom::Vec3 transformed_pos = geom::Vec3(transformation_matrix_*geom::Vec4(pos));

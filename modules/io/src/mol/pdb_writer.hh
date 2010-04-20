@@ -42,6 +42,8 @@ public:
   PDBWriter(const boost::filesystem::path& filename);
   PDBWriter(std::ostream& outstream);
   
+  void SetFlags(PDBFlags flags);
+  
   void Write(const mol::EntityView& ent);
   void Write(const mol::EntityHandle& ent);
   
@@ -57,6 +59,7 @@ private:
   std::ofstream  outfile_;
   std::ostream&   outstream_;
   int mol_count_;
+  PDBFlags flags_;  
 };
  
 }}

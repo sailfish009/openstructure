@@ -116,10 +116,7 @@ public:
   
   /// \brief Get int property by id
   int GetIntProperty(Prop::ID prop_id) const;
-
-  /// \brief Get the internal index
-  unsigned long GetIndex() const;
-
+public:
   /// \brief get atom implementation.
   ///
   /// Intended for internal use.

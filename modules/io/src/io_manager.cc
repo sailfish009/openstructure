@@ -20,7 +20,6 @@
 #include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/mol/entity_io_crd_handler.hh>
 #include <ost/io/mol/entity_io_sdf_handler.hh>
-#include <ost/io/mol/entity_io_mae_handler.hh>
 #include <ost/io/seq/fasta_io_handler.hh>
 #include <ost/io/seq/promod_io_handler.hh>
 #include <ost/io/mol/surface_io_msms_handler.hh>
@@ -44,7 +43,6 @@ IOManager::IOManager()
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOPDBHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOCRDHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOSDFHandlerFactory));
-  RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOMAEHandlerFactory));
   RegisterFactory(SequenceIOHandlerFactoryBasePtr(new FastaIOHandlerFactory));  
   RegisterFactory(SequenceIOHandlerFactoryBasePtr(new ClustalIOHandlerFactory));  
   RegisterFactory(SequenceIOHandlerFactoryBasePtr(new PromodIOHandlerFactory));    

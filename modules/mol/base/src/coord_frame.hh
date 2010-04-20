@@ -29,9 +29,16 @@
 namespace ost { namespace mol {
 
 
-typedef std::vector<geom::Vec3> CoordFrame;
+class CoordFrame;
+
 typedef boost::shared_ptr<CoordFrame> CoordFramePtr;
 typedef std::vector<CoordFramePtr> CoordFrameList;
+
+class DLLEXPORT_OST_MOL CoordFrame : public std::vector<geom::Vec3> {
+public:
+  CoordFrame() {}
+  CoordFrame(Real ts) {}
+};
 
 }}
 
