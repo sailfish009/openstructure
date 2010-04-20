@@ -27,7 +27,7 @@
 
 #include <ost/gui/module_config.hh>
 #include <QPlainTextEdit>
-
+#include <QHash>
 #include "python_interpreter.hh"
 #include "shell_history.hh"
 #include  "python_shell_fw.hh"
