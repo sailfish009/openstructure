@@ -96,7 +96,6 @@ geom::AlignedCuboid TraceRendererBase::GetBoundingBox() const
   bool empty=true;
   for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
     // first build the spline
-    Spline spl;
     const NodeListSubset& nl=trace_subset_[node_list];
     for (int i=0; i<nl.GetSize();++i) {
       const NodeEntry& entry=nl[i];      
