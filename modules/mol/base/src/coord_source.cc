@@ -20,6 +20,7 @@
 /*
   Author: Marco Biasini
  */
+#include <ost/log.hh>
 #include <ost/mol/atom_handle.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/in_mem_coord_source.hh>
@@ -53,10 +54,12 @@ CoordSource::~CoordSource()
 void CoordSource::CopyFrame(uint frame_id)
 {
   if (atoms_.empty()) {
+    LOGN_DEBUG("atom list empty, ignored");
     return;
   }  
   CoordFramePtr frame=this->GetFrame(frame_id);
   if (!frame) {
+    LOGN_DEBUG("invalid frame given, ignored");
     return;
   }
   assert(frame->size()==atoms_.size());
@@ -64,7 +67,7 @@ void CoordSource::CopyFrame(uint frame_id)
   CoordFrame::const_iterator c=frame->begin();
   for (AtomHandleList::iterator i=atoms_.begin(), 
        e=atoms_.end(); i!=e; ++i, ++c) {
-    edi.SetAtomPos(*i, *c);
+     edi.SetAtomPos(*i, *c);
   }
 }
 
