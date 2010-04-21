@@ -57,17 +57,17 @@ if [ $# == 0 ];then
 else
   opts=""
   for argument in "$@";do 
-    if [ "$argument" == "-i" ] ;then
-      interactive="-i"
-    else
-      if [ -n "$opts" ]; then
-        opts=$opts"#""$argument"
-      else  
-        opts="$argument"
-      fi  
-    fi
+    if [ -n "$opts" ]; then
+      opts=$opts"#""$argument"
+    else  
+      opts="$argument"
+    fi  
   done
+  if [ $1 == "-i" ] ;then
+    interactive="-i"
+  fi
 fi
+
 # finally pass control to python instance
 IFS="#"
 exec $pyexec $interactive "$DNG_ROOT/@LIBDIR@/openstructure/init_cl.py" $opts

@@ -1,4 +1,31 @@
 import sys, os, platform
+import optparse
+
+interactive=False
+
+def show_help(option, opt, value, parser):
+  parser.print_help()
+  sys.exit(-1)
+
+def interactive_flag(option, opt, value, parser):
+  pass
+
+usage = 'usage: ost [ost options] [script to execute] [script parameters]'
+class OstOptionParser(optparse.OptionParser):
+  def __init__(self, **kwargs):
+    optparse.OptionParser.__init__(self, **kwargs)
+  def exit(self, status_code, error_message):
+    print error_message,
+    QtGui.QApplication.instance().exit()
+    sys.exit(-1)
+
+parser=OstOptionParser(usage=usage,conflict_handler="resolve")
+parser.add_option("-i", "--interactive", action="callback", callback=interactive_flag, help="start interpreter interactively (must be first parameter, ignored otherwise)")
+parser.add_option("-h", "--help", action="callback", callback=show_help, help="show this help message and exit")
+parser.add_option("-v", "--verbosity_level", action="store", type="int", dest="vlevel", default=1, help="sets the verbosity level [default: %default]")
+parser.disable_interspersed_args()
+(options, args) = parser.parse_args()
+
 if platform.machine()=='x86_64':
   sys.path.insert(0, os.getenv('DNG_ROOT')+'/lib64/openstructure')
 else:
@@ -40,7 +67,16 @@ if os.path.exists(_ostrc):
   except Exception, e:
     print e
 
-if(len(sys.argv)>0):
-  script=sys.argv[0]
-  execfile(script)
+PushVerbosityLevel(options.vlevel)
+
+sys.path.append(".")
+
+if len(parser.rargs)>0 :
+  script=parser.rargs[0]	
+  sys_argv_backup=sys.argv
+  sys.argv=parser.rargs
+  try:
+    execfile(script)
+  finally:
+    sys.argv=sys_argv_backup
 
