@@ -123,7 +123,7 @@ class OstOptionParser(optparse.OptionParser):
 
 parser=OstOptionParser(usage=usage,conflict_handler="resolve")
 parser.add_option("-h", "--help", action="callback", callback=show_help, help="show this help message and exit")
-parser.add_option("-v", "--verbosity_level", action="store", type="int", dest="vlevel", default=1, help="sets the verbosity level [default: %default]")
+parser.add_option("-v", "--verbosity_level", action="store", type="int", dest="vlevel", default=0, help="sets the verbosity level [default: %default]")
 parser.add_option("-s", "--script", action="callback", default=[], dest="script", type="string", callback=parse_script_option, help="executes a script (syntax: -s SCRIPT [options] [args]) Anything that follows this option is passed to the script")
 parser.add_option("-p", "--pdb_id", dest="pdb_ids", default=[],action="append", help="PDB file ID. The file will be retrieved from PDB")
 parser.add_option("-b", "--builder", dest="builder", default="HEURISTIC", help="Type of builder used by the progam (either RULE_BASED or HEURISTIC) [default: %default]")
