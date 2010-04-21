@@ -18,8 +18,10 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 
-#include "menu_proxy.hh"
-#include "menu_bar_proxy.hh"
+#include "sip_handler.hh"
+
+#include <QMenuBar>
+#include <QMenu>
 
 using namespace boost::python;
 using namespace ost;
@@ -28,11 +30,16 @@ using namespace ost::gui;
 
 void export_MenuBar()
 {
-  class_<MenuBarProxy, bases<SipHandlerBase> >("MenuBar")
-    .def("Show", &MenuBarProxy::Show)
-    .def("Hide", &MenuBarProxy::Hide)
+  class_<QMenuBar, boost::noncopyable>("MenuBar")
+    .def("Show", &QMenuBar::show)
+    .def("Hide", &QMenuBar::hide)
+    .def("GetQObject",&get_py_qobject<QMenuBar>)
+    .add_property("qobject", &get_py_qobject<QMenuBar>)
   ;
 
-  class_<MenuProxy, bases<SipHandlerBase> >("Menu");
+  class_<QMenu, boost::noncopyable>("Menu")
+    .def("GetQObject",&get_py_qobject<QMenu>)
+    .add_property("qobject", &get_py_qobject<QMenu>)
+  ;
 }
 

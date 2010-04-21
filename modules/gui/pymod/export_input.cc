@@ -43,8 +43,8 @@ void export_Input()
 {
   class_<SpnavInput, bases<SipHandlerBase>, boost::noncopyable >("SpnavInput",no_init)
     .def("GetQThread", &spnav_get_instance).staticmethod("GetQThread")
-    .def("GetQObject", &ost::gui::get_py_qobject<SpnavInput>)
-    .add_property("qobject", &ost::gui::get_py_qobject<SpnavInput>)
+    .def("GetQObject", &get_py_qobject<SpnavInput>)
+    .add_property("qobject", &get_py_qobject<SpnavInput>)
     .def("Instance", &SpnavInput::Instance,
      return_value_policy<reference_existing_object>()).staticmethod("Instance")
   ;

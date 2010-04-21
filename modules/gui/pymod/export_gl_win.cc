@@ -28,12 +28,12 @@ using namespace ost::gui;
 
 void export_GLWin()
 {
-  class_<GLWin, boost::noncopyable >("GLWin", no_init)
+  class_<GLWin, boost::noncopyable>("GLWin", no_init)
     .def("Show", &GLWin::show)
     .def("Hide", &GLWin::hide)
     .def("StatusMessage",&GLWin::StatusMessage)
-    .def("GetQObject",&ost::gui::get_py_qobject<GLWin>)
-    .add_property("qobject", &ost::gui::get_py_qobject<GLWin>)
+    .def("GetQObject",&get_py_qobject<GLWin>)
+    .add_property("qobject", &get_py_qobject<GLWin>)
   ;
 }
 

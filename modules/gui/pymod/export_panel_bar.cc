@@ -75,14 +75,7 @@ void panels_add_widget_to_pool_b(Panels * panels, const QString& name, int limit
 
 object panels_get_menu(Panels* panels)
 {
-  static object sip_module=import("sip");
-  static object pyqt4_module=import("PyQt4.QtGui");
-  object obj(MenuProxy(panels->GetMenu()));
-  object sip_handle=obj.attr("GetSipHandle")();
-  object qmenu = pyqt4_module.attr("QMenu");
-  object menu = sip_module.attr("wrapinstance")(sip_handle, qmenu);
-
-  return menu;
+  return get_py_qobject<QMenu>(panels->GetMenu());
 }
 
 object panels_get_qwidget(Panels* panels)
