@@ -33,7 +33,6 @@ using namespace boost::python;
 #include "transfer_ownership.hh"
 #include "sip_handler.hh"
 
-#include "tool_options_win_proxy.hh"
 #if OST_IMG_ENABLED
 #include "data_viewer_proxy.hh"
 using namespace ost::img::gui;
@@ -43,11 +42,6 @@ using namespace ost;
 using namespace ost::gui;
 
 namespace {
-
-ToolOptionsWinProxy app_get_tool_options_win(GostyApp* app)
-{
-  return ToolOptionsWinProxy(app->GetToolOptionsWin());
-}
 
 #if OST_IMG_ENABLED
 DataViewerProxyPtr app_create_data_viewer1(GostyApp* app, const ost::img::Data& d, const QString& name)
@@ -101,8 +95,10 @@ void export_Gosty()
         return_value_policy<reference_existing_object>())
     .add_property("seq_viewer", make_function(&GostyApp::GetSequenceViewer,
         return_value_policy<reference_existing_object>()))
-    .def("GetToolOptionsWin", &app_get_tool_options_win)
-    .add_property("tool_options_win", &app_get_tool_options_win)     
+    .def("GetToolOptionsWin", &GostyApp::GetToolOptionsWin,
+        return_value_policy<reference_existing_object>())
+    .add_property("tool_options_win", make_function(&GostyApp::GetToolOptionsWin,
+        return_value_policy<reference_existing_object>()))
      #if OST_IMG_ENABLED
     .def("CreateDataViewer", &app_create_data_viewer1)
     .def("CreateDataViewer", &app_create_data_viewer2)

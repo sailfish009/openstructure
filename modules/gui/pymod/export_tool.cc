@@ -23,14 +23,13 @@
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include <iostream>
-using namespace boost::python;
-
 #include <ost/gui/tools/tool.hh>
 #include <ost/gui/tools/tool_manager.hh>
-#include "tool_options_win_proxy.hh"
+#include <ost/gui/tools/tool_options_win.hh>
+#include "sip_handler.hh"
 #include "qptr.hh"
 
+using namespace boost::python;
 using namespace ost::gui;
 using namespace ost;
 
@@ -246,9 +245,11 @@ void export_Tool()
     .def("FindToolByName", &ToolManager::FindToolByName,
          return_value_policy<reference_existing_object>())
   ;
-  class_<ToolOptionsWinProxy, bases<SipHandlerBase> >("ToolOptionsWin")
-    .def("Show", &ToolOptionsWinProxy::Show)
-    .def("Hide", &ToolOptionsWinProxy::Hide)
+  class_<ToolOptionsWin, boost::noncopyable>("ToolOptionsWin", no_init)
+    .def("Show", &ToolOptionsWin::show)
+    .def("Hide", &ToolOptionsWin::hide)
+    .def("GetQObject",&get_py_qobject<ToolOptionsWin>)
+    .add_property("qobject", &get_py_qobject<ToolOptionsWin>)
   ;
 
   class_<gfx::NodePtrList>("NodePtrList", init<>())
