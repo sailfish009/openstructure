@@ -54,7 +54,7 @@ create a new instance of a !RuleBasedBuilder and register it in the builder
 registry of the conop module. In Python, this can be achieved with
 
 \code
-import conop
+from ost import conop
 compound_lib=conop.CompoundLib.Load('...')
 rbb=conop.RuleBasedBuilder(compound_lib)
 conop.Conopology.Instance().RegisterBuilder(rbb,'rbb')
@@ -70,7 +70,7 @@ information on how to create the neccessary files to use the rule-based builder.
 The high level interface is exposed by the Conopoloy singleton instance:
 
 \code
-import conop
+from ost import conop
 
 cc=conop.Conopology.Instance()
 
