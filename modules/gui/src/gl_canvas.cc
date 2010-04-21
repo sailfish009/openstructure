@@ -217,6 +217,8 @@ void GLCanvas::RequestContextMenu(const QPoint& pos)
 
 void GLCanvas::HandleMousePressEvent(QMouseEvent* event)
 {
+  gfx::Scene& scene=gfx::Scene::Instance();
+  scene.Pick(event->x(), scene.GetViewport().height-event->y(), 0);
   event->accept();
 }
 
