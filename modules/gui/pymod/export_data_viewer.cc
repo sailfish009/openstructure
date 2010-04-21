@@ -25,32 +25,34 @@
 #include <boost/python.hpp>
 #include <ost/base.hh>
 #include <ost/gui/data_viewer/data_viewer.hh>
-#include "data_viewer_proxy.hh"
 #include <ost/gui/data_viewer/overlay_manager.hh>
+
+#include "sip_handler.hh"
 
 using namespace boost::python;
 using namespace ost::img;
 using namespace ost;
 using namespace ost::img::gui;
+using namespace ost::gui;
 
 namespace {
 
-void add_dock1(DataViewerProxy* p, QWidget* w, const String& name) 
+void add_dock1(DataViewer* p, QWidget* w, const String& name)
 {
   p->AddDockWidget(w,QString::fromStdString(name));
 }
 
-void add_dock2(DataViewerProxy* p, QWidget* w, const QString& name) 
+void add_dock2(DataViewer* p, QWidget* w, const QString& name)
 {
   p->AddDockWidget(w,name);
 }
 
-void add_dock3(DataViewerProxy* p, QWidget* w, const String& name, bool s) 
+void add_dock3(DataViewer* p, QWidget* w, const String& name, bool s)
 {
   p->AddDockWidget(w,QString::fromStdString(name),s);
 }
 
-void add_dock4(DataViewerProxy* p, QWidget* w, const QString& name, bool s) 
+void add_dock4(DataViewer* p, QWidget* w, const QString& name, bool s)
 {
   p->AddDockWidget(w,name,s);
 }
@@ -61,30 +63,32 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(o_AddOverlay, AddOverlay, 1, 2)
 
 void export_data_viewer()
 {
-  class_<DataViewerProxy, DataViewerProxyPtr, bases<ost::gui::SipHandlerBase> >("DataViewer",no_init)
-    .def("SetData",&DataViewerProxy::SetData)
-    .def("SetName",&DataViewerProxy::SetName)
-    .def("GetOverlayManager",&DataViewerProxy::GetOverlayManager)
-    .def("GetNormalizer",&DataViewerProxy::GetNormalizer,
+  class_<DataViewer, boost::noncopyable >("DataViewer",no_init)
+    .def("SetData",&DataViewer::SetData)
+    .def("SetName",&DataViewer::SetName)
+    .def("GetOverlayManager",&DataViewer::GetOverlayManager)
+    .def("GetNormalizer",&DataViewer::GetNormalizer,
 	 return_value_policy<return_by_value>())
-    .def("Renormalize",&DataViewerProxy::Renormalize)
-    .def("AddOverlay",&DataViewerProxy::AddOverlay,o_AddOverlay())
-    .def("ClearOverlays",&DataViewerProxy::ClearOverlays)
-    .def("GetSelection",&DataViewerProxy::GetSelection)
-    .def("UpdateView",&DataViewerProxy::UpdateView)
-    .def("Recenter",&DataViewerProxy::Recenter)
+    .def("Renormalize",&DataViewer::Renormalize)
+    .def("AddOverlay",&DataViewer::AddOverlay,o_AddOverlay())
+    .def("ClearOverlays",&DataViewer::ClearOverlays)
+    .def("GetSelection",&DataViewer::GetSelection)
+    .def("UpdateView",&DataViewer::UpdateView)
+    .def("Recenter",&DataViewer::Recenter)
     .def("AddDockWidget",add_dock1)
     .def("AddDockWidget",add_dock2)
     .def("AddDockWidget",add_dock3)
     .def("AddDockWidget",add_dock4)
-    .def("RemoveDockWidget",&DataViewerProxy::RemoveDockWidget)
-    .def("SetAntialiasing",&DataViewerProxy::SetAntialiasing)
-    .def("Show",&DataViewerProxy::Show)
-    .def("Hide", &DataViewerProxy::Hide)
+    .def("RemoveDockWidget",&DataViewer::RemoveDockWidget)
+    .def("SetAntialiasing",&DataViewer::SetAntialiasing)
+    .def("Show",&DataViewer::show)
+    .def("Hide", &DataViewer::hide)
+    .def("GetQObject",&get_py_qobject<DataViewer>)
+    .add_property("qobject", &get_py_qobject<DataViewer>)
     /*
-    .def("SetAutoNormalize",&DataViewerProxy::SetAutoNormalize)
-    .def("ShowClickedPosition",&DataViewerProxy::ShowClickedPosition,o_ShowClickedPosition())
-    .def("GetClickedPosition",&DataViewerProxy::GetClickedPosition)
-    */    
+    .def("SetAutoNormalize",&DataViewer::SetAutoNormalize)
+    .def("ShowClickedPosition",&DataViewer::ShowClickedPosition,o_ShowClickedPosition())
+    .def("GetClickedPosition",&DataViewer::GetClickedPosition)
+    */
     ;
 }
