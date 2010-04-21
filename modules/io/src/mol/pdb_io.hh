@@ -20,12 +20,13 @@
 #define OST_IO_PDB_IO_HH
 
 #include <stack>
+#include <ost/io/module_config.hh>
 
 namespace ost { namespace io {
   
 
 /// \brief flags that incluence the behaviour of the PDBReader and PDBWriter
-struct PDB {
+struct DLLEXPORT_OST_IO PDB {
 
     /// \brief skip faulty records
     /// This flag tells the PDB loader to ignore faulty records. By default,
