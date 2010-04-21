@@ -26,11 +26,11 @@ using namespace boost::python;
 #include <ost/gui/gl_win.hh>
 #include <ost/gui/perspective.hh>
 #include <ost/gui/tools/tool_options_win.hh>
+#include <ost/gui/python_shell/python_shell.hh>
 
 #include "transfer_ownership.hh"
 #include "sip_handler.hh"
 
-#include "python_shell_proxy.hh"
 #include "tool_options_win_proxy.hh"
 #include "scene_win_proxy.hh"
 #include "sequence_viewer_proxy.hh"
@@ -43,11 +43,6 @@ using namespace ost;
 using namespace ost::gui;
 
 namespace {
-
-PythonShellProxy app_get_py_shell(GostyApp* app)
-{
-  return PythonShellProxy(app->GetPyShell());
-}
 
 ToolOptionsWinProxy app_get_tool_options_win(GostyApp* app)
 {
@@ -100,8 +95,10 @@ void export_Gosty()
     .def("Instance", &GostyApp::Instance,
          return_value_policy<reference_existing_object>()).staticmethod("Instance")
     .def("SetAppTitle", &GostyApp::SetAppTitle)
-    .def("GetPyShell", &app_get_py_shell)
-    .add_property("py_shell", &app_get_py_shell)
+    .def("GetPyShell", &GostyApp::GetPyShell,
+        return_value_policy<reference_existing_object>())
+    .add_property("py_shell", make_function(&GostyApp::GetPyShell,
+        return_value_policy<reference_existing_object>()))
     .def("GetGLWin", &GostyApp::GetGLWin,
         return_value_policy<reference_existing_object>())
     .add_property("gl_win", make_function(&GostyApp::GetGLWin,

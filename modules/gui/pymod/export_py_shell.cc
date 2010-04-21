@@ -17,25 +17,36 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-using namespace boost::python;
 
-#include <iostream>
-
-#include "python_shell_proxy.hh"
+#include <ost/gui/python_shell/python_shell.hh>
 #include <ost/gui/python_shell/python_shell_widget.hh>
 
+#include "sip_handler.hh"
 
+using namespace boost::python;
 using namespace ost;
 using namespace ost::gui;
 
+namespace {
+
+void pyshell_set_tab_width(PythonShell* py_shell, int width) {
+  py_shell->PyShell()->SetTabWidth(width);
+}
+
+int pyshell_get_tab_width(PythonShell* py_shell) {
+  return py_shell->PyShell()->GetTabWidth();
+}
+
+}
+
 void export_PyShell()
 { 
-  class_<PythonShellProxy, bases<SipHandlerBase> >("PythonShell", no_init)
-    .def("Show", &PythonShellProxy::Show)
-    .def("Hide", &PythonShellProxy::Hide)
-    .def("SetTabWidth", &PythonShellProxy::SetTabWidth)
-    .def("GetTabWidth", &PythonShellProxy::GetTabWidth)
+  class_<PythonShell, boost::noncopyable>("PythonShell", no_init)
+    .def("Show", &PythonShell::show)
+    .def("Hide", &PythonShell::hide)
+    .def("SetTabWidth", &pyshell_set_tab_width)
+    .def("GetTabWidth", &pyshell_get_tab_width)
+    .def("GetQObject",&get_py_qobject<PythonShell>)
+    .add_property("qobject", &get_py_qobject<PythonShell>)
   ;
 }
