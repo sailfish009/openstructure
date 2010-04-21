@@ -20,7 +20,6 @@ from PyQt4 import QtCore, QtGui
 
 from ost import gui
 import sys, random
-import sip
 
 class Points(QtGui.QWidget):
     def __init__(self, parent=None):
