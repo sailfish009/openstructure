@@ -34,6 +34,10 @@ namespace {
   typedef EntityView (ResidueHandle::*StringMethod)(const String&, uint) const;
   QueryMethod select_query=&ResidueHandle::Select;
   StringMethod select_string=&ResidueHandle::Select;
+
+  void set_sec_struct1(ResidueBase* b, const SecStructure& s) {b->SetSecStructure(s);}
+  void set_sec_struct2(ResidueBase* b, char c) {b->SetSecStructure(SecStructure(c));}
+
 }
 
 //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_insert_overloads,
@@ -82,7 +86,8 @@ void export_Residue()
   class_<ResidueBase> residue_base("ResidueBase", no_init);
   residue_base
     .def("GetSecStructure", &ResidueBase::GetSecStructure)
-    .def("SetSecStructure", &ResidueBase::SetSecStructure)
+    .def("SetSecStructure", set_sec_struct1)
+    .def("SetSecStructure", set_sec_struct2)
     .def("GetPhiTorsion", &ResidueBase::GetPhiTorsion)
     .def("GetPsiTorsion", &ResidueBase::GetPsiTorsion)
     .def("GetOmegaTorsion", &ResidueBase::GetOmegaTorsion)

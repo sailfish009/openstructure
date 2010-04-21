@@ -50,7 +50,8 @@ class AtomImpl: public GenericPropertyContainerImpl,
                 public boost::enable_shared_from_this<AtomImpl> {
 public:
    AtomImpl(const EntityImplPtr& ent, const ResidueImplPtr& res,
-           const String& name, const geom::Vec3& pos, const AtomProp& prop);
+            const String& name, const geom::Vec3& pos, const AtomProp& prop,
+            unsigned long index);
 
   ~AtomImpl();
   void Apply(EntityVisitor& h);
@@ -137,6 +138,9 @@ public:
   Real GetFloatProperty(Prop::ID prop_id) const;
   
   int GetIntProperty(Prop::ID prop_id) const;                     
+
+  unsigned long GetIndex() const {return index_;}
+  void SetIndex(unsigned long index) {index_=index;}
                      
 private:
   ResidueImplW res_;
@@ -171,6 +175,8 @@ private:
     unsigned int mask = 0x1<<bit;
     return (state_ & mask)!=0;
   }
+
+  unsigned long index_;
 };
 
 /// \internal

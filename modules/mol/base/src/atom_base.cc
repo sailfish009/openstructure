@@ -156,5 +156,11 @@ int AtomBase::GetIntProperty(Prop::ID prop_id) const
   return Impl()->GetIntProperty(prop_id);
 }
 
+unsigned long AtomBase::GetIndex() const
+{
+  this->CheckValidity();
+  return Impl()->GetIndex();
+}
+
 }} // ns
 

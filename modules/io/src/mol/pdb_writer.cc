@@ -123,27 +123,20 @@ private:
 
 PDBWriter::PDBWriter(std::ostream& stream):
   outfile_(), outstream_(stream)
-{
-
-}
+{}
 
 PDBWriter::PDBWriter(const boost::filesystem::path& filename):
-  outfile_(filename.file_string().c_str()), outstream_(outfile_), mol_count_(0),
-  flags_(0)
-{
-
-}
+  outfile_(filename.file_string().c_str()), outstream_(outfile_), mol_count_(0)
+{}
 
 PDBWriter::PDBWriter(const String& filename):
-  outfile_(filename.c_str()), outstream_(outfile_),  mol_count_(0), flags_(0)
-{
-
-}
+  outfile_(filename.c_str()), outstream_(outfile_),  mol_count_(0)
+{}
 
 void PDBWriter::WriteModelLeader()
 {
   ++mol_count_;
-  if (flags_ & PDB::WRITE_MULTIPLE_MODELS) {
+  if (PDB::Flags() & PDB::WRITE_MULTIPLE_MODELS) {
     outstream_ << "MODEL     " << mol_count_ << std::endl;
   } else if (mol_count_>1) {
     throw IOException("Please enable the PDB::WRITE_MULTIPLE_MODELS flag to "
@@ -153,7 +146,7 @@ void PDBWriter::WriteModelLeader()
 
 void PDBWriter::WriteModelTrailer()
 {
-  if (flags_ & PDB::WRITE_MULTIPLE_MODELS) {
+  if (PDB::Flags() & PDB::WRITE_MULTIPLE_MODELS) {
     outstream_ << "ENDMDL" << std::endl;
   }
 }
@@ -163,16 +156,11 @@ void PDBWriter::WriteModel(H ent)
 {
   this->WriteModelLeader();
   PDBWriterImpl writer(outstream_);
-  if (flags_ & PDB::PQR_FORMAT) {
+  if (PDB::Flags() & PDB::PQR_FORMAT) {
     writer.SetIsPQR(true);
   }
   ent.Apply(writer);
   this->WriteModelTrailer();
-}
-
-void PDBWriter::SetFlags(PDBFlags flags)
-{
-  flags_=flags;
 }
 
 void PDBWriter::Write(const mol::EntityView& ent)
@@ -199,7 +187,7 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
       }
       last_chain=(*i).GetResidue().GetChain();
     }
-    write_atom(outstream_, *i, counter, flags_ & PDB::PQR_FORMAT);      
+    write_atom(outstream_, *i, counter, PDB::Flags() & PDB::PQR_FORMAT);      
   }
   this->WriteModelTrailer();
 }
