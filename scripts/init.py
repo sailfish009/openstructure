@@ -51,7 +51,7 @@ def _InitFrontEnd():
   main_area=app.perspective.main_area
   _InitPanels(app, app.perspective.panels)
   _InitMenuBar(app.perspective.GetMenuBar())
-  _InitSpaceNav(app.perspective.panels.qwidget)
+  _InitSpaceNav(app.perspective.panels.qobject)
   _InitContextMenu()
   main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win.qobject, int(QtCore.Qt.WindowMaximized))
   app.perspective.Restore()
