@@ -1,2 +1,2 @@
 #!/bin/sh
-cat harmony.py | gosty Harmony $@
+gosty harmony.py Harmony $@

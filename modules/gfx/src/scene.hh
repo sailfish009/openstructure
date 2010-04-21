@@ -330,9 +330,6 @@ class DLLEXPORT_OST_GFX Scene {
   float ElapsedTime() const;
 
   Viewport GetViewport() const;
-
-  void StartOffscreenMode(unsigned int w, unsigned int h);
-  void StopOffscreenMode();
   
   // temporary interface
   void ActivateShader(const String& name);
@@ -397,7 +394,6 @@ private:
 
   bool offscreen_flag_;
   OffscreenBuffer* main_offscreen_buffer_;
-  uint old_vp_[2];
 
   uint selection_mode_;
 

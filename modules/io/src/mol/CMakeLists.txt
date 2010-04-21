@@ -1,9 +1,7 @@
 set(OST_IO_MOL_SOURCES
 entity_io_crd_handler.cc	
-entity_io_mae_handler.cc	
 pdb_reader.cc
 entity_io_pdb_handler.cc	
-pdb_io.cc
 pdb_writer.cc
 entity_io_sdf_handler.cc	
 save_entity.cc
@@ -19,7 +17,6 @@ set(OST_IO_MOL_HEADERS
 star_parser.hh
 dcd_io.hh
 entity_io_crd_handler.hh	
-entity_io_mae_handler.hh	
 pdb_io.hh
 entity_io_handler.hh		
 pdb_reader.hh

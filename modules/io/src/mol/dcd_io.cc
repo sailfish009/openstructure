@@ -22,8 +22,6 @@
 */
 
 #include <fstream>
-#include <algorithm>
-
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/filesystem/convenience.hpp>
 
@@ -33,13 +31,12 @@
 #include <ost/conop/conop.hh>
 #include <ost/mol/xcs_editor.hh>
 
-#include <ost/io/io_exception.hh>
-#include <ost/io/swap_util.hh>
-#include "load_entity.hh"
 #include "dcd_io.hh"
 #include "pdb_reader.hh"
 #include "pdb_writer.hh"
 #include "entity_io_crd_handler.hh"
+#include <ost/io/io_exception.hh>
+#include <ost/io/swap_util.hh>
 
 namespace ost { namespace io {
 
@@ -61,19 +58,11 @@ struct DCDHeader {
   int t_atom_count,f_atom_count, atom_count;
 };
 
-bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
-{
-  return a1.GetIndex()<a2.GetIndex();
-}
-
-mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
+mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist,
 			       const String& trj_fn,
 			       unsigned int stride)
 {
   Profile profile_load("LoadCHARMMTraj");
-
-  mol::AtomHandleList alist(alist2);
-  std::sort(alist.begin(),alist.end(),less_index);
 
   bool gap_flag = true;
 
@@ -132,7 +121,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   header.f_atom_count=header.icntrl[8];
   header.atom_count=header.t_atom_count-header.f_atom_count;
 
-  LOGN_DEBUG("LoadCHARMMTraj: " << header.num << " trajectories with " 
+  LOGN_MESSAGE("LoadCHARMMTraj: " << header.num << " trajectories with " 
                << header.atom_count << " atoms (" << header.f_atom_count 
                << " fixed) each");
 
@@ -147,8 +136,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   std::vector<geom::Vec3> clist(header.t_atom_count);
   std::vector<float> xlist(header.t_atom_count);
 
-  int i=0;
-  for(;i<header.num;++i) {
+  for(int i=0;i<header.num;++i) {
     if(skip_flag) ff.seekg(14*4,std::ios_base::cur);
     // read each frame
     if(!ff) {
@@ -181,9 +169,9 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
     for(uint j=0;j<clist.size();++j) {
       clist[j].SetZ(xlist[j]);
     }
-
-    cg.AddFrame(clist);
-
+    if(i%stride) {
+      cg.AddFrame(clist);
+    }
   }
 
   ff.get();
@@ -191,9 +179,6 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
     LOGN_VERBOSE("LoadCHARMMTraj: unexpected trailing file data, bytes read: " 
                  << ff.tellg());
   }
-
-  LOGN_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with " << cg.GetAtomCount() << " atoms each");
-
   return cg;
 }
 
@@ -203,8 +188,30 @@ mol::CoordGroupHandle LoadCHARMMTraj(const String& crd_fn,
                                      const String& trj_fn,
                                      unsigned int stride)
 {
-  mol::EntityHandle ent=LoadEntity(crd_fn);
-  return load_dcd(ent.GetAtomList(),trj_fn,stride);
+  boost::filesystem::path crd_f(crd_fn);
+
+  // first the coordinate reference file
+  conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  std::vector<mol::AtomHandle> alist;
+  if(boost::filesystem::extension(crd_f)==".pdb") {
+    PDBReader reader(crd_f);
+    reader.SetFlags(PDB::SEQUENTIAL_ATOM_IMPORT);
+    LOGN_MESSAGE("importing coordinate data");
+    reader.Import(ent);
+    alist = reader.GetSequentialAtoms();
+  } else if (boost::filesystem::extension(crd_f)==".crd") {
+    CRDReader reader(crd_f);
+    LOGN_MESSAGE("importing coordinate data");
+    reader.Import(ent);
+    alist = reader.GetSequentialAtoms();
+  } else {
+    throw(IOException("unsupported coordinate file format"));
+  }
+  conop::Conopology::Instance().ConnectAll(builder,ent);
+
+  return load_dcd(alist,trj_fn,stride);
 }
 
 

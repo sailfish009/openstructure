@@ -40,8 +40,7 @@ AtomImpl::AtomImpl(const EntityImplPtr& e,
                    const ResidueImplPtr& r,
                    const String& n,
                    const geom::Vec3& p,
-                   const AtomProp& prop,
-                   unsigned long index):
+                   const AtomProp& prop):
   res_(r),
   name_(n),
   pos_(p),
@@ -49,8 +48,7 @@ AtomImpl::AtomImpl(const EntityImplPtr& e,
   prim_connector_(),
   connector_list_(),
   fragment_(),
-  state_(0),
-  index_(index)
+  state_(0)
 {
   EntityHandle ent = this->GetEntity();
   geom::Mat4 transf_matrix = ent.GetTransformationMatrix();

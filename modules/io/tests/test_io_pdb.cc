@@ -91,11 +91,10 @@ BOOST_AUTO_TEST_CASE(join_spread_records_on)
 {
   String fname("testfiles/pdb/join-spread-records.pdb");
   PDBReader reader(fname);
+  reader.SetFlags(PDB::JOIN_SPREAD_ATOM_RECORDS);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  PDB::PushFlags(PDB::JOIN_SPREAD_ATOM_RECORDS);
   reader.Import(ent);
-  PDB::PopFlags();
   BOOST_CHECK_EQUAL(ent.GetResidueCount(), 2);
   mol::ResidueHandle res1=ent.FindResidue("A", mol::ResNum(1));
   BOOST_CHECK(res1.IsValid());

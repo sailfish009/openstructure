@@ -123,8 +123,6 @@ void export_RenderOptions()
     .def("GetNormalSmoothFactor", &TraceRenderOptions::GetNormalSmoothFactor)
     .def("SetTubeRadius", &TraceRenderOptions::SetTubeRadius)
     .def("GetTubeRadius", &TraceRenderOptions::GetTubeRadius)
-    .def("SetRadius", &TraceRenderOptions::SetTubeRadius)
-    .def("GetRadius", &TraceRenderOptions::GetTubeRadius)
   ;
 }
 

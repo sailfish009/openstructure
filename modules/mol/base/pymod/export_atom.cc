@@ -46,7 +46,6 @@ void export_Atom()
     .def("GetProp", &AtomBase::GetProp,
          return_value_policy<copy_const_reference>())
     .def("SetProp", &AtomBase::SetProp, args("prop"))
-    .def("GetIndex", &AtomBase::GetIndex)
     .add_property("prop",
                   make_function(&AtomBase::GetProp,
                                 return_value_policy<copy_const_reference>()))
@@ -57,7 +56,6 @@ void export_Atom()
                   make_function(&AtomBase::GetName,
                                 return_value_policy<copy_const_reference>()),
                   &AtomBase::SetName)
-    .add_property("index",&AtomBase::GetIndex)
 
   ;
   generic_prop_def<AtomBase>(atom_base);

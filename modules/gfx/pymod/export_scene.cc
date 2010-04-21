@@ -124,8 +124,6 @@ void export_Scene()
     .def("SetShadow",&Scene::SetShadow)
     .def("SetShadowQuality",&Scene::SetShadowQuality)
     .def("AttachObserver",&Scene::AttachObserver)
-    .def("StartOffscreenMode",&Scene::StartOffscreenMode)
-    .def("StopOffscreenMode",&Scene::StopOffscreenMode)
     .def("__getitem__",scene_getitem)
     .add_property("bg",
                   &Scene::GetBackground, 
