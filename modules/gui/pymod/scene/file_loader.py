@@ -48,13 +48,6 @@ class BaseRemoteLoader(gui.RemoteSiteLoader):
     else:
       gui.FileLoader.LoadObject(str(file_name),str(selection))
     return None
-
-  #Hack for C++ (will be changed soon)
-  def ByIdAddr(self,id,selection):
-    reply = self.ById(id,selection)
-    if reply is not None:
-      return sip.unwrapinstance(reply)
-    return 0
     
   def IsImg(self):
     return False

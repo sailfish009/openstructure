@@ -50,9 +50,8 @@ struct WrappedRemoteSiteLoader : public RemoteSiteLoader
     }
 
     virtual QNetworkReply* ById(const QString& id, const QString& selection=QString()){
-      //This hackish code will be changed soon(er or later)
-      unsigned long addr=call_method<unsigned long, std::string>(self, "ByIdAddr", id.toStdString(), selection.toStdString());
-      QNetworkReply* network_reply= reinterpret_cast<QNetworkReply*>(addr);
+      object obj = call_method<object, std::string, std::string>(self, "ById", id.toStdString(), selection.toStdString());
+      QNetworkReply* network_reply= get_cpp_qobject<QNetworkReply>(obj);
       if(network_reply){
         return network_reply;
       }
