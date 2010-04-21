@@ -57,7 +57,6 @@ except NameError:
   pass
 sys.ps1='ost> '
 sys.ps2='..... '
-print ''
 sys.argv=sys.argv[1:]
 home = os.getenv('HOME') or os.getenv('USERPROFILE')
 _ostrc=os.path.join(home, '.ostrc')
