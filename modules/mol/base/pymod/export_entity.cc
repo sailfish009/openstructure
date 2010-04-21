@@ -46,6 +46,10 @@ StringMethod select_string=&EntityHandle::Select;
 //Connect1 conn1=&EntityHandle::Connect;
 //Connect2 conn2=&EntityHandle::Connect;
 
+
+Real (EntityHandle::*get_angle1)(const AtomHandle&, const AtomHandle&, const AtomHandle&) const = &EntityHandle::GetAngle;
+Real (EntityHandle::*get_angle2)(const AtomView&, const AtomView&, const AtomView&) const = &EntityHandle::GetAngle;
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_xcs_editor_overloads, 
                                       EntityHandle::RequestXCSEditor, 0, 1)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_ics_editor_overloads, 
@@ -92,7 +96,8 @@ void export_Entity()
     .add_property("residue_count", &EntityHandle::GetResidueCount)
     .add_property("atom_count", &EntityHandle::GetAtomCount)
     .def("FindWithin", &EntityHandle::FindWithin)
-    .def("GetAngle", &EntityHandle::GetAngle)
+    .def("GetAngle", get_angle1)
+    .def("GetAngle", get_angle2)
     .def("FindTorsion", &EntityHandle::FindTorsion)
     .def("Apply", &EntityHandle::Apply)
     .def("Copy", &EntityHandle::Copy)

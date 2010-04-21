@@ -697,6 +697,19 @@ std::pair<Real,Real> EntityView::GetMinMax(const String& prop,
   return std::make_pair(min_v,max_v);
 }
 
+Real EntityView::GetAngle(const AtomHandle& a1, const AtomHandle& a2,
+                const AtomHandle& a3) const
+{
+  return this->GetHandle().GetAngle(a1,a2,a3);
+}
+
+Real EntityView::GetAngle(const AtomView& a1, const AtomView& a2,
+                const AtomView& a3) const
+{
+  return this->GetHandle().GetAngle(a1.GetHandle(),a2.GetHandle(),a3.GetHandle());
+}
+
+
 #ifdef _MSC_VER
 AtomView EntityView::AddXAtom(const AtomHandle& ah, ViewAddFlags flags)
 {

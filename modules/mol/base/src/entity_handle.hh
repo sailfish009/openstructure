@@ -253,6 +253,10 @@ public:
   Real GetAngle(const AtomHandle& a1, const AtomHandle& a2,
                 const AtomHandle& a3) const;
 
+  /// \brief  Get angle in radians between bonds a1-a2 and a2-a3
+  Real GetAngle(const AtomView& a1, const AtomView& a2,
+                const AtomView& a3) const;
+
   const geom::Mat4& GetTransformationMatrix() const;
 
 

@@ -83,6 +83,9 @@ void export_EntityView()
   void (EntityView::* apply1)(EntityVisitor&) = &EntityView::Apply;
   void (EntityView::* apply2)(EntityViewVisitor&) = &EntityView::Apply;
 
+  Real (EntityView::*get_angle1)(const AtomHandle&, const AtomHandle&, const AtomHandle&) const = &EntityView::GetAngle;
+  Real (EntityView::*get_angle2)(const AtomView&, const AtomView&, const AtomView&) const = &EntityView::GetAngle;
+
   class_<EntityView, bases<EntityBase> >("EntityView", no_init)
     .def("Apply",apply1)
     .def("Apply",apply2)
@@ -102,6 +105,8 @@ void export_EntityView()
     .def("GetResidueCount", &EntityView::GetResidueCount)
     .def("GetChainCount", &EntityView::GetChainCount)
     .def("GetBondCount", &EntityView::GetBondCount)
+    .def("GetAngle", get_angle1)
+    .def("GetAngle", get_angle2)
     .def("FindChain", find_chain_hnd)
     .def("RemoveChain", &EntityView::RemoveChain)
     .def("FindWithin", &EntityView::FindWithin)
