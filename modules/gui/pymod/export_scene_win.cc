@@ -20,11 +20,11 @@
 
 #include <boost/python.hpp>
 
-#include "scene_win_proxy.hh"
+#include <ost/gui/scene_win/scene_win.hh>
+#include <ost/gui/scene_win/context_menu.hh>
 
 #include "sip_handler.hh"
 
-#include <ost/gui/scene_win/context_menu.hh>
 
 using namespace boost::python;
 using namespace ost;

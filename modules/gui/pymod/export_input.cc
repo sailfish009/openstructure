@@ -22,8 +22,6 @@
 
 #include "sip_handler.hh"
 
-#include "spnav_input_proxy.hh"
-
 using namespace boost::python;
 using namespace ost;
 using namespace ost::gui;
@@ -41,7 +39,7 @@ object spnav_get_instance()
 
 void export_Input()
 {
-  class_<SpnavInput, bases<SipHandlerBase>, boost::noncopyable >("SpnavInput",no_init)
+  class_<SpnavInput, boost::noncopyable >("SpnavInput",no_init)
     .def("GetQThread", &spnav_get_instance).staticmethod("GetQThread")
     .def("GetQObject", &get_py_qobject<SpnavInput>)
     .add_property("qobject", &get_py_qobject<SpnavInput>)
