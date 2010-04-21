@@ -43,9 +43,6 @@ namespace ost { namespace io {
 
 using boost::format;
 
-String FORMAT_NAME_STRING;
-String FORMAT_DESCRIPTION_STRING;
-
 CRDReader::CRDReader(const boost::filesystem::path& loc):
   sequential_atom_list_(),
   curr_chain_(),

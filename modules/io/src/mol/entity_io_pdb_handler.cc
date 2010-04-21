@@ -50,9 +50,12 @@ void EntityIOPDBHandler::Export(const mol::EntityView& ent,
 {
   PDBWriter writer(loc);
   if (boost::iequals(boost::filesystem::extension(loc), ".pqr")) {
-    writer.SetFlags(PDB::PQR_FORMAT);
+    PDB::PushFlags(PDB::Flags() | PDB::PQR_FORMAT);
+    writer.Write(ent);
+    PDB::PopFlags();
+  } else {
+    writer.Write(ent);
   }
-  writer.Write(ent);
 }
 
 void EntityIOPDBHandler::Import(mol::EntityHandle& ent, 

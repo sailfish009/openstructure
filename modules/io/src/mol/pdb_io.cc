@@ -16,23 +16,25 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_MOL_COORD_FRAME_HH
-#define OST_MOL_COORD_FRAME_HH
+#include "pdb_io.hh"
 
-/*
-  Author: Marco Biasini
- */
-#include <boost/shared_ptr.hpp>
-#include <ost/geom/geom.hh>
-#include <ost/mol/module_config.hh>
+namespace ost { namespace io {
 
-namespace ost { namespace mol {
+  PDB& PDB::Instance() {
+    static PDB x;
+    return x;
+  }
+
+  const unsigned int PDB::SKIP_FAULTY_RECORDS=0x1;
+  const unsigned int PDB::NO_HETATMS=0x2;
+  const unsigned int PDB::WRITE_MULTIPLE_MODELS=0x4;
+  const unsigned int PDB::PQR_FORMAT=0x8;
+  const unsigned int PDB::JOIN_SPREAD_ATOM_RECORDS=0x10;
+  const unsigned int PDB::CALPHA_ONLY=0x20;
+
+  void PDB::PushFlags(unsigned int flags) {PDB::Instance().fstack.push(flags);}
+  unsigned int PDB::Flags() {return PDB::Instance().fstack.empty() ? 0 : PDB::Instance().fstack.top();}
+  void PDB::PopFlags() {PDB::Instance().fstack.pop();}
 
 
-typedef std::vector<geom::Vec3> CoordFrame;
-typedef boost::shared_ptr<CoordFrame> CoordFramePtr;
-typedef std::vector<CoordFramePtr> CoordFrameList;
-
-}}
-
-#endif
+}} // ns

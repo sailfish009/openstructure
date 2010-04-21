@@ -47,17 +47,7 @@ public:
   bool HasNext();
 
   void Import(mol::EntityHandle& ent,
-              const String& restrict_chains="");
-  void SetFlags(PDBFlags flags);
-  
-  /// \brief get list of atoms
-  /// 
-  /// The atom handles reflect the order of atom records in the PDb files. This 
-  /// is used to synchronize PDB and coordgroup io.
-  /// 
-  /// By default, the atom list is empty, The PDB::SEQUENTIAL_ATOM_IMPORT flag
-  /// must be set.
-  std::vector<mol::AtomHandle> GetSequentialAtoms() const;
+	      const String& restrict_chains="");
 
 private:
   void ClearState();
@@ -90,8 +80,7 @@ private:
   std::istream& instream_;
   boost::iostreams::filtering_stream<boost::iostreams::input>  in_;
   String curr_line_;
-  std::vector<mol::AtomHandle> sequential_atom_list_;
-  PDBFlags flags_;
+  
   // this needs to be set to true for reading pqr
   // file (i.e. pdb formatted file with charges in occupacy
   // column, and radii in b-factor column)

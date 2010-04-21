@@ -28,6 +28,7 @@ using namespace boost::python;
 #include <ost/io/seq/save.hh>
 #include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/mol/entity_io_crd_handler.hh>
+#include <ost/io/mol/entity_io_mae_handler.hh>
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/mol/dcd_io.hh>
@@ -120,6 +121,9 @@ BOOST_PYTHON_MODULE(_io)
   def("LoadCHARMMTraj",load_dcd3);
   def("LoadCHARMMTraj",load_dcd4);
   def("SaveCHARMMTraj",SaveCHARMMTraj,save_charmm_trj_ov());
+
+  def("LoadMAE", &LoadMAE);
+
   export_pdb_io();
 #if OST_IMG_ENABLED  
   export_map_io();

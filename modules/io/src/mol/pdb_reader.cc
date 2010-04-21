@@ -62,19 +62,19 @@ mol::ResNum to_res_num(int num, char ins_code)
 }
 
 PDBReader::PDBReader(std::istream& instream):
-  infile_(), instream_(instream), flags_(0)
+  infile_(), instream_(instream)
 {
   this->Init(boost::filesystem::path(""));
 }
 
 PDBReader::PDBReader(const String& filename)
-  : infile_(filename), instream_(infile_), flags_(0)
+  : infile_(filename), instream_(infile_)
 {
   this->Init(boost::filesystem::path(filename));
 }
 
 PDBReader::PDBReader(const boost::filesystem::path& loc):
-  infile_(loc), instream_(infile_), flags_(0)
+  infile_(loc), instream_(infile_)
 {
   this->Init(loc);
 }
@@ -107,7 +107,7 @@ bool PDBReader::HasNext()
      StringRef curr_line(curr_line_.c_str(), curr_line_.length());
      if (curr_line.size()>5 && 
          (IEquals(curr_line.substr(0, 6), StringRef("ATOM  ", 6)) ||
-         (!(flags_ & PDB::NO_HETATMS) &&
+         (!(PDB::Flags() & PDB::NO_HETATMS) &&
           IEquals(curr_line.substr(0, 6),StringRef("HETATM ", 6))) ||
           IEquals(curr_line.substr(0, 6),StringRef("ANISOU ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
@@ -124,6 +124,8 @@ bool PDBReader::HasNext()
 void PDBReader::Import(mol::EntityHandle& ent,
                        const String& restrict_chains)
 {
+  LOGN_DEBUG("PDBReader: current flags: " << PDB::Flags());
+
   Profile profile_import("PDBReader::Import");
   this->ClearState();
   // first read curr_line and then read next...
@@ -172,7 +174,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
           continue;
         }
         if (IEquals(curr_line.substr(0, 6), StringRef("HETATM", 6))) {
-          if (flags_ & PDB::NO_HETATMS)
+          if (PDB::Flags() & PDB::NO_HETATMS)
             continue;
           LOGN_TRACE("processing HETATM entry");
           this->ParseAndAddAtom(curr_line, line_num_, ent, 
@@ -251,17 +253,6 @@ void PDBReader::ClearState()
   hard_end_=false;
   helix_list_.clear();
   strand_list_.clear();
-  sequential_atom_list_.clear();
-}
-
-std::vector<mol::AtomHandle> PDBReader::GetSequentialAtoms() const
-{
-  return sequential_atom_list_;
-}
-
-void PDBReader::SetFlags(PDBFlags flags)
-{
-  flags_=flags;
 }
 
 bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num, 
@@ -277,7 +268,7 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
 
   std::pair<bool, int> a_num=line.substr(6, 5).ltrim().to_int();
   if (!a_num.first) {
-    if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
+    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
       return false;
     }
     throw IOException(str(format("invalid atom number on line %d") %line_num));
@@ -287,7 +278,7 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
   res_name=line.substr(17, 3).trim();
   std::pair<bool, int> res_num=line.substr(22, 4).ltrim().to_int();;
   if (!res_num.first) {
-    if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
+    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
       return false;
     }
     throw IOException(str(format("invalid res number on line %d") % line_num));
@@ -312,7 +303,7 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   for (int i=0;i<6; ++i) {
     std::pair<bool, int> result=line.substr(29+i*7, 6).to_int();
     if (!result.first) {
-      if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
+      if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
         return;
       }
       throw IOException(str(format("invalid ANISOU record on line %d")%line_num));
@@ -321,7 +312,7 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   }
   String aname(atom_name.str());
   if (!curr_residue_.IsValid()) {
-    if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
+    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
       return;
     } 
     const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
@@ -329,7 +320,7 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   }
   mol::AtomHandle atom=curr_residue_.FindAtom(aname);
   if (!atom.IsValid()) {
-    if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
+    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
       return;
     } 
     const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
@@ -368,7 +359,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   for (int i=0;i<3; ++i) {
     std::pair<bool, float> result=line.substr(30+i*8, 8).ltrim().to_float();
     if (!result.first) {
-      if (flags_ & PDB::SKIP_FAULTY_RECORDS) {
+      if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
         return;
       }
       throw IOException(str(format("invalid coordinate on line %d")%line_num));
@@ -433,24 +424,31 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   }
 
   if(update_chain) {
-    if (!(curr_chain_=ent.FindChain(s_chain))) {
+    curr_chain_=mol::ChainHandle();
+#if 0
+    // TODO: should this depend on JOIN_SPREAD as well?
+    if (PDB::Flags() & PDB::JOIN_SPREAD_ATOM_RECORDS) {
+      curr_chain_=ent.FindChain(s_chain);
+    }
+#else
+      curr_chain_=ent.FindChain(s_chain);
+#endif
+    if(!curr_chain_.IsValid()) {
       LOGN_DUMP("new chain " << s_chain);
       curr_chain_=editor.InsertChain(s_chain);
       ++chain_count_;
     }
+    assert(curr_chain_.IsValid());
   }
   if(update_residue) {
-    if (flags_ & PDB::JOIN_SPREAD_ATOM_RECORDS) {
+    curr_residue_=mol::ResidueHandle();
+    if (PDB::Flags() & PDB::JOIN_SPREAD_ATOM_RECORDS) {
       curr_residue_=curr_chain_.FindResidue(res_num);
-      if (!curr_residue_.IsValid()) {
-        LOGN_DUMP("new residue " << res_name << " " << res_num);
-        curr_residue_=editor.AppendResidue(curr_chain_, res_name.str(), res_num);
-        ++residue_count_; 
-      }
-    } else {
+    }
+    if (!curr_residue_.IsValid()) {
       LOGN_DUMP("new residue " << res_name << " " << res_num);
       curr_residue_=editor.AppendResidue(curr_chain_, res_name.str(), res_num);
-      ++residue_count_;      
+      ++residue_count_; 
     }
     assert(curr_residue_.IsValid());
   }
@@ -494,16 +492,22 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     } else {
       mol::AtomHandle ah=editor.InsertAltAtom(curr_residue_, aname,
                                               String(1, alt_loc), apos, aprop);
-      if (flags_ & PDB::SEQUENTIAL_ATOM_IMPORT) {
+      /*
+	for now, this is not needed - the cg will use an global atom id sorted
+	list insteadx
+      if (PDB::Flags() & PDB::SEQUENTIAL_ATOM_IMPORT) {
         sequential_atom_list_.push_back(ah);
       }
+      */
       ++atom_count_;
     }
   } else {
     mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, aprop);
-    if (flags_ & PDB::SEQUENTIAL_ATOM_IMPORT) {
+    /*
+    if (PDB::Flags() & PDB::SEQUENTIAL_ATOM_IMPORT) {
       sequential_atom_list_.push_back(ah);
     }
+    */
     ++atom_count_;
   }
 }

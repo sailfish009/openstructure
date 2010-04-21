@@ -19,22 +19,28 @@
 #ifndef OST_IO_PDB_IO_HH
 #define OST_IO_PDB_IO_HH
 
+#include <stack>
+
 namespace ost { namespace io {
   
+
 /// \brief flags that incluence the behaviour of the PDBReader and PDBWriter
 struct PDB {
-  typedef enum {
+
     /// \brief skip faulty records
-    /// 
     /// This flag tells the PDB loader to ignore faulty records. By default,
     /// faulty records abort import.
-    SKIP_FAULTY_RECORDS=1,
+  static const unsigned int SKIP_FAULTY_RECORDS;
+
     /// \brief do not import HETATM records
-    NO_HETATMS=2,
+  static const unsigned int NO_HETATMS;
+
     /// \brief enable writing of multiple models
-    WRITE_MULTIPLE_MODELS=4,
+  static const unsigned int WRITE_MULTIPLE_MODELS;
+
     /// \brief enable for PQR
-    PQR_FORMAT=8,
+  static const unsigned int PQR_FORMAT;
+
     /// \brief Join atom records into one residue, even if the atom records
     ///     are not sequential.
     /// 
@@ -57,20 +63,19 @@ struct PDB {
     /// 
     /// By default, the atom 550 will start a new residue instead of being
     /// joined with atoms 43-48 into one residue.
-    JOIN_SPREAD_ATOM_RECORDS=16,
-    //// \brief keep track of the order of atom records
-    /// 
-    /// This option is mostly useful in combination with 
-    /// PDB::JOIN_SPREAD_ATOM_RECORDS and CoordGroups.
-    /// 
-    /// The atoms are accessible via PDBReader::GetSequentialAtoms()
-    SEQUENTIAL_ATOM_IMPORT=32,
-    /// \brief only import C-alpha atoms
-    CALPHA_ONLY=64
-  } Type; 
-};
+  static const unsigned int JOIN_SPREAD_ATOM_RECORDS;
 
-typedef unsigned int PDBFlags;
+    /// \brief only import C-alpha atoms
+  static const unsigned int CALPHA_ONLY;
+
+  static void PushFlags(unsigned int flags);
+  static unsigned int Flags();
+  static void PopFlags();
+
+  static PDB& Instance();
+
+  std::stack<unsigned int> fstack;
+};
 
 }}
 

@@ -52,21 +52,27 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
     flags|=PDB.NO_HETATMS
   if join_spread_atom_records:
     flags|=PDB.JOIN_SPREAD_ATOM_RECORDS
-  reader.SetFlags(flags)
-  if load_multi:
-    ent_list=[]
-    while reader.HasNext():
-      ent=mol.CreateEntity()
-      reader.Import(ent, restrict_chains)
-      conop_inst.ConnectAll(builder, ent, 0)
-      ent_list.append(ent)
-    return ent_list
-  else:
-    ent=mol.CreateEntity()    
-    if reader.HasNext():
-      reader.Import(ent, restrict_chains)
-      conop_inst.ConnectAll(builder, ent, 0)
-    return ent
+  try:
+    PDB.PushFlags(PDB.Flags() | flags)
+    if load_multi:
+      ent_list=[]
+      while reader.HasNext():
+        ent=mol.CreateEntity()
+        reader.Import(ent, restrict_chains)
+        conop_inst.ConnectAll(builder, ent, 0)
+        ent_list.append(ent)
+      PDB.PopFlags()
+      return ent_list
+    else:
+      ent=mol.CreateEntity()    
+      if reader.HasNext():
+        reader.Import(ent, restrict_chains)
+        conop_inst.ConnectAll(builder, ent, 0)
+      PDB.PopFlags()
+      return ent
+  except:
+    PDB.PopFlags()
+    raise
 
 def SavePDB(models, filename):
   """

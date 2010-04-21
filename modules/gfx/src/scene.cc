@@ -293,7 +293,7 @@ void Scene::InitGL()
 
 void Scene::RequestRedraw()
 {
-  if (win_) {
+  if (win_ && !offscreen_flag_) {
     win_->DoRefresh();
   }
 }
@@ -545,6 +545,37 @@ namespace {
     GfxObjP node;
   };
 
+#if 0
+  struct RegexFindObj: public GfxNodeVisitor {
+    RegexFindObj(const String& rs): reg(), valid(false), node() {
+      try {
+        reg = boost::regex(rs);
+        valid = true;
+      } catch (boost::regex_error& e) {
+        LOGN_ERROR("invalid regex");
+      }
+    }
+
+    virtual bool VisitNode(GfxNode* n, const Stack& st) {
+      return true;
+    }
+
+    virtual void VisitObject(GfxObj* o, const Stack& st) {
+      if(boost::regex_match(o->GetName(),reg)) {
+        GfxNodeP nn = o->shared_from_this();
+        GfxObjP oo = dyn_cast<GfxObj>(nn);
+        if(oo) {
+          olist.push_back(oo);
+        }
+      }
+    }
+
+    boost::regex reg;
+    bool valid;
+    std::vector<GfxObjP> olist;
+  };
+#endif
+
   struct FindNode2: public GfxNodeVisitor {
     FindNode2(GfxNodeP n): node(n), found(false) {}
     virtual bool VisitNode(GfxNode* n, const Stack& st) {
@@ -584,6 +615,14 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
   }
 
   LOG_DEBUG("scene: graphical object added @" << n.get() << std::endl);
+
+  if(root_node_->GetChildCount()==0) {
+    GfxObjP go = boost::dynamic_pointer_cast<GfxObj>(n);
+    if(go) {
+      SetCenter(go->GetCenter());
+    }
+  }
+
   root_node_->Add(n);
   if (redraw) {
     this->RequestRedraw();
@@ -1162,6 +1201,55 @@ uint Scene::GetSelectionMode() const
   return selection_mode_;
 }
 
+void Scene::StartOffscreenMode(unsigned int width, unsigned int height)
+{
+  if(main_offscreen_buffer_) return;
+  main_offscreen_buffer_ = new OffscreenBuffer(width,height,OffscreenBufferFormat(),true);
+
+  if(!main_offscreen_buffer_->IsValid()) {
+    LOGN_ERROR("error during offscreen buffer creation");
+    delete main_offscreen_buffer_;   
+    main_offscreen_buffer_=0;
+    return;
+  }
+  old_vp_[0]=vp_width_;
+  old_vp_[1]=vp_height_;
+  main_offscreen_buffer_->MakeActive();
+  offscreen_flag_=true;
+  root_node_->ContextSwitch();
+
+#if OST_SHADER_SUPPORT_ENABLED
+  String shader_name = Shader::Instance().GetCurrentName();
+#endif
+  LOGN_DEBUG("initializing GL");
+  this->InitGL();
+  LOGN_DEBUG("setting viewport");
+  Resize(width,height);
+  LOGN_DEBUG("updating fog settings");
+  update_fog();
+  glDrawBuffer(GL_FRONT);
+#if OST_SHADER_SUPPORT_ENABLED
+  LOGN_DEBUG("activating shader");
+  Shader::Instance().Activate(shader_name);
+#endif
+}
+
+void Scene::StopOffscreenMode()
+{
+  if(main_offscreen_buffer_) {
+    if (win_) {
+      win_->MakeActive();
+    }
+    delete main_offscreen_buffer_;
+    main_offscreen_buffer_=0;
+    Scene::Instance().SetViewport(old_vp_[0],old_vp_[1]);
+    offscreen_flag_=false;
+    root_node_->ContextSwitch();
+    glDrawBuffer(GL_BACK);
+    update_fog();
+  }
+}
+
 void Scene::Export(const String& fname, unsigned int width,
                    unsigned int height, bool transparent)
 {
@@ -1176,80 +1264,94 @@ void Scene::Export(const String& fname, unsigned int width,
     return;
   }
 
-  LOGN_DEBUG("switching to offscreen rendering");
-  bool old_flag=offscreen_flag_;
   GLint old_vp[4];
   glGetIntegerv(GL_VIEWPORT,old_vp);
-  try {
-    OffscreenBuffer ob(width,height,OffscreenBufferFormat(),true);
-
-    if(!ob.IsValid()) {
-      LOGN_ERROR("error during offscreen buffer creation");
-      return;
-    }
-
-    ob.MakeActive();
-    offscreen_flag_=true;
-    root_node_->ContextSwitch();
+  bool old_flag=offscreen_flag_;
+  if(!main_offscreen_buffer_) {
+    LOGN_DEBUG("switching to offscreen rendering");
+    glGetIntegerv(GL_VIEWPORT,old_vp);
+    try {
+      OffscreenBuffer ob(width,height,OffscreenBufferFormat(),true);
+      
+      if(!ob.IsValid()) {
+        LOGN_ERROR("error during offscreen buffer creation");
+        return;
+      }
+      
+      ob.MakeActive();
+      offscreen_flag_=true;
+      root_node_->ContextSwitch();
 #if 1
 #if OST_SHADER_SUPPORT_ENABLED
-    String shader_name = Shader::Instance().GetCurrentName();
+      String shader_name = Shader::Instance().GetCurrentName();
 #endif
-    LOGN_DEBUG("initializing GL");
-    this->InitGL();
-    LOGN_DEBUG("setting viewport");
-    SetViewport(width,height);
-    LOGN_DEBUG("reseting projection");
-    ResetProjection();
-    LOGN_DEBUG("updating fog settings");
-    update_fog();
-    glDrawBuffer(GL_FRONT);
-    //this->flag_all_dirty();
+      LOGN_DEBUG("initializing GL");
+      this->InitGL();
+      LOGN_DEBUG("setting viewport");
+      SetViewport(width,height);
+      LOGN_DEBUG("reseting projection");
+      ResetProjection();
+      LOGN_DEBUG("updating fog settings");
+      update_fog();
+      glDrawBuffer(GL_FRONT);
+      //this->flag_all_dirty();
 #if OST_SHADER_SUPPORT_ENABLED
-    LOGN_DEBUG("activating shader");
-    Shader::Instance().Activate(shader_name);
+      LOGN_DEBUG("activating shader");
+      Shader::Instance().Activate(shader_name);
 #endif
 #endif
-    LOGN_DEBUG("doing rendering");
-    this->RenderGL();
-    // make sure drawing operations are finished
-    glFinish();
-    boost::shared_array<uchar> img_data(new uchar[width*height*4]);
-
-    LOGN_DEBUG("setting background transparency");
-    if (transparent) {
-      glPixelTransferf(GL_ALPHA_BIAS, 0.0);
-    } else {
-      // shift alpha channel by one to make sure pixels are read out as opaque
-      glPixelTransferf(GL_ALPHA_BIAS, 1.0);
+    } catch (std::exception& e) {
+      LOGN_ERROR("exception during offscreen rendering: " << e.what());
+      throw;
+      // noop
     }
-
-    LOGN_DEBUG("reading framebuffer pixels");
-    glReadBuffer(GL_FRONT);
-    glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
-
-    LOGN_DEBUG("calling bitmap export");
-    BitmapExport(fname,ext,width,height,img_data.get());
-  } catch (std::exception& e) {
-    LOGN_ERROR("exception during offscreen rendering: " << e.what());
-    throw;
-    // noop
   }
-  LOGN_DEBUG("switching back to main context");
-  if(main_offscreen_buffer_) {
-    main_offscreen_buffer_->MakeActive();
-  } else if (win_) {
-    win_->MakeActive();
+  LOGN_DEBUG("doing rendering");
+  this->RenderGL();
+  // make sure drawing operations are finished
+  glFinish();
+
+  unsigned int width2=width;
+  unsigned int height2=height;
+  if(!main_offscreen_buffer_) {
+    width2=old_vp[2];
+    height2=old_vp[3];
+  }
+  boost::shared_array<uchar> img_data(new uchar[width2*height2*4]);
+      
+  LOGN_DEBUG("setting background transparency");
+  if (transparent) {
+    glPixelTransferf(GL_ALPHA_BIAS, 0.0);
   } else {
-    LOGN_ERROR("erm, no context to fall back to");
-    return;
+    // shift alpha channel by one to make sure pixels are read out as opaque
+    glPixelTransferf(GL_ALPHA_BIAS, 1.0);
   }
-  Scene::Instance().SetViewport(old_vp[2],old_vp[3]);
-  offscreen_flag_=old_flag;
-  root_node_->ContextSwitch();
-  glDrawBuffer(GL_BACK);
-  LOGN_DEBUG("updating fog");
-  update_fog();
+  
+  LOGN_DEBUG("reading framebuffer pixels");
+  glReadBuffer(GL_FRONT);
+  glReadPixels(0,0,width2,height2,GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
+
+  LOGN_DEBUG("calling bitmap export");
+  BitmapExport(fname,ext,width2,height2,img_data.get());
+  
+
+  if(!main_offscreen_buffer_) {
+    LOGN_DEBUG("switching back to main context");
+    if(main_offscreen_buffer_) {
+      main_offscreen_buffer_->MakeActive();
+    } else if (win_) {
+      win_->MakeActive();
+    } else {
+      LOGN_ERROR("erm, no context to fall back to");
+      return;
+    }
+    Scene::Instance().SetViewport(old_vp[2],old_vp[3]);
+    offscreen_flag_=old_flag;
+    root_node_->ContextSwitch();
+    glDrawBuffer(GL_BACK);
+    LOGN_DEBUG("updating fog");
+    update_fog();
+  }
 }
 
 void Scene::Export(const String& fname, bool transparent)
