@@ -30,7 +30,6 @@ using namespace boost::python;
 #include "transfer_ownership.hh"
 #include "python_shell_proxy.hh"
 #include "tool_options_win_proxy.hh"
-#include "gl_win_proxy.hh"
 #include "scene_win_proxy.hh"
 #include "sequence_viewer_proxy.hh"
 #if OST_IMG_ENABLED

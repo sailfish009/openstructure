@@ -34,17 +34,24 @@ using namespace boost::python;
 namespace ost { namespace gui {
 
 
-template <class O> object get_qobject(O* obj)
+template <class O> object get_py_qobject(O* cpp_object)
 {
   static object sip_module=import("sip");
   static object pyqt4_module=import("PyQt4.QtCore");
-  QObject* qobject = qobject_cast<QObject*>(obj);
+  QObject* qobject = qobject_cast<QObject*>(cpp_object);
   unsigned long addr = reinterpret_cast<unsigned long>(qobject);
   object py_qobject = pyqt4_module.attr("QObject");
   object object = sip_module.attr("wrapinstance")(addr, py_qobject);
   return object;
 };
 
+
+template <class O> O* get_cpp_qobject(object py_object)
+{
+  static object sip_module=import("sip");
+  unsigned long addr = extract<unsigned long>(sip_module.attr("unwrapinstance")(py_object));
+  return reinterpret_cast<O*>(addr);
+};
 
 class SipHandlerBase {
 public:

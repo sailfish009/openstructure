@@ -32,8 +32,8 @@ void export_GLWin()
     .def("Show", &GLWin::show)
     .def("Hide", &GLWin::hide)
     .def("StatusMessage",&GLWin::StatusMessage)
-    .def("GetQObject",&ost::gui::get_qobject<GLWin>)
-    .add_property("qobject", &ost::gui::get_qobject<GLWin>)
+    .def("GetQObject",&ost::gui::get_py_qobject<GLWin>)
+    .add_property("qobject", &ost::gui::get_py_qobject<GLWin>)
   ;
 }
 

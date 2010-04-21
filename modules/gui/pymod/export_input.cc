@@ -34,7 +34,7 @@ object spnav_get_instance()
 {
   static object sip_module=import("sip");
   static object pyqt4_module=import("PyQt4.QtCore");
-  return ost::gui::get_qobject<SpnavInput>(SpnavInput::Instance());
+  return ost::gui::get_py_qobject<SpnavInput>(SpnavInput::Instance());
 }
 
 }
@@ -43,8 +43,8 @@ void export_Input()
 {
   class_<SpnavInput, bases<SipHandlerBase>, boost::noncopyable >("SpnavInput",no_init)
     .def("GetQThread", &spnav_get_instance).staticmethod("GetQThread")
-    .def("GetQObject", &ost::gui::get_qobject<SpnavInput>)
-    .add_property("qobject", &ost::gui::get_qobject<SpnavInput>)
+    .def("GetQObject", &ost::gui::get_py_qobject<SpnavInput>)
+    .add_property("qobject", &ost::gui::get_py_qobject<SpnavInput>)
     .def("Instance", &SpnavInput::Instance,
      return_value_policy<reference_existing_object>()).staticmethod("Instance")
   ;
