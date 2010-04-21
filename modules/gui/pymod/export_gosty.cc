@@ -28,6 +28,8 @@ using namespace boost::python;
 #include <ost/gui/tools/tool_options_win.hh>
 
 #include "transfer_ownership.hh"
+#include "sip_handler.hh"
+
 #include "python_shell_proxy.hh"
 #include "tool_options_win_proxy.hh"
 #include "scene_win_proxy.hh"
@@ -84,6 +86,13 @@ void app_add_widget_to_app_a(GostyApp* app, const QString& ident,
   }
 }
 
+void app_add_widget_to_app_b(GostyApp* app, const QString& ident,
+                               object py_object)
+{
+  if(QWidget* widget = get_cpp_qobject<QWidget>(py_object)){
+    app->AddWidgetToApp(ident, widget);
+  }
+}
 
 void export_Gosty()
 {
@@ -112,6 +121,7 @@ void export_Gosty()
                   make_function(&GostyApp::GetPerspective, 
                                 return_value_policy<reference_existing_object>()))
     .def("AddWidgetToApp", &app_add_widget_to_app_a)
+    .def("AddWidgetToApp", &app_add_widget_to_app_b)
     .def("GetPerspective", &GostyApp::GetPerspective, 
          return_value_policy<reference_existing_object>())
   ;

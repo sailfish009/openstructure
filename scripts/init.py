@@ -1,5 +1,4 @@
 import __main__
-import sip
 import sys
 import optparse
 from ost import io, mol, seq, geom, conop, gui
@@ -50,7 +49,7 @@ def _InitFrontEnd():
   app.SetAppTitle("DNG")
   main_area=app.perspective.main_area
   _InitPanels(app, app.perspective.panels)
-  _InitMenuBar(app.perspective.GetMenuBar())
+  _InitMenuBar(app.perspective.menubar)
   _InitSpaceNav(app.perspective.panels.qobject)
   _InitContextMenu()
   main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win.qobject, int(QtCore.Qt.WindowMaximized))

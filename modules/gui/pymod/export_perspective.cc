@@ -57,6 +57,7 @@ void export_Perspective()
                   return_value_policy<reference_existing_object>()))
     .add_property("panels", make_function(&Perspective::GetPanels,
                   return_value_policy<reference_existing_object>()))
+    .add_property("menubar", make_function(&app_get_menu_bar))
   ;
 }
 

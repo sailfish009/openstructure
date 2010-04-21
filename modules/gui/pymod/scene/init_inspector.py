@@ -18,6 +18,7 @@
 #------------------------------------------------------------------------------
 
 import sip
+
 from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
@@ -45,8 +46,7 @@ def _InitInspector():
   mywidget = InspectorDialog(app.gl_win.qobject)
   mywidget.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.Tool)
   mywidget.show()
-  unwrapped = gui.BPQtHandle(sip.unwrapinstance(mywidget))
-  app.AddWidgetToApp("InspectorDialog", unwrapped)  
+  app.AddWidgetToApp("InspectorDialog", mywidget)  
   menu_bar=app.perspective.GetMenuBar()
   InitInspectorMenu(mywidget,menu_bar)
 
