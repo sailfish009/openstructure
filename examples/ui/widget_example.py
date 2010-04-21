@@ -22,23 +22,20 @@ from ost import gui
 from PyQt4 import QtCore, QtGui
 from board import Board
 
-
-#Create Widget
-tetris=Board()
-#Unwrap PyQt Object to C++ Object
-unwrapped=gui.BPQtHandle(sip.unwrapinstance(tetris))
-#Set Parent of Widget
-app=gui.GostyApp.Instance()
-app.AddWidgetToApp("Tetris", unwrapped)
-
-#Wrap widget to Qt Widget
-wid=gui.WrappedWidget(unwrapped)
-
 #Get Panels (Class which manages widgets)
 panels=gui.GostyApp.Instance().perspective.panels
+
+#Create Widget
+tetris=Board(panels.qobject)
+
+#Wrap widget to Qt Widget
+wid=gui.WrappedWidget(tetris)
+
 #Add Widget to widget pool
 panels.AddWidgetToPool("Break Widget",wid)
+
 #Add Widget to right panel
 panels.AddWidget(gui.PanelPosition.RIGHT_PANEL,wid,False)
+
 #Fun can start..
 tetris.start()

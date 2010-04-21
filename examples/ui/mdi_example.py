@@ -51,16 +51,12 @@ class Points(QtGui.QWidget):
 
 app=gui.GostyApp.Instance()
 
-pts=Points()
-
-widget = gui.BPQtHandle(sip.unwrapinstance(pts))
-
-app.AddWidgetToApp("points",widget)
-
 #Get main area widget
 main_area=app.perspective.main_area
 
+pts=Points(main_area.qobject)
+
 #Add Widget
-main_area.AddWidget("Some Points", widget)
+main_area.AddWidget("Some Points", pts)
 
 
