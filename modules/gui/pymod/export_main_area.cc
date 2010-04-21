@@ -164,8 +164,9 @@ void export_MainArea()
     .def("ShowSubWindow", &main_area_show_sub_window)        
     .def("HideSubWindow", &MainArea::HideSubWindow)
     .def("HideSubWindow", &main_area_hide_sub_window)            
-    .def("EnableTabbedMode", &MainArea::EnableTabbedMode, 
-         arg("flag")=true)
+    .def("EnableTabbedMode", &MainArea::EnableTabbedMode, arg("flag")=true)
+    .def("GetQObject",&get_py_qobject<MainArea>)
+    .add_property("qobject", &get_py_qobject<MainArea>)
   ;
 }
 
