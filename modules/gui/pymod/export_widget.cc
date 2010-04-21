@@ -37,8 +37,12 @@ using namespace ost::gui;
 
 struct WrappedWidget : public Widget
 {
-  WrappedWidget(PyObject *p, QObject* object):
-       Widget(dynamic_cast<QWidget*>(object)){ }
+  WrappedWidget(PyObject *p, object py_object):
+       Widget(NULL,NULL){
+    if(QWidget* widget = get_cpp_qobject<QWidget>(py_object)){
+      this->SetInternalWidget(widget);
+    }
+  }
 
   virtual bool Restore(const QString& prefix){return true;}
 
@@ -50,11 +54,13 @@ struct WrappedWidget : public Widget
 
 void export_Widget()
 {
-  class_<Widget, WrappedWidget, boost::noncopyable>("WrappedWidget",init<QObject*>())
+  class_<Widget, WrappedWidget, boost::noncopyable>("WrappedWidget",init<object>())
     .def("Save", &WrappedWidget::Save)
     .def("Restore", &WrappedWidget::Restore)
     .def("SetDestroyOnClose", &WrappedWidget::SetDestroyOnClose)
     .def("DestroyOnClose", &WrappedWidget::DestroyOnClose)
+    .def("GetQObject",&get_py_qobject<Widget>)
+    .add_property("qobject", &get_py_qobject<Widget>)
   ;
 }
 
