@@ -52,6 +52,9 @@ template <class O> object get_py_qobject(O* cpp_object)
 template <class O> O* get_cpp_qobject(object py_object)
 {
   if(py_object.ptr() != Py_None){
+    if(PyObject_HasAttrString(py_object.ptr(), "qobject")){
+      py_object = py_object.attr("qobject");
+    }
     static object sip_module=import("sip");
     unsigned long addr = extract<unsigned long>(sip_module.attr("unwrapinstance")(py_object));
     if(addr){

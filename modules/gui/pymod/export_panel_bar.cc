@@ -98,17 +98,6 @@ object panels_get_menu(Panels* panels)
   return get_py_qobject<QMenu>(panels->GetMenu());
 }
 
-object panels_get_qwidget(Panels* panels)
-{
-  static object sip_module=import("sip");
-  static object pyqt4_module=import("PyQt4.QtGui");
-  object sip_handle((size_t)panels);
-  object qwidget = pyqt4_module.attr("QWidget");
-  object widget = sip_module.attr("wrapinstance")(sip_handle, qwidget);
-
-  return widget;
-}
-
 void panel_bar_add_widget_a(PanelBar * pb, Widget* widget, bool hidden=false)
 {
   pb->AddWidget(widget,hidden);
@@ -149,7 +138,6 @@ void export_PanelBar()
     .def("RemoveWidget", &panels_remove_widget_b)
     .def("RemoveWidget", &panels_remove_widget_c)
     .def("GetMenu", &panels_get_menu)
-    .def("GetQWidget", &panels_get_qwidget)
     .def("AddWidgetToPool", &panels_add_widget_to_pool_a)
     .def("AddWidgetToPool", &panels_add_widget_to_pool_b)
     .def("AddWidgetToPool", &panels_add_widget_to_pool_c)
