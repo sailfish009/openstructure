@@ -42,8 +42,7 @@ class InitInspectorMenu(QtCore.QObject):
     
 def _InitInspector():
   app=gui.GostyApp.Instance()
-  gl_win=sip.wrapinstance(app.gl_win.GetSipHandle(),QtGui.QWidget)
-  mywidget = InspectorDialog(gl_win)
+  mywidget = InspectorDialog(app.gl_win.qobject)
   mywidget.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.Tool)
   mywidget.show()
   unwrapped = gui.BPQtHandle(sip.unwrapinstance(mywidget))

@@ -19,14 +19,32 @@
 #ifndef OST_GUI_SIP_HANDLER_HH
 #define OST_GUI_SIP_HANDLER_HH
 
-#include <ost/message.hh>
+#include <boost/python.hpp>
+
 #include <QWidget>
+
+#include <ost/message.hh>
+
+using namespace boost::python;
 
 /*
    Author: Ansgar Philippsen, Marco Biasini
  */
 
 namespace ost { namespace gui {
+
+
+template <class O> object get_qobject(O* obj)
+{
+  static object sip_module=import("sip");
+  static object pyqt4_module=import("PyQt4.QtCore");
+  QObject* qobject = qobject_cast<QObject*>(obj);
+  unsigned long addr = reinterpret_cast<unsigned long>(qobject);
+  object py_qobject = pyqt4_module.attr("QObject");
+  object object = sip_module.attr("wrapinstance")(addr, py_qobject);
+  return object;
+};
+
 
 class SipHandlerBase {
 public:

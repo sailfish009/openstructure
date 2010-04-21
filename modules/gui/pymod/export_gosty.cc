@@ -53,11 +53,6 @@ ToolOptionsWinProxy app_get_tool_options_win(GostyApp* app)
   return ToolOptionsWinProxy(app->GetToolOptionsWin());
 }
 
-GLWinProxy app_get_gl_win(GostyApp* app)
-{
-  return GLWinProxy(app->GetGLWin());
-}
-
 SceneWinProxy app_get_scene_win(GostyApp* app)
 {
   return SceneWinProxy(app->GetSceneWin());
@@ -99,8 +94,10 @@ void export_Gosty()
     .def("SetAppTitle", &GostyApp::SetAppTitle)
     .def("GetPyShell", &app_get_py_shell)
     .add_property("py_shell", &app_get_py_shell)
-    .def("GetGLWin", &app_get_gl_win)
-    .add_property("gl_win", &app_get_gl_win)                                
+    .def("GetGLWin", &GostyApp::GetGLWin,
+        return_value_policy<reference_existing_object>())
+    .add_property("gl_win", make_function(&GostyApp::GetGLWin,
+        return_value_policy<reference_existing_object>()))
     .def("GetSceneWin", &app_get_scene_win)
     .add_property("scene_win", &app_get_scene_win)                                
     .def("GetSequenceViewer", &app_get_seq_viewer)

@@ -53,7 +53,7 @@ def _InitFrontEnd():
   _InitMenuBar(app.perspective.GetMenuBar())
   _InitSpaceNav(app.perspective.panels.qwidget)
   _InitContextMenu()
-  main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win, int(QtCore.Qt.WindowMaximized))
+  main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win.qobject, int(QtCore.Qt.WindowMaximized))
   app.perspective.Restore()
   additional_modules=getattr(__main__, 'ADDITIONAL_GUI_MODULES', [])
   for module_name in additional_modules:

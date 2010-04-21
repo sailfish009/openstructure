@@ -17,7 +17,11 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
-#include <iostream>
+
+#include <ost/gui/input/spnav_input.hh>
+
+#include "sip_handler.hh"
+
 #include "spnav_input_proxy.hh"
 
 using namespace boost::python;
@@ -30,22 +34,18 @@ object spnav_get_instance()
 {
   static object sip_module=import("sip");
   static object pyqt4_module=import("PyQt4.QtCore");
-  SpnavInput* spnav = SpnavInput::Instance();
-  unsigned long addr = reinterpret_cast<unsigned long>(spnav);
-  object obj(addr);
-  object qthread = pyqt4_module.attr("QThread");
-  object thread = sip_module.attr("wrapinstance")(addr, qthread);
-
-  return thread;
+  return ost::gui::get_qobject<SpnavInput>(SpnavInput::Instance());
 }
 
 }
 
 void export_Input()
 {
-  class_<SpnavInputProxy, bases<SipHandlerBase> >("SpnavInput",no_init)
+  class_<SpnavInput, bases<SipHandlerBase>, boost::noncopyable >("SpnavInput",no_init)
     .def("GetQThread", &spnav_get_instance).staticmethod("GetQThread")
-    .def("Instance", &SpnavInputProxy::Instance,
+    .def("GetQObject", &ost::gui::get_qobject<SpnavInput>)
+    .add_property("qobject", &ost::gui::get_qobject<SpnavInput>)
+    .def("Instance", &SpnavInput::Instance,
      return_value_policy<reference_existing_object>()).staticmethod("Instance")
   ;
 }

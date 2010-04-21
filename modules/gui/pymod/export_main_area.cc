@@ -107,6 +107,30 @@ void main_area_hide_sub_window(MainArea* m, const SipHandlerBase& sh)
   m->HideSubWindow(reinterpret_cast<QWidget*>(sh.GetSipHandle()));
 }
 
+
+
+
+void main_area_add_pers_widget_g(MainArea* m, const QString& title,
+    const QString& name, object py_object, int window_states)
+{
+  static object sip_module=import("sip");
+  static object gui_module=import("ost.gui");
+  static object pyqt4_module=import("PyQt4.QtCore");
+
+  unsigned long addr = extract<unsigned long>(sip_module.attr("unwrapinstance")(py_object));
+  QWidget* widget = reinterpret_cast<QWidget*>(addr);
+  if(widget){
+    Qt::WindowStates q_window_states =Qt::WindowStates(window_states);
+    m->AddPersistentWidget(title, name, widget, q_window_states);
+  }
+}
+
+
+
+
+
+
+
 }
 
 void export_MainArea()
@@ -121,6 +145,7 @@ void export_MainArea()
     .def("AddPersistentWidget", &main_area_add_pers_widget_d)
     .def("AddPersistentWidget", &main_area_add_pers_widget_e)
     .def("AddPersistentWidget", &main_area_add_pers_widget_f)
+    .def("AddPersistentWidget", &main_area_add_pers_widget_g)
     .def("width", &MainArea::width)
     .def("height", &MainArea::height)
     .def("ShowSubWindow", &MainArea::ShowSubWindow)

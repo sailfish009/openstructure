@@ -27,8 +27,6 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::gui;
 
-
-
 namespace {
 
 unsigned long sip_handle(QObject* w)
