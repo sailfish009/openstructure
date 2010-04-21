@@ -84,8 +84,8 @@ void export_overlay()
     .def("SetName",&Overlay::SetName)
     ;
 
-  class_<NullOverlay,bases<Overlay>,boost::noncopyable>("NullOverlay",init<>())
-    ;
+   class_<NullOverlay,bases<Overlay>,boost::noncopyable>("NullOverlay",init<>())
+     ;
 
   class_<PointlistOverlayBase,bases<Overlay>,boost::noncopyable>("PointlistOverlayBase",init<const String&>())
     .def("SetSymbolSize",&PointlistOverlayBase::SetSymbolSize)
@@ -108,8 +108,8 @@ void export_overlay()
     .def("Clear",&PointlistOverlay::Clear)
     ;
 
-  class_<DrawOverlay,bases<Overlay>,boost::noncopyable>("DrawOverlay",init<ImageHandle>())
-    ;
+   class_<DrawOverlay,bases<Overlay>,boost::noncopyable>("DrawOverlay",init<ImageHandle>())
+     ;
 
   class_<MaskOverlay,bases<Overlay>,boost::noncopyable>("MaskOverlay",init<>())
     .def(init<const MaskPtr&>())

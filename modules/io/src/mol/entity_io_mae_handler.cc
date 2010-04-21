@@ -62,7 +62,7 @@ using boost::format;
             nrvo.push_back(line.substr(p0,p1-p0));
             ++p1;
             p0=p1;
-            while(isspace(line[p1]) and p1<line.size()) {++p0;++p1;}
+            while(isspace(line[p1]) && p1<line.size()) {++p0;++p1;}
             --p0; --p1;
           }
         } else {
@@ -70,7 +70,7 @@ using boost::format;
             nrvo.push_back(line.substr(p0+1,p1-p0-1));
             ++p1;
             p0=p1;
-            while(isspace(line[p1]) and p1<line.size()) {++p0;++p1;}
+            while(isspace(line[p1]) && p1<line.size()) {++p0;++p1;}
             --p0; --p1;
           } else if(line[p1]=='"') {
             in_string=true;
