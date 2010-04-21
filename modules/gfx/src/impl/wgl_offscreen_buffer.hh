@@ -19,7 +19,6 @@
 #ifndef OST_GFX_WGL_OFFSCREEN_BUFFER_HH
 #define OST_GFX_WGL_OFFSCREEN_BUFFER_HH
 
-#include <ost/gfx/GL/wglew.h>
 
 namespace ost { namespace gfx {
 
@@ -46,13 +45,6 @@ private:
   int height_;
   bool valid_;
   bool active_;
-
-  HPBUFFERARB        pbuffer_;
-  HGLRC              context_; //rendering context
-  HGLRC              old_context_;
-  
-  HDC                dev_context_;//device context
-  HDC                old_dev_context_;
 };
 
 }} // ns

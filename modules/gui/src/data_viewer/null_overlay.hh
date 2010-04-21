@@ -23,10 +23,11 @@
 */
 
 #include "overlay_base.hh"
+#include <ost/gui/module_config.hh>
 
 namespace ost { namespace img { namespace gui {
 
-class DLLEXPORT NullOverlay: public Overlay
+class DLLEXPORT_OST_GUI NullOverlay: public Overlay
 {
   Q_OBJECT;
 public:

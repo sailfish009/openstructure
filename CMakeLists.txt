@@ -29,6 +29,7 @@ option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
       OFF)
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
 option(DEPLOYMENT "switch on deployment settings" OFF)
+option(COMPOUND_LIB "location of the compound library to enable rule based builder based on the chemical component dictionary")
 
 
 if (PREFIX)

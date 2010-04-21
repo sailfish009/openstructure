@@ -70,6 +70,8 @@ private:
 };
 
 DLLEXPORT_OST_INFO std::ostream& operator<<(std::ostream&, const InfoPath& p);
+#ifndef _MSC_VER
 DLLEXPORT_OST_INFO InfoPath operator+(const InfoPath& p1, const InfoPath& p2);
+#endif
 
 }} // ns

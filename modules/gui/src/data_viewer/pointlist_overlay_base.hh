@@ -72,7 +72,7 @@ class DLLEXPORT_OST_GUI PointlistOverlayBaseSettings: public QDialog
   QPushButton* passive_color_b_;
 };
 
-class DLLEXPORT PointlistOverlayBase: public Overlay
+class DLLEXPORT_OST_GUI PointlistOverlayBase: public Overlay
 {
   Q_OBJECT;
 public:

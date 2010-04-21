@@ -21,7 +21,7 @@
 
 namespace ost { namespace gfx {
 
-OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared=true):
+OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared):
   width_(width), height_(height), valid_(false), active_(false)
 {}
 
