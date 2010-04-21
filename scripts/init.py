@@ -29,7 +29,8 @@ def _InitRuleBasedBuilder():
 # switch to rule-based builder for high fidelity if compounds.chemlib is 
 # available
 _InitRuleBasedBuilder()
-def _InitPanels(app, panels):
+def _InitPanels(app):
+  panels = app.perspective.panels
   panels.AddWidgetToPool('ost.gui.FileBrowser', -1)
   panels.AddWidgetToPool('ost.gui.PythonShell', 1)
   panels.AddWidgetToPool('ost.gui.RemoteLoader', -1)
@@ -48,17 +49,17 @@ def _InitFrontEnd():
   app=gui.GostyApp.Instance()
   app.SetAppTitle("DNG")
   main_area=app.perspective.main_area
-  _InitPanels(app, app.perspective.panels)
-  _InitMenuBar(app.perspective.menubar)
-  _InitSpaceNav(app.perspective.panels.qobject)
-  _InitContextMenu()
+  _InitPanels(app)
+  _InitMenuBar(app)
+  _InitSpaceNav(app)
+  _InitContextMenu(app)
   main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win.qobject, int(QtCore.Qt.WindowMaximized))
   app.perspective.Restore()
   additional_modules=getattr(__main__, 'ADDITIONAL_GUI_MODULES', [])
   for module_name in additional_modules:
     __import__(module_name)
   app.ProcessEvents()
-  _InitInspector()
+  _InitInspector(app)
 
 def _load_files():
   for pdb_id in options.pdb_ids:

@@ -33,10 +33,11 @@ class SpacenavControl(QtCore.QObject):
       self.rot = not self.rot
       print "Rotation Enabled:",self.rot
       
-def _InitSpaceNav(parent):
+def _InitSpaceNav(app):
   try:
     spnav = gui.SpnavInput.GetQThread()
     spnav.start()
+    parent = app.gl_win.qobject
     SpacenavControl(spnav,parent)
   except AttributeError:
     pass

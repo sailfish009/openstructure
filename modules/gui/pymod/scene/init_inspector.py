@@ -41,8 +41,7 @@ class InitInspectorMenu(QtCore.QObject):
   def Toggle(self):
     self.inspector_.setVisible(self.show_.isChecked())
     
-def _InitInspector():
-  app=gui.GostyApp.Instance()
+def _InitInspector(app):
   mywidget = InspectorDialog(app.gl_win.qobject)
   mywidget.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.Tool)
   mywidget.show()

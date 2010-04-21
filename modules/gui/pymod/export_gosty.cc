@@ -25,6 +25,7 @@ using namespace boost::python;
 
 #include <ost/gui/gl_win.hh>
 #include <ost/gui/perspective.hh>
+#include <ost/gui/scene_win/scene_win.hh>
 #include <ost/gui/tools/tool_options_win.hh>
 #include <ost/gui/python_shell/python_shell.hh>
 
@@ -32,7 +33,6 @@ using namespace boost::python;
 #include "sip_handler.hh"
 
 #include "tool_options_win_proxy.hh"
-#include "scene_win_proxy.hh"
 #include "sequence_viewer_proxy.hh"
 #if OST_IMG_ENABLED
 #include "data_viewer_proxy.hh"
@@ -47,11 +47,6 @@ namespace {
 ToolOptionsWinProxy app_get_tool_options_win(GostyApp* app)
 {
   return ToolOptionsWinProxy(app->GetToolOptionsWin());
-}
-
-SceneWinProxy app_get_scene_win(GostyApp* app)
-{
-  return SceneWinProxy(app->GetSceneWin());
 }
 
 SequenceViewerProxy app_get_seq_viewer(GostyApp* app)
@@ -103,8 +98,10 @@ void export_Gosty()
         return_value_policy<reference_existing_object>())
     .add_property("gl_win", make_function(&GostyApp::GetGLWin,
         return_value_policy<reference_existing_object>()))
-    .def("GetSceneWin", &app_get_scene_win)
-    .add_property("scene_win", &app_get_scene_win)                                
+    .def("GetSceneWin", &GostyApp::GetSceneWin,
+        return_value_policy<reference_existing_object>())
+    .add_property("scene_win", make_function(&GostyApp::GetSceneWin,
+        return_value_policy<reference_existing_object>()))
     .def("GetSequenceViewer", &app_get_seq_viewer)
     .add_property("seq_viewer", &app_get_seq_viewer)
     .def("GetToolOptionsWin", &app_get_tool_options_win)

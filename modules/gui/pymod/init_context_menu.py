@@ -147,6 +147,6 @@ class AlignmentContextMenu(QtCore.QObject):
       ShowResultDialog(ent_list, res_list).exec_()
       
     
-def _InitContextMenu():
-  cm=gui.GostyApp.Instance().GetSceneWin().GetContextMenu()
+def _InitContextMenu(app):
+  cm=app.scene_win.GetContextMenu()
   AlignmentContextMenu(cm)

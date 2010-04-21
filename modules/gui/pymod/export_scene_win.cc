@@ -22,6 +22,8 @@
 
 #include "scene_win_proxy.hh"
 
+#include "sip_handler.hh"
+
 #include <ost/gui/scene_win/context_menu.hh>
 
 using namespace boost::python;
@@ -32,31 +34,12 @@ namespace {
 
 void context_menu_add_action(ContextMenu* cm, object action, int types)
 {
-  static object sip_module=import("sip");
-  static object gui_module=import("ost.gui");
-  static object pyqt4_module=import("PyQt4.QtCore");
-
-  unsigned long addr = extract<unsigned long>(sip_module.attr("unwrapinstance")(action));
-  QAction* act = reinterpret_cast<QAction*>(addr);
+  QAction* act = get_cpp_qobject<QAction>(action);
   if(act){
     ContextActionTypes type = ContextActionTypes(types);
     cm->AddAction(act,type);
   }
 }
-
-object context_menu_get_qobject(ContextMenu* cm)
-{
-  static object sip_module=import("sip");
-  static object pyqt4_module=import("PyQt4.QtCore");
-  size_t addr = reinterpret_cast<size_t>(cm);
-  object obj(addr);
-  object sip_handle=obj;
-  object qobject = pyqt4_module.attr("QObject");
-  object object = sip_module.attr("wrapinstance")(sip_handle, qobject);
-
-  return object;
-}
-
 
 }
 
@@ -80,14 +63,16 @@ void export_SceneWin()
 
   class_<ContextMenu, boost::noncopyable>("ContextMenu", no_init)
     .def("AddAction", &context_menu_add_action)
-    .def("GetQObject", &context_menu_get_qobject)
-    .add_property("qobject",&context_menu_get_qobject)
+    .def("GetQObject",&get_py_qobject<ContextMenu>)
+    .add_property("qobject", &get_py_qobject<ContextMenu>)
   ;
 
-  class_<SceneWinProxy, bases<SipHandlerBase> >("SceneWin")
-    .def("Show", &SceneWinProxy::Show)
-    .def("Hide", &SceneWinProxy::Hide)
-    .def("GetContextMenu", &SceneWinProxy::GetContextMenu, return_value_policy<reference_existing_object>())
+  class_<SceneWin, boost::noncopyable>("SceneWin", no_init)
+    .def("Show", &SceneWin::show)
+    .def("Hide", &SceneWin::hide)
+    .def("GetContextMenu", &SceneWin::GetContextMenu, return_value_policy<reference_existing_object>())
+    .def("GetQObject",&get_py_qobject<SceneWin>)
+    .add_property("qobject", &get_py_qobject<SceneWin>)
   ;
 
 }
