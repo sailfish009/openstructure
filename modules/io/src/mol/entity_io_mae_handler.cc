@@ -55,7 +55,7 @@ using boost::format;
       std::vector<std::string> nrvo;
       bool in_string=false;
       int p0=0;
-      for(int p1=1;p1<line.size();++p1) {
+      for(size_t p1=1;p1<line.size();++p1) {
         if(in_string) {
           if(line[p1]=='"') {
             in_string=false;
@@ -111,7 +111,6 @@ void MAEReader::Import(mol::EntityHandle& ent)
   bool in_ct_block=false;
   bool in_atom_block=false;
   bool parsing_atoms=false;
-  bool debug=true;
   std::vector<std::string> prop_list;
   int i_atom_name=-1;
   int i_atom_xpos=-1;
@@ -289,7 +288,7 @@ bool mae_handler_is_responsible_for(const boost::filesystem::path& loc,
                                     const String& type) {
   if(type=="auto") {
     String match_suf_string=loc.string();
-	std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
+    std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
     if( detail::FilenameEndsWith(match_suf_string,".mae") || detail::FilenameEndsWith(match_suf_string,".mae.gz") ) {
       return true;
     }
