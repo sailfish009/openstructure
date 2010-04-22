@@ -283,8 +283,18 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
     }
     throw IOException(str(format("invalid res number on line %d") % line_num));
   }
+
   char  ins_c=line[26];  
   resnum=to_res_num(res_num.second, ins_c);
+  if (PDB::Flags() & PDB::CALPHA_ONLY) {
+    if (record_type[0]=='H' || record_type[0]=='h') {
+      return false;
+    } 
+    if (atom_name!=StringRef("CA", 2)) {
+      return false;
+    }
+    return true;
+  }
   return true;
 }
 
@@ -301,7 +311,7 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   }
   double anisou[6]={0.0, 0.0, 0.0, 0.0, 0.0, 0.0};  
   for (int i=0;i<6; ++i) {
-    std::pair<bool, int> result=line.substr(29+i*7, 6).to_int();
+    std::pair<bool, int> result=line.substr(29+i*7, 6).ltrim().to_int();
     if (!result.first) {
       if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
         return;
@@ -312,7 +322,8 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   }
   String aname(atom_name.str());
   if (!curr_residue_.IsValid()) {
-    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS || 
+        PDB::Flags() & PDB::CALPHA_ONLY) {
       return;
     } 
     const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
@@ -320,7 +331,8 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   }
   mol::AtomHandle atom=curr_residue_.FindAtom(aname);
   if (!atom.IsValid()) {
-    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS ||
+        PDB::Flags() & PDB::CALPHA_ONLY) {
       return;
     } 
     const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";

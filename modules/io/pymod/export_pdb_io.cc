@@ -53,6 +53,7 @@ void export_pdb_io()
     pdb_scope.attr("SKIP_FAULTY_RECORDS")=PDB::SKIP_FAULTY_RECORDS;
     pdb_scope.attr("WRITE_MULTIPLE_MODELS")=PDB::WRITE_MULTIPLE_MODELS;
     pdb_scope.attr("JOIN_SPREAD_ATOM_RECORDS")=PDB::JOIN_SPREAD_ATOM_RECORDS;
+    pdb_scope.attr("CALPHA_ONLY")=PDB::CALPHA_ONLY;    
   }
 
   class_<PDBReader, boost::noncopyable>("PDBReader", init<String>())

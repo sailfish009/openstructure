@@ -56,7 +56,8 @@ BOOST_AUTO_TEST_CASE(atom_record)
   BOOST_REQUIRE_EQUAL(ent.GetChainCount(), 2);
   BOOST_REQUIRE_EQUAL(ent.GetResidueCount(), 2);
   BOOST_REQUIRE_EQUAL(ent.GetAtomCount(), 2);
-  mol::AtomHandle a1=ent.FindChain("A").GetAtomList()[0];
+  mol::AtomHandle a1=ent.FindAtom("A", mol::ResNum(1), "N");
+  BOOST_REQUIRE(a1.IsValid());
   BOOST_CHECK_EQUAL(a1.GetName(), "N");
   BOOST_CHECK_EQUAL(a1.GetResidue().GetName(), "MET");
   BOOST_CHECK_EQUAL(a1.GetResidue().GetChain().GetName(), "A");  
@@ -66,7 +67,8 @@ BOOST_AUTO_TEST_CASE(atom_record)
   BOOST_CHECK_EQUAL(a1.GetProp().occupancy, 0.5);  
   BOOST_CHECK_EQUAL(a1.GetProp().element, "N");
   BOOST_CHECK_EQUAL(a1.GetProp().is_hetatm, false);
-  mol::AtomHandle a2=ent.FindChain(" ").GetAtomList()[0];
+  mol::AtomHandle a2=ent.FindAtom(" ", mol::ResNum(1), "CA");
+  BOOST_REQUIRE(a2.IsValid());  
   BOOST_CHECK_EQUAL(a2.GetName(), "CA");
   BOOST_CHECK_EQUAL(a2.GetResidue().GetName(), "MET");
   BOOST_CHECK_EQUAL(a2.GetResidue().GetChain().GetName(), " ");  
@@ -120,9 +122,53 @@ BOOST_AUTO_TEST_CASE(join_spread_records_off)
   BOOST_CHECK_EQUAL(res1.GetAtomCount(), 1);
   BOOST_CHECK(res1.FindAtom("N"));
   mol::ResidueHandle res2=ent.FindResidue("A", mol::ResNum(2));  
-  BOOST_CHECK(res2.IsValid());
+  BOOST_REQUIRE(res2.IsValid());
   BOOST_CHECK_EQUAL(res2.GetAtomCount(), 1);
   BOOST_CHECK(res2.FindAtom("N"));
 }
+
+BOOST_AUTO_TEST_CASE(calpha_only_import_on)
+{
+  String fname("testfiles/pdb/calpha.pdb");
+  PDBReader reader(fname);
+  PDB::PushFlags(PDB::CALPHA_ONLY);
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  PDB::PopFlags();
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(calpha_only_import_off)
+{
+  String fname("testfiles/pdb/calpha.pdb");
+  PDBReader reader(fname);
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 2);
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 4);
+}
+
+BOOST_AUTO_TEST_CASE(anisou_record)
+{
+  String fname("testfiles/pdb/anisou.pdb");
+  PDBReader reader(fname);
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_REQUIRE(ent.GetAtomCount()==1);
+  mol::AtomHandle a1=ent.FindAtom("A", mol::ResNum(7), "N");
+  BOOST_REQUIRE(a1.IsValid());
+  mol::AtomProp props=a1.GetProp();
+  BOOST_CHECK_CLOSE( 0.0100, props.anisou(0, 0), 1e-4);
+  BOOST_CHECK_CLOSE(-0.0016, props.anisou(1, 0), 1e-4);
+  BOOST_CHECK_CLOSE(-0.0026, props.anisou(2, 0), 1e-4);
+  BOOST_CHECK_CLOSE(-0.0016, props.anisou(0, 1), 1e-4);
+  BOOST_CHECK_CLOSE( 0.0110, props.anisou(1, 1), 1e-4);
+  BOOST_CHECK_CLOSE(-0.0054, props.anisou(2, 1), 1e-4);
+  BOOST_CHECK_CLOSE(-0.0026, props.anisou(0, 2), 1e-4);
+  BOOST_CHECK_CLOSE(-0.0054, props.anisou(1, 2), 1e-4);
+  BOOST_CHECK_CLOSE( 0.0120, props.anisou(2, 2), 1e-4);    
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
