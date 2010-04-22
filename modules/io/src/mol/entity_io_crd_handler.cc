@@ -154,7 +154,48 @@ void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
   ++atom_count_;
 }
 
+CRDWriter::CRDWriter(std::ostream& ostream) :
+     outfile_(), outstream_(ostream), atom_count_(0)
+{}
 
+CRDWriter::CRDWriter(const boost::filesystem::path& filename) :
+  outfile_(filename.file_string().c_str()), outstream_(outfile_),
+  atom_count_(0)
+{}
+
+CRDWriter::CRDWriter(const String& filename) :
+  outfile_(filename.c_str()), outstream_(outfile_), atom_count_(0)
+{}
+
+void CRDWriter::WriteHeader(const mol::EntityView& ent)
+{
+  outstream_  << "* COOR FILE CREATED BY OPENSTRUCTURE" << std::endl;
+  outstream_  << "*" << std::endl;
+  outstream_  << ent.GetAtomCount() << std::endl;
+}
+
+bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
+{
+  atom_count_++;
+  String e_name=atom.GetEntity().GetName();
+  if (e_name=="") {
+    e_name="MOL";
+  }
+  mol::ResidueHandle res=atom.GetResidue();
+  outstream_  << format("%5i") % atom_count_
+              << format("%5i") % res.GetNumber() << " "
+              << format("%4s") % res.GetKey() << " "
+              << format("%-4s") % atom.GetName()
+              << format("%10.5f") % atom.GetPos().GetX()
+              << format("%10.5f") % atom.GetPos().GetY()
+              << format("%10.5f") % atom.GetPos().GetZ() << " "
+              << format("%-4s") % e_name << " "
+              << format("%-5i") % res.GetNumber() << " "
+              << format("%8.5f") % atom.GetProp().b_factor
+              << std::endl;
+
+  return true;
+}
 
 bool EntityIOCRDHandler::RequiresBuilder() const
 {
@@ -169,8 +210,21 @@ void EntityIOCRDHandler::Import(mol::EntityHandle& ent,
 }
 
 void EntityIOCRDHandler::Export(const mol::EntityView& ent,
+                                std::ostream& stream) const
+{
+  CRDWriter writer(stream);
+  writer.WriteHeader(ent);
+  mol::EntityView non_const_view = ent;
+  non_const_view.Apply(writer);
+}
+
+void EntityIOCRDHandler::Export(const mol::EntityView& ent,
                                 const boost::filesystem::path& loc) const
 {
+  CRDWriter writer(loc);
+  writer.WriteHeader(ent);
+  mol::EntityView non_const_view = ent;
+  non_const_view.Apply(writer);
 }
 
 namespace {
@@ -201,7 +255,7 @@ bool EntityIOCRDHandler::ProvidesImport(const boost::filesystem::path& loc,
 bool EntityIOCRDHandler::ProvidesExport(const boost::filesystem::path& loc,
                                         const String& type)
 {
-  return false;
+  return crd_handler_is_responsible_for(loc, type);
 }
 
 mol::EntityHandle LoadCRD(const String& file_name) 
@@ -224,11 +278,7 @@ void EntityIOCRDHandler::Import(mol::EntityHandle& ent,
 }
 
 
-void EntityIOCRDHandler::Export(const mol::EntityView& ent, 
-                                std::ostream& stream) const
-{
-  throw IOException("CRD format does not support export to stream");
-}
+
 
 }} // ns
 
