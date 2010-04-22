@@ -72,6 +72,7 @@ private:
   int atom_count_;
   int line_num_;
   bool hard_end_;
+  int num_model_records_;
   String restrict_chains_;
   HSList helix_list_;
   HSList strand_list_;

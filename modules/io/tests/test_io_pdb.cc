@@ -19,6 +19,7 @@
 #include <ost/mol/mol.hh>
 #include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/pdb_reader.hh>
+#include <ost/io/io_exception.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
@@ -177,6 +178,33 @@ BOOST_AUTO_TEST_CASE(only_66_cols)
   PDBReader reader(fname);
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
+}
+
+BOOST_AUTO_TEST_CASE(no_endmdl_record)
+{
+  String fname("testfiles/pdb/model.pdb");
+  PDBReader reader(fname);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+
+}
+
+BOOST_AUTO_TEST_CASE(no_endmdl_record_fault_tolerant)
+{
+  String fname("testfiles/pdb/model.pdb");
+  PDBReader reader(fname);
+  PDB::PushFlags(PDB::SKIP_FAULTY_RECORDS);  
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 1);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);  
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 3);
+  ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 1);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);  
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 2);  
+  PDB::PopFlags();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -81,6 +81,7 @@ PDBReader::PDBReader(const boost::filesystem::path& loc):
 
 void PDBReader::Init(const boost::filesystem::path& loc)
 {
+  num_model_records_=0;
   if (boost::iequals(".gz", boost::filesystem::extension(loc))) {
     in_.push(boost::iostreams::gzip_decompressor());
   }
@@ -134,7 +135,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
   do {
     if (curr_line_.empty()) {
       continue;
-    }    
+    }
     StringRef curr_line(curr_line_.c_str(), curr_line_.size());
     switch(curr_line[0]) {
       case 'A':
@@ -166,6 +167,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
         }
         if (IEquals(curr_line.substr(0, 6), StringRef("ENDMDL", 6))) {
           go_on=false;
+          num_model_records_=0;
           break;
         }
       case 'H':
@@ -182,6 +184,26 @@ void PDBReader::Import(mol::EntityHandle& ent,
         } else if (IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6))) {
           this->ParseHelixEntry(curr_line);
         }
+        break;
+      case 'M':
+      case 'm':
+        if (curr_line.size()<6) {
+          continue;
+        }
+        if (IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6))) {
+          ++num_model_records_;          
+          if (num_model_records_<2) {
+            continue;
+          }
+          if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+            go_on=false;
+            num_model_records_=1;
+            break;
+          }
+          String msg=str(format("MODEL record without matching ENDMDL on line %d")%line_num_);
+          throw IOException(msg);
+        }
+        break;
       case 'S':
       case 's':
         if (curr_line.size()<6) {
@@ -190,6 +212,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
         if (IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6))) {
           this->ParseStrandEntry(curr_line);
         }
+        break;
       default:
         break;
     }
