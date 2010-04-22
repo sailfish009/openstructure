@@ -112,7 +112,8 @@ bool PDBReader::HasNext()
           IEquals(curr_line.substr(0, 6),StringRef("HETATM ", 6))) ||
           IEquals(curr_line.substr(0, 6),StringRef("ANISOU ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
-         IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6)))) {
+         IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)))) {
        return true;
      } else if (IEquals(curr_line.rtrim(), StringRef("END", 3))) {
        hard_end_=true;
