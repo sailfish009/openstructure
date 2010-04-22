@@ -25,9 +25,8 @@ using namespace boost::python;
 
 using namespace ost;
 using namespace ost::mol;
-#include "generic_property_def.hh"
 
-#include "generic_property_def.hh"
+#include <ost/export_helper/generic_property_def.hh>
 
 namespace {
   typedef EntityView (ResidueHandle::*QueryMethod)(const Query&, uint) const;
@@ -118,9 +117,7 @@ void export_Residue()
                                  return_value_policy<copy_const_reference>()))
     .add_property("qualified_name", &ResidueBase::GetQualifiedName)
   ;
-  generic_prop_def(residue_base);
-
-  generic_prop_def(residue_base);
+  generic_prop_def<ResidueBase>(residue_base);
 
   class_<ResidueHandle, bases<ResidueBase> >("ResidueHandle", init<>())
     .def("GetChain",&ResidueHandle::GetChain)

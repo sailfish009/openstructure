@@ -42,7 +42,7 @@ public: // constructors
   ChainBase();
   ChainBase(const impl::ChainImplPtr& impl);
 public:
-  friend class GenericPropertyContainer<ChainBase>;  
+  friend class ConstGenericPropertyContainer<ChainBase>;
   String GetName() const;
   /// \name Handle validity
   //@{

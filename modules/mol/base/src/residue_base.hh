@@ -63,7 +63,7 @@ public:
   ResidueBase(const impl::ResidueImplPtr& impl);
   ResidueBase(const ResidueBase& rhs);
 public:
-  friend class GenericPropertyContainer<ResidueBase>;
+  friend class ConstGenericPropertyContainer<ResidueBase>;
   /// \brief return residue number
   const ResNum& GetNumber() const;
 

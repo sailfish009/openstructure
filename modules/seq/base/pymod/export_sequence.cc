@@ -22,6 +22,8 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
+#include <ost/generic_property.hh>
+#include <ost/export_helper/generic_property_def.hh>
 #include <ost/info/info.hh>
 #include <ost/mol/mol.hh>
 #include <ost/seq/sequence_handle.hh>
@@ -145,46 +147,54 @@ RevRegionRangeIter iter_range3(AlignedRegion& aln_region)
   return RevRegionRangeIter(aln_region.begin(), aln_region.end());
 }
 
+template <typename C, typename O>
+void const_seq_handle_def(O& bp_class)
+{
+  bp_class
+    .def("GetResidueIndex", &C::GetResidueIndex)
+    .def("GetPos", &C::GetPos)
+    .def("GetLength", &C::GetLength)
+    .def("GetResidue", &C::GetResidue)
+    .def("GetOneLetterCode", &C::GetOneLetterCode)
+    .def("__getitem__", &C::GetOneLetterCode)
+    .def("GetSequenceOffset", &C::GetSequenceOffset)
+    .def("Copy", &C::Copy)
+    .def("GetFirstNonGap", &C::GetFirstNonGap)
+    .def("GetLastNonGap", &C::GetLastNonGap)
+    .add_property("first_non_gap", &C::GetFirstNonGap)
+    .add_property("last_non_gap", &C::GetLastNonGap)
+    .def("GetAttachedView", &C::GetAttachedView)
+    .def("GetGaplessString", &C::GetGaplessString)
+    .def("GetString", &C::GetString,
+         return_value_policy<copy_const_reference>())
+         .def("GetName", &C::GetName,
+              return_value_policy<copy_const_reference>())
+    .def("HasAttachedView", &C::HasAttachedView)
+    .def("__len__", &C::GetLength)
+    .add_property("length", &C::GetLength)
+    .add_property("attached_view", &C::GetAttachedView)
+    .add_property("name",
+                  make_function(&C::GetName,
+                                return_value_policy<copy_const_reference>()))
+    .add_property("sequence_offset", &C::GetSequenceOffset)
+    .add_property("gapless_string", &C::GetGaplessString)
+    .add_property("string",
+                  make_function(&C::GetString,
+                                return_value_policy<copy_const_reference>()))
+    .def("__str__", &C::GetString,
+         return_value_policy<copy_const_reference>())
+  ;
+}
+
 }
 
 void export_sequence()
 {
-  class_<ConstSequenceHandle>("ConstSequenceHandle", init<>())
-    .def("GetResidueIndex", &ConstSequenceHandle::GetResidueIndex)
-    .def("GetPos", &ConstSequenceHandle::GetPos)
-    .def("GetLength", &ConstSequenceHandle::GetLength)
-    .def("GetResidue", &ConstSequenceHandle::GetResidue)
-    .def("GetOneLetterCode", &ConstSequenceHandle::GetOneLetterCode)
-    .def("__getitem__", &ConstSequenceHandle::GetOneLetterCode)
-    .def("GetSequenceOffset", &ConstSequenceHandle::GetSequenceOffset)
-    .def("Copy", &ConstSequenceHandle::Copy)
-    .def("GetFirstNonGap", &ConstSequenceHandle::GetFirstNonGap)
-    .def("GetLastNonGap", &ConstSequenceHandle::GetLastNonGap)
-    .add_property("first_non_gap", &SequenceHandle::GetFirstNonGap)
-    .add_property("last_non_gap", &SequenceHandle::GetLastNonGap)
-    .def("GetAttachedView", &ConstSequenceHandle::GetAttachedView)
-    .def("GetGaplessString", &ConstSequenceHandle::GetGaplessString)
-    .def("GetString", &ConstSequenceHandle::GetString,
-         return_value_policy<copy_const_reference>())
-         .def("GetName", &ConstSequenceHandle::GetName,
-              return_value_policy<copy_const_reference>())
-    .def("HasAttachedView", &ConstSequenceHandle::HasAttachedView)
-    .def("__len__", &SequenceHandle::GetLength)
-    .add_property("length", &SequenceHandle::GetLength)
-    .add_property("attached_view", &ConstSequenceHandle::GetAttachedView)
-    .add_property("name",
-                  make_function(&ConstSequenceHandle::GetName,
-                                return_value_policy<copy_const_reference>()))
-    .add_property("sequence_offset", &ConstSequenceHandle::GetSequenceOffset)
-    .add_property("gapless_string", &ConstSequenceHandle::GetGaplessString)
-    .add_property("string",
-                  make_function(&ConstSequenceHandle::GetString,
-                                return_value_policy<copy_const_reference>()))
-    .def("__str__", &ConstSequenceHandle::GetString,
-         return_value_policy<copy_const_reference>())
-  ;
-
-  class_<SequenceHandle, bases<ConstSequenceHandle> >("SequenceHandle", init<>())
+  class_<ConstSequenceHandle> const_seq("ConstSequenceHandle", init<>());
+  const_seq_handle_def<ConstSequenceHandle>(const_seq);
+  const_generic_prop_def<ConstSequenceHandle>(const_seq);
+  class_<SequenceHandle> seq_handle("SequenceHandle", init<>());
+  seq_handle
     .def("SetSequenceOffset", &SequenceHandle::SetSequenceOffset)
     .def("AttachView", attach_one)
     .def("AttachView", attach_two)
@@ -201,6 +211,10 @@ void export_sequence()
     .add_property("sequence_offset", &SequenceHandle::GetSequenceOffset,
                   &SequenceHandle::SetSequenceOffset)
   ;
+  const_seq_handle_def<SequenceHandle>(seq_handle);
+  generic_prop_def<SequenceHandle>(seq_handle);
+  implicitly_convertible<SequenceHandle, ConstSequenceHandle>();
+  
   def("CreateSequence", &CreateSequence);
   /*class_<SequenceHandleList>("SequenceHandleList", init<>())
     .def(vector_indexing_suite<SequenceHandleList>())

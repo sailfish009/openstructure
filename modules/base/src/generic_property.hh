@@ -127,11 +127,11 @@ public:
 private:
   mutable PropertyMap* map_;
 };  
-  
-/// \brief base class for the handler classes
+
 template <typename H>
-class  TEMPLATE_EXPORT GenericPropertyContainer
-{
+class TEMPLATE_EXPORT ConstGenericPropertyContainer {
+protected:
+  
   template<typename T>
   T gp_get(const String& key) const {
     if(HasGenericProperty(key)) {
@@ -150,19 +150,21 @@ class  TEMPLATE_EXPORT GenericPropertyContainer
     }
     return def;
   }
+  GenericPropertyContainerImpl* GetImpl() 
+  {
+    return static_cast<H*>(this)->GpImpl();
+  }
 
-
+  const GenericPropertyContainerImpl* GetImpl() const
+  {
+    return static_cast<const H*>(this)->GpImpl();
+  }  
 public:
   /// \brief checks existence of property
   bool HasGenericProperty(const String& key) const {
-    return GetImpl()->HasGenericProperty(key);
+    return this->GetImpl()->HasGenericProperty(key);
   }
-
-  void ClearGenericProperties()
-  {
-    GetImpl()->ClearGenericProperties();
-  }
-
+    
   /// \brief returns a String representation of stored value
   /// 
   /// returns the String representation of this property, or the empty String if 
@@ -174,50 +176,25 @@ public:
   {
     if(!HasGenericProperty(key)) return "";
     std::ostringstream rep("");
-    rep << GetImpl()->GenericProperty(key);
+    rep << this->GetImpl()->GenericProperty(key);
     return rep.str();
-  }
-  
-  /// \brief sets String property
-  void SetGenericStringProperty(const String& key, const String& value)
-  {
-    GetImpl()->GenericProperty(key)=value;
-  }
-
-  /// \brief sets floating point property
-  void SetGenericFloatProperty(const String& key, Real value)
-  {
-    GetImpl()->GenericProperty(key)=value;
-  }
-
-  /// \brief sets integer property
-  void SetGenericIntProperty(const String& key, int value)
-  {
-    GetImpl()->GenericProperty(key)=value;
-  }
-
-  /// \ brief sets boolean property
-  void SetGenericBoolProperty(const String& key, bool value)
-  {
-    GetImpl()->GenericProperty(key)=value;
-  }
-
-  /// \brief returns String property, raises an exception if it does not exist
-  String GetGenericStringProperty(const String& key) const
-  {
-    return gp_get<String>(key);
-  }
+  }  
+    /// \brief returns String property, raises an exception if it does not exist
+    String GetGenericStringProperty(const String& key) const
+    {
+      return this->gp_get<String>(key);
+    }
 
   /// \brief returns floating point property, raises an exception if it does 
   ///     not exist
   Real GetGenericFloatProperty(const String& key) const
   {
     if(HasGenericProperty(key)) {
-      GenericPropertyValue value=GetImpl()->GenericProperty(key);
+      GenericPropertyValue value=this->GetImpl()->GenericProperty(key);
       if (value.which()==1) {
-        return boost::get<Real>(GetImpl()->GenericProperty(key));
+        return boost::get<Real>(this->GetImpl()->GenericProperty(key));
       } else if (value.which()==2) {
-        return boost::get<int>(GetImpl()->GenericProperty(key));
+        return boost::get<int>(this->GetImpl()->GenericProperty(key));
       }
       std::ostringstream m("");
       m << "property '" << key << "' is not numeric";
@@ -229,29 +206,30 @@ public:
     }
   }
 
+
   /// \brief returns integer property, raises an exception if it does not exist
   int GetGenericIntProperty(const String& key) const
   {
-    return gp_get<int>(key);
+    return this->gp_get<int>(key);
   }
 
   /// \brief returns boolean property, raises an exception if it does not exist
   bool GetGenericBoolProperty(const String& key) const
   {
-    return gp_get<bool>(key);
+    return this->gp_get<bool>(key);
   }
 
   /// \brief returns String property, or the given default if it does not exist
   String GetGenericStringProperty(const String& key, const String& def) const
   {
-    return gp_get<String>(key,def);
+    return this->gp_get<String>(key,def);
   }
 
   /// \brief returns floating point property, or the given default if it does
   ///     not exist
   Real GetGenericFloatProperty(const String& key, Real def) const
   {
-    if(HasGenericProperty(key)) {
+    if(this->HasGenericProperty(key)) {
       GenericPropertyValue value=GetImpl()->GenericProperty(key);
       if (value.which()==1) {
         return boost::get<Real>(GetImpl()->GenericProperty(key));
@@ -269,29 +247,55 @@ public:
   /// \brief returns integer property, or the given default if it does not exist
   int GetGenericIntProperty(const String& key, int def) const
   {
-    return gp_get<int>(key, def);
+    return this->gp_get<int>(key, def);
   }
 
   /// \brief returns boolean property, or the given default if it does not exist
   bool GetGenericBoolProperty(const String& key, bool def) const
   {
-    return gp_get<bool>(key, def);
+    return this->gp_get<bool>(key, def);
   }
-  
+
   std::map<String,GenericPropertyValue> GetGenericPropertyMap() const
   {
-    return GetImpl()->GetGenericPropertyMap();
-  }
-protected:
-  GenericPropertyContainerImpl* GetImpl() 
+    return this->GetImpl()->GetGenericPropertyMap();
+  }  
+};
+
+/// \brief base class for the handler classes
+template <typename H>
+class  TEMPLATE_EXPORT GenericPropertyContainer : 
+   public ConstGenericPropertyContainer<H>
+{
+public:
+  void ClearGenericProperties()
   {
-    return static_cast<H*>(this)->GpImpl();
+    this->GetImpl()->ClearGenericProperties();
   }
   
-  const GenericPropertyContainerImpl* GetImpl() const
+  /// \brief sets String property
+  void SetGenericStringProperty(const String& key, const String& value)
   {
-    return static_cast<const H*>(this)->GpImpl();
-  }  
+    this->GetImpl()->GenericProperty(key)=value;
+  }
+
+  /// \brief sets floating point property
+  void SetGenericFloatProperty(const String& key, Real value)
+  {
+    this->GetImpl()->GenericProperty(key)=value;
+  }
+
+  /// \brief sets integer property
+  void SetGenericIntProperty(const String& key, int value)
+  {
+    this->GetImpl()->GenericProperty(key)=value;
+  }
+
+  /// \ brief sets boolean property
+  void SetGenericBoolProperty(const String& key, bool value)
+  {
+    this->GetImpl()->GenericProperty(key)=value;
+  }
 };
 
 

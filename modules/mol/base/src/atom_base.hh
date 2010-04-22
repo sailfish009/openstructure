@@ -49,7 +49,7 @@ public:
   AtomBase();
   AtomBase(const impl::AtomImplPtr& impl);
 public:  
-  friend class GenericPropertyContainer<AtomBase>;  
+  friend class ConstGenericPropertyContainer<AtomBase>;  
   ///\brief Get atom name. 
   ///
   /// In Python the atom name may also be accesssed over the property \c Name

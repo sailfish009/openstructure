@@ -28,7 +28,7 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol;
 
-#include "generic_property_def.hh"
+#include <ost/export_helper/generic_property_def.hh>
 
 namespace {
 EntityHandle create1() {  return CreateEntity(); }

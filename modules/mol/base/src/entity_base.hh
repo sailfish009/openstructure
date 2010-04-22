@@ -30,7 +30,7 @@ namespace ost { namespace mol {
 class DLLEXPORT_OST_MOL EntityBase: 
   public GenericPropertyContainer<EntityBase> {
 public:
-  friend class GenericPropertyContainer<EntityBase>;
+  friend class ConstGenericPropertyContainer<EntityBase>;
   EntityBase(const impl::EntityImplPtr& impl);
   EntityBase();
   

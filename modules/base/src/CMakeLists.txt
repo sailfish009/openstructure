@@ -31,7 +31,7 @@ fixed_string.hh
 )
 
 module(NAME base SOURCES ${OST_BASE_SOURCES} 
-       HEADERS ${OST_BASE_HEADERS}
+       HEADERS generic_property_def.hh IN_DIR export_helper ${OST_BASE_HEADERS}
        DEPENDS_ON geom
        HEADER_OUTPUT_DIR ost)
 

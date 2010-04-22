@@ -24,9 +24,7 @@ using namespace boost::python;
 
 using namespace ost;
 using namespace ost::mol;
-#include "generic_property_def.hh"
-
-#include "generic_property_def.hh"
+#include <ost/export_helper/generic_property_def.hh>
 
 namespace {
   typedef void (ChainHandle::*RnumMethod)(const ResNum&);

@@ -26,8 +26,8 @@ using namespace boost::python;
 
 using namespace ost;
 using namespace ost::mol;
-#include "generic_property_def.hh"
-#include "generic_property_def.hh"
+#include <ost/export_helper/generic_property_def.hh>
+
 void export_Bond()
 {
   void (BondHandle::* apply1)(EntityVisitor&) = &BondHandle::Apply;

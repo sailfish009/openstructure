@@ -24,8 +24,8 @@
   Author: Marco Biasini
  */
  
-template <typename C>
-void generic_prop_def(class_<C>& bp_class)
+template <typename C, typename O>
+void const_generic_prop_def(O& bp_class)
 {
   bool (C::*get_bool1)(const String&, bool) const=&C::GetGenericBoolProperty;
   bool (C::*get_bool2)(const String&)  const=&C::GetGenericBoolProperty;
@@ -40,6 +40,24 @@ void generic_prop_def(class_<C>& bp_class)
   String (C::*get_str2)(const String&) const=&C::GetGenericStringProperty;  
   bp_class
     .def("HasGenericProperty", &C::HasGenericProperty)
+    .def("GetGenericPropertyStringRepresentation",
+         &C::GetGenericPropertyStringRepresentation)          
+    .def("GetGenericBoolProperty", get_bool1)
+    .def("GetGenericBoolProperty", get_bool2)        
+    .def("GetGenericFloatProperty", get_float1)
+    .def("GetGenericFloatProperty", get_float2)    
+    .def("GetGenericIntProperty", get_int1)
+    .def("GetGenericIntProperty", get_int2)    
+    .def("GetGenericStringProperty", get_str1)
+    .def("GetGenericStringProperty", get_str2)    
+  ;
+}
+
+template <typename C, typename O>
+void generic_prop_def(O& bp_class)
+{
+  const_generic_prop_def<C, O>(bp_class);
+  bp_class
     .def("SetGenericBoolProperty",
          &C::SetGenericBoolProperty)
     .def("ClearGenericProperties",  
@@ -52,14 +70,6 @@ void generic_prop_def(class_<C>& bp_class)
         &C::SetGenericIntProperty)
     .def("SetGenericStringProperty",
         &C::SetGenericStringProperty)          
-    .def("GetGenericBoolProperty", get_bool1)
-    .def("GetGenericBoolProperty", get_bool2)        
-    .def("GetGenericFloatProperty", get_float1)
-    .def("GetGenericFloatProperty", get_float2)    
-    .def("GetGenericIntProperty", get_int1)
-    .def("GetGenericIntProperty", get_int2)    
-    .def("GetGenericStringProperty", get_str1)
-    .def("GetGenericStringProperty", get_str2)    
   ;
 }
 

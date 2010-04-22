@@ -32,7 +32,7 @@ ConstSequenceHandle::ConstSequenceHandle()
 { }
 
 SequenceHandle::SequenceHandle(const impl::SequenceImplPtr& impl):
-  ConstSequenceHandle(impl)
+  impl_(impl)
 { }
 
 ConstSequenceHandle::ConstSequenceHandle(const impl::SequenceImplPtr& impl):
@@ -74,10 +74,6 @@ SequenceHandle CreateSequence(const String& name, const String& seq)
 {
   return SequenceHandle(impl::SequenceImpl::FromString(name, seq));
 }
-
-SequenceHandle::SequenceHandle():
-  ConstSequenceHandle()
-{ }
 
 
 String ConstSequenceHandle::GetGaplessString() const
@@ -175,8 +171,6 @@ void SequenceHandle::SetName(const String& name)
   return Impl()->SetName(name);   
 }
 
-
-
 void SequenceHandle::SetString(const String& seq)
 {
   this->CheckValidity();
@@ -228,4 +222,150 @@ std::ostream& operator<<(std::ostream& os, const ConstSequenceHandle& sequence)
   return os;
 }
 
+bool SequenceHandle::operator==(const SequenceHandle& rhs) const
+{
+  return impl_==rhs.impl_;
+}
+
+bool SequenceHandle::operator!=(const SequenceHandle& rhs) const
+{
+  return impl_!=rhs.impl_;
+}
+
+
+void SequenceHandle::CheckValidity() const
+{
+  if (!impl_) {
+    throw InvalidHandle();
+  }
+}
+
+bool SequenceHandle::IsValid() const
+{
+  return impl_.get()!=0;
+}
+
+impl::SequenceImplPtr& SequenceHandle::Impl() const 
+{
+  return impl_;
+}
+
+
+SequenceHandle::SequenceHandle():
+  impl_()
+{ }
+
+
+String SequenceHandle::GetGaplessString() const
+{
+  this->CheckValidity();
+  return Impl()->GetGaplessString();
+}
+
+int SequenceHandle::GetSequenceOffset() const
+{
+  this->CheckValidity();
+  return Impl()->GetSequenceOffset();  
+}
+
+SequenceHandle::operator ConstSequenceHandle() const
+{
+  return ConstSequenceHandle(impl_);
+}
+
+int SequenceHandle::GetLength() const
+{
+  this->CheckValidity();
+  return Impl()->GetLength();
+}
+
+
+char SequenceHandle::GetOneLetterCode(int position) const
+{
+  this->CheckValidity();
+  return Impl()->GetOneLetterCode(position);
+}
+
+mol::ResidueView SequenceHandle::GetResidue(int position) const
+{
+  this->CheckValidity();
+  return Impl()->GetResidue(position);  
+}
+
+mol::EntityView SequenceHandle::GetAttachedView() const
+{
+  this->CheckValidity();
+  return Impl()->GetAttachedView(); 
+}
+
+SequenceHandle SequenceHandle::Copy() const
+{
+  this->CheckValidity();
+  return Impl()->Copy();     
+}
+
+bool SequenceHandle::HasAttachedView() const
+{
+  this->CheckValidity();
+  return Impl()->HasAttachedView();   
+}
+
+
+int SequenceHandle::GetResidueIndex(int pos) const
+{
+  this->CheckValidity();
+  return Impl()->GetResidueIndex(pos);   
+}
+
+int SequenceHandle::GetPos(int residue_index) const
+{
+  this->CheckValidity();
+  return Impl()->GetPos(residue_index);   
+}
+
+
+int SequenceHandle::GetFirstNonGap() const
+{
+  this->CheckValidity();
+  return Impl()->GetFirstNonGap(); 
+}
+
+
+int SequenceHandle::GetLastNonGap() const
+{
+  this->CheckValidity();
+  return Impl()->GetLastNonGap(); 
+}
+
+const String& SequenceHandle::GetName() const
+{
+  this->CheckValidity();
+  return Impl()->GetName();
+}
+
+const String& SequenceHandle::GetString() const
+{
+  this->CheckValidity();
+  return Impl()->GetString(); 
+}
+
+GenericPropertyContainerImpl* ConstSequenceHandle::GpImpl()
+{
+  return Impl().get();
+}
+
+const GenericPropertyContainerImpl* ConstSequenceHandle::GpImpl() const
+{
+  return Impl().get();
+}
+
+GenericPropertyContainerImpl* SequenceHandle::GpImpl()
+{
+  return Impl().get();
+}
+
+const GenericPropertyContainerImpl* SequenceHandle::GpImpl() const
+{
+  return Impl().get();
+}
 }}

@@ -26,7 +26,8 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol;
 
-#include "generic_property_def.hh"
+#include <ost/export_helper/generic_property_def.hh>
+
 void export_Atom()
 {
   class_<AtomBase> atom_base("AtomBase", no_init);

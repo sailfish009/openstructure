@@ -34,7 +34,7 @@ namespace ost { namespace mol {
 class DLLEXPORT_OST_MOL BondHandle: 
     public GenericPropertyContainer<BondHandle> {
 public:
-  friend class GenericPropertyContainer<BondHandle>;  
+  friend class ConstGenericPropertyContainer<BondHandle>;  
   /// necessary dummy ctor, creates invalid handle
   BondHandle();
   /// ctor for internal use, in public interface for convenience purposes

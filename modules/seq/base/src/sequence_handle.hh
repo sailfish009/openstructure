@@ -24,6 +24,7 @@
  */
 
 #include <ost/base.hh>
+#include <ost/generic_property.hh>
 #include <ost/info/info_fw.hh>
 #include <ost/seq/module_config.hh>
 
@@ -41,8 +42,10 @@ class AlignmentHandle;
 /// 
 /// The ConstSequenceHandle provides all read-only methods of the 
 /// \ref SequenceHandle "sequence handle".
-class DLLEXPORT_OST_SEQ ConstSequenceHandle {
+class DLLEXPORT_OST_SEQ ConstSequenceHandle : 
+  public ConstGenericPropertyContainer<ConstSequenceHandle> {
 public:
+  friend class ConstGenericPropertyContainer<ConstSequenceHandle>;
   friend class AlignmentHandle;
   friend class ConstSequenceList;
   friend class SequenceList;
@@ -116,14 +119,15 @@ public:
   /// \brief whether the sequence is valid
   bool IsValid() const;
   /// \internal
+protected:
+  GenericPropertyContainerImpl* GpImpl();
+
+  const GenericPropertyContainerImpl* GpImpl() const;
 public:
   ConstSequenceHandle(const impl::SequenceImplPtr& impl);
   impl::SequenceImplPtr& Impl() const;  
-protected:
-  void CheckValidity() const;
-
-
 private:
+  void CheckValidity() const;
   mutable impl::SequenceImplPtr impl_;  
 };
 
@@ -149,12 +153,80 @@ private:
 ///
 /// Sequences IO is dealt with in the sequence module. For more information, 
 /// consult \ref module_seq "this page".
-class DLLEXPORT_OST_SEQ SequenceHandle : public ConstSequenceHandle {
+class DLLEXPORT_OST_SEQ SequenceHandle : 
+  public GenericPropertyContainer<SequenceHandle> {
 public:
-  friend class ConstSequenceHandle;
+  friend class GenericPropertyContainer<SequenceHandle>;  
   friend class SequenceList;
 
+  friend class AlignmentHandle;
+  friend class ConstSequenceList;
   
+  /// \brief       Get residue index corresponding to given sequence position
+  /// \param pos   zero-based index
+  /// \throws      out_of_range if pos is not in [0, length-1].
+  int GetResidueIndex(int pos) const;
+
+  /// \brief Get zero-based index for given residue number.
+  /// \throws out_of_range, if number is not included in sequence.
+  int GetPos(int residue_index) const;
+
+  /// \brief Get position of first non-gap character in sequence
+  int GetFirstNonGap() const;
+  
+  /// \brief Get position of last non-gap character in sequence
+  int GetLastNonGap() const;  
+  
+  /// \brief Get name of sequence
+  /// 
+  /// \sa SequenceHandle::GetName()
+  const String& GetName() const;  
+  
+  /// \brief get sequence as a string, including all the gaps
+  /// 
+  /// \sa GetGaplessString()
+  const String& GetString() const;
+  
+  /// \brief Get sequence as string ignoring gaps
+  String GetGaplessString() const;
+
+  /// \brief Get sequence offset from N-terminus
+  ///
+  /// \sa SequenceHandle::SetSequenceOffset
+  int GetSequenceOffset() const;  
+  
+  /// \brief Get lenght of sequence, including gaps.
+  int GetLength() const;
+
+  /// \brief get one letter code of residue at position
+  char GetOneLetterCode(int position) const;
+
+  /// \brief get residue at position
+  ///
+  /// will return the residue view at the given sequence position or an invalid
+  /// residue view when no view is attached, the index is out of bounds or the
+  /// position contains a gap.
+  mol::ResidueView GetResidue(int position) const;
+
+  /// \brief get attached view. may be an invalid entity view
+  /// \sa SequenceHandle::AttachView(const mol::EntityView&, const String&)
+  mol::EntityView GetAttachedView() const;
+  
+  /// \brief create copy sequence
+  /// The newly created sequence has the same attached view.
+  SequenceHandle Copy() const;
+  
+  /// \brief whether the sequence has an attached view
+  /// 
+  /// \sa SequenceHandle::AttachView(const mol::EntityView&, const String&)
+  bool HasAttachedView() const;
+  
+  bool operator==(const SequenceHandle& rhs) const;
+  bool operator!=(const SequenceHandle& rhs) const;  
+  
+  /// \brief whether the sequence is valid
+  bool IsValid() const;
+    
   /// \brief create invalid sequence handle
   /// 
   /// \sa IsValid()
@@ -178,7 +250,7 @@ public:
   /// \throw IntegrityError when the view contains more than one chain
   void AttachView(const mol::EntityView& view);
 
-
+  operator ConstSequenceHandle() const;
   /// \brief attach entity view to sequence
   ///
   /// The sequence is mapped onto the chain with given name
@@ -186,6 +258,15 @@ public:
   
   /// \internal
   SequenceHandle(const impl::SequenceImplPtr& impl);  
+  
+  impl::SequenceImplPtr& Impl() const;  
+
+  GenericPropertyContainerImpl* GpImpl();
+
+  const GenericPropertyContainerImpl* GpImpl() const;
+private:
+  void CheckValidity() const;  
+  mutable impl::SequenceImplPtr impl_;
 };
 
 SequenceHandle DLLEXPORT_OST_SEQ CreateSequence(const String& name, 
