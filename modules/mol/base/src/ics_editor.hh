@@ -78,6 +78,12 @@ public:
   /// \brief  rotate torsion angle
   void RotateTorsionAngle(TorsionHandle torsion, Real delta);  
 
+  void RotateTorsionAngle(const AtomHandle& atom_a,
+                          const AtomHandle& atom_b,
+                          const AtomHandle& atom_c,
+                          const AtomHandle& atom_d,
+                          Real angle);
+
   void SetTorsionAngle(const AtomHandle& atom_a, const AtomHandle& atom_b,
                        const AtomHandle& atom_c, const AtomHandle& atom_d,
                        Real angle);
