@@ -171,4 +171,12 @@ BOOST_AUTO_TEST_CASE(anisou_record)
 }
 
 
+BOOST_AUTO_TEST_CASE(only_66_cols)
+{
+  String fname("testfiles/pdb/short.pdb");
+  PDBReader reader(fname);
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

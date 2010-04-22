@@ -382,11 +382,19 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   if(is_pqr_) {
     occ=std::make_pair(true, 1.0);
     temp=std::make_pair(true, 0.0);
-    charge=line.substr(54,6).ltrim().to_float();
-    radius=line.substr(60, 6).ltrim().to_float();
+    if (line.length()>=60) {
+      charge=line.substr(54,6).ltrim().to_float();      
+    }
+    if (line.length()>=66) {
+      radius=line.substr(60, 6).ltrim().to_float();      
+    }
   } else {
-    occ=line.substr(54,6).ltrim().to_float();
-    temp=line.substr(60, 6).ltrim().to_float();
+    if (line.length()>=60) {
+      occ=line.substr(54,6).ltrim().to_float();      
+    }
+    if (line.length()>=66) {
+      temp=line.substr(60, 6).ltrim().to_float();      
+    }
   }
   LOGN_TRACE( "line: [" << line << "]" );
   String s_ele;
