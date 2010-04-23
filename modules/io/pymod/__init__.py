@@ -21,7 +21,7 @@ from ost import mol,conop
 
 def LoadPDB(filename, restrict_chains="", no_hetatms=False,
             fault_tolerant=False, load_multi=False,
-            join_spread_atom_records=False):
+            join_spread_atom_records=False, calpha_only=False):
   """
   Load PDB file from disk.
 
@@ -46,8 +46,10 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
   reader=PDBReader(filename)
 
   flags=0
+  if calpha_only:
+    flags|=PDB.CALPHA_ONLY
   if fault_tolerant:
-    flags=PDB.SKIP_FAULTY_RECORDS
+    flags|=PDB.SKIP_FAULTY_RECORDS
   if no_hetatms:
     flags|=PDB.NO_HETATMS
   if join_spread_atom_records:

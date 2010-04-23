@@ -41,9 +41,10 @@ class ModelRepository:
     basename=self.file_pattern_ % {'id' : pdb_id, 'chain' :chain, 'dir' : pdb_id[1:3]}
     return os.path.join(self.directory_, basename)
     
-  def Load(self, pdb_id, chains=""):
+  def Load(self, pdb_id, chains='', calpha_only=False, fault_tolerant=False):
     return io.LoadPDB(self.FilenameForModel(pdb_id, chains),
-                          chains)
+                      chains, calpha_only=calpha_only, 
+                      fault_tolerant=fault_tolerant)
                       
   def LoadMulti(self, pdb_id, chains=""):
     return io.LoadMultiPDB(self.FilenameForModel(pdb_id, chains))
