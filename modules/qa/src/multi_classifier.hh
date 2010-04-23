@@ -176,6 +176,7 @@ public:
   uint32_t GetIndexOf(Real value) const {
     Real factor=(value-lower_bound_)/(upper_bound_-lower_bound_);
     uint32_t idx=uint32_t(floor(this->GetNumberOfClasses()*factor));
+//     std::cout << value << " " << factor << std::endl;
     assert(this->GetNumberOfClasses()>idx);
     return idx;
   }

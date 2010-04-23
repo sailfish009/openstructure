@@ -81,7 +81,7 @@ public:
           if (d<0) d=0.0;
 
           if (d>options_.lower_cutoff) {
-            if (abs(atom_handle.GetResidue().GetNumber().GetNum()-a.GetResidue().GetNumber().GetNum())<options_.sequence_sep) {
+            if (abs(atom_handle.GetResidue().GetIndex()-a.GetResidue().GetIndex())<options_.sequence_sep) {
               continue;
             }
             energy_+=energies_.Get(type_a, type_b, d);
@@ -89,6 +89,9 @@ public:
             //std::cout << type_a << "(" << atom_handle.GetQualifiedName() << ")" << " " << type_b << "(" << a.GetQualifiedName() << ")" << " : " << d << "     " << energies_.Get(type_a, type_b, d) << std::endl;
           }
         }
+// 	else {
+// 	  std::cout << "Unknown type: " << type_b << std::endl;
+// 	}
       }
     }
     return false;

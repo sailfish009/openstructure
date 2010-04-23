@@ -62,12 +62,12 @@ public:
     if (!prev_phit || !prev_psit || !central_phit || !central_psit ||
         !next_phit || !next_psit)
       return false;
-    Real prev_phi=prev_phit.GetAngle()*180/M_PI - 0.000000001;
-    Real prev_psi=prev_psit.GetAngle()*180/M_PI - 0.000000001;
-    Real central_phi=central_phit.GetAngle()*180/M_PI - 0.000000001;
-    Real central_psi=central_psit.GetAngle()*180/M_PI - 0.000000001;
-    Real next_phi=next_phit.GetAngle()*180/M_PI - 0.000000001;
-    Real next_psi=next_psit.GetAngle()*180/M_PI - 0.000000001;
+    Real prev_phi=prev_phit.GetAngle()*180/M_PI - 0.001;
+    Real prev_psi=prev_psit.GetAngle()*180/M_PI - 0.001;
+    Real central_phi=central_phit.GetAngle()*180/M_PI - 0.001;
+    Real central_psi=central_psit.GetAngle()*180/M_PI - 0.001;
+    Real next_phi=next_phit.GetAngle()*180/M_PI - 0.001;
+    Real next_psi=next_psit.GetAngle()*180/M_PI - 0.001;
 
     histo_.Add(1, ca, prev_phi, prev_psi, central_phi, central_psi, next_phi, next_psi);
     return false;

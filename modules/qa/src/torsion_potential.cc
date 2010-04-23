@@ -68,12 +68,12 @@ public:
     if (!prev_phit || !prev_psit || !central_phit || !central_psit ||
         !next_phit || !next_psit)
       return false;
-    Real prev_phi=prev_phit.GetAngle()*180/M_PI - 0.000000001;
-    Real prev_psi=prev_psit.GetAngle()*180/M_PI - 0.000000001;
-    Real central_phi=central_phit.GetAngle()*180/M_PI - 0.000000001;
-    Real central_psi=central_psit.GetAngle()*180/M_PI - 0.000000001;
-    Real next_phi=next_phit.GetAngle()*180/M_PI - 0.000000001;
-    Real next_psi=next_psit.GetAngle()*180/M_PI - 0.000000001;
+    Real prev_phi=prev_phit.GetAngle()*180/M_PI - 0.001; if (prev_phi<-180) prev_phi=-180;
+    Real prev_psi=prev_psit.GetAngle()*180/M_PI - 0.001; if (prev_psi<-180) prev_psi=-180;
+    Real central_phi=central_phit.GetAngle()*180/M_PI - 0.001; if (central_phi<-180) central_phi=-180;
+    Real central_psi=central_psit.GetAngle()*180/M_PI - 0.001; if (central_psi<-180) central_psi=-180;
+    Real next_phi=next_phit.GetAngle()*180/M_PI - 0.001; if (next_phi<-180) next_phi=-180;
+    Real next_psi=next_psit.GetAngle()*180/M_PI - 0.001; if (next_psi<-180) next_psi=-180;
 
     // calculate position of the amino acid in the alphabet
     int icenter=this->GetAAIndex(ca);
