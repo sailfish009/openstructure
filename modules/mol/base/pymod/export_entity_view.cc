@@ -86,7 +86,7 @@ void export_EntityView()
   Real (EntityView::*get_angle1)(const AtomHandle&, const AtomHandle&, const AtomHandle&) const = &EntityView::GetAngle;
   Real (EntityView::*get_angle2)(const AtomView&, const AtomView&, const AtomView&) const = &EntityView::GetAngle;
 
-  class_<EntityView, bases<EntityBase> >("EntityView", no_init)
+  class_<EntityView, bases<EntityBase> >("EntityView", init<>())
     .def("Apply",apply1)
     .def("Apply",apply2)
     .def("Copy", &EntityView::Copy)
