@@ -194,6 +194,8 @@ void export_sequence()
   const_seq_handle_def<ConstSequenceHandle>(const_seq);
   const_generic_prop_def<ConstSequenceHandle>(const_seq);
   class_<SequenceHandle> seq_handle("SequenceHandle", init<>());
+  const_seq_handle_def<SequenceHandle>(seq_handle);
+  generic_prop_def<SequenceHandle>(seq_handle);  
   seq_handle
     .def("SetSequenceOffset", &SequenceHandle::SetSequenceOffset)
     .def("AttachView", attach_one)
@@ -211,8 +213,7 @@ void export_sequence()
     .add_property("sequence_offset", &SequenceHandle::GetSequenceOffset,
                   &SequenceHandle::SetSequenceOffset)
   ;
-  const_seq_handle_def<SequenceHandle>(seq_handle);
-  generic_prop_def<SequenceHandle>(seq_handle);
+
   implicitly_convertible<SequenceHandle, ConstSequenceHandle>();
   
   def("CreateSequence", &CreateSequence);
