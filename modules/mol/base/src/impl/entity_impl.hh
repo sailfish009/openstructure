@@ -80,7 +80,7 @@ typedef enum {
 
 
 /// \internal
-class EntityImpl: public GenericPropertyContainerImpl,
+class EntityImpl: public GenericPropContainerImpl,
                   public boost::enable_shared_from_this<EntityImpl>                  
 {
 public:

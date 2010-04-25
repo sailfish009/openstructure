@@ -10,7 +10,7 @@ class ScoreUpdater(QtCore.QObject):
 
   def UpdateScores(self):
     for atom in self.old_atoms:
-      atom.SetGenericFloatProperty('clash', 0)
+      atom.SetFloatProp('clash', 0)
     
     ligand = self.level.ligand
     prot_within = set()
@@ -22,6 +22,6 @@ class ScoreUpdater(QtCore.QObject):
     lig_view=ligand.handle.CreateFullView()
     for a in prot_within:
       score=qa.ClashScore(a, lig_view)
-      a.SetGenericFloatProperty('clash', score)
+      a.SetFloatProp('clash', score)
     self.level.surface.go.ReapplyColorOps()
     self.old_atoms = prot_within

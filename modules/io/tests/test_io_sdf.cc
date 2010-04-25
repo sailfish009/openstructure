@@ -54,9 +54,9 @@ BOOST_AUTO_TEST_CASE(test_io_sdf)
   BOOST_CHECK(ch.IsValid());
 
   // check properties
-  BOOST_CHECK(ch.HasGenericProperty("r_i_glide_rmsd"));
+  BOOST_CHECK(ch.HasProp("r_i_glide_rmsd"));
   BOOST_CHECK_EQUAL(boost::lexical_cast<Real>(boost::trim_copy
-                     (ch.GetGenericStringProperty("r_i_glide_rmsd"))),
+                     (ch.GetStringProp("r_i_glide_rmsd"))),
                      0.543804f);
 }
 

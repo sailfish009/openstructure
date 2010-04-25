@@ -44,12 +44,12 @@ namespace ost { namespace mol {
 /// that the position of an atom is undefined when there are pending changes
 /// of an ICSEditor in buffered edit mode. Before calling #GetPos(),
 /// ICSEditor::UpdateXCS() should be called explicitly.
-class DLLEXPORT_OST_MOL AtomBase: public GenericPropertyContainer<AtomBase> {
+class DLLEXPORT_OST_MOL AtomBase: public GenericPropContainer<AtomBase> {
 public:
   AtomBase();
   AtomBase(const impl::AtomImplPtr& impl);
 public:  
-  friend class ConstGenericPropertyContainer<AtomBase>;  
+  friend class ConstGenericPropContainer<AtomBase>;  
   ///\brief Get atom name. 
   ///
   /// In Python the atom name may also be accesssed over the property \c Name
@@ -135,9 +135,9 @@ public:
   long GetHashCode() const;  
 protected:
   
-  GenericPropertyContainerImpl* GpImpl();
+  GenericPropContainerImpl* GpImpl();
   
-  const GenericPropertyContainerImpl* GpImpl() const;
+  const GenericPropContainerImpl* GpImpl() const;
   
   void CheckValidity() const;
   impl::AtomImplPtr   impl_;

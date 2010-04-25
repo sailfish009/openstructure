@@ -46,7 +46,7 @@ namespace ost { namespace mol { namespace impl {
 /// coordinates. the secondary connectors connect this atom with the atoms that
 /// themselves depend on the coordinate system of this atom.
 /// \internal
-class AtomImpl: public GenericPropertyContainerImpl,
+class AtomImpl: public GenericPropContainerImpl,
                 public boost::enable_shared_from_this<AtomImpl> {
 public:
    AtomImpl(const EntityImplPtr& ent, const ResidueImplPtr& res,

@@ -29,12 +29,12 @@ AtomBase::AtomBase()
 AtomBase::AtomBase(const impl::AtomImplPtr& impl):
   impl_(impl) 
 {}
-GenericPropertyContainerImpl* AtomBase::GpImpl()
+GenericPropContainerImpl* AtomBase::GpImpl()
 {
   return Impl().get();
 }
 
-const GenericPropertyContainerImpl* AtomBase::GpImpl() const
+const GenericPropContainerImpl* AtomBase::GpImpl() const
 {
   return Impl().get();
 }

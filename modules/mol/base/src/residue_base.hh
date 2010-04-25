@@ -57,13 +57,13 @@ namespace ost { namespace mol {
 /// When loading an entity from file, the one-letter and chemical class of a
 /// residue are assigned by the \ref conop::Builder "default builder".
 class DLLEXPORT_OST_MOL ResidueBase: 
-   public GenericPropertyContainer<ResidueBase> {
+   public GenericPropContainer<ResidueBase> {
 public:
   ResidueBase();
   ResidueBase(const impl::ResidueImplPtr& impl);
   ResidueBase(const ResidueBase& rhs);
 public:
-  friend class ConstGenericPropertyContainer<ResidueBase>;
+  friend class ConstGenericPropContainer<ResidueBase>;
   /// \brief return residue number
   const ResNum& GetNumber() const;
 
@@ -145,9 +145,9 @@ public:
 
   const impl::ResidueImplPtr& Impl() const;
 protected:
-  GenericPropertyContainerImpl* GpImpl();
+  GenericPropContainerImpl* GpImpl();
   
-  const GenericPropertyContainerImpl* GpImpl() const;  
+  const GenericPropContainerImpl* GpImpl() const;  
   void CheckValidity() const;
 private:
   impl::ResidueImplPtr impl_;

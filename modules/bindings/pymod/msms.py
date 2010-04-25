@@ -77,7 +77,7 @@ def _ParseAreaFile(entity,file, property):
     for l in area_lines:
         atom_no, sesa, sasa = l.split()
         a = entity.atoms[int(atom_no)] 
-        a.SetGenericFloatProperty(property, float(sasa))
+        a.SetFloatProp(property, float(sasa))
     
     
 ## \brief Method which recursively deletes a directory

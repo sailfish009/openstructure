@@ -43,7 +43,7 @@ class SequenceImpl;
 typedef boost::shared_ptr<SequenceImpl> SequenceImplPtr;
 
 /// \internal
-class DLLEXPORT_OST_SEQ SequenceImpl : public GenericPropertyContainerImpl {
+class DLLEXPORT_OST_SEQ SequenceImpl : public GenericPropContainerImpl {
 public:
   /// \brief       Construct new sequence object from sequence_string.
   static SequenceImplPtr FromString(const String& seq_name,

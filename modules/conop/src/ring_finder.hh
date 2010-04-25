@@ -44,7 +44,7 @@ public:
   /// \brief Walk along the path of the entity in a depth first search and
   ///        identify atoms and bonds which are in rings
   ///
-  /// For all atoms and bonds, belonging to a ring, the GenericBoolProperty
+  /// For all atoms and bonds, belonging to a ring, the BoolProp
   /// RFinring is set to true. The search for rings is only carried out once.
   /// This method does not need to be called explicitly, it will be
   /// automatically called if the rings have not yet been identified.

@@ -23,7 +23,7 @@ class Anim(QtCore.QTimer):
         self.edi.UpdateICS()
         for a in self.b.view.atoms:
           score=qa.ClashScore(a.handle, self.a.view)
-          a.SetGenericFloatProperty('clash', score)
+          a.SetFloatProp('clash', score)
         self.a.UpdatePositions()
         self.b.ReapplyColorOps()
 
@@ -70,7 +70,7 @@ b=TheWall()
 a_go=gfx.Entity("a", gfx.CUSTOM, a)
 b_go=gfx.Entity("b", gfx.CUSTOM, b)
 for a in a.atoms:
-  a.SetGenericFloatProperty('clash', 0.0)
+  a.SetFloatProp('clash', 0.0)
 
 scene.Add(a_go)
 scene.Add(b_go)

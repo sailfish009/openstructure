@@ -36,12 +36,12 @@ impl::EntityImplPtr& EntityBase::Impl() {
 const impl::EntityImplPtr& EntityBase::Impl() const {
   return impl_;
 }
-GenericPropertyContainerImpl* EntityBase::GpImpl()
+GenericPropContainerImpl* EntityBase::GpImpl()
 {
   return Impl().get();
 }
 
-const GenericPropertyContainerImpl* EntityBase::GpImpl() const
+const GenericPropContainerImpl* EntityBase::GpImpl() const
 {
   return Impl().get();
 }

@@ -32,9 +32,9 @@ namespace ost { namespace mol {
 /// Represents a chemical bond between two atoms (#GetFirst(), #GetSecond()).
 /// New bonds are created with EditorBase::Connect().
 class DLLEXPORT_OST_MOL BondHandle: 
-    public GenericPropertyContainer<BondHandle> {
+    public GenericPropContainer<BondHandle> {
 public:
-  friend class ConstGenericPropertyContainer<BondHandle>;  
+  friend class ConstGenericPropContainer<BondHandle>;  
   /// necessary dummy ctor, creates invalid handle
   BondHandle();
   /// ctor for internal use, in public interface for convenience purposes
@@ -113,9 +113,9 @@ public:
   
 protected:
   
-  GenericPropertyContainerImpl* GpImpl();
+  GenericPropContainerImpl* GpImpl();
   
-  const GenericPropertyContainerImpl* GpImpl() const;  
+  const GenericPropContainerImpl* GpImpl() const;  
   void CheckValidity() const;
 private:
   impl::ConnectorImplP impl_;

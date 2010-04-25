@@ -349,22 +349,22 @@ const String& SequenceHandle::GetString() const
   return Impl()->GetString(); 
 }
 
-GenericPropertyContainerImpl* ConstSequenceHandle::GpImpl()
+GenericPropContainerImpl* ConstSequenceHandle::GpImpl()
 {
   return Impl().get();
 }
 
-const GenericPropertyContainerImpl* ConstSequenceHandle::GpImpl() const
+const GenericPropContainerImpl* ConstSequenceHandle::GpImpl() const
 {
   return Impl().get();
 }
 
-GenericPropertyContainerImpl* SequenceHandle::GpImpl()
+GenericPropContainerImpl* SequenceHandle::GpImpl()
 {
   return Impl().get();
 }
 
-const GenericPropertyContainerImpl* SequenceHandle::GpImpl() const
+const GenericPropContainerImpl* SequenceHandle::GpImpl() const
 {
   return Impl().get();
 }

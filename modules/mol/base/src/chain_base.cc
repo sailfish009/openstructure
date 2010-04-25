@@ -28,13 +28,13 @@ ChainBase::ChainBase()
 ChainBase::ChainBase(const impl::ChainImplPtr& impl): 
   impl_(impl) 
 {}
-GenericPropertyContainerImpl* ChainBase::GpImpl()
+GenericPropContainerImpl* ChainBase::GpImpl()
 {
   return impl_.get();
 }
 
 
-const GenericPropertyContainerImpl* ChainBase::GpImpl() const
+const GenericPropContainerImpl* ChainBase::GpImpl() const
 {
   return impl_.get();
 }

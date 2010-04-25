@@ -36,30 +36,30 @@ BOOST_AUTO_TEST_CASE( test_generic_property )
   AtomHandle atom2 = editor.InsertAtom(res, "Y",geom::Vec3());
   BondHandle bond = editor.Connect(atom, atom2);
 
-  eh.SetGenericStringProperty("a","123");
-  ch.SetGenericFloatProperty("b",1.5);
-  res.SetGenericIntProperty("c",123);
-  atom.SetGenericBoolProperty("d",true);
-  bond.SetGenericIntProperty("e", 12);
+  eh.SetStringProp("a","123");
+  ch.SetFloatProp("b",1.5);
+  res.SetIntProp("c",123);
+  atom.SetBoolProp("d",true);
+  bond.SetIntProp("e", 12);
 
-  BOOST_CHECK(eh.HasGenericProperty("x")==false);
-  BOOST_CHECK(eh.HasGenericProperty("a")==true);
+  BOOST_CHECK(eh.HasProp("x")==false);
+  BOOST_CHECK(eh.HasProp("a")==true);
 
-  BOOST_CHECK(eh.GetGenericStringProperty("a")=="123");
-  BOOST_CHECK(ch.GetGenericFloatProperty("b")==1.5);
-  BOOST_CHECK(res.GetGenericIntProperty("c")==123);
-  BOOST_CHECK(atom.GetGenericBoolProperty("d")==true);
-  BOOST_CHECK(bond.GetGenericIntProperty("e")==12);
+  BOOST_CHECK(eh.GetStringProp("a")=="123");
+  BOOST_CHECK(ch.GetFloatProp("b")==1.5);
+  BOOST_CHECK(res.GetIntProp("c")==123);
+  BOOST_CHECK(atom.GetBoolProp("d")==true);
+  BOOST_CHECK(bond.GetIntProp("e")==12);
 
   EntityView ev = eh.CreateFullView();
   ChainView chv = ev.FindChain("A");
   ResidueView resv = ev.FindResidue(res);
   AtomView atomv = ev.FindAtom(atom);
 
-  BOOST_CHECK(ev.GetGenericStringProperty("a")=="123");
-  BOOST_CHECK(chv.GetGenericFloatProperty("b")==1.5);
-  BOOST_CHECK(resv.GetGenericIntProperty("c")==123);
-  BOOST_CHECK(atomv.GetGenericBoolProperty("d")==true);
+  BOOST_CHECK(ev.GetStringProp("a")=="123");
+  BOOST_CHECK(chv.GetFloatProp("b")==1.5);
+  BOOST_CHECK(resv.GetIntProp("c")==123);
+  BOOST_CHECK(atomv.GetBoolProp("d")==true);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -28,9 +28,9 @@ namespace ost { namespace mol {
 
 /// \brief definition of EntityBase
 class DLLEXPORT_OST_MOL EntityBase: 
-  public GenericPropertyContainer<EntityBase> {
+  public GenericPropContainer<EntityBase> {
 public:
-  friend class ConstGenericPropertyContainer<EntityBase>;
+  friend class ConstGenericPropContainer<EntityBase>;
   EntityBase(const impl::EntityImplPtr& impl);
   EntityBase();
   
@@ -65,9 +65,9 @@ public:
   const impl::EntityImplPtr& Impl() const;
 protected:
   
-  GenericPropertyContainerImpl* GpImpl();
+  GenericPropContainerImpl* GpImpl();
   
-  const GenericPropertyContainerImpl* GpImpl() const;
+  const GenericPropContainerImpl* GpImpl() const;
   
   void CheckValidity() const;  
 private:

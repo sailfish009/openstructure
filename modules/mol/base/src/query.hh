@@ -56,7 +56,7 @@ namespace ost { namespace mol {
 /// resulting view.
 ///
 /// For matching GenericProperties, use gapropname, grpropname, gcpropname for
-/// the GenericProperty 'propname' at the atom, residue and chain level
+/// the GenericProp 'propname' at the atom, residue and chain level
 /// respectively. The g marks the property as generic.
 struct DLLEXPORT_OST_MOL QueryFlag {
   typedef enum {

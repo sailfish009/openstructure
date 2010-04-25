@@ -43,9 +43,9 @@ class AlignmentHandle;
 /// The ConstSequenceHandle provides all read-only methods of the 
 /// \ref SequenceHandle "sequence handle".
 class DLLEXPORT_OST_SEQ ConstSequenceHandle : 
-  public ConstGenericPropertyContainer<ConstSequenceHandle> {
+  public ConstGenericPropContainer<ConstSequenceHandle> {
 public:
-  friend class ConstGenericPropertyContainer<ConstSequenceHandle>;
+  friend class ConstGenericPropContainer<ConstSequenceHandle>;
   friend class AlignmentHandle;
   friend class ConstSequenceList;
   friend class SequenceList;
@@ -120,9 +120,9 @@ public:
   bool IsValid() const;
   /// \internal
 protected:
-  GenericPropertyContainerImpl* GpImpl();
+  GenericPropContainerImpl* GpImpl();
 
-  const GenericPropertyContainerImpl* GpImpl() const;
+  const GenericPropContainerImpl* GpImpl() const;
 public:
   ConstSequenceHandle(const impl::SequenceImplPtr& impl);
   impl::SequenceImplPtr& Impl() const;  
@@ -154,9 +154,9 @@ private:
 /// Sequences IO is dealt with in the sequence module. For more information, 
 /// consult \ref module_seq "this page".
 class DLLEXPORT_OST_SEQ SequenceHandle : 
-  public GenericPropertyContainer<SequenceHandle> {
+  public GenericPropContainer<SequenceHandle> {
 public:
-  friend class GenericPropertyContainer<SequenceHandle>;  
+  friend class GenericPropContainer<SequenceHandle>;  
   friend class SequenceList;
 
   friend class AlignmentHandle;
@@ -261,9 +261,9 @@ public:
   
   impl::SequenceImplPtr& Impl() const;  
 
-  GenericPropertyContainerImpl* GpImpl();
+  GenericPropContainerImpl* GpImpl();
 
-  const GenericPropertyContainerImpl* GpImpl() const;
+  const GenericPropContainerImpl* GpImpl() const;
 private:
   void CheckValidity() const;  
   mutable impl::SequenceImplPtr impl_;

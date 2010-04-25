@@ -36,7 +36,7 @@ public:
   /// it is used as an index to determine in which order the generic properties
   /// where specified in the query string.
   /// GenericProperties are defined with gapropname, grpropname, gcpropname for
-  /// the GenericProperty 'propname' at the atom, residue and chain level
+  /// the GenericProp 'propname' at the atom, residue and chain level
   /// respectively.
   typedef enum {
     RNAME, ANAME, CNAME, ELE, RNUM, ANUM, AX, AY, AZ, OCC, RTYPE, ISHETATM,

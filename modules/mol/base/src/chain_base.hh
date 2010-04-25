@@ -36,13 +36,13 @@ namespace ost { namespace mol {
 /// Chains are linear chains of \ref ResidueHandle "residues". Peptide chains are
 /// ordered from N- to C-terminus. 
 class DLLEXPORT_OST_MOL ChainBase: 
-  public GenericPropertyContainer<ChainBase> {
+  public GenericPropContainer<ChainBase> {
 
 public: // constructors
   ChainBase();
   ChainBase(const impl::ChainImplPtr& impl);
 public:
-  friend class ConstGenericPropertyContainer<ChainBase>;
+  friend class ConstGenericPropContainer<ChainBase>;
   String GetName() const;
   /// \name Handle validity
   //@{
@@ -66,9 +66,9 @@ public:
     return impl_;
   }
 protected:
-  GenericPropertyContainerImpl* GpImpl();
+  GenericPropContainerImpl* GpImpl();
   
-  const GenericPropertyContainerImpl* GpImpl() const;
+  const GenericPropContainerImpl* GpImpl() const;
     
   void CheckValidity() const;
 private:

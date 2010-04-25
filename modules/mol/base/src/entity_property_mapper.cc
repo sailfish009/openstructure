@@ -52,17 +52,17 @@ Real EntityPropertyMapper::get_property(const T& atom, Real def_value) const
   switch(prop_.level) {
     case Prop::ATOM:
       if (B) {
-        return atom.GetGenericFloatProperty(prop_name_, def_value);
+        return atom.GetFloatProp(prop_name_, def_value);
       } else {
-        return atom.GetGenericFloatProperty(prop_name_);          
+        return atom.GetFloatProp(prop_name_);          
       }
     case Prop::RESIDUE:
       if (B) {
-        Real value=atom.GetResidue().GetGenericFloatProperty(prop_name_, 
+        Real value=atom.GetResidue().GetFloatProp(prop_name_, 
                                                              def_value);
         return value; 
       } else {
-        return atom.GetResidue().GetGenericFloatProperty(prop_name_);
+        return atom.GetResidue().GetFloatProp(prop_name_);
       }
     default:
      return def_value;
@@ -98,12 +98,12 @@ Real EntityPropertyMapper::Get(const AtomView& atom,
 
 Real EntityPropertyMapper::Get(const ResidueView& res) const
 {
-  return res.GetGenericFloatProperty(prop_name_);
+  return res.GetFloatProp(prop_name_);
 }
 
 Real EntityPropertyMapper::Get(const ResidueHandle& res) const
 {
-  return res.GetGenericFloatProperty(prop_name_);
+  return res.GetFloatProp(prop_name_);
 }
 
 
@@ -111,13 +111,13 @@ Real EntityPropertyMapper::Get(const ResidueHandle& res) const
 Real EntityPropertyMapper::Get(const ResidueHandle& res,
                                  Real def_value) const
 {
-  return res.GetGenericFloatProperty(prop_name_, def_value);
+  return res.GetFloatProp(prop_name_, def_value);
 }
 
 Real EntityPropertyMapper::Get(const ResidueView& res,
                                  Real def_value) const
 {
-  return res.GetGenericFloatProperty(prop_name_, def_value);
+  return res.GetFloatProp(prop_name_, def_value);
 }
 
 
@@ -127,12 +127,12 @@ Real EntityPropertyMapper::Get(const ResidueView& res,
 
 Real EntityPropertyMapper::Get(const ChainView& chain) const
 {
-  return chain.GetGenericFloatProperty(prop_name_);
+  return chain.GetFloatProp(prop_name_);
 }
 
 Real EntityPropertyMapper::Get(const ChainHandle& chain) const
 {
-  return chain.GetGenericFloatProperty(prop_name_);
+  return chain.GetFloatProp(prop_name_);
 }
 
 
@@ -140,13 +140,13 @@ Real EntityPropertyMapper::Get(const ChainHandle& chain) const
 Real EntityPropertyMapper::Get(const ChainHandle& chain,
                                  Real def_value) const
 {
-  return chain.GetGenericFloatProperty(prop_name_, def_value);
+  return chain.GetFloatProp(prop_name_, def_value);
 }
 
 Real EntityPropertyMapper::Get(const ChainView& chain,
                                  Real def_value) const
 {
-  return chain.GetGenericFloatProperty(prop_name_, def_value);
+  return chain.GetFloatProp(prop_name_, def_value);
 }
 
 }} //ns

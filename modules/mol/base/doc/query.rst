@@ -92,9 +92,9 @@ they are defined. Therefore, all generic properties start with a ``g``, followed
 .. code-block:: python
    
    # set generic properties for atom, residue, chain
-   atom_handle.SetGenericFloatProperty("testpropatom", 5.2)
-   resid_handle.SetGenericFloatProperty("testpropres", 1.1)
-   chain_handle.SetGenericIntProperty("testpropchain", 10)
+   atom_handle.SetFloatProp("testpropatom", 5.2)
+   resid_handle.SetFloatProp("testpropres", 1.1)
+   chain_handle.SetIntProp("testpropchain", 10)
    
    # query statements
    sel_a=e.Select("gatestpropatom<=10.0")

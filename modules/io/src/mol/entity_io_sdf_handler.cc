@@ -65,7 +65,7 @@ void EntityIOSDFHandler::Import(mol::EntityHandle& ent, std::istream& instream)
       while(std::getline(instream,line) && !boost::iequals(line, "")) {
         data_value.append(line);
       }
-      curr_chain_.SetGenericStringProperty(data_header, data_value);
+      curr_chain_.SetStringProp(data_header, data_value);
     } else if (boost::iequals(line, "$$$$")) {
       LOGN_MESSAGE("MOLECULE " << curr_chain_.GetName() << " (" << chain_count_ << ") added.")
       NextMolecule();
@@ -363,8 +363,8 @@ namespace {
       ostr_ << "M  END" << std::endl;
       
       // write data block
-      std::map<String,GenericPropertyValue> prop_map = non_const_chain.GetGenericPropertyMap();
-      std::map<String,GenericPropertyValue>::iterator iter;
+      std::map<String,GenericPropValue> prop_map = non_const_chain.GetPropMap();
+      std::map<String,GenericPropValue>::iterator iter;
       for(iter = prop_map.begin(); iter != prop_map.end(); ++iter) {
         ostr_ << "> <" << (*iter).first << ">" << std::endl;
         ostr_ << (*iter).second << std::endl;

@@ -26,7 +26,7 @@
 using namespace boost::python;
 
 void export_Logger();
-void export_GenericProperty();
+void export_GenericProp();
 void export_Range();
 void export_Units();
 

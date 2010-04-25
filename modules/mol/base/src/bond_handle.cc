@@ -31,12 +31,12 @@ BondHandle::BondHandle():
 BondHandle::BondHandle(const impl::ConnectorImplP& im):
   impl_(im)
 {}
-GenericPropertyContainerImpl* BondHandle::GpImpl()
+GenericPropContainerImpl* BondHandle::GpImpl()
 {
   return impl_.get();
 }
 
-const GenericPropertyContainerImpl* BondHandle::GpImpl() const
+const GenericPropContainerImpl* BondHandle::GpImpl() const
 {
   return impl_.get();
 }

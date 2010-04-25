@@ -34,12 +34,12 @@ ResidueBase::ResidueBase(const impl::ResidueImplPtr& impl):
   impl_(impl) 
 {}
 
-GenericPropertyContainerImpl* ResidueBase::GpImpl()
+GenericPropContainerImpl* ResidueBase::GpImpl()
 {
   return Impl().get();
 }
 
-const GenericPropertyContainerImpl* ResidueBase::GpImpl() const
+const GenericPropContainerImpl* ResidueBase::GpImpl() const
 {
   return Impl().get();
 }
