@@ -185,7 +185,7 @@ geom::Vec3 EntityView::GetCenterOfMass() const
   if (this->GetAtomCount()>0 && mass>0) {
     AtomViewIter it=this->AtomsBegin();
     for(; it!=this->AtomsEnd(); ++it) {
-      center+=(*it).GetPos()*(*it).GetProp().mass;
+      center+=(*it).GetPos()*(*it).GetMass();
     }
     center/=mass;
   }
@@ -197,7 +197,7 @@ Real EntityView::GetMass() const
   Real mass = 0;
   AtomViewIter it=this->AtomsBegin();
   for(; it!=this->AtomsEnd(); ++it) {
-    mass+=(*it).GetProp().mass;
+    mass+=(*it).GetMass();
   }
   return mass;
 }

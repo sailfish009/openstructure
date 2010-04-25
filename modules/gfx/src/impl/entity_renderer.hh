@@ -24,8 +24,8 @@
 */
 
 
-#if defined(GetProp)
-#undef GetProp
+#if defined(GetAtomProps)
+#undef GetAtomProps
 #endif
 #include <vector>
 
@@ -185,7 +185,7 @@ protected:
 //Simplify color ops
 struct ByElementGetCol {
   Color ColorOfAtom(mol::AtomHandle& atom) const{
-    return GfxObj::Ele2Color(atom.GetProp().element);
+    return GfxObj::Ele2Color(atom.GetElement());
   }
 };
 

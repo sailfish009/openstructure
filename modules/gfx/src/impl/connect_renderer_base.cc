@@ -49,7 +49,7 @@ public:
     if(mode==SEL_ATOM) {
       float d=geom::Distance(line_,atom.GetPos());
       if((fixed_radius && d<=dlim_) || 
-         (!fixed_radius && d<=atom.GetProp().radius)) {
+         (!fixed_radius && d<=atom.GetRadius())) {
         geom::Vec3 v=Scene::Instance().Project(atom.GetPos());
         if(v[2]>0.0 && v[2]<zmin_) {
           zmin_=v[2];

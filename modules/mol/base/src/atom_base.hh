@@ -33,7 +33,7 @@ namespace ost { namespace mol {
 /// Groups common functionality for AtomView and AtomHandle.
 ///
 /// Most of the atom properties such as temperature factor, element, radius
-/// and charge can be accessed with #GetProp() that returns an object of
+/// and charge can be accessed with #GetAtomProps() that returns an object of
 /// type AtomProp.
 ///
 /// Like \ref ResidueBase residues, \ref ChainBase "chains" and 
@@ -80,11 +80,11 @@ public:
   /// \brief Get atom properties such as element name, radius crystallographic
   ///     occupancy and temperature factors.
   ///
-  /// \sa      #SetProp
-  const AtomProp& GetProp() const;
+  /// \sa      #SetAtomProps
+  const AtomProp& GetAtomProps() const;
     
   /// \brief  Set atom properties.
-  void SetProp(const AtomProp& prop);
+  void SetAtomProps(const AtomProp& prop);
   //@} 
   
   /// \name Handle validity
@@ -120,11 +120,36 @@ public:
   /// \brief Get the internal index
   unsigned long GetIndex() const;
 
+  /// \brief returns the van-der-Waals radius of the atom
+  Real GetRadius() const;
+  
+  /// \brief returns the element name of the atom
+  const String& GetElement() const;
+  
+  /// \brief whether the atom is a hetatm
+  bool IsHetAtom() const;
+  
+  /// \brief Get isotropic temperature factor of atom
+  /// 
+  /// The returned value may be zero for some structures
+  Real GetBFactor() const;
+  
+  /// \brief get mass of atom
+  /// 
+  /// The returned value may be zero
+  Real GetMass() const;
+  
+  /// \brief get charge
+  Real GetCharge() const;
+  
+  /// \brief get atom occupancy
+  Real GetOccupancy() const;
+  
   /// \brief get atom implementation.
   ///
   /// Intended for internal use.
   const impl::AtomImplPtr& Impl() const;
-  
+
   /// \brief get atom implementation
   impl::AtomImplPtr& Impl();
 

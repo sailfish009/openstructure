@@ -121,7 +121,7 @@ public:
 
   virtual void Dump(int level=0) const;
 
-  const Prop& GetProp() const {
+  const Prop& GetAtomProps() const {
     return sel_;
   }
   CompOP GetCompOP() const {

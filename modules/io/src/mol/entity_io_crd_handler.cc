@@ -191,7 +191,7 @@ bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
               << format("%10.5f") % atom.GetPos().GetZ() << " "
               << format("%-4s") % e_name << " "
               << format("%-5i") % res.GetNumber() << " "
-              << format("%8.5f") % atom.GetProp().b_factor
+              << format("%8.5f") % atom.GetBFactor()
               << std::endl;
 
   return true;

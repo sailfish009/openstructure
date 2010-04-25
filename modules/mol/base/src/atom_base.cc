@@ -76,16 +76,16 @@ std::vector<String> AtomBase::GetAltGroupNames() const
 }
 
 
-const AtomProp& AtomBase::GetProp() const 
+const AtomProp& AtomBase::GetAtomProps() const 
 {
   this->CheckValidity();  
-  return impl_->GetProp();
+  return impl_->GetAtomProps();
 }
 
-void AtomBase::SetProp(const AtomProp& prop) 
+void AtomBase::SetAtomProps(const AtomProp& prop) 
 {
   this->CheckValidity();  
-  impl_->GetProp()=prop;
+  impl_->GetAtomProps()=prop;
 }
 
 impl::AtomImplPtr& AtomBase::Impl() 
@@ -134,6 +134,51 @@ std::ostream& operator<<(std::ostream& os, const AtomBase& atom)
     os << "invalid atom";
   }
   return os;
+}
+
+
+Real AtomBase::GetRadius() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().radius;
+}
+
+
+const String& AtomBase::GetElement() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().element;
+}
+
+
+bool AtomBase::IsHetAtom() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().is_hetatm;
+}
+
+Real AtomBase::GetBFactor() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().b_factor;
+}
+
+Real AtomBase::GetMass() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().mass;
+}
+
+Real AtomBase::GetCharge() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().charge;
+}
+
+Real AtomBase::GetOccupancy() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().occupancy;
 }
 
 

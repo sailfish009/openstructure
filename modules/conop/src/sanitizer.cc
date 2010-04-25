@@ -42,12 +42,12 @@ bool Sanitizer::VisitResidue(const mol::ResidueHandle& residue) {
 }
 
 void Sanitizer::FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec) {
-  mol::AtomProp props=atom.GetProp();
+  mol::AtomProp props=atom.GetAtomProps();
   if (props.element!=spec.element) {
     props.element=spec.element;
     LOGN_MESSAGE("Correcting element for " << atom.GetQualifiedName() <<
                  " (now " << spec.element << ", was " << props.element << ")");
-    atom.SetProp(props);
+    atom.SetAtomProps(props);
   }
 }
 

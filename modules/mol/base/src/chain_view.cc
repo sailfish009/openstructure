@@ -313,7 +313,7 @@ Real ChainView::GetMass() const {
     ResidueView r=*i;
     for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
          e2=r.GetAtomList().end(); j!=e2; ++j) {
-      mass+=j->GetProp().mass;
+      mass+=j->GetMass();
     }
   }
   return mass;
@@ -388,7 +388,7 @@ geom::Vec3 ChainView::GetCenterOfMass() const
       ResidueView r=*i;
       for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
           e2=r.GetAtomList().end(); j!=e2; ++j) {
-        center+=j->GetPos() * j->GetProp().mass;
+        center+=j->GetPos() * j->GetAtomProps().mass;
       }
     }
     center/=mass;

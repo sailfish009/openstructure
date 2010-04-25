@@ -458,10 +458,9 @@ bool HeuristicBuilder::IsResidueComplete(const mol::ResidueHandle& rh)
 
 void HeuristicBuilder::FillAtomProps(mol::AtomHandle atom)
 {
-  mol::AtomProp prop=atom.GetProp();
+  mol::AtomProp prop=atom.GetAtomProps();
   if (prop.element=="") {
-    prop.element=Builder::GuessAtomElement(atom.GetName(), 
-                                           atom.GetProp().is_hetatm);    
+    prop.element=Builder::GuessAtomElement(atom.GetName(), prop.is_hetatm);
   }
   Conopology& conop_inst=Conopology::Instance();
   if (prop.radius==0.0) {
@@ -470,7 +469,7 @@ void HeuristicBuilder::FillAtomProps(mol::AtomHandle atom)
   if (prop.mass==0.0) {
     prop.mass=conop_inst.GetDefaultAtomMass(prop.element);    
   }
-  atom.SetProp(prop);  
+  atom.SetAtomProps(prop);  
 }
 
 }} // ns

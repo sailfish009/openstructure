@@ -363,7 +363,7 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
     throw IOException(str(format(fmt_str) % line_num));      
   }
   //get properties which are already set and extend them by adding the ANISOU info
-  mol::AtomProp aprop=atom.GetProp();
+  mol::AtomProp aprop=atom.GetAtomProps();
   geom::Mat3 mat(anisou[0], anisou[3], anisou[4],
                  anisou[3], anisou[1], anisou[5],
                  anisou[4], anisou[5], anisou[2]);
@@ -371,7 +371,7 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   //divide by 10**4 to actually reflect the real values
   aprop.anisou/=10000;
   aprop.has_anisou=true;
-  atom.SetProp(aprop);
+  atom.SetAtomProps(aprop);
   return;  
 }
 

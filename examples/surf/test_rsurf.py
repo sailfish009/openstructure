@@ -15,7 +15,7 @@ scene.Add(gs)
 # for debug reasons
 rs=mol.RSurf(1.5)
 for a in ev.GetAtomList():
-    rs.AddSphere(a.GetPos(),a.GetProp().Radius,str(a))
+    rs.AddSphere(a.GetPos(),a.GetRadius(),str(a))
 rs.Build()
 rs.Triangulate(60.0*3.1415/180.0)
 gr=gfx.RSurface("r",rs)

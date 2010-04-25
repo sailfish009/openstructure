@@ -55,7 +55,7 @@ def _SetupFiles(entity, selection):
   for a in entity_view.GetAtomList():
     position=a.GetPos()
     tmp_file_handle.write('%8.3f %8.3f %8.3f %4.2f\n' % (position[0],
-                          position[1], position[2], a.GetProp().radius))
+                          position[1], position[2], a.GetAtomProps().radius))
   tmp_file_handle.close()
   
   return (tmp_dir_name, tmp_file_name)

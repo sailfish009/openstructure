@@ -357,7 +357,7 @@ Real ChainImpl::GetMass() const
     ResidueImplPtr r=*i;
     for (AtomImplList::iterator j=r->GetAtomList().begin(); 
           j!=r->GetAtomList().end(); ++j) {
-      mass+=(*j)->GetProp().mass;
+      mass+=(*j)->GetAtomProps().mass;
     }
   }
   return mass;
@@ -426,7 +426,7 @@ geom::Vec3 ChainImpl::GetCenterOfMass() const
       ResidueImplPtr r=*i;
       for (AtomImplList::iterator j=r->GetAtomList().begin(); 
            j!=r->GetAtomList().end(); ++j) {
-        center+=(*j)->GetPos() * (*j)->GetProp().mass;
+        center+=(*j)->GetPos() * (*j)->GetAtomProps().mass;
       }
     }
     center/=mass;

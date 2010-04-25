@@ -65,13 +65,13 @@ bool Builder::IsBondFeasible(const mol::AtomHandle& atom_a,
 {
   Real len=geom::Length2(atom_a.GetPos()-atom_b.GetPos());
   Real radii=0.0;
-  if (atom_a.GetProp().radius>0.0) {
-    radii=atom_a.GetProp().radius;
+  if (atom_a.GetRadius()>0.0) {
+    radii=atom_a.GetRadius();
   } else {
     return false;
   }
-  if (atom_b.GetProp().radius>0.0) {
-    radii+=atom_b.GetProp().radius;
+  if (atom_b.GetRadius()>0.0) {
+    radii+=atom_b.GetRadius();
   } else {
     return false;
   } 

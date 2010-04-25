@@ -280,7 +280,7 @@ namespace {
         ostr_ << format("%10.4f") % atom.GetPos()[0]
               << format("%10.4f") % atom.GetPos()[1]
               << format("%10.4f ") % atom.GetPos()[2]
-              << format("%-3s") % atom.GetProp().element
+              << format("%-3s") % atom.GetElement()
               << " 0  0  0  0  0  0"
               << std::endl;
         return true;

@@ -71,9 +71,9 @@ public:
 
   void SetOriginalPos(const geom::Vec3& pos) { pos_=pos; }
   
-  const AtomProp& GetProp() const {return prop_;}
+  const AtomProp& GetAtomProps() const {return prop_;}
   
-  AtomProp& GetProp() {return prop_;}
+  AtomProp& GetAtomProps() {return prop_;}
   
   ResidueImplPtr GetResidue() const;
 

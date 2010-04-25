@@ -36,7 +36,7 @@ void write_atom(std::ostream& ostr, const mol::AtomHandle& atom, int atomnum,
 {
   mol::ResidueHandle res=atom.GetResidue();
   char ins_code=res.GetNumber().GetInsCode();
-  String record_name=atom.GetProp().is_hetatm ? "HETATM" : "ATOM  ";
+  String record_name=atom.GetAtomProps().is_hetatm ? "HETATM" : "ATOM  ";
   String aname_str=atom.GetName();
   if(aname_str.length()<4) {
     aname_str=" "+aname_str;
@@ -54,13 +54,13 @@ void write_atom(std::ostream& ostr, const mol::AtomHandle& atom, int atomnum,
          << "   "
          << format("%8.3f%8.3f%8.3f") % p[0] % p[1] % p[2];
     if(is_pqr) {
-      ostr << format("%6.2f") % atom.GetProp().charge
-           << format("%6.2f") % atom.GetProp().radius;
+      ostr << format("%6.2f") % atom.GetAtomProps().charge
+           << format("%6.2f") % atom.GetAtomProps().radius;
     } else {
-      ostr << format("%6.2f") % atom.GetProp().occupancy
-           << format("%6.2f") % atom.GetProp().b_factor;
+      ostr << format("%6.2f") % atom.GetAtomProps().occupancy
+           << format("%6.2f") % atom.GetAtomProps().b_factor;
     }
-    ostr << format("%10s%2s") % "" % atom.GetProp().element
+    ostr << format("%10s%2s") % "" % atom.GetAtomProps().element
          << std::endl
     ;    
   } else {
@@ -77,13 +77,13 @@ void write_atom(std::ostream& ostr, const mol::AtomHandle& atom, int atomnum,
             << "   "
             << format("%8.3f%8.3f%8.3f") % p[0] % p[1] % p[2];
        if(is_pqr) {
-         ostr << format("%6.2f") % atom.GetProp().charge
-              << format("%6.2f") % atom.GetProp().radius;
+         ostr << format("%6.2f") % atom.GetAtomProps().charge
+              << format("%6.2f") % atom.GetAtomProps().radius;
        } else {
-         ostr << format("%6.2f") % atom.GetProp().occupancy
-              << format("%6.2f") % atom.GetProp().b_factor;
+         ostr << format("%6.2f") % atom.GetAtomProps().occupancy
+              << format("%6.2f") % atom.GetAtomProps().b_factor;
        }
-       ostr << format("%10s%2s") % "" % atom.GetProp().element
+       ostr << format("%10s%2s") % "" % atom.GetAtomProps().element
             << std::endl
        ;       
     }

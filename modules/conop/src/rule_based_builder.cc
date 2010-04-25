@@ -61,7 +61,7 @@ void RuleBasedBuilder::CheckResidueCompleteness(const mol::ResidueHandle& rh) {
 
 void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec) 
 {
-  mol::AtomProp props=atom.GetProp();
+  mol::AtomProp props=atom.GetAtomProps();
   if (props.element=="") {
     props.element=spec.element;
   }
@@ -72,7 +72,7 @@ void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec)
   if (props.mass==0.0) {
     props.mass=conop_inst.GetDefaultAtomMass(spec.element);
   }
-  atom.SetProp(props);  
+  atom.SetAtomProps(props);  
 }
 
 void RuleBasedBuilder::FillResidueProps(mol::ResidueHandle residue) {
@@ -265,7 +265,7 @@ void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom)
 
 bool RuleBasedBuilder::OnUnknownAtom(mol::AtomHandle atom)
 {
-  mol::AtomProp props=atom.GetProp();
+  mol::AtomProp props=atom.GetAtomProps();
   if (props.element=="") {
     props.element=Builder::GuessAtomElement(atom.GetName(), props.is_hetatm);
   }
@@ -276,7 +276,7 @@ bool RuleBasedBuilder::OnUnknownAtom(mol::AtomHandle atom)
   if (props.mass==0.0) {
     props.mass=conop_inst.GetDefaultAtomMass(props.element);
   }
-  atom.SetProp(props); 
+  atom.SetAtomProps(props); 
   return false;
 }
 

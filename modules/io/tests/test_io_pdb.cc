@@ -64,10 +64,10 @@ BOOST_AUTO_TEST_CASE(atom_record)
   BOOST_CHECK_EQUAL(a1.GetResidue().GetChain().GetName(), "A");  
   
   BOOST_CHECK_EQUAL(a1.GetPos(), geom::Vec3(16.0, 64.0, 8.0));
-  BOOST_CHECK_EQUAL(a1.GetProp().b_factor, 1.0);
-  BOOST_CHECK_EQUAL(a1.GetProp().occupancy, 0.5);  
-  BOOST_CHECK_EQUAL(a1.GetProp().element, "N");
-  BOOST_CHECK_EQUAL(a1.GetProp().is_hetatm, false);
+  BOOST_CHECK_EQUAL(a1.GetAtomProps().b_factor, 1.0);
+  BOOST_CHECK_EQUAL(a1.GetAtomProps().occupancy, 0.5);  
+  BOOST_CHECK_EQUAL(a1.GetAtomProps().element, "N");
+  BOOST_CHECK_EQUAL(a1.GetAtomProps().is_hetatm, false);
   mol::AtomHandle a2=ent.FindAtom(" ", mol::ResNum(1), "CA");
   BOOST_REQUIRE(a2.IsValid());  
   BOOST_CHECK_EQUAL(a2.GetName(), "CA");
@@ -75,10 +75,10 @@ BOOST_AUTO_TEST_CASE(atom_record)
   BOOST_CHECK_EQUAL(a2.GetResidue().GetChain().GetName(), " ");  
   
   BOOST_CHECK_EQUAL(a2.GetPos(), geom::Vec3(32.0, -128.0, -2.5));
-  BOOST_CHECK_EQUAL(a2.GetProp().b_factor, 128.0);
-  BOOST_CHECK_EQUAL(a2.GetProp().occupancy, 1.0);  
-  BOOST_CHECK_EQUAL(a2.GetProp().element, "C");
-  BOOST_CHECK_EQUAL(a2.GetProp().is_hetatm, true);
+  BOOST_CHECK_EQUAL(a2.GetAtomProps().b_factor, 128.0);
+  BOOST_CHECK_EQUAL(a2.GetAtomProps().occupancy, 1.0);  
+  BOOST_CHECK_EQUAL(a2.GetAtomProps().element, "C");
+  BOOST_CHECK_EQUAL(a2.GetAtomProps().is_hetatm, true);
 }
 
 BOOST_AUTO_TEST_CASE(end_record)
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE(anisou_record)
   BOOST_REQUIRE(ent.GetAtomCount()==1);
   mol::AtomHandle a1=ent.FindAtom("A", mol::ResNum(7), "N");
   BOOST_REQUIRE(a1.IsValid());
-  mol::AtomProp props=a1.GetProp();
+  mol::AtomProp props=a1.GetAtomProps();
   BOOST_CHECK_CLOSE( 0.0100, props.anisou(0, 0), 1e-4);
   BOOST_CHECK_CLOSE(-0.0016, props.anisou(1, 0), 1e-4);
   BOOST_CHECK_CLOSE(-0.0026, props.anisou(2, 0), 1e-4);

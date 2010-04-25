@@ -328,7 +328,7 @@ geom::Vec3 EntityImpl::GetCenterOfMass() const {
   Real mass = this->GetMass();
   if (this->GetAtomCount()>0 && mass>0) {
     for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      center+=it->second->GetPos()*it->second->GetProp().mass;
+      center+=it->second->GetPos()*it->second->GetAtomProps().mass;
     }
     center/=mass;
   }
@@ -339,7 +339,7 @@ Real EntityImpl::GetMass() const {
   Real mass=0.0;
   for (AtomImplMap::const_iterator it = atom_map_.begin();
       it!=atom_map_.end();++it) {
-    mass+=it->second->GetProp().mass;
+    mass+=it->second->GetAtomProps().mass;
   }
   return mass;
 }
