@@ -24,7 +24,7 @@ Authors: Pascal Benkert, Marco Biasini
 """
 
 import os
-import tempfile
+import tempfile,subprocess
 
 from ost import io,mol
 from ost import settings
@@ -44,7 +44,10 @@ def _ExecuteDSSP(path, temp_dir=None):
   # subsequent process
   temp_dssp_path=tempfile.mktemp(suffix=".out",prefix="dssp", dir=temp_dir)
   dssp_abs_path=settings.Locate('dssp', env_name='DSSP_EXECUTABLE')
-  status = os.system(dssp_abs_path+" "+path+" 2>/dev/null 1> "+temp_dssp_path)
+  command=dssp_abs_path+" "+path+" "+temp_dssp_path
+  ps=subprocess.Popen(command, shell=True, stderr=subprocess.PIPE)
+  err_lines=ps.stderr.readlines()
+
   return temp_dssp_path
 
 
@@ -134,22 +137,22 @@ def LoadDSSP(file_name, model, extract_burial_status_flag=0,
         # set property "burial status:
         if extract_burial_status_flag == 1:
          #set default (dummy) burial status for incomplete residues:
-         residue.SetStringProp("burial_status", 'X')
+         residue.SetGenericStringProperty("burial_status", 'X')
 
          #handle seleno-methionine appearing as amino acid 'X' in DSSP:
          if residue.name=="MSE" and amino_acid=='X':
            amino_acid='M'
 
-         residue.SetFloatProp("solvent_accessibility", 
+         residue.SetGenericFloatProperty("solvent_accessibility", 
                                          solvent_accessibility)
          if calculate_relative_sa:
            relative_sa=_CalcRelativeSA(amino_acid,solvent_accessibility)
-           residue.SetFloatProp("relative_solvent_accessibility", 
+           residue.SetGenericFloatProperty("relative_solvent_accessibility", 
                                            relative_sa)
            if relative_sa < 0.25:
-             residue.SetStringProp("burial_status", 'b')
+             residue.SetGenericStringProperty("burial_status", 'b')
            else:
-             residue.SetStringProp("burial_status", 'e')
+             residue.SetGenericStringProperty("burial_status", 'e')
       except Exception, e:
         print "ERROR:",e
         continue
