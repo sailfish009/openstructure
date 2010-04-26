@@ -39,20 +39,33 @@ Conopology::Conopology():
 {
   builder_map_["HEURISTIC"]=BuilderP(new HeuristicBuilder());
   builder_map_["DEFAULT"]=builder_map_["HEURISTIC"];
+
   ele_rad_map_["H"]  = 1.09;
+
   ele_rad_map_["C"]  = 1.75;
   ele_rad_map_["N"]  = 1.55;
   ele_rad_map_["O"]  = 1.52;
   ele_rad_map_["F"]  = 1.47;
+
   ele_rad_map_["Na"] = 2.27;
   ele_rad_map_["Mg"] = 1.73;
+  ele_rad_map_["Si"] = 2.10;
   ele_rad_map_["P"]  = 1.80;
   ele_rad_map_["S"]  = 1.80;
   ele_rad_map_["Cl"] = 1.75;
+
   ele_rad_map_["K"]  = 2.75;
   ele_rad_map_["Ca"] = 2.00;
+  ele_rad_map_["Mn"] = 2.00;
+  ele_rad_map_["Fe"] = 2.00;
+  ele_rad_map_["Co"] = 2.00;
+  ele_rad_map_["Ni"] = 1.63;
+  ele_rad_map_["Cu"] = 1.40;
+  ele_rad_map_["Zn"] = 1.39;
   ele_rad_map_["Br"] = 1.85;
+
   ele_rad_map_["I"]  = 1.98;
+
 
   // Element masses according to IUPAC standards
   // see http://www.chem.qmul.ac.uk/iupac/AtWt/
