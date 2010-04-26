@@ -137,22 +137,22 @@ def LoadDSSP(file_name, model, extract_burial_status_flag=0,
         # set property "burial status:
         if extract_burial_status_flag == 1:
          #set default (dummy) burial status for incomplete residues:
-         residue.SetGenericStringProperty("burial_status", 'X')
+         residue.SetStringProp("burial_status", 'X')
 
          #handle seleno-methionine appearing as amino acid 'X' in DSSP:
          if residue.name=="MSE" and amino_acid=='X':
            amino_acid='M'
 
-         residue.SetGenericFloatProperty("solvent_accessibility", 
+         residue.SetFloatProp("solvent_accessibility", 
                                          solvent_accessibility)
          if calculate_relative_sa:
            relative_sa=_CalcRelativeSA(amino_acid,solvent_accessibility)
-           residue.SetGenericFloatProperty("relative_solvent_accessibility", 
+           residue.SetFloatProp("relative_solvent_accessibility", 
                                            relative_sa)
            if relative_sa < 0.25:
-             residue.SetGenericStringProperty("burial_status", 'b')
+             residue.SetStringProp("burial_status", 'b')
            else:
-             residue.SetGenericStringProperty("burial_status", 'e')
+             residue.SetStringProp("burial_status", 'e')
       except Exception, e:
         print "ERROR:",e
         continue
