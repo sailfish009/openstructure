@@ -57,6 +57,7 @@ private:
   std::ofstream  outfile_;
   std::ostream&   outstream_;
   int mol_count_;
+  std::map<long, int> atom_indices_;
 };
  
 }}

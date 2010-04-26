@@ -90,10 +90,28 @@ void write_atom(std::ostream& ostr, const mol::AtomHandle& atom, int atomnum,
   }
 }
 
+void write_conect(std::ostream& ostr, int atom_index,
+                  std::list<int>& partner_indices)
+{
+  int counter=0;
+  partner_indices.sort();
+  for (std::list<int>::const_iterator i=partner_indices.begin();
+       i!=partner_indices.end(); ++i, counter++) {
+    if (counter>3) {
+      ostr << std::endl;
+      counter=0;
+    }
+    if (counter==0) ostr << "CONECT" << format("%5i") % atom_index;
+    ostr << format("%5i") % (*i);
+  }
+  ostr << std::endl;
+}
+
 class PDBWriterImpl : public mol::EntityVisitor {
 public:
-  PDBWriterImpl(std::ostream& ostream)
-    : ostr_(ostream), counter_(0), is_pqr_(false), last_chain_() {
+  PDBWriterImpl(std::ostream& ostream, std::map<long,int>& atom_indices)
+    : ostr_(ostream), counter_(0), is_pqr_(false), last_chain_(),
+      atom_indices_(atom_indices) {
   }
 private:
 public:
@@ -106,6 +124,9 @@ public:
       last_chain_=atom.GetResidue().GetChain();
     }    
     write_atom(ostr_, atom, counter_, is_pqr_);
+    if (atom.GetAtomProps().is_hetatm) {
+      atom_indices_[atom.GetHashCode()]=counter_;
+    }
     return true;
   }
   void SetIsPQR(bool t) {
@@ -116,8 +137,40 @@ private:
   int              counter_;
   bool             is_pqr_;
   mol::ChainHandle last_chain_;
+  std::map<long,int>& atom_indices_;
 };
 
+class PDBConectWriterImpl : public mol::EntityVisitor {
+public:
+  PDBConectWriterImpl(std::ostream& ostream, std::map<long,int>& atom_indices)
+    : ostr_(ostream), atom_indices_(atom_indices) {
+  }
+private:
+public:
+  virtual bool VisitAtom(const mol::AtomHandle& atom) {
+    if (atom.GetAtomProps().is_hetatm) {
+      bool has_partner=false;
+      int atom_index=atom_indices_[atom.GetHashCode()];
+      mol::AtomHandleList partners=atom.GetBondPartners();
+      std::list<int> partner_indices;
+      for (mol::AtomHandleList::const_iterator i=partners.begin();
+           i!=partners.end(); ++i) {
+        int pind=atom_indices_[i->GetHashCode()];
+        if (pind!=0) {
+          partner_indices.push_back(pind);
+          has_partner=true;
+        }
+      }
+      if (has_partner) {
+        write_conect(ostr_, atom_index, partner_indices);
+      }
+    }
+    return true;
+  }
+private:
+  std::ostream&       ostr_;
+  std::map<long,int>& atom_indices_;
+};
 
 }
 
@@ -130,7 +183,7 @@ PDBWriter::PDBWriter(const boost::filesystem::path& filename):
 {}
 
 PDBWriter::PDBWriter(const String& filename):
-  outfile_(filename.c_str()), outstream_(outfile_),  mol_count_(0)
+  outfile_(filename.c_str()), outstream_(outfile_), mol_count_(0)
 {}
 
 void PDBWriter::WriteModelLeader()
@@ -155,11 +208,13 @@ template <typename H>
 void PDBWriter::WriteModel(H ent)
 {
   this->WriteModelLeader();
-  PDBWriterImpl writer(outstream_);
+  PDBWriterImpl writer(outstream_,atom_indices_);
   if (PDB::Flags() & PDB::PQR_FORMAT) {
     writer.SetIsPQR(true);
   }
   ent.Apply(writer);
+  PDBConectWriterImpl con_writer(outstream_,atom_indices_);
+  ent.Apply(con_writer);
   this->WriteModelTrailer();
 }
 
@@ -187,7 +242,7 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
       }
       last_chain=(*i).GetResidue().GetChain();
     }
-    write_atom(outstream_, *i, counter, PDB::Flags() & PDB::PQR_FORMAT);      
+    write_atom(outstream_, *i, counter, PDB::Flags() & PDB::PQR_FORMAT);
   }
   this->WriteModelTrailer();
 }
