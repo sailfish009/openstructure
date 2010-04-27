@@ -28,6 +28,7 @@ platform.hh
 string_ref.hh
 pod_vector.hh
 fixed_string.hh
+tri_matrix.hh
 )
 
 module(NAME base SOURCES ${OST_BASE_SOURCES} 
