@@ -16,18 +16,13 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-
-/*
-  Authors: Marco Biasini, Ansgar Philippsen
-*/
-
 #include "sline_renderer.hh"
 
 #include <ost/gfx/entity.hh>
 
 namespace ost { namespace gfx { namespace impl {
 
-SlineRenderer::SlineRenderer(BackboneTrace* trace): 
+SlineRenderer::SlineRenderer(BackboneTrace& trace): 
   TraceRendererBase(trace, 3), options_(new SlineRenderOptions()) 
 {
   this->SetName("Fast Spline");
@@ -45,7 +40,7 @@ void SlineRenderer::PrepareRendering()
   }
 }
 
-void SlineRenderer::PrepareRendering(const BackboneTrace& trace_subset, 
+void SlineRenderer::PrepareRendering(TraceSubset& trace_subset, 
                                      IndexedVertexArray& va, bool is_sel)
 {
   const Color& sel_clr=this->GetSelectionColor();
@@ -61,24 +56,30 @@ void SlineRenderer::PrepareRendering(const BackboneTrace& trace_subset,
     va.SetLineWidth(options_->GetLineWidth());
     va.SetPointSize(options_->GetLineWidth());
     va.SetAALines(options_->GetAALines());
-    for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
+    for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
       // first build the spline
-      SplineEntryList spl;
-      const NodeEntryList& nl=trace_subset.GetList(node_list);
-      if(nl.empty()) continue;
-      for (unsigned int i=0; i<nl.size();++i) {
+      Spline spl;
+      const NodeListSubset& nl=trace_subset[node_list];
+      assert(nl.GetSize() && "node list subset with zero eles encountered!");
+      for (int i=0; i<nl.GetSize();++i) {
         const NodeEntry& entry=nl[i];
-        SplineEntry ee(entry.atom.GetPos(), entry.direction,
-                       entry.normal, entry.rad, 
-                       is_sel ? sel_clr : entry.color1, 
-                       is_sel ? sel_clr : entry.color2, 0);
+        SplineEntry& ee = spl.AddEntry(entry.atom.GetPos(), entry.direction,
+                                       entry.normal, entry.rad, 
+                                       is_sel ? sel_clr : entry.color1, 
+                                       is_sel ? sel_clr : entry.color2, 0);
         ee.v1 = entry.v1;
-        spl.push_back(ee);
       }
-      SplineEntryList sel = Spline::Generate(spl,spline_detail);      
-      SplineEntryList::const_iterator sit=sel.begin();
+      SplineEntryList sel = spl.Generate(spline_detail);      
+      SplineEntryList::const_iterator sit=sel.begin(), 
+                                     send=sel.end()-spline_detail+1;
+      if (nl.AtStart()>0) {
+        sit+=nl.AtStart()*spline_detail-spline_detail/2;
+      }
+      if (nl.AtEnd()>0) {
+        send-=nl.AtEnd()*spline_detail-spline_detail/2;
+      }
       VertexID p0=va.Add(sit->position, geom::Vec3(),sit->color1);
-      for (++sit; sit!=sel.end(); ++sit) {
+      for (++sit; sit<send; ++sit) {
         VertexID p1 = va.Add(sit->position, geom::Vec3(),sit->color1);
         va.AddLine(p0,p1);
         p0=p1;

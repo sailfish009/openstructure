@@ -199,12 +199,6 @@ public:
                float minv,float maxv,
                mol::Prop::Level hint=mol::Prop::UNSPECIFIED);
 
-  // temporary, should be incorporated with ColorBy
-  void DetailColorBy(const String& prop, 
-                     const Gradient& gradient,
-                     float minv,float maxv,
-                     mol::Prop::Level hint=mol::Prop::UNSPECIFIED);
-
   // convenience
   void ColorBy(const String& prop, 
                const Gradient& gradient,
@@ -263,9 +257,6 @@ public:
   void ApplyOptions(RenderMode::Type render_mode,
                           RenderOptionsPtr& render_options);
   bool HasSelection() const;
-
-  void UpdateView();
-  
 protected:
 
   virtual void CustomPreRenderGL(bool flag);

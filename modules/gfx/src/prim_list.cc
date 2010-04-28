@@ -31,9 +31,7 @@ PrimList::PrimList(const String& name):
   points_(),
   lines_(),
   radius_(0.5),
-  diameter_(0.5),
-  sphere_detail_(4),
-  arc_detail_(4)
+  diameter_(0.5)
 {}
 
 void PrimList::Clear()
@@ -97,6 +95,8 @@ void PrimList::CustomPreRenderGL(bool flag)
     } else {
       render_simple();
     }
+  } else {
+    RefreshVA(va_);
   }
 }
 
@@ -155,28 +155,12 @@ void PrimList::SetDiameter(float d)
 {
   diameter_=d;
   Scene::Instance().RequestRedraw();
-  FlagRebuild();
 }
 
 void PrimList::SetRadius(float r)
 {
   radius_=r;
   Scene::Instance().RequestRedraw();
-  FlagRebuild();
-}
-
-void PrimList::SetSphereDetail(unsigned int d)
-{
-  sphere_detail_=d;
-  Scene::Instance().RequestRedraw();
-  FlagRebuild();
-}
-
-void PrimList::SetArcDetail(unsigned int d)
-{
-  arc_detail_=d;
-  Scene::Instance().RequestRedraw();
-  FlagRebuild();
 }
 
 void PrimList::SetColor(const Color& c)
@@ -185,7 +169,6 @@ void PrimList::SetColor(const Color& c)
     it->color=c;
   }
   Scene::Instance().RequestRedraw();
-  FlagRebuild();
 }
 
 

@@ -24,8 +24,8 @@
 */
 
 
-#if defined(GetAtomProps)
-#undef GetAtomProps
+#if defined(GetProp)
+#undef GetProp
 #endif
 #include <vector>
 
@@ -160,8 +160,6 @@ public:
   void FlagPositionsDirty();
 
   void Debug(unsigned int flags);
-
-  IndexedVertexArray& VA() {return va_;}
 protected:
   virtual void SetName(const String& name);
 
@@ -180,13 +178,12 @@ protected:
   DirtyFlags            sel_state_;
   DirtyFlags            state_;
   unsigned int          debug_flags_;
-  float                 opacity_;
 };
 
 //Simplify color ops
 struct ByElementGetCol {
   Color ColorOfAtom(mol::AtomHandle& atom) const{
-    return GfxObj::Ele2Color(atom.GetElement());
+    return GfxObj::Ele2Color(atom.GetAtomProps().element);
   }
 };
 

@@ -87,41 +87,85 @@ void GfxView::AddBond(const BondHandle& b)
 }
 
 
+void SplineEntry::ToQuat()
+{
+  // assert orthonormal system
+  // TODO: this seems broken
+  geom::Vec3 dir = geom::Normalize(direction);
+  geom::Vec3 norm0 = geom::Normalize(normal);
+  geom::Vec3 norm2 = geom::Cross(dir,norm0);
+  geom::Vec3 norm1 = geom::Cross(norm2,dir);
+  geom::Mat3 rmat(dir[0],norm1[0],norm2[0],
+                  dir[1],norm1[1],norm2[1],
+                  dir[2],norm1[2],norm2[2]);
+  
+  geom::Quat quat(rmat);
+  quat_value[0]=quat.w;
+  quat_value[1]=quat.x;
+  quat_value[2]=quat.y;
+  quat_value[3]=quat.z;
+}
+
+void SplineEntry::FromQuat() 
+{
+  /* 
+     assert orthornormal system since direction was
+     probably adjusted for curvature
+  */
+  // TODO: this seems broken
+  geom::Quat quat(quat_value[0],quat_value[1],quat_value[2],quat_value[3]);
+  geom::Mat3 rmat = quat.ToRotationMatrix();
+  geom::Vec3 norm0 = geom::Normalize(geom::Vec3(rmat(0,1),rmat(1,1),rmat(2,1)));
+  geom::Vec3 dir = geom::Normalize(direction);
+  geom::Vec3 norm2 = geom::Normalize(geom::Cross(dir,norm0));
+  normal = geom::Normalize(geom::Cross(norm2,dir));
+}
+
 ////////////////////////////
 
+
+Spline::Spline():
+  entry_list_()
+{}
+
+
+SplineEntry& Spline::AddEntry(const geom::Vec3& pos, const geom::Vec3& dir, const geom::Vec3& normal, float rad, const Color& c1, const Color& c2, int type)
+{
+  entry_list_.push_back(SplineEntry(pos,
+                                    geom::Normalize(dir),
+                                    geom::Normalize(normal),
+                                    rad,c1,c2,type));
+  entry_list_.back().ToQuat();
+  return entry_list_.back();
+}
 
 static int bsplineGen(float *x,float *y, int n, float yp1, float ypn, float *y2);
 static int bsplineGet(float *xa, float *ya, float *y2a, int n, float x, float *y);
 
 #define SPLINE_ENTRY_INTERPOLATE(COMPONENT)             \
     for(int c=0;c<size;++c) {                           \
-      yc[c]=entry_list.at(c). COMPONENT ;		\
+      yc[c]=entry_list_[c]. COMPONENT ;                 \
     }                                                   \
     bsplineGen(xp,yp,size,1.0e30,1.0e30,y2p);           \
-    for(int c=0;c<size-1;++c) {                         \
+    for(int c=0;c<size;++c) {                           \
       for(int d=0;d<nsub;++d) {                         \
         float u=static_cast<float>(c*nsub+d)*i_nsub;    \
         float v=0.0;                                    \
         bsplineGet(xp,yp,y2p,size,u,&v);                \
-        sublist.at(c*nsub+d). COMPONENT = v;		\
+        sublist[c*nsub+d]. COMPONENT = v;               \
       }                                                 \
-      float u=static_cast<float>((size-1)*nsub)*i_nsub;	\
-      float v=0.0;                                      \
-      bsplineGet(xp,yp,y2p,size,u,&v);                  \
-      sublist.at((size-1)*nsub). COMPONENT = v;		\
     }                                                   
 
-SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
+SplineEntryList Spline::Generate(int nsub) const
 {
   if(nsub<=0) {
-    return entry_list;
+    return entry_list_;
   }
-  int size=entry_list.size();
-  if (size<2) {
-    return entry_list;
+  int size=entry_list_.size();
+  if (size==0) {
+    return entry_list_;
   }
-  // we want to go to the last point, but not beyond
-  int ipsize=(size-1)*nsub+1;
+  int ipsize=(size)*nsub;
   float i_nsub=1.0/static_cast<float>(nsub);
   std::vector<float> xc(size);
   std::vector<float> yc(size);
@@ -140,8 +184,9 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
   // create sublist with enough entries
   SplineEntryList sublist(ipsize);
 
-  // interpolate color
+  // interpolate internal quaternion and color
   for(int k=0;k<4;++k) {
+    SPLINE_ENTRY_INTERPOLATE(quat_value[k]);
     SPLINE_ENTRY_INTERPOLATE(color1[k]);
     SPLINE_ENTRY_INTERPOLATE(color2[k]);
   }
@@ -158,14 +203,14 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
   // assign direction and normal
   // entity trace has the same algorithm
 
-  geom::Vec3 p0 = sublist.at(0).position;
-  geom::Vec3 p1 = sublist.at(1).position;
-  geom::Vec3 p2 = ipsize>2 ? sublist.at(2).position : p1+(p1-p0);
+  geom::Vec3 p0 = sublist[0].position;
+  geom::Vec3 p1 = sublist[1].position;
+  geom::Vec3 p2 = sublist[2].position;
   // normal of 0 is set at the end
-  sublist.at(0).direction=geom::Normalize(p1-p0);
-  sublist.at(0).v1=geom::Normalize(sublist.at(0).v1);
-  geom::Vec3 orth = geom::Cross(sublist.at(0).direction,sublist.at(0).v1);
-  sublist.at(0).v0 = geom::Normalize(geom::Cross(orth,sublist.at(0).direction));
+  sublist[0].direction=geom::Normalize(p1-p0);
+  sublist[0].v1=geom::Normalize(sublist[0].v1);
+  geom::Vec3 orth = geom::Cross(sublist[0].direction,sublist[0].v1);
+  sublist[0].v0 = geom::Normalize(geom::Cross(orth,sublist[0].direction));
 
   // reference normal to avoid twisting
   //geom::Vec3 nref=geom::Normalize(geom::Cross(p0-p1,p2-p1));
@@ -175,83 +220,88 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
     geom::Vec3 p12 = p2-p1;
     // correction for perfectly aligned consecutive directions
     if(p10==-p12 || p10==p12) p12+=geom::Vec3(0.001,0.001,0.001);
-    sublist.at(i).normal=geom::Normalize(geom::Cross(p10,p12));
+    sublist[i].normal=geom::Normalize(geom::Cross(p10,p12));
     // paranoid error checking due to occasional roundoff troubles
     float cosw = geom::Dot(geom::Normalize(p10),geom::Normalize(p12));
     cosw = std::min(float(1.0),std::max(float(-1.0),cosw));
     float omega=0.5*acos(cosw);
-    orth=geom::AxisRotation(sublist.at(i).normal, -omega)*p12;
-    sublist.at(i).direction=geom::Normalize(geom::Cross(sublist.at(i).normal,orth));
+    orth=geom::AxisRotation(sublist[i].normal, -omega)*p12;
+    sublist[i].direction=geom::Normalize(geom::Cross(sublist[i].normal,orth));
     // twist avoidance
-    sublist.at(i).v1=geom::Normalize(sublist.at(i).v1);
-    orth = geom::Cross(sublist.at(i).direction,sublist.at(i).v1);
-    sublist.at(i).v0 = geom::Normalize(geom::Cross(orth,sublist.at(i).direction));
-    if(geom::Dot(sublist.at(i-1).v0,sublist.at(i).v0)<0.0) {
-      sublist.at(i).v0=-sublist.at(i).v0;
-      //sublist.at(i).nflip = !sublist.at(i).nflip;
+    sublist[i].v1=geom::Normalize(sublist[i].v1);
+    orth = geom::Cross(sublist[i].direction,sublist[i].v1);
+    sublist[i].v0 = geom::Normalize(geom::Cross(orth,sublist[i].direction));
+    if(geom::Dot(sublist[i-1].v0,sublist[i].v0)<0.0) {
+      sublist[i].v0=-sublist[i].v0;
+      //sublist[i].nflip = !sublist[i].nflip;
     }
 
     // avoid twisting
-    //if(geom::Dot(sublist.at(i).normal,nref)<0.0) sublist.at(i).normal=-sublist.at(i).normal;
-    //nref=sublist.at(i).normal;
+    //if(geom::Dot(sublist[i].normal,nref)<0.0) sublist[i].normal=-sublist[i].normal;
+    //nref=sublist[i].normal;
     // skip over shift for the last iteration
     if(i==sublist.size()-2) break;
     // shift to i+1 for next iteration
-    p0 = sublist.at(i).position;
-    p1 = sublist.at(i+1).position;
-    p2 = sublist.at(i+2).position;
+    p0 = sublist[i].position;
+    p1 = sublist[i+1].position;
+    p2 = sublist[i+2].position;
   }
   // assign remaining ones
-  sublist.at(0).normal=sublist.at(1).normal;
-  sublist.at(i+1).direction=geom::Normalize(p2-p1);
-  sublist.at(i+1).normal=sublist.at(i).normal;
-  sublist.at(i+1).v1=geom::Normalize(sublist.at(i+1).v1);
-  orth = geom::Cross(sublist.at(i+1).direction,sublist.at(i+1).v1);
-  sublist.at(i+1).v0 = geom::Normalize(geom::Cross(orth,sublist.at(i+1).direction));
+  sublist[0].normal=sublist[1].normal;
+  sublist[i+1].direction=geom::Normalize(p2-p1);
+  sublist[i+1].normal=sublist[i].normal;
+  sublist[i+1].v1=geom::Normalize(sublist[i+1].v1);
+  orth = geom::Cross(sublist[i+1].direction,sublist[i+1].v1);
+  sublist[i+1].v0 = geom::Normalize(geom::Cross(orth,sublist[i+1].direction));
 
   // hack
   // TODO: merge this with above routine
   for(unsigned int i=0;i<sublist.size()-1;++i) {
-    sublist.at(i).normal = sublist.at(i).v0;
+    sublist[i].normal = sublist[i].v0;
   }
 
   // finally the non-interpolated type
   // with some tweaks for proper strand rendering
-  for(int c=0;c<size-1;++c) {
-    int type1=entry_list[c].type;
-    int type2=entry_list[std::min(c+1,size-1)].type;
+  for(int c=0;c<size;++c) {
     for(int d=0;d<nsub;++d) {
-      sublist.at(c*nsub+d).type=entry_list[c].type;
-      sublist.at(c*nsub+d).type1=type1;
-      sublist.at(c*nsub+d).type2=type2;
-      sublist.at(c*nsub+d).frac=float(d)/float(nsub);
+      sublist[c*nsub+d].type=entry_list_[c].type;
+      int type1=entry_list_[c].type;
+      int type2=entry_list_[std::min(c+1,size-1)].type;
+      //int type0=entry_list_[std::max(0,c-1)].type;
+      if(type1==2 && type2==3) {
+        type1=2;
+        type2=2;
+      } else if(type1==3) {
+        type1=4;
+        // uncommenting this causes the strand arrows
+        // to blend into a tip instead of the n+1
+        // profile - gives visual artefacts
+        //type2=3;
+      }
+      sublist[c*nsub+d].type1=type1;
+      sublist[c*nsub+d].type2=type2;
+      sublist[c*nsub+d].frac=float(d)/float(nsub);
     }
   }                                                   
-  int type1=entry_list.back().type;
-  int type2=type1;
-  sublist.back().type=entry_list.back().type;
-  sublist.back().type1=type1;
-  sublist.back().type2=type2;
-  sublist.back().frac=0.0;
 
   // the nflip flags for helices for correct inside/outside assignment
   int c=0;
   bool nflip=false;
-  while(c<nsub*(size-1)) {
+  while(c<nsub*size-1) {
     int cstart=c;
-    if(sublist.at(c).type==1 && sublist.at(c+1).type==1) {
-      geom::Vec3 n = geom::Normalize(geom::Cross(sublist.at(c).normal,
-                                                 sublist.at(c).direction));
-      geom::Vec3 p0 = sublist.at(c).position+n;
-      geom::Vec3 q0 = sublist.at(c).position-n;
+    if(sublist[c].type==1 && sublist[c+1].type==1) {
+      geom::Vec3 n = geom::Normalize(geom::Cross(sublist[c].normal,
+                                                 sublist[c].direction));
+      geom::Vec3 p0 = sublist[c].position+n;
+      geom::Vec3 q0 = sublist[c].position-n;
       float psum=0.0;
       float qsum=0.0;
       ++c;
-      while(sublist.at(c).type==1 && c<nsub*size) {
-        n = geom::Normalize(geom::Cross(sublist.at(c).normal,
-                                        sublist.at(c).direction));
-        geom::Vec3 p1 = sublist.at(c).position+n;
-        geom::Vec3 q1 = sublist.at(c).position-n;
+      while(sublist[c].type==1 && c<nsub*size) {
+        n = geom::Normalize(geom::Cross(sublist[c].normal,
+                                        sublist[c].direction));
+        geom::Vec3 p1 = sublist[c].position+n;
+        geom::Vec3 q1 = sublist[c].position-n;
         psum+=Length(p1-p0);
         qsum+=Length(q1-q0);
         p0=p1;
@@ -261,7 +311,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
       
       nflip = qsum>psum;
       for(int cc=cstart;cc<c;++cc) {
-        sublist.at(c).nflip=nflip;
+        sublist[cc].nflip=nflip;
       }
     } else {
       ++c;

@@ -105,9 +105,8 @@ Entity::Entity(const String& name,
 
 impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
 {
-  RendererMap::iterator rit = renderer_.find(rm);
-  if(rit!=renderer_.end()) {
-    return rit->second;
+  if (renderer_.find(rm)!=renderer_.end()) {
+    return renderer_.find(rm)->second;
   }
   impl::EntityRenderer* r=NULL;
   switch (rm) {
@@ -118,22 +117,22 @@ impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
       r=new impl::CustomRenderer();
       break;
     case RenderMode::SLINE:
-      r=new impl::SlineRenderer(&trace_);
+      r=new impl::SlineRenderer(trace_);
       break;
     case RenderMode::LINE_TRACE:
-      r=new impl::LineTraceRenderer(&trace_);
+      r=new impl::LineTraceRenderer(trace_);
       break;
     case RenderMode::TRACE:
-      r=new impl::TraceRenderer(&trace_);
+      r=new impl::TraceRenderer(trace_);
       break;
     case RenderMode::HSC:
-      r=new impl::CartoonRenderer(&trace_,false);
+      r=new impl::CartoonRenderer(trace_);
       break;
     case RenderMode::CPK:
       r=new impl::CPKRenderer();
       break;
     case RenderMode::TUBE:
-      r=new impl::CartoonRenderer(&trace_, true);
+      r=new impl::CartoonRenderer(trace_, true);
       break;
     default:
       return 0;
@@ -145,14 +144,11 @@ impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
 void Entity::init(RenderMode::Type rm)
 {
   // TODO replace with def mat for this gfx obj type
-  SetMatAmb(Color(0,0,0));
-  SetMatDiff(Color(1,1,1));
-  SetMatSpec(Color(0.7,0.7,0.7));
-  SetMatShin(96);
+  SetMat(0.0,1.0,0.8,96.0);
 
   update_view_=true;
   render_mode_=rm;
-  trace_.ResetView(this->GetView());
+  trace_.SetView(this->GetView());
   sel_=this->GetView().CreateEmptyView();  
   impl::EntityRenderer* r=this->GetOrCreateRenderer(rm);
   if(!r) return;
@@ -201,18 +197,6 @@ void Entity::SetBlurFactors(float bf1,float bf2)
 void Entity::Rebuild()
 {
   geom::Vec3 delta=GetTF().GetTrans()-GetTF().GetCenter();
-
-  if(update_view_) {
-    EntityView nv=this->GetView();
-    for (RendererMap::iterator i=renderer_.begin(), 
-           e=renderer_.end(); i!=e; ++i) {
-      i->second->ClearViews();
-      i->second->AddView(nv);
-      i->second->UpdateViews();
-      i->second->PrepareRendering();
-    }
-  }
-
   this->ReapplyColorOps();
   FlagRebuild();
   geom::Vec3 center=this->GetCenter();
@@ -341,15 +325,16 @@ void Entity::CustomRenderGL(RenderPass pass)
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
     if(r->IsEnabled()){
-      if(pass==STANDARD_RENDER_PASS || pass==OPAQUE_RENDER_PASS) {
-        r->Render(pass);
-        if(pass==STANDARD_RENDER_PASS && outline_flag_) {
-          r->VA().SetOutlineMode(outline_mode_);
+      switch(pass) {
+        case STANDARD_RENDER_PASS:
+        case OPAQUE_RENDER_PASS:
           r->Render(pass);
-          r->VA().SetOutlineMode(0);
-        }
-      } else if(pass==GLOW_RENDER_PASS && r->HasSelection()) {
-        r->Render(pass);
+          break;
+        case GLOW_RENDER_PASS:
+          if (r->HasSelection()) {
+            r->Render(pass);
+          }
+          break;
       }
     }
   }
@@ -780,16 +765,6 @@ void Entity::ColorBy(const String& prop,
   this->Apply(glop);
 }
 
-void Entity::DetailColorBy(const String& prop,
-                           const Gradient& gradient,
-                           float minv,float maxv,
-                           mol::Prop::Level level)
-{
-  GradientLevelColorOp glop = GradientLevelColorOp("",prop, gradient,minv,maxv,level);
-  glop.SetMask(DETAIL_COLOR);
-  this->Apply(glop);
-}
-
 void Entity::ColorBy(const String& prop,
                      const Color& c1, const Color& c2,
                      float minv, float maxv,
@@ -971,13 +946,6 @@ void Entity::CleanColorOps()
 void Entity::ReapplyColorOps()
 {
   GfxObj::ReapplyColorOps();
-}
-
-void Entity::UpdateView() 
-{
-  update_view_=true; 
-  Rebuild();
-  UpdatePositions();
 }
 
 }} // ns

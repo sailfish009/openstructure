@@ -26,9 +26,6 @@ public:
   virtual void StatusMessage(const String& m) {
     call_method<void, const String>(self, "StatusMessage", m);
   }
-  virtual bool HasMultisample() const {
-    return call_method<bool>(self,"HasMultisample");
-  }
 
 private:
   PyObject* self;

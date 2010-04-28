@@ -33,67 +33,58 @@
 #include <ost/config.hh>
 #include <ost/gfx/module_config.hh>
 
+#include <ost/gfx/color_ops/color_op.hh>
+
+#include <ost/geom/geom.hh>
+#include <ost/mol/entity_handle.hh>
+#include <ost/mol/entity_view.hh>
 #include <ost/mol/transform.hh>
 
+
+#if OST_IMG_ENABLED
+#  include <ost/img/map.hh>
+#endif
+
 #include "gfx_object_fw.hh"
-#include "gfx_object_base.hh"
+#include "gfx_node.hh"
 #include "gfx_prim.hh"
 #include "vertex_array.hh"
 #include "input.hh"
+#include "render_mode.hh"
+#include "material.hh"
+#include "gradient.hh"
+
 
 namespace ost { namespace gfx {
 
 class Scene; // fw decl
 
-/// \brief main class for all graphic objects
-class DLLEXPORT_OST_GFX GfxObj: public GfxObjBase
+/// \brief Base class for all graphical rendering objects
+class DLLEXPORT_OST_GFX GfxObj: public GfxNode
 {
+
 public:
   GfxObj(const String& name);
+  virtual ~GfxObj();
 
-  // gfx node interface
   virtual GfxNodeP Copy() const;
-  virtual void DeepSwap(GfxObj& go);
-  virtual void RenderGL(RenderPass pass);
-  virtual void RenderPov(PovState& pov);
+
   virtual void Apply(GfxNodeVisitor& v,GfxNodeVisitor::Stack st);
+
   virtual int GetType() const;
-  //
 
-  // gfx obj base interface
-  virtual void SetMatAmb(const Color& c);
-  virtual void SetMatDiff(const Color& c);
-  virtual void SetMatSpec(const Color& c);
-  virtual void SetMatShin(float s);
-  virtual void SetMatEmm(const Color& c);
-  virtual void ContextSwitch();
-  virtual void SetRenderMode(RenderMode::Type m);
-  virtual RenderMode::Type GetRenderMode() const;
+  virtual void RenderGL(RenderPass pass);
+
+  virtual void RenderPov(PovState& pov);
+
+  void Clear();
+  
+  /// \brief get transform
+  const mol::Transform& GetTF() const;
+  /// \brief set transform
+  void SetTF(const mol::Transform& tf);
+  
   virtual geom::Vec3 GetCenter() const;
-  virtual void SetLineWidth(float w);
-  virtual void SetPolyMode(unsigned int m);
-  virtual void AALines(bool f);
-  virtual void SetLineHalo(float f);
-  virtual void Outline(bool f);
-  virtual void SetOutlineMode(int m);
-  virtual void SetOutlineExpandFactor(float f);
-  virtual void SetOutlineExpandColor(const Color& c);
-  virtual void AmbientOcclusion(bool f);
-  virtual void SetAmbientLocalWeight(float w);
-  virtual void SetAmbientOcclusionWeight(float w);
-  virtual void SetOpacity(float f);
-  virtual void ColorBy(const mol::EntityView& ev, 
-                       const String& prop,
-                       const Gradient& g, float minv, float maxv);
-#if OST_IMG_ENABLED
-  virtual void ColorBy(const img::MapHandle& mh,
-                       const String& prop,
-                       const Gradient& g,float minv, float maxv);
-#endif
-
-  // end of gfx obj base interface
-
-  // new gfx obj virtual interface starts here
 
   /// \brief returns the left-bottom-front and the right-top-back corner
   /// that encompasses all graphical elements in this object
@@ -107,10 +98,8 @@ public:
   virtual void ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
                              const mol::Transform& tf) const;
 
-  // implemented in derived classes for the actual GL rendering
   virtual void CustomRenderGL(RenderPass pass);
 
-  // implemented in derived classes for the actual POVray export
   virtual void CustomRenderPov(PovState& pov);
 
   // handle pick (select) event
@@ -127,20 +116,43 @@ public:
 
   // input event entry point
   virtual void OnInput(const InputEvent& e);
-
-  // informs derived class that render mode has changes
+  
+  virtual void DeepSwap(GfxObj& go);
+  
   virtual void OnRenderModeChange();
   virtual void OnGLCleanup();
-  //
 
-  /// \brief removes all graphical elements
-  void Clear();
+  /// \brief change render mode
+  virtual void SetRenderMode(RenderMode::Type m);
+  /// \brief current render mode
+  RenderMode::Type GetRenderMode() const;
+
+  /// \brief set line width
+  void SetLineWidth(float w);
   
-  /// \brief get transform
-  const mol::Transform& GetTF() const;
-  /// \brief set transform
-  void SetTF(const mol::Transform& tf);
-  
+  /// \brief get line width 
+  float GetLineWidth() const;
+
+  void SetSphereDetail(unsigned int d);
+  unsigned int GetSphereDetail() const;
+
+  // subdivions per 90deg
+  void SetArcDetail(unsigned int d);
+  unsigned int GetArcDetail() const;
+
+  void SetSplineDetail(unsigned int d);
+  unsigned int GetSplineDetail() const;
+
+  void SetPolyMode(unsigned int m);
+  unsigned int GetPolyMode() const;
+
+  // sophisticated line anti-aliasing, requires shader
+  void SetAALines(bool f);
+  bool GetAALines() const;
+
+  void SetLineHalo(float f);
+  float GetLineHalo() const;
+
   // add a label at the given position
   void AddLabel(const String& s, const geom::Vec3& pos, const Color& col, float psize);
   // convenience method
@@ -149,16 +161,29 @@ public:
   void AddLabel(const String& s, const geom::Vec3& pos, float psize);
   // convenience method
   void AddLabel(const String& s, const geom::Vec3& pos);
+
   // remove all labels
   void ClearLabels();
 
+  void SetMatAmb(const Color& c);
+  void SetMatAmb(float c);
+  void SetMatDiff(const Color& c);
+  void SetMatDiff(float c);
+  void SetMatSpec(const Color& c);
+  void SetMatSpec(float c);
+  void SetMatShin(float s);
+  void SetMatEmm(const Color& c);
+  void SetMatEmm(float c);
+  void SetMat(const Color& amb, const Color& diff, const Color& spec, float shin);
+  void SetMat(float amb, float diff, float spec, float shin);
+
+  void SetOpacity(float o);
+  float GetOpacity() const;
+
+  static Color Ele2Color(const String& ele);
+
   void FlagRebuild();
   void FlagRefresh();
-
-  bool GetAALines() const {return aalines_flag_;}
-  float GetLineWidth() const {return line_width_;}
-  float GetLineHalo() const {return line_halo_;}
-  float GetOpacity() const {return opacity_;}
 
   void SetNormalSmoothFactor(float smoothf);
   float GetNormalSmoothFactor() const;
@@ -166,21 +191,82 @@ public:
   Material GetMaterial() const;
   void SetMaterial(const Material& m);
 
+  void SetOutlineMode(int m);
+  void SetOutlineExpandFactor(float f);
+  void SetOutlineExpandColor(const Color& c);
+
   // experimental, don't use
   void SmoothVertices(float smoothf);
+  // experimental, don't use
+  void AmbientOcclusion(bool f);
  
   void GLCleanup();
 
-  // this really should not be here
-  static Color Ele2Color(const String& ele);
+  /// \brief color each component based on the gradient-mapped property of 
+  ///    the given entity
+  virtual void ColorBy(const mol::EntityView& ev, 
+                       const String& prop,
+                       const Gradient& g, float minv, float maxv);
+    
+  /// \brief convenience method
+  void ColorBy(const mol::EntityView& ev, 
+               const String& prop,
+               const Color& c1, const Color& c2, float minv, float maxv);
 
-  void Debug(unsigned int flags);
+  /// \brief convenience method
+  void ColorBy(const mol::EntityHandle& eh, 
+               const String& prop,
+               const Gradient& g, float minv, float maxv);
+  /// \brief convenience method
+  void ColorBy(const mol::EntityHandle& eh, 
+               const String& prop,
+               const Color& c1, const Color& c2, float minv, float maxv);
+  // convenience method
+  void ColorBy(const mol::EntityView& ev, 
+               const String& prop,
+               const Gradient& g);
+  // convenience method
+  void ColorBy(const mol::EntityView& ev, 
+               const String& prop,
+               const Color& c1, const Color& c2);
+  // convenience method
+  void ColorBy(const mol::EntityHandle& ev, 
+               const String& prop,
+               const Gradient& g);
+  // convenience method
+  void ColorBy(const mol::EntityHandle& ev, 
+               const String& prop,
+               const Color& c1, const Color& c2);
+#if OST_IMG_ENABLED
+  // convenience method
+  void ColorBy(const img::MapHandle& mh,
+               const String& prop,
+               const Gradient& g);
+  // convenience method
+  void ColorBy(const img::MapHandle& mh,
+               const String& prop,
+               const Color& c1, const Color& c2);
+  // dito for maps
+  virtual void ColorBy(const img::MapHandle& mh,
+                       const String& prop,
+                       const Gradient& g,float minv, float maxv);
+  // convenience method
+  void ColorBy(const img::MapHandle& mh,
+               const String& prop,
+               const Color& c1, const Color& c2, float minv, float maxv);  
+#endif
+
+  void Debug(unsigned int flags) {debug_flags_=flags; RefreshVA();}
 
  protected:
   
   void PreRenderGL(bool flag);
   virtual void CustomPreRenderGL(bool flag);
 
+  void RefreshVA(IndexedVertexArray& va);
+
+  virtual void RefreshVA() {RefreshVA(va_);}
+  
  private:
   GfxObj(const GfxObj& o);
   GfxObj& operator=(const GfxObj&);
@@ -189,16 +275,19 @@ public:
   void AppendColorOp(gfx::ColorOp* op);
   void CleanColorOps();
   void ReapplyColorOps();
-  void render_labels() const;
 
   IndexedVertexArray va_;
   RenderMode::Type render_mode_;
   unsigned int debug_flags_;
  
+ private: 
   mol::Transform transform_;
   bool rebuild_;
   bool refresh_;
   float line_width_;
+  unsigned int sphere_detail_;
+  unsigned int arc_detail_;
+  unsigned int spline_detail_;
   unsigned int poly_mode_;
   bool aalines_flag_;
   float line_halo_;
@@ -209,12 +298,12 @@ public:
 
   float opacity_;
   float smoothf_;
-  bool outline_flag_;
-  int outline_mode_;
+  int omode_;
 
   boost::ptr_vector<gfx::ColorOp> c_ops_;
 
   TextPrimList labels_;
+  void render_labels() const;
 
   bool use_occlusion_;
 };

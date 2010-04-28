@@ -28,7 +28,7 @@ namespace gfx {
 
 CPKRenderOptions::CPKRenderOptions(): sphere_detail_(4) {
 #if OST_SHADER_SUPPORT_ENABLED
-  cpk_mode_=0;
+  cpk_mode_=1;
 #else
   cpk_mode_=0;
 #endif

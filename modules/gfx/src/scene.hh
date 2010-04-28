@@ -46,7 +46,6 @@
 namespace ost { namespace gfx {
 
 class InputEvent;
-class OffscreenBuffer;
 
 typedef std::vector<SceneObserver*>  SceneObserverList;
 
@@ -93,14 +92,8 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief turn fog on or off
   void SetFog(bool f);
 
-  /// \brief check fog status
-  bool GetFog() const;
-
   /// \brief set the fog color
   void SetFogColor(const Color& c);
-
-  /// \brief get the fog color
-  Color GetFogColor() const;
 
   /// \brief turn shadow on and off
   void SetShadow(bool f);
@@ -191,15 +184,13 @@ class DLLEXPORT_OST_GFX Scene {
   /// \name Export
   //@}
   /// \brief export scene into a bitmap, rendering into offscreen of given size
-  /// if a main offscreen buffer is active (\sa StartOffscreenMode), then the
-  /// dimensions here are ignored
   void Export(const String& fname, unsigned int w,
               unsigned int h, bool transparent=true);
 
   /// \brief export snapshot of current scene
   void Export(const String& fname, bool transparent=true);
 
-  /// \brief export scene into povray files named fname.pov and fname.inc
+  /// \brief export scene into povray files names fname.pov and fname.inc
   void ExportPov(const std::string& fname, const std::string& wdir=".");
   //@}
   /// \brief entry point for gui events (internal use)
@@ -233,9 +224,6 @@ class DLLEXPORT_OST_GFX Scene {
 
   /// \brief set background color
   void SetBackground(const Color& c);
-
-  /// \brief get background color
-  Color GetBackground() const;
 
   /// \brief center rotation on the given point
   void SetCenter(const geom::Vec3& cen);
@@ -323,27 +311,15 @@ class DLLEXPORT_OST_GFX Scene {
   
   bool InOffscreenMode() const;
 
+  /// \brief internal use
+  static void SetOffscreenMode();
+
   /// \brief switch into test mode (internal use)
   void SetTestMode(bool t);
 
   float ElapsedTime() const;
 
   Viewport GetViewport() const;
-
-  /*!
-    This method has two different tasks. 
-
-    During interactive rendering, it facilitates export 
-    into an offscreen buffer with Scene::Export(file,width,height)
-    by avoiding repeated initializations of the GL state, e.g.
-    during animation rendering.
-
-    During batch mode, this is the only way to get meaningful
-    functionality with the gfx module
-  */
-  void StartOffscreenMode(unsigned int w, unsigned int h);
-  /// \brief stops offline rendering in interactive mode
-  void StopOffscreenMode();
   
   // temporary interface
   void ActivateShader(const String& name);
@@ -406,9 +382,7 @@ private:
   GLuint texture_id_;
   bool auto_autoslab_;
 
-  bool offscreen_flag_; // a simple indicator whether in offscreen mode or not
-  OffscreenBuffer* main_offscreen_buffer_; // not null if a main offscreen buffer is present
-  uint old_vp_[2]; // used by the offline rendering code
+  bool offscreen_flag_;
 
   uint selection_mode_;
 

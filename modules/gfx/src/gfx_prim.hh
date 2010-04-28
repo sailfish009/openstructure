@@ -48,19 +48,13 @@ typedef std::vector<SpherePrim> SpherePrimList;
 
 struct CylinderPrim {
   CylinderPrim():
-    start(),end(),radius(1.0),color1(),color2(),length(1.0),rotmat(),rotmat_t()
+    start(),end(),radius(1.0),color(),length(1.0),rotmat(),rotmat_t()
   {
     calc_rotmat();
   }
 
   CylinderPrim(const geom::Vec3& st, const geom::Vec3& en, float rad, const Color& col):
-    start(st),end(en),radius(rad),color1(col),color2(col),length(geom::Length(end-start)),rotmat(),rotmat_t() 
-  {
-    calc_rotmat();
-  }
-
-  CylinderPrim(const geom::Vec3& st, const geom::Vec3& en, float rad, const Color& col1, const Color& col2):
-    start(st),end(en),radius(rad),color1(col1),color2(col2),length(geom::Length(end-start)),rotmat(),rotmat_t() 
+    start(st),end(en),radius(rad),color(col),length(geom::Length(end-start)),rotmat(),rotmat_t() 
   {
     calc_rotmat();
   }
@@ -69,7 +63,7 @@ struct CylinderPrim {
 
   geom::Vec3 start,end;
   float radius;
-  Color color1, color2;
+  Color color;
   float length;
   geom::Mat3 rotmat;
   geom::Mat3 rotmat_t;

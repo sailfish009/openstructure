@@ -115,14 +115,7 @@ struct DLLEXPORT_OST_GFX SplineEntry {
     color1(1.0,1.0,1.0,1.0),
     color2(1.0,1.0,1.0,1.0),
     rad(1.0),
-    type(0),
-    type1(0),
-    type2(0),
-    frac(0.0),
-    v0(1.0,0.0,0.0),
-    v1(0.0,1.0,0.0),
-    v2(0.0,0.0,1.0),
-    nflip(false)
+    type(0)
   {
   }
   SplineEntry(const geom::Vec3& p, 
@@ -130,17 +123,22 @@ struct DLLEXPORT_OST_GFX SplineEntry {
               const geom::Vec3& n,
               float r,
               const Color& c1, const Color& c2,
-              unsigned int t):
+              int t):
     position(p),direction(d),normal(n),color1(c1),color2(c2),rad(r),type(t),
     type1(t),type2(t),frac(0.0),v0(),v1(),v2(),nflip(false)
   {
   }
 
+  void ToQuat();
+
+  void FromQuat();
+
   geom::Vec3 position,direction,normal;
   Color color1, color2;
+  float quat_value[4];
   float rad;
-  unsigned int type;
-  unsigned int type1, type2;
+  int type;
+  int type1, type2;
   float frac;
   geom::Vec3 v0,v1,v2; // helper vectors
   bool nflip;
@@ -151,7 +149,20 @@ typedef std::vector<SplineEntryList> SplineEntryListList;
 
 class DLLEXPORT_OST_GFX Spline {
 public:
-  static SplineEntryList Generate(const SplineEntryList& entry_list,int nsub);
+
+public:
+  // ctor
+  Spline();
+
+  // add entry at a given position, with direction and normal vectors
+  SplineEntry& AddEntry(const geom::Vec3& pos, const geom::Vec3& dir, 
+                        const geom::Vec3& normal, float r, const Color& col1, 
+                        const Color& col2, int type);
+
+  SplineEntryList Generate(int nsub) const;
+
+private:
+  SplineEntryList entry_list_;
 };
 
 }}} // ns

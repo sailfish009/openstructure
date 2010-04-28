@@ -92,16 +92,6 @@ void color_by_08(Entity* e,
   e->ColorBy(prop,c1,c2);
 }
 
-// temporary, see comment in gfx/entity.hh
-void detail_color_by_02(Entity* e,
-                        const String& prop, 
-                        const Gradient& gradient,
-                        float minv,float maxv)
-{
-  e->DetailColorBy(prop,gradient,minv,maxv);
-}
-
-
 void radius_by_01(Entity* e,
                   const String& prop, 
                   float rmin,float rmax,
@@ -255,7 +245,6 @@ void export_Entity()
     .add_property("selection", &Entity::GetSelection, 
                   &Entity::SetSelection)
     .def("GetView", &Entity::GetView)
-    .def("UpdateView", &Entity::UpdateView)
     .def("GetRenderModeName", &Entity::GetRenderModeName)
     .def("GetNotEmptyRenderModes", &Entity::GetNotEmptyRenderModes)
     .def("SetRenderMode", set_rm1, arg("keep")=false)
@@ -272,7 +261,6 @@ void export_Entity()
     .def("ColorBy", color_by_06)
     .def("ColorBy", color_by_07)
     .def("ColorBy", color_by_08)
-    .def("DetailColorBy", detail_color_by_02)
     COLOR_BY_DEF()
     .def("RadiusBy", radius_by_01)
     .def("RadiusBy", radius_by_02)

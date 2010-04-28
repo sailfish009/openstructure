@@ -102,8 +102,6 @@ void export_RenderOptions()
     .def("GetHelixEcc", &CartoonRenderOptions::GetHelixEcc)
     .def("SetHelixProfileType", &CartoonRenderOptions::SetHelixProfileType)
     .def("GetHelixProfileType", &CartoonRenderOptions::GetHelixProfileType)
-    .def("SetHelixMode", &CartoonRenderOptions::SetHelixMode)
-    .def("GetHelixMode", &CartoonRenderOptions::GetHelixMode)
     .def("SetStrandWidth", &CartoonRenderOptions::SetStrandWidth)
     .def("GetStrandWidth", &CartoonRenderOptions::GetStrandWidth)
     .def("SetStrandThickness", &CartoonRenderOptions::SetStrandThickness)
@@ -112,8 +110,6 @@ void export_RenderOptions()
     .def("GetStrandEcc", &CartoonRenderOptions::GetStrandEcc)
     .def("SetStrandProfileType", &CartoonRenderOptions::SetStrandProfileType)
     .def("GetStrandProfileType", &CartoonRenderOptions::GetStrandProfileType)
-    .def("SetStrandMode", &CartoonRenderOptions::SetStrandMode)
-    .def("GetStrandMode", &CartoonRenderOptions::GetStrandMode)
   ;
   
   class_<TraceRenderOptions, boost::shared_ptr<TraceRenderOptions>, bases<RenderOptions>, boost::noncopyable>("TraceRenderOptions")
@@ -123,8 +119,6 @@ void export_RenderOptions()
     .def("GetNormalSmoothFactor", &TraceRenderOptions::GetNormalSmoothFactor)
     .def("SetTubeRadius", &TraceRenderOptions::SetTubeRadius)
     .def("GetTubeRadius", &TraceRenderOptions::GetTubeRadius)
-    .def("SetRadius", &TraceRenderOptions::SetTubeRadius)
-    .def("GetRadius", &TraceRenderOptions::GetTubeRadius)
   ;
 }
 

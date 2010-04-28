@@ -33,15 +33,11 @@ class DLLEXPORT_OST_GFX GLWinBase {
 public:
   virtual ~GLWinBase() {}
 
-  virtual void MakeActive() {}
-
   virtual void DoRefresh() = 0;
 
   virtual void StatusMessage(const String& m) = 0;
 
   virtual void SetStereo(bool s) = 0;
-
-  virtual bool HasMultisample() const = 0;
 };
 
 }}
