@@ -42,28 +42,45 @@ class CPKWidget(RenderModeWidget):
     
     self.sphere_spinbox_ = QtGui.QSpinBox()
     self.sphere_spinbox_.setRange(min_sphere_detail, max_sphere_detail)
-    
+
+    cpk_mode_label = QtGui.QLabel("Rendering Mode")
+    self.cpk_mode_ = QtGui.QComboBox()
+    self.cpk_mode_.addItem("Triangles")
+    self.cpk_mode_.addItem("Fast Spheres (exp")
+    self.cpk_mode_.addItem("Fast Spheres ++ (exp)")
+
     cpk_label = QtGui.QLabel(self.text_)
     font = cpk_label.font()
     font.setBold(True)
     
     sphere_label = QtGui.QLabel("Sphere Detail")
     grid = QtGui.QGridLayout()
-    grid.addWidget(cpk_label,0,0,1,1)
-    grid.addWidget(sphere_label, 1, 0, 1, 3)
-    grid.addWidget(self.sphere_spinbox_, 1, 2, 1, 1)
-    grid.setRowStretch(2,1)
+    row=0
+    grid.addWidget(cpk_label,row,0,1,1)
+    row+=1
+    grid.addWidget(sphere_label, row, 0, 1, 3)
+    grid.addWidget(self.sphere_spinbox_, row, 2, 1, 1)
+    row+=1
+    grid.addWidget(cpk_mode_label,row,0,1,1)
+    grid.addWidget(self.cpk_mode_,row,3,1,2)
+    row+=1
+    grid.setRowStretch(row,1)
     self.setLayout(grid)
   
     QtCore.QObject.connect(self.sphere_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateSphereDetail)
+    QtCore.QObject.connect(self.cpk_mode_, QtCore.SIGNAL("currentIndexChanged(int)"), self.UpdateCPKMode)
     
     self.setMinimumSize(250,60)
     
   def UpdateSphereDetail(self, value):
     self.GetOptions().SetSphereDetail(value)
+
+  def UpdateCPKMode(self, value):
+    self.GetOptions().SetCPKMode(value)
     
   def UpdateGui(self,options):
     self.sphere_spinbox_.setValue(options.GetSphereDetail())
+    self.cpk_mode_.setCurrentIndex(options.GetCPKMode())
 
   def GetText(self):
     return self.text_
