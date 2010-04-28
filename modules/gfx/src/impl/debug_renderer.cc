@@ -33,7 +33,7 @@ namespace gfx {
 using namespace impl;
 using namespace mol;
 
-DebugRenderer::DebugRenderer(BackboneTrace& trace): 
+DebugRenderer::DebugRenderer(BackboneTrace* trace): 
   TraceRendererBase(trace, 2), options_(new SlineRenderOptions()) {
   this->SetName("Debug");
 }

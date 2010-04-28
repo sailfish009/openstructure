@@ -448,6 +448,9 @@ void GfxObj::RenderPov(PovState& pov)
     pov.start_obj(GetName(),1.0,1.0,1.0);
     // apply local transformation
     // using transform_
+    if(rebuild_ || refresh_) {
+      PreRenderGL(true);
+    }
     CustomRenderPov(pov);
     pov.end_obj();
   }

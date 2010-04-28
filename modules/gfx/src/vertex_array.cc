@@ -562,13 +562,16 @@ void IndexedVertexArray::RenderGL()
 namespace {
   unsigned int col_to_index(float* c)
   {
-    return static_cast<unsigned int>(c[0]*7.0)*64+static_cast<unsigned int>(c[1]*7.0)*8+static_cast<unsigned int>(c[2]*7.0);
+    // don't look too closely - I am lacking sufficient caffeine to do this more elegantly
+    int ret= std::max(0,std::min<int>(511,static_cast<int>(round(c[0]*7.0f))*64+static_cast<int>(round(c[1]*7.0f))*8+static_cast<unsigned int>(round(c[2]*7.0f))));
+    return static_cast<unsigned int>(ret);
   }
 }
 
 void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
 {
   if(entry_list_.empty()) return;
+
   pov.inc() << "mesh2 {\n";
 
   pov.inc() << " vertex_vectors { " << entry_list_.size() << ",\n";

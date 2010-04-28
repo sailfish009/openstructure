@@ -17,12 +17,16 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+/*
+  Authors: Marco Biasini, Ansgar Philippsen
+*/
+
 #include "line_trace_renderer.hh"
 #include <ost/gfx/entity.hh>
 
 namespace ost { namespace gfx { namespace impl {
 
-LineTraceRenderer::LineTraceRenderer(BackboneTrace& trace): 
+LineTraceRenderer::LineTraceRenderer(BackboneTrace* trace): 
   TraceRendererBase(trace, 1), options_(new LineTraceRenderOptions())
 {
   this->SetName("Fast Trace");
@@ -41,10 +45,9 @@ void LineTraceRenderer::PrepareRendering()
   }
 }
 
-void LineTraceRenderer::PrepareRendering(TraceSubset& trace_subset,
+void LineTraceRenderer::PrepareRendering(const BackboneTrace& trace_subset,
                                          IndexedVertexArray& va, bool is_sel)
 {
-
   const Color& sel_clr=this->GetSelectionColor();
   if(options_!=NULL){
     va.Clear();
@@ -56,54 +59,27 @@ void LineTraceRenderer::PrepareRendering(TraceSubset& trace_subset,
     va.SetLineWidth(options_->GetLineWidth());
     va.SetPointSize(options_->GetLineWidth());
     va.SetAALines(options_->GetAALines());
-    for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
-      const NodeListSubset& nl=trace_subset[node_list];
+    for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
+      const NodeEntryList& nl=trace_subset.GetList(node_list);
 
-      if (nl.GetSize()==2) {
-        VertexID p0, p1;
-        if (nl.AtStart()==0) {
-          p0=va.Add(nl[0].atom.GetPos(), geom::Vec3(),
-                    is_sel ? sel_clr : nl[0].color1);
-          p1=va.Add((nl[0].atom.GetPos()+nl[1].atom.GetPos())/2, 
-                    geom::Vec3(), is_sel ? sel_clr : nl[1].color1);
-        } else {
-          p0=va.Add((nl[0].atom.GetPos()+nl[1].atom.GetPos())/2, 
-                    geom::Vec3(), is_sel ? sel_clr : nl[0].color1);
-          p1=va.Add(nl[1].atom.GetPos(), 
-                    geom::Vec3(), is_sel ? sel_clr : nl[1].color1);
-        }
-        va.AddLine(p0, p1);        
-        continue;
+      if (nl.size()<2) {
+	continue;
       }
-      if (nl.GetSize()<3) {
-        continue;
-      }
-      VertexID p0;      
-      if (nl.AtStart()==0) {
-        p0=va.Add(nl[0].atom.GetPos(), geom::Vec3(),
-                  is_sel ? sel_clr : nl[0].color1);
-      } else {
-        p0=va.Add((nl[0].atom.GetPos()+nl[1].atom.GetPos())/2, 
-                  geom::Vec3(), is_sel ? sel_clr : nl[0].color1);
-      }
-      for (int i=1; i<nl.GetSize()-1;++i) {
+
+      VertexID p0=va.Add(nl[0].atom.GetPos(), geom::Vec3(),
+			 is_sel ? sel_clr : nl[0].color1);
+
+      for (unsigned int i=1; i<nl.size()-1;++i) {
         const NodeEntry& entry=nl[i];
         VertexID p1 =va.Add(entry.atom.GetPos(), geom::Vec3(), 
                             is_sel ? sel_clr : entry.color1);
         va.AddLine(p0, p1);
         p0=p1;
       }
-      const NodeEntry& entry=nl[nl.GetSize()-1];      
-      if (nl.AtEnd()==0) {
-        VertexID p1 =va.Add(entry.atom.GetPos(), geom::Vec3(), 
-                            is_sel ? sel_clr : entry.color1);
-        va.AddLine(p0, p1);                            
-      } else {
-        geom::Vec3 p=(entry.atom.GetPos()+nl[nl.GetSize()-2].atom.GetPos())*0.5;
-        VertexID p1 =va.Add(p, geom::Vec3(), 
-                            is_sel ? sel_clr : entry.color1);
-        va.AddLine(p0, p1);
-      }
+      const NodeEntry& entry=nl.back();      
+      VertexID p1 =va.Add(entry.atom.GetPos(), geom::Vec3(), 
+			  is_sel ? sel_clr : entry.color1);
+      va.AddLine(p0, p1);
     }
   }
   sel_state_=0;
@@ -112,7 +88,6 @@ void LineTraceRenderer::PrepareRendering(TraceSubset& trace_subset,
 
 void LineTraceRenderer::Render()
 {
-
 }
 
 bool LineTraceRenderer::CanSetOptions(RenderOptionsPtr& render_options)

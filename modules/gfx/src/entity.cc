@@ -105,8 +105,9 @@ Entity::Entity(const String& name,
 
 impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
 {
-  if (renderer_.find(rm)!=renderer_.end()) {
-    return renderer_.find(rm)->second;
+  RendererMap::iterator rit = renderer_.find(rm);
+  if(rit!=renderer_.end()) {
+    return rit->second;
   }
   impl::EntityRenderer* r=NULL;
   switch (rm) {
@@ -117,22 +118,22 @@ impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
       r=new impl::CustomRenderer();
       break;
     case RenderMode::SLINE:
-      r=new impl::SlineRenderer(trace_);
+      r=new impl::SlineRenderer(&trace_);
       break;
     case RenderMode::LINE_TRACE:
-      r=new impl::LineTraceRenderer(trace_);
+      r=new impl::LineTraceRenderer(&trace_);
       break;
     case RenderMode::TRACE:
-      r=new impl::TraceRenderer(trace_);
+      r=new impl::TraceRenderer(&trace_);
       break;
     case RenderMode::HSC:
-      r=new impl::CartoonRenderer(trace_);
+      r=new impl::CartoonRenderer(&trace_,false);
       break;
     case RenderMode::CPK:
       r=new impl::CPKRenderer();
       break;
     case RenderMode::TUBE:
-      r=new impl::CartoonRenderer(trace_, true);
+      r=new impl::CartoonRenderer(&trace_, true);
       break;
     default:
       return 0;
@@ -148,7 +149,7 @@ void Entity::init(RenderMode::Type rm)
 
   update_view_=true;
   render_mode_=rm;
-  trace_.SetView(this->GetView());
+  trace_.ResetView(this->GetView());
   sel_=this->GetView().CreateEmptyView();  
   impl::EntityRenderer* r=this->GetOrCreateRenderer(rm);
   if(!r) return;
@@ -197,6 +198,18 @@ void Entity::SetBlurFactors(float bf1,float bf2)
 void Entity::Rebuild()
 {
   geom::Vec3 delta=GetTF().GetTrans()-GetTF().GetCenter();
+
+  if(update_view_) {
+    EntityView nv=this->GetView();
+    for (RendererMap::iterator i=renderer_.begin(), 
+           e=renderer_.end(); i!=e; ++i) {
+      i->second->ClearViews();
+      i->second->AddView(nv);
+      i->second->UpdateViews();
+      i->second->PrepareRendering();
+    }
+  }
+
   this->ReapplyColorOps();
   FlagRebuild();
   geom::Vec3 center=this->GetCenter();
@@ -764,6 +777,16 @@ void Entity::ColorBy(const String& prop,
   this->Apply(glop);
 }
 
+void Entity::DetailColorBy(const String& prop,
+                           const Gradient& gradient,
+                           float minv,float maxv,
+                           mol::Prop::Level level)
+{
+  GradientLevelColorOp glop = GradientLevelColorOp("",prop, gradient,minv,maxv,level);
+  glop.SetMask(DETAIL_COLOR);
+  this->Apply(glop);
+}
+
 void Entity::ColorBy(const String& prop,
                      const Color& c1, const Color& c2,
                      float minv, float maxv,
@@ -945,6 +968,13 @@ void Entity::CleanColorOps()
 void Entity::ReapplyColorOps()
 {
   GfxObj::ReapplyColorOps();
+}
+
+void Entity::UpdateView() 
+{
+  update_view_=true; 
+  Rebuild();
+  UpdatePositions();
 }
 
 }} // ns

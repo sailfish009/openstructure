@@ -97,7 +97,7 @@ private:
   float    max_;              // < maximum value of voxels inside OctreeNode
 };
 
-typedef std::vector<OctreeNode> OcNodeList;
+typedef std::vector<OctreeNode> OcNodeEntryList;
 
 
 /// \brief Octree datastructure for 3D images
@@ -215,7 +215,7 @@ private:
                                          OctreeNode& parent);
 
   img::ImageHandle            map_;
-  std::vector<OcNodeList>      levels_;
+  std::vector<OcNodeEntryList>      levels_;
 };
 
 }}}

@@ -39,7 +39,7 @@ public:
   {
     if(last_chain_ && chain!=last_chain_) {
       if(!list_.empty()) {
-        backbone_trace_->AddNodeList(list_);
+        backbone_trace_->AddNodeEntryList(list_);
         list_.clear();
       }
       last_chain_=chain;
@@ -51,7 +51,7 @@ public:
   {
     if(!mol::InSequence(last_residue_,res)) {
       if(!list_.empty()) {
-        backbone_trace_->AddNodeList(list_);
+        backbone_trace_->AddNodeEntryList(list_);
         list_.clear();
       }
     }
@@ -76,7 +76,7 @@ public:
   virtual void OnExit()
   {
     if (!list_.empty()) {
-      backbone_trace_->AddNodeList(list_);
+      backbone_trace_->AddNodeEntryList(list_);
       list_.clear();
     }
   }
@@ -87,23 +87,38 @@ private:
   NodeEntryList      list_;
 };
 
+BackboneTrace::BackboneTrace()
+{}
+
 BackboneTrace::BackboneTrace(const mol::EntityView& ent)
 {
   view_=ent;
-  TraceBuilder trace(this);
-  if (view_) {
-    view_.Apply(trace);
-  }
+  Rebuild();
 }
 
-BackboneTrace::BackboneTrace()
-{
-  
-}
-
-void BackboneTrace::SetView(const mol::EntityView& ent)
+void BackboneTrace::ResetView(const mol::EntityView& ent)
 {
   view_=ent;
+  Rebuild();
+}
+
+int BackboneTrace::GetListCount() const
+{
+  return node_list_list_.size();
+}
+
+const NodeEntryList& BackboneTrace::GetList(int index) const
+{
+  return node_list_list_[index];
+}
+
+NodeEntryList& BackboneTrace::GetList(int index)
+{
+  return node_list_list_[index];
+}
+
+void BackboneTrace::Rebuild()
+{
   if (view_) {
     node_list_list_.clear();
     TraceBuilder trace(this);    
@@ -111,7 +126,7 @@ void BackboneTrace::SetView(const mol::EntityView& ent)
   }
 }
 
-void BackboneTrace::AddNodeList(const NodeEntryList& l)
+void BackboneTrace::AddNodeEntryList(const NodeEntryList& l)
 {
   if(l.size()>=3) {
     node_list_list_.push_back(l);
@@ -183,114 +198,25 @@ void BackboneTrace::PrepList(NodeEntryList& nelist)
   nelist[i+1].normal=nelist[i].normal;
 }
 
-int BackboneTrace::GetListCount() const
+BackboneTrace BackboneTrace::CreateSubset(const mol::EntityView& subview)
 {
-  return node_list_list_.size();
-}
-
-const NodeEntryList& BackboneTrace::GetList(int index) const
-{
-  return node_list_list_[index];
-}
-
-NodeEntryList& BackboneTrace::GetList(int index)
-{
-  return node_list_list_[index];
-}
-
-void BackboneTrace::Rebuild()
-{
-  TraceBuilder trace(this);
-  view_.Apply(trace);  
-}
-
-NodeListSubset::NodeListSubset(BackboneTrace& trace, int index):
-  trace_(trace), list_index_(index), at_start_(0), at_end_(0)
-{
-}
-
-TraceSubset::TraceSubset(BackboneTrace& trace, 
-                         const mol::EntityView& view, int n):
-  trace_(trace), overshoot_(n)
-{
-  this->Update(view);
-}
-
-TraceSubset::TraceSubset(BackboneTrace& trace, int n):
-  trace_(trace), overshoot_(n)
-{
-  
-}
-
-
-void TraceSubset::NodeListEnd(NodeListSubset& nl, int c, int s)
-{
-  if (nl.GetSize()>0) {
-    int n=std::min(s-(nl.indices_.back()+1), overshoot_);
-    nl.at_end_=n;    
-    while (n>0) {
-      nl.indices_.push_back(nl.indices_.back()+1);
-      --n;
-    }
-  }
-}
-
-void TraceSubset::NodeListStart(NodeListSubset& nl, int c)
-{
-  if (nl.GetSize()==0 && c>0) {
-    for (int i=std::max(0,c-overshoot_); i<c; ++i) {
-      nl.indices_.push_back(i);
-    }
-    nl.at_start_=nl.indices_.size();
-  }
-}
-
-
-void TraceSubset::Update(const mol::EntityView& view)
-{
-
-  lists_.clear();
-  if (!view.IsValid()) {
-    return;
-  }
-  for (int i=0; i<trace_.GetListCount(); ++i) {
-    const NodeEntryList& l=trace_.GetList(i); 
-    int c=0;
-    NodeEntryList::const_iterator j=l.begin(),e=l.end();  
-    NodeListSubset curr(trace_, i);
-    while (j!=e) {  
-      while (j!=e && view.FindAtom(j->atom)) {
-        if (curr.indices_.empty()) {
-          this->NodeListStart(curr, c);
-        }
-        curr.indices_.push_back(c);
-        ++j; ++c;
-      }
-      if (curr.GetSize()) {
-        this->NodeListEnd(curr, curr.indices_.back(), l.size());
-        lists_.push_back(curr);
-        curr=NodeListSubset(trace_, i);
-      } else {
-        ++c; ++j;        
+  BackboneTrace nrvo;
+  nrvo.view_=subview;
+  nrvo.node_list_list_.clear();
+  for(NodeEntryListList::const_iterator nitnit=node_list_list_.begin();nitnit!=node_list_list_.end();++nitnit) {
+    NodeEntryList new_nlist;
+    const NodeEntryList& nlist=*nitnit;
+    for(NodeEntryList::const_iterator nit=nlist.begin();nit!=nlist.end();++nit) {
+      if(subview.FindAtom(nit->atom).IsValid()) {
+	new_nlist.push_back(*nit);
       }
     }
+    if(!new_nlist.empty()) {
+      nrvo.node_list_list_.push_back(new_nlist);
+    }
   }
+  return nrvo;
 }
 
-NodeListSubset& NodeListSubset::operator=(const NodeListSubset& rhs)
-{
-  trace_=rhs.trace_;
-  list_index_=rhs.list_index_;
-  indices_=rhs.indices_;
-  return *this;
-}
+}}} // ns
 
-TraceSubset& TraceSubset::operator=(const TraceSubset& rhs)
-{
-  trace_=rhs.trace_;
-  lists_=rhs.lists_;
-  overshoot_=rhs.overshoot_;
-  return *this;
-}
-
-}}}

@@ -16,6 +16,11 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+/*
+   Author: Ansgar Philippsen
+*/
+
 #ifndef OST_GFX_CARTOON_RENDERER_HH
 #define OST_GFX_CARTOON_RENDERER_HH
 
@@ -34,23 +39,19 @@ namespace ost { namespace gfx { namespace impl {
 /// \internal
 class DLLEXPORT_OST_GFX CartoonRenderer: public TraceRendererBase {
 public:
-  CartoonRenderer(BackboneTrace& trace, bool force_tube=false);
+  CartoonRenderer(BackboneTrace* trace, bool force_tube=false);
+  virtual ~CartoonRenderer();
 
   virtual void PrepareRendering();
-  virtual void Render();
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);
   virtual void SetOptions(RenderOptionsPtr& render_options);
   virtual RenderOptionsPtr GetOptions();
 
-
   virtual void SetForceTube(bool force_tube);
-
-
-  virtual ~CartoonRenderer();
   
 private:
-  void PrepareRendering(const TraceSubset& subset, IndexedVertexArray& va, 
+  void PrepareRendering(const BackboneTrace& subset, IndexedVertexArray& va, 
                         SplineEntryListList& spline_list_list, bool is_sel);
 
   void FudgeSplineObj(IndexedVertexArray&, SplineEntryListList&);

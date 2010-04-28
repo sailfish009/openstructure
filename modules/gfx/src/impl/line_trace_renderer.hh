@@ -16,6 +16,11 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+/*
+  Authors: Marco Biasini, Ansgar Philippsen
+*/
+
 #ifndef OST_GFX_IMPL_LINE_TRACE_RENDERER_HH
 #define OST_GFX_IMPL_LINE_TRACE_RENDERER_HH
 
@@ -36,10 +41,10 @@ using namespace impl;
 /// \internal
 class DLLEXPORT_OST_GFX LineTraceRenderer: public TraceRendererBase {
 public:
-  LineTraceRenderer(BackboneTrace& trace);
+  LineTraceRenderer(BackboneTrace* trace);
 
   virtual void PrepareRendering();
-  virtual void PrepareRendering(TraceSubset& trace_subset, 
+  virtual void PrepareRendering(const BackboneTrace& trace_subset, 
                                 IndexedVertexArray& va, bool is_sel);
   virtual void Render();
 

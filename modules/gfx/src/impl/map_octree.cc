@@ -94,7 +94,7 @@ std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
   }
   assert(parent.IsLeaf()==false);
   if (levels_.size()<=level) {
-    levels_.push_back(OcNodeList());
+    levels_.push_back(OcNodeEntryList());
     levels_.back().reserve(this->GetNumNodesForLevel(level));
     assert(level<9 && "MAP TOO BIG for Octree");
   }  

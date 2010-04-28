@@ -16,6 +16,11 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+/*
+   Author: Ansgar Philippsen
+*/
+
 #include "cartoon_renderer.hh"
 
 #include <Eigen/Core>
@@ -34,7 +39,7 @@ static const unsigned int MAX_ARC_DETAIL=12;
 
 using namespace impl;
 
-CartoonRenderer::CartoonRenderer(BackboneTrace& trace, bool force_tube): 
+CartoonRenderer::CartoonRenderer(BackboneTrace* trace, bool force_tube): 
   TraceRendererBase(trace, 3),   force_tube_(force_tube),
   options_(new CartoonRenderOptions(force_tube))
 {
@@ -46,7 +51,7 @@ void CartoonRenderer::SetForceTube(bool force_tube)
   force_tube_ = force_tube;
 }
 
-void CartoonRenderer::PrepareRendering(const TraceSubset& subset, 
+void CartoonRenderer::PrepareRendering(const BackboneTrace& subset, 
                                        IndexedVertexArray& va,
                                        SplineEntryListList& spline_list_list,
                                        bool is_sel)
@@ -61,11 +66,11 @@ void CartoonRenderer::PrepareRendering(const TraceSubset& subset,
     va.SetColorMaterial(true);
     va.SetMode(0x4);
     va.SetPolyMode(options_->GetPolyMode());
-    for (int node_list=0; node_list<subset.GetSize(); ++node_list) {
+    for (int node_list=0; node_list<subset.GetListCount(); ++node_list) {
       // first build the spline
       SplineEntryList spl;
-      const NodeListSubset& nl=subset[node_list];
-      for (int i=0; i<nl.GetSize();++i) {      
+      const NodeEntryList& nl=subset.GetList(node_list);
+      for (unsigned int i=0; i<nl.size();++i) {
         int type=0;
         const NodeEntry& entry=nl[i];
         if(!force_tube_) {
@@ -111,8 +116,6 @@ void CartoonRenderer::PrepareRendering()
   sel_state_=0;
   state_=0;
 }
-
-void CartoonRenderer::Render(){}
 
 bool CartoonRenderer::CanSetOptions(RenderOptionsPtr& render_options)
 {
@@ -302,7 +305,6 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
   unsigned int detail = std::min(MAX_ARC_DETAIL,
                                  std::max(options_->GetArcDetail(),
                                  (unsigned int)1));
-  int spline_detail=std::max((unsigned int) 1, options_->GetSplineDetail());
   std::vector<TraceProfile> profiles;
   float factor=is_sel ? 0.2 : 0.0;
   profiles.push_back(GetCircProfile(detail,
@@ -346,15 +348,13 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
     */
     SplineEntryList slist=*it;
     if(slist.empty()) continue;
-    int sit=0, send=slist.size()-spline_detail+1;
-    //int sit=0,send=slist.size();
-    TraceProfile tprof1=TransformAndAddProfile(profiles,slist[sit],va);
-    CapProfile(tprof1,slist[sit],true,va);
+    TraceProfile tprof1=TransformAndAddProfile(profiles,slist[0],va);
+    CapProfile(tprof1,slist[0],true,va);
     TraceProfile tprof2;
-    SplineEntry last_se=slist[std::max(0,send-1)];
-    for (int sc=sit+1; sc<send; ++sc) {
-      if(slist[sc].type==3) {
-        if(slist[sc-1].type==2) {
+    unsigned int sc=1;
+    for (; sc<slist.size(); ++sc) {
+      if(slist.at(sc).type==3) {
+        if(slist.at(sc-1).type==2) {
           // boundary to arrow
           SplineEntry se(slist[sc]);
           tprof2=TransformAndAddProfile(profiles,se, va);
@@ -365,7 +365,7 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
           se.type2=4;
           tprof2=TransformAndAddProfile(profiles,se, va);
         } else {
-          SplineEntry se(slist[sc]);
+          SplineEntry se(slist.at(sc));
           se.type1=4;
           if(options_->GetStrandMode()==1) se.type2=5;
           tprof2=TransformAndAddProfile(profiles,se, va);
@@ -375,13 +375,10 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
       }
       AssembleProfile(tprof1,tprof2,va);
       tprof1=tprof2;
-      last_se=slist[sc];
     }
-    CapProfile(tprof1,slist.at(send-1),false,va);
+    CapProfile(tprof1,slist.at(sc-1),false,va);
   }
 }
-
-
 
 TraceProfile CartoonRenderer::TransformAndAddProfile(const std::vector<TraceProfile>& profiles, const SplineEntry& se, IndexedVertexArray& va)
 {

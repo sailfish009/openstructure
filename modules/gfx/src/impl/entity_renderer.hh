@@ -180,6 +180,7 @@ protected:
   DirtyFlags            sel_state_;
   DirtyFlags            state_;
   unsigned int          debug_flags_;
+  float                 opacity_;
 };
 
 //Simplify color ops
