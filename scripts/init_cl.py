@@ -31,7 +31,6 @@ if platform.machine()=='x86_64':
 else:
   sys.path.insert(0,os.getenv('DNG_ROOT')+'/lib/openstructure')
      
-#from ost import io, mol, seq, conop, geom
 from ost import *
 import ost
 
@@ -51,10 +50,6 @@ import os.path
 HistoryFile=os.path.expanduser('~/.ost_history')
 InGUIMode=False
 
-try:  
-  gfx.set_offscreen_mode()
-except NameError:
-  pass
 sys.ps1='ost> '
 sys.ps2='..... '
 sys.argv=sys.argv[1:]

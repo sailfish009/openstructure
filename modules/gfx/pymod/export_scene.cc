@@ -48,11 +48,6 @@ GfxObjP scene_getitem(Scene* scene, const String& item)
   return scene->operator[](item);
 }
 
-void set_offscreen_mode()
-{
-  Scene::Instance().SetOffscreenMode();
-}
-
 } // anon ns
 
 
@@ -60,8 +55,6 @@ void export_Scene()
 {
   def("Scene",get_scene,return_value_policy<reference_existing_object>());
 
-  def("set_offscreen_mode",set_offscreen_mode);
-  
   // will be removed...
   def("PickAtom", &pick_atom);
 

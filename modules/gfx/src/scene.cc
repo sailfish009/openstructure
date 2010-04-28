@@ -1268,9 +1268,8 @@ void Scene::Export(const String& fname, unsigned int width,
   glGetIntegerv(GL_VIEWPORT,old_vp);
   bool old_flag=offscreen_flag_;
   if(!main_offscreen_buffer_) {
-    LOGN_DEBUG("switching to offscreen rendering");
-    glGetIntegerv(GL_VIEWPORT,old_vp);
     try {
+      LOGN_DEBUG("creating a " << width <<"x" << height << " offscreen rendering buffer");
       OffscreenBuffer ob(width,height,OffscreenBufferFormat(),true);
       
       if(!ob.IsValid()) {
@@ -1280,7 +1279,6 @@ void Scene::Export(const String& fname, unsigned int width,
       
       ob.MakeActive();
       offscreen_flag_=true;
-      root_node_->ContextSwitch();
 #if 1
 #if OST_SHADER_SUPPORT_ENABLED
       String shader_name = Shader::Instance().GetCurrentName();
@@ -1294,26 +1292,30 @@ void Scene::Export(const String& fname, unsigned int width,
       LOGN_DEBUG("updating fog settings");
       update_fog();
       glDrawBuffer(GL_FRONT);
-      //this->flag_all_dirty();
+
 #if OST_SHADER_SUPPORT_ENABLED
       LOGN_DEBUG("activating shader");
       Shader::Instance().Activate(shader_name);
 #endif
+      root_node_->ContextSwitch();
 #endif
     } catch (std::exception& e) {
-      LOGN_ERROR("exception during offscreen rendering: " << e.what());
+      LOGN_ERROR("exception during offscreen rendering initialization: " << e.what());
       throw;
-      // noop
     }
+  } else {
+    LOGN_DEBUG("using active main offscreen buffer");
   }
-  LOGN_DEBUG("doing rendering");
+  LOGN_DEBUG("rendering into offscreen buffer");
   this->RenderGL();
   // make sure drawing operations are finished
+  glFlush();
   glFinish();
 
   unsigned int width2=width;
   unsigned int height2=height;
-  if(!main_offscreen_buffer_) {
+  if(main_offscreen_buffer_!=NULL) {
+    // use settings from active main buffer
     width2=old_vp[2];
     height2=old_vp[3];
   }
@@ -1334,28 +1336,29 @@ void Scene::Export(const String& fname, unsigned int width,
   LOGN_DEBUG("calling bitmap export");
   BitmapExport(fname,ext,width2,height2,img_data.get());
   
-
   if(!main_offscreen_buffer_) {
     LOGN_DEBUG("switching back to main context");
-    if(main_offscreen_buffer_) {
-      main_offscreen_buffer_->MakeActive();
-    } else if (win_) {
-      win_->MakeActive();
-    } else {
-      LOGN_ERROR("erm, no context to fall back to");
+    if (!win_) {
       return;
     }
+    win_->MakeActive();
     Scene::Instance().SetViewport(old_vp[2],old_vp[3]);
     offscreen_flag_=old_flag;
     root_node_->ContextSwitch();
     glDrawBuffer(GL_BACK);
     LOGN_DEBUG("updating fog");
     update_fog();
+  } else {
+    // nothing needs to happen here, main offscreen buffer was active, and stays active
   }
 }
 
 void Scene::Export(const String& fname, bool transparent)
 {
+  if(!win_ && !main_offscreen_buffer_) {
+    LOGN_ERROR("Export without dimensions either requires an interactive session \nor an active offscreen mode (scene.StartOffscreenMode(W,H))");
+    return;
+  }
   int d_index=fname.rfind('.');
   if (d_index==-1) {
     LOGN_ERROR("no file extension specified");
@@ -1368,6 +1371,12 @@ void Scene::Export(const String& fname, bool transparent)
   }
   GLint vp[4];
   glGetIntegerv(GL_VIEWPORT,vp);
+
+  if(main_offscreen_buffer_) {
+    this->RenderGL();
+    glFlush();
+    glFinish();
+  }
 
   if (transparent) {
     glPixelTransferf(GL_ALPHA_BIAS, 0.0);
@@ -1692,21 +1701,6 @@ GfxNodeP Scene::GetRootNode() const
 bool Scene::InOffscreenMode() const
 {
   return offscreen_flag_;
-}
-
-void Scene::SetOffscreenMode()
-{
-  if(main_offscreen_buffer_) return;
-  main_offscreen_buffer_ = new OffscreenBuffer(1000,1000,OffscreenBufferFormat(),false);
-  if(main_offscreen_buffer_->IsValid()) {
-    LOGN_DEBUG("activating offscreen buffer");
-    main_offscreen_buffer_->MakeActive();
-    offscreen_flag_=true;
-    InitGL();
-  } else {
-    LOGN_DEBUG("offscreen buffer is not valid");
-    delete main_offscreen_buffer_;
-  }
 }
 
 float Scene::ElapsedTime() const
