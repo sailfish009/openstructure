@@ -62,6 +62,8 @@ public:
   /// \brief store current atom positions in new frame
   void Capture();
 
+  void CaptureInto(int pos);
+
   /// \brief store current atom positions in given frame (must exist)
   void Capture(uint frame);
   
@@ -80,7 +82,7 @@ public:
   /// \brief whether the handle is valid
   operator bool() const;
   
-  const AtomHandleList& GetAtomList() const;
+  AtomHandleList GetAtomList() const;
   CoordFramePtr GetFrame(uint frame) const;
 private:
   void CheckValidity() const;
@@ -91,7 +93,7 @@ private:
 };
 
 // factory method
-// create with a reference set of atoms and the number of frames
+// create with a reference set of atoms and zero frames
 DLLEXPORT_OST_MOL CoordGroupHandle CreateCoordGroup(const AtomHandleList& atoms);
 
 }} // ns

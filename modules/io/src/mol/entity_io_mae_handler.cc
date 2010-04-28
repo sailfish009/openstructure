@@ -30,7 +30,6 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/format.hpp>
 #include <boost/regex.hpp>
 
@@ -128,11 +127,16 @@ void MAEReader::Import(mol::EntityHandle& ent)
       if(in_atom_block) {
         if(parsing_atoms) {
           if(boost::regex_match(line,r_delim)) {
-            std::cerr << "stopping atom parsing" << std::endl;
+            LOGN_DUMP( "stopping atom parsing" );
             parsing_atoms=false;
+            prop_list.clear();
           } else {
             // parsing atom line
             std::vector<std::string> tokens=tokenize(line);
+            for(int i=0;i<tokens.size();++i) {
+              LOG_DUMP( "[" << tokens[i] << "] ");
+            }
+            LOGN_DUMP("");
             add_atom(ent,editor,
                      tokens[i_atom_name],
                      tokens[i_atom_xpos],
@@ -153,37 +157,39 @@ void MAEReader::Import(mol::EntityHandle& ent)
                i_chain_name==-1) {
               throw IOException("missing atom prop");
             }
-            std::cerr << "starting atom parsing" << std::endl;
+            LOGN_DUMP( "starting atom parsing" );
             parsing_atoms=true;
           } else if(line[0]=='}') {
-            std::cerr << "exiting atom block" << std::endl;
+            LOGN_DUMP( "exiting atom block" );
             in_atom_block=false;
           } else {
             // parsing property line
-            int pid=prop_list.size();
-            prop_list.push_back(line);
-            std::cerr << "found property '" << prop_list.back() << "'" << std::endl;
-            if(line=="s_m_pdb_atom_name") i_atom_name=pid;
-            else if(line=="r_m_x_coord") i_atom_xpos=pid;
-            else if(line=="r_m_y_coord") i_atom_ypos=pid;
-            else if(line=="r_m_z_coord") i_atom_zpos=pid;
-            else if(line=="s_m_pdb_residue_name") i_res_name=pid;
-            else if(line=="i_m_residue_number") i_res_num=pid;
-            else if(line=="s_m_pdb_segment_name") i_chain_name=pid;
+            if(line[0]!='#') {
+              int pid=prop_list.size()+1;
+              prop_list.push_back(line);
+              LOGN_DUMP( "found property '" << prop_list.back() << "' id=" << pid );
+              if(line=="s_m_pdb_atom_name") i_atom_name=pid;
+              else if(line=="r_m_x_coord") i_atom_xpos=pid;
+              else if(line=="r_m_y_coord") i_atom_ypos=pid;
+              else if(line=="r_m_z_coord") i_atom_zpos=pid;
+              else if(line=="s_m_pdb_residue_name") i_res_name=pid;
+              else if(line=="i_m_residue_number") i_res_num=pid;
+              else if(line=="s_m_pdb_segment_name") i_chain_name=pid;
+            }
           }
         }
       } else { // not in atom block
         if(boost::regex_match(line,r_atom_block)) {
-          std::cerr << "entering atom block" << std::endl;
+          LOGN_DUMP( "entering atom block" );
           in_atom_block=true;
         } else if(line[0]=='}') {
-          std::cerr << "exiting ct block" << std::endl;
+          LOGN_DUMP( "exiting ct block" );
           in_ct_block=false;
         }
       }
     } else { // not in ct block
       if(boost::regex_match(line,r_ct_block)) {
-        std::cerr << "entering ct block" << std::endl;
+        LOGN_DUMP( "entering ct block" );
         in_ct_block=true;
       }
     }
@@ -196,25 +202,27 @@ void MAEReader::Import(mol::EntityHandle& ent)
 
 void MAEReader::add_atom(mol::EntityHandle ent,
                          mol::XCSEditor& editor,
-                         const std::string& aname, 
+                         const std::string& aname2, 
                          const std::string& s_axpos, 
                          const std::string& s_aypos, 
                          const std::string& s_azpos, 
-                         const std::string& rname,
+                         const std::string& rname2,
                          const std::string& s_rnum,
-                         const std::string& cname)
+                         const std::string& cname2)
 {
-  std::string ele = aname.substr(0,1);
-  int irnum = boost::lexical_cast<int>(s_rnum);
-  geom::Vec3 apos(boost::lexical_cast<Real>(s_axpos),
-                  boost::lexical_cast<Real>(s_aypos),
-                  boost::lexical_cast<Real>(s_azpos));
+  std::string aname=boost::trim_copy(aname2);
+  std::string rname=boost::trim_copy(rname2);
+  std::string cname=boost::trim_copy(cname2);
+  std::string ele=aname.substr(0,1);
+  if(isdigit(ele[0])) ele="H";
+
+  int irnum = atoi(s_rnum.c_str());
+  geom::Vec3 apos(atof(s_axpos.c_str()),
+                  atof(s_aypos.c_str()),
+                  atof(s_azpos.c_str()));
 
   mol::ResidueKey rkey(rname);
   
-  // some postprocessing
-  LOGN_TRACE( "cname: [" << cname << "]" );
-
   mol::ResNum rnum(irnum);
   
   // determine chain and residue update
@@ -236,23 +244,27 @@ void MAEReader::add_atom(mol::EntityHandle ent,
 
   if(update_chain) {  
     if (!(curr_chain_=ent.FindChain(cname))) {
-      LOGN_DUMP("new chain " << cname);      
       curr_chain_=editor.InsertChain(cname);
+      LOGN_DUMP("new chain " << curr_chain_);      
       ++chain_count_;      
+    } else {
+      LOGN_DUMP("old chain " << curr_chain_);      
     }
   }
 
   if(update_residue) {
     if (!(curr_residue_=curr_chain_.FindResidue(rnum))) {
-      LOGN_DUMP("new residue " << rkey << " " << rnum);
       curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
       assert(curr_residue_.IsValid());
+      LOGN_DUMP(" new residue " << curr_residue_);
       ++residue_count_;
+    } else {
+      LOGN_DUMP(" old residue " << curr_residue_);
     }
   }
 
   // finally add atom
-  LOGN_DUMP("adding atom " << aname << " (" << ele << ") @" << apos);
+  LOGN_DUMP("  atom " << aname << " (" << ele << ") @" << apos);
   mol::AtomProp aprop;
   aprop.element=ele;
   aprop.radius=conop::Conopology::Instance().GetDefaultAtomRadius(ele);

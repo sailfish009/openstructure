@@ -66,9 +66,11 @@ public:
   bool IsMutable() const;
   
   void Capture();
+  void CaptureInto(int pos);
   void Capture(uint f);
   
-  virtual void AddFrame(const std::vector<geom::Vec3>& coords);
+  virtual void AddFrame(const std::vector<geom::Vec3>& coords) = 0;
+  virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords) = 0;
 protected:
   void SetMutable(bool flag);
 private:

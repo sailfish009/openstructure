@@ -36,6 +36,8 @@ namespace {
 
   void set_sec_struct1(ResidueBase* b, const SecStructure& s) {b->SetSecStructure(s);}
   void set_sec_struct2(ResidueBase* b, char c) {b->SetSecStructure(SecStructure(c));}
+  void set_chemclass1(ResidueBase* b, const ChemClass& cc) {b->SetChemClass(cc);}
+  void set_chemclass2(ResidueBase* b, char c) {b->SetChemClass(ChemClass(c));}
 
 }
 
@@ -104,6 +106,9 @@ void export_Residue()
          return_value_policy<copy_const_reference>())
     .def("GetNumber", &ResidueBase::GetNumber,
          return_value_policy<copy_const_reference>())
+    .def("GetChemClass", &ResidueBase::GetChemClass)
+    .def("SetChemClass", set_chemclass1)
+    .def("SetChemClass", set_chemclass2)
     .add_property("number",
                    make_function(&ResidueBase::GetNumber,
                                  return_value_policy<copy_const_reference>()))

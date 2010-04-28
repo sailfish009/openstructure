@@ -16,7 +16,6 @@ uint InMemCoordSource::GetFrameCount()
 
 CoordFramePtr InMemCoordSource::GetFrame(uint frame_id) const
 {
-  
   return frame_id>=frames_.size() ? CoordFramePtr() : frames_[frame_id];
 }
 
@@ -29,6 +28,14 @@ void InMemCoordSource::AddFrame(const std::vector<geom::Vec3>& coords)
 {
   CoordFramePtr fp(new CoordFrame(coords));
   frames_.push_back(fp);
+}
+
+void InMemCoordSource::InsertFrame(int pos, const std::vector<geom::Vec3>& coords)
+{
+  CoordFrameList::iterator it = frames_.begin();
+  for(int i=0;i<pos;++i) ++it;
+  CoordFramePtr fp(new CoordFrame(coords));
+  frames_.insert(it,fp);
 }
 
 }}

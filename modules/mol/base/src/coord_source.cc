@@ -87,6 +87,21 @@ void CoordSource::Capture()
   this->AddFrame(coords);
 }
 
+void CoordSource::CaptureInto(int pos)
+{
+  std::vector<geom::Vec3> coords;
+  coords.reserve(atoms_.size());
+  for (AtomHandleList::const_iterator i=atoms_.begin(), 
+       e=atoms_.end(); i!=e; ++i) {
+    coords.push_back(i->GetPos());
+  }
+  if(pos<0 || pos>=GetFrameCount()) {
+    this->AddFrame(coords);
+  } else {
+    this->InsertFrame(pos,coords);
+  }
+}
+
 void CoordSource::Capture(uint f)
 {
   CoordFrame& fp=*(GetFrame(f));
@@ -122,11 +137,6 @@ EntityHandle CoordSource::GetEntity() const
 bool CoordSource::IsMutable() const
 {
  return mutable_; 
-}
-
-void CoordSource::AddFrame(const std::vector<geom::Vec3>& coords)
-{
-  assert(0 && "implement me");
 }
 
 void CoordSource::SetMutable(bool flag)
