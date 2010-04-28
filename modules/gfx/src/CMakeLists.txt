@@ -10,6 +10,7 @@ gfx_fw.hh
 gfx_node.hh
 gfx_node_fw.hh
 gfx_node_visitor.hh
+gfx_object_base.hh
 gfx_object.hh
 gfx_object_fw.hh
 gfx_prim.hh

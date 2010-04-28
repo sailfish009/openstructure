@@ -145,7 +145,10 @@ impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
 void Entity::init(RenderMode::Type rm)
 {
   // TODO replace with def mat for this gfx obj type
-  SetMat(0.0,1.0,0.8,96.0);
+  SetMatAmb(Color(0,0,0));
+  SetMatDiff(Color(1,1,1));
+  SetMatSpec(Color(0.7,0.7,0.7));
+  SetMatShin(96);
 
   update_view_=true;
   render_mode_=rm;
@@ -340,8 +343,8 @@ void Entity::CustomRenderGL(RenderPass pass)
     if(r->IsEnabled()){
       if(pass==STANDARD_RENDER_PASS || pass==OPAQUE_RENDER_PASS) {
         r->Render(pass);
-        if(pass==STANDARD_RENDER_PASS && omode_>0) {
-          r->VA().SetOutlineMode(omode_);
+        if(pass==STANDARD_RENDER_PASS && outline_flag_) {
+          r->VA().SetOutlineMode(outline_mode_);
           r->Render(pass);
           r->VA().SetOutlineMode(0);
         }

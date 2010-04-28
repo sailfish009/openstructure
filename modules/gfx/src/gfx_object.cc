@@ -41,7 +41,7 @@
 namespace ost { namespace gfx {
 
 GfxObj::GfxObj(const String& name):
-  GfxNode(name),
+  GfxObjBase(name),
   va_(),
   render_mode_(RenderMode::SIMPLE),
   debug_flags_(0),
@@ -49,9 +49,6 @@ GfxObj::GfxObj(const String& name):
   rebuild_(true),
   refresh_(false),
   line_width_(2.0),
-  sphere_detail_(4),
-  arc_detail_(4),
-  spline_detail_(8),
   poly_mode_(2),
   aalines_flag_(false),
   line_halo_(0.0),
@@ -60,21 +57,116 @@ GfxObj::GfxObj(const String& name):
   mat_update_(true),
   opacity_(1.0),
   smoothf_(0.0),
-  omode_(0),
+  outline_flag_(false),
+  outline_mode_(1),
   c_ops_(),
   labels_(),
   use_occlusion_(false)
 {
 }
 
-GfxObj::~GfxObj()
-{}
-
-GfxObj::GfxObj(const GfxObj& o):
-  GfxNode("") // to make the compiler happy
+GfxObj::GfxObj(const GfxObj&):
+  GfxObjBase("") // to make the compiler happy
 {}
 
 GfxObj& GfxObj::operator=(const GfxObj&) {return *this;}
+
+////////////////////////////////////////
+// the GfxNode interface
+
+GfxNodeP GfxObj::Copy() const
+{
+  return GfxNodeP(new GfxObj(*this));
+}
+
+void GfxObj::DeepSwap(GfxObj& go)
+{
+  GfxNode::DeepSwap(*this);
+  std::swap(transform_,go.transform_);
+  std::swap(rebuild_,go.rebuild_);
+  std::swap(refresh_,go.refresh_);
+  std::swap(poly_mode_,go.poly_mode_);
+  std::swap(aalines_flag_,go.aalines_flag_);
+  std::swap(line_halo_,go.line_halo_);
+  std::swap(mat_,go.mat_);
+  std::swap(mat_dlist_,go.mat_dlist_);
+  std::swap(mat_update_,go.mat_update_);
+  std::swap(opacity_,go.opacity_);
+  std::swap(smoothf_,go.smoothf_);
+  std::swap(outline_flag_,go.outline_flag_);
+  std::swap(outline_mode_,go.outline_mode_);
+  std::swap(c_ops_,go.c_ops_);
+  std::swap(labels_,go.labels_);
+  std::swap(use_occlusion_,go.use_occlusion_);
+}
+
+void GfxObj::RenderGL(RenderPass pass)
+{
+  LOGN_TRACE("object " << GetName() << ": RenderGL()");
+
+  if(pass==0) {
+    if(mat_update_) {
+      LOGN_TRACE("updating material display list");
+      if(mat_dlist_==0) {
+        mat_dlist_=glGenLists(1);
+      }
+      glNewList(mat_dlist_,GL_COMPILE);
+      mat_.RenderGL();
+      glEndList();
+      mat_update_=false;
+    }
+    
+    if(rebuild_ || refresh_) {
+      PreRenderGL(rebuild_);
+      rebuild_=false;
+      refresh_=false;
+    }
+  }
+  if(IsVisible()) {
+    LOGN_TRACE("applying local transformation");
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glMultMatrix(transform_.GetTransposedMatrix().Data());
+    if(Scene::Instance().InOffscreenMode()) {
+      LOGN_TRACE("applying material");
+      mat_.RenderGL();
+    } else {
+      LOGN_TRACE("applying material display list");
+      glCallList(mat_dlist_);
+    }
+    LOGN_TRACE("calling custom render gl pass " << pass);
+
+    CustomRenderGL(pass);
+
+    if(pass==0 && outline_flag_>0) {
+      va_.SetOutlineMode(outline_mode_);
+      CustomRenderGL(pass);
+      va_.SetOutlineMode(0);
+    }
+
+    if(pass==1) {
+      LOGN_TRACE("drawing labels");
+      render_labels();
+    }
+
+    glPopMatrix();    
+  }
+}
+
+
+void GfxObj::RenderPov(PovState& pov)
+{
+  if(IsVisible()) {
+    pov.start_obj(GetName(),1.0,1.0,1.0);
+    // apply local transformation
+    // using transform_
+    if(rebuild_ || refresh_) {
+      PreRenderGL(true);
+    }
+    CustomRenderPov(pov);
+    pov.end_obj();
+  }
+}
 
 void GfxObj::Apply(GfxNodeVisitor& v, GfxNodeVisitor::Stack st)
 {
@@ -85,6 +177,170 @@ int GfxObj::GetType() const
 {
   return 1;
 }
+
+////////////////////////////////////////
+// now for the GfxObjBase interface
+void GfxObj::SetMatAmb(const Color& c)
+{
+  mat_.SetAmb(c);
+  mat_update_=true;
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetMatDiff(const Color& c)
+{
+  mat_.SetDiff(c);
+  mat_update_=true;
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetMatSpec(const Color& c)
+{
+  mat_.SetSpec(c);
+  mat_update_=true;
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetMatShin(float s)
+{
+  mat_.SetShin(s);
+  mat_update_=true;
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetMatEmm(const Color& c)
+{
+  mat_.SetEmm(c);
+  mat_update_=true;
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::ContextSwitch()
+{
+  FlagRebuild();
+  GfxNode::ContextSwitch();
+}
+
+void GfxObj::SetRenderMode(RenderMode::Type m)
+{
+  if (render_mode_==m) return;
+  render_mode_=m;
+  OnRenderModeChange();
+  FlagRebuild();
+}
+
+RenderMode::Type GfxObj::GetRenderMode() const
+{
+  return render_mode_;
+}
+
+geom::Vec3 GfxObj::GetCenter() const 
+{
+  return this->GetBoundingBox().GetCenter();
+}
+
+void GfxObj::SetLineWidth(float w)
+{
+  va_.SetLineWidth(w);
+  line_width_=std::max(float(0.01),w);
+  FlagRefresh();
+  Scene::Instance().RenderModeChanged(GetName());
+}
+
+void GfxObj::SetPolyMode(unsigned int m)
+{
+  if(m==poly_mode_) return;
+  poly_mode_=std::min((unsigned int)2,m);
+  va_.SetPolyMode(poly_mode_);
+  FlagRefresh();
+}
+
+void GfxObj::AALines(bool f)
+{
+  if(f==aalines_flag_) return;
+  va_.SetAALines(f);
+  aalines_flag_=f;
+  FlagRefresh();
+}
+
+void GfxObj::SetLineHalo(float f)
+{
+  va_.SetLineHalo(f);
+  line_halo_=f;
+  FlagRefresh();
+}
+
+void GfxObj::Outline(bool f)
+{
+  outline_flag_=f;
+  FlagRefresh();
+  if(f) {
+    outline_mode_=std::min(3,std::max(1,outline_mode_));
+  }
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetOutlineMode(int m)
+{
+  outline_mode_=m;
+  if(outline_flag_) {
+    FlagRefresh();
+    Scene::Instance().RequestRedraw();
+  }
+}
+
+void GfxObj::SetOutlineExpandFactor(float f)
+{
+  va_.SetOutlineExpandFactor(f);
+}
+
+void GfxObj::SetOutlineExpandColor(const Color& c)
+{
+  va_.SetOutlineExpandColor(c);
+}
+
+void GfxObj::AmbientOcclusion(bool f)
+{
+  va_.UseAmbient(f);
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetAmbientLocalWeight(float w)
+{
+  va_.AmbientLocalWeight(w);
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetAmbientOcclusionWeight(float w)
+{
+  va_.AmbientOcclusionWeight(w);
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetOpacity(float o)
+{
+  opacity_=o;
+  FlagRebuild();
+}
+
+void GfxObj::ColorBy(const mol::EntityView& ev, 
+                      const String& prop,
+                      const Gradient& g, float minv, float maxv)
+{
+  LOGN_VERBOSE("ColorBy not implemented for this gfx object");
+}
+
+#if OST_IMG_ENABLED
+void GfxObj::ColorBy(const img::MapHandle& mh,
+                      const String& prop,
+                      const Gradient& g, float minv, float maxv)
+{
+  LOGN_VERBOSE("ColorBy not implemented for this gfx object");
+}
+#endif
+
+//////////////////////////////////////////////////
+// and now for the rest of the GfxObj interface
 
 geom::AlignedCuboid GfxObj::GetBoundingBox() const
 {
@@ -119,57 +375,18 @@ void GfxObj::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc,
   }
 }
 
-GfxNodeP GfxObj::Copy() const
-{
-  return GfxNodeP(new GfxObj(*this));
-}
-
-void GfxObj::DeepSwap(GfxObj& go)
-{
-  GfxNode::DeepSwap(*this);
-  std::swap(transform_,go.transform_);
-  std::swap(rebuild_,go.rebuild_);
-  std::swap(refresh_,go.refresh_);
-  std::swap(sphere_detail_,go.sphere_detail_);
-  std::swap(arc_detail_,go.arc_detail_);
-  std::swap(spline_detail_,go.spline_detail_);
-  std::swap(poly_mode_,go.poly_mode_);
-  std::swap(aalines_flag_,go.aalines_flag_);
-  std::swap(line_halo_,go.line_halo_);
-  std::swap(mat_,go.mat_);
-  std::swap(mat_dlist_,go.mat_dlist_);
-  std::swap(mat_update_,go.mat_update_);
-  std::swap(opacity_,go.opacity_);
-  std::swap(smoothf_,go.smoothf_);
-}
 
 void GfxObj::CustomRenderGL(RenderPass pass) {}
+
 void GfxObj::CustomPreRenderGL(bool flag) {}
 
 void GfxObj::CustomRenderPov(PovState& pov) {}
 
-void GfxObj::ContextSwitch()
+bool GfxObj::OnSelect(const geom::Line3& l, geom::Vec3& result, 
+                      float zlim, bool pick_flag)
 {
-  FlagRebuild();
-  GfxNode::ContextSwitch();
+  return false;
 }
-
-/* 
-  this should not be necessary anymore
-
-void GfxObj::RefreshVA(IndexedVertexArray& va)
-{
-
-  va.SetLineWidth(GetLineWidth());
-  va.SetPolyMode(GetPolyMode());
-  va.SetAALines(GetAALines());
-  va.SetLineHalo(GetLineHalo());
-  va.DrawNormals(debug_flags_&0x1);
-  va.SetPolyMode(debug_flags_&0x2 ? 1 : 2);
-  va.UseAmbient(use_occlusion_);
-  va.FlagRefresh();
-}
-*/
 
 void GfxObj::OnInput(const InputEvent& e) 
 {
@@ -232,30 +449,6 @@ void GfxObj::SetTF(const mol::Transform& tf)
   transform_=tf;
 }
 
-geom::Vec3 GfxObj::GetCenter() const 
-{
-  return this->GetBoundingBox().GetCenter();
-}
-
-bool GfxObj::OnSelect(const geom::Line3& l, geom::Vec3& result, 
-                      float zlim, bool pick_flag)
-{
-  return false;
-}
-
-void GfxObj::SetRenderMode(RenderMode::Type m)
-{
-  if (render_mode_==m) return;
-  render_mode_=m;
-  OnRenderModeChange();
-  FlagRebuild();
-}
-
-RenderMode::Type GfxObj::GetRenderMode() const
-{
-  return render_mode_;
-}
-
 void GfxObj::FlagRebuild()
 {
   rebuild_=true;
@@ -285,177 +478,6 @@ void GfxObj::OnRenderModeChange()
   Scene::Instance().RenderModeChanged(GetName());
 }
 
-void GfxObj::SetLineWidth(float w)
-{
-  va_.SetLineWidth(w);
-  line_width_=std::max(float(0.01),w);
-  FlagRefresh();
-  Scene::Instance().RenderModeChanged(GetName());
-}
-
-float GfxObj::GetLineWidth() const
-{
-  return line_width_;
-}
-
-void GfxObj::SetSphereDetail(unsigned int d)
-{
-  if(d==sphere_detail_) return;
-  sphere_detail_=d;
-  FlagRebuild();
-}
-
-unsigned int GfxObj::GetSphereDetail() const
-{
-  return sphere_detail_;
-}
-
-void GfxObj::SetArcDetail(unsigned int d)
-{
-  if(d==arc_detail_) return;
-  arc_detail_=d;
-  FlagRebuild();
-}
-
-unsigned int GfxObj::GetArcDetail() const
-{
-  return arc_detail_;
-}
-
-void GfxObj::SetSplineDetail(unsigned int d)
-{
-  if(d==spline_detail_) return;
-  spline_detail_=d;
-  FlagRebuild();
-}
-
-unsigned int GfxObj::GetSplineDetail() const
-{
-  return spline_detail_;
-}
-
-void GfxObj::SetPolyMode(unsigned int m)
-{
-  if(m==poly_mode_) return;
-  poly_mode_=std::min((unsigned int)2,m);
-  va_.SetPolyMode(poly_mode_);
-  FlagRefresh();
-}
-
-unsigned int GfxObj::GetPolyMode() const
-{
-  return poly_mode_;
-}
-
-void GfxObj::SetAALines(bool f)
-{
-  if(f==aalines_flag_) return;
-  va_.SetAALines(f);
-  aalines_flag_=f;
-  FlagRefresh();
-}
-
-bool GfxObj::GetAALines() const
-{
-  return aalines_flag_;
-}
-
-void GfxObj::SetLineHalo(float f)
-{
-  va_.SetLineHalo(f);
-  line_halo_=f;
-  FlagRefresh();
-}
-
-float GfxObj::GetLineHalo() const
-{
-  return line_halo_;
-}
-
-void GfxObj::SetOutlineMode(int m)
-{
-  omode_=m;
-  FlagRefresh();
-}
-
-void GfxObj::SetOutlineExpandFactor(float f)
-{
-  va_.SetOutlineExpandFactor(f);
-}
-
-void GfxObj::SetOutlineExpandColor(const Color& c)
-{
-  va_.SetOutlineExpandColor(c);
-}
-
-void GfxObj::RenderGL(RenderPass pass)
-{
-  LOGN_TRACE("object " << GetName() << ": RenderGL()");
-
-  if(pass==0) {
-    if(mat_update_) {
-      LOGN_TRACE("updating material display list");
-      if(mat_dlist_==0) {
-        mat_dlist_=glGenLists(1);
-      }
-      glNewList(mat_dlist_,GL_COMPILE);
-      mat_.RenderGL();
-      glEndList();
-      mat_update_=false;
-    }
-    
-    if(rebuild_ || refresh_) {
-      PreRenderGL(rebuild_);
-      rebuild_=false;
-      refresh_=false;
-    }
-  }
-  if(IsVisible()) {
-    LOGN_TRACE("applying local transformation");
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glMultMatrix(transform_.GetTransposedMatrix().Data());
-    if(Scene::Instance().InOffscreenMode()) {
-      LOGN_TRACE("applying material");
-      mat_.RenderGL();
-    } else {
-      LOGN_TRACE("applying material display list");
-      glCallList(mat_dlist_);
-    }
-    LOGN_TRACE("calling custom render gl pass " << pass);
-
-    CustomRenderGL(pass);
-
-    if(pass==0 && omode_>0) {
-      va_.SetOutlineMode(omode_);
-      CustomRenderGL(pass);
-      va_.SetOutlineMode(0);
-    }
-
-    if(pass==1) {
-      LOGN_TRACE("drawing labels");
-      render_labels();
-    }
-
-    glPopMatrix();    
-  }
-}
-
-
-void GfxObj::RenderPov(PovState& pov)
-{
-  if(IsVisible()) {
-    pov.start_obj(GetName(),1.0,1.0,1.0);
-    // apply local transformation
-    // using transform_
-    if(rebuild_ || refresh_) {
-      PreRenderGL(true);
-    }
-    CustomRenderPov(pov);
-    pov.end_obj();
-  }
-}
-
 void GfxObj::PreRenderGL(bool f)
 {
   LOGN_DUMP("object " << GetName() << ": PreRenderGL()");
@@ -464,6 +486,7 @@ void GfxObj::PreRenderGL(bool f)
 
 void GfxObj::Clear()
 {
+  va_.Clear();
 }
 
 Color GfxObj::Ele2Color(const String& ele)
@@ -505,90 +528,6 @@ void GfxObj::ClearLabels()
   labels_.clear();
 }
 
-void GfxObj::SetMatAmb(const Color& c)
-{
-  mat_.SetAmb(c);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetMatAmb(float c)
-{
-  mat_.SetAmb(c);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetMatDiff(const Color& c)
-{
-  mat_.SetDiff(c);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetMatDiff(float c)
-{
-  mat_.SetDiff(c);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetMatSpec(const Color& c)
-{
-  mat_.SetSpec(c);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetMatSpec(float c)
-{
-  mat_.SetSpec(c);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetMatShin(float s)
-{
-  mat_.SetShin(s);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetMatEmm(const Color& c)
-{
-  mat_.SetEmm(c);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetMatEmm(float c)
-{
-  mat_.SetEmm(c);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetMat(const Color& amb, const Color& diff, const Color& spec, float shin)
-{
-  SetMatAmb(amb);
-  SetMatDiff(diff);
-  SetMatSpec(spec);
-  SetMatShin(shin);
-  SetMatEmm(0.0);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetMat(float amb, float diff, float spec, float shin)
-{
-  SetMatAmb(amb);
-  SetMatDiff(diff);
-  SetMatSpec(spec);
-  SetMatShin(shin);
-  SetMatEmm(0.0);
-  mat_update_=true;
-  Scene::Instance().RequestRedraw();
-}
 
 Material GfxObj::GetMaterial() const
 {
@@ -612,148 +551,10 @@ void GfxObj::GLCleanup()
 void GfxObj::OnGLCleanup()
 {}
 
-void GfxObj::SetOpacity(float o)
-{
-  opacity_=o;
-  FlagRebuild();
-}
-
-float GfxObj::GetOpacity() const
-{
-  return opacity_;
-}
-
 void GfxObj::SmoothVertices(float smoothf)
 {
   va_.SmoothVertices(smoothf);
   FlagRefresh();
-}
-
-void GfxObj::AmbientOcclusion(bool f)
-{
-  va_.UseAmbient(f);
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::AmbientLocalWeight(float w)
-{
-  va_.AmbientLocalWeight(w);
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::AmbientOcclusionWeight(float w)
-{
-  va_.AmbientOcclusionWeight(w);
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::ColorBy(const mol::EntityView& ev, 
-                      const String& prop,
-                      const Gradient& g, float minv, float maxv)
-{
-  LOGN_VERBOSE("ColorBy not implemented for this gfx object");
-}
-
-
-void GfxObj::ColorBy(const mol::EntityView& ev, 
-                      const String& prop,
-                      const Color& c1, const Color& c2, float minv, float maxv)
-{
-  Gradient g;
-  g.SetColorAt(0.0,c1);
-  g.SetColorAt(1.0,c2);
-  this->ColorBy(ev,prop,g,minv,maxv);
-}
-
-#if OST_IMG_ENABLED
-void GfxObj::ColorBy(const img::MapHandle& mh,
-                      const String& prop,
-                      const Gradient& g, float minv, float maxv)
-{
-  LOGN_VERBOSE("ColorBy not implemented for this gfx object");
-}
-
-void GfxObj::ColorBy(const img::MapHandle& mh,
-                      const String& prop,
-                      const Color& c1, const Color& c2, float minv, float maxv)
-{
-  Gradient g;
-  g.SetColorAt(0.0,c1);
-  g.SetColorAt(1.0,c2);
-  this->ColorBy(mh,prop,g,minv,maxv);
-}
-
-void GfxObj::ColorBy(const img::MapHandle& mh,
-                      const String& prop,
-                      const Gradient& g)
-{
-  ost::img::alg::Stat stat;
-  mh.Apply(stat);
-  float min = static_cast<float>(stat.GetMinimum());
-  float max = static_cast<float>(stat.GetMaximum());
-  std::pair<float,float> minmax = std::make_pair(min,max);
-  this->ColorBy(mh,prop,g,minmax.first, minmax.second);
-}
-
-void GfxObj::ColorBy(const img::MapHandle& mh,
-                      const String& prop,
-                      const Color& c1, const Color& c2)
-{
-  ost::img::alg::Stat stat;
-  mh.Apply(stat);
-  float min = static_cast<float>(stat.GetMinimum());
-  float max = static_cast<float>(stat.GetMaximum());
-  std::pair<float,float> minmax = std::make_pair(min,max);
-  this->ColorBy(mh,prop,c1,c2,minmax.first, minmax.second);
-}
-
-#endif //OST_IMG_ENABLED
-
-void GfxObj::ColorBy(const mol::EntityHandle& eh, 
-                      const String& prop,
-                      const Gradient& g, float minv, float maxv)
-{
-  this->ColorBy(eh.CreateFullView(),prop,g,minv,maxv);
-}
-    
-void GfxObj::ColorBy(const mol::EntityHandle& eh, 
-                      const String& prop,
-                      const Color& c1, const Color& c2, float minv, float maxv)
-{
-  Gradient g;
-  g.SetColorAt(0.0,c1);
-  g.SetColorAt(1.0,c2);
-  this->ColorBy(eh,prop,g,minv,maxv);
-}
-
-void GfxObj::ColorBy(const mol::EntityView& ev, 
-                      const String& prop,
-                      const Gradient& g)
-{
-  std::pair<float,float> minmax = ev.GetMinMax(prop);
-  this->ColorBy(ev,prop,g,minmax.first, minmax.second);
-}
-    
-void GfxObj::ColorBy(const mol::EntityView& ev, 
-                      const String& prop,
-                      const Color& c1, const Color& c2)
-{
-  std::pair<float,float> minmax = ev.GetMinMax(prop);
-  this->ColorBy(ev,prop,c1,c2,minmax.first, minmax.second);
-}
-
-void GfxObj::ColorBy(const mol::EntityHandle& eh, 
-                      const String& prop,
-                      const Gradient& g)
-{
-  this->ColorBy(eh.CreateFullView(),prop,g);
-}
-
-void GfxObj::ColorBy(const mol::EntityHandle& eh, 
-                      const String& prop,
-                      const Color& c1, const Color& c2)
-{
-  this->ColorBy(eh.CreateFullView(),prop,c1,c2);
 }
 
 namespace {

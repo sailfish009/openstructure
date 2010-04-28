@@ -43,7 +43,10 @@ Surface::Surface(const String& name, const mol::SurfaceHandle& sh):
   recalc_bb_(true)
 {
   // TODO replace with def mat for this gfx obj type
-  SetMat(0.0,1.0,0.2,48.0);
+  SetMatAmb(Color(0,0,0));
+  SetMatDiff(Color(1,1,1));
+  SetMatSpec(Color(0.2,0.2,0.2));
+  SetMatShin(48);
   Rebuild();
 }
 

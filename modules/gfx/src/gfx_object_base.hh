@@ -1,0 +1,134 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
+#ifndef OST_GFX_OBJ_BASE_HH
+#define OST_GFX_OBJ_BASE_HH
+
+/*
+  Author: Ansgar Philippsen
+*/
+
+#include <ost/geom/geom.hh>
+#include <ost/mol/entity_handle.hh>
+#include <ost/mol/entity_view.hh>
+#if OST_IMG_ENABLED
+#  include <ost/img/map.hh>
+#endif
+
+#include <ost/config.hh>
+#include "module_config.hh"
+
+#include "gfx_node.hh"
+#include "color.hh"
+#include "render_mode.hh"
+#include "gradient.hh"
+#include "material.hh"
+#include "color_ops/color_op.hh"
+
+namespace ost { namespace gfx {
+
+class Scene; // fw decl
+
+/// \brief main interface for all graphic objects, both in C++ and Python
+/*
+  this abstract base class is for both the actual GfxObj as well as a 
+  shortly implemented re-design of the GfxNode, and hence temporary in
+  its current form
+*/
+class DLLEXPORT_OST_GFX GfxObjBase: public GfxNode
+{
+ public:
+  GfxObjBase(const String& name): GfxNode(name) {}
+  
+  /// \brief material ambient color
+  virtual void SetMatAmb(const Color& c) = 0;
+  /// \brief material diffuse color
+  virtual void SetMatDiff(const Color& c) = 0;
+  /// \brief material specular color
+  virtual void SetMatSpec(const Color& c) = 0;
+  /// \brief material shininess
+  virtual void SetMatShin(float s) = 0;
+  /// \brief material emmissive color
+  virtual void SetMatEmm(const Color& c) = 0;
+
+  /// \brief rendering context switch, some things need to be regenerated
+  virtual void ContextSwitch() = 0;
+
+  /// \brief change render mode
+  virtual void SetRenderMode(RenderMode::Type m) = 0;
+  /// \brief current render mode
+  virtual RenderMode::Type GetRenderMode() const = 0;
+  
+  /// \brief get geometric center
+  virtual geom::Vec3 GetCenter() const = 0;
+
+  /// \brief set line width
+  virtual void SetLineWidth(float w) = 0;
+  
+  /// \brief set polygon mode
+  virtual void SetPolyMode(unsigned int m) = 0;
+
+  /// \brief turn on sophisticated line anti-aliasing, requires shader
+  virtual void AALines(bool f) = 0;
+
+  /// \brief turn on line halo of given strength
+  virtual void SetLineHalo(float f) = 0;
+
+  /// \brief turn outline rendering on or off
+  virtual void Outline(bool f) = 0;
+
+  /// \brief set outline mode
+  virtual void SetOutlineMode(int m) = 0;
+  /// \brief set outline tweak factor
+  virtual void SetOutlineExpandFactor(float f) = 0;
+  /// \brief set outline color
+  virtual void SetOutlineExpandColor(const Color& c) = 0;
+
+  /// \brief ambient occlusion rendering
+  /// results are cached, but may be very slow on first call 
+  virtual void AmbientOcclusion(bool f) = 0;
+  
+  /// \brief blending weight of local color to fragment color
+  virtual void SetAmbientLocalWeight(float w) = 0;
+  
+  /// \brief blending weight of occlusion factor
+  virtual void SetAmbientOcclusionWeight(float w) = 0;
+
+  /// \brief set opacity (1 = no transparency)
+  virtual void SetOpacity(float f) = 0;
+
+  /// \brief color each component based on the gradient-mapped property of 
+  ///    the given entity
+  virtual void ColorBy(const mol::EntityView& ev, 
+                       const String& prop,
+                       const Gradient& g, float minv, float maxv) = 0;
+
+#if OST_IMG_ENABLED
+  /// \brief color based on image
+  virtual void ColorBy(const img::MapHandle& mh,
+                       const String& prop,
+                       const Gradient& g,float minv, float maxv) = 0;
+#endif
+    
+
+
+};
+
+}} // ns
+
+#endif

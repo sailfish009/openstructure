@@ -72,7 +72,10 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
   debug_octree_(false),
   color_(Color::GREY)
 {
-  SetMat(0.0,1.0,0.1,32.0);
+  SetMatAmb(Color(0,0,0));
+  SetMatDiff(Color(1,1,1));
+  SetMatSpec(Color(0.1,0.1,0.1));
+  SetMatShin(32);
   mol::Transform tf=this->GetTF();
   tf.SetCenter(this->GetCenter());
   tf.SetTrans(this->GetCenter());
@@ -94,7 +97,10 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   color_(Color::GREY)
 {
   // TODO replace with def mat for this gfx obj type
-  SetMat(0.0,1.0,0.1,32.0);
+  SetMatAmb(Color(0,0,0));
+  SetMatDiff(Color(1,1,1));
+  SetMatSpec(Color(0.1,0.1,0.1));
+  SetMatShin(32);
   mol::Transform tf=this->GetTF();
   tf.SetCenter(this->GetCenter());
   tf.SetTrans(this->GetCenter());  
