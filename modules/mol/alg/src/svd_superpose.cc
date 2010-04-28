@@ -131,6 +131,8 @@ public:
                                   ERVecX Vec);
   SuperpositionResult Run(const mol::AtomViewList& atoms1,          
                           const mol::AtomViewList& atoms2);
+  SuperpositionResult Run(const std::vector<geom::Vec3>& pl1,
+                          const std::vector<geom::Vec3>& pl2);
   SuperpositionResult DoSuperposition();
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW //needed only if *fixed* sized matrices are
                                     //members of classes  
@@ -295,6 +297,12 @@ SuperpositionResult SuperposerSVD::Run(const mol::AtomViewList& atoms1,
   return impl_->Run(atoms1, atoms2);
 }
 
+SuperpositionResult SuperposerSVD::Run(const std::vector<geom::Vec3>& pl1,
+                                       const std::vector<geom::Vec3>& pl2)
+{
+  return impl_->Run(pl1,pl2);
+}
+  
 SuperpositionResult SuperposerSVDImpl::Run(const mol::AtomViewList& atoms1,
                                            const mol::AtomViewList& atoms2)
 {
@@ -315,6 +323,15 @@ SuperpositionResult SuperposerSVDImpl::Run(const mol::AtomViewList& atoms1,
   return this->DoSuperposition();
 }
 
+SuperpositionResult SuperposerSVDImpl::Run(const std::vector<geom::Vec3>& pl1,
+                                           const std::vector<geom::Vec3>& pl2)
+{
+  for (unsigned int counter=0; counter<pl1.size();++counter) {
+    atoms1_.row(counter)=ERVec3(SuperposerSVDImpl::Vec3ToEigenVec(pl1[counter]));
+    atoms2_.row(counter)=ERVec3(SuperposerSVDImpl::Vec3ToEigenVec(pl2[counter]));
+  }
+  return this->DoSuperposition();
+}
 
 
 SuperpositionResult SuperposeAtoms(const mol::AtomViewList& atoms1,
@@ -367,6 +384,24 @@ SuperpositionResult SuperposeSVD(const mol::EntityView& ev1,
     mol::XCSEditor ed=ev1.GetHandle().RequestXCSEditor();
     ed.ApplyTransform(res.transformation);
   }
+  return res;
+}
+
+SuperpositionResult SuperposeSVD(const std::vector<geom::Vec3>& pl1,
+                                 const std::vector<geom::Vec3>& pl2)
+{
+  if (pl1.size()!=pl2.size()){
+    throw std::runtime_error("pointlist lengths not equal");
+  }
+  if ((pl1.size()<3)){
+    throw std::runtime_error("three or more points required");
+  }
+  SuperposerSVD sp(pl1.size(), true);
+  SuperpositionResult res=sp.Run(pl1, pl2);
+  res.entity_view1=EntityView();
+  res.entity_view2=EntityView();
+  res.ncycles=1;
+  res.rmsd=0.0;
   return res;
 }
 

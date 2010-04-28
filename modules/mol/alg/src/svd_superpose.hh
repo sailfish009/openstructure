@@ -59,6 +59,9 @@ public:
   SuperpositionResult Run(const mol::AtomViewList& atoms1,
                           const mol::AtomViewList& atoms2);
 
+  SuperpositionResult Run(const std::vector<geom::Vec3>& pl1,
+                          const std::vector<geom::Vec3>& pl2);
+
 private:
   SuperposerSVDImpl* impl_;
 };
@@ -71,6 +74,10 @@ SuperpositionResult DLLEXPORT_OST_MOL_ALG SuperposeAtoms(const mol::AtomViewList
 SuperpositionResult DLLEXPORT_OST_MOL_ALG SuperposeSVD(const mol::EntityView& ev1,
                                                     const mol::EntityView& ev2,
                                                     bool apply_transform);
+
+/// \brief superposes two pointlists
+SuperpositionResult DLLEXPORT_OST_MOL_ALG SuperposeSVD(const std::vector<geom::Vec3>& pl1,
+                                                       const std::vector<geom::Vec3>& pl2);
 
 /// \brief iterative superposition
 SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposition(mol::EntityView& ev1,
