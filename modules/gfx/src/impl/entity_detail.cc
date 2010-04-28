@@ -137,6 +137,8 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
     xc[c]=static_cast<float>(c);
   }
 
+  LOGN_DEBUG("SplineGenerate: interpolating spline entry components");
+  
   // create sublist with enough entries
   SplineEntryList sublist(ipsize);
 
@@ -155,6 +157,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
 
   SPLINE_ENTRY_INTERPOLATE(rad);
 
+  LOGN_DEBUG("SplineGenerate: assigning direction and normal components");
   // assign direction and normal
   // entity trace has the same algorithm
 
@@ -215,8 +218,10 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
     sublist.at(i).normal = sublist.at(i).v0;
   }
 
+  LOGN_DEBUG("SplineGenerate: assigning non-interpolated entry components");
   // finally the non-interpolated type
   // with some tweaks for proper strand rendering
+  // part of this probably belongs into cartoon renderer
   for(int c=0;c<size-1;++c) {
     int type1=entry_list[c].type;
     int type2=entry_list[std::min(c+1,size-1)].type;
@@ -235,9 +240,11 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
   sublist.back().frac=0.0;
 
   // the nflip flags for helices for correct inside/outside assignment
-  int c=0;
+  // this probably belongs into cartoon renderer
+  LOGN_DEBUG("SplineGenerate: setting nflip flags for helices");
+  unsigned int c=0;
   bool nflip=false;
-  while(c<nsub*(size-1)) {
+  while(c<sublist.size()-1) {
     int cstart=c;
     if(sublist.at(c).type==1 && sublist.at(c+1).type==1) {
       geom::Vec3 n = geom::Normalize(geom::Cross(sublist.at(c).normal,
@@ -247,7 +254,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
       float psum=0.0;
       float qsum=0.0;
       ++c;
-      while(sublist.at(c).type==1 && c<nsub*size) {
+      while(sublist.at(c).type==1 && c<sublist.size()-1) {
         n = geom::Normalize(geom::Cross(sublist.at(c).normal,
                                         sublist.at(c).direction));
         geom::Vec3 p1 = sublist.at(c).position+n;
@@ -260,7 +267,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
       }
       
       nflip = qsum>psum;
-      for(int cc=cstart;cc<c;++cc) {
+      for(unsigned int cc=cstart;cc<c;++cc) {
         sublist.at(c).nflip=nflip;
       }
     } else {
@@ -268,6 +275,8 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
     }
   }
   sublist.back().nflip=nflip;
+
+  LOGN_DEBUG("SplineGenerate: done");
 
   // done
   return sublist;

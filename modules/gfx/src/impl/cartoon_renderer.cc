@@ -56,51 +56,62 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
                                        SplineEntryListList& spline_list_list,
                                        bool is_sel)
 {
+  if(options_==NULL) {
+    LOGN_DEBUG("CartoonRenderer: NULL options, not creating objects");
+  }
+
+  va.Clear();
+  va.SetLighting(true);
+  va.SetCullFace(true);
+  va.SetColorMaterial(true);
+  va.SetMode(0x4);
+  va.SetPolyMode(options_->GetPolyMode());
+
+  LOGN_DEBUG("CartoonRenderer: starting object build");
   int spline_detail=std::max((unsigned int) 1, options_->GetSplineDetail());
   const Color& sel_clr=this->GetSelectionColor();
   SplineEntryListList tmp_sll;
-  if(options_!=NULL){
-    va.Clear();
-    va.SetLighting(true);
-    va.SetCullFace(true);
-    va.SetColorMaterial(true);
-    va.SetMode(0x4);
-    va.SetPolyMode(options_->GetPolyMode());
-    for (int node_list=0; node_list<subset.GetListCount(); ++node_list) {
-      // first build the spline
-      SplineEntryList spl;
-      const NodeEntryList& nl=subset.GetList(node_list);
-      for (unsigned int i=0; i<nl.size();++i) {
-        int type=0;
-        const NodeEntry& entry=nl[i];
-        if(!force_tube_) {
-          mol::ResidueHandle resh = entry.atom.GetResidue();
-          mol::SecStructure sst=resh.GetSecStructure();
-          if(sst.IsHelical()) {
-            type=1;
-          } else if(sst.IsExtended()) {
-            type=2;
-          }
-        }
-        SplineEntry ee(entry.atom.GetPos(),entry.direction,
-                       entry.normal, entry.rad, 
-                       is_sel ? sel_clr : entry.color1, 
-                       is_sel ? sel_clr : entry.color2, type);
-        ee.v1 = entry.v1;
-        spl.push_back(ee);
+  for (int node_list=0; node_list<subset.GetListCount(); ++node_list) {
+    LOGN_DEBUG("CartoonRenderer: collecting spline entries for node list " << node_list);
+    // first build the spline
+    SplineEntryList spl;
+    const NodeEntryList& nl=subset.GetList(node_list);
+    for (unsigned int i=0; i<nl.size();++i) {
+      int type=0;
+      const NodeEntry& entry=nl[i];
+      if(!force_tube_) {
+	mol::ResidueHandle resh = entry.atom.GetResidue();
+	mol::SecStructure sst=resh.GetSecStructure();
+	if(sst.IsHelical()) {
+	  type=1;
+	} else if(sst.IsExtended()) {
+	  type=2;
+	}
       }
-      if(!spl.empty()) {
-        tmp_sll.push_back(spl);
-      }
+      SplineEntry ee(entry.atom.GetPos(),entry.direction,
+		     entry.normal, entry.rad, 
+		     is_sel ? sel_clr : entry.color1, 
+		     is_sel ? sel_clr : entry.color2, type);
+      ee.v1 = entry.v1;
+      spl.push_back(ee);
     }
+    LOGN_DEBUG("CartoonRenderer: found " << spl.size() << " entries");
+    if(!spl.empty()) {
+      tmp_sll.push_back(spl);
+    }
+  }
+  if(!force_tube_) {
+    LOGN_DEBUG("CartoonRenderer: adjusting spline-entry-list lists for various modes");
     FudgeSplineObj(va,tmp_sll);
-    spline_list_list.clear();
-    for(SplineEntryListList::const_iterator sit=tmp_sll.begin();sit!=tmp_sll.end();++sit) {
-      spline_list_list.push_back(Spline::Generate(*sit,spline_detail));
-    }
-    RebuildSplineObj(va, spline_list_list, is_sel);    
-    //va.SmoothNormals(options_->GetNormalSmoothFactor());
-  }  
+  }
+  spline_list_list.clear();
+  unsigned int tmp_count=0;
+  for(SplineEntryListList::const_iterator sit=tmp_sll.begin();sit!=tmp_sll.end();++sit) {
+    LOGN_DEBUG("CartoonRenderer: generating full spline for spline-entry-list " << tmp_count++);
+    spline_list_list.push_back(Spline::Generate(*sit,spline_detail));
+  }
+  RebuildSplineObj(va, spline_list_list, is_sel);    
+  //va.SmoothNormals(options_->GetNormalSmoothFactor());
 }
 
 void CartoonRenderer::PrepareRendering()
@@ -178,9 +189,10 @@ void CartoonRenderer::FudgeSplineObj(IndexedVertexArray& va, SplineEntryListList
   SplineEntryList nlist;
   
   for(unsigned int llc=0;llc<olistlist.size();++llc) {
+    LOGN_DEBUG("CartoonRenderer: fudging spline segment " << llc);
     SplineEntryList olist = olistlist[llc];
     for(unsigned int lc=0;lc<olist.size();++lc) {
-      if(olist.at(lc).type==1 && options_->GetHelixMode()==1) {
+      if(olist.at(lc).type==1) {
         if(options_->GetHelixMode()==1) {
           // cylindrical helix
           // collect all CA positions 
@@ -250,7 +262,10 @@ void CartoonRenderer::FudgeSplineObj(IndexedVertexArray& va, SplineEntryListList
             nlist.push_back(olist.at(lc));
           }
         }
-      } else if(olist.at(lc).type==2) {
+      }
+      if(lc>=olist.size()) break;
+      // can't use else here in case the above routine advanced lc to end
+      if(olist.at(lc).type==2) {
         // strand
         unsigned int kstart=nlist.size();
         unsigned int kend=kstart;
@@ -258,22 +273,22 @@ void CartoonRenderer::FudgeSplineObj(IndexedVertexArray& va, SplineEntryListList
           nlist.push_back(olist.at(lc));
         }
         kend-=1;
-        nlist[kend].type=3; // mark end of strand
+        nlist.at(kend).type=3; // mark end of strand
 
         if(options_->GetStrandMode()==1 && kend>kstart) {
-          nlist[kend-1].type=3;
-          nlist[kend].type=5;
+          nlist.at(kend-1).type=3;
+          nlist.at(kend).type=5;
           // smooth the strands
-          nlist[kstart].direction = geom::Normalize(nlist[kend].position-nlist[kstart].position);
-          nlist[kend].direction=nlist[kstart].direction;
+          nlist.at(kstart).direction = geom::Normalize(nlist.at(kend).position-nlist.at(kstart).position);
+          nlist.at(kend).direction=nlist.at(kstart).direction;
           float invf=1.0/static_cast<float>(kend-kstart);
           for(unsigned int k=kstart;k<=kend;++k) {
             float f = static_cast<float>(k-kstart)*invf;
-            nlist[k].position=nlist[kstart].position+f*(nlist[kend].position-nlist[kstart].position);
-            nlist[k].direction=nlist[kstart].direction;
-            geom::Vec3 tmpn=geom::Normalize(nlist[kstart].normal+f*(nlist[kend].normal-nlist[kstart].normal));
-            geom::Vec3 tmpx=geom::Normalize(geom::Cross(nlist[kstart].direction,tmpn));
-            nlist[k].normal=geom::Normalize(geom::Cross(tmpx,nlist[kstart].direction));
+            nlist.at(k).position=nlist.at(kstart).position+f*(nlist.at(kend).position-nlist.at(kstart).position);
+            nlist.at(k).direction=nlist.at(kstart).direction;
+            geom::Vec3 tmpn=geom::Normalize(nlist.at(kstart).normal+f*(nlist.at(kend).normal-nlist.at(kstart).normal));
+            geom::Vec3 tmpx=geom::Normalize(geom::Cross(nlist.at(kstart).direction,tmpn));
+            nlist.at(k).normal=geom::Normalize(geom::Cross(tmpx,nlist.at(kstart).direction));
           }
           // break nodelist, re-start at arrow tip
           if(lc+1<olist.size()) {
@@ -302,6 +317,7 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
                                        const SplineEntryListList& spline_list_list,
                                        bool is_sel)
 {
+  LOGN_DEBUG("CartoonRenderer: starting profile assembly");
   unsigned int detail = std::min(MAX_ARC_DETAIL,
                                  std::max(options_->GetArcDetail(),
                                  (unsigned int)1));
@@ -339,6 +355,7 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
   }
 
   // iterate over all spline segments
+  unsigned int tmp_count=0;
   for(SplineEntryListList::const_iterator it=spline_list_list.begin();
       it<spline_list_list.end();++it) {
     /*
@@ -348,6 +365,7 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
     */
     SplineEntryList slist=*it;
     if(slist.empty()) continue;
+    LOGN_DEBUG("CartoonRenderer: assembling fragment " << tmp_count << " with " << slist.size() << " spline segments");
     TraceProfile tprof1=TransformAndAddProfile(profiles,slist[0],va);
     CapProfile(tprof1,slist[0],true,va);
     TraceProfile tprof2;
