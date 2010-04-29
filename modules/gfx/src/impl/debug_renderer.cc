@@ -63,7 +63,7 @@ void DebugRenderer::PrepareRendering()
       }
 
       SplineEntry ee(it->atom.GetPos(),it->direction,it->normal,
-                     it->rad,it->color1,it->color2,type);
+                     it->rad,it->color1,it->color2,type,it->id);
       ee.v1 = it->v1;
       spl.push_back(ee);
     }

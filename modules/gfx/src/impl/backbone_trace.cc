@@ -32,7 +32,8 @@ public:
   TraceBuilder(BackboneTrace* bb_trace):
     backbone_trace_(bb_trace),
     last_residue_(),
-    list_()
+    list_(),
+    id_counter_(0)
   {}
 
   virtual bool VisitChain(const mol::ChainHandle& chain)
@@ -60,11 +61,11 @@ public:
     if (ca) {
       NodeEntry entry={ca, GfxObj::Ele2Color(ca.GetAtomProps().element),
                        GfxObj::Ele2Color(ca.GetAtomProps().element),
-                       geom::Vec3(0.0,0.0,0.0), // this will be set by the gfx trace obj
+                       geom::Vec3(), // this will be set by the gfx trace obj
                        res.GetCentralNormal(),
                        1.0,
-                       geom::Vec3(),geom::Vec3(),geom::Vec3(),
-                       false};
+                       geom::Vec3(),geom::Vec3(),geom::Vec3(), // for later use in NA rendering
+                       false,id_counter_++};
       list_.push_back(entry);
     }
 
@@ -85,6 +86,7 @@ private:
   mol::ResidueHandle last_residue_;
   mol::ChainHandle   last_chain_;
   NodeEntryList      list_;
+  int                id_counter_;
 };
 
 BackboneTrace::BackboneTrace()

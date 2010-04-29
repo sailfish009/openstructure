@@ -91,7 +91,8 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
       SplineEntry ee(entry.atom.GetPos(),entry.direction,
 		     entry.normal, entry.rad, 
 		     is_sel ? sel_clr : entry.color1, 
-		     is_sel ? sel_clr : entry.color2, type);
+		     is_sel ? sel_clr : entry.color2,
+		     type, entry.id);
       ee.v1 = entry.v1;
       spl.push_back(ee);
     }
@@ -102,25 +103,68 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
   }
   if(!force_tube_) {
     LOGN_DEBUG("CartoonRenderer: adjusting spline-entry-list lists for various modes");
-    FudgeSplineObj(va,tmp_sll);
+    FudgeSplineObj(tmp_sll);
   }
   spline_list_list.clear();
   unsigned int tmp_count=0;
   for(SplineEntryListList::const_iterator sit=tmp_sll.begin();sit!=tmp_sll.end();++sit) {
-    LOGN_DEBUG("CartoonRenderer: generating full spline for spline-entry-list " << tmp_count++);
-    spline_list_list.push_back(Spline::Generate(*sit,spline_detail));
+    if(sit->size()==2 and sit->at(0).type==6) {
+      // don't intpol cylinders
+      spline_list_list.push_back(*sit);
+    } else {
+      LOGN_DEBUG("CartoonRenderer: generating full spline for spline-entry-list " << tmp_count++);
+      spline_list_list.push_back(Spline::Generate(*sit,spline_detail));
+    }
   }
-  RebuildSplineObj(va, spline_list_list, is_sel);    
-  //va.SmoothNormals(options_->GetNormalSmoothFactor());
 }
 
 void CartoonRenderer::PrepareRendering()
 {
   TraceRendererBase::PrepareRendering();
-  va_.Clear();
-  this->PrepareRendering(trace_subset_, va_, spline_list_list_, false);
-  if (this->HasSelection()) {
-    this->PrepareRendering(sel_subset_, sel_va_, sel_spline_list_list_, true);
+  if(state_>0) {
+    this->PrepareRendering(trace_subset_, va_, spline_list_list_, false);
+    RebuildSplineObj(va_, spline_list_list_, false);
+  }
+  if (this->HasSelection() && (state_>0 || sel_state_>0)) {
+    // extract spline segments from list_list that match 
+    // (via id) the selection subset
+    // first put all ids into a set for fast lookup
+    std::set<int> id_set;
+    for(int nlc=0;nlc<sel_subset_.GetListCount();++nlc) {
+      const NodeEntryList& nelist=sel_subset_.GetList(nlc);
+      for(NodeEntryList::const_iterator nit=nelist.begin();nit!=nelist.end();++nit) {
+	id_set.insert(nit->id);
+      }
+    }
+    // now find all matching spline segments
+    sel_spline_list_list_.clear();
+    for(SplineEntryListList::const_iterator sit=spline_list_list_.begin();sit!=spline_list_list_.end();++sit) {
+      const SplineEntryList& slist=*sit;
+      SplineEntryList nlist;
+      unsigned int sc=0;
+      while(sc<slist.size()) {
+	int curr_id=slist.at(sc).id;
+	if(id_set.count(curr_id)>0) {
+	  // if a match is found, add all until a new id is found
+	  while(sc<slist.size() &&  slist.at(sc).id==curr_id) {
+	    nlist.push_back(slist[sc++]);
+	  }
+	} else {
+	  // introduce break
+	  if(!nlist.empty()) {
+	    sel_spline_list_list_.push_back(nlist);
+	    nlist.clear();
+	  }
+	  // and advance to the next id
+	  while(sc<slist.size() &&  slist.at(sc).id==curr_id) ++sc;
+	}
+      }
+      if(!nlist.empty()) {
+	sel_spline_list_list_.push_back(nlist);
+	nlist.clear();
+      }
+    }
+    RebuildSplineObj(sel_va_, sel_spline_list_list_, true);
     sel_va_.SetColorMaterial(false);
     sel_va_.SetLighting(false);
   }
@@ -183,7 +227,7 @@ namespace {
   
 } // ns
 
-void CartoonRenderer::FudgeSplineObj(IndexedVertexArray& va, SplineEntryListList& olistlist)
+void CartoonRenderer::FudgeSplineObj(SplineEntryListList& olistlist)
 {
   SplineEntryListList nlistlist;
   SplineEntryList nlist;
@@ -234,6 +278,16 @@ void CartoonRenderer::FudgeSplineObj(IndexedVertexArray& va, SplineEntryListList
               nlist.clear();
             }
 
+	    // make a two entry list with the cyl type
+	    nlist.push_back(SplineEntry(cyl.first,geom::Vec3(),geom::Vec3(),0.0,
+					olist[lstart].color1,olist[lstart].color1,
+					6,olist[lstart].id));
+	    nlist.push_back(SplineEntry(cyl.second,geom::Vec3(),geom::Vec3(),0.0,
+					olist[lend].color1,olist[lend].color1,
+					6,olist[lend].id));
+	    nlistlist.push_back(nlist);
+	    nlist.clear();
+
             if(lend+1<olist.size()) {
               // and get going with an entry at the end of the cylinder
               SplineEntry tmp_start(olist[lend]);
@@ -248,13 +302,6 @@ void CartoonRenderer::FudgeSplineObj(IndexedVertexArray& va, SplineEntryListList
               }
               nlist.push_back(tmp_start);
             }
-
-            // and finally make the cylinder
-            va.AddCylinder(CylinderPrim(cyl.first,cyl.second,
-                                        options_->GetHelixWidth(),
-                                        olist[lstart].color1,
-                                        olist[lend].color1),
-                           options_->GetArcDetail(),true);
           }
         } else { // helix mode 0
           // just copy them over
@@ -366,6 +413,16 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
     SplineEntryList slist=*it;
     if(slist.empty()) continue;
     LOGN_DEBUG("CartoonRenderer: assembling fragment " << tmp_count << " with " << slist.size() << " spline segments");
+
+    if(slist.size()==2 && slist[0].type==6) {
+      // make a cylinder
+      va.AddCylinder(CylinderPrim(slist[0].position,slist[1].position,
+				  options_->GetHelixWidth(),
+				  slist[0].color1,slist[1].color1),
+		     options_->GetArcDetail(),true);
+      continue;
+    }
+
     TraceProfile tprof1=TransformAndAddProfile(profiles,slist[0],va);
     CapProfile(tprof1,slist[0],true,va);
     TraceProfile tprof2;

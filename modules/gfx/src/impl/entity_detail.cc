@@ -230,6 +230,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
       sublist.at(c*nsub+d).type1=type1;
       sublist.at(c*nsub+d).type2=type2;
       sublist.at(c*nsub+d).frac=float(d)/float(nsub);
+      sublist.at(c*nsub+d).id=entry_list[c].id;
     }
   }                                                   
   int type1=entry_list.back().type;

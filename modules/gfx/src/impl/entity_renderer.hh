@@ -56,11 +56,11 @@
 namespace ost { namespace gfx { namespace impl {
 
 typedef enum {
-  DIRTY_VIEW   =1,
-  DIRTY_VA     =2,
+  DIRTY_VIEW   = 0x1,
+  DIRTY_VA     = 0x2
 } DirtyFlag;
 
-typedef char DirtyFlags;
+typedef unsigned int DirtyFlags;
 
 /// \internal
 class DLLEXPORT_OST_GFX EntityRenderer {

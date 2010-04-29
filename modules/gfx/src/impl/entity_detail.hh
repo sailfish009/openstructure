@@ -90,6 +90,7 @@ struct DLLEXPORT_OST_GFX NodeEntry {
   float rad;
   geom::Vec3 v0,v1,v2; // helper vectors
   bool nflip;
+  int id;
 };
 
 typedef std::vector<NodeEntry> NodeEntryList;
@@ -122,7 +123,8 @@ struct DLLEXPORT_OST_GFX SplineEntry {
     v0(1.0,0.0,0.0),
     v1(0.0,1.0,0.0),
     v2(0.0,0.0,1.0),
-    nflip(false)
+    nflip(false),
+    id(-1)
   {
   }
   SplineEntry(const geom::Vec3& p, 
@@ -130,9 +132,9 @@ struct DLLEXPORT_OST_GFX SplineEntry {
               const geom::Vec3& n,
               float r,
               const Color& c1, const Color& c2,
-              unsigned int t):
+              unsigned int t, int i):
     position(p),direction(d),normal(n),color1(c1),color2(c2),rad(r),type(t),
-    type1(t),type2(t),frac(0.0),v0(),v1(),v2(),nflip(false)
+    type1(t),type2(t),frac(0.0),v0(),v1(),v2(),nflip(false),id(i)
   {
   }
 
@@ -144,6 +146,7 @@ struct DLLEXPORT_OST_GFX SplineEntry {
   float frac;
   geom::Vec3 v0,v1,v2; // helper vectors
   bool nflip;
+  int id;
 };
   
 typedef std::vector<SplineEntry> SplineEntryList;

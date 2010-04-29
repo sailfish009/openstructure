@@ -54,7 +54,7 @@ private:
   void PrepareRendering(const BackboneTrace& subset, IndexedVertexArray& va, 
                         SplineEntryListList& spline_list_list, bool is_sel);
 
-  void FudgeSplineObj(IndexedVertexArray&, SplineEntryListList&);
+  void FudgeSplineObj(SplineEntryListList&);
 
   void RebuildSplineObj(IndexedVertexArray& va,
                         const SplineEntryListList& spline_list_list,

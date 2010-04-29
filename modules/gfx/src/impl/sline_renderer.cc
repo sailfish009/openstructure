@@ -71,7 +71,8 @@ void SlineRenderer::PrepareRendering(const BackboneTrace& trace_subset,
         SplineEntry ee(entry.atom.GetPos(), entry.direction,
                        entry.normal, entry.rad, 
                        is_sel ? sel_clr : entry.color1, 
-                       is_sel ? sel_clr : entry.color2, 0);
+                       is_sel ? sel_clr : entry.color2,
+		       0, entry.id);
         ee.v1 = entry.v1;
         spl.push_back(ee);
       }
