@@ -254,7 +254,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
       float psum=0.0;
       float qsum=0.0;
       ++c;
-      while(sublist.at(c).type==1 && c<sublist.size()-1) {
+      while(c<sublist.size() && sublist.at(c).type==1) {
         n = geom::Normalize(geom::Cross(sublist.at(c).normal,
                                         sublist.at(c).direction));
         geom::Vec3 p1 = sublist.at(c).position+n;
@@ -268,7 +268,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
       
       nflip = qsum>psum;
       for(unsigned int cc=cstart;cc<c;++cc) {
-        sublist.at(c).nflip=nflip;
+        sublist.at(cc).nflip=nflip;
       }
     } else {
       ++c;
