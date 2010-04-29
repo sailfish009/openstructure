@@ -29,6 +29,13 @@ using namespace ost::mol;
 #include <ost/export_helper/generic_property_def.hh>
 
 namespace {
+  
+  
+  String sec_structure_as_string(SecStructure& s)
+  {
+    return String(1, char(s));
+  }
+
   typedef EntityView (ResidueHandle::*QueryMethod)(const Query&, uint) const;
   typedef EntityView (ResidueHandle::*StringMethod)(const String&, uint) const;
   QueryMethod select_query=&ResidueHandle::Select;
@@ -70,7 +77,8 @@ void export_Residue()
       .def(init<SecStructure::Type>())
       .def("IsHelical", &SecStructure::IsHelical)
       .def("IsExtended", &SecStructure::IsExtended)
-      .def("IsCoil", &SecStructure::IsCoil)        
+      .def("IsCoil", &SecStructure::IsCoil)
+      .def("__str__", &sec_structure_as_string)
     ;
     enum_<SecStructure::Type>("Type")
       .value("EXTENDED", SecStructure::EXTENDED)
