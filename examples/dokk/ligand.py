@@ -5,6 +5,16 @@ class Ligand:
   def __init__(self, ligand, config=None):
     self.handle=ligand
     self.solution=ligand.Copy().CreateFullView()
+    try:
+      show_sol = bool(int(config.Level["SHOW_SOLUTION"]))
+    except KeyError:
+      show_sol = True
+    if show_sol:
+      self.sol_go=gfx.Entity("Solution", gfx.SIMPLE, self.solution)
+      self.sol_go.SetColor(gfx.GREEN, 'ele=C')
+    else:
+      self.sol_go = None
+    gfx.Scene().Add(self.sol_go)
     self.go=gfx.Entity("Ligand", gfx.CPK, self.handle)
     self.go.SetColor(gfx.GREEN, 'ele=C')
     self.go.cpk_options.SetSphereDetail(7)
@@ -93,6 +103,8 @@ class Ligand:
       self.go.UpdatePositions()
     
   def Close(self):
+    if self.sol_go:
+      gfx.Scene().Remove(self.sol_go)
     gfx.Scene().Remove(self.go)
     del(self.go)
     
