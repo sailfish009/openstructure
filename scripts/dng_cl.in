@@ -28,9 +28,8 @@ export DNG_ROOT=$BIN_DIR/..
 export PATH=$BIN_DIR:$PATH
 
 # set ld_library_path and pythonhome for bundle (commented except in linux bundles)
-
 #export LD_LIBRARY_PATH=$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH
-#export PYTHONHOME=$DNG_ROOT
+#export PYTHONPATH=$DING_ROOT/@LIBDIR@/python2.6
 
 # retrieve absolute path to python executable
 pyexec=""
