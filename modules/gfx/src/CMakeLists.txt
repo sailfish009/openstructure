@@ -244,6 +244,8 @@ if (USE_SHADER)
     shader/fast_sphere_vs.glsl
     shader/fast_sphere_fs.glsl
     shader/outline_vs.glsl
+    shader/convolute1_vs.glsl
+    shader/convolute1_fs.glsl
   )
   copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  

@@ -632,6 +632,7 @@ void GfxObj::render_depth_only()
   glDisable(GL_NORMALIZE);
   glEnable(GL_DEPTH_TEST);
   CustomRenderGL(STANDARD_RENDER_PASS);
+  CustomRenderGL(TRANSPARENT_RENDER_PASS);
   glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);      
   glPopAttrib();
 }

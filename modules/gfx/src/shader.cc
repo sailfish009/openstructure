@@ -129,7 +129,7 @@ void Shader::Setup()
     GLenum type;
   } shader_list[] = {
     //////////////////////////////////////////////////////////////////
-    // this is the master list of all shader code in lib/ost/shader
+    // this is the master list of all shader code in shader/
 
     {"basic_lf_vs.glsl", GL_VERTEX_SHADER},
     {"basic_lf_fs.glsl", GL_FRAGMENT_SHADER},
@@ -151,7 +151,9 @@ void Shader::Setup()
     {"iso_fs.glsl", GL_FRAGMENT_SHADER},
     {"fast_sphere_vs.glsl", GL_VERTEX_SHADER},
     {"fast_sphere_fs.glsl", GL_FRAGMENT_SHADER},
-    {"outline_vs.glsl", GL_VERTEX_SHADER}
+    {"outline_vs.glsl", GL_VERTEX_SHADER},
+    {"convolute1_vs.glsl", GL_VERTEX_SHADER},
+    {"convolute1_fs.glsl", GL_FRAGMENT_SHADER}
     //////////////////////////////////////////////////////////////////
   };
 
@@ -259,12 +261,19 @@ void Shader::Setup()
   if(link_shader(shader_program_list,"fast_sphere",shader_program_id)) {
     shader_program_map_["fast_sphere"]=shader_program_id;
   }
-  // basic shader
+  // outline shader
   shader_program_list.clear();
   shader_program_list.push_back(shader_code_map_["outline_vs.glsl"]);
   shader_program_list.push_back(shader_code_map_["basic_lf_fs.glsl"]);
   if(link_shader(shader_program_list,"outline",shader_program_id)) {
     shader_program_map_["outline"]=shader_program_id;
+  }
+  // convolute1 shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["convolute1_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["convolute1_fs.glsl"]);
+  if(link_shader(shader_program_list,"convolute1",shader_program_id)) {
+    shader_program_map_["convolute1"]=shader_program_id;
   }
 
   valid_=true;

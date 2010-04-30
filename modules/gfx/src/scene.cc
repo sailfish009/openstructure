@@ -112,7 +112,10 @@ Scene::Scene():
   fog_color_(0.0,0.0,0.0,0.0),
   shadow_flag_(false),
   shadow_quality_(1),
-  shadow_texture_id_(),
+  shadow_tex_id_(),
+  depth_tex_id_(),
+  kernel_tex_id_(),
+  scene_tex_id_(),
   auto_autoslab_(true),
   offscreen_flag_(false),
   main_offscreen_buffer_(0),
@@ -285,7 +288,10 @@ void Scene::InitGL()
   Shader::Instance().Setup();
   Shader::Instance().Activate("fraglight");
 
-  glGenTextures(1,&shadow_texture_id_);
+  glGenTextures(1,&shadow_tex_id_);
+  glGenTextures(1,&depth_tex_id_);
+  glGenTextures(1,&kernel_tex_id_);
+  glGenTextures(1,&scene_tex_id_);
 #endif
 
   prep_glyphs();
@@ -1590,7 +1596,7 @@ void Scene::prep_shadow_map()
 
   // now get the shadow map
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, shadow_texture_id_);
+  glBindTexture(GL_TEXTURE_2D, shadow_tex_id_);
 
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
                    0,0, smap_size,smap_size, 0);
@@ -1675,6 +1681,177 @@ void Scene::prep_shadow_map()
   glEnd();
   Shader::Instance().Activate("basic_shadow");
 #endif
+#endif
+}
+
+void Scene::prep_depth_map()
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  unsigned int vp_width2=vp_width_/2;
+  unsigned int vp_height2=vp_height_/2;
+
+  // render pass 1 - without shadows
+  // turn shadowing off for subsequent rendering
+  glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),
+              "shadow_flag"),0);
+  // save overall gl settings
+  glPushAttrib(GL_ENABLE_BIT);
+  // maximize rendering for depth-only information
+  glDisable(GL_LIGHTING);
+  glDisable(GL_FOG);
+  glDisable(GL_COLOR_MATERIAL);
+  glDisable(GL_NORMALIZE);
+  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+
+  // render scene with only depth components
+  glClear(GL_DEPTH_BUFFER_BIT);
+  glViewport(0,0,vp_width2,vp_height2);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  glMultMatrix(transform_.GetTransposedMatrix().Data());
+  root_node_->RenderGL(DEPTH_RENDER_PASS);
+
+  // now get the depth map
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, depth_tex_id_);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+                   0,0, vp_width2, vp_height2, 0);
+
+  // restore settings
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+  glPopAttrib();
+  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+  glViewport(0,0,vp_width_,vp_height_);
+
+  // next is the kernel
+  static std::vector<GLfloat> kernel_data;
+  if(kernel_data.empty()) {
+    int kernel_size=2;
+    float sum=0.0;
+    float prec=0.02;
+    float sigma=static_cast<float>(kernel_size)/std::sqrt(-std::log(prec));
+    for( int u=-kernel_size;u<=kernel_size;++u) {
+      for( int v=-kernel_size;v<=kernel_size;++v) {
+	float y=std::exp(static_cast<float>(-u*u-v*v)/(sigma*sigma));
+	if(y>=prec) {
+	  sum+=y;
+	  kernel_data.push_back(static_cast<float>(u));
+	  kernel_data.push_back(static_cast<float>(v));
+	  kernel_data.push_back(y);
+	}
+      }
+    }
+    float ivpw=1.0/static_cast<float>(vp_width2);
+    float ivph=1.0/static_cast<float>(vp_height2);
+    for(unsigned int i=0;i<kernel_data.size();i+=3) {
+      kernel_data[i+0]=(ivpw*kernel_data[i+0])*0.5+0.5;
+      kernel_data[i+1]=(ivph*kernel_data[i+1])*0.5+0.5;
+      kernel_data[i+2]=kernel_data[i+2]/sum;
+    }
+  }
+
+  glEnable(GL_TEXTURE_1D);
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_1D, kernel_tex_id_);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGB,kernel_data.size()/3,0,GL_RGB,GL_FLOAT,&kernel_data[0]);
+
+  // now convolute the depth map with the kernel
+  Shader::Instance().PushProgram();
+  Shader::Instance().Activate("convolute1");
+  GLuint cpr=Shader::Instance().GetCurrentProgram();
+  // assign tex units
+  glUniform1i(glGetUniformLocation(cpr,"data"),1);
+  glUniform1i(glGetUniformLocation(cpr,"kernel"),2);
+  glUniform1i(glGetUniformLocation(cpr,"kernel_size"),kernel_data.size());
+  glUniform1i(glGetUniformLocation(cpr,"vp_width"),vp_width_);
+  glUniform1i(glGetUniformLocation(cpr,"vp_height"),vp_height_);
+
+  // set up viewport filling quad to run the fragment shader
+  glPushAttrib(GL_ENABLE_BIT);
+  glDisable(GL_DEPTH_TEST);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glViewport(0,0,vp_width2,vp_height2);
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0,1,0,1,-1,1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  glColor3f(1.0,0.0,1.0);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0,0.0);
+  glVertex2f(0.0,0.0);
+  glTexCoord2f(0.0,1.0);
+  glVertex2f(0.0,1.0);
+  glTexCoord2f(1.0,1.0);
+  glVertex2f(1.0,1.0);
+  glTexCoord2f(1.0,0.0);
+  glVertex2f(1.0,0.0);
+  glEnd();
+
+  // now grab the result
+  glEnable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, scene_tex_id_);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                   0,0, vp_width2, vp_height2, 0);
+
+
+#if 1
+  // this debug code draws the depth map across the complete screen
+  //glViewport(0,0,vp_width_,vp_height_);
+  Shader::Instance().Activate("");
+  glViewport(0,0,vp_width_,vp_height_);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glOrtho(0,1,0,1,-1,1);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glColor3f(1.0,0.0,1.0);
+  glEnable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, scene_tex_id_);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0,0.0);
+  glVertex2f(0.01,0.01);
+  glTexCoord2f(0.0,1.0);
+  glVertex2f(0.01,0.99);
+  glTexCoord2f(1.0,1.0);
+  glVertex2f(0.99,0.99);
+  glTexCoord2f(1.0,0.0);
+  glVertex2f(0.99,0.01);
+  glEnd();
+#endif
+
+  // restore settings
+  Shader::Instance().PopProgram();
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+  glPopAttrib();
+  glViewport(0,0,vp_width_,vp_height_);
+
+
+
 #endif
 }
 

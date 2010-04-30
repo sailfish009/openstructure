@@ -403,7 +403,10 @@ private:
   Color fog_color_;
   bool shadow_flag_;
   int shadow_quality_;
-  GLuint shadow_texture_id_;
+  GLuint shadow_tex_id_;
+  GLuint depth_tex_id_;
+  GLuint kernel_tex_id_;
+  GLuint scene_tex_id_;
   bool auto_autoslab_;
 
   bool offscreen_flag_; // a simple indicator whether in offscreen mode or not
@@ -431,6 +434,7 @@ private:
   void set_far(float f);
   void update_fog();
   void prep_shadow_map();
+  void prep_depth_map();
   void flag_all_dirty();
   void prep_glyphs();
   void prep_blur();
