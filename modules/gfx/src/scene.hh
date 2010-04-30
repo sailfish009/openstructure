@@ -403,7 +403,7 @@ private:
   Color fog_color_;
   bool shadow_flag_;
   int shadow_quality_;
-  GLuint texture_id_;
+  GLuint shadow_texture_id_;
   bool auto_autoslab_;
 
   bool offscreen_flag_; // a simple indicator whether in offscreen mode or not

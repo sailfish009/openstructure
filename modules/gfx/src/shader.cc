@@ -137,8 +137,8 @@ void Shader::Setup()
     {"fraglight_lf_fs.glsl", GL_FRAGMENT_SHADER},
     {"basic_lfs_vs.glsl", GL_VERTEX_SHADER},
     {"basic_lfs_fs.glsl", GL_FRAGMENT_SHADER},
-    {"fraglight_lfs_vs.glsl", GL_VERTEX_SHADER},
-    {"fraglight_lfs_fs.glsl", GL_FRAGMENT_SHADER},
+    {"fraglight_vs.glsl", GL_VERTEX_SHADER},
+    {"fraglight_fs.glsl", GL_FRAGMENT_SHADER},
     {"basic_hf_vs.glsl", GL_VERTEX_SHADER},
     {"selfx_vs.glsl", GL_VERTEX_SHADER},
     {"selfx_fs.glsl", GL_FRAGMENT_SHADER},
@@ -205,8 +205,8 @@ void Shader::Setup()
   }
   // fraglight shader with shadow map
   shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["fraglight_lfs_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["fraglight_lfs_fs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["fraglight_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["fraglight_fs.glsl"]);
   if(link_shader(shader_program_list,"fraglight_shadow",shader_program_id)) {
     shader_program_map_["fraglight_shadow"]=shader_program_id;
   }

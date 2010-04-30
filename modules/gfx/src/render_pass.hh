@@ -32,9 +32,12 @@ typedef enum {
   GLOW_RENDER_PASS,
   /// \brief renders objects with solid color as used for shadow map
   ///     generation
-  OPAQUE_RENDER_PASS,
+  DEPTH_RENDER_PASS,
   /// \ brief for transparent objects
-  TRANSPARENT_RENDER_PASS
+  /// the standard render pass is not supposed to render transparent
+  /// objects, as they should get drawn after the rest of the scene
+  TRANSPARENT_RENDER_PASS,
+  OVERLAY_RENDER_PASS
 } RenderPass;
  
 }}

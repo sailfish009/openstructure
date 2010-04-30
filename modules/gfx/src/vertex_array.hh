@@ -145,6 +145,8 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   Color GetColor(VertexID id) const;
   void SetColor(VertexID id, const Color& col);
 
+  void SetOpacity(float o);
+
   // OpenGL rendering call
   void RenderGL();
 

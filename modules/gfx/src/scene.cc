@@ -112,7 +112,7 @@ Scene::Scene():
   fog_color_(0.0,0.0,0.0,0.0),
   shadow_flag_(false),
   shadow_quality_(1),
-  texture_id_(),
+  shadow_texture_id_(),
   auto_autoslab_(true),
   offscreen_flag_(false),
   main_offscreen_buffer_(0),
@@ -285,7 +285,7 @@ void Scene::InitGL()
   Shader::Instance().Setup();
   Shader::Instance().Activate("fraglight");
 
-  glGenTextures(1,&texture_id_);
+  glGenTextures(1,&shadow_texture_id_);
 #endif
 
   prep_glyphs();
@@ -470,7 +470,7 @@ void Scene::RenderGL()
   #if OST_SHADER_SUPPORT_ENABLED
     if(shadow_flag_) {
       prep_shadow_map();
-  #if DEBUG_SMAP
+  #ifdef DEBUG_SMAP
       return;
   #endif
     }
@@ -1586,11 +1586,11 @@ void Scene::prep_shadow_map()
   glMultMatrix(ltrans.GetTransposedMatrix().Data());
 
   // only render non-transparent objects for the shadow map
-  root_node_->RenderGL(OPAQUE_RENDER_PASS);
+  root_node_->RenderGL(DEPTH_RENDER_PASS);
 
   // now get the shadow map
   glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture_id_);
+  glBindTexture(GL_TEXTURE_2D, shadow_texture_id_);
 
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
                    0,0, smap_size,smap_size, 0);
@@ -1786,7 +1786,14 @@ void Scene::render_scene_with_glow()
   glDepthFunc(GL_LEQUAL);    
   glDepthMask(1);
   glEnable(GL_DEPTH_TEST);
+
   root_node_->RenderGL(STANDARD_RENDER_PASS);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  root_node_->RenderGL(TRANSPARENT_RENDER_PASS);
+  glDisable(GL_BLEND);
+  root_node_->RenderGL(OVERLAY_RENDER_PASS);
+
   glPushAttrib(GL_ENABLE_BIT);
   glEnable(GL_COLOR_MATERIAL);
   glShadeModel(GL_FLAT);

@@ -1,3 +1,6 @@
+uniform bool occlusion_flag;
+varying vec4 ambient_color;
+
 void main()
 {
   // transformed position
@@ -14,6 +17,14 @@ void main()
   // shadow map projection coords
   gl_TexCoord[1] = gl_TextureMatrix[0] * gl_Vertex;
 
+  if(occlusion_flag) {
+    // ambient occlusion and color terms
+    ambient_color = gl_MultiTexCoord0;
+  } else {
+    ambient_color.rgb = gl_Color;
+    ambient_color.a = 1.0;
+  }
   gl_FrontColor=gl_Color;
   gl_BackColor=gl_Color;
 }
+

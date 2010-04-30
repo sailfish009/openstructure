@@ -52,8 +52,9 @@ Surface::Surface(const String& name, const mol::SurfaceHandle& sh):
 
 void Surface::CustomRenderGL(RenderPass pass)
 {
-  if(pass>0) return;
-  va_.RenderGL();
+  if(pass==STANDARD_RENDER_PASS) {
+    va_.RenderGL();
+  }
 }
 
 void Surface::CustomRenderPov(PovState& pov)
@@ -269,6 +270,7 @@ void Surface::Apply(const gfx::UniformColorOp& op, bool store){
   }
   FlagRefresh();
 }
+
 void Surface::Apply(const gfx::BasicGradientColorOp& op, bool store)
 {
   if(store){
@@ -520,9 +522,9 @@ Vec3 RSurface::GetCenter() const
 
 void RSurface::CustomRenderGL(RenderPass pass)
 {
-  if (!(pass==STANDARD_RENDER_PASS || pass==OPAQUE_RENDER_PASS)) 
-    return;
-  va_.RenderGL();
+  if(pass==STANDARD_RENDER_PASS) {
+    va_.RenderGL();
+  }
 }
 
 geom::AlignedCuboid RSurface::GetBoundingBox() const

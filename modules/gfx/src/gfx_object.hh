@@ -82,6 +82,7 @@ public:
   virtual void SetAmbientLocalWeight(float w);
   virtual void SetAmbientOcclusionWeight(float w);
   virtual void SetOpacity(float f);
+  virtual float GetOpacity() const {return opacity_;}
   virtual void ColorBy(const mol::EntityView& ev, 
                        const String& prop,
                        const Gradient& g, float minv, float maxv);
@@ -108,6 +109,10 @@ public:
                              const mol::Transform& tf) const;
 
   // implemented in derived classes for the actual GL rendering
+  /*
+    note: only STANDARD_RENDER_PASS and GLOW_RENDER_PASS need to 
+    be implemented, the rest is taken care of by GfxObj::RenderGL
+  */
   virtual void CustomRenderGL(RenderPass pass);
 
   // implemented in derived classes for the actual POVray export
@@ -158,7 +163,6 @@ public:
   bool GetAALines() const {return aalines_flag_;}
   float GetLineWidth() const {return line_width_;}
   float GetLineHalo() const {return line_halo_;}
-  float GetOpacity() const {return opacity_;}
 
   void SetNormalSmoothFactor(float smoothf);
   float GetNormalSmoothFactor() const;
@@ -190,6 +194,7 @@ public:
   void CleanColorOps();
   void ReapplyColorOps();
   void render_labels() const;
+  void render_depth_only();
 
   IndexedVertexArray va_;
   RenderMode::Type render_mode_;

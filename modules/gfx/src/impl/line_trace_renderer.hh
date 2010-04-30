@@ -46,7 +46,6 @@ public:
   virtual void PrepareRendering();
   virtual void PrepareRendering(const BackboneTrace& trace_subset, 
                                 IndexedVertexArray& va, bool is_sel);
-  virtual void Render();
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);
   virtual void SetOptions(RenderOptionsPtr& render_options);

@@ -120,6 +120,9 @@ void GfxObj::RenderGL(RenderPass pass)
       PreRenderGL(rebuild_);
       rebuild_=false;
       refresh_=false;
+      // there really needs to be a central place
+      // where the va attributes are re-applied
+      va_.SetOpacity(opacity_);
     }
   }
   if(IsVisible()) {
@@ -136,15 +139,30 @@ void GfxObj::RenderGL(RenderPass pass)
     }
     LOGN_TRACE("calling custom render gl pass " << pass);
 
-    CustomRenderGL(pass);
-
-    if(pass==0 && outline_flag_>0) {
-      va_.SetOutlineMode(outline_mode_);
-      CustomRenderGL(pass);
-      va_.SetOutlineMode(0);
-    }
-
-    if(pass==1) {
+    /*
+      only STANDARD_RENDER_PASS and GLOW_RENDER_PASS are
+      passed down to the custom rendering routines
+    */
+   
+    if(pass==DEPTH_RENDER_PASS) {
+      render_depth_only();
+    } else if(pass==TRANSPARENT_RENDER_PASS) {
+      if(GetOpacity()<1.0) {
+	render_depth_only();
+	CustomRenderGL(STANDARD_RENDER_PASS);
+      }
+    } else if(pass==STANDARD_RENDER_PASS) {
+      if(GetOpacity()>=1.0) {
+	CustomRenderGL(STANDARD_RENDER_PASS);
+      }
+      if(outline_flag_) {
+	va_.SetOutlineMode(outline_mode_);
+	CustomRenderGL(pass);
+	va_.SetOutlineMode(0);
+      }
+    } else if(pass==GLOW_RENDER_PASS) {
+      CustomRenderGL(GLOW_RENDER_PASS);
+    } else if(pass==OVERLAY_RENDER_PASS) {
       LOGN_TRACE("drawing labels");
       render_labels();
     }
@@ -320,7 +338,9 @@ void GfxObj::SetAmbientOcclusionWeight(float w)
 void GfxObj::SetOpacity(float o)
 {
   opacity_=o;
-  FlagRebuild();
+  va_.SetOpacity(opacity_);
+  FlagRefresh();
+  Scene::Instance().RequestRedraw();
 }
 
 void GfxObj::ColorBy(const mol::EntityView& ev, 
@@ -578,7 +598,7 @@ void GfxObj::ReapplyColorOps(){
     GfxObjP o=dyn_cast<GfxObj>(shared_from_this());
     for(boost::ptr_vector<gfx::ColorOp>::iterator it=c_ops_.begin();
       it!=c_ops_.end();++it) {
-	    it->ApplyTo(o);
+      it->ApplyTo(o);
     }
   }
 }
@@ -595,5 +615,26 @@ void GfxObj::Debug(unsigned int flags)
 {
   va_.DrawNormals(flags & 0x1);
 }
+
+void GfxObj::render_depth_only()
+{
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
+  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_COLOR_MATERIAL);
+  glDisable(GL_BLEND);
+  glDisable(GL_FOG);
+  glShadeModel(GL_FLAT);
+  glDisable(GL_LINE_SMOOTH);
+  glDisable(GL_POINT_SMOOTH);
+  glDisable(GL_POLYGON_SMOOTH);
+  glDisable(GL_DITHER);
+  glDisable(GL_NORMALIZE);
+  glEnable(GL_DEPTH_TEST);
+  CustomRenderGL(STANDARD_RENDER_PASS);
+  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);      
+  glPopAttrib();
+}
+
 
 }} // ns

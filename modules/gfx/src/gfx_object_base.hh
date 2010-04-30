@@ -112,6 +112,9 @@ class DLLEXPORT_OST_GFX GfxObjBase: public GfxNode
   /// \brief set opacity (1 = no transparency)
   virtual void SetOpacity(float f) = 0;
 
+  /// \brief returns a value smaller than 1.0 if transparency is used in this object
+  virtual float GetOpacity() const = 0;
+
   /// \brief color each component based on the gradient-mapped property of 
   ///    the given entity
   virtual void ColorBy(const mol::EntityView& ev, 

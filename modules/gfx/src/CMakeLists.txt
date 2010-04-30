@@ -229,8 +229,8 @@ if (USE_SHADER)
     shader/fraglight_lf_fs.glsl
     shader/basic_lfs_vs.glsl
     shader/basic_lfs_fs.glsl
-    shader/fraglight_lfs_vs.glsl
-    shader/fraglight_lfs_fs.glsl
+    shader/fraglight_vs.glsl
+    shader/fraglight_fs.glsl
     shader/basic_hf_vs.glsl
     shader/selfx_vs.glsl
     shader/selfx_fs.glsl

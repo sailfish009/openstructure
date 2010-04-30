@@ -140,7 +140,13 @@ public:
 
   virtual void OptionsChanged(RenderMode::Type mode);
 
+  virtual void SetOpacity(float f);
+  virtual float GetOpacity() const {return opacity_;}
+
   /// \brief rebuild graphical object (see ctor comments)
+  /*
+    the naming here is misleading - this method WON'T be called upon FlagRebuild
+  */
   void Rebuild();
 
   /// \brief only grab updated positions, dont rebuild the whole thing
@@ -291,6 +297,8 @@ private:
 
   typedef boost::ptr_map<RenderMode::Type, impl::EntityRenderer> RendererMap;
   mutable RendererMap renderer_;
+
+  float opacity_;
 };
 
 

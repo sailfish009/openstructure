@@ -37,7 +37,7 @@ public:
   
   virtual void RenderPov(PovState& pov, const std::string& name);
 
-  virtual void Render(RenderPass pass=STANDARD_RENDER_PASS);
+  virtual void Render(RenderPass pass);
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);
   virtual void SetOptions(RenderOptionsPtr& render_options);

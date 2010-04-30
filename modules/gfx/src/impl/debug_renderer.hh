@@ -33,7 +33,6 @@ public:
   DebugRenderer(BackboneTrace* trace);
 
   virtual void PrepareRendering();
-  virtual void Render();
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);
   virtual void SetOptions(RenderOptionsPtr& render_options);

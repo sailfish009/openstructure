@@ -118,7 +118,7 @@ public:
   /// 
   /// The rendering buffers and vertex arrays should be prepared in 
   /// PrepareRendering()
-  virtual void Render(RenderPass pass=STANDARD_RENDER_PASS);
+  virtual void Render(RenderPass pass);
   
   ///\brief povray rendering call
   virtual void RenderPov(PovState& pov, const std::string& name);

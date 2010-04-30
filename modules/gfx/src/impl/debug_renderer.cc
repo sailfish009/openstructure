@@ -104,8 +104,6 @@ void DebugRenderer::PrepareRendering()
 #endif
 }
 
-void DebugRenderer::Render(){}
-
 bool DebugRenderer::CanSetOptions(RenderOptionsPtr& render_options){
  return render_options.get()->GetRenderMode()==RenderMode::SLINE;
 }

@@ -129,12 +129,14 @@ struct AALineEntryLess
 
 void PrimList::CustomRenderGL(RenderPass pass)
 {
-  if(pass!=STANDARD_RENDER_PASS) return;
-  va_.RenderGL();
+  if(pass==STANDARD_RENDER_PASS || pass==TRANSPARENT_RENDER_PASS) {
+    va_.RenderGL();
+  }
 }
 
 void PrimList::CustomRenderPov(PovState& pov)
 {
+  // TODO: add primlist pov export
 }
 
 void PrimList::AddPoint(geom::Vec3& p, const Color& col)

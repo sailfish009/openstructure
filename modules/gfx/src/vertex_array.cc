@@ -361,6 +361,17 @@ void IndexedVertexArray::SetColor(VertexID id, const Color& c)
   entry_list_[id].c[3]=c[3];
 }
 
+void IndexedVertexArray::SetOpacity(float o)
+{
+  o=std::max(0.0f,std::min(1.0f,o));
+  // this should really just set a value in the shader... 
+  // but we need to support the fixed function pipeline as well
+  for(EntryList::iterator it=entry_list_.begin();it!=entry_list_.end();++it) {
+    it->c[3]=o;
+  }
+  FlagRefresh();
+}
+
 void IndexedVertexArray::RenderGL() 
 {
   static bool use_buff=false;

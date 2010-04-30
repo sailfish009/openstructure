@@ -86,10 +86,6 @@ void LineTraceRenderer::PrepareRendering(const BackboneTrace& trace_subset,
   state_=0;
 }
 
-void LineTraceRenderer::Render()
-{
-}
-
 bool LineTraceRenderer::CanSetOptions(RenderOptionsPtr& render_options)
 {
  return render_options.get()->GetRenderMode()==RenderMode::LINE_TRACE;

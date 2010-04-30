@@ -74,7 +74,7 @@ void CPKRenderer::Render(RenderPass pass)
 {
   if(options_!=NULL){
 #if OST_SHADER_SUPPORT_ENABLED
-    if(options_->GetCPKMode()==1 || options_->GetCPKMode()==2) {
+    if(pass==STANDARD_RENDER_PASS && (options_->GetCPKMode()==1 || options_->GetCPKMode()==2)) {
       this->RenderCPK2();
       return;
     }
