@@ -16,36 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE ost_seq_alg
+#include <boost/test/unit_test.hpp>
 
-#include <ost/seq/alg/merge_pairwise_alignments.hh>
-#include <ost/seq/alg/sequence_identity.hh>
-#include <ost/seq/alg/ins_del.hh>
-
-using namespace boost::python;
-using namespace ost::seq;
-using namespace ost::seq::alg;
-
-void export_Align();
-
-BOOST_PYTHON_MODULE(_seq_alg)
-{
-  enum_<RefMode::Type>("RefMode")
-    .value("ALIGNMENT", RefMode::ALIGNMENT)
-    .value("LONGER_SEQUENCE", RefMode::LONGER_SEQUENCE)
-    .export_values()
-  ;
-  def("SequenceIdentity", &SequenceIdentity, arg("seq_a")=0, arg("seq_b")=1);
-  
-  class_<AlignedRegionList>("AlignedRegionList", init<>())
-    .def(vector_indexing_suite<AlignedRegionList>())
-  ;
-  class_<InsDel>("InsDel", init<const AlignmentHandle&, int, int>())
-    .def(init<const AlignmentHandle&>())
-    .def("GetDeletions", &InsDel::GetDeletions)
-    .def("GetInsertions", &InsDel::GetInsertions)
-  ;
-  def("MergePairwiseAlignments", &MergePairwiseAlignments);
-  export_Align();  
-}

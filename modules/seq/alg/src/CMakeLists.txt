@@ -6,9 +6,11 @@ subst_weight_matrix.hh
 local_align.hh
 alignment_opts.hh
 global_align.hh
+merge_pairwise_alignments.hh
 )
 
 set(OST_SEQ_ALG_SOURCES
+merge_pairwise_alignments.cc
 global_align.cc
 sequence_identity.cc
 ins_del.cc
