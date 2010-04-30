@@ -22,7 +22,7 @@ class SpnavInputDevice(QtCore.QObject):
     self.rot = True
     
     self._lock_input = False
-    self._trans_factor = 0.5
+    self._trans_factor = 0.125
     
     self.score_scip = 0
   def SetLevel(self, level):

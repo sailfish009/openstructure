@@ -2,7 +2,7 @@ import dokk
 from PyQt4 import QtCore, QtGui
 from hud import *
 from ost import gui
-
+from level_info import HighScore
 
 ALPHABET = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3','4','5','6','7','8','9']
 LETTER_BREAK = 3000
@@ -15,9 +15,7 @@ class NameEnter(QtCore.QObject):
       self._spnav = gui.SpnavInput.GetQThread()
       self._spnav.start()
     except AttributeError:
-      self._spnav = None
-      
-        
+      self._spnav = None  
     self.Reset()
     
   def Reset(self):
@@ -108,11 +106,13 @@ class HUDNameInput(QtCore.QObject):
     self.connect(self.ne,QtCore.SIGNAL("Changed()"),self.Update)
     self.connect(self.ne,QtCore.SIGNAL("Finished()"),self.Finish)
     self.huds = list()
-
+    self.high_score = HighScore(None)
     self.hud_text = None
     self.bg = None
       
   def Start(self):
+    self.high_score.topten = dokk.Dokk().GetLevel().topten
+    self.high_score.Start()
     self.ne.Start()
     del(self.huds[:])
     rect = QtCore.QRect(QtCore.QPoint(60, 60), QtCore.QSize(dokk.Dokk().gl_win.Width()-120, 220))
@@ -145,6 +145,7 @@ class HUDNameInput(QtCore.QObject):
         self.huds[i].color = QtGui.QColor(255,255,255)
         
   def Stop(self):
+    self.high_score.Finish()
     self.ne.Stop()
     for hud in self.huds:
       dokk.Dokk().gl_win.RemoveHUDObject(hud)
