@@ -505,12 +505,45 @@ TraceProfile CartoonRenderer::TransformAndAddProfile(const std::vector<TraceProf
   return tf_prof;
 }
 
+namespace {
+
+  float spread(const geom::Vec3& v1, geom::Vec3& v2, geom::Vec3& v3, geom::Vec3& v4)
+  {
+    return geom::Dot(geom::Normalize(geom::Cross(geom::Normalize(v3-v1),geom::Normalize(v2-v1))),
+                     geom::Normalize(geom::Cross(geom::Normalize(v3-v4),geom::Normalize(v2-v4))));
+  }
+
+}
+
 void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
                                       const TraceProfile& prof2, 
                                       IndexedVertexArray& va)
 {
-  // determine rotational offset with a heuristic routine
-  int best_off=0;
+  float accum[]={0.0,0.0,0.0,0.0,0.0};
+  for(int i=0;i<prof1.size();++i) {
+    int i1=(i+0)%prof1.size();
+    int i2=(i+1)%prof1.size();
+    geom::Vec3 v1=va.GetVert(prof1[i1].id);
+    geom::Vec3 v2=va.GetVert(prof1[i2].id);
+    for(int k=-2;k<=2;++k) {
+      int i3=(i+k+0+prof1.size())%prof1.size();
+      int i4=(i+k+1+prof1.size())%prof1.size();
+      geom::Vec3 v3=va.GetVert(prof2[i3].id);
+      geom::Vec3 v4=va.GetVert(prof2[i4].id);
+      accum[k+2]+=spread(v1,v2,v3,v4);
+    }
+  }
+
+  float best_spread=accum[0];
+  int best_off=-2;
+  for(int k=-1;k<=2;++k) {
+    if(accum[k+2]<best_spread) {
+      best_spread=accum[k+2];
+      best_off=k;
+    }
+  }
+  best_off=(best_off+prof1.size())%prof1.size();
+
 #if 0
   uint i1=0;
   uint i2=prof1.size()/4;

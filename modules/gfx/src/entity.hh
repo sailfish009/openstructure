@@ -142,6 +142,9 @@ public:
 
   virtual void SetOpacity(float f);
   virtual float GetOpacity() const {return opacity_;}
+  virtual void SetOutlineWidth(float f);
+  virtual void SetOutlineExpandFactor(float f);
+  virtual void SetOutlineExpandColor(const Color& c);
 
   /// \brief rebuild graphical object (see ctor comments)
   /*
@@ -299,6 +302,9 @@ private:
   mutable RendererMap renderer_;
 
   float opacity_;
+  bool blur_;
+  float blurf1_;
+  float blurf2_;
 };
 
 

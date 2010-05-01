@@ -307,14 +307,22 @@ void GfxObj::SetOutlineMode(int m)
   }
 }
 
+void GfxObj::SetOutlineWidth(float f)
+{
+  va_.SetOutlineWidth(f);
+  Scene::Instance().RequestRedraw();
+}
+
 void GfxObj::SetOutlineExpandFactor(float f)
 {
   va_.SetOutlineExpandFactor(f);
+  Scene::Instance().RequestRedraw();
 }
 
 void GfxObj::SetOutlineExpandColor(const Color& c)
 {
   va_.SetOutlineExpandColor(c);
+  Scene::Instance().RequestRedraw();
 }
 
 void GfxObj::AmbientOcclusion(bool f)

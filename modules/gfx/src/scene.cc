@@ -56,8 +56,6 @@
 # include "shader.hh"
 #endif
 
-//#define DEBUG_SMAP
-
 using boost::bind;
 
 namespace ost {
@@ -113,6 +111,7 @@ Scene::Scene():
   shadow_flag_(false),
   shadow_quality_(1),
   shadow_tex_id_(),
+  depth_dark_flag_(false),
   depth_tex_id_(),
   kernel_tex_id_(),
   scene_tex_id_(),
@@ -168,18 +167,43 @@ Color Scene::GetFogColor() const
 void Scene::SetShadow(bool f)
 {
   shadow_flag_=f;
+  // the redraw routine will deal with the Shader
   RequestRedraw();
-}
-
-bool Scene::GetShadow()
-{
-  return shadow_flag_;
 }
 
 void Scene::SetShadowQuality(int q)
 {
   shadow_quality_=std::min(3,std::max(0,q));
+  if(shadow_flag_) {
+    RequestRedraw();
+  }
+}
+
+void Scene::SetDepthDarkening(bool f)
+{
+  depth_dark_flag_=f;
+  // the redraw routine will deal with the Shader
   RequestRedraw();
+}
+
+
+void Scene::SetShadingMode(const std::string& smode)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  if(smode=="fallback") {
+    Shader::Instance().Activate("");
+  } else if(smode=="basic") {
+    Shader::Instance().Activate("basic");
+  } else if(smode=="hf") {
+    Shader::Instance().Activate("hemilight");
+  } else if(smode=="toon1") {
+    Shader::Instance().Activate("toon1");
+  } else if(smode=="toon2") {
+    Shader::Instance().Activate("toon2");
+  } else {
+    Shader::Instance().Activate("fraglight");
+  }
+#endif
 }
 
 namespace {
@@ -286,7 +310,7 @@ void Scene::InitGL()
 #if OST_SHADER_SUPPORT_ENABLED
   LOGN_DEBUG("scene: shader setup");
   Shader::Instance().Setup();
-  Shader::Instance().Activate("fraglight");
+  SetShadingMode("default");
 
   glGenTextures(1,&shadow_tex_id_);
   glGenTextures(1,&depth_tex_id_);
@@ -474,12 +498,16 @@ void Scene::RenderGL()
   if(auto_autoslab_) Autoslab(false, false);
 
   #if OST_SHADER_SUPPORT_ENABLED
-    if(shadow_flag_) {
-      prep_shadow_map();
-  #ifdef DEBUG_SMAP
-      return;
-  #endif
-    }
+  if(depth_dark_flag_) {
+    prep_depth_darkening();
+  } else {
+    Shader::Instance().SetDepthMapping(0,0);
+  }
+  if(shadow_flag_) {
+    prep_shadow_map();
+  } else {
+    Shader::Instance().SetShadowMapping(0,0);
+  }
   #endif
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   prep_blur();
@@ -1543,6 +1571,95 @@ void Scene::update_fog()
   glFogf(GL_FOG_END,zfar_+ffar_);
 }
 
+namespace {
+
+  void draw_screen_quad(unsigned int w, unsigned int h, GLuint gltex, GLuint tex_id)
+  {
+    glPushAttrib(GL_ENABLE_BIT | GL_VIEWPORT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_FOG_BIT);
+
+    // setup
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+    glDisable(GL_FOG);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_BLEND);
+    glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_POINT_SMOOTH);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0,0,w,h);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(0,1,0,1,-1,1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // draw
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0,0.0);
+    glVertex2f(0.0,0.0);
+    glTexCoord2f(0.0,1.0);
+    glVertex2f(0.0,1.0);
+    glTexCoord2f(1.0,1.0);
+    glVertex2f(1.0,1.0);
+    glTexCoord2f(1.0,0.0);
+    glVertex2f(1.0,0.0);
+    glEnd();
+  
+    // grab the result
+    glEnable(GL_TEXTURE_2D);
+    glActiveTexture(gltex);
+    glBindTexture(GL_TEXTURE_2D, tex_id);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0,0, w, h, 0);
+
+    // restore settings
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glPopAttrib();
+  }
+
+  // this debug code draws the given texture across the complete screen
+  void draw_debug_tex(unsigned int w, unsigned int h, GLuint tex_id)
+  {
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    Shader::Instance().PushProgram();
+
+    Shader::Instance().Activate("");
+    glViewport(0,0,w,h);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0,1,0,1,-1,1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glColor3f(1.0,0.0,1.0);
+    glEnable(GL_TEXTURE_2D);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex_id);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0,0.0);
+    glVertex2f(0.01,0.01);
+    glTexCoord2f(0.0,1.0);
+    glVertex2f(0.01,0.99);
+    glTexCoord2f(1.0,1.0);
+    glVertex2f(0.99,0.99);
+    glTexCoord2f(1.0,0.0);
+    glVertex2f(0.99,0.01);
+    glEnd();
+    glPopAttrib();
+    Shader::Instance().PopProgram();
+  }
+}
+
 void Scene::prep_shadow_map()
 {
 #if OST_SHADER_SUPPORT_ENABLED
@@ -1560,20 +1677,19 @@ void Scene::prep_shadow_map()
   // render pass 1 - without shadows
 
   // turn shadowing off for subsequent rendering
-  glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),
-              "shadow_flag"),0);
+  Shader::Instance().SetShadowMapping(false,0);
+
   // save overall gl settings
   glPushAttrib(GL_VIEWPORT_BIT | GL_ENABLE_BIT);
   // maximize rendering for depth-only information
-#ifndef DEBUG_SMAP
   glDisable(GL_LIGHTING);
   glDisable(GL_FOG);
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_NORMALIZE);
   glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
-#endif
 
   // render scene with only depth components
+  // seen from the light's perspective
   glViewport(0,0,smap_size,smap_size);
   glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -1601,7 +1717,6 @@ void Scene::prep_shadow_map()
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
                    0,0, smap_size,smap_size, 0);
 
-  ////////////////
   // all of the following texture and shader params need to be moved
   // to a one-time initialization place
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -1611,21 +1726,8 @@ void Scene::prep_shadow_map()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-  GLuint cpr=Shader::Instance().GetCurrentProgram();
-
   // assign tex unit 0 to shadow map
-  glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"shadow_map"),0);
-  //int depth_bits;
-  //glGetIntegerv(GL_DEPTH_BITS, &depth_bits);
-  //float depth_bias = 1.0/static_cast<float>(1<<depth_bits);
-  glUniform1f(glGetUniformLocation(cpr,"depth_bias"),0.008);
-
-  glUniform1f(glGetUniformLocation(cpr,"epsilon"),0.002);
-
-  glUniform1f(glGetUniformLocation(cpr,"shadow_multiplier"),0.4);
-
-  //
-  //////////////////
+  Shader::Instance().SetShadowMapping(true,0);
 
   // restore settings
   glPopMatrix();
@@ -1638,10 +1740,6 @@ void Scene::prep_shadow_map()
 
   glEnable(GL_TEXTURE_2D);
 
-  // and turn shadowing on for subsequent rendering
-  glUniform1i(glGetUniformLocation(cpr,"shadow_flag"),1);
-
-#ifndef DEBUG_SMAP
   // set up appropriate texture matrix
   Mat4 bias(0.5,0.0,0.0,0.5,
                   0.0,0.5,0.0,0.5,
@@ -1655,45 +1753,47 @@ void Scene::prep_shadow_map()
   Mat4 ttmp=Transpose(texm);
   glLoadMatrix(ttmp.Data());
   glMatrixMode(GL_MODELVIEW);
-#else
-  // this debug code draws the depth map across the screen
-  Shader::Instance().Activate("");
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_FOG);
-  glEnable(GL_TEXTURE_2D);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(-1,11,-1,11,-1,1);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glColor3f(1.0,1.0,1.0);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0);
-  glVertex2f(0.0,0.0);
-  glTexCoord2f(0.0,1.0);
-  glVertex2f(0.0,10.0);
-  glTexCoord2f(1.0,1.0);
-  glVertex2f(10.0,10.0);
-  glTexCoord2f(1.0,0.0);
-  glVertex2f(10.0,0.0);
-  glEnd();
-  Shader::Instance().Activate("basic_shadow");
-#endif
 #endif
 }
 
-void Scene::prep_depth_map()
+void Scene::prep_depth_darkening()
 {
 #if OST_SHADER_SUPPORT_ENABLED
-  unsigned int vp_width2=vp_width_/2;
-  unsigned int vp_height2=vp_height_/2;
+  prep_depth_map(vp_width_/2,vp_height_/2);
+  // in unit 1, bound to depth_tex_id_
+
+  // kernel is static for now, inside the convolution shader
+
+  // now convolute the depth map with the kernel
+  Shader::Instance().PushProgram();
+  Shader::Instance().Activate("convolute1");
+  GLuint cpr=Shader::Instance().GetCurrentProgram();
+  // assign tex units
+  glUniform1i(glGetUniformLocation(cpr,"data"),1);
+  glUniform1i(glGetUniformLocation(cpr,"vp_width"),vp_width_/2);
+  glUniform1i(glGetUniformLocation(cpr,"vp_height"),vp_height_/2);
+
+  // set up viewport filling quad to run the fragment shader
+  draw_screen_quad(vp_width_/2,vp_height_/2,GL_TEXTURE1, depth_tex_id_);
+
+  Shader::Instance().PopProgram();
+
+  // mode 1, tex unit 1
+  Shader::Instance().SetDepthMapping(1,1);
+
+#endif
+}
+
+// returns the depth map in texture 1
+// bound to depth_tex_id_
+void Scene::prep_depth_map(unsigned int w, unsigned int h)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  unsigned int vp_width2=w;
+  unsigned int vp_height2=h;
 
   // render pass 1 - without shadows
-  // turn shadowing off for subsequent rendering
-  glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),
-              "shadow_flag"),0);
+  Shader::Instance().SetShadowMapping(false,0);
   // save overall gl settings
   glPushAttrib(GL_ENABLE_BIT);
   // maximize rendering for depth-only information
@@ -1730,127 +1830,6 @@ void Scene::prep_depth_map()
   glPopAttrib();
   glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
   glViewport(0,0,vp_width_,vp_height_);
-
-  // next is the kernel
-  static std::vector<GLfloat> kernel_data;
-  if(kernel_data.empty()) {
-    int kernel_size=2;
-    float sum=0.0;
-    float prec=0.02;
-    float sigma=static_cast<float>(kernel_size)/std::sqrt(-std::log(prec));
-    for( int u=-kernel_size;u<=kernel_size;++u) {
-      for( int v=-kernel_size;v<=kernel_size;++v) {
-	float y=std::exp(static_cast<float>(-u*u-v*v)/(sigma*sigma));
-	if(y>=prec) {
-	  sum+=y;
-	  kernel_data.push_back(static_cast<float>(u));
-	  kernel_data.push_back(static_cast<float>(v));
-	  kernel_data.push_back(y);
-	}
-      }
-    }
-    float ivpw=1.0/static_cast<float>(vp_width2);
-    float ivph=1.0/static_cast<float>(vp_height2);
-    for(unsigned int i=0;i<kernel_data.size();i+=3) {
-      kernel_data[i+0]=(ivpw*kernel_data[i+0])*0.5+0.5;
-      kernel_data[i+1]=(ivph*kernel_data[i+1])*0.5+0.5;
-      kernel_data[i+2]=kernel_data[i+2]/sum;
-    }
-  }
-
-  glEnable(GL_TEXTURE_1D);
-  glActiveTexture(GL_TEXTURE2);
-  glBindTexture(GL_TEXTURE_1D, kernel_tex_id_);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  glTexImage1D(GL_TEXTURE_1D,0,GL_RGB,kernel_data.size()/3,0,GL_RGB,GL_FLOAT,&kernel_data[0]);
-
-  // now convolute the depth map with the kernel
-  Shader::Instance().PushProgram();
-  Shader::Instance().Activate("convolute1");
-  GLuint cpr=Shader::Instance().GetCurrentProgram();
-  // assign tex units
-  glUniform1i(glGetUniformLocation(cpr,"data"),1);
-  glUniform1i(glGetUniformLocation(cpr,"kernel"),2);
-  glUniform1i(glGetUniformLocation(cpr,"kernel_size"),kernel_data.size());
-  glUniform1i(glGetUniformLocation(cpr,"vp_width"),vp_width_);
-  glUniform1i(glGetUniformLocation(cpr,"vp_height"),vp_height_);
-
-  // set up viewport filling quad to run the fragment shader
-  glPushAttrib(GL_ENABLE_BIT);
-  glDisable(GL_DEPTH_TEST);
-  glClear(GL_COLOR_BUFFER_BIT);
-  glViewport(0,0,vp_width2,vp_height2);
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glOrtho(0,1,0,1,-1,1);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-  glColor3f(1.0,0.0,1.0);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0);
-  glVertex2f(0.0,0.0);
-  glTexCoord2f(0.0,1.0);
-  glVertex2f(0.0,1.0);
-  glTexCoord2f(1.0,1.0);
-  glVertex2f(1.0,1.0);
-  glTexCoord2f(1.0,0.0);
-  glVertex2f(1.0,0.0);
-  glEnd();
-
-  // now grab the result
-  glEnable(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, scene_tex_id_);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                   0,0, vp_width2, vp_height2, 0);
-
-
-#if 1
-  // this debug code draws the depth map across the complete screen
-  //glViewport(0,0,vp_width_,vp_height_);
-  Shader::Instance().Activate("");
-  glViewport(0,0,vp_width_,vp_height_);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(0,1,0,1,-1,1);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glColor3f(1.0,0.0,1.0);
-  glEnable(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, scene_tex_id_);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0);
-  glVertex2f(0.01,0.01);
-  glTexCoord2f(0.0,1.0);
-  glVertex2f(0.01,0.99);
-  glTexCoord2f(1.0,1.0);
-  glVertex2f(0.99,0.99);
-  glTexCoord2f(1.0,0.0);
-  glVertex2f(0.99,0.01);
-  glEnd();
-#endif
-
-  // restore settings
-  Shader::Instance().PopProgram();
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
-  glPopAttrib();
-  glViewport(0,0,vp_width_,vp_height_);
-
-
 
 #endif
 }
@@ -1900,14 +1879,6 @@ void Scene::SetTestMode(bool f)
   } else {
     Remove("GfxTestObj");
   }
-}
-
-// temporary interface
-void Scene::ActivateShader(const String& name)
-{
-#if OST_SHADER_SUPPORT_ENABLED
-  Shader::Instance().Activate(name);
-#endif
 }
 
 void Scene::prep_glyphs()

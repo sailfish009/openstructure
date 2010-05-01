@@ -1,14 +1,14 @@
 uniform sampler2D shadow_map;
 uniform bool shadow_flag;
-uniform float depth_bias;
-uniform float epsilon;
+uniform float shadow_depth_bias;
+uniform float shadow_epsilon;
 uniform float shadow_multiplier;
 uniform bool fog_flag;
 
 float CalcShadowFactor(in vec4 coord, in vec2 o)
 {
   // get original depth value of line projected towards light
-  float d = texture2D(shadow_map, coord.xy+o*epsilon).x+depth_bias;
+  float d = texture2D(shadow_map, coord.xy+o*shadow_epsilon).x+shadow_depth_bias;
   return d<=coord.z ? shadow_multiplier : 1.0;
 }
 

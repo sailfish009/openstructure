@@ -210,7 +210,7 @@ BackboneTrace BackboneTrace::CreateSubset(const mol::EntityView& subview)
     const NodeEntryList& nlist=*nitnit;
     for(NodeEntryList::const_iterator nit=nlist.begin();nit!=nlist.end();++nit) {
       if(subview.FindAtom(nit->atom).IsValid()) {
-	new_nlist.push_back(*nit);
+        new_nlist.push_back(*nit);
       }
     }
     if(!new_nlist.empty()) {

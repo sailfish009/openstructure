@@ -73,12 +73,14 @@ void export_GfxObj()
     .def("SetLineHalo",&GfxObjBase::SetLineHalo)
     .def("Outline",&GfxObjBase::Outline)
     .def("SetOutlineMode",&GfxObjBase::SetOutlineMode)
+    .def("SetOutlineWidth",&GfxObjBase::SetOutlineWidth)
     .def("SetOutlineExpandFactor",&GfxObjBase::SetOutlineExpandFactor)
     .def("SetOutlineExpandColor",&GfxObjBase::SetOutlineExpandColor)
     .def("AmbientOcclusion",&GfxObjBase::AmbientOcclusion)
     .def("SetAmbientLocalWeight",&GfxObjBase::SetAmbientLocalWeight)
     .def("SetAmbientOcclusionWeight",&GfxObjBase::SetAmbientOcclusionWeight)
     .def("SetOpacity",&GfxObjBase::SetOpacity)
+    .def("GetOpacity",&GfxObjBase::GetOpacity)
     .add_property("center", &GfxObjBase::GetCenter)
     COLOR_BY_DEF()
    ;
@@ -95,7 +97,6 @@ void export_GfxObj()
     .def("GetAALines",&GfxObj::GetAALines)
     .def("GetLineWidth",&GfxObj::GetLineWidth)
     .def("GetLineHalo",&GfxObj::GetLineHalo)
-    .def("GetOpacity",&GfxObj::GetOpacity)
     ;
   register_ptr_to_python<GfxObjP>();
 

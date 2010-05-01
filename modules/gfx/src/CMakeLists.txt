@@ -223,12 +223,8 @@ target_link_libraries(ost_gfx ${OPENGL_LIBRARIES} ${PNG_LIBRARIES})
 
 if (USE_SHADER)
   set(SHADER_FILES
-    shader/basic_lf_vs.glsl
-    shader/basic_lf_fs.glsl
-    shader/fraglight_lf_vs.glsl
-    shader/fraglight_lf_fs.glsl
-    shader/basic_lfs_vs.glsl
-    shader/basic_lfs_fs.glsl
+    shader/basic_vs.glsl
+    shader/basic_fs.glsl
     shader/fraglight_vs.glsl
     shader/fraglight_fs.glsl
     shader/basic_hf_vs.glsl

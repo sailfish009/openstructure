@@ -52,6 +52,9 @@ public:
   void PopProgram();
 
   void UpdateState();
+
+  void SetShadowMapping(bool flag, GLuint texid);
+  void SetDepthMapping(int mode, GLuint texid);
   
 private:
   Shader();
@@ -59,6 +62,11 @@ private:
   bool valid_;
   GLuint current_program_;
   String current_name_;
+
+  bool shadow_flag_;
+  GLuint shadow_map_id_;
+  int depth_mode_;
+  GLuint depth_map_id_;
 
   std::stack<String> program_stack_;
 

@@ -26,10 +26,36 @@
 
 namespace ost { namespace gfx { namespace impl {
 
+namespace {
+
+void add_atom_and_bond(mol::AtomHandle atom1,mol::AtomHandle atom2, AtomEntryMap& amap, BondEntryList& blist)
+{
+  AtomEntry ae1(atom1,0.0,0.0,Color(1,1,1));
+  amap[atom1.GetHashCode()]=ae1;
+  AtomEntry ae2(atom2,0.0,0.0,Color(1,1,1));
+  amap[atom2.GetHashCode()]=ae2;
+  blist.push_back(BondEntry(mol::BondHandle(),0.0f,
+                            &amap[atom1.GetHashCode()],
+                            &amap[atom2.GetHashCode()]));
+}
+
+}
+
+
 LineTraceRenderer::LineTraceRenderer(BackboneTrace* trace): 
-  TraceRendererBase(trace, 1), options_(new LineTraceRenderOptions())
+  TraceRendererBase(trace, 1), 
+  options_(new LineTraceRenderOptions()),
+  amap_(),
+  blist_()
 {
   this->SetName("Fast Trace");
+
+  for (int node_list=0; node_list<trace->GetListCount(); ++node_list) {
+    const NodeEntryList& nl=trace->GetList(node_list);
+    for (unsigned int i=0; i<nl.size()-1;++i) {
+      add_atom_and_bond(nl[i].atom,nl[i+1].atom,amap_,blist_);
+    }
+  }
 }
 
 void LineTraceRenderer::PrepareRendering() 
@@ -61,14 +87,13 @@ void LineTraceRenderer::PrepareRendering(const BackboneTrace& trace_subset,
     va.SetAALines(options_->GetAALines());
     for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
       const NodeEntryList& nl=trace_subset.GetList(node_list);
-
+      
       if (nl.size()<2) {
-	continue;
+        continue;
       }
 
       VertexID p0=va.Add(nl[0].atom.GetPos(), geom::Vec3(),
-			 is_sel ? sel_clr : nl[0].color1);
-
+                         is_sel ? sel_clr : nl[0].color1);
       for (unsigned int i=1; i<nl.size()-1;++i) {
         const NodeEntry& entry=nl[i];
         VertexID p1 =va.Add(entry.atom.GetPos(), geom::Vec3(), 
@@ -76,9 +101,9 @@ void LineTraceRenderer::PrepareRendering(const BackboneTrace& trace_subset,
         va.AddLine(p0, p1);
         p0=p1;
       }
-      const NodeEntry& entry=nl.back();      
+      const NodeEntry& entry=nl.back();
       VertexID p1 =va.Add(entry.atom.GetPos(), geom::Vec3(), 
-			  is_sel ? sel_clr : entry.color1);
+                          is_sel ? sel_clr : entry.color1);
       va.AddLine(p0, p1);
     }
   }

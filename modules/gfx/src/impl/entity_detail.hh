@@ -70,6 +70,9 @@ struct DLLEXPORT_OST_GFX BondEntry
 
 typedef std::vector<BondEntry> BondEntryList;
 
+void DoRenderBlur(BondEntryList& bl, float bf1, float bf2);
+void DoBlurSnapshot(BondEntryList& bl);
+
 class DLLEXPORT_OST_GFX GfxView {
 public:
   void Clear();

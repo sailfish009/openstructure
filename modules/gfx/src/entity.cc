@@ -71,7 +71,10 @@ Entity::Entity(const String& name,
   sel_(),
   sel_update_(),
   trace_(),
-  opacity_(1.0)
+  opacity_(1.0),
+  blur_(false),
+  blurf1_(1.0),
+  blurf2_(0.8)
 {
   init(RenderMode::SIMPLE);
 }
@@ -86,7 +89,10 @@ Entity::Entity(const String& name,
   sel_(),
   sel_update_(),
   trace_(),
-  opacity_(1.0)
+  opacity_(1.0),
+  blur_(false),
+  blurf1_(1.0),
+  blurf2_(0.8)
 {
   init(m);
 }
@@ -99,7 +105,10 @@ Entity::Entity(const String& name,
   sel_(),
   sel_update_(),
   trace_(),
-  opacity_(1.0)
+  opacity_(1.0),
+  blur_(false),
+  blurf1_(1.0),
+  blurf2_(0.8)
 {
   init(RenderMode::SIMPLE);
 }
@@ -113,7 +122,10 @@ Entity::Entity(const String& name,
   sel_(),
   sel_update_(),
   trace_(),
-  opacity_(1.0)
+  opacity_(1.0),
+  blur_(false),
+  blurf1_(1.0),
+  blurf2_(0.8)
 {
   init(m);
 }
@@ -180,38 +192,29 @@ void Entity::init(RenderMode::Type rm)
   Rebuild();
 }
 
-namespace {
-
-SimpleRenderOptionsPtr get_sro(impl::EntityRenderer* renderer)
-{
-  impl::SimpleRenderer* sr=dynamic_cast<SimpleRenderer*>(renderer);
-  assert(sr);  
-  return dyn_cast<SimpleRenderOptions>(sr->GetOptions());  
-}
-}
 void Entity::SetBlur(bool f)
 {
-  impl::EntityRenderer* renderer=this->GetOrCreateRenderer(RenderMode::SIMPLE);
-  if(!renderer) return;
-  SimpleRenderOptionsPtr sro=get_sro(renderer);
-  sro->SetBlurFlag(f);
+  blur_=f;
 }
 
 void Entity::BlurSnapshot()
 {
-  impl::EntityRenderer* renderer=this->GetOrCreateRenderer(RenderMode::SIMPLE);
-  if(!renderer) return;
-  impl::SimpleRenderer* sr=dynamic_cast<SimpleRenderer*>(renderer);
-  assert(sr);
-  sr->BlurSnapshot();
+  for (RendererMap::iterator i=renderer_.begin(),e=renderer_.end(); i!=e; ++i) {
+    impl::SimpleRenderer* sr = dynamic_cast<impl::SimpleRenderer*>(i->second);
+    if(sr) {
+      DoBlurSnapshot(sr->GetBondEntryList());
+    }
+    impl::LineTraceRenderer* lr = dynamic_cast<impl::LineTraceRenderer*>(i->second);
+    if(lr) {
+      DoBlurSnapshot(lr->GetBondEntryList());
+    }
+  }
 }
 
 void Entity::SetBlurFactors(float bf1,float bf2)
 {
-  impl::EntityRenderer* renderer=this->GetOrCreateRenderer(RenderMode::SIMPLE);
-  if(!renderer) return;
-  SimpleRenderOptionsPtr sro=get_sro(renderer);
-  sro->SetBlurFactors(bf1, bf2);
+  blurf1_=bf1;
+  blurf2_=bf2;
 }
 
 void Entity::Rebuild()
@@ -367,6 +370,16 @@ void Entity::CustomRenderGL(RenderPass pass)
         }
       } else if(pass==GLOW_RENDER_PASS) {
         r->Render(GLOW_RENDER_PASS);
+      }
+      if(blur_) {
+        impl::SimpleRenderer* sr = dynamic_cast<impl::SimpleRenderer*>(r);
+        if(sr) {
+          DoRenderBlur(sr->GetBondEntryList(),blurf1_,blurf2_);
+        }
+        impl::LineTraceRenderer* lr = dynamic_cast<impl::LineTraceRenderer*>(r);
+        if(lr) {
+          DoRenderBlur(lr->GetBondEntryList(),blurf1_,blurf2_);
+        }
       }
     }
   }
@@ -557,6 +570,36 @@ void Entity::SetOpacity(float f)
 {
   opacity_=f;
   this->UpdateIfNeeded();
+  Scene::Instance().RequestRedraw();
+}
+
+void Entity::SetOutlineWidth(float f)
+{
+  for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
+    if(it->second->IsEnabled()){
+      it->second->VA().SetOutlineWidth(f);
+    }
+  }
+  Scene::Instance().RequestRedraw();
+}
+
+void Entity::SetOutlineExpandFactor(float f)
+{
+  for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
+    if(it->second->IsEnabled()){
+      it->second->VA().SetOutlineExpandFactor(f);
+    }
+  }
+  Scene::Instance().RequestRedraw();
+}
+
+void Entity::SetOutlineExpandColor(const Color& c)
+{
+  for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
+    if(it->second->IsEnabled()){
+      it->second->VA().SetOutlineExpandColor(c);
+    }
+  }
   Scene::Instance().RequestRedraw();
 }
 

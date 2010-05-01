@@ -342,35 +342,31 @@ void GLCanvas::keyPressEvent(QKeyEvent* event)
       this->CopySelectionToClipboard();
       return;
     } else if(event->key()==Qt::Key_1) {
-      gfx::Scene::Instance().ActivateShader("");
+      gfx::Scene::Instance().SetShadingMode("fallback");
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_2) {
-      gfx::Scene::Instance().ActivateShader("basic");
+      gfx::Scene::Instance().SetShadingMode("basic");
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_3) {
-      gfx::Scene::Instance().ActivateShader("fraglight");
+      gfx::Scene::Instance().SetShadingMode("default");
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_4) {
-      gfx::Scene::Instance().ActivateShader("basic_shadow");
+      gfx::Scene::Instance().SetShadingMode("hf");
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_5) {
-      gfx::Scene::Instance().ActivateShader("fraglight_shadow");
+      gfx::Scene::Instance().SetShadingMode("toon1");
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_6) {
-      gfx::Scene::Instance().ActivateShader("hemilight");
+      gfx::Scene::Instance().SetShadingMode("toon2");
       DoRefresh();
       return;
-    } else if(event->key()==Qt::Key_7) {
-      gfx::Scene::Instance().ActivateShader("toon");
-      DoRefresh();
-      return;
-    } else if(event->key()==Qt::Key_8) {
-      gfx::Scene::Instance().ActivateShader("toon2");
+    } else if(event->key()==Qt::Key_P) {
+      gfx::Scene::Instance().SetShadow(!gfx::Scene::Instance().GetShadow());
       DoRefresh();
       return;
     }    

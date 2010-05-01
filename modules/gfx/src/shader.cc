@@ -131,12 +131,8 @@ void Shader::Setup()
     //////////////////////////////////////////////////////////////////
     // this is the master list of all shader code in shader/
 
-    {"basic_lf_vs.glsl", GL_VERTEX_SHADER},
-    {"basic_lf_fs.glsl", GL_FRAGMENT_SHADER},
-    {"fraglight_lf_vs.glsl", GL_VERTEX_SHADER},
-    {"fraglight_lf_fs.glsl", GL_FRAGMENT_SHADER},
-    {"basic_lfs_vs.glsl", GL_VERTEX_SHADER},
-    {"basic_lfs_fs.glsl", GL_FRAGMENT_SHADER},
+    {"basic_vs.glsl", GL_VERTEX_SHADER},
+    {"basic_fs.glsl", GL_FRAGMENT_SHADER},
     {"fraglight_vs.glsl", GL_VERTEX_SHADER},
     {"fraglight_fs.glsl", GL_FRAGMENT_SHADER},
     {"basic_hf_vs.glsl", GL_VERTEX_SHADER},
@@ -186,36 +182,22 @@ void Shader::Setup()
   std::vector<GLuint> shader_program_list;
   GLuint shader_program_id;
   // basic shader
-  shader_program_list.push_back(shader_code_map_["basic_lf_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["basic_lf_fs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["basic_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["basic_fs.glsl"]);
   if(link_shader(shader_program_list,"basic",shader_program_id)) {
     shader_program_map_["basic"]=shader_program_id;
   }
   // fraglight shader
   shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["fraglight_lf_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["fraglight_lf_fs.glsl"]);
-  if(link_shader(shader_program_list,"fraglight",shader_program_id)) {
-    shader_program_map_["fraglight"]=shader_program_id;
-  }
-  // basic shadow map shader
-  shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["basic_lfs_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["basic_lfs_fs.glsl"]);
-  if(link_shader(shader_program_list,"basic_shadow",shader_program_id)) {
-    shader_program_map_["basic_shadow"]=shader_program_id;
-  }
-  // fraglight shader with shadow map
-  shader_program_list.clear();
   shader_program_list.push_back(shader_code_map_["fraglight_vs.glsl"]);
   shader_program_list.push_back(shader_code_map_["fraglight_fs.glsl"]);
-  if(link_shader(shader_program_list,"fraglight_shadow",shader_program_id)) {
-    shader_program_map_["fraglight_shadow"]=shader_program_id;
+  if(link_shader(shader_program_list,"fraglight",shader_program_id)) {
+    shader_program_map_["fraglight"]=shader_program_id;
   }
   // basic hemisphere lighting shader
   shader_program_list.clear();
   shader_program_list.push_back(shader_code_map_["basic_hf_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["basic_lf_fs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["basic_fs.glsl"]);
   if(link_shader(shader_program_list,"hemilight",shader_program_id)) {
     shader_program_map_["hemilight"]=shader_program_id;
   }
@@ -230,8 +212,8 @@ void Shader::Setup()
   shader_program_list.clear();
   shader_program_list.push_back(shader_code_map_["toon_vs.glsl"]);
   shader_program_list.push_back(shader_code_map_["toon_fs.glsl"]);
-  if(link_shader(shader_program_list,"toon",shader_program_id)) {
-    shader_program_map_["toon"]=shader_program_id;
+  if(link_shader(shader_program_list,"toon1",shader_program_id)) {
+    shader_program_map_["toon1"]=shader_program_id;
   }
   // toon2 shader
   shader_program_list.clear();
@@ -242,7 +224,7 @@ void Shader::Setup()
   }
   // line shader
   shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["basic_lf_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["basic_vs.glsl"]);
   shader_program_list.push_back(shader_code_map_["aaline_fs.glsl"]);
   if(link_shader(shader_program_list,"aaline",shader_program_id)) {
     shader_program_map_["aaline"]=shader_program_id;
@@ -264,7 +246,7 @@ void Shader::Setup()
   // outline shader
   shader_program_list.clear();
   shader_program_list.push_back(shader_code_map_["outline_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["basic_lf_fs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["basic_fs.glsl"]);
   if(link_shader(shader_program_list,"outline",shader_program_id)) {
     shader_program_map_["outline"]=shader_program_id;
   }
@@ -288,14 +270,6 @@ void Shader::Activate(const String& name)
       glUseProgram(it->second);
       current_program_=it->second;
       current_name_=name;
-
-      if(name=="basic_shadow" || name=="fraglight_shadow") {
-    	if(!Scene::Instance().GetShadow())
-          Scene::Instance().SetShadow(true);
-      } else {
-      	if(Scene::Instance().GetShadow())
-          Scene::Instance().SetShadow(false);
-      }
 
       UpdateState();
       return;
@@ -345,10 +319,28 @@ void Shader::PopProgram()
   }
 }
 
+void Shader::SetShadowMapping(bool flag, GLuint texid)
+{
+  shadow_flag_=flag;
+  if(flag) {
+    shadow_map_id_=texid;
+  }
+  UpdateState();
+}
+
+void Shader::SetDepthMapping(int mode, GLuint texid)
+{
+  depth_mode_=mode;
+  if(mode>0) {
+    depth_map_id_=texid;
+  }
+  UpdateState();
+}
+
 void Shader::UpdateState()
 {
   if(current_program_!=0) {
-    // update current lighting and fog settings, valid for all shaders
+    // update all settings
     GLint result;
     glGetIntegerv(GL_LIGHTING,&result);
     LOGN_TRACE("setting lighting flag to " << result);
@@ -360,7 +352,25 @@ void Shader::UpdateState()
     glGetIntegerv(GL_FOG,&result);
     LOGN_TRACE("setting fog flag to " << result);
     glUniform1i(glGetUniformLocation(current_program_,"fog_flag"),result);
+    if(shadow_flag_) {
+      LOGN_TRACE("setting shadow flag to 1");
+      glUniform1i(glGetUniformLocation(current_program_,"shadow_flag"),1);
+      glUniform1i(glGetUniformLocation(current_program_,"shadow_map"),shadow_map_id_);
+      glUniform1f(glGetUniformLocation(current_program_,"shadow_depth_bias"),0.008);
+      glUniform1f(glGetUniformLocation(current_program_,"shadow_epsilon"),0.002);
+      glUniform1f(glGetUniformLocation(current_program_,"shadow_multiplier"),0.4);
+    } else {
+      LOGN_TRACE("setting shadow flag to 0");
+      glUniform1i(glGetUniformLocation(current_program_,"shadow_flag"),0);
+    }
+    LOGN_TRACE("setting depth mode to" << depth_mode_);
+    glUniform1i(glGetUniformLocation(current_program_,"depth_mode"),depth_mode_);
+    if(depth_mode_>0) {
+      glUniform1i(glGetUniformLocation(current_program_,"depth_map"),depth_map_id_);
+    }
+
     glDisable(GL_COLOR_MATERIAL);
+
   } else {
     glEnable(GL_COLOR_MATERIAL);
   }

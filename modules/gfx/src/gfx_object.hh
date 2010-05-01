@@ -76,6 +76,7 @@ public:
   virtual void SetLineHalo(float f);
   virtual void Outline(bool f);
   virtual void SetOutlineMode(int m);
+  virtual void SetOutlineWidth(float f);
   virtual void SetOutlineExpandFactor(float f);
   virtual void SetOutlineExpandColor(const Color& c);
   virtual void AmbientOcclusion(bool f);

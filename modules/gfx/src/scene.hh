@@ -102,15 +102,21 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief get the fog color
   Color GetFogColor() const;
 
-  /// \brief turn shadow on and off
+  /// \brief turn shadow mapping on and off
   void SetShadow(bool f);
 
-  /// \brief returns true if shadow is on
-  bool GetShadow();
+  /// \brief get shadow mapping status
+  bool GetShadow() const {return shadow_flag_;}
 
   /// \brief shadow quality from 0 (low) to 3 (high), default=1
   void SetShadowQuality(int q);
+
+  void SetDepthDarkening(bool f);
   
+  /// \brief select shading mode
+  /// one of fallback, basic, default, hf, toon1, toon2
+  void SetShadingMode(const std::string& smode);
+
   /// \name clipping planes
   //@{
   /// \brief get near clipping plane
@@ -345,9 +351,6 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief stops offline rendering in interactive mode
   void StopOffscreenMode();
   
-  // temporary interface
-  void ActivateShader(const String& name);
-
   void SetBlur(uint n);
   void BlurSnapshot();
 
@@ -404,6 +407,7 @@ private:
   bool shadow_flag_;
   int shadow_quality_;
   GLuint shadow_tex_id_;
+  bool depth_dark_flag_;
   GLuint depth_tex_id_;
   GLuint kernel_tex_id_;
   GLuint scene_tex_id_;
@@ -434,7 +438,8 @@ private:
   void set_far(float f);
   void update_fog();
   void prep_shadow_map();
-  void prep_depth_map();
+  void prep_depth_darkening();
+  void prep_depth_map(uint,uint);
   void flag_all_dirty();
   void prep_glyphs();
   void prep_blur();

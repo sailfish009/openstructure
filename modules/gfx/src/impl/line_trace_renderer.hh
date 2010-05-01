@@ -53,8 +53,12 @@ public:
 
   virtual ~LineTraceRenderer();
 
+  BondEntryList& GetBondEntryList() {return blist_;}
+
 private:
   LineTraceRenderOptionsPtr  options_;
+  AtomEntryMap amap_;   // for blur rendering
+  BondEntryList blist_; // dito
 };
 
 }}}

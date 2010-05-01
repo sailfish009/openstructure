@@ -72,7 +72,7 @@ inline void apply_color_op(TraceRendererBase* rend, BackboneTrace& trace_subset,
 } //ns
 
 TraceRendererBase::TraceRendererBase(BackboneTrace* trace, int n):
-  trace_(trace), trace_subset_(*trace), sel_subset_()
+  trace_(trace), trace_subset_(), sel_subset_()
 {
 }
 

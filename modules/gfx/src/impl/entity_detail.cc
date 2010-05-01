@@ -16,7 +16,13 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+#include <ost/gfx/gl_helper.hh>
+#include <ost/gfx/scene.hh>
+#include <ost/gfx/color.hh>
+
 #include "entity_detail.hh"
+
 
 namespace ost { 
 
@@ -24,11 +30,134 @@ using namespace mol;
 
 namespace gfx { namespace impl {
 
-  namespace {
+namespace {
 
-    static const float default_radius=0.28;
+static const float default_radius=0.28;
 
+struct BlurQuadEntry
+{
+  float zdist;
+  geom::Vec3 p1,p2,p3,p4;
+  gfx::Color c1,c2,c3,c4;
+};
+
+struct BlurQuadEntryLess
+{
+  bool operator()(const BlurQuadEntry& e1, const BlurQuadEntry& e2)
+  {
+    // provides back-to-front sorting
+    return e1.zdist<e2.zdist;
   }
+};
+
+} // anon ns
+
+void DoRenderBlur(BondEntryList& bl, float bf1, float bf2)
+{
+  // add blur for this particular orientation!
+  // don't use vertex array, but on-the-fly oriented and z-sorted quads
+  mol::Transform tf = Scene::Instance().GetTransform();
+
+  std::vector<BlurQuadEntry> bql;
+  for (BondEntryList::iterator it=bl.begin(); it!=bl.end();++it) {
+
+    if(!it->atom1 || !it->atom2) continue;
+
+    const geom::Vec3 p0=tf.Apply(it->atom1->atom.GetPos());
+    const geom::Vec3 p2=tf.Apply(it->atom2->atom.GetPos());
+    geom::Vec3 p1=(p0+p2)*0.5;
+
+    const geom::Vec3 q0=tf.Apply(it->pp1);
+    const geom::Vec3 q2=tf.Apply(it->pp2);
+    geom::Vec3 q1=(q0+q2)*0.5;
+
+    float ll0 = geom::Length2(p0-q0);
+    float ll1 = geom::Length2(p1-q1);
+    float ll2 = geom::Length2(p2-q2);
+
+    if(ll0<1e-2 && ll1<1e-2 && ll2<1e-2) continue;
+
+    float x0 = exp(-bf1*ll0);
+    float x1 = exp(-bf1*ll1);
+    float x2 = exp(-bf1*ll2);
+
+    BlurQuadEntry bqe;
+
+    bqe.zdist=0.25*(p0[2]+p2[2]+q0[2]+q2[2]);
+
+    // first half
+    bqe.p1 = p0;
+    bqe.p2 = p1;
+    bqe.p3 = q0;
+    bqe.p4 = q1;
+    bqe.c1 = it->atom1->color;
+    bqe.c2 = it->atom1->color;
+    bqe.c3 = it->atom1->color;
+    bqe.c4 = it->atom1->color;
+    bqe.c1[3] = x0;
+    bqe.c2[3] = x1;
+    bqe.c3[3]=x0*bf2;
+    bqe.c4[3]=x1*bf2;
+
+    bql.push_back(bqe);
+
+    // second half
+    bqe.p1 = p1;
+    bqe.p2 = p2;
+    bqe.p3 = q1;
+    bqe.p4 = q2;
+    bqe.c1 = it->atom2->color;
+    bqe.c2 = it->atom2->color;
+    bqe.c3 = it->atom2->color;
+    bqe.c4 = it->atom2->color;
+    bqe.c1[3] = x1;
+    bqe.c2[3] = x2;
+    bqe.c3[3]=x1*bf2;
+    bqe.c4[3]=x2*bf2;
+
+    bql.push_back(bqe);
+  }
+
+  std::sort(bql.begin(),bql.end(),BlurQuadEntryLess());
+
+  glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_CULL_FACE);
+  glDepthFunc(GL_LESS);
+  glDepthMask(GL_FALSE);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  glBegin(GL_QUADS);
+  glNormal3f(0.0,0.0,0.0);
+  for (std::vector<BlurQuadEntry>::const_iterator it=bql.begin();
+       it!=bql.end();++it) {
+    glColor4fv(it->c1);
+    glVertex3v(it->p1.Data());
+    glColor4fv(it->c2);
+    glVertex3v(it->p2.Data());
+    glColor4fv(it->c4);
+    glVertex3v(it->p4.Data());
+    glColor4fv(it->c3);
+    glVertex3v(it->p3.Data());
+  }
+
+  glEnd();
+  glPopMatrix();
+  glPopAttrib();
+}
+
+void DoBlurSnapshot(BondEntryList& bl)
+{
+  for (BondEntryList::iterator it=bl.begin();
+       it!=bl.end();++it) {
+    if(it->atom1 && it->atom2) {
+      it->pp1=it->atom1->atom.GetPos();
+      it->pp2=it->atom2->atom.GetPos();
+    }
+  }
+}
+
 
 void GfxView::Clear() 
 {
