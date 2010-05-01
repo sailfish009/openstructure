@@ -52,24 +52,12 @@ public:
   void PopProgram();
 
   void UpdateState();
-
-  void SetShadowMapping(bool flag, GLuint texid);
-  void SetDepthMapping(int mode, GLuint texid);
-  void SetOcclusionMapping(bool flag, GLuint texid);
-  
 private:
   Shader();
 
   bool valid_;
   GLuint current_program_;
   String current_name_;
-
-  bool shadow_flag_;
-  GLuint shadow_map_id_;
-  int depth_mode_;
-  GLuint depth_map_id_;
-  bool occl_flag_;
-  GLuint occl_map_id_;
 
   std::stack<String> program_stack_;
 

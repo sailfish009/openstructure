@@ -109,14 +109,6 @@ Scene::Scene():
   axis_flag_(false),
   fog_flag_(true),
   fog_color_(0.0,0.0,0.0,0.0),
-  shadow_flag_(false),
-  shadow_quality_(1),
-  shadow_tex_id_(),
-  depth_dark_flag_(false),
-  amb_occl_flag_(false),
-  depth_tex_id_(),
-  kernel_tex_id_(),
-  scene_tex_id_(),
   auto_autoslab_(true),
   offscreen_flag_(false),
   main_offscreen_buffer_(0),
@@ -168,33 +160,45 @@ Color Scene::GetFogColor() const
 
 void Scene::SetShadow(bool f)
 {
-  shadow_flag_=f;
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().shadow_flag=f;
   // the redraw routine will deal with the Shader
   RequestRedraw();
+#endif
+}
+
+bool Scene::GetShadow() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().shadow_flag;
+#endif
 }
 
 void Scene::SetShadowQuality(int q)
 {
-  shadow_quality_=std::min(3,std::max(0,q));
-  if(shadow_flag_) {
-    RequestRedraw();
-  }
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().shadow_quality=std::min(3,std::max(0,q));
+  RequestRedraw();
+#endif
 }
 
 void Scene::SetDepthDarkening(bool f)
 {
-  depth_dark_flag_=f;
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().depth_dark_flag=f;
   // the redraw routine will deal with the Shader
   RequestRedraw();
+#endif
 }
 
 void Scene::SetAmbientOcclusion(bool f)
 {
-  amb_occl_flag_=f;
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().amb_occl_flag=f;
   // the redraw routine will deal with the Shader
   RequestRedraw();
+#endif
 }
-
 
 void Scene::SetShadingMode(const std::string& smode)
 {
@@ -320,11 +324,8 @@ void Scene::InitGL()
   LOGN_DEBUG("scene: shader setup");
   Shader::Instance().Setup();
   SetShadingMode("default");
-
-  glGenTextures(1,&shadow_tex_id_);
-  glGenTextures(1,&depth_tex_id_);
-  glGenTextures(1,&kernel_tex_id_);
-  glGenTextures(1,&scene_tex_id_);
+  LOGN_DEBUG("scene: scenefx setup");
+  impl::SceneFX::Instance().Setup();
 #endif
 
   prep_glyphs();
@@ -369,6 +370,9 @@ void Scene::SetViewport(int w, int h)
   vp_height_=h;
   aspect_ratio_=static_cast<float>(w)/static_cast<float>(h);
   ResetProjection();
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().Resize(w,h);
+#endif
 }
 
 void Scene::Resize(int w, int h)
@@ -506,23 +510,6 @@ void Scene::RenderGL()
 {
   if(auto_autoslab_) Autoslab(false, false);
 
-  #if OST_SHADER_SUPPORT_ENABLED
-  if(amb_occl_flag_) {
-    impl::prep_amb_occlusion(*this,GL_TEXTURE1, depth_tex_id_);
-  } else {
-    Shader::Instance().SetOcclusionMapping(0,0);
-  }
-  if(depth_dark_flag_) {
-    impl::prep_depth_darkening(*this,GL_TEXTURE1, depth_tex_id_);
-  } else {
-    Shader::Instance().SetDepthMapping(0,0);
-  }
-  if(shadow_flag_) {
-    impl::prep_shadow_map(*this,GL_TEXTURE0,shadow_tex_id_,shadow_quality_);
-  } else {
-    Shader::Instance().SetShadowMapping(0,0);
-  }
-  #endif
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   prep_blur();
 
@@ -533,6 +520,17 @@ void Scene::RenderGL()
 
   glMultMatrix(transform_.GetTransposedMatrix().Data());
 
+  // TODO: handle stereo
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().Preprocess();
+#endif
+  render_standard_scene();
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().Postprocess();
+#endif
+  render_glow();
+  
+#if 0
   if(stereo_==2 || stereo_==3) {
     render_interlaced_stereo();
   } else if (stereo_==1) {
@@ -540,11 +538,8 @@ void Scene::RenderGL()
   } else {
     this->render_scene_with_glow();
   }
-  #if OST_SHADER_SUPPORT_ENABLED
-  if(shadow_flag_) {
-    glDisable(GL_TEXTURE_2D);
-  }
-  #endif
+#endif
+
 }
 
 void Scene::Register(GLWinBase* win)
@@ -1681,7 +1676,7 @@ void Scene::prep_blur()
   glFlush();
 }
 
-void Scene::render_scene_with_glow()
+void Scene::render_standard_scene()
 {
   glDepthFunc(GL_LEQUAL);    
   glDepthMask(1);
@@ -1693,8 +1688,11 @@ void Scene::render_scene_with_glow()
   root_node_->RenderGL(TRANSPARENT_RENDER_PASS);
   glDisable(GL_BLEND);
   root_node_->RenderGL(OVERLAY_RENDER_PASS);
+}
 
-  glPushAttrib(GL_ENABLE_BIT);
+void Scene::render_glow()
+{
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glEnable(GL_COLOR_MATERIAL);
   glShadeModel(GL_FLAT);
   glDisable(GL_FOG);
@@ -1739,6 +1737,7 @@ void Scene::stereo_projection(unsigned int view)
 
 void Scene::render_interlaced_stereo()
 {
+#if 0
   // set up stencil buffer
   glPushAttrib(GL_STENCIL_BUFFER_BIT| GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
   glMatrixMode(GL_PROJECTION);
@@ -1791,10 +1790,12 @@ void Scene::render_interlaced_stereo()
   root_node_->RenderGL(GLOW_RENDER_PASS);
   glDisable(GL_STENCIL_TEST);
   glPopAttrib();
+#endif
 }
 
 void Scene::render_quad_buffered_stereo()
 {
+#if 0
   glDrawBuffer(GL_BACK);
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   glDrawBuffer(GL_BACK_LEFT);
@@ -1814,6 +1815,7 @@ void Scene::render_quad_buffered_stereo()
   }
   this->render_scene_with_glow();
   glDrawBuffer(GL_BACK);
+#endif
 }
 
 }} // ns

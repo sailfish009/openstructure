@@ -33,12 +33,49 @@ class Scene;
 
 namespace impl {
 
-void prep_shadow_map(Scene& scene, GLuint texunit, GLuint texid, uint quality);
-void prep_depth_darkening(Scene& scene, GLuint texunit, GLuint texid);
-void prep_amb_occlusion(Scene& scene, GLuint texunit, GLuint texid);
-void prep_depth_map(Scene& scene, uint, uint, GLuint texunit, GLuint texid);
-void draw_screen_quad(unsigned int w, unsigned int h, GLuint texunit, GLuint texid);
-void draw_debug_tex(unsigned int w, unsigned int h, GLuint texid);
+class SceneFX {
+public:
+  ~SceneFX();
+  static SceneFX& Instance();
+
+  void Setup();
+
+  void Resize(unsigned int w, unsigned int h);
+  
+  void Preprocess();
+  // assumes scene has been drawn in the active framebuffer
+  void Postprocess();
+
+  bool shadow_flag;
+  int shadow_quality;
+  bool depth_dark_flag;
+  bool amb_occl_flag;
+
+private:
+  SceneFX();
+  SceneFX(const SceneFX&) {}
+  SceneFX& operator=(const SceneFX&) {return *this;}
+
+  void prep_shadow_map();
+  void prep_depth_darkening();
+  void prep_amb_occlusion();
+  void draw_screen_quad(uint w, uint h);
+  void draw_debug_tex(unsigned int w, unsigned int h, GLuint texid);
+
+  GLuint scene_tex_id_;
+  GLuint depth_tex_id_;
+  GLuint shadow_tex_id_;
+  GLuint occl_tex_id_;
+  GLuint dark_tex_id_;
+  GLuint norm_tex_id_;
+
+  GLuint scene_tex2_id_;
+  GLuint norm_tex2_id_;
+  GLuint scene_fb_;
+  GLuint depth_rb_;
+
+  bool use_fb_;
+};
 
 }}} // ns
 

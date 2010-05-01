@@ -51,8 +51,8 @@ class OffscreenBuffer;
 typedef std::vector<SceneObserver*>  SceneObserverList;
 
 struct Viewport {
-  int bottom;
-  int left;
+  int x;
+  int y;
   int width;
   int height;
 };
@@ -106,7 +106,7 @@ class DLLEXPORT_OST_GFX Scene {
   void SetShadow(bool f);
 
   /// \brief get shadow mapping status
-  bool GetShadow() const {return shadow_flag_;}
+  bool GetShadow() const;
 
   /// \brief shadow quality from 0 (low) to 3 (high), default=1
   void SetShadowQuality(int q);
@@ -409,14 +409,6 @@ private:
   bool axis_flag_;
   bool fog_flag_;
   Color fog_color_;
-  bool shadow_flag_;
-  int shadow_quality_;
-  GLuint shadow_tex_id_;
-  bool depth_dark_flag_;
-  bool amb_occl_flag_;
-  GLuint depth_tex_id_;
-  GLuint kernel_tex_id_;
-  GLuint scene_tex_id_;
   bool auto_autoslab_;
 
   bool offscreen_flag_; // a simple indicator whether in offscreen mode or not
@@ -449,7 +441,8 @@ private:
   void stereo_projection(unsigned int view);
   void render_interlaced_stereo();
   void render_quad_buffered_stereo();
-  void render_scene_with_glow();
+  void render_standard_scene();
+  void render_glow();
   bool IsNameAvailable(String name);
 };
 

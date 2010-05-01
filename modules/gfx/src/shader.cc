@@ -150,7 +150,9 @@ void Shader::Setup()
     {"outline_vs.glsl", GL_VERTEX_SHADER},
     {"quadpp_vs.glsl", GL_VERTEX_SHADER},
     {"convolute1_fs.glsl", GL_FRAGMENT_SHADER},
-    {"amboccl_fs.glsl", GL_FRAGMENT_SHADER}
+    {"amboccl_fs.glsl", GL_FRAGMENT_SHADER},
+    {"scenefx_vs.glsl", GL_VERTEX_SHADER},
+    {"scenefx_fs.glsl", GL_FRAGMENT_SHADER}
     //////////////////////////////////////////////////////////////////
   };
 
@@ -253,17 +255,24 @@ void Shader::Setup()
   }
   // convolute1 shader
   shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["quadpp.glsl"]);
+  shader_program_list.push_back(shader_code_map_["quadpp_vs.glsl"]);
   shader_program_list.push_back(shader_code_map_["convolute1_fs.glsl"]);
   if(link_shader(shader_program_list,"convolute1",shader_program_id)) {
     shader_program_map_["convolute1"]=shader_program_id;
   }
-  // amb occl shader
+  // amboccl shader
   shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["quadpp.glsl"]);
+  shader_program_list.push_back(shader_code_map_["quadpp_vs.glsl"]);
   shader_program_list.push_back(shader_code_map_["amboccl_fs.glsl"]);
   if(link_shader(shader_program_list,"amboccl",shader_program_id)) {
     shader_program_map_["amboccl"]=shader_program_id;
+  }
+  // scenefx shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["scenefx_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["scenefx_fs.glsl"]);
+  if(link_shader(shader_program_list,"scenefx",shader_program_id)) {
+    shader_program_map_["scenefx"]=shader_program_id;
   }
 
   valid_=true;
@@ -327,33 +336,6 @@ void Shader::PopProgram()
   }
 }
 
-void Shader::SetShadowMapping(bool flag, GLuint texid)
-{
-  shadow_flag_=flag;
-  if(flag) {
-    shadow_map_id_=texid;
-  }
-  UpdateState();
-}
-
-void Shader::SetOcclusionMapping(bool flag, GLuint texid)
-{
-  occl_flag_=flag;
-  if(flag) {
-    occl_map_id_=texid;
-  }
-  UpdateState();
-}
-
-void Shader::SetDepthMapping(int mode, GLuint texid)
-{
-  depth_mode_=mode;
-  if(mode>0) {
-    depth_map_id_=texid;
-  }
-  UpdateState();
-}
-
 void Shader::UpdateState()
 {
   if(current_program_!=0) {
@@ -369,23 +351,6 @@ void Shader::UpdateState()
     glGetIntegerv(GL_FOG,&result);
     LOGN_TRACE("setting fog flag to " << result);
     glUniform1i(glGetUniformLocation(current_program_,"fog_flag"),result);
-    if(shadow_flag_) {
-      LOGN_TRACE("setting shadow flag to 1");
-      glUniform1i(glGetUniformLocation(current_program_,"shadow_flag"),1);
-      glUniform1i(glGetUniformLocation(current_program_,"shadow_map"),shadow_map_id_);
-      glUniform1f(glGetUniformLocation(current_program_,"shadow_depth_bias"),0.008);
-      glUniform1f(glGetUniformLocation(current_program_,"shadow_epsilon"),0.002);
-      glUniform1f(glGetUniformLocation(current_program_,"shadow_multiplier"),0.4);
-    } else {
-      LOGN_TRACE("setting shadow flag to 0");
-      glUniform1i(glGetUniformLocation(current_program_,"shadow_flag"),0);
-    }
-    LOGN_TRACE("setting depth mode to" << depth_mode_);
-    glUniform1i(glGetUniformLocation(current_program_,"depth_mode"),depth_mode_);
-    if(depth_mode_>0) {
-      glUniform1i(glGetUniformLocation(current_program_,"depth_map"),depth_map_id_);
-    }
-
     glDisable(GL_COLOR_MATERIAL);
 
   } else {

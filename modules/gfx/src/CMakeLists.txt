@@ -244,7 +244,8 @@ if (USE_SHADER)
     shader/outline_vs.glsl
     shader/quadpp_vs.glsl
     shader/convolute1_fs.glsl
-    shader/amboccl_fs.glsl
+    shader/scenefx_vs.glsl
+    shader/scenefx_fs.glsl
   )
   copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  
