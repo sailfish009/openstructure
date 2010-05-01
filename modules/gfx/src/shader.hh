@@ -55,6 +55,7 @@ public:
 
   void SetShadowMapping(bool flag, GLuint texid);
   void SetDepthMapping(int mode, GLuint texid);
+  void SetOcclusionMapping(bool flag, GLuint texid);
   
 private:
   Shader();
@@ -67,6 +68,8 @@ private:
   GLuint shadow_map_id_;
   int depth_mode_;
   GLuint depth_map_id_;
+  bool occl_flag_;
+  GLuint occl_map_id_;
 
   std::stack<String> program_stack_;
 

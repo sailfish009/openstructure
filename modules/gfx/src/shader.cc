@@ -148,8 +148,9 @@ void Shader::Setup()
     {"fast_sphere_vs.glsl", GL_VERTEX_SHADER},
     {"fast_sphere_fs.glsl", GL_FRAGMENT_SHADER},
     {"outline_vs.glsl", GL_VERTEX_SHADER},
-    {"convolute1_vs.glsl", GL_VERTEX_SHADER},
-    {"convolute1_fs.glsl", GL_FRAGMENT_SHADER}
+    {"quadpp_vs.glsl", GL_VERTEX_SHADER},
+    {"convolute1_fs.glsl", GL_FRAGMENT_SHADER},
+    {"amboccl_fs.glsl", GL_FRAGMENT_SHADER}
     //////////////////////////////////////////////////////////////////
   };
 
@@ -252,10 +253,17 @@ void Shader::Setup()
   }
   // convolute1 shader
   shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["convolute1_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["quadpp.glsl"]);
   shader_program_list.push_back(shader_code_map_["convolute1_fs.glsl"]);
   if(link_shader(shader_program_list,"convolute1",shader_program_id)) {
     shader_program_map_["convolute1"]=shader_program_id;
+  }
+  // amb occl shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["quadpp.glsl"]);
+  shader_program_list.push_back(shader_code_map_["amboccl_fs.glsl"]);
+  if(link_shader(shader_program_list,"amboccl",shader_program_id)) {
+    shader_program_map_["amboccl"]=shader_program_id;
   }
 
   valid_=true;
@@ -324,6 +332,15 @@ void Shader::SetShadowMapping(bool flag, GLuint texid)
   shadow_flag_=flag;
   if(flag) {
     shadow_map_id_=texid;
+  }
+  UpdateState();
+}
+
+void Shader::SetOcclusionMapping(bool flag, GLuint texid)
+{
+  occl_flag_=flag;
+  if(flag) {
+    occl_map_id_=texid;
   }
   UpdateState();
 }

@@ -112,6 +112,8 @@ class DLLEXPORT_OST_GFX Scene {
   void SetShadowQuality(int q);
 
   void SetDepthDarkening(bool f);
+
+  void SetAmbientOcclusion(bool f);
   
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
@@ -356,6 +358,9 @@ class DLLEXPORT_OST_GFX Scene {
 
   void RenderText(const TextPrim& t);
 
+  geom::Vec3 GetLightDir() const {return light_dir_;}
+  geom::Mat3 GetLightRot() const {return light_rot_;}
+
 protected:
   friend class GfxObj; 
   friend class GfxNode;
@@ -408,6 +413,7 @@ private:
   int shadow_quality_;
   GLuint shadow_tex_id_;
   bool depth_dark_flag_;
+  bool amb_occl_flag_;
   GLuint depth_tex_id_;
   GLuint kernel_tex_id_;
   GLuint scene_tex_id_;
@@ -437,9 +443,6 @@ private:
   void set_near(float n);
   void set_far(float f);
   void update_fog();
-  void prep_shadow_map();
-  void prep_depth_darkening();
-  void prep_depth_map(uint,uint);
   void flag_all_dirty();
   void prep_glyphs();
   void prep_blur();

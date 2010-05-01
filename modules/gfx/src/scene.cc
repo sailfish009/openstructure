@@ -54,6 +54,7 @@
 
 #if OST_SHADER_SUPPORT_ENABLED
 # include "shader.hh"
+# include "impl/scene_fx.hh"
 #endif
 
 using boost::bind;
@@ -112,6 +113,7 @@ Scene::Scene():
   shadow_quality_(1),
   shadow_tex_id_(),
   depth_dark_flag_(false),
+  amb_occl_flag_(false),
   depth_tex_id_(),
   kernel_tex_id_(),
   scene_tex_id_(),
@@ -182,6 +184,13 @@ void Scene::SetShadowQuality(int q)
 void Scene::SetDepthDarkening(bool f)
 {
   depth_dark_flag_=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+}
+
+void Scene::SetAmbientOcclusion(bool f)
+{
+  amb_occl_flag_=f;
   // the redraw routine will deal with the Shader
   RequestRedraw();
 }
@@ -498,13 +507,18 @@ void Scene::RenderGL()
   if(auto_autoslab_) Autoslab(false, false);
 
   #if OST_SHADER_SUPPORT_ENABLED
+  if(amb_occl_flag_) {
+    impl::prep_amb_occlusion(*this,GL_TEXTURE1, depth_tex_id_);
+  } else {
+    Shader::Instance().SetOcclusionMapping(0,0);
+  }
   if(depth_dark_flag_) {
-    prep_depth_darkening();
+    impl::prep_depth_darkening(*this,GL_TEXTURE1, depth_tex_id_);
   } else {
     Shader::Instance().SetDepthMapping(0,0);
   }
   if(shadow_flag_) {
-    prep_shadow_map();
+    impl::prep_shadow_map(*this,GL_TEXTURE0,shadow_tex_id_,shadow_quality_);
   } else {
     Shader::Instance().SetShadowMapping(0,0);
   }
@@ -1571,268 +1585,6 @@ void Scene::update_fog()
   glFogf(GL_FOG_END,zfar_+ffar_);
 }
 
-namespace {
-
-  void draw_screen_quad(unsigned int w, unsigned int h, GLuint gltex, GLuint tex_id)
-  {
-    glPushAttrib(GL_ENABLE_BIT | GL_VIEWPORT_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_FOG_BIT);
-
-    // setup
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_COLOR_MATERIAL);
-    glDisable(GL_FOG);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_BLEND);
-    glDisable(GL_LINE_SMOOTH);
-    glDisable(GL_POINT_SMOOTH);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glViewport(0,0,w,h);
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glOrtho(0,1,0,1,-1,1);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-
-    // draw
-    glColor3f(1.0,0.0,1.0);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0,0.0);
-    glVertex2f(0.0,0.0);
-    glTexCoord2f(0.0,1.0);
-    glVertex2f(0.0,1.0);
-    glTexCoord2f(1.0,1.0);
-    glVertex2f(1.0,1.0);
-    glTexCoord2f(1.0,0.0);
-    glVertex2f(1.0,0.0);
-    glEnd();
-  
-    // grab the result
-    glEnable(GL_TEXTURE_2D);
-    glActiveTexture(gltex);
-    glBindTexture(GL_TEXTURE_2D, tex_id);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0,0, w, h, 0);
-
-    // restore settings
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glPopAttrib();
-  }
-
-  // this debug code draws the given texture across the complete screen
-  void draw_debug_tex(unsigned int w, unsigned int h, GLuint tex_id)
-  {
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    Shader::Instance().PushProgram();
-
-    Shader::Instance().Activate("");
-    glViewport(0,0,w,h);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(0,1,0,1,-1,1);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glColor3f(1.0,0.0,1.0);
-    glEnable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, tex_id);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0,0.0);
-    glVertex2f(0.01,0.01);
-    glTexCoord2f(0.0,1.0);
-    glVertex2f(0.01,0.99);
-    glTexCoord2f(1.0,1.0);
-    glVertex2f(0.99,0.99);
-    glTexCoord2f(1.0,0.0);
-    glVertex2f(0.99,0.01);
-    glEnd();
-    glPopAttrib();
-    Shader::Instance().PopProgram();
-  }
-}
-
-void Scene::prep_shadow_map()
-{
-#if OST_SHADER_SUPPORT_ENABLED
-  GLint smap_size=256 << shadow_quality_;
-
-  // modelview transform for the lightsource pov
-  mol::Transform ltrans(transform_);
-  ltrans.SetRot(light_rot_*transform_.GetRot());
-
-  // calculate encompassing box for ortho projection
-  geom::AlignedCuboid bb=this->GetBoundingBox(ltrans);
-  const Vec3& tmin=bb.GetMin();
-  const Vec3& tmax=bb.GetMax();
-
-  // render pass 1 - without shadows
-
-  // turn shadowing off for subsequent rendering
-  Shader::Instance().SetShadowMapping(false,0);
-
-  // save overall gl settings
-  glPushAttrib(GL_VIEWPORT_BIT | GL_ENABLE_BIT);
-  // maximize rendering for depth-only information
-  glDisable(GL_LIGHTING);
-  glDisable(GL_FOG);
-  glDisable(GL_COLOR_MATERIAL);
-  glDisable(GL_NORMALIZE);
-  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
-
-  // render scene with only depth components
-  // seen from the light's perspective
-  glViewport(0,0,smap_size,smap_size);
-  glClear(GL_DEPTH_BUFFER_BIT);
-
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glOrtho(tmin[0],tmax[0],tmin[1],tmax[1],-tmax[2],-tmin[2]);
-  //glFrustum(tmin[0],tmax[0],tmin[1],tmax[1],-tmax[2],-tmin[2]);
-  float glpmat[16];
-  glGetv(GL_PROJECTION_MATRIX, glpmat);
-  Mat4 pmat(Transpose(Mat4(glpmat)));
-
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-  glMultMatrix(ltrans.GetTransposedMatrix().Data());
-
-  // only render non-transparent objects for the shadow map
-  root_node_->RenderGL(DEPTH_RENDER_PASS);
-
-  // now get the shadow map
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, shadow_tex_id_);
-
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-                   0,0, smap_size,smap_size, 0);
-
-  // all of the following texture and shader params need to be moved
-  // to a one-time initialization place
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-  // assign tex unit 0 to shadow map
-  Shader::Instance().SetShadowMapping(true,0);
-
-  // restore settings
-  glPopMatrix();
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-
-  glPopAttrib();
-  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-
-  glEnable(GL_TEXTURE_2D);
-
-  // set up appropriate texture matrix
-  Mat4 bias(0.5,0.0,0.0,0.5,
-                  0.0,0.5,0.0,0.5,
-                  0.0,0.0,0.5,0.5,
-                  0.0,0.0,0.0,1.0);
-
-  Mat4 texm = bias*pmat*ltrans.GetMatrix();
-
-  glMatrixMode(GL_TEXTURE);
-  // make explicit object instead of temporary to avoid potential crash with Data()
-  Mat4 ttmp=Transpose(texm);
-  glLoadMatrix(ttmp.Data());
-  glMatrixMode(GL_MODELVIEW);
-#endif
-}
-
-void Scene::prep_depth_darkening()
-{
-#if OST_SHADER_SUPPORT_ENABLED
-  prep_depth_map(vp_width_/2,vp_height_/2);
-  // in unit 1, bound to depth_tex_id_
-
-  // kernel is static for now, inside the convolution shader
-
-  // now convolute the depth map with the kernel
-  Shader::Instance().PushProgram();
-  Shader::Instance().Activate("convolute1");
-  GLuint cpr=Shader::Instance().GetCurrentProgram();
-  // assign tex units
-  glUniform1i(glGetUniformLocation(cpr,"data"),1);
-  glUniform1i(glGetUniformLocation(cpr,"vp_width"),vp_width_/2);
-  glUniform1i(glGetUniformLocation(cpr,"vp_height"),vp_height_/2);
-
-  // set up viewport filling quad to run the fragment shader
-  draw_screen_quad(vp_width_/2,vp_height_/2,GL_TEXTURE1, depth_tex_id_);
-
-  Shader::Instance().PopProgram();
-
-  // mode 1, tex unit 1
-  Shader::Instance().SetDepthMapping(1,1);
-
-#endif
-}
-
-// returns the depth map in texture 1
-// bound to depth_tex_id_
-void Scene::prep_depth_map(unsigned int w, unsigned int h)
-{
-#if OST_SHADER_SUPPORT_ENABLED
-  unsigned int vp_width2=w;
-  unsigned int vp_height2=h;
-
-  // render pass 1 - without shadows
-  Shader::Instance().SetShadowMapping(false,0);
-  // save overall gl settings
-  glPushAttrib(GL_ENABLE_BIT);
-  // maximize rendering for depth-only information
-  glDisable(GL_LIGHTING);
-  glDisable(GL_FOG);
-  glDisable(GL_COLOR_MATERIAL);
-  glDisable(GL_NORMALIZE);
-  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
-
-  // render scene with only depth components
-  glClear(GL_DEPTH_BUFFER_BIT);
-  glViewport(0,0,vp_width2,vp_height2);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-  glMultMatrix(transform_.GetTransposedMatrix().Data());
-  root_node_->RenderGL(DEPTH_RENDER_PASS);
-
-  // now get the depth map
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, depth_tex_id_);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-                   0,0, vp_width2, vp_height2, 0);
-
-  // restore settings
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
-  glPopAttrib();
-  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-  glViewport(0,0,vp_width_,vp_height_);
-
-#endif
-}
 
 namespace {
 class DirtyAll: public GfxNodeVisitor

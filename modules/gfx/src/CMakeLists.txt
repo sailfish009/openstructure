@@ -192,6 +192,8 @@ if (USE_SHADER)
   message("Compiling with Shader Support")
   list(APPEND OST_GFX_SOURCES shader.cc)
   list(APPEND OST_GFX_HEADERS shader.hh)
+  list(APPEND OST_GFX_SOURCES impl/scene_fx.cc)
+  list(APPEND OST_GFX_IMPL_HEADERS scene_fx.hh)
   if (NOT APPLE)
     set(OST_GLEW_HEADERS
        glew.h
@@ -240,8 +242,9 @@ if (USE_SHADER)
     shader/fast_sphere_vs.glsl
     shader/fast_sphere_fs.glsl
     shader/outline_vs.glsl
-    shader/convolute1_vs.glsl
+    shader/quadpp_vs.glsl
     shader/convolute1_fs.glsl
+    shader/amboccl_fs.glsl
   )
   copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  
