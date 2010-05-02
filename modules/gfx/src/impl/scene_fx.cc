@@ -37,6 +37,8 @@ SceneFX::~SceneFX()
 
 void SceneFX::Setup()
 {
+  LOGN_VERBOSE("SceneFX: setup");
+
   glGenTextures(1,&scene_tex_id_);
   glGenTextures(1,&depth_tex_id_);
   glGenTextures(1,&shadow_tex_id_);
@@ -91,6 +93,7 @@ void SceneFX::Setup()
 
 void SceneFX::Resize(unsigned int w, unsigned int h)
 {
+#if 0
   glBindTexture(GL_TEXTURE_2D, scene_tex2_id_);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
   glBindTexture(GL_TEXTURE_2D, norm_tex2_id_);
@@ -109,13 +112,14 @@ void SceneFX::Resize(unsigned int w, unsigned int h)
 
   if(status!=GL_FRAMEBUFFER_COMPLETE) {
     use_fb_=false;
-    LOGN_VERBOSE("framebuffer error code " << status);
+    LOGN_VERBOSE("SceneFX: framebuffer error code " << status);
   } else {
     use_fb_=true;
   }
 
   glBindRenderbuffer(GL_RENDERBUFFER, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif
 }
 
 void SceneFX::Preprocess() 
@@ -128,23 +132,36 @@ void SceneFX::Preprocess()
 void SceneFX::Postprocess()
 {
   Viewport vp=Scene::Instance().GetViewport();
-  // grab color buffer
-  glBindTexture(GL_TEXTURE_2D, scene_tex_id_);
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vp.x, vp.y, vp.width, vp.height, 0);
-  // and depth buffer
-  glBindTexture(GL_TEXTURE_2D, depth_tex_id_);
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, vp.x, vp.y, vp.width, vp.height, 0);
 
   if(use_fb_) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  } else {
+    // grab color buffer
+    glBindTexture(GL_TEXTURE_2D, scene_tex_id_);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vp.x, vp.y, vp.width, vp.height, 0);
+    // and depth buffer
+    glBindTexture(GL_TEXTURE_2D, depth_tex_id_);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, vp.x, vp.y, vp.width, vp.height, 0);
+
+    if(amb_occl_flag) {
+      // now for the normal buffer hack if the framebuffer stuff failed
+      Shader::Instance().PushProgram();
+      Shader::Instance().Activate("dumpnorm");
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      Scene::Instance().GetRootNode()->RenderGL(STANDARD_RENDER_PASS);
+      Shader::Instance().PopProgram();
+      glBindTexture(GL_TEXTURE_2D, norm_tex_id_);
+      glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, vp.x, vp.y, vp.width, vp.height, 0);
+    }
   }
 
   if(shadow_flag) {
     prep_shadow_map();
   }
   if(amb_occl_flag) {
-    //prep_amb_occlusion();
-    //draw_debug_tex(vp.width,vp.height,norm_tex_id_);
+    prep_amb_occlusion();
+    draw_debug_tex(vp.width,vp.height,occl_tex_id_);
+    return;
   }
   if(depth_dark_flag) {
     //prep_depth_darkening();
@@ -272,7 +289,6 @@ void SceneFX::prep_amb_occlusion()
 {
   Viewport vp=Scene::Instance().GetViewport();
 
-  // kernel is static for now, inside the convolution shader
   Shader::Instance().PushProgram();
   Shader::Instance().Activate("amboccl");
   GLuint cpr=Shader::Instance().GetCurrentProgram();
@@ -287,9 +303,9 @@ void SceneFX::prep_amb_occlusion()
   // set up viewport filling quad to run the fragment shader
   draw_screen_quad(vp.width,vp.height);
 
-  glActiveTexture(GL_TEXTURE3);
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, occl_tex_id_);
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_INTENSITY, 0,0, vp.width, vp.height, 0);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0,0, vp.width, vp.height, 0);
 
   Shader::Instance().PopProgram();
 }

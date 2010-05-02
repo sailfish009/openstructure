@@ -220,9 +220,12 @@ void CPKRenderer::RenderCPK2()
       aelist = CPKOcclusion();
     }
 
+
+    uint write_normals = Shader::Instance().GetCurrentName()=="dumpnorm" ? 1 : 0;
     Shader::Instance().PushProgram();
     Shader::Instance().Activate("fast_sphere");
     Shader::Instance().UpdateState();
+    glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"write_normals"),write_normals);
 
     glPushAttrib(GL_ENABLE_BIT);
     glDisable(GL_LIGHTING);

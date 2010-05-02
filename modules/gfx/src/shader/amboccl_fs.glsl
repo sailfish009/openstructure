@@ -4,6 +4,6 @@ uniform sampler2D norm;
 void main()
 {
   float val = texture2D(depth,gl_TexCoord[0].xy).r;
-  gl_FragColor.rgb=1.0;
+  gl_FragColor.rgb=vec3(val,val,val);
   gl_FragColor.a=1.0;
 }

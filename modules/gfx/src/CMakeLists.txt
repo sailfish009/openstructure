@@ -246,6 +246,8 @@ if (USE_SHADER)
     shader/convolute1_fs.glsl
     shader/scenefx_vs.glsl
     shader/scenefx_fs.glsl
+    shader/dumpnorm_vs.glsl
+    shader/dumpnorm_fs.glsl
   )
   copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  

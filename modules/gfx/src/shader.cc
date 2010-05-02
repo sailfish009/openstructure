@@ -148,6 +148,8 @@ void Shader::Setup()
     {"fast_sphere_vs.glsl", GL_VERTEX_SHADER},
     {"fast_sphere_fs.glsl", GL_FRAGMENT_SHADER},
     {"outline_vs.glsl", GL_VERTEX_SHADER},
+    {"dumpnorm_vs.glsl", GL_VERTEX_SHADER},
+    {"dumpnorm_fs.glsl", GL_FRAGMENT_SHADER},
     {"quadpp_vs.glsl", GL_VERTEX_SHADER},
     {"convolute1_fs.glsl", GL_FRAGMENT_SHADER},
     {"amboccl_fs.glsl", GL_FRAGMENT_SHADER},
@@ -252,6 +254,13 @@ void Shader::Setup()
   shader_program_list.push_back(shader_code_map_["basic_fs.glsl"]);
   if(link_shader(shader_program_list,"outline",shader_program_id)) {
     shader_program_map_["outline"]=shader_program_id;
+  }
+  // dumpnorm shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["dumpnorm_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["dumpnorm_fs.glsl"]);
+  if(link_shader(shader_program_list,"dumpnorm",shader_program_id)) {
+    shader_program_map_["dumpnorm"]=shader_program_id;
   }
   // convolute1 shader
   shader_program_list.clear();
