@@ -50,6 +50,7 @@ public:
   int shadow_quality;
   bool depth_dark_flag;
   bool amb_occl_flag;
+  float amb_occl_factor;
 
 private:
   SceneFX();
@@ -68,6 +69,8 @@ private:
   GLuint occl_tex_id_;
   GLuint dark_tex_id_;
   GLuint norm_tex_id_;
+  GLuint kernel_tex_id_;
+  uint kernel_size_;
 
   GLuint scene_tex2_id_;
   GLuint norm_tex2_id_;

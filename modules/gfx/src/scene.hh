@@ -114,6 +114,7 @@ class DLLEXPORT_OST_GFX Scene {
   void SetDepthDarkening(bool f);
 
   void SetAmbientOcclusion(bool f);
+  void SetAmbientOcclusionFactor(float f);
   
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2

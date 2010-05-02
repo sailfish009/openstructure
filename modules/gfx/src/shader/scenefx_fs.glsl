@@ -9,6 +9,7 @@ uniform float shadow_epsilon;
 uniform float shadow_multiplier;
 uniform bool occl_flag;
 uniform sampler2D occl_map;
+uniform float occl_mult;
 
 float CalcShadowFactor(in vec4 coord, in vec2 o)
 {
@@ -33,7 +34,7 @@ void main()
 
   float occl_factor=1.0;
   if(occl_flag) {
-    occl_factor=texture2D(occl_map,gl_TexCoord[0].xy).r;
+    occl_factor=max(0.0,1.0-occl_mult*texture2D(occl_map,gl_TexCoord[0].xy).r);
   }
     
   vec4 scene_color=texture2D(scene,gl_TexCoord[0].xy);

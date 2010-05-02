@@ -1,3 +1,5 @@
+#include <boost/random.hpp>
+
 #include "scene_fx.hh"
 
 #include <ost/log.hh>
@@ -7,6 +9,11 @@
 #include <ost/gfx/scene.hh>
 
 namespace ost { namespace gfx { namespace impl {
+
+namespace {
+  boost::mt19937 RandomGenerator(time(NULL));
+  boost::uniform_01<boost::mt19937> UniformRandom(RandomGenerator);
+}
 
 SceneFX& SceneFX::Instance()
 {
@@ -19,12 +26,15 @@ SceneFX::SceneFX():
   shadow_quality(1),
   depth_dark_flag(false),
   amb_occl_flag(false),
+  amb_occl_factor(1.0),
   scene_tex_id_(),
   depth_tex_id_(),
   shadow_tex_id_(),
   occl_tex_id_(),
   dark_tex_id_(),
   norm_tex_id_(),
+  kernel_tex_id_(),
+  kernel_size_(0),
   scene_tex2_id_(),
   norm_tex2_id_(),
   scene_fb_(),
@@ -45,13 +55,12 @@ void SceneFX::Setup()
   glGenTextures(1,&occl_tex_id_);
   glGenTextures(1,&dark_tex_id_);
   glGenTextures(1,&norm_tex_id_);
+  glGenTextures(1,&kernel_tex_id_);
 
   glGenFramebuffers(1,&scene_fb_);
   glGenRenderbuffers(1,&depth_rb_);
   glGenTextures(1,&scene_tex2_id_);
   glGenTextures(1,&norm_tex2_id_);
-
-  glActiveTexture(GL_TEXTURE0);
 
   glBindTexture(GL_TEXTURE_2D, scene_tex_id_);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -72,14 +81,14 @@ void SceneFX::Setup()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
   glBindTexture(GL_TEXTURE_2D, occl_tex_id_);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
   glBindTexture(GL_TEXTURE_2D, dark_tex_id_);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
@@ -89,6 +98,29 @@ void SceneFX::Setup()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_1D, kernel_tex_id_);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  
+  std::vector<GLfloat> tmp;
+  for(int u=-20;u<=20;++u) {
+    for(int v=-20;v<=20;++v) {
+      if(UniformRandom()<0.1) {
+	// norm to 1
+	float x = static_cast<float>(u+20)*0.025;
+	float y = static_cast<float>(v+20)*0.025;
+	tmp.push_back(x);
+	tmp.push_back(y);
+	tmp.push_back(0.0);
+	tmp.push_back(0.0);
+      }
+    }
+  }
+
+  kernel_size_=tmp.size()/4;
+  glTexImage1D(GL_TEXTURE_1D,0,4,kernel_size_,0,GL_RGBA, GL_FLOAT, &tmp[0]);
 }
 
 void SceneFX::Resize(unsigned int w, unsigned int h)
@@ -149,9 +181,9 @@ void SceneFX::Postprocess()
       Shader::Instance().Activate("dumpnorm");
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       Scene::Instance().GetRootNode()->RenderGL(STANDARD_RENDER_PASS);
-      Shader::Instance().PopProgram();
       glBindTexture(GL_TEXTURE_2D, norm_tex_id_);
-      glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, vp.x, vp.y, vp.width, vp.height, 0);
+      glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vp.x, vp.y, vp.width, vp.height, 0);
+      Shader::Instance().PopProgram();
     }
   }
 
@@ -160,8 +192,6 @@ void SceneFX::Postprocess()
   }
   if(amb_occl_flag) {
     prep_amb_occlusion();
-    draw_debug_tex(vp.width,vp.height,occl_tex_id_);
-    return;
   }
   if(depth_dark_flag) {
     //prep_depth_darkening();
@@ -170,12 +200,13 @@ void SceneFX::Postprocess()
 
   Shader::Instance().PushProgram();
   glEnable(GL_TEXTURE_2D);
+  glEnable(GL_TEXTURE_1D);
   Shader::Instance().Activate("scenefx");
+  GLuint cpr=Shader::Instance().GetCurrentProgram();
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D,depth_tex_id_);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,scene_tex_id_);
-  GLuint cpr=Shader::Instance().GetCurrentProgram();
   glUniform1i(glGetUniformLocation(cpr,"scene"),0);
   glUniform1i(glGetUniformLocation(cpr,"depth"),1);
   glUniform2f(glGetUniformLocation(cpr,"scalef"),
@@ -196,16 +227,15 @@ void SceneFX::Postprocess()
   } else {
     glUniform1i(glGetUniformLocation(cpr,"shadow_flag"),0);
   }
-#if 0
   if(amb_occl_flag) {
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D,occl_tex_id_);
     glUniform1i(glGetUniformLocation(cpr,"occl_flag"),1);
     glUniform1i(glGetUniformLocation(cpr,"occl_map"),3);
+    glUniform1f(glGetUniformLocation(cpr,"occl_mult"),amb_occl_factor);
   } else {
     glUniform1i(glGetUniformLocation(cpr,"occl_flag"),0);
   }
-#endif
 
   draw_screen_quad(vp.width,vp.height);
   glDisable(GL_TEXTURE_2D);
@@ -289,6 +319,9 @@ void SceneFX::prep_amb_occlusion()
 {
   Viewport vp=Scene::Instance().GetViewport();
 
+  uint width=vp.width/2;
+  uint height=vp.height/2;
+
   Shader::Instance().PushProgram();
   Shader::Instance().Activate("amboccl");
   GLuint cpr=Shader::Instance().GetCurrentProgram();
@@ -297,15 +330,23 @@ void SceneFX::prep_amb_occlusion()
   glBindTexture(GL_TEXTURE_2D,depth_tex_id_);
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D,norm_tex_id_);
-  glUniform1i(glGetUniformLocation(cpr,"depth"),0);
-  glUniform1i(glGetUniformLocation(cpr,"norm"),1);
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_1D,kernel_tex_id_);
+  glUniform1i(glGetUniformLocation(cpr,"depth_map"),0);
+  glUniform1i(glGetUniformLocation(cpr,"norm_map"),1);
+  glUniform1i(glGetUniformLocation(cpr,"kernel"),2);
+  glUniform1f(glGetUniformLocation(cpr,"step"),1.0/static_cast<float>(kernel_size_));
+  glUniform2f(glGetUniformLocation(cpr,"i_vp"),1.0/static_cast<float>(width),1.0/static_cast<float>(height));
+  double pm[16];
+  glGetDoublev(GL_PROJECTION_MATRIX,pm);
+  glUniform4f(glGetUniformLocation(cpr,"abcd"),pm[0],pm[5],pm[10],pm[14]);
 
   // set up viewport filling quad to run the fragment shader
-  draw_screen_quad(vp.width,vp.height);
+  draw_screen_quad(width,height);
 
-  glActiveTexture(GL_TEXTURE0);
+  glActiveTexture(GL_TEXTURE3);
   glBindTexture(GL_TEXTURE_2D, occl_tex_id_);
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0,0, vp.width, vp.height, 0);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0,0, width, height, 0);
 
   Shader::Instance().PopProgram();
 }

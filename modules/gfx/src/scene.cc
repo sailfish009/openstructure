@@ -198,6 +198,15 @@ void Scene::SetAmbientOcclusion(bool f)
   // the redraw routine will deal with the Shader
   RequestRedraw();
 #endif
+} 
+
+void Scene::SetAmbientOcclusionFactor(float f)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().amb_occl_factor=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
 }
 
 void Scene::SetShadingMode(const std::string& smode)
