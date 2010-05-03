@@ -26,6 +26,7 @@
 
 #include "painter.hh"
 #include "seq_text_painter.hh"
+#include "seq_selection_painter.hh"
 
 #include "view_object.hh"
 
@@ -91,8 +92,10 @@ int ViewObject::GetRowCount()
 void ViewObject::AddSequence(seq::SequenceHandle& sequence)
 {
   Row* new_row = new Row(this);
-  Painter* p = new SeqTextPainter(this);
-  new_row->InsertPainter(p,0);
+  Painter* p = new SeqSelectionPainter(this);
+  new_row->InsertPainter(p);
+  p = new SeqTextPainter(this);
+  new_row->InsertPainter(p);
   QPair<Row*, seq::SequenceHandle> pair(new_row,sequence);
   rows_.append(pair);
 }
