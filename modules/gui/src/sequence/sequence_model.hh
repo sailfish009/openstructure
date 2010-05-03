@@ -25,6 +25,8 @@
 
 #include <QAbstractTableModel>
 
+#include <ost/mol/chain_view.hh>
+
 #include <ost/seq/sequence_list.hh>
 
 #include "sequence_model.hh"
@@ -39,6 +41,7 @@ class SequenceModel : public QAbstractTableModel
 public:
   SequenceModel(QObject *parent = 0);
 
+  void InsertChain(QString& name, mol::ChainView& view);
   void InsertSequence(QString& name, seq::SequenceHandle& seq);
   void InsertSequences(QString& name, seq::SequenceList& list);
 

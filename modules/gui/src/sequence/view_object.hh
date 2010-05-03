@@ -26,8 +26,12 @@
 #include <QObject>
 #include <QPair>
 #include <QList>
+#include <QVarLengthArray>
 #include <QFont>
 #include <QSize>
+
+#include <ost/mol/alg/sec_structure_segments.hh>
+#include <ost/mol/entity_handle.hh>
 
 #include <ost/seq/sequence_list.hh>
 
@@ -36,13 +40,33 @@
 
 namespace ost { namespace gui {
 
+struct ListEntry {
+  Row*   row;
+  seq::SequenceHandle seq;
+  QVarLengthArray<mol::SecStructure> secstr;
+  ListEntry(): row(NULL)
+         {}
+  ListEntry(Row* r): row(r)
+         {}
+  ListEntry(Row* r,
+      seq::SequenceHandle& sequence): row(r), seq(sequence)
+         {}
+  ListEntry(Row* r,
+      seq::SequenceHandle& sequence,
+      QVarLengthArray<mol::SecStructure>& sec): row(r), seq(sequence), secstr(sec)
+         {}
+};
+
+
 class ViewObject : public QObject
 {
   Q_OBJECT
 
+
 public:
   ViewObject(seq::SequenceList& sequences, const QString& name, QObject* parent = 0);
   ViewObject(seq::SequenceHandle& sequence, const QString& name, QObject* parent = 0);
+  ViewObject(mol::ChainView& chain, const QString& name, QObject* parent = 0);
 
   void InsertRow(int pos, Row* row);
   void RemoveRow(Row* row);
@@ -55,6 +79,7 @@ public:
   int GetMaxColumnCount() const;
 
   void AddSequence(seq::SequenceHandle& sequence);
+  void AddChain(mol::ChainView& chain);
 
   QVariant GetData(int row, int column, int role);
 
@@ -66,12 +91,15 @@ public:
 private:
   void Init();
   QString name_;
-  QList<QPair<Row*, seq::SequenceHandle> > rows_;
+  QList<ListEntry> rows_;
   QFont font_;
   QSize default_size_;
+  QSize default_cell_size_;
 };
 
 
 }}
+
+Q_DECLARE_METATYPE(ost::gui::ListEntry)
 
 #endif

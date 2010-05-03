@@ -67,25 +67,11 @@ void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
     for (mol::ChainViewList::const_iterator c=v.GetChainList().begin(),
          e1=v.GetChainList().end(); c!=e1; ++c) {
       mol::ChainView chain=*c;
-      String seq_str;
-      seq_str.reserve(chain.GetResidueCount());
-      for (mol::ResidueViewList::const_iterator r=chain.GetResidueList().begin(),
-           e2=chain.GetResidueList().end(); r!=e2; ++r) {
-        mol::ResidueView res=*r;
-        seq_str.append(1, res.GetOneLetterCode());
-      }
-      if (seq_str.empty()) {
-        continue;
-      }
       QString name = QString(o->GetName().c_str());
       if (chain.GetName()!="" && chain.GetName()!=" ") {
         name= name + " ("+chain.GetName().c_str()+")";
       }
-      seq::SequenceHandle sequence=seq::CreateSequence(name.toStdString(), seq_str);
-      mol::EntityView v_one_chain=v.GetHandle().CreateEmptyView();
-      v_one_chain.AddChain(chain, mol::ViewAddFlag::INCLUDE_ALL);
-      sequence.AttachView(v_one_chain);
-      model_->InsertSequence(name,sequence);
+      model_->InsertChain(name,chain);
     }
     seq_table_view_->resizeColumnsToContents();
     seq_table_view_->resizeRowsToContents();

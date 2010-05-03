@@ -24,9 +24,12 @@
 
 #include <QtGui>
 
+#include <ost/mol/mol.hh>
+
 #include "painter.hh"
-#include "seq_text_painter.hh"
+#include "seq_secstr_painter.hh"
 #include "seq_selection_painter.hh"
+#include "seq_text_painter.hh"
 
 #include "view_object.hh"
 
@@ -47,19 +50,25 @@ ViewObject::ViewObject(seq::SequenceHandle& sequence, const QString& name, QObje
   this->Init();
 }
 
+ViewObject::ViewObject(mol::ChainView& chain, const QString& name, QObject *parent): QObject(parent), name_(name)
+{
+  this->AddChain(chain);
+  this->Init();
+}
+
 void ViewObject::Init()
 {
   font_ = QFont("Courier",10);
   QFontMetrics metrics = QFontMetrics(font_);
-  default_size_ = QSize(metrics.width(QString("_"))+2,metrics.height()+2);
+  default_size_=QSize(metrics.boundingRect('W').width(),metrics.boundingRect('|').height());
+  default_cell_size_ = QSize(metrics.boundingRect('W').width()+2,metrics.boundingRect('|').height()+2);
 }
 
 void ViewObject::InsertRow(int pos, Row* row)
 {
   if(pos >= 0 && pos <= rows_.size()){
-    seq::SequenceHandle sequence = seq::SequenceHandle();
-    QPair<Row*, seq::SequenceHandle> pair(row,sequence);
-    rows_.insert(pos,pair);
+    ListEntry entry(row);
+    rows_.insert(pos,entry);
   }
 }
 
@@ -67,7 +76,7 @@ void ViewObject::RemoveRow(Row* row)
 {
   QList<int> rows_to_delete;
   for (int i = 0; i < rows_.size(); ++i){
-    if(rows_[i].first == row){
+    if(rows_[i].row == row){
       rows_to_delete.append(i);
     }
   }
@@ -79,7 +88,7 @@ void ViewObject::RemoveRow(Row* row)
 Row* ViewObject::GetRow(int pos)
 {
    if(pos >= 0 && pos < rows_.size()){
-     return rows_[pos].first;
+     return rows_[pos].row;
    }
    return NULL;
 }
@@ -97,7 +106,44 @@ void ViewObject::AddSequence(seq::SequenceHandle& sequence)
   p = new SeqTextPainter(this);
   new_row->InsertPainter(p);
   QPair<Row*, seq::SequenceHandle> pair(new_row,sequence);
-  rows_.append(pair);
+  //rows_.append(pair);
+}
+
+void ViewObject::AddChain(mol::ChainView& chain)
+{
+  String seq_str;
+  seq_str.reserve(chain.GetResidueCount());
+  for (mol::ResidueViewList::const_iterator r=chain.GetResidueList().begin(),
+       e2=chain.GetResidueList().end(); r!=e2; ++r) {
+    mol::ResidueView res=*r;
+    seq_str.append(1, res.GetOneLetterCode());
+  }
+  if (!seq_str.empty()) {
+    seq::SequenceHandle sequence=seq::CreateSequence(this->GetName().toStdString(), seq_str);
+    mol::EntityView v_one_chain=chain.GetEntity().GetHandle().CreateEmptyView();
+    v_one_chain.AddChain(chain, mol::ViewAddFlag::INCLUDE_ALL);
+    sequence.AttachView(v_one_chain);
+
+    Row* new_row = new Row(this);
+    Painter* p = new SeqSelectionPainter(this);
+    new_row->InsertPainter(p);
+    p = new SeqSecStrPainter(this);
+    new_row->InsertPainter(p);
+    p = new SeqTextPainter(this);
+    new_row->InsertPainter(p);
+    QPair<Row*, seq::SequenceHandle> pair(new_row,sequence);
+    mol::alg::SecStructureSegments sec = mol::alg::ExtractSecStructureSegments(chain);
+    QVarLengthArray<mol::SecStructure> sec_str(chain.GetResidueCount());
+    for (mol::alg::SecStructureSegments::iterator i=sec.begin(),
+         e=sec.end(); i!=e; ++i) {
+      mol::alg::SecStructureSegment s=*i;
+      for(int i = s.first; i <= s.last ;i++){
+        sec_str[i] = s.ss_type;
+      }
+    }
+    ListEntry entry(new_row, sequence, sec_str);
+    rows_.append(entry);
+  }
 }
 
 QVariant ViewObject::GetData(int row, int column, int role)
@@ -113,12 +159,20 @@ QVariant ViewObject::GetData(int row, int column, int role)
   }
   else if(column > 0) {
     if (role==Qt::DisplayRole) {
-      return QVariant(QString(rows_[row].second.GetOneLetterCode(column - 1)));
+      return QVariant(QString(rows_[row].seq.GetOneLetterCode(column - 1)));
     }
     if (role==Qt::FontRole){
       return QVariant(font_);
     }
     if (role==Qt::SizeHintRole){
+      return QVariant(default_cell_size_);
+    }
+    if (role==Qt::UserRole){
+      QVariant variant;
+      variant.setValue(rows_[row]);
+      return variant;
+    }
+    if (role==Qt::UserRole+1){
       return QVariant(default_size_);
     }
   }
@@ -129,9 +183,9 @@ int ViewObject::GetMaxColumnCount() const
 {
   int columns = 0;
   for(int i = 0; i < rows_.size(); i++){
-    int col_length = rows_[i].second.GetLength();
+    int col_length = rows_[i].seq.GetLength();
     if(columns < col_length){
-      columns = rows_[i].second.GetLength() + 1;
+      columns = rows_[i].seq.GetLength() + 1;
     }
   }
   return columns;

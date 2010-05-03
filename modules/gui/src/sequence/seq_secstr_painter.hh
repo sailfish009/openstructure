@@ -16,32 +16,28 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#ifndef OST_SEQUENCE_VIEWER_SEQ_SECSTR_PAINTER
+#define OST_SEQUENCE_VIEWER_SEQ_SECSTR_PAINTER
 
 /*
   Author: Stefan Scheuber
  */
 
+#include <QObject>
 
-#include <QtGui>
-
-#include "seq_text_painter.hh"
+#include "painter.hh"
 
 namespace ost { namespace gui {
 
-SeqTextPainter::SeqTextPainter(QObject* parent)
-    : Painter(parent)
-{}
-
-void SeqTextPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
-  painter->save();
-  painter->setPen(QPen(Qt::black));
-  QVariant value = index.data(Qt::DisplayRole);
-  if (value.isValid()){
-    QString text = value.toString();
-    painter->setFont(index.data(Qt::FontRole).value<QFont>());
-    painter->drawText(option.rect, Qt::AlignCenter, text);
-  }
-  painter->restore();
-}
+class SeqSecStrPainter : public Painter
+{
+  Q_OBJECT
+public:
+  SeqSecStrPainter(QObject* parent = 0);
+  void Paint(QPainter *painter, const QStyleOptionViewItem &option,
+      const QModelIndex &index);
+};
 
 }}
+
+#endif

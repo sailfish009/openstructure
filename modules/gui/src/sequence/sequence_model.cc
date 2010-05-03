@@ -45,6 +45,18 @@ void SequenceModel::InsertSequence(QString& name, seq::SequenceHandle& seq){
   this->endInsertRows();
 }
 
+void SequenceModel::InsertChain(QString& name, mol::ChainView& view){
+  int cols = this->columnCount();
+  int new_cols = view.GetResidueCount();
+  this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
+  objects_.append(new ViewObject(view, name, this));
+  if(new_cols > cols){
+    this->beginInsertColumns(QModelIndex(), cols, new_cols);
+    this->endInsertColumns();
+  }
+  this->endInsertRows();
+}
+
 void SequenceModel::InsertSequences(QString& name, seq::SequenceList& list){
   this->beginInsertRows(this->index(this->rowCount(),0),this->rowCount(),this->rowCount()+list.GetCount());
   objects_.append(new ViewObject(list, name, this));

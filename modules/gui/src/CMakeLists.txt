@@ -23,6 +23,7 @@ sequence_search_bar.hh
 set(OST_GUI_SEQUENCE_VIEW_HEADERS
 painter.hh
 row.hh
+seq_secstr_painter.hh
 seq_selection_painter.hh
 seq_text_painter.hh
 sequence_delegate.hh
@@ -206,6 +207,7 @@ sequence_viewer/sequence_viewer.cc
 sequence_viewer/sequence_scene.cc
 sequence_viewer/sequence_search_bar.cc
 sequence/row.cc
+sequence/seq_secstr_painter.cc
 sequence/seq_selection_painter.cc
 sequence/seq_text_painter.cc
 sequence/sequence_delegate.cc
@@ -331,6 +333,7 @@ sequence_viewer/sequence_scene.hh
 sequence_viewer/sequence_search_bar.hh
 sequence/painter.hh
 sequence/row.hh
+sequence/seq_secstr_painter.hh
 sequence/seq_selection_painter.hh
 sequence/seq_text_painter.hh
 sequence/sequence_delegate.hh
