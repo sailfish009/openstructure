@@ -66,6 +66,8 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
          "margin: 0px;"
       "}"
     );
+  seq_table_view_->horizontalHeader()->setMinimumSectionSize(8);
+  seq_table_view_->horizontalHeader()->setDefaultSectionSize(10);
 }
 
 void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
@@ -94,12 +96,6 @@ void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
       mol::EntityView v_one_chain=v.GetHandle().CreateEmptyView();
       v_one_chain.AddChain(chain, mol::ViewAddFlag::INCLUDE_ALL);
       seq.AttachView(v_one_chain);
-      //SequenceItem* item=new SequenceItem(seq);
-      //connect(item, SIGNAL(SelectionChanged(SequenceItem*)),
-      //        this, SLOT(ItemSelectionChanged(SequenceItem*)));
-      //this->AddSequence(item);
-      //obj_map_.insert(std::make_pair(item, o));
-
       QStandardItem* item = new QStandardItem(name.c_str());
       QStandardItemModel* model = qobject_cast<QStandardItemModel*>(seq_table_view_->model());
       if(model){
@@ -109,15 +105,16 @@ void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
         model->setItem(row, 0, item);
         for(int i = 0; i< seq.GetLength(); i++){
           item = new QStandardItem(QString(seq.GetOneLetterCode(i)));
-          item->setTextAlignment(Qt::AlignCenter);
+          item->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
           item->setFont(QFont("Courier",10));
+          QFontMetrics m = QFontMetrics(QFont("Courier",10));
+          item->setSizeHint(QSize(m.width(QString(seq.GetOneLetterCode(i)))+6,item->sizeHint().height()));
           model->setItem(row, i+1, item);
           model->setHeaderData(i+1, Qt::Horizontal, QObject::tr("") );
         }
       }
     }
     seq_table_view_->resizeColumnsToContents();
-    std::cout << seq_table_view_->styleSheet().toStdString() << std::endl;
   }
 }
 

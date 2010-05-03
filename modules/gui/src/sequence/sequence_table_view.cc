@@ -34,6 +34,32 @@ namespace ost { namespace gui {
 SequenceTableView::SequenceTableView(QAbstractItemModel * model)
 {
   this->setModel(model);
+  this->setStyleSheet("QTableView {"
+        "show-decoration-selected: 1;"
+    "}"
+    "QTableView::item {"
+        "border: 0px solid #d9d9d9;"
+        "border-left: 0px;"
+        "border-right: 0px;"
+        "padding-bottom: 0px;"
+        "padding-top: 0px;"
+        "padding-left: 0px;"
+        "padding-right: 0px;"
+        "margin-top: 0px;"
+        "margin-bottom: 0px;"
+        "margin-left: 0px;"
+        "margin-right: 0px;"
+    "}"
+    "QTableView::item:hover {"
+        "background-color: #EEEEEE;"
+    "}"
+    "QTableView::item:selected:active{"
+        "background-color: #7ff963;"
+    "}"
+    "QTableView::item:selected:!active {"
+        "background-color: #47ce27;"
+    "}");
+
   column_not_move_ = new QTableView(this);
 
   column_not_move_->setModel(this->model());
@@ -54,8 +80,8 @@ SequenceTableView::SequenceTableView(QAbstractItemModel * model)
   column_not_move_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   column_not_move_->show();
   column_not_move_->setStyleSheet("QTableView { border: 0px;"
-                                 "background-color: #8EDE21;"
-                                 "selection-background-color: #999}"
+                                 "background-color: #dbdbdb;"
+                                 "selection-background-color: #EEEEEE}"
                                  "QTableView::item{ border: none;"
                                  "padding: 0px; border-width: 0px; margin: 0px;}");
   column_not_move_->setShowGrid(false);
@@ -70,27 +96,6 @@ SequenceTableView::SequenceTableView(QAbstractItemModel * model)
       "}"
     );
 
-  this->setStyleSheet("QTableView {"
-      "show-decoration-selected: 1;"
-  "}"
-  "QTableView::item {"
-       "border: 1px solid #d9d9d9;"
-      "border-left-color: transparent;"
-      "border-right-color: transparent;"
-  "}"
-  "QTableView::item:hover {"
-      "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e7effd, stop: 1 #cbdaf1);"
-      "border: 1px solid #bfcde4;"
-  "}"
-  "QTableView::item:selected {"
-      "border: 1px solid #567dbc;"
-  "}"
-  "QTableView::item:selected:active{"
-      "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6ea1f1, stop: 1 #567dbc);"
-  "}"
-  "QTableView::item:selected:!active {"
-      "background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);"
-  "}");
   this->setShowGrid(false);
 
   this->updateNotMoveColumn();
