@@ -221,11 +221,15 @@ void ChainView::RemoveResidue(ResidueView view) {
   if (!view.IsValid())
     return;
   view.RemoveAtoms();
+  int index = view.GetIndex();
   ResidueViewList::iterator i=data_->residues.begin();
   for (; i!=data_->residues.end(); ++i) {
+    int res_index = (*i).GetIndex();
     if (*i==view) {
       data_->residues.erase(i);
-      return;
+    }
+    else if(index < res_index){
+      (*i).SetIndex(res_index-1);
     }
   }
 }
