@@ -59,12 +59,12 @@ bool PirIOHandler::ProvidesImport(const boost::filesystem::path& loc,
    String match_suf_string=loc.string();
    std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
    if (detail::FilenameEndsWith(match_suf_string,".pir"))  {
-  return true;
+    return true;
    }
   } else if(format=="pir") {
     return true;
   }
-  return false;                
+  return false;
 }
 
 bool PirIOHandler::ProvidesExport(const boost::filesystem::path& loc, 

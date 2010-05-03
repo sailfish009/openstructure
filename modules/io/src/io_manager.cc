@@ -144,9 +144,9 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
     }
     throw IOUnknownFormatException("Unsupported type in FindMapImportHandle.");
   }else{
-  String match_suf_string=loc.string();
-  std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
-  for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
+    String match_suf_string=loc.string();
+    std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
+    for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
       if((*it)->MatchSuffix(match_suf_string)) {
         return (*it)->Create();
       }
@@ -211,8 +211,8 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerFile(const boost::filesystem::pat
     if (pos == String::npos){
       throw IOUnknownFormatException("No file suffix given for " + filename+", please indicate file type.");
     }
-  String match_suf_string=loc.string();
-  std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
+    String match_suf_string=loc.string();
+    std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
       if((*it)->MatchSuffix(match_suf_string)) {
         return(*it)->Create();
