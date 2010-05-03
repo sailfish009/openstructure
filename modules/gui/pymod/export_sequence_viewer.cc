@@ -18,18 +18,22 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 
-#include "sequence_viewer_proxyV2.hh"
+#include <ost/gui/sequence_viewer/sequence_viewer.hh>
+
+#include "sip_handler.hh"
 
 using namespace boost::python;
 using namespace ost;
 using namespace ost::gui;
 
 
-void export_SequenceViewerV2()
+void export_SequenceViewer()
 {
-  class_<SequenceViewerProxyV2, bases<SipHandlerBase> >("SequenceViewerV2", init<>())
-    .def("Show", &SequenceViewerProxyV2::Show)
-    .def("Hide", &SequenceViewerProxyV2::Hide)
+  class_<SequenceViewer, boost::noncopyable >("SequenceViewer", no_init)
+    .def("Show", &SequenceViewer::show)
+    .def("Hide", &SequenceViewer::hide)
+    .def("GetQObject",&get_py_qobject<SequenceViewer>)
+    .add_property("qobject", &get_py_qobject<SequenceViewer>)
   ;
 }
 
