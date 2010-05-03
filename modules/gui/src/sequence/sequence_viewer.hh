@@ -24,26 +24,33 @@
  */
 
 #include <QWidget>
-#include <QTableView>
+
+#include <ost/gfx/scene.hh>
+#include <ost/gfx/gfx_object.hh>
 
 #include <ost/gui/widget.hh>
 
 #include <ost/gui/module_config.hh>
 
+#include "sequence_table_view.hh"
+
 namespace ost { namespace gui {
 
 /// \brief QTableView with first column not moving
-class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget {
+class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget, public gfx::SceneObserver  {
   Q_OBJECT
 public:
   SequenceViewerV2(QWidget* parent=NULL);
   ~SequenceViewerV2();
 
+  virtual void NodeAdded(const gfx::GfxNodeP& node);
+  virtual void NodeRemoved(const gfx::GfxNodeP& node);
+
   virtual bool Restore(const QString&){return true;};
   virtual bool Save(const QString&){return true;};
 
 private:
-  QTableView* seq_table_view_;
+  SequenceTableView* seq_table_view_;
 };
 
 }}

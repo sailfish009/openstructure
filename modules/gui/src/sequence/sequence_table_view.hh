@@ -36,6 +36,10 @@ public:
   SequenceTableView(QAbstractItemModel * model);
   ~SequenceTableView();
 
+public slots:
+  void columnCountChanged(const QModelIndex& index, int old_count, int new_count);
+  void resizeColumnsToContents();
+
 protected:
   virtual void resizeEvent(QResizeEvent *event);
   virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);

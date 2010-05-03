@@ -23,6 +23,7 @@ sequence_search_bar.hh
 set(OST_GUI_SEQUENCE_VIEW_HEADERS
 sequence_table_view.hh
 sequence_viewer.hh
+sequence_delegate.hh
 )
 
 set(OST_GUI_TOOLS_HEADERS
@@ -200,6 +201,7 @@ sequence_viewer/sequence_scene.cc
 sequence_viewer/sequence_search_bar.cc
 sequence/sequence_table_view.cc
 sequence/sequence_viewer.cc
+sequence/sequence_delegate.cc
 gosty_app.cc
 change_process_name.cc
 main_area.cc
@@ -318,6 +320,7 @@ sequence_viewer/sequence_scene.hh
 sequence_viewer/sequence_search_bar.hh
 sequence/sequence_table_view.hh
 sequence/sequence_viewer.hh
+sequence/sequence_delegate.hh
 plot_viewer/plot_axis_base.hh
 plot_viewer/plot_data_graphics_item_base.hh
 plot_viewer/plot_function_info.hh
