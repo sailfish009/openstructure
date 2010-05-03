@@ -16,17 +16,14 @@ def ClustalW(seq1, seq2, clustalw=None):
                                                            out)
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   ps.stdout.readlines()
-  taln=io.LoadAlignment(out)
-  aln=seq.CreateAlignment()
-  if (seq1.HasAttachedView() and seq2.HasAttachedView()):
-    seq00=taln.GetSequence(0).Copy()
-    seq00.AttachView(seq1.GetAttachedView().Copy())
-    seq01=taln.GetSequence(1).Copy()
-    seq01.AttachView(seq2.GetAttachedView().Copy())
-    aln.AddSequence(seq00)
-    aln.AddSequence(seq01)
-  else:
-    aln=taln.Copy()
+  aln=io.LoadAlignment(out)
+  aln.SetSequenceOffset(0,seq1.GetSequenceOffset())
+  aln.SetSequenceOffset(1,seq2.GetSequenceOffset())
+  if seq1.HasAttachedView():
+    aln.AttachView(0,seq1.GetAttachedView().Copy())
+  if seq2.HasAttachedView():
+    aln.AttachView(1,seq2.GetAttachedView().Copy())
+
 
   #~ temp_dir.Cleanup()
   
