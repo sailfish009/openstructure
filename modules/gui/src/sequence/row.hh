@@ -44,6 +44,8 @@ public:
   Painter* GetPainter(int pos);
   int GetPainterCount();
 
+  const PainterList& GetPainters() const;
+
 private:
   bool IsPosValid(int pos);
   PainterList painter_;

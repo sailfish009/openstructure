@@ -67,4 +67,9 @@ bool Row::IsPosValid(int pos)
   return false;
 }
 
+const PainterList& Row::GetPainters() const
+{
+  return painter_;
+}
+
 }}

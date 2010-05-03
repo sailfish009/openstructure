@@ -27,6 +27,8 @@
 
 #include <ost/gui/module_config.hh>
 
+#include "sequence_delegate.hh"
+
 namespace ost { namespace gui {
 
 /// \brief QTableView with first column not moving
@@ -50,7 +52,8 @@ private slots:
   void ResizeHeight(int index, int, int size);
 
 private:
-  QTableView *column_not_move_;
+  QTableView* column_not_move_;
+  SequenceDelegate* delegate_;
   void updateNotMoveColumn();
 };
 

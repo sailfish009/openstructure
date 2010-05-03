@@ -35,7 +35,7 @@ SequenceModel::SequenceModel(QObject *parent)
 
 void SequenceModel::InsertSequence(QString& name, seq::SequenceHandle& seq){
   int cols = this->columnCount();
-  int new_cols = cols + seq.GetLength();
+  int new_cols = seq.GetLength();
   this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
   objects_.append(new ViewObject(seq, name, this));
   if(new_cols > cols){
@@ -68,6 +68,11 @@ ViewObject* SequenceModel::GetObject(QString& name){
     }
   }
   return NULL;
+}
+
+const PainterList& SequenceModel::GetPainters(const QModelIndex& index) const{
+  QPair<int, ViewObject*> pair = this->GetItem(index);
+  return pair.second->GetRow(pair.first)->GetPainters();
 }
 
 QPair<int, ViewObject*> SequenceModel::GetItem(const QModelIndex& index) const{

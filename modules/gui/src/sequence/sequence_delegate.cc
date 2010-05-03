@@ -29,22 +29,15 @@ namespace ost { namespace gui {
 
 SequenceDelegate::SequenceDelegate(SequenceModel* seq_model, QObject *parent)
     : QItemDelegate(parent), seq_model_(seq_model)
-{
-  QFontMetrics metrics = QFontMetrics(QFont("Courier",10));
-  default_size = QSize(metrics.width(QString("_"))+2,metrics.height()+2);
-}
+{}
 
 void SequenceDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                          const QModelIndex &index) const
 {
-/*  Row* row = seq_model_->GetRow(index);
-  for(int i=0; i < row->GetPainterCount(); i++){
-    row->GetPainter(i)->Paint(painter, option, index);
-  }*/
-}
-
-QSize& SequenceDelegate::GetDefaultSize(){
-  return default_size;
+  const PainterList& painters = seq_model_->GetPainters(index);
+  for(int i=0; i < painters.size(); i++){
+    painters[i]->Paint(painter, option, index);
+  }
 }
 
 }}

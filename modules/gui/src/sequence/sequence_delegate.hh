@@ -26,7 +26,6 @@
 #include <QItemDelegate>
 #include <QModelIndex>
 
-#include "sequence_table_view.hh"
 #include "sequence_model.hh"
 
 namespace ost { namespace gui {

@@ -26,6 +26,8 @@
 #include <QObject>
 #include <QPair>
 #include <QList>
+#include <QFont>
+#include <QSize>
 
 #include <ost/seq/sequence_list.hh>
 
@@ -62,8 +64,11 @@ public:
 
 
 private:
+  void Init();
   QString name_;
   QList<QPair<Row*, seq::SequenceHandle> > rows_;
+  QFont font_;
+  QSize default_size_;
 };
 
 

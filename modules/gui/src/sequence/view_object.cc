@@ -37,11 +37,20 @@ ViewObject::ViewObject(seq::SequenceList& sequences, const QString& name, QObjec
     seq::SequenceHandle seq = sequences[i];
     this->AddSequence(seq);
   }
+  this->Init();
 }
 
 ViewObject::ViewObject(seq::SequenceHandle& sequence, const QString& name, QObject *parent): QObject(parent), name_(name)
 {
   this->AddSequence(sequence);
+  this->Init();
+}
+
+void ViewObject::Init()
+{
+  font_ = QFont("Courier",10);
+  QFontMetrics metrics = QFontMetrics(font_);
+  default_size_ = QSize(metrics.width(QString("_"))+2,metrics.height()+2);
 }
 
 void ViewObject::InsertRow(int pos, Row* row)
@@ -102,6 +111,12 @@ QVariant ViewObject::GetData(int row, int column, int role)
   else if(column > 0) {
     if (role==Qt::DisplayRole) {
       return QVariant(QString(rows_[row].second.GetOneLetterCode(column - 1)));
+    }
+    if (role==Qt::FontRole){
+      return QVariant(font_);
+    }
+    if (role==Qt::SizeHintRole){
+      return QVariant(default_size_);
     }
   }
   return QVariant();

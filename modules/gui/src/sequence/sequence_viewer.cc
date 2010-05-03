@@ -54,10 +54,9 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
   layout->addWidget(seq_table_view_);
   this->setLayout(layout);
   connect(model_,SIGNAL(columnsInserted(const QModelIndex&, int, int)),seq_table_view_,SLOT(columnCountChanged(const QModelIndex&, int, int)));
-  /*
+
   seq_table_view_->horizontalHeader()->setMinimumSectionSize(2);
   seq_table_view_->verticalHeader()->setMinimumSectionSize(2);
-  */
 }
 
 void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)

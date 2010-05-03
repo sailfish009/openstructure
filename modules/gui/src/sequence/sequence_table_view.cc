@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include "sequence_table_view.hh"
+#include "sequence_model.hh"
 
 namespace ost { namespace gui {
 
@@ -112,6 +113,8 @@ SequenceTableView::SequenceTableView(QAbstractItemModel * model)
 
   connect(column_not_move_->verticalScrollBar(), SIGNAL(valueChanged(int)), this->verticalScrollBar(), SLOT(setValue(int)));
   connect(verticalScrollBar(), SIGNAL(valueChanged(int)), column_not_move_->verticalScrollBar(), SLOT(setValue(int)));
+
+  delegate_ = new SequenceDelegate(qobject_cast<SequenceModel*>(this->model()),this);
  }
 
 void SequenceTableView::ResizeWidth(int index, int, int size)
@@ -163,8 +166,9 @@ void SequenceTableView::updateNotMoveColumn()
 void SequenceTableView::columnCountChanged(const QModelIndex& index, int old_count, int new_count){
   if(old_count >= 0 && old_count <= new_count){
     if(old_count == 0)old_count = 1;
-    for(int col=old_count; col<new_count; col++){
+    for(int col=old_count; col<=new_count; col++){
       column_not_move_->setColumnHidden(col, true);
+      this->setItemDelegateForColumn(col, delegate_);
     }
   }
 }

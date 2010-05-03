@@ -45,6 +45,7 @@ public:
   void RemoveSequence(QString& name);
 
   ViewObject* GetObject(QString& name);
+  const PainterList& GetPainters(const QModelIndex& index) const;
 
   QPair<int, ViewObject*> GetItem(const QModelIndex& index) const;
 
