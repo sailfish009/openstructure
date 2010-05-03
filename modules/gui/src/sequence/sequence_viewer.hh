@@ -16,20 +16,36 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
+#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
+#define OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
 
-#include "sequence_viewer_proxyV2.hh"
+/*
+  Author: Stefan Scheuber
+ */
 
-using namespace boost::python;
-using namespace ost;
-using namespace ost::gui;
+#include <QWidget>
+#include <QTableView>
 
+#include <ost/gui/widget.hh>
 
-void export_SequenceViewerV2()
-{
-  class_<SequenceViewerProxyV2, bases<SipHandlerBase> >("SequenceViewerV2", init<>())
-    .def("Show", &SequenceViewerProxyV2::Show)
-    .def("Hide", &SequenceViewerProxyV2::Hide)
-  ;
-}
+#include <ost/gui/module_config.hh>
 
+namespace ost { namespace gui {
+
+/// \brief QTableView with first column not moving
+class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget {
+  Q_OBJECT
+public:
+  SequenceViewerV2(QWidget* parent=NULL);
+  ~SequenceViewerV2();
+
+  virtual bool Restore(const QString&){return true;};
+  virtual bool Save(const QString&){return true;};
+
+private:
+  QTableView* seq_table_view_;
+};
+
+}}
+
+#endif

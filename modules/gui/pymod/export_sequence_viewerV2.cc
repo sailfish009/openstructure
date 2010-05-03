@@ -18,18 +18,18 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 
-#include "sequence_viewer_proxyV2.hh"
+#include "sequence_viewer_proxy.hh"
 
 using namespace boost::python;
 using namespace ost;
 using namespace ost::gui;
 
 
-void export_SequenceViewerV2()
+void export_SequenceViewer()
 {
-  class_<SequenceViewerProxyV2, bases<SipHandlerBase> >("SequenceViewerV2", init<>())
-    .def("Show", &SequenceViewerProxyV2::Show)
-    .def("Hide", &SequenceViewerProxyV2::Hide)
+  class_<SequenceViewerProxy, bases<SipHandlerBase> >("SequenceViewer")
+    .def("Show", &SequenceViewerProxy::Show)
+    .def("Hide", &SequenceViewerProxy::Hide)
   ;
 }
 

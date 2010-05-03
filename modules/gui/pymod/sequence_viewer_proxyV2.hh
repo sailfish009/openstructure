@@ -16,20 +16,32 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
+#ifndef OST_GUI_SEQUENCE_VIEWER_PROXY_V2_HH
+#define OST_GUI_SEQUENCE_VIEWER_PROXY_V2_HH
 
-#include "sequence_viewer_proxyV2.hh"
+#include <ost/gui/sequence/sequence_viewer.hh>
 
-using namespace boost::python;
-using namespace ost;
-using namespace ost::gui;
+#include "sip_handler.hh"
 
+namespace ost { namespace gui {
 
-void export_SequenceViewerV2()
-{
-  class_<SequenceViewerProxyV2, bases<SipHandlerBase> >("SequenceViewerV2", init<>())
-    .def("Show", &SequenceViewerProxyV2::Show)
-    .def("Hide", &SequenceViewerProxyV2::Hide)
-  ;
-}
+class  SequenceViewerProxyV2 : public SipHandler<SequenceViewerV2> {
 
+public:
+  SequenceViewerProxyV2(SequenceViewerV2* seq_viewer=new SequenceViewerV2()):
+    SipHandler<SequenceViewerV2>(seq_viewer)
+  { }
+  
+  void Show()  
+  {
+    return Me()->show();
+  }
+  void Hide()  
+  {
+    return Me()->hide();
+  }
+};
+
+}}
+
+#endif

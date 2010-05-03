@@ -19,6 +19,12 @@ sequence_viewer.hh
 sequence_scene.hh
 sequence_search_bar.hh
 )
+
+set(OST_GUI_SEQUENCE_VIEW_HEADERS
+sequence_table_view.hh
+sequence_viewer.hh
+)
+
 set(OST_GUI_TOOLS_HEADERS
 tool.hh
 tool_option_group.hh
@@ -192,6 +198,8 @@ sequence_viewer/sequence_viewer_base.cc
 sequence_viewer/sequence_viewer.cc
 sequence_viewer/sequence_scene.cc
 sequence_viewer/sequence_search_bar.cc
+sequence/sequence_table_view.cc
+sequence/sequence_viewer.cc
 gosty_app.cc
 change_process_name.cc
 main_area.cc
@@ -308,6 +316,8 @@ sequence_viewer/sequence_viewer_base.hh
 sequence_viewer/sequence_viewer.hh
 sequence_viewer/sequence_scene.hh
 sequence_viewer/sequence_search_bar.hh
+sequence/sequence_table_view.hh
+sequence/sequence_viewer.hh
 plot_viewer/plot_axis_base.hh
 plot_viewer/plot_data_graphics_item_base.hh
 plot_viewer/plot_function_info.hh
@@ -410,6 +420,7 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
        HEADERS ${OST_GUI_TOOLS_HEADERS} IN_DIR tools
                ${OST_GUI_PLOT_VIEWER_HEADERS} IN_DIR plot_viewer
                ${OST_GUI_SEQUENCE_VIEWER_HEADERS} IN_DIR sequence_viewer
+               ${OST_GUI_SEQUENCE_VIEW_HEADERS} IN_DIR sequence
                ${OST_GUI_PYTHON_SHELL_HEADERS} IN_DIR python_shell
                ${OST_GUI_PANEL_BAR_HEADERS} IN_DIR panel_bar
                ${OST_GUI_SCENE_WIN_HEADERS} IN_DIR scene_win

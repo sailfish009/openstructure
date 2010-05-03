@@ -16,20 +16,40 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
+#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_TABLE_VIEW
+#define OST_SEQUENCE_VIEWER_SEQUENCE_TABLE_VIEW
 
-#include "sequence_viewer_proxyV2.hh"
+/*
+  Author: Stefan Scheuber
+ */
 
-using namespace boost::python;
-using namespace ost;
-using namespace ost::gui;
+#include <QTableView>
 
+#include <ost/gui/module_config.hh>
 
-void export_SequenceViewerV2()
-{
-  class_<SequenceViewerProxyV2, bases<SipHandlerBase> >("SequenceViewerV2", init<>())
-    .def("Show", &SequenceViewerProxyV2::Show)
-    .def("Hide", &SequenceViewerProxyV2::Hide)
-  ;
-}
+namespace ost { namespace gui {
 
+/// \brief QTableView with first column not moving
+class DLLEXPORT_OST_GUI SequenceTableView : public QTableView {
+  Q_OBJECT
+public:
+  SequenceTableView(QAbstractItemModel * model);
+  ~SequenceTableView();
+
+protected:
+  virtual void resizeEvent(QResizeEvent *event);
+  virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
+  void scrollTo (const QModelIndex & index, ScrollHint hint = EnsureVisible);
+
+private slots:
+  void ResizeWidth(int index, int, int size);
+  void ResizeHeight(int index, int, int size);
+
+private:
+  QTableView *column_not_move_;
+  void updateNotMoveColumn();
+};
+
+}}
+
+#endif
