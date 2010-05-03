@@ -80,13 +80,19 @@ void SequenceModel::InsertGfxEntity(gfx::EntityP& ent){
   this->endInsertRows();
 }
 
-void SequenceModel::RemoveSequence(gfx::EntityP& entity){
+void SequenceModel::RemoveGfxEntity(gfx::EntityP& entity){
   ViewObject* obj = this->GetObject(entity);
   if(obj){
     int index = objects_.indexOf(obj);
-    this->beginRemoveRows(QModelIndex(),index,index);
+    this->beginRemoveRows(QModelIndex(),index,index+obj->GetRowCount()-1);
+    int cols_before = this->columnCount();
     objects_.removeAt(index);
     this->endRemoveRows();
+    int cols = this->columnCount();
+    if(cols_before>cols){
+      this->beginRemoveColumns(QModelIndex(), cols, cols_before-1);
+      this->endRemoveColumns();
+    }
   }
 }
 
@@ -173,7 +179,7 @@ int SequenceModel::columnCount(const QModelIndex& parent) const
   for (int i = 0; i<objects_.size(); i++){
     int max_col = objects_[i]->GetMaxColumnCount();
     if(max_col >= cols)
-      cols = max_col+1;
+      cols = max_col;
   }
   return cols;
 }

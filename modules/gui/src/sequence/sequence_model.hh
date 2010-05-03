@@ -47,7 +47,7 @@ public:
   void InsertSequence(QString& name, seq::SequenceHandle& seq);
   void InsertSequences(const QList<QString>& names, seq::SequenceList& list);
 
-  void RemoveSequence(gfx::EntityP& entity);
+  void RemoveGfxEntity(gfx::EntityP& entity);
 
   ViewObject* GetObject(gfx::EntityP& entity);
   const PainterList& GetPainters(const QModelIndex& index) const;

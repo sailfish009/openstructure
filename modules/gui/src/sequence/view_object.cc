@@ -182,14 +182,12 @@ void ViewObject::SetSelection(int row, const QSet<int>& added, const QSet<int>& 
 
     QSetIterator<int> i(removed);
     while (i.hasNext()){
-      std::cout << "REMOVED!" << std::endl;
       int row = i.next();
       if (mol::ResidueView rv=seq.GetResidue(row-1)) {
         view.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ATOMS);
       }
     }
     sel = mol::Difference(sel,view);
-
     view = seq.GetAttachedView().GetHandle().CreateEmptyView();
     i = QSetIterator<int>(added);
     while (i.hasNext()){
@@ -199,6 +197,7 @@ void ViewObject::SetSelection(int row, const QSet<int>& added, const QSet<int>& 
       }
     }
     sel = mol::Union(sel,view);
+    sel.AddAllInclusiveBonds();
     entity->SetSelection(sel);
   }
 }
@@ -207,7 +206,7 @@ QVariant ViewObject::GetData(int row, int column, int role)
 {
   if(row<0 || row >= rows_.size())return QVariant();
 
-  if(column<0 || column >= rows_[row].seq.GetLength())return QVariant();
+  if(column<0 || column >= rows_[row].seq.GetLength()+1)return QVariant();
 
   if(column == 0) {
     if (role == Qt::DisplayRole){
@@ -241,8 +240,8 @@ int ViewObject::GetMaxColumnCount() const
   int columns = 0;
   for(int i = 0; i < rows_.size(); i++){
     int col_length = rows_[i].seq.GetLength();
-    if(columns < col_length){
-      columns = rows_[i].seq.GetLength() + 1;
+    if(columns <= col_length){
+      columns = col_length+1;
     }
   }
   return columns;

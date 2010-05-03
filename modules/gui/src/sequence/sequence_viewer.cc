@@ -77,7 +77,7 @@ void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
 void SequenceViewerV2::NodeRemoved(const gfx::GfxNodeP& node)
 {
   if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(node)) {
-
+    model_->RemoveGfxEntity(o);
   }
 }
 
