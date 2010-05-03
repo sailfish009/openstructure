@@ -20,6 +20,7 @@
 #define OST_SCENE_FX_HH
 
 #include <ost/gfx/gl_helper.hh>
+#include <ost/geom/geom.hh>
 
 /*
   low level code for scene shading effects
@@ -49,6 +50,7 @@ public:
   bool shadow_flag;
   int shadow_quality;
   bool depth_dark_flag;
+  float depth_dark_factor;
   bool amb_occl_flag;
   float amb_occl_factor;
 
@@ -66,11 +68,14 @@ private:
   GLuint scene_tex_id_;
   GLuint depth_tex_id_;
   GLuint shadow_tex_id_;
+  geom::Mat4 shadow_tex_mat_;
   GLuint occl_tex_id_;
   GLuint dark_tex_id_;
   GLuint norm_tex_id_;
   GLuint kernel_tex_id_;
   uint kernel_size_;
+  GLuint kernel2_tex_id_;
+  uint kernel2_size_;
 
   GLuint scene_tex2_id_;
   GLuint norm_tex2_id_;

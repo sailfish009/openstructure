@@ -112,6 +112,8 @@ Scene::Scene():
   auto_autoslab_(true),
   offscreen_flag_(false),
   main_offscreen_buffer_(0),
+  old_vp_(),
+  def_shading_mode_("default"),
   selection_mode_(1),
   test_flag_(false),
   tmp_tex_(),
@@ -191,6 +193,15 @@ void Scene::SetDepthDarkening(bool f)
 #endif
 }
 
+void Scene::SetDepthDarkeningFactor(float f)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().depth_dark_factor=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
 void Scene::SetAmbientOcclusion(bool f)
 {
 #if OST_SHADER_SUPPORT_ENABLED
@@ -212,6 +223,9 @@ void Scene::SetAmbientOcclusionFactor(float f)
 void Scene::SetShadingMode(const std::string& smode)
 {
 #if OST_SHADER_SUPPORT_ENABLED
+  // this here is required - in case SetShadingMode is called
+  // before GL is initialized (e.g. during batch mode rendering)
+  def_shading_mode_=smode;
   if(smode=="fallback") {
     Shader::Instance().Activate("");
   } else if(smode=="basic") {
@@ -332,7 +346,7 @@ void Scene::InitGL()
 #if OST_SHADER_SUPPORT_ENABLED
   LOGN_DEBUG("scene: shader setup");
   Shader::Instance().Setup();
-  SetShadingMode("default");
+  SetShadingMode(def_shading_mode_);
   LOGN_DEBUG("scene: scenefx setup");
   impl::SceneFX::Instance().Setup();
 #endif

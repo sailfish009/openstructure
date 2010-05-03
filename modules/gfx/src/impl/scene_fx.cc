@@ -25,16 +25,20 @@ SceneFX::SceneFX():
   shadow_flag(false),
   shadow_quality(1),
   depth_dark_flag(false),
+  depth_dark_factor(1.0),
   amb_occl_flag(false),
   amb_occl_factor(1.0),
   scene_tex_id_(),
   depth_tex_id_(),
   shadow_tex_id_(),
+  shadow_tex_mat_(),
   occl_tex_id_(),
   dark_tex_id_(),
   norm_tex_id_(),
   kernel_tex_id_(),
   kernel_size_(0),
+  kernel2_tex_id_(),
+  kernel2_size_(0),
   scene_tex2_id_(),
   norm_tex2_id_(),
   scene_fb_(),
@@ -56,6 +60,7 @@ void SceneFX::Setup()
   glGenTextures(1,&dark_tex_id_);
   glGenTextures(1,&norm_tex_id_);
   glGenTextures(1,&kernel_tex_id_);
+  glGenTextures(1,&kernel2_tex_id_);
 
   glGenFramebuffers(1,&scene_fb_);
   glGenRenderbuffers(1,&depth_rb_);
@@ -103,24 +108,51 @@ void SceneFX::Setup()
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  
+
   std::vector<GLfloat> tmp;
   for(int u=-20;u<=20;++u) {
     for(int v=-20;v<=20;++v) {
       if(UniformRandom()<0.1) {
-	// norm to 1
-	float x = static_cast<float>(u+20)*0.025;
-	float y = static_cast<float>(v+20)*0.025;
-	tmp.push_back(x);
-	tmp.push_back(y);
-	tmp.push_back(0.0);
-	tmp.push_back(0.0);
+        // norm to 1
+        float x = static_cast<float>(u+20)*0.025;
+        float y = static_cast<float>(v+20)*0.025;
+        tmp.push_back(x);
+        tmp.push_back(y);
+        tmp.push_back(0.0);
+        tmp.push_back(0.0);
       }
     }
   }
 
   kernel_size_=tmp.size()/4;
   glTexImage1D(GL_TEXTURE_1D,0,4,kernel_size_,0,GL_RGBA, GL_FLOAT, &tmp[0]);
+
+  glBindTexture(GL_TEXTURE_1D, kernel2_tex_id_);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  
+  // depth darkening kernel
+  tmp.clear();
+  for(int u=-5;u<=5;++u) {
+    for(int v=-5;v<=5;++v) {
+      if(UniformRandom()<0.5) {
+        // norm to -1 ... 1
+        float x = static_cast<float>(u)*0.2;
+        float y = static_cast<float>(v)*0.2;
+        // gaussian kernel with sigma
+        float v = exp((-x*x-y*y)*0.5);
+        // norml to 0 ... 1
+        tmp.push_back(x*0.5+0.5);
+        tmp.push_back(y*0.5+0.5);
+        tmp.push_back(v);
+        tmp.push_back(0.0);
+      }
+    }
+  }
+
+  kernel2_size_=tmp.size()/4;
+  glTexImage1D(GL_TEXTURE_1D,0,4,kernel2_size_,0,GL_RGBA, GL_FLOAT, &tmp[0]);
 }
 
 void SceneFX::Resize(unsigned int w, unsigned int h)
@@ -163,11 +195,18 @@ void SceneFX::Preprocess()
 
 void SceneFX::Postprocess()
 {
-  Viewport vp=Scene::Instance().GetViewport();
-
   if(use_fb_) {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  } else {
+  }
+
+  if(!shadow_flag && !amb_occl_flag && !depth_dark_flag) {
+    // no postprocessing is needed
+    return;
+  }
+
+  Viewport vp=Scene::Instance().GetViewport();
+
+  if(!use_fb_) {
     // grab color buffer
     glBindTexture(GL_TEXTURE_2D, scene_tex_id_);
     glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vp.x, vp.y, vp.width, vp.height, 0);
@@ -194,9 +233,8 @@ void SceneFX::Postprocess()
     prep_amb_occlusion();
   }
   if(depth_dark_flag) {
-    //prep_depth_darkening();
+    prep_depth_darkening();
   }
-
 
   Shader::Instance().PushProgram();
   glEnable(GL_TEXTURE_2D);
@@ -207,14 +245,18 @@ void SceneFX::Postprocess()
   glBindTexture(GL_TEXTURE_2D,depth_tex_id_);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,scene_tex_id_);
-  glUniform1i(glGetUniformLocation(cpr,"scene"),0);
-  glUniform1i(glGetUniformLocation(cpr,"depth"),1);
+  glUniform1i(glGetUniformLocation(cpr,"scene_map"),0);
+  glUniform1i(glGetUniformLocation(cpr,"depth_map"),1);
   glUniform2f(glGetUniformLocation(cpr,"scalef"),
 	      1.0f/static_cast<float>(vp.width),
 	      1.0f/static_cast<float>(vp.height));
   glUniform2f(glGetUniformLocation(cpr,"zmorph"),
 	      Scene::Instance().GetFar()-Scene::Instance().GetNear(),
 	      Scene::Instance().GetNear());
+  glUniform2f(glGetUniformLocation(cpr,"i_vp"),1.0/static_cast<float>(vp.width),1.0/static_cast<float>(vp.height));
+  double pm[16];
+  glGetDoublev(GL_PROJECTION_MATRIX,pm);
+  glUniform4f(glGetUniformLocation(cpr,"abcd"),pm[0],pm[5],pm[10],pm[14]);
 
   if(shadow_flag) {
     glActiveTexture(GL_TEXTURE2);
@@ -224,6 +266,13 @@ void SceneFX::Postprocess()
     glUniform1f(glGetUniformLocation(cpr,"shadow_depth_bias"),0.008);
     glUniform1f(glGetUniformLocation(cpr,"shadow_epsilon"),0.002);
     glUniform1f(glGetUniformLocation(cpr,"shadow_multiplier"),0.4);
+    glActiveTexture(GL_TEXTURE0);
+    glMatrixMode(GL_TEXTURE);
+    glPushMatrix();
+    // make explicit object instead of temporary to avoid potential crash with Data()
+    geom::Mat4 ttmp=Transpose(shadow_tex_mat_);
+    glLoadMatrix(ttmp.Data());
+    glMatrixMode(GL_MODELVIEW);
   } else {
     glUniform1i(glGetUniformLocation(cpr,"shadow_flag"),0);
   }
@@ -236,8 +285,25 @@ void SceneFX::Postprocess()
   } else {
     glUniform1i(glGetUniformLocation(cpr,"occl_flag"),0);
   }
+  if(depth_dark_flag) {
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D,dark_tex_id_);
+    glUniform1i(glGetUniformLocation(cpr,"dark_flag"),1);
+    glUniform1i(glGetUniformLocation(cpr,"dark_map"),4);
+    glUniform1f(glGetUniformLocation(cpr,"dark_mult"),depth_dark_factor);
+  } else {
+    glUniform1i(glGetUniformLocation(cpr,"dark_flag"),0);
+  }
 
   draw_screen_quad(vp.width,vp.height);
+
+  if(shadow_flag) {
+    glMatrixMode(GL_TEXTURE);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+  }
+
+  glDisable(GL_TEXTURE_1D);
   glDisable(GL_TEXTURE_2D);
   Shader::Instance().PopProgram();
 }
@@ -262,12 +328,12 @@ void SceneFX::prep_shadow_map()
   glDisable(GL_FOG);
   glDisable(GL_COLOR_MATERIAL);
   glDisable(GL_NORMALIZE);
-  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+  //glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
 
   // render scene with only depth components
   // seen from the light's perspective
   glViewport(0,0,smap_size,smap_size);
-  glClear(GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
@@ -284,7 +350,7 @@ void SceneFX::prep_shadow_map()
   glMultMatrix(ltrans.GetTransposedMatrix().Data());
 
   // only render non-transparent objects for the shadow map
-  Scene::Instance().GetRootNode()->RenderGL(DEPTH_RENDER_PASS);
+  Scene::Instance().GetRootNode()->RenderGL(STANDARD_RENDER_PASS);
 
   // now get the shadow map
   glActiveTexture(GL_TEXTURE2);
@@ -298,21 +364,25 @@ void SceneFX::prep_shadow_map()
   glMatrixMode(GL_MODELVIEW);
 
   glPopAttrib();
-  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
+  //glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
   // set up appropriate texture matrix
   geom::Mat4 bias(0.5,0.0,0.0,0.5,
                   0.0,0.5,0.0,0.5,
                   0.0,0.0,0.5,0.5,
                   0.0,0.0,0.0,1.0);
-  
-  geom::Mat4 texm = bias*pmat*ltrans.GetMatrix();
+  float glpmat2[16];
+  glGetv(GL_PROJECTION_MATRIX, glpmat2);
+  geom::Mat4 pmat2(Transpose(geom::Mat4(glpmat2)));
+  float glmmat2[16];
+  glGetv(GL_MODELVIEW_MATRIX, glmmat2);
+  geom::Mat4 mmat2(Transpose(geom::Mat4(glmmat2)));
 
-  glMatrixMode(GL_TEXTURE);
-  // make explicit object instead of temporary to avoid potential crash with Data()
-  geom::Mat4 ttmp=Transpose(texm);
-  glLoadMatrix(ttmp.Data());
-  glMatrixMode(GL_MODELVIEW);
+  geom::Mat4 lmat2;
+  lmat2.PasteRotation(Scene::Instance().GetLightRot());
+
+  shadow_tex_mat_ = bias*pmat*ltrans.GetMatrix();
+  //shadow_tex_mat_ = bias*pmat*lmat2*geom::Invert(pmat2);
 }
 
 void SceneFX::prep_amb_occlusion()
@@ -355,22 +425,25 @@ void SceneFX::prep_depth_darkening()
 {
   Viewport vp=Scene::Instance().GetViewport();
 
-  // kernel is static for now, inside the convolution shader
   Shader::Instance().PushProgram();
   Shader::Instance().Activate("convolute1");
   GLuint cpr=Shader::Instance().GetCurrentProgram();
   // assign tex units
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D,depth_tex_id_);
+  glActiveTexture(GL_TEXTURE2);
+  glBindTexture(GL_TEXTURE_1D,kernel2_tex_id_);
   glUniform1i(glGetUniformLocation(cpr,"data"),1);
-  glUniform1i(glGetUniformLocation(cpr,"vp_width"),vp.width/2);
-  glUniform1i(glGetUniformLocation(cpr,"vp_height"),vp.height/2);
+  glUniform1i(glGetUniformLocation(cpr,"kernel"),2);
+  glUniform1f(glGetUniformLocation(cpr,"step"),1.0/static_cast<float>(kernel2_size_));
+  glUniform2f(glGetUniformLocation(cpr,"i_vp"),1.0/static_cast<float>(vp.width),1.0/static_cast<float>(vp.height));
 
   // set up viewport filling quad to run the fragment shader
   draw_screen_quad(vp.width/2,vp.height/2);
 
+  glActiveTexture(GL_TEXTURE4);
   glBindTexture(GL_TEXTURE_2D, dark_tex_id_);
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 0,0,vp.width/2, vp.height/2, 0);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0,0,vp.width/2, vp.height/2, 0);
 
   Shader::Instance().PopProgram();
 }
@@ -422,32 +495,13 @@ void SceneFX::draw_screen_quad(unsigned int w, unsigned int h)
 // this debug code draws the given texture across the complete screen
 void SceneFX::draw_debug_tex(unsigned int w, unsigned int h, GLuint texid)
 {
-  glPushAttrib(GL_ALL_ATTRIB_BITS);
   Shader::Instance().PushProgram();
-  
   Shader::Instance().Activate("");
-  glViewport(0,0,w,h);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(0,1,0,1,-1,1);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glColor3f(1.0,0.0,1.0);
-  glEnable(GL_TEXTURE_2D);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, texid);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0);
-  glVertex2f(0.01,0.01);
-  glTexCoord2f(0.0,1.0);
-  glVertex2f(0.01,0.99);
-  glTexCoord2f(1.0,1.0);
-  glVertex2f(0.99,0.99);
-  glTexCoord2f(1.0,0.0);
-  glVertex2f(0.99,0.01);
-  glEnd();
-  glPopAttrib();
+
+  draw_screen_quad(w,h);
+
   Shader::Instance().PopProgram();
 }
 

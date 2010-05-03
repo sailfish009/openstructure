@@ -112,6 +112,7 @@ class DLLEXPORT_OST_GFX Scene {
   void SetShadowQuality(int q);
 
   void SetDepthDarkening(bool f);
+  void SetDepthDarkeningFactor(float f);
 
   void SetAmbientOcclusion(bool f);
   void SetAmbientOcclusionFactor(float f);
@@ -415,6 +416,7 @@ private:
   bool offscreen_flag_; // a simple indicator whether in offscreen mode or not
   OffscreenBuffer* main_offscreen_buffer_; // not null if a main offscreen buffer is present
   uint old_vp_[2]; // used by the offline rendering code
+  std::string def_shading_mode_;
 
   uint selection_mode_;
 
