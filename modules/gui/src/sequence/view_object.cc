@@ -75,7 +75,7 @@ ViewObject::ViewObject(gfx::EntityP& entity, QObject* parent): QObject(parent), 
 
 void ViewObject::Init()
 {
-  font_ = QFont("Courier",30);
+  font_ = QFont("Courier",11);
   QFontMetrics metrics = QFontMetrics(font_);
   default_size_=QSize(metrics.boundingRect('W').width(),metrics.boundingRect('|').height());
   default_cell_size_ = QSize(metrics.boundingRect('W').width()+2,metrics.boundingRect('|').height()*2);
