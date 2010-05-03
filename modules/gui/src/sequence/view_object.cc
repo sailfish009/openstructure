@@ -182,18 +182,22 @@ void ViewObject::SetSelection(int row, const QSet<int>& added, const QSet<int>& 
 
     QSetIterator<int> i(removed);
     while (i.hasNext()){
-      int column = i.next();
-      if (mol::ResidueView rv=seq.GetResidue(column-1)) {
-        view.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ATOMS);
+      int column = i.next()-1;
+      if(column >= 0 && column < seq.GetLength()){
+        if (mol::ResidueView rv=seq.GetResidue(seq.GetResidueIndex(column))) {
+          view.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ATOMS);
+        }
       }
     }
     sel = mol::Difference(sel,view);
     view = seq.GetAttachedView().GetHandle().CreateEmptyView();
     i = QSetIterator<int>(added);
     while (i.hasNext()){
-      int column = i.next();
-      if (mol::ResidueView rv=seq.GetResidue(column-1)) {
-        view.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ATOMS);
+      int column = i.next()-1;
+      if(column >= 0 && column < seq.GetLength()){
+        if (mol::ResidueView rv=seq.GetResidue(seq.GetResidueIndex(column))) {
+          view.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ATOMS);
+        }
       }
     }
     sel = mol::Union(sel,view);
@@ -256,13 +260,49 @@ void ViewObject::DoubleClicked(int row, int column)
 {
   if(column==0){
     QSet<int> all;
-    for(int i = 1; i <= rows_[row].seq.GetLength(); i++){
-      all.insert(i);
+    int seq_length = rows_[row].seq.GetLength();
+    for(int i = 0; i < seq_length; i++){
+      all.insert(i+1);
     }
     this->SetSelection(row,all,QSet<int>());
   }
   else if(column>0){
-
+    column-=1;
+    QVarLengthArray<mol::SecStructure> sec = rows_[row].secstr;
+    if(sec.size()>0 && column < sec.size()){
+      mol::SecStructure& src_str = sec[column];
+      QVarLengthArray<bool> src_type(3);
+      src_type[0] = src_str.IsHelical();
+      src_type[1] = src_str.IsExtended();
+      src_type[2] = src_str.IsCoil();
+      int i = column;
+      QSet<int> cols_to_add;
+      mol::SecStructure& col_str = sec[i];
+      while(i >= 0 && (col_str = sec[i])){
+        if(src_type[0] == col_str.IsHelical()
+            && src_type[1] == col_str.IsExtended()
+            && src_type[2] == col_str.IsCoil()){
+        cols_to_add.insert(i+1);
+        --i;
+        }
+        else{break;}
+      }
+      i = column + 1;
+      if(i < sec.size()){
+        while(i < sec.size() && (col_str = sec[i])){
+          if(src_type[0] == col_str.IsHelical()
+              && src_type[1] == col_str.IsExtended()
+              && src_type[2] == col_str.IsCoil()){
+          cols_to_add.insert(i+1);
+          ++i;
+          }
+          else{
+            break;
+          }
+        }
+      }
+      this->SetSelection(row,cols_to_add, QSet<int>());
+    }
   }
 }
 
@@ -282,7 +322,7 @@ QMap<int, QList<int> > ViewObject::GetIndexesForView(const mol::EntityView& view
            e2=src_chain.GetResidueList().end(); j!=e2; ++j) {
           mol::ResidueView dst_res=dst_chain.FindResidue(j->GetHandle());
           assert(dst_res.IsValid());
-          int p=seq.GetPos(dst_res.GetIndex()+1);
+          int p=dst_res.GetIndex()+1;
           assert(p>=0 && p<=seq.GetLength());
           selected_indexes[i].append(p);
         }

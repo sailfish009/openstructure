@@ -57,6 +57,8 @@ private:
 
 private slots:
   void SelectionModelChanged(const QItemSelection&, const QItemSelection&);
+  void DoubleClicked(const QModelIndex& index);
+
 };
 
 }}

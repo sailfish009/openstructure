@@ -24,6 +24,7 @@
 #include <QHeaderView>
 #include <QScrollBar>
 #include <QTableWidgetItem>
+#include <QMouseEvent>
 
 #include <iostream>
 #include "sequence_table_view.hh"
@@ -181,6 +182,24 @@ void SequenceTableView::resizeColumnsToContents(){
 
 QTableView* SequenceTableView::GetFirstRow(){
   return column_not_move_;
+}
+
+void SequenceTableView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+  QModelIndex index = indexAt(event->pos());
+  this->last_double_click_ = index;
+  QAbstractItemView::mouseDoubleClickEvent(event);
+}
+
+
+void SequenceTableView::mouseReleaseEvent(QMouseEvent* event)
+{
+  QModelIndex index = indexAt(event->pos());
+  bool double_click = (index.isValid() && index == this->last_double_click_);
+  if (double_click) {
+    return;
+  }
+  QAbstractItemView::mouseReleaseEvent(event);
 }
 
 SequenceTableView::~SequenceTableView(){}

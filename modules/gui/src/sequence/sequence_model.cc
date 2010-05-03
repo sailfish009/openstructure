@@ -81,22 +81,21 @@ void SequenceModel::InsertGfxEntity(gfx::EntityP& ent){
 }
 
 void SequenceModel::RemoveGfxEntity(gfx::EntityP& entity){
-  ViewObject* obj = this->GetObject(entity);
-  if(obj){
-    int index = objects_.indexOf(obj);
+  if(ViewObject* obj = this->GetItem(entity)){
+    int index = this->GetGlobalRow(obj,0);
     this->beginRemoveRows(QModelIndex(),index,index+obj->GetRowCount()-1);
     int cols_before = this->columnCount();
-    objects_.removeAt(index);
+    objects_.removeOne(obj);
     this->endRemoveRows();
     int cols = this->columnCount();
     if(cols_before>cols){
-      this->beginRemoveColumns(QModelIndex(), cols, cols_before-1);
+      this->beginRemoveColumns(QModelIndex(), cols, cols_before);
       this->endRemoveColumns();
     }
   }
 }
 
-ViewObject* SequenceModel::GetObject(gfx::EntityP& entity){
+ViewObject* SequenceModel::GetItem(gfx::EntityP& entity){
   if(entity != NULL){
     for (int i = 0 ; i< objects_.size(); i++){
       if(entity == objects_[i]->GetGfxObject()){
@@ -160,7 +159,7 @@ int SequenceModel::GetGlobalRow(ViewObject* obj, int row) const
 QModelIndexList SequenceModel::GetModelIndexes(gfx::EntityP& entity, const mol::EntityView& view)
 {
   QModelIndexList list;
-  if(ViewObject* object = this->GetObject(entity)){
+  if(ViewObject* object = this->GetItem(entity)){
     QMap<int, QList<int> > indexes = object->GetIndexesForView(view);
     QMapIterator< int, QList<int> > i(indexes);
     while (i.hasNext()) {

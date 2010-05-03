@@ -44,6 +44,8 @@ public slots:
   QTableView* GetFirstRow();
 
 protected:
+  virtual void mouseDoubleClickEvent(QMouseEvent* event);
+  virtual void mouseReleaseEvent(QMouseEvent* event);
   virtual void resizeEvent(QResizeEvent *event);
   virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
   void scrollTo (const QModelIndex & index, ScrollHint hint = EnsureVisible);
@@ -55,6 +57,7 @@ private slots:
 private:
   QTableView* column_not_move_;
   SequenceDelegate* delegate_;
+  QModelIndex last_double_click_;
   void updateNotMoveColumn();
 };
 

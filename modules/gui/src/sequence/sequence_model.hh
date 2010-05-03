@@ -52,10 +52,8 @@ public:
   QModelIndexList GetModelIndexes(gfx::EntityP& entity, const mol::EntityView& view);
   int GetGlobalRow(ViewObject* obj, int row) const;
 
-  ViewObject* GetObject(gfx::EntityP& entity);
-  const PainterList& GetPainters(const QModelIndex& index) const;
 
-  ViewObject* GetItem(const QModelIndex& index) const;
+  const PainterList& GetPainters(const QModelIndex& index) const;
 
   // abstract item model interface
   int rowCount(const QModelIndex& parent=QModelIndex()) const;
@@ -74,6 +72,8 @@ public slots:
   void SelectionChanged(const QItemSelection& sel, const QItemSelection& desel);
 
 private:
+  ViewObject* GetItem(gfx::EntityP& entity);
+  ViewObject* GetItem(const QModelIndex& index) const;
   QPair<int, ViewObject*> GetRowWithItem(int row) const;
   QPair<int, ViewObject*> GetRowWithItem(const QModelIndex& index) const;
 
