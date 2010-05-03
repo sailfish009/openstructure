@@ -16,44 +16,56 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
-#define OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
+#ifndef OST_SEQUENCE_VIEWER_VIEW_OBJECT
+#define OST_SEQUENCE_VIEWER_VIEW_OBJECT
 
 /*
   Author: Stefan Scheuber
  */
 
-#include <QWidget>
+#include <QObject>
+#include <QPair>
+#include <QList>
 
-#include <ost/gfx/scene.hh>
-#include <ost/gfx/gfx_object.hh>
+#include <ost/seq/sequence_list.hh>
 
-#include <ost/gui/widget.hh>
+#include "row.hh"
 
-#include <ost/gui/module_config.hh>
-
-#include "sequence_model.hh"
-#include "sequence_table_view.hh"
 
 namespace ost { namespace gui {
 
-/// \brief QTableView with first column not moving
-class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget, public gfx::SceneObserver  {
+class ViewObject : public QObject
+{
   Q_OBJECT
+
 public:
-  SequenceViewerV2(QWidget* parent=NULL);
-  ~SequenceViewerV2();
+  ViewObject(seq::SequenceList& sequences, const QString& name, QObject* parent = 0);
+  ViewObject(seq::SequenceHandle& sequence, const QString& name, QObject* parent = 0);
 
-  virtual void NodeAdded(const gfx::GfxNodeP& node);
-  virtual void NodeRemoved(const gfx::GfxNodeP& node);
+  void InsertRow(int pos, Row* row);
+  void RemoveRow(Row* row);
 
-  virtual bool Restore(const QString&){return true;};
-  virtual bool Save(const QString&){return true;};
+  const QString& GetName() const;
+  void SetName(const QString& name);
+
+  Row* GetRow(int pos);
+  int GetRowCount();
+  int GetMaxColumnCount() const;
+
+  void AddSequence(seq::SequenceHandle& sequence);
+
+  QVariant GetData(int row, int column, int role);
+
+  bool SetData(int column, const QVariant& value, int role);
+
+  Qt::ItemFlags Flags(int row, int column) const;
+
 
 private:
-  SequenceModel* model_;
-  SequenceTableView* seq_table_view_;
+  QString name_;
+  QList<QPair<Row*, seq::SequenceHandle> > rows_;
 };
+
 
 }}
 

@@ -16,45 +16,55 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
-#define OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
 
 /*
   Author: Stefan Scheuber
  */
 
-#include <QWidget>
 
-#include <ost/gfx/scene.hh>
-#include <ost/gfx/gfx_object.hh>
+#include <QtGui>
 
-#include <ost/gui/widget.hh>
-
-#include <ost/gui/module_config.hh>
-
-#include "sequence_model.hh"
-#include "sequence_table_view.hh"
+#include "row.hh"
 
 namespace ost { namespace gui {
 
-/// \brief QTableView with first column not moving
-class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget, public gfx::SceneObserver  {
-  Q_OBJECT
-public:
-  SequenceViewerV2(QWidget* parent=NULL);
-  ~SequenceViewerV2();
+Row::Row(QObject *parent) : QObject(parent)
+{ }
 
-  virtual void NodeAdded(const gfx::GfxNodeP& node);
-  virtual void NodeRemoved(const gfx::GfxNodeP& node);
+void Row::InsertPainter(Painter* painter, int pos)
+{
+  if(pos == -1 || pos == painter_.size()){
+    painter_.append(painter);
+  }
+  else if(this->IsPosValid(pos)){
+    painter_.insert(pos, painter);
+  }
+}
 
-  virtual bool Restore(const QString&){return true;};
-  virtual bool Save(const QString&){return true;};
+void Row::RemovePainter(Painter* painter)
+{
+  painter_.removeAll(painter);
+}
 
-private:
-  SequenceModel* model_;
-  SequenceTableView* seq_table_view_;
-};
+Painter* Row::GetPainter(int pos)
+{
+  if(this->IsPosValid(pos)){
+    return painter_[pos];
+  }
+  return NULL;
+}
+
+int Row::GetPainterCount()
+{
+  return painter_.size();
+}
+
+bool Row::IsPosValid(int pos)
+{
+  if(pos >= 0 && pos < painter_.size()){
+    return true;
+  }
+  return false;
+}
 
 }}
-
-#endif

@@ -16,44 +16,33 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
-#define OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
+#ifndef OST_SEQUENCE_VIEWER_PAINTER
+#define OST_SEQUENCE_VIEWER_PAINTER
 
 /*
   Author: Stefan Scheuber
  */
 
-#include <QWidget>
-
-#include <ost/gfx/scene.hh>
-#include <ost/gfx/gfx_object.hh>
-
-#include <ost/gui/widget.hh>
-
-#include <ost/gui/module_config.hh>
-
-#include "sequence_model.hh"
-#include "sequence_table_view.hh"
+#include <QObject>
+#include <QPainter>
+#include <QStyleOptionViewItem>
+#include <QModelIndex>
+#include <QList>
 
 namespace ost { namespace gui {
 
-/// \brief QTableView with first column not moving
-class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget, public gfx::SceneObserver  {
+class Painter : public QObject
+{
   Q_OBJECT
+
 public:
-  SequenceViewerV2(QWidget* parent=NULL);
-  ~SequenceViewerV2();
+  Painter(QObject* parent = 0):QObject(parent){};
+  virtual void Paint(QPainter* painter, const QStyleOptionViewItem& option,
+                           const QModelIndex& index) = 0;
 
-  virtual void NodeAdded(const gfx::GfxNodeP& node);
-  virtual void NodeRemoved(const gfx::GfxNodeP& node);
-
-  virtual bool Restore(const QString&){return true;};
-  virtual bool Save(const QString&){return true;};
-
-private:
-  SequenceModel* model_;
-  SequenceTableView* seq_table_view_;
 };
+
+typedef QList<Painter*> PainterList;
 
 }}
 

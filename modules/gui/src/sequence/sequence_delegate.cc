@@ -23,56 +23,28 @@
 
 
 #include <QtGui>
-#include <iostream>
 #include "sequence_delegate.hh"
 
 namespace ost { namespace gui {
 
-SequenceDelegate::SequenceDelegate(SequenceTableView* view, QObject *parent)
-    : QItemDelegate(parent), view_(view)
+SequenceDelegate::SequenceDelegate(SequenceModel* seq_model, QObject *parent)
+    : QItemDelegate(parent), seq_model_(seq_model)
 {
-
+  QFontMetrics metrics = QFontMetrics(QFont("Courier",10));
+  default_size = QSize(metrics.width(QString("_"))+2,metrics.height()+2);
 }
-
-/*
-QWidget *SequenceDelegate::createEditor(QWidget *parent,  const QStyleOptionViewItem &, const QModelIndex &) const
-{
-  QSpinBox *editor = new QSpinBox(parent);
-  editor->setMinimum(0);
-  editor->setMaximum(100);
-
-  return editor;
-}
-*/
 
 void SequenceDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                          const QModelIndex &index) const
 {
-  painter->save();
-
-  painter->setPen(QPen(Qt::NoPen));
-  if(option.state & QStyle::State_Selected){
-    painter->setBrush(option.palette.highlight());
-  }
-  else{
-    painter->setBrush(QBrush(Qt::white));
-  }
-  painter->drawRect(option.rect);
-
-  painter->setPen(QPen(Qt::lightGray));
-  if(index.column()%2){
-    painter->drawLine(option.rect.topLeft(),option.rect.bottomRight());
-  }
-  else{
-    painter->drawLine(option.rect.bottomLeft(),option.rect.topRight());
-  }
-  painter->setPen(QPen(Qt::black));
-  QVariant value = index.data(Qt::DisplayRole);
-  if (value.isValid()){
-      QString text = value.toString();
-      painter->setFont(QFont("Courier",10));
-      painter->drawText(option.rect, Qt::AlignLeft|Qt::AlignVCenter, text);
-  }
-  painter->restore();
+/*  Row* row = seq_model_->GetRow(index);
+  for(int i=0; i < row->GetPainterCount(); i++){
+    row->GetPainter(i)->Paint(painter, option, index);
+  }*/
 }
+
+QSize& SequenceDelegate::GetDefaultSize(){
+  return default_size;
+}
+
 }}

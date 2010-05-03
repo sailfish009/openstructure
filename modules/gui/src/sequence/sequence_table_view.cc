@@ -60,6 +60,17 @@ SequenceTableView::SequenceTableView(QAbstractItemModel * model)
         "background-color: #47ce27;"
     "}");
 
+  this->verticalHeader()->hide();
+  this->horizontalHeader()->setStyleSheet(
+        "QHeaderView::section {"
+           "padding-bottom: 0px;"
+           "padding-top: 0px;"
+           "padding-left: 0px;"
+           "padding-right: 0px;"
+           "margin: 0px;"
+        "}"
+      );
+
   column_not_move_ = new QTableView(this);
 
   column_not_move_->setModel(this->model());
@@ -86,15 +97,7 @@ SequenceTableView::SequenceTableView(QAbstractItemModel * model)
                                  "padding: 0px; border-width: 0px; margin: 0px;}");
   column_not_move_->setShowGrid(false);
 
-  column_not_move_->horizontalHeader()->setStyleSheet(
-      "QHeaderView::section {"
-         "padding-bottom: 0px;"
-         "padding-top: 0px;"
-         "padding-left: 0px;"
-         "padding-right: 0px;"
-         "margin: 0px;"
-      "}"
-    );
+  column_not_move_->horizontalHeader()->setStyleSheet(this->horizontalHeader()->styleSheet());
 
   this->setShowGrid(false);
 
@@ -158,8 +161,9 @@ void SequenceTableView::updateNotMoveColumn()
 }
 
 void SequenceTableView::columnCountChanged(const QModelIndex& index, int old_count, int new_count){
-  if(old_count > 1 && old_count <= new_count){
-    for(int col=old_count-1; col<this->model()->columnCount(); col++){
+  if(old_count >= 0 && old_count <= new_count){
+    if(old_count == 0)old_count = 1;
+    for(int col=old_count; col<new_count; col++){
       column_not_move_->setColumnHidden(col, true);
     }
   }

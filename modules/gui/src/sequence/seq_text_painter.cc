@@ -16,45 +16,32 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
-#define OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
 
 /*
   Author: Stefan Scheuber
  */
 
-#include <QWidget>
 
-#include <ost/gfx/scene.hh>
-#include <ost/gfx/gfx_object.hh>
+#include <QtGui>
 
-#include <ost/gui/widget.hh>
-
-#include <ost/gui/module_config.hh>
-
-#include "sequence_model.hh"
-#include "sequence_table_view.hh"
+#include "seq_text_painter.hh"
 
 namespace ost { namespace gui {
 
-/// \brief QTableView with first column not moving
-class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget, public gfx::SceneObserver  {
-  Q_OBJECT
-public:
-  SequenceViewerV2(QWidget* parent=NULL);
-  ~SequenceViewerV2();
+SeqTextPainter::SeqTextPainter(QObject* parent)
+    : Painter(parent)
+{}
 
-  virtual void NodeAdded(const gfx::GfxNodeP& node);
-  virtual void NodeRemoved(const gfx::GfxNodeP& node);
-
-  virtual bool Restore(const QString&){return true;};
-  virtual bool Save(const QString&){return true;};
-
-private:
-  SequenceModel* model_;
-  SequenceTableView* seq_table_view_;
-};
+void SeqTextPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
+  painter->save();
+  painter->setPen(QPen(Qt::black));
+  QVariant value = index.data(Qt::DisplayRole);
+  if (value.isValid()){
+    QString text = value.toString();
+    painter->setFont(QFont("Courier",10));
+    painter->drawText(option.rect, Qt::AlignLeft|Qt::AlignVCenter, text);
+  }
+  painter->restore();
+}
 
 }}
-
-#endif

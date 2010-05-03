@@ -16,44 +16,54 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
-#define OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
+#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_MODEL
+#define OST_SEQUENCE_VIEWER_SEQUENCE_MODEL
 
 /*
   Author: Stefan Scheuber
  */
 
-#include <QWidget>
+#include <QAbstractTableModel>
 
-#include <ost/gfx/scene.hh>
-#include <ost/gfx/gfx_object.hh>
-
-#include <ost/gui/widget.hh>
-
-#include <ost/gui/module_config.hh>
+#include <ost/seq/sequence_list.hh>
 
 #include "sequence_model.hh"
-#include "sequence_table_view.hh"
+#include "view_object.hh"
 
 namespace ost { namespace gui {
 
-/// \brief QTableView with first column not moving
-class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget, public gfx::SceneObserver  {
+class SequenceModel : public QAbstractTableModel
+{
   Q_OBJECT
+
 public:
-  SequenceViewerV2(QWidget* parent=NULL);
-  ~SequenceViewerV2();
+  SequenceModel(QObject *parent = 0);
 
-  virtual void NodeAdded(const gfx::GfxNodeP& node);
-  virtual void NodeRemoved(const gfx::GfxNodeP& node);
+  void InsertSequence(QString& name, seq::SequenceHandle& seq);
+  void InsertSequences(QString& name, seq::SequenceList& list);
 
-  virtual bool Restore(const QString&){return true;};
-  virtual bool Save(const QString&){return true;};
+  void RemoveSequence(QString& name);
+
+  ViewObject* GetObject(QString& name);
+
+  QPair<int, ViewObject*> GetItem(const QModelIndex& index) const;
+
+  // abstract item model interface
+  int rowCount(const QModelIndex& parent=QModelIndex()) const;
+
+  int columnCount(const QModelIndex& parent=QModelIndex()) const;
+
+  QVariant data(const QModelIndex& index, int role=Qt::DisplayRole) const;
+
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role=Qt::DisplayRole) const;
+
+  virtual Qt::ItemFlags flags(const QModelIndex& index=QModelIndex()) const;
 
 private:
-  SequenceModel* model_;
-  SequenceTableView* seq_table_view_;
+  QList<ViewObject*> objects_;
 };
+
 
 }}
 

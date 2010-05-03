@@ -25,11 +25,9 @@
 
 #include <QItemDelegate>
 #include <QModelIndex>
-#include <QObject>
-#include <QSize>
-#include <QSpinBox>
 
 #include "sequence_table_view.hh"
+#include "sequence_model.hh"
 
 namespace ost { namespace gui {
 
@@ -38,15 +36,14 @@ class SequenceDelegate : public QItemDelegate
   Q_OBJECT
 
 public:
-  SequenceDelegate(SequenceTableView* view, QObject *parent = 0);
-
- /*   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                          const QModelIndex &index) const;*/
+  SequenceDelegate(SequenceModel* seq_model, QObject *parent = 0);
 
   void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
+  QSize& GetDefaultSize();
 private:
-  SequenceTableView* view_;
+  SequenceModel* seq_model_;
+  QSize default_size;
 };
 
 

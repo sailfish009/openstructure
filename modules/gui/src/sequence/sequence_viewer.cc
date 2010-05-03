@@ -22,7 +22,6 @@
  */
 #include <boost/pointer_cast.hpp>
 
-#include <QStandardItem>
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QHeaderView>
@@ -35,6 +34,8 @@
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/entity_fw.hh>
 
+#include "sequence_model.hh"
+
 #include "sequence_viewer.hh"
 
 #include "sequence_delegate.hh"
@@ -45,31 +46,18 @@ namespace ost { namespace gui {
 SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
 {
   gfx::Scene::Instance().AttachObserver(this);
-  QStandardItemModel* model=new QStandardItemModel();
+  model_ = new SequenceModel(this);
 
   QVBoxLayout* layout = new QVBoxLayout(this);
 
-  seq_table_view_ = new SequenceTableView(model);
+  seq_table_view_ = new SequenceTableView(model_);
   layout->addWidget(seq_table_view_);
-  //seq_table_view_->setItemDelegateForColumn(2,new SequenceDelegate(seq_table_view_));
   this->setLayout(layout);
-  connect(model,SIGNAL(columnsInserted(const QModelIndex&, int, int)),seq_table_view_,SLOT(columnCountChanged(const QModelIndex&, int, int)));
-  //QPushButton* pb = new QPushButton("BLABLA");
-  //seq_table_view_->setIndexWidget(model->index(0,2),pb);
-  seq_table_view_->verticalHeader()->hide();
-  seq_table_view_->horizontalHeader()->setStyleSheet(
-      "QHeaderView::section {"
-         "padding-bottom: 0px;"
-         "padding-top: 0px;"
-         "padding-left: 0px;"
-         "padding-right: 0px;"
-         "margin: 0px;"
-      "}"
-    );
-  seq_table_view_->horizontalHeader()->setMinimumSectionSize(8);
-  seq_table_view_->horizontalHeader()->setDefaultSectionSize(10);
-  seq_table_view_->verticalHeader()->setMinimumSectionSize(8);
-  seq_table_view_->verticalHeader()->setDefaultSectionSize(10);
+  connect(model_,SIGNAL(columnsInserted(const QModelIndex&, int, int)),seq_table_view_,SLOT(columnCountChanged(const QModelIndex&, int, int)));
+  /*
+  seq_table_view_->horizontalHeader()->setMinimumSectionSize(2);
+  seq_table_view_->verticalHeader()->setMinimumSectionSize(2);
+  */
 }
 
 void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
@@ -90,33 +78,15 @@ void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
       if (seq_str.empty()) {
         continue;
       }
-      String name=o->GetName();
+      QString name = QString(o->GetName().c_str());
       if (chain.GetName()!="" && chain.GetName()!=" ") {
-        name+=" ("+chain.GetName()+")";
+        name= name + " ("+chain.GetName().c_str()+")";
       }
-      seq::SequenceHandle seq=seq::CreateSequence(name, seq_str);
+      seq::SequenceHandle sequence=seq::CreateSequence(name.toStdString(), seq_str);
       mol::EntityView v_one_chain=v.GetHandle().CreateEmptyView();
       v_one_chain.AddChain(chain, mol::ViewAddFlag::INCLUDE_ALL);
-      seq.AttachView(v_one_chain);
-      QStandardItem* item = new QStandardItem(name.c_str());
-      QStandardItemModel* model = qobject_cast<QStandardItemModel*>(seq_table_view_->model());
-      SequenceDelegate* del = new SequenceDelegate(seq_table_view_,this);
-      if(model){
-        int row = model->rowCount();
-        model->setHeaderData(0, Qt::Horizontal, QObject::tr("") );
-        model->setHeaderData(row, Qt::Vertical, QObject::tr("") );
-        model->setItem(row, 0, item);
-        for(int i = 0; i< seq.GetLength(); i++){
-          item = new QStandardItem(QString(seq.GetOneLetterCode(i)));
-          item->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-          item->setFont(QFont("Courier",10));
-          QFontMetrics m = QFontMetrics(QFont("Courier",10));
-          item->setSizeHint(QSize(m.width(QString(seq.GetOneLetterCode(i)))+2,m.height()+2));
-          model->setItem(row, i+1, item);
-          model->setHeaderData(i+1, Qt::Horizontal, QObject::tr("") );
-          seq_table_view_->setItemDelegateForColumn(i+1,del);
-        }
-      }
+      sequence.AttachView(v_one_chain);
+      model_->InsertSequence(name,sequence);
     }
     seq_table_view_->resizeColumnsToContents();
     seq_table_view_->resizeRowsToContents();
