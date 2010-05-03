@@ -42,19 +42,20 @@ class SequenceModel : public QAbstractTableModel
 public:
   SequenceModel(QObject *parent = 0);
 
-  void InsertGfxEntity(gfx::EntityP& ent);
+  void InsertGfxEntity(gfx::EntityP& entity);
   void InsertChain(QString& name, mol::ChainView& view);
   void InsertSequence(QString& name, seq::SequenceHandle& seq);
   void InsertSequences(const QList<QString>& names, seq::SequenceList& list);
 
   void RemoveGfxEntity(gfx::EntityP& entity);
 
+  QModelIndexList GetModelIndexes(gfx::EntityP& entity, const mol::EntityView& view);
+  int GetGlobalRow(ViewObject* obj, int row) const;
+
   ViewObject* GetObject(gfx::EntityP& entity);
   const PainterList& GetPainters(const QModelIndex& index) const;
 
   ViewObject* GetItem(const QModelIndex& index) const;
-
-  void SelectionChanged(const QItemSelection& sel, const QItemSelection& desel);
 
   // abstract item model interface
   int rowCount(const QModelIndex& parent=QModelIndex()) const;
@@ -67,6 +68,10 @@ public:
                       int role=Qt::DisplayRole) const;
 
   virtual Qt::ItemFlags flags(const QModelIndex& index=QModelIndex()) const;
+
+public slots:
+  void DoubleClicked(const QModelIndex& index);
+  void SelectionChanged(const QItemSelection& sel, const QItemSelection& desel);
 
 private:
   QPair<int, ViewObject*> GetRowWithItem(int row) const;

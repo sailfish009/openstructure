@@ -54,8 +54,6 @@ void SeqSecStrPainter::Paint(QPainter* painter, const QStyleOptionViewItem& opti
         painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
         pos = center + std_diff;
         painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
-        //stack.push_back(QPointF(s.first*advance_, -.6*height_));
-        //stack.push_back(QPointF((s.last+1)*advance_,  -.6*height_));
       } else if (sec_element.IsHelical()) {
         int pos = center - diff;
         painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);

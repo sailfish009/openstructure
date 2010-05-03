@@ -46,6 +46,7 @@ public:
 
   virtual void NodeAdded(const gfx::GfxNodeP& node);
   virtual void NodeRemoved(const gfx::GfxNodeP& node);
+  virtual void SelectionChanged(const gfx::GfxObjP& o, const mol::EntityView& view);
 
   virtual bool Restore(const QString&){return true;};
   virtual bool Save(const QString&){return true;};
@@ -54,8 +55,8 @@ private:
   SequenceModel* model_;
   SequenceTableView* seq_table_view_;
 
-public slots:
-  void OnSelectionChange(const QItemSelection& sel, const QItemSelection& desel);
+private slots:
+  void SelectionModelChanged(const QItemSelection&, const QItemSelection&);
 };
 
 }}

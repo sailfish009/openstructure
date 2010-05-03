@@ -25,6 +25,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QHeaderView>
+#include <QAbstractItemView>
 
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/entity_view.hh>
@@ -57,12 +58,10 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
 
   seq_table_view_->horizontalHeader()->setMinimumSectionSize(2);
   seq_table_view_->verticalHeader()->setMinimumSectionSize(2);
-
-  connect(seq_table_view_->selectionModel(),
-      SIGNAL(selectionChanged(const QItemSelection&,
-              const QItemSelection&)), this,
-      SLOT(OnSelectionChange(const QItemSelection&,
-              const QItemSelection&)));
+  seq_table_view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+  connect(seq_table_view_,SIGNAL(doubleClicked(const QModelIndex&)),model_,SLOT(DoubleClicked(const QModelIndex&)));
+  connect(seq_table_view_->GetFirstRow(),SIGNAL(doubleClicked(const QModelIndex&)),model_,SLOT(DoubleClicked(const QModelIndex&)));
 }
 
 void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
@@ -81,11 +80,41 @@ void SequenceViewerV2::NodeRemoved(const gfx::GfxNodeP& node)
   }
 }
 
-void SequenceViewerV2::OnSelectionChange(const QItemSelection& sel,
-  const QItemSelection& desel) {
+void SequenceViewerV2::SelectionModelChanged(const QItemSelection& sel, const QItemSelection& desel)
+{
+  gfx::Scene::Instance().DetachObserver(this);
   model_->SelectionChanged(sel, desel);
+  gfx::Scene::Instance().AttachObserver(this);
 }
 
-SequenceViewerV2::~SequenceViewerV2(){}
+void SequenceViewerV2::SelectionChanged(const gfx::GfxObjP& o,
+                                      const mol::EntityView& view)
+{
+  disconnect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+  std::cout << "SELECTION CHANGED!" << std::endl;
+  QItemSelectionModel* model = seq_table_view_->selectionModel();
+  gfx::EntityP entity=boost::dynamic_pointer_cast<gfx::Entity>(o);
+  if(entity){
+    const QModelIndexList& list = model_->GetModelIndexes(entity, view);
+    std::cout << list.size() << std::endl;
+    QSet<int> rows_visited;
+    for(int i = 0; i<list.size(); i++){
+      int row =list[i].row();
+      if(!rows_visited.contains(row)){
+        model->select(list[i],QItemSelectionModel::Rows|QItemSelectionModel::Deselect);
+        rows_visited.insert(row);
+      }
+    }
+    for(int i = 0; i<list.size(); i++){
+      model->select(list[i],QItemSelectionModel::Select);
+    }
+  }
+  connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+}
+
+
+SequenceViewerV2::~SequenceViewerV2(){
+  gfx::Scene::Instance().DetachObserver(this);
+}
 
 }}

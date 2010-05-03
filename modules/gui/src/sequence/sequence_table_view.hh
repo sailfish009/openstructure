@@ -41,6 +41,7 @@ public:
 public slots:
   void columnCountChanged(const QModelIndex& index, int old_count, int new_count);
   void resizeColumnsToContents();
+  QTableView* GetFirstRow();
 
 protected:
   virtual void resizeEvent(QResizeEvent *event);

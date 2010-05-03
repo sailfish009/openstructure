@@ -179,6 +179,10 @@ void SequenceTableView::resizeColumnsToContents(){
   updateNotMoveColumn();
 }
 
+QTableView* SequenceTableView::GetFirstRow(){
+  return column_not_move_;
+}
+
 SequenceTableView::~SequenceTableView(){}
 
 }}

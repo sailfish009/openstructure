@@ -75,7 +75,7 @@ ViewObject::ViewObject(gfx::EntityP& entity, QObject* parent): QObject(parent), 
 
 void ViewObject::Init()
 {
-  font_ = QFont("Courier",10);
+  font_ = QFont("Courier",30);
   QFontMetrics metrics = QFontMetrics(font_);
   default_size_=QSize(metrics.boundingRect('W').width(),metrics.boundingRect('|').height());
   default_cell_size_ = QSize(metrics.boundingRect('W').width()+2,metrics.boundingRect('|').height()*2);
@@ -157,7 +157,7 @@ void ViewObject::AddChain(mol::ChainView& chain, const QString& name)
         sec_str[i] = s.ss_type;
       }
     }
-    ListEntry entry(new_row, name, sequence, sec_str);
+    ListEntry entry(new_row, name, sequence, chain, sec_str);
     rows_.append(entry);
   }
 }
@@ -182,8 +182,8 @@ void ViewObject::SetSelection(int row, const QSet<int>& added, const QSet<int>& 
 
     QSetIterator<int> i(removed);
     while (i.hasNext()){
-      int row = i.next();
-      if (mol::ResidueView rv=seq.GetResidue(row-1)) {
+      int column = i.next();
+      if (mol::ResidueView rv=seq.GetResidue(column-1)) {
         view.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ATOMS);
       }
     }
@@ -191,8 +191,8 @@ void ViewObject::SetSelection(int row, const QSet<int>& added, const QSet<int>& 
     view = seq.GetAttachedView().GetHandle().CreateEmptyView();
     i = QSetIterator<int>(added);
     while (i.hasNext()){
-      int row = i.next();
-      if (mol::ResidueView rv=seq.GetResidue(row-1)) {
+      int column = i.next();
+      if (mol::ResidueView rv=seq.GetResidue(column-1)) {
         view.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ATOMS);
       }
     }
@@ -250,6 +250,46 @@ int ViewObject::GetMaxColumnCount() const
 bool ViewObject::SetData(int column, const QVariant& value, int role)
 {
   return false;
+}
+
+void ViewObject::DoubleClicked(int row, int column)
+{
+  if(column==0){
+    QSet<int> all;
+    for(int i = 1; i <= rows_[row].seq.GetLength(); i++){
+      all.insert(i);
+    }
+    this->SetSelection(row,all,QSet<int>());
+  }
+  else if(column>0){
+
+  }
+}
+
+QMap<int, QList<int> > ViewObject::GetIndexesForView(const mol::EntityView& view)
+{
+  if(view.GetChainCount()==0){
+    return QMap<int, QList<int> >();
+  }
+  else{
+    QMap<int, QList<int> > selected_indexes;
+    for(int i=0; i< rows_.size(); i++){
+      mol::ChainView dst_chain=(rows_[i].chain);
+      seq::SequenceHandle seq = rows_[i].seq;
+      if (mol::ChainView src_chain=view.FindChain(dst_chain.GetName())) {
+        // for each residue in the selection deduce index in sequence
+        for (mol::ResidueViewList::const_iterator j=src_chain.GetResidueList().begin(),
+           e2=src_chain.GetResidueList().end(); j!=e2; ++j) {
+          mol::ResidueView dst_res=dst_chain.FindResidue(j->GetHandle());
+          assert(dst_res.IsValid());
+          int p=seq.GetPos(dst_res.GetIndex()+1);
+          assert(p>=0 && p<=seq.GetLength());
+          selected_indexes[i].append(p);
+        }
+      }
+    }
+    return selected_indexes;
+  }
 }
 
 Qt::ItemFlags ViewObject::Flags(int row, int column) const

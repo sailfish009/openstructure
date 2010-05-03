@@ -143,6 +143,38 @@ ViewObject* SequenceModel::GetItem(const QModelIndex& index) const
   return this->GetRowWithItem(index).second;
 }
 
+int SequenceModel::GetGlobalRow(ViewObject* obj, int row) const
+{
+  int glob_row = -1;
+  int index = objects_.indexOf(obj);
+  if(index >= 0){
+    glob_row = 0;
+    for(int i=0; i<index; i++){
+      glob_row += objects_[i]->GetRowCount();
+    }
+    return glob_row + row;
+  }
+  return glob_row;
+}
+
+QModelIndexList SequenceModel::GetModelIndexes(gfx::EntityP& entity, const mol::EntityView& view)
+{
+  QModelIndexList list;
+  if(ViewObject* object = this->GetObject(entity)){
+    QMap<int, QList<int> > indexes = object->GetIndexesForView(view);
+    QMapIterator< int, QList<int> > i(indexes);
+    while (i.hasNext()) {
+      i.next();
+      int row = this->GetGlobalRow(object, i.key());
+      const QList<int>& index_list = i.value();
+      for(int i=0; i<index_list.size(); i++){
+        list.append(this->index(row,index_list[i]));
+      }
+    }
+  }
+  return list;
+}
+
 void SequenceModel::SelectionChanged(const QItemSelection& sel, const QItemSelection& desel)
 {
   QMap<int,QPair<QSet<int>,QSet<int> > > sel_map;
@@ -161,6 +193,14 @@ void SequenceModel::SelectionChanged(const QItemSelection& sel, const QItemSelec
     i.next();
     QPair<int, ViewObject*> item = this->GetRowWithItem(i.key());
     item.second->SetSelection(item.first,i.value().first, i.value().second);
+  }
+}
+
+void SequenceModel::DoubleClicked(const QModelIndex& index)
+{
+  QPair<int, ViewObject*> item = this->GetRowWithItem(index);
+  if(item.second){
+    item.second->DoubleClicked(item.first,index.column());
   }
 }
 

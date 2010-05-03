@@ -46,6 +46,7 @@ struct ListEntry {
   Row*   row;
   QString name;
   seq::SequenceHandle seq;
+  mol::ChainView chain;
   QVarLengthArray<mol::SecStructure> secstr;
   ListEntry(): row(NULL)
          {}
@@ -57,8 +58,8 @@ struct ListEntry {
       seq::SequenceHandle& sequence): row(r), name(n), seq(sequence)
          {}
   ListEntry(Row* r, const QString& n,
-      seq::SequenceHandle& sequence,
-      QVarLengthArray<mol::SecStructure>& sec): row(r), name(n), seq(sequence), secstr(sec)
+      const seq::SequenceHandle& sequence, const mol::ChainView& c,
+      const QVarLengthArray<mol::SecStructure>& sec): row(r), name(n), seq(sequence), chain(c), secstr(sec)
          {}
 };
 
@@ -95,6 +96,9 @@ public:
 
   Qt::ItemFlags Flags(int row, int column) const;
 
+  void DoubleClicked(int row, int column);
+
+  QMap<int, QList<int> > GetIndexesForView(const mol::EntityView& view);
 
 private:
   void Init();
