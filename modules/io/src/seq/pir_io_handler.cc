@@ -1,0 +1,131 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
+#include "pir_io_handler.hh"
+#include <ost/message.hh>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/convenience.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+
+#include <ost/io/io_exception.hh>
+#include <ost/seq/invalid_sequence.hh>
+/*
+  Author: Juergen Haas
+ */
+
+using boost::format;
+
+namespace ost { namespace io {
+
+void PirIOHandler::Import(seq::SequenceList& aln,
+                            const boost::filesystem::path& loc) 
+{
+    if (!boost::filesystem::exists(loc)) {
+      throw IOException("File does not exist");
+    }
+    
+    boost::filesystem::ifstream infile(loc);
+    this->Import(aln, infile);
+}
+
+void PirIOHandler::Export(const seq::ConstSequenceList& msa,
+                            const boost::filesystem::path& loc) const {
+  boost::filesystem::ofstream outfile(loc);
+  this->Export(msa, outfile);
+}
+
+
+
+
+bool PirIOHandler::ProvidesImport(const boost::filesystem::path& loc, 
+                                    const String& format) {
+  if (format=="auto") {
+   String match_suf_string=loc.string();
+   std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
+   if (detail::FilenameEndsWith(match_suf_string,".pir"))  {
+  return true;
+   }
+  } else if(format=="pir") {
+    return true;
+  }
+  return false;                
+}
+
+bool PirIOHandler::ProvidesExport(const boost::filesystem::path& loc, 
+                           const String& format) {
+  return PirIOHandler::ProvidesImport(loc, format);
+}
+
+void PirIOHandler::Import(seq::SequenceList& aln,
+                            std::istream& instream)
+{
+  const char* error_msg="Bad Pir file: Expected '>', but '%1%' found.";  
+  
+  String line;
+  std::getline(instream, line);    
+  int seq_count=0;
+  //not yet supported
+  throw IOException("Import of PIR format is not yet supported!");
+  while (!instream.eof()) {
+    // parse header information. cut after first "|"
+    if (line.find_first_not_of("\n\t ")==String::npos) {
+      std::getline(instream, line);
+      continue;
+    }
+    if (line.length()==0 || line[0]!='>') {
+      String error=str(format(error_msg) % line);
+      throw IOException(error);
+    }
+    String identifier=line.substr(1);
+    String sequence_str;
+    while (std::getline(instream, line) && line.size()>0 && line[0]!='>') {
+      if (line.find_first_not_of("\n\t ")==String::npos) {
+        continue;
+      }
+      sequence_str+=line;
+    }
+    if (sequence_str.length()>0) {
+      try {
+        seq::SequenceHandle seq=seq::CreateSequence(identifier, sequence_str);
+        aln.AddSequence(seq);          
+        seq_count+=1;
+      } catch (seq::InvalidSequence& e) {
+        throw e;
+      }
+    } else {
+      throw IOException("Bad Pir file: Sequence is empty.");
+    }
+  }    
+  if (seq_count==0) {
+    throw IOException("Bad Pir file: File is empty");
+  }                        
+
+}
+
+void PirIOHandler::Export(const seq::ConstSequenceList& seqs,
+                            std::ostream& ostream) const
+{
+  for (int i=0; i<seqs.GetCount(); ++i) {
+    ostream << ">P1;" << seqs[i].GetName() << std::endl;
+    ostream << "title" << std::endl;
+    ostream << seqs[i].GetString() <<"*" << std::endl;
+  }
+}
+
+}}

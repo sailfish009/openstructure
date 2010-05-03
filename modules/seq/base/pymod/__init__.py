@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 from _seq import *
+from ost import mol
 
 def ViewsFromAlignment(multi_seq_ali, ent_a, ent_b, include_atoms=True):
   seq_a=multi_seq_ali.GetSequence(0)
@@ -66,8 +67,8 @@ def ViewsFromSequences(seq_a, seq_b, ent_a=None, ent_b=None,
   #~ print seq_ent_a
   #~ print s1
 
-  print seq_ent_a
-  print s1
+  #~ print seq_ent_a
+  #~ print s1
   off_a = seq_ent_a.index(s1)
   off_b = seq_ent_b.index(s2)
 

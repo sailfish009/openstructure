@@ -22,6 +22,7 @@
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/mol/entity_io_mae_handler.hh>
 #include <ost/io/seq/fasta_io_handler.hh>
+#include <ost/io/seq/pir_io_handler.hh>
 #include <ost/io/seq/promod_io_handler.hh>
 #include <ost/io/mol/surface_io_msms_handler.hh>
 #include <ost/io/seq/clustal_io_handler.hh>
@@ -46,6 +47,7 @@ IOManager::IOManager()
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOSDFHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOMAEHandlerFactory));
   RegisterFactory(SequenceIOHandlerFactoryBasePtr(new FastaIOHandlerFactory));  
+  RegisterFactory(SequenceIOHandlerFactoryBasePtr(new PirIOHandlerFactory));
   RegisterFactory(SequenceIOHandlerFactoryBasePtr(new ClustalIOHandlerFactory));  
   RegisterFactory(SequenceIOHandlerFactoryBasePtr(new PromodIOHandlerFactory));    
   RegisterFactory(SurfaceIOHandlerFactoryBasePtr(new SurfaceIOMSMSHandlerFactory));
@@ -142,9 +144,9 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
     }
     throw IOUnknownFormatException("Unsupported type in FindMapImportHandle.");
   }else{
-	String match_suf_string=loc.string();
-	std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
-	for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
+  String match_suf_string=loc.string();
+  std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
+  for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
       if((*it)->MatchSuffix(match_suf_string)) {
         return (*it)->Create();
       }
@@ -209,8 +211,8 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerFile(const boost::filesystem::pat
     if (pos == String::npos){
       throw IOUnknownFormatException("No file suffix given for " + filename+", please indicate file type.");
     }
-	String match_suf_string=loc.string();
-	std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
+  String match_suf_string=loc.string();
+  std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
       if((*it)->MatchSuffix(match_suf_string)) {
         return(*it)->Create();
