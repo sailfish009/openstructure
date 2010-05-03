@@ -24,6 +24,7 @@
  */
 
 #include <QAbstractTableModel>
+#include <QItemSelection>
 
 #include <ost/mol/chain_view.hh>
 
@@ -41,16 +42,19 @@ class SequenceModel : public QAbstractTableModel
 public:
   SequenceModel(QObject *parent = 0);
 
+  void InsertGfxEntity(gfx::EntityP& ent);
   void InsertChain(QString& name, mol::ChainView& view);
   void InsertSequence(QString& name, seq::SequenceHandle& seq);
-  void InsertSequences(QString& name, seq::SequenceList& list);
+  void InsertSequences(const QList<QString>& names, seq::SequenceList& list);
 
-  void RemoveSequence(QString& name);
+  void RemoveSequence(gfx::EntityP& entity);
 
-  ViewObject* GetObject(QString& name);
+  ViewObject* GetObject(gfx::EntityP& entity);
   const PainterList& GetPainters(const QModelIndex& index) const;
 
-  QPair<int, ViewObject*> GetItem(const QModelIndex& index) const;
+  ViewObject* GetItem(const QModelIndex& index) const;
+
+  void SelectionChanged(const QItemSelection& sel, const QItemSelection& desel);
 
   // abstract item model interface
   int rowCount(const QModelIndex& parent=QModelIndex()) const;
@@ -65,6 +69,9 @@ public:
   virtual Qt::ItemFlags flags(const QModelIndex& index=QModelIndex()) const;
 
 private:
+  QPair<int, ViewObject*> GetRowWithItem(int row) const;
+  QPair<int, ViewObject*> GetRowWithItem(const QModelIndex& index) const;
+
   QList<ViewObject*> objects_;
 };
 

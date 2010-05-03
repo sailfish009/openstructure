@@ -25,6 +25,7 @@
 #include <QtGui>
 
 #include <ost/mol/mol.hh>
+#include <ost/mol/view_op.hh>
 
 #include "painter.hh"
 #include "seq_secstr_painter.hh"
@@ -35,24 +36,40 @@
 
 namespace ost { namespace gui {
 
-ViewObject::ViewObject(seq::SequenceList& sequences, const QString& name, QObject *parent): QObject(parent), name_(name)
+ViewObject::ViewObject(seq::SequenceList& sequences, const QList<QString>& names, QObject *parent): QObject(parent)
 {
-  for(int i=0; i<sequences.GetCount(); i++){
-    seq::SequenceHandle seq = sequences[i];
-    this->AddSequence(seq);
+  if(names.size() == sequences.GetCount()){
+    for(int i=0; i<sequences.GetCount(); i++){
+      seq::SequenceHandle seq = sequences[i];
+      this->AddSequence(seq, names[i]);
+    }
+    this->Init();
   }
+}
+
+ViewObject::ViewObject(seq::SequenceHandle& sequence, const QString& name, QObject *parent): QObject(parent), entity_(gfx::EntityP())
+{
+  this->AddSequence(sequence, name);
   this->Init();
 }
 
-ViewObject::ViewObject(seq::SequenceHandle& sequence, const QString& name, QObject *parent): QObject(parent), name_(name)
+ViewObject::ViewObject(mol::ChainView& chain, const QString& name, QObject *parent): QObject(parent), entity_(gfx::EntityP())
 {
-  this->AddSequence(sequence);
+  this->AddChain(chain, name);
   this->Init();
 }
 
-ViewObject::ViewObject(mol::ChainView& chain, const QString& name, QObject *parent): QObject(parent), name_(name)
-{
-  this->AddChain(chain);
+ViewObject::ViewObject(gfx::EntityP& entity, QObject* parent): QObject(parent), entity_(entity){
+  mol::EntityView view =entity->GetView();
+  for (mol::ChainViewList::const_iterator c=view.GetChainList().begin(),
+       e1=view.GetChainList().end(); c!=e1; ++c) {
+    mol::ChainView chain=*c;
+    QString name = QString(entity->GetName().c_str());
+    if (chain.GetName()!="" && chain.GetName()!=" ") {
+      name= name + " ("+chain.GetName().c_str()+")";
+    }
+    this->AddChain(chain, name);
+  }
   this->Init();
 }
 
@@ -61,7 +78,7 @@ void ViewObject::Init()
   font_ = QFont("Courier",10);
   QFontMetrics metrics = QFontMetrics(font_);
   default_size_=QSize(metrics.boundingRect('W').width(),metrics.boundingRect('|').height());
-  default_cell_size_ = QSize(metrics.boundingRect('W').width()+2,metrics.boundingRect('|').height()+2);
+  default_cell_size_ = QSize(metrics.boundingRect('W').width()+2,metrics.boundingRect('|').height()*2);
 }
 
 void ViewObject::InsertRow(int pos, Row* row)
@@ -98,18 +115,18 @@ int ViewObject::GetRowCount()
   return rows_.size();
 }
 
-void ViewObject::AddSequence(seq::SequenceHandle& sequence)
+void ViewObject::AddSequence(seq::SequenceHandle& sequence, const QString& name)
 {
   Row* new_row = new Row(this);
   Painter* p = new SeqSelectionPainter(this);
   new_row->InsertPainter(p);
   p = new SeqTextPainter(this);
   new_row->InsertPainter(p);
-  QPair<Row*, seq::SequenceHandle> pair(new_row,sequence);
-  //rows_.append(pair);
+  ListEntry entry(new_row, name, sequence);
+  rows_.append(entry);
 }
 
-void ViewObject::AddChain(mol::ChainView& chain)
+void ViewObject::AddChain(mol::ChainView& chain, const QString& name)
 {
   String seq_str;
   seq_str.reserve(chain.GetResidueCount());
@@ -119,7 +136,7 @@ void ViewObject::AddChain(mol::ChainView& chain)
     seq_str.append(1, res.GetOneLetterCode());
   }
   if (!seq_str.empty()) {
-    seq::SequenceHandle sequence=seq::CreateSequence(this->GetName().toStdString(), seq_str);
+    seq::SequenceHandle sequence=seq::CreateSequence(name.toStdString(), seq_str);
     mol::EntityView v_one_chain=chain.GetEntity().GetHandle().CreateEmptyView();
     v_one_chain.AddChain(chain, mol::ViewAddFlag::INCLUDE_ALL);
     sequence.AttachView(v_one_chain);
@@ -131,7 +148,6 @@ void ViewObject::AddChain(mol::ChainView& chain)
     new_row->InsertPainter(p);
     p = new SeqTextPainter(this);
     new_row->InsertPainter(p);
-    QPair<Row*, seq::SequenceHandle> pair(new_row,sequence);
     mol::alg::SecStructureSegments sec = mol::alg::ExtractSecStructureSegments(chain);
     QVarLengthArray<mol::SecStructure> sec_str(chain.GetResidueCount());
     for (mol::alg::SecStructureSegments::iterator i=sec.begin(),
@@ -141,8 +157,49 @@ void ViewObject::AddChain(mol::ChainView& chain)
         sec_str[i] = s.ss_type;
       }
     }
-    ListEntry entry(new_row, sequence, sec_str);
+    ListEntry entry(new_row, name, sequence, sec_str);
     rows_.append(entry);
+  }
+}
+
+void ViewObject::AttachGfxObject(gfx::EntityP& ent)
+{
+  entity_ = ent;
+}
+
+gfx::EntityP& ViewObject::GetGfxObject()
+{
+  return entity_;
+}
+
+void ViewObject::SetSelection(int row, const QSet<int>& added, const QSet<int>& removed)
+{
+  if(gfx::EntityP entity = this->GetGfxObject()){
+    ListEntry& entry = rows_[row];
+    mol::EntityView sel = entity->GetSelection();
+    seq::SequenceHandle& seq = entry.seq;
+    mol::EntityView view = seq.GetAttachedView().GetHandle().CreateEmptyView();
+
+    QSetIterator<int> i(removed);
+    while (i.hasNext()){
+      std::cout << "REMOVED!" << std::endl;
+      int row = i.next();
+      if (mol::ResidueView rv=seq.GetResidue(row-1)) {
+        view.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ATOMS);
+      }
+    }
+    sel = mol::Difference(sel,view);
+
+    view = seq.GetAttachedView().GetHandle().CreateEmptyView();
+    i = QSetIterator<int>(added);
+    while (i.hasNext()){
+      int row = i.next();
+      if (mol::ResidueView rv=seq.GetResidue(row-1)) {
+        view.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ATOMS);
+      }
+    }
+    sel = mol::Union(sel,view);
+    entity->SetSelection(sel);
   }
 }
 
@@ -150,11 +207,11 @@ QVariant ViewObject::GetData(int row, int column, int role)
 {
   if(row<0 || row >= rows_.size())return QVariant();
 
-  if(column<0 || column >= this->GetMaxColumnCount())return QVariant();
+  if(column<0 || column >= rows_[row].seq.GetLength())return QVariant();
 
-  if(column == 0 && row == 0) {
+  if(column == 0) {
     if (role == Qt::DisplayRole){
-      return QVariant(this->GetName());
+      return QVariant(rows_[row].name);
     }
   }
   else if(column > 0) {
@@ -209,16 +266,6 @@ Qt::ItemFlags ViewObject::Flags(int row, int column) const
     return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
   }
   return Qt::NoItemFlags;
-}
-
-const QString& ViewObject::GetName() const
-{
- return name_;
-}
-
-void ViewObject::SetName(const QString& name)
-{
-  name_ = name;
 }
 
 }}

@@ -36,7 +36,10 @@ void SequenceDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 {
   const PainterList& painters = seq_model_->GetPainters(index);
   for(int i=0; i < painters.size(); i++){
-    painters[i]->Paint(painter, option, index);
+    painters[i]->parent();
+    if(painters[i]){
+      painters[i]->Paint(painter, option, index);
+    }
   }
 }
 

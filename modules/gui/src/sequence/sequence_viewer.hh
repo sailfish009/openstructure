@@ -53,6 +53,9 @@ public:
 private:
   SequenceModel* model_;
   SequenceTableView* seq_table_view_;
+
+public slots:
+  void OnSelectionChange(const QItemSelection& sel, const QItemSelection& desel);
 };
 
 }}

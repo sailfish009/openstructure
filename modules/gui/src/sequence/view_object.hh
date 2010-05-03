@@ -33,6 +33,8 @@
 #include <ost/mol/alg/sec_structure_segments.hh>
 #include <ost/mol/entity_handle.hh>
 
+#include <ost/gfx/entity.hh>
+
 #include <ost/seq/sequence_list.hh>
 
 #include "row.hh"
@@ -42,18 +44,21 @@ namespace ost { namespace gui {
 
 struct ListEntry {
   Row*   row;
+  QString name;
   seq::SequenceHandle seq;
   QVarLengthArray<mol::SecStructure> secstr;
   ListEntry(): row(NULL)
          {}
   ListEntry(Row* r): row(r)
          {}
-  ListEntry(Row* r,
-      seq::SequenceHandle& sequence): row(r), seq(sequence)
+  ListEntry(Row* r, const QString& n): row(r), name(n)
          {}
-  ListEntry(Row* r,
+  ListEntry(Row* r, const QString& n,
+      seq::SequenceHandle& sequence): row(r), name(n), seq(sequence)
+         {}
+  ListEntry(Row* r, const QString& n,
       seq::SequenceHandle& sequence,
-      QVarLengthArray<mol::SecStructure>& sec): row(r), seq(sequence), secstr(sec)
+      QVarLengthArray<mol::SecStructure>& sec): row(r), name(n), seq(sequence), secstr(sec)
          {}
 };
 
@@ -64,22 +69,25 @@ class ViewObject : public QObject
 
 
 public:
-  ViewObject(seq::SequenceList& sequences, const QString& name, QObject* parent = 0);
+  ViewObject(seq::SequenceList& sequences, const QList<QString>& names, QObject* parent = 0);
   ViewObject(seq::SequenceHandle& sequence, const QString& name, QObject* parent = 0);
   ViewObject(mol::ChainView& chain, const QString& name, QObject* parent = 0);
+  ViewObject(gfx::EntityP& entity, QObject* parent = 0);
 
   void InsertRow(int pos, Row* row);
   void RemoveRow(Row* row);
-
-  const QString& GetName() const;
-  void SetName(const QString& name);
 
   Row* GetRow(int pos);
   int GetRowCount();
   int GetMaxColumnCount() const;
 
-  void AddSequence(seq::SequenceHandle& sequence);
-  void AddChain(mol::ChainView& chain);
+  void AddSequence(seq::SequenceHandle& sequence, const QString& name=QString());
+  void AddChain(mol::ChainView& chain, const QString& name=QString());
+
+  void AttachGfxObject(gfx::EntityP& ent);
+  gfx::EntityP& GetGfxObject();
+
+  void SetSelection(int row, const QSet<int>& added, const QSet<int>& removed);
 
   QVariant GetData(int row, int column, int role);
 
@@ -90,8 +98,8 @@ public:
 
 private:
   void Init();
-  QString name_;
   QList<ListEntry> rows_;
+  gfx::EntityP entity_;
   QFont font_;
   QSize default_size_;
   QSize default_cell_size_;

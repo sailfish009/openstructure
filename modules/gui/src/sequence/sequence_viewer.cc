@@ -57,22 +57,18 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
 
   seq_table_view_->horizontalHeader()->setMinimumSectionSize(2);
   seq_table_view_->verticalHeader()->setMinimumSectionSize(2);
+
+  connect(seq_table_view_->selectionModel(),
+      SIGNAL(selectionChanged(const QItemSelection&,
+              const QItemSelection&)), this,
+      SLOT(OnSelectionChange(const QItemSelection&,
+              const QItemSelection&)));
 }
 
 void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
 {
   if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(n)) {
-    // extract all chains
-    mol::EntityView v=o->GetView();
-    for (mol::ChainViewList::const_iterator c=v.GetChainList().begin(),
-         e1=v.GetChainList().end(); c!=e1; ++c) {
-      mol::ChainView chain=*c;
-      QString name = QString(o->GetName().c_str());
-      if (chain.GetName()!="" && chain.GetName()!=" ") {
-        name= name + " ("+chain.GetName().c_str()+")";
-      }
-      model_->InsertChain(name,chain);
-    }
+    model_->InsertGfxEntity(o);
     seq_table_view_->resizeColumnsToContents();
     seq_table_view_->resizeRowsToContents();
   }
@@ -83,6 +79,11 @@ void SequenceViewerV2::NodeRemoved(const gfx::GfxNodeP& node)
   if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(node)) {
 
   }
+}
+
+void SequenceViewerV2::OnSelectionChange(const QItemSelection& sel,
+  const QItemSelection& desel) {
+  model_->SelectionChanged(sel, desel);
 }
 
 SequenceViewerV2::~SequenceViewerV2(){}
