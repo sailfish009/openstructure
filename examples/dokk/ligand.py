@@ -25,6 +25,12 @@ class Ligand:
     self.pivot_=mol.AtomHandle()
     self.start_tf_=geom.Mat4()
     self.config = config
+    
+    
+    self.planes=[geom.Plane(1, 0, 0, -float(self.config.Box["XMAX"])), geom.Plane(-1, 0, 0, float(self.config.Box["XMIN"])),
+                 geom.Plane(0, 1, 0, -float(self.config.Box["YMAX"])), geom.Plane(0, -1, 0, float(self.config.Box["YMIN"])),
+                 geom.Plane(0, 0, 1, -float(self.config.Box["ZMAX"])), geom.Plane(0, 0, -1, float(self.config.Box["ZMIN"]))]
+    
     self.box_max = geom.Vec3(float(self.config.Box["XMAX"]),
                             float(self.config.Box["YMAX"]),
                             float(self.config.Box["ZMAX"]))
@@ -54,7 +60,7 @@ class Ligand:
     self.go.UpdatePositions()
 
   def Shift(self, vec):
-    if self.__IsInside(vec):
+      vec = self.__CheckBoundingBox(vec)
       trans=geom.Mat4()
       trans.PasteTranslation(vec)
       edi=self.handle.RequestXCSEditor()    
@@ -71,12 +77,12 @@ class Ligand:
     trans.PasteTranslation(-center)
     trans2=geom.Mat4()
     trans2_vec = ((tf.GetTrans())*gfx.Scene().GetTransform().GetRot())
-    if self.__IsInside(trans2_vec):
-      trans2_vec = center + trans2_vec
-      trans2.PasteTranslation(trans2_vec)
-      full_tf = trans2*rot*trans
-      edi.ApplyTransform(full_tf)
-      self.go.UpdatePositions()
+    trans2_vec = self.__CheckBoundingBox(trans2_vec)
+    trans2_vec = center + trans2_vec
+    trans2.PasteTranslation(trans2_vec)
+    full_tf = trans2*rot*trans
+    edi.ApplyTransform(full_tf)
+    self.go.UpdatePositions()
 
 
   def RMSDToSolution(self):
@@ -108,11 +114,13 @@ class Ligand:
     gfx.Scene().Remove(self.go)
     del(self.go)
     
-  def __IsInside(self, vec):
-    center = self.GetCenter()
-    rad = 1
-    if center[0] + rad + vec[0] < self.box_max[0] and center[0] - rad + vec[0] > self.box_min[0] and \
-     center[1] + rad + vec[1] < self.box_max[1] and center[1] - rad + vec[1] > self.box_min[1] and \
-     center[2] + rad + vec[2] < self.box_max[2] and center[2] - rad + vec[2] > self.box_min[2] :
-      return True
-    return False
+  def __CheckBoundingBox(self, vec):
+    old_pos= self.GetCenter()
+    new_pos= old_pos + vec
+    for p in self.planes:
+       if geom.Distance(p, new_pos)>0.0:
+         dot=geom.Dot(p.GetNormal(),vec)
+         if dot>0:
+           vec-=dot*p.GetNormal()
+           return vec
+    return vec 
