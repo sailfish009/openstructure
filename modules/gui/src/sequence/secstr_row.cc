@@ -78,6 +78,9 @@ const mol::ChainView& SecStrRow::GetChain() const
 QVariant SecStrRow::GetData(int column, int role) const
 {
   if(column > 0 && column <= this->GetSequence().GetLength()){
+    if (role==Qt::ToolTipRole){
+      return QVariant(QString(this->chain_.GetResidueByIndex(column-1).GetQualifiedName().c_str()));
+    }
     if (role==Qt::UserRole){
       QVariant variant;
       variant.setValue(secstr_);

@@ -87,6 +87,9 @@ QVariant SequenceRow::GetData(int column, int role) const
     if (role==Qt::SizeHintRole){
       return QVariant(this->GetCellSize());
     }
+    if (role==Qt::ToolTipRole){
+      return QVariant(QString(this->sequence_.GetOneLetterCode(column - 1)));
+    }
   }
   return QVariant();
 }

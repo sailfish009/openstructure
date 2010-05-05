@@ -119,9 +119,7 @@ const PainterList& SequenceModel::GetPainters(const QModelIndex& index) const{
     pair.second->GetRow(pair.first);
     return pair.second->GetRow(pair.first)->GetPainters();
   }
-  else{
-    assert(false);
-  }
+  assert(false);
 }
 
 QPair<int, ViewObject*> SequenceModel::GetRowWithItem(int row) const{
