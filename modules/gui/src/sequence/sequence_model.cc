@@ -31,7 +31,7 @@
 namespace ost { namespace gui {
 
 SequenceModel::SequenceModel(QObject *parent)
-    : QAbstractTableModel(parent)
+    : QAbstractTableModel(parent), max_columns(0)
 {
 }
 
@@ -41,6 +41,7 @@ void SequenceModel::InsertSequence(QString& name, seq::SequenceHandle& seq){
   this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
   objects_.append(new ViewObject(seq, name, this));
   if(new_cols > cols){
+    this->max_columns = new_cols;
     this->beginInsertColumns(QModelIndex(), cols, new_cols);
     this->endInsertColumns();
   }
@@ -53,6 +54,7 @@ void SequenceModel::InsertChain(QString& name, mol::ChainView& view){
   this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
   objects_.append(new ViewObject(view, name, this));
   if(new_cols > cols){
+    this->max_columns = new_cols;
     this->beginInsertColumns(QModelIndex(), cols, new_cols);
     this->endInsertColumns();
   }
@@ -74,6 +76,7 @@ void SequenceModel::InsertGfxEntity(gfx::EntityP& ent){
   objects_.append(obj);
   int new_cols = obj->GetMaxColumnCount();
   if(new_cols > cols){
+    this->max_columns = new_cols;
     this->beginInsertColumns(QModelIndex(), cols, new_cols);
     this->endInsertColumns();
   }
@@ -89,6 +92,7 @@ void SequenceModel::RemoveGfxEntity(gfx::EntityP& entity){
     this->endRemoveRows();
     int cols = this->columnCount();
     if(cols_before>cols){
+      this->max_columns = cols;
       this->beginRemoveColumns(QModelIndex(), cols, cols_before);
       this->endRemoveColumns();
     }
@@ -214,13 +218,7 @@ int SequenceModel::rowCount(const QModelIndex& parent) const
 
 int SequenceModel::columnCount(const QModelIndex& parent) const
 {
-  int cols = 0;
-  for (int i = 0; i<objects_.size(); i++){
-    int max_col = objects_[i]->GetMaxColumnCount();
-    if(max_col >= cols)
-      cols = max_col;
-  }
-  return cols;
+  return max_columns;
 }
 
 QVariant SequenceModel::data(const QModelIndex& index, int role) const

@@ -27,7 +27,10 @@
 #include <QPainter>
 #include <QStyleOptionViewItem>
 #include <QModelIndex>
+#include <QVarLengthArray>
 #include <QList>
+
+#include <ost/mol/alg/sec_structure_segments.hh>
 
 namespace ost { namespace gui {
 
@@ -45,5 +48,7 @@ public:
 typedef QList<Painter*> PainterList;
 
 }}
+
+Q_DECLARE_METATYPE(QVarLengthArray<ost::mol::SecStructure>)
 
 #endif

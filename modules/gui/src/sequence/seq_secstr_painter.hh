@@ -24,6 +24,7 @@
  */
 
 #include <QObject>
+#include <QVarLengthArray>
 
 #include "painter.hh"
 

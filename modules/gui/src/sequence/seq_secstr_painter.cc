@@ -25,7 +25,6 @@
 #include <QtGui>
 
 #include "seq_secstr_painter.hh"
-#include "view_object.hh"
 
 namespace ost { namespace gui {
 
@@ -37,58 +36,54 @@ void SeqSecStrPainter::Paint(QPainter* painter, const QStyleOptionViewItem& opti
   QVariant var = index.data(Qt::UserRole);
   painter->save();
   painter->setPen(QPen(Qt::lightGray));
-  ListEntry entry = index.data(Qt::UserRole).value<ListEntry>();
-  if(entry.secstr.size()>0){
+  const QVarLengthArray<mol::SecStructure>& sec_str = index.data(Qt::UserRole).value<QVarLengthArray<mol::SecStructure> >();
+  int column = index.column()-1;
+  if(sec_str.size()>0 && column < sec_str.size()){
     QSize size = index.data(Qt::UserRole+1).toSize();
-    QVarLengthArray<mol::SecStructure>& sec_str = entry.secstr;
-    int column = index.column()-1;
-    if(column < sec_str.size()){
-      mol::SecStructure sec_element = sec_str[column];
+    mol::SecStructure sec_element = sec_str[column];
 
-      int std_diff = (size.height()/2);
-      int diff = size.height()/1.25;
-      int center = option.rect.top()+(option.rect.height()/2);
-
-      if (sec_element.IsCoil()) {
-        int pos = center - std_diff;
-        painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
-        pos = center + std_diff;
-        painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
-      } else if (sec_element.IsHelical()) {
-        int pos = center - diff;
+    int std_diff = (size.height()/2);
+    int diff = size.height()/1.25;
+    int center = option.rect.top()+(option.rect.height()/2);
+    if (sec_element.IsCoil()) {
+      int pos = center - std_diff;
+      painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
+      pos = center + std_diff;
+      painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
+    } else if (sec_element.IsHelical()) {
+      int pos = center - diff;
+      painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
+      pos = center + diff;
+      painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
+      if(column - 1 > 0 && !sec_str[column-1].IsHelical()){
+        painter->drawLine(option.rect.left(),center+std_diff,option.rect.left(),center+diff);
+        painter->drawLine(option.rect.left(),center-std_diff,option.rect.left(),center-diff);
+      }
+      if(column + 1 < sec_str.size() && !sec_str[column+1].IsHelical()){
+        painter->drawLine(option.rect.right(),center+std_diff,option.rect.right(),center+diff);
+        painter->drawLine(option.rect.right(),center-std_diff,option.rect.right(),center-diff);
+      }
+    } else if (sec_element.IsExtended()) {
+      int pos = center - diff;
+      if(column - 1 > 0 && !sec_str[column-1].IsExtended()){
+        painter->drawLine(option.rect.left(),center+std_diff,option.rect.left(),center+diff);
+        painter->drawLine(option.rect.left(),center-std_diff,option.rect.left(),center-diff);
+      }
+      if(column + 1 < sec_str.size() && !sec_str[column+1].IsExtended()){
+        int max_diff = size.height();
+        painter->drawLine(option.rect.left(),center+diff,option.rect.left(),center+max_diff);
+        painter->drawLine(option.rect.left(),center-diff,option.rect.left(),center-max_diff);
+        painter->drawLine(option.rect.left(),center+max_diff,option.rect.right(),center+std_diff);
+        painter->drawLine(option.rect.left(),center-max_diff,option.rect.right(),center-std_diff);
+      }
+      else{
         painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
         pos = center + diff;
         painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
-        if(column - 1 > 0 && !sec_str[column-1].IsHelical()){
-          painter->drawLine(option.rect.left(),center+std_diff,option.rect.left(),center+diff);
-          painter->drawLine(option.rect.left(),center-std_diff,option.rect.left(),center-diff);
-        }
-        if(column + 1 < sec_str.size() && !sec_str[column+1].IsHelical()){
-          painter->drawLine(option.rect.right(),center+std_diff,option.rect.right(),center+diff);
-          painter->drawLine(option.rect.right(),center-std_diff,option.rect.right(),center-diff);
-        }
-      } else if (sec_element.IsExtended()) {
-        int pos = center - diff;
-        if(column - 1 > 0 && !sec_str[column-1].IsExtended()){
-          painter->drawLine(option.rect.left(),center+std_diff,option.rect.left(),center+diff);
-          painter->drawLine(option.rect.left(),center-std_diff,option.rect.left(),center-diff);
-        }
-        if(column + 1 < sec_str.size() && !sec_str[column+1].IsExtended()){
-          int max_diff = size.height();
-          painter->drawLine(option.rect.left(),center+diff,option.rect.left(),center+max_diff);
-          painter->drawLine(option.rect.left(),center-diff,option.rect.left(),center-max_diff);
-          painter->drawLine(option.rect.left(),center+max_diff,option.rect.right(),center+std_diff);
-          painter->drawLine(option.rect.left(),center-max_diff,option.rect.right(),center-std_diff);
-        }
-        else{
-          painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
-          pos = center + diff;
-          painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
-        }
       }
-      if(!(column+1 < sec_str.size())){
-        painter->drawLine(option.rect.right(),center+std_diff,option.rect.right(),center-std_diff);
-      }
+    }
+    if(!(column+1 < sec_str.size())){
+      painter->drawLine(option.rect.right(),center+std_diff,option.rect.right(),center-std_diff);
     }
   }
   painter->restore();

@@ -38,7 +38,7 @@ BaseRow::BaseRow(QFont font, QObject *parent) : QObject(parent)
 
 int BaseRow::GetColumnCount() const
 {
-  return -1;
+  return 0;
 }
 
 void BaseRow::Init()

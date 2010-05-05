@@ -50,7 +50,7 @@ void SequenceRow::SetName(const QString& name)
   this->name_ = name;
 }
 
-const QString& SequenceRow::GetName()
+const QString& SequenceRow::GetName() const
 {
   return this->name_;
 }

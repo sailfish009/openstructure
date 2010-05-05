@@ -78,6 +78,7 @@ private:
   QPair<int, ViewObject*> GetRowWithItem(const QModelIndex& index) const;
 
   QList<ViewObject*> objects_;
+  int max_columns;
 };
 
 

@@ -66,13 +66,18 @@ void SecStrRow::SetChain(mol::ChainView& chain)
       }
     }
     this->chain_ = chain;
-    this->SetSequence(sequence);
+    SequenceRow::SetSequence(sequence);
   }
+}
+
+const mol::ChainView& SecStrRow::GetChain() const
+{
+  return this->chain_;
 }
 
 QVariant SecStrRow::GetData(int column, int role) const
 {
-  if(column > 0 && column < this->GetSequence().GetLength()){
+  if(column > 0 && column <= this->GetSequence().GetLength()){
     if (role==Qt::UserRole){
       QVariant variant;
       variant.setValue(secstr_);
@@ -89,16 +94,17 @@ void SecStrRow::DoubleClicked(int column)
 {
   if(column>0){
     column-=1;
-    if(this->secstr_.size()>0 && column < this->secstr_.size()){
-      mol::SecStructure& src_str = this->secstr_[column];
+    const QVarLengthArray<mol::SecStructure>& sec = this->secstr_;
+    if(sec.size()>0 && column < sec.size()){
+      const mol::SecStructure& src_str = sec[column];
       QVarLengthArray<bool> src_type(3);
       src_type[0] = src_str.IsHelical();
       src_type[1] = src_str.IsExtended();
       src_type[2] = src_str.IsCoil();
       int i = column;
       QSet<int> cols_to_add;
-      mol::SecStructure& col_str = this->secstr_[i];
-      while(i >= 0 && (col_str = this->secstr_[i])){
+      mol::SecStructure col_str = sec[i];
+      while(i >= 0 && (col_str = sec[i])){
         if(src_type[0] == col_str.IsHelical()
             && src_type[1] == col_str.IsExtended()
             && src_type[2] == col_str.IsCoil()){
@@ -108,8 +114,8 @@ void SecStrRow::DoubleClicked(int column)
         else{break;}
       }
       i = column + 1;
-      if(i < this->secstr_.size()){
-        while(i < this->secstr_.size() && (col_str = this->secstr_[i])){
+      if(i < sec.size()){
+        while(i < sec.size() && (col_str = sec[i])){
           if(src_type[0] == col_str.IsHelical()
               && src_type[1] == col_str.IsExtended()
               && src_type[2] == col_str.IsCoil()){

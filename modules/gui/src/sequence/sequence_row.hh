@@ -48,7 +48,7 @@ public:
   virtual void DoubleClicked(int column);
 
   void SetName(const QString& name);
-  const QString& GetName();
+  const QString& GetName() const;
 
   virtual void SetSequence(seq::SequenceHandle& sequence);
   const seq::SequenceHandle& GetSequence() const;

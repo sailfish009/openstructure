@@ -45,6 +45,7 @@ public:
 
   void SetSequence(seq::SequenceHandle& sequence);
   void SetChain(mol::ChainView& chain);
+  const mol::ChainView& GetChain() const;
 
 private:
   mol::ChainView chain_;
@@ -54,7 +55,5 @@ private:
 typedef QList<BaseRow*> BaseRowList;
 
 }}
-
-Q_DECLARE_METATYPE(QVarLengthArray<ost::mol::SecStructure>)
 
 #endif

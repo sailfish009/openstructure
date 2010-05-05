@@ -42,28 +42,6 @@
 
 namespace ost { namespace gui {
 
-struct ListEntry {
-  BaseRow*   row;
-  QString name;
-  seq::SequenceHandle seq;
-  mol::ChainView chain;
-  QVarLengthArray<mol::SecStructure> secstr;
-  ListEntry(): row(NULL)
-         {}
-  ListEntry(BaseRow* r): row(r)
-         {}
-  ListEntry(BaseRow* r, const QString& n): row(r), name(n)
-         {}
-  ListEntry(BaseRow* r, const QString& n,
-      seq::SequenceHandle& sequence): row(r), name(n), seq(sequence)
-         {}
-  ListEntry(BaseRow* r, const QString& n,
-      const seq::SequenceHandle& sequence, const mol::ChainView& c,
-      const QVarLengthArray<mol::SecStructure>& sec): row(r), name(n), seq(sequence), chain(c), secstr(sec)
-         {}
-};
-
-
 class ViewObject : public QObject
 {
   Q_OBJECT
@@ -91,9 +69,7 @@ public:
   void SetSelection(int row, const QSet<int>& added, const QSet<int>& removed);
 
   QVariant GetData(int row, int column, int role);
-
-  bool SetData(int column, const QVariant& value, int role);
-
+  bool SetData(int row, int column, const QVariant& value, int role);
   Qt::ItemFlags Flags(int row, int column) const;
 
   void DoubleClicked(int row, int column);
@@ -101,17 +77,11 @@ public:
   QMap<int, QList<int> > GetIndexesForView(const mol::EntityView& view);
 
 private:
-  void Init();
-  QList<ListEntry> rows_;
+  QList<BaseRow*> rows_;
   gfx::EntityP entity_;
-  QFont font_;
-  QSize default_size_;
-  QSize default_cell_size_;
 };
 
 
 }}
-
-Q_DECLARE_METATYPE(ost::gui::ListEntry)
 
 #endif
