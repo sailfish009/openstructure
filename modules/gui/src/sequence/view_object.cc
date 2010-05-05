@@ -29,11 +29,13 @@
 
 #include "sequence_row.hh"
 #include "secstr_row.hh"
+#include "title_row.hh"
 
 #include "painter.hh"
 #include "seq_secstr_painter.hh"
 #include "seq_selection_painter.hh"
 #include "seq_text_painter.hh"
+#include "tick_painter.hh"
 
 #include "view_object.hh"
 
@@ -71,6 +73,14 @@ ViewObject::ViewObject(gfx::EntityP& entity, QObject* parent): QObject(parent), 
     }
     this->AddChain(chain, name);
   }
+}
+
+ViewObject::ViewObject(QObject* parent): QObject(parent)
+{
+  TitleRow* new_row = new TitleRow(this);
+  Painter* p = new TickPainter(this);
+  new_row->InsertPainter(p);
+  rows_.append(new_row);
 }
 
 void ViewObject::InsertRow(int pos, BaseRow* row)

@@ -60,8 +60,6 @@ private:
   seq::SequenceHandle sequence_;
 };
 
-typedef QList<BaseRow*> BaseRowList;
-
 }}
 
 #endif

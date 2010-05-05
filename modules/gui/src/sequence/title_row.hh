@@ -16,42 +16,30 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#ifndef OST_SEQUENCE_VIEWER_TITLE_ROW
+#define OST_SEQUENCE_VIEWER_TITLE_ROW
 
 /*
   Author: Stefan Scheuber
  */
 
+#include <QObject>
 
-#include <QtGui>
-
-#include "seq_selection_painter.hh"
+#include "base_row.hh"
 
 namespace ost { namespace gui {
 
-SeqSelectionPainter::SeqSelectionPainter(QObject* parent)
-    : Painter(parent)
-{}
+class TitleRow : public BaseRow
+{
+  Q_OBJECT
 
-void SeqSelectionPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
-  painter->save();
-  if ((index.column()-1)%10 > 4){
-    painter->fillRect(option.rect, QColor(240,240,240));
+public:
+  TitleRow(QObject* parent);
 
-  }
-  if((index.column())%10 == 0){
-    painter->setPen(QPen(QColor(135,135,135)));
-    painter->drawLine(option.rect.topRight(),option.rect.bottomRight());
-  }
-  if (option.state & QStyle::State_HasFocus){
-    painter->fillRect(option.rect, QColor(240,240,0,60));
-  }
-  if (option.state & QStyle::State_MouseOver){
-    painter->fillRect(option.rect, QColor(240,240,240,128));
-  }
-  if (option.state & QStyle::State_Selected){
-    painter->fillRect(option.rect, QColor(0,240,0,128));
-  }
-  painter->restore();
-}
-
+  virtual QVariant GetData(int column, int role) const;
+  virtual Qt::ItemFlags Flags(int column) const;
+  virtual void DoubleClicked(int column);
+};
 }}
+
+#endif

@@ -32,6 +32,8 @@ sequence_model.hh
 sequence_row.hh
 sequence_table_view.hh
 sequence_viewer.hh
+tick_painter.hh
+title_row.hh
 view_object.hh
 )
 
@@ -218,6 +220,8 @@ sequence/sequence_model.cc
 sequence/sequence_row.cc
 sequence/sequence_table_view.cc
 sequence/sequence_viewer.cc
+sequence/tick_painter.cc
+sequence/title_row.cc
 sequence/view_object.cc
 gosty_app.cc
 change_process_name.cc
@@ -346,6 +350,8 @@ sequence/sequence_model.hh
 sequence/sequence_row.hh
 sequence/sequence_table_view.hh
 sequence/sequence_viewer.hh
+sequence/tick_painter.hh
+sequence/title_row.hh
 sequence/view_object.hh
 plot_viewer/plot_axis_base.hh
 plot_viewer/plot_data_graphics_item_base.hh

@@ -52,6 +52,7 @@ public:
   ViewObject(seq::SequenceHandle& sequence, const QString& name, QObject* parent = 0);
   ViewObject(mol::ChainView& chain, const QString& name, QObject* parent = 0);
   ViewObject(gfx::EntityP& entity, QObject* parent = 0);
+  ViewObject(QObject* parent = 0);
 
   void InsertRow(int pos, BaseRow* row);
   void RemoveRow(BaseRow* row);

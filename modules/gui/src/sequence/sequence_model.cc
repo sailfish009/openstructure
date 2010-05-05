@@ -33,6 +33,9 @@ namespace ost { namespace gui {
 SequenceModel::SequenceModel(QObject *parent)
     : QAbstractTableModel(parent), max_columns(0)
 {
+  this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
+  objects_.append(new ViewObject(this));
+  this->endInsertRows();
 }
 
 void SequenceModel::InsertSequence(QString& name, seq::SequenceHandle& seq){

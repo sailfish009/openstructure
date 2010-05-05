@@ -51,9 +51,6 @@ private:
   mol::ChainView chain_;
   QVarLengthArray<mol::SecStructure> secstr_;
 };
-
-typedef QList<BaseRow*> BaseRowList;
-
 }}
 
 #endif

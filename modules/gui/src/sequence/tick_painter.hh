@@ -16,42 +16,28 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#ifndef OST_SEQUENCE_VIEWER_TICK_PAINTER
+#define OST_SEQUENCE_VIEWER_TICK_PAINTER
 
 /*
   Author: Stefan Scheuber
  */
 
+#include <QObject>
 
-#include <QtGui>
-
-#include "seq_selection_painter.hh"
+#include "painter.hh"
 
 namespace ost { namespace gui {
 
-SeqSelectionPainter::SeqSelectionPainter(QObject* parent)
-    : Painter(parent)
-{}
-
-void SeqSelectionPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
-  painter->save();
-  if ((index.column()-1)%10 > 4){
-    painter->fillRect(option.rect, QColor(240,240,240));
-
-  }
-  if((index.column())%10 == 0){
-    painter->setPen(QPen(QColor(135,135,135)));
-    painter->drawLine(option.rect.topRight(),option.rect.bottomRight());
-  }
-  if (option.state & QStyle::State_HasFocus){
-    painter->fillRect(option.rect, QColor(240,240,0,60));
-  }
-  if (option.state & QStyle::State_MouseOver){
-    painter->fillRect(option.rect, QColor(240,240,240,128));
-  }
-  if (option.state & QStyle::State_Selected){
-    painter->fillRect(option.rect, QColor(0,240,0,128));
-  }
-  painter->restore();
-}
+class TickPainter : public Painter
+{
+  Q_OBJECT
+public:
+  TickPainter(QObject* parent = 0);
+  void Paint(QPainter *painter, const QStyleOptionViewItem &option,
+      const QModelIndex &index);
+};
 
 }}
+
+#endif

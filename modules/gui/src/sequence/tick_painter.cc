@@ -24,32 +24,31 @@
 
 #include <QtGui>
 
-#include "seq_selection_painter.hh"
+#include "tick_painter.hh"
 
 namespace ost { namespace gui {
 
-SeqSelectionPainter::SeqSelectionPainter(QObject* parent)
+TickPainter::TickPainter(QObject* parent)
     : Painter(parent)
 {}
 
-void SeqSelectionPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
+void TickPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
   painter->save();
-  if ((index.column()-1)%10 > 4){
-    painter->fillRect(option.rect, QColor(240,240,240));
-
-  }
-  if((index.column())%10 == 0){
-    painter->setPen(QPen(QColor(135,135,135)));
-    painter->drawLine(option.rect.topRight(),option.rect.bottomRight());
-  }
-  if (option.state & QStyle::State_HasFocus){
-    painter->fillRect(option.rect, QColor(240,240,0,60));
-  }
-  if (option.state & QStyle::State_MouseOver){
-    painter->fillRect(option.rect, QColor(240,240,240,128));
-  }
-  if (option.state & QStyle::State_Selected){
-    painter->fillRect(option.rect, QColor(0,240,0,128));
+  painter->setPen(QPen(Qt::red));
+  QVariant value = index.data(Qt::DisplayRole);
+  if (value.isValid()){
+    if(index.column()%10==0 || index.column()%10==1){
+      QRect rect = option.rect;
+      QString text = value.toString();
+      if(index.column()%10==0){
+        rect.setRight(rect.right()+rect.width());
+      }
+      else{
+        rect.setLeft(rect.left()-rect.width());
+      }
+      painter->setFont(index.data(Qt::FontRole).value<QFont>());
+      painter->drawText(rect, Qt::AlignLeft|Qt::AlignBottom, text);
+    }
   }
   painter->restore();
 }

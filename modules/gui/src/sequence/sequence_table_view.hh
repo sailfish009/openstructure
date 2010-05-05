@@ -36,8 +36,9 @@ class DLLEXPORT_OST_GUI SequenceTableView : public QTableView {
   Q_OBJECT
 public:
   SequenceTableView(QAbstractItemModel * model);
-  QTableView* GetFirstRow();
-  QTableView* GetFirstColumn();
+  QTableView* GetStaticRow();
+  QTableView* GetStaticColumn();
+  QTableView* GetStaticField();
   ~SequenceTableView();
 
 public slots:

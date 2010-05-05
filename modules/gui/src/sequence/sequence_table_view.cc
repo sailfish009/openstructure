@@ -83,7 +83,7 @@ void SequenceTableView::InitStaticColumn()
   static_column_->horizontalHeader()->hide();
 
   //this->viewport()->stackUnder(static_column_);
-
+  static_column_->setSelectionBehavior(SelectRows);
   static_column_->setSelectionModel(this->selectionModel());
   for(int col=1; col<this->model()->columnCount(); col++){
    static_column_->setColumnHidden(col, true);
@@ -95,7 +95,7 @@ void SequenceTableView::InitStaticColumn()
   static_column_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   static_column_->show();
   static_column_->setStyleSheet("QTableView { border: 0px;"
-                                 "background-color: #ff0000;"
+                                 "background-color: #EDEDED;"
                                  "selection-background-color: #EEEEEE}"
                                  "QTableView::item{ border: none;"
                                  "padding: 0px; border-width: 0px; margin: 0px;}");
@@ -118,6 +118,7 @@ void SequenceTableView::InitStaticRow()
   static_row_->horizontalHeader()->hide();
   static_row_->verticalHeader()->hide();
 
+  static_row_->setSelectionBehavior(SelectColumns);
   static_row_->setSelectionModel(this->selectionModel());
   for(int row=1; row<this->model()->rowCount(); row++){
     static_row_->setRowHidden(row, true);
@@ -129,13 +130,15 @@ void SequenceTableView::InitStaticRow()
   static_row_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   static_row_->show();
   static_row_->setStyleSheet("QTableView { border: 0px;"
-                                 "background-color: #00ff00;"
+                                 "background-color: #EDEDED;"
                                  "selection-background-color: #EEEEEE}"
                                  "QTableView::item{ border: none;"
                                  "padding: 0px; border-width: 0px; margin: 0px;}");
   static_row_->setShowGrid(false);
 
   static_row_->setHorizontalScrollMode(ScrollPerPixel);
+
+  static_row_->setItemDelegate(delegate_);
 
   connect(static_row_->horizontalScrollBar(), SIGNAL(valueChanged(int)), this->horizontalScrollBar(), SLOT(setValue(int)));
   connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), static_row_->horizontalScrollBar(), SLOT(setValue(int)));
@@ -166,7 +169,7 @@ void SequenceTableView::InitStaticField(){
   static_field_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   static_field_->show();
   static_field_->setStyleSheet("QTableView { border: 0px;"
-                                 "background-color: #0000ff;"
+                                 "background-color: #E0E0E0;"
                                  "selection-background-color: #EEEEEE}"
                                  "QTableView::item{ border: none;"
                                  "padding: 0px; border-width: 0px; margin: 0px;}");
@@ -271,7 +274,6 @@ void SequenceTableView::columnCountChanged(const QModelIndex& index, int old_cou
       static_field_->setColumnHidden(col,true);
       this->setItemDelegateForColumn(col, delegate_);
     }
-    this->setItemDelegateForRow(0, new QItemDelegate(this));
   }
 }
 
@@ -310,12 +312,16 @@ void SequenceTableView::resizeRowsToContents(){
   this->updateStaticField();
 }
 
-QTableView* SequenceTableView::GetFirstRow(){
+QTableView* SequenceTableView::GetStaticRow(){
   return static_row_;
 }
 
-QTableView* SequenceTableView::GetFirstColumn(){
+QTableView* SequenceTableView::GetStaticColumn(){
   return static_column_;
+}
+
+QTableView* SequenceTableView::GetStaticField(){
+  return static_field_;
 }
 
 void SequenceTableView::mouseDoubleClickEvent(QMouseEvent *event)
