@@ -36,12 +36,15 @@ class DLLEXPORT_OST_GUI SequenceTableView : public QTableView {
   Q_OBJECT
 public:
   SequenceTableView(QAbstractItemModel * model);
+  QTableView* GetFirstRow();
+  QTableView* GetFirstColumn();
   ~SequenceTableView();
 
 public slots:
   void columnCountChanged(const QModelIndex& index, int old_count, int new_count);
+  void rowCountChanged(const QModelIndex& index, int old_count, int new_count);
   void resizeColumnsToContents();
-  QTableView* GetFirstRow();
+  void resizeRowsToContents();
 
 protected:
   virtual void mouseDoubleClickEvent(QMouseEvent* event);
@@ -51,14 +54,21 @@ protected:
   void scrollTo (const QModelIndex & index, ScrollHint hint = EnsureVisible);
 
 private slots:
+  void InitStaticColumn();
+  void InitStaticRow();
+  void InitStaticField();
   void ResizeWidth(int index, int, int size);
   void ResizeHeight(int index, int, int size);
 
 private:
-  QTableView* column_not_move_;
+  QTableView* static_column_;
+  QTableView* static_row_;
+  QTableView* static_field_;
   SequenceDelegate* delegate_;
   QModelIndex last_double_click_;
-  void updateNotMoveColumn();
+  void updateStaticColumn();
+  void updateStaticRow();
+  void updateStaticField();
 };
 
 }}

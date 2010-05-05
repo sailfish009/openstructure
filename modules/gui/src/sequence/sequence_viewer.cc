@@ -55,13 +55,14 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
   layout->addWidget(seq_table_view_);
   this->setLayout(layout);
   connect(model_,SIGNAL(columnsInserted(const QModelIndex&, int, int)),seq_table_view_,SLOT(columnCountChanged(const QModelIndex&, int, int)));
+  connect(model_,SIGNAL(rowsInserted(const QModelIndex&, int, int)),seq_table_view_,SLOT(rowCountChanged(const QModelIndex&, int, int)));
 
   seq_table_view_->horizontalHeader()->setMinimumSectionSize(2);
   seq_table_view_->verticalHeader()->setMinimumSectionSize(2);
   seq_table_view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
   connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
   connect(seq_table_view_,SIGNAL(doubleClicked(const QModelIndex&)),model_,SLOT(DoubleClicked(const QModelIndex&)));
-  connect(seq_table_view_->GetFirstRow(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
+  connect(seq_table_view_->GetFirstColumn(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
 }
 
 void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
