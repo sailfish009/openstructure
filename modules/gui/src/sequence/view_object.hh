@@ -37,27 +37,27 @@
 
 #include <ost/seq/sequence_list.hh>
 
-#include "row.hh"
+#include "base_row.hh"
 
 
 namespace ost { namespace gui {
 
 struct ListEntry {
-  Row*   row;
+  BaseRow*   row;
   QString name;
   seq::SequenceHandle seq;
   mol::ChainView chain;
   QVarLengthArray<mol::SecStructure> secstr;
   ListEntry(): row(NULL)
          {}
-  ListEntry(Row* r): row(r)
+  ListEntry(BaseRow* r): row(r)
          {}
-  ListEntry(Row* r, const QString& n): row(r), name(n)
+  ListEntry(BaseRow* r, const QString& n): row(r), name(n)
          {}
-  ListEntry(Row* r, const QString& n,
+  ListEntry(BaseRow* r, const QString& n,
       seq::SequenceHandle& sequence): row(r), name(n), seq(sequence)
          {}
-  ListEntry(Row* r, const QString& n,
+  ListEntry(BaseRow* r, const QString& n,
       const seq::SequenceHandle& sequence, const mol::ChainView& c,
       const QVarLengthArray<mol::SecStructure>& sec): row(r), name(n), seq(sequence), chain(c), secstr(sec)
          {}
@@ -75,10 +75,10 @@ public:
   ViewObject(mol::ChainView& chain, const QString& name, QObject* parent = 0);
   ViewObject(gfx::EntityP& entity, QObject* parent = 0);
 
-  void InsertRow(int pos, Row* row);
-  void RemoveRow(Row* row);
+  void InsertRow(int pos, BaseRow* row);
+  void RemoveRow(BaseRow* row);
 
-  Row* GetRow(int pos);
+  BaseRow* GetRow(int pos);
   int GetRowCount();
   int GetMaxColumnCount() const;
 

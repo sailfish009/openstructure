@@ -16,43 +16,78 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_ROW
-#define OST_SEQUENCE_VIEWER_ROW
 
 /*
   Author: Stefan Scheuber
  */
 
-#include <QObject>
-#include <QModelIndex>
-#include <QList>
 
-#include "painter.hh"
+#include <QtGui>
+
+#include "base_row.hh"
 
 namespace ost { namespace gui {
 
-class Row : public QObject
+BaseRow::BaseRow(QObject *parent) : QObject(parent)
+{ }
+
+void BaseRow::InsertPainter(Painter* painter, int pos)
 {
-  Q_OBJECT
+  if(pos == -1 || pos == painter_.size()){
+    painter_.append(painter);
+  }
+  else if(this->IsPainterPosValid(pos)){
+    painter_.insert(pos, painter);
+  }
+}
 
-public:
-  Row(QObject *parent = 0);
+void BaseRow::RemovePainter(Painter* painter)
+{
+  painter_.removeAll(painter);
+}
 
-  void InsertPainter(Painter* painter, int pos = -1);
-  void RemovePainter(Painter* painter);
+Painter* BaseRow::GetPainter(int pos)
+{
+  if(this->IsPainterPosValid(pos)){
+    return painter_[pos];
+  }
+  return NULL;
+}
 
-  Painter* GetPainter(int pos);
-  int GetPainterCount();
+int BaseRow::GetPainterCount()
+{
+  return painter_.size();
+}
 
-  const PainterList& GetPainters() const;
+bool BaseRow::IsPainterPosValid(int pos)
+{
+  if(pos >= 0 && pos < painter_.size()){
+    return true;
+  }
+  return false;
+}
 
-private:
-  bool IsPosValid(int pos);
-  PainterList painter_;
-};
+const PainterList& BaseRow::GetPainters() const
+{
+  return painter_;
+}
 
-typedef QList<Row*> RowList;
+QVariant BaseRow::GetData(int column, int role) const
+{
+  return QVariant();
+}
+
+bool BaseRow::SetData(int column, const QVariant& value, int role)
+{
+  return false;
+}
+
+Qt::ItemFlags BaseRow::Flags(int column) const
+{
+  return Qt::NoItemFlags;
+}
+
+void BaseRow::DoubleClicked(int column)
+{ }
 
 }}
-
-#endif

@@ -81,7 +81,7 @@ void ViewObject::Init()
   default_cell_size_ = QSize(metrics.boundingRect('W').width()+2,metrics.boundingRect('|').height()*2);
 }
 
-void ViewObject::InsertRow(int pos, Row* row)
+void ViewObject::InsertRow(int pos, BaseRow* row)
 {
   if(pos >= 0 && pos <= rows_.size()){
     ListEntry entry(row);
@@ -89,7 +89,7 @@ void ViewObject::InsertRow(int pos, Row* row)
   }
 }
 
-void ViewObject::RemoveRow(Row* row)
+void ViewObject::RemoveRow(BaseRow* row)
 {
   QList<int> rows_to_delete;
   for (int i = 0; i < rows_.size(); ++i){
@@ -102,7 +102,7 @@ void ViewObject::RemoveRow(Row* row)
   }
 }
 
-Row* ViewObject::GetRow(int pos)
+BaseRow* ViewObject::GetRow(int pos)
 {
    if(pos >= 0 && pos < rows_.size()){
      return rows_[pos].row;
@@ -117,7 +117,7 @@ int ViewObject::GetRowCount()
 
 void ViewObject::AddSequence(seq::SequenceHandle& sequence, const QString& name)
 {
-  Row* new_row = new Row(this);
+  BaseRow* new_row = new BaseRow(this);
   Painter* p = new SeqSelectionPainter(this);
   new_row->InsertPainter(p);
   p = new SeqTextPainter(this);
@@ -141,7 +141,7 @@ void ViewObject::AddChain(mol::ChainView& chain, const QString& name)
     v_one_chain.AddChain(chain, mol::ViewAddFlag::INCLUDE_ALL);
     sequence.AttachView(v_one_chain);
 
-    Row* new_row = new Row(this);
+    BaseRow* new_row = new BaseRow(this);
     Painter* p = new SeqSelectionPainter(this);
     new_row->InsertPainter(p);
     p = new SeqSecStrPainter(this);

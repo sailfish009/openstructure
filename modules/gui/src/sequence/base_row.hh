@@ -16,60 +16,48 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#ifndef OST_SEQUENCE_VIEWER_ROW
+#define OST_SEQUENCE_VIEWER_ROW
 
 /*
   Author: Stefan Scheuber
  */
 
+#include <QObject>
+#include <QModelIndex>
+#include <QList>
 
-#include <QtGui>
-
-#include "row.hh"
+#include "painter.hh"
 
 namespace ost { namespace gui {
 
-Row::Row(QObject *parent) : QObject(parent)
-{ }
-
-void Row::InsertPainter(Painter* painter, int pos)
+class BaseRow : public QObject
 {
-  if(pos == -1 || pos == painter_.size()){
-    painter_.append(painter);
-  }
-  else if(this->IsPosValid(pos)){
-    painter_.insert(pos, painter);
-  }
-}
+  Q_OBJECT
 
-void Row::RemovePainter(Painter* painter)
-{
-  painter_.removeAll(painter);
-}
+public:
+  BaseRow(QObject *parent = 0);
 
-Painter* Row::GetPainter(int pos)
-{
-  if(this->IsPosValid(pos)){
-    return painter_[pos];
-  }
-  return NULL;
-}
+  void InsertPainter(Painter* painter, int pos = -1);
+  void RemovePainter(Painter* painter);
 
-int Row::GetPainterCount()
-{
-  return painter_.size();
-}
+  Painter* GetPainter(int pos);
+  int GetPainterCount();
 
-bool Row::IsPosValid(int pos)
-{
-  if(pos >= 0 && pos < painter_.size()){
-    return true;
-  }
-  return false;
-}
+  const PainterList& GetPainters() const;
 
-const PainterList& Row::GetPainters() const
-{
-  return painter_;
-}
+  virtual QVariant GetData(int column, int role) const;
+  virtual bool SetData(int column, const QVariant& value, int role);
+  virtual Qt::ItemFlags Flags(int column) const;
+  virtual void DoubleClicked(int column);
+
+private:
+  bool IsPainterPosValid(int pos);
+  PainterList painter_;
+};
+
+typedef QList<BaseRow*> BaseRowList;
 
 }}
+
+#endif
