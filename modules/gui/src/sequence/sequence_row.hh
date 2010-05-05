@@ -57,6 +57,7 @@ public:
 
 private:
   QString name_;
+  QFont name_font_;
   seq::SequenceHandle sequence_;
 };
 

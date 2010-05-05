@@ -24,6 +24,7 @@
  */
 
 #include <QTableView>
+#include <QWheelEvent>
 
 #include <ost/gui/module_config.hh>
 
@@ -41,6 +42,9 @@ public:
   QTableView* GetStaticField();
   ~SequenceTableView();
 
+signals:
+  void MouseWheelEvent(QWheelEvent* event);
+
 public slots:
   void columnCountChanged(const QModelIndex& index, int old_count, int new_count);
   void rowCountChanged(const QModelIndex& index, int old_count, int new_count);
@@ -50,7 +54,8 @@ public slots:
 protected:
   virtual void mouseDoubleClickEvent(QMouseEvent* event);
   virtual void mouseReleaseEvent(QMouseEvent* event);
-  virtual void resizeEvent(QResizeEvent *event);
+  virtual void resizeEvent(QResizeEvent* event);
+  virtual void wheelEvent (QWheelEvent* event);
   virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
   void scrollTo (const QModelIndex & index, ScrollHint hint = EnsureVisible);
 

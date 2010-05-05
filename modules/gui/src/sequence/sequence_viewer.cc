@@ -73,6 +73,7 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
   connect(seq_table_view_,SIGNAL(doubleClicked(const QModelIndex&)),model_,SLOT(DoubleClicked(const QModelIndex&)));
   connect(seq_table_view_->GetStaticColumn(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
   connect(seq_table_view_->GetStaticRow(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
+  connect(seq_table_view_,SIGNAL(MouseWheelEvent(QWheelEvent*)),this,SLOT(MouseWheelEvent(QWheelEvent*)));
 
   gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
   GetNodesVisitor gnv;
@@ -134,6 +135,26 @@ void SequenceViewerV2::DoubleClicked(const QModelIndex& index)
   disconnect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
   model_->DoubleClicked(index);
   connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+}
+
+void SequenceViewerV2::MouseWheelEvent(QWheelEvent* event)
+{
+  int delta = event->delta();
+  if (event->orientation() == Qt::Vertical) {
+    if(delta>0){
+      model_->ZoomIn();
+      seq_table_view_->viewport()->update();
+      seq_table_view_->resizeColumnsToContents();
+      seq_table_view_->resizeRowsToContents();
+    }
+    else if(delta<0){
+      model_->ZoomOut();
+      seq_table_view_->viewport()->update();
+      seq_table_view_->resizeColumnsToContents();
+      seq_table_view_->resizeRowsToContents();
+    }
+  }
+  event->accept();
 }
 
 SequenceViewerV2::~SequenceViewerV2(){

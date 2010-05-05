@@ -250,4 +250,18 @@ Qt::ItemFlags SequenceModel::flags(const QModelIndex& index) const
   return QAbstractItemModel::flags(index);
 }
 
+void SequenceModel::ZoomIn()
+{
+  for (int i = 0; i<objects_.size(); i++){
+    objects_[i]->ZoomIn();
+  }
+}
+
+void SequenceModel::ZoomOut()
+{
+  for (int i = 0; i<objects_.size(); i++){
+    objects_[i]->ZoomOut();
+  }
+}
+
 }}

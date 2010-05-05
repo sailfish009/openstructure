@@ -180,6 +180,20 @@ void ViewObject::DoubleClicked(int row, int column)
   }
 }
 
+void ViewObject::ZoomIn()
+{
+  for(int i=0; i< rows_.size(); i++){
+    rows_[i]->ZoomIn();
+  }
+}
+
+void ViewObject::ZoomOut()
+{
+  for(int i=0; i< rows_.size(); i++){
+    rows_[i]->ZoomOut();
+  }
+}
+
 QMap<int, QList<int> > ViewObject::GetIndexesForView(const mol::EntityView& view)
 {
   if(view.GetChainCount()==0){

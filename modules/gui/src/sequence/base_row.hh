@@ -60,6 +60,9 @@ public:
   virtual Qt::ItemFlags Flags(int column) const;
   virtual void DoubleClicked(int column);
 
+  virtual void ZoomIn();
+  virtual void ZoomOut();
+
 private:
   bool IsPainterPosValid(int pos);
   PainterList painter_;

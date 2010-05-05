@@ -68,6 +68,8 @@ public:
   virtual Qt::ItemFlags flags(const QModelIndex& index=QModelIndex()) const;
 
 public slots:
+  void ZoomIn();
+  void ZoomOut();
   void DoubleClicked(const QModelIndex& index);
   void SelectionChanged(const QItemSelection& sel, const QItemSelection& desel);
 

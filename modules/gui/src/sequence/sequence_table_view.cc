@@ -342,6 +342,16 @@ void SequenceTableView::mouseReleaseEvent(QMouseEvent* event)
   QAbstractItemView::mouseReleaseEvent(event);
 }
 
+void SequenceTableView::wheelEvent(QWheelEvent* event)
+{
+  if(event->modifiers() & Qt::ControlModifier){
+    emit MouseWheelEvent(event);
+  }
+  else{
+    QTableView::wheelEvent(event);
+  }
+}
+
 SequenceTableView::~SequenceTableView(){}
 
 }}

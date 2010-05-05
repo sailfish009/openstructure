@@ -74,6 +74,8 @@ public:
   Qt::ItemFlags Flags(int row, int column) const;
 
   void DoubleClicked(int row, int column);
+  void ZoomIn();
+  void ZoomOut();
 
   QMap<int, QList<int> > GetIndexesForView(const mol::EntityView& view);
 

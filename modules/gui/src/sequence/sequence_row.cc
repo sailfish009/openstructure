@@ -34,7 +34,7 @@
 
 namespace ost { namespace gui {
 
-SequenceRow::SequenceRow(const QString& name, seq::SequenceHandle& sequence, ViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), sequence_(sequence)
+SequenceRow::SequenceRow(const QString& name, seq::SequenceHandle& sequence, ViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11)), sequence_(sequence)
 { }
 
 SequenceRow::SequenceRow(const QString& name, ViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name)
@@ -74,7 +74,7 @@ QVariant SequenceRow::GetData(int column, int role) const
       return QVariant(this->name_);
     }
     if (role == Qt::FontRole){
-      return QVariant(this->GetFont());
+      return QVariant(name_font_);
     }
   }
   else if(column > 0) {

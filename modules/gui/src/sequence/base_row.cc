@@ -130,4 +130,24 @@ Qt::ItemFlags BaseRow::Flags(int column) const
 void BaseRow::DoubleClicked(int column)
 { }
 
+void BaseRow::ZoomIn()
+{
+  QFont font = this->GetFont();
+  int pointsize = font.pointSize();
+  if(pointsize < 30){
+    font.setPointSize(++pointsize);
+  }
+  this->SetFont(font);
+}
+
+void BaseRow::ZoomOut()
+{
+  QFont font = this->GetFont();
+  int pointsize = font.pointSize();
+  if(pointsize > 5){
+    font.setPointSize(--pointsize);
+  }
+  this->SetFont(font);
+}
+
 }}
