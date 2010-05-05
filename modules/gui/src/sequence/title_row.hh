@@ -41,6 +41,7 @@ public:
   virtual void DoubleClicked(int column);
 private:
   QFont font_;
+  QFont small_font_;
 };
 }}
 

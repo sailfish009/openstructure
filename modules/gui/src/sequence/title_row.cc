@@ -29,8 +29,11 @@
 
 namespace ost { namespace gui {
 
-TitleRow::TitleRow(QObject* parent) : BaseRow(QFont("Courier",10),parent), font_("Verdana",9)
-{ font_.setItalic(true);}
+TitleRow::TitleRow(QObject* parent) : BaseRow(QFont("Courier",10),parent), font_("Verdana",9), small_font_("Verdana",7)
+{
+  font_.setItalic(true);
+  small_font_.setItalic(true);
+}
 
 QVariant TitleRow::GetData(int column, int role) const
 {
@@ -45,7 +48,12 @@ QVariant TitleRow::GetData(int column, int role) const
       return QVariant(QString::number(column));
   }
   else if (role==Qt::FontRole){
-    return QVariant(font_);
+    if(column < 999){
+      return QVariant(font_);
+    }
+    else{
+      return QVariant(small_font_);
+    }
   }
   else if (role==Qt::TextAlignmentRole){
     return QVariant(Qt::AlignHCenter|Qt::AlignBottom);
