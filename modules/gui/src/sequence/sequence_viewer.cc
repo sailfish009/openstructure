@@ -33,7 +33,8 @@
 #include <ost/seq/sequence_handle.hh>
 
 #include <ost/gfx/entity.hh>
-#include <ost/gfx/entity_fw.hh>
+#include <ost/gfx/scene.hh>
+#include <ost/gfx/gfx_node_visitor.hh>
 
 #include "sequence_model.hh"
 
@@ -43,6 +44,14 @@
 
 namespace ost { namespace gui {
 
+struct GetNodesVisitor: public gfx::GfxNodeVisitor {
+  GetNodesVisitor(): nodes_() {}
+  virtual void VisitObject(gfx::GfxObj* o, const Stack& st) {
+    nodes_.push_back(o->shared_from_this());
+  }
+  gfx::NodePtrList nodes_;
+  gfx::NodePtrList GetNodes(){return nodes_;}
+};
 
 SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
 {
@@ -64,6 +73,14 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
   connect(seq_table_view_,SIGNAL(doubleClicked(const QModelIndex&)),model_,SLOT(DoubleClicked(const QModelIndex&)));
   connect(seq_table_view_->GetStaticColumn(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
   connect(seq_table_view_->GetStaticRow(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
+
+  gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
+  GetNodesVisitor gnv;
+  gfx::Scene::Instance().Apply(gnv);
+  gfx::NodePtrList list = gnv.GetNodes();
+  for(unsigned int i=0; i<list.size();i++){
+    this->NodeAdded(list[i]);
+  }
 }
 
 void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
