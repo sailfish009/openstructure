@@ -73,6 +73,9 @@ QVariant SequenceRow::GetData(int column, int role) const
     if (role == Qt::DisplayRole){
       return QVariant(this->name_);
     }
+    if (role == Qt::FontRole){
+      return QVariant(this->GetFont());
+    }
   }
   else if(column > 0) {
     if (role==Qt::DisplayRole) {

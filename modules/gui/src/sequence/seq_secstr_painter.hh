@@ -37,6 +37,12 @@ public:
   SeqSecStrPainter(QObject* parent = 0);
   void Paint(QPainter *painter, const QStyleOptionViewItem &option,
       const QModelIndex &index);
+private:
+  void PaintRect(QPainter* painter, const QRect& rect, int center, int diff);
+  void DrawArrow(QPainter* painter, const QRect& rect, int center, int std_diff, int diff, int max_diff);
+  QBrush brush_;
+  QPen border_pen_;
+  QPen brush_pen_;
 };
 
 }}

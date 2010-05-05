@@ -29,7 +29,7 @@
 namespace ost { namespace gui {
 
 SeqSecStrPainter::SeqSecStrPainter(QObject* parent)
-    : Painter(parent)
+    : Painter(parent), brush_(QColor(255,255,177,192)), border_pen_(Qt::lightGray), brush_pen_(QColor(255,255,177,192))
 {}
 
 void SeqSecStrPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
@@ -45,17 +45,14 @@ void SeqSecStrPainter::Paint(QPainter* painter, const QStyleOptionViewItem& opti
     int std_diff = (size.height()/2);
     int diff = size.height()/1.25;
     int center = option.rect.top()+(option.rect.height()/2);
+
     if (sec_element.IsCoil()) {
-      int pos = center - std_diff;
-      painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
-      pos = center + std_diff;
-      painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
+      this->PaintRect(painter,option.rect,center,std_diff);
+
     } else if (sec_element.IsHelical()) {
-      int pos = center - diff;
-      painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
-      pos = center + diff;
-      painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
-      if(column - 1 > 0 && !sec_str[column-1].IsHelical()){
+      this->PaintRect(painter,option.rect,center,diff);
+
+      if(column - 1 >= 0 && !sec_str[column-1].IsHelical()){
         painter->drawLine(option.rect.left(),center+std_diff,option.rect.left(),center+diff);
         painter->drawLine(option.rect.left(),center-std_diff,option.rect.left(),center-diff);
       }
@@ -63,23 +60,17 @@ void SeqSecStrPainter::Paint(QPainter* painter, const QStyleOptionViewItem& opti
         painter->drawLine(option.rect.right(),center+std_diff,option.rect.right(),center+diff);
         painter->drawLine(option.rect.right(),center-std_diff,option.rect.right(),center-diff);
       }
+
     } else if (sec_element.IsExtended()) {
-      int pos = center - diff;
-      if(column - 1 > 0 && !sec_str[column-1].IsExtended()){
-        painter->drawLine(option.rect.left(),center+std_diff,option.rect.left(),center+diff);
-        painter->drawLine(option.rect.left(),center-std_diff,option.rect.left(),center-diff);
-      }
       if(column + 1 < sec_str.size() && !sec_str[column+1].IsExtended()){
-        int max_diff = size.height();
-        painter->drawLine(option.rect.left(),center+diff,option.rect.left(),center+max_diff);
-        painter->drawLine(option.rect.left(),center-diff,option.rect.left(),center-max_diff);
-        painter->drawLine(option.rect.left(),center+max_diff,option.rect.right(),center+std_diff);
-        painter->drawLine(option.rect.left(),center-max_diff,option.rect.right(),center-std_diff);
+        this->DrawArrow(painter,option.rect,center,std_diff,diff,size.height());
       }
       else{
-        painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
-        pos = center + diff;
-        painter->drawLine(option.rect.left(),pos,option.rect.right(),pos);
+        this->PaintRect(painter,option.rect,center,diff);
+      }
+      if(column - 1 >= 0 && !sec_str[column-1].IsExtended()){
+        painter->drawLine(option.rect.left(),center+std_diff,option.rect.left(),center+diff);
+        painter->drawLine(option.rect.left(),center-std_diff,option.rect.left(),center-diff);
       }
     }
     if(!(column+1 < sec_str.size())){
@@ -87,6 +78,37 @@ void SeqSecStrPainter::Paint(QPainter* painter, const QStyleOptionViewItem& opti
     }
   }
   painter->restore();
+}
+
+void SeqSecStrPainter::PaintRect(QPainter* painter, const QRect& rect, int center, int diff)
+{
+  QPoint top_left(rect.left(),center+diff);
+  QPoint bottom_right(rect.right(),center-diff);
+  QRect draw_rect = QRect(top_left,bottom_right);
+  painter->setBrush(brush_);
+  painter->setPen(brush_pen_);
+  painter->drawRect(draw_rect);
+  painter->setPen(border_pen_);
+  painter->drawLine(draw_rect.topLeft(),draw_rect.topRight());
+  painter->drawLine(draw_rect.bottomLeft(),draw_rect.bottomRight());
+}
+
+void SeqSecStrPainter::DrawArrow(QPainter* painter, const QRect& rect, int center, int std_diff, int diff, int max_diff)
+{
+  const QPoint points[4] = {
+    QPoint(rect.left(), center+max_diff),
+    QPoint(rect.right(), center+std_diff),
+    QPoint(rect.right(), center-std_diff),
+    QPoint(rect.left(), center-max_diff)
+  };
+  painter->setBrush(brush_);
+  painter->setPen(brush_pen_);
+  painter->drawPolygon(points, 4);
+  painter->setPen(border_pen_);
+  painter->drawLine(QPoint(rect.left(),center+diff),points[0]);
+  painter->drawLine(QPoint(rect.left(),center-diff),points[3]);
+  painter->drawLine(points[0],points[1]);
+  painter->drawLine(points[2],points[3]);
 }
 
 }}

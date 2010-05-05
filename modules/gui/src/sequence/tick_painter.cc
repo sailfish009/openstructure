@@ -29,12 +29,12 @@
 namespace ost { namespace gui {
 
 TickPainter::TickPainter(QObject* parent)
-    : Painter(parent)
+    : Painter(parent), pen_(QPen(Qt::darkGray))
 {}
 
 void TickPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
   painter->save();
-  painter->setPen(QPen(Qt::red));
+  painter->setPen(pen_);
   QVariant value = index.data(Qt::DisplayRole);
   if (value.isValid()){
     if(index.column()%10==0 || index.column()%10==1){

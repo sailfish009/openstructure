@@ -39,6 +39,8 @@ public:
   virtual QVariant GetData(int column, int role) const;
   virtual Qt::ItemFlags Flags(int column) const;
   virtual void DoubleClicked(int column);
+private:
+  QFont font_;
 };
 }}
 

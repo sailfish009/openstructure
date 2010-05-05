@@ -36,6 +36,8 @@ public:
   TickPainter(QObject* parent = 0);
   void Paint(QPainter *painter, const QStyleOptionViewItem &option,
       const QModelIndex &index);
+private:
+  QPen pen_;
 };
 
 }}
