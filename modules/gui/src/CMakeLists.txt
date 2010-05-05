@@ -21,13 +21,15 @@ sequence_search_bar.hh
 )
 
 set(OST_GUI_SEQUENCE_VIEW_HEADERS
-painter.hh
 base_row.hh
+painter.hh
+secstr_row.hh
 seq_secstr_painter.hh
 seq_selection_painter.hh
 seq_text_painter.hh
 sequence_delegate.hh
 sequence_model.hh
+sequence_row.hh
 sequence_table_view.hh
 sequence_viewer.hh
 view_object.hh
@@ -207,11 +209,13 @@ sequence_viewer/sequence_viewer.cc
 sequence_viewer/sequence_scene.cc
 sequence_viewer/sequence_search_bar.cc
 sequence/base_row.cc
+sequence/secstr_row.cc
 sequence/seq_secstr_painter.cc
 sequence/seq_selection_painter.cc
 sequence/seq_text_painter.cc
 sequence/sequence_delegate.cc
 sequence/sequence_model.cc
+sequence/sequence_row.cc
 sequence/sequence_table_view.cc
 sequence/sequence_viewer.cc
 sequence/view_object.cc
@@ -331,13 +335,15 @@ sequence_viewer/sequence_viewer_base.hh
 sequence_viewer/sequence_viewer.hh
 sequence_viewer/sequence_scene.hh
 sequence_viewer/sequence_search_bar.hh
-sequence/painter.hh
 sequence/base_row.hh
+sequence/painter.hh
+sequence/secstr_row.hh
 sequence/seq_secstr_painter.hh
 sequence/seq_selection_painter.hh
 sequence/seq_text_painter.hh
 sequence/sequence_delegate.hh
 sequence/sequence_model.hh
+sequence/sequence_row.hh
 sequence/sequence_table_view.hh
 sequence/sequence_viewer.hh
 sequence/view_object.hh

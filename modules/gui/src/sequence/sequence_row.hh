@@ -16,56 +16,48 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_BASE_ROW
-#define OST_SEQUENCE_VIEWER_BASE_ROW
+#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_ROW
+#define OST_SEQUENCE_VIEWER_SEQUENCE_ROW
 
 /*
   Author: Stefan Scheuber
  */
 
 #include <QObject>
-#include <QModelIndex>
-#include <QList>
 
-#include "painter.hh"
+#include <ost/seq/sequence_handle.hh>
+
+#include "base_row.hh"
 
 namespace ost { namespace gui {
 
-class BaseRow : public QObject
+class ViewObject;
+
+class SequenceRow : public BaseRow
 {
   Q_OBJECT
 
 public:
-  BaseRow(QObject *parent = 0);
-  BaseRow(QFont font, QObject *parent = 0);
-
-  void Init();
+  SequenceRow(const QString& name, seq::SequenceHandle& sequence, ViewObject* parent);
+  SequenceRow(const QString& name, ViewObject* parent);
 
   virtual int GetColumnCount() const;
 
-  void InsertPainter(Painter* painter, int pos = -1);
-  void RemovePainter(Painter* painter);
-  Painter* GetPainter(int pos);
-  int GetPainterCount();
-  const PainterList& GetPainters() const;
-
-  const QFont& GetFont() const;
-  void SetFont(const QFont& font);
-  const QSize& GetFontSize() const;
-
-  virtual const QSize& GetCellSize() const;
-
   virtual QVariant GetData(int column, int role) const;
-  virtual bool SetData(int column, const QVariant& value, int role);
   virtual Qt::ItemFlags Flags(int column) const;
   virtual void DoubleClicked(int column);
 
+  void SetName(const QString& name);
+  const QString& GetName();
+
+  virtual void SetSequence(seq::SequenceHandle& sequence);
+  const seq::SequenceHandle& GetSequence() const;
+
+  void SetSelection(const QSet<int>& added, const QSet<int>& removed);
+
 private:
-  bool IsPainterPosValid(int pos);
-  PainterList painter_;
-  QFont font_;
-  QSize default_font_size_;
-  QSize default_cell_size_;
+  QString name_;
+  seq::SequenceHandle sequence_;
 };
 
 typedef QList<BaseRow*> BaseRowList;

@@ -29,7 +29,24 @@
 namespace ost { namespace gui {
 
 BaseRow::BaseRow(QObject *parent) : QObject(parent)
-{ }
+{ this->SetFont(font_); }
+
+BaseRow::BaseRow(QFont font, QObject *parent) : QObject(parent)
+{
+  this->SetFont(font);
+}
+
+int BaseRow::GetColumnCount() const
+{
+  return -1;
+}
+
+void BaseRow::Init()
+{
+  QFontMetrics metrics = QFontMetrics(font_);
+  default_font_size_=QSize(metrics.boundingRect('W').width(),metrics.boundingRect('|').height());
+  default_cell_size_ = QSize(metrics.boundingRect('W').width()+2,metrics.boundingRect('|').height()*2);
+}
 
 void BaseRow::InsertPainter(Painter* painter, int pos)
 {
@@ -65,6 +82,29 @@ bool BaseRow::IsPainterPosValid(int pos)
     return true;
   }
   return false;
+}
+
+const QFont& BaseRow::GetFont() const
+{
+  return font_;
+}
+
+void BaseRow::SetFont(const QFont& font)
+{
+  font_ = font;
+  QFontMetrics metrics = QFontMetrics(font_);
+  default_font_size_=QSize(metrics.boundingRect('W').width(),metrics.boundingRect('|').height());
+  default_cell_size_ = QSize(metrics.boundingRect('W').width()+2,metrics.boundingRect('|').height()*2);
+}
+
+const QSize& BaseRow::GetFontSize() const
+{
+  return default_font_size_;
+}
+
+const QSize& BaseRow::GetCellSize() const
+{
+  return default_cell_size_;
 }
 
 const PainterList& BaseRow::GetPainters() const

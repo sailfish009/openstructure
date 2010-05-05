@@ -16,60 +16,45 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_BASE_ROW
-#define OST_SEQUENCE_VIEWER_BASE_ROW
+#ifndef OST_SEQUENCE_VIEWER_SECSTR_ROW
+#define OST_SEQUENCE_VIEWER_SECSTR_ROW
 
 /*
   Author: Stefan Scheuber
  */
 
 #include <QObject>
-#include <QModelIndex>
-#include <QList>
+#include <QVarLengthArray>
 
-#include "painter.hh"
+#include <ost/mol/chain_view.hh>
+#include <ost/mol/alg/sec_structure_segments.hh>
+
+#include "sequence_row.hh"
 
 namespace ost { namespace gui {
 
-class BaseRow : public QObject
+class SecStrRow : public SequenceRow
 {
   Q_OBJECT
 
 public:
-  BaseRow(QObject *parent = 0);
-  BaseRow(QFont font, QObject *parent = 0);
-
-  void Init();
-
-  virtual int GetColumnCount() const;
-
-  void InsertPainter(Painter* painter, int pos = -1);
-  void RemovePainter(Painter* painter);
-  Painter* GetPainter(int pos);
-  int GetPainterCount();
-  const PainterList& GetPainters() const;
-
-  const QFont& GetFont() const;
-  void SetFont(const QFont& font);
-  const QSize& GetFontSize() const;
-
-  virtual const QSize& GetCellSize() const;
+  SecStrRow(const QString& name, mol::ChainView& chain, ViewObject* parent);
 
   virtual QVariant GetData(int column, int role) const;
-  virtual bool SetData(int column, const QVariant& value, int role);
-  virtual Qt::ItemFlags Flags(int column) const;
   virtual void DoubleClicked(int column);
 
+  void SetSequence(seq::SequenceHandle& sequence);
+  void SetChain(mol::ChainView& chain);
+
 private:
-  bool IsPainterPosValid(int pos);
-  PainterList painter_;
-  QFont font_;
-  QSize default_font_size_;
-  QSize default_cell_size_;
+  mol::ChainView chain_;
+  QVarLengthArray<mol::SecStructure> secstr_;
 };
 
 typedef QList<BaseRow*> BaseRowList;
 
 }}
+
+Q_DECLARE_METATYPE(QVarLengthArray<ost::mol::SecStructure>)
 
 #endif
