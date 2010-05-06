@@ -72,6 +72,45 @@ void info_group_remove2(InfoGroup* g, InfoGroup& group )
 {
   g->Remove(group);
 }
+void info_group_remove3(InfoGroup* g, InfoPath& path, bool use_defaults )
+{
+  g->Remove(path,use_defaults);
+}
+
+void info_handle_apply1a(InfoHandle* h, InfoVisitor& v)
+{
+  h->Apply(v);
+}
+
+void info_handle_apply1b(InfoHandle* h, InfoVisitor& v, bool b)
+{
+  h->Apply(v,b);
+}
+
+void info_handle_apply2a(InfoHandle* h, InfoConstVisitor& v)
+{
+  h->Apply(v);
+}
+
+void info_handle_apply2b(InfoHandle* h, InfoConstVisitor& v, bool b)
+{
+  h->Apply(v,b);
+}
+
+void info_handle_remove1(InfoHandle* h, InfoPath& path )
+{
+  h->Remove(path);
+}
+
+void info_handle_remove2(InfoHandle* h, InfoGroup& group )
+{
+  h->Remove(group);
+}
+void info_handle_remove3(InfoHandle* h, InfoPath& path, bool use_defaults )
+{
+  h->Remove(path,use_defaults);
+}
+
 
 class InfoVisitorProxy : public InfoVisitor {
 public:
@@ -110,6 +149,13 @@ InfoItem (InfoGroup::*create_item_c)(const String&, bool)=&InfoGroup::CreateItem
 InfoItem (InfoGroup::*create_item_d)(const String&, Real)=&InfoGroup::CreateItem;
 
 }
+
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getgroup_overloads, GetGroup, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(retrievegroup_overloads, RetrieveGroup, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(hasgroup_overloads, HasGroup, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getitem_overloads, GetItem, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(hasitem_overloads, HasItem, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(retrieveitem_overloads, RetrieveItem, 1, 2)
 
 
 BOOST_PYTHON_MODULE(_info)
@@ -160,21 +206,22 @@ BOOST_PYTHON_MODULE(_info)
     .def("GetName",&InfoGroup::GetName)
     .def("SetName",&InfoGroup::SetName)
     .add_property("name",&InfoGroup::GetName,&InfoGroup::SetName)
-    .def("GetGroup",&InfoGroup::GetGroup)
+    .def("GetGroup",&InfoGroup::GetGroup,getgroup_overloads())
     .def("GetGroups", &InfoGroup::GetGroups)
     .def("GetItems", &InfoGroup::GetItems)
     .def("CreateGroup",&InfoGroup::CreateGroup)
-    .def("RetrieveGroup",&InfoGroup::RetrieveGroup)
-    .def("HasGroup",&InfoGroup::HasGroup)
-    .def("GetItem",&InfoGroup::GetItem)
+    .def("RetrieveGroup",&InfoGroup::RetrieveGroup,retrievegroup_overloads())
+    .def("HasGroup",&InfoGroup::HasGroup,hasgroup_overloads())
+    .def("GetItem",&InfoGroup::GetItem,getitem_overloads())
     .def("CreateItem",create_item_a)
     .def("CreateItem",create_item_b)
     .def("CreateItem",create_item_c)
     .def("CreateItem",create_item_d)            
-    .def("HasItem",&InfoGroup::HasItem)
-    .def("RetrieveItem",&InfoGroup::RetrieveItem)
+    .def("HasItem",&InfoGroup::HasItem,hasitem_overloads())
+    .def("RetrieveItem",&InfoGroup::RetrieveItem,retrieveitem_overloads())
     .def("Remove",info_group_remove1)
     .def("Remove",info_group_remove2)
+    .def("Remove",info_group_remove3)
     .def("GetAttribute",&InfoGroup::GetAttribute)
     .def("SetAttribute",&InfoGroup::SetAttribute)
     .def("HasAttribute",&InfoGroup::HasAttribute)
@@ -185,6 +232,7 @@ BOOST_PYTHON_MODULE(_info)
     .def("Apply",info_group_apply2a)
     .def("Apply",info_group_apply2b)
     .def("GetTextData",&InfoGroup::GetTextData)
+    .def("GetPath",&InfoGroup::GetPath)
     ;
 
   class_<InfoHandle>("InfoHandle",no_init)
@@ -193,7 +241,35 @@ BOOST_PYTHON_MODULE(_info)
     .def("Root",&InfoHandle::Root)
     .def("AddDefault",&InfoHandle::AddDefault)
     .def("Copy",&InfoHandle::Copy)
-    ;  
+    .def("HasDefaultGroup",&InfoHandle::HasDefaultGroup)
+    .def("GetDefaultGroup",&InfoHandle::GetDefaultGroup)
+    .def("HasDefaultItem",&InfoHandle::HasDefaultItem)
+    .def("GetDefaultItem",&InfoHandle::GetDefaultItem)
+    .def("GetParent",&InfoHandle::GetParent)
+    .def("GetName",&InfoHandle::GetName)
+    .def("SetName",&InfoHandle::SetName)
+    .add_property("name",&InfoHandle::GetName,&InfoHandle::SetName)
+    .def("GetGroup",&InfoHandle::GetGroup,getgroup_overloads())
+    .def("CreateGroup",&InfoHandle::CreateGroup)
+    .def("RetrieveGroup",&InfoHandle::RetrieveGroup,retrievegroup_overloads())
+    .def("HasGroup",&InfoHandle::HasGroup,hasgroup_overloads())
+    .def("GetItem",&InfoHandle::GetItem,getitem_overloads())
+    .def("CreateItem",&InfoHandle::CreateItem)
+    .def("HasItem",&InfoHandle::HasItem,hasitem_overloads())
+    .def("RetrieveItem",&InfoHandle::RetrieveItem,retrieveitem_overloads())
+    .def("Remove",info_handle_remove1)
+    .def("Remove",info_handle_remove2)
+    .def("Remove",info_handle_remove3)
+    .def("GetAttribute",&InfoHandle::GetAttribute)
+    .def("SetAttribute",&InfoHandle::SetAttribute)
+    .def("HasAttribute",&InfoHandle::HasAttribute)
+    .def("GetAttributeList",&InfoHandle::GetAttributeList)
+    .def("Apply",info_handle_apply1a)
+    .def("Apply",info_handle_apply1b)
+    .def("Apply",info_handle_apply2a)
+    .def("Apply",info_handle_apply2b)
+    .def("GetTextData",&InfoHandle::GetTextData)
+    ;
 
   def("CreateInfo",CreateInfoPtr1);
   def("CreateInfo",CreateInfoPtr2);
@@ -202,6 +278,7 @@ BOOST_PYTHON_MODULE(_info)
   class_<InfoPath>("InfoPath",init<const String&>())
     .def("GetList",&InfoPath::GetList)
     .def("IsRelative",&InfoPath::IsRelative)
+    .def(self_ns::str(self))
     ;
 
   def("GetFloatInfoItem",GetFloatInfoItem);

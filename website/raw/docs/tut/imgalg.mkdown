@@ -46,7 +46,11 @@ Similar to ModOP, except that no information can be stored beyond the
 application of the algorithm itself. Example: rotation around an arbitrary angle. Implemented
 as dox[ost::img::ConstModOPAlgorithm|ConstModOPAlgorithm].
 
-## Custom Algorithms
+## Implemented algorithms
+
+A list of implemented algorithms can be found [here](docs/tut/imgalglist.html)
+
+## Custom Algorithms (for developers)
 
 Writing custom algorithms for the 'img' module is fairly straightforward, in view of the fact that the final
 algorithm will integrate seamlessly into the build environment, both at the C++ and Python runtime

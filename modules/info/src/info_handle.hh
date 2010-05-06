@@ -53,7 +53,7 @@ DLLEXPORT InfoHandle LoadInfo(const String& file);
 */
 class DLLEXPORT InfoHandle {
   friend InfoHandle CreateInfo();
-  friend InfoHandle CreateInfo(const String&);
+  friend InfoHandle CreateInfo(const String& text);
   friend InfoHandle LoadInfo(const String&);
 
   typedef std::vector<RootPtr> RootPtrList;
@@ -81,6 +81,31 @@ public:
 
   bool HasDefaultItem(const InfoPath& p) const;
   InfoItem GetDefaultItem(const InfoPath& p) const;
+ 
+ //! group interface
+  InfoGroup GetParent() const;
+  void SetName(const String& name);
+  String GetName() const;
+  InfoGroup GetGroup(const InfoPath& path, bool use_defaults=true) const;
+  InfoGroup CreateGroup(const String& name);
+  bool HasGroup(const InfoPath& name, bool use_defaults=true) const;
+  InfoGroup RetrieveGroup(const InfoPath& path, bool use_defaults=true);
+  InfoItem GetItem(const InfoPath& path, bool use_defaults=true) const;
+  InfoItem CreateItem(const String& name, const String& value);
+  bool HasItem(const InfoPath& path, bool use_defaults=true) const;
+  InfoItem RetrieveItem(const InfoPath& path, bool use_defaults=true);
+  void Remove(const InfoPath& path, bool remove_defaults=false);
+  void Remove(const InfoGroup& group);
+  String GetAttribute(const String& name) const;
+  void SetAttribute(const String& name, const String& value);
+  bool HasAttribute(const String& name) const;
+  void RemoveAttribute(const String& name);
+  std::vector<String> GetAttributeList() const;
+  String GetTextData() const;
+  void SetTextData(const String& td);
+  void Apply(InfoVisitor& v, bool visit_this=true);
+  void Apply(InfoConstVisitor& v, bool visit_this=true) const;
+
 
 private:
   InfoHandle(RootPtr impl);

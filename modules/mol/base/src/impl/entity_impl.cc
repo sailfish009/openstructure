@@ -76,7 +76,8 @@ EntityImpl::EntityImpl():
   xcs_editor_count_(0),
   ics_editor_count_(0),  
   dirty_flags_(DisableICS),
-  name_("")
+  name_(""),
+  next_index_(0L)
 {    
 }
 
@@ -327,7 +328,7 @@ geom::Vec3 EntityImpl::GetCenterOfMass() const {
   Real mass = this->GetMass();
   if (this->GetAtomCount()>0 && mass>0) {
     for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      center+=it->second->GetPos()*it->second->GetProp().mass;
+      center+=it->second->GetPos()*it->second->GetAtomProps().mass;
     }
     center/=mass;
   }
@@ -338,7 +339,7 @@ Real EntityImpl::GetMass() const {
   Real mass=0.0;
   for (AtomImplMap::const_iterator it = atom_map_.begin();
       it!=atom_map_.end();++it) {
-    mass+=it->second->GetProp().mass;
+    mass+=it->second->GetAtomProps().mass;
   }
   return mass;
 }
@@ -350,9 +351,9 @@ AtomImplPtr EntityImpl::CreateAtom(const ResidueImplPtr& rp,
 {
 #if MAKE_SHARED_AVAILABLE
   AtomImplPtr ap=boost::make_shared<AtomImpl>(shared_from_this(), rp, name, 
-                                              pos, prop);
+                                              pos, prop,next_index_++);
 #else
-  AtomImplPtr ap(new AtomImpl(shared_from_this(), rp, name, pos, prop));
+  AtomImplPtr ap(new AtomImpl(shared_from_this(), rp, name, pos, prop,next_index_++));
 #endif
   if (identity_transf_ == false) {
     geom::Vec3 transformed_pos = geom::Vec3(transformation_matrix_*geom::Vec4(pos));
@@ -1165,7 +1166,7 @@ void EntityImpl::DecXCSEditorCount()
 void EntityImpl::UpdateOrganizerIfNeeded()
 {
   if (dirty_flags_ & DirtyOrganizer) {
-    LOGN_VERBOSE("atom organizer marked as dirty. updating");
+    LOGN_DEBUG("atom organizer marked as dirty. updating");
     this->UpdateOrganizer();
     dirty_flags_&=~DirtyOrganizer;
   }

@@ -25,7 +25,6 @@ using namespace ost::gfx;
 
 #include "color_by_def.hh"
 
-
 void export_GfxObj()
 {
   void (GfxObj::* set_mat_amb1)(const Color&) = &GfxObj::SetMatAmb;
@@ -76,6 +75,8 @@ void export_GfxObj()
     .def("SetOutlineExpandFactor",&GfxObj::SetOutlineExpandFactor)
     .def("SetOutlineExpandColor",&GfxObj::SetOutlineExpandColor)
     .def("SmoothVertices",&GfxObj::SmoothVertices)
+    .def("AmbientOcclusion",&GfxObj::AmbientOcclusion)
+    .def("Debug",&GfxObj::Debug)
     .add_property("center", &GfxObj::GetCenter)
     COLOR_BY_DEF()
     ;

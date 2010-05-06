@@ -56,6 +56,8 @@ public:
   virtual float GetTubeRadius() const;
   virtual void SetTubeRatio(float tube_ratio);
   virtual float GetTubeRatio() const;
+  virtual unsigned int GetTubeProfileType() const;
+  virtual void SetTubeProfileType(unsigned int);
 
   virtual void SetHelixWidth(float helix_width);
   virtual float GetHelixWidth() const;
@@ -63,6 +65,8 @@ public:
   virtual float GetHelixThickness() const;
   virtual void SetHelixEcc(float helix_ecc);
   virtual float GetHelixEcc() const;
+  virtual unsigned int GetHelixProfileType() const;
+  virtual void SetHelixProfileType(unsigned int);
 
   virtual void SetStrandWidth(float strand_width);
   virtual float GetStrandWidth() const;
@@ -70,6 +74,8 @@ public:
   virtual float GetStrandThickness() const;
   virtual void SetStrandEcc(float strand_ecc);
   virtual float GetStrandEcc() const;
+  virtual unsigned int GetStrandProfileType() const;
+  virtual void SetStrandProfileType(unsigned int);
 
   float GetMaxRad() const;
 
@@ -85,13 +91,15 @@ private:
 
   float tube_radius_;
   float tube_ratio_;
+  unsigned int tube_profile_;
   float helix_width_;
   float helix_thickness_;
   float helix_ecc_;
+  unsigned int helix_profile_;
   float strand_width_;
   float strand_thickness_;
   float strand_ecc_;
-
+  unsigned int strand_profile_;
 };
 
 typedef boost::shared_ptr<CartoonRenderOptions> CartoonRenderOptionsPtr;

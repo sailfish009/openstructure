@@ -25,6 +25,7 @@
 #include <ost/profile.hh>
 #include <ost/base.hh>
 #include <ost/img/alg/stat.hh>
+#include <ost/img/alg/discrete_shrink.hh>
 
 #include "gl_helper.hh"
 #include "glext_include.hh"
@@ -40,6 +41,19 @@
 #include "shader.hh"
 #endif
 
+namespace {
+
+int compute_downsampling_fact(const ost::img::ImageHandle& mh)
+{
+  ost::img::Extent ext = mh.GetExtent();
+  int max = ext.GetWidth();
+  if (ext.GetHeight() > ext.GetWidth() && ext.GetHeight() > ext.GetDepth()) max=ext.GetHeight();
+  if (ext.GetDepth() > ext.GetWidth() && ext.GetDepth() > ext.GetHeight()) max=ext.GetDepth();
+  int fact = std::ceil(static_cast<float>(max)/64.0);
+  return fact;
+}
+
+}
 
 namespace ost { 
 
@@ -47,18 +61,21 @@ namespace gfx {
 
 MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
   GfxObj(name),
-  mh_(mh),
-  octree_(mh),
+  original_mh_(mh),
+  downsampled_mh_(MapIso::DownsampleMap(mh)),
+  mh_(downsampled_mh_),
+  octree_(mh_),
   level_(level),
   normals_calculated_(false),
   alg_(0),
   smoothf_(0.2),
   debug_octree_(false),
-  color_(Color::WHITE)
+  color_(Color::GREY)
 {
-  // TODO replace with def mat for this gfx obj type
-
-  SetMat(0.0,1.0,0.1,32.0);
+  SetMatAmb(Color(0,0,0));
+  SetMatDiff(Color(1,1,1));
+  SetMatSpec(Color(0.1,0.1,0.1));
+  SetMatShin(32);
   mol::Transform tf=this->GetTF();
   tf.SetCenter(this->GetCenter());
   tf.SetTrans(this->GetCenter());
@@ -69,16 +86,21 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
 MapIso::MapIso(const String& name, const img::MapHandle& mh, 
                float level, uint a):
   GfxObj(name),
-  mh_(mh),
-  octree_(mh),  
+  original_mh_(mh),
+  downsampled_mh_(MapIso::DownsampleMap(mh)),
+  mh_(downsampled_mh_),
+  octree_(mh_),
   level_(level),
   normals_calculated_(false),
   alg_(a),
   debug_octree_(false),
-  color_(Color::WHITE)
+  color_(Color::GREY)
 {
   // TODO replace with def mat for this gfx obj type
-  SetMat(0.0,1.0,0.1,32.0);
+  SetMatAmb(Color(0,0,0));
+  SetMatDiff(Color(1,1,1));
+  SetMatSpec(Color(0.1,0.1,0.1));
+  SetMatShin(32);
   mol::Transform tf=this->GetTF();
   tf.SetCenter(this->GetCenter());
   tf.SetTrans(this->GetCenter());  
@@ -123,6 +145,7 @@ void MapIso::OnRenderModeChange()
     va_.SetMode(0x2); // only lines
     va_.SetTwoSided(true);
   }
+  GfxObj::OnRenderModeChange();
 }
 
 void MapIso::CustomPreRenderGL(bool flag)
@@ -130,7 +153,7 @@ void MapIso::CustomPreRenderGL(bool flag)
   if(flag) {
     Rebuild();
   } else {
-    RefreshVA(va_);
+    //RefreshVA(va_);
   }
 }
 
@@ -272,6 +295,16 @@ float MapIso::GetStdDev() const
   return stat.GetStandardDeviation();
 }
 
+img::ImageHandle& MapIso::GetMap()
+{
+  return mh_;
+}
+
+img::ImageHandle& MapIso::GetOriginalMap()
+{
+  return original_mh_;
+}
+
 float MapIso::GetMean() const
 {
   img::alg::Stat stat;
@@ -286,5 +319,15 @@ void MapIso::SetNSF(float nsf)
   Scene::Instance().RequestRedraw();
 }
 
+img::ImageHandle MapIso::DownsampleMap(const img::ImageHandle& mh)
+{
+  uint downsampling_fact = compute_downsampling_fact(mh);
+  img:: ImageHandle ret_mh = mh;
+  if (downsampling_fact != 1) {
+    img::alg::DiscreteShrink shrink_alg(img::Size(downsampling_fact,downsampling_fact,downsampling_fact));
+    ret_mh = mh.Apply(shrink_alg);
+  }
+  return ret_mh;
+}
 
 }} // ns

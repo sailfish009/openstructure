@@ -69,13 +69,23 @@ public:
   
   /// \brief get current isocontouring level
   float GetLevel() const;
-  
+
   /// \brief get mean value of map
   float GetMean() const;
   
   /// \brief get std dev of map.
   float GetStdDev() const;
   
+  /// \brief get the map handle of the currently displayed map
+  // The following is a hack. For the DataViewer I need to pass a reference to an ImagHandle
+  // that never goes out of scope, so I get a reference from here
+  img::ImageHandle& GetMap();
+
+  /// \brief get the map handle of the original map
+  // The following is a hack. For the DataViewer I need to pass a reference to an ImagHandle
+  // that never goes out of scope, so I get a reference from here
+  img::ImageHandle& GetOriginalMap();
+
   /// \brief set  color
   /// 
   /// By default, the color is white.
@@ -92,8 +102,11 @@ public:
   void SetDebugOctree(bool flag) { debug_octree_=flag; }
 protected:
   virtual void CustomPreRenderGL(bool flag);
+  static img::ImageHandle DownsampleMap(const img::ImageHandle& mh);
 
 private:
+  img::MapHandle   original_mh_;
+  img::MapHandle   downsampled_mh_;
   img::MapHandle   mh_;
   impl::MapOctree  octree_;
   float            level_;
@@ -106,7 +119,6 @@ private:
   float            min_max_;
   bool             debug_octree_;
   Color            color_; 
-
 };
 
 }}

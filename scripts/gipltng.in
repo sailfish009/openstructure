@@ -34,4 +34,4 @@ export LD_LIBRARY_PATH=$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH
 # line. If the HERE documnt is fed directly into gosty, the backtrace shows the 
 # full command in case of a segfault which is very confusing and not helpful 
 # at all
-cat $DNG_ROOT/@LIBDIR@/openstructure/init_img.py| gosty img $@
+gosty $DNG_ROOT/@LIBDIR@/openstructure/init_iplt.py img $@

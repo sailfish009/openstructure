@@ -33,7 +33,7 @@ namespace ost { namespace mol {
 /// Groups common functionality for AtomView and AtomHandle.
 ///
 /// Most of the atom properties such as temperature factor, element, radius
-/// and charge can be accessed with #GetProp() that returns an object of
+/// and charge can be accessed with #GetAtomProps() that returns an object of
 /// type AtomProp.
 ///
 /// Like \ref ResidueBase residues, \ref ChainBase "chains" and 
@@ -44,12 +44,12 @@ namespace ost { namespace mol {
 /// that the position of an atom is undefined when there are pending changes
 /// of an ICSEditor in buffered edit mode. Before calling #GetPos(),
 /// ICSEditor::UpdateXCS() should be called explicitly.
-class DLLEXPORT_OST_MOL AtomBase: public GenericPropertyContainer<AtomBase> {
+class DLLEXPORT_OST_MOL AtomBase: public GenericPropContainer<AtomBase> {
 public:
   AtomBase();
   AtomBase(const impl::AtomImplPtr& impl);
 public:  
-  friend class GenericPropertyContainer<AtomBase>;  
+  friend class ConstGenericPropContainer<AtomBase>;  
   ///\brief Get atom name. 
   ///
   /// In Python the atom name may also be accesssed over the property \c Name
@@ -80,11 +80,11 @@ public:
   /// \brief Get atom properties such as element name, radius crystallographic
   ///     occupancy and temperature factors.
   ///
-  /// \sa      #SetProp
-  const AtomProp& GetProp() const;
+  /// \sa      #SetAtomProps
+  const AtomProp& GetAtomProps() const;
     
   /// \brief  Set atom properties.
-  void SetProp(const AtomProp& prop);
+  void SetAtomProps(const AtomProp& prop);
   //@} 
   
   /// \name Handle validity
@@ -116,12 +116,40 @@ public:
   
   /// \brief Get int property by id
   int GetIntProperty(Prop::ID prop_id) const;
-public:
+
+  /// \brief Get the internal index
+  unsigned long GetIndex() const;
+
+  /// \brief returns the van-der-Waals radius of the atom
+  Real GetRadius() const;
+  
+  /// \brief returns the element name of the atom
+  const String& GetElement() const;
+  
+  /// \brief whether the atom is a hetatm
+  bool IsHetAtom() const;
+  
+  /// \brief Get isotropic temperature factor of atom
+  /// 
+  /// The returned value may be zero for some structures
+  Real GetBFactor() const;
+  
+  /// \brief get mass of atom
+  /// 
+  /// The returned value may be zero
+  Real GetMass() const;
+  
+  /// \brief get charge
+  Real GetCharge() const;
+  
+  /// \brief get atom occupancy
+  Real GetOccupancy() const;
+  
   /// \brief get atom implementation.
   ///
   /// Intended for internal use.
   const impl::AtomImplPtr& Impl() const;
-  
+
   /// \brief get atom implementation
   impl::AtomImplPtr& Impl();
 
@@ -132,9 +160,9 @@ public:
   long GetHashCode() const;  
 protected:
   
-  GenericPropertyContainerImpl* GpImpl();
+  GenericPropContainerImpl* GpImpl();
   
-  const GenericPropertyContainerImpl* GpImpl() const;
+  const GenericPropContainerImpl* GpImpl() const;
   
   void CheckValidity() const;
   impl::AtomImplPtr   impl_;

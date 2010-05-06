@@ -10,6 +10,7 @@ endif()
 set(OST_IO_PYMOD_MODULES
   __init__.py
   hhsearch.py
+  repository.py
 )
 
 

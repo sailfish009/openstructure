@@ -134,8 +134,10 @@ BOOST_PYTHON_MODULE(_gfx)
   class_<PrimList, bases<GfxObj>, PrimListP, boost::noncopyable>("PrimList", init<const String& >())
     .def("Clear",&PrimList::Clear)
     .def("AddLine",&PrimList::AddLine)
+    .def("AddPoint",&PrimList::AddPoint)
     .def("SetColor",&PrimList::SetColor)
     .def("SetDiameter",&PrimList::SetDiameter)
+    .def("SetRadius",&PrimList::SetRadius)
   ;
 
   class_<GfxTestObj, bases<GfxObj>, boost::noncopyable>("GfxTestObj", init<>());

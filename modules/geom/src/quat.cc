@@ -184,17 +184,20 @@ Vec3 find_vector_for_BOD(const Vec3& xyz, const Vec3& uvw)
 
 Quat extract_from_rotmat(const Mat3& rot)
 {
-  if ((fabs(rot(0,0) - 1.0) <= std::numeric_limits<Real>::epsilon()) &&
-      (fabs(rot(1,1) - 1.0) <= std::numeric_limits<Real>::epsilon()) &&
-      (fabs(rot(2,2) - 1.0) <= std::numeric_limits<Real>::epsilon())) {
+  if ((std::abs(rot(0,0) - Real(1.0)) <= std::numeric_limits<Real>::epsilon()) &&
+      (std::abs(rot(1,1) - Real(1.0)) <= std::numeric_limits<Real>::epsilon()) &&
+      (std::abs(rot(2,2) - Real(1.0)) <= std::numeric_limits<Real>::epsilon())) {
     return Quat(1.0,0.0,0.0,0.0);
   }
 
-  Real cos_theta = (rot(0,0)+rot(1,1)+rot(2,2)-1.0)*0.5;
-  Real stuff = (cos_theta+1.0)*0.5;
+  Real cos_theta = (rot(0,0)+rot(1,1)+rot(2,2)-Real(1.0))*Real(0.5);
+  Real stuff = (cos_theta+Real(1.0))*Real(0.5);
+  if(stuff<Real(0.0) || stuff>Real(1.0)) {
+    return Quat(1.0,0.0,0.0,0.0);
+  }
   Real cos_theta_sur_2 = sqrt(stuff);
-  Real sin_theta_sur_2 = sqrt(1.0-stuff);
-  
+  Real sin_theta_sur_2 = sqrt(Real(1.0)-stuff);
+
   Vec3 xyz = find_invariant_vector(rot);
   Vec3 uvw = find_orthogonal_vector(xyz);
   Vec3 rst = find_vector_for_BOD(xyz,uvw);
@@ -216,7 +219,7 @@ Quat extract_from_rotmat(const Mat3& rot)
     if(desambiguator >= 1.0) {
       q = Quat(0.0, +xyz[0], +xyz[1], +xyz[2]);
     } else {
-      q = Quat(0, -xyz[0], -xyz[1], -xyz[2]);
+      q = Quat(0.0, -xyz[0], -xyz[1], -xyz[2]);
     }
   }
   

@@ -64,7 +64,7 @@ LoaderManagerPtr FileLoader::loader_manager_ = LoaderManagerPtr();
 
 FileLoader::FileLoader(){}
 
-void FileLoader::LoadObject(const QString& filename)
+void FileLoader::LoadObject(const QString& filename, const QString& selection)
 {
   gfx::GfxObjP obj;
   if(filename.endsWith(".py",Qt::CaseInsensitive)){
@@ -74,11 +74,11 @@ void FileLoader::LoadObject(const QString& filename)
       filename.endsWith(".ent",Qt::CaseInsensitive)||
       filename.endsWith(".pdb.gz",Qt::CaseInsensitive)||
       filename.endsWith(".ent.gz",Qt::CaseInsensitive)){
-    FileLoader::LoadPDB(filename);
+    FileLoader::LoadPDB(filename, selection);
   }
   else{
     try{
-      obj=FileLoader::TryLoadEntity(filename);
+      obj=FileLoader::TryLoadEntity(filename, io::EntityIOHandlerP(), selection);
   #if OST_IMG_ENABLED
       if (!obj)  {
         try{
@@ -136,18 +136,18 @@ gfx::GfxObjP FileLoader::NoHandlerFound(const QString& filename)
   return gfx::GfxObjP();
 }
 
-void FileLoader::LoadFrom(const QString& id, const QString& site)
+void FileLoader::LoadFrom(const QString& id, const QString& site, const QString& selection)
 {
   if(!loader_manager_)
     loader_manager_ = LoaderManagerPtr(new LoaderManager());
   RemoteSiteLoader* remote_site = loader_manager_->GetRemoteSiteLoader(site);
   if(remote_site){
-    remote_site->LoadById(id);
+    remote_site->LoadById(id,selection);
   }
   else{
     remote_site = loader_manager_->GetCurrentSiteLoader();
     if(remote_site){
-      remote_site->LoadById(id);
+      remote_site->LoadById(id,selection);
     }
   }
 }
@@ -201,7 +201,7 @@ void FileLoader::HandleError(Message m, ErrorType type, const QString& filename,
   }
 }
 
-gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler) throw (io::IOException)
+gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler, const QString& selection) throw (io::IOException)
 {
   if(!handler){
     try{
@@ -213,7 +213,7 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHand
   }
   if(handler){
     if(dynamic_cast<io::EntityIOPDBHandler*>(handler.get())){
-      FileLoader::LoadPDB(filename);
+      FileLoader::LoadPDB(filename, selection);
     }
     else{
       QFileInfo file_info(filename);
@@ -224,7 +224,7 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHand
           conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();
           conop::Conopology::Instance().ConnectAll(builder,eh,0);
       }
-      gfx::GfxObjP obj(new gfx::Entity(file_info.baseName().toStdString(),eh));
+      gfx::GfxObjP obj(new gfx::Entity(file_info.baseName().toStdString(),eh,mol::Query(selection.toStdString())));
       return obj;
     }
   }
@@ -288,6 +288,10 @@ gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHa
       gfx::SurfaceP gfx_surf(new gfx::Surface(fi.baseName().toStdString(),sh));
       return gfx_surf;
     }
+    else{
+      gfx::SurfaceP gfx_surf(new gfx::Surface(fi.baseName().toStdString(),sh));
+      return gfx_surf;
+    }
   }
   return gfx::GfxObjP();
 }
@@ -305,7 +309,7 @@ void FileLoader::RunScript(const QString& filename)
   //HackerMode Off
 }
 
-void FileLoader::LoadPDB(const QString& filename)
+void FileLoader::LoadPDB(const QString& filename, const QString& selection)
 {
   io::PDBReader reader(filename.toStdString());
   QList<mol::EntityHandle> entities;
@@ -319,7 +323,7 @@ void FileLoader::LoadPDB(const QString& filename)
 
   QFileInfo file_info(filename);
   if(entities.size()==1){
-    gfx::EntityP gfx_ent(new gfx::Entity(file_info.baseName().toStdString(),entities.first()));
+    gfx::EntityP gfx_ent(new gfx::Entity(file_info.baseName().toStdString(),entities.first(),mol::Query(selection.toStdString())));
     try{
       gfx::Scene::Instance().Add(gfx_ent);
     }
@@ -333,7 +337,7 @@ void FileLoader::LoadPDB(const QString& filename)
   else{
     try{
       for(int i = 0 ; i<entities.size(); i++){
-        gfx::EntityP gfx_ent(new gfx::Entity(QString(file_info.baseName()+" ("+QString::number(i)+")").toStdString(),entities[i]));
+        gfx::EntityP gfx_ent(new gfx::Entity(QString(file_info.baseName()+" ("+QString::number(i)+")").toStdString(),entities[i],mol::Query(selection.toStdString())));
         gfx::Scene::Instance().Add(gfx_ent);
       }
     }

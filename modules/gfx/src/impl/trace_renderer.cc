@@ -43,6 +43,48 @@ void TraceRenderer::PrepareRendering()
   }
 }
 
+#if 1
+void TraceRenderer::PrepareRendering(TraceSubset& trace_subset,
+                                     IndexedVertexArray& va, bool is_sel)
+{
+  float plus=is_sel ? 0.05: 0.0;
+  const Color& sel_clr=this->GetSelectionColor();
+  if(options_!=NULL){
+    va.Clear();
+    va.SetLighting(true);
+    va.SetCullFace(true);
+    va.SetColorMaterial(true);
+    va.SetTwoSided(false);
+    for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
+      const NodeListSubset& nl=trace_subset[node_list];
+      mol::AtomHandle a1=nl[0].atom;
+      va.AddSphere(SpherePrim(a1.GetPos(),
+                              options_->GetTubeRadius()+plus,
+                              is_sel ? sel_clr : nl[0].color1),
+                   options_->GetArcDetail());
+      for(int i=1;i<nl.GetSize();++i) {
+        mol::AtomHandle a2=nl[i].atom;
+        va.AddSphere(SpherePrim(a2.GetPos(),
+                                options_->GetTubeRadius()+plus,
+                                is_sel ? sel_clr : nl[i].color1),
+                     options_->GetArcDetail());
+        const geom::Vec3& p0=a1.GetPos();
+        const geom::Vec3& p2=a2.GetPos();
+        geom::Vec3 p1=(p0+p2)*0.5;
+        va.AddCylinder(CylinderPrim(p0,p1,options_->GetTubeRadius()+plus,nl[i-1].color1),
+                       options_->GetArcDetail());
+        va.AddCylinder(CylinderPrim(p1,p2,options_->GetTubeRadius()+plus,nl[i].color1),
+                       options_->GetArcDetail());
+        a1=a2;
+      }
+    }
+  }
+  sel_state_=0;
+  state_=0;
+}
+
+#else
+
 void TraceRenderer::PrepareRendering(TraceSubset& trace_subset,
                                      IndexedVertexArray& va, bool is_sel)
 {
@@ -130,6 +172,7 @@ void TraceRenderer::PrepareRendering(TraceSubset& trace_subset,
   sel_state_=0;
   state_=0;
 }
+#endif
 
 VertexID TraceRenderer::AddCappedProfile(IndexedVertexArray& va, 
                                          const Color& color,
@@ -203,7 +246,6 @@ void TraceRenderer::RenderPov(PovState& pov, const std::string& name)
     Color col0=nl[0].color1;
     pov.write_sphere(p0,rad0,col0,name);
     for (int i=1; i<nl.GetSize();++i) {
-      const NodeEntry& entry=nl[i];
       geom::Vec3 p1=nl[i].atom.GetPos();
       float rad1=0.2;
       Color col1=nl[i].color1;

@@ -1,5 +1,4 @@
 set(OST_QA_PYMOD_SOURCES
-  export_ca_distance.cc
   export_interaction.cc
   export_torsion.cc
   export_packing.cc

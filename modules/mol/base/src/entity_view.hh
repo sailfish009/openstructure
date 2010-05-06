@@ -284,6 +284,14 @@ public:
   std::pair<Real,Real> GetMinMax(const String& prop, 
                                      Prop::Level hint=Prop::UNSPECIFIED) const;
 
+  /// \brief  Get angle in radians between bonds a1-a2 and a2-a3
+  Real GetAngle(const AtomHandle& a1, const AtomHandle& a2,
+                const AtomHandle& a3) const;
+
+  /// \brief  Get angle in radians between bonds a1-a2 and a2-a3
+  Real GetAngle(const AtomView& a1, const AtomView& a2,
+                const AtomView& a3) const;
+
   /// \brief returns a string containing a human-readable summary of the
   ///     entity view
   String Dump() const;

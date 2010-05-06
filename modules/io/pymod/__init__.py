@@ -20,53 +20,61 @@ from _io import *
 from ost import mol,conop
 
 def LoadPDB(filename, restrict_chains="", no_hetatms=False,
-            fault_tolerant=False, load_multi=False, 
-            join_spread_atom_records=False):
+            fault_tolerant=False, load_multi=False,
+            join_spread_atom_records=False, calpha_only=False):
   """
   Load PDB file from disk.
-  
+
   If restrict_chains is not an empty string, only chains listed in the
-  string will be imported. 
-  
+  string will be imported.
+
   If fault_tolerant is set to true, the import will succeed, even if the
   PDB contains faulty records. The faulty records will be ignored in that
   case.
-  
+
   If not_hetatms is set to True, HETATM records will be ignored
-  
+
   If load_multi is set to true, a list of entities will be returned instead
   of only the first.
-  
-  If join_spread_atom_records is set to true, atom records belonging to the 
+
+  If join_spread_atom_records is set to true, atom records belonging to the
   same residue are joined, even if they do not appear sequentially in the PDB
   file.
-  """          
+  """
   conop_inst=conop.Conopology.Instance()
   builder=conop_inst.GetBuilder("DEFAULT")
   reader=PDBReader(filename)
 
   flags=0
+  if calpha_only:
+    flags|=PDB.CALPHA_ONLY
   if fault_tolerant:
-    flags=PDB.SKIP_FAULTY_RECORDS
+    flags|=PDB.SKIP_FAULTY_RECORDS
   if no_hetatms:
     flags|=PDB.NO_HETATMS
   if join_spread_atom_records:
     flags|=PDB.JOIN_SPREAD_ATOM_RECORDS
-  reader.SetFlags(flags)
-  if load_multi:
-    ent_list=[]
-    while reader.HasNext():
+  try:
+    PDB.PushFlags(PDB.Flags() | flags)
+    if load_multi:
+      ent_list=[]
+      while reader.HasNext():
+        ent=mol.CreateEntity()
+        reader.Import(ent, restrict_chains)
+        conop_inst.ConnectAll(builder, ent, 0)
+        ent_list.append(ent)
+      PDB.PopFlags()
+      return ent_list
+    else:
       ent=mol.CreateEntity()
-      reader.Import(ent, restrict_chains)
-      conop_inst.ConnectAll(builder, ent, 0)
-      ent_list.append(ent)
-    return ent_list
-  else:
-    ent=mol.CreateEntity()    
-    if reader.HasNext():
-      reader.Import(ent, restrict_chains)
-      conop_inst.ConnectAll(builder, ent, 0)
-    return ent
+      if reader.HasNext():
+        reader.Import(ent, restrict_chains)
+        conop_inst.ConnectAll(builder, ent, 0)
+      PDB.PopFlags()
+      return ent
+  except:
+    PDB.PopFlags()
+    raise
 
 def SavePDB(models, filename):
   """
@@ -75,18 +83,24 @@ def SavePDB(models, filename):
   if not getattr(models, '__len__', None):
     models=[models]
   writer=PDBWriter(filename)
-  if len(models)>1:
-    writer.SetFlags(PDB.WRITE_MULTIPLE_MODELS)
-  for model in models:
-    writer.Write(model)
-
+  try:
+    if len(models)>1:
+      PDB.PushFlags(PDB.Flags() |PDB.WRITE_MULTIPLE_MODELS)
+    else:
+      PDB.PushFlags(0)
+    for model in models:
+      writer.Write(model)
+    PDB.PopFlags()
+  except:
+    PDB.PopFlags()
+    raise
 try:
   from ost import img
   LoadMap = LoadImage
-  SaveMap = SaveImage  
+  SaveMap = SaveImage
 except ImportError:
   pass
- 
+
  ## loads several images and puts them in an ImageList
  # \sa \ref fft_li.py "View Fourier Transform Example"
 def LoadImageList (files):
@@ -94,14 +108,14 @@ def LoadImageList (files):
   for file in files:
     image=LoadImage(file)
     image_list.append(image)
-  return image_list  
-      
+  return image_list
+
 LoadMapList=LoadImageList
 
 ## \example fft_li.py
 #
-# This scripts loads one or more images and shows their Fourier Transforms on the screen. A viewer 
-# is opened for each loaded image. The Fourier Transform honors the origin of the reference system, 
+# This scripts loads one or more images and shows their Fourier Transforms on the screen. A viewer
+# is opened for each loaded image. The Fourier Transform honors the origin of the reference system,
 # which is assumed to be at the center of the image.
 #
 # Usage:

@@ -66,6 +66,7 @@ typedef char DirtyFlags;
 class DLLEXPORT_OST_GFX EntityRenderer {
 public:
   EntityRenderer();
+  virtual ~EntityRenderer(){}
 
   /// \brief add view
   void AddView(const mol::EntityView& view);
@@ -145,8 +146,6 @@ public:
 
   virtual void RenderOptionsChanged();
 
-  virtual ~EntityRenderer(){}
-
   virtual void Apply(const gfx::ByElementColorOp& op)=0;
   virtual void Apply(const gfx::ByChainColorOp& op)=0;
   virtual void Apply(const gfx::UniformColorOp& op)=0;
@@ -159,6 +158,8 @@ public:
   bool IsDirty() const;
   
   void FlagPositionsDirty();
+
+  void Debug(unsigned int flags);
 protected:
   virtual void SetName(const String& name);
 
@@ -176,12 +177,13 @@ protected:
   
   DirtyFlags            sel_state_;
   DirtyFlags            state_;
+  unsigned int          debug_flags_;
 };
 
 //Simplify color ops
 struct ByElementGetCol {
   Color ColorOfAtom(mol::AtomHandle& atom) const{
-    return GfxObj::Ele2Color(atom.GetProp().element);
+    return GfxObj::Ele2Color(atom.GetAtomProps().element);
   }
 };
 

@@ -113,6 +113,23 @@ void ICSEditor::RotateTorsionAngle(TorsionHandle torsion, Real angle)
 }
 
 
+void ICSEditor::RotateTorsionAngle(const AtomHandle& atom_a,
+                                   const AtomHandle& atom_b,
+                                   const AtomHandle& atom_c,
+                                   const AtomHandle& atom_d, Real angle)
+{
+  CheckHandleValidity(atom_a);
+  CheckHandleValidity(atom_b);
+  CheckHandleValidity(atom_c);
+  CheckHandleValidity(atom_d);
+  impl::Dihedral d(atom_a.Impl(), atom_b.Impl(), atom_c.Impl(), atom_d.Impl());
+  Real cur_angle=d.GetAngleICS();
+  d.SetAngleICS(cur_angle+angle);
+  ent_.Impl()->MarkXCSDirty();
+  this->Update();
+}
+
+
 void ICSEditor::SetTorsionAngle(const AtomHandle& atom_a, 
                                 const AtomHandle& atom_b,
                                 const AtomHandle& atom_c, 

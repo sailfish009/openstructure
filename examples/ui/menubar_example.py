@@ -18,7 +18,6 @@
 #------------------------------------------------------------------------------
 from ost import gui
 from ost.gui import FileLoader
-import sip
 
 from PyQt4 import QtCore, QtGui
 

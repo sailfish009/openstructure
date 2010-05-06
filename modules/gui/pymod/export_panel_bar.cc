@@ -20,10 +20,8 @@
 
 #include <ost/gui/panel_bar/panels.hh>
 #include <ost/gui/panel_bar/panel_bar.hh>
-#include <ost/gui/panel_bar/button_bar.hh>
 #include "ost/gui/widget.hh"
 
-#include "menu_proxy.hh"
 #include "sip_handler.hh"
 
 
@@ -35,22 +33,21 @@ using namespace ost::gui;
 namespace{
 void panels_add_widget_a(Panels * panels, PanelPosition pos, const SipHandlerBase& sh, bool hidden=false)
 {
-  panels->AddWidget(pos,reinterpret_cast<Widget*>(sh.GetSipHandle()),hidden);
+  if(Widget* widget = reinterpret_cast<Widget*>(sh.GetSipHandle())){
+    panels->AddWidget(pos,widget,hidden);
+  }
 }
 
-void panels_add_widget_b(Panels * panels, PanelPosition pos, const SipHandlerBase& sh)
+void panels_add_widget_b(Panels * panels, PanelPosition pos, Widget* widget, bool hidden=false)
 {
-  panels->AddWidget(pos,reinterpret_cast<Widget*>(sh.GetSipHandle()));
+  panels->AddWidget(pos,widget,hidden);
 }
 
-void panels_add_widget_c(Panels * panels, PanelPosition pos, Widget* w, bool hidden=false)
+void panels_add_widget_c(Panels * panels, PanelPosition pos, object py_object, bool hidden=false)
 {
-  panels->AddWidget(pos,w,hidden);
-}
-
-void panels_add_widget_d(Panels * panels, PanelPosition pos, Widget* w)
-{
-  panels->AddWidget(pos,w);
+  if(Widget* widget = get_cpp_qobject<Widget>(py_object)){
+    panels->AddWidget(pos,widget,hidden);
+  }
 }
 
 void panels_remove_widget_a(Panels * panels, Widget* w)
@@ -60,7 +57,16 @@ void panels_remove_widget_a(Panels * panels, Widget* w)
 
 void panels_remove_widget_b(Panels * panels, const SipHandlerBase& sh)
 {
-  panels->RemoveWidget(reinterpret_cast<Widget*>(sh.GetSipHandle()));
+  if(Widget* widget = reinterpret_cast<Widget*>(sh.GetSipHandle())){
+    panels->RemoveWidget(widget);
+  }
+}
+
+void panels_remove_widget_c(Panels * panels, object py_object)
+{
+  if(Widget* widget = get_cpp_qobject<Widget>(py_object)){
+    panels->RemoveWidget(widget);
+  }
 }
 
 void panels_add_widget_to_pool_a(Panels * panels, const QString& full_name, Widget* widget)
@@ -68,26 +74,47 @@ void panels_add_widget_to_pool_a(Panels * panels, const QString& full_name, Widg
   panels->AddWidgetToPool(full_name,widget);
 }
 
-void panels_add_widget_to_pool_b(Panels * panels, const QString& name, int limit=-1)
+void panels_add_widget_to_pool_b(Panels * panels, const QString& full_name, const SipHandlerBase& sh)
+{
+  if(Widget* widget = reinterpret_cast<Widget*>(sh.GetSipHandle())){
+    panels->AddWidgetToPool(full_name,widget);
+  }
+}
+
+void panels_add_widget_to_pool_c(Panels * panels, const QString& full_name, object py_object)
+{
+  if(Widget* widget = get_cpp_qobject<Widget>(py_object)){
+    panels->AddWidgetToPool(full_name,widget);
+  }
+}
+
+void panels_add_widget_to_pool_d(Panels * panels, const QString& name, int limit=-1)
 {
   panels->AddWidgetToPool(name,limit);
 }
 
 object panels_get_menu(Panels* panels)
 {
-  static object sip_module=import("sip");
-  static object pyqt4_module=import("PyQt4.QtGui");
-  object obj(MenuProxy(panels->GetMenu()));
-  object sip_handle=obj.attr("GetSipHandle")();
-  object qmenu = pyqt4_module.attr("QMenu");
-  object menu = sip_module.attr("wrapinstance")(sip_handle, qmenu);
-
-  return menu;
+  return get_py_qobject<QMenu>(panels->GetMenu());
 }
 
-void panel_bar_add_widget(PanelBar * pb, const SipHandlerBase& sh, bool hidden)
+void panel_bar_add_widget_a(PanelBar * pb, Widget* widget, bool hidden=false)
 {
-  pb->AddWidget(reinterpret_cast<Widget*>(sh.GetSipHandle()),hidden);
+  pb->AddWidget(widget,hidden);
+}
+
+void panel_bar_add_widget_b(PanelBar * pb, const SipHandlerBase& sh, bool hidden=false)
+{
+  if(Widget* widget = reinterpret_cast<Widget*>(sh.GetSipHandle())){
+    pb->AddWidget(widget,hidden);
+  }
+}
+
+void panel_bar_add_widget_c(PanelBar * pb, object py_object, bool hidden=false)
+{
+  if(Widget* widget = get_cpp_qobject<Widget>(py_object)){
+    pb->AddWidget(widget,hidden);
+  }
 }
 
 }
@@ -103,33 +130,36 @@ void export_PanelBar()
       ;
 
   class_<Panels, boost::noncopyable>("Panels", no_init)
-    .def("AddWidget", &panels_add_widget_a)
-    .def("AddWidget", &panels_add_widget_b)
-    .def("AddWidget", &panels_add_widget_c)
-    .def("AddWidget", &panels_add_widget_d)
+    .def("AddWidget", &panels_add_widget_a, arg("hidden")=false)
+    .def("AddWidget", &panels_add_widget_b, arg("hidden")=false)
+    .def("AddWidget", &panels_add_widget_c, arg("hidden")=false)
     .def("AddWidgetByName", &Panels::AddWidgetByName)
     .def("RemoveWidget", &panels_remove_widget_a)
     .def("RemoveWidget", &panels_remove_widget_b)
+    .def("RemoveWidget", &panels_remove_widget_c)
     .def("GetMenu", &panels_get_menu)
     .def("AddWidgetToPool", &panels_add_widget_to_pool_a)
     .def("AddWidgetToPool", &panels_add_widget_to_pool_b)
+    .def("AddWidgetToPool", &panels_add_widget_to_pool_c)
+    .def("AddWidgetToPool", &panels_add_widget_to_pool_d)
     .def("Save", &Panels::Save)
     .def("Restore", &Panels::Restore)
     .add_property("menu", &panels_get_menu)
+    .def("GetQObject",&get_py_qobject<Panels>)
+    .add_property("qobject", &get_py_qobject<Panels>)
   ;
 
   class_<PanelBar, boost::noncopyable>("PanelBar", no_init)
-    .def("AddWidget", &panel_bar_add_widget)
-    .def("AddWidget", &PanelBar::AddWidget)
+    .def("AddWidget", &panel_bar_add_widget_a, arg("hidden")=false)
+    .def("AddWidget", &panel_bar_add_widget_b, arg("hidden")=false)
+    .def("AddWidget", &panel_bar_add_widget_c, arg("hidden")=false)
     .def("Restore", &PanelBar::Restore)
     .def("Save", &PanelBar::Save)
     .def("Hide", &PanelBar::hide)
     .def("Show", &PanelBar::show)
+    .def("GetQObject",&get_py_qobject<PanelBar>)
+    .add_property("qobject", &get_py_qobject<PanelBar>)
   ;
 
-  class_<ButtonBar, boost::noncopyable>("ButtonBar", no_init)
-    .def("Hide", &ButtonBar::hide)
-    .def("Show", &ButtonBar::show)
-  ;
 }
 

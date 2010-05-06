@@ -25,3 +25,5 @@ title: Tutorials
 ## For Developers
  * [Expanding OpenStructure - Creating a New Module](docs/tut/newmodule.html)
  * [Using External Programs within OpenStructure](docs/tut/external.html)
+ * [Creating new algorithms for Images and Density Maps](docs/tut/imgalgdata.html)
+ * [Creating new image state algorithms](docs/tut/imgalgdistate.html)

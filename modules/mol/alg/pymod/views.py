@@ -1,10 +1,7 @@
 """
- Algorithms operating on two views. 
+A bunch of algorithms operating on two views. 
 
-All these algorithms return a tuple of views that contain the same number of
-residues. Thes residues at corresponding indices in these two views form pairs.
-
-Author: Marco Biasini  
+Authors: Marco Biasini, Pascal Benkert
 """
 
 from ost import io,mol
@@ -53,3 +50,71 @@ def PairResiduesByNum(view_a, view_b,
   except StopIteration:
     pass
   return result_a, result_b
+  
+def RepresentativeAtoms(ent, chain=None, alpha_and_beta=False):
+  """
+  Returns a view with one or two representative atom per amino acid residue. 
+
+  There are two basic modes, controlled by the alpha_and_beta parameter:
+
+  When the parameter is false, for residues with a sidechain, the C-beta atom is 
+  used, for residues without  sidechain, the C-alpha atom is used. Note that this 
+  is different from using the selection
+
+    (aname=CA and rname=GLY) or (aname=CB and rname!=GLY)
+
+  When the alpha_and_beta parameter is true, both C-alpha and C-beta (if
+  available) are added to the view.
+
+  If chain is not equal to None, only atoms of the chain with that chain name
+  will be added to the view.
+  """
+  if isinstance(ent,mol.EntityHandle):
+    e_view = ent.CreateEmptyView()
+  elif isinstance(ent,mol.EntityView):
+    e_view = ent.GetHandle().CreateEmptyView()
+  if ent.IsValid():
+    # all chains:
+    if chain==None:
+      for res in ent.residues:
+        if res.IsPeptideLinking():
+          atom =  res.FindAtom('CB')
+          if atom.IsValid():
+            e_view.AddAtom(atom)   
+
+            #also add C-alpha for hybrid-potential:
+            if alpha_and_beta == 1:
+              atom =  res.FindAtom('CA')
+              if atom.IsValid():
+                e_view.AddAtom(atom)
+
+          else: # Cbeta does not exist, Calpha?
+            atom =  res.FindAtom('CA')
+            if atom.IsValid():
+              e_view.AddAtom(atom)
+
+              # count C_alphas twice for hybrid-potential:
+              if alpha_and_beta == 1:
+                e_view.AddAtom(atom)
+
+    elif chain != "" and ent.FindChain(chain).IsValid():
+      for res in ent.FindChain(chain).GetResidueList():
+       if res.IsPeptideLinking():
+          atom =  res.FindAtom('CB')
+          if atom.IsValid():
+            e_view.AddAtom(atom)
+
+            if alpha_and_beta == 1:
+              atom =  res.FindAtom('CA')
+              if atom.IsValid():
+                e_view.AddAtom(atom)
+
+          else: # Cbeta does not exist, Calpha?
+            atom =  res.FindAtom('CA')
+            if atom.IsValid():
+              e_view.AddAtom(atom)
+
+              # count C_alphas twice for glycine:
+              if alpha_and_beta == 1:
+                e_view.AddAtom(atom)
+  return e_view

@@ -224,10 +224,18 @@ void ChainView::RemoveResidue(ResidueView view) {
   ResidueViewList::iterator i=data_->residues.begin();
   for (; i!=data_->residues.end(); ++i) {
     if (*i==view) {
-      data_->residues.erase(i);
-      return;
+      break;
     }
   }
+  ResidueViewList::iterator to_del = i;
+  int index = view.GetIndex();
+  for(; i!=data_->residues.end(); ++i) {
+    int res_index = (*i).GetIndex();
+    if(index < res_index){
+      (*i).SetIndex(res_index-1);
+    }
+  }
+  data_->residues.erase(to_del);
 }
 
 ResidueView ChainView::AddResidue(const ResidueView& residue_view, 
@@ -313,7 +321,7 @@ Real ChainView::GetMass() const {
     ResidueView r=*i;
     for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
          e2=r.GetAtomList().end(); j!=e2; ++j) {
-      mass+=j->GetProp().mass;
+      mass+=j->GetMass();
     }
   }
   return mass;
@@ -388,7 +396,7 @@ geom::Vec3 ChainView::GetCenterOfMass() const
       ResidueView r=*i;
       for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
           e2=r.GetAtomList().end(); j!=e2; ++j) {
-        center+=j->GetPos() * j->GetProp().mass;
+        center+=j->GetPos() * j->GetAtomProps().mass;
       }
     }
     center/=mass;

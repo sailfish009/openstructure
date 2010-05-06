@@ -41,8 +41,19 @@ def _SetupFiles(models):
 def _CleanupFiles(dir_name):
   import shutil
   shutil.rmtree(dir_name)
-  
+
+class TMAlignResult:
+  def __init__(self, rmsd, tm_score, aligned_length, transform):
+    self.rmsd=rmsd
+    self.tm_score=tm_score    
+    self.aligned_length=aligned_length
+    self.transform=transform
+
 def _ParseTmAlign(lines):
+  info_line=lines[11].split(',')
+  aln_length=float(info_line[0].split('=')[1].strip())
+  rmsd=float(info_line[1].split('=')[1].strip())  
+  tm_score=float(info_line[2].split('=')[1].strip())
   tf1=[float(i.strip()) for i in lines[15].split()]
   tf2=[float(i.strip()) for i in lines[16].split()]
   tf3=[float(i.strip()) for i in lines[17].split()]
@@ -50,7 +61,7 @@ def _ParseTmAlign(lines):
                 tf2[4], tf3[2], tf3[3], tf3[4])
   tf=geom.Mat4(rot)
   tf.PasteTranslation(geom.Vec3(tf1[1], tf2[1], tf3[1]))
-  return tf
+  return TMAlignResult(rmsd, aln_length, tm_score, tf)
 
 def _RunTmAlign(tmalign, tmp_dir):
   tmalign_path=settings.Locate('tmalign', explicit_file_name=tmalign)
@@ -108,10 +119,10 @@ def TMAlign(model1, model2, tmalign=None):
   Run tmalign on two protein structures
   """
   tmp_dir_name=_SetupFiles((model1, model2))
-  tf=_RunTmAlign(tmalign, tmp_dir_name)
-  model1.handle.RequestXCSEditor().ApplyTransform(tf)
+  result=_RunTmAlign(tmalign, tmp_dir_name)
+  model1.handle.RequestXCSEditor().ApplyTransform(result.transform)
   _CleanupFiles(tmp_dir_name)
-
+  return result
 def TMScore(model1, model2, tmscore=None):
   """
   Run tmscore on two protein structures

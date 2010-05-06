@@ -46,6 +46,16 @@ typedef boost::shared_ptr<PrimList> PrimListP;
 ///      \ref random_lines.py "Random Lines"
 class DLLEXPORT_OST_GFX PrimList: public GfxObj 
 {
+  struct PointEntry {
+    PointEntry(const geom::Vec3& p, const Color& c):
+      pos(p), color(c) {}
+    geom::Vec3 pos;
+    Color color;
+    geom::Mat3 rotmat;
+  };
+
+  typedef std::vector<PointEntry> PointEntryList;
+
   struct LineEntry {
     LineEntry(const geom::Vec3& p1, const geom::Vec3& p2, const Color& c):
       pos1(p1), pos2(p2), color(c) {}
@@ -68,14 +78,22 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
 
   virtual void CustomRenderGL(RenderPass pass);
 
+  virtual void OnRenderModeChange();
+
   /// \brief  clear all prims
   void Clear();
+
+  /// \brief add line as defined by two endpoints
+  void AddPoint(geom::Vec3& p, const Color& col=Color());
 
   /// \brief add line as defined by two endpoints
   void AddLine(geom::Vec3& p1, geom::Vec3& p2, const Color& col=Color());
 
   /// \brief cylinder diameter for custom rendering mode
   void SetDiameter(float d);
+  
+  /// \brief sphere radius for points in custom rendering mode
+  void SetRadius(float r);
 
   /// \brief set global prims color, overriding individual ones
   void SetColor(const Color& c);
@@ -84,10 +102,13 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
   virtual void CustomPreRenderGL(bool flag);
 
  private:
+  PointEntryList points_;
   LineEntryList lines_;
+  float radius_;
   float diameter_;
-
+  
   void render_simple();
+  void render_custom();
 };
 
 /// \example primitives.py

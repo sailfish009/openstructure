@@ -37,17 +37,17 @@ namespace ost { namespace mol {
 
 class DLLEXPORT_OST_MOL ResidueViewData {
 public:
-  ResidueViewData();
-  ResidueViewData(const ChainViewDataPtr& chain_data)
-    : chain(chain_data) {
-  }
+  ResidueViewData(int residue_index): index(residue_index){}
+  ResidueViewData(const ChainViewDataPtr& chain_data, int residue_index)
+    : chain(chain_data), index(residue_index) { }
   ChainViewDataWeakPtr  chain;
   AtomViewList          atoms;
+  int                   index;
 };
 
 ResidueView::ResidueView(const ChainView&      chain,
                          const ResidueHandle&  residue)
-  : ResidueBase(residue.Impl()), data_(new ResidueViewData(chain.ViewData())) {
+  : ResidueBase(residue.Impl()), data_(new ResidueViewData(chain.ViewData(), chain.GetResidueCount())) {
 }
 
 ResidueView::ResidueView(const ResidueViewDataPtr& data,
@@ -185,7 +185,13 @@ bool ResidueView::operator!=(const ResidueView& rhs) const
 int ResidueView::GetIndex() const
 {
   this->CheckValidity();
-  return this->GetChain().GetResidueIndex(this->GetNumber());
+  return data_->index;
+}
+
+void ResidueView::SetIndex(int index)
+{
+  this->CheckValidity();
+  data_->index = index;
 }
 
 double ResidueView::GetMass() const
@@ -194,7 +200,7 @@ double ResidueView::GetMass() const
   double mass = 0;
   AtomViewList::const_iterator i;
   for (i=data_->atoms.begin(); i!=data_->atoms.end(); ++i) {
-    mass+=(*i).GetProp().mass;
+    mass+=(*i).GetAtomProps().mass;
   }
   return mass;
 }
@@ -239,7 +245,7 @@ geom::Vec3 ResidueView::GetCenterOfMass() const
   if (!data_->atoms.empty() && mass > 0) {
     AtomViewList::const_iterator i;
     for (i=data_->atoms.begin(); i!=data_->atoms.end(); ++i) {
-      center+=(*i).GetPos()*(*i).GetProp().mass;
+      center+=(*i).GetPos()*(*i).GetAtomProps().mass;
     }
       center/=mass;
   }

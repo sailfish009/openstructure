@@ -20,6 +20,7 @@
 /*
   Author: Marco Biasini
  */
+#include <ost/log.hh>
 #include <ost/mol/atom_handle.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/in_mem_coord_source.hh>
@@ -53,10 +54,12 @@ CoordSource::~CoordSource()
 void CoordSource::CopyFrame(uint frame_id)
 {
   if (atoms_.empty()) {
+    LOGN_DEBUG("atom list empty, ignored");
     return;
   }  
   CoordFramePtr frame=this->GetFrame(frame_id);
   if (!frame) {
+    LOGN_DEBUG("invalid frame given, ignored");
     return;
   }
   assert(frame->size()==atoms_.size());
@@ -64,7 +67,7 @@ void CoordSource::CopyFrame(uint frame_id)
   CoordFrame::const_iterator c=frame->begin();
   for (AtomHandleList::iterator i=atoms_.begin(), 
        e=atoms_.end(); i!=e; ++i, ++c) {
-    edi.SetAtomPos(*i, *c);
+     edi.SetAtomPos(*i, *c);
   }
 }
 
@@ -82,6 +85,21 @@ void CoordSource::Capture()
     coords.push_back(i->GetPos());
   }
   this->AddFrame(coords);
+}
+
+void CoordSource::CaptureInto(int pos)
+{
+  std::vector<geom::Vec3> coords;
+  coords.reserve(atoms_.size());
+  for (AtomHandleList::const_iterator i=atoms_.begin(), 
+       e=atoms_.end(); i!=e; ++i) {
+    coords.push_back(i->GetPos());
+  }
+  if(pos<0 || pos>=GetFrameCount()) {
+    this->AddFrame(coords);
+  } else {
+    this->InsertFrame(pos,coords);
+  }
 }
 
 void CoordSource::Capture(uint f)
@@ -119,11 +137,6 @@ EntityHandle CoordSource::GetEntity() const
 bool CoordSource::IsMutable() const
 {
  return mutable_; 
-}
-
-void CoordSource::AddFrame(const std::vector<geom::Vec3>& coords)
-{
-  assert(0 && "implement me");
 }
 
 void CoordSource::SetMutable(bool flag)

@@ -31,6 +31,7 @@
 
 #include <boost/filesystem/convenience.hpp>
 
+#include <QFile>
 #include <QDebug>
 #include <QFile>
 #include <QApplication>

@@ -80,7 +80,7 @@ typedef enum {
 
 
 /// \internal
-class EntityImpl: public GenericPropertyContainerImpl,
+class EntityImpl: public GenericPropContainerImpl,
                   public boost::enable_shared_from_this<EntityImpl>                  
 {
 public:
@@ -268,6 +268,9 @@ private:
   int ics_editor_count_;
   int dirty_flags_;
   String name_;
+
+  unsigned long next_index_;
+
   template <bool always_true>
   EntityView do_selection(const EntityHandle&, const Query&, QueryFlags) const;
 };

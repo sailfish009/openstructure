@@ -3,7 +3,6 @@ from PyQt4 import QtCore, QtGui
 from ost import geom, gfx, gui
 
 import sys, random
-import sip
 
 class SpnavWidget(QtCore.QObject):
   def __init__(self, spnav,

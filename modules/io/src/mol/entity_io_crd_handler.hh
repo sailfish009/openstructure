@@ -25,8 +25,6 @@
  */
 #include <ost/io/mol/entity_io_handler.hh>
 
-#include <ost/mol/coord_group.hh>
-
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -54,6 +52,23 @@ private:
   boost::iostreams::filtering_stream<boost::iostreams::input>  in_;
 };
 
+
+class DLLEXPORT_OST_IO CRDWriter : public mol::EntityVisitor {
+public:
+  CRDWriter(const String& filename);
+  CRDWriter(const boost::filesystem::path& filename);
+  CRDWriter(std::ostream& outstream);
+
+  virtual bool VisitAtom(const mol::AtomHandle& atom);
+
+  void WriteHeader(const mol::EntityView& ent);
+
+private:
+  std::ofstream   outfile_;
+  std::ostream&   outstream_;
+  int atom_count_;
+};
+
 class DLLEXPORT_OST_IO EntityIOCRDHandler: public EntityIOHandler {
 public:
   virtual void Import(mol::EntityHandle& ent, const boost::filesystem::path& loc);
@@ -79,14 +94,6 @@ public:
 typedef EntityIOHandlerFactory<EntityIOCRDHandler> EntityIOCRDHandlerFactory;
 
 mol::EntityHandle DLLEXPORT_OST_IO LoadCRD(const String& file_name);
-
-/*
-  the flag can tweak the behavior of the importer; right now, the zero bit
-  can be used to switch old format compatibility on
-*/
-mol::CoordGroupHandle DLLEXPORT_OST_IO LoadCHARMMTraj(const String& crd,
-                                                 const String& trj,
-                                                 int flags=0);
 
 }} // ns
 

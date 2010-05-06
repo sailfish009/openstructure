@@ -54,6 +54,8 @@ void export_CoordGroup()
     .def("IsValid", &CoordGroupHandle::IsValid)
     .def("Capture", capture1)
     .def("Capture", capture2)
+    .def("CaptureInto",&CoordGroupHandle::CaptureInto)
+    .def("GetAtomList",&CoordGroupHandle::GetAtomList)
     .def("__getitem__",cg_getitem)
     .def("__setitem__",cg_setitem)
   ;

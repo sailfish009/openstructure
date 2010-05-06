@@ -37,8 +37,8 @@ struct WrappedRemoteSiteLoader : public RemoteSiteLoader
         RemoteSiteLoader(), self(p)
     { }
 
-    virtual void LoadById(const QString& id){
-       return call_method<void, std::string>(self, "LoadById", id.toStdString());
+    virtual void LoadById(const QString& id, const QString& selection=QString()){
+       return call_method<void, std::string>(self, "LoadById", id.toStdString(), selection.toStdString());
     }
 
     virtual QString GetRemoteSiteName(){
@@ -49,10 +49,9 @@ struct WrappedRemoteSiteLoader : public RemoteSiteLoader
       return call_method<bool>(self, "IsImg");
     }
 
-    virtual QNetworkReply* ById(const QString& id){
-      //This hackish code will be changed soon(er or later)
-      unsigned long addr=call_method<unsigned long, std::string>(self, "ByIdAddr", id.toStdString());
-      QNetworkReply* network_reply= reinterpret_cast<QNetworkReply*>(addr);
+    virtual QNetworkReply* ById(const QString& id, const QString& selection=QString()){
+      object obj = call_method<object, std::string, std::string>(self, "ById", id.toStdString(), selection.toStdString());
+      QNetworkReply* network_reply= get_cpp_qobject<QNetworkReply>(obj);
       if(network_reply){
         return network_reply;
       }

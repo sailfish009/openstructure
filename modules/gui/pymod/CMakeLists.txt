@@ -9,6 +9,7 @@ set(OST_GUI_PYMOD_SOURCES
   export_remote_site_loader.cc
   export_scene_win.cc
   export_sequence_viewer.cc
+  export_sequence_viewerV2.cc
   export_perspective.cc
   export_sip_handler.cc
   export_scene_selection.cc
@@ -60,7 +61,6 @@ line_trace_widget.py
 )
 if (ENABLE_IMG)
   list(APPEND OST_GUI_PYMOD_SOURCES
-  data_viewer_proxy.cc
   export_data_viewer.cc
   export_overlay.cc
   )
@@ -74,7 +74,9 @@ endif()
 
 set(OST_GUI_PYMOD_MODULES
   __init__.py
+  init_context_menu.py
   init_menubar.py
+  init_spacenav.py
 )
 
 pymod(NAME gui CPP ${OST_GUI_PYMOD_SOURCES} 

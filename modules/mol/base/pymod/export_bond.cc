@@ -26,8 +26,8 @@ using namespace boost::python;
 
 using namespace ost;
 using namespace ost::mol;
-#include "generic_property_def.hh"
-#include "generic_property_def.hh"
+#include <ost/export_helper/generic_property_def.hh>
+
 void export_Bond()
 {
   void (BondHandle::* apply1)(EntityVisitor&) = &BondHandle::Apply;
@@ -41,6 +41,8 @@ void export_Bond()
                   make_function(&BondHandle::GetFirst))
     .add_property("second", 
                   make_function(&BondHandle::GetSecond))
+    .add_property("other", 
+                  make_function(&BondHandle::GetOther))
     .add_property("length", 
                   &BondHandle::GetLength)
     .add_property("bond_order",
@@ -48,6 +50,7 @@ void export_Bond()
                   &BondHandle::SetBondOrder)
     .def("GetFirst", &BondHandle::GetFirst)    
     .def("GetSecond",&BondHandle::GetSecond)
+    .def("GetOther",&BondHandle::GetOther)
     .def("GetLength",&BondHandle::GetLength)
     .def("GetBondOrder",&BondHandle::GetBondOrder)
     .def("SetBondOrder",&BondHandle::SetBondOrder)

@@ -280,7 +280,7 @@ bool QueryImpl::IsAlwaysUndef(const Node* ast,
   else {
     const SelNode* sel_node = dynamic_cast<const SelNode*>(ast);
     assert(sel_node);
-    if ((int)target_level > (int)sel_node->GetProp().level) {
+    if ((int)target_level > (int)sel_node->GetAtomProps().level) {
       return true;
     }
   }
@@ -296,7 +296,7 @@ void QueryImpl::ExtractSelStmts(const Node* ast) {
   else {
     const SelNode* sel_node = dynamic_cast<const SelNode*>(ast);
     assert(sel_node);
-    SelStmt val(sel_node->GetProp().id,
+    SelStmt val(sel_node->GetAtomProps().id,
                 sel_node->GetCompOP(),
                 sel_node->GetParm());
     std::vector<SelStmt>::iterator i = std::find(sel_values_.begin(),
@@ -304,7 +304,7 @@ void QueryImpl::ExtractSelStmts(const Node* ast) {
     if (i==sel_values_.end()) {
       size_t idx = sel_values_.size();
       sel_values_.push_back(val);
-      indices_[(int)sel_node->GetProp().level].insert(idx);      
+      indices_[(int)sel_node->GetAtomProps().level].insert(idx);      
     }
   }  
 }
@@ -361,8 +361,8 @@ void QueryImpl::ASTToSelStack(const Node* src_ast,
   }
   else {
     const SelNode* sel_node = dynamic_cast<const SelNode*>(src_ast);
-    assert((int)target_level <= (int)sel_node->GetProp().level);
-    SelStmt val(sel_node->GetProp().id,sel_node->GetCompOP(),
+    assert((int)target_level <= (int)sel_node->GetAtomProps().level);
+    SelStmt val(sel_node->GetAtomProps().id,sel_node->GetCompOP(),
                 sel_node->GetParm());
     std::vector<SelStmt>::iterator i = std::find(sel_values_.begin(),
                                                  sel_values_.end(),val);

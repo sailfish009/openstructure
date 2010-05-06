@@ -18,6 +18,7 @@
 #------------------------------------------------------------------------------
 
 import sip
+
 from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
@@ -40,14 +41,11 @@ class InitInspectorMenu(QtCore.QObject):
   def Toggle(self):
     self.inspector_.setVisible(self.show_.isChecked())
     
-def _InitInspector():
-  app=gui.GostyApp.Instance()
-  gl_win=sip.wrapinstance(app.gl_win.GetSipHandle(),QtGui.QWidget)
-  mywidget = InspectorDialog(gl_win)
+def _InitInspector(app):
+  mywidget = InspectorDialog(app.gl_win.qobject)
   mywidget.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.Tool)
   mywidget.show()
-  unwrapped = gui.BPQtHandle(sip.unwrapinstance(mywidget))
-  app.AddWidgetToApp("InspectorDialog", unwrapped)  
+  app.AddWidgetToApp("InspectorDialog", mywidget)  
   menu_bar=app.perspective.GetMenuBar()
   InitInspectorMenu(mywidget,menu_bar)
 

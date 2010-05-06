@@ -28,6 +28,11 @@ The following links provide direct access to the API documentation.
 
  * dox[ost::gfx::Scene|Scene] | [Graphical Entity](dox/html/gfx_ent.html)
 
+### Image Manipulation
+
+
+ * dox[ost::img::ImageHandle|ImageHandle] 
+
 ### Global Data Structure Index
  * [Data Structure index](dox/html/classes.html)
 

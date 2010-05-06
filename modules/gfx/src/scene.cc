@@ -124,6 +124,7 @@ Scene::Scene():
   blur_count_(0),
   blur_buffer_(),
   stereo_(0),
+  stereo_inverted_(false),
   stereo_eye_(0),
   stereo_eye_dist_(150.0),
   stereo_eye_offset_(10.0)
@@ -1061,6 +1062,11 @@ void Scene::Stereo(unsigned int m)
   RequestRedraw();
 }
 
+void Scene::SetStereoInverted(bool f)
+{
+  stereo_inverted_=f;
+}
+
 void Scene::SetStereoEye(unsigned int m)
 {
   stereo_eye_= (m>2) ? 0: m;
@@ -1737,12 +1743,21 @@ void Scene::render_quad_buffered_stereo()
   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   glDrawBuffer(GL_BACK_LEFT);
   glClear(GL_DEPTH_BUFFER_BIT);
-  stereo_projection(stereo_==1 ? 1: 2);
+  if (stereo_inverted_) {
+    stereo_projection(stereo_==1 ? 2 : 1);
+  } else {
+    stereo_projection(stereo_==1 ? 1 : 2);
+  }
   this->render_scene_with_glow();
   glDrawBuffer(GL_BACK_RIGHT);
   glClear(GL_DEPTH_BUFFER_BIT);
-  stereo_projection(stereo_==1 ? 2 : 1);
+  if (stereo_inverted_) {
+    stereo_projection(stereo_==1 ? 1 : 2);
+  } else {
+    stereo_projection(stereo_==1 ? 2 : 1);
+  }
   this->render_scene_with_glow();
+  glDrawBuffer(GL_BACK);
 }
 
 }} // ns

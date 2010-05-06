@@ -135,7 +135,7 @@ impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
       r=new impl::CartoonRenderer(trace_, true);
       break;
     default:
-      assert(0 && "GetOrCreateRendererer() not implemented for this mode");
+      return 0;
   }
   renderer_.insert(rm, r);
   return r;
@@ -151,7 +151,8 @@ void Entity::init(RenderMode::Type rm)
   trace_.SetView(this->GetView());
   sel_=this->GetView().CreateEmptyView();  
   impl::EntityRenderer* r=this->GetOrCreateRenderer(rm);
-  
+  if(!r) return;
+
   r->AddView(this->GetView());
   r->UpdateViews();
   set_static_max_rad();
@@ -171,6 +172,7 @@ SimpleRenderOptionsPtr get_sro(impl::EntityRenderer* renderer)
 void Entity::SetBlur(bool f)
 {
   impl::EntityRenderer* renderer=this->GetOrCreateRenderer(RenderMode::SIMPLE);
+  if(!renderer) return;
   SimpleRenderOptionsPtr sro=get_sro(renderer);
   sro->SetBlurFlag(f);
 }
@@ -178,6 +180,7 @@ void Entity::SetBlur(bool f)
 void Entity::BlurSnapshot()
 {
   impl::EntityRenderer* renderer=this->GetOrCreateRenderer(RenderMode::SIMPLE);
+  if(!renderer) return;
   impl::SimpleRenderer* sr=dynamic_cast<SimpleRenderer*>(renderer);
   assert(sr);
   sr->BlurSnapshot();
@@ -186,6 +189,7 @@ void Entity::BlurSnapshot()
 void Entity::SetBlurFactors(float bf1,float bf2)
 {
   impl::EntityRenderer* renderer=this->GetOrCreateRenderer(RenderMode::SIMPLE);
+  if(!renderer) return;
   SimpleRenderOptionsPtr sro=get_sro(renderer);
   sro->SetBlurFactors(bf1, bf2);
 }
@@ -303,6 +307,15 @@ void Entity::CustomPreRenderGL(bool update)
 {
   if (update) {
     this->UpdateIfNeeded();
+    RefreshVA();
+  }
+}
+
+void Entity::RefreshVA()
+{
+  for (RendererMap::iterator i=renderer_.begin(), 
+	 e=renderer_.end(); i!=e; ++i) {
+    i->second->Debug(debug_flags_);
   }
 }
 
@@ -493,6 +506,7 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
 RenderOptionsPtr Entity::GetOptions(RenderMode::Type render_mode)
 {
   EntityRenderer* renderer = this->GetOrCreateRenderer(render_mode);
+  if(!renderer) return RenderOptionsPtr();
   RenderOptionsPtr render_options=renderer->GetOptions();
   EntityP e=boost::dynamic_pointer_cast<Entity>(shared_from_this());
   render_options->AddObserver(e);
@@ -500,15 +514,18 @@ RenderOptionsPtr Entity::GetOptions(RenderMode::Type render_mode)
 }
 
 void Entity::SetOptions(RenderMode::Type render_mode, 
-                              RenderOptionsPtr& render_options)
+			RenderOptionsPtr& render_options)
 {
+  if(!render_options) return;
   RendererMap::iterator i=renderer_.find(render_mode);
   if(i!= renderer_.end()) {
     EntityRenderer* entity_renderer =i->second;
     if(entity_renderer->CanSetOptions(render_options)){
       EntityP e=boost::dynamic_pointer_cast<Entity>(shared_from_this());
       RenderOptionsPtr old_render_options = entity_renderer->GetOptions();
-      old_render_options->RemoveObserver(e);
+      if(old_render_options) {
+	old_render_options->RemoveObserver(e);
+      }
       entity_renderer->SetOptions(render_options);
       render_options->AddObserver(e);
       FlagRebuild();
@@ -544,6 +561,7 @@ void Entity::ApplyOptions(RenderMode::Type render_mode,
 void Entity::OptionsChanged(RenderMode::Type render_mode)
 {
   impl::EntityRenderer* entity_renderer=this->GetOrCreateRenderer(render_mode);
+  if(!entity_renderer) return;
   entity_renderer->RenderOptionsChanged();
   FlagRebuild();
   Scene::Instance().ObjectChanged(this->GetName());
@@ -556,13 +574,15 @@ void Entity::OnRenderModeChange()
     i->second->ClearViews();
   }
   impl::EntityRenderer* r=this->GetOrCreateRenderer(render_mode_);
+  if(!r) return;
+
   r->AddView(this->GetView());
   for (RendererMap::iterator i=renderer_.begin(), 
-       e=renderer_.end(); i!=e; ++i) {
-     mol::EntityView rv=i->second->GetFullView();
-     if (rv.IsValid() && rv.GetAtomCount()>0) {
-       i->second->SetSelection(mol::Intersection(sel_, rv));
-     }         
+	 e=renderer_.end(); i!=e; ++i) {
+    mol::EntityView rv=i->second->GetFullView();
+    if (rv.IsValid() && rv.GetAtomCount()>0) {
+      i->second->SetSelection(mol::Intersection(sel_, rv));
+    }         
     i->second->UpdateViews();
   }  
   this->ReapplyColorOps();
@@ -616,6 +636,7 @@ void Entity::SetRenderMode(RenderMode::Type mode,
                            const mol::EntityView& view, bool keep)
 {
   EntityRenderer* rend = this->GetOrCreateRenderer(mode);
+  if(!rend) return;
   rend->AddView(view);
 
   // substract view from all renderers
@@ -639,6 +660,7 @@ void Entity::SetRenderMode(RenderMode::Type mode,
 mol::EntityView Entity::GetRenderView(RenderMode::Type mode)
 {
   EntityRenderer* rend = this->GetOrCreateRenderer(mode);
+  if(!rend) return mol::EntityView();
   return rend->GetFullView();
 }
 

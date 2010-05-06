@@ -41,36 +41,43 @@ public:
   {
     this->UpdateVal();
   }
-  
+
   AlignedColumnIterator& operator++()
   {
     ++curr_;
     this->UpdateVal();
     return *this;
   }
-  
+
+  AlignedColumnIterator& operator--()
+  {
+    --curr_;
+    this->UpdateVal();
+    return *this;
+  }
+
   AlignedColumnIterator operator++(int)
   {
     AlignedColumnIterator ans(*this);
     ++(*this);
     return ans;
   }
-  
+
   AlignedColumn* operator->()
   {
     return &val_;
   }
-  
+
   AlignedColumn& operator*()
   {
     return val_;
   }
-  
+
   bool operator==(const AlignedColumnIterator& rhs) const
   {
     return aln_==rhs.aln_ && rhs.curr_==curr_;
   }
-  
+
   bool operator!=(const AlignedColumnIterator& rhs) const
   {
     return !(*this==rhs);

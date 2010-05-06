@@ -215,10 +215,12 @@ boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
           bool b=false;
           if (p=="helix") {
             b=r->GetSecStructure().IsHelical();
-          } else if (p=="ext") {
+          } else if (p=="ext" || p=="strand") {
             b=r->GetSecStructure().IsExtended();
           } else if (p=="coil") {
             b=r->GetSecStructure().IsCoil();
+          } else if (p=="*") {
+            b=true;
           }
           s_[*i]=ss.comp_op==COP_EQ ? b : !b;          
         } else {
@@ -324,17 +326,17 @@ boost::logic::tribool QueryState::EvalAtom(const impl::AtomImplPtr& a) {
                                boost::get<float>(ss.param));
         break;                
       case Prop::OCC:
-        float_value=a->GetProp().occupancy;
+        float_value=a->GetAtomProps().occupancy;
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
                                boost::get<float>(ss.param));
         break;                        
       case Prop::ELE:
-        str_value = a->GetProp().element;
+        str_value = a->GetAtomProps().element;
         s_[*i] = cmp_string(ss.comp_op,str_value,
           boost::get<String>(ss.param));                          
         break;
       case Prop::ABFAC:
-        float_value=a->GetProp().b_factor;
+        float_value=a->GetAtomProps().b_factor;
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
                               boost::get<float>(ss.param));
         break;
@@ -344,11 +346,11 @@ boost::logic::tribool QueryState::EvalAtom(const impl::AtomImplPtr& a) {
                                 ss.comp_op);
         break;
       case Prop::ISHETATM:
-        int_value = a->GetProp().is_hetatm;
+        int_value = a->GetAtomProps().is_hetatm;
         s_[*i] = cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));
         break;
       case Prop::ACHARGE:
-        float_value=a->GetProp().charge;
+        float_value=a->GetAtomProps().charge;
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
                               boost::get<float>(ss.param));
         break;

@@ -45,4 +45,30 @@ BOOST_AUTO_TEST_CASE(test_in_sequence)
   BOOST_CHECK(!InSequence(rA,rC));
 }
 
+BOOST_AUTO_TEST_CASE(test_res_index)
+{
+  EntityHandle eh=CreateEntity();
+  XCSEditor e=eh.RequestXCSEditor();
+  ChainHandle ch1=e.InsertChain("A");
+  ResidueHandle rA = e.AppendResidue(ch1, "A");
+  ResidueHandle rB = e.AppendResidue(ch1, "B");
+  ResidueHandle rC = e.AppendResidue(ch1, "C");
+  EntityView v(eh);
+  ChainView cv1(v, ch1);
+  ResidueView rvA = cv1.AddResidue(rA);
+  ResidueView rvB = cv1.AddResidue(rB);
+  ResidueView rvC = cv1.AddResidue(rC);
+  BOOST_CHECK_EQUAL(rvA.GetIndex(),0);
+  BOOST_CHECK_EQUAL(rvA.GetIndex(),cv1.GetResidueIndex(rvA.GetNumber()));
+  BOOST_CHECK_EQUAL(rvB.GetIndex(),1);
+  BOOST_CHECK_EQUAL(rvB.GetIndex(),cv1.GetResidueIndex(rvB.GetNumber()));
+  BOOST_CHECK_EQUAL(rvC.GetIndex(),2);
+  BOOST_CHECK_EQUAL(rvC.GetIndex(),cv1.GetResidueIndex(rvC.GetNumber()));
+  cv1.RemoveResidue(rvB);
+  BOOST_CHECK_EQUAL(rvA.GetIndex(),0);
+  BOOST_CHECK_EQUAL(rvA.GetIndex(),cv1.GetResidueIndex(rvA.GetNumber()));
+  BOOST_CHECK_EQUAL(rvC.GetIndex(),1);
+  BOOST_CHECK_EQUAL(rvC.GetIndex(),cv1.GetResidueIndex(rvC.GetNumber()));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

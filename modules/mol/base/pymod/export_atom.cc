@@ -26,7 +26,8 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol;
 
-#include "generic_property_def.hh"
+#include <ost/export_helper/generic_property_def.hh>
+
 void export_Atom()
 {
   class_<AtomBase> atom_base("AtomBase", no_init);
@@ -43,11 +44,12 @@ void export_Atom()
     .def(self_ns::str(self))
     .add_property("hash_code", &AtomBase::GetHashCode)
     .def("GetHashCode", &AtomBase::GetHashCode)
-    .def("GetProp", &AtomBase::GetProp,
+    .def("GetAtomProps", &AtomBase::GetAtomProps,
          return_value_policy<copy_const_reference>())
-    .def("SetProp", &AtomBase::SetProp, args("prop"))
+    .def("SetAtomProps", &AtomBase::SetAtomProps, args("prop"))
+    .def("GetIndex", &AtomBase::GetIndex)
     .add_property("prop",
-                  make_function(&AtomBase::GetProp,
+                  make_function(&AtomBase::GetAtomProps,
                                 return_value_policy<copy_const_reference>()))
     .add_property("pos",
                   make_function(&AtomBase::GetPos,
@@ -56,7 +58,20 @@ void export_Atom()
                   make_function(&AtomBase::GetName,
                                 return_value_policy<copy_const_reference>()),
                   &AtomBase::SetName)
-
+    .add_property("index",&AtomBase::GetIndex)
+    
+    .def("GetRadius", &AtomBase::GetRadius)
+    .def("GetElement", &AtomBase::GetElement, 
+         return_value_policy<copy_const_reference>())
+    .def("GetCharge", &AtomBase::GetCharge)
+    .def("GetMass", &AtomBase::GetMass)
+    .def("IsHetAtom", &AtomBase::IsHetAtom)    
+    .add_property("radius", &AtomBase::GetRadius)
+    .add_property("element", make_function(&AtomBase::GetElement, 
+                  return_value_policy<copy_const_reference>()))
+    .add_property("is_hetatom", &AtomBase::IsHetAtom)
+    .add_property("charge", &AtomBase::GetCharge)
+    .add_property("mass", &AtomBase::GetMass)
   ;
   generic_prop_def<AtomBase>(atom_base);
 

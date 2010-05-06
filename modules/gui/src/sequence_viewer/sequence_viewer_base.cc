@@ -207,7 +207,7 @@ SequenceViewerBase::Style SequenceViewerBase::GetDisplayStyle() const
 
 void SequenceViewerBase::AddSequence(SequenceItem* seq)
 {
-  seq->SetShowSecStructure(style_==LOOSE);  
+  seq->SetShowSecStructure(style_==LOOSE);
   scene_->AddSequence(seq);
   QRectF rect=scene_->itemsBoundingRect();
   view_->setSceneRect(QRectF(0, 0, +rect.left()+rect.width(), 

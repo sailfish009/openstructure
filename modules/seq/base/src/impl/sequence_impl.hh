@@ -26,7 +26,7 @@
 #include <list>
 
 #include <boost/shared_ptr.hpp>
-
+#include <ost/generic_property.hh>
 #include <ost/info/info_fw.hh>
 #include <ost/mol/residue_prop.hh>
 #include <ost/mol/entity_view.hh>
@@ -43,7 +43,7 @@ class SequenceImpl;
 typedef boost::shared_ptr<SequenceImpl> SequenceImplPtr;
 
 /// \internal
-class DLLEXPORT_OST_SEQ SequenceImpl {
+class DLLEXPORT_OST_SEQ SequenceImpl : public GenericPropContainerImpl {
 public:
   /// \brief       Construct new sequence object from sequence_string.
   static SequenceImplPtr FromString(const String& seq_name,

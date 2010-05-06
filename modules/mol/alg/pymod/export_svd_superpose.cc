@@ -30,6 +30,8 @@ using namespace ost::mol::alg;
 
 void export_svdSuperPose()
 {
+  SuperpositionResult (*sup1)(const mol::EntityView&,const mol::EntityView&,bool) = SuperposeSVD;
+  SuperpositionResult (*sup2)(const std::vector<geom::Vec3>&,const std::vector<geom::Vec3>& ) = SuperposeSVD;
   class_<SuperpositionResult>("SuperpositionResult", init<>())
     .def_readwrite("ncycles", &SuperpositionResult::ncycles)
     .def_readwrite("rmsd", &SuperpositionResult::rmsd)
@@ -41,7 +43,8 @@ void export_svdSuperPose()
                &SuperpositionResult::entity_view2)
   ;
   def("SuperposeAtoms", &SuperposeAtoms,(arg("apply_transform")=true));
-  def("SuperposeSVD", &SuperposeSVD, (arg("apply_transform")=true));
+  def("SuperposeSVD", sup1);
+  def("SuperposeSVD", sup2);
   def("CalculateRMSD", &CalculateRMSD, (arg("transformation")=geom::Mat4()));
   def("IterativeSuperposition", &IterativeSuperposition, (arg("ncycles")=200,
                                                           arg("dist_thres")=4.0,

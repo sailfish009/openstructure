@@ -77,8 +77,8 @@ class InitMenuBar(QtCore.QObject):
   def OpenDocs(self):
     QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://www.openstructure.org/docs/index.html"))
     
-def _InitMenuBar(menu_bar):
-  InitMenuBar(menu_bar)
+def _InitMenuBar(app):
+  InitMenuBar(app.perspective.menubar)
   
 ## \example menubar_example.py
 #

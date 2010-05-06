@@ -36,13 +36,22 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-EntityRenderer::EntityRenderer():name_(""),enabled_(true){}
+EntityRenderer::EntityRenderer():
+  name_(""),
+  enabled_(true)
+{}
 
 void EntityRenderer::FlagPositionsDirty()
 {
   state_|=DIRTY_VA;
   sel_state_|=DIRTY_VA;
 }
+
+ void EntityRenderer::Debug(unsigned int flags)
+ {
+   debug_flags_=flags;
+   va_.DrawNormals(debug_flags_&0x1);
+ }
 
 const String& EntityRenderer::GetName() const{
   return name_;
@@ -135,6 +144,7 @@ void EntityRenderer::Render(RenderPass pass)
 {
   assert(sel_state_==0 && state_==0);
   if (pass==STANDARD_RENDER_PASS) {
+    va_.DrawNormals(debug_flags_&0x1);
     va_.RenderGL();
   } else if (pass==GLOW_RENDER_PASS && this->HasSelection()) {
     sel_va_.RenderGL();

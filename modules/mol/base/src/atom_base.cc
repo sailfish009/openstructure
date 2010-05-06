@@ -29,12 +29,12 @@ AtomBase::AtomBase()
 AtomBase::AtomBase(const impl::AtomImplPtr& impl):
   impl_(impl) 
 {}
-GenericPropertyContainerImpl* AtomBase::GpImpl()
+GenericPropContainerImpl* AtomBase::GpImpl()
 {
   return Impl().get();
 }
 
-const GenericPropertyContainerImpl* AtomBase::GpImpl() const
+const GenericPropContainerImpl* AtomBase::GpImpl() const
 {
   return Impl().get();
 }
@@ -76,16 +76,16 @@ std::vector<String> AtomBase::GetAltGroupNames() const
 }
 
 
-const AtomProp& AtomBase::GetProp() const 
+const AtomProp& AtomBase::GetAtomProps() const 
 {
   this->CheckValidity();  
-  return impl_->GetProp();
+  return impl_->GetAtomProps();
 }
 
-void AtomBase::SetProp(const AtomProp& prop) 
+void AtomBase::SetAtomProps(const AtomProp& prop) 
 {
   this->CheckValidity();  
-  impl_->GetProp()=prop;
+  impl_->GetAtomProps()=prop;
 }
 
 impl::AtomImplPtr& AtomBase::Impl() 
@@ -126,11 +126,59 @@ long AtomBase::GetHashCode() const
   return reinterpret_cast<long>(Impl().get());
 }
 
-std::ostream& operator<<(std::ostream& os, 
-                         const AtomBase& atom) 
+std::ostream& operator<<(std::ostream& os, const AtomBase& atom) 
 {
-  os << atom.GetQualifiedName();
+  if (atom.IsValid()) {
+    os << atom.GetQualifiedName();
+  } else {
+    os << "invalid atom";
+  }
   return os;
+}
+
+
+Real AtomBase::GetRadius() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().radius;
+}
+
+
+const String& AtomBase::GetElement() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().element;
+}
+
+
+bool AtomBase::IsHetAtom() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().is_hetatm;
+}
+
+Real AtomBase::GetBFactor() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().b_factor;
+}
+
+Real AtomBase::GetMass() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().mass;
+}
+
+Real AtomBase::GetCharge() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().charge;
+}
+
+Real AtomBase::GetOccupancy() const
+{
+  this->CheckValidity();
+  return Impl()->GetAtomProps().occupancy;
 }
 
 
@@ -151,6 +199,12 @@ int AtomBase::GetIntProperty(Prop::ID prop_id) const
 {
   this->CheckValidity();
   return Impl()->GetIntProperty(prop_id);
+}
+
+unsigned long AtomBase::GetIndex() const
+{
+  this->CheckValidity();
+  return Impl()->GetIndex();
 }
 
 }} // ns

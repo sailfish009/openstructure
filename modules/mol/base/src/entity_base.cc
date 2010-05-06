@@ -36,22 +36,22 @@ impl::EntityImplPtr& EntityBase::Impl() {
 const impl::EntityImplPtr& EntityBase::Impl() const {
   return impl_;
 }
-GenericPropertyContainerImpl* EntityBase::GpImpl()
+GenericPropContainerImpl* EntityBase::GpImpl()
 {
   return Impl().get();
 }
 
-const GenericPropertyContainerImpl* EntityBase::GpImpl() const
+const GenericPropContainerImpl* EntityBase::GpImpl() const
 {
   return Impl().get();
 }
 
 bool EntityBase::IsValid() const {
-  return Impl();
+  return impl_.get()!=0;
 }
 
 EntityBase::operator bool() const {
-  return impl_;
+  return impl_.get()!=0;
 }
 
 void EntityBase::CheckValidity() const {
@@ -69,9 +69,14 @@ void EntityBase::SetName(const String& ent_name) {
   impl_->SetName(ent_name);
 }
 
-DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os, 
-                                            const EntityBase& ent) {
+DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os,   
+                                           const EntityBase& ent) {
+  if (ent.IsValid()) {
     os << "entity";
+  } else {
+    os << "invalid";
+  }
+
   return os;
 }
 }} //ns

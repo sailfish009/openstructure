@@ -185,7 +185,7 @@ geom::Vec3 EntityView::GetCenterOfMass() const
   if (this->GetAtomCount()>0 && mass>0) {
     AtomViewIter it=this->AtomsBegin();
     for(; it!=this->AtomsEnd(); ++it) {
-      center+=(*it).GetPos()*(*it).GetProp().mass;
+      center+=(*it).GetPos()*(*it).GetMass();
     }
     center/=mass;
   }
@@ -197,7 +197,7 @@ Real EntityView::GetMass() const
   Real mass = 0;
   AtomViewIter it=this->AtomsBegin();
   for(; it!=this->AtomsEnd(); ++it) {
-    mass+=(*it).GetProp().mass;
+    mass+=(*it).GetMass();
   }
   return mass;
 }
@@ -696,6 +696,19 @@ std::pair<Real,Real> EntityView::GetMinMax(const String& prop,
   }
   return std::make_pair(min_v,max_v);
 }
+
+Real EntityView::GetAngle(const AtomHandle& a1, const AtomHandle& a2,
+                const AtomHandle& a3) const
+{
+  return this->GetHandle().GetAngle(a1,a2,a3);
+}
+
+Real EntityView::GetAngle(const AtomView& a1, const AtomView& a2,
+                const AtomView& a3) const
+{
+  return this->GetHandle().GetAngle(a1.GetHandle(),a2.GetHandle(),a3.GetHandle());
+}
+
 
 #ifdef _MSC_VER
 AtomView EntityView::AddXAtom(const AtomHandle& ah, ViewAddFlags flags)

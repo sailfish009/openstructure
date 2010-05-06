@@ -29,7 +29,6 @@
 
 #ifdef _MSC_VER
 #include <windows.h>
-#undef GetProp
 # ifdef FindAtom
 #  undef FindAtom
 # endif

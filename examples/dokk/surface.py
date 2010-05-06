@@ -11,3 +11,7 @@ class Surface:
     grad.SetColorAt(0.7, gfx.Color(1.0, 1.0, 0.0))
     grad.SetColorAt(1.0, gfx.Color(1.0, 0.0, 0.0))    
     self.go.ColorBy('clash', grad, 0.0, 10.0, mol.Prop.Level.ATOM)        
+
+  def Close(self):
+    gfx.Scene().Remove(self.go)
+    del(self.go)

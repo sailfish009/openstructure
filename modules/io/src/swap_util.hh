@@ -46,7 +46,7 @@ void swap_uint(uint *p, int n) {swap_buf<uint>(p,n);}
 inline
 void swap_float(float *p, int n) {swap_buf<float>(p,n);}
 inline
-void swap_double(Real *p, int n) {swap_buf<Real>(p,n);}
+void swap_double(double *p, int n) {swap_buf<double>(p,n);}
 inline
 void swap_long(long *p, int n) {swap_buf<long>(p,n);}
 

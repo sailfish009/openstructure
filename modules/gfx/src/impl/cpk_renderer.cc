@@ -70,21 +70,18 @@ void CPKRenderer::PrepareRendering(GfxView& view, IndexedVertexArray& va, bool i
   state_=0;
 }
 
-void CPKRenderer::Render()
+void CPKRenderer::Render(RenderPass pass)
 {
   if(options_!=NULL){
 #if OST_SHADER_SUPPORT_ENABLED
     if(options_->GetCPKMode()==1 || options_->GetCPKMode()==2) {
       this->RenderCPK2();
       return;
-    } else {
-      this->RenderCPK3();
-      return;
     }
-#else
-    this->RenderCPK3();;
 #endif
   }
+  // fall back to parent if above did not fire
+  EntityRenderer::Render(pass);
 }
 
 void CPKRenderer::RenderPov(PovState& pov, const std::string& name)

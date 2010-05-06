@@ -143,20 +143,10 @@ int init_python_interpreter()
 
 void prepare_scripts(int argc, char** argv, PythonInterpreter& py)
 {
-  QTextStream stdin_stream(stdin);
-  QString stdin_line;
-  QString script_qstring("");
-  stdin_line=stdin_stream.readLine();
-  while (!stdin_line.isNull())
-  {
-    stdin_line.append("\n");
-    script_qstring += stdin_line;
-    stdin_line=stdin_stream.readLine();
-  }
-  for (int param_iter=1; param_iter<argc; ++param_iter) {
+  for (int param_iter=2; param_iter<argc; ++param_iter) {
     py.AppendCommandlineArgument(QString(argv[param_iter]));
   }
-  py.RunCommand(script_qstring);
+  py.RunScript(argv[1]);
 }
 
 

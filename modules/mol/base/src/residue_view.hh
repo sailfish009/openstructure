@@ -37,6 +37,9 @@ namespace ost { namespace mol {
 /// affect the view and do not alter the structure and topology of the underlying
 /// \ref ResidueHandle "residue".
 class DLLEXPORT_OST_MOL ResidueView : public ResidueBase {
+
+  friend class ChainView;
+
 public:
   /// \brief Create invalid ResidueView
   ResidueView();
@@ -170,6 +173,12 @@ public:
   bool operator==(const ResidueView& rhs) const;
   
   bool operator!=(const ResidueView& rhs) const;
+
+protected:
+  /// \brief set the index of residiue view in chain
+  /// should be called from chainview whenever indexes change
+  void SetIndex(int index);
+
 private:
   ResidueViewDataPtr  data_;
 };

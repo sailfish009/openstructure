@@ -39,7 +39,7 @@ class InspectorWidget(ToolBarOptionsWidget):
                 [InspectorWidget.ICONS_PATH+"render_icon.png",RenderOptionsWidget(self),None], 
                 [InspectorWidget.ICONS_PATH+"color_icon.png",ColorOptionsWidget(self),None],
                 [InspectorWidget.ICONS_PATH+"preset_icon.png", PresetWidget(self),None],
-                [InspectorWidget.ICONS_PATH+"tool_icon.png",sip.wrapinstance(app.GetToolOptionsWin().GetSipHandle(),QtGui.QWidget),"Tool Options"]
+                [InspectorWidget.ICONS_PATH+"tool_icon.png",app.tool_options_win.qobject,"Tool Options"]
               ]
     for o in options:
       ToolBarOptionsWidget.AddWidget(self,o[0], o[1], o[2])
@@ -47,10 +47,8 @@ class InspectorWidget(ToolBarOptionsWidget):
     self.obs = SceneObserverImpl()
     self.obs.AttachObserver(self)
     ost.scene.AttachObserver(self.obs)    
-    app=gui.GostyApp.Instance()
     self.scene_selection_ = gui.SceneSelection.Instance()
-    scenewin = sip.wrapinstance(app.GetSceneWin().GetSipHandle(),QtGui.QWidget)
-    QtCore.QObject.connect(scenewin,QtCore.SIGNAL("ActiveNodesChanged()"),
+    QtCore.QObject.connect(app.scene_win.qobject,QtCore.SIGNAL("ActiveNodesChanged()"),
                            self.ActiveNodesChanged)     
     
     self.setMinimumSize(250,215)

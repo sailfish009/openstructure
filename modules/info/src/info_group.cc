@@ -78,6 +78,12 @@ void InfoGroup::SetName(const String& name)
   impl_->SetName(name);
 }
 
+InfoPath InfoGroup::GetPath() const
+{
+  return InfoPath(impl_->GetPath());
+}
+
+
 InfoGroupList InfoGroup::GetGroups(const InfoPath& path) const
 {
   std::vector<String> plist=path.GetList();
@@ -96,7 +102,7 @@ InfoItemList InfoGroup::GetItems(const InfoPath& path) const
 {
   InfoGroupList groups=this->GetGroups(path.Strip());
   InfoItemList items;
-  String iname=path.Leaf();  
+  String iname=path.Leaf();
   for (InfoGroupList::iterator i=groups.begin(), e=groups.end(); i!=e; ++i) {
     InfoGroup group=*i;
     detail::EleList eles=group.impl_->GetSubs(iname);
@@ -113,7 +119,8 @@ InfoItemList InfoGroup::GetItems(const InfoPath& path) const
   return items;
 }
 
-InfoGroup InfoGroup::GetGroup(const InfoPath& path) const
+
+InfoGroup InfoGroup::GetGroup(const InfoPath& path, bool use_defaults) const
 {
   std::vector<String> plist=path.GetList();
   if(plist.empty()) return *this;
@@ -122,9 +129,9 @@ InfoGroup InfoGroup::GetGroup(const InfoPath& path) const
   if(do_group_lookup(pos,plist.end(),last_group)) {
     return last_group;
   } else {
-    if(root_.HasDefaultGroup(path)) {
-    // TODO: prepend path to this group
-    return root_.GetDefaultGroup(path);
+    InfoPath basepath=GetPath();
+    if(root_.HasDefaultGroup(basepath+path) && use_defaults) {
+      return root_.GetDefaultGroup(basepath+path);
     }
   }
   std::ostringstream msg;
@@ -173,7 +180,7 @@ bool InfoGroup::do_group_lookup(std::vector<String>::const_iterator& pos,
   return false;
 }
 
-bool InfoGroup::HasGroup(const InfoPath& path) const
+bool InfoGroup::HasGroup(const InfoPath& path, bool use_defaults) const
 {
   std::vector<String> plist=path.GetList();
   if(plist.empty()) return true;
@@ -181,9 +188,8 @@ bool InfoGroup::HasGroup(const InfoPath& path) const
   InfoGroup last_group(*this);
   if(do_group_lookup(pos,plist.end(),last_group)) {
     return true;
-  } else {
-    // TODO: prepend path to this group
-    return root_.HasDefaultGroup(path);
+  } else if(use_defaults){
+    return root_.HasDefaultGroup(GetPath()+path);
   }
   return false; // to make compiler happy
 }
@@ -198,53 +204,45 @@ InfoGroup InfoGroup::group_create(InfoGroup group,
   return group_create(subgroup,pos,end);
 }
 
-InfoGroup InfoGroup::RetrieveGroup(const InfoPath& path)
+InfoGroup InfoGroup::RetrieveGroup(const InfoPath& path, bool use_defaults)
 {
-  std::vector<String> plist=path.GetList();
-  if(plist.empty()) return *this;
-  std::vector<String>::const_iterator pos=plist.begin();
-  InfoGroup last_group(*this);
-  bool ret=do_group_lookup(pos,plist.end(),last_group);
-  if(ret) {
-    return last_group;
+  if(HasGroup(path,use_defaults)) {
+    return GetGroup(path);
   } else {
-    return group_create(last_group,pos,plist.end());
+    std::vector<String> plist=path.GetList();
+    InfoGroup last_group(*this);
+    std::vector<String>::const_iterator pos=plist.begin();
+    bool ret=do_group_lookup(pos,plist.end(),last_group);
+    if(ret) {
+      return last_group;
+    } else {
+      return group_create(last_group,pos,plist.end());
+    }
   }
-
 }
 
-
-
-
-InfoItem InfoGroup::GetItem(const InfoPath& path) const
+InfoItem InfoGroup::GetItem(const InfoPath& path, bool use_defaults) const
 {
   InfoGroup grp=*this;
-
   InfoPath grppath=path.Strip();
-
   std::vector<String> plist=grppath.GetList();
-
   std::vector<String>::const_iterator pos=plist.begin();
-
   String iname=path.GetList().back();
-
   InfoGroup last_group(*this);
   if(do_group_lookup(pos,plist.end(),last_group)) {
     if(last_group.impl_->HasSub(iname)) {
 
       ElePtr p(last_group.impl_->GetSub(iname));
       if(!p->HasAttribute("value")) {
-        throw InfoError(String("requested item '") + iname + 
-                        String("' has not value attribute"));
+        throw InfoError(String("requested item '") + iname + String("' has not value attribute"));
       }
       return InfoItem(root_,p,ResolveItemType(p));
     }
   }
-
   // check default
-  // TODO: prepend path to this group
-  if(root_.HasDefaultItem(path)) {
-    return root_.GetDefaultItem(path);
+  InfoPath basepath=GetPath();
+  if(use_defaults && root_.HasDefaultItem(basepath+path)) {
+    return root_.GetDefaultItem(basepath+path);
   }
   throw InfoError(String("requested item '") + iname + String("' not found"));
 }
@@ -265,7 +263,7 @@ InfoItem InfoGroup::CreateItem(const String& name, Real value)
 
 InfoItem InfoGroup::CreateItem(const String& name, bool value)
 {
-  InfoItem item=this->CreateItem(name, String(""));  
+  InfoItem item=this->CreateItem(name, String(""));
   item.SetBool(value);
   return item;  
 }
@@ -284,49 +282,51 @@ InfoItem InfoGroup::CreateItem(const String& name, const geom::Vec3& vector)
   return item;
 }
 
-bool InfoGroup::HasItem(const InfoPath& path) const
+
+bool InfoGroup::HasItem(const InfoPath& path, bool use_defaults) const
 {
   InfoGroup grp=*this;
-
   InfoPath grppath=path.Strip();
-
   std::vector<String> plist=grppath.GetList();
-
   std::vector<String>::const_iterator pos=plist.begin();
-
   InfoGroup last_group(*this);
   if(do_group_lookup(pos,plist.end(),last_group)) {
     String iname=path.GetList().back();
     if(last_group.impl_->HasSub(iname)) {
       ElePtr p(last_group.impl_->GetSub(iname));
       if(p->HasAttribute("value")) {
-	return true;
+        return true;
       }
     }
   } 
-
   // fallback to default item
-  return root_.HasDefaultItem(path);
+  if(use_defaults){
+    return root_.HasDefaultItem(GetPath()+path);
+  }
+  return false;
 }
 
-InfoItem InfoGroup::RetrieveItem(const InfoPath& path)
+
+InfoItem InfoGroup::RetrieveItem(const InfoPath& path, bool use_defaults)
 {
   String item=path.GetList().back();
 
-  InfoGroup grp = RetrieveGroup(path.Strip());
+  InfoGroup grp = RetrieveGroup(path.Strip(),use_defaults);
   
-  if(grp.HasItem(item)) {
+  if(grp.HasItem(item,use_defaults)) {
     return grp.GetItem(item);
   } else {
     return grp.CreateItem(item,"");
   }
 }
 
-void InfoGroup::Remove(const InfoPath& path)
+void InfoGroup::Remove(const InfoPath& path, bool remove_defaults)
 {
-  InfoGroup g=GetGroup(path);
-  InfoGroup p=g.GetParent();
-  p.impl_->RemoveSub(g.GetName());
+  if(HasGroup(path,remove_defaults)){
+    InfoGroup g=GetGroup(path,remove_defaults);
+    InfoGroup p=g.GetParent();
+    p.impl_->RemoveSub(g.GetName());
+  }
 }
 
 void InfoGroup::Remove(const InfoGroup& group)

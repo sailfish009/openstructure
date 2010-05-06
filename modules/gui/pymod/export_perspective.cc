@@ -23,9 +23,6 @@
 #include <ost/gui/perspective.hh>
 #include <ost/gui/main_area.hh>
 
-#include "menu_bar_proxy.hh"
-#include "menu_proxy.hh"
-
 #include "sip_handler.hh"
 
 using namespace boost::python;
@@ -34,26 +31,12 @@ using namespace ost::gui;
 
 object app_get_menu_bar(Perspective* pers)
 {
-  static object sip_module=import("sip");
-  static object pyqt4_module=import("PyQt4.QtGui");
-  object obj(MenuBarProxy(pers->GetMenuBar()));
-  object sip_handle=obj.attr("GetSipHandle")();
-  object qmenubar = pyqt4_module.attr("QMenuBar");
-  object menu_bar = sip_module.attr("wrapinstance")(sip_handle, qmenubar);
-
-  return menu_bar;
+  return get_py_qobject<QMenuBar>(pers->GetMenuBar());
 }
 
 object app_get_menu(Perspective* pers, const QString& name)
 {
-  static object sip_module=import("sip");
-  static object pyqt4_module=import("PyQt4.QtGui");
-  object obj(MenuProxy(pers->GetMenu(name)));
-  object sip_handle=obj.attr("GetSipHandle")();
-  object qmenu = pyqt4_module.attr("QMenu");
-  object menu = sip_module.attr("wrapinstance")(sip_handle, qmenu);
-
-  return menu;
+  return get_py_qobject<QMenu>(pers->GetMenu(name));
 }
 
 void export_Perspective()
@@ -74,6 +57,7 @@ void export_Perspective()
                   return_value_policy<reference_existing_object>()))
     .add_property("panels", make_function(&Perspective::GetPanels,
                   return_value_policy<reference_existing_object>()))
+    .add_property("menubar", make_function(&app_get_menu_bar))
   ;
 }
 

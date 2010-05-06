@@ -51,9 +51,11 @@ public:
            const QGLFormat& f = QGLFormat::defaultFormat());
 
   // gfx::GLWinBase interface
+  virtual void MakeActive();
   virtual void DoRefresh();
   virtual void StatusMessage(const String& m);
   virtual void SetStereo(bool s);
+  virtual bool HasMultisample() const {return format().sampleBuffers();}
 
   // central point for sending input to the gfx layer
   void OnTransform(gfx::InputCommand, int indx, 

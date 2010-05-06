@@ -38,7 +38,7 @@
 namespace ost { namespace mol {namespace impl {
 
 /// \internal
-class ChainImpl: public GenericPropertyContainerImpl,
+class ChainImpl: public GenericPropContainerImpl,
                  public boost::enable_shared_from_this<ChainImpl>
 {
 public:

@@ -54,11 +54,13 @@ Vec4::Vec4(const Real d[4])
   this->set(d[0],d[1],d[2],d[3]);
 }
 
-/*Vec4::Vec4(const float d[4])
+#if OST_DOUBLE_PRECISION
+Vec4::Vec4(const float d[4])
 {
   this->set(d[0],d[1],d[2],d[3]);
 }
-*/
+#endif
+
 Vec4& Vec4::operator=(const Vec4& v)
 {
   if(&v!=this) {

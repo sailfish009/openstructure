@@ -104,7 +104,7 @@ macro(stage_headers HEADERS HEADER_INSTALL_DIR TARGET SUB)
   # introduce a helper target to make sure the headers are staged before
   # building the library
   string(REPLACE "/" "_" _SUB_NO_SLASH "${SUB}")
-  string(REPLACE "ost_" "" _TARGET "${TARGET}")
+  string(REPLACE "${PREFIX}_" "" _TARGET "${TARGET}")
   #message("target before: ${TARGET} after: ${_TARGET}")
   set(_TARGET_NAME ${_TARGET}_${_SUB_NO_SLASH}_headers)
   set(_SUB ${SUB})
@@ -133,19 +133,30 @@ endmacro()
 macro(module)
   #-----------------------------------------------------------------------------
   # deal with arguments
-  #-----------------------------------------------------------------------------  
-  parse_argument_list(_ARG 
-                      "NAME;SOURCES;HEADERS;DEPENDS_ON;LINK;HEADER_OUTPUT_DIR" 
-                      "" ${ARGN})  
+  #-----------------------------------------------------------------------------
+  set(_ARGS "NAME;SOURCES;HEADERS;DEPENDS_ON;LINK;HEADER_OUTPUT_DIR;PREFIX")
+  set(_ARG_PREFIX ost)  
+  parse_argument_list(_ARG "${_ARGS}" "" ${ARGN})  
   if (NOT _ARG_NAME)
-    message(FATAL_ERROR "invalid use of module(): a module name must be provided")
+    message(FATAL_ERROR 
+            "invalid use of module(): a module name must be provided")
   endif()
-  
-  set(_HEADER_OUTPUT_DIR ost/${_ARG_NAME})
+
+
   if (_ARG_HEADER_OUTPUT_DIR)
     set(_HEADER_OUTPUT_DIR ${_ARG_HEADER_OUTPUT_DIR})
+  else()
+    if (_ARG_PREFIX)
+      set(_HEADER_OUTPUT_DIR "${_ARG_PREFIX}/${_ARG_NAME}")
+    else()
+      set(_HEADER_OUTPUT_DIR "${_ARG_NAME}")
+    endif()
   endif()
-  set(_LIB_NAME ost_${_ARG_NAME})
+  if (_ARG_PREFIX)
+    set(_LIB_NAME ${_ARG_PREFIX}_${_ARG_NAME})
+  else()
+    set(_LIB_NAME ${_ARG_NAME})
+  endif()
   string(TOUPPER ${_LIB_NAME} _UPPER_LIB_NAME)  
   #-----------------------------------------------------------------------------
   # create library  
@@ -343,15 +354,20 @@ macro(pymod)
   #-----------------------------------------------------------------------------
   # deal with arguments
   #-----------------------------------------------------------------------------
+  set(_ARG_PREFIX ost)
   parse_argument_list(_ARG 
-                      "NAME;CPP;PY;LINK;OUTPUT_DIR" "" ${ARGN})
+                      "NAME;CPP;PY;LINK;OUTPUT_DIR;PREFIX" "" ${ARGN})
   if (NOT _ARG_NAME)
     message(FATAL_ERROR "invalid use of pymod(): a name must be provided")
   endif()
   if (_ARG_OUTPUT_DIR)
     set(PYMOD_DIR "openstructure/${_ARG_OUTPUT_DIR}")
   else()
-    set(PYMOD_DIR "openstructure/ost/${_ARG_NAME}")
+    if (_ARG_PREFIX)
+        set(PYMOD_DIR "openstructure/${_ARG_PREFIX}/${_ARG_NAME}")
+    else()
+      set(PYMOD_DIR "openstructure/${_ARG_NAME}")
+    endif()
   endif()
   set(PYMOD_STAGE_DIR "${LIB_STAGE_PATH}/${PYMOD_DIR}")
   file(MAKE_DIRECTORY ${PYMOD_STAGE_DIR})
@@ -363,9 +379,14 @@ macro(pymod)
     set_target_properties("_${_ARG_NAME}"
                           PROPERTIES ECHO_STRING
                           "Building Python Module ${_ARG_NAME}")
-    get_target_property(_CUSTOM_CHECK "ost_${_ARG_NAME}" HEADER_ONLY)
+    if (_ARG_PREFIX)
+      set(_PARENT_NAME "${_ARG_PREFIX}_${_ARG_NAME}")
+    else()
+      set(_PARENT_NAME "${_ARG_NAME}")
+    endif()
+    get_target_property(_CUSTOM_CHECK "${_PARENT_NAME}" HEADER_ONLY)
     if (NOT _CUSTOM_CHECK)
-      set(_PARENT_LIB_NAME "ost_${_ARG_NAME}")
+      set(_PARENT_LIB_NAME "${_PARENT_NAME}")
     endif()
     target_link_libraries("_${_ARG_NAME}" ${_PARENT_LIB_NAME} 
                           ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
@@ -410,11 +431,11 @@ macro(pymod)
           endforeach()
           install(FILES ${_ABS_PY_FILES} DESTINATION
                   "${LIB_DIR}/${PYMOD_DIR}/${_DIR}")
-          set(_D "${_HEADER_OUTPUT_DIR}/${_DIR}")
-          add_custom_target("${_ARG_NAME}_${_DIR}_pymod" ALL)
+          string(REPLACE "/" "_" _DIR_NO_SLASH "${_DIR}")
+          add_custom_target("${_ARG_NAME}_${_DIR_NO_SLASH}_pymod" ALL)
           copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}" 
                             "${_ABS_PY_FILES}" "TARGETS"
-                            "${_ARG_NAME}_${_DIR}_pymod")
+                            "${_ARG_NAME}_${_DIR_NO_SLASH}_pymod")
           set(_PY_FILES)
         else()
           list(APPEND _PY_FILES "${_PY_FILE}")
@@ -429,8 +450,8 @@ macro(pymod)
       include_directories(${PYTHON_INCLUDE_PATH})
       install(FILES ${_PY_FILES} DESTINATION "${LIB_DIR}/${PYMOD_DIR}")
       endif()
-  endif()
-  get_target_property(_MOD_DEPS "ost_${_ARG_NAME}" MODULE_DEPS)
+  endif()  
+  get_target_property(_MOD_DEPS "${_PARENT_NAME}" MODULE_DEPS)
   if(_MOD_DEPS)
     foreach(dep ${_MOD_DEPS})
        add_dependencies("_${_ARG_NAME}" "_${dep}")

@@ -98,7 +98,7 @@ DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   on_resize(size().width(),size().height()); // needed for proper initialization
 
   setMouseTracking(true);
-
+  setFocusPolicy(Qt::StrongFocus);
   //TODO cursors
   setCursor(cursor_);
   /*
@@ -606,11 +606,6 @@ void DataViewerPanelBase::wheelEvent(QWheelEvent* event)
   }
 }
 
-void DataViewerPanelBase::enterEvent(QEvent* event)
-{
-  if(!IsDataValid()) return;
-  setFocus();
-}
 
 void DataViewerPanelBase::SetSelectionMode(int mode)
 {

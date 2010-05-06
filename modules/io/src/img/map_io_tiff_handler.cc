@@ -40,6 +40,7 @@
 #include <ost/io/io_exception.hh>
 
 #include "map_io_tiff_handler.hh"
+#include "tiff_util.hh"
 
 namespace ost { namespace io {
 

@@ -32,7 +32,7 @@ SurfaceHandle BuildSurface(const EntityView& ev, Real probe_radius, Real patch_s
   rsurf::RSurf rsurf(probe_radius);
 
   for(AtomViewIter it=ev.AtomsBegin();it!=ev.AtomsEnd();++it) {
-    rsurf.AddSphere((*it).GetPos(),(*it).GetProp().radius,(*it).GetQualifiedName());
+    rsurf.AddSphere((*it).GetPos(),(*it).GetAtomProps().radius,(*it).GetQualifiedName());
   }
 
   rsurf.Build();

@@ -25,10 +25,10 @@ Here is another example:
     # array subscript notation:
     c=geom.Vec2(a[0],b[1])
     # print length of vector a and b
-    print Length(a), Length(b)
+    print geom.Length(a), geom.Length(b)
 
     # calculate dot (inner) product
-    print Dot(a,b)
+    print geom.Dot(a,b)
 
     # do some fancy calculation
     d = a+2*b
@@ -44,7 +44,7 @@ Here are examples of both approaches:
     :::python 
     # the standard python math module defines the pi constant and the acos function
     import math
-    angle= math.acos(Normalize(c),Normalize(d))*180.0/math.pi
+    angle= math.acos(geom.Normalize(c),geom.Normalize(d))*180.0/math.pi
     # computing the angle using the geom.Angle function
     angle2=geom.Angle(c,d)
 

@@ -24,32 +24,32 @@ using namespace boost::python;
 
 using namespace ost;
 
-void export_GenericProperty()
+void export_GenericProp()
 {
-  String (GenericPropertyContainer::* get_string1)(const String&) const = &GenericPropertyContainer::GetGenericStringProperty;
-  String (GenericPropertyContainer::* get_string2)(const String&, const String&) const = &GenericPropertyContainer::GetGenericStringProperty;
-  Real (GenericPropertyContainer::* get_float1)(const String&) const = &GenericPropertyContainer::GetGenericFloatProperty;
-  Real (GenericPropertyContainer::* get_float2)(const String&, Real) const = &GenericPropertyContainer::GetGenericFloatProperty;
-  int (GenericPropertyContainer::* get_int1)(const String&) const = &GenericPropertyContainer::GetGenericIntProperty;
-  int (GenericPropertyContainer::* get_int2)(const String&, int) const = &GenericPropertyContainer::GetGenericIntProperty;
-  bool (GenericPropertyContainer::* get_bool1)(const String&) const = &GenericPropertyContainer::GetGenericBoolProperty;
-  bool (GenericPropertyContainer::* get_bool2)(const String&, bool) const = &GenericPropertyContainer::GetGenericBoolProperty;
+  String (GenericPropContainer::* get_string1)(const String&) const = &GenericPropContainer::GetStringProp;
+  String (GenericPropContainer::* get_string2)(const String&, const String&) const = &GenericPropContainer::GetStringProp;
+  Real (GenericPropContainer::* get_float1)(const String&) const = &GenericPropContainer::GetFloatProp;
+  Real (GenericPropContainer::* get_float2)(const String&, Real) const = &GenericPropContainer::GetFloatProp;
+  int (GenericPropContainer::* get_int1)(const String&) const = &GenericPropContainer::GetIntProp;
+  int (GenericPropContainer::* get_int2)(const String&, int) const = &GenericPropContainer::GetIntProp;
+  bool (GenericPropContainer::* get_bool1)(const String&) const = &GenericPropContainer::GetBoolProp;
+  bool (GenericPropContainer::* get_bool2)(const String&, bool) const = &GenericPropContainer::GetBoolProp;
 
-  class_<GenericPropertyContainer, boost::noncopyable>("GenericPropertyContainer",no_init)
-    .def("HasGenericProperty",&GenericPropertyContainer::HasGenericProperty)
-    .def("SetGenericStringProperty",&GenericPropertyContainer::SetGenericStringProperty)
-    .def("GetGenericStringProperty",get_string1)
-    .def("GetGenericStringProperty",get_string2)
-    .def("SetGenericFloatProperty",&GenericPropertyContainer::SetGenericFloatProperty)
-    .def("GetGenericFloatProperty",get_float1)
-    .def("GetGenericFloatProperty",get_float2)
-    .def("SetGenericIntProperty",&GenericPropertyContainer::SetGenericIntProperty)
-    .def("GetGenericIntProperty",get_int1)
-    .def("GetGenericIntProperty",get_int2)
-    .def("SetGenericBoolProperty",&GenericPropertyContainer::SetGenericBoolProperty)
-    .def("GetGenericBoolProperty",get_bool1)
-    .def("GetGenericBoolProperty",get_bool2)
-    .def("ClearGenericProperties",&GenericPropertyContainer::ClearGenericProperties)
-    .def("GetGenericPropertyStringRepresentation",&GenericPropertyContainer::GetGenericPropertyStringRepresentation)
+  class_<GenericPropContainer, boost::noncopyable>("GenericPropContainer",no_init)
+    .def("HasProp",&GenericPropContainer::HasProp)
+    .def("SetStringProp",&GenericPropContainer::SetStringProp)
+    .def("GetStringProp",get_string1)
+    .def("GetStringProp",get_string2)
+    .def("SetFloatProp",&GenericPropContainer::SetFloatProp)
+    .def("GetFloatProp",get_float1)
+    .def("GetFloatProp",get_float2)
+    .def("SetIntProp",&GenericPropContainer::SetIntProp)
+    .def("GetIntProp",get_int1)
+    .def("GetIntProp",get_int2)
+    .def("SetBoolProp",&GenericPropContainer::SetBoolProp)
+    .def("GetBoolProp",get_bool1)
+    .def("GetBoolProp",get_bool2)
+    .def("ClearProps",&GenericPropContainer::ClearProps)
+    .def("GetPropAsString",&GenericPropContainer::GetPropAsString)
     ;
 }

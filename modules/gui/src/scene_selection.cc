@@ -27,6 +27,14 @@
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gfx/entity.hh>
 
+#if OST_IMG_ENABLED
+
+#include <ost/gfx/map_iso.hh>
+#include <ost/gui/main_area.hh>
+#include <ost/gui/perspective.hh>
+
+#endif
+
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_win/scene_win.hh>
 #include <ost/gui/query_dialog.hh>
@@ -38,9 +46,7 @@ SceneSelection* SceneSelection::scene_selection_ = NULL;
 
 SceneSelection::SceneSelection():nodes_(),views_()
 {
-  SceneWin* scene_win = GostyApp::Instance()->GetSceneWin();
-  QObject::connect(scene_win, SIGNAL(ActiveNodesChanged(gfx::NodePtrList,gfx::EntityP,mol::QueryViewWrapperList)),
-               this, SLOT(SetActiveNodes(gfx::NodePtrList,gfx::EntityP,mol::QueryViewWrapperList)));
+
 }
 
 void SceneSelection::SetActiveNodes(gfx::NodePtrList nodes, gfx::EntityP entity, mol::QueryViewWrapperList views){
@@ -125,6 +131,28 @@ void SceneSelection::Delete() {
       gfx::Scene::Instance().Remove(selected_objects[i]);
   }
 }
+
+#if OST_IMG_ENABLED
+
+void SceneSelection::ViewDensitySlices() {
+  for(unsigned int i = 0; i < nodes_.size(); i++){
+    gfx::GfxNodeP node = nodes_[i];
+    if (node) {
+      gfx::MapIsoP obj = dyn_cast<gfx::MapIso> (node);
+      if (obj) {
+        // The following is a hack. I need to pass a reference to an ImagHandle
+        // that never goes out of scope, so I get a reference from the MapIso using
+        // GetMap and pass it to the CreateDataViewer
+        img::gui::DataViewer* dv = GostyApp::Instance()->CreateDataViewer(obj->GetOriginalMap());
+          MainArea* ma = GostyApp::Instance()->GetPerspective()->GetMainArea();
+          ma->AddWidget(QString(obj->GetName().c_str()), dv) ;
+        dv->show();
+      }
+    }
+  }
+}
+
+#endif // OST_IMG_ENABLED
 
 void SceneSelection::Select() {
   QueryDialog d;
@@ -248,9 +276,8 @@ void SceneSelection::SelectAllViews(){
 void SceneSelection::DeselectAllViews(){
   mol::EntityView sel = view_entity_->GetSelection();
   if(sel.IsValid()){
-    for(unsigned int i= 0; i < views_.size(); i++){
-      sel = mol::Difference(sel, views_[i].GetEntityView());
-    }
+    sel = mol::Difference(sel, this->GetViewUnion());
+    view_entity_->SetSelection(sel);
   }
 }
 
@@ -265,6 +292,7 @@ void SceneSelection::SelectViews(){
     }
   }
 }
+
 
 gfx::EntityP SceneSelection::GetViewEntity() const{
   return view_entity_;

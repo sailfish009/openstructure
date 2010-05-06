@@ -61,6 +61,7 @@ void Surface::CustomRenderPov(PovState& pov)
 void Surface::OnRenderModeChange()
 {
   Rebuild();
+  GfxObj::OnRenderModeChange();
 }
 
 void Surface::Replace(const mol::SurfaceHandle& sh)

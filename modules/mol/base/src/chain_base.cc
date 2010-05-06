@@ -28,13 +28,13 @@ ChainBase::ChainBase()
 ChainBase::ChainBase(const impl::ChainImplPtr& impl): 
   impl_(impl) 
 {}
-GenericPropertyContainerImpl* ChainBase::GpImpl()
+GenericPropContainerImpl* ChainBase::GpImpl()
 {
   return impl_.get();
 }
 
 
-const GenericPropertyContainerImpl* ChainBase::GpImpl() const
+const GenericPropContainerImpl* ChainBase::GpImpl() const
 {
   return impl_.get();
 }
@@ -49,7 +49,7 @@ ChainBase::operator bool() const {
 }
 
 bool ChainBase::IsValid() const {
-  return impl_;
+  return impl_.get()!=0;
 }
 
 void ChainBase::CheckValidity() const {
@@ -57,9 +57,13 @@ void ChainBase::CheckValidity() const {
     throw InvalidHandle();
 }
 
-DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os, 
-                                            const ChainBase& chain) {
-  os << chain.GetName();                                              
+std::ostream& operator<<(std::ostream& os, const ChainBase& chain) 
+{
+  if (chain.IsValid()) {
+    os << chain.GetName();
+  } else {
+    os << "invalid chain";
+  }
   return os;
 }
 

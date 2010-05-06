@@ -30,7 +30,6 @@ option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
 option(DEPLOYMENT "switch on deployment settings" OFF)
 
-
 if (PREFIX)
   set(CMAKE_INSTALL_PREFIX ${PREFIX})
 endif()
@@ -240,3 +239,10 @@ message(STATUS
         "   Optimize                     (-DOPTIMIZE) : ${_OPT}\n"
         "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
         "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}")
+        
+# doc target to create HTML documentation
+#set(SPHINX sphinx-build)
+#set(SPHINX_OPTIONS -c doc/conf -b html -d doc/html/doctrees)
+#add_custom_target(doc COMMAND 
+#                  ${SPHINX} ${SPHINX_OPTIONS} modules doc/html
+#                  VERBATIM)

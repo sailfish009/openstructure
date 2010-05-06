@@ -31,12 +31,12 @@ BondHandle::BondHandle():
 BondHandle::BondHandle(const impl::ConnectorImplP& im):
   impl_(im)
 {}
-GenericPropertyContainerImpl* BondHandle::GpImpl()
+GenericPropContainerImpl* BondHandle::GpImpl()
 {
   return impl_.get();
 }
 
-const GenericPropertyContainerImpl* BondHandle::GpImpl() const
+const GenericPropContainerImpl* BondHandle::GpImpl() const
 {
   return impl_.get();
 }
@@ -61,6 +61,20 @@ AtomHandle BondHandle::GetSecond() const
 {
   this->CheckValidity();  
   AtomHandle nrvo(impl_->GetSecond());
+  return nrvo;
+}
+
+AtomHandle BondHandle::GetOther(const AtomHandle& a) const
+{
+  this->CheckValidity();
+  if(a.IsValid()) {
+    if(a.Impl()==impl_->GetFirst()) {
+      return GetSecond();
+    } else {
+      return GetFirst();
+    }
+  }
+  AtomHandle nrvo(impl_->GetFirst());
   return nrvo;
 }
 

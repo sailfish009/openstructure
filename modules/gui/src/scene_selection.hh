@@ -44,6 +44,9 @@ public:
 public slots:
   void CenterOnObjects();
   void Delete();
+#if OST_IMG_ENABLED
+  void ViewDensitySlices();
+#endif // OST_IMG_ENABLED
   void CopyViews();
   void Select();
   void Deselect();

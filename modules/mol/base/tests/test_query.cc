@@ -33,9 +33,9 @@ EntityHandle make_query_test_entity()
   EntityHandle eh = CreateEntity();
   XCSEditor e=eh.RequestXCSEditor();
   ChainHandle chain = e.InsertChain("A");
-  chain.SetGenericFloatProperty("testpropc", 1.0);
+  chain.SetFloatProp("testpropc", 1.0);
   ResidueHandle res = e.AppendResidue(chain, "MET");
-  res.SetGenericFloatProperty("testpropr", 1.0);
+  res.SetFloatProp("testpropr", 1.0);
   AtomProp c_atom;
   c_atom.element="C";
   c_atom.radius=1.0;
@@ -51,7 +51,7 @@ EntityHandle make_query_test_entity()
   s_atom.element="S";
   s_atom.radius=1.0;
   AtomHandle ah=e.InsertAtom(res, "N",geom::Vec3(21.609,35.384,56.705), n_atom);
-  ah.SetGenericFloatProperty("testpropa", 1.0);
+  ah.SetFloatProp("testpropa", 1.0);
   e.InsertAtom(res, "CA",geom::Vec3(20.601,35.494,57.793), c_atom);
   e.InsertAtom(res, "C",geom::Vec3(19.654,34.300,57.789), c_atom);
   e.InsertAtom(res, "O",geom::Vec3(18.447,34.456,57.595), o_atom);

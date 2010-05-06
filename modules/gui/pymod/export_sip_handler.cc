@@ -27,8 +27,6 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::gui;
 
-
-
 namespace {
 
 unsigned long sip_handle(QObject* w)
@@ -36,9 +34,9 @@ unsigned long sip_handle(QObject* w)
   return reinterpret_cast<unsigned long>(w);
 }
 
-QObject* bpqt_handle(unsigned long a)
+QWidget* bpqt_handle(unsigned long a)
 {
-  return reinterpret_cast<QObject*>(a);
+  return reinterpret_cast<QWidget*>(a);
 }
 
 }

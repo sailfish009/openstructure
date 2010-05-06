@@ -23,9 +23,6 @@
 #ifndef OST_SUPERPOSITION_HH
 #define OST_SUPERPOSITION_HH
 
-#include <Eigen/Core>
-#include <Eigen/Array>
-
 #include <ost/base.hh>
 #include <ost/geom/geom.hh>
 #include <ost/mol/mol.hh>
@@ -48,46 +45,25 @@ struct DLLEXPORT_OST_MOL_ALG SuperpositionResult {
   mol::EntityView entity_view2;
 };
 
-
-typedef Eigen::Matrix<Real,3,1> EVec3;
-typedef Eigen::Matrix<Real,3,3> EMat3;
-typedef Eigen::Matrix<Real,1,3> ERVec3;
-typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> EMatX;
-typedef Eigen::Matrix<Real,1,Eigen::Dynamic> ERVecX;
+class SuperposerSVDImpl;
 
 /// \brief effiently superpose a bunch of models with the same number of atoms
-/// Choose either two EntityViews, two AtomViewLists or two EigenMatrices of the
-/// same size to superpose.
+/// Choose either two EntityViews or two AtomViewLists.
 class DLLEXPORT_OST_MOL_ALG SuperposerSVD {
 public:
   SuperposerSVD(int natoms, bool alloc_atoms);
-
+  ~SuperposerSVD();
   SuperpositionResult Run(const mol::EntityView& ev1,
                           const mol::EntityView& ev2);
 
   SuperpositionResult Run(const mol::AtomViewList& atoms1,
                           const mol::AtomViewList& atoms2);
 
-  SuperpositionResult Run(const EMatX atoms1,
-                          const EMatX atoms2);
+  SuperpositionResult Run(const std::vector<geom::Vec3>& pl1,
+                          const std::vector<geom::Vec3>& pl2);
+
 private:
-
-
-  int natoms_;
-  bool alloc_atoms_;
-  EMatX atoms1_;
-  EMatX atoms2_;
-  void EntToMatrices(const mol::EntityView& ev1, const mol::EntityView& ev2);
-  geom::Vec3 EigenVec3ToVec3(const EVec3 &vec);
-  geom::Mat3 EigenMat3ToMat3(const EMat3 &mat);
-  EVec3 Vec3ToEigenRVec(const geom::Vec3 &vec);
-  EVec3 Vec3ToEigenVec(const geom::Vec3 &vec);
-  EMatX SubtractVecFromMatrixRows(EMatX Mat,
-                                  ERVecX Vec);
-  EIGEN_MAKE_ALIGNED_OPERATOR_NEW //needed only if *fixed* sized matrices are
-                                    //members of classes
-  SuperpositionResult DoSuperposition();
-
+  SuperposerSVDImpl* impl_;
 };
 
 /// \brief takes the corresponding atoms and superposes them
@@ -98,6 +74,10 @@ SuperpositionResult DLLEXPORT_OST_MOL_ALG SuperposeAtoms(const mol::AtomViewList
 SuperpositionResult DLLEXPORT_OST_MOL_ALG SuperposeSVD(const mol::EntityView& ev1,
                                                     const mol::EntityView& ev2,
                                                     bool apply_transform);
+
+/// \brief superposes two pointlists
+SuperpositionResult DLLEXPORT_OST_MOL_ALG SuperposeSVD(const std::vector<geom::Vec3>& pl1,
+                                                       const std::vector<geom::Vec3>& pl2);
 
 /// \brief iterative superposition
 SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposition(mol::EntityView& ev1,

@@ -26,5 +26,5 @@ set BIN_DIR=%~dp0
 echo %BIN_DIR%
 
 set DNG_ROOT=%BIN_DIR%\..
-set PATH=%BIN_DIR%;%DNG_ROOT%\@LIBDIR@\Release;%DNG_ROOT%\@LIBDIR@;%DNG_ROOT%\bin\Release;%PATH%
-type "%DNG_ROOT%\@LIBDIR@\openstructure\init_iplt.py" | "%BIN_DIR%Release\gosty.exe" ost %*
+set PATH=%BIN_DIR%;%DNG_ROOT%\@LIBDIR@\@BUILD_TYPE@;%DNG_ROOT%\@LIBDIR@;%DNG_ROOT%\bin\@BUILD_TYPE@;%PATH%
+"%BIN_DIR%\@BUILD_TYPE@\gosty.exe" "%DNG_ROOT%\@LIBDIR@\openstructure\init_iplt.py" ost %*

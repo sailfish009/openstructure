@@ -55,6 +55,8 @@ public:
 
   void AddView(gfx::EntityP entity, mol::EntityView view);
 
+  ContextMenu* GetContextMenu();
+
 public slots:
   void OnSelectionChange(const QItemSelection& sel, const QItemSelection& desel);
 
@@ -66,6 +68,7 @@ public slots:
 
 private slots:
   void RowsInserted(const QModelIndex & parent, int start, int end);
+  void DoubleClicked(const QModelIndex & index);
 
 private:
   SceneWinModel* model_;

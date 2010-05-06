@@ -65,16 +65,16 @@ syntax: instead of  rnum>=10 and rnum<=20` one can write \c rnum=10:20`
 \section gen_prop GenericProperties
 
 The query language can also be used for numeric generic properties (i.e.
-GenericFloatProperty and GenericIntProperty), but the syntax is slightly
+FloatProp and IntProp), but the syntax is slightly
 different. To access any generic properties, it needs to be specified that
 they are generic and at which level they are defined. Therefore, all generic
 properties start with a \c g, followed by an \c a, \c r or \c c for atom,
 residue or chain level respectively. 
 \code
 # set generic properties for atom, residue, chain
-atom_handle.SetGenericFloatProperty("testpropatom", 5.2)
-resid_handle.SetGenericFloatProperty("testpropres", 1.1)
-chain_handle.SetGenericIntProperty("testpropchain", 10)
+atom_handle.SetFloatProp("testpropatom", 5.2)
+resid_handle.SetFloatProp("testpropres", 1.1)
+chain_handle.SetIntProp("testpropchain", 10)
 
 # query statements
 sel_a=e.Select("gatestpropatom<=10.0")

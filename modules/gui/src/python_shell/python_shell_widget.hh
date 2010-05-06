@@ -42,14 +42,6 @@ class Gutter;
 class PythonCompleter;
 class PathCompleter;
 
-typedef enum {
-  // to execute a command, the command must end with an empty line, or
-  // Cmd+Return must be pressed
-  SHELL_INTERACTION_MATHEMATICA=0,
-  // to execute a command, a single return key press is sufficient. Cmd+Return
-  // starts newline. This mode is the default
-  SHELL_INTERACTION_BASH=1
-} ShellInteractionMode;
 
 class DLLEXPORT_OST_GUI PythonShellWidget : public QPlainTextEdit {
 
@@ -59,7 +51,6 @@ class DLLEXPORT_OST_GUI PythonShellWidget : public QPlainTextEdit {
 public:
   PythonShellWidget(QWidget* parent=NULL);
   GutterBlockList GetGutterBlocks(const QRect& rect);
-  void SetInteractionMode(ShellInteractionMode mode);
   void SetTabWidth(int width);
   int GetTabWidth() const;
   QString GetCommand();
@@ -119,7 +110,6 @@ protected:
   bool output_visible_;
   int completion_start_;
   int completion_end_;
-   ShellInteractionMode mode_;
   QTextBlock block_edit_start_;
   OutputBlockList output_blocks_;
   StateMachine* machine_;

@@ -34,12 +34,16 @@ CartoonRenderOptions::CartoonRenderOptions(bool force_tube):
   smooth_factor_(0.0),
   tube_radius_(0.4),
   tube_ratio_(1.0),
+  tube_profile_(0),
   helix_width_(1.1),
   helix_thickness_(0.2),
   helix_ecc_(0.3),
+  helix_profile_(1),
   strand_width_(1.2),
   strand_thickness_(0.2),
-  strand_ecc_(0.3) {}
+  strand_ecc_(0.3),
+  strand_profile_(1)
+{}
 
 RenderMode::Type CartoonRenderOptions::GetRenderMode(){
   if(force_tube_)
@@ -137,6 +141,17 @@ float CartoonRenderOptions::GetTubeRatio() const{
   return tube_ratio_;
 }
 
+unsigned int CartoonRenderOptions::GetTubeProfileType() const
+{
+  return tube_profile_;
+}
+
+void CartoonRenderOptions::SetTubeProfileType(unsigned int t)
+{
+  tube_profile_=t;
+  this->NotifyStateChange();
+}
+
 void CartoonRenderOptions::SetHelixWidth(float helix_width){
   if(helix_width_ != helix_width){
     helix_width_= helix_width>0.0 ? helix_width : helix_width_;
@@ -170,6 +185,17 @@ float CartoonRenderOptions::GetHelixEcc() const{
   return helix_ecc_;
 }
 
+unsigned int CartoonRenderOptions::GetHelixProfileType() const
+{
+  return helix_profile_;
+}
+
+void CartoonRenderOptions::SetHelixProfileType(unsigned int t)
+{
+  helix_profile_=t;
+  this->NotifyStateChange();
+}
+
 void CartoonRenderOptions::SetStrandWidth(float strand_width){
   if(strand_width_ != strand_width){
     strand_width_= strand_width>0.0 ? strand_width : strand_width_;
@@ -201,6 +227,17 @@ void CartoonRenderOptions::SetStrandEcc(float strand_ecc){
 
 float CartoonRenderOptions::GetStrandEcc() const{
   return strand_ecc_;
+}
+
+unsigned int CartoonRenderOptions::GetStrandProfileType() const
+{
+  return strand_profile_;
+}
+
+void CartoonRenderOptions::SetStrandProfileType(unsigned int t)
+{
+  strand_profile_=t;
+  this->NotifyStateChange();
 }
 
 float CartoonRenderOptions::GetMaxRad() const{

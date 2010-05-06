@@ -17,19 +17,23 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
-#include "gl_win_proxy.hh"
+
+#include <ost/gui/gl_win.hh>
+
+#include "sip_handler.hh"
 
 using namespace boost::python;
 using namespace ost;
 using namespace ost::gui;
 
-
 void export_GLWin()
 {
-  class_<GLWinProxy, bases<SipHandlerBase> >("GLWin")
-    .def("Show", &GLWinProxy::Show)
-    .def("Hide", &GLWinProxy::Hide)
-    .def("StatusMessage",&GLWinProxy::StatusMessage)
+  class_<GLWin, boost::noncopyable>("GLWin", no_init)
+    .def("Show", &GLWin::show)
+    .def("Hide", &GLWin::hide)
+    .def("StatusMessage",&GLWin::StatusMessage)
+    .def("GetQObject",&get_py_qobject<GLWin>)
+    .add_property("qobject", &get_py_qobject<GLWin>)
   ;
 }
 

@@ -95,7 +95,7 @@ void tag_value_convert(int number_type, void* src_ptr, DEST* dest_ptr, size_t n=
   } else if(number_type==6) {
     value_convert<float,DEST>(src_ptr,dest_ptr,n);
   } else if(number_type==7) {
-    value_convert<Real,DEST>(src_ptr,dest_ptr,n);
+    value_convert<double,DEST>(src_ptr,dest_ptr,n);
   } else if(number_type==8) {
     value_convert<int,DEST>(src_ptr,dest_ptr,n);
   } else if(number_type==9) {
@@ -133,7 +133,7 @@ void img_data_convert(int number_type, void* src_ptr, img::RealSpatialImageState
   } else if(number_type==6) {
     img_data_convert2<float,DEST>(src_ptr,isi);
   } else if(number_type==7) {
-    img_data_convert2<Real,DEST>(src_ptr,isi);
+    img_data_convert2<double,DEST>(src_ptr,isi);
   } else if(number_type==8) {
     img_data_convert2<int,DEST>(src_ptr,isi);
   } else if(number_type==9) {
@@ -316,7 +316,7 @@ void DM3Collector::check_image()
       img_data_convert<Real>(image_number_type_,image_data_.get(),*is);
 
       if(swap_data_)
-      swap_double(reinterpret_cast<Real*>(is->Data().GetData()),data_size);
+      swap_buf<Real>(reinterpret_cast<Real*>(is->Data().GetData()),data_size);
 
       image_handle_list_.push_back(ih);
     } else {
@@ -338,7 +338,7 @@ size_t DM3Collector::type_sizeof(uint n)
   } else if(n==6) {
     return sizeof(float);
   } else if(n==7) {
-    return sizeof(Real);
+    return sizeof(double);
   } else if(n==0) {
     throw IOException("I/O Dm3: unexpected number type 0");
   }
@@ -468,8 +468,8 @@ void DM3Collector::parse_tag_type_single(int depth, const String& name,TagTypeIn
   size_t bufsize = type_sizeof(number_type);
   file_read(buffer,bufsize,1,fp);
   // TODO: swap data
-  Real tmp;
-  tag_value_convert<Real>(number_type,buffer,&tmp);
+  double tmp;
+  tag_value_convert<double>(number_type,buffer,&tmp);
   LOG_VERBOSE(String(depth,' ') << "value: " << tmp << std::endl);
 
   handle_single_tag(name,number_type,buffer);
@@ -536,8 +536,8 @@ void DM3Collector::parse_tag_type_simple_struct(int depth, const String& name, T
     size_t bufsize = type_sizeof(number_types[c]);
     void* buffer = &buffers[c];
     file_read(buffer,bufsize,1,fp);
-    Real tmp;
-    tag_value_convert<Real>(number_types[c],buffer,&tmp);
+    double tmp;
+    tag_value_convert<double>(number_types[c],buffer,&tmp);
     LOG_VERBOSE(String(depth,' ') << "value " << c << ": " << tmp << std::endl);
     // TODO: swap data
   }

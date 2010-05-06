@@ -35,16 +35,13 @@
 #include <ost/profile.hh>
 
 #include <ost/io/io_exception.hh>
-#include "entity_io_crd_handler.hh"
-#include "pdb_reader.hh"
 #include <ost/io/swap_util.hh>
+
+#include "entity_io_crd_handler.hh"
 
 namespace ost { namespace io {
 
 using boost::format;
-
-String FORMAT_NAME_STRING;
-String FORMAT_DESCRIPTION_STRING;
 
 CRDReader::CRDReader(const boost::filesystem::path& loc):
   sequential_atom_list_(),
@@ -157,7 +154,48 @@ void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
   ++atom_count_;
 }
 
+CRDWriter::CRDWriter(std::ostream& ostream) :
+     outfile_(), outstream_(ostream), atom_count_(0)
+{}
 
+CRDWriter::CRDWriter(const boost::filesystem::path& filename) :
+  outfile_(filename.file_string().c_str()), outstream_(outfile_),
+  atom_count_(0)
+{}
+
+CRDWriter::CRDWriter(const String& filename) :
+  outfile_(filename.c_str()), outstream_(outfile_), atom_count_(0)
+{}
+
+void CRDWriter::WriteHeader(const mol::EntityView& ent)
+{
+  outstream_  << "* COOR FILE CREATED BY OPENSTRUCTURE" << std::endl;
+  outstream_  << "*" << std::endl;
+  outstream_  << ent.GetAtomCount() << std::endl;
+}
+
+bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
+{
+  atom_count_++;
+  String e_name=atom.GetEntity().GetName();
+  if (e_name=="") {
+    e_name="MOL";
+  }
+  mol::ResidueHandle res=atom.GetResidue();
+  outstream_  << format("%5i") % atom_count_
+              << format("%5i") % res.GetNumber() << " "
+              << format("%4s") % res.GetKey() << " "
+              << format("%-4s") % atom.GetName()
+              << format("%10.5f") % atom.GetPos().GetX()
+              << format("%10.5f") % atom.GetPos().GetY()
+              << format("%10.5f") % atom.GetPos().GetZ() << " "
+              << format("%-4s") % e_name << " "
+              << format("%-5i") % res.GetNumber() << " "
+              << format("%8.5f") % atom.GetBFactor()
+              << std::endl;
+
+  return true;
+}
 
 bool EntityIOCRDHandler::RequiresBuilder() const
 {
@@ -172,8 +210,21 @@ void EntityIOCRDHandler::Import(mol::EntityHandle& ent,
 }
 
 void EntityIOCRDHandler::Export(const mol::EntityView& ent,
+                                std::ostream& stream) const
+{
+  CRDWriter writer(stream);
+  writer.WriteHeader(ent);
+  mol::EntityView non_const_view = ent;
+  non_const_view.Apply(writer);
+}
+
+void EntityIOCRDHandler::Export(const mol::EntityView& ent,
                                 const boost::filesystem::path& loc) const
 {
+  CRDWriter writer(loc);
+  writer.WriteHeader(ent);
+  mol::EntityView non_const_view = ent;
+  non_const_view.Apply(writer);
 }
 
 namespace {
@@ -204,7 +255,7 @@ bool EntityIOCRDHandler::ProvidesImport(const boost::filesystem::path& loc,
 bool EntityIOCRDHandler::ProvidesExport(const boost::filesystem::path& loc,
                                         const String& type)
 {
-  return false;
+  return crd_handler_is_responsible_for(loc, type);
 }
 
 mol::EntityHandle LoadCRD(const String& file_name) 
@@ -219,173 +270,6 @@ mol::EntityHandle LoadCRD(const String& file_name)
   return ent;
 }
 
-namespace {
-
-struct TrjHeader {
-  char hdrr[4];
-  int icntrl[20];
-  int ntitle;
-  char title[1024];
-  int num, istep, freq,nstep;
-  int t_atom_count,f_atom_count, atom_count;
-};
-
-}
-
-/* 
-   icntrl[1]: number of coordinate sets in file
-   icntrl[2]: number of previous dynamic steps
-   icntrl[3]: frequency for saving coordinates
-   icntlr[4]: number of steps for creation run
-*/
-
-mol::CoordGroupHandle LoadCHARMMTraj(const String& crd_fn,
-                                     const String& trj_fn,
-                                     int flags)
-{
-  Profile profile_load("LoadCHARMMTraj");
-
-  bool gap_flag = true;
-
-  boost::filesystem::path crd_f(crd_fn);
-  boost::filesystem::path trj_f(trj_fn);
-
-  
-
-  // first the coordinate reference file
-  conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
-  mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
-  std::vector<mol::AtomHandle> alist;
-  if(boost::filesystem::extension(crd_f)==".pdb") {
-    PDBReader reader(crd_f);
-    reader.SetFlags(PDB::SEQUENTIAL_ATOM_IMPORT);
-    LOGN_MESSAGE("importing coordinate data");
-    reader.Import(ent);
-    alist = reader.GetSequentialAtoms();
-  } else if (boost::filesystem::extension(crd_f)==".crd") {
-    CRDReader reader(crd_f);
-    LOGN_MESSAGE("importing coordinate data");
-    reader.Import(ent);
-    alist = reader.GetSequentialAtoms();
-  } else {
-    throw(IOException("unsupported coordinate file format"));
-  }
-  conop::Conopology::Instance().ConnectAll(builder,ent);
-
-  // now the trajectory
-  boost::filesystem::ifstream ff(trj_f);
-  
-  TrjHeader header;
-  char dummy[4];
-  bool swap_flag=false;
-
-  LOGN_MESSAGE("importing trajectory data");
-
-  if(gap_flag) ff.read(dummy,sizeof(dummy));
-  ff.read(header.hdrr,sizeof(char)*4);
-  ff.read(reinterpret_cast<char*>(header.icntrl),sizeof(int)*20);
-
-  if(header.icntrl[1]<0 || header.icntrl[1]>1e6) {
-    // nonsense atom count, try swapping
-    swap_int(header.icntrl,20);
-    if(header.icntrl[1]<0 || header.icntrl[1]>1e6) {
-      throw(IOException("LoadCHARMMTraj: nonsense atom count in header"));
-    } else {
-      LOGN_MESSAGE("LoadCHARMMTraj: byte-swapping");
-      swap_flag=true;
-    }
-  }
-
-  bool skip_flag=false;
-
-  if(header.icntrl[19]!=0) { // CHARMM format
-    skip_flag=(header.icntrl[10]!=0);
-    if(skip_flag) {
-      LOGN_VERBOSE("LoadCHARMMTraj: using CHARMM format with per-frame header");
-    } else {
-      LOGN_VERBOSE("LoadCHARMMTraj: using CHARMM format");
-    }
-  } else {
-    // XPLOR format
-    LOGN_VERBOSE("LoadCHARMMTraj: using XPLOR format");
-  }
-
-  if(gap_flag) ff.read(dummy,sizeof(dummy));
-  ff.read(reinterpret_cast<char*>(&header.ntitle),sizeof(int));
-  if(swap_flag) swap_int(&header.ntitle,1);
-  if(gap_flag) ff.read(dummy,sizeof(dummy));
-  ff.read(header.title,sizeof(char)*header.ntitle);
-  header.title[header.ntitle]='\0';
-  if(gap_flag) ff.read(dummy,sizeof(dummy));
-  ff.read(reinterpret_cast<char*>(&header.t_atom_count),sizeof(int));
-  if(swap_flag) swap_int(&header.t_atom_count,1);
-  if(gap_flag) ff.read(dummy,sizeof(dummy));
-  header.num=header.icntrl[0];
-  header.istep=header.icntrl[1];
-  header.freq=header.icntrl[2];
-  header.nstep=header.icntrl[3];
-  header.f_atom_count=header.icntrl[8];
-  header.atom_count=header.t_atom_count-header.f_atom_count;
-
-  LOGN_MESSAGE("LoadCHARMMTraj: " << header.num << " trajectories with " 
-               << header.atom_count << " atoms (" << header.f_atom_count 
-               << " fixed) each");
-
-  if(alist.size() != static_cast<size_t>(header.t_atom_count)) {
-    LOGN_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
-               << " in coordinate file, " << header.t_atom_count 
-               << " in each traj frame");
-    throw(IOException("invalid trajectory"));
-  }
-
-  mol::CoordGroupHandle cg=CreateCoordGroup(alist);
-  std::vector<geom::Vec3> clist(header.t_atom_count);
-  std::vector<float> xlist(header.t_atom_count);
-
-  for(int i=0;i<header.num;++i) {
-    if(skip_flag) ff.seekg(14*4,std::ios_base::cur);
-    // read each frame
-    if(!ff) {
-      /* premature EOF */
-      LOGN_ERROR("LoadCHARMMTraj: premature end of file, " << i 
-                 << " frames read");
-      break;
-    }
-    // x coord
-    if(gap_flag) ff.read(dummy,sizeof(dummy));
-    ff.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
-    if(swap_flag) swap_float(&xlist[0],xlist.size());
-    if(gap_flag) ff.read(dummy,sizeof(dummy));
-    for(uint j=0;j<clist.size();++j) {
-      clist[j].SetX(xlist[j]);
-    }
-    // y coord
-    if(gap_flag) ff.read(dummy,sizeof(dummy));
-    ff.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
-    if(swap_flag) swap_float(&xlist[0],xlist.size());
-    if(gap_flag) ff.read(dummy,sizeof(dummy));
-    for(uint j=0;j<clist.size();++j) {
-      clist[j].SetY(xlist[j]);
-    }
-    // z coord
-    if(gap_flag) ff.read(dummy,sizeof(dummy));
-    ff.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
-    if(swap_flag) swap_float(&xlist[0],xlist.size());
-    if(gap_flag) ff.read(dummy,sizeof(dummy));
-    for(uint j=0;j<clist.size();++j) {
-      clist[j].SetZ(xlist[j]);
-    }
-    cg.AddFrame(clist);
-  }
-
-  ff.get();
-  if(!ff.eof()) {
-    LOGN_VERBOSE("LoadCHARMMTraj: unexpected trailing file data, bytes read: " 
-                 << ff.tellg());
-  }
-  return cg;
-}
 
 void EntityIOCRDHandler::Import(mol::EntityHandle& ent, 
                                 std::istream& stream)
@@ -394,11 +278,7 @@ void EntityIOCRDHandler::Import(mol::EntityHandle& ent,
 }
 
 
-void EntityIOCRDHandler::Export(const mol::EntityView& ent, 
-                                std::ostream& stream) const
-{
-  throw IOException("CRD format does not support export to stream");
-}
+
 
 }} // ns
 

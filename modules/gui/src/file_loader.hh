@@ -49,13 +49,13 @@ private:
   };
 
   FileLoader();
-  static gfx::GfxObjP TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler=io::EntityIOHandlerP()) throw (io::IOException);
+  static gfx::GfxObjP TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler=io::EntityIOHandlerP(), const QString& selection=QString()) throw (io::IOException);
   static gfx::GfxObjP TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler=io::SurfaceIOHandlerPtr()) throw (io::IOException);
 #if OST_IMG_ENABLED
   static gfx::GfxObjP TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler=io::MapIOHandlerPtr()) throw (io::IOException, io::IOFileAlreadyLoadedException);
 #endif
   static void RunScript(const QString& filename);
-  static void LoadPDB(const QString& filename);
+  static void LoadPDB(const QString& filename, const QString& selection=QString());
   static void AddToScene(const QString& filename, gfx::GfxObjP obj);
   static void HandleError(Message m, ErrorType type, const QString& filename, gfx::GfxObjP obj=gfx::GfxObjP());
   static gfx::GfxObjP NoHandlerFound(const QString& filename);
@@ -68,8 +68,8 @@ private:
 #endif
 
 public:
-  static void LoadObject(const QString& filename);
-  static void LoadFrom(const QString& id, const QString& site=QString());
+  static void LoadObject(const QString& filename, const QString& selection=QString());
+  static void LoadFrom(const QString& id, const QString& site=QString(), const QString& selection=QString());
   static std::vector<String> GetSiteLoaderIdents();
   static LoaderManagerPtr GetLoaderManager();
 };

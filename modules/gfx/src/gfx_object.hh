@@ -195,8 +195,11 @@ public:
   void SetOutlineExpandFactor(float f);
   void SetOutlineExpandColor(const Color& c);
 
+  // experimental, don't use
   void SmoothVertices(float smoothf);
-  
+  // experimental, don't use
+  void AmbientOcclusion(bool f);
+ 
   void GLCleanup();
 
   /// \brief color each component based on the gradient-mapped property of 
@@ -252,12 +255,17 @@ public:
                const String& prop,
                const Color& c1, const Color& c2, float minv, float maxv);  
 #endif
+
+  void Debug(unsigned int flags) {debug_flags_=flags; RefreshVA();}
+
  protected:
   
   void PreRenderGL(bool flag);
   virtual void CustomPreRenderGL(bool flag);
 
   void RefreshVA(IndexedVertexArray& va);
+
+  virtual void RefreshVA() {RefreshVA(va_);}
   
  private:
   GfxObj(const GfxObj& o);
@@ -270,6 +278,7 @@ public:
 
   IndexedVertexArray va_;
   RenderMode::Type render_mode_;
+  unsigned int debug_flags_;
  
  private: 
   mol::Transform transform_;
@@ -295,6 +304,8 @@ public:
 
   TextPrimList labels_;
   void render_labels() const;
+
+  bool use_occlusion_;
 };
 
 }} //ns

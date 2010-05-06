@@ -44,6 +44,7 @@ struct Properties : public boost::spirit::symbols<Prop> {
       ("z",Prop(Prop::AZ, Prop::FLOAT, Prop::ATOM))
       ("occ",Prop(Prop::OCC, Prop::FLOAT, Prop::ATOM)) 
       ("cname",Prop(Prop::CNAME, Prop::STRING, Prop::CHAIN))
+      ("chain",Prop(Prop::CNAME, Prop::STRING, Prop::CHAIN))
       ("ishetatm",Prop(Prop::ISHETATM, Prop::INT, Prop::ATOM))
       ("abfac", Prop(Prop::ABFAC, Prop::FLOAT, Prop::ATOM))
       ("rbfac", Prop(Prop::RBFAC, Prop::FLOAT, Prop::RESIDUE))

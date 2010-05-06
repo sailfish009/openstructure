@@ -118,7 +118,7 @@ CoordFramePtr CoordGroupHandle::GetFrame(uint frame) const
   return source_->GetFrame(frame);
 }
 
-const AtomHandleList& CoordGroupHandle::GetAtomList() const
+AtomHandleList CoordGroupHandle::GetAtomList() const
 {
   this->CheckValidity();
   return source_->GetAtomList();
@@ -129,6 +129,16 @@ void CoordGroupHandle::Capture()
   this->CheckValidity();
   if (source_->IsMutable()) {
     source_->Capture();    
+  } else {
+    throw IntegrityError("Can't capture. CoordGroup is immutable");
+  }  
+}
+
+void CoordGroupHandle::CaptureInto(int pos)
+{
+  this->CheckValidity();
+  if (source_->IsMutable()) {
+    source_->CaptureInto(pos);    
   } else {
     throw IntegrityError("Can't capture. CoordGroup is immutable");
   }  

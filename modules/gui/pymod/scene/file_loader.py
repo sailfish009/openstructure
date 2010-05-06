@@ -33,28 +33,21 @@ class BaseRemoteLoader(gui.RemoteSiteLoader):
     self.downloads_=dict()
     QtCore.QObject.connect(self.networkmanager_, QtCore.SIGNAL("finished(QNetworkReply*)"), self.DownloadFinished)
 
-  def LoadById(self, id):
-    self.ById(id)
+  def LoadById(self, id, selection=""):
+    self.ById(id, selection)
   
-  def ById(self, id):
+  def ById(self, id, selection=""):
     file_name=self.GetFileName(id)
     file = QtCore.QFile(file_name)
     if(file.size()==0):
         url = QtCore.QUrl(self.GetUrl(id))
         request = QtNetwork.QNetworkRequest(url)
         reply = self.networkmanager_.get(request)
-        self.downloads_[reply]=id
+        self.downloads_[reply]=[id,selection]
         return reply
     else:
-      gui.FileLoader.LoadObject(str(file_name))
+      gui.FileLoader.LoadObject(str(file_name),str(selection))
     return None
-
-  #Hack for C++ (will be changed soon)
-  def ByIdAddr(self,id):
-    reply = self.ById(id)
-    if reply is not None:
-      return sip.unwrapinstance(reply)
-    return 0
     
   def IsImg(self):
     return False
@@ -69,7 +62,7 @@ class BaseRemoteLoader(gui.RemoteSiteLoader):
     pass
     
   def DownloadFinished(self, reply):
-    file_name=self.GetFileName(self.downloads_[reply])
+    file_name=self.GetFileName(self.downloads_[reply][0])
     file = QtCore.QFile(file_name)
     if(reply.error()!=QtNetwork.QNetworkReply.NoError or reply.bytesAvailable()==0):
       self.HandleError(reply.errorString());
@@ -79,8 +72,9 @@ class BaseRemoteLoader(gui.RemoteSiteLoader):
         if(file.open(QtCore.QIODevice.WriteOnly)):
            file.write(reply.readAll());
         file.close();
+        selection=self.downloads_[reply][1]
         del(self.downloads_[reply])
-        gui.FileLoader.LoadObject(str(file_name))
+        gui.FileLoader.LoadObject(str(file_name),str(selection))
 
 class GenericLoader(BaseRemoteLoader):
   EXT_NAME_ATTRIBUTE_NAME = "ExtName"

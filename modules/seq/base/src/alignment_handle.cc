@@ -226,7 +226,7 @@ AlignedColumnIterator AlignmentHandle::end() const
   return AlignedColumnIterator(*this, this->GetLength(), this->GetLength());
 }
 
-AlignedColumn AlignmentHandle::operator[](int index)
+AlignedColumn AlignmentHandle::operator[](int index) const
 {
   return AlignedColumn(*this, index);
 }
@@ -236,6 +236,12 @@ void AlignmentHandle::SetSequenceName(int seq_index, const String& name)
 {
   this->CheckValidity();
   impl_->GetSequence(seq_index)->SetName(name);
+}
+
+void AlignmentHandle::SetSequenceOffset(int seq_index, int offset)
+{
+  this->CheckValidity();
+  impl_->GetSequence(seq_index)->SetSequenceOffset(offset);
 }
 
 }}

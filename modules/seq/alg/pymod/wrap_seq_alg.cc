@@ -18,9 +18,12 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-using namespace boost::python;
+
+#include <ost/seq/alg/merge_pairwise_alignments.hh>
 #include <ost/seq/alg/sequence_identity.hh>
 #include <ost/seq/alg/ins_del.hh>
+
+using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
 
@@ -43,5 +46,6 @@ BOOST_PYTHON_MODULE(_seq_alg)
     .def("GetDeletions", &InsDel::GetDeletions)
     .def("GetInsertions", &InsDel::GetInsertions)
   ;
+  def("MergePairwiseAlignments", &MergePairwiseAlignments);
   export_Align();  
 }

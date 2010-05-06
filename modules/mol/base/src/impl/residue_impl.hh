@@ -43,7 +43,7 @@ namespace ost { namespace mol {  namespace impl {
 
 /// \internal
 /// \brief Residue implementation
-class ResidueImpl: public GenericPropertyContainerImpl,
+class ResidueImpl: public GenericPropContainerImpl,
                    public boost::enable_shared_from_this<ResidueImpl>
                    
 {

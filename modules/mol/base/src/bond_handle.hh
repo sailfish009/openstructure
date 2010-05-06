@@ -32,9 +32,9 @@ namespace ost { namespace mol {
 /// Represents a chemical bond between two atoms (#GetFirst(), #GetSecond()).
 /// New bonds are created with EditorBase::Connect().
 class DLLEXPORT_OST_MOL BondHandle: 
-    public GenericPropertyContainer<BondHandle> {
+    public GenericPropContainer<BondHandle> {
 public:
-  friend class GenericPropertyContainer<BondHandle>;  
+  friend class ConstGenericPropContainer<BondHandle>;  
   /// necessary dummy ctor, creates invalid handle
   BondHandle();
   /// ctor for internal use, in public interface for convenience purposes
@@ -73,6 +73,11 @@ public:
   /// \brief get second atom
   /// In python also available as the property second
   AtomHandle GetSecond() const;
+
+  /// \brief get other atom
+  /// Returns one of the two atoms that does not match the given one.
+  /// In python also available as the property other
+  AtomHandle GetOther(const AtomHandle& a) const;
   //@}
 
   /// \brief return midpoint between the two atoms (transformed coordinates)
@@ -108,9 +113,9 @@ public:
   
 protected:
   
-  GenericPropertyContainerImpl* GpImpl();
+  GenericPropContainerImpl* GpImpl();
   
-  const GenericPropertyContainerImpl* GpImpl() const;  
+  const GenericPropContainerImpl* GpImpl() const;  
   void CheckValidity() const;
 private:
   impl::ConnectorImplP impl_;

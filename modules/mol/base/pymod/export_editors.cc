@@ -48,6 +48,11 @@ void (ICSEditor::*set_torsion_a)(TorsionHandle, Real)=&ICSEditor::SetTorsionAngl
 void (ICSEditor::*set_torsion_b)(const AtomHandle&, const AtomHandle&,
                                  const AtomHandle&, const AtomHandle&,
                                  Real)=&ICSEditor::SetTorsionAngle;
+
+void (ICSEditor::*rotate_torsion_a)(TorsionHandle, Real)=&ICSEditor::RotateTorsionAngle;
+void (ICSEditor::*rotate_torsion_b)(const AtomHandle&, const AtomHandle&,
+                                    const AtomHandle&, const AtomHandle&,
+                                    Real)=&ICSEditor::RotateTorsionAngle;
                                  
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_insert_atom_overloads, 
                                        EditorBase::InsertAtom, 3, 4)
@@ -94,7 +99,8 @@ void export_Editors()
     .def("SetBondLength", &ICSEditor::SetBondLength)
     .def("SetTorsionAngle", set_torsion_a)
     .def("SetTorsionAngle", set_torsion_b)    
-    .def("RotateTorsionAngle", &ICSEditor::RotateTorsionAngle)
+    .def("RotateTorsionAngle", rotate_torsion_a)
+    .def("RotateTorsionAngle", rotate_torsion_b)
     .def("UpdateXCS", &ICSEditor::UpdateXCS)
     .def("__exit__", &ICSEditor::UpdateXCS)
   ;  

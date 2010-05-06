@@ -41,8 +41,8 @@ void GfxView::AddAtom(const AtomView& av)
 {
   AtomHandle a=av.GetHandle();
   AtomEntry ae(a,default_radius,
-               a.GetProp().radius,
-               GfxObj::Ele2Color(a.GetProp().element));
+               a.GetRadius(),
+               GfxObj::Ele2Color(a.GetElement()));
   atom_map[a.GetHashCode()]=ae;
   if(av.GetBondCount()==0) {
     orphan_atom_list.push_back(a.GetHashCode());
@@ -70,16 +70,16 @@ void GfxView::AddBond(const BondHandle& b)
   if (ae1 && !ae2) {
     AtomHandle a=b.GetSecond();
     AtomEntry ae(a,default_radius,
-                 a.GetProp().radius,
-                 GfxObj::Ele2Color(a.GetProp().element));
+                 a.GetRadius(),
+                 GfxObj::Ele2Color(a.GetElement()));
     atom_map[a.GetHashCode()]=ae;
     ae2=&atom_map[a.GetHashCode()];
   }
   if (!ae1 && ae2) {
     AtomHandle a=b.GetFirst();
     AtomEntry ae(a,default_radius,
-                 a.GetProp().radius,
-                 GfxObj::Ele2Color(a.GetProp().element));
+                 a.GetRadius(),
+                 GfxObj::Ele2Color(a.GetElement()));
     atom_map[a.GetHashCode()]=ae;
     ae1=&atom_map[a.GetHashCode()];
   }

@@ -96,6 +96,8 @@ public:
   /// internal routine
   virtual void CustomRenderGL(RenderPass pass);
 
+  virtual void RefreshVA();
+  
   virtual bool OnSelect(const geom::Line3& l, geom::Vec3& result, float zlim,
                         bool pick_flag);
 

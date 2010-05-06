@@ -28,9 +28,10 @@ using namespace boost::python;
 #include <ost/io/seq/save.hh>
 #include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/mol/entity_io_crd_handler.hh>
+#include <ost/io/mol/entity_io_mae_handler.hh>
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/mol/pdb_reader.hh>
-#include <ost/io/mol/save_dcd.hh>
+#include <ost/io/mol/dcd_io.hh>
 using namespace ost;
 using namespace ost::io;
 
@@ -65,10 +66,14 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_handle_ov,
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_view_ov,
                                 save_ent_view, 2, 3)
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(load_charmm_trj_ov,
-                                LoadCHARMMTraj, 2, 3)
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_charmm_trj_ov,
                                 SaveCHARMMTraj, 3, 4)
+
+mol::CoordGroupHandle load_dcd1(const String& c, const String& t) {return LoadCHARMMTraj(c,t);}
+mol::CoordGroupHandle load_dcd2(const String& c, const String& t, unsigned int s) {return LoadCHARMMTraj(c,t,s);}
+mol::CoordGroupHandle load_dcd3(const mol::EntityHandle& e, const String& t) {return LoadCHARMMTraj(e,t);}
+mol::CoordGroupHandle load_dcd4(const mol::EntityHandle& e, const String& t, unsigned int s) {return LoadCHARMMTraj(e,t,s);}
+
 }
 
 void export_pdb_io();
@@ -111,8 +116,14 @@ BOOST_PYTHON_MODULE(_io)
   def("LoadSDF", &LoadSDF);
 
   def("LoadCRD", &LoadCRD);
-  def("LoadCHARMMTraj",LoadCHARMMTraj,load_charmm_trj_ov());
+  def("LoadCHARMMTraj",load_dcd1);
+  def("LoadCHARMMTraj",load_dcd2);
+  def("LoadCHARMMTraj",load_dcd3);
+  def("LoadCHARMMTraj",load_dcd4);
   def("SaveCHARMMTraj",SaveCHARMMTraj,save_charmm_trj_ov());
+
+  def("LoadMAE", &LoadMAE);
+
   export_pdb_io();
 #if OST_IMG_ENABLED  
   export_map_io();

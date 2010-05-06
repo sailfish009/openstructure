@@ -25,16 +25,17 @@ using namespace boost::python;
 
 #include <ost/gui/gl_win.hh>
 #include <ost/gui/perspective.hh>
+#include <ost/gui/python_shell/python_shell.hh>
+#include <ost/gui/scene_win/scene_win.hh>
+#include <ost/gui/sequence_viewer/sequence_viewer.hh>
 #include <ost/gui/tools/tool_options_win.hh>
 
 #include "transfer_ownership.hh"
-#include "python_shell_proxy.hh"
-#include "tool_options_win_proxy.hh"
-#include "gl_win_proxy.hh"
-#include "scene_win_proxy.hh"
-#include "sequence_viewer_proxy.hh"
+#include "sip_handler.hh"
+
 #if OST_IMG_ENABLED
-#include "data_viewer_proxy.hh"
+#include <ost/img/data.hh>
+#include <ost/gui/data_viewer/data_viewer.hh>
 using namespace ost::img::gui;
 #endif
 
@@ -43,46 +44,21 @@ using namespace ost::gui;
 
 namespace {
 
-PythonShellProxy app_get_py_shell(GostyApp* app)
-{
-  return PythonShellProxy(app->GetPyShell());
-}
-
-ToolOptionsWinProxy app_get_tool_options_win(GostyApp* app)
-{
-  return ToolOptionsWinProxy(app->GetToolOptionsWin());
-}
-
-GLWinProxy app_get_gl_win(GostyApp* app)
-{
-  return GLWinProxy(app->GetGLWin());
-}
-
-SceneWinProxy app_get_scene_win(GostyApp* app)
-{
-  return SceneWinProxy(app->GetSceneWin());
-}
-
-SequenceViewerProxy app_get_seq_viewer(GostyApp* app)
-{
-  return SequenceViewerProxy(app->GetSequenceViewer());
-}
-
 #if OST_IMG_ENABLED
-DataViewerProxyPtr app_create_data_viewer1(GostyApp* app, const ost::img::Data& d, const QString& name)
+DataViewer* app_create_data_viewer1(GostyApp* app, const ost::img::Data& d, const QString& name)
 {
-  return DataViewerProxyPtr(new DataViewerProxy(app->CreateDataViewer(d,name)));
+  return app->CreateDataViewer(d,name);
 }
-DataViewerProxyPtr app_create_data_viewer2(GostyApp* app, const ost::img::Data& d)
+DataViewer* app_create_data_viewer2(GostyApp* app, const ost::img::Data& d)
 {
-  return DataViewerProxyPtr(new DataViewerProxy(app->CreateDataViewer(d)));
+  return app->CreateDataViewer(d);
 }
 #endif
 
 }
 
 void app_add_widget_to_app_a(GostyApp* app, const QString& ident,
-                               QObject* object)
+                               QWidget* object)
 {
   if(QWidget* widget = dynamic_cast<QWidget*>(object)){
     TransferOwnership(widget);
@@ -90,6 +66,13 @@ void app_add_widget_to_app_a(GostyApp* app, const QString& ident,
   }
 }
 
+void app_add_widget_to_app_b(GostyApp* app, const QString& ident,
+                               object py_object)
+{
+  if(QWidget* widget = get_cpp_qobject<QWidget>(py_object)){
+    app->AddWidgetToApp(ident, widget);
+  }
+}
 
 void export_Gosty()
 {
@@ -97,25 +80,40 @@ void export_Gosty()
     .def("Instance", &GostyApp::Instance,
          return_value_policy<reference_existing_object>()).staticmethod("Instance")
     .def("SetAppTitle", &GostyApp::SetAppTitle)
-    .def("GetPyShell", &app_get_py_shell)
-    .add_property("py_shell", &app_get_py_shell)
-    .def("GetGLWin", &app_get_gl_win)
-    .add_property("gl_win", &app_get_gl_win)                                
-    .def("GetSceneWin", &app_get_scene_win)
-    .add_property("scene_win", &app_get_scene_win)                                
-    .def("GetSequenceViewer", &app_get_seq_viewer)
-    .add_property("seq_viewer", &app_get_seq_viewer)
-    .def("GetToolOptionsWin", &app_get_tool_options_win)
-    .add_property("tool_options_win", &app_get_tool_options_win)     
+    .def("GetPyShell", &GostyApp::GetPyShell,
+        return_value_policy<reference_existing_object>())
+    .add_property("py_shell", make_function(&GostyApp::GetPyShell,
+        return_value_policy<reference_existing_object>()))
+    .def("GetGLWin", &GostyApp::GetGLWin,
+        return_value_policy<reference_existing_object>())
+    .add_property("gl_win", make_function(&GostyApp::GetGLWin,
+        return_value_policy<reference_existing_object>()))
+    .def("GetSceneWin", &GostyApp::GetSceneWin,
+        return_value_policy<reference_existing_object>())
+    .add_property("scene_win", make_function(&GostyApp::GetSceneWin,
+        return_value_policy<reference_existing_object>()))
+    .def("GetSequenceViewer", &GostyApp::GetSequenceViewer,
+        return_value_policy<reference_existing_object>())
+    .add_property("seq_viewer", make_function(&GostyApp::GetSequenceViewer,
+        return_value_policy<reference_existing_object>()))
+    .def("GetSequenceViewerV2", &GostyApp::GetSequenceViewerV2,
+        return_value_policy<reference_existing_object>())
+    .add_property("seq_viewer_v2", make_function(&GostyApp::GetSequenceViewerV2,
+        return_value_policy<reference_existing_object>()))
+    .def("GetToolOptionsWin", &GostyApp::GetToolOptionsWin,
+        return_value_policy<reference_existing_object>())
+    .add_property("tool_options_win", make_function(&GostyApp::GetToolOptionsWin,
+        return_value_policy<reference_existing_object>()))
      #if OST_IMG_ENABLED
-    .def("CreateDataViewer", &app_create_data_viewer1)
-    .def("CreateDataViewer", &app_create_data_viewer2)
+    .def("CreateDataViewer", &app_create_data_viewer1,return_value_policy<reference_existing_object>())
+    .def("CreateDataViewer", &app_create_data_viewer2,return_value_policy<reference_existing_object>())
     #endif
     .def("ProcessEvents", &GostyApp::ProcessEvents)           
     .add_property("perspective", 
                   make_function(&GostyApp::GetPerspective, 
                                 return_value_policy<reference_existing_object>()))
     .def("AddWidgetToApp", &app_add_widget_to_app_a)
+    .def("AddWidgetToApp", &app_add_widget_to_app_b)
     .def("GetPerspective", &GostyApp::GetPerspective, 
          return_value_policy<reference_existing_object>())
   ;

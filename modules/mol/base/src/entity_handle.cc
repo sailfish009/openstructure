@@ -215,6 +215,12 @@ Real EntityHandle::GetAngle(const AtomHandle& a1, const AtomHandle& a2,
   return Impl()->GetAngle(a1.Impl(), a2.Impl(), a3.Impl());
 }
 
+Real EntityHandle::GetAngle(const AtomView& a1, const AtomView& a2,
+                              const AtomView& a3) const
+{
+  return GetAngle(a1.GetHandle(), a2.GetHandle(), a3.GetHandle());
+}
+
 const geom::Mat4& EntityHandle::GetTransformationMatrix() const
 
 {

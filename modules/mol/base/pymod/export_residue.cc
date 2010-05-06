@@ -25,15 +25,27 @@ using namespace boost::python;
 
 using namespace ost;
 using namespace ost::mol;
-#include "generic_property_def.hh"
 
-#include "generic_property_def.hh"
+#include <ost/export_helper/generic_property_def.hh>
 
 namespace {
+  
+  
+  String sec_structure_as_string(SecStructure& s)
+  {
+    return String(1, char(s));
+  }
+
   typedef EntityView (ResidueHandle::*QueryMethod)(const Query&, uint) const;
   typedef EntityView (ResidueHandle::*StringMethod)(const String&, uint) const;
   QueryMethod select_query=&ResidueHandle::Select;
   StringMethod select_string=&ResidueHandle::Select;
+
+  void set_sec_struct1(ResidueBase* b, const SecStructure& s) {b->SetSecStructure(s);}
+  void set_sec_struct2(ResidueBase* b, char c) {b->SetSecStructure(SecStructure(c));}
+  void set_chemclass1(ResidueBase* b, const ChemClass& cc) {b->SetChemClass(cc);}
+  void set_chemclass2(ResidueBase* b, char c) {b->SetChemClass(ChemClass(c));}
+
 }
 
 //BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_insert_overloads,
@@ -65,7 +77,8 @@ void export_Residue()
       .def(init<SecStructure::Type>())
       .def("IsHelical", &SecStructure::IsHelical)
       .def("IsExtended", &SecStructure::IsExtended)
-      .def("IsCoil", &SecStructure::IsCoil)        
+      .def("IsCoil", &SecStructure::IsCoil)
+      .def("__str__", &sec_structure_as_string)
     ;
     enum_<SecStructure::Type>("Type")
       .value("EXTENDED", SecStructure::EXTENDED)
@@ -82,7 +95,8 @@ void export_Residue()
   class_<ResidueBase> residue_base("ResidueBase", no_init);
   residue_base
     .def("GetSecStructure", &ResidueBase::GetSecStructure)
-    .def("SetSecStructure", &ResidueBase::SetSecStructure)
+    .def("SetSecStructure", set_sec_struct1)
+    .def("SetSecStructure", set_sec_struct2)
     .def("GetPhiTorsion", &ResidueBase::GetPhiTorsion)
     .def("GetPsiTorsion", &ResidueBase::GetPsiTorsion)
     .def("GetOmegaTorsion", &ResidueBase::GetOmegaTorsion)
@@ -100,6 +114,9 @@ void export_Residue()
          return_value_policy<copy_const_reference>())
     .def("GetNumber", &ResidueBase::GetNumber,
          return_value_policy<copy_const_reference>())
+    .def("GetChemClass", &ResidueBase::GetChemClass)
+    .def("SetChemClass", set_chemclass1)
+    .def("SetChemClass", set_chemclass2)
     .add_property("number",
                    make_function(&ResidueBase::GetNumber,
                                  return_value_policy<copy_const_reference>()))
@@ -113,9 +130,7 @@ void export_Residue()
                                  return_value_policy<copy_const_reference>()))
     .add_property("qualified_name", &ResidueBase::GetQualifiedName)
   ;
-  generic_prop_def(residue_base);
-
-  generic_prop_def(residue_base);
+  generic_prop_def<ResidueBase>(residue_base);
 
   class_<ResidueHandle, bases<ResidueBase> >("ResidueHandle", init<>())
     .def("GetChain",&ResidueHandle::GetChain)

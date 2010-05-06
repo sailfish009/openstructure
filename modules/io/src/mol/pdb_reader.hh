@@ -24,7 +24,7 @@
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem/fstream.hpp>
-
+#include <ost/string_ref.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/io/module_config.hh>
@@ -47,26 +47,23 @@ public:
   bool HasNext();
 
   void Import(mol::EntityHandle& ent,
-              const String& restrict_chains="");
-  void SetFlags(PDBFlags flags);
-  
-  /// \brief get list of atoms
-  /// 
-  /// The atom handles reflect the order of atom records in the PDb files. This 
-  /// is used to synchronize PDB and coordgroup io.
-  /// 
-  /// By default, the atom list is empty, The PDB::SEQUENTIAL_ATOM_IMPORT flag
-  /// must be set.
-  std::vector<mol::AtomHandle> GetSequentialAtoms() const;
+	      const String& restrict_chains="");
 
 private:
   void ClearState();
+  void AssignSecStructure(mol::EntityHandle ent);
+  void ParseAndAddAtom(const StringRef& line, int line_num,
+                       mol::EntityHandle& h, const StringRef& record_type);
 
-  void ParseAndAddAtom(const String& line, int line_num,
-                       mol::EntityHandle& h, const String& record_type);
-
-  void ParseHelixEntry(const String& line);
-  void ParseStrandEntry(const String& line);
+  /// \brief parses the common part of ATOM, HETATM and ANISOU records
+  bool ParseAtomIdent(const StringRef& line, int line_num, 
+                      char& chain_name, StringRef& res, 
+                      mol::ResNum& resnum, StringRef& atom_name, char& alt_loc,
+                      const StringRef& record_type);
+  void ParseAnisou(const StringRef& line, int line_num,
+                   mol::EntityHandle& h);
+  void ParseHelixEntry(const StringRef& line);
+  void ParseStrandEntry(const StringRef& line);
   void Init(const boost::filesystem::path& loc);
   mol::ChainHandle curr_chain_;
   mol::ResidueHandle curr_residue_;
@@ -74,6 +71,8 @@ private:
   int residue_count_;
   int atom_count_;
   int line_num_;
+  bool hard_end_;
+  int num_model_records_;
   String restrict_chains_;
   HSList helix_list_;
   HSList strand_list_;
@@ -82,8 +81,7 @@ private:
   std::istream& instream_;
   boost::iostreams::filtering_stream<boost::iostreams::input>  in_;
   String curr_line_;
-  std::vector<mol::AtomHandle> sequential_atom_list_;
-  PDBFlags flags_;
+  
   // this needs to be set to true for reading pqr
   // file (i.e. pdb formatted file with charges in occupacy
   // column, and radii in b-factor column)

@@ -63,7 +63,6 @@ PythonShellWidget::PythonShellWidget(QWidget* parent):
   output_visible_(true),
   completion_start_(0),
   completion_end_(0),
-  mode_(SHELL_INTERACTION_BASH),
   block_edit_start_(document()->begin()),
   output_blocks_(),
   machine_(new StateMachine(this)),
@@ -71,7 +70,8 @@ PythonShellWidget::PythonShellWidget(QWidget* parent):
   readwrite_state_(new State),
   multiline_active_state_(new State)
 {
-  setLineWrapMode(QPlainTextEdit::NoWrap);
+  setLineWrapMode(QPlainTextEdit::WidgetWidth);
+
   document()->setDocumentLayout(new PythonShellTextDocumentLayout(document()));
   setViewportMargins(Gutter::GUTTER_WIDTH, 0, 0, 0);
   setUndoRedoEnabled(false);
@@ -107,11 +107,7 @@ PythonShellWidget::PythonShellWidget(QWidget* parent):
           SLOT(complete(const QRect&,bool)));
   connect(this,SIGNAL(SetPathCompletionPrefix(const QString&)),path_completer_, 
           SLOT(setCompletionPrefix(const QString&)));
-  if (mode_==SHELL_INTERACTION_BASH) {
-    set_block_edit_mode_(EDITMODE_SINGLELINE);
-  } else {
-    set_block_edit_mode_(EDITMODE_MULTILINE_INACTIVE);
-  }
+  set_block_edit_mode_(EDITMODE_SINGLELINE);
   setup_readonly_state_machine_();
   setup_state_machine_();
 }
@@ -169,97 +165,83 @@ void PythonShellWidget::setup_state_machine_()
   connect(history_down,SIGNAL(entered()),this,SLOT(OnHistoryDownStateEntered()));
   connect(executing,SIGNAL(entered()),this,SLOT(OnExecuteStateEntered()));
 
-  if (mode_==SHELL_INTERACTION_BASH) {
-    KeyEventTransition* tr1=new KeyEventTransition(QEvent::KeyPress,
-                                                   Qt::Key_Return,
-                                                   Qt::NoModifier,
-                                                   executing,
-                                                   true,
-                                                   new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
-    single_line->addTransition(tr1);
-    connect(tr1,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-    KeyEventTransition* tr3=new KeyEventTransition(QEvent::KeyPress,
-                                                   Qt::Key_Return,
-                                                   Qt::NoModifier,
-                                                   multiline_active_state_,
-                                                   true,
-                                                   new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
-    single_line->addTransition(tr3);
-    connect(tr3,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-    single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::NoModifier,history_up));
-    single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::NoModifier,history_down));
+  KeyEventTransition* tr1=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 executing,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
+  single_line->addTransition(tr1);
+  connect(tr1,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+  KeyEventTransition* tr3=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 multiline_active_state_,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
+  single_line->addTransition(tr3);
+  connect(tr3,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::NoModifier,history_up));
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::NoModifier,history_down));
 
-    KeyEventTransition* tr4=new KeyEventTransition(QEvent::KeyPress,
-                                                   Qt::Key_Return,
-                                                   Qt::NoModifier,
-                                                   executing,
-                                                   true,
-                                                   new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
-    multi_line_inactive->addTransition(tr4);
-    connect(tr4,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-    KeyEventTransition* tr6=new KeyEventTransition(QEvent::KeyPress,
-                                                   Qt::Key_Return,
-                                                   Qt::NoModifier,
-                                                   multiline_active_state_,
-                                                   true,
-                                                   new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
-    multi_line_inactive->addTransition(tr6);
-    connect(tr6,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-    multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Left,Qt::NoModifier,multiline_active_state_));
-    multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Right,Qt::NoModifier,multiline_active_state_));
-    multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::ControlModifier,multiline_active_state_));
-    multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::NoModifier,history_up));
-    multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::NoModifier,history_down));
+  KeyEventTransition* tr4=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 executing,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
+  multi_line_inactive->addTransition(tr4);
+  connect(tr4,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+  KeyEventTransition* tr6=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 multiline_active_state_,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
+  multi_line_inactive->addTransition(tr6);
+  connect(tr6,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Left,Qt::NoModifier,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Right,Qt::NoModifier,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::ControlModifier,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::NoModifier,history_up));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::NoModifier,history_down));
 
-    KeyEventTransition* tr7=new KeyEventTransition(QEvent::KeyPress,
-                                                   Qt::Key_Return,
-                                                   Qt::NoModifier,
-                                                   executing,
-                                                   true,
-                                                   new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
-    multiline_active_state_->addTransition(tr7);
-    connect(tr7,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-    KeyEventTransition* tr8=new KeyEventTransition(QEvent::KeyPress,
-                                                   Qt::Key_Return,
-                                                   Qt::NoModifier,
-                                                   multiline_active_state_,
-                                                   true,
-                                                   new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
-    multiline_active_state_->addTransition(tr8);
-    connect(tr8,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+  KeyEventTransition* tr7=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 executing,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
+  multiline_active_state_->addTransition(tr7);
+  connect(tr7,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+  KeyEventTransition* tr8=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 multiline_active_state_,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
+  multiline_active_state_->addTransition(tr8);
+  connect(tr8,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
 
-    multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier,multi_line_inactive));
-    multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::ControlModifier,history_up));
-    multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier,history_down));
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier,multi_line_inactive));
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::ControlModifier,history_up));
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier,history_down));
 
-    history_up->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
-    history_up->addTransition(new AutomaticTransition(single_line,new HistoryGuard(&history_,EDITMODE_SINGLELINE)));
-    history_down->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
-    history_down->addTransition(new AutomaticTransition(single_line,new HistoryGuard(&history_,EDITMODE_SINGLELINE)));
+  history_up->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
+  history_up->addTransition(new AutomaticTransition(single_line,new HistoryGuard(&history_,EDITMODE_SINGLELINE)));
+  history_down->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
+  history_down->addTransition(new AutomaticTransition(single_line,new HistoryGuard(&history_,EDITMODE_SINGLELINE)));
 
-    executing->addTransition(new AutomaticTransition(single_line));
+  executing->addTransition(new AutomaticTransition(single_line));
 
-    machine_->setInitialState(single_line);
-  } else {
-    multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::ControlModifier,executing));
-    multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::NoModifier,multiline_active_state_));
-
-    multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::ControlModifier,executing));
-
-    executing->addTransition(new AutomaticTransition(multi_line_inactive));
-
-    history_up->addTransition(new AutomaticTransition(multi_line_inactive));
-    history_down->addTransition(new AutomaticTransition(multi_line_inactive));
-
-    machine_->setInitialState(multi_line_inactive);
-  }
-
+  machine_->setInitialState(single_line);
   machine_->start();
 }
 
 void PythonShellWidget::OnReadonlyEntered()
 {
   setReadOnly(true);
+  setTextInteractionFlags(textInteractionFlags() | Qt::TextSelectableByKeyboard);
 }
 
 void PythonShellWidget::OnReadwriteEntered()

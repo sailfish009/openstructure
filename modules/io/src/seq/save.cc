@@ -67,7 +67,7 @@ SequenceListToString(const seq::ConstSequenceList& seq_list,
   SequenceIOHandlerPtr ali_io=m.FindAlignmentExportHandler("", format);
   
   if (!ali_io) {
-    throw IOException("Can't sequences to format '"+format+"'.");
+    throw IOException("Can't export sequences to format '"+format+"'.");
   }
   std::stringstream sstream;
   ali_io->Export(seq_list, sstream);

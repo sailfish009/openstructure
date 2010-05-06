@@ -32,7 +32,7 @@
 
 namespace ost { namespace mol { namespace impl {
 
-class ConnectorImpl: public GenericPropertyContainerImpl,
+class ConnectorImpl: public GenericPropContainerImpl,
                      public boost::enable_shared_from_this<ConnectorImpl> {
 public:
   ConnectorImpl(const EntityImplPtr& e, const AtomImplPtr& first, 

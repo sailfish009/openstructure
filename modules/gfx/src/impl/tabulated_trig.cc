@@ -30,9 +30,9 @@ public:
   const static int TAB_ENTRIES=360;
   CosTable() 
   {
-    float delta=2*M_PI/TAB_ENTRIES;
+    float delta=2.0*M_PI/TAB_ENTRIES;
     for (int i=0; i<TAB_ENTRIES; ++i) {
-      tab_[i]=cos(delta*i);
+      tab_[i]=cos(delta*static_cast<float>(i));
     }
   }
   float Get(float angle) const 
