@@ -24,30 +24,23 @@
 
 #include <QtGui>
 
-#include "seq_selection_painter.hh"
+#include "background_painter.hh"
 
 namespace ost { namespace gui {
 
-SeqSelectionPainter::SeqSelectionPainter(QObject* parent)
-    : Painter(parent), focus_color_(255,0,0,0), mouse_over_color_(240,240,240,192)
-{
+BackgroundPainter::BackgroundPainter(QObject* parent)
+    : Painter(parent)
+{}
 
-}
-
-void SeqSelectionPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
+void BackgroundPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
   painter->save();
-  /*
-  if (option.state & QStyle::State_HasFocus){
-    painter->fillRect(option.rect, focus_color_);
+  if ((index.column()-1)%10 > 4){
+    painter->fillRect(option.rect, QColor(240,240,240));
+
   }
-  */
-  if (option.state & QStyle::State_MouseOver){
-    painter->fillRect(option.rect, mouse_over_color_);
-  }
-  if (option.state & QStyle::State_Selected){
-    QColor color = option.palette.highlight().color();
-    color.setAlpha(128);
-    painter->fillRect(option.rect, color);
+  if(index.row()>0 && (index.column())%10 == 0){
+    painter->setPen(QPen(QColor(135,135,135)));
+    painter->drawLine(option.rect.topRight(),option.rect.bottomRight());
   }
   painter->restore();
 }

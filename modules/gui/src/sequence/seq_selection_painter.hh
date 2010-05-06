@@ -36,6 +36,9 @@ public:
   SeqSelectionPainter(QObject* parent = 0);
   void Paint(QPainter *painter, const QStyleOptionViewItem &option,
       const QModelIndex &index);
+private:
+  QColor focus_color_;
+  QColor mouse_over_color_;
 };
 
 }}

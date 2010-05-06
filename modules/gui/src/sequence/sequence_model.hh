@@ -81,6 +81,7 @@ private:
 
   QList<ViewObject*> objects_;
   int max_columns;
+  PainterList empty_list_;
 };
 
 

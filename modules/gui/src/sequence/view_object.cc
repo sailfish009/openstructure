@@ -32,6 +32,7 @@
 #include "title_row.hh"
 
 #include "painter.hh"
+#include "background_painter.hh"
 #include "seq_secstr_painter.hh"
 #include "seq_selection_painter.hh"
 #include "seq_text_painter.hh"
@@ -78,7 +79,9 @@ ViewObject::ViewObject(gfx::EntityP& entity, QObject* parent): QObject(parent), 
 ViewObject::ViewObject(QObject* parent): QObject(parent)
 {
   TitleRow* new_row = new TitleRow(this);
-  Painter* p = new TickPainter(this);
+  Painter* p = new BackgroundPainter(this);
+  new_row->InsertPainter(p);
+  p = new TickPainter(this);
   new_row->InsertPainter(p);
   rows_.append(new_row);
 }
@@ -111,7 +114,9 @@ int ViewObject::GetRowCount()
 void ViewObject::AddSequence(seq::SequenceHandle& sequence, const QString& name)
 {
   SequenceRow* new_row = new SequenceRow(name, sequence, this);
-  Painter* p = new SeqSelectionPainter(this);
+  Painter* p = new BackgroundPainter(this);
+  new_row->InsertPainter(p);
+  p = new SeqSelectionPainter(this);
   new_row->InsertPainter(p);
   p = new SeqTextPainter(this);
   new_row->InsertPainter(p);
@@ -121,11 +126,13 @@ void ViewObject::AddSequence(seq::SequenceHandle& sequence, const QString& name)
 void ViewObject::AddChain(mol::ChainView& chain, const QString& name)
 {
   SecStrRow* new_row = new SecStrRow(name, chain, this);
-  Painter* p = new SeqSelectionPainter(this);
+  Painter* p = new BackgroundPainter(this);
   new_row->InsertPainter(p);
   p = new SeqSecStrPainter(this);
   new_row->InsertPainter(p);
   p = new SeqTextPainter(this);
+  new_row->InsertPainter(p);
+  p = new SeqSelectionPainter(this);
   new_row->InsertPainter(p);
   rows_.append(new_row);
 }

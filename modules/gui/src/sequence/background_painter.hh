@@ -16,40 +16,28 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#ifndef OST_SEQUENCE_VIEWER_BACKGROUND_PAINTER
+#define OST_SEQUENCE_VIEWER_BACKGROUND_PAINTER
 
 /*
   Author: Stefan Scheuber
  */
 
+#include <QObject>
 
-#include <QtGui>
-
-#include "seq_selection_painter.hh"
+#include "painter.hh"
 
 namespace ost { namespace gui {
 
-SeqSelectionPainter::SeqSelectionPainter(QObject* parent)
-    : Painter(parent), focus_color_(255,0,0,0), mouse_over_color_(240,240,240,192)
+class BackgroundPainter : public Painter
 {
-
-}
-
-void SeqSelectionPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
-  painter->save();
-  /*
-  if (option.state & QStyle::State_HasFocus){
-    painter->fillRect(option.rect, focus_color_);
-  }
-  */
-  if (option.state & QStyle::State_MouseOver){
-    painter->fillRect(option.rect, mouse_over_color_);
-  }
-  if (option.state & QStyle::State_Selected){
-    QColor color = option.palette.highlight().color();
-    color.setAlpha(128);
-    painter->fillRect(option.rect, color);
-  }
-  painter->restore();
-}
+  Q_OBJECT
+public:
+  BackgroundPainter(QObject* parent = 0);
+  void Paint(QPainter *painter, const QStyleOptionViewItem &option,
+      const QModelIndex &index);
+};
 
 }}
+
+#endif

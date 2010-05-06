@@ -35,10 +35,16 @@
 namespace ost { namespace gui {
 
 SequenceRow::SequenceRow(const QString& name, seq::SequenceHandle& sequence, ViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11)), sequence_(sequence)
-{ }
+{
+  name_font_.setBold(true);
+  name_font_.setItalic(true);
+}
 
-SequenceRow::SequenceRow(const QString& name, ViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name)
-{ }
+SequenceRow::SequenceRow(const QString& name, ViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11))
+{
+  name_font_.setBold(true);
+  name_font_.setItalic(true);
+}
 
 int SequenceRow::GetColumnCount() const
 {
