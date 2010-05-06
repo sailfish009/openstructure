@@ -60,6 +60,8 @@ public slots:
   void ShowExclusive();
   void HideExclusive();
   mol::EntityView GetViewUnion();
+  void ShowDownsampledMap();
+  void ShowOriginalMap();
 
 private slots:
   void SetActiveNodes(gfx::NodePtrList nodes, gfx::EntityP entity, mol::QueryViewWrapperList views);

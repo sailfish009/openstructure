@@ -45,7 +45,10 @@ enum ContextActionType
   SINGLE=0x80,
   MULTI=0x100
 #if OST_IMG_ENABLED
-  ,MAP=0x200
+  ,MAP=0x200,
+  MAP_ORIGINAL=0x400,
+  MAP_DOWNSAMPLED=0x800,
+  MAP_DSAMPLED_AVAIL=0x1000
 #endif
 };
 Q_DECLARE_FLAGS(ContextActionTypes, ContextActionType)

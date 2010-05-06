@@ -32,6 +32,11 @@
 
 namespace ost { namespace gfx {
 
+enum MapIsoType {
+  ORIGINAL_MAP,
+  DOWNSAMPLED_MAP
+};
+
 class MapIso;
 typedef boost::shared_ptr<MapIso> MapIsoP;
 
@@ -86,6 +91,23 @@ public:
   // that never goes out of scope, so I get a reference from here
   img::ImageHandle& GetOriginalMap();
 
+  /// \brief get the map handle of the downsampled map
+  // The following is a hack. For the DataViewer I need to pass a reference to an ImagHandle
+  // that never goes out of scope, so I get a reference from here
+  img::ImageHandle& GetDownsampledMap();
+
+  /// \brief sets the donsampled map to active
+  void ShowDownsampledMap();
+
+  /// \brief sets the original map to active
+  void ShowOriginalMap();
+
+  /// \brief checks if the downsampled map is available
+  bool IsDownsampledMapAvailable() const ;
+
+  /// \brief returns the type of map currently being show
+  MapIsoType GetShownMapType() const;
+
   /// \brief set  color
   /// 
   /// By default, the color is white.
@@ -100,6 +122,13 @@ public:
   const Color& GetColor() const { return color_; }
   void SetNSF(float smoothf);
   void SetDebugOctree(bool flag) { debug_octree_=flag; }
+
+  /// \brief flags the octree to be rebuilt
+  void MakeOctreeDirty();
+
+  /// \brief checks is the octree needs to be rebuilt
+  bool IsOctreeDirty() const;
+
 protected:
   virtual void CustomPreRenderGL(bool flag);
   static img::ImageHandle DownsampleMap(const img::ImageHandle& mh);
@@ -119,6 +148,7 @@ private:
   float            min_max_;
   bool             debug_octree_;
   Color            color_; 
+  bool             dirty_octree_;
 };
 
 }}
