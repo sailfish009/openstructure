@@ -34,7 +34,7 @@ BackgroundPainter::BackgroundPainter(QObject* parent)
 
 void BackgroundPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
   painter->save();
-  if ((index.column()-1)%10 > 4){
+  if (index.column()>0 && (index.column()-1)%10 < 5){
     painter->fillRect(option.rect, QColor(240,240,240));
 
   }
