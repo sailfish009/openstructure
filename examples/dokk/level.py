@@ -35,6 +35,8 @@ class Level(QtCore.QObject):
   def Load(self):
     level_dir=os.path.join('datafiles', self.name_)
     ini_file = "level"+Dokk().GetLanguage()+".ini"
+    if not os.path.exists(os.path.join(level_dir, ini_file)):
+      ini_file = "level.ini"
     self.config = Config(os.path.join(level_dir, ini_file))
     self.topten = TopTen(os.path.join(level_dir, 'top_ten.ini'))
     print 'Loading %s' % self.config.Level["NAME"]

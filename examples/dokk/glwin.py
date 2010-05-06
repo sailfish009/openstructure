@@ -42,8 +42,11 @@ class DokkGLCanvas(QGLWidget):
     gfx.Scene().RenderGL()
 
   def SetLevel(self, level):
+    level_dir = "datafiles"
     ini_file = "hud"+self.dokk.GetLanguage()+".ini"
-    self.config = Config(os.path.join('datafiles', ini_file))
+    if not os.path.exists(os.path.join(level_dir, ini_file)):
+      ini_file = "hud.ini"
+    self.config = Config(os.path.join(level_dir, ini_file))
     self.spnav_input.SetLevel(level)
     
   def paintEvent(self, event):
