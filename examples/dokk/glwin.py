@@ -1,10 +1,13 @@
 # -*- coding: iso-8859-15 -*-
 
 import math
+import os
 from ost import gfx
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 from PyQt4.QtOpenGL import *
+
+from config import Config
 
 from spnav_input import SpnavInputDevice
 from hud import HUD, HUDObject
@@ -27,7 +30,8 @@ class DokkGLCanvas(QGLWidget):
     self.update_timer.start(UPDATE_INTERVAL)
     
     self.hud = HUD()
-        
+    self.config = None
+    
     self._lock_input = False
     QObject.connect(self.update_timer, SIGNAL("timeout()"), self.update)
         
@@ -38,6 +42,8 @@ class DokkGLCanvas(QGLWidget):
     gfx.Scene().RenderGL()
 
   def SetLevel(self, level):
+    ini_file = "hud"+self.dokk.GetLanguage()+".ini"
+    self.config = Config(os.path.join('datafiles', ini_file))
     self.spnav_input.SetLevel(level)
     
   def paintEvent(self, event):
@@ -54,13 +60,13 @@ class DokkGLCanvas(QGLWidget):
     painter.drawRect(QRect(QPoint(0, 0), QSize(self.width(), 35)))
     painter.setPen(QPen(QColor(255,255,255), Qt.SolidLine))
     painter.setFont(QFont("Verdana",20))
-    painter.drawText(QPoint(10, 25), "Sie sind %.1f von der Lösung entfernt" % self.dokk.GetLevel().GetRMSD())
+    painter.drawText(QPoint(10, 25), self.config.Text["RMSD"] % self.dokk.GetLevel().GetRMSD())
     if self.dokk.GetLevel().IsIntroDone():
       time_col=self.dokk.GetLevel().GetRemainingTime()/10
       if time_col>1:
         time_col=1
       painter.setPen(QPen(QColor(255,255*time_col,255*time_col), Qt.SolidLine))
-    painter.drawText(QPoint(self.width()-250, 25), "noch %.0f Sekunden" % self.dokk.GetLevel().GetRemainingTime())
+    painter.drawText(QPoint(self.width()-275, 25), self.config.Text["SECONDS"] % self.dokk.GetLevel().GetRemainingTime())
     if self.hud is not None:
       self.hud.Paint(painter)
     self.dokk.GetLevel().CheckSolved()

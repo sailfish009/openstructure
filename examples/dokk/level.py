@@ -34,7 +34,8 @@ class Level(QtCore.QObject):
     
   def Load(self):
     level_dir=os.path.join('datafiles', self.name_)
-    self.config = Config(os.path.join(level_dir, 'level.ini'))
+    ini_file = "level"+Dokk().GetLanguage()+".ini"
+    self.config = Config(os.path.join(level_dir, ini_file))
     self.topten = TopTen(os.path.join(level_dir, 'top_ten.ini'))
     print 'Loading %s' % self.config.Level["NAME"]
     ligand_ent=io.LoadSDF(os.path.join(level_dir, 'ligand.sdf'))
