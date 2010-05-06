@@ -96,6 +96,10 @@ void export_Gosty()
         return_value_policy<reference_existing_object>())
     .add_property("seq_viewer", make_function(&GostyApp::GetSequenceViewer,
         return_value_policy<reference_existing_object>()))
+    .def("GetSequenceViewerV2", &GostyApp::GetSequenceViewerV2,
+        return_value_policy<reference_existing_object>())
+    .add_property("seq_viewer_v2", make_function(&GostyApp::GetSequenceViewerV2,
+        return_value_policy<reference_existing_object>()))
     .def("GetToolOptionsWin", &GostyApp::GetToolOptionsWin,
         return_value_policy<reference_existing_object>())
     .add_property("tool_options_win", make_function(&GostyApp::GetToolOptionsWin,

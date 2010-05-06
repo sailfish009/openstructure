@@ -36,13 +36,26 @@
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node_visitor.hh>
 
-#include "sequence_model.hh"
+#include <ost/gui/widget_registry.hh>
+#include <ost/gui/gosty_app.hh>
 
+#include "sequence_model.hh"
 #include "sequence_viewer.hh"
 
-#include "sequence_delegate.hh"
-
 namespace ost { namespace gui {
+
+class SequenceViewerV2Factory: public WidgetFactory {
+public:
+  SequenceViewerV2Factory() :
+    WidgetFactory("ost::gui::SequenceViewerV2", "Sequence Viewer V2") {
+  }
+
+  virtual Widget* Create(QWidget* parent) {
+    return GostyApp::Instance()->GetSequenceViewerV2();
+  }
+};
+
+OST_REGISTER_WIDGET(SequenceViewerV2, SequenceViewerV2Factory);
 
 struct GetNodesVisitor: public gfx::GfxNodeVisitor {
   GetNodesVisitor(): nodes_() {}
@@ -59,6 +72,8 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
   model_ = new SequenceModel(this);
 
   QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setMargin(0);
+  layout->setSpacing(0);
 
   seq_table_view_ = new SequenceTableView(model_);
   layout->addWidget(seq_table_view_);

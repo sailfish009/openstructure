@@ -46,7 +46,7 @@ GostyApp* GostyApp::app_=NULL;
 
 GostyApp::GostyApp():
   py_shell_(NULL), w_py_shell_(NULL), gl_win_(NULL), w_gl_win_(NULL),
-  scene_win_(NULL), w_scene_win_(NULL), seq_viewer_(NULL), tool_options_win_(NULL),
+  scene_win_(NULL), w_scene_win_(NULL), seq_viewer_(NULL), seq_viewer_v2_(NULL), tool_options_win_(NULL),
   w_tool_options_(NULL), main_(new GostyMainWindow), 
   perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>())
 {
@@ -102,6 +102,15 @@ SequenceViewer* GostyApp::GetSequenceViewer()
   seq_viewer_->SetDestroyOnClose(false);
   }
   return seq_viewer_;
+}
+
+SequenceViewerV2* GostyApp::GetSequenceViewerV2()
+{
+  if (seq_viewer_v2_==NULL) {
+    seq_viewer_v2_=new SequenceViewerV2;
+    seq_viewer_v2_->SetDestroyOnClose(false);
+  }
+  return seq_viewer_v2_;
 }
 
 #if OST_IMG_ENABLED
