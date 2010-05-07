@@ -280,7 +280,7 @@ void SequenceImpl::Replace(const String& str,int start, int end)
 
 void SequenceImpl::ShiftRegion(int start, int end, int amount)
 {
-  if(start <= end && end + amount > this->GetLength() || start + amount <= 0){
+  if(start > end || start + amount <= 0 || end + amount > this->GetLength()){
     throw std::out_of_range("Region not valid");
   }
   String str1=seq_string_.substr(start, end-start);
