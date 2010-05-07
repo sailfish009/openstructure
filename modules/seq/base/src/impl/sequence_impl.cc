@@ -63,8 +63,13 @@ SequenceImplPtr SequenceImpl::FromString(const String& seq_name,
 
 void SequenceImpl::SetString(const String& seq)
 {
-  seq_string_=seq;
-  this->ShiftsFromSequence();
+  if (SequenceImpl::IsSequenceStringSane(seq)) {
+    seq_string_=seq;
+    this->ShiftsFromSequence();
+  }
+  else {
+    throw InvalidSequence();
+  }
 }
 
 SequenceImpl::SequenceImpl(const String& seq_name,
@@ -207,7 +212,7 @@ void SequenceImpl::AttachView(const mol::EntityView& view)
 {
   static const char* msg="Expected 1 chain, but %d chains found";
   attached_view_=view;
-  if (attached_view_.GetChainCount()!=1) {
+  if (view.IsValid() && attached_view_.GetChainCount()!=1) {
     throw IntegrityError(str(format(msg) % attached_view_.GetChainCount()));
   }
 }
