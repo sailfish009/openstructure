@@ -123,24 +123,6 @@ private:
   boost::ptr_vector<gfx::ColorOp> c_ops_;
 };
 
-// temporary debug 
-class RSurface;
-typedef boost::shared_ptr<RSurface> RSurfaceP;
-
-class DLLEXPORT_OST_GFX RSurface: public GfxObj {
-public:
-  RSurface(const String& name, const mol::rsurf::RSurfP& rs);
-  virtual geom::Vec3 GetCenter() const;
-  virtual void CustomRenderGL(RenderPass pass);
-  
-  virtual geom::AlignedCuboid GetBoundingBox() const;
-
-  virtual void ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, const mol::Transform& tf) const;
-
-private:
-  mol::rsurf::RSurfP rs_;
-};
-
 }} // ns
 
 #endif

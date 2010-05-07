@@ -28,6 +28,10 @@ SurfaceHandle CreateSurface()
 }
 
 
+SurfaceHandle::SurfaceHandle():
+  impl_()
+{}
+
 SurfaceHandle::SurfaceHandle(const impl::SurfaceImplP& p):
   impl_(p)
 {}

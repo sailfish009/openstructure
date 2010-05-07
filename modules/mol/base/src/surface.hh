@@ -21,6 +21,5 @@
 
 #include <ost/mol/surface_handle.hh>
 #include <ost/mol/impl/surface_impl.hh>
-#include <ost/mol/impl/rsurf_impl.hh>
 
 #endif
