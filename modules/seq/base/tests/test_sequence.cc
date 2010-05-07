@@ -88,6 +88,24 @@ BOOST_AUTO_TEST_CASE(seq_string)
   BOOST_CHECK_EQUAL(s.GetGaplessString(),"");
 }
 
+BOOST_AUTO_TEST_CASE(seq_onelettercode)
+{
+  SequenceHandle s=CreateSequence("S1", "abfcdadeaf");
+  BOOST_CHECK_EQUAL(s.GetOneLetterCode(0),'a');
+  BOOST_CHECK_EQUAL(s.GetOneLetterCode(3),'c');
+  BOOST_CHECK_EQUAL(s.GetOneLetterCode(9),'f');
+  BOOST_CHECK_THROW(s.GetOneLetterCode(-1),Error);
+  BOOST_CHECK_THROW(s.GetOneLetterCode(10),Error);
+  s=CreateSequence("S1", "-afc--de-f");
+  BOOST_CHECK_EQUAL(s.GetOneLetterCode(0),'-');
+  BOOST_CHECK_EQUAL(s.GetOneLetterCode(1),'a');
+  BOOST_CHECK_EQUAL(s.GetOneLetterCode(9),'f');
+  BOOST_CHECK_THROW(s.GetOneLetterCode(-1),Error);
+  BOOST_CHECK_THROW(s.GetOneLetterCode(10),Error);
+  s=CreateSequence("S1", "");
+  BOOST_CHECK_THROW(s.GetOneLetterCode(0),Error);
+}
+
 BOOST_AUTO_TEST_CASE(seq_getnum) 
 {
   SequenceHandle s=CreateSequence("S1", "-afc--de-f");
