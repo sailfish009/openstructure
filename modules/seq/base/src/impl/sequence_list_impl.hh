@@ -41,12 +41,21 @@ public:
   /// \brief get number of sequences in list
   int GetCount() const { return list_.size(); }
   
-  SequenceImplPtr& GetSequence(int i) 
-  { 
-    return list_[i]; 
+  SequenceImplPtr& GetSequence(int i) {
+    unsigned int index = static_cast<unsigned int>(i);
+    if (index<list_.size()) {
+      return list_[index];
+    }
+    throw Error("Index not covered SequenceList");
   }
   
-  const SequenceImplPtr& GetSequence(int i) const { return list_[i]; }  
+  const SequenceImplPtr& GetSequence(unsigned int i) const {
+    unsigned int index = static_cast<unsigned int>(i);
+    if (index<list_.size()) {
+      return list_[index];
+    }
+    throw Error("Index not covered SequenceList");
+  }
   
   int GetPos(int seq_index, int residue_index) const;
 

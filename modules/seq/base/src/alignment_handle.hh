@@ -121,8 +121,7 @@ public:
   ///      If set to -1, no master sequence is defined and the operations will
   ///      affect all sequences
   ///
-  /// This method does not throw any exceptions, even if the aligned region is
-  /// out of bounds.
+  /// If the aligned region is out of bounds, a std::out_of_bounds exeception will be thrown.
   AlignedRegion MakeRegion(int start, int n, int master=-1) const;
 
   /// \brief get number of sequences in alignment
