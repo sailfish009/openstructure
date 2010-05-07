@@ -31,6 +31,7 @@
 
 #if OST_IMG_ENABLED
 #include <ost/gfx/map_iso.hh>
+#include <ost/dyn_cast.hh>
 #endif // OST_IMG_ENABLED
 
 #include "custom_part_node.hh"
@@ -154,7 +155,7 @@ void ContextMenu::ShowMenu(const QPoint& pos)
           {
             flags &= ~MAP;
           } else {
-            gfx::MapIso* mapisop = dynamic_cast<gfx::MapIso*> (gfx_node.get());
+            gfx::MapIsoP mapisop = dyn_cast<gfx::MapIso> (gfx_node);
             if (mapisop->GetShownMapType() == gfx::ORIGINAL_MAP){
               flags &= ~MAP_DOWNSAMPLED;
             } else {

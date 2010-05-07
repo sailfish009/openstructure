@@ -73,9 +73,6 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
   color_(Color::GREY)
 {
   // TODO replace with def mat for this gfx obj type
-  if (mh.IsFrequency() == true){
-    throw Error("Error: Map not in real space. Cannot create of this map");
-  }
   if (mh_ != original_mh_) {
     downsampled_mh_ = mh_;
   }
@@ -105,10 +102,10 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   color_(Color::GREY)  
 {
   // TODO replace with def mat for this gfx obj type
-  if (downsampled_mh_ == original_mh_) {
-    mh_ = original_mh_;
-    downsampled_mh_ = img::ImageHandle();
+  if (mh_ != original_mh_) {
+    downsampled_mh_ = mh_;
   }
+  octree_.Initialize();
   SetMatAmb(Color(0,0,0));
   SetMatDiff(Color(1,1,1));
   SetMatSpec(Color(0.1,0.1,0.1));
@@ -279,10 +276,9 @@ void MapIso::Rebuild()
   if (octree_.IsMapManageable(mh_) == false) {
     throw Error("Error: Map is too big for visualization");
   }
-  if (IsOctreeDirty()==true) {
+  if (IfOctreeDirty()==true) {
     octree_.SetNewMap(mh_);
     octree_.Initialize();
-    dirty_octree_=false;
   }
   va_.Clear();
   va_.SetMode(0x2);
@@ -380,7 +376,7 @@ MapIsoType MapIso::GetShownMapType() const
    return ret;
 }
 
-bool MapIso::IsOctreeDirty() const
+bool MapIso::IfOctreeDirty() const
 {
   return dirty_octree_;
 }

@@ -96,7 +96,7 @@ public:
   // that never goes out of scope, so I get a reference from here
   img::ImageHandle& GetDownsampledMap();
 
-  /// \brief sets the donsampled map to active
+  /// \brief sets the donwsampled map to active
   void ShowDownsampledMap();
 
   /// \brief sets the original map to active
@@ -127,7 +127,7 @@ public:
   void MakeOctreeDirty();
 
   /// \brief checks is the octree needs to be rebuilt
-  bool IsOctreeDirty() const;
+  bool IfOctreeDirty() const;
 
 protected:
   virtual void CustomPreRenderGL(bool flag);
