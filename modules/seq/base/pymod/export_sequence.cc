@@ -250,6 +250,7 @@ void export_sequence()
     .add_property("sequences", &AlignmentHandle::GetSequences)
     .def("SetSequenceName",  &AlignmentHandle::SetSequenceName)
     .def("SetSequenceOffset", &AlignmentHandle::SetSequenceOffset)
+    .def("GetSequenceOffset", &AlignmentHandle::GetSequenceOffset)
   ;
   class_<AlignedColumn>("AlignedColumn", no_init)
     .def("GetIndex", &AlignedColumn::GetIndex)

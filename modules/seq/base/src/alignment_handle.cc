@@ -62,7 +62,7 @@ int AlignmentHandle::GetResidueIndex(int seq_index, int pos) const
 void AlignmentHandle::AddSequence(const ConstSequenceHandle& sequence)
 {
   this->CheckValidity();
-  if (impl_->GetCount()>0 && 
+  if (impl_->GetCount()>0 &&
       impl_->GetSequence(0)->GetLength()!=sequence.GetLength()) {
     throw InvalidAlignment();
   }
@@ -143,7 +143,7 @@ void AlignmentHandle::AttachView(int seq_index, const mol::EntityView& view)
   impl_->GetSequence(seq_index)->AttachView(view);
 }
 
-void AlignmentHandle::AttachView(int seq_index, const mol::EntityView& view, 
+void AlignmentHandle::AttachView(int seq_index, const mol::EntityView& view,
                                  const String& chain_name)
 {
   this->CheckValidity();
@@ -160,7 +160,7 @@ ConstSequenceHandle AlignmentHandle::FindSequence(const String& name) const
 void AlignmentHandle::Cut(int start, int end)
 {
   this->CheckValidity();
-  for (impl::SequenceListImpl::Iterator i=impl_->Begin(), 
+  for (impl::SequenceListImpl::Iterator i=impl_->Begin(),
        e=impl_->End(); i!=e; ++i) {
     (*i)->Cut(start, end-start);
   }
@@ -183,12 +183,12 @@ void AlignmentHandle::Replace(const AlignedRegion& aln_r, int start, int end){
   }
 }
 
-void AlignmentHandle::ShiftRegion(int start, int end, int amount, 
+void AlignmentHandle::ShiftRegion(int start, int end, int amount,
                                   int master)
 {
   this->CheckValidity();
   int cnt=0;
-  for (impl::SequenceListImpl::Iterator i=impl_->Begin(), 
+  for (impl::SequenceListImpl::Iterator i=impl_->Begin(),
        e=impl_->End(); i!=e; ++i, ++cnt) {
     if (master==-1 || cnt==master) {
       (*i)->ShiftRegion(start, end, amount);
@@ -216,7 +216,7 @@ char AlignmentHandle::GetOneLetterCode(int seq_index, int pos) const
 
 AlignedColumnIterator AlignmentHandle::begin() const
 {
-  // no need to check for validity here  
+  // no need to check for validity here
   return AlignedColumnIterator(*this, 0, this->GetLength());
 }
 
@@ -244,4 +244,9 @@ void AlignmentHandle::SetSequenceOffset(int seq_index, int offset)
   impl_->GetSequence(seq_index)->SetSequenceOffset(offset);
 }
 
+int AlignmentHandle::GetSequenceOffset(int seq_index)
+{
+  this->CheckValidity();
+  return impl_->GetSequence(seq_index)->GetSequenceOffset();
+}
 }}
