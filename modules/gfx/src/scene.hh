@@ -173,16 +173,18 @@ class DLLEXPORT_OST_GFX Scene {
   /*
     0=off
     1=quad-buffered
-    2=interlaced variant #1
-    3=interlaced variant #2
+    2=interlaced stereo
   */
   void Stereo(unsigned int);
 
   /// \brief invert stereo eyes for stereo mode=0
   void SetStereoInverted(bool f);
 
-  /// \brief eye mode, 0=center, 1=left, 2=right
-  void SetStereoEye(unsigned int);
+  /// \brief stereo view mode, 0=center, 1=left, 2=right
+  void SetStereoView(unsigned int);
+
+  void SetStereoEyeDist(float);
+  void SetStereoEyeOffset(float);
 
   /// \brief set main light direction
   void SetLightDir(const geom::Vec3& dir);
@@ -429,11 +431,12 @@ private:
 
   uint blur_count_;
   std::vector<boost::shared_array<unsigned char> > blur_buffer_;
-  GLuint  glow_tex_;
   unsigned int stereo_;
   bool stereo_inverted_;
   unsigned int stereo_eye_;
   float stereo_eye_dist_,stereo_eye_offset_;
+  unsigned int scene_left_tex_;
+  unsigned int scene_right_tex_;
 
   void set_near(float n);
   void set_far(float f);
@@ -442,10 +445,10 @@ private:
   void prep_glyphs();
   void prep_blur();
   void stereo_projection(unsigned int view);
+  void render_scene();
+  void render_glow();
   void render_interlaced_stereo();
   void render_quad_buffered_stereo();
-  void render_standard_scene();
-  void render_glow();
   bool IsNameAvailable(String name);
 };
 

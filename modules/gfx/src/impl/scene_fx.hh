@@ -35,6 +35,7 @@ class Scene;
 namespace impl {
 
 class SceneFX {
+  friend class ::ost::gfx::Scene;
 public:
   ~SceneFX();
   static SceneFX& Instance();
@@ -46,6 +47,8 @@ public:
   void Preprocess();
   // assumes scene has been drawn in the active framebuffer
   void Postprocess();
+
+  void DrawTex(unsigned int w, unsigned int h, GLuint texid);
 
   bool shadow_flag;
   int shadow_quality;
@@ -63,7 +66,6 @@ private:
   void prep_depth_darkening();
   void prep_amb_occlusion();
   void draw_screen_quad(uint w, uint h);
-  void draw_debug_tex(unsigned int w, unsigned int h, GLuint texid);
 
   GLuint scene_tex_id_;
   GLuint depth_tex_id_;

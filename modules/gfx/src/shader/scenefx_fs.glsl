@@ -1,7 +1,7 @@
 uniform sampler2D scene_map;
 uniform sampler2D depth_map;
-uniform vec2 scalef;
-uniform vec2 zmorph;
+uniform vec2 i_vp;
+uniform vec4 abcd;
 uniform bool shadow_flag;
 uniform sampler2D shadow_map;
 uniform float shadow_depth_bias;
@@ -13,8 +13,6 @@ uniform float occl_mult;
 uniform bool dark_flag;
 uniform sampler2D dark_map;
 uniform float dark_mult;
-uniform vec2 i_vp;
-uniform vec4 abcd;
 
 vec3 unproject(in vec3 scr)
 { 
@@ -40,9 +38,7 @@ void main()
     float depth = texture2D(depth_map,gl_TexCoord[0].xy).r;
     vec4 tcoord = gl_ModelViewProjectionMatrixInverse*vec4(gl_FragCoord.xy*i_vp*2.0-1.0,depth,1.0);
     vec4 coord = gl_TextureMatrix[0]*tcoord;
-    //vec4 coord = gl_TextureMatrix[0]*vec4(gl_FragCoord.xy*i_vp*2.0-1.0,depth,1.0);
     coord/=coord.w;
-
     shadow_factor = 0.0;
     shadow_factor += 0.18*CalcShadowFactor(coord, vec2(-0.7, -0.7));
     shadow_factor += 0.18*CalcShadowFactor(coord, vec2(0.7, -0.7));

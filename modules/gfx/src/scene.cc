@@ -95,9 +95,9 @@ Scene::Scene():
   observers_(),
   transform_(),
   fov_(30.0),
-  znear_(-200.0),zfar_(200.0),
-  fnear_(5.0), ffar_(0.0),
-  vp_width_(100),vp_height_(100),
+  znear_(1.0),zfar_(1000.0),
+  fnear_(1.0), ffar_(1000.0),
+  vp_width_(1000),vp_height_(1000),
   scene_view_stack_(),
   aspect_ratio_(1.0),
   background_(Color(0.0,0.0,0.0,0.0)),
@@ -125,8 +125,10 @@ Scene::Scene():
   stereo_(0),
   stereo_inverted_(false),
   stereo_eye_(0),
-  stereo_eye_dist_(150.0),
-  stereo_eye_offset_(10.0)
+  stereo_eye_dist_(5.0),
+  stereo_eye_offset_(10.0),
+  scene_left_tex_(),
+  scene_right_tex_()
 {
   transform_.SetTrans(Vec3(0,0,-100));
 }
@@ -257,6 +259,8 @@ void Scene::InitGL()
 {
   LOGN_DEBUG("scene: initializing GL state");
 
+  LOGN_VERBOSE(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
+
 #if OST_SHADER_SUPPORT_ENABLED
   LOGN_DEBUG("scene: shader pre-gl");
   Shader::Instance().PreGLInit();
@@ -352,6 +356,27 @@ void Scene::InitGL()
 #endif
 
   prep_glyphs();
+
+  glGenTextures(1,&scene_left_tex_);
+  glGenTextures(1,&scene_right_tex_);
+
+  glEnable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE0);
+
+  glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+  glBindTexture(GL_TEXTURE_2D, scene_right_tex_);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
 }
 
 void Scene::RequestRedraw()
@@ -533,36 +558,15 @@ void Scene::RenderGL()
 {
   if(auto_autoslab_) Autoslab(false, false);
 
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   prep_blur();
 
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  set_light_dir(light_dir_);
-
-  glMultMatrix(transform_.GetTransposedMatrix().Data());
-
-  // TODO: handle stereo
-#if OST_SHADER_SUPPORT_ENABLED
-  impl::SceneFX::Instance().Preprocess();
-#endif
-  render_standard_scene();
-#if OST_SHADER_SUPPORT_ENABLED
-  impl::SceneFX::Instance().Postprocess();
-#endif
-  render_glow();
-  
-#if 0
-  if(stereo_==2 || stereo_==3) {
+  if(stereo_==1) {
+    render_quad_buffered_stereo();
+  } else if (stereo_==2) {
     render_interlaced_stereo();
-  } else if (stereo_==1) {
-    this->render_quad_buffered_stereo();
   } else {
-    this->render_scene_with_glow();
+    render_scene();
   }
-#endif
-
 }
 
 void Scene::Register(GLWinBase* win)
@@ -1195,13 +1199,13 @@ void Scene::Stereo(unsigned int m)
 {
   if(m==1) {
     stereo_=m;
-    if(win_) win_->SetStereo(true);
+    //if(win_) win_->SetStereo(true);
   } else if(m==2 || m==3) {
     stereo_=m;
-    if(win_) win_->SetStereo(false);
+    //if(win_) win_->SetStereo(false);
   } else {
     stereo_=0;
-    if(win_) win_->SetStereo(false);
+    //if(win_) win_->SetStereo(false);
   }
   RequestRedraw();
 }
@@ -1209,14 +1213,32 @@ void Scene::Stereo(unsigned int m)
 void Scene::SetStereoInverted(bool f)
 {
   stereo_inverted_=f;
+  RequestRedraw();
 }
 
-void Scene::SetStereoEye(unsigned int m)
+void Scene::SetStereoView(unsigned int m)
 {
   stereo_eye_= (m>2) ? 0: m;
   ResetProjection();
   RequestRedraw();
 }
+
+void Scene::SetStereoEyeDist(float d)
+{
+  stereo_eye_dist_=d;
+  if(stereo_>0) {
+    RequestRedraw();
+  }
+}
+
+void Scene::SetStereoEyeOffset(float o)
+{
+  stereo_eye_offset_=o;
+  if(stereo_>0) {
+    RequestRedraw();
+  }
+}
+
 
 
 void Scene::SetLightDir(const Vec3& dir)
@@ -1699,11 +1721,18 @@ void Scene::prep_blur()
   glFlush();
 }
 
-void Scene::render_standard_scene()
+void Scene::render_scene()
 {
-  glDepthFunc(GL_LEQUAL);    
-  glDepthMask(1);
-  glEnable(GL_DEPTH_TEST);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  glMultMatrix(transform_.GetTransposedMatrix().Data());
+
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().Preprocess();
+#endif
 
   root_node_->RenderGL(STANDARD_RENDER_PASS);
   glEnable(GL_BLEND);
@@ -1711,6 +1740,12 @@ void Scene::render_standard_scene()
   root_node_->RenderGL(TRANSPARENT_RENDER_PASS);
   glDisable(GL_BLEND);
   root_node_->RenderGL(OVERLAY_RENDER_PASS);
+
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().Postprocess();
+#endif
+
+  render_glow();
 }
 
 void Scene::render_glow()
@@ -1743,12 +1778,32 @@ void Scene::stereo_projection(unsigned int view)
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   
-  float zn=std::max(float(1.0),znear_);
-  float zf=std::max(float(1.1),zfar_);
+  GLdouble zn=std::max<float>(1.0,znear_);
+  GLdouble zf=std::max<float>(1.1,zfar_);
 
+#if 1
+  GLdouble top = zn * std::tan(fov_*M_PI/360.0);
+  GLdouble bot = -top;
+  GLdouble right = top*aspect_ratio_;
+  GLdouble left = -right;
+  GLdouble shift=0.0;
+  if(view==1 || view==2) {
+    shift = 0.5*stereo_eye_dist_*zn/zf * (view==1 ? 1.0 : -1.0);
+    left+=shift;
+    right+=shift*0.5;
+  }
+  glFrustum(left,right,bot,top,zn,zf);
+  GLdouble trans[16];
+  for(int i=0;i<16;++i) trans[i]=0.0;
+  trans[0]=1.0;
+  trans[5]=1.0;
+  trans[10]=1.0;
+  trans[15]=1.0;
+  trans[12]=shift;
+  glMultMatrixd(trans);
+#else
   gluPerspective(fov_,aspect_ratio_,zn,zf);
-
-  if(view>0) {
+  if(view==1 || view==2) {
     float iod = (view==1) ? -stereo_eye_dist_ : stereo_eye_dist_;
     //float fr=(-stereo_eye_offset_-zn)/(zf-zn);
     float angle=180.0f/M_PI*std::atan(stereo_eye_offset_/(2.0*iod));
@@ -1756,21 +1811,36 @@ void Scene::stereo_projection(unsigned int view)
     glRotated(-angle,0.0,1.0,0.0);
     glTranslated(0.0,0.0,-transform_.GetTrans()[2]);
   }
+#endif
 }
 
 void Scene::render_interlaced_stereo()
 {
-#if 0
-  // set up stencil buffer
-  glPushAttrib(GL_STENCIL_BUFFER_BIT| GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glOrtho(0,vp_width_,0,vp_height_,-1,1);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-  glDrawBuffer(GL_NONE);
+  glGetError();
+  stereo_projection(1);
+  render_scene();
+
+  glEnable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
+  check_gl_error();
+
+  stereo_projection(2);
+  render_scene();
+  glEnable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, scene_right_tex_);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
+  check_gl_error();
+  stereo_projection(0);
+
+#if OST_SHADER_SUPPORT_ENABLED
+  Shader::Instance().PushProgram();
+  Shader::Instance().Activate("");
+#endif
+
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
@@ -1779,6 +1849,17 @@ void Scene::render_interlaced_stereo()
   glDisable(GL_BLEND);
   glDisable(GL_LINE_SMOOTH);
   glDisable(GL_POINT_SMOOTH);
+  glDisable(GL_MULTISAMPLE);
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0,vp_width_,0,vp_height_,-1,1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  // draw interlace lines in stencil buffer
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glLineWidth(1.0);
   glEnable(GL_STENCIL_TEST);
   glStencilMask(0x1);
@@ -1793,52 +1874,54 @@ void Scene::render_interlaced_stereo()
     glVertex2i(vp_width_-1,i);
   } 
   glEnd();
-  glPopMatrix();
+
+  glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
+
+  // left eye
+  glStencilFunc(GL_EQUAL,0x1,0x1);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
+  // draw
+  glColor3f(1.0,0.0,1.0);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
+  glEnd();
+
+  // right eye
+  glStencilFunc(GL_EQUAL,0x0,0x1);
+  glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
+  // draw
+  glColor3f(1.0,0.0,1.0);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
+  glEnd();
+
+  // restore settings
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
   glPopAttrib();
-
-  glEnable(GL_STENCIL_TEST);
-  glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
-
-  glStencilFunc(GL_EQUAL,0x1,0x1);
-  stereo_projection(stereo_==2 ? 1 : 2);
-  root_node_->RenderGL(STANDARD_RENDER_PASS);
-  root_node_->RenderGL(GLOW_RENDER_PASS);
-
-  glStencilFunc(GL_EQUAL,0x0,0x1);
-  stereo_projection(stereo_==2 ? 2 : 1);
-  root_node_->RenderGL(STANDARD_RENDER_PASS);
-  root_node_->RenderGL(GLOW_RENDER_PASS);
-  glDisable(GL_STENCIL_TEST);
-  glPopAttrib();
+#if OST_SHADER_SUPPORT_ENABLED
+  Shader::Instance().PopProgram();
 #endif
 }
 
 void Scene::render_quad_buffered_stereo()
 {
-#if 0
-  glDrawBuffer(GL_BACK);
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
   glDrawBuffer(GL_BACK_LEFT);
-  glClear(GL_DEPTH_BUFFER_BIT);
-  if (stereo_inverted_) {
-    stereo_projection(stereo_==1 ? 2 : 1);
-  } else {
-    stereo_projection(stereo_==1 ? 1 : 2);
-  }
-  this->render_scene_with_glow();
+  stereo_projection(stereo_inverted_ ? 1 : 2);
+  render_scene();
   glDrawBuffer(GL_BACK_RIGHT);
-  glClear(GL_DEPTH_BUFFER_BIT);
-  if (stereo_inverted_) {
-    stereo_projection(stereo_==1 ? 1 : 2);
-  } else {
-    stereo_projection(stereo_==1 ? 2 : 1);
-  }
-  this->render_scene_with_glow();
-  glDrawBuffer(GL_BACK);
-#endif
+  stereo_projection(stereo_inverted_ ? 2 : 1);
+  render_scene();
 }
 
 }} // ns

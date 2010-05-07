@@ -38,17 +38,23 @@ Author: Juergen Haas
 #include "glext_include.hh"
 #include "gl_include.hh"
 
+#include <ost/log.hh>
+
+inline void check_gl_error()
+{
+  GLenum error_code;
+  if((error_code=glGetError())!=GL_NO_ERROR) {
+    LOGN_VERBOSE("GL error: " << gluErrorString(error_code));
+  }
+}
+
 inline void glVertex3v(double* v){
   glVertex3dv(v);
 }
 
-
-
 inline void glVertex3v(const double* v){
   glVertex3dv(v);
 }
-
-
 
 inline void glVertex3v(float* v){
   glVertex3fv(v);
