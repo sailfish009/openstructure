@@ -19,12 +19,36 @@
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
+#include <ost/mol/mol.hh>
+
 #include <ost/seq/sequence_handle.hh>
 #include <ost/seq/invalid_sequence.hh>
 #include <ost/seq/sequence_op.hh>
 
 using namespace ost;
 using namespace ost::seq;
+using namespace ost::mol;
+
+
+struct Fixture {
+  Fixture() {
+    eh = CreateEntity();
+    eh.SetName("TestEntity");
+    XCSEditor e=eh.RequestXCSEditor();
+    chain = e.InsertChain("A");
+    res1 = e.AppendResidue(chain, "ARG");
+    e.InsertAtom(res1, "CA",geom::Vec3(1,0,0));
+    res2 = e.AppendResidue(chain, "ARG");
+    e.InsertAtom(res2, "CA",geom::Vec3(0,1,0));
+    res3 = e.AppendResidue(chain, "ARG");
+    e.InsertAtom(res3, "CA",geom::Vec3(0,0,1));
+  }
+  EntityHandle eh;
+  ChainHandle  chain;
+  ResidueHandle res1;
+  ResidueHandle res2;
+  ResidueHandle res3;
+};
 
 BOOST_AUTO_TEST_SUITE( seq )
 
@@ -34,18 +58,46 @@ BOOST_AUTO_TEST_CASE(seq_triv)
   BOOST_CHECK_THROW(CreateSequence("S1", "1"), InvalidSequence);
   BOOST_CHECK_THROW(CreateSequence("S1", "."), InvalidSequence);
   BOOST_CHECK_THROW(CreateSequence("S1", " "), InvalidSequence);
+  SequenceHandle s=CreateSequence("S1","-afbcdefghijkLMNOPQRSTUV-");
+  BOOST_CHECK_EQUAL(s.GetString(),"-afbcdefghijkLMNOPQRSTUV-");
+  BOOST_CHECK_NO_THROW(s.SetString("-afc--de-f"));
+  BOOST_CHECK_EQUAL(s.GetString(),"-afc--de-f");
+  BOOST_CHECK_THROW(s.SetString("1"), InvalidSequence);
+}
+
+BOOST_AUTO_TEST_CASE(seq_length)
+{
+  SequenceHandle s=CreateSequence("S1", "abfcdadeaf");
+  BOOST_CHECK_EQUAL(s.GetLength(),10);
+  s=CreateSequence("S1", "-afc--de-f");
+  BOOST_CHECK_EQUAL(s.GetLength(),10);
+  s=CreateSequence("S1", "");
+  BOOST_CHECK_EQUAL(s.GetLength(),0);
+}
+
+BOOST_AUTO_TEST_CASE(seq_string)
+{
+  SequenceHandle s=CreateSequence("S1", "abfcdadeaf");
+  BOOST_CHECK_EQUAL(s.GetString(),"abfcdadeaf");
+  BOOST_CHECK_EQUAL(s.GetGaplessString(),"abfcdadeaf");
+  s=CreateSequence("S1", "-afc--de-f");
+  BOOST_CHECK_EQUAL(s.GetString(),"-afc--de-f");
+  BOOST_CHECK_EQUAL(s.GetGaplessString(),"afcdef");
+  s=CreateSequence("S1", "");
+  BOOST_CHECK_EQUAL(s.GetString(),"");
+  BOOST_CHECK_EQUAL(s.GetGaplessString(),"");
 }
 
 BOOST_AUTO_TEST_CASE(seq_getnum) 
 {
   SequenceHandle s=CreateSequence("S1", "-afc--de-f");
   BOOST_CHECK_THROW(s.GetResidueIndex(0), Error);
-  BOOST_CHECK(s.GetResidueIndex(1)==1-1);
-  BOOST_CHECK(s.GetResidueIndex(2)==2-1);
-  BOOST_CHECK(s.GetResidueIndex(3)==3-1);
-  BOOST_CHECK(s.GetResidueIndex(6)==4-1);
-  BOOST_CHECK(s.GetResidueIndex(7)==5-1);
-  BOOST_CHECK(s.GetResidueIndex(9)==6-1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(1),1-1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(2),2-1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(3),3-1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(6),4-1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(7),5-1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(9),6-1);
   BOOST_CHECK_THROW(s.GetResidueIndex(-1), Error);
   BOOST_CHECK_THROW(s.GetResidueIndex(10), Error);
 }
@@ -60,6 +112,87 @@ BOOST_AUTO_TEST_CASE(seq_getpos)
   BOOST_CHECK(s.GetPos(3)==6);
   BOOST_CHECK(s.GetPos(4)==7);
   BOOST_CHECK(s.GetPos(5)==9);
+}
+
+BOOST_AUTO_TEST_CASE(seq_offset)
+{
+  SequenceHandle s=CreateSequence("S1", "-afc--de-f");
+  SequenceHandle s2=CreateSequence("S1", "-afc--de-f");
+  s.SetSequenceOffset(2);
+  BOOST_CHECK_THROW(s.GetPos(-1), Error);
+  BOOST_CHECK_THROW(s.GetPos(0), Error);
+  BOOST_CHECK_THROW(s.GetPos(1), Error);
+  BOOST_CHECK_EQUAL(s.GetPos(2),1);
+  BOOST_CHECK_EQUAL(s.GetPos(2),s2.GetPos(2-2));
+  BOOST_CHECK_EQUAL(s.GetPos(5),6);
+  BOOST_CHECK_EQUAL(s.GetPos(5),s2.GetPos(5-2));
+  BOOST_CHECK_EQUAL(s.GetPos(7),9);
+  BOOST_CHECK_EQUAL(s.GetPos(7),s2.GetPos(7-2));
+  BOOST_CHECK_THROW(s.GetPos(8), Error);
+  BOOST_CHECK_THROW(s.GetResidueIndex(0), Error);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(1),2);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(1),s2.GetResidueIndex(1)+2);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(6), 5);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(6),s2.GetResidueIndex(6)+2);
+  BOOST_CHECK_THROW(s.GetResidueIndex(10), Error);
+
+  s.SetSequenceOffset(-1);
+  BOOST_CHECK_THROW(s.GetPos(-2), Error);
+  BOOST_CHECK_EQUAL(s.GetPos(-1), 1);
+  BOOST_CHECK_EQUAL(s.GetPos(0), 2);
+  BOOST_CHECK_EQUAL(s.GetPos(0),s2.GetPos(0+1));
+  BOOST_CHECK_EQUAL(s.GetPos(2), 6);
+  BOOST_CHECK_EQUAL(s.GetPos(2),s2.GetPos(2+1));
+  BOOST_CHECK_EQUAL(s.GetPos(4),9);
+  BOOST_CHECK_EQUAL(s.GetPos(4),s2.GetPos(4+1));
+  BOOST_CHECK_THROW(s.GetPos(5), Error);
+  BOOST_CHECK_THROW(s.GetResidueIndex(0), Error);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(1),-1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(1),s2.GetResidueIndex(1)-1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(6), 2);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(6),s2.GetResidueIndex(6)-1);
+  BOOST_CHECK_THROW(s.GetResidueIndex(10), Error);
+}
+
+BOOST_AUTO_TEST_CASE(seq_gaps)
+{
+  SequenceHandle s=CreateSequence("S1", "");
+  BOOST_CHECK_EQUAL(s.GetFirstNonGap(),-1);
+  BOOST_CHECK_EQUAL(s.GetLastNonGap(),-1);
+
+  s=CreateSequence("S1", "afcdef");
+  BOOST_CHECK_EQUAL(s.GetFirstNonGap(),0);
+  BOOST_CHECK_EQUAL(s.GetLastNonGap(),5);
+
+  s=CreateSequence("S1", "-afc--de-f-");
+  BOOST_CHECK_EQUAL(s.GetFirstNonGap(),1);
+  BOOST_CHECK_EQUAL(s.GetLastNonGap(),9);
+}
+
+BOOST_AUTO_TEST_CASE(seq_attach_view)
+{
+  Fixture f;
+  SequenceHandle s=CreateSequence("S1", "r-r");
+  BOOST_CHECK_EQUAL(s.HasAttachedView(),false);
+  BOOST_CHECK_EQUAL(s.GetAttachedView(),EntityView());
+  BOOST_CHECK_EQUAL(s.GetResidue(0),ResidueHandle());
+
+  EntityView v = f.eh.CreateFullView();
+  s.AttachView(v);
+  BOOST_CHECK_EQUAL(s.HasAttachedView(),true);
+  BOOST_CHECK_EQUAL(s.GetAttachedView(),v);
+
+  BOOST_CHECK_EQUAL(s.GetResidue(0),f.res1);
+  BOOST_CHECK_EQUAL(s.GetResidue(s.GetPos(0)),f.res1);
+  BOOST_CHECK_EQUAL(s.GetResidue(1),ResidueHandle());
+  BOOST_CHECK_EQUAL(s.GetResidue(2),f.res3);
+  BOOST_CHECK_EQUAL(s.GetResidue(s.GetPos(1)),f.res3);
+
+  v = EntityView();
+  s.AttachView(v);
+  BOOST_CHECK_EQUAL(s.HasAttachedView(),false);
+  BOOST_CHECK_EQUAL(s.GetAttachedView(),EntityView());
+  BOOST_CHECK_EQUAL(s.GetResidue(0),ResidueHandle());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
