@@ -170,6 +170,8 @@ int SequenceImpl::GetLength() const {
 
 char SequenceImpl::GetOneLetterCode(int position) const
 {
+  if (position<0 || position>=static_cast<int>(seq_string_.length()))
+    throw Error("Position is not covered in sequence");
   return seq_string_[position];
 }
 
