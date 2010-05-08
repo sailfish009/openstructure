@@ -56,6 +56,7 @@ public:
   float depth_dark_factor;
   bool amb_occl_flag;
   float amb_occl_factor;
+  uint amb_occl_mode;
 
 private:
   SceneFX();

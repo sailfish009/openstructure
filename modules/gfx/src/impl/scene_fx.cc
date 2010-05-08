@@ -28,6 +28,7 @@ SceneFX::SceneFX():
   depth_dark_factor(1.0),
   amb_occl_flag(false),
   amb_occl_factor(1.0),
+  amb_occl_mode(1),
   scene_tex_id_(),
   depth_tex_id_(),
   shadow_tex_id_(),
@@ -263,8 +264,7 @@ void SceneFX::Postprocess()
     glBindTexture(GL_TEXTURE_2D,shadow_tex_id_);
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
-    // make explicit object instead of temporary to avoid potential crash with Data()
-    geom::Mat4 ttmp=Transpose(shadow_tex_mat_);
+    geom::Mat4 ttmp=geom::Transpose(shadow_tex_mat_);
     glLoadMatrix(ttmp.Data());
     glMatrixMode(GL_MODELVIEW);
     glActiveTexture(GL_TEXTURE0);
@@ -379,7 +379,7 @@ void SceneFX::prep_shadow_map()
   //glFrustum(tmin[0],tmax[0],tmin[1],tmax[1],-tmax[2],-tmin[2]);
   float glpmat[16];
   glGetv(GL_PROJECTION_MATRIX, glpmat);
-  geom::Mat4 pmat(Transpose(geom::Mat4(glpmat)));
+  geom::Mat4 pmat(geom::Transpose(geom::Mat4(glpmat)));
 
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
@@ -416,7 +416,7 @@ void SceneFX::prep_shadow_map()
   //shadow_tex_mat_ = bias*pmat*ltrans.GetMatrix();
   Scene::Instance().ResetProjection();
   glGetv(GL_PROJECTION_MATRIX, glpmat);
-  geom::Mat4 pmat2(Transpose(geom::Mat4(glpmat)));
+  geom::Mat4 pmat2(geom::Transpose(geom::Mat4(glpmat)));
   /*
     given the normalized coordinates in scenefx, the camera projection and modelview transformation
     are first reverted, and then the light modelview and projection are applied, resulting (with the
@@ -435,7 +435,6 @@ void SceneFX::prep_amb_occlusion()
   Shader::Instance().PushProgram();
   Shader::Instance().Activate("amboccl");
   GLuint cpr=Shader::Instance().GetCurrentProgram();
-  // assign tex units
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D,depth_tex_id_);
   glActiveTexture(GL_TEXTURE1);
@@ -448,10 +447,15 @@ void SceneFX::prep_amb_occlusion()
   glUniform1i(glGetUniformLocation(cpr,"kernel"),2);
   glUniform1f(glGetUniformLocation(cpr,"step"),1.0/static_cast<float>(kernel_size_));
   glUniform2f(glGetUniformLocation(cpr,"i_vp"),1.0/static_cast<float>(width),1.0/static_cast<float>(height));
+  glUniform1i(glGetUniformLocation(cpr,"mode"),amb_occl_mode);
   double pm[16];
   glGetDoublev(GL_PROJECTION_MATRIX,pm);
   glUniform4f(glGetUniformLocation(cpr,"abcd"),pm[0],pm[5],pm[10],pm[14]);
-
+  glMatrixMode(GL_TEXTURE);
+  glPushMatrix();
+  geom::Mat4 ipm(geom::Transpose(geom::Invert(geom::Transpose(geom::Mat4(pm)))));
+  glLoadMatrix(ipm.Data());
+  glMatrixMode(GL_MODELVIEW);
 
   // set up viewport filling quad to run the fragment shader
   draw_screen_quad(width,height);

@@ -195,7 +195,7 @@ void Scene::SetDepthDarkening(bool f)
 #endif
 }
 
-void Scene::SetDepthDarkeningFactor(float f)
+void Scene::SetDepthDarkeningWeight(float f)
 {
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().depth_dark_factor=f;
@@ -213,10 +213,19 @@ void Scene::SetAmbientOcclusion(bool f)
 #endif
 } 
 
-void Scene::SetAmbientOcclusionFactor(float f)
+void Scene::SetAmbientOcclusionWeight(float f)
 {
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().amb_occl_factor=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
+void Scene::SetAmbientOcclusionMode(uint m)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().amb_occl_mode=m;
   // the redraw routine will deal with the Shader
   RequestRedraw();
 #endif
@@ -241,6 +250,7 @@ void Scene::SetShadingMode(const std::string& smode)
   } else {
     Shader::Instance().Activate("fraglight");
   }
+  RequestRedraw();
 #endif
 }
 
