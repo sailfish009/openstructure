@@ -82,6 +82,7 @@ private:
   GLuint scene_tex2_id_;
   GLuint norm_tex2_id_;
   GLuint scene_fb_;
+  GLuint scene_rb_;
   GLuint depth_rb_;
 
   bool use_fb_;

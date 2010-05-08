@@ -1,7 +1,5 @@
 uniform sampler2D scene_map;
 uniform sampler2D depth_map;
-uniform vec2 i_vp;
-uniform vec4 abcd;
 uniform bool shadow_flag;
 uniform sampler2D shadow_map;
 uniform float shadow_depth_bias;
@@ -14,13 +12,6 @@ uniform bool dark_flag;
 uniform sampler2D dark_map;
 uniform float dark_mult;
 
-vec3 unproject(in vec3 scr)
-{ 
-  vec3 tmp=vec3(scr.x*i_vp.x*2.0-1.0,scr.y*i_vp.y*2.0-1.0,scr.z);
-  float iw = 1.0/(tmp.z/abcd.w+abcd.z/abcd.w);
-  return iw*vec3(tmp.x/abcd.x,tmp.y/abcd.y,-1.0);
-}
-
 float CalcShadowFactor(in vec4 coord, in vec2 o)
 {
   // get original depth value of line projected towards light
@@ -30,15 +21,21 @@ float CalcShadowFactor(in vec4 coord, in vec2 o)
 
 void main()
 {
+  float depth = texture2D(depth_map,gl_TexCoord[0].xy).r;
+  if(depth>=1.0) {
+    discard;
+  }
   vec4 scene_color=texture2D(scene_map,gl_TexCoord[0].xy);
   gl_FragColor.a = scene_color.a;
 
   float shadow_factor=1.0;
   if(shadow_flag) {
-    float depth = texture2D(depth_map,gl_TexCoord[0].xy).r;
-    vec4 tcoord = gl_ModelViewProjectionMatrixInverse*vec4(gl_FragCoord.xy*i_vp*2.0-1.0,depth,1.0);
-    vec4 coord = gl_TextureMatrix[0]*tcoord;
+    vec4 pcoord = vec4(gl_TexCoord[0].xy*2.0-1.0,depth*2.0-1.0,1.0);
+    vec4 coord = gl_TextureMatrix[2]*pcoord;
     coord/=coord.w;
+    //float d = texture2D(shadow_map, coord.xy).r;
+    //gl_FragColor.rgb=vec3(1.0,d,0.0);
+    //return;
     shadow_factor = 0.0;
     shadow_factor += 0.18*CalcShadowFactor(coord, vec2(-0.7, -0.7));
     shadow_factor += 0.18*CalcShadowFactor(coord, vec2(0.7, -0.7));

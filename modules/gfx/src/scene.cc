@@ -181,7 +181,7 @@ bool Scene::GetShadow() const
 void Scene::SetShadowQuality(int q)
 {
 #if OST_SHADER_SUPPORT_ENABLED
-  impl::SceneFX::Instance().shadow_quality=std::min(3,std::max(0,q));
+  impl::SceneFX::Instance().shadow_quality=std::min(8,std::max(0,q));
   RequestRedraw();
 #endif
 }

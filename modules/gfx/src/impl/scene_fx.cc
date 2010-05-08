@@ -42,6 +42,7 @@ SceneFX::SceneFX():
   scene_tex2_id_(),
   norm_tex2_id_(),
   scene_fb_(),
+  scene_rb_(),
   depth_rb_(),
   use_fb_(false)
 {}
@@ -63,6 +64,7 @@ void SceneFX::Setup()
   glGenTextures(1,&kernel2_tex_id_);
 
   glGenFramebuffers(1,&scene_fb_);
+  glGenRenderbuffers(1,&scene_rb_);
   glGenRenderbuffers(1,&depth_rb_);
   glGenTextures(1,&scene_tex2_id_);
   glGenTextures(1,&norm_tex2_id_);
@@ -208,7 +210,7 @@ void SceneFX::Postprocess()
 
   if(!shadow_flag && !amb_occl_flag && !depth_dark_flag) {
     // no postprocessing is needed
-    //return;
+    return;
   }
 
   Viewport vp=Scene::Instance().GetViewport();
@@ -255,14 +257,16 @@ void SceneFX::Postprocess()
 
   glUniform1i(glGetUniformLocation(cpr,"scene_map"),0);
   glUniform1i(glGetUniformLocation(cpr,"depth_map"),1);
-  glUniform2f(glGetUniformLocation(cpr,"i_vp"),1.0/static_cast<float>(vp.width),1.0/static_cast<float>(vp.height));
-  double pm[16];
-  glGetDoublev(GL_PROJECTION_MATRIX,pm);
-  glUniform4f(glGetUniformLocation(cpr,"abcd"),pm[0],pm[5],pm[10],pm[14]);
 
   if(shadow_flag) {
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D,shadow_tex_id_);
+    glMatrixMode(GL_TEXTURE);
+    glPushMatrix();
+    // make explicit object instead of temporary to avoid potential crash with Data()
+    geom::Mat4 ttmp=Transpose(shadow_tex_mat_);
+    glLoadMatrix(ttmp.Data());
+    glMatrixMode(GL_MODELVIEW);
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(cpr,"shadow_flag"),1);
     glUniform1i(glGetUniformLocation(cpr,"shadow_map"),2);
@@ -270,12 +274,6 @@ void SceneFX::Postprocess()
     glUniform1f(glGetUniformLocation(cpr,"shadow_epsilon"),0.002);
     glUniform1f(glGetUniformLocation(cpr,"shadow_multiplier"),0.4);
 
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
-    // make explicit object instead of temporary to avoid potential crash with Data()
-    geom::Mat4 ttmp=Transpose(shadow_tex_mat_);
-    glLoadMatrix(ttmp.Data());
-    glMatrixMode(GL_MODELVIEW);
   } else {
     glUniform1i(glGetUniformLocation(cpr,"shadow_flag"),0);
   }
@@ -304,9 +302,11 @@ void SceneFX::Postprocess()
   draw_screen_quad(vp.width,vp.height);
 
   if(shadow_flag) {
+    glActiveTexture(GL_TEXTURE2);
     glMatrixMode(GL_TEXTURE);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
+    glActiveTexture(GL_TEXTURE0);
   }
 
   glDisable(GL_TEXTURE_1D);
@@ -328,11 +328,30 @@ void SceneFX::DrawTex(unsigned int w, unsigned int h, GLuint texid)
 
 void SceneFX::prep_shadow_map()
 {
-  GLint smap_size=256 << shadow_quality;
+  GLint smap_size=256 * (1+shadow_quality);
+
+#if 1
+  glBindFramebuffer(GL_FRAMEBUFFER, scene_fb_);
+
+  glBindRenderbuffer(GL_RENDERBUFFER, scene_rb_);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA,smap_size,smap_size);
+  glBindRenderbuffer(GL_RENDERBUFFER, depth_rb_);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,smap_size,smap_size);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, scene_rb_);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_rb_);
+
+  GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+  if(status!=GL_FRAMEBUFFER_COMPLETE) {
+    LOGN_DEBUG("fbo switch for shadow mapping failed, using fallback");
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  }
+#endif
 
   // modelview transform for the lightsource pov
   mol::Transform ltrans(Scene::Instance().GetTransform());
-  ltrans.SetRot(Scene::Instance().GetLightRot()*Scene::Instance().GetTransform().GetRot());
+  ltrans.SetRot(Scene::Instance().GetLightRot()*ltrans.GetRot());
 
   // calculate encompassing box for ortho projection
   geom::AlignedCuboid bb=Scene::Instance().GetBoundingBox(ltrans);
@@ -384,12 +403,26 @@ void SceneFX::prep_shadow_map()
   glPopAttrib();
   //glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
+#if 1
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#endif
+
   // set up appropriate texture matrix
   geom::Mat4 bias(0.5,0.0,0.0,0.5,
                   0.0,0.5,0.0,0.5,
                   0.0,0.0,0.5,0.5,
                   0.0,0.0,0.0,1.0);
-  shadow_tex_mat_ = bias*pmat*ltrans.GetMatrix();
+  //shadow_tex_mat_ = bias*pmat*ltrans.GetMatrix();
+  Scene::Instance().ResetProjection();
+  glGetv(GL_PROJECTION_MATRIX, glpmat);
+  geom::Mat4 pmat2(Transpose(geom::Mat4(glpmat)));
+  /*
+    given the normalized coordinates in scenefx, the camera projection and modelview transformation
+    are first reverted, and then the light modelview and projection are applied, resulting (with the
+    bias) in the proper 2D lookup into the shadow map
+  */
+  shadow_tex_mat_ = bias*pmat*ltrans.GetMatrix()*geom::Invert(Scene::Instance().GetTransform().GetMatrix())*geom::Invert(pmat2);
 }
 
 void SceneFX::prep_amb_occlusion()
@@ -482,6 +515,8 @@ void SceneFX::draw_screen_quad(unsigned int w, unsigned int h)
   glPushMatrix();
   glLoadIdentity();
   glEnable(GL_TEXTURE_2D);
+  glActiveTexture(GL_TEXTURE0);
+  glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
   // draw
   glColor3f(1.0,0.0,1.0);
   glBegin(GL_QUADS);
