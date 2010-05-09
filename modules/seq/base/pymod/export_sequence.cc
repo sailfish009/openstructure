@@ -102,8 +102,9 @@ struct RevRegionRangeIter {
     if (b_==e_) {
       boost::python::objects::stop_iteration_error();
     }
-    AlignedColumn col=*e_;
     --e_;
+    AlignedColumn col=*e_;
+
     return col;
   }
 private:
@@ -142,7 +143,7 @@ RegionRangeIter iter_range2(AlignedRegion& aln_region)
   return RegionRangeIter(aln_region.begin(), aln_region.end());
 }
 
-RevRegionRangeIter iter_range3(AlignedRegion& aln_region)
+RevRegionRangeIter iter_range_rev(AlignedRegion& aln_region)
 {
   return RevRegionRangeIter(aln_region.begin(), aln_region.end());
 }
@@ -274,7 +275,7 @@ void export_sequence()
     .def("__getitem__", &AlignedRegion::operator[])
     .def("__len__", &AlignedRegion::GetLength)
     .def("__iter__", iter_range2)
-    //~ .def("__iter__", iter_range3)
+    //~ .def("__reversed__", iter_range_rev)
     .add_property("start", &AlignedRegion::GetStart)
     .add_property("end", &AlignedRegion::GetEnd)
   ;
