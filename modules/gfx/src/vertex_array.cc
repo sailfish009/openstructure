@@ -31,8 +31,6 @@
 #include "vertex_array_helper.hh"
 #include "povray.hh"
 
-#include "impl/calc_ambient.hh"
-
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
 #endif
@@ -142,7 +140,6 @@ VertexID IndexedVertexArray::Add(const Vec3& vert,
                                  const Color& col) 
 {
   dirty_=true;
-  ambient_dirty_=true;
   entry_list_.push_back(Entry(vert,norm,col));
   return entry_list_.size()-1;
 }
@@ -163,7 +160,6 @@ LineID IndexedVertexArray::AddLine(VertexID id0, VertexID id1)
 {
   assert(id0<entry_list_.size() && id1<entry_list_.size());
   dirty_=true;
-  ambient_dirty_=true;
   line_index_list_.push_back(id0);
   line_index_list_.push_back(id1);
   return line_index_list_.size()-2;
@@ -173,7 +169,6 @@ TriID IndexedVertexArray::AddTri(VertexID id0, VertexID id1, VertexID id2)
 {
   assert(id0<entry_list_.size() && id1<entry_list_.size() && id2<entry_list_.size());
   dirty_=true;
-  ambient_dirty_=true;
   tri_index_list_.push_back(id0);
   tri_index_list_.push_back(id1);
   tri_index_list_.push_back(id2);
@@ -203,7 +198,6 @@ QuadID IndexedVertexArray::AddQuad(VertexID id0, VertexID id1, VertexID id2, Ver
 {
   assert(id0<entry_list_.size() && id1<entry_list_.size() && id2<entry_list_.size() && id3<entry_list_.size());
   dirty_=true;
-  ambient_dirty_=true;
   quad_index_list_.push_back(id0);
   quad_index_list_.push_back(id1);
   quad_index_list_.push_back(id2);
@@ -214,7 +208,6 @@ QuadID IndexedVertexArray::AddQuad(VertexID id0, VertexID id1, VertexID id2, Ver
 void IndexedVertexArray::AddSphere(const SpherePrim& prim, unsigned int detail) 
 {
   dirty_=true;
-  ambient_dirty_=true;
 
   unsigned int level= std::min(VA_SPHERE_MAX_DETAIL,detail);
 
@@ -235,7 +228,6 @@ void IndexedVertexArray::AddSphere(const SpherePrim& prim, unsigned int detail)
 void IndexedVertexArray::AddIcoSphere(const SpherePrim& prim, unsigned int detail) 
 {
   dirty_=true;
-  ambient_dirty_=true;
   
   unsigned int level= std::min(VA_ICO_SPHERE_MAX_DETAIL,detail);
   
@@ -252,7 +244,6 @@ void IndexedVertexArray::AddIcoSphere(const SpherePrim& prim, unsigned int detai
 void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail,bool cap)
 {
   dirty_=true;
-  ambient_dirty_=true;
   
   unsigned int level = std::min(VA_CYL_MAX_DETAIL,detail);
   
@@ -390,11 +381,6 @@ void IndexedVertexArray::RenderGL()
   if(dirty_) {
     dirty_=false;
 #if OST_SHADER_SUPPORT_ENABLED
-    if(ambient_dirty_ && use_ambient_) {
-      LOGN_DUMP("re-calculating ambient occlusion terms");
-      recalc_ambient_occlusion();
-      ambient_dirty_=false;
-    }
 
     LOGN_DUMP("checking buffer object availability");
     if(mode_&0x2 && aalines_flag_) {
@@ -476,16 +462,6 @@ void IndexedVertexArray::RenderGL()
     } else { 
       glDisable(GL_CULL_FACE); 
     }
-#if OST_SHADER_SUPPORT_ENABLED
-    if(use_ambient_ && !ambient_data_.empty()) {
-      glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"occlusion_flag"),1);
-      glUniform2f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"ambient_weight"),
-                  local_ambient_weight_,
-                  ambient_occlusion_weight_);
-    } else {
-      glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"occlusion_flag"),0);
-    }
-#endif
   }
   
   if(mode_&0x1) {
@@ -647,14 +623,11 @@ void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
 void IndexedVertexArray::Clear()
 {
   dirty_=true;
-  ambient_dirty_=true;
   entry_list_.clear();
   quad_index_list_.clear();
   tri_index_list_.clear();
   line_index_list_.clear();
   ntentry_list_.clear();
-  ambient_data_.clear();
-  use_ambient_=false;
 } 
 
 void IndexedVertexArray::Reset() 
@@ -677,8 +650,6 @@ void IndexedVertexArray::Reset()
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
   draw_normals_=false;
-  local_ambient_weight_=0.3;
-  ambient_occlusion_weight_=1.0;
 }
 
 void IndexedVertexArray::FlagRefresh()
@@ -951,36 +922,6 @@ void IndexedVertexArray::SmoothVertices(float smoothf)
   }
 }
 
-void IndexedVertexArray::UseAmbient(bool f)
-{
-  if(use_ambient_==f) return;
-  use_ambient_=f;
-  FlagRefresh();
-}
-
-Color IndexedVertexArray::GetAmbientColor(VertexID id) const
-{
-  Color nrvo;
-  if(id*4>=ambient_data_.size()) return nrvo;
-  unsigned int offset=id*4;
-  nrvo = Color(ambient_data_[offset+0],
-               ambient_data_[offset+1],
-               ambient_data_[offset+2],
-               ambient_data_[offset+3]);
-  return nrvo;
-} 
-
-void IndexedVertexArray::SetAmbientColor(VertexID id, const Color& c) 
-{
-  if(id*4>=ambient_data_.size()) return;
-  unsigned int offset=id*4;
-  ambient_data_[offset+0]=c[0];
-  ambient_data_[offset+1]=c[1];
-  ambient_data_[offset+2]=c[2];
-  ambient_data_[offset+3]=c[3];
-}
-
-
 namespace {
 
 uint npatch_tab_id(uint u, uint v, uint N)
@@ -1086,7 +1027,6 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   line_index_list_=va.line_index_list_;
   ntentry_list_=va.ntentry_list_;
   dirty_=true;
-  ambient_dirty_=va.ambient_dirty_;
   mode_=va.mode_;
   poly_mode_=va.poly_mode_;
   lighting_=va.lighting_;
@@ -1104,10 +1044,6 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   outline_exp_factor_=va.outline_exp_factor_;
   outline_exp_color_=va.outline_exp_color_;
   draw_normals_=va.draw_normals_;
-  use_ambient_=va.use_ambient_;
-  ambient_data_=va.ambient_data_;
-  local_ambient_weight_=va.local_ambient_weight_;
-  ambient_occlusion_weight_=va.ambient_occlusion_weight_;
 }
   
 bool IndexedVertexArray::prep_buff()
@@ -1177,24 +1113,6 @@ bool IndexedVertexArray::prep_buff()
     VERTEX_ARRAY_CHECK_GL_ERROR("set qindex buf");
   }
 
-  if(use_ambient_) {
-    if(ambient_data_.empty()) {
-      LOGN_VERBOSE("ambient data empty");
-      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    } else {
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-      glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_AMBIENT_BUFFER]);
-      VERTEX_ARRAY_CHECK_GL_ERROR("bind ambient buf");
-      glBufferData(GL_ARRAY_BUFFER,
-		   sizeof(float) * ambient_data_.size(),
-		   &ambient_data_[0],
-		   GL_STATIC_DRAW);
-      VERTEX_ARRAY_CHECK_GL_ERROR("set ambient buf");
-    }
-  } else {
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  }
-  
   return true;
 #else
   return false;
@@ -1221,12 +1139,6 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
     glInterleavedArrays(GetFormat(),sizeof(Entry),NULL);
 #endif
 
-    if(use_ambient_) {
-      if(!ambient_data_.empty()) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_AMBIENT_BUFFER]);
-        glTexCoordPointer(4,GL_FLOAT,0,NULL);
-      }
-    }
     glBindBuffer(GL_ARRAY_BUFFER,0);
 
     if(!tri_index_list_.empty() && (mode_ & 0x4)) {
@@ -1455,12 +1367,6 @@ void IndexedVertexArray::draw_line_halo(bool use_buff)
   glPopAttrib();
   glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
   glLineWidth(line_width_);
-}
-
-void IndexedVertexArray::recalc_ambient_occlusion()
-{
-  ambient_data_.resize(4*entry_list_.size());
-  CalcAmbientTerms(*this);
 }
 
 }} // ns

@@ -325,24 +325,6 @@ void GfxObj::SetOutlineExpandColor(const Color& c)
   Scene::Instance().RequestRedraw();
 }
 
-void GfxObj::AmbientOcclusion(bool f)
-{
-  va_.UseAmbient(f);
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetAmbientLocalWeight(float w)
-{
-  va_.AmbientLocalWeight(w);
-  Scene::Instance().RequestRedraw();
-}
-
-void GfxObj::SetAmbientOcclusionWeight(float w)
-{
-  va_.AmbientOcclusionWeight(w);
-  Scene::Instance().RequestRedraw();
-}
-
 void GfxObj::SetOpacity(float o)
 {
   opacity_=o;

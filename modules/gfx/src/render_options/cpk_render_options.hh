@@ -42,9 +42,8 @@ public:
   virtual void SetSphereDetail(uint detail);
   virtual uint GetSphereDetail();
 
-  virtual void SetCPKMode(uint mode);
-  virtual uint GetCPKMode();
-
+  virtual void SetSphereMode(uint mode);
+  virtual uint GetSphereMode();
 
   virtual ~CPKRenderOptions();
 

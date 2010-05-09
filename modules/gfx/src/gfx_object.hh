@@ -79,9 +79,6 @@ public:
   virtual void SetOutlineWidth(float f);
   virtual void SetOutlineExpandFactor(float f);
   virtual void SetOutlineExpandColor(const Color& c);
-  virtual void AmbientOcclusion(bool f);
-  virtual void SetAmbientLocalWeight(float w);
-  virtual void SetAmbientOcclusionWeight(float w);
   virtual void SetOpacity(float f);
   virtual float GetOpacity() const {return opacity_;}
   virtual void ColorBy(const mol::EntityView& ev, 

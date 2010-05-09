@@ -28,7 +28,7 @@ namespace gfx {
 
 CPKRenderOptions::CPKRenderOptions(): sphere_detail_(4) {
 #if OST_SHADER_SUPPORT_ENABLED
-  cpk_mode_=0;
+  cpk_mode_=1;
 #else
   cpk_mode_=0;
 #endif
@@ -46,7 +46,7 @@ void CPKRenderOptions::ApplyRenderOptions(RenderOptionsPtr render_options){
   CPKRenderOptionsPtr options = boost::static_pointer_cast<CPKRenderOptions>(render_options);
 
   sphere_detail_=options->GetSphereDetail();
-  cpk_mode_=options->GetCPKMode();
+  cpk_mode_=options->GetSphereMode();
   this->NotifyStateChange();
 }
 
@@ -61,14 +61,14 @@ uint CPKRenderOptions::GetSphereDetail(){
   return sphere_detail_;
 }
 
-void CPKRenderOptions::SetCPKMode(uint mode){
+void CPKRenderOptions::SetSphereMode(uint mode){
   if(cpk_mode_!=mode) {
     cpk_mode_=mode;
     this->NotifyStateChange();
   }
 }
 
-uint CPKRenderOptions::GetCPKMode(){
+uint CPKRenderOptions::GetSphereMode(){
   return cpk_mode_;
 }
 

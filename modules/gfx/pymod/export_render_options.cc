@@ -63,8 +63,8 @@ void export_RenderOptions()
   class_<CPKRenderOptions, boost::shared_ptr<CPKRenderOptions>, bases<RenderOptions>, boost::noncopyable>("CPKRenderOptions")
     .def("SetSphereDetail", &CPKRenderOptions::SetSphereDetail)
     .def("GetSphereDetail", &CPKRenderOptions::GetSphereDetail)
-    .def("SetCPKMode", &CPKRenderOptions::SetCPKMode)
-    .def("GetCPKMode", &CPKRenderOptions::GetCPKMode)
+    .def("SetSphereMode", &CPKRenderOptions::SetSphereMode)
+    .def("GetSphereMode", &CPKRenderOptions::GetSphereMode)
   ;
 
   class_<CustomRenderOptions, boost::shared_ptr<CustomRenderOptions>, bases<RenderOptions>, boost::noncopyable>("CustomRenderOptions")

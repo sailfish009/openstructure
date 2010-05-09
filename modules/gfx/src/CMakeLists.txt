@@ -62,7 +62,6 @@ trace_render_options.hh
 
 
 set(OST_GFX_IMPL_HEADERS
-calc_ambient.hh
 cartoon_renderer.hh
 custom_renderer.hh
 cpk_renderer.hh
@@ -116,7 +115,6 @@ color_ops/gradient_color_op.cc
 color_ops/entity_view_color_op.cc
 color_ops/basic_gradient_color_op.cc
 color_ops/gradient_level_color_op.cc
-impl/calc_ambient.cc
 impl/entity_renderer.cc
 impl/entity_detail.cc
 impl/cartoon_renderer.cc

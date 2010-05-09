@@ -153,17 +153,6 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   // POVray export
   void RenderPov(PovState& pov, const std::string& name);
 
-  // turn on ambient lighting, first call may take a while
-  void UseAmbient(bool f);
-
-  // see fraglight_lf_fs shader
-  void AmbientLocalWeight(float w) {local_ambient_weight_=w;}
-  // see fraglight_lf_fs shader
-  void AmbientOcclusionWeight(float w) {ambient_occlusion_weight_=w;}
-
-  Color GetAmbientColor(VertexID id) const;
-  void SetAmbientColor(VertexID id, const Color& col);
-
   // only removes the drawing elements
   void Clear();
   // removes all elements and resets internal state to default
@@ -229,19 +218,12 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
 
   unsigned int buffer_id_[7]; // magic number related to the .cc buffer use
 
-  bool use_ambient_;
-  bool ambient_dirty_;
-  std::vector<float> ambient_data_;
-  float local_ambient_weight_;
-  float ambient_occlusion_weight_;
-
   void copy(const IndexedVertexArray& va);
   bool prep_buff();
   void draw_ltq(bool use_buff);
   void draw_p(bool use_buff);
   void draw_aalines();
   void draw_line_halo(bool use_buff);
-  void recalc_ambient_occlusion();
 };
 
 }} // ns

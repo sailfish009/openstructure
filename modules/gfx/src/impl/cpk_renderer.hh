@@ -43,13 +43,9 @@ public:
   virtual void SetOptions(RenderOptionsPtr& render_options);
   virtual RenderOptionsPtr GetOptions();
 
-  virtual ~CPKRenderer();
-
 private:
   void PrepareRendering(GfxView& view, IndexedVertexArray& va, bool is_sel);
-  std::vector<impl::AtomEntry*> CPKOcclusion();
-  void RenderCPK2();
-  void RenderCPK3();
+  void Render3DSprites();
 
   CPKRenderOptionsPtr options_;
 };
