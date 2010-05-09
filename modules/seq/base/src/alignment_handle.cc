@@ -203,8 +203,8 @@ void AlignmentHandle::ShiftRegion(int start, int end, int amount,
 AlignedRegion AlignmentHandle::MakeRegion(int start, int n, int master) const
 {
   this->CheckValidity();
-  if(start<0 || n < 0 || start >= n || start + n > this->GetLength()){
-    throw std::out_of_range("Region not valid");
+  if((start<0 )||( n < 0 )|| ((start + n) > this->GetLength())){
+    throw std::out_of_range("invalid region");
   }
   return AlignedRegion(*this, start, start+n, master);
 }

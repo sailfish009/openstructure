@@ -170,7 +170,7 @@ int SequenceImpl::GetLength() const {
 
 char SequenceImpl::GetOneLetterCode(int position) const
 {
-  if (position<0 || position>=static_cast<int>(seq_string_.length()))
+  if (position<0 || position>static_cast<int>(seq_string_.length()))
     throw Error("Position is not covered in sequence");
   return seq_string_[position];
 }
@@ -281,7 +281,7 @@ void SequenceImpl::Replace(const String& str,int start, int end)
 void SequenceImpl::ShiftRegion(int start, int end, int amount)
 {
   if(start > end || start + amount <= 0 || end + amount > this->GetLength()){
-    throw std::out_of_range("Region not valid");
+    throw std::out_of_range("ShiftRegion: invalid region");
   }
   String str1=seq_string_.substr(start, end-start);
   if (amount<0) {
