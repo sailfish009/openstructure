@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(alignment_aligned_region)
   BOOST_CHECK_EQUAL(ar.GetEnd(),3);
 
   BOOST_CHECK_THROW(ar = a.MakeRegion(-1,2,0),std::out_of_range);
-  BOOST_CHECK_THROW(ar = a.MakeRegion(0,6,0),std::out_of_range);
+  BOOST_CHECK_THROW(ar = a.MakeRegion(0,7,0),std::out_of_range);
   BOOST_CHECK_THROW(ar = a.MakeRegion(2,4,0),std::out_of_range);
   BOOST_CHECK_THROW(ar = a.MakeRegion(3,2,0),std::out_of_range);
   BOOST_CHECK_THROW(ar = a.MakeRegion(3,3,0),std::out_of_range);
