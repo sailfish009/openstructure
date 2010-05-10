@@ -195,7 +195,7 @@ public:
   
   char& operator[](size_t index)
   {
-    assert(index<_len_);
+    assert(index<len_);
     return data_[index];
   }
 private:

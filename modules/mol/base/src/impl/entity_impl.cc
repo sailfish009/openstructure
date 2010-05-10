@@ -891,7 +891,7 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
   LOGN_DUMP("entering chain loop");
   for (ChainImplList::const_iterator 
        ch_it=chain_list_.begin(); ch_it!=chain_list_.end();++ch_it) {
-    LOGN_DUMP("checking chain " << ch_it->GetName());
+    LOGN_DUMP("checking chain " << (*ch_it)->GetName());
     c_added = false;
     tribool c = always_true ? tribool(true) : qs.EvalChain(*ch_it);
     if (c == true) {
