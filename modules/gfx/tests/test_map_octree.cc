@@ -174,6 +174,7 @@ BOOST_AUTO_TEST_CASE(octree_power_of_two)
   img.SetReal(img::Point(0, 0, 1), 0.5f);
   Pow2Vis v;
   MapOctree octree(img);
+  octree.Initialize();
   octree.VisitDF(v);  
   BOOST_CHECK_EQUAL(v.leaf_count, 8);
   BOOST_CHECK_EQUAL(v.node_count, 1);
@@ -192,6 +193,7 @@ BOOST_AUTO_TEST_CASE(octree_non_power_of_two)
   img.SetReal(img::Point(0, 0, 1), 0.5f);
   NonPow2Vis v;
   MapOctree octree(img);
+  octree.Initialize();
   octree.VisitDF(v);  
 }
 
