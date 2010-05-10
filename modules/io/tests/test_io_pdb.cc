@@ -203,7 +203,6 @@ BOOST_AUTO_TEST_CASE(anisou_record)
   BOOST_CHECK_CLOSE( 0.0120, props.anisou(2, 2), 1e-4);    
 }
 
-
 BOOST_AUTO_TEST_CASE(only_66_cols)
 {
   String fname("testfiles/pdb/short.pdb");
@@ -324,6 +323,22 @@ BOOST_AUTO_TEST_CASE(write_ter)
                             "testfiles/pdb/ter-out.pdb"));
 }
 
+BOOST_AUTO_TEST_CASE(write_conect)
+{
+  // this scope is required to force the writer stream to be closed before
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    PDBReader reader(String("testfiles/pdb/conect.pdb"));
+    PDBWriter writer(String("testfiles/pdb/conect-out.pdb"));
+    mol::EntityHandle ent=mol::CreateEntity();
+    reader.Import(ent);
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/conect.pdb",
+                            "testfiles/pdb/conect-out.pdb"));
+}
 
 BOOST_AUTO_TEST_CASE(res_name_too_long)
 {
