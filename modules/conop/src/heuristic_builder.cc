@@ -418,7 +418,13 @@ void HeuristicBuilder::FillResidueProps(mol::ResidueHandle residue) {
     residue.SetChemClass(mol::ChemClass(ret.first.GetChemClass()));
     residue.SetOneLetterCode(ret.first.GetOneLetterCode());    
   } else {
-    residue.SetChemClass(mol::ChemClass(mol::ChemClass::Unknown));
+    if (residue.FindAtom("N") && residue.FindAtom("CA") && 
+        residue.FindAtom("C") && residue.FindAtom("O")) {
+      residue.SetChemClass(mol::ChemClass(mol::ChemClass::LPeptideLinking));
+    } else {
+      residue.SetChemClass(mol::ChemClass(mol::ChemClass::Unknown));
+    }
+
     residue.SetOneLetterCode('?');
   }
 
