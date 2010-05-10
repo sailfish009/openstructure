@@ -41,7 +41,7 @@ bool shift_left(const String& atom_name, bool is_hetatm,
     return false;
   }
 
-  if (isnumber(atom_name[0]) || atom_name=="UNK" ||
+  if (isdigit(atom_name[0]) || atom_name=="UNK" ||
       atom_name.length()==4) {
     return true;
   }
