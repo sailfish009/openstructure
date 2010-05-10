@@ -28,7 +28,6 @@ namespace ost { namespace mol { namespace impl {
 class ChainImpl;
 typedef boost::shared_ptr<ChainImpl> ChainImplPtr;
 typedef boost::weak_ptr<ChainImpl> ChainImplW;
-typedef std::list<ChainImplPtr> ChainImplList;
 
 }}} // ns
 

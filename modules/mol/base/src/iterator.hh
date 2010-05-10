@@ -80,17 +80,17 @@ private:
 
 namespace impl {
   // forward declearation of chain impl map.
-  typedef std::map<String, ChainImplPtr> ChainImplMap;
+  typedef std::vector<ChainImplPtr> ChainImplList;
 }
 class DLLEXPORT_OST_MOL ChainHandleIter : public std::iterator<std::forward_iterator_tag, 
                                              ChainHandle> {
 public: // internally used constructors
-  ChainHandleIter(impl::ChainImplMap::iterator chain_it)  
+  ChainHandleIter(impl::ChainImplList::iterator chain_it)  
     : cur_(chain_it) {    
   }
 public:
   ChainHandle operator*() {
-    return ChainHandle(cur_->second);
+    return ChainHandle(*cur_);
   }
   
   ChainHandleIter& operator++() {
@@ -106,7 +106,7 @@ public:
     return !this->operator==(rhs);
   }
 private:
-  impl::ChainImplMap::iterator cur_;
+  impl::ChainImplList::iterator cur_;
 };
 
 class DLLEXPORT_OST_MOL ResidueHandleIter : public std::iterator<std::forward_iterator_tag,
@@ -114,7 +114,7 @@ class DLLEXPORT_OST_MOL ResidueHandleIter : public std::iterator<std::forward_it
 public:
   ResidueHandleIter() {    
   }
-  ResidueHandleIter(impl::ChainImplMap::iterator chain_it, 
+  ResidueHandleIter(impl::ChainImplList::iterator chain_it, 
                     impl::ResidueImplList::iterator res_it,
                     impl::EntityImplPtr ent);
   bool operator==(const ResidueHandleIter& rhs) const {
@@ -133,7 +133,7 @@ public:
   ResidueHandle operator*();
   
 private:
-  impl::ChainImplMap::iterator cur_chain_;
+  impl::ChainImplList::iterator cur_chain_;
   impl::ResidueImplList::iterator cur_res_;
   impl::EntityImplPtr  ent_;
 };
@@ -174,7 +174,7 @@ class DLLEXPORT_OST_MOL AtomHandleIter : public std::iterator<std::forward_itera
 public:
   AtomHandleIter(); 
 
-  AtomHandleIter(impl::ChainImplMap::iterator chain_it,
+  AtomHandleIter(impl::ChainImplList::iterator chain_it,
                  impl::ResidueImplList::iterator res_it,
                  impl::AtomImplList::iterator atom_it,
                  impl::EntityImplPtr ent, bool skip_empty);
@@ -195,7 +195,7 @@ public:
   AtomHandle operator*();
 private:
   void SkipEmpty();
-  impl::ChainImplMap::iterator cur_chain_;
+  impl::ChainImplList::iterator cur_chain_;
   impl::ResidueImplList::iterator cur_res_;
   impl::AtomImplList::iterator cur_atom_;
   impl::EntityImplPtr  ent_;

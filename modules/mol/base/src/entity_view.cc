@@ -76,9 +76,9 @@ EntityView::EntityView(const EntityHandle& entity,
                        ViewAddFlags flags)
   : EntityBase(entity.Impl()), data_(new EntityViewData()) {
   if (flags & ViewAddFlag::INCLUDE_CHAINS) {
-    impl::ChainImplMap::const_iterator i=entity.Impl()->GetChainMap().begin();
-    for (; i!=entity.Impl()->GetChainMap().end(); ++i) {
-      this->AddChain(ChainHandle(i->second), flags);
+    impl::ChainImplList::const_iterator i=entity.Impl()->GetChainList().begin();
+    for (; i!=entity.Impl()->GetChainList().end(); ++i) {
+      this->AddChain(ChainHandle(*i), flags);
     }
   }
 }

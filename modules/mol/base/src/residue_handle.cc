@@ -181,7 +181,7 @@ AtomHandleIter ResidueHandle::AtomsBegin() const
   impl::ResidueImplPtr r=Impl();
   int index=this->GetIndex();
   impl::ChainImplPtr c=r->GetChain();
-  impl::ChainImplMap::iterator cc=r->GetEntity()->GetChainMap().find(c->GetName());
+  impl::ChainImplList::iterator cc=r->GetEntity()->GetChain(c->GetName());
   return AtomHandleIter(cc, c->GetResidueList().begin()+index,
                         r->GetAtomList().begin(), r->GetEntity(), true);
 }
@@ -192,7 +192,7 @@ AtomHandleIter ResidueHandle::AtomsEnd() const
   impl::ResidueImplPtr r=Impl();
   int index=this->GetIndex();
   impl::ChainImplPtr c=r->GetChain();
-  impl::ChainImplMap::iterator cc=r->GetEntity()->GetChainMap().find(c->GetName());
+  impl::ChainImplList::iterator cc=r->GetEntity()->GetChain(c->GetName());
   if (c->GetResidueList().begin()+index+1==c->GetResidueList().end()) {
     return AtomHandleIter(cc, c->GetResidueList().begin()+index,
                           r->GetAtomList().end(), r->GetEntity(), false);

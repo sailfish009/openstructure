@@ -125,17 +125,18 @@ bool ChainHandle::operator!=(const ChainHandle& ref) const
 ResidueHandleIter ChainHandle::ResiduesBegin() const {
   this->CheckValidity();
   impl::ChainImplPtr c=Impl();
-  impl::ChainImplMap::iterator cc=c->GetEntity()->GetChainMap().find(c->GetName());
-  return ResidueHandleIter(cc, c->GetResidueList().begin(), c->GetEntity());
+  impl::ChainImplList::iterator cc=c->GetEntity()->GetChain(this->GetName());
+  return ResidueHandleIter(cc, c->GetResidueList().begin(), 
+                           c->GetEntity());
 }
 
 ResidueHandleIter ChainHandle::ResiduesEnd() const {
   this->CheckValidity();
   impl::ChainImplPtr c=Impl();
-  impl::ChainImplMap::iterator cc=c->GetEntity()->GetChainMap().find(c->GetName());  
-  impl::ChainImplMap::iterator nc=cc; ++nc;
-  if (nc!=c->GetEntity()->GetChainMap().end()) {
-    return ResidueHandleIter(nc, nc->second->GetResidueList().begin(), 
+  impl::ChainImplList::iterator cc=c->GetEntity()->GetChain(this->GetName());
+  impl::ChainImplList::iterator nc=cc; ++nc;
+  if (nc!=c->GetEntity()->GetChainList().end()) {
+    return ResidueHandleIter(nc, (*nc)->GetResidueList().begin(), 
                              c->GetEntity());    
   } else {
     return ResidueHandleIter(cc, c->GetResidueList().end(), 
@@ -151,7 +152,7 @@ AtomHandleIter ChainHandle::AtomsBegin() const
 
     return AtomHandleIter();
   }  
-  impl::ChainImplMap::iterator cc=c->GetEntity()->GetChainMap().find(c->GetName());    
+  impl::ChainImplList::iterator cc=c->GetEntity()->GetChain(this->GetName()); 
   return AtomHandleIter(cc, c->GetResidueList().begin(),
                         c->GetResidueList().front()->GetAtomList().begin(),
                         c->GetEntity(), true);    
@@ -164,10 +165,10 @@ AtomHandleIter ChainHandle::AtomsEnd() const {
   if (c->GetResidueList().empty()) {
     return AtomHandleIter();
   }  
-  impl::ChainImplMap::iterator cc=c->GetEntity()->GetChainMap().find(c->GetName());
-  impl::ChainImplMap::iterator nc=cc; ++nc;
-  impl::ResidueImplList& rc=nc->second->GetResidueList();
-  if (nc!=c->GetEntity()->GetChainMap().end()) {  
+  impl::ChainImplList::iterator cc=c->GetEntity()->GetChain(this->GetName());
+  impl::ChainImplList::iterator nc=cc; ++nc;
+  impl::ResidueImplList& rc=(*nc)->GetResidueList();
+  if (nc!=c->GetEntity()->GetChainList().end()) {  
     return AtomHandleIter(nc, rc.begin(), rc.front()->GetAtomList().begin(),
                           c->GetEntity(), false);
   } else {

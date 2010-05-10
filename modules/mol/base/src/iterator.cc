@@ -28,21 +28,21 @@ namespace ost { namespace mol {
 
 ResidueHandleIter& ResidueHandleIter::operator++() {
   ++cur_res_;
-  if (cur_res_==cur_chain_->second->GetResidueList().end()) {
+  if (cur_res_==(*cur_chain_)->GetResidueList().end()) {
     // we have to skip over empty chains otherwise we end up pointing to an 
     // invalid residue.
     do {
       ++cur_chain_;
-      if (ent_->GetChainMap().end()==cur_chain_) {
+      if (ent_->GetChainList().end()==cur_chain_) {
         break;        
       }
-      cur_res_=cur_chain_->second->GetResidueList().begin();
-    } while (cur_chain_->second->GetResidueList().empty());
+      cur_res_=(*cur_chain_)->GetResidueList().begin();
+    } while ((*cur_chain_)->GetResidueList().empty());
   }        
   return *this;
 }
 
-ResidueHandleIter::ResidueHandleIter(impl::ChainImplMap::iterator chain_it, 
+ResidueHandleIter::ResidueHandleIter(impl::ChainImplList::iterator chain_it, 
                                      impl::ResidueImplList::iterator res_it,
                                      impl::EntityImplPtr ent) 
  : cur_chain_(chain_it), cur_res_(res_it),
@@ -99,7 +99,7 @@ AtomHandleIter::AtomHandleIter()
 #endif
 {}  
 
-AtomHandleIter::AtomHandleIter(impl::ChainImplMap::iterator chain_it,
+AtomHandleIter::AtomHandleIter(impl::ChainImplList::iterator chain_it,
                                impl::ResidueImplList::iterator res_it,
                                impl::AtomImplList::iterator atom_it,
                                impl::EntityImplPtr ent, bool skip_empty)
@@ -122,19 +122,19 @@ void AtomHandleIter::SkipEmpty()
     // pointing to an invalid atom.
     do {
       ++cur_res_;
-      if (cur_chain_->second->GetResidueList().end()==cur_res_) {
+      if ((*cur_chain_)->GetResidueList().end()==cur_res_) {
         do {
           ++cur_chain_;
-          if (ent_->GetChainMap().end()==cur_chain_) {
+          if (ent_->GetChainList().end()==cur_chain_) {
             return;
           }
 
-          cur_res_=cur_chain_->second->GetResidueList().begin();
-          if (!cur_chain_->second->GetResidueList().empty())          
+          cur_res_=(*cur_chain_)->GetResidueList().begin();
+          if (!(*cur_chain_)->GetResidueList().empty())          
             cur_atom_=(*cur_res_)->GetAtomList().begin();
           else
             cur_atom_=impl::AtomImplList::iterator();
-        } while (cur_chain_->second->GetResidueList().empty());
+        } while ((*cur_chain_)->GetResidueList().empty());
       } else {
         cur_atom_=(*cur_res_)->GetAtomList().begin();
       }
