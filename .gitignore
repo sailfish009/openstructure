@@ -19,5 +19,6 @@ html
 scratch
 pov_*test.pov
 pov_*test.inc
+*-out.pdb
 CMakeLists.txt.user
 OpenStructure.cbp

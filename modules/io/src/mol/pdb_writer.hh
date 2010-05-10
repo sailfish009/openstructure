@@ -28,9 +28,11 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
-#include <ost/io/module_config.hh>
-
 #include <ost/mol/mol.hh>
+
+#include <ost/io/module_config.hh>
+#include <ost/io/formatted_line.hh>
+
 
 #include "pdb_io.hh"
 
@@ -58,6 +60,7 @@ private:
   std::ostream&   outstream_;
   int mol_count_;
   std::map<long, int> atom_indices_;
+  FormattedLine       line_;
 };
  
 }}

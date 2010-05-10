@@ -22,6 +22,7 @@
 #include <boost/format.hpp>
 #include <string.h>
 #include <ost/io/io_exception.hh>
+
 #include "pdb_writer.hh"
 
 using boost::format;
@@ -31,63 +32,119 @@ namespace ost { namespace io {
 
 namespace {
 
-void write_atom(std::ostream& ostr, const mol::AtomHandle& atom, int atomnum, 
+// determine whether the element name has to be shifted to to the left by one
+// column.
+bool shift_left(const String& atom_name, bool is_hetatm, 
+                const String& element, float mass) 
+{
+  if (is_hetatm==false) {
+    return false;
+  }
+
+  if (isnumber(atom_name[0]) || atom_name=="UNK" ||
+      atom_name.length()==4) {
+    return true;
+  }
+  if (mass>34) {
+    if (element=="W" || element=="V") {
+      return false;
+    }    
+    return true;
+  }
+  return (element=="K" || element=="CA" || element=="NA" || 
+          element=="MG" || element=="LI");
+}
+
+void write_atom(std::ostream& ostr, FormattedLine& line, 
+                const mol::AtomHandle& atom, int atomnum, 
                 bool is_pqr)
 {
   mol::ResidueHandle res=atom.GetResidue();
   char ins_code=res.GetNumber().GetInsCode();
-  String record_name=atom.GetAtomProps().is_hetatm ? "HETATM" : "ATOM  ";
-  String aname_str=atom.GetName();
-  if(aname_str.length()<4) {
-    aname_str=" "+aname_str;
-  }
+  StringRef record_name(atom.IsHetAtom() ? "HETATM" : "ATOM  ", 6);
   std::vector<String> names=atom.GetAltGroupNames();
-  if (names.empty()) {
-    geom::Vec3 p=atom.GetPos();
-    String ins_str=(ins_code==0 ? " " : String(1, ins_code));
-    ostr << record_name << format("%5d") % atomnum
-         << format(" %-4s") % aname_str
-         << " "
-         << format("%.3s") % res.GetKey()
-         << format(" %.1s") % res.GetChain().GetName()
-         << format("%4d%s") % res.GetNumber().GetNum() %  ins_str
-         << "   "
-         << format("%8.3f%8.3f%8.3f") % p[0] % p[1] % p[2];
-    if(is_pqr) {
-      ostr << format("%6.2f") % atom.GetAtomProps().charge
-           << format("%6.2f") % atom.GetAtomProps().radius;
-    } else {
-      ostr << format("%6.2f") % atom.GetAtomProps().occupancy
-           << format("%6.2f") % atom.GetAtomProps().b_factor;
-    }
-    ostr << format("%10s%2s") % "" % atom.GetAtomProps().element
-         << std::endl
-    ;    
+  
+  geom::Vec3 p=atom.GetPos();
+  line( 0, 6)=record_name;
+  line( 6, 5)=fmt::LPaddedInt(atomnum);
+  String atom_name=atom.GetName();
+  if (atom_name.size()>4) {
+    throw IOException("Atom name '"+atom.GetQualifiedName()+
+                      "' is too long for PDB output. At most 4 character "
+                      "are allowed");
+  }
+  if (shift_left(atom_name, atom.IsHetAtom(), atom.GetElement(), 
+                 atom.GetMass())) {
+    line(12, 4)=fmt::RPadded(atom_name);
   } else {
-    for (std::vector<String>::const_iterator i=names.begin(), 
-         e=names.end(); i!=e; ++i) {
-       geom::Vec3 p=atom.GetAltPos(*i);
-       String ins_str=(ins_code==0 ? " " : String(1, ins_code));
-       ostr << record_name << format("%5d") % atomnum
-            << format(" %-4s") % aname_str
-            << *i
-            << format("%.3s") % res.GetKey()
-            << format(" %.1s") % res.GetChain().GetName()
-            << format("%4d%s") % res.GetNumber().GetNum() %  ins_str
-            << "   "
-            << format("%8.3f%8.3f%8.3f") % p[0] % p[1] % p[2];
-       if(is_pqr) {
-         ostr << format("%6.2f") % atom.GetAtomProps().charge
-              << format("%6.2f") % atom.GetAtomProps().radius;
-       } else {
-         ostr << format("%6.2f") % atom.GetAtomProps().occupancy
-              << format("%6.2f") % atom.GetAtomProps().b_factor;
-       }
-       ostr << format("%10s%2s") % "" % atom.GetAtomProps().element
-            << std::endl
-       ;       
+    line(13, 3)=fmt::RPadded(atom_name);
+  }
+  if (res.GetKey().size()>3) {
+    throw IOException("Residue name '"+res.GetQualifiedName()+
+                      "' is too long for PDB output. At most 3 characters are "
+                      "allowed");
+  }
+  line(17, 3)=fmt::LPadded(res.GetKey());
+  
+  String chain_name=res.GetChain().GetName();
+  if (chain_name.size()>0) {
+    if (chain_name.size()==1) {
+      line[21]=chain_name[0];
+    } else {
+      throw IOException("PDB format only support single-letter chain names");
     }
   }
+  line(22, 4)=fmt::LPaddedInt(res.GetNumber().GetNum());
+  if (ins_code!=0) {
+    line[26]=ins_code;
+  }
+  
+  // deal with alternative atom locations
+  if (names.empty()) {
+    line(30, 8)=fmt::LPaddedFloat(p[0],  3);
+    line(38, 8)=fmt::LPaddedFloat(p[1],  3);
+    line(46, 8)=fmt::LPaddedFloat(p[2],  3);
+    
+    if (is_pqr) {
+      line(54, 6)=fmt::LPaddedFloat(atom.GetCharge(), 2);
+      line(60, 6)=fmt::LPaddedFloat(atom.GetRadius(), 2);
+    } else {
+      line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
+      line(60, 6)=fmt::LPaddedFloat(atom.GetBFactor(), 2);
+    }
+    
+    line(76, 2)=fmt::LPadded(atom.GetElement());
+    ostr << line;
+  } else {
+    for (std::vector<String>::const_iterator
+         i=names.begin(), e=names.end(); i!=e; ++i) {
+      p=atom.GetAltPos(*i);
+      line(30, 50).Clear();
+
+      if (i->size()>1) {
+        throw IOException("Alternative atom indicator '"+atom.GetQualifiedName()+
+                          "("+*i+")' too long for PDB output. At most 1 "
+                          "character is allowed");
+      }
+      line[16]=(*i)[0];
+      line(30, 8)=fmt::LPaddedFloat(p[0],  3);
+      line(38, 8)=fmt::LPaddedFloat(p[1],  3);
+      line(46, 8)=fmt::LPaddedFloat(p[2],  3);
+
+      if (is_pqr) {
+       line(54, 6)=fmt::LPaddedFloat(atom.GetCharge(), 2);
+       line(60, 6)=fmt::LPaddedFloat(atom.GetRadius(), 2);
+      } else {
+       line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
+       line(60, 6)=fmt::LPaddedFloat(atom.GetBFactor(), 2);
+      }
+
+      line(76, 2)=fmt::LPadded(atom.GetElement());
+      ostr << line;
+    }
+  }
+
+  line.Clear();
 }
 
 void write_conect(std::ostream& ostr, int atom_index,
@@ -109,35 +166,63 @@ void write_conect(std::ostream& ostr, int atom_index,
 
 class PDBWriterImpl : public mol::EntityVisitor {
 public:
-  PDBWriterImpl(std::ostream& ostream, std::map<long,int>& atom_indices)
-    : ostr_(ostream), counter_(0), is_pqr_(false), last_chain_(),
-      atom_indices_(atom_indices) {
+  PDBWriterImpl(std::ostream& ostream, FormattedLine& line, 
+                std::map<long,int>& atom_indices)
+    : ostr_(ostream), counter_(0), is_pqr_(false),
+      atom_indices_(atom_indices), line_(line), peptide_(false) {
   }
 private:
 public:
   virtual bool VisitAtom(const mol::AtomHandle& atom) {
     counter_++;
-    if (last_chain_!=atom.GetResidue().GetChain()) {
-      if (last_chain_.IsValid()) {
-        ostr_ << "TER" << std::endl;
-      }
-      last_chain_=atom.GetResidue().GetChain();
-    }    
-    write_atom(ostr_, atom, counter_, is_pqr_);
+    write_atom(ostr_, line_, atom, counter_, is_pqr_);
     if (atom.GetAtomProps().is_hetatm) {
       atom_indices_[atom.GetHashCode()]=counter_;
     }
     return true;
   }
+  
+  virtual bool VisitResidue(const mol::ResidueHandle& res)
+  {
+    if (res.IsPeptideLinking()) {
+      peptide_=true;
+    } else {
+      if (peptide_) {
+        this->WriteTer(prev_);
+      }
+      peptide_=false;
+    }
+    prev_=res;
+    return true;
+  }
+  
+  void WriteTer(mol::ResidueHandle res)
+  {
+    counter_++;
+    line_(0, 6)=StringRef("TER   ", 6);
+    line_( 6, 5)=fmt::LPaddedInt(counter_);
+    line_(17, 3)=fmt::LPadded(res.GetKey());
+    line_[21]=res.GetChain().GetName()[0];
+    line_(22, 4)=fmt::LPaddedInt(res.GetNumber().GetNum());
+    char ins_code=res.GetNumber().GetInsCode();
+    if (ins_code!=0) {
+      line_[26]=ins_code;
+    }    
+    ostr_ << line_;
+    line_.Clear();
+  }
+  
   void SetIsPQR(bool t) {
     is_pqr_=t;
   }
 private:
-  std::ostream&    ostr_;
-  int              counter_;
-  bool             is_pqr_;
-  mol::ChainHandle last_chain_;
+  std::ostream&       ostr_;
+  int                 counter_;
+  bool                is_pqr_;
   std::map<long,int>& atom_indices_;
+  FormattedLine&      line_;
+  mol::ResidueHandle  prev_;
+  bool                peptide_;
 };
 
 class PDBConectWriterImpl : public mol::EntityVisitor {
@@ -175,15 +260,18 @@ private:
 }
 
 PDBWriter::PDBWriter(std::ostream& stream):
-  outfile_(), outstream_(stream)
-{}
+  outfile_(), outstream_(stream), mol_count_(0), line_(80)
+{
+  
+}
 
 PDBWriter::PDBWriter(const boost::filesystem::path& filename):
-  outfile_(filename.file_string().c_str()), outstream_(outfile_), mol_count_(0)
+  outfile_(filename.file_string().c_str()), outstream_(outfile_), 
+  mol_count_(0), line_(80)
 {}
 
 PDBWriter::PDBWriter(const String& filename):
-  outfile_(filename.c_str()), outstream_(outfile_), mol_count_(0)
+  outfile_(filename.c_str()), outstream_(outfile_), mol_count_(0), line_(80)
 {}
 
 void PDBWriter::WriteModelLeader()
@@ -208,7 +296,7 @@ template <typename H>
 void PDBWriter::WriteModel(H ent)
 {
   this->WriteModelLeader();
-  PDBWriterImpl writer(outstream_,atom_indices_);
+  PDBWriterImpl writer(outstream_,line_, atom_indices_);
   if (PDB::Flags() & PDB::PQR_FORMAT) {
     writer.SetIsPQR(true);
   }
@@ -235,14 +323,7 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
   mol::ChainHandle last_chain;
   for (mol::AtomHandleList::const_iterator i=atoms.begin(),
        e=atoms.end(); i!=e; ++i, ++counter) {
-
-    if (last_chain!=(*i).GetResidue().GetChain()) {
-      if (last_chain.IsValid()) {
-        outstream_ << "TER" << std::endl;
-      }
-      last_chain=(*i).GetResidue().GetChain();
-    }
-    write_atom(outstream_, *i, counter, PDB::Flags() & PDB::PQR_FORMAT);
+    write_atom(outstream_, line_, *i, counter, PDB::Flags() & PDB::PQR_FORMAT);
   }
   this->WriteModelTrailer();
 }
