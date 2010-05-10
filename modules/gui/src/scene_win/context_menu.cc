@@ -26,12 +26,13 @@
 #include <QItemSelection>
 #include <QItemSelectionModel>
 
+#include <ost/dyn_cast.hh>
+
 #include <ost/gui/scene_selection.hh>
 #include <ost/gui/query_dialog.hh>
 
 #if OST_IMG_ENABLED
 #include <ost/gfx/map_iso.hh>
-#include <ost/dyn_cast.hh>
 #endif // OST_IMG_ENABLED
 
 #include "custom_part_node.hh"
