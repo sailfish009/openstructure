@@ -148,10 +148,10 @@ void ContextMenu::ShowMenu(const QPoint& pos)
             flags &= ~NOT_VISIBLE;
           }
           if(gfx_node->GetType()==0){flags &= ~NOT_SCENE;}
-          if(!dynamic_cast<gfx::GfxObj*> (gfx_node.get())){flags &= ~GFX_OBJECT;}
-          if(!dynamic_cast<gfx::Entity*> (gfx_node.get())){flags &= ~ENTITY;}
+          if(!dyn_cast<gfx::GfxObj> (gfx_node)){flags &= ~GFX_OBJECT;}
+          if(!dyn_cast<gfx::Entity> (gfx_node)){flags &= ~ENTITY;}
 #if OST_IMG_ENABLED
-          if(!dynamic_cast<gfx::MapIso*> (gfx_node.get()))
+          if(!dyn_cast<gfx::MapIso>(gfx_node))
           {
             flags &= ~MAP;
           } else {
@@ -165,11 +165,11 @@ void ContextMenu::ShowMenu(const QPoint& pos)
               flags &= ~MAP_DSAMPLED_AVAIL;
             }
           }
-          if(!dynamic_cast<gfx::MapIso*> (gfx_node.get())){
+          if(!dyn_cast<gfx::MapIso> (gfx_node)){
           flags &= ~MAP;
 
           }
-          if(!dynamic_cast<gfx::MapIso*> (gfx_node.get())){flags &= ~MAP;}
+          if(!dyn_cast<gfx::MapIso> (gfx_node)){flags &= ~MAP;}
 #endif // OST_IMG_ENABLED
         }
         else{
