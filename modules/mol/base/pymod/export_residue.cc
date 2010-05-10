@@ -71,6 +71,7 @@ void export_Residue()
     .def(self+int())
     .def(self-int())    
   ;
+  implicitly_convertible<int, ResNum>();
   {
     scope sec_struct_scope=class_<SecStructure>("SecStructure", init<>())
       .def(init<char>())
