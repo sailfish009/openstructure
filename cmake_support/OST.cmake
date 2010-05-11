@@ -496,7 +496,7 @@ macro(ost_unittest MODULE SOURCE_FILES)
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
                             "ost_${MODULE}")
         add_custom_target("${_test_name}_run"
-                        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo
+                        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo 
                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                         COMMENT "running checks for module ${MODULE}"
                         DEPENDS ${_test_name})
@@ -513,13 +513,17 @@ macro(ost_unittest MODULE SOURCE_FILES)
     foreach(py_test ${PY_TESTS})
       if(WIN32)
         set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost.bat")
+        add_custom_target("${py_test}_run"
+                  CALL "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                  COMMENT "running checks ${py_test}" VERBATIM)
       else()
         set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost")
-      endif()
-      add_custom_target("${py_test}_run"
-                  COMMAND ${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo
+        add_custom_target("${py_test}_run"
+                  sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                  COMMENT "running checks  ${py_test}" VERBATIM)
+                  COMMENT "running checks ${py_test}" VERBATIM)
+      endif()
       add_dependencies("${py_test}_run" ost_scripts "_${MODULE}")
       add_dependencies(check "${py_test}_run")
       if (WIN32)
