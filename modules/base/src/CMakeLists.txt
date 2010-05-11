@@ -8,6 +8,7 @@ units.cc
 string_ref.cc
 platform.cc
 message.cc
+test_utils/compare_files.cc
 )
 
 set(OST_BASE_HEADERS
@@ -32,7 +33,7 @@ tri_matrix.hh
 )
 
 module(NAME base SOURCES ${OST_BASE_SOURCES} 
-       HEADERS generic_property_def.hh IN_DIR export_helper ${OST_BASE_HEADERS}
+       HEADERS generic_property_def.hh IN_DIR export_helper compare_files.hh IN_DIR test_utils ${OST_BASE_HEADERS}
        DEPENDS_ON geom
        HEADER_OUTPUT_DIR ost)
 

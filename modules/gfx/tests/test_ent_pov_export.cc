@@ -26,6 +26,7 @@
 #include <ost/io/load_entity.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/entity.hh>
+#include <ost/test_utils/compare_files.hh>
 
 using boost::unit_test_framework::test_suite;
 using namespace ost;
@@ -40,36 +41,6 @@ boost::shared_ptr<Entity> prepare_object(gfx::RenderMode::Type mode)
   Scene::Instance().Add(gfx_ent);
   Scene::Instance().CenterOn(gfx_ent);
   return gfx_ent;
-}
-
-bool compare_files(const String& test, const String& gold_standard)
-{
-  std::ifstream test_stream(test.c_str());
-  std::ifstream gold_stream(gold_standard.c_str());
-  String test_line, gold_line;
-  while (true) {
-    bool test_end=std::getline(test_stream, test_line);
-    bool gold_end=std::getline(gold_stream, gold_line);
-    if (!(test_end || gold_end)) {
-      return true;
-    }
-    if (!test_end) {
-      std::cerr << gold_standard << " contains additional line(s):"
-                << std::endl << gold_line;
-      return false;
-    }
-    if (!gold_end) {
-      std::cerr << test << " contains additional line(s):"
-                << std::endl << test_line;
-      return false;
-    }
-    if (gold_line!=test_line) {
-      std::cerr << "line mismatch:" << std::endl << "test: " << test_line 
-                << std::endl << "gold: " << gold_line;
-      return false;
-    }
-  }
-  return true;
 }
 
 // The GfxView uses a std::map for efficient access to atoms. This however has 

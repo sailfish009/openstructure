@@ -1,7 +1,7 @@
-Displayed atoms
-                    3D
- Structure written by MMmdl.
- 45 47  0  0  1  0            999 V2000
+Test Ligand
+
+
+ 45 47  0  0  0  0            999 V2000
    35.9455    5.9021   22.1706 C   0  0  0  0  0  0
    34.6074    5.5226   22.4445 O   0  0  0  0  0  0
    33.9561    6.2475   23.4088 C   0  0  0  0  0  0
@@ -95,38 +95,23 @@ Displayed atoms
  26 27  1  0  0  0
  27 45  1  0  0  0
 M  END
+> <i_i_glide_confnum>
+2
+
 > <i_i_glide_lignum>
 1
+
+> <i_i_glide_posenum>
+352
 
 > <r_i_docking_score>
 -8.84426
 
-> <r_i_glide_gscore>
--8.84426
-
-> <r_i_glide_lipo>
--2.84534
-
-> <r_i_glide_hbond>
--0.960751
-
-> <r_i_glide_metal>
--0
-
-> <r_i_glide_rewards>
--0.799851
-
-> <r_i_glide_evdw>
--46.0502
-
 > <r_i_glide_ecoul>
 -16.1644
 
-> <r_i_glide_erotb>
-0.517993
-
-> <r_i_glide_esite>
--0.0291388
+> <r_i_glide_einternal>
+6.78671
 
 > <r_i_glide_emodel>
 -96.9661
@@ -134,32 +119,47 @@ M  END
 > <r_i_glide_energy>
 -62.2146
 
-> <r_i_glide_einternal>
-6.78671
+> <r_i_glide_erotb>
+0.517993
+
+> <r_i_glide_esite>
+-0.0291388
+
+> <r_i_glide_evdw>
+-46.0502
+
+> <r_i_glide_gscore>
+-8.84426
+
+> <r_i_glide_hbond>
+-0.960751
 
 > <r_i_glide_ligand_efficiency>
 -0.327565
 
-> <r_i_glide_ligand_efficiency_sa>
--0.982695
-
 > <r_i_glide_ligand_efficiency_ln>
 -2.0588
 
-> <i_i_glide_confnum>
-2
+> <r_i_glide_ligand_efficiency_sa>
+-0.982695
 
-> <i_i_glide_posenum>
-352
+> <r_i_glide_lipo>
+-2.84534
+
+> <r_i_glide_metal>
+-0
+
+> <r_i_glide_rewards>
+-0.799851
 
 > <r_i_glide_rmsd>
 0.6819
 
 $$$$
-Displayed atoms
-                    3D
- Structure written by MMmdl.
- 45 47  0  0  1  0            999 V2000
+Test Ligand
+
+
+ 45 47  0  0  0  0            999 V2000
    34.3938    4.9895   21.4537 C   0  0  0  0  0  0
    34.9786    5.7318   22.5298 O   0  0  0  0  0  0
    34.1450    6.3862   23.4047 C   0  0  0  0  0  0
@@ -253,38 +253,23 @@ Displayed atoms
  26 27  1  0  0  0
  27 45  1  0  0  0
 M  END
+> <i_i_glide_confnum>
+14
+
 > <i_i_glide_lignum>
 1
+
+> <i_i_glide_posenum>
+302
 
 > <r_i_docking_score>
 -8.79327
 
-> <r_i_glide_gscore>
--8.79327
-
-> <r_i_glide_lipo>
--2.69167
-
-> <r_i_glide_hbond>
--0.966475
-
-> <r_i_glide_metal>
--0
-
-> <r_i_glide_rewards>
--0.777126
-
-> <r_i_glide_evdw>
--46.4187
-
 > <r_i_glide_ecoul>
 -16.9687
 
-> <r_i_glide_erotb>
-0.517993
-
-> <r_i_glide_esite>
--0.00975737
+> <r_i_glide_einternal>
+5.76514
 
 > <r_i_glide_emodel>
 -98.4298
@@ -292,32 +277,47 @@ M  END
 > <r_i_glide_energy>
 -63.3874
 
-> <r_i_glide_einternal>
-5.76514
+> <r_i_glide_erotb>
+0.517993
+
+> <r_i_glide_esite>
+-0.00975737
+
+> <r_i_glide_evdw>
+-46.4187
+
+> <r_i_glide_gscore>
+-8.79327
+
+> <r_i_glide_hbond>
+-0.966475
 
 > <r_i_glide_ligand_efficiency>
 -0.325677
 
-> <r_i_glide_ligand_efficiency_sa>
--0.97703
-
 > <r_i_glide_ligand_efficiency_ln>
 -2.04693
 
-> <i_i_glide_confnum>
-14
+> <r_i_glide_ligand_efficiency_sa>
+-0.97703
 
-> <i_i_glide_posenum>
-302
+> <r_i_glide_lipo>
+-2.69167
+
+> <r_i_glide_metal>
+-0
+
+> <r_i_glide_rewards>
+-0.777126
 
 > <r_i_glide_rmsd>
 0.605551
 
 $$$$
-Displayed atoms
-                    3D
- Structure written by MMmdl.
- 45 47  0  0  1  0            999 V2000
+Test Ligand
+
+
+ 45 47  0  0  0  0            999 V2000
    36.2241    5.1749   22.8554 C   0  0  0  0  0  0
    35.0609    5.8871   22.4479 O   0  0  0  0  0  0
    34.2768    6.4601   23.4276 C   0  0  0  0  0  0
@@ -411,38 +411,23 @@ Displayed atoms
  26 27  1  0  0  0
  27 45  1  0  0  0
 M  END
+> <i_i_glide_confnum>
+1
+
 > <i_i_glide_lignum>
 1
+
+> <i_i_glide_posenum>
+177
 
 > <r_i_docking_score>
 -8.70173
 
-> <r_i_glide_gscore>
--8.70173
-
-> <r_i_glide_lipo>
--2.74283
-
-> <r_i_glide_hbond>
--0.97397
-
-> <r_i_glide_metal>
--0
-
-> <r_i_glide_rewards>
--0.764823
-
-> <r_i_glide_evdw>
--46.5538
-
 > <r_i_glide_ecoul>
 -15.8862
 
-> <r_i_glide_erotb>
-0.517993
-
-> <r_i_glide_esite>
--0.0274759
+> <r_i_glide_einternal>
+1.84397
 
 > <r_i_glide_emodel>
 -99.0481
@@ -450,32 +435,47 @@ M  END
 > <r_i_glide_energy>
 -62.44
 
-> <r_i_glide_einternal>
-1.84397
+> <r_i_glide_erotb>
+0.517993
+
+> <r_i_glide_esite>
+-0.0274759
+
+> <r_i_glide_evdw>
+-46.5538
+
+> <r_i_glide_gscore>
+-8.70173
+
+> <r_i_glide_hbond>
+-0.97397
 
 > <r_i_glide_ligand_efficiency>
 -0.322286
 
-> <r_i_glide_ligand_efficiency_sa>
--0.966858
-
 > <r_i_glide_ligand_efficiency_ln>
 -2.02562
 
-> <i_i_glide_confnum>
-1
+> <r_i_glide_ligand_efficiency_sa>
+-0.966858
 
-> <i_i_glide_posenum>
-177
+> <r_i_glide_lipo>
+-2.74283
+
+> <r_i_glide_metal>
+-0
+
+> <r_i_glide_rewards>
+-0.764823
 
 > <r_i_glide_rmsd>
 0.543804
 
 $$$$
-Displayed atoms
-                    3D
- Structure written by MMmdl.
- 45 47  0  0  1  0            999 V2000
+Test Ligand
+
+
+ 45 47  0  0  0  0            999 V2000
    36.1312    5.0238   22.8745 C   0  0  0  0  0  0
    35.3492    6.1234   22.4285 O   0  0  0  0  0  0
    34.5144    6.6833   23.3611 C   0  0  0  0  0  0
@@ -569,38 +569,23 @@ Displayed atoms
  26 27  1  0  0  0
  27 45  1  0  0  0
 M  END
+> <i_i_glide_confnum>
+9
+
 > <i_i_glide_lignum>
 1
+
+> <i_i_glide_posenum>
+294
 
 > <r_i_docking_score>
 -8.69162
 
-> <r_i_glide_gscore>
--8.69162
-
-> <r_i_glide_lipo>
--2.92829
-
-> <r_i_glide_hbond>
--0.870172
-
-> <r_i_glide_metal>
--0
-
-> <r_i_glide_rewards>
--0.764823
-
-> <r_i_glide_evdw>
--48.432
-
 > <r_i_glide_ecoul>
 -14.7519
 
-> <r_i_glide_erotb>
-0.517993
-
-> <r_i_glide_esite>
--0.0119369
+> <r_i_glide_einternal>
+5.89466
 
 > <r_i_glide_emodel>
 -97.7232
@@ -608,23 +593,38 @@ M  END
 > <r_i_glide_energy>
 -63.1839
 
-> <r_i_glide_einternal>
-5.89466
+> <r_i_glide_erotb>
+0.517993
+
+> <r_i_glide_esite>
+-0.0119369
+
+> <r_i_glide_evdw>
+-48.432
+
+> <r_i_glide_gscore>
+-8.69162
+
+> <r_i_glide_hbond>
+-0.870172
 
 > <r_i_glide_ligand_efficiency>
 -0.321912
 
-> <r_i_glide_ligand_efficiency_sa>
--0.965735
-
 > <r_i_glide_ligand_efficiency_ln>
 -2.02327
 
-> <i_i_glide_confnum>
-9
+> <r_i_glide_ligand_efficiency_sa>
+-0.965735
 
-> <i_i_glide_posenum>
-294
+> <r_i_glide_lipo>
+-2.92829
+
+> <r_i_glide_metal>
+-0
+
+> <r_i_glide_rewards>
+-0.764823
 
 > <r_i_glide_rmsd>
 0.463026

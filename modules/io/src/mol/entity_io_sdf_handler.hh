@@ -20,7 +20,6 @@
 #define OST_IO_ENTITY_IO_PLUGIN_SDF_H
 
 #include <ost/io/mol/entity_io_handler.hh>
-#include <ost//mol/xcs_editor.hh>
 
 namespace ost { namespace io {
 
@@ -45,29 +44,6 @@ public:
 
   static String GetFormatName() { return String("Sdf"); }
   static String GetFormatDescription() { return String("Structure-data format from Molecular Design Limited"); }
-
-private:
-  void ClearState();
-
-  void NextMolecule();
-
-  void ParseAndAddHeader(const String& line, int line_num, mol::EntityHandle& ent,
-                         mol::XCSEditor& editor);
-
-  void ParseAndAddAtom(const String& line, int line_num, mol::EntityHandle& ent, 
-                       bool hetatm, mol::XCSEditor& editor);
-
-  void ParseAndAddBond(const String& line, int line_num, mol::EntityHandle& ent,
-                       mol::XCSEditor& editor);
-
-  mol::ChainHandle curr_chain_;
-  mol::ResidueHandle curr_residue_;
-  int chain_count_;
-  int residue_count_;
-  int atom_count_;
-  int bond_count_;
-  int line_num;
-
 };
 
 typedef EntityIOHandlerFactory<EntityIOSDFHandler> EntityIOSDFHandlerFactory;

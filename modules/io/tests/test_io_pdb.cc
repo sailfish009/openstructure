@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/test_utils/compare_files.hh>
 #include <ost/mol/mol.hh>
 #include <ost/conop/conop.hh>
 #include <ost/io/mol/entity_io_pdb_handler.hh>
@@ -29,36 +30,6 @@ using boost::unit_test_framework::test_suite;
 using namespace ost;
 using namespace ost::io;
 
-
-bool compare_files(const String& test, const String& gold_standard)
-{
-  std::ifstream test_stream(test.c_str());
-  std::ifstream gold_stream(gold_standard.c_str());
-  String test_line, gold_line;
-  while (true) {
-    bool test_end=std::getline(test_stream, test_line);
-    bool gold_end=std::getline(gold_stream, gold_line);
-    if (!(test_end || gold_end)) {
-      return true;
-    }
-    if (!test_end) {
-      std::cerr << gold_standard << " contains additional line(s):"
-                << std::endl << gold_line;
-      return false;
-    }
-    if (!gold_end) {
-      std::cerr << test << " contains additional line(s):"
-                << std::endl << test_line;
-      return false;
-    }
-    if (gold_line!=test_line) {
-      std::cerr << "line mismatch:" << std::endl << "test: " << test_line 
-                << std::endl << "gold: " << gold_line;
-      return false;
-    }
-  }
-  return true;
-}
 BOOST_AUTO_TEST_SUITE( io )
 
 
