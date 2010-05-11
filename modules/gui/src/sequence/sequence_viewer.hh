@@ -32,6 +32,7 @@
 
 #include <ost/gui/module_config.hh>
 
+#include "sequence_search_bar.hh"
 #include "sequence_model.hh"
 #include "sequence_table_view.hh"
 
@@ -51,7 +52,18 @@ public:
   virtual bool Restore(const QString&){return true;};
   virtual bool Save(const QString&){return true;};
 
+public slots:
+/// \internal
+void OnSearchBarUpdate(const QString&, bool, const QString&);
+
+private slots:
+/// \brief show sequence search bar
+void FindInSequence();
+
 private:
+  void UpdateSearchBar();
+  void SelectList(const QModelIndexList& list);
+  SeqSearchBar* seq_search_bar_;
   SequenceModel* model_;
   SequenceTableView* seq_table_view_;
 

@@ -78,6 +78,7 @@ public:
   void ZoomOut();
 
   QMap<int, QList<int> > GetIndexesForView(const mol::EntityView& view);
+  QMap<int, QList<int> > GetIndexesForSubject(const QString& subject, const QString& sequence_name=QString());
 
 private:
   QList<BaseRow*> rows_;

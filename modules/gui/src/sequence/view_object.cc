@@ -229,6 +229,35 @@ QMap<int, QList<int> > ViewObject::GetIndexesForView(const mol::EntityView& view
   }
 }
 
+QMap<int, QList<int> > ViewObject::GetIndexesForSubject(const QString& subject, const QString& sequence_name)
+{
+  if(subject.size()==0){
+    return QMap<int, QList<int> >();
+  }
+  QMap<int, QList<int> > selected_indexes;
+  String subject_str = subject.toStdString();
+  for(int i=0; i< rows_.size(); i++){
+    if(SequenceRow* secstr_row = qobject_cast<SequenceRow*>(rows_[i])){
+      if(sequence_name.size()==0 || sequence_name==secstr_row->GetName()){
+        seq::SequenceHandle seq = secstr_row->GetSequence();
+        String seq_str=seq.GetString();
+        size_t pos=0;
+        size_t first=String::npos;
+        while ((pos=seq_str.find(subject_str, pos))!=String::npos) {
+          if (first==String::npos) {
+            first=pos;
+          }
+          for(int j=0; j < subject.size(); j++){
+            selected_indexes[i].append(pos+j+1);
+          }
+          pos+=subject.length();
+        }
+      }
+    }
+  }
+  return selected_indexes;
+}
+
 Qt::ItemFlags ViewObject::Flags(int row, int column) const
 {
   if(row<0 || row >= rows_.size())return Qt::NoItemFlags;

@@ -50,6 +50,8 @@ public:
   void RemoveGfxEntity(gfx::EntityP& entity);
 
   QModelIndexList GetModelIndexes(gfx::EntityP& entity, const mol::EntityView& view);
+  QModelIndexList GetModelIndexes(const QString& subject, const QString& sequence_name=QString());
+
   int GetGlobalRow(ViewObject* obj, int row) const;
 
 

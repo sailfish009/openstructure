@@ -22,10 +22,11 @@
  */
 #include <boost/pointer_cast.hpp>
 
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QHeaderView>
 #include <QAbstractItemView>
+#include <QHeaderView>
+#include <QPushButton>
+#include <QShortcut>
+#include <QVBoxLayout>
 
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/entity_view.hh>
@@ -75,6 +76,13 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
   layout->setMargin(0);
   layout->setSpacing(0);
 
+  seq_search_bar_ = new SeqSearchBar(this);
+  seq_search_bar_->hide();
+  layout->addWidget(seq_search_bar_);
+  QShortcut* shortcut=new QShortcut(QKeySequence(tr("Ctrl+F")), this);
+  connect(shortcut, SIGNAL(activated()), this, SLOT(FindInSequence()));
+  connect(seq_search_bar_, SIGNAL(Changed(const QString&, bool, const QString&)), this, SLOT(OnSearchBarUpdate(const QString&, bool, const QString&)));
+
   seq_table_view_ = new SequenceTableView(model_);
   layout->addWidget(seq_table_view_);
   this->setLayout(layout);
@@ -106,6 +114,7 @@ void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
     seq_table_view_->resizeColumnsToContents();
     seq_table_view_->resizeRowsToContents();
   }
+  this->UpdateSearchBar();
 }
 
 void SequenceViewerV2::NodeRemoved(const gfx::GfxNodeP& node)
@@ -113,6 +122,16 @@ void SequenceViewerV2::NodeRemoved(const gfx::GfxNodeP& node)
   if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(node)) {
     model_->RemoveGfxEntity(o);
   }
+}
+
+void SequenceViewerV2::UpdateSearchBar()
+{
+  QStringList sequence_names_;
+  for(int i = 1; i< model_->rowCount(); i++){
+        QString name = model_->data(model_->index(i,0),Qt::DisplayRole).toString();
+        sequence_names_.append(name);
+  }
+  seq_search_bar_->UpdateItems(sequence_names_);
 }
 
 void SequenceViewerV2::SelectionModelChanged(const QItemSelection& sel, const QItemSelection& desel)
@@ -126,21 +145,10 @@ void SequenceViewerV2::SelectionChanged(const gfx::GfxObjP& o,
                                       const mol::EntityView& view)
 {
   disconnect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
-  QItemSelectionModel* model = seq_table_view_->selectionModel();
   gfx::EntityP entity=boost::dynamic_pointer_cast<gfx::Entity>(o);
   if(entity){
     const QModelIndexList& list = model_->GetModelIndexes(entity, view);
-    QSet<int> rows_visited;
-    for(int i = 0; i<list.size(); i++){
-      int row =list[i].row();
-      if(!rows_visited.contains(row)){
-        model->select(list[i],QItemSelectionModel::Rows|QItemSelectionModel::Deselect);
-        rows_visited.insert(row);
-      }
-    }
-    for(int i = 0; i<list.size(); i++){
-      model->select(list[i],QItemSelectionModel::Select);
-    }
+    this->SelectList(list);
   }
   connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
 }
@@ -170,6 +178,46 @@ void SequenceViewerV2::MouseWheelEvent(QWheelEvent* event)
     }
   }
   event->accept();
+}
+
+void SequenceViewerV2::FindInSequence()
+{
+  if(seq_search_bar_->isHidden()){
+    seq_search_bar_->show();
+  }
+  else{
+    seq_search_bar_->hide();
+  }
+}
+
+void SequenceViewerV2::OnSearchBarUpdate(const QString& subject,
+                                           bool search_in_all, const QString& name)
+{
+  seq_table_view_->selectionModel()->clear();
+  if(search_in_all){
+    const QModelIndexList& list = model_->GetModelIndexes(subject);
+    this->SelectList(list);
+  }
+  else{
+    const QModelIndexList& list = model_->GetModelIndexes(subject,name);
+    this->SelectList(list);
+  }
+}
+
+void SequenceViewerV2::SelectList(const QModelIndexList& list)
+{
+  QItemSelectionModel* model = seq_table_view_->selectionModel();
+  QSet<int> rows_visited;
+  for(int i = 0; i<list.size(); i++){
+    int row =list[i].row();
+    if(!rows_visited.contains(row)){
+      model->select(list[i],QItemSelectionModel::Rows|QItemSelectionModel::Deselect);
+      rows_visited.insert(row);
+    }
+  }
+  for(int i = 0; i<list.size(); i++){
+    model->select(list[i],QItemSelectionModel::Select);
+  }
 }
 
 SequenceViewerV2::~SequenceViewerV2(){

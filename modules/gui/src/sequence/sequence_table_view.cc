@@ -95,8 +95,7 @@ void SequenceTableView::InitStaticColumn()
   static_column_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   static_column_->show();
   static_column_->setStyleSheet("QTableView { border: 0px;"
-                                 "background-color: #FFFFFF;"
-                                 "selection-background-color: #EEEEEE}"
+                                 "background-color: #FFFFFF}"
                                  "QTableView::item{ border: none;"
                                  "padding: 0px; border-width: 0px; margin: 0px;}");
   static_column_->setShowGrid(false);
@@ -130,8 +129,7 @@ void SequenceTableView::InitStaticRow()
   static_row_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   static_row_->show();
   static_row_->setStyleSheet("QTableView { border: 0px;"
-                                 "background-color: #FFFFFF;"
-                                 "selection-background-color: #EEEEEE}"
+                                 "background-color: #FFFFFF}"
                                  "QTableView::item{ border: none;"
                                  "padding: 0px; border-width: 0px; margin: 0px;}");
   static_row_->setShowGrid(false);
@@ -169,8 +167,7 @@ void SequenceTableView::InitStaticField(){
   static_field_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   static_field_->show();
   static_field_->setStyleSheet("QTableView { border: 0px;"
-                                 "background-color: #FFFFFF;"
-                                 "selection-background-color: #EEEEEE}"
+                                 "background-color: #FFFFFF}"
                                  "QTableView::item{ border: none;"
                                  "padding: 0px; border-width: 0px; margin: 0px;}");
   static_field_->setShowGrid(false);

@@ -179,6 +179,25 @@ QModelIndexList SequenceModel::GetModelIndexes(gfx::EntityP& entity, const mol::
   return list;
 }
 
+QModelIndexList SequenceModel::GetModelIndexes(const QString& subject, const QString& sequence_name)
+{
+  QModelIndexList list;
+  for (int i = 0; i<objects_.size(); i++){
+    ViewObject* object = objects_[i];
+    QMap<int, QList<int> > indexes = object->GetIndexesForSubject(subject,sequence_name);
+    QMapIterator< int, QList<int> > i(indexes);
+    while (i.hasNext()) {
+      i.next();
+      int row = this->GetGlobalRow(object, i.key());
+      const QList<int>& index_list = i.value();
+      for(int i=0; i<index_list.size(); i++){
+        list.append(this->index(row,index_list[i]));
+      }
+    }
+  }
+  return list;
+}
+
 void SequenceModel::SelectionChanged(const QItemSelection& sel, const QItemSelection& desel)
 {
   QMap<int,QPair<QSet<int>,QSet<int> > > sel_map;
