@@ -174,7 +174,7 @@ void AlignmentHandle::Replace(const AlignedRegion& aln_r, int start, int end){
                          "to share the same number of sequences");
   }
   int aln_rStart=aln_r.GetStart();
-  int aln_rEnd=aln_r.GetEnd();
+  int aln_rEnd=aln_r.GetEnd()-1;
   AlignmentHandle aln=aln_r.GetAlignmentHandle();
   //iterate over sequences and replace part of sequences with the substrings
   //from aligned region
