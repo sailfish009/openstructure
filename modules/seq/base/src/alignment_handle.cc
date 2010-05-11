@@ -170,16 +170,17 @@ void AlignmentHandle::Replace(const AlignedRegion& aln_r, int start, int end){
   this->CheckValidity();
   //check that alignment handle and aligned region contain same number of sequences
   if (impl_->GetCount() != aln_r.GetAlignmentHandle().GetCount()) {
-    throw IntegrityError("alignment handle and aligned region are required "\
-                         "to share the same number of sequences");
+    throw IntegrityError("alignment handle and aligned region are required "
+                         "to have the same number of sequences");
   }
-  int aln_rStart=aln_r.GetStart();
-  int aln_rEnd=aln_r.GetEnd()-1;
+  int aln_r_start=aln_r.GetStart();
+  int aln_r_length=aln_r.GetLength();
   AlignmentHandle aln=aln_r.GetAlignmentHandle();
   //iterate over sequences and replace part of sequences with the substrings
   //from aligned region
   for (int i=0;i<impl_->GetCount() ;++i) {
-    this->GetSequence(i).Impl()->Replace(aln.GetSequence(i).GetString().substr(aln_rStart,aln_rEnd), start, end);
+    String s=aln.GetSequence(i).GetString().substr(aln_r_start, aln_r_length);
+    this->GetSequence(i).Impl()->Replace(s, start, end);
   }
 }
 
