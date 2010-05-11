@@ -23,10 +23,13 @@
 #include <boost/pointer_cast.hpp>
 
 #include <QAbstractItemView>
+#include <QApplication>
+#include <QClipboard>
 #include <QHeaderView>
 #include <QPushButton>
 #include <QShortcut>
 #include <QVBoxLayout>
+#include <QVarLengthArray>
 
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/entity_view.hh>
@@ -96,6 +99,7 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
   connect(seq_table_view_,SIGNAL(doubleClicked(const QModelIndex&)),model_,SLOT(DoubleClicked(const QModelIndex&)));
   connect(seq_table_view_->GetStaticColumn(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
   connect(seq_table_view_->GetStaticRow(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
+  connect(seq_table_view_,SIGNAL(CopyEvent(QKeyEvent*)),this,SLOT(CopyEvent(QKeyEvent*)));
   connect(seq_table_view_,SIGNAL(MouseWheelEvent(QWheelEvent*)),this,SLOT(MouseWheelEvent(QWheelEvent*)));
 
   gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
@@ -128,8 +132,8 @@ void SequenceViewerV2::UpdateSearchBar()
 {
   QStringList sequence_names_;
   for(int i = 1; i< model_->rowCount(); i++){
-        QString name = model_->data(model_->index(i,0),Qt::DisplayRole).toString();
-        sequence_names_.append(name);
+    QString name = model_->data(model_->index(i,0),Qt::DisplayRole).toString();
+    sequence_names_.append(name);
   }
   seq_search_bar_->UpdateItems(sequence_names_);
 }
@@ -176,6 +180,27 @@ void SequenceViewerV2::MouseWheelEvent(QWheelEvent* event)
       seq_table_view_->resizeColumnsToContents();
       seq_table_view_->resizeRowsToContents();
     }
+  }
+  event->accept();
+}
+
+void SequenceViewerV2::CopyEvent(QKeyEvent* event)
+{
+  const QModelIndexList& list = seq_table_view_->selectionModel()->selectedIndexes();
+  if(list.size()>0){
+    QString clipboard_string;
+
+    QVarLengthArray<QString> clipboard_array(model_->rowCount());
+    for(int i = 0; i < list.size(); i++){
+      const QModelIndex& index = list[i];
+      clipboard_array[index.row()].append(model_->data(index,Qt::DisplayRole).toString());
+    }
+    for(int i = 0; i < clipboard_array.size(); i++){
+      if(clipboard_array[i].size()>0){
+        clipboard_string.append(clipboard_array[i]+"\n");
+      }
+    }
+    QApplication::clipboard()->setText(clipboard_string);
   }
   event->accept();
 }

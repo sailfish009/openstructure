@@ -349,6 +349,16 @@ void SequenceTableView::wheelEvent(QWheelEvent* event)
   }
 }
 
+void SequenceTableView::keyPressEvent(QKeyEvent* event)
+{
+  if(event->matches(QKeySequence::Copy)){
+    emit CopyEvent(event);
+  }
+  else{
+    QTableView::keyPressEvent(event);
+  }
+}
+
 SequenceTableView::~SequenceTableView(){}
 
 }}

@@ -56,10 +56,6 @@ public slots:
 /// \internal
 void OnSearchBarUpdate(const QString&, bool, const QString&);
 
-private slots:
-/// \brief show sequence search bar
-void FindInSequence();
-
 private:
   void UpdateSearchBar();
   void SelectList(const QModelIndexList& list);
@@ -68,10 +64,12 @@ private:
   SequenceTableView* seq_table_view_;
 
 private slots:
+  /// \brief show sequence search bar
+  void FindInSequence();
   void SelectionModelChanged(const QItemSelection&, const QItemSelection&);
   void DoubleClicked(const QModelIndex& index);
   void MouseWheelEvent(QWheelEvent* event);
-
+  void CopyEvent(QKeyEvent* event);
 };
 
 }}

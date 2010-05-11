@@ -44,6 +44,7 @@ public:
 
 signals:
   void MouseWheelEvent(QWheelEvent* event);
+  void CopyEvent(QKeyEvent* event);
 
 public slots:
   void columnCountChanged(const QModelIndex& index, int old_count, int new_count);
@@ -55,7 +56,8 @@ protected:
   virtual void mouseDoubleClickEvent(QMouseEvent* event);
   virtual void mouseReleaseEvent(QMouseEvent* event);
   virtual void resizeEvent(QResizeEvent* event);
-  virtual void wheelEvent (QWheelEvent* event);
+  virtual void wheelEvent(QWheelEvent* event);
+  virtual void keyPressEvent(QKeyEvent* event);
   virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
   void scrollTo (const QModelIndex & index, ScrollHint hint = EnsureVisible);
 
