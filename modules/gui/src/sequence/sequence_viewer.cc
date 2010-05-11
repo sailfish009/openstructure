@@ -186,18 +186,35 @@ void SequenceViewerV2::MouseWheelEvent(QWheelEvent* event)
 
 void SequenceViewerV2::CopyEvent(QKeyEvent* event)
 {
-  const QModelIndexList& list = seq_table_view_->selectionModel()->selectedIndexes();
+  QItemSelectionModel* model = seq_table_view_->selectionModel();
+  const QModelIndexList& list = model->selectedIndexes();
   if(list.size()>0){
     QString clipboard_string;
-
-    QVarLengthArray<QString> clipboard_array(model_->rowCount());
+    QSet<int> rows;
+    int min_col=0;
+    int max_col=0;
     for(int i = 0; i < list.size(); i++){
-      const QModelIndex& index = list[i];
-      clipboard_array[index.row()].append(model_->data(index,Qt::DisplayRole).toString());
+      if(list[i].column()>max_col){
+        max_col = list[i].column();
+      }
+      if(list[i].column()<min_col){
+        min_col = list[i].column();
+      }
+      rows.insert(list[i].row());
     }
-    for(int i = 0; i < clipboard_array.size(); i++){
-      if(clipboard_array[i].size()>0){
-        clipboard_string.append(clipboard_array[i]+"\n");
+
+    for(int i = 0; i < model_->rowCount(); i++){
+      if(rows.contains(i)){
+        for(int j=min_col; j<=max_col; j++){
+          const QModelIndex& index = model_->index(i,j);
+          if(model->isSelected(index)){
+            clipboard_string.append(model_->data(index,Qt::DisplayRole).toString());
+          }
+          else{
+            clipboard_string.append('-');
+          }
+        }
+        clipboard_string.append("\n");
       }
     }
     QApplication::clipboard()->setText(clipboard_string);
