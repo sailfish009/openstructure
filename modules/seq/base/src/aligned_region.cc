@@ -115,6 +115,9 @@ int AlignedRegion::GetMaster() const
 
 void AlignedRegion::SetMaster(int master)
 {
+  if(master < -1 || master >= aln_.GetCount()){
+    throw IntegrityError("Master out of bounds");
+  }
   master_=master;
 }
 
