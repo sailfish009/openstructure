@@ -104,10 +104,10 @@ BOOST_AUTO_TEST_CASE(properties_sdf)
   {
     BOOST_REQUIRE(i->HasProp("prop_one"));
     BOOST_REQUIRE(i->HasProp("prop_two"));
-    BOOST_CHECK_EQUAL(i->GetStringProp("prop_one"),
-                      boost::lexical_cast<std::string>(count));
-    BOOST_CHECK_EQUAL(i->GetStringProp("prop_two"),
-                      boost::lexical_cast<std::string>(count*(-2)));
+    BOOST_CHECK_CLOSE(boost::lexical_cast<Real>(i->GetStringProp("prop_one")),
+                      Real(count),Real(1e-4));
+    BOOST_CHECK_CLOSE(boost::lexical_cast<Real>(i->GetStringProp("prop_two")),
+                      Real(count*(-2.2)),Real(1e-4));
   }
 }
 
