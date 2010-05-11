@@ -104,16 +104,16 @@ BOOST_AUTO_TEST_CASE(aligned_region_replace)
   SequenceHandle seq12 = CreateSequence("S2","ghijk-l");
   a1.AddSequence(seq11);
   a1.AddSequence(seq12);
-  AlignedRegion ar1 = a1.MakeRegion(1,2);
+  AlignedRegion ar1 = a1.MakeRegion(2,2);
   AlignmentHandle a2 = CreateAlignment();
   SequenceHandle seq21 = CreateSequence("S1","zzzzzzz");
   SequenceHandle seq22 = CreateSequence("S2","ee-----");
   a2.AddSequence(seq21);
   a2.AddSequence(seq22);
-  AlignedRegion ar2 = a2.MakeRegion(1,2);
+  AlignedRegion ar2 = a2.MakeRegion(2,2);
   ar1.Replace(ar2);
-  BOOST_CHECK_EQUAL(a1.GetSequence(0).GetString(),"azzcdef");
-  BOOST_CHECK_EQUAL(a1.GetSequence(1).GetString(),"ge-jk-l");
+  BOOST_CHECK_EQUAL(a1.GetSequence(0).GetString(),"abzzdef");
+  BOOST_CHECK_EQUAL(a1.GetSequence(1).GetString(),"gh--k-l");
 
   a1 = CreateAlignment();
   seq11 = CreateSequence("S1","ab-cdef");
