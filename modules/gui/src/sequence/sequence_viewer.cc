@@ -191,7 +191,7 @@ void SequenceViewerV2::CopyEvent(QKeyEvent* event)
   if(list.size()>0){
     QString clipboard_string;
     QSet<int> rows;
-    int min_col=0;
+    int min_col=model_->columnCount();
     int max_col=0;
     for(int i = 0; i < list.size(); i++){
       if(list[i].column()>max_col){
