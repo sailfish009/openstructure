@@ -203,8 +203,12 @@ void SequenceViewerV2::CopyEvent(QKeyEvent* event)
       rows.insert(list[i].row());
     }
 
+    bool first_row = true;
     for(int i = 0; i < model_->rowCount(); i++){
       if(rows.contains(i)){
+        if(!first_row){
+          clipboard_string.append("\n");
+        }
         for(int j=min_col; j<=max_col; j++){
           const QModelIndex& index = model_->index(i,j);
           if(model->isSelected(index)){
@@ -214,7 +218,7 @@ void SequenceViewerV2::CopyEvent(QKeyEvent* event)
             clipboard_string.append('-');
           }
         }
-        clipboard_string.append("\n");
+        first_row = false;
       }
     }
     QApplication::clipboard()->setText(clipboard_string);
