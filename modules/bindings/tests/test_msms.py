@@ -32,4 +32,7 @@ if __name__ == "__main__":
   except(settings.FileNotFound):
     print "Could not find msms executable: ignoring unit tests"
     exit(0)
-  unittest.main()
+  try:
+    unittest.main()
+  except Exception, e:
+    print e

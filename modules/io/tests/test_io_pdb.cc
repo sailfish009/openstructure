@@ -163,15 +163,15 @@ BOOST_AUTO_TEST_CASE(anisou_record)
   mol::AtomHandle a1=ent.FindAtom("A", mol::ResNum(7), "N");
   BOOST_REQUIRE(a1.IsValid());
   mol::AtomProp props=a1.GetAtomProps();
-  BOOST_CHECK_CLOSE( 0.0100, props.anisou(0, 0), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0016, props.anisou(1, 0), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0026, props.anisou(2, 0), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0016, props.anisou(0, 1), 1e-4);
-  BOOST_CHECK_CLOSE( 0.0110, props.anisou(1, 1), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0054, props.anisou(2, 1), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0026, props.anisou(0, 2), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0054, props.anisou(1, 2), 1e-4);
-  BOOST_CHECK_CLOSE( 0.0120, props.anisou(2, 2), 1e-4);    
+  BOOST_CHECK_CLOSE(Real( 0.0100), props.anisou(0, 0), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0016), props.anisou(1, 0), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0026), props.anisou(2, 0), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0016), props.anisou(0, 1), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real( 0.0110), props.anisou(1, 1), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0054), props.anisou(2, 1), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0026), props.anisou(0, 2), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0054), props.anisou(1, 2), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real( 0.0120), props.anisou(2, 2), Real(1e-4));    
 }
 
 BOOST_AUTO_TEST_CASE(only_66_cols)
