@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE(alignment_aligned_region)
   SequenceHandle seq2 = CreateSequence("S2","ghijkl");
   a.AddSequence(seq1);
   a.AddSequence(seq2);
-  AlignedRegion ar = a.MakeRegion(1,2,0);
+  AlignedRegion ar = a.MakeRegion(1,2);
   BOOST_CHECK_EQUAL(ar.GetLength(),2);
   BOOST_CHECK_EQUAL(ar.GetStart(),1);
   BOOST_CHECK_EQUAL(ar.GetEnd(),3);
