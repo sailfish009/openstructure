@@ -172,7 +172,6 @@ void PythonShellWidget::setup_state_machine_()
                                                  true,
                                                  new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
   single_line->addTransition(tr1);
-  connect(tr1,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
   KeyEventTransition* tr3=new KeyEventTransition(QEvent::KeyPress,
                                                  Qt::Key_Return,
                                                  Qt::NoModifier,
@@ -191,7 +190,6 @@ void PythonShellWidget::setup_state_machine_()
                                                  true,
                                                  new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
   multi_line_inactive->addTransition(tr4);
-  connect(tr4,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
   KeyEventTransition* tr6=new KeyEventTransition(QEvent::KeyPress,
                                                  Qt::Key_Return,
                                                  Qt::NoModifier,
@@ -213,7 +211,6 @@ void PythonShellWidget::setup_state_machine_()
                                                  true,
                                                  new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
   multiline_active_state_->addTransition(tr7);
-  connect(tr7,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
   KeyEventTransition* tr8=new KeyEventTransition(QEvent::KeyPress,
                                                  Qt::Key_Return,
                                                  Qt::NoModifier,
@@ -257,6 +254,17 @@ void PythonShellWidget::OnEnterTransition()
   QTextCursor cursor=textCursor();
   cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
   setTextCursor(cursor);
+  cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+  bool new_indent=cursor.selectedText()==":";
+  cursor.movePosition(QTextCursor::StartOfLine);
+  cursor.movePosition(QTextCursor::NextWord, QTextCursor::KeepAnchor);
+  insertPlainText(QString(QChar::ParagraphSeparator));
+  if(cursor.selectedText()[0].isSpace() && ! cursor.atBlockEnd()){
+    insertPlainText(QString(cursor.selectedText()));
+  }
+  if (new_indent){
+    insertPlainText(QString("\t"));
+  }
 }
 void PythonShellWidget::OnSingleLineStateEntered()
 {
@@ -264,7 +272,6 @@ void PythonShellWidget::OnSingleLineStateEntered()
 }
 void PythonShellWidget::OnMultiLineActiveStateEntered()
 {
-    insertPlainText(QString(QChar::ParagraphSeparator));
     set_block_edit_mode_(EDITMODE_MULTILINE_ACTIVE);
 }
 void PythonShellWidget::OnMultiLineInactiveStateEntered()
@@ -285,6 +292,9 @@ void PythonShellWidget::OnHistoryDownStateEntered()
 }
 void PythonShellWidget::OnExecuteStateEntered()
 {
+  QTextCursor cursor=textCursor();
+  cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+  setTextCursor(cursor);
   set_block_type_(block_edit_start_,textCursor().block(),BLOCKTYPE_CODE);
   insertPlainText(QString(QChar::ParagraphSeparator));
   QString command=GetCommand();
