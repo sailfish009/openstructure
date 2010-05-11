@@ -67,8 +67,8 @@ def ViewsFromSequences(seq_a, seq_b, ent_a=None, ent_b=None,
   #~ print seq_ent_a
   #~ print s1
 
-  #~ print seq_ent_a
-  #~ print s1
+  #~ print seq_ent_b
+  #~ print s2
   off_a = seq_ent_a.index(s1)
   off_b = seq_ent_b.index(s2)
 
@@ -84,32 +84,34 @@ def ViewsFromSequences(seq_a, seq_b, ent_a=None, ent_b=None,
   # iterate over residues
   while index_a<seq_a.GetLength() and index_b<seq_b.GetLength():
       # print 'index',index_a, seq_a.GetLength(), index_b, seq_b.GetLength()
-   while seq_a.GetOneLetterCode(index_a)=='-':
+    while seq_a.GetOneLetterCode(index_a)=='-':
      index_a+=1
      if seq_a.GetLength()<index_a:
        done=True
        break
-   while seq_b.GetOneLetterCode(index_b)=='-':
+    while seq_b.GetOneLetterCode(index_b)=='-':
      index_b+=1
      if seq_b.GetLength()<index_b:
        done=True
        break
-   if done or len(res_a)<=off_a+index_b or len(res_b)<=off_b+index_a:
+    if done or len(res_a)<=off_a+index_b or len(res_b)<=off_b+index_a:
      break
-   ra=res_a[off_a+index_b]
-   rb=res_b[off_b+index_a]
-   #ra = res_a[index_b]
-   #rb = res_a[index_a]
-   #~ print "set align_index %d for %s %s" % (align_index, ra, rb)
-   #ra.SetIntProp("align_index",align_index)
-   #rb.SetIntProp("align_index",align_index)
-   align_index += 1
-   ev_a.AddResidue(is_ha and ra or ra.handle, flags)
-   ev_b.AddResidue(is_hb and rb or rb.handle, flags)
-   index_a+=1
-   index_b+=1
-   eda=ev_a.handle.RequestXCSEditor()
-   eda.RenameChain(ent_a.chains[0].handle,ent_a.chains[0].name)
-   edb=ev_b.handle.RequestXCSEditor()
-   edb.RenameChain(ent_b.chains[0].handle, ent_b.chains[0].name)
+    ra=res_a[off_a+index_b]
+    rb=res_b[off_b+index_a]
+    #ra = res_a[index_b]
+    #rb = res_a[index_a]
+    #~ print "set align_index %d for %s %s" % (align_index, ra, rb)
+    #ra.SetIntProp("align_index",align_index)
+    #rb.SetIntProp("align_index",align_index)
+    align_index += 1
+    ev_a.AddResidue(is_ha and ra or ra.handle, flags)
+    ev_b.AddResidue(is_hb and rb or rb.handle, flags)
+    index_a+=1
+    index_b+=1
+  if (ent_a.chains[0].name!=ev_a.chains[0].name):
+    eda=ev_a.handle.RequestXCSEditor()
+    eda.RenameChain(ent_a.chains[0].handle,ent_a.chains[0].name)
+  if  (ent_b.chains[0].name!=ev_b.chains[0].name): 
+    edb=ev_b.handle.RequestXCSEditor()
+    edb.RenameChain(ent_b.chains[0].handle, ent_b.chains[0].name)
   return ev_a, ev_b
