@@ -38,16 +38,19 @@ int AlignedColumn::GetIndex() const
 
 char AlignedColumn::operator[](int row) const
 {
+  this->CheckRowValidity(row);
   return aln_.GetOneLetterCode(row, index_);
 }
 
 int AlignedColumn::GetResidueIndex(int row) const
 {
+  this->CheckRowValidity(row);
   return aln_.GetResidueIndex(row, index_);
 }
 
 mol::ResidueView AlignedColumn::GetResidue(int row) const
 {
+  this->CheckRowValidity(row);
   return aln_.GetResidue(row, index_);
 }
 
@@ -63,5 +66,13 @@ int AlignedColumn::GetRowCount() const
 {
   return aln_.GetCount();
 }
+
+void AlignedColumn::CheckRowValidity(int row) const
+{
+  if(row<0 || row>=this->GetRowCount()){
+    throw std::out_of_range("Row out of bounds");
+  }
+}
+
 
 }}

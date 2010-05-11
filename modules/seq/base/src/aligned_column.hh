@@ -55,6 +55,8 @@ public:
   /// \sa AlignmentHandle::GetResidue()
   mol::ResidueView GetResidue(int row) const;
 private:
+  void CheckRowValidity(int row) const;
+
   AlignmentHandle aln_;
   int             index_;
 };

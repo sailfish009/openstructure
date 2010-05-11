@@ -94,7 +94,11 @@ AlignedColumnIterator AlignedRegion::end()
 
 AlignedColumn AlignedRegion::operator[](int index) const
 {
-  return AlignedColumn(aln_, start_+index);
+  int col_index = start_+index;
+  if(col_index<start_ || col_index>=end_){
+    throw std::out_of_range("Index out of region");
+  }
+  return AlignedColumn(aln_, col_index);
 }
 
 bool AlignedRegion::operator==(const AlignedRegion& rhs) const
