@@ -136,7 +136,7 @@ public:
   
   LineSlice& operator=(const fmt::RPadded& str)
   {
-    assert(str.size()==len_);
+    assert(str.size()<=len_);
     memcpy(data_, str.data(), str.size());
     return *this;
   }
@@ -179,7 +179,7 @@ public:
   
   LineSlice operator()(int start, int len) 
   { 
-    assert(start>=0 && start+len<len_);
+    assert(start>=0 && start+len<=static_cast<int>(len_));
     return LineSlice(data_+start, len);
   }
   
