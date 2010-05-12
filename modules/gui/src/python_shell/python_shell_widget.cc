@@ -180,8 +180,8 @@ void PythonShellWidget::setup_state_machine_()
                                                  new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
   single_line->addTransition(tr3);
   connect(tr3,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::NoModifier,history_up));
-  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::NoModifier,history_down));
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::KeypadModifier,history_up));
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::KeypadModifier,history_down));
 
   KeyEventTransition* tr4=new KeyEventTransition(QEvent::KeyPress,
                                                  Qt::Key_Return,
@@ -198,11 +198,11 @@ void PythonShellWidget::setup_state_machine_()
                                                  new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
   multi_line_inactive->addTransition(tr6);
   connect(tr6,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Left,Qt::NoModifier,multiline_active_state_));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Right,Qt::NoModifier,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Left,Qt::KeypadModifier,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Right,Qt::KeypadModifier,multiline_active_state_));
   multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::ControlModifier,multiline_active_state_));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::NoModifier,history_up));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::NoModifier,history_down));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::KeypadModifier,history_up));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::KeypadModifier,history_down));
 
   KeyEventTransition* tr7=new KeyEventTransition(QEvent::KeyPress,
                                                  Qt::Key_Return,
@@ -221,8 +221,8 @@ void PythonShellWidget::setup_state_machine_()
   connect(tr8,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
 
   multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier,multi_line_inactive));
-  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::ControlModifier,history_up));
-  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier,history_down));
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::ControlModifier | Qt::KeypadModifier,history_up));
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier | Qt::KeypadModifier,history_down));
 
   history_up->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
   history_up->addTransition(new AutomaticTransition(single_line,new HistoryGuard(&history_,EDITMODE_SINGLELINE)));
@@ -280,13 +280,16 @@ void PythonShellWidget::OnMultiLineInactiveStateEntered()
 }
 void PythonShellWidget::OnHistoryUpStateEntered()
 {
-  --history_;
+  if(history_.AtEnd()){
+    history_.SetCurrentCommand(GetCommand(),get_block_edit_mode_());
+  }
+  history_.MoveToPreviousMatch();
   set_command_(history_.GetCommand());
   set_block_edit_mode_(history_.GetCommandMode());
 }
 void PythonShellWidget::OnHistoryDownStateEntered()
 {
-  ++history_;
+  history_.MoveToNextMatch();
   set_command_(history_.GetCommand());
   set_block_edit_mode_(history_.GetCommandMode());
 }
