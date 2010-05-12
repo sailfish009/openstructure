@@ -27,7 +27,7 @@ namespace ost {
 
 class DLLEXPORT IntegrityError : public Error {
 public:
-  IntegrityError::IntegrityError(const String& msg):
+  IntegrityError(const String& msg):
     Error(msg)
   { } 
 };

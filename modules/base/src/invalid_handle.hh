@@ -29,7 +29,7 @@ namespace ost {
 /// \brief Signals access of member functions of invalid handles
 class DLLEXPORT InvalidHandle : public Error {
 public:
-  InvalidHandle::InvalidHandle()
+  InvalidHandle()
     : Error("Can not access invalid handle or view") 
   {}
 }; 
