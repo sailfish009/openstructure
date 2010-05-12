@@ -19,16 +19,20 @@
 from _seq import *
 from ost import mol
 
+## \brief Create two views from sequence alignment such that the matching 
+#      residues occur at the same index within the chain.
+#
+# The first sequence in the sequence alignment belongs to ent_a, the second to
+# ent_b.
+#
+# Requires that each of the entities/views only contains one chain and that
+# the sequence offset of the sequences in the alignment is set appropriately.
 def ViewsFromAlignment(multi_seq_ali, ent_a, ent_b, include_atoms=True):
   seq_a=multi_seq_ali.GetSequence(0)
   seq_b=multi_seq_ali.GetSequence(1)
-
-  # set offset according to ent_a and ent_b
-
-
   return ViewsFromSequences(seq_a, seq_b, ent_a, ent_b, include_atoms)
 
-def ViewsFromSequences(seq_a, seq_b, ent_a=None, ent_b=None,
+def ViewsFromSequences(seq_a, seq_b, ent_a=None, ent_b=None, 
                        include_atoms=True):
   ent_a=ent_a or seq_a.attached_view
   ent_b=ent_b or seq_b.attached_view
@@ -37,81 +41,42 @@ def ViewsFromSequences(seq_a, seq_b, ent_a=None, ent_b=None,
   if ent_b.chain_count>1:
    raise RuntimeError("second entity contains more than one chain")
   is_ha=isinstance(ent_a, mol.EntityHandle)
-  is_hb=isinstance(ent_b, mol.EntityHandle)
+  is_hb=isinstance(ent_b, mol.EntityHandle)  
 
   ev_a= is_ha and ent_a.CreateEmptyView() or ent_a.handle.CreateEmptyView()
   ev_b= is_hb and ent_b.CreateEmptyView() or ent_b.handle.CreateEmptyView()
 
   flags=include_atoms and mol.ViewAddFlag.INCLUDE_ATOMS or 0
-  # get all residues
   res_a=ent_a.residues
   res_b=ent_b.residues
-
-  # map sequence onto
-  s1 = seq_a.gapless_string
-  s2 = seq_b.gapless_string
-
-  # get sequence of ent1
-  seq_ent_a = ""
-  seq_ent_b= ""
-
-  sub_a = ent_a.Select("peptide = 1")
-  sub_b = ent_b.Select("peptide = 1")
-  for res1 in sub_a.residues:
-      seq_ent_a = "%s%s" % (seq_ent_a, res1.one_letter_code)
-
-  seq_ent_b = ""
-  for res2 in sub_b.residues:
-      seq_ent_b = "%s%s" % (seq_ent_b, res2.one_letter_code)
-
-  #~ print seq_ent_a
-  #~ print s1
-
-  #~ print seq_ent_b
-  #~ print s2
-  off_a = seq_ent_a.index(s1)
-  off_b = seq_ent_b.index(s2)
-
-  #off_a=seq_a.GetSequenceOffset()
-  #off_b=seq_b.GetSequenceOffset()
-
+  off_a=seq_a.GetSequenceOffset()
+  off_b=seq_b.GetSequenceOffset()
 
   index_a, index_b=(0, 0)
   done=False
-
-  align_index = 0
-
-  # iterate over residues
+  #~ for i,j in zip(ent_a.residues,ent_b.residues): print i,i.index,j,j.index
+  #~ print  
   while index_a<seq_a.GetLength() and index_b<seq_b.GetLength():
-      # print 'index',index_a, seq_a.GetLength(), index_b, seq_b.GetLength()
-    while seq_a.GetOneLetterCode(index_a)=='-':
-     index_a+=1
-     if seq_a.GetLength()<index_a:
-       done=True
-       break
-    while seq_b.GetOneLetterCode(index_b)=='-':
-     index_b+=1
-     if seq_b.GetLength()<index_b:
-       done=True
-       break
-    if done or len(res_a)<=off_a+index_b or len(res_b)<=off_b+index_a:
-     break
+    while seq_a.GetOneLetterCode(index_a+off_b)=='-':
+      index_a+=1
+      print 'gap a'
+      if seq_a.GetLength()<=index_a+off_b:
+        done=True        
+        break
+    while seq_b.GetOneLetterCode(index_b+off_a)=='-':
+      index_b+=1
+      print 'gap b'
+      if seq_b.GetLength()<=index_b+off_a:
+        done=True
+        break
+    if done or len(res_a)<=index_b+off_a or len(res_b)<=index_a+off_b:
+      break
     ra=res_a[off_a+index_b]
     rb=res_b[off_b+index_a]
-    #ra = res_a[index_b]
-    #rb = res_a[index_a]
-    #~ print "set align_index %d for %s %s" % (align_index, ra, rb)
-    #ra.SetIntProp("align_index",align_index)
-    #rb.SetIntProp("align_index",align_index)
-    align_index += 1
+    print 'index_a',index_a, seq_a.GetLength(),seq_a.GetOneLetterCode(index_a+off_a),ra
+    print 'index_b',index_b, seq_b.GetLength(),seq_b.GetOneLetterCode(index_b+off_b),rb
     ev_a.AddResidue(is_ha and ra or ra.handle, flags)
     ev_b.AddResidue(is_hb and rb or rb.handle, flags)
     index_a+=1
     index_b+=1
-  if (ent_a.chains[0].name!=ev_a.chains[0].name):
-    eda=ev_a.handle.RequestXCSEditor()
-    eda.RenameChain(ent_a.chains[0].handle,ent_a.chains[0].name)
-  if  (ent_b.chains[0].name!=ev_b.chains[0].name): 
-    edb=ev_b.handle.RequestXCSEditor()
-    edb.RenameChain(ent_b.chains[0].handle, ent_b.chains[0].name)
   return ev_a, ev_b
