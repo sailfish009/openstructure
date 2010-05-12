@@ -21,7 +21,13 @@
 #define OST_COMPARE_FILES_HH
 
 #include <ost/base.hh>
+#include <ost/module_config.hh>
 
-bool compare_files(const String& test, const String& gold_standard);
+namespace ost {
+
+bool DLLEXPORT_OST_BASE compare_files(const String& test, 
+                                      const String& gold_standard);  
+}
+
 
 #endif

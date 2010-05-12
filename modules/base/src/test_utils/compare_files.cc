@@ -21,6 +21,7 @@
 #include <fstream>
 #include "compare_files.hh"
 
+namespace ost {
 bool compare_files(const String& test, const String& gold_standard)
 {
   std::ifstream test_stream(test.c_str());
@@ -49,4 +50,6 @@ bool compare_files(const String& test, const String& gold_standard)
     }
   }
   return true;
+}
+
 }

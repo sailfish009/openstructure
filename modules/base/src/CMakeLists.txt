@@ -1,7 +1,5 @@
 set(OST_BASE_SOURCES 
 generic_property.cc
-invalid_handle.cc
-integrity_error.cc
 log.cc
 profile.cc
 units.cc
