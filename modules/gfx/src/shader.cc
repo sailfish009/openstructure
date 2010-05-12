@@ -76,7 +76,7 @@ bool compile_shader(String shader_name, String shader_code, GLenum shader_type, 
   GLint sh_compiled;
   glGetShaderiv(shader_id, GL_COMPILE_STATUS, &sh_compiled);
   if(sh_compiled==GL_TRUE) {
-    LOGN_VERBOSE("shader [" << shader_name << "] successfully compiled (" << shader_id << ")");
+    LOGN_DEBUG("shader [" << shader_name << "] successfully compiled (" << shader_id << ")");
   } else {
     GLint sh_log_length;
     glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &sh_log_length);
@@ -93,7 +93,7 @@ bool link_shader(const std::vector<GLuint>& code_list, String pr_name, GLuint& s
   shader_pr = glCreateProgram();
   for(std::vector<GLuint>::const_iterator it=code_list.begin();it!=code_list.end();++it) {
     if(*it == 0) {
-      LOGN_VERBOSE("skipping shader [" << pr_name << "] due to missing compiled code");
+      LOGN_DEBUG("skipping shader [" << pr_name << "] due to missing compiled code");
       return false;
     }
     LOGN_DEBUG("attaching compiled shader id " << *it << " to " << shader_pr);
@@ -104,7 +104,7 @@ bool link_shader(const std::vector<GLuint>& code_list, String pr_name, GLuint& s
   GLint pr_linked;
   glGetProgramiv(shader_pr,GL_LINK_STATUS,&pr_linked);
   if(pr_linked==GL_TRUE) {
-    LOGN_VERBOSE("shader [" << pr_name << "] sucessfully linked");
+    LOGN_DEBUG("shader [" << pr_name << "] sucessfully linked");
   } else {
     GLint pr_log_length;
     glGetProgramiv(shader_pr, GL_INFO_LOG_LENGTH, &pr_log_length);

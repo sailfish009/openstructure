@@ -273,7 +273,7 @@ void GfxObj::SetPolyMode(unsigned int m)
   FlagRefresh();
 }
 
-void GfxObj::AALines(bool f)
+void GfxObj::SetAALines(bool f)
 {
   if(f==aalines_flag_) return;
   va_.SetAALines(f);
@@ -288,7 +288,7 @@ void GfxObj::SetLineHalo(float f)
   FlagRefresh();
 }
 
-void GfxObj::Outline(bool f)
+void GfxObj::SetOutline(bool f)
 {
   outline_flag_=f;
   FlagRefresh();

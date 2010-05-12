@@ -76,13 +76,6 @@ void GLCanvas::StatusMessage(const String& m)
   glwin_->StatusMessage(m);
 }
 
-void GLCanvas::SetStereo(bool s)
-{
-  QGLFormat f=this->format();
-  f.setStereo(s);
-  this->setFormat(f);
-}
-
 void GLCanvas::OnTransform(gfx::InputCommand com, int indx, 
                            gfx::TransformTarget trg, Real val)
 {
@@ -365,8 +358,12 @@ void GLCanvas::keyPressEvent(QKeyEvent* event)
       gfx::Scene::Instance().SetShadingMode("toon2");
       DoRefresh();
       return;
-    } else if(event->key()==Qt::Key_P) {
+    } else if(event->key()==Qt::Key_0) {
       gfx::Scene::Instance().SetShadow(!gfx::Scene::Instance().GetShadow());
+      DoRefresh();
+      return;
+    } else if(event->key()==Qt::Key_9) {
+      gfx::Scene::Instance().SetAmbientOcclusion(!gfx::Scene::Instance().GetAmbientOcclusion());
       DoRefresh();
       return;
     }    

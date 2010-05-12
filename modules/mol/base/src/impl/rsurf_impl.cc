@@ -313,9 +313,11 @@ void RSurf::Build()
   ntet->W = ArcP(new Arc(ntet->C, ntet->A, ntet->S));
   ntet->W->A = ntet;
   // note: creation of all three prior to traversal is necessary!
-  traverse_arc(ntet,ntet->U,ntet->C);
-  traverse_arc(ntet,ntet->V,ntet->A);
-  traverse_arc(ntet,ntet->W,ntet->B);
+  
+  ntet->depth=0;
+  traverse_arc(ntet,ntet->U,ntet->C,1);
+  //traverse_arc(ntet,ntet->V,ntet->A,1);
+  //traverse_arc(ntet,ntet->W,ntet->B,1);
 
   LOGN_DUMP("build " << tet_list_.size() << " tets and " << arc_list_.size() << " arcs");
 
@@ -325,8 +327,10 @@ void RSurf::Build()
   }
 }
 
-void RSurf::traverse_arc(TetP tet, ArcP& arc, SphereP c)
+void RSurf::traverse_arc(TetP tet, ArcP& arc, SphereP c, uint depth)
 {
+  if(depth>4) return;
+
   if(tet->S!=arc->S) {
     LOGN_VERBOSE("unexpected error during arc traversal: tet->S != arc->S; aborting arc traversal (" <<arc->H->name << "," << arc->K->name << ")");
     return;
@@ -364,6 +368,7 @@ void RSurf::traverse_arc(TetP tet, ArcP& arc, SphereP c)
 
 
   // given the new tet, handle current arc
+  ntet->depth=depth;
   ntet->U = arc;
   arc->SetT(ntet->S);
   arc->B=ntet;
@@ -375,15 +380,15 @@ void RSurf::traverse_arc(TetP tet, ArcP& arc, SphereP c)
     ntet->V->A = ntet;
     ntet->W = ArcP(new Arc(ntet->B, ntet->A, ntet->S));
     ntet->W->A = ntet;
-    traverse_arc(ntet,ntet->V,ntet->A);
-    traverse_arc(ntet,ntet->W,ntet->C);
+    traverse_arc(ntet,ntet->V,ntet->A,depth+1);
+    traverse_arc(ntet,ntet->W,ntet->C,depth+1);
   } else {
     ntet->V = ArcP(new Arc(ntet->B, ntet->C, ntet->S));
     ntet->V->A = ntet;
     ntet->W = ArcP(new Arc(ntet->C, ntet->A, ntet->S));
     ntet->W->A = ntet;
-    traverse_arc(ntet,ntet->V,ntet->A);
-    traverse_arc(ntet,ntet->W,ntet->B);
+    traverse_arc(ntet,ntet->V,ntet->A,depth+1);
+    traverse_arc(ntet,ntet->W,ntet->B,depth+1);
   }
 
 }
@@ -391,27 +396,48 @@ void RSurf::traverse_arc(TetP tet, ArcP& arc, SphereP c)
 std::pair<TetP,bool> RSurf::get_tet(SphereP a, SphereP b, SphereP c, const Sphere& s, bool create)
 {
   // TODO: this could use a hash table instead of a list for faster lookup
-  for(TetList::const_iterator it=tet_list_.begin();it!=tet_list_.end();++it) {
+  bool parity_swap=false;
+  TetList::const_iterator it=tet_list_.begin();
+  for(;it!=tet_list_.end();++it) {
     Tet& tet=*(*it);
-    // only compare same parity
-    if(tet.parity_swap) {
-      if((tet.A==a && tet.C==b && tet.B==c) ||
-         (tet.A==c && tet.C==a && tet.B==b) ||
-         (tet.A==b && tet.C==c && tet.B==a)) {
-        return std::make_pair(*it,true);
-      }
-    } else {
-      if((tet.A==a && tet.B==b && tet.C==c) ||
-         (tet.A==c && tet.B==a && tet.C==b) ||
-         (tet.A==b && tet.B==c && tet.C==a)) {
-        return std::make_pair(*it,true);
-      }
+
+    // first find matching triplet
+    if((tet.A==a && tet.B==b && tet.C==c) ||
+       (tet.A==c && tet.B==a && tet.C==b) ||
+       (tet.A==b && tet.B==c && tet.C==a)) {
+      parity_swap=false;
+      LOGN_DUMP("found tet with order 0");
+      break;
+    } else if((tet.A==a && tet.C==b && tet.B==c) ||
+	      (tet.A==c && tet.C==a && tet.B==b) ||
+	      (tet.A==b && tet.C==c && tet.B==a)) {
+      parity_swap=true;
+      LOGN_DUMP("found tet with order 1");
+      break;
     }
   }
-  if(create) {
-    TetP tet(new Tet(a,b,c,s));
-    tet_list_.push_back(tet);
-    return std::make_pair(tet,false);
+
+  if(it==tet_list_.end()) {
+    if(create) {
+      LOGN_DUMP("no tet found, making new one");
+      TetP tet(new Tet(a,b,c,s));
+      tet_list_.push_back(tet);
+      return std::make_pair(tet,false);
+    }
+
+  } else {
+    if(parity_swap==(*it)->parity_swap) {
+      LOGN_DUMP("parities match, returning old one");
+      return std::make_pair(*it,true);
+    } else {
+      // re-use ABC assignment from tet
+      if(create) {
+	LOGN_DUMP("parities don't match, creating new one");
+	TetP tet(new Tet((*it)->A,(*it)->B,(*it)->C,s));
+	tet_list_.push_back(tet);
+	return std::make_pair(tet,false);
+      }
+    }
   }
   return std::make_pair(TetP(),false);
 }

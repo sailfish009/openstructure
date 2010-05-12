@@ -84,13 +84,12 @@ struct Sphere {
   std::vector<geom::Vec3> top_list;
   std::vector<ArcDirDeque> arc_list_list;
 };
-  
+
 typedef boost::shared_ptr<Sphere> SphereP;
 typedef std::vector<SphereP> SphereList;
 
 struct Tet;
 typedef boost::shared_ptr<Tet> TetP;
-
 
 // arc that bridges two tets
 /*
@@ -145,6 +144,8 @@ struct Tet {
 
   bool parity_swap;
 
+  uint depth; // debug
+
   void init();
 };
   
@@ -180,7 +181,7 @@ public:
 private:
 
   // main recursive routine
-  void traverse_arc(TetP tet, ArcP& arc, SphereP c);
+  void traverse_arc(TetP tet, ArcP& arc, SphereP c, uint depth);
 
   // get tet from list, optionally creating it if necessary
   // the solvent s is either used as a parity check, or as the new sphere

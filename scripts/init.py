@@ -45,9 +45,10 @@ def _InitPanels(app):
     panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.seq_viewer)
     panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.py_shell)
 
-def _InitFrontEnd():
+def _InitFrontEnd(try_stereo):
   app=gui.GostyApp.Instance()
   app.SetAppTitle("DNG")
+  app.TryStereo(try_stereo)
   main_area=app.perspective.main_area
   _InitPanels(app)
   _InitMenuBar(app)
@@ -129,6 +130,7 @@ parser.add_option("-p", "--pdb_id", dest="pdb_ids", default=[],action="append", 
 parser.add_option("-b", "--builder", dest="builder", default="HEURISTIC", help="Type of builder used by the progam (either RULE_BASED or HEURISTIC) [default: %default]")
 parser.add_option("-c", "--compound_library", dest="complib", default="compounds.chemlib", help="Compound library for the RULE_BASED builder (only used if --builder option is set to RULE_BASED, otherwise ignored [default: %default]")
 parser.add_option("-q", "--query", dest="query", default="", help="Selection query to be highlighted automatically upon loading (only used together with -p option or when a PDB file is loaded, otherwise ignored [default: None]")
+parser.add_option("-S","--stereo", dest="try_stereo", default=False, action="store_true",help="try to get a quad-buffer stereo visual")
 parser.disable_interspersed_args()
 (options, args) = parser.parse_args()
 
@@ -152,7 +154,7 @@ if options.builder=="RULE_BASED":
   conop.Conopology.Instance().SetDefaultBuilder('rbb')
 
 PushVerbosityLevel(options.vlevel)
-_InitFrontEnd()
+_InitFrontEnd(options.try_stereo)
 
 if len(loading_list)!=0 or len(options.pdb_ids)!=0:
   _load_files()

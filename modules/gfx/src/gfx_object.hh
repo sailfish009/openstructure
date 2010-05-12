@@ -72,9 +72,9 @@ public:
   virtual geom::Vec3 GetCenter() const;
   virtual void SetLineWidth(float w);
   virtual void SetPolyMode(unsigned int m);
-  virtual void AALines(bool f);
+  virtual void SetAALines(bool f);
   virtual void SetLineHalo(float f);
-  virtual void Outline(bool f);
+  virtual void SetOutline(bool f);
   virtual void SetOutlineMode(int m);
   virtual void SetOutlineWidth(float f);
   virtual void SetOutlineExpandFactor(float f);

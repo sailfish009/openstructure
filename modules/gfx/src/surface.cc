@@ -384,17 +384,26 @@ RSurface::RSurface(const String& name, const RSurfP& rs):
   SphereList slist = rs->GetSphereList();
 
 
-#if 0
+#if 1
   for(TetList::const_iterator it=tlist.begin();it!=tlist.end();++it) {
-    VertexID id1 = va_.Add((*it)->A->pos,Vec3(),Color(1,1,1));
-    VertexID id2 = va_.Add((*it)->B->pos,Vec3(),Color(1,1,1));
-    VertexID id3 = va_.Add((*it)->C->pos,Vec3(),Color(1,1,1));
-    VertexID id4 = va_.Add((*it)->cA,Vec3(),Color(0,1,0));
-    VertexID id5 = va_.Add((*it)->cB,Vec3(),Color(0,1,0));
-    VertexID id6 = va_.Add((*it)->cC,Vec3(),Color(0,1,0));
-    va_.AddLine(id1,id4);
-    va_.AddLine(id2,id5);
-    va_.AddLine(id3,id6);
+    Color col(1,1,0);
+    if((*it)->depth==0) {
+      col=Color(0.5,0,0);
+    } else if((*it)->depth==1) {
+      col=Color(1,0,0);
+    } else if((*it)->depth==2) {
+      col=Color(1,0.5,0);
+    }
+    VertexID id0 = va_.Add((*it)->S->pos,geom::Vec3(),col);
+    VertexID id1 = va_.Add((*it)->A->pos,geom::Vec3(),Color(1,1,1));
+    VertexID id2 = va_.Add((*it)->B->pos,geom::Vec3(),Color(1,1,1));
+    VertexID id3 = va_.Add((*it)->C->pos,geom::Vec3(),Color(1,1,1));
+    VertexID id4 = va_.Add((*it)->cA,geom::Vec3(),Color(0,1,0));
+    VertexID id5 = va_.Add((*it)->cB,geom::Vec3(),Color(0,1,0));
+    VertexID id6 = va_.Add((*it)->cC,geom::Vec3(),Color(0,1,0));
+    va_.AddLine(id1,id0);
+    va_.AddLine(id2,id0);
+    va_.AddLine(id3,id0);
     va_.AddLine(id4,id5);
     va_.AddLine(id5,id6);
     va_.AddLine(id6,id4);
@@ -417,96 +426,6 @@ RSurface::RSurface(const String& name, const RSurfP& rs):
     }
   }
 #endif
-
-
-  for(SphereList::const_iterator it=slist.begin();it!=slist.end();++it) {
-    for(uint l=0;l<(*it)->arc_list_list.size();++l) {
-      const Sphere& sp = *(*it);
-      const ArcDirDeque& alist=sp.arc_list_list[l];
-      if(alist.empty()) continue; 
-
-      if(alist.size()<4) continue;
-      Vec3 a0 = alist[0].inv_arc ? -alist[0].arc->axis : alist[0].arc->axis;
-      Vec3 a1 = alist[1].inv_arc ? -alist[1].arc->axis : alist[1].arc->axis;
-      Vec3 s0 = alist[0].inv_arc ? alist[0].arc->T->pos : alist[0].arc->S->pos;
-      Vec3 s1 = alist[1].inv_arc ? alist[1].arc->T->pos : alist[1].arc->S->pos;
-      Vec3 p0 = sp.pos+sp.rad*(s0-sp.pos)/((sp.rad+alist[0].arc->S->rad));
-      Vec3 p1 = sp.pos+sp.rad*(s1-sp.pos)/((sp.rad+alist[1].arc->S->rad));
-
-      VertexID id00 = va_.Add(p0,Vec3(),Color(1,1,1));
-      VertexID id10 = va_.Add(p1,Vec3(),Color(1,1,1));
-      VertexID id20 = id00;
-
-      for(float c=0.0;c<=1.0;c+=0.1) {
-        Mat3 r0 = AxisRotation(a0,c*alist[0].arc->phi);
-        Mat3 r1 = AxisRotation(a1,c*alist[1].arc->phi);
-        Vec3 v0 = r0*(p0-alist[0].arc->fixpoint)+alist[0].arc->fixpoint;
-        Vec3 v1 = r1*(p1-alist[1].arc->fixpoint)+alist[1].arc->fixpoint;
-        Vec3 v2 = r1*(v0-alist[1].arc->fixpoint)+alist[1].arc->fixpoint;
-        VertexID id01 = va_.Add(v0,Vec3(),Color(1,1,1));
-        VertexID id11 = va_.Add(v1,Vec3(),Color(1,1,1));
-        VertexID id21 = va_.Add(v2,Vec3(),Color(1,c,0));
-        va_.AddLine(id00,id01);
-        va_.AddLine(id10,id11);
-        va_.AddLine(id20,id21);
-        id00=id01;
-        id10=id11;
-        id20=id21;
-      }
-
-#if 0
-      Vec3 sum1;
-      Vec3 sum2;
-      Vec3 sum3;
-      Vec3 prev;
-      float plan=0.0;
-      for(uint i=0;i<alist.size();++i) {
-        uint j = (i-1+alist.size())%alist.size();
-        uint k = (i+1)%alist.size();
-        sum1+=(alist[i].arc->mid-sp.pos)*alist[i].arc->phi;
-        Vec3 d0 = alist[i].arc->S->pos-sp.pos;
-        Vec3 d1 = alist[i].arc->mid-sp.pos;
-        Vec3 d2 = alist[i].arc->T->pos-sp.pos;
-
-        Vec3 p0 = sp.pos+sp.rad*(d0)/(sp.rad+alist[i].arc->S->rad);
-        Vec3 p1 = sp.pos+sp.rad*(d1)/(sp.rad+alist[i].arc->S->rad);
-        Vec3 p2 = sp.pos+sp.rad*(d2)/(sp.rad+alist[i].arc->S->rad);
-        Vec3 c0 = Normalize(Cross(Normalize(alist[i].w.pos-alist[i].v.pos),
-                                  Normalize(alist[k].w.pos-alist[k].v.pos))+
-                            Cross(Normalize(alist[j].w.pos-alist[j].v.pos),
-                                  Normalize(alist[i].w.pos-alist[i].v.pos)));
-        Vec3 c1 = Normalize(Cross(Normalize(p0-p1),Normalize(p2-p1)));
-
-        if(i>0) {
-          plan+=Dot(prev,Normalize(d1));
-        }
-        prev=Normalize(d1);
-        sum2+=c0*alist[i].arc->phi;
-
-        VertexID id0 = va_.Add(p0,Vec3(),Color(1,1,0));
-        VertexID id1 = va_.Add(p1,Vec3(),Color(1,1,1));
-        VertexID id2 = va_.Add(p2,Vec3(),Color(1,1,0));
-        VertexID id3 = va_.Add(sp.pos,Vec3(),Color(1,1,1));
-        va_.AddLine(id0,id1);
-        va_.AddLine(id1,id2);
-        //va_.AddLine(id1,id3);
-      }
-      float f = plan/static_cast<float>(alist.size());
-      VertexID id8 = va_.Add(sp.pos,Vec3(),Color(1,1,1));
-      VertexID id9 = va_.Add(sp.pos+1.1*sp.rad*Normalize(sum1),Vec3(),Color(0,0,1));
-      VertexID idA = va_.Add(sp.pos+1.1*sp.rad*Normalize(sum2),Vec3(),Color(1,0,0));
-      VertexID idB = va_.Add(sp.pos+1.1*sp.rad*Normalize(f*sum1+(1.0-f)*sum2),Vec3(),Color(0,1,0));
-      va_.AddLine(id8,id9);
-      va_.AddLine(id8,idA);
-      va_.AddLine(id8,idB);
-#endif
-#if 0
-      VertexID id0 = va_.Add(sp.pos,Vec3(),Color(1,1,1));
-      VertexID id1 = va_.Add(sp.top_list[l],Vec3(),Color(1,1,0));
-      va_.AddLine(id0,id1);
-#endif
-    }
-  }
 
   va_.SetMode(0x2);
   va_.SetLighting(false);

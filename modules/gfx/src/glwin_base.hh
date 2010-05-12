@@ -39,7 +39,7 @@ public:
 
   virtual void StatusMessage(const String& m) = 0;
 
-  virtual void SetStereo(bool s) = 0;
+  virtual bool HasStereo() const = 0;
 
   virtual bool HasMultisample() const = 0;
 };

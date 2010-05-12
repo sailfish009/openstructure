@@ -47,6 +47,17 @@ namespace {
     b->SetMatShin(p);
     set_mat_emm2(b,0.0);
   }
+
+  void set_outline(GfxObjBase* b, bool f)
+  {
+    LOGN_MESSAGE("Outline(bool) is deprecated, use SetOutline(bool) instead");
+    b->SetOutline(f);
+  }
+  void set_aalines(GfxObjBase* b, bool f)
+  {
+    LOGN_MESSAGE("AALines(bool) is deprecated, use SetAALines(bool) instead");
+    b->SetAALines(f);
+  }
 }
 
 void export_GfxObj()
@@ -69,9 +80,11 @@ void export_GfxObj()
     .def("GetCenter",&GfxObjBase::GetCenter)
     .def("SetLineWidth", &GfxObjBase::SetLineWidth)
     .def("SetPolyMode",&GfxObjBase::SetPolyMode)
-    .def("AALines",&GfxObjBase::AALines)
+    .def("AALines",set_aalines)
+    .def("SetAALines",&GfxObjBase::SetAALines)
     .def("SetLineHalo",&GfxObjBase::SetLineHalo)
-    .def("Outline",&GfxObjBase::Outline)
+    .def("Outline",set_outline)
+    .def("SetOutline",&GfxObjBase::SetOutline)
     .def("SetOutlineMode",&GfxObjBase::SetOutlineMode)
     .def("SetOutlineWidth",&GfxObjBase::SetOutlineWidth)
     .def("SetOutlineExpandFactor",&GfxObjBase::SetOutlineExpandFactor)

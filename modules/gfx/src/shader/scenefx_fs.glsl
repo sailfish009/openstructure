@@ -1,7 +1,9 @@
 uniform sampler2D scene_map;
 uniform sampler2D depth_map;
+uniform vec2 i_vp;
 uniform bool shadow_flag;
 uniform sampler2D shadow_map;
+uniform float shadow_weight;
 uniform float shadow_depth_bias;
 uniform float shadow_epsilon;
 uniform float shadow_multiplier;
@@ -33,15 +35,13 @@ void main()
     vec4 pcoord = vec4(gl_TexCoord[0].xy*2.0-1.0,depth*2.0-1.0,1.0);
     vec4 coord = gl_TextureMatrix[2]*pcoord;
     coord/=coord.w;
-    //float d = texture2D(shadow_map, coord.xy).r;
-    //gl_FragColor.rgb=vec3(1.0,d,0.0);
-    //return;
     shadow_factor = 0.0;
     shadow_factor += 0.18*CalcShadowFactor(coord, vec2(-0.7, -0.7));
     shadow_factor += 0.18*CalcShadowFactor(coord, vec2(0.7, -0.7));
     shadow_factor += 0.18*CalcShadowFactor(coord, vec2(0.7, 0.7));
     shadow_factor += 0.18*CalcShadowFactor(coord, vec2(-0.7, 0.7));
     shadow_factor += 0.28*CalcShadowFactor(coord, vec2(0, 0));
+    shadow_factor = mix(1.0, shadow_factor, shadow_weight);
   }
 
   float occl_factor=1.0;

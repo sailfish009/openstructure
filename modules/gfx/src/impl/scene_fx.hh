@@ -52,11 +52,13 @@ public:
 
   bool shadow_flag;
   int shadow_quality;
+  float shadow_weight;
   bool depth_dark_flag;
   float depth_dark_factor;
   bool amb_occl_flag;
   float amb_occl_factor;
   uint amb_occl_mode;
+  uint amb_occl_quality;
 
 private:
   SceneFX();

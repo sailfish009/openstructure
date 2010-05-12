@@ -112,6 +112,7 @@ void export_Gosty()
     .def("AddWidgetToApp", &app_add_widget_to_app_b)
     .def("GetPerspective", &GostyApp::GetPerspective, 
          return_value_policy<reference_existing_object>())
+    .def("TryStereo",&GostyApp::TryStereo)
   ;
   register_ptr_to_python<GostyApp*>();
 }

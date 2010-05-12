@@ -125,8 +125,7 @@ Scene::Scene():
   stereo_(0),
   stereo_inverted_(false),
   stereo_eye_(0),
-  stereo_eye_dist_(5.0),
-  stereo_eye_offset_(10.0),
+  stereo_eye_dist_(10.0),
   scene_left_tex_(),
   scene_right_tex_()
 {
@@ -186,6 +185,14 @@ void Scene::SetShadowQuality(int q)
 #endif
 }
 
+void Scene::SetShadowWeight(float w)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().shadow_weight=w;
+  RequestRedraw();
+#endif
+}
+
 void Scene::SetDepthDarkening(bool f)
 {
 #if OST_SHADER_SUPPORT_ENABLED
@@ -213,6 +220,15 @@ void Scene::SetAmbientOcclusion(bool f)
 #endif
 } 
 
+bool Scene::GetAmbientOcclusion() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_flag;
+#else
+  return false;
+#endif
+} 
+
 void Scene::SetAmbientOcclusionWeight(float f)
 {
 #if OST_SHADER_SUPPORT_ENABLED
@@ -226,6 +242,15 @@ void Scene::SetAmbientOcclusionMode(uint m)
 {
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().amb_occl_mode=m;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
+void Scene::SetAmbientOcclusionQuality(uint m)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().amb_occl_quality=m;
   // the redraw routine will deal with the Shader
   RequestRedraw();
 #endif
@@ -570,10 +595,8 @@ void Scene::RenderGL()
 
   prep_blur();
 
-  if(stereo_==1) {
-    render_quad_buffered_stereo();
-  } else if (stereo_==2) {
-    render_interlaced_stereo();
+  if(stereo_==1 || stereo_==2) {
+    render_stereo();
   } else {
     render_scene();
   }
@@ -1208,14 +1231,16 @@ void Scene::SetFogOffsets(float no, float fo)
 void Scene::Stereo(unsigned int m)
 {
   if(m==1) {
-    stereo_=m;
-    //if(win_) win_->SetStereo(true);
-  } else if(m==2 || m==3) {
-    stereo_=m;
-    //if(win_) win_->SetStereo(false);
+    if(win_ && win_->HasStereo()) {
+      stereo_=1;
+    } else {
+      LOGN_MESSAGE("No visual present for quad-buffered stereo");
+      stereo_=0;
+    }
+  } else if(m==2) {
+    stereo_=2;
   } else {
     stereo_=0;
-    //if(win_) win_->SetStereo(false);
   }
   RequestRedraw();
 }
@@ -1240,16 +1265,6 @@ void Scene::SetStereoEyeDist(float d)
     RequestRedraw();
   }
 }
-
-void Scene::SetStereoEyeOffset(float o)
-{
-  stereo_eye_offset_=o;
-  if(stereo_>0) {
-    RequestRedraw();
-  }
-}
-
-
 
 void Scene::SetLightDir(const Vec3& dir)
 {
@@ -1791,14 +1806,13 @@ void Scene::stereo_projection(unsigned int view)
   GLdouble zn=std::max<float>(1.0,znear_);
   GLdouble zf=std::max<float>(1.1,zfar_);
 
-#if 1
   GLdouble top = zn * std::tan(fov_*M_PI/360.0);
   GLdouble bot = -top;
   GLdouble right = top*aspect_ratio_;
   GLdouble left = -right;
   GLdouble shift=0.0;
   if(view==1 || view==2) {
-    shift = 0.5*stereo_eye_dist_*zn/zf * (view==1 ? 1.0 : -1.0);
+    shift = 0.5*stereo_eye_dist_*zn/zf * (view==1 ? -1.0 : 1.0);
     left+=shift;
     right+=shift*0.5;
   }
@@ -1811,22 +1825,11 @@ void Scene::stereo_projection(unsigned int view)
   trans[15]=1.0;
   trans[12]=shift;
   glMultMatrixd(trans);
-#else
-  gluPerspective(fov_,aspect_ratio_,zn,zf);
-  if(view==1 || view==2) {
-    float iod = (view==1) ? -stereo_eye_dist_ : stereo_eye_dist_;
-    //float fr=(-stereo_eye_offset_-zn)/(zf-zn);
-    float angle=180.0f/M_PI*std::atan(stereo_eye_offset_/(2.0*iod));
-    glTranslated(0.0,0.0,transform_.GetTrans()[2]);
-    glRotated(-angle,0.0,1.0,0.0);
-    glTranslated(0.0,0.0,-transform_.GetTrans()[2]);
-  }
-#endif
 }
 
-void Scene::render_interlaced_stereo()
+void Scene::render_stereo()
 {
-  glGetError();
+  stereo_eye_=1;
   stereo_projection(1);
   render_scene();
 
@@ -1834,8 +1837,8 @@ void Scene::render_interlaced_stereo()
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
-  check_gl_error();
 
+  stereo_eye_=2;
   stereo_projection(2);
   render_scene();
   glEnable(GL_TEXTURE_2D);
@@ -1843,6 +1846,7 @@ void Scene::render_interlaced_stereo()
   glBindTexture(GL_TEXTURE_2D, scene_right_tex_);
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
   check_gl_error();
+  stereo_eye_=0;
   stereo_projection(0);
 
 #if OST_SHADER_SUPPORT_ENABLED
@@ -1868,41 +1872,35 @@ void Scene::render_interlaced_stereo()
   glPushMatrix();
   glLoadIdentity();
 
-  // draw interlace lines in stencil buffer
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLineWidth(1.0);
-  glEnable(GL_STENCIL_TEST);
-  glStencilMask(0x1);
-  glClearStencil(0x0);
-  glClear(GL_STENCIL_BUFFER_BIT);
-  glStencilFunc(GL_ALWAYS,0x1,0x1);
-  glStencilOp(GL_REPLACE,GL_REPLACE,GL_REPLACE);
-  glBegin(GL_LINES);
-  glColor3f(1.0,1.0,1.0);
-  for(unsigned int i=0;i<vp_height_;i+=2) {
-    glVertex2i(0,i);
-    glVertex2i(vp_width_-1,i);
-  } 
-  glEnd();
-
-  glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
-
-  // left eye
-  glStencilFunc(GL_EQUAL,0x1,0x1);
-
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
-  // draw
-  glColor3f(1.0,0.0,1.0);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
-  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
-  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
-  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
-  glEnd();
+  if(stereo_==2) {
+    // draw interlace lines in stencil buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLineWidth(1.0);
+    glEnable(GL_STENCIL_TEST);
+    glStencilMask(0x1);
+    glClearStencil(0x0);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glStencilFunc(GL_ALWAYS,0x1,0x1);
+    glStencilOp(GL_REPLACE,GL_REPLACE,GL_REPLACE);
+    glBegin(GL_LINES);
+    glColor3f(1.0,1.0,1.0);
+    for(unsigned int i=0;i<vp_height_;i+=2) {
+      glVertex2i(0,i);
+      glVertex2i(vp_width_-1,i);
+    } 
+    glEnd();
+    
+    glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
+  }
 
   // right eye
-  glStencilFunc(GL_EQUAL,0x0,0x1);
+  if(stereo_==1) {
+    glDrawBuffer(GL_BACK_RIGHT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  } else if(stereo_==2) {
+    glStencilFunc(GL_EQUAL,0x0,0x1);
+  }
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
   // draw
   glColor3f(1.0,0.0,1.0);
@@ -1913,6 +1911,24 @@ void Scene::render_interlaced_stereo()
   glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
   glEnd();
 
+  // left eye
+  if(stereo_==1) {
+    glDrawBuffer(GL_BACK_LEFT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  } else if(stereo_==2) {
+    glStencilFunc(GL_EQUAL,0x1,0x1);
+  }
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
+  // draw
+  glColor3f(1.0,0.0,1.0);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
+  glEnd();
+  
   // restore settings
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
@@ -1922,16 +1938,6 @@ void Scene::render_interlaced_stereo()
 #if OST_SHADER_SUPPORT_ENABLED
   Shader::Instance().PopProgram();
 #endif
-}
-
-void Scene::render_quad_buffered_stereo()
-{
-  glDrawBuffer(GL_BACK_LEFT);
-  stereo_projection(stereo_inverted_ ? 1 : 2);
-  render_scene();
-  glDrawBuffer(GL_BACK_RIGHT);
-  stereo_projection(stereo_inverted_ ? 2 : 1);
-  render_scene();
 }
 
 }} // ns

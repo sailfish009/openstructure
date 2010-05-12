@@ -111,12 +111,16 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief shadow quality from 0 (low) to 3 (high), default=1
   void SetShadowQuality(int q);
 
+  void SetShadowWeight(float w);
+
   void SetDepthDarkening(bool f);
   void SetDepthDarkeningWeight(float f);
 
   void SetAmbientOcclusion(bool f);
+  bool GetAmbientOcclusion() const;
   void SetAmbientOcclusionWeight(float f);
   void SetAmbientOcclusionMode(uint m);
+  void SetAmbientOcclusionQuality(uint q);
   
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
@@ -185,7 +189,6 @@ class DLLEXPORT_OST_GFX Scene {
   void SetStereoView(unsigned int);
 
   void SetStereoEyeDist(float);
-  void SetStereoEyeOffset(float);
 
   /// \brief set main light direction
   void SetLightDir(const geom::Vec3& dir);
@@ -435,7 +438,7 @@ private:
   unsigned int stereo_;
   bool stereo_inverted_;
   unsigned int stereo_eye_;
-  float stereo_eye_dist_,stereo_eye_offset_;
+  float stereo_eye_dist_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
 
@@ -448,8 +451,7 @@ private:
   void stereo_projection(unsigned int view);
   void render_scene();
   void render_glow();
-  void render_interlaced_stereo();
-  void render_quad_buffered_stereo();
+  void render_stereo();
   bool IsNameAvailable(String name);
 };
 

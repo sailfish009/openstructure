@@ -24,11 +24,13 @@ SceneFX& SceneFX::Instance()
 SceneFX::SceneFX():
   shadow_flag(false),
   shadow_quality(1),
+  shadow_weight(1.0),
   depth_dark_flag(false),
   depth_dark_factor(1.0),
   amb_occl_flag(false),
   amb_occl_factor(1.0),
   amb_occl_mode(1),
+  amb_occl_quality(1),
   scene_tex_id_(),
   depth_tex_id_(),
   shadow_tex_id_(),
@@ -259,6 +261,10 @@ void SceneFX::Postprocess()
   glUniform1i(glGetUniformLocation(cpr,"scene_map"),0);
   glUniform1i(glGetUniformLocation(cpr,"depth_map"),1);
 
+  glUniform2f(glGetUniformLocation(cpr,"i_vp"),
+              1.0/static_cast<float>(vp.width),
+              1.0/static_cast<float>(vp.height));
+
   if(shadow_flag) {
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D,shadow_tex_id_);
@@ -273,6 +279,7 @@ void SceneFX::Postprocess()
     glUniform1f(glGetUniformLocation(cpr,"shadow_depth_bias"),0.008);
     glUniform1f(glGetUniformLocation(cpr,"shadow_epsilon"),0.002);
     glUniform1f(glGetUniformLocation(cpr,"shadow_multiplier"),0.4);
+    glUniform1f(glGetUniformLocation(cpr,"shadow_weight"),shadow_weight);
 
   } else {
     glUniform1i(glGetUniformLocation(cpr,"shadow_flag"),0);
@@ -414,7 +421,6 @@ void SceneFX::prep_shadow_map()
                   0.0,0.0,0.5,0.5,
                   0.0,0.0,0.0,1.0);
   //shadow_tex_mat_ = bias*pmat*ltrans.GetMatrix();
-  Scene::Instance().ResetProjection();
   glGetv(GL_PROJECTION_MATRIX, glpmat);
   geom::Mat4 pmat2(geom::Transpose(geom::Mat4(glpmat)));
   /*
@@ -429,8 +435,11 @@ void SceneFX::prep_amb_occlusion()
 {
   Viewport vp=Scene::Instance().GetViewport();
 
-  uint width=vp.width/2;
-  uint height=vp.height/2;
+  uint qf=1;
+  if(amb_occl_quality==0) {qf=4;}
+  else if(amb_occl_quality==1) {qf=2;}
+  uint width=vp.width/qf;
+  uint height=vp.height/qf;
 
   Shader::Instance().PushProgram();
   Shader::Instance().Activate("amboccl");
@@ -451,6 +460,7 @@ void SceneFX::prep_amb_occlusion()
   double pm[16];
   glGetDoublev(GL_PROJECTION_MATRIX,pm);
   glUniform4f(glGetUniformLocation(cpr,"abcd"),pm[0],pm[5],pm[10],pm[14]);
+
   glMatrixMode(GL_TEXTURE);
   glPushMatrix();
   geom::Mat4 ipm(geom::Transpose(geom::Invert(geom::Transpose(geom::Mat4(pm)))));
@@ -459,6 +469,10 @@ void SceneFX::prep_amb_occlusion()
 
   // set up viewport filling quad to run the fragment shader
   draw_screen_quad(width,height);
+
+  glMatrixMode(GL_TEXTURE);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, occl_tex_id_);

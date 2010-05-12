@@ -84,13 +84,13 @@ class DLLEXPORT_OST_GFX GfxObjBase: public GfxNode
   virtual void SetPolyMode(unsigned int m) = 0;
 
   /// \brief turn on sophisticated line anti-aliasing, requires shader
-  virtual void AALines(bool f) = 0;
+  virtual void SetAALines(bool f) = 0;
 
   /// \brief turn on line halo of given strength
   virtual void SetLineHalo(float f) = 0;
 
   /// \brief turn outline rendering on or off
-  virtual void Outline(bool f) = 0;
+  virtual void SetOutline(bool f) = 0;
   /// \brief set outline mode
   virtual void SetOutlineMode(int m) = 0;
   /// \brief set outline width (modes 1 + 2)

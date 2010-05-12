@@ -54,7 +54,7 @@ public:
   virtual void MakeActive();
   virtual void DoRefresh();
   virtual void StatusMessage(const String& m);
-  virtual void SetStereo(bool s);
+  virtual bool HasStereo() const {return format().stereo();};
   virtual bool HasMultisample() const {return format().sampleBuffers();}
 
   // central point for sending input to the gfx layer
