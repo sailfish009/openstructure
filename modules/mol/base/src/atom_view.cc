@@ -115,7 +115,7 @@ mol::AtomViewList AtomView::GetBondPartners() const
   mol::AtomViewList avl;
   mol::BondHandleList::const_iterator i;
   for (i=data_->bonds.begin();i!=data_->bonds.end();++i) {
-    if (i->GetFirst()!=*this) {
+    if (i->GetFirst().GetHashCode()!=this->GetHashCode()) {
       avl.push_back(this->GetEntity().FindAtom(i->GetFirst()));
     } else {
       avl.push_back(this->GetEntity().FindAtom(i->GetSecond()));

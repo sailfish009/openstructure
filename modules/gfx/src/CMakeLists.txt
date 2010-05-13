@@ -230,6 +230,7 @@ if (USE_SHADER)
     shader/basic_lf_fs.glsl
     shader/basic_lf_vs.glsl
     shader/basic_vs.glsl
+    shader/beacon_fs.glsl
     shader/convolute1_fs.glsl
     shader/dumpnorm_fs.glsl
     shader/dumpnorm_vs.glsl
