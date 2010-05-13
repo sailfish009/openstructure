@@ -218,7 +218,12 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${TIFF_INCLUDE_DIR}
                     ${SPNAV_INCLUDE_DIR}
                     )
-
+if (UNIX)
+  SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+  SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
+  SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+endif()
 
 
 add_subdirectory(modules)

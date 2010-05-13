@@ -190,12 +190,11 @@ macro(module)
     set_target_properties(${_LIB_NAME} PROPERTIES
                           LIBRARY_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
                           ARCHIVE_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
-                          RUNTIME_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
-                          INSTALL_RPATH "."
-                          INSTALL_NAME_DIR "@rpath")
+                          RUNTIME_OUTPUT_DIRECTORY ${LIB_STAGE_PATH})
     if (APPLE)
       set_target_properties(${_LIB_NAME} PROPERTIES
-                            LINK_FLAGS "-Wl,-rpath,.")
+                            LINK_FLAGS "-Wl,-rpath,."
+                            INSTALL_NAME_DIR "@rpath")
     endif()
     if (WIN32)
       #set_target_properties(${_LIB_NAME} PROPERTIES PREFIX "../")
@@ -391,12 +390,12 @@ macro(pymod)
     target_link_libraries("_${_ARG_NAME}" ${_PARENT_LIB_NAME} 
                           ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
     set_target_properties("_${_ARG_NAME}"
-                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR}
-                          INSTALL_NAME_DIR "@rpath")
+                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR})
     if (APPLE)
       file(RELATIVE_PATH _REL_PATH "${PYMOD_STAGE_DIR}" "${LIB_STAGE_PATH}")
       set_target_properties(_${_ARG_NAME} PROPERTIES
-                            LINK_FLAGS "-Wl,-rpath,@${_REL_PATH}")
+                            LINK_FLAGS "-Wl,-rpath,@${_REL_PATH}"
+                            INSTALL_NAME_DIR "@rpath")
     endif()                          
     if (NOT WIN32)
       set_target_properties("_${_ARG_NAME}"

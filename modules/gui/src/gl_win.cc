@@ -90,7 +90,7 @@ gl_canvas_(NULL)
   this->SetInternalWidget(main);
   gfx::Scene::Instance().AttachObserver(this);
   QGLFormat format = gl_canvas_->format();
-  LOGN_VERBOSE("GLCanvas: rbits=" << format.redBufferSize() 
+  LOGN_DEBUG("GLCanvas: rbits=" << format.redBufferSize() 
                << " gbits=" << format.greenBufferSize() 
                << " bbits=" << format.blueBufferSize() 
                << " abits=" << format.alphaBufferSize() 

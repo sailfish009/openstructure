@@ -125,7 +125,8 @@ Scene::Scene():
   stereo_(0),
   stereo_inverted_(false),
   stereo_eye_(0),
-  stereo_eye_dist_(10.0),
+  stereo_eye_dist_(5.0),
+  stereo_eye_off_(0.0),
   scene_left_tex_(),
   scene_right_tex_()
 {
@@ -355,7 +356,7 @@ void Scene::InitGL()
   glGetIntegerv(GL_SAMPLES, &msamples);
 
   if(mbufs>0 && msamples>0) {
-    LOGN_VERBOSE("enabling multisampling with: " << msamples << " samples");
+    LOGN_VERBOSE("Scene: enabling multisampling with: " << msamples << " samples");
     glDisable(GL_LINE_SMOOTH);
     glDisable(GL_POINT_SMOOTH);
     glDisable(GL_POLYGON_SMOOTH);
@@ -862,7 +863,6 @@ void Scene::Apply(GfxNodeVisitor& v) const
 
 void Scene::OnInput(const InputEvent& e)
 {
-  float sf=1.0;
   if(e.GetCommand()==INPUT_COMMAND_AUTOSLAB) {
     Autoslab();
   } else if(e.GetCommand()==INPUT_COMMAND_TOGGLE_FOG) {
@@ -898,7 +898,8 @@ void Scene::OnInput(const InputEvent& e)
       transform_.ApplyYAxisTranslation(e.GetDelta()*fxy[1]);
     }
   } else if(e.GetCommand()==INPUT_COMMAND_TRANSZ) {
-    float delta=e.GetDelta()*sf;
+    float currz=transform_.GetTrans()[2];
+    float delta=currz*pow(1.01,-e.GetDelta())-currz;
     transform_.ApplyZAxisTranslation(delta);
     SetNearFar(znear_-delta,zfar_-delta);
   } else if(e.GetCommand()==INPUT_COMMAND_SLABN) {
@@ -1261,6 +1262,14 @@ void Scene::SetStereoView(unsigned int m)
 void Scene::SetStereoEyeDist(float d)
 {
   stereo_eye_dist_=d;
+  if(stereo_>0) {
+    RequestRedraw();
+  }
+}
+
+void Scene::SetStereoEyeOff(float d)
+{
+  stereo_eye_off_=d;
   if(stereo_>0) {
     RequestRedraw();
   }
@@ -1735,7 +1744,7 @@ void Scene::prep_glyphs()
   }
   for(int cc=128;cc<256;++cc) glyph_map_[cc]=Vec2(0.0,0.0);
 
-  LOGN_VERBOSE("done loading glyphs");
+  LOGN_DEBUG("done loading glyphs");
 
 }
 
@@ -1811,20 +1820,19 @@ void Scene::stereo_projection(unsigned int view)
   GLdouble right = top*aspect_ratio_;
   GLdouble left = -right;
   GLdouble shift=0.0;
-  if(view==1 || view==2) {
-    shift = 0.5*stereo_eye_dist_*zn/zf * (view==1 ? -1.0 : 1.0);
-    left+=shift;
-    right+=shift*0.5;
-  }
+
   glFrustum(left,right,bot,top,zn,zf);
-  GLdouble trans[16];
-  for(int i=0;i<16;++i) trans[i]=0.0;
-  trans[0]=1.0;
-  trans[5]=1.0;
-  trans[10]=1.0;
-  trans[15]=1.0;
-  trans[12]=shift;
-  glMultMatrixd(trans);
+
+  if(view==1 || view==2) {
+    float ff=(view==1 ? -1.0 : 1.0);
+    float dist=-transform_.GetTrans()[2];
+    geom::Mat4 skew=geom::Transpose(geom::Mat4(1.0,0.0,ff*stereo_eye_dist_/dist,ff*stereo_eye_dist_,
+                                               0.0,1.0,0.0,0.0,
+                                               0.0,0.0,1.0,0.0,
+                                               0.0,0.0,0.0,1.0));
+    glMultMatrix(skew.Data());
+  }
+
 }
 
 void Scene::render_stereo()

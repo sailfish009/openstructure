@@ -168,7 +168,7 @@ Bitmap import_png(const String& filename)
     }
   }
 
-  LOGN_VERBOSE("loaded " << width << "x" << height << ":" << channels << " bitmap");
+  LOGN_DEBUG("loaded " << width << "x" << height << ":" << channels << " bitmap");
 
   bm.channels=channels;
   bm.width=width;

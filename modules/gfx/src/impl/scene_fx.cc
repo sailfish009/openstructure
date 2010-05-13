@@ -55,7 +55,7 @@ SceneFX::~SceneFX()
 
 void SceneFX::Setup()
 {
-  LOGN_VERBOSE("SceneFX: setup");
+  LOGN_DEBUG("SceneFX: setup");
 
   glGenTextures(1,&scene_tex_id_);
   glGenTextures(1,&depth_tex_id_);

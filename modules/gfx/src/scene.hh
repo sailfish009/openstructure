@@ -189,6 +189,7 @@ class DLLEXPORT_OST_GFX Scene {
   void SetStereoView(unsigned int);
 
   void SetStereoEyeDist(float);
+  void SetStereoEyeOff(float);
 
   /// \brief set main light direction
   void SetLightDir(const geom::Vec3& dir);
@@ -438,7 +439,7 @@ private:
   unsigned int stereo_;
   bool stereo_inverted_;
   unsigned int stereo_eye_;
-  float stereo_eye_dist_;
+  float stereo_eye_dist_,stereo_eye_off_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
 

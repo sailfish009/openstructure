@@ -223,29 +223,34 @@ target_link_libraries(ost_gfx ${OPENGL_LIBRARIES} ${PNG_LIBRARIES})
 
 if (USE_SHADER)
   set(SHADER_FILES
-    shader/basic_vs.glsl
-    shader/basic_fs.glsl
-    shader/fraglight_vs.glsl
-    shader/fraglight_fs.glsl
-    shader/basic_hf_vs.glsl
-    shader/selfx_vs.glsl
-    shader/selfx_fs.glsl
-    shader/toon_vs.glsl
-    shader/toon_fs.glsl
-    shader/toon2_fs.glsl
-    shader/noop_vs.glsl
     shader/aaline_fs.glsl
-    shader/iso_vs.glsl
-    shader/iso_fs.glsl
-    shader/fast_sphere_vs.glsl
+    shader/amboccl_fs.glsl
+    shader/basic_fs.glsl
+    shader/basic_hf_vs.glsl
+    shader/basic_lf_fs.glsl
+    shader/basic_lf_vs.glsl
+    shader/basic_vs.glsl
+    shader/convolute1_fs.glsl
+    shader/dumpnorm_fs.glsl
+    shader/dumpnorm_vs.glsl
     shader/fast_sphere_fs.glsl
+    shader/fast_sphere_vs.glsl
+    shader/fraglight_fs.glsl
+    shader/fraglight_lf_fs.glsl
+    shader/fraglight_lf_vs.glsl
+    shader/fraglight_vs.glsl
+    shader/iso_fs.glsl
+    shader/iso_vs.glsl
+    shader/noop_vs.glsl
     shader/outline_vs.glsl
     shader/quadpp_vs.glsl
-    shader/convolute1_fs.glsl
-    shader/scenefx_vs.glsl
     shader/scenefx_fs.glsl
-    shader/dumpnorm_vs.glsl
-    shader/dumpnorm_fs.glsl
+    shader/scenefx_vs.glsl
+    shader/selfx_fs.glsl
+    shader/selfx_vs.glsl
+    shader/toon2_fs.glsl
+    shader/toon_fs.glsl
+    shader/toon_vs.glsl
   )
   copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  
