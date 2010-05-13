@@ -154,7 +154,8 @@ void Shader::Setup()
     {"convolute1_fs.glsl", GL_FRAGMENT_SHADER},
     {"amboccl_fs.glsl", GL_FRAGMENT_SHADER},
     {"scenefx_vs.glsl", GL_VERTEX_SHADER},
-    {"scenefx_fs.glsl", GL_FRAGMENT_SHADER}
+    {"scenefx_fs.glsl", GL_FRAGMENT_SHADER},
+    {"beacon_fs.glsl", GL_FRAGMENT_SHADER}
     //////////////////////////////////////////////////////////////////
   };
 
@@ -275,6 +276,13 @@ void Shader::Setup()
   shader_program_list.push_back(shader_code_map_["amboccl_fs.glsl"]);
   if(link_shader(shader_program_list,"amboccl",shader_program_id)) {
     shader_program_map_["amboccl"]=shader_program_id;
+  }
+  // beacon shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["scenefx_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["beacon_fs.glsl"]);
+  if(link_shader(shader_program_list,"beacon",shader_program_id)) {
+    shader_program_map_["beacon"]=shader_program_id;
   }
   // scenefx shader
   shader_program_list.clear();

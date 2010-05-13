@@ -280,6 +280,27 @@ void Scene::SetShadingMode(const std::string& smode)
 #endif
 }
 
+void Scene::SetBeacon(int wx, int wy)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  stereo_projection(0);
+  geom::Vec3 p0=UnProject(geom::Vec3(static_cast<Real>(wx),static_cast<Real>(wy),0.0));
+  std::cerr << p0 << Project(p0) << std::endl;
+  geom::Vec3 p1=UnProject(geom::Vec3(static_cast<Real>(wx),static_cast<Real>(wy),1.0));
+  stereo_projection(stereo_eye_);
+  impl::SceneFX::Instance().use_beacon=true;
+  impl::SceneFX::Instance().beacon.p0=p0;
+  impl::SceneFX::Instance().beacon.p1=p1;
+#endif  
+}
+
+void Scene::SetBeaconOff()
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().use_beacon=false;
+#endif  
+}
+
 namespace {
 
 void set_light_dir(Vec3 ld)
@@ -412,7 +433,6 @@ void Scene::InitGL()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
-
 }
 
 void Scene::RequestRedraw()
@@ -1819,7 +1839,6 @@ void Scene::stereo_projection(unsigned int view)
   GLdouble bot = -top;
   GLdouble right = top*aspect_ratio_;
   GLdouble left = -right;
-  GLdouble shift=0.0;
 
   glFrustum(left,right,bot,top,zn,zf);
 

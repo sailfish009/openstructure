@@ -34,6 +34,10 @@ class Scene;
 
 namespace impl {
 
+struct Beacon {
+  geom::Vec3 p0,p1;
+};
+
 class SceneFX {
   friend class ::ost::gfx::Scene;
 public:
@@ -59,6 +63,8 @@ public:
   float amb_occl_factor;
   uint amb_occl_mode;
   uint amb_occl_quality;
+  bool use_beacon;
+  Beacon beacon;
 
 private:
   SceneFX();
@@ -89,6 +95,8 @@ private:
   GLuint depth_rb_;
 
   bool use_fb_;
+
+  bool use_beacon_;
 };
 
 }}} // ns

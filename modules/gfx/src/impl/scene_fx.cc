@@ -31,6 +31,8 @@ SceneFX::SceneFX():
   amb_occl_factor(1.0),
   amb_occl_mode(1),
   amb_occl_quality(1),
+  use_beacon(false),
+  beacon(),
   scene_tex_id_(),
   depth_tex_id_(),
   shadow_tex_id_(),
@@ -211,7 +213,7 @@ void SceneFX::Postprocess()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  if(!shadow_flag && !amb_occl_flag && !depth_dark_flag) {
+  if(!shadow_flag && !amb_occl_flag && !depth_dark_flag && !use_beacon) {
     // no postprocessing is needed
     return;
   }
@@ -314,6 +316,63 @@ void SceneFX::Postprocess()
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
     glActiveTexture(GL_TEXTURE0);
+  }
+
+  if(use_beacon) {
+    Shader::Instance().Activate("");
+    cpr=Shader::Instance().GetCurrentProgram();
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    Scene::Instance().ResetProjection();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    geom::Vec3 w0=Scene::Instance().Project(beacon.p0);
+    geom::Vec3 w1=Scene::Instance().Project(beacon.p1)-w0;
+    geom::Vec2 q0(w0[0]-5.0,w0[1]-5.0);
+    geom::Vec2 q1(w0[0]-5.0,w0[1]+5.0);
+    geom::Vec2 q2(w0[0]+5.0,w0[1]+5.0);
+    geom::Vec2 q3(w0[0]+5.0,w0[1]-5.0);
+    std::cerr << beacon.p0 << " " << w0 << std::endl;
+    float iw=1.0/static_cast<float>(vp.width);
+    float ih=1.0/static_cast<float>(vp.height);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D,depth_tex_id_);
+    glActiveTexture(GL_TEXTURE0);
+    glUniform1i(glGetUniformLocation(cpr,"depth_map"),1);
+    glUniform3f(glGetUniformLocation(cpr,"wpos"),w0[0],w0[1],w0[2]);
+    glUniform3f(glGetUniformLocation(cpr,"wdir"),w1[0],w1[1],w1[2]);
+    glUniform1f(glGetUniformLocation(cpr,"wlen"),geom::Length(w1));
+    glUniform1f(glGetUniformLocation(cpr,"rad"),2.0);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+    glDisable(GL_FOG);
+    glDisable(GL_CULL_FACE);
+    glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_POINT_SMOOTH);
+    glShadeModel(GL_FLAT);
+    glViewport(0,0,vp.width,vp.height);
+    glEnable(GL_TEXTURE_2D);
+    glColor3f(1.0,0.0,1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f(iw*q0[0],ih*q0[1]);
+    glVertex2f(q0[0],q0[1]);
+    glTexCoord2f(iw*q1[0],ih*q1[1]);
+    glVertex2f(q1[0],q1[1]);
+    glTexCoord2f(iw*q2[0],ih*q2[1]);
+    glVertex2f(q2[0],q2[1]);
+    glTexCoord2f(iw*q3[0],ih*q3[1]);
+    glVertex2f(q3[0],q3[1]);
+    glEnd();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glPopAttrib();
   }
 
   glDisable(GL_TEXTURE_1D);

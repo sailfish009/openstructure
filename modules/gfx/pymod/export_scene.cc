@@ -130,6 +130,8 @@ void export_Scene()
     .def("StartOffscreenMode",&Scene::StartOffscreenMode)
     .def("StopOffscreenMode",&Scene::StopOffscreenMode)
     .def("SetShadingMode",&Scene::SetShadingMode)
+    .def("SetBeacon",&Scene::SetBeacon)
+    .def("SetBeaconOff",&Scene::SetBeaconOff)
     .def("__getitem__",scene_getitem)
     .add_property("bg",
                   &Scene::GetBackground, 

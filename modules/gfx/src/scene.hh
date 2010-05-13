@@ -370,6 +370,9 @@ class DLLEXPORT_OST_GFX Scene {
   geom::Vec3 GetLightDir() const {return light_dir_;}
   geom::Mat3 GetLightRot() const {return light_rot_;}
 
+  void SetBeacon(int wx, int wy);
+  void SetBeaconOff();
+
 protected:
   friend class GfxObj; 
   friend class GfxNode;
