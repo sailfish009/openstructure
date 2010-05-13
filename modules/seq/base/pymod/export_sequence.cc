@@ -20,8 +20,9 @@
 #include <boost/python/slice.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-using namespace boost::python;
 
+
+#include <ost/export_helper/pair_to_tuple_conv.hh>
 #include <ost/generic_property.hh>
 #include <ost/export_helper/generic_property_def.hh>
 #include <ost/info/info.hh>
@@ -31,10 +32,12 @@ using namespace boost::python;
 #include <ost/seq/sequence_op.hh>
 #include <ost/seq/sequence_list.hh>
 #include <ost/seq/aligned_region.hh>
+#include <ost/seq/views_from_sequences.hh>
 #include "const_seq_list_export_def.hh"
 
 using namespace ost;
 using namespace ost::seq;
+using namespace boost::python;
 
 namespace {
 
@@ -292,10 +295,15 @@ void export_sequence()
     .def("__getitem__", &do_slice_b)
   ;
   implicitly_convertible<SequenceList, ConstSequenceList>();
+  to_python_converter<std::pair<mol::EntityView, mol::EntityView>, 
+                      PairToTupleConverter<mol::EntityView, mol::EntityView> >();
   def("CreateSequenceList", &CreateSequenceList);
   def("SequenceFromChain", seq_from_chain_a);
   def("SequenceFromChain", seq_from_chain_b);
   def("SequenceToInfo", &SequenceToInfo);
+  def("ViewsFromSequences", &ViewsFromSequences, (arg("seq1"), arg("seq2")));
+  def("ViewsFromAlignment", &ViewsFromAlignment, 
+      (arg("aln"), arg("index1")=0, arg("index2")=1));
   def("SequenceListToInfo", &SequenceListToInfo);
   def("SequenceFromInfo", &SequenceFromInfo);
   def("CreateAlignment", &CreateAlignment);

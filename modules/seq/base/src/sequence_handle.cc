@@ -51,6 +51,11 @@ bool ConstSequenceHandle::operator!=(const ConstSequenceHandle& rhs) const
   return impl_!=rhs.impl_;
 }
 
+char ConstSequenceHandle::operator[](int index) const
+{
+  this->CheckValidity();
+  return this->GetOneLetterCode(index);
+}
 
 void ConstSequenceHandle::CheckValidity() const
 {

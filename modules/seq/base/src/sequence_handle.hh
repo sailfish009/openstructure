@@ -116,6 +116,8 @@ public:
   bool operator==(const ConstSequenceHandle& rhs) const;
   bool operator!=(const ConstSequenceHandle& rhs) const;  
   
+  char operator[](int index) const;
+  
   /// \brief whether the sequence is valid
   bool IsValid() const;
   /// \internal

@@ -23,7 +23,7 @@ using namespace boost::python;
 #include <ost/gfx/entity.hh>
 using namespace ost;
 using namespace ost::gfx;
-
+#include <ost/export_helper/pair_to_tuple_conv.hh>
 #include "color_by_def.hh"
 
 namespace {
@@ -176,14 +176,6 @@ void ent_apply_62(Entity* e, MapHandleColorOp& mhco){
   e->Apply(mhco);
 }
 #endif //OST_IMG_ENABLED
-
-template<class T1, class T2>
-struct PairToTupleConverter {
-  static PyObject* convert(const std::pair<T1, T2>& pair) {
-    tuple t=boost::python::make_tuple<T1,T2>(pair.first,pair.second);
-    return incref(t.ptr());
-  }
-};
 
 
 RenderOptionsPtr ent_sline_opts(Entity* ent)
