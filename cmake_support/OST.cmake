@@ -390,7 +390,8 @@ macro(pymod)
     target_link_libraries("_${_ARG_NAME}" ${_PARENT_LIB_NAME} 
                           ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
     set_target_properties("_${_ARG_NAME}"
-                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR})
+                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR}
+                          INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
     if (APPLE)
       file(RELATIVE_PATH _REL_PATH "${PYMOD_STAGE_DIR}" "${LIB_STAGE_PATH}")
       set_target_properties(_${_ARG_NAME} PROPERTIES
