@@ -43,9 +43,9 @@ void GfxView::AddAtom(const AtomView& av)
   AtomEntry ae(a,default_radius,
                a.GetRadius(),
                GfxObj::Ele2Color(a.GetElement()));
-  atom_map[a.GetHashCode()]=ae;
+  atom_map[a.GetHandle().GetHashCode()]=ae;
   if(av.GetBondCount()==0) {
-    orphan_atom_list.push_back(a.GetHashCode());
+    orphan_atom_list.push_back(a.GetHandle().GetHashCode());
   }
 }
 

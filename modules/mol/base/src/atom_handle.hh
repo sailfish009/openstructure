@@ -81,6 +81,13 @@ public:
   /// 
   /// Useful for duck-typing in Python and templated code.
   AtomHandle GetHandle() const;
+  
+  /// \brief Get unique identifier for atom
+  /// 
+  /// Get hash code that uniquely identifies every atom. The hash code is
+  /// identical for all atom views pointing to a given atom.
+  long GetHashCode() const;
+  
   bool operator==(const AtomHandle& ref) const;
   bool operator!=(const AtomHandle& ref) const;
 

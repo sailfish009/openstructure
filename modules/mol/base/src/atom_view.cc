@@ -115,7 +115,7 @@ mol::AtomViewList AtomView::GetBondPartners() const
   mol::AtomViewList avl;
   mol::BondHandleList::const_iterator i;
   for (i=data_->bonds.begin();i!=data_->bonds.end();++i) {
-    if (i->GetFirst()!=*this) {
+    if (i->GetFirst().GetHandle()!=this->GetHandle()) {
       avl.push_back(this->GetEntity().FindAtom(i->GetFirst()));
     } else {
       avl.push_back(this->GetEntity().FindAtom(i->GetSecond()));
@@ -156,7 +156,13 @@ void AtomView::RemoveBondInternal(const BondHandle& bond)
     data_->bonds.erase(i);    
   }
 }
-  
+
+long AtomView::GetHashCode() const 
+{
+  this->CheckValidity();  
+  return reinterpret_cast<long>(data_.get());
+} 
+
 }} // ns
 
 
