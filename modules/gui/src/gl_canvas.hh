@@ -102,6 +102,7 @@ private:
   bool bench_flag_;
   QPoint last_pos_;
   SceneMenu* scene_menu_;
+  bool show_beacon_;
 };
 
 }} // ns

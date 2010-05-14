@@ -308,6 +308,10 @@ void SceneFX::Postprocess()
     glUniform1i(glGetUniformLocation(cpr,"dark_flag"),0);
   }
 
+  if(use_beacon) {
+    prep_beacon();
+  }
+
   draw_screen_quad(vp.width,vp.height);
 
   if(shadow_flag) {
@@ -319,60 +323,7 @@ void SceneFX::Postprocess()
   }
 
   if(use_beacon) {
-    Shader::Instance().Activate("");
-    cpr=Shader::Instance().GetCurrentProgram();
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    Scene::Instance().ResetProjection();
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    geom::Vec3 w0=Scene::Instance().Project(beacon.p0);
-    geom::Vec3 w1=Scene::Instance().Project(beacon.p1)-w0;
-    geom::Vec2 q0(w0[0]-5.0,w0[1]-5.0);
-    geom::Vec2 q1(w0[0]-5.0,w0[1]+5.0);
-    geom::Vec2 q2(w0[0]+5.0,w0[1]+5.0);
-    geom::Vec2 q3(w0[0]+5.0,w0[1]-5.0);
-    std::cerr << beacon.p0 << " " << w0 << std::endl;
-    float iw=1.0/static_cast<float>(vp.width);
-    float ih=1.0/static_cast<float>(vp.height);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D,depth_tex_id_);
-    glActiveTexture(GL_TEXTURE0);
-    glUniform1i(glGetUniformLocation(cpr,"depth_map"),1);
-    glUniform3f(glGetUniformLocation(cpr,"wpos"),w0[0],w0[1],w0[2]);
-    glUniform3f(glGetUniformLocation(cpr,"wdir"),w1[0],w1[1],w1[2]);
-    glUniform1f(glGetUniformLocation(cpr,"wlen"),geom::Length(w1));
-    glUniform1f(glGetUniformLocation(cpr,"rad"),2.0);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_COLOR_MATERIAL);
-    glDisable(GL_FOG);
-    glDisable(GL_CULL_FACE);
-    glDisable(GL_LINE_SMOOTH);
-    glDisable(GL_POINT_SMOOTH);
-    glShadeModel(GL_FLAT);
-    glViewport(0,0,vp.width,vp.height);
-    glEnable(GL_TEXTURE_2D);
-    glColor3f(1.0,0.0,1.0);
-    glBegin(GL_QUADS);
-    glTexCoord2f(iw*q0[0],ih*q0[1]);
-    glVertex2f(q0[0],q0[1]);
-    glTexCoord2f(iw*q1[0],ih*q1[1]);
-    glVertex2f(q1[0],q1[1]);
-    glTexCoord2f(iw*q2[0],ih*q2[1]);
-    glVertex2f(q2[0],q2[1]);
-    glTexCoord2f(iw*q3[0],ih*q3[1]);
-    glVertex2f(q3[0],q3[1]);
-    glEnd();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPopMatrix();
-    glPopAttrib();
+    draw_beacon();
   }
 
   glDisable(GL_TEXTURE_1D);
@@ -614,5 +565,111 @@ void SceneFX::draw_screen_quad(unsigned int w, unsigned int h)
   glPopMatrix();
   glPopAttrib();
 }
+
+void SceneFX::prep_beacon()
+{
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  Scene::Instance().stereo_projection(0);
+  GLdouble glpmat[16];
+  glGetDoublev(GL_PROJECTION_MATRIX, glpmat);
+  geom::Mat4 pmat(geom::Transpose(geom::Mat4(glpmat)));
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  geom::Mat4 mmat=Scene::Instance().GetTransform().GetTransposedMatrix();
+  GLdouble glmmat[16];
+  for(int i=0;i<16;++i) glmmat[i]=static_cast<GLdouble>(mmat.Data()[i]);
+  GLint glvp[4];
+  glGetIntegerv(GL_VIEWPORT,glvp);
+
+  double res[3];
+  gluUnProject(beacon.wx,beacon.wy,0.0,
+	       glmmat,glpmat,glvp,
+	       &res[0],&res[1],&res[2]);
+  beacon.p0=geom::Vec3(res[0],res[1],res[2]);
+  gluUnProject(beacon.wx,beacon.wy,1.0,
+	       glmmat,glpmat,glvp,
+	       &res[0],&res[1],&res[2]);
+  beacon.p1=geom::Vec3(res[0],res[1],res[2]);
+
+  glGetv(GL_PROJECTION_MATRIX, glpmat);
+  geom::Mat4 pmat2(geom::Transpose(geom::Mat4(glpmat)));
+  beacon.mat = geom::Invert(Scene::Instance().GetTransform().GetMatrix())*geom::Invert(pmat2);
+}
+
+void SceneFX::draw_beacon()
+{
+  Viewport vp=Scene::Instance().GetViewport();
+  float iw=1.0/static_cast<float>(vp.width);
+  float ih=1.0/static_cast<float>(vp.height);
+  Shader::Instance().PushProgram();
+  Shader::Instance().Activate("beacon");
+  uint cpr=Shader::Instance().GetCurrentProgram();
+
+  float rad=0.6;
+  float delta = rad/(std::max<float>(1.0,Scene::Instance().znear_) * Scene::Instance().aspect_ratio_ * std::tan(Scene::Instance().fov_*M_PI/360.0))/iw;
+  geom::Vec2 q0(beacon.wx-delta,beacon.wy-delta);
+  geom::Vec2 q1(beacon.wx-delta,beacon.wy+delta);
+  geom::Vec2 q2(beacon.wx+delta,beacon.wy+delta);
+  geom::Vec2 q3(beacon.wx+delta,beacon.wy-delta);
+
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D,depth_tex_id_);
+  glMatrixMode(GL_TEXTURE);
+  glPushMatrix();
+  geom::Mat4 ttmp=geom::Transpose(beacon.mat);
+  glLoadMatrix(ttmp.Data());
+  glActiveTexture(GL_TEXTURE0);
+  glUniform1i(glGetUniformLocation(cpr,"depth_map"),1);
+  glUniform3f(glGetUniformLocation(cpr,"pos"),beacon.p0[0],beacon.p0[1],beacon.p0[2]);
+  geom::Vec3 dir=beacon.p1-beacon.p0;
+  glUniform3f(glGetUniformLocation(cpr,"dir"),dir[0],dir[1],dir[2]);
+  glUniform1f(glGetUniformLocation(cpr,"len"),geom::Length(dir));
+  glUniform1f(glGetUniformLocation(cpr,"rad"),rad);
+
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0,vp.width,0,vp.height,-1,1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND);
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_COLOR_MATERIAL);
+  glDisable(GL_FOG);
+  glDisable(GL_CULL_FACE);
+  glDisable(GL_LINE_SMOOTH);
+  glDisable(GL_POINT_SMOOTH);
+  glShadeModel(GL_FLAT);
+  glViewport(0,0,vp.width,vp.height);
+  glEnable(GL_TEXTURE_2D);
+  glColor3f(1.0,0.0,1.0);
+  glBegin(GL_QUADS);
+  glTexCoord2f(iw*q0[0],ih*q0[1]);
+  glVertex2f(q0[0],q0[1]);
+  glTexCoord2f(iw*q1[0],ih*q1[1]);
+  glVertex2f(q1[0],q1[1]);
+  glTexCoord2f(iw*q2[0],ih*q2[1]);
+  glVertex2f(q2[0],q2[1]);
+  glTexCoord2f(iw*q3[0],ih*q3[1]);
+  glVertex2f(q3[0],q3[1]);
+  glEnd();
+  glActiveTexture(GL_TEXTURE1);
+  glMatrixMode(GL_TEXTURE);
+  glPopMatrix();
+  glActiveTexture(GL_TEXTURE0);
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+  glPopAttrib();
+  Shader::Instance().PopProgram();
+}
+
 
 }}} // ns

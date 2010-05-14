@@ -35,7 +35,9 @@ class Scene;
 namespace impl {
 
 struct Beacon {
+  float wx, wy;
   geom::Vec3 p0,p1;
+  geom::Mat4 mat;
 };
 
 class SceneFX {
@@ -75,6 +77,8 @@ private:
   void prep_depth_darkening();
   void prep_amb_occlusion();
   void draw_screen_quad(uint w, uint h);
+  void prep_beacon();
+  void draw_beacon();
 
   GLuint scene_tex_id_;
   GLuint depth_tex_id_;
@@ -95,8 +99,6 @@ private:
   GLuint depth_rb_;
 
   bool use_fb_;
-
-  bool use_beacon_;
 };
 
 }}} // ns

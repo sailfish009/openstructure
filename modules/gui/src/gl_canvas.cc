@@ -47,14 +47,19 @@ using gfx::Scene;
 
 GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QGLFormat& f):
   QGLWidget(f,parent),
-  glwin_(gl_win)
+  glwin_(gl_win),
+  mouse_key_mask_(),
+  refresh_(true),
+  master_timer_(),
+  bench_flag_(false),
+  last_pos_(),
+  scene_menu_(NULL),
+  show_beacon_(false)
 {
   if(!isValid()) return;
-  refresh_=true;
   master_timer_.start(10,this);
   setFocusPolicy(Qt::StrongFocus);
-  bench_flag_=false;
-  setMouseTracking(false);
+  setMouseTracking(true);
   scene_menu_=new SceneMenu();
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
@@ -225,6 +230,10 @@ void GLCanvas::HandleMouseMoveEvent(QMouseEvent* event)
   int indx=0;
   gfx::TransformTarget trg=gfx::TRANSFORM_VIEW;  
 
+  if(show_beacon_) {
+    Scene::Instance().SetBeacon(event->x(),size().height()-event->y());
+  }
+
   QPoint delta=QPoint(event->x(), event->y())-last_pos_;
   if (event->buttons() & Qt::LeftButton) {
     if (event->buttons() & Qt::MidButton) {
@@ -320,6 +329,12 @@ void GLCanvas::CopySelectionToClipboard()
 
 void GLCanvas::keyPressEvent(QKeyEvent* event)
 {
+  if(event->key()==Qt::Key_Space) {
+    show_beacon_=true;
+    Scene::Instance().SetBeacon(last_pos_.x(),size().height()-last_pos_.y());
+    DoRefresh();
+    setCursor(Qt::BlankCursor);
+  }
   if((event->modifiers() & Qt::ControlModifier)) {
     // Ctrl pressed
     if(event->key()==Qt::Key_A) {
@@ -373,6 +388,13 @@ void GLCanvas::keyPressEvent(QKeyEvent* event)
 
 void GLCanvas::keyReleaseEvent(QKeyEvent* event)
 {
+  if(event->key()==Qt::Key_Space) {
+    show_beacon_=false;
+    Scene::Instance().SetBeaconOff();
+    DoRefresh();
+    setCursor(Qt::ArrowCursor);
+    return;
+  }
   if(event->key()==Qt::Key_Alt){
     emit ReleaseFocus();
     return;

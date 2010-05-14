@@ -57,6 +57,8 @@ struct Viewport {
   int height;
 };
 
+namespace impl {class SceneFX;}
+
 /// \brief main class for organization and root for the graphical display
 /// 
 /// The scene manages graphical objects for rendering. Typical graphical objects 
@@ -74,6 +76,7 @@ struct Viewport {
 /// disabling the AutoAutoslab(). The near and far clipping plane can then be 
 /// adjusted manually.
 class DLLEXPORT_OST_GFX Scene {
+  friend class impl::SceneFX;
  private:
    
   // TODO: this struct may be the seed for a proper

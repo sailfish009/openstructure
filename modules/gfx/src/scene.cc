@@ -283,14 +283,9 @@ void Scene::SetShadingMode(const std::string& smode)
 void Scene::SetBeacon(int wx, int wy)
 {
 #if OST_SHADER_SUPPORT_ENABLED
-  stereo_projection(0);
-  geom::Vec3 p0=UnProject(geom::Vec3(static_cast<Real>(wx),static_cast<Real>(wy),0.0));
-  std::cerr << p0 << Project(p0) << std::endl;
-  geom::Vec3 p1=UnProject(geom::Vec3(static_cast<Real>(wx),static_cast<Real>(wy),1.0));
-  stereo_projection(stereo_eye_);
   impl::SceneFX::Instance().use_beacon=true;
-  impl::SceneFX::Instance().beacon.p0=p0;
-  impl::SceneFX::Instance().beacon.p1=p1;
+  impl::SceneFX::Instance().beacon.wx=static_cast<float>(wx);
+  impl::SceneFX::Instance().beacon.wy=static_cast<float>(wy);
 #endif  
 }
 

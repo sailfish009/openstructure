@@ -1,6 +1,6 @@
-uniform vec3 wpos;
-uniform vec3 wdir;
-uniform float wlen;
+uniform vec3 pos;
+uniform vec3 dir;
+uniform float len;
 uniform float rad;
 uniform sampler2D depth_map;
 
@@ -8,14 +8,16 @@ void main()
 {
   float depth = texture2D(depth_map,gl_TexCoord[0].xy).r;
   if(depth>=1.0) {
-    //discard;
+    discard;
   }
-  float d = length(cross(wdir,vec3(gl_FragCoord.xy,depth)-wpos))/wlen;
-  if(d<rad) {
-    gl_FragColor.rgb=vec3(0,1,0);
-    gl_FragColor.a=1.0;
-  } else {
-    gl_FragColor.rgb=vec3(1,0,0);
-    gl_FragColor.a=1.0;
+  vec4 pcoord = vec4(gl_TexCoord[0].xy*2.0-1.0,depth*2.0-1.0,1.0);
+  vec4 coord = gl_TextureMatrix[1]*pcoord;
+  coord/=coord.w;
+
+  float d = length(cross(dir,coord.xyz-pos))/len;
+  if(d>rad) {
+    discard;
   }
+  gl_FragColor.rgb=vec3(0,1.0,0);
+  gl_FragColor.a=min(0.9,mix(3.0,0.0,d/rad));
 }
