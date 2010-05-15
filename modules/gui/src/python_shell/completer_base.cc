@@ -61,7 +61,7 @@ void OstCompleterBase::complete(const QRect & rect,bool inline_completion)
                            (popup()->verticalScrollBar()->isVisible() ? 
                             popup()->verticalScrollBar()->width():0);
   popup()->setFixedWidth(popup_width);
-  popup()->move(popup()->pos()+QPoint(0,-popup()->height()-rect.height()));
+  popup()->move(widget()->mapToGlobal(rect.topLeft()+QPoint(0,-popup()->height())));
 }
 
 QString OstCompleterBase::GetCommonMatch()

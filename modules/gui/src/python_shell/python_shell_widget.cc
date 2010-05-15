@@ -144,6 +144,11 @@ void PythonShellWidget::setup_readonly_state_machine_()
 
 void PythonShellWidget::setup_state_machine_()
 {
+  #ifdef __APPLE__
+    QFlags<Qt::KeyboardModifier> DNG_ARROW_MODIFIERS = Qt::KeypadModifier;
+  #else
+    QFlags<Qt::KeyboardModifier> DNG_ARROW_MODIFIERS = Qt::NoModifier;
+  #endif
   State* single_line=new State;
   State* multi_line_inactive=new State;
   State* completing=new State;
@@ -180,8 +185,8 @@ void PythonShellWidget::setup_state_machine_()
                                                  new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
   single_line->addTransition(tr3);
   connect(tr3,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::KeypadModifier,history_up));
-  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::KeypadModifier,history_down));
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
 
   KeyEventTransition* tr4=new KeyEventTransition(QEvent::KeyPress,
                                                  Qt::Key_Return,
@@ -198,11 +203,11 @@ void PythonShellWidget::setup_state_machine_()
                                                  new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
   multi_line_inactive->addTransition(tr6);
   connect(tr6,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Left,Qt::KeypadModifier,multiline_active_state_));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Right,Qt::KeypadModifier,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Left,DNG_ARROW_MODIFIERS,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Right,DNG_ARROW_MODIFIERS,multiline_active_state_));
   multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::ControlModifier,multiline_active_state_));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::KeypadModifier,history_up));
-  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::KeypadModifier,history_down));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
 
   KeyEventTransition* tr7=new KeyEventTransition(QEvent::KeyPress,
                                                  Qt::Key_Return,
@@ -221,8 +226,8 @@ void PythonShellWidget::setup_state_machine_()
   connect(tr8,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
 
   multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier,multi_line_inactive));
-  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::ControlModifier | Qt::KeypadModifier,history_up));
-  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier | Qt::KeypadModifier,history_down));
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_up));
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_down));
 
   history_up->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
   history_up->addTransition(new AutomaticTransition(single_line,new HistoryGuard(&history_,EDITMODE_SINGLELINE)));
@@ -693,11 +698,6 @@ void PythonShellWidget::showEvent(QShowEvent* event)
   if(!init) {
     init=true;
   }
-}
-
-void PythonShellWidget::AquireFocus()
-{
-  setFocus(Qt::OtherFocusReason);
 }
 
 

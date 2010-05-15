@@ -70,7 +70,6 @@ public slots:
   void AppendOutput(unsigned int id,const QString& output);
   void AppendError(unsigned int id,const QString& output);
   void OutputFinished(unsigned int id, bool error);
-  void AquireFocus();
   void Complete(bool inline_completion=true);
   void Recomplete(const QString& completion);
   // slots for state machine
