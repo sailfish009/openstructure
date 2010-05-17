@@ -116,7 +116,6 @@ ViewObject* SequenceModel::GetItem(gfx::EntityP& entity){
 const PainterList& SequenceModel::GetPainters(const QModelIndex& index) const{
   QPair<int, ViewObject*> pair = this->GetRowWithItem(index);
   if(pair.second){
-    pair.second->GetRow(pair.first);
     return pair.second->GetRow(pair.first)->GetPainters();
   }
   return empty_list_;

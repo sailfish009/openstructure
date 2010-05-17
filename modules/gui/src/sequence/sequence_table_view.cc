@@ -68,9 +68,10 @@ SequenceTableView::SequenceTableView(QAbstractItemModel * model)
 
   this->InitStaticRow();
   this->InitStaticColumn();
-//  this->viewport()->stackUnder(static_row_);
   this->InitStaticField();
-//  this->viewport()->stackUnder(static_field_);
+  this->viewport()->stackUnder(static_field_);
+  this->viewport()->stackUnder(static_column_);
+  this->viewport()->stackUnder(static_row_);
  }
 
 void SequenceTableView::InitStaticColumn()
@@ -82,7 +83,6 @@ void SequenceTableView::InitStaticColumn()
   static_column_->verticalHeader()->hide();
   static_column_->horizontalHeader()->hide();
 
-  //this->viewport()->stackUnder(static_column_);
   static_column_->setSelectionBehavior(SelectRows);
   static_column_->setSelectionModel(this->selectionModel());
   for(int col=1; col<this->model()->columnCount(); col++){
@@ -95,7 +95,9 @@ void SequenceTableView::InitStaticColumn()
   static_column_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   static_column_->show();
   static_column_->setStyleSheet("QTableView { border: 0px;"
-                                 "background-color: #FFFFFF}"
+                                 "selection-color: #4f4f4f;"
+                                 "selection-background-color: white;"
+                                 "background-color: white}"
                                  "QTableView::item{ border: none;"
                                  "padding: 0px; border-width: 0px; margin: 0px;}");
   static_column_->setShowGrid(false);

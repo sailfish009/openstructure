@@ -75,12 +75,22 @@ QVariant SequenceRow::GetData(int column, int role) const
 {
   if(column<0 || column > sequence_.GetLength())return QVariant();
 
+  if (role == Qt::ForegroundRole){
+    return QColor(Qt::black);
+  }
+
   if(column == 0) {
     if (role == Qt::DisplayRole){
       return QVariant(this->name_);
     }
     if (role == Qt::FontRole){
-      return QVariant(name_font_);
+      return QVariant(this->name_font_);
+    }
+    if (role == Qt::TextAlignmentRole){
+      return QVariant(Qt::AlignLeft|Qt::AlignVCenter);
+    }
+    if (role==Qt::ToolTipRole){
+      return QVariant(this->name_);
     }
   }
   else if(column > 0) {

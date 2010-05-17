@@ -204,7 +204,7 @@ void SequenceViewerV2::CopyEvent(QKeyEvent* event)
     }
 
     bool first_row = true;
-    for(int i = 0; i < model_->rowCount(); i++){
+    for(int i = 1; i < model_->rowCount(); i++){
       if(rows.contains(i)){
         if(!first_row){
           clipboard_string.append("\n");
