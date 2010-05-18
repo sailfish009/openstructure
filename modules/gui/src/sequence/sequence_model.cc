@@ -184,13 +184,13 @@ QModelIndexList SequenceModel::GetModelIndexes(const QString& subject, const QSt
   for (int i = 0; i<objects_.size(); i++){
     ViewObject* object = objects_[i];
     QMap<int, QList<int> > indexes = object->GetIndexesForSubject(subject,sequence_name);
-    QMapIterator< int, QList<int> > i(indexes);
-    while (i.hasNext()) {
-      i.next();
-      int row = this->GetGlobalRow(object, i.key());
-      const QList<int>& index_list = i.value();
-      for(int i=0; i<index_list.size(); i++){
-        list.append(this->index(row,index_list[i]));
+    QMapIterator< int, QList<int> > iter(indexes);
+    while (iter.hasNext()) {
+      iter.next();
+      int row = this->GetGlobalRow(object, iter.key());
+      const QList<int>& index_list = iter.value();
+      for(int j=0; j<index_list.size(); j++){
+        list.append(this->index(row,index_list[j]));
       }
     }
   }

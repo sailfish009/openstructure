@@ -45,7 +45,7 @@ struct WrappedTool : public Tool
     {
       try {
         return call_method<void, MouseEvent>(self, "Click", event);
-      } catch(error_already_set& e) {
+      } catch(error_already_set& ) {
         PyErr_Print();
       }
     }
@@ -58,7 +58,7 @@ struct WrappedTool : public Tool
     {
       try {
         return call_method< bool, gfx::NodePtrList >(self, "CanOperateOn", nodes);
-      } catch(error_already_set& e) {
+      } catch(error_already_set& ) {
         PyErr_Print();
       }
       return false;
@@ -71,7 +71,7 @@ struct WrappedTool : public Tool
         String loc = call_method<String>(self, "GetIconPath");
         QIcon icon = QIcon(loc.c_str());
         return icon;
-      } catch(error_already_set& e) {
+      } catch(error_already_set& ) {
         PyErr_Print();
       }
       QIcon icon = QIcon();

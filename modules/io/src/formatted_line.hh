@@ -68,7 +68,7 @@ struct LPaddedInt {
 struct LPaddedFloat {
   LPaddedFloat(Real val, int prec)
   {
-    double rounded_val=round(val*pow(10, prec))*pow(0.1, prec);
+    Real rounded_val=round(val*pow(Real(10), prec))*pow(Real(0.1), prec);
     size_t curr=0;
     bool minus=rounded_val<0;
     rounded_val=std::abs(rounded_val);
