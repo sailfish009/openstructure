@@ -486,12 +486,13 @@ macro(ost_unittest MODULE SOURCE_FILES)
     if(DEFINED CPP_TESTS)
       add_executable(${_test_name} EXCLUDE_FROM_ALL ${_SOURCES})
       if (WIN32)
-        target_link_libraries(${_test_name} "ost_${MODULE}")  
+        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "ost_${MODULE}")  
         add_custom_target("${_test_name}_run"
                         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe || echo
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/..
                         COMMENT "running checks for module ${MODULE}"
                         DEPENDS ${_test_name})
+        add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe)
       else()
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
                             "ost_${MODULE}")

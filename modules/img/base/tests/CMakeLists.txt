@@ -17,6 +17,6 @@ tests.cc
 
 
 ost_unittest(img "${OST_IMG_BASE_UNIT_TESTS}")
-if(NOT WIN32)
+
 target_link_libraries(img_tests ost_img_alg)
-endif()
+

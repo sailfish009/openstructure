@@ -25,6 +25,7 @@
 #ifndef IMG_TEST_IMAGE_H
 #define IMG_TEST_IMAGE_H
 
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 

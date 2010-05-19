@@ -299,7 +299,7 @@ public:
   See also common algorithms, e.g. img::alg::Stat
 */
 template <class FNC>
-class DLLEXPORT_OST_IMG_BASE ImageStateNonModVisitor: public FNC, public ImageStateNonModVisitorBase {
+class DLLEXPORT ImageStateNonModVisitor: public FNC, public ImageStateNonModVisitorBase {
 public:
   
   IMAGE_STATE_VISITOR_CTOR_ADAPTERS(ImageStateNonModVisitor)
@@ -354,7 +354,7 @@ public:
 
 */
 template <class FNC>
-class DLLEXPORT_OST_IMG_BASE ImageStateModIPVisitor: public FNC, public ImageStateModIPVisitorBase {
+class DLLEXPORT ImageStateModIPVisitor: public FNC, public ImageStateModIPVisitorBase {
 public:
   IMAGE_STATE_VISITOR_CTOR_ADAPTERS(ImageStateModIPVisitor)
 
@@ -461,7 +461,7 @@ public:
 
 */
 template <class FNC>
-class DLLEXPORT_OST_IMG_BASE ImageStateModOPVisitor: public FNC, public ImageStateModOPVisitorBase {
+class DLLEXPORT ImageStateModOPVisitor: public FNC, public ImageStateModOPVisitorBase {
 public:
 
   IMAGE_STATE_VISITOR_CTOR_ADAPTERS(ImageStateModOPVisitor)

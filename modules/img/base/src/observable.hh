@@ -39,7 +39,7 @@ namespace ost { namespace img {
   and ObserverUpdate
 */
 template <class T>
-class DLLEXPORT_OST_IMG_BASE Observable {
+class DLLEXPORT Observable {
   typedef std::list<T *> ObserverList;
   typedef typename ObserverList::iterator ObserverIter;
   typedef typename ObserverList::const_iterator ObserverConstIter;

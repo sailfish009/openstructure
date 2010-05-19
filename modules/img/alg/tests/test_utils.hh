@@ -27,7 +27,8 @@
 
 #include <iostream>
 
-#include <boost/test/test_tools.hpp>
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
 //#include <img/base.hh>
 #include <ost/img/image_state.hh>
