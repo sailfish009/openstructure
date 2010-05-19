@@ -30,6 +30,7 @@ void export_Vec2()
 
   class_<Vec2>("Vec2",init<>())
     .def(init<Real,Real>())
+    .def(init<const Vec2&>())
     .def(init<const Vec3&>())
     .def(init<const Vec4&>())
     .def(self *= Real())
