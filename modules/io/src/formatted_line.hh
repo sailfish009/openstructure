@@ -1,6 +1,12 @@
 #ifndef OST_IO_FORMATTED_LINE_HH
 #define OST_IO_FORMATTED_LINE_HH
 
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
+#include <cstdio>
+
 #include <ost/string_ref.hh>
 
 /*
@@ -68,43 +74,58 @@ struct LPaddedInt {
 struct LPaddedFloat {
   LPaddedFloat(Real val, int prec)
   {
-    Real rounded_val=round(val*pow(Real(10), prec))*pow(Real(0.1), prec);
-    size_t curr=0;
-    bool minus=rounded_val<0;
-    rounded_val=std::abs(rounded_val);
-    int int_val=int(rounded_val);
-    if (minus) {
-      data[curr]='-';
-      ++curr;
+    switch(prec){
+      case 0:
+        len = snprintf(data, sizeof(data), "%.0f", val);
+        break;
+      case 1:
+        len = snprintf(data, sizeof(data), "%.1f", val);
+        break;
+      case 2:
+        len = snprintf(data, sizeof(data), "%.2f", val);
+        break;
+      case 3:
+        len = snprintf(data, sizeof(data), "%.3f", val);
+        break;
+      default:
+        Real rounded_val=round(val*pow(Real(10), prec))*pow(Real(0.1), prec);
+        size_t curr=0;
+        bool minus=rounded_val<0;
+        rounded_val=std::abs(rounded_val);
+        int int_val=int(rounded_val);
+        if (minus) {
+          data[curr]='-';
+          ++curr;
+        }
+        do {
+          int m=int_val%10;
+          data[curr]='0'+m;
+          ++curr;
+          int_val/=10;
+        } while(int_val);
+        // swap
+        for (size_t i=0, e=(curr-int(minus))/2; i<e; ++i) {
+          std::swap(data[int(minus)+i], data[curr-i-1]);
+        }
+        data[curr]='\0';
+        len=curr;
+        if (prec==0) {
+          return;
+        }
+        data[curr]='.';
+        curr++;
+        rounded_val-=int(rounded_val);
+        while(prec>0) {
+          rounded_val*=10;
+          int m=int(rounded_val);
+          rounded_val-=int(rounded_val);
+          data[curr]='0'+m;
+          curr++;
+          --prec;
+        }
+        data[curr]='\0';
+        len=curr;
     }
-    do {
-      int m=int_val%10;
-      data[curr]='0'+m;
-      ++curr;
-      int_val/=10;
-    } while(int_val);
-    // swap
-    for (size_t i=0, e=(curr-int(minus))/2; i<e; ++i) {
-      std::swap(data[int(minus)+i], data[curr-i-1]);
-    }
-    data[curr]='\0';
-    len=curr;
-    if (prec==0) {
-      return;
-    }
-    data[curr]='.';
-    curr++;
-    rounded_val-=int(rounded_val);
-    while(prec>0) {
-      rounded_val*=10;
-      int m=int(rounded_val);
-      rounded_val-=int(rounded_val);
-      data[curr]='0'+m;
-      curr++;
-      --prec;
-    }
-    data[curr]='\0';
-    len=curr;
   }
   char   data[20];
   size_t len;  
