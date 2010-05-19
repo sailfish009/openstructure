@@ -21,10 +21,14 @@
   Author: Marco Biasini
  */
 
-#include <boost/test/unit_test.hpp>
+#include <ost/gfx/impl/map_octree.hh>
+
 #include <ost/img/image_handle.hh>
 #include <ost/img/image_factory.hh>
-#include <ost/gfx/impl/map_octree.hh>
+
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
 
 using boost::unit_test_framework::test_suite;
 using namespace ost;

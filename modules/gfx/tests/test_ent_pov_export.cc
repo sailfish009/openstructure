@@ -22,13 +22,17 @@
  */
 
 #include <fstream>
-#include <boost/test/unit_test.hpp>
 #include <ost/io/load_entity.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/entity.hh>
+
 #include <ost/test_utils/compare_files.hh>
 
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
 using boost::unit_test_framework::test_suite;
+
 using namespace ost;
 using namespace ost::gfx;
 
@@ -100,6 +104,7 @@ bool compare_sphere_cyl_entries(const String& test,
 }
 
 }
+
 BOOST_AUTO_TEST_SUITE(gfx)
 
 BOOST_AUTO_TEST_CASE(pov_export_simple)
@@ -127,7 +132,7 @@ BOOST_AUTO_TEST_CASE(pov_export_cartoon)
   Scene::Instance().SetOffscreenMode();
   boost::shared_ptr<Entity> obj=prepare_object(RenderMode::HSC);
   Scene::Instance().ExportPov("pov_cartoon_test", ".");
-  BOOST_CHECK(compare_files("pov_cartoon_test.inc", 
+  BOOST_CHECK(ost::compare_files("pov_cartoon_test.inc", 
                             "testfiles/pov_cartoon_std.inc"));
   Scene::Instance().Remove(obj);
 }
@@ -147,7 +152,7 @@ BOOST_AUTO_TEST_CASE(pov_export_trace)
   Scene::Instance().SetOffscreenMode();
   boost::shared_ptr<Entity> obj=prepare_object(RenderMode::TRACE);
   Scene::Instance().ExportPov("pov_trace_test", ".");
-  BOOST_CHECK(compare_files("pov_trace_test.inc", 
+  BOOST_CHECK(ost::compare_files("pov_trace_test.inc", 
                             "testfiles/pov_trace_std.inc"));
   Scene::Instance().Remove(obj);
 }
@@ -157,7 +162,7 @@ BOOST_AUTO_TEST_CASE(pov_export_line_trace)
   Scene::Instance().SetOffscreenMode();
   boost::shared_ptr<Entity> obj=prepare_object(RenderMode::LINE_TRACE);
   Scene::Instance().ExportPov("pov_line_trace_test", ".");
-  BOOST_CHECK(compare_files("pov_line_trace_test.inc", 
+  BOOST_CHECK(ost::compare_files("pov_line_trace_test.inc", 
                             "testfiles/pov_line_trace_std.inc"));
   Scene::Instance().Remove(obj);
 }
@@ -167,7 +172,7 @@ BOOST_AUTO_TEST_CASE(pov_export_sline)
   Scene::Instance().SetOffscreenMode();
   boost::shared_ptr<Entity> obj=prepare_object(RenderMode::SLINE);
   Scene::Instance().ExportPov("pov_sline_test", ".");
-  BOOST_CHECK(compare_files("pov_sline_test.inc", 
+  BOOST_CHECK(ost::compare_files("pov_sline_test.inc", 
                             "testfiles/pov_sline_std.inc"));
   Scene::Instance().Remove(obj);
 }

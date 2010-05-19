@@ -34,7 +34,7 @@ namespace ost {
 /// \brief vector container that treats its data as POD - even if it isn't in 
 ///      the strict sense.
 template <typename T>
-class DLLEXPORT_OST_BASE PodVector {
+class TEMPLATE_DEF_EXPORT PodVector {
 public:
   PodVector(): begin_(NULL), end_(NULL), capacity_(NULL) {}
   typedef T value_type;
