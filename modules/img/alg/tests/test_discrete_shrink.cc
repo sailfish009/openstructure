@@ -53,7 +53,7 @@ void test()
       h.GetReal(p2+Point(1,0))+
       h.GetReal(p2+Point(0,1))+
       h.GetReal(p2+Point(1,1)));
-    BOOST_CHECK_CLOSE(std::fabs(sm-rh.GetReal(it)),0.0,0.000001);
+    BOOST_CHECK_SMALL(Real(std::fabs(sm-rh.GetReal(it))),Real(1e-7));
   }
   
 }
