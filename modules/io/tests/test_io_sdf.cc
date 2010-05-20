@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(read_sdf)
 
   // check properties
   BOOST_CHECK(ch.HasProp("r_i_glide_rmsd"));
-  BOOST_CHECK_EQUAL(boost::lexical_cast<Real>(boost::trim_copy
+  BOOST_CHECK_EQUAL(boost::lexical_cast<float>(boost::trim_copy
                      (ch.GetStringProp("r_i_glide_rmsd"))),
                      0.543804f);
 }

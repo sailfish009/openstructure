@@ -312,7 +312,7 @@ void test_ImageOps()
   ImageHandle h3=h1+h2;
   for(ExtentIterator it(Extent(Point(-4,-3),Point(4,5))); !it.AtEnd(); ++it) {
     if(ex1.Contains(it) && ex2.Contains(it)) {
-      BOOST_REQUIRE(std::fabs(h3.GetReal(it)-(h1.GetReal(it)+h2.GetReal(it)))<1e-10);
+      BOOST_REQUIRE_CLOSE(std::fabs(h3.GetReal(it)-(h1.GetReal(it)+h2.GetReal(it))),0.0,0.000001);
     } else if (ex1.Contains(it)) {
       BOOST_REQUIRE(h3.GetReal(it)==h1.GetReal(it));
     } else {
