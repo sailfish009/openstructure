@@ -256,7 +256,7 @@ void CompoundLib::LoadAtomsFromDB(CompoundPtr comp, int pk) {
         atom_sp.alt_name=String(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1)));        
         atom_sp.element=String(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2))); 
         atom_sp.ordinal=sqlite3_column_int(stmt, 3);  
-        atom_sp.is_leaving=bool(sqlite3_column_int(stmt, 4));
+        atom_sp.is_leaving=bool(sqlite3_column_int(stmt, 4)!=0);
         comp->AddAtom(atom_sp);
       }
   }

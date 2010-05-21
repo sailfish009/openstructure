@@ -49,10 +49,10 @@ private:
   };
 
   FileLoader();
-  static gfx::GfxObjP TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler=io::EntityIOHandlerP(), const QString& selection=QString()) throw (io::IOException);
-  static gfx::GfxObjP TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler=io::SurfaceIOHandlerPtr()) throw (io::IOException);
+  static gfx::GfxObjP TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler=io::EntityIOHandlerP(), const QString& selection=QString());
+  static gfx::GfxObjP TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler=io::SurfaceIOHandlerPtr());
 #if OST_IMG_ENABLED
-  static gfx::GfxObjP TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler=io::MapIOHandlerPtr()) throw (io::IOException, io::IOFileAlreadyLoadedException);
+  static gfx::GfxObjP TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler=io::MapIOHandlerPtr());
 #endif
   static void RunScript(const QString& filename);
   static void LoadPDB(const QString& filename, const QString& selection=QString());

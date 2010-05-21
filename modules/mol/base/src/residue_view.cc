@@ -208,9 +208,9 @@ double ResidueView::GetMass() const
 geom::Vec3 ResidueView::GetGeometricStart() const 
 {
   this->CheckValidity();
-  geom::Vec3 minimum(std::numeric_limits<double>::max(),
-                     std::numeric_limits<double>::max(),
-                     std::numeric_limits<double>::max());
+  geom::Vec3 minimum(std::numeric_limits<Real>::max(),
+                     std::numeric_limits<Real>::max(),
+                     std::numeric_limits<Real>::max());
   AtomViewList::const_iterator i;
   for (i=data_->atoms.begin(); i!=data_->atoms.end(); ++i) {
     minimum=geom::Min(minimum, (*i).GetPos());
@@ -221,9 +221,9 @@ geom::Vec3 ResidueView::GetGeometricStart() const
 geom::Vec3 ResidueView::GetGeometricEnd() const 
 {
   this->CheckValidity();
-  geom::Vec3 maximum(-std::numeric_limits<double>::max(),
-                     -std::numeric_limits<double>::max(),
-                     -std::numeric_limits<double>::max());
+  geom::Vec3 maximum(-std::numeric_limits<Real>::max(),
+                     -std::numeric_limits<Real>::max(),
+                     -std::numeric_limits<Real>::max());
   AtomViewList::const_iterator i;
   for (i=data_->atoms.begin(); i!=data_->atoms.end(); ++i) {
     maximum=geom::Max(maximum, (*i).GetPos());

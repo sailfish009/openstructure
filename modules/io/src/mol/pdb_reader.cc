@@ -404,8 +404,8 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   }
   // b-factors and occ are replaced by radius and charge if PQR file format
   if(is_pqr_) {
-    occ=std::make_pair(true, 1.0);
-    temp=std::make_pair(true, 0.0);
+    occ=std::make_pair(true, Real(1.0));
+    temp=std::make_pair(true, Real(0.0));
     if (line.length()>=60) {
       charge=line.substr(54,6).ltrim().to_float();      
     }

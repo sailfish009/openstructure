@@ -323,7 +323,7 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
   mol::ChainHandle last_chain;
   for (mol::AtomHandleList::const_iterator i=atoms.begin(),
        e=atoms.end(); i!=e; ++i, ++counter) {
-    write_atom(outstream_, line_, *i, counter, PDB::Flags() & PDB::PQR_FORMAT);
+    write_atom(outstream_, line_, *i, counter, (PDB::Flags() & PDB::PQR_FORMAT) != 0);
   }
   this->WriteModelTrailer();
 }

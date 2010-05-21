@@ -28,8 +28,8 @@ bool compare_files(const String& test, const String& gold_standard)
   std::ifstream gold_stream(gold_standard.c_str());
   String test_line, gold_line;
   while (true) {
-    bool test_end=std::getline(test_stream, test_line);
-    bool gold_end=std::getline(gold_stream, gold_line);
+    bool test_end=std::getline(test_stream, test_line) != 0;
+    bool gold_end=std::getline(gold_stream, gold_line) != 0;
     if (!(test_end || gold_end)) {
       return true;
     }

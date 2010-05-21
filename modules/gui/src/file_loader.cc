@@ -201,7 +201,7 @@ void FileLoader::HandleError(Message m, ErrorType type, const QString& filename,
   }
 }
 
-gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler, const QString& selection) throw (io::IOException)
+gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler, const QString& selection)
 {
   if(!handler){
     try{
@@ -232,7 +232,7 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHand
 }
 
 #if OST_IMG_ENABLED
-gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler) throw(io::IOException, io::IOFileAlreadyLoadedException)
+gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler)
 {
   if(!handler){
     try{
@@ -266,7 +266,7 @@ gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr
 }
 #endif
 
-gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler) throw(io::IOException)
+gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler)
 {
   if(!handler){
     try{

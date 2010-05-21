@@ -138,7 +138,7 @@ void PlotViewerPanel::wheelEvent ( QWheelEvent * e )
 }
 void PlotViewerPanel::OnZoomX(int delta,QPoint pos)
 {
-  QPointF cursorpos=mapToScene(pos+QPoint(-PlotAxisBase::AXISWIDTH,0));
+  QPointF cursorpos=mapToScene(pos+QPoint(-int(PlotAxisBase::AXISWIDTH),0));
   Real scalefactor=exp(delta/1000.0);
   QRectF scenerect;
   scenerect.setCoords(cursorpos.x()-(cursorpos.x()-GetMinimumX())/scalefactor,
