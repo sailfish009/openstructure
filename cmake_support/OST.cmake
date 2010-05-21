@@ -501,6 +501,8 @@ macro(ost_unittest MODULE SOURCE_FILES)
                         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                         COMMENT "running checks for module ${MODULE}"
                         DEPENDS ${_test_name})
+        add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} ) 
+                        
       endif()
 
       add_dependencies(check "${_test_name}_run")

@@ -6,10 +6,10 @@ cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake_support)
 include(OST)
 
-
-
 project(OpenStructure CXX C)
 
+INCLUDE(CTest)
+ENABLE_TESTING()
 
 option(USE_SHADER "whether to compile with shader support"
        OFF)
