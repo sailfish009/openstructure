@@ -38,6 +38,9 @@ void BackgroundPainter::Paint(QPainter* painter, const QStyleOptionViewItem& opt
     painter->fillRect(option.rect, QColor(240,240,240));
 
   }
+  else{
+    painter->fillRect(option.rect, QColor(255,255,255));
+  }
   if(index.row()>0 && (index.column())%10 == 0){
     painter->setPen(QPen(QColor(135,135,135)));
     painter->drawLine(option.rect.topRight(),option.rect.bottomRight());

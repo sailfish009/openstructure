@@ -169,7 +169,9 @@ void SequenceTableView::InitStaticField(){
   static_field_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   static_field_->show();
   static_field_->setStyleSheet("QTableView { border: 0px;"
-                                 "background-color: #FFFFFF}"
+                                 "selection-color: transparent;"
+                                 "selection-background-color: transparent;"
+                                 "background-color: white}"
                                  "QTableView::item{ border: none;"
                                  "padding: 0px; border-width: 0px; margin: 0px;}");
   static_field_->setShowGrid(false);
