@@ -19,8 +19,10 @@
 /*
   Author: Marco Biasini
  */
+#include <locale>
 #include <boost/format.hpp>
 #include <string.h>
+
 #include <ost/io/io_exception.hh>
 
 #include "pdb_writer.hh"
@@ -257,6 +259,17 @@ private:
   std::map<long,int>& atom_indices_;
 };
 
+struct ForcePOSIX {
+  std::locale old_locale;
+  ForcePOSIX(){
+    old_locale=std::locale();
+    setlocale(LC_NUMERIC, "POSIX");
+  }
+  ~ForcePOSIX(){
+    setlocale(LC_NUMERIC, old_locale.name().c_str());
+  }
+};
+
 }
 
 PDBWriter::PDBWriter(std::ostream& stream):
@@ -295,6 +308,7 @@ void PDBWriter::WriteModelTrailer()
 template <typename H>
 void PDBWriter::WriteModel(H ent)
 {
+  ForcePOSIX posix = ForcePOSIX();
   this->WriteModelLeader();
   PDBWriterImpl writer(outstream_,line_, atom_indices_);
   if (PDB::Flags() & PDB::PQR_FORMAT) {
@@ -318,6 +332,7 @@ void PDBWriter::Write(const mol::EntityHandle& ent)
 
 void PDBWriter::Write(const mol::AtomHandleList& atoms)
 {
+  ForcePOSIX posix = ForcePOSIX();
   this->WriteModelLeader();
   int counter=1;
   mol::ChainHandle last_chain;
