@@ -29,6 +29,7 @@ option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
       OFF)
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
 option(DEPLOYMENT "switch on deployment settings" OFF)
+option(COMPILE_TESTS "wheter unit tests should be compiled by default" OFF)
 
 if (PREFIX)
   set(CMAKE_INSTALL_PREFIX ${PREFIX})
@@ -224,7 +225,7 @@ include_directories(${Boost_INCLUDE_DIRS}
 add_subdirectory(modules)
 add_subdirectory(scripts)
 add_subdirectory(deployment)
-set (FILES_TO_BE_REMOVED stage CMakeFiles)
+set(FILES_TO_BE_REMOVED CMakeFiles stage tests)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
                          "${FILES_TO_BE_REMOVED}")
 
@@ -246,3 +247,4 @@ message(STATUS
 #add_custom_target(doc COMMAND 
 #                  ${SPHINX} ${SPHINX_OPTIONS} modules doc/html
 #                  VERBATIM)
+
