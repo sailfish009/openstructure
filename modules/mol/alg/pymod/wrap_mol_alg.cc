@@ -24,7 +24,12 @@
 using namespace boost::python;
 
 void export_svdSuperPose();
+void export_entity_to_density();
+
 BOOST_PYTHON_MODULE(_mol_alg)
 {
   export_svdSuperPose();
+  #if OST_IMG_ENABLED
+  export_entity_to_density();
+  #endif
 }
