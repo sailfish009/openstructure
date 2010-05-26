@@ -28,3 +28,4 @@ if (NOT ENABLE_UI)
   set(CMAKE_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-no_ui")
 endif()
 
+set(BUILDNAME "${CMAKE_SYSTEM_NAME}")
