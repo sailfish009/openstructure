@@ -30,3 +30,6 @@ module(NAME mol_alg SOURCES ${OST_MOL_ALG_SOURCES}
        HEADER_OUTPUT_DIR ost/mol/alg
        DEPENDS_ON ${MOL_ALG_DEPS})
 
+copy_if_different("." "${STAGE_DIR}/share/openstructure"
+                  "atom_scattering_properties.txt" "ATOM_SCATTERING_PROPS"
+                  "ost_mol_alg")

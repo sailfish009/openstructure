@@ -30,6 +30,7 @@ using namespace ost::mol::alg;
 
 
 #if OST_IMG_ENABLED
+
 #include <ost/mol/alg/entity_to_density.hh>
 
 //"thin wrappers" for default parameters
