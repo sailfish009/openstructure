@@ -604,6 +604,7 @@ void Scene::Remove(const GfxNodeP& go)
   if(!go) return;
   root_node_->Remove(go);
   this->NotifyObservers(bind(&SceneObserver::NodeRemoved, _1,go));
+  this->RequestRedraw();
 }
 
 void Scene::Remove(const String& name)
@@ -614,6 +615,7 @@ void Scene::Remove(const String& name)
     root_node_->Remove(name);
     if(GfxObjP go = dyn_cast<GfxObj>(fn.node)) {
       this->NotifyObservers(bind(&SceneObserver::NodeRemoved, _1,go));
+      this->RequestRedraw();
     }
   }
 }
