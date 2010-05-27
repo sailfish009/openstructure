@@ -62,7 +62,7 @@ namespace {
 
 void export_GfxObj()
 {
-  class_<GfxObjBase, bases<GfxNode>, boost::noncopyable>("GfxObjBase",no_init)
+  class_<GfxObjBase, boost::shared_ptr<GfxObjBase>, bases<GfxNode>, boost::noncopyable>("GfxObjBase",no_init)
     .def("SetMatAmb",&GfxObjBase::SetMatAmb)
     .def("SetMatAmb",set_mat_amb2)
     .def("SetMatDiff",&GfxObjBase::SetMatDiff)
@@ -94,8 +94,9 @@ void export_GfxObj()
     .add_property("center", &GfxObjBase::GetCenter)
     COLOR_BY_DEF()
    ;
+  //register_ptr_to_python<GfxObjBaseP>();
 
-  class_<GfxObj, bases<GfxObjBase>, boost::noncopyable>("GfxObj",no_init)
+  class_<GfxObj, boost::shared_ptr<GfxObj>, bases<GfxObjBase>, boost::noncopyable>("GfxObj",no_init)
     .def("GetTF", &GfxObj::GetTF, return_value_policy<copy_const_reference>())
     .def("SetTF", &GfxObj::SetTF)
     .def("FlagRebuild",&GfxObj::FlagRebuild)
@@ -108,6 +109,6 @@ void export_GfxObj()
     .def("GetLineWidth",&GfxObj::GetLineWidth)
     .def("GetLineHalo",&GfxObj::GetLineHalo)
     ;
-  register_ptr_to_python<GfxObjP>();
+  //register_ptr_to_python<GfxObjP>();
 
 }

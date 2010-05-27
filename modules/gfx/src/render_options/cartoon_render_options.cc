@@ -44,7 +44,8 @@ CartoonRenderOptions::CartoonRenderOptions(bool force_tube):
   strand_thickness_(0.2),
   strand_ecc_(0.3),
   strand_profile_(1),
-  strand_mode_(0)
+  strand_mode_(0),
+  color_blend_mode_(0)
 {}
 
 RenderMode::Type CartoonRenderOptions::GetRenderMode(){
@@ -267,6 +268,16 @@ void CartoonRenderOptions::SetStrandMode(unsigned int m)
 {
   strand_mode_=m;
   this->NotifyStateChange();
+}
+
+void CartoonRenderOptions::SetColorBlendMode(unsigned int m)
+{
+  color_blend_mode_=m;
+  this->NotifyStateChange();
+}
+unsigned int CartoonRenderOptions::GetColorBlendMode() const
+{
+  return color_blend_mode_;
 }
 
 float CartoonRenderOptions::GetMaxRad() const{

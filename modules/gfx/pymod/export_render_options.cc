@@ -114,6 +114,8 @@ void export_RenderOptions()
     .def("GetStrandProfileType", &CartoonRenderOptions::GetStrandProfileType)
     .def("SetStrandMode", &CartoonRenderOptions::SetStrandMode)
     .def("GetStrandMode", &CartoonRenderOptions::GetStrandMode)
+    .def("SetColorBlendMode", &CartoonRenderOptions::SetColorBlendMode)
+    .def("GetColorBlendMode", &CartoonRenderOptions::GetColorBlendMode)
   ;
   
   class_<TraceRenderOptions, boost::shared_ptr<TraceRenderOptions>, bases<RenderOptions>, boost::noncopyable>("TraceRenderOptions")

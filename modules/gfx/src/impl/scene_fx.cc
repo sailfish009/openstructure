@@ -8,6 +8,10 @@
 #include <ost/gfx/shader.hh>
 #include <ost/gfx/scene.hh>
 
+#if !GL_VERSION_3_0
+#warning using OpenGL 2.0 interface
+#endif
+
 namespace ost { namespace gfx { namespace impl {
 
 namespace {
@@ -57,6 +61,7 @@ SceneFX::~SceneFX()
 
 void SceneFX::Setup()
 {
+  if(!GLEW_VERSION_2_0) return;
   LOGN_DEBUG("SceneFX: setup");
 
   glGenTextures(1,&scene_tex_id_);
@@ -68,9 +73,15 @@ void SceneFX::Setup()
   glGenTextures(1,&kernel_tex_id_);
   glGenTextures(1,&kernel2_tex_id_);
 
+#if GL_VERSION_3_0
   glGenFramebuffers(1,&scene_fb_);
   glGenRenderbuffers(1,&scene_rb_);
   glGenRenderbuffers(1,&depth_rb_);
+#else
+  glGenFramebuffersEXT(1,&scene_fb_);
+  glGenRenderbuffersEXT(1,&scene_rb_);
+  glGenRenderbuffersEXT(1,&depth_rb_);
+#endif
   glGenTextures(1,&scene_tex2_id_);
   glGenTextures(1,&norm_tex2_id_);
 
@@ -202,15 +213,25 @@ void SceneFX::Resize(unsigned int w, unsigned int h)
 
 void SceneFX::Preprocess() 
 {
+  if(!GLEW_VERSION_2_0) return;
   if(use_fb_) {
+#if GL_VERSION_3_0
     glBindFramebuffer(GL_FRAMEBUFFER, scene_fb_);
+#else
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, scene_fb_);
+#endif
   }
 }
 
 void SceneFX::Postprocess()
 {
+  if(!GLEW_VERSION_2_0) return;
   if(use_fb_) {
+#if GL_VERSION_3_0
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#else
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+#endif
   }
 
   if(!shadow_flag && !amb_occl_flag && !depth_dark_flag && !use_beacon) {
@@ -333,6 +354,7 @@ void SceneFX::Postprocess()
 
 void SceneFX::DrawTex(unsigned int w, unsigned int h, GLuint texid)
 {
+  if(!GLEW_VERSION_2_0) return;
   Shader::Instance().PushProgram();
   Shader::Instance().Activate("");
   glActiveTexture(GL_TEXTURE0);
@@ -347,22 +369,39 @@ void SceneFX::prep_shadow_map()
 {
   GLint smap_size=256 * (1+shadow_quality);
 
-#if 1
+#if GL_VERSION_3_0
   glBindFramebuffer(GL_FRAMEBUFFER, scene_fb_);
-
   glBindRenderbuffer(GL_RENDERBUFFER, scene_rb_);
   glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA,smap_size,smap_size);
   glBindRenderbuffer(GL_RENDERBUFFER, depth_rb_);
   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,smap_size,smap_size);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, scene_rb_);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depth_rb_);
-
+  
   GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-
+  
   if(status!=GL_FRAMEBUFFER_COMPLETE) {
     LOGN_DEBUG("fbo switch for shadow mapping failed, using fallback");
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    smap_size=512;
+  }
+#else
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, scene_fb_);
+  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, scene_rb_);
+  glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_RGBA,smap_size,smap_size);
+  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, depth_rb_);
+  glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT,smap_size,smap_size);
+  glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, scene_rb_);
+  glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depth_rb_);
+  
+  GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+  
+  if(status!=GL_FRAMEBUFFER_COMPLETE_EXT) {
+    LOGN_DEBUG("fbo switch for shadow mapping failed, using fallback");
+    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+    smap_size=512;
   }
 #endif
 
@@ -420,9 +459,12 @@ void SceneFX::prep_shadow_map()
   glPopAttrib();
   //glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
-#if 1
+#if GL_VERSION_3_0
   glBindRenderbuffer(GL_RENDERBUFFER, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#else
+  glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+  glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 #endif
 
   // set up appropriate texture matrix

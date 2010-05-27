@@ -204,6 +204,11 @@ void (Entity::*set_rm1)(RenderMode::Type, const mol::EntityView&, bool)=&Entity:
 void (Entity::*set_rm2)(RenderMode::Type)=&Entity::SetRenderMode;
 RenderOptionsPtr ent_trace_opts(Entity* ent)
 {
+  return ent->GetOptions(RenderMode::TRACE);
+}
+
+RenderOptionsPtr ent_line_trace_opts(Entity* ent)
+{
   return ent->GetOptions(RenderMode::LINE_TRACE);
 }
 
@@ -293,6 +298,7 @@ void export_Entity()
     .add_property("cartoon_options", &ent_hsc_opts)    
     .add_property("cpk_options", &ent_cpk_opts)
     .add_property("trace_options", &ent_trace_opts)
+    .add_property("line_trace_options", &ent_line_trace_opts)
     .def("ApplyOptions", &Entity::ApplyOptions)
     .def("SetOptions", &Entity::SetOptions)
     .def("Apply",&ent_apply_11)

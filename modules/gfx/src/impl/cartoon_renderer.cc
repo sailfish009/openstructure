@@ -113,7 +113,7 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
       spline_list_list.push_back(*sit);
     } else {
       LOGN_DEBUG("CartoonRenderer: generating full spline for spline-entry-list " << tmp_count++);
-      spline_list_list.push_back(Spline::Generate(*sit,spline_detail));
+      spline_list_list.push_back(Spline::Generate(*sit,spline_detail,options_->GetColorBlendMode()));
     }
   }
 }

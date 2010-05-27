@@ -94,6 +94,7 @@ Scene::Scene():
   root_node_(new GfxNode("Scene")),
   observers_(),
   transform_(),
+  gl_init_(false),
   fov_(30.0),
   znear_(1.0),zfar_(1000.0),
   fnear_(1.0), ffar_(1000.0),
@@ -307,16 +308,18 @@ void set_light_dir(Vec3 ld)
 
 }
 
-void Scene::InitGL()
+void Scene::InitGL(bool full)
 {
   LOGN_DEBUG("scene: initializing GL state");
 
-  LOGN_VERBOSE(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
+  if(full) {
+    LOGN_VERBOSE(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
 
 #if OST_SHADER_SUPPORT_ENABLED
-  LOGN_DEBUG("scene: shader pre-gl");
-  Shader::Instance().PreGLInit();
+    LOGN_DEBUG("scene: shader pre-gl");
+    Shader::Instance().PreGLInit();
 #endif
+  }
 
   // TODO: add more lights
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_amb_);
@@ -367,9 +370,11 @@ void Scene::InitGL()
   // line and point anti-aliasing
 
 #if OST_SHADER_SUPPORT_ENABLED
-  GLint mbufs,msamples;
-  glGetIntegerv(GL_SAMPLE_BUFFERS, &mbufs);
-  glGetIntegerv(GL_SAMPLES, &msamples);
+  GLint mbufs=0,msamples=0;
+  if(GLEW_VERSION_2_0) {
+    glGetIntegerv(GL_SAMPLE_BUFFERS, &mbufs);
+    glGetIntegerv(GL_SAMPLES, &msamples);
+  }
 
   if(mbufs>0 && msamples>0) {
     LOGN_VERBOSE("Scene: enabling multisampling with: " << msamples << " samples");
@@ -398,22 +403,30 @@ void Scene::InitGL()
   glDisable(GL_NORMALIZE);
   // double-buffer rendering requires this
   // glDrawBuffer(GL_BACK);
-  // initialize shaders
+
 #if OST_SHADER_SUPPORT_ENABLED
-  LOGN_DEBUG("scene: shader setup");
-  Shader::Instance().Setup();
-  SetShadingMode(def_shading_mode_);
-  LOGN_DEBUG("scene: scenefx setup");
-  impl::SceneFX::Instance().Setup();
+  if(full) {
+    LOGN_DEBUG("scene: shader setup");
+    Shader::Instance().Setup();
+    SetShadingMode(def_shading_mode_);
+    LOGN_DEBUG("scene: scenefx setup");
+    impl::SceneFX::Instance().Setup();
+  }
 #endif
 
-  prep_glyphs();
+  if(full) {
+    prep_glyphs();
+  }
 
-  glGenTextures(1,&scene_left_tex_);
-  glGenTextures(1,&scene_right_tex_);
+  if(full) {
+    glGenTextures(1,&scene_left_tex_);
+    glGenTextures(1,&scene_right_tex_);
+  }
 
   glEnable(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);
+  if(GLEW_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
 
   glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -428,6 +441,9 @@ void Scene::InitGL()
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+  LOGN_DEBUG("scene: gl init done");
+  gl_init_=true;
 }
 
 void Scene::RequestRedraw()
@@ -1338,16 +1354,16 @@ uint Scene::GetSelectionMode() const
   return selection_mode_;
 }
 
-void Scene::StartOffscreenMode(unsigned int width, unsigned int height)
+bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
 {
-  if(main_offscreen_buffer_) return;
+  if(main_offscreen_buffer_) return false;
   main_offscreen_buffer_ = new OffscreenBuffer(width,height,OffscreenBufferFormat(),true);
 
   if(!main_offscreen_buffer_->IsValid()) {
     LOGN_ERROR("error during offscreen buffer creation");
     delete main_offscreen_buffer_;   
     main_offscreen_buffer_=0;
-    return;
+    return false;
   }
   old_vp_[0]=vp_width_;
   old_vp_[1]=vp_height_;
@@ -1358,8 +1374,13 @@ void Scene::StartOffscreenMode(unsigned int width, unsigned int height)
 #if OST_SHADER_SUPPORT_ENABLED
   String shader_name = Shader::Instance().GetCurrentName();
 #endif
+
   LOGN_DEBUG("initializing GL");
-  this->InitGL();
+  if(gl_init_) {
+    this->InitGL(false);
+  } else {
+    this->InitGL(true);
+  }
   LOGN_DEBUG("setting viewport");
   Resize(width,height);
   LOGN_DEBUG("updating fog settings");
@@ -1369,6 +1390,7 @@ void Scene::StartOffscreenMode(unsigned int width, unsigned int height)
   LOGN_DEBUG("activating shader");
   Shader::Instance().Activate(shader_name);
 #endif
+  return true;
 }
 
 void Scene::StopOffscreenMode()
@@ -1401,47 +1423,13 @@ void Scene::Export(const String& fname, unsigned int width,
     return;
   }
 
-  GLint old_vp[4];
-  glGetIntegerv(GL_VIEWPORT,old_vp);
-  bool old_flag=offscreen_flag_;
-  if(!main_offscreen_buffer_) {
-    try {
-      LOGN_DEBUG("creating a " << width <<"x" << height << " offscreen rendering buffer");
-      OffscreenBuffer ob(width,height,OffscreenBufferFormat(),true);
-      
-      if(!ob.IsValid()) {
-        LOGN_ERROR("error during offscreen buffer creation");
-        return;
-      }
-      
-      ob.MakeActive();
-      offscreen_flag_=true;
-#if 1
-#if OST_SHADER_SUPPORT_ENABLED
-      String shader_name = Shader::Instance().GetCurrentName();
-#endif
-      LOGN_DEBUG("initializing GL");
-      this->InitGL();
-      LOGN_DEBUG("setting viewport");
-      SetViewport(width,height);
-      LOGN_DEBUG("reseting projection");
-      ResetProjection();
-      LOGN_DEBUG("updating fog settings");
-      update_fog();
-      glDrawBuffer(GL_FRONT);
+  bool of_flag = (main_offscreen_buffer_==0);
 
-#if OST_SHADER_SUPPORT_ENABLED
-      LOGN_DEBUG("activating shader");
-      Shader::Instance().Activate(shader_name);
-#endif
-      root_node_->ContextSwitch();
-#endif
-    } catch (std::exception& e) {
-      LOGN_ERROR("exception during offscreen rendering initialization: " << e.what());
-      throw;
+  // only switch if offscreen mode is not active
+  if(of_flag) {
+    if(!StartOffscreenMode(width,height)) {
+      return;
     }
-  } else {
-    LOGN_DEBUG("using active main offscreen buffer");
   }
   LOGN_DEBUG("rendering into offscreen buffer");
   this->RenderGL();
@@ -1449,14 +1437,7 @@ void Scene::Export(const String& fname, unsigned int width,
   glFlush();
   glFinish();
 
-  unsigned int width2=width;
-  unsigned int height2=height;
-  if(main_offscreen_buffer_!=NULL) {
-    // use settings from active main buffer
-    width2=old_vp[2];
-    height2=old_vp[3];
-  }
-  boost::shared_array<uchar> img_data(new uchar[width2*height2*4]);
+  boost::shared_array<uchar> img_data(new uchar[width*height*4]);
       
   LOGN_DEBUG("setting background transparency");
   if (transparent) {
@@ -1468,25 +1449,15 @@ void Scene::Export(const String& fname, unsigned int width,
   
   LOGN_DEBUG("reading framebuffer pixels");
   glReadBuffer(GL_FRONT);
-  glReadPixels(0,0,width2,height2,GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
+  glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
+  glReadBuffer(GL_BACK);
 
   LOGN_DEBUG("calling bitmap export");
-  BitmapExport(fname,ext,width2,height2,img_data.get());
-  
-  if(!main_offscreen_buffer_) {
-    LOGN_DEBUG("switching back to main context");
-    if (!win_) {
-      return;
-    }
-    win_->MakeActive();
-    Scene::Instance().SetViewport(old_vp[2],old_vp[3]);
-    offscreen_flag_=old_flag;
-    root_node_->ContextSwitch();
-    glDrawBuffer(GL_BACK);
-    LOGN_DEBUG("updating fog");
-    update_fog();
-  } else {
-    // nothing needs to happen here, main offscreen buffer was active, and stays active
+  BitmapExport(fname,ext,width,height,img_data.get());
+
+  // only switch back if it was not on to begin with
+  if(of_flag) {
+    StopOffscreenMode();
   }
 }
 
@@ -1760,7 +1731,6 @@ void Scene::prep_glyphs()
   for(int cc=128;cc<256;++cc) glyph_map_[cc]=Vec2(0.0,0.0);
 
   LOGN_DEBUG("done loading glyphs");
-
 }
 
 void Scene::prep_blur()
@@ -1856,7 +1826,9 @@ void Scene::render_stereo()
   render_scene();
 
   glEnable(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);
+  if(GLEW_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
   glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
 
@@ -1864,7 +1836,9 @@ void Scene::render_stereo()
   stereo_projection(2);
   render_scene();
   glEnable(GL_TEXTURE_2D);
-  glActiveTexture(GL_TEXTURE0);
+  if(GLEW_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
   glBindTexture(GL_TEXTURE_2D, scene_right_tex_);
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
   check_gl_error();
@@ -1922,7 +1896,9 @@ void Scene::render_stereo()
   } else if(stereo_==2) {
     glStencilFunc(GL_EQUAL,0x0,0x1);
   }
-  glActiveTexture(GL_TEXTURE0);
+  if(GLEW_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
   glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
   // draw
   glColor3f(1.0,0.0,1.0);
@@ -1940,7 +1916,9 @@ void Scene::render_stereo()
   } else if(stereo_==2) {
     glStencilFunc(GL_EQUAL,0x1,0x1);
   }
-  glActiveTexture(GL_TEXTURE0);
+  if(GLEW_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
   glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
   // draw
   glColor3f(1.0,0.0,1.0);

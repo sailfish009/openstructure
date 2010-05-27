@@ -81,6 +81,9 @@ public:
   virtual unsigned int GetStrandMode() const;
   virtual void SetStrandMode(unsigned int);
 
+  virtual void SetColorBlendMode(unsigned int);
+  virtual unsigned int GetColorBlendMode() const;
+
   float GetMaxRad() const;
 
   virtual ~CartoonRenderOptions();
@@ -107,6 +110,7 @@ private:
   unsigned int strand_profile_;
   unsigned int strand_mode_;
 
+  unsigned int color_blend_mode_;
 };
 
 typedef boost::shared_ptr<CartoonRenderOptions> CartoonRenderOptionsPtr;

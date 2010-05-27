@@ -49,7 +49,11 @@ Shader::Shader():
   current_name_(""),
   shader_code_map_(),
   shader_program_map_()
-{}
+{
+  if(!GLEW_VERSION_2_0) {
+    LOGN_VERBOSE("OpenGL version smaller 2.0, deactivating shader functionality");
+  }
+}
 
 
 void Shader::PreGLInit() 
@@ -120,6 +124,8 @@ bool link_shader(const std::vector<GLuint>& code_list, String pr_name, GLuint& s
 
 void Shader::Setup() 
 {
+  if(!GLEW_VERSION_2_0) return;
+
   String ost_root = GetSharedDataPath();
   bf::path ost_root_dir(ost_root);
   bf::path shader_dir(ost_root_dir / "shader");
@@ -297,6 +303,8 @@ void Shader::Setup()
 
 void Shader::Activate(const String& name)
 {
+  if(!GLEW_VERSION_2_0) return;
+
   if(!name.empty()) {
     std::map<String, GLuint>::iterator it = shader_program_map_.find(name);
     if(it!=shader_program_map_.end()) {
@@ -331,6 +339,7 @@ String Shader::GetCurrentName() const
 
 bool Shader::IsValid() const
 {
+  if(!GLEW_VERSION_2_0) return false;
   return valid_;
 }
 
@@ -341,11 +350,13 @@ bool Shader::IsActive() const
 
 void Shader::PushProgram()
 {
+  if(!GLEW_VERSION_2_0) return;
   program_stack_.push(current_name_);
 }
 
 void Shader::PopProgram()
 {
+  if(!GLEW_VERSION_2_0) return;
   if(!program_stack_.empty()) {
     current_name_ = program_stack_.top();
     program_stack_.pop();
@@ -355,6 +366,7 @@ void Shader::PopProgram()
 
 void Shader::UpdateState()
 {
+  if(!GLEW_VERSION_2_0) return;
   if(current_program_!=0) {
     // update all settings
     GLint result;

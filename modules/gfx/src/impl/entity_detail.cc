@@ -240,7 +240,7 @@ static int bsplineGet(float *xa, float *ya, float *y2a, int n, float x, float *y
       sublist.at((size-1)*nsub). COMPONENT = v;		\
     }                                                   
 
-SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
+SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, uint color_blend_mode)
 {
   if(nsub<=0) {
     return entry_list;
@@ -272,11 +272,28 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub)
   SplineEntryList sublist(ipsize);
 
   // interpolate color
-  for(int k=0;k<4;++k) {
-    SPLINE_ENTRY_INTERPOLATE(color1[k]);
-    SPLINE_ENTRY_INTERPOLATE(color2[k]);
+  if(color_blend_mode==0) {
+    for(int k=0;k<4;++k) {
+      SPLINE_ENTRY_INTERPOLATE(color1[k]);
+      SPLINE_ENTRY_INTERPOLATE(color2[k]);
+    }
+  } else {
+    for(int c=0;c<size-1;++c) {
+      for(int k=0;k<4;++k) {
+        int d=0;
+        for(;d<nsub/2;++d) {
+          sublist.at(c*nsub+d).color1[k]=entry_list[c].color1[k];
+          sublist.at(c*nsub+d).color2[k]=entry_list[c].color2[k];
+        }
+        for(;d<nsub;++d) {
+          sublist.at(c*nsub+d).color1[k]=entry_list[c+1].color1[k];
+          sublist.at(c*nsub+d).color2[k]=entry_list[c+1].color2[k];
+        }
+      }
+    }
   }
 
+  // interpolate position and helper vectors
   for(int k=0;k<3;++k) {
     SPLINE_ENTRY_INTERPOLATE(position[k]);
     //SPLINE_ENTRY_INTERPOLATE(v0[k]);

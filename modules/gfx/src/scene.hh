@@ -226,7 +226,7 @@ class DLLEXPORT_OST_GFX Scene {
   void OnInput(const InputEvent& e);
   
   /// \brief initialize OpenGL after context has been setup (internal use)
-  void InitGL();
+  void InitGL(bool full=true);
 
   /// \brief handle new viewport size (internal use)
   void Resize(int w, int h);
@@ -360,8 +360,10 @@ class DLLEXPORT_OST_GFX Scene {
 
     During batch mode, this is the only way to get meaningful
     functionality with the gfx module
+
+    returns true upon success and false upon failure
   */
-  void StartOffscreenMode(unsigned int w, unsigned int h);
+  bool StartOffscreenMode(unsigned int w, unsigned int h);
   /// \brief stops offline rendering in interactive mode
   void StopOffscreenMode();
   
@@ -402,6 +404,8 @@ private:
   SceneObserverList    observers_;
 
   mol::Transform transform_; // overall modelview transformation
+
+  bool gl_init_;
 
   float fov_; // field of view
   float znear_,zfar_; // near and far clipping plane
