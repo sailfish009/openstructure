@@ -107,13 +107,24 @@ void SequenceModel::RemoveGfxEntity(gfx::EntityP& entity){
     int cols_before = this->columnCount();
     objects_.removeOne(obj);
     this->endRemoveRows();
-    int cols = this->columnCount();
+    int cols = this->GetColumnCount();
     if(cols_before>cols){
       this->max_columns = cols;
       this->beginRemoveColumns(QModelIndex(), cols, cols_before);
       this->endRemoveColumns();
     }
   }
+}
+
+int SequenceModel::GetColumnCount() const{
+  int cols = 0;
+  for(int i = 0; i<objects_.size();i++){
+    int ob_cols = objects_[i]->GetMaxColumnCount();
+    if(ob_cols>cols){
+      cols = ob_cols;
+    }
+  }
+  return cols;
 }
 
 SequenceViewObject* SequenceModel::GetItem(gfx::EntityP& entity){

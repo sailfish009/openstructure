@@ -78,6 +78,7 @@ public slots:
   void SelectionChanged(const QItemSelection& sel, const QItemSelection& desel);
 
 private:
+  int GetColumnCount() const;
   SequenceViewObject* GetItem(gfx::EntityP& entity);
   BaseViewObject* GetItem(const QModelIndex& index) const;
   QPair<int, BaseViewObject*> GetRowWithItem(int row) const;
