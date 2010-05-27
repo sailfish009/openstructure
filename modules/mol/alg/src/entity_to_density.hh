@@ -1,8 +1,8 @@
 #ifndef OST_ENTITY_TO_DENSITY_HH
 #define OST_ENTITY_TO_DENSITY_HH
 
-#import <ost/mol/entity_view.hh>
-#import <ost/img/map.hh>
+#include <ost/mol/entity_view.hh>
+#include <ost/img/map.hh>
 
 #include <ost/mol/alg/module_config.hh>
 
