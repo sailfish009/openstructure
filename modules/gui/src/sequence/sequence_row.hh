@@ -53,7 +53,7 @@ public:
   virtual void SetSequence(seq::SequenceHandle& sequence);
   const seq::SequenceHandle& GetSequence() const;
 
-  void SetSelection(const QSet<int>& added, const QSet<int>& removed);
+  virtual void SetSelection(const QSet<int>& added, const QSet<int>& removed);
 
 private:
   QString name_;

@@ -58,7 +58,7 @@ int BaseViewObject::GetRowCount()
 
 void BaseViewObject::SetSelection(int row, const QSet<int>& added, const QSet<int>& removed)
 {
-  if(row<0 || row >= rows_.size()){
+  if(row>=0 && row < rows_.size()){
     rows_[row]->SetSelection(added,removed);
   }
 }
