@@ -29,20 +29,18 @@
 
 #include "sequence_row.hh"
 #include "secstr_row.hh"
-#include "title_row.hh"
 
 #include "painter.hh"
 #include "background_painter.hh"
 #include "seq_secstr_painter.hh"
 #include "seq_selection_painter.hh"
 #include "seq_text_painter.hh"
-#include "tick_painter.hh"
 
-#include "view_object.hh"
+#include "sequence_view_object.hh"
 
 namespace ost { namespace gui {
 
-ViewObject::ViewObject(seq::SequenceList& sequences, const QList<QString>& names, QObject *parent): QObject(parent)
+SequenceViewObject::SequenceViewObject(seq::SequenceList& sequences, const QList<QString>& names, QObject *parent): BaseViewObject(parent), entity_(gfx::EntityP())
 {
   if(names.size() == sequences.GetCount()){
     for(int i=0; i<sequences.GetCount(); i++){
@@ -52,17 +50,17 @@ ViewObject::ViewObject(seq::SequenceList& sequences, const QList<QString>& names
   }
 }
 
-ViewObject::ViewObject(seq::SequenceHandle& sequence, const QString& name, QObject *parent): QObject(parent), entity_(gfx::EntityP())
+SequenceViewObject::SequenceViewObject(seq::SequenceHandle& sequence, const QString& name, QObject *parent): BaseViewObject(parent), entity_(gfx::EntityP())
 {
   this->AddSequence(sequence, name);
 }
 
-ViewObject::ViewObject(mol::ChainView& chain, const QString& name, QObject *parent): QObject(parent), entity_(gfx::EntityP())
+SequenceViewObject::SequenceViewObject(mol::ChainView& chain, const QString& name, QObject *parent): BaseViewObject(parent), entity_(gfx::EntityP())
 {
   this->AddChain(chain, name);
 }
 
-ViewObject::ViewObject(gfx::EntityP& entity, QObject* parent): QObject(parent), entity_(entity)
+SequenceViewObject::SequenceViewObject(gfx::EntityP& entity, QObject* parent): BaseViewObject(parent), entity_(entity)
 {
   mol::EntityView view =entity->GetView();
   for (mol::ChainViewList::const_iterator c=view.GetChainList().begin(),
@@ -76,42 +74,7 @@ ViewObject::ViewObject(gfx::EntityP& entity, QObject* parent): QObject(parent), 
   }
 }
 
-ViewObject::ViewObject(QObject* parent): QObject(parent)
-{
-  TitleRow* new_row = new TitleRow(this);
-  Painter* p = new BackgroundPainter(this);
-  new_row->InsertPainter(p);
-  p = new TickPainter(this);
-  new_row->InsertPainter(p);
-  rows_.append(new_row);
-}
-
-void ViewObject::InsertRow(int pos, BaseRow* row)
-{
-  if(pos >= 0 && pos <= rows_.size()){
-    rows_.insert(pos,row);
-  }
-}
-
-void ViewObject::RemoveRow(BaseRow* row)
-{
-  rows_.removeAll(row);
-}
-
-BaseRow* ViewObject::GetRow(int pos)
-{
-   if(pos >= 0 && pos < rows_.size()){
-     return rows_[pos];
-   }
-   return NULL;
-}
-
-int ViewObject::GetRowCount()
-{
-  return rows_.size();
-}
-
-void ViewObject::AddSequence(seq::SequenceHandle& sequence, const QString& name)
+void SequenceViewObject::AddSequence(seq::SequenceHandle& sequence, const QString& name)
 {
   SequenceRow* new_row = new SequenceRow(name, sequence, this);
   Painter* p = new BackgroundPainter(this);
@@ -123,7 +86,7 @@ void ViewObject::AddSequence(seq::SequenceHandle& sequence, const QString& name)
   rows_.append(new_row);
 }
 
-void ViewObject::AddChain(mol::ChainView& chain, const QString& name)
+void SequenceViewObject::AddChain(mol::ChainView& chain, const QString& name)
 {
   SecStrRow* new_row = new SecStrRow(name, chain, this);
   Painter* p = new BackgroundPainter(this);
@@ -137,71 +100,17 @@ void ViewObject::AddChain(mol::ChainView& chain, const QString& name)
   rows_.append(new_row);
 }
 
-void ViewObject::AttachGfxObject(gfx::EntityP& ent)
+void SequenceViewObject::AttachGfxObject(gfx::EntityP& ent)
 {
   entity_ = ent;
 }
 
-gfx::EntityP& ViewObject::GetGfxObject()
+gfx::EntityP& SequenceViewObject::GetGfxObject()
 {
   return entity_;
 }
 
-void ViewObject::SetSelection(int row, const QSet<int>& added, const QSet<int>& removed)
-{
-  if(SequenceRow* sequence_row = qobject_cast<SequenceRow*>(rows_[row])){
-    sequence_row->SetSelection(added,removed);
-  }
-}
-
-QVariant ViewObject::GetData(int row, int column, int role)
-{
-  if(row<0 || row >= rows_.size())return QVariant();
-
-  return rows_[row]->GetData(column,role);
-}
-
-int ViewObject::GetMaxColumnCount() const
-{
-  int columns = 0;
-  for(int i = 0; i < rows_.size(); i++){
-    int col_length = rows_[i]->GetColumnCount();
-    if(columns < col_length){
-      columns = col_length;
-    }
-  }
-  return columns;
-}
-
-bool ViewObject::SetData(int row, int column, const QVariant& value, int role)
-{
-  if(row<0 || row >= rows_.size())return false;
-
-  return rows_[row]->SetData(column, value, role);
-}
-
-void ViewObject::DoubleClicked(int row, int column)
-{
-  if(row>=0 || row < rows_.size()){
-    rows_[row]->DoubleClicked(column);
-  }
-}
-
-void ViewObject::ZoomIn()
-{
-  for(int i=0; i< rows_.size(); i++){
-    rows_[i]->ZoomIn();
-  }
-}
-
-void ViewObject::ZoomOut()
-{
-  for(int i=0; i< rows_.size(); i++){
-    rows_[i]->ZoomOut();
-  }
-}
-
-QMap<int, QList<int> > ViewObject::GetIndexesForView(const mol::EntityView& view)
+QMap<int, QList<int> > SequenceViewObject::GetIndexesForView(const mol::EntityView& view)
 {
   if(view.GetChainCount()==0){
     return QMap<int, QList<int> >();
@@ -229,7 +138,7 @@ QMap<int, QList<int> > ViewObject::GetIndexesForView(const mol::EntityView& view
   }
 }
 
-QMap<int, QList<int> > ViewObject::GetIndexesForSubject(const QString& subject, const QString& sequence_name)
+QMap<int, QList<int> > SequenceViewObject::GetIndexesForSubject(const QString& subject, const QString& sequence_name)
 {
   if(subject.size()==0){
     return QMap<int, QList<int> >();
@@ -256,13 +165,6 @@ QMap<int, QList<int> > ViewObject::GetIndexesForSubject(const QString& subject, 
     }
   }
   return selected_indexes;
-}
-
-Qt::ItemFlags ViewObject::Flags(int row, int column) const
-{
-  if(row<0 || row >= rows_.size())return Qt::NoItemFlags;
-
-  return rows_[row]->Flags(column);
 }
 
 }}

@@ -59,6 +59,7 @@ public:
   virtual bool SetData(int column, const QVariant& value, int role);
   virtual Qt::ItemFlags Flags(int column) const;
   virtual void DoubleClicked(int column);
+  virtual void SetSelection(const QSet<int>& added, const QSet<int>& removed);
 
   virtual void ZoomIn();
   virtual void ZoomOut();

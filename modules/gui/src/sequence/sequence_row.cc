@@ -29,18 +29,18 @@
 
 #include <ost/gfx/entity.hh>
 
-#include "view_object.hh"
+#include "sequence_view_object.hh"
 #include "sequence_row.hh"
 
 namespace ost { namespace gui {
 
-SequenceRow::SequenceRow(const QString& name, seq::SequenceHandle& sequence, ViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11)), sequence_(sequence)
+SequenceRow::SequenceRow(const QString& name, seq::SequenceHandle& sequence, SequenceViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11)), sequence_(sequence)
 {
   name_font_.setBold(true);
   name_font_.setItalic(true);
 }
 
-SequenceRow::SequenceRow(const QString& name, ViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11))
+SequenceRow::SequenceRow(const QString& name, SequenceViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11))
 {
   name_font_.setBold(true);
   name_font_.setItalic(true);
@@ -135,7 +135,7 @@ void SequenceRow::DoubleClicked(int column)
 
 void SequenceRow::SetSelection(const QSet<int>& added, const QSet<int>& removed)
 {
-  ViewObject* view_object = qobject_cast<ViewObject*>(this->parent());
+  SequenceViewObject* view_object = qobject_cast<SequenceViewObject*>(this->parent());
   if(view_object){
     if(gfx::EntityP entity = view_object->GetGfxObject()){
       mol::EntityView sel = entity->GetSelection();

@@ -26,6 +26,13 @@
 
 #include <QtGui>
 
+#include "sequence_view_object.hh"
+
+#include "title_row.hh"
+
+#include "background_painter.hh"
+#include "tick_painter.hh"
+
 #include "sequence_model.hh"
 
 namespace ost { namespace gui {
@@ -34,7 +41,14 @@ SequenceModel::SequenceModel(QObject *parent)
     : QAbstractTableModel(parent), max_columns(0)
 {
   this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
-  objects_.append(new ViewObject(this));
+  BaseViewObject* title = new BaseViewObject(this);
+  TitleRow* title_row = new TitleRow(this);
+  Painter* p = new BackgroundPainter(this);
+  title_row->InsertPainter(p);
+  p = new TickPainter(this);
+  title_row->InsertPainter(p);
+  title->InsertRow(0,title_row);
+  objects_.append(title);
   this->endInsertRows();
 }
 
@@ -42,7 +56,7 @@ void SequenceModel::InsertSequence(QString& name, seq::SequenceHandle& seq){
   int cols = this->columnCount();
   int new_cols = seq.GetLength();
   this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
-  objects_.append(new ViewObject(seq, name, this));
+  objects_.append(new SequenceViewObject(seq, name, this));
   if(new_cols > cols){
     this->max_columns = new_cols;
     this->beginInsertColumns(QModelIndex(), cols, new_cols);
@@ -55,7 +69,7 @@ void SequenceModel::InsertChain(QString& name, mol::ChainView& view){
   int cols = this->columnCount();
   int new_cols = view.GetResidueCount();
   this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
-  objects_.append(new ViewObject(view, name, this));
+  objects_.append(new SequenceViewObject(view, name, this));
   if(new_cols > cols){
     this->max_columns = new_cols;
     this->beginInsertColumns(QModelIndex(), cols, new_cols);
@@ -66,7 +80,7 @@ void SequenceModel::InsertChain(QString& name, mol::ChainView& view){
 
 void SequenceModel::InsertSequences(const QList<QString>& names, seq::SequenceList& list){
   this->beginInsertRows(this->index(this->rowCount(),0),this->rowCount(),this->rowCount()+list.GetCount());
-  objects_.append(new ViewObject(list, names, this));
+  objects_.append(new SequenceViewObject(list, names, this));
   this->endInsertRows();
 }
 
@@ -75,7 +89,7 @@ void SequenceModel::InsertGfxEntity(gfx::EntityP& ent){
   int size = view.GetChainList().size();
   int cols = this->columnCount();
   this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount()+size);
-  ViewObject* obj = new ViewObject(ent, this);
+  SequenceViewObject* obj = new SequenceViewObject(ent, this);
   objects_.append(obj);
   int new_cols = obj->GetMaxColumnCount();
   if(new_cols > cols){
@@ -87,7 +101,7 @@ void SequenceModel::InsertGfxEntity(gfx::EntityP& ent){
 }
 
 void SequenceModel::RemoveGfxEntity(gfx::EntityP& entity){
-  if(ViewObject* obj = this->GetItem(entity)){
+  if(SequenceViewObject* obj = this->GetItem(entity)){
     int index = this->GetGlobalRow(obj,0);
     this->beginRemoveRows(QModelIndex(),index,index+obj->GetRowCount()-1);
     int cols_before = this->columnCount();
@@ -102,11 +116,13 @@ void SequenceModel::RemoveGfxEntity(gfx::EntityP& entity){
   }
 }
 
-ViewObject* SequenceModel::GetItem(gfx::EntityP& entity){
+SequenceViewObject* SequenceModel::GetItem(gfx::EntityP& entity){
   if(entity != NULL){
     for (int i = 0 ; i< objects_.size(); i++){
-      if(entity == objects_[i]->GetGfxObject()){
-        return objects_[i];
+      if(SequenceViewObject* seq_view_object = qobject_cast<SequenceViewObject*>(objects_[i])){
+        if(entity == seq_view_object->GetGfxObject()){
+          return seq_view_object;
+        }
       }
     }
   }
@@ -114,14 +130,14 @@ ViewObject* SequenceModel::GetItem(gfx::EntityP& entity){
 }
 
 const PainterList& SequenceModel::GetPainters(const QModelIndex& index) const{
-  QPair<int, ViewObject*> pair = this->GetRowWithItem(index);
+  QPair<int, BaseViewObject*> pair = this->GetRowWithItem(index);
   if(pair.second){
     return pair.second->GetRow(pair.first)->GetPainters();
   }
   return empty_list_;
 }
 
-QPair<int, ViewObject*> SequenceModel::GetRowWithItem(int row) const{
+QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(int row) const{
   if(!objects_.isEmpty()){
     int rows = 0;
     int i = -1;
@@ -132,21 +148,21 @@ QPair<int, ViewObject*> SequenceModel::GetRowWithItem(int row) const{
       rows += last_row;
     }
     int sub_index = row - (rows-last_row);
-    return QPair<int, ViewObject*>(sub_index, objects_[i]);
+    return QPair<int, BaseViewObject*>(sub_index, objects_[i]);
   }
-  return QPair<int, ViewObject*>(-1, NULL);
+  return QPair<int, BaseViewObject*>(-1, NULL);
 }
 
-QPair<int, ViewObject*> SequenceModel::GetRowWithItem(const QModelIndex& index) const{
+QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(const QModelIndex& index) const{
   return this->GetRowWithItem(index.row());
 }
 
-ViewObject* SequenceModel::GetItem(const QModelIndex& index) const
+BaseViewObject* SequenceModel::GetItem(const QModelIndex& index) const
 {
   return this->GetRowWithItem(index).second;
 }
 
-int SequenceModel::GetGlobalRow(ViewObject* obj, int row) const
+int SequenceModel::GetGlobalRow(BaseViewObject* obj, int row) const
 {
   int glob_row = -1;
   int index = objects_.indexOf(obj);
@@ -163,15 +179,17 @@ int SequenceModel::GetGlobalRow(ViewObject* obj, int row) const
 QModelIndexList SequenceModel::GetModelIndexes(gfx::EntityP& entity, const mol::EntityView& view)
 {
   QModelIndexList list;
-  if(ViewObject* object = this->GetItem(entity)){
-    QMap<int, QList<int> > indexes = object->GetIndexesForView(view);
-    QMapIterator< int, QList<int> > i(indexes);
-    while (i.hasNext()) {
-      i.next();
-      int row = this->GetGlobalRow(object, i.key());
-      const QList<int>& index_list = i.value();
-      for(int i=0; i<index_list.size(); i++){
-        list.append(this->index(row,index_list[i]));
+  if(BaseViewObject* object = this->GetItem(entity)){
+    if(SequenceViewObject* seq_view_object = qobject_cast<SequenceViewObject*>(object)){
+      QMap<int, QList<int> > indexes = seq_view_object->GetIndexesForView(view);
+      QMapIterator< int, QList<int> > i(indexes);
+      while (i.hasNext()) {
+        i.next();
+        int row = this->GetGlobalRow(seq_view_object, i.key());
+        const QList<int>& index_list = i.value();
+        for(int i=0; i<index_list.size(); i++){
+          list.append(this->index(row,index_list[i]));
+        }
       }
     }
   }
@@ -182,15 +200,16 @@ QModelIndexList SequenceModel::GetModelIndexes(const QString& subject, const QSt
 {
   QModelIndexList list;
   for (int i = 0; i<objects_.size(); i++){
-    ViewObject* object = objects_[i];
-    QMap<int, QList<int> > indexes = object->GetIndexesForSubject(subject,sequence_name);
-    QMapIterator< int, QList<int> > iter(indexes);
-    while (iter.hasNext()) {
-      iter.next();
-      int row = this->GetGlobalRow(object, iter.key());
-      const QList<int>& index_list = iter.value();
-      for(int j=0; j<index_list.size(); j++){
-        list.append(this->index(row,index_list[j]));
+    if(SequenceViewObject* seq_view_object = qobject_cast<SequenceViewObject*>(objects_[i])){
+      QMap<int, QList<int> > indexes = seq_view_object->GetIndexesForSubject(subject,sequence_name);
+      QMapIterator< int, QList<int> > iter(indexes);
+      while (iter.hasNext()) {
+        iter.next();
+        int row = this->GetGlobalRow(seq_view_object, iter.key());
+        const QList<int>& index_list = iter.value();
+        for(int j=0; j<index_list.size(); j++){
+          list.append(this->index(row,index_list[j]));
+        }
       }
     }
   }
@@ -213,14 +232,14 @@ void SequenceModel::SelectionChanged(const QItemSelection& sel, const QItemSelec
   QMapIterator< int,QPair<QSet<int>,QSet<int> > > i(sel_map);
   while (i.hasNext()) {
     i.next();
-    QPair<int, ViewObject*> item = this->GetRowWithItem(i.key());
+    QPair<int, BaseViewObject*> item = this->GetRowWithItem(i.key());
     item.second->SetSelection(item.first,i.value().first, i.value().second);
   }
 }
 
 void SequenceModel::DoubleClicked(const QModelIndex& index)
 {
-  QPair<int, ViewObject*> item = this->GetRowWithItem(index);
+  QPair<int, BaseViewObject*> item = this->GetRowWithItem(index);
   if(item.second){
     item.second->DoubleClicked(item.first,index.column());
   }
@@ -242,7 +261,7 @@ int SequenceModel::columnCount(const QModelIndex& parent) const
 
 QVariant SequenceModel::data(const QModelIndex& index, int role) const
 {
-  QPair<int, ViewObject*> item = this->GetRowWithItem(index);
+  QPair<int, BaseViewObject*> item = this->GetRowWithItem(index);
   if(!item.second) return QVariant();
   QVariant data = item.second->GetData(item.first,index.column(),role);
   return data;
@@ -259,7 +278,7 @@ QVariant SequenceModel::headerData(int section, Qt::Orientation orientation,
 
 Qt::ItemFlags SequenceModel::flags(const QModelIndex& index) const
 {
-  QPair<int, ViewObject*> item = GetRowWithItem(index);
+  QPair<int, BaseViewObject*> item = GetRowWithItem(index);
   if(item.second){
     return item.second->Flags(item.first, index.column());
   }

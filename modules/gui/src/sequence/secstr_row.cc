@@ -33,7 +33,7 @@
 
 namespace ost { namespace gui {
 
-SecStrRow::SecStrRow(const QString& name, mol::ChainView& chain, ViewObject* parent) : SequenceRow(name,parent)
+SecStrRow::SecStrRow(const QString& name, mol::ChainView& chain, SequenceViewObject* parent) : SequenceRow(name,parent)
 { this->SetChain(chain); }
 
 void SecStrRow::SetSequence(seq::SequenceHandle& sequence)

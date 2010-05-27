@@ -130,6 +130,9 @@ Qt::ItemFlags BaseRow::Flags(int column) const
 void BaseRow::DoubleClicked(int column)
 { }
 
+void BaseRow::SetSelection(const QSet<int>& added, const QSet<int>& removed)
+{ }
+
 void BaseRow::ZoomIn()
 {
   QFont font = this->GetFont();

@@ -16,50 +16,49 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_ROW
-#define OST_SEQUENCE_VIEWER_SEQUENCE_ROW
+#ifndef OST_SEQUENCE_VIEWER_BASE_VIEW_OBJECT
+#define OST_SEQUENCE_VIEWER_BASE_VIEW_OBJECT
 
 /*
   Author: Stefan Scheuber
  */
 
 #include <QObject>
-
-#include <ost/seq/sequence_handle.hh>
+#include <QList>
 
 #include "base_row.hh"
 
+
 namespace ost { namespace gui {
 
-class SequenceViewObject;
-
-class SequenceRow : public BaseRow
+class BaseViewObject : public QObject
 {
   Q_OBJECT
 
+
 public:
-  SequenceRow(const QString& name, seq::SequenceHandle& sequence, SequenceViewObject* parent);
-  SequenceRow(const QString& name, SequenceViewObject* parent);
+  BaseViewObject(QObject* parent = 0);
 
-  virtual int GetColumnCount() const;
+  void InsertRow(int pos, BaseRow* row);
+  void RemoveRow(BaseRow* row);
+  BaseRow* GetRow(int pos);
+  int GetRowCount();
+  int GetMaxColumnCount() const;
 
-  virtual QVariant GetData(int column, int role) const;
-  virtual Qt::ItemFlags Flags(int column) const;
-  virtual void DoubleClicked(int column);
+  void SetSelection(int row, const QSet<int>& added, const QSet<int>& removed);
 
-  void SetName(const QString& name);
-  const QString& GetName() const;
+  QVariant GetData(int row, int column, int role);
+  bool SetData(int row, int column, const QVariant& value, int role);
+  Qt::ItemFlags Flags(int row, int column) const;
 
-  virtual void SetSequence(seq::SequenceHandle& sequence);
-  const seq::SequenceHandle& GetSequence() const;
+  void DoubleClicked(int row, int column);
+  void ZoomIn();
+  void ZoomOut();
 
-  void SetSelection(const QSet<int>& added, const QSet<int>& removed);
-
-private:
-  QString name_;
-  QFont name_font_;
-  seq::SequenceHandle sequence_;
+protected:
+  QList<BaseRow*> rows_;
 };
+
 
 }}
 

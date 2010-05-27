@@ -16,50 +16,33 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_VIEW_OBJECT
-#define OST_SEQUENCE_VIEWER_VIEW_OBJECT
+#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_VIEW_OBJECT
+#define OST_SEQUENCE_VIEWER_SEQUENCE_VIEW_OBJECT
 
 /*
   Author: Stefan Scheuber
  */
 
-#include <QObject>
-#include <QPair>
-#include <QList>
-#include <QVarLengthArray>
-#include <QFont>
-#include <QSize>
 
-#include <ost/mol/alg/sec_structure_segments.hh>
 #include <ost/mol/entity_handle.hh>
 
 #include <ost/gfx/entity.hh>
 
 #include <ost/seq/sequence_list.hh>
 
-#include "base_row.hh"
-
+#include "base_view_object.hh"
 
 namespace ost { namespace gui {
 
-class ViewObject : public QObject
+class SequenceViewObject : public BaseViewObject
 {
   Q_OBJECT
 
-
 public:
-  ViewObject(seq::SequenceList& sequences, const QList<QString>& names, QObject* parent = 0);
-  ViewObject(seq::SequenceHandle& sequence, const QString& name, QObject* parent = 0);
-  ViewObject(mol::ChainView& chain, const QString& name, QObject* parent = 0);
-  ViewObject(gfx::EntityP& entity, QObject* parent = 0);
-  ViewObject(QObject* parent = 0);
-
-  void InsertRow(int pos, BaseRow* row);
-  void RemoveRow(BaseRow* row);
-
-  BaseRow* GetRow(int pos);
-  int GetRowCount();
-  int GetMaxColumnCount() const;
+  SequenceViewObject(seq::SequenceList& sequences, const QList<QString>& names, QObject* parent = 0);
+  SequenceViewObject(seq::SequenceHandle& sequence, const QString& name, QObject* parent = 0);
+  SequenceViewObject(mol::ChainView& chain, const QString& name, QObject* parent = 0);
+  SequenceViewObject(gfx::EntityP& entity, QObject* parent = 0);
 
   void AddSequence(seq::SequenceHandle& sequence, const QString& name=QString());
   void AddChain(mol::ChainView& chain, const QString& name=QString());
@@ -67,21 +50,10 @@ public:
   void AttachGfxObject(gfx::EntityP& ent);
   gfx::EntityP& GetGfxObject();
 
-  void SetSelection(int row, const QSet<int>& added, const QSet<int>& removed);
-
-  QVariant GetData(int row, int column, int role);
-  bool SetData(int row, int column, const QVariant& value, int role);
-  Qt::ItemFlags Flags(int row, int column) const;
-
-  void DoubleClicked(int row, int column);
-  void ZoomIn();
-  void ZoomOut();
-
   QMap<int, QList<int> > GetIndexesForView(const mol::EntityView& view);
   QMap<int, QList<int> > GetIndexesForSubject(const QString& subject, const QString& sequence_name=QString());
 
 private:
-  QList<BaseRow*> rows_;
   gfx::EntityP entity_;
 };
 

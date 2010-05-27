@@ -30,8 +30,10 @@
 
 #include <ost/seq/sequence_list.hh>
 
-#include "sequence_model.hh"
-#include "view_object.hh"
+#include <ost/gfx/entity.hh>
+
+#include "base_view_object.hh"
+#include "sequence_view_object.hh"
 
 namespace ost { namespace gui {
 
@@ -52,7 +54,7 @@ public:
   QModelIndexList GetModelIndexes(gfx::EntityP& entity, const mol::EntityView& view);
   QModelIndexList GetModelIndexes(const QString& subject, const QString& sequence_name=QString());
 
-  int GetGlobalRow(ViewObject* obj, int row) const;
+  int GetGlobalRow(BaseViewObject* obj, int row) const;
 
 
   const PainterList& GetPainters(const QModelIndex& index) const;
@@ -76,12 +78,12 @@ public slots:
   void SelectionChanged(const QItemSelection& sel, const QItemSelection& desel);
 
 private:
-  ViewObject* GetItem(gfx::EntityP& entity);
-  ViewObject* GetItem(const QModelIndex& index) const;
-  QPair<int, ViewObject*> GetRowWithItem(int row) const;
-  QPair<int, ViewObject*> GetRowWithItem(const QModelIndex& index) const;
+  SequenceViewObject* GetItem(gfx::EntityP& entity);
+  BaseViewObject* GetItem(const QModelIndex& index) const;
+  QPair<int, BaseViewObject*> GetRowWithItem(int row) const;
+  QPair<int, BaseViewObject*> GetRowWithItem(const QModelIndex& index) const;
 
-  QList<ViewObject*> objects_;
+  QList<BaseViewObject*> objects_;
   int max_columns;
   PainterList empty_list_;
 };
