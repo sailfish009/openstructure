@@ -42,8 +42,10 @@ void FillAtomScatteringPropsTable(AtomScatteringPropsTable& table)
   boost::filesystem::path loc(fullpath);
   boost::filesystem::ifstream infile(loc);
   if (!infile) {
-    LOGN_ERROR("Couldn't find " << fullpath);
-    return;
+    String msg;
+    std::stringstream msgstr(msg);
+    msgstr << "Couldn't find " << fullpath << std::endl;
+    throw ost::Error(msg);
   }
   String line;
   std::getline(infile, line);
@@ -67,7 +69,6 @@ void FillAtomScatteringPropsTable(AtomScatteringPropsTable& table)
                >> atom_props.b4;
     table.push_back(atom_props);
   }
-  std::cout << table.size() << std::endl;
 };
 
 
@@ -91,14 +92,17 @@ class EntityToDensityHelperBase
 public:
 
   EntityToDensityHelperBase (const ost::mol::EntityView entity_view,
-                             const ost::mol::alg::DensityType& density_type,
                              Real falloff_start,
                              Real falloff_end,
-                             Real source_wavelength):
-      density_type_(density_type), entity_view_(entity_view),
+                             Real source_wavelength,
+                             geom::Vec3 map_start,
+                             geom::Vec3 map_end
+                             ):
+      entity_view_(entity_view),
       falloff_start_frequency_(1.0/falloff_start),
       falloff_end_frequency_(1.0/falloff_end),
-      source_wavelength_(source_wavelength)
+      source_wavelength_(source_wavelength),
+      map_start_(map_start),map_end_(map_end)
   {
     if (scattering_props_table_loaded_ == false)
     {
@@ -109,8 +113,7 @@ public:
 
   void VisitState(img::ComplexHalfFrequencyImageState& is) const
   {
-    geom::Vec3 map_start=is.IndexToCoord(is.GetExtent().GetStart());
-    geom::Vec3 map_end=is.IndexToCoord(is.GetExtent().GetEnd());
+
     geom::Vec3 frequency_sampling =
              is.GetSampling().GetFrequencySampling();
 
@@ -133,15 +136,15 @@ public:
       while (found != true && table_iter!=scatt_props_table_.end())
       {
         if ( (*table_iter).element == (*iterator).GetAtomProps().element)
-        {
+        {        
           geom::Vec3 coord = (*iterator).GetPos();
 
-          if (coord[0] >= map_start[0] &&
-              coord[0] <= map_end[0] &&
-              coord[1] >= map_start[1] &&
-              coord[1] <= map_end[1] &&
-              coord[2] >= map_start[2] &&
-              coord[2] <= map_end[2])
+          if (coord[0] >= map_start_[0] &&
+              coord[0] <= map_end_[0] &&
+              coord[1] >= map_start_[1] &&
+              coord[1] <= map_end_[1] &&
+              coord[2] >= map_start_[2] &&
+              coord[2] <= map_end_[2])
           {
 
             // This part of the code assumes that the three axes
@@ -149,7 +152,7 @@ public:
             // Eventually, when maps and images will be merged,
             // it will substituted by the map's xyz2uvw method
 
-            geom::Vec3 adjusted_coord  = coord-map_start;
+            geom::Vec3 adjusted_coord  = coord-map_start_;
 
             for (img::ExtentIterator mp_it(reduced_extent);
                !mp_it.AtEnd();++mp_it)
@@ -217,6 +220,9 @@ private:
   static AtomScatteringPropsTable scatt_props_table_;
   static bool scattering_props_table_loaded_;
   Real source_wavelength_;
+  geom::Vec3 map_start_;
+  geom::Vec3 map_end_;
+
 };
 
 AtomScatteringPropsTable EntityToDensityHelperBase::scatt_props_table_ =
@@ -253,7 +259,7 @@ public:
     mol::EntityView effective_entity_view=entity_view_;
     Real k,C;
 
-    if (density_type_ == ROSETTA_HIGH_RESOLUTION)
+    if (density_type_ == HIGH_RESOLUTION)
     {
       k = (M_PI*M_PI)/(resolution_*resolution_);
       C = sqrt((M_PI*M_PI*M_PI)/(k*k*k));
@@ -292,9 +298,8 @@ public:
               coord[2] >= map_start[2] &&
               coord[2] <= map_end[2])
           {
-            geom::Vec3 adjusted_coord  = geom::Vec3(coord[0]-map_start[0],
-                                                    coord[1]-map_start[1],
-                                                    coord[2]-map_start[2]);
+
+            geom::Vec3 adjusted_coord  = coord-map_start;
             geom::Vec3 pixel_coord=is.CoordToIndex(coord);
             img::Point rounded_pixel_coord(round(pixel_coord[0]),
                                             round(pixel_coord[1]),
@@ -366,52 +371,71 @@ typedef img::ImageStateConstModIPAlgorithm<EntityToDensityRosettaHelperBase>
 
 } // namespace
 
-void EntityToDensity (const mol::EntityView& entity_view,
-                      img::MapHandle& map,
-                      const DensityType& density_type,
-                      Real falloff_start,
-                      Real falloff_end,
-                      bool clear_map_flag,
-                      Real source_wavelength)
+void EntityToDensityScattering(const mol::EntityView& entity_view,
+                                     img::MapHandle& map,
+                                     Real falloff_start,
+                                     Real falloff_end,
+                                     bool clear_map_flag,
+                                     Real source_wavelength)
 {
   if(falloff_start<=0.0) throw std::runtime_error("Invalid falloff start");
   if(falloff_end<=0.0 || falloff_end>falloff_start)
      throw std::runtime_error("Invalid falloff end");
 
-  if (density_type == SCATTERING_FACTORS)
-  {
-    if (clear_map_flag==true) {
-      img::MapHandle mm=img::CreateImage(img::Extent(map.GetSize(),
-                                           img::Point(0,0)),
-                                           img::COMPLEX,img::HALF_FREQUENCY);
-      // swap newly created map into place
-      mm.SetAbsoluteOrigin(map.GetAbsoluteOrigin());
-      map.Swap(mm);
-    } else {
-      map.ApplyIP(img::alg::DFT());
-    }
+ geom ::Vec3 rs_sampl = map.GetSpatialSampling();
+  geom ::Vec3 abs_orig = map.GetAbsoluteOrigin();
+  geom::Vec3 map_start = geom::Vec3(abs_orig[0]+map.GetExtent().GetStart()[0]*rs_sampl[0],
+                                    abs_orig[1]+map.GetExtent().GetStart()[1]*rs_sampl[1],
+                                    abs_orig[2]+map.GetExtent().GetStart()[2]*rs_sampl[2]);
 
-    detail::EntityToDensityHelper e_to_d_helper(entity_view,density_type,
-                                                falloff_start,
-                                                falloff_end,
-                                                source_wavelength);
-    map.ApplyIP(e_to_d_helper);
+  geom::Vec3 map_end = geom::Vec3(abs_orig[0]+map.GetExtent().GetEnd()[0]*rs_sampl[0],
+                                  abs_orig[1]+map.GetExtent().GetEnd()[1]*rs_sampl[1],
+                                  abs_orig[2]+map.GetExtent().GetEnd()[2]*rs_sampl[2]);
+  detail::EntityToDensityHelper e_to_d_helper(entity_view,
+                                              falloff_start,
+                                              falloff_end,
+                                              source_wavelength, map_start,map_end);
+  if (clear_map_flag==true) {
+    img::MapHandle mm=img::CreateImage(img::Extent(map.GetSize(),
+                                       img::Point(0,0)),
+                                       img::COMPLEX,img::HALF_FREQUENCY);
+    // swap newly created map into place
+    mm.SetSpatialSampling(map.GetSpatialSampling());
+    mm.SetAbsoluteOrigin(map.GetAbsoluteOrigin());
+    map.Swap(mm);
+  } else {
     map.ApplyIP(img::alg::DFT());
-  }  else {
-    if (clear_map_flag==true) {
-      img::MapHandle mm=img::CreateImage(img::Extent(img::Point(0,0),
-                                           map.GetSize()));
-      // swap newly created map into place
-      mm.SetAbsoluteOrigin(map.GetAbsoluteOrigin());
-      map.Swap(mm);
-    }
-    Real resolution = (falloff_start+falloff_end)/2.0;
-    detail::EntityToDensityRosettaHelper e_to_d_r_helper
+  }
+
+  map.ApplyIP(e_to_d_helper);
+  map.ApplyIP(img::alg::DFT());
+}
+
+
+void EntityToDensityRosetta(const mol::EntityView& entity_view,
+                            img::MapHandle& map,
+                            const DensityType& density_type,
+                            Real resolution,
+                            bool clear_map_flag,
+                            Real source_wavelength)
+
+{
+  if(resolution <=0.0) throw std::runtime_error("Invalid resolution");
+  if (clear_map_flag==true) {
+    img::MapHandle mm=img::CreateImage(img::Extent(img::Point(0,0),
+                                       map.GetSize()));
+    // swap newly created map into place
+    mm.SetSpatialSampling(map.GetSpatialSampling());
+    mm.SetAbsoluteOrigin(map.GetAbsoluteOrigin());
+    map.Swap(mm);
+  }
+
+  detail::EntityToDensityRosettaHelper e_to_d_r_helper
                                                 (entity_view,density_type,
                                                 resolution);
-    map.ApplyIP(e_to_d_r_helper);
-  }
+  map.ApplyIP(e_to_d_r_helper);
 }
+
 
 }}} // ns
 

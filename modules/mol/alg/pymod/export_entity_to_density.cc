@@ -21,6 +21,9 @@
  * Author Juergen Haas
  */
 #include <boost/python.hpp>
+#include <ost/config.hh>
+
+#if OST_IMG_ENABLED
 
 #include <ost/mol/alg/entity_to_density.hh>
 
@@ -28,48 +31,19 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol::alg;
 
-
-#if OST_IMG_ENABLED
-
-#include <ost/mol/alg/entity_to_density.hh>
-
 //"thin wrappers" for default parameters
-int etd1(const mol::EntityView& entity_view,
-         img::MapHandle& map,
-         const DensityType& density_type,
-         Real falloff_start,
-         Real falloff_end,
-         bool clear_map_flag)
-{
-  EntityToDensity(entity_view, map, density_type, falloff_start,
-                  falloff_end, clear_map_flag);
-                  return 0;
-}
-
-int etd2(const mol::EntityView& entity_view,
-        img::MapHandle& map,
-        const DensityType& density_type,
-        Real falloff_start,
-        Real falloff_end)
-{
-  EntityToDensity(entity_view, map, density_type, falloff_start,
-                  falloff_end);
-                  return 0;
-}
-
+BOOST_PYTHON_FUNCTION_OVERLOADS(etd_rosetta, EntityToDensityRosetta, 4, 6)
+BOOST_PYTHON_FUNCTION_OVERLOADS(etd_scattering, EntityToDensityScattering, 4, 6)
 
 void export_entity_to_density()
 {
-
-    def("EntityToDensity",EntityToDensity);
-    def("EntityToDensity",etd1);
-    def("EntityToDensity",etd2);
+    def("EntityToDensityRosetta",EntityToDensityRosetta,etd_rosetta());
+    def("EntityToDensityScattering",EntityToDensityScattering,etd_scattering());
 
     enum_<DensityType>("DensityType")
-    .value("SCATTERING_FACTORS", SCATTERING_FACTORS)
-    .value("ROSETTA_HIGH_RESOLUTION", ROSETTA_HIGH_RESOLUTION)
-    .value("ROSETTA_LOW_RESOLUTION", ROSETTA_LOW_RESOLUTION)
+    .value("HIGH_RESOLUTION", HIGH_RESOLUTION)
+    .value("LOW_RESOLUTION", LOW_RESOLUTION)
     .export_values()
     ;
- }
+}
 #endif
