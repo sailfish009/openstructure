@@ -43,6 +43,7 @@ public:
   SequenceViewObject(seq::SequenceHandle& sequence, const QString& name, QObject* parent = 0);
   SequenceViewObject(mol::ChainView& chain, const QString& name, QObject* parent = 0);
   SequenceViewObject(gfx::EntityP& entity, QObject* parent = 0);
+  SequenceViewObject(QObject* parent = 0);
 
   void AddSequence(seq::SequenceHandle& sequence, const QString& name=QString());
   void AddChain(mol::ChainView& chain, const QString& name=QString());

@@ -16,26 +16,28 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
+#ifndef OST_SEQUENCE_VIEWER_ALIGNMENT_VIEW_OBJECT
+#define OST_SEQUENCE_VIEWER_ALIGNMENT_VIEW_OBJECT
 
-#include <ost/gui/sequence/sequence_viewer.hh>
+/*
+  Author: Stefan Scheuber
+ */
 
-#include "sip_handler.hh"
+#include <ost/seq/alignment_handle.hh>
 
-using namespace boost::python;
-using namespace ost;
-using namespace ost::gui;
+#include "sequence_view_object.hh"
 
+namespace ost { namespace gui {
 
-void export_SequenceViewerV2()
+class AlignmentViewObject : public SequenceViewObject
 {
-  class_<SequenceViewerV2, boost::noncopyable >("SequenceViewerV2",init<>())
-    .def("Show", &SequenceViewerV2::show)
-    .def("Hide", &SequenceViewerV2::hide)
-    .def("AddAlignment", &SequenceViewerV2::AddAlignment)
-    .def("RemoveAlignment", &SequenceViewerV2::RemoveAlignment)
-    .def("GetQObject",&get_py_qobject<SequenceViewerV2>)
-    .add_property("qobject", &get_py_qobject<SequenceViewerV2>)
-  ;
-}
+  Q_OBJECT
 
+public:
+  AlignmentViewObject(const seq::AlignmentHandle& alignment, QObject* parent = 0);
+};
+
+
+}}
+
+#endif

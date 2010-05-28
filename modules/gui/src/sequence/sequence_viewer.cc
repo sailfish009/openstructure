@@ -128,6 +128,18 @@ void SequenceViewerV2::NodeRemoved(const gfx::GfxNodeP& node)
   }
 }
 
+void SequenceViewerV2::AddAlignment(const seq::AlignmentHandle& alignment)
+{
+  if(alignment.GetCount()>0 && alignment.GetLength()>0){
+    model_->InsertAlignment(alignment);
+  }
+}
+
+void SequenceViewerV2::RemoveAlignment(const seq::AlignmentHandle& alignment)
+{
+  model_->RemoveAlignment(alignment);
+}
+
 void SequenceViewerV2::UpdateSearchBar()
 {
   QStringList sequence_names_;

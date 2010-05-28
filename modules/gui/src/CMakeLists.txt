@@ -36,6 +36,7 @@ sequence_table_view.hh
 sequence_viewer.hh
 tick_painter.hh
 title_row.hh
+alignment_view_object.hh
 base_view_object.hh
 sequence_view_object.hh
 )
@@ -227,6 +228,7 @@ sequence/sequence_table_view.cc
 sequence/sequence_viewer.cc
 sequence/tick_painter.cc
 sequence/title_row.cc
+sequence/alignment_view_object.cc
 sequence/base_view_object.cc
 sequence/sequence_view_object.cc
 gosty_app.cc
@@ -360,6 +362,7 @@ sequence/sequence_table_view.hh
 sequence/sequence_viewer.hh
 sequence/tick_painter.hh
 sequence/title_row.hh
+sequence/alignment_view_object.hh
 sequence/base_view_object.hh
 sequence/sequence_view_object.hh
 plot_viewer/plot_axis_base.hh

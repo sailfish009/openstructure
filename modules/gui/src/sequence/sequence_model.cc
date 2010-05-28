@@ -26,6 +26,7 @@
 
 #include <QtGui>
 
+#include "alignment_view_object.hh"
 #include "sequence_view_object.hh"
 
 #include "title_row.hh"
@@ -78,6 +79,19 @@ void SequenceModel::InsertChain(QString& name, mol::ChainView& view){
   this->endInsertRows();
 }
 
+void SequenceModel::InsertAlignment(const seq::AlignmentHandle& alignment){
+  int cols = this->columnCount();
+  int new_cols = alignment.GetLength();
+  this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount()+alignment.GetCount()-1);
+  objects_.append(new AlignmentViewObject(alignment, this));
+  if(new_cols > cols){
+    this->max_columns = new_cols;
+    this->beginInsertColumns(QModelIndex(), cols, new_cols);
+    this->endInsertColumns();
+  }
+  this->endInsertRows();
+}
+
 void SequenceModel::InsertSequences(const QList<QString>& names, seq::SequenceList& list){
   this->beginInsertRows(this->index(this->rowCount(),0),this->rowCount(),this->rowCount()+list.GetCount());
   objects_.append(new SequenceViewObject(list, names, this));
@@ -114,6 +128,10 @@ void SequenceModel::RemoveGfxEntity(gfx::EntityP& entity){
       this->endRemoveColumns();
     }
   }
+}
+
+void SequenceModel::RemoveAlignment(const seq::AlignmentHandle& alignment){
+
 }
 
 int SequenceModel::GetColumnCount() const{

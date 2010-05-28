@@ -74,6 +74,9 @@ SequenceViewObject::SequenceViewObject(gfx::EntityP& entity, QObject* parent): B
   }
 }
 
+SequenceViewObject::SequenceViewObject(QObject* parent): BaseViewObject(parent), entity_(gfx::EntityP())
+{ }
+
 void SequenceViewObject::AddSequence(seq::SequenceHandle& sequence, const QString& name)
 {
   SequenceRow* new_row = new SequenceRow(name, sequence, this);

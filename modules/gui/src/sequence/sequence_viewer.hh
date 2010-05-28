@@ -25,6 +25,8 @@
 
 #include <QWidget>
 
+#include <ost/seq/alignment_handle.hh>
+
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_object.hh>
 
@@ -48,6 +50,9 @@ public:
   virtual void NodeAdded(const gfx::GfxNodeP& node);
   virtual void NodeRemoved(const gfx::GfxNodeP& node);
   virtual void SelectionChanged(const gfx::GfxObjP& o, const mol::EntityView& view);
+
+  virtual void AddAlignment(const seq::AlignmentHandle& alignment);
+  virtual void RemoveAlignment(const seq::AlignmentHandle& alignment);
 
   virtual bool Restore(const QString&){return true;};
   virtual bool Save(const QString&){return true;};
