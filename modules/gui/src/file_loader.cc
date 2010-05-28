@@ -38,6 +38,9 @@
 
 #include <ost/conop/conop.hh>
 
+#include <ost/seq/sequence_list.hh>
+#include <ost/seq/alignment_handle.hh>
+
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/surface.hh>
 #include <ost/gfx/scene.hh>
@@ -47,6 +50,7 @@
 #include <ost/gui/python_shell/python_interpreter.hh>
 #include <ost/gui/main_area.hh>
 #include <ost/gui/file_type_dialog.hh>
+#include <ost/gui/sequence/sequence_viewer.hh>
 
 #if OST_IMG_ENABLED
   #include <ost/io/img/load_map.hh>
@@ -88,6 +92,13 @@ void FileLoader::LoadObject(const QString& filename, const QString& selection)
         }
       }
   #endif
+      if (!obj)  {
+        try{
+          obj=FileLoader::TryLoadAlignment(filename);
+        } catch (io::IOFileAlreadyLoadedException&) {
+          return;
+        }
+      }
       if (!obj) {
         obj=FileLoader::TryLoadSurface(filename);
       }
@@ -292,6 +303,29 @@ gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHa
       gfx::SurfaceP gfx_surf(new gfx::Surface(fi.baseName().toStdString(),sh));
       return gfx_surf;
     }
+  }
+  return gfx::GfxObjP();
+}
+
+gfx::GfxObjP FileLoader::TryLoadAlignment(const QString& filename, io::SequenceIOHandlerPtr handler)
+{
+  if(!handler){
+    try{
+      handler = io::IOManager::Instance().FindAlignmentImportHandler(filename.toStdString(),"auto");
+    }
+    catch(io::IOUnknownFormatException e){
+      handler = io::SequenceIOHandlerPtr();
+    }
+  }
+  if(handler){
+    seq::SequenceList seq_list = seq::CreateSequenceList();
+    handler->Import(seq_list,filename.toStdString());
+    seq::AlignmentHandle alignment = seq::AlignmentFromSequenceList(seq_list);
+    gui::MainArea* main_area = gui::GostyApp::Instance()->GetPerspective()->GetMainArea();
+    SequenceViewerV2* viewer = new SequenceViewerV2(main_area);
+    viewer->AddAlignment(alignment);
+    main_area->AddWidget(filename,viewer);
+    throw io::IOFileAlreadyLoadedException("Loaded in DataViewer");
   }
   return gfx::GfxObjP();
 }
