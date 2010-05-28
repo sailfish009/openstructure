@@ -21,6 +21,7 @@ sequence_search_bar.hh
 )
 
 set(OST_GUI_SEQUENCE_VIEW_HEADERS
+align_properties_painter.hh
 base_row.hh
 background_painter.hh
 painter.hh
@@ -214,6 +215,7 @@ sequence_viewer/sequence_viewer_base.cc
 sequence_viewer/sequence_viewer.cc
 sequence_viewer/sequence_scene.cc
 sequence_viewer/sequence_search_bar.cc
+sequence/align_properties_painter.cc
 sequence/base_row.cc
 sequence/background_painter.cc
 sequence/secstr_row.cc
@@ -347,6 +349,7 @@ sequence_viewer/sequence_viewer_base.hh
 sequence_viewer/sequence_viewer.hh
 sequence_viewer/sequence_scene.hh
 sequence_viewer/sequence_search_bar.hh
+sequence/align_properties_painter.hh
 sequence/background_painter.hh
 sequence/base_row.hh
 sequence/painter.hh
