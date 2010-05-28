@@ -132,6 +132,8 @@ void SequenceViewerV2::AddAlignment(const seq::AlignmentHandle& alignment)
 {
   if(alignment.GetCount()>0 && alignment.GetLength()>0){
     model_->InsertAlignment(alignment);
+    seq_table_view_->resizeColumnsToContents();
+    seq_table_view_->resizeRowsToContents();
   }
 }
 
