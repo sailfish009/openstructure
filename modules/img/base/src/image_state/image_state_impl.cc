@@ -72,7 +72,8 @@ template <typename T, class D>
 ImageStateImpl<T,D>::ImageStateImpl(const ImageStateImpl<T,D>& s):
   domain_(s.domain_),
   data_(s.data_),
-  sampling_(s.sampling_)
+  sampling_(s.sampling_),
+  absolute_origin_(s.absolute_origin_)
 {
   sampling_.SetDomain(domain_.GetDomain());
 }
@@ -85,6 +86,7 @@ ImageStateImpl<T,D>& ImageStateImpl<T,D>::operator=(const ImageStateImpl<T,D>& s
     domain_=s.domain_;
     data_=s.data_; // copy
     sampling_=s.sampling_;
+    absolute_origin_=s.absolute_origin_;
     sampling_.SetDomain(domain_.GetDomain());
   }
   return *this;
