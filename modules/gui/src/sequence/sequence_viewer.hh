@@ -44,7 +44,7 @@ namespace ost { namespace gui {
 class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget, public gfx::SceneObserver  {
   Q_OBJECT
 public:
-  SequenceViewerV2(QWidget* parent=NULL);
+  SequenceViewerV2(bool listen_scene=true, QWidget* parent=NULL);
   ~SequenceViewerV2();
 
   virtual void NodeAdded(const gfx::GfxNodeP& node);

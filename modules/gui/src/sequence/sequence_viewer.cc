@@ -70,9 +70,11 @@ struct GetNodesVisitor: public gfx::GfxNodeVisitor {
   gfx::NodePtrList GetNodes(){return nodes_;}
 };
 
-SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
+SequenceViewerV2::SequenceViewerV2(bool listen_scene, QWidget* parent): Widget(NULL,parent)
 {
-  gfx::Scene::Instance().AttachObserver(this);
+  if(listen_scene){
+    gfx::Scene::Instance().AttachObserver(this);
+  }
   model_ = new SequenceModel(this);
 
   QVBoxLayout* layout = new QVBoxLayout(this);
@@ -102,12 +104,14 @@ SequenceViewerV2::SequenceViewerV2(QWidget* parent): Widget(NULL,parent)
   connect(seq_table_view_,SIGNAL(CopyEvent(QKeyEvent*)),this,SLOT(CopyEvent(QKeyEvent*)));
   connect(seq_table_view_,SIGNAL(MouseWheelEvent(QWheelEvent*)),this,SLOT(MouseWheelEvent(QWheelEvent*)));
 
-  gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
-  GetNodesVisitor gnv;
-  gfx::Scene::Instance().Apply(gnv);
-  gfx::NodePtrList list = gnv.GetNodes();
-  for(unsigned int i=0; i<list.size();i++){
-    this->NodeAdded(list[i]);
+  if(listen_scene){
+    gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
+    GetNodesVisitor gnv;
+    gfx::Scene::Instance().Apply(gnv);
+    gfx::NodePtrList list = gnv.GetNodes();
+    for(unsigned int i=0; i<list.size();i++){
+      this->NodeAdded(list[i]);
+    }
   }
 }
 

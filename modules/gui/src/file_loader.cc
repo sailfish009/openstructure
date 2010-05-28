@@ -322,7 +322,7 @@ gfx::GfxObjP FileLoader::TryLoadAlignment(const QString& filename, io::SequenceI
     handler->Import(seq_list,filename.toStdString());
     seq::AlignmentHandle alignment = seq::AlignmentFromSequenceList(seq_list);
     gui::MainArea* main_area = gui::GostyApp::Instance()->GetPerspective()->GetMainArea();
-    SequenceViewerV2* viewer = new SequenceViewerV2(main_area);
+    SequenceViewerV2* viewer = new SequenceViewerV2(false,main_area);
     viewer->AddAlignment(alignment);
     main_area->AddWidget(filename,viewer);
     throw io::IOFileAlreadyLoadedException("Loaded in DataViewer");
