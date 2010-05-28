@@ -112,7 +112,7 @@ QVariant SequenceRow::GetData(int column, int role) const
 
 Qt::ItemFlags SequenceRow::Flags(int column) const
 {
-  if(column<0 || column > this->GetColumnCount())return Qt::NoItemFlags;
+  if(column<0 || column >= this->GetColumnCount())return Qt::NoItemFlags;
 
   if(column==0){
     return Qt::ItemIsSelectable|Qt::ItemIsEnabled;
