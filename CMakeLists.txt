@@ -13,6 +13,8 @@ ENABLE_TESTING()
 
 option(USE_SHADER "whether to compile with shader support"
        OFF)
+option(SET_RPATH "embed rpath upon make install"
+       OFF)
 option(COMPILE_TMTOOLS "whether to compile the tmalign and tmscore programs"
        OFF)
 option(PROFILE "whether to compile with profiling support"
@@ -219,7 +221,19 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${TIFF_INCLUDE_DIR}
                     ${SPNAV_INCLUDE_DIR}
                     )
-
+if (UNIX)
+  SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+  SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  if(USE_RPATH)
+    set(_USE_RPATH ON)
+    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+  else()
+    set(_USE_RPATH OFF)
+   SET(CMAKE_INSTALL_RPATH "")
+   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+  endif() 
+endif()
 
 
 add_subdirectory(modules)
@@ -233,6 +247,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
 
 message(STATUS 
         "OpenStructure will be built with the following options:\n"
+        "   RPath in install            (-DUSE_RPATH) : ${_USE_RPATH}\n"
         "   Graphical interface         (-DENABLE_UI) : ${_UI}\n"
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
         "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"        
@@ -247,4 +262,3 @@ message(STATUS
 #add_custom_target(doc COMMAND 
 #                  ${SPHINX} ${SPHINX_OPTIONS} modules doc/html
 #                  VERBATIM)
-
