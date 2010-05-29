@@ -122,10 +122,12 @@ void CartoonRenderer::PrepareRendering()
 {
   TraceRendererBase::PrepareRendering();
   if(state_>0) {
+    va_.Clear();
     this->PrepareRendering(trace_subset_, va_, spline_list_list_, false);
     RebuildSplineObj(va_, spline_list_list_, false);
   }
   if (this->HasSelection() && (state_>0 || sel_state_>0)) {
+    sel_va_.Clear();
     // extract spline segments from list_list that match 
     // (via id) the selection subset
     // first put all ids into a set for fast lookup

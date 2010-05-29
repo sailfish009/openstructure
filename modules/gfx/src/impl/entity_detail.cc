@@ -379,7 +379,6 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
       sublist.at(c*nsub+d).type1=type1;
       sublist.at(c*nsub+d).type2=type2;
       sublist.at(c*nsub+d).frac=float(d)/float(nsub);
-      sublist.at(c*nsub+d).id=entry_list[c].id;
     }
   }                                                   
   int type1=entry_list.back().type;
@@ -388,6 +387,18 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   sublist.back().type1=type1;
   sublist.back().type2=type2;
   sublist.back().frac=0.0;
+
+  // the id for selections, shifted by one half
+  for(int c=0;c<size-1;++c) {
+    int d=0;
+    for(;d<nsub/2;++d) {
+      sublist.at(c*nsub+d).id=entry_list[c].id;
+    }
+    for(;d<nsub;++d) {
+      sublist.at(c*nsub+d).id=entry_list[c+1].id;
+    }
+  }
+  sublist.back().id=entry_list.back().id;
 
   // the nflip flags for helices for correct inside/outside assignment
   // this probably belongs into cartoon renderer
