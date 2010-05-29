@@ -59,6 +59,7 @@ void TraceRenderer::PrepareRendering(BackboneTrace& trace_subset,
     va.SetColorMaterial(true);
     va.SetTwoSided(false);
     if(is_sel) {
+      va.SetOpacity(GetSelectionColor().Alpha());
       for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
 	const NodeEntryList& nl=trace_subset.GetList(node_list);
 	for(unsigned int i=0;i<nl.size();++i) {

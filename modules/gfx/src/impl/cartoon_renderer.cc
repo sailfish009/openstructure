@@ -54,7 +54,7 @@ void CartoonRenderer::SetForceTube(bool force_tube)
 void CartoonRenderer::PrepareRendering(const BackboneTrace& subset, 
                                        IndexedVertexArray& va,
                                        SplineEntryListList& spline_list_list,
-                                       bool is_sel)
+                                       bool)
 {
   if(options_==NULL) {
     LOGN_DEBUG("CartoonRenderer: NULL options, not creating objects");
@@ -69,7 +69,6 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
 
   LOGN_DEBUG("CartoonRenderer: starting object build");
   int spline_detail=std::max((unsigned int) 1, options_->GetSplineDetail());
-  const Color& sel_clr=this->GetSelectionColor();
   SplineEntryListList tmp_sll;
   for (int node_list=0; node_list<subset.GetListCount(); ++node_list) {
     LOGN_DEBUG("CartoonRenderer: collecting spline entries for node list " << node_list);
@@ -90,8 +89,8 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
       }
       SplineEntry ee(entry.atom.GetPos(),entry.direction,
 		     entry.normal, entry.rad, 
-		     is_sel ? sel_clr : entry.color1, 
-		     is_sel ? sel_clr : entry.color2,
+		     entry.color1, 
+		     entry.color2,
 		     type, entry.id);
       ee.v1 = entry.v1;
       spl.push_back(ee);
@@ -128,6 +127,7 @@ void CartoonRenderer::PrepareRendering()
   }
   if (this->HasSelection() && (state_>0 || sel_state_>0)) {
     sel_va_.Clear();
+    Color sel_color=GetSelectionColor();
     // extract spline segments from list_list that match 
     // (via id) the selection subset
     // first put all ids into a set for fast lookup
@@ -150,6 +150,9 @@ void CartoonRenderer::PrepareRendering()
 	  // if a match is found, add all until a new id is found
 	  while(sc<slist.size() &&  slist.at(sc).id==curr_id) {
 	    nlist.push_back(slist[sc++]);
+	    // override with the selection color
+	    nlist.back().color1=sel_color;
+	    nlist.back().color2=sel_color;
 	  }
 	} else {
 	  // introduce break
@@ -167,8 +170,11 @@ void CartoonRenderer::PrepareRendering()
       }
     }
     RebuildSplineObj(sel_va_, sel_spline_list_list_, true);
-    sel_va_.SetColorMaterial(false);
+    sel_va_.SetColorMaterial(true);
     sel_va_.SetLighting(false);
+    sel_va_.SetMode(0x4);
+    sel_va_.SetPolyMode(options_->GetPolyMode());
+    sel_va_.SetOpacity(sel_color.Alpha());
   }
   sel_state_=0;
   state_=0;
