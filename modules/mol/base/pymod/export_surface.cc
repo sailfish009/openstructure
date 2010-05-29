@@ -24,7 +24,6 @@ using namespace boost::python;
 #include <ost/mol/surface_handle.hh>
 #include <ost/mol/surface_builder.hh>
 #include <ost/mol/entity_handle.hh>
-#include <ost/mol/impl/rsurf_impl.hh>
 #include <ost/mol/impl/surface_impl.hh>
 
 using namespace ost;
@@ -35,12 +34,6 @@ namespace {
 SurfaceHandle create1()
 {
   return CreateSurface();
-}
-
-void rsurf_tri_dummy(rsurf::RSurf& rs, float patch_size)
-{
-  impl::SurfaceImplP impl(new impl::SurfaceImpl());
-  rs.Triangulate(impl,patch_size);
 }
 
 void (SurfaceHandle::*attach1)(const EntityHandle&,Real)=&SurfaceHandle::Attach;
@@ -74,10 +67,4 @@ void export_Surface()
   def("CreateSurface",create1);
 
   def("BuildSurface",BuildSurface);
-
-  class_<rsurf::RSurf,rsurf::RSurfP>("RSurf", init<Real>())
-    .def("AddSphere",&rsurf::RSurf::AddSphere)
-    .def("Build",&rsurf::RSurf::Build)
-    .def("Triangulate",rsurf_tri_dummy)
-    ;
 }

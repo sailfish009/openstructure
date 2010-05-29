@@ -18,29 +18,16 @@
 //------------------------------------------------------------------------------
 #include "surface_builder.hh"
 
-#include "surface_handle.hh"
-#include <ost/mol/impl/surface_impl.hh>
-#include <ost/mol/impl/rsurf_impl.hh>
+#include <ost/log.hh>
 
+#include "surface_handle.hh"
 #include "entity_view.hh"
-#include "iterator.hh"
 
 namespace ost { namespace mol {
 
 SurfaceHandle BuildSurface(const EntityView& ev, Real probe_radius, Real patch_size)
 {
-  rsurf::RSurf rsurf(probe_radius);
-
-  for(AtomViewIter it=ev.AtomsBegin();it!=ev.AtomsEnd();++it) {
-    rsurf.AddSphere((*it).GetPos(),(*it).GetAtomProps().radius,(*it).GetQualifiedName());
-  }
-
-  rsurf.Build();
-
-  impl::SurfaceImplP impl(new impl::SurfaceImpl());
-  rsurf.Triangulate(impl,patch_size);
-
-  return SurfaceHandle(impl);
+  LOGN_ERROR("surface building not yet fully implemented");
 }
 
 }}

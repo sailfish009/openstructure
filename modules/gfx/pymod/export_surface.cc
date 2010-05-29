@@ -123,7 +123,4 @@ void export_Surface()
     .def("ReapplyColorOps", &Surface::ReapplyColorOps)
     ;
 
-  class_<RSurface, bases<GfxObj>, RSurfaceP, boost::noncopyable>("RSurface", init<const String&, const mol::rsurf::RSurfP&>())
-    ;
-
 }

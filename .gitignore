@@ -21,3 +21,4 @@ pov_*test.pov
 pov_*test.inc
 CMakeLists.txt.user
 OpenStructure.cbp
+DartConfiguration.tcl
