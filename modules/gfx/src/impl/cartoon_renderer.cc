@@ -319,34 +319,42 @@ void CartoonRenderer::FudgeSplineObj(SplineEntryListList& olistlist)
         for(;lc<olist.size() && olist.at(lc).type==2;++lc,++kend) {
           nlist.push_back(olist.at(lc));
         }
-        kend-=1;
-        nlist.at(kend).type=3; // mark end of strand
-
-        if(options_->GetStrandMode()==1 && kend>kstart) {
-          nlist.at(kend-1).type=3;
-          nlist.at(kend).type=5;
-          // smooth the strands
-          nlist.at(kstart).direction = geom::Normalize(nlist.at(kend).position-nlist.at(kstart).position);
-          nlist.at(kend).direction=nlist.at(kstart).direction;
-          float invf=1.0/static_cast<float>(kend-kstart);
-          for(unsigned int k=kstart;k<=kend;++k) {
-            float f = static_cast<float>(k-kstart)*invf;
-            nlist.at(k).position=nlist.at(kstart).position+f*(nlist.at(kend).position-nlist.at(kstart).position);
-            nlist.at(k).direction=nlist.at(kstart).direction;
-            geom::Vec3 tmpn=geom::Normalize(nlist.at(kstart).normal+f*(nlist.at(kend).normal-nlist.at(kstart).normal));
-            geom::Vec3 tmpx=geom::Normalize(geom::Cross(nlist.at(kstart).direction,tmpn));
-            nlist.at(k).normal=geom::Normalize(geom::Cross(tmpx,nlist.at(kstart).direction));
-          }
-          // break nodelist, re-start at arrow tip
-          if(lc+1<olist.size()) {
-            nlistlist.push_back(nlist);
-            nlist.clear();
-            nlist.push_back(nlistlist.back().back());
-            nlist.back().type=0;
-            nlist.back().color1=olist[lc+1].color1;
-            nlist.back().color2=olist[lc+1].color2;
-          }
-        }
+	if(kend-kstart<2) {
+	  // dont bother with too short strands
+	  for(unsigned int i=kstart;i<kend;++i) {
+	    nlist.at(i).type=0;
+	  }
+	} else {
+	  kend-=1;
+	  // these magic numbers are used in RebuildSplineObj for proper arrow rendering
+	  nlist.at(kend-1).type=3;
+	  nlist.at(kend).type=5;
+	  
+	  if(options_->GetStrandMode()==1) {
+	    // smooth the strands for mode 1
+	    nlist.at(kstart).direction = geom::Normalize(nlist.at(kend).position-nlist.at(kstart).position);
+	    nlist.at(kend).direction=nlist.at(kstart).direction;
+	    float invf=1.0/static_cast<float>(kend-kstart);
+	    for(unsigned int k=kstart;k<=kend;++k) {
+	      float f = static_cast<float>(k-kstart)*invf;
+	      nlist.at(k).position=nlist.at(kstart).position+f*(nlist.at(kend).position-nlist.at(kstart).position);
+	      nlist.at(k).direction=nlist.at(kstart).direction;
+	      geom::Vec3 tmpn=geom::Normalize(nlist.at(kstart).normal+f*(nlist.at(kend).normal-nlist.at(kstart).normal));
+	      geom::Vec3 tmpx=geom::Normalize(geom::Cross(nlist.at(kstart).direction,tmpn));
+	      nlist.at(k).normal=geom::Normalize(geom::Cross(tmpx,nlist.at(kstart).direction));
+	    }
+	  }
+	  
+	  // break nodelist, re-start at arrow tip for both modes
+	  if(lc+1<olist.size()) {
+	    nlistlist.push_back(nlist);
+	    nlist.clear();
+	    nlist.push_back(nlistlist.back().back());
+	    nlist.back().type=0;
+	    nlist.back().color1=olist[lc+1].color1;
+	    nlist.back().color2=olist[lc+1].color2;
+	  }
+	}
       }
       if(lc<olist.size()) {
         nlist.push_back(olist.at(lc));
@@ -429,7 +437,7 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
     unsigned int sc=1;
     for (; sc<slist.size(); ++sc) {
       if(slist.at(sc).type==3) {
-        if(slist.at(sc-1).type==2) {
+        if(slist.at(sc-1).type!=3) {
           // boundary to arrow
           SplineEntry se(slist[sc]);
           tprof2=TransformAndAddProfile(profiles,se, va);
@@ -510,7 +518,7 @@ namespace {
   float spread(const geom::Vec3& v1, geom::Vec3& v2, geom::Vec3& v3, geom::Vec3& v4)
   {
     return geom::Dot(geom::Normalize(geom::Cross(geom::Normalize(v3-v1),geom::Normalize(v2-v1))),
-                     geom::Normalize(geom::Cross(geom::Normalize(v3-v4),geom::Normalize(v2-v4))));
+		     geom::Normalize(geom::Cross(geom::Normalize(v3-v4),geom::Normalize(v2-v4))));
   }
 
 }
@@ -543,28 +551,6 @@ void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
     }
   }
   best_off=(best_off+prof1.size())%prof1.size();
-
-#if 0
-  uint i1=0;
-  uint i2=prof1.size()/4;
-  uint i3=prof1.size()/2;
-  uint i4=std::min(prof1.size()-1,size_t(i2+i3));
-  float best_val = Dot(prof1[i1].n,prof2[i1].n)+
-                    Dot(prof1[i2].n,prof2[i2].n)+
-                    Dot(prof1[i3].n,prof2[i3].n)+
-                    Dot(prof1[i4].n,prof2[i4].n);
-
-  for(unsigned int oo=1;oo<prof1.size();++oo) {
-    float val = Dot(prof1[i1].n,prof2[oo].n)+
-                 Dot(prof1[i2].n,prof2[(oo+i2)%prof1.size()].n)+
-                 Dot(prof1[i3].n,prof2[(oo+i3)%prof1.size()].n)+
-                 Dot(prof1[i4].n,prof2[(oo+i4)%prof1.size()].n);
-    if(val>best_val) {
-      best_val=val;
-      best_off=oo;
-    }
-  }
-#endif
 
   // assume both profiles have the same size
   for(unsigned int i1=0;i1<prof1.size();++i1) {

@@ -357,10 +357,13 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   sublist.at(i+1).v1=geom::Normalize(sublist.at(i+1).v1);
   orth = geom::Cross(sublist.at(i+1).direction,sublist.at(i+1).v1);
   sublist.at(i+1).v0 = geom::Normalize(geom::Cross(orth,sublist.at(i+1).direction));
+  if(geom::Dot(sublist.at(i).v0,sublist.at(i+1).v0)<0.0) {
+    sublist.at(i+1).v0=-sublist.at(i+1).v0;
+  }
 
   // hack
   // TODO: merge this with above routine
-  for(unsigned int i=0;i<sublist.size()-1;++i) {
+  for(unsigned int i=0;i<sublist.size();++i) {
     sublist.at(i).normal = sublist.at(i).v0;
   }
 
