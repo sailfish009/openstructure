@@ -33,7 +33,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(scene_autoslab_overloads,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(scene_export_pov_overloads,
                                        Scene::ExportPov, 1,2)
 void (Scene::*apply)(const InputEvent&, bool)=&Scene::Apply;
-namespace {
 
 Scene* get_scene()
 {
@@ -49,16 +48,13 @@ GfxObjP scene_getitem(Scene* scene, const String& item)
   return scene->operator[](item);
 }
 
-}
+} // anon ns
 
-}
 
 void export_Scene()
 {
   def("Scene",get_scene,return_value_policy<reference_existing_object>());
 
-  def("set_offscreen_mode",&Scene::SetOffscreenMode);
-  
   // will be removed...
   def("PickAtom", &pick_atom);
 
@@ -87,30 +83,26 @@ void export_Scene()
     .def("CenterOn",center_on1)
     .def("CenterOn",center_on2)
     .def("UnProject",  &Scene::UnProject, arg("ignore_vp")=false)
+    .def("Project",  &Scene::Project, arg("ignore_vp")=false)
     .def("InitGL", &Scene::InitGL)
     .def("RenderGL", &Scene::RenderGL)
     .def("Resize", &Scene::Resize)
     .def("SetBackground", &Scene::SetBackground)
-    .add_property("center", &Scene::GetCenter, &Scene::SetCenter)
-    .add_property("near", &Scene::GetNear, &Scene::SetNear)
-    .add_property("far", &Scene::GetFar, &Scene::SetFar)
     .def("SetNearFar",&Scene::SetNearFar)
     .def("SetFog",&Scene::SetFog)
     .def("SetFogColor",&Scene::SetFogColor)
-    .add_property("fog_near_offset", &Scene::GetFogNearOffset, 
-                  &Scene::SetFogNearOffset)
-    .add_property("fog_far_offset", &Scene::GetFogFarOffset, 
-                  &Scene::SetFogFarOffset)
     .def("SetFOV",&Scene::SetFOV)
     .def("GetFOV",&Scene::GetFOV)
     .def("SetFogOffsets",&Scene::SetFogOffsets)
     .def("Stereo",&Scene::Stereo)
     .def("SetStereoInverted",&Scene::SetStereoInverted)
-    .def("Apply", apply)
-    .def("SetStereoEye",&Scene::SetStereoEye)
+    .def("SetStereoView",&Scene::SetStereoView)
+    .def("SetStereoEyeDist",&Scene::SetStereoEyeDist)
+    .def("SetStereoEyeOff",&Scene::SetStereoEyeOff)
     .def("SetLightDir",&Scene::SetLightDir)
     .def("SetLightProp",set_light_prop1)
     .def("SetLightProp",set_light_prop2)
+    .def("Apply", apply)
     .def("Export",export1, arg("transparent")=true)
     .def("Export",export2, arg("transparent")=true)
     .def("ExportPov",&Scene::ExportPov,
@@ -127,9 +119,47 @@ void export_Scene()
     .def("BlurSnapshot",&Scene::BlurSnapshot)
     .def("SetShadow",&Scene::SetShadow)
     .def("SetShadowQuality",&Scene::SetShadowQuality)
+    .def("SetShadowWeight",&Scene::SetShadowWeight)
+    .def("SetDepthDarkening",&Scene::SetDepthDarkening)
+    .def("SetDepthDarkeningWeight",&Scene::SetDepthDarkeningWeight)
+    .def("SetAmbientOcclusion",&Scene::SetAmbientOcclusion)
+    .def("SetAmbientOcclusionWeight",&Scene::SetAmbientOcclusionWeight)
+    .def("SetAmbientOcclusionMode",&Scene::SetAmbientOcclusionMode)
+    .def("SetAmbientOcclusionQuality",&Scene::SetAmbientOcclusionQuality)
     .def("AttachObserver",&Scene::AttachObserver)
+    .def("StartOffscreenMode",&Scene::StartOffscreenMode)
+    .def("StopOffscreenMode",&Scene::StopOffscreenMode)
+    .def("SetShadingMode",&Scene::SetShadingMode)
+    .def("SetBeacon",&Scene::SetBeacon)
+    .def("SetBeaconOff",&Scene::SetBeaconOff)
+    .def("__getitem__",scene_getitem)
+    .add_property("bg",
+                  &Scene::GetBackground, 
+                  &Scene::SetBackground)
+    .add_property("center", &Scene::GetCenter, &Scene::SetCenter)
+    .add_property("near", &Scene::GetNear, &Scene::SetNear)
+    .add_property("far", &Scene::GetFar, &Scene::SetFar)
+    .add_property("fov", &Scene::GetFOV, &Scene::SetFOV)
+    .add_property("fog", &Scene::GetFog, &Scene::SetFog)
+    .add_property("fogcol", &Scene::GetFogColor, &Scene::SetFogColor)
+    .add_property("fogno",
+                  &Scene::GetFogNearOffset, 
+                  &Scene::SetFogNearOffset)
+    .add_property("fogfo",
+                  &Scene::GetFogFarOffset, 
+                  &Scene::SetFogFarOffset)
+    .add_property("smode",
+                  &Scene::GetSelectionMode,
+                  &Scene::SetSelectionMode)
+    // deprecated python properties!
     .add_property("selection_mode", &Scene::GetSelectionMode,
                    &Scene::SetSelectionMode)
-    .def("__getitem__",scene_getitem)
+    .add_property("fog_near_offset",
+                  &Scene::GetFogNearOffset, 
+                  &Scene::SetFogNearOffset)
+    .add_property("fog_far_offset",
+                  &Scene::GetFogFarOffset, 
+                  &Scene::SetFogFarOffset)
+    
   ;
 }

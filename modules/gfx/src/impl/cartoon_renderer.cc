@@ -16,8 +16,17 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+/*
+   Author: Ansgar Philippsen
+*/
+
 #include "cartoon_renderer.hh"
 
+#include <Eigen/Core>
+#include <Eigen/Array>
+#include <Eigen/SVD>
+#include <Eigen/LU>
 
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/impl/tabulated_trig.hh>
@@ -30,16 +39,11 @@ static const unsigned int MAX_ARC_DETAIL=12;
 
 using namespace impl;
 
-CartoonRenderer::CartoonRenderer(BackboneTrace& trace, bool force_tube): 
+CartoonRenderer::CartoonRenderer(BackboneTrace* trace, bool force_tube): 
   TraceRendererBase(trace, 3),   force_tube_(force_tube),
   options_(new CartoonRenderOptions(force_tube))
 {
-if(force_tube){
-  this->SetName("Smooth Tube");
-}
-else{
-  this->SetName("Helix & Strand Cartoon");
-}
+  this->SetName(force_tube ? "Smooth Tube" : "Helix & Strand Cartoon");
 }
 
 void CartoonRenderer::SetForceTube(bool force_tube)
@@ -47,74 +51,134 @@ void CartoonRenderer::SetForceTube(bool force_tube)
   force_tube_ = force_tube;
 }
 
-void CartoonRenderer::PrepareRendering(TraceSubset& subset, 
+void CartoonRenderer::PrepareRendering(const BackboneTrace& subset, 
                                        IndexedVertexArray& va,
                                        SplineEntryListList& spline_list_list,
-                                       bool is_sel)
+                                       bool)
 {
+  if(options_==NULL) {
+    LOGN_DEBUG("CartoonRenderer: NULL options, not creating objects");
+  }
+
+  va.Clear();
+  va.SetLighting(true);
+  va.SetCullFace(true);
+  va.SetColorMaterial(true);
+  va.SetMode(0x4);
+  va.SetPolyMode(options_->GetPolyMode());
+
+  LOGN_DEBUG("CartoonRenderer: starting object build");
   int spline_detail=std::max((unsigned int) 1, options_->GetSplineDetail());
-  const Color& sel_clr=this->GetSelectionColor();
-  if(options_!=NULL){
-    va.Clear();
-    va.SetLighting(true);
-    va.SetCullFace(true);
-    va.SetColorMaterial(true);
-    va.SetMode(0x4);
-    va.SetPolyMode(options_->GetPolyMode());
-    spline_list_list.clear();
-    for (int node_list=0; node_list<subset.GetSize(); ++node_list) {
-      // first build the spline
-      Spline spl;
-      const NodeListSubset& nl=subset[node_list];
-      for (int i=0; i<nl.GetSize();++i) {      
-        int type=0;
-        const NodeEntry& entry=nl[i];
-        if(!force_tube_) {
-          mol::ResidueHandle resh = entry.atom.GetResidue();
-          mol::SecStructure sst=resh.GetSecStructure();
-          mol::ResidueHandle resh2 = resh.GetNext();
-          mol::SecStructure sst2=mol::SecStructure(mol::SecStructure::COIL);
-          if (resh2.IsValid()) {
-            sst2=resh2.GetSecStructure();
-          }
-          if(sst.IsHelical()) {
-            type=1;
-          } else if(sst.IsExtended()) {
-            if(!sst2.IsExtended()) {
-              type=3; // end of strand
-            } else {
-              type=2;
-            }
-          }
-        }
-        SplineEntry& ee = spl.AddEntry(entry.atom.GetPos(),entry.direction,
-                                       entry.normal, entry.rad, 
-                                       is_sel ? sel_clr : entry.color1, 
-                                       is_sel ? sel_clr : entry.color2, type);
-        ee.v1 = entry.v1;
+  SplineEntryListList tmp_sll;
+  for (int node_list=0; node_list<subset.GetListCount(); ++node_list) {
+    LOGN_DEBUG("CartoonRenderer: collecting spline entries for node list " << node_list);
+    // first build the spline
+    SplineEntryList spl;
+    const NodeEntryList& nl=subset.GetList(node_list);
+    for (unsigned int i=0; i<nl.size();++i) {
+      int type=0;
+      const NodeEntry& entry=nl[i];
+      if(!force_tube_) {
+	mol::ResidueHandle resh = entry.atom.GetResidue();
+	mol::SecStructure sst=resh.GetSecStructure();
+	if(sst.IsHelical()) {
+	  type=1;
+	} else if(sst.IsExtended()) {
+	  type=2;
+	}
       }
-      spline_list_list.push_back(spl.Generate(spline_detail));
-      // now create the shape around the interpolated pathway
+      SplineEntry ee(entry.atom.GetPos(),entry.direction,
+		     entry.normal, entry.rad, 
+		     entry.color1, 
+		     entry.color2,
+		     type, entry.id);
+      ee.v1 = entry.v1;
+      spl.push_back(ee);
     }
-    RebuildSplineObj(spline_list_list.back(), va, spline_list_list, subset, is_sel);    
-    va.SmoothNormals(options_->GetNormalSmoothFactor());
-  }  
+    LOGN_DEBUG("CartoonRenderer: found " << spl.size() << " entries");
+    if(!spl.empty()) {
+      tmp_sll.push_back(spl);
+    }
+  }
+  if(!force_tube_) {
+    LOGN_DEBUG("CartoonRenderer: adjusting spline-entry-list lists for various modes");
+    FudgeSplineObj(tmp_sll);
+  }
+  spline_list_list.clear();
+  unsigned int tmp_count=0;
+  for(SplineEntryListList::const_iterator sit=tmp_sll.begin();sit!=tmp_sll.end();++sit) {
+    if(sit->size()==2 and sit->at(0).type==6) {
+      // don't intpol cylinders
+      spline_list_list.push_back(*sit);
+    } else {
+      LOGN_DEBUG("CartoonRenderer: generating full spline for spline-entry-list " << tmp_count++);
+      spline_list_list.push_back(Spline::Generate(*sit,spline_detail,options_->GetColorBlendMode()));
+    }
+  }
 }
+
 void CartoonRenderer::PrepareRendering()
 {
   TraceRendererBase::PrepareRendering();
-  va_.Clear();
-  this->PrepareRendering(trace_subset_, va_, spline_list_list_, false);
-  if (this->HasSelection()) {
-    this->PrepareRendering(sel_subset_, sel_va_, sel_spline_list_list_, true);
-    sel_va_.SetColorMaterial(false);
+  if(state_>0) {
+    va_.Clear();
+    this->PrepareRendering(trace_subset_, va_, spline_list_list_, false);
+    RebuildSplineObj(va_, spline_list_list_, false);
+  }
+  if (this->HasSelection() && (state_>0 || sel_state_>0)) {
+    sel_va_.Clear();
+    Color sel_color=GetSelectionColor();
+    // extract spline segments from list_list that match 
+    // (via id) the selection subset
+    // first put all ids into a set for fast lookup
+    std::set<int> id_set;
+    for(int nlc=0;nlc<sel_subset_.GetListCount();++nlc) {
+      const NodeEntryList& nelist=sel_subset_.GetList(nlc);
+      for(NodeEntryList::const_iterator nit=nelist.begin();nit!=nelist.end();++nit) {
+	id_set.insert(nit->id);
+      }
+    }
+    // now find all matching spline segments
+    sel_spline_list_list_.clear();
+    for(SplineEntryListList::const_iterator sit=spline_list_list_.begin();sit!=spline_list_list_.end();++sit) {
+      const SplineEntryList& slist=*sit;
+      SplineEntryList nlist;
+      unsigned int sc=0;
+      while(sc<slist.size()) {
+	int curr_id=slist.at(sc).id;
+	if(id_set.count(curr_id)>0) {
+	  // if a match is found, add all until a new id is found
+	  while(sc<slist.size() &&  slist.at(sc).id==curr_id) {
+	    nlist.push_back(slist[sc++]);
+	    // override with the selection color
+	    nlist.back().color1=sel_color;
+	    nlist.back().color2=sel_color;
+	  }
+	} else {
+	  // introduce break
+	  if(!nlist.empty()) {
+	    sel_spline_list_list_.push_back(nlist);
+	    nlist.clear();
+	  }
+	  // and advance to the next id
+	  while(sc<slist.size() &&  slist.at(sc).id==curr_id) ++sc;
+	}
+      }
+      if(!nlist.empty()) {
+	sel_spline_list_list_.push_back(nlist);
+	nlist.clear();
+      }
+    }
+    RebuildSplineObj(sel_va_, sel_spline_list_list_, true);
+    sel_va_.SetColorMaterial(true);
     sel_va_.SetLighting(false);
+    sel_va_.SetMode(0x4);
+    sel_va_.SetPolyMode(options_->GetPolyMode());
+    sel_va_.SetOpacity(sel_color.Alpha());
   }
   sel_state_=0;
   state_=0;
 }
-
-void CartoonRenderer::Render(){}
 
 bool CartoonRenderer::CanSetOptions(RenderOptionsPtr& render_options)
 {
@@ -131,95 +195,286 @@ RenderOptionsPtr CartoonRenderer::GetOptions()
  return options_;
 }
 
-void CartoonRenderer::RebuildSplineObj(const SplineEntryList& l, 
-                                       IndexedVertexArray& va,
-                                       SplineEntryListList& spline_list_list,
-                                       const TraceSubset& subset, bool is_sel)
+namespace {
+  typedef Eigen::Matrix<Real,3,1> EVec3;
+  typedef Eigen::Matrix<Real,3,3> EMat3;
+  typedef Eigen::Matrix<Real,1,3> ERVec3;
+  typedef Eigen::Matrix<Real,Eigen::Dynamic,Eigen::Dynamic> EMatX;
+  typedef Eigen::Matrix<Real,1,Eigen::Dynamic> ERVecX;
+
+  ERVec3 to_eigen(const geom::Vec3& v)
+  {
+    EVec3 nrvo=EVec3::Zero();
+    nrvo[0]=v[0]; nrvo[1]=v[1]; nrvo[2]=v[2];
+    return nrvo;
+  }
+  
+  std::pair<geom::Vec3,geom::Vec3> fit_helix(const std::vector<geom::Vec3>& points)
+  {
+    if(points.size()<4) {
+      return std::make_pair(points.front(),points.back());
+    }
+    geom::Vec3 cen(0.0,0.0,0.0);
+    for(unsigned int i=0;i<points.size();++i) cen+=points[i];
+    cen/=static_cast<float>(points.size());
+
+    EMatX A=EMatX::Zero(points.size(),3);
+    for(unsigned int i=0;i<points.size();++i) {
+      A.row(i)=to_eigen(points[i]-cen);
+    }
+
+    Eigen::SVD<EMatX> svd(A);
+    EMatX V=svd.matrixV();
+    geom::Vec3 ax(V(0,0),V(1,0),V(2,0));
+
+    geom::Vec3 p1=cen+ax*(-geom::Dot(cen,ax)+geom::Dot(points.front(),ax))/geom::Length2(ax);
+    geom::Vec3 p2=cen+ax*(-geom::Dot(cen,ax)+geom::Dot(points.back(),ax))/geom::Length2(ax);
+
+    return std::make_pair(p1,p2);
+  }
+  
+} // ns
+
+void CartoonRenderer::FudgeSplineObj(SplineEntryListList& olistlist)
 {
+  SplineEntryListList nlistlist;
+  SplineEntryList nlist;
+  
+  for(unsigned int llc=0;llc<olistlist.size();++llc) {
+    LOGN_DEBUG("CartoonRenderer: fudging spline segment " << llc);
+    SplineEntryList olist = olistlist[llc];
+    for(unsigned int lc=0;lc<olist.size();++lc) {
+      if(olist.at(lc).type==1) {
+        if(options_->GetHelixMode()==1) {
+          // cylindrical helix
+          // collect all CA positions 
+          std::vector<geom::Vec3> points;
+          SplineEntry tmp_end(olist.at(lc));
+          unsigned int lstart=lc;
+          for(;lc<olist.size() && olist.at(lc).type==1;++lc) {
+            points.push_back(olist.at(lc).position);
+          }
+          unsigned int lend=lc-1;
+          if(lend-lstart<3) {
+            // this is a short helix, may as well not bother
+            for(unsigned int i=lstart;i<=lend;++i) {
+              nlist.push_back(olist[i]);
+              nlist.back().type=0;
+            }
+          } else {
+            // fit points to a cylinder
+            std::pair<geom::Vec3,geom::Vec3> cyl=fit_helix(points);
+
+            // extend the current spline to start of cyl
+            geom::Vec3 cyl_dir = geom::Normalize(cyl.second-cyl.first);
+            
+            if(lstart>0) {
+              SplineEntry tmp_end(olist[lstart]);
+              tmp_end.type=0;
+              tmp_end.position=cyl.first;
+              tmp_end.direction=cyl_dir;
+              tmp_end.color1=olist[lstart-1].color1;
+              tmp_end.color2=olist[lstart-1].color2;
+              tmp_end.normal=geom::Normalize(geom::Cross(cyl_dir,geom::Cross(tmp_end.normal,cyl_dir)));
+              if(geom::Dot(tmp_end.normal,olist[lstart].normal)<0.0) {
+                tmp_end.normal=-tmp_end.normal;
+              }
+              nlist.push_back(tmp_end);
+
+              // break nodelist
+              nlistlist.push_back(nlist);
+              nlist.clear();
+            }
+
+	    // make a two entry list with the cyl type
+	    nlist.push_back(SplineEntry(cyl.first,geom::Vec3(),geom::Vec3(),0.0,
+					olist[lstart].color1,olist[lstart].color1,
+					6,olist[lstart].id));
+	    nlist.push_back(SplineEntry(cyl.second,geom::Vec3(),geom::Vec3(),0.0,
+					olist[lend].color1,olist[lend].color1,
+					6,olist[lend].id));
+	    nlistlist.push_back(nlist);
+	    nlist.clear();
+
+            if(lend+1<olist.size()) {
+              // and get going with an entry at the end of the cylinder
+              SplineEntry tmp_start(olist[lend]);
+              tmp_start.type=0;
+              tmp_start.position=cyl.second;
+              tmp_start.direction=cyl_dir;
+              tmp_start.color1=olist[lend+1].color1;
+              tmp_start.color2=olist[lend+1].color2;
+              tmp_start.normal=geom::Normalize(geom::Cross(cyl_dir,geom::Cross(tmp_start.normal,cyl_dir)));
+              if(geom::Dot(tmp_start.normal,olist[lstart].normal)<0.0) {
+                tmp_start.normal=-tmp_start.normal;
+              }
+              nlist.push_back(tmp_start);
+            }
+          }
+        } else { // helix mode 0
+          // just copy them over
+          for(;lc<olist.size() && olist.at(lc).type==1;++lc) {
+            nlist.push_back(olist.at(lc));
+          }
+        }
+      }
+      if(lc>=olist.size()) break;
+      // can't use else here in case the above routine advanced lc to end
+      if(olist.at(lc).type==2) {
+        // strand
+        unsigned int kstart=nlist.size();
+        unsigned int kend=kstart;
+        for(;lc<olist.size() && olist.at(lc).type==2;++lc,++kend) {
+          nlist.push_back(olist.at(lc));
+        }
+	if(kend-kstart<2) {
+	  // dont bother with too short strands
+	  for(unsigned int i=kstart;i<kend;++i) {
+	    nlist.at(i).type=0;
+	  }
+	} else {
+	  kend-=1;
+	  // these magic numbers are used in RebuildSplineObj for proper arrow rendering
+	  nlist.at(kend-1).type=3;
+	  nlist.at(kend).type=5;
+	  
+	  if(options_->GetStrandMode()==1) {
+	    // smooth the strands for mode 1
+	    nlist.at(kstart).direction = geom::Normalize(nlist.at(kend).position-nlist.at(kstart).position);
+	    nlist.at(kend).direction=nlist.at(kstart).direction;
+	    float invf=1.0/static_cast<float>(kend-kstart);
+	    for(unsigned int k=kstart;k<=kend;++k) {
+	      float f = static_cast<float>(k-kstart)*invf;
+	      nlist.at(k).position=nlist.at(kstart).position+f*(nlist.at(kend).position-nlist.at(kstart).position);
+	      nlist.at(k).direction=nlist.at(kstart).direction;
+	      geom::Vec3 tmpn=geom::Normalize(nlist.at(kstart).normal+f*(nlist.at(kend).normal-nlist.at(kstart).normal));
+	      geom::Vec3 tmpx=geom::Normalize(geom::Cross(nlist.at(kstart).direction,tmpn));
+	      nlist.at(k).normal=geom::Normalize(geom::Cross(tmpx,nlist.at(kstart).direction));
+	    }
+	  }
+	  
+	  // break nodelist, re-start at arrow tip for both modes
+	  if(lc+1<olist.size()) {
+	    nlistlist.push_back(nlist);
+	    nlist.clear();
+	    nlist.push_back(nlistlist.back().back());
+	    nlist.back().type=0;
+	    nlist.back().color1=olist[lc+1].color1;
+	    nlist.back().color2=olist[lc+1].color2;
+	  }
+	}
+      }
+      if(lc<olist.size()) {
+        nlist.push_back(olist.at(lc));
+      }
+    }
+    if(!nlist.empty()) {
+      nlistlist.push_back(nlist);
+      nlist.clear();
+    }
+  }
+  olistlist.swap(nlistlist);
+}
+
+void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
+                                       const SplineEntryListList& spline_list_list,
+                                       bool is_sel)
+{
+  LOGN_DEBUG("CartoonRenderer: starting profile assembly");
   unsigned int detail = std::min(MAX_ARC_DETAIL,
                                  std::max(options_->GetArcDetail(),
                                  (unsigned int)1));
-  int spline_detail=std::max((unsigned int) 1, options_->GetSplineDetail());
   std::vector<TraceProfile> profiles;
   float factor=is_sel ? 0.2 : 0.0;
   profiles.push_back(GetCircProfile(detail,
 				    options_->GetTubeRadius()*options_->GetTubeRatio()+factor,
 				    options_->GetTubeRadius()+factor, 
 				    options_->GetTubeProfileType(),
-				    1.0)); // tube
+				    1.0)); // profile 0 = tube
   if (!force_tube_) {
     profiles.push_back(GetCircProfile(detail,
 				      options_->GetHelixWidth()+factor,
 				      options_->GetHelixThickness()+factor,
 				      options_->GetHelixProfileType(),
-				      options_->GetHelixEcc())); // helix
+				      options_->GetHelixEcc())); // profile 1 = helix
     profiles.push_back(GetCircProfile(detail,
 				      options_->GetStrandWidth()+factor,
 				      options_->GetStrandThickness()+factor,
 				      options_->GetStrandProfileType(),
-				      options_->GetStrandEcc())); // strand
-    profiles.push_back(GetCircProfile(detail,
-				      0.1*options_->GetStrandWidth()+factor,
-				      options_->GetStrandThickness()+factor,
-				      options_->GetTubeProfileType(),
-				      1.0)); // arrow end, tube profile
+				      options_->GetStrandEcc())); // profile 2 = strand
+    profiles.push_back(profiles.back()); // profile 3==2, strand
+
     profiles.push_back(GetCircProfile(detail,
 				      1.7*options_->GetStrandWidth()+factor,
 				      1.1*options_->GetStrandThickness()+factor,
 				      options_->GetStrandProfileType(),
-				      options_->GetStrandEcc())); // arrow start
+				      options_->GetStrandEcc())); // profile 4 = arrow start
+    profiles.push_back(GetCircProfile(detail,
+				      0.01*options_->GetStrandWidth()+factor,
+				      1.1*options_->GetStrandThickness()+factor,
+				      options_->GetStrandProfileType(),
+				      options_->GetStrandEcc())); // profile 5 = arrow end
+
   }
 
   // iterate over all spline segments
-  for(SplineEntryListList::iterator it=spline_list_list.begin();
+  unsigned int tmp_count=0;
+  for(SplineEntryListList::const_iterator it=spline_list_list.begin();
       it<spline_list_list.end();++it) {
     /*
       for each spline segment, transform the profile according to the
       normal and direction and assemble it together with the last
       transformed profile into a graphical segment
     */
-    SplineEntryList& slist=*it;
-    const NodeListSubset& nl=subset[it-spline_list_list.begin()];
-    int sit=0, send=slist.size()-spline_detail+1;
-    if (nl.AtStart()>0) {
-      sit+=nl.AtStart()*spline_detail-spline_detail/2;
+    SplineEntryList slist=*it;
+    if(slist.empty()) continue;
+    LOGN_DEBUG("CartoonRenderer: assembling fragment " << tmp_count << " with " << slist.size() << " spline segments");
+
+    if(slist.size()==2 && slist[0].type==6) {
+      // make a cylinder
+      va.AddCylinder(CylinderPrim(slist[0].position,slist[1].position,
+				  options_->GetHelixWidth(),
+				  slist[0].color1,slist[1].color1),
+		     options_->GetArcDetail(),true);
+      continue;
     }
-    if (nl.AtEnd()>0) {
-      send-=nl.AtEnd()*spline_detail-spline_detail/2;
-    }
-    TraceProfile tprof1=TransformAndAddProfile(profiles,slist[sit],va);
-    CapProfile(tprof1,slist[sit],true,va);
+
+    TraceProfile tprof1=TransformAndAddProfile(profiles,slist[0],va);
+    CapProfile(tprof1,slist[0],true,va);
     TraceProfile tprof2;
-    SplineEntry& last_se=slist[send-1];
-    for (int sc=sit+1; sc<send; ++sc) {
-      if(slist[sc-1].type==2 && slist[sc].type==3) {
-        // arrow on last strand segment
-        // type1 is already set to 4 (Spline::Generate),
-        // hence just insert single bridging profile
-        SplineEntry se(slist[sc]);
-        se.type=last_se.type;
-        se.type1=last_se.type1;
-        se.type2=last_se.type2;
-        tprof2=TransformAndAddProfile(profiles,se, va);
-        AssembleProfile(tprof1,tprof2,va);
-        tprof1=tprof2;
-        tprof2=TransformAndAddProfile(profiles,slist[sc], va);
-        last_se=slist[sc];
+    unsigned int sc=1;
+    for (; sc<slist.size(); ++sc) {
+      if(slist.at(sc).type==3) {
+        if(slist.at(sc-1).type!=3) {
+          // boundary to arrow
+          SplineEntry se(slist[sc]);
+          tprof2=TransformAndAddProfile(profiles,se, va);
+          AssembleProfile(tprof1,tprof2,va);
+          tprof1=tprof2;
+          se.type=2;
+          se.type1=4;
+          se.type2=4;
+          tprof2=TransformAndAddProfile(profiles,se, va);
+        } else {
+          SplineEntry se(slist.at(sc));
+          se.type1=4;
+          if(options_->GetStrandMode()==1) se.type2=5;
+          tprof2=TransformAndAddProfile(profiles,se, va);
+        }
       } else {
-        tprof2=TransformAndAddProfile(profiles,slist[sc], va);
+        tprof2=TransformAndAddProfile(profiles,slist.at(sc), va);
       }
       AssembleProfile(tprof1,tprof2,va);
       tprof1=tprof2;
-      last_se=slist[sc];
     }
-    CapProfile(tprof1,slist[send-1],false,va);
+    CapProfile(tprof1,slist.at(sc-1),false,va);
   }
 }
 
-
-
 TraceProfile CartoonRenderer::TransformAndAddProfile(const std::vector<TraceProfile>& profiles, const SplineEntry& se, IndexedVertexArray& va)
 {
+  assert(se.type1>=0 && se.type1<=5);
+  assert(se.type2>=0 && se.type2<=5);
   TraceProfile prof1 = profiles[se.type1];
   TraceProfile prof2 = profiles[se.type2];
 
@@ -266,33 +521,44 @@ TraceProfile CartoonRenderer::TransformAndAddProfile(const std::vector<TraceProf
   return tf_prof;
 }
 
+namespace {
+
+  float spread(const geom::Vec3& v1, geom::Vec3& v2, geom::Vec3& v3, geom::Vec3& v4)
+  {
+    return geom::Dot(geom::Normalize(geom::Cross(geom::Normalize(v3-v1),geom::Normalize(v2-v1))),
+		     geom::Normalize(geom::Cross(geom::Normalize(v3-v4),geom::Normalize(v2-v4))));
+  }
+
+}
+
 void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
                                       const TraceProfile& prof2, 
                                       IndexedVertexArray& va)
 {
-  // determine rotational offset with a heuristic routine
-  int best_off=0;
-#if 0
-  uint i1=0;
-  uint i2=prof1.size()/4;
-  uint i3=prof1.size()/2;
-  uint i4=std::min(prof1.size()-1,size_t(i2+i3));
-  float best_val = Dot(prof1[i1].n,prof2[i1].n)+
-                    Dot(prof1[i2].n,prof2[i2].n)+
-                    Dot(prof1[i3].n,prof2[i3].n)+
-                    Dot(prof1[i4].n,prof2[i4].n);
-
-  for(unsigned int oo=1;oo<prof1.size();++oo) {
-    float val = Dot(prof1[i1].n,prof2[oo].n)+
-                 Dot(prof1[i2].n,prof2[(oo+i2)%prof1.size()].n)+
-                 Dot(prof1[i3].n,prof2[(oo+i3)%prof1.size()].n)+
-                 Dot(prof1[i4].n,prof2[(oo+i4)%prof1.size()].n);
-    if(val>best_val) {
-      best_val=val;
-      best_off=oo;
+  float accum[]={0.0,0.0,0.0,0.0,0.0};
+  for(int i=0;i<prof1.size();++i) {
+    int i1=(i+0)%prof1.size();
+    int i2=(i+1)%prof1.size();
+    geom::Vec3 v1=va.GetVert(prof1[i1].id);
+    geom::Vec3 v2=va.GetVert(prof1[i2].id);
+    for(int k=-2;k<=2;++k) {
+      int i3=(i+k+0+prof1.size())%prof1.size();
+      int i4=(i+k+1+prof1.size())%prof1.size();
+      geom::Vec3 v3=va.GetVert(prof2[i3].id);
+      geom::Vec3 v4=va.GetVert(prof2[i4].id);
+      accum[k+2]+=spread(v1,v2,v3,v4);
     }
   }
-#endif
+
+  float best_spread=accum[0];
+  int best_off=-2;
+  for(int k=-1;k<=2;++k) {
+    if(accum[k+2]<best_spread) {
+      best_spread=accum[k+2];
+      best_off=k;
+    }
+  }
+  best_off=(best_off+prof1.size())%prof1.size();
 
   // assume both profiles have the same size
   for(unsigned int i1=0;i1<prof1.size();++i1) {

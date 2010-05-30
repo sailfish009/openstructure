@@ -38,7 +38,8 @@ void export_png(const String& filename, unsigned int width, unsigned int height,
     LOGN_ERROR("error opening" << filename << " for exporting");
     return;
   }
-  
+
+  LOGN_DEBUG("creating png write struct");
   png_structp png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING,
                                                 NULL, NULL, NULL);
   if (png_ptr == NULL) {
@@ -47,6 +48,7 @@ void export_png(const String& filename, unsigned int width, unsigned int height,
     return;
   }
   
+  LOGN_DEBUG("creating png info struct");
   png_infop info_ptr = png_create_info_struct(png_ptr);
   if (info_ptr == NULL) {
     fclose(fp);
@@ -72,20 +74,24 @@ void export_png(const String& filename, unsigned int width, unsigned int height,
                PNG_INTERLACE_NONE,
                PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
   
+  LOGN_DEBUG("writing png info");
   png_write_info(png_ptr, info_ptr);
   
   png_bytep* row_pointers = new png_bytep[height];
 
   png_byte* png_data = data;
 
+  LOGN_DEBUG("assigning png row pointers");
   for(uint i=0;i<height;++i){
     row_pointers[height-i-1]=&png_data[i*4*width];
   }
 
+  LOGN_DEBUG("writing png image");
   png_write_image(png_ptr, row_pointers);
 
   delete []row_pointers;
 
+  LOGN_DEBUG("finalizing png write");
   png_write_end(png_ptr, info_ptr);
   
   png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
@@ -162,7 +168,7 @@ Bitmap import_png(const String& filename)
     }
   }
 
-  LOGN_VERBOSE("loaded " << width << "x" << height << ":" << channels << " bitmap");
+  LOGN_DEBUG("loaded " << width << "x" << height << ":" << channels << " bitmap");
 
   bm.channels=channels;
   bm.width=width;

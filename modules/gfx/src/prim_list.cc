@@ -31,7 +31,9 @@ PrimList::PrimList(const String& name):
   points_(),
   lines_(),
   radius_(0.5),
-  diameter_(0.5)
+  diameter_(0.5),
+  sphere_detail_(4),
+  arc_detail_(4)
 {}
 
 void PrimList::Clear()
@@ -95,8 +97,6 @@ void PrimList::CustomPreRenderGL(bool flag)
     } else {
       render_simple();
     }
-  } else {
-    RefreshVA(va_);
   }
 }
 
@@ -129,12 +129,14 @@ struct AALineEntryLess
 
 void PrimList::CustomRenderGL(RenderPass pass)
 {
-  if(pass!=STANDARD_RENDER_PASS) return;
-  va_.RenderGL();
+  if(pass==STANDARD_RENDER_PASS || pass==TRANSPARENT_RENDER_PASS) {
+    va_.RenderGL();
+  }
 }
 
 void PrimList::CustomRenderPov(PovState& pov)
 {
+  // TODO: add primlist pov export
 }
 
 void PrimList::AddPoint(geom::Vec3& p, const Color& col)
@@ -155,12 +157,28 @@ void PrimList::SetDiameter(float d)
 {
   diameter_=d;
   Scene::Instance().RequestRedraw();
+  FlagRebuild();
 }
 
 void PrimList::SetRadius(float r)
 {
   radius_=r;
   Scene::Instance().RequestRedraw();
+  FlagRebuild();
+}
+
+void PrimList::SetSphereDetail(unsigned int d)
+{
+  sphere_detail_=d;
+  Scene::Instance().RequestRedraw();
+  FlagRebuild();
+}
+
+void PrimList::SetArcDetail(unsigned int d)
+{
+  arc_detail_=d;
+  Scene::Instance().RequestRedraw();
+  FlagRebuild();
 }
 
 void PrimList::SetColor(const Color& c)
@@ -169,6 +187,7 @@ void PrimList::SetColor(const Color& c)
     it->color=c;
   }
   Scene::Instance().RequestRedraw();
+  FlagRebuild();
 }
 
 

@@ -2,6 +2,7 @@ uniform bool lighting_flag;
 uniform bool two_sided_flag;
 uniform bool fog_flag;
 uniform bool occlusion_flag;
+uniform vec2 ambient_weight;
 varying vec4 ambient_color;
 
 // copy from basic_fl_vs !
@@ -34,31 +35,34 @@ void main()
     vec4 amb = vec4(0.0);
     vec4 diff = vec4(0.0);
     vec4 spec = vec4(0.0);
-    vec4 color = vec4(0.0);
 
-    /* 
-      For ambient occlusion, this blends the local ambient color together with
-      the fragment color at intensity given my the ambient material settings;
-      ambient_color defaults to gl_Color, so for non ambient-occluded scenes,
-      this is a noop
-    */
-    vec4 diff_color = gl_Color;
+    vec4 color = gl_Color;
     if(occlusion_flag) {
-      diff_color.rgb = mix(gl_Color.rgb,ambient_color.rgb,gl_FrontMaterial.ambient.rgb);
+      /* 
+        For ambient occlusion and local coloring, two effects are possible. 
+        (1) Blending of the original fragment color and the accumulated
+            color of the neighbouring fragments, by ambient_weight[0].
+        (2) Attenuating the resulting color intensity by the ambient occlusion,
+            modulated by ambient_weight[1]
+        Only the rgb values are affected, fragment opacity is unchanged
+      */
+
+      color.rgb = mix(gl_Color.rgb,ambient_color.rgb,ambient_weight[0]);
+      color.rgb = mix(color.rgb,ambient_color.aaa*color.rgb,ambient_weight[1]);
     }
 
     if(DirectionalLight(normal, gl_FrontMaterial.shininess, amb, diff, spec)) {
 
       color  = gl_FrontLightModelProduct.sceneColor  +
-               (amb  * gl_FrontMaterial.diffuse * diff_color * ambient_color.a) +
-               (diff * gl_FrontMaterial.diffuse * diff_color) +
+               (amb  * gl_FrontMaterial.ambient * color) +
+               (diff * gl_FrontMaterial.diffuse * color) +
                (spec * gl_FrontMaterial.specular);
     } else {
       DirectionalLight(-normal, gl_BackMaterial.shininess, amb, diff, spec);
 
       color = gl_BackLightModelProduct.sceneColor  +
-              (amb  * gl_BackMaterial.ambient * diff_color * ambient_color.a) +
-              (diff * gl_BackMaterial.diffuse * diff_color) +
+              (amb  * gl_BackMaterial.ambient * color) +
+              (diff * gl_BackMaterial.diffuse * color) +
               (spec * gl_BackMaterial.specular);
     }
     

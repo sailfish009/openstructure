@@ -20,8 +20,9 @@
 #define OST_GFX_IMPL_TRACE_RENDERER_HH
 
 /*
-   Author: Marco Biasini
- */
+   Authors: Marco Biasini, Ansgar Philippsen
+*/
+
 #include <ost/gfx/impl/backbone_trace.hh>
 #include <ost/gfx/impl/entity_detail.hh>
 #include <ost/gfx/impl/trace_renderer_base.hh>
@@ -37,12 +38,12 @@ using namespace impl;
 /// \internal
 class DLLEXPORT_OST_GFX TraceRenderer: public TraceRendererBase {
 public:
-  TraceRenderer(BackboneTrace& trace);
+  TraceRenderer(BackboneTrace* trace);
 
   virtual void PrepareRendering();
-  virtual void PrepareRendering(TraceSubset& trace_subset, 
+  virtual void PrepareRendering(BackboneTrace& trace_subset, 
                                 IndexedVertexArray& va, bool is_sel);
-  virtual void Render();
+
   virtual void RenderPov(PovState& pov, const std::string& name);
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);
@@ -51,14 +52,6 @@ public:
 
   virtual ~TraceRenderer();
 private:
-  VertexID AddCappedProfile(IndexedVertexArray& va, const Color& color,
-                            const geom::Vec3& center, const geom::Mat3& ori, 
-                            float radius, bool flip_normal, int n);
-  VertexID AddCircularProfile(IndexedVertexArray& va, const Color& color,
-                              const geom::Vec3& center, const geom::Mat3& ori,
-                              float radius, int n);
-  void ConnectProfiles(VertexID prof1, VertexID prof2, int n, 
-                       const geom::Vec3& dir, IndexedVertexArray& va);
   TraceRenderOptionsPtr  options_;
 };
 

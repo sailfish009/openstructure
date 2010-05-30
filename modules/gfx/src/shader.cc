@@ -49,7 +49,11 @@ Shader::Shader():
   current_name_(""),
   shader_code_map_(),
   shader_program_map_()
-{}
+{
+  if(!GLEW_VERSION_2_0) {
+    LOGN_VERBOSE("OpenGL version smaller 2.0, deactivating shader functionality");
+  }
+}
 
 
 void Shader::PreGLInit() 
@@ -76,7 +80,7 @@ bool compile_shader(String shader_name, String shader_code, GLenum shader_type, 
   GLint sh_compiled;
   glGetShaderiv(shader_id, GL_COMPILE_STATUS, &sh_compiled);
   if(sh_compiled==GL_TRUE) {
-    LOGN_VERBOSE("shader [" << shader_name << "] successfully compiled (" << shader_id << ")");
+    LOGN_DEBUG("shader [" << shader_name << "] successfully compiled (" << shader_id << ")");
   } else {
     GLint sh_log_length;
     glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &sh_log_length);
@@ -93,7 +97,7 @@ bool link_shader(const std::vector<GLuint>& code_list, String pr_name, GLuint& s
   shader_pr = glCreateProgram();
   for(std::vector<GLuint>::const_iterator it=code_list.begin();it!=code_list.end();++it) {
     if(*it == 0) {
-      LOGN_VERBOSE("skipping shader [" << pr_name << "] due to missing compiled code");
+      LOGN_DEBUG("skipping shader [" << pr_name << "] due to missing compiled code");
       return false;
     }
     LOGN_DEBUG("attaching compiled shader id " << *it << " to " << shader_pr);
@@ -104,7 +108,7 @@ bool link_shader(const std::vector<GLuint>& code_list, String pr_name, GLuint& s
   GLint pr_linked;
   glGetProgramiv(shader_pr,GL_LINK_STATUS,&pr_linked);
   if(pr_linked==GL_TRUE) {
-    LOGN_VERBOSE("shader [" << pr_name << "] sucessfully linked");
+    LOGN_DEBUG("shader [" << pr_name << "] sucessfully linked");
   } else {
     GLint pr_log_length;
     glGetProgramiv(shader_pr, GL_INFO_LOG_LENGTH, &pr_log_length);
@@ -120,6 +124,8 @@ bool link_shader(const std::vector<GLuint>& code_list, String pr_name, GLuint& s
 
 void Shader::Setup() 
 {
+  if(!GLEW_VERSION_2_0) return;
+
   String ost_root = GetSharedDataPath();
   bf::path ost_root_dir(ost_root);
   bf::path shader_dir(ost_root_dir / "shader");
@@ -129,16 +135,12 @@ void Shader::Setup()
     GLenum type;
   } shader_list[] = {
     //////////////////////////////////////////////////////////////////
-    // this is the master list of all shader code in lib/ost/shader
+    // this is the master list of all shader code in shader/
 
-    {"basic_lf_vs.glsl", GL_VERTEX_SHADER},
-    {"basic_lf_fs.glsl", GL_FRAGMENT_SHADER},
-    {"fraglight_lf_vs.glsl", GL_VERTEX_SHADER},
-    {"fraglight_lf_fs.glsl", GL_FRAGMENT_SHADER},
-    {"basic_lfs_vs.glsl", GL_VERTEX_SHADER},
-    {"basic_lfs_fs.glsl", GL_FRAGMENT_SHADER},
-    {"fraglight_lfs_vs.glsl", GL_VERTEX_SHADER},
-    {"fraglight_lfs_fs.glsl", GL_FRAGMENT_SHADER},
+    {"basic_vs.glsl", GL_VERTEX_SHADER},
+    {"basic_fs.glsl", GL_FRAGMENT_SHADER},
+    {"fraglight_vs.glsl", GL_VERTEX_SHADER},
+    {"fraglight_fs.glsl", GL_FRAGMENT_SHADER},
     {"basic_hf_vs.glsl", GL_VERTEX_SHADER},
     {"selfx_vs.glsl", GL_VERTEX_SHADER},
     {"selfx_fs.glsl", GL_FRAGMENT_SHADER},
@@ -151,7 +153,15 @@ void Shader::Setup()
     {"iso_fs.glsl", GL_FRAGMENT_SHADER},
     {"fast_sphere_vs.glsl", GL_VERTEX_SHADER},
     {"fast_sphere_fs.glsl", GL_FRAGMENT_SHADER},
-    {"outline_vs.glsl", GL_VERTEX_SHADER}
+    {"outline_vs.glsl", GL_VERTEX_SHADER},
+    {"dumpnorm_vs.glsl", GL_VERTEX_SHADER},
+    {"dumpnorm_fs.glsl", GL_FRAGMENT_SHADER},
+    {"quadpp_vs.glsl", GL_VERTEX_SHADER},
+    {"convolute1_fs.glsl", GL_FRAGMENT_SHADER},
+    {"amboccl_fs.glsl", GL_FRAGMENT_SHADER},
+    {"scenefx_vs.glsl", GL_VERTEX_SHADER},
+    {"scenefx_fs.glsl", GL_FRAGMENT_SHADER},
+    {"beacon_fs.glsl", GL_FRAGMENT_SHADER}
     //////////////////////////////////////////////////////////////////
   };
 
@@ -184,36 +194,22 @@ void Shader::Setup()
   std::vector<GLuint> shader_program_list;
   GLuint shader_program_id;
   // basic shader
-  shader_program_list.push_back(shader_code_map_["basic_lf_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["basic_lf_fs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["basic_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["basic_fs.glsl"]);
   if(link_shader(shader_program_list,"basic",shader_program_id)) {
     shader_program_map_["basic"]=shader_program_id;
   }
   // fraglight shader
   shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["fraglight_lf_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["fraglight_lf_fs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["fraglight_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["fraglight_fs.glsl"]);
   if(link_shader(shader_program_list,"fraglight",shader_program_id)) {
     shader_program_map_["fraglight"]=shader_program_id;
-  }
-  // basic shadow map shader
-  shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["basic_lfs_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["basic_lfs_fs.glsl"]);
-  if(link_shader(shader_program_list,"basic_shadow",shader_program_id)) {
-    shader_program_map_["basic_shadow"]=shader_program_id;
-  }
-  // fraglight shader with shadow map
-  shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["fraglight_lfs_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["fraglight_lfs_fs.glsl"]);
-  if(link_shader(shader_program_list,"fraglight_shadow",shader_program_id)) {
-    shader_program_map_["fraglight_shadow"]=shader_program_id;
   }
   // basic hemisphere lighting shader
   shader_program_list.clear();
   shader_program_list.push_back(shader_code_map_["basic_hf_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["basic_lf_fs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["basic_fs.glsl"]);
   if(link_shader(shader_program_list,"hemilight",shader_program_id)) {
     shader_program_map_["hemilight"]=shader_program_id;
   }
@@ -228,8 +224,8 @@ void Shader::Setup()
   shader_program_list.clear();
   shader_program_list.push_back(shader_code_map_["toon_vs.glsl"]);
   shader_program_list.push_back(shader_code_map_["toon_fs.glsl"]);
-  if(link_shader(shader_program_list,"toon",shader_program_id)) {
-    shader_program_map_["toon"]=shader_program_id;
+  if(link_shader(shader_program_list,"toon1",shader_program_id)) {
+    shader_program_map_["toon1"]=shader_program_id;
   }
   // toon2 shader
   shader_program_list.clear();
@@ -240,7 +236,7 @@ void Shader::Setup()
   }
   // line shader
   shader_program_list.clear();
-  shader_program_list.push_back(shader_code_map_["basic_lf_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["basic_vs.glsl"]);
   shader_program_list.push_back(shader_code_map_["aaline_fs.glsl"]);
   if(link_shader(shader_program_list,"aaline",shader_program_id)) {
     shader_program_map_["aaline"]=shader_program_id;
@@ -259,12 +255,47 @@ void Shader::Setup()
   if(link_shader(shader_program_list,"fast_sphere",shader_program_id)) {
     shader_program_map_["fast_sphere"]=shader_program_id;
   }
-  // basic shader
+  // outline shader
   shader_program_list.clear();
   shader_program_list.push_back(shader_code_map_["outline_vs.glsl"]);
-  shader_program_list.push_back(shader_code_map_["basic_lf_fs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["basic_fs.glsl"]);
   if(link_shader(shader_program_list,"outline",shader_program_id)) {
     shader_program_map_["outline"]=shader_program_id;
+  }
+  // dumpnorm shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["dumpnorm_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["dumpnorm_fs.glsl"]);
+  if(link_shader(shader_program_list,"dumpnorm",shader_program_id)) {
+    shader_program_map_["dumpnorm"]=shader_program_id;
+  }
+  // convolute1 shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["quadpp_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["convolute1_fs.glsl"]);
+  if(link_shader(shader_program_list,"convolute1",shader_program_id)) {
+    shader_program_map_["convolute1"]=shader_program_id;
+  }
+  // amboccl shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["quadpp_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["amboccl_fs.glsl"]);
+  if(link_shader(shader_program_list,"amboccl",shader_program_id)) {
+    shader_program_map_["amboccl"]=shader_program_id;
+  }
+  // beacon shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["scenefx_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["beacon_fs.glsl"]);
+  if(link_shader(shader_program_list,"beacon",shader_program_id)) {
+    shader_program_map_["beacon"]=shader_program_id;
+  }
+  // scenefx shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["scenefx_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["scenefx_fs.glsl"]);
+  if(link_shader(shader_program_list,"scenefx",shader_program_id)) {
+    shader_program_map_["scenefx"]=shader_program_id;
   }
 
   valid_=true;
@@ -272,6 +303,8 @@ void Shader::Setup()
 
 void Shader::Activate(const String& name)
 {
+  if(!GLEW_VERSION_2_0) return;
+
   if(!name.empty()) {
     std::map<String, GLuint>::iterator it = shader_program_map_.find(name);
     if(it!=shader_program_map_.end()) {
@@ -279,14 +312,6 @@ void Shader::Activate(const String& name)
       glUseProgram(it->second);
       current_program_=it->second;
       current_name_=name;
-
-      if(name=="basic_shadow" || name=="fraglight_shadow") {
-    	if(!Scene::Instance().GetShadow())
-          Scene::Instance().SetShadow(true);
-      } else {
-      	if(Scene::Instance().GetShadow())
-          Scene::Instance().SetShadow(false);
-      }
 
       UpdateState();
       return;
@@ -314,6 +339,7 @@ String Shader::GetCurrentName() const
 
 bool Shader::IsValid() const
 {
+  if(!GLEW_VERSION_2_0) return false;
   return valid_;
 }
 
@@ -324,11 +350,13 @@ bool Shader::IsActive() const
 
 void Shader::PushProgram()
 {
+  if(!GLEW_VERSION_2_0) return;
   program_stack_.push(current_name_);
 }
 
 void Shader::PopProgram()
 {
+  if(!GLEW_VERSION_2_0) return;
   if(!program_stack_.empty()) {
     current_name_ = program_stack_.top();
     program_stack_.pop();
@@ -338,8 +366,9 @@ void Shader::PopProgram()
 
 void Shader::UpdateState()
 {
+  if(!GLEW_VERSION_2_0) return;
   if(current_program_!=0) {
-    // update current lighting and fog settings, valid for all shaders
+    // update all settings
     GLint result;
     glGetIntegerv(GL_LIGHTING,&result);
     LOGN_TRACE("setting lighting flag to " << result);
@@ -352,6 +381,7 @@ void Shader::UpdateState()
     LOGN_TRACE("setting fog flag to " << result);
     glUniform1i(glGetUniformLocation(current_program_,"fog_flag"),result);
     glDisable(GL_COLOR_MATERIAL);
+
   } else {
     glEnable(GL_COLOR_MATERIAL);
   }

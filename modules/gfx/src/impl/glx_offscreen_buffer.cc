@@ -107,7 +107,9 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
 OffscreenBuffer::~OffscreenBuffer()
 {
   if(valid_) {
+    LOGN_DEBUG("offscreen buffer: glXDestroyContext()");
     glXDestroyContext(dpy_, context_);
+    LOGN_DEBUG("offscreen buffer: glXDestroyPbuffer()");
     glXDestroyPbuffer(dpy_, pbuffer_);
   }
 }

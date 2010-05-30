@@ -67,6 +67,8 @@ public:
   virtual float GetHelixEcc() const;
   virtual unsigned int GetHelixProfileType() const;
   virtual void SetHelixProfileType(unsigned int);
+  virtual unsigned int GetHelixMode() const;
+  virtual void SetHelixMode(unsigned int);
 
   virtual void SetStrandWidth(float strand_width);
   virtual float GetStrandWidth() const;
@@ -76,6 +78,11 @@ public:
   virtual float GetStrandEcc() const;
   virtual unsigned int GetStrandProfileType() const;
   virtual void SetStrandProfileType(unsigned int);
+  virtual unsigned int GetStrandMode() const;
+  virtual void SetStrandMode(unsigned int);
+
+  virtual void SetColorBlendMode(unsigned int);
+  virtual unsigned int GetColorBlendMode() const;
 
   float GetMaxRad() const;
 
@@ -96,10 +103,14 @@ private:
   float helix_thickness_;
   float helix_ecc_;
   unsigned int helix_profile_;
+  unsigned int helix_mode_;
   float strand_width_;
   float strand_thickness_;
   float strand_ecc_;
   unsigned int strand_profile_;
+  unsigned int strand_mode_;
+
+  unsigned int color_blend_mode_;
 };
 
 typedef boost::shared_ptr<CartoonRenderOptions> CartoonRenderOptionsPtr;

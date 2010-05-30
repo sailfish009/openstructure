@@ -25,61 +25,90 @@ using namespace ost::gfx;
 
 #include "color_by_def.hh"
 
+namespace {
+  // convenience for python
+  void set_mat_amb2(GfxObjBase* b, float c) {b->SetMatAmb(Color(c,c,c,1.0));}
+  void set_mat_diff2(GfxObjBase* b, float c) {b->SetMatDiff(Color(c,c,c,1.0));}
+  void set_mat_spec2(GfxObjBase* b, float c) {b->SetMatSpec(Color(c,c,c,1.0));}
+  void set_mat_emm2(GfxObjBase* b, float c) {b->SetMatEmm(Color(c,c,c,1.0));}
+  void set_mat1(GfxObjBase* b, float a, float d, float s, float p)
+  {
+    set_mat_amb2(b,a);
+    set_mat_diff2(b,d);
+    set_mat_spec2(b,s);
+    b->SetMatShin(p);
+    set_mat_emm2(b,0.0);
+  }
+  void set_mat2(GfxObjBase* b, Color a, Color d, Color s, float p)
+  {
+    b->SetMatAmb(a);
+    b->SetMatDiff(d);
+    b->SetMatSpec(s);
+    b->SetMatShin(p);
+    set_mat_emm2(b,0.0);
+  }
+
+  void set_outline(GfxObjBase* b, bool f)
+  {
+    LOGN_MESSAGE("Outline(bool) is deprecated, use SetOutline(bool) instead");
+    b->SetOutline(f);
+  }
+  void set_aalines(GfxObjBase* b, bool f)
+  {
+    LOGN_MESSAGE("AALines(bool) is deprecated, use SetAALines(bool) instead");
+    b->SetAALines(f);
+  }
+}
+
 void export_GfxObj()
 {
-  void (GfxObj::* set_mat_amb1)(const Color&) = &GfxObj::SetMatAmb;
-  void (GfxObj::* set_mat_amb2)(float) = &GfxObj::SetMatAmb;
-  void (GfxObj::* set_mat_diff1)(const Color&) = &GfxObj::SetMatDiff;
-  void (GfxObj::* set_mat_diff2)(float) = &GfxObj::SetMatDiff;
-  void (GfxObj::* set_mat_spec1)(const Color&) = &GfxObj::SetMatSpec;
-  void (GfxObj::* set_mat_spec2)(float) = &GfxObj::SetMatSpec;
-  void (GfxObj::* set_mat_emm1)(const Color&) = &GfxObj::SetMatEmm;
-  void (GfxObj::* set_mat_emm2)(float) = &GfxObj::SetMatEmm;
-  void (GfxObj::* set_mat1)(const Color&,const Color&, 
-                            const Color&, float) = &GfxObj::SetMat;
-  void (GfxObj::* set_mat2)(float,float,float,float) = &GfxObj::SetMat;
-
-  class_<GfxObj, bases<GfxNode>, boost::noncopyable>("GfxObj",no_init)
-    .def("GetCenter",&GfxObj::GetCenter)
-    .def("SetRenderMode", &GfxObj::SetRenderMode)
-    .def("GetRenderMode", &GfxObj::GetRenderMode)
-    .def("SetLineWidth", &GfxObj::SetLineWidth)
-    .def("GetLineWidth", &GfxObj::GetLineWidth)
-    .def("SetLineHalo",&GfxObj::SetLineHalo)
-    .def("GetLineHalo",&GfxObj::GetLineHalo)
-    .def("SetSphereDetail",&GfxObj::SetSphereDetail)
-    .def("SetArcDetail",&GfxObj::SetArcDetail)
-    .def("SetSplineDetail",&GfxObj::SetSplineDetail)
-    .def("SetMatAmb",set_mat_amb1)
+  class_<GfxObjBase, boost::shared_ptr<GfxObjBase>, bases<GfxNode>, boost::noncopyable>("GfxObjBase",no_init)
+    .def("SetMatAmb",&GfxObjBase::SetMatAmb)
     .def("SetMatAmb",set_mat_amb2)
-    .def("SetMatDiff",set_mat_diff1)
+    .def("SetMatDiff",&GfxObjBase::SetMatDiff)
     .def("SetMatDiff",set_mat_diff2)
-    .def("GetTF", &GfxObj::GetTF, return_value_policy<copy_const_reference>())
-    .def("SetTF", &GfxObj::SetTF)
-    .def("SetMatSpec",set_mat_spec1)
+    .def("SetMatSpec",&GfxObjBase::SetMatSpec)
     .def("SetMatSpec",set_mat_spec2)
-    .def("SetMatEmm",set_mat_emm1)
+    .def("SetMatEmm",&GfxObjBase::SetMatEmm)
     .def("SetMatEmm",set_mat_emm2)
-    .def("SetMatShin",&GfxObj::SetMatShin)
+    .def("SetMatShin",&GfxObjBase::SetMatShin)
     .def("SetMat",set_mat1)
     .def("SetMat",set_mat2)
-    .def("SetPolyMode",&GfxObj::SetPolyMode)
-    .def("SetAALines",&GfxObj::SetAALines)
-    .def("SetOpacity",&GfxObj::SetOpacity)
-    .def("GetOpacity",&GfxObj::GetOpacity)
+    .def("ContextSwitch", &GfxObjBase::ContextSwitch)
+    .def("SetRenderMode", &GfxObjBase::SetRenderMode)
+    .def("GetRenderMode", &GfxObjBase::GetRenderMode)
+    .def("GetCenter",&GfxObjBase::GetCenter)
+    .def("SetLineWidth", &GfxObjBase::SetLineWidth)
+    .def("SetPolyMode",&GfxObjBase::SetPolyMode)
+    .def("AALines",set_aalines)
+    .def("SetAALines",&GfxObjBase::SetAALines)
+    .def("SetLineHalo",&GfxObjBase::SetLineHalo)
+    .def("Outline",set_outline)
+    .def("SetOutline",&GfxObjBase::SetOutline)
+    .def("SetOutlineMode",&GfxObjBase::SetOutlineMode)
+    .def("SetOutlineWidth",&GfxObjBase::SetOutlineWidth)
+    .def("SetOutlineExpandFactor",&GfxObjBase::SetOutlineExpandFactor)
+    .def("SetOutlineExpandColor",&GfxObjBase::SetOutlineExpandColor)
+    .def("SetOpacity",&GfxObjBase::SetOpacity)
+    .def("GetOpacity",&GfxObjBase::GetOpacity)
+    .add_property("center", &GfxObjBase::GetCenter)
+    COLOR_BY_DEF()
+   ;
+  //register_ptr_to_python<GfxObjBaseP>();
+
+  class_<GfxObj, boost::shared_ptr<GfxObj>, bases<GfxObjBase>, boost::noncopyable>("GfxObj",no_init)
+    .def("GetTF", &GfxObj::GetTF, return_value_policy<copy_const_reference>())
+    .def("SetTF", &GfxObj::SetTF)
     .def("FlagRebuild",&GfxObj::FlagRebuild)
     .def("FlagRefresh",&GfxObj::FlagRefresh)
     .def("SetNormalSmoothFactor",&GfxObj::SetNormalSmoothFactor)
     .def("GetNormalSmoothFactor",&GfxObj::GetNormalSmoothFactor)
-    .def("SetOutlineMode",&GfxObj::SetOutlineMode)
-    .def("SetOutlineExpandFactor",&GfxObj::SetOutlineExpandFactor)
-    .def("SetOutlineExpandColor",&GfxObj::SetOutlineExpandColor)
     .def("SmoothVertices",&GfxObj::SmoothVertices)
-    .def("AmbientOcclusion",&GfxObj::AmbientOcclusion)
     .def("Debug",&GfxObj::Debug)
-    .add_property("center", &GfxObj::GetCenter)
-    COLOR_BY_DEF()
+    .def("GetAALines",&GfxObj::GetAALines)
+    .def("GetLineWidth",&GfxObj::GetLineWidth)
+    .def("GetLineHalo",&GfxObj::GetLineHalo)
     ;
-  register_ptr_to_python<GfxObjP>();
+  //register_ptr_to_python<GfxObjP>();
 
 }

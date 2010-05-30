@@ -237,25 +237,17 @@ private:
 
 void MapIso::CustomRenderGL(RenderPass pass)
 {
-  switch (pass) {
-    case OPAQUE_RENDER_PASS:
-      glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-      va_.RenderGL();      
-      glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);      
-      break;
-    case STANDARD_RENDER_PASS:
-      va_.RenderGL();
-      if (debug_octree_) {
-        OctreeDebugger d(level_, mh_.IndexToCoord(img::Point(1,1,1))-
-                         mh_.IndexToCoord(img::Point(0,0,0)));
-        glPushAttrib(GL_ENABLE_BIT);
-        glDisable(GL_LIGHTING);
-        octree_.VisitDF(d);
-        glPopAttrib();
-      }
-      break;
-    case GLOW_RENDER_PASS:
-      return;
+  if(pass==STANDARD_RENDER_PASS) {
+    va_.RenderGL();
+    if (debug_octree_) {
+      OctreeDebugger d(level_,
+		       mh_.IndexToCoord(img::Point(1,1,1))-
+		       mh_.IndexToCoord(img::Point(0,0,0)));
+      glPushAttrib(GL_ENABLE_BIT);
+      glDisable(GL_LIGHTING);
+      octree_.VisitDF(d);
+      glPopAttrib();
+    }
   }
 }
 

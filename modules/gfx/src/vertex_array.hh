@@ -134,7 +134,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   // add an icosahedral based sphere with the given params to the va
   void AddIcoSphere(const SpherePrim& prim, unsigned int detail);
 
-  void AddCylinder(const CylinderPrim& prim, unsigned int detail);
+  void AddCylinder(const CylinderPrim& prim, unsigned int detail,bool cap=false);
 
   geom::Vec3 GetVert(VertexID id) const;
   void SetVert(VertexID id, const geom::Vec3& vert);
@@ -145,19 +145,30 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   Color GetColor(VertexID id) const;
   void SetColor(VertexID id, const Color& col);
 
+  void SetOpacity(float o);
+
   // OpenGL rendering call
   void RenderGL();
 
   // POVray export
   void RenderPov(PovState& pov, const std::string& name);
 
-  
+  // only removes the drawing elements
   void Clear();
+  // removes all elements and resets internal state to default
+  void Reset();
+
+  // forces re-calculation of some buffered features
   void FlagRefresh();
 
-  void CalcNormals(float smoothf);
+  // for debugging, draw all normals
   void DrawNormals(bool f);
 
+  // NOTE: all methods below could be delegated to the outside, 
+  // using the GetEntries() and Get*Indices() member functions
+
+  // experimental, do not use
+  void CalcNormals(float smoothf);
   // experimental, do not use
   void CalcFullNormals();
   // experimental, do not use
@@ -166,17 +177,13 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   void NPatch();
   // experimental, do not use
   void SmoothVertices(float smoothf);
-  // experimental, do not use
-  void UseAmbient(bool f);
+
 
   const EntryList& GetEntries() const {return entry_list_;}
   const IndexList& GetQuadIndices() const {return quad_index_list_;}
   const IndexList& GetTriIndices() const {return tri_index_list_;}
   const IndexList& GetLineIndices() const {return line_index_list_;}
 
-  Color GetAmbientColor(VertexID id) const;
-  void SetAmbientColor(VertexID id, const Color& col);
-  
  private:
   bool initialized_;
   
@@ -211,17 +218,12 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
 
   unsigned int buffer_id_[7]; // magic number related to the .cc buffer use
 
-  bool use_ambient_;
-  bool ambient_dirty_;
-  std::vector<float> ambient_data_;
-
   void copy(const IndexedVertexArray& va);
   bool prep_buff();
   void draw_ltq(bool use_buff);
   void draw_p(bool use_buff);
   void draw_aalines();
   void draw_line_halo(bool use_buff);
-  void recalc_ambient_occlusion();
 };
 
 }} // ns

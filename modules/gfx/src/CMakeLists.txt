@@ -10,6 +10,7 @@ gfx_fw.hh
 gfx_node.hh
 gfx_node_fw.hh
 gfx_node_visitor.hh
+gfx_object_base.hh
 gfx_object.hh
 gfx_object_fw.hh
 gfx_prim.hh
@@ -61,7 +62,6 @@ trace_render_options.hh
 
 
 set(OST_GFX_IMPL_HEADERS
-calc_ambient.hh
 cartoon_renderer.hh
 custom_renderer.hh
 cpk_renderer.hh
@@ -89,7 +89,6 @@ set(OST_GFX_SOURCES
 bitmap_io.cc
 color.cc
 primitives.cc
-offscreen_buffer.cc
 entity.cc
 
 symmetry_node.cc
@@ -116,7 +115,6 @@ color_ops/gradient_color_op.cc
 color_ops/entity_view_color_op.cc
 color_ops/basic_gradient_color_op.cc
 color_ops/gradient_level_color_op.cc
-impl/calc_ambient.cc
 impl/entity_renderer.cc
 impl/entity_detail.cc
 impl/cartoon_renderer.cc
@@ -173,10 +171,27 @@ else()
   set(OST_GFX_MAP_SOURCES "")  
 endif()
 
+if (UNIX AND NOT APPLE)
+  list(APPEND OST_GFX_SOURCES impl/glx_offscreen_buffer.cc)
+  list(APPEND OST_GFX_IMPL_HEADERS glx_offscreen_buffer.hh)
+endif()
+
+if (APPLE)
+  list(APPEND OST_GFX_SOURCES impl/cgl_offscreen_buffer.cc)
+  list(APPEND OST_GFX_IMPL_HEADERS cgl_offscreen_buffer.hh)
+endif()
+
+if(WIN32)
+  list(APPEND OST_GFX_SOURCES impl/wgl_offscreen_buffer.cc)
+  list(APPEND OST_GFX_IMPL_HEADERS wgl_offscreen_buffer.hh)
+endif()
+
 if (USE_SHADER)
   message("Compiling with Shader Support")
   list(APPEND OST_GFX_SOURCES shader.cc)
   list(APPEND OST_GFX_HEADERS shader.hh)
+  list(APPEND OST_GFX_SOURCES impl/scene_fx.cc)
+  list(APPEND OST_GFX_IMPL_HEADERS scene_fx.hh)
   if (NOT APPLE)
     set(OST_GLEW_HEADERS
        glew.h
@@ -208,27 +223,35 @@ target_link_libraries(ost_gfx ${OPENGL_LIBRARIES} ${PNG_LIBRARIES})
 
 if (USE_SHADER)
   set(SHADER_FILES
-    shader/basic_lf_vs.glsl
-    shader/basic_lf_fs.glsl
-    shader/fraglight_lf_vs.glsl
-    shader/fraglight_lf_fs.glsl
-    shader/basic_lfs_vs.glsl
-    shader/basic_lfs_fs.glsl
-    shader/fraglight_lfs_vs.glsl
-    shader/fraglight_lfs_fs.glsl
-    shader/basic_hf_vs.glsl
-    shader/selfx_vs.glsl
-    shader/selfx_fs.glsl
-    shader/toon_vs.glsl
-    shader/toon_fs.glsl
-    shader/toon2_fs.glsl
-    shader/noop_vs.glsl
     shader/aaline_fs.glsl
-    shader/iso_vs.glsl
-    shader/iso_fs.glsl
-    shader/fast_sphere_vs.glsl
+    shader/amboccl_fs.glsl
+    shader/basic_fs.glsl
+    shader/basic_hf_vs.glsl
+    shader/basic_lf_fs.glsl
+    shader/basic_lf_vs.glsl
+    shader/basic_vs.glsl
+    shader/beacon_fs.glsl
+    shader/convolute1_fs.glsl
+    shader/dumpnorm_fs.glsl
+    shader/dumpnorm_vs.glsl
     shader/fast_sphere_fs.glsl
+    shader/fast_sphere_vs.glsl
+    shader/fraglight_fs.glsl
+    shader/fraglight_lf_fs.glsl
+    shader/fraglight_lf_vs.glsl
+    shader/fraglight_vs.glsl
+    shader/iso_fs.glsl
+    shader/iso_vs.glsl
+    shader/noop_vs.glsl
     shader/outline_vs.glsl
+    shader/quadpp_vs.glsl
+    shader/scenefx_fs.glsl
+    shader/scenefx_vs.glsl
+    shader/selfx_fs.glsl
+    shader/selfx_vs.glsl
+    shader/toon2_fs.glsl
+    shader/toon_fs.glsl
+    shader/toon_vs.glsl
   )
   copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  

@@ -52,7 +52,6 @@ public:
   void PopProgram();
 
   void UpdateState();
-  
 private:
   Shader();
 

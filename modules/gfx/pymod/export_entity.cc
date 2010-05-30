@@ -92,6 +92,16 @@ void color_by_08(Entity* e,
   e->ColorBy(prop,c1,c2);
 }
 
+// temporary, see comment in gfx/entity.hh
+void detail_color_by_02(Entity* e,
+                        const String& prop, 
+                        const Gradient& gradient,
+                        float minv,float maxv)
+{
+  e->DetailColorBy(prop,gradient,minv,maxv);
+}
+
+
 void radius_by_01(Entity* e,
                   const String& prop, 
                   float rmin,float rmax,
@@ -177,7 +187,6 @@ void ent_apply_62(Entity* e, MapHandleColorOp& mhco){
 }
 #endif //OST_IMG_ENABLED
 
-
 RenderOptionsPtr ent_sline_opts(Entity* ent)
 {
   return ent->GetOptions(RenderMode::SLINE);
@@ -185,6 +194,11 @@ RenderOptionsPtr ent_sline_opts(Entity* ent)
 void (Entity::*set_rm1)(RenderMode::Type, const mol::EntityView&, bool)=&Entity::SetRenderMode;
 void (Entity::*set_rm2)(RenderMode::Type)=&Entity::SetRenderMode;
 RenderOptionsPtr ent_trace_opts(Entity* ent)
+{
+  return ent->GetOptions(RenderMode::TRACE);
+}
+
+RenderOptionsPtr ent_line_trace_opts(Entity* ent)
 {
   return ent->GetOptions(RenderMode::LINE_TRACE);
 }
@@ -237,6 +251,7 @@ void export_Entity()
     .add_property("selection", &Entity::GetSelection, 
                   &Entity::SetSelection)
     .def("GetView", &Entity::GetView)
+    .def("UpdateView", &Entity::UpdateView)
     .def("GetRenderModeName", &Entity::GetRenderModeName)
     .def("GetNotEmptyRenderModes", &Entity::GetNotEmptyRenderModes)
     .def("SetRenderMode", set_rm1, arg("keep")=false)
@@ -253,6 +268,7 @@ void export_Entity()
     .def("ColorBy", color_by_06)
     .def("ColorBy", color_by_07)
     .def("ColorBy", color_by_08)
+    .def("DetailColorBy", detail_color_by_02)
     COLOR_BY_DEF()
     .def("RadiusBy", radius_by_01)
     .def("RadiusBy", radius_by_02)
@@ -273,6 +289,7 @@ void export_Entity()
     .add_property("cartoon_options", &ent_hsc_opts)    
     .add_property("cpk_options", &ent_cpk_opts)
     .add_property("trace_options", &ent_trace_opts)
+    .add_property("line_trace_options", &ent_line_trace_opts)
     .def("ApplyOptions", &Entity::ApplyOptions)
     .def("SetOptions", &Entity::SetOptions)
     .def("Apply",&ent_apply_11)

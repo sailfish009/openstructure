@@ -67,7 +67,14 @@ Entity::Entity(const String& name,
                const Query& q):
   GfxObj(name),
   qv_(q, h),
-  bbox_(geom::Vec3(), geom::Vec3())
+  bbox_(geom::Vec3(), geom::Vec3()),
+  sel_(),
+  sel_update_(),
+  trace_(),
+  opacity_(1.0),
+  blur_(false),
+  blurf1_(1.0),
+  blurf2_(0.8)
 {
   init(RenderMode::SIMPLE);
 }
@@ -78,7 +85,14 @@ Entity::Entity(const String& name,
                const Query& q):
   GfxObj(name),
   qv_(q, h),
-  bbox_(geom::Vec3(), geom::Vec3())  
+  bbox_(geom::Vec3(), geom::Vec3()),
+  sel_(),
+  sel_update_(),
+  trace_(),
+  opacity_(1.0),
+  blur_(false),
+  blurf1_(1.0),
+  blurf2_(0.8)
 {
   init(m);
 }
@@ -87,7 +101,14 @@ Entity::Entity(const String& name,
                const EntityView& v):
   GfxObj(name),
   qv_(v),
-  bbox_(geom::Vec3(), geom::Vec3())  
+  bbox_(geom::Vec3(), geom::Vec3()),
+  sel_(),
+  sel_update_(),
+  trace_(),
+  opacity_(1.0),
+  blur_(false),
+  blurf1_(1.0),
+  blurf2_(0.8)
 {
   init(RenderMode::SIMPLE);
 }
@@ -97,7 +118,14 @@ Entity::Entity(const String& name,
                const EntityView& v):
   GfxObj(name),
   qv_(v),
-  bbox_(geom::Vec3(), geom::Vec3())  
+  bbox_(geom::Vec3(), geom::Vec3()),
+  sel_(),
+  sel_update_(),
+  trace_(),
+  opacity_(1.0),
+  blur_(false),
+  blurf1_(1.0),
+  blurf2_(0.8)
 {
   init(m);
 }
@@ -105,8 +133,9 @@ Entity::Entity(const String& name,
 
 impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
 {
-  if (renderer_.find(rm)!=renderer_.end()) {
-    return renderer_.find(rm)->second;
+  RendererMap::iterator rit = renderer_.find(rm);
+  if(rit!=renderer_.end()) {
+    return rit->second;
   }
   impl::EntityRenderer* r=NULL;
   switch (rm) {
@@ -117,22 +146,22 @@ impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
       r=new impl::CustomRenderer();
       break;
     case RenderMode::SLINE:
-      r=new impl::SlineRenderer(trace_);
+      r=new impl::SlineRenderer(&trace_);
       break;
     case RenderMode::LINE_TRACE:
-      r=new impl::LineTraceRenderer(trace_);
+      r=new impl::LineTraceRenderer(&trace_);
       break;
     case RenderMode::TRACE:
-      r=new impl::TraceRenderer(trace_);
+      r=new impl::TraceRenderer(&trace_);
       break;
     case RenderMode::HSC:
-      r=new impl::CartoonRenderer(trace_);
+      r=new impl::CartoonRenderer(&trace_,false);
       break;
     case RenderMode::CPK:
       r=new impl::CPKRenderer();
       break;
     case RenderMode::TUBE:
-      r=new impl::CartoonRenderer(trace_, true);
+      r=new impl::CartoonRenderer(&trace_, true);
       break;
     default:
       return 0;
@@ -144,11 +173,14 @@ impl::EntityRenderer* Entity::GetOrCreateRenderer(RenderMode::Type rm)
 void Entity::init(RenderMode::Type rm)
 {
   // TODO replace with def mat for this gfx obj type
-  SetMat(0.0,1.0,0.8,96.0);
+  SetMatAmb(Color(0,0,0));
+  SetMatDiff(Color(1,1,1));
+  SetMatSpec(Color(0.7,0.7,0.7));
+  SetMatShin(96);
 
   update_view_=true;
   render_mode_=rm;
-  trace_.SetView(this->GetView());
+  trace_.ResetView(this->GetView());
   sel_=this->GetView().CreateEmptyView();  
   impl::EntityRenderer* r=this->GetOrCreateRenderer(rm);
   if(!r) return;
@@ -160,43 +192,46 @@ void Entity::init(RenderMode::Type rm)
   Rebuild();
 }
 
-namespace {
-
-SimpleRenderOptionsPtr get_sro(impl::EntityRenderer* renderer)
-{
-  impl::SimpleRenderer* sr=dynamic_cast<SimpleRenderer*>(renderer);
-  assert(sr);  
-  return dyn_cast<SimpleRenderOptions>(sr->GetOptions());  
-}
-}
 void Entity::SetBlur(bool f)
 {
-  impl::EntityRenderer* renderer=this->GetOrCreateRenderer(RenderMode::SIMPLE);
-  if(!renderer) return;
-  SimpleRenderOptionsPtr sro=get_sro(renderer);
-  sro->SetBlurFlag(f);
+  blur_=f;
 }
 
 void Entity::BlurSnapshot()
 {
-  impl::EntityRenderer* renderer=this->GetOrCreateRenderer(RenderMode::SIMPLE);
-  if(!renderer) return;
-  impl::SimpleRenderer* sr=dynamic_cast<SimpleRenderer*>(renderer);
-  assert(sr);
-  sr->BlurSnapshot();
+  for (RendererMap::iterator i=renderer_.begin(),e=renderer_.end(); i!=e; ++i) {
+    impl::SimpleRenderer* sr = dynamic_cast<impl::SimpleRenderer*>(i->second);
+    if(sr) {
+      DoBlurSnapshot(sr->GetBondEntryList());
+    }
+    impl::LineTraceRenderer* lr = dynamic_cast<impl::LineTraceRenderer*>(i->second);
+    if(lr) {
+      DoBlurSnapshot(lr->GetBondEntryList());
+    }
+  }
 }
 
 void Entity::SetBlurFactors(float bf1,float bf2)
 {
-  impl::EntityRenderer* renderer=this->GetOrCreateRenderer(RenderMode::SIMPLE);
-  if(!renderer) return;
-  SimpleRenderOptionsPtr sro=get_sro(renderer);
-  sro->SetBlurFactors(bf1, bf2);
+  blurf1_=bf1;
+  blurf2_=bf2;
 }
 
 void Entity::Rebuild()
 {
   geom::Vec3 delta=GetTF().GetTrans()-GetTF().GetCenter();
+
+  if(update_view_) {
+    EntityView nv=this->GetView();
+    for (RendererMap::iterator i=renderer_.begin(), 
+           e=renderer_.end(); i!=e; ++i) {
+      i->second->ClearViews();
+      i->second->AddView(nv);
+      i->second->UpdateViews();
+      i->second->PrepareRendering();
+    }
+  }
+
   this->ReapplyColorOps();
   FlagRebuild();
   geom::Vec3 center=this->GetCenter();
@@ -249,7 +284,7 @@ void Entity::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc,
     maxc = geom::Max(maxc, geom::Max(t1, geom::Max(t2, geom::Max(t3, 
                      geom::Max(t4, geom::Max(t5, geom::Max(t6,
                      geom::Max(t7, t8))))))));
-  } catch(Error&) {
+  } catch(Error& e) {
     // in case the object is empty...
   }
 } 
@@ -296,6 +331,7 @@ bool Entity::UpdateIfNeeded() const
       renderer->PrepareRendering();
       updated=true;
     }
+    renderer->VA().SetOpacity(opacity_);
   }
   if (updated) {
     this->CacheBoundingBox();
@@ -324,66 +360,29 @@ void Entity::CustomRenderGL(RenderPass pass)
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
-    if(r->IsEnabled()){
-      switch(pass) {
-        case STANDARD_RENDER_PASS:
-        case OPAQUE_RENDER_PASS:
-          r->Render(pass);
-          break;
-        case GLOW_RENDER_PASS:
-          if (r->HasSelection()) {
-            r->Render(pass);
-          }
-          break;
+    if(r->IsEnabled()) {
+      if(pass==STANDARD_RENDER_PASS) {
+        r->Render(pass);
+        if(outline_flag_) {
+          r->VA().SetOutlineMode(outline_mode_);
+          r->Render(STANDARD_RENDER_PASS);
+          r->VA().SetOutlineMode(0);
+        }
+      } else if(pass==GLOW_RENDER_PASS) {
+        r->Render(GLOW_RENDER_PASS);
+      }
+      if(blur_) {
+        impl::SimpleRenderer* sr = dynamic_cast<impl::SimpleRenderer*>(r);
+        if(sr) {
+          DoRenderBlur(sr->GetBondEntryList(),blurf1_,blurf2_);
+        }
+        impl::LineTraceRenderer* lr = dynamic_cast<impl::LineTraceRenderer*>(r);
+        if(lr) {
+          DoRenderBlur(lr->GetBondEntryList(),blurf1_,blurf2_);
+        }
       }
     }
   }
-  geom::AlignedCuboid bbox=this->GetBoundingBox();
-  geom::Vec3 mmin=bbox.GetMin();
-  geom::Vec3 mmax=bbox.GetMax();
-#if 0  
-  glDisable(GL_LIGHTING);
-  glLineWidth(1.0);
-  glColor3f(1.0, 1.0, 1.0);
-  glBegin(GL_LINES);
-    glVertex3(geom::Vec3(mmin[0], mmin[1], mmin[2]));
-    glVertex3(geom::Vec3(mmin[0], mmax[1], mmin[2]));
-    
-    glVertex3(geom::Vec3(mmin[0], mmax[1], mmin[2]));
-    glVertex3(geom::Vec3(mmin[0], mmax[1], mmax[2]));
-    
-    glVertex3(geom::Vec3(mmin[0], mmax[1], mmax[2]));
-    glVertex3(geom::Vec3(mmin[0], mmin[1], mmax[2]));
-    
-    glVertex3(geom::Vec3(mmin[0], mmin[1], mmax[2]));
-    glVertex3(geom::Vec3(mmin[0], mmin[1], mmin[2]));   
-    
-    
-    glVertex3(geom::Vec3(mmax[0], mmin[1], mmin[2]));
-    glVertex3(geom::Vec3(mmax[0], mmax[1], mmin[2]));
-    
-    glVertex3(geom::Vec3(mmax[0], mmax[1], mmin[2]));
-    glVertex3(geom::Vec3(mmax[0], mmax[1], mmax[2]));
-    
-    glVertex3(geom::Vec3(mmax[0], mmax[1], mmax[2]));
-    glVertex3(geom::Vec3(mmax[0], mmin[1], mmax[2]));
-    
-    glVertex3(geom::Vec3(mmax[0], mmin[1], mmax[2]));
-    glVertex3(geom::Vec3(mmax[0], mmin[1], mmin[2]));
-    
-    glVertex3(geom::Vec3(mmin[0], mmin[1], mmin[2]));
-    glVertex3(geom::Vec3(mmax[0], mmin[1], mmin[2]));
-    
-    glVertex3(geom::Vec3(mmin[0], mmax[1], mmin[2]));
-    glVertex3(geom::Vec3(mmax[0], mmax[1], mmin[2]));
-    
-    glVertex3(geom::Vec3(mmin[0], mmax[1], mmax[2]));
-    glVertex3(geom::Vec3(mmax[0], mmax[1], mmax[2]));
-    
-    glVertex3(geom::Vec3(mmin[0], mmin[1], mmax[2]));
-    glVertex3(geom::Vec3(mmax[0], mmin[1], mmax[2]));
-  glEnd();
-#endif
 }
 
 void Entity::CustomRenderPov(PovState& pov)
@@ -567,6 +566,43 @@ void Entity::OptionsChanged(RenderMode::Type render_mode)
   Scene::Instance().ObjectChanged(this->GetName());
 }
 
+void Entity::SetOpacity(float f)
+{
+  opacity_=f;
+  this->UpdateIfNeeded();
+  Scene::Instance().RequestRedraw();
+}
+
+void Entity::SetOutlineWidth(float f)
+{
+  for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
+    if(it->second->IsEnabled()){
+      it->second->VA().SetOutlineWidth(f);
+    }
+  }
+  Scene::Instance().RequestRedraw();
+}
+
+void Entity::SetOutlineExpandFactor(float f)
+{
+  for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
+    if(it->second->IsEnabled()){
+      it->second->VA().SetOutlineExpandFactor(f);
+    }
+  }
+  Scene::Instance().RequestRedraw();
+}
+
+void Entity::SetOutlineExpandColor(const Color& c)
+{
+  for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
+    if(it->second->IsEnabled()){
+      it->second->VA().SetOutlineExpandColor(c);
+    }
+  }
+  Scene::Instance().RequestRedraw();
+}
+
 void Entity::OnRenderModeChange()
 {
   for (RendererMap::iterator i=renderer_.begin(), 
@@ -652,7 +688,7 @@ void Entity::SetRenderMode(RenderMode::Type mode,
      }
      renderer->UpdateViews();
   }
-  this->ReapplyColorOps();
+  this->ReapplyColorOps(); // done in rebuild?
   this->FlagRebuild();
   Scene::Instance().RenderModeChanged(GetName());
 }
@@ -676,7 +712,7 @@ void Entity::SetVisible(const mol::EntityView& view, bool visible){
     renderer->SetVisible(view, visible);
     renderer->UpdateViews();
   }
-  this->ReapplyColorOps();
+  this->ReapplyColorOps(); // done in rebuild?
   this->FlagRebuild();
 }
 
@@ -762,6 +798,16 @@ void Entity::ColorBy(const String& prop,
                      mol::Prop::Level level)
 {
   GradientLevelColorOp glop = GradientLevelColorOp("",prop, gradient,minv,maxv,level);
+  this->Apply(glop);
+}
+
+void Entity::DetailColorBy(const String& prop,
+                           const Gradient& gradient,
+                           float minv,float maxv,
+                           mol::Prop::Level level)
+{
+  GradientLevelColorOp glop = GradientLevelColorOp("",prop, gradient,minv,maxv,level);
+  glop.SetMask(DETAIL_COLOR);
   this->Apply(glop);
 }
 
@@ -946,6 +992,13 @@ void Entity::CleanColorOps()
 void Entity::ReapplyColorOps()
 {
   GfxObj::ReapplyColorOps();
+}
+
+void Entity::UpdateView() 
+{
+  update_view_=true; 
+  Rebuild();
+  UpdatePositions();
 }
 
 }} // ns

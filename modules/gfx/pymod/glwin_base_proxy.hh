@@ -22,9 +22,14 @@ public:
   virtual void DoRefresh() {
     call_method<void>(self, "DoRefresh");
   }
-  virtual void SetStereo(bool flag) { }
+  virtual bool HasStereo() const { 
+    return call_method<bool>(self,"HasStereo");
+  }
   virtual void StatusMessage(const String& m) {
     call_method<void, const String>(self, "StatusMessage", m);
+  }
+  virtual bool HasMultisample() const {
+    return call_method<bool>(self,"HasMultisample");
   }
 
 private:

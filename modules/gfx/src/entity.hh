@@ -140,7 +140,16 @@ public:
 
   virtual void OptionsChanged(RenderMode::Type mode);
 
+  virtual void SetOpacity(float f);
+  virtual float GetOpacity() const {return opacity_;}
+  virtual void SetOutlineWidth(float f);
+  virtual void SetOutlineExpandFactor(float f);
+  virtual void SetOutlineExpandColor(const Color& c);
+
   /// \brief rebuild graphical object (see ctor comments)
+  /*
+    the naming here is misleading - this method WON'T be called upon FlagRebuild
+  */
   void Rebuild();
 
   /// \brief only grab updated positions, dont rebuild the whole thing
@@ -198,6 +207,12 @@ public:
                const Gradient& gradient,
                float minv,float maxv,
                mol::Prop::Level hint=mol::Prop::UNSPECIFIED);
+
+  // temporary, should be incorporated with ColorBy
+  void DetailColorBy(const String& prop, 
+                     const Gradient& gradient,
+                     float minv,float maxv,
+                     mol::Prop::Level hint=mol::Prop::UNSPECIFIED);
 
   // convenience
   void ColorBy(const String& prop, 
@@ -257,6 +272,9 @@ public:
   void ApplyOptions(RenderMode::Type render_mode,
                           RenderOptionsPtr& render_options);
   bool HasSelection() const;
+
+  void UpdateView();
+  
 protected:
 
   virtual void CustomPreRenderGL(bool flag);
@@ -282,6 +300,11 @@ private:
 
   typedef boost::ptr_map<RenderMode::Type, impl::EntityRenderer> RendererMap;
   mutable RendererMap renderer_;
+
+  float opacity_;
+  bool blur_;
+  float blurf1_;
+  float blurf2_;
 };
 
 

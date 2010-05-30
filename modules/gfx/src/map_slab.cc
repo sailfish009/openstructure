@@ -108,16 +108,9 @@ void MapSlab::CustomRenderGL(RenderPass pass)
 {
   if(rebuild_) rebuild_tex();
 
-  if(GetOpacity()<1.0) {
-    if(pass!=1) return;
-    glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
+  if(pass==STANDARD_RENDER_PASS) {
     render_slab();
-    glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-  } else {
-    if(pass!=0) return;
   }
-
-  render_slab();
 }
 
 void MapSlab::CustomRenderPov(PovState& pov)

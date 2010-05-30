@@ -38,13 +38,9 @@
   #include <ost/gui/data_viewer/data_viewer.hh>
 #endif
 
-
-
-
 class QMainWindow;
 class QMdiArea;
 class QWidget;
-
 
 namespace ost { namespace gui {
 
@@ -81,7 +77,7 @@ public:
   /// The GL window is initialized when this method is first called. All 
   /// subsequent calls will return the same GLWin instance.
   GLWin* GetGLWin();
-  
+
   /// \brief get scene menu
   /// 
   /// The scene menu window is initialized when this method is first called. All 
@@ -140,6 +136,9 @@ public:
   /// \param app_title Title that will be displayed in the title bar
   void SetAppTitle(const QString& app_title);
 
+  /// \brief attempt to get a stereo visual upon startup
+  void TryStereo(bool f) {try_stereo_=f;}
+  
 public slots:
   /// \brief This slot must be called when the application is going to be terminated.
   void OnQuit();
@@ -166,6 +165,8 @@ private:
   Perspective*      perspective_;
   
   QMap<QString,WidgetGeomHandler *> external_widgets_;
+
+  bool try_stereo_;
 
   static GostyApp*  app_;
 };

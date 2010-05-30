@@ -31,8 +31,6 @@
 #include "vertex_array_helper.hh"
 #include "povray.hh"
 
-#include "impl/calc_ambient.hh"
-
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
 #endif
@@ -77,7 +75,7 @@ IndexedVertexArray::Entry::Entry(const Vec3& vv, const Vec3& nn, const Color& cc
 IndexedVertexArray::IndexedVertexArray()
 {
   initialized_=false;
-  Clear(); // replaces ctor initialization list
+  Reset(); // replaces ctor initialization list
 }
 
 IndexedVertexArray::~IndexedVertexArray()
@@ -142,7 +140,6 @@ VertexID IndexedVertexArray::Add(const Vec3& vert,
                                  const Color& col) 
 {
   dirty_=true;
-  ambient_dirty_=true;
   entry_list_.push_back(Entry(vert,norm,col));
   return entry_list_.size()-1;
 }
@@ -163,7 +160,6 @@ LineID IndexedVertexArray::AddLine(VertexID id0, VertexID id1)
 {
   assert(id0<entry_list_.size() && id1<entry_list_.size());
   dirty_=true;
-  ambient_dirty_=true;
   line_index_list_.push_back(id0);
   line_index_list_.push_back(id1);
   return line_index_list_.size()-2;
@@ -173,7 +169,6 @@ TriID IndexedVertexArray::AddTri(VertexID id0, VertexID id1, VertexID id2)
 {
   assert(id0<entry_list_.size() && id1<entry_list_.size() && id2<entry_list_.size());
   dirty_=true;
-  ambient_dirty_=true;
   tri_index_list_.push_back(id0);
   tri_index_list_.push_back(id1);
   tri_index_list_.push_back(id2);
@@ -203,7 +198,6 @@ QuadID IndexedVertexArray::AddQuad(VertexID id0, VertexID id1, VertexID id2, Ver
 {
   assert(id0<entry_list_.size() && id1<entry_list_.size() && id2<entry_list_.size() && id3<entry_list_.size());
   dirty_=true;
-  ambient_dirty_=true;
   quad_index_list_.push_back(id0);
   quad_index_list_.push_back(id1);
   quad_index_list_.push_back(id2);
@@ -214,7 +208,6 @@ QuadID IndexedVertexArray::AddQuad(VertexID id0, VertexID id1, VertexID id2, Ver
 void IndexedVertexArray::AddSphere(const SpherePrim& prim, unsigned int detail) 
 {
   dirty_=true;
-  ambient_dirty_=true;
 
   unsigned int level= std::min(VA_SPHERE_MAX_DETAIL,detail);
 
@@ -235,7 +228,6 @@ void IndexedVertexArray::AddSphere(const SpherePrim& prim, unsigned int detail)
 void IndexedVertexArray::AddIcoSphere(const SpherePrim& prim, unsigned int detail) 
 {
   dirty_=true;
-  ambient_dirty_=true;
   
   unsigned int level= std::min(VA_ICO_SPHERE_MAX_DETAIL,detail);
   
@@ -249,43 +241,63 @@ void IndexedVertexArray::AddIcoSphere(const SpherePrim& prim, unsigned int detai
   }
 }
 
-void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail)
+void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail,bool cap)
 {
   dirty_=true;
-  ambient_dirty_=true;
   
   unsigned int level = std::min(VA_CYL_MAX_DETAIL,detail);
   
   const std::vector<Vec3>& vlist = detail::GetPrebuildCyl(level);
   
   Vec3 off(0.0,0.0,prim.length);
+
+  Vec3 cn0 = cap ? prim.rotmat* geom::Vec3(0.0,0.0,-1.0) : Vec3();
+  Vec3 cn1 = -cn0;
+  VertexID cid0 = cap ? Add(prim.start, cn0 , prim.color1) : 0;
+  VertexID cid7 = cap ? Add(prim.rotmat * off + prim.start, cn1, prim.color2) : 0;
   
   // prepare first vertices to add
   std::vector<Vec3>::const_iterator it=vlist.begin();
   Vec3 v0 = (*it);
   Vec3 n0 = prim.rotmat * v0; 
   v0*=prim.radius;
-  VertexID id1 = Add(prim.rotmat * v0 + prim.start, n0, prim.color);
-  VertexID id2 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color);
+  VertexID id1 = Add(prim.rotmat * v0 + prim.start, n0, prim.color1);
+  VertexID id2 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color2);
+  VertexID cid1 = cap ? Add(prim.rotmat * v0 + prim.start, cn0, prim.color1) : 0;
+  VertexID cid2 = cap ? Add(prim.rotmat * (v0+off) + prim.start, cn1, prim.color2) : 0;
   
   // now for the loop around the circle
   VertexID id3=id1;
   VertexID id4=id2;
+  VertexID cid3=cid1;
+  VertexID cid4=cid2;
   ++it;
   for(;it!=vlist.end();++it) {
     v0 = (*it);
     n0 = prim.rotmat * v0; 
     v0 *= prim.radius;
-    VertexID id5 = Add(prim.rotmat * v0 + prim.start, n0, prim.color);
-    VertexID id6 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color);
+    VertexID id5 = Add(prim.rotmat * v0 + prim.start, n0, prim.color1);
+    VertexID id6 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color2);
     AddTri(id3,id5,id4);
     AddTri(id5,id6,id4);
+    if(cap) {
+      VertexID cid5 = Add(prim.rotmat * v0 + prim.start, cn0, prim.color1);
+      VertexID cid6 = Add(prim.rotmat * (v0+off) + prim.start, cn1, prim.color2);
+      AddTri(cid0,cid5,cid3);
+      AddTri(cid7,cid4,cid6);
+      cid3=cid5;
+      cid4=cid6;
+    }
     id3=id5;
     id4=id6;
   }
   // and finally close the circle
   AddTri(id3,id1,id4);
   AddTri(id1,id2,id4);
+  if(cap) {
+    AddTri(cid0,cid1,cid3);
+    AddTri(cid7,cid4,cid2);
+  }
 }
 
 Vec3 IndexedVertexArray::GetVert(VertexID id) const
@@ -340,6 +352,17 @@ void IndexedVertexArray::SetColor(VertexID id, const Color& c)
   entry_list_[id].c[3]=c[3];
 }
 
+void IndexedVertexArray::SetOpacity(float o)
+{
+  o=std::max(0.0f,std::min(1.0f,o));
+  // this should really just set a value in the shader... 
+  // but we need to support the fixed function pipeline as well
+  for(EntryList::iterator it=entry_list_.begin();it!=entry_list_.end();++it) {
+    it->c[3]=o;
+  }
+  FlagRefresh();
+}
+
 void IndexedVertexArray::RenderGL() 
 {
   static bool use_buff=false;
@@ -347,7 +370,9 @@ void IndexedVertexArray::RenderGL()
   if(!initialized_) {
     LOGN_DUMP("initializing vertex array lists");
 #if OST_SHADER_SUPPORT_ENABLED
-    glGenBuffers(7,buffer_id_);
+    if(!Scene::Instance().InOffscreenMode()) {
+      glGenBuffers(7,buffer_id_);
+    }
 #endif
     outline_mat_dlist_=glGenLists(1);
     initialized_=true;
@@ -356,11 +381,6 @@ void IndexedVertexArray::RenderGL()
   if(dirty_) {
     dirty_=false;
 #if OST_SHADER_SUPPORT_ENABLED
-    if(ambient_dirty_ && use_ambient_) {
-      LOGN_DUMP("re-calculating ambient occlusion terms");
-      recalc_ambient_occlusion();
-      ambient_dirty_=false;
-    }
 
     LOGN_DUMP("checking buffer object availability");
     if(mode_&0x2 && aalines_flag_) {
@@ -369,6 +389,7 @@ void IndexedVertexArray::RenderGL()
       use_buff=prep_buff();
     }
     if(!use_buff) {
+      LOGN_DUMP("buffer not available");
       glBindBuffer(GL_ARRAY_BUFFER,0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
     } else {
@@ -441,11 +462,6 @@ void IndexedVertexArray::RenderGL()
     } else { 
       glDisable(GL_CULL_FACE); 
     }
-#if OST_SHADER_SUPPORT_ENABLED
-    if(use_ambient_ && !ambient_data_.empty()) {
-      glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"occlusion_flag"),1);
-    }
-#endif
   }
   
   if(mode_&0x1) {
@@ -511,12 +527,6 @@ void IndexedVertexArray::RenderGL()
     }
   }
 
-#if OST_SHADER_SUPPORT_ENABLED
-  if(use_ambient_) {
-    glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"occlusion_flag"),0);
-  }
-#endif
-
   if(draw_normals_) {
     //glColor3f(1,0,0);
     glBegin(GL_LINES);
@@ -539,13 +549,16 @@ void IndexedVertexArray::RenderGL()
 namespace {
   unsigned int col_to_index(float* c)
   {
-    return static_cast<unsigned int>(c[0]*7.0)*64+static_cast<unsigned int>(c[1]*7.0)*8+static_cast<unsigned int>(c[2]*7.0);
+    // don't look too closely - I am lacking sufficient caffeine to do this more elegantly
+    int ret= std::max(0,std::min<int>(511,static_cast<int>(round(c[0]*7.0f))*64+static_cast<int>(round(c[1]*7.0f))*8+static_cast<unsigned int>(round(c[2]*7.0f))));
+    return static_cast<unsigned int>(ret);
   }
 }
 
 void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
 {
   if(entry_list_.empty()) return;
+
   pov.inc() << "mesh2 {\n";
 
   pov.inc() << " vertex_vectors { " << entry_list_.size() << ",\n";
@@ -607,15 +620,19 @@ void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
   pov.inc() << "}\n";
 }
 
-void IndexedVertexArray::Clear() 
+void IndexedVertexArray::Clear()
 {
   dirty_=true;
-  ambient_dirty_=true;
   entry_list_.clear();
   quad_index_list_.clear();
   tri_index_list_.clear();
   line_index_list_.clear();
   ntentry_list_.clear();
+} 
+
+void IndexedVertexArray::Reset() 
+{
+  Clear();
   mode_=0x4;
   poly_mode_=2;
   lighting_=true;
@@ -633,8 +650,6 @@ void IndexedVertexArray::Clear()
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
   draw_normals_=false;
-  use_ambient_=false;
-  ambient_data_.clear();
 }
 
 void IndexedVertexArray::FlagRefresh()
@@ -907,36 +922,6 @@ void IndexedVertexArray::SmoothVertices(float smoothf)
   }
 }
 
-void IndexedVertexArray::UseAmbient(bool f)
-{
-  if(use_ambient_==f) return;
-  use_ambient_=f;
-  FlagRefresh();
-}
-
-Color IndexedVertexArray::GetAmbientColor(VertexID id) const
-{
-  Color nrvo;
-  if(id*4>=ambient_data_.size()) return nrvo;
-  unsigned int offset=id*4;
-  nrvo = Color(ambient_data_[offset+0],
-               ambient_data_[offset+1],
-               ambient_data_[offset+2],
-               ambient_data_[offset+3]);
-  return nrvo;
-} 
-
-void IndexedVertexArray::SetAmbientColor(VertexID id, const Color& c) 
-{
-  if(id*4>=ambient_data_.size()) return;
-  unsigned int offset=id*4;
-  ambient_data_[offset+0]=c[0];
-  ambient_data_[offset+1]=c[1];
-  ambient_data_[offset+2]=c[2];
-  ambient_data_[offset+3]=c[3];
-}
-
-
 namespace {
 
 uint npatch_tab_id(uint u, uint v, uint N)
@@ -1042,7 +1027,6 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   line_index_list_=va.line_index_list_;
   ntentry_list_=va.ntentry_list_;
   dirty_=true;
-  ambient_dirty_=va.ambient_dirty_;
   mode_=va.mode_;
   poly_mode_=va.poly_mode_;
   lighting_=va.lighting_;
@@ -1060,12 +1044,11 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   outline_exp_factor_=va.outline_exp_factor_;
   outline_exp_color_=va.outline_exp_color_;
   draw_normals_=va.draw_normals_;
-  use_ambient_=va.use_ambient_;
-  ambient_data_=va.ambient_data_;
 }
   
 bool IndexedVertexArray::prep_buff()
 {
+  if(Scene::Instance().InOffscreenMode()) return false;
 #if OST_SHADER_SUPPORT_ENABLED
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
@@ -1130,24 +1113,6 @@ bool IndexedVertexArray::prep_buff()
     VERTEX_ARRAY_CHECK_GL_ERROR("set qindex buf");
   }
 
-  if(use_ambient_) {
-    if(ambient_data_.empty()) {
-      LOGN_VERBOSE("ambient data empty");
-      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    } else {
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-      glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_AMBIENT_BUFFER]);
-      VERTEX_ARRAY_CHECK_GL_ERROR("bind ambient buf");
-      glBufferData(GL_ARRAY_BUFFER,
-		   sizeof(float) * ambient_data_.size(),
-		   &ambient_data_[0],
-		   GL_STATIC_DRAW);
-      VERTEX_ARRAY_CHECK_GL_ERROR("set ambient buf");
-    }
-  } else {
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  }
-  
   return true;
 #else
   return false;
@@ -1174,12 +1139,6 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
     glInterleavedArrays(GetFormat(),sizeof(Entry),NULL);
 #endif
 
-    if(use_ambient_) {
-      if(!ambient_data_.empty()) {
-        glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_AMBIENT_BUFFER]);
-        glTexCoordPointer(4,GL_FLOAT,0,NULL);
-      }
-    }
     glBindBuffer(GL_ARRAY_BUFFER,0);
 
     if(!tri_index_list_.empty() && (mode_ & 0x4)) {
@@ -1408,12 +1367,6 @@ void IndexedVertexArray::draw_line_halo(bool use_buff)
   glPopAttrib();
   glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
   glLineWidth(line_width_);
-}
-
-void IndexedVertexArray::recalc_ambient_occlusion()
-{
-  ambient_data_.resize(4*entry_list_.size());
-  CalcAmbientTerms(*this);
 }
 
 }} // ns

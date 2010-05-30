@@ -56,6 +56,7 @@ void main()
   vec4 ec_Pos = gl_ModelViewMatrix* gl_Vertex;
 
   vec3 normal = normalize(gl_NormalMatrix * gl_Normal);
+  gl_TexCoord[0].stp = normal;
   
   if(lighting_flag) {
     CalcFrontAndBackColor(normal);

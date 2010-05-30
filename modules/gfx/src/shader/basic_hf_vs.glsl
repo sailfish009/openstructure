@@ -17,7 +17,10 @@ void main()
   // hemisphere lighting contribution
   vec3 ec_pos = vec3(gl_ModelViewMatrix* gl_Vertex);
   if(lighting_flag) {
-    vec3 normal = normalize(gl_NormalMatrix * gl_Normal);
+    vec3 normal = vec3(0,0,1);
+    if(dot(gl_Normal,gl_Normal)>0.001) {
+      normal = normalize(gl_NormalMatrix * gl_Normal);
+    }
     vec3 l_dir  = normalize(gl_LightSource[0].position.xyz); // assume directional vector
     float a  = 0.5+0.5*dot(normal,l_dir);
     gl_FrontColor.rgb = mix(ground_color, sky_color, a).rgb;

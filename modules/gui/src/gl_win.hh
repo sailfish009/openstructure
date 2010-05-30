@@ -43,7 +43,7 @@ class DLLEXPORT_OST_GUI GLWin: public Widget, public gfx::SceneObserver
 {
   Q_OBJECT;
 public:
-  GLWin(QWidget* p);
+  GLWin(QWidget* p, bool try_stereo=false);
   ~GLWin();
   void SetTestMode(bool f);
 

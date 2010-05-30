@@ -48,7 +48,8 @@ GostyApp::GostyApp():
   py_shell_(NULL), w_py_shell_(NULL), gl_win_(NULL), w_gl_win_(NULL),
   scene_win_(NULL), w_scene_win_(NULL), seq_viewer_(NULL), seq_viewer_v2_(NULL), tool_options_win_(NULL),
   w_tool_options_(NULL), main_(new GostyMainWindow), 
-  perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>())
+  perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>()),
+  try_stereo_(false)
 {
   assert(GostyApp::app_==NULL);
   GostyApp::app_=this;
@@ -150,10 +151,10 @@ PythonShell* GostyApp::GetPyShell()
   return py_shell_;
 }
 
-GLWin*  GostyApp::GetGLWin()
+GLWin* GostyApp::GetGLWin()
 {
   if (gl_win_==NULL) {
-    gl_win_=new GLWin(main_);
+    gl_win_=new GLWin(main_,try_stereo_);
     gl_win_->SetDestroyOnClose(false);    
   }
   return gl_win_;  

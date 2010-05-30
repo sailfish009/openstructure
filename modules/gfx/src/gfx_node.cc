@@ -160,5 +160,11 @@ bool GfxNode::IsVisible() const
   return show_;
 }
 
+void GfxNode::ContextSwitch()
+{
+  for(GfxNodeVector::iterator it =node_vector_.begin();it!=node_vector_.end();++it) {
+    (*it)->ContextSwitch();
+  }
+}
 
 }} // ns
