@@ -176,6 +176,8 @@ bool Scene::GetShadow() const
 {
 #if OST_SHADER_SUPPORT_ENABLED
   return impl::SceneFX::Instance().shadow_flag;
+#else
+  return false;
 #endif
 }
 
@@ -424,9 +426,11 @@ void Scene::InitGL(bool full)
   }
 
   glEnable(GL_TEXTURE_2D);
+#if OST_SHADER_SUPPORT_ENABLED
   if(GLEW_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
   }
+#endif
 
   glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -1826,9 +1830,11 @@ void Scene::render_stereo()
   render_scene();
 
   glEnable(GL_TEXTURE_2D);
+#if OST_SHADER_SUPPORT_ENABLED
   if(GLEW_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
   }
+#endif
   glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
 
@@ -1836,9 +1842,11 @@ void Scene::render_stereo()
   stereo_projection(2);
   render_scene();
   glEnable(GL_TEXTURE_2D);
+#if OST_SHADER_SUPPORT_ENABLED
   if(GLEW_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
   }
+#endif
   glBindTexture(GL_TEXTURE_2D, scene_right_tex_);
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
   check_gl_error();
@@ -1896,9 +1904,11 @@ void Scene::render_stereo()
   } else if(stereo_==2) {
     glStencilFunc(GL_EQUAL,0x0,0x1);
   }
+#if OST_SHADER_SUPPORT_ENABLED
   if(GLEW_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
   }
+#endif
   glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
   // draw
   glColor3f(1.0,0.0,1.0);
@@ -1916,9 +1926,11 @@ void Scene::render_stereo()
   } else if(stereo_==2) {
     glStencilFunc(GL_EQUAL,0x1,0x1);
   }
+#if OST_SHADER_SUPPORT_ENABLED
   if(GLEW_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
   }
+#endif
   glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
   // draw
   glColor3f(1.0,0.0,1.0);
