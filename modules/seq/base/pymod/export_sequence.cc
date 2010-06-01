@@ -134,6 +134,53 @@ private:
   AlignedColumnIterator e_;
 };
 
+struct ConstSeqListIter {
+  ConstSeqListIter(ConstSequenceList& list):
+    b_(list.begin()), e_(list.end())
+  { }
+
+  ConstSequenceHandle next()
+  {
+    if (b_==e_) {
+      boost::python::objects::stop_iteration_error();
+    }
+    ConstSequenceHandle s=*b_;
+    ++b_;
+    return s;
+  }
+private:
+  ConstSequenceList::iterator b_;
+  ConstSequenceList::iterator e_;
+};
+
+struct SeqListIter {
+  SeqListIter(SequenceList& list):
+    b_(list.begin()), e_(list.end())
+  { }
+
+  SequenceHandle next()
+  {
+    if (b_==e_) {
+      boost::python::objects::stop_iteration_error();
+    }
+    SequenceHandle s=*b_;
+    ++b_;
+    return s;
+  }
+private:
+  SequenceList::iterator b_;
+  SequenceList::iterator e_;
+};
+
+ConstSeqListIter iter_cs(ConstSequenceList& sl) 
+{
+  return ConstSeqListIter(sl);
+}
+
+SeqListIter iter_sl(SequenceList& sl) 
+{
+  return SeqListIter(sl);
+}
 
 RegionRangeIter iter_range1(AlignmentHandle& aln)
 {
@@ -229,6 +276,12 @@ void export_sequence()
     class_<RevRegionRangeIter>("RevRegionRangeIter", no_init)
     .def("next", &RevRegionRangeIter::next)
   ;
+  class_<ConstSeqListIter>("ConstSeqListIter", no_init)
+    .def("next", &ConstSeqListIter::next)
+  ;
+  class_<SeqListIter>("SeqListIter", no_init)
+    .def("next", &SeqListIter::next)
+  ;
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)
     .add_property("sequence_count", &AlignmentHandle::GetCount)
@@ -284,10 +337,12 @@ void export_sequence()
   class_<ConstSequenceList>("ConstSequenceList", init<>())
     CONST_SEQ_LIST_DEF(ConstSequenceList)
     .def("__getitem__", &do_slice_a)
+    .def("__iter__", &iter_cs)    
   ;
   class_<SequenceList>("SequenceList", init<>())
     CONST_SEQ_LIST_DEF(SequenceList)
     .def("__getitem__", &do_slice_b)
+    .def("__iter__", &iter_sl)
   ;
   class_<AlignmentList>("AlignmentList", init<>())
     .def(vector_indexing_suite<AlignmentList>())

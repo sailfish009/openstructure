@@ -24,10 +24,9 @@
   .def("GetMaxLength", &C::GetMaxLength)                                       \
   .def("GetMinLength", &C::GetMinLength)                                       \
   .def("Take", &C::Take)                                                       \
-  .def("Slice", &C::Slice)                                                   \
+  .def("Slice", &C::Slice)                                                     \
   .def("SequencesHaveEqualLength",                                             \
        &C::SequencesHaveEqualLength)                                           \
   .def("__getitem__", &C::operator[])                                          \
-  .def("__iter__", iterator<C>())                                              \
   .def("__len__", &C::GetCount)
 
