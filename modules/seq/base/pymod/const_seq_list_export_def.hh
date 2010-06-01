@@ -23,6 +23,7 @@
   .def("AddSequence", &C::AddSequence)                                         \
   .def("GetMaxLength", &C::GetMaxLength)                                       \
   .def("GetMinLength", &C::GetMinLength)                                       \
+  .def("IsValid", &C::IsValid)                                                 \
   .def("Take", &C::Take)                                                       \
   .def("Slice", &C::Slice)                                                     \
   .def("SequencesHaveEqualLength",                                             \

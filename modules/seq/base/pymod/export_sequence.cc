@@ -136,7 +136,7 @@ private:
 
 struct ConstSeqListIter {
   ConstSeqListIter(ConstSequenceList& list):
-    b_(list.begin()), e_(list.end())
+    l_(list), b_(l_.begin()), e_(l_.end())
   { }
 
   ConstSequenceHandle next()
@@ -144,18 +144,19 @@ struct ConstSeqListIter {
     if (b_==e_) {
       boost::python::objects::stop_iteration_error();
     }
-    ConstSequenceHandle s=*b_;
+    ConstSequenceHandle s=*b_;  
     ++b_;
     return s;
   }
 private:
+  ConstSequenceList           l_;
   ConstSequenceList::iterator b_;
   ConstSequenceList::iterator e_;
 };
 
 struct SeqListIter {
   SeqListIter(SequenceList& list):
-    b_(list.begin()), e_(list.end())
+    l_(list), b_(l_.begin()), e_(l_.end())
   { }
 
   SequenceHandle next()
@@ -168,6 +169,7 @@ struct SeqListIter {
     return s;
   }
 private:
+  SequenceList           l_;
   SequenceList::iterator b_;
   SequenceList::iterator e_;
 };
@@ -209,6 +211,7 @@ void const_seq_handle_def(O& bp_class)
     .def("__getitem__", &C::GetOneLetterCode)
     .def("GetSequenceOffset", &C::GetSequenceOffset)
     .def("Copy", &C::Copy)
+    .def("IsValid", &C::IsValid)
     .def("GetFirstNonGap", &C::GetFirstNonGap)
     .def("GetLastNonGap", &C::GetLastNonGap)
     .add_property("first_non_gap", &C::GetFirstNonGap)
