@@ -135,7 +135,7 @@ AlignmentViewObject::AlignmentViewObject(const seq::AlignmentHandle& alignment, 
 
 QVariant AlignmentViewObject::GetData(int row, int column, int role)
 {
-  if(column > 0 && column <= alignment_.GetLength() && this->GetCurrentDisplayMode() == conservation_mode){
+  if(column > 0 && this->GetCurrentDisplayMode() == conservation_mode){
     if(role == Qt::UserRole+3 ){
       if(column -1 < conservation_.size()){
         return QVariant(conservation_[column-1]);
