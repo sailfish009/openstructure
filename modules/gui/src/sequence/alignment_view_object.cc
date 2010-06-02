@@ -69,7 +69,7 @@ QMap<QString,int> GetGroupMap(){
 }
 
 QColor GetColor(int cons){
-  int color = 255 - int((float(cons) / 100) * 255);
+  int color = 255 - int((float(cons) / 100) * 200);
   return QColor(color,color,color);
 }
 
@@ -120,10 +120,10 @@ AlignmentViewObject::AlignmentViewObject(const seq::AlignmentHandle& alignment, 
 
     }
     if(element.size()==1){
-      conservation_[j] = GetColor(100);
+      conservation_[j] = QColor(175,175,175);
     }
     else if(group > 0){
-      conservation_[j] = GetColor(70);
+      conservation_[j] = QColor(200,200,200);
     }
     else{
       conservation_[j] = Qt::transparent;
@@ -145,8 +145,8 @@ QVariant AlignmentViewObject::GetData(int row, int column, int role)
 
     if(role == Qt::ForegroundRole){
       if(column -1 < conservation_.size()){
-        return QVariant(GetForeGroundColor(conservation_[column-1]));
-      }
+          return QVariant(Qt::black);
+        }
         return QVariant(Qt::transparent);
     }
 

@@ -156,8 +156,7 @@ void SequenceViewerV2::InitActions()
   QAction* menu_action = new QAction(this);
   menu_action->setText("Menubar");
   menu_action->setShortcut(QKeySequence(tr("Ctrl+M")));
-  menu_action->setCheckable(true);
-  menu_action->setToolTip("Display Menubar (Ctrl+M)");
+  menu_action->setToolTip("Display Options (Ctrl+M)");
   menu_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("menubar_icon.png")));
   action_list_.append(menu_action);
   connect(menu_action, SIGNAL(triggered(bool)), this, SLOT(DisplayMenu()));

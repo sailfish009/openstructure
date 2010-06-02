@@ -32,26 +32,26 @@ namespace {
 
 QMap<QString,QColor> GetColorMap(){
   QMap<QString,QColor> map;
-  map["G"]=QColor(Qt::gray);
-  map["A"]=QColor(Qt::gray);
-  map["V"]=QColor(Qt::gray);
-  map["L"]=QColor(Qt::gray);
-  map["I"]=QColor(Qt::gray);
-  map["F"]=QColor(255,165,0);
-  map["Y"]=QColor(255,165,0);
-  map["W"]=QColor(255,165,0);
-  map["C"]=QColor(Qt::yellow);
-  map["M"]=QColor(Qt::yellow);
-  map["S"]=QColor(Qt::green);
-  map["T"]=QColor(Qt::green);
-  map["K"]=QColor(Qt::red);
-  map["R"]=QColor(Qt::red);
-  map["H"]=QColor(Qt::red);
-  map["D"]=QColor(Qt::blue);
-  map["E"]=QColor(Qt::blue);
-  map["N"]=QColor(Qt::blue);
-  map["Q"]=QColor(Qt::blue);
-  map["P"]=QColor(Qt::magenta);
+  map["G"]=QColor(175,175,175,100);
+  map["A"]=QColor(175,175,175,100);
+  map["V"]=QColor(175,175,175,100);
+  map["L"]=QColor(175,175,175,100);
+  map["I"]=QColor(175,175,175,100);
+  map["F"]=QColor(255,165,100);
+  map["Y"]=QColor(255,165,100);
+  map["W"]=QColor(255,165,100);
+  map["C"]=QColor(255,255,0,100);
+  map["M"]=QColor(255,255,0,100);
+  map["S"]=QColor(0,255,0,100);
+  map["T"]=QColor(0,255,0,100);
+  map["K"]=QColor(255,0,0,100);
+  map["R"]=QColor(255,0,0,100);
+  map["H"]=QColor(255,0,0,100);
+  map["D"]=QColor(0,0,255,100);
+  map["E"]=QColor(0,0,255,100);
+  map["N"]=QColor(0,0,255,100);
+  map["Q"]=QColor(0,0,255,100);
+  map["P"]=QColor(0,255,255,100);
   return map;
 }
 
