@@ -297,17 +297,27 @@ void SequenceModel::DoubleClicked(const QModelIndex& index)
 const QStringList& SequenceModel::GetDisplayModes()
 {
   display_modes_.clear();
-  bool removed = false;
+  QMap<QString,int> string_map;
   for (int i = 0; i<objects_.size(); i++){
     const QStringList& list = objects_[i]->GetDisplayModes();
     for(int j=0; j<list.size(); j++){
-      if(i = 0){
-        display_modes_.append(list.at(i));
+      if(!string_map.contains(list.at(j))){
+        string_map.insert(list.at(j),1);
       }
-      else if (!display_modes_.contains(list.at(i))){
-        display_modes_.removeAll(list.at(i));
-        removed = true;
+      else {
+        string_map[list.at(j)] = string_map[list.at(j)] + 1;
       }
+    }
+  }
+  bool removed = false;
+  QMapIterator<QString, int> i(string_map);
+  while (i.hasNext()) {
+    i.next();
+    if(objects_.size()-1 <= i.value()){
+      display_modes_.append(i.key());
+    }
+    else{
+      removed = true;
     }
   }
   if(removed){

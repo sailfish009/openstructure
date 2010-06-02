@@ -46,47 +46,47 @@ void change_display_mode_c(SequenceViewerV2* seq_viewer, const seq::AlignmentHan
   seq_viewer->ChangeDisplayMode(alignment, mode);
 }
 
-void get_current_display_mode_a(SequenceViewerV2* seq_viewer)
+String get_current_display_mode_a(SequenceViewerV2* seq_viewer)
 {
-  seq_viewer->GetCurrentDisplayMode();
+  return seq_viewer->GetCurrentDisplayMode().toStdString();
 }
 
-void get_current_display_mode_b(SequenceViewerV2* seq_viewer, const gfx::EntityP& entity)
+String get_current_display_mode_b(SequenceViewerV2* seq_viewer, const gfx::EntityP& entity)
 {
-  seq_viewer->GetCurrentDisplayMode(entity);
+  return seq_viewer->GetCurrentDisplayMode(entity).toStdString();
 }
 
-void get_current_display_mode_c(SequenceViewerV2* seq_viewer, const seq::AlignmentHandle& alignment)
+String get_current_display_mode_c(SequenceViewerV2* seq_viewer, const seq::AlignmentHandle& alignment)
 {
-  seq_viewer->GetCurrentDisplayMode(alignment);
+  return seq_viewer->GetCurrentDisplayMode(alignment).toStdString();
 }
 
-std::vector<QString> get_display_modes_a(SequenceViewerV2* seq_viewer)
+std::vector<String> get_display_modes_a(SequenceViewerV2* seq_viewer)
 {
-  std::vector<QString> modes;
+  std::vector<String> modes;
   const QStringList& list = seq_viewer->GetDisplayModes();
   for (int i=0; i<list.size(); i++){
-    modes.push_back(list.at(i));
+    modes.push_back(list.at(i).toStdString());
   }
   return modes;
 }
 
-std::vector<QString> get_display_modes_b(SequenceViewerV2* seq_viewer, const gfx::EntityP& entity)
+std::vector<String> get_display_modes_b(SequenceViewerV2* seq_viewer, const gfx::EntityP& entity)
 {
-  std::vector<QString> modes;
+  std::vector<String> modes;
   const QStringList& list = seq_viewer->GetDisplayModes(entity);
   for (int i=0; i<list.size(); i++){
-    modes.push_back(list.at(i));
+    modes.push_back(list.at(i).toStdString());
   }
   return modes;
 }
 
-std::vector<QString> get_display_modes_c(SequenceViewerV2* seq_viewer, const seq::AlignmentHandle& alignment)
+std::vector<String> get_display_modes_c(SequenceViewerV2* seq_viewer, const seq::AlignmentHandle& alignment)
 {
-  std::vector<QString> modes;
+  std::vector<String> modes;
   const QStringList& list = seq_viewer->GetDisplayModes(alignment);
   for (int i=0; i<list.size(); i++){
-    modes.push_back(list.at(i));
+    modes.push_back(list.at(i).toStdString());
   }
   return modes;
 }
@@ -112,10 +112,6 @@ void export_SequenceViewerV2()
     .def("ChangeDisplayMode",&change_display_mode_c)
     .def("GetQObject",&get_py_qobject<SequenceViewerV2>)
     .add_property("qobject", &get_py_qobject<SequenceViewerV2>)
-  ;
-
-  class_<std::vector<QString> >("QStringList", init<>())
-    .def(vector_indexing_suite<std::vector<QString>, true >())
   ;
 }
 
