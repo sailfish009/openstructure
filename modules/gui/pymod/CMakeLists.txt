@@ -45,7 +45,6 @@ render_mode_widget.py
 render_op.py
 render_options_widget.py
 scene_observer_impl.py
-sequence_widget.py
 simple_widget.py
 sline_widget.py
 toolbar_options_widget.py
@@ -97,7 +96,6 @@ set(INSPECTOR_ICONS
   scene/icons/color_icon.png
   scene/icons/preset_icon.png  
   scene/icons/render_icon.png
-  scene/icons/seq_icon.png
   scene/icons/tool_icon.png
 )
 copy_if_different("./" "${STAGE_DIR}/share/openstructure/scene/icons" 

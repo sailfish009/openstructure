@@ -40,7 +40,6 @@ class InspectorWidget(ToolBarOptionsWidget):
                 [InspectorWidget.ICONS_PATH+"render_icon.png",RenderOptionsWidget(self),None], 
                 [InspectorWidget.ICONS_PATH+"color_icon.png",ColorOptionsWidget(self),None],
                 [InspectorWidget.ICONS_PATH+"preset_icon.png", PresetWidget(self),None],
-                [InspectorWidget.ICONS_PATH+"seq_icon.png", SequenceWidget(self),None],
                 [InspectorWidget.ICONS_PATH+"tool_icon.png",app.tool_options_win.qobject,"Tool Options"]
               ]
     for o in options:
