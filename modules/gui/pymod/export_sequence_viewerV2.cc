@@ -26,6 +26,25 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::gui;
 
+namespace {
+
+void change_display_mode_a(SequenceViewerV2* seq_viewer, const QString& mode)
+{
+  seq_viewer->ChangeDisplayMode(mode);
+}
+
+void change_display_mode_b(SequenceViewerV2* seq_viewer, const gfx::EntityP& entity, const QString& mode)
+{
+  seq_viewer->ChangeDisplayMode(entity, mode);
+}
+
+void change_display_mode_c(SequenceViewerV2* seq_viewer, const seq::AlignmentHandle& alignment, const QString& mode)
+{
+  seq_viewer->ChangeDisplayMode(alignment, mode);
+}
+
+}
+
 
 void export_SequenceViewerV2()
 {
@@ -34,6 +53,9 @@ void export_SequenceViewerV2()
     .def("Hide", &SequenceViewerV2::hide)
     .def("AddAlignment", &SequenceViewerV2::AddAlignment)
     .def("RemoveAlignment", &SequenceViewerV2::RemoveAlignment)
+    .def("ChangeDisplayMode",&change_display_mode_a)
+    .def("ChangeDisplayMode",&change_display_mode_b)
+    .def("ChangeDisplayMode",&change_display_mode_c)
     .def("GetQObject",&get_py_qobject<SequenceViewerV2>)
     .add_property("qobject", &get_py_qobject<SequenceViewerV2>)
   ;

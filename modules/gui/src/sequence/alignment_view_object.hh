@@ -38,11 +38,17 @@ public:
 
   QVariant GetData(int row, int column, int role);
 
+  const seq::AlignmentHandle& GetAlignment();
+
+  void SetDisplayMode(const QString& mode);
+
 private:
   seq::AlignmentHandle alignment_;
   QMap<int, QColor> conservation_;
 
   static QMap<QString,int> group_map_;
+
+  static const QString conservation_mode;
 };
 
 

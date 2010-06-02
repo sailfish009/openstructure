@@ -51,12 +51,20 @@ public:
   virtual bool SetData(int row, int column, const QVariant& value, int role);
   virtual Qt::ItemFlags Flags(int row, int column) const;
 
+  virtual const QStringList& GetDisplayModes();
+  virtual const QString& GetCurrentDisplayMode();
+  virtual void SetDisplayMode(const QString& mode);
+
   void DoubleClicked(int row, int column);
   void ZoomIn();
   void ZoomOut();
 
 protected:
+  virtual void AddDisplayMode(const QString& mode);
+
   QList<BaseRow*> rows_;
+  QString current_display_mode_;
+  QStringList display_modes_;
 };
 
 

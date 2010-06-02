@@ -30,40 +30,49 @@
 #include "sequence_row.hh"
 #include "secstr_row.hh"
 
-#include "align_properties_painter.hh"
-#include "conservation_painter.hh"
-#include "painter.hh"
-#include "background_painter.hh"
-#include "seq_secstr_painter.hh"
-#include "seq_selection_painter.hh"
-#include "seq_text_painter.hh"
-
 #include "sequence_view_object.hh"
 
 namespace ost { namespace gui {
 
+const QString SequenceViewObject::properties_mode = "Highlight properties";
+const QString SequenceViewObject::secondary_structure_mode = "Secondary structure";
+
+AlignPropertiesPainter* SequenceViewObject::align_properties_painter = new AlignPropertiesPainter();
+ConservationPainter* SequenceViewObject::conservation_painter = new ConservationPainter();
+BackgroundPainter* SequenceViewObject::background_painter = new BackgroundPainter();
+SeqSecStrPainter* SequenceViewObject::seq_secondary_structure_painter = new SeqSecStrPainter();
+SeqSelectionPainter* SequenceViewObject::seq_selection_painter = new SeqSelectionPainter();
+SeqTextPainter* SequenceViewObject::seq_text_painter = new SeqTextPainter();
+
 SequenceViewObject::SequenceViewObject(seq::SequenceList& sequences, const QList<QString>& names, QObject *parent): BaseViewObject(parent), entity_(gfx::EntityP())
 {
+  this->Init();
   if(names.size() == sequences.GetCount()){
     for(int i=0; i<sequences.GetCount(); i++){
       seq::SequenceHandle seq = sequences[i];
       this->AddSequence(seq, names[i]);
     }
   }
+  this->SetDisplayMode(properties_mode);
 }
 
 SequenceViewObject::SequenceViewObject(seq::SequenceHandle& sequence, const QString& name, QObject *parent): BaseViewObject(parent), entity_(gfx::EntityP())
 {
+  this->Init();
   this->AddSequence(sequence, name);
+  this->SetDisplayMode(properties_mode);
 }
 
 SequenceViewObject::SequenceViewObject(mol::ChainView& chain, const QString& name, QObject *parent): BaseViewObject(parent), entity_(gfx::EntityP())
 {
+  this->Init();
   this->AddChain(chain, name);
+  this->SetDisplayMode(properties_mode);
 }
 
 SequenceViewObject::SequenceViewObject(gfx::EntityP& entity, QObject* parent): BaseViewObject(parent), entity_(entity)
 {
+  this->Init();
   mol::EntityView view =entity->GetView();
   for (mol::ChainViewList::const_iterator c=view.GetChainList().begin(),
        e1=view.GetChainList().end(); c!=e1; ++c) {
@@ -74,38 +83,40 @@ SequenceViewObject::SequenceViewObject(gfx::EntityP& entity, QObject* parent): B
     }
     this->AddChain(chain, name);
   }
+  this->SetDisplayMode(secondary_structure_mode);
 }
 
 SequenceViewObject::SequenceViewObject(QObject* parent): BaseViewObject(parent), entity_(gfx::EntityP())
-{ }
+{
+  this->Init();
+  this->SetDisplayMode(properties_mode);
+}
+
+void SequenceViewObject::Init()
+{
+  this->AddDisplayMode(properties_mode);
+  if(entity_){
+    this->AddDisplayMode(secondary_structure_mode);
+  }
+}
 
 void SequenceViewObject::AddSequence(seq::SequenceHandle& sequence, const QString& name)
 {
   SequenceRow* new_row = new SequenceRow(name, sequence, this);
-  Painter* p = new BackgroundPainter(this);
-  new_row->InsertPainter(p);
-  p = new AlignPropertiesPainter(this);
-  new_row->InsertPainter(p);
-  p = new ConservationPainter(this);
-  new_row->InsertPainter(p);
-  p = new SeqTextPainter(this);
-  new_row->InsertPainter(p);
-  p = new SeqSelectionPainter(this);
-  new_row->InsertPainter(p);
+  new_row->InsertPainter(background_painter);
+  new_row->InsertPainter(align_properties_painter);
+  new_row->InsertPainter(seq_text_painter);
+  new_row->InsertPainter(seq_selection_painter);
   rows_.append(new_row);
 }
 
 void SequenceViewObject::AddChain(mol::ChainView& chain, const QString& name)
 {
   SecStrRow* new_row = new SecStrRow(name, chain, this);
-  Painter* p = new BackgroundPainter(this);
-  new_row->InsertPainter(p);
-  p = new SeqSecStrPainter(this);
-  new_row->InsertPainter(p);
-  p = new SeqTextPainter(this);
-  new_row->InsertPainter(p);
-  p = new SeqSelectionPainter(this);
-  new_row->InsertPainter(p);
+  new_row->InsertPainter(background_painter);
+  new_row->InsertPainter(seq_secondary_structure_painter);
+  new_row->InsertPainter(seq_text_painter);
+  new_row->InsertPainter(seq_selection_painter);
   rows_.append(new_row);
 }
 
@@ -117,6 +128,29 @@ void SequenceViewObject::AttachGfxObject(gfx::EntityP& ent)
 gfx::EntityP& SequenceViewObject::GetGfxObject()
 {
   return entity_;
+}
+
+void SequenceViewObject::SetDisplayMode(const QString& mode)
+{
+  if(this->display_modes_.contains(mode)){
+    if(mode == properties_mode){
+      for(int i=0 ; i<this->GetRowCount(); i++){
+        BaseRow* row = this->GetRow(i);
+        row->RemovePainter(seq_secondary_structure_painter);
+        row->RemovePainter(conservation_painter);
+        row->InsertPainter(align_properties_painter,1);
+      }
+    }
+    else if(mode == secondary_structure_mode){
+      for(int i=0 ; i<this->GetRowCount(); i++){
+        BaseRow* row = this->GetRow(i);
+        row->RemovePainter(align_properties_painter);
+        row->RemovePainter(conservation_painter);
+        row->InsertPainter(seq_secondary_structure_painter,1);
+      }
+    }
+  }
+  BaseViewObject::SetDisplayMode(mode);
 }
 
 QMap<int, QList<int> > SequenceViewObject::GetIndexesForView(const mol::EntityView& view)

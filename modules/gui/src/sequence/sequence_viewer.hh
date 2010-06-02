@@ -58,8 +58,11 @@ public:
   virtual bool Save(const QString&){return true;};
 
 public slots:
-/// \internal
-void OnSearchBarUpdate(const QString&, bool, const QString&);
+  void ChangeDisplayMode(const QString&);
+  void ChangeDisplayMode(const seq::AlignmentHandle&, const QString&);
+  void ChangeDisplayMode(const gfx::EntityP&, const QString&);
+  //internal
+  void OnSearchBarUpdate(const QString&, bool, const QString&);
 
 private:
   void UpdateSearchBar();
@@ -75,6 +78,7 @@ private slots:
   void DoubleClicked(const QModelIndex& index);
   void MouseWheelEvent(QWheelEvent* event);
   void CopyEvent(QKeyEvent* event);
+
 };
 
 }}

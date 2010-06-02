@@ -89,6 +89,30 @@ bool BaseViewObject::SetData(int row, int column, const QVariant& value, int rol
   return rows_[row]->SetData(column, value, role);
 }
 
+const QStringList& BaseViewObject::GetDisplayModes()
+{
+  return display_modes_;
+}
+
+const QString& BaseViewObject::GetCurrentDisplayMode()
+{
+  return current_display_mode_;
+}
+
+void BaseViewObject::SetDisplayMode(const QString& mode)
+{
+  if(display_modes_.contains(mode)){
+    this->current_display_mode_ = mode;
+  }
+}
+
+void BaseViewObject::AddDisplayMode(const QString& mode)
+{
+  if(!display_modes_.contains(mode)){
+    this->display_modes_.append(mode);
+  }
+}
+
 void BaseViewObject::DoubleClicked(int row, int column)
 {
   if(row>=0 || row < rows_.size()){

@@ -30,7 +30,15 @@
 
 #include <ost/seq/sequence_list.hh>
 
+#include "align_properties_painter.hh"
+#include "conservation_painter.hh"
+#include "background_painter.hh"
+#include "seq_secstr_painter.hh"
+#include "seq_selection_painter.hh"
+#include "seq_text_painter.hh"
+
 #include "base_view_object.hh"
+
 
 namespace ost { namespace gui {
 
@@ -45,17 +53,34 @@ public:
   SequenceViewObject(gfx::EntityP& entity, QObject* parent = 0);
   SequenceViewObject(QObject* parent = 0);
 
+  void Init();
+
   void AddSequence(seq::SequenceHandle& sequence, const QString& name=QString());
   void AddChain(mol::ChainView& chain, const QString& name=QString());
 
   void AttachGfxObject(gfx::EntityP& ent);
   gfx::EntityP& GetGfxObject();
 
+  virtual void SetDisplayMode(const QString& mode);
+
   QMap<int, QList<int> > GetIndexesForView(const mol::EntityView& view);
   QMap<int, QList<int> > GetIndexesForSubject(const QString& subject, const QString& sequence_name=QString());
 
+protected:
+  static const QString properties_mode;
+  static const QString secondary_structure_mode;
+
+  static AlignPropertiesPainter* align_properties_painter;
+  static ConservationPainter* conservation_painter;
+  static BackgroundPainter* background_painter;
+  static SeqSecStrPainter* seq_secondary_structure_painter;
+  static SeqSelectionPainter* seq_selection_painter;
+  static SeqTextPainter* seq_text_painter;
+
 private:
   gfx::EntityP entity_;
+
+
 };
 
 

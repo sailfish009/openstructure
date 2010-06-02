@@ -284,6 +284,24 @@ void SequenceViewerV2::SelectList(const QModelIndexList& list)
   }
 }
 
+void SequenceViewerV2::ChangeDisplayMode(const QString& string)
+{
+  model_->SetDisplayMode(string);
+  seq_table_view_->viewport()->update();
+}
+
+void SequenceViewerV2::ChangeDisplayMode(const seq::AlignmentHandle& alignment, const QString& string)
+{
+  model_->SetDisplayMode(alignment, string);
+  seq_table_view_->viewport()->update();
+}
+
+void SequenceViewerV2::ChangeDisplayMode(const gfx::EntityP& entity, const QString& string)
+{
+  model_->SetDisplayMode(entity, string);
+  seq_table_view_->viewport()->update();
+}
+
 SequenceViewerV2::~SequenceViewerV2(){
   gfx::Scene::Instance().DetachObserver(this);
 }

@@ -34,6 +34,7 @@
 #include <ost/gfx/entity.hh>
 
 #include "base_view_object.hh"
+#include "alignment_view_object.hh"
 #include "sequence_view_object.hh"
 
 namespace ost { namespace gui {
@@ -60,6 +61,14 @@ public:
   int GetGlobalRow(BaseViewObject* obj, int row) const;
 
 
+  const QStringList& GetDisplayModes(gfx::EntityP& entity);
+  const QStringList& GetDisplayModes(const seq::AlignmentHandle& alignment);
+  const QString& GetCurrentDisplayMode(gfx::EntityP& entity);
+  const QString& GetCurrentDisplayMode(const seq::AlignmentHandle& alignment);
+  void SetDisplayMode(const QString& mode);
+  void SetDisplayMode(const gfx::EntityP& entity, const QString& mode);
+  void SetDisplayMode(const seq::AlignmentHandle& alignment, const QString& mode);
+
   const PainterList& GetPainters(const QModelIndex& index) const;
 
   // abstract item model interface
@@ -79,17 +88,19 @@ public slots:
   void ZoomOut();
   void DoubleClicked(const QModelIndex& index);
   void SelectionChanged(const QItemSelection& sel, const QItemSelection& desel);
-
 private:
   int GetColumnCount() const;
-  SequenceViewObject* GetItem(gfx::EntityP& entity);
+  SequenceViewObject* GetItem(const gfx::EntityP& entity);
+  AlignmentViewObject* GetItem(const seq::AlignmentHandle& alignment);
   BaseViewObject* GetItem(const QModelIndex& index) const;
   QPair<int, BaseViewObject*> GetRowWithItem(int row) const;
   QPair<int, BaseViewObject*> GetRowWithItem(const QModelIndex& index) const;
 
   QList<BaseViewObject*> objects_;
   int max_columns;
-  PainterList empty_list_;
+  PainterList empty_painter_list_;
+  QString empty_string_;
+  QStringList empty_string_list_;
 };
 
 

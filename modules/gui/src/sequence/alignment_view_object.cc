@@ -86,6 +86,8 @@ QColor GetForeGroundColor(QColor background){
 
 QMap<QString,int> AlignmentViewObject::group_map_ = GetGroupMap();
 
+const QString AlignmentViewObject::conservation_mode = "Highlight conservation";
+
 AlignmentViewObject::AlignmentViewObject(const seq::AlignmentHandle& alignment, QObject* parent): SequenceViewObject(parent), alignment_(alignment)
 {
   for(int i=0; i<alignment.GetCount(); i++){
@@ -127,12 +129,13 @@ AlignmentViewObject::AlignmentViewObject(const seq::AlignmentHandle& alignment, 
       conservation_[j] = Qt::transparent;
     }
   }
+  this->AddDisplayMode(conservation_mode);
 }
 
 
 QVariant AlignmentViewObject::GetData(int row, int column, int role)
 {
-  if(column > 0 && column <= alignment_.GetLength()){
+  if(column > 0 && column <= alignment_.GetLength() && this->GetCurrentDisplayMode() == conservation_mode){
     if(role == Qt::UserRole+3 ){
       if(column -1 < conservation_.size()){
         return QVariant(conservation_[column-1]);
@@ -150,6 +153,24 @@ QVariant AlignmentViewObject::GetData(int row, int column, int role)
   }
 
   return BaseViewObject::GetData(row,column,role);
+}
+
+void AlignmentViewObject::SetDisplayMode(const QString& mode)
+{
+  if(this->display_modes_.contains(mode) && mode == conservation_mode){
+    for(int i=0 ; i<this->GetRowCount(); i++){
+      BaseRow* row = this->GetRow(i);
+      row->RemovePainter(seq_secondary_structure_painter);
+      row->RemovePainter(align_properties_painter);
+      row->InsertPainter(conservation_painter,1);
+    }
+  }
+  SequenceViewObject::SetDisplayMode(mode);
+}
+
+const seq::AlignmentHandle& AlignmentViewObject::GetAlignment()
+{
+  return alignment_;
 }
 
 }}

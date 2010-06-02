@@ -26,9 +26,6 @@
 
 #include <QtGui>
 
-#include "alignment_view_object.hh"
-#include "sequence_view_object.hh"
-
 #include "title_row.hh"
 
 #include "background_painter.hh"
@@ -131,7 +128,19 @@ void SequenceModel::RemoveGfxEntity(gfx::EntityP& entity){
 }
 
 void SequenceModel::RemoveAlignment(const seq::AlignmentHandle& alignment){
-
+  if(AlignmentViewObject* obj = this->GetItem(alignment)){
+    int index = this->GetGlobalRow(obj,0);
+    this->beginRemoveRows(QModelIndex(),index,index+obj->GetRowCount()-1);
+    int cols_before = this->columnCount();
+    objects_.removeOne(obj);
+    this->endRemoveRows();
+    int cols = this->GetColumnCount();
+    if(cols_before>cols){
+      this->max_columns = cols;
+      this->beginRemoveColumns(QModelIndex(), cols, cols_before);
+      this->endRemoveColumns();
+    }
+  }
 }
 
 int SequenceModel::GetColumnCount() const{
@@ -145,7 +154,7 @@ int SequenceModel::GetColumnCount() const{
   return cols;
 }
 
-SequenceViewObject* SequenceModel::GetItem(gfx::EntityP& entity){
+SequenceViewObject* SequenceModel::GetItem(const gfx::EntityP& entity){
   if(entity != NULL){
     for (int i = 0 ; i< objects_.size(); i++){
       if(SequenceViewObject* seq_view_object = qobject_cast<SequenceViewObject*>(objects_[i])){
@@ -158,12 +167,23 @@ SequenceViewObject* SequenceModel::GetItem(gfx::EntityP& entity){
   return NULL;
 }
 
+AlignmentViewObject* SequenceModel::GetItem(const seq::AlignmentHandle& alignment){
+  for (int i = 0 ; i< objects_.size(); i++){
+    if(AlignmentViewObject* alignment_object = qobject_cast<AlignmentViewObject*>(objects_[i])){
+      if(alignment == alignment_object->GetAlignment()){
+        return alignment_object;
+      }
+    }
+  }
+  return NULL;
+}
+
 const PainterList& SequenceModel::GetPainters(const QModelIndex& index) const{
   QPair<int, BaseViewObject*> pair = this->GetRowWithItem(index);
   if(pair.second){
     return pair.second->GetRow(pair.first)->GetPainters();
   }
-  return empty_list_;
+  return empty_painter_list_;
 }
 
 QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(int row) const{
@@ -271,6 +291,73 @@ void SequenceModel::DoubleClicked(const QModelIndex& index)
   QPair<int, BaseViewObject*> item = this->GetRowWithItem(index);
   if(item.second){
     item.second->DoubleClicked(item.first,index.column());
+  }
+}
+
+const QStringList& SequenceModel::GetDisplayModes(gfx::EntityP& entity)
+{
+  BaseViewObject* item = this->GetItem(entity);
+  if(item){
+    return item->GetDisplayModes();
+  }
+  else{
+    return empty_string_list_;
+  }
+}
+
+const QStringList& SequenceModel::GetDisplayModes(const seq::AlignmentHandle& alignment)
+{
+  BaseViewObject* item = this->GetItem(alignment);
+  if(item){
+    return item->GetDisplayModes();
+  }
+  else{
+    return empty_string_list_;
+  }
+}
+
+const QString& SequenceModel::GetCurrentDisplayMode(gfx::EntityP& entity)
+{
+  BaseViewObject* item = this->GetItem(entity);
+  if(item){
+    return item->GetCurrentDisplayMode();
+  }
+  else{
+    return empty_string_;
+  }
+}
+
+const QString& SequenceModel::GetCurrentDisplayMode(const seq::AlignmentHandle& alignment)
+{
+  BaseViewObject* item = this->GetItem(alignment);
+  if(item){
+    return item->GetCurrentDisplayMode();
+  }
+  else{
+    return empty_string_;
+  }
+}
+
+void SequenceModel::SetDisplayMode(const QString& mode)
+{
+  for (int i = 0; i<objects_.size(); i++){
+    objects_[i]->SetDisplayMode(mode);
+  }
+}
+
+void SequenceModel::SetDisplayMode(const gfx::EntityP& entity, const QString& mode)
+{
+  BaseViewObject* item = this->GetItem(entity);
+  if(item){
+    return item->SetDisplayMode(mode);
+  }
+}
+
+void SequenceModel::SetDisplayMode(const seq::AlignmentHandle& alignment, const QString& mode)
+{
+  BaseViewObject* item = this->GetItem(alignment);
+  if(item){
+    return item->SetDisplayMode(mode);
   }
 }
 
