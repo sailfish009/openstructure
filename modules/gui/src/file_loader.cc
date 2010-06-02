@@ -103,7 +103,11 @@ void FileLoader::LoadObject(const QString& filename, const QString& selection)
         obj=FileLoader::TryLoadSurface(filename);
       }
       if (!obj) {
-        obj=FileLoader::NoHandlerFound(filename);
+        try{
+          obj=FileLoader::NoHandlerFound(filename);
+        } catch (io::IOFileAlreadyLoadedException&) {
+          return;
+        }
       }
       if (!obj){
         return;
@@ -134,6 +138,9 @@ gfx::GfxObjP FileLoader::NoHandlerFound(const QString& filename)
   if(dialog.exec()){
     if(dialog.GetEntityHandler()){
       return TryLoadEntity(filename, dialog.GetEntityHandler());
+    }
+    if(dialog.GetSequenceHandler()){
+      return TryLoadAlignment(filename, dialog.GetSequenceHandler());
     }
     if(dialog.GetSurfaceHandler()){
       return TryLoadSurface(filename,dialog.GetSurfaceHandler());
