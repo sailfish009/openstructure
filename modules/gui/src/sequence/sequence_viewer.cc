@@ -25,12 +25,14 @@
 #include <QAbstractItemView>
 #include <QApplication>
 #include <QClipboard>
+#include <QDir>
 #include <QHeaderView>
 #include <QPushButton>
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QVarLengthArray>
 
+#include <ost/platform.hh>
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/entity_view.hh>
 
@@ -70,27 +72,57 @@ struct GetNodesVisitor: public gfx::GfxNodeVisitor {
   gfx::NodePtrList GetNodes(){return nodes_;}
 };
 
-SequenceViewerV2::SequenceViewerV2(bool listen_scene, QWidget* parent): Widget(NULL,parent)
+SequenceViewerV2::SequenceViewerV2(bool stand_alone, QWidget* parent): Widget(NULL,parent)
 {
-  if(listen_scene){
-    gfx::Scene::Instance().AttachObserver(this);
-  }
   model_ = new SequenceModel(this);
 
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
+  this->setLayout(layout);
 
+  this->InitActions();
+
+  if(!stand_alone){
+    gfx::Scene::Instance().AttachObserver(this);
+    gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
+    GetNodesVisitor gnv;
+    gfx::Scene::Instance().Apply(gnv);
+    gfx::NodePtrList list = gnv.GetNodes();
+    for(unsigned int i=0; i<list.size();i++){
+      this->NodeAdded(list[i]);
+    }
+  }
+  else{
+    this->InitMenuBar();
+  }
+
+  this->InitSearchBar();
+  this->InitView();
+}
+
+void SequenceViewerV2::InitMenuBar()
+{
+  toolbar_ = new QToolBar(this);
+  toolbar_->setToolButtonStyle(Qt::ToolButtonIconOnly);
+  toolbar_->setIconSize(QSize(16,16));
+  toolbar_->addActions(action_list_);
+  layout()->addWidget(toolbar_);
+}
+
+void SequenceViewerV2::InitSearchBar()
+{
   seq_search_bar_ = new SeqSearchBar(this);
   seq_search_bar_->hide();
-  layout->addWidget(seq_search_bar_);
-  QShortcut* shortcut=new QShortcut(QKeySequence(tr("Ctrl+F")), this);
-  connect(shortcut, SIGNAL(activated()), this, SLOT(FindInSequence()));
+  layout()->addWidget(seq_search_bar_);
   connect(seq_search_bar_, SIGNAL(Changed(const QString&, bool, const QString&)), this, SLOT(OnSearchBarUpdate(const QString&, bool, const QString&)));
+}
 
+void SequenceViewerV2::InitView()
+{
   seq_table_view_ = new SequenceTableView(model_);
-  layout->addWidget(seq_table_view_);
-  this->setLayout(layout);
+  layout()->addWidget(seq_table_view_);
+
   connect(model_,SIGNAL(columnsInserted(const QModelIndex&, int, int)),seq_table_view_,SLOT(columnCountChanged(const QModelIndex&, int, int)));
   connect(model_,SIGNAL(rowsInserted(const QModelIndex&, int, int)),seq_table_view_,SLOT(rowCountChanged(const QModelIndex&, int, int)));
 
@@ -103,16 +135,32 @@ SequenceViewerV2::SequenceViewerV2(bool listen_scene, QWidget* parent): Widget(N
   connect(seq_table_view_->GetStaticRow(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
   connect(seq_table_view_,SIGNAL(CopyEvent(QKeyEvent*)),this,SLOT(CopyEvent(QKeyEvent*)));
   connect(seq_table_view_,SIGNAL(MouseWheelEvent(QWheelEvent*)),this,SLOT(MouseWheelEvent(QWheelEvent*)));
+}
 
-  if(listen_scene){
-    gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
-    GetNodesVisitor gnv;
-    gfx::Scene::Instance().Apply(gnv);
-    gfx::NodePtrList list = gnv.GetNodes();
-    for(unsigned int i=0; i<list.size();i++){
-      this->NodeAdded(list[i]);
-    }
-  }
+void SequenceViewerV2::InitActions()
+{
+  QDir icon_path(GetSharedDataPath().c_str());
+  icon_path.cd("gui");
+  icon_path.cd("icons");
+
+  QAction* find_action = new QAction(this);
+  find_action->setText("Find Dialog");
+  find_action->setShortcut(QKeySequence(tr("Ctrl+F")));
+  find_action->setCheckable(true);
+  find_action->setToolTip("Display Find-Dialog (Ctrl+F)");
+  find_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("find_icon.png")));
+  action_list_.append(find_action);
+  connect(find_action, SIGNAL(triggered(bool)), this, SLOT(FindInSequence()));
+
+  display_mode_actions_ = new QActionGroup(this);
+  QAction* menu_action = new QAction(this);
+  menu_action->setText("Menubar");
+  menu_action->setShortcut(QKeySequence(tr("Ctrl+M")));
+  menu_action->setCheckable(true);
+  menu_action->setToolTip("Display Menubar (Ctrl+M)");
+  menu_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("menubar_icon.png")));
+  action_list_.append(menu_action);
+  connect(menu_action, SIGNAL(triggered(bool)), this, SLOT(DisplayMenu()));
 }
 
 void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
@@ -326,6 +374,41 @@ void SequenceViewerV2::ChangeDisplayMode(const gfx::EntityP& entity, const QStri
 {
   model_->SetDisplayMode(entity, string);
   seq_table_view_->viewport()->update();
+}
+
+ActionList SequenceViewerV2::GetActions()
+{
+  return action_list_;
+}
+
+void SequenceViewerV2::DisplayMenu()
+{
+  QMenu* menu = new QMenu();
+  QList<QAction*> actions = display_mode_actions_->actions();
+  for(int i=0;i<actions.size();i++){
+    display_mode_actions_->removeAction(actions[i]);
+  }
+  const QStringList& display_modes = this->GetDisplayModes();
+  for(int i=0; i<display_modes.size(); i++){
+    QString ident(display_modes[i]);
+    QAction* action = new QAction(ident,menu);
+    action->setCheckable(true);
+    connect(action,SIGNAL(triggered(bool)),this,SLOT(ChangeDisplayMode()));
+    display_mode_actions_->addAction(action);
+    if(display_modes[i] == this->GetCurrentDisplayMode() ){
+      action->setChecked(true);
+    }
+    menu->addAction(action);
+  }
+  menu->exec(QCursor::pos());
+}
+
+void SequenceViewerV2::ChangeDisplayMode()
+{
+  QAction* action = display_mode_actions_->checkedAction();
+  if(action){
+    this->ChangeDisplayMode(action->text());
+  }
 }
 
 SequenceViewerV2::~SequenceViewerV2(){

@@ -24,6 +24,8 @@
  */
 
 #include <QWidget>
+#include <QActionGroup>
+#include <QToolBar>
 
 #include <ost/seq/alignment_handle.hh>
 
@@ -44,7 +46,7 @@ namespace ost { namespace gui {
 class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget, public gfx::SceneObserver  {
   Q_OBJECT
 public:
-  SequenceViewerV2(bool listen_scene=true, QWidget* parent=NULL);
+  SequenceViewerV2(bool stand_alone=false, QWidget* parent=NULL);
   ~SequenceViewerV2();
 
   virtual void NodeAdded(const gfx::GfxNodeP& node);
@@ -65,22 +67,34 @@ public:
   virtual const QString& GetCurrentDisplayMode(const seq::AlignmentHandle& alignment);
   virtual const QString& GetCurrentDisplayMode(const gfx::EntityP& entity);
 
+  virtual ActionList GetActions();
+
 public slots:
   void ChangeDisplayMode(const QString&);
   void ChangeDisplayMode(const seq::AlignmentHandle&, const QString&);
   void ChangeDisplayMode(const gfx::EntityP&, const QString&);
+  void DisplayMenu();
   //internal
   void OnSearchBarUpdate(const QString&, bool, const QString&);
 
 private:
+  void InitActions();
+  void InitView();
+  void InitSearchBar();
+  void InitMenuBar();
   void UpdateSearchBar();
   void SelectList(const QModelIndexList& list);
+  QToolBar* toolbar_;
   SeqSearchBar* seq_search_bar_;
   SequenceModel* model_;
   SequenceTableView* seq_table_view_;
 
+  ActionList action_list_;
+
+  QActionGroup* display_mode_actions_;
+
 private slots:
-  /// \brief show sequence search bar
+  void ChangeDisplayMode();
   void FindInSequence();
   void SelectionModelChanged(const QItemSelection&, const QItemSelection&);
   void DoubleClicked(const QModelIndex& index);
