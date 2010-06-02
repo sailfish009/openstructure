@@ -35,6 +35,14 @@ class AlignmentViewObject : public SequenceViewObject
 
 public:
   AlignmentViewObject(const seq::AlignmentHandle& alignment, QObject* parent = 0);
+
+  QVariant GetData(int row, int column, int role);
+
+private:
+  seq::AlignmentHandle alignment_;
+  QMap<int, QColor> conservation_;
+
+  static QMap<QString,int> group_map_;
 };
 
 

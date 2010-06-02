@@ -45,11 +45,11 @@ public:
   int GetRowCount();
   int GetMaxColumnCount() const;
 
-  void SetSelection(int row, const QSet<int>& added, const QSet<int>& removed);
+  virtual void SetSelection(int row, const QSet<int>& added, const QSet<int>& removed);
 
-  QVariant GetData(int row, int column, int role);
-  bool SetData(int row, int column, const QVariant& value, int role);
-  Qt::ItemFlags Flags(int row, int column) const;
+  virtual QVariant GetData(int row, int column, int role);
+  virtual bool SetData(int row, int column, const QVariant& value, int role);
+  virtual Qt::ItemFlags Flags(int row, int column) const;
 
   void DoubleClicked(int row, int column);
   void ZoomIn();

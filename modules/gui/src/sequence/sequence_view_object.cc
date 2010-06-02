@@ -31,6 +31,7 @@
 #include "secstr_row.hh"
 
 #include "align_properties_painter.hh"
+#include "conservation_painter.hh"
 #include "painter.hh"
 #include "background_painter.hh"
 #include "seq_secstr_painter.hh"
@@ -85,9 +86,11 @@ void SequenceViewObject::AddSequence(seq::SequenceHandle& sequence, const QStrin
   new_row->InsertPainter(p);
   p = new AlignPropertiesPainter(this);
   new_row->InsertPainter(p);
-  p = new SeqSelectionPainter(this);
+  p = new ConservationPainter(this);
   new_row->InsertPainter(p);
   p = new SeqTextPainter(this);
+  new_row->InsertPainter(p);
+  p = new SeqSelectionPainter(this);
   new_row->InsertPainter(p);
   rows_.append(new_row);
 }

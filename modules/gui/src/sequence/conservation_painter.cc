@@ -24,22 +24,20 @@
 
 #include <QtGui>
 
-#include "seq_text_painter.hh"
+#include "conservation_painter.hh"
 
 namespace ost { namespace gui {
 
-SeqTextPainter::SeqTextPainter(QObject* parent)
+
+ConservationPainter::ConservationPainter(QObject* parent)
     : Painter(parent)
 {}
 
-void SeqTextPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
+void ConservationPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
   painter->save();
-  painter->setPen(index.data(Qt::ForegroundRole).value<QColor>());
-  QVariant value = index.data(Qt::DisplayRole);
-  if (value.isValid()){
-    QString text = value.toString();
-    painter->setFont(index.data(Qt::FontRole).value<QFont>());
-    painter->drawText(option.rect, Qt::AlignCenter, text);
+  if (index.column()>0){
+    QColor cons = index.data(Qt::UserRole+3).value<QColor>();
+    painter->fillRect(option.rect, cons);
   }
   painter->restore();
 }
