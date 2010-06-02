@@ -29,7 +29,6 @@ from render_options_widget import RenderOptionsWidget
 from color_options_widget import ColorOptionsWidget
 from ost.gui.scene.scene_observer_impl import SceneObserverImpl
 from preset_widget import PresetWidget
-from sequence_widget import SequenceWidget
 
 class InspectorWidget(ToolBarOptionsWidget):
   ICONS_PATH = os.path.join(ost.GetSharedDataPath(), "scene", "icons/")

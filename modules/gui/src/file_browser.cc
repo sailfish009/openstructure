@@ -24,6 +24,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QApplication>
+#include <QUrl>
 
 #include <ost/platform.hh>
 #include <ost/config.hh>
@@ -242,8 +243,7 @@ void FileBrowser::LoadCurrentObject(){
 void FileBrowser::LoadWithSystemEditor(){
   QModelIndex index = view_->selectionModel()->currentIndex();
   QString file_name=model_->filePath(index);
-  std::cout << file_name.toStdString() << std::endl;
-  QDesktopServices::openUrl(file_name);
+  QDesktopServices::openUrl(QUrl::fromLocalFile(file_name));
 }
 
 
