@@ -33,9 +33,6 @@ class SequenceWidget(QtGui.QWidget):
     self.text_ = "Sequences"
     
     self.display_modes_ = QtGui.QComboBox(self);
-    self.display_modes_.addItem("Highlight properties")
-    self.display_modes_.addItem("Secondary structure")
-    self.display_modes_.addItem("Highlight conservation")
     QtCore.QObject.connect(self.display_modes_, QtCore.SIGNAL("activated(int)"), self.__ChangeDisplayMode)
     self.setMinimumSize(250,150)
     
@@ -43,23 +40,53 @@ class SequenceWidget(QtGui.QWidget):
   def Update(self):
     self.display_modes_.setEnabled(True)
     scene_selection = gui.SceneSelection.Instance()
-    
+    seq_viewer = gui.GostyApp.Instance().GetSequenceViewerV2()
+    self.display_modes_.clear()
+          
     if scene_selection.GetActiveNodeCount() == 0 and scene_selection.GetActiveViewCount() == 0:
       self.display_modes_.setEnabled(False)
       return
-        
-    for i in range(0,scene_selection.GetActiveNodeCount()):
-      node = scene_selection.GetActiveNode(i)
-      if not (isinstance(node, gfx.Entity) or (isinstance(node, seq.AlignmentHandle))) :
+    elif scene_selection.GetActiveNodeCount() == 1 and scene_selection.GetActiveViewCount() == 0:
+      node = scene_selection.GetActiveNode(0) 
+      if (isinstance(node, gfx.Entity)) or (isinstance(node, seq.AlignmentHandle)):
+        selected = seq_viewer.GetCurrentDisplayMode(node)
+        modes = seq_viewer.GetDisplayModes(node)
+      elif (isinstance(node,gfx.GfxNode)) and (node.GetName() == "Scene"):
+        selected = seq_viewer.GetCurrentDisplayMode()
+        modes = seq_viewer.GetDisplayModes()
+      else:
         self.display_modes_.setEnabled(self,False)
-        return
+        selected = None
+        modes = list()
+      for m in modes:
+        self.display_modes_.addItem(m)
+      for i in range(0,self.display_modes_.count()):
+        if(selected == self.display_modes_.itemText(i)):
+          self.display_modes_.setCurrentIndex(i)
+    elif scene_selection.GetActiveNodeCount() > 1 and scene_selection.GetActiveViewCount() == 0:
+      for i in range(0,scene_selection.GetActiveNodeCount()):
+        node = scene_selection.GetActiveNode(i)
+        if not (isinstance(node, gfx.Entity) or (isinstance(node, seq.AlignmentHandle))) :
+          self.display_modes_.setEnabled(self,False)
+          return
+      selected = seq_viewer.GetCurrentDisplayMode()
+      modes = seq_viewer.GetDisplayModes()
+      for m in modes:
+        self.display_modes_.addItem(m)
+      for i in range(0,self.display_modes_.count()):
+        if(selected == self.display_modes_.itemText(i)):
+          self.display_modes_.setCurrentIndex(i)
+    else:
+      self.display_modes_.setEnabled(self,False)      
     
-    seq_viewer = gui.GostyApp.Instance().GetSequenceViewerV2()
     
   def __ChangeDisplayMode(self):
     seq_viewer = gui.GostyApp.Instance().GetSequenceViewerV2()
     scene_selection = gui.SceneSelection.Instance()
     for i in range(0,scene_selection.GetActiveNodeCount()):
       node = scene_selection.GetActiveNode(i)
-      seq_viewer.ChangeDisplayMode(node, str(self.display_modes_.currentText()))
+      if (isinstance(node,gfx.GfxNode)) and (node.GetName() == "Scene"):
+        seq_viewer.ChangeDisplayMode(str(self.display_modes_.currentText()))
+      else:
+        seq_viewer.ChangeDisplayMode(node, str(self.display_modes_.currentText()))
     
