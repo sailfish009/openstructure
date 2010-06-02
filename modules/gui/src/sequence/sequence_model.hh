@@ -61,9 +61,11 @@ public:
   int GetGlobalRow(BaseViewObject* obj, int row) const;
 
 
-  const QStringList& GetDisplayModes(gfx::EntityP& entity);
+  const QStringList& GetDisplayModes();
+  const QStringList& GetDisplayModes(const gfx::EntityP& entity);
   const QStringList& GetDisplayModes(const seq::AlignmentHandle& alignment);
-  const QString& GetCurrentDisplayMode(gfx::EntityP& entity);
+  const QString& GetCurrentDisplayMode();
+  const QString& GetCurrentDisplayMode(const gfx::EntityP& entity);
   const QString& GetCurrentDisplayMode(const seq::AlignmentHandle& alignment);
   void SetDisplayMode(const QString& mode);
   void SetDisplayMode(const gfx::EntityP& entity, const QString& mode);
@@ -101,6 +103,8 @@ private:
   PainterList empty_painter_list_;
   QString empty_string_;
   QStringList empty_string_list_;
+  QStringList display_modes_;
+  QString current_display_mode_;
 };
 
 

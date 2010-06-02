@@ -294,7 +294,29 @@ void SequenceModel::DoubleClicked(const QModelIndex& index)
   }
 }
 
-const QStringList& SequenceModel::GetDisplayModes(gfx::EntityP& entity)
+const QStringList& SequenceModel::GetDisplayModes()
+{
+  display_modes_.clear();
+  bool removed = false;
+  for (int i = 0; i<objects_.size(); i++){
+    const QStringList& list = objects_[i]->GetDisplayModes();
+    for(int j=0; j<list.size(); j++){
+      if(i = 0){
+        display_modes_.append(list.at(i));
+      }
+      else if (!display_modes_.contains(list.at(i))){
+        display_modes_.removeAll(list.at(i));
+        removed = true;
+      }
+    }
+  }
+  if(removed){
+    display_modes_.insert(0," ");
+  }
+  return display_modes_;
+}
+
+const QStringList& SequenceModel::GetDisplayModes(const gfx::EntityP& entity)
 {
   BaseViewObject* item = this->GetItem(entity);
   if(item){
@@ -316,7 +338,23 @@ const QStringList& SequenceModel::GetDisplayModes(const seq::AlignmentHandle& al
   }
 }
 
-const QString& SequenceModel::GetCurrentDisplayMode(gfx::EntityP& entity)
+const QString& SequenceModel::GetCurrentDisplayMode()
+{
+  current_display_mode_.clear();
+  for (int i = 0; i<objects_.size(); i++){
+    const QString& mode = objects_[i]->GetCurrentDisplayMode();
+    if(current_display_mode_.isEmpty()){
+      current_display_mode_ = mode;
+    }
+    else if(current_display_mode_ != mode){
+      current_display_mode_ = " ";
+      break;
+    }
+  }
+  return current_display_mode_;
+}
+
+const QString& SequenceModel::GetCurrentDisplayMode(const gfx::EntityP& entity)
 {
   BaseViewObject* item = this->GetItem(entity);
   if(item){

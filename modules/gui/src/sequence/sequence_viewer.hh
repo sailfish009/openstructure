@@ -57,6 +57,14 @@ public:
   virtual bool Restore(const QString&){return true;};
   virtual bool Save(const QString&){return true;};
 
+  virtual const QStringList& GetDisplayModes();
+  virtual const QStringList& GetDisplayModes(const seq::AlignmentHandle& alignment);
+  virtual const QStringList& GetDisplayModes(const gfx::EntityP& entity);
+
+  virtual const QString& GetCurrentDisplayMode();
+  virtual const QString& GetCurrentDisplayMode(const seq::AlignmentHandle& alignment);
+  virtual const QString& GetCurrentDisplayMode(const gfx::EntityP& entity);
+
 public slots:
   void ChangeDisplayMode(const QString&);
   void ChangeDisplayMode(const seq::AlignmentHandle&, const QString&);

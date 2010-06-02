@@ -284,6 +284,32 @@ void SequenceViewerV2::SelectList(const QModelIndexList& list)
   }
 }
 
+const QStringList& SequenceViewerV2::GetDisplayModes()
+{
+  return model_->GetDisplayModes();
+}
+const QStringList& SequenceViewerV2::GetDisplayModes(const seq::AlignmentHandle& alignment)
+{
+  return model_->GetDisplayModes(alignment);
+}
+const QStringList& SequenceViewerV2::GetDisplayModes(const gfx::EntityP& entity)
+{
+  return model_->GetDisplayModes(entity);
+}
+
+const QString& SequenceViewerV2::GetCurrentDisplayMode()
+{
+  return model_->GetCurrentDisplayMode();
+}
+const QString& SequenceViewerV2::GetCurrentDisplayMode(const seq::AlignmentHandle& alignment)
+{
+  return model_->GetCurrentDisplayMode(alignment);
+}
+const QString& SequenceViewerV2::GetCurrentDisplayMode(const gfx::EntityP& entity)
+{
+  return model_->GetCurrentDisplayMode(entity);
+}
+
 void SequenceViewerV2::ChangeDisplayMode(const QString& string)
 {
   model_->SetDisplayMode(string);
