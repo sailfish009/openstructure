@@ -16,7 +16,9 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <QCursor>
 #include <QVBoxLayout>
+#include <QDesktopServices>
 #include <QDir>
 #include <QHeaderView>
 #include <QFileInfo>
@@ -91,6 +93,8 @@ void FileBrowser::Init(const QString& path)
   view_->setModel(model_);
   view_->setRootIndex(model_->index(path));
   view_->setAttribute(Qt::WA_MacShowFocusRect, false);
+  view_->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(view_,SIGNAL(customContextMenuRequested(const QPoint&)),this,SLOT(ShowContextMenu(const QPoint&)));
   menu_= new QComboBox(this);
   UpdateMenu(path);
 
@@ -137,13 +141,7 @@ bool FileBrowser::Restore(const QString& prefix)
 
 void FileBrowser::DoubleClicked(const QModelIndex& index)
 {
-  if(model_->isDir(index)){
-    view_->setRootIndex(index);
-    UpdateMenu(model_->filePath(index));
-  }
-  else{
-    LoadObject(index);
-  }
+  LoadObject(index);
 }
 
 void FileBrowser::ChangeToParentDirectory(int index){
@@ -193,10 +191,15 @@ void FileBrowser::AddItem(const QDir& directory, const QString& mypath){
 }
 
 void FileBrowser::LoadObject(const QModelIndex& index){
-  gfx::GfxObjP obj;
   if (index.isValid()) {
-    QString file_name=model_->filePath(index);
-    FileLoader::LoadObject(file_name);
+    if(model_->isDir(index)){
+      view_->setRootIndex(index);
+      UpdateMenu(model_->filePath(index));
+    }
+    else{
+      QString file_name=model_->filePath(index);
+      FileLoader::LoadObject(file_name);
+    }
   }
 }
 
@@ -205,6 +208,44 @@ void FileBrowser::keyPressEvent(QKeyEvent* event){
     model_->refresh();
   }
 }
+
+void FileBrowser::ShowContextMenu(const QPoint& pos){
+
+  QModelIndex index = view_->selectionModel()->currentIndex();
+  QMenu* menu = new QMenu(this);
+  if(model_->isDir(index)){
+    QAction* open_action = new QAction(menu);
+    open_action->setText("Open");
+    connect(open_action,SIGNAL(triggered(bool)),this,SLOT(LoadCurrentObject()));
+    menu->addAction(open_action);
+  }
+  if(!model_->isDir(index)){
+    QAction* load_action = new QAction(menu);
+    load_action->setText("Load");
+    connect(load_action,SIGNAL(triggered(bool)),this,SLOT(LoadCurrentObject()));
+    menu->addAction(load_action);
+    QAction* system_open_action = new QAction(menu);
+    system_open_action->setText("Open with system editor");
+    connect(system_open_action,SIGNAL(triggered(bool)),this,SLOT(LoadWithSystemEditor()));
+    menu->addAction(system_open_action);
+  }
+  if(menu->actions().size()>0){
+    menu->exec(QCursor::pos());
+  }
+}
+
+void FileBrowser::LoadCurrentObject(){
+  QModelIndex index = view_->selectionModel()->currentIndex();
+  this->LoadObject(index);
+}
+
+void FileBrowser::LoadWithSystemEditor(){
+  QModelIndex index = view_->selectionModel()->currentIndex();
+  QString file_name=model_->filePath(index);
+  std::cout << file_name.toStdString() << std::endl;
+  QDesktopServices::openUrl(file_name);
+}
+
 
 OST_REGISTER_WIDGET_WITH_DEFAULT_FACTORY(ost::gui, FileBrowser, "File Browser");  
 
