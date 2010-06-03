@@ -40,10 +40,10 @@ SequenceModel::SequenceModel(QObject *parent)
 {
   this->beginInsertRows(QModelIndex(),this->rowCount(),this->rowCount());
   BaseViewObject* title = new BaseViewObject(this);
-  TitleRow* title_row = new TitleRow(this);
-  Painter* p = new BackgroundPainter(this);
+  TitleRow* title_row = new TitleRow(title);
+  Painter* p = new BackgroundPainter(title_row);
   title_row->InsertPainter(p);
-  p = new TickPainter(this);
+  p = new TickPainter(title_row);
   title_row->InsertPainter(p);
   title->InsertRow(0,title_row);
   objects_.append(title);

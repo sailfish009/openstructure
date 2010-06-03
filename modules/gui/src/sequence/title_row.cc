@@ -77,10 +77,11 @@ Qt::ItemFlags TitleRow::Flags(int column) const
 void TitleRow::DoubleClicked(int column)
 {
  if(this->parent()){
-   SequenceModel* model = qobject_cast<SequenceModel*>(this->parent()->parent());
-   int rows = model->rowCount()-1;
-   QItemSelection add = QItemSelection(model->index(1,column),model->index(rows,column));
-   model->SelectionChanged(add,QItemSelection());
+   if(SequenceModel* model = qobject_cast<SequenceModel*>(this->parent()->parent())){
+     int rows = model->rowCount()-1;
+     QItemSelection add = QItemSelection(model->index(1,column),model->index(rows,column));
+     model->SelectionChanged(add,QItemSelection());
+   }
  }
 }
 
