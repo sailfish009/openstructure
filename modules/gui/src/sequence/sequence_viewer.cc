@@ -83,6 +83,13 @@ SequenceViewerV2::SequenceViewerV2(bool stand_alone, QWidget* parent): Widget(NU
 
   this->InitActions();
 
+
+  if(stand_alone){
+    this->InitMenuBar();
+  }
+  this->InitSearchBar();
+  this->InitView();
+
   if(!stand_alone){
     gfx::Scene::Instance().AttachObserver(this);
     gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
@@ -93,12 +100,6 @@ SequenceViewerV2::SequenceViewerV2(bool stand_alone, QWidget* parent): Widget(NU
       this->NodeAdded(list[i]);
     }
   }
-  else{
-    this->InitMenuBar();
-  }
-
-  this->InitSearchBar();
-  this->InitView();
 }
 
 void SequenceViewerV2::InitMenuBar()
