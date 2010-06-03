@@ -10,7 +10,7 @@ This document describes the :class:`EntityHandle` and related classes.
 
    Creates a new entity. The created entity is empty, that is, it does not
    contain any atoms, residues, chains, bonds or torsions. To populate the
-   entity, create a new editor.
+   entity, use an :ref:`editor`.
    
    :returns: The newly created :class:`EntityHandle`
    

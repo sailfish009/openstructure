@@ -2,7 +2,13 @@ OpenStructure documentation
 ================================================================================
 
 .. toctree::
-
-  geom/doc/geom
-  conop/doc/conop
-  mol/base/doc/mol
+  :maxdepth: 2
+  
+  intro
+  install.rst
+  img/base/img
+  img/alg/alg
+  geom/geom
+  conop/conop
+  mol/base/mol
+  seq/base/seq
