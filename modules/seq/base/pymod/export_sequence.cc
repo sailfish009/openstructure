@@ -315,6 +315,7 @@ void export_sequence()
     .def("GetIndex", &AlignedColumn::GetIndex)
     .def("__getitem__", &AlignedColumn::operator[])
     .def("GetRowCount", &AlignedColumn::GetRowCount)
+    .def("GetResidue", &AlignedColumn::GetResidue)
     .def(self_ns::str(self))
   ;
   class_<AlignedRegion>("AlignedRegion", no_init)

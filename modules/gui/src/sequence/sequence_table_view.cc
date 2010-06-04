@@ -66,12 +66,15 @@ SequenceTableView::SequenceTableView(QAbstractItemModel * model)
 
   delegate_ = new SequenceDelegate(qobject_cast<SequenceModel*>(this->model()),this);
 
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))
+  std::cout << "INIT STATIC" << QT_VERSION << std::endl;
   this->InitStaticRow();
   this->InitStaticColumn();
   this->InitStaticField();
   this->viewport()->stackUnder(static_field_);
   this->viewport()->stackUnder(static_column_);
   this->viewport()->stackUnder(static_row_);
+#endif
  }
 
 void SequenceTableView::InitStaticColumn()
@@ -187,7 +190,8 @@ void SequenceTableView::InitStaticField(){
   this->updateStaticField();
 }
 void SequenceTableView::ResizeWidth(int index, int, int size)
-{
+{ 
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))  
   if(index == 0){
     static_column_->setColumnWidth(0,size);
     static_field_->setColumnWidth(0,size);
@@ -195,10 +199,12 @@ void SequenceTableView::ResizeWidth(int index, int, int size)
     this->updateStaticField();
   }
   static_row_->setRowHeight(index,size);
+#endif  
 }
 
 void SequenceTableView::ResizeHeight(int index, int, int size)
 {
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))
   static_column_->setRowHeight(index, size);
   if(index == 0){
     static_row_->setRowHeight(0,size);
@@ -206,14 +212,17 @@ void SequenceTableView::ResizeHeight(int index, int, int size)
     this->updateStaticRow();
     this->updateStaticField();
   }
+#endif
 }
 
 void SequenceTableView::resizeEvent(QResizeEvent * event)
 {
   QTableView::resizeEvent(event);
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))
   this->updateStaticColumn();
   this->updateStaticRow();
   this->updateStaticField();
+#endif  
 }
 
 QModelIndex SequenceTableView::moveCursor(CursorAction action, Qt::KeyboardModifiers modifiers)
@@ -237,9 +246,13 @@ QModelIndex SequenceTableView::moveCursor(CursorAction action, Qt::KeyboardModif
 }
 
 void SequenceTableView::scrollTo(const QModelIndex & index, ScrollHint hint){
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))
   if(index.column()>0 && index.row()>0){
     QTableView::scrollTo(index, hint);
   }
+#else
+  QTableView::scrollTo(index, hint);
+#endif
 }
 
 void SequenceTableView::updateStaticColumn()
@@ -268,18 +281,23 @@ void SequenceTableView::updateStaticField(){
 }
 
 void SequenceTableView::columnCountChanged(const QModelIndex& index, int old_count, int new_count){
-  if(old_count >= 0 && old_count <= new_count){
+  if(old_count >= 0 && old_count <= new_count) {
+  
     if(old_count == 0)old_count = 1;
     for(int col=old_count; col<=new_count; col++){
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))        
       static_column_->setColumnHidden(col, true);
       static_field_->setColumnHidden(col,true);
+#endif          
       this->setItemDelegateForColumn(col, delegate_);
     }
+
   }
 }
 
 void SequenceTableView::rowCountChanged(const QModelIndex& index, int old_count, int new_count){
   if(old_count >= 0 && old_count <= new_count){
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))    
     if(old_count == 0){
       old_count = 1;
     }
@@ -287,23 +305,28 @@ void SequenceTableView::rowCountChanged(const QModelIndex& index, int old_count,
       static_row_->setRowHidden(row, true);
       static_field_->setRowHidden(row,true);
     }
+#endif
   }
 }
 
 
 void SequenceTableView::resizeColumnsToContents(){
   QTableView::resizeColumnsToContents();
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))    
   static_column_->setColumnWidth(0,this->columnWidth(0));
   static_field_->setColumnWidth(0,this->columnWidth(0));
   for(int i = 0; i < this->model()->columnCount(); i++){
     static_row_->setColumnWidth(i,this->columnWidth(i));
   }
+
   this->updateStaticColumn();
   this->updateStaticField();
+#endif  
 }
 
 void SequenceTableView::resizeRowsToContents(){
   QTableView::resizeRowsToContents();
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))
   static_row_->setRowHeight(0,this->rowHeight(0));
   static_field_->setRowHeight(0,this->rowHeight(0));
   for(int i = 0; i < this->model()->columnCount(); i++){
@@ -311,17 +334,21 @@ void SequenceTableView::resizeRowsToContents(){
   }
   this->updateStaticRow();
   this->updateStaticField();
+#endif  
 }
 
-QTableView* SequenceTableView::GetStaticRow(){
+QTableView* SequenceTableView::GetStaticRow()
+{
   return static_row_;
 }
 
-QTableView* SequenceTableView::GetStaticColumn(){
+QTableView* SequenceTableView::GetStaticColumn()
+{
   return static_column_;
 }
 
-QTableView* SequenceTableView::GetStaticField(){
+QTableView* SequenceTableView::GetStaticField()
+{
   return static_field_;
 }
 
