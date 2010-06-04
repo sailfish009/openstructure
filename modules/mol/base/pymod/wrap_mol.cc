@@ -41,6 +41,7 @@ void export_CoordGroup();
 void export_PropertyID();
 void export_BoundingBox();
 void export_QueryViewWrapper();
+void export_EntityPropertyMapper();
 BOOST_PYTHON_MODULE(_mol)
 {
   export_Entity();
@@ -61,7 +62,7 @@ BOOST_PYTHON_MODULE(_mol)
   export_PropertyID();  
   export_BoundingBox();
   export_QueryViewWrapper();
-
+  export_EntityPropertyMapper();
   class_<Transform>("Transform", init<>())
     .def("GetMatrix",&Transform::GetMatrix)
     .def("GetTransposedMatrix",&Transform::GetTransposedMatrix)

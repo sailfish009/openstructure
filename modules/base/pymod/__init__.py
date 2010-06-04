@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 from _base import *
+from stutil import *
 
 from ost import geom
 from ost import io

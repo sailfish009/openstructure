@@ -18,6 +18,7 @@ export_query_view_wrapper.cc
 export_torsion.cc
 export_visitor.cc
 wrap_mol.cc
+export_entity_property_mapper.cc
 )
 
 pymod(NAME mol CPP ${OST_BASE_PYMOD_SOURCES} PY __init__.py)
