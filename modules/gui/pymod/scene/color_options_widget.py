@@ -90,16 +90,18 @@ class ColorOptionsWidget(ComboOptionsWidget):
       if (not _img_present) or (not isinstance(node, gfx.MapIso)):
         all_img = False
     
-    if not all_entity and not all_img:
-      ComboOptionsWidget.setEnabled(self,False)
-      return
-    if all_img:
+    if all_img and (not all_entity):
       for w in self.img_widgets_:
         self.AddWidget(w[0], w[1])
-    if all_entity:
+    elif all_entity and (not all_img):
       for w in self.entity_widgets_:
         self.AddWidget(w[0], w[1])
-  
+    else:
+      ComboOptionsWidget.setEnabled(self,False)
+      return
+    
+    self.GetCurrentWidget().Update()
+    
   def GetText(self):
     return self.text_
   
