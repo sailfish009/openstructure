@@ -25,6 +25,7 @@
 #include <ost/profile.hh>
 #include <ost/base.hh>
 #include <ost/img/alg/discrete_shrink.hh>
+#include <ost/img/alg/histogram.hh>
 
 #include "gl_helper.hh"
 #include "glext_include.hh"
@@ -65,6 +66,8 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
   mh_(MapIso::DownsampleMap(mh)),
   octree_(mh_),
   stat_calculated_(false),
+  histogram_calculated_(false),
+  histogram_bin_count_(100),
   level_(level),
   normals_calculated_(false),
   alg_(0),
@@ -95,6 +98,9 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   downsampled_mh_(),
   mh_(MapIso::DownsampleMap(mh)),
   octree_(mh_),
+  stat_calculated_(false),
+  histogram_calculated_(false),
+  histogram_bin_count_(100),
   level_(level),
   normals_calculated_(false),
   alg_(a),
@@ -308,6 +314,13 @@ void MapIso::CalculateStat() const
   stat_calculated_=true;
 }
 
+void MapIso::CalculateHistogram() const
+{
+  histogram_ = img::alg::HistogramBase(histogram_bin_count_, this->GetMinLevel(), this->GetMaxLevel());
+  mh_.ApplyIP(histogram_);
+  histogram_calculated_=true;
+}
+
 float MapIso::GetMinLevel() const
 {
   if(!stat_calculated_)CalculateStat();
@@ -329,6 +342,25 @@ float MapIso::GetStdDev() const
 {
   if(!stat_calculated_)CalculateStat();
   return stat_.GetStandardDeviation();
+}
+
+void MapIso::SetHistogramBinCount(int count)
+{
+  if (count > 0){
+    histogram_bin_count_ = count;
+    histogram_calculated_ = false;
+  }
+}
+
+int MapIso::GetHistogramBinCount() const
+{
+  return histogram_bin_count_;
+}
+
+std::vector<int> MapIso::GetHistogram() const
+{
+  if(!histogram_calculated_)CalculateHistogram();
+  return histogram_.GetBins();
 }
 
 img::ImageHandle& MapIso::GetMap()
@@ -365,6 +397,7 @@ void MapIso::ShowDownsampledMap()
   if (downsampled_mh_.IsValid()) mh_ = downsampled_mh_;
   MakeOctreeDirty();
   stat_calculated_ = false;
+  histogram_calculated_ = false;
   Rebuild();
   Scene::Instance().RequestRedraw();
 }
@@ -375,6 +408,7 @@ void MapIso::ShowOriginalMap()
   if (original_mh_.IsValid()) mh_ = original_mh_;
   MakeOctreeDirty();
   stat_calculated_ = false;
+  histogram_calculated_ = false;
   Rebuild();
   Scene::Instance().RequestRedraw();
 }

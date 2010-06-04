@@ -44,5 +44,9 @@ BOOST_PYTHON_MODULE(_base)
   ;
   class_<std::vector<String> >("StringList", init<>())
     .def(vector_indexing_suite<std::vector<String> >())
-  ;  
+  ;
+  typedef std::vector<int> IntList;
+  class_<std::vector<int> >("IntList", init<>())
+    .def(vector_indexing_suite<std::vector<int> >())
+  ;
 }

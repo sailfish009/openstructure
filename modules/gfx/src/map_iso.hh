@@ -27,6 +27,7 @@
 
 #include <ost/img/map.hh>
 #include <ost/img/alg/stat.hh>
+#include <ost/img/alg/histogram.hh>
 
 #include <ost/gfx/impl/map_octree.hh>
 #include "gfx_object.hh"
@@ -86,6 +87,16 @@ public:
   /// \brief get std dev of map.
   float GetStdDev() const;
   
+
+  /// \brief get histogram
+  std::vector<int> GetHistogram() const;
+
+  /// \brief set Histogram bin count
+  void SetHistogramBinCount(int count);
+
+  /// \brief get Histogram bin count
+  int GetHistogramBinCount() const;
+
   /// \brief get the map handle of the currently displayed map
   // The following is a hack. For the DataViewer I need to pass a reference to an ImagHandle
   // that never goes out of scope, so I get a reference from here
@@ -136,27 +147,31 @@ public:
 
 protected:
   void CalculateStat() const;
+  void CalculateHistogram() const;
   virtual void CustomPreRenderGL(bool flag);
   static img::ImageHandle DownsampleMap(const img::ImageHandle& mh);
 
 private:
-  img::MapHandle   original_mh_;
-  img::MapHandle   downsampled_mh_;
-  img::MapHandle   mh_;
-  impl::MapOctree  octree_;
+  img::MapHandle           original_mh_;
+  img::MapHandle           downsampled_mh_;
+  img::MapHandle           mh_;
+  impl::MapOctree          octree_;
   mutable img::alg::Stat   stat_;
   mutable bool             stat_calculated_;
-  float            level_;
-  bool             normals_calculated_;
-  uint             alg_;
-  float            smoothf_;
-  float            min_;
-  float            max_;
-  float            std_dev_;
-  float            min_max_;
-  bool             debug_octree_;
-  Color            color_; 
-  bool             dirty_octree_;
+  mutable img::alg::Histogram   histogram_;
+  mutable bool             histogram_calculated_;
+  int                      histogram_bin_count_;
+  float                    level_;
+  bool                     normals_calculated_;
+  uint                     alg_;
+  float                    smoothf_;
+  float                    min_;
+  float                    max_;
+  float                    std_dev_;
+  float                    min_max_;
+  bool                     debug_octree_;
+  Color                    color_;
+  bool                     dirty_octree_;
 };
 
 }}
