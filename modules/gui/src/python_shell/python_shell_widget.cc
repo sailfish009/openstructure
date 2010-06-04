@@ -642,11 +642,13 @@ void PythonShellWidget::insertFromMimeData(const QMimeData * source)
     lines[i]=QString(num_spaces, '\t')+right;
   }
   text=lines.join(QString(1, QChar::LineSeparator));
-  int line_sep=text.count(QChar::LineSeparator);
-  if(line_sep>0){
+  if(lines.size()>0){
     machine_->setActive(multiline_active_state_);
   }
   QPlainTextEdit::insertFromMimeData(source);
+  if(lines.size()>0){
+    set_block_type_(block_edit_start_,document()->lastBlock(),BLOCKTYPE_BLOCKEDIT);
+  }
 }
 
 GutterBlockList PythonShellWidget::GetGutterBlocks(const QRect& rect)
