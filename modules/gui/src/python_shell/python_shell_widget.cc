@@ -612,6 +612,7 @@ QString PythonShellWidget::GetCommand()
   QTextCursor cursor(block_edit_start_);
   cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
   QString text= cursor.selectedText();
+  text.replace(QChar::LineSeparator,"\n");
   text.replace(QChar::ParagraphSeparator,"\n");
   return text;
 }
