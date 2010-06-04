@@ -52,7 +52,7 @@ SceneWin::SceneWin(QWidget* parent) :
   view_ = new QTreeView(this);
   context_menu_ = new ContextMenu(view_,model_);
   view_->setAttribute(Qt::WA_MacShowFocusRect, false);
-  view_->setAttribute(Qt::WA_MacMiniSize, true);
+  view_->setAttribute(Qt::WA_MacSmallSize, true);
   view_->header()->hide();
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
   view_->setModel(model_);
