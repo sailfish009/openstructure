@@ -24,7 +24,6 @@
 #include <ost/profile.hh>
 #include <ost/profile.hh>
 #include <ost/base.hh>
-#include <ost/img/alg/stat.hh>
 #include <ost/img/alg/discrete_shrink.hh>
 
 #include "gl_helper.hh"
@@ -65,6 +64,7 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
   downsampled_mh_(),
   mh_(MapIso::DownsampleMap(mh)),
   octree_(mh_),
+  stat_calculated_(false),
   level_(level),
   normals_calculated_(false),
   alg_(0),
@@ -302,6 +302,24 @@ void MapIso::SetLevel(float l)
   Scene::Instance().RequestRedraw();
 }
 
+void MapIso::CalculateStat() const
+{
+  mh_.ApplyIP(stat_);
+  stat_calculated_=true;
+}
+
+float MapIso::GetMinLevel() const
+{
+  if(!stat_calculated_)CalculateStat();
+  return stat_.GetMinimum();
+}
+
+float MapIso::GetMaxLevel() const
+{
+  if(!stat_calculated_)CalculateStat();
+  return stat_.GetMaximum();
+}
+
 float MapIso::GetLevel() const
 {
   return level_;
@@ -309,9 +327,8 @@ float MapIso::GetLevel() const
 
 float MapIso::GetStdDev() const
 {
-  img::alg::Stat stat;
-  mh_.Apply(stat);
-  return stat.GetStandardDeviation();
+  if(!stat_calculated_)CalculateStat();
+  return stat_.GetStandardDeviation();
 }
 
 img::ImageHandle& MapIso::GetMap()
@@ -331,9 +348,8 @@ img::ImageHandle& MapIso::GetDownsampledMap()
 
 float MapIso::GetMean() const
 {
-  img::alg::Stat stat;
-  mh_.Apply(stat);
-  return static_cast<float>(stat.GetMean());
+  if(!stat_calculated_)CalculateStat();
+  return static_cast<float>(stat_.GetMean());
 }
 
 void MapIso::SetNSF(float nsf)
@@ -348,6 +364,7 @@ void MapIso::ShowDownsampledMap()
 {
   if (downsampled_mh_.IsValid()) mh_ = downsampled_mh_;
   MakeOctreeDirty();
+  stat_calculated_ = false;
   Rebuild();
   Scene::Instance().RequestRedraw();
 }
@@ -357,6 +374,7 @@ void MapIso::ShowOriginalMap()
 {
   if (original_mh_.IsValid()) mh_ = original_mh_;
   MakeOctreeDirty();
+  stat_calculated_ = false;
   Rebuild();
   Scene::Instance().RequestRedraw();
 }

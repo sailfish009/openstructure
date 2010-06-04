@@ -26,6 +26,8 @@
 #include <boost/shared_ptr.hpp>
 
 #include <ost/img/map.hh>
+#include <ost/img/alg/stat.hh>
+
 #include <ost/gfx/impl/map_octree.hh>
 #include "gfx_object.hh"
 #include "map_iso_prop.hh"
@@ -72,6 +74,9 @@ public:
   /// Will force rebuild of the vertex buffers/indices
   void SetLevel(float l);
   
+  float GetMinLevel() const;
+  float GetMaxLevel() const;
+
   /// \brief get current isocontouring level
   float GetLevel() const;
 
@@ -130,6 +135,7 @@ public:
   bool IfOctreeDirty() const;
 
 protected:
+  void CalculateStat() const;
   virtual void CustomPreRenderGL(bool flag);
   static img::ImageHandle DownsampleMap(const img::ImageHandle& mh);
 
@@ -138,6 +144,8 @@ private:
   img::MapHandle   downsampled_mh_;
   img::MapHandle   mh_;
   impl::MapOctree  octree_;
+  mutable img::alg::Stat   stat_;
+  mutable bool             stat_calculated_;
   float            level_;
   bool             normals_calculated_;
   uint             alg_;
