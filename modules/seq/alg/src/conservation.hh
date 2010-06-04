@@ -16,33 +16,28 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <vector>
 
-#include <boost/python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <ost/base.hh>
-#include <ost/platform.hh>
+#include <ost/seq/alignment_handle.hh>
+#include <ost/seq/alg/module_config.hh>
 
-using namespace boost::python;
+/*
+  Authors: Marco Biasini
+ */
+namespace ost { namespace seq { namespace alg {
 
-void export_Logger();
-void export_GenericProp();
-void export_Range();
-void export_Units();
+/// \brief Calculates conservation scores for each column in the alignment. 
+/// 
+/// The conservation score is a value between 0 and 1. The bigger the number 
+/// the more conserved the aligned residues are. 
+/// 
+/// \p assign If true, the conservation scores are assigned to attached 
+///     residues. The name of the property can be changed with the prop_name 
+///     parameter. Useful when coloring entities based on sequence conservation.
+/// \p prop_name The property name for assigning the conservation to 
+///     attached residues. Defaults to 'cons'.
+/// 
+std::vector<Real> DLLEXPORT_OST_SEQ_ALG Conservation(const AlignmentHandle& aln,
+                                             bool assign=true,
+                                             const String& prop_name="cons");
+}}}
 
-BOOST_PYTHON_MODULE(_base)
-{
-  def("SetPrefixPath", &ost::SetPrefixPath);
-  def("GetPrefixPath", &ost::GetPrefixPath);
-  def("GetSharedDataPath", &ost::GetSharedDataPath);  
-  export_Logger();
-  export_Range();
-  export_Units();
-  typedef std::vector<float> FloatList;
-  class_<FloatList>("FloatList", init<>())
-    .def(vector_indexing_suite<FloatList>())
-  ;
-  class_<std::vector<String> >("StringList", init<>())
-    .def(vector_indexing_suite<std::vector<String> >())
-  ;  
-}
