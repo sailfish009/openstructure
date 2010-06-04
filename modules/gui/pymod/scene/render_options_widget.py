@@ -23,6 +23,7 @@ from ost import gui
 from ost import gfx
 try: 
   from ost import img
+  from wireframe_widget import WireframeWidget
   _img_present=True
 except ImportError:
   _img_present=False
@@ -69,7 +70,7 @@ class RenderOptionsWidget(ComboOptionsWidget):
 
     self.img_widgets_ = list()
     self.img_widgets_.append(["", EmptyMode()])
-    self.img_widgets_.append([gfx.RenderMode.SIMPLE, EmptyMode("Wireframe",gfx.RenderMode.SIMPLE)])
+    self.img_widgets_.append([gfx.RenderMode.SIMPLE, WireframeWidget()])
     self.img_widgets_.append([gfx.RenderMode.FILL, EmptyMode("Fill",gfx.RenderMode.FILL)])
 
     self.setMinimumSize(250,200)
