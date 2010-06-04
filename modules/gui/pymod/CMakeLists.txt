@@ -35,6 +35,7 @@ immutable_gradient_info_handler.py
 immutable_preset_info_handler.py
 init_inspector.py
 inspector_widget.py
+map_level_widget.py
 preset.py
 preset_editor_list_model.py
 preset_editor_widget.py
