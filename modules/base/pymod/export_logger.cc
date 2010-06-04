@@ -39,7 +39,7 @@ void pop_verb()
   Logger::Instance().PopVerbosityLevel();
 }
 
-void log_error(const String& m) {LOGN_MESSAGE(m);}
+void log_error(const String& m) {LOGN_ERROR(m);}
 void log_message(const String& m) {LOGN_MESSAGE(m);}
 void log_verbose(const String& m) {LOGN_VERBOSE(m);}
 void log_debug(const String& m) {LOGN_DEBUG(m);}
