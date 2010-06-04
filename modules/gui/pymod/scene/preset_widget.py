@@ -67,7 +67,7 @@ class PresetWidget(QtGui.QWidget):
   
     QtCore.QObject.connect(self.list_view_, QtCore.SIGNAL("doubleClicked(const QModelIndex)"), self.Load)
     
-    self.setMinimumSize(250,150)
+    self.setMinimumSize(250,200)
     
   def CreateImmutableContextMenu(self):  
     self.immucontext_menu_ = QtGui.QMenu("Context menu", self)

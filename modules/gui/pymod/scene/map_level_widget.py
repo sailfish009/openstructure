@@ -28,6 +28,48 @@ except ImportError:
   pass
 from PyQt4 import QtCore, QtGui
 
+from preset_widget import PresetWidget
+
+class AdditionalSettingsWidget(QtGui.QWidget):
+  def __init__(self, parent=None):
+    QtGui.QWidget.__init__(self, parent)
+    self.stack = QtGui.QStackedWidget(self);
+    self.map_widget_ = MapLevelWidget(self)
+    self.setContentsMargins(0,0,0,0)
+    self.preset_widget_ = PresetWidget(self)
+    self.stack.addWidget(self.map_widget_);
+    self.stack.addWidget(self.preset_widget_);
+    self.stack.setContentsMargins(0,0,0,0)
+    self.setMinimumSize(self.preset_widget_.minimumSize())
+    
+  def Update(self):
+    self.setEnabled(True)
+    scene_selection = gui.SceneSelection.Instance()
+    all_img = True
+    all_entity = True
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      node = scene_selection.GetActiveNode(i)
+      if not (isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface)):
+        all_entity = False
+      if (not _img_present) or (not isinstance(node, gfx.MapIso)):
+        all_img = False
+    if all_img:
+      self.map_widget_.Update()
+      self.setMinimumSize(self.map_widget_.minimumSize())
+      self.resize(self.map_widget_.minimumSize())
+      self.stack.resize(self.map_widget_.minimumSize())
+      self.stack.setMinimumSize(self.map_widget_.minimumSize())
+      self.stack.setCurrentWidget(self.map_widget_)
+    elif all_entity:
+      self.preset_widget_.Update()
+      self.setMinimumSize(self.preset_widget_.minimumSize())
+      self.resize(self.preset_widget_.minimumSize())
+      self.stack.resize(self.preset_widget_.minimumSize())
+      self.stack.setMinimumSize(self.preset_widget_.minimumSize())
+      self.stack.setCurrentWidget(self.preset_widget_)
+    else:
+      self.setEnabled(False)
+    
 #Map Level Widget
 class MapLevelWidget(QtGui.QWidget):
   def __init__(self, parent=None):
@@ -56,7 +98,7 @@ class MapLevelWidget(QtGui.QWidget):
     QtCore.QObject.connect(self.level_preview_, QtCore.SIGNAL("levelModified"), self.ModifySpinBox)
     QtCore.QObject.connect(self.level_spinbox_, QtCore.SIGNAL("valueChanged(double)"), self.UpdateLevel)
 
-    self.setMinimumSize(250,300)
+    self.setMinimumSize(250,200)
         
   def Update(self):
     scene_selection = gui.SceneSelection.Instance()
@@ -93,7 +135,7 @@ class LevelPreview(QtGui.QWidget):
     
     #Defaults
     self.border_offset_ = 3
-    self.preview_height_ = 100
+    self.preview_height_ = 150
     QtGui.QWidget.__init__(self, parent)
     
     #Ui

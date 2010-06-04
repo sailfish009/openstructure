@@ -28,8 +28,7 @@ from toolbar_options_widget import ToolBarOptionsWidget
 from render_options_widget import RenderOptionsWidget
 from color_options_widget import ColorOptionsWidget
 from ost.gui.scene.scene_observer_impl import SceneObserverImpl
-from preset_widget import PresetWidget
-from map_level_widget import MapLevelWidget
+from map_level_widget import AdditionalSettingsWidget
 
 class InspectorWidget(ToolBarOptionsWidget):
   ICONS_PATH = os.path.join(ost.GetSharedDataPath(), "scene", "icons/")
@@ -39,8 +38,7 @@ class InspectorWidget(ToolBarOptionsWidget):
     options = [
                 [InspectorWidget.ICONS_PATH+"render_icon.png",RenderOptionsWidget(self),None], 
                 [InspectorWidget.ICONS_PATH+"color_icon.png",ColorOptionsWidget(self),None],
-                [InspectorWidget.ICONS_PATH+"preset_icon.png", PresetWidget(self),None],
-                [InspectorWidget.ICONS_PATH+"preset_icon.png", MapLevelWidget(self),"Map Level Options"],
+                [InspectorWidget.ICONS_PATH+"preset_icon.png", AdditionalSettingsWidget(self),"Additional Node Settings"],
                 [InspectorWidget.ICONS_PATH+"tool_icon.png",app.tool_options_win.qobject,"Tool Options"]
               ]
     for o in options:
