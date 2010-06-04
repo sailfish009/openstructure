@@ -22,6 +22,13 @@ import sys
 from ost import mol
 from ost import gui
 from ost import gfx
+try: 
+  from ost import img
+  _img_present=True
+except ImportError:
+  _img_present=False
+  pass
+
 from PyQt4 import QtCore, QtGui
 from gradient_editor_widget import GradientEditor
 from uniform_color_widget import UniformColorWidget
@@ -35,11 +42,15 @@ class ColorOptionsWidget(ComboOptionsWidget):
     self.text_ = "Color Options"
     
     #Add options to menu
-    self.AddWidget("Color by Element", ByElementWidget("Color by Element"))
-    self.AddWidget("Color by Chain", ByChainWidget("Color by Chain"))
-    self.AddWidget("Color by Property", GradientEditor(self))
-    self.AddWidget("Uniform",UniformColorWidget(self))
+    self.entity_widgets_ = list()
+    self.entity_widgets_.append(["Color by Element", ByElementWidget("Color by Element")])
+    self.entity_widgets_.append(["Color by Chain", ByChainWidget("Color by Chain")])
+    self.entity_widgets_.append(["Color by Property", GradientEditor()])
+    self.entity_widgets_.append(["Uniform",UniformColorWidget()])
   
+    self.img_widgets_ = list()
+    self.img_widgets_.append(["Uniform",UniformColorWidget()])
+
     self.setMinimumSize(250,200)
     
   def DoSomething(self, item):
@@ -57,19 +68,38 @@ class ColorOptionsWidget(ComboOptionsWidget):
     
     
   def Update(self):
+    
     ComboOptionsWidget.setEnabled(self,True)
     scene_selection = gui.SceneSelection.Instance()
     
     if scene_selection.GetActiveNodeCount() == 0 and scene_selection.GetActiveViewCount() == 0:
       ComboOptionsWidget.setEnabled(self,False)
       return
-        
+    
+    for w in self.entity_widgets_:
+      self.RemoveWidget(w[0])
+    for w in self.img_widgets_:
+      self.RemoveWidget(w[0])
+    
+    all_entity = True
+    all_img = True
     for i in range(0,scene_selection.GetActiveNodeCount()):
       node = scene_selection.GetActiveNode(i)
       if not (isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface)):
-        ComboOptionsWidget.setEnabled(self,False)
-        return
-
+        all_entity = False
+      if (not _img_present) or (not isinstance(node, gfx.MapIso)):
+        all_img = False
+    
+    if not all_entity and not all_img:
+      ComboOptionsWidget.setEnabled(self,False)
+      return
+    if all_img:
+      for w in self.img_widgets_:
+        self.AddWidget(w[0], w[1])
+    if all_entity:
+      for w in self.entity_widgets_:
+        self.AddWidget(w[0], w[1])
+  
   def GetText(self):
     return self.text_
   

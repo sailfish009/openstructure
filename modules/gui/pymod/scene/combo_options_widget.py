@@ -81,7 +81,7 @@ class ComboOptionsWidget(QtGui.QWidget):
   def RemoveWidget(self,ident):
     index = self.__GetIndex(ident)
     if(index >= 0):
-      self.stacked_widget_.removeWidget(self.combo_box_.itemData().toPyObject()[1])
+      self.stacked_widget_.removeWidget(self.combo_box_.itemData(index).toPyObject()[1])
       self.combo_box_.removeItem(index)
   
   def DoSomething(self, item):
@@ -127,7 +127,7 @@ class ComboOptionsWidget(QtGui.QWidget):
   def __GetIndex(self, ident):
     for i in range(self.combo_box_.count()):
       pair = self.combo_box_.itemData(i).toPyObject()
-      if ident == pair[0] and i != self.combo_box_.currentIndex():
+      if ident == pair[0]:
         return i
     return -1
   

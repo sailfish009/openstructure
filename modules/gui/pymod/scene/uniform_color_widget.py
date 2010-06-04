@@ -21,6 +21,12 @@
 from ost import gui
 from ost import gfx
 from ost import mol
+try: 
+  from ost import img
+  _img_present=True
+except ImportError:
+  _img_present=False
+  pass
 from PyQt4 import QtCore, QtGui
 from color_select_widget import ColorSelectWidget
 
@@ -68,10 +74,12 @@ class UniformColorWidget(QtGui.QWidget):
       self.ChangeViewColor(entity,view)
         
   def ChangeColor(self, node):
+    gfx_color = self.GetGfxColor()
     if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
-      gfx_color = self.GetGfxColor()
       node.CleanColorOps()
       node.SetColor(gfx_color,"")
+    elif _img_present and isinstance(node, gfx.MapIso):
+      node.SetColor(gfx_color)
   
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
