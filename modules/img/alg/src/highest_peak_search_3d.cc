@@ -135,6 +135,11 @@ template <typename T, class D>
     LOG_VERBOSE(" exclusion radius: " << exclusion_radius_ << std::endl);
     LOG_VERBOSE(" threshold: " << threshold_ << std::endl);
 
+    if (max_num_peaks_ < 1)
+    {
+      throw Error("Error: Maximum number of peaks smaller than 1. Cannot create peak list");
+    }
+
     if(ext_list_.size()==0)
     {
       LOG_VERBOSE(" excluded regions: none" << std::endl);
