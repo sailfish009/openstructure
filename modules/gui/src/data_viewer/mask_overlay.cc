@@ -214,5 +214,19 @@ void MaskOverlay::ClearMask()
   add_mode_=false;
 }
 
+void MaskOverlay::SetShift(geom::Vec2 shift)
+{
+  shift_=shift;
+}
+
+void MaskOverlay::ApplyShiftToMask()
+{
+  for(std::vector<geom::Polygon2>::iterator it=polygons_.begin();it!=polygons_.end();++it){
+    (*it)=(*it)+shift_;
+  }
+  new_poly_=new_poly_+shift_;
+  shift_=geom::Vec2(0.0,0.0);
+}
+
 
 }}}  //ns
