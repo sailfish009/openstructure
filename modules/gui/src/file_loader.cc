@@ -50,7 +50,7 @@
 #include <ost/gui/python_shell/python_interpreter.hh>
 #include <ost/gui/main_area.hh>
 #include <ost/gui/file_type_dialog.hh>
-#include <ost/gui/sequence/sequence_viewer.hh>
+#include <ost/gui/sequence_viewer/sequence_viewer.hh>
 
 #if OST_IMG_ENABLED
   #include <ost/io/img/load_map.hh>
@@ -329,7 +329,7 @@ gfx::GfxObjP FileLoader::TryLoadAlignment(const QString& filename, io::SequenceI
     handler->Import(seq_list,filename.toStdString());
     seq::AlignmentHandle alignment = seq::AlignmentFromSequenceList(seq_list);
     gui::MainArea* main_area = gui::GostyApp::Instance()->GetPerspective()->GetMainArea();
-    SequenceViewerV2* viewer = new SequenceViewerV2(true,main_area);
+    SequenceViewer* viewer = new SequenceViewer(true,main_area);
     viewer->AddAlignment(alignment);
     main_area->AddWidget(filename,viewer);
     throw io::IOFileAlreadyLoadedException("Loaded in DataViewer");

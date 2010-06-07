@@ -43,11 +43,11 @@
 namespace ost { namespace gui {
 
 /// \brief QTableView with first column not moving
-class DLLEXPORT_OST_GUI SequenceViewerV2 : public Widget, public gfx::SceneObserver  {
+class DLLEXPORT_OST_GUI SequenceViewer : public Widget, public gfx::SceneObserver  {
   Q_OBJECT
 public:
-  SequenceViewerV2(bool stand_alone=true, QWidget* parent=NULL);
-  ~SequenceViewerV2();
+  SequenceViewer(bool stand_alone=true, QWidget* parent=NULL);
+  ~SequenceViewer();
 
   virtual void NodeAdded(const gfx::GfxNodeP& node);
   virtual void NodeRemoved(const gfx::GfxNodeP& node);

@@ -50,18 +50,18 @@
 
 namespace ost { namespace gui {
 
-class SequenceViewerV2Factory: public WidgetFactory {
+class SequenceViewerFactory: public WidgetFactory {
 public:
-  SequenceViewerV2Factory() :
-    WidgetFactory("ost::gui::SequenceViewerV2", "Sequence Viewer V2") {
+  SequenceViewerFactory() :
+    WidgetFactory("ost::gui::SequenceViewer", "Sequence Viewer") {
   }
 
   virtual Widget* Create(QWidget* parent) {
-    return GostyApp::Instance()->GetSequenceViewerV2();
+    return GostyApp::Instance()->GetSequenceViewer();
   }
 };
 
-OST_REGISTER_WIDGET(SequenceViewerV2, SequenceViewerV2Factory);
+OST_REGISTER_WIDGET(SequenceViewer, SequenceViewerFactory);
 
 struct GetNodesVisitor: public gfx::GfxNodeVisitor {
   GetNodesVisitor(): nodes_() {}
@@ -72,7 +72,7 @@ struct GetNodesVisitor: public gfx::GfxNodeVisitor {
   gfx::NodePtrList GetNodes(){return nodes_;}
 };
 
-SequenceViewerV2::SequenceViewerV2(bool stand_alone, QWidget* parent): Widget(NULL,parent)
+SequenceViewer::SequenceViewer(bool stand_alone, QWidget* parent): Widget(NULL,parent)
 {
   model_ = new SequenceModel(this);
 
@@ -102,7 +102,7 @@ SequenceViewerV2::SequenceViewerV2(bool stand_alone, QWidget* parent): Widget(NU
   }
 }
 
-void SequenceViewerV2::InitMenuBar()
+void SequenceViewer::InitMenuBar()
 {
   toolbar_ = new QToolBar(this);
   toolbar_->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -111,7 +111,7 @@ void SequenceViewerV2::InitMenuBar()
   layout()->addWidget(toolbar_);
 }
 
-void SequenceViewerV2::InitSearchBar()
+void SequenceViewer::InitSearchBar()
 {
   seq_search_bar_ = new SeqSearchBar(this);
   seq_search_bar_->hide();
@@ -119,7 +119,7 @@ void SequenceViewerV2::InitSearchBar()
   connect(seq_search_bar_, SIGNAL(Changed(const QString&, bool, const QString&)), this, SLOT(OnSearchBarUpdate(const QString&, bool, const QString&)));
 }
 
-void SequenceViewerV2::InitView()
+void SequenceViewer::InitView()
 {
   seq_table_view_ = new SequenceTableView(model_);
   layout()->addWidget(seq_table_view_);
@@ -140,7 +140,7 @@ void SequenceViewerV2::InitView()
   connect(seq_table_view_,SIGNAL(MouseWheelEvent(QWheelEvent*)),this,SLOT(MouseWheelEvent(QWheelEvent*)));
 }
 
-void SequenceViewerV2::InitActions()
+void SequenceViewer::InitActions()
 {
   QDir icon_path(GetSharedDataPath().c_str());
   icon_path.cd("gui");
@@ -165,7 +165,7 @@ void SequenceViewerV2::InitActions()
   connect(menu_action, SIGNAL(triggered(bool)), this, SLOT(DisplayMenu()));
 }
 
-void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
+void SequenceViewer::NodeAdded(const gfx::GfxNodeP& n)
 {
   if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(n)) {
     model_->InsertGfxEntity(o);
@@ -175,14 +175,14 @@ void SequenceViewerV2::NodeAdded(const gfx::GfxNodeP& n)
   this->UpdateSearchBar();
 }
 
-void SequenceViewerV2::NodeRemoved(const gfx::GfxNodeP& node)
+void SequenceViewer::NodeRemoved(const gfx::GfxNodeP& node)
 {
   if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(node)) {
     model_->RemoveGfxEntity(o);
   }
 }
 
-void SequenceViewerV2::AddAlignment(const seq::AlignmentHandle& alignment)
+void SequenceViewer::AddAlignment(const seq::AlignmentHandle& alignment)
 {
   if(alignment.GetCount()>0 && alignment.GetLength()>0){
     model_->InsertAlignment(alignment);
@@ -191,12 +191,12 @@ void SequenceViewerV2::AddAlignment(const seq::AlignmentHandle& alignment)
   }
 }
 
-void SequenceViewerV2::RemoveAlignment(const seq::AlignmentHandle& alignment)
+void SequenceViewer::RemoveAlignment(const seq::AlignmentHandle& alignment)
 {
   model_->RemoveAlignment(alignment);
 }
 
-void SequenceViewerV2::UpdateSearchBar()
+void SequenceViewer::UpdateSearchBar()
 {
   QStringList sequence_names_;
   for(int i = 1; i< model_->rowCount(); i++){
@@ -206,14 +206,14 @@ void SequenceViewerV2::UpdateSearchBar()
   seq_search_bar_->UpdateItems(sequence_names_);
 }
 
-void SequenceViewerV2::SelectionModelChanged(const QItemSelection& sel, const QItemSelection& desel)
+void SequenceViewer::SelectionModelChanged(const QItemSelection& sel, const QItemSelection& desel)
 {
   gfx::Scene::Instance().DetachObserver(this);
   model_->SelectionChanged(sel, desel);
   gfx::Scene::Instance().AttachObserver(this);
 }
 
-void SequenceViewerV2::SelectionChanged(const gfx::GfxObjP& o,
+void SequenceViewer::SelectionChanged(const gfx::GfxObjP& o,
                                       const mol::EntityView& view)
 {
   disconnect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
@@ -225,14 +225,14 @@ void SequenceViewerV2::SelectionChanged(const gfx::GfxObjP& o,
   connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
 }
 
-void SequenceViewerV2::DoubleClicked(const QModelIndex& index)
+void SequenceViewer::DoubleClicked(const QModelIndex& index)
 {
   disconnect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
   model_->DoubleClicked(index);
   connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
 }
 
-void SequenceViewerV2::MouseWheelEvent(QWheelEvent* event)
+void SequenceViewer::MouseWheelEvent(QWheelEvent* event)
 {
   int delta = event->delta();
   if (event->orientation() == Qt::Vertical) {
@@ -252,7 +252,7 @@ void SequenceViewerV2::MouseWheelEvent(QWheelEvent* event)
   event->accept();
 }
 
-void SequenceViewerV2::CopyEvent(QKeyEvent* event)
+void SequenceViewer::CopyEvent(QKeyEvent* event)
 {
   QItemSelectionModel* model = seq_table_view_->selectionModel();
   const QModelIndexList& list = model->selectedIndexes();
@@ -294,7 +294,7 @@ void SequenceViewerV2::CopyEvent(QKeyEvent* event)
   event->accept();
 }
 
-void SequenceViewerV2::FindInSequence()
+void SequenceViewer::FindInSequence()
 {
   if(seq_search_bar_->isHidden()){
     seq_search_bar_->show();
@@ -304,7 +304,7 @@ void SequenceViewerV2::FindInSequence()
   }
 }
 
-void SequenceViewerV2::OnSearchBarUpdate(const QString& subject,
+void SequenceViewer::OnSearchBarUpdate(const QString& subject,
                                            bool search_in_all, const QString& name)
 {
   seq_table_view_->selectionModel()->clear();
@@ -318,7 +318,7 @@ void SequenceViewerV2::OnSearchBarUpdate(const QString& subject,
   }
 }
 
-void SequenceViewerV2::SelectList(const QModelIndexList& list)
+void SequenceViewer::SelectList(const QModelIndexList& list)
 {
   QItemSelectionModel* model = seq_table_view_->selectionModel();
   QSet<int> rows_visited;
@@ -334,56 +334,56 @@ void SequenceViewerV2::SelectList(const QModelIndexList& list)
   }
 }
 
-const QStringList& SequenceViewerV2::GetDisplayModes()
+const QStringList& SequenceViewer::GetDisplayModes()
 {
   return model_->GetDisplayModes();
 }
-const QStringList& SequenceViewerV2::GetDisplayModes(const seq::AlignmentHandle& alignment)
+const QStringList& SequenceViewer::GetDisplayModes(const seq::AlignmentHandle& alignment)
 {
   return model_->GetDisplayModes(alignment);
 }
-const QStringList& SequenceViewerV2::GetDisplayModes(const gfx::EntityP& entity)
+const QStringList& SequenceViewer::GetDisplayModes(const gfx::EntityP& entity)
 {
   return model_->GetDisplayModes(entity);
 }
 
-const QString& SequenceViewerV2::GetCurrentDisplayMode()
+const QString& SequenceViewer::GetCurrentDisplayMode()
 {
   return model_->GetCurrentDisplayMode();
 }
-const QString& SequenceViewerV2::GetCurrentDisplayMode(const seq::AlignmentHandle& alignment)
+const QString& SequenceViewer::GetCurrentDisplayMode(const seq::AlignmentHandle& alignment)
 {
   return model_->GetCurrentDisplayMode(alignment);
 }
-const QString& SequenceViewerV2::GetCurrentDisplayMode(const gfx::EntityP& entity)
+const QString& SequenceViewer::GetCurrentDisplayMode(const gfx::EntityP& entity)
 {
   return model_->GetCurrentDisplayMode(entity);
 }
 
-void SequenceViewerV2::ChangeDisplayMode(const QString& string)
+void SequenceViewer::ChangeDisplayMode(const QString& string)
 {
   model_->SetDisplayMode(string);
   seq_table_view_->viewport()->update();
 }
 
-void SequenceViewerV2::ChangeDisplayMode(const seq::AlignmentHandle& alignment, const QString& string)
+void SequenceViewer::ChangeDisplayMode(const seq::AlignmentHandle& alignment, const QString& string)
 {
   model_->SetDisplayMode(alignment, string);
   seq_table_view_->viewport()->update();
 }
 
-void SequenceViewerV2::ChangeDisplayMode(const gfx::EntityP& entity, const QString& string)
+void SequenceViewer::ChangeDisplayMode(const gfx::EntityP& entity, const QString& string)
 {
   model_->SetDisplayMode(entity, string);
   seq_table_view_->viewport()->update();
 }
 
-ActionList SequenceViewerV2::GetActions()
+ActionList SequenceViewer::GetActions()
 {
   return action_list_;
 }
 
-void SequenceViewerV2::DisplayMenu()
+void SequenceViewer::DisplayMenu()
 {
   QMenu* menu = new QMenu();
   QList<QAction*> actions = display_mode_actions_->actions();
@@ -405,7 +405,7 @@ void SequenceViewerV2::DisplayMenu()
   menu->exec(QCursor::pos());
 }
 
-void SequenceViewerV2::ChangeDisplayMode()
+void SequenceViewer::ChangeDisplayMode()
 {
   QAction* action = display_mode_actions_->checkedAction();
   if(action){
@@ -413,7 +413,7 @@ void SequenceViewerV2::ChangeDisplayMode()
   }
 }
 
-SequenceViewerV2::~SequenceViewerV2(){
+SequenceViewer::~SequenceViewer(){
   gfx::Scene::Instance().DetachObserver(this);
 }
 

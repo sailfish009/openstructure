@@ -35,14 +35,14 @@ def _InitPanels(app):
   panels.AddWidgetToPool('ost.gui.PythonShell', 1)
   panels.AddWidgetToPool('ost.gui.RemoteLoader', -1)
   panels.AddWidgetToPool('ost.gui.SceneWin', 1)
-  panels.AddWidgetToPool('ost.gui.SequenceViewerV2', 1)
+  panels.AddWidgetToPool('ost.gui.SequenceViewer', 1)
   if not panels.Restore("ui/perspective/panels"):
     panels.AddWidget(gui.PanelPosition.LEFT_PANEL, app.scene_win)
     panels.AddWidgetByName(gui.PanelPosition.LEFT_PANEL, 
                            'ost.gui.FileBrowser', False)    
     panels.AddWidgetByName(gui.PanelPosition.LEFT_PANEL, 
                            'ost.gui.RemoteLoader', False)
-    panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.seq_viewer_v2)
+    panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.seq_viewer)
     panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.py_shell)
 
 def _InitFrontEnd():

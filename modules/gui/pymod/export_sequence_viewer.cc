@@ -21,7 +21,7 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include <ost/gui/sequence/sequence_viewer.hh>
+#include <ost/gui/sequence_viewer/sequence_viewer.hh>
 
 #include "sip_handler.hh"
 
@@ -31,37 +31,37 @@ using namespace ost::gui;
 
 namespace {
 
-void change_display_mode_a(SequenceViewerV2* seq_viewer, const QString& mode)
+void change_display_mode_a(SequenceViewer* seq_viewer, const QString& mode)
 {
   seq_viewer->ChangeDisplayMode(mode);
 }
 
-void change_display_mode_b(SequenceViewerV2* seq_viewer, const gfx::EntityP& entity, const QString& mode)
+void change_display_mode_b(SequenceViewer* seq_viewer, const gfx::EntityP& entity, const QString& mode)
 {
   seq_viewer->ChangeDisplayMode(entity, mode);
 }
 
-void change_display_mode_c(SequenceViewerV2* seq_viewer, const seq::AlignmentHandle& alignment, const QString& mode)
+void change_display_mode_c(SequenceViewer* seq_viewer, const seq::AlignmentHandle& alignment, const QString& mode)
 {
   seq_viewer->ChangeDisplayMode(alignment, mode);
 }
 
-String get_current_display_mode_a(SequenceViewerV2* seq_viewer)
+String get_current_display_mode_a(SequenceViewer* seq_viewer)
 {
   return seq_viewer->GetCurrentDisplayMode().toStdString();
 }
 
-String get_current_display_mode_b(SequenceViewerV2* seq_viewer, const gfx::EntityP& entity)
+String get_current_display_mode_b(SequenceViewer* seq_viewer, const gfx::EntityP& entity)
 {
   return seq_viewer->GetCurrentDisplayMode(entity).toStdString();
 }
 
-String get_current_display_mode_c(SequenceViewerV2* seq_viewer, const seq::AlignmentHandle& alignment)
+String get_current_display_mode_c(SequenceViewer* seq_viewer, const seq::AlignmentHandle& alignment)
 {
   return seq_viewer->GetCurrentDisplayMode(alignment).toStdString();
 }
 
-std::vector<String> get_display_modes_a(SequenceViewerV2* seq_viewer)
+std::vector<String> get_display_modes_a(SequenceViewer* seq_viewer)
 {
   std::vector<String> modes;
   const QStringList& list = seq_viewer->GetDisplayModes();
@@ -71,7 +71,7 @@ std::vector<String> get_display_modes_a(SequenceViewerV2* seq_viewer)
   return modes;
 }
 
-std::vector<String> get_display_modes_b(SequenceViewerV2* seq_viewer, const gfx::EntityP& entity)
+std::vector<String> get_display_modes_b(SequenceViewer* seq_viewer, const gfx::EntityP& entity)
 {
   std::vector<String> modes;
   const QStringList& list = seq_viewer->GetDisplayModes(entity);
@@ -81,7 +81,7 @@ std::vector<String> get_display_modes_b(SequenceViewerV2* seq_viewer, const gfx:
   return modes;
 }
 
-std::vector<String> get_display_modes_c(SequenceViewerV2* seq_viewer, const seq::AlignmentHandle& alignment)
+std::vector<String> get_display_modes_c(SequenceViewer* seq_viewer, const seq::AlignmentHandle& alignment)
 {
   std::vector<String> modes;
   const QStringList& list = seq_viewer->GetDisplayModes(alignment);
@@ -94,14 +94,14 @@ std::vector<String> get_display_modes_c(SequenceViewerV2* seq_viewer, const seq:
 }
 
 
-void export_SequenceViewerV2()
+void export_SequenceViewer()
 {
-  class_<SequenceViewerV2, boost::noncopyable >("SequenceViewerV2",init<>())
+  class_<SequenceViewer, boost::noncopyable >("SequenceViewer",init<>())
     .def(init<bool, optional<QWidget*> >())
-    .def("Show", &SequenceViewerV2::show)
-    .def("Hide", &SequenceViewerV2::hide)
-    .def("AddAlignment", &SequenceViewerV2::AddAlignment)
-    .def("RemoveAlignment", &SequenceViewerV2::RemoveAlignment)
+    .def("Show", &SequenceViewer::show)
+    .def("Hide", &SequenceViewer::hide)
+    .def("AddAlignment", &SequenceViewer::AddAlignment)
+    .def("RemoveAlignment", &SequenceViewer::RemoveAlignment)
     .def("GetDisplayModes", &get_display_modes_a)
     .def("GetDisplayModes", &get_display_modes_b)
     .def("GetDisplayModes", &get_display_modes_c)
@@ -111,8 +111,8 @@ void export_SequenceViewerV2()
     .def("ChangeDisplayMode",&change_display_mode_a)
     .def("ChangeDisplayMode",&change_display_mode_b)
     .def("ChangeDisplayMode",&change_display_mode_c)
-    .def("GetQObject",&get_py_qobject<SequenceViewerV2>)
-    .add_property("qobject", &get_py_qobject<SequenceViewerV2>)
+    .def("GetQObject",&get_py_qobject<SequenceViewer>)
+    .add_property("qobject", &get_py_qobject<SequenceViewer>)
   ;
 }
 
