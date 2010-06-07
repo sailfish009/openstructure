@@ -105,7 +105,7 @@ AlignmentViewObject::AlignmentViewObject(const seq::AlignmentHandle& alignment, 
   //Calculate Conservation Mode 1
   for(unsigned int i=0; i<values.size(); i++){
     gfx::Color color = gradient_.GetColorAt(values[i]);
-    conservation_1_[i] = QColor(color.Red()*255,color.Green()*255,color.Blue()*255);
+    conservation_1_[i] = QColor(color.Red()*255,color.Green()*255,color.Blue()*255,100);
   }
 
   //Calculate Conservation Mode 2
@@ -191,7 +191,7 @@ QVariant AlignmentViewObject::GetData(int row, int column, int role)
 
 void AlignmentViewObject::SetDisplayMode(const QString& mode)
 {
-  if(this->display_modes_.contains(mode)){
+  if(this->display_modes_.contains(mode) && mode != this->GetCurrentDisplayMode()){
     if(mode == conservation_mode_1 || mode == conservation_mode_2){
       for(int i=0 ; i<this->GetRowCount(); i++){
         BaseRow* row = this->GetRow(i);

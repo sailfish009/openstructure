@@ -132,7 +132,7 @@ gfx::EntityP& SequenceViewObject::GetGfxObject()
 
 void SequenceViewObject::SetDisplayMode(const QString& mode)
 {
-  if(this->display_modes_.contains(mode)){
+  if(this->display_modes_.contains(mode) &&  mode != this->GetCurrentDisplayMode()){
     if(mode == properties_mode){
       for(int i=0 ; i<this->GetRowCount(); i++){
         BaseRow* row = this->GetRow(i);
