@@ -12,13 +12,6 @@ side_bar.hh
 splitter_panel_bar.hh
 tabbed_panel_bar.hh
 )
-set(OST_GUI_SEQUENCE_VIEWER_HEADERS
-sequence_item.hh
-sequence_viewer_base.hh
-sequence_viewer.hh
-sequence_scene.hh
-sequence_search_bar.hh
-)
 
 set(OST_GUI_SEQUENCE_VIEW_HEADERS
 align_properties_painter.hh
@@ -211,11 +204,6 @@ scene_menu.cc
 widget.cc
 widget_pool.cc
 remote_site_loader.cc
-sequence_viewer/sequence_item.cc
-sequence_viewer/sequence_viewer_base.cc
-sequence_viewer/sequence_viewer.cc
-sequence_viewer/sequence_scene.cc
-sequence_viewer/sequence_search_bar.cc
 sequence/align_properties_painter.cc
 sequence/base_row.cc
 sequence/background_painter.cc
@@ -346,11 +334,6 @@ scene_selection.hh
 widget.hh
 widget_geom_handler.hh
 widget_pool.hh
-sequence_viewer/sequence_item.hh
-sequence_viewer/sequence_viewer_base.hh
-sequence_viewer/sequence_viewer.hh
-sequence_viewer/sequence_scene.hh
-sequence_viewer/sequence_search_bar.hh
 sequence/align_properties_painter.hh
 sequence/background_painter.hh
 sequence/base_row.hh

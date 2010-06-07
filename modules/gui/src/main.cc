@@ -43,7 +43,6 @@
 #include "gl_win.hh"
 //#include "entity_explorer/entity_explorer.hh"
 #include "mdi_sub_window.hh"
-#include "sequence_viewer/sequence_viewer.hh"
 #include "tools/tool_options_win.hh"
 #include "plot_viewer/plot_viewer_proxy.hh"
 #include "plot_viewer/plot_viewer.hh"

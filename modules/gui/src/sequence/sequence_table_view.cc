@@ -67,7 +67,6 @@ SequenceTableView::SequenceTableView(QAbstractItemModel * model)
   delegate_ = new SequenceDelegate(qobject_cast<SequenceModel*>(this->model()),this);
 
 #if !(defined(__APPLE__) && (QT_VERSION>=0x040600))
-  std::cout << "INIT STATIC" << QT_VERSION << std::endl;
   this->InitStaticRow();
   this->InitStaticColumn();
   this->InitStaticField();

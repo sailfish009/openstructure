@@ -8,7 +8,6 @@ set(OST_GUI_PYMOD_SOURCES
   export_gosty.cc
   export_remote_site_loader.cc
   export_scene_win.cc
-  export_sequence_viewer.cc
   export_sequence_viewerV2.cc
   export_perspective.cc
   export_sip_handler.cc
