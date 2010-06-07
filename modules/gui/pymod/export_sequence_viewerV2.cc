@@ -97,6 +97,7 @@ std::vector<String> get_display_modes_c(SequenceViewerV2* seq_viewer, const seq:
 void export_SequenceViewerV2()
 {
   class_<SequenceViewerV2, boost::noncopyable >("SequenceViewerV2",init<>())
+    .def(init<bool, optional<QWidget*> >())
     .def("Show", &SequenceViewerV2::show)
     .def("Hide", &SequenceViewerV2::hide)
     .def("AddAlignment", &SequenceViewerV2::AddAlignment)

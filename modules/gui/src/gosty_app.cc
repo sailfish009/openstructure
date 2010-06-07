@@ -107,7 +107,7 @@ SequenceViewer* GostyApp::GetSequenceViewer()
 SequenceViewerV2* GostyApp::GetSequenceViewerV2()
 {
   if (seq_viewer_v2_==NULL) {
-    seq_viewer_v2_=new SequenceViewerV2;
+    seq_viewer_v2_=new SequenceViewerV2(false);
     seq_viewer_v2_->SetDestroyOnClose(false);
   }
   return seq_viewer_v2_;
