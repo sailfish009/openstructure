@@ -25,6 +25,8 @@
 
 #include <ost/seq/alignment_handle.hh>
 
+#include <ost/gfx/gradient.hh>
+
 #include "sequence_view_object.hh"
 
 namespace ost { namespace gui {
@@ -37,18 +39,20 @@ public:
   AlignmentViewObject(const seq::AlignmentHandle& alignment, QObject* parent = 0);
 
   QVariant GetData(int row, int column, int role);
-
   const seq::AlignmentHandle& GetAlignment();
 
   void SetDisplayMode(const QString& mode);
 
 private:
+  gfx::Gradient gradient_;
   seq::AlignmentHandle alignment_;
-  QMap<int, QColor> conservation_;
+  QMap<int, QColor> conservation_1_;
+  QMap<int, QColor> conservation_2_;
 
   static QMap<QString,int> group_map_;
 
-  static const QString conservation_mode;
+  static const QString conservation_mode_1;
+  static const QString conservation_mode_2;
 };
 
 

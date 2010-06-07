@@ -480,7 +480,7 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
                ${OST_GUI_INPUT_HEADERS}
                ${OST_GUI_DATA_VIEWER_HEADERS}
                ${OST_GUI_HEADERS}
-       DEPENDS_ON gfx io mol_alg
+       DEPENDS_ON gfx io mol_alg seq_alg
        LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES} ${SPNAV_LIBRARIES})
 include_directories(${PYTHON_INCLUDE_PATH})
 qt4_add_resources(OST_QT_RESOURCE dngr.qrc)
