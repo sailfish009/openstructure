@@ -36,10 +36,12 @@ Real DLLEXPORT_OST_GEOM Length(const Vec3& v);
 Real DLLEXPORT_OST_GEOM Length2(const Vec3& v);
 
 //! return true if components differ not more than ephilon
-bool DLLEXPORT_OST_GEOM Equal(const Vec3& v1, const Vec3& v2, Real ephilon=EPSILON);
+bool DLLEXPORT_OST_GEOM Equal(const Vec3& v1, const Vec3& v2, 
+                              Real ephilon=EPSILON);
 
 //! return true if components differ not more than ephilon
-bool DLLEXPORT_OST_GEOM Equal(const Mat3& m1, const Mat3& m2, Real ephilon=EPSILON);
+bool DLLEXPORT_OST_GEOM Equal(const Mat3& m1, const Mat3& m2, 
+                              Real ephilon=EPSILON);
 
 //! vector dot product
 Real DLLEXPORT_OST_GEOM Dot(const Vec3& v1, const Vec3& v2);

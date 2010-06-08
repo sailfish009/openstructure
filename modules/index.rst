@@ -26,6 +26,7 @@ Modules
   conop/conop
   mol/base/mol
   seq/base/seq
+  base/base
 
 Extending OpenStructure
 --------------------------------------------------------------------------------
