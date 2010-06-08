@@ -29,6 +29,7 @@ from render_options_widget import RenderOptionsWidget
 from color_options_widget import ColorOptionsWidget
 from ost.gui.scene.scene_observer_impl import SceneObserverImpl
 from map_level_widget import AdditionalSettingsWidget
+from scene_selection_helper import SelHelper
 
 class InspectorWidget(ToolBarOptionsWidget):
   ICONS_PATH = os.path.join(ost.GetSharedDataPath(), "scene", "icons/")
@@ -58,15 +59,19 @@ class InspectorWidget(ToolBarOptionsWidget):
         
   #Observer Methods    
   def NodeRemoved(self, node):
+    SelHelper().Update()
     ToolBarOptionsWidget.Update(self)  
   
   def RenderModeChanged(self, node):
+    SelHelper().Update()
     ToolBarOptionsWidget.Update(self)
    
   def NodeChanged(self, node):
+    SelHelper().Update()
     ToolBarOptionsWidget.Update(self)
 
   def ActiveNodesChanged(self):
+    SelHelper().Update()
     ToolBarOptionsWidget.Update(self)
 
 class InspectorDialog(QtGui.QDialog):

@@ -58,7 +58,7 @@ class UniformColorWidget(QtGui.QWidget):
     top_layout.addLayout(grid)
     self.setLayout(top_layout)
     
-    QtCore.QObject.connect(self.color_select_widget_, QtCore.SIGNAL("colorChanged"), self.Update)
+    QtCore.QObject.connect(self.color_select_widget_, QtCore.SIGNAL("colorChanged"), self.ChangeColors)
     
     self.setMinimumSize(250,150)
 
@@ -66,31 +66,37 @@ class UniformColorWidget(QtGui.QWidget):
     scene_selection = gui.SceneSelection.Instance()
     for i in range(0,scene_selection.GetActiveNodeCount()):
       node = scene_selection.GetActiveNode(i)
+      if _img_present and isinstance(node, gfx.MapIso):
+        if self.color_select_widget_.GetGfxColor() != node.GetColor():
+          self.color_select_widget_.SetGfxColor(node.GetColor())
+      else:
+        self.ChangeColors()
+        
+  def ChangeColors(self):
+    scene_selection = gui.SceneSelection.Instance()
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      node = scene_selection.GetActiveNode(i)
       self.ChangeColor(node)
-      
+    
     if(scene_selection.GetActiveViewCount() > 0):
       entity = scene_selection.GetViewEntity()
       view = scene_selection.GetViewUnion()
       self.ChangeViewColor(entity,view)
-        
+  
   def ChangeColor(self, node):
-    gfx_color = self.GetGfxColor()
+    gfx_color = self.color_select_widget_.GetGfxColor()
     if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
-      node.CleanColorOps()
-      node.SetColor(gfx_color,"")
+        node.CleanColorOps()
+        node.SetColor(gfx_color,"")
     elif _img_present and isinstance(node, gfx.MapIso):
-      node.SetColor(gfx_color)
+        node.SetColor(gfx_color)
   
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
-      gfx_color = self.GetGfxColor()
+      gfx_color = self.color_select_widget_.GetGfxColor()
       ufco=gfx.UniformColorOp(mol.QueryViewWrapper(view),gfx_color)
       entity.Apply(ufco)
-  
-  def GetGfxColor(self):
-    color = self.color_select_widget_.GetColor()
-    return gfx.Color(color.redF(), color.greenF(), color.blueF())
-  
+    
   def resizeEvent(self, event):
     self.color_select_widget_.SetSize(self.width()/2,self.height()/2)
     

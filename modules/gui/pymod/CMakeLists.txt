@@ -45,6 +45,7 @@ render_mode_widget.py
 render_op.py
 render_options_widget.py
 scene_observer_impl.py
+scene_selection_helper.py
 simple_widget.py
 sline_widget.py
 toolbar_options_widget.py

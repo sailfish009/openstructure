@@ -103,7 +103,9 @@ class ComboOptionsWidget(QtGui.QWidget):
       self.__UpdateView(None)
   
   def GetCurrentWidget(self):
-    return self.__GetCurrentPair()[1]
+    if(self.combo_box_.currentIndex() >= 0):
+      return self.__GetCurrentPair()[1]
+    return None
   
   def DoResize(self):
     item = self.GetCurrentWidget()

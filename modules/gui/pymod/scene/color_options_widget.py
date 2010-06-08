@@ -30,6 +30,7 @@ except ImportError:
   pass
 
 from PyQt4 import QtCore, QtGui
+from scene_selection_helper import SelHelper
 from gradient_editor_widget import GradientEditor
 from uniform_color_widget import UniformColorWidget
 from combo_options_widget import ComboOptionsWidget
@@ -70,9 +71,8 @@ class ColorOptionsWidget(ComboOptionsWidget):
   def Update(self):
     
     ComboOptionsWidget.setEnabled(self,True)
-    scene_selection = gui.SceneSelection.Instance()
     
-    if scene_selection.GetActiveNodeCount() == 0 and scene_selection.GetActiveViewCount() == 0:
+    if SelHelper().CheckAllFlags(SelHelper.NO_SELECTION):
       ComboOptionsWidget.setEnabled(self,False)
       return
     
@@ -81,19 +81,11 @@ class ColorOptionsWidget(ComboOptionsWidget):
     for w in self.img_widgets_:
       self.RemoveWidget(w[0])
     
-    all_entity = True
-    all_img = True
-    for i in range(0,scene_selection.GetActiveNodeCount()):
-      node = scene_selection.GetActiveNode(i)
-      if not (isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface)):
-        all_entity = False
-      if (not _img_present) or (not isinstance(node, gfx.MapIso)):
-        all_img = False
     
-    if all_img and (not all_entity):
+    if SelHelper().CheckAllFlags(SelHelper.HAS_IMG | SelHelper.IS_SINGLE):
       for w in self.img_widgets_:
         self.AddWidget(w[0], w[1])
-    elif all_entity and (not all_img):
+    elif SelHelper().CheckMinOneFlag(SelHelper.HAS_ENTITY| SelHelper.HAS_VIEW| SelHelper.HAS_SURFACE) and SelHelper().CheckNotFlags(SelHelper.HAS_IMG):
       for w in self.entity_widgets_:
         self.AddWidget(w[0], w[1])
     else:
