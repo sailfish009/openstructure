@@ -198,6 +198,36 @@ bool SceneWinModel::setData(const QModelIndex& index,
   return false;
 }
 
+QStringList SceneWinModel::mimeTypes() const
+{
+    QStringList types;
+    types << "text/plain";
+    return types;
+}
+
+Qt::DropActions SceneWinModel::supportedDragActions() const
+{
+    return Qt::MoveAction;
+}
+
+QMimeData* SceneWinModel::mimeData(const QModelIndexList &indexes) const
+{
+  QMimeData *mimeData = new QMimeData();
+  QByteArray encoded_data;
+
+  QDataStream stream(&encoded_data, QIODevice::WriteOnly);
+
+
+  foreach (QModelIndex index, indexes) {
+    if (index.isValid() && index.column()==1) {
+      QString text = "scene['"+data(index, Qt::DisplayRole).toString()+"']";
+      encoded_data.append(text);
+    }
+  }
+  mimeData->setData("text/plain", encoded_data);
+  return mimeData;
+}
+
 void SceneWinModel::NodeAdded(const gfx::GfxNodeP& node)
 {
   gfx::EntityP e=boost::dynamic_pointer_cast<gfx::Entity>(node);

@@ -59,6 +59,7 @@ SceneWin::SceneWin(QWidget* parent) :
   view_->setSelectionBehavior(QAbstractItemView::SelectRows);
   view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
   view_->setEditTriggers(QAbstractItemView::EditKeyPressed);
+  view_->setDragEnabled(true);
   view_->expandAll();
 
   layout->addWidget(view_);
