@@ -70,9 +70,10 @@ class RenderOptionsWidget(ComboOptionsWidget):
     self.entity_widgets_.append([gfx.RenderMode.HSC, HSCWidget()])
 
     self.img_widgets_ = list()
-    self.img_widgets_.append(["", EmptyMode()])
-    self.img_widgets_.append([gfx.RenderMode.SIMPLE, WireframeWidget()])
-    self.img_widgets_.append([gfx.RenderMode.FILL, EmptyMode("Fill",gfx.RenderMode.FILL)])
+    if _img_present:
+      self.img_widgets_.append(["", EmptyMode()])
+      self.img_widgets_.append([gfx.RenderMode.SIMPLE, WireframeWidget()])
+      self.img_widgets_.append([gfx.RenderMode.FILL, EmptyMode("Fill",gfx.RenderMode.FILL)])
 
     self._in_view_method = False
     self.setMinimumSize(250,200)

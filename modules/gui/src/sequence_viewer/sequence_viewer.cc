@@ -27,6 +27,7 @@
 #include <QClipboard>
 #include <QDir>
 #include <QHeaderView>
+#include <QMenu>
 #include <QPushButton>
 #include <QShortcut>
 #include <QVBoxLayout>
