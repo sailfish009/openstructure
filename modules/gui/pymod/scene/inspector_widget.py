@@ -47,8 +47,7 @@ class InspectorWidget(ToolBarOptionsWidget):
     
     self.obs = SceneObserverImpl()
     self.obs.AttachObserver(self)
-    ost.scene.AttachObserver(self.obs)    
-    self.scene_selection_ = gui.SceneSelection.Instance()
+    ost.scene.AttachObserver(self.obs)
     QtCore.QObject.connect(app.scene_win.qobject,QtCore.SIGNAL("ActiveNodesChanged()"),
                            self.ActiveNodesChanged)     
     

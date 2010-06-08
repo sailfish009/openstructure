@@ -38,8 +38,10 @@ class SelHelper():
   HAS_VIEW = 2
   HAS_IMG = 4
   HAS_SURFACE = 8
-  IS_SINGLE = 16
-  IS_MULTI = 32
+  IS_ONE_TYPE = 16
+  IS_MULTI_TYPE = 32
+  SINGLE_SELECTION = 64
+  MULTI_SELCTION = 128
     
   def __init__(self):
     self.__dict__ = self.__shared_state
@@ -76,10 +78,15 @@ class SelHelper():
       cnt += 1
     
     if cnt == 1:
-      self.current_flags_ = self.current_flags_ | SelHelper.IS_SINGLE
+      self.current_flags_ = self.current_flags_ | SelHelper.IS_ONE_TYPE
     elif cnt > 1:
-      self.current_flags_ = self.current_flags_ | SelHelper.IS_MULTI
-         
+      self.current_flags_ = self.current_flags_ | SelHelper.IS_MULTI_TYPE
+    
+    if self.scene_sel_.GetActiveNodeCount()==1:
+      self.current_flags_ = self.current_flags_ | SelHelper.SINGLE_SELECTION
+    elif self.scene_sel_.GetActiveNodeCount()>1:
+      self.current_flags_ = self.current_flags_ | SelHelper.MULTI_SELECTION
+    
   def CheckAllFlags(self, flags):
     if(flags == self.current_flags_ & flags) and (flags == self.current_flags_ | flags):
       return True

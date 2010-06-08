@@ -82,7 +82,7 @@ class ColorOptionsWidget(ComboOptionsWidget):
       self.RemoveWidget(w[0])
     
     
-    if SelHelper().CheckAllFlags(SelHelper.HAS_IMG | SelHelper.IS_SINGLE):
+    if SelHelper().CheckFlags(SelHelper.HAS_IMG | SelHelper.IS_ONE_TYPE):
       for w in self.img_widgets_:
         self.AddWidget(w[0], w[1])
     elif SelHelper().CheckMinOneFlag(SelHelper.HAS_ENTITY| SelHelper.HAS_VIEW| SelHelper.HAS_SURFACE) and SelHelper().CheckNotFlags(SelHelper.HAS_IMG):

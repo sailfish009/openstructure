@@ -27,6 +27,7 @@ try:
 except ImportError:
   _img_present=False
   pass
+from scene_selection_helper import SelHelper
 
 #Wireframe Options
 class WireframeWidget(QtGui.QWidget):
@@ -92,13 +93,7 @@ class WireframeWidget(QtGui.QWidget):
   def Update(self):
     self.setEnabled(True)
     self.UpdateGui()
-    scene_selection = gui.SceneSelection.Instance()
-    if scene_selection.GetActiveNodeCount() > 0 :
-      for i in range(0,scene_selection.GetActiveNodeCount()):
-        node = scene_selection.GetActiveNode(i)
-        if _img_present and isinstance(node, gfx.MapIso):
-          self.setEnabled(False)
-    else:
+    if SelHelper().CheckNotFlags(SelHelper.HAS_IMG | SelHelper.IS_SINGLE):
       self.setEnabled(False)          
 
   def GetText(self):

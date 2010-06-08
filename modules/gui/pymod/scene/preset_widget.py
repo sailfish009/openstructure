@@ -23,6 +23,7 @@ import ost
 import os
 from datetime import datetime
 from PyQt4 import QtCore, QtGui
+from scene_selection_helper import SelHelper
 from preset_list_model import PresetListModel
 from preset_editor_widget import PresetEditor
 from preset import Preset
@@ -145,16 +146,13 @@ class PresetWidget(QtGui.QWidget):
   
   def Update(self):
     self.setEnabled(True)
-    scene_selection = gui.SceneSelection.Instance()
-    if scene_selection.GetActiveNodeCount() == 0:
+    if SelHelper().CheckAllFlags(SelHelper.NO_SELECTION):
       self.setEnabled(False)
       return
     
-    for i in range(0,scene_selection.GetActiveNodeCount()):
-      entity = scene_selection.GetActiveNode(i)
-      if not isinstance(scene_selection.GetActiveNode(i), gfx.Entity):
-        self.setEnabled(False)
-        return
+    if SelHelper().CheckNotFlags(SelHelper.HAS_ENTITY | SelHelper.IS_ONE_TYPE):
+      self.setEnabled(False)
+      return
 
   def Rename(self):
     if(self.list_view_.currentIndex().isValid()):
