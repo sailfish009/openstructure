@@ -93,7 +93,7 @@ class WireframeWidget(QtGui.QWidget):
   def Update(self):
     self.setEnabled(True)
     self.UpdateGui()
-    if SelHelper().CheckNotFlags(SelHelper.HAS_IMG | SelHelper.IS_SINGLE):
+    if SelHelper().CheckNotFlags(SelHelper.HAS_IMG | SelHelper.IS_ONE_TYPE):
       self.setEnabled(False)          
 
   def GetText(self):

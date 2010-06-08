@@ -41,7 +41,7 @@ class SelHelper():
   IS_ONE_TYPE = 16
   IS_MULTI_TYPE = 32
   SINGLE_SELECTION = 64
-  MULTI_SELCTION = 128
+  MULTI_SELECTION = 128
     
   def __init__(self):
     self.__dict__ = self.__shared_state

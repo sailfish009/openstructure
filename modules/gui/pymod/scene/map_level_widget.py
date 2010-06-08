@@ -30,16 +30,14 @@ from PyQt4 import QtCore, QtGui
 
 from preset_widget import PresetWidget
 
-class AdditionalSettingsWidget(QtGui.QWidget):
+class AdditionalSettingsWidget(QtGui.QStackedWidget):
   def __init__(self, parent=None):
-    QtGui.QWidget.__init__(self, parent)
-    self.stack = QtGui.QStackedWidget(self);
+    QtGui.QStackedWidget.__init__(self, parent)
     self.map_widget_ = MapLevelWidget(self)
-    self.setContentsMargins(0,0,0,0)
     self.preset_widget_ = PresetWidget(self)
-    self.stack.addWidget(self.map_widget_);
-    self.stack.addWidget(self.preset_widget_);
-    self.stack.setContentsMargins(0,0,0,0)
+    self.addWidget(self.preset_widget_);
+    self.addWidget(self.map_widget_);
+    self.setContentsMargins(0,0,0,0)
     self.setMinimumSize(self.preset_widget_.minimumSize())
     
   def Update(self):
@@ -57,16 +55,14 @@ class AdditionalSettingsWidget(QtGui.QWidget):
       self.map_widget_.Update()
       self.setMinimumSize(self.map_widget_.minimumSize())
       self.resize(self.map_widget_.minimumSize())
-      self.stack.resize(self.map_widget_.minimumSize())
-      self.stack.setMinimumSize(self.map_widget_.minimumSize())
-      self.stack.setCurrentWidget(self.map_widget_)
+      self.setMinimumSize(self.map_widget_.minimumSize())
+      self.setCurrentWidget(self.map_widget_)
     elif all_entity:
       self.preset_widget_.Update()
       self.setMinimumSize(self.preset_widget_.minimumSize())
       self.resize(self.preset_widget_.minimumSize())
-      self.stack.resize(self.preset_widget_.minimumSize())
-      self.stack.setMinimumSize(self.preset_widget_.minimumSize())
-      self.stack.setCurrentWidget(self.preset_widget_)
+      self.setMinimumSize(self.preset_widget_.minimumSize())
+      self.setCurrentWidget(self.preset_widget_)
     else:
       self.setEnabled(False)
     
