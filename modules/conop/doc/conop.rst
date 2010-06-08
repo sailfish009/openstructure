@@ -1,7 +1,7 @@
-:mod:`conop` -- Connectivity and Topology of Molecules
+:mod:`~ost.conop` -- Connectivity and Topology of Molecules
 ================================================================================
 
-.. module:: conop
+.. module:: ost.conop
    :synopsis: The conop modules implement different strategies to derive
                connectivity information of molecules.
 

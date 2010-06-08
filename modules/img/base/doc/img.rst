@@ -1,8 +1,8 @@
-:mod:`img` Images and Density Maps
+:mod:`~ost.img` Images and Density Maps
 ================================================================================
   
-.. module:: mol
-   :synopsis: Images and Density Maps
+.. module:: ost.img
+   :synopsis: Images and density maps
               
 Introduction : The ImageHandle
 --------------------------------------------------------------------------------

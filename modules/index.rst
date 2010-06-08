@@ -11,7 +11,7 @@ Introduction
   :maxdepth: 2
 
   intro
-  install.rst
+  install
   
 Modules
 --------------------------------------------------------------------------------
@@ -27,6 +27,7 @@ Modules
   mol/base/mol
   seq/base/seq
   base/base
+  io/io
 
 Extending OpenStructure
 --------------------------------------------------------------------------------

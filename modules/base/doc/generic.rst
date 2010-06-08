@@ -82,12 +82,12 @@ to access a property of a different data type, e.g.:
 Use of Generic Properties in Queries
 --------------------------------------------------------------------------------
 
-The :doc:`query` can also be used for numeric generic properties (i.e. bool, 
+The :doc:`../mol/base/query` can also be used for numeric generic properties (i.e. bool, 
 int, float), but the syntax is slightly different. To access any generic 
 properties, it needs to be specified that they are generic and at which level 
 they are defined. Therefore, all generic properties start with a 'g', followed 
 by an 'a', 'r' or 'c' for atom, residue or chain level respectively. For more 
-details see :doc:`query`. 
+details see :doc:`../mol/base/query`. 
 
 
 API documentation

@@ -114,7 +114,7 @@ the module shared library, a `CMakeLists.txt` file needs to be written for the
   
 
 The line containing the `DEPENDS_ON` directive lists all the modules on which
-the new module depends (in this case :mod:`mol` and :mod:`mol.alg`).  The 
+the new module depends (in this case :mod:`mol` and :mod:`ost.mol.alg`).  The 
 `module` macro will take care of staging the headers, in this case into 
 `ost/mod` and compiling, linking and staging of a library with the  name 
 `libost_mod.so` (`libost_gmod.dylib` on MacOS X).
@@ -243,7 +243,7 @@ Here is finally the build script skeleton that needs to be put into
   
 In the last line the call to the 'target\_link\_libraries' function contains the 
 names of the modules on which the 'mod' unit test code depends (in this case, 
-the :mod:`mol` and :mod:`mol.alg` modules), in addition to the `mod` module 
+the :mod:`mol` and :mod:`ost.mol.alg` modules), in addition to the `mod` module 
 itself.
 
 The Python Wrapper

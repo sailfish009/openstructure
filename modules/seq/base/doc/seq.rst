@@ -1,7 +1,7 @@
-:mod:`seq` -- Sequences and Alignments
+:mod:`~ost.seq` -- Sequences and Alignments
 ================================================================================
 
-.. module:: seq
+.. module:: ost.seq
    :synopsis: Contains classes and functions to deal with sequences and 
               alignments
 

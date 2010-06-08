@@ -1,13 +1,15 @@
-:mod:`img.alg` - Image Processing Algorithms
+:mod:`~ost.img.alg` - Image Processing Algorithms
 ================================================================================
 
-
+.. module:: ost.img.alg
+  :synopsis: Image processing algorithms
+  
 Usage of Image Algorithms
 --------------------------------------------------------------------------------
 
 Image algorithms are objects. To execute them, the algorithms are applied to an 
-image by passing it to the :meth:`img.ImageHandle.Apply` or 
-:meth:`img.ImageHandle.ApplyIP` method:
+image by passing it to the :meth:`ost.img.ImageHandle.Apply` or 
+:meth:`ost.img.ImageHandle.ApplyIP` method:
 
 .. code-block:: python
   

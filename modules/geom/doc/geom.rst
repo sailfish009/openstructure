@@ -1,4 +1,4 @@
-:mod:`ost.geom` -- vectors, matrices and geometrical objects
+:mod:`~ost.geom` -- vectors, matrices and geometrical objects
 ================================================================================
 
 .. module:: ost.geom
