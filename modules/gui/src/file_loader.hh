@@ -46,7 +46,8 @@ private:
   enum ErrorType { DEFAULT = 0,
     IO_LOADING,
     GFX_ADD,
-    GFX_MULTIPLE_ADD
+    GFX_MULTIPLE_ADD,
+    INFO
   };
 
   FileLoader();

@@ -217,6 +217,12 @@ void FileLoader::HandleError(Message m, ErrorType type, const QString& filename,
       break;
     }
   }
+  else if(type==INFO){
+    QMessageBox message_box(QMessageBox::Information,
+        "Information", m._mesg.c_str());
+    message_box.setStandardButtons( QMessageBox::Ok);
+    message_box.exec();
+  }
 }
 
 gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler, const QString& selection)
@@ -361,9 +367,11 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
     conop::Conopology::Instance().ConnectAll(builder,ent,0);
     entities.append(ent);
   }
-
   QFileInfo file_info(filename);
-  if(entities.size()==1){
+  if(entities.empty()){
+    FileLoader::HandleError(Message(QString("No entities found in file: "+ filename).toStdString()),INFO,filename);
+  }
+  else if(entities.size()==1){
     gfx::EntityP gfx_ent(new gfx::Entity(file_info.baseName().toStdString(),entities.first(),mol::Query(selection.toStdString())));
     try{
       gfx::Scene::Instance().Add(gfx_ent);
