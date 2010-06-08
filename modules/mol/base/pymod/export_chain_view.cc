@@ -24,7 +24,7 @@ using namespace boost::python;
 #include <ost/mol/query.hh>
 #include <ost/mol/chain_handle.hh>
 #include <ost/mol/entity_visitor.hh>
-
+#include <ost/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 
@@ -58,6 +58,7 @@ void export_ChainView()
 {
   class_<ChainViewList>("ChainViewList", no_init)
     .def(vector_indexing_suite<ChainViewList>())
+    .def(ost::VectorAdditions<ChainViewList>())    
   ;
 
   void (ChainView::* apply1)(EntityVisitor&) = &ChainView::Apply;

@@ -27,7 +27,7 @@ using namespace ost;
 using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
-
+#include <ost/export_helper/vector.hh>
 void export_Atom()
 {
   class_<AtomBase> atom_base("AtomBase", no_init);
@@ -94,6 +94,7 @@ void export_Atom()
 
   class_<AtomHandleList>("AtomHandleList", no_init)
     .def(vector_indexing_suite<AtomHandleList>())
+    .def(ost::VectorAdditions<AtomHandleList>())
   ;
   class_<AtomProp>("AtomProp", init<>())
     .def_readwrite("element", &AtomProp::element)

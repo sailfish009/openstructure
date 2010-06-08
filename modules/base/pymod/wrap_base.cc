@@ -20,6 +20,7 @@
 
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <ost/export_helper/vector.hh>
 #include <ost/base.hh>
 #include <ost/platform.hh>
 
@@ -41,12 +42,16 @@ BOOST_PYTHON_MODULE(_base)
   typedef std::vector<float> FloatList;
   class_<FloatList>("FloatList", init<>())
     .def(vector_indexing_suite<FloatList>())
+    .def(ost::VectorAdditions<FloatList>())
   ;
+  
   class_<std::vector<String> >("StringList", init<>())
     .def(vector_indexing_suite<std::vector<String> >())
   ;
+  
   typedef std::vector<int> IntList;
   class_<std::vector<int> >("IntList", init<>())
     .def(vector_indexing_suite<std::vector<int> >())
-  ;
+    .def(ost::VectorAdditions<IntList>())
+  ;  
 }
