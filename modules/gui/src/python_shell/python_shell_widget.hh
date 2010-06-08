@@ -67,6 +67,7 @@ signals:
 
 public slots:
   void InsertCompletion(const QString& completion);
+  void InsertPathCompletion(const QString& completion);
   void AppendOutput(unsigned int id,const QString& output);
   void AppendError(unsigned int id,const QString& output);
   void OutputFinished(unsigned int id, bool error);

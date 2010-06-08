@@ -100,7 +100,7 @@ PythonShellWidget::PythonShellWidget(QWidget* parent):
           SLOT(SetCompletionPrefix(const QString&)));
   path_completer_->setWidget(viewport());
   connect(path_completer_,SIGNAL(activated(const QString&)),this, 
-          SLOT(InsertCompletion(const QString&)));
+          SLOT(InsertPathCompletion(const QString&)));
   connect(path_completer_,SIGNAL(recomplete(const QString&)),this, 
           SLOT(Recomplete(const QString&)));
   connect(this,SIGNAL(RequestPathCompletion(const QRect&,bool)),path_completer_, 
@@ -360,6 +360,13 @@ void  PythonShellWidget::InsertCompletion(const QString& completion)
   tc.setPosition(completion_end_,QTextCursor::KeepAnchor);
   tc.insertText(completion);
   setTextCursor(tc);
+}
+void  PythonShellWidget::InsertPathCompletion(const QString& completion)
+{
+  InsertCompletion(completion);
+  if(QFileInfo(completion).isDir()){
+    textCursor().insertText(QDir::separator());
+  }
 }
 
 

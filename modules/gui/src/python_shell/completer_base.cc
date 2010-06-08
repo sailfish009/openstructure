@@ -71,7 +71,7 @@ QString OstCompleterBase::GetCommonMatch()
   }
   QStringList matches;
   for(int i=0;i<completionCount();++i){
-  setCurrentRow(i);
+    setCurrentRow(i);
     matches.append(currentCompletion().remove(0,completionPrefix().length()));
   }
   QString common_match;
