@@ -364,7 +364,8 @@ void  PythonShellWidget::InsertCompletion(const QString& completion)
 void  PythonShellWidget::InsertPathCompletion(const QString& completion)
 {
   InsertCompletion(completion);
-  if(QFileInfo(completion).isDir()){
+  // append dir separator for directories if none present (Windows adds it already for the inline completion)
+  if(QFileInfo(completion).isDir() && ! completion.endsWith(QDir::separator())){
     textCursor().insertText(QDir::separator());
   }
 }
