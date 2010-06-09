@@ -44,7 +44,7 @@ class RenderModeWidget(QtGui.QWidget):
     
     scene_selection = gui.SceneSelection.Instance()
     if scene_selection.GetActiveNodeCount() == 0 and scene_selection.GetActiveViewCount() == 0:
-      ComboOptionsWidget.setEnabled(self,False)
+      self.setEnabled(False)
       return
     
     if scene_selection.GetActiveNodeCount() > 0 :
@@ -53,7 +53,7 @@ class RenderModeWidget(QtGui.QWidget):
         if isinstance(entity, gfx.Entity):
           self.entities_.add(entity)
         else:
-          ComboOptionsWidget.setEnabled(self,False)
+          self.setEnabled(False)
           return
 
     if scene_selection.GetActiveViewCount() > 0 :
