@@ -54,6 +54,9 @@ void RenderModesNode::Update(){
       model->AddNode(this, node);
       render_types_.insert(render_modes[i],node);
     }
+    else{
+      render_types_[render_modes[i]]->Update();
+    }
   }
   QSet<gfx::RenderMode::Type> types_to_delete;
   QMap<gfx::RenderMode::Type,RenderModeNode*>::iterator type;
