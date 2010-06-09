@@ -21,8 +21,9 @@
 /*
   Author: Ansgar Philippsen
 */
-
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+
 #include <iostream>
 #include <ost/img/image.hh>
 #include <ost/img/alg/filter.hh>
@@ -450,9 +451,9 @@ void FourierFiltersTest()
 }
 
 
-DLLEXPORT_IMG_ALG boost::unit_test::test_suite::test_suite* init_unit_test_suite( int argc, char* argv[] )
+boost::unit_test::test_suite* init_unit_test_suite( int argc, char* argv[] )
 {
-    boost::unit_test::test_suite::test_suite* test = BOOST_TEST_SUITE( "FiltersTest" );
+    boost::unit_test::test_suite* test = BOOST_TEST_SUITE( "FiltersTest" );
 
     test->add( BOOST_TEST_CASE( &LineIterator1DTest ) );
     test->add( BOOST_TEST_CASE( &LineIterator2DTest ) );

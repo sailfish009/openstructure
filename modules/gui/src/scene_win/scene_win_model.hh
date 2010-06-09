@@ -23,6 +23,8 @@
   Author: Stefan Scheuber, Marco Biasini, Ansgar Philippsen
  */
 
+#include <QStringList>
+#include <QMimeData>
 #include <QMap>
 #include <QAbstractItemModel>
 
@@ -87,6 +89,10 @@ public:
   virtual bool setData(const QModelIndex& index=QModelIndex(),
                        const QVariant& value=QVariant(), 
                        int role=Qt::DisplayRole);
+
+  virtual QStringList mimeTypes() const;
+  Qt::DropActions supportedDragActions() const;
+  virtual QMimeData* mimeData(const QModelIndexList& indexes) const;
 
   // scene observer interface
   virtual void NodeAdded(const gfx::GfxNodeP& node);

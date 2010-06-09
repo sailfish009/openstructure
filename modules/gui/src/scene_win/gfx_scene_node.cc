@@ -71,10 +71,10 @@ bool GfxSceneNode::SetData(int column, const QVariant& value, int role){
 
 Qt::ItemFlags GfxSceneNode::Flags(int column) const{
   if(column==0){
-    return Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled;
+    return Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled|Qt::ItemIsDragEnabled;
   }
   else if(column==1){
-    return Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsEditable;
+    return Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsEditable|Qt::ItemIsDragEnabled;
   }
   return Qt::NoItemFlags;
 }

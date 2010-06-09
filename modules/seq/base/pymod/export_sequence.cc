@@ -20,8 +20,9 @@
 #include <boost/python/slice.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-using namespace boost::python;
 
+
+#include <ost/export_helper/pair_to_tuple_conv.hh>
 #include <ost/generic_property.hh>
 #include <ost/export_helper/generic_property_def.hh>
 #include <ost/info/info.hh>
@@ -31,11 +32,12 @@ using namespace boost::python;
 #include <ost/seq/sequence_op.hh>
 #include <ost/seq/sequence_list.hh>
 #include <ost/seq/aligned_region.hh>
+#include <ost/seq/views_from_sequences.hh>
 #include "const_seq_list_export_def.hh"
 
 using namespace ost;
 using namespace ost::seq;
-
+using namespace boost::python;
 namespace {
 
 void (SequenceHandle::*attach_one)(const mol::EntityView&)=&SequenceHandle::AttachView;
@@ -102,8 +104,9 @@ struct RevRegionRangeIter {
     if (b_==e_) {
       boost::python::objects::stop_iteration_error();
     }
-    AlignedColumn col=*e_;
     --e_;
+    AlignedColumn col=*e_;
+
     return col;
   }
 private:
@@ -131,6 +134,55 @@ private:
   AlignedColumnIterator e_;
 };
 
+struct ConstSeqListIter {
+  ConstSeqListIter(ConstSequenceList& list):
+    l_(list), b_(l_.begin()), e_(l_.end())
+  { }
+
+  ConstSequenceHandle next()
+  {
+    if (b_==e_) {
+      boost::python::objects::stop_iteration_error();
+    }
+    ConstSequenceHandle s=*b_;  
+    ++b_;
+    return s;
+  }
+private:
+  ConstSequenceList           l_;
+  ConstSequenceList::iterator b_;
+  ConstSequenceList::iterator e_;
+};
+
+struct SeqListIter {
+  SeqListIter(SequenceList& list):
+    l_(list), b_(l_.begin()), e_(l_.end())
+  { }
+
+  SequenceHandle next()
+  {
+    if (b_==e_) {
+      boost::python::objects::stop_iteration_error();
+    }
+    SequenceHandle s=*b_;
+    ++b_;
+    return s;
+  }
+private:
+  SequenceList           l_;
+  SequenceList::iterator b_;
+  SequenceList::iterator e_;
+};
+
+ConstSeqListIter iter_cs(ConstSequenceList& sl) 
+{
+  return ConstSeqListIter(sl);
+}
+
+SeqListIter iter_sl(SequenceList& sl) 
+{
+  return SeqListIter(sl);
+}
 
 RegionRangeIter iter_range1(AlignmentHandle& aln)
 {
@@ -142,7 +194,7 @@ RegionRangeIter iter_range2(AlignedRegion& aln_region)
   return RegionRangeIter(aln_region.begin(), aln_region.end());
 }
 
-RevRegionRangeIter iter_range3(AlignedRegion& aln_region)
+RevRegionRangeIter iter_range_rev(AlignedRegion& aln_region)
 {
   return RevRegionRangeIter(aln_region.begin(), aln_region.end());
 }
@@ -159,6 +211,7 @@ void const_seq_handle_def(O& bp_class)
     .def("__getitem__", &C::GetOneLetterCode)
     .def("GetSequenceOffset", &C::GetSequenceOffset)
     .def("Copy", &C::Copy)
+    .def("IsValid", &C::IsValid)
     .def("GetFirstNonGap", &C::GetFirstNonGap)
     .def("GetLastNonGap", &C::GetLastNonGap)
     .add_property("first_non_gap", &C::GetFirstNonGap)
@@ -226,6 +279,12 @@ void export_sequence()
     class_<RevRegionRangeIter>("RevRegionRangeIter", no_init)
     .def("next", &RevRegionRangeIter::next)
   ;
+  class_<ConstSeqListIter>("ConstSeqListIter", no_init)
+    .def("next", &ConstSeqListIter::next)
+  ;
+  class_<SeqListIter>("SeqListIter", no_init)
+    .def("next", &SeqListIter::next)
+  ;
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)
     .add_property("sequence_count", &AlignmentHandle::GetCount)
@@ -250,11 +309,13 @@ void export_sequence()
     .add_property("sequences", &AlignmentHandle::GetSequences)
     .def("SetSequenceName",  &AlignmentHandle::SetSequenceName)
     .def("SetSequenceOffset", &AlignmentHandle::SetSequenceOffset)
+    .def("GetSequenceOffset", &AlignmentHandle::GetSequenceOffset)
   ;
   class_<AlignedColumn>("AlignedColumn", no_init)
     .def("GetIndex", &AlignedColumn::GetIndex)
     .def("__getitem__", &AlignedColumn::operator[])
     .def("GetRowCount", &AlignedColumn::GetRowCount)
+    .def("GetResidue", &AlignedColumn::GetResidue)
     .def(self_ns::str(self))
   ;
   class_<AlignedRegion>("AlignedRegion", no_init)
@@ -273,27 +334,34 @@ void export_sequence()
     .def("__getitem__", &AlignedRegion::operator[])
     .def("__len__", &AlignedRegion::GetLength)
     .def("__iter__", iter_range2)
-    //~ .def("__iter__", iter_range3)
+    //~ .def("__reversed__", iter_range_rev)
     .add_property("start", &AlignedRegion::GetStart)
     .add_property("end", &AlignedRegion::GetEnd)
   ;
   class_<ConstSequenceList>("ConstSequenceList", init<>())
     CONST_SEQ_LIST_DEF(ConstSequenceList)
     .def("__getitem__", &do_slice_a)
+    .def("__iter__", &iter_cs)    
   ;
   class_<SequenceList>("SequenceList", init<>())
     CONST_SEQ_LIST_DEF(SequenceList)
     .def("__getitem__", &do_slice_b)
+    .def("__iter__", &iter_sl)
   ;
   class_<AlignmentList>("AlignmentList", init<>())
     .def(vector_indexing_suite<AlignmentList>())
     .def("__getitem__", &do_slice_b)
   ;
   implicitly_convertible<SequenceList, ConstSequenceList>();
+  to_python_converter<std::pair<mol::EntityView, mol::EntityView>, 
+                      PairToTupleConverter<mol::EntityView, mol::EntityView> >();
   def("CreateSequenceList", &CreateSequenceList);
   def("SequenceFromChain", seq_from_chain_a);
   def("SequenceFromChain", seq_from_chain_b);
   def("SequenceToInfo", &SequenceToInfo);
+  def("ViewsFromSequences", &ViewsFromSequences, (arg("seq1"), arg("seq2")));
+  def("ViewsFromAlignment", &ViewsFromAlignment, 
+      (arg("aln"), arg("index1")=0, arg("index2")=1));
   def("SequenceListToInfo", &SequenceListToInfo);
   def("SequenceFromInfo", &SequenceFromInfo);
   def("CreateAlignment", &CreateAlignment);

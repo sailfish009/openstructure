@@ -24,8 +24,8 @@
 #include <ost/profile.hh>
 #include <ost/profile.hh>
 #include <ost/base.hh>
-#include <ost/img/alg/stat.hh>
 #include <ost/img/alg/discrete_shrink.hh>
+#include <ost/img/alg/histogram.hh>
 
 #include "gl_helper.hh"
 #include "glext_include.hh"
@@ -62,9 +62,12 @@ namespace gfx {
 MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
   GfxObj(name),
   original_mh_(mh),
-  downsampled_mh_(MapIso::DownsampleMap(mh)),
-  mh_(downsampled_mh_),
+  downsampled_mh_(),
+  mh_(MapIso::DownsampleMap(mh)),
   octree_(mh_),
+  stat_calculated_(false),
+  histogram_calculated_(false),
+  histogram_bin_count_(100),
   level_(level),
   normals_calculated_(false),
   alg_(0),
@@ -72,6 +75,11 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
   debug_octree_(false),
   color_(Color::GREY)
 {
+  // TODO replace with def mat for this gfx obj type
+  if (mh_ != original_mh_) {
+    downsampled_mh_ = mh_;
+  }
+  octree_.Initialize();
   SetMatAmb(Color(0,0,0));
   SetMatDiff(Color(1,1,1));
   SetMatSpec(Color(0.1,0.1,0.1));
@@ -87,16 +95,23 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
                float level, uint a):
   GfxObj(name),
   original_mh_(mh),
-  downsampled_mh_(MapIso::DownsampleMap(mh)),
-  mh_(downsampled_mh_),
+  downsampled_mh_(),
+  mh_(MapIso::DownsampleMap(mh)),
   octree_(mh_),
+  stat_calculated_(false),
+  histogram_calculated_(false),
+  histogram_bin_count_(100),
   level_(level),
   normals_calculated_(false),
   alg_(a),
   debug_octree_(false),
-  color_(Color::GREY)
+  color_(Color::GREY)  
 {
   // TODO replace with def mat for this gfx obj type
+  if (mh_ != original_mh_) {
+    downsampled_mh_ = mh_;
+  }
+  octree_.Initialize();
   SetMatAmb(Color(0,0,0));
   SetMatDiff(Color(1,1,1));
   SetMatSpec(Color(0.1,0.1,0.1));
@@ -261,6 +276,16 @@ void MapIso::OnInput(const InputEvent& e)
 
 void MapIso::Rebuild()
 {
+  if (mh_.IsFrequency() == true){
+    throw Error("Error: Map not in real space. Cannot create of this map");
+  }
+  if (octree_.IsMapManageable(mh_) == false) {
+    throw Error("Error: Map is too big for visualization");
+  }
+  if (IfOctreeDirty()==true) {
+    octree_.SetNewMap(mh_);
+    octree_.Initialize();
+  }
   va_.Clear();
   va_.SetMode(0x2);
   normals_calculated_=false;
@@ -273,7 +298,7 @@ void MapIso::Rebuild()
   va_.CalcNormals(1.0);
   va_.DrawNormals(true);
 #endif  
-  OnRenderModeChange();
+  OnRenderModeChange();  
 }
 
 void MapIso::SetLevel(float l)
@@ -283,6 +308,31 @@ void MapIso::SetLevel(float l)
   Scene::Instance().RequestRedraw();
 }
 
+void MapIso::CalculateStat() const
+{
+  mh_.ApplyIP(stat_);
+  stat_calculated_=true;
+}
+
+void MapIso::CalculateHistogram() const
+{
+  histogram_ = img::alg::HistogramBase(histogram_bin_count_, this->GetMinLevel(), this->GetMaxLevel());
+  mh_.ApplyIP(histogram_);
+  histogram_calculated_=true;
+}
+
+float MapIso::GetMinLevel() const
+{
+  if(!stat_calculated_)CalculateStat();
+  return stat_.GetMinimum();
+}
+
+float MapIso::GetMaxLevel() const
+{
+  if(!stat_calculated_)CalculateStat();
+  return stat_.GetMaximum();
+}
+
 float MapIso::GetLevel() const
 {
   return level_;
@@ -290,9 +340,27 @@ float MapIso::GetLevel() const
 
 float MapIso::GetStdDev() const
 {
-  img::alg::Stat stat;
-  mh_.Apply(stat);
-  return stat.GetStandardDeviation();
+  if(!stat_calculated_)CalculateStat();
+  return stat_.GetStandardDeviation();
+}
+
+void MapIso::SetHistogramBinCount(int count)
+{
+  if (count > 0){
+    histogram_bin_count_ = count;
+    histogram_calculated_ = false;
+  }
+}
+
+int MapIso::GetHistogramBinCount() const
+{
+  return histogram_bin_count_;
+}
+
+std::vector<int> MapIso::GetHistogram() const
+{
+  if(!histogram_calculated_)CalculateHistogram();
+  return histogram_.GetBins();
 }
 
 img::ImageHandle& MapIso::GetMap()
@@ -305,11 +373,15 @@ img::ImageHandle& MapIso::GetOriginalMap()
   return original_mh_;
 }
 
+img::ImageHandle& MapIso::GetDownsampledMap()
+{
+  return downsampled_mh_;
+}
+
 float MapIso::GetMean() const
 {
-  img::alg::Stat stat;
-  mh_.Apply(stat);
-  return static_cast<float>(stat.GetMean());
+  if(!stat_calculated_)CalculateStat();
+  return static_cast<float>(stat_.GetMean());
 }
 
 void MapIso::SetNSF(float nsf)
@@ -319,11 +391,60 @@ void MapIso::SetNSF(float nsf)
   Scene::Instance().RequestRedraw();
 }
 
+/// \brief sets the donsampled map to active
+void MapIso::ShowDownsampledMap()
+{
+  if (downsampled_mh_.IsValid()) mh_ = downsampled_mh_;
+  MakeOctreeDirty();
+  stat_calculated_ = false;
+  histogram_calculated_ = false;
+  Rebuild();
+  Scene::Instance().RequestRedraw();
+}
+
+/// \brief sets the original map to active
+void MapIso::ShowOriginalMap()
+{
+  if (original_mh_.IsValid()) mh_ = original_mh_;
+  MakeOctreeDirty();
+  stat_calculated_ = false;
+  histogram_calculated_ = false;
+  Rebuild();
+  Scene::Instance().RequestRedraw();
+}
+
+
+void MapIso::MakeOctreeDirty()
+{
+  dirty_octree_=true;
+}
+
+MapIsoType MapIso::GetShownMapType() const
+{
+   MapIsoType ret = ORIGINAL_MAP;
+   if (mh_ == downsampled_mh_) {
+     ret = DOWNSAMPLED_MAP;
+   }
+   return ret;
+}
+
+bool MapIso::IfOctreeDirty() const
+{
+  return dirty_octree_;
+}
+
+/// \brief checks if the downsampled map is available
+bool MapIso::IsDownsampledMapAvailable() const
+{
+  return !(downsampled_mh_==img::ImageHandle());
+}
+
 img::ImageHandle MapIso::DownsampleMap(const img::ImageHandle& mh)
 {
   uint downsampling_fact = compute_downsampling_fact(mh);
   img:: ImageHandle ret_mh = mh;
   if (downsampling_fact != 1) {
+    LOG_MESSAGE("Downsampling map for more comfortable visualization")
     img::alg::DiscreteShrink shrink_alg(img::Size(downsampling_fact,downsampling_fact,downsampling_fact));
     ret_mh = mh.Apply(shrink_alg);
   }

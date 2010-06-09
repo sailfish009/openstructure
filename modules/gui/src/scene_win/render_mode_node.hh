@@ -54,8 +54,7 @@ public:
 
   gfx::RenderMode::Type GetRenderMode() const;
 
-  virtual void SetQueryView(mol::QueryViewWrapper part);
-
+  virtual void Update();
 private:
   gfx::EntityP entity_;
   gfx::RenderMode::Type render_mode_;

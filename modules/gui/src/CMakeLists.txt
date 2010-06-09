@@ -12,16 +12,12 @@ side_bar.hh
 splitter_panel_bar.hh
 tabbed_panel_bar.hh
 )
-set(OST_GUI_SEQUENCE_VIEWER_HEADERS
-sequence_item.hh
-sequence_viewer_base.hh
-sequence_viewer.hh
-sequence_scene.hh
-sequence_search_bar.hh
-)
 
-set(OST_GUI_SEQUENCE_VIEW_HEADERS
+set(OST_GUI_SEQUENCE_VIEWER_HEADERS
+align_properties_painter.hh
 base_row.hh
+background_painter.hh
+conservation_painter.hh
 painter.hh
 secstr_row.hh
 seq_secstr_painter.hh
@@ -30,11 +26,14 @@ seq_text_painter.hh
 sequence_delegate.hh
 sequence_model.hh
 sequence_row.hh
+sequence_search_bar.hh
 sequence_table_view.hh
 sequence_viewer.hh
 tick_painter.hh
 title_row.hh
-view_object.hh
+alignment_view_object.hh
+base_view_object.hh
+sequence_view_object.hh
 )
 
 set(OST_GUI_TOOLS_HEADERS
@@ -209,24 +208,25 @@ scene_menu.cc
 widget.cc
 widget_pool.cc
 remote_site_loader.cc
-sequence_viewer/sequence_item.cc
-sequence_viewer/sequence_viewer_base.cc
-sequence_viewer/sequence_viewer.cc
-sequence_viewer/sequence_scene.cc
+sequence_viewer/align_properties_painter.cc
+sequence_viewer/base_row.cc
+sequence_viewer/background_painter.cc
+sequence_viewer/conservation_painter.cc
+sequence_viewer/secstr_row.cc
+sequence_viewer/seq_secstr_painter.cc
+sequence_viewer/seq_selection_painter.cc
+sequence_viewer/seq_text_painter.cc
+sequence_viewer/sequence_delegate.cc
+sequence_viewer/sequence_model.cc
+sequence_viewer/sequence_row.cc
 sequence_viewer/sequence_search_bar.cc
-sequence/base_row.cc
-sequence/secstr_row.cc
-sequence/seq_secstr_painter.cc
-sequence/seq_selection_painter.cc
-sequence/seq_text_painter.cc
-sequence/sequence_delegate.cc
-sequence/sequence_model.cc
-sequence/sequence_row.cc
-sequence/sequence_table_view.cc
-sequence/sequence_viewer.cc
-sequence/tick_painter.cc
-sequence/title_row.cc
-sequence/view_object.cc
+sequence_viewer/sequence_table_view.cc
+sequence_viewer/sequence_viewer.cc
+sequence_viewer/tick_painter.cc
+sequence_viewer/title_row.cc
+sequence_viewer/alignment_view_object.cc
+sequence_viewer/base_view_object.cc
+sequence_viewer/sequence_view_object.cc
 gosty_app.cc
 change_process_name.cc
 main_area.cc
@@ -342,25 +342,26 @@ scene_selection.hh
 widget.hh
 widget_geom_handler.hh
 widget_pool.hh
-sequence_viewer/sequence_item.hh
-sequence_viewer/sequence_viewer_base.hh
-sequence_viewer/sequence_viewer.hh
-sequence_viewer/sequence_scene.hh
+sequence_viewer/align_properties_painter.hh
+sequence_viewer/background_painter.hh
+sequence_viewer/base_row.hh
+sequence_viewer/conservation_painter.hh
+sequence_viewer/painter.hh
+sequence_viewer/secstr_row.hh
+sequence_viewer/seq_secstr_painter.hh
+sequence_viewer/seq_selection_painter.hh
+sequence_viewer/seq_text_painter.hh
+sequence_viewer/sequence_delegate.hh
+sequence_viewer/sequence_model.hh
+sequence_viewer/sequence_row.hh
 sequence_viewer/sequence_search_bar.hh
-sequence/base_row.hh
-sequence/painter.hh
-sequence/secstr_row.hh
-sequence/seq_secstr_painter.hh
-sequence/seq_selection_painter.hh
-sequence/seq_text_painter.hh
-sequence/sequence_delegate.hh
-sequence/sequence_model.hh
-sequence/sequence_row.hh
-sequence/sequence_table_view.hh
-sequence/sequence_viewer.hh
-sequence/tick_painter.hh
-sequence/title_row.hh
-sequence/view_object.hh
+sequence_viewer/sequence_table_view.hh
+sequence_viewer/sequence_viewer.hh
+sequence_viewer/tick_painter.hh
+sequence_viewer/title_row.hh
+sequence_viewer/alignment_view_object.hh
+sequence_viewer/base_view_object.hh
+sequence_viewer/sequence_view_object.hh
 plot_viewer/plot_axis_base.hh
 plot_viewer/plot_data_graphics_item_base.hh
 plot_viewer/plot_function_info.hh
@@ -470,14 +471,13 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
        HEADERS ${OST_GUI_TOOLS_HEADERS} IN_DIR tools
                ${OST_GUI_PLOT_VIEWER_HEADERS} IN_DIR plot_viewer
                ${OST_GUI_SEQUENCE_VIEWER_HEADERS} IN_DIR sequence_viewer
-               ${OST_GUI_SEQUENCE_VIEW_HEADERS} IN_DIR sequence
                ${OST_GUI_PYTHON_SHELL_HEADERS} IN_DIR python_shell
                ${OST_GUI_PANEL_BAR_HEADERS} IN_DIR panel_bar
                ${OST_GUI_SCENE_WIN_HEADERS} IN_DIR scene_win
                ${OST_GUI_INPUT_HEADERS}
                ${OST_GUI_DATA_VIEWER_HEADERS}
                ${OST_GUI_HEADERS}
-       DEPENDS_ON gfx io mol_alg
+       DEPENDS_ON gfx io mol_alg seq_alg
        LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES} ${SPNAV_LIBRARIES})
 include_directories(${PYTHON_INCLUDE_PATH})
 qt4_add_resources(OST_QT_RESOURCE dngr.qrc)

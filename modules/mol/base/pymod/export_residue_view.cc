@@ -22,7 +22,7 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-
+#include <ost/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 
@@ -48,6 +48,7 @@ void export_ResidueView()
 {
   class_<ResidueViewList>("ResidueViewList", no_init)
     .def(vector_indexing_suite<ResidueViewList>())
+    .def(ost::VectorAdditions<ResidueViewList>()) 
   ;
 
   void (ResidueView::* apply1)(EntityVisitor&) = &ResidueView::Apply;

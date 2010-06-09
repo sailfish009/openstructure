@@ -22,7 +22,7 @@
 #include <ost/seq/alg/merge_pairwise_alignments.hh>
 #include <ost/seq/alg/sequence_identity.hh>
 #include <ost/seq/alg/ins_del.hh>
-
+#include <ost/seq/alg/conservation.hh>
 using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
@@ -47,5 +47,6 @@ BOOST_PYTHON_MODULE(_seq_alg)
     .def("GetInsertions", &InsDel::GetInsertions)
   ;
   def("MergePairwiseAlignments", &MergePairwiseAlignments);
+  def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons"));
   export_Align();  
 }

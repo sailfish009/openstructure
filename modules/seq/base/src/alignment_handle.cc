@@ -62,9 +62,9 @@ int AlignmentHandle::GetResidueIndex(int seq_index, int pos) const
 void AlignmentHandle::AddSequence(const ConstSequenceHandle& sequence)
 {
   this->CheckValidity();
-  if (impl_->GetCount()>0 && 
-      impl_->GetSequence(0)->GetLength()!=sequence.GetLength()) {
-    throw InvalidAlignment();
+  if (!sequence.IsValid() || (impl_->GetCount()>0 &&
+      impl_->GetSequence(0)->GetLength()!=sequence.GetLength())) {
+    throw InvalidSequence();
   }
   return impl_->AddSequence(sequence.Impl());
 }
@@ -124,7 +124,7 @@ int AlignmentHandle::GetCount() const
 
 AlignmentHandle AlignmentFromSequenceList(const SequenceList& seq_list)
 {
-  if (seq_list.SequencesHaveEqualLength()) {
+  if (seq_list.IsValid() && seq_list.SequencesHaveEqualLength()) {
     return AlignmentHandle(seq_list.Impl());
   }
   throw InvalidAlignment();
@@ -143,7 +143,7 @@ void AlignmentHandle::AttachView(int seq_index, const mol::EntityView& view)
   impl_->GetSequence(seq_index)->AttachView(view);
 }
 
-void AlignmentHandle::AttachView(int seq_index, const mol::EntityView& view, 
+void AlignmentHandle::AttachView(int seq_index, const mol::EntityView& view,
                                  const String& chain_name)
 {
   this->CheckValidity();
@@ -160,7 +160,7 @@ ConstSequenceHandle AlignmentHandle::FindSequence(const String& name) const
 void AlignmentHandle::Cut(int start, int end)
 {
   this->CheckValidity();
-  for (impl::SequenceListImpl::Iterator i=impl_->Begin(), 
+  for (impl::SequenceListImpl::Iterator i=impl_->Begin(),
        e=impl_->End(); i!=e; ++i) {
     (*i)->Cut(start, end-start);
   }
@@ -170,28 +170,33 @@ void AlignmentHandle::Replace(const AlignedRegion& aln_r, int start, int end){
   this->CheckValidity();
   //check that alignment handle and aligned region contain same number of sequences
   if (impl_->GetCount() != aln_r.GetAlignmentHandle().GetCount()) {
-    throw IntegrityError("alignment handle and aligned region are required "\
-                         "to share the same number of sequences");
+    throw IntegrityError("alignment handle and aligned region are required "
+                         "to have the same number of sequences");
   }
-  int aln_rStart=aln_r.GetStart();
-  int aln_rEnd=aln_r.GetEnd();
+  int aln_r_start=aln_r.GetStart();
+  int aln_r_length=aln_r.GetLength();
   AlignmentHandle aln=aln_r.GetAlignmentHandle();
   //iterate over sequences and replace part of sequences with the substrings
   //from aligned region
   for (int i=0;i<impl_->GetCount() ;++i) {
-    this->GetSequence(i).Impl()->Replace(aln.GetSequence(i).GetString().substr(aln_rStart,aln_rEnd), start, end);
+    String s=aln.GetSequence(i).GetString().substr(aln_r_start, aln_r_length);
+    this->GetSequence(i).Impl()->Replace(s, start, end);
   }
 }
 
-void AlignmentHandle::ShiftRegion(int start, int end, int amount, 
+void AlignmentHandle::ShiftRegion(int start, int end, int amount,
                                   int master)
 {
   this->CheckValidity();
   int cnt=0;
-  for (impl::SequenceListImpl::Iterator i=impl_->Begin(), 
-       e=impl_->End(); i!=e; ++i, ++cnt) {
-    if (master==-1 || cnt==master) {
-      (*i)->ShiftRegion(start, end, amount);
+  if(master!=-1){
+    impl::SequenceImplPtr handle = this->GetSequence(master).Impl();
+    handle->ShiftRegion(start, end, amount);
+  }
+  else{
+    for (impl::SequenceListImpl::Iterator i=impl_->Begin(),
+         e=impl_->End(); i!=e; ++i, ++cnt) {
+        (*i)->ShiftRegion(start, end, amount);
     }
   }
 }
@@ -199,6 +204,9 @@ void AlignmentHandle::ShiftRegion(int start, int end, int amount,
 AlignedRegion AlignmentHandle::MakeRegion(int start, int n, int master) const
 {
   this->CheckValidity();
+  if((start<0 )||( n < 0 )|| ((start + n) > this->GetLength())){
+    throw std::out_of_range("invalid region");
+  }
   return AlignedRegion(*this, start, start+n, master);
 }
 
@@ -216,7 +224,7 @@ char AlignmentHandle::GetOneLetterCode(int seq_index, int pos) const
 
 AlignedColumnIterator AlignmentHandle::begin() const
 {
-  // no need to check for validity here  
+  // no need to check for validity here
   return AlignedColumnIterator(*this, 0, this->GetLength());
 }
 
@@ -244,4 +252,9 @@ void AlignmentHandle::SetSequenceOffset(int seq_index, int offset)
   impl_->GetSequence(seq_index)->SetSequenceOffset(offset);
 }
 
+int AlignmentHandle::GetSequenceOffset(int seq_index)
+{
+  this->CheckValidity();
+  return impl_->GetSequence(seq_index)->GetSequenceOffset();
+}
 }}

@@ -27,7 +27,7 @@ using namespace ost;
 using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
-
+#include <ost/export_helper/vector.hh>
 void export_Atom()
 {
   class_<AtomBase> atom_base("AtomBase", no_init);
@@ -42,8 +42,6 @@ void export_Atom()
     .add_property("qualified_name", &AtomBase::GetQualifiedName)
     .def("IsValid", &AtomBase::IsValid)
     .def(self_ns::str(self))
-    .add_property("hash_code", &AtomBase::GetHashCode)
-    .def("GetHashCode", &AtomBase::GetHashCode)
     .def("GetAtomProps", &AtomBase::GetAtomProps,
          return_value_policy<copy_const_reference>())
     .def("SetAtomProps", &AtomBase::SetAtomProps, args("prop"))
@@ -86,14 +84,17 @@ void export_Atom()
     .add_property("handle", &AtomHandle::GetHandle)
     .add_property("entity", &AtomHandle::GetEntity)
     .def("GetBondPartners", &AtomHandle::GetBondPartners)
+    .def("GetHashCode", &AtomHandle::GetHashCode)    
     .def("FindBondToAtom", &AtomHandle::FindBondToAtom, args("other_atom"))
     .def(self==self)
     .def(self!=self)
     .def("__hash__", &AtomHandle::GetHashCode)
+    .add_property("hash_code", &AtomHandle::GetHashCode)
   ;
 
   class_<AtomHandleList>("AtomHandleList", no_init)
     .def(vector_indexing_suite<AtomHandleList>())
+    .def(ost::VectorAdditions<AtomHandleList>())
   ;
   class_<AtomProp>("AtomProp", init<>())
     .def_readwrite("element", &AtomProp::element)

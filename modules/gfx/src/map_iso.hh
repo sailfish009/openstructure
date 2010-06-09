@@ -26,11 +26,19 @@
 #include <boost/shared_ptr.hpp>
 
 #include <ost/img/map.hh>
+#include <ost/img/alg/stat.hh>
+#include <ost/img/alg/histogram.hh>
+
 #include <ost/gfx/impl/map_octree.hh>
 #include "gfx_object.hh"
 #include "map_iso_prop.hh"
 
 namespace ost { namespace gfx {
+
+enum MapIsoType {
+  ORIGINAL_MAP,
+  DOWNSAMPLED_MAP
+};
 
 class MapIso;
 typedef boost::shared_ptr<MapIso> MapIsoP;
@@ -67,6 +75,9 @@ public:
   /// Will force rebuild of the vertex buffers/indices
   void SetLevel(float l);
   
+  float GetMinLevel() const;
+  float GetMaxLevel() const;
+
   /// \brief get current isocontouring level
   float GetLevel() const;
 
@@ -76,6 +87,16 @@ public:
   /// \brief get std dev of map.
   float GetStdDev() const;
   
+
+  /// \brief get histogram
+  std::vector<int> GetHistogram() const;
+
+  /// \brief set Histogram bin count
+  void SetHistogramBinCount(int count);
+
+  /// \brief get Histogram bin count
+  int GetHistogramBinCount() const;
+
   /// \brief get the map handle of the currently displayed map
   // The following is a hack. For the DataViewer I need to pass a reference to an ImagHandle
   // that never goes out of scope, so I get a reference from here
@@ -85,6 +106,23 @@ public:
   // The following is a hack. For the DataViewer I need to pass a reference to an ImagHandle
   // that never goes out of scope, so I get a reference from here
   img::ImageHandle& GetOriginalMap();
+
+  /// \brief get the map handle of the downsampled map
+  // The following is a hack. For the DataViewer I need to pass a reference to an ImagHandle
+  // that never goes out of scope, so I get a reference from here
+  img::ImageHandle& GetDownsampledMap();
+
+  /// \brief sets the donwsampled map to active
+  void ShowDownsampledMap();
+
+  /// \brief sets the original map to active
+  void ShowOriginalMap();
+
+  /// \brief checks if the downsampled map is available
+  bool IsDownsampledMapAvailable() const ;
+
+  /// \brief returns the type of map currently being show
+  MapIsoType GetShownMapType() const;
 
   /// \brief set  color
   /// 
@@ -100,25 +138,40 @@ public:
   const Color& GetColor() const { return color_; }
   void SetNSF(float smoothf);
   void SetDebugOctree(bool flag) { debug_octree_=flag; }
+
+  /// \brief flags the octree to be rebuilt
+  void MakeOctreeDirty();
+
+  /// \brief checks is the octree needs to be rebuilt
+  bool IfOctreeDirty() const;
+
 protected:
+  void CalculateStat() const;
+  void CalculateHistogram() const;
   virtual void CustomPreRenderGL(bool flag);
   static img::ImageHandle DownsampleMap(const img::ImageHandle& mh);
 
 private:
-  img::MapHandle   original_mh_;
-  img::MapHandle   downsampled_mh_;
-  img::MapHandle   mh_;
-  impl::MapOctree  octree_;
-  float            level_;
-  bool             normals_calculated_;
-  uint             alg_;
-  float            smoothf_;
-  float            min_;
-  float            max_;
-  float            std_dev_;
-  float            min_max_;
-  bool             debug_octree_;
-  Color            color_; 
+  img::MapHandle           original_mh_;
+  img::MapHandle           downsampled_mh_;
+  img::MapHandle           mh_;
+  impl::MapOctree          octree_;
+  mutable img::alg::Stat   stat_;
+  mutable bool             stat_calculated_;
+  mutable img::alg::Histogram   histogram_;
+  mutable bool             histogram_calculated_;
+  int                      histogram_bin_count_;
+  float                    level_;
+  bool                     normals_calculated_;
+  uint                     alg_;
+  float                    smoothf_;
+  float                    min_;
+  float                    max_;
+  float                    std_dev_;
+  float                    min_max_;
+  bool                     debug_octree_;
+  Color                    color_;
+  bool                     dirty_octree_;
 };
 
 }}

@@ -257,48 +257,48 @@ AtomHandle EntityHandle::FindAtom(const String& chain_name,
 
 ResidueHandleIter EntityHandle::ResiduesBegin() const {
   this->CheckValidity();
-  if (Impl()->GetChainMap().empty()) {
+  if (Impl()->GetChainList().empty()) {
     return ResidueHandleIter();
   }
   impl::EntityImplPtr i=Impl();
-  impl::ChainImplPtr chain=i->GetChainMap().begin()->second;
-  return ResidueHandleIter(i->GetChainMap().begin(),
+  impl::ChainImplPtr chain=i->GetChainList().front();
+  return ResidueHandleIter(i->GetChainList().begin(),
                            chain->GetResidueList().begin(), i);
 }
 
 ResidueHandleIter EntityHandle::ResiduesEnd() const {
   this->CheckValidity();
-  if (Impl()->GetChainMap().empty()) {
+  if (Impl()->GetChainList().empty()) {
     return ResidueHandleIter();
   }
   impl::EntityImplPtr i=Impl();
-  impl::ChainImplPtr chain=i->GetChainMap().rbegin()->second;
-  return ResidueHandleIter(i->GetChainMap().end(),
+  impl::ChainImplPtr chain=i->GetChainList().back();
+  return ResidueHandleIter(i->GetChainList().end(),
                            chain->GetResidueList().end(), i);
 }
 
 ChainHandleIter EntityHandle::ChainsBegin() const {
   this->CheckValidity();
-  return ChainHandleIter(Impl()->GetChainMap().begin());
+  return ChainHandleIter(Impl()->GetChainList().begin());
 }
 
 
 ChainHandleIter EntityHandle::ChainsEnd() const {
-  return ChainHandleIter(Impl()->GetChainMap().end());
+  return ChainHandleIter(Impl()->GetChainList().end());
 }
 
 
 AtomHandleIter EntityHandle::AtomsBegin() const {
   this->CheckValidity();
   impl::EntityImplPtr ent=Impl();
-  if (ent->GetChainMap().empty()) {
+  if (ent->GetChainList().empty()) {
     return AtomHandleIter();
   }
-  impl::ResidueImplList& r=ent->GetChainMap().begin()->second->GetResidueList();
+  impl::ResidueImplList& r=ent->GetChainList().front()->GetResidueList();
   if (r.empty()) {
     return AtomHandleIter();
   }
-  return AtomHandleIter(ent->GetChainMap().begin(), r.begin(),
+  return AtomHandleIter(ent->GetChainList().begin(), r.begin(),
                         r.front()->GetAtomList().begin(), ent, true);
 }
 
@@ -306,14 +306,14 @@ AtomHandleIter EntityHandle::AtomsEnd() const
 {
   this->CheckValidity();
   impl::EntityImplPtr ent=Impl();
-  if (ent->GetChainMap().empty()) {
+  if (ent->GetChainList().empty()) {
     return AtomHandleIter();
   }
-  impl::ResidueImplList& r=ent->GetChainMap().rbegin()->second->GetResidueList();
+  impl::ResidueImplList& r=ent->GetChainList().back()->GetResidueList();
   if (r.empty()) {
     return AtomHandleIter();
   }
-  return AtomHandleIter(ent->GetChainMap().end(), r.end(),
+  return AtomHandleIter(ent->GetChainList().end(), r.end(),
                         r.back()->GetAtomList().end(), ent, false);
 }
 

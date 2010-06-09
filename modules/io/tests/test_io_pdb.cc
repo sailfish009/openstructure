@@ -16,9 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/test_utils/compare_files.hh>
 #include <ost/mol/mol.hh>
+#include <ost/conop/conop.hh>
 #include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/pdb_reader.hh>
+#include <ost/io/pdb_writer.hh>
 #include <ost/io/io_exception.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -160,17 +163,16 @@ BOOST_AUTO_TEST_CASE(anisou_record)
   mol::AtomHandle a1=ent.FindAtom("A", mol::ResNum(7), "N");
   BOOST_REQUIRE(a1.IsValid());
   mol::AtomProp props=a1.GetAtomProps();
-  BOOST_CHECK_CLOSE( 0.0100, props.anisou(0, 0), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0016, props.anisou(1, 0), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0026, props.anisou(2, 0), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0016, props.anisou(0, 1), 1e-4);
-  BOOST_CHECK_CLOSE( 0.0110, props.anisou(1, 1), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0054, props.anisou(2, 1), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0026, props.anisou(0, 2), 1e-4);
-  BOOST_CHECK_CLOSE(-0.0054, props.anisou(1, 2), 1e-4);
-  BOOST_CHECK_CLOSE( 0.0120, props.anisou(2, 2), 1e-4);    
+  BOOST_CHECK_CLOSE(Real( 0.0100), props.anisou(0, 0), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0016), props.anisou(1, 0), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0026), props.anisou(2, 0), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0016), props.anisou(0, 1), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real( 0.0110), props.anisou(1, 1), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0054), props.anisou(2, 1), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0026), props.anisou(0, 2), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0054), props.anisou(1, 2), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real( 0.0120), props.anisou(2, 2), Real(1e-4));    
 }
-
 
 BOOST_AUTO_TEST_CASE(only_66_cols)
 {
@@ -186,7 +188,54 @@ BOOST_AUTO_TEST_CASE(no_endmdl_record)
   PDBReader reader(fname);
   mol::EntityHandle ent=mol::CreateEntity();
   BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
 
+BOOST_AUTO_TEST_CASE(write_atom)
+{
+  std::stringstream out;
+  PDBWriter writer(out);
+  
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::ChainHandle ch=edi.InsertChain("A");
+  mol::ResidueHandle r=edi.AppendResidue(ch, "GLY");
+  mol::AtomProp c_prop;
+  c_prop.element="C";
+  c_prop.occupancy=1.0;
+  c_prop.b_factor=128.0;
+  mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), 
+                                   c_prop);
+  writer.Write(ent);
+  String s=out.str();
+  BOOST_CHECK_EQUAL(s.substr(0, 54), 
+                    "ATOM      1  CA  GLY A   1      32.000-128.000  -2.500");
+  BOOST_CHECK_EQUAL(s.substr(54, 26), 
+                    "  1.00128.00           C  ");
+}
+
+BOOST_AUTO_TEST_CASE(write_hetatom)
+{
+  std::stringstream out;
+  PDBWriter writer(out);
+  
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::ChainHandle ch=edi.InsertChain("A");
+  mol::ResidueHandle r=edi.AppendResidue(ch, "CA");
+  mol::AtomProp c_prop;
+  c_prop.element="CA";
+  c_prop.is_hetatm=true;
+  c_prop.mass=40.01;
+  c_prop.occupancy=1.0;
+  c_prop.b_factor=40.75;
+  mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), 
+                                   c_prop);
+  writer.Write(ent);
+  String s=out.str();
+  BOOST_CHECK_EQUAL(s.substr(0, 54), 
+                    "HETATM    1 CA    CA A   1      32.000-128.000  -2.500");
+  BOOST_CHECK_EQUAL(s.substr(54, 26), 
+                    "  1.00 40.75          CA  ");
 }
 
 BOOST_AUTO_TEST_CASE(no_endmdl_record_fault_tolerant)
@@ -205,6 +254,100 @@ BOOST_AUTO_TEST_CASE(no_endmdl_record_fault_tolerant)
   BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);  
   BOOST_CHECK_EQUAL(ent.GetAtomCount(), 2);  
   PDB::PopFlags();
+}
+
+BOOST_AUTO_TEST_CASE(alt_loc_import_export)
+{
+  String fname("testfiles/pdb/alt-loc.pdb");  
+  // this scope is required to force the writer stream to be closed before 
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    PDBReader reader(fname);
+    PDBWriter writer(String("testfiles/pdb/alt-loc-out.pdb"));
+    
+    mol::EntityHandle ent=mol::CreateEntity();
+    reader.Import(ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/alt-loc.pdb", 
+                            "testfiles/pdb/alt-loc-out.pdb"));
+}
+
+BOOST_AUTO_TEST_CASE(write_ter)
+{
+  String fname("testfiles/pdb/ter.pdb");  
+  // this scope is required to force the writer stream to be closed before 
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    PDBReader reader(fname);
+    PDBWriter writer(String("testfiles/pdb/ter-out.pdb"));
+    
+    mol::EntityHandle ent=mol::CreateEntity();
+    reader.Import(ent);
+    // we use conopology to mark amino acids as peptide-linking. this is require 
+    // for proper TER output
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/ter.pdb", 
+                            "testfiles/pdb/ter-out.pdb"));
+}
+
+BOOST_AUTO_TEST_CASE(write_conect)
+{
+  // this scope is required to force the writer stream to be closed before
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    PDBReader reader(String("testfiles/pdb/conect.pdb"));
+    PDBWriter writer(String("testfiles/pdb/conect-out.pdb"));
+    mol::EntityHandle ent=mol::CreateEntity();
+    reader.Import(ent);
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/conect.pdb",
+                            "testfiles/pdb/conect-out.pdb"));
+}
+
+BOOST_AUTO_TEST_CASE(res_name_too_long)
+{
+  std::stringstream out;
+  PDBWriter writer(out);
+  
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::ChainHandle ch=edi.InsertChain("A");
+  mol::ResidueHandle r=edi.AppendResidue(ch, "CALCIUM");
+  mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5));
+  BOOST_CHECK_THROW(writer.Write(ent), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(chain_name_too_long)
+{
+  std::stringstream out;
+  PDBWriter writer(out);
+  
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::ChainHandle ch=edi.InsertChain("AB");
+  mol::ResidueHandle r=edi.AppendResidue(ch, "CA");
+  mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5));
+  BOOST_CHECK_THROW(writer.Write(ent), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(atom_name_too_long)
+{
+  std::stringstream out;
+  PDBWriter writer(out);
+  
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::ChainHandle ch=edi.InsertChain("A");
+  mol::ResidueHandle r=edi.AppendResidue(ch, "CA");
+  mol::AtomHandle a=edi.InsertAtom(r, "CALCIUM", geom::Vec3(32.0, -128.0, -2.5));
+  BOOST_CHECK_THROW(writer.Write(ent), IOException);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

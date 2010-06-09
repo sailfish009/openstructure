@@ -37,8 +37,6 @@ class DLLEXPORT_OST_MOL SurfaceImpl {
   typedef std::vector<SurfaceVertex> VertexList;
   typedef std::vector<SurfaceTri> FaceList;
 
-  friend class ::ost::mol::rsurf::RSurf;
-
 public:
   SurfaceImpl();
 

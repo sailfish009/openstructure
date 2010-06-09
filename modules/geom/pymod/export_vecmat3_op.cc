@@ -58,4 +58,5 @@ void export_VecMat3_op()
   def("Minor",Mat3Minor);
   def("EulerTransformation",EulerTransformation);
   def("AxisRotation",AxisRotation);
+  def("OrthogonalVector",OrthogonalVector);
 }

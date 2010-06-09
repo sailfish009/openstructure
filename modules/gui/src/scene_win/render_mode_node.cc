@@ -77,9 +77,9 @@ gfx::RenderMode::Type RenderModeNode::GetRenderMode() const {
   return render_mode_;
 }
 
-void RenderModeNode::SetQueryView(mol::QueryViewWrapper part)
+void RenderModeNode::Update()
 {
-  //Do Nothing
+  this->SetQueryView(mol::QueryViewWrapper(entity_->GetRenderView(this->GetRenderMode())));
 }
 
 }}

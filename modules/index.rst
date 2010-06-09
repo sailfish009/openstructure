@@ -2,7 +2,39 @@ OpenStructure documentation
 ================================================================================
 
 .. toctree::
+  :maxdepth: 2
+  
+Introduction
+--------------------------------------------------------------------------------  
 
-  geom/doc/geom
-  conop/doc/conop
-  mol/base/doc/mol
+.. toctree::
+  :maxdepth: 2
+
+  intro
+  install
+  
+Modules
+--------------------------------------------------------------------------------
+
+.. toctree::
+  :maxdepth: 2
+
+  base/generic
+  img/base/img
+  img/alg/alg
+  geom/geom
+  conop/conop
+  mol/base/mol
+  seq/base/seq
+  base/base
+  io/io
+
+Extending OpenStructure
+--------------------------------------------------------------------------------
+
+.. toctree::
+  :maxdepth: 2
+  
+  newmodule
+  external
+  

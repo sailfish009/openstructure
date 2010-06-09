@@ -17,29 +17,35 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 from _io import *
-from ost import mol,conop
+from ost import mol, conop
 
 def LoadPDB(filename, restrict_chains="", no_hetatms=False,
             fault_tolerant=False, load_multi=False,
             join_spread_atom_records=False, calpha_only=False):
   """
-  Load PDB file from disk.
+  Load PDB file from disk and returns one or more entities. Several options 
+  allow to customize the exact behaviour of the PDB import.
 
-  If restrict_chains is not an empty string, only chains listed in the
-  string will be imported.
+  :param restrict_chains: If not an empty string, only chains listed in the
+     string will be imported.
 
-  If fault_tolerant is set to true, the import will succeed, even if the
-  PDB contains faulty records. The faulty records will be ignored in that
-  case.
+  :param fault_tolerant: If True, the import will succeed, even if the
+     PDB contains faulty records. The faulty records will be ignored and import 
+     continues as if the records haven't been present.
 
-  If not_hetatms is set to True, HETATM records will be ignored
+  :param no_hetatms: If set to True, HETATM records will be ignored
 
-  If load_multi is set to true, a list of entities will be returned instead
-  of only the first.
+  :param load_multi: If set to True, a list of entities will be returned instead
+     of only the first. This is useful when dealing with multi-PDB files.
 
-  If join_spread_atom_records is set to true, atom records belonging to the
-  same residue are joined, even if they do not appear sequentially in the PDB
-  file.
+  :param join_spread_atom_records: If set to true, atom records belonging to the
+     same residue are joined, even if they do not appear sequentially in the PDB
+     file.
+  :rtype: :class:`~ost.mol.EntityHandle` or a list thereof if `load_multi` is 
+      True.
+      
+  :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
+      inexistent file
   """
   conop_inst=conop.Conopology.Instance()
   builder=conop_inst.GetBuilder("DEFAULT")
@@ -78,7 +84,13 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
 
 def SavePDB(models, filename):
   """
-  Save entity or list of entities to disk
+  Save entity or list of entities to disk. If a list of entities is supplied the 
+  PDB file will be saved as a multi PDB file. Each of the entities is wrapped 
+  into a MODEL/ENDMDL pair.
+  
+  :param models: The entity or list of entities (handles or views) to be saved
+  :param filename: The filename
+  :type  filename: string
   """
   if not getattr(models, '__len__', None):
     models=[models]

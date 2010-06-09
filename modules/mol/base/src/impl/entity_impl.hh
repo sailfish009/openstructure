@@ -56,7 +56,7 @@ typedef std::map<AtomImpl*,AtomImplPtr> AtomImplMap;
 /// \internal
 typedef std::map<ResidueImpl*,ResidueImplPtr> ResidueImplMap;
 /// \internal
-typedef std::map<String,ChainImplPtr> ChainImplMap;
+typedef std::vector<ChainImplPtr> ChainImplList;
 /// \internal
 typedef std::map<ConnectorImpl*,ConnectorImplP> ConnectorImplMap;
 /// \internal
@@ -201,10 +201,9 @@ public:
 
   bool IsTransfIdentity() const;
 
-  ChainImplList GetChainList() const;
+  const ChainImplList& GetChainList() const { return chain_list_; }
 
-  ChainImplMap& GetChainMap() {return chain_map_; }
-  const ChainImplMap& GetChainMap() const {return chain_map_; }
+  ChainImplList& GetChainList() { return chain_list_; }
 
   void DeleteFromConnMap(const ConnectorImplP& conn);
 
@@ -241,6 +240,8 @@ public:
 
   const String& GetName() const;
 
+  impl::ChainImplList::iterator GetChain(const String& name);
+
   void SetName(const String& ent_name);
 
 private:
@@ -251,7 +252,7 @@ private:
   void DoCopyBondsAndTorsions(EntityImplPtr dest);
 
   AtomImplMap atom_map_;
-  ChainImplMap chain_map_;
+  ChainImplList chain_list_;
   ConnectorImplMap connector_map_;
   TorsionImplMap torsion_map_;
 

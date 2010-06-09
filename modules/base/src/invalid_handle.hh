@@ -27,9 +27,11 @@
 namespace ost {
 
 /// \brief Signals access of member functions of invalid handles
-class DLLEXPORT_OST_BASE InvalidHandle : public Error {
+class DLLEXPORT InvalidHandle : public Error {
 public:
-  InvalidHandle();
+  InvalidHandle()
+    : Error("Can not access invalid handle or view") 
+  {}
 }; 
 
 template <typename H>

@@ -15,6 +15,7 @@ aligned_region.hh
 aligned_column.hh
 aligned_column_iterator.hh
 invalid_sequence.hh
+views_from_sequences.hh
 )
 
 set(OST_SEQ_SOURCES
@@ -26,6 +27,7 @@ aligned_column.cc
 sequence_list.cc
 alignment_handle.cc
 sequence_op.cc
+views_from_sequences.cc
 )
 module(NAME seq SOURCES ${OST_SEQ_SOURCES} 
        HEADERS ${OST_SEQ_IMPL_HEADERS} IN_DIR impl

@@ -1,9 +1,11 @@
 Vectors
 ================================================================================
-.. currentmodule:: geom
+.. currentmodule:: ost.geom
 
 
-The :class:`Vec2`, :class:`Vec3`, :class:`Vec4` classes implement vectors in 2, 3 and four dimensions. They support basic arithmetic via overloaded operators. Essentially, the following basic operations are available:
+The :class:`Vec2`, :class:`Vec3`, :class:`Vec4` classes implement vectors in 2, 
+3 and four dimensions. They support basic arithmetic via overloaded operators. 
+Essentially, the following basic operations are available:
 
  * adding and subtracting two vectors
  * negation
@@ -19,7 +21,8 @@ This is shown in the following example:
    print vec_a+vec_b
    print vec_a*3-vec_b
 
-The standard vector operations are implemented as :ref:`free standing functions <vector-functions>`:
+The standard vector operations are implemented as :ref:`free standing functions 
+<vector-functions>`:
 
 
 .. code-block:: python

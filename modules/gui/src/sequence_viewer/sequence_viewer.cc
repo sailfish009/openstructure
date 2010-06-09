@@ -16,37 +16,44 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QMenu>
 
-#include <ost/dyn_cast.hh>
-#include <ost/mol/view_op.hh>
+/*
+  Author: Stefan Scheuber
+ */
+#include <boost/pointer_cast.hpp>
+
+#include <QAbstractItemView>
+#include <QApplication>
+#include <QClipboard>
+#include <QDir>
+#include <QHeaderView>
+#include <QMenu>
+#include <QPushButton>
+#include <QShortcut>
+#include <QVBoxLayout>
+#include <QVarLengthArray>
+
+#include <ost/platform.hh>
+#include <ost/mol/chain_view.hh>
+#include <ost/mol/entity_view.hh>
+
+#include <ost/seq/sequence_handle.hh>
 
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node_visitor.hh>
-#include <ost/gfx/gfx_node.hh>
-#include <ost/gfx/gfx_object.hh>
 
 #include <ost/gui/widget_registry.hh>
 #include <ost/gui/gosty_app.hh>
 
+#include "sequence_model.hh"
 #include "sequence_viewer.hh"
-
 
 namespace ost { namespace gui {
 
-struct GetNodesVisitor: public gfx::GfxNodeVisitor {
-  GetNodesVisitor(): nodes_() {}
-  virtual void VisitObject(gfx::GfxObj* o, const Stack& st) {
-    nodes_.push_back(o->shared_from_this());
-  }
-  gfx::NodePtrList nodes_;
-  gfx::NodePtrList GetNodes(){return nodes_;}
-};
-
 class SequenceViewerFactory: public WidgetFactory {
 public:
-	SequenceViewerFactory() :
+  SequenceViewerFactory() :
     WidgetFactory("ost::gui::SequenceViewer", "Sequence Viewer") {
   }
 
@@ -57,186 +64,358 @@ public:
 
 OST_REGISTER_WIDGET(SequenceViewer, SequenceViewerFactory);
 
-SequenceViewer::SequenceViewer(QWidget* parent):
-  SequenceViewerBase(parent), we_are_changing_the_selection_(false)
-{
-  gfx::Scene::Instance().AttachObserver(this);
-  this->SetDisplayStyle(SequenceViewer::LOOSE);
+struct GetNodesVisitor: public gfx::GfxNodeVisitor {
+  GetNodesVisitor(): nodes_() {}
+  virtual void VisitObject(gfx::GfxObj* o, const Stack& st) {
+    nodes_.push_back(o->shared_from_this());
+  }
+  gfx::NodePtrList nodes_;
+  gfx::NodePtrList GetNodes(){return nodes_;}
+};
 
-  gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
-  GetNodesVisitor gnv;
-  gfx::Scene::Instance().Apply(gnv);
-  gfx::NodePtrList list = gnv.GetNodes();
-  for(unsigned int i=0; i<list.size();i++){
-    this->NodeAdded(list[i]);
+SequenceViewer::SequenceViewer(bool stand_alone, QWidget* parent): Widget(NULL,parent)
+{
+  model_ = new SequenceModel(this);
+
+  QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setMargin(0);
+  layout->setSpacing(0);
+  this->setLayout(layout);
+
+  this->InitActions();
+
+
+  if(stand_alone){
+    this->InitMenuBar();
+  }
+  this->InitSearchBar();
+  this->InitView();
+
+  if(!stand_alone){
+    gfx::Scene::Instance().AttachObserver(this);
+    gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
+    GetNodesVisitor gnv;
+    gfx::Scene::Instance().Apply(gnv);
+    gfx::NodePtrList list = gnv.GetNodes();
+    for(unsigned int i=0; i<list.size();i++){
+      this->NodeAdded(list[i]);
+    }
   }
 }
 
-SequenceViewer::~SequenceViewer()
+void SequenceViewer::InitMenuBar()
 {
-  gfx::Scene::Instance().DetachObserver(this);
+  toolbar_ = new QToolBar(this);
+  toolbar_->setToolButtonStyle(Qt::ToolButtonIconOnly);
+  toolbar_->setIconSize(QSize(16,16));
+  toolbar_->addActions(action_list_);
+  layout()->addWidget(toolbar_);
+}
+
+void SequenceViewer::InitSearchBar()
+{
+  seq_search_bar_ = new SeqSearchBar(this);
+  seq_search_bar_->hide();
+  layout()->addWidget(seq_search_bar_);
+  connect(seq_search_bar_, SIGNAL(Changed(const QString&, bool, const QString&)), this, SLOT(OnSearchBarUpdate(const QString&, bool, const QString&)));
+}
+
+void SequenceViewer::InitView()
+{
+  seq_table_view_ = new SequenceTableView(model_);
+  layout()->addWidget(seq_table_view_);
+
+  connect(model_,SIGNAL(columnsInserted(const QModelIndex&, int, int)),seq_table_view_,SLOT(columnCountChanged(const QModelIndex&, int, int)));
+  connect(model_,SIGNAL(rowsInserted(const QModelIndex&, int, int)),seq_table_view_,SLOT(rowCountChanged(const QModelIndex&, int, int)));
+
+  seq_table_view_->horizontalHeader()->setMinimumSectionSize(2);
+  seq_table_view_->verticalHeader()->setMinimumSectionSize(2);
+  seq_table_view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+  connect(seq_table_view_,SIGNAL(doubleClicked(const QModelIndex&)),model_,SLOT(DoubleClicked(const QModelIndex&)));
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))  
+  connect(seq_table_view_->GetStaticColumn(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
+  connect(seq_table_view_->GetStaticRow(),SIGNAL(doubleClicked(const QModelIndex&)),this,SLOT(DoubleClicked(const QModelIndex&)));
+#endif
+  connect(seq_table_view_,SIGNAL(CopyEvent(QKeyEvent*)),this,SLOT(CopyEvent(QKeyEvent*)));
+  connect(seq_table_view_,SIGNAL(MouseWheelEvent(QWheelEvent*)),this,SLOT(MouseWheelEvent(QWheelEvent*)));
+}
+
+void SequenceViewer::InitActions()
+{
+  QDir icon_path(GetSharedDataPath().c_str());
+  icon_path.cd("gui");
+  icon_path.cd("icons");
+
+  QAction* find_action = new QAction(this);
+  find_action->setText("Find Dialog");
+  find_action->setShortcut(QKeySequence(tr("Ctrl+F")));
+  find_action->setCheckable(true);
+  find_action->setToolTip("Display Find-Dialog (Ctrl+F)");
+  find_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("find_icon.png")));
+  action_list_.append(find_action);
+  connect(find_action, SIGNAL(triggered(bool)), this, SLOT(FindInSequence()));
+
+  display_mode_actions_ = new QActionGroup(this);
+  QAction* menu_action = new QAction(this);
+  menu_action->setText("Menubar");
+  menu_action->setShortcut(QKeySequence(tr("Ctrl+M")));
+  menu_action->setToolTip("Display Options (Ctrl+M)");
+  menu_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("menubar_icon.png")));
+  action_list_.append(menu_action);
+  connect(menu_action, SIGNAL(triggered(bool)), this, SLOT(DisplayMenu()));
 }
 
 void SequenceViewer::NodeAdded(const gfx::GfxNodeP& n)
 {
-  if (gfx::EntityP o=dyn_cast<gfx::Entity>(n)) {
-    // extract all chains 
-    mol::EntityView v=o->GetView();
-    for (mol::ChainViewList::const_iterator c=v.GetChainList().begin(),
-         e1=v.GetChainList().end(); c!=e1; ++c) {
-      mol::ChainView chain=*c;
-      String seq_str;
-      seq_str.reserve(chain.GetResidueCount());
-      for (mol::ResidueViewList::const_iterator r=chain.GetResidueList().begin(),
-           e2=chain.GetResidueList().end(); r!=e2; ++r) {
-        mol::ResidueView res=*r;
-        seq_str.append(1, res.GetOneLetterCode());
-      }
-      if (seq_str.empty()) {
-        continue;
-      }      
-      String name=o->GetName();
-      if (chain.GetName()!="" && chain.GetName()!=" ") {
-        name+=" ("+chain.GetName()+")";
-      }
-      seq::SequenceHandle seq=seq::CreateSequence(name, seq_str);
-      mol::EntityView v_one_chain=v.GetHandle().CreateEmptyView();
-      v_one_chain.AddChain(chain, mol::ViewAddFlag::INCLUDE_ALL);
-      seq.AttachView(v_one_chain);
-      SequenceItem* item=new SequenceItem(seq);
-      connect(item, SIGNAL(SelectionChanged(SequenceItem*)),
-              this, SLOT(ItemSelectionChanged(SequenceItem*)));
-      this->AddSequence(item);
-      obj_map_.insert(std::make_pair(item, o));      
-    }
+  if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(n)) {
+    model_->InsertGfxEntity(o);
+    seq_table_view_->resizeColumnsToContents();
+    seq_table_view_->resizeRowsToContents();
   }
-}
-
-void SequenceViewer::ItemSelectionChanged(SequenceItem* item)
-{
-  if (we_are_changing_the_selection_==true) {
-    return;
-  }
-  we_are_changing_the_selection_=true;
-  // map sequence item back to graphical object
-  if (gfx::GfxObjP p=this->GfxObjForSeqItem(item)) {
-    gfx::EntityP ec=dyn_cast<gfx::Entity>(p);
-    seq::SequenceHandle seq=item->GetSequence();
-    mol::EntityView att_v=seq.GetAttachedView();
-    if (!att_v) {
-      we_are_changing_the_selection_=false;      
-      return;
-    }
-    const SequenceItem::Selection& sel=item->GetSelection();
-    // reset selection of "our" chain
-    mol::EntityView sel_v=ec->GetSelection();
-    if (mol::ChainView c=sel_v.FindChain(att_v.GetChainList().front().GetHandle())) {
-      sel_v.RemoveChain(c);
-    }
-    if (sel.empty()) {
-      try {
-        ec->SetSelection(sel_v);        
-      } catch(...) {
-      }
-      we_are_changing_the_selection_=false;      
-      return;
-    }   
-    for (SequenceItem::Selection::const_iterator j=sel.begin(),
-         e=sel.end(); j!=e; ++j) {
-      for (size_t k=j->Loc; k<j->End(); ++k) {
-        if (int(k)>seq.GetLength() || seq.GetOneLetterCode(k)=='-') {
-          continue;
-        }
-        if (mol::ResidueView rv=seq.GetResidue(k)) {
-          sel_v.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ATOMS);
-        }
-      }
-    }
-    sel_v.AddAllInclusiveBonds();
-    try {
-      ec->SetSelection(sel_v);      
-    } catch(...) {
-    }
-
-  }
-  we_are_changing_the_selection_=false;
+  this->UpdateSearchBar();
 }
 
 void SequenceViewer::NodeRemoved(const gfx::GfxNodeP& node)
 {
-  if (gfx::EntityP o=dyn_cast<gfx::Entity>(node)) {
-    SequenceItemList seq_items=this->SeqItemsForGfxObj(o);
-    for (SequenceItemList::iterator i=seq_items.begin(),
-     e=seq_items.end(); i!=e; ++i) {
-    SequenceItem* seq_item=*i;
-    this->RemoveSequence(seq_item);
-    delete seq_item;
-    }
+  if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(node)) {
+    model_->RemoveGfxEntity(o);
   }
 }
 
-void SequenceViewer::SelectionChanged(const gfx::GfxObjP& o, 
+void SequenceViewer::AddAlignment(const seq::AlignmentHandle& alignment)
+{
+  if(alignment.GetCount()>0 && alignment.GetLength()>0){
+    model_->InsertAlignment(alignment);
+    seq_table_view_->resizeColumnsToContents();
+    seq_table_view_->resizeRowsToContents();
+  }
+}
+
+void SequenceViewer::RemoveAlignment(const seq::AlignmentHandle& alignment)
+{
+  model_->RemoveAlignment(alignment);
+}
+
+void SequenceViewer::UpdateSearchBar()
+{
+  QStringList sequence_names_;
+  for(int i = 1; i< model_->rowCount(); i++){
+    QString name = model_->data(model_->index(i,0),Qt::DisplayRole).toString();
+    sequence_names_.append(name);
+  }
+  seq_search_bar_->UpdateItems(sequence_names_);
+}
+
+void SequenceViewer::SelectionModelChanged(const QItemSelection& sel, const QItemSelection& desel)
+{
+  gfx::Scene::Instance().DetachObserver(this);
+  model_->SelectionChanged(sel, desel);
+  gfx::Scene::Instance().AttachObserver(this);
+}
+
+void SequenceViewer::SelectionChanged(const gfx::GfxObjP& o,
                                       const mol::EntityView& view)
 {
-  if (we_are_changing_the_selection_) {
-    return;
+  disconnect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+  gfx::EntityP entity=boost::dynamic_pointer_cast<gfx::Entity>(o);
+  if(entity){
+    const QModelIndexList& list = model_->GetModelIndexes(entity, view);
+    this->SelectList(list);
   }
-  we_are_changing_the_selection_=true;
-  gfx::EntityP ec=dyn_cast<gfx::Entity>(o);
-  
+  connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+}
 
-  std::vector<bool> selected_cols;
-  selected_cols.resize(this->GetLongestSequenceLength(), false);
+void SequenceViewer::DoubleClicked(const QModelIndex& index)
+{
+  disconnect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+  model_->DoubleClicked(index);
+  connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+}
 
-  // get affected sequence items
-  SequenceItemList seq_items=this->SeqItemsForGfxObj(o);
-
-  for (SequenceItemList::iterator i=seq_items.begin(), 
-       e=seq_items.end(); i!=e; ++i) {
-    SequenceItem* seq_item=*i;
-
-    if(view.GetChainCount()==0){
-        this->SelectColumns(seq_item, selected_cols);
+void SequenceViewer::MouseWheelEvent(QWheelEvent* event)
+{
+  int delta = event->delta();
+  if (event->orientation() == Qt::Vertical) {
+    if(delta>0){
+      model_->ZoomIn();
+      seq_table_view_->viewport()->update();
+      seq_table_view_->resizeColumnsToContents();
+      seq_table_view_->resizeRowsToContents();
     }
-    else
-    {
-    seq::SequenceHandle seq=seq_item->GetSequence();
-    mol::ChainView dst_chain=(seq.GetAttachedView().GetChainList())[0];
-    if (mol::ChainView src_chain=view.FindChain(dst_chain.GetName())) {
-        // for each residue in the selection deduce index in sequence
-        for (mol::ResidueViewList::const_iterator j=src_chain.GetResidueList().begin(),
-           e2=src_chain.GetResidueList().end(); j!=e2; ++j) {
-        mol::ResidueView dst_res=dst_chain.FindResidue(j->GetHandle());
-        assert(dst_res.IsValid());
-        int p=seq.GetPos(dst_res.GetIndex());
-        assert(p>=0 && p<=seq.GetLength());
-        selected_cols[p]=true;
+    else if(delta<0){
+      model_->ZoomOut();
+      seq_table_view_->viewport()->update();
+      seq_table_view_->resizeColumnsToContents();
+      seq_table_view_->resizeRowsToContents();
+    }
+  }
+  event->accept();
+}
+
+void SequenceViewer::CopyEvent(QKeyEvent* event)
+{
+  QItemSelectionModel* model = seq_table_view_->selectionModel();
+  const QModelIndexList& list = model->selectedIndexes();
+  if(list.size()>0){
+    QString clipboard_string;
+    QSet<int> rows;
+    int min_col=model_->columnCount();
+    int max_col=0;
+    for(int i = 0; i < list.size(); i++){
+      if(list[i].column()>max_col){
+        max_col = list[i].column();
+      }
+      if(list[i].column()<min_col){
+        min_col = list[i].column();
+      }
+      rows.insert(list[i].row());
+    }
+
+    bool first_row = true;
+    for(int i = 1; i < model_->rowCount(); i++){
+      if(rows.contains(i)){
+        if(!first_row){
+          clipboard_string.append("\n");
         }
-        this->SelectColumns(seq_item, selected_cols);
-        std::fill(selected_cols.begin(), selected_cols.end(), false);
+        for(int j=min_col; j<=max_col; j++){
+          const QModelIndex& index = model_->index(i,j);
+          if(model->isSelected(index)){
+            clipboard_string.append(model_->data(index,Qt::DisplayRole).toString());
+          }
+          else{
+            clipboard_string.append('-');
+          }
+        }
+        first_row = false;
       }
     }
+    QApplication::clipboard()->setText(clipboard_string);
   }
-  we_are_changing_the_selection_=false;  
+  event->accept();
 }
 
-SequenceItemList SequenceViewer::SeqItemsForGfxObj(const gfx::GfxObjP& obj)
+void SequenceViewer::FindInSequence()
 {
-  SequenceItemList seq_items;
-  gfx::EntityP ec=dyn_cast<gfx::Entity>(obj);
-  std::map<SequenceItem*, gfx::EntityP>::iterator i,e;
-  for (i=obj_map_.begin(), e=obj_map_.end(); i!=e; ++i) {
-    if (i->second==ec) {
-      seq_items.push_back(i->first);
+  if(seq_search_bar_->isHidden()){
+    seq_search_bar_->show();
+  }
+  else{
+    seq_search_bar_->hide();
+  }
+}
+
+void SequenceViewer::OnSearchBarUpdate(const QString& subject,
+                                           bool search_in_all, const QString& name)
+{
+  seq_table_view_->selectionModel()->clear();
+  if(search_in_all){
+    const QModelIndexList& list = model_->GetModelIndexes(subject);
+    this->SelectList(list);
+  }
+  else{
+    const QModelIndexList& list = model_->GetModelIndexes(subject,name);
+    this->SelectList(list);
+  }
+}
+
+void SequenceViewer::SelectList(const QModelIndexList& list)
+{
+  QItemSelectionModel* model = seq_table_view_->selectionModel();
+  QSet<int> rows_visited;
+  for(int i = 0; i<list.size(); i++){
+    int row =list[i].row();
+    if(!rows_visited.contains(row)){
+      model->select(list[i],QItemSelectionModel::Rows|QItemSelectionModel::Deselect);
+      rows_visited.insert(row);
     }
   }
-  return seq_items;
+  for(int i = 0; i<list.size(); i++){
+    model->select(list[i],QItemSelectionModel::Select);
+  }
 }
 
-gfx::GfxObjP SequenceViewer::GfxObjForSeqItem(SequenceItem* item)
+const QStringList& SequenceViewer::GetDisplayModes()
 {
-  std::map<SequenceItem*, gfx::EntityP>::iterator i=obj_map_.find(item);
-  return (i!=obj_map_.end()) ? i->second : gfx::EntityP();
+  return model_->GetDisplayModes();
+}
+const QStringList& SequenceViewer::GetDisplayModes(const seq::AlignmentHandle& alignment)
+{
+  return model_->GetDisplayModes(alignment);
+}
+const QStringList& SequenceViewer::GetDisplayModes(const gfx::EntityP& entity)
+{
+  return model_->GetDisplayModes(entity);
+}
+
+const QString& SequenceViewer::GetCurrentDisplayMode()
+{
+  return model_->GetCurrentDisplayMode();
+}
+const QString& SequenceViewer::GetCurrentDisplayMode(const seq::AlignmentHandle& alignment)
+{
+  return model_->GetCurrentDisplayMode(alignment);
+}
+const QString& SequenceViewer::GetCurrentDisplayMode(const gfx::EntityP& entity)
+{
+  return model_->GetCurrentDisplayMode(entity);
+}
+
+void SequenceViewer::ChangeDisplayMode(const QString& string)
+{
+  model_->SetDisplayMode(string);
+  seq_table_view_->viewport()->update();
+}
+
+void SequenceViewer::ChangeDisplayMode(const seq::AlignmentHandle& alignment, const QString& string)
+{
+  model_->SetDisplayMode(alignment, string);
+  seq_table_view_->viewport()->update();
+}
+
+void SequenceViewer::ChangeDisplayMode(const gfx::EntityP& entity, const QString& string)
+{
+  model_->SetDisplayMode(entity, string);
+  seq_table_view_->viewport()->update();
+}
+
+ActionList SequenceViewer::GetActions()
+{
+  return action_list_;
+}
+
+void SequenceViewer::DisplayMenu()
+{
+  QMenu* menu = new QMenu();
+  QList<QAction*> actions = display_mode_actions_->actions();
+  for(int i=0;i<actions.size();i++){
+    display_mode_actions_->removeAction(actions[i]);
+  }
+  const QStringList& display_modes = this->GetDisplayModes();
+  for(int i=0; i<display_modes.size(); i++){
+    QString ident(display_modes[i]);
+    QAction* action = new QAction(ident,menu);
+    action->setCheckable(true);
+    connect(action,SIGNAL(triggered(bool)),this,SLOT(ChangeDisplayMode()));
+    display_mode_actions_->addAction(action);
+    if(display_modes[i] == this->GetCurrentDisplayMode() ){
+      action->setChecked(true);
+    }
+    menu->addAction(action);
+  }
+  menu->exec(QCursor::pos());
+}
+
+void SequenceViewer::ChangeDisplayMode()
+{
+  QAction* action = display_mode_actions_->checkedAction();
+  if(action){
+    this->ChangeDisplayMode(action->text());
+  }
+}
+
+SequenceViewer::~SequenceViewer(){
+  gfx::Scene::Instance().DetachObserver(this);
 }
 
 }}

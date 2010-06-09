@@ -7,4 +7,4 @@ set(OST_BASE_PYMOD_SOURCES
 
 pymod(NAME base OUTPUT_DIR ost 
       CPP ${OST_BASE_PYMOD_SOURCES} 
-      PY __init__.py settings.py)
+      PY __init__.py settings.py stutil.py)

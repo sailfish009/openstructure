@@ -35,27 +35,27 @@ class AlignedRegion;
 class AlignedColumn;
 class AlignedColumnIterator;
 
-/// \brief representation of a multiple sequence alignemnt consisting of two or 
+/// \brief representation of a multiple sequence alignemnt consisting of two or
 ///     more sequences
 ///
-/// A sequence alignment consists of two or more sequences. The number of 
-/// sequences in the alignment can be obtained by #GetCount(). 
+/// A sequence alignment consists of two or more sequences. The number of
+/// sequences in the alignment can be obtained by #GetCount().
 /// All sequences are of length #GetLength().
-/// 
-/// Typically sequence alignments are used column-based, i.e by looking at an 
-/// aligned columns in the sequence alignment. To get a row-based (sequence) 
-/// view on the sequence list, use AlignmentHandle::GetSequenceList(). For an 
+///
+/// Typically sequence alignments are used column-based, i.e by looking at an
+/// aligned columns in the sequence alignment. To get a row-based (sequence)
+/// view on the sequence list, use AlignmentHandle::GetSequenceList(). For an
 /// overview of how to use the sequence module, see \ref module_seq "here"
-/// 
-/// All operators that operate on an alignment will again  produce a valid 
-/// alignment. This mean that it is not possible to change the length of one 
+///
+/// All operators that operate on an alignment will again  produce a valid
+/// alignment. This mean that it is not possible to change the length of one
 /// sequence, without  adjusting the other sequences, too.
 class DLLEXPORT_OST_SEQ AlignmentHandle {
 public:
 
   typedef AlignedColumnIterator iterator;
   AlignmentHandle();
-  
+
   /// \brief  Get position in sequence with index seq_index that corresponds to
   ///         the given residue index.
   ///
@@ -68,19 +68,19 @@ public:
   int GetResidueIndex(int seq_index, int pos) const;
 
   mol::ResidueView GetResidue(int seq_index, int pos) const;
-  
+
   char GetOneLetterCode(int seq_index, int pos) const;
-  
+
   /// \brief     Add new sequence to multiple sequence alignment.
-  /// 
-  /// If the sequence length does not match with the length of the other 
+  ///
+  /// If the sequence length does not match with the length of the other
   /// sequences in the alignment, an InvalidSequence() exception is thrown.
   void AddSequence(const ConstSequenceHandle& sequence);
 
   /// \brief     Get sequence with given index.
   /// \return    sequence or invalid handle if the index is out of bounds
-  ConstSequenceHandle GetSequence(int seq_id) const; 
-  
+  ConstSequenceHandle GetSequence(int seq_id) const;
+
   /// \brief   Convert multiple sequence alignment to string.
   String ToString(int width=80) const;
 
@@ -88,87 +88,87 @@ public:
   int GetLength() const;
 
   /// \brief deep-copy multi sequence alignment
-  AlignmentHandle Copy() const;  
-  
+  AlignmentHandle Copy() const;
+
   /// \brief find sequence by name.
-  /// 
-  /// If several sequences have the same name, the first matching sequence will 
+  ///
+  /// If several sequences have the same name, the first matching sequence will
   /// be returned.
   ConstSequenceHandle FindSequence(const String& name) const;
-  
+
   /// \brief attach view to given sequence
   /// \sa SequenceHandle::AttachView(const mol::EntityView&)
   void AttachView(int seq_index, const mol::EntityView& view);
-  
+
   /// \brief attach view to given sequence
-  /// \sa SequenceHandle::AttachView(const mol::EntityView&, const String&)  
-  void AttachView(int seq_index, const mol::EntityView& view, 
+  /// \sa SequenceHandle::AttachView(const mol::EntityView&, const String&)
+  void AttachView(int seq_index, const mol::EntityView& view,
                   const String& chain_name);
-                  
+
   /// \brief set name of sequence
   void SetSequenceName(int seq_index, const String& name);
-  
-  void SetSequenceOffset(int seq_index, int offset);
+
+  void SetSequenceOffset(int seq_index, int offset); 
+  int  GetSequenceOffset(int seq_index);
   /// \brief Get list of sequences (read-only)
   ConstSequenceList GetSequences() const;
-  
+
   /// \brief create an aligned region.
-  /// 
+  ///
   /// \param start is the index of the first column
   /// \param n is the length of the sequence
-  /// \param master is the reference system for operations such as shifting. 
-  ///      If set to -1, no master sequence is defined and the operations will 
+  /// \param master is the reference system for operations such as shifting.
+  ///      If set to -1, no master sequence is defined and the operations will
   ///      affect all sequences
-  /// 
-  /// This method does not throw any exceptions, even if the aligned region is 
-  /// out of bounds.
+  ///
+  /// If the aligned region is out of bounds, a std::out_of_bounds exeception will be thrown.
   AlignedRegion MakeRegion(int start, int n, int master=-1) const;
-  
+
   /// \brief get number of sequences in alignment
   int GetCount() const;
-  
+
   bool operator==(const AlignmentHandle& rhs) const;
-  bool operator!=(const AlignmentHandle& rhs) const;  
-  
+  bool operator!=(const AlignmentHandle& rhs) const;
+
   /// \brief get aligned column at index
-  /// 
-  /// This method does not throw any exception. Upon accessing methods of the 
-  /// aligned column, exceptions might be thrown when the index is out of 
+  ///
+  /// This method does not throw any exception. Upon accessing methods of the
+  /// aligned column, exceptions might be thrown when the index is out of
   /// bounds.
   AlignedColumn operator[](int index) const;
-  
-  AlignmentHandle(const impl::SequenceListImplPtr& impl);  
-  
+
+  AlignmentHandle(const impl::SequenceListImplPtr& impl);
+
   /// \brief cut out half-closed interval start, end
   void Cut(int start, int end);
-  
+
   ///\brief Replace part of an alignment
   void Replace(const AlignedRegion& rhs, int start, int end);
   /// \brief shift half-closed interval by amount
-  /// 
+  ///
   /// if master is -1, all sequences of the alignment will be shifted. Otherwise
   /// only the sequence with given index is affected.
   void ShiftRegion(int start, int end, int amount, int master=-1);
-  
+
   /// \brief Column iterator start-point
   iterator begin() const;
   /// \brief Column iterator end-point
   iterator end() const;
-  
+
 private:
   void CheckValidity() const;
-  impl::SequenceListImplPtr impl_; 
+  impl::SequenceListImplPtr impl_;
 };
 
 AlignmentHandle DLLEXPORT_OST_SEQ CreateAlignment();
 
 /// \brief convert alignment from sequence list
-/// 
-/// If the sequences in the SequenceList have different lengths, an 
+///
+/// If the sequences in the SequenceList have different lengths, an
 /// InvalidAlignment exception is thrown.
-/// 
+///
 /// \return alignment consisting of the sequences in seq_list.
-AlignmentHandle DLLEXPORT_OST_SEQ 
+AlignmentHandle DLLEXPORT_OST_SEQ
 AlignmentFromSequenceList(const SequenceList& seq_list);
 
 typedef std::vector<AlignmentHandle> AlignmentList;

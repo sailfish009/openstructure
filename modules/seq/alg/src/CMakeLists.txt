@@ -7,6 +7,7 @@ local_align.hh
 alignment_opts.hh
 global_align.hh
 merge_pairwise_alignments.hh
+conservation.hh
 )
 
 set(OST_SEQ_ALG_SOURCES
@@ -16,6 +17,7 @@ sequence_identity.cc
 ins_del.cc
 subst_weight_matrix.cc
 local_align.cc
+conservation.cc
 )
 
 module(NAME seq_alg HEADER_OUTPUT_DIR ost/seq/alg SOURCES ${OST_SEQ_ALG_SOURCES}

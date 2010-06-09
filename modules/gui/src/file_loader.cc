@@ -38,6 +38,9 @@
 
 #include <ost/conop/conop.hh>
 
+#include <ost/seq/sequence_list.hh>
+#include <ost/seq/alignment_handle.hh>
+
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/surface.hh>
 #include <ost/gfx/scene.hh>
@@ -47,6 +50,7 @@
 #include <ost/gui/python_shell/python_interpreter.hh>
 #include <ost/gui/main_area.hh>
 #include <ost/gui/file_type_dialog.hh>
+#include <ost/gui/sequence_viewer/sequence_viewer.hh>
 
 #if OST_IMG_ENABLED
   #include <ost/io/img/load_map.hh>
@@ -88,11 +92,22 @@ void FileLoader::LoadObject(const QString& filename, const QString& selection)
         }
       }
   #endif
+      if (!obj)  {
+        try{
+          obj=FileLoader::TryLoadAlignment(filename);
+        } catch (io::IOFileAlreadyLoadedException&) {
+          return;
+        }
+      }
       if (!obj) {
         obj=FileLoader::TryLoadSurface(filename);
       }
       if (!obj) {
-        obj=FileLoader::NoHandlerFound(filename);
+        try{
+          obj=FileLoader::NoHandlerFound(filename);
+        } catch (io::IOFileAlreadyLoadedException&) {
+          return;
+        }
       }
       if (!obj){
         return;
@@ -123,6 +138,9 @@ gfx::GfxObjP FileLoader::NoHandlerFound(const QString& filename)
   if(dialog.exec()){
     if(dialog.GetEntityHandler()){
       return TryLoadEntity(filename, dialog.GetEntityHandler());
+    }
+    if(dialog.GetSequenceHandler()){
+      return TryLoadAlignment(filename, dialog.GetSequenceHandler());
     }
     if(dialog.GetSurfaceHandler()){
       return TryLoadSurface(filename,dialog.GetSurfaceHandler());
@@ -199,9 +217,15 @@ void FileLoader::HandleError(Message m, ErrorType type, const QString& filename,
       break;
     }
   }
+  else if(type==INFO){
+    QMessageBox message_box(QMessageBox::Information,
+        "Information", m._mesg.c_str());
+    message_box.setStandardButtons( QMessageBox::Ok);
+    message_box.exec();
+  }
 }
 
-gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler, const QString& selection) throw (io::IOException)
+gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler, const QString& selection)
 {
   if(!handler){
     try{
@@ -232,7 +256,7 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHand
 }
 
 #if OST_IMG_ENABLED
-gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler) throw(io::IOException, io::IOFileAlreadyLoadedException)
+gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler)
 {
   if(!handler){
     try{
@@ -266,7 +290,7 @@ gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr
 }
 #endif
 
-gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler) throw(io::IOException)
+gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler)
 {
   if(!handler){
     try{
@@ -296,6 +320,29 @@ gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHa
   return gfx::GfxObjP();
 }
 
+gfx::GfxObjP FileLoader::TryLoadAlignment(const QString& filename, io::SequenceIOHandlerPtr handler)
+{
+  if(!handler){
+    try{
+      handler = io::IOManager::Instance().FindAlignmentImportHandler(filename.toStdString(),"auto");
+    }
+    catch(io::IOUnknownFormatException e){
+      handler = io::SequenceIOHandlerPtr();
+    }
+  }
+  if(handler){
+    seq::SequenceList seq_list = seq::CreateSequenceList();
+    handler->Import(seq_list,filename.toStdString());
+    seq::AlignmentHandle alignment = seq::AlignmentFromSequenceList(seq_list);
+    gui::MainArea* main_area = gui::GostyApp::Instance()->GetPerspective()->GetMainArea();
+    SequenceViewer* viewer = new SequenceViewer(true,main_area);
+    viewer->AddAlignment(alignment);
+    main_area->AddWidget(filename,viewer);
+    throw io::IOFileAlreadyLoadedException("Loaded in DataViewer");
+  }
+  return gfx::GfxObjP();
+}
+
 void FileLoader::RunScript(const QString& filename)
 {
   PythonInterpreter& pi = PythonInterpreter::Instance();
@@ -320,9 +367,11 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
     conop::Conopology::Instance().ConnectAll(builder,ent,0);
     entities.append(ent);
   }
-
   QFileInfo file_info(filename);
-  if(entities.size()==1){
+  if(entities.empty()){
+    FileLoader::HandleError(Message(QString("No entities found in file: "+ filename).toStdString()),INFO,filename);
+  }
+  else if(entities.size()==1){
     gfx::EntityP gfx_ent(new gfx::Entity(file_info.baseName().toStdString(),entities.first(),mol::Query(selection.toStdString())));
     try{
       gfx::Scene::Instance().Add(gfx_ent);

@@ -64,7 +64,7 @@ namespace ost { namespace mol { namespace impl {
 
 EntityImpl::EntityImpl():
   atom_map_(),
-  chain_map_(),
+  chain_list_(),
   connector_map_(),
   torsion_map_(),
   transformation_matrix_(),
@@ -104,9 +104,9 @@ mol::BondHandleList EntityImpl::GetBondList() const
 int EntityImpl::GetResidueCount() const 
 {
   int count=0;
-  for (ChainImplMap::const_iterator i=chain_map_.begin(), 
-       e=chain_map_.end(); i!=e; ++i) {
-    count+=i->second->GetResidueCount();
+  for (ChainImplList::const_iterator i=chain_list_.begin(), 
+       e=chain_list_.end(); i!=e; ++i) {
+    count+=(*i)->GetResidueCount();
   }
   return count;
 }
@@ -133,9 +133,9 @@ ChainImplPtr EntityImpl::InsertChain(const ChainImplPtr& chain)
 
 void EntityImpl::ReplicateHierarchy(EntityImplPtr dest)
 {
-  for (ChainImplMap::const_iterator i=chain_map_.begin(), 
-       e1=chain_map_.end(); i!=e1; ++i) {
-    ChainImplPtr src_chain=i->second;
+  for (ChainImplList::const_iterator i=chain_list_.begin(), 
+       e1=chain_list_.end(); i!=e1; ++i) {
+    ChainImplPtr src_chain=*i;
     ChainImplPtr dst_chain=dest->InsertChain(src_chain);
     // copy generic properties
     dst_chain->Assign(*src_chain.get());
@@ -176,10 +176,10 @@ AtomImplPtr lookup_atom(const AtomImplPtr& atom, EntityImplPtr dest,
 
 void EntityImpl::DoCopyBondsAndTorsions(EntityImplPtr dest)
 {
-  for (ChainImplMap::const_iterator i=chain_map_.begin(), 
-       i2=dest->chain_map_.begin(), e1=chain_map_.end(); i!=e1; ++i, ++i2) {
-    ChainImplPtr src_chain=i->second;
-    ChainImplPtr dst_chain=i2->second;
+  for (ChainImplList::const_iterator i=chain_list_.begin(), 
+       i2=dest->chain_list_.begin(), e1=chain_list_.end(); i!=e1; ++i, ++i2) {
+    ChainImplPtr src_chain=*i;
+    ChainImplPtr dst_chain=*i2;
     for (ResidueImplList::iterator j=src_chain->GetResidueList().begin(),
          j2=dst_chain->GetResidueList().begin(),
          e2=src_chain->GetResidueList().end(); j!=e2; ++j, ++j2) {
@@ -236,7 +236,7 @@ void EntityImpl::DoCopy(EntityImplPtr dest)
 
 int EntityImpl::GetChainCount() const 
 {
-  return static_cast<int>(chain_map_.size());
+  return static_cast<int>(chain_list_.size());
 }
 
 const geom::Mat4& EntityImpl::GetTransfMatrix() const
@@ -384,17 +384,19 @@ ResidueImplPtr EntityImpl::CreateResidue(const ChainImplPtr& cp,
 
 ChainImplPtr EntityImpl::InsertChain(const String& cname)
 {
-  ChainImplMap::iterator i=chain_map_.find(cname);
-  if (i!=chain_map_.end()) {
-    throw IntegrityError("Can't insert chain. A chain with name '"+cname+
-                         "' already exists");
+  for (ChainImplList::iterator 
+       i=chain_list_.begin(), e=chain_list_.end(); i!=e; ++i) {
+      if ((*i)->GetName()==cname) {
+        throw IntegrityError("Can't insert chain. A chain with name '"+cname+
+                             "' already exists");
+      }
   }
 #if MAKE_SHARED_AVAILABLE
   ChainImplPtr cp=boost::make_shared<ChainImpl>(shared_from_this(), cname);
 #else
   ChainImplPtr cp(new ChainImpl(shared_from_this(), cname));
 #endif
-  chain_map_.insert(ChainImplMap::value_type(cp->GetName(),cp));
+  chain_list_.push_back(cp);
   return cp;
 }
 
@@ -767,8 +769,9 @@ void EntityImpl::Apply(EntityVisitor& v)
 {
   LOG_TRACE("visitor @" << &v << " visiting entity impl @" << this << std::endl);
   v.OnEntry();
-  for(ChainImplMap::iterator it = chain_map_.begin();it!=chain_map_.end();++it) {
-    it->second->Apply(v);
+  for(ChainImplList::iterator 
+      it = chain_list_.begin();it!=chain_list_.end();++it) {
+    (*it)->Apply(v);
   }
 
   for(ConnectorImplMap::iterator it = connector_map_.begin();it!=connector_map_.end();++it) {
@@ -821,22 +824,13 @@ void EntityImpl::NotifyObserver()
 void EntityImpl::Swap(EntityImpl& impl)
 {
   atom_map_.swap(impl.atom_map_);
-  chain_map_.swap(impl.chain_map_);
+  chain_list_.swap(impl.chain_list_);
   connector_map_.swap(impl.connector_map_);
   torsion_map_.swap(impl.torsion_map_);
   std::swap(transformation_matrix_,impl.transformation_matrix_);
   atom_organizer_.Swap(impl.atom_organizer_);
   fragment_list_.swap(impl.fragment_list_);
   observer_map_.swap(impl.observer_map_);
-}
-
-ChainImplList EntityImpl::GetChainList() const {
-  ChainImplList cl;
-  ChainImplMap::const_iterator i;
-  for (i=chain_map_.begin(); i!=chain_map_.end(); ++i) {
-    cl.push_back(i->second);
-  }
-  return cl;
 }
 
 
@@ -895,19 +889,15 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
   EntityHandle myself(const_cast<impl::EntityImpl*>(this)->shared_from_this());
   QueryState qs(query.CreateQueryState(myself));
   LOGN_DUMP("entering chain loop");
-  for (ChainImplMap::const_iterator ch_it = chain_map_.begin();
-       ch_it!=chain_map_.end();++ch_it) {
-    if(!ch_it->second) {
-      LOGN_DUMP("found invalid chain shared_ptr");
-      continue;
-    }
-    LOGN_DUMP("checking chain " << ch_it->second->GetName());
+  for (ChainImplList::const_iterator 
+       ch_it=chain_list_.begin(); ch_it!=chain_list_.end();++ch_it) {
+    LOGN_DUMP("checking chain " << (*ch_it)->GetName());
     c_added = false;
-    tribool c = always_true ? tribool(true) : qs.EvalChain(ch_it->second);
+    tribool c = always_true ? tribool(true) : qs.EvalChain(*ch_it);
     if (c == true) {
       LOGN_DUMP("chain is selected");
       // Include all residues
-      const ChainImplPtr& ci=ch_it->second;
+      const ChainImplPtr& ci=*ch_it;
       ++chain_count;
       ChainView chain=view.AddChain(ci);
       ResidueImplList::const_iterator re_it = ci->GetResidueList().begin();
@@ -930,7 +920,7 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
     } else if (indeterminate(c)) {
       // Test residues
       r_added = false;
-      const ChainImplPtr& ci = ch_it->second;
+      const ChainImplPtr& ci = *ch_it;
 
       ChainView chain;
       ResidueImplList::const_iterator re_it = ci->GetResidueList().begin();
@@ -1042,10 +1032,10 @@ EntityView EntityImpl::CreateFullView(const EntityHandle& h) const
 }
 
 ChainImplPtr EntityImpl::FindChain(const String& name) const {
-  ChainImplMap::const_iterator i;
-  for(i=chain_map_.begin(); i!=chain_map_.end();++i) {
-    if (i->second->GetName()==name)
-      return i->second;
+  ChainImplList::const_iterator i;
+  for(i=chain_list_.begin(); i!=chain_list_.end();++i) {
+    if ((*i)->GetName()==name)
+      return *i;
   }
   return ChainImplPtr();
 }
@@ -1078,7 +1068,7 @@ TorsionImplMap& EntityImpl::GetTorsionMap() {
 void EntityImpl::DeleteChain(const ChainImplPtr& chain) {
   if (chain && chain->GetEntity().get()==this) {
     chain->DeleteAllResidues();
-    chain_map_.erase(chain->GetName());
+    chain_list_.erase(this->GetChain(chain->GetName()));
   }
 }
 
@@ -1191,24 +1181,26 @@ void EntityImpl::DecICSEditorCount()
   }
 }
 
+impl::ChainImplList::iterator EntityImpl::GetChain(const String& name)
+{
+  impl::ChainImplList& cc=this->GetChainList();
+  for (impl::ChainImplList::iterator i=cc.begin(), e=cc.end(); i!=e; ++i) {
+    if ((*i)->GetName()==name) {
+      return i;
+    }
+  }
+  return  cc.end();
+}
 void EntityImpl::RenameChain(ChainImplPtr chain, const String& new_name)
 {
-  ChainImplMap::iterator i, j;
-  j=chain_map_.find(new_name);
-
-  if (j!=chain_map_.end() && j->second!=chain) {
+  ChainImplList::iterator i;
+  ChainImplPtr  ch=this->FindChain(new_name);
+  if (ch) {
     throw IntegrityError("unable to rename chain '"+chain->GetName()+
                          "' to '"+new_name+"', since there is already a chain "
                          "with that name");
   }
-  for(i=chain_map_.begin(); i!=chain_map_.end();++i) {
-    if (i->second==chain) {
-      chain_map_.erase(i);
-      chain_map_.insert(std::make_pair(new_name, chain));
-      chain->SetName(new_name);
-      break;
-    }
-  }
+  chain->SetName(new_name);
 }
 
 void EntityImpl::UpdateTransformedPos(){

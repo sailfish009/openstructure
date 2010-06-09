@@ -22,7 +22,15 @@ import sys
 from ost import mol
 from ost import gui
 from ost import gfx
+try: 
+  from ost import img
+  _img_present=True
+except ImportError:
+  _img_present=False
+  pass
+
 from PyQt4 import QtCore, QtGui
+from scene_selection_helper import SelHelper
 from gradient_editor_widget import GradientEditor
 from uniform_color_widget import UniformColorWidget
 from combo_options_widget import ComboOptionsWidget
@@ -35,11 +43,15 @@ class ColorOptionsWidget(ComboOptionsWidget):
     self.text_ = "Color Options"
     
     #Add options to menu
-    self.AddWidget("Color by Element", ByElementWidget("Color by Element"))
-    self.AddWidget("Color by Chain", ByChainWidget("Color by Chain"))
-    self.AddWidget("Color by Property", GradientEditor(self))
-    self.AddWidget("Uniform",UniformColorWidget(self))
+    self.entity_widgets_ = list()
+    self.entity_widgets_.append(["Color by Element", ByElementWidget("Color by Element")])
+    self.entity_widgets_.append(["Color by Chain", ByChainWidget("Color by Chain")])
+    self.entity_widgets_.append(["Color by Property", GradientEditor()])
+    self.entity_widgets_.append(["Uniform",UniformColorWidget()])
   
+    self.img_widgets_ = list()
+    self.img_widgets_.append(["Uniform",UniformColorWidget()])
+
     self.setMinimumSize(250,200)
     
   def DoSomething(self, item):
@@ -57,19 +69,31 @@ class ColorOptionsWidget(ComboOptionsWidget):
     
     
   def Update(self):
-    ComboOptionsWidget.setEnabled(self,True)
-    scene_selection = gui.SceneSelection.Instance()
     
-    if scene_selection.GetActiveNodeCount() == 0 and scene_selection.GetActiveViewCount() == 0:
+    ComboOptionsWidget.setEnabled(self,True)
+    
+    if SelHelper().CheckAllFlags(SelHelper.NO_SELECTION):
       ComboOptionsWidget.setEnabled(self,False)
       return
-        
-    for i in range(0,scene_selection.GetActiveNodeCount()):
-      node = scene_selection.GetActiveNode(i)
-      if not (isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface)):
-        ComboOptionsWidget.setEnabled(self,False)
-        return
-
+    
+    for w in self.entity_widgets_:
+      self.RemoveWidget(w[0])
+    for w in self.img_widgets_:
+      self.RemoveWidget(w[0])
+    
+    
+    if SelHelper().CheckFlags(SelHelper.HAS_IMG | SelHelper.IS_ONE_TYPE):
+      for w in self.img_widgets_:
+        self.AddWidget(w[0], w[1])
+    elif SelHelper().CheckMinOneFlag(SelHelper.HAS_ENTITY| SelHelper.HAS_VIEW| SelHelper.HAS_SURFACE) and SelHelper().CheckNotFlags(SelHelper.HAS_IMG):
+      for w in self.entity_widgets_:
+        self.AddWidget(w[0], w[1])
+    else:
+      ComboOptionsWidget.setEnabled(self,False)
+      return
+    
+    self.GetCurrentWidget().Update()
+    
   def GetText(self):
     return self.text_
   

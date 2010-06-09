@@ -3,12 +3,13 @@ import __main__
  
 
 def GetValue(val_key,val_default=None,prefix='OST'):
-  '''
+  """
   Returns the value of the variable val_key if defined, otherwise returns the 
   default value provided by the user (if provided). Search order: 
-  1) environment variable called $prefix_$val_key 
-  2) variable called val_key in .dngrc file
-  '''
+  
+   * environment variable called $prefix_$val_key 
+   * variable called val_key in .ostrc file
+  """
   if prefix:
     env_var_name='%s_%s' % (prefix, val_key)
   else:
@@ -24,6 +25,12 @@ def GetValue(val_key,val_default=None,prefix='OST'):
       return val_default
 
 class FileNotFound(RuntimeError):
+  """
+  Raised when :func:`Locate` is unable to locate a file. The exception contains
+  detailed information on what was tried to locate the file, i.e. search paths, 
+  environment variables and also provides useful hints on how to let Locate know
+  where to find the file.
+  """
   def __init__(self, name, reason):
     self.name=name
     self.reason=reason
@@ -33,21 +40,23 @@ class FileNotFound(RuntimeError):
 def Locate(file_name, explicit_file_name=None, search_paths=[],
            env_name=None, search_system_paths=True):
   """
-  Helper function to locate files. To get the full name of 
-  an executable, let's say qmake, use
+  Helper function to locate files. To get the full name of an executable, let's 
+  say qmake, use
+  
+  .. code-block:: python
 
-  abs_qmake_path=Locate('qmake', env_name='QMAKE_EXECUTABLE')
+    abs_qmake_path=Locate('qmake', env_name='QMAKE_EXECUTABLE')
 
-  First the function checks if an environment variable with the
-  name QMAKE_EXECUTABLE is set. If so, the value of this variable
-  is returned. Next, each directory listed in search_paths is 
-  searched. If the executable could still not be found and
-  search_system_paths is set to True, the binary search paths are
-  searched.
+  First the function checks if an environment variable with the name 
+  QMAKE_EXECUTABLE is set. If so, the value of this variable is returned. Next, 
+  each directory listed in search_paths is searched. If the executable could 
+  still not be found and search_system_paths is set to True, the binary search 
+  paths are searched.
 
-  If the file could not be located, a FileNotFound exception will be raised
-  containing a detail description why Locate failed. The error message is
-  formatted in such a way that it can directly be presented to the user.
+  If the file could not be located, a :exc:`~ost.settings.FileNotFound` 
+  exception will be raised containing a detail description why Locate failed. The 
+  error message is formatted in such a way that it can directly be presented to 
+  the user.
   """
   if type(file_name) is str:
     file_names=[file_name]

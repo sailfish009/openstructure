@@ -51,6 +51,9 @@ private slots:
   void DoubleClicked(const QModelIndex& index);
   void ChangeToParentDirectory(int index);
   void Split();
+  void ShowContextMenu(const QPoint& pos);
+  void LoadCurrentObject();
+  void LoadWithSystemEditor();
 private:
   void LoadObject(const QModelIndex& index);
   void UpdateMenu(const QString& path);

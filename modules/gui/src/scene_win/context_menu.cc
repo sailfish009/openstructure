@@ -26,6 +26,8 @@
 #include <QItemSelection>
 #include <QItemSelectionModel>
 
+#include <ost/dyn_cast.hh>
+
 #include <ost/gui/scene_selection.hh>
 #include <ost/gui/query_dialog.hh>
 
@@ -114,6 +116,14 @@ ContextMenu::ContextMenu(QTreeView* view, SceneWinModel* model):
   action = new QAction("View Density Slices",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(ViewDensitySlices()));
   this->AddAction(action, MAP);
+
+  action = new QAction("Show Original Map",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(ShowOriginalMap()));
+  this->AddAction(action, MAP | SINGLE | MAP_DOWNSAMPLED);
+
+  action = new QAction("Show Downsampled Map",this);
+  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(ShowDownsampledMap()));
+  this->AddAction(action, MAP | SINGLE | MAP_ORIGINAL | MAP_DSAMPLED_AVAIL);
 #endif // OST_IMG_ENABLED
 
 }
@@ -139,10 +149,28 @@ void ContextMenu::ShowMenu(const QPoint& pos)
             flags &= ~NOT_VISIBLE;
           }
           if(gfx_node->GetType()==0){flags &= ~NOT_SCENE;}
-          if(!dynamic_cast<gfx::GfxObj*> (gfx_node.get())){flags &= ~GFX_OBJECT;}
-          if(!dynamic_cast<gfx::Entity*> (gfx_node.get())){flags &= ~ENTITY;}
+          if(!dyn_cast<gfx::GfxObj> (gfx_node)){flags &= ~GFX_OBJECT;}
+          if(!dyn_cast<gfx::Entity> (gfx_node)){flags &= ~ENTITY;}
 #if OST_IMG_ENABLED
-          if(!dynamic_cast<gfx::MapIso*> (gfx_node.get())){flags &= ~MAP;}
+          if(!dyn_cast<gfx::MapIso>(gfx_node))
+          {
+            flags &= ~MAP;
+          } else {
+            gfx::MapIsoP mapisop = dyn_cast<gfx::MapIso> (gfx_node);
+            if (mapisop->GetShownMapType() == gfx::ORIGINAL_MAP){
+              flags &= ~MAP_DOWNSAMPLED;
+            } else {
+              flags &= ~MAP_ORIGINAL;
+            }
+            if (mapisop->IsDownsampledMapAvailable() == false){
+              flags &= ~MAP_DSAMPLED_AVAIL;
+            }
+          }
+          if(!dyn_cast<gfx::MapIso> (gfx_node)){
+          flags &= ~MAP;
+
+          }
+          if(!dyn_cast<gfx::MapIso> (gfx_node)){flags &= ~MAP;}
 #endif // OST_IMG_ENABLED
         }
         else{

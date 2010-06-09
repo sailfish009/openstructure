@@ -118,8 +118,8 @@ void export_overlay()
     .def("ClearMask",&MaskOverlay::ClearMask)
     .def("GetShift",&MaskOverlay::GetShift)
     .def("ClearShift",&MaskOverlay::ClearShift)
-   // .def("SetShift",&MaskOverlay::SetShift)
-   // .def("ApplyShiftToMask",&MaskOverlay::ApplyShiftToMask)
+    .def("SetShift",&MaskOverlay::SetShift)
+    .def("ApplyShiftToMask",&MaskOverlay::ApplyShiftToMask)
     ;
 
 /*  class_<Gauss2DOverlay,bases<Overlay>,boost::noncopyable>("Gauss2DOverlay",init<const alg::ParamsGauss2D&>())

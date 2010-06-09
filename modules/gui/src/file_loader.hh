@@ -32,6 +32,7 @@
 
 #include <ost/io/io_exception.hh>
 #include <ost/io/entity_io_handler.hh>
+#include <ost/io/sequence_io_handler.hh>
 #include <ost/io/surface_io_handler.hh>
 #if OST_IMG_ENABLED
 #include <ost/io/map_io_handler.hh>
@@ -45,14 +46,16 @@ private:
   enum ErrorType { DEFAULT = 0,
     IO_LOADING,
     GFX_ADD,
-    GFX_MULTIPLE_ADD
+    GFX_MULTIPLE_ADD,
+    INFO
   };
 
   FileLoader();
-  static gfx::GfxObjP TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler=io::EntityIOHandlerP(), const QString& selection=QString()) throw (io::IOException);
-  static gfx::GfxObjP TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler=io::SurfaceIOHandlerPtr()) throw (io::IOException);
+  static gfx::GfxObjP TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler=io::EntityIOHandlerP(), const QString& selection=QString());
+  static gfx::GfxObjP TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler=io::SurfaceIOHandlerPtr());
+  static gfx::GfxObjP TryLoadAlignment(const QString& filename, io::SequenceIOHandlerPtr handler=io::SequenceIOHandlerPtr());
 #if OST_IMG_ENABLED
-  static gfx::GfxObjP TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler=io::MapIOHandlerPtr()) throw (io::IOException, io::IOFileAlreadyLoadedException);
+  static gfx::GfxObjP TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler=io::MapIOHandlerPtr());
 #endif
   static void RunScript(const QString& filename);
   static void LoadPDB(const QString& filename, const QString& selection=QString());

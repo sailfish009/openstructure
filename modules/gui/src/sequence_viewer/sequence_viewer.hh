@@ -16,45 +16,93 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_VIEWER_HH
-#define OST_SEQUENCE_VIEWER_HH
+#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
+#define OST_SEQUENCE_VIEWER_SEQUENCE_VIEWER
 
 /*
-  Author: Marco Biasini
+  Author: Stefan Scheuber
  */
 
-#include <map>
+#include <QWidget>
+#include <QActionGroup>
+#include <QToolBar>
 
-#include <ost/gfx/scene_observer.hh>
-#include <ost/gui/sequence_viewer/sequence_viewer_base.hh>
-#include <ost/gfx/entity.hh>
+#include <ost/seq/alignment_handle.hh>
+
+#include <ost/gfx/scene.hh>
+#include <ost/gfx/gfx_object.hh>
+
+#include <ost/gui/widget.hh>
+
+#include <ost/gui/module_config.hh>
+
+#include "sequence_search_bar.hh"
+#include "sequence_model.hh"
+#include "sequence_table_view.hh"
 
 namespace ost { namespace gui {
 
-class SequenceItem;
-
-/// \brief sequence view
-class DLLEXPORT_OST_GUI SequenceViewer : public SequenceViewerBase, 
-                                         public gfx::SceneObserver {
+/// \brief QTableView with first column not moving
+class DLLEXPORT_OST_GUI SequenceViewer : public Widget, public gfx::SceneObserver  {
   Q_OBJECT
 public:
-  SequenceViewer(QWidget* parent=NULL);
+  SequenceViewer(bool stand_alone=true, QWidget* parent=NULL);
   ~SequenceViewer();
-  
+
   virtual void NodeAdded(const gfx::GfxNodeP& node);
-  
   virtual void NodeRemoved(const gfx::GfxNodeP& node);
-  
-  virtual void SelectionChanged(const gfx::GfxObjP& obj, const mol::EntityView& sel);
+  virtual void SelectionChanged(const gfx::GfxObjP& o, const mol::EntityView& view);
+
+  virtual void AddAlignment(const seq::AlignmentHandle& alignment);
+  virtual void RemoveAlignment(const seq::AlignmentHandle& alignment);
+
+  virtual bool Restore(const QString&){return true;};
+  virtual bool Save(const QString&){return true;};
+
+  virtual const QStringList& GetDisplayModes();
+  virtual const QStringList& GetDisplayModes(const seq::AlignmentHandle& alignment);
+  virtual const QStringList& GetDisplayModes(const gfx::EntityP& entity);
+
+  virtual const QString& GetCurrentDisplayMode();
+  virtual const QString& GetCurrentDisplayMode(const seq::AlignmentHandle& alignment);
+  virtual const QString& GetCurrentDisplayMode(const gfx::EntityP& entity);
+
+  virtual ActionList GetActions();
+
 public slots:
-  void ItemSelectionChanged(SequenceItem* item);
+  void ChangeDisplayMode(const QString&);
+  void ChangeDisplayMode(const seq::AlignmentHandle&, const QString&);
+  void ChangeDisplayMode(const gfx::EntityP&, const QString&);
+  void DisplayMenu();
+  //internal
+  void OnSearchBarUpdate(const QString&, bool, const QString&);
+
 private:
-  SequenceItemList SeqItemsForGfxObj(const gfx::GfxObjP& obj);
-  gfx::GfxObjP GfxObjForSeqItem(SequenceItem* seq_item);  
-  std::map<SequenceItem*, gfx::EntityP>  obj_map_;
-  bool we_are_changing_the_selection_;
+  void InitActions();
+  void InitView();
+  void InitSearchBar();
+  void InitMenuBar();
+  void UpdateSearchBar();
+  void SelectList(const QModelIndexList& list);
+  QToolBar* toolbar_;
+  SeqSearchBar* seq_search_bar_;
+  SequenceModel* model_;
+  SequenceTableView* seq_table_view_;
+
+  ActionList action_list_;
+
+  QActionGroup* display_mode_actions_;
+
+private slots:
+  void ChangeDisplayMode();
+  void FindInSequence();
+  void SelectionModelChanged(const QItemSelection&, const QItemSelection&);
+  void DoubleClicked(const QModelIndex& index);
+  void MouseWheelEvent(QWheelEvent* event);
+  void CopyEvent(QKeyEvent* event);
+
 };
- 
+
 }}
 
 #endif

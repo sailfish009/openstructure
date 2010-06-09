@@ -46,6 +46,8 @@ public slots:
   void Delete();
 #if OST_IMG_ENABLED
   void ViewDensitySlices();
+  void ShowDownsampledMap();
+  void ShowOriginalMap();  
 #endif // OST_IMG_ENABLED
   void CopyViews();
   void Select();
@@ -60,6 +62,7 @@ public slots:
   void ShowExclusive();
   void HideExclusive();
   mol::EntityView GetViewUnion();
+
 
 private slots:
   void SetActiveNodes(gfx::NodePtrList nodes, gfx::EntityP entity, mol::QueryViewWrapperList views);

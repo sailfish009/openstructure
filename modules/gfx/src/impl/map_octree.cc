@@ -25,11 +25,33 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-MapOctree::MapOctree(const img::ImageHandle& map):
-  map_(map)
+MapOctree::MapOctree(const img::ImageHandle& ih):
+  map_(ih),
+  built_(false)
+{}
+
+void MapOctree::Initialize()
 {
+  built_=false;
+  levels_.clear();
   this->BuildOctree();
 }
+
+
+void MapOctree::SetNewMap(const img::ImageHandle& ih)
+{
+  map_=ih;
+}
+
+bool MapOctree::IsMapManageable (const img::ImageHandle ih)
+{
+ bool manageable = true;
+ if (ih.GetExtent().GetWidth() > 256 ||
+     ih.GetExtent().GetHeight() > 256 ||
+     ih.GetExtent().GetDepth() > 256 ) manageable=false;
+ return manageable;
+}
+
 
 uint32_t MapOctree::GetNumNodesForLevel(uint8_t level) const
 {
@@ -52,7 +74,9 @@ void MapOctree::BuildOctree()
   assert(p && "Octree only supports real spatial images");
   OctreeNode dummy;
   this->BuildOctreeRec(range_vec, 0, p, map_.GetExtent(), dummy);
+  built_=true;
 }
+
 std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
                                                  uint16_t level,
                                                  img::RealSpatialImageState* map,
@@ -100,9 +124,9 @@ std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
   }  
   // determine branch pattern
   uint16_t highest_order_mask=1 << highest_order_bit;
-  bool branch_x=range_vec.x & highest_order_mask;
-  bool branch_y=range_vec.y & highest_order_mask;
-  bool branch_z=range_vec.z & highest_order_mask;
+  bool branch_x=(range_vec.x & highest_order_mask)!= 0;
+  bool branch_y=(range_vec.y & highest_order_mask)!= 0;
+  bool branch_z=(range_vec.z & highest_order_mask)!= 0;
   int range_x[2][2];
   int range_y[2][2];
   int range_z[2][2];

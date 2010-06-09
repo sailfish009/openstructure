@@ -25,9 +25,11 @@
 
 namespace ost {
 
-class DLLEXPORT_OST_BASE IntegrityError : public Error {
+class DLLEXPORT IntegrityError : public Error {
 public:
-  IntegrityError(const String& msg);  
+  IntegrityError(const String& msg):
+    Error(msg)
+  { } 
 };
 
 }

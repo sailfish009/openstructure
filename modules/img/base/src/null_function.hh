@@ -27,6 +27,7 @@
 #ifndef IMG_NULL_FUNCTION_H
 #define IMG_NULL_FUNCTION_H
 
+#include "module_config.hh"
 #include "function_base.hh"
 
 namespace ost { namespace img {
@@ -36,7 +37,7 @@ namespace ost { namespace img {
   Implements Function interface, will always
   return zero
 */
-class DLLEXPORT_OST_IMG_BASE NullFunction: public Function {
+class DLLEXPORT NullFunction: public Function {
 public:
   NullFunction():
     Function(SPATIAL) 
@@ -47,6 +48,8 @@ public:
   virtual Real GetIntpolReal(const Vec3& v) const {return 0.0;}
 
   virtual Complex GetIntpolComplex(const Vec3& v) const {return Complex(0.0,0.0);}
+  
+  virtual ~NullFunction(){};
 };
 
 }} // namespace

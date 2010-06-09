@@ -3,7 +3,9 @@ set(GUI_ICONS
   icons/add_icon.png
   icons/close_icon.png
   icons/distance_icon.png
+  icons/find_icon.png
   icons/map_icon.png
+  icons/menubar_icon.png
   icons/rigid_body_manipulator_icon.png
   icons/selection_icon.png
   icons/show_sidebar_icon.png

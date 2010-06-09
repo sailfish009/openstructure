@@ -40,7 +40,7 @@ public:
     memcpy(data_, rhs.data_, sizeof(uint32_t[D]));
   }
   IndexBase() {
-    memset(data_, sizeof(uint32_t[D]), 0);
+    memset(data_, 0, sizeof(uint32_t[D]));
   }
   IndexBase& operator=(const IndexBase& rhs) {
     memcpy(data_, rhs.data_, sizeof(uint32_t[D]));

@@ -249,7 +249,7 @@ void Entity::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc,
     maxc = geom::Max(maxc, geom::Max(t1, geom::Max(t2, geom::Max(t3, 
                      geom::Max(t4, geom::Max(t5, geom::Max(t6,
                      geom::Max(t7, t8))))))));
-  } catch(Error& e) {
+  } catch(Error&) {
     // in case the object is empty...
   }
 } 

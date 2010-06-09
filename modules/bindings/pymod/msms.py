@@ -144,7 +144,10 @@ def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
 
   # parse selection
   if no_hydrogens:
-    selection+=" and ele!=H"
+    if selection=="":
+      selection="ele!=H"
+    else:
+      selection+=" and ele!=H"
 
   # setup files for msms
   (msms_data_dir, msms_data_file)=_SetupFiles(entity, selection)
@@ -215,7 +218,10 @@ def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
 
   # parse selection
   if no_hydrogens:
-    selection+=" and ele!=H"
+    if selection=="":
+      selection="ele!=H"
+    else:
+      selection+=" and ele!=H"
 
   # setup files for msms
   

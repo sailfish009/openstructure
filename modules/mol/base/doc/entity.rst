@@ -1,7 +1,7 @@
 The Molecular Entity
 ================================================================================
 
-.. currentmodule:: mol
+.. currentmodule:: ost.mol
 
 This document describes the :class:`EntityHandle` and related classes.
 
@@ -10,7 +10,7 @@ This document describes the :class:`EntityHandle` and related classes.
 
    Creates a new entity. The created entity is empty, that is, it does not
    contain any atoms, residues, chains, bonds or torsions. To populate the
-   entity, create a new editor.
+   entity, use an :doc:`editors`.
    
    :returns: The newly created :class:`EntityHandle`
    

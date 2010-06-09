@@ -27,6 +27,7 @@
 #ifndef IMG_FUNCTION_BASE_H
 #define IMG_FUNCTION_BASE_H
 
+#include "module_config.hh"
 #include "data.hh"
 #include "data_observer.hh"
 #include "observable.hh"

@@ -43,9 +43,9 @@ void GfxView::AddAtom(const AtomView& av)
   AtomEntry ae(a,default_radius,
                a.GetRadius(),
                GfxObj::Ele2Color(a.GetElement()));
-  atom_map[a.GetHashCode()]=ae;
+  atom_map[a.GetHandle().GetHashCode()]=ae;
   if(av.GetBondCount()==0) {
-    orphan_atom_list.push_back(a.GetHashCode());
+    orphan_atom_list.push_back(a.GetHandle().GetHashCode());
   }
 }
 
@@ -297,7 +297,7 @@ SplineEntryList Spline::Generate(int nsub) const
       float psum=0.0;
       float qsum=0.0;
       ++c;
-      while(sublist[c].type==1 && c<nsub*size) {
+      while(c<nsub*size && sublist[c].type==1) {
         n = geom::Normalize(geom::Cross(sublist[c].normal,
                                         sublist[c].direction));
         geom::Vec3 p1 = sublist[c].position+n;

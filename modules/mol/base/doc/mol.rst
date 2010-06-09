@@ -1,7 +1,7 @@
-:mod:`mol` -- Molecular structures and surfaces
+:mod:`~ost.mol` -- Molecular structures and surfaces
 ================================================================================
 
-.. module:: mol
+.. module:: ost.mol
    :synopsis: Contains classes and functions to deal with molecular structures
               and surfaces
 

@@ -59,11 +59,19 @@ class ColorSelectWidget(QtGui.QWidget):
   def GetColor(self):
     return self.color_
   
+  def GetGfxColor(self):
+    color = self.GetColor()
+    return gfx.Color(color.redF(), color.greenF(), color.blueF())
+  
   def SetColor(self, color):
     if(self.color_ != color):
       self.color_ = color
       self.emit(QtCore.SIGNAL("colorChanged"))
       self.update()
+  
+  def SetGfxColor(self, color):
+    qcolor= QtGui.QColor(color.Red()*255,color.Green()*255,color.Blue()*255,color.Alpha()*255)
+    self.SetColor(qcolor)
             
   def paintEvent(self, event):
     if self.isEnabled():

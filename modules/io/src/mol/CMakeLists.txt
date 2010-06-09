@@ -6,6 +6,8 @@ entity_io_pdb_handler.cc
 pdb_io.cc
 pdb_writer.cc
 entity_io_sdf_handler.cc	
+sdf_reader.cc
+sdf_writer.cc
 save_entity.cc
 load_entity.cc
 surface_io_msms_handler.cc
@@ -26,6 +28,8 @@ pdb_reader.hh
 entity_io_pdb_handler.hh	
 pdb_writer.hh
 entity_io_sdf_handler.hh	
+sdf_reader.hh
+sdf_writer.hh
 save_entity.hh
 load_entity.hh			
 surface_io_handler.hh

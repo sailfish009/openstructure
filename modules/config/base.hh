@@ -80,7 +80,7 @@ inline Real rint(Real d)
 #pragma warning(disable:4244)
 #pragma warning(disable:4231)
 #pragma warning(disable:4305)
-
+#pragma warning(disable:4351) // turn off "new behavior ... will be default initialized" warning 
 
 #ifndef log2_function
 #define log2_function

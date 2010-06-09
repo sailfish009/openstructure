@@ -152,6 +152,23 @@ void SceneSelection::ViewDensitySlices() {
   }
 }
 
+void SceneSelection::ShowDownsampledMap()
+{
+  gfx::MapIsoP obj = dyn_cast<gfx::MapIso> (nodes_[0]);
+  if (obj) {
+    obj->ShowDownsampledMap();
+  }
+}
+
+
+void SceneSelection::ShowOriginalMap()
+{
+  gfx::MapIsoP obj = dyn_cast<gfx::MapIso> (nodes_[0]);
+  if (obj) {
+    obj->ShowOriginalMap();
+  }
+}
+
 #endif // OST_IMG_ENABLED
 
 void SceneSelection::Select() {

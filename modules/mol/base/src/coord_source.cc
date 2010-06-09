@@ -95,7 +95,7 @@ void CoordSource::CaptureInto(int pos)
        e=atoms_.end(); i!=e; ++i) {
     coords.push_back(i->GetPos());
   }
-  if(pos<0 || pos>=GetFrameCount()) {
+  if(pos<0 || pos>=static_cast<int>(this->GetFrameCount())) {
     this->AddFrame(coords);
   } else {
     this->InsertFrame(pos,coords);

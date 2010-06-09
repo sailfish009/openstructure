@@ -28,14 +28,4 @@ typedef boost::shared_ptr<SurfaceImpl> SurfaceImplP;
 
 }}} // ns
 
-namespace ost { namespace mol { namespace rsurf {
-
-/// \internal
-class RSurf;
-
-/// \internal
-typedef boost::shared_ptr<RSurf> RSurfP;
-
-}}} // ns
-
 #endif

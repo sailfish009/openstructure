@@ -6,12 +6,14 @@ cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake_support)
 include(OST)
 
-
-
 project(OpenStructure CXX C)
 
+INCLUDE(CTest)
+ENABLE_TESTING()
 
 option(USE_SHADER "whether to compile with shader support"
+       OFF)
+option(SET_RPATH "embed rpath upon make install"
        OFF)
 option(COMPILE_TMTOOLS "whether to compile the tmalign and tmscore programs"
        OFF)
@@ -29,6 +31,7 @@ option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
       OFF)
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
 option(DEPLOYMENT "switch on deployment settings" OFF)
+option(COMPILE_TESTS "wheter unit tests should be compiled by default" OFF)
 
 if (PREFIX)
   set(CMAKE_INSTALL_PREFIX ${PREFIX})
@@ -218,13 +221,25 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${TIFF_INCLUDE_DIR}
                     ${SPNAV_INCLUDE_DIR}
                     )
-
+if (UNIX)
+  SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+  SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  if(USE_RPATH)
+    set(_USE_RPATH ON)
+    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+  else()
+    set(_USE_RPATH OFF)
+   SET(CMAKE_INSTALL_RPATH "")
+   SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+  endif() 
+endif()
 
 
 add_subdirectory(modules)
 add_subdirectory(scripts)
 add_subdirectory(deployment)
-set (FILES_TO_BE_REMOVED stage CMakeFiles)
+set(FILES_TO_BE_REMOVED CMakeFiles stage tests)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
                          "${FILES_TO_BE_REMOVED}")
 
@@ -232,6 +247,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
 
 message(STATUS 
         "OpenStructure will be built with the following options:\n"
+        "   RPath in install            (-DUSE_RPATH) : ${_USE_RPATH}\n"
         "   Graphical interface         (-DENABLE_UI) : ${_UI}\n"
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
         "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"        

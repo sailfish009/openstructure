@@ -55,3 +55,4 @@ configure_file(config.hh.in ${CONFIG_HH_FILE})
 add_custom_target(ost_config)
 stage_headers("${OST_CONFIG_HEADERS}" "ost" 
               "ost_config" "" "ost")
+install(FILES ${OST_CONFIG_HEADERS} DESTINATION include/ost)

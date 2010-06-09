@@ -9,7 +9,6 @@ query_ast.cc
 query_impl.cc
 residue_impl.cc
 surface_impl.cc
-rsurf_impl.cc
 torsion_impl.cc
 PARENT_SCOPE
 )
@@ -34,7 +33,6 @@ residue_impl.hh
 residue_impl_fw.hh
 surface_impl.hh
 surface_impl_fw.hh
-rsurf_impl.hh
 torsion_impl.hh
 torsion_impl_fw.hh
 PARENT_SCOPE

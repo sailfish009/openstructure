@@ -22,7 +22,7 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-
+#include <ost/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 
@@ -71,6 +71,7 @@ void export_Residue()
     .def(self+int())
     .def(self-int())    
   ;
+  implicitly_convertible<int, ResNum>();
   {
     scope sec_struct_scope=class_<SecStructure>("SecStructure", init<>())
       .def(init<char>())
@@ -174,5 +175,6 @@ void export_Residue()
 
   class_<ResidueHandleList>("ResidueHandleList", no_init)
     .def(vector_indexing_suite<ResidueHandleList>())
+    .def(ost::VectorAdditions<ResidueHandleList>())    
   ;
 }

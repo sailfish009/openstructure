@@ -16,8 +16,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQUENCE_SEARCH_BAR_HH
-#define OST_SEQUENCE_SEARCH_BAR_HH
+#ifndef OST_SEQUENCE_VIEWER_SEQUENCE_SEARCH_BAR_HH
+#define OST_SEQUENCE_VIEWER_SEQUENCE_SEARCH_BAR_HH
 
 /*
   Author: Marco Biasini
@@ -27,20 +27,19 @@
 #include <QWidget>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QSet>
 
 namespace ost { namespace gui {
 
-class SequenceItem;  
-
 /// \brief search bar to search in multiple sequence alignment
-class DLLEXPORT_OST_GUI SequenceSearchBar : public QWidget {
+class DLLEXPORT_OST_GUI SeqSearchBar : public QWidget {
   Q_OBJECT
 public:
-  SequenceSearchBar(QWidget* parent=NULL);
+  SeqSearchBar(QWidget* parent=NULL);
   
-  void Show(const std::vector<SequenceItem*>& sequences);
+  void UpdateItems(const QStringList& sequences);
 signals:
-  void Changed(const QString&, bool, int);
+  void Changed(const QString&, bool, const QString&);
 public slots:
    void OnSubjectChanged(const QString&);
    void OnSearchInChanged(int);

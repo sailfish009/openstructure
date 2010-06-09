@@ -31,7 +31,6 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/scene_win/scene_win.hh>
 #include <ost/gui/sequence_viewer/sequence_viewer.hh>
-#include <ost/gui/sequence/sequence_viewer.hh>
 #include <ost/gui/main.hh>
 #include <ost/gui/widget_geom_handler.hh>
 #if OST_IMG_ENABLED
@@ -93,7 +92,6 @@ public:
   /// The sequence viewer is initialized when this method is first called. All
   /// subsequent calls will return the same SequenceViewer instance.
   SequenceViewer* GetSequenceViewer();
-  SequenceViewerV2* GetSequenceViewerV2();
   
   /// \brief get tool options window
   /// 
@@ -156,8 +154,7 @@ private:
   SceneWin*         scene_win_;
   QWidget*          w_scene_win_;
 
-  SequenceViewer*   seq_viewer_;
-  SequenceViewerV2* seq_viewer_v2_;
+  SequenceViewer* seq_viewer_;
 
   ToolOptionsWin*   tool_options_win_;
   QWidget*          w_tool_options_;  

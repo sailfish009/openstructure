@@ -38,6 +38,9 @@ typedef std::vector<SurfaceVertexID> SurfaceVertexIDList;
 // molecular surface
 class DLLEXPORT_OST_MOL SurfaceHandle {
 public:
+  // creates invalid handle
+  SurfaceHandle();
+  
   // internally used ctor
   SurfaceHandle(const impl::SurfaceImplP& p);
 

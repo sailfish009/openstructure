@@ -21,10 +21,19 @@
  * Author Juergen Haas
  */
 #include <boost/python.hpp>
+#include <ost/config.hh>
 using namespace boost::python;
 
 void export_svdSuperPose();
+
+#if OST_IMG_ENABLED
+void export_entity_to_density();
+#endif
+
 BOOST_PYTHON_MODULE(_mol_alg)
 {
   export_svdSuperPose();
+  #if OST_IMG_ENABLED
+  export_entity_to_density();
+  #endif
 }

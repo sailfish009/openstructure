@@ -63,8 +63,13 @@ SequenceImplPtr SequenceImpl::FromString(const String& seq_name,
 
 void SequenceImpl::SetString(const String& seq)
 {
-  seq_string_=seq;
-  this->ShiftsFromSequence();
+  if (SequenceImpl::IsSequenceStringSane(seq)) {
+    seq_string_=seq;
+    this->ShiftsFromSequence();
+  }
+  else {
+    throw InvalidSequence();
+  }
 }
 
 SequenceImpl::SequenceImpl(const String& seq_name,
@@ -165,6 +170,8 @@ int SequenceImpl::GetLength() const {
 
 char SequenceImpl::GetOneLetterCode(int position) const
 {
+  if (position<0 || position>=static_cast<int>(seq_string_.length()))
+    throw Error("Position is not covered in sequence");
   return seq_string_[position];
 }
 
@@ -207,7 +214,7 @@ void SequenceImpl::AttachView(const mol::EntityView& view)
 {
   static const char* msg="Expected 1 chain, but %d chains found";
   attached_view_=view;
-  if (attached_view_.GetChainCount()!=1) {
+  if (view.IsValid() && attached_view_.GetChainCount()!=1) {
     throw IntegrityError(str(format(msg) % attached_view_.GetChainCount()));
   }
 }
@@ -273,6 +280,9 @@ void SequenceImpl::Replace(const String& str,int start, int end)
 
 void SequenceImpl::ShiftRegion(int start, int end, int amount)
 {
+  if(start > end || start + amount < 0 || end + amount > this->GetLength()){
+    throw std::out_of_range("ShiftRegion: invalid region");
+  }
   String str1=seq_string_.substr(start, end-start);
   if (amount<0) {
     String str2=seq_string_.substr(start+amount, -amount);

@@ -77,6 +77,17 @@ BOOST_AUTO_TEST_CASE(gen_full_view)
   BOOST_CHECK_EQUAL(avl[1].GetBondCount(),2);
   BOOST_CHECK_EQUAL(avl[2].GetBondCount(),2);
   BOOST_CHECK_EQUAL(avl[3].GetBondCount(),1);
+  
+  mol::AtomView av1=avl[0];
+  mol::AtomView av2=avl[1];
+  
+  BOOST_CHECK(av1!=av2);
+  BOOST_CHECK(av1.GetHashCode()!=av2.GetHashCode());
+  BOOST_CHECK(av1.GetHandle().GetHashCode()!=av1.GetHashCode());
+  
+  mol::AtomView av3=av1;
+  BOOST_CHECK(av1==av3);
+  BOOST_CHECK_EQUAL(av1.GetHashCode(), av3.GetHashCode());  
 }
 
 BOOST_AUTO_TEST_SUITE_END()

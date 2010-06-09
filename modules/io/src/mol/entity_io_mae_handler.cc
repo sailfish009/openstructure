@@ -133,7 +133,7 @@ void MAEReader::Import(mol::EntityHandle& ent)
           } else {
             // parsing atom line
             std::vector<std::string> tokens=tokenize(line);
-            for(int i=0;i<tokens.size();++i) {
+            for(size_t i=0;i<tokens.size();++i) {
               LOG_DUMP( "[" << tokens[i] << "] ");
             }
             LOGN_DUMP("");

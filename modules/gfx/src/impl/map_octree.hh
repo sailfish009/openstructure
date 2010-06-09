@@ -109,8 +109,11 @@ typedef std::vector<OctreeNode> OcNodeEntryList;
 class DLLEXPORT_OST_GFX MapOctree {
 public:
   MapOctree(const img::ImageHandle& map);
+  void Initialize();
   uint32_t GetNumNodesForLevel(uint8_t level) const;
-  
+  void SetNewMap(const img::ImageHandle& ih);
+  static bool IsMapManageable (const img::ImageHandle ih);
+
   /// \brief depth-first visit of octree nodes
   template <typename F>
   void VisitDF(F& f) const
@@ -216,6 +219,7 @@ private:
 
   img::ImageHandle            map_;
   std::vector<OcNodeEntryList>      levels_;
+  bool                        built_;
 };
 
 }}}

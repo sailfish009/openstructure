@@ -25,6 +25,7 @@
 #ifndef TEST_IMAGE_STATE_H
 #define TEST_IMAGE_STATE_H
 
+#define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 

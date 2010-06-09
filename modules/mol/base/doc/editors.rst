@@ -1,7 +1,7 @@
 Editors
 ================================================================================
 
-.. currentmodule:: mol
+.. currentmodule:: ost.mol
 
 The structure, topology and connectivity of entities is edited via editors. This 
 includes operations such as changing atom positions, connecting atoms with bonds 
@@ -118,7 +118,7 @@ euclidian space.
      transform.
      
      :param atom: must be a valid atom handle
-     :type  atom: :class:`mol.AtomHandle`
+     :type  atom: :class:`ost.mol.AtomHandle`
      :param pos: The new position
      :type  pos: :class:`geom.Vec3`
      
@@ -129,7 +129,7 @@ euclidian space.
      the original pos.
      
      :param atom: must be a valid atom handle
-     :type  atom: :class:`mol.AtomHandle`
+     :type  atom: :class:`ost.mol.AtomHandle`
      :param pos: The new untransformed position
      :type  pos: :class:`geom.Vec3`
   

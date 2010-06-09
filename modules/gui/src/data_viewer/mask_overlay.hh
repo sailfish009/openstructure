@@ -56,6 +56,8 @@ public:
   void ClearMask();
   void ClearShift(){shift_=geom::Vec2();}
   geom::Vec2 GetShift(){return shift_;}
+  void SetShift(geom::Vec2 shift);
+  void ApplyShiftToMask();
 
 protected:
   std::vector<geom::Polygon2> polygons_;

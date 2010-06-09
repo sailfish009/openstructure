@@ -13,6 +13,7 @@ io_utils.hh
 io_exception.hh
 convert.hh
 converting_streams.hh
+formatted_line.hh
 )
 
 set(OST_IO_SOURCES

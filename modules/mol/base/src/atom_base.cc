@@ -120,12 +120,6 @@ void AtomBase::CheckValidity() const
     throw InvalidHandle();
 }
 
-long AtomBase::GetHashCode() const 
-{
-  this->CheckValidity();  
-  return reinterpret_cast<long>(Impl().get());
-}
-
 std::ostream& operator<<(std::ostream& os, const AtomBase& atom) 
 {
   if (atom.IsValid()) {
