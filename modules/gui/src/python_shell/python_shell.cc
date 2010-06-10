@@ -63,10 +63,6 @@ bool PythonShell::Save(const QString& prefix)
   return true;  
 }
 
-void PythonShell::AddLogger(TextLogger* logger)
-{
-  this->PyShell()->AddLogger(logger);
-}
 
 PythonShellWidget* PythonShell::PyShell()
 {

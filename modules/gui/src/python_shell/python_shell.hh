@@ -40,7 +40,6 @@ public:
   virtual bool Save(const QString& prefix);
   
 public:
-  void AddLogger(TextLogger* logger);  
   PythonShellWidget* PyShell();
 };
  

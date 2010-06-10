@@ -127,7 +127,8 @@ void GostyApp::SetupPyShellLogging()
 {
   TextLogger* console_logger=new TextLogger(stdout);
   this->ReadLoggerSettings("console", console_logger);
-  py_shell_->AddLogger(console_logger);  
+  // get log from Interpreter instead of shell
+  //py_shell_->AddLogger(console_logger);
   // TODO: Setup file logging
 }
 

@@ -33,8 +33,8 @@
 
 #include <QFile>
 #include <QDebug>
+#include <QFile>
 #include <QApplication>
-#include <QThread>
 #include <QStringList>
 #include <ost/log.hh>
 
@@ -44,246 +44,78 @@ PythonInterpreter::PythonInterpreter():
   QObject(),
   main_module_(),
   main_namespace_(),
-#ifndef _MSC_VER
-  sig_act_(),
-#endif
-  output_redirector_(),
-  main_thread_runner_(),
   running_(false),
-  mutex_(),
-  gstate_(),
-  main_thread_state_(NULL),
-  proxy_(this),
   compile_command_(),
-  exec_wait_(false),
-  exec_queue_(),
-  parse_expr_cmd_()  
+  worker_()
 {
+  connect(this,SIGNAL(WakeWorker()),&worker_,SLOT(Wake()),Qt::QueuedConnection);
+  connect(&worker_,SIGNAL(Output(unsigned int,const QString&)),this,SIGNAL(Output(unsigned int,const QString&)));
+  connect(&worker_,SIGNAL(ErrorOutput(unsigned int,const QString&)),this,SIGNAL(ErrorOutput(unsigned int,const QString&)));
+  connect(&worker_,SIGNAL(Finished(unsigned int, bool)),this,SIGNAL(Finished(unsigned int, bool)));
+  main_module_ = bp::import("__main__");
+  main_namespace_ = bp::extract<bp::dict>(main_module_.attr("__dict__"));
+  main_namespace_["os"]=bp::import("os");
+  main_namespace_["__builtin__"]=bp::import("__builtin__");
+  main_namespace_["keyword"]=bp::import("keyword");
+  bp::object code=bp::import("code");
+  compile_command_=code.attr("compile_command");
 }
 
 PythonInterpreter::~PythonInterpreter()
 {
- PyGILState_Release(gstate_);
- PyEval_RestoreThread(main_thread_state_);
 }
 
-PythonInterpreter& PythonInterpreter::Instance(bool register_sighandler, 
-                                               bool multithreaded)
+PythonInterpreter& PythonInterpreter::Instance()
 {
-  //todo handle register_sighandler;
-  static bool initialized=false;
   static PythonInterpreter instance;
-  static QThread thread;
-  if(!initialized){
-    initialized=true;
-    if(multithreaded){
-      instance.moveToThread(&thread);
-      thread.start();
-      instance.Init(true);
-    }else{
-      instance.Init(false);
-    }
-  }
   return instance;
 }
 
-void PythonInterpreter::Init(bool multithreaded)
+
+
+void PythonInterpreter::Stop()
 {
-  if(multithreaded){
-    //initialize over a blocking queued connection to get the correct thread context
-  /*  connect(this, SIGNAL(InitSignal(bool)),this, SLOT(InitSlot(bool)),Qt::BlockingQueuedConnection);
-    emit InitSignal(true);*/
-  }else{
-    // direct initalization
-    InitSlot(false);
-  }
-}
-
-void PythonInterpreter::RedirectOutput()
-{
-  main_namespace_["sys"].attr("stderr") = output_redirector_;
-  main_namespace_["sys"].attr("stdout") = output_redirector_;
-}
-
-void PythonInterpreter::InitSlot(bool multithreaded)
-{
-  if(multithreaded){
-    //main_thread_runner_.moveToThread(QApplication::instance()->thread());
-    //connect(this,SIGNAL(RunInMainThreadSignal(const QString&)),&main_thread_runner_,SLOT(Run(const QString&)),Qt::BlockingQueuedConnection);
-  }else{
-    connect(this,SIGNAL(RunInMainThreadSignal(const QString&)),&main_thread_runner_,SLOT(Run(const QString&)),Qt::DirectConnection);
-  }
-  Py_InitializeEx(1);
-  PyEval_InitThreads();
-  main_thread_state_ = PyEval_SaveThread();
-  gstate_ = PyGILState_Ensure();
-  //store signal handler
-  #ifndef _MSC_VER
-  sigaction(SIGINT,0,&sig_act_);
-  #endif
-  main_module_ = bp::import("__main__");
-  main_module_.attr("in_gui_mode")=true;  
-  main_namespace_ = bp::extract<bp::dict>(main_module_.attr("__dict__"));
-  parse_expr_cmd_=bp::import("parser").attr("expr");  
-  main_namespace_["OutputRedirector"] = bp::class_<OutputRedirector>("OutputRedirector", bp::init<>())
-                                          .def("write", &OutputRedirector::Write);
-  main_namespace_["PythonInterpreterProxy"] = bp::class_<PythonInterpreterProxy>("PythonInterpreterProxy", bp::init<PythonInterpreter*>())
-                                          .def("Run", &PythonInterpreterProxy::Run);
-
-  main_namespace_["os"]=bp::import("os");
-  main_namespace_["__builtin__"]=bp::import("__builtin__");
-  main_namespace_["keyword"]=bp::import("keyword");
-
-  parse_expr_cmd_=bp::import("parser").attr("expr");  
-
-  main_namespace_["sys"]=bp::import("sys");  
-
-  main_module_.attr("Proxy")=proxy_;
-  bp::object code=bp::import("code");
-  compile_command_=code.attr("compile_command");
-
-}
-
-namespace {
-#ifndef _MSC_VER
-  class SigIntHandler {
-  public:
-    SigIntHandler(const struct sigaction& act) {
-      sigaction(SIGINT,&act,&old_);
-    }
-    ~SigIntHandler() {
-      sigaction(SIGINT,&old_,0);
-    }
-  private:
-    struct sigaction old_;
-  };
-#endif
-}
-void PythonInterpreter::RunInitRC()
-{
-  if(!getenv("HOME")) return;
-  String fname=String(getenv("HOME"))+"/.dngrc";
-  try {
-    if (boost::filesystem::exists(fname)) {
-      try {
-        bp::exec_file(bp::str(fname), main_module_.attr("__dict__"), 
-                      main_module_.attr("__dict__"));      
-      } catch(bp::error_already_set&) {
-        PyErr_Print();
-      }
-    }
-  } catch(std::exception&) {
-    // silently ignore. needed for boost 1.33.1
-  }  
-}
-
-void PythonInterpreter::ExecWait()
-{
-  ++exec_wait_;
-}
-
-void PythonInterpreter::ExecRelease()
-{
-  --exec_wait_;
-  assert(exec_wait_>=0);
-  if(exec_wait_==0) {
-    for(std::vector<QString>::const_iterator it=exec_queue_.begin();
-        it!=exec_queue_.end();++it) {
-      if(!RunCommand(*it)) break;        
-    }
-    exec_queue_.clear();
-  }
-}
-
-void PythonInterpreter::RunScript(const String& fname)
-{
-    QFile file(QString::fromStdString(fname));
-  if (!file.open(QIODevice::ReadOnly | QIODevice::Text)){
-    LOGN_ERROR("could not open " << fname);
-    return;
-  }
-  QTextStream in(&file);
-  RunCommand(in.readAll());
-}
-
-bool PythonInterpreter::IsSimpleExpression(const QString& expr)
-{
-  try {
-    parse_expr_cmd_(bp::str(expr.toStdString()));
-    return true;
-  } catch(bp::error_already_set&) {
-    PyErr_Clear();
-    return false;
-  }
-}
-
-bool PythonInterpreter::RunCommand(const QString& command)
-{
-  bool flag=true;
-  if(exec_wait_!=0) {
-    exec_queue_.push_back(command);
-    return flag;
-  }
-
-  // becore doing anything give Qt the chance to handle events for 100ms
-  QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents,100);
-  mutex_.lock();
-  running_=true;
-  mutex_.unlock();
-#ifndef _MSC_VER
-  SigIntHandler sh(sig_act_);
-#endif
-  try{
-    if(command.indexOf(QString("\n"))==-1){
-      if(command=="exit" || command=="quit"){
-        emit Exit();
-      }
-      if (this->IsSimpleExpression(command)) {
-        bp::object repr=main_module_.attr("__builtins__").attr("repr");
-        bp::object result=bp::eval(bp::str(command.toStdString()),
-                                   main_namespace_, main_namespace_);
-        String rstring=bp::extract<String>(repr(result));
-        if(rstring!="None"){
-          output_redirector_.Write(rstring);
-          output_redirector_.Write("\n");
-        }
-        emit Done(STATUS_OK,output_redirector_.GetOutput());
-        flag=true;
-      } else {
-        bp::exec(bp::str(command.toStdString()),main_namespace_,main_namespace_);
-        flag=true;
-      }
-    }else{
-      bp::exec(bp::str(command.toStdString()),main_namespace_,main_namespace_);
-    }
-    emit Done(STATUS_OK,output_redirector_.GetOutput());
-  }catch(bp::error_already_set){
-    if(PyErr_ExceptionMatches(PyExc_SystemExit)){
-      PyErr_Clear();
-      emit Exit();
-    } else{
-      PyErr_Print();
-      QString output=output_redirector_.GetOutput();
-      std::cout << output.toStdString() << std::endl;
-      emit Done(STATUS_ERROR,output);
-      flag=false;
-    }
-  }
-  mutex_.lock();
   running_=false;
-  mutex_.unlock();
-  return flag;
+}
+
+void PythonInterpreter::Start()
+{
+  running_=true;
+    emit WakeWorker();
+}
+
+
+
+unsigned int PythonInterpreter::RunScript(const QString& fname)
+{
+  QFile script(fname);
+  if (!script.open(QIODevice::ReadOnly | QIODevice::Text)){
+    LOGN_ERROR("could not open " << fname.toStdString());
+    return RunCommand("");
+  }
+  QString command=script.readAll();
+  command.append('\n');
+  command.append('\n');
+  return RunCommand(command);
+}
+
+unsigned int PythonInterpreter::RunCommand(const QString& command)
+{
+  unsigned int id=worker_.AddCommand(command);
+  if(running_){
+    emit WakeWorker();
+  }
+  return id;
 }
 
 CodeBlockStatus PythonInterpreter::GetCodeBlockStatus(const QString& command)
 {
+  // move to pure c++ to avoid clash with running worker
+  // move to worker class
   CodeBlockStatus status=CODE_BLOCK_COMPLETE;
-  mutex_.lock();
-  running_=true;
-  mutex_.unlock();
-#ifndef _MSC_VER
+/*#ifndef _MSC_VER
   SigIntHandler sh(sig_act_);
-#endif
+#endif*/
   QStringList lines=command.split("\n");  
   String cmd;  
   for (int i=0; i<lines.size(); ++i) {
@@ -317,70 +149,9 @@ CodeBlockStatus PythonInterpreter::GetCodeBlockStatus(const QString& command)
       }
     }
   }
-  mutex_.lock();
-  running_=false;
-  mutex_.unlock();
-  return status;
+   return status;
 }
 
-enum returncodes{
-    RC_OK=0,
-    RC_ERROR=2>>1,
-    RC_LOOP=2,
-    RC_EXIT=2<<1,
-};
-
-void PythonInterpreter::CallFunction(const bp::object& func,
-                                     const bp::object& args)
-{
-  unsigned int retcode=RC_OK;
-  bool result;
-  try{
-#ifndef _MSC_VER
-  SigIntHandler sh(sig_act_);
-#endif
-    if (len(args)>0) {
-      result=bp::extract<bool>(func(args));
-    } else {
-      result=bp::extract<bool>(func());
-    }
-    if (!result) {
-      retcode|=RC_ERROR;
-      PyErr_Print();
-    }
-  } catch(bp::error_already_set) {
-    if (PyErr_ExceptionMatches(PyExc_KeyboardInterrupt)){
-      retcode|=RC_EXIT;
-    } else {
-      PyErr_Print();
-      retcode|=RC_ERROR;
-    }
-  }
-}
-
-bool PythonInterpreter::IsRunning()
-{
-  mutex_.lock();
-  bool state=running_;
-  mutex_.unlock();
-  return state;
-}
-
-void PythonInterpreter::Abort()
-{
-  if(IsRunning()){
-    raise(SIGINT);
-  }
-}
-
-bp::object PythonInterpreter::RunInMainThread(const QString& widget)
-{
-  PyGILState_Release(gstate_);
-  emit RunInMainThreadSignal(widget);
-  gstate_ = PyGILState_Ensure();
-  return main_module_.attr("Proxy").attr("_widget_");
-
-}
 
 void PythonInterpreter::AppendModulePath(const QString& entry)
 {
@@ -401,18 +172,6 @@ void PythonInterpreter::AppendCommandlineArgument(const QString& arg)
   RunCommand(init_code);
 }
 
-void PythonInterpreter::SetCommandLineArguments(const QList<QString>& args)
-{
-  QString init_code("");
-  init_code += "\nsys.argv=[]";  
-  for (QList<QString>::const_iterator i=args.begin(), e=args.end(); i!=e; ++i) {
-    init_code += "\nsys.argv.append('" ;
-    init_code += *i;    
-    init_code += "')\n";    
-  }
-
-  RunCommand(init_code);
-}
 bp::object PythonInterpreter::GetMainModule() const
 {
   return main_module_;

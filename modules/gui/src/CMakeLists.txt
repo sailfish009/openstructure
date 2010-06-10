@@ -66,9 +66,13 @@ python_tokenizer.hh
 python_syntax_highlighter.hh
 text_logger.hh
 python_interpreter.hh
-python_interpreter_proxy.hh
+python_interpreter_worker.hh
 python_shell_text_document_layout.hh
 shell_history.hh
+state_machine.hh
+state.hh
+transition.hh
+transition_guard.hh
 )
 
 set(OST_GUI_SCENE_WIN_HEADERS
@@ -289,7 +293,7 @@ python_shell/path_completer.cc
 python_shell/python_context_parser.cc
 python_shell/python_completer.cc
 python_shell/python_interpreter.cc
-python_shell/python_interpreter_proxy.cc
+python_shell/python_interpreter_worker.cc
 python_shell/python_namespace_tree_model.cc
 python_shell/python_namespace_tree_item.cc
 python_shell/python_shell.cc
@@ -300,6 +304,10 @@ python_shell/python_syntax_highlighter.cc
 python_shell/shell_history.cc
 python_shell/string_literal_positions.cc
 python_shell/text_logger.cc
+python_shell/state_machine.cc
+python_shell/state.cc
+python_shell/transition.cc
+python_shell/transition_guard.cc
 scene_win/context_menu.cc
 scene_win/current_selection_node.cc
 scene_win/custom_part_node.cc
@@ -363,13 +371,20 @@ plot_viewer/plot_legend_panel.hh
 python_shell/main_thread_runner.hh
 python_shell/completer_base.hh
 python_shell/gutter.hh
+python_shell/output_redirector.hh
 python_shell/path_completer.hh
 python_shell/python_completer.hh
 python_shell/python_interpreter.hh
+python_shell/python_interpreter_worker.hh
 python_shell/python_namespace_tree_model.hh
 python_shell/python_shell.hh
 python_shell/python_shell_widget.hh
 python_shell/text_logger.hh
+python_shell/state_machine.hh
+python_shell/state.hh
+python_shell/transition.hh
+python_shell/transition_guard.hh
+python_shell/output_redirector.hh
 panel_bar/button_bar.hh
 panel_bar/drop_box.hh
 panel_bar/panel_bar.hh

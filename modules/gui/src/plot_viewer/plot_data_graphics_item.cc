@@ -132,10 +132,10 @@ void PlotDataGraphicsItem::Redraw()
 
 void PlotDataGraphicsItem::Callback(const PlotDataEntry& pde)
 {
-  PlotDataInfoPtr infoptr=dyn_cast<PlotDataInfo>(infoptr_);
-  if(infoptr->callback!=boost::python::object()){
-    PythonInterpreter::Instance().CallFunction(infoptr->callback,boost::python::make_tuple(pde.x,pde.y,pde.ex,pde.ey,pde.q,boost::python::str(pde.info.toStdString().c_str())));
-  }
+ // PlotDataInfoPtr infoptr=dyn_cast<PlotDataInfo>(infoptr_);
+ // if(infoptr->callback!=boost::python::object()){
+ //   PythonInterpreter::Instance().CallFunction(infoptr->callback,boost::python::make_tuple(pde.x,pde.y,pde.ex,pde.ey,pde.q,boost::python::str(pde.info.toStdString().c_str())));
+ // }
 }
 
 }}//ns
