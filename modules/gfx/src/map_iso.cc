@@ -160,6 +160,7 @@ void MapIso::OnRenderModeChange()
     va_.SetMode(0x2); // only lines
     va_.SetTwoSided(true);
   }
+  this->FlagRebuild();
   GfxObj::OnRenderModeChange();
 }
 
@@ -167,9 +168,8 @@ void MapIso::CustomPreRenderGL(bool flag)
 {
   if(flag) {
     Rebuild();
-  } else {
-    //RefreshVA(va_);
   }
+  RefreshVA(va_);
 }
 
 namespace {
