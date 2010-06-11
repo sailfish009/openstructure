@@ -427,10 +427,12 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
       if (sel.type==Prop::INT) {
         // todo. Add check to test that the comparison operator is only one of
         // = and !=. The others don't make too much sense.
-        if (value_string=="true") {
+        if (value_string=="true" || value_string=="True" || 
+            value_string=="TRUE") {
           value=ParamType(int(1));
           break;
-        } else if (value_string=="false") {   
+        } else if (value_string=="false" || value_string=="False" || 
+                   value_string=="FALSE") {   
           value=ParamType(int(0));
           break;
         }
