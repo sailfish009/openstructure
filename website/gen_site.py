@@ -119,7 +119,10 @@ def copy_images(opts, dirname, names):
      base_dir=dirname[len(opts.input_dir)+1:]
    out_dir=os.path.join(opts.output_dir, base_dir)
    for name in names:
-     if name.endswith('.jpg') or name.endswith('.png'):
+     if name.endswith('.jpg') or\
+        name.endswith('.JPG') or\
+        name.endswith('.png') or\
+        name.endswith('.PNG'):
        shutil.copy(os.path.join(dirname,name), os.path.join(out_dir,name))
 
 if not os.path.exists(opts.output_dir):

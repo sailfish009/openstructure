@@ -12,5 +12,5 @@ OpenStructure is released under the  <a target="extern" href="http://www.gnu.org
  * Located in the same directory is also ***ost.bat*** a command line interface to the openstructure framework.
 
 ## Supported Windows Platforms
-Currently we only truely support Windows XP.
+Currently we only offer a 32bit Windows version.
 
