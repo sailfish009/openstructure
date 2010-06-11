@@ -4,5 +4,6 @@ title: Gallery
 |   |   |
 | - | - |
 | [![Loop modelling using our fragment library](100212_Loops_Tn.png "Loop Modelling")](100212_Loops.png "Loop Modelling")| [![BE Scroe](100212_BE_Score_Tn.png "BE Score")](100212_BE_Score.png "BE Score") |
-| [![Screenshot Mac OS](100212_Openstructure1.0a1_1622_Mac_Tn.png "Screenshot Mac OS")](100212_Openstructure1.0a1_1622_Mac.png "Screenshot Mac OS") | [![Screenshot Windows](100611_Screenshot_Windows_TN.png "Screenshot Windows")](100611_Screenshot_Windows.png "Screenshot Windows")|
-| [![Screenshot Linux](100611_Screenshot_Linux_TN.png "Screenshot Linux")](100611_Screenshot_Linux.png "Screenshot Linux") ||
+| [![Screenshot Mac OS](100212_Openstructure1.0a1_1622_Mac_Tn.png "Screenshot Mac OS")](100212_Openstructure1.0a1_1622_Mac.png "Screenshot Mac OS") | [![Screenshot Windows Surface](surface_windows7_TN.PNG "Screenshot Windows Surface")](surface_windows7.PNG "Screenshot Windows Surface")|
+| [![Screenshot Linux](100611_Screenshot_Linux_TN.png "Screenshot Linux")](100611_Screenshot_Linux.png "Screenshot Linux") | [![Screenshot Windows](map_windows7_TN.PNG "Screenshot Windows Map")](map_windows7.PNG "Screenshot Windows Map")|
+| [![Screenshot Windows](100611_Screenshot_Windows_TN.png "Screenshot Windows")](100611_Screenshot_Windows.png "Screenshot Windows")||
