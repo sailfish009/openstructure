@@ -1,0 +1,213 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Using External Programs within OpenStructure &mdash; OpenStructure v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="OpenStructure v1.0 documentation" href="index.html" />
+    <link rel="prev" title="Creating a New Module" href="newmodule.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="newmodule.html" title="Creating a New Module"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">OpenStructure v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Using External Programs within OpenStructure</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#locating-the-executable">Locating the Executable</a></li>
+<li><a class="reference internal" href="#prepare-all-files">Prepare All Files</a></li>
+<li><a class="reference internal" href="#execute-the-external-program">Execute the External Program</a></li>
+<li><a class="reference internal" href="#read-generated-output">Read Generated Output</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="newmodule.html"
+                        title="previous chapter">Creating a New Module</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/external.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="using-external-programs-within-openstructure">
+<h1>Using External Programs within OpenStructure<a class="headerlink" href="#using-external-programs-within-openstructure" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>It is often very useful to use external programs to do a specific task. In principle, this can be done by writing out files from OpenStructure and manually running an external program, however, for convenience, this can also be done directly from within OpenStructure using Python commands.</p>
+<p>This tutorial will give you some hints how to do this for a new external program. The process basically consists of four steps:</p>
+<blockquote>
+<ul class="simple">
+<li>locate the executable of the external program</li>
+<li>prepare all necessary files</li>
+<li>execute the external program from python</li>
+<li>read in generated output</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="locating-the-executable">
+<h2>Locating the Executable<a class="headerlink" href="#locating-the-executable" title="Permalink to this headline">¶</a></h2>
+<p>There is a helper function available to locate files, and especially executables: <a class="reference internal" href="base/base.html#ost.settings.Locate" title="ost.settings.Locate"><tt class="xref py py-func docutils literal"><span class="pre">Locate()</span></tt></a>. Using this, you can obtain the full path of an executable.</p>
+<p>As an example, we would like to obtain the full path of the msms executable (a program to calculate molecular surfaces):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">from</span> <span class="nn">ost</span> <span class="k">import</span> <span class="n">settings</span>
+<span class="n">exe_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">Locate</span><span class="p">(</span><span class="s">&#39;msms&#39;</span><span class="p">,</span> <span class="n">search_paths</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;/opt/app&#39;</span><span class="p">,</span><span class="s">&#39;/home/app&#39;</span><span class="p">],</span>
+            <span class="n">env_name</span><span class="o">=</span><span class="s">&#39;MSMS&#39;</span><span class="p">,</span> <span class="n">search_system_paths</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">exe_path</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="base/base.html#ost.settings.Locate" title="ost.settings.Locate"><tt class="xref py py-func docutils literal"><span class="pre">Locate()</span></tt></a> command looks for the program with the name
+<cite>msms</cite>. If env_name is set, it first looks if an environment variable with the
+name <cite>MSMS</cite> is set. If not, all paths in search_paths are searched. If the
+executable could still not be found and search_system_paths is set to True, the
+binary search paths are searched. If the executable could not be found, a
+<tt class="xref py py-exc docutils literal"><span class="pre">FileNotFound</span></tt> exception is raised with a detailed description where
+Locate was searching for the executable.</p>
+</div>
+<div class="section" id="prepare-all-files">
+<h2>Prepare All Files<a class="headerlink" href="#prepare-all-files" title="Permalink to this headline">¶</a></h2>
+<p>The preparation of the necessary files is very dependent on the external program. Often it is useful to generate a temporary directory or file. For this, the python module tempfile is very handy.</p>
+<p>An example how to generate a temporary directory, open a file in this directory and write the position and radius of all atoms into this file is shown here:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">import</span> <span class="nn">tempfile</span>
+<span class="k">import</span> <span class="nn">os</span>
+
+<span class="c"># generate a temporary directory</span>
+<span class="n">tmp_dir_name</span><span class="o">=</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()</span>
+<span class="k">print</span> <span class="s">&#39;temporary directory:&#39;</span><span class="p">,</span><span class="n">tmp_dir_name</span>
+
+<span class="c"># generate and open a file in the temp directory</span>
+<span class="n">tmp_file_name</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir_name</span><span class="p">,</span><span class="s">&quot;entity&quot;</span><span class="p">)</span>
+<span class="n">tmp_file_handle</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">tmp_file_name</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&#39;temporary file:&#39;</span><span class="p">,</span><span class="n">tmp_file_handle</span>
+
+<span class="c"># write position and radius of all atoms to file</span>
+<span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">entity</span><span class="o">.</span><span class="n">GetAtomList</span><span class="p">():</span>
+  <span class="n">position</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">GetPos</span><span class="p">()</span>
+  <span class="n">tmp_file_handle</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%8.3f</span><span class="s"> </span><span class="si">%8.3f</span><span class="s"> </span><span class="si">%8.3f</span><span class="s"> </span><span class="si">%4.2f</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mf">0</span><span class="p">],</span>
+                        <span class="n">position</span><span class="p">[</span><span class="mf">1</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mf">2</span><span class="p">],</span> <span class="n">a</span><span class="o">.</span><span class="n">GetProp</span><span class="p">()</span><span class="o">.</span><span class="n">radius</span><span class="p">))</span>
+
+<span class="c"># close the file</span>
+<span class="n">tmp_file_handle</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="execute-the-external-program">
+<h2>Execute the External Program<a class="headerlink" href="#execute-the-external-program" title="Permalink to this headline">¶</a></h2>
+<p>The external program can be executed from python using the python module subprocess.</p>
+<p>To run the external program msms from the above example, with the temporary file generated before, we can use the following:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">import</span> <span class="nn">subprocess</span>
+
+<span class="c"># set the command to execute</span>
+<span class="n">command</span><span class="o">=</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> -if </span><span class="si">%s</span><span class="s"> -of </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">exe_path</span><span class="p">,</span>
+          <span class="n">tmp_file_name</span><span class="p">,</span> <span class="n">tmp_file_name</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&#39;command:&#39;</span><span class="p">,</span><span class="n">command</span>
+
+<span class="c"># run the executable with the command</span>
+<span class="n">proc</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+<span class="n">stdout_value</span><span class="p">,</span> <span class="n">stderr_value</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+
+<span class="c">#check for successful completion of msms</span>
+<span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="o">!=</span><span class="mf">0</span><span class="p">:</span>
+  <span class="k">print</span> <span class="s">&quot;WARNING: msms error</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">stdout_value</span>
+  <span class="k">raise</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">CalledProcessError</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="p">,</span> <span class="n">command</span><span class="p">)</span>
+
+<span class="c"># print everything written to the command line (stdout)</span>
+<span class="k">print</span> <span class="n">stdout_value</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="read-generated-output">
+<h2>Read Generated Output<a class="headerlink" href="#read-generated-output" title="Permalink to this headline">¶</a></h2>
+<p>The last step includes reading of generated files (like in the case of msms) and/or processing of the generated command line output.</p>
+<p>Here we first print the command line output and then load the generated msms surface and print the number of vertex points:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># print everything written to the command line (stdout)</span>
+<span class="k">print</span> <span class="n">stdout_value</span>
+
+<span class="c"># read msms surface from file</span>
+<span class="n">surface</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">LoadSurface</span><span class="p">(</span><span class="n">tmp_file_name</span><span class="p">,</span> <span class="s">&quot;msms&quot;</span><span class="p">)</span>
+<span class="k">print</span> <span class="s">&#39;number of vertices:&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">surface</span><span class="o">.</span><span class="n">GetVertexIDList</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="newmodule.html" title="Creating a New Module"
+             >previous</a> |</li>
+        <li><a href="index.html">OpenStructure v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, OpenStructure authors.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b2.
+    </div>
+  </body>
+</html>

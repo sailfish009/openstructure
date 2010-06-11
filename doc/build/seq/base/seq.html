@@ -1,0 +1,552 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>seq – Sequences and Alignments &mdash; OpenStructure v1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenStructure v1.0 documentation" href="../../index.html" />
+    <link rel="next" title="ost.settings - Locate Files and Retrieve Preferences" href="../../base/base.html" />
+    <link rel="prev" title="Queries" href="../../mol/base/query.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../base/base.html" title="ost.settings - Locate Files and Retrieve Preferences"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../../mol/base/query.html" title="Queries"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">OpenStructure v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">seq</span></tt> &#8211; Sequences and Alignments</a><ul>
+<li><a class="reference internal" href="#attaching-structures-to-sequences">Attaching Structures to Sequences</a><ul>
+<li><a class="reference internal" href="#sequence-offset">Sequence Offset</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#loading-and-saving-sequences-and-alignments">Loading and Saving Sequences and Alignments</a></li>
+<li><a class="reference internal" href="#the-sequencehandle">The SequenceHandle</a></li>
+<li><a class="reference internal" href="#the-sequencelist">The SequenceList</a></li>
+<li><a class="reference internal" href="#the-alignmenthandle">The AlignmentHandle</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../../mol/base/query.html"
+                        title="previous chapter">Queries</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../../base/base.html"
+                        title="next chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">ost.settings</span></tt> - Locate Files and Retrieve Preferences</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/seq/base/seq.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-ost.seq">
+<span id="seq-sequences-and-alignments"></span><h1><a class="reference internal" href="#module-ost.seq" title="Contains classes and functions to deal with sequences and alignments"><tt class="xref py py-mod docutils literal"><span class="pre">seq</span></tt></a> &#8211; Sequences and Alignments<a class="headerlink" href="#module-ost.seq" title="Permalink to this headline">¶</a></h1>
+<p>The <tt class="xref py py-mod docutils literal"><span class="pre">seq</span></tt> module helps you working with sequence data of various kinds. It
+has classes for <a class="reference internal" href="#ost.seq.SequenceHandle" title="ost.seq.SequenceHandle"><tt class="xref py py-class docutils literal"><span class="pre">single</span> <span class="pre">sequences</span></tt></a>, <a class="reference internal" href="#ost.seq.SequenceList" title="ost.seq.SequenceList"><tt class="xref py py-class docutils literal"><span class="pre">lists</span> <span class="pre">of</span>
+<span class="pre">sequences</span></tt></a> and <a class="reference internal" href="#ost.seq.AlignmentHandle" title="ost.seq.AlignmentHandle"><tt class="xref py py-class docutils literal"><span class="pre">alignments</span></tt></a> of two or
+more sequences.</p>
+<div class="section" id="attaching-structures-to-sequences">
+<span id="attaching-views"></span><h2>Attaching Structures to Sequences<a class="headerlink" href="#attaching-structures-to-sequences" title="Permalink to this headline">¶</a></h2>
+<p>Being a structural biology framework, it is not surprising that the sequence
+classes have been designed to work together with structural data. Each sequence
+can have an attached <tt class="xref py py-class docutils literal"><span class="pre">EntityView</span></tt> allowing for fast mapping between
+residues in the entity view and position in the sequence.</p>
+<div class="section" id="sequence-offset">
+<span id="id1"></span><h3>Sequence Offset<a class="headerlink" href="#sequence-offset" title="Permalink to this headline">¶</a></h3>
+<p>When using sequences and structures together, often the start of the structure
+and the beginning of the sequence do not fall together. In the following case,
+the alignment of sequences B and C only covers a subpart of structure A:</p>
+<div class="highlight-python"><pre>A acefghiklmnpqrstuvwy
+B     ghiklm
+C     123-45</pre>
+</div>
+<p>We would now like to know which residue in protein A is aligned to which residue
+in sequence C. This is achieved by setting the sequence offset of sequence C to
+4. In essence, the sequence offset influences all the mapping operations from
+position in the sequence to residue index and vice versa. By default, the
+sequence offset is 0.</p>
+</div>
+</div>
+<div class="section" id="loading-and-saving-sequences-and-alignments">
+<h2>Loading and Saving Sequences and Alignments<a class="headerlink" href="#loading-and-saving-sequences-and-alignments" title="Permalink to this headline">¶</a></h2>
+<p>The <tt class="xref py py-mod docutils literal"><span class="pre">io</span></tt> module supports input and output of common sequence formats.
+Single  sequences can be loaded from disk with <tt class="xref py py-func docutils literal"><span class="pre">io.LoadSequence()</span></tt>,
+alignments are loaded with <tt class="xref py py-func docutils literal"><span class="pre">io.LoadAlignment()</span></tt> and lists of sequences are loaded with <tt class="xref py py-func docutils literal"><span class="pre">io.LoadSequenceList()</span></tt>. In addition to the file based input
+methods, sequences can also be loaded from a string:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">seq_string</span><span class="o">=</span><span class="s">&#39;&#39;&#39;&gt;sequence</span>
+<span class="s">abcdefghiklmnop&#39;&#39;&#39;</span>
+<span class="n">s</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">LoadSequenceFromString</span><span class="p">(</span><span class="n">seq_string</span><span class="p">,</span> <span class="s">&#39;fasta&#39;</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">s</span> <span class="c"># will print &quot;sequence abcdefghiklmnop&quot;</span>
+</pre></div>
+</div>
+<p>Note that, in that case specifying the format is mandatory.</p>
+</div>
+<div class="section" id="the-sequencehandle">
+<h2>The SequenceHandle<a class="headerlink" href="#the-sequencehandle" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ost.seq.CreateSequence">
+<tt class="descclassname">ost.seq.</tt><tt class="descname">CreateSequence</tt><big>(</big><em>name</em>, <em>sequence</em><big>)</big><a class="headerlink" href="#ost.seq.CreateSequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new <a class="reference internal" href="#ost.seq.SequenceHandle" title="ost.seq.SequenceHandle"><tt class="xref py py-class docutils literal"><span class="pre">SequenceHandle</span></tt></a> with the given name and sequence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> &#8211; name of the sequence</li>
+<li><strong>sequence</strong> &#8211; String of characters representing the sequence. Only
+alphanumerical characters and &#8216;-&#8216; are allowed.</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name" colspan="2">Raises InvalidSequence:</th></tr>
+<tr><td>&nbsp;</td><td class="field-body"><p class="first last">When the sequence string contains forbidden
+characters, that is anything that is not alphanumeric or a hyphen.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.seq.SequenceHandle">
+<em class="property">class </em><tt class="descclassname">ost.seq.</tt><tt class="descname">SequenceHandle</tt><a class="headerlink" href="#ost.seq.SequenceHandle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a sequence. New instances are created with <a class="reference internal" href="#ost.seq.CreateSequence" title="ost.seq.CreateSequence"><tt class="xref py py-func docutils literal"><span class="pre">CreateSequence()</span></tt></a>.</p>
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.GetPos">
+<tt class="descname">GetPos</tt><big>(</big><em>residue_index</em><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.GetPos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get position of residue with index in sequence. This is best illustrated in
+the following example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">s</span><span class="o">=</span><span class="n">seq</span><span class="o">.</span><span class="n">CreateSequence</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="s">&quot;abc---def&quot;</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">GetPos</span><span class="p">(</span><span class="mf">1</span><span class="p">)</span> <span class="c"># prints 1</span>
+<span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">GetPos</span><span class="p">(</span><span class="mf">3</span><span class="p">)</span> <span class="c"># prints 6</span>
+</pre></div>
+</div>
+<p>The reverse mapping, that is from position in the sequence to residue index
+can be achieved with <a class="reference internal" href="#ost.seq.SequenceHandle.GetResidueIndex" title="ost.seq.SequenceHandle.GetResidueIndex"><tt class="xref py py-meth docutils literal"><span class="pre">GetResidueIndex()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.GetResidueIndex">
+<tt class="descname">GetResidueIndex</tt><big>(</big><em>pos</em><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.GetResidueIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get residue index of character at given position. This method is the
+inverse of <a class="reference internal" href="#ost.seq.SequenceHandle.GetPos" title="ost.seq.SequenceHandle.GetPos"><tt class="xref py py-meth docutils literal"><span class="pre">GetPos()</span></tt></a>. If the sequence contains a gap at that position,
+an <tt class="xref py py-exc docutils literal"><span class="pre">Error</span></tt> is raised.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">s</span><span class="o">=</span><span class="n">seq</span><span class="o">.</span><span class="n">CreateSequence</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="s">&quot;abc--def&quot;</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">GetResidueIndex</span><span class="p">(</span><span class="mf">1</span><span class="p">)</span> <span class="c"># prints 1</span>
+<span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">GetResidueIndex</span><span class="p">(</span><span class="mf">6</span><span class="p">)</span> <span class="c"># prints 4</span>
+<span class="c"># the following line raises an exception of type</span>
+<span class="c"># Error with the message &quot;requested position contains</span>
+<span class="c"># a gap&quot;</span>
+<span class="k">print</span> <span class="n">s</span><span class="o">.</span><span class="n">GetResidueIndex</span><span class="p">(</span><span class="mf">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.GetLastNonGap">
+<tt class="descname">GetLastNonGap</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.GetLastNonGap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get position of last non-gap character in sequence. In case of an empty
+sequence, or, a sequence only consisting of hyphens, -1 is returned</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.GetFirstNonGap">
+<tt class="descname">GetFirstNonGap</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.GetFirstNonGap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get position of first non-gap character in sequence. In case of an empty
+sequence, or, a sequence only consisting of hyphens, -1 is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.AttachView">
+<tt class="descname">AttachView</tt><big>(</big><em>view</em><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.AttachView" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">AttachView</tt><big>(</big><em>view</em><span class="optional">[</span>, <em>chain_name</em><span class="optional">]</span><big>)</big></dt>
+<dd><p>Attach an <tt class="xref py py-class docutils literal"><span class="pre">EntityView</span></tt> to sequence. The first signature requires
+that the view contains one chain. If not, an <tt class="xref py py-exc docutils literal"><span class="pre">IntegrityError</span></tt> is
+raised. The second signature will select the chain with the given name. If
+no such chain exists, an <tt class="xref py py-exc docutils literal"><span class="pre">IntegrityError</span></tt> is raised.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.HasAttachedView">
+<tt class="descname">HasAttachedView</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.HasAttachedView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns True when the sequence has a view attached, False if not.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.GetAttachedView">
+<tt class="descname">GetAttachedView</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.GetAttachedView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the attached <tt class="xref py py-class docutils literal"><span class="pre">EntityView</span></tt>, or an invalid
+<tt class="xref py py-class docutils literal"><span class="pre">EntityView</span></tt> if no view has been attached. Also available as
+the property <a class="reference internal" href="#ost.seq.SequenceHandle.attached_view" title="ost.seq.SequenceHandle.attached_view"><tt class="xref py py-attr docutils literal"><span class="pre">attached_view</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.GetName">
+<tt class="descname">GetName</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.GetName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the name of the sequence. Also available as the property
+<a class="reference internal" href="#ost.seq.SequenceHandle.name" title="ost.seq.SequenceHandle.name"><tt class="xref py py-attr docutils literal"><span class="pre">name</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.SetSequenceOffset">
+<tt class="descname">SetSequenceOffset</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.SetSequenceOffset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the <a class="reference internal" href="#sequence-offset"><em>sequence offset</em></a>. By default, the offset is
+0. Also available as the property <a class="reference internal" href="#ost.seq.SequenceHandle.sequence_offset" title="ost.seq.SequenceHandle.sequence_offset"><tt class="xref py py-attr docutils literal"><span class="pre">sequence_offset</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.GetSequenceOffset">
+<tt class="descname">GetSequenceOffset</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.GetSequenceOffset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the <a class="reference internal" href="#sequence-offset"><em>sequence offset</em></a>. Also available as
+<a class="reference internal" href="#ost.seq.SequenceHandle.sequence_offset" title="ost.seq.SequenceHandle.sequence_offset"><tt class="xref py py-attr docutils literal"><span class="pre">sequence_offset</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.GetGaplessString">
+<tt class="descname">GetGaplessString</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.GetGaplessString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string version of this sequence with all hyphens removed. Also
+available as the property <a class="reference internal" href="#ost.seq.SequenceHandle.gapless_string" title="ost.seq.SequenceHandle.gapless_string"><tt class="xref py py-attr docutils literal"><span class="pre">gapless_string</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.SetName">
+<tt class="descname">SetName</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.SetName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set name of the sequence. Also available as the property <a class="reference internal" href="#ost.seq.SequenceHandle.name" title="ost.seq.SequenceHandle.name"><tt class="xref py py-attr docutils literal"><span class="pre">name</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.seq.SequenceHandle.gapless_string">
+<tt class="descname">gapless_string</tt><a class="headerlink" href="#ost.seq.SequenceHandle.gapless_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shorthand for <a class="reference internal" href="#ost.seq.SequenceHandle.GetGaplessString" title="ost.seq.SequenceHandle.GetGaplessString"><tt class="xref py py-meth docutils literal"><span class="pre">GetGaplessString()</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.seq.SequenceHandle.name">
+<tt class="descname">name</tt><a class="headerlink" href="#ost.seq.SequenceHandle.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shorthand for <a class="reference internal" href="#ost.seq.SequenceHandle.GetName" title="ost.seq.SequenceHandle.GetName"><tt class="xref py py-meth docutils literal"><span class="pre">GetName()</span></tt></a>/<a class="reference internal" href="#ost.seq.SequenceHandle.SetName" title="ost.seq.SequenceHandle.SetName"><tt class="xref py py-meth docutils literal"><span class="pre">SetName()</span></tt></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.seq.SequenceHandle.attached_view">
+<tt class="descname">attached_view</tt><a class="headerlink" href="#ost.seq.SequenceHandle.attached_view" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shorthand for <a class="reference internal" href="#ost.seq.SequenceHandle.GetAttachedView" title="ost.seq.SequenceHandle.GetAttachedView"><tt class="xref py py-meth docutils literal"><span class="pre">GetAttachedView()</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.seq.SequenceHandle.sequence_offset">
+<tt class="descname">sequence_offset</tt><a class="headerlink" href="#ost.seq.SequenceHandle.sequence_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shorthand for <a class="reference internal" href="#ost.seq.SequenceHandle.GetSequenceOffset" title="ost.seq.SequenceHandle.GetSequenceOffset"><tt class="xref py py-meth docutils literal"><span class="pre">GetSequenceOffset()</span></tt></a>/<a class="reference internal" href="#ost.seq.SequenceHandle.SetSequenceOffset" title="ost.seq.SequenceHandle.SetSequenceOffset"><tt class="xref py py-meth docutils literal"><span class="pre">SetSequenceOffset()</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.__len__">
+<tt class="descname">__len__</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.__len__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the length of the sequence (including insertions and deletions)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.SequenceHandle.__str__">
+<tt class="descname">__str__</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.SequenceHandle.__str__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sequence as a string.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="the-sequencelist">
+<h2>The SequenceList<a class="headerlink" href="#the-sequencelist" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ost.seq.SequenceList">
+<em class="property">class </em><tt class="descclassname">ost.seq.</tt><tt class="descname">SequenceList</tt><a class="headerlink" href="#ost.seq.SequenceList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a list of sequences. The class provides a row-based interface. New
+instances are created with <tt class="xref py py-func docutils literal"><span class="pre">CreateSequenceList()</span></tt>.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="the-alignmenthandle">
+<h2>The AlignmentHandle<a class="headerlink" href="#the-alignmenthandle" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference internal" href="#ost.seq.AlignmentHandle" title="ost.seq.AlignmentHandle"><tt class="xref py py-class docutils literal"><span class="pre">AlignmentHandle</span></tt></a> represents a list of aligned sequences. In
+constrast to <a class="reference internal" href="#ost.seq.SequenceList" title="ost.seq.SequenceList"><tt class="xref py py-class docutils literal"><span class="pre">SequenceList</span></tt></a>, an alignment requires all sequences to be of
+the same length. New instances of alignments are created with
+<a class="reference internal" href="#ost.seq.CreateAlignment" title="ost.seq.CreateAlignment"><tt class="xref py py-func docutils literal"><span class="pre">CreateAlignment()</span></tt></a> and <a class="reference internal" href="#ost.seq.AlignmentFromSequenceList" title="ost.seq.AlignmentFromSequenceList"><tt class="xref py py-func docutils literal"><span class="pre">AlignmentFromSequenceList()</span></tt></a>.</p>
+<p>Typically sequence alignments are used column-based, i.e by looking at an
+aligned columns in the sequence alignment. To get a row-based (sequence) view
+on the sequence list, use <tt class="xref py py-meth docutils literal"><span class="pre">GetSequenceList()</span></tt>.</p>
+<p>All functions that operate on an alignment will again produce a valid alignment.
+This mean that it is not possible to change the length of one sequence, without
+adjusting the other sequences, too.</p>
+<p>The following example shows how to iterate over the columns and sequences of
+an alignment:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">aln</span><span class="o">=</span><span class="n">io</span><span class="o">.</span><span class="n">LoadAlignment</span><span class="p">(</span><span class="s">&#39;aln.fasta&#39;</span><span class="p">)</span>
+<span class="c"># iterate over the columns</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">aln</span><span class="p">:</span>
+  <span class="k">print</span> <span class="n">col</span>
+
+<span class="c"># iterate over the sequences</span>
+<span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">aln</span><span class="o">.</span><span class="n">sequences</span><span class="p">:</span>
+  <span class="k">print</span> <span class="n">s</span>
+</pre></div>
+</div>
+<dl class="function">
+<dt id="ost.seq.CreateAlignment">
+<tt class="descclassname">ost.seq.</tt><tt class="descname">CreateAlignment</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.CreateAlignment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates and returns a new <a class="reference internal" href="#ost.seq.AlignmentHandle" title="ost.seq.AlignmentHandle"><tt class="xref py py-class docutils literal"><span class="pre">AlignmentHandle</span></tt></a> with no sequences.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.seq.AlignmentFromSequenceList">
+<tt class="descclassname">ost.seq.</tt><tt class="descname">AlignmentFromSequenceList</tt><big>(</big><em>sequences</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentFromSequenceList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new alignment from the given list of sequences</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>sequences</strong> (<em>ConstSequenceList</em>) &#8211; the list of sequences</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Raises :</th><td class="field-body"><p class="first last"><tt class="xref py py-exc docutils literal"><span class="pre">InvalidAlignment</span></tt> if the sequences do not have the same length.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.seq.AlignmentHandle">
+<em class="property">class </em><tt class="descclassname">ost.seq.</tt><tt class="descname">AlignmentHandle</tt><a class="headerlink" href="#ost.seq.AlignmentHandle" title="Permalink to this definition">¶</a></dt>
+<dd><div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Several of these methods just forward calls to the sequence. For more
+detailed information, have a look at the <a class="reference internal" href="#ost.seq.SequenceHandle" title="ost.seq.SequenceHandle"><tt class="xref py py-class docutils literal"><span class="pre">SequenceHandle</span></tt></a>
+documentation.</p>
+</div>
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.GetSequence">
+<tt class="descname">GetSequence</tt><big>(</big><em>index</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.GetSequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the sequence at the given index, raising an IndexError when trying
+to access an inexistent sequence.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.GetSequenceList">
+<tt class="descname">GetSequenceList</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.GetSequenceList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all sequence of the alignment.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.GetLength">
+<tt class="descname">GetLength</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.GetLength" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the length of the alignment.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.GetCount">
+<tt class="descname">GetCount</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.GetCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of sequences in the alignment.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.ToString">
+<tt class="descname">ToString</tt><big>(</big><em>width=80</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.ToString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a formatted string version of the alignment. The sequences are
+split into smaller parts to fit into the number columns specified.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">aln</span><span class="o">=</span><span class="n">seq</span><span class="o">.</span><span class="n">CreateAlignment</span><span class="p">()</span>
+<span class="n">aln</span><span class="o">.</span><span class="n">AddSequence</span><span class="p">(</span><span class="n">seq</span><span class="o">.</span><span class="n">CreateSequence</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="s">&quot;abcdefghik&quot;</span><span class="p">))</span>
+<span class="n">aln</span><span class="o">.</span><span class="n">AddSequence</span><span class="p">(</span><span class="n">seq</span><span class="o">.</span><span class="n">CreateSequence</span><span class="p">(</span><span class="s">&quot;B&quot;</span><span class="p">,</span> <span class="s">&quot;1234567890&quot;</span><span class="p">))</span>
+<span class="c"># The following command will print the output given below</span>
+<span class="k">print</span> <span class="n">aln</span><span class="o">.</span><span class="n">ToString</span><span class="p">(</span><span class="mf">7</span><span class="p">)</span>
+<span class="c"># A abcde</span>
+<span class="c"># B 12345</span>
+<span class="c">#</span>
+<span class="c"># A fghik</span>
+<span class="c"># B 67890</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.FindSequence">
+<tt class="descname">FindSequence</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.FindSequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find sequence with given name. If the alignment contains several sequences
+with the same name, the first sequence is returned.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.SetSequenceName">
+<tt class="descname">SetSequenceName</tt><big>(</big><em>seq_index</em>, <em>name</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.SetSequenceName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the name of the sequence at index <cite>seq_index</cite> to name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.SetSequenceOffset">
+<tt class="descname">SetSequenceOffset</tt><big>(</big><em>seq_index</em>, <em>offset</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.SetSequenceOffset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the sequence offset of sequence at index <cite>seq_index</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.Copy">
+<tt class="descname">Copy</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.Copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a deep copy of the alignment</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.GetPos">
+<tt class="descname">GetPos</tt><big>(</big><em>seq_index</em>, <em>res_index</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.GetPos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get position of residue with index equal to <cite>res_index</cite> in sequence at index
+<cite>seq_index</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.GetResidueIndex">
+<tt class="descname">GetResidueIndex</tt><big>(</big><em>seq_index</em>, <em>pos</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.GetResidueIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get residue index of residue at position <cite>pos</cite> in sequence at index
+<cite>seq_index</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.AttachView">
+<tt class="descname">AttachView</tt><big>(</big><em>seq_index</em>, <em>view</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.AttachView" title="Permalink to this definition">¶</a></dt>
+<dt>
+<tt class="descname">AttachView</tt><big>(</big><em>seq_index</em>, <em>view</em>, <em>chain_name</em><big>)</big></dt>
+<dd><p>Attach the given view to the sequence at index <cite>seq_index</cite>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.Cut">
+<tt class="descname">Cut</tt><big>(</big><em>start</em>, <em>end</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.Cut" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the columns in the half-closed interval <cite>start</cite>, <cite>end</cite> from the
+alignment.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">aln</span><span class="o">=</span><span class="n">seq</span><span class="o">.</span><span class="n">CreateAlignment</span><span class="p">()</span>
+<span class="n">aln</span><span class="o">.</span><span class="n">AddSequence</span><span class="p">(</span><span class="n">seq</span><span class="o">.</span><span class="n">CreateSequence</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="s">&quot;abcd---hik&quot;</span><span class="p">))</span>
+<span class="n">aln</span><span class="o">.</span><span class="n">AddSequence</span><span class="p">(</span><span class="n">seq</span><span class="o">.</span><span class="n">CreateSequence</span><span class="p">(</span><span class="s">&quot;B&quot;</span><span class="p">,</span> <span class="s">&quot;1234567890&quot;</span><span class="p">))</span>
+<span class="n">aln</span><span class="o">.</span><span class="n">Cut</span><span class="p">(</span><span class="mf">4</span><span class="p">,</span> <span class="mf">7</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="n">aln</span><span class="o">.</span><span class="n">ToString</span><span class="p">(</span><span class="mf">80</span><span class="p">)</span>
+<span class="c"># will print</span>
+<span class="c"># A abcdhik</span>
+<span class="c"># B 1234890</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.Replace">
+<tt class="descname">Replace</tt><big>(</big><em>new_region</em>, <em>start</em>, <em>end</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.Replace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the columns in the half-closed interval <cite>start</cite>, <cite>end</cite> with the
+columns in <cite>new_region</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>new_region</strong> (<em>AlignedRegionAlignmentHandle</em>) &#8211; The region to be inserted</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.seq.AlignmentHandle.ShiftRegion">
+<tt class="descname">ShiftRegion</tt><big>(</big><em>start</em>, <em>end</em>, <em>amount</em>, <em>master=-1</em><big>)</big><a class="headerlink" href="#ost.seq.AlignmentHandle.ShiftRegion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shift columns in the half-closed interval <cite>start</cite>, <cite>end</cite>. If amount is a
+positive number, the columns are shifted to the right, if negative, the
+columns are shifted to the left.</p>
+<p>If master is set to -1, all sequences in the region are affected, otherwise
+only the sequence at index equal to master is shifted.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../base/base.html" title="ost.settings - Locate Files and Retrieve Preferences"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../../mol/base/query.html" title="Queries"
+             >previous</a> |</li>
+        <li><a href="../../index.html">OpenStructure v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, OpenStructure authors.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b2.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1120 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Geometric Objects &mdash; OpenStructure v1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpenStructure v1.0 documentation" href="../index.html" />
+    <link rel="up" title="geom – vectors, matrices and geometrical objects" href="geom.html" />
+    <link rel="next" title="conop – Connectivity and Topology of Molecules" href="../conop/conop.html" />
+    <link rel="prev" title="Matrices" href="mat.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../conop/conop.html" title="conop – Connectivity and Topology of Molecules"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="mat.html" title="Matrices"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">OpenStructure v1.0 documentation</a> &raquo;</li>
+          <li><a href="geom.html" accesskey="U"><tt class="docutils literal"><span class="pre">geom</span></tt> &#8211; vectors, matrices and geometrical objects</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Geometric Objects</a><ul>
+<li><a class="reference internal" href="#geometrical-objects-in-two-dimensions">Geometrical Objects in Two Dimensions</a></li>
+<li><a class="reference internal" href="#geometrical-objects-in-three-dimensions">Geometrical Objects in Three Dimensions</a></li>
+<li><a class="reference internal" href="#operations-on-geometrical-objects">Operations on Geometrical Objects</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="mat.html"
+                        title="previous chapter">Matrices</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../conop/conop.html"
+                        title="next chapter"><tt class="docutils literal docutils literal"><span class="pre">conop</span></tt> &#8211; Connectivity and Topology of Molecules</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/geom/composite.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="geometric-objects">
+<h1>Geometric Objects<a class="headerlink" href="#geometric-objects" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="geometrical-objects-in-two-dimensions">
+<h2>Geometrical Objects in Two Dimensions<a class="headerlink" href="#geometrical-objects-in-two-dimensions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ost.geom.Line2">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Line2</tt><a class="headerlink" href="#ost.geom.Line2" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Line2</tt><big>(</big><em>from</em>, <em>to</em><big>)</big></dt>
+<dd><p>Parametric line in two dimensions as defined by an origin and a normalized
+direction vector. The first constructor creates a line with origin (0,0) and
+direction along the x axis. The second signature creates a line originating
+from <cite>from</cite> and pointing towards <cite>to</cite>.</p>
+<dl class="method">
+<dt id="ost.geom.Line2.At">
+<tt class="descname">At</tt><big>(</big><em>t</em><big>)</big><a class="headerlink" href="#ost.geom.Line2.At" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the point on the line at (signed) distance t from origin.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> &#8211; free parameter</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">&lt;pending_xref py:class=&#8221;Line2&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec2&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec2&lt;/literal&gt;&lt;/pending_xref&gt;</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Line2.GetOrigin">
+<tt class="descname">GetOrigin</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Line2.GetOrigin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the origin of the line: Also available as <a class="reference internal" href="#ost.geom.Line2.origin" title="ost.geom.Line2.origin"><tt class="xref py py-attr docutils literal"><span class="pre">origin</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;Line2&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec2&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec2&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Line2.GetDirection">
+<tt class="descname">GetDirection</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Line2.GetDirection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the normalized direction vector. Also available as
+<a class="reference internal" href="#ost.geom.Line2.direction" title="ost.geom.Line2.direction"><tt class="xref py py-attr docutils literal"><span class="pre">direction</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;Line2&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec2&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec2&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Line2.direction">
+<tt class="descname">direction</tt><a class="headerlink" href="#ost.geom.Line2.direction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Line2.origin">
+<tt class="descname">origin</tt><a class="headerlink" href="#ost.geom.Line2.origin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.geom.Rectangle2">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Rectangle2</tt><a class="headerlink" href="#ost.geom.Rectangle2" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Rectangle2</tt><big>(</big><em>top_left</em>, <em>bottom_right</em><big>)</big></dt>
+<dd><p>Axis aligned rectangle. The first signature creates a rectangle with top-left
+corner (-1, -1) and bottom-right corner (1, 1), wheras the second method
+allows to set the top-left and bottom-right corners directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>top_left</strong> (<em>Vec2</em>) &#8211; The top-left corner</li>
+<li><strong>bottom_right</strong> (<em>Vec2</em>) &#8211; The bottom-right corner</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="ost.geom.Rectangle2.GetWidth">
+<tt class="descname">GetWidth</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Rectangle2.GetWidth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the width of the rectangle. Also available as <a class="reference internal" href="#ost.geom.Rectangle2.width" title="ost.geom.Rectangle2.width"><tt class="xref py py-attr docutils literal"><span class="pre">width</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Rectangle2.GetHeight">
+<tt class="descname">GetHeight</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Rectangle2.GetHeight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the height of the rectangle. Also available as <a class="reference internal" href="#ost.geom.Rectangle2.height" title="ost.geom.Rectangle2.height"><tt class="xref py py-attr docutils literal"><span class="pre">height</span></tt></a>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Rectangle2.width">
+<tt class="descname">width</tt><a class="headerlink" href="#ost.geom.Rectangle2.width" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Rectangle2.height">
+<tt class="descname">height</tt><a class="headerlink" href="#ost.geom.Rectangle2.height" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Rectangle2.GetStart">
+<tt class="descname">GetStart</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Rectangle2.GetStart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get top-left corner</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;Rectangle2&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec2&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec2&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Rectangle2.GetEnd">
+<tt class="descname">GetEnd</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Rectangle2.GetEnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get bottom-right corner</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;Rectangle2&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec2&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec2&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Rectangle2.SetStart">
+<tt class="descname">SetStart</tt><big>(</big><em>top_left</em><big>)</big><a class="headerlink" href="#ost.geom.Rectangle2.SetStart" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set top-left corner, leaving the bottom-right corner untouched.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Rectangle2.SetEnd">
+<tt class="descname">SetEnd</tt><big>(</big><em>bottom_right</em><big>)</big><a class="headerlink" href="#ost.geom.Rectangle2.SetEnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the bottom-right corner, leaving the top-left corner untouched.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.geom.Circle2">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Circle2</tt><a class="headerlink" href="#ost.geom.Circle2" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Circle2</tt><big>(</big><em>circle</em><big>)</big></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Circle2</tt><big>(</big><em>center</em>, <em>radius</em><big>)</big></dt>
+<dd><p>The first signature creates a circle centered at (0, 0) and radius 1.0. The
+second signature creates a circle with the same paramters as <cite>circle</cite>. The
+third signature creates a new circle with given center and radius.</p>
+<dl class="method">
+<dt id="ost.geom.Circle2.SetCenter">
+<tt class="descname">SetCenter</tt><big>(</big><em>center</em><big>)</big><a class="headerlink" href="#ost.geom.Circle2.SetCenter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set center of circle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>center</strong> (<em>Vec2</em>) &#8211; The new center</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Circle2.SetRadius">
+<tt class="descname">SetRadius</tt><big>(</big><em>radius</em><big>)</big><a class="headerlink" href="#ost.geom.Circle2.SetRadius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set radius of circle</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>center</strong> &#8211; The new radius</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Circle2.GetCenter">
+<tt class="descname">GetCenter</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Circle2.GetCenter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the center of the circle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Circle2.GetRadius">
+<tt class="descname">GetRadius</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Circle2.GetRadius" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the radius of the circle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Circle2.GetArea">
+<tt class="descname">GetArea</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Circle2.GetArea" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the area of the circle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Circle2.GetCircumference">
+<tt class="descname">GetCircumference</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Circle2.GetCircumference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the circumference of the circle</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.geom.Ellipse2">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Ellipse2</tt><a class="headerlink" href="#ost.geom.Ellipse2" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Ellipse2</tt><big>(</big><em>center</em>, <em>a</em>, <em>b</em>, <em>gamma</em><big>)</big></dt>
+<dd><p>An ellipse is defined by a center, two principal axis and gamma that
+defines the angle between the first principal axis an the x-axis.</p>
+<dl class="method">
+<dt id="ost.geom.Ellipse2.At">
+<tt class="descname">At</tt><big>(</big><em>t</em><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.At" title="Permalink to this definition">¶</a></dt>
+<dd><p>?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.AtAngle">
+<tt class="descname">AtAngle</tt><big>(</big><em>angle</em><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.AtAngle" title="Permalink to this definition">¶</a></dt>
+<dd><p>?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.GetBoundingBox">
+<tt class="descname">GetBoundingBox</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.GetBoundingBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the bounding rectangle (axis-aligned) of the ellipse</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;Ellipse2&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Rectangle2&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Rectangle2&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.GetA">
+<tt class="descname">GetA</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.GetA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the first principal-axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.GetB">
+<tt class="descname">GetB</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.GetB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the second principal-axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.GetGamma">
+<tt class="descname">GetGamma</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.GetGamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the angle of the first principal axis to the x-axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.GetArea">
+<tt class="descname">GetArea</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.GetArea" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the area of the ellipse</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.GetOrigin">
+<tt class="descname">GetOrigin</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.GetOrigin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the center of the ellipse</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.SetA">
+<tt class="descname">SetA</tt><big>(</big><em>a</em><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.SetA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the length of the first principal axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.SetB">
+<tt class="descname">SetB</tt><big>(</big><em>b</em><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.SetB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the length of the second principal axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.SetGamma">
+<tt class="descname">SetGamma</tt><big>(</big><em>gamma</em><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.SetGamma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the angle of the first principal axis to the x-axis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Ellipse2.SetOrigin">
+<tt class="descname">SetOrigin</tt><big>(</big><em>ori</em><big>)</big><a class="headerlink" href="#ost.geom.Ellipse2.SetOrigin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the center of the ellipse</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="geometrical-objects-in-three-dimensions">
+<h2>Geometrical Objects in Three Dimensions<a class="headerlink" href="#geometrical-objects-in-three-dimensions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ost.geom.Line3">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Line3</tt><a class="headerlink" href="#ost.geom.Line3" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Line3</tt><big>(</big><em>from</em>, <em>to</em><big>)</big></dt>
+<dd><p>Parametric line in three dimensions as defined by an origin and a normalized
+direction vector. The first constructor creates a line with origin (0,0) and
+direction along the x axis. The second signature creates a line originating
+from <cite>from</cite> and pointing towards <cite>to</cite>.</p>
+<dl class="method">
+<dt id="ost.geom.Line3.At">
+<tt class="descname">At</tt><big>(</big><em>t</em><big>)</big><a class="headerlink" href="#ost.geom.Line3.At" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the point on the line at (signed) distance t from origin.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> &#8211; free parameter</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">&lt;pending_xref py:class=&#8221;Line3&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec3&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec3&lt;/literal&gt;&lt;/pending_xref&gt;</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Line3.GetOrigin">
+<tt class="descname">GetOrigin</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Line3.GetOrigin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the origin of the line: Also available as <a class="reference internal" href="#ost.geom.Line3.origin" title="ost.geom.Line3.origin"><tt class="xref py py-attr docutils literal"><span class="pre">origin</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;Line3&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec3&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec3&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Line3.GetDirection">
+<tt class="descname">GetDirection</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Line3.GetDirection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the normalized direction vector. Also available as
+<a class="reference internal" href="#ost.geom.Line3.direction" title="ost.geom.Line3.direction"><tt class="xref py py-attr docutils literal"><span class="pre">direction</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;Line3&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec3&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec3&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Line3.direction">
+<tt class="descname">direction</tt><a class="headerlink" href="#ost.geom.Line3.direction" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="vec.html#ost.geom.Vec3" title="ost.geom.Vec3"><tt class="xref py py-class docutils literal"><span class="pre">Vec3</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Line3.origin">
+<tt class="descname">origin</tt><a class="headerlink" href="#ost.geom.Line3.origin" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="vec.html#ost.geom.Vec3" title="ost.geom.Vec3"><tt class="xref py py-class docutils literal"><span class="pre">Vec3</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.geom.Plane">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Plane</tt><a class="headerlink" href="#ost.geom.Plane" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Plane</tt><big>(</big><em>p1</em>, <em>p2</em>, <em>p3</em><big>)</big></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Plane</tt><big>(</big><em>x</em>, <em>y</em>, <em>z</em>, <em>p</em><big>)</big></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Plane</tt><big>(</big><em>line</em>, <em>point</em><big>)</big></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Plane</tt><big>(</big><em>point</em>, <em>normal</em><big>)</big></dt>
+<dd><p>A plane in 3d-space. The plane can be constructed by either passing in 3
+points (p1, p2, p3), a normal and a point, the four parameters that define the
+implicit plane equation (<cite>x</cite>, <cite>y</cite>, <cite>z</cite>, <cite>p</cite>) or a line and a point.</p>
+<dl class="method">
+<dt id="ost.geom.Plane.GetNormal">
+<tt class="descname">GetNormal</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Plane.GetNormal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the normal of the plane. Also available as <a class="reference internal" href="#ost.geom.Plane.normal" title="ost.geom.Plane.normal"><tt class="xref py py-attr docutils literal"><span class="pre">normal</span></tt></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;Plane&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec3&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec3&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Plane.GetP">
+<tt class="descname">GetP</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Plane.GetP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the plane offset, i.e. the projection of any point on the plane onto
+the normal. Also available as <a class="reference internal" href="#ost.geom.Plane.p" title="ost.geom.Plane.p"><tt class="xref py py-attr docutils literal"><span class="pre">p</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Plane.GetOrigin">
+<tt class="descname">GetOrigin</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Plane.GetOrigin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the origin of the plane. Also available as <a class="reference internal" href="#ost.geom.Plane.origin" title="ost.geom.Plane.origin"><tt class="xref py py-attr docutils literal"><span class="pre">origin</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;Plane&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec3&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec3&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Plane.origin">
+<tt class="descname">origin</tt><a class="headerlink" href="#ost.geom.Plane.origin" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="vec.html#ost.geom.Vec3" title="ost.geom.Vec3"><tt class="xref py py-class docutils literal"><span class="pre">Vec3</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Plane.normal">
+<tt class="descname">normal</tt><a class="headerlink" href="#ost.geom.Plane.normal" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="vec.html#ost.geom.Vec3" title="ost.geom.Vec3"><tt class="xref py py-class docutils literal"><span class="pre">Vec3</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Plane.p">
+<tt class="descname">p</tt><a class="headerlink" href="#ost.geom.Plane.p" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.geom.Sphere">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Sphere</tt><a class="headerlink" href="#ost.geom.Sphere" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Sphere</tt><big>(</big><em>center</em>, <em>radius</em><big>)</big></dt>
+<dd><p>Represents a sphere in 3d space. The first constructor creates a sphere with
+radius 1, centered at (0, 0, 0), the second allows you to set the radius and
+center directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>center</strong> (<em>Vec3</em>) &#8211; The center</li>
+<li><strong>radius</strong> &#8211; The radius</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="ost.geom.Sphere.radius">
+<tt class="descname">radius</tt><a class="headerlink" href="#ost.geom.Sphere.radius" title="Permalink to this definition">¶</a></dt>
+<dd><p>The radius of the sphere. Read-write. Also available as <a class="reference internal" href="#ost.geom.Sphere.GetRadius" title="ost.geom.Sphere.GetRadius"><tt class="xref py py-meth docutils literal"><span class="pre">GetRadius()</span></tt></a>,
+<a class="reference internal" href="#ost.geom.Sphere.SetRadius" title="ost.geom.Sphere.SetRadius"><tt class="xref py py-meth docutils literal"><span class="pre">SetRadius()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Sphere.origin">
+<tt class="descname">origin</tt><a class="headerlink" href="#ost.geom.Sphere.origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>The center of the sphere. Read-write. Also available as <a class="reference internal" href="#ost.geom.Sphere.GetOrigin" title="ost.geom.Sphere.GetOrigin"><tt class="xref py py-meth docutils literal"><span class="pre">GetOrigin()</span></tt></a>,
+<a class="reference internal" href="#ost.geom.Sphere.SetOrigin" title="ost.geom.Sphere.SetOrigin"><tt class="xref py py-meth docutils literal"><span class="pre">SetOrigin()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="vec.html#ost.geom.Vec3" title="ost.geom.Vec3"><tt class="xref py py-class docutils literal"><span class="pre">Vec3</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Sphere.GetOrigin">
+<tt class="descname">GetOrigin</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Sphere.GetOrigin" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#ost.geom.Sphere.origin" title="ost.geom.Sphere.origin"><tt class="xref py py-attr docutils literal"><span class="pre">origin</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Sphere.SetOrigin">
+<tt class="descname">SetOrigin</tt><big>(</big><em>origin</em><big>)</big><a class="headerlink" href="#ost.geom.Sphere.SetOrigin" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#ost.geom.Sphere.origin" title="ost.geom.Sphere.origin"><tt class="xref py py-attr docutils literal"><span class="pre">origin</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Sphere.GetRadius">
+<tt class="descname">GetRadius</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.Sphere.GetRadius" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#ost.geom.Sphere.radius" title="ost.geom.Sphere.radius"><tt class="xref py py-attr docutils literal"><span class="pre">radius</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.Sphere.SetRadius">
+<tt class="descname">SetRadius</tt><big>(</big><em>radius</em><big>)</big><a class="headerlink" href="#ost.geom.Sphere.SetRadius" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#ost.geom.Sphere.radius" title="ost.geom.Sphere.radius"><tt class="xref py py-attr docutils literal"><span class="pre">radius</span></tt></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.geom.AlignedCuboid">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">AlignedCuboid</tt><big>(</big><em>min</em>, <em>max</em><big>)</big><a class="headerlink" href="#ost.geom.AlignedCuboid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Axis aligned cuboid is a cuboid whose axes are aligned to the x-, y-, and z-
+axes of the coordinate system. For arbitrarily oriented bounding cuboid
+class, see <a class="reference internal" href="#ost.geom.Cuboid" title="ost.geom.Cuboid"><tt class="xref py py-class docutils literal"><span class="pre">Cuboid</span></tt></a>.</p>
+<dl class="method">
+<dt id="ost.geom.AlignedCuboid.GetMin">
+<tt class="descname">GetMin</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.AlignedCuboid.GetMin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get minimum coordinate, i.e. the lower bound of x-, y-, and z for
+any point in the cuboid</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;AlignedCuboid&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec3&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec3&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.AlignedCuboid.GetMax">
+<tt class="descname">GetMax</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.AlignedCuboid.GetMax" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get maximum coordinate, i.e. the upper bound of x-, y-, and z for
+any point in the cuboid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">&lt;pending_xref py:class=&#8221;AlignedCuboid&#8221; py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec3&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec3&lt;/literal&gt;&lt;/pending_xref&gt;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.geom.CuboidAxis">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">CuboidAxis</tt><a class="headerlink" href="#ost.geom.CuboidAxis" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">CuboidAxis</tt><big>(</big><em>dir</em>, <em>half_extent</em><big>)</big></dt>
+<dd><p>A cuboid axis is defined by a half-extent, and a direction vector. This class
+is used in together with the <a class="reference internal" href="#ost.geom.Cuboid" title="ost.geom.Cuboid"><tt class="xref py py-class docutils literal"><span class="pre">Cuboid</span></tt></a> class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dir</strong> (<em>Vec3</em>) &#8211; Direction vector, will be normalized</li>
+<li><strong>half_extent</strong> &#8211; The half extent</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="ost.geom.CuboidAxis.vector">
+<tt class="descname">vector</tt><a class="headerlink" href="#ost.geom.CuboidAxis.vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>The normalized direction vector of the cuboid axis. Also available as
+<a class="reference internal" href="#ost.geom.CuboidAxis.GetVector" title="ost.geom.CuboidAxis.GetVector"><tt class="xref py py-meth docutils literal"><span class="pre">GetVector()</span></tt></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="vec.html#ost.geom.Vec3" title="ost.geom.Vec3"><tt class="xref py py-class docutils literal"><span class="pre">Vec3</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.CuboidAxis.half_extent">
+<tt class="descname">half_extent</tt><a class="headerlink" href="#ost.geom.CuboidAxis.half_extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The half extent of the cuboid axis is the magnitude of the cuboid
+axis measured from the center to the corner. Also available as
+<a class="reference internal" href="#ost.geom.CuboidAxis.GetHalfExtent" title="ost.geom.CuboidAxis.GetHalfExtent"><tt class="xref py py-meth docutils literal"><span class="pre">GetHalfExtent()</span></tt></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.CuboidAxis.extent">
+<tt class="descname">extent</tt><a class="headerlink" href="#ost.geom.CuboidAxis.extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The extent of the cuboid axis. This value is always twice the
+<a class="reference internal" href="#ost.geom.CuboidAxis.half_extent" title="ost.geom.CuboidAxis.half_extent"><tt class="xref py py-attr docutils literal"><span class="pre">half_extent</span></tt></a>. Read-only. Also available as
+<a class="reference internal" href="#ost.geom.CuboidAxis.GetExtent" title="ost.geom.CuboidAxis.GetExtent"><tt class="xref py py-meth docutils literal"><span class="pre">GetExtent()</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.CuboidAxis.GetHalfExtent">
+<tt class="descname">GetHalfExtent</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.CuboidAxis.GetHalfExtent" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#ost.geom.CuboidAxis.half_extent" title="ost.geom.CuboidAxis.half_extent"><tt class="xref py py-attr docutils literal"><span class="pre">half_extent</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.CuboidAxis.GetExtent">
+<tt class="descname">GetExtent</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.CuboidAxis.GetExtent" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#ost.geom.CuboidAxis.extent" title="ost.geom.CuboidAxis.extent"><tt class="xref py py-attr docutils literal"><span class="pre">extent</span></tt></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.geom.CuboidAxis.GetVector">
+<tt class="descname">GetVector</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.geom.CuboidAxis.GetVector" title="Permalink to this definition">¶</a></dt>
+<dd><p>See <a class="reference internal" href="#ost.geom.CuboidAxis.vector" title="ost.geom.CuboidAxis.vector"><tt class="xref py py-attr docutils literal"><span class="pre">vector</span></tt></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.geom.Cuboid">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Cuboid</tt><big>(</big><em>center</em>, <em>axis_a</em>, <em>axis_b</em>, <em>axis_c</em><big>)</big><a class="headerlink" href="#ost.geom.Cuboid" title="Permalink to this definition">¶</a></dt>
+<dd><p>An arbitrarily oriented cuboid defined by a center and 3 axis. The 3 cuboid
+axis are stored in the order they are passed to the constructor. This means,
+that there is no guarantee that the 3 axes form a right-handed coordinate
+system. If a right-handed coordinate system is a requirement, you have to
+ensure this on your own:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">center</span><span class="o">=...</span>
+<span class="n">axis_a</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">CuboidAxis</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">axis_b</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">CuboidAxis</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+<span class="n">axis_c</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">CuboidAxis</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">Cross</span><span class="p">(</span><span class="n">axis_a</span><span class="o">.</span><span class="n">vector</span><span class="p">,</span> <span class="n">axis_b</span><span class="o">.</span><span class="n">vector</span><span class="p">),</span> <span class="o">...</span><span class="p">)</span>
+
+<span class="n">cuboid</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">Cuboid</span><span class="p">(</span><span class="n">center</span><span class="p">,</span> <span class="n">axis_a</span><span class="p">,</span> <span class="n">axis_b</span><span class="p">,</span> <span class="n">axis_c</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>center</strong> (<em>Vec3</em>) &#8211; The center</li>
+<li><strong>axis_a</strong> (<em>CuboidAxis</em>) &#8211; The first axis</li>
+<li><strong>axis_b</strong> (<em>CuboidAxis</em>) &#8211; The second axis</li>
+<li><strong>axis_c</strong> (<em>CuboidAxis</em>) &#8211; The third axis</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="ost.geom.Cuboid.center">
+<tt class="descname">center</tt><a class="headerlink" href="#ost.geom.Cuboid.center" title="Permalink to this definition">¶</a></dt>
+<dd><p>The center of the cuboid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="vec.html#ost.geom.Vec3" title="ost.geom.Vec3"><tt class="xref py py-class docutils literal"><span class="pre">Vec3</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Cuboid.axis_a">
+<tt class="descname">axis_a</tt><a class="headerlink" href="#ost.geom.Cuboid.axis_a" title="Permalink to this definition">¶</a></dt>
+<dd><p>The first cuboid axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="#ost.geom.CuboidAxis" title="ost.geom.CuboidAxis"><tt class="xref py py-class docutils literal"><span class="pre">CuboidAxis</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Cuboid.axis_b">
+<tt class="descname">axis_b</tt><a class="headerlink" href="#ost.geom.Cuboid.axis_b" title="Permalink to this definition">¶</a></dt>
+<dd><p>The second cuboid axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="#ost.geom.CuboidAxis" title="ost.geom.CuboidAxis"><tt class="xref py py-class docutils literal"><span class="pre">CuboidAxis</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Cuboid.axis_c">
+<tt class="descname">axis_c</tt><a class="headerlink" href="#ost.geom.Cuboid.axis_c" title="Permalink to this definition">¶</a></dt>
+<dd><p>The third cuboid axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body"><a class="reference internal" href="#ost.geom.CuboidAxis" title="ost.geom.CuboidAxis"><tt class="xref py py-class docutils literal"><span class="pre">CuboidAxis</span></tt></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="operations-on-geometrical-objects">
+<h2>Operations on Geometrical Objects<a class="headerlink" href="#operations-on-geometrical-objects" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ost.geom.Angle">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">Angle</tt><big>(</big><em>lhs</em>, <em>rhs</em><big>)</big><a class="headerlink" href="#ost.geom.Angle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the angle (in radians) between <cite>lhs</cite> and <cite>rhs</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lhs</strong> (<em>Line2Line3Plane</em>) &#8211; First object</li>
+<li><strong>rhs</strong> (<em>Line2Line3Plane</em>) &#8211; Second object</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.IntersectionPoint">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">IntersectionPoint</tt><big>(</big><em>lhs</em>, <em>rhs</em><big>)</big><a class="headerlink" href="#ost.geom.IntersectionPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates and returns the intersection point between <cite>lhs</cite> and <cite>rhs</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lhs</strong> (<em>Line2Line3Plane</em>) &#8211; First object</li>
+<li><strong>rhs</strong> (<em>Line2Line3Plane</em>) &#8211; Second object</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Raises :</th><td class="field-body"><p class="first"><tt class="xref py py-exc docutils literal"><span class="pre">GeomException</span></tt> when the two objects do not intersect</p>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">&lt;pending_xref py:class py:module=&#8221;ost.geom&#8221; refdoc=&#8221;geom/composite&#8221; refdomain=&#8221;py&#8221; refexplicit=&#8221;False&#8221; reftarget=&#8221;Vec3&#8221; reftype=&#8221;class&#8221;&gt;&lt;literal classes=&#8221;xref py py-class&#8221;&gt;Vec3&lt;/literal&gt;&lt;/pending_xref&gt; (<a class="reference internal" href="vec.html#ost.geom.Vec2" title="ost.geom.Vec2"><tt class="xref py py-class docutils literal"><span class="pre">Vec2</span></tt></a> in case of <a class="reference internal" href="#ost.geom.Line2" title="ost.geom.Line2"><tt class="xref py py-class docutils literal"><span class="pre">Line2</span></tt></a>)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.IntersectionLine">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">IntersectionLine</tt><big>(</big><em>plane2</em>, <em>plane2</em><big>)</big><a class="headerlink" href="#ost.geom.IntersectionLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the intersection line between <cite>plane1</cite> and <cite>plane2</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>plane1</strong> (<em>Plane</em>) &#8211; The first plane</li>
+<li><strong>plane2</strong> (<em>Plane</em>) &#8211; The second plane</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Raises :</th><td class="field-body"><p class="first last">:exc:GeomException if the two planes are parallel.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.Distance">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">Distance</tt><big>(</big><em>lhs</em>, <em>rhs</em><big>)</big><a class="headerlink" href="#ost.geom.Distance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the minimal distance between <cite>lhs</cite> and <cite>rhs</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lhs</strong> (<em>Line2Line3Plane</em>) &#8211; First object</li>
+<li><strong>rhs</strong> (<em>Line2Line3Plane</em>) &#8211; Second object</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">float</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.IsOnLine">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">IsOnLine</tt><big>(</big><em>line</em>, <em>point</em>, <em>epsilon=geom.EPSILON</em><big>)</big><a class="headerlink" href="#ost.geom.IsOnLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether <cite>point</cite> lies on <cite>line</cite> and returns true if point i no further
+away than <cite>epsilon</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.IsInPlane">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">IsInPlane</tt><big>(</big><em>plane</em>, <em>object</em>, <em>epsilon=geom.EPSILON</em><big>)</big><a class="headerlink" href="#ost.geom.IsInPlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether <cite>object</cite> lies in <cite>plane</cite> and returns true if the difference is
+no bigger than <cite>epsilon</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>plane</strong> (<em>Plane</em>) &#8211; The plane</li>
+<li><strong>object</strong> (<em>Vec3Line3</em>) &#8211; The object</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.AreParallel">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">AreParallel</tt><big>(</big><em>lhs</em>, <em>rhs</em>, <em>epsilon=geom.EPSILON</em><big>)</big><a class="headerlink" href="#ost.geom.AreParallel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether <cite>lhs</cite> and <cite>rhs</cite> are parallel and returns true, if the difference
+is below the given treshold <cite>epsilon</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lhs</strong> (<em>Line2Line3Plane</em>) &#8211; First object</li>
+<li><strong>rhs</strong> (<em>Line2Line3Plane</em>) &#8211; Second object</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.AreIntersecting">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">AreIntersecting</tt><big>(</big><em>line1</em>, <em>line2</em>, <em>epsilon=geom.EPSILON</em><big>)</big><a class="headerlink" href="#ost.geom.AreIntersecting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether <cite>line1</cite> and <cite>line2</cite> are intersecting and returns true, if they
+intersect below the given threshold <cite>epsilon</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>lhs</strong> (<em>Line2Line3</em>) &#8211; First line</li>
+<li><strong>rhs</strong> (<em>Line2Line3</em>) &#8211; Second line</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">bool</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.IsInSphere">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">IsInSphere</tt><big>(</big><em>sphere</em>, <em>point</em><big>)</big><a class="headerlink" href="#ost.geom.IsInSphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether the <cite>sphere</cite> contains <cite>point</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../conop/conop.html" title="conop – Connectivity and Topology of Molecules"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="mat.html" title="Matrices"
+             >previous</a> |</li>
+        <li><a href="../index.html">OpenStructure v1.0 documentation</a> &raquo;</li>
+          <li><a href="geom.html" ><tt class="docutils literal"><span class="pre">geom</span></tt> &#8211; vectors, matrices and geometrical objects</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, OpenStructure authors.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b2.
+    </div>
+  </body>
+</html>

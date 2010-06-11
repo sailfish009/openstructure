@@ -1,0 +1,199 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>alg - Image Processing Algorithms &mdash; OpenStructure v1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="OpenStructure v1.0 documentation" href="../../index.html" />
+    <link rel="next" title="geom – vectors, matrices and geometrical objects" href="../../geom/geom.html" />
+    <link rel="prev" title="img Images and Density Maps" href="../base/img.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../geom/geom.html" title="geom – vectors, matrices and geometrical objects"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../base/img.html" title="img Images and Density Maps"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../../index.html">OpenStructure v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#"><tt class="docutils literal"><span class="pre">alg</span></tt> - Image Processing Algorithms</a><ul>
+<li><a class="reference internal" href="#usage-of-image-algorithms">Usage of Image Algorithms</a></li>
+<li><a class="reference internal" href="#filters-in-fourier-space">Filters in Fourier Space</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../base/img.html"
+                        title="previous chapter"><tt class="docutils literal docutils literal"><span class="pre">img</span></tt> Images and Density Maps</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../../geom/geom.html"
+                        title="next chapter"><tt class="docutils literal docutils literal docutils literal docutils literal docutils literal docutils literal"><span class="pre">geom</span></tt> &#8211; vectors, matrices and geometrical objects</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/img/alg/alg.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-ost.img.alg">
+<span id="alg-image-processing-algorithms"></span><h1><a class="reference internal" href="#module-ost.img.alg" title="Image processing algorithms"><tt class="xref py py-mod docutils literal"><span class="pre">alg</span></tt></a> - Image Processing Algorithms<a class="headerlink" href="#module-ost.img.alg" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="usage-of-image-algorithms">
+<h2>Usage of Image Algorithms<a class="headerlink" href="#usage-of-image-algorithms" title="Permalink to this headline">¶</a></h2>
+<p>Image algorithms are objects. To execute them, the algorithms are applied to an
+image by passing it to the <tt class="xref py py-meth docutils literal"><span class="pre">ost.img.ImageHandle.Apply()</span></tt> or
+<tt class="xref py py-meth docutils literal"><span class="pre">ost.img.ImageHandle.ApplyIP()</span></tt> method:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">image</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">CreateImage</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">Size</span><span class="p">(</span><span class="mf">200</span><span class="p">,</span> <span class="mf">200</span><span class="p">))</span>
+<span class="n">fft_image</span><span class="o">=</span><span class="n">image</span><span class="o">.</span><span class="n">Apply</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">alg</span><span class="o">.</span><span class="n">FFT</span><span class="p">())</span>
+<span class="n">image</span><span class="o">.</span><span class="n">ApplyIP</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">alg</span><span class="o">.</span><span class="n">FFT</span><span class="p">())</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="ost.img.alg.FFT">
+<em class="property">class </em><tt class="descclassname">ost.img.alg.</tt><tt class="descname">FFT</tt><a class="headerlink" href="#ost.img.alg.FFT" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fast Fourier Transforms the image. The FFT algorithms is aware of the
+image&#8217;s domain. The following rules apply:</p>
+<blockquote>
+<ul class="simple">
+<li>SPATIAL -&gt; HALF_FREQUENCY</li>
+<li>HALF_FREQUENCY -&gt; SPATIAL</li>
+<li>FREQUENCY -&gt; COMPLEX_SPATIAL</li>
+<li>COMPLEX_SPATIAL -&gt; FREQUENCY</li>
+</ul>
+</blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.img.alg.GaussianFilter">
+<em class="property">class </em><tt class="descclassname">ost.img.alg.</tt><tt class="descname">GaussianFilter</tt><big>(</big><em>sigma=1.0</em><big>)</big><a class="headerlink" href="#ost.img.alg.GaussianFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a gaussian filter to the supplied image. Sigma is given in pixels.</p>
+<p>Implemented after I.T.Young, L.J. van Vliet,&#8221;Recursive implementation of the
+Gaussian filter&#8221;, Signal Processing, 44(1995), 139-151</p>
+</dd></dl>
+
+</div>
+<div class="section" id="filters-in-fourier-space">
+<h2>Filters in Fourier Space<a class="headerlink" href="#filters-in-fourier-space" title="Permalink to this headline">¶</a></h2>
+<p>The following filters operate in Fourier Space. If the image they are applied on is in spatial domain, they will first be converted to frequency domain and then converted back after the filter has been applied.</p>
+<dl class="class">
+<dt id="ost.img.alg.LowpassFilter">
+<em class="property">class </em><tt class="descclassname">ost.img.alg.</tt><tt class="descname">LowpassFilter</tt><big>(</big><em>freq_limit</em><big>)</big><a class="headerlink" href="#ost.img.alg.LowpassFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters an image by masking out frequencies higher than
+<cite>freg_limit</cite>.</p>
+<dl class="method">
+<dt id="ost.img.alg.LowpassFilter.GetLimit">
+<tt class="descname">GetLimit</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.img.alg.LowpassFilter.GetLimit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the frequency limit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.img.alg.LowpassFilter.SetLimit">
+<tt class="descname">SetLimit</tt><big>(</big><em>freq</em><big>)</big><a class="headerlink" href="#ost.img.alg.LowpassFilter.SetLimit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the frequency limit</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.img.alg.HighpassFilter">
+<em class="property">class </em><tt class="descclassname">ost.img.alg.</tt><tt class="descname">HighpassFilter</tt><a class="headerlink" href="#ost.img.alg.HighpassFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filters an image by masking out frequences lower than <cite>freq_limit</cite></p>
+<dl class="method">
+<dt id="ost.img.alg.HighpassFilter.GetLimit">
+<tt class="descname">GetLimit</tt><big>(</big><big>)</big><a class="headerlink" href="#ost.img.alg.HighpassFilter.GetLimit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the frequency limit</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ost.img.alg.HighpassFilter.SetLimit">
+<tt class="descname">SetLimit</tt><big>(</big><em>freq</em><big>)</big><a class="headerlink" href="#ost.img.alg.HighpassFilter.SetLimit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the frequency limit</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../../geom/geom.html" title="geom – vectors, matrices and geometrical objects"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../base/img.html" title="img Images and Density Maps"
+             >previous</a> |</li>
+        <li><a href="../../index.html">OpenStructure v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, OpenStructure authors.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b2.
+    </div>
+  </body>
+</html>

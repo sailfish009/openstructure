@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 import shutil
 if len(sys.argv)==2:
   root_dir=sys.argv[1]
@@ -20,6 +20,25 @@ def _RequireCopy(in_name, out_name):
   if os.path.getmtime(in_name)>os.path.getmtime(out_name):
     return True
   return False
+
+
+pattern = re.compile('[a-zA-Z0-9_//]+\.png|[a-zA-Z0-9_//]+\.jpg')
+def _CheckImage(in_name):
+  file = open(in_name, "r")
+  text = file.read()
+  picture_list = pattern.findall(text)
+  file.close()
+  return picture_list
+
+def _CreateAndCopy(in_name, outdir):
+  out_name=_OutputPath(in_name, outdir)
+  out_dir=os.path.dirname(out_name)
+  if not os.path.exists(out_dir):
+    _MkDir(out_dir)
+  if _RequireCopy(in_name, out_name):
+    print 'cp %s %s' % (in_name, out_name)
+    os.system('cp %s %s' % (in_name, out_name))
+
 def _MkDir(dirname):
   """
   Recursively create directories if they don't exist
@@ -34,13 +53,11 @@ def _CollectRstDocs(outdir, dirname, fnames):
   for fname in fnames:
     if fname.endswith('.rst'):
       in_name=os.path.join(dirname, fname)
-      out_name=_OutputPath(in_name, outdir)
-      out_dir=os.path.dirname(out_name)
-      if not os.path.exists(out_dir):
-        _MkDir(out_dir)
-      if _RequireCopy(in_name, out_name):
-        print 'cp %s %s' % (in_name, out_name)
-        os.system('cp %s %s' % (in_name, out_name))
+      _CreateAndCopy(in_name,outdir)
+      img_list = _CheckImage(in_name)
+      for img in img_list:
+        img_name = os.path.join(dirname,img)
+        _CreateAndCopy(img_name, outdir)
       
 for sub_dir in ('modules',):
   os.path.walk(sub_dir, _CollectRstDocs, 'doc/source')

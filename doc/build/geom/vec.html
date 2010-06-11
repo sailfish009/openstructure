@@ -1,0 +1,444 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Vectors &mdash; OpenStructure v1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="OpenStructure v1.0 documentation" href="../index.html" />
+    <link rel="up" title="geom – vectors, matrices and geometrical objects" href="geom.html" />
+    <link rel="next" title="Matrices" href="mat.html" />
+    <link rel="prev" title="geom – vectors, matrices and geometrical objects" href="geom.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mat.html" title="Matrices"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="geom.html" title="geom – vectors, matrices and geometrical objects"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">OpenStructure v1.0 documentation</a> &raquo;</li>
+          <li><a href="geom.html" accesskey="U"><tt class="docutils literal docutils literal docutils literal docutils literal docutils literal"><span class="pre">geom</span></tt> &#8211; vectors, matrices and geometrical objects</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Vectors</a><ul>
+<li><a class="reference internal" href="#vector-classes">Vector Classes</a></li>
+<li><a class="reference internal" href="#functions-operating-on-vectors">Functions Operating on Vectors</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="geom.html"
+                        title="previous chapter"><tt class="docutils literal docutils literal docutils literal docutils literal"><span class="pre">geom</span></tt> &#8211; vectors, matrices and geometrical objects</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="mat.html"
+                        title="next chapter">Matrices</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/geom/vec.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="vectors">
+<h1>Vectors<a class="headerlink" href="#vectors" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="#ost.geom.Vec2" title="ost.geom.Vec2"><tt class="xref py py-class docutils literal"><span class="pre">Vec2</span></tt></a>, <a class="reference internal" href="#ost.geom.Vec3" title="ost.geom.Vec3"><tt class="xref py py-class docutils literal"><span class="pre">Vec3</span></tt></a>, <a class="reference internal" href="#ost.geom.Vec4" title="ost.geom.Vec4"><tt class="xref py py-class docutils literal"><span class="pre">Vec4</span></tt></a> classes implement vectors in 2,
+3 and four dimensions. They support basic arithmetic via overloaded operators.
+Essentially, the following basic operations are available:</p>
+<blockquote>
+<ul class="simple">
+<li>adding and subtracting two vectors</li>
+<li>negation</li>
+<li>multiplying and dividing by scalar value</li>
+</ul>
+</blockquote>
+<p>This is shown in the following example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">vec_a</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">Vec2</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="mf">0</span><span class="p">)</span>
+<span class="n">vec_b</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">Vec2</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span> <span class="mf">1</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">vec_a</span><span class="p">,</span> <span class="n">vec_b</span>
+<span class="k">print</span> <span class="n">vec_a</span><span class="o">+</span><span class="n">vec_b</span>
+<span class="k">print</span> <span class="n">vec_a</span><span class="o">*</span><span class="mf">3</span><span class="o">-</span><span class="n">vec_b</span>
+</pre></div>
+</div>
+<p>The standard vector operations are implemented as <a class="reference internal" href="#vector-functions"><em>free standing functions</em></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">vec_a</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">Vec3</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="mf">0</span><span class="p">,</span> <span class="mf">0</span><span class="p">)</span>
+<span class="n">vec_b</span><span class="o">=</span><span class="n">geom</span><span class="o">.</span><span class="n">Vec3</span><span class="p">(</span><span class="mf">0</span><span class="p">,</span> <span class="mf">1</span><span class="p">,</span> <span class="mf">0</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="n">geom</span><span class="o">.</span><span class="n">Dot</span><span class="p">(</span><span class="n">vec_a</span><span class="p">,</span> <span class="n">vec_b</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">geom</span><span class="o">.</span><span class="n">Cross</span><span class="p">(</span><span class="n">vec_a</span><span class="p">,</span> <span class="n">vec_b</span><span class="p">)</span>
+
+<span class="k">print</span> <span class="n">geom</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">Vec3</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="mf">1</span><span class="p">,</span> <span class="mf">0</span><span class="p">))</span>
+
+<span class="k">print</span> <span class="n">geom</span><span class="o">.</span><span class="n">Length</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">Vec3</span><span class="p">(</span><span class="mf">1</span><span class="p">,</span> <span class="mf">1</span><span class="p">,</span> <span class="mf">1</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="section" id="vector-classes">
+<h2>Vector Classes<a class="headerlink" href="#vector-classes" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ost.geom.Vec2">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Vec2</tt><big>(</big><span class="optional">[</span><em>x=0.0</em>, <em>y=0.0</em>, <em>z=0.0</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#ost.geom.Vec2" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Vec2</tt><big>(</big><em>vec</em><big>)</big></dt>
+<dd><p>Real-valued vector in 2 dimensions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; x coordinate</li>
+<li><strong>y</strong> &#8211; y coordinate</li>
+<li><strong>vec</strong> &#8211; the coordinates are set to the coordinates of vec. If vec is a
+<a class="reference internal" href="#ost.geom.Vec2" title="ost.geom.Vec2"><tt class="xref py py-class docutils literal"><span class="pre">Vec2</span></tt></a>, the coordinates are copied directly, If vec is a
+<a class="reference internal" href="#ost.geom.Vec3" title="ost.geom.Vec3"><tt class="xref py py-class docutils literal"><span class="pre">Vec3</span></tt></a>, the x and y coordinates are set to the
+coordinates of vec and z is silently swallowed. If vec is of
+type <a class="reference internal" href="#ost.geom.Vec4" title="ost.geom.Vec4"><tt class="xref py py-class docutils literal"><span class="pre">Vec4</span></tt></a>, x and y are divided by the homogenous
+coordinate w, raising a DivideByZeroException when w is zero.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="ost.geom.Vec2.x">
+<tt class="descname">x</tt><a class="headerlink" href="#ost.geom.Vec2.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>The x-coordinate of the vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Vec2.y">
+<tt class="descname">y</tt><a class="headerlink" href="#ost.geom.Vec2.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>The y-coordinate of the vector.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.geom.Vec3">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Vec3</tt><big>(</big><span class="optional">[</span><em>x=0.0</em>, <em>y=0.0</em>, <em>z=0.0</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#ost.geom.Vec3" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Vec3</tt><big>(</big><em>vec</em><big>)</big></dt>
+<dd><p>Real-valued vector in 3 dimensions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; x coordinate</li>
+<li><strong>y</strong> &#8211; y coordinate</li>
+<li><strong>z</strong> &#8211; z coordinate</li>
+<li><strong>vec</strong> &#8211; the coordinates are set to the coordinates of vec. If vec is a
+<a class="reference internal" href="#ost.geom.Vec3" title="ost.geom.Vec3"><tt class="xref py py-class docutils literal"><span class="pre">Vec3</span></tt></a>, the coordinates are copied directly, If vec is a
+<a class="reference internal" href="#ost.geom.Vec2" title="ost.geom.Vec2"><tt class="xref py py-class docutils literal"><span class="pre">Vec2</span></tt></a>, the x and y coordinates are set to the
+coordinates of vec and z is initialized to zero. If vec is of
+type <a class="reference internal" href="#ost.geom.Vec4" title="ost.geom.Vec4"><tt class="xref py py-class docutils literal"><span class="pre">Vec4</span></tt></a>, x, y and z are divided by homogenous
+coordinate w, raising a DivideByZeroException when w is zero.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="ost.geom.Vec3.x">
+<tt class="descname">x</tt><a class="headerlink" href="#ost.geom.Vec3.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>The x-coordinate of the vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float or int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Vec3.y">
+<tt class="descname">y</tt><a class="headerlink" href="#ost.geom.Vec3.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>The y-coordinate of the vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float or int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Vec3.z">
+<tt class="descname">z</tt><a class="headerlink" href="#ost.geom.Vec3.z" title="Permalink to this definition">¶</a></dt>
+<dd><p>The z-coordinate of the vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float or int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ost.geom.Vec4">
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Vec4</tt><big>(</big><span class="optional">[</span><em>x=0.0</em>, <em>y=0.0</em>, <em>z=0.0</em>, <em>w=1.0</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#ost.geom.Vec4" title="Permalink to this definition">¶</a></dt>
+<dt>
+<em class="property">class </em><tt class="descclassname">ost.geom.</tt><tt class="descname">Vec4</tt><big>(</big><em>vec</em><big>)</big></dt>
+<dd><p>Real-valued vector in 4 dimensions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>x</strong> &#8211; x coordinate</li>
+<li><strong>y</strong> &#8211; y coordinate</li>
+<li><strong>z</strong> &#8211; z coordinate</li>
+<li><strong>w</strong> &#8211; w (homogenous) coordinate</li>
+<li><strong>vec</strong> &#8211; the coordinates are set to the coordinates of vec. If vec is a
+<a class="reference internal" href="#ost.geom.Vec4" title="ost.geom.Vec4"><tt class="xref py py-class docutils literal"><span class="pre">Vec4</span></tt></a>, the coordinates are copied directly, If vec is a
+<a class="reference internal" href="#ost.geom.Vec2" title="ost.geom.Vec2"><tt class="xref py py-class docutils literal"><span class="pre">Vec2</span></tt></a>, the x and y coordinates are set to the
+coordinates of vec and z and w are initialized to 0 and 1,
+respectively. If vec is of type <a class="reference internal" href="#ost.geom.Vec4" title="ost.geom.Vec4"><tt class="xref py py-class docutils literal"><span class="pre">Vec4</span></tt></a>, x, y and z are
+divided by homogenous coordinate w, raising a
+DivideByZeroException when w is zero.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="ost.geom.Vec4.x">
+<tt class="descname">x</tt><a class="headerlink" href="#ost.geom.Vec4.x" title="Permalink to this definition">¶</a></dt>
+<dd><p>The x-coordinate of the vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float or int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Vec4.y">
+<tt class="descname">y</tt><a class="headerlink" href="#ost.geom.Vec4.y" title="Permalink to this definition">¶</a></dt>
+<dd><p>The y-coordinate of the vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float or int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Vec4.z">
+<tt class="descname">z</tt><a class="headerlink" href="#ost.geom.Vec4.z" title="Permalink to this definition">¶</a></dt>
+<dd><p>The z-coordinate of the vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float or int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ost.geom.Vec4.w">
+<tt class="descname">w</tt><a class="headerlink" href="#ost.geom.Vec4.w" title="Permalink to this definition">¶</a></dt>
+<dd><p>The homogenous coordinate.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Type :</th><td class="field-body">float or int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="functions-operating-on-vectors">
+<span id="vector-functions"></span><h2>Functions Operating on Vectors<a class="headerlink" href="#functions-operating-on-vectors" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ost.geom.Cross">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">Cross</tt><big>(</big><em>vec_a</em>, <em>vec_b</em><big>)</big><a class="headerlink" href="#ost.geom.Cross" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cross product of <cite>vec_a</cite> and <cite>vec_b</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.Dot">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">Dot</tt><big>(</big><em>vec_a</em>, <em>vec_b</em><big>)</big><a class="headerlink" href="#ost.geom.Dot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dot (scalar) product of <cite>vec_a</cite> and <cite>vec_b</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vec_a</strong> &#8211; first vector</li>
+<li><strong>vec_b</strong> &#8211; second vector</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.Length">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">Length</tt><big>(</big><em>vec</em><big>)</big><a class="headerlink" href="#ost.geom.Length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Length of vector</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vec</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.Length2">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">Length2</tt><big>(</big><em>vec</em><big>)</big><a class="headerlink" href="#ost.geom.Length2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the squared length of <cite>vec</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vec</strong> &#8211; </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ost.geom.Normalize">
+<tt class="descclassname">ost.geom.</tt><tt class="descname">Normalize</tt><big>(</big><em>vec</em><big>)</big><a class="headerlink" href="#ost.geom.Normalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a normalized version of <cite>vec</cite></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>vec</strong> &#8211; Vector to be normalized</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="mat.html" title="Matrices"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="geom.html" title="geom – vectors, matrices and geometrical objects"
+             >previous</a> |</li>
+        <li><a href="../index.html">OpenStructure v1.0 documentation</a> &raquo;</li>
+          <li><a href="geom.html" ><tt class="docutils literal docutils literal docutils literal docutils literal docutils literal"><span class="pre">geom</span></tt> &#8211; vectors, matrices and geometrical objects</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, OpenStructure authors.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b2.
+    </div>
+  </body>
+</html>

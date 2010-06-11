@@ -1,0 +1,227 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installing OpenStructure &mdash; OpenStructure v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="OpenStructure v1.0 documentation" href="index.html" />
+    <link rel="next" title="Storing Custom Data" href="base/generic.html" />
+    <link rel="prev" title="A gentle introduction to OpenStructure" href="intro.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="base/generic.html" title="Storing Custom Data"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="A gentle introduction to OpenStructure"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">OpenStructure v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installing OpenStructure</a><ul>
+<li><a class="reference internal" href="#installing-the-dependencies">Installing the Dependencies</a></li>
+<li><a class="reference internal" href="#checking-out-the-source">Checking out the Source</a></li>
+<li><a class="reference internal" href="#configuring">Configuring</a><ul>
+<li><a class="reference internal" href="#flag-to-choose-build-system">Flag to choose build system</a></li>
+<li><a class="reference internal" href="#flags-to-control-the-dependencies">Flags to Control the Dependencies</a></li>
+<li><a class="reference internal" href="#build-options">Build Options</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#building-the-project">Building the Project</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="previous chapter">A gentle introduction to OpenStructure</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="base/generic.html"
+                        title="next chapter">Storing Custom Data</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/install.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installing-openstructure">
+<h1>Installing OpenStructure<a class="headerlink" href="#installing-openstructure" title="Permalink to this headline">¶</a></h1>
+<p>This document describes how to install OpenStructure from source. If you are not planning to develop code for OpenStructure, you might be better off with one of the binaries available for download.</p>
+<div class="section" id="installing-the-dependencies">
+<h2>Installing the Dependencies<a class="headerlink" href="#installing-the-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>OpenStructure uses a bunch of OpenSource libraries. If you haven&#8217;t already installed them, please install them now!</p>
+<blockquote>
+<ul class="simple">
+<li><a class="reference external" href="http://cmake.org">CMake</a></li>
+<li><a class="reference external" href="http://eigen.tuxfamily.org">Eigen2</a></li>
+<li><a class="reference external" href="http://boost.org">Boost</a></li>
+<li><a class="reference external" href="http://www.libpng.org">libpng</a></li>
+<li><a class="reference external" href="http://python.org">Python</a></li>
+<li><a class="reference external" href="http://qt.nokia.com">Qt</a></li>
+</ul>
+</blockquote>
+<p>When you enable support for image processing, you will need:</p>
+<blockquote>
+<ul class="simple">
+<li><a class="reference external" href="http://fftw.org">FFTW3</a>. By default, OpenStructure is compiled with single precision and thus also requires FFTW to be compiled with single precision. Most platforms offer this as a second package. If you are compiling manually, use the <cite>&#8211;enable-single</cite> option.</li>
+<li><a class="reference external" href="http://www.libtiff.org">libtiff</a></li>
+</ul>
+</blockquote>
+<p>If you would like to use the graphical user interface, also install:</p>
+<blockquote>
+<ul class="simple">
+<li><a class="reference external" href="http://www.riverbankcomputing.co.uk/software/sip/download">SIP</a>.</li>
+<li><a class="reference external" href="http://www.riverbankcomputing.co.uk/software/pyqt/download">PyQt4</a>.</li>
+</ul>
+</blockquote>
+<p>In case you are compiling under Windows you have to install <a class="reference external" href="http://www.microsoft.com/express/Downloads">Visualstudio
+2008</a>. to compile the dependecies
+and OpenStructure. We recommend to compile the dependecies manually. Enter the
+directories where the dependencies are located in Tools-&gt;Options-&gt;Projects and
+Solutions-&gt;VC++ directories. Choose &#8216;bin&#8217; directories to enter program paths to
+cmake, qmake and python, &#8216;lib&#8217; directories to point to the location(s) of your
+dependencies.</p>
+</div>
+<div class="section" id="checking-out-the-source">
+<h2>Checking out the Source<a class="headerlink" href="#checking-out-the-source" title="Permalink to this headline">¶</a></h2>
+<p>You can checkout the source from SVN. The repository is located at</p>
+<blockquote>
+<a class="reference external" href="https://dng.biozentrum.unibas.ch/svn/openstructure/trunk">https://dng.biozentrum.unibas.ch/svn/openstructure/trunk</a></blockquote>
+<p>If you are using the commandline client, type in your shell</p>
+<blockquote>
+svn co <a class="reference external" href="https://ost.biozentrum.unibas.ch/svn/openstructure/trunk">https://ost.biozentrum.unibas.ch/svn/openstructure/trunk</a></blockquote>
+<p>On Windows install svn clients like <a class="reference external" href="http://tortoisesvn.tigris.org">tortoisesvn</a> and use the function &#8216;checkout&#8217; then enter the above mention URL.</p>
+</div>
+<div class="section" id="configuring">
+<h2>Configuring<a class="headerlink" href="#configuring" title="Permalink to this headline">¶</a></h2>
+<p>OpenStructure uses <a class="reference external" href="http://cmake.org">CMake</a> for compiling and building the project. The next required step is to configure the build environment using cmake. You can do that by invoking <cite>cmake</cite> in the project directory (On Windows choose Tools-&gt;visualstudio commandline prompt from within visualstudio) :</p>
+<blockquote>
+cmake . &lt;options&gt;</blockquote>
+<p>There are two kinds of options: Options that let you control the building behaviour, enabling and disabling the compilation of certain modules and options that let you tell CMake where to find the dependencies. All of them are passed to CMake with via <cite>-D&lt;opt&gt;=&lt;value&gt;</cite>.</p>
+<div class="section" id="flag-to-choose-build-system">
+<h3>Flag to choose build system<a class="headerlink" href="#flag-to-choose-build-system" title="Permalink to this headline">¶</a></h3>
+<p>On Windows make sure you specify -G&#8221;Visual Studio 9 2008&#8221;!</p>
+</div>
+<div class="section" id="flags-to-control-the-dependencies">
+<h3>Flags to Control the Dependencies<a class="headerlink" href="#flags-to-control-the-dependencies" title="Permalink to this headline">¶</a></h3>
+<p>By default, <a class="reference external" href="http://cmake.org">CMake</a> searches the standard directories for dependencies. However, on some systems, this might not be enough. Here is a short description of how CMake figures out what dependencies to take and how you can influence it.</p>
+<blockquote>
+<ul class="simple">
+<li>Boost is mainly controlled via the <cite>BOOST_ROOT</cite> option. If boost wasn&#8217;t
+found, it should be set to the prefix of the boost installation.</li>
+<li><cite>QT_QMAKE_EXECUTABLE</cite> defines the exact Qt installation to take. It should
+be set to the full path to <cite>qmake</cite>.</li>
+<li><cite>PYTHON_ROOT</cite> is the Python equivalent of BOOST_ROOT. It should be set to
+the prefix path containing the python binary, headers and libraries.</li>
+<li><cite>SYS_ROOT</cite> controls the general prefix for searching libraries and headers.
+By default, it is set to <cite>/</cite>.</li>
+</ul>
+</blockquote>
+</div>
+<div class="section" id="build-options">
+<h3>Build Options<a class="headerlink" href="#build-options" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<ul class="simple">
+<li><cite>ENABLE_UI</cite> controls whether to build the graphical user interface module. By
+default it is set to true.</li>
+<li><cite>ENABLE_IMG</cite> controls whether to build the image processing module. This will
+enable support for density maps, and general image processing in 1, 2 an 3
+dimensions. By default it is set to true.</li>
+<li><cite>ENABLE_GFX</cite> controls whether to build the graphics module. By default, this
+is set to true. If set to none, this implies <cite>ENABLE_UI=NO</cite>.</li>
+<li>Shader support is controlled with <cite>USE_SHADER</cite>. By default, no shaders are
+used.</li>
+<li>If <cite>OPTIMIZE</cite> is set to 1, an optimized version of OpenStructure is built.</li>
+</ul>
+</blockquote>
+</div>
+</div>
+<div class="section" id="building-the-project">
+<h2>Building the Project<a class="headerlink" href="#building-the-project" title="Permalink to this headline">¶</a></h2>
+<p>Type <cite>make</cite>. If you are using a multi-core machine, you can use the <cite>-j</cite> flag to run
+multiple jobs at once.</p>
+<p>On Windows run &#8216;Build OpenStructure&#8217; from the build menu.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="base/generic.html" title="Storing Custom Data"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="A gentle introduction to OpenStructure"
+             >previous</a> |</li>
+        <li><a href="index.html">OpenStructure v1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, OpenStructure authors.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0b2.
+    </div>
+  </body>
+</html>
