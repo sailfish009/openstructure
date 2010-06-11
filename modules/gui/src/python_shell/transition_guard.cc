@@ -37,14 +37,17 @@ EditPositionGuard::EditPositionGuard(PythonShellWidget* shell, int flags):
 bool EditPositionGuard::check()
 {
   bool returnflag=false;
+  QTextCursor tc=shell_->textCursor();
   if(flags_ & SMALLER){
-    returnflag |= shell_->textCursor().position()< shell_->GetEditStartBlock().position();
+    returnflag|=tc.selectionStart()<shell_->GetEditStartBlock().position();
   }
   if(flags_ & EQUAL){
-    returnflag |= shell_->textCursor().position()== shell_->GetEditStartBlock().position();
+    if (!(flags_ & SELECTION && tc.hasSelection())) {
+      returnflag|=tc.selectionStart()==shell_->GetEditStartBlock().position();    
+    }
   }
   if(flags_ & BIGGER){
-    returnflag |= shell_->textCursor().position()> shell_->GetEditStartBlock().position();
+    returnflag |= tc.selectionStart()> shell_->GetEditStartBlock().position();
   }
   return returnflag;
 }

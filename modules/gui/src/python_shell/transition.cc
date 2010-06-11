@@ -61,7 +61,8 @@ KeyEventTransition::KeyEventTransition(QEvent::Type type,int key,Qt::KeyboardMod
 std::pair<bool,bool> KeyEventTransition::checkEvent(QKeyEvent* event)
 {
   assert(is_active_());
-  if(event->type()==type_ && (event->key()==key_ || key_==Qt::Key_Any) && event->modifiers() == modifiers_ && guard_->check()){
+  if(event->type()==type_ && (event->key()==key_ || 
+     key_==Qt::Key_Any) && event->modifiers() == modifiers_ && guard_->check()){
     trigger_();
     return std::pair<bool,bool>(true,swallow_);
   }

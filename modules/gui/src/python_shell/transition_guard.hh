@@ -40,7 +40,8 @@ public:
   enum FLAGS{
     SMALLER=1,
     EQUAL=2,
-    BIGGER=4
+    BIGGER=4,
+    SELECTION=8
   };
     EditPositionGuard(PythonShellWidget* shell,int flags);
     virtual bool check();

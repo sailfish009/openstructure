@@ -135,7 +135,7 @@ void PythonShellWidget::setup_readonly_state_machine_()
                                                          Qt::NoModifier,
                                                          readwrite_state_,
                                                          true,
-                                                         new EditPositionGuard(this,EditPositionGuard::EQUAL))));
+                                                         new EditPositionGuard(this,EditPositionGuard::EQUAL|EditPositionGuard::SELECTION))));
   connect(readonly,SIGNAL(entered()),this,SLOT(OnReadonlyEntered()));
   connect(readwrite_state_,SIGNAL(entered()),this,SLOT(OnReadwriteEntered()));
   readonly_machine_->setInitialState(readwrite_state_);
