@@ -77,25 +77,25 @@ ContextMenu::ContextMenu(QTreeView* view, SceneWinModel* model):
 
   action = new QAction("Show",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(MakeVisible()));
-  this->AddAction(action, ENTITY_VIEW);
+  this->AddAction(action, ENTITY_VIEW | VIEWS_SAME_OBJECT);
   action = new QAction("Hide",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(MakeHidden()));
-  this->AddAction(action, ENTITY_VIEW);
+  this->AddAction(action, ENTITY_VIEW | VIEWS_SAME_OBJECT);
   action = new QAction("Show Exclusive",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(ShowExclusive()));
-  this->AddAction(action, ENTITY_VIEW);
+  this->AddAction(action, ENTITY_VIEW | VIEWS_SAME_OBJECT);
   action = new QAction("Hide Exclusive",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(HideExclusive()));
-  this->AddAction(action, ENTITY_VIEW);
+  this->AddAction(action, ENTITY_VIEW | VIEWS_SAME_OBJECT);
   action = new QAction("Select All",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(SelectAllViews()));
-  this->AddAction(action, ENTITY_VIEW);
+  this->AddAction(action, ENTITY_VIEW | VIEWS_SAME_OBJECT);
   action = new QAction("Deselect All",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(DeselectAllViews()));
-  this->AddAction(action, ENTITY_VIEW);
+  this->AddAction(action, ENTITY_VIEW | VIEWS_SAME_OBJECT);
   action = new QAction("Select..",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(SelectViews()));
-  this->AddAction(action, ENTITY_VIEW);
+  this->AddAction(action, ENTITY_VIEW | VIEWS_SAME_OBJECT);
   action = new QAction("Create Custom View",this);
   connect(action, SIGNAL(triggered()), this, SLOT(AddView()));
   this->AddAction(action, ENTITY_VIEW);
@@ -134,6 +134,7 @@ void ContextMenu::ShowMenu(const QPoint& pos)
   ContextActionTypes flags;
   flags = ~flags;
 
+  gfx::EntityP view_entity = gfx::EntityP();
   int cnt = 0;
   if(indexes.size()>0){
     for(int i = 0; i < indexes.size(); i++){
@@ -186,6 +187,14 @@ void ContextMenu::ShowMenu(const QPoint& pos)
           flags &= ~(ENTITY_VIEW | CUSTOM_VIEW);
         }
         else{
+          if(view_entity){
+            if(!(entity_part_node->GetEntity() == view_entity)){
+              flags &= ~VIEWS_SAME_OBJECT;
+            }
+          }
+          else{
+            view_entity = entity_part_node->GetEntity();
+          }
           CustomPartNode* custom_part_node = qobject_cast<CustomPartNode*>(entity_part_node);
           if(!custom_part_node){
             flags &= ~CUSTOM_VIEW;
