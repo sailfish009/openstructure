@@ -160,6 +160,7 @@ int main(int argc, char** argv)
   QCoreApplication::setOrganizationName("OpenStructure");
   QCoreApplication::setOrganizationDomain("openstructure.org");
   QCoreApplication::setApplicationName(argv[0]);
+	app.setLibraryPaths(QStringList());
   if (int rv=setup_resources(app)<0) {
     return rv;
   }
