@@ -2,7 +2,7 @@
 REM create a zip archive for deployment on windows
 REM no regisrty entries
 REM no PATHs will be changed except in the DNG session
-set inst_dir=openstructure1.0.0a1_1885
+set inst_dir=openstructure1.0.0a1_2381
 set archive_name=OpenStructureWin32
 if exist "%inst_dir%" rmdir /S /Q "%inst_dir%" 
 if exist %archive_name%.zip del %archive_name%.zip*.*
