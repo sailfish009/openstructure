@@ -51,7 +51,7 @@ class ColorSelectWidget(QtGui.QWidget):
   def ChangeColor(self):
     color = QtGui.QColorDialog.getColor(self.color_, self)
     
-    if(color != self.color_):
+    if(color != self.color_ and color.isValid()):
       self.color_ = color
       self.emit(QtCore.SIGNAL("colorChanged"))
       self.update()
