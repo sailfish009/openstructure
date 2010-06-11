@@ -77,7 +77,11 @@ if (USE_SHADER)
 else()
   set(_SHADER OFF)
 endif()
-
+if (COMPILE_TMTOOLS)
+  set(_TM_TOOLS ON)
+else()
+  set(_TM_TOOLS OFF)
+endif()
 if (ENABLE_IMG)
   set(_IMG ON)
 else()
@@ -247,6 +251,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
 
 message(STATUS 
         "OpenStructure will be built with the following options:\n"
+        "   Install Prefix                  (-PREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
         "   RPath in install            (-DUSE_RPATH) : ${_USE_RPATH}\n"
         "   Graphical interface         (-DENABLE_UI) : ${_UI}\n"
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
@@ -254,7 +259,8 @@ message(STATUS
         "   Shader support             (-DUSE_SHADER) : ${_SHADER}\n"
         "   Optimize                     (-DOPTIMIZE) : ${_OPT}\n"
         "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
-        "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}")
+        "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
+        "   TMAlign and TMScore   (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}")
         
 # doc target to create HTML documentation
 #set(SPHINX sphinx-build)
