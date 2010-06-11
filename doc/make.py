@@ -61,5 +61,5 @@ def _CollectRstDocs(outdir, dirname, fnames):
       
 for sub_dir in ('modules',):
   os.path.walk(sub_dir, _CollectRstDocs, 'doc/source')
-os.system('sphinx-build -b html -c %s %s %s' % ('doc/conf', 'doc/source', 
+os.system('sphinx-build-2.6 -b html -c %s %s %s' % ('doc/conf', 'doc/source', 
                                                 'doc/build'))
