@@ -115,7 +115,7 @@ void GostyApp::ReadLoggerSettings(const QString& group_name, TextLogger* logger)
 {
   QSettings settings;
   settings.beginGroup("logging");
-  settings.beginGroup(group_name);
+  settings.beginGroup(group_name);   
   logger->SetCodeLogging(settings.value("log_code",QVariant(false)).toBool());
   logger->SetOutputLogging(settings.value("log_output",QVariant(true)).toBool());
   logger->SetErrorLogging(settings.value("log_error",QVariant(true)).toBool());
@@ -127,8 +127,14 @@ void GostyApp::SetupPyShellLogging()
 {
   TextLogger* console_logger=new TextLogger(stdout);
   this->ReadLoggerSettings("console", console_logger);
-  // get log from Interpreter instead of shell
-  //py_shell_->AddLogger(console_logger);
+  if (console_logger->GetErrorLogging()) {
+    connect(&PythonInterpreter::Instance(), SIGNAL(ErrorOutput(unsigned int, const QString &)),
+            console_logger,SLOT(AppendOutput(unsigned int, const QString &)));
+  }
+  if (console_logger->GetOutputLogging()) {
+    connect(&PythonInterpreter::Instance(), SIGNAL(Output(unsigned int, const QString &)),
+            console_logger,SLOT(AppendOutput(unsigned int, const QString &)));
+  }
   // TODO: Setup file logging
 }
 
@@ -136,8 +142,8 @@ PythonShell* GostyApp::GetPyShell()
 {
   if (py_shell_==NULL) {
     py_shell_=new PythonShell;
-    this->SetupPyShellLogging();             
-    py_shell_->SetDestroyOnClose(false);                 
+    this->SetupPyShellLogging();
+    py_shell_->SetDestroyOnClose(false);
   }
   return py_shell_;
 }

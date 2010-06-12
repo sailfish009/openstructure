@@ -70,18 +70,9 @@ void TextLogger::AppendCode(const QString& text)
   operator<<('\n');
   flush();
 }
-void TextLogger::AppendOutput(int status,const QString& text)
+void TextLogger::AppendOutput(unsigned int id,const QString& text)
 {
-  if (text=="\n") {
-    return;
-  }  
-  if(!((log_output_ && status==STATUS_OK) || (log_error_ && status==STATUS_ERROR))
-     || text.size()==0){
-    return;
-  }
-
   operator<<(text);
-  operator<<('\n');
   flush();
 }
 void TextLogger::SetCodeLogging(bool flag)
