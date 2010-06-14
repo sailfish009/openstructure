@@ -1,5 +1,6 @@
 import os, sys, re
 import shutil
+from ost import settings
 if len(sys.argv)==2:
   root_dir=sys.argv[1]
 else:
@@ -61,5 +62,6 @@ def _CollectRstDocs(outdir, dirname, fnames):
       
 for sub_dir in ('modules',):
   os.path.walk(sub_dir, _CollectRstDocs, 'doc/source')
-os.system('sphinx-build-2.6 -b html -c %s %s %s' % ('doc/conf', 'doc/source', 
-                                                'doc/build'))
+sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6'])
+os.system('%s -b html -c %s %s %s' % (sphinx_bin, 'doc/conf', 'doc/source', 
+                                      'doc/build'))
