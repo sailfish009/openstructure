@@ -142,8 +142,6 @@ public slots:
   /// \brief This slot must be called when the application is going to be terminated.
   void OnQuit();
 private:  
-  void SetupPyShellLogging();
-  void ReadLoggerSettings(const QString& group_name, TextLogger* logger);
   GostyApp();  
   PythonShell*      py_shell_;
   QWidget*          w_py_shell_;
