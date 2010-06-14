@@ -164,20 +164,22 @@ When one needs to visit all the image pixels belonging to an Extent in sequence,
     for pixel in ei:
       print i.GetReal(pixel)
 
-.. _spatial_point
+.. _data-type:
 
 DataType
 ^^^^^^^^
 
 The DataType of an image represents the nature of the data it contains. An image can contain 'REAL' or 'COMPLEX' values.
 
-.. _data-domain
+.. _data-domain:
 
 DataDomain
 ^^^^^^^^^^
 
 The DataDomain of an image specifies wether the image contains data in the 'SPATIAL' domain or in the 'FREQUENCY' domain. A 'HALF_FREQUENCY' domain also exists,
 representing centrosymmetric frequency data (such as the data coming from the Fourier transform of an image from the real spatial domain)
+
+.. _spatial-origin:
 
 SpatialOrigin
 ^^^^^^^^^^^^^^
@@ -186,7 +188,7 @@ Type: :class:`Point`
 
 The Spatial Origin of an image is the first pixel of its extent. Specifically, this is the top left pixel for 2D images and the top-top-left for 3D images.
 
-.. _absolute-origin
+.. _absolute-origin:
 
 AbsoluteOrigin
 ^^^^^^^^^^^^^^^^
@@ -195,7 +197,7 @@ Type: :class:`~ost.geom.Vec3`
 
 The Absolute Origin of an image describes the coordinates, in the absolute reference system used by OpenStructure, of the pixel in with all indexes equal to 0. Please notice that the pixel does not necessarily need to belong to the extent of the image.
 
-.. _pixel-sampling
+.. _pixel-sampling:
 
 PixelSampling
 ^^^^^^^^^^^^^^^^^
@@ -204,7 +206,6 @@ Type: :class:`~ost.geom.Vec3`
 
 The PixelSampling property of an image describes the size of its pixels. For the same image, the size of pixels in the 'SPATIAL' and in the 'FREQUENCY' :ref:`data-domain` are obviously interdependent. OpenStructure takes care of the transformation and allows access to both pixel sampling irrespective of the current image domain.
 
-.. _data-type
 
 
 
@@ -278,7 +279,7 @@ ImageHandle class.
 
   .. method:: GetComplex(pixel)
 
-     Returns the complex value of the specified image pixel. If the image holds data of the 'REAL' :ref:`data_type`, the method return s complex value with the pixel content
+     Returns the complex value of the specified image pixel. If the image holds data of the 'REAL' :ref:`data-type`, the method return s complex value with the pixel content
      as real part and a null imaginary part.     
 
      :param pixel:
@@ -299,14 +300,14 @@ ImageHandle class.
 
   .. method:: GetFrequencySampling()
      
-     Returns the :ref`pixel-sampling` of the image in the 'FREQUENCY' :ref:`DataDomain`
+     Returns the :ref:`pixel-sampling` of the image in the 'FREQUENCY' :ref:`data-domain`
        
      :rtype: :class:`~ost.geom.Vec3`
 
   .. method:: GetIntpolComplex(frac_pixel)
 
      Returns the interpolated complex value of the virtual pixel corresponding to the specified fractional indexes. This is computed by calculating a weighted vector sum of 
-     the values of the surrounding pixels. If the image holds data of the 'REAL' :ref:`data_type`, the method computes the interpolated value using bilinear interpolation (trilinear
+     the values of the surrounding pixels. If the image holds data of the 'REAL' :ref:`data-type`, the method computes the interpolated value using bilinear interpolation (trilinear
      for 3D images), then returns a complex value with the interpolated value as real part and a null imaginary part.
 
      :param frac_pixel: Fractional pixel indexes
@@ -316,7 +317,7 @@ ImageHandle class.
   .. method:: GetIntpolReal(frac_pixel)
 
      Returns the interpolated value of the virtual pixel corresponding to the specified fractional indexes. This is computed by using bilinear interpolation (trilinear
-     for 3D images). If the image holds data of the 'COMPLEX' :ref:`data_type`, the method computes the interpolated value as a weighted vector sum of 
+     for 3D images). If the image holds data of the 'COMPLEX' :ref:`data-type`, the method computes the interpolated value as a weighted vector sum of 
      the values of the surrounding pixels, then returns the amplitude of the interpolated value. 
 
      :param frac_pixel: Fractional pixel indexes
@@ -331,7 +332,7 @@ ImageHandle class.
 
   .. method:: GetReal(pixel)
 
-     Returns the value of the specified image pixel. If the image holds data of the 'COMPLEX' :ref:`data_type`, the method return the amplitude of the pixel content.
+     Returns the value of the specified image pixel. If the image holds data of the 'COMPLEX' :ref:`data-type`, the method return the amplitude of the pixel content.
 
      :param arg2:
      :type  arg2: :class:`Point`
@@ -351,7 +352,7 @@ ImageHandle class.
 
   .. method:: GetSpatialSampling()
 
-     Return the :ref:`pixel-sampling' of the image in the 'SPATIAL' :ref:`data-domain`.
+     Return the :ref:`pixel-sampling` of the image in the 'SPATIAL' :ref:`data-domain`.
 
     :rtype: :class:`~ost.geom.Vec3`
 
@@ -384,7 +385,7 @@ ImageHandle class.
 
   .. method:: IsValid()
 
-     ??????????? 
+     Please check ??????????? 
 
     :rtype: bool
 
@@ -406,7 +407,7 @@ ImageHandle class.
  
   .. method:: SetComplex(pixel, value)
 
-     Sets the content of the specified pixel to the provided value.  If the image holds data of the 'REAL' :ref:`data_type`, the method sets the pixel to the amplitude of the provided
+     Sets the content of the specified pixel to the provided value.  If the image holds data of the 'REAL' :ref:`data-type`, the method sets the pixel to the amplitude of the provided
      value.
 
      :param pixel:
@@ -423,7 +424,7 @@ ImageHandle class.
 
   .. method:: SetReal(pixel, value)
 
-     Sets the content of the specified pixel to the provided value.  If the image holds data of the 'COMPLEX' :ref:`data_type`, the method sets the pixel to a value has a real
+     Sets the content of the specified pixel to the provided value.  If the image holds data of the 'COMPLEX' :ref:`data-type`, the method sets the pixel to a value has a real
      part equal to the provided value and a null complex part.
  
      :param pixel:
