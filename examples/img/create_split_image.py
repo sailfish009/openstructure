@@ -35,7 +35,11 @@ def CreateSplitImage(imagelist, start_at_y=True):
         count+=1
     return result
 
-imagelist=io.LoadImageList(sys.argv[1:-1])
+if len(sys.argv)<3:
+  imagelist=io.LoadImageList(['circle.png', 'square.png'])
+else:
+  imagelist=io.LoadImageList(sys.argv[1:-1])
+
 result=CreateSplitImage(imagelist)
 v_result=gui.CreateDataViewer(result)
 io.SaveImage(result,sys.argv[-1])

@@ -1,7 +1,9 @@
 import sys
 import ost.img.alg
-
-images=io.LoadImageList(sys.argv[1:])
+if len(sys.argv)<2:
+images=io.LoadImageList(['square.png'])  
+else:
+  images=io.LoadImageList(sys.argv[1:])
 viewers=[]
 i=1
 for im in images:

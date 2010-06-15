@@ -2,8 +2,12 @@ import sys
 import math
 import ost.img.alg
 
-image1=io.LoadImage(sys.argv[1])
-image2=io.LoadImage(sys.argv[2])
+if len(sys.argv)==2:
+  image1=io.LoadImage(sys.argv[1])
+  image2=io.LoadImage(sys.argv[2])
+else:
+  image1=io.LoadImage('square.png')
+  image2=io.LoadImage('circle.png')
 if image1.GetExtent() != image2.GetExtent():
   raise RuntimeError('The input images should have the same size.')
 image1.CenterSpatialOrigin()

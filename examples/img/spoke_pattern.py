@@ -2,15 +2,12 @@ import math
 import sys
 import ost.img.alg
 
-if len(sys.argv)!=2:
-  raise RuntimeError('Wrong number of command line arguments. The name of the output file should be the only argument.')
-
 # Tweakable parameters
-wedge_start = 80 # Width of wedge at the narrower point
-wedge_end = 2000 # Width of wedge at the broader point
+wedge_start = 20 # Width of wedge at the narrower point
+wedge_end = 500 # Width of wedge at the broader point
 number_of_bands = 11 # Number of alternating bands (must be odd)
-size_of_image_x = 2000 # Size of the image (X)
-size_of_image_y = 2000 # Size of the image (Y)
+size_of_image_x = 500 # Size of the image (X)
+size_of_image_y = 500 # Size of the image (Y)
 pixel_sampling = 1.0 * Units.A # Pixel width
 threshold = 2.0 * Units.A # Threshold for low pass filtering
 amplitude = 255 # amplitude of the obscillations
@@ -43,7 +40,8 @@ filter=ost.img.alg.GaussianLowPassFilter(threshold)
 image.ApplyIP(filter)
 
 # Image is saved
-io.SaveImage(image,sys.argv[1])
+if len(sys.argv)==2:
+  io.SaveImage(image,sys.argv[1])
 
 # Viewer is launched to show the result
 v=gui.CreateDataViewer(image)

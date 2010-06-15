@@ -26,6 +26,4 @@ scene.SetCenter(go.GetCenter())
 scene.AutoAutoslab(True)
 
 anim=Anim(cg,go)
-
-print "enter anim.start(10) to start trajectory animation; use anim.stop() to turn it off again."
-
+anim.start(10)
