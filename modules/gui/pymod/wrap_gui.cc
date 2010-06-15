@@ -41,6 +41,7 @@ void export_MainArea();
 void export_MenuBar();
 void export_RemoteSiteLoader();
 void export_FileLoader();
+void export_FileViewer();
 void export_Widget();
 
 #if OST_SPNAV_ENABLED
@@ -118,6 +119,7 @@ BOOST_PYTHON_MODULE(_gui)
   export_SequenceViewer();
   export_RemoteSiteLoader();
   export_FileLoader();
+  export_FileViewer();
   export_Widget();
 
   #if OST_SPNAV_ENABLED

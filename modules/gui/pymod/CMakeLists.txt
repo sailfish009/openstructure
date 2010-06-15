@@ -16,6 +16,7 @@ set(OST_GUI_PYMOD_SOURCES
   export_panel_bar.cc
   export_menu_bar.cc
   export_file_loader.cc
+  export_file_viewer.cc
   export_widget.cc
 )
 set(OST_GUI_SCENE_PYMOD_MODULES

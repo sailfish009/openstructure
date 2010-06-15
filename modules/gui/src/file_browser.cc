@@ -41,6 +41,7 @@
 #include <ost/gui/perspective.hh>
 #include <ost/gui/panel_bar/panels.hh>
 #include <ost/gui/file_loader.hh>
+#include <ost/gui/file_viewer.hh>
 
 #include <ost/gui/python_shell/python_interpreter.hh>
 
@@ -226,8 +227,14 @@ void FileBrowser::ShowContextMenu(const QPoint& pos){
     connect(load_action,SIGNAL(triggered(bool)),this,SLOT(LoadCurrentObject()));
     menu->addAction(load_action);
     QAction* system_open_action = new QAction(menu);
-    system_open_action->setText("Open with system editor");
-    connect(system_open_action,SIGNAL(triggered(bool)),this,SLOT(LoadWithSystemEditor()));
+    if(model_->filePath(index).endsWith(".py")){
+      system_open_action->setText("Show source");
+      connect(system_open_action,SIGNAL(triggered(bool)),this,SLOT(LoadWithSourceViewer()));
+    }
+    else{
+      system_open_action->setText("Open with system default");
+      connect(system_open_action,SIGNAL(triggered(bool)),this,SLOT(LoadWithSystemEditor()));
+    }
     menu->addAction(system_open_action);
   }
   if(menu->actions().size()>0){
@@ -246,6 +253,12 @@ void FileBrowser::LoadWithSystemEditor(){
   QDesktopServices::openUrl(QUrl::fromLocalFile(file_name));
 }
 
+void FileBrowser::LoadWithSourceViewer(){
+  QModelIndex index = view_->selectionModel()->currentIndex();
+  QString file_name=model_->filePath(index);
+  FileViewer* file_viewer = new FileViewer(file_name);
+  file_viewer->show();
+}
 
 OST_REGISTER_WIDGET_WITH_DEFAULT_FACTORY(ost::gui, FileBrowser, "File Browser");  
 

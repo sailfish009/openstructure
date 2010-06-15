@@ -164,6 +164,7 @@ set(OST_GUI_HEADERS
 change_process_name.hh
 file_browser.hh
 file_type_dialog.hh
+file_viewer.hh
 remote_loader.hh
 gl_canvas.hh
 gl_win.hh
@@ -197,6 +198,7 @@ perspective.cc
 widget_registry.cc
 file_browser.cc
 file_type_dialog.cc
+file_viewer.cc
 remote_loader.cc
 main.cc
 mdi_sub_window.cc
@@ -326,6 +328,7 @@ scene_win/scene_win_model.cc
 set(HEADERS_TO_BE_MOCCED
 file_browser.hh
 file_type_dialog.hh
+file_viewer.hh
 remote_loader.hh
 gl_canvas.hh
 gl_win.hh
