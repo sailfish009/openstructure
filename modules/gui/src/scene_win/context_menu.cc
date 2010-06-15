@@ -28,6 +28,8 @@
 
 #include <ost/dyn_cast.hh>
 
+#include <ost/gfx/scene.hh>
+
 #include <ost/gui/scene_selection.hh>
 #include <ost/gui/query_dialog.hh>
 
@@ -66,14 +68,14 @@ ContextMenu::ContextMenu(QTreeView* view, SceneWinModel* model):
 
   action = new QAction("Delete",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Delete()));
-  this->AddAction(action, GFX_OBJECT|NOT_SCENE);
+  this->AddAction(action, GFX_NODE|NOT_SCENE);
 
   action = new QAction("Show",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Show()));
-  this->AddAction(action, GFX_OBJECT|NOT_VISIBLE);
+  this->AddAction(action, GFX_NODE|NOT_VISIBLE);
   action = new QAction("Hide",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Hide()));
-  this->AddAction(action, GFX_OBJECT|NOT_HIDDEN);
+  this->AddAction(action, GFX_NODE|NOT_HIDDEN);
 
   action = new QAction("Show",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(MakeVisible()));
@@ -149,7 +151,7 @@ void ContextMenu::ShowMenu(const QPoint& pos)
           else{
             flags &= ~NOT_VISIBLE;
           }
-          if(gfx_node->GetType()==0){flags &= ~NOT_SCENE;}
+          if(gfx::Scene::Instance().GetRootNode() == gfx_node){flags &= ~NOT_SCENE;}
           if(!dyn_cast<gfx::GfxObj> (gfx_node)){flags &= ~GFX_OBJECT;}
           if(!dyn_cast<gfx::Entity> (gfx_node)){flags &= ~ENTITY;}
 #if OST_IMG_ENABLED
@@ -175,7 +177,7 @@ void ContextMenu::ShowMenu(const QPoint& pos)
 #endif // OST_IMG_ENABLED
         }
         else{
-          flags &= ~(GFX_OBJECT | ENTITY
+          flags &= ~(GFX_NODE | GFX_OBJECT | ENTITY
 #if OST_IMG_ENABLED
               | MAP
 #endif

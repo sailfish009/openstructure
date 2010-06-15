@@ -117,18 +117,13 @@ void SceneSelection::CenterOnObjects() {
 }
 
 void SceneSelection::Delete() {
-  QList<gfx::GfxObjP> selected_objects;
+  QList<gfx::GfxNodeP> selected_objects;
   for(unsigned int i = 0; i < nodes_.size(); i++){
     gfx::GfxNodeP node = nodes_[i];
-    if (node) {
-      gfx::GfxObjP obj = dyn_cast<gfx::GfxObj> (node);
-      if (obj) {
-        selected_objects.append(obj);
-      }
-    }
+    selected_objects.append(node);
   }
   for(int i=0; i < selected_objects.size(); i++){
-      gfx::Scene::Instance().Remove(selected_objects[i]);
+    gfx::Scene::Instance().Remove(selected_objects[i]);
   }
 }
 
