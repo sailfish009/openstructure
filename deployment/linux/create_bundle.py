@@ -52,10 +52,17 @@ subprocess.call('sed "s/\#export QT_PLUGIN_PATH/ export QT_PLUGIN_PATH/g" script
 subprocess.call('mv scripts/dng.in scripts/dng.in.backup',shell=True,cwd='../../')
 subprocess.call('sed "s/\#export LD_LIBRARY_PATH/ export LD_LIBRARY_PATH/g" scripts/dng.in.backup > scripts/dng.in.preprepre',shell=True,cwd='../../')
 subprocess.call('sed "s/\#export PYTHONHOME/ export PYTHONHOME/g" scripts/dng.in.preprepre > scripts/dng.in.prepre',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export PYTHONPATH/ export PYTHONPATH/g" scripts/ost.in.prepre > scripts/ost.in.pre',shell=True,cwd='../../')
+subprocess.call('sed "s/\#export PYTHONPATH/ export PYTHONPATH/g" scripts/dng.in.prepre > scripts/dng.in.pre',shell=True,cwd='../../')
 subprocess.call('sed "s/\#export QT_PLUGIN_PATH/ export QT_PLUGIN_PATH/g" scripts/dng.in.pre > scripts/dng.in',shell=True,cwd='../../')
+print 'Downloading Chemlib dictionary'
+subprocess.call('wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif', shell=True, cwd='../../')
 print 'Compiling Openstructure'
 subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DBoost_COMPILER='+boost_string, shell=True,cwd='../../')
+subprocess.call('make',shell=True,cwd='../../')
+print 'Converting Chemlib dictionary'
+subprocess.call('stage/bin/chemdict_tool create components.cif compounds.chemlib', shell=True, cwd='../../')
+print 'Staging Chemlib dictionary'
+subprocess.call('cmake ./ -DCOMPOUND_LIB=compounds.chemlib',shell=True,cwd='../../')
 subprocess.call('make',shell=True,cwd='../../')
 print 'Removing obsolete packages and package directory'
 subprocess.call('rm -fr openstructure-linux*',shell=True,cwd='../../')
