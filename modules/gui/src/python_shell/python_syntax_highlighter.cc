@@ -95,9 +95,9 @@ void PythonSyntaxHighlighter::highlightBlock(const QString& text_block) {
     int string_state=0;
     int bs=previousBlockState()==-1 ? 0 : previousBlockState();
     if (bs & BLOCKTYPE_MULTILINE_SQ) {
-      string_state=1;
-    } else if (bs & BLOCKTYPE_MULTILINE_DQ) {
       string_state=2;
+    } else if (bs & BLOCKTYPE_MULTILINE_DQ) {
+      string_state=1;
     }
     PythonTokenizer pt(text_block,string_state);
     PythonToken t;
