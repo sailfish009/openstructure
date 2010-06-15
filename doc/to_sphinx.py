@@ -10,10 +10,14 @@ print '.. currentmodule:: %s' % module
 print ''
 print '.. class:: %s' % class_name
 
+def _arg_type(arg_type):
+  if arg_type not in ('str', 'int', 'bool', 'float', 'None'):
+    return ':class:`%s`' % arg_type
+  return arg_type
 class TypedArgument:
   def __init__(self, name, arg_type):
     self.name=name
-    self.type=arg_type
+    self.type=_arg_type(arg_type)
 
 class Method:
   def __init__(self, name, rtype, args, optional):
@@ -57,10 +61,15 @@ def parse_signature(signature):
       args.append(TypedArgument(a.groupdict()['name'], a.groupdict()['type']))  
     
     return Method(method_match.groupdict()['name'], 
-                  method_match.groupdict()['rtype'], args[1:], opt_args)
+                  _arg_type(method_match.groupdict()['rtype']), 
+                  args[1:], opt_args)
   print signature, 'not matched'
 
-for m in dir(the_class):
+if '--no-derived' in sys.argv:
+  members=the_class.__dict__.keys()
+else:
+  members=dir(the_class)
+for m in members:
   if m.startswith('__'):
     continue
   member_doc=getattr(the_class, m).__doc__
