@@ -23,10 +23,12 @@
 #include <QSyntaxHighlighter>
 #include <QTextEdit>
 
+#include <ost/gui/module_config.hh>
+
 namespace ost { namespace gui {
 
 /// \brief a simplistic file viewer
-class FileViewer : public QWidget {
+class DLLEXPORT_OST_GUI FileViewer : public QWidget {
   Q_OBJECT
 public:
   FileViewer(const QString& path=QString(), QWidget* parent=NULL);
