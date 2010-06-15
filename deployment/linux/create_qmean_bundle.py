@@ -117,6 +117,8 @@ print 'Copy examples into package directory structure'
 subprocess.call('cp -pRL  examples  '+directory_name+'/share/openstructure/',shell=True,cwd='../../')
 print 'Removing headers from package directory structure'
 subprocess.call('rm -fr   '+directory_name+'/include',shell=True,cwd='../../')
+print 'Copying supplementary material into package directory structure'
+subprocess.call('cp -pRL  stage/share/openstructure  '+directory_name+'/share/',shell=True,cwd='../../')
 print 'Copy qmean examples into package directory structure'
 subprocess.call('cp -pRL  modules/scratch/qmean/examples '+directory_name+'',shell=True,cwd='../../')
 print 'Copy readme and license files into package directory structure'

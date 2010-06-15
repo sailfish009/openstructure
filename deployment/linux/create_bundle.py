@@ -107,7 +107,9 @@ print 'Copy Qt 4 plugins into package directory structure'
 subprocess.call('cp -pRL '+qt4_plugins+' '+directory_name+'/bin/',shell=True,cwd='../../')
 print 'Installing OpenStructure into package directory structure'
 subprocess.call('make install',shell=True,cwd='../../')
-print 'Copy examples into package directory structure'
+print 'Copying supplementary material into package directory structure'
+subprocess.call('cp -pRL  stage/share/openstructure  '+directory_name+'/share/',shell=True,cwd='../../')
+print 'Copying examples into package directory structure'
 subprocess.call('cp -pRL  examples  '+directory_name+'/share/openstructure/',shell=True,cwd='../../')
 print 'Removing headers from package directory structure'
 subprocess.call('rm -fr   '+directory_name+'/include',shell=True,cwd='../../')
