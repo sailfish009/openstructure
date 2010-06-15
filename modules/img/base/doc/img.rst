@@ -85,20 +85,23 @@ Every 2D or 3D image in OpenStructure has some basic properties, which are discu
 Point
 ^^^^^^^^
 
-This class represents an image pixel. It is defined using three integer numbers, corresponding to the pixel’s indexes along the weight and depth dimensions respectively. For 2-dimensional images, the 3rd index can be omitted.
+.. class:: Point(x=0, y=0, z=0)
+           Point(x=0, y=0)
 
-  .. class:: ost.img.Point(x=0, y=0, z=0)¶
-  .. class:: ost.img.Point(x=0, y=0)
+  This class represents an image pixel. It is defined using three integer numbers, corresponding to the pixel’s indexes along the weight and depth dimensions respectively. 
+  For 2-dimensional images, the 3rd index can be omitted.
+
 
 Size
 ^^^^^^^^
 
-This property describes the size of an image. It is defined using three integer numbers: When depth is not specified, the size is assumed to refer to a 2D image two-dimensional (depth=1).
+.. class:: Size(width, height, depth)
+           Size(width, height)
 
-  .. class:: ost.img.Size(width, height, depth)¶
-  .. class:: ost.img.Size(width, height)
+  This property describes the size of an image. It is defined using three integer numbers: When depth is not specified, the size is assumed to refer to a 2D image 
+  two-dimensional  (depth=1).
 
-The Size class can be passed to the CreateImage function to define the size of the image being created.
+  The Size class can be passed to the CreateImage function to define the size of the image being created.
 
   .. code-block:: python 
 
@@ -111,15 +114,15 @@ The Size class can be passed to the CreateImage function to define the size of t
 Extent
 ^^^^^^^^
 
-This property describes the extent of an image in pixels. The image extent is a rectangle in 2d and a cuboid in 3d, and can be defined in a number of ways: giving the first and the last point of the extent, specifying the first point and the size of the extent, or listing the size of the extent and its central point.
+.. class:: Extent(first and last point)
+           Extent(first point, size)
+           Extent(size, central point)
 
-.. code-block:: python 
+  This property describes the extent of an image in pixels. The image extent is a rectangle in 2d and a cuboid in 3d, and can be defined in a number of ways: giving the first 
+  and the last point of the extent, specifying the first point and the size of the extent, or listing the size of the extent and its central point.
 
-  .. class:: ost.img.Extent(first and last point)¶
-  .. class:: ost.img.Extent(first point, size)
-  .. class:: ost.img.Extent(size, central point)
 
-Some examples:
+  Some examples:
 
   .. code-block:: python 
 
@@ -130,7 +133,7 @@ Some examples:
     # again the same extent using its size and central pixel
     s=img.Extent(img.Size(4,7),img.Point(3,7))
 
-The Extent class can be passed to the CreateImage function to create an image with a specific extent.
+  The Extent class can be passed to the CreateImage function to create an image with a specific extent.
 
   .. code-block:: python 
 
@@ -140,9 +143,9 @@ The Extent class can be passed to the CreateImage function to create an image wi
     # uses a temporary instance of the Extent class
     i=img.CreateImage(img.Extent(img.Point(2,4),img.Size(4,7)))
 
-Given an Extent, is it possible to recover its full size, and also the length of each of its dimensions separately.
+  Given an Extent, is it possible to recover its full size, and also the length of each of its dimensions separately.
 
-Examples:
+  Examples:
 
   .. code-block:: python 
 
@@ -153,7 +156,7 @@ Examples:
     h=e.GetHeight()
     d=e.GetDepth()
 
-When one needs to visit all the image pixels belonging to an Extent in sequence, one can use an ExtentIterator:
+  When one needs to visit all the image pixels belonging to an Extent in sequence, one can use an ExtentIterator:
 
   .. code-block:: python 
 
@@ -169,15 +172,15 @@ When one needs to visit all the image pixels belonging to an Extent in sequence,
 DataType
 ^^^^^^^^
 
-The DataType of an image represents the nature of the data it contains. An image can contain 'REAL' or 'COMPLEX' values.
+  The DataType of an image represents the nature of the data it contains. An image can contain 'REAL' or 'COMPLEX' values.
 
 .. _data-domain:
 
 DataDomain
 ^^^^^^^^^^
 
-The DataDomain of an image specifies wether the image contains data in the 'SPATIAL' domain or in the 'FREQUENCY' domain. A 'HALF_FREQUENCY' domain also exists,
-representing centrosymmetric frequency data (such as the data coming from the Fourier transform of an image from the real spatial domain)
+  The DataDomain of an image specifies wether the image contains data in the 'SPATIAL' domain or in the 'FREQUENCY' domain. A 'HALF_FREQUENCY' domain also exists,
+  representing centrosymmetric frequency data (such as the data coming from the Fourier transform of an image from the real spatial domain)
 
 .. _spatial-origin:
 
@@ -186,7 +189,8 @@ SpatialOrigin
 
 Type: :class:`Point`
 
-The Spatial Origin of an image is the first pixel of its extent. Specifically, this is the top left pixel for 2D images and the top-top-left for 3D images.
+  The Spatial Origin of an image is the first pixel of its extent. Specifically, this is the top left pixel for 2D images
+  and the top-top-left for 3D images.
 
 .. _absolute-origin:
 
@@ -195,7 +199,8 @@ AbsoluteOrigin
 
 Type: :class:`~ost.geom.Vec3`
 
-The Absolute Origin of an image describes the coordinates, in the absolute reference system used by OpenStructure, of the pixel in with all indexes equal to 0. Please notice that the pixel does not necessarily need to belong to the extent of the image.
+  The Absolute Origin of an image describes the coordinates, in the absolute reference system used by OpenStructure, of the pixel in with all indexes equal to 0. Please notice 
+  that the pixel does not necessarily need to belong to the extent of the image.
 
 .. _pixel-sampling:
 
@@ -204,11 +209,8 @@ PixelSampling
 
 Type: :class:`~ost.geom.Vec3`
 
-The PixelSampling property of an image describes the size of its pixels. For the same image, the size of pixels in the 'SPATIAL' and in the 'FREQUENCY' :ref:`data-domain` are obviously interdependent. OpenStructure takes care of the transformation and allows access to both pixel sampling irrespective of the current image domain.
-
-
-
-
+  The PixelSampling property of an image describes the size of its pixels. For the same image, the size of pixels in the 'SPATIAL' and in the 'FREQUENCY' :ref:`data-domain` are
+  obviously interdependent. OpenStructure takes care of the transformation and allows access to both pixel sampling irrespective of the current image domain.
 
 ImageHandle
 -----------
@@ -224,7 +226,7 @@ ImageHandle class.
      the modified image. See :doc:`../alg/alg` 
 
      :param algorithm: algorithm
-     :type  algorithm: Instance of an algorithm class (:doc:`../alg/alg`)
+     :type  algorithm: Instance of an algorithm class - See :doc:`../alg/alg`.
      :rtype: :class:`ImageHandle`
 
   .. method:: ApplyIP(algorithm)
@@ -233,7 +235,7 @@ ImageHandle class.
      `:doc:`../alg/alg`
 
      :param algorithm: algorithm
-     :type  algorithm: Instance of an algorithm class (:doc:`../alg/alg`)
+     :type  algorithm: Instance of an algorithm class - See: doc:`../alg/alg`.
 
   .. method:: CenterSpatialOrigin()
 
@@ -269,7 +271,7 @@ ImageHandle class.
      extracted 'FREQUENCY' sub-image is centered around the origin and hence 
      back-transformable to 'SPATIAL'.
 
-     :param extent:
+     :param extent: Portion of the image to extract
      :type  extent: :class:`Extent`
      :rtype: :class:`ImageHandle`
 
@@ -279,7 +281,7 @@ ImageHandle class.
      accepting fractional numbers for pixel indexes.
      
      :param frac_pixel: Fractional pixel indexes
-     :type  frac_pixel: :class:`~ost.geomVec3`
+     :type  frac_pixel: :class:`~ost.geom.Vec3`
      :rtype: :class:`~ost.geom.Vec3`
 
   .. method:: GetAbsoluteOrigin()
@@ -293,7 +295,7 @@ ImageHandle class.
      Returns the complex value of the specified image pixel. If the image holds data of the 'REAL' :ref:`data-type`, the method return s complex value with the pixel content
      as real part and a null imaginary part.     
 
-     :param pixel:
+     :param pixel: Image pixel
      :type  pixel: :class:`Point`
      :rtype: complex
 
@@ -307,7 +309,7 @@ ImageHandle class.
 
      Returns the :class:`Extent` of an image.
 
-     :rtype: class:`Extent`
+     :rtype: :class:`Extent`
 
   .. method:: GetFrequencySampling()
      
@@ -345,8 +347,8 @@ ImageHandle class.
 
      Returns the value of the specified image pixel. If the image holds data of the 'COMPLEX' :ref:`data-type`, the method return the amplitude of the pixel content.
 
-     :param arg2:
-     :type  arg2: :class:`Point`
+     :param pixel: Image pixel
+     :type  pixel: :class:`Point`
      :rtype: float
 
   .. method:: GetSize()
@@ -366,7 +368,7 @@ ImageHandle class.
      Return the :ref:`pixel-sampling` of the image in the 'SPATIAL' 
      :ref:`data-domain`.
 
-    :rtype: :class:`~ost.geom.Vec3`
+     :rtype: :class:`~ost.geom.Vec3`
 
   .. method:: GetType()
      
@@ -382,9 +384,9 @@ ImageHandle class.
      sub-pixel precision is needed, the method :meth:`FractionalIndexToCoord` 
      can be used.
     
-    :param pixel:
-    :type  pixel: :class:`Point`
-    :rtype: :class:`~ost.geom.Vec3`
+     :param pixel:
+     :type  pixel: :class:`Point`
+     :rtype: :class:`~ost.geom.Vec3`
 
   .. method:: IsFrequency()
 
@@ -405,7 +407,7 @@ ImageHandle class.
      to call any method on the image handle other than `IsValid` when this 
      method returns false.
 
-    :rtype: bool
+     :rtype: bool
 
   .. method:: Paste(source_image)
    
@@ -416,14 +418,14 @@ ImageHandle class.
      not exist in both are ignored. Please notice that this method only copies 
      the pixel content: all other properties of the image are left untouched. 
 
-     :param source_image:
-     :type  data: :class:`ImageHandle`
+     :param source_image: Source image that gets pasted into the current one
+     :type  source_image: :class:`ImageHandle`
 
   .. method:: SetAbsoluteOrigin(coord)
   
      Sets the :ref:`absolute-origin` of the image to the specified coordinates  
   
-     :param coord:
+     :param coord: Absolute coordinates
      :type  coord: :class:`~ost.geom.Vec3`
  
   .. method:: SetComplex(pixel, value)
@@ -433,33 +435,34 @@ ImageHandle class.
      to the amplitude of the provided.
      value.
 
-     :param pixel:
-     :type  pixe;: Point
-     :param value:
+     :param pixel: Image pixel
+     :type  pixel: :class:`Point`
+     :param value: Value 
      :type  value: complex
  
   .. method:: SetPixelSampling(sampling)
 
      Sets the :ref:`pixel-sampling` of the image to the provided values in the current :ref:`data-domain`. 
 
-     :param sampling:
+     :param sampling: Size of a pixel in x,y and z direction respectively
      :type  sampling: :class:`~ost.geom.Vec3`
 
   .. method:: SetReal(pixel, value)
 
-     Sets the content of the specified pixel to the provided value.  If the image holds data of the 'COMPLEX' :ref:`data-type`, the method sets the pixel to a value has a real
-     part equal to the provided value and a null complex part.
+     Sets the content of the specified pixel to the provided value.  If the image holds data of the 'COMPLEX'
+     :ref:`data-type`, the method sets the pixel to a value has a real part equal to the provided value and a null 
+     complex part.
  
-     :param pixel:
+     :param pixel: Image pixel
      :type  pixel: :class:`Point`
-     :param value:
+     :param value: Value
      :type  value: float
 
   .. method:: SetSpatialOrigin(pixel_indexes)
 
      Sets the :ref:`spatial-origin` of the image to the provided indexes.
 
-     :param pixel_indexes:
+     :param pixel_indexes: Indexes of the first pixel of the image
      :type  pixel_indexes: :class:`Point`
      :rtype: None
 
@@ -467,7 +470,7 @@ ImageHandle class.
 
      Sets the :ref:`pixel-sampling` if the image to the provided values in the spatial :ref:`data-domain`
 
-     :param sampl:
+     :param sampl: Size of a pixel in x,y and z direction respectively
      :type  sampl: :class:`~ost.geom.Vec3`
  
   
