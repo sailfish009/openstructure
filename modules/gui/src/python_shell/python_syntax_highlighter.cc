@@ -44,6 +44,8 @@ PythonSyntaxHighlighter::PythonSyntaxHighlighter(QTextDocument* parent):
   formats_[PythonToken::END]=format;  
   format.setForeground(QBrush(QColor(150,0,0)));
   formats_[PythonToken::OPERATOR]=format;  
+  format.setForeground(QBrush(QColor(100,100,100)));  
+  formats_[PythonToken::COMMENT]=format;
   format.setForeground(QBrush(QColor(0,0,150)));
   formats_[PythonToken::GROUPING]=format;  
   format.setForeground(QBrush(QColor(35,107,142)));

@@ -62,6 +62,7 @@ public:
     NUMBER,
     OPERATOR,
     GROUPING,
+    COMMENT,
     END
   };
   PythonToken();
