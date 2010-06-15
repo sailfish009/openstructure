@@ -4,7 +4,10 @@ Storing Custom Data
 Introduction
 --------------------------------------------------------------------------------
 
-It is often very convenient to store any arbitrary data inside an Entity. A few examples are: 
+.. currentmodule:: ost
+
+It is often very convenient to store any arbitrary data inside an Entity. A few 
+examples are: 
 
   * calculated properties of atoms
   * sequence conservation of a residue
@@ -12,27 +15,29 @@ It is often very convenient to store any arbitrary data inside an Entity. A few 
   * fit of a fragment inside an electron density map
 
 In OpenStructure this is supported by the use of generic properties. Most 
-building blocks are derived from :class:`GenericPropertyContainer`, meaning that 
-arbitrary key-value pairs can be stored in them. In essence, the following 
+building blocks are derived from :class:`~ost.GenericPropertyContainer`, meaning 
+that arbitrary key-value pairs can be stored in them. In essence, the following 
 classes support generic properties:
 
-  * :class:`~mol.EntityHandle` and :class:`~mol.EntityView`
-  * :class:`~mol.ChainHandle` and :class:`~mol.ChainView`
-  * :class:`~ResidueHandle` and :class:`~mol.ResidueView`
-  * :class:`~mol.AtomHandle` and :class:`~mol.AtomView`
-  * :class:`~mol.BondHandle`
-  * :class:`~seq.SequenceHandle` and :class:`~seq.AlignmentHandle`
+  * :class:`~ost.mol.EntityHandle` and :class:`~ost.mol.EntityView`
+  * :class:`~ost.mol.ChainHandle` and :class:`~ost.mol.ChainView`
+  * :class:`~ost.mol.ResidueHandle` and :class:`~ost.mol.ResidueView`
+  * :class:`~ost.mol.AtomHandle` and :class:`~ost.mol.AtomView`
+  * :class:`~ost.mol.BondHandle`
+  * :class:`~ost.seq.SequenceHandle` and :class:`~ost.seq.AlignmentHandle`
 
 The view variants will reflect the generic properties of the handle variants.
 
-A generic property key is always a string, and a value can be one of string, float, int or bool. For each of these data types, methods to retrieve and store values are available both in Python and C++.
+A generic property key is always a string, and a value can be one of string, 
+float, int or bool. For each of these data types, methods to retrieve and store 
+values are available both in Python and C++.
 
 Storing and Accessing Data
 --------------------------------------------------------------------------------
 
-All OpenStructure building blocks that are :class:`GenericPropContainers`, have 
-four different methods to store generic data, depending on the data type (i.e. 
-string, float, int or bool).
+All OpenStructure building blocks that are :class:`~ost.GenericPropContainers`, 
+have four different methods to store generic data, depending on the data type 
+(i.e. string, float, int or bool).
 
 To store a float value with the key 'myfloatprop' in all atoms of an entity:
 
@@ -53,7 +58,7 @@ already exists, it will be overwritten. To check if it exists, use:
     
 To access the value of a generic property, we first check if the property exists
 and then access it, using the method suitable for the data type of the property. 
-For the previously set property "myfloatprop" of the data type real, at the atom 
+For the previously set property `myfloatprop` of the data type real, at the atom 
 level:
 
 .. code-block:: python
@@ -82,12 +87,12 @@ to access a property of a different data type, e.g.:
 Use of Generic Properties in Queries
 --------------------------------------------------------------------------------
 
-The :doc:`../mol/base/query` can also be used for numeric generic properties (i.e. bool, 
-int, float), but the syntax is slightly different. To access any generic 
-properties, it needs to be specified that they are generic and at which level 
-they are defined. Therefore, all generic properties start with a 'g', followed 
-by an 'a', 'r' or 'c' for atom, residue or chain level respectively. For more 
-details see :doc:`../mol/base/query`. 
+The :doc:`../mol/base/query` can also be used for numeric generic properties 
+(i.e. bool, int, float), but the syntax is slightly different. To access any 
+generic properties, it needs to be specified that they are generic and at which 
+level (chain, residue, atom) they are defined. Therefore, all generic properties 
+start with a 'g', followed by an 'a', 'r' or 'c' for atom, residue or chain 
+level respectively. For more details see :doc:`../mol/base/query`. 
 
 
 API documentation
