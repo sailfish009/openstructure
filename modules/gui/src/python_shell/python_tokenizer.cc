@@ -137,11 +137,13 @@ PythonToken PythonTokenizer::GetOperatorToken()
 {
   static QString operators[] = {
     QString("+="), QString("-="), QString("*="), 
+    QString("**"), QString("&="), QString("|="),
     QString("/="), QString("+"), QString("-"), 
     QString("/"), QString("*"), QString("."),
     QString("%"), QString("="), QString("!="), 
     QString("!"), QString("<="), QString(">="), 
-    QString("<"), QString(":"), QString("?"),
+    QString("<"), QString(":"), QString("?"), 
+    QString("|"), QString("&"), QString("^"),
     QString("")
   };
   size_t index = -1;
@@ -205,7 +207,7 @@ PythonToken PythonTokenizer::GetStringDelim()
 {
   Range range(current_pos_,0);
   // Find out which type of delimiters are used for the String. i.e. <">, 
-  // <"""> or <'>
+  // <""">, <'''> or <'>
   QString delimiter = "\"";
   if (command_[current_pos_] == '\'')
     delimiter = "'";

@@ -86,7 +86,8 @@ public:
   PythonToken NextToken();
   const PythonToken& CurrentToken() const;
   void SetInString(bool in_string);
-  
+  bool InString() const { return in_string_; }
+  const QString& GetDelim() const { return string_delim_; }
 private:
   void EatWhities();
   QString GetSubString(const Range& range);
