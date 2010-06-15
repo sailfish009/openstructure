@@ -220,27 +220,32 @@ ImageHandle class.
 
   .. method:: Apply(algorithm)
 
-     Applies an algorithm on an image and returns a new ImageHandle containing the modified image. See :doc:`doc/img/alg` 
+     Applies an algorithm on an image and returns a new ImageHandle containing 
+     the modified image. See :doc:`../alg/alg` 
 
      :param algorithm: algorithm
-     :type  algorithm: Instance of an algorithm class (:doc:`doc/img/alg`)
+     :type  algorithm: Instance of an algorithm class (:doc:`../alg/alg`)
      :rtype: :class:`ImageHandle`
 
   .. method:: ApplyIP(algorithm)
 
-     Applies an algorithm on an image, overwriting the current content. See :doc:`doc/img/alg` 
+     Applies an algorithm on an image, overwriting the current content. See 
+     `:doc:`../alg/alg`
 
      :param algorithm: algorithm
-     :type  algorithm: Instance of an algorithm class (:doc:`doc/img/alg`)
+     :type  algorithm: Instance of an algorithm class (:doc:`../alg/alg`)
 
   .. method:: CenterSpatialOrigin()
 
-     Sets the :ref:`spatial-origin` of an image in such a way that the central pixel has all 0 indexes, e.g. (0,0) or (0,0,0) for 3d images 
+     Sets the :ref:`spatial-origin` of an image in such a way that the central 
+     pixel has all 0 indexes, e.g. (0,0) or (0,0,0) for 3d images.
     
   .. method:: CoordToIndex(coord)
 
-     Returns the indexes of an image corresponding to the specified absolute coordinates. (See :ref:`absolute-origin'). A given set of absolute coordinates will almost never fall
-     exactly at the center of a pixel, so this method return fractional indexes. 
+     Returns the indexes of an image corresponding to the specified absolute 
+     coordinates. (See :ref:`absolute-origin`). A given set of absolute 
+     coordinates will almost never fall exactly at the center of a pixel, so 
+     this method return fractional indexes. 
 
      :param coord: Absolute coordinates
      :type  coord: :class:`~ost.geom.Vec3`
@@ -248,16 +253,21 @@ ImageHandle class.
 
   .. method:: Copy()
      
-     Creates a and returns a copy of the ImageHandle. The new handle does not point to the same underlying data as the old one, but to a complete and separate copy of the
-     original data.
+     Creates a and returns a copy of the ImageHandle. The new handle does not 
+     point to the same underlying data as the old one, but to a complete and 
+     separate copy of the original data.
 
      :rtype: :class:`ImageHandle`
 
   .. method:: Extract(extent)
      
-     Creates and returns a new image that contains a copy of a portion of the original image. The extracted image keeps the same :ref:`data-type` of the original image,
-     but extractions from images in the 'FREQEUNCY' or 'HALF FREQUENCY' domains result in 'COMPLEX' 'SPATIAL' images. This transformation is necessary, since the there is no
-     guarantee that the extracted 'FREQUENCY' sub-image is centered around the origin and hence back-transformable to 'SPATIAL'.
+     Creates and returns a new image that contains a copy of a portion of the 
+     original image. The extracted image keeps the same :ref:`data-type` of the 
+     original image, but extractions from images in the 'FREQEUNCY' or 
+     'HALF FREQUENCY' domains result in 'COMPLEX' 'SPATIAL' images. This 
+     transformation is necessary, since the there is no guarantee that the 
+     extracted 'FREQUENCY' sub-image is centered around the origin and hence 
+     back-transformable to 'SPATIAL'.
 
      :param extent:
      :type  extent: :class:`Extent`
@@ -265,7 +275,8 @@ ImageHandle class.
 
   .. method:: FractionalIndexToCoord(frac_pixel)
 
-     Same as :method:`IndexToCoord(pixel)`, but introduces subpixel precision by accepting fractional numbers for pixel indexes.
+     Same as :meth:`IndexToCoord`, but introduces subpixel precision by 
+     accepting fractional numbers for pixel indexes.
      
      :param frac_pixel: Fractional pixel indexes
      :type  frac_pixel: :class:`~ost.geomVec3`
@@ -352,7 +363,8 @@ ImageHandle class.
 
   .. method:: GetSpatialSampling()
 
-     Return the :ref:`pixel-sampling` of the image in the 'SPATIAL' :ref:`data-domain`.
+     Return the :ref:`pixel-sampling` of the image in the 'SPATIAL' 
+     :ref:`data-domain`.
 
     :rtype: :class:`~ost.geom.Vec3`
 
@@ -364,8 +376,11 @@ ImageHandle class.
 
   .. method:: IndexToCoord(pixel)
  
-     Returns the absolute coordinates (See :ref:`absolute-origin`) corresponding to the pixel with the specified indexes. Please note this method always returns the coordinates
-     corresponding to the center of the pixel. When sub-pixel precision is needed, the method :method:`eFractionalIndexToCoord(frac_Pixel) can be used.
+     Returns the absolute coordinates (See :ref:`absolute-origin`) corresponding 
+     to the pixel with the specified indexes. Please note this method always
+     returns the coordinates corresponding to the center of the pixel. When 
+     sub-pixel precision is needed, the method :meth:`FractionalIndexToCoord` 
+     can be used.
     
     :param pixel:
     :type  pixel: :class:`Point`
@@ -373,27 +388,33 @@ ImageHandle class.
 
   .. method:: IsFrequency()
 
-     Returns true if the :ref:`data-domain` of the image is 'FREQUENCY` or `HALF-FREQUENCY'     
+     Returns true if the :ref:`data-domain` of the image is `FREQUENCY` or 
+     `HALF-FREQUENCY`     
 
      :rtype: bool
 
   .. method:: IsSpatial()
 
-     Returns true if the :ref:`data-domain` of the image is 'SPATIAL'     
+     Returns true if the :ref:`data-domain` of the image is 'SPATIAL'.  
 
      :rtype: bool
 
   .. method:: IsValid()
 
-     Please check ??????????? 
+     Returns true, when the image handle is valid, false if not. It is an error 
+     to call any method on the image handle other than `IsValid` when this 
+     method returns false.
 
     :rtype: bool
 
   .. method:: Paste(source_image)
    
-     Copies the content of a different image into the current one, overwriting pre-existing data . The values of pixels with given indexes in the source image are copied into pixels
-     with the same indexes in the target image. If the two images have different extents (see :class:`Extent`), pixels that do not exist in both are ignored. Please notice
-     that this method only copies the pixel content: all other properties of the image are left untouched. 
+     Copies the content of a different image into the current one, overwriting 
+     pre-existing data . The values of pixels with given indexes in the source 
+     image are copied into pixels with the same indexes in the target image. If 
+     the two images have different extents (see :class:`Extent`), pixels that do 
+     not exist in both are ignored. Please notice that this method only copies 
+     the pixel content: all other properties of the image are left untouched. 
 
      :param source_image:
      :type  data: :class:`ImageHandle`
@@ -407,7 +428,9 @@ ImageHandle class.
  
   .. method:: SetComplex(pixel, value)
 
-     Sets the content of the specified pixel to the provided value.  If the image holds data of the 'REAL' :ref:`data-type`, the method sets the pixel to the amplitude of the provided
+     Sets the content of the specified pixel to the provided value.  If the 
+     image holds data of the 'REAL' :ref:`data-type`, the method sets the pixel 
+     to the amplitude of the provided.
      value.
 
      :param pixel:
@@ -440,7 +463,7 @@ ImageHandle class.
      :type  pixel_indexes: :class:`Point`
      :rtype: None
 
-  .. method:: SetSpatialSampling(arg2)
+  .. method:: SetSpatialSampling(sampl)
 
      Sets the :ref:`pixel-sampling` if the image to the provided values in the spatial :ref:`data-domain`
 
