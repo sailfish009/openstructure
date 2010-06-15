@@ -81,7 +81,7 @@ void Logger::PopVerbosityLevel()
 std::ostream& Logger::operator()(enum LogLevel l)
 {
   if(l<=level_) {
-    return std::cout;
+    return std::cerr;
   }
   return null_;
 }
