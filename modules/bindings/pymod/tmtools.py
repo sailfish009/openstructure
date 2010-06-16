@@ -28,7 +28,7 @@ tmalign: Y. Zhang and J. Skolnick, Nucl. Acids Res. 2005 33, 2302-9
 Authors: Pascal Benkert, Marco Biasini
 """
 
-import subprocess, os, tempfile
+import subprocess, os, tempfile, platform
 from ost import settings, io, geom
 
 def _SetupFiles(models):
@@ -64,10 +64,14 @@ def _ParseTmAlign(lines):
   return TMAlignResult(rmsd, aln_length, tm_score, tf)
 
 def _RunTmAlign(tmalign, tmp_dir):
-  tmalign_path=settings.Locate('tmalign', explicit_file_name=tmalign)
   model1_filename=os.path.join(tmp_dir, 'model01.pdb')
-  model2_filename=os.path.join(tmp_dir, 'model02.pdb')  
-  command="%s '%s' '%s'" %(tmalign_path, model1_filename, model2_filename)
+  model2_filename=os.path.join(tmp_dir, 'model02.pdb')
+  if platform.system() == "Windows":
+    tmalign_path=settings.Locate('tmalign.exe', explicit_file_name=tmalign)
+    command="\"%s\" %s %s" %(os.path.normpath(tmalign_path), model1_filename, model2_filename)
+  else:
+    tmalign_path=settings.Locate('tmalign', explicit_file_name=tmalign)  
+    command="%s '%s' '%s'" %(tmalign_path, model1_filename, model2_filename)
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   lines=ps.stdout.readlines()
   if (len(lines))<22:
@@ -104,10 +108,14 @@ def _ParseTmScore(lines):
 
 
 def _RunTmScore(tmscore, tmp_dir):
-  tmscore_path=settings.Locate('tmscore', explicit_file_name=tmscore)
   model1_filename=os.path.join(tmp_dir, 'model01.pdb')
   model2_filename=os.path.join(tmp_dir, 'model02.pdb')  
-  command="%s '%s' '%s'" %(tmscore_path, model1_filename, model2_filename)
+  if platform.system() == "Windows":
+    tmscore_path=settings.Locate('tmscore.exe', explicit_file_name=tmscore)
+    command="\"%s\" %s %s" %(os.path.normpath(tmscore_path), model1_filename, model2_filename)
+  else:
+    tmscore_path=settings.Locate('tmscore', explicit_file_name=tmscore)
+    command="%s '%s' '%s'" %(tmscore_path, model1_filename, model2_filename)
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   lines=ps.stdout.readlines()
   if (len(lines))<22:

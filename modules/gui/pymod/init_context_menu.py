@@ -1,3 +1,5 @@
+import platform
+
 from PyQt4 import QtCore, QtGui
 
 from ost import geom, gfx, gui
@@ -105,7 +107,10 @@ class ShowResultDialog(QtGui.QDialog):
 class AlignmentContextMenu(QtCore.QObject):
   def __init__(self, context_menu):
     try:
-      settings.Locate('tmalign')
+      if platform.system() == "Windows":
+        settings.Locate("tmalign.exe")
+      else:
+        settings.Locate("tmalign")
       QtCore.QObject.__init__(self, context_menu.qobject)
 
       self.action = QtGui.QAction("Align", self)

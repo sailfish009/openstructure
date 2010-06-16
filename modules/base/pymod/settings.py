@@ -1,4 +1,4 @@
-import os
+import os, platform
 import __main__
  
 
@@ -87,7 +87,10 @@ def Locate(file_name, explicit_file_name=None, search_paths=[],
 
   if search_system_paths:
     paths=os.getenv('PATH')
-    searched+=paths.split(':')
+    if platform.system() == "Windows":
+      searched+=paths.split(';')
+    else:
+      searched+=paths.split(':')
     for path in searched:
       for file_name in file_names:
         full_file_name=os.path.join(path, file_name)
