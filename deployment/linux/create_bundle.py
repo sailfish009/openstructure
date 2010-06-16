@@ -62,7 +62,7 @@ subprocess.call('make',shell=True,cwd='../../')
 print 'Converting Chemlib dictionary'
 subprocess.call('stage/bin/chemdict_tool create components.cif compounds.chemlib', shell=True, cwd='../../')
 print '\nStaging Chemlib dictionary'
-subprocess.call('cmake ./ -DCOMPOUND_LIB=compounds.chemlib -DENABLE_IMG=ON -DENABLE_UI=ON -DENABLE_GFX=ON',shell=True,cwd='../../')
+subprocess.call('cmake ./ -DCOMPOUND_LIB=compounds.chemlib -DENABLE_IMG=ON -DENABLE_UI=ON -DENABLE_GFX=ON -DCOMPILE_TMTOOLS=ON',shell=True,cwd='../../')
 subprocess.call('make',shell=True,cwd='../../')
 print 'Removing obsolete packages and package directory'
 subprocess.call('rm -fr openstructure-linux*',shell=True,cwd='../../')
