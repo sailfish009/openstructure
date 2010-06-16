@@ -7,11 +7,10 @@
 Applying algorithms
 -------------------
 
-While image properties are usually manipulated using method of the :class:'~ost.img.ImageHandle` class, their data content
-is manipulated using image algorithms. Image algorithms are objects. Each of them is a class, and its methods are used to handle the algorithm parameters. Applying an algorithm to an image is then conceptually a two-step process. First, an instance of an algorithm class is created, yielding an algorithm object. In a second step, the algorithm object is applied to an image. An algorithm can be applied in-place (using the :meth:`ost.img.ImageHandle.Apply` method), modifying the image. or out-of-place, (using :meth:`~ost.img.ImageHandle.ApplyIP` ), leaving the original image untouched, and returning the result as a new image. 
+While image properties are usually manipulated using method of the :class:`~ost.img.ImageHandle` class, their data content
+is manipulated using image algorithms. Image algorithms are objects. Each of them is a class, and its methods are used to handle the algorithm parameters. Applying an algorithm to an image is then conceptually a two-step process. First, an instance of an algorithm class is created, yielding an algorithm object. In a second step, the algorithm object is applied to an image. An algorithm can be applied in-place (using the :meth:`~ßost.img.ImageHandle.Apply` method), modifying the image. or out-of-place, (using :meth:`~ost.img.ImageHandle.ApplyIP` ), leaving the original image untouched, and returning the result as a new image. 
 
-Here is an example that uses the :class:`Randomize` algorithm. This algorithm feels the pixels of the image with random 
-values between 0.0 and 1.0
+Here is an example. All the algorithms used in the following are described in the :ref:`algorithms` section.
 
 .. code-block:: python
  
@@ -20,145 +19,453 @@ values between 0.0 and 1.0
   # applies algorithm object in place, overwriting the image
   im.ApplyIP( rand_alg )
 
-Now that we have some (noisy) data present, let us run another algorithm, this time a Gaussian filter with a sigma of 4 pixel.
-
-im.ApplyIP( img.alg.GaussianFilter(4.0) ) # apply temporary algorithm object in-place
-As you can see, it is not always necessary to create an independent algorithm instance first, in many cases a temporary object will suffice (this applies to the randomization algorithm as well, 'im.ApplyIP(alg.Randomize())' would have been fine). However, when used this way, the algorithm class will cease to exist as soon as the algorithm is applied. This can be important if the algorithm stores some values that need to be recovered later. For example:
-
-stat=img.alg.Stat()
-im.ApplyIP(stat)
-mean=stat.GetMean()
-Algorithms are stateful objects and can store values. The 'Stat' algorithm computes basic statistics about the image it is applied on (maximum and minimum values, standard deviations, etc). The data are stored within the algorithm instance and can be recovered using the algorithm's methods. It would obviously make very little sense not to create an instance of the 'Stat' algorithm. When the algorithms ceases to exist, all information would be lost.
-
-Applying a Fourier Transform
-
-An image is Fourier-transformed using the 'img.alg.FFT()' algorithm object:
-
-im=io.LoadImage("imagename.tif") # load the image
-# create an instance of the fft algorithm object
-fft=img.alg.FFT() 
-# do the actual Fourier transformation
-im_ft=im.Apply(fft) 
-# back-transform
-im2 = im_ft.Apply(fft) 
-# if this is run from within the dng graphical frontend, open viewers to look at the images
-gui.CreateDataViewer(im)
-gui.CreateDataViewer(im_ft)
-gui.CreateDataViewer(im2)
-It is not really necessary to use the 'fft' variable to store the 'im.alg.FFT()' instance, a temporary object can be used, since the 'FFT' algorithm object is stateless. In addition, the algorithm can be applied in-place to avoid the creation of a second image:
-
-im=io.LoadImage("imagename.tif") # load the image
-# do the actual Fourier transformation, in-place using temporary object
-im.ApplyIP(alg.FFT()) 
-# repeating this command will do the back-transform
-im.ApplyIP(alg.FFT())
-As said before, the 'alg.FFT()' algorithm does not require a direction to be given, this is implicitly determined by the active domain of the underlying image state: a 'SPATIAL' image will always be transformed to the 'FREQUENCY' domain, and vice-versa.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Usage of Image Algorithms
---------------------------------------------------------------------------------
-
-Image algorithms are objects. To execute them, the algorithms are applied to an 
-image by passing it to the :meth:`ost.img.ImageHandle.Apply` or 
-:meth:`ost.img.ImageHandle.ApplyIP` method:
+Sometimes, there is no need to create a permanent instance of an algorithm object. A temporary object enough:
 
 .. code-block:: python
-  
-  image=img.CreateImage(img.Size(200, 200))
-  fft_image=image.Apply(img.alg.FFT())
-  image.ApplyIP(img.alg.FFT())
-  
-  
-.. class:: FFT
 
-  Fast Fourier Transforms the image. The FFT algorithms is aware of the 
-  image's domain. The following rules apply:
-  
-   * SPATIAL -> HALF_FREQUENCY
-   * HALF_FREQUENCY -> SPATIAL
-   * FREQUENCY -> COMPLEX_SPATIAL
-   * COMPLEX_SPATIAL -> FREQUENCY
+  # applies temporary algorithm object in-place
+  im.ApplyIP( img.alg.GaussianFilter(4.0) )
 
-.. class:: GaussianFilter(sigma=1.0)
+When used this way, the algorithm class will cease to exist as soon as the algorithm is applied. However, some algorithm are stateful and store information. One good example is the Stat algorithm, which does not modify the image when applied, but change its internal state to store information extracted from the image, which can be recovered later. For example:
 
-  Applies a gaussian filter to the supplied image. Sigma is given in pixels.
+.. code-block:: python
 
-  Implemented after I.T.Young, L.J. van Vliet,"Recursive implementation of the
-  Gaussian filter", Signal Processing, 44(1995), 139-151
+  # creates and applies an algorithm object
+  stat=img.alg.Stat()
+  im.ApplyIP(stat)
+  # extracts information from the algorithm
+  mean=stat.GetMean()
 
-Filters in Fourier Space
+It is important to remember that when the algorithms ceases to exist, all information it stores is lost.
+
+Fourier Transforming Images
+----------------------------
+
+An image can be Fourier-transformed using either the FFT algorithm or the DFT algorithm. The difference between the two is that the DFT algorithm honors the :ref:`spatial-origin` of the image, and applies the corresponding phase shift in Fourier space. The FFT does not follow this behavior. 
+
+.. code-block:: python
+
+  # create an instance of the Dft algorithm object
+  dft=img.alg.DFT() 
+  # do the actual Fourier transformation
+  im_ft=im.Apply(dft) 
+  # back-transform
+  im2 = im_ft.Apply(dft) 
+
+The FFT and DFT algorithms do not require a direction to be given (forward or back transform). This is implicitly determined by the current :ref:`data-domain` of the image being transformed. The following rules apply. 
+
+* SPATIAL -> HALF_FREQUENCY
+* HALF_FREQUENCY -> SPATIAL
+* FREQUENCY -> COMPLEX_SPATIAL
+* COMPLEX_SPATIAL -> FREQUENCY
+
+.. _filters:
+
+Filters
+-------
+
+OpenStructure makes several image filters available. Most of them are Fourier space filters, others are real space ones.
+However, since the :class:`ost.img.ImagerHandle` class is aware of its own :ref:`data-domain`, the user does not need to
+convert the image to Fourier space or to real space. Irrespective of which domain the filter applies to, OpenStructure 
+will internally convert the image to the appropriate domain, apply the filter, and then return the image to its original 
+conditions.
+
+The following filters are available (their are described in the :ref:`algorithms` section below)
+
+Fourier space filters:
+
+* :class:`LowPassFilter`
+* :class:`HighPassFilter`
+* :class:`GaussianLowPassFilter`
+* :class:`GaussianHighPassFilter`
+* :class:`FermiLowPassFilter`
+* :class:`FermiHighPassFilter`
+* :class:`ButterworthLowPassFilter`
+* :class:`ButterworthHighPassFilter`
+* :class:`FermiLowPassFilter`
+
+Real space filters:
+
+* :class:`GaussianFilter`
+
+.. _algorithms:
+
+Selected Algorithms
 --------------------------------------------------------------------------------
 
-The following filters operate in Fourier Space. If the image they are applied on is in spatial domain, they will first be converted to frequency domain and then converted back after the filter has been applied.
-  
-.. class:: LowpassFilter(freq_limit)
+Many algorithms are available for image manipulation. What follows is a description of the 
+most important ones.
 
-  Filters an image by masking out frequencies higher than
-  `freg_limit`.
+.. class:: DFT()
 
-  .. method:: GetLimit()
-    
-    Returns the frequency limit
-    
-  .. method:: SetLimit(freq)
-    
-    Set the frequency limit
-    
-.. class:: HighpassFilter
+   This algorithm performs a Fourier Transform of the image, honoring its :ref:`spatial-origin`, thus
+   applying the corresponding phase shift in Fourier space.
+
+.. class:: DiscreteShrink(block_size)
+
+   The algorithm performs a scaling of the original image by merging adjacent 
+   blocks of pixels. The block size is passed in the constructor in the form of a :class:`~ost.img.Size`
+   but can be changed later using the relevant method. The :class:`~ost.img.Size` and the :class:`~ost.img.Extent` 
+   of the image are changed when the algorithm is applied. The :ref:`pixel-sampling` of the image is also adjusted 
+   according to the scaling, so that the size of the image in the absolute reference system used by
+   OpenStructure stays constant.
+   
+   :param block_size: Size of the blocks to be merged
+   :type block_size: :class:`~ost.img.Size`
+
+   .. method:: GetBlocksize()
+
+     Returns the current size of the blocks to be merged
+
+     :rtype: :class:`~ost.img.Size`
+
+   .. method:: SetBlocksize(block size)
+
+    Sets the size of the blocks to be shrunk to the specified value
+
+    :param block_size:
+    :type  block_size: :class:`~ost.img.Size`
  
-  Filters an image by masking out frequences lower than `freq_limit`
+.. class:: FFT()
+
+    This algorithm performs a Fourier Transform of the image, without honoring its :ref:`spatial-origin` (See :class:`DFT`)
+	
+.. class:: LowPassFilter(cutoff=1.0)
+
+   This algorithm applies a Fourier low pass filter to the image. The filter cutoff frequency needs
+   to be provided in sampling units (for example 8 Angstrom). Please notice that this filter features a sharp dropoff.
+
+   :param cutoff: Frequency cutoff in sampling units
+   :type  cutoff: float
+
+   .. method:: GetLimit()
+     
+     Returns the current value of the filter cutoff frequency  (in sampling units).
+
+     :rtype: float
+
+   .. method:: SetLimit(cutoff)
+
+     Sets the value of the filter cutoff frequency to the specified value (in sampling units).
+
+     :param cutoff: Frequency cutoff in sampling units
+     :type  cutoff: float
+
+.. class:: HighPassFilter(cutoff=1.0)
+
+   This algorithm applies a Fourier high pass filter to the image. The filter cutoff frequency needs
+   to be provided in sampling units (for example 8 Angstrom). Please notice that this filter features a sharp dropoff.
+
+   :param cutoff: Frequency cutoff in sampling units
+   :type  cutoff: float
+
+   .. method:: GetLimit()
+     
+     Returns the current value of the filter cutoff frequency  (in sampling units).
+
+     :rtype: float
+
+   .. method:: SetLimit(cutoff)
+
+     Sets the value of the filter cutoff frequency to the specified value (in sampling units).
+
+     :param cutoff: Frequency cutoff in sampling units
+     :type  cutoff: float
+
+
+.. class:: GaussianLowPassFilter(cutoff=1.0)
+
+   This algorithm applies a Fourier `Gaussian low pass filter <http://en.wikipedia.org/wiki/Gaussian_filter>`_ to the
+   image. The filter cutoff frequency needs to be provided in sampling units (for example 8 Angstrom). 
+
+   :param cutoff: Frequency cutoff in sampling units
+   :type  cutoff: float
+
+   .. method:: GetLimit()
   
-  .. method:: GetLimit()
-    
-    Returns the frequency limit
-    
-  .. method:: SetLimit(freq)
-    
-    Set the frequency limit
+     Returns the current value of the filter cutoff frequency (in sampling units).
+
+     :rtype: float
+
+   .. method:: SetLimit(cutoff)
+
+	 Sets the value of the filter cutoff frequency to the specified value (in sampling units).
+
+	 :param cutoff: Frequency cutoff in sampling units
+	 :type  cutoff: float
+
+.. class:: GaussianHighPassFilter(cutoff=1.0)
+
+   This algorithm applies a Fourier `Gaussian High pass filter <http://en.wikipedia.org/wiki/Gaussian_filter>`_ to the
+   image. The filter cutoff frequency needs to be provided in sampling units (for example 8 Angstrom). 
+
+   :param cutoff: Frequency cutoff in sampling units
+   :type  cutoff: float
+
+   .. method:: GetLimit()
   
+     Returns the current value of the filter cutoff frequency (in sampling units).
+
+     :rtype: float
+
+   .. method:: SetLimit(cutoff)
+
+	 Sets the value of the filter cutoff frequency to the specified value (in sampling units).
+
+	 :param cutoff: Frequency cutoff in sampling units
+	 :type  cutoff: float
+	
+.. class:: FermiLowPassFilter(cutoff=1.0,t=1.0)
+
+   This algorithm applies a Fourier `Fermi low pass filter <http://en.wikipedia.org/wiki/Fermi_filter>`_ to the
+   image. The filter cutoff frequency and the temperature parameter T need to be provided in sampling units 
+   (for example 8 Angstrom). 
+
+   :param cutoff: Frequency cutoff in sampling units
+   :type  cutoff: float
+   :param t: Temperature factor in sampling units
+   :type  t: float
+
+   .. method:: GetLimit()
+  
+     Returns the current value of the filter cutoff frequency in sampling units.
+
+     :rtype: float
+
+   .. method:: SetLimit(cutoff)
+
+	 Sets the value of the filter cutoff frequency to the specified value (in sampling units).
+
+	 :param cutoff: Frequency cutoff in sampling units
+	 :type  cutoff: float
+	
+   .. method:: GetT()
+  
+     Returns the current value of the filter's T factor (in sampling units).
+
+     :rtype: float
+
+   .. method:: SetT(t_factor)
+
+	 Sets the value of the filter's T factor to the specified value (in sampling units).
+
+	 :param t_factor: Frequency cutoff in sampling units
+	 :type  t_factor: float
+
+.. class:: FermiHighPassFilter(cutoff=1.0,t=1.0)
+
+   This algorithm applies a Fourier `Fermi high pass filter <http://en.wikipedia.org/wiki/Fermi_filter>`_ to the
+   image. The filter cutoff frequency and the temperature parameter T need to be provided in sampling units 
+   (for example 8 Angstrom). 
+
+   :param cutoff: Frequency cutoff in sampling units
+   :type  cutoff: float
+   :param t: Temperature factor in sampling units
+   :type  t: float
+
+   .. method:: GetLimit()
+  
+     Returns the current value of the filter cutoff frequency in sampling units.
+
+     :rtype: float
+
+   .. method:: SetLimit(cutoff)
+
+	 Sets the value of the filter cutoff frequency to the specified value (in sampling units).
+
+	 :param cutoff: Frequency cutoff in sampling units
+	 :type  cutoff: float
+	
+   .. method:: GetT()
+  
+     Returns the current value of the filter's T factor (in sampling units).
+
+     :rtype: float
+
+   .. method:: SetT(t_factor)
+
+	 Sets the value of the filter's T factor to the specified value (in sampling units).
+
+	 :param t_factor: Frequency cutoff in sampling units
+	 :type  t_factor: float
+	
+.. class:: ButterworthLowPassFilter(passband=1.0,stopband=1.0)
+
+   This algorithm applies a Fourier `Butterworth low pass filter <http://en.wikipedia.org/wiki/Butterworth_filter>`_ to
+   the image. The filter passband and stopband frequencies need to be provided in sampling units (for example 8 Angstrom). 
+   The default values of the Epsilon and Maximum Passband Gain parameters are set to 0.882 and 10.624 respectively.
+
+   :param passband: Passband frequency in sampling units
+   :type  passband: float
+   :param stopband: Stopband frequency in sampling units
+   :type  stopband: float
+
+   .. method:: GetLimit()
+  
+     Returns the current value of the filter passband frequency in sampling units.
+
+     :rtype: float
+
+   .. method:: SetLimit(passband)
+
+	 Sets the value of the filter passband frequency to the specified value (in sampling units).
+
+	 :param passband: Frequency cutoff in sampling units
+	 :type  passband: float
+	
+   .. method:: GetStop()
+  
+     Returns the current value of the filter's stopband frequency (in sampling units).
+
+     :rtype: float
+
+   .. method:: SetStop(stopband)
+
+	 Sets the value of the filter's stopband frequency to the specified value (in sampling units).
+
+	 :param stopband: Frequency cutoff in sampling units
+	 :type  stopband: float	
+	
+   .. method:: GetEps()
+  
+     Returns the current value of the filter's Epsilon parameter.
+
+     :rtype: float
+
+   .. method:: SetEps(epsilon)
+
+	 Sets the value of the filter's epsilon parameter to the specified value.
+
+	 :param eps: Epsilon parameter
+	 :type  eps: float
+	
+   .. method:: GetA()
+  
+     Returns the current value of the filter's Maximum Passband Gain parameter.
+
+     :rtype: float
+
+   .. method:: SetA(gain)
+
+	 Sets the value of the filter's Maximum Passband Gain parameter to the specified value.
+
+	 :param gain: Maximum Passband Gain parameter
+	 :type  gain: float			
+	
+.. class:: ButterworthHighPassFilter(passband=1.0,stopband=1.0)
+
+   This algorithm applies a Fourier `Butterworth high pass filter <http://en.wikipedia.org/wiki/Butterworth_filter>`_ 
+   to the image. The filter passband and stopband frequencies need to be provided in sampling units (for example 8
+   Angstrom). The default values of the Epsilon and Maximum Passband Gain parameters are set to 0.882 and 10.624
+   respectively.
+
+   :param passband: Passband frequency in sampling units
+   :type  passband: float
+   :param stopband: Stopband frequency in sampling units
+   :type  stopband: float
+
+   .. method:: GetLimit()
+  
+     Returns the current value of the filter passband frequency in sampling units.
+
+     :rtype: float
+
+   .. method:: SetLimit(passband)
+
+	 Sets the value of the filter passband frequency to the specified value (in sampling units).
+
+	 :param passband: Frequency cutoff in sampling units
+	 :type  passband: float
+	
+   .. method:: GetStop()
+  
+     Returns the current value of the filter's stopband frequency (in sampling units).
+
+     :rtype: float
+
+   .. method:: SetStop(stopband)
+
+	 Sets the value of the filter's stopband frequency to the specified value (in sampling units).
+
+	 :param stopband: Frequency cutoff in sampling units
+	 :type  stopband: float	
+	
+   .. method:: GetEps()
+  
+     Returns the current value of the filter's Epsilon parameter.
+
+     :rtype: float
+
+   .. method:: SetEps(epsilon)
+
+	 Sets the value of the filter's epsilon parameter to the specified value.
+
+	 :param eps: Epsilon parameter
+	 :type  eps: float
+	
+   .. method:: GetA()
+   
+     Returns the current value of the filter's Maximum Passband Gain parameter.
+
+     :rtype: float
+
+   .. method:: SetA(gain)
+
+	 Sets the value of the filter's Maximum Passband Gain parameter to the specified value.
+
+	 :param gain: Maximum Passband Gain parameter
+	 :type  gain: float	
+	
+.. class:: GaussianFilter(sigma=1.0)
+
+	 This algorithm applies a real space Gaussian filter to the image, as defined in the following publication:
+	
+	 I.T.Young, L.J. van Vliet,"Recursive implementation of the Gaussian filter",Signal Processing, 44(1995), 139-151
+	
+	 :param sigma: Width of the Gaussian filter
+	 :type  sigma: float
+
+	 .. method:: GetSigma()
+
+	   Returns the current value of the filter's width.
+
+	   :rtype: float
+
+	 .. method:: SetSigma(width)
+
+	   Sets the value of the filter's width to the specified value.
+
+	   :param sigma: Width of the Gaussian filter
+	   :type  sigma: float			
+	
+	 .. method:: SetQ(q_param)
+
+	   Sets the value of the filter's Q parameter (see publication) to the specified value.
+
+	   :param q_param: Filter's Q parameter
+	   :type  q_param: float			
+
+.. class:: Histogram(bins,minimum,maximum)
+
+   This algorithm performs an histogram analysis of the image. The minimum and maximum pixel values of the histogram
+   representation must be provided when the algorithm object is created, as well as the number of bins in the histogram.
+   Bins are assumed to be evenly distributed and minimum and maximum values for each bin are automatically computed.
+   When the algorithm is applied to an image, the analysis is carried out. A python 'list' object containing in sequence
+   the pixel counts for all the bins can the be recovered from the algorithm object.
+
+   :param bins: Number of bins in the histogram
+   :type  bins: int
+   :param minimum: Minimum value in the histogram
+   :type  minimum: float
+   :param maximum: Maximum value in the histogram
+
+   .. method:: GetBins()
+
+     Returns the bins of the histogram representation
+
+     :rtype: list of ints 
+
+   :type  maximum: float
+
+   .. method:: GetBins()
+
