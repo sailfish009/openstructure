@@ -141,7 +141,7 @@ void RemoteLoader::Clicked()
   if(!line_edit_->text().isEmpty() && site_actions_->checkedAction()){
     RemoteSiteLoader* loader = FileLoader::GetLoaderManager()->GetRemoteSiteLoader(site_actions_->checkedAction()->text());
 
-    QString text = line_edit_->text();
+    QString text = line_edit_->text().simplified();
     QString id = text;
     QString selection = "";
     int pos = text.indexOf('[');
