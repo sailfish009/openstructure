@@ -22,14 +22,14 @@
 
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
-#include <ost/gui/panel_bar/panels.hh>
-#include <ost/gui/panel_bar/drop_box.hh>
 #include <ost/gui/widget.hh>
 #include <ost/gui/widget_registry.hh>
 
+#include "drop_box.hh"
 #include "panel_bar.hh"
-#include "tabbed_panel_bar.hh"
+#include "panel_manager.hh"
 #include "splitter_panel_bar.hh"
+#include "tabbed_panel_bar.hh"
 
 namespace ost {
 namespace gui {

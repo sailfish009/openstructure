@@ -25,12 +25,12 @@
 #include <QAction>
 
 #include <ost/gui/module_config.hh>
-#include <ost/gui/panel_bar/panel_bar_widget_holder.hh>
 #include <ost/gui/widget_pool.hh>
 #include <ost/gui/widget.hh>
 #include <ost/gui/thin_splitter.hh>
 
 #include "panel_widget_container.hh"
+#include "panel_bar_widget_holder.hh"
 
 namespace ost { namespace gui {
 

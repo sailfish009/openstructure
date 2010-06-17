@@ -33,7 +33,7 @@ void export_Gosty();
 void export_PyShell();
 void export_SceneWin();
 void export_SequenceViewer();
-void export_PanelBar();
+void export_Panels();
 void export_Perspective();
 void export_SipHandler();
 void export_SceneSelection();
@@ -111,7 +111,7 @@ BOOST_PYTHON_MODULE(_gui)
   export_GLWin();
   export_MainArea();
   export_PyShell();
-  export_PanelBar();
+  export_Panels();
   export_MenuBar();
   export_Perspective();  
   export_SceneWin();

@@ -13,7 +13,7 @@ set(OST_GUI_PYMOD_SOURCES
   export_sip_handler.cc
   export_scene_selection.cc
   export_main_area.cc
-  export_panel_bar.cc
+  export_panels.cc
   export_menu_bar.cc
   export_file_loader.cc
   export_file_viewer.cc

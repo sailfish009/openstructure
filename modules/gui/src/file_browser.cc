@@ -39,7 +39,7 @@
 
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
-#include <ost/gui/panel_bar/panels.hh>
+#include <ost/gui/panels/panel_manager.hh>
 #include <ost/gui/file_loader.hh>
 #include <ost/gui/file_viewer.hh>
 
@@ -176,7 +176,7 @@ void FileBrowser::UpdateMenu(const QString& path){
 }
 
 void FileBrowser::Split(){
-  Panels* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
+  PanelManager* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
   QString current_path = model_->filePath(view_->rootIndex());
   Widget* new_file_browser = new FileBrowser(current_path);
   panels->MoveNextTo(qobject_cast<Widget*>(this), new_file_browser);

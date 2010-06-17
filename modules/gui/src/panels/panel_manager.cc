@@ -25,7 +25,7 @@
 
 #include "bottom_bar.hh"
 #include "side_bar.hh"
-#include "panels.hh"
+#include "panel_manager.hh"
 #include "tabbed_panel_bar.hh"
 #include "splitter_panel_bar.hh"
 
@@ -45,7 +45,7 @@ public:
 };
 
 
-Panels::Panels(QWidget* widget):
+PanelManager::PanelManager(QWidget* widget):
  Widget(NULL, widget->parentWidget()),
      right_panel_splitter_(new ThinSplitter(Qt::Horizontal, this)),
      left_panel_splitter_(new ThinSplitter(Qt::Horizontal, this)),
@@ -97,11 +97,11 @@ Panels::Panels(QWidget* widget):
   this->acceptDrops();
 }
 
-void Panels::AddWidgetToPool(const QString& class_name, int limit){
+void PanelManager::AddWidgetToPool(const QString& class_name, int limit){
   pool_->Add(class_name, limit);
 }
 
-void Panels::AddWidgetToPool(const QString& name, Widget* widget){
+void PanelManager::AddWidgetToPool(const QString& name, Widget* widget){
   QString id = widget->metaObject()->className();
   widget->setParent(this);
   id.replace(".", "::");
@@ -110,7 +110,7 @@ void Panels::AddWidgetToPool(const QString& name, Widget* widget){
   pool_->Add(id, 1);
 }
 
-void Panels::AddWidget(PanelPosition pos, Widget* widget, bool is_hidden){
+void PanelManager::AddWidget(PanelPosition pos, Widget* widget, bool is_hidden){
   if(panels_.contains(pos) && this->GetParentPanel(widget) == NONE){
     if(pool_->IsAvailable(widget->metaObject()->className())){
       panels_[pos]->AddWidget(widget,is_hidden);
@@ -119,7 +119,7 @@ void Panels::AddWidget(PanelPosition pos, Widget* widget, bool is_hidden){
   }
 }
 
-void Panels::AddWidgetByName(PanelPosition pos, const QString& class_name, 
+void PanelManager::AddWidgetByName(PanelPosition pos, const QString& class_name,
                              bool is_hidden)
 {
   QString n=class_name;
@@ -130,7 +130,7 @@ void Panels::AddWidgetByName(PanelPosition pos, const QString& class_name,
   }
 }
 
-bool Panels::Save(const QString& prefix)
+bool PanelManager::Save(const QString& prefix)
 {
   bool saveok = true;
   QSettings settings;
@@ -172,7 +172,7 @@ bool Panels::Save(const QString& prefix)
   return saveok;
 }
 
-bool Panels::Restore(const QString& prefix)
+bool PanelManager::Restore(const QString& prefix)
 {
   QList<int> sizes = QList<int>();
   QSettings settings;
@@ -214,13 +214,13 @@ bool Panels::Restore(const QString& prefix)
   return restoreok;
 }
 
-void Panels::ToggleViewMode(PanelPosition pos){
+void PanelManager::ToggleViewMode(PanelPosition pos){
   if(panels_.contains(pos)){
    panels_[pos]->ToggleViewMode();
   }
 }
 
-void Panels::ToggleHide(){
+void PanelManager::ToggleHide(){
   QMapIterator<PanelPosition, PanelBar*> i(panels_);
   while (i.hasNext()) {
       i.next();
@@ -228,13 +228,13 @@ void Panels::ToggleHide(){
   }
 }
 
-void Panels::ToggleHide(PanelPosition pos){
+void PanelManager::ToggleHide(PanelPosition pos){
   if(panels_.contains(pos)){
    panels_[pos]->ToggleHide();
   }
 }
 
-void Panels::MoveWidget(Widget * widget, PanelPosition pos, int index){
+void PanelManager::MoveWidget(Widget * widget, PanelPosition pos, int index){
   if(panels_.contains(pos)){
     PanelPosition current_position = this->GetParentPanel(widget);
     if(current_position == pos){
@@ -253,14 +253,14 @@ void Panels::MoveWidget(Widget * widget, PanelPosition pos, int index){
   }
 }
 
-void Panels::MoveNextTo(Widget* target, Widget* widget){
+void PanelManager::MoveNextTo(Widget* target, Widget* widget){
   PanelPosition target_position =  this->GetParentPanel(target);
   if(panels_.contains(target_position)){
     this->MoveWidget(widget,target_position,panels_[target_position]->GetIndex(target));
   }
 }
 
-void Panels::ReplaceWidget(Widget* w1, Widget* w2){
+void PanelManager::ReplaceWidget(Widget* w1, Widget* w2){
   if(pool_->IsAvailable(w2->metaObject()->className())){
     PanelPosition pos_w1 = this->GetParentPanel(w1);
     PanelPosition pos_w2  = this->GetParentPanel(w2);
@@ -274,7 +274,7 @@ void Panels::ReplaceWidget(Widget* w1, Widget* w2){
   }
 }
 
-void Panels::ReplaceWidget(Widget* w1, QString& class_name){
+void PanelManager::ReplaceWidget(Widget* w1, QString& class_name){
   if(pool_->IsAvailable(class_name)){
     PanelPosition pos = this->GetParentPanel(w1);
     if(panels_.contains(pos)){
@@ -289,7 +289,7 @@ void Panels::ReplaceWidget(Widget* w1, QString& class_name){
   }
 }
 
-void Panels::RemoveWidget(Widget *widget){
+void PanelManager::RemoveWidget(Widget *widget){
   PanelPosition pos = this->GetParentPanel(widget);
   if(panels_.contains(pos)){
     panels_[pos]->RemoveWidget(widget);
@@ -297,13 +297,13 @@ void Panels::RemoveWidget(Widget *widget){
   }
 }
 
-QList<QString> Panels::GetAvailableWidgets()
+QList<QString> PanelManager::GetAvailableWidgets()
 {
   return pool_->GetAvailableWidgets();
 }
 
 
-QMenu* Panels::GetAvailableWidgetsMenu()
+QMenu* PanelManager::GetAvailableWidgetsMenu()
 {
   QMenu* m=new QMenu;
 
@@ -317,7 +317,7 @@ QMenu* Panels::GetAvailableWidgetsMenu()
   return m;
 }
 
-PanelPosition Panels::GetParentPanel(Widget* widget){
+PanelPosition PanelManager::GetParentPanel(Widget* widget){
   QMapIterator<PanelPosition, PanelBar*> i(panels_);
   while (i.hasNext()) {
       i.next();
@@ -329,7 +329,7 @@ PanelPosition Panels::GetParentPanel(Widget* widget){
   return NONE;
 }
 
-void Panels::StartDrag()
+void PanelManager::StartDrag()
 {
   QMapIterator<PanelPosition, PanelBar*> i(panels_);
   while (i.hasNext()) {
@@ -338,7 +338,7 @@ void Panels::StartDrag()
   }
 }
 
-void Panels::EndDrag()
+void PanelManager::EndDrag()
 {
   QMapIterator<PanelPosition, PanelBar*> i(panels_);
   while (i.hasNext()) {
@@ -347,7 +347,7 @@ void Panels::EndDrag()
   }
 }
 
-QMenu* Panels::GetMenu()
+QMenu* PanelManager::GetMenu()
 {
   QMenu* panel_menu = new QMenu(this);
   panel_menu->setTitle("Panels");
@@ -378,7 +378,7 @@ QMenu* Panels::GetMenu()
   return panel_menu;
 }
 
-void Panels::UpdateAddMenu(){
+void PanelManager::UpdateAddMenu(){
   add_menu_->clear();
   WidgetRegistry* wf=WidgetRegistry::Instance();
   QList<QString> available=this->GetAvailableWidgets();
@@ -389,7 +389,7 @@ void Panels::UpdateAddMenu(){
   }
 }
 
-void Panels::AddWidgetFromMenu(QAction* action){
+void PanelManager::AddWidgetFromMenu(QAction* action){
   if(action){
     QString new_class_name=action->data().toString();
     if(panels_.contains(current_menu_)){
@@ -398,7 +398,7 @@ void Panels::AddWidgetFromMenu(QAction* action){
   }
 }
 
-void Panels::UpdateCurrentMenu(){
+void PanelManager::UpdateCurrentMenu(){
   QAction* action = qobject_cast<QAction*>(this->sender());
   if(action){
     current_menu_ = PanelPosition(action->data().toInt());

@@ -16,8 +16,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_PANEL_BAR_PANELS
-#define OST_GUI_PANEL_BAR_PANELS
+#ifndef OST_GUI_PANEL_BAR_PANEL_MANAGER
+#define OST_GUI_PANEL_BAR_PANEL_MANAGER
 
 #include <QWidget>
 #include <QString>
@@ -45,18 +45,18 @@ enum PanelPosition
 /// \brief Class which organizes all widgets which are in the side panels
 /// This class handles all side bar widgets. It can be used to display, hide or move a widget to a PaneBar. There are three Bars (left, bottom, right) which are organized by this class.
 /// Whenever a widget is being removed or added it checks first if the widget type is known and if there are available instances.
-class DLLEXPORT_OST_GUI Panels : public Widget {
+class DLLEXPORT_OST_GUI PanelManager : public Widget {
   Q_OBJECT
 public:
-  Panels(QWidget* widget);
-  ~Panels(){ }
+  PanelManager(QWidget* widget);
+  ~PanelManager(){ }
   virtual bool Save(const QString& prefix);
   virtual bool Restore(const QString& prefix);
 
   /// \brief Add a widget to the widget pool
   ///
   /// The widget must already be in the WidgetRegistry.
-  /// If you are not sure if the Widget is in the WidgetRegistry, use the \ref Panels::AddWidgetToPool(const QString& name, Widget* widget) Method instead.
+  /// If you are not sure if the Widget is in the WidgetRegistry, use the \ref PanelManager::AddWidgetToPool(const QString& name, Widget* widget) Method instead.
   /// \param class_name class name of class which should be added to WidgetRegistry.
   /// \param limit amount of parallel instances allowed (-1 if infinite)
   virtual void AddWidgetToPool(const QString& class_name, int limit=-1);
@@ -75,7 +75,7 @@ public:
   /// \param is_hidden marks if the class should be displayed in the gui. Default the widget will be shown.
   void AddWidget(PanelPosition pos, Widget* widget, bool is_hidden=false);
   /// \brief Display a Widget in a PanelBar
-  /// Same as \ref Panels::AddWidget(PanelPosition pos, Widget* widget, bool is_hidden)
+  /// Same as \ref PanelManager::AddWidget(PanelPosition pos, Widget* widget, bool is_hidden)
   /// \param pos Indicates which PanelBar is affected
   /// \param class_name the class_name of the widget you would like to add.
   /// \param is_hidden marks if the class should be displayed in the gui. Default the widget will be shown.
@@ -87,7 +87,7 @@ public:
   /// \param w1 The widget which will be replaced
   /// \param w2 The new Widget which should replace the old one.
   void ReplaceWidget(Widget* w1, Widget* w2);
-  /// Same as \ref Panels::ReplaceWidget(Widget* w1, Widget* w2)
+  /// Same as \ref PanelManager::ReplaceWidget(Widget* w1, Widget* w2)
   /// \param w1 The widget which will be replaced
   /// \param class_name The class_name which from which a instance will be created and then replaces the old one.
   void ReplaceWidget(Widget* w1, QString& class_name);

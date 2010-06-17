@@ -29,9 +29,9 @@
 class QMainWindow;
 class QTextEdit;
 
-#include <ost/gui/panel_bar/panels.hh>
-#include <ost/gui/panel_bar/button_bar.hh>
-#include <ost/gui/panel_bar/panel_bar.hh>
+#include <ost/gui/panels/panel_manager.hh>
+#include <ost/gui/panels/button_bar.hh>
+#include <ost/gui/panels/panel_bar.hh>
 #include <ost/gui/module_config.hh>
 
 /*
@@ -60,9 +60,9 @@ public:
   /// \return The menu with the given name. If it does not exist, it will be created and returned.
   QMenu* GetMenu(const QString& name);
   
-  /// \brief The Panels class organizes all the widgets in the side panels.
-  /// \return The Panels instance which is used in this perspective.
-  Panels* GetPanels();
+  /// \brief The PanelManager class organizes all the widgets in the side panels.
+  /// \return The PanelManager instance which is used in this perspective.
+  PanelManager* GetPanels();
 
   /// \brief Returns the MainArea
   /// \return The main area which is used in this perspective.
@@ -94,7 +94,7 @@ private:
   QMenuBar*        menu_bar_;
   QMap<QString,QMenu*> menus_;
   MainArea*       main_area_;
-  Panels*         panels_;
+  PanelManager*   panels_;
   QWidget*        quick_access_bar_;
   QStatusBar*     status_bar_;
 };

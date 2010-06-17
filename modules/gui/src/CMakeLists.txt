@@ -1,8 +1,8 @@
 set(OST_GUI_PANEL_BAR_HEADERS
 button_bar.hh
 drop_box.hh
-panels.hh
 panel_bar.hh
+panel_manager.hh
 bottom_bar.hh
 button_box.hh
 event_button.hh
@@ -238,18 +238,18 @@ scene_selection.cc
 widget_geom_handler.cc
 file_loader.cc
 loader_manager.cc
-panel_bar/button_bar.cc
-panel_bar/drop_box.cc
-panel_bar/panel_bar.cc
-panel_bar/bottom_bar.cc
-panel_bar/button_box.cc
-panel_bar/event_button.cc
-panel_bar/panels.cc
-panel_bar/panel_widget_container.cc
-panel_bar/panel_bar_widget_holder.cc
-panel_bar/side_bar.cc
-panel_bar/splitter_panel_bar.cc
-panel_bar/tabbed_panel_bar.cc
+panels/button_bar.cc
+panels/drop_box.cc
+panels/panel_bar.cc
+panels/bottom_bar.cc
+panels/button_box.cc
+panels/event_button.cc
+panels/panel_manager.cc
+panels/panel_widget_container.cc
+panels/panel_bar_widget_holder.cc
+panels/side_bar.cc
+panels/splitter_panel_bar.cc
+panels/tabbed_panel_bar.cc
 tools/tool_option_group.cc
 tools/tool_options.cc
 tools/tool_option.cc
@@ -388,18 +388,18 @@ python_shell/state.hh
 python_shell/transition.hh
 python_shell/transition_guard.hh
 python_shell/output_redirector.hh
-panel_bar/button_bar.hh
-panel_bar/drop_box.hh
-panel_bar/panel_bar.hh
-panel_bar/panels.hh
-panel_bar/bottom_bar.hh
-panel_bar/button_box.hh
-panel_bar/event_button.hh
-panel_bar/panel_widget_container.hh
-panel_bar/panel_bar_widget_holder.hh
-panel_bar/side_bar.hh
-panel_bar/splitter_panel_bar.hh
-panel_bar/tabbed_panel_bar.hh
+panels/button_bar.hh
+panels/drop_box.hh
+panels/panel_bar.hh
+panels/panel_manager.hh
+panels/bottom_bar.hh
+panels/button_box.hh
+panels/event_button.hh
+panels/panel_widget_container.hh
+panels/panel_bar_widget_holder.hh
+panels/side_bar.hh
+panels/splitter_panel_bar.hh
+panels/tabbed_panel_bar.hh
 scene_win/context_menu.hh
 scene_win/current_selection_node.hh
 scene_win/custom_part_node.hh
@@ -475,7 +475,7 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
                ${OST_GUI_PLOT_VIEWER_HEADERS} IN_DIR plot_viewer
                ${OST_GUI_SEQUENCE_VIEWER_HEADERS} IN_DIR sequence_viewer
                ${OST_GUI_PYTHON_SHELL_HEADERS} IN_DIR python_shell
-               ${OST_GUI_PANEL_BAR_HEADERS} IN_DIR panel_bar
+               ${OST_GUI_PANEL_BAR_HEADERS} IN_DIR panels
                ${OST_GUI_SCENE_WIN_HEADERS} IN_DIR scene_win
                ${OST_GUI_INPUT_HEADERS}
                ${OST_GUI_DATA_VIEWER_HEADERS}

@@ -24,9 +24,6 @@
 
 #include "panel_widget_container.hh"
 #include "splitter_panel_bar.hh"
-#include <iostream>
-
-#include <iostream>
 
 namespace ost { namespace gui {
 

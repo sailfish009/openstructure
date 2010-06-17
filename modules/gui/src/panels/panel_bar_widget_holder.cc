@@ -37,9 +37,9 @@
 #include <ost/gui/widget_registry.hh>
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
-#include <ost/gui/panel_bar/panel_bar.hh>
-#include <ost/gui/panel_bar/panels.hh>
 
+#include "panel_manager.hh"
+#include "panel_bar.hh"
 #include "panel_bar_widget_holder.hh"
 
 /*
@@ -134,7 +134,7 @@ void PanelBarWidgetHolder::SetWidget(Widget* widget)
 
 void PanelBarWidgetHolder::LabelClick(bool checked)
 {
-  Panels* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
+  PanelManager* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
   QMenu* m = panels->GetAvailableWidgetsMenu();
   if (QAction* a=m->exec(toolbar_->mapToGlobal(QPoint(0, 0)))) {
     QString new_class_name=a->data().toString();
@@ -172,14 +172,14 @@ void PanelBarWidgetHolder::mouseMoveEvent(QMouseEvent *event)
 
   drag->setMimeData(mime_data);
   drag->exec();
-  Panels* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
+  PanelManager* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
   panels->EndDrag();
 }
 
 void PanelBarWidgetHolder::dragEnterEvent(QDragEnterEvent *event)
 {
   if (event->mimeData()->hasFormat("OpenStructure/Widget")){
-    Panels* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
+    PanelManager* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
     panels->StartDrag();
     event->acceptProposedAction();
   }

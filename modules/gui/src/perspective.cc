@@ -54,7 +54,7 @@ Perspective::Perspective(QMainWindow* parent):
 
   status_bar_ = new QStatusBar(main_area_);
 
-  panels_ = new Panels(main_area_);
+  panels_ = new PanelManager(main_area_);
   l->addWidget(panels_,1);
   this->SetupQuickAccessBar();
   l->addWidget(quick_access_bar_, 0);
@@ -115,7 +115,7 @@ QMenu* Perspective::GetMenu(const QString& name)
   return menu;
 }
 
-Panels* Perspective::GetPanels()
+PanelManager* Perspective::GetPanels()
 {
   return panels_;
 }

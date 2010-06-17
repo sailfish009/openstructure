@@ -20,14 +20,10 @@
 
 #include <boost/python.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+
 using namespace boost::python;
 
 #include <ost/gui/widget.hh>
-#include <ost/gui/widget_registry.hh>
-#include <ost/gui/gosty_app.hh>
-#include <ost/gui/perspective.hh>
-#include <ost/gui/panel_bar/panels.hh>
 
 #include "sip_handler.hh"
 
