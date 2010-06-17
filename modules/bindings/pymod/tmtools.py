@@ -69,11 +69,15 @@ def _RunTmAlign(tmalign, tmp_dir):
   if platform.system() == "Windows":
     tmalign_path=settings.Locate('tmalign.exe', explicit_file_name=tmalign)
     command="\"%s\" %s %s" %(os.path.normpath(tmalign_path), model1_filename, model2_filename)
+    command=command+" > "+tmp_dir+"/tmalign_output"
   else:
     tmalign_path=settings.Locate('tmalign', explicit_file_name=tmalign)  
     command="%s '%s' '%s'" %(tmalign_path, model1_filename, model2_filename)
-  ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-  lines=ps.stdout.readlines()
+    command=command+" > "+tmp_dir+"/tmalign_output"
+  ps=subprocess.call(command, shell=True, stdout=subprocess.PIPE)
+  tmalign_f=open(tmp_dir+"/tmalign_output","r")
+  lines=tmalign_f.readlines()
+  tmalign_f.close()
   if (len(lines))<22:
     raise RuntimeError("tmalign superposition failed")
   return _ParseTmAlign(lines)
@@ -113,11 +117,15 @@ def _RunTmScore(tmscore, tmp_dir):
   if platform.system() == "Windows":
     tmscore_path=settings.Locate('tmscore.exe', explicit_file_name=tmscore)
     command="\"%s\" %s %s" %(os.path.normpath(tmscore_path), model1_filename, model2_filename)
+    command=command+" > "+tmp_dir+"/tmscore_output"
   else:
     tmscore_path=settings.Locate('tmscore', explicit_file_name=tmscore)
     command="%s '%s' '%s'" %(tmscore_path, model1_filename, model2_filename)
+    command=command+" > "+tmp_dir+"/tmscore_output"
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-  lines=ps.stdout.readlines()
+  tmscore_f=open(tmp_dir+"/tmscore_output","r")
+  lines=tmscore_f.readlines()
+  tmscore_f.close()
   if (len(lines))<22:
     raise RuntimeError("tmscore superposition failed")
   return _ParseTmScore(lines)
