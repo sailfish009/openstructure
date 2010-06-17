@@ -28,6 +28,7 @@ Modules
   seq/base/seq
   base/base
   io/io
+  gui/gui
 
 Extending OpenStructure
 --------------------------------------------------------------------------------
