@@ -114,6 +114,20 @@ With `<ctrl + f>` you can show or hide the search bar which help you finding par
 The SequenceViewer class represents a graphical sequence viewer. To see the sequences of a :class:`gfx.Entity`, you
 can use the :meth:`AddEntity` method. If you want to load an alignment, the :meth:`AddAlignment` method can be used.
 
+  .. method:: AddEntity(entity)
+        
+    Add :class:`gfx.Entity` to SequenceViewer.  
+    
+    :param entity: an entity instance 
+    :type  entity: :class:`gfx.Entity`
+
+  .. method:: RemoveEntity(entity)
+  
+    Remove entity from sequence viewer.
+    
+    :param entity: an entity instance
+    :type  entity: :class:`gfx.Entity`
+
   .. method:: AddAlignment(alignment)
         
     Add :class:`seq.AlignmentHandle` to SequenceViewer.  
@@ -123,7 +137,7 @@ can use the :meth:`AddEntity` method. If you want to load an alignment, the :met
 
   .. method:: RemoveAlignment(alignment)
   
-    Remove alignment from sequenceviewer.
+    Remove alignment from sequence viewer.
     
     :param alignment: an alignment instance
     :type  alignment: :class:`seq.AlignmentHandle`
