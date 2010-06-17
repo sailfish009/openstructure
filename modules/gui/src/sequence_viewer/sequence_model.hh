@@ -47,13 +47,13 @@ public:
   SequenceModel(QObject *parent = 0);
 
   void InsertAlignment(const seq::AlignmentHandle& alignment);
-  void InsertGfxEntity(gfx::EntityP& entity);
+  void InsertGfxEntity(const gfx::EntityP& entity);
   void InsertChain(QString& name, mol::ChainView& view);
   void InsertSequence(QString& name, seq::SequenceHandle& seq);
   void InsertSequences(const QList<QString>& names, seq::SequenceList& list);
 
   void RemoveAlignment(const seq::AlignmentHandle& alignment);
-  void RemoveGfxEntity(gfx::EntityP& entity);
+  void RemoveGfxEntity(const gfx::EntityP& entity);
 
   QModelIndexList GetModelIndexes(gfx::EntityP& entity, const mol::EntityView& view);
   QModelIndexList GetModelIndexes(const QString& subject, const QString& sequence_name=QString());

@@ -50,7 +50,7 @@ public:
   SequenceViewObject(seq::SequenceList& sequences, const QList<QString>& names, QObject* parent = 0);
   SequenceViewObject(seq::SequenceHandle& sequence, const QString& name, QObject* parent = 0);
   SequenceViewObject(mol::ChainView& chain, const QString& name, QObject* parent = 0);
-  SequenceViewObject(gfx::EntityP& entity, QObject* parent = 0);
+  SequenceViewObject(const gfx::EntityP& entity, QObject* parent = 0);
   SequenceViewObject(QObject* parent = 0);
 
   void Init();

@@ -166,20 +166,30 @@ void SequenceViewer::InitActions()
   connect(menu_action, SIGNAL(triggered(bool)), this, SLOT(DisplayMenu()));
 }
 
+void SequenceViewer::AddEntity(const gfx::EntityP& entity)
+{
+  model_->InsertGfxEntity(entity);
+  seq_table_view_->resizeColumnsToContents();
+  seq_table_view_->resizeRowsToContents();
+  this->UpdateSearchBar();
+}
+
+void SequenceViewer::RemoveEntity(const gfx::EntityP& entity)
+{
+  model_->RemoveGfxEntity(entity);
+}
+
 void SequenceViewer::NodeAdded(const gfx::GfxNodeP& n)
 {
   if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(n)) {
-    model_->InsertGfxEntity(o);
-    seq_table_view_->resizeColumnsToContents();
-    seq_table_view_->resizeRowsToContents();
+    this->AddEntity(o);
   }
-  this->UpdateSearchBar();
 }
 
 void SequenceViewer::NodeRemoved(const gfx::GfxNodeP& node)
 {
   if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(node)) {
-    model_->RemoveGfxEntity(o);
+    this->RemoveEntity(o);
   }
 }
 

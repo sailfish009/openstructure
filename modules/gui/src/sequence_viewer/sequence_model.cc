@@ -95,7 +95,7 @@ void SequenceModel::InsertSequences(const QList<QString>& names, seq::SequenceLi
   this->endInsertRows();
 }
 
-void SequenceModel::InsertGfxEntity(gfx::EntityP& ent){
+void SequenceModel::InsertGfxEntity(const gfx::EntityP& ent){
   mol::EntityView view=ent->GetView();
   int size = view.GetChainList().size();
   int cols = this->columnCount();
@@ -111,7 +111,7 @@ void SequenceModel::InsertGfxEntity(gfx::EntityP& ent){
   this->endInsertRows();
 }
 
-void SequenceModel::RemoveGfxEntity(gfx::EntityP& entity){
+void SequenceModel::RemoveGfxEntity(const gfx::EntityP& entity){
   if(SequenceViewObject* obj = this->GetItem(entity)){
     int index = this->GetGlobalRow(obj,0);
     this->beginRemoveRows(QModelIndex(),index,index+obj->GetRowCount()-1);

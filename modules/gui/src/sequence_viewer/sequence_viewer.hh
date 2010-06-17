@@ -49,9 +49,10 @@ public:
   SequenceViewer(bool stand_alone=true, QWidget* parent=NULL);
   ~SequenceViewer();
 
-  virtual void NodeAdded(const gfx::GfxNodeP& node);
-  virtual void NodeRemoved(const gfx::GfxNodeP& node);
   virtual void SelectionChanged(const gfx::GfxObjP& o, const mol::EntityView& view);
+
+  virtual void AddEntity(const gfx::EntityP& entity);
+  virtual void RemoveEntity(const gfx::EntityP& entity);
 
   virtual void AddAlignment(const seq::AlignmentHandle& alignment);
   virtual void RemoveAlignment(const seq::AlignmentHandle& alignment);
@@ -78,6 +79,9 @@ public slots:
   void OnSearchBarUpdate(const QString&, bool, const QString&);
 
 private:
+  virtual void NodeAdded(const gfx::GfxNodeP& node);
+  virtual void NodeRemoved(const gfx::GfxNodeP& node);
+
   void InitActions();
   void InitView();
   void InitSearchBar();

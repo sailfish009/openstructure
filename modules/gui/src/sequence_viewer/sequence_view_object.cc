@@ -70,7 +70,7 @@ SequenceViewObject::SequenceViewObject(mol::ChainView& chain, const QString& nam
   this->SetDisplayMode(properties_mode);
 }
 
-SequenceViewObject::SequenceViewObject(gfx::EntityP& entity, QObject* parent): BaseViewObject(parent), entity_(entity)
+SequenceViewObject::SequenceViewObject(const gfx::EntityP& entity, QObject* parent): BaseViewObject(parent), entity_(entity)
 {
   this->Init();
   mol::EntityView view =entity->GetView();
