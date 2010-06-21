@@ -23,7 +23,6 @@
 #include <iostream>
 
 #include <QApplication>
-#include <QDebug>
 #include <QFontMetrics>
 #include <QClipboard>
 #include <QPainter>
@@ -247,6 +246,40 @@ void PythonShellWidget::setup_state_machine_()
                                                  true,
                                                  new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
   single_line->addTransition(tr3);
+  KeyEventTransition* keypad_enter1=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           Qt::NoModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  single_line->addTransition(keypad_enter1);
+  connect(keypad_enter1,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter2=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           Qt::ShiftModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  single_line->addTransition(keypad_enter2);
+  connect(keypad_enter2,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter3=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           Qt::MetaModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  single_line->addTransition(keypad_enter3);
+  connect(keypad_enter3,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                    Qt::Key_Return,
+                                                    Qt::ControlModifier,
+                                                    multiline_active_state_,
+                                                    false));
+  // just to make OSX happy we also add the transitions with Meta (-> Ctrl o OSX)
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                    Qt::Key_Return,
+                                                    Qt::MetaModifier,
+                                                    multiline_active_state_,
+                                                    false));
+                                                 
   connect(tr3,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
   single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
   single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
@@ -271,6 +304,38 @@ void PythonShellWidget::setup_state_machine_()
   multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::ControlModifier,multiline_active_state_));
   multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
   multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
+  KeyEventTransition* keypad_enter4=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           Qt::NoModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multi_line_inactive->addTransition(keypad_enter4);
+  connect(keypad_enter4,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter5=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           Qt::ShiftModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multi_line_inactive->addTransition(keypad_enter5);
+  connect(keypad_enter5,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter6=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           Qt::MetaModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multi_line_inactive->addTransition(keypad_enter6);
+  connect(keypad_enter6,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                            Qt::Key_Return,
+                                                            Qt::ControlModifier,
+                                                            multiline_active_state_,
+                                                            false));
+  // just to make OSX happy we also add the transitions with Meta (-> Ctrl o OSX)
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                            Qt::Key_Return,
+                                                            Qt::MetaModifier,
+                                                            multiline_active_state_,
+                                                            false));
 
   KeyEventTransition* tr7=new KeyEventTransition(QEvent::KeyPress,
                                                  Qt::Key_Return,
@@ -291,6 +356,27 @@ void PythonShellWidget::setup_state_machine_()
   multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier,multi_line_inactive));
   multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_up));
   multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_down));
+  KeyEventTransition* keypad_enter7=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           Qt::NoModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multiline_active_state_->addTransition(keypad_enter7);
+  connect(keypad_enter7,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter8=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           Qt::ShiftModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multiline_active_state_->addTransition(keypad_enter8);
+  connect(keypad_enter8,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter9=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           Qt::MetaModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multiline_active_state_->addTransition(keypad_enter9);
+  connect(keypad_enter9,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
 
   history_up->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
   history_up->addTransition(new AutomaticTransition(single_line,new HistoryGuard(&history_,EDITMODE_SINGLELINE)));
@@ -330,6 +416,10 @@ void PythonShellWidget::OnMixedToReadwrite()
 
 }
 
+void PythonShellWidget::OnKeypadEnterTransition()
+{
+  insertPlainText(QString(QChar::LineSeparator));
+}
 void PythonShellWidget::OnEnterTransition()
 {
   QTextCursor cursor=textCursor();
@@ -382,13 +472,13 @@ void PythonShellWidget::OnExecuteStateEntered()
   set_block_type_(block_edit_start_,textCursor().block(),BLOCKTYPE_CODE);
   insertPlainText(QString(QChar::ParagraphSeparator));
   QString command=GetCommand();
-  unsigned int id=PythonInterpreter::Instance().RunCommand(command);
-  output_blocks_.insert(id,textCursor().block());
-  command=command.trimmed();
-  if (command.size()>0) {
-    history_.AppendCommand(command,get_block_edit_mode_());
+  QString command_trimmed=command.trimmed();
+  if (command_trimmed.size()>0) {
+    unsigned int id=PythonInterpreter::Instance().RunCommand(command);
+    output_blocks_.insert(id,textCursor().block());
+    history_.AppendCommand(command_trimmed,get_block_edit_mode_());
+    insertPlainText(QString(QChar::ParagraphSeparator));
   }
-  insertPlainText(QString(QChar::ParagraphSeparator));
   block_edit_start_=textCursor().block();
 
 }
@@ -439,11 +529,12 @@ void  PythonShellWidget::InsertCompletion(const QString& completion)
 }
 void  PythonShellWidget::InsertPathCompletion(const QString& completion)
 {
-  InsertCompletion(completion);
+  QString path=completion;
   // append dir separator for directories if none present (Windows adds it already for the inline completion)
-  if(QFileInfo(completion).isDir() && ! completion.endsWith(QDir::separator())){
-    textCursor().insertText(QDir::separator());
+  if(QFileInfo(path).isDir() && ! completion.endsWith(QDir::separator())){
+    path+=QDir::separator();
   }
+  InsertCompletion(QDir::toNativeSeparators(path));
 }
 
 

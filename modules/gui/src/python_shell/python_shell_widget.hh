@@ -81,6 +81,7 @@ public slots:
   void OnHistoryDownStateEntered();
   void OnExecuteStateEntered();
   void OnEnterTransition();
+  void OnKeypadEnterTransition();
   void OnReadonlyEntered();
   void OnReadwriteEntered();
   void OnMixedToReadwrite();
