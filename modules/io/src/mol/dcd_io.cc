@@ -78,7 +78,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   bool gap_flag = true;
 
   boost::filesystem::path trj_f(trj_fn);
-  boost::filesystem::ifstream ff(trj_f);
+  boost::filesystem::ifstream ff(trj_f, std::ios::binary);
   
   DCDHeader header;
   char dummy[4];
@@ -165,6 +165,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
     for(uint j=0;j<clist.size();++j) {
       clist[j].SetX(xlist[j]);
     }
+
     // y coord
     if(gap_flag) ff.read(dummy,sizeof(dummy));
     ff.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
@@ -173,6 +174,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
     for(uint j=0;j<clist.size();++j) {
       clist[j].SetY(xlist[j]);
     }
+
     // z coord
     if(gap_flag) ff.read(dummy,sizeof(dummy));
     ff.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
