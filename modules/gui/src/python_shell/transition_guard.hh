@@ -38,16 +38,21 @@ class EditPositionGuard : public TransitionGuard
 {
 public:
   enum FLAGS{
+    ALWAYSTRUE=0,
     SMALLER=1,
     EQUAL=2,
     BIGGER=4,
-    SELECTION=8
+    ANCHORSMALLER=8,
+    ANCHOREQUAL=16,
+    ANCHORBIGGER=32
   };
-    EditPositionGuard(PythonShellWidget* shell,int flags);
+    EditPositionGuard(PythonShellWidget* shell,int flags1, int flags2=ALWAYSTRUE);
     virtual bool check();
 protected:
+    virtual bool check_flag(int flag);
     PythonShellWidget* shell_;
-    int flags_;
+    int flags1_;
+    int flags2_;
 };
 
 class BlockStatusGuard : public TransitionGuard
@@ -59,6 +64,8 @@ protected:
     PythonShellWidget* shell_;
     int status_;
 };
+
+
 
 }} //ns
 

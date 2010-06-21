@@ -93,6 +93,8 @@ void PythonInterpreterWorker::run_command_(std::pair<unsigned int,QString> pair)
     } else {
       bp::exec(bp::str(command.toStdString()),main_namespace_,main_namespace_);
     }
+    output_redirector_->Flush();
+    error_redirector_->Flush();
     emit Finished(pair.first,true);
     return;
   }catch(bp::error_already_set){
@@ -103,6 +105,8 @@ void PythonInterpreterWorker::run_command_(std::pair<unsigned int,QString> pair)
       PyErr_Print();
     }
   }
+  output_redirector_->Flush();
+  error_redirector_->Flush();
   emit Finished(pair.first,false);
   return;
 }

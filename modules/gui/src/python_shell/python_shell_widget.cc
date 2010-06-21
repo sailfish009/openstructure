@@ -115,27 +115,90 @@ PythonShellWidget::PythonShellWidget(QWidget* parent):
 void PythonShellWidget::setup_readonly_state_machine_()
 {
   State* readonly=new State;
+  State* mixed=new State;
+  readonly_machine_->addState(mixed);
   readonly_machine_->addState(readonly);
   readonly_machine_->addState(readwrite_state_);
-  readonly->addTransition((new SignalTransition(this,
+  readonly->addTransition(new SignalTransition(this,
                                                 SIGNAL(cursorPositionChanged()),
                                                 readwrite_state_,
-                                                new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER))));
-  readonly->addTransition((new KeyEventTransition(QEvent::KeyPress,
+                                                new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
+                                                                           EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
+  readonly->addTransition(new SignalTransition(this,
+                                                SIGNAL(cursorPositionChanged()),
+                                                mixed,
+                                                new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
+                                                                           EditPositionGuard::ANCHORSMALLER)));
+  readonly->addTransition(new SignalTransition(this,
+                                                SIGNAL(cursorPositionChanged()),
+                                                mixed,
+                                                new EditPositionGuard(this,EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER,
+                                                                           EditPositionGuard::SMALLER)));
+
+  readonly->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                  Qt::Key_Backspace,
+                                                  Qt::NoModifier,
+                                                  readwrite_state_,
+                                                  true));
+
+  readonly->addTransition(new KeyEventTransition(QEvent::KeyPress,
                                                   Qt::Key_Any,
                                                   Qt::NoModifier,
                                                   readwrite_state_,
-                                                  false)));
-  readwrite_state_->addTransition((new SignalTransition(this,
+                                                  false));
+
+  readwrite_state_->addTransition(new SignalTransition(this,
                                                       SIGNAL(cursorPositionChanged()),
                                                       readonly,
-                                                      new EditPositionGuard(this,EditPositionGuard::SMALLER))));
-  readwrite_state_->addTransition((new KeyEventTransition(QEvent::KeyPress,
+                                                      new EditPositionGuard(this,EditPositionGuard::SMALLER | EditPositionGuard::EQUAL,
+                                                                                 EditPositionGuard::ANCHORSMALLER)));
+  readwrite_state_->addTransition(new SignalTransition(this,
+                                                      SIGNAL(cursorPositionChanged()),
+                                                      readonly,
+                                                      new EditPositionGuard(this,EditPositionGuard::ANCHORSMALLER | EditPositionGuard::ANCHOREQUAL,
+                                                                                 EditPositionGuard::SMALLER)));
+
+  readwrite_state_->addTransition(new SignalTransition(this,
+                                                        SIGNAL(cursorPositionChanged()),
+                                                        mixed,
+                                                        new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
+                                                                                   EditPositionGuard::ANCHORSMALLER)));
+  readwrite_state_->addTransition(new SignalTransition(this,
+                                                        SIGNAL(cursorPositionChanged()),
+                                                        mixed,
+                                                        new EditPositionGuard(this,EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER,
+                                                                                   EditPositionGuard::SMALLER)));
+
+  readwrite_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,
                                                          Qt::Key_Backspace,
                                                          Qt::NoModifier,
                                                          readwrite_state_,
                                                          true,
-                                                         new EditPositionGuard(this,EditPositionGuard::EQUAL|EditPositionGuard::SELECTION))));
+                                                         new EditPositionGuard(this,EditPositionGuard::EQUAL,
+                                                                                    EditPositionGuard::ANCHOREQUAL)));
+
+  mixed->addTransition(new SignalTransition(this,
+                                             SIGNAL(cursorPositionChanged()),
+                                             readwrite_state_,
+                                             new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
+                                                                        EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
+
+  KeyEventTransition* kt1=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Backspace,
+                                                 Qt::NoModifier,
+                                                 readwrite_state_,
+                                                 true);
+  mixed->addTransition(kt1);
+  connect(kt1,SIGNAL(triggered()),this,SLOT(OnMixedToReadwrite()));
+
+  KeyEventTransition* kt2=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Any,
+                                                 Qt::NoModifier,
+                                                 readwrite_state_,
+                                                 false);
+  mixed->addTransition(kt2);
+  connect(kt2,SIGNAL(triggered()),this,SLOT(OnMixedToReadwrite()));
+
   connect(readonly,SIGNAL(entered()),this,SLOT(OnReadonlyEntered()));
   connect(readwrite_state_,SIGNAL(entered()),this,SLOT(OnReadwriteEntered()));
   readonly_machine_->setInitialState(readwrite_state_);
@@ -252,6 +315,19 @@ void PythonShellWidget::OnReadwriteEntered()
     moveCursor(QTextCursor::End);
   }
   setReadOnly(false);
+}
+void PythonShellWidget::OnMixedToReadwrite()
+{
+  QTextCursor tc=textCursor();
+  if(tc.position()< GetEditStartBlock().position()){
+    tc.setPosition(GetEditStartBlock().position(),QTextCursor::KeepAnchor);
+    setTextCursor(tc);
+  }else{
+    tc.setPosition(GetEditStartBlock().position(),QTextCursor::MoveAnchor);
+    tc.setPosition(textCursor().position(),QTextCursor::KeepAnchor);
+    setTextCursor(tc);
+  }
+
 }
 
 void PythonShellWidget::OnEnterTransition()

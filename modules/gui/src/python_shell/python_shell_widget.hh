@@ -83,6 +83,7 @@ public slots:
   void OnEnterTransition();
   void OnReadonlyEntered();
   void OnReadwriteEntered();
+  void OnMixedToReadwrite();
 
 protected:
   virtual void mouseReleaseEvent (QMouseEvent* event );

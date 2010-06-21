@@ -28,18 +28,37 @@
 namespace ost { namespace gui {
 
 OutputRedirector::OutputRedirector():
- QObject()
+ QObject(),
+ buffer_(),
+ timer_()
 {
 }
 
 
 void OutputRedirector::Write( String const& str )
 {
-  //buffer_.append(str);
-  emit OnOutput(QString::fromStdString(str));
-
+  if(timer_.isValid()){
+    if(timer_.elapsed()>1000){
+      QString output = buffer_+QString::fromStdString(str);
+      buffer_="";
+      emit OnOutput(output);
+      timer_.restart();
+    }else{
+      buffer_+=QString::fromStdString(str);
+    }
+  }else{
+    buffer_+=QString::fromStdString(str);
+    timer_.start();
+  }
 }
-String  OutputRedirector::buffer_; 
+
+void OutputRedirector::Flush()
+{
+  timer_=QTime();
+  QString output = buffer_;
+  buffer_="";
+  emit OnOutput(output);
+}
 
 
 

@@ -26,6 +26,7 @@
   Author: Andreas Schenk
 */
 
+#include <QTime>
 #include <QString>
 #include <QObject>
 #include <ost/gui/module_config.hh>
@@ -38,10 +39,12 @@ Q_OBJECT
 public:
   OutputRedirector();
   void Write(const String& str);
+  void Flush();
 signals:
   void OnOutput(const QString& output);
 private:
-    static String  buffer_; 
+    QString  buffer_;
+    QTime timer_;
 };
 
 }}//ns
