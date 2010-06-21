@@ -316,11 +316,20 @@ Quat& Quat::operator*=(Real s)
 }
 
 Quat& Quat::operator*=(const Quat& q)
-{
-  w = this->w*q.w - this->x*q.x - this->y*q.y - this->z*q.z;
-  x = this->w*q.x + this->x*q.w + this->y*q.z - this->z*q.y;
-  y = this->w*q.y + this->y*q.w - this->x*q.z + this->z*q.x;
-  z = this->w*q.z + this->z*q.w + this->x*q.y - this->y*q.x;
+{  
+  Vec3 v00 (x,y,z);
+  Vec3 v10 (q.x,q.y,q.z);
+
+  Real w2=w*q.w-Dot(v00,v10);
+  Vec3 v2=Cross(v00,v10);
+  Vec3 v3=v10;  v3 *= w;
+  Vec3 v4=v00;  v4 *= q.w;
+  Vec3 v5=v2+v3+v4;
+  
+  w=w2;
+  x=v5[0];
+  y=v5[1];
+  z=v5[2];
   return *this;
 }
 
@@ -447,6 +456,7 @@ Vec3 Quat::Rotate(const Vec3& vec) const {
   Quat tmp(0.0, vec[0], vec[1], vec[2]);
   Quat conj=Conjugate(*this);
   Quat res=*this*tmp*conj;
+  std::cout << *this << "*" << tmp << "*" << conj << std::endl;
   return Vec3(res.x, res.y, res.z);
 }
 
