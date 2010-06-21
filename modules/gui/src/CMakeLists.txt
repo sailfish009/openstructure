@@ -387,7 +387,6 @@ python_shell/state_machine.hh
 python_shell/state.hh
 python_shell/transition.hh
 python_shell/transition_guard.hh
-python_shell/output_redirector.hh
 panels/button_bar.hh
 panels/drop_box.hh
 panels/panel_bar.hh
