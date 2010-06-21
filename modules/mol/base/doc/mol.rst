@@ -12,3 +12,4 @@ The mol module implement data structure to work with molecular datasets. At its 
   entity
   editors
   query
+  surface
