@@ -532,7 +532,7 @@ void  PythonShellWidget::InsertPathCompletion(const QString& completion)
   QString path=completion;
   // append dir separator for directories if none present (Windows adds it already for the inline completion)
   if(QFileInfo(path).isDir() && ! completion.endsWith(QDir::separator())){
-    path+=QDir::separator();
+    path+="/";
   }
   InsertCompletion(QDir::toNativeSeparators(path));
 }
@@ -645,9 +645,9 @@ void PythonShellWidget::Complete(bool inline_completion)
                       QTextCursor::MoveAnchor, sep);      
     }
     if (QDir(text).isAbsolute()) {
-      emit SetPathCompletionPrefix(text);
+      emit SetPathCompletionPrefix(QDir::fromNativeSeparators(text));
     } else {
-      emit SetPathCompletionPrefix(QDir::currentPath()+QDir::separator()+text);
+      emit SetPathCompletionPrefix(QDir::currentPath()+"/"+QDir::fromNativeSeparators(text));
     }
     emit RequestPathCompletion(cursorRect(cp), 
                                inline_completion);
