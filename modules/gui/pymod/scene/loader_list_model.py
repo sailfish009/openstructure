@@ -36,6 +36,8 @@ class LoaderListModel(QtCore.QAbstractListModel):
         self.AddLoaderToInfo(name, loader)
       self.emit(QtCore.SIGNAL("dataChanged"),model_index, end_index)
       gui.FileLoader.GetLoaderManager().AddRemoteSiteLoader(name, loader)
+      if(loader.IsDefault()):
+        gui.FileLoader.GetLoaderManager().SetDefaultRemoteSiteIdent(name)
       return True
     return False
   

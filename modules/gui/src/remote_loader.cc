@@ -102,7 +102,7 @@ void RemoteLoader::BuildMenu(String active_loader)
       QAction* action = new QAction(loader_ident,site_loader_menu_);
       action->setCheckable(true);
       site_actions_->addAction(action);
-      if(site_actions_->checkedAction()==NULL ||selected_site_loader_==loader_ident.toStdString() ){
+      if((site_actions_->checkedAction()==NULL && loader_ident == FileLoader::GetLoaderManager()->GetDefaultRemoteSiteIdent()) ||selected_site_loader_==loader_ident.toStdString() ){
         action->setChecked(true);
       }
       site_loader_menu_->addAction(action);

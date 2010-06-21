@@ -99,6 +99,19 @@ QMenu* LoaderManager::GetSiteMenu(){
   return site_menu_;
 }
 
+RemoteSiteLoader* LoaderManager::GetDefaultRemoteSiteLoader()
+{
+ return GetRemoteSiteLoader(GetDefaultRemoteSiteIdent());
+}
+
+QString LoaderManager::GetDefaultRemoteSiteIdent(){
+  return default_site_;
+}
+
+void LoaderManager::SetDefaultRemoteSiteIdent(const QString& ident){
+  default_site_ = ident;
+}
+
 LoaderManager::~LoaderManager(){}
 
 } }

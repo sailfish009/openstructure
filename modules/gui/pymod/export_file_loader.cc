@@ -68,6 +68,8 @@ void export_FileLoader()
     .def("GetSiteLoaderIdents", &LoaderManager::GetSiteLoaderIdents)
     .def("AddRemoteSiteLoader", &add_remote_site_loader)
     .def("RemoveRemoteSiteLoader", &LoaderManager::RemoveRemoteSiteLoader)
+    .def("SetDefaultRemoteSiteIdent", &LoaderManager::SetDefaultRemoteSiteIdent)
+    .def("GetDefaultRemoteSiteIdent", &LoaderManager::GetDefaultRemoteSiteIdent)
   ;
 
   class_<FileLoader, boost::noncopyable>("FileLoader", no_init)

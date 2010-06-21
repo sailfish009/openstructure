@@ -52,6 +52,9 @@ class BaseRemoteLoader(gui.RemoteSiteLoader):
   def IsImg(self):
     return False
     
+  def IsDefault(self):
+    return False
+
   def GetRemoteSiteName(self):
     pass  
   
@@ -83,13 +86,14 @@ class GenericLoader(BaseRemoteLoader):
   FILE_TYPE_ATTRIBUTE_NAME = "FileType"
   TMP_URL_ATTRIBUTE_NAME= "TmpUrl"
   IMG_ATTRIBUTE_NAME= "Img"
-  
-  def __init__(self, name, url, up_case, file_type, tmp_url=None, img=False):
+  DEFAULT_ATTRIBUTE_NAME= "Default"
+  def __init__(self, name, url, up_case, file_type, tmp_url=None, img=False, default=False):
     BaseRemoteLoader.__init__(self)
     self.name_ = QtCore.QString(name)
     self.url_ = QtCore.QString(url)
     self.up_case_ = up_case
     self.img_ = img
+    self.default_ = default
     if file_type is not None:
       self.file_type_ = QtCore.QString(file_type)
     else:
@@ -103,6 +107,9 @@ class GenericLoader(BaseRemoteLoader):
   def IsImg(self):
     return self.img_    
 
+  def IsDefault(self):
+    return self.default_
+  
   def GetRemoteSiteName(self):
     return self.name_
   
@@ -138,7 +145,7 @@ class GenericLoader(BaseRemoteLoader):
   
   def HandleError(self, message):
     messageBox =QtGui.QMessageBox(QtGui.QMessageBox.Warning,
-            "Error while Loading PDB from "+self.name_, "Could not download file ("+message+")!")
+            "Error while Loading file from "+self.name_, "Could not download file ("+message+")!")
     messageBox.exec_()
     
   def ToInfo(self,group):
@@ -152,6 +159,8 @@ class GenericLoader(BaseRemoteLoader):
       group.SetAttribute(GenericLoader.TMP_URL_ATTRIBUTE_NAME, str(self.tmp_url_))
     if self.img_ is not None:
       group.SetAttribute(GenericLoader.IMG_ATTRIBUTE_NAME, str(int(self.img_)))
+    if self.default_ is not None:
+      group.SetAttribute(GenericLoader.DEFAULT_ATTRIBUTE_NAME, str(int(self.default_)))
       
   @staticmethod
   def FromInfo(group):
@@ -161,6 +170,7 @@ class GenericLoader(BaseRemoteLoader):
     file_type = None
     tmp_url = None
     img = False
+    default = False
     
     if group.HasAttribute(GenericLoader.EXT_NAME_ATTRIBUTE_NAME):
       name = QtCore.QString(group.GetAttribute(GenericLoader.EXT_NAME_ATTRIBUTE_NAME))
@@ -179,5 +189,8 @@ class GenericLoader(BaseRemoteLoader):
     
     if group.HasAttribute(GenericLoader.IMG_ATTRIBUTE_NAME):
       img = bool(int(group.GetAttribute(GenericLoader.IMG_ATTRIBUTE_NAME)))
+      
+    if group.HasAttribute(GenericLoader.DEFAULT_ATTRIBUTE_NAME):
+      default = bool(int(group.GetAttribute(GenericLoader.DEFAULT_ATTRIBUTE_NAME)))
 
-    return GenericLoader(name, url, up_case, file_type, tmp_url, img)
+    return GenericLoader(name, url, up_case, file_type, tmp_url, img, default)
