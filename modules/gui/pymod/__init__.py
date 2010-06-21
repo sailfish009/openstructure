@@ -27,11 +27,11 @@ def _close_event_override_(event):
 def _set_data_override_(data):
   print "set data"
 
-def CreateDataViewer(ih,flag=True):
+def CreateDataViewer(ih,flag=False):
       viewer=GostyApp.Instance().CreateDataViewer(ih)
       if flag:
         viewer.image_=ih
-        sip_viewer=sip.warpinstance(viewer.GetSipHandle())
+        sip_viewer=viewer.qobject
         sip_viewer.closeEvent=_close_event_override_
         sip_viewer.setData=_set_data_override_
       return viewer
