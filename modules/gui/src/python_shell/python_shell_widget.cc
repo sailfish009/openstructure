@@ -464,6 +464,7 @@ void PythonShellWidget::AppendOutput(unsigned int id,const QString& output)
   verticalScrollBar()->triggerAction(QAbstractSlider::SliderToMaximum);
   ensureCursorVisible();
   repaint();
+  QApplication::processEvents();
 }
 
 void PythonShellWidget::AppendError(unsigned int id,const QString& output)
@@ -483,6 +484,7 @@ void PythonShellWidget::AppendError(unsigned int id,const QString& output)
   verticalScrollBar()->triggerAction(QAbstractSlider::SliderToMaximum);
   ensureCursorVisible();
   repaint();
+  QApplication::processEvents();
 }
 
 void PythonShellWidget::set_block_type_(const QTextBlock& start, const QTextBlock& end, BlockType type)

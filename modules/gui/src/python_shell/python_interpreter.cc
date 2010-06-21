@@ -34,7 +34,6 @@
 #include <QFile>
 #include <QDebug>
 #include <QFile>
-#include <QApplication>
 #include <QStringList>
 #include <ost/log.hh>
 
