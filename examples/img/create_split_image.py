@@ -42,4 +42,5 @@ else:
 
 result=CreateSplitImage(imagelist)
 v_result=gui.CreateDataViewer(result)
-io.SaveImage(result,sys.argv[-1])
+main_area=gui.GostyApp.Instance().perspective.main_area
+main_area.AddWidget("Split Image", v_result)

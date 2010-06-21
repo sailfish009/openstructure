@@ -22,4 +22,5 @@ for pixel in ex_it:
   phase_diff=phase1-phase2
   diff_image.SetReal(pixel,180.0*float(phase_diff)/math.pi)
 v=gui.CreateDataViewer(diff_image)
-v.SetName("Phase difference (in degrees)")
+main_area=gui.GostyApp.Instance().perspective.main_area
+main_area.AddWidget("Phase difference (in degrees)", v)

@@ -39,9 +39,5 @@ for y in range (start_y,end_y+1):
 filter=ost.img.alg.GaussianLowPassFilter(threshold)
 image.ApplyIP(filter)
 
-# Image is saved
-if len(sys.argv)==2:
-  io.SaveImage(image,sys.argv[1])
-
 # Viewer is launched to show the result
 v=gui.CreateDataViewer(image)
