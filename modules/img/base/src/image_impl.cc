@@ -29,5 +29,4 @@ ImageImpl CreateImageImpl(const Extent& e, DataType type, DataDomain dom)
   return ImageImpl(new ImageStateBasePtr(CreateState(e,type,dom)));
 }
 
-
 }} // ns
