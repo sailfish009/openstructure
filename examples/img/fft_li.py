@@ -1,7 +1,7 @@
 import sys
 import ost.img.alg
 if len(sys.argv)<2:
-images=io.LoadImageList(['square.png'])  
+  images=io.LoadImageList(['square.png'])  
 else:
   images=io.LoadImageList(sys.argv[1:])
 viewers=[]
