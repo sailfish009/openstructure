@@ -19,7 +19,7 @@ The Handle Classes
 .. class:: EntityHandle
 
   The entity class represents a molecular structure. Such a structure is in
-  general made up of one or more linear chains of residues, which in turn are
+  general made up of one or more chains of residues, which in turn are
   formed by one or more atoms.
 
   The interface of entities is tailored to biological macromolecules, but this
