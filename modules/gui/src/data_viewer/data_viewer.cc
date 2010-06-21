@@ -72,7 +72,7 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   lastmouse_()
 {
   connect(ov_manager_gui_,SIGNAL(SettingsChanged()),this,SLOT(UpdateView()));
-  setWindowTitle("GIPLT Viewer");
+  setWindowTitle("OpenStructure Data Viewer");
   build(data);
 }
 
