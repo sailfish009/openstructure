@@ -1,4 +1,4 @@
-:mod:`~ost.img.alg` - Image Processing Algorithms
+:mod:`img.alg <ost.img.alg>` - Image Processing Algorithms
 ================================================================================
 
 .. module:: ost.img.alg
@@ -7,8 +7,16 @@
 Applying algorithms
 -------------------
 
-While image properties are usually manipulated using method of the :class:`~ost.img.ImageHandle` class, their data content
-is manipulated using image algorithms. Image algorithms are objects. Each of them is a class, and its methods are used to handle the algorithm parameters. Applying an algorithm to an image is then conceptually a two-step process. First, an instance of an algorithm class is created, yielding an algorithm object. In a second step, the algorithm object is applied to an image. An algorithm can be applied in-place (using the :meth:`~ßost.img.ImageHandle.Apply` method), modifying the image. or out-of-place, (using :meth:`~ost.img.ImageHandle.ApplyIP` ), leaving the original image untouched, and returning the result as a new image. 
+While image properties are usually manipulated using method of the 
+:class:`~ost.img.ImageHandle` class, their data content is manipulated using 
+image algorithms. Image algorithms are objects. Each of them is a class, and its 
+methods are used to handle the algorithm parameters. Applying an algorithm to an 
+image is then conceptually a two-step process. First, an instance of an 
+algorithm class is created, yielding an algorithm object. In a second step, the 
+algorithm object is applied to an image. An algorithm can be applied in-place 
+(using the :meth:`~ost.img.ImageHandle.Apply` method), modifying the image, or 
+out-of-place, (using :meth:`~ost.img.ImageHandle.ApplyIP` ), leaving the original image 
+untouched, and returning the result as a new image. 
 
 Here is an example. All the algorithms used in the following are described in the :ref:`algorithms` section.
 
@@ -19,14 +27,19 @@ Here is an example. All the algorithms used in the following are described in th
   # applies algorithm object in place, overwriting the image
   im.ApplyIP( rand_alg )
 
-Sometimes, there is no need to create a permanent instance of an algorithm object. A temporary object enough:
+Sometimes, there is no need to create a permanent instance of an algorithm 
+object. A temporary object enough:
 
 .. code-block:: python
 
   # applies temporary algorithm object in-place
   im.ApplyIP( img.alg.GaussianFilter(4.0) )
 
-When used this way, the algorithm class will cease to exist as soon as the algorithm is applied. However, some algorithm are stateful and store information. One good example is the Stat algorithm, which does not modify the image when applied, but change its internal state to store information extracted from the image, which can be recovered later. For example:
+When used this way, the algorithm class will cease to exist as soon as the 
+algorithm is applied. However, some algorithm are stateful and store 
+information. One good example is the :class:`Stat` algorithm, which does not
+modify the image when applied, but change its internal state to store 
+information extracted from the image, which can be recovered later. For example:
 
 .. code-block:: python
 
@@ -41,7 +54,11 @@ It is important to remember that when the algorithms ceases to exist, all inform
 Fourier Transforming Images
 ----------------------------
 
-An image can be Fourier-transformed using either the FFT algorithm or the DFT algorithm. The difference between the two is that the DFT algorithm honors the :ref:`spatial-origin` of the image, and applies the corresponding phase shift in Fourier space. The FFT does not follow this behavior. 
+An image can be Fourier-transformed using either the :class:`FFT` algorithm or 
+the :class:`DFT` algorithm. The difference between the two is that the 
+:class:`DFT` algorithm honors the :ref:`spatial-origin` of the image, and 
+applies the corresponding phase shift in Fourier space. The :class:`FFT` does 
+not follow this behavior. 
 
 .. code-block:: python
 
@@ -52,23 +69,27 @@ An image can be Fourier-transformed using either the FFT algorithm or the DFT al
   # back-transform
   im2 = im_ft.Apply(dft) 
 
-The FFT and DFT algorithms do not require a direction to be given (forward or back transform). This is implicitly determined by the current :ref:`data-domain` of the image being transformed. The following rules apply. 
+The :class:`FFT` and :class:`DFT` algorithms do not require a direction to be 
+given (forward or back transform). This is implicitly determined by the current 
+:ref:`data-domain` of the image being transformed. The following rules apply. 
 
-* SPATIAL -> HALF_FREQUENCY
-* HALF_FREQUENCY -> SPATIAL
-* FREQUENCY -> COMPLEX_SPATIAL
-* COMPLEX_SPATIAL -> FREQUENCY
+* :obj:`SPATIAL` -> :obj:`HALF_FREQUENCY`
+* :obj:`HALF_FREQUENCY` -> :obj:`SPATIAL`
+* :obj:`FREQUENCY` -> :obj:`COMPLEX_SPATIAL`
+* :obj:`COMPLEX_SPATIAL` -> :obj:`FREQUENCY`
 
 .. _filters:
 
 Filters
 -------
 
-OpenStructure makes several image filters available. Most of them are Fourier space filters, others are real space ones.
-However, since the :class:`ost.img.ImagerHandle` class is aware of its own :ref:`data-domain`, the user does not need to
-convert the image to Fourier space or to real space. Irrespective of which domain the filter applies to, OpenStructure 
-will internally convert the image to the appropriate domain, apply the filter, and then return the image to its original 
-conditions.
+OpenStructure makes several image filters available. Most of them are Fourier 
+space filters, others are real space ones. However, since the 
+:class:`~ost.img.ImagerHandle` class is aware of its own :ref:`data-domain`, 
+the user does not need to convert the image to Fourier space or to real space. 
+Irrespective of which domain the filter applies to, OpenStructure  will 
+internally convert the image to the appropriate domain, apply the filter, and 
+then return the image to its original conditions.
 
 The following filters are available (their are described in the :ref:`algorithms` section below)
 
@@ -98,17 +119,19 @@ most important ones.
 
 .. class:: DFT()
 
-   This algorithm performs a Fourier Transform of the image, honoring its :ref:`spatial-origin`, thus
-   applying the corresponding phase shift in Fourier space.
+   This algorithm performs a Fourier Transform of the image, honoring its 
+   :ref:`spatial-origin`, thus applying the corresponding phase shift in Fourier 
+   space.
 
 .. class:: DiscreteShrink(block_size)
 
    The algorithm performs a scaling of the original image by merging adjacent 
-   blocks of pixels. The block size is passed in the constructor in the form of a :class:`~ost.img.Size`
-   but can be changed later using the relevant method. The :class:`~ost.img.Size` and the :class:`~ost.img.Extent` 
-   of the image are changed when the algorithm is applied. The :ref:`pixel-sampling` of the image is also adjusted 
-   according to the scaling, so that the size of the image in the absolute reference system used by
-   OpenStructure stays constant.
+   blocks of pixels. The block size is passed in the constructor in the form of 
+   a :class:`~ost.img.Size` but can be changed later using the relevant method. 
+   The :class:`~ost.img.Size` and the :class:`~ost.img.Extent` of the image are 
+   changed when the algorithm is applied. The :ref:`pixel-sampling` of the image 
+   is also adjusted according to the scaling, so that the size of the image in 
+   the absolute reference system used by OpenStructure stays constant.
    
    :param block_size: Size of the blocks to be merged
    :type block_size: :class:`~ost.img.Size`
@@ -128,7 +151,8 @@ most important ones.
  
 .. class:: FFT()
 
-    This algorithm performs a Fourier Transform of the image, without honoring its :ref:`spatial-origin` (See :class:`DFT`)
+    This algorithm performs a Fourier Transform of the image, without honoring 
+    its :ref:`spatial-origin` (See :class:`DFT`)
 	
 .. class:: LowPassFilter(cutoff=1.0)
 
@@ -445,13 +469,17 @@ most important ones.
 	   :param q_param: Filter's Q parameter
 	   :type  q_param: float			
 
-.. class:: Histogram(bins,minimum,maximum)
+.. class:: Histogram(bins, minimum, maximum)
 
-   This algorithm performs an histogram analysis of the image. The minimum and maximum pixel values of the histogram
-   representation must be provided when the algorithm object is created, as well as the number of bins in the histogram.
-   Bins are assumed to be evenly distributed and minimum and maximum values for each bin are automatically computed.
-   When the algorithm is applied to an image, the analysis is carried out. A python 'list' object containing in sequence
-   the pixel counts for all the bins can the be recovered from the algorithm object.
+   This algorithm performs an histogram analysis of the image. The minimum and 
+   maximum pixel values of the histogram representation must be provided when 
+   the algorithm object is created, as well as the number of bins in the 
+   histogram. Bins are equally spaced and minimum and maximum values for each 
+   bin are automatically computed.
+   
+   When the algorithm is applied to an image, the analysis is carried out. A 
+   python 'list' object containing in sequence the pixel counts for all the bins 
+   can the be recovered from the algorithm object.
 
    :param bins: Number of bins in the histogram
    :type  bins: int
