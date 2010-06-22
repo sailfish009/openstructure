@@ -41,3 +41,5 @@ image.ApplyIP(filter)
 
 # Viewer is launched to show the result
 v=gui.CreateDataViewer(image)
+main_area=gui.GostyApp.Instance().perspective.main_area
+main_area.AddWidget("Modulated Image", v)
