@@ -7,12 +7,24 @@ Structure File Formats
 The following file formats are supported by :func:`~ost.io.LoadEntity`. 
 
 
-  
+
+CRD - CARD format file used by CHARMM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This trajectory file format is used by the CHARMM program suite (Molecular Modelling).
+*Recognized File Extensions*
+  crd
+
+MAE - Maestro coordinate file format (used by Schroedinger Inc.)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File format by the popular Maestro package.
+*Recognized File Extensions*
+  mae
+
 PDB - Brookhaven PDB File
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Fine grained control over PDB file import is available via the 
-:func:`~ost.io.LoadPDB` function. The PDB importer support loading gzipped PDB 
-files. gzipped PDB files are detected by the .gz file extension.
+:func:`~ost.io.LoadPDB` function. The PDB importer supports loading gzipped PDB 
+files, which are auto-detected by the .gz file extension.
 
 *Recognized File Extensions*
   ent, pdb, ent.gz, pdb.gz
@@ -28,12 +40,6 @@ PQR
 
 *Format Name*
   pqr
-
-CRD - CARD format file used by CHARMM
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-*Recognized File Extensions*
-  crd
   
 SDF
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

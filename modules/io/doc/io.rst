@@ -2,12 +2,9 @@
 ================================================================================
 
 .. module:: ost.io
-  :synopsis: Input and output of sequences, structures and density maps
+  :synopsis: Input and output of sequences, alignments, structures, images and density maps.
 
-The io module deals with input and output of :class:`entities 
-<ost.mol.EntityHandle>`, :class:`alignments <ost.seq.AlignmentHandle>`, and
-:class:`images <ost.img.ImageHandle>`. Importers for common file formats such 
-as PDB, SDF, FASTA, CLUSTAL W, DX and CHARMM trajectory files are available. 
+The io module deals with input and output of :class:`entities <ost.mol.EntityHandle>`, :class:`alignments <ost.seq.AlignmentHandle>`, :class:`sequences <ost.seq.SequenceHandle>`, :class:`images <ost.img.ImageHandle>`. Importers for common file formats containing molecules such as PDB, SDF and CHARMM trajectory files are available. Sequence and alignment file formats such as FASTA and CLUSTALW are supported as well, alongside various image data (e.g. png, dm3) and density map files (e.g. CCP4, MRC). 
 
 Molecular Structures
 --------------------------------------------------------------------------------
@@ -101,3 +98,80 @@ file:
 .. autofunction:: ost.io.SavePDB
 
   
+Sequences and Alignments
+--------------------------------------------------------------------------------
+
+Loading sequence or alignment files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. function:: LoadSequence(filename, format='auto')
+
+  Load sequence data from disk. If format is set to 'auto', the function guesses the 
+  filetype based on the extension of the file. Files ending in '.fasta', '.aln' will automatically be loaded.
+  For files with non-standard extensions, the format can be set explicitly specifying 
+  the 'format' parameter. 
+  
+  .. code-block:: python
+
+    # recognizes FASTA file by file extension
+    myseq=io.LoadSequence('seq.fasta')
+    # for obtaining a SequenceList
+    seqlist=io.LoadSequenceList('seqs.fasta')
+    # or for multiple aligned fasta files use
+    aln=io.LoadAlignment('algnm.aln',format="clustal")
+    
+For a list of file formats supported by :func:`LoadSequence` see :doc:`formats`.
+  
+  :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
+      is not recognized or the file format can not be detected based on the 
+      file extension
+      
+      :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
+      inexistent file
+
+.. function:: LoadSequenceList(filename, format='auto')
+
+  For a desription of how to use :func:`LoadSequenceList` please refer to :func:`LoadSequence`.
+  For a list of file formats supported by :func:`LoadSequenceList` see :doc:`formats`.
+
+.. function:: LoadAlignment(filename, format='auto')
+
+  For a desription of how to use :func:`LoadAlignment` please refer to :func:`LoadSequence`.
+  For a list of file formats supported by :func:`LoadAlignment` see :doc:`formats`.
+      
+Saving Sequence Data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. function:: SaveSequence(filename, format='auto')
+
+Saving sequence data is performed by calling :func:`SaveSequence`.
+For files with non-standard extensions, the format can be set explicitly specifying 
+the 'format' parameter. 
+  
+  .. code-block:: python
+
+    # recognizes FASTA file by file extension
+    io.SaveSequence(myseq,'seq.fasta')
+    # for saving a SequenceList
+    io.SaveSequenceList(seqlist,'seqlist.fasta')
+    # or multiple aligned fasta files
+    io.SaveAlignment(aln,'algnm.aln',format="clustal")
+    
+For a list of file formats supported by :func:`SaveSequence` see :doc:`formats`.
+  
+  :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
+      is not recognized or the file format can not be detected based on the 
+      file extension
+      
+      :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
+      inexistent file
+
+.. function:: SaveSequenceList(filename, format='auto')
+
+  For a desription of how to use :func:`SaveSequenceList` please refer to :func:`SaveSequence`.
+  For a list of file formats supported by :func:`SaveSequenceList` see :doc:`formats`.
+
+.. function:: SaveAlignment(filename, format='auto')
+
+  For a desription of how to use :func:`SaveAlignment` please refer to :func:`SaveSequence`.
+  For a list of file formats supported by :func:`SaveAlignment` see :doc:`formats`.
+
