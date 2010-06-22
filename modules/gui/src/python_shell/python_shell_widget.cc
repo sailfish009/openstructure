@@ -208,8 +208,10 @@ void PythonShellWidget::setup_state_machine_()
 {
   #ifdef __APPLE__
     QFlags<Qt::KeyboardModifier> DNG_ARROW_MODIFIERS = Qt::KeypadModifier;
+    QFlags<Qt::KeyboardModifier> DNG_ENTER_MODIFIERS = Qt::NoModifier;
   #else
     QFlags<Qt::KeyboardModifier> DNG_ARROW_MODIFIERS = Qt::NoModifier;
+    QFlags<Qt::KeyboardModifier> DNG_ENTER_MODIFIERS = Qt::KeypadModifier;
   #endif
   State* single_line=new State;
   State* multi_line_inactive=new State;
@@ -248,21 +250,21 @@ void PythonShellWidget::setup_state_machine_()
   single_line->addTransition(tr3);
   KeyEventTransition* keypad_enter1=new KeyEventTransition(QEvent::KeyPress,
                                                            Qt::Key_Enter,
-                                                           Qt::NoModifier,
+                                                           DNG_ENTER_MODIFIERS| Qt::NoModifier,
                                                            multiline_active_state_,
                                                            true);
   single_line->addTransition(keypad_enter1);
   connect(keypad_enter1,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
   KeyEventTransition* keypad_enter2=new KeyEventTransition(QEvent::KeyPress,
                                                            Qt::Key_Enter,
-                                                           Qt::ShiftModifier,
+                                                           DNG_ENTER_MODIFIERS| Qt::ShiftModifier,
                                                            multiline_active_state_,
                                                            true);
   single_line->addTransition(keypad_enter2);
   connect(keypad_enter2,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
   KeyEventTransition* keypad_enter3=new KeyEventTransition(QEvent::KeyPress,
                                                            Qt::Key_Enter,
-                                                           Qt::MetaModifier,
+                                                           DNG_ENTER_MODIFIERS| Qt::MetaModifier,
                                                            multiline_active_state_,
                                                            true);
   single_line->addTransition(keypad_enter3);
@@ -306,21 +308,21 @@ void PythonShellWidget::setup_state_machine_()
   multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
   KeyEventTransition* keypad_enter4=new KeyEventTransition(QEvent::KeyPress,
                                                            Qt::Key_Enter,
-                                                           Qt::NoModifier,
+                                                           DNG_ENTER_MODIFIERS| Qt::NoModifier,
                                                            multiline_active_state_,
                                                            true);
   multi_line_inactive->addTransition(keypad_enter4);
   connect(keypad_enter4,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
   KeyEventTransition* keypad_enter5=new KeyEventTransition(QEvent::KeyPress,
                                                            Qt::Key_Enter,
-                                                           Qt::ShiftModifier,
+                                                           DNG_ENTER_MODIFIERS| Qt::ShiftModifier,
                                                            multiline_active_state_,
                                                            true);
   multi_line_inactive->addTransition(keypad_enter5);
   connect(keypad_enter5,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
   KeyEventTransition* keypad_enter6=new KeyEventTransition(QEvent::KeyPress,
                                                            Qt::Key_Enter,
-                                                           Qt::MetaModifier,
+                                                           DNG_ENTER_MODIFIERS | Qt::MetaModifier,
                                                            multiline_active_state_,
                                                            true);
   multi_line_inactive->addTransition(keypad_enter6);
@@ -358,21 +360,21 @@ void PythonShellWidget::setup_state_machine_()
   multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_down));
   KeyEventTransition* keypad_enter7=new KeyEventTransition(QEvent::KeyPress,
                                                            Qt::Key_Enter,
-                                                           Qt::NoModifier,
+                                                           DNG_ENTER_MODIFIERS | Qt::NoModifier,
                                                            multiline_active_state_,
                                                            true);
   multiline_active_state_->addTransition(keypad_enter7);
   connect(keypad_enter7,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
   KeyEventTransition* keypad_enter8=new KeyEventTransition(QEvent::KeyPress,
                                                            Qt::Key_Enter,
-                                                           Qt::ShiftModifier,
+                                                           DNG_ENTER_MODIFIERS | Qt::ShiftModifier,
                                                            multiline_active_state_,
                                                            true);
   multiline_active_state_->addTransition(keypad_enter8);
   connect(keypad_enter8,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
   KeyEventTransition* keypad_enter9=new KeyEventTransition(QEvent::KeyPress,
                                                            Qt::Key_Enter,
-                                                           Qt::MetaModifier,
+                                                           DNG_ENTER_MODIFIERS | Qt::MetaModifier,
                                                            multiline_active_state_,
                                                            true);
   multiline_active_state_->addTransition(keypad_enter9);
@@ -529,12 +531,12 @@ void  PythonShellWidget::InsertCompletion(const QString& completion)
 }
 void  PythonShellWidget::InsertPathCompletion(const QString& completion)
 {
-  QString path=completion;
+  QString path=QDir::fromNativeSeparators(completion);
   // append dir separator for directories if none present (Windows adds it already for the inline completion)
-  if(QFileInfo(path).isDir() && ! completion.endsWith(QDir::separator())){
+  if(QFileInfo(path).isDir() && ! completion.endsWith("/")){
     path+="/";
   }
-  InsertCompletion(QDir::toNativeSeparators(path));
+  InsertCompletion(path);
 }
 
 
@@ -638,16 +640,16 @@ void PythonShellWidget::Complete(bool inline_completion)
     completion_end_=positions->GetEnd(literal_index);
     QTextCursor cp=textCursor();
     QString text=cursor.selectedText();        
-    int sep=text.lastIndexOf(QDir::separator());    
+    int sep=text.lastIndexOf("/");    
     cp.setPosition(positions->GetStart(literal_index));
     if (sep!=-1) {
       cp.movePosition(QTextCursor::NextCharacter,
                       QTextCursor::MoveAnchor, sep);      
     }
     if (QDir(text).isAbsolute()) {
-      emit SetPathCompletionPrefix(QDir::fromNativeSeparators(text));
+      emit SetPathCompletionPrefix(text);
     } else {
-      emit SetPathCompletionPrefix(QDir::currentPath()+"/"+QDir::fromNativeSeparators(text));
+      emit SetPathCompletionPrefix(QDir::currentPath()+"/"+text);
     }
     emit RequestPathCompletion(cursorRect(cp), 
                                inline_completion);
