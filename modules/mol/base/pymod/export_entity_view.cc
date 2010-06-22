@@ -80,15 +80,10 @@ void export_EntityView()
     .export_values()
   ;
 
-  void (EntityView::* apply1)(EntityVisitor&) = &EntityView::Apply;
-  void (EntityView::* apply2)(EntityViewVisitor&) = &EntityView::Apply;
-
   Real (EntityView::*get_angle1)(const AtomHandle&, const AtomHandle&, const AtomHandle&) const = &EntityView::GetAngle;
   Real (EntityView::*get_angle2)(const AtomView&, const AtomView&, const AtomView&) const = &EntityView::GetAngle;
 
   class_<EntityView, bases<EntityBase> >("EntityView", init<>())
-    .def("Apply",apply1)
-    .def("Apply",apply2)
     .def("Copy", &EntityView::Copy)
     .def("FindChain", find_chain_str)
     .def("FindResidue", &EntityView::FindResidue)

@@ -61,9 +61,6 @@ void export_ChainView()
     .def(ost::VectorAdditions<ChainViewList>())    
   ;
 
-  void (ChainView::* apply1)(EntityVisitor&) = &ChainView::Apply;
-  void (ChainView::* apply2)(EntityViewVisitor&) = &ChainView::Apply;
-
   class_<ChainView, bases<ChainBase> >("ChainView", init<>())
     .def("GetResidueList", &ChainView::GetResidueList,
          return_value_policy<copy_const_reference>())
@@ -81,8 +78,6 @@ void export_ChainView()
          X_add_residue_overloads(args("residue_handle", "view_add_flags")))
     .def("AddResidue", vm, 
          X_add_residue_overloads(args("residue_view", "view_add_flags")))         
-    .def("Apply", apply1, args("visitor"))
-    .def("Apply", apply2, args("visitor"))
     .def("RemoveResidue", &ChainView::RemoveResidue)
     .def("RemoveResidues", &ChainView::RemoveResidues)
     .def("InSequence", &ChainView::InSequence)

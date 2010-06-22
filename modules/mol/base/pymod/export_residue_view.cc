@@ -51,9 +51,6 @@ void export_ResidueView()
     .def(ost::VectorAdditions<ResidueViewList>()) 
   ;
 
-  void (ResidueView::* apply1)(EntityVisitor&) = &ResidueView::Apply;
-  void (ResidueView::* apply2)(EntityViewVisitor&) = &ResidueView::Apply;
-
   class_<ResidueView, bases<ResidueBase> >("ResidueView", init<>())
     .def("GetChain",&ResidueView::GetChain)
     .def("GetAtomList", &ResidueView::GetAtomList,
@@ -67,8 +64,6 @@ void export_ResidueView()
     .def("AddAtom", add_atom_view, X_add_atom_overloads(args("atom_view", "flags")))
     .def("FindAtom", handle_find_atom, args("atom_handle"))
     .def("IsAtomIncluded", &ResidueView::IsAtomIncluded, args("atom_handle"))
-    .def("Apply", apply1, args("visitor"))
-    .def("Apply", apply2, args("visitor"))
     .def("GetIndex", &ResidueView::GetIndex)  
     .add_property("chain", &ResidueView::GetChain)
     .add_property("entity", &ResidueView::GetEntity)

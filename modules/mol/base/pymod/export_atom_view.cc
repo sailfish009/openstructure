@@ -28,14 +28,10 @@ using namespace ost::mol;
 
 void export_AtomView()
 {
-  void (AtomView::* apply1)(EntityVisitor&) = &AtomView::Apply;
-  void (AtomView::* apply2)(EntityViewVisitor&) = &AtomView::Apply;
 
   class_<AtomView, bases<AtomBase> >("AtomView", init<>())
     .def("GetResidue",&AtomView::GetResidue)
     .add_property("residue",&AtomView::GetResidue)
-    .def("Apply", apply1, args("visitor"))
-    .def("Apply", apply2, args("visitor"))
     .def(self==self)
     .def(self!=self)
     .add_property("handle", &AtomView::GetHandle)

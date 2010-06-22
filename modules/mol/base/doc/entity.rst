@@ -247,12 +247,6 @@ The Handle Classes
   
     See :attr:`mass`
     
-  .. method:: Apply(visitor)
-    
-    Apply EntityVisitor to the entity. In Python, you usually don't need this 
-    function bother using. EntityVisitors are mainly used in C++ to implement
-    algorithms that are able to operate on :class:`EntityViews <EntityView>` 
-    and :class:`entity handles<EntityHandle>` at the same time.
     
   .. method:: FindWithin(pos, radius)
   
@@ -605,15 +599,6 @@ The Handle Classes
     
     :type: list of :class:`bond handles<BondHandle>`
   
-  .. method:: Apply(visitor)
-
-    Apply an entity visitor to the atom. In Python, you usually don't have to 
-    use this method. It is mainly used in C++ to write  algorithms that work on 
-    both :class:`EntityHandle` and :class:`EntityView` at the same time.
-    
-    :param visitor: The entity visitor
-    :type  visitor: :class:`EntityVisitor`
-
   .. method:: FindBondToAtom(other_atom)
 
     Finds and returns the bond formed between this atom and `other_atom`. If no 
@@ -804,14 +789,14 @@ The View Classes
 
   .. method:: CreateFullView()
 
-    Returns a copy of this entity. Provided for duck-typing purposes.
+    Returns a copy of this entity. Provided for `duck-typing <http://en.wikipedia.org/wiki/Duck_typing>` purposes.
     
     :rtype: EntityView
   
   .. method:: AddChain(chain_handle[, view_add_flags])
 
     Add chain to view. By default, only the chain is added to the view, but not 
-    its residues and atoms. This behaviour can be changed by passing in an
+    its residues and atoms. This behavior can be changed by passing in an
     appropriate set of `view_add_flags`
     
     :param chain_handle:
@@ -876,7 +861,6 @@ The View Classes
     
     :type  residue: ResidueView
     
-
   .. method:: RemoveAtom(atom)
   
     Remove atom from view
@@ -959,6 +943,7 @@ The View Classes
   .. method:: GetMass()
 
     Get total mass of view.
+
     :rtype: float
 
   .. method:: GetCenterOfMass()
@@ -970,15 +955,14 @@ The View Classes
 
   .. method:: GetGeometricCenter()
     
-    Get the geometric center, that is the centerof the axis-aligned 
-    bounding box.
+    Get the geometric center (the center of the axis-aligned 
+    bounding box).
     
     :rtype: :class:`~ost.geom.Vec3`
 
   .. method:: GetGeometricStart()
     
     :rtype: :class:`~ost.geom.Vec3`
-
 
   .. attribute:: chain_count
     
@@ -1022,14 +1006,6 @@ The View Classes
     
     :rtype: int
 
-  .. method:: Apply(visitor)
-
-    Apply entity visitor to view. In Python, you usually don't have to use this 
-    method. See :meth:`EntityHandle.Apply`
-    
-    :param visitor:
-    :type  visitor: class:`EntityVisitor`
-
   .. method:: GetResidueCount()
     
     See :attr:`residue_count`
@@ -1052,7 +1028,6 @@ The View Classes
 
     :rtype: class:`ResidueViewList`
 
-
   .. method:: GetGeometricEnd()
 
     :rtype: :class:`~ost.geom.Vec3`
@@ -1069,7 +1044,6 @@ The View Classes
     :rtype: int
 
 .. class:: ChainView
-
 
   .. attribute:: name
   
@@ -1161,7 +1135,6 @@ The View Classes
     
     :type: bool
 
-
   .. method:: AddAtom(atom_handle[, view_add_flags])
 
     Add atom to the view. If the residue of the atom is not already part of the 
@@ -1178,7 +1151,7 @@ The View Classes
 
     Add residue to the view. If the atom does not belong to chain, the result is
     undefined. By default, only the residue, but no atoms are added to the view. 
-    To change the behaviour, pass in a suitable combination of `view_add_flags`.
+    To change the behavior, pass in a suitable combination of `view_add_flags`.
     
     :param residue_handle:
     :type  residue_handle: :class:`ResidueHandle`
@@ -1208,7 +1181,6 @@ The View Classes
     :rtype: :class:`ResidueView`
     :returns: The residue view, or an invalid residue view if no residue with 
        the given residue number is in the view.
-    
 
   .. method:: GetCenterOfAtoms()
 
@@ -1222,11 +1194,9 @@ The View Classes
     
     See :attr:`entity`
 
-
   .. method:: GetGeometricCenter()
     
     See :attr:`geometric_center`
-    
 
   .. method:: GetHandle()
 
@@ -1258,7 +1228,6 @@ The View Classes
   .. method:: InSequence()
   
     See :attr:`in_sequence`
-    
 
   .. method:: IsValid()
 
@@ -1296,7 +1265,6 @@ The View Classes
     
     :param visitor: The visitor
     :type  visitor: :class:`EntityVisitor`
-
 
 .. class:: ResidueView
 

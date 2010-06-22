@@ -30,9 +30,6 @@ using namespace ost::mol;
 
 void export_Bond()
 {
-  void (BondHandle::* apply1)(EntityVisitor&) = &BondHandle::Apply;
-  void (BondHandle::* apply2)(EntityViewVisitor&) = &BondHandle::Apply;
-
   class_<BondHandle> bond_handle("BondHandle", init<>());
   bond_handle
     .def("GetPos", &BondHandle::GetPos)
@@ -55,8 +52,6 @@ void export_Bond()
     .def("GetBondOrder",&BondHandle::GetBondOrder)
     .def("SetBondOrder",&BondHandle::SetBondOrder)
     .def("IsValid", &BondHandle::IsValid)       
-    .def("Apply",apply1)
-    .def("Apply",apply2)
     .def(self == self)
     .def(self != self)
     .def(self_ns::str(self))

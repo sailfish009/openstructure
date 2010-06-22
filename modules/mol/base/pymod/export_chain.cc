@@ -65,7 +65,6 @@ void export_Chain()
     //.def("AppendResidue", append_one_arg, args("residue_key"))
     //.def("AppendResidue", append_two_arg, args("residue_key", 
     //                                            "residue_number"))
-    .def("Apply", &ChainHandle::Apply, args("visitor"))
     .def("GetNext", &ChainHandle::GetNext)
     .def("GetPrev", &ChainHandle::GetPrev)
     //.def("InsertResidueBefore", &ChainHandle::InsertResidueBefore, 
