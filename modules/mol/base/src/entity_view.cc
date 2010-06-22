@@ -489,22 +489,24 @@ AtomViewIter EntityView::AtomsEnd() const {
                       rvl.back().GetAtomList().end(), *this, false);
 }
 
-ResidueViewIter EntityView::ResiduesBegin() const {
+ResidueViewIter EntityView::ResiduesBegin() const 
+{
   this->CheckValidity();
   if (data_->chains.empty()) {
     return ResidueViewIter();
   }
   const ResidueViewList& rvl=data_->chains.front().GetResidueList();
-  return ResidueViewIter(data_->chains.begin(), rvl.begin(), *this);
+  return ResidueViewIter(data_->chains.begin(), rvl.begin(), *this, true);
 }
 
-ResidueViewIter EntityView::ResiduesEnd() const {
+ResidueViewIter EntityView::ResiduesEnd() const 
+{
     this->CheckValidity();
     if (data_->chains.empty()) {
       return ResidueViewIter();
     }
     const ResidueViewList& rvl=data_->chains.back().GetResidueList();
-    return ResidueViewIter(data_->chains.end(), rvl.end(), *this);
+    return ResidueViewIter(data_->chains.end(), rvl.end(), *this, false);
 }
 
 

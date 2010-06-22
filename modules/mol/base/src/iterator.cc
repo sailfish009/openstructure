@@ -25,9 +25,8 @@
 
 namespace ost { namespace mol {
 
-
-ResidueHandleIter& ResidueHandleIter::operator++() {
-  ++cur_res_;
+void ResidueHandleIter::SkipEmpty()
+{
   if (cur_res_==(*cur_chain_)->GetResidueList().end()) {
     // we have to skip over empty chains otherwise we end up pointing to an 
     // invalid residue.
@@ -38,16 +37,23 @@ ResidueHandleIter& ResidueHandleIter::operator++() {
       }
       cur_res_=(*cur_chain_)->GetResidueList().begin();
     } while ((*cur_chain_)->GetResidueList().empty());
-  }        
+  }
+}
+ResidueHandleIter& ResidueHandleIter::operator++() 
+{
+  ++cur_res_;
+  this->SkipEmpty();
   return *this;
 }
 
 ResidueHandleIter::ResidueHandleIter(impl::ChainImplList::iterator chain_it, 
                                      impl::ResidueImplList::iterator res_it,
-                                     impl::EntityImplPtr ent) 
+                                     impl::EntityImplPtr ent, bool skip_empty) 
  : cur_chain_(chain_it), cur_res_(res_it),
    ent_(ent) {
-
+  if (skip_empty) {
+    this->SkipEmpty();
+  }
 }
 
 ResidueHandle ResidueHandleIter::operator*() {
@@ -60,8 +66,8 @@ ResidueView ResidueViewIter::operator*() {
   return ResidueView(*cur_res_);
 }
 
-ResidueViewIter& ResidueViewIter::operator++() {
-  ++cur_res_;
+void ResidueViewIter::SkipEmpty()
+{
   if (cur_res_==cur_chain_->GetResidueList().end()) {
     // we have to skip over empty chains otherwise we end up pointing to an 
     // invalid residue.
@@ -72,7 +78,11 @@ ResidueViewIter& ResidueViewIter::operator++() {
       }
       cur_res_=cur_chain_->GetResidueList().begin();
     } while (cur_chain_->GetResidueList().empty());
-  }        
+  }  
+}
+ResidueViewIter& ResidueViewIter::operator++() {
+  ++cur_res_;
+  this->SkipEmpty();
   return *this;
 }
 
@@ -86,9 +96,12 @@ ResidueViewIter::ResidueViewIter()
 
 ResidueViewIter::ResidueViewIter(ChainViewList::const_iterator chain_it,
                                  ResidueViewList::const_iterator res_it,
-                                 EntityView ent) 
+                                 EntityView ent, bool skip_empty) 
  : cur_chain_(chain_it), cur_res_(res_it),
    ent_(ent) {
+  if (skip_empty) {
+    this->SkipEmpty();
+  }
 }
 
 AtomHandleIter::AtomHandleIter() 

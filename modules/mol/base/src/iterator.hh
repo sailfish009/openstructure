@@ -116,7 +116,7 @@ public:
   }
   ResidueHandleIter(impl::ChainImplList::iterator chain_it, 
                     impl::ResidueImplList::iterator res_it,
-                    impl::EntityImplPtr ent);
+                    impl::EntityImplPtr ent, bool skip_empty);
   bool operator==(const ResidueHandleIter& rhs) const {
 #if defined(_MSC_VER)    
     return cur_chain_==rhs.cur_chain_ && cur_res_==rhs.cur_res_;
@@ -124,7 +124,7 @@ public:
     return cur_res_==rhs.cur_res_;
 #endif
   }
-  
+  void SkipEmpty();
   bool operator!=(const ResidueHandleIter& rhs) const {
     return !this->operator==(rhs);
   }
@@ -145,17 +145,16 @@ public:
 
   ResidueViewIter(ChainViewList::const_iterator chain_it,
                   ResidueViewList::const_iterator res_it,
-                  EntityView ent);
+                  EntityView ent, bool skip_empty);
 
   bool operator==(const ResidueViewIter& rhs) const {
 #if defined(_MSC_VER)    
     return cur_chain_==rhs.cur_chain_ && cur_res_==rhs.cur_res_;
 #else
     return cur_res_==rhs.cur_res_;
-#endif    
-    return cur_res_==rhs.cur_res_;
+#endif
   }
-  
+  void SkipEmpty();
   bool operator!=(const ResidueViewIter& rhs) const {
     return !this->operator==(rhs);
   }

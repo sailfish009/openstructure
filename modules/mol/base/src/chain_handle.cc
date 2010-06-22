@@ -127,7 +127,7 @@ ResidueHandleIter ChainHandle::ResiduesBegin() const {
   impl::ChainImplPtr c=Impl();
   impl::ChainImplList::iterator cc=c->GetEntity()->GetChain(this->GetName());
   return ResidueHandleIter(cc, c->GetResidueList().begin(), 
-                           c->GetEntity());
+                           c->GetEntity(), true);
 }
 
 ResidueHandleIter ChainHandle::ResiduesEnd() const {
@@ -137,10 +137,10 @@ ResidueHandleIter ChainHandle::ResiduesEnd() const {
   impl::ChainImplList::iterator nc=cc; ++nc;
   if (nc!=c->GetEntity()->GetChainList().end()) {
     return ResidueHandleIter(nc, (*nc)->GetResidueList().begin(), 
-                             c->GetEntity());    
+                             c->GetEntity(), true);    
   } else {
     return ResidueHandleIter(cc, c->GetResidueList().end(), 
-                             c->GetEntity());    
+                             c->GetEntity(), true);    
   }
 }
 

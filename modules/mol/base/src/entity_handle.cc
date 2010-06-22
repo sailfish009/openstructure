@@ -263,7 +263,7 @@ ResidueHandleIter EntityHandle::ResiduesBegin() const {
   impl::EntityImplPtr i=Impl();
   impl::ChainImplPtr chain=i->GetChainList().front();
   return ResidueHandleIter(i->GetChainList().begin(),
-                           chain->GetResidueList().begin(), i);
+                           chain->GetResidueList().begin(), i, true);
 }
 
 ResidueHandleIter EntityHandle::ResiduesEnd() const {
@@ -274,7 +274,7 @@ ResidueHandleIter EntityHandle::ResiduesEnd() const {
   impl::EntityImplPtr i=Impl();
   impl::ChainImplPtr chain=i->GetChainList().back();
   return ResidueHandleIter(i->GetChainList().end(),
-                           chain->GetResidueList().end(), i);
+                           chain->GetResidueList().end(), i, false);
 }
 
 ChainHandleIter EntityHandle::ChainsBegin() const {
