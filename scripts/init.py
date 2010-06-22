@@ -49,8 +49,8 @@ def _InitFrontEnd():
   app=gui.GostyApp.Instance()
   app.SetAppTitle("DNG")
   main_area=app.perspective.main_area
-  _InitPanels(app)
   _InitMenuBar(app)
+  _InitPanels(app)
   _InitSpaceNav(app)
   _InitContextMenu(app)
   main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win, int(QtCore.Qt.WindowMaximized))

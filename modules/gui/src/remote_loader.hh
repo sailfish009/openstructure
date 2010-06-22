@@ -53,6 +53,7 @@ private slots:
   void UrlClick();
   void DownloadFinished();
   void UpdateProgress(qint64 read, qint64 total);
+  void RenameButton();
 
 private:
   QLineEdit* line_edit_;

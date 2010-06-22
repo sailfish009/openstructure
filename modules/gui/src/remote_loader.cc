@@ -73,6 +73,8 @@ RemoteLoader::RemoteLoader(QWidget* parent):
   action_list_.append(select_url_action);
 
   connect(select_url_action, SIGNAL(triggered(bool)), this, SLOT(UrlClick()));
+  this->BuildMenu();
+  this->RenameButton();
 }
 
 void RemoteLoader::UrlClick()
@@ -83,7 +85,7 @@ void RemoteLoader::UrlClick()
 
 void RemoteLoader::BuildMenu(String active_loader)
 {
-  if(active_loader.size()>0){
+  if(!active_loader.empty()){
     selected_site_loader_ = active_loader;
   }
   else if(site_actions_->checkedAction()!=NULL){
@@ -100,6 +102,7 @@ void RemoteLoader::BuildMenu(String active_loader)
     RemoteSiteLoader* loader = FileLoader::GetLoaderManager()->GetRemoteSiteLoader(loader_ident);
     if(loader && ((loader->IsImg() && img_support_) || !loader->IsImg())){
       QAction* action = new QAction(loader_ident,site_loader_menu_);
+      connect(action, SIGNAL(triggered()), this, SLOT(RenameButton()));
       action->setCheckable(true);
       site_actions_->addAction(action);
       if((site_actions_->checkedAction()==NULL && loader_ident == FileLoader::GetLoaderManager()->GetDefaultRemoteSiteIdent()) ||selected_site_loader_==loader_ident.toStdString() ){
@@ -132,6 +135,10 @@ bool RemoteLoader::Restore(const QString& prefix)
   if (settings.contains("loader")) {
     this->BuildMenu(settings.value("loader").toString().toStdString());
   }
+  else{
+    this->BuildMenu();
+  }
+  this->RenameButton();
   return true;
 }
 
@@ -185,6 +192,14 @@ void RemoteLoader::UpdateProgress(qint64 read, qint64 total){
 
 void RemoteLoader::DownloadFinished(){
   this->ShowProgressBar(false);
+}
+
+
+void RemoteLoader::RenameButton(){
+  if(site_actions_->checkedAction()){
+    QString text = "Load (" + site_actions_->checkedAction()->text() + ")";
+    button_->setText(text);
+  }
 }
 
 OST_REGISTER_WIDGET_WITH_DEFAULT_FACTORY(ost::gui, RemoteLoader, "Remote Loader");
