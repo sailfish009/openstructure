@@ -175,3 +175,16 @@ For a list of file formats supported by :func:`SaveSequence` see :doc:`formats`.
   For a desription of how to use :func:`SaveAlignment` please refer to :func:`SaveSequence`.
   For a list of file formats supported by :func:`SaveAlignment` see :doc:`formats`.
 
+
+.. testsetup:: *
+  import io
+  
+.. doctest::
+  CHECKME
+  
+.. testcode::
+  print 'hi'
+  
+.. testoutput::
+
+

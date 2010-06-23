@@ -1,6 +1,9 @@
 import os, sys, re
 import shutil
 from ost import settings
+from optparse import OptionParser
+
+
 if len(sys.argv)==2:
   root_dir=sys.argv[1]
 else:
@@ -59,9 +62,34 @@ def _CollectRstDocs(outdir, dirname, fnames):
       for img in img_list:
         img_name = os.path.join(dirname,img)
         _CreateAndCopy(img_name, outdir)
-      
+
+
+def ParseArgs():
+  parser = OptionParser("usage: ost make.py [options] ")
+  parser.add_option("-l", "--linkcheck", dest="linkcheck", help="validate all external links")
+  parser.add_option("-b", "--build-html", dest="html", help="build html documentation")
+  parser.add_option("-d", "--doctest", dest="doctest", help="run all test")
+  return parser.parse_args()
+
+opts, args=ParseArgs()
+if not opts.html and\
+   not opts.linkcheck and\
+   not opts.doctest:
+     print 'It is mandatory to choose at least one option'
+     command='ost '+sys.argv[0]+' -h'
+     os.system(command)
+     os._exit(-1)
+
+     
 for sub_dir in ('modules',):
   os.path.walk(sub_dir, _CollectRstDocs, 'doc/source')
 sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6'])
-os.system('%s -b html -c %s %s %s' % (sphinx_bin, 'doc/conf', 'doc/source', 
+if opts.html:
+  os.system('%s -b html -c %s %s %s' % (sphinx_bin, 'doc/conf', 'doc/source', 
+                                      'doc/build'))
+if opts.doctest:
+  os.system('%s -b doctest -c %s %s %s' % (sphinx_bin, 'doc/conf', 'doc/source', 
+                                      'doc/build'))
+if opts.linkcheck:
+  os.system('%s -b linkcheck -c %s %s %s' % (sphinx_bin, 'doc/conf', 'doc/source', 
                                       'doc/build'))
