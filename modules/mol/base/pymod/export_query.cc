@@ -29,6 +29,12 @@ void translate_QueryError(const QueryError& e) {
   PyErr_SetString(PyExc_RuntimeError, e.GetFormattedMessage().c_str());
 }
 
+String error_msg(Query& q)
+{
+  return QueryError(q.GetQueryString(), 
+                    q.GetErrorDescription()).GetFormattedMessage();
+}
+
 void export_Query()
 {
   
@@ -52,7 +58,9 @@ void export_Query()
     .def("IsAtomSelected", &Query::IsAtomSelected)    
     .def("IsResidueSelected", &Query::IsResidueSelected)
     .def("IsChainSelected", &Query::IsChainSelected)    
-    .add_property("String",  
+    .add_property("valid", &Query::IsValid)
+    .add_property("error", &error_msg)
+    .add_property("string",  
                   make_function(&Query::GetQueryString,
                                 return_value_policy<copy_const_reference>()))
     .def("GetErrorDescription", &Query::GetErrorDescription, 

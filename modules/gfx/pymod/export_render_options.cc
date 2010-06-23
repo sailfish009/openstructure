@@ -43,6 +43,10 @@ void export_RenderOptions()
     .def("GetLineWidth",&LineRenderOptions::GetLineWidth)
     .def("SetAALines",&LineRenderOptions::SetAALines)
     .def("GetAALines",&LineRenderOptions::GetAALines)
+    .add_property("aa_lines", &LineRenderOptions::GetAALines, 
+                  &LineRenderOptions::SetAALines)
+    .add_property("line_width", &LineRenderOptions::GetLineWidth, 
+                  &LineRenderOptions::SetLineWidth)    
   ;
 
   class_<SimpleRenderOptions, boost::shared_ptr<SimpleRenderOptions>, bases<LineRenderOptions>, boost::noncopyable>("SimpleRenderOptions")
@@ -50,6 +54,10 @@ void export_RenderOptions()
     .def("SetBondOrderDistance", &SimpleRenderOptions::SetBondOrderDistance)
     .def("GetBondOrderFlag", &SimpleRenderOptions::GetBondOrderFlag)
     .def("GetBondOrderDistance", &SimpleRenderOptions::GetBondOrderDistance)
+    .add_property("draw_bond_order", &SimpleRenderOptions::GetBondOrderFlag, 
+                  &SimpleRenderOptions::SetBondOrderFlag)
+    .add_property("bond_order_distance", &SimpleRenderOptions::GetBondOrderDistance, 
+                  &SimpleRenderOptions::SetBondOrderDistance)    
   ;
 
   class_<LineTraceRenderOptions, boost::shared_ptr<LineTraceRenderOptions>, bases<LineRenderOptions>, boost::noncopyable>("LineTraceRenderOptions")
@@ -65,6 +73,10 @@ void export_RenderOptions()
     .def("GetSphereDetail", &CPKRenderOptions::GetSphereDetail)
     .def("SetCPKMode", &CPKRenderOptions::SetCPKMode)
     .def("GetCPKMode", &CPKRenderOptions::GetCPKMode)
+    .add_property("cpk_mode", &CPKRenderOptions::GetCPKMode, 
+                  &CPKRenderOptions::SetCPKMode)
+    .add_property("sphere_detail", &CPKRenderOptions::GetSphereDetail, 
+                  &CPKRenderOptions::SetSphereDetail)
   ;
 
   class_<CustomRenderOptions, boost::shared_ptr<CustomRenderOptions>, bases<RenderOptions>, boost::noncopyable>("CustomRenderOptions")
@@ -76,6 +88,11 @@ void export_RenderOptions()
     .def("GetSphereRad", &CustomRenderOptions::GetSphereRad)
     .def("SetBondRad", &CustomRenderOptions::SetBondRad)
     .def("GetBondRad", &CustomRenderOptions::GetBondRad)
+    .add_property("sphere_detail", &CustomRenderOptions::GetSphereDetail, &CustomRenderOptions::SetSphereDetail)
+    .add_property("bond_rad", &CustomRenderOptions::GetBondRad, &CustomRenderOptions::SetBondRad)
+    .add_property("sphere_rad", &CustomRenderOptions::GetSphereRad, &CustomRenderOptions::SetSphereRad)    
+    .add_property("arc_detail", &CustomRenderOptions::GetArcDetail, 
+                  &CustomRenderOptions::SetArcDetail)
   ;
 
   class_<CartoonRenderOptions, boost::shared_ptr<CartoonRenderOptions>, bases<RenderOptions>, boost::noncopyable>("CartoonRenderOptions")
@@ -119,6 +136,13 @@ void export_RenderOptions()
     .def("GetNormalSmoothFactor", &TraceRenderOptions::GetNormalSmoothFactor)
     .def("SetTubeRadius", &TraceRenderOptions::SetTubeRadius)
     .def("GetTubeRadius", &TraceRenderOptions::GetTubeRadius)
+    .add_property("tube_radius", &TraceRenderOptions::GetTubeRadius, 
+                  &TraceRenderOptions::SetTubeRadius)
+    .add_property("arc_detail", &TraceRenderOptions::GetArcDetail, 
+                  &TraceRenderOptions::SetArcDetail)
+    .add_property("normal_smooth_factor", 
+                  &TraceRenderOptions::GetNormalSmoothFactor, 
+                  &TraceRenderOptions::SetNormalSmoothFactor)    
   ;
 }
 

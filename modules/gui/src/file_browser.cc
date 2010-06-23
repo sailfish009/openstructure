@@ -71,7 +71,9 @@ FileBrowser::FileBrowser(QWidget* parent):
     } 
 # elif defined(__APPLE__)
   if (path.contains("DNG.app") || path=="/") {
-    QString example_path="/Applications/OpenStructure/Examples/entity";    
+    QDir dir(QCoreApplication::applicationDirPath());
+    dir.cdUp();
+    QString example_path=dir.path()+"/examples";
     if (QDir(example_path).exists()) {
       path=example_path;
     }    
