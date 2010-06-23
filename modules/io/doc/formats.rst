@@ -11,12 +11,14 @@ The following file formats are supported by :func:`~ost.io.LoadEntity`.
 CRD - CARD format file used by CHARMM
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This trajectory file format is used by the CHARMM program suite (Molecular Modelling).
+
 *Recognized File Extensions*
   crd
 
 MAE - Maestro coordinate file format (used by Schroedinger Inc.)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 File format by the popular Maestro package.
+
 *Recognized File Extensions*
   mae
 
