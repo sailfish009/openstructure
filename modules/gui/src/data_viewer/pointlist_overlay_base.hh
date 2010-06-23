@@ -85,6 +85,7 @@ public:
 
   // own virtual interface
   virtual void DrawPointList(QPainter& pnt, DataViewerPanel* dvp, const QColor& col ,const std::vector<QPoint>& pointlist);
+  virtual void DrawVariableSizePointList(QPainter& pnt, DataViewerPanel* dvp, const QColor& col ,const std::vector<std::pair<QPoint,double> >& pointlist);
 
   //
   unsigned int GetSymbolSize() const;
@@ -93,6 +94,8 @@ public:
   void SetSymbolShape(unsigned int symbolshape);
   bool GetCrosshair() const;
   void SetCrosshair(bool flag);
+  void SetActiveColor(const QColor& col);
+  void SetPassiveColor(const QColor& col);
 private:
 
   template <class StrategyClass> 

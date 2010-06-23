@@ -197,6 +197,18 @@ void PointlistOverlayBase::DrawPointList(QPainter& pnt, DataViewerPanel* dvp,
   }
   strategy_->SetSymbolSize(static_cast<int>((GetSymbolSize()-0.5) * dvp->GetZoomScale()));
 }
+void PointlistOverlayBase::DrawVariableSizePointList(QPainter& pnt, DataViewerPanel* dvp, 
+                                                     const QColor& color,
+                                                     const std::vector<std::pair<QPoint,double> >& pointlist)
+{
+  strategy_->SetPenColor(color);
+  strategy_->SetSymbolStrength(symbolstrength_);
+  for(unsigned int i = 0; i < pointlist.size(); i++) {
+    strategy_->SetSymbolSize(static_cast<int>((GetSymbolSize()-0.5) * dvp->GetZoomScale()*pointlist[i].second));
+    strategy_->Draw(pnt,pointlist[i].first);
+  }
+  strategy_->SetSymbolSize(static_cast<int>((GetSymbolSize()-0.5) * dvp->GetZoomScale()));
+}
 
 bool PointlistOverlayBase::GetCrosshair() const
 {
@@ -274,6 +286,16 @@ void PointlistOverlayBase::SetProps(PointlistOverlayBaseSettings* props)
   passive_color_=props->passive_color;
   symbolsize_=props->symbol_size;
   symbolstrength_=props->symbol_strength;
+}
+
+void PointlistOverlayBase::SetActiveColor(const QColor& col)
+{
+  active_color_=col;
+}
+
+void PointlistOverlayBase::SetPassiveColor(const QColor& col)
+{
+  passive_color_=col;
 }
 
 }}}  //ns
