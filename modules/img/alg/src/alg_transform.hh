@@ -50,15 +50,15 @@ struct DLLEXPORT_IMG_ALG TransformFnc {
 
     if(offset_==Vec3(0.0,0.0,0.0)) {
       for(ExtentIterator it(nisi->GetExtent()); !it.AtEnd(); ++it) {
-	Point p(it);
-	Vec3 vold_norm=Vec3(imat * Vec4(p.ToVec3()));
-	nisi->Value(it) = isi.CalcIntpolValue(vold_norm);
+        Point p(it);
+        Vec3 vold_norm=Vec3(imat * Vec4(p.ToVec3()));
+        nisi->Value(it) = isi.CalcIntpolValue(vold_norm);
       }
     } else {
       for(ExtentIterator it(nisi->GetExtent()); !it.AtEnd(); ++it) {
-	Point p(it);
-	Vec3 vold_norm=Vec3(imat * Vec4(p.ToVec3()-offset_))+offset_;
-	nisi->Value(it) = isi.CalcIntpolValue(vold_norm);
+        Point p(it);
+        Vec3 vold_norm=Vec3(imat * Vec4(p.ToVec3()-offset_))+offset_;
+        nisi->Value(it) = isi.CalcIntpolValue(vold_norm);
       }
     }
     
