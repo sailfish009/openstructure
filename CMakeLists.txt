@@ -87,6 +87,11 @@ if (ENABLE_IMG)
 else()
   set(_IMG OFF)
 endif()
+if (PROFILE)
+  set(_PROFILE ON)
+else()
+  set(_PROFILE OFF)
+endif()
 
 if (COMPOUND_LIB)
   set(_COMP_LIB "${COMPOUND_LIB}")
@@ -255,9 +260,10 @@ message(STATUS
         "   RPath in install            (-DUSE_RPATH) : ${_USE_RPATH}\n"
         "   Graphical interface         (-DENABLE_UI) : ${_UI}\n"
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"        
+        "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support             (-DUSE_SHADER) : ${_SHADER}\n"
         "   Optimize                     (-DOPTIMIZE) : ${_OPT}\n"
+        "   Profiling support             (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
         "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
         "   TMAlign and TMScore   (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}")
