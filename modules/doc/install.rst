@@ -45,7 +45,7 @@ You can checkout the source from SVN. The repository is located at
 
 If you are using the commandline client, type in your shell 
 
-   svn co https://ost.biozentrum.unibas.ch/svn/openstructure/trunk
+   svn co https://dng.biozentrum.unibas.ch/svn/openstructure/trunk
 
 On Windows install svn clients like `tortoisesvn <http://tortoisesvn.tigris.org>`_ and use the function 'checkout' then enter the above mention URL.
 
