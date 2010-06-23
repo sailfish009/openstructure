@@ -190,6 +190,17 @@ BOOST_AUTO_TEST_CASE(no_endmdl_record)
   BOOST_CHECK_THROW(reader.Import(ent), IOException);
 }
 
+BOOST_AUTO_TEST_CASE(faulty_lines)
+{
+  String fname("testfiles/pdb/faulty.pdb");
+  PDBReader reader(fname);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+
+  PDB::PushFlags(PDB::SKIP_FAULTY_RECORDS);
+  reader.Import(ent);
+}
+
 BOOST_AUTO_TEST_CASE(write_atom)
 {
   std::stringstream out;
