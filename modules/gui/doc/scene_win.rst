@@ -16,7 +16,7 @@ selected objects.
 
   .. method:: GetContextMenu()
   
-     Returns the :class:`ContextMenu`-instance.
+    Returns the :class:`ContextMenu`-instance.
      
     :rtype: ContextMenu
 
