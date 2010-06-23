@@ -456,7 +456,6 @@ Vec3 Quat::Rotate(const Vec3& vec) const {
   Quat tmp(0.0, vec[0], vec[1], vec[2]);
   Quat conj=Conjugate(*this);
   Quat res=*this*tmp*conj;
-  std::cout << *this << "*" << tmp << "*" << conj << std::endl;
   return Vec3(res.x, res.y, res.z);
 }
 
