@@ -69,6 +69,7 @@ def ParseArgs():
   parser.add_option("-l","--linkcheck", action="store_true", default=False, dest="linkcheck", help="validate all external links")
   parser.add_option("-b", "--build-html", action="store_true", default=False, dest="html", help="build html documentation")
   parser.add_option("-d", "--doctest", action="store_true", default=False, dest="doctest", help="run all test")
+  parser.add_option("-q", "--quiet", action="store_true", default=False, dest="quiet", help="run all test")
   return parser.parse_args()
 
 opts, args=ParseArgs()
@@ -76,16 +77,21 @@ if not opts.html and\
    not opts.linkcheck and\
    not opts.doctest:
      opts.html=True
-     
+
+opt_str='' 
+if opts.quiet:
+  opt_str=' -Q '
+
 for sub_dir in ('modules',):
   os.path.walk(sub_dir, _CollectRstDocs, 'doc/source')
 sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6'])
+
 if opts.html:
-  os.system('%s -b html -c %s %s %s' % (sphinx_bin, 'doc/conf', 'doc/source', 
+  os.system('%s %s -b html -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source', 
                                       'doc/build'))
 if opts.doctest:
-  os.system('%s -b doctest -c %s %s %s' % (sphinx_bin, 'doc/conf', 'doc/source', 
+  os.system('%s %s -b doctest -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source', 
                                       'doc/build'))
 if opts.linkcheck:
-  os.system('%s -b linkcheck -c %s %s %s' % (sphinx_bin, 'doc/conf', 'doc/source', 
+  os.system('%s %s -b linkcheck -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source', 
                                       'doc/build'))
