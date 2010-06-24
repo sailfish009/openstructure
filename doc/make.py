@@ -66,9 +66,9 @@ def _CollectRstDocs(outdir, dirname, fnames):
 
 def ParseArgs():
   parser = OptionParser("usage: ost make.py [options] ")
-  parser.add_option("-l", "--linkcheck", dest="linkcheck", help="validate all external links")
-  parser.add_option("-b", "--build-html", dest="html", help="build html documentation")
-  parser.add_option("-d", "--doctest", dest="doctest", help="run all test")
+  parser.add_option("-l","--linkcheck", action="store_true", default=False, dest="linkcheck", help="validate all external links")
+  parser.add_option("-b", "--build-html", action="store_true", default=False, dest="html", help="build html documentation")
+  parser.add_option("-d", "--doctest", action="store_true", default=False, dest="doctest", help="run all test")
   return parser.parse_args()
 
 opts, args=ParseArgs()
