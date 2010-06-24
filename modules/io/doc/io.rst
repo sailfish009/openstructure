@@ -176,15 +176,22 @@ For a list of file formats supported by :func:`SaveSequence` see :doc:`formats`.
   For a list of file formats supported by :func:`SaveAlignment` see :doc:`formats`.
 
 
-.. testsetup:: *
-  import io
-  
-.. doctest::
-  CHECKME
-  
-.. testcode::
-  print 'hi'
-  
-.. testoutput::
+.. testsetup:: io
+  from ost import io
+
+.. testcode:: io
+  :hide:
+
+  from ost import io,seq
+  ent=io.LoadPDB('./examples/entity/fragment.pdb')
+  print ent.atom_count 
+  myseq=seq.SequenceFromChain('t',ent.chains[0])
+  print myseq.GetLength()
+
+.. testoutput:: io
+  :hide:
+
+  81
+  12
 
 
