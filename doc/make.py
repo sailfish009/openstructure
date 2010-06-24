@@ -75,11 +75,7 @@ opts, args=ParseArgs()
 if not opts.html and\
    not opts.linkcheck and\
    not opts.doctest:
-     print 'It is mandatory to choose at least one option'
-     command='ost '+sys.argv[0]+' -h'
-     os.system(command)
-     os._exit(-1)
-
+     opts.html=True
      
 for sub_dir in ('modules',):
   os.path.walk(sub_dir, _CollectRstDocs, 'doc/source')
