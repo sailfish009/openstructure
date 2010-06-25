@@ -4,7 +4,13 @@
 .. module:: ost.io
   :synopsis: Input and output of sequences, alignments, structures, images and density maps.
 
-The io module deals with input and output of :class:`entities <ost.mol.EntityHandle>`, :class:`alignments <ost.seq.AlignmentHandle>`, :class:`sequences <ost.seq.SequenceHandle>`, :class:`images <ost.img.ImageHandle>`. Importers for common file formats containing molecules such as PDB, SDF and CHARMM trajectory files are available. Sequence and alignment file formats such as FASTA and CLUSTALW are supported as well, alongside various image data (e.g. png, dm3) and density map files (e.g. CCP4, MRC). 
+The io module deals with input and output of :class:`entities 
+<ost.mol.EntityHandle>`, :class:`alignments <ost.seq.AlignmentHandle>`, 
+:class:`sequences <ost.seq.SequenceHandle>`, :class:`images 
+<ost.img.ImageHandle>`. Importers for common file formats containing molecules 
+such as PDB, SDF and CHARMM trajectory files are available. Sequence and 
+alignment file formats such as FASTA and CLUSTALW are supported as well as  
+various image data (e.g. png, dm3) and density map files (e.g. CCP4, MRC). 
 
 Molecular Structures
 --------------------------------------------------------------------------------
@@ -105,10 +111,12 @@ Loading sequence or alignment files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. function:: LoadSequence(filename, format='auto')
 
-  Load sequence data from disk. If format is set to 'auto', the function guesses the 
-  filetype based on the extension of the file. Files ending in '.fasta', '.aln' will automatically be loaded.
-  For files with non-standard extensions, the format can be set explicitly specifying 
-  the 'format' parameter. 
+  Load sequence data from disk. If format is set to 'auto', the function guesses 
+  the filetype based on the extension of the file. Files ending in '.fasta', 
+  '.aln' will automatically be loaded.
+  
+  For files with non-standard extensions, the format can be set explicitly 
+  specifying the `format` parameter. 
   
   .. code-block:: python
 
@@ -119,7 +127,8 @@ Loading sequence or alignment files
     # or for multiple aligned fasta files use
     aln=io.LoadAlignment('algnm.aln',format="clustal")
     
-For a list of file formats supported by :func:`LoadSequence` see :doc:`formats`.
+  For a list of file formats supported by :func:`LoadSequence` see
+  :doc:`formats`.
   
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
       is not recognized or the file format can not be detected based on the 
@@ -130,22 +139,24 @@ For a list of file formats supported by :func:`LoadSequence` see :doc:`formats`.
 
 .. function:: LoadSequenceList(filename, format='auto')
 
-  For a desription of how to use :func:`LoadSequenceList` please refer to :func:`LoadSequence`.
-  For a list of file formats supported by :func:`LoadSequenceList` see :doc:`formats`.
+  For a desription of how to use :func:`LoadSequenceList` please refer to 
+  :func:`LoadSequence`. For a list of file formats supported by
+  :func:`LoadSequenceList` see :doc:`formats`.
 
 .. function:: LoadAlignment(filename, format='auto')
 
-  For a desription of how to use :func:`LoadAlignment` please refer to :func:`LoadSequence`.
-  For a list of file formats supported by :func:`LoadAlignment` see :doc:`formats`.
+  For a desription of how to use :func:`LoadAlignment` please refer to 
+  :func:`LoadSequence`. For a list of file formats supported by 
+  :func:`LoadAlignment` see :doc:`formats`.
       
 Saving Sequence Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. function:: SaveSequence(filename, format='auto')
 
-Saving sequence data is performed by calling :func:`SaveSequence`.
-For files with non-standard extensions, the format can be set explicitly specifying 
-the 'format' parameter. 
+  Saving sequence data is performed by calling :func:`SaveSequence`.
+  For files with non-standard extensions, the format can be set explicitly 
+  specifying the 'format' parameter. 
   
   .. code-block:: python
 
@@ -156,7 +167,8 @@ the 'format' parameter.
     # or multiple aligned fasta files
     io.SaveAlignment(aln,'algnm.aln',format="clustal")
     
-For a list of file formats supported by :func:`SaveSequence` see :doc:`formats`.
+  For a list of file formats supported by :func:`SaveSequence` see
+  :doc:`formats`.
   
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
       is not recognized or the file format can not be detected based on the 
@@ -167,13 +179,17 @@ For a list of file formats supported by :func:`SaveSequence` see :doc:`formats`.
 
 .. function:: SaveSequenceList(filename, format='auto')
 
-  For a desription of how to use :func:`SaveSequenceList` please refer to :func:`SaveSequence`.
-  For a list of file formats supported by :func:`SaveSequenceList` see :doc:`formats`.
+  For a desription of how to use :func:`SaveSequenceList` please refer to 
+  :func:`SaveSequence`. For a list of file formats supported by 
+  :func:`SaveSequenceList` see :doc:`formats`.
 
 .. function:: SaveAlignment(filename, format='auto')
 
-  For a desription of how to use :func:`SaveAlignment` please refer to :func:`SaveSequence`.
-  For a list of file formats supported by :func:`SaveAlignment` see :doc:`formats`.
+  For a desription of how to use :func:`SaveAlignment` please refer to 
+  :func:`SaveSequence`.
+  
+  For a list of file formats supported by :func:`SaveAlignment` see 
+  :doc:`formats`.
 
 
 .. testsetup:: io
