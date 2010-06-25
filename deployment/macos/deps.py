@@ -69,7 +69,7 @@ def copy_binaries(stage_dir, outdir, binary_names, scripts):
       continue
     dst_name=os.path.join(outdir, 'bin', os.path.basename(bin_name))
     shutil.copy(bin_name, dst_name)
-    update_load_commands(dst_name)
+    update_load_commands(dst_name, exe=True)
     os.system(ADD_RPATH % ('../lib', dst_name))
   for script in scripts:
     shutil.copy(os.path.join(stage_dir, 'bin', script), 
@@ -89,9 +89,10 @@ def split_framework_components(abs_path):
         trail=os.path.join(*parts[i+1:])
         return lead, trail
 
-def update_load_commands(lib):
+def update_load_commands(lib, exe=False):
   direct_deps=set()
   _deps_for_lib(lib, direct_deps, recursive=False)
+  os.chmod(lib, 0666)
   for direct_dep in direct_deps:
     if direct_dep.endswith('.dylib'):
       new_name=os.path.basename(direct_dep)
@@ -104,6 +105,10 @@ def update_load_commands(lib):
       new_name=os.path.join(framework_name, rel_path)
       os.system(CHANGE_LOAD_CMD % (direct_dep, new_name, lib))
   os.system(ADD_RPATH % ('.', lib))
+  if exe:
+    os.chmod(lib, 0555)
+  else:
+    os.chmod(lib, 0444)
 
 def copy_deps(dependencies, outdir):
   for dep in dependencies:
@@ -124,11 +129,21 @@ def copy_deps(dependencies, outdir):
 
 def update_pymod_shared_objects(lib_path, path, files):
   for f in files:
-    if os.path.splitext(f)[1] == '.so':
+    if not os.path.exists(os.path.join(path, f)):
+      continue
+    base, ext=os.path.splitext(f)
+    if  ext=='.so':
       path_to_lib_path=os.path.relpath(lib_path, path)
       abs_name=os.path.join(path, f)
       os.system(ADD_RPATH % (path_to_lib_path, abs_name))
       update_load_commands(abs_name)
+    elif ext=='.py':
+      pyc_path=os.path.join(path, '%s.pyc' % base)
+      if os.path.exists(pyc_path):
+        os.unlink(pyc_path)      
+      pyo_path=os.path.join(path, '%s.pyo' % base)
+      if os.path.exists(pyo_path):
+        os.unlink(f)
 
 def get_site_package_dir():
   """
