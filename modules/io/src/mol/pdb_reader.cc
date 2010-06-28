@@ -279,17 +279,30 @@ void PDBReader::ClearState()
   strand_list_.clear();
 }
 
+bool PDBReader::EnsureLineLength(const StringRef& line, size_t size)
+{
+  if (line.length()<size) {
+    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+      return false;
+    }    
+    throw IOException(str(format("premature end of line %d") %line_num_));
+  }  
+  return true;
+}
+
 bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num, 
                                char& chain_name,  StringRef& res_name,
                                mol::ResNum& resnum, StringRef& atom_name, 
                                char& alt_loc, const StringRef& record_type)
 {
+  if (!this->EnsureLineLength(line, 27)) {
+    return false;
+  }
   chain_name=line[21];
   if (restrict_chains_.size()>0 &&
     restrict_chains_.find(chain_name)==String::npos) {
     return false;
   }
-
   std::pair<bool, int> a_num=line.substr(6, 5).ltrim().to_int();
   if (!a_num.first) {
     if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
@@ -325,6 +338,9 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
 void PDBReader::ParseAnisou(const StringRef& line, int line_num, 
                             mol::EntityHandle& ent)
 {
+  if (!this->EnsureLineLength(line, 77)) {
+    return;
+  }  
   char chain_name=0;
   char alt_loc=0;
   StringRef res_name, atom_name;
@@ -372,13 +388,15 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   aprop.anisou/=10000;
   aprop.has_anisou=true;
   atom.SetAtomProps(aprop);
-  return;  
 }
 
 void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
                                 mol::EntityHandle& ent, 
                                 const StringRef& record_type)
 {
+  if (!this->EnsureLineLength(line, 59)) {
+    return;
+  }
   mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
   char alt_loc=0;
   char chain_name=0;
@@ -558,9 +576,15 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
 
 void PDBReader::ParseHelixEntry(const StringRef& line)
 {
+  if (!this->EnsureLineLength(line, 38)) {
+    return;
+  }
   std::pair<bool, int>  start_num=line.substr(21, 4).ltrim().to_int();
   std::pair<bool, int>  end_num=line.substr(33, 4).ltrim().to_int();
   if (!start_num.first || !end_num.first) {
+    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+      return;
+    }    
     throw IOException(str(format("invalid helix entry on line %d") % line_num_));
   }
   LOGN_DEBUG("making helix entry: " << start_num.second << ", " 
@@ -577,12 +601,19 @@ void PDBReader::ParseHelixEntry(const StringRef& line)
 
 void PDBReader::ParseStrandEntry(const StringRef& line)
 {
+  if (!this->EnsureLineLength(line, 38)) {
+    return;
+  }  
   std::pair<bool, int>  start_num=line.substr(22, 4).ltrim().to_int();
   std::pair<bool, int>  end_num=line.substr(33, 4).ltrim().to_int();
   if (!start_num.first || !end_num.first) {
-    throw IOException(str(format("invalid strand entry on line %d") % line_num_));
+    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+      return;
+    }
+    throw IOException(str(format("invalid strand entry on line %d")%line_num_));
   }
-  LOGN_DEBUG("making strand entry: " << start_num.second << ", " << line[26] << " " << end_num.second << " " << line[37]);
+  LOGN_DEBUG("making strand entry: " << start_num.second << ", " << line[26] 
+             << " " << end_num.second << " " << line[37]);
   HSEntry hse = {to_res_num(start_num.second, line[26]),
                  to_res_num(end_num.second, line[37]),
                  line.substr(21,1).str()};
