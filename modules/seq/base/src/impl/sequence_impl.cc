@@ -108,7 +108,7 @@ void SequenceImpl::ShiftsFromSequence()
 int SequenceImpl::GetResidueIndex(int pos) const
 {
   if (pos<0 || pos>=static_cast<int>(seq_string_.length()))
-    throw Error("Position is not covered in sequence");
+    throw std::out_of_range("Position is not covered in sequence");
   if (seq_string_[pos]=='-')
     throw Error("Requested position contains a gap");
   std::list<Shift>::const_iterator i;
@@ -136,7 +136,7 @@ int SequenceImpl::GetPos(int index) const
   int shifted_index=index-sequence_offset_;
   int pos=this->GetPosNoBounds(shifted_index);
   if (pos<0 || pos>=static_cast<int>(seq_string_.length()))
-    throw Error("number not covered in sequence");
+    throw std::out_of_range("number not covered in sequence");
   return pos;
 }
 
@@ -171,7 +171,7 @@ int SequenceImpl::GetLength() const {
 char SequenceImpl::GetOneLetterCode(int position) const
 {
   if (position<0 || position>=static_cast<int>(seq_string_.length()))
-    throw Error("Position is not covered in sequence");
+    throw std::out_of_range("Position is not covered in sequence");
   return seq_string_[position];
 }
 
