@@ -472,8 +472,9 @@ AtomViewIter EntityView::AtomsBegin() const
   if (rvl.empty()) {
     return AtomViewIter();
   }
-  return AtomViewIter(data_->chains.begin(), rvl.begin(),
-                      rvl.front().GetAtomList().begin(), *this, true);
+  return AtomViewIter(impl::begin(data_->chains), impl::begin(rvl),
+                      impl::begin(rvl.front().GetAtomList()), 
+                      *this, true);
 }
 
 AtomViewIter EntityView::AtomsEnd() const {
@@ -485,8 +486,8 @@ AtomViewIter EntityView::AtomsEnd() const {
   if (rvl.empty()) {
     return AtomViewIter();
   }
-  return AtomViewIter(data_->chains.end(), rvl.end(),
-                      rvl.back().GetAtomList().end(), *this, false);
+  return AtomViewIter(impl::end(data_->chains), impl::end(rvl),
+                      impl::end(rvl.back().GetAtomList()), *this, false);
 }
 
 ResidueViewIter EntityView::ResiduesBegin() const 
@@ -496,7 +497,8 @@ ResidueViewIter EntityView::ResiduesBegin() const
     return ResidueViewIter();
   }
   const ResidueViewList& rvl=data_->chains.front().GetResidueList();
-  return ResidueViewIter(data_->chains.begin(), rvl.begin(), *this, true);
+  return ResidueViewIter(impl::begin(data_->chains), 
+                         impl::begin(rvl), *this, true);
 }
 
 ResidueViewIter EntityView::ResiduesEnd() const 
@@ -506,7 +508,8 @@ ResidueViewIter EntityView::ResiduesEnd() const
       return ResidueViewIter();
     }
     const ResidueViewList& rvl=data_->chains.back().GetResidueList();
-    return ResidueViewIter(data_->chains.end(), rvl.end(), *this, false);
+    return ResidueViewIter(impl::end(data_->chains), 
+                           impl::end(rvl), *this, false);
 }
 
 

@@ -39,7 +39,7 @@
 #include <ost/mol/impl/connector_impl_fw.hh>
 #include <ost/mol/impl/torsion_impl_fw.hh>
 #include <ost/mol/impl/fragment_impl_fw.hh>
-
+#include <ost/mol/impl/pointer_iterator.hh>
 #include <ost/mol/entity_visitor_fw.hh>
 #include <ost/mol/entity_observer_fw.hh>
 #include <ost/mol/entity_view.hh>
@@ -242,6 +242,7 @@ public:
 
   impl::ChainImplList::iterator GetChain(const String& name);
 
+  pointer_it<ChainImplPtr> GetChainIter(const String& name);
   void SetName(const String& ent_name);
 
 private:

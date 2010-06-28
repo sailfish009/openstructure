@@ -1191,6 +1191,18 @@ impl::ChainImplList::iterator EntityImpl::GetChain(const String& name)
   }
   return  cc.end();
 }
+
+pointer_it<ChainImplPtr> EntityImpl::GetChainIter(const String& name)
+{
+  impl::ChainImplList& cc=this->GetChainList();
+  for (size_t i=0; i<cc.size(); ++i) {
+    if (cc[i]->GetName()==name) {
+      return &cc.front()+i;
+    }
+  }
+  return  pointer_it<ChainImplPtr>(NULL);
+}
+
 void EntityImpl::RenameChain(ChainImplPtr chain, const String& new_name)
 {
   ChainImplList::iterator i;

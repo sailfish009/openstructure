@@ -181,9 +181,9 @@ AtomHandleIter ResidueHandle::AtomsBegin() const
   impl::ResidueImplPtr r=Impl();
   int index=this->GetIndex();
   impl::ChainImplPtr c=r->GetChain();
-  impl::ChainImplList::iterator cc=r->GetEntity()->GetChain(c->GetName());
-  return AtomHandleIter(cc, c->GetResidueList().begin()+index,
-                        r->GetAtomList().begin(), r->GetEntity(), true);
+  impl::pointer_it<impl::ChainImplPtr> cc=r->GetEntity()->GetChainIter(c->GetName());
+  return AtomHandleIter(cc, impl::begin(c->GetResidueList())+index,
+                        impl::begin(r->GetAtomList()), r->GetEntity(), true);
 }
 
 AtomHandleIter ResidueHandle::AtomsEnd() const 
@@ -192,14 +192,15 @@ AtomHandleIter ResidueHandle::AtomsEnd() const
   impl::ResidueImplPtr r=Impl();
   int index=this->GetIndex();
   impl::ChainImplPtr c=r->GetChain();
-  impl::ChainImplList::iterator cc=r->GetEntity()->GetChain(c->GetName());
+  impl::pointer_it<impl::ChainImplPtr> cc=r->GetEntity()->GetChainIter(c->GetName());
   if (c->GetResidueList().begin()+index+1==c->GetResidueList().end()) {
-    return AtomHandleIter(cc, c->GetResidueList().begin()+index,
-                          r->GetAtomList().end(), r->GetEntity(), false);
+    return AtomHandleIter(cc, impl::begin(c->GetResidueList())+index,
+                          impl::begin(r->GetAtomList()), r->GetEntity(), false);
   } else {
-    impl::ResidueImplList::iterator x=(c->GetResidueList().begin()+index+1);
-    return AtomHandleIter(cc, c->GetResidueList().begin()+index+1,
-                          (*x)->GetAtomList().begin(), r->GetEntity(), false);
+    impl::pointer_it<impl::ResidueImplPtr> x=(impl::begin(c->GetResidueList())+index+1);
+    return AtomHandleIter(cc, impl::begin(c->GetResidueList())+index+1,
+                          impl::begin((*x)->GetAtomList()), 
+                          r->GetEntity(), false);
   }
 
 }

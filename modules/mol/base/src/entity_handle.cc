@@ -262,8 +262,8 @@ ResidueHandleIter EntityHandle::ResiduesBegin() const {
   }
   impl::EntityImplPtr i=Impl();
   impl::ChainImplPtr chain=i->GetChainList().front();
-  return ResidueHandleIter(i->GetChainList().begin(),
-                           chain->GetResidueList().begin(), i, true);
+  return ResidueHandleIter(impl::begin(i->GetChainList()),
+                           impl::begin(chain->GetResidueList()), i, true);
 }
 
 ResidueHandleIter EntityHandle::ResiduesEnd() const {
@@ -273,8 +273,8 @@ ResidueHandleIter EntityHandle::ResiduesEnd() const {
   }
   impl::EntityImplPtr i=Impl();
   impl::ChainImplPtr chain=i->GetChainList().back();
-  return ResidueHandleIter(i->GetChainList().end(),
-                           chain->GetResidueList().end(), i, false);
+  return ResidueHandleIter(impl::end(i->GetChainList()),
+                           impl::end(chain->GetResidueList()), i, false);
 }
 
 ChainHandleIter EntityHandle::ChainsBegin() const {
@@ -298,8 +298,8 @@ AtomHandleIter EntityHandle::AtomsBegin() const {
   if (r.empty()) {
     return AtomHandleIter();
   }
-  return AtomHandleIter(ent->GetChainList().begin(), r.begin(),
-                        r.front()->GetAtomList().begin(), ent, true);
+  return AtomHandleIter(impl::begin(ent->GetChainList()), impl::begin(r),
+                        impl::begin(r.front()->GetAtomList()), ent, true);
 }
 
 AtomHandleIter EntityHandle::AtomsEnd() const 
@@ -313,8 +313,8 @@ AtomHandleIter EntityHandle::AtomsEnd() const
   if (r.empty()) {
     return AtomHandleIter();
   }
-  return AtomHandleIter(ent->GetChainList().end(), r.end(),
-                        r.back()->GetAtomList().end(), ent, false);
+  return AtomHandleIter(impl::end(ent->GetChainList()), impl::end(r),
+                        impl::end(r.back()->GetAtomList()), ent, false);
 }
 
 XCSEditor EntityHandle::RequestXCSEditor(EditMode mode) const
