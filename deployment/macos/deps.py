@@ -89,6 +89,11 @@ def split_framework_components(abs_path):
         trail=os.path.join(*parts[i+1:])
         return lead, trail
 
+def change_id(id,lib):
+  os.chmod(lib, 0666)
+  os.system(CHANGE_ID % (id,lib))
+  os.chmod(lib, 0444)
+
 def update_load_commands(lib, exe=False):
   direct_deps=set()
   _deps_for_lib(lib, direct_deps, recursive=False)
@@ -115,7 +120,7 @@ def copy_deps(dependencies, outdir):
     if dep.endswith('.dylib'):
       dst_name=os.path.join(outdir, 'lib', os.path.basename(dep))
       shutil.copy(dep, dst_name)
-      os.system(CHANGE_ID % (os.path.basename(dep), dst_name))
+      change_id(os.path.basename(dep), dst_name)
       update_load_commands(dst_name)
     else:
       assert dep.find('.framework/')>=0
@@ -123,8 +128,8 @@ def copy_deps(dependencies, outdir):
       framework_name=os.path.basename(framework_path)
       dst_name=os.path.join(outdir, 'lib', framework_name)
       shutil.copytree(framework_path, dst_name)
-      os.system(CHANGE_ID % (os.path.join(dst_name, rel_path), 
-                             os.path.join(dst_name, rel_path)))
+      change_id(os.path.join(dst_name, rel_path), 
+                             os.path.join(dst_name, rel_path))
       update_load_commands(os.path.join(dst_name, rel_path))
 
 def update_pymod_shared_objects(lib_path, path, files):
