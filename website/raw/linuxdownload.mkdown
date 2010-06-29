@@ -19,11 +19,10 @@ a command line terminal, type:
         :::bash
         tar xvfz <archive name>
  
-2. Open a terminal, move to the package directory and then to the 'bin' subdirectory:
+2. Open a terminal and move to the package directory:
 
         :::bash
         cd <directory name>
-        cd bin
     
 3. Launch the graphical front end 'DNG':
 
