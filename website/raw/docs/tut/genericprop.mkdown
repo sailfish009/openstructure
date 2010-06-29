@@ -35,37 +35,37 @@ To store a float value with the key 'myfloatprop' in all atoms of an entity:
     import math
     for atom in entity.GetAtomList(): 
       val=5*math.sin(0.4*atom.GetPos().GetX())
-      atom.SetGenericFloatProperty("myfloatprop", val)
+      atom.SetFloatProp("myfloatprop", val)
 
 If a GenericProperty at a given level (i.e. atom, bond, residue, chain or entity) already exists, it will be overwritten. To check if it exists, use:
 
     ::::python
-    exists=atom.HasGenericProperty("myfloatprop")
+    exists=atom.HasProp("myfloatprop")
     print exists
     
 To access the value of a GenericProperty, we first check if the property exists and then access it, using the method suitable for the data type of the property. For the previously set property "myfloatprop" of the data type Real, at the atom level:
 
     ::::python
     for atom in entity.GetAtomList(): 
-      if atom.HasGenericProperty("myfloatprop"):
-        print atom.GetGenericFloatProperty("myfloatprop")
+      if atom.HasProp("myfloatprop"):
+        print atom.GetFloatProp("myfloatprop")
         
 When trying to access a property that has not been set, or one that has been set, but at a different level, an error is thrown. The same is true when trying to access a property of a different data type, e.g.:
 
     ::::python
     # all of the following lines will throw errors
     # error because the property does not exist 
-    print atom.GetGenericFloatProperty("unknownprop")
+    print atom.GetFloatProp("unknownprop")
     
     # error because the property was set at another level
-    print entity.GetGenericFloatProperty("myfloatprop")
+    print entity.GetFloatProp("myfloatprop")
     
     # error because the data type of the property is different
-    print atom.GetGenericStringProperty("myfloatprop")
+    print atom.GetStringProp("myfloatprop")
     
 For more details see dox[ost::GenericPropertyContainer|GenericPropertyContainer].
 
 ## Use of GenericProperties in Queries
 
-The [query language](docs/tut/query.html) can also be used for numeric generic properties (i.e. GenericFloatProperty and GenericIntProperty), but the syntax is slightly different. To access any generic properties, it needs to be specified that they are generic and at which level they are defined. Therefore, all generic properties start with a 'g', followed by an 'a', 'r' or 'c' for atom, residue or chain level respectively. For more details [see documentation](dox/html/query.html#gen_prop). 
+The [query language](docs/tut/query.html) can also be used for numeric generic properties (i.e. FloatProp and IntProp), but the syntax is slightly different. To access any generic properties, it needs to be specified that they are generic and at which level they are defined. Therefore, all generic properties start with a 'g', followed by an 'a', 'r' or 'c' for atom, residue or chain level respectively. For more details [see documentation](dox/html/query.html#gen_prop). 
 

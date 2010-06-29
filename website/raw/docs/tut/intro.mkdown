@@ -84,7 +84,7 @@ Of course, we can also get a list of atoms grouped by residues:
 And, for completeness, we will first group them by chain, then by residues.
 
     ::::python
-    for chain in fragments.chains:
+    for chain in fragment.chains:
       print 'chain', chain.name, 'has', chain.residue_count, 'residue(s)'
       for residue in chain.residues:
         print ' ', residue, 'has', residue.atom_count, 'atom(s).'
@@ -198,29 +198,29 @@ Before using the load functionality for an image, you have to import the io modu
 To load a density map, type
 
      ::::python
-     map=io.LoadImage('OST_INSTALLATION_PATH/share/openstructure/examples/map/1ppt.map')
+     the_map=io.LoadImage('/path/to/examples/map/1ppt.map')
 
-This will load the fragment density map from the specified file 'fragment.map' and store the result in fragment_map.
+This will load the fragment density map from the specified file '1ppt.map' and store the result in the_map.
 
 Now let's inspect what we just loaded:
 
     ::::python
-    print map.GetPixelSampling()
+    print the_map.GetPixelSampling()
     
 We can see that the sampling is set to 1.0 Angstroems in all three dimensions.
 
 ## Manipulating  images and density maps
 
-The algorithms used for manipulation of an image are found in the img module. Therefore before using an algorithm we first have to import the img module.
+The algorithms used for manipulation of an image are found in the img.alg module. Therefore before using an algorithm we first have to import the img.alg module.
 
     ::::python
-    from ost import img
+    from ost.img import alg
 
 
-The img module provides a wide range of algorithm to manipulate image data. Here for the example we use a LowPassFilter to restrict the resolution of the density map.
+The img.alg module provides a wide range of algorithm to manipulate image data. Here for the example we use a LowPassFilter to restrict the resolution of the density map.
 
      ::::python
-     map_filtered=map.Apply(img.alg.LowPassFilter(3.0))
+     map_filtered=the_map.Apply(alg.LowPassFilter(3.0))
 
 The filtered map is stored in a new variable called fragment\_map\_filtered.
 
@@ -240,7 +240,7 @@ the user to move through the slices. In OpenStructure this is achieved using a D
 filtered map is created using the following command:
 
     ::::python
-    gui.CreateDataViewer(map_filtered)
+    gui.CreateDataViewer(map_filtered)
 
 This command displays a panel showing one slice of the density map lying on a particular (x,y) plane in the coordinate reference system.
 The 'z' and 'x' keys can be used to move to slices lying at a lower or higher coordinate along the 'z' axis, allowing the examination of
