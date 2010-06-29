@@ -65,13 +65,13 @@ FileBrowser::FileBrowser(QWidget* parent):
     dir.cdUp();
     dir.cdUp();
     path=dir.path();
-    QString example_path=path+"/share/openstructure/examples/entity";
+    QString example_path=path+"/share/openstructure/examples/";
     if (QDir(example_path).exists()) {
       path=example_path;
     } 
 # elif defined(__APPLE__)
   if (path.contains("DNG.app") || path=="/") {
-    QDir dir(QCoreApplication::applicationDirPath());
+    QString example_path="/Applications/OpenStructure/Examples/";
     dir.cdUp();
     QString example_path=dir.path()+"/examples";
     if (QDir(example_path).exists()) {
