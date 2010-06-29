@@ -54,11 +54,11 @@ public:
   /// \param show if show if false hide the widget even the position is not correct.
   virtual void ShowWidget(Widget* widget,int pos,bool show = true) = 0;
   /// \brief Begin with dragging widgets
-  /// This method is initially called in the \ref Panels class in the \ref Panels::StartDrag() method.
+  /// This method is initially called in the \ref PanelManager class in the \ref PanelManager::StartDrag() method.
 
   virtual void StartDrag();
   /// \brief Stop dragging widgets
-  /// This method is initially called in the \ref Panels class in the \ref Panels::EndDrag() method.
+  /// This method is initially called in the \ref PanelManager class in the \ref PanelManager::EndDrag() method.
   virtual void EndDrag();
 
   /// \brief Get the PanelBar

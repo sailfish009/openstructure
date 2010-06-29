@@ -79,7 +79,7 @@ public:
   /// \param pos Indicates which PanelBar is affected
   /// \param class_name the class_name of the widget you would like to add.
   /// \param is_hidden marks if the class should be displayed in the gui. Default the widget will be shown.
-  void AddWidgetByName(PanelPosition pos, const QString& class_name, bool hidden=false);
+  void AddWidgetByName(PanelPosition pos, const QString& class_name, bool is_hidden=false);
 
   /// \brief Replace a Widget with another Widget
   /// With this Method you can replace a Widget which is in a PanelBar with another Widget.

@@ -80,10 +80,10 @@ public:
   int GetIndex(Widget* widget);
 
   /// \brief Begin with dragging widgets
-  /// This method is called by the \ref Panels class. Read more about this method at \ref Panels::StartDrag() .
+  /// This method is called by the \ref PanelManager class. Read more about this method at \ref PanelManager::StartDrag() .
   void DragEnter();
   /// \brief Stop dragging widgets
-  /// This method is called by the \ref Panels class. Read more about this method at \ref Panels::EndDrag() .
+  /// This method is called by the \ref PanelManager class. Read more about this method at \ref PanelManager::EndDrag() .
   void EndDrag();
 
   /// \brief Get action which changes the visibility of this widget
