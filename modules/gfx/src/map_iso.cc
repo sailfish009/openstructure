@@ -135,8 +135,8 @@ geom::Vec3 MapIso::GetCenter() const
   geom::Vec3 nrvo = mh_.IndexToCoord(mh_.GetExtent().GetCenter());
   return nrvo;
 }
-  
-void MapIso::OnRenderModeChange()
+
+void MapIso::UpdateRenderParams()
 {
   if(GetRenderMode()==RenderMode::FILL ||
      GetRenderMode()==RenderMode::OUTLINE) {
@@ -159,7 +159,12 @@ void MapIso::OnRenderModeChange()
     va_.SetLineWidth(this->GetLineWidth());
     va_.SetMode(0x2); // only lines
     va_.SetTwoSided(true);
-  }
+  }  
+}
+
+void MapIso::OnRenderModeChange()
+{
+  this->UpdateRenderParams();
   this->FlagRebuild();
   GfxObj::OnRenderModeChange();
 }
@@ -298,7 +303,7 @@ void MapIso::Rebuild()
   va_.CalcNormals(1.0);
   va_.DrawNormals(true);
 #endif  
-  OnRenderModeChange();  
+  this->UpdateRenderParams();  
 }
 
 void MapIso::SetLevel(float l)
@@ -316,7 +321,8 @@ void MapIso::CalculateStat() const
 
 void MapIso::CalculateHistogram() const
 {
-  histogram_ = img::alg::HistogramBase(histogram_bin_count_, this->GetMinLevel(), this->GetMaxLevel());
+  histogram_ = img::alg::HistogramBase(histogram_bin_count_, 
+                                       this->GetMinLevel(), this->GetMaxLevel());
   mh_.ApplyIP(histogram_);
   histogram_calculated_=true;
 }

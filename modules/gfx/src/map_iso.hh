@@ -146,6 +146,7 @@ public:
   bool IfOctreeDirty() const;
 
 protected:
+  void UpdateRenderParams();
   void CalculateStat() const;
   void CalculateHistogram() const;
   virtual void CustomPreRenderGL(bool flag);
