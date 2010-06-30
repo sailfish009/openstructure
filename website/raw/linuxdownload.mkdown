@@ -6,9 +6,10 @@ title: Download - Linux
 
 OpenStructure is released under the  <a target="extern" href="http://www.gnu.org/licenses/lgpl-3.0-standalone.html">LGPL Version 3</a> license.
 
- * [OpenStructure Linux Bundle](downloads/OSTcurrent_linux.tgz)
+ * [OpenStructure Linux Bundle - Ubuntu 10.04 (Lucid Lynx)) and later](downloads/openstructure-1.0.0a-rev2473-lucid-32bit.tgz)
+ * [OpenStructure Linux Bundle - Ubuntu 9.10 (Karmic Koala) and earlier](downloads/openstructure-1.0.0a-rev2473-karmic-32bit.tgz)
 
-This archive file contains a stand-alone self-contained version of OpenStructure for the Linux platform. .
+Each of thers archive files contains a stand-alone self-contained version of OpenStructure for the Linux platform. .
 
 To run it, follow this simple instructions:
 
@@ -35,9 +36,14 @@ a command line terminal, type:
         ./ost
         
 Note
-:   The package has been created on a 32bit machine (but should work also on 64 bit machines, provided
+:   These packages have been created on a 32bit machine (but should work also on 64 bit machines, provided
 that the correct 32-bit compatibility libraries are installed).
-The following Linux distributions are supported:
+
+
+Although the file archives have been created using the Ubuntu linux distribution, they have also been tested on 
+other systems.
+
+The Karmic file archive has been tested on the following Linux distributions:
 
 * Ubuntu 9.10
 * Ubuntu 9.04
@@ -45,8 +51,13 @@ The following Linux distributions are supported:
 * Fedora Core 12
 * Fedora Core 11
 * Fedora Core 10
-* OpenSUSE 11.2
+* CentOS 5.5 
 
-The package does not contain drivers for the graphic card on your machine. In order to fully appreciate
+The Lucid file archive has been tested on the following Linux distributions:
+
+* Ubuntu 10.04
+* Fedora Core 13
+
+The archives do not contain drivers for the graphic card on your machine. In order to fully appreciate
 the OpenStructure experience, you have to install the graphic drivers yourself and activate 3D acceleration.
 This procedure in distribution and architecture specific, so it can not be described in details here.
