@@ -70,7 +70,7 @@ subprocess.call('rm -fr openstructure-linux*',shell=True,cwd='../../')
 print 'Creating new package directory'
 subprocess.call('mkdir '+directory_name,shell=True,cwd='../../')
 subprocess.call('mkdir '+directory_name+'/bin',shell=True,cwd='../../')
-rint 'Copy python executable into stage for dependency detection'
+print 'Copy python executable into stage for dependency detection'
 subprocess.call('cp '+system_python_bin+ ' 'stage/bin/python',shell=True,cwd='../../')
 print 'Copy python libraries into the stage for dependency detection'
 subprocess.call('cp -pRL '+system_python_libs+' stage/'+libdir,shell=True,cwd='../../')
