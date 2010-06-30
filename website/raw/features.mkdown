@@ -14,8 +14,8 @@ title: Features
  
 ## Supported Platforms
 
- * [Windows XP](windowsdownload.html)
- * [MacOS X 10.5 and 10.6](macdownload.html)
+ * [Windows](windowsdownload.html)
+ * [MacOS X](macdownload.html)
  * [Linux](linuxdownload.html)
 
 ## Macromolecules

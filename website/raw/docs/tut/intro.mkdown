@@ -115,12 +115,13 @@ Use the mouse to rotate, zoom in an shift the camera. Double clicking on an atom
 ## Introduction to Views
 
 Often during processing and visualisation of data, only parts of a protein structure are of interest. This realisation has had a major impact on the design of OpenStructure and is tied very deeply into the core of the framework. Subparts of structure are modeled as so-called dox[ost::mol::EntityView|EntityViews]. You can think of them as a selection of chains, residues, atoms and bonds of an entity. A views has almost the same interface as the underlying entity, making it very easy to mix entity views with handles in Python due to the dynamic nature of the language. An algorithm that is written for entities will almost always (with some care) also work for dox[ost::mol::EntityHandle|EntityHandles]. This is referred to as [duck-typing](http://en.wikipedia.org/wiki/Duck_typing) (I don' t care if it is a duck as long as it looks like a duck), a concept used all over the place in Python. 
-￼
+
 A typical view can be seen in the image on the left. The view consists of one chain, one residue and two atoms. Again the same rule applies: No atom can be part of the view without it's residue. In this example, no bonds are included, since there is at most one atom per bond in the original structure.
 
 To familiarize yourself with the concept of views, we will use the fragment in the 3D window.
 
 We will use several ways to select parts of our fragment:
+
  * By using a dedicated query language
  * By manually constructing a view
 
@@ -236,7 +237,7 @@ density value. Isosurfaces are easy to create in OpenStructure:
      scene.Add(go)
 
 The other way to visualize a 3-dimensional map is by showing one 2-dimensional density slice at a time, allowing
-the user to move through the slices. In OpenStructure this is achieved using a DataViewer docs/tut/imgdataviewer.html). A DataViewer showing the
+the user to move through the slices. In OpenStructure this is achieved using a [DataViewer](docs/tut/imgdataviewer.html). A DataViewer showing the
 filtered map is created using the following command:
 
     ::::python
