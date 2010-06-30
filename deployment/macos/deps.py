@@ -2,6 +2,7 @@ import os
 import subprocess
 import shutil
 import sys
+import glob
 def _lib_name(component):
   return 'libost_%s.dylib' % component
 
@@ -168,25 +169,25 @@ def update_pymod_shared_objects(args, path, files):
       abs_name=os.path.join(path, f)
       os.system(ADD_RPATH % (path_to_lib_path, abs_name))
       update_load_commands(abs_name, False, use_rpath, exe_path)
-    elif ext=='.py':
-      pyc_path=os.path.join(path, '%s.pyc' % base)
-      if os.path.exists(pyc_path):
-        os.unlink(pyc_path)      
-      pyo_path=os.path.join(path, '%s.pyo' % base)
-      if os.path.exists(pyo_path):
-        os.unlink(f)
-
+    elif ext in ('.pyc', '.pyo'):
+      os.unlink(os.path.join(path, f))
 def get_site_package_dir():
   """
   Get site-package directory of this python installation. This assumes 
   that ost was linked against the same version of Python
   """
   for p in sys.path:
-    pattern='/site-packages/'
+    pattern='/site-packages'
     index=p.find(pattern)
     if index>=0:
       return p[:index+len(pattern)]
   raise RuntimeError("Couldn't determine site-packages location")
+
+def get_python_home():
+  """
+  Derive Python home by looking at the location of the os module
+  """
+  return os.path.dirname(sys.modules['os'].__file__)
 
 def check_install_name_tool_capabilities():
   """
@@ -207,6 +208,7 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False):
   elif force_no_rpath:
     print "I will use the arcane @executable_path"
     use_rpath=False
+
   if os.path.exists(outdir):
     shutil.rmtree(outdir)
   os.system('mkdir -p "%s"' % outdir)
@@ -224,6 +226,27 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False):
   print 'copying pymod'
   shutil.copytree(os.path.join(stage_dir, 'lib/openstructure'), 
                   os.path.join(outdir, 'lib/openstructure'))
+  assert not os.path.exists(os.path.join(outdir, 'lib', 'Python.framework'))
+  if len(glob.glob(os.path.join(outdir, 'lib', 'libpython*')))>0:
+    print 'looks like we are using a non-standard python.'
+    python_home=get_python_home()
+    print 'also copying python modules from %s' % python_home
+    modules_dst=os.path.join(outdir, 'lib', os.path.basename(python_home))
+    shutil.copytree(python_home, modules_dst)
+    shutil.rmtree(os.path.join(modules_dst, 'site-packages'))
+    copy_binaries(os.path.join(python_home, '../..'), outdir, 
+                  ['python'], [], use_rpath)
+    # replace the python executable
+    ost_script=os.path.join(outdir, 'bin', 'ost')
+    os.chmod(ost_script, 0666)
+    script=''.join(open(ost_script, 'r').readlines())
+    python_bin=os.path.abspath(os.path.join(python_home, '../../bin/python'))
+    script=script.replace(python_bin, '$BIN_DIR/python')
+    open(ost_script, 'w').write(script)
+    os.chmod(ost_script, 0555)
+  elif use_rpath==False:
+    print 'BIG FAT WARNING: Creation bundle with @executable_path and default'
+    print 'Python might not work. Test carefully before deploying.'
   if no_includes:
     os.system(REMOVE_HEADERS % outdir)
     os.system(REMOVE_CURRENT % outdir)  
@@ -236,6 +259,6 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False):
     else:
       shutil.copy(src, os.path.join(outdir, 'lib/openstructure', sp))
   print 'updating link commands of python shared objects'
-  os.path.walk(os.path.join(outdir, 'lib', 'openstructure'), 
+  os.path.walk(os.path.join(outdir, 'lib'), 
                update_pymod_shared_objects, 
                (os.path.join(outdir, 'lib'), use_rpath))
