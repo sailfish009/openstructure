@@ -14,7 +14,7 @@ system_python_libs='/usr/lib/python2.6'
 second_system_python_libs_flag=True
 second_system_python_libs='/usr/lib/pymodules/python2.6'
 qt4_plugins='/usr/lib/qt4/plugins'
-additional_label='ubuntu-1.0.0a-'
+additional_label='ubuntu-1.0.0a'
 list_of_excluded_libraries=['ld-linux','libexpat','libgcc_s','libglib','cmov','libice','libSM','libX','libg','libGL.so','libfontconfig','libfreetype','libdrm','libxcb','libICE']
 
 currdir=os.getcwd()
@@ -71,7 +71,7 @@ print 'Creating new package directory'
 subprocess.call('mkdir '+directory_name,shell=True,cwd='../../')
 subprocess.call('mkdir '+directory_name+'/bin',shell=True,cwd='../../')
 print 'Copy python executable into stage for dependency detection'
-subprocess.call('cp '+system_python_bin+ ' 'stage/bin/python',shell=True,cwd='../../')
+subprocess.call('cp '+system_python_bin+ ' stage/bin/python',shell=True,cwd='../../')
 print 'Copy python libraries into the stage for dependency detection'
 subprocess.call('cp -pRL '+system_python_libs+' stage/'+libdir,shell=True,cwd='../../')
 if second_system_python_libs_flag==True:
@@ -118,6 +118,15 @@ print 'Copying supplementary material into package directory structure'
 subprocess.call('cp -pRL  stage/share/openstructure  '+directory_name+'/share/',shell=True,cwd='../../')
 print 'Copying examples into package directory structure'
 subprocess.call('cp -pRL  examples  '+directory_name+'/share/openstructure/',shell=True,cwd='../../')
+print 'Copying ReadMe file into package directory structure'
+subprocess.call('cp deployment/README.hmtl '+directory_name,shell=True,cwd='../../')
+print 'Creating executables at the top level of the package directory structure'
+subprocess.call('echo "bin/dng" > '+directory_name+'/dng',shell=True,cwd='../../')
+subprocess.call('chmod +x '+directory_name+'/dng',shell=True,cwd='../../')
+subprocess.call('chmod -w '+directory_name+'/dng',shell=True,cwd='../../')
+subprocess.call('echo "bin/ost" > '+directory_name+'/ost',shell=True,cwd='../../')
+subprocess.call('chmod +x '+directory_name+'/ost',shell=True,cwd='../../')
+subprocess.call('chmod -w '+directory_name+'/ost',shell=True,cwd='../../')
 print 'Removing headers from package directory structure'
 subprocess.call('rm -fr   '+directory_name+'/include',shell=True,cwd='../../')
 print 'De-hardcoding package python binary path from openstructure executables'
