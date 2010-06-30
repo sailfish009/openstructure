@@ -119,7 +119,7 @@ subprocess.call('cp -pRL  stage/share/openstructure  '+directory_name+'/share/',
 print 'Copying examples into package directory structure'
 subprocess.call('cp -pRL  examples  '+directory_name+'/share/openstructure/',shell=True,cwd='../../')
 print 'Copying ReadMe file into package directory structure'
-subprocess.call('cp deployment/README.hmtl '+directory_name,shell=True,cwd='../../')
+subprocess.call('cp deployment/README.html '+directory_name,shell=True,cwd='../../')
 print 'Creating executables at the top level of the package directory structure'
 subprocess.call('echo "bin/dng" > '+directory_name+'/dng',shell=True,cwd='../../')
 subprocess.call('chmod +x '+directory_name+'/dng',shell=True,cwd='../../')
