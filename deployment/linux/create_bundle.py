@@ -14,7 +14,7 @@ system_python_libs='/usr/lib/python2.6'
 second_system_python_libs_flag=True
 second_system_python_libs='/usr/lib/pymodules/python2.6'
 qt4_plugins='/usr/lib/qt4/plugins'
-additional_label='ubuntu'
+additional_label='ubuntu-1.0.0a-'
 list_of_excluded_libraries=['ld-linux','libexpat','libgcc_s','libglib','cmov','libice','libSM','libX','libg','libGL.so','libfontconfig','libfreetype','libdrm','libxcb','libICE']
 
 currdir=os.getcwd()
@@ -58,12 +58,12 @@ print 'Downloading Chemlib dictionary'
 subprocess.call('wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif', shell=True, cwd='../../')
 print 'Compiling Openstructure'
 subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DBoost_COMPILER='+boost_string+'-DENABLE_IMG=OFF -DENABLE_UI=OFF -DENABLE_GFX=OFF', shell=True,cwd='../../')
-subprocess.call('make',shell=True,cwd='../../')
+subprocess.call('make -j5',shell=True,cwd='../../')
 print 'Converting Chemlib dictionary'
 subprocess.call('stage/bin/chemdict_tool create components.cif compounds.chemlib', shell=True, cwd='../../')
 print '\nStaging Chemlib dictionary'
-subprocess.call('cmake ./ -DCOMPOUND_LIB=compounds.chemlib -DENABLE_IMG=ON -DENABLE_UI=ON -DENABLE_GFX=ON -DCOMPILE_TMTOOLS=ON',shell=True,cwd='../../')
-subprocess.call('make',shell=True,cwd='../../')
+subprocess.call('cmake ./ -DCOMPOUND_LIB=compounds.chemlib -DENABLE_IMG=ON -DENABLE_UI=ON -DENABLE_GFX=ON',shell=True,cwd='../../')
+subprocess.call('make -j5',shell=True,cwd='../../')
 print 'Removing obsolete packages and package directory'
 subprocess.call('rm -fr openstructure-linux*',shell=True,cwd='../../')
 print 'Creating new package directory'
