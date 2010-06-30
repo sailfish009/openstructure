@@ -6,10 +6,10 @@ title: Download
 
 Please choose your platform
 
-Current Version: 1.0.0.a_2370
+Current Version: 1.0.0.a
 
  * [Windows](windowsdownload.html)
- * [MacOS X 10.6](macdownload.html)
+ * [MacOS X 10.5 or later](macdownload.html)
  * [Linux](linuxdownload.html)
 
     

@@ -8,7 +8,7 @@ OpenStructure is released under the  <a target="extern" href="http://www.gnu.org
 
 ## Install It
  * [Download the package](downloads/OSTcurrent_macos.pkg). It contains a 
-   full-fledged version of OpenStructure. *Important*: You need MacOS 10.6 or 
+   full-fledged version of OpenStructure. *Important*: You need MacOS 10.5 or 
    later to run OpenStructure.
 
  *  Doubleclick the package to start the installation
