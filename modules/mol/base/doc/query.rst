@@ -4,7 +4,7 @@ Queries
 .. currentmodule:: ost.mol
 
 OpenStructure includes a powerful query system that allows you to perform custom 
-selections in a convenient way.
+selections on a molecular entity in a convenient way.
 
 
 The Basics
@@ -175,10 +175,12 @@ The following properties may be used in predicates. The type is given for each p
 Properties of Chains
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
 **cname/chain** (str) :attr:`Chain name<ChainHandle.name>` 
   
 Properties of Residues
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 
 **rname** (str): :attr:`Residue name<ResidueHandle.name>`
  
@@ -198,12 +200,11 @@ index is the same for views and handles.
 Properties of Atoms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
 **aname** (str): :attr:`Atom name<AtomHandle.name>`
   
 **ele** (str): :attr:`Atom element<AtomHandle.element>`
-  
 
-  
 **occ** (float): :attr:`Atom occupancy<AtomHandle.occupancy>`
 
 **abfac** (float): :attr:`Atom B-factor<AtomHandle.b_factor>`

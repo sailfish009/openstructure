@@ -63,7 +63,7 @@ be achieved with
   conop.Conopology.Instance().RegisterBuilder(rbb,'rbb')
   conop.Conopology.Instance().SetDefaultBuilder('rbb')
 
-All subsequent calls to :func:`io.LoadEntity` will make use of the
+All subsequent calls to :func:`ost.io.LoadEntity` will make use of the
 RuleBasedBuilder  instead of the heuristic builder. See 
 :ref:`here <mmcif-convert>` for more  information on how to create the necessary 
 files to use the rule-based builder.
@@ -225,18 +225,20 @@ files to use the rule-based builder.
 Connecting atoms
 --------------------------------------------------------------------------------
 
-The high level interface is exposed by the Conopoloy singleton instance:
+A single function call to :func:`ConnectAll` is sufficient to assign residue and atoms properties as well as to connect atoms with bonds.
+
 
 .. code-block:: python
-  
-  import conop
-  
-  cc=conop.Conopology.Instance()
-  
-  ent=BuildRawModel(...)
-  cc.ConnectAll(cc.GetBuilder(), ent)
 
-For fine grained control, the builder interface may be used directly.
+  # Suppose that BuildRawModel is a function that returns a protein structure
+  # with no atom properties assigned and no bonds formed.
+  ent=BuildRawModel(...)
+  print ent.bonds  # will return an empty list
+  # Call ConnectAll() to assign properties/connect atoms
+  conop.ConnectAll(ent)
+  print ent.bonds  # will print a list containing many bonds
+
+For fine grained control, the :class:`Builder` interface may be used directly.
 
 
 .. _mmcif-convert:
