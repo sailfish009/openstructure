@@ -3,6 +3,7 @@ import subprocess
 import shutil
 import sys
 import glob
+
 def _lib_name(component):
   return 'libost_%s.dylib' % component
 
@@ -25,7 +26,8 @@ def _deps_for_lib(lib, pool, recursive=True):
         pool.add(d)        
   return
 
-def collect_deps(stage_dir, components, binaries):
+def collect_deps(stage_dir, components, binaries, site_packages, 
+                 site_packages_dir):
   """
   Collect the dependencies for the given components and returns a list of 
   frameworks/libraries that the component depends on.
@@ -47,6 +49,14 @@ def collect_deps(stage_dir, components, binaries):
       continue
     if bin_name not in pool:
       _deps_for_lib(bin_name, pool)
+  for site_package in site_packages:
+    full_path=os.path.join(site_packages_dir, site_package)
+    if not os.path.exists(full_path):
+      print 'WARNING', site_package, 'does not exists'
+      continue
+    if os.path.isdir(full_path):
+      for so_file in glob.glob(os.path.join(full_path, '*.so')):
+        _deps_for_lib(so_file, pool)
   return pool
 
 BINARIES=['gosty', 'chemdict_tool']
@@ -63,10 +73,15 @@ REMOVE_HEADERS='rm -rf `find %s/lib -type d -name Headers`'
 REMOVE_CURRENT='rm -rf `find %s/lib -type d -name Current`'
 # collect libs of non-standard libraries/frameworks we depend on
 
-def copy_binaries(stage_dir, outdir, binary_names, scripts, use_rpath):
+def copy_binaries(stage_dir, outdir, binary_names, scripts, use_rpath, 
+                  append_bin=True):
+
   exe_path=os.path.abspath(os.path.join(outdir, 'bin'))
   for binary_name in binary_names:
-    bin_name=os.path.join(stage_dir, 'bin', binary_name)
+    if append_bin:
+      bin_name=os.path.join(stage_dir, 'bin', binary_name)
+    else:
+      bin_name=os.path.join(stage_dir, binary_name)
     if not os.path.exists(bin_name):
       print 'WARNING:', binary_name, 'does not exist'
       continue
@@ -171,6 +186,7 @@ def update_pymod_shared_objects(args, path, files):
       update_load_commands(abs_name, False, use_rpath, exe_path)
     elif ext in ('.pyc', '.pyo'):
       os.unlink(os.path.join(path, f))
+
 def get_site_package_dir():
   """
   Get site-package directory of this python installation. This assumes 
@@ -198,7 +214,9 @@ def check_install_name_tool_capabilities():
   output=inst_name_tool.communicate()[1]
   return output.find('-add_rpath')!=-1
 
-def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False):
+def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
+                    macports_workaround=False):
+  site_packages=get_site_package_dir()                    
   # figure out if install_name_tool supports the -add_rpath option.
   use_rpath=True
   if not check_install_name_tool_capabilities():
@@ -218,7 +236,8 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False):
   shutil.copytree(os.path.join(stage_dir, 'share'), 
                   os.path.join(outdir, 'share'))
   print 'collecting dependencies'
-  deps=collect_deps(stage_dir, COMPONENTS, BINARIES)
+  deps=collect_deps(stage_dir, COMPONENTS, BINARIES, SITE_PACKAGES, 
+                    site_packages)
   print 'copying dependencies'
   copy_deps(deps, outdir, use_rpath)
   print 'copying binaries'
@@ -226,31 +245,62 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False):
   print 'copying pymod'
   shutil.copytree(os.path.join(stage_dir, 'lib/openstructure'), 
                   os.path.join(outdir, 'lib/openstructure'))
-  assert not os.path.exists(os.path.join(outdir, 'lib', 'Python.framework'))
-  if len(glob.glob(os.path.join(outdir, 'lib', 'libpython*')))>0:
+  copied_py_framework=False
+  non_std_python=False
+  if os.path.exists(os.path.join(outdir, 'lib/Python.framework')):
+    framework_path=os.path.join(outdir, 'lib/Python.framework')
+    nonstd_python=True
+    copied_py_framework=True
+  if glob.glob(os.path.join(outdir, 'lib', 'libpython*'))>0:
+    non_std_python=True
+  if non_std_python:
     print 'looks like we are using a non-standard python.'
-    python_home=get_python_home()
-    print 'also copying python modules from %s' % python_home
-    modules_dst=os.path.join(outdir, 'lib', os.path.basename(python_home))
-    shutil.copytree(python_home, modules_dst)
-    shutil.rmtree(os.path.join(modules_dst, 'site-packages'))
-    copy_binaries(os.path.join(python_home, '../..'), outdir, 
-                  ['python'], [], use_rpath)
+    python_home=get_python_home()    
+    if not copied_py_framework:
+      print 'also copying python modules from %s' % python_home
+      modules_dst=os.path.join(outdir, 'lib', os.path.basename(python_home))
+      shutil.copytree(python_home, modules_dst)
+      shutil.rmtree(os.path.join(modules_dst, 'site-packages'))
+      copy_binaries(os.path.join(python_home, '../..'), outdir, 
+                    ['python'], [], use_rpath)
+      python_bin=os.path.abspath(os.path.join(python_home, '../../bin/python'))
+    else:
+      # For MacPorts it's even more involved. Python is not executed directly 
+      # but rather uses a wrapper executable that calls the actual python exe.
+      # We have to include that one into the bundle.
+      if macports_workaround:
+        path_to_app='../../Resources/Python.app/Contents/MacOS/'
+        exe_path=os.path.join(python_home, path_to_app)
+        copy_binaries(exe_path, outdir, ['python'], [], 
+                      use_rpath, append_bin=False)
+        python_bin=os.path.join('/opt/local/bin/python')
+      else:
+        copy_binaries(os.path.join(python_home, '../..'), outdir, 
+                      ['python'], [], use_rpath)
+        python_bin=os.path.abspath(os.path.join(python_home, '../../bin/python'))
+      # remove all versions but the one we are using
+      version_string=sys.version[0:3]
+      prefix, postfix=split_framework_components(python_home)
+      site_packages_dir=os.path.join(outdir, 'lib', 'Python.framework', 
+                                 postfix, 'site-packages')
+      shutil.rmtree(site_packages_dir)
+      for directory in glob.glob(os.path.join(framework_path, 'Versions/*')):
+        if os.path.basename(directory)!=version_string:
+          shutil.rmtree(directory)
     # replace the python executable
     ost_script=os.path.join(outdir, 'bin', 'ost')
     os.chmod(ost_script, 0666)
     script=''.join(open(ost_script, 'r').readlines())
-    python_bin=os.path.abspath(os.path.join(python_home, '../../bin/python'))
     script=script.replace(python_bin, '$BIN_DIR/python')
     open(ost_script, 'w').write(script)
     os.chmod(ost_script, 0555)
   elif use_rpath==False:
     print 'BIG FAT WARNING: Creation bundle with @executable_path and default'
     print 'Python might not work. Test carefully before deploying.'
+
   if no_includes:
     os.system(REMOVE_HEADERS % outdir)
     os.system(REMOVE_CURRENT % outdir)  
-  site_packages=get_site_package_dir()
   print 'copying site-packages'
   for sp in SITE_PACKAGES:
     src=os.path.join(site_packages, sp)  
