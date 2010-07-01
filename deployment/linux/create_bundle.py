@@ -9,7 +9,7 @@ import sys
 
 boost_string='\".so.1.40.0\"'
 system_python_bin='/usr/bin/python2.6'
-name_python_bin='python2.6'
+name_python_bin='python'
 system_python_libs='/usr/lib/python2.6'
 second_system_python_libs_flag=True
 second_system_python_libs='/usr/lib/pymodules/python2.6'
@@ -127,6 +127,9 @@ subprocess.call('chmod -w '+directory_name+'/dng',shell=True,cwd='../../')
 subprocess.call('echo "bin/ost" > '+directory_name+'/ost',shell=True,cwd='../../')
 subprocess.call('chmod +x '+directory_name+'/ost',shell=True,cwd='../../')
 subprocess.call('chmod -w '+directory_name+'/ost',shell=True,cwd='../../')
+print 'Copying additional libraries in the package directory structure'
+subprocess.call('cp /usr/lib/libssl.so.0.9.8   '+directory_name+'/'+libdir,shell=True,cwd='../../')
+subprocess.call('cp /usr/lib/libcrypto.so.0.9.8   '+directory_name+'/'+libdir,shell=True,cwd='../../')
 print 'Removing headers from package directory structure'
 subprocess.call('rm -fr   '+directory_name+'/include',shell=True,cwd='../../')
 print 'De-hardcoding package python binary path from openstructure executables'
