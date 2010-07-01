@@ -135,21 +135,26 @@ void FileLoader::AddToScene(const QString& filename, gfx::GfxObjP obj)
 gfx::GfxObjP FileLoader::NoHandlerFound(const QString& filename)
 {
   FileTypeDialog dialog(filename);
-  if(dialog.exec()){
-    if(dialog.GetEntityHandler()){
-      return TryLoadEntity(filename, dialog.GetEntityHandler());
+  try{
+    if(dialog.exec()){
+      if(dialog.GetEntityHandler()){
+        return TryLoadEntity(filename, dialog.GetEntityHandler());
+      }
+      if(dialog.GetSequenceHandler()){
+        return TryLoadAlignment(filename, dialog.GetSequenceHandler());
+      }
+      if(dialog.GetSurfaceHandler()){
+        return TryLoadSurface(filename,dialog.GetSurfaceHandler());
+      }
+  #if OST_IMG_ENABLED
+      if(dialog.GetMapHandler()){
+        return TryLoadMap(filename,dialog.GetMapHandler());
+      }
+  #endif
     }
-    if(dialog.GetSequenceHandler()){
-      return TryLoadAlignment(filename, dialog.GetSequenceHandler());
-    }
-    if(dialog.GetSurfaceHandler()){
-      return TryLoadSurface(filename,dialog.GetSurfaceHandler());
-    }
-#if OST_IMG_ENABLED
-    if(dialog.GetMapHandler()){
-      return TryLoadMap(filename,dialog.GetMapHandler());
-    }
-#endif
+  }
+  catch (io::IOException& e) {
+    FileLoader::HandleError(e,IO_LOADING,filename);
   }
   return gfx::GfxObjP();
 }
