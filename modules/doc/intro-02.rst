@@ -72,7 +72,7 @@ Isosurfaces are easy to create in OpenStructure:
 
 The other way to visualize a 3-dimensional map is by showing one 2-dimensional 
 density slice at a time, allowing the user to move through the slices. In 
-OpenStructure this is achieved using a DataViewer :doc:`gui/image-viewer`). 
+OpenStructure this is achieved using a DataViewer). 
 A DataViewer showing the filtered map is created using the following command:
 
 .. code-block:: python

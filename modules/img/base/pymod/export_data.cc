@@ -61,6 +61,7 @@ void export_Data()
 
   class_<ConstData, boost::noncopyable>("ConstData", no_init )
     .def("GetType",&ConstData::GetType)
+    .add_property("type", &ConstData::GetType)
     .def("GetDomain",&ConstData::GetDomain)
     .def("GetExtent",&ConstData::GetExtent)
     .def("GetReal",&ConstData::GetReal)

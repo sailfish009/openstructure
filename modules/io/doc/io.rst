@@ -1,6 +1,11 @@
 :mod:`~ost.io` - Input and Output of Sequences, Structures and Maps
 ================================================================================
 
+.. toctree::
+  :hidden:
+  
+  formats
+
 .. module:: ost.io
   :synopsis: Input and output of sequences, alignments, structures, images and density maps.
 
@@ -11,6 +16,8 @@ The io module deals with input and output of :class:`entities
 such as PDB, SDF and CHARMM trajectory files are available. Sequence and 
 alignment file formats such as FASTA and CLUSTALW are supported as well as  
 various image data (e.g. png, dm3) and density map files (e.g. CCP4, MRC). 
+
+.. _mol-io:
 
 Molecular Structures
 --------------------------------------------------------------------------------
@@ -103,12 +110,16 @@ file:
       
 .. autofunction:: ost.io.SavePDB
 
-  
+
+
+.. _seq-io:
+
 Sequences and Alignments
 --------------------------------------------------------------------------------
 
 Loading sequence or alignment files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. function:: LoadSequence(filename, format='auto')
 
   Load sequence data from disk. If format is set to 'auto', the function guesses 

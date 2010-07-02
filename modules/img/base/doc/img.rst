@@ -1,6 +1,11 @@
 :mod:`~ost.img` - Images and Density Maps
 ================================================================================
-  
+
+.. toctree::
+  :hidden:
+
+  point-size-extent
+
 .. module:: ost.img
    :synopsis: Images and density maps
               
@@ -32,17 +37,17 @@ Creating and visualizing ImageHandles
 
 As a first step, enter the following lines in the OpenStructure python console:
 
-  .. code-block:: python
+.. code-block:: python
   
-    im=img.CreateImage(img.Size(200,200))
+  im=img.CreateImage(img.Size(200,200))
 
 This will create an empty, 2D image, with a height and width of 200 pixels, 
 whose origin (ie the pixel with the coordinates <0,0>) is in the top-left 
 corner.
 
-  .. code-block:: python
+.. code-block:: python
   
-    v=gui.CreateDataViewer(im)
+  v=gui.CreateDataViewer(im)
 
 A viewer window will pop up (see below), showing a white frame on a black 
 background. The inner area of the white frame is the image, which is empty.
@@ -53,21 +58,21 @@ Reading and writing into an image
 Data can be read and written from and into an image using the following 
 commands:
 
-  .. code-block:: python
-  
-    # writes the real value 23.4 into pixel 10,10
-    im.SetReal(img.Point(10,10),23.4)
-    # reads the value in pixel 10,10
-    val=im.GetReal(img.Point(10,10))
+.. code-block:: python
+
+  # writes the real value 23.4 into pixel 10,10
+  im.SetReal(img.Point(10,10),23.4)
+  # reads the value in pixel 10,10
+  val=im.GetReal(img.Point(10,10))
     
 The complex equivalents are also available    
 
-  .. code-block:: python
-  
-    # writes the complex value value 2+3j into pixel 10,10
-    im.SetComplex(img.Point(10,10),2+3j)
-    # reads the value in pixel 10,10
-    val=im.GetComplex(img.Point(10,10))
+.. code-block:: python
+
+  # writes the complex value value 2+3j into pixel 10,10
+  im.SetComplex(img.Point(10,10),2+3j)
+  # reads the value in pixel 10,10
+  val=im.GetComplex(img.Point(10,10))
 
 The image knows in which domain it is, and will adjust the type of data being 
 written accordingly. For example, if one writes a complex value in a 
@@ -79,180 +84,114 @@ converted to complex by setting the imaginary part to 0.
 Image properties
 -----------------
 
-Every 2D or 3D image in OpenStructure has some basic properties, which are discussed in detail in the next paragraphs.
-
-Point
-^^^^^^^^
-
-.. class:: Point(x=0, y=0, z=0)
-
-  This class represents an image pixel. It is defined using three integer 
-  numbers, corresponding to the pixel’s indexes along the weight and depth 
-  dimensions respectively. 
-
-
-Size
-^^^^^^^^
-
-.. class:: Size(width, height, depth)
-           Size(width, height)
-
-  This property describes the size of an image. It is defined using three 
-  integer numbers: When depth is not specified, the size is assumed to refer to 
-  a 2D image two-dimensional (depth=1).
-
-  The :class:`Size` class can be passed to the :func:`CreateImage` function to
-  define the size of the image being created.
-
-  .. code-block:: python 
-
-    # uses the size class to create an image
-    s=img.Size(40,20,30)
-    i=img.CreateImage(s)
-    # uses a temporary instance of the Size class
-    i=img.CreateImage(img.Size(40,20,30))
-
-Extent
-^^^^^^^^
-
-.. class:: Extent(first_point, last_point)
-           Extent(first_point, size)
-           Extent(size, center_point)
-
-  This property describes the extent of an image in pixels. The image extent is 
-  a rectangle in 2d and a cuboid in 3d, and can be defined in a number of ways: 
-  giving the first and the last point of the extent, specifying the first point 
-  and the size of the extent, or listing the size of the extent and its central 
-  point.
-
-
-  Some examples:
-
-  .. code-block:: python 
-
-    # defines a rectangular extent that goes from pixel (2,4) to pixel (5,10)  
-    s=img.Extent(img.Point(2,4),img.Point(5,10))
-    # defines the same extent using its first point and its size
-    s=img.Extent(img.Point(2,4),img.Size(4,7))
-    # again the same extent using its size and central pixel
-    s=img.Extent(img.Size(4,7),img.Point(3,7))
-
-  The :class:`Extent` class can be passed to the :func:`CreateImage` function to
-  create an image with a specific extent.
-
-  .. code-block:: python 
-
-    # uses the Extent class to create an image
-    e=img.Extent(img.Point(2,4),img.Size(4,7))
-    i=img.CreateImage(e)
-    # uses a temporary instance of the Extent class
-    i=img.CreateImage(img.Extent(img.Point(2,4),img.Size(4,7)))
-
-  Given an :class:`Extent`, is it possible to recover its full size, and also
-  the length of each of its dimensions separately.
-
-  Examples:
-
-  .. code-block:: python 
-
-    # gets the size of an extent (e is a 3D extent)
-    s=e.GetSize()
-    # gets the three dimensions separately
-    w=e.GetWidth()
-    h=e.GetHeight()
-    d=e.GetDepth()
-
-  When one needs to visit all the image pixels belonging to an :class:`Extent`
-  in sequence, one can use an :class:`ExtentIterator`:
-
-  .. code-block:: python 
-
-    # defines an iterator over an extent e
-    ei=ExtentIterator(e)
-    # visits all the pixels in the extent and
-    # prints out their values
-    for pixel in ei:
-      print i.GetReal(pixel)
-
-.. _data-type:
-
-DataType
-^^^^^^^^
-
-  The DataType of an image represents the nature of the data it contains. An image can contain 'REAL' or :obj:`COMPLEX` values.
-
 .. _data-domain:
 
-DataDomain
-^^^^^^^^^^
+The data domain
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  The data domain of an image specifies wether the image contains data in the 
-  spatial or frequency domain. A :obj:`HALF_FREQUENCY` domain also exists, 
-  representing centrosymmetric frequency data (such as the data coming from the 
-  Fourier transform of an image from the real spatial domain)
+The data domain of an image specifies wether the image contains data in the 
+spatial or frequency domain. A :obj:`HALF_FREQUENCY` domain also exists, 
+representing centrosymmetric frequency data (such as the data coming from the 
+Fourier transform of an image from the real spatial domain)
 
-  .. data:: SPATIAL
+.. data:: SPATIAL
 
-    Real-valued spatial images
+  Real-valued spatial images
 
-  .. data:: COMPLEX_SPATIAL
+.. data:: COMPLEX_SPATIAL
 
-    Complex-valued spatial images, i.e. resulting from a Fourier transform of
-    the :obj:`FREQUENCY` domain.
-    
-  .. data:: FREQUENCY
-    
-    Complex frequeny domain.
-    
-  .. data:: HALF_FREQUENCY
+  Complex-valued spatial images, i.e. resulting from a Fourier transform of
+  the :obj:`FREQUENCY` domain.
   
-    Centrosymmetric frequency images
+.. data:: FREQUENCY
+  
+  Complex frequeny domain.
+  
+.. data:: HALF_FREQUENCY
+
+  Centrosymmetric frequency images
     
 
 
 .. _spatial-origin:
 
-SpatialOrigin
-^^^^^^^^^^^^^^
+The spatial origin
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Type: :class:`Point`
-
-  The spatial origin of an image is the first pixel of its extent. Specifically, 
-  this is the top left pixel for 2D images and the top-front-left  corner for 3D
-  images.
+The spatial origin of an image is the first pixel of its extent. Specifically, 
+this is the top left pixel for 2D images and the top-front-left  corner for 3D
+images.
 
 .. _absolute-origin:
 
-AbsoluteOrigin
-^^^^^^^^^^^^^^^^
+The absolute origin
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Type: :class:`~ost.geom.Vec3`
-
-  The absolute origin of an image describes the coordinates, in the absolute 
-  reference system used by OpenStructure, of the pixel in with all indexes equal 
-  to 0. Please note that the pixel does not necessarily need to belong to the 
-  extent of the image.
+The absolute origin of an image describes the coordinates, in the absolute 
+reference system used by OpenStructure, of the pixel in with all indexes equal 
+to 0. Please note that the pixel does not necessarily need to belong to the 
+extent of the image.
 
 .. _pixel-sampling:
 
-PixelSampling
-^^^^^^^^^^^^^^^^^
+Pixel sampling
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Type: :class:`~ost.geom.Vec3`
 
-  The pixel sampling property of an image describes the size of its pixels. For
-  the same image, the size of pixels in the :obj:`SPATIAL` and in the
-  :obj:`FREQUENCY` :ref:`data-domain` are obviously interdependent.
-  OpenStructure takes care of the transformation and allows access to both pixel 
-  sampling irrespective of the current image domain.
+The pixel sampling property of an image describes the size of its pixels. For
+the same image, the size of pixels in the :obj:`SPATIAL` and in the
+:obj:`FREQUENCY` :ref:`data-domain` are obviously interdependent.
+OpenStructure takes care of the transformation and allows access to both pixel 
+sampling irrespective of the current image domain.
 
-ImageHandle
------------
+The ImageHandle class
+--------------------------------------------------------------------------------
 
-The public interface of the ImageHandle class provides many ways to manipulate image properties. What follows is a brief description of the most important methods of the
-ImageHandle class.
+The public interface of the ImageHandle class provides many ways to manipulate 
+image properties. What follows is a brief description of the most important 
+methods and attributes of the ImageHandle class.
 
 .. class:: ImageHandle
+
+  .. attribute:: size
+  
+    The size of the image. Read-only.
+    
+    :type: :class:`Size`
+    
+  .. attribute:: extent
+  
+    The extent of the image. Read-only.
+    
+    :type: :class:`Extent`
+  
+  .. attribute:: type
+  
+    The DataType of an image represents the nature of the data it contains. An
+    image can contain :obj`REAL` or :obj:`COMPLEX` values.
+  
+  .. attribute:: absolute_origin
+  
+    The absolute origin of an image describes the coordinates, in the absolute 
+    reference system used by OpenStructure, of the pixel in with all indexes 
+    equal to 0. Please note that the pixel does not necessarily need to belong 
+    to the extent of the image. Read-write.
+    
+    :type: :class:`~ost.geom.Vec3`
+    
+
+  .. attribute:: spatial_origin
+  
+    The spatial origin of an image is the first pixel of its extent. 
+    Specifically, this is the top left pixel for 2D images and the 
+    top-front-left  corner for 3Dimages.
+    
+    :type: :class:`Point`
+
+  .. attribute:: domain
+  
+    The current domain of the image. See :ref:`data-domain`. Read-only.
+    
 
   .. method:: Apply(algorithm)
 
@@ -300,10 +239,10 @@ ImageHandle class.
      Creates and returns a new image that contains a copy of a portion of the 
      original image. The extracted image keeps the same :ref:`data-type` of the 
      original image, but extractions from images in the 'FREQEUNCY' or 
-     'HALF FREQUENCY' domains result in :obj:`COMPLEX ` :obj:`SPATIAL` images. This 
-     transformation is necessary, since the there is no guarantee that the 
-     extracted :obj:`FREQUENCY` sub-image is centered around the origin and hence 
-     back-transformable to :obj:`SPATIAL`.
+     'HALF FREQUENCY' domains result in :obj:`COMPLEX ` :obj:`SPATIAL` images. 
+     This transformation is necessary, since the there is no guarantee that the 
+     extracted :obj:`FREQUENCY` sub-image is centered around the origin and 
+     hence back-transformable to :obj:`SPATIAL`.
 
      :param extent: Portion of the image to extract
      :type  extent: :class:`Extent`
@@ -326,8 +265,9 @@ ImageHandle class.
 
   .. method:: GetComplex(pixel)
 
-     Returns the complex value of the specified image pixel. If the image holds data of the 'REAL' :ref:`data-type`, the method return s complex value with the pixel content
-     as real part and a null imaginary part.     
+     Returns the complex value of the specified image pixel. If the image holds 
+     data of the 'REAL' :ref:`data-type`, the method return s complex value with 
+     the pixel content as real part and a null imaginary part.
 
      :param pixel: Image pixel
      :type  pixel: :class:`Point`
@@ -335,16 +275,12 @@ ImageHandle class.
 
   .. method:: GetDomain()
     
-     Returns the :ref:`data-domain` of an image (:obj:`SPATIAL`, 
-     :obj:`FREQUENCY`or :obj:`HALF_FREQUENCY`)  
-
-     :rtype: DataDomain     ???????????
+     See :attr:`domain`
 
   .. method:: GetExtent()
 
-     Returns the :class:`Extent` of an image.
+    See :attr:`extent`
 
-     :rtype: :class:`Extent`
 
   .. method:: GetFrequencySampling()
      
@@ -372,9 +308,9 @@ ImageHandle class.
      Returns the interpolated value of the virtual pixel corresponding to the 
      specified fractional indexes. This is computed by using bilinear 
      interpolation (trilinear for 3D images). If the image holds data of the 
-     :obj:`COMPLEX ` :ref:`data-type`, the method computes the interpolated value as a 
-     weighted vector sum of the values of the surrounding pixels, then returns 
-     the amplitude of the interpolated value. 
+     :obj:`COMPLEX ` :ref:`data-type`, the method computes the interpolated 
+     value as a weighted vector sum of the values of the surrounding pixels, 
+     then returns the amplitude of the interpolated value. 
 
      :param frac_pixel: Fractional pixel indexes
      :type  frac_pixel: :class:`~ost.geom.Vec3` 
@@ -390,8 +326,8 @@ ImageHandle class.
   .. method:: GetReal(pixel)
 
      Returns the value of the specified image pixel. If the image holds data of 
-     the :obj:`COMPLEX ` :ref:`data-type`, the method return the amplitude of the 
-     pixel content.
+     the :obj:`COMPLEX ` :ref:`data-type`, the method return the amplitude of 
+     the pixel content.
 
      :param pixel: Image pixel
      :type  pixel: :class:`Point`

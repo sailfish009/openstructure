@@ -193,6 +193,7 @@ It is interesting to note that the offset from center (`trans`) is given in rota
   .. method:: GetFOV()
 
     Get the field of view angle in the y direction (in degrees).
+    
     :rtype: float
 
   .. method:: GetRTC()
@@ -201,7 +202,7 @@ It is interesting to note that the offset from center (`trans`) is given in rota
     
       Looks stale. Remove it?
       
-    :rtype: :class:`Mat4`
+    :rtype: :class:`~ost.geom.Mat4`
 
   .. method:: GetTransform()
 
@@ -310,7 +311,7 @@ It is interesting to note that the offset from center (`trans`) is given in rota
   .. method:: SetRTC(arg2)
 
     :param arg2:
-    :type  arg2: :class:`Mat4`
+    :type  arg2: :class:`~ost.geom.Mat4`
 
   .. method:: SetShadow(arg2)
 

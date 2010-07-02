@@ -14,7 +14,7 @@ for the platform-independent data like icons, images and examples.
 
 OpenStructure uses `CMake <http://www.cmake.org>`_ to build the project. The 
 rules for the build-system are defined in `CMakeLists.txt` files. When running 
-`CMake <http://cmake.org>`_, the files are  compiled and copied into stage. The 
+`cmake`, the files are  compiled and copied into stage. The 
 real installation, if necessary, happens at a later stage. This is referred to 
 as staging of the files.
 

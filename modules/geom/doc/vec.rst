@@ -2,7 +2,6 @@ Vectors
 ================================================================================
 .. currentmodule:: ost.geom
 
-
 The :class:`Vec2`, :class:`Vec3`, :class:`Vec4` classes implement vectors in 2, 
 3 and four dimensions. They support basic arithmetic via overloaded operators. 
 Essentially, the following basic operations are available:
