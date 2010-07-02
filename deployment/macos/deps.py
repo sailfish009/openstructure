@@ -110,7 +110,7 @@ def split_framework_components(abs_path):
 def change_id(id, lib, use_rpath):
   os.chmod(lib, 0666)
   if use_rpath:
-    os.system(CHANGE_ID_RRPATH % (id,lib))
+    os.system(CHANGE_ID_RPATH % (id,lib))
   else:
     os.system(CHANGE_ID % (id,lib))
   os.chmod(lib, 0444)
@@ -169,6 +169,7 @@ def copy_deps(dependencies, outdir, use_rpath):
       else:
         change_id(os.path.join('../lib', framework_name, rel_path), 
                   os.path.join(dst_name, rel_path), use_rpath)
+      os.unlink(os.path.join(dst_name, os.path.splitext(framework_name)[0]))
       update_load_commands(os.path.join(dst_name, rel_path), False, 
                            use_rpath, exe_path)
 
@@ -260,7 +261,8 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
       print 'also copying python modules from %s' % python_home
       modules_dst=os.path.join(outdir, 'lib', os.path.basename(python_home))
       shutil.copytree(python_home, modules_dst)
-      shutil.rmtree(os.path.join(modules_dst, 'site-packages'))
+      if os.path.exists(os.path.join(modules_dst, 'site-packages')):
+        shutil.rmtree(os.path.join(modules_dst, 'site-packages'))
       copy_binaries(os.path.join(python_home, '../..'), outdir, 
                     ['python'], [], use_rpath)
       python_bin=os.path.abspath(os.path.join(python_home, '../../bin/python'))
@@ -283,7 +285,8 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
       prefix, postfix=split_framework_components(python_home)
       site_packages_dir=os.path.join(outdir, 'lib', 'Python.framework', 
                                  postfix, 'site-packages')
-      shutil.rmtree(site_packages_dir)
+      if os.path.exists(site_packages_dir):
+        shutil.rmtree(site_packages_dir)
       for directory in glob.glob(os.path.join(framework_path, 'Versions/*')):
         if os.path.basename(directory)!=version_string:
           shutil.rmtree(directory)
