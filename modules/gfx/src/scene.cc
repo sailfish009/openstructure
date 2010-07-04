@@ -373,7 +373,7 @@ void Scene::InitGL(bool full)
 
 #if OST_SHADER_SUPPORT_ENABLED
   GLint mbufs=0,msamples=0;
-  if(GLEW_VERSION_2_0) {
+  if(OST_GL_VERSION_2_0) {
     glGetIntegerv(GL_SAMPLE_BUFFERS, &mbufs);
     glGetIntegerv(GL_SAMPLES, &msamples);
   }
@@ -427,7 +427,7 @@ void Scene::InitGL(bool full)
 
   glEnable(GL_TEXTURE_2D);
 #if OST_SHADER_SUPPORT_ENABLED
-  if(GLEW_VERSION_2_0) {
+  if(OST_GL_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
@@ -1831,7 +1831,7 @@ void Scene::render_stereo()
 
   glEnable(GL_TEXTURE_2D);
 #if OST_SHADER_SUPPORT_ENABLED
-  if(GLEW_VERSION_2_0) {
+  if(OST_GL_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
@@ -1843,7 +1843,7 @@ void Scene::render_stereo()
   render_scene();
   glEnable(GL_TEXTURE_2D);
 #if OST_SHADER_SUPPORT_ENABLED
-  if(GLEW_VERSION_2_0) {
+  if(OST_GL_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
@@ -1905,7 +1905,7 @@ void Scene::render_stereo()
     glStencilFunc(GL_EQUAL,0x0,0x1);
   }
 #if OST_SHADER_SUPPORT_ENABLED
-  if(GLEW_VERSION_2_0) {
+  if(OST_GL_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
@@ -1927,7 +1927,7 @@ void Scene::render_stereo()
     glStencilFunc(GL_EQUAL,0x1,0x1);
   }
 #if OST_SHADER_SUPPORT_ENABLED
-  if(GLEW_VERSION_2_0) {
+  if(OST_GL_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
   }
 #endif
