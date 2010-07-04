@@ -1,0 +1,35 @@
+Keyboard:
+---------
+P                           Previous Level
+N                           Next Level
+<Space>                     Start Level
+<Backspace>                 Give up / Reset Level
+<Enter>                     Confirm / Set position
+E                           Display solution (only available when game not started)
+R                           Move ligand to start position
+<ESC>                       Quit
+<ArrowKeys>                 Move Camera
+W,A,S,D                     Move Camera
+
+Mouse:
+------
+Mouse wheel                 Zoom
+left click drag             Rotate Ligand
+<Shift> + left click drag   Move ligand
+right click drag            Rotate Camera
+
+
+Space Navigator:
+----------------
+<L>                         Previous Level
+<R>                         Next Level
+<T>                         Start Level
+<2D>                        Qucikstart Level
+<ALT>                       Give up / Reset Level
+<FIT>                       Confirm / Set position
+<+>                         Display solution (only available when game not started)
+<->                         Move ligand to start position
+<ESC>                       Quit
+<Shift>                     Load first Level
+<1>                         Enable / Disable Translation
+<2>                         Enable / Disable Rotation
