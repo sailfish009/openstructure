@@ -108,14 +108,8 @@ public:
   /// similar to GetCenterOfMass(), but the atoms are not mass weighted
   geom::Vec3 GetCenterOfAtoms() const;
   
-  /// \brief Get entity's geometric center
-  ///
-  /// Returns the geometric center of the entity's bounding box
-  /// by calculating (GetGeometricStart()+GetGeometricEnd())/2
-  geom::Vec3 GetGeometricCenter() const;
-             
-  geom::Vec3 GetGeometricStart() const;
-  geom::Vec3 GetGeometricEnd() const;
+  geom::AlignedCuboid GetBounds() const;
+  
 public:
   /// \name Internal
   //@{

@@ -84,20 +84,8 @@ public:
   
   /// \brief Get entity's center of mass (mass weighted)
   geom::Vec3 GetCenterOfMass() const;  
-  /// \brief Get entity's geometric center
-  ///
-  /// Returns the geometric center of the entity's bounding box
-  /// by calculating (GetGeometricStart()+GetGeometricEnd())/2
-  geom::Vec3 GetGeometricCenter() const;
 
-  /// \brief Get entity's minimum cartesian coordinates
-  geom::Vec3 GetGeometricStart() const;
-
-  /// \brief Get entity's maximum cartesian coordinates
-  geom::Vec3 GetGeometricEnd() const;
-
-  /// \brief Get size of the entity
-  geom::Vec3 GetBoundarySize() const;
+  geom::AlignedCuboid GetBounds() const;
   //@}
   
   /// \brief

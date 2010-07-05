@@ -27,6 +27,7 @@ using namespace boost::python;
 #include <ost/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
+#include "bounds.hh"
 
 namespace {
 typedef ResidueView (ChainView::*RnumMethod)(const ResNum&) const;
@@ -92,15 +93,17 @@ void export_ChainView()
     .def("GetMass", &ChainView::GetMass)
     .def("GetCenterOfMass", &ChainView::GetCenterOfMass)
     .def("GetCenterOfAtoms", &ChainView::GetCenterOfAtoms)
-    .def("GetGeometricCenter", &ChainView::GetGeometricCenter)
-    .add_property("geometric_center", &ChainView::GetGeometricCenter)
+    .def("GetGeometricCenter", geom_center<ChainView>)
+    .add_property("geometric_center", geom_center<ChainView>)
     .add_property("mass", &ChainView::GetMass)
     .add_property("center_of_mass", &ChainView::GetCenterOfMass)
     .add_property("center_of_atoms", &ChainView::GetCenterOfAtoms)
     .add_property("valid", &ChainView::IsValid)      
     .add_property("in_sequence", &ChainView::InSequence)    
-    .def("GetGeometricStart", &ChainView::GetGeometricStart)
-    .def("GetGeometricEnd", &ChainView::GetGeometricEnd)
+    .def("GetGeometricStart", geom_start<ChainView>)
+    .def("GetGeometricEnd", geom_end<ChainView>)
+    .def("GetBounds", &ChainView::GetBounds)
+    .add_property("bounds", &ChainView::GetBounds)
   ;
 
 

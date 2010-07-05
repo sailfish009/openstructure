@@ -427,31 +427,23 @@ Real ResidueImpl::GetMass() const
   return mass;
 }
 
-geom::Vec3 ResidueImpl::GetGeometricEnd() const {
-  geom::Vec3 maximum(-std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity());
-  for (AtomImplList::const_iterator i=atom_list_.begin(); 
-       i!=atom_list_.end(); ++i) {
-    maximum=geom::Max(maximum,(*i)->GetPos());
-  }
-  return maximum;
-}
-
-geom::Vec3 ResidueImpl::GetGeometricStart() const {
-  geom::Vec3 minimum(std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity());
-  for (AtomImplList::const_iterator i=atom_list_.begin(); 
-       i!=atom_list_.end(); ++i) {
-    minimum=geom::Min(minimum,(*i)->GetPos());
-  }
-  return minimum;
-}
-
-geom::Vec3 ResidueImpl::GetGeometricCenter() const
+geom::AlignedCuboid ResidueImpl::GetBounds() const 
 {
-  return (this->GetGeometricStart() + this->GetGeometricEnd())/2;
+  
+  geom::Vec3 mmin( std::numeric_limits<Real>::infinity());
+  geom::Vec3 mmax(-std::numeric_limits<Real>::infinity());  
+
+  if (atom_list_.size()>0) {
+    AtomImplList::const_iterator i=atom_list_.begin();
+    mmin=mmax=(*i)->GetPos();
+    for (++i; i!=atom_list_.end(); ++i) {
+      mmax=geom::Max(mmax,(*i)->GetPos());
+      mmin=geom::Min(mmin,(*i)->GetPos());      
+    }    
+    return geom::AlignedCuboid(mmin, mmax);
+  } else {
+    return geom::AlignedCuboid(geom::Vec3(), geom::Vec3());
+  }
 }
 
 geom::Vec3 ResidueImpl::GetCenterOfAtoms() const

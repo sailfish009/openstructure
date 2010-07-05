@@ -93,10 +93,11 @@ public:
   Real GetMass() const;
   geom::Vec3 GetCenterOfMass() const;
   geom::Vec3 GetCenterOfAtoms() const;
-  geom::Vec3 GetGeometricCenter() const;
-  geom::Vec3 GetGeometricStart() const;
-  geom::Vec3 GetGeometricEnd() const;
-  geom::Vec3 GetBoundarySize() const;
+  
+  /// \brief returns the axis-aligned bounding box of the entity
+  geom::AlignedCuboid GetBounds() const;
+  
+
 
   // default copy ctor and assignment op should work for now
   AtomImplPtr CreateAtom(const ResidueImplPtr& rp, const String& name,

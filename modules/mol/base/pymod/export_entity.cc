@@ -23,7 +23,7 @@ using namespace boost::python;
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/query.hh>
 #include <ost/mol/mol.hh>
-
+#include "bounds.hh"
 
 using namespace ost;
 using namespace ost::mol;
@@ -55,6 +55,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_xcs_editor_overloads,
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_ics_editor_overloads, 
                                       EntityHandle::RequestICSEditor, 0, 1)                                      
 
+
 }
 
 void export_Entity()
@@ -81,11 +82,13 @@ void export_Entity()
     .def("GetMass", &EntityHandle::GetMass)
     .def("GetCenterOfMass", &EntityHandle::GetCenterOfMass)
     .def("GetCenterOfAtoms", &EntityHandle::GetCenterOfAtoms)
-    .def("GetGeometricCenter", &EntityHandle::GetGeometricCenter)
-    .add_property("geometric_center", &EntityHandle::GetGeometricCenter)
-    .def("GetGeometricStart", &EntityHandle::GetGeometricStart)
-    .def("GetGeometricEnd", &EntityHandle::GetGeometricEnd)
-    .def("GetBoundarySize", &EntityHandle::GetBoundarySize)
+    .def("GetGeometricCenter", geom_center<EntityHandle>)
+    .add_property("geometric_center", geom_center<EntityHandle>)
+    .add_property("geometric_end", geom_end<EntityHandle>)
+    .add_property("geometric_start", geom_start<EntityHandle>)
+    .def("GetGeometricStart", geom_start<EntityHandle>)
+    .def("GetGeometricEnd", geom_end<EntityHandle>)
+    .def("GetBoundarySize", geom_size<EntityHandle>)
     .def("GetResidueCount", &EntityHandle::GetResidueCount)
     .def("GetAtomCount", &EntityHandle::GetAtomCount)
     .def("GetBondCount", &EntityHandle::GetBondCount)
@@ -111,6 +114,8 @@ void export_Entity()
     .add_property("chains", &EntityHandle::GetChainList)
     .add_property("bonds", &EntityHandle::GetBondList)
     .add_property("valid", &EntityHandle::IsValid)
+    .def("GetBounds", &EntityHandle::GetBounds)
+    .add_property("bounds", &EntityHandle::GetBounds)
     .def("GetTransformationMatrix", &EntityHandle::GetTransformationMatrix,
          return_value_policy<copy_const_reference>())
     .add_property("transform", 

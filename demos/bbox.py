@@ -10,8 +10,6 @@ def RenderBBox(bbox):
   bb.SetFillColor(gfx.Color(0.5, 0.8, 0.5, 0.2))
   scene.Add(bb)
 
-print 'Center:',(helix.GetGeometricStart()+helix.GetGeometricEnd())*.5
-  
 RenderBBox(bbox)
 scene.center=go.center
 print 'Demo2: Translucent bounding box around an OpenStructure entity'

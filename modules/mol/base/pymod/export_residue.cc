@@ -27,7 +27,7 @@ using namespace ost;
 using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
-
+#include "bounds.hh"
 namespace {
   
   
@@ -165,20 +165,22 @@ void export_Residue()
     .def("GetMass", &ResidueHandle::GetMass)
     .def("GetCenterOfMass", &ResidueHandle::GetCenterOfMass)
     .def("GetCenterOfAtoms", &ResidueHandle::GetCenterOfAtoms)
-    .def("GetGeometricCenter", &ResidueHandle::GetGeometricCenter)
+    .def("GetGeometricCenter", geom_center<ResidueHandle>)
     .add_property("mass", &ResidueHandle::GetMass)
     .add_property("center_of_mass", &ResidueHandle::GetCenterOfMass)
     .add_property("center_of_atoms", &ResidueHandle::GetCenterOfAtoms)  
-    .add_property("geometric_center", &ResidueHandle::GetGeometricCenter)
+    .add_property("geometric_center", geom_center<ResidueHandle>)
     .add_property("phi_torsion", &ResidueHandle::GetPhiTorsion)
     .add_property("psi_torsion", &ResidueHandle::GetPsiTorsion)
     .add_property("omega_torsion", &ResidueHandle::GetOmegaTorsion)
     .add_property("valid", &ResidueHandle::IsValid) 
-    .def("GetGeometricStart", &ResidueHandle::GetGeometricStart)
-    .def("GetGeometricEnd", &ResidueHandle::GetGeometricEnd)
+    .def("GetGeometricStart", geom_start<ResidueHandle>)
+    .def("GetGeometricEnd", geom_end<ResidueHandle>)
     .def(self==self)
     .def(self!=self)
     .def("__hash__", &ResidueHandle::GetHashCode)
+    .def("GetBounds", &ResidueHandle::GetBounds)
+    .add_property("bounds", &ResidueHandle::GetBounds)    
   ;
 
   class_<ResidueHandleList>("ResidueHandleList", no_init)

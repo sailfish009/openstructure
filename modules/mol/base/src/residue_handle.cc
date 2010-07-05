@@ -226,22 +226,10 @@ geom::Vec3 ResidueHandle::GetAltAtomPos(const AtomHandle& atom,
   return Impl()->GetAltAtomPos(atom.Impl(), group);
 }
 
-geom::Vec3 ResidueHandle::GetGeometricStart() const
+geom::AlignedCuboid ResidueHandle::GetBounds() const
 {
   this->CheckValidity();
-  return Impl()->GetGeometricStart();
-}
-
-geom::Vec3 ResidueHandle::GetGeometricEnd() const
-{
-  this->CheckValidity();
-  return Impl()->GetGeometricEnd();
-}
-
-geom::Vec3 ResidueHandle::GetGeometricCenter() const
-{
-  this->CheckValidity();
-  return Impl()->GetGeometricCenter();
+  return Impl()->GetBounds();
 }
 
 geom::Vec3 ResidueHandle::GetCenterOfMass() const

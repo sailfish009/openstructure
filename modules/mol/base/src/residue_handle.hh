@@ -19,9 +19,11 @@
 #ifndef OST_RESIDUE_HANDLE_HU
 #define OST_RESIDUE_HANDLE_HU
 
+#include <ost/geom/vec3.hh>
+#include <ost/geom/aligned_cuboid.hh>
+
 #include <ost/mol/query.hh>
 #include <ost/mol/module_config.hh>
-#include <ost/geom/vec3.hh>
 #include <ost/mol/residue_base.hh>
 #include <ost/mol/atom_prop.hh>
 #include <ost/mol/entity_visitor_fw.hh>
@@ -77,17 +79,8 @@ public:
   /// similar to GetCenterOfMass(), but the atoms are not mass weighted
   geom::Vec3 GetCenterOfAtoms() const;
   
-  /// \brief Get entity's geometric center
-  ///
-  /// Returns the geometric center of the entity's bounding box
-  /// by calculating (GetGeometricStart()+GetGeometricEnd())/2
-  geom::Vec3 GetGeometricCenter() const;
-  
-  /// \brief Get entity's minimum cartesian coordinates
-  geom::Vec3 GetGeometricStart() const;
-  
-  /// \brief Get entity's maximum cartesian coordinates
-  geom::Vec3 GetGeometricEnd() const;
+  /// \brief get axis-aligned bounding box of residue
+  geom::AlignedCuboid GetBounds() const;
   
   /// \brief The chain this residue is attached to
   ChainHandle GetChain() const;

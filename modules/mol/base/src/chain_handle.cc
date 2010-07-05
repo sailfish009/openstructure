@@ -197,22 +197,10 @@ void ChainHandle::AssignSecondaryStructure(SecStructure ss,
   Impl()->AssignSecondaryStructure(ss, start, end);
 }
 
-geom::Vec3 ChainHandle::GetGeometricCenter() const
+geom::AlignedCuboid ChainHandle::GetBounds() const
 {
   this->CheckValidity();
-  return Impl()->GetGeometricCenter();
-}
-
-geom::Vec3 ChainHandle::GetGeometricStart() const
-{
-  this->CheckValidity();
-  return Impl()->GetGeometricStart();
-}
-
-geom::Vec3 ChainHandle::GetGeometricEnd() const
-{
-  this->CheckValidity();
-  return Impl()->GetGeometricEnd();
+  return Impl()->GetBounds();
 }
 
 geom::Vec3 ChainHandle::GetCenterOfMass() const

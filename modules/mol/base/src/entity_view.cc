@@ -171,13 +171,6 @@ geom::Vec3 EntityView::GetCenterOfAtoms() const
   return center;
 }
 
-geom::Vec3 EntityView::GetGeometricCenter() const 
-{
-  geom::Vec3 center;
-  center = (this->GetGeometricEnd() + this->GetGeometricStart())/2;
-  return center;
-}
-
 geom::Vec3 EntityView::GetCenterOfMass() const 
 {
   geom::Vec3 center;
@@ -726,17 +719,6 @@ AtomView EntityView::FindXAtom(const AtomHandle& ah)
 }
 #endif
 
-geom::Vec3 EntityView::GetGeometricStart() const
-{
-  this->CheckValidity();
-  geom::Vec3 m(std::numeric_limits<Real>::max(),
-               std::numeric_limits<Real>::max(),
-               std::numeric_limits<Real>::max());
-  for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
-    m=geom::Min(m, (*it).GetPos());
-  }
-  return m;
-}
 
 AtomView EntityView::FindAtom(const String& chain_name, 
                               const ResNum& num,
@@ -749,16 +731,20 @@ AtomView EntityView::FindAtom(const String& chain_name,
   }
   return AtomView();
 }
-geom::Vec3 EntityView::GetGeometricEnd() const
+geom::AlignedCuboid EntityView::GetBounds() const
 {
   this->CheckValidity();
-  geom::Vec3 m(-std::numeric_limits<Real>::max(),
-               -std::numeric_limits<Real>::max(),
-               -std::numeric_limits<Real>::max());
-  for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
-    m=geom::Max(m, (*it).GetPos());
+  geom::Vec3 mmin( std::numeric_limits<Real>::max());
+  geom::Vec3 mmax(-std::numeric_limits<Real>::max());
+  if (this->GetAtomCount()) {
+    for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
+      mmax=geom::Max(mmax, (*it).GetPos());
+      mmin=geom::Min(mmin, (*it).GetPos());
+    }    
+    return geom::AlignedCuboid(mmin, mmax);
+  } else {
+    return geom::AlignedCuboid(geom::Vec3(), geom::Vec3());
   }
-  return m;
 }
 
 

@@ -131,9 +131,9 @@ public:
   Real GetMass() const;
   geom::Vec3 GetCenterOfMass() const;
   geom::Vec3 GetCenterOfAtoms() const;
-  geom::Vec3 GetGeometricCenter() const;
-  geom::Vec3 GetGeometricStart() const;
-  geom::Vec3 GetGeometricEnd() const;
+  
+  geom::AlignedCuboid GetBounds() const;
+  
 
   void DeleteAtom(const AtomImplPtr& atom);
   void DeleteAtoms(const String& atom_name);

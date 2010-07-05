@@ -25,6 +25,7 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol;
 #include <ost/export_helper/generic_property_def.hh>
+#include "bounds.hh"
 
 namespace {
   typedef void (ChainHandle::*RnumMethod)(const ResNum&);
@@ -83,15 +84,17 @@ void export_Chain()
     .def("GetMass", &ChainHandle::GetMass)
     .def("GetCenterOfMass", &ChainHandle::GetCenterOfMass)
     .def("GetCenterOfAtoms", &ChainHandle::GetCenterOfAtoms)
-    .def("GetGeometricCenter", &ChainHandle::GetGeometricCenter)
-    .add_property("geometric_center", &ChainHandle::GetGeometricCenter)
+    .def("GetGeometricCenter", geom_center<ChainHandle>)
+    .add_property("geometric_center", geom_center<ChainHandle>)
     .add_property("mass", &ChainHandle::GetMass)
     .add_property("center_of_mass", &ChainHandle::GetCenterOfMass)
     .add_property("center_of_atoms", &ChainHandle::GetCenterOfAtoms)  
     .add_property("in_sequence", &ChainHandle::InSequence)  
     .add_property("valid", &ChainHandle::IsValid)    
-    .def("GetGeometricStart", &ChainHandle::GetGeometricStart)
-    .def("GetGeometricEnd", &ChainHandle::GetGeometricEnd)
+    .def("GetBounds", &ChainHandle::GetBounds)
+    .add_property("bounds", &ChainHandle::GetBounds)
+    .def("GetGeometricStart", geom_start<ChainHandle>)
+    .def("GetGeometricEnd", geom_end<ChainHandle>)
   ;
   
   class_<ChainHandleList>("ChainHandleList", no_init)

@@ -81,9 +81,10 @@ public:
   Real GetMass() const;
   geom::Vec3 GetCenterOfMass() const;
   geom::Vec3 GetCenterOfAtoms() const;
-  geom::Vec3 GetGeometricCenter() const;
-  geom::Vec3 GetGeometricStart() const;
-  geom::Vec3 GetGeometricEnd() const;
+  
+  /// \brief returns the axis-aligned bounding box of the entity
+  geom::AlignedCuboid GetBounds() const;
+  
   
   ///\brief  Get residue by number. Returns a invalid pointer if the chain
   ///        does not have any residue with this number.

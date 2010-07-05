@@ -34,6 +34,12 @@ Vec3::Vec3(Real x, Real y, Real z)
   this->set(x,y,z);
 }
 
+Vec3::Vec3(Real v)
+{
+  this->set(v, v, v);
+}
+
+
 //#if OST_DOUBLE_PRECISION
 //Vec3::Vec3(float x, float y, float z)
 //{

@@ -64,6 +64,8 @@ public:
   //! explicit initialization with an array of doubles
   explicit Vec3(const Real[3]);
 
+  explicit Vec3(Real v);
+  
 #if OST_DOUBLE_PRECISION
   //! explicit initialization with an array of floats
   explicit Vec3(const float[3]);

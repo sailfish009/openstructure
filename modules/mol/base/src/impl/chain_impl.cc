@@ -363,41 +363,27 @@ Real ChainImpl::GetMass() const
   return mass;
 }
 
-geom::Vec3 ChainImpl::GetGeometricStart() const 
+geom::AlignedCuboid ChainImpl::GetBounds() const 
 {
-  geom::Vec3 minimum(std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity());
+  geom::Vec3 mmin( std::numeric_limits<Real>::infinity());
+  geom::Vec3 mmax(-std::numeric_limits<Real>::infinity());
+  bool atoms=false;
   for (ResidueImplList::const_iterator i=residue_list_.begin(); 
         i!=residue_list_.end(); ++i) {
     ResidueImplPtr r=*i;
     for (AtomImplList::iterator j=r->GetAtomList().begin(); 
           j!=r->GetAtomList().end(); ++j) {
-      minimum=geom::Min(minimum,(*j)->GetPos());
+      mmin=geom::Min(mmin, (*j)->GetPos());
+      mmax=geom::Max(mmax, (*j)->GetPos());
+      atoms=true;
     }
   }
-  return minimum;
-}
-
-geom::Vec3 ChainImpl::GetGeometricEnd() const {
-  geom::Vec3 maximum(-std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity());
-  for (ResidueImplList::const_iterator i=residue_list_.begin(); 
-        i!=residue_list_.end(); ++i) {
-    ResidueImplPtr r=*i;
-    for (AtomImplList::iterator j=r->GetAtomList().begin(); 
-          j!=r->GetAtomList().end(); ++j) {
-      maximum=geom::Max(maximum,(*j)->GetPos());
-    }
+  if (!atoms) {
+    return geom::AlignedCuboid(geom::Vec3(), geom::Vec3());
   }
-  return maximum;
+  return geom::AlignedCuboid(mmin, mmax);
 }
 
-geom::Vec3 ChainImpl::GetGeometricCenter() const
-{
-  return (this->GetGeometricStart() + this->GetGeometricEnd()) / 2;
-}
 
 geom::Vec3 ChainImpl::GetCenterOfAtoms() const
 {

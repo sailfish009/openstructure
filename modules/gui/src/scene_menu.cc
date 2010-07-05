@@ -102,20 +102,20 @@ void SceneMenu::CenterOnResidue()
 void SceneMenu::CenterOnChain()
 {
   mol::ChainHandle chain=picked_.second.GetResidue().GetChain();
-  gfx::Scene::Instance().SetCenter(chain.GetGeometricCenter());
+  gfx::Scene::Instance().SetCenter(chain.GetBounds().GetCenter());
 }
 
 void SceneMenu::CenterOnView()
 {
   mol::ResidueHandle res=picked_.second.GetResidue();
-  gfx::Scene::Instance().SetCenter(res.GetGeometricCenter());
+  gfx::Scene::Instance().SetCenter(res.GetBounds().GetCenter());
 }
 
 void SceneMenu::CenterOnSelection()
 {
   gfx::EntityP e=dyn_cast<gfx::Entity>(picked_.first);
   if (e->GetSelection() && e->GetSelection().GetAtomCount()>0) {
-    geom::Vec3 center=e->GetSelection().GetGeometricCenter();
+    geom::Vec3 center=e->GetSelection().GetBounds().GetCenter();
     gfx::Scene::Instance().SetCenter(center);
   }
 }

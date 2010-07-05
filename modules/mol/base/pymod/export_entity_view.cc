@@ -26,6 +26,7 @@ using namespace boost::python;
 #include <ost/mol/view_op.hh>
 using namespace ost;
 using namespace ost::mol;
+#include "bounds.hh"
 
 namespace {
 
@@ -90,10 +91,10 @@ void export_EntityView()
     .def("FindAtom", find_atom_a)
     .def("FindAtom", find_atom_b)    
     .def("GetAtomCount", &EntityView::GetAtomCount)
-    .def("GetGeometricStart", &EntityView::GetGeometricStart)
-    .def("GetGeometricEnd", &EntityView::GetGeometricEnd)
-    .def("GetGeometricCenter", &EntityView::GetGeometricCenter)
-    .add_property("geometric_center", &EntityView::GetGeometricCenter)
+    .def("GetGeometricStart", geom_start<EntityView>)
+    .def("GetGeometricEnd", geom_end<EntityView>)
+    .def("GetGeometricCenter", geom_center<EntityView>)
+    .add_property("geometric_center", geom_center<EntityView>)
     .def("GetCenterOfMass", &EntityView::GetCenterOfMass)
     .def("GetCenterOfAtoms", &EntityView::GetCenterOfAtoms)
     .def("GetMass", &EntityView::GetMass)
@@ -153,6 +154,8 @@ void export_EntityView()
     .def(self==self)
     .def(self!=self)
     .def("Dump", &EntityView::Dump)
+    .def("GetBounds", &EntityView::GetBounds)
+    .add_property("bounds", &EntityView::GetBounds)    
   ;
   def("Union", &Union);
   def("Difference", &Difference);

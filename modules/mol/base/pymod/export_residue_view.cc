@@ -25,6 +25,7 @@ using namespace boost::python;
 #include <ost/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
+#include "bounds.hh"
 
 namespace {
 typedef AtomView (ResidueView::*StringMethod)(const String&) const;
@@ -79,14 +80,16 @@ void export_ResidueView()
     .def("GetMass", &ResidueView::GetMass)
     .def("GetCenterOfMass", &ResidueView::GetCenterOfMass)
     .def("GetCenterOfAtoms", &ResidueView::GetCenterOfAtoms)
-    .def("GetGeometricCenter", &ResidueView::GetGeometricCenter)
+    .def("GetGeometricCenter", geom_center<ResidueView>)
     .add_property("mass", &ResidueView::GetMass)
     .add_property("center_of_mass", &ResidueView::GetCenterOfMass)
     .add_property("center_of_atoms", &ResidueView::GetCenterOfAtoms)    
-    .add_property("geometric_center", &ResidueView::GetGeometricCenter)
+    .add_property("geometric_center", geom_center<ResidueView>)
     .add_property("valid", &ResidueView::IsValid)    
-    .def("GetGeometricStart", &ResidueView::GetGeometricStart)
-    .def("GetGeometricEnd", &ResidueView::GetGeometricEnd) 
+    .def("GetGeometricStart", geom_start<ResidueView>)
+    .def("GetGeometricEnd", geom_end<ResidueView>) 
+    .def("GetBounds", &ResidueView::GetBounds)
+    .add_property("bounds", &ResidueView::GetBounds)    
   ;
 
 

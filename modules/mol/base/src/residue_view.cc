@@ -205,36 +205,17 @@ double ResidueView::GetMass() const
   return mass;
 }
 
-geom::Vec3 ResidueView::GetGeometricStart() const 
+geom::AlignedCuboid ResidueView::GetBounds() const 
 {
   this->CheckValidity();
-  geom::Vec3 minimum(std::numeric_limits<Real>::max(),
-                     std::numeric_limits<Real>::max(),
-                     std::numeric_limits<Real>::max());
+  geom::Vec3 mmin( std::numeric_limits<Real>::max());
+  geom::Vec3 mmax(-std::numeric_limits<Real>::max());  
   AtomViewList::const_iterator i;
   for (i=data_->atoms.begin(); i!=data_->atoms.end(); ++i) {
-    minimum=geom::Min(minimum, (*i).GetPos());
+    mmin=geom::Min(mmin, (*i).GetPos());
+    mmax=geom::Max(mmax, (*i).GetPos());
   }
-  return minimum;
-}
-
-geom::Vec3 ResidueView::GetGeometricEnd() const 
-{
-  this->CheckValidity();
-  geom::Vec3 maximum(-std::numeric_limits<Real>::max(),
-                     -std::numeric_limits<Real>::max(),
-                     -std::numeric_limits<Real>::max());
-  AtomViewList::const_iterator i;
-  for (i=data_->atoms.begin(); i!=data_->atoms.end(); ++i) {
-    maximum=geom::Max(maximum, (*i).GetPos());
-  }
-  return maximum;
-}
-
-geom::Vec3 ResidueView::GetGeometricCenter() const
-{
-  this->CheckValidity();
-  return (this->GetGeometricStart() + this->GetGeometricEnd())/2;
+  return geom::AlignedCuboid(mmin, mmax);
 }
 
 geom::Vec3 ResidueView::GetCenterOfMass() const 

@@ -55,25 +55,12 @@ geom::Vec3 EntityHandle::GetCenterOfAtoms() const {
   return Impl()->GetCenterOfAtoms();
 }
 
-geom::Vec3 EntityHandle::GetGeometricCenter() const {
+geom::AlignedCuboid EntityHandle::GetBounds() const 
+{
   this->CheckValidity();
-  return Impl()->GetGeometricCenter();
+  return Impl()->GetBounds();
 }
 
-geom::Vec3 EntityHandle::GetGeometricStart() const {
-  this->CheckValidity();
-  return Impl()->GetGeometricStart();
-}
-
-geom::Vec3 EntityHandle::GetGeometricEnd() const {
-  this->CheckValidity();
-  return Impl()->GetGeometricEnd();
-}
-
-geom::Vec3 EntityHandle::GetBoundarySize() const {
-  this->CheckValidity();
-  return Impl()->GetBoundarySize();
-}
 
 EntityHandle::EntityHandle(const impl::EntityImplPtr& e)
   : EntityBase(e)

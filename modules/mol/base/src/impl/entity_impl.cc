@@ -262,60 +262,29 @@ EntityImpl::~EntityImpl()
     it->second->OnDestroy();
   }
 }
-
-geom::Vec3 EntityImpl::GetGeometricStart() const 
+geom::AlignedCuboid EntityImpl::GetBounds() const
 {
-  geom::Vec3 minimum(std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity());
-  if (this->GetAtomCount()>0) {
-    for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      minimum=geom::Min(minimum,it->second->GetPos());
-    }
-  }
-  return minimum;
-}
 
-geom::Vec3 EntityImpl::GetGeometricEnd() const {
-  geom::Vec3 maximum(-std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity());
   if (this->GetAtomCount()>0) {
-    for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      maximum=geom::Max(maximum,it->second->GetPos());
+    geom::Vec3 mmin, mmax;    
+    AtomImplMap::const_iterator it=atom_map_.begin();
+    mmin=mmax=it->second->GetPos();
+    for (++it; it!=atom_map_.end();++it) {
+      mmin=geom::Min(mmin,it->second->GetPos());
+      mmax=geom::Min(mmax,it->second->GetPos());      
     }
+    return geom::AlignedCuboid(mmin, mmax);    
+  } else {
+    return geom::AlignedCuboid(geom::Vec3(), geom::Vec3());
   }
-  return maximum;
-}
 
-geom::Vec3 EntityImpl::GetBoundarySize() const {
-  geom::Vec3 size;
-  geom::Vec3 minimum(std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity());
-  geom::Vec3 maximum(-std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity());
-  if (this->GetAtomCount()>0) {
-    for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      minimum=geom::Min(minimum,it->second->GetPos());
-      maximum=geom::Max(maximum,it->second->GetPos());
-    }
-  }
-  size=maximum-minimum;
-  return size;
-}
-
-geom::Vec3 EntityImpl::GetGeometricCenter() const {
-  geom::Vec3 center;
-  center = (this->GetGeometricEnd() + this->GetGeometricStart())/2;
-  return center;
 }
 
 geom::Vec3 EntityImpl::GetCenterOfAtoms() const {
   geom::Vec3 center;
   if (this->GetAtomCount()>0) {
-    for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
+    for (AtomImplMap::const_iterator it = atom_map_.begin();
+         it!=atom_map_.end();++it) {
       center+=it->second->GetPos();
     }
     center/=static_cast<Real>(atom_map_.size());
