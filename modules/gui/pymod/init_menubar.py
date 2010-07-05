@@ -52,6 +52,12 @@ class InitMenuBar(QtCore.QObject):
     help.addAction(webpage)
         
     window.addMenu(persp.panels.menu)
+    gl_win = QtGui.QAction('&GL Window', self)
+    gl_win.setStatusTip('Display gl windows')
+    gl_win.setShortcut('Ctrl+G')
+    self.connect(gl_win, QtCore.SIGNAL('triggered()'), self.ShowGLWin)
+    window.addAction(gl_win)
+    
     #Options
     #Add file loader to menu
     loader_manager = QtGui.QAction('File &Loader', self)
@@ -76,6 +82,13 @@ class InitMenuBar(QtCore.QObject):
   
   def OpenDocs(self):
     QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://www.openstructure.org/docs/index.html"))
+    
+  def ShowGLWin(self):
+    gosty=gui.GostyApp.Instance()
+    gl_win=gosty.GetGLWin()
+    if gl_win and gl_win.qobject.isHidden():
+      gl_win.Show()
+      
     
 def _InitMenuBar(app):
   InitMenuBar(app.perspective.menubar)
