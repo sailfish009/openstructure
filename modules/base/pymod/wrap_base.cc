@@ -39,7 +39,7 @@ BOOST_PYTHON_MODULE(_base)
   export_Logger();
   export_Range();
   export_Units();
-  typedef std::vector<float> FloatList;
+  typedef std::vector<Real> FloatList;
   class_<FloatList>("FloatList", init<>())
     .def(vector_indexing_suite<FloatList>())
     .def(ost::VectorAdditions<FloatList>())
