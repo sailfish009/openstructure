@@ -12,7 +12,17 @@ set(GUI_ICONS
   icons/site_icon.png
   icons/split_icon.png
 )
+
+set(GUI_IMAGES
+  images/logo-small.png
+)
+
 add_custom_target(scene_icons ALL)
 copy_if_different("./" "${STAGE_DIR}/share/openstructure/gui/icons" 
                   "${GUI_ICONS}" "ICONS_FOR_GUI" scene_icons)
 install(FILES ${GUI_ICONS} DESTINATION "share/openstructure/gui/icons")
+
+add_custom_target(gui_images ALL)
+copy_if_different("./" "${STAGE_DIR}/share/openstructure/gui/images" 
+                  "${GUI_IMAGES}" "IMAGES_FOR_GUI" gui_images)
+install(FILES ${GUI_IMAGES} DESTINATION "share/openstructure/gui/images")

@@ -17,6 +17,7 @@ from ost.gui.scene.init_inspector import _InitInspector
 from ost.gui.init_menubar import _InitMenuBar
 from ost.gui.init_spacenav import _InitSpaceNav
 from ost.gui.init_context_menu import _InitContextMenu
+from ost.gui.init_splash import _InitSplash
 
 def _InitRuleBasedBuilder():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
@@ -44,13 +45,16 @@ def _InitPanels(app):
                            'ost.gui.RemoteLoader', False)
     panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.seq_viewer)
     panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.py_shell)
+    return False
+  return True
 
 def _InitFrontEnd():
   app=gui.GostyApp.Instance()
   app.SetAppTitle("DNG")
   main_area=app.perspective.main_area
   _InitMenuBar(app)
-  _InitPanels(app)
+  if not _InitPanels(app):
+    _InitSplash(app)
   _InitSpaceNav(app)
   _InitContextMenu(app)
   main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win, int(QtCore.Qt.WindowMaximized))

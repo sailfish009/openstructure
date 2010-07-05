@@ -80,6 +80,7 @@ set(OST_GUI_PYMOD_MODULES
   init_context_menu.py
   init_menubar.py
   init_spacenav.py
+  init_splash.py
 )
 
 pymod(NAME gui CPP ${OST_GUI_PYMOD_SOURCES} 
