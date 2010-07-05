@@ -1,5 +1,9 @@
 import math,random
 from ost import img
+
+# remove all objects from scene, just in case
+scene.RemoveAll()
+
 vmax=-10000.0
 vmin=+10000.0
 mh=img.CreateMap(img.Size(32,32,32))
@@ -44,6 +48,7 @@ go1=gfx.MapIso("iso", mh,0.5)
 go1.SetLineWidth(1.5)
 scene.Add(go1)
 scene.SetCenter(go1.GetCenter())
+
 
 go2 = gfx.MapSlab("slab",mh,geom.Plane(go1.GetCenter(),geom.Vec3(0.0,0.0,1.0)))
 scene.Add(go2)

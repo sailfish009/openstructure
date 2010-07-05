@@ -1,22 +1,27 @@
 from ost.seq import alg
+scene.RemoveAll()
 #-------------------------------------------------------------------------------
 # Loading structure and alignment
 #-------------------------------------------------------------------------------
-m=io.LoadPDB('sh2.pdb')
+m=io.LoadPDB('data/sh2.pdb')
 mp=m.Select('ishetatm=false')
-aln=io.LoadAlignment('sh2.aln')
+aln=io.LoadAlignment('data/sh2.aln')
 aln.AttachView(0, mp)
+
 #-------------------------------------------------------------------------------
 # Calculate conservation of alignment
+# First we set all properties to zero, then let alg.Conservation assign the
+# conservation scores to the residues
 #-------------------------------------------------------------------------------
 for r in m.residues:
   r.SetFloatProp('cons', 0)
 alg.Conservation(aln)
+
 #-------------------------------------------------------------------------------
 # Setup Graphical Objects for Rendering
 #-------------------------------------------------------------------------------
 g=gfx.Entity('SH2', m)
-s=io.LoadSurface('sh2.vert')
+s=io.LoadSurface('data/sh2.vert')
 gs=gfx.Surface('SH2-surf', s)
 scene.Add(gs)
 scene.Add(g)
@@ -36,9 +41,11 @@ g.SetRenderMode(gfx.CUSTOM,
                 m.Select('ishetatm=true'))
 g.SetColor(gfx.YELLOW, 'ishetatm=true')
 
-
+#-------------------------------------------------------------------------------
+# Create alignment viewer and show it on the screen
+#-------------------------------------------------------------------------------
 seq_viewer=gui.SequenceViewer()
 seq_viewer.AddAlignment(aln)
 seq_viewer.Show()
 
-print 'Colouring the active site according to the level of conservation found inthe sequences shown in the sequence viewer. Highly conserved regions are shown in blue, variable regions in red.'
+

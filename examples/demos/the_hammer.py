@@ -1,6 +1,10 @@
 from PyQt4 import QtCore
 import math
 from ost import qa
+
+# remove all objects from scene, just in case
+scene.RemoveAll()
+
 class Anim(QtCore.QTimer):
     def __init__(self, a, b):
         QtCore.QTimer.__init__(self)
