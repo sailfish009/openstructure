@@ -27,8 +27,6 @@ using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
 
-void export_Align();
-
 BOOST_PYTHON_MODULE(_seq_alg)
 {
   enum_<RefMode::Type>("RefMode")
@@ -48,5 +46,5 @@ BOOST_PYTHON_MODULE(_seq_alg)
   ;
   def("MergePairwiseAlignments", &MergePairwiseAlignments);
   def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons"));
-  export_Align();  
+
 }
