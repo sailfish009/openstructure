@@ -20,10 +20,8 @@ class SplashDialog(QtGui.QDialog):
     self.label.setHtml("Welcome to <b>Openstructure</b>!<br /><br />You are running version 1.0.0a<br /><br />If you are new to OpenStructure, we invite you to run the demos from the examples directory. Scripts can be displayed by right clicking on the file and selecting 'Show source'.<br /><br />Feel free visit our website at:<br /> http://www.openstructure.org")
     layout.addWidget(self.label)
     
-def _InitSplash(app):
-  splash = SplashDialog(app.perspective.main_area.qobject)
-  #print dir(splash)
-
+def _InitSplash():
+  splash = SplashDialog(gui.GostyApp.Instance().perspective.main_area.qobject)
   splash.showNormal()
 
   #QtCore.QTimer.singleShot(30000, splash.close);

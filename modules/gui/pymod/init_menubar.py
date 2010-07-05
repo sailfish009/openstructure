@@ -26,8 +26,8 @@ import ost
 from PyQt4 import QtCore, QtGui
 from ost.gui import FileLoader
 from ost.gui.scene.file_loader import GenericLoader
-
 from ost.gui.scene.loader_manager_widget import LoaderManagerWidget
+from ost.gui.init_splash import _InitSplash
 
 class InitMenuBar(QtCore.QObject):
   def __init__(self, menu_bar=None):
@@ -50,6 +50,12 @@ class InitMenuBar(QtCore.QObject):
     webpage.setShortcut('Ctrl+D')
     self.connect(webpage, QtCore.SIGNAL('triggered()'), self.OpenDocs)
     help.addAction(webpage)
+    about = QtGui.QAction('&About', self)
+    about.setStatusTip('About')
+    about.setShortcut('Ctrl+A')
+    self.connect(about, QtCore.SIGNAL('triggered()'), self.About)
+    help.addAction(about)
+    
         
     window.addMenu(persp.panels.menu)
     gl_win = QtGui.QAction('&GL Window', self)
@@ -83,6 +89,9 @@ class InitMenuBar(QtCore.QObject):
   def OpenDocs(self):
     QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://www.openstructure.org/docs/index.html"))
     
+  def About(self):
+    _InitSplash()
+  
   def ShowGLWin(self):
     gosty=gui.GostyApp.Instance()
     gl_win=gosty.GetGLWin()
