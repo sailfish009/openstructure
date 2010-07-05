@@ -23,6 +23,7 @@
 #include <ost/seq/alg/sequence_identity.hh>
 #include <ost/seq/alg/ins_del.hh>
 #include <ost/seq/alg/conservation.hh>
+#include <ost/seq/alg/subst_weight_matrix.hh>
 using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
@@ -43,6 +44,11 @@ BOOST_PYTHON_MODULE(_seq_alg)
     .def(init<const AlignmentHandle&>())
     .def("GetDeletions", &InsDel::GetDeletions)
     .def("GetInsertions", &InsDel::GetInsertions)
+  ;
+  
+  class_<SubstWeightMatrix, SubstWeightMatrixPtr>("SubstWeightMatrix", init<>())
+    .def("GetWeight", &SubstWeightMatrix::GetWeight)
+    .def("SetWeight", &SubstWeightMatrix::SetWeight)
   ;
   def("MergePairwiseAlignments", &MergePairwiseAlignments);
   def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons"));
