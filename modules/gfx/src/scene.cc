@@ -607,6 +607,12 @@ void Scene::Remove(const GfxNodeP& go)
   this->RequestRedraw();
 }
 
+void Scene::RemoveAll()
+{
+  root_node_->RemoveAll();
+  this->RequestRedraw();
+}
+
 void Scene::Remove(const String& name)
 {
   FindNode fn(name);

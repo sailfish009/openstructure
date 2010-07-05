@@ -68,6 +68,8 @@ class DLLEXPORT_OST_GFX GfxNode: public boost::enable_shared_from_this<GfxNode>
   // return name
   String GetName() const;
 
+  // remove all child nodes
+  void RemoveAll();
   // change name
   void Rename(const String& name);
 

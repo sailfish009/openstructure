@@ -281,6 +281,10 @@ class DLLEXPORT_OST_GFX Scene {
   void Remove(const GfxNodeP& go);
   /// remove graphical object from the scene
   void Remove(const String& name);
+  
+  /// \brief remove all objects from the scene
+  void RemoveAll();
+  
   /// \brief rename an existing graphical object
   /// defunct for now
   bool Rename(const String& old_name, const String& new_name);

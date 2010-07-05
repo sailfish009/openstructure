@@ -214,7 +214,12 @@ It is interesting to note that the offset from center (`trans`) is given in rota
     
     :param obj:
     :type  obj: :class:`GfxNode`
-
+  
+  .. method:: RemoveAll()
+  
+    Remove all objects from the scene
+    
+    
   .. method:: RenderGL()
 
     Renders the scene.
