@@ -8,7 +8,7 @@ ent=io.LoadEntity(filename)
 
 edi=ent.RequestXCSEditor()
 m=geom.Mat4()
-m.PasteTranslation(-ent.bounds.min)
+m.PasteTranslation(-ent.GetGeometricStart())
 edi.ApplyTransform(m)
 edi.UpdateICS()
 frag=gfx.Entity('frag', ent)

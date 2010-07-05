@@ -2,9 +2,9 @@ from ost.seq import alg
 #-------------------------------------------------------------------------------
 # Loading structure and alignment
 #-------------------------------------------------------------------------------
-m=io.LoadPDB('sh2.pdb')
+m=io.LoadPDB('data/sh2.pdb')
 mp=m.Select('ishetatm=false')
-aln=io.LoadAlignment('sh2.aln')
+aln=io.LoadAlignment('data/sh2.aln')
 aln.AttachView(0, mp)
 #-------------------------------------------------------------------------------
 # Calculate conservation of alignment
@@ -16,7 +16,7 @@ alg.Conservation(aln)
 # Setup Graphical Objects for Rendering
 #-------------------------------------------------------------------------------
 g=gfx.Entity('SH2', m)
-s=io.LoadSurface('sh2.vert')
+s=io.LoadSurface('data/sh2.vert')
 gs=gfx.Surface('SH2-surf', s)
 scene.Add(gs)
 scene.Add(g)

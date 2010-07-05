@@ -18,7 +18,7 @@ class Anim(QtCore.QTimer):
         self.cg_.CopyFrame(self.frame_)
         go.UpdatePositions()
 
-cg = io.LoadCHARMMTraj("sample.pdb","sample.dcd")
+cg = io.LoadCHARMMTraj("data/sample.pdb","data/sample.dcd")
 eh=cg.GetEntity()
 ev=eh.Select("not ele=H")
 go=gfx.Entity("mol",gfx.SIMPLE, ev)
@@ -29,5 +29,6 @@ scene.SetCenter(go.GetCenter())
 scene.AutoAutoslab(True)
 
 anim=Anim(cg,go)
+
 print 'Demo 6: Import of a CHARMM trajectory. Type anim.stop() to halt animation, anim.start(100) to start it again with stepsize 100!Starting animation now....'
 anim.start(50)

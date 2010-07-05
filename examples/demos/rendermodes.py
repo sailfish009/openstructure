@@ -1,5 +1,5 @@
 # load pdb file
-eh=io.LoadEntity("sdh.pdb")
+eh=io.LoadEntity("data/sdh.pdb")
 
 
 sdh_go=gfx.Entity("SDH2", eh.Select("cname=A"))

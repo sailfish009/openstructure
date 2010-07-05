@@ -1,4 +1,4 @@
-sdh=io.LoadPDB('sdh.pdb')
+sdh=io.LoadPDB('data/sdh.pdb')
 helix=sdh.Select('rnum=99:128 and cname=A and aname=CA,C,N,O')
 go=gfx.Entity('helix', gfx.SIMPLE, helix)
 scene.Add(go)
@@ -10,6 +10,8 @@ def RenderBBox(bbox):
   bb.SetFillColor(gfx.Color(0.5, 0.8, 0.5, 0.2))
   scene.Add(bb)
 
+print 'Center:',(helix.GetGeometricStart()+helix.GetGeometricEnd())*.5
+  
 RenderBBox(bbox)
 scene.center=go.center
 print 'Demo2: Translucent bounding box around an OpenStructure entity'

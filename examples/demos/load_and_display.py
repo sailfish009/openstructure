@@ -1,5 +1,5 @@
 # Load chain A of SDH
-ent=io.LoadPDB('sdh.pdb', restrict_chains='A')
+ent=io.LoadPDB('data/sdh.pdb', restrict_chains='A')
 
 # create graphics object
 go=gfx.Entity('SDH', ent)
