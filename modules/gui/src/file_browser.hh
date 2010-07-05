@@ -55,6 +55,7 @@ private slots:
   void LoadCurrentObject();
   void LoadWithSystemEditor();
   void LoadWithSourceViewer();
+
 private:
   void LoadObject(const QModelIndex& index);
   void UpdateMenu(const QString& path);

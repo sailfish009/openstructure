@@ -16,14 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <QCoreApplication>
 #include <QCursor>
 #include <QVBoxLayout>
 #include <QDesktopServices>
 #include <QDir>
-#include <QHeaderView>
 #include <QFileInfo>
-#include <QMessageBox>
-#include <QApplication>
 #include <QUrl>
 
 #include <ost/platform.hh>
@@ -81,6 +79,11 @@ FileBrowser::FileBrowser(QWidget* parent):
         path=example_path;
       }
     }
+  }
+# else
+  QString example_path=path+"/share/openstructure/examples/";
+  if (QDir(example_path).exists()) {
+    path=example_path;
   }
 #endif
   this->Init(path);
