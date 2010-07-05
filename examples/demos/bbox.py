@@ -1,4 +1,4 @@
-sdh=io.LoadPDB('data/sdh.pdb')
+sdh=io.LoadPDB('sdh.pdb')
 helix=sdh.Select('rnum=99:128 and cname=A and aname=CA,C,N,O')
 go=gfx.Entity('helix', gfx.SIMPLE, helix)
 scene.Add(go)
