@@ -15,13 +15,6 @@ This trajectory file format is used by the CHARMM program suite (Molecular Model
 *Recognized File Extensions*
   crd
 
-MAE - Maestro coordinate file format (used by Schroedinger Inc.)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-File format by the popular Maestro package.
-
-*Recognized File Extensions*
-  mae
-
 PDB - Brookhaven PDB File
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Fine grained control over PDB file import is available via the 
@@ -43,7 +36,7 @@ PQR
 *Format Name*
   pqr
   
-SDF
+SDF - Structured Data File
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 *Recognized File Extensions*
@@ -78,12 +71,3 @@ Promod
   
 *Format Name*
   promod
-
-PIR
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-*Recognized File Extensions*
-  pir
-  
-*Format Name*
-  pir
