@@ -72,9 +72,9 @@ class MapLevelWidget(QtGui.QWidget):
     QtGui.QWidget.__init__(self, parent)
     
     #Create Ui elements
-    map_level_label = QtGui.QLabel("Map Contour Level")
-    font = map_level_label.font()
-    font.setBold(True)
+    self.map_level_label_ = QtGui.QLabel("Map Contour Level")
+    self.font = self.map_level_label_.font()
+    self.font.setBold(True)
     
     self.level_preview_ = LevelPreview()
     
@@ -85,7 +85,7 @@ class MapLevelWidget(QtGui.QWidget):
     grid = QtGui.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
     grid.addWidget(self.level_preview_, 0, 0, 1, 4)
-    grid.addWidget(map_level_label, 1, 0, 1, 3)
+    grid.addWidget(self.map_level_label_, 1, 0, 1, 3)
     grid.addWidget(self.level_spinbox_,1,3,1,1)
     grid.setRowStretch(3, 1)
     self.setLayout(grid)
@@ -101,13 +101,22 @@ class MapLevelWidget(QtGui.QWidget):
     if(scene_selection.GetActiveNodeCount()==1):
       node = scene_selection.GetActiveNode(0)
       if _img_present and isinstance(node, gfx.MapIso):
-        self.level_preview_.SetBins(node.GetHistogram())
-        self.level_preview_.SetMinimum(node.GetMinLevel())
-        self.level_spinbox_.setMinimum(node.GetMinLevel())
-        self.level_preview_.SetMaximum(node.GetMaxLevel())
-        self.level_spinbox_.setMaximum(node.GetMaxLevel())
-        self.level_preview_.SetLevel(node.GetLevel())
-        self.setEnabled(True)
+        try:
+          self.level_preview_.SetBins(node.GetHistogram())
+          self.level_preview_.SetMinimum(node.GetMinLevel())
+          self.level_spinbox_.setMinimum(node.GetMinLevel())
+          self.level_preview_.SetMaximum(node.GetMaxLevel())
+          self.level_spinbox_.setMaximum(node.GetMaxLevel())
+          self.level_preview_.SetLevel(node.GetLevel())
+          self.level_spinbox_.show()
+          self.font.setBold(True)
+          self.map_level_label_.setText("Map Contour Level")
+          self.setEnabled(True)
+        except UserWarning:
+          self.font.setBold(False)
+          self.map_level_label_.setText("Map uniformly filled with level %s"%node.GetLevel())
+          self.level_spinbox_.hide()
+          self.setEnabled(False)
       else:
         self.setEnabled(False)
     else:
