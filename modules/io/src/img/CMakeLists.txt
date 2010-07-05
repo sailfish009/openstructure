@@ -10,6 +10,7 @@ map_io_dat_handler.cc
 map_io_jpk_handler.cc
 map_io_nanoscope_handler.cc
 map_io_png_handler.cc
+map_io_df3_handler.cc
 convert_vax_data.c
 image_format.cc
 tiff_util.cc
@@ -18,6 +19,7 @@ PARENT_SCOPE
 
 set(OST_IO_IMG_HEADERS
 load_map.hh
+map_io_df3_handler.hh
 image_format.hh
 image_format_conversion.cc
 map_io_dx_handler.hh

@@ -37,6 +37,7 @@
 #  include  <ost/io/img/map_io_dat_handler.hh>
 #  include  <ost/io/img/map_io_jpk_handler.hh>
 #  include  <ost/io/img/map_io_nanoscope_handler.hh>
+#  include  <ost/io/img/map_io_df3_handler.hh>
 #endif
 namespace ost { namespace io {
 
@@ -62,6 +63,7 @@ IOManager::IOManager()
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOJpkHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIODatHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIONanoscopeHandlerFactory));
+  RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIODF3HandlerFactory));  
 #endif
 }
 
