@@ -17,7 +17,7 @@ class SplashDialog(QtGui.QDialog):
     layout.addWidget(imageLabel)
     self.label = QtGui.QTextEdit()
     self.label.setReadOnly(True)
-    self.label.setHtml("Welcome to <b>Openstructure</b><br /><br />You are running version 1.0.0a<br /><br />If you are new to OpenStructure, you might want to run the demos from the examples directory. To see, how the demos work, right click on the file and click 'show source'.<br /><br />Lean more on the official website:<br /> http://www.openstructure.org")
+    self.label.setHtml("Welcome to <b>Openstructure</b>!<br /><br />You are running version 1.0.0a<br /><br />If you are new to OpenStructure, we invite you to run the demos from the examples directory. Scripts can be displayed by right clicking on the file and selecting 'Show source'.<br /><br />Feel free visit our website at:<br /> http://www.openstructure.org")
     layout.addWidget(self.label)
     
 def _InitSplash(app):
