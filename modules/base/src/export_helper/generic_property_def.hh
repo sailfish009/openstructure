@@ -185,6 +185,7 @@ void generic_prop_def(O& bp_class)
     .def("SetGenericFloatProperty", &depr_set_float<C>)
     .def("SetGenericBoolProperty", &depr_set_bool<C>)
     .def("SetGenericStringProperty", &depr_set_string<C>)
+    .def("RemoveProp", &C::RemoveProp)
   ;
 }
 

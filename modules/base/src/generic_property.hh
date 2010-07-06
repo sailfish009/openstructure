@@ -102,6 +102,12 @@ public:
     }
   }
   
+  void RemoveProp(const String& key)
+  {
+    if (map_) {
+      map_->erase(key);
+    }
+  }
   void Assign(const GenericPropContainerImpl& impl)
   {
     if (impl.map_) {
@@ -159,6 +165,7 @@ protected:
   {
     return static_cast<const H*>(this)->GpImpl();
   }  
+  
 public:
   /// \brief checks existence of property
   bool HasProp(const String& key) const {
@@ -295,6 +302,11 @@ public:
   void SetBoolProp(const String& key, bool value)
   {
     this->GetImpl()->GenericProp(key)=value;
+  }
+  
+  void RemoveProp(const String& key)
+  {
+    this->GetImpl()->RemoveProp(key);
   }
 };
 
