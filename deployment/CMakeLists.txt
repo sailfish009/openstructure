@@ -1,1 +1,6 @@
+get_ost_rev()
+include(Deployment)
+set(SUBST_DIC OST_VERSION="${OST_VERSION}")
+add_custom_target(deploymnt ALL)
+script(NAME README.html INPUT README.html.in SUBSTITUTE ${SUBST_DIC} TARGET deploymnt)
 add_subdirectory(win)
