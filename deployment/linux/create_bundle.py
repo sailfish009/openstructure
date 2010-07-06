@@ -45,7 +45,7 @@ svninfo_split=string.split(svninfo_lines[4])
 revstring=svninfo_split[1]
 directory_name='openstructure-linux-'+archstring+'-'+additional_label+'-rev'+revstring
 print 'Stripping subversion information to avoid accidental commit'
-subprocess.call('rm -rf $(find . -name .svn)',shell=True,cwd='../../')
+#subprocess.call('rm -rf $(find . -name .svn)',shell=True,cwd='../../')
 print 'Hardcoding package python binary path in openstructure executables'
 subprocess.call('mv scripts/ost.in scripts/ost.in.backup',shell=True,cwd='../../')
 subprocess.call('sed "s/@PYTHON_BINARY@/\$DNG_ROOT\/bin\/'+python_bin_in_bundle+'/g" scripts/ost.in.backup > scripts/ost.in.prepreprepre',shell=True,cwd='../../')
@@ -142,8 +142,9 @@ print 'Removing headers from package directory structure'
 subprocess.call('rm -fr   '+directory_name+'/include',shell=True,cwd='../../')
 print 'Stripping pyc files from bundle'
 subprocess.call('rm -rf $(find . -name *.pyc)',shell=True,cwd='../../')
-print 'removing dokk from bundle'
-subprocess.call('rm -rf '+directory_name+'/share/openstructure/examples/dokk',shell=True,cwd='../../')
+print 'removing dokk and harmony examples from bundle'
+subprocess.call('rm -rf '+directory_name+'/share/openstructure/examples/code_fragments/dokk',shell=True,cwd='../../')
+subprocess.call('rm -rf '+directory_name+'/share/openstructure/examples/code_fragments/harmony',shell=True,cwd='../../')
 print 'De-hardcoding package python binary path from openstructure executables'
 subprocess.call('rm scripts/ost.in',shell=True,cwd='../../')
 subprocess.call('rm scripts/ost.in.pre*',shell=True,cwd='../../')
