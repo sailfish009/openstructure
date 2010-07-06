@@ -136,7 +136,7 @@ int SequenceImpl::GetPos(int index) const
   int shifted_index=index-sequence_offset_;
   int pos=this->GetPosNoBounds(shifted_index);
   if (pos<0 || pos>=static_cast<int>(seq_string_.length()))
-    throw std::out_of_range("number not covered in sequence");
+    throw Error("number not covered in sequence");
   return pos;
 }
 

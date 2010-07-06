@@ -46,7 +46,7 @@ public:
     if (index<list_.size()) {
       return list_[index];
     }
-    throw Error("Index not covered SequenceList");
+    throw std::out_of_range("Index not covered SequenceList");
   }
   
   const SequenceImplPtr& GetSequence(unsigned int i) const {
@@ -54,7 +54,7 @@ public:
     if (index<list_.size()) {
       return list_[index];
     }
-    throw Error("Index not covered SequenceList");
+    throw std::out_of_range("Index not covered SequenceList");
   }
   
   int GetPos(int seq_index, int residue_index) const;

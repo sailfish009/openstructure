@@ -102,10 +102,10 @@ BOOST_AUTO_TEST_CASE(alignment_onelettercode)
   BOOST_CHECK_EQUAL(a.GetOneLetterCode(0,3),seq1.GetOneLetterCode(3));
   BOOST_CHECK_EQUAL(a.GetOneLetterCode(1,3),'w');
   BOOST_CHECK_EQUAL(a.GetOneLetterCode(1,3),seq2.GetOneLetterCode(3));
-  BOOST_CHECK_THROW(a.GetOneLetterCode(0,-1),Error);
-  BOOST_CHECK_THROW(a.GetOneLetterCode(1,6),Error);
-  BOOST_CHECK_THROW(a.GetOneLetterCode(2,0),Error);
-  BOOST_CHECK_THROW(a.GetOneLetterCode(-1,0),Error);
+  BOOST_CHECK_THROW(a.GetOneLetterCode(0,-1),std::out_of_range);
+  BOOST_CHECK_THROW(a.GetOneLetterCode(1,6),std::out_of_range);
+  BOOST_CHECK_THROW(a.GetOneLetterCode(2,0),std::out_of_range);
+  BOOST_CHECK_THROW(a.GetOneLetterCode(-1,0), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(alignment_pos_and_index)
@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(alignment_pos_and_index)
   BOOST_CHECK_EQUAL(a.GetResidueIndex(1,4), 2);
   BOOST_CHECK_THROW(a.GetPos(0,-1),Error);
   BOOST_CHECK_THROW(a.GetPos(1,4),Error);
-  BOOST_CHECK_THROW(a.GetPos(2,0),Error);
-  BOOST_CHECK_THROW(a.GetPos(-1,0),Error);
+  BOOST_CHECK_THROW(a.GetPos(2,0),std::out_of_range);
+  BOOST_CHECK_THROW(a.GetPos(-1,0),std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(alignment_getseq)
@@ -132,8 +132,8 @@ BOOST_AUTO_TEST_CASE(alignment_getseq)
   a.AddSequence(seq2);
   BOOST_CHECK_EQUAL(a.GetSequence(0), seq1);
   BOOST_CHECK_EQUAL(a.GetSequence(1), seq2);
-  BOOST_CHECK_THROW(a.GetSequence(-1), Error);
-  BOOST_CHECK_THROW(a.GetSequence(2), Error);
+  BOOST_CHECK_THROW(a.GetSequence(-1), std::out_of_range);
+  BOOST_CHECK_THROW(a.GetSequence(2), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(alignment_attach_view)
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(alignment_attach_view)
   BOOST_CHECK_NO_THROW(a.AttachView(0,EntityView()));
   BOOST_CHECK_EQUAL(a.GetResidue(0,1), EntityView());
   BOOST_CHECK_EQUAL(a.GetResidue(0,3), EntityView());
-  BOOST_CHECK_THROW(a.GetResidue(-1,0),Error)
+  BOOST_CHECK_THROW(a.GetResidue(-1,0),std::out_of_range)
 }
 
 BOOST_AUTO_TEST_CASE(alignment_cut)
@@ -170,10 +170,10 @@ BOOST_AUTO_TEST_CASE(alignment_cut)
   BOOST_CHECK_EQUAL(a.GetLength(),2);
   BOOST_CHECK_EQUAL(a.GetOneLetterCode(0,0),'r');
   BOOST_CHECK_EQUAL(a.GetOneLetterCode(0,1),'r');
-  BOOST_CHECK_THROW(a.GetOneLetterCode(0,2),Error);
+  BOOST_CHECK_THROW(a.GetOneLetterCode(0,2),std::out_of_range);
   BOOST_CHECK_EQUAL(a.GetOneLetterCode(1,0),'a');
   BOOST_CHECK_EQUAL(a.GetOneLetterCode(1,1),'-');
-  BOOST_CHECK_THROW(a.GetOneLetterCode(1,2),Error);
+  BOOST_CHECK_THROW(a.GetOneLetterCode(1,2),std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(alignment_shift_region)
@@ -194,8 +194,8 @@ BOOST_AUTO_TEST_CASE(alignment_shift_region)
   BOOST_CHECK_EQUAL(a.GetSequence(0).GetString(),"abefcd");
   BOOST_CHECK_EQUAL(a.GetSequence(1).GetString(),"ghlkij");
 
-  BOOST_CHECK_THROW(a.ShiftRegion(0,2,1,2),Error);
-  BOOST_CHECK_THROW(a.ShiftRegion(0,2,1,-2),Error);
+  BOOST_CHECK_THROW(a.ShiftRegion(0,2,1,2),std::out_of_range);
+  BOOST_CHECK_THROW(a.ShiftRegion(0,2,1,-2),std::out_of_range);
 
   BOOST_CHECK_THROW(a.ShiftRegion(0,2,-1),std::out_of_range);
   BOOST_CHECK_THROW(a.ShiftRegion(0,5,2),std::out_of_range);

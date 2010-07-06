@@ -94,16 +94,16 @@ BOOST_AUTO_TEST_CASE(seq_onelettercode)
   BOOST_CHECK_EQUAL(s.GetOneLetterCode(0),'a');
   BOOST_CHECK_EQUAL(s.GetOneLetterCode(3),'c');
   BOOST_CHECK_EQUAL(s.GetOneLetterCode(9),'f');
-  BOOST_CHECK_THROW(s.GetOneLetterCode(-1),Error);
-  BOOST_CHECK_THROW(s.GetOneLetterCode(10),Error);
+  BOOST_CHECK_THROW(s.GetOneLetterCode(-1),std::out_of_range);
+  BOOST_CHECK_THROW(s.GetOneLetterCode(10),std::out_of_range);
   s=CreateSequence("S1", "-afc--de-f");
   BOOST_CHECK_EQUAL(s.GetOneLetterCode(0),'-');
   BOOST_CHECK_EQUAL(s.GetOneLetterCode(1),'a');
   BOOST_CHECK_EQUAL(s.GetOneLetterCode(9),'f');
-  BOOST_CHECK_THROW(s.GetOneLetterCode(-1),Error);
-  BOOST_CHECK_THROW(s.GetOneLetterCode(10),Error);
+  BOOST_CHECK_THROW(s.GetOneLetterCode(-1),std::out_of_range);
+  BOOST_CHECK_THROW(s.GetOneLetterCode(10),std::out_of_range);
   s=CreateSequence("S1", "");
-  BOOST_CHECK_THROW(s.GetOneLetterCode(0),Error);
+  BOOST_CHECK_THROW(s.GetOneLetterCode(0), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(seq_getnum) 
@@ -116,8 +116,8 @@ BOOST_AUTO_TEST_CASE(seq_getnum)
   BOOST_CHECK_EQUAL(s.GetResidueIndex(6),4-1);
   BOOST_CHECK_EQUAL(s.GetResidueIndex(7),5-1);
   BOOST_CHECK_EQUAL(s.GetResidueIndex(9),6-1);
-  BOOST_CHECK_THROW(s.GetResidueIndex(-1), Error);
-  BOOST_CHECK_THROW(s.GetResidueIndex(10), Error);
+  BOOST_CHECK_THROW(s.GetResidueIndex(-1), std::out_of_range);
+  BOOST_CHECK_THROW(s.GetResidueIndex(10), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(seq_getpos) 
@@ -152,7 +152,8 @@ BOOST_AUTO_TEST_CASE(seq_offset)
   BOOST_CHECK_EQUAL(s.GetResidueIndex(1),s2.GetResidueIndex(1)+2);
   BOOST_CHECK_EQUAL(s.GetResidueIndex(6), 5);
   BOOST_CHECK_EQUAL(s.GetResidueIndex(6),s2.GetResidueIndex(6)+2);
-  BOOST_CHECK_THROW(s.GetResidueIndex(10), Error);
+  BOOST_CHECK_THROW(s.GetResidueIndex(10), std::out_of_range);
+  BOOST_CHECK_THROW(s.GetResidueIndex(-1), std::out_of_range);
 
   s.SetSequenceOffset(-1);
   BOOST_CHECK_THROW(s.GetPos(-2), Error);
@@ -169,7 +170,7 @@ BOOST_AUTO_TEST_CASE(seq_offset)
   BOOST_CHECK_EQUAL(s.GetResidueIndex(1),s2.GetResidueIndex(1)-1);
   BOOST_CHECK_EQUAL(s.GetResidueIndex(6), 2);
   BOOST_CHECK_EQUAL(s.GetResidueIndex(6),s2.GetResidueIndex(6)-1);
-  BOOST_CHECK_THROW(s.GetResidueIndex(10), Error);
+  BOOST_CHECK_THROW(s.GetResidueIndex(10), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(seq_gaps)
