@@ -1,5 +1,5 @@
 if(DEPLOYMENT)
-  get_ost_rev()
+#  get_ost_rev()
   include(Deployment)
   set(SUBST_DICT OST_VERSION="${OST_VERSION}")
   add_custom_target(deployment ALL)
