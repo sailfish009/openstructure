@@ -105,6 +105,7 @@ void StarParser::ParseLoop()
   while (this->GetLine(line)) {
     StringRef tline=line.rtrim();
     if (tline.empty()) {
+      this->ConsumeLine();
       continue;
     }
     switch(tline[0]) {
@@ -137,6 +138,7 @@ void StarParser::ParseLoop()
   while (this->GetLine(line)) {
     StringRef tline=line.rtrim();
     if (tline.empty()) {
+      this->ConsumeLine();
       continue;
     }
     switch (tline[0]) {
@@ -213,6 +215,7 @@ void StarParser::ParseDataItem()
     while (this->NextLine(line)) {
       StringRef tline=line.rtrim();
       if (tline.empty()) {
+        this->ConsumeLine();
         continue;
       }
       if (tline[0]==';') {
