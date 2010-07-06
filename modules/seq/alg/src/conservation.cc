@@ -82,8 +82,7 @@ float PhysicoChemicalDissim(char c1, char c2)
              -1, 13, 19, 21, 18, 22};
   int idx_a=(c1=='-' || c1<'A' || c1>'Z') ? 20 : indices[c1-'A'];
   int idx_b=(c2=='-' || c2<'A' || c2>'Z') ? 20 : indices[c2-'A'];  
-  assert(idx_a>=0);
-  assert(idx_b>=0);
+
   if (idx_a<0) {
     idx_a=20;
   }
@@ -103,7 +102,7 @@ std::vector<Real> Conservation(const AlignmentHandle& aln, bool assign,
                                const String& prop)
 {
   std::vector<Real> cons(aln.GetLength(), 0.0);
-  int comb=aln.GetCount()*(aln.GetCount()-1)/2;
+  int comb=(aln.GetCount()*(aln.GetCount()-1))/2;
   for (int col=0; col<aln.GetLength(); ++col) {
     float score=0.0;
     AlignedColumn c=aln[col];
@@ -119,6 +118,10 @@ std::vector<Real> Conservation(const AlignmentHandle& aln, bool assign,
         if (c[i]!='-') {
           mol::ResidueView r=c.GetResidue(i);
           if (r.IsValid()) {
+            if (r.GetOneLetterCode()!=c[i]) {
+              std::cout << "WARNING: " << col << " " << c[i] << "!=" 
+                        << r.GetOneLetterCode() << std::endl;
+            }
             r.SetFloatProp(prop, score);
           }
         }

@@ -7,7 +7,7 @@ m=io.LoadPDB('data/sh2.pdb')
 mp=m.Select('ishetatm=false')
 aln=io.LoadAlignment('data/sh2.aln')
 aln.AttachView(0, mp)
-
+aln.SetSequenceOffset(0, 1)
 #-------------------------------------------------------------------------------
 # Calculate conservation of alignment
 # First we set all properties to zero, then let alg.Conservation assign the
@@ -27,12 +27,12 @@ scene.Add(gs)
 scene.Add(g)
 scene.CenterOn(g)
 
-s.Attach(mp.Select('ishetatm=false'), 5.0)
+s.Attach(mp.Select('ishetatm=false'), 8.0)
 
 gr=gfx.Gradient()
-gr.SetColorAt(0.0, gfx.BLUE)
-gr.SetColorAt(0.5, gfx.WHITE)
-gr.SetColorAt(1.0, gfx.RED)
+gr.SetColorAt(0.0, gfx.Color(0.1, 0.1, 0.8))
+gr.SetColorAt(1.0, gfx.Color(0.8, 0.1, 0.1))
+
 gs.ColorBy('cons', gr, 0.8, 1.0, 
            mol.Prop.Level.RESIDUE)
 g.SetRenderMode(gfx.HSC, 
