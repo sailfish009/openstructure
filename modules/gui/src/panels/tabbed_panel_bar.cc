@@ -20,8 +20,6 @@
 #include <QSettings>
 #include <QDir>
 
-#include <iostream>
-
 #include <ost/gui/widget_registry.hh>
 
 #include "tabbed_panel_bar.hh"
@@ -98,10 +96,7 @@ void TabbedPanelBar::CurrentChanged(int index){
 
 
 TabbedPanelBar::~TabbedPanelBar(){
-  //Do not destroy widgets
-  for(int i=0; i< tab_widget_->count();i++){
-    tab_widget_->widget(i)->setParent(NULL);
-  }
+  toolbar_->clear();
 }
 
 }}
