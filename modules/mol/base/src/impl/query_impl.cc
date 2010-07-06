@@ -145,15 +145,9 @@ bool is_ident_or_str(char c) {
 QueryToken QueryLexer::LexIdentOrStringToken() {
   static IdentTokens ident_tokens;
   size_t start=current_;
-  bool is_string=false;
   while (current_<query_string_.length() && 
          is_ident_or_str(query_string_[current_])) {
-    if (!isalnum(query_string_[current_]))
-      is_string=true;
     current_++;
-  }
-  if (is_string) {
-    return QueryToken(Range(start, current_-start), tok::String);
   }
   String ident=query_string_.substr(start, current_-start);
   if (tok::Type* t=find(ident_tokens, ident.c_str())) {
