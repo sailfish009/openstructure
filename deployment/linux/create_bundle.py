@@ -145,8 +145,6 @@ subprocess.call('rm -rf $(find . -name *.pyc)',shell=True,cwd='../../')
 print 'removing dokk and harmony examples from bundle'
 subprocess.call('rm -rf '+directory_name+'/share/openstructure/examples/code_fragments/dokk',shell=True,cwd='../../')
 subprocess.call('rm -rf '+directory_name+'/share/openstructure/examples/code_fragments/harmony',shell=True,cwd='../../')
-print 'removing README.html from bin directory in the package directory structure'
-subprocess.call('rm -fr   '+directory_name+'/bin/README.html',shell=True,cwd='../../')
 print 'De-hardcoding package python binary path from openstructure executables'
 subprocess.call('rm scripts/ost.in',shell=True,cwd='../../')
 subprocess.call('rm scripts/ost.in.pre*',shell=True,cwd='../../')
