@@ -24,6 +24,7 @@
 #include <QString>
 #include <QAction>
 #include <QTabWidget>
+#include <QToolBar>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget_pool.hh>
@@ -46,10 +47,16 @@ public:
 
   void WidgetMoved(Widget* widget, int position);
   QString GetName();
+
 private:
   virtual void ShowWidget(Widget* widget, int pos, bool show);
   QHBoxLayout* layout_;
-  QTabWidget* tabWidget_;
+  QTabWidget* tab_widget_;
+  QToolBar* toolbar_;
+
+private slots:
+  void CurrentChanged(int index);
+
 };
 
 }}

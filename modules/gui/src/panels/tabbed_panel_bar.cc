@@ -18,6 +18,9 @@
 //------------------------------------------------------------------------------
 
 #include <QSettings>
+#include <QDir>
+
+#include <iostream>
 
 #include <ost/gui/widget_registry.hh>
 
@@ -31,11 +34,19 @@ TabbedPanelBar::TabbedPanelBar(PanelBar* parent):
   layout_ = new QHBoxLayout(this);
   layout_->setMargin(0);
   layout_->setSpacing(0);
-  tabWidget_ = new QTabWidget(this);
+  tab_widget_ = new QTabWidget(this);
   #if QT_VERSION>=0x40503
-    tabWidget_->setDocumentMode(true);
+    tab_widget_->setDocumentMode(true);
   #endif
-  layout_->addWidget(tabWidget_);
+  layout_->addWidget(tab_widget_);
+
+  toolbar_ = new QToolBar(this);
+  toolbar_->setFloatable(false);
+  toolbar_->setContentsMargins(0, 0, 0, 0);
+  toolbar_->setToolButtonStyle(Qt::ToolButtonIconOnly);
+  toolbar_->setIconSize(QSize(16,16));
+  tab_widget_->setCornerWidget(toolbar_, Qt::TopRightCorner);
+  connect(tab_widget_,SIGNAL(currentChanged(int)),this,SLOT(CurrentChanged(int)));
 }
 
 bool TabbedPanelBar::Save(const QString& prefix)
@@ -50,16 +61,16 @@ bool TabbedPanelBar::Restore(const QString& prefix)
 
 void TabbedPanelBar::WidgetMoved(Widget* widget, int index){
   QString class_name = widget->metaObject()->className();
-  if(tabWidget_->indexOf(widget)>=0){
-    tabWidget_->removeTab(tabWidget_->indexOf(widget));
+  if(tab_widget_->indexOf(widget)>=0){
+    tab_widget_->removeTab(tab_widget_->indexOf(widget));
   }
-  tabWidget_->insertTab(index,widget,WidgetRegistry::Instance()->GetFullName(class_name));
+  tab_widget_->insertTab(index,widget,WidgetRegistry::Instance()->GetFullName(class_name));
 }
 
 void TabbedPanelBar::ShowWidget(Widget* widget, int pos, bool show){
-  if(tabWidget_->indexOf(widget)>=0){
+  if(tab_widget_->indexOf(widget)>=0){
     if(!show){
-      tabWidget_->removeTab(tabWidget_->indexOf(widget));
+      tab_widget_->removeTab(tab_widget_->indexOf(widget));
     }
   }
   else{
@@ -73,10 +84,23 @@ QString TabbedPanelBar::GetName(){
   return "Tabbed Mode";
 }
 
+void TabbedPanelBar::CurrentChanged(int index){
+  if(Widget* widget = qobject_cast<Widget*>(tab_widget_->currentWidget())){
+    ActionList actions = widget->GetActions();
+    toolbar_->clear();
+    if(!actions.isEmpty()){
+      for(int i = 0;i<actions.size();i++){
+        toolbar_->addAction(actions[i]);
+      }
+    }
+  }
+}
+
+
 TabbedPanelBar::~TabbedPanelBar(){
   //Do not destroy widgets
-  for(int i=0; i< tabWidget_->count();i++){
-    tabWidget_->widget(i)->setParent(NULL);
+  for(int i=0; i< tab_widget_->count();i++){
+    tab_widget_->widget(i)->setParent(NULL);
   }
 }
 
