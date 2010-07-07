@@ -23,6 +23,7 @@
 #include <QWidget>
 #include <QString>
 #include <QAction>
+#include <QTabBar>
 #include <QTabWidget>
 #include <QToolBar>
 
@@ -35,7 +36,32 @@
 
 namespace ost { namespace gui {
 
-/// \brief tabbed bottom Bar
+/// \brief tabbed drag widget
+class DLLEXPORT_OST_GUI DragTabBar : public QTabBar{
+  Q_OBJECT
+public:
+  DragTabBar(QTabWidget* parent);
+
+protected:
+  void mousePressEvent(QMouseEvent *event);
+  void mouseMoveEvent(QMouseEvent *event);
+  void dragEnterEvent(QDragEnterEvent *event);
+  void dropEvent(QDropEvent *event);
+
+private:
+  QTabWidget* tab_widget_;
+  QPoint drag_start_pos_;
+
+};
+
+/// \brief tabbed drag widget
+class DLLEXPORT_OST_GUI TabbedDragWidget : public QTabWidget{
+  Q_OBJECT
+public:
+  TabbedDragWidget(QWidget* parent);
+};
+
+/// \brief tabbed bar
 class DLLEXPORT_OST_GUI TabbedPanelBar : public PanelWidgetContainer {
   Q_OBJECT
 public:
