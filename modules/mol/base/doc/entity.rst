@@ -65,7 +65,13 @@ The Handle Classes
      This property is read-only. Also available as :meth:`GetAtomList`
   
      :type: A list of :class:`atom handles<AtomHandle>`
-     
+  
+  .. attribute:: bounds
+  
+    Axis-aligned bounding box of the entity. Read-only
+    
+    :type: :class:`ost.geom.AlignedCuboid`
+
   .. attribute:: mass
     
     The total mass of the entity in Dalton. Also available as :meth:`GetMass`.
@@ -322,7 +328,13 @@ The Handle Classes
      This property is read-only. Also available as :meth:`GetAtomList`
 
      :type: A list of :class:`atom handles<AtomHandle>`
-     
+
+  .. attribute:: bounds
+
+    Axis-aligned bounding box of the chain. Read-only
+
+    :type: :class:`ost.geom.AlignedCuboid`
+          
   .. attribute:: mass
   
     The total mass of this chain in Dalton. Also available as :meth:`GetMass`
@@ -424,6 +436,12 @@ The Handle Classes
       print ''.join([r.one_letter_code for r in chain.residues])
     
     :type: str
+    
+  .. attribute:: bounds
+  
+    Axis-aligned bounding box of the residue. Read-only.
+    
+    :type: :class:`ost.geom.AlignedCuboid`
     
   .. attribute:: mass
   
@@ -774,6 +792,12 @@ The View Classes
     
     :type: A list of :class:`AtomViews <AtomView>`
 
+  .. attribute:: bounds
+  
+    Axis-aligned bounding box of the entity view. Read-only.
+    
+    :type: :class:`ost.geom.AlignedCuboid`
+
   .. attribute:: handle
   
      The underlying :class:`handle <EntityHandle>` of the entity view. Also 
@@ -906,7 +930,7 @@ The View Classes
       
     :param residue: Residue handle
     :type  residue: ResidueHandle
-    :returns: The residue view pointing the the handle, or an invalid handle if the residue is not part of the view
+    :returns: The residue view pointing the the handle, or an invalid handle if  the residue is not part of the view
     :rtype: class:`ResidueView`
 
   .. method:: FindAtom(chain_name, res_num, atom_name)
@@ -1101,7 +1125,13 @@ The View Classes
      This property is read-only. Also available as :meth:`GetAtomList`
 
      :type: A list of :class:`atom handles<AtomHandle>`
-     
+
+  .. attribute:: bounds
+
+    Axis-aligned bounding box of the chain. Read-only
+ 
+    :type: :class:`ost.geom.AlignedCuboid`
+    
   .. attribute:: mass
   
     The total mass of this chain in Dalton. Also available as :meth:`GetMass`
@@ -1258,14 +1288,6 @@ The View Classes
     :type  flags: int
     :rtype: :class:`EntityView`
 
-  .. method:: Apply(visitor)
-  
-    Apply entity visitor to view. In Python, you usually don't have to use this 
-    method. 
-    
-    :param visitor: The visitor
-    :type  visitor: :class:`EntityVisitor`
-
 .. class:: ResidueView
 
   .. attribute:: name
@@ -1302,6 +1324,12 @@ The View Classes
   
     :type: str
   
+  .. attribute:: bounds
+
+    Axis-aligned bounding box of the residue view. Read-only
+
+    :type: :class:`ost.geom.AlignedCuboid`
+
   .. attribute:: mass
 
     The total mass of this residue in Dalton. Also available as :meth:`GetMass`.
@@ -1400,14 +1428,6 @@ The View Classes
   .. method:: GetAtomList()
 
     See :attr:`atoms`
-
-  .. method:: Apply(visitor)
-
-    Apply entity visitor to the residue. In Python, you don't have to use this 
-    method. Is is mainly used in C++.
-    
-    :param visitor:
-    :type  visitor: :class:`EntityVisitor`
     
   .. method:: Select(query[, flags])
    

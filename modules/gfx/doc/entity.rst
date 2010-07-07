@@ -100,10 +100,25 @@ Render Options
   Defaults to off.
   
   :type: bool
+  
+
+
 
 **bond_order_distance**
 
   The distance between the lines depicting higher order bonds.
+
+
+Loading and Displaying an Entity  
+--------------------------------------------------------------------------------
+
+This code examples shows how to load a structure and display it on the screen. It also shows how to programmatically combine different render modes in one graphical entity.
+
+.. literalinclude:: /../../examples/demos/load_and_display.py
+
+
+Entity API Reference
+--------------------------------------------------------------------------------
 
 .. class:: Entity(name, entity)
            Entity(name, render_mode, entity)

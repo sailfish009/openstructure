@@ -159,4 +159,10 @@ API documentation
   .. method:: SetBoolProp(key, value)
   
     Set bool property, overriding a property with the same name
+    
+  .. method:: RemoveProp(key)
+  
+    Removes the property with given key, regardless of its type. If the property 
+    does not exist, the method has no effect.
+    
 

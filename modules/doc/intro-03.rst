@@ -23,7 +23,7 @@ of data.
 The last command is not mandatory, but very convenient to center the camera on the object. 
 
 
-The :class:`~ost.gfx.Scene`
+The Scene
 --------------------------------------------------------------------------------
 
 
@@ -57,7 +57,7 @@ manipulated:
 The last command assigns a uniform red coloring to all atoms.
 
 
-The :class:`Graphical Entity <ost.gfx.Entity>`
+The Graphical Entity
 --------------------------------------------------------------------------------
 
 Now let's look at the graphical entity in more detail. The graphical entity is 
