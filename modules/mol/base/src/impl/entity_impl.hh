@@ -75,7 +75,7 @@ typedef enum {
   // dirty trace (implies dirty ICS)
   DirtyTrace=DirtyICS+4,
   DirtyOrganizer=8,
-  DisableICS=16,
+  DisableICS=16
 } EntityDirtyFlags;
 
 

@@ -34,9 +34,9 @@ namespace ost { namespace qa {
 
 namespace {
 
-class TorsionStat : public mol::EntityVisitor {
+class TorsionStatSolis : public mol::EntityVisitor {
 public:
-  TorsionStat(TorsionStatisticsSolis::TorsionHistogram& histo):
+  TorsionStatSolis(TorsionStatisticsSolis::TorsionHistogram& histo):
     histo_(histo)
   {}
   
@@ -94,13 +94,13 @@ int TorsionStatisticsSolis::GetTorsionBucketSize() const
 
 void TorsionStatisticsSolis::Extract(mol::EntityView view)
 {
-  TorsionStat stat(histogram_);
+  TorsionStatSolis stat(histogram_);
   view.Apply(stat);
 }
 
 void TorsionStatisticsSolis::Extract(mol::EntityHandle entity)
 {
-  TorsionStat stat(histogram_);
+  TorsionStatSolis stat(histogram_);
   entity.Apply(stat);
 }
 

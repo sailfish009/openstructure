@@ -66,7 +66,7 @@ namespace tok {
     None,
     UnknownChar,
     UnterminatedQuote,
-    String,
+    String
   }
   Type;
 }

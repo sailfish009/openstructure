@@ -30,7 +30,7 @@ namespace ost { namespace seq { namespace alg {
 struct RefMode {
   enum Type {
     ALIGNMENT=0,
-    LONGER_SEQUENCE,
+    LONGER_SEQUENCE
   };
 };
   
