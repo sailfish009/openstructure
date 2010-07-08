@@ -32,7 +32,7 @@ typedef enum {
   GLOW_RENDER_PASS,
   /// \brief renders objects with solid color as used for shadow map
   ///     generation
-  OPAQUE_RENDER_PASS,
+  OPAQUE_RENDER_PASS
 } RenderPass;
  
 }}

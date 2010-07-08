@@ -54,7 +54,7 @@ private:
 
 
 template <typename T, ToolOption::Type C>
-class DLLEXPORT_OST_GUI ToolOptionNum : public ToolOption {
+class DLLEXPORT ToolOptionNum : public ToolOption {
 public:
   ToolOptionNum(const String& key, const String& verbose_name, T default_v, 
                 T min_value=std::numeric_limits<T>::min(),
@@ -87,10 +87,13 @@ private:
 typedef ToolOptionNum<int, ToolOption::INT> ToolOptionInt;
 typedef ToolOptionNum<float, ToolOption::FLOAT> ToolOptionFloat;
 
-#ifndef _MSC_VER
-extern template class ToolOptionNum<int,ToolOption::INT>;
-extern template class ToolOptionNum<float,ToolOption::FLOAT>;
+
+#if !defined(_MSC_VER)
+  extern template class ToolOptionNum<int,ToolOption::INT>;
+  extern template class ToolOptionNum<float,ToolOption::FLOAT>;
 #endif
+
+
 
 class DLLEXPORT_OST_GUI ToolOptionEnum : public ToolOption {
 public:

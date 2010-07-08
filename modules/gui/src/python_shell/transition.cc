@@ -72,7 +72,7 @@ std::pair<bool,bool> KeyEventTransition::checkEvent(QKeyEvent* event)
 MouseEventTransition::MouseEventTransition(QEvent::Type type,Qt::MouseButton button,Qt::KeyboardModifiers modifiers, State* target, bool swallow_event,  TransitionGuard*  guard):
   TransitionBase(target,guard),
   type_(type),
-  button_(button_),
+  button_(button),
   modifiers_(modifiers),
   swallow_(swallow_event)
 {
