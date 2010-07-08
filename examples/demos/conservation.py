@@ -13,8 +13,6 @@ aln.SetSequenceOffset(0, 1)
 # First we set all properties to zero, then let alg.Conservation assign the
 # conservation scores to the residues
 #-------------------------------------------------------------------------------
-for r in m.residues:
-  r.SetFloatProp('cons', 0)
 alg.Conservation(aln)
 
 #-------------------------------------------------------------------------------

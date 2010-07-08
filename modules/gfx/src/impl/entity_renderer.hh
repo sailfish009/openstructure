@@ -57,7 +57,7 @@ namespace ost { namespace gfx { namespace impl {
 
 typedef enum {
   DIRTY_VIEW   =1,
-  DIRTY_VA     =2,
+  DIRTY_VA     =2
 } DirtyFlag;
 
 typedef char DirtyFlags;
@@ -204,14 +204,14 @@ struct UniformGetCol {
 };
 
 struct GradientLevelGetCol {
-  GradientLevelGetCol(const GradientLevelColorOp& op):property_(op.GetProperty()),
+  GradientLevelGetCol(const GradientLevelColorOp& op): property_(op.GetProperty()),
       epm_(property_, op.GetLevel()),
       gradient_(op.GetGradient()),
       minv_(op.GetMinV()),
       maxv_(op.GetMaxV()){}
   Color ColorOfAtom(mol::AtomHandle& atom) const{
     try{
-      float n=Normalize(epm_.Get(atom), minv_, maxv_);
+      float n=Normalize(epm_.Get(atom, minv_), minv_, maxv_);
       return gradient_.GetColorAt(n);
     }catch(std::exception&){
       LOGN_DEBUG("property " << property_ << " not found");

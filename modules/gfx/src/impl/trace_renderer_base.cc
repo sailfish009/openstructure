@@ -34,7 +34,9 @@ void set_node_entry_color(NodeEntry& e, ColorMask mask,
 }
 
 template <typename T1>
-inline void apply_color_op(TraceRendererBase* rend, TraceSubset& trace_subset, T1 get_col, const ColorOp& op)
+inline void apply_color_op(TraceRendererBase* rend, 
+                           TraceSubset& trace_subset, T1 get_col, 
+                           const ColorOp& op)
 {
   rend->UpdateViews();
   ColorMask mask = op.GetMask();

@@ -688,9 +688,14 @@ std::pair<Real,Real> EntityView::GetMinMax(const String& prop,
   Real min_v=std::numeric_limits<Real>::max();
   Real max_v=-std::numeric_limits<Real>::max();  
   for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
-    Real v=epm.Get(*it);
-    max_v=std::max(v, max_v);
-    min_v=std::min(v, min_v);
+    try {
+      Real v=epm.Get(*it);
+      max_v=std::max(v, max_v);
+      min_v=std::min(v, min_v);      
+    } catch(...) {
+      // do nothing in case of missing property
+      continue;
+    }
   }
   return std::make_pair(min_v,max_v);
 }

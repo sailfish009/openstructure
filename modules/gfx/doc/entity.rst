@@ -196,6 +196,9 @@ Entity API Reference
     the built-in properties is identical to the properties available in 
     :doc:`query language <../mol/base/query>`.
     
+    In case a generic property is undefined for a certain element, the property 
+    the value of min is used for that element.
+    
     :param prop: The name of the numeric property
     :type  prop: str
     :param color1: Color corresponding to min value
