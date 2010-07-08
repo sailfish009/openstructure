@@ -118,6 +118,7 @@ public:
   
   char operator[](int index) const;
   
+  
   /// \brief whether the sequence is valid
   bool IsValid() const;
   /// \internal
@@ -251,7 +252,9 @@ public:
   ///
   /// \throw IntegrityError when the view contains more than one chain
   void AttachView(const mol::EntityView& view);
-
+  
+  void SetOneLetterCode(int position, char new_char);
+  
   operator ConstSequenceHandle() const;
   /// \brief attach entity view to sequence
   ///

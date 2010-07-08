@@ -106,6 +106,7 @@ public:
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
 
+  void SetOneLetterCode(int position, char new_char);
   /// \brief get residue at position
   ///
   /// will return the residue view at the given sequence position or an invalid

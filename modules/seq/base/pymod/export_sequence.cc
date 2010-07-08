@@ -250,6 +250,8 @@ void export_sequence()
   const_seq_handle_def<SequenceHandle>(seq_handle);
   generic_prop_def<SequenceHandle>(seq_handle);  
   seq_handle
+    .def("__setitem__", &SequenceHandle::SetOneLetterCode)
+    .def("SetOneLetterCode", &SequenceHandle::SetOneLetterCode)  
     .def("SetSequenceOffset", &SequenceHandle::SetSequenceOffset)
     .def("AttachView", attach_one)
     .def("AttachView", attach_two)

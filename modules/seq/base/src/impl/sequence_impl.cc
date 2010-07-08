@@ -105,6 +105,27 @@ void SequenceImpl::ShiftsFromSequence()
   }
 }
 
+void SequenceImpl::SetOneLetterCode(int position, char new_char)
+{
+  if (position<0 || position>=static_cast<int>(seq_string_.length()))
+    throw std::out_of_range("Position is not covered in sequence");
+  if (new_char=='-') {
+    if (seq_string_[position]!='-') {
+      seq_string_[position]=new_char;
+      this->ShiftsFromSequence();
+      return;
+    }
+  } else  {
+    if (seq_string_[position]=='-') {
+      seq_string_[position]=new_char;
+      this->ShiftsFromSequence();
+      return;
+    } else {
+      seq_string_[position]=new_char;
+    }
+  }
+}
+
 int SequenceImpl::GetResidueIndex(int pos) const
 {
   if (pos<0 || pos>=static_cast<int>(seq_string_.length()))

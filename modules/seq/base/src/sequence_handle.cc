@@ -57,6 +57,7 @@ char ConstSequenceHandle::operator[](int index) const
   return this->GetOneLetterCode(index);
 }
 
+
 void ConstSequenceHandle::CheckValidity() const
 {
   if (!impl_) {
@@ -289,6 +290,12 @@ char SequenceHandle::GetOneLetterCode(int position) const
 {
   this->CheckValidity();
   return Impl()->GetOneLetterCode(position);
+}
+
+void SequenceHandle::SetOneLetterCode(int position, char new_char)
+{
+  this->CheckValidity();
+  Impl()->SetOneLetterCode(position, new_char);
 }
 
 mol::ResidueView SequenceHandle::GetResidue(int position) const
