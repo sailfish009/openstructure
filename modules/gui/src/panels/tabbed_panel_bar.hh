@@ -45,8 +45,6 @@ public:
 protected:
   void mousePressEvent(QMouseEvent *event);
   void mouseMoveEvent(QMouseEvent *event);
-  void dragEnterEvent(QDragEnterEvent *event);
-  void dropEvent(QDropEvent *event);
 
 private:
   QTabWidget* tab_widget_;
@@ -73,6 +71,10 @@ public:
 
   void WidgetMoved(Widget* widget, int position);
   QString GetName();
+
+protected:
+  void dragEnterEvent(QDragEnterEvent *event);
+  void dropEvent(QDropEvent *event);
 
 private:
   virtual void ShowWidget(Widget* widget, int pos, bool show);

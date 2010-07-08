@@ -48,6 +48,7 @@ TabbedPanelBar::TabbedPanelBar(PanelBar* parent):
   toolbar_->setIconSize(QSize(16,16));
   tab_widget_->setCornerWidget(toolbar_, Qt::TopRightCorner);
   connect(tab_widget_,SIGNAL(currentChanged(int)),this,SLOT(CurrentChanged(int)));
+  this->setAcceptDrops(true);
 }
 
 bool TabbedPanelBar::Save(const QString& prefix)
@@ -97,6 +98,27 @@ void TabbedPanelBar::CurrentChanged(int index){
   }
 }
 
+void TabbedPanelBar::dragEnterEvent(QDragEnterEvent *event)
+{
+  if (event->mimeData()->hasFormat("OpenStructure/Widget")){
+    PanelManager* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
+    panels->StartDrag();
+    event->acceptProposedAction();
+  }
+}
+
+void TabbedPanelBar::dropEvent(QDropEvent *event)
+{
+  const QMimeData* mime_data = event->mimeData();
+  QVariant variant =  mime_data->property("OpenStructure/Widget");
+  Widget* widget = variant.value<Widget*>();
+  Widget* current_widget = qobject_cast<Widget*>(tab_widget_->currentWidget());
+  if(widget && current_widget && widget != current_widget){
+    GostyApp::Instance()->GetPerspective()->GetPanels()->MoveNextTo(current_widget,widget);
+  }
+  event->acceptProposedAction();
+}
+
 TabbedPanelBar::~TabbedPanelBar(){
   toolbar_->clear();
 }
@@ -109,9 +131,7 @@ TabbedDragWidget::TabbedDragWidget(QWidget* parent):
 
 //DragTabBar
 DragTabBar::DragTabBar(QTabWidget* parent):
-  QTabBar(parent),tab_widget_(parent) {
-  this->setAcceptDrops(true);
-}
+  QTabBar(parent),tab_widget_(parent) {}
 
 void DragTabBar::mousePressEvent(QMouseEvent *event)
 {
@@ -144,26 +164,7 @@ void DragTabBar::mouseMoveEvent(QMouseEvent *event)
   panels->EndDrag();
 }
 
-void DragTabBar::dragEnterEvent(QDragEnterEvent *event)
-{
-  if (event->mimeData()->hasFormat("OpenStructure/Widget")){
-    PanelManager* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
-    panels->StartDrag();
-    event->acceptProposedAction();
-  }
-}
 
-void DragTabBar::dropEvent(QDropEvent *event)
-{
-  const QMimeData* mime_data = event->mimeData();
-  QVariant variant =  mime_data->property("OpenStructure/Widget");
-  Widget* widget = variant.value<Widget*>();
-  Widget* current_widget = qobject_cast<Widget*>(tab_widget_->currentWidget());
-  if(widget && current_widget && widget != current_widget){
-    GostyApp::Instance()->GetPerspective()->GetPanels()->MoveNextTo(current_widget,widget);
-  }
-  event->acceptProposedAction();
-}
 
 }}
 
