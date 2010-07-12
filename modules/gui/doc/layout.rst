@@ -187,14 +187,14 @@ Drag and Drop
 The widgets which are held by a Side Panel can be moved to an other position in 
 the panel or even to another side panel. The widget can be moved by simply 
 clicking on the border of the widget and drag and drop it to the desired position.
-The drag and drop feature is currently only supported by the splitter view mode.
+The drag and drop feature is currently supported by the splitter as well as the tabbed view mode.
 
 Adding a custom Widget
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The Left-, Bottom- and Right-Panel are organized by one Superclass. It is only 
-possible to display a widget which is in the widget pool of the panels class. 
-Once a widget is in the pool all the methods of the Panels class can be used to 
+The Left-, Bottom- and Right-Panel are organized by the :class:`PanelManager`. It is only 
+possible to display a widget which is in the widget pool of the PanelManager class. 
+Once a widget is in the pool all the methods of the PanelManager class can be used to 
 display / hide the widget in any position of the panels. OpenStructure remembers 
 the size and location of a Widget. So, OpenStructure should look the same after 
 restarting it.
