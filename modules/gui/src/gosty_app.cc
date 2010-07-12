@@ -24,7 +24,6 @@
 #include <QMenuBar>
 #include <QDesktopWidget>
 
-#include <ost/gui/mdi_sub_window.hh>
 #include <ost/gui/python_shell/python_shell.hh>
 #include <ost/gui/gl_win.hh>
 #include <ost/gui/tools/tool_options_win.hh>

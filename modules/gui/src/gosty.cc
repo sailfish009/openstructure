@@ -34,7 +34,7 @@
 #include "gl_win.hh"
 #include "widget_state_saver.hh"
 #include "gosty.hh"
-#include "change_process_name.hh"
+
 // must come last
 #include <QApplication>
 #include <QResource>

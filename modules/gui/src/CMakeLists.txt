@@ -161,7 +161,6 @@ if (ENABLE_IMG)
 endif()
 
 set(OST_GUI_HEADERS
-change_process_name.hh
 file_browser.hh
 file_type_dialog.hh
 file_viewer.hh
@@ -172,7 +171,6 @@ scene_menu.hh
 gosty_app.hh
 main.hh
 main_area.hh
-mdi_sub_window.hh
 module_config.hh
 perspective.hh
 query_dialog.hh
@@ -180,7 +178,6 @@ remote_site_loader.hh
 scene_selection.hh
 main_window.hh
 dock_widget.hh
-main_window.hh
 dock_widget.hh
 thin_splitter.hh
 widget.hh
@@ -201,7 +198,6 @@ file_type_dialog.cc
 file_viewer.cc
 remote_loader.cc
 main.cc
-mdi_sub_window.cc
 gl_canvas.cc
 dock_widget.cc
 main_window.cc
@@ -230,7 +226,6 @@ sequence_viewer/alignment_view_object.cc
 sequence_viewer/base_view_object.cc
 sequence_viewer/sequence_view_object.cc
 gosty_app.cc
-change_process_name.cc
 main_area.cc
 query_dialog.cc
 widget_state_saver.cc
@@ -336,7 +331,6 @@ scene_menu.hh
 gosty_app.hh
 main.hh
 main_area.hh
-mdi_sub_window.hh
 perspective.hh
 query_dialog.hh
 dock_widget.hh
@@ -493,7 +487,3 @@ endif()
 
 executable(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
            DEPENDS_ON gui ${LINK})
-#if (APPLE)
-#  set_source_files_properties(change_process_name.cc
-#                              PROPERTIES COMPILE_FLAGS "-ObjC++")
-#endif()
