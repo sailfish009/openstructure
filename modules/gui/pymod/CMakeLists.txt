@@ -88,7 +88,6 @@ pymod(NAME gui CPP ${OST_GUI_PYMOD_SOURCES}
          ${OST_GUI_PYMOD_MODULES})
 
 set(PRESET_FILES
-  scene/gradients.xml
   scene/presets.xml
   scene/loaders.xml
 )
