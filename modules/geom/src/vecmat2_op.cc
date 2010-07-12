@@ -26,70 +26,6 @@
 #include "mat2.hh"
 
 namespace geom {
-
-Real Length(const Vec2& v)
-{
-  return std::sqrt(Length2(v));
-}
-
-Real Length2(const Vec2& v)
-{
-  return v[0]*v[0]+v[1]*v[1];
-}
-
-bool Equal(const Vec2& v1, const Vec2& v2, Real ephilon)
-{
-  return std::fabs(v1[0]-v2[0])<ephilon &&
-    std::fabs(v1[1]-v2[1])<ephilon;
-}
-bool Equal(const Mat2& m1, const Mat2& m2, Real ephilon)
-{
-  return std::fabs(m1(0,0)-m2(0,0))<ephilon &&
-    std::fabs(m1(0,1)-m2(0,1))<ephilon &&
-    std::fabs(m1(1,0)-m2(1,0))<ephilon &&
-    std::fabs(m1(1,1)-m2(1,1))<ephilon;
-}
-
-Real Dot(const Vec2& v1, const Vec2& v2)
-{
-  return v1[0]*v2[0]+v1[1]*v2[1];
-}
-
-Vec2 Normalize(const Vec2& v)
-{
-  Real l=Length(v);
-  if(l==0.0) {
-    return v;
-  }
-  return v/l;
-}
-
-
-Vec2 CompMultiply(const Vec2& v1, const Vec2& v2)
-{
-  Vec2 nrvo(v1[0]*v2[0],v1[1]*v2[1]);
-  return nrvo;
-}
-
-Vec2 CompDivide(const Vec2& v1, const Vec2& v2)
-{
-  Vec2 nrvo(v1[0]/v2[0],v1[1]/v2[1]);
-  return nrvo;
-}
-
-Vec2 operator*(const Vec2& v,const Mat2& m)
-{
-  Vec2 nrvo(v[0]*m(0,0)+v[1]*m(1,0),
-      v[0]*m(0,1)+v[1]*m(1,1));
-  return nrvo;
-}
-
-Vec2 operator*(const Mat2& m, const Vec2& v)
-{
-  Vec2 nrvo(v[0]*m(0,0)+v[1]*m(0,1),
-      v[0]*m(1,0)+v[1]*m(1,1));
-  return nrvo;
-}
 // determinant
 Real Det(const Mat2& m)
 {
@@ -116,14 +52,6 @@ Real Angle(const Vec2& v1, const Vec2& v2)
 {
   return std::acos(Dot(v1,v2)/Length(v1)/Length(v2));
 }
-Mat2 operator*(const Mat2& m1, const Mat2& m2)
-{
-  Mat2 nrvo(m1(0,0)*m2(0,0)+m1(0,1)*m2(1,0),
-      m1(0,0)*m2(0,1)+m1(0,1)*m2(1,1),
-      m1(1,0)*m2(0,0)+m1(1,1)*m2(1,0),
-      m1(1,0)*m2(0,1)+m1(1,1)*m2(1,1));
-  return nrvo;
-}
 
 Real SignedAngle(const Vec2& v1, const Vec2& v2)
 {
@@ -131,21 +59,7 @@ Real SignedAngle(const Vec2& v1, const Vec2& v2)
   vc=Cross(Vec3(v1),Vec3(v2));
   if(Length(v1)==0.0 || Length(v2)==0.0 || Length(vc)==0.0)
     return 0.0;
-  return acos(Dot(v1,v2)/Length(v1)/Length(v2))*vc.GetZ()/std::fabs(vc.GetZ());
-}
-
-Vec2 Min(const Vec2& v1, const Vec2& v2)
-{
-  Vec2 nrvo(std::min(v1[0],v2[0]),
-            std::min(v1[1],v2[1]));
-  return nrvo;
-}
-
-Vec2 Max(const Vec2& v1, const Vec2& v2)
-{
-  Vec2 nrvo(std::max(v1[0],v2[0]),
-            std::max(v1[1],v2[1]));
-  return nrvo;
+  return acos(Dot(v1,v2)/Length(v1)/Length(v2))*vc.z/std::fabs(vc.z);
 }
 
 Vec2 Rotate(const Vec2& v,Real ang)

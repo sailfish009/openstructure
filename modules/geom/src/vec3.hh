@@ -24,8 +24,9 @@
 #include <vector>
 #include <boost/operators.hpp>
 
-#include <ost/geom/module_config.hh>
+
 #include <ost/config.hh>
+#include <ost/geom/module_config.hh>
 
 namespace geom {
 
@@ -43,13 +44,13 @@ class DLLEXPORT_OST_GEOM Vec3:
 {
 public:
   //! Default initialization, all components are set to zero
-  Vec3();
+  Vec3(): x(0), y(0), z(0) {}
 
   //! Initialization with x, y and z component
-  Vec3(Real x, Real y, Real z);
+  Vec3(Real px, Real py, Real pz): x(px), y(py), z(pz) {}
 
   //! copy ctor
-  Vec3(const Vec3& v);
+  Vec3(const Vec3& v): x(v.x), y(v.y), z(v.z) { }
 
   //! (implicit) initialization with 2D vector
   Vec3(const Vec2& v);
@@ -60,62 +61,139 @@ public:
     to a 3D vector, resulting in (x/w,y/w,z/w)
   */
   explicit Vec3(const Vec4& v);
-
-  //! explicit initialization with an array of doubles
-  explicit Vec3(const Real[3]);
-
-  explicit Vec3(Real v);
   
-#if OST_DOUBLE_PRECISION
+  explicit Vec3(Real v): x(v), y(v), z(v) { }
+  
+  //! explicit initialization with an array of doubles
+  explicit Vec3(const double v[3]): x(v[0]), y(v[1]), z(v[2]) { }
+
   //! explicit initialization with an array of floats
-  explicit Vec3(const float[3]);
-#endif
+  explicit Vec3(const float v[3]): x(v[0]), y(v[1]), z(v[2]) { }
+
   //! assignement op
-  Vec3& operator=(const Vec3& v);
+  Vec3& operator=(const Vec3& v)
+  {
+    x=v.x;
+    y=v.y;
+    z=v.z;
+    return *this;
+  }
 
   //! comparable
-  bool operator==(const Vec3& rhs) const;
+  bool operator==(const Vec3& rhs) const
+  {
+    return x==rhs.x && y==rhs.y && z==rhs.z;
+  }
 
   //! element access
-  Real& operator[](std::size_t indx);
+  Real& operator[](std::size_t indx)
+  {
+    return (&x)[indx];
+  }
+  
   //! const element access
-  const Real& operator[](std::size_t indx) const;
+  const Real& operator[](std::size_t indx) const
+  {
+    
+    return (&x)[indx];
+  }
   //! element access
-  Real GetX() const;
-  Real GetY() const;
-  Real GetZ() const;
-  void SetX(Real v);
-  void SetY(Real v);
-  void SetZ(Real v);
+  Real GetX() const { return x; }
+  Real GetY() const { return y; }
+  Real GetZ() const { return z; }
+  void SetX(Real v) { x=v; }
+  void SetY(Real v) { y=v; }
+  void SetZ(Real v) { z=v; }
 
   //! addable op
-  Vec3& operator+=(const Vec3& rhs);
-  Vec3& operator+=(Real d);
+  Vec3& operator+=(const Vec3& rhs)
+  {
+    x+=rhs.x;
+    y+=rhs.y;
+    z+=rhs.z;
+    return *this;
+  }
+  
+  Vec3& operator+=(Real d)
+  {
+    x+=d;
+    y+=d;
+    z+=d;
+    return *this;
+  }
+  
   //! subtractable op
-  Vec3& operator-=(const Vec3& rhs);
-  Vec3& operator-=(Real d);
+  Vec3& operator-=(const Vec3& rhs)
+  {
+    x-=rhs.x;
+    y-=rhs.y;
+    z-=rhs.z;
+    return *this;
+  }
+  
+  Vec3& operator-=(Real d)
+  {
+    x-=d;
+    y-=d;
+    z-=d;
+    return *this;
+  }
   //! negateable
-  Vec3 operator-() const;
+  Vec3 operator-() const
+  {
+    return Vec3(-x, -y, -z);
+  }
+  
   //! multipliable
-  Vec3& operator*=(Real d);
+  Vec3& operator*=(Real d)
+  {
+    x*=d;
+    y*=d;
+    z*=d;
+    return *this;
+  }
+  
   //! dividable
-  Vec3& operator/=(Real d);
+  Vec3& operator/=(Real d)
+  {
+    Real one_over_d=Real(1.0)/d;
+    x*=one_over_d;
+    y*=one_over_d;
+    z*=one_over_d;
+    return *this;
+  }
 
-  Real* Data() {return data_;}
-  const Real* Data() const {return data_;}
+  Real* Data() {return &x;}
+  const Real* Data() const {return &x;}
 
-private:
-  Real data_[3];
-
-  void set(Real x, Real y, Real z);
+  Real x;
+  Real y;
+  Real z;
 };
 
-DLLEXPORT_OST_GEOM Vec3 operator/(Real, const Vec3& v);
+inline Vec3 operator/(Real d, const Vec3& v)
+{
+  Vec3 nrvo(d/v[0],d/v[1],d/v[2]);
+  return nrvo;
+}
 
-DLLEXPORT_OST_GEOM std::ostream& operator<<(std::ostream&, const Vec3&);
+inline std::ostream& operator<<(std::ostream& os, const Vec3& v)
+{
+  os << "[" << v.x << ", " << v.y << "]";
+  return os;
+}
+}
+
+#include <ost/geom/vec2.hh>
+#include <ost/geom/vec4.hh>
+
+namespace geom {
 
 typedef std::vector<Vec3> Vec3List;
 
+inline Vec3::Vec3(const Vec2& v): x(v.x), y(v.y), z(0.0) { }
+inline Vec3::Vec3(const Vec4& v): x(v.x/v.w), y(v.y/v.w), z(v.z/v.w) { }
+  
 } // namespace geom
 
 

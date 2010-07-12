@@ -45,7 +45,7 @@ To store a float value with the key 'myfloatprop' in all atoms of an entity:
   
   import math
   for atom in entity.GetAtomList(): 
-    val=5*math.sin(0.4*atom.GetPos().GetX())
+    val=5*math.sin(0.4*atom.GetPos().x)
     atom.SetFloatProp("myfloatprop", val)
   
 If a GenericProp at a given level (i.e. atom, bond, residue, chain or entity) 

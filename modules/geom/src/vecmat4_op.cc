@@ -23,93 +23,9 @@
 #include "vecmat3_op.hh"
 
 #include "exc.hh"
-#include "vec4.hh"
-#include "mat4.hh"
-#include "mat3.hh"
+
 
 namespace geom {
-
-Real Length(const Vec4& v)
-{
-  return std::sqrt(Length2(v));
-}
-
-Real Length2(const Vec4& v)
-{
-  return v[0]*v[0]+v[1]*v[1]+v[2]*v[2]+v[3]*v[3];
-}
-
-bool Equal(const Vec4& v1, const Vec4& v2, Real epsilon)
-{
-  return std::fabs(v1[0]-v2[0])<epsilon &&
-    std::fabs(v1[1]-v2[1])<epsilon &&
-    std::fabs(v1[2]-v2[2])<epsilon &&
-    std::fabs(v1[3]-v2[3])<epsilon;
-}
-
-bool Equal(const Mat4& m1, const Mat4& m2, Real epsilon)
-{
-  return std::fabs(m1(0,0)-m2(0,0))<epsilon &&
-    std::fabs(m1(0,1)-m2(0,1))<epsilon &&
-    std::fabs(m1(0,2)-m2(0,2))<epsilon &&
-    std::fabs(m1(0,3)-m2(0,3))<epsilon &&
-    std::fabs(m1(1,0)-m2(1,0))<epsilon &&
-    std::fabs(m1(1,1)-m2(1,1))<epsilon &&
-    std::fabs(m1(1,2)-m2(1,2))<epsilon &&
-    std::fabs(m1(1,3)-m2(1,3))<epsilon &&
-    std::fabs(m1(2,0)-m2(2,0))<epsilon &&
-    std::fabs(m1(2,1)-m2(2,1))<epsilon &&
-    std::fabs(m1(2,2)-m2(2,2))<epsilon &&
-    std::fabs(m1(2,3)-m2(2,3))<epsilon &&
-    std::fabs(m1(3,0)-m2(3,0))<epsilon &&
-    std::fabs(m1(3,1)-m2(3,1))<epsilon &&
-    std::fabs(m1(3,2)-m2(3,2))<epsilon &&
-    std::fabs(m1(3,3)-m2(3,3))<epsilon;
-}
-
-Real Dot(const Vec4& v1, const Vec4& v2)
-{
-  return v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2]+v1[3]*v2[3];
-}
-
-Vec4 Normalize(const Vec4& v)
-{
-  Real l=Length(v);
-  if(l==0.0) {
-    return v;
-  }
-  return v/l;
-}
-
-Vec4 CompMultiply(const Vec4& v1, const Vec4& v2)
-{
-  Vec4 nrvo(v1[0]*v2[0],v1[1]*v2[1],v1[2]*v2[2],v1[3]*v2[3]);
-  return nrvo;
-}
-
-Vec4 CompDivide(const Vec4& v1, const Vec4& v2)
-{
-  Vec4 nrvo(v1[0]/v2[0],v1[1]/v2[1],v1[2]/v2[2],v1[3]/v2[3]);
-  return nrvo;
-}
-
-Vec4 operator*(const Vec4& v,const Mat4& m)
-{
-  Vec4 nrvo(v[0]*m(0,0)+v[1]*m(1,0)+v[2]*m(2,0)+v[3]*m(3,0),
-      v[0]*m(0,1)+v[1]*m(1,1)+v[2]*m(2,1)+v[3]*m(3,1),
-      v[0]*m(0,2)+v[1]*m(1,2)+v[2]*m(2,2)+v[3]*m(3,2),
-      v[0]*m(0,3)+v[1]*m(1,3)+v[2]*m(2,3)+v[3]*m(3,3));
-  return nrvo;
-}
-
-Vec4 operator*(const Mat4& m, const Vec4& v)
-{
-  Vec4 nrvo(v[0]*m(0,0)+v[1]*m(0,1)+v[2]*m(0,2)+v[3]*m(0,3),
-      v[0]*m(1,0)+v[1]*m(1,1)+v[2]*m(1,2)+v[3]*m(1,3),
-      v[0]*m(2,0)+v[1]*m(2,1)+v[2]*m(2,2)+v[3]*m(2,3),
-      v[0]*m(3,0)+v[1]*m(3,1)+v[2]*m(3,2)+v[3]*m(3,3));
-  return nrvo;
-}
 
 Real Comp(const Mat4& m, unsigned int i_in, unsigned int j_in)
 {
@@ -158,7 +74,6 @@ Mat4 Transpose(const Mat4& m)
   return r;
 }
 
-#if 1
 Mat4 Invert(const Mat4& in)
 {
   Mat4 m(in);
@@ -221,22 +136,6 @@ Mat4 Invert(const Mat4& in)
   return m;
 }
 
-#else
-
-Mat4 Invert(const Mat4& m)
-{
-  Mat4 r;
-  Real d=Det(m);
-  for (int i=0;i<4;i++){
-    for (int j=0;j<4;j++){
-      r(j,i)=Comp(m,i,j)/d;
-    }
-  }
-  return r;
-}
-
-#endif
-
 Mat4 operator*(const Mat4& m1, const Mat4& m2)
 {
   Mat4 nrvo(m1(0,0)*m2(0,0)+m1(0,1)*m2(1,0)+m1(0,2)*m2(2,0)+m1(0,3)*m2(3,0),
@@ -265,24 +164,6 @@ Real Angle(const Vec4& v1, const Vec4& v2)
 {
   Real t=std::min(std::max(Dot(v1,v2)/(Length(v1)*Length(v2)),Real(-1.0)),Real(1.0));
   return std::acos(t);
-}
-
-Vec4 Min(const Vec4& v1, const Vec4& v2)
-{
-  Vec4 nrvo(std::min(v1[0],v2[0]),
-            std::min(v1[1],v2[1]),
-            std::min(v1[2],v2[2]),
-            std::min(v1[3],v2[3]));
-  return nrvo;
-}
-
-Vec4 Max(const Vec4& v1, const Vec4& v2)
-{
-  Vec4 nrvo(std::max(v1[0],v2[0]),
-            std::max(v1[1],v2[1]),
-            std::max(v1[2],v2[2]),
-            std::max(v1[3],v2[3]));
-  return nrvo;
 }
 
 } // ns

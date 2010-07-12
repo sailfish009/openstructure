@@ -110,9 +110,9 @@ void SceneSelection::CenterOnObjects() {
     }
   }
   if(changed){
-    gfx::Scene::Instance().SetCenter(geom::Vec3(((max.GetX()+min.GetX())/2),
-                                                ((max.GetY()+min.GetY())/2),
-                                                ((max.GetZ()+min.GetZ())/2)));
+    gfx::Scene::Instance().SetCenter(geom::Vec3(((max.x+min.x)/2),
+                                                ((max.y+min.y)/2),
+                                                ((max.z+min.z)/2)));
   }
 }
 

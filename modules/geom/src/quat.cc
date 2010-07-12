@@ -462,21 +462,21 @@ Vec3 Quat::Rotate(const Vec3& vec) const {
 Quat Grassmann(const Quat& lhs, const Quat& rhs)
 {
   return Quat(lhs.GetAngle()*rhs.GetAngle()-
-              lhs.GetAxis().GetX()*rhs.GetAxis().GetX()-
-              lhs.GetAxis().GetY()*rhs.GetAxis().GetY()-
-              lhs.GetAxis().GetZ()*rhs.GetAxis().GetZ(),
-                    lhs.GetAngle()*rhs.GetAxis().GetX()+
-                    lhs.GetAxis().GetX()*rhs.GetAngle()+
-                    lhs.GetAxis().GetY()*rhs.GetAxis().GetZ()-
-                    lhs.GetAxis().GetZ()*rhs.GetAxis().GetY(),
-               lhs.GetAngle()*rhs.GetAxis().GetY()-
-               lhs.GetAxis().GetX()*rhs.GetAxis().GetZ()+
-               lhs.GetAxis().GetY()*rhs.GetAngle()+
-               lhs.GetAxis().GetZ()*rhs.GetAxis().GetX(),
-                    lhs.GetAngle()*rhs.GetAxis().GetZ()+
-                    lhs.GetAxis().GetX()*rhs.GetAxis().GetY()-
-                    lhs.GetAxis().GetY()*rhs.GetAxis().GetX()+
-                    lhs.GetAxis().GetZ()*rhs.GetAngle());
+              lhs.GetAxis().x*rhs.GetAxis().x-
+              lhs.GetAxis().y*rhs.GetAxis().y-
+              lhs.GetAxis().z*rhs.GetAxis().z,
+                    lhs.GetAngle()*rhs.GetAxis().x+
+                    lhs.GetAxis().x*rhs.GetAngle()+
+                    lhs.GetAxis().y*rhs.GetAxis().z-
+                    lhs.GetAxis().z*rhs.GetAxis().y,
+               lhs.GetAngle()*rhs.GetAxis().y-
+               lhs.GetAxis().x*rhs.GetAxis().z+
+               lhs.GetAxis().y*rhs.GetAngle()+
+               lhs.GetAxis().z*rhs.GetAxis().x,
+                    lhs.GetAngle()*rhs.GetAxis().z+
+                    lhs.GetAxis().x*rhs.GetAxis().y-
+                    lhs.GetAxis().y*rhs.GetAxis().x+
+                    lhs.GetAxis().z*rhs.GetAngle());
 }
 
 std::ostream& operator<<(std::ostream& str, const Quat& q)

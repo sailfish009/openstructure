@@ -163,7 +163,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
     if(swap_flag) swap_float(&xlist[0],xlist.size());
     if(gap_flag) ff.read(dummy,sizeof(dummy));
     for(uint j=0;j<clist.size();++j) {
-      clist[j].SetX(xlist[j]);
+      clist[j].x=xlist[j];
     }
 
     // y coord
@@ -172,7 +172,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
     if(swap_flag) swap_float(&xlist[0],xlist.size());
     if(gap_flag) ff.read(dummy,sizeof(dummy));
     for(uint j=0;j<clist.size();++j) {
-      clist[j].SetY(xlist[j]);
+      clist[j].y=xlist[j];
     }
 
     // z coord
@@ -181,7 +181,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
     if(swap_flag) swap_float(&xlist[0],xlist.size());
     if(gap_flag) ff.read(dummy,sizeof(dummy));
     for(uint j=0;j<clist.size();++j) {
-      clist[j].SetZ(xlist[j]);
+      clist[j].z=xlist[j];
     }
 
     cg.AddFrame(clist);

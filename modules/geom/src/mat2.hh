@@ -21,6 +21,7 @@
 
 #include <cstddef> // for size_t
 #include <ostream>
+#include <cassert>
 
 #include <boost/operators.hpp>
 
@@ -63,9 +64,17 @@ public:
   bool operator==(const Mat2& rhs) const;
 
   //! element access
-  Real& operator()(std::size_t r, std::size_t c);
+  Real& operator()(std::size_t r, std::size_t c)
+  {
+    assert(r<=1 && c<=1);
+    return data_[r][c];
+  }
   //! const element access
-  const Real& operator()(std::size_t r, std::size_t c) const;
+  const Real& operator()(std::size_t r, std::size_t c) const
+  {
+    assert(r<=1 && c<=1);
+    return data_[r][c];
+  }
 
   //! addable op
   Mat2& operator+=(const Mat2& rhs);

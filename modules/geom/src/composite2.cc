@@ -88,16 +88,16 @@ Vec2 Ellipse2::calc_(Real t) const
 Rectangle2 Ellipse2::GetBoundingBox() const
 {
   if(gamma_==0.0 || gamma_==M_PI){
-    return Rectangle2(Vec2(origin_.GetX()-a_,origin_.GetY()-b_),Vec2(origin_.GetX()+a_/2,origin_.GetY()+b_));
+    return Rectangle2(Vec2(origin_.x-a_,origin_.y-b_),Vec2(origin_.x+a_/2,origin_.y+b_));
   }
   if(gamma_==M_PI*0.5 || gamma_==3*M_PI*0.5){
-    return Rectangle2(Vec2(origin_.GetX()-b_,origin_.GetY()-a_),Vec2(origin_.GetX()+b_/2,origin_.GetY()+a_));
+    return Rectangle2(Vec2(origin_.x-b_,origin_.y-a_),Vec2(origin_.x+b_/2,origin_.y+a_));
   }
   Real t=atan(-b_/a_*tan(gamma_));
   Vec2 vx=calc_(t);
   t=atan(b_/a_/tan(gamma_));
   Vec2 vy=calc_(t);
-  return Rectangle2(Vec2(origin_.GetX()-vx.GetX(),origin_.GetY()-vy.GetY()),Vec2(origin_.GetX()+vx.GetX(),origin_.GetY()+vy.GetY()));
+  return Rectangle2(Vec2(origin_.x-vx.x,origin_.y-vy.y),Vec2(origin_.x+vx.x,origin_.y+vy.y));
 }
 
 Rectangle2::Rectangle2():
@@ -112,11 +112,11 @@ bottomright_(bottomright)
 }
 Real Rectangle2::GetWidth() const
 {
-    return bottomright_.GetX()-topleft_.GetX();
+    return bottomright_.x-topleft_.x;
 }
 Real Rectangle2::GetHeight() const
 {
-    return bottomright_.GetY()-topleft_.GetY();
+    return bottomright_.y-topleft_.y;
 }
 Real Rectangle2::GetArea() const
 {
@@ -207,7 +207,7 @@ Real Polygon2::GetArea() const
     unsigned int ip1=(i+1)%nodecount;
     Vec2 n1=GetNode(i);
     Vec2 n2=GetNode(ip1);
-    area+=n1.GetX()*n2.GetY()-n2.GetX()*n1.GetY();
+    area+=n1.x*n2.y-n2.x*n1.y;
   }
   return area/2.0;
 }
@@ -220,8 +220,8 @@ Vec2 Polygon2::GetCentroid() const
     unsigned int ip1=(i+1)%nodecount;
     Vec2 n1=GetNode(i);
     Vec2 n2=GetNode(ip1);
-    cx+=(n1.GetX()+n2.GetX())*(n1.GetX()*n2.GetY()-n2.GetX()*n1.GetY());
-    cy+=(n1.GetY()+n2.GetY())*(n1.GetX()*n2.GetY()-n2.GetX()*n1.GetY());
+    cx+=(n1.x+n2.x)*(n1.x*n2.y-n2.x*n1.y);
+    cy+=(n1.y+n2.y)*(n1.x*n2.y-n2.x*n1.y);
   }
   Real area=GetArea();
   return Vec2(cx/(6.0*area),cy/(6.0*area));
@@ -255,17 +255,17 @@ Rectangle2 Polygon2::GetBoundingBox() const
   {
     return Rectangle2(Vec2(0.0,0.0),Vec2(0.0,0.0));
   }
-  Real x_min=operator[](0).GetX();
+  Real x_min=operator[](0).x;
   Real x_max=x_min;
-  Real y_min=operator[](0).GetY();
+  Real y_min=operator[](0).y;
   Real y_max=y_min;
   unsigned int nodecount=GetNodeCount();
   for(unsigned int i=0;i<nodecount;++i){
     Vec2 n=operator[](i);
-    x_min=std::min<Real>(n.GetX(),x_min);
-    x_max=std::max<Real>(n.GetX(),x_max);
-    y_min=std::min<Real>(n.GetY(),y_min);
-    y_max=std::max<Real>(n.GetY(),y_max);
+    x_min=std::min<Real>(n.x,x_min);
+    x_max=std::max<Real>(n.x,x_max);
+    y_min=std::min<Real>(n.y,y_min);
+    y_max=std::max<Real>(n.y,y_max);
   }
   return Rectangle2(Vec2(x_min,y_min),Vec2(x_max,y_max));
 }

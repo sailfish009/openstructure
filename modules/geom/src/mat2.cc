@@ -65,20 +65,6 @@ bool Mat2::operator==(const Mat2& rhs) const
     data_[1][1] == rhs.data_[1][1];
 }
 
-
-Real& Mat2::operator()(std::size_t r, std::size_t c)
-{
-  if(r>1 || c>1) throw OutOfRangeException();
-  return data_[r][c];
-}
-
-const Real& Mat2::operator()(std::size_t r, std::size_t c) const
-{
-  if(r>1 || c>1) throw OutOfRangeException();
-  return data_[r][c];
-}
-
-
 Mat2& Mat2::operator+=(const Mat2& rhs)
 {
   data_[0][0]+=rhs(0,0);
