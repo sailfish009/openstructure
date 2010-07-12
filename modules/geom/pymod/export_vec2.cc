@@ -17,9 +17,12 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
-using namespace boost::python;
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+
 
 #include <ost/geom/geom.hh>
+
+using namespace boost::python;
 
 const Real Vec2_getitem(const geom::Vec2& v, int i) {return v[i];}
 void Vec2_setitem(geom::Vec2& v,const  int i,const  Real val) {v[i]=val;}
@@ -54,6 +57,8 @@ void export_Vec2()
     .def("GetY", &Vec2::GetY)
     .add_property("x", &Vec2::GetX, &Vec2::SetX)
     .add_property("y", &Vec2::GetY, &Vec2::SetY)
-
   ;
+  class_<Vec2List>("Vec2List", init<>())
+    .def(vector_indexing_suite<Vec2List>())
+  ;  
 }

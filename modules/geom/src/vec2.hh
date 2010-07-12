@@ -21,7 +21,7 @@
 
 #include <cstddef> // for size_t
 #include <ostream>
-
+#include <vector>
 #include <boost/operators.hpp>
 
 #include <ost/geom/module_config.hh>
@@ -106,6 +106,8 @@ private:
 DLLEXPORT_OST_GEOM Vec2 operator/(Real d, const Vec2& v);
 
 DLLEXPORT_OST_GEOM std::ostream& operator<<(std::ostream&, const Vec2&);
+
+typedef std::vector<Vec2> Vec2List;
 
 } // namespace geom
 
