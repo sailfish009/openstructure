@@ -71,6 +71,9 @@ class DLLEXPORT_OST_GFX Gradient {
 
 public:
   Gradient();
+
+  Gradient(const String& name);
+
   /// \brief get color
   Color GetColorAt(float t) const;
   /// \brief set color
