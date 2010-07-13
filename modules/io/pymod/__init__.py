@@ -16,12 +16,38 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
+import os, tempfile, ftplib, httplib
+
 from _io import *
 from ost import mol, conop
 
+def __GetModelFromPDB(model_id, output_dir, file_pattern='pdb%s.ent.gz'):
+  file_name = file_pattern % model_id
+  file_path = os.path.join(output_dir,file_name)
+  try:
+    server="ftp.wwpdb.org"
+    ftp=ftplib.FTP(server,"anonymous","user@")
+    ftp.cwd("pub/pdb/data/structures/all/pdb")
+    ftp_retrfile=open(file_path,"wb")
+    ftp.retrbinary("RETR "+file_name,ftp_retrfile.write)
+    ftp_retrfile.close()
+  except:
+    conn=httplib.HTTPConnection('www.pdb.org')
+    conn.request('GET', '/pdb/files/%s.pdb.gz' % model_id )
+    response=conn.getresponse()
+    if response.status==200:
+      data=response.read()
+      f=open(os.path.join(output_dir, file_pattern % model_id), 'w+')
+      f.write(data)
+      f.close()
+    else:
+      conn.close()
+      return False
+  return os.path.getsize(file_path) > 0
+
 def LoadPDB(filename, restrict_chains="", no_hetatms=False,
             fault_tolerant=False, load_multi=False,
-            join_spread_atom_records=False, calpha_only=False):
+            join_spread_atom_records=False, calpha_only=False, remote=False):
   """
   Load PDB file from disk and returns one or more entities. Several options 
   allow to customize the exact behaviour of the PDB import.
@@ -41,12 +67,22 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
   :param join_spread_atom_records: If set to true, atom records belonging to the
      same residue are joined, even if they do not appear sequentially in the PDB
      file.
+  
+  :param remote: If set to true, the method tries to load the pdb from the remote
+     pdb repository www.pdb.org.
   :rtype: :class:`~ost.mol.EntityHandle` or a list thereof if `load_multi` is 
       True.
       
   :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
       inexistent file
   """
+  if remote:
+    output_dir = tempfile.gettempdir()
+    if __GetModelFromPDB(filename, output_dir):
+      filename = os.path.join(output_dir, 'pdb%s.ent.gz' % filename)
+    else:
+      raise IOError('Can not load PDB %s from www.pdb.org'%filename) 
+  
   conop_inst=conop.Conopology.Instance()
   builder=conop_inst.GetBuilder("DEFAULT")
   reader=PDBReader(filename)
