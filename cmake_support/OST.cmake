@@ -629,10 +629,12 @@ endmacro()
 macro(get_ost_rev)
   if (NOT OST_REV)
     if (NOT WIN32)
-      exec_program("svn" 
-                   ARGS "info |grep Revision|awk '{print $2}'"
-                   OUTPUT_VARIABLE OST_REV
-      )
+      if (EXISTS .svn)
+        exec_program("svn" 
+                     ARGS "info |grep Revision|awk '{print $2}'"
+                     OUTPUT_VARIABLE OST_REV
+        )
+      endif()
     else()
       exec_program("svnversion.exe"
                    ARGS ""
@@ -642,5 +644,7 @@ macro(get_ost_rev)
       string(REGEX REPLACE "[A-Za-z]" "" OST_REV ${OST_REV})
     endif()
   endif()
-  message("Revision: ${OST_REV}")
+  if (OST_REV)
+    message("Revision: ${OST_REV}")
+  endif()
 endmacro()
