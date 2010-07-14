@@ -60,17 +60,17 @@ class RenderModeWidget(QtGui.QWidget):
       entity = scene_selection.GetViewEntity()
       self.entities_.add(entity)
     
-    for entity in self.entities_:
+    if len(self.entities_)>0:
+      entity = self.entities_.pop()
       self.options_=entity.GetOptions(self.GetRenderMode())
-      self.entities_.remove(entity)
-      break
-    self.UpdateGui(self.options_)
-    
-    QtGui.QWidget.setEnabled(self,True)
+      self.UpdateGui(self.options_)
+      QtGui.QWidget.setEnabled(self,True)
+    else:
+      QtGui.QWidget.setEnabled(self,False)
     
   def ApplyOptions(self):
     for entity in self.entities_:
-      entity.SetOptions(self.GetRenderMode(),self.options_)
+      entity.ApplyOptions(self.GetRenderMode(), self.GetOptions())
 
   def GetOptions(self):
     return self.options_

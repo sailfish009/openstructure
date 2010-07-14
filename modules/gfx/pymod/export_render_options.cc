@@ -36,6 +36,9 @@ void export_RenderOptions()
 {
   class_<RenderOptions, boost::shared_ptr<RenderOptions>, boost::noncopyable>("RenderOptions", no_init)
     .def("GetRenderMode",&RenderOptions::GetRenderMode)
+    .def("NotifyStateChange",&RenderOptions::NotifyStateChange)
+    .def("AddObserver",&RenderOptions::AddObserver)
+    .def("RemoveObserver",&RenderOptions::RemoveObserver)
   ;
 
   class_<LineRenderOptions, boost::shared_ptr<LineRenderOptions>, bases<RenderOptions>, boost::noncopyable>("LineRenderOptions", no_init)
@@ -50,6 +53,7 @@ void export_RenderOptions()
   ;
 
   class_<SimpleRenderOptions, boost::shared_ptr<SimpleRenderOptions>, bases<LineRenderOptions>, boost::noncopyable>("SimpleRenderOptions")
+    .def(init<const SimpleRenderOptions&>())
     .def("SetBondOrderFlag", &SimpleRenderOptions::SetBondOrderFlag)
     .def("SetBondOrderDistance", &SimpleRenderOptions::SetBondOrderDistance)
     .def("GetBondOrderFlag", &SimpleRenderOptions::GetBondOrderFlag)
@@ -61,14 +65,17 @@ void export_RenderOptions()
   ;
 
   class_<LineTraceRenderOptions, boost::shared_ptr<LineTraceRenderOptions>, bases<LineRenderOptions>, boost::noncopyable>("LineTraceRenderOptions")
+    .def(init<const LineTraceRenderOptions&>())
   ;
 
   class_<SlineRenderOptions, boost::shared_ptr<SlineRenderOptions>, bases<LineRenderOptions>, boost::noncopyable>("SlineRenderOptions")
+    .def(init<const SlineRenderOptions&>())
     .def("SetSplineDetail", &SlineRenderOptions::SetSplineDetail)
     .def("GetSplineDetail", &SlineRenderOptions::GetSplineDetail)
   ;
 
   class_<CPKRenderOptions, boost::shared_ptr<CPKRenderOptions>, bases<RenderOptions>, boost::noncopyable>("CPKRenderOptions")
+    .def(init<const CPKRenderOptions&>())
     .def("SetSphereDetail", &CPKRenderOptions::SetSphereDetail)
     .def("GetSphereDetail", &CPKRenderOptions::GetSphereDetail)
     .def("SetCPKMode", &CPKRenderOptions::SetCPKMode)
@@ -80,6 +87,7 @@ void export_RenderOptions()
   ;
 
   class_<CustomRenderOptions, boost::shared_ptr<CustomRenderOptions>, bases<RenderOptions>, boost::noncopyable>("CustomRenderOptions")
+    .def(init<const CustomRenderOptions&>())
     .def("SetSphereDetail", &CustomRenderOptions::SetSphereDetail)
     .def("GetSphereDetail", &CustomRenderOptions::GetSphereDetail)
     .def("SetArcDetail", &CustomRenderOptions::SetArcDetail)
@@ -96,6 +104,7 @@ void export_RenderOptions()
   ;
 
   class_<CartoonRenderOptions, boost::shared_ptr<CartoonRenderOptions>, bases<RenderOptions>, boost::noncopyable>("CartoonRenderOptions")
+    .def(init<const CartoonRenderOptions&>())
     .def(init<optional<bool> >())
     .def("SetSplineDetail", &CartoonRenderOptions::SetSplineDetail)
     .def("GetSplineDetail", &CartoonRenderOptions::GetSplineDetail)
@@ -130,6 +139,7 @@ void export_RenderOptions()
   ;
   
   class_<TraceRenderOptions, boost::shared_ptr<TraceRenderOptions>, bases<RenderOptions>, boost::noncopyable>("TraceRenderOptions")
+    .def(init<const TraceRenderOptions&>())
     .def("SetArcDetail", &TraceRenderOptions::SetArcDetail)
     .def("GetArcDetail", &TraceRenderOptions::GetArcDetail)
     .def("SetNormalSmoothFactor", &TraceRenderOptions::SetNormalSmoothFactor)
