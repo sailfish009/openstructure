@@ -37,10 +37,15 @@ class InitInspectorMenu(QtCore.QObject):
     self.show_.setCheckable(True)
     self.show_.setChecked(not self.inspector_.isHidden())
     self.connect(self.show_, QtCore.SIGNAL('triggered()'), self.Toggle)
-    
+    self.connect(inspectordialog, QtCore.SIGNAL('visible'), self.UpdateCheckbox)
   def Toggle(self):
-    self.inspector_.setVisible(self.show_.isChecked())
-    
+    self.inspector_.setVisible(not self.inspector_.isVisible())
+  
+  def UpdateCheckbox(self, visibility):
+    self.disconnect(self.show_, QtCore.SIGNAL('triggered()'), self.Toggle)
+    self.show_.setChecked(visibility)
+    self.connect(self.show_, QtCore.SIGNAL('triggered()'), self.Toggle)
+  
 def _InitInspector(app):
   mywidget = InspectorDialog(app.gl_win.qobject)
   mywidget.setWindowFlags(QtCore.Qt.Dialog | QtCore.Qt.Tool)

@@ -95,3 +95,11 @@ class InspectorDialog(QtGui.QDialog):
     
   def ToggleHide(self,checked):
     self.setHidden(not self.isHidden())
+
+  def hideEvent(self, event):
+    self.emit(QtCore.SIGNAL("visible"),False)
+    QtGui.QDialog.hideEvent(self,event)
+    
+  def showEvent(self, event):
+    self.emit(QtCore.SIGNAL("visible"),True)
+    QtGui.QDialog.showEvent(self,event)
