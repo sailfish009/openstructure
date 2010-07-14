@@ -75,6 +75,8 @@ void export_ColorOps()
     .def(init<const mol::QueryViewWrapper&>())
     .def(init<const String&, int>())
     .def(init<const mol::QueryViewWrapper&, int>())
+    .def("GetChainCount",&ByChainColorOp::GetChainCount)
+    .def("SetChainCount",&ByChainColorOp::SetChainCount)
     .def("FromInfo",&ByChainColorOp::FromInfo)
     .staticmethod("FromInfo")
   ;

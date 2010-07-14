@@ -908,11 +908,13 @@ void Entity::Apply(const gfx::ByElementColorOp& op, bool store)
 
 void Entity::Apply(const gfx::ByChainColorOp& op, bool store)
 {
+  const_cast<gfx::ByChainColorOp&>(op).SetChainCount(this->GetView().GetChainCount());
   if(store){
     ByChainColorOp* op_ptr = new ByChainColorOp(op);
     this->AppendColorOp(op_ptr);
   }
   apply_color_op_to_renderer_list(renderer_.begin(), renderer_.end(), op);
+  const_cast<gfx::ByChainColorOp&>(op).SetChainCount(0);
   FlagRebuild();
 }
 

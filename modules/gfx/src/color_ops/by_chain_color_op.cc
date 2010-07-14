@@ -26,20 +26,11 @@
 
 namespace ost { namespace gfx {
 
-ByChainColorOp::ByChainColorOp() : ColorOp(){this->init();}
+ByChainColorOp::ByChainColorOp() : ColorOp(),chain_count_(0),color_grad_("RAINBOW"){}
 
-ByChainColorOp::ByChainColorOp(const String& selection, int mask) : ColorOp(selection,mask){this->init();}
+ByChainColorOp::ByChainColorOp(const String& selection, int mask) : ColorOp(selection,mask),chain_count_(0),color_grad_("RAINBOW"){}
 
-ByChainColorOp::ByChainColorOp(const mol::QueryViewWrapper& query_view, int mask) : ColorOp(query_view,mask){this->init();}
-
-void ByChainColorOp::init(){
-  color_grad_.SetColorAt(0,Color(1,1,0));
-  color_grad_.SetColorAt(0.16666,Color(1,0,0));
-  color_grad_.SetColorAt(0.33333,Color(0,1,1));
-  color_grad_.SetColorAt(0.5,Color(0,1,0));
-  color_grad_.SetColorAt(0.66666,Color(1,0,1));
-  color_grad_.SetColorAt(0.83333,Color(0,0,1));
-}
+ByChainColorOp::ByChainColorOp(const mol::QueryViewWrapper& query_view, int mask) : ColorOp(query_view,mask),chain_count_(0),color_grad_("RAINBOW"){}
 
 bool ByChainColorOp::CanApplyTo(const GfxObjP& obj) const{
   if(dynamic_cast<Entity*>(obj.get()))
@@ -62,6 +53,16 @@ gfx::Color ByChainColorOp::GetColor(String ident) const{
   return colors_[ident];
 }
 
+int ByChainColorOp::GetChainCount() const
+{
+  return chain_count_;
+}
+
+void ByChainColorOp::SetChainCount(int chain_count)
+{
+  chain_count_ = chain_count;
+}
+
 gfx::ByChainColorOp ByChainColorOp::FromInfo(info::InfoGroup& group){
   gfx::ColorOp op = ColorOp::FromInfo(group);
   String selection = op.GetSelection();
@@ -71,18 +72,13 @@ gfx::ByChainColorOp ByChainColorOp::FromInfo(info::InfoGroup& group){
 
 gfx::Color ByChainColorOp::GenerateColor(String& ident) const{
   unsigned int size=colors_.size()-1;
-  int cnt = size % 6;
-  int factor = abs(size/6.0)+1;
-  float start = 1.0/(6.0*factor);
-  if(factor > 1 && !((factor+1) & 1)){
-    float old_start = 1.0 / (6.0 *abs(size/6.0));
-    start += old_start;
+  if(size<=0){
+    colors_[ident] = color_grad_.GetColorAt(0.0);
   }
-  float value = start + (cnt / 6.0);
-  if(value >= 1){
-    value -=1;
+  else{
+    colors_[ident] = color_grad_.GetColorAt(float(size) / chain_count_);
   }
-  return color_grad_.GetColorAt(value);
+  return colors_[ident];
 }
 
 }}

@@ -66,7 +66,6 @@ public:
   static gfx::ColorOp FromInfo(info::InfoGroup& group);
 private:
   mol::QueryViewWrapper query_view_;
-  mol::EntityView view_;
   ColorMask mask_;
 };
 

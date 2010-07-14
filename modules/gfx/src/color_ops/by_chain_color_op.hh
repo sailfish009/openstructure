@@ -43,13 +43,16 @@ public:
 
   virtual gfx::Color GetColor(String ident) const;
 
+  virtual int GetChainCount() const;
+  virtual void SetChainCount(int chain_count);
+
   //virtual void ToInfo(info::InfoGroup& group) const;
   static gfx::ByChainColorOp FromInfo(info::InfoGroup& group);
 
 private:
-  void init();
   gfx::Color GenerateColor(String& ident) const;
 
+  mutable int chain_count_;
   mutable std::map<String,gfx::Color> colors_;
 
   gfx::Gradient color_grad_;
