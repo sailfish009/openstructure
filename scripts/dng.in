@@ -30,4 +30,15 @@ export LD_LIBRARY_PATH="$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH"
 #export PYTHONPATH="$DNG_ROOT/@LIBDIR@/python2.6"
 #export QT_PLUGIN_PATH="$BIN_DIR/plugins"
 
-gosty $DNG_ROOT/@LIBDIR@/openstructure/init.py ost $@
+opts=""
+for argument in "$@";do
+  if [ -n "$opts" ]; then
+    opts=$opts"#""$argument"
+  else
+    opts="$argument"
+  fi
+done
+
+IFS="#"
+gosty $DNG_ROOT/@LIBDIR@/openstructure/init.py ost $opts
+IFS=$' \t\n'
