@@ -142,6 +142,20 @@ void main_area_hide_sub_window(MainArea* m, const SipHandlerBase& sh)
 
 }
 
+void main_area_show_sub_window_b(MainArea* m, object py_object)
+{
+  if(QWidget* widget = get_cpp_qobject<QWidget>(py_object)){
+    m->ShowSubWindow(widget);
+  }
+}
+
+void main_area_hide_sub_window_b(MainArea* m, object py_object)
+{
+  if(QWidget* widget = get_cpp_qobject<QWidget>(py_object)){
+    m->HideSubWindow(widget);
+  }
+}
+
 void export_MainArea()
 {  
   class_<MainArea, boost::noncopyable>("MainArea", no_init)
@@ -161,8 +175,10 @@ void export_MainArea()
     .def("width", &MainArea::width)
     .def("height", &MainArea::height)
     .def("ShowSubWindow", &MainArea::ShowSubWindow)
-    .def("ShowSubWindow", &main_area_show_sub_window)        
+    .def("ShowSubWindow", &main_area_show_sub_window)
+    .def("ShowSubWindow", &main_area_show_sub_window_b)
     .def("HideSubWindow", &MainArea::HideSubWindow)
+    .def("HideSubWindow", &main_area_hide_sub_window_b)
     .def("HideSubWindow", &main_area_hide_sub_window)            
     .def("EnableTabbedMode", &MainArea::EnableTabbedMode, arg("flag")=true)
     .def("GetQObject",&get_py_qobject<MainArea>)

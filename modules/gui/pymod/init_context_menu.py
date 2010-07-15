@@ -2,9 +2,12 @@ import platform
 
 from PyQt4 import QtCore, QtGui
 
-from ost import geom, gfx, gui
+import sip
+
+from ost import geom, gfx, gui, seq
 from ost import settings
 from ost.bindings import tmtools
+from ost.seq import alg
 
 class SelectRefDialog(QtGui.QDialog):
   def __init__(self, ent_list, parent=None):
@@ -23,6 +26,14 @@ class SelectRefDialog(QtGui.QDialog):
     self.list.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
     vb.addWidget(self.label)
     vb.addWidget(self.list)
+    self.show_scores = QtGui.QCheckBox(self)
+    self.show_scores.setText("Show Scores")
+    self.show_scores.setChecked(True)
+    vb.addWidget(self.show_scores)
+    self.show_alignment = QtGui.QCheckBox(self)
+    self.show_alignment.setText("Display Alignment")
+    self.show_alignment.setChecked(False)
+    vb.addWidget(self.show_alignment)
     hb = QtGui.QHBoxLayout()
     hb.setDirection(QtGui.QBoxLayout.LeftToRight)
     cancel_btn = QtGui.QPushButton("Cancel", self)
@@ -58,7 +69,13 @@ class SelectRefDialog(QtGui.QDialog):
         self.ent_list_.remove(ent)
         self.ent_list_.insert(0,ent)
     self.accept()
-      
+     
+  def GetShowScores(self):
+    return self.show_scores.isChecked()
+  
+  def GetDisplayAlignment(self):
+    return self.show_alignment.isChecked()
+  
   def GetEntities(self):
     return self.ent_list_
 
@@ -124,14 +141,11 @@ class AlignmentContextMenu(QtCore.QObject):
     ent_list = list()
     for i in range(0,scene_selection.GetActiveNodeCount()):
       ent_list.append(scene_selection.GetActiveNode(i))
-    if len(ent_list) == 2:
-      self.__Align(ent_list)
-    elif len(ent_list) > 2:
-      sd = SelectRefDialog(ent_list)
-      if(sd.exec_()):
-        self.__Align(sd.GetEntities())
+    sd = SelectRefDialog(ent_list)
+    if(sd.exec_()):
+      self.__Align(sd.GetEntities(),sd.GetShowScores(), sd.GetDisplayAlignment())
         
-  def __Align(self, ent_list):
+  def __Align(self, ent_list,show_scores=True, display_alignment=False):
     node = ent_list[0]
     res_list = list()
     if isinstance(node, gfx.Entity):
@@ -141,7 +155,10 @@ class AlignmentContextMenu(QtCore.QObject):
         if isinstance(node, gfx.Entity):
           res_list.append(tmtools.TMAlign(node.view.handle, ref))
           node.UpdatePositions()
-    self.__ShowScore(ent_list, res_list)
+    if show_scores:
+      self.__ShowScore(ent_list, res_list)
+    if display_alignment:
+      self.__DisplayAlignment(res_list)
     
   def __ShowScore(self, ent_list, res_list):
     if(len(res_list)==1):
@@ -151,7 +168,21 @@ class AlignmentContextMenu(QtCore.QObject):
     elif(len(res_list)>1):
       ShowResultDialog(ent_list, res_list).exec_()
       
-    
+  def __DisplayAlignment(self, res_list):
+    if(len(res_list)>0):
+      ref_seq = res_list[0].ref_sequence
+      aln_list = seq.AlignmentList()
+      if(ref_seq.IsValid()):
+        for res in res_list:
+          aln_list.append(res.alignment)
+        alignment = alg.MergePairwiseAlignments(aln_list, ref_seq)
+        gosty = gui.GostyApp.Instance()
+        main_area = gosty.perspective.GetMainArea()
+        seq_viewer = gui.SequenceViewerV2(True)
+        gosty.AddWidgetToApp(str(ref_seq),seq_viewer)
+        seq_viewer.AddAlignment(alignment)
+        main_area.ShowSubWindow(seq_viewer)
+  
 def _InitContextMenu(app):
   cm=app.scene_win.GetContextMenu()
   AlignmentContextMenu(cm)

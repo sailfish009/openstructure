@@ -28,8 +28,8 @@ tmalign: Y. Zhang and J. Skolnick, Nucl. Acids Res. 2005 33, 2302-9
 Authors: Pascal Benkert, Marco Biasini
 """
 
-import subprocess, os, tempfile, platform
-from ost import settings, io, geom
+import subprocess, os, tempfile
+from ost import settings, io, geom, seq
 
 def _SetupFiles(models):
   # create temporary directory
@@ -43,11 +43,13 @@ def _CleanupFiles(dir_name):
   shutil.rmtree(dir_name)
 
 class TMAlignResult:
-  def __init__(self, rmsd, tm_score, aligned_length, transform):
+  def __init__(self, rmsd, tm_score, aligned_length, transform, ref_sequence, alignment):
     self.rmsd=rmsd
     self.tm_score=tm_score    
     self.aligned_length=aligned_length
     self.transform=transform
+    self.ref_sequence =ref_sequence
+    self.alignment=alignment
 
 def _ParseTmAlign(lines):
   info_line=lines[11].split(',')
@@ -61,7 +63,12 @@ def _ParseTmAlign(lines):
                 tf2[4], tf3[2], tf3[3], tf3[4])
   tf=geom.Mat4(rot)
   tf.PasteTranslation(geom.Vec3(tf1[1], tf2[1], tf3[1]))
-  return TMAlignResult(rmsd, aln_length, tm_score, tf)
+  seq1 = seq.CreateSequence("1",lines[20].strip())
+  seq2 = seq.CreateSequence("2",lines[22].strip())
+  alignment = seq.CreateAlignment()
+  alignment.AddSequence(seq1)
+  alignment.AddSequence(seq2)
+  return TMAlignResult(rmsd, aln_length, tm_score, tf, seq1, alignment)
 
 def _RunTmAlign(tmalign, tmp_dir):
   model1_filename=os.path.join(tmp_dir, 'model01.pdb')
