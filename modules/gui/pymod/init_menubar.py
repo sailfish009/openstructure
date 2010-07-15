@@ -64,6 +64,11 @@ class InitMenuBar(QtCore.QObject):
     self.connect(gl_win, QtCore.SIGNAL('triggered()'), self.ShowGLWin)
     window.addAction(gl_win)
     
+    reset = QtGui.QAction('Reset View', self)
+    reset.setStatusTip('Reset the Panels and Widgets')
+    self.connect(reset, QtCore.SIGNAL('triggered()'), self.ResetView)
+    window.addAction(reset)
+    
     #Options
     #Add file loader to menu
     loader_manager = QtGui.QAction('File &Loader', self)
@@ -97,8 +102,23 @@ class InitMenuBar(QtCore.QObject):
     gl_win=gosty.GetGLWin()
     if gl_win and gl_win.qobject.isHidden():
       gl_win.Show()
-      
-    
+  
+  def ResetView(self):
+    msg_box = QtGui.QMessageBox()
+    msg_box.setWindowTitle("Reset the Panels and Widget");
+    msg_box.setText("Do you really want to reset the Panels and Widgets?");
+    msg_box.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel);
+    msg_box.setDefaultButton(QtGui.QMessageBox.Cancel);
+    ret = msg_box.exec_();
+    if(ret == QtGui.QMessageBox.Yes):
+      settings = QtCore.QSettings()
+      settings.setValue("restore_settings",QtCore.QVariant(False))
+      info_box = QtGui.QMessageBox()
+      info_box.setStandardButtons(QtGui.QMessageBox.Ok)
+      info_box.setWindowTitle("Restart OpenStructure")
+      info_box.setText("You must restart OpenStructure for the changes to take effect!");
+      info_box.exec_();
+            
 def _InitMenuBar(app):
   InitMenuBar(app.perspective.menubar)
   

@@ -30,6 +30,14 @@ def _InitRuleBasedBuilder():
 # switch to rule-based builder for high fidelity if compounds.chemlib is 
 # available
 _InitRuleBasedBuilder()
+
+def _CheckRestore():
+  settings = QtCore.QSettings()
+  restore = settings.value("restore_settings",QtCore.QVariant(False)).toBool()
+  if not restore:
+    settings.clear()
+  settings.setValue("restore_settings",QtCore.QVariant(True))
+
 def _InitPanels(app):
   panels = app.perspective.panels
   panels.AddWidgetToPool('ost.gui.FileBrowser', -1)
@@ -49,6 +57,7 @@ def _InitPanels(app):
   return True
 
 def _InitFrontEnd():
+  _CheckRestore()
   app=gui.GostyApp.Instance()
   app.SetAppTitle("DNG")
   main_area=app.perspective.main_area
@@ -64,7 +73,7 @@ def _InitFrontEnd():
     __import__(module_name)
   app.ProcessEvents()
   _InitInspector(app)
-
+  
 def _load_files():
   for pdb_id in options.pdb_ids:
     pdb_id, sel=_SplitIDSel(pdb_id)
