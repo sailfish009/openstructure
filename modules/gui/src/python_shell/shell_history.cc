@@ -91,14 +91,14 @@ void ShellHistory::MoveToPreviousMatch()
 void ShellHistory::MoveToNextMatch()
 {
   int newindex=index_+1;
-  while(newindex<history_list_.size()){
+  while(static_cast<unsigned int>(newindex)<history_list_.size()){
     if(history_list_[newindex].first.indexOf(current_)==0 || current_.size()==0){
       index_=newindex;
       break;
     }
     ++newindex;
   }
-  if(newindex!=index_){
+  if(static_cast<unsigned int>(newindex)!=index_){
     index_=history_list_.size();
   }
 }
