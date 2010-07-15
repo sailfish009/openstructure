@@ -122,6 +122,7 @@ class ShowResultDialog(QtGui.QDialog):
     self.list.resizeColumnsToContents()
 
 class AlignmentContextMenu(QtCore.QObject):
+
   def __init__(self, context_menu):
     try:
       if platform.system() == "Windows":
@@ -133,6 +134,7 @@ class AlignmentContextMenu(QtCore.QObject):
       self.action = QtGui.QAction("Align", self)
       QtCore.QObject.connect(self.action,QtCore.SIGNAL("triggered()"), self.Align)
       context_menu.AddAction(self.action, gui.ContextActionType.ENTITY | gui.ContextActionType.MULTI)
+      self.seq_viewer = None
     except settings.FileNotFound:
       return
     
@@ -170,19 +172,25 @@ class AlignmentContextMenu(QtCore.QObject):
       
   def __DisplayAlignment(self, res_list):
     if(len(res_list)>0):
-      ref_seq = res_list[0].ref_sequence
+      ref_seq = seq.CreateSequence("REF",res_list[0].ref_sequence.GetGaplessString())
       aln_list = seq.AlignmentList()
       if(ref_seq.IsValid()):
         for res in res_list:
+          print res.alignment.GetSequence(0)
+          print res.alignment.GetSequence(1)
+          print "----------------"
           aln_list.append(res.alignment)
         alignment = alg.MergePairwiseAlignments(aln_list, ref_seq)
         gosty = gui.GostyApp.Instance()
         main_area = gosty.perspective.GetMainArea()
-        seq_viewer = gui.SequenceViewerV2(True)
-        gosty.AddWidgetToApp(str(ref_seq),seq_viewer)
-        seq_viewer.AddAlignment(alignment)
-        main_area.ShowSubWindow(seq_viewer)
-  
+        if self.seq_viewer:
+          main_area.RemoveWidget(self.seq_viewer)
+          self.seq_viewer.qobject.close()
+        self.seq_viewer = gui.SequenceViewer(True)
+        self.seq_viewer.AddAlignment(alignment)
+        self.seq_viewer.ChangeDisplayMode("Highlight conservation 1")
+        self.seq_viewer.Show()
+        
 def _InitContextMenu(app):
   cm=app.scene_win.GetContextMenu()
   AlignmentContextMenu(cm)

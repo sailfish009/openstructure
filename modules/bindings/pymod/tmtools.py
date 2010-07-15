@@ -28,7 +28,7 @@ tmalign: Y. Zhang and J. Skolnick, Nucl. Acids Res. 2005 33, 2302-9
 Authors: Pascal Benkert, Marco Biasini
 """
 
-import subprocess, os, tempfile
+import subprocess, os, tempfile, platform
 from ost import settings, io, geom, seq
 
 def _SetupFiles(models):
@@ -66,9 +66,9 @@ def _ParseTmAlign(lines):
   seq1 = seq.CreateSequence("1",lines[20].strip())
   seq2 = seq.CreateSequence("2",lines[22].strip())
   alignment = seq.CreateAlignment()
-  alignment.AddSequence(seq1)
   alignment.AddSequence(seq2)
-  return TMAlignResult(rmsd, aln_length, tm_score, tf, seq1, alignment)
+  alignment.AddSequence(seq1)
+  return TMAlignResult(rmsd, aln_length, tm_score, tf, seq2, alignment)
 
 def _RunTmAlign(tmalign, tmp_dir):
   model1_filename=os.path.join(tmp_dir, 'model01.pdb')
