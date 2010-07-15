@@ -50,8 +50,13 @@ void update_shifts(const AlignmentHandle& aln,
       j++;
     }
     if (shift>0) {
-      assert(i>0);
-      int res_index=s1.GetResidueIndex(i-1);
+      int res_index=0;
+      if (i == 0){
+        res_index=-1;
+      }
+      else if (i > 0) {
+        res_index=s1.GetResidueIndex(i-1);
+      }
       ShiftMap::iterator p=shifts.find(res_index);
       if (p!=shifts.end()) {
         p->second=std::max(p->second, shift);
@@ -70,13 +75,18 @@ SequenceHandle shift_reference(const SequenceHandle& ref_seq,
   String ref_str=ref_seq.GetString();
   int last=0;
   for (ShiftMap::const_iterator i=shifts.begin(),e=shifts.end();i!=e; ++i) {
-    new_sequence << ref_str.substr(last, i->first-last+1) 
+    if(i->first == -1){
+      new_sequence << String(i->second,'-');
+    }
+    else{
+      new_sequence << ref_str.substr(last, i->first-last+1)
                  << String(i->second, '-');
-    last=i->first+1;
+      last=i->first+1;
+    }
   }
   new_sequence << ref_str.substr(last);
   SequenceHandle s=CreateSequence(ref_seq.GetName(), 
-                                            new_sequence.str());                                               
+                                            new_sequence.str());
   if (ref_seq.HasAttachedView())
     s.AttachView(ref_seq.GetAttachedView());
   s.SetSequenceOffset(s.GetSequenceOffset());
@@ -96,15 +106,19 @@ SequenceHandle realign_sequence(const AlignmentHandle& aln,
       shift++;
       ++j;
     }
-    if (i>0 && s1.GetOneLetterCode(i-1)!='-') {
-      ShiftMap::const_iterator p=shifts.find(s1.GetResidueIndex(i-1));
-      if (p!=shifts.end()) {
-        int d=p->second-shift;
-        assert(d>=0);
-        new_sequence << String(d, '-');
-      }      
+    ShiftMap::const_iterator p=shifts.end();
+    if (i == 0){
+      p=shifts.find(-1);
     }
-    new_sequence << s2.GetOneLetterCode(i);    
+    else if (i>0 && s1.GetOneLetterCode(i-1)!='-') {
+      p=shifts.find(s1.GetResidueIndex(i-1));
+    }
+    if (p!=shifts.end()) {
+      int d=p->second-shift;
+      assert(d>=0);
+      new_sequence << String(d, '-');
+    }
+    new_sequence << s2.GetOneLetterCode(i);
   }
   SequenceHandle s=CreateSequence(s2.GetName(), new_sequence.str());
   if (s2.HasAttachedView())

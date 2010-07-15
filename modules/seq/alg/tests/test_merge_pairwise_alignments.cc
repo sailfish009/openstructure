@@ -60,8 +60,8 @@ BOOST_AUTO_TEST_CASE(merge_pairwise_alignments_one)
 BOOST_AUTO_TEST_CASE(merge_pairwise_alignments_two) 
 {
   SequenceHandle ref=CreateSequence("REF", "abcdefghijklmn");
-  SequenceHandle s1=CreateSequence("S1", "abcd---efghijklmn");
-  SequenceHandle s2=CreateSequence("S2", "abcdxyzefghijklmn");
+  SequenceHandle s1=CreateSequence("S1",   "abcd---efghijklmn");
+  SequenceHandle s2=CreateSequence("S2",   "abcdxyzefghijklmn");
   AlignmentHandle aln1=CreateAlignment();
   aln1.AddSequence(s1);
   aln1.AddSequence(s2);
@@ -82,4 +82,29 @@ BOOST_AUTO_TEST_CASE(merge_pairwise_alignments_two)
   BOOST_CHECK_EQUAL(seqs[2].GetString(), "abcd--yefghijklmn");
 }
 
+
+BOOST_AUTO_TEST_CASE(merge_pairwise_alignments_three)
+{
+  SequenceHandle ref=CreateSequence("REF", "abcdefghijk");
+  SequenceHandle s1=CreateSequence("S1",   "--abcdefghijk");
+  SequenceHandle s2=CreateSequence("S2",   "xyabcdefghijk");
+  AlignmentHandle aln1=CreateAlignment();
+  aln1.AddSequence(s1);
+  aln1.AddSequence(s2);
+
+  SequenceHandle s3=CreateSequence("S1", "-abcdefghijk");
+  SequenceHandle s4=CreateSequence("S2", "zabcdefghijk");
+
+  AlignmentHandle aln2=CreateAlignment();
+  aln2.AddSequence(s3);
+  aln2.AddSequence(s4);
+  AlignmentList l;
+  l.push_back(aln1);
+  l.push_back(aln2);
+  AlignmentHandle m=alg::MergePairwiseAlignments(l, ref);
+  ConstSequenceList seqs=m.GetSequences();
+  BOOST_CHECK_EQUAL(seqs[0].GetString(), "--abcdefghijk");
+  BOOST_CHECK_EQUAL(seqs[1].GetString(), "xyabcdefghijk");
+  BOOST_CHECK_EQUAL(seqs[2].GetString(), "-zabcdefghijk");
+}
 BOOST_AUTO_TEST_SUITE_END()
