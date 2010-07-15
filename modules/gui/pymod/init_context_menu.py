@@ -176,15 +176,11 @@ class AlignmentContextMenu(QtCore.QObject):
       aln_list = seq.AlignmentList()
       if(ref_seq.IsValid()):
         for res in res_list:
-          print res.alignment.GetSequence(0)
-          print res.alignment.GetSequence(1)
-          print "----------------"
           aln_list.append(res.alignment)
         alignment = alg.MergePairwiseAlignments(aln_list, ref_seq)
         gosty = gui.GostyApp.Instance()
         main_area = gosty.perspective.GetMainArea()
         if self.seq_viewer:
-          main_area.RemoveWidget(self.seq_viewer)
           self.seq_viewer.qobject.close()
         self.seq_viewer = gui.SequenceViewer(True)
         self.seq_viewer.AddAlignment(alignment)
