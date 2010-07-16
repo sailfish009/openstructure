@@ -164,6 +164,22 @@ if options.builder=="RULE_BASED":
   conop.Conopology.Instance().RegisterBuilder(rbb,'rbb')
   conop.Conopology.Instance().SetDefaultBuilder('rbb')
 
+home = os.getenv('HOME') or os.getenv('USERPROFILE')
+_ostrc=os.path.join(home, '.ostrc')
+if os.path.exists(_ostrc):
+  try:
+    exec(open(_ostrc))
+  except Exception, e:
+    print e
+else:
+  rcfile=open(_ostrc,"w")
+  print >> rcfile, '# This python file is parsed by ost and dng at startup'
+  print >> rcfile, '# Its content is made available in the global namespace'
+  print >> rcfile, '# It can be used to define custom variables and functions'
+  print >> rcfile, '# For example:'
+  print >> rcfile, '# IMPORTANT_DIR="path/to/important/dir"'
+  rcfile.close()
+
 PushVerbosityLevel(options.vlevel)
 _InitFrontEnd()
 
