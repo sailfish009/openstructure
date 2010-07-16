@@ -354,10 +354,15 @@ void FileLoader::RunScript(const QString& filename)
   //HackerMode On
   //The following code lines are just temporary
   //TODO create class or function which can load any kind of files and execute scripts
+  pi.RunCommand("_sys_argv_backup=sys.argv");
+  pi.RunCommand("sys.argv=''");
   pi.RunCommand("_dir=os.getcwd()");
   pi.RunCommand("os.chdir('"+QFileInfo(filename).absolutePath()+"')");
   pi.RunCommand("execfile('"+QFileInfo(filename).fileName()+"')");
   pi.RunCommand("os.chdir(_dir)");
+  pi.RunCommand("del(_dir)");
+  pi.RunCommand("sys.argv=_sys_argv_backup");
+  pi.RunCommand("del(_sys_argv_backup)");
   //HackerMode Off
 }
 
