@@ -355,7 +355,7 @@ void FileLoader::RunScript(const QString& filename)
   //The following code lines are just temporary
   //TODO create class or function which can load any kind of files and execute scripts
   pi.RunCommand("_sys_argv_backup=sys.argv");
-  pi.RunCommand("sys.argv=''");
+  pi.RunCommand("sys.argv=list()");
   pi.RunCommand("_dir=os.getcwd()");
   pi.RunCommand("os.chdir('"+QFileInfo(filename).absolutePath()+"')");
   pi.RunCommand("execfile('"+QFileInfo(filename).fileName()+"')");
