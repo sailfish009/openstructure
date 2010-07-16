@@ -75,10 +75,10 @@ def _RunTmAlign(tmalign, tmp_dir):
   model2_filename=os.path.join(tmp_dir, 'model02.pdb')
   if platform.system() == "Windows":
     tmalign_path=settings.Locate('tmalign.exe', explicit_file_name=tmalign)
-    command="\"%s\" %s %s" %(os.path.normpath(tmalign_path), model1_filename, model2_filename)
+    command="\"%s\" \"%s\" \"%s\"" %(os.path.normpath(tmalign_path), model1_filename, model2_filename)
   else:
     tmalign_path=settings.Locate('tmalign', explicit_file_name=tmalign)  
-    command="%s '%s' '%s'" %(tmalign_path, model1_filename, model2_filename)
+    command="\"%s\" \"%s\" \"%s\"" %(tmalign_path, model1_filename, model2_filename)
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   ps.wait()
   lines=ps.stdout.readlines()
@@ -120,10 +120,10 @@ def _RunTmScore(tmscore, tmp_dir):
   model2_filename=os.path.join(tmp_dir, 'model02.pdb')  
   if platform.system() == "Windows":
     tmscore_path=settings.Locate('tmscore.exe', explicit_file_name=tmscore)
-    command="\"%s\" %s %s" %(os.path.normpath(tmscore_path), model1_filename, model2_filename)
+    command="\"%s\" \"%s\" \"%s\"" %(os.path.normpath(tmscore_path), model1_filename, model2_filename)
   else:
     tmscore_path=settings.Locate('tmscore', explicit_file_name=tmscore)
-    command="%s '%s' '%s'" %(tmscore_path, model1_filename, model2_filename)
+    command="\"%s\" \"%s\" \"%s\"" %(tmscore_path, model1_filename, model2_filename)
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   ps.wait()
   lines=ps.stdout.readlines()
