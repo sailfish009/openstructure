@@ -19,6 +19,7 @@
 #ifndef GEOM_VEC2_H
 #define GEOM_VEC2_H
 
+#include <stdexcept>
 #include <cstddef> // for size_t
 #include <ostream>
 #include <vector>
@@ -82,13 +83,18 @@ public:
   //! element access
   Real& operator[](std::size_t indx)
   {
+    if (indx>1) {
+      throw std::out_of_range("Index must be in the range [0-1]");
+    }
     return (&x)[indx];
   }
   
   //! const element access
   const Real& operator[](std::size_t indx) const
   {
-    
+    if (indx>1) {
+      throw std::out_of_range("Index must be in the range [0-1]");
+    }
     return (&x)[indx];
   }
   
