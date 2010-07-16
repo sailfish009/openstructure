@@ -106,6 +106,7 @@ class InitMenuBar(QtCore.QObject):
   def ResetView(self):
     msg_box = QtGui.QMessageBox()
     msg_box.setWindowTitle("Reset the Panels and Widget");
+    msg_box.setIcon(QtGui.QMessageBox.Question)
     msg_box.setText("Do you really want to reset the Panels and Widgets?");
     msg_box.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel);
     msg_box.setDefaultButton(QtGui.QMessageBox.Cancel);
@@ -115,6 +116,7 @@ class InitMenuBar(QtCore.QObject):
       settings.setValue("restore_settings",QtCore.QVariant(False))
       info_box = QtGui.QMessageBox()
       info_box.setStandardButtons(QtGui.QMessageBox.Ok)
+      info_box.setIcon(QtGui.QMessageBox.Information)
       info_box.setWindowTitle("Restart OpenStructure")
       info_box.setText("You must restart OpenStructure for the changes to take effect!");
       info_box.exec_();
