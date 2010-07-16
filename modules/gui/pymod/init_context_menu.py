@@ -160,7 +160,7 @@ class AlignmentContextMenu(QtCore.QObject):
     if show_scores:
       self.__ShowScore(ent_list, res_list)
     if display_alignment:
-      self.__DisplayAlignment(res_list)
+      self.__DisplayAlignment(ent_list, res_list)
     
   def __ShowScore(self, ent_list, res_list):
     if(len(res_list)==1):
@@ -170,13 +170,14 @@ class AlignmentContextMenu(QtCore.QObject):
     elif(len(res_list)>1):
       ShowResultDialog(ent_list, res_list).exec_()
       
-  def __DisplayAlignment(self, res_list):
+  def __DisplayAlignment(self, ent_list, res_list):
     if(len(res_list)>0):
-      ref_seq = seq.CreateSequence("REF",res_list[0].ref_sequence.GetGaplessString())
+      ref_seq = seq.CreateSequence("%s (ref)"%ent_list[0].GetName(),res_list[0].ref_sequence.GetGaplessString())
       aln_list = seq.AlignmentList()
       if(ref_seq.IsValid()):
-        for res in res_list:
-          aln_list.append(res.alignment)
+        for i in range(0, len(res_list)):
+          res_list[i].alignment.SetSequenceName(1,ent_list[i+1].GetName())
+          aln_list.append(res_list[i].alignment)
         alignment = alg.MergePairwiseAlignments(aln_list, ref_seq)
         gosty = gui.GostyApp.Instance()
         main_area = gosty.perspective.GetMainArea()
