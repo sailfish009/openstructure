@@ -169,16 +169,25 @@ bool InfoGroup::do_group_lookup(std::vector<String>::const_iterator& pos,
 } 
 
 bool InfoGroup::do_group_lookup(std::vector<String>::const_iterator& pos,
-                                const std::vector<String>::const_iterator& end,
-                                InfoGroup& subgroup) const
+				const std::vector<String>::const_iterator& end,
+				InfoGroup& subgroup) const
 {
-  InfoGroupList subgroups;
-  if (this->do_group_lookup(pos, end, subgroups)) {
-    subgroup.Swap(subgroups.front());
+  if(pos==end) {
     return true;
   }
+  if(impl_->HasSub(*pos)) {
+    InfoGroup subgrp(root_,impl_->GetSub(*pos));
+    // remember last valid group
+    subgroup = subgrp;
+    ++pos;
+    if(pos==end) {
+      return true;
+    } else {
+      return subgrp.do_group_lookup(pos,end,subgroup);
+    }
+  }
   return false;
-}
+} 
 
 bool InfoGroup::HasGroup(const InfoPath& path, bool use_defaults) const
 {
@@ -210,6 +219,7 @@ InfoGroup InfoGroup::RetrieveGroup(const InfoPath& path, bool use_defaults)
     return GetGroup(path);
   } else {
     std::vector<String> plist=path.GetList();
+    if(plist.empty()) return *this;
     InfoGroup last_group(*this);
     std::vector<String>::const_iterator pos=plist.begin();
     bool ret=do_group_lookup(pos,plist.end(),last_group);
