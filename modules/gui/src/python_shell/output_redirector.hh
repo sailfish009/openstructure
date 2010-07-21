@@ -39,6 +39,7 @@ Q_OBJECT
 public:
   OutputRedirector();
   void Write(const String& str);
+public slots:
   void Flush();
 signals:
   void OnOutput(const QString& output);

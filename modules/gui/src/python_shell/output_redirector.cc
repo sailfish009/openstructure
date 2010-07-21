@@ -22,6 +22,7 @@
   Author: Andreas Schenk
 */
 
+#include <QTimer>
 #include "output_redirector.hh"
 
 
@@ -49,11 +50,15 @@ void OutputRedirector::Write( String const& str )
   }else{
     buffer_+=QString::fromStdString(str);
     timer_.start();
+    QTimer::singleShot(0, this, SLOT(Flush()));
   }
 }
 
 void OutputRedirector::Flush()
 {
+  if(! timer_.isValid()){
+    return;
+  }
   timer_=QTime();
   QString output = buffer_;
   buffer_="";
