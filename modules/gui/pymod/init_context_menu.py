@@ -125,10 +125,17 @@ class AlignmentContextMenu(QtCore.QObject):
 
   def __init__(self, context_menu):
     try:
-      if platform.system() == "Windows":
-        settings.Locate("tmalign.exe")
-      else:
-        settings.Locate("tmalign")
+      try: # workaround for interrupted system call bug on OSX
+        if platform.system() == "Windows":
+          settings_name="tmalign.exe"
+        else:
+          settings_name="tmalign"
+      except IOError:
+        # if platform.system() fails with an IOError we are most likely on a buggy mac an therefore
+        # use "tmalign"
+        settings_name="tmalign"
+
+      settings.Locate(settings_name)
       QtCore.QObject.__init__(self, context_menu.qobject)
 
       self.action = QtGui.QAction("Align", self)
