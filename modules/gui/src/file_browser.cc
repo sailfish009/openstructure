@@ -55,7 +55,11 @@
 namespace ost { namespace gui {
 
 FileBrowser::FileBrowser(QWidget* parent):
- Widget(NULL, parent)
+ Widget(NULL, parent),
+ menu_(new QComboBox(this)),
+ model_(new QDirModel),
+ view_(new QListView(this)),
+ action_list_()
 {
   QString path=QDir::currentPath();
   QDir dir(QCoreApplication::applicationDirPath());
@@ -90,23 +94,24 @@ FileBrowser::FileBrowser(QWidget* parent):
 }
 
 FileBrowser::FileBrowser(const QString& path, QWidget* parent):
- Widget(NULL, parent)
+ Widget(NULL, parent),
+ menu_(new QComboBox(this)),
+ model_(new QDirModel),
+ view_(new QListView(this)),
+ action_list_()
 {
   this->Init(path);
 }
 
 void FileBrowser::Init(const QString& path)
 {
-  model_=new QDirModel;
   model_->setSorting(QDir::Name|QDir::DirsFirst|QDir::IgnoreCase);
 
-  view_=new QListView(this);
   view_->setModel(model_);
   view_->setRootIndex(model_->index(path));
   view_->setAttribute(Qt::WA_MacShowFocusRect, false);
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(view_,SIGNAL(customContextMenuRequested(const QPoint&)),this,SLOT(ShowContextMenu(const QPoint&)));
-  menu_= new QComboBox(this);
   UpdateMenu(path);
 
   QVBoxLayout* l=new QVBoxLayout(this);
