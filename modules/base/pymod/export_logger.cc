@@ -39,6 +39,16 @@ void pop_verb()
   Logger::Instance().PopVerbosityLevel();
 }
 
+void pop_verb_file() 
+{
+  Logger::Instance().PopFile();
+}
+
+void push_verb_file(const String& filename) 
+{
+  Logger::Instance().PushFile(filename);
+}
+
 void log_error(const String& m) {LOGN_ERROR(m);}
 void log_message(const String& m) {LOGN_MESSAGE(m);}
 void log_verbose(const String& m) {LOGN_VERBOSE(m);}
@@ -51,6 +61,8 @@ void export_Logger()
   
   def("PushVerbosityLevel",push_verb);
   def("PopVerbosityLevel",pop_verb);
+  def("PushVerbosityFile",push_verb_file);
+  def("PopVerbosityFile",pop_verb_file);
 
   def("LogError",log_error);
   def("LogMessage",log_message);

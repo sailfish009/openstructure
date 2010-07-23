@@ -26,6 +26,8 @@
 
 namespace ost {
 
+typedef std::stack<std::ostream*> OStreamStack;
+
   // singleton
 class DLLEXPORT_OST_BASE Logger {
 public:
@@ -40,6 +42,8 @@ public:
   
   void PushVerbosityLevel(int level);
   void PopVerbosityLevel();
+  void PushFile(const String& filename);
+  void PopFile();
 
   std::ostream& operator()(enum LogLevel);
 
@@ -51,11 +55,13 @@ protected:
   Logger();
   Logger(const Logger&);
   Logger& operator=(const Logger&);
-
+  
 private:
   int level_;
   std::stack<int> level_stack_;
   std::ostream null_;
+  std::ostream stream_;
+  OStreamStack ostream_stack_;
 };
 
 #define PUSH_VERBOSITY(n) ::ost::Logger::Instance().PushVerbosityLevel(n)

@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <iostream>
+#include <fstream>
 
 
 #include <ost/log.hh>
@@ -45,15 +46,24 @@ Logger& Logger::Instance()
 Logger::Logger():
   level_(0),
   level_stack_(),
-  null_(new DevNull())
+  null_(new DevNull()),
+  stream_(0),
+  ostream_stack_()
 {
+  ostream_stack_.push(new std::ostream(std::cerr.rdbuf()));
+  stream_.rdbuf(ostream_stack_.top()->rdbuf());
 }
 
 Logger::Logger(const Logger&):
   level_(0),
   level_stack_(),
-  null_(0)
-{}
+  null_(0),
+  stream_(0),
+  ostream_stack_()
+{
+  ostream_stack_.push(new std::ostream(std::cerr.rdbuf()));
+  stream_.rdbuf(ostream_stack_.top()->rdbuf());
+}
 
 Logger& Logger::operator=(const Logger&)
 {
@@ -81,11 +91,25 @@ void Logger::PopVerbosityLevel()
 std::ostream& Logger::operator()(enum LogLevel l)
 {
   if(l<=level_) {
-    return std::cerr;
+    return stream_;
   }
   return null_;
 }
 
+void Logger::PushFile(const String& fn)
+{
+  ostream_stack_.push(new std::ofstream(fn.c_str()));
+  stream_.rdbuf(ostream_stack_.top()->rdbuf());
+}
+
+void Logger::PopFile()
+{
+  if(ostream_stack_.size()>1) {
+    delete ostream_stack_.top();
+    ostream_stack_.pop();
+    stream_.rdbuf(ostream_stack_.top()->rdbuf());
+  }
+}
 
 
 } // ns
