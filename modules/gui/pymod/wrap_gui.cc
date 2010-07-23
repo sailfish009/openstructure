@@ -22,7 +22,6 @@
 #include <QString>
 #include <ost/config.hh>
 
-
 using namespace boost::python;
 
 void export_AlignmentView();
