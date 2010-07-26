@@ -95,7 +95,10 @@ Real Det(const Mat3& m)
 
 Real Angle(const Vec3& v1, const Vec3& v2)
 {
-  return std::acos(Dot(Normalize(v1), Normalize(v2)));
+  Real dot_product = Dot(Normalize(v1), Normalize(v2));
+  dot_product=std::max(static_cast<Real>(-1.0),dot_product);
+  dot_product=std::min(static_cast<Real>(1.0),dot_product);
+  return std::acos(dot_product);
 }
 
 Mat3 EulerTransformation(Real theta, Real phi, Real xi)
