@@ -63,7 +63,7 @@ void info_group_apply2b(InfoGroup* g, InfoConstVisitor& v, bool b)
   g->Apply(v,b);
 }
 
-void info_group_remove1(InfoGroup* g, InfoPath& path )
+void info_group_remove1(InfoGroup* g, const String& path )
 {
   g->Remove(path);
 }
@@ -72,7 +72,7 @@ void info_group_remove2(InfoGroup* g, InfoGroup& group )
 {
   g->Remove(group);
 }
-void info_group_remove3(InfoGroup* g, InfoPath& path, bool use_defaults )
+void info_group_remove3(InfoGroup* g, const String& path, bool use_defaults )
 {
   g->Remove(path,use_defaults);
 }
