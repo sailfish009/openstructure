@@ -22,7 +22,11 @@
 # convenience wrapper for non-gui openstructure interface 'ost'
 #
 # Self detect important directories
-SCRIPT_NAME=$0
+if [ -h "$0" ] ; then
+  SCRIPT_NAME=`readlink "$0"`
+else
+  SCRIPT_NAME="$0"
+fi
 BIN_DIR=`dirname "$SCRIPT_NAME"`
 export DNG_ROOT=`cd "$BIN_DIR/..";pwd`
 export PATH="$DNG_ROOT/bin:$PATH"
