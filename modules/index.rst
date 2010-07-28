@@ -24,7 +24,7 @@ OpenStructure documentation
 For Starters
 --------------------------------------------------------------------------------
 
-**Installation**: :doc:`install`
+**Installation**: `install from binary <http://www.openstructure.org/download/>`_ | :doc:`install from source <install>`
 
 **Tutorial Style**: :doc:`introduction <intro>` | :doc:`molecules intro <intro-01>` | :doc:`images intro <intro-02>` | :doc:`graphics intro <intro-03>`
 
@@ -43,7 +43,7 @@ Molecules
 
 
 
-Images
+Density Maps and Images
 --------------------------------------------------------------------------------
 
 **Overview**: :doc:`images intro <intro-02>` | :doc:`img module <img/base/img>` | :doc:`img.alg module <img/alg/alg>`

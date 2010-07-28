@@ -1,7 +1,7 @@
-Installing OpenStructure
+Installing OpenStructure From Source
 ================================================================================
 
-This document describes how to install OpenStructure from source. If you are not planning to develop code for OpenStructure, you might be better off with one of the binaries available for download.
+This document describes how to install OpenStructure from source. If you are mainly insterested in using OpenStructure and are not planning to modify the code of OpenStructure itself, please use one of the binaries `available for download <http://openstructure.org/download/>`_.
 
 Installing the Dependencies
 --------------------------------------------------------------------------------

@@ -7,7 +7,7 @@ Loading and inspecting a protein structure
 --------------------------------------------------------------------------------
 
 The code to load and save structures is not directly part of the mol module, but rather lives in a module dedicated to input and output of any kind of data: The 
-:mod:`~ost.io` module. We will be using functions if this module to load 
+:mod:`~ost.io` module. We will be using functions of this module to load 
 structures. 
 
 One of the most commonly used file formats for macromolecular structures are PDB 
