@@ -21,7 +21,7 @@
 #include <boost/python.hpp>
 #include <QString>
 #include <ost/config.hh>
-
+#include <ost/gui/admin.hh>
 using namespace boost::python;
 
 void export_AlignmentView();
@@ -97,6 +97,7 @@ namespace {
 
 
 }
+using namespace ost::gui;
 
 BOOST_PYTHON_MODULE(_gui)
 {
@@ -131,4 +132,10 @@ BOOST_PYTHON_MODULE(_gui)
   export_overlay();
   export_overlay_manager();
   #endif
+  
+  class_<AdminRights>("AdminRights", init<>())
+    .def("Acquire", &AdminRights::Acquire)
+    .def("Release", &AdminRights::Release)
+    .def("CreateLink", &AdminRights::CreateLink)
+  ;
 }

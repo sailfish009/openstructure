@@ -28,7 +28,7 @@ from ost.gui import FileLoader
 from ost.gui.scene.file_loader import GenericLoader
 from ost.gui.scene.loader_manager_widget import LoaderManagerWidget
 from ost.gui.init_splash import _InitSplash
-
+from ost.gui.dng import termuse
 class InitMenuBar(QtCore.QObject):
   def __init__(self, menu_bar=None):
     QtCore.QObject.__init__(self, menu_bar)
@@ -50,6 +50,11 @@ class InitMenuBar(QtCore.QObject):
     webpage.setShortcut('Ctrl+D')
     self.connect(webpage, QtCore.SIGNAL('triggered()'), self.OpenDocs)
     help.addAction(webpage)
+    if sys.platform=='darwin':
+      install_ctl=QtGui.QAction('Install Command Line Tool', self)    
+      self.connect(install_ctl, QtCore.SIGNAL('triggered()'), 
+                   termuse.InstallTerminalPrograms)
+      help.addAction(install_ctl)
     about = QtGui.QAction('&About', self)
     about.setStatusTip('About')
     about.setShortcut('Ctrl+A')

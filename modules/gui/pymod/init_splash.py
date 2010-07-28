@@ -22,6 +22,6 @@ class SplashDialog(QtGui.QDialog):
     
 def _InitSplash():
   splash = SplashDialog(gui.GostyApp.Instance().perspective.main_area.qobject)
-  splash.showNormal()
+  splash.exec_()
 
   #QtCore.QTimer.singleShot(30000, splash.close);

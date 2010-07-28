@@ -18,7 +18,7 @@ from ost.gui.init_menubar import _InitMenuBar
 from ost.gui.init_spacenav import _InitSpaceNav
 from ost.gui.init_context_menu import _InitContextMenu
 from ost.gui.init_splash import _InitSplash
-
+from ost.gui.dng import termuse
 def _InitRuleBasedBuilder():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
   if os.path.exists(compound_lib_path):
@@ -56,6 +56,7 @@ def _InitPanels(app):
     return False
   return True
 
+
 def _InitFrontEnd():
   _CheckRestore()
   app=gui.GostyApp.Instance()
@@ -64,6 +65,11 @@ def _InitFrontEnd():
   _InitMenuBar(app)
   if not _InitPanels(app):
     _InitSplash()
+  if sys.platform=='darwin':
+    settings=QtCore.QSettings()    
+    if not settings.value('install/clt', False).toBool():
+      settings.setValue('install/clt', QtCore.QVariant(True))
+      termuse.InstallTerminalPrograms()
   _InitSpaceNav(app)
   _InitContextMenu(app)
   main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win, int(QtCore.Qt.WindowMaximized))
@@ -72,6 +78,7 @@ def _InitFrontEnd():
   for module_name in additional_modules:
     __import__(module_name)
   app.ProcessEvents()
+
   _InitInspector(app)
   
 def _load_files():

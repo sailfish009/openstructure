@@ -169,6 +169,7 @@ gl_canvas.hh
 gl_win.hh
 scene_menu.hh
 gosty_app.hh
+admin.hh
 main.hh
 main_area.hh
 module_config.hh
@@ -204,6 +205,7 @@ main_window.cc
 gl_win.cc
 scene_menu.cc
 widget.cc
+admin.cc
 widget_pool.cc
 remote_site_loader.cc
 sequence_viewer/align_properties_painter.cc
@@ -458,7 +460,9 @@ if (ENABLE_SPNAV)
       input/spnav_input.hh
   )
 endif()
-
+if (APPLE)
+  set(ADDITIONAL_LIBRARIES "-framework Security")
+endif()
 set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTNETWORK 1)
 include(${QT_USE_FILE})
@@ -474,7 +478,13 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
                ${OST_GUI_DATA_VIEWER_HEADERS}
                ${OST_GUI_HEADERS}
        DEPENDS_ON gfx io mol_alg seq_alg
-       LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES} ${SPNAV_LIBRARIES})
+       LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES}
+            ${SPNAV_LIBRARIES})
+            
+if (ADDITIONAL_LIBRARIES)
+  target_link_libraries(ost_gui "${ADDITIONAL_LIBRARIES}")
+endif()
+
 include_directories(${PYTHON_INCLUDE_PATH})
 qt4_add_resources(OST_QT_RESOURCE dngr.qrc)
 qt4_wrap_cpp(OST_GOSTY_MOC "gosty.hh")

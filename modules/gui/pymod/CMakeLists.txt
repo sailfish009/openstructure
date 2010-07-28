@@ -84,8 +84,14 @@ set(OST_GUI_PYMOD_MODULES
   init_splash.py
 )
 
+set(OST_GUI_PYMOD_DNG_MODULES
+  __init__.py
+  termuse.py
+)
+
 pymod(NAME gui CPP ${OST_GUI_PYMOD_SOURCES} 
       PY ${OST_GUI_SCENE_PYMOD_MODULES} IN_DIR scene
+         ${OST_GUI_PYMOD_DNG_MODULES} IN_DIR dng
          ${OST_GUI_PYMOD_MODULES})
 
 set(PRESET_FILES
