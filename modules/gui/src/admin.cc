@@ -61,10 +61,10 @@ void AdminRights::Release()
 
 void AdminRights::CreateLink(const String& from, const String& to)
 {
-  static const char* minus_s="-s";
+  static const char* minus_sf="-sf";
   // const_casts are gross, but at least that way we keep gcc happy
   char* const args[]={
-    const_cast<char*>(minus_s),
+    const_cast<char*>(minus_sf),
     const_cast<char*>(from.c_str()),
     const_cast<char*>(to.c_str()),
     NULL
