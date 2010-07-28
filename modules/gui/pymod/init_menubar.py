@@ -92,7 +92,7 @@ class InitMenuBar(QtCore.QObject):
     self.loader_manager.exec_()
   
   def OpenDocs(self):
-    QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://www.openstructure.org/docs/index.html"))
+    QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://www.openstructure.org/docs/"))
     
   def About(self):
     _InitSplash()
