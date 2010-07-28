@@ -45,8 +45,6 @@ bool AdminRights::Acquire()
   AuthorizationItem   kActionRight = { "", 0, 0, 0 };
   AuthorizationRights kRights      = { 1, &kActionRight };
 
-  assert(gAuthorization != NULL);
-
   // Request the application-specific right.
   return noErr==AuthorizationCopyRights(auth_, &kRights, NULL, kFlags, NULL);
 }
