@@ -207,7 +207,7 @@ find_package(Qt4 4.5.0 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Eigen 2.0.0 REQUIRED)
-find_package(Python 2.2.1 REQUIRED)
+find_package(Python 2.4 REQUIRED)
 
 if (ENABLE_IMG)
   find_package(FFTW REQUIRED)
