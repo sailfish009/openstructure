@@ -28,6 +28,7 @@ void export_AlignmentView();
 void export_Tool();
 void export_Plot();
 void export_GLWin();
+void export_InfoWidget();
 void export_Gosty();
 void export_PyShell();
 void export_SceneWin();
@@ -109,6 +110,7 @@ BOOST_PYTHON_MODULE(_gui)
   export_AlignmentView();
   export_Tool();
   export_Plot();
+  export_InfoWidget();
   export_GLWin();
   export_MainArea();
   export_PyShell();

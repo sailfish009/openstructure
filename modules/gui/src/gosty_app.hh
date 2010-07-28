@@ -29,10 +29,12 @@
 
 #include <ost/config.hh>
 #include <ost/gui/module_config.hh>
-#include <ost/gui/scene_win/scene_win.hh>
-#include <ost/gui/sequence_viewer/sequence_viewer.hh>
 #include <ost/gui/main.hh>
 #include <ost/gui/widget_geom_handler.hh>
+#include <ost/gui/scene_win/scene_win.hh>
+#include <ost/gui/sequence_viewer/sequence_viewer.hh>
+#include <ost/gui/info_widget/info_widget.hh>
+
 #if OST_IMG_ENABLED
   #include <ost/gui/data_viewer/data_viewer.hh>
 #endif
@@ -99,6 +101,12 @@ public:
   /// All subsequent calls will return the same SceneWin instance.  
   ToolOptionsWin* GetToolOptionsWin();
   
+  /// \brief get info widget
+  ///
+  /// The InfoWidget is initialized when this method is first called.
+  /// All subsequent calls will return the same InfoWidget instance.
+  InfoWidget* GetInfoWidget();
+
 #if OST_IMG_ENABLED
   /// \brief create new DataViewer
   /// 
@@ -144,18 +152,16 @@ public slots:
 private:  
   GostyApp();  
   PythonShell*      py_shell_;
-  QWidget*          w_py_shell_;
                     
   GLWin*            gl_win_;
-  QWidget*          w_gl_win_;
                     
   SceneWin*         scene_win_;
-  QWidget*          w_scene_win_;
+
+  InfoWidget*       info_widget_;
 
   SequenceViewer* seq_viewer_;
 
   ToolOptionsWin*   tool_options_win_;
-  QWidget*          w_tool_options_;  
   GostyMainWindow*  main_;
 
   Perspective*      perspective_;

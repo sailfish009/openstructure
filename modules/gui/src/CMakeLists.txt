@@ -91,6 +91,9 @@ scene_win.hh
 scene_win_model.hh
 )
 
+set(OST_GUI_INFO_WIDGET_HEADERS
+info_widget.hh
+)
 
 if (ENABLE_SPNAV)
 set(OST_GUI_INPUT_HEADERS
@@ -208,6 +211,7 @@ widget.cc
 admin.cc
 widget_pool.cc
 remote_site_loader.cc
+info_widget/info_widget.cc
 sequence_viewer/align_properties_painter.cc
 sequence_viewer/base_row.cc
 sequence_viewer/background_painter.cc
@@ -341,6 +345,7 @@ scene_selection.hh
 widget.hh
 widget_geom_handler.hh
 widget_pool.hh
+info_widget/info_widget.hh
 sequence_viewer/align_properties_painter.hh
 sequence_viewer/background_painter.hh
 sequence_viewer/base_row.hh
@@ -474,6 +479,7 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
                ${OST_GUI_PYTHON_SHELL_HEADERS} IN_DIR python_shell
                ${OST_GUI_PANEL_BAR_HEADERS} IN_DIR panels
                ${OST_GUI_SCENE_WIN_HEADERS} IN_DIR scene_win
+               ${OST_GUI_INFO_WIDGET_HEADERS} IN_DIR info_widget
                ${OST_GUI_INPUT_HEADERS}
                ${OST_GUI_DATA_VIEWER_HEADERS}
                ${OST_GUI_HEADERS}

@@ -43,9 +43,8 @@ GostyApp* GostyApp::app_=NULL;
 
 
 GostyApp::GostyApp():
-  py_shell_(NULL), w_py_shell_(NULL), gl_win_(NULL), w_gl_win_(NULL),
-  scene_win_(NULL), w_scene_win_(NULL), seq_viewer_(NULL), tool_options_win_(NULL),
-  w_tool_options_(NULL), main_(new GostyMainWindow), 
+  py_shell_(NULL), gl_win_(NULL), scene_win_(NULL), info_widget_(NULL), seq_viewer_(NULL),
+  tool_options_win_(NULL), main_(new GostyMainWindow),
   perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>())
 {
   assert(GostyApp::app_==NULL);
@@ -138,6 +137,14 @@ Perspective* GostyApp::GetPerspective()
     perspective_=new Perspective(main_);
   }
   return perspective_;
+}
+
+InfoWidget* GostyApp::GetInfoWidget()
+{
+  if (info_widget_==NULL) {
+    info_widget_=new InfoWidget(main_);
+  }
+  return info_widget_;
 }
 
 void GostyApp::AddWidgetToApp(const QString& ident, QWidget* widget)
