@@ -252,7 +252,7 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
     framework_path=os.path.join(outdir, 'lib/Python.framework')
     nonstd_python=True
     copied_py_framework=True
-  if glob.glob(os.path.join(outdir, 'lib', 'libpython*'))>0:
+  if len(glob.glob(os.path.join(outdir, 'lib', 'libpython*')))>0:
     non_std_python=True
   if non_std_python:
     print 'looks like we are using a non-standard python.'

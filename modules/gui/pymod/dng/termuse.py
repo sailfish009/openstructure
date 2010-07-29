@@ -25,7 +25,8 @@ class TerminalUsageDialog(QDialog):
     self.path_combo=QComboBox()
     self.path_combo.setFixedWidth(150)
     for path in os.getenv('PATH').split(':'):
-      if os.path.exists(os.path.expanduser(path)):
+      exp_path=os.path.expanduser(path)
+      if os.path.exists(exp_path) and exp_path.find('DNG.app')==-1:
         self.path_combo.addItem(path)
     l2.addWidget(self.path_combo)
     l.addLayout(l2)

@@ -43,31 +43,43 @@ def _WriteInfoPList(bundle):
     info_plist.write(INFO_PLIST)
     info_plist.close()
 
-def _WriteScript(bundle):
-  script="""#!/bin/sh
-  if [ -e $HOME/Library/OpenStructure/bin/dng ]; then
-    $HOME/Library/OpenStructure/bin/dng
-  else
-    /Library/OpenStructure/bin/dng
-  fi
-  """
+def _WriteScript(bundle, standalone):
+  if standalone:
+    script="""#!/bin/sh
+if [ -h "$0" ] ; then
+  SCRIPT_NAME=`readlink "$0"`
+else
+  SCRIPT_NAME="$0"
+fi
+`dirname "$SCRIPT_NAME"`/../bin/dng
+    """
+  else:
+    script="""#!/bin/sh
+if [ -e $HOME/Library/OpenStructure/bin/dng ]; then
+  $HOME/Library/OpenStructure/bin/dng
+else
+  /Library/OpenStructure/bin/dng
+fi
+    """
   bin_path=os.path.join('%s.app' % bundle, 'Contents/MacOS/dng')
   bin=open(bin_path, 'w+')
   bin.write(script)
   bin.close()
   os.system('chmod a+x %s' % bin_path)
 
-def _CreateBundleSkeleton(bundle):
+def _CreateBundleSkeleton(bundle, standalone):
   bin_path=os.path.join('%s.app' % bundle, 'Contents/MacOS')
   if not os.path.exists(bin_path):
     os.makedirs(bin_path)
   _WritePkgInfo(bundle)
   _WriteInfoPList(bundle)
-  _WriteScript(bundle)
+  _WriteScript(bundle, standalone)
   res_dir='%s.app/Contents/Resources' % bundle
   if not os.path.exists(res_dir):
     os.makedirs(res_dir)  
   copy('../../graphics/icon.icns', res_dir)
 
-def create_bundle(bundle_name):
-  _CreateBundleSkeleton(bundle_name)
+def create_bundle(bundle_name, standalone=False):
+  _CreateBundleSkeleton(bundle_name, standalone)
+  if standalone:
+    os.system('mv standalone/* DNG.app/Contents/')
