@@ -30,24 +30,24 @@
 #include <ost/gui/gosty_app.hh>
 
 #include "log_reader.hh"
-#include "info_widget.hh"
+#include "message_widget.hh"
 
 namespace ost {namespace gui {
 
-class InfoWidgetFactory: public WidgetFactory {
+class MessageWidgetFactory: public WidgetFactory {
 public:
-  InfoWidgetFactory() :
-    WidgetFactory("ost::gui::InfoWidget", "Info Widget") {
+  MessageWidgetFactory() :
+    WidgetFactory("ost::gui::MessageWidget", "Messages") {
   }
 
   virtual Widget* Create(QWidget* parent) {
-    return GostyApp::Instance()->GetInfoWidget();
+    return GostyApp::Instance()->GetMessageWidget();
   }
 };
 
-OST_REGISTER_WIDGET(InfoWidget, InfoWidgetFactory);
+OST_REGISTER_WIDGET(MessageWidget, MessageWidgetFactory);
 
-InfoWidget::InfoWidget(QWidget* parent) :
+MessageWidget::MessageWidget(QWidget* parent) :
   Widget(NULL, parent), model_(new QStandardItemModel(this)), view_(
       new QListView(this)) {
   QVBoxLayout* layout = new QVBoxLayout(this);
@@ -79,11 +79,11 @@ InfoWidget::InfoWidget(QWidget* parent) :
   new LogReader(this);
 }
 
-void InfoWidget::Update() {
+void MessageWidget::Update() {
   view_->viewport()->update();
 }
 
-void InfoWidget::LogMessage(const QString& message, QMessageBox::Icon icon) {
+void MessageWidget::LogMessage(const QString& message, QMessageBox::Icon icon) {
   QPixmap pix_icon = this->GetIcon(icon, this);
   QStandardItem* item = new QStandardItem();
   item->setText(message);
@@ -92,11 +92,11 @@ void InfoWidget::LogMessage(const QString& message, QMessageBox::Icon icon) {
   this->model_->appendRow(item);
 }
 
-void InfoWidget::LogMessage(QStandardItem* item) {
+void MessageWidget::LogMessage(QStandardItem* item) {
   this->model_->appendRow(item);
 }
 
-void InfoWidget::LogMessage(const QString& message, QIcon icon) {
+void MessageWidget::LogMessage(const QString& message, QIcon icon) {
   QStandardItem* item = new QStandardItem();
   item->setText(message);
   item->setIcon(icon);
@@ -104,7 +104,7 @@ void InfoWidget::LogMessage(const QString& message, QIcon icon) {
   this->model_->appendRow(item);
 }
 
-QPixmap InfoWidget::GetIcon(QMessageBox::Icon icon, QWidget* widget) {
+QPixmap MessageWidget::GetIcon(QMessageBox::Icon icon, QWidget* widget) {
   QStyle *style = widget ? widget->style() : QApplication::style();
   int icon_size = style->pixelMetric(QStyle::PM_MessageBoxIconSize, 0, widget);
   QIcon tmp_icon;
@@ -128,11 +128,11 @@ QPixmap InfoWidget::GetIcon(QMessageBox::Icon icon, QWidget* widget) {
   return QPixmap();
 }
 
-void InfoWidget::Clear() {
+void MessageWidget::Clear() {
   this->model_->clear();
 }
 
-void InfoWidget::RemoveSelected() {
+void MessageWidget::RemoveSelected() {
   QItemSelectionModel* selection_model = this->view_->selectionModel();
   const QItemSelection& item_selection = selection_model->selection();
   const QModelIndexList& model_indexes = item_selection.indexes();
@@ -141,11 +141,11 @@ void InfoWidget::RemoveSelected() {
   }
 }
 
-ActionList InfoWidget::GetActions() {
+ActionList MessageWidget::GetActions() {
   return this->actions_;
 }
 
-void InfoWidget::ContextMenuRequested(const QPoint& pos) {
+void MessageWidget::ContextMenuRequested(const QPoint& pos) {
 
   QAction* remove_selected_action = new QAction("Remove", this);
   remove_selected_action->setToolTip("Remove this item");
@@ -159,7 +159,7 @@ void InfoWidget::ContextMenuRequested(const QPoint& pos) {
   }
 }
 
-InfoWidget::~InfoWidget() {
+MessageWidget::~MessageWidget() {
 }
 
 }

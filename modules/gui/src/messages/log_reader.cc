@@ -21,7 +21,7 @@
  */
 #include <ost/log.hh>
 
-#include "info_widget.hh"
+#include "message_widget.hh"
 #include "log_reader.hh"
 
 namespace ost { namespace gui {
@@ -35,15 +35,15 @@ LogReader::LogReader(QObject* parent) :
 
 void LogReader::LogMessage(const String& message, int severity){
   if(this->parent()){
-    if(InfoWidget* info_widget = qobject_cast<InfoWidget*>(this->parent())){
+    if(MessageWidget* message_widget = qobject_cast<MessageWidget*>(this->parent())){
       QString q_message(message.c_str());
       if(q_message.endsWith("\n")){
         q_message.remove(q_message.size()-1,q_message.size()-1);
         if(!log_cache_.contains(severity)){
-          info_widget->LogMessage(q_message,GetIconForSeverity(severity));
+          message_widget->LogMessage(q_message,GetIconForSeverity(severity));
         }
         else{
-          info_widget->LogMessage(log_cache_[severity]+q_message,GetIconForSeverity(severity));
+          message_widget->LogMessage(log_cache_[severity]+q_message,GetIconForSeverity(severity));
           log_cache_.remove(severity);
         }
       }

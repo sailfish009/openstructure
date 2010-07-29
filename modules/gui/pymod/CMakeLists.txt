@@ -1,7 +1,7 @@
 set(OST_GUI_PYMOD_SOURCES
   wrap_gui.cc
   export_alignment_view.cc
-  export_info_widget.cc  
+  export_message_widget.cc  
   export_gl_win.cc
   export_plot.cc
   export_tool.cc

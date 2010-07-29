@@ -21,7 +21,7 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
-#include <ost/gui/info_widget/info_widget.hh>
+#include <ost/gui/messages/message_widget.hh>
 
 #include "sip_handler.hh"
 
@@ -31,27 +31,27 @@ using namespace ost::gui;
 
 namespace {
 
-void log_message_a(InfoWidget* info_widget, const QString& message, QMessageBox::Icon icon = QMessageBox::Information)
+void log_message_a(MessageWidget* message_widget, const QString& message, QMessageBox::Icon icon = QMessageBox::Information)
 {
-  info_widget->LogMessage(message,icon);
+  message_widget->LogMessage(message,icon);
 }
 
-void log_message_b(InfoWidget * info_widget, object py_object)
+void log_message_b(MessageWidget * message_widget, object py_object)
 {
   if(py_object.ptr() != Py_None){
     if(PyObject_IsInstance(py_object.ptr(), (PyObject*)&PyString_Type)){
     String message = extract < std::string > (py_object);
-    info_widget->LogMessage(QString(message.c_str()));
+    message_widget->LogMessage(QString(message.c_str()));
     }
     else if(QStandardItem* item = get_cpp_qobject<QStandardItem>(py_object)){
-      info_widget->LogMessage(item);
+      message_widget->LogMessage(item);
     }
   }
 }
 
 }
 
-void export_InfoWidget()
+void export_MessageWidget()
 {
   enum_<QMessageBox::Icon>("MessageIcon")
       .value("QUESTION", QMessageBox::Question)
@@ -61,15 +61,15 @@ void export_InfoWidget()
       .export_values()
       ;
 
-  class_<InfoWidget, boost::noncopyable>("InfoWidget", no_init)
-     .def("Show", &InfoWidget::show)
-     .def("Hide", &InfoWidget::hide)
-     .def("Clear", &InfoWidget::Clear)
-     .def("RemoveSelected", &InfoWidget::RemoveSelected)
+  class_<MessageWidget, boost::noncopyable>("MessageWidget", no_init)
+     .def("Show", &MessageWidget::show)
+     .def("Hide", &MessageWidget::hide)
+     .def("Clear", &MessageWidget::Clear)
+     .def("RemoveSelected", &MessageWidget::RemoveSelected)
      .def("LogMessage", &log_message_a)
      .def("LogMessage", &log_message_b)
-     .def("GetQObject",&get_py_qobject<InfoWidget>)
-     .add_property("qobject", &get_py_qobject<InfoWidget>)
+     .def("GetQObject",&get_py_qobject<MessageWidget>)
+     .add_property("qobject", &get_py_qobject<MessageWidget>)
    ;
 }
 

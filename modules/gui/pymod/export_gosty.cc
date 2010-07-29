@@ -99,9 +99,9 @@ void export_Gosty()
         return_value_policy<reference_existing_object>())
     .add_property("tool_options_win", make_function(&GostyApp::GetToolOptionsWin,
         return_value_policy<reference_existing_object>()))
-    .def("GetInfoWidget", &GostyApp::GetInfoWidget,
+    .def("GetMessageWidget", &GostyApp::GetMessageWidget,
         return_value_policy<reference_existing_object>())
-    .add_property("info_widget", make_function(&GostyApp::GetInfoWidget,
+    .add_property("message_widget", make_function(&GostyApp::GetMessageWidget,
         return_value_policy<reference_existing_object>()))
      #if OST_IMG_ENABLED
     .def("CreateDataViewer", &app_create_data_viewer1,return_value_policy<reference_existing_object>())

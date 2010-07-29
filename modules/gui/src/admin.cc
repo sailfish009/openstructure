@@ -85,7 +85,7 @@ AdminRights::~AdminRights()
 { }
 
 bool AdminRights::Acquire()
-{ }
+{ return false; }
 
 void AdminRights::Release()
 { }

@@ -45,7 +45,7 @@ def _InitPanels(app):
   panels.AddWidgetToPool('ost.gui.RemoteLoader', -1)
   panels.AddWidgetToPool('ost.gui.SceneWin', 1)
   panels.AddWidgetToPool('ost.gui.SequenceViewer', 1)
-  panels.AddWidgetToPool('ost.gui.InfoWidget', 1)
+  panels.AddWidgetToPool('ost.gui.MessageWidget', 1)
   if not panels.Restore("ui/perspective/panels"):
     panels.AddWidget(gui.PanelPosition.LEFT_PANEL, app.scene_win)
     panels.AddWidgetByName(gui.PanelPosition.LEFT_PANEL, 

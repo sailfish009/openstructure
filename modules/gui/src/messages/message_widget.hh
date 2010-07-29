@@ -16,15 +16,14 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_INFO_WIDGET_LOG_READER_HH
-#define OST_GUI_INFO_WIDGET_LOG_READER_HH
+#ifndef OST_GUI_MESSAGES_MESSAGE_WIDGET_HH
+#define OST_GUI_MESSAGES_MESSAGE_WIDGET_HH
 
-#include <QObject>
-#include <QMap>
+#include <QListView>
 #include <QMessageBox>
+#include <QStandardItemModel>
 
-#include <ost/log_sink.hh>
-
+#include <ost/gui/widget.hh>
 #include <ost/gui/module_config.hh>
 
 /*
@@ -33,18 +32,44 @@
 
 namespace ost { namespace gui {
 
-class DLLEXPORT_OST_GUI LogReader: public QObject, public LogSink
+// the display window for Log Messages
+class DLLEXPORT_OST_GUI MessageWidget: public Widget
 {
   Q_OBJECT;
 public:
-  LogReader(QObject* parent=NULL);
-  ~LogReader();
+  MessageWidget(QWidget* parent=NULL);
+  ~MessageWidget();
 
-  void LogMessage(const String& message, int severity);
+public:
+  virtual void LogMessage(const QString& message, QMessageBox::Icon icon=QMessageBox::Information);
+  virtual void LogMessage(QStandardItem* item);
+  virtual void LogMessage(const QString& message, QIcon icon);
+
+  virtual void SetMaxMessages(int max){}
+  virtual int GetMaxMessages(){return 0;}
+
+  virtual int GetMessagesCount(){return 0;}
+
+  virtual bool Save(const QString& prefix) { return true; }
+  virtual bool Restore(const QString& prefix) { return true; }
+
+  ActionList GetActions();
+public slots:
+  void Clear();
+  void RemoveSelected();
+  void Update();
+
+private slots:
+  void ContextMenuRequested(const QPoint& pos);
 
 private:
-  QMap<int, QString> log_cache_;
-  QMessageBox::Icon GetIconForSeverity(int severity);
+  QPixmap GetIcon(QMessageBox::Icon icon, QWidget* widget);
+
+
+  QStandardItemModel* model_;
+  QListView* view_;
+
+  ActionList actions_;
 };
 
 }} // ns
