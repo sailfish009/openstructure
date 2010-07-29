@@ -31,9 +31,9 @@
 
 namespace ost {
 
-namespace {
+namespace impl{
 
-  class DevNull: public std::streambuf {
+  class DLLEXPORT DevNull: public std::streambuf {
   protected:
     virtual int_type overflow(int_type c) {return c;}
     virtual std::streamsize xsputn(const char* s, std::streamsize num) {return num;}
@@ -41,7 +41,7 @@ namespace {
 
 } // anon ns
 
-class DLLEXPORT_OST_BASE LogSink {
+class DLLEXPORT LogSink {
 public:
   LogSink(){};
   virtual ~LogSink() { }
@@ -50,18 +50,21 @@ public:
 
 typedef boost::shared_ptr<LogSink> LogSinkPtr;
 
-class DLLEXPORT_OST_BASE NullLogSink : public LogSink {
+class DLLEXPORT NullLogSink : public LogSink {
 public:
-  NullLogSink():null_(new DevNull()){}
+  NullLogSink():null_(new impl::DevNull()){}
   virtual void LogMessage(const String& message, int severity){null_ << message;}
-
+  ~NullLogSink(){
+  	null_.flush();
+    delete null_.rdbuf();
+  }
 private:
   std::ostream null_;
 };
 
 typedef boost::shared_ptr<NullLogSink> NullLogSinkPtr;
 
-class DLLEXPORT_OST_BASE StdLogSink : public LogSink {
+class DLLEXPORT StdLogSink : public LogSink {
 public:
   StdLogSink(std::ostream& stream):stream_(stream){}
   virtual void LogMessage(const String& message, int severity){
@@ -72,7 +75,7 @@ private:
   std::ostream& stream_;
 };
 
-class DLLEXPORT_OST_BASE FileLogSink : public LogSink {
+class DLLEXPORT FileLogSink : public LogSink {
 public:
   FileLogSink(const String& file_name):stream_(file_name.c_str(), std::ios::out){}
   virtual void LogMessage(const String& message, int severity){
@@ -83,7 +86,7 @@ public:
   }
 
   ~FileLogSink(){
-    stream_.close();
+    stream_.flush();
   }
 private:
   std::ofstream stream_;
