@@ -151,6 +151,8 @@ def copy_deps(dependencies, outdir, use_rpath):
   for dep in dependencies:
     if dep.endswith('.dylib'):
       dst_name=os.path.join(outdir, 'lib', os.path.basename(dep))
+      if not os.path.exists(dep):
+        continue
       shutil.copy(dep, dst_name)
       if use_rpath:
         change_id(os.path.basename(dep), dst_name, use_rpath)
