@@ -44,6 +44,7 @@ namespace {
 class DLLEXPORT_OST_BASE LogSink {
 public:
   LogSink(){};
+  virtual ~LogSink() { }
   virtual void LogMessage(const String& message, int severity = 0)=0;
 };
 
