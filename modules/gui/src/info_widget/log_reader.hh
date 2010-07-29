@@ -20,6 +20,8 @@
 #define OST_GUI_INFO_WIDGET_LOG_READER_HH
 
 #include <QObject>
+#include <QMap>
+#include <QMessageBox>
 
 #include <ost/log_sink.hh>
 
@@ -38,9 +40,11 @@ public:
   LogReader(QObject* parent=NULL);
   ~LogReader();
 
-public:
-  void LogMessage(const String& message);
+  void LogMessage(const String& message, int severity);
 
+private:
+  QMap<int, QString> log_cache_;
+  QMessageBox::Icon GetIconForSeverity(int severity);
 };
 
 }} // ns

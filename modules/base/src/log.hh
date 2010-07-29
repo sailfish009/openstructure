@@ -70,17 +70,17 @@ private:
 #define PUSH_VERBOSITY(n) ::ost::Logger::Instance().PushVerbosityLevel(n)
 #define POP_VERBOSITY(n) ::ost::Logger::Instance().PopVerbosityLevel()
 
-#define LOG_ERROR(m) ::ost::Logger::Instance()(::ost::Logger::QUIET) << m;
-#define LOGN_ERROR(m) ::ost::Logger::Instance()(::ost::Logger::QUIET) << m << std::endl;
+#define LOG_ERROR(m) if(true){std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::QUIET)->LogMessage(tmp_stream__.str());}
+#define LOGN_ERROR(m) if(true){std::stringstream tmp_stream__;tmp_stream__ << m << std::endl;::ost::Logger::Instance()(::ost::Logger::QUIET)->LogMessage(tmp_stream__.str());}
 
-#define LOG_MESSAGE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::NORMAL) {(::ost::Logger::Instance()(::ost::Logger::NORMAL)) << m ;}
-#define LOGN_MESSAGE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::NORMAL) {(::ost::Logger::Instance()(::ost::Logger::NORMAL)) << m << std::endl;}
+#define LOG_MESSAGE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::NORMAL) {std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::NORMAL)->LogMessage(tmp_stream__.str(),::ost::Logger::NORMAL);}
+#define LOGN_MESSAGE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::NORMAL) {std::stringstream tmp_stream__; tmp_stream__ << m <<std::endl;::ost::Logger::Instance()(::ost::Logger::NORMAL)->LogMessage(tmp_stream__.str(),::ost::Logger::NORMAL);}
 
-#define LOG_VERBOSE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::VERBOSE) {(::ost::Logger::Instance()(::ost::Logger::VERBOSE)) << m ;}
-#define LOGN_VERBOSE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::VERBOSE) {(::ost::Logger::Instance()(::ost::Logger::VERBOSE)) << m << std::endl;}
+#define LOG_VERBOSE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::VERBOSE) {std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::VERBOSE)->LogMessage(tmp_stream__.str(),::ost::Logger::VERBOSE);}
+#define LOGN_VERBOSE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::VERBOSE) {std::stringstream tmp_stream__; tmp_stream__ << m <<std::endl;::ost::Logger::Instance()(::ost::Logger::VERBOSE)->LogMessage(tmp_stream__.str(),::ost::Logger::VERBOSE);}
 
-#define LOG_DEBUG(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {(::ost::Logger::Instance()(::ost::Logger::DEBUG)) << m ;}
-#define LOGN_DEBUG(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {(::ost::Logger::Instance()(::ost::Logger::DEBUG)) << m << std::endl;}
+#define LOG_DEBUG(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::DEBUG)->LogMessage(tmp_stream__.str(),::ost::Logger::DEBUG);}
+#define LOGN_DEBUG(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {std::stringstream tmp_stream__; tmp_stream__ << m <<std::endl;::ost::Logger::Instance()(::ost::Logger::DEBUG)->LogMessage(tmp_stream__.str(),::ost::Logger::DEBUG);}
 
 #ifdef NDEBUG
 
@@ -92,11 +92,11 @@ private:
 
 #else
 
-#  define LOG_DUMP(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DUMP) {(::ost::Logger::Instance()(::ost::Logger::DUMP)) << m ;}
-#  define LOGN_DUMP(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DUMP) {(::ost::Logger::Instance()(::ost::Logger::DUMP)) << m << std::endl;}
+#  define LOG_DUMP(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DUMP) {std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::DUMP)->LogMessage(tmp_stream__.str(),::ost::Logger::DUMP);}
+#  define LOGN_DUMP(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DUMP) {std::stringstream tmp_stream__; tmp_stream__ << m <<std::endl;::ost::Logger::Instance()(::ost::Logger::DUMP)->LogMessage(tmp_stream__.str(),::ost::Logger::DUMP);}
 
-#  define LOG_TRACE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::TRACE) {(::ost::Logger::Instance()(::ost::Logger::TRACE)) << m ;}
-#  define LOGN_TRACE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::TRACE) {(::ost::Logger::Instance()(::ost::Logger::TRACE)) << m << std::endl;}
+#  define LOG_TRACE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::TRACE) {std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::TRACE)->LogMessage(tmp_stream__.str(),::ost::Logger::TRACE);}
+#  define LOGN_TRACE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::TRACE) {std::stringstream tmp_stream__; tmp_stream__ << m <<std::endl;::ost::Logger::Instance()(::ost::Logger::TRACE)->LogMessage(tmp_stream__.str(),::ost::Logger::TRACE);}
 
 #endif
 

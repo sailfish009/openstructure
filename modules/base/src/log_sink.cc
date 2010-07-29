@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/log.hh>
 #include <ost/log_sink.hh>
 #include <iostream>
 namespace ost {
@@ -30,6 +31,7 @@ bool ObservableLogSink::AddObserver(LogObserverPtr& observer){
   }
   return false;
 }
+
 bool ObservableLogSink::RemoveObserver(LogObserverPtr& observer){
   std::vector<LogObserverPtr>::iterator found = std::find( this->observers_.begin(), this->observers_.end(), observer);
   if( found != this->observers_.end() ){
@@ -39,11 +41,11 @@ bool ObservableLogSink::RemoveObserver(LogObserverPtr& observer){
   return false;
 }
 
-void ObservableLogSink::LogMessage(const String& message){
+void ObservableLogSink::LogMessage(const String& message, int severity){
   std::vector<LogObserverPtr>::const_iterator observers_it = this->observers_.begin() ;
   while( observers_it != this->observers_.end() )
   {
-    ( *observers_it )->LogMessage(message) ;
+    ( *observers_it )->LogMessage(message, severity);
     observers_it++;
   }
 }

@@ -36,15 +36,48 @@ LogReader::LogReader(QObject* parent) :
   olsp->AddObserver(losp);
 }
 
-void LogReader::LogMessage(const String& message){
+void LogReader::LogMessage(const String& message, int severity){
   if(this->parent()){
     if(InfoWidget* info_widget = qobject_cast<InfoWidget*>(this->parent())){
-      info_widget->LogMessage(message.c_str());
+      QString q_message(message.c_str());
+      if(q_message.endsWith("\n")){
+        q_message.remove(q_message.size()-1,q_message.size()-1);
+        if(!log_cache_.contains(severity)){
+          info_widget->LogMessage(q_message,GetIconForSeverity(severity));
+        }
+        else{
+          info_widget->LogMessage(log_cache_[severity]+q_message,GetIconForSeverity(severity));
+          log_cache_.remove(severity);
+        }
+      }
+      else{
+        if(!log_cache_.contains(severity)){
+          log_cache_[severity] = message.c_str();
+        }
+        else{
+          log_cache_[severity].append(message.c_str());
+        }
+      }
     }
   }
 }
 
-LogReader::~LogReader() {}
+QMessageBox::Icon LogReader::GetIconForSeverity(int severity){
+  switch (severity) {
+    case 1:
+      return QMessageBox::Warning;
+    case 0:
+      return QMessageBox::Critical;
+    default :
+      return QMessageBox::Information;
+  }
+}
+
+LogReader::~LogReader() {
+  ost::Logger& logger = ost::Logger::Instance();
+  LogSinkPtr olsp = LogSinkPtr(new StdLogSink(std::cerr));
+  logger.SetSink(olsp);
+}
 
 }
 } // ns
