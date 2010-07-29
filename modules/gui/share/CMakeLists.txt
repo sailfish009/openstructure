@@ -2,6 +2,7 @@
 set(GUI_ICONS
   icons/add_icon.png
   icons/close_icon.png
+  icons/delete_icon.png
   icons/distance_icon.png
   icons/find_icon.png
   icons/map_icon.png

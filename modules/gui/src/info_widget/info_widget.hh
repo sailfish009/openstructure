@@ -53,7 +53,10 @@ public:
   virtual bool Save(const QString& prefix) { return true; }
   virtual bool Restore(const QString& prefix) { return true; }
 
+  ActionList GetActions();
 public slots:
+  void Clear();
+  void RemoveSelected();
   void Update();
 
 private:
@@ -62,6 +65,8 @@ private:
 
   QStandardItemModel* model_;
   QListView* view_;
+
+  ActionList actions_;
 };
 
 }} // ns

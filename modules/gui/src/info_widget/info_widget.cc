@@ -19,8 +19,11 @@
 /*
  Author: Stefan Scheuber
  */
+#include <QDir>
 #include <QVBoxLayout>
 #include <QApplication>
+
+#include <ost/platform.hh>
 
 #include <ost/gui/widget_registry.hh>
 #include <ost/gui/gosty_app.hh>
@@ -42,13 +45,10 @@ public:
 
 OST_REGISTER_WIDGET(InfoWidget, InfoWidgetFactory);
 
-InfoWidget::InfoWidget(QWidget* parent) :
-  Widget(NULL, parent) {
+InfoWidget::InfoWidget(QWidget* parent) : Widget(NULL, parent), model_(new QStandardItemModel(this)), view_(new QListView(this)) {
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
-  model_ = new QStandardItemModel(this);
-  view_ = new QListView(this);
   view_->setAttribute(Qt::WA_MacShowFocusRect, false);
   view_->setAttribute(Qt::WA_MacSmallSize, true);
   view_->setModel(model_);
@@ -56,6 +56,17 @@ InfoWidget::InfoWidget(QWidget* parent) :
   view_->setDragEnabled(true);
 
   layout->addWidget(view_);
+
+
+  QDir icon_path(GetSharedDataPath().c_str());
+  icon_path.cd("gui");
+  icon_path.cd("icons");
+
+  QAction* clear_action = new QAction(this);
+  clear_action->setToolTip("Clear info panel");
+  clear_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("delete_icon.png")));
+  connect(clear_action,SIGNAL(triggered(bool)), this, SLOT(Clear()));
+  this->actions_.append(clear_action);
 }
 
 void InfoWidget::Update() {
@@ -106,7 +117,22 @@ QPixmap InfoWidget::GetIcon(QMessageBox::Icon icon, QWidget* widget)
     return QPixmap();
 }
 
+void InfoWidget::Clear(){
+  this->model_->clear();
+}
 
+void InfoWidget::RemoveSelected(){
+  QItemSelectionModel* selection_model = this->view_->selectionModel();
+  const QItemSelection& item_selection =  selection_model->selection();
+  const QModelIndexList& model_indexes = item_selection.indexes();
+  for(int i=0;i<model_indexes.size();i++){
+    this->model_->removeRow(model_indexes[i].row());
+  }
+}
+
+ActionList InfoWidget::GetActions(){
+  return this->actions_;
+}
 
 InfoWidget::~InfoWidget() {
 }
