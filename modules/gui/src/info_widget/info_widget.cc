@@ -19,9 +19,10 @@
 /*
  Author: Stefan Scheuber
  */
-#include <QDir>
-#include <QVBoxLayout>
 #include <QApplication>
+#include <QDir>
+#include <QMenu>
+#include <QVBoxLayout>
 
 #include <ost/platform.hh>
 
@@ -30,7 +31,8 @@
 
 #include "info_widget.hh"
 
-namespace ost { namespace gui {
+namespace ost {
+namespace gui {
 
 class InfoWidgetFactory: public WidgetFactory {
 public:
@@ -45,7 +47,9 @@ public:
 
 OST_REGISTER_WIDGET(InfoWidget, InfoWidgetFactory);
 
-InfoWidget::InfoWidget(QWidget* parent) : Widget(NULL, parent), model_(new QStandardItemModel(this)), view_(new QListView(this)) {
+InfoWidget::InfoWidget(QWidget* parent) :
+  Widget(NULL, parent), model_(new QStandardItemModel(this)), view_(
+      new QListView(this)) {
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
@@ -54,9 +58,12 @@ InfoWidget::InfoWidget(QWidget* parent) : Widget(NULL, parent), model_(new QStan
   view_->setModel(model_);
   view_->setSelectionBehavior(QAbstractItemView::SelectRows);
   view_->setDragEnabled(true);
+  view_->setContextMenuPolicy(Qt::CustomContextMenu);
 
   layout->addWidget(view_);
 
+  connect(view_, SIGNAL(customContextMenuRequested(const QPoint&)), this,
+      SLOT(ContextMenuRequested(const QPoint&)));
 
   QDir icon_path(GetSharedDataPath().c_str());
   icon_path.cd("gui");
@@ -64,8 +71,9 @@ InfoWidget::InfoWidget(QWidget* parent) : Widget(NULL, parent), model_(new QStan
 
   QAction* clear_action = new QAction(this);
   clear_action->setToolTip("Clear info panel");
-  clear_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("delete_icon.png")));
-  connect(clear_action,SIGNAL(triggered(bool)), this, SLOT(Clear()));
+  clear_action->setIcon(QIcon(icon_path.absolutePath() + QDir::separator()
+      + QString("delete_icon.png")));
+  connect(clear_action, SIGNAL(triggered(bool)), this, SLOT(Clear()));
   this->actions_.append(clear_action);
 }
 
@@ -73,65 +81,78 @@ void InfoWidget::Update() {
   view_->viewport()->update();
 }
 
-void InfoWidget::LogMessage(const QString& message, QMessageBox::Icon icon){
-  QPixmap pix_icon = this->GetIcon(icon,this);
+void InfoWidget::LogMessage(const QString& message, QMessageBox::Icon icon) {
+  QPixmap pix_icon = this->GetIcon(icon, this);
   QStandardItem* item = new QStandardItem();
   item->setText(message);
   item->setIcon(QIcon(pix_icon));
   this->model_->appendRow(item);
 }
 
-void InfoWidget::LogMessage(QStandardItem* item){
+void InfoWidget::LogMessage(QStandardItem* item) {
   this->model_->appendRow(item);
 }
 
-void InfoWidget::LogMessage(const QString& message, QIcon icon){
+void InfoWidget::LogMessage(const QString& message, QIcon icon) {
   QStandardItem* item = new QStandardItem();
   item->setText(message);
   item->setIcon(icon);
   this->model_->appendRow(item);
 }
 
-QPixmap InfoWidget::GetIcon(QMessageBox::Icon icon, QWidget* widget)
-{
-    QStyle *style = widget ? widget->style() : QApplication::style();
-    int icon_size = style->pixelMetric(QStyle::PM_MessageBoxIconSize, 0, widget);
-    QIcon tmp_icon;
-    switch (icon) {
-    case QMessageBox::Information:
-        tmp_icon = style->standardIcon(QStyle::SP_MessageBoxInformation, 0, widget);
-        break;
-    case QMessageBox::Warning:
-        tmp_icon = style->standardIcon(QStyle::SP_MessageBoxWarning, 0, widget);
-        break;
-    case QMessageBox::Critical:
-        tmp_icon = style->standardIcon(QStyle::SP_MessageBoxCritical, 0, widget);
-        break;
-    case QMessageBox::Question:
-        tmp_icon = style->standardIcon(QStyle::SP_MessageBoxQuestion, 0, widget);
-    default:
-        break;
-    }
-    if (!tmp_icon.isNull())
-        return tmp_icon.pixmap(icon_size, icon_size);
-    return QPixmap();
+QPixmap InfoWidget::GetIcon(QMessageBox::Icon icon, QWidget* widget) {
+  QStyle *style = widget ? widget->style() : QApplication::style();
+  int icon_size = style->pixelMetric(QStyle::PM_MessageBoxIconSize, 0, widget);
+  QIcon tmp_icon;
+  switch (icon) {
+  case QMessageBox::Information:
+    tmp_icon = style->standardIcon(QStyle::SP_MessageBoxInformation, 0, widget);
+    break;
+  case QMessageBox::Warning:
+    tmp_icon = style->standardIcon(QStyle::SP_MessageBoxWarning, 0, widget);
+    break;
+  case QMessageBox::Critical:
+    tmp_icon = style->standardIcon(QStyle::SP_MessageBoxCritical, 0, widget);
+    break;
+  case QMessageBox::Question:
+    tmp_icon = style->standardIcon(QStyle::SP_MessageBoxQuestion, 0, widget);
+  default:
+    break;
+  }
+  if (!tmp_icon.isNull())
+    return tmp_icon.pixmap(icon_size, icon_size);
+  return QPixmap();
 }
 
-void InfoWidget::Clear(){
+void InfoWidget::Clear() {
   this->model_->clear();
 }
 
-void InfoWidget::RemoveSelected(){
+void InfoWidget::RemoveSelected() {
   QItemSelectionModel* selection_model = this->view_->selectionModel();
-  const QItemSelection& item_selection =  selection_model->selection();
+  const QItemSelection& item_selection = selection_model->selection();
   const QModelIndexList& model_indexes = item_selection.indexes();
-  for(int i=0;i<model_indexes.size();i++){
+  for (int i = 0; i < model_indexes.size(); i++) {
     this->model_->removeRow(model_indexes[i].row());
   }
 }
 
-ActionList InfoWidget::GetActions(){
+ActionList InfoWidget::GetActions() {
   return this->actions_;
+}
+
+void InfoWidget::ContextMenuRequested(const QPoint& pos) {
+
+  QAction* remove_selected_action = new QAction("Remove", this);
+  remove_selected_action->setToolTip("Remove this item");
+  connect(remove_selected_action, SIGNAL(triggered(bool)), this,
+      SLOT(RemoveSelected()));
+
+  QMenu* menu = new QMenu();
+  menu->addAction(remove_selected_action);
+  if (menu->actions().size() > 0) {
+    menu->popup(view_->viewport()->mapToGlobal(pos));
+  }
 }
 
 InfoWidget::~InfoWidget() {

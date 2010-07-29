@@ -59,6 +59,9 @@ public slots:
   void RemoveSelected();
   void Update();
 
+private slots:
+  void ContextMenuRequested(const QPoint& pos);
+
 private:
   QPixmap GetIcon(QMessageBox::Icon icon, QWidget* widget);
 
