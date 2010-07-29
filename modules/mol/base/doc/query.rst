@@ -218,6 +218,8 @@ Properties of Atoms
 Query API documentation
 --------------------------------------------------------------------------------
 
+In the following, the interface of the query class is described. In general, you will not have to use this interface but will pass the query as string directly. 
+
 .. class:: Query(string='')
   
   Create a new query from the given string. The constructor does not throw any

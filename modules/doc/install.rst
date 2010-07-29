@@ -1,19 +1,37 @@
 Installing OpenStructure From Source
 ================================================================================
 
-This document describes how to install OpenStructure from source. If you are mainly insterested in using OpenStructure and are not planning to modify the code of OpenStructure itself, please use one of the binaries `available for download <http://openstructure.org/download/>`_.
+.. note::
+
+  This document describes how to install OpenStructure from source. If you are
+  mainly insterested in using OpenStructure and are not planning to modify the
+  code of OpenStructure itself, please use one of the binaries `available for
+  download <http://openstructure.org/download/>`_.
+
+Brief Overview
+--------------------------------------------------------------------------------
+
+Compiling OpenStructure consists of several steps that are described below in more detail. In essence, these steps are:
+
+ * Installing the Dependencies
+ * Checking out the source code from SVN
+ * Configuring the build with cmake
+ * Compiling an Linking
+ 
+
+.. installdeps_
 
 Installing the Dependencies
 --------------------------------------------------------------------------------
 
-OpenStructure uses a bunch of OpenSource libraries. If you haven't already installed them, please install them now!
+OpenStructure uses a bunch of OpenSource libraries. If you haven't already installed them, please install them now! Where appropriate the minimally required version is given in parantheses.
 
- * `CMake <http://cmake.org>`_
- * `Eigen2 <http://eigen.tuxfamily.org>`_
- * `Boost <http://boost.org>`_
- * `libpng <http://www.libpng.org>`_
- * `Python <http://python.org>`_
- * `Qt <http://qt.nokia.com>`_
+ * `CMake <http://cmake.org>`_ (2.6.4)
+ * `Eigen2 <http://eigen.tuxfamily.org>`_ (2.0.6)
+ * `Boost <http://boost.org>`_ (1.37)
+ * `libpng <http://www.libpng.org>`_ 
+ * `Python <http://python.org>`_ (2.4)
+ * `Qt <http://qt.nokia.com>`_ (4.5)
 
 When you enable support for image processing, you will need:
 
@@ -45,25 +63,38 @@ You can checkout the source from SVN. The repository is located at
 
 If you are using the commandline client, type in your shell 
 
+.. code-block:: bash
+
    svn co https://dng.biozentrum.unibas.ch/svn/openstructure/trunk
 
-On Windows install svn clients like `tortoisesvn <http://tortoisesvn.tigris.org>`_ and use the function 'checkout' then enter the above mention URL.
+On Windows, we recommend to install a graphical frontend for svn, for example `tortoisesvn <http://tortoisesvn.tigris.org>`_. 
 
 
 Configuring
 --------------------------------------------------------------------------------
 
 
-OpenStructure uses `CMake <http://cmake.org>`_ for compiling and building the project. The next required step is to configure the build environment using cmake. You can do that by invoking `cmake` in the project directory (On Windows choose Tools->visualstudio commandline prompt from within visualstudio) :
+OpenStructure uses `CMake <http://cmake.org>`_ for compiling and building the project. The next required step is to configure the build environment using cmake. You can do that by invoking `cmake` in the project directory.
 
-    cmake . <options>
+.. code-block:: bash
+
+  cmake . <options>
 
 There are two kinds of options: Options that let you control the building behaviour, enabling and disabling the compilation of certain modules and options that let you tell CMake where to find the dependencies. All of them are passed to CMake with via `-D<opt>=<value>`.
 
-Flag to choose build system
+On Windows, use Tools -> VisualStudio commandline prompt from within VisualStudio)
+
+Flag to choose build generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-On Windows make sure you specify -G"Visual Studio 9 2008"!
+CMake supports different build generators. On UNIX, that is MacOS X and Linux, the default build generator is Makefiles, but it is also possible to use other programs. For a list of supported build generators on your platform, start cmake without parameters. 
+
+On Windows you have to explicitly set the buil generator to "Visual Studio 9 2008":
+
+.. code-block:: bash
+
+  cmake -G"Visual Studio 9 2008"
+
 
 Flags to Control the Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
