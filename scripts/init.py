@@ -66,11 +66,6 @@ def _InitFrontEnd():
   _InitMenuBar(app)
   if not _InitPanels(app):
     _InitSplash()
-  if sys.platform=='darwin':
-    settings=QtCore.QSettings()    
-    if not settings.value('install/clt', False).toBool():
-      settings.setValue('install/clt', QtCore.QVariant(True))
-      termuse.InstallTerminalPrograms()
   _InitSpaceNav(app)
   _InitContextMenu(app)
   main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win, int(QtCore.Qt.WindowMaximized))
