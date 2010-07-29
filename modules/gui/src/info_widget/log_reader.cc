@@ -29,11 +29,8 @@ namespace ost { namespace gui {
 LogReader::LogReader(QObject* parent) :
   QObject(parent) {
   ost::Logger& logger = ost::Logger::Instance();
-  ObservableLogSinkPtr olsp = ObservableLogSinkPtr(new ObservableLogSink());
-  LogSinkPtr lsp = LogSinkPtr(olsp);
-  logger.SetSink(lsp);
-  LogObserverPtr losp = LogObserverPtr(this);
-  olsp->AddObserver(losp);
+  LogSinkPtr lsp = LogSinkPtr(this);
+  logger.PushSink(lsp);
 }
 
 void LogReader::LogMessage(const String& message, int severity){
@@ -75,8 +72,7 @@ QMessageBox::Icon LogReader::GetIconForSeverity(int severity){
 
 LogReader::~LogReader() {
   ost::Logger& logger = ost::Logger::Instance();
-  LogSinkPtr olsp = LogSinkPtr(new StdLogSink(std::cerr));
-  logger.SetSink(olsp);
+  logger.PopSink();
 }
 
 }

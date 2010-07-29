@@ -33,7 +33,7 @@
 
 namespace ost { namespace gui {
 
-class DLLEXPORT_OST_GUI LogReader: public QObject, public LogObserver
+class DLLEXPORT_OST_GUI LogReader: public QObject, public LogSink
 {
   Q_OBJECT;
 public:

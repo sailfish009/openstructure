@@ -23,7 +23,7 @@ namespace ost {
 
 ObservableLogSink::ObservableLogSink(){}
 
-bool ObservableLogSink::AddObserver(LogObserverPtr& observer){
+bool ObservableLogSink::AddObserver(LogSinkPtr& observer){
   if((std::find( this->observers_.begin(), this->observers_.end(), observer )) == this->observers_.end())
   {
     this->observers_.push_back( observer );
@@ -32,8 +32,8 @@ bool ObservableLogSink::AddObserver(LogObserverPtr& observer){
   return false;
 }
 
-bool ObservableLogSink::RemoveObserver(LogObserverPtr& observer){
-  std::vector<LogObserverPtr>::iterator found = std::find( this->observers_.begin(), this->observers_.end(), observer);
+bool ObservableLogSink::RemoveObserver(LogSinkPtr& observer){
+  std::vector<LogSinkPtr>::iterator found = std::find( this->observers_.begin(), this->observers_.end(), observer);
   if( found != this->observers_.end() ){
     this->observers_.erase(found);
     return true;
@@ -42,7 +42,7 @@ bool ObservableLogSink::RemoveObserver(LogObserverPtr& observer){
 }
 
 void ObservableLogSink::LogMessage(const String& message, int severity){
-  std::vector<LogObserverPtr>::const_iterator observers_it = this->observers_.begin() ;
+  std::vector<LogSinkPtr>::const_iterator observers_it = this->observers_.begin() ;
   while( observers_it != this->observers_.end() )
   {
     ( *observers_it )->LogMessage(message, severity);

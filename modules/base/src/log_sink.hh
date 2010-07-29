@@ -21,6 +21,7 @@
 
 #include <ostream>
 #include <iostream>
+#include <fstream>
 #include <stack>
 #include <vector>
 
@@ -42,6 +43,7 @@ namespace {
 
 class DLLEXPORT_OST_BASE LogSink {
 public:
+  LogSink(){};
   virtual void LogMessage(const String& message, int severity = 0)=0;
 };
 
@@ -56,6 +58,7 @@ private:
   std::ostream null_;
 };
 
+typedef boost::shared_ptr<NullLogSink> NullLogSinkPtr;
 
 class DLLEXPORT_OST_BASE StdLogSink : public LogSink {
 public:
@@ -68,20 +71,34 @@ private:
   std::ostream& stream_;
 };
 
-class DLLEXPORT_OST_BASE LogObserver {
+class DLLEXPORT_OST_BASE FileLogSink : public LogSink {
 public:
-  virtual void LogMessage(const String& message, int severity)=0;
+  FileLogSink(const String& file_name):stream_(file_name.c_str(), std::ios::out){}
+  virtual void LogMessage(const String& message, int severity){
+    if (stream_.is_open()){
+      stream_ << message;
+      stream_.flush();
+    }
+  }
+
+  ~FileLogSink(){
+    stream_.close();
+  }
+private:
+  std::ofstream stream_;
 };
-typedef boost::shared_ptr<LogObserver> LogObserverPtr;
+
+typedef boost::shared_ptr<FileLogSink> FileLogSinkPtr;
+
 
 class DLLEXPORT_OST_BASE ObservableLogSink : public LogSink {
 public:
   ObservableLogSink();
-  bool AddObserver(LogObserverPtr& observer);
-  bool RemoveObserver(LogObserverPtr& observer);
+  bool AddObserver(LogSinkPtr& observer);
+  bool RemoveObserver(LogSinkPtr& observer);
   void LogMessage(const String& message, int severity);
 private:
-  std::vector<LogObserverPtr> observers_;
+  std::vector<LogSinkPtr> observers_;
 };
 
 typedef boost::shared_ptr<ObservableLogSink> ObservableLogSinkPtr;
