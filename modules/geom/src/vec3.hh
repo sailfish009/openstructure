@@ -185,7 +185,7 @@ inline Vec3 operator/(Real d, const Vec3& v)
 
 inline std::ostream& operator<<(std::ostream& os, const Vec3& v)
 {
-  os << "[" << v.x << ", " << v.y << "]";
+  os << "[" << v.x << ", " << v.y << ", " << v.z << "]";
   return os;
 }
 }
