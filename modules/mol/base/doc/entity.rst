@@ -743,17 +743,11 @@ The Handle Classes
 The View Classes
 --------------------------------------------------------------------------------
 
-.. class:: ResidueView
-
-  .. attribute:: handle
-
-    The residue handle this view points to. Also available as 
-    :meth:`GetHandle`.
-  
-    :type: :class:`ResidueHandle`
-
 .. class:: EntityView
 
+  An entity view represents a structural subset of an :class:`EntityHandle`. For 
+  an introduction ,see :doc:`../../intro-01`.
+  
   .. attribute:: chains
    
     List of all chains of this entity. The chains are in the same 
@@ -1289,6 +1283,13 @@ The View Classes
     :rtype: :class:`EntityView`
 
 .. class:: ResidueView
+
+  .. attribute:: handle
+
+    The residue handle this view points to. Also available as 
+    :meth:`GetHandle`.
+
+    :type: :class:`ResidueHandle`
 
   .. attribute:: name
 

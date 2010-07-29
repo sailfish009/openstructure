@@ -130,10 +130,51 @@ Build Options
    
  * If `OPTIMIZE` is set to 1, an optimized version of OpenStructure is built.
 
+Example Configurations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Ubuntu 10.04 Lucid/Lynx**
+
+All the dependencies can be installed from the package manager and are thus located in standard locations. cmake will automatically find them without the need to pass any additional parameters. The only exception is -DOPTIMIZE, which will tell cmake to build an optimized (-O3 -DNDEBUG) version of OpenStructure.
+
+.. code-block:: bash
+
+  cmake . -DOPTIMIZE=1
+
+**MacOS X with MacPorts and optimization turned on**
+
+MacPorts installs all the software under /opt/local. Thus we have to tell cmake where to find Boost, Python and Qt.
+
+.. code-block:: bash
+  
+  cmake . -DBOOST_ROOT=/opt/local -DPYTHON_ROOT=/opt/local \
+        -DSYS_ROOT=/opt/local -DQT_QMAKE_EXECUTABLE=/opt/local/bin/qmake \
+        -DOPTIMIZE=1
+
+
 Building the Project
 --------------------------------------------------------------------------------
 
-Type `make`. If you are using a multi-core machine, you can use the `-j` flag to run
-multiple jobs at once.
+Type `make`. If you are using a multi-core machine, you can use the `-j` flag to 
+run multiple jobs at once.
 
 On Windows run 'Build OpenStructure' from the build menu.
+
+
+
+What's next?
+--------------------------------------------------------------------------------
+
+On Linux and MacOS X, you can start dng from the command-line. The binaries are all located in stage/bin:
+
+.. code-block:: bash
+
+  stage/bin/dng
+  
+or, to start the command-line interpreter:
+
+.. code-block:: bash
+
+  stage/bin/ost
+  
+If you repeatedly use OpenStructure, it is recommended to add /path/to/dng/stage/bin to your path.
