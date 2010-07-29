@@ -29,10 +29,10 @@
 #include <ost/gui/widget_registry.hh>
 #include <ost/gui/gosty_app.hh>
 
+#include "log_reader.hh"
 #include "info_widget.hh"
 
-namespace ost {
-namespace gui {
+namespace ost {namespace gui {
 
 class InfoWidgetFactory: public WidgetFactory {
 public:
@@ -75,6 +75,8 @@ InfoWidget::InfoWidget(QWidget* parent) :
       + QString("delete_icon.png")));
   connect(clear_action, SIGNAL(triggered(bool)), this, SLOT(Clear()));
   this->actions_.append(clear_action);
+
+  new LogReader(this);
 }
 
 void InfoWidget::Update() {
@@ -86,6 +88,7 @@ void InfoWidget::LogMessage(const QString& message, QMessageBox::Icon icon) {
   QStandardItem* item = new QStandardItem();
   item->setText(message);
   item->setIcon(QIcon(pix_icon));
+  item->setEditable(false);
   this->model_->appendRow(item);
 }
 
@@ -97,6 +100,7 @@ void InfoWidget::LogMessage(const QString& message, QIcon icon) {
   QStandardItem* item = new QStandardItem();
   item->setText(message);
   item->setIcon(icon);
+  item->setEditable(false);
   this->model_->appendRow(item);
 }
 

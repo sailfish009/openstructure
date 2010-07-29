@@ -1,6 +1,7 @@
 set(OST_BASE_SOURCES 
 generic_property.cc
 log.cc
+log_sink.cc
 profile.cc
 units.cc
 string_ref.cc
@@ -15,6 +16,7 @@ integrity_error.hh
 invalid_handle.hh
 ptr_observer.hh
 log.hh
+log_sink.hh
 profile.hh
 dyn_cast.hh
 stdint.hh

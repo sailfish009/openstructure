@@ -22,11 +22,12 @@
 #include <ostream>
 #include <stack>
 
+#include <ost/log_sink.hh>
 #include <ost/module_config.hh>
 
 namespace ost {
 
-typedef std::stack<std::ostream*> OStreamStack;
+typedef std::stack<LogSinkPtr> LogSinkStack;
 
   // singleton
 class DLLEXPORT_OST_BASE Logger {
@@ -39,18 +40,20 @@ public:
     DUMP,
     TRACE
   };
-  
+
   void PushVerbosityLevel(int level);
   void PopVerbosityLevel();
+  void PushSink(LogSinkPtr& sink);
   void PushFile(const String& filename);
+  //! DEPRECATED use PopSink() instead
   void PopFile();
-
-  std::ostream& operator()(enum LogLevel);
+  void PopSink();
+  LogSinkPtr& operator()(enum LogLevel);
 
   static Logger& Instance();
 
   int GetLogLevel() const {return level_;}
-  
+
 protected:
   Logger();
   Logger(const Logger&);
@@ -59,9 +62,9 @@ protected:
 private:
   int level_;
   std::stack<int> level_stack_;
-  std::ostream null_;
-  std::ostream stream_;
-  OStreamStack ostream_stack_;
+  LogSinkStack sink_stack_;
+  LogSinkPtr null_sink_;
+  LogSinkPtr sink_;
 };
 
 #define PUSH_VERBOSITY(n) ::ost::Logger::Instance().PushVerbosityLevel(n)

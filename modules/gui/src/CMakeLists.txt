@@ -93,6 +93,7 @@ scene_win_model.hh
 
 set(OST_GUI_INFO_WIDGET_HEADERS
 info_widget.hh
+log_reader.hh
 )
 
 if (ENABLE_SPNAV)
@@ -212,6 +213,7 @@ admin.cc
 widget_pool.cc
 remote_site_loader.cc
 info_widget/info_widget.cc
+info_widget/log_reader.cc
 sequence_viewer/align_properties_painter.cc
 sequence_viewer/base_row.cc
 sequence_viewer/background_painter.cc
@@ -346,6 +348,7 @@ widget.hh
 widget_geom_handler.hh
 widget_pool.hh
 info_widget/info_widget.hh
+info_widget/log_reader.hh
 sequence_viewer/align_properties_painter.hh
 sequence_viewer/background_painter.hh
 sequence_viewer/base_row.hh

@@ -16,26 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <iostream>
-#include <fstream>
-
-
+#include <ost/log_sink.hh>
 #include <ost/log.hh>
 
 namespace ost {
 
 Logger& Log = Logger::Instance();
-
-namespace {
-
-  class DevNull: public std::streambuf {
-  protected:
-    virtual int_type overflow(int_type c) {return c;}
-    virtual std::streamsize xsputn(const char* s, std::streamsize num) {return num;}
-  };
-
-} // anon ns
-
 
 Logger& Logger::Instance()
 {
@@ -46,23 +32,23 @@ Logger& Logger::Instance()
 Logger::Logger():
   level_(0),
   level_stack_(),
-  null_(new DevNull()),
-  stream_(0),
-  ostream_stack_()
+  sink_stack_(),
+  null_sink_(new NullLogSink()),
+  sink_()
 {
-  ostream_stack_.push(new std::ostream(std::cerr.rdbuf()));
-  stream_.rdbuf(ostream_stack_.top()->rdbuf());
+  sink_stack_.push(LogSinkPtr(new StdLogSink(std::cerr)));
+  sink_= sink_stack_.top();
 }
 
 Logger::Logger(const Logger&):
   level_(0),
   level_stack_(),
-  null_(0),
-  stream_(0),
-  ostream_stack_()
+  sink_stack_(),
+  null_sink_(new NullLogSink()),
+  sink_()
 {
-  ostream_stack_.push(new std::ostream(std::cerr.rdbuf()));
-  stream_.rdbuf(ostream_stack_.top()->rdbuf());
+  sink_stack_.push(LogSinkPtr(new StdLogSink(std::cerr)));
+  sink_= sink_stack_.top();
 }
 
 Logger& Logger::operator=(const Logger&)
@@ -88,29 +74,41 @@ void Logger::PopVerbosityLevel()
   }
 }
 
-std::ostream& Logger::operator()(enum LogLevel l)
+LogSinkPtr& Logger::operator()(enum LogLevel l)
 {
   if(l<=level_) {
-    return stream_;
+    return sink_;
   }
-  return null_;
+  return null_sink_;
 }
 
 void Logger::PushFile(const String& fn)
 {
-  ostream_stack_.push(new std::ofstream(fn.c_str()));
-  stream_.rdbuf(ostream_stack_.top()->rdbuf());
+  sink_stack_.push(LogSinkPtr(new FileLogSink(fn)));
+  sink_ = sink_stack_.top();
 }
 
 void Logger::PopFile()
 {
-  if(ostream_stack_.size()>1) {
-    delete ostream_stack_.top();
-    ostream_stack_.pop();
-    stream_.rdbuf(ostream_stack_.top()->rdbuf());
+  if(sink_stack_.size()>1) {
+    sink_stack_.pop();
+    sink_ = sink_stack_.top();
   }
 }
 
+void Logger::PushSink(LogSinkPtr& sink)
+{
+  sink_stack_.push(sink);
+  sink_ = sink_stack_.top();
+}
+
+void Logger::PopSink()
+{
+  if(sink_stack_.size()>1) {
+      sink_stack_.pop();
+      sink_ = sink_stack_.top();
+  }
+}
 
 } // ns
 
