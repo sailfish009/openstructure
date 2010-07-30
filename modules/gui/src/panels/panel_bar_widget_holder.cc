@@ -90,10 +90,10 @@ void PanelBarWidgetHolder::SetupToolBar()
 
   QString class_name=widget_->metaObject()->className();
   WidgetRegistry* wf=WidgetRegistry::Instance();
-
+  toolbar_->setAttribute(Qt::WA_MacSmallSize);
   QAction* label_ = toolbar_->addAction(wf->GetFullName(class_name));
   connect(label_, SIGNAL(triggered(bool)), this, SLOT(LabelClick(bool)));
-  toolbar_->addSeparator();
+  //toolbar_->addSeparator();
   QWidget* spacer = new QWidget(this);
   QHBoxLayout* hbox = new QHBoxLayout(spacer);
   spacer->setLayout(hbox);

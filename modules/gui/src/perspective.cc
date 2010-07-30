@@ -26,7 +26,7 @@
 #include <QSizeGrip>
 #include <QKeySequence>
 #include <QStatusBar>
-
+#include <QPushButton>
 #include <ost/platform.hh>
 
 #include <ost/gui/widget_registry.hh>
@@ -69,23 +69,35 @@ void Perspective::SetupQuickAccessBar()
   QHBoxLayout* l2=new QHBoxLayout(quick_access_bar_);
   l2->setMargin(0);
   l2->setSpacing(0);
-
-  QToolButton* toggle_side_bar=new QToolButton(quick_access_bar_);
+  l2->setContentsMargins(0, 0, 0, 0);
+  QPushButton* toggle_side_bar=new QPushButton(quick_access_bar_);
+  toggle_side_bar->setAttribute(Qt::WA_MacSmallSize);
+  #if !defined(__APPLE__)
   toggle_side_bar->setText("A");
+  #endif
+  toggle_side_bar->setFlat(true);
   toggle_side_bar->setToolTip("Glory A-Button");
-  toggle_side_bar->setIconSize(QSize(20,20));
-  toggle_side_bar->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("show_sidebar_icon.png")));
+  toggle_side_bar->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+
+                                 QString("show_sidebar_icon.png")));
+  toggle_side_bar->setIconSize(QSize(10,10));  
   toggle_side_bar->setCheckable(true);
-  toggle_side_bar->setChecked(true);
+  toggle_side_bar->setFixedSize(QSize(20, 20));  
+  toggle_side_bar->setChecked(false);
   connect(toggle_side_bar, SIGNAL(clicked()), panels_,
           SLOT(ToggleHide()));
   l2->addWidget(toggle_side_bar, 0);
 
-  QToolButton* add_side_bar_widget=new QToolButton(quick_access_bar_);          
+  QPushButton* add_side_bar_widget=new QPushButton(quick_access_bar_);
+  add_side_bar_widget->setAttribute(Qt::WA_MacSmallSize);  
+  #if !defined(__APPLE__)
   add_side_bar_widget->setText("+");
+  #endif
+  add_side_bar_widget->setFlat(true);  
+  add_side_bar_widget->setFixedSize(QSize(20, 20));
   add_side_bar_widget->setToolTip("Add widget to left sidebar");
-  add_side_bar_widget->setIconSize(QSize(20,20));
-  add_side_bar_widget->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("add_icon.png")));
+  add_side_bar_widget->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+
+                                     QString("add_icon.png")));
+  add_side_bar_widget->setIconSize(QSize(10,10));  
   connect(add_side_bar_widget, SIGNAL(clicked()), this, 
           SLOT(AddSideBarWidget()));          
   l2->addWidget(add_side_bar_widget, 0);

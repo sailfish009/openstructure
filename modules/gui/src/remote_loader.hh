@@ -19,7 +19,7 @@
 #ifndef OST_GUI_REMOTE_LOADER_HH
 #define OST_GUI_REMOTE_LOADER_HH
 
-#include <QPushButton>
+#include <QToolButton>
 #include <QLineEdit>
 #include <QKeyEvent>
 #include <QProgressBar>
@@ -57,7 +57,7 @@ private slots:
 
 private:
   QLineEdit* line_edit_;
-  QPushButton* button_;
+  QToolButton* button_;
   QProgressBar* progress_bar_;
   ActionList action_list_;
   QMenu* site_loader_menu_;

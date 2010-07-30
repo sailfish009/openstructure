@@ -23,7 +23,6 @@
 #include <QNetworkReply>
 #include <QHBoxLayout>
 #include <QDir>
-
 #include <ost/platform.hh>
 
 #include <ost/gui/file_loader.hh>
@@ -39,7 +38,8 @@ RemoteLoader::RemoteLoader(QWidget* parent):
 {
   img_support_=OST_IMG_ENABLED;
   line_edit_ = new QLineEdit(this);
-  button_ = new QPushButton("Load",this);
+  button_ = new QToolButton(this);
+  button_->setAttribute(Qt::WA_MacSmallSize);
   progress_bar_ = new QProgressBar(this);
   progress_bar_->setVisible(false);
   progress_bar_->setRange(0,0);
@@ -48,12 +48,11 @@ RemoteLoader::RemoteLoader(QWidget* parent):
   l->addWidget(line_edit_);
   l->addWidget(button_);
   l->addWidget(progress_bar_);
-  l->setMargin(0);
-  l->setSpacing(0);
+  l->setMargin(3);
+  l->setSpacing(2);
 
   this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  this->setMinimumHeight(progress_bar_->height());
-  this->setMaximumHeight(progress_bar_->height());
+  this->setFixedHeight(progress_bar_->height());
   connect(button_, SIGNAL(clicked()), this,
           SLOT(Clicked()));
 
@@ -69,7 +68,8 @@ RemoteLoader::RemoteLoader(QWidget* parent):
   QAction* select_url_action = new QAction(this);
   select_url_action->setText("URL");
   select_url_action->setToolTip("Select remote URL");
-  select_url_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("site_icon.png")));
+  select_url_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+
+                                   QString("site_icon.png")));
   action_list_.append(select_url_action);
 
   connect(select_url_action, SIGNAL(triggered(bool)), this, SLOT(UrlClick()));
