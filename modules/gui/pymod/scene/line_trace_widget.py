@@ -72,9 +72,11 @@ class LineTraceWidget(RenderModeWidget):
     
   def UpdateAA(self, value):
     self.GetOptions().SetAALines(value)
+    self.ApplyOptions()
     
   def UpdateLineWidth(self, value):
     self.GetOptions().SetLineWidth(value)
+    self.ApplyOptions()
     
   def UpdateGui(self,options):
     self.aa_rendering_cb_.setChecked(options.GetAALines())    

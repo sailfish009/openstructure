@@ -61,6 +61,7 @@ class CPKWidget(RenderModeWidget):
     
   def UpdateSphereDetail(self, value):
     self.GetOptions().SetSphereDetail(value)
+    self.ApplyOptions()
     
   def UpdateGui(self,options):
     self.sphere_spinbox_.setValue(options.GetSphereDetail())

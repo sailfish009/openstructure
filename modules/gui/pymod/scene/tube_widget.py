@@ -134,15 +134,19 @@ class TubeWidget(RenderModeWidget):
    
   def UpdatePolyMode(self, value):
     self.GetOptions().SetPolyMode(value)
+    self.ApplyOptions()
     
   def UpdateSplineDetail(self, value):
     self.GetOptions().SetSplineDetail(value)
-    
+    self.ApplyOptions()
+        
   def UpdateArcDetail(self, value):
     self.GetOptions().SetArcDetail(value)
-
+    self.ApplyOptions()
+    
   def UpdateRadius(self, value):
     self.GetOptions().SetTubeRadius(value)
+    self.ApplyOptions()
     
   def UpdateSliderRadius(self, value):
     self.GetOptions().SetTubeRadius(value/10.0)
