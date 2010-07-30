@@ -193,6 +193,7 @@ void SequenceTableView::ResizeWidth(int index, int, int size)
 #if !(defined(__APPLE__) && (QT_VERSION>=0x040600))  
   if(index == 0){
     static_column_->setColumnWidth(0,size);
+    static_row_->setColumnWidth(0,size);
     static_field_->setColumnWidth(0,size);
     this->updateStaticColumn();
     this->updateStaticField();
@@ -206,6 +207,7 @@ void SequenceTableView::ResizeHeight(int index, int, int size)
 #if !(defined(__APPLE__) && (QT_VERSION>=0x040600))
   static_column_->setRowHeight(index, size);
   if(index == 0){
+    static_column_->setRowHeight(0,size);
     static_row_->setRowHeight(0,size);
     static_field_->setRowHeight(0,size);
     this->updateStaticRow();
