@@ -54,6 +54,7 @@ def _InitPanels(app):
                            'ost.gui.RemoteLoader', False)
     panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.seq_viewer)
     panels.AddWidget(gui.PanelPosition.BOTTOM_PANEL, app.py_shell)
+    panels.AddWidget(gui.PanelPosition.RIGHT_PANEL, app.message_widget)
     return False
   return True
 
@@ -64,8 +65,6 @@ def _InitFrontEnd():
   app.SetAppTitle("DNG")
   main_area=app.perspective.main_area
   _InitMenuBar(app)
-  if not _InitPanels(app):
-    _InitSplash()
   _InitSpaceNav(app)
   _InitContextMenu(app)
   main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win, int(QtCore.Qt.WindowMaximized))
@@ -76,6 +75,9 @@ def _InitFrontEnd():
   app.ProcessEvents()
 
   _InitInspector(app)
+  
+  if not _InitPanels(app):
+    _InitSplash()
   
 def _load_files():
   for pdb_id in options.pdb_ids:
