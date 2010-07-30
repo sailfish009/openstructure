@@ -123,6 +123,7 @@ void SequenceViewer::InitSearchBar()
 void SequenceViewer::InitView()
 {
   seq_table_view_ = new SequenceTableView(model_);
+  seq_table_view_->setTextElideMode(Qt::ElideRight);  
   layout()->addWidget(seq_table_view_);
 
   connect(model_,SIGNAL(columnsInserted(const QModelIndex&, int, int)),seq_table_view_,SLOT(columnCountChanged(const QModelIndex&, int, int)));
@@ -169,8 +170,7 @@ void SequenceViewer::InitActions()
 void SequenceViewer::AddEntity(const gfx::EntityP& entity)
 {
   model_->InsertGfxEntity(entity);
-  seq_table_view_->resizeColumnsToContents();
-  seq_table_view_->resizeRowsToContents();
+  this->FitToContents();
   this->UpdateSearchBar();
 }
 
@@ -197,8 +197,7 @@ void SequenceViewer::AddAlignment(const seq::AlignmentHandle& alignment)
 {
   if(alignment.GetCount()>0 && alignment.GetLength()>0){
     model_->InsertAlignment(alignment);
-    seq_table_view_->resizeColumnsToContents();
-    seq_table_view_->resizeRowsToContents();
+    this->FitToContents();
   }
 }
 
@@ -243,21 +242,26 @@ void SequenceViewer::DoubleClicked(const QModelIndex& index)
   connect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
 }
 
+void SequenceViewer::FitToContents()
+{
+  seq_table_view_->resizeColumnsToContents();
+  seq_table_view_->resizeRowsToContents();
+  seq_table_view_->setColumnWidth(0, 150);  
+}
+
 void SequenceViewer::MouseWheelEvent(QWheelEvent* event)
 {
   int delta = event->delta();
   if (event->orientation() == Qt::Vertical) {
     if(delta>0){
       model_->ZoomIn();
-      seq_table_view_->viewport()->update();
-      seq_table_view_->resizeColumnsToContents();
-      seq_table_view_->resizeRowsToContents();
+      this->FitToContents();
+      seq_table_view_->viewport()->update();      
     }
     else if(delta<0){
       model_->ZoomOut();
-      seq_table_view_->viewport()->update();
-      seq_table_view_->resizeColumnsToContents();
-      seq_table_view_->resizeRowsToContents();
+      this->FitToContents();
+      seq_table_view_->viewport()->update();      
     }
   }
   event->accept();

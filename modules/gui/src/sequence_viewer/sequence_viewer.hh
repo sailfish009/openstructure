@@ -81,7 +81,7 @@ public slots:
 private:
   virtual void NodeAdded(const gfx::GfxNodeP& node);
   virtual void NodeRemoved(const gfx::GfxNodeP& node);
-
+  void FitToContents();
   void InitActions();
   void InitView();
   void InitSearchBar();
