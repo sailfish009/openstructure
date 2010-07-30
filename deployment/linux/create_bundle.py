@@ -129,12 +129,8 @@ subprocess.call('cp -pRL  examples  '+directory_name+'/share/openstructure/',she
 print 'Copying ReadMe file into package directory structure'
 subprocess.call('cp deployment/README.html '+directory_name,shell=True,cwd='../../')
 print 'Creating executables at the top level of the package directory structure'
-subprocess.call('echo "bin/dng" > '+directory_name+'/dng',shell=True,cwd='../../')
-subprocess.call('chmod +x '+directory_name+'/dng',shell=True,cwd='../../')
-subprocess.call('chmod -w '+directory_name+'/dng',shell=True,cwd='../../')
-subprocess.call('echo "bin/ost" > '+directory_name+'/ost',shell=True,cwd='../../')
-subprocess.call('chmod +x '+directory_name+'/ost',shell=True,cwd='../../')
-subprocess.call('chmod -w '+directory_name+'/ost',shell=True,cwd='../../')
+subprocess.call('ln -sf bin/dng ./dng',shell=True,cwd='../../'+directory_name)
+subprocess.call('ln -sf bin/ost ./ost',shell=True,cwd='../../'+directory_name)
 print 'Copying additional libraries in the package directory structure'
 subprocess.call('cp /usr/lib/libssl.so.0.9.8   '+directory_name+'/'+libdir,shell=True,cwd='../../')
 subprocess.call('cp /usr/lib/libcrypto.so.0.9.8   '+directory_name+'/'+libdir,shell=True,cwd='../../')
