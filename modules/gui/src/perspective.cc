@@ -72,9 +72,6 @@ void Perspective::SetupQuickAccessBar()
   l2->setContentsMargins(0, 0, 0, 0);
   QPushButton* toggle_side_bar=new QPushButton(quick_access_bar_);
   toggle_side_bar->setAttribute(Qt::WA_MacSmallSize);
-  #if !defined(__APPLE__)
-  toggle_side_bar->setText("A");
-  #endif
   toggle_side_bar->setFlat(true);
   toggle_side_bar->setToolTip("Glory A-Button");
   toggle_side_bar->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+
@@ -88,10 +85,7 @@ void Perspective::SetupQuickAccessBar()
   l2->addWidget(toggle_side_bar, 0);
 
   QPushButton* add_side_bar_widget=new QPushButton(quick_access_bar_);
-  add_side_bar_widget->setAttribute(Qt::WA_MacSmallSize);  
-  #if !defined(__APPLE__)
-  add_side_bar_widget->setText("+");
-  #endif
+  add_side_bar_widget->setAttribute(Qt::WA_MacSmallSize);
   add_side_bar_widget->setFlat(true);  
   add_side_bar_widget->setFixedSize(QSize(20, 20));
   add_side_bar_widget->setToolTip("Add widget to left sidebar");
