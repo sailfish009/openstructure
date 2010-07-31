@@ -184,6 +184,12 @@ public:
   ///
   /// \sa ChainHandle::DeleteResidue, DeleteAtom
   void DeleteResidue(const ResidueHandle& residue_handle);
+
+  /// \brief reorder residues of given chain based on their residue number
+  void ReorderResidues(const ChainHandle& chain);
+
+  /// \brief reorder residues of all chains based on their residue number
+  void ReorderAllResidues();
     
   /// \brief Get edit mode of editor
   EditMode GetMode() const;

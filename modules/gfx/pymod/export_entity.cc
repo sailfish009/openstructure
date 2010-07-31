@@ -228,12 +228,22 @@ RenderOptionsPtr ent_cpk_opts(Entity* ent)
   return ent->GetOptions(RenderMode::CPK);
 }
 
+void set_query1(Entity* e, const mol::Query& q)
+{
+  e->SetQuery(q);
+}
+
+void set_query2(Entity* e, const std::string& q)
+{
+  e->SetQuery(mol::Query(q));
+}
+
 }
 
 void export_Entity()
 {
-  class_<Entity, boost::shared_ptr<Entity>, bases<GfxObj>, boost::noncopyable>("Entity", init<const String&, const mol:: EntityHandle&, optional<const mol:: Query&> >())
-    .def(init<const String&, RenderMode::Type, const mol::EntityHandle&, optional<const mol::Query&> >())
+  class_<Entity, boost::shared_ptr<Entity>, bases<GfxObj>, boost::noncopyable>("Entity", init<const String&, const mol:: EntityHandle&, optional<const mol:: Query&, mol::QueryFlags> >())
+    .def(init<const String&, RenderMode::Type, const mol::EntityHandle&, optional<const mol::Query&, mol::QueryFlags> >())
     .def(init<const String&, const mol::EntityView&>())
     .def(init<const String&, RenderMode::Type, const mol::EntityView&>())
     .def("SetColor",ent_set_color1)
@@ -252,6 +262,8 @@ void export_Entity()
                   &Entity::SetSelection)
     .def("GetView", &Entity::GetView)
     .def("UpdateView", &Entity::UpdateView)
+    .def("SetQuery", set_query1)
+    .def("SetQuery", set_query2)
     .def("GetRenderModeName", &Entity::GetRenderModeName)
     .def("GetNotEmptyRenderModes", &Entity::GetNotEmptyRenderModes)
     .def("SetRenderMode", set_rm1, arg("keep")=false)

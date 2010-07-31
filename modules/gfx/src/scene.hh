@@ -185,6 +185,8 @@ class DLLEXPORT_OST_GFX Scene {
   */
   void Stereo(unsigned int);
 
+  int GetStereo() const {return stereo_;}
+
   /// \brief invert stereo eyes for stereo mode=0
   void SetStereoInverted(bool f);
 

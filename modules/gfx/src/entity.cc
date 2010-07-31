@@ -64,9 +64,10 @@ using namespace impl;
 
 Entity::Entity(const String& name,
                const EntityHandle& h,
-               const Query& q):
+               const Query& q,
+               QueryFlags f):
   GfxObj(name),
-  qv_(q, h),
+  qv_(q, h, f),
   bbox_(geom::Vec3(), geom::Vec3()),
   sel_(),
   sel_update_(),
@@ -82,9 +83,10 @@ Entity::Entity(const String& name,
 Entity::Entity(const String& name,
                RenderMode::Type m,
                const EntityHandle& h,
-               const Query& q):
+               const Query& q,
+               QueryFlags f):
   GfxObj(name),
-  qv_(q, h),
+  qv_(q, h, f),
   bbox_(geom::Vec3(), geom::Vec3()),
   sel_(),
   sel_update_(),
@@ -837,6 +839,13 @@ mol::EntityView Entity::GetView() const
     cached_view_=qv_.GetEntityView();
   }
   return cached_view_;
+}
+
+void Entity::SetQuery(const mol::Query& q)
+{
+  qv_.SetQuery(q);
+  update_view_=true;
+  Rebuild();
 }
 
 void Entity::ColorBy(const String& prop,

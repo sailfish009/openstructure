@@ -32,8 +32,8 @@ public:
   explicit QueryViewWrapper(const EntityHandle& entity_handle);
   explicit QueryViewWrapper(const EntityView& entity_view);
   QueryViewWrapper();
-  QueryViewWrapper(const Query& query, const EntityHandle& handle);
-  QueryViewWrapper(const Query& query, const EntityView& view);  
+  QueryViewWrapper(const Query& query, const EntityHandle& handle, QueryFlags f=0);
+  QueryViewWrapper(const Query& query, const EntityView& view, QueryFlags f=0);  
   EntityView GetEntityView() const;
   bool DependsOnQuery() const;
   bool IsDataValid() const;
@@ -41,11 +41,15 @@ public:
   void SetQuery(const Query& query);
   const Query& GetQuery() const;
 
+  void SetQueryFlags(QueryFlags f);
+  QueryFlags GetQueryFlags() const;
+
 private:
   bool view_set_;
   EntityHandle entity_handle_;
   EntityView entity_view_;
   Query query_;
+  QueryFlags flags_;
 };
 
 } } // ns

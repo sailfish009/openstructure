@@ -83,6 +83,8 @@ void export_Editors()
     .def("Connect", connect_d)    
     .def("RenameChain", &EditorBase::RenameChain)
     .def("AddTorsion", &EditorBase::AddTorsion)
+    .def("ReorderResidues",&EditorBase::ReorderResidues)
+    .def("ReorderAllResidues",&EditorBase::ReorderAllResidues)
   ;
   
   class_<XCSEditor, bases<EditorBase> >("XCSEditor", no_init)

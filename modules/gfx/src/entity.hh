@@ -70,13 +70,15 @@ public:
   /// Rebuild() will re-apply the mol::Query to the given mol::EntityHandle
   Entity(const String& name,
          const mol::EntityHandle& eh,
-         const mol::Query& q=mol::Query());
+         const mol::Query& q=mol::Query(),
+         mol::QueryFlags f=0);
 
   /// \brief variant with explicit graphics mode instead of the default
   Entity(const String& name,
          RenderMode::Type m,
          const mol::EntityHandle& eh,
-         const mol::Query& q=mol::Query());
+         const mol::Query& q=mol::Query(),
+         mol::QueryFlags f=0);
 
   /// \brief Initialize with an object name and an explicit mol::Entity view; 
   ///    later calls to Rebuild always use this mol::Entity view
@@ -174,6 +176,7 @@ public:
   /// \brief get view
   mol::EntityView GetView() const;
 
+  void SetQuery(const mol::Query& q);
 
   // turn blur on or off
   void SetBlur(bool f);

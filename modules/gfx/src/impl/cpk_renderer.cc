@@ -86,6 +86,7 @@ void CPKRenderer::Render(RenderPass pass)
 
 void CPKRenderer::RenderPov(PovState& pov, const std::string& name)
 {
+  if(view_.atom_map.empty()) return;
   pov.write_merge_or_union(name);
   
   for (AtomEntryMap::const_iterator it=view_.atom_map.begin();it!=view_.atom_map.end();++it) {
@@ -172,7 +173,6 @@ void CPKRenderer::Render3DSprites()
 
     glEnd();
     glPopAttrib();
-    glPopMatrix();
 
     Shader::Instance().PopProgram();
     Shader::Instance().UpdateState();

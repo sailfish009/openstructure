@@ -110,6 +110,8 @@ public:
   void DeleteResidue(const ResidueImplPtr& residue);
   
   void DeleteAllResidues();
+
+  void ReorderResidues();
   
   int GetIndex(const ResNum& number) const;  
   

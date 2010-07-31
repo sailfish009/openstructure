@@ -26,57 +26,80 @@ QueryViewWrapper::QueryViewWrapper():
         view_set_(false),
         entity_handle_(),
         entity_view_(),
-        query_(){}
+        query_(),
+        flags_(0)
+{}
 
 QueryViewWrapper::QueryViewWrapper(const EntityHandle& entity_handle):
     view_set_(false),
     entity_handle_(entity_handle),
     entity_view_(),
-    query_(){}
+    query_(),
+    flags_(0)
+{}
 
 QueryViewWrapper::QueryViewWrapper(const EntityView& entity_view):
     view_set_(true),
     entity_handle_(),
     entity_view_(entity_view),
-    query_(){}
+    query_(),
+    flags_(0)
+{}
 
 QueryViewWrapper::QueryViewWrapper(const Query& query, 
-                                   const EntityHandle& entity_handle):
+                                   const EntityHandle& entity_handle,
+                                   QueryFlags f):
     view_set_(false),
     entity_handle_(entity_handle),
     entity_view_(),
-    query_(query)
-{ }
+    query_(query),
+    flags_(f)
+{}
 
 QueryViewWrapper::QueryViewWrapper(const Query& query, 
-                                   const EntityView& view):
+                                   const EntityView& view,
+                                   QueryFlags f):
     view_set_(true),
     entity_handle_(),
     entity_view_(view),
-    query_(query)
-{ }
+    query_(query),
+    flags_(f)
+{}
 
 EntityView QueryViewWrapper::GetEntityView() const
 {
   if(view_set_) {
-    return query_.MatchAll() ? entity_view_ : entity_view_.Select(query_);
+    return query_.MatchAll() ? entity_view_ : entity_view_.Select(query_,flags_);
   } else {
     if(entity_handle_.IsValid()){
-      return entity_handle_.Select(query_);
+      return entity_handle_.Select(query_,flags_);
     }
     return entity_view_;
   }
 }
 
-const Query& QueryViewWrapper::GetQuery() const{
+const Query& QueryViewWrapper::GetQuery() const
+{
   return query_;
 }
 
-void QueryViewWrapper::SetQuery(const Query& query){
+void QueryViewWrapper::SetQuery(const Query& query)
+{
   query_ = query;
 }
 
-bool QueryViewWrapper::IsDataValid() const{
+void QueryViewWrapper::SetQueryFlags(QueryFlags f)
+{
+  flags_=f;
+}
+
+QueryFlags QueryViewWrapper::GetQueryFlags() const
+{
+  return flags_;
+}
+
+bool QueryViewWrapper::IsDataValid() const
+{
   if(view_set_){
     return entity_view_.IsValid();
   }
@@ -88,4 +111,4 @@ bool QueryViewWrapper::DependsOnQuery() const
   return query_.MatchAll();
 }
 
-} } // ns
+}} // ns

@@ -119,6 +119,7 @@ void TraceRenderer::PrepareRendering(BackboneTrace& trace_subset,
 
 void TraceRenderer::RenderPov(PovState& pov, const std::string& name)
 {
+  if(trace_subset_.GetListCount()==0) return;
   pov.write_merge_or_union(name);
 
   for (int node_list=0; node_list<trace_subset_.GetListCount(); ++node_list) {

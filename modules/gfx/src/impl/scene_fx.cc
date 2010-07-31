@@ -61,7 +61,6 @@ SceneFX::~SceneFX()
 
 void SceneFX::Setup()
 {
-  if(!GLEW_VERSION_2_0) return;
   LOGN_DEBUG("SceneFX: setup");
 
   glGenTextures(1,&scene_tex_id_);
@@ -213,7 +212,6 @@ void SceneFX::Resize(unsigned int w, unsigned int h)
 
 void SceneFX::Preprocess() 
 {
-  if(!GLEW_VERSION_2_0) return;
   if(use_fb_) {
 #if GL_VERSION_3_0
     glBindFramebuffer(GL_FRAMEBUFFER, scene_fb_);
@@ -225,7 +223,6 @@ void SceneFX::Preprocess()
 
 void SceneFX::Postprocess()
 {
-  if(!GLEW_VERSION_2_0) return;
   if(use_fb_) {
 #if GL_VERSION_3_0
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -354,7 +351,6 @@ void SceneFX::Postprocess()
 
 void SceneFX::DrawTex(unsigned int w, unsigned int h, GLuint texid)
 {
-  if(!GLEW_VERSION_2_0) return;
   Shader::Instance().PushProgram();
   Shader::Instance().Activate("");
   glActiveTexture(GL_TEXTURE0);

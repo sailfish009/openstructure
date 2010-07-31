@@ -27,6 +27,23 @@
  
 namespace ost { namespace gfx { namespace impl {
 
+namespace {
+
+bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2)
+{
+  if(!r1.IsValid() || !r2.IsValid()) return false;
+  if(r1.GetChain()!=r2.GetChain()) return false;
+  mol::ResNum n1 = r1.GetNumber();
+  mol::ResNum n2 = r2.GetNumber();
+  if(n2.GetInsCode()!='\0') {
+    if(n1.NextInsertionCode()==n2) return true;
+  }
+  if(n1.GetNum()+1==n2.GetNum()) return true;
+  return false;
+}
+
+} // anon ns
+
 class TraceBuilder: public mol::EntityVisitor {
 public:
   TraceBuilder(BackboneTrace* bb_trace):
@@ -50,7 +67,9 @@ public:
 
   virtual bool VisitResidue(const mol::ResidueHandle& res)
   {
-    if(!mol::InSequence(last_residue_,res)) {
+    // check in-sequence
+    bool in_seq=in_sequence(last_residue_,res);
+    if(!in_seq) {
       if(!list_.empty()) {
         backbone_trace_->AddNodeEntryList(list_);
         list_.clear();

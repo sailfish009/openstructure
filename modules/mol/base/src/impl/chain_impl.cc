@@ -439,4 +439,17 @@ void ChainImpl::SetName(const String& new_name)
   name_=new_name;
 }
 
+namespace {
+  bool rnum_cmp(const ResidueImplPtr& r1, const ResidueImplPtr& r2)
+  {
+    return r1->GetNumber()<r2->GetNumber();
+  }
+}
+
+void ChainImpl::ReorderResidues()
+{
+  std::sort(residue_list_.begin(),residue_list_.end(),rnum_cmp);
+  UpdateShifts();
+}
+
 }}} // ns

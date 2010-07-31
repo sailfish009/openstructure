@@ -398,9 +398,8 @@ void IndexedVertexArray::RenderGL()
 #endif
   }
   
-  glPushAttrib(GL_ENABLE_BIT | GL_POLYGON_BIT | GL_COLOR_BUFFER_BIT | GL_LIGHTING_BIT);
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-  glPushMatrix();
 
   if(outline_mode_>0) {
     LOGN_TRACE("outline rendering");
@@ -541,7 +540,6 @@ void IndexedVertexArray::RenderGL()
     glEnd();
   }
 
-  glPopMatrix();
   glPopClientAttrib();
   glPopAttrib();
 }

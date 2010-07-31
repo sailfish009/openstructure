@@ -188,6 +188,7 @@ BondEntryList& SimpleRenderer::GetBondEntryList()
 
 void SimpleRenderer::RenderPov(PovState& pov, const std::string& name)
 {
+  if(view_.atom_map.empty() && view_.bond_list.empty()) return;
   pov.write_merge_or_union(name);
   
   for (AtomEntryMap::const_iterator it=view_.atom_map.begin();
