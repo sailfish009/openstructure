@@ -26,7 +26,6 @@
 #include <QTableWidgetItem>
 #include <QMouseEvent>
 
-#include <iostream>
 #include "sequence_table_view.hh"
 #include "sequence_model.hh"
 
@@ -198,14 +197,12 @@ void SequenceTableView::ResizeWidth(int index, int, int size)
     this->updateStaticColumn();
     this->updateStaticField();
   }
-  static_row_->setRowHeight(index,size);
 #endif  
 }
 
 void SequenceTableView::ResizeHeight(int index, int, int size)
 {
 #if !(defined(__APPLE__) && (QT_VERSION>=0x040600))
-  static_column_->setRowHeight(index, size);
   if(index == 0){
     static_column_->setRowHeight(0,size);
     static_row_->setRowHeight(0,size);
