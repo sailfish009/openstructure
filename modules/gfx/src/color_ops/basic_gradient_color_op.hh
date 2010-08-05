@@ -52,6 +52,7 @@ public:
   static gfx::BasicGradientColorOp FromInfo(info::InfoGroup& group);
 
 private:
+  void Init();
   gfx::Gradient gradient_;
   mol::Prop::Level level_;
 };

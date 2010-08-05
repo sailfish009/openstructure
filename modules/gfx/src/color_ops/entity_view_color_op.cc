@@ -27,16 +27,21 @@
 namespace ost { namespace gfx {
 
 EntityViewColorOp::EntityViewColorOp() : GradientColorOp(), ev_(){
-
+  this->Init();
 }
 EntityViewColorOp::EntityViewColorOp(int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const mol::EntityView& ev) :
   GradientColorOp("", mask, property, gradient, minv, maxv), ev_(ev){
-
+  this->Init();
 }
 
 EntityViewColorOp::EntityViewColorOp(const String& property, const gfx::Gradient& gradient, float minv, float maxv, const mol::EntityView& ev) :
   GradientColorOp("", property, gradient, minv, maxv), ev_(ev){
+  this->Init();
+}
 
+void EntityViewColorOp::Init()
+{
+  this->SetName("EntityView gradient");
 }
 
 bool EntityViewColorOp::CanApplyTo(const GfxObjP& obj) const{

@@ -27,29 +27,36 @@
 namespace ost { namespace gfx {
 
 UniformColorOp::UniformColorOp() : ColorOp(), color_(){
-
+  this->Init();
 }
 
 UniformColorOp::UniformColorOp(const String& selection, 
                                const gfx::Color& color): 
   ColorOp(selection), color_(color){
-
+  this->Init();
 }
 
 UniformColorOp::UniformColorOp(const String& selection, int mask,
                                const gfx::Color& color):
   ColorOp(selection,mask), color_(color){
+  this->Init();
 }
 
 UniformColorOp::UniformColorOp(const mol::QueryViewWrapper& query_view,
                                const gfx::Color& color):
   ColorOp(query_view), color_(color){
-
+  this->Init();
 }
 
 UniformColorOp::UniformColorOp(const mol::QueryViewWrapper& query_view,
                                int mask, const gfx::Color& color):
   ColorOp(query_view,mask), color_(color){
+  this->Init();
+}
+
+void UniformColorOp::Init()
+{
+  this->SetName("Uniform color");
 }
 
 bool UniformColorOp::CanApplyTo(const GfxObjP& obj) const

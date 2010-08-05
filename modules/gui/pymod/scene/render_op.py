@@ -32,7 +32,10 @@ class RenderOp():
     self.selection_ = selection
     self.keep_ = keep
     self.flags_ = flags
-    
+
+  def GetName(self):
+    return "Render mode: %s"%str(self.GetRenderMode())
+
   def SetRenderMode(self, render_mode):
     self.render_mode_ = render_mode
     

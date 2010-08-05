@@ -25,11 +25,25 @@
 
 namespace ost { namespace gfx {
 
-ByElementColorOp::ByElementColorOp() : ColorOp(){}
+ByElementColorOp::ByElementColorOp() : ColorOp()
+{
+  this->Init();
+}
 
-ByElementColorOp::ByElementColorOp(const String& selection, int mask) : ColorOp(selection,mask){}
+ByElementColorOp::ByElementColorOp(const String& selection, int mask) : ColorOp(selection,mask)
+{
+  this->Init();
+}
 
-ByElementColorOp::ByElementColorOp(const mol::QueryViewWrapper& query_view, int mask) : ColorOp(query_view,mask){}
+ByElementColorOp::ByElementColorOp(const mol::QueryViewWrapper& query_view, int mask) : ColorOp(query_view,mask)
+{
+  this->Init();
+}
+
+void ByElementColorOp::Init()
+{
+  this->SetName("By element");
+}
 
 bool ByElementColorOp::CanApplyTo(const GfxObjP& obj) const{
   if(dynamic_cast<Entity*>(obj.get()))

@@ -21,16 +21,16 @@
 
 namespace ost { namespace gfx {
 
-ColorOp::ColorOp(): query_view_(), mask_(DETAIL_COLOR|MAIN_COLOR)
+ColorOp::ColorOp():  name_("Abstract coloring"), query_view_(), mask_(DETAIL_COLOR|MAIN_COLOR)
 { }
 
 
 ColorOp::ColorOp(const String& selection, int mask):
-    query_view_(mol::Query(selection),mol::EntityView() ), mask_(mask)
+    name_("Abstract coloring"), query_view_(mol::Query(selection),mol::EntityView() ), mask_(mask)
 { }
 
 ColorOp::ColorOp(const mol::QueryViewWrapper& query_view, int mask):
-    query_view_(query_view), mask_(mask)
+    name_("Abstract coloring"), query_view_(query_view), mask_(mask)
 { }
 
 bool ColorOp::CanApplyTo(const GfxObjP& obj) const
@@ -41,6 +41,16 @@ bool ColorOp::CanApplyTo(const GfxObjP& obj) const
 void ColorOp::ApplyTo(GfxObjP& obj) const
 {
   //Do Nothing
+}
+
+const String& ColorOp::GetName() const
+{
+  return name_;
+}
+
+void ColorOp::SetName(const String& name)
+{
+  name_=name;
 }
 
 void ColorOp::SetSelection(const String& selection)

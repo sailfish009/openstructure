@@ -31,6 +31,9 @@ class VisibilityOp():
     self.visible_ = visible
     self.flags_ = flags
     
+  def GetName(self):
+    return "Visible: %s"%str(self.IsVisible())
+  
   def SetSelection(self, selection):
     self.selection_ = selection
     

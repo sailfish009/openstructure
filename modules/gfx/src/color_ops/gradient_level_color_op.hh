@@ -76,6 +76,7 @@ public:
   static gfx::GradientLevelColorOp FromInfo(info::InfoGroup& group);
 
 private:
+  void Init();
   mol::Prop::Level level_;
 };
 

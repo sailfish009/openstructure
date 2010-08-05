@@ -26,20 +26,33 @@
 namespace ost { namespace gfx {
 
 MapHandleColorOp::MapHandleColorOp() : GradientColorOp(), mh_(){
-
+  this->Init();
 }
 
 MapHandleColorOp::MapHandleColorOp(const String& selection, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh) :
-  GradientColorOp(selection, property, gradient, minv, maxv), mh_(mh){ }
+  GradientColorOp(selection, property, gradient, minv, maxv), mh_(mh){
+  this->Init();
+}
 
 MapHandleColorOp::MapHandleColorOp(const String& selection, int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh) :
-  GradientColorOp(selection, mask, property, gradient, minv, maxv), mh_(mh){ }
+  GradientColorOp(selection, mask, property, gradient, minv, maxv), mh_(mh){
+  this->Init();
+}
 
 MapHandleColorOp::MapHandleColorOp(const mol::QueryViewWrapper& query_view, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh) :
-  GradientColorOp(query_view, property, gradient, minv, maxv), mh_(mh){ }
+  GradientColorOp(query_view, property, gradient, minv, maxv), mh_(mh){
+  this->Init();
+}
 
 MapHandleColorOp::MapHandleColorOp(const mol::QueryViewWrapper& query_view, int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh) :
-  GradientColorOp(query_view, mask, property, gradient, minv, maxv), mh_(mh){ }
+  GradientColorOp(query_view, mask, property, gradient, minv, maxv), mh_(mh){
+  this->Init();
+}
+
+void MapHandleColorOp::Init()
+{
+  this->SetName("MapHandle gradient");
+}
 
 bool MapHandleColorOp::CanApplyTo(const GfxObjP& obj) const{
   if(dynamic_cast<Entity*>(obj.get())){

@@ -50,6 +50,7 @@ public:
   static gfx::ByChainColorOp FromInfo(info::InfoGroup& group);
 
 private:
+  void Init();
   gfx::Color GenerateColor(String& ident) const;
 
   mutable int chain_count_;

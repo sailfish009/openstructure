@@ -25,7 +25,7 @@
 namespace ost { namespace gfx {
 
 GradientColorOp::GradientColorOp() : ColorOp(), property_(), gradient_(){
-
+  this->Init();
 }
 
 GradientColorOp::GradientColorOp(const String& selection, const String& property,
@@ -33,48 +33,69 @@ GradientColorOp::GradientColorOp(const String& selection, const String& property
                                  float minv, float maxv):
   ColorOp(selection), property_(property), gradient_(gradient), calculate_(false),
   minv_(minv), maxv_(maxv)
-{ }
+{
+  this->Init();
+}
 
 GradientColorOp::GradientColorOp(const String& selection, int mask, const String& property,
                                  const gfx::Gradient& gradient,
                                  float minv, float maxv):
   ColorOp(selection,mask), property_(property), gradient_(gradient), calculate_(false),
   minv_(minv), maxv_(maxv)
-{ }
+{
+  this->Init();
+}
 
 GradientColorOp::GradientColorOp(const String& selection, const String& property,
                                  const gfx::Gradient& gradient):
   ColorOp(selection), property_(property), gradient_(gradient), calculate_(true)
-{ }
+{
+  this->Init();
+}
 
 GradientColorOp::GradientColorOp(const String& selection, int mask, const String& property,
                                  const gfx::Gradient& gradient):
   ColorOp(selection,mask), property_(property), gradient_(gradient), calculate_(true)
-{ }
+{
+  this->Init();
+}
 
 GradientColorOp::GradientColorOp(const mol::QueryViewWrapper& query_view, const String& property,
                                  const gfx::Gradient& gradient,
                                  float minv, float maxv):
   ColorOp(query_view), property_(property), gradient_(gradient), calculate_(false),
   minv_(minv), maxv_(maxv)
-{ }
+{
+  this->Init();
+}
 
 GradientColorOp::GradientColorOp(const mol::QueryViewWrapper& query_view, int mask, const String& property,
                                  const gfx::Gradient& gradient,
                                  float minv, float maxv):
   ColorOp(query_view,mask), property_(property), gradient_(gradient), calculate_(false),
   minv_(minv), maxv_(maxv)
-{ }
+{
+  this->Init();
+}
 
 GradientColorOp::GradientColorOp(const mol::QueryViewWrapper& query_view, const String& property,
                                  const gfx::Gradient& gradient):
   ColorOp(query_view), property_(property), gradient_(gradient), calculate_(true)
-{ }
+{
+  this->Init();
+}
 
 GradientColorOp::GradientColorOp(const mol::QueryViewWrapper& query_view, int mask, const String& property,
                                  const gfx::Gradient& gradient):
   ColorOp(query_view,mask), property_(property), gradient_(gradient), calculate_(true)
-{ }
+{
+  this->Init();
+}
+
+void GradientColorOp::Init()
+{
+  this->SetName("Gradient");
+}
 
 void GradientColorOp::SetProperty(const String& property)
 {

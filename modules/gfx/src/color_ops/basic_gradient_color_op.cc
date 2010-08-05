@@ -26,12 +26,17 @@
 namespace ost { namespace gfx {
 
 BasicGradientColorOp::BasicGradientColorOp() : ColorOp(), gradient_(){
-
+  this->Init();
 }
 
 BasicGradientColorOp::BasicGradientColorOp(const String& selection, const gfx::Gradient& gradient, mol::Prop::Level level) :
   ColorOp(selection), gradient_(gradient), level_(level){
+  this->Init();
+}
 
+void BasicGradientColorOp::Init()
+{
+  this->SetName("Basic gradient");
 }
 
 bool BasicGradientColorOp::CanApplyTo(const GfxObjP& obj) const{

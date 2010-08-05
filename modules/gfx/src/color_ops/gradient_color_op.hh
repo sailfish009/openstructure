@@ -65,6 +65,7 @@ public:
   static gfx::GradientColorOp FromInfo(info::InfoGroup& group);
 
 private:
+  void Init();
   String property_;
   gfx::Gradient gradient_;
   bool calculate_;

@@ -26,11 +26,25 @@
 
 namespace ost { namespace gfx {
 
-ByChainColorOp::ByChainColorOp() : ColorOp(),chain_count_(0),color_grad_("RAINBOW"){}
+ByChainColorOp::ByChainColorOp() : ColorOp(),chain_count_(0),color_grad_("RAINBOW")
+{
+  this->Init();
+}
 
-ByChainColorOp::ByChainColorOp(const String& selection, int mask) : ColorOp(selection,mask),chain_count_(0),color_grad_("RAINBOW"){}
+ByChainColorOp::ByChainColorOp(const String& selection, int mask) : ColorOp(selection,mask),chain_count_(0),color_grad_("RAINBOW")
+{
+  this->Init();
+}
 
-ByChainColorOp::ByChainColorOp(const mol::QueryViewWrapper& query_view, int mask) : ColorOp(query_view,mask),chain_count_(0),color_grad_("RAINBOW"){}
+ByChainColorOp::ByChainColorOp(const mol::QueryViewWrapper& query_view, int mask) : ColorOp(query_view,mask),chain_count_(0),color_grad_("RAINBOW")
+{
+  this->Init();
+}
+
+void ByChainColorOp::Init()
+{
+  this->SetName("By chain");
+}
 
 bool ByChainColorOp::CanApplyTo(const GfxObjP& obj) const{
   if(dynamic_cast<Entity*>(obj.get()))

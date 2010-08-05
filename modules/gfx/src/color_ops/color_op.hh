@@ -51,6 +51,8 @@ public:
   virtual bool CanApplyTo(const GfxObjP& obj) const;
   virtual void ApplyTo(GfxObjP& obj) const;
 
+  virtual const String& GetName() const;
+
   ColorMask GetMask() const;
   
   void SetMask(ColorMask mask);
@@ -67,7 +69,12 @@ public:
 
   virtual void ToInfo(info::InfoGroup& group) const;
   static gfx::ColorOp FromInfo(info::InfoGroup& group);
+
+protected:
+  virtual void SetName(const String& name);
+
 private:
+  String name_;
   mol::QueryViewWrapper query_view_;
   ColorMask mask_;
 };
