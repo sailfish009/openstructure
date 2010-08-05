@@ -65,9 +65,9 @@ void ByChainColorOp::SetChainCount(int chain_count)
 
 gfx::ByChainColorOp ByChainColorOp::FromInfo(info::InfoGroup& group){
   gfx::ColorOp op = ColorOp::FromInfo(group);
-  String selection = op.GetSelection();
+  mol::QueryViewWrapper wrapper(op.GetSelection(),op.GetSelectionFlags());
   int mask = op.GetMask();
-  return gfx::ByChainColorOp(selection, mask);
+  return gfx::ByChainColorOp(wrapper, mask);
 }
 
 gfx::Color ByChainColorOp::GenerateColor(String& ident) const{

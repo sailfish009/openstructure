@@ -58,6 +58,9 @@ public:
   virtual void SetSelection(const String& selection);
   virtual String GetSelection() const;
 
+  virtual void SetSelectionFlags(mol::QueryFlags flags);
+  virtual mol::QueryFlags GetSelectionFlags() const;
+
   virtual bool IsSelectionOnly() const;
   virtual void SetView(const mol::EntityView& view);
   virtual mol::EntityView GetView() const;

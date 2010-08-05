@@ -97,9 +97,9 @@ gfx::UniformColorOp UniformColorOp::FromInfo(info::InfoGroup& group)
   float r, g, b, a;
   ss >> r >> g >> b >> a;
   Color c = Color(r,g,b,a);
-  String selection = op.GetSelection();
+  mol::QueryViewWrapper wrapper(op.GetSelection(),op.GetSelectionFlags());
   int mask = op.GetMask();
-  return gfx::UniformColorOp(selection,mask,c);
+  return gfx::UniformColorOp(wrapper,mask,c);
 }
 
 }}

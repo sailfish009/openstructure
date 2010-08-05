@@ -150,12 +150,12 @@ gfx::GradientColorOp GradientColorOp::FromInfo(info::InfoGroup& group)
     if(ss.good())property.append(" ");
     part.clear();
   }
-  String selection = op.GetSelection();
+  mol::QueryViewWrapper wrapper(op.GetSelection(),op.GetSelectionFlags());
   if(calculate) {
-    return gfx::GradientColorOp(selection,mask,property,gradient);
+    return gfx::GradientColorOp(wrapper,mask,property,gradient);
   }
   else {
-    return gfx::GradientColorOp(selection,mask,property,gradient, minv, maxv);
+    return gfx::GradientColorOp(wrapper,mask,property,gradient, minv, maxv);
   }
 }
 

@@ -46,9 +46,9 @@ void ByElementColorOp::ApplyTo(GfxObjP& objP) const{
 
 gfx::ByElementColorOp ByElementColorOp::FromInfo(info::InfoGroup& group){
   gfx::ColorOp op = ColorOp::FromInfo(group);
-  String selection = op.GetSelection();
+  mol::QueryViewWrapper wrapper(op.GetSelection(),op.GetSelectionFlags());
   int mask = op.GetMask();
-  return gfx::ByElementColorOp(selection, mask);
+  return gfx::ByElementColorOp(wrapper, mask);
 }
 
 }}

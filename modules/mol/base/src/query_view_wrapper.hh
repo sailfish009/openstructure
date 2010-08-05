@@ -33,7 +33,9 @@ public:
   explicit QueryViewWrapper(const EntityView& entity_view);
   QueryViewWrapper();
   QueryViewWrapper(const Query& query, const EntityHandle& handle);
-  QueryViewWrapper(const Query& query, const EntityView& view);  
+  QueryViewWrapper(const Query& query, const EntityView& view = mol::EntityView());
+  QueryViewWrapper(const Query& query, QueryFlags flags, const EntityHandle& handle);
+  QueryViewWrapper(const Query& query, QueryFlags flags, const EntityView& view = mol::EntityView());
   EntityView GetEntityView() const;
   bool DependsOnQuery() const;
   bool IsDataValid() const;
@@ -41,11 +43,15 @@ public:
   void SetQuery(const Query& query);
   const Query& GetQuery() const;
 
+  void SetFlags(QueryFlags flags);
+  QueryFlags GetFlags() const;
+
 private:
   bool view_set_;
   EntityHandle entity_handle_;
   EntityView entity_view_;
   Query query_;
+  QueryFlags flags_;
 };
 
 } } // ns

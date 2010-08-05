@@ -143,17 +143,17 @@ gfx::GradientLevelColorOp GradientLevelColorOp::FromInfo(info::InfoGroup& group)
   int l;
   ss >> l;
   mol::Prop::Level level = mol::Prop::Level(l);
-  String selection = gop.GetSelection();
+  mol::QueryViewWrapper wrapper(gop.GetSelection(),gop.GetSelectionFlags());
   String property = gop.GetProperty();
   int mask = gop.GetMask();
   gfx::Gradient gradient = gop.GetGradient();
   float minv = gop.GetMinV();
   float maxv = gop.GetMaxV();
   if(gop.GetCalculateMinMax()){
-    return gfx::GradientLevelColorOp(selection, mask, property, gradient, level);
+    return gfx::GradientLevelColorOp(wrapper, mask, property, gradient, level);
   }
   else{
-    return gfx::GradientLevelColorOp(selection, mask, property, gradient, minv, maxv, level);
+    return gfx::GradientLevelColorOp(wrapper, mask, property, gradient, minv, maxv, level);
   }
 }
 

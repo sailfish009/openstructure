@@ -82,14 +82,14 @@ gfx::MapHandleColorOp MapHandleColorOp::FromInfo(info::InfoGroup& group){
   info::InfoGroup super_group = group.GetGroup("GradientColorOp");
   gfx::GradientColorOp gop = GradientColorOp::FromInfo(super_group);
   std::istringstream ss(group.GetTextData());
-  String selection = gop.GetSelection();
+  mol::QueryViewWrapper wrapper(gop.GetSelection(),gop.GetSelectionFlags());
   gfx::Gradient gradient = gop.GetGradient();
   int mask = gop.GetMask();
   String property = gop.GetProperty();
   float minv = gop.GetMinV();
   float maxv = gop.GetMaxV();
   //TODO load map handle
-  return gfx::MapHandleColorOp(selection, mask, property, gradient, minv, maxv, img::MapHandle());
+  return gfx::MapHandleColorOp(wrapper, mask, property, gradient, minv, maxv, img::MapHandle());
 }
 
 }}

@@ -26,43 +26,62 @@ QueryViewWrapper::QueryViewWrapper():
         view_set_(false),
         entity_handle_(),
         entity_view_(),
-        query_(){}
+        query_(),
+        flags_(0){}
 
 QueryViewWrapper::QueryViewWrapper(const EntityHandle& entity_handle):
     view_set_(false),
     entity_handle_(entity_handle),
     entity_view_(),
-    query_(){}
+    query_(),
+    flags_(0){}
 
 QueryViewWrapper::QueryViewWrapper(const EntityView& entity_view):
     view_set_(true),
     entity_handle_(),
     entity_view_(entity_view),
-    query_(){}
+    query_(),
+    flags_(0){}
 
 QueryViewWrapper::QueryViewWrapper(const Query& query, 
                                    const EntityHandle& entity_handle):
     view_set_(false),
     entity_handle_(entity_handle),
     entity_view_(),
-    query_(query)
-{ }
+    query_(query),
+    flags_(0){}
 
 QueryViewWrapper::QueryViewWrapper(const Query& query, 
                                    const EntityView& view):
     view_set_(true),
     entity_handle_(),
     entity_view_(view),
-    query_(query)
-{ }
+    query_(query),
+    flags_(0){}
+
+QueryViewWrapper::QueryViewWrapper(const Query& query, QueryFlags flags,
+                                   const EntityHandle& entity_handle):
+    view_set_(false),
+    entity_handle_(entity_handle),
+    entity_view_(),
+    query_(query),
+    flags_(flags){}
+
+QueryViewWrapper::QueryViewWrapper(const Query& query, QueryFlags flags,
+                                   const EntityView& view):
+    view_set_(true),
+    entity_handle_(),
+    entity_view_(view),
+    query_(query),
+    flags_(flags){}
 
 EntityView QueryViewWrapper::GetEntityView() const
 {
   if(view_set_) {
-    return query_.MatchAll() ? entity_view_ : entity_view_.Select(query_);
+    return query_.MatchAll() ? entity_view_ : entity_view_.Select(query_,flags_);
   } else {
     if(entity_handle_.IsValid()){
-      return entity_handle_.Select(query_);
+      return entity_handle_.Select(query_,flags_);
     }
     return entity_view_;
   }
@@ -74,6 +93,13 @@ const Query& QueryViewWrapper::GetQuery() const{
 
 void QueryViewWrapper::SetQuery(const Query& query){
   query_ = query;
+}
+
+void QueryViewWrapper::SetFlags(QueryFlags flags){
+  flags_ = flags;
+}
+QueryFlags QueryViewWrapper::GetFlags() const{
+  return flags_;
 }
 
 bool QueryViewWrapper::IsDataValid() const{

@@ -40,27 +40,19 @@ inline void apply_color_op(TraceRendererBase* rend,
 {
   rend->UpdateViews();
   ColorMask mask = op.GetMask();
+  mol::EntityView view;
   if(op.IsSelectionOnly()){
-    mol::Query q(op.GetSelection());
-    for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
-      NodeListSubset& nl=trace_subset[node_list];
-      for (int i=0; i<nl.GetSize();++i) {
-        if (q.IsAtomSelected(nl[i].atom)) {
-          Color clr =get_col.ColorOfAtom(nl[i].atom);
-          set_node_entry_color(nl[i],mask,clr);
-        }
-      }
-    }
+    view = rend->GetEffectiveView().Select(op.GetSelection(),op.GetSelectionFlags());
   }
   else{
-    mol::EntityView view = op.GetView();
-    for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
-      NodeListSubset& nl=trace_subset[node_list];
-      for (int i=0; i<nl.GetSize();++i) {
-        if(view.FindAtom(nl[i].atom)){
-          Color clr =get_col.ColorOfAtom(nl[i].atom);
-          set_node_entry_color(nl[i],mask,clr);
-        }
+    view = op.GetView();
+  }
+  for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
+    NodeListSubset& nl=trace_subset[node_list];
+    for (int i=0; i<nl.GetSize();++i) {
+      if(view.FindAtom(nl[i].atom)){
+        Color clr =get_col.ColorOfAtom(nl[i].atom);
+        set_node_entry_color(nl[i],mask,clr);
       }
     }
   }

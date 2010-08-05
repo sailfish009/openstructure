@@ -84,7 +84,6 @@ gfx::EntityViewColorOp EntityViewColorOp::FromInfo(info::InfoGroup& group){
   info::InfoGroup super_group = group.GetGroup("GradientColorOp");
   gfx::GradientColorOp gop = GradientColorOp::FromInfo(super_group);
   std::istringstream ss(group.GetTextData());
-  String selection = gop.GetSelection();
   gfx::Gradient gradient = gop.GetGradient();
   int mask = gop.GetMask();
   String property = gop.GetProperty();

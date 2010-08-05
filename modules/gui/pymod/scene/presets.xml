@@ -2,28 +2,28 @@
 <EMDataInfo>
  <Presets>
   <Preset Name="Secondary Structure" >
-   <Op ClassName="VisibilityOp" Index="0"  Visible="1" />
+   <Op ClassName="VisibilityOp" Index="0"  Visible="1" Flags="0"/>
    <Op ClassName="UniformColorOp" Index="1">
-    <ColorOp>2 rtype=helix</ColorOp>0	1	0	1</Op>
+    <ColorOp>2 0 rtype=helix</ColorOp>0	1	0	1</Op>
    <Op ClassName="UniformColorOp" Index="2">
-    <ColorOp>2 rtype=ext</ColorOp>1	0	0	1</Op>
+    <ColorOp>2 0 rtype=ext</ColorOp>1	0	0	1</Op>
    <Op ClassName="UniformColorOp" Index="3">
-    <ColorOp>2 rtype!=ext,helix</ColorOp>0.5  0.5	0.5	1</Op>
+    <ColorOp>2 0 rtype!=ext,helix</ColorOp>0.5  0.5	0.5	1</Op>
    <Op ClassName="UniformColorOp" Index="4">
-    <ColorOp>1 rtype=helix</ColorOp>0.7 1.0 0.8 1</Op>
+    <ColorOp>1 0 rtype=helix</ColorOp>0.7 1.0 0.8 1</Op>
    <Op ClassName="UniformColorOp" Index="5">
-    <ColorOp>1 rtype!=ext,helix</ColorOp>1.0 0.8 0.2 1</Op>
+    <ColorOp>1 0 rtype!=ext,helix</ColorOp>1.0 0.8 0.2 1</Op>
   </Preset>
   <Preset Name="Highlight Ligand (Carbon)" >
-   <Op Keep="0" RenderMode="HSC" ClassName="RenderOp" Index="0" ></Op>
-   <Op Keep="0" RenderMode="CUSTOM" ClassName="RenderOp" Index="1" >ishetatm=1 and not rname==HOH</Op>
-   <Op ClassName="ByElementColorOp" Index="2" >3 </Op>
+   <Op Keep="0" RenderMode="HSC" ClassName="RenderOp" Index="0" Flags="0"></Op>
+   <Op Keep="0" RenderMode="CUSTOM" ClassName="RenderOp" Index="1" Flags="0">ishetatm=1 and not rname==HOH</Op>
+   <Op ClassName="ByElementColorOp" Index="2" >3 0</Op>
    <Op ClassName="UniformColorOp" Index="3">
-    <ColorOp>2 ishetatm=1 and ele=C</ColorOp>0     1       0       1</Op>
+    <ColorOp>2 0 ishetatm=1 and ele=C</ColorOp>0     1       0       1</Op>
   </Preset>
   <Preset Name="Hydrophobic" >
    <Op ClassName="UniformColorOp" Index="0" >
-    <ColorOp>3  rname=GLY,ALA,VAL,LEU,ILE,PHE,TYR,TRP,LYS,HIS,CYS,THR</ColorOp>0  0.666667  1 1</Op>
+    <ColorOp>3  0 rname=GLY,ALA,VAL,LEU,ILE,PHE,TYR,TRP,LYS,HIS,CYS,THR</ColorOp>0  0.666667  1 1</Op>
   </Preset>
  </Presets>
 </EMDataInfo>

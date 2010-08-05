@@ -53,6 +53,16 @@ String ColorOp::GetSelection() const
   return query_view_.GetQuery().GetQueryString();
 }
 
+void ColorOp::SetSelectionFlags(mol::QueryFlags flags)
+{
+  query_view_.SetFlags(flags);
+}
+
+mol::QueryFlags ColorOp::GetSelectionFlags() const
+{
+  return query_view_.GetFlags();
+}
+
 bool ColorOp::IsSelectionOnly() const
 {
   return !query_view_.IsDataValid();
@@ -71,7 +81,7 @@ void ColorOp::SetView(const mol::EntityView& view)
 void ColorOp::ToInfo(info::InfoGroup& group) const
 {
   std::ostringstream ss;
-  ss << (int)mask_ << "\t" << query_view_.GetQuery().GetQueryString();
+  ss << (int)mask_ << "\t" << query_view_.GetFlags() << "\t" << query_view_.GetQuery().GetQueryString();
   group.SetTextData(ss.str());
 }
 
@@ -80,7 +90,8 @@ gfx::ColorOp ColorOp::FromInfo(ost::info::InfoGroup& group)
   ColorOp op;
   std::istringstream ss(group.GetTextData());
   int mask;
-  ss >> mask;
+  mol::QueryFlags flags;
+  ss >> mask >> flags;
   op.SetMask(mask);
   String selection;
   String part;
@@ -91,6 +102,7 @@ gfx::ColorOp ColorOp::FromInfo(ost::info::InfoGroup& group)
     part.clear();
   }
   op.SetSelection(selection);
+  op.SetSelectionFlags(flags);
   return op;
 }
 
