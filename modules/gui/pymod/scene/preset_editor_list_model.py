@@ -45,7 +45,7 @@ class PresetEditorListModel(QtCore.QAbstractListModel):
         name=data.GetName()
         selection=str(data.GetSelection())
         if(len(selection)>0):
-          return QtCore.QVariant(str("%s (%s)"%(name,selection)))
+          return QtCore.QVariant(str("%s (%s)"%(name,selection.replace(os.linesep, " "))))
         else:
           return QtCore.QVariant(str("%s (all)"%name))
     return QtCore.QVariant()

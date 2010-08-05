@@ -42,6 +42,7 @@ void export_Query()
   
   class_<QueryErrorDesc>("QueryErrorDesc", no_init)
     .def_readonly("msg", &QueryErrorDesc::msg)
+    .def_readonly("range", &QueryErrorDesc::range)
   ;
   
   enum_<QueryFlag::Flag>("QueryFlag")
