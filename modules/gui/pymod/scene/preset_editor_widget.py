@@ -30,7 +30,7 @@ from gradient_editor_widget import GradientPreview
 from gradient_editor_widget import GradientEdit
 from preset_editor_list_model import PresetEditorListModel
 from immutable_gradient_info_handler import ImmutableGradientInfoHandler
-from query_editor import QueryEditor
+from query_editor import QueryEditorWidget
 from ost.mol import Prop
 from ost.gfx import ByElementColorOp
 from ost.gfx import ByChainColorOp
@@ -183,7 +183,7 @@ class PresetEditor(QtGui.QDialog):
 class UniformColorOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
-    self.query_editor_ = QueryEditor(self)
+    self.query_editor_ = QueryEditorWidget(self)
 
     detail_label = QtGui.QLabel("Parts")
     self.detail_selection_cb_ = QtGui.QComboBox()
@@ -254,7 +254,7 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
     
-    self.query_editor_ = QueryEditor(self)
+    self.query_editor_ = QueryEditorWidget(self)
     
     detail_label = QtGui.QLabel("Parts")
     self.detail_selection_cb_ = QtGui.QComboBox()
@@ -422,7 +422,7 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
 class ByElementColorOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
-    self.query_editor_ = QueryEditor(self)
+    self.query_editor_ = QueryEditorWidget(self)
 
     detail_label = QtGui.QLabel("Parts")
     self.detail_selection_cb_ = QtGui.QComboBox()
@@ -478,7 +478,7 @@ class ByElementColorOpWidget(QtGui.QDialog):
 class ByChainColorOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
-    self.query_editor_ = QueryEditor(self)
+    self.query_editor_ = QueryEditorWidget(self)
 
     detail_label = QtGui.QLabel("Parts")
     self.detail_selection_cb_ = QtGui.QComboBox()
@@ -534,7 +534,7 @@ class ByChainColorOpWidget(QtGui.QDialog):
 class RenderOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
-    self.query_editor_ = QueryEditor(self)
+    self.query_editor_ = QueryEditorWidget(self)
   
     self.keep_ = QtGui.QCheckBox("Keep")
     self.keep_.setChecked(False)
@@ -609,7 +609,7 @@ class RenderOpWidget(QtGui.QDialog):
 class VisibilityOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
-    self.query_editor_ = QueryEditor(self)
+    self.query_editor_ = QueryEditorWidget(self)
   
     self.visible_ = QtGui.QCheckBox("Visible")
     self.visible_.setChecked(True)
