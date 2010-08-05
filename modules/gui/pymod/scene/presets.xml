@@ -25,5 +25,31 @@
    <Op ClassName="UniformColorOp" Index="0" >
     <ColorOp>3  0 rname=GLY,ALA,VAL,LEU,ILE,PHE,TYR,TRP,LYS,HIS,CYS,THR</ColorOp>0  0.666667  1 1</Op>
   </Preset>
+  <Preset Name="Chains">
+   <Op Keep="0" Flags="0" RenderMode="HSC" ClassName="RenderOp" Index="0"/>
+   <Op ClassName="ByChainColorOp" Index="1">2 0 </Op>
+   <Op ClassName="UniformColorOp" Index="2">
+    <ColorOp>1  0 </ColorOp>1 1 1 1</Op>
+   <Op Keep="1" Flags="0" RenderMode="CUSTOM" ClassName="RenderOp" Index="3">ishetatm=1 and rname!=HOH</Op>
+   <Op ClassName="ByElementColorOp" Index="4">3 0 ishetatm=1 and rname!=HOH</Op>
+   <Op ClassName="UniformColorOp" Index="5">
+    <ColorOp>3  0 ishetatm=1 and ele=C</ColorOp>0 1 0 1</Op>
+  </Preset>
+  <Preset Name="Property">
+   <Op ClassName="UniformColorOp" Index="0">
+    <ColorOp>3  0 rname=GLY,ALA,VAL,LEU,ILE</ColorOp>0.658824 0.658824  0.658824  1</Op>
+   <Op ClassName="UniformColorOp" Index="1">
+    <ColorOp>3  0 rname=PHE,TYR,TRP</ColorOp>1  0.666667  0 1</Op>
+   <Op ClassName="UniformColorOp" Index="2">
+    <ColorOp>3  0 rname=CYS,MET</ColorOp>1  1 0 1</Op>
+   <Op ClassName="UniformColorOp" Index="3">
+    <ColorOp>3  0 rname=SER,THR</ColorOp>0  0.666667  0 1</Op>
+   <Op ClassName="UniformColorOp" Index="4">
+    <ColorOp>3  0 rname=LYS,ARG,HIS</ColorOp>1  0 0 1</Op>
+   <Op ClassName="UniformColorOp" Index="5">
+    <ColorOp>3  0 rname=ASP,GLU,ASN,GLN</ColorOp>0.0980392  0.443137  1 1</Op>
+   <Op ClassName="UniformColorOp" Index="6">
+    <ColorOp>3  0 rname=PRO</ColorOp>0  1 1 1</Op>
+  </Preset>
  </Presets>
 </EMDataInfo>
