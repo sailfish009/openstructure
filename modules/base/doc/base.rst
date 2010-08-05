@@ -1,9 +1,7 @@
-:mod:`ost.settings` - Locate Files and Retrieve Preferences
+:mod:`ost` - OpenStructure Base Module
 ================================================================================
 
-.. automodule:: ost.settings
-  :synopsis: Helper Functions to Locate Files and Retrieve Preferences
-  :members:
-  
-  
+.. toctree::
 
+  logging
+  settings
