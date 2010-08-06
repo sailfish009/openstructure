@@ -26,4 +26,6 @@ xcopy /E /I /Y /EXCLUDE:excludes+exclude_file_types ..\..\stage\bin "%inst_dir%\
 set PATH="c:\Program Files (x86)"\7-Zip\;%PATH%
 REM 7z a -r -t7z %archive_name% "%inst_dir%" > log
 REM if exist %archive_name%.7z copy /b 7zS.sfx + config.txt + %archive_name%.7z %archive_name%.exe
+if exist \TMTools\TMalign.exe copy /B \TMTools\TMalign.exe "%inst_dir%\bin\Release"
+if exist \TMTools\TMscore.exe copy /B \TMTools\TMscore.exe "%inst_dir%\bin\Release"
 7z a -r -tzip %archive_name% "%inst_dir%" > log
