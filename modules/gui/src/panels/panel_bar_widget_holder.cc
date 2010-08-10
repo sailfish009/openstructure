@@ -49,33 +49,31 @@
 namespace ost { namespace gui {
 
 
-PanelBarWidgetHolder::PanelBarWidgetHolder(Widget* widget,Qt::Orientation orientation,
-                                         QWidget* parent):
+PanelBarWidgetHolder::PanelBarWidgetHolder(Widget* widget, Qt::Orientation orientation,
+                                           QWidget* parent):
   QWidget(parent), toolbar_(new QToolBar(parent)),
   widget_(widget), label_(NULL)
 {
   this->SetupToolBar();
   QVBoxLayout* v_layout=new QVBoxLayout(this);
   this->setLayout(v_layout);
+  widget->setVisible(true);  
   v_layout->setMargin(0);
   v_layout->setSpacing(0);    
-  v_layout->addWidget(toolbar_, 1);
-  v_layout->addWidget(widget, 100);
+  v_layout->addWidget(toolbar_, 0);
+  v_layout->addWidget(widget, 1);
 
-  this->setSizePolicy(widget->sizePolicy());
+  this->setSizePolicy(widget->sizePolicy());  
   if(orientation == Qt::Horizontal){
     if(this->sizePolicy().horizontalPolicy()==QSizePolicy::Fixed){
-      this->setMinimumWidth(widget->minimumWidth());
-      this->setMinimumWidth(widget->maximumWidth());
-    }
-    else if(this->sizePolicy().verticalPolicy()==QSizePolicy::Fixed){
+      this->setFixedWidth(widget->minimumWidth());
+    } else if (this->sizePolicy().verticalPolicy()==QSizePolicy::Fixed) {
       v_layout->addStretch(1);
     }
   }
   if(orientation == Qt::Vertical){
-    if(this->sizePolicy().verticalPolicy()==QSizePolicy::Fixed){
-      this->setMinimumHeight(toolbar_->height()+widget->minimumHeight());
-      this->setMaximumHeight(toolbar_->height()+widget->maximumHeight());
+    if(this->sizePolicy().verticalPolicy()==QSizePolicy::Fixed) {
+      this->setFixedHeight(this->sizeHint().height());
     }
   }
 
@@ -104,14 +102,13 @@ void PanelBarWidgetHolder::SetupToolBar()
   toolbar_->setContentsMargins(0, 0, 0, 0);
   toolbar_->setToolButtonStyle(Qt::ToolButtonIconOnly);
   toolbar_->setIconSize(QSize(16,16));
-  if(!actions.isEmpty()){
-    for(int i = 0;i<actions.size();i++){
-      toolbar_->addAction(actions[i]);
-    }
-  }
+  for (int i=0; i<actions.size();i++) {
+    toolbar_->addAction(actions[i]);
+  }  
   QAction* delete_me=toolbar_->addAction(" x ");
   delete_me->setToolTip("Close "+ label_->text());
-  delete_me->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("close_icon.png")));
+  delete_me->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+
+                           QString("close_icon.png")));
   connect(delete_me, SIGNAL(triggered()), this, SLOT(Remove()));
 }
 
@@ -125,7 +122,7 @@ void PanelBarWidgetHolder::SetWidget(Widget* widget)
   QBoxLayout* l=dynamic_cast<QBoxLayout*>(layout());
   assert(l);
   l->removeWidget(widget_);
-  l->addWidget(widget, 100);
+  l->addWidget(widget, 1);
   QString class_name=widget->metaObject()->className();
   WidgetRegistry* wf=WidgetRegistry::Instance();
   label_->setText(wf->GetFullName(class_name));

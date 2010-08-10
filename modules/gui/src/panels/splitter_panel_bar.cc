@@ -80,7 +80,7 @@ void SplitterPanelBar::WidgetMoved(Widget* widget, int index){
     wh->setVisible(false);
     wh->setParent(NULL);
   }
-  PanelBarWidgetHolder* side_bar_widget_holder = new PanelBarWidgetHolder(widget,splitter_->orientation(),this->GetPanelBar());
+  PanelBarWidgetHolder* side_bar_widget_holder=new PanelBarWidgetHolder(widget,splitter_->orientation(),this->GetPanelBar());
   widget_holders_.insert(index,side_bar_widget_holder);
   splitter_->insertWidget(index, widget_holders_.at(index));
   if(pos>=0 && pos<sizes_.size() && index>=0 && index<sizes_.size()){
@@ -92,7 +92,8 @@ void SplitterPanelBar::WidgetMoved(Widget* widget, int index){
 }
 
 
-QString SplitterPanelBar::GetName(){
+QString SplitterPanelBar::GetName()
+{
   return "Splitter Mode";
 }
 

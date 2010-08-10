@@ -41,6 +41,7 @@ RemoteLoader::RemoteLoader(QWidget* parent):
   button_ = new QToolButton(this);
   button_->setAttribute(Qt::WA_MacSmallSize);
   progress_bar_ = new QProgressBar(this);
+  progress_bar_->setAttribute(Qt::WA_MacSmallSize);
   progress_bar_->setVisible(false);
   progress_bar_->setRange(0,0);
 
@@ -51,8 +52,6 @@ RemoteLoader::RemoteLoader(QWidget* parent):
   l->setMargin(3);
   l->setSpacing(2);
 
-  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  this->setFixedHeight(progress_bar_->height());
   connect(button_, SIGNAL(clicked()), this,
           SLOT(Clicked()));
 
@@ -71,10 +70,11 @@ RemoteLoader::RemoteLoader(QWidget* parent):
   select_url_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+
                                    QString("site_icon.png")));
   action_list_.append(select_url_action);
-
   connect(select_url_action, SIGNAL(triggered(bool)), this, SLOT(UrlClick()));
   this->BuildMenu();
   this->RenameButton();
+  this->setFixedHeight(button_->height());
+  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);  
 }
 
 void RemoteLoader::UrlClick()
