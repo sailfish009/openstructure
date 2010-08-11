@@ -77,7 +77,9 @@ class RenderOp():
     and  group.HasAttribute(RenderOp.KEEP_ATTRIBUTE_NAME)):
       render_mode = getattr(gfx.RenderMode, group.GetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME))
       keep = bool(int(group.GetAttribute(RenderOp.KEEP_ATTRIBUTE_NAME)))
-      flags = int(group.GetAttribute(RenderOp.FLAGS_ATTRIBUTE_NAME))
+      flags=0
+      if group.HasAttribute(RenderOp.FLAGS_ATTRIBUTE_NAME):
+        flags = int(group.GetAttribute(RenderOp.FLAGS_ATTRIBUTE_NAME))
       selection = group.GetTextData()
       render_op = RenderOp(render_mode,selection,flags,keep)
     return render_op
