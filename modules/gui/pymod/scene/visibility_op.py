@@ -66,7 +66,9 @@ class VisibilityOp():
     visible_op = None
     if group.HasAttribute(VisibilityOp.VISIBLE_ATTRIBUTE_NAME):
       visible = bool(int(group.GetAttribute(VisibilityOp.VISIBLE_ATTRIBUTE_NAME)))
-      flags = int(group.GetAttribute(VisibilityOp.FLAGS_ATTRIBUTE_NAME))
+      flags = 0
+      if group.HasAttribute(VisibilityOp.FLAGS_ATTRIBUTE_NAME):
+        flags = int(group.GetAttribute(VisibilityOp.FLAGS_ATTRIBUTE_NAME))
       selection = group.GetTextData()
       visible_op = VisibilityOp(selection,flags,visible)
     return visible_op
