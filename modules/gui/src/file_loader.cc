@@ -374,15 +374,19 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
   conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
   while (reader.HasNext()){
     mol::EntityHandle ent=mol::CreateEntity();
-    reader.Import(ent);
+    try {
+      reader.Import(ent);      
+    } catch (io::IOException &e) {
+      LOGN_ERROR(e.what());
+      continue;
+    }
     conop::Conopology::Instance().ConnectAll(builder,ent,0);
     entities.append(ent);
   }
   QFileInfo file_info(filename);
   if(entities.empty()){
     FileLoader::HandleError(Message(QString("No entities found in file: "+ filename).toStdString()),INFO,filename);
-  }
-  else if(entities.size()==1){
+  }else if (entities.size()==1){
     gfx::EntityP gfx_ent(new gfx::Entity(file_info.baseName().toStdString(),entities.first(),mol::Query(selection.toStdString())));
     try{
       gfx::Scene::Instance().Add(gfx_ent);
@@ -393,9 +397,8 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
     if (gfx::Scene::Instance().GetRootNode()->GetChildCount()==1) {
       gfx::Scene::Instance().SetCenter(gfx_ent->GetCenter());
     }
-  }
-  else{
-    try{
+  } else {
+    try {
       for(int i = 0 ; i<entities.size(); i++){
         gfx::EntityP gfx_ent(new gfx::Entity(QString(file_info.baseName()+" ("+QString::number(i)+")").toStdString(),entities[i],mol::Query(selection.toStdString())));
         gfx::Scene::Instance().Add(gfx_ent);
