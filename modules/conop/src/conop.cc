@@ -42,7 +42,7 @@ Conopology::Conopology():
 
   ele_rad_map_["H"]  = 1.09;
                  
-  ele_rad_map_["C"]  = 1.75;
+  ele_rad_map_["C"]  = 1.70;  //was 1.75
   ele_rad_map_["N"]  = 1.55;
   ele_rad_map_["O"]  = 1.52;
   ele_rad_map_["F"]  = 1.47;
