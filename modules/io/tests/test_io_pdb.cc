@@ -305,6 +305,48 @@ BOOST_AUTO_TEST_CASE(write_ter)
                             "testfiles/pdb/ter-out.pdb"));
 }
 
+BOOST_AUTO_TEST_CASE(write_ter2)
+{
+  String fname("testfiles/pdb/ter2.pdb");  
+  // this scope is required to force the writer stream to be closed before 
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    PDBReader reader(fname);
+    PDBWriter writer(String("testfiles/pdb/ter2-out.pdb"));
+    
+    mol::EntityHandle ent=mol::CreateEntity();
+    reader.Import(ent);
+    // we use conopology to mark amino acids as peptide-linking. this is 
+    // require for proper TER output
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/ter2.pdb", 
+                            "testfiles/pdb/ter2-out.pdb"));
+}
+
+BOOST_AUTO_TEST_CASE(write_ter3)
+{
+  String fname("testfiles/pdb/ter3.pdb");  
+  // this scope is required to force the writer stream to be closed before 
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    PDBReader reader(fname);
+    PDBWriter writer(String("testfiles/pdb/ter3-out.pdb"));
+    
+    mol::EntityHandle ent=mol::CreateEntity();
+    reader.Import(ent);
+    // we use conopology to mark amino acids as peptide-linking. this is 
+    // require for proper TER output
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/ter3.pdb", 
+                            "testfiles/pdb/ter3-out.pdb"));
+}
+
 BOOST_AUTO_TEST_CASE(write_conect)
 {
   // this scope is required to force the writer stream to be closed before

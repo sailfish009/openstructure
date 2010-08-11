@@ -200,6 +200,19 @@ public:
     return true;
   }
   
+  virtual bool VisitChain(const mol::ChainHandle& chain)
+  {
+    if (peptide_) {
+      this->WriteTer(prev_);
+    }
+    return true;
+  }
+  virtual void OnExit()
+  {
+    if (peptide_) {
+      this->WriteTer(prev_);
+    }
+  }
   void WriteTer(mol::ResidueHandle res)
   {
     counter_++;
