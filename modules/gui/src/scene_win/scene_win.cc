@@ -53,6 +53,7 @@ SceneWin::SceneWin(QWidget* parent) :
   context_menu_ = new ContextMenu(view_,model_);
   view_->setAttribute(Qt::WA_MacShowFocusRect, false);
   view_->setAttribute(Qt::WA_MacSmallSize, true);
+  view_->setFrameShape(QFrame::NoFrame);
   view_->header()->hide();
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
   view_->setModel(model_);

@@ -59,7 +59,7 @@ MessageWidget::MessageWidget(QWidget* parent) :
   view_->setSelectionBehavior(QAbstractItemView::SelectRows);
   view_->setDragEnabled(true);
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
-
+  view_->setFrameShape(QFrame::NoFrame);
   layout->addWidget(view_);
 
   connect(view_, SIGNAL(customContextMenuRequested(const QPoint&)), this,

@@ -123,6 +123,7 @@ void SequenceViewer::InitSearchBar()
 void SequenceViewer::InitView()
 {
   seq_table_view_ = new SequenceTableView(model_);
+  seq_table_view_->setFrameShape(QFrame::NoFrame);
   seq_table_view_->setTextElideMode(Qt::ElideRight);  
   layout()->addWidget(seq_table_view_);
 

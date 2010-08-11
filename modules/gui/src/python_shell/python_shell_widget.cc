@@ -70,7 +70,7 @@ PythonShellWidget::PythonShellWidget(QWidget* parent):
   multiline_active_state_(new State)
 {
   setLineWrapMode(QPlainTextEdit::WidgetWidth);
-
+  this->setFrameShape(QFrame::NoFrame);
   document()->setDocumentLayout(new PythonShellTextDocumentLayout(document()));
   setViewportMargins(Gutter::GUTTER_WIDTH, 0, 0, 0);
   setUndoRedoEnabled(false);
