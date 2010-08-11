@@ -7,6 +7,7 @@ import sip
 from ost import geom, gfx, gui, seq
 from ost import settings
 from ost.bindings import tmtools
+from ost.bindings import msms
 from ost.seq import alg
 
 class SelectRefDialog(QtGui.QDialog):
@@ -121,6 +122,102 @@ class ShowResultDialog(QtGui.QDialog):
           
     self.list.resizeColumnsToContents()
 
+class CalculateSurfaceSettingsDialog(QtGui.QDialog):
+  def __init__(self, executable, parent=None):
+    QtGui.QDialog.__init__(self, parent)
+    vb = QtGui.QGridLayout()
+    self.setLayout(vb)
+    self.setWindowTitle("MSMS Surface Settings")
+    msmsexe_label=QtGui.QLabel("executable")
+    self.msmsexe_field=QtGui.QLineEdit()
+    self.msmsexe_field.setText(executable)
+    msmsexe_browsebutton=QtGui.QPushButton("Browse")
+    vb.addWidget(msmsexe_label, 0, 0)
+    vb.addWidget(self.msmsexe_field, 0, 1)
+    vb.addWidget(msmsexe_browsebutton, 0, 2)
+    surfname_label=QtGui.QLabel("surface name")
+    self.surfname_field=QtGui.QLineEdit()
+    self.surfname_field.setText("surface")
+    vb.addWidget(surfname_label, 1, 0)
+    vb.addWidget(self.surfname_field, 1, 1, 1, 2)
+    density_label=QtGui.QLabel("density")
+    self.density_spinbox=QtGui.QSpinBox()
+    self.density_spinbox.setRange(1, 10)
+    self.density_spinbox.setValue(4)
+    vb.addWidget(density_label, 2, 0)
+    vb.addWidget(self.density_spinbox, 2, 1, 1, 2)
+    probe_label=QtGui.QLabel("probe radius")
+    self.probe_spinbox=QtGui.QDoubleSpinBox()
+    self.probe_spinbox.setDecimals(1)
+    self.probe_spinbox.setSingleStep(0.1)
+    self.probe_spinbox.setRange(0.3, 5.0)
+    self.probe_spinbox.setValue(1.4)
+    vb.addWidget(probe_label, 3, 0)
+    vb.addWidget(self.probe_spinbox, 3, 1, 1, 2)
+    selection_label=QtGui.QLabel("selection")
+    self.selection_field=QtGui.QLineEdit()
+    self.selection_field.setText("")
+    vb.addWidget(selection_label, 4, 0)
+    vb.addWidget(self.selection_field, 4, 1, 1, 2)
+    self.noh_box=QtGui.QCheckBox("no hydrogens")
+    vb.addWidget(self.noh_box, 5, 0, 1, 2)
+    
+    cancel_btn = QtGui.QPushButton("Cancel", self)
+    ok_btn = QtGui.QPushButton("OK", self)
+    vb.addWidget(cancel_btn, 6, 1)
+    vb.addWidget(ok_btn, 6, 2)
+    
+    QtCore.QObject.connect(msmsexe_browsebutton, QtCore.SIGNAL("clicked()"), self.GetPath)
+    QtCore.QObject.connect(ok_btn, QtCore.SIGNAL("clicked()"), self.accept)
+    QtCore.QObject.connect(cancel_btn, QtCore.SIGNAL("clicked()"), self.reject)
+    
+  def GetPath(self):
+    path=QtGui.QFileDialog().getOpenFileName(self, "Choose MSMS Executable")
+    self.msmsexe_field.setText(path)
+
+class SurfaceContextMenu(QtCore.QObject):
+  def __init__(self, context_menu):
+    try:
+      settings_name="msms"
+      self.executable=settings.Locate(settings_name)
+    except settings.FileNotFound:
+      self.executable=""
+    QtCore.QObject.__init__(self, context_menu.qobject)
+    self.action = QtGui.QAction("Calculate Surface", self)
+    QtCore.QObject.connect(self.action, QtCore.SIGNAL("triggered()"),
+                           self.CalculateSurface)
+    context_menu.AddAction(self.action, gui.ContextActionType.ENTITY)
+    
+  def CalculateSurface(self):
+    scene_selection = gui.SceneSelection.Instance()
+    ent_list = list()
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      ent_list.append(scene_selection.GetActiveNode(i))
+    cssd = CalculateSurfaceSettingsDialog(self.executable)
+    if(cssd.exec_()):
+      self.__CalculateSurface(ent_list,
+                              str(cssd.surfname_field.text()),
+                              str(cssd.msmsexe_field.text()),
+                              cssd.density_spinbox.value(),
+                              cssd.probe_spinbox.value(),
+                              str(cssd.selection_field.text()),
+                              cssd.noh_box.isChecked())
+      
+  def __CalculateSurface(self,ent_list,name,msms_exe,density,radius,selection,noh):
+    for entity in ent_list:
+      if isinstance(entity, gfx.Entity):
+        try:
+          s=msms.CalculateSurface(entity.view.handle,
+                                  msms_exe=msms_exe,
+                                  density=density,
+                                  radius=radius,
+                                  selection=selection,
+                                  no_hydrogens=noh)[0]
+          gfx.Scene().Add(gfx.Surface("%s_%s"%(entity.GetName(),name),s))
+        except RuntimeError:
+          return
+  
+
 class AlignmentContextMenu(QtCore.QObject):
 
   def __init__(self, context_menu):
@@ -198,3 +295,4 @@ class AlignmentContextMenu(QtCore.QObject):
 def _InitContextMenu(app):
   cm=app.scene_win.GetContextMenu()
   AlignmentContextMenu(cm)
+  SurfaceContextMenu(cm)
