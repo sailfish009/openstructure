@@ -4,8 +4,11 @@ from PyQt4 import QtCore, QtGui
 
 import sip
 
+from subprocess import CalledProcessError
+
 from ost import geom, gfx, gui, seq
 from ost import settings
+from ost import LogError
 from ost.bindings import tmtools
 from ost.bindings import msms
 from ost.seq import alg
@@ -214,7 +217,8 @@ class SurfaceContextMenu(QtCore.QObject):
                                   selection=selection,
                                   no_hydrogens=noh)[0]
           gfx.Scene().Add(gfx.Surface("%s_%s"%(entity.GetName(),name),s))
-        except RuntimeError:
+        except (RuntimeError, CalledProcessError):
+          LogError("WARNING: Surface could not be calculated")
           return
   
 
