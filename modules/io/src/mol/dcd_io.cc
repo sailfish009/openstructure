@@ -89,11 +89,10 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   if(gap_flag) ff.read(dummy,sizeof(dummy));
   ff.read(header.hdrr,sizeof(char)*4);
   ff.read(reinterpret_cast<char*>(header.icntrl),sizeof(int)*20);
-
-  if(header.icntrl[1]<0 || header.icntrl[1]>1e6) {
+  if(header.icntrl[1]<0 || header.icntrl[1]>1e8) {
     // nonsense atom count, try swapping
     swap_int(header.icntrl,20);
-    if(header.icntrl[1]<0 || header.icntrl[1]>1e6) {
+    if(header.icntrl[1]<0 || header.icntrl[1]>1e8) {
       throw(IOException("LoadCHARMMTraj: nonsense atom count in header"));
     } else {
       LOGN_MESSAGE("LoadCHARMMTraj: byte-swapping");
@@ -147,8 +146,17 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   std::vector<geom::Vec3> clist(header.t_atom_count);
   std::vector<float> xlist(header.t_atom_count);
 
+  size_t frame_size=0;
+  if (skip_flag) {
+    frame_size+=14*4;
+  }
+  if (gap_flag) {
+    frame_size+=6*sizeof(dummy);
+  }
+  frame_size+=3*sizeof(float)*xlist.size();
+
   int i=0;
-  for(;i<header.num;++i) {
+  for(;i<header.num;i+=stride) {
     if(skip_flag) ff.seekg(14*4,std::ios_base::cur);
     // read each frame
     if(!ff) {
@@ -186,6 +194,8 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
 
     cg.AddFrame(clist);
 
+    // skip frames (defined by stride)
+    if(stride>1) ff.seekg(frame_size*(stride-1),std::ios_base::cur);
   }
 
   ff.get();
