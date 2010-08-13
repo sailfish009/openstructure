@@ -134,7 +134,8 @@ def _RunMSMS(command):
 # \param attach_esa    Attaches per atom SESA to specified FloatProp at atom level
 # \return              Touplet of lists for (SES, SAS)
 def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
-                         no_hydrogens=False, selection="",
+                         no_hydrogens=False, no_hetatoms=False, no_waters=False,
+                         selection="",
                          msms_exe=None, msms_env=None, keep_files=False, 
                          attach_asa=None, attach_esa=None):
   import re 
@@ -144,10 +145,19 @@ def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
 
   # parse selection
   if no_hydrogens:
-    if selection=="":
-      selection="ele!=H"
-    else:
-      selection+=" and ele!=H"
+    if selection!='':
+      selection+=" and "
+    selection="ele!=H"
+  
+  if no_hetatoms:
+    if selection!='':
+      selection+=" and "
+    selection="ishetatm=False"
+  
+  if no_waters:
+    if selection!='':
+      selection+=" and "
+    selection="rname!=HOH"
 
   # setup files for msms
   (msms_data_dir, msms_data_file)=_SetupFiles(entity, selection)
@@ -208,8 +218,10 @@ def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
 # \param keep_files    Do not delete temporary files
 # \return list of OST SurfaceHandle objects
 def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
-                     no_hydrogens=False, selection="",
+                     no_hydrogens=False, no_hetatoms=False, no_waters=False,
+                     selection="",
                      msms_exe=None, msms_env=None, keep_files=False):
+  
   import os
   import re
 
@@ -218,10 +230,19 @@ def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
 
   # parse selection
   if no_hydrogens:
-    if selection=="":
-      selection="ele!=H"
-    else:
-      selection+=" and ele!=H"
+    if selection!='':
+      selection+=" and "
+    selection="ele!=H"
+      
+  if no_hetatoms:
+    if selection!='':
+      selection+=" and "
+    selection="ishetatm=False"
+      
+  if no_waters:
+    if selection!='':
+      selection+=" and "
+    selection="rname!=HOH"
 
   # setup files for msms
   

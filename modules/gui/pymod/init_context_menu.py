@@ -163,7 +163,11 @@ class CalculateSurfaceSettingsDialog(QtGui.QDialog):
     vb.addWidget(selection_label, 4, 0)
     vb.addWidget(self.selection_field, 4, 1, 1, 2)
     self.noh_box=QtGui.QCheckBox("no hydrogens")
-    vb.addWidget(self.noh_box, 5, 0, 1, 2)
+    vb.addWidget(self.noh_box, 5, 0)
+    self.nohet_box=QtGui.QCheckBox("no hetatoms")
+    vb.addWidget(self.nohet_box, 5, 1)
+    self.nowat_box=QtGui.QCheckBox("no waters")
+    vb.addWidget(self.nowat_box, 5, 2)
     
     cancel_btn = QtGui.QPushButton("Cancel", self)
     ok_btn = QtGui.QPushButton("OK", self)
@@ -176,7 +180,8 @@ class CalculateSurfaceSettingsDialog(QtGui.QDialog):
     
   def GetPath(self):
     path=QtGui.QFileDialog().getOpenFileName(self, "Choose MSMS Executable")
-    self.msmsexe_field.setText(path)
+    if path!='':
+      self.msmsexe_field.setText(path)
 
 class SurfaceContextMenu(QtCore.QObject):
   def __init__(self, context_menu):
@@ -204,9 +209,12 @@ class SurfaceContextMenu(QtCore.QObject):
                               cssd.density_spinbox.value(),
                               cssd.probe_spinbox.value(),
                               str(cssd.selection_field.text()),
-                              cssd.noh_box.isChecked())
+                              cssd.noh_box.isChecked(),
+                              cssd.nohet_box.isChecked(),
+                              cssd.nowat_box.isChecked())
       
-  def __CalculateSurface(self,ent_list,name,msms_exe,density,radius,selection,noh):
+  def __CalculateSurface(self,ent_list,name,msms_exe,density,
+                         radius,selection,noh,nohet,nowat):
     for entity in ent_list:
       if isinstance(entity, gfx.Entity):
         try:
@@ -215,10 +223,15 @@ class SurfaceContextMenu(QtCore.QObject):
                                   density=density,
                                   radius=radius,
                                   selection=selection,
-                                  no_hydrogens=noh)[0]
+                                  no_hydrogens=noh,
+                                  no_hetatoms=nohet,
+                                  no_waters=nowat)[0]
           gfx.Scene().Add(gfx.Surface("%s_%s"%(entity.GetName(),name),s))
         except (RuntimeError, CalledProcessError):
           LogError("WARNING: Surface could not be calculated")
+          return
+        except UserWarning:
+          LogError("WARNING: Entry with the same name already present in scene")
           return
   
 
