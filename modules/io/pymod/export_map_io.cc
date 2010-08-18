@@ -132,6 +132,8 @@ void export_map_io()
     .def("GetFormat", &TIF::GetFormat)
     .def("SetSigned", &TIF::SetSigned)
     .def("GetSigned", &TIF::GetSigned)
+    .def("SetBitDepth", &TIF::SetBitDepth)
+    .def("GetBitDepth", &TIF::GetBitDepth)
     .def("GetPhasecolor", &TIF::GetPhasecolor)
     .def("SetPhasecolor", &TIF::SetPhasecolor)
     .def("SetSubimage", &TIF::SetSubimage)
@@ -143,9 +145,13 @@ void export_map_io()
     .def("GetNormalizeOnSave", &PNG::GetNormalizeOnSave)
   ;
 
-  class_<DAT, bases<ImageFormatBase> >("DAT", init<bool,Endianess>((arg("normalize_on_save") = false,arg("endianess") = OST_LOCAL_ENDIAN)))
-    .def("SetNormalizeOnSave", &PNG::SetNormalizeOnSave)
-    .def("GetNormalizeOnSave", &PNG::GetNormalizeOnSave)
+  class_<DAT, bases<ImageFormatBase> >("DAT", init<bool,Format,bool,Endianess>((arg("normalize_on_save") = false,arg("format")=OST_DEFAULT_FORMAT,arg("signed")=false,arg("endianess") = OST_LOCAL_ENDIAN)))
+    .def("SetNormalizeOnSave", &DAT::SetNormalizeOnSave)
+    .def("GetNormalizeOnSave", &DAT::GetNormalizeOnSave)
+    .def("SetSigned", &DAT::SetSigned)
+    .def("GetSigned", &DAT::GetSigned)
+    .def("SetBitDepth", &DAT::SetBitDepth)
+    .def("GetBitDepth", &DAT::GetBitDepth)
   ;
 
   class_<JPK, bases<TIF> >("JPK", init<boost::logic::tribool,Format,bool,bool,int>

@@ -47,21 +47,21 @@ namespace ost { namespace io {
 String TIF::FORMAT_STRING="defined_tiff";
 
  TIF::TIF(boost::logic::tribool normalize_on_save, Format bit_depth, bool sign, bool phasecolor, int subimage):
-    ImageFormatBase(FORMAT_STRING)
+  ImageFormatBase(FORMAT_STRING),
+  normalize_on_save_(normalize_on_save),
+  bit_depth_(bit_depth),
+  signed_(sign),
+  phasecolor_(phasecolor)
 {
-  normalize_on_save_ = normalize_on_save;
-  bit_depth_ = bit_depth;
-  signed_ = sign;
-  phasecolor_ = phasecolor;
 }
 
 TIF::TIF(String format_string, boost::logic::tribool  normalize_on_save, Format bit_depth,bool sign, bool phasecolor, int subimage):
-  ImageFormatBase(format_string)
+  ImageFormatBase(FORMAT_STRING),
+  normalize_on_save_(normalize_on_save),
+  bit_depth_(bit_depth),
+  signed_(sign),
+  phasecolor_(phasecolor)
 {
-  normalize_on_save_ = normalize_on_save;
-  bit_depth_ = bit_depth;
-  signed_ = sign;
-  phasecolor_ = phasecolor;
 }
 
 Format TIF::GetBitDepth() const
