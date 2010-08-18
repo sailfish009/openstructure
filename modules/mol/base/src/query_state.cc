@@ -63,7 +63,7 @@ bool QueryState::do_within(const geom::Vec3& pos, const impl::WithinParam& p,
     if (op==COP_LE)
       return geom::Dot(d, d) <= p.GetRadiusSquare();
     else
-      return geom::Dot(d, d) >= p.GetRadiusSquare();    
+      return geom::Dot(d, d) > p.GetRadiusSquare();
   } else {
     const LazilyBoundRef& r=this->GetBoundObject(p.GetRef());
     for (AtomViewIter i=r.view.AtomsBegin(), e=r.view.AtomsEnd(); i!=e; ++i) {
@@ -72,7 +72,7 @@ bool QueryState::do_within(const geom::Vec3& pos, const impl::WithinParam& p,
         if (geom::Dot(d, d) <= p.GetRadiusSquare()) {
           return true;
         }
-      } else if (geom::Dot(d, d) <= p.GetRadiusSquare()) {
+      } else if (geom::Dot(d, d) > p.GetRadiusSquare()) {
         return false;
       }
     }
