@@ -212,27 +212,24 @@ void PointlistOverlayBase::DrawVariableSizePointList(QPainter& pnt, DataViewerPa
 
 bool PointlistOverlayBase::GetCrosshair() const
 {
-  //return menu_->IsChecked(ID_Crosshair);
-  return false;
+  return a_cr_->isChecked();
 }
 
 void PointlistOverlayBase::SetCrosshair(bool flag)
 {
-  /*
-  if(menu_->IsChecked(ID_Crosshair))	{
-    if(menu_->IsChecked(ID_Square)){
+  if(a_cr_->isChecked())	{
+    if(a_sq_->isChecked()){
       ReplaceStrategy<CrosshairSquareDrawingStrategy>();
     }else{
       ReplaceStrategy<CrosshairCircleDrawingStrategy>();
     }
   } else {
-    if(menu_->IsChecked(ID_Square)){
+    if(a_sq_->isChecked()){
       ReplaceStrategy<SquareDrawingStrategy>();
     }else{
       ReplaceStrategy<CircleDrawingStrategy>();
     }
   }
-  */
 }
 
 unsigned int PointlistOverlayBase::GetSymbolSize() const 
@@ -247,30 +244,28 @@ void PointlistOverlayBase::SetSymbolSize(unsigned int symbolsize)
 
 unsigned int PointlistOverlayBase::GetSymbolShape() const
 {
-  //return menu_->IsChecked(ID_Circle) ? 0 : 1;
-  return 0;
+  return a_sq_->isChecked() ? 1 : 0;
 }
 
 void PointlistOverlayBase::SetSymbolShape(unsigned int symbolshape)
 {
-  /*
   switch(symbolshape){
   case 1:
-    if(menu_->IsChecked(ID_Crosshair)){
+    if(a_cr_->isChecked()){
       ReplaceStrategy<CrosshairSquareDrawingStrategy>();
     }else{
       ReplaceStrategy<SquareDrawingStrategy>();
     }
     break;
   case 0:
-    if(menu_->IsChecked(ID_Crosshair)){
+    if(a_cr_->isChecked()){
         ReplaceStrategy<CrosshairCircleDrawingStrategy>();
     }else{
       ReplaceStrategy<CircleDrawingStrategy>();
     }
     break;
   }
-  */
+  
 }
 
 template <class StrategyClass>
