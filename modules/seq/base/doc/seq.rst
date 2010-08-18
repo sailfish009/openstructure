@@ -107,6 +107,14 @@ The SequenceHandle
       # a gap"
       print s.GetResidueIndex(3)
 
+  .. method:: GetResidue(pos)
+     
+    As, :meth:`GetResidueIndex`, but directly returns the residue view. If no
+    view is attached, or if the position is a gap, an invalid residue view
+    is returned.
+    
+    :rtype: :class:`~ost.mol.ResidueView`
+    
   .. method:: GetLastNonGap()
      
     Get position of last non-gap character in sequence. In case of an empty

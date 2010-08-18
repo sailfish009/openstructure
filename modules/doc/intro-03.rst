@@ -37,7 +37,7 @@ In fact, this is the preferred way to use functionality of the scene. As an easy
 
 .. code-block:: python
 
-  scene.background=gfx.WHITE
+  scene.SetBackground(gfx.WHITE)
 
 Now, the color of the screen has changed to white. To set it back to black, simply assign :obj:`gfx.BLACK` to the background property.
 
@@ -54,7 +54,7 @@ manipulated:
   obj.SetColor(gfx.RED)
 
 
-The last command assigns a uniform red coloring to all atoms.
+The last command assigns a uniform red color to all atoms.
 
 
 The Graphical Entity
