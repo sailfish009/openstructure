@@ -104,15 +104,14 @@ BOOST_PYTHON_MODULE(_io)
   def("LoadSequence", &LoadSequence, arg("format")="auto");
   def("SequenceListFromString", &SequenceListFromString);
   def("SequenceFromString", &SequenceFromString);  
-  def("SaveAlignment", &SaveAlignment, 
-      save_alignment_ov(args("alignment", "filename", "format")));
+  def("SaveAlignment", &SaveAlignment, arg("format")="auto");
   def("LoadSurface",LoadSurface,load_surface_ov());
   def("LoadManagedSurface",LoadManagedSurface,load_msurface_ov());
 
   def("SequenceToString", &SequenceToString);
   def("SequenceListToString", &SequenceListToString); 
-  def("SaveSequenceList", &SaveSequenceList);
-  def("SaveSequence", &SaveSequence);
+  def("SaveSequenceList", &SaveSequenceList, arg("format")="auto");
+  def("SaveSequence", &SaveSequence, arg("format")="auto");
   def("LoadSDF", &LoadSDF);
 
   def("LoadCRD", &LoadCRD);
