@@ -17,3 +17,5 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 from _mol import *
+import ost.geom as _geom
+from ost.mol import alg
