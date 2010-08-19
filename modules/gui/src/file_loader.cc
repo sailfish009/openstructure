@@ -40,7 +40,7 @@
 
 #include <ost/seq/sequence_list.hh>
 #include <ost/seq/alignment_handle.hh>
-
+#include <ost/seq/invalid_sequence.hh>
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/surface.hh>
 #include <ost/gfx/scene.hh>
@@ -325,7 +325,8 @@ gfx::GfxObjP FileLoader::TryLoadSurface(const QString& filename, io::SurfaceIOHa
   return gfx::GfxObjP();
 }
 
-gfx::GfxObjP FileLoader::TryLoadAlignment(const QString& filename, io::SequenceIOHandlerPtr handler)
+gfx::GfxObjP FileLoader::TryLoadAlignment(const QString& filename, 
+                                          io::SequenceIOHandlerPtr handler)
 {
   if(!handler){
     try{
@@ -337,7 +338,16 @@ gfx::GfxObjP FileLoader::TryLoadAlignment(const QString& filename, io::SequenceI
   }
   if(handler){
     seq::SequenceList seq_list = seq::CreateSequenceList();
-    handler->Import(seq_list,filename.toStdString());
+    try {
+      handler->Import(seq_list,filename.toStdString());      
+    } catch(io::IOException& e) {
+      LOGN_ERROR(e.what());
+      return gfx::GfxObjP();
+    }
+    catch(seq::InvalidSequence& e) {
+      LOGN_ERROR(e.what());
+      return gfx::GfxObjP();
+    }
     seq::AlignmentHandle alignment = seq::AlignmentFromSequenceList(seq_list);
     gui::MainArea* main_area = gui::GostyApp::Instance()->GetPerspective()->GetMainArea();
     SequenceViewer* viewer = new SequenceViewer(true,main_area);
