@@ -96,7 +96,13 @@ String SequenceListImpl::ToString(int width) const
   return buffer.str();
 }
 
-
+void SequenceListImpl::RemoveSequence(int index)
+{
+  if (index<0 || index>=static_cast<int>(list_.size())) {
+    return;
+  }
+  list_.erase(list_.begin()+index);
+}
 int SequenceListImpl::GetMinLength() const
 {
   int min_length=std::numeric_limits<int>::max();

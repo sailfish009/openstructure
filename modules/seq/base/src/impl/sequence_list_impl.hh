@@ -57,6 +57,8 @@ public:
     throw std::out_of_range("Index not covered SequenceList");
   }
   
+  
+  void RemoveSequence(int index);
   int GetPos(int seq_index, int residue_index) const;
 
   int GetResidueIndex(int seq_index, int pos) const;

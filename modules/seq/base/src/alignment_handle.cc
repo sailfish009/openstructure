@@ -82,6 +82,12 @@ String AlignmentHandle::ToString(int width) const
   return impl_->ToString(width);
 }
 
+void AlignmentHandle::RemoveSequence(int seq_index)
+{
+  this->CheckValidity();
+  impl_->RemoveSequence(seq_index);
+}
+
 int AlignmentHandle::GetLength() const
 {
   this->CheckValidity();
