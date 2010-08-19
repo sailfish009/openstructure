@@ -93,11 +93,11 @@ String MRC::FORMAT_STRING = "defined_mrc";
 
 
 MRC::MRC(bool normalize_on_save, Subformat subformat,Endianess endianess_on_save):
-  ImageFormatBase(FORMAT_STRING)
+  ImageFormatBase(FORMAT_STRING),
+  subformat_(subformat),
+  normalize_on_save_(normalize_on_save),
+  endianess_on_save_(endianess_on_save)
 {
-  normalize_on_save_ = normalize_on_save;
-  subformat_ = subformat;
-  endianess_on_save_ = endianess_on_save;
 }
 
 Endianess MRC::GetEndianessOnSave() const

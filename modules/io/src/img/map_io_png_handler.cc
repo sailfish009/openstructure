@@ -46,9 +46,9 @@ namespace ost { namespace io {
 String PNG::FORMAT_STRING="defined_png";
 
 PNG::PNG(bool normalize_on_save):
-    ImageFormatBase(FORMAT_STRING)
+    ImageFormatBase(FORMAT_STRING),
+    normalize_on_save_(normalize_on_save)
 {
-    normalize_on_save_ = normalize_on_save;
     this->SetMinimum(0.0);
     this->SetMaximum(255.0);
 }

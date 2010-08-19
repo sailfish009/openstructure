@@ -48,10 +48,10 @@ namespace ost { namespace io {
 String Spider::FORMAT_STRING = "defined_spider";
 
 Spider::Spider(bool normalize_on_save,Endianess endianness_on_save):
-  ImageFormatBase(FORMAT_STRING)
+  ImageFormatBase(FORMAT_STRING),
+  normalize_on_save_(normalize_on_save),
+  endianness_on_save_(endianness_on_save)
 {
-  normalize_on_save_ = normalize_on_save;
-  endianness_on_save_ = endianness_on_save;
 }
 
 Endianess Spider::GetEndianessOnSave() const

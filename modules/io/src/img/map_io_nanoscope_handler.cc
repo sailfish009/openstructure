@@ -47,9 +47,9 @@ namespace ost { namespace io {
 String Nanoscope::FORMAT_STRING = "defined_nanoscope";
 
 Nanoscope::Nanoscope(int subimage):
-  ImageFormatBase(FORMAT_STRING)
+  ImageFormatBase(FORMAT_STRING),
+  subimage_(subimage)
 {
-  subimage_ = subimage;
 }
 
 int Nanoscope::GetSubimage() const

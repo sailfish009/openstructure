@@ -46,9 +46,9 @@ using boost::format;
 String DX::FORMAT_STRING="defined_dx";
 
 DX::DX (bool normalize_on_save):
-  ImageFormatBase(FORMAT_STRING)
+  ImageFormatBase(FORMAT_STRING),
+  normalize_on_save_(normalize_on_save) 
 {
-  normalize_on_save_ = normalize_on_save;
 }
 
 bool DX::GetNormalizeOnSave() const

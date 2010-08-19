@@ -45,9 +45,9 @@ namespace ost { namespace io {
 String DF3::FORMAT_STRING="defined_df3";
 
 DF3::DF3(bool normalize_on_save):
-    ImageFormatBase(FORMAT_STRING)
+    ImageFormatBase(FORMAT_STRING),
+    normalize_on_save_(normalize_on_save)
 {
-    normalize_on_save_ = normalize_on_save;
 }
 
 bool DF3::GetNormalizeOnSave() const

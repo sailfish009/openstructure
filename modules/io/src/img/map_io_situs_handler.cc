@@ -46,9 +46,9 @@ namespace ost { namespace io {
 String Situs::FORMAT_STRING="defined_situs";
 
 Situs::Situs(bool normalize_on_save):
-    ImageFormatBase(FORMAT_STRING)
+    ImageFormatBase(FORMAT_STRING),
+    normalize_on_save_(normalize_on_save)
 {
-    normalize_on_save_ = normalize_on_save;
 }
 
 bool Situs::GetNormalizeOnSave() const
