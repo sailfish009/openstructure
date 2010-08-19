@@ -378,7 +378,6 @@ QueryImpl::QueryImpl(const String& query_string)
     sel_values_.push_back(sel_value);    
     Node* ast_root = this->BuildAST();
     if (ast_root) {
-      // ast_root->Dump();      
       // Get all selection statements
       this->ExtractSelStmts(ast_root);
       this->ASTToSelStack(ast_root,Prop::CHAIN,
@@ -389,6 +388,7 @@ QueryImpl::QueryImpl(const String& query_string)
                           sel_stacks_[(int)Prop::ATOM]);        
       delete ast_root;
       empty_optimize_=false;
+      has_error_=false;
     } else {
       has_error_=true;
     }  
@@ -773,8 +773,9 @@ Node* QueryImpl::ParseSubExpr(QueryLexer& lexer, bool paren) {
       error_desc_.range=t.GetRange();
       return NULL;
     }
-    if (t.IsEOF())
-      continue;
+    if (t.IsEOF()) {
+      return root_node.release();
+    }
     if (!this->ExpectLogicalOperator(t))
       return NULL;
     switch(t.GetType()) {
@@ -958,19 +959,35 @@ Node* QueryImpl::ParseWithinExpr(QueryLexer& lexer) {
     return NULL;
   QueryToken ct=lexer.CurrentToken();
   if (ct.GetType()==tok::LeftCurlyBrace) {
-    geom::Vec3 point;
-    if (this->ParsePoint(lexer, point)) {
-      lexer.NextToken();  
-      ParamType pt(WithinParam(point, rv*rv));
-      CompOP comp_op= COP_LE;
-      if (inversion_stack_.back())
-        comp_op=COP_GE;
-      SelNode* within_node=new SelNode(Prop(Prop::WITHIN, Prop::VEC_DIST,
-                                            Prop::ATOM), 
-                                       comp_op, pt);
-      return within_node;
-    } else {
-      return NULL;
+    Node* points=NULL;
+    while (true) {
+      geom::Vec3 point;
+      if (this->ParsePoint(lexer, point)) {
+        ParamType pt(WithinParam(point, rv*rv));
+        CompOP comp_op= COP_LE;
+        if (inversion_stack_.back())
+          comp_op=COP_GE;
+        SelNode* within_node=new SelNode(Prop(Prop::WITHIN, Prop::VEC_DIST,
+                                              Prop::ATOM), 
+                                         comp_op, pt);
+        if (points) {
+          points=this->Concatenate(points, within_node, LOP_OR);
+        } else {
+          points=within_node;
+        }
+        QueryToken nt=lexer.NextToken();
+        if (nt.GetType()==tok::Coma) {
+          nt=lexer.NextToken();
+          if (!this->Expect(tok::LeftCurlyBrace, "'{'", nt)) {
+            delete points;
+            return NULL;
+          }
+          continue;
+        }
+        return points;
+      } else {
+        return NULL;
+      }
     }
   } else if (ct.GetType()==tok::LeftBracket) {
     // push false onto inversion stack to make sure we have a proper start for
