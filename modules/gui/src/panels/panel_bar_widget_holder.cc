@@ -86,7 +86,7 @@ void PanelBarWidgetHolder::SetupToolBar()
   icon_path.cd("gui");
   icon_path.cd("icons");
 
-  QString class_name=widget_->metaObject()->className();
+  QString class_name=widget_->GetUniqueID();
   WidgetRegistry* wf=WidgetRegistry::Instance();
   toolbar_->setAttribute(Qt::WA_MacSmallSize);
   QAction* label_ = toolbar_->addAction(wf->GetFullName(class_name));
@@ -123,7 +123,7 @@ void PanelBarWidgetHolder::SetWidget(Widget* widget)
   assert(l);
   l->removeWidget(widget_);
   l->addWidget(widget, 1);
-  QString class_name=widget->metaObject()->className();
+  QString class_name=widget->GetUniqueID();
   WidgetRegistry* wf=WidgetRegistry::Instance();
   label_->setText(wf->GetFullName(class_name));
   widget_=widget;
@@ -135,7 +135,7 @@ void PanelBarWidgetHolder::LabelClick(bool checked)
   QMenu* m = panels->GetAvailableWidgetsMenu();
   if (QAction* a=m->exec(toolbar_->mapToGlobal(QPoint(0, 0)))) {
     QString new_class_name=a->data().toString();
-    if (new_class_name!=widget_->metaObject()->className()) {
+    if (new_class_name!=widget_->GetUniqueID()) {
       panels->ReplaceWidget(widget_,new_class_name);
     }
   }

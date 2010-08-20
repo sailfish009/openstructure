@@ -69,7 +69,7 @@ void PanelBar::AddWidget(Widget* widget, bool is_hidden)
 {
   int index = this->GetIndex(widget);
   if (index == -1) {
-    QString class_name = widget->metaObject()->className();
+    QString class_name = widget->GetUniqueID();
     WidgetState ws = WidgetState(widget, !is_hidden, class_name);
     widget_states_.append(ws);
     if(current_view_mode_){
@@ -221,7 +221,7 @@ void PanelBar::InsertWidget(Widget * widget, int index, bool is_hidden)
       current_view_mode_->WidgetMoved(widget, index);
     }
   } else {
-    QString class_name = widget->metaObject()->className();
+    QString class_name = widget->GetUniqueID();
     WidgetState ws = WidgetState(widget, !is_hidden, class_name);
     widget_states_.insert(index, ws);
     if(current_view_mode_){

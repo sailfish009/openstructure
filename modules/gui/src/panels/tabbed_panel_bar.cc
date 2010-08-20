@@ -62,7 +62,7 @@ bool TabbedPanelBar::Restore(const QString& prefix)
 }
 
 void TabbedPanelBar::WidgetMoved(Widget* widget, int index){
-  QString class_name = widget->metaObject()->className();
+  QString class_name = widget->GetUniqueID();
   if(tab_widget_->indexOf(widget)>=0){
     tab_widget_->removeTab(tab_widget_->indexOf(widget));
   }

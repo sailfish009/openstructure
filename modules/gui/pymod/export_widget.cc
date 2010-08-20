@@ -35,22 +35,22 @@ struct WrappedWidget : public Widget
 {
   WrappedWidget(PyObject *p, object py_object):
        Widget(NULL,NULL){
-    if(QWidget* widget = get_cpp_qobject<QWidget>(py_object)){
+    if (QWidget* widget=get_cpp_qobject<QWidget>(py_object)) {
       this->SetInternalWidget(widget);
     }
   }
-
   virtual bool Restore(const QString& prefix){return true;}
 
   virtual bool Save(const QString& prefix){return true;}
 
   virtual ~WrappedWidget(){ }
-
+private:
+  QString   unique_id_;
 };
 
 void export_Widget()
 {
-  class_<Widget, WrappedWidget, boost::noncopyable>("WrappedWidget",init<object>())
+  class_<Widget, WrappedWidget, boost::noncopyable>("Widget", init<object>())
     .def("Save", &WrappedWidget::Save)
     .def("Restore", &WrappedWidget::Restore)
     .def("SetDestroyOnClose", &WrappedWidget::SetDestroyOnClose)

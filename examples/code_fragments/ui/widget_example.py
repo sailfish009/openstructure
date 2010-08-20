@@ -29,7 +29,7 @@ panels=gui.GostyApp.Instance().perspective.panels
 tetris=Board(panels.qobject)
 
 #Wrap widget to Qt Widget
-wid=gui.WrappedWidget(tetris)
+wid=gui.Widget(tetris)
 
 #Add Widget to widget pool
 panels.AddWidgetToPool("Break Widget",wid)

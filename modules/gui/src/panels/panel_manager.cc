@@ -101,20 +101,19 @@ void PanelManager::AddWidgetToPool(const QString& class_name, int limit){
   pool_->Add(class_name, limit);
 }
 
-void PanelManager::AddWidgetToPool(const QString& name, Widget* widget){
-  QString id = widget->metaObject()->className();
-  widget->setParent(this);
-  id.replace(".", "::");
-  ExternalWidgetFactory* ewf = new ExternalWidgetFactory(id,name,widget);
+void PanelManager::AddWidgetToPool(const QString& name, Widget* widget) {
+  //widget->setParent(this);
+  widget->SetUniqueID(name);
+  ExternalWidgetFactory* ewf = new ExternalWidgetFactory(name, name, widget);
   WidgetRegistry::Instance()->RegisterWidgetFactory(ewf);
-  pool_->Add(id, 1);
+  pool_->Add(name, 1);
 }
 
 void PanelManager::AddWidget(PanelPosition pos, Widget* widget, bool is_hidden){
   if(panels_.contains(pos) && this->GetParentPanel(widget) == NONE){
-    if(pool_->IsAvailable(widget->metaObject()->className())){
+    if(pool_->IsAvailable(widget->GetUniqueID())){
       panels_[pos]->AddWidget(widget,is_hidden);
-      pool_->Take(widget->metaObject()->className());
+      pool_->Take(widget->GetUniqueID());
     }
   }
 }
@@ -243,11 +242,11 @@ void PanelManager::MoveWidget(Widget * widget, PanelPosition pos, int index){
     else{
       if(panels_.contains(current_position)){
         panels_[current_position]->RemoveWidget(widget);
-        pool_->Give(widget->metaObject()->className());
+        pool_->Give(widget->GetUniqueID());
       }
-      if(pool_->IsAvailable(widget->metaObject()->className())){
+      if(pool_->IsAvailable(widget->GetUniqueID())){
         panels_[pos]->InsertWidget(widget,index,false);
-        pool_->Take(widget->metaObject()->className());
+        pool_->Take(widget->GetUniqueID());
       }
     }
   }
@@ -261,15 +260,15 @@ void PanelManager::MoveNextTo(Widget* target, Widget* widget){
 }
 
 void PanelManager::ReplaceWidget(Widget* w1, Widget* w2){
-  if(pool_->IsAvailable(w2->metaObject()->className())){
+  if(pool_->IsAvailable(w2->GetUniqueID())){
     PanelPosition pos_w1 = this->GetParentPanel(w1);
     PanelPosition pos_w2  = this->GetParentPanel(w2);
     if(panels_.contains(pos_w1) && pos_w2 == NONE){
       int index = panels_[pos_w1]->GetIndex(w1);
       panels_[pos_w1]->RemoveWidget(w1);
-      pool_->Give(w1->metaObject()->className());
+      pool_->Give(w1->GetUniqueID());
       panels_[pos_w1]->InsertWidget(w2,index,false);
-      pool_->Take(w2->metaObject()->className());
+      pool_->Take(w2->GetUniqueID());
     }
   }
 }
@@ -280,7 +279,7 @@ void PanelManager::ReplaceWidget(Widget* w1, QString& class_name){
     if(panels_.contains(pos)){
       int index = panels_[pos]->GetIndex(w1);
       panels_[pos]->RemoveWidget(w1);
-      pool_->Give(w1->metaObject()->className());
+      pool_->Give(w1->GetUniqueID());
       WidgetRegistry* wf=WidgetRegistry::Instance();
       Widget* widget = wf->Create(class_name,this);
       panels_[pos]->InsertWidget(widget,index,false);
@@ -293,7 +292,7 @@ void PanelManager::RemoveWidget(Widget *widget){
   PanelPosition pos = this->GetParentPanel(widget);
   if(panels_.contains(pos)){
     panels_[pos]->RemoveWidget(widget);
-    pool_->Give(widget->metaObject()->className());
+    pool_->Give(widget->GetUniqueID());
   }
 }
 
