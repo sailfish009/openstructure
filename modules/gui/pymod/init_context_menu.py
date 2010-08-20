@@ -12,6 +12,7 @@ from ost import LogError, mol
 from ost.bindings import tmtools
 from ost.bindings import msms
 from ost.seq import alg
+import ost
 from ost.gui.scene.query_editor import QueryEditorWidget,QueryDialog
 
 class SelectRefDialog(QtGui.QDialog):
@@ -329,7 +330,11 @@ class SelectMenuPoints(QtCore.QObject):
     ent=scene_selection.GetActiveNode(0)
     dialog=QueryDialog('Select...')
     if dialog.exec_():
-      ent.selection=ent.view.Select(dialog.query, dialog.query_flags)
+      q=mol.Query(dialog.query)
+      if q.IsValid():
+        ent.selection=ent.view.Select(dialog.query, dialog.query_flags)
+      else:
+        ost.LogError("invalid query: %s" % q.error)
 
   def _UniqueName(self, ent):
     """
