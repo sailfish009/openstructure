@@ -105,6 +105,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
         reader.Import(ent, restrict_chains)
         conop_inst.ConnectAll(builder, ent, 0)
         ent_list.append(ent)
+      if len(ent_list)==0:
+        raise IOError("File doesn't contain any entities")
       PDB.PopFlags()
       return ent_list
     else:
@@ -112,6 +114,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
       if reader.HasNext():
         reader.Import(ent, restrict_chains)
         conop_inst.ConnectAll(builder, ent, 0)
+      else:
+        raise IOError("File doesn't contain any entities")
       PDB.PopFlags()
       return ent
   except:
