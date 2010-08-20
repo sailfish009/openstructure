@@ -36,11 +36,16 @@ FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
 #endif
 {
   this->setWindowTitle("File format not recognized");
+  this->setFixedSize(QSize(400, 300));
   QVBoxLayout* vb=new QVBoxLayout(this);
-  label_ = new QLabel("The file format could not be recognized, please select the type of the file from the list:");
+  label_ = new QLabel("The file format could not be recognized, "
+                      "please select the type of the file from the list:");
+  label_->setWordWrap(true);
   list_ = new QTableWidget(this);
+  list_->setShowGrid(false);
   list_->horizontalHeader()->setStretchLastSection(true);
   list_->setColumnCount(2);
+  list_->setAttribute(Qt::WA_MacSmallSize);
   list_->verticalHeader()->setVisible(false);
   list_->horizontalHeader()->setVisible(false);
   list_->setSelectionBehavior(QAbstractItemView::SelectRows);
