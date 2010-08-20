@@ -2,54 +2,60 @@ from ost import mol
 from PyQt4 import QtCore, QtGui
 
 class QueryEditorWidget(QtGui.QWidget):
-   
   def __init__(self, parent=None): 
     QtGui.QWidget.__init__(self, parent)
-    self.default_font_= QtGui.QTextCharFormat()
+    self.default_font_=QtGui.QTextCharFormat()
     self.default_font_.setForeground(QtGui.QBrush(QtGui.QColor(0,0,0)))
-    self.error_font_= QtGui.QTextCharFormat()
+    self.error_font_=QtGui.QTextCharFormat()
     self.error_font_.setForeground(QtGui.QBrush(QtGui.QColor(255,0,0))) 
-    self.selection_edit_ = QtGui.QTextEdit(self)
-    self.selection_edit_.setMinimumHeight(50)
-    self.selection_edit_.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.MinimumExpanding))
+    self.selection_edit_=QtGui.QTextEdit(self)
+    self.selection_edit_.setFixedHeight(40)
     self.selection_edit_.updateGeometry()
-    selection_label = QtGui.QLabel("Selection",self)
-        
-    self.status_=QtGui.QLabel("",self);
+    self.status_=QtGui.QLabel(" ",self);
     self.status_.setWordWrap(True)
     self.status_.setMargin(0)
-    self.status_.setHidden(True)
     self.status_.setAlignment(QtCore.Qt.AlignRight)
-    self.status_.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,QtGui.QSizePolicy.Expanding))
-    self.checkboxes_ = dict()
-    for k,v in mol.QueryFlag.__dict__["values"].iteritems():
-      checkbox = QtGui.QCheckBox(str(v),self)
-      self.checkboxes_[checkbox]=k
-      
-    v_checkbox_layout = QtGui.QVBoxLayout()
-    v_checkbox_layout.setMargin(0)
-    v_checkbox_layout.setSpacing(0)
-    for k,v in self.checkboxes_.iteritems():
-      v_checkbox_layout.addWidget(k)
+    self.status_.setSizePolicy(QtGui.QSizePolicy(QtGui.QSizePolicy.Minimum,
+                                                 QtGui.QSizePolicy.Expanding))
+    vl=QtGui.QVBoxLayout()
+    vl.addWidget(self.selection_edit_)
+    self.no_bonds_=QtGui.QRadioButton('none')
+    self.ex_bonds_=QtGui.QRadioButton('exclusive')
+    self.in_bonds_=QtGui.QRadioButton('inclusive')
+    self.in_bonds_.setChecked(True)
+    self.match_res_=QtGui.QCheckBox('match residues')
     
-    flag_label = QtGui.QLabel("Query flags")       
-    grid = QtGui.QGridLayout(self)
-    grid.setContentsMargins(0,5,0,0)
-    grid.addWidget(selection_label,0,0,1,1,QtCore.Qt.AlignTop|QtCore.Qt.AlignLeft)
-    grid.addWidget(self.selection_edit_,0,1,1,1)
-    grid.addWidget(self.status_,1,0,1,2,QtCore.Qt.AlignRight)
-    grid.addWidget(flag_label,2,0,3,1,QtCore.Qt.AlignTop|QtCore.Qt.AlignLeft)
-    grid.addLayout(v_checkbox_layout,2,1,3,1)
-    grid.setRowStretch(0,1)
+    vl.setMargin(0)
+    vl.setSpacing(0)
+    self.setLayout(vl)
+    vl.addWidget(self.status_)
+    hl=QtGui.QHBoxLayout()
+    l=QtGui.QLabel("bonds:")
+
+    hl.addWidget(l)
+    hl.addSpacing(5)
+    hl.addWidget(self.no_bonds_)
+    hl.addWidget(self.ex_bonds_)
+    hl.addWidget(self.in_bonds_)
+    hl.addStretch(1)
+    hl.addWidget(self.match_res_)
+    vl.addLayout(hl)
+
     self.changing_text_=False;
-    self.connect(self.selection_edit_,QtCore.SIGNAL("textChanged()"),self.UpdateMessage)
-    
+    self.connect(self.selection_edit_,QtCore.SIGNAL("textChanged()"),
+                 self._StartTimer)
+    self.timer_=QtCore.QTimer()
+    QtCore.QObject.connect(self.timer_, QtCore.SIGNAL('timeout()'),
+                           self._UpdateMessage)
   def GetQueryFlags(self):
-    flag = 0
-    for k,v in self.checkboxes_.iteritems():
-      if k.isChecked():
-        flag += v
-    return flag
+    flags=0
+    if self.no_bonds_.isChecked():
+      flags|=mol.NO_BONDS
+    if self.ex_bonds_.isChecked():
+      flags|=mol.EXCLUSIVE_BONDS
+    if self.match_res_.isChecked():
+      flags|=mol.MATCH_RESIDUES
+    return flags
   
   def GetQuery(self):
     return mol.Query(str(self.selection_edit_.toPlainText()))
@@ -58,16 +64,19 @@ class QueryEditorWidget(QtGui.QWidget):
     return str(self.selection_edit_.toPlainText())
   
   def SetQueryFlags(self,flags):
-    for k,v in self.checkboxes_.iteritems():
-      if (flags & v)>0:
-        k.setChecked(True)
-      else:
-        k.setChecked(False)
+    self.no_bonds_.setChecked(flags & mol.NO_BONDS)
+    self.ex_bonds_.setChecked(flags & mol.EXCLUSIVE_BONDS)
+    self.in_bonds_.setChecked(not (flags & mol.NO_BONDS|mol.EXCLUSIVE_BONDS))
+    self.match_res_.setChecked(flags & mol.MATCH_RESIDUES)
   
   def SetQuery(self,query):
     self.selection_edit_.setText(query)
     
-  def UpdateMessage(self):
+  def _StartTimer(self):
+    self.timer_.stop()
+    self.timer_.start(500)
+
+  def _UpdateMessage(self):
     if self.changing_text_:
       return
     self.changing_text_ = True
@@ -79,15 +88,41 @@ class QueryEditorWidget(QtGui.QWidget):
     
     if query.IsValid():
       self.status_.setText("")
-      self.status_.setHidden(True)
     else:      
       d=query.GetErrorDescription()
       self.status_.setText("<font color='red'>%s</font>"%d.msg)
-      self.status_.setVisible(True)
       self.status_.setFixedSize(self.width(),self.status_.height())
-      
       cursor.movePosition(QtGui.QTextCursor.Start)
-      cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.MoveAnchor, d.range.Loc)
-      cursor.movePosition(QtGui.QTextCursor.NextCharacter, QtGui.QTextCursor.KeepAnchor, d.range.Length)
-      cursor.setCharFormat(self.error_font_)
-    self.changing_text_ = False
+      if d.range.Loc<len(query.string):
+        
+        cursor.movePosition(QtGui.QTextCursor.NextCharacter, 
+                            QtGui.QTextCursor.MoveAnchor, d.range.Loc)
+        cursor.movePosition(QtGui.QTextCursor.NextCharacter, 
+                            QtGui.QTextCursor.KeepAnchor, d.range.Length)
+        cursor.setCharFormat(self.error_font_)
+    self.changing_text_=False
+    
+class QueryDialog(QtGui.QDialog):
+  def __init__(self, title, parent=None):
+    QtGui.QDialog.__init__(self, parent)
+    l=QtGui.QVBoxLayout(self)
+    self.setWindowTitle(title)
+    self.editor=QueryEditorWidget(self)
+    l.addWidget(self.editor)
+    l.addSpacing(10)
+    l3=QtGui.QHBoxLayout()
+    ab=QtGui.QPushButton('OK')
+    ab.setDefault(True)
+    cb=QtGui.QPushButton('Cancel')
+    l3.addStretch(1)
+    l3.addWidget(cb, 0)
+    l3.addWidget(ab, 0)
+    l.addLayout(l3)
+    QtCore.QObject.connect(cb, QtCore.SIGNAL('clicked()'), self.reject)
+    QtCore.QObject.connect(ab, QtCore.SIGNAL('clicked()'), self.accept)
+  @property 
+  def query_flags(self):
+    return self.editor.GetQueryFlags()
+  @property
+  def query(self):
+    return self.editor.GetQueryText()

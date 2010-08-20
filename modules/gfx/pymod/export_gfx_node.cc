@@ -39,6 +39,7 @@ void export_GfxNode()
     .def("Add",node_add1)
     .def("Remove",node_rem1)
     .def("Add",node_add2)
+    .add_property("name", &GfxNode::GetName)    
     .def("Remove",node_rem2)
     .def("Remove",node_rem3)
     ;

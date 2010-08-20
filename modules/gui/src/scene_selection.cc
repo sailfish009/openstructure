@@ -166,26 +166,6 @@ void SceneSelection::ShowOriginalMap()
 
 #endif // OST_IMG_ENABLED
 
-void SceneSelection::Select() {
-  QueryDialog d;
-  if (d.exec() == QDialog::Accepted) {
-    QString query = d.GetQueryString();
-    for(unsigned int i = 0; i < nodes_.size(); i++){
-      gfx::GfxNodeP node = nodes_[i];
-      if (node) {
-        gfx::Entity* obj = dynamic_cast<gfx::Entity*> (node.get());
-        if (obj) {
-          mol::Query q(query.toStdString());
-          if (q.IsValid()) {
-              mol::EntityView ent = obj->GetView().Select(q);
-              obj->SetSelection(ent);
-          }
-        }
-     }
-    }
-  }
-}
-
 void SceneSelection::Deselect(){
   for(unsigned int i = 0; i < nodes_.size(); i++){
     gfx::GfxNodeP node = nodes_[i];
@@ -194,32 +174,6 @@ void SceneSelection::Deselect(){
       if (obj) {
         obj->SetSelection(obj->GetView().CreateEmptyView());
       }
-    }
-  }
-}
-
-void SceneSelection::CopyViews() {
-  QueryDialog d;
-  QList<gfx::GfxObjP> objects_to_add;
-  if (d.exec() == QDialog::Accepted) {
-    QString query = d.GetQueryString();
-    for(unsigned int i = 0; i < nodes_.size(); i++){
-      gfx::GfxNodeP node = nodes_[i];
-      if (node) {
-        gfx::Entity* obj = dynamic_cast<gfx::Entity*> (node.get());
-        if (obj) {
-          mol::Query q(query.toStdString());
-          if (q.IsValid()) {
-            mol::EntityView ent = obj->GetView().Select(q);
-            gfx::EntityP new_obj(new gfx::Entity(obj->GetName()
-                                 + " *", ent));
-            objects_to_add.append(new_obj);
-          }
-        }
-      }
-    }
-    for(int i=0; i < objects_to_add.size(); i++){
-      gfx::Scene::Instance().Add(objects_to_add[i]);
     }
   }
 }
@@ -293,17 +247,6 @@ void SceneSelection::DeselectAllViews(){
   }
 }
 
-void SceneSelection::SelectViews(){
-  QueryDialog d;
-  if (d.exec() == QDialog::Accepted) {
-    QString query = d.GetQueryString();
-    mol::Query q(query.toStdString());
-    mol::EntityView union_view = this->GetViewUnion();
-    if(union_view.IsValid() && q.IsValid()){
-      view_entity_->SetSelection(union_view.Select(q));
-    }
-  }
-}
 
 
 gfx::EntityP SceneSelection::GetViewEntity() const{

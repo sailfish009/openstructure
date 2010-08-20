@@ -68,7 +68,6 @@ public:
   void AddAction(QAction* action,ContextActionTypes type);
 
 private slots:
-  void AddViewFromEntity();
   void AddView();
   void Rename();
   void DeleteView();

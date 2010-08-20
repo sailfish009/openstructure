@@ -292,6 +292,9 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief retrieve gfx object by name
   GfxObjP operator[](const String& name);
 
+  /// \brief whether the scene contains a node of the given name
+  bool HasNode(const String& name) const;
+  
   /// \brief actual event handling for scene (internal use)
   void Apply(const InputEvent& ie, bool request_redraw=true);
 

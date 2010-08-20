@@ -178,7 +178,6 @@ main.hh
 main_area.hh
 module_config.hh
 perspective.hh
-query_dialog.hh
 remote_site_loader.hh
 scene_selection.hh
 main_window.hh
@@ -235,7 +234,6 @@ sequence_viewer/base_view_object.cc
 sequence_viewer/sequence_view_object.cc
 gosty_app.cc
 main_area.cc
-query_dialog.cc
 widget_state_saver.cc
 scene_selection.cc
 widget_geom_handler.cc
@@ -340,7 +338,6 @@ gosty_app.hh
 main.hh
 main_area.hh
 perspective.hh
-query_dialog.hh
 dock_widget.hh
 main_window.hh
 scene_selection.hh

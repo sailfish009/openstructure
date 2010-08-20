@@ -656,6 +656,13 @@ GfxObjP Scene::operator[](const String& name)
   return nrvo;
 }
 
+bool Scene::HasNode(const String& name) const
+{
+  FindNode fn(name);
+  this->Apply(fn);
+  return fn.node;
+}
+
 void Scene::Apply(const InputEvent& e, bool request_redraw)
 {
   LOG_TRACE("Scene: received input: c=" << e.GetCommand() << " i=" << e.GetIndex() << " t=" << e.GetTarget() << std::endl);

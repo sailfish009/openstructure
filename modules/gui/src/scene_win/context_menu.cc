@@ -53,15 +53,6 @@ ContextMenu::ContextMenu(QTreeView* view, SceneWinModel* model):
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(CenterOnObjects()));
   this->AddAction(action, GFX_OBJECT);
 
-  action = new QAction("Copy",this);
-  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(CopyViews()));
-  this->AddAction(action, ENTITY);
-  action = new QAction("Create Custom View",this);
-  connect(action, SIGNAL(triggered()), this, SLOT(AddViewFromEntity()));
-  this->AddAction(action, ENTITY);
-  action = new QAction("Select..", this);
-  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Select()));
-  this->AddAction(action, ENTITY);
   action = new QAction("Deselect",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(Deselect()));
   this->AddAction(action, ENTITY);
@@ -94,9 +85,6 @@ ContextMenu::ContextMenu(QTreeView* view, SceneWinModel* model):
   this->AddAction(action, ENTITY_VIEW | VIEWS_SAME_OBJECT);
   action = new QAction("Deselect All",this);
   connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(DeselectAllViews()));
-  this->AddAction(action, ENTITY_VIEW | VIEWS_SAME_OBJECT);
-  action = new QAction("Select..",this);
-  connect(action, SIGNAL(triggered()), SceneSelection::Instance(), SLOT(SelectViews()));
   this->AddAction(action, ENTITY_VIEW | VIEWS_SAME_OBJECT);
   action = new QAction("Create Custom View",this);
   connect(action, SIGNAL(triggered()), this, SLOT(AddView()));
@@ -230,30 +218,6 @@ void ContextMenu::ShowMenu(const QPoint& pos)
 
 void ContextMenu::AddAction(QAction* action,ContextActionTypes type){
   actions_[action] = type;
-}
-
-void ContextMenu::AddViewFromEntity() {
-  QueryDialog d;
-  if (d.exec() == QDialog::Accepted) {
-    QString query = d.GetQueryString();
-    int node_count = SceneSelection::Instance()->GetActiveNodeCount();
-    for(int i = 0; i < node_count; i++){
-      gfx::GfxNodeP node = SceneSelection::Instance()->GetActiveNode(i);
-      if (node) {
-        EntityNode* ent_node = qobject_cast<EntityNode*>(model_->FindGfxNode(node));
-        if (ent_node) {
-          mol::Query q(query.toStdString());
-          if (q.IsValid()) {
-            gfx::EntityP entity = boost::dynamic_pointer_cast<gfx::Entity>(ent_node->GetGfxNode());
-            if(entity){
-              CustomPartNode* child_node = new CustomPartNode("New View", entity, mol::QueryViewWrapper(q,entity->GetView()),ent_node->GetCustomViewNode());
-              model_->AddNode(ent_node->GetCustomViewNode(),child_node);
-            }
-          }
-        }
-     }
-    }
-  }
 }
 
 void ContextMenu::AddView(){

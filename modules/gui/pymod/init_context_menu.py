@@ -8,10 +8,11 @@ from subprocess import CalledProcessError
 
 from ost import geom, gfx, gui, seq
 from ost import settings
-from ost import LogError
+from ost import LogError, mol
 from ost.bindings import tmtools
 from ost.bindings import msms
 from ost.seq import alg
+from ost.gui.scene.query_editor import QueryEditorWidget,QueryDialog
 
 class SelectRefDialog(QtGui.QDialog):
   def __init__(self, ent_list, parent=None):
@@ -234,7 +235,6 @@ class SurfaceContextMenu(QtCore.QObject):
           LogError("WARNING: Entry with the same name already present in scene")
           return
   
-
 class AlignmentContextMenu(QtCore.QObject):
 
   def __init__(self, context_menu):
@@ -308,8 +308,71 @@ class AlignmentContextMenu(QtCore.QObject):
         self.seq_viewer.AddAlignment(alignment)
         self.seq_viewer.ChangeDisplayMode("Highlight conservation 1")
         self.seq_viewer.Show()
-        
+
+class SelectMenuPoints(QtCore.QObject):
+  def __init__(self, context_menu):
+    QtCore.QObject.__init__(self, context_menu.qobject)
+    action=QtGui.QAction("Select...", self)
+    QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'),
+                           self._Select)
+    context_menu.AddAction(action, gui.ENTITY)
+    action=QtGui.QAction("Copy Selection...", self)
+    QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'),
+                           self._CopyViews)
+    context_menu.AddAction(action, gui.ENTITY)
+    action=QtGui.QAction('Select...', self)
+    QtCore.QObject.connect(action, QtCore.SIGNAL('triggered()'),
+                           self._SelectViewsSameEntity)
+    context_menu.AddAction(action, gui.ENTITY_VIEW|gui.VIEWS_SAME_OBJECT)    
+  def _Select(self):
+    scene_selection=gui.SceneSelection.Instance()
+    ent=scene_selection.GetActiveNode(0)
+    dialog=QueryDialog('Select...')
+    if dialog.exec_():
+      ent.selection=ent.view.Select(dialog.query, dialog.query_flags)
+
+  def _UniqueName(self, ent):
+    """
+    Returns a name based on ent that is unique within the scene
+    """
+    ent_name=ent.GetName()
+    num=2
+    while True:
+      candidate_name='%s-%d' % (ent_name, num)
+      if not gfx.Scene().HasNode(candidate_name):
+        return candidate_name
+      num+=1
+
+  def _SelectViewsSameEntity(self):
+
+    union=gui.SceneSelection.Instance().GetViewUnion()
+    dialog=QueryDialog('Select...')
+    if dialog.exec_():
+      q=mol.Query(dialog.query)    
+      if q.IsValid():
+        ve=gui.SceneSelection.Instance().GetViewEntity()
+        ve.selection=union.Select(q, dialog.query_flags)
+      else:    
+        ost.LogError("invalid query: %s" % q.error)    
+  
+  def _CopyViews(self):
+    views_to_add=[]
+    scene_selection=gui.SceneSelection.Instance()
+    ent=scene_selection.GetActiveNode(0)
+    dialog=QueryDialog('Select...')
+    if dialog.exec_():
+      q=mol.Query(dialog.query)
+      if q.IsValid():
+        for i in range(scene_selection.GetActiveNodeCount()):
+          ent=scene_selection.GetActiveNode(i)
+          selected=ent.view.Select(q, dialog.query_flags)
+          gfx_ent=gfx.Entity(self._UniqueName(ent),selected)
+          gfx.Scene().Add(gfx_ent)
+      else:    
+        ost.LogError("invalid query: %s" % q.error)
+   
 def _InitContextMenu(app):
   cm=app.scene_win.GetContextMenu()
   AlignmentContextMenu(cm)
   SurfaceContextMenu(cm)
+  SelectMenuPoints(cm)

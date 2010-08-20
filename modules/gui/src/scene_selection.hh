@@ -49,14 +49,11 @@ public slots:
   void ShowDownsampledMap();
   void ShowOriginalMap();  
 #endif // OST_IMG_ENABLED
-  void CopyViews();
-  void Select();
   void Deselect();
   void Show();
   void Hide();
   void SelectAllViews();
   void DeselectAllViews();
-  void SelectViews();
   void MakeVisible();
   void MakeHidden();
   void ShowExclusive();

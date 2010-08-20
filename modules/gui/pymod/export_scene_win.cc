@@ -53,6 +53,7 @@ void export_SceneWin()
       .value("NOT_VISIBLE", NOT_VISIBLE)
       .value("NOT_HIDDEN", NOT_HIDDEN)
       .value("NOT_SCENE", NOT_SCENE)
+      .value("VIEWS_SAME_OBJECT", VIEWS_SAME_OBJECT)
       .value("SINGLE", SINGLE)
       .value("MULTI", MULTI)
 #if OST_IMG_ENABLED
