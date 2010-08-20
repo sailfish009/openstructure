@@ -140,8 +140,11 @@ class GenericLoader(BaseRemoteLoader):
         file_type = remote_url.right(remote_url.size()-index-1)
     if file_type is None:
       file_type = self.file_type_
-    
-    return url+formatted_id +"_"+self.name_+"."+file_type
+    if len(self.name_)>0:
+      print self.name_
+      return url+formatted_id +"_"+self.name_+"."+file_type
+    else:
+      return url+formatted_id+"."+file_type
   
   def HandleError(self, message):
     messageBox =QtGui.QMessageBox(QtGui.QMessageBox.Warning,
