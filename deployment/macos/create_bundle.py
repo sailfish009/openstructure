@@ -7,6 +7,10 @@ INFO_PLIST="""<?xml version="1.0" encoding="UTF-8"?>
   <string>English</string>
   <key>CFBundleExecutable</key>
   <string>dng</string>
+  <key>CFBundleName</key>
+  <string>DNG</string>  
+  <key>CFBundleDisplayName</key>
+  <string>DNG</string>  
   <key>CFBundleHelpBookFolder</key>
   <string>OpenStructure Manual</string>
   <key>CFBundleHelpBookName</key>
