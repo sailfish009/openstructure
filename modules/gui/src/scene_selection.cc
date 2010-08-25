@@ -37,7 +37,6 @@
 
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_win/scene_win.hh>
-#include <ost/gui/query_dialog.hh>
 
 #include "scene_selection.hh"
 
