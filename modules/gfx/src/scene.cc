@@ -373,8 +373,10 @@ void Scene::InitGL(bool full)
 
 #if OST_SHADER_SUPPORT_ENABLED
   GLint mbufs=0,msamples=0;
-  glGetIntegerv(GL_SAMPLE_BUFFERS, &mbufs);
-  glGetIntegerv(GL_SAMPLES, &msamples);
+  if(OST_GL_VERSION_2_0) {
+    glGetIntegerv(GL_SAMPLE_BUFFERS, &mbufs);
+    glGetIntegerv(GL_SAMPLES, &msamples);
+  }
 
   if(mbufs>0 && msamples>0) {
     LOGN_VERBOSE("Scene: enabling multisampling with: " << msamples << " samples");
@@ -425,7 +427,9 @@ void Scene::InitGL(bool full)
 
   glEnable(GL_TEXTURE_2D);
 #if OST_SHADER_SUPPORT_ENABLED
-  glActiveTexture(GL_TEXTURE0);
+  if(OST_GL_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
 #endif
 
   glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
@@ -1828,7 +1832,9 @@ void Scene::render_stereo()
 
   glEnable(GL_TEXTURE_2D);
 #if OST_SHADER_SUPPORT_ENABLED
-  glActiveTexture(GL_TEXTURE0);
+  if(OST_GL_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
 #endif
   glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
@@ -1838,7 +1844,9 @@ void Scene::render_stereo()
   render_scene();
   glEnable(GL_TEXTURE_2D);
 #if OST_SHADER_SUPPORT_ENABLED
-  glActiveTexture(GL_TEXTURE0);
+  if(OST_GL_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
 #endif
   glBindTexture(GL_TEXTURE_2D, scene_right_tex_);
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
@@ -1897,7 +1905,9 @@ void Scene::render_stereo()
     glStencilFunc(GL_EQUAL,0x0,0x1);
   }
 #if OST_SHADER_SUPPORT_ENABLED
+  if(OST_GL_VERSION_2_0) {
     glActiveTexture(GL_TEXTURE0);
+  }
 #endif
   glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
   // draw
@@ -1917,7 +1927,9 @@ void Scene::render_stereo()
     glStencilFunc(GL_EQUAL,0x1,0x1);
   }
 #if OST_SHADER_SUPPORT_ENABLED
-  glActiveTexture(GL_TEXTURE0);
+  if(OST_GL_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
 #endif
   glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
   // draw
