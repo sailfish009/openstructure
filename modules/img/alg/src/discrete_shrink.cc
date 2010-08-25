@@ -74,6 +74,8 @@ ImageStateBasePtr DiscreteShrinkFnc::VisitState(const ImageStateImpl<T,D>& isi) 
 
   LOG_VERBOSE("ds: " << isi.GetExtent() << " " << new_ext << std::endl);
 
+
+  geom::Vec3 ao = isi.GetAbsoluteOrigin();
   PixelSampling new_ps = isi.GetSampling();
   new_ps.SetExtent(new_ext);
 
@@ -97,6 +99,7 @@ ImageStateBasePtr DiscreteShrinkFnc::VisitState(const ImageStateImpl<T,D>& isi) 
 
   LOG_VERBOSE("ds: newstart: " << newstart << std::endl);
 
+  ni->SetAbsoluteOrigin(ao);
   ni->SetSpatialOrigin(newstart);
   ni->GetSampling().SetPixelSampling(CompMultiply(ni->GetSampling().GetPixelSampling(),Vec3(bs_[0],bs_[1],bs_[2])));
 

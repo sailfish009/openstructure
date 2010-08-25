@@ -90,6 +90,9 @@ ImageHandle ImageHandle::Copy(bool cc) const
     copy constructor,with the cloned ImageStateBasePtr as a parameter.
     This new ptr on the heap is then in turn used to initialize the StatePtrPtr.
   */
+
+  ImageHandle copy_img = ImageHandle(StatePtrPtr(new ImageStateBasePtr(ImageStatePtr()->Clone(cc))));
+  copy_img.SetAbsoluteOrigin(ImageStatePtr()->GetAbsoluteOrigin());
   return ImageHandle(StatePtrPtr(new ImageStateBasePtr(ImageStatePtr()->Clone(cc))));
 }
 
