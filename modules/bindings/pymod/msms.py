@@ -135,7 +135,7 @@ def _RunMSMS(command):
 # \return              Touplet of lists for (SES, SAS)
 def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
                          no_hydrogens=False, no_hetatoms=False, no_waters=False,
-                         selection="",
+                         selection='',
                          msms_exe=None, msms_env=None, keep_files=False, 
                          attach_asa=None, attach_esa=None):
   import re 
@@ -147,17 +147,17 @@ def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
   if no_hydrogens:
     if selection!='':
       selection+=" and "
-    selection="ele!=H"
+    selection+="ele!=H"
   
   if no_hetatoms:
     if selection!='':
       selection+=" and "
-    selection="ishetatm=False"
+    selection+="ishetatm=False"
   
   if no_waters:
     if selection!='':
       selection+=" and "
-    selection="rname!=HOH"
+    selection+="rname!=HOH"
 
   # setup files for msms
   (msms_data_dir, msms_data_file)=_SetupFiles(entity, selection)
@@ -219,7 +219,7 @@ def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
 # \return list of OST SurfaceHandle objects
 def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
                      no_hydrogens=False, no_hetatoms=False, no_waters=False,
-                     selection="",
+                     selection='',
                      msms_exe=None, msms_env=None, keep_files=False):
   
   import os
@@ -232,20 +232,19 @@ def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
   if no_hydrogens:
     if selection!='':
       selection+=" and "
-    selection="ele!=H"
+    selection+="ele!=H"
       
   if no_hetatoms:
     if selection!='':
       selection+=" and "
-    selection="ishetatm=False"
+    selection+="ishetatm=False"
       
   if no_waters:
     if selection!='':
       selection+=" and "
-    selection="rname!=HOH"
+    selection+="rname!=HOH"
 
   # setup files for msms
-  
   (msms_data_dir, msms_data_file)=_SetupFiles(entity, selection)
 
   # set command line
