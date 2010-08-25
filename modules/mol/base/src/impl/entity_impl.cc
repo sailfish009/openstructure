@@ -271,7 +271,7 @@ geom::AlignedCuboid EntityImpl::GetBounds() const
     mmin=mmax=it->second->GetPos();
     for (++it; it!=atom_map_.end();++it) {
       mmin=geom::Min(mmin,it->second->GetPos());
-      mmax=geom::Min(mmax,it->second->GetPos());      
+      mmax=geom::Max(mmax,it->second->GetPos());
     }
     return geom::AlignedCuboid(mmin, mmax);    
   } else {

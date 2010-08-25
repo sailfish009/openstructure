@@ -162,11 +162,13 @@ scope PlaneScope =
     .def("GetMax", &AlignedCuboid::GetMax, 
          return_value_policy<copy_const_reference>())
     .def("GetCenter", &AlignedCuboid::GetCenter)
+    .def("GetSize", &AlignedCuboid::GetSize)
     .add_property("max", make_function(&AlignedCuboid::GetMax,
          return_value_policy<copy_const_reference>()))
     .add_property("min", make_function(&AlignedCuboid::GetMin,
          return_value_policy<copy_const_reference>()))
     .add_property("center", &AlignedCuboid::GetCenter)
+    .add_property("size", &AlignedCuboid::GetSize)
   ;
 }
 
