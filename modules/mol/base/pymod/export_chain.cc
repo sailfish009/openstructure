@@ -95,6 +95,8 @@ void export_Chain()
     .add_property("bounds", &ChainHandle::GetBounds)
     .def("GetGeometricStart", geom_start<ChainHandle>)
     .def("GetGeometricEnd", geom_end<ChainHandle>)
+    .def(self==self)
+    .def(self!=self)
   ;
   
   class_<ChainHandleList>("ChainHandleList", no_init)

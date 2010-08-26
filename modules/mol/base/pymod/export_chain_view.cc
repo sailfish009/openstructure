@@ -104,6 +104,8 @@ void export_ChainView()
     .def("GetGeometricEnd", geom_end<ChainView>)
     .def("GetBounds", &ChainView::GetBounds)
     .add_property("bounds", &ChainView::GetBounds)
+    .def(self==self)
+    .def(self!=self)
   ;
 
 
