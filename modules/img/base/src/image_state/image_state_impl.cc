@@ -105,7 +105,7 @@ boost::shared_ptr<ImageStateImpl<T,D> > ImageStateImpl<T,D>::CloneState(bool cc)
   if(cc) {
     return SharedPtrType(new ImageStateImpl<T,D>(*this));
   } else {
-    return SharedPtrType(new ImageStateImpl<T,D>(domain_.GetLogicalExtent(),sampling_));
+    return SharedPtrType(new ImageStateImpl<T,D>(domain_.GetLogicalExtent(),sampling_,this->absolute_origin_));
   }
 }
 
