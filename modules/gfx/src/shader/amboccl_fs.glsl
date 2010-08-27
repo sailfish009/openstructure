@@ -6,6 +6,8 @@ uniform vec2 i_vp;
 uniform vec4 abcd;
 uniform int mode;
 
+// gl_TexCoord[0] comes from quadpp_vs, i.e. from post processing
+
 vec3 unproject(in vec3 rpos)
 { 
   vec4 coord = gl_TextureMatrix[0]*vec4(rpos.xy*2.0-1.0,rpos.z*2.0-1.0,1.0);

@@ -12,7 +12,7 @@ void main()
     normal = normalize(gl_NormalMatrix * gl_Normal);
   }
   // since a directional light is used, the position is not needed
-  gl_TexCoord[0].stp=normal;
+  gl_TexCoord[2].stp=normal;
 
   gl_FrontColor=gl_Color;
   gl_BackColor=gl_Color;

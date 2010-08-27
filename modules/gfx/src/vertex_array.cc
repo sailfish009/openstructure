@@ -62,13 +62,15 @@ IndexedVertexArray::Entry::Entry()
   v[0]=0.0; v[1]=0.0; v[2]=0.0;
   n[0]=0.0; n[1]=0.0; n[2]=1.0;
   c[0]=0.0; c[1]=0.0; c[2]=0.0; c[3]=0.0;
+  t[0]=0.0; t[1]=0.0;
 }
 
-IndexedVertexArray::Entry::Entry(const Vec3& vv, const Vec3& nn, const Color& cc)
+  IndexedVertexArray::Entry::Entry(const Vec3& vv, const Vec3& nn, const Color& cc, const geom::Vec2& tt)
 {
   v[0]=vv[0]; v[1]=vv[1]; v[2]=vv[2];
   n[0]=nn[0]; n[1]=nn[1]; n[2]=nn[2];
   c[0]=cc[0]; c[1]=cc[1]; c[2]=cc[2]; c[3]=cc[3];
+  t[0]=tt[0]; t[1]=tt[1];
 }
 
 
@@ -76,6 +78,7 @@ IndexedVertexArray::IndexedVertexArray()
 {
   initialized_=false;
   Reset(); // replaces ctor initialization list
+  glGenTextures(1,&tex_id_);
 }
 
 IndexedVertexArray::~IndexedVertexArray()
@@ -85,24 +88,27 @@ IndexedVertexArray::~IndexedVertexArray()
 IndexedVertexArray::IndexedVertexArray(const IndexedVertexArray& va)
 {
   copy(va);
+  glGenTextures(1,&tex_id_);
 }
 
 IndexedVertexArray& IndexedVertexArray::operator=(const IndexedVertexArray& va)
 {
   copy(va);
+  // keep already allocated tex id
   return *this;
 }
 
 unsigned int IndexedVertexArray::GetFormat()
 {
   // hardcoded for now, may be refactored and moved into an impl
-  return GL_C4F_N3F_V3F;
+  return GL_T2F_C4F_N3F_V3F;
 }
 
 
 void IndexedVertexArray::Cleanup() 
 {
   if(initialized_) {
+    glDeleteTextures(1,&tex_id_);
     glDeleteLists(outline_mat_dlist_,1);
 #if OST_SHADER_SUPPORT_ENABLED
     glDeleteBuffers(7,buffer_id_);
@@ -137,10 +143,11 @@ void IndexedVertexArray::SetOutlineExpandColor(const Color& c) {outline_exp_colo
 
 VertexID IndexedVertexArray::Add(const Vec3& vert, 
                                  const Vec3& norm,
-                                 const Color& col) 
+                                 const Color& col,
+                                 const Vec2& texc) 
 {
   dirty_=true;
-  entry_list_.push_back(Entry(vert,norm,col));
+  entry_list_.push_back(Entry(vert,norm,col,texc));
   return entry_list_.size()-1;
 }
 
@@ -350,6 +357,21 @@ void IndexedVertexArray::SetColor(VertexID id, const Color& c)
   entry_list_[id].c[1]=c[1];
   entry_list_[id].c[2]=c[2];
   entry_list_[id].c[3]=c[3];
+}
+
+Vec2 IndexedVertexArray::GetTexCoord(VertexID id) const
+{
+  Vec2 nrvo;
+  if(id>=entry_list_.size()) return nrvo;
+  nrvo = Vec2(entry_list_[id].t);
+  return nrvo;
+} 
+
+void IndexedVertexArray::SetTexCoord(VertexID id, const Vec2& t) 
+{
+  if(id>=entry_list_.size()) return;
+  entry_list_[id].t[0]=t[0];
+  entry_list_[id].t[1]=t[1];
 }
 
 void IndexedVertexArray::SetOpacity(float o)
@@ -648,6 +670,7 @@ void IndexedVertexArray::Reset()
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
   draw_normals_=false;
+  use_tex_=false;
 }
 
 void IndexedVertexArray::FlagRefresh()
@@ -937,7 +960,7 @@ void IndexedVertexArray::NPatch()
   IndexList tri_index_list;
   IndexList line_index_list;
 
-  entry_list.push_back(Entry(Vec3(),Vec3(),Color(1,0,0)));
+  entry_list.push_back(Entry(Vec3(),Vec3(),Color(1,0,0),Vec2()));
 
   for(uint c=0;c<tri_index_list_.size();) {
     VertexID id0 = tri_index_list_[c++];
@@ -975,7 +998,8 @@ void IndexedVertexArray::NPatch()
           3.0*(u*u*v*p210+u*u*w*p201+u*v*v*p120+v*v*w*p021+v*w*w*p012+u*w*w*p102)+
           6.0*u*v*w*p111;
         Vec3 n = Normalize(u*u*n200+v*v*n020+w*w*n002+u*v*n110+u*w*n101+v*w*n011);
-        entry_list.push_back(Entry(p,n,Color()));
+        // TODO: patch texture coord as well
+        entry_list.push_back(Entry(p,n,Color(),Vec2()));
         tab[npatch_tab_id(uc,vc,N)] = entry_list.size()-1;
       }
     }
@@ -1042,6 +1066,7 @@ void IndexedVertexArray::copy(const IndexedVertexArray& va)
   outline_exp_factor_=va.outline_exp_factor_;
   outline_exp_color_=va.outline_exp_color_;
   draw_normals_=va.draw_normals_;
+  use_tex_=va.use_tex_;
 }
   
 bool IndexedVertexArray::prep_buff()
@@ -1129,9 +1154,12 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
       in place of the absolute pointer
     */
     glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_VERTEX_BUFFER]);
-    glVertexPointer(3, GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*7));
-    glNormalPointer(GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*4));
-    glColorPointer(4, GL_FLOAT, sizeof(Entry), 0);
+    glVertexPointer(3, GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*9));
+    glNormalPointer(GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*6));
+    glColorPointer(4, GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*2));
+    if(use_tex_) {
+      glTexCoordPointer(2, GL_FLOAT, sizeof(Entry), 0);
+    }
 #else
     glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_VERTEX_BUFFER]);
     glInterleavedArrays(GetFormat(),sizeof(Entry),NULL);
@@ -1179,9 +1207,12 @@ void IndexedVertexArray::draw_p(bool use_buff)
   if(use_buff && !Scene::Instance().InOffscreenMode()) {
 #if OST_SHADER_SUPPORT_ENABLED
     glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_VERTEX_BUFFER]);
-    glVertexPointer(3, GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*7));
-    glNormalPointer(GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*4));
-    glColorPointer(4, GL_FLOAT, sizeof(Entry), 0);
+    glVertexPointer(3, GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*9));
+    glNormalPointer(GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*6));
+    glColorPointer(4, GL_FLOAT, sizeof(Entry), reinterpret_cast<void*>(sizeof(float)*2));
+    if(use_tex_) {
+      glTexCoordPointer(2, GL_FLOAT, sizeof(Entry), 0);
+    }
     glDrawArrays(GL_POINTS,0,entry_list_.size());
 #endif
   } else {

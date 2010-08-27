@@ -237,8 +237,6 @@ if (USE_SHADER)
     shader/fast_sphere_fs.glsl
     shader/fast_sphere_vs.glsl
     shader/fraglight_fs.glsl
-    shader/fraglight_lf_fs.glsl
-    shader/fraglight_lf_vs.glsl
     shader/fraglight_vs.glsl
     shader/iso_fs.glsl
     shader/iso_vs.glsl
@@ -252,6 +250,7 @@ if (USE_SHADER)
     shader/toon2_fs.glsl
     shader/toon_fs.glsl
     shader/toon_vs.glsl
+    shader/screenblur4_fs.glsl
   )
   copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  

@@ -161,7 +161,8 @@ void Shader::Setup()
     {"amboccl_fs.glsl", GL_FRAGMENT_SHADER},
     {"scenefx_vs.glsl", GL_VERTEX_SHADER},
     {"scenefx_fs.glsl", GL_FRAGMENT_SHADER},
-    {"beacon_fs.glsl", GL_FRAGMENT_SHADER}
+    {"beacon_fs.glsl", GL_FRAGMENT_SHADER},
+    {"screenblur4_fs.glsl", GL_FRAGMENT_SHADER}
     //////////////////////////////////////////////////////////////////
   };
 
@@ -296,6 +297,13 @@ void Shader::Setup()
   shader_program_list.push_back(shader_code_map_["scenefx_fs.glsl"]);
   if(link_shader(shader_program_list,"scenefx",shader_program_id)) {
     shader_program_map_["scenefx"]=shader_program_id;
+  }
+  // screen blur shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["quadpp_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["screenblur4_fs.glsl"]);
+  if(link_shader(shader_program_list,"screenblur4",shader_program_id)) {
+    shader_program_map_["screenblur4"]=shader_program_id;
   }
 
   valid_=true;

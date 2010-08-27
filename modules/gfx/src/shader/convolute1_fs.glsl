@@ -3,6 +3,8 @@ uniform sampler1D kernel;
 uniform float step;
 uniform vec2 i_vp;
 
+// gl_TexCoord[0] comes from quadpp_vs, i.e. from post processing
+
 void main()
 {
   float i;

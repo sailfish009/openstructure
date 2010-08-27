@@ -5,7 +5,7 @@ scene.Add(gfx.Surface("s",s))
 scene.SetShadingMode("hf")
 
 # add outlines to surface
-scene["s"].Outline(True)
+scene["s"].SetOutline(True)
 scene["s"].SetOutlineMode(3)
 
 # turn on realtime ambient occlusion

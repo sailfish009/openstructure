@@ -33,7 +33,7 @@ void main()
   vec4 diff = vec4(0.0);
   vec4 spec = vec4(0.0);
   vec4 color = vec4(0.0);
-  vec3 normal = normalize(gl_TexCoord[0].stp);
+  vec3 normal = normalize(gl_TexCoord[2].stp);
 
   DirectionalLight(normal, gl_FrontMaterial.shininess, amb, diff, spec);
 

@@ -14,6 +14,8 @@ uniform bool dark_flag;
 uniform sampler2D dark_map;
 uniform float dark_mult;
 
+// gl_TexCoord[0] comes from scenefx_vs, i.e. from post processing
+
 float CalcShadowFactor(in vec4 coord, in vec2 o)
 {
   // get original depth value of line projected towards light

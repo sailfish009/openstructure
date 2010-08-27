@@ -112,5 +112,13 @@ inline void glLoadMatrix(double* arr) {
   glLoadMatrixd(arr);
 }
 
+inline void glLoadTransposeMatrix(float* arr) {
+  glLoadTransposeMatrixf(arr);
+}
+
+inline void glLoadTransposeMatrix(double* arr) {
+  glLoadTransposeMatrixd(arr);
+}
+
 
 #endif

@@ -49,7 +49,8 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
  public:
   struct Entry {
     Entry();
-    Entry(const geom::Vec3& vv, const geom::Vec3& nn, const Color& cc);
+    Entry(const geom::Vec3& vv, const geom::Vec3& nn, const Color& cc, const geom::Vec2& tt);
+    float t[2];
     float c[4];
     float n[3];
     float v[3];
@@ -111,7 +112,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   void SetOutlineExpandColor(const Color& c);
 
   // vertex, normal, and color (C4F_N3F_V3F)
-  VertexID Add(const geom::Vec3& vert, const geom::Vec3& norm, const Color& col);
+  VertexID Add(const geom::Vec3& vert, const geom::Vec3& norm, const Color& col, const geom::Vec2& tex=geom::Vec2());
 
   unsigned int GetVertexCount() const;
   void DumpVertices() const;
@@ -144,6 +145,9 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
 
   Color GetColor(VertexID id) const;
   void SetColor(VertexID id, const Color& col);
+
+  geom::Vec2 GetTexCoord(VertexID id) const;
+  void SetTexCoord(VertexID id, const geom::Vec2& tex);
 
   void SetOpacity(float o);
 
@@ -178,6 +182,8 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   // experimental, do not use
   void SmoothVertices(float smoothf);
 
+  void SetTex(bool b) {use_tex_=b;}
+  uint& TexID() {return tex_id_;}
 
   const EntryList& GetEntries() const {return entry_list_;}
   const IndexList& GetQuadIndices() const {return quad_index_list_;}
@@ -215,6 +221,9 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   Color outline_exp_color_;
 
   bool draw_normals_;
+
+  bool use_tex_;
+  uint tex_id_;
 
   unsigned int buffer_id_[7]; // magic number related to the .cc buffer use
 

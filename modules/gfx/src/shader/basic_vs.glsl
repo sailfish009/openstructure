@@ -56,7 +56,7 @@ void main()
   vec4 ec_Pos = gl_ModelViewMatrix* gl_Vertex;
 
   vec3 normal = normalize(gl_NormalMatrix * gl_Normal);
-  gl_TexCoord[0].stp = normal;
+  gl_TexCoord[2].stp = normal;
   
   if(lighting_flag) {
     CalcFrontAndBackColor(normal);
@@ -67,8 +67,5 @@ void main()
 
   // for some reason, the fog and z coordinate are sign toggled...
   gl_FogFragCoord = -ec_Pos.z;
-
-  // shadow map projection coords
-  gl_TexCoord[1] = gl_TextureMatrix[0] * gl_Vertex;
 }
 

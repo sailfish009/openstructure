@@ -4,6 +4,8 @@ uniform float len;
 uniform float rad;
 uniform sampler2D depth_map;
 
+// gl_TexCoord[0] comes from scenefx_vs, i.e. from post processing
+
 void main()
 {
   float depth = texture2D(depth_map,gl_TexCoord[0].xy).r;

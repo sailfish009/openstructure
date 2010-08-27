@@ -73,6 +73,7 @@ private:
   SceneFX(const SceneFX&) {}
   SceneFX& operator=(const SceneFX&) {return *this;}
 
+  void screenblur4();
   void prep_shadow_map();
   void prep_depth_darkening();
   void prep_amb_occlusion();

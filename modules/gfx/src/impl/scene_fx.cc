@@ -293,8 +293,7 @@ void SceneFX::Postprocess()
     glBindTexture(GL_TEXTURE_2D,shadow_tex_id_);
     glMatrixMode(GL_TEXTURE);
     glPushMatrix();
-    geom::Mat4 ttmp=geom::Transpose(shadow_tex_mat_);
-    glLoadMatrix(ttmp.Data());
+    glLoadTransposeMatrix(shadow_tex_mat_.Data());
     glMatrixMode(GL_MODELVIEW);
     glActiveTexture(GL_TEXTURE0);
     glUniform1i(glGetUniformLocation(cpr,"shadow_flag"),1);
@@ -660,8 +659,7 @@ void SceneFX::draw_beacon()
   glBindTexture(GL_TEXTURE_2D,depth_tex_id_);
   glMatrixMode(GL_TEXTURE);
   glPushMatrix();
-  geom::Mat4 ttmp=geom::Transpose(beacon.mat);
-  glLoadMatrix(ttmp.Data());
+  glLoadTransposeMatrix(beacon.mat.Data());
   glActiveTexture(GL_TEXTURE0);
   glUniform1i(glGetUniformLocation(cpr,"depth_map"),1);
   glUniform3f(glGetUniformLocation(cpr,"pos"),beacon.p0[0],beacon.p0[1],beacon.p0[2]);
@@ -713,5 +711,28 @@ void SceneFX::draw_beacon()
   Shader::Instance().PopProgram();
 }
 
+void SceneFX::screenblur4()
+{
+  Viewport vp=Scene::Instance().GetViewport();
+  glBindTexture(GL_TEXTURE_2D, scene_tex_id_);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, vp.x, vp.y, vp.width, vp.height, 0);
+  glBindTexture(GL_TEXTURE_2D, depth_tex_id_);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, vp.x, vp.y, vp.width, vp.height, 0);
+  Shader::Instance().PushProgram();
+  Shader::Instance().Activate("screenblur4");
+  GLuint cpr=Shader::Instance().GetCurrentProgram();
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D,depth_tex_id_);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D,scene_tex_id_);
+  glUniform1i(glGetUniformLocation(cpr,"scene_map"),0);
+  glUniform1i(glGetUniformLocation(cpr,"depth_map"),1);
+  glUniform2f(glGetUniformLocation(cpr,"i_vp"),
+              1.0/static_cast<float>(vp.width),
+              1.0/static_cast<float>(vp.height));
+  glUniform1f(glGetUniformLocation(cpr,"depth_cutoff"),0.5);
+  draw_screen_quad(vp.width,vp.height);
+  Shader::Instance().PopProgram();
+}
 
 }}} // ns
