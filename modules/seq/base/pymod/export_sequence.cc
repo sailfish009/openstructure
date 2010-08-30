@@ -337,7 +337,6 @@ void export_sequence()
     .def("__getitem__", &AlignedRegion::operator[])
     .def("__len__", &AlignedRegion::GetLength)
     .def("__iter__", iter_range2)
-    //~ .def("__reversed__", iter_range_rev)
     .add_property("start", &AlignedRegion::GetStart)
     .add_property("end", &AlignedRegion::GetEnd)
   ;
