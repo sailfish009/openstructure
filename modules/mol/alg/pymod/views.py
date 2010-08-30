@@ -69,14 +69,12 @@ def RepresentativeAtoms(ent, chain=None, alpha_and_beta=False):
   If chain is not equal to None, only atoms of the chain with that chain name
   will be added to the view.
   """
-  if isinstance(ent,mol.EntityHandle):
-    e_view = ent.CreateEmptyView()
-  elif isinstance(ent,mol.EntityView):
-    e_view = ent.GetHandle().CreateEmptyView()
+  e_view=ent.CreateEmptyView()
   if ent.IsValid():
     # all chains:
     if chain==None:
       for res in ent.residues:
+        res=res.handle
         if res.IsPeptideLinking():
           atom =  res.FindAtom('CB')
           if atom.IsValid():
@@ -99,7 +97,8 @@ def RepresentativeAtoms(ent, chain=None, alpha_and_beta=False):
 
     elif chain != "" and ent.FindChain(chain).IsValid():
       for res in ent.FindChain(chain).GetResidueList():
-       if res.IsPeptideLinking():
+        res=res.handle
+        if res.IsPeptideLinking():
           atom =  res.FindAtom('CB')
           if atom.IsValid():
             e_view.AddAtom(atom)
