@@ -35,8 +35,8 @@ BOOST_PYTHON_MODULE(_seq_alg)
     .value("LONGER_SEQUENCE", RefMode::LONGER_SEQUENCE)
     .export_values()
   ;
-  def("SequenceIdentity", &SequenceIdentity, arg("seq_a")=0, arg("seq_b")=1);
-  
+  def("SequenceIdentity", &SequenceIdentity, 
+      (arg("ref_mode")=RefMode::ALIGNMENT, arg("seq_a")=0, arg("seq_b")=1));
   class_<AlignedRegionList>("AlignedRegionList", init<>())
     .def(vector_indexing_suite<AlignedRegionList>())
   ;

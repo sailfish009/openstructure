@@ -30,28 +30,43 @@ Real SequenceIdentity(const AlignmentHandle& aln, RefMode::Type ref_mode,
 {
   int non_gap_count=0;
   int identical_count=0;
-  for (AlignedColumnIterator i=aln.begin(), e=aln.end(); i!=e; ++i) {
-    AlignedColumn col=*i;
-    if (!(col[seq_a] == '-' && col[seq_b]=='-')) {
+  const String& sa=aln.GetSequence(seq_a).GetString();
+  const String& sb=aln.GetSequence(seq_b).GetString();  
+  for (String::const_iterator 
+       i=sa.begin(), e=sa.end(), j=sb.begin(); i!=e; ++i, ++j) {
+    if (!((*i)== '-' || (*j)=='-')) {
       non_gap_count++;
     }
-    if (col[seq_a]!='-' && col[seq_a]==col[seq_b]) {
+    if ((*i)!='-' && (*i)==(*j)) {
       identical_count++;
     }
   }
   Real seq_id=0.0;
-  // devide by length of longer sequence:
+  // divide by length of longer sequence:
   if (ref_mode==RefMode::LONGER_SEQUENCE) {
     int wo_gaps_a=aln.GetSequence(seq_a).GetGaplessString().length();
     int wo_gaps_b=aln.GetSequence(seq_b).GetGaplessString().length();
     if(wo_gaps_a>=wo_gaps_b) {
-      seq_id=100*static_cast<Real>(identical_count)/wo_gaps_a;
+      if (wo_gaps_a==0) {
+        seq_id=0;
+      } else {
+        seq_id=100*static_cast<Real>(identical_count)/wo_gaps_a;        
+      }
+
     } else {
-      seq_id=100*static_cast<Real>(identical_count)/wo_gaps_b;
+      if (wo_gaps_b==0) {
+        seq_id=0;
+      } else {
+        seq_id=100*static_cast<Real>(identical_count)/wo_gaps_b;        
+      }
     }
   } else {
-    // divide by alignment length:
-    seq_id=100*static_cast<Real>(identical_count)/non_gap_count;
+    if (non_gap_count==0) {
+      seq_id=0;
+    } else {
+      // divide by alignment length:
+      seq_id=100*static_cast<Real>(identical_count)/non_gap_count;      
+    }
   }
   return seq_id;
 }
