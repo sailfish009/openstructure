@@ -18,3 +18,18 @@
 #------------------------------------------------------------------------------
 from _seq import *
 from ost.seq import alg
+
+_CreateAlignment=CreateAlignment
+def CreateAlignment(*seqs):
+  aln=_CreateAlignment()
+  for s in seqs:
+    aln.AddSequence(s)
+  return aln
+  
+_CreateSequenceList=CreateSequenceList
+def CreateSequenceList(*seqs):
+  sl=_CreateSequenceList()
+  for s in seqs:
+    sl.AddSequence(s)
+  return sl
+
