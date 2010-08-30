@@ -554,9 +554,9 @@ void DataViewerPanelBase::mouseMoveEvent(QMouseEvent* event)
     Point max_pos=WinToPoint(vsize.width(),vsize.height());
     Point min_pos=WinToPoint(0,0);
     selection_=Extent(Point(std::max(min_pos[0],std::min(drag_start[0],mouse_pos[0])),
-                            std::max(min_pos[1],std::min(drag_start[1],mouse_pos[1]))),
+                            std::max(min_pos[1],std::min(drag_start[1],mouse_pos[1])), slab_),
                       Point(std::max(drag_start[0],std::min(max_pos[0],mouse_pos[0])),
-                            std::max(drag_start[1],std::min(max_pos[1],mouse_pos[1]))));
+                            std::max(drag_start[1],std::min(max_pos[1],mouse_pos[1])), slab_));
     if(selection_mode_>0){
       Size s=selection_.GetSize();
       int minsize=std::min<int>(s[0],s[1]);

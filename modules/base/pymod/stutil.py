@@ -93,3 +93,13 @@ def Correl(xs, ys):
   sigma_x=math.sqrt(sigma_x/len(xs))
   sigma_y=math.sqrt(sigma_y/len(ys))  
   return cross_term/((len(xs)-1)*sigma_x*sigma_y)
+
+def Histogram(xs, bounds, num_bins):
+  bins=[0 for i in range(num_bins)]
+  d=1.0*num_bins/(bounds[1]-bounds[0])
+  for x in xs:
+    index=int((x-bounds[0])*d)
+    if index>num_bins-1 or index<0:
+      continue
+    bins[index]+=1
+  return bins
