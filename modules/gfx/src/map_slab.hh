@@ -29,8 +29,8 @@
 #include <ost/geom/geom.hh>
 
 #include <ost/img/map.hh>
-#include <ost/gfx/gl_include.hh>
 
+#include "glext_include.hh"
 #include "gfx_object.hh"
 
 namespace ost { namespace gfx {

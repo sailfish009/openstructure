@@ -32,6 +32,7 @@
 #include <ost/gfx/module_config.hh>
 #include <ost/mol/transform.hh>
 
+#include "gl_include.hh"
 #include "color.hh"
 #include "gfx_object_fw.hh"
 #include "gfx_node_fw.hh"
@@ -40,7 +41,6 @@
 #include "glwin_base.hh"
 #include "scene_observer.hh"
 #include "gfx_prim.hh"
-#include "gl_include.hh"
 #include "povray_fw.hh"
 
 namespace ost { namespace gfx {

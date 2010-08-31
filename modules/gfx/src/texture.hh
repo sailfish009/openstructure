@@ -16,34 +16,57 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GFX_TEST_OBJ_HH
-#define OST_GFX_TEST_OBJ_HH
+#ifndef OST_GFX_TEXTURE_HH
+#define OST_GFX_TEXTURE_HH
 
 /*
-  test gfx obj
+  texture
 
   Author: Ansgar Philippsen
 */
 
-#include "gfx_object.hh"
+#include <boost/shared_array.hpp>
+
+#include "module_config.hh"
 #include "glext_include.hh"
+#include "color.hh"
+#include "bitmap_io.hh"
 
 namespace ost { namespace gfx {
 
-class DLLEXPORT_OST_GFX GfxTestObj: public GfxObj
+class Texture
 {
- public:
-  GfxTestObj();
+public:
+  Texture():
+    w_(0),
+    h_(0),
+    d_()
+  {}
 
-  virtual geom::Vec3 GetCenter() const;
+  Texture(GLint w, GLint h):
+    w_(w),
+    h_(h),
+    d_(new Color[w*h])
+  {}
 
-  virtual geom::AlignedCuboid GetBoundingBox() const;
+  Texture(const Bitmap& b);
 
-  virtual void CustomRenderGL(RenderPass pass);
- private:
+  bool IsValid() const {return d_;}
 
-  GLuint tex_id;
+  Color& operator()(uint u, uint v) {return d_[v*w_+u];}
+  const Color& operator()(uint u, uint v) const {return d_[v*w_+u];}
 
+  float* data() {return d_[0];}
+  
+  GLint width() const {return w_;}
+  GLint height() const {return h_;}
+  GLint format() const {return GL_RGBA;}
+  GLint type() const {return GL_FLOAT;}
+  GLint border() const {return 0;}
+
+private:
+  GLint w_,h_;
+  boost::shared_array<Color> d_;
 };
 
 }} // ns

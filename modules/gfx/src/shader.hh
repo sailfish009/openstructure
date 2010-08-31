@@ -29,7 +29,7 @@
 #include <map>
 #include <stack>
 #include <ost/gfx/module_config.hh>
-#include "gl_include.hh"
+#include "glext_include.hh"
 
 namespace ost { namespace gfx {
 

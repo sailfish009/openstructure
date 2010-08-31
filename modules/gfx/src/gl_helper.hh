@@ -36,7 +36,6 @@ Author: Juergen Haas
 #include <ost/geom/vec3.hh>
 
 #include "glext_include.hh"
-#include "gl_include.hh"
 
 #include <ost/log.hh>
 

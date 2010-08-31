@@ -19,13 +19,14 @@
 #include <boost/python.hpp>
 using namespace boost::python;
 
+#include <ost/gfx/module_config.hh>
+#if OST_SHADER_SUPPORT_ENABLED
+#include <ost/gfx/shader.hh>
+#endif
 #include <ost/info/info.hh>
 #include <ost/gfx/prim_list.hh>
 #include <ost/gfx/gradient.hh>
 #include <ost/gfx/gfx_test_object.hh>
-#if OST_SHADER_SUPPORT_ENABLED
-#include <ost/gfx/shader.hh>
-#endif
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 extern void export_Scene();

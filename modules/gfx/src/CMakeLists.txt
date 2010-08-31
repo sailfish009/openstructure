@@ -22,6 +22,7 @@ prim_list.hh
 scene.hh
 selection.hh
 surface.hh
+texture.hh
 vertex_array.hh
 vertex_array_helper.hh
 scene_observer.hh
@@ -90,9 +91,7 @@ bitmap_io.cc
 color.cc
 primitives.cc
 entity.cc
-
 symmetry_node.cc
-
 gfx_node.cc
 gfx_object.cc
 gfx_prim.cc
@@ -107,6 +106,7 @@ vertex_array.cc
 vertex_array_helper.cc
 material.cc
 povray.cc
+texture.cc
 color_ops/color_op.cc
 color_ops/by_element_color_op.cc
 color_ops/by_chain_color_op.cc
