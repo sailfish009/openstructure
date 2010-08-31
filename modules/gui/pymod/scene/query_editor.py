@@ -38,8 +38,8 @@ class QueryEditorWidget(QtGui.QWidget):
     hl.addWidget(self.ex_bonds_)
     hl.addWidget(self.in_bonds_)
     hl.addStretch(1)
-    hl.addWidget(self.match_res_)
     vl.addLayout(hl)
+    vl.addWidget(self.match_res_)
 
     self.changing_text_=False;
     self.connect(self.selection_edit_,QtCore.SIGNAL("textChanged()"),
@@ -47,6 +47,7 @@ class QueryEditorWidget(QtGui.QWidget):
     self.timer_=QtCore.QTimer()
     QtCore.QObject.connect(self.timer_, QtCore.SIGNAL('timeout()'),
                            self._UpdateMessage)
+    
   def GetQueryFlags(self):
     flags=0
     if self.no_bonds_.isChecked():
@@ -120,9 +121,22 @@ class QueryDialog(QtGui.QDialog):
     l.addLayout(l3)
     QtCore.QObject.connect(cb, QtCore.SIGNAL('clicked()'), self.reject)
     QtCore.QObject.connect(ab, QtCore.SIGNAL('clicked()'), self.accept)
+    self.connect(self.editor.selection_edit_,QtCore.SIGNAL("textChanged()"),self._CheckNewline)
+
   @property 
   def query_flags(self):
     return self.editor.GetQueryFlags()
   @property
   def query(self):
     return self.editor.GetQueryText()
+  
+  def event(self, e):
+    if e.type() == QtCore.QEvent.KeyPress and (e.key () == QtCore.Qt.Key_Return or e.key () == QtCore.Qt.Key_Enter):
+      self.accept()
+      return True
+    else:
+      return QtGui.QDialog.event(self, e)
+  
+  def _CheckNewline(self):
+    if self.editor.GetQueryText().endswith("\n"):
+      self.accept()
