@@ -123,6 +123,7 @@ struct DLLEXPORT_OST_GFX SplineEntry {
     type1(0),
     type2(0),
     frac(0.0),
+    running_length(0.0),
     v0(1.0,0.0,0.0),
     v1(0.0,1.0,0.0),
     v2(0.0,0.0,1.0),
@@ -137,7 +138,7 @@ struct DLLEXPORT_OST_GFX SplineEntry {
               const Color& c1, const Color& c2,
               unsigned int t, int i):
     position(p),direction(d),normal(n),color1(c1),color2(c2),rad(r),type(t),
-    type1(t),type2(t),frac(0.0),v0(),v1(),v2(),nflip(false),id(i)
+    type1(t),type2(t),frac(0.0),running_length(0.0),v0(),v1(),v2(),nflip(false),id(i)
   {
   }
 
@@ -146,7 +147,7 @@ struct DLLEXPORT_OST_GFX SplineEntry {
   float rad;
   unsigned int type;
   unsigned int type1, type2;
-  float frac;
+  float frac,running_length;
   geom::Vec3 v0,v1,v2; // helper vectors
   bool nflip;
   int id;

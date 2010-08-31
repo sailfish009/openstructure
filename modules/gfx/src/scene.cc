@@ -276,6 +276,8 @@ void Scene::SetShadingMode(const std::string& smode)
     Shader::Instance().Activate("toon1");
   } else if(smode=="toon2") {
     Shader::Instance().Activate("toon2");
+  } else if(smode=="test_tex") {
+    Shader::Instance().Activate("test_tex");
   } else {
     Shader::Instance().Activate("fraglight");
   }

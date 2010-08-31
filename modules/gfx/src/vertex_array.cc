@@ -670,7 +670,7 @@ void IndexedVertexArray::Reset()
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
   draw_normals_=false;
-  use_tex_=false;
+  use_tex_=true;
 }
 
 void IndexedVertexArray::FlagRefresh()
@@ -1146,7 +1146,7 @@ void IndexedVertexArray::draw_ltq(bool use_buff)
 {
   if(use_buff && !Scene::Instance().InOffscreenMode()) {
 #if OST_SHADER_SUPPORT_ENABLED
-#if 1
+#if 0
     /*
       for now, since v,n,c live in a packed format (formerly used
       with glInterleavedArrays), only a single buffer is

@@ -490,15 +490,25 @@ TraceProfile CartoonRenderer::TransformAndAddProfile(const std::vector<TraceProf
                   norm[2],orth[2],dir[2]);
 
   // assemble profile with custom coloring
-  TraceProfile tf_prof(prof1.size());
+
+  /*
+    N+1 is used here because the first point
+    needs to be duplicated for texture
+    coordinate assignment to work properly
+  */
+  TraceProfile tf_prof(prof1.size()+1);
+
+
   unsigned int half=prof1.size()/2;
   unsigned int seg=prof1.size()/16;
-  for(unsigned int c=0;c<prof1.size();++c) {
-    geom::Vec3 vec=rmat*se.rad*prof1[c].v;
-    geom::Vec3 norm=rmat*prof1[c].n;
+  for(unsigned int c=0;c<prof1.size()+1;++c) {
+    // use cc everywhere except for the texture coordinate calculation
+    int cc=c%prof1.size();
+    geom::Vec3 vec=rmat*se.rad*prof1[cc].v;
+    geom::Vec3 norm=rmat*prof1[cc].n;
     if(fuse_flag) {
-      geom::Vec3 vec2=rmat*se.rad*prof2[c].v;
-      geom::Vec3 norm2=rmat*prof2[c].n;
+      geom::Vec3 vec2=rmat*se.rad*prof2[cc].v;
+      geom::Vec3 norm2=rmat*prof2[cc].n;
       vec=se.position+(1.0f-se.frac)*vec+se.frac*vec2;
       norm=Normalize((1.0f-se.frac)*norm+se.frac*norm2);
     } else {
@@ -516,7 +526,10 @@ TraceProfile CartoonRenderer::TransformAndAddProfile(const std::vector<TraceProf
     } else if(se.type==2 || se.type==3) {
       if(c<=seg || (c>=half-seg && c<=half+seg) || c>=prof1.size()-seg) col=se.color2;
     }
-    tf_prof[c].id=va.Add(vec,norm, col);
+    // c is used instead of cc to get 1.0 for the last point
+    float tx=static_cast<float>(c)/static_cast<float>(prof1.size());
+    float ty=se.running_length;
+    tf_prof[c].id=va.Add(vec,norm,col,geom::Vec2(tx,ty));
   }
   return tf_prof;
 }
@@ -535,15 +548,26 @@ void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
                                       const TraceProfile& prof2, 
                                       IndexedVertexArray& va)
 {
+  /*
+    the wrap around algorithm used here needs to take into account
+    that the TraceProfile has a duplicate entry for prof*[0] and
+    prof*[N-1], which fall onto the same point except and have
+    the same normal but a different texture coordinate. Hence
+    all the mods are done with size()-1, but in the assembly
+    routine prof*[0] is turned into prof*[N-1] if necessary
+  */
+  size_t size=prof1.size()-1;
+
+  // first get the best correction offset
   float accum[]={0.0,0.0,0.0,0.0,0.0};
-  for(int i=0;i<prof1.size();++i) {
-    int i1=(i+0)%prof1.size();
-    int i2=(i+1)%prof1.size();
+  for(int i=0;i<size;++i) {
+    int i1=(i+0)%(size);
+    int i2=(i+1)%(size);
     geom::Vec3 v1=va.GetVert(prof1[i1].id);
     geom::Vec3 v2=va.GetVert(prof1[i2].id);
     for(int k=-2;k<=2;++k) {
-      int i3=(i+k+0+prof1.size())%prof1.size();
-      int i4=(i+k+1+prof1.size())%prof1.size();
+      int i3=(i+k+0+size)%(size);
+      int i4=(i+k+1+size)%(size);
       geom::Vec3 v3=va.GetVert(prof2[i3].id);
       geom::Vec3 v4=va.GetVert(prof2[i4].id);
       accum[k+2]+=spread(v1,v2,v3,v4);
@@ -558,13 +582,17 @@ void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
       best_off=k;
     }
   }
-  best_off=(best_off+prof1.size())%prof1.size();
+  best_off=(best_off+(size))%(size);
 
-  // assume both profiles have the same size
-  for(unsigned int i1=0;i1<prof1.size();++i1) {
-    unsigned int i2=(i1+1)%prof1.size();
-    unsigned int i3=(i1+best_off)%prof1.size();
-    unsigned int i4=(i1+best_off+1)%prof1.size();
+  // now assemble the triangles
+  for(unsigned int i1=0;i1<size;++i1) {
+    unsigned int i2=(i1+1)%(size);
+    unsigned int i3=(i1+best_off)%(size);
+    unsigned int i4=(i1+best_off+1)%(size);
+
+    // wrap around correction for proper texture coordinates
+    i2 = (i2==0) ? size : i2;
+    i4 = (i4==0) ? size : i4;
 
 #if 1
     va.AddTri(prof1[i1].id,prof1[i2].id,prof2[i3].id);
@@ -580,13 +608,16 @@ void CartoonRenderer::CapProfile(const impl::TraceProfile& p,
                                  bool flipn, IndexedVertexArray& va)
 {
   geom::Vec3 norm=flipn ? -se.direction : se.direction;
-  VertexID pi0 = va.Add(se.position,norm, se.color1);
+  VertexID pi0 = va.Add(se.position,norm, se.color1,geom::Vec2(0.5,0.5));
   std::vector<VertexID> vertices(p.size());
+  float fac=2.0*M_PI/static_cast<float>(p.size()-1);
   for(unsigned int i=0;i<p.size();++i) {
-    vertices[i]=va.Add(p[i].v,norm,se.color1);
+    float aa=fac*static_cast<float>(i%(p.size()-1));
+    vertices[i]=va.Add(p[i].v,norm,se.color1,geom::Vec2(0.5*cos(aa)+0.5,0.5*sin(aa)+0.5));
   }
-  for(unsigned int i1=0;i1<p.size();++i1) {
-    unsigned int i2=(i1+1)%p.size();
+  // taking first/last duplication into account again (see AssembleProfile)
+  for(unsigned int i1=0;i1<p.size()-1;++i1) {
+    unsigned int i2=i1+1;
     if(flipn) {
       va.AddTri(pi0,vertices[i2],vertices[i1]);
     } else {

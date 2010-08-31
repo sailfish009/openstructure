@@ -162,7 +162,8 @@ void Shader::Setup()
     {"scenefx_vs.glsl", GL_VERTEX_SHADER},
     {"scenefx_fs.glsl", GL_FRAGMENT_SHADER},
     {"beacon_fs.glsl", GL_FRAGMENT_SHADER},
-    {"screenblur4_fs.glsl", GL_FRAGMENT_SHADER}
+    {"screenblur4_fs.glsl", GL_FRAGMENT_SHADER},
+    {"test_tex_fs.glsl", GL_FRAGMENT_SHADER}
     //////////////////////////////////////////////////////////////////
   };
 
@@ -304,6 +305,13 @@ void Shader::Setup()
   shader_program_list.push_back(shader_code_map_["screenblur4_fs.glsl"]);
   if(link_shader(shader_program_list,"screenblur4",shader_program_id)) {
     shader_program_map_["screenblur4"]=shader_program_id;
+  }
+  // test tex shader
+  shader_program_list.clear();
+  shader_program_list.push_back(shader_code_map_["fraglight_vs.glsl"]);
+  shader_program_list.push_back(shader_code_map_["test_tex_fs.glsl"]);
+  if(link_shader(shader_program_list,"test_tex",shader_program_id)) {
+    shader_program_map_["test_tex"]=shader_program_id;
   }
 
   valid_=true;

@@ -251,6 +251,7 @@ if (USE_SHADER)
     shader/toon_fs.glsl
     shader/toon_vs.glsl
     shader/screenblur4_fs.glsl
+    shader/test_tex_fs.glsl
   )
   copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  

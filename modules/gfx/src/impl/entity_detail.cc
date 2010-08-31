@@ -378,15 +378,21 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
       sublist.at(c*nsub+d).type=entry_list[c].type;
       sublist.at(c*nsub+d).type1=type1;
       sublist.at(c*nsub+d).type2=type2;
-      sublist.at(c*nsub+d).frac=float(d)/float(nsub);
+      float frac=float(d)/float(nsub);
+      sublist.at(c*nsub+d).frac=frac;
     }
-  }                                                   
+  }
   int type1=entry_list.back().type;
   int type2=type1;
   sublist.back().type=entry_list.back().type;
   sublist.back().type1=type1;
   sublist.back().type2=type2;
   sublist.back().frac=0.0;
+
+  float insub=1.0/static_cast<float>(nsub);
+  for(int c=0;c<sublist.size();++c) {
+    sublist[c].running_length=static_cast<float>(c)*insub;
+  }
 
   // the id for selections, shifted by one half
   for(int c=0;c<size-1;++c) {

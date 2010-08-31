@@ -111,7 +111,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   void SetOutlineExpandFactor(float f);
   void SetOutlineExpandColor(const Color& c);
 
-  // vertex, normal, and color (C4F_N3F_V3F)
+  // vertex, normal, color and texcoord (T2F_C4F_N3F_V3F)
   VertexID Add(const geom::Vec3& vert, const geom::Vec3& norm, const Color& col, const geom::Vec2& tex=geom::Vec2());
 
   unsigned int GetVertexCount() const;
@@ -182,7 +182,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   // experimental, do not use
   void SmoothVertices(float smoothf);
 
-  void SetTex(bool b) {use_tex_=b;}
+  void UseTex(bool b) {use_tex_=b;}
   uint& TexID() {return tex_id_;}
 
   const EntryList& GetEntries() const {return entry_list_;}
