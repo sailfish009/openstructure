@@ -47,6 +47,8 @@
 // hardcode the value here...
 #define OST_GL_VERSION_2_0 1
 #else
-#define OST_GL_VERSION_2_0 GLEW_VERSION_2_0
+#ifdef GLEW_VERSION_2_0
+#define OST_GL_VERSION_2_0 1
+#endif
 #endif
 #endif
