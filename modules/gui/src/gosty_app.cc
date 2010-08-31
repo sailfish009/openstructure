@@ -142,7 +142,7 @@ Perspective* GostyApp::GetPerspective()
 MessageWidget* GostyApp::GetMessageWidget()
 {
   if (message_widget_==NULL) {
-    message_widget_=new MessageWidget(main_);
+    message_widget_=new MessageWidget;
   }
   return message_widget_;
 }

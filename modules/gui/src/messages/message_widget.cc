@@ -202,8 +202,7 @@ int MessageWidget::GetTotalMessagesCount() {
   return model_->rowCount();
 }
 
-MessageWidget::~MessageWidget() {
-}
+MessageWidget::~MessageWidget() {}
 
 }
 } // ns
