@@ -2,9 +2,11 @@
 set(GUI_ICONS
   icons/add_icon.png
   icons/close_icon.png
+  icons/critical_icon.png
   icons/delete_icon.png
   icons/distance_icon.png
   icons/find_icon.png
+  icons/information_icon.png
   icons/map_icon.png
   icons/menubar_icon.png
   icons/rigid_body_manipulator_icon.png
@@ -12,6 +14,7 @@ set(GUI_ICONS
   icons/show_sidebar_icon.png
   icons/site_icon.png
   icons/split_icon.png
+  icons/warning_icon.png
 )
 
 set(GUI_IMAGES

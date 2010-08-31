@@ -133,9 +133,28 @@ void MessageWidget::Decrease(QMessageBox::Icon icon){
 }
 
 QPixmap MessageWidget::GetIcon(QMessageBox::Icon icon, QWidget* widget) {
+  QDir icon_path(GetSharedDataPath().c_str());
+  icon_path.cd("gui");
+  icon_path.cd("icons");
+
   QStyle *style = widget ? widget->style() : QApplication::style();
   int icon_size = style->pixelMetric(QStyle::PM_MessageBoxIconSize, 0, widget);
   QIcon tmp_icon;
+#if  defined(__APPLE__)
+  switch (icon) {
+    case QMessageBox::Information:
+      tmp_icon = QIcon(icon_path.absolutePath()+QDir::separator()+QString("information_icon.png"));
+      break;
+    case QMessageBox::Warning:
+      tmp_icon = QIcon(icon_path.absolutePath()+QDir::separator()+QString("warning_icon.png"));
+      break;
+    case QMessageBox::Critical:
+      tmp_icon = QIcon(icon_path.absolutePath()+QDir::separator()+QString("critical_icon.png"));
+      break;
+    default:
+      break;
+  }
+#else
   switch (icon) {
   case QMessageBox::Information:
     tmp_icon = style->standardIcon(QStyle::SP_MessageBoxInformation, 0, widget);
@@ -151,6 +170,7 @@ QPixmap MessageWidget::GetIcon(QMessageBox::Icon icon, QWidget* widget) {
   default:
     break;
   }
+#endif
   if (!tmp_icon.isNull())
     return tmp_icon.pixmap(icon_size, icon_size);
   return QPixmap();
