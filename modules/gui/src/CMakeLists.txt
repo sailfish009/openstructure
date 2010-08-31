@@ -93,6 +93,7 @@ scene_win_model.hh
 
 set(OST_GUI_MESSAGES_HEADERS
 message_widget.hh
+message_box_widget.hh
 log_reader.hh
 )
 
@@ -212,6 +213,7 @@ admin.cc
 widget_pool.cc
 remote_site_loader.cc
 messages/message_widget.cc
+messages/message_box_widget.cc
 messages/log_reader.cc
 sequence_viewer/align_properties_painter.cc
 sequence_viewer/base_row.cc
@@ -345,6 +347,7 @@ widget.hh
 widget_geom_handler.hh
 widget_pool.hh
 messages/message_widget.hh
+messages/message_box_widget.hh
 messages/log_reader.hh
 sequence_viewer/align_properties_painter.hh
 sequence_viewer/background_painter.hh

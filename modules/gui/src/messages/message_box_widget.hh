@@ -16,14 +16,13 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_MESSAGES_MESSAGE_WIDGET_HH
-#define OST_GUI_MESSAGES_MESSAGE_WIDGET_HH
+#ifndef OST_GUI_MESSAGES_BOX_MESSAGE_WIDGET_HH
+#define OST_GUI_MESSAGES_BOX_MESSAGE_WIDGET_HH
 
-#include <QListView>
+#include <QWidget>
+#include <QMap>
 #include <QMessageBox>
-#include <QStandardItemModel>
 
-#include <ost/gui/widget.hh>
 #include <ost/gui/module_config.hh>
 
 /*
@@ -32,49 +31,37 @@
 
 namespace ost { namespace gui {
 
-// the display window for Log Messages
-class DLLEXPORT_OST_GUI MessageWidget: public Widget
+class DLLEXPORT_OST_GUI MessageLevel: public QWidget
 {
   Q_OBJECT;
 public:
-  MessageWidget(QWidget* parent=NULL);
-  ~MessageWidget();
+  MessageLevel(QPixmap icon, QWidget* parent);
 
+  void SetMessageCount(int message_count);
+  int GetMessageCount();
+private:
+  int message_count_;
+  QLabel* count_label_;
+};
+
+// a summarized version for the the Log Messages
+class DLLEXPORT_OST_GUI MessageBoxWidget: public QWidget
+{
+  Q_OBJECT;
 public:
-  virtual void LogMessage(const QString& message, QMessageBox::Icon icon=QMessageBox::Information);
-  virtual void LogMessage(QStandardItem* item);
-  virtual void LogMessage(const QString& message, QIcon icon);
-
-  virtual int GetMessagesCount(QMessageBox::Icon icon=QMessageBox::NoIcon);
-  virtual int GetTotalMessagesCount();
-  virtual bool Save(const QString& prefix) { return true; }
-  virtual bool Restore(const QString& prefix) { return true; }
-
-  QPixmap GetIcon(QMessageBox::Icon icon, QWidget* widget);
-
-  ActionList GetActions();
-
-signals:
-  void MessageCountChanged(QMessageBox::Icon);
-  void AllCleared();
+  MessageBoxWidget(QWidget* parent=NULL);
+  ~MessageBoxWidget();
 
 public slots:
-  void Clear();
-  void RemoveSelected();
-  void Update();
+  void Update(QMessageBox::Icon icon);
+  void UpdateAll();
 
-private slots:
-  void ContextMenuRequested(const QPoint& pos);
+protected:
+  void mouseDoubleClickEvent(QMouseEvent* event);
 
 private:
-  void Increase(QMessageBox::Icon icon);
-  void Decrease(QMessageBox::Icon icon);
+  QMap<QMessageBox::Icon,MessageLevel*> level_map_;
 
-  QStandardItemModel* model_;
-  QListView* view_;
-
-  ActionList actions_;
-  QMap<int,int> count_map_;
 };
 
 }} // ns

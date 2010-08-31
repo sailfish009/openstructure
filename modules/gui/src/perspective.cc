@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <QTextEdit>
+#include <QSizeGrip>
 #include <QMainWindow>
 #include <QSettings>
 #include <QDebug>
@@ -27,12 +28,14 @@
 #include <QKeySequence>
 #include <QStatusBar>
 #include <QPushButton>
+
 #include <ost/platform.hh>
 
 #include <ost/gui/widget_registry.hh>
 #include <ost/gui/perspective.hh>
 #include <ost/gui/file_browser.hh>
 #include <ost/gui/main_area.hh>
+#include <ost/gui/messages/message_box_widget.hh>
 
 /*
   Author: Marco Biasini
@@ -53,6 +56,7 @@ Perspective::Perspective(QMainWindow* parent):
   parent->setCentralWidget(central_);
 
   status_bar_ = new QStatusBar(main_area_);
+  status_bar_->setSizeGripEnabled (false);
 
   panels_ = new PanelManager(main_area_);
   l->addWidget(panels_,1);
@@ -96,6 +100,8 @@ void Perspective::SetupQuickAccessBar()
           SLOT(AddSideBarWidget()));          
   l2->addWidget(add_side_bar_widget, 0);
   l2->addWidget(status_bar_);
+  l2->addWidget(new MessageBoxWidget(quick_access_bar_));
+  l2->addWidget(new QSizeGrip(quick_access_bar_));
 }
 
 void Perspective::StatusMessage(const String& m)

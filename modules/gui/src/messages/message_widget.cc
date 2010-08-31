@@ -86,22 +86,50 @@ void MessageWidget::Update() {
 void MessageWidget::LogMessage(const QString& message, QMessageBox::Icon icon) {
   QPixmap pix_icon = this->GetIcon(icon, this);
   QStandardItem* item = new QStandardItem();
+  item->setData(QVariant(icon));
   item->setText(message);
   item->setIcon(QIcon(pix_icon));
   item->setEditable(false);
   this->model_->appendRow(item);
+  this->Increase(icon);
 }
 
 void MessageWidget::LogMessage(QStandardItem* item) {
+  item->setData(QVariant(QMessageBox::NoIcon));
   this->model_->appendRow(item);
+  this->Increase(QMessageBox::NoIcon);
 }
 
 void MessageWidget::LogMessage(const QString& message, QIcon icon) {
   QStandardItem* item = new QStandardItem();
   item->setText(message);
+  item->setData(QVariant(QMessageBox::NoIcon));
   item->setIcon(icon);
   item->setEditable(false);
   this->model_->appendRow(item);
+  this->Increase(QMessageBox::NoIcon);
+}
+
+void MessageWidget::Increase(QMessageBox::Icon icon){
+  if(count_map_.contains(icon)){
+    count_map_[icon] = count_map_[icon] + 1;
+  }
+  else{
+    count_map_[icon] = 1;
+  }
+  emit MessageCountChanged(icon);
+}
+
+void MessageWidget::Decrease(QMessageBox::Icon icon){
+  if(count_map_.contains(icon)){
+    if(count_map_[icon]>0){
+      count_map_[icon] = count_map_[icon] - 1;
+    }
+    else{
+      count_map_[icon] = 0;
+    }
+  }
+  emit MessageCountChanged(icon);
 }
 
 QPixmap MessageWidget::GetIcon(QMessageBox::Icon icon, QWidget* widget) {
@@ -130,6 +158,8 @@ QPixmap MessageWidget::GetIcon(QMessageBox::Icon icon, QWidget* widget) {
 
 void MessageWidget::Clear() {
   this->model_->clear();
+  this->count_map_.clear();
+  emit AllCleared();
 }
 
 void MessageWidget::RemoveSelected() {
@@ -137,7 +167,10 @@ void MessageWidget::RemoveSelected() {
   const QItemSelection& item_selection = selection_model->selection();
   const QModelIndexList& model_indexes = item_selection.indexes();
   for (int i = 0; i < model_indexes.size(); i++) {
-    this->model_->removeRow(model_indexes[i].row());
+    int row = model_indexes[i].row();
+    QMessageBox::Icon icon = QMessageBox::Icon(this->model_->item(row)->data().toInt());
+    this->model_->removeRow(row);
+    this->Decrease(icon);
   }
 }
 
@@ -146,7 +179,6 @@ ActionList MessageWidget::GetActions() {
 }
 
 void MessageWidget::ContextMenuRequested(const QPoint& pos) {
-
   QAction* remove_selected_action = new QAction("Remove", this);
   remove_selected_action->setToolTip("Remove this item");
   connect(remove_selected_action, SIGNAL(triggered(bool)), this,
@@ -157,6 +189,17 @@ void MessageWidget::ContextMenuRequested(const QPoint& pos) {
   if (menu->actions().size() > 0) {
     menu->popup(view_->viewport()->mapToGlobal(pos));
   }
+}
+
+int MessageWidget::GetMessagesCount(QMessageBox::Icon icon) {
+  if(count_map_.contains(icon)){
+    return count_map_[icon];
+  }
+  return 0;
+}
+
+int MessageWidget::GetTotalMessagesCount() {
+  return model_->rowCount();
 }
 
 MessageWidget::~MessageWidget() {
