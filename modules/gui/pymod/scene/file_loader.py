@@ -141,16 +141,13 @@ class GenericLoader(BaseRemoteLoader):
     if file_type is None:
       file_type = self.file_type_
     if len(self.name_)>0:
-      print self.name_
       return url+formatted_id +"_"+self.name_+"."+file_type
     else:
       return url+formatted_id+"."+file_type
   
   def HandleError(self, message):
-    messageBox =QtGui.QMessageBox(QtGui.QMessageBox.Warning,
-            "Error while Loading file from "+self.name_, "Could not download file ("+message+")!")
-    messageBox.exec_()
-    
+    ost.LogError(str("Could not download file\n"+message+""))
+   
   def ToInfo(self,group):
     group.SetAttribute(GenericLoader.EXT_NAME_ATTRIBUTE_NAME, str(self.name_))
     group.SetAttribute(GenericLoader.URL_ATTRIBUTE_NAME, str(self.url_))
