@@ -43,7 +43,8 @@ MessageLevel::MessageLevel(QPixmap icon, QWidget* parent): QWidget(parent), mess
   layout->setSpacing(0);
   QLabel* icon_label = new QLabel(this);
   icon_label->setFixedSize(20,20);
-  icon_label->setPixmap(icon.scaled(20,20));
+  icon_label->setPixmap(icon.scaled(15,15, Qt::IgnoreAspectRatio, 
+                                    Qt::SmoothTransformation));
   layout->addWidget(icon_label);
   layout->addWidget(count_label_);
 }
