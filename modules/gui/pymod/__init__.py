@@ -35,3 +35,7 @@ def CreateDataViewer(ih,flag=False):
         sip_viewer.closeEvent=_close_event_override_
         sip_viewer.setData=_set_data_override_
       return viewer
+
+def ClearMessageWidget():
+      gosty=GostyApp.Instance()
+      gosty.message_widget.Clear()
