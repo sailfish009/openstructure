@@ -43,6 +43,9 @@ public slots:
   void SelectSidechains();
   void SelectLigands();
   void SelectAroundAtom();
+  void SelectAroundResidue();
+  void SelectAtom();
+  void SelectResidue();
   void Select(const String& str);
   void UnSelect();
   void CenterOnAtom();

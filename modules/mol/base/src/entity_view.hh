@@ -286,6 +286,16 @@ public:
   Real GetAngle(const AtomView& a1, const AtomView& a2,
                 const AtomView& a3) const;
 
+  /// \brief  Extend current view to include all atoms of each residue where
+  ///         at least one atom is selected currently
+  EntityView ExtendViewToResidues() const;
+
+  /// \brief  Extend current view to include all atoms that are within the sum
+  ///         of their vdw radii + gap
+  ///
+  /// Include all atoms within: at1.GetRadius() + at2.GetRadius() + gap
+  EntityView ExtendViewToSurrounding(Real gap) const;
+
   /// \brief returns a string containing a human-readable summary of the
   ///     entity view
   String Dump() const;

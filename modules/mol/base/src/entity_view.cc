@@ -773,6 +773,42 @@ void EntityView::RemoveAtomInternal(const AtomView& av)
   data_->handle_to_view.erase(av.GetHandle().GetHashCode());
 }
 
+EntityView EntityView::ExtendViewToResidues() const
+{
+  this->CheckValidity();
+  EntityView view=this->CreateEmptyView();
+  ResidueViewList residues=this->GetResidueList();
+  ResidueViewList::const_iterator res_it;
+  for (res_it=residues.begin(); res_it!=residues.end(); ++res_it) {
+    view.AddResidue((*res_it).GetHandle(),
+                    mol::ViewAddFlag::INCLUDE_ALL|mol::ViewAddFlag::CHECK_DUPLICATES);
+  }
+  view.AddAllInclusiveBonds();
+  return view;
+}
+
+EntityView EntityView::ExtendViewToSurrounding(Real gap) const
+{
+  this->CheckValidity();
+  EntityView view=this->CreateEmptyView();
+  AtomViewList atoms=this->GetAtomList();
+  AtomViewList::const_iterator atm_it;
+  Real max_dist=5+gap;
+  for (atm_it=atoms.begin(); atm_it!=atoms.end(); ++atm_it) {
+    view.AddAtom((*atm_it),mol::ViewAddFlag::INCLUDE_ALL|mol::ViewAddFlag::CHECK_DUPLICATES);
+    AtomHandleList prot_atoms=this->GetHandle().FindWithin((*atm_it).GetPos(),max_dist);
+    AtomHandleList::const_iterator protatm_it;
+    for (protatm_it=prot_atoms.begin(); protatm_it!=prot_atoms.end(); ++protatm_it){
+      Real dist=geom::Distance((*atm_it).GetPos(), (*protatm_it).GetPos());
+      if (dist <= (*atm_it).GetRadius() + (*protatm_it).GetRadius() + gap) {
+        view.AddAtom((*protatm_it),mol::ViewAddFlag::INCLUDE_ALL|mol::ViewAddFlag::CHECK_DUPLICATES);
+      }
+    }
+  }
+  view.AddAllInclusiveBonds();
+  return view;
+}
+
 namespace {
 
 class EntityViewDumper : public EntityVisitor {

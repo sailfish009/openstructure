@@ -86,6 +86,8 @@ void export_EntityView()
 
   class_<EntityView, bases<EntityBase> >("EntityView", init<>())
     .def("Copy", &EntityView::Copy)
+    .def("ExtendViewToResidues", &EntityView::ExtendViewToResidues)
+    .def("ExtendViewToSurrounding", &EntityView::ExtendViewToSurrounding)
     .def("FindChain", find_chain_str)
     .def("FindResidue", &EntityView::FindResidue)
     .def("FindAtom", find_atom_a)
