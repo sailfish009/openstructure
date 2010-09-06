@@ -19,6 +19,15 @@ from ost.gui.init_spacenav import _InitSpaceNav
 from ost.gui.init_context_menu import _InitContextMenu
 from ost.gui.init_splash import _InitSplash
 from ost.gui.dng import termuse
+
+from PyQt4.QtGui import *
+def _my_exit(code):
+  QtGui.QApplication.instance().quit()
+  sys._exit(code)
+
+sys._exit=sys.exit
+sys.exit=_my_exit
+
 def _InitRuleBasedBuilder():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
   if os.path.exists(compound_lib_path):
