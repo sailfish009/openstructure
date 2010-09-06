@@ -394,7 +394,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
                                 mol::EntityHandle& ent, 
                                 const StringRef& record_type)
 {
-  if (!this->EnsureLineLength(line, 59)) {
+  if (!this->EnsureLineLength(line, 54)) {
     return;
   }
   mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
