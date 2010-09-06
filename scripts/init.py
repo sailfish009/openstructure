@@ -23,6 +23,7 @@ from ost.gui.dng import termuse
 from PyQt4.QtGui import *
 def _my_exit(code):
   QtGui.QApplication.instance().quit()
+  gui.GostyApp.Instance().ProcessEvents()
   sys._exit(code)
 
 sys._exit=sys.exit
