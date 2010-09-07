@@ -13,11 +13,11 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False):
       seq_list.AddSequence(seq1)
       seq_list.AddSequence(seq2)
     elif isinstance(seq1, str) and isinstance(seq2, str):
-      seq1=CreateSequence("seq1", seq1)
-      seq2=CreateSequence("seq2", seq2)
+      seqh1=CreateSequence("seq1", seq1)
+      seqh2=CreateSequence("seq2", seq2)
       seq_list=seq.CreateSequenceList()
-      seq_list.AddSequence(seq1)
-      seq_list.AddSequence(seq2)
+      seq_list.AddSequence(seqh1)
+      seq_list.AddSequence(seqh2)
     else:
       LogError("WARNING: Specify at least two Sequences")
       return
