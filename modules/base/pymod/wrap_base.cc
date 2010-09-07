@@ -16,10 +16,9 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <vector>
-
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <vector>
 #include <ost/export_helper/vector.hh>
 #include <ost/base.hh>
 #include <ost/platform.hh>
