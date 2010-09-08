@@ -1,4 +1,5 @@
 from ost import io, seq, mol, conop
+import ost
 
 def Renumber(seq_handle):
   """
@@ -19,32 +20,30 @@ def Renumber(seq_handle):
     io.SavePDB(e, "renum.pdb")
    
   """
-  if seq_handle.HasAttachedView==False:
+  if seq_handle.HasAttachedView()==False:
     raise RuntimeError, "Sequence Handle has no attached view"
-  counter=0
   changed_residue_count=0
-  renumberingFlag = 0
+  renumberingFlag = False
   ent_n=mol.CreateEntity()
   ed=ent_n.RequestXCSEditor()
   c=ed.InsertChain(" ")
   for pos in range(len(seq_handle)):
     if seq_handle[pos]!='-':
-      r=seq_handle.attached_view.residues[counter]
+      r=seq_handle.GetResidue(pos)
       if r.IsValid():
           #print seq_handle[pos],r.number.num,pos+1
           if r.number.num!=pos+1:
             changed_residue_count+=1
-            renumberingFlag = 1
+            renumberingFlag = True
           r_n=ed.AppendResidue(c,r.name, mol.ResNum(pos+1))
           for atom in r.atoms:
             ed.InsertAtom(r_n,atom.name,atom.pos,atom.prop)
       else:
         err='Error: renumbering failed at position %s' %pos
         raise RuntimeError, err
-      counter+=1
-  if renumberingFlag == 1:
+  if renumberingFlag == True:
     err = 'Warning: %s residues have been renumbered!' %changed_residue_count
-    print err
+    ost.LogMessage(err)
   conop.ConnectAll(ent_n)
   return ent_n
 
