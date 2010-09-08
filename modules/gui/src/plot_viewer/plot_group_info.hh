@@ -19,10 +19,10 @@
 #ifndef PLOT_GROUP_INFO_HH_
 #define PLOT_GROUP_INFO_HH_
 
-#include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/python.hpp>
 #include "plot_info_base.hh"
+#include <vector>
+#include <boost/python.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace ost{namespace gui{
 

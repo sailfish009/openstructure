@@ -16,9 +16,9 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <vector>
 
 #include <boost/python.hpp>
+#include <vector>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include <ost/gui/sequence_viewer/sequence_viewer.hh>

@@ -16,17 +16,17 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <string>
 
 #include <boost/python.hpp>
+#include <string>
 #include <boost/python/register_ptr_to_python.hpp>
 
-using namespace boost::python;
 
 #include <ost/gui/widget.hh>
 
 #include "sip_handler.hh"
 
+using namespace boost::python;
 using namespace ost;
 using namespace ost::gui;
 

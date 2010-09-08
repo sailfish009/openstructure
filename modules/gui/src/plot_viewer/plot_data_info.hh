@@ -24,11 +24,10 @@
   Author: Andreas Schenk
 */
 
-#include <vector>
-#include <boost/python.hpp>
-
 #include <ost/gui/module_config.hh>
 #include <ost/gui/plot_viewer/plot_data_info_fw.hh>
+#include <boost/python.hpp>
+#include <vector>
 
 #include "plot_info_base.hh"
 
