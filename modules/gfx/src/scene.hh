@@ -350,8 +350,11 @@ protected:
   void RenderModeChanged(const String& name);
 
 private:  
+
   template <typename ACTION>
-  void NotifyObservers(const ACTION& action);  
+  void NotifyObservers(const ACTION& action) {
+    std::for_each(observers_.begin(), observers_.end(), action);
+  }
   Scene();
   Scene(const Scene&) {}
   Scene& operator=(const Scene&) {return *this;}

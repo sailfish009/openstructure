@@ -472,11 +472,6 @@ void Scene::Unregister(GLWinBase* win)
   win_=0;
 }
 
-template <typename ACTION>
-void Scene::NotifyObservers(const ACTION& action) {
-  std::for_each(observers_.begin(), observers_.end(), action);
-}
-
 namespace {
   struct FindNode: public GfxNodeVisitor {
     FindNode(const String& n): nam(n), node() {}
