@@ -431,7 +431,7 @@ void DataViewerPanelBase::paintEvent(QPaintEvent* event)
   painter.drawPixmap(QPoint(0,0),*pixmap_);
 #endif
 
-  if(zoom_level_ >= 6 && display_pixel_values_) {
+  if(zoom_level_ >= 7 && display_pixel_values_) {
     draw_pixel_values(painter);
   }
 
@@ -1009,20 +1009,37 @@ void DataViewerPanelBase::draw_pixel_values(QPainter& painter)
 
   QFont fnt("Courier",(zoom_level_-6)*2+7);
   painter.setFont(fnt);
-  
-  for(int i = 0; i <= (b[0] - a[0]); ++i) {
-    for(int j = 0; j <= (b[1] - a[1]); ++j) {
-      Real pixel_value = GetObservedData().GetReal(Point(a[0]+i, 
-                                                               a[1]+j,slab_));
-      QString value_string = QString("%1").arg(pixel_value,0,'g',5);
-      Real rv = GetNormalizer()->Convert(pixel_value);
-      QPoint p = FracPointToWinCenter(geom::Vec2(static_cast<Real>(a[0]+i),
-                                                 static_cast<Real>(a[1]+j)));
-      unsigned char rgb = (rv>130.0) ? 0 : 255;
-      painter.setPen(QColor(rgb,rgb,rgb));
-      int string_h=painter.fontMetrics().height();
-      int string_w=painter.fontMetrics().width(value_string);
-      painter.drawText(p.x() - string_w/2, p.y() + string_h/2, value_string);
+  if(GetObservedData().GetType()==REAL){
+    for(int i = 0; i <= (b[0] - a[0]); ++i) {
+      for(int j = 0; j <= (b[1] - a[1]); ++j) {
+        Real pixel_value = GetObservedData().GetReal(Point(a[0]+i,
+                                                                 a[1]+j,slab_));
+        QString value_string = QString("%1").arg(pixel_value,0,'g',5);
+        Real rv = GetNormalizer()->Convert(pixel_value);
+        QPoint p = FracPointToWinCenter(geom::Vec2(static_cast<Real>(a[0]+i),
+                                                   static_cast<Real>(a[1]+j)));
+        unsigned char rgb = (rv>130.0) ? 0 : 255;
+        painter.setPen(QColor(rgb,rgb,rgb));
+        int string_h=painter.fontMetrics().height();
+        int string_w=painter.fontMetrics().width(value_string);
+        painter.drawText(p.x() - string_w/2, p.y() + string_h/2, value_string);
+      }
+    }
+  }else{
+    for(int i = 0; i <= (b[0] - a[0]); ++i) {
+      for(int j = 0; j <= (b[1] - a[1]); ++j) {
+        Complex pixel_value = GetObservedData().GetComplex(Point(a[0]+i,
+                                                                 a[1]+j,slab_));
+        QString value_string = QString("%1+i%2").arg(pixel_value.real(),0,'g',5).arg(pixel_value.imag(),0,'g',5);
+        Real rv = GetNormalizer()->Convert(abs(pixel_value));
+        QPoint p = FracPointToWinCenter(geom::Vec2(static_cast<Real>(a[0]+i),
+                                                   static_cast<Real>(a[1]+j)));
+        unsigned char rgb = (rv>130.0) ? 0 : 255;
+        painter.setPen(QColor(rgb,rgb,rgb));
+        int string_h=painter.fontMetrics().height();
+        int string_w=painter.fontMetrics().width(value_string);
+        painter.drawText(p.x() - string_w/2, p.y() + string_h/2, value_string);
+      }
     }
   }
 }
