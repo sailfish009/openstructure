@@ -60,7 +60,7 @@ private:
   static void RunScript(const QString& filename);
   static void LoadPDB(const QString& filename, const QString& selection=QString());
   static void AddToScene(const QString& filename, gfx::GfxObjP obj);
-  static void HandleError(Message m, ErrorType type, const QString& filename, gfx::GfxObjP obj=gfx::GfxObjP());
+  static void HandleError(const Error& e, ErrorType type, const QString& filename, gfx::GfxObjP obj=gfx::GfxObjP());
   static gfx::GfxObjP NoHandlerFound(const QString& filename);
   virtual ~FileLoader();
 

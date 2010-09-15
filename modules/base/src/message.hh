@@ -20,7 +20,7 @@
 /*
   messages and logs
 
-  Author: Ansgar Philippsen
+  Authors: Ansgar Philippsen, Andteas Schenk
 */
 
 #ifndef OST_MESSAGE_HH
@@ -31,18 +31,14 @@
 
 namespace ost {
 
-struct DLLEXPORT Message: public std::exception {
-  Message(const String& mesg,const String& prefix="");
-  virtual ~Message() throw();
-  // exception interface
-  virtual const char* what() const throw();
 
-  String _prefix;
-  String _mesg;
-};
-
-struct DLLEXPORT Error: public Message {
+class DLLEXPORT Error: virtual public std::exception {
+public:
   Error(const String& m);
+  ~Error() throw();
+  virtual const char* what() const throw();
+protected:
+  String mesg_;
 };
 
 } // namespace

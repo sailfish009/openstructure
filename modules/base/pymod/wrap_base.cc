@@ -22,6 +22,7 @@
 #include <ost/export_helper/vector.hh>
 #include <ost/base.hh>
 #include <ost/platform.hh>
+#include <ost/message.hh>
 
 using namespace boost::python;
 
@@ -30,8 +31,16 @@ void export_GenericProp();
 void export_Range();
 void export_Units();
 
+// exception translator
+void translator(const ost::Error& x) {
+  PyErr_SetString(PyExc_Exception, x.what() );
+}
+
+
 BOOST_PYTHON_MODULE(_base)
 {
+  register_exception_translator<ost::Error>(&translator);
+
   def("SetPrefixPath", &ost::SetPrefixPath);
   def("GetPrefixPath", &ost::GetPrefixPath);
   def("GetSharedDataPath", &ost::GetSharedDataPath);  

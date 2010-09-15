@@ -36,10 +36,7 @@ class ImmutablePresetInfoHandler():
     
     self.root_ = self.handle_.Root()
     
-    try:
-      self.presets_ = self.root_.GetGroup(ImmutablePresetInfoHandler.PRESETS_GROUP_NAME)
-    except UserWarning:
-      self.presets_ = self.root_.CreateGroup(ImmutablePresetInfoHandler.PRESETS_GROUP_NAME)
+    self.presets_ = self.root_.RetrieveGroup(ImmutablePresetInfoHandler.PRESETS_GROUP_NAME)
 
     
   def GetPreset(self, name):

@@ -36,10 +36,7 @@ class ImmutableLoaderInfoHandler():
     
     self.root_ = self.handle_.Root()
     
-    try:
-      self.loaders_ = self.root_.GetGroup(ImmutableLoaderInfoHandler.LOADERS_GROUP_NAME)
-    except UserWarning:
-      self.loaders_ = self.root_.CreateGroup(ImmutableLoaderInfoHandler.LOADERS_GROUP_NAME)
+    self.loaders_ = self.root_.RetrieveGroup(ImmutableLoaderInfoHandler.LOADERS_GROUP_NAME)
 
     
   def GetLoader(self, name):

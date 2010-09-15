@@ -127,7 +127,7 @@ void FileLoader::AddToScene(const QString& filename, gfx::GfxObjP obj)
       gfx::Scene::Instance().SetCenter(obj->GetCenter());
     }
   }
-  catch (Message m) {
+  catch (Error m) {
     FileLoader::HandleError(m, GFX_ADD, filename, obj);
   }
 }
@@ -189,11 +189,11 @@ std::vector<String> FileLoader::GetSiteLoaderIdents()
   return loader_manager_->GetSiteLoaderIdents();
 }
 
-void FileLoader::HandleError(Message m, ErrorType type, const QString& filename, gfx::GfxObjP obj)
+void FileLoader::HandleError(const Error& e, ErrorType type, const QString& filename, gfx::GfxObjP obj)
 {
   if(type==GFX_ADD || type==GFX_MULTIPLE_ADD){
     QMessageBox message_box(QMessageBox::Warning,
-        "Error while adding Node to Scene", m._mesg.c_str());
+        "Error while adding Node to Scene", e.what());
     if(type==GFX_ADD){
       message_box.setStandardButtons( QMessageBox::Yes | QMessageBox::Cancel);
       message_box.setButtonText(QMessageBox::Yes, "Reload");
@@ -212,7 +212,7 @@ void FileLoader::HandleError(Message m, ErrorType type, const QString& filename,
   }
   else if(type==IO_LOADING){
     QMessageBox message_box(QMessageBox::Warning,
-                "Error while loading file", m._mesg.c_str());
+                "Error while loading file", e.what());
     message_box.setStandardButtons( QMessageBox::Yes | QMessageBox::Cancel);
     message_box.setButtonText(QMessageBox::Yes, "Chose format");
     int value = message_box.exec();
@@ -224,7 +224,7 @@ void FileLoader::HandleError(Message m, ErrorType type, const QString& filename,
   }
   else if(type==INFO){
     QMessageBox message_box(QMessageBox::Information,
-        "Information", m._mesg.c_str());
+        "Information", e.what());
     message_box.setStandardButtons( QMessageBox::Ok);
     message_box.exec();
   }
@@ -395,14 +395,14 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
   }
   QFileInfo file_info(filename);
   if(entities.empty()){
-    FileLoader::HandleError(Message(QString("No entities found in file: "+ filename).toStdString()),INFO,filename);
+    FileLoader::HandleError(Error(QString("No entities found in file: "+ filename).toStdString()),INFO,filename);
   }else if (entities.size()==1){
     gfx::EntityP gfx_ent(new gfx::Entity(file_info.baseName().toStdString(),entities.first(),mol::Query(selection.toStdString())));
     try{
       gfx::Scene::Instance().Add(gfx_ent);
     }
-    catch (Message m) {
-      HandleError(m, GFX_ADD, filename, gfx_ent);
+    catch (Error e) {
+      HandleError(e, GFX_ADD, filename, gfx_ent);
     }
     if (gfx::Scene::Instance().GetRootNode()->GetChildCount()==1) {
       gfx::Scene::Instance().SetCenter(gfx_ent->GetCenter());
@@ -414,8 +414,8 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
         gfx::Scene::Instance().Add(gfx_ent);
       }
     }
-    catch (Message m) {
-      FileLoader::HandleError(m,GFX_MULTIPLE_ADD,filename);
+    catch (Error e) {
+      FileLoader::HandleError(e,GFX_MULTIPLE_ADD,filename);
     }
   }
 }

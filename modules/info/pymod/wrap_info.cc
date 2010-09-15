@@ -36,9 +36,6 @@ using namespace ost::info;
 
 namespace {
 
-void info_error_translator(const InfoError& x) {
-  PyErr_SetString(PyExc_UserWarning, x.what());
-}
 
 InfoHandle (*CreateInfoPtr1)()=CreateInfo;
 InfoHandle (*CreateInfoPtr2)(const String&)=CreateInfo;
@@ -160,7 +157,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(retrieveitem_overloads, RetrieveItem, 1, 
 
 BOOST_PYTHON_MODULE(_info)
 {
-  register_exception_translator<InfoError>(&info_error_translator);
 
   enum_<Type>("ItemType")
     .value("STRING",IT_STRING)
