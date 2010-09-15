@@ -258,7 +258,7 @@ message(STATUS
         "OpenStructure will be built with the following options:\n"
         "   Install Prefix                  (-PREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
         "   RPath in install            (-DUSE_RPATH) : ${_USE_RPATH}\n"
-        "   Graphical interface         (-DENABLE_UI) : ${_UI}\n"
+        "   Graphical interface        (-DENABLE_GUI) : ${_UI}\n"
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
         "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support             (-DUSE_SHADER) : ${_SHADER}\n"
