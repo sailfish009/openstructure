@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(seq_triv)
 {
   BOOST_CHECK_NO_THROW(CreateSequence("S1", "-afbcdefghijkLMNOPQRSTUV-"));
   BOOST_CHECK_THROW(CreateSequence("S1", "1"), InvalidSequence);
-  BOOST_CHECK_THROW(CreateSequence("S1", "."), InvalidSequence);
+  BOOST_CHECK_THROW(CreateSequence("S1", "*"), InvalidSequence);
   BOOST_CHECK_THROW(CreateSequence("S1", " "), InvalidSequence);
   SequenceHandle s=CreateSequence("S1","-afbcdefghijkLMNOPQRSTUV-");
   BOOST_CHECK_EQUAL(s.GetString(),"-afbcdefghijkLMNOPQRSTUV-");

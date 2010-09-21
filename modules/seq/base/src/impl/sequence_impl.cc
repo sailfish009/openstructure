@@ -36,7 +36,7 @@ namespace {
 
 bool is_sane_code(char code)
 {
-  return (isalpha(code) || code=='?');
+  return (isalpha(code) || code=='?' || code=='.');
 }
 
 }
