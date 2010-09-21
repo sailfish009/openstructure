@@ -41,7 +41,7 @@ public:
   static CompoundLibPtr Create(const String& database);
   ~CompoundLib();
   
-  CompoundPtr FindCompound(const String& id);
+  CompoundPtr FindCompound(const String& id, Compound::Dialect dialect);
   void AddCompound(const CompoundPtr& compound);
   CompoundLibPtr Copy(const String& filename) const;
   void ClearCache();

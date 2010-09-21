@@ -38,9 +38,9 @@ typedef enum {
 
 class DLLEXPORT_OST_CONOP ChemdictParser : public io::StarParser {
 public:
-  ChemdictParser(std::istream& stream): 
-    io::StarParser(stream),
-    compound_(new Compound("UNK")), last_(0), loop_type_(DONT_KNOW)
+  ChemdictParser(std::istream& stream, Compound::Dialect dialect): 
+    io::StarParser(stream), compound_(new Compound("UNK")), 
+    last_(0), loop_type_(DONT_KNOW), dialect_(dialect)
   {
     this->InitTypeMap();
   }
@@ -83,7 +83,11 @@ private:
   std::map<String, int>                   atom_map_;
   LoopType                                loop_type_;  
   AtomSpec                                atom_;
+  Compound::Dialect                       dialect_;
 };
 
 
 }}
+
+
+#endif

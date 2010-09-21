@@ -5,6 +5,7 @@ namespace ost { namespace conop {
 bool ChemdictParser::OnBeginData(const StringRef& data_name) 
 {    
   compound_.reset(new Compound(data_name.str()));
+  compound_->SetDialect(dialect_);
   if (last_!=data_name[0]) {
     last_=data_name[0];
     std::cout << last_ << std::flush;
@@ -76,6 +77,7 @@ void ChemdictParser::OnDataItem(const io::StarDataItem& item)
       // The type of water is set to "?". let's change it to water...
       if (compound_->GetID()=="HOH") {
         compound_->SetChemClass(mol::ChemClass(mol::ChemClass::Water));
+        compound_->SetOneLetterCode('.');
       } else {
         std::map<String, mol::ChemClass>::iterator i=tm_.find(type);
         if (i!=tm_.end()) {
@@ -148,6 +150,7 @@ void ChemdictParser::InitTypeMap()
   tm_["NON-POLYMER"]=mol::ChemClass(mol::ChemClass::NonPolymer);
   tm_["RNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::RNALinking);
   tm_["?"]=mol::ChemClass(mol::ChemClass::Unknown);  
+  tm_["WATER"]=mol::ChemClass(mol::ChemClass::Water);
 }
 
 }}

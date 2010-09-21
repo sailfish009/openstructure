@@ -71,7 +71,8 @@ bool RuleBasedBuilder::HasUnknownAtoms(mol::ResidueHandle res)
   mol::AtomHandleList::iterator i=atoms.begin();
   for (mol::AtomHandleList::iterator 
        i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
-    if ((*i).Impl()->GetState()==std::numeric_limits<unsigned int>::max()) {
+    if ((*i).Impl()->GetState()==std::numeric_limits<unsigned int>::max() &&
+        this->GetStrictHydrogenMode() && (*i).GetElement()!="H") {
       return true;
     }
   }
@@ -113,11 +114,14 @@ struct OrdinalComp {
 
 void RuleBasedBuilder::LookupCompound(const mol::ResidueHandle& rh) 
 {
-   if ((last_compound_) && (rh.GetName()==last_compound_->GetID())) {
-     return;
-   } else {
-     last_compound_= compound_lib_->FindCompound(rh.GetName());
-   }
+  Compound::Dialect dialect=this->GetDialect()==PDB_DIALECT ? Compound::PDB : Compound::CHARMM;  
+  if ((last_compound_) && (rh.GetName()==last_compound_->GetID())) {
+   return;
+  }
+  last_compound_=compound_lib_->FindCompound(rh.GetName(), dialect);
+  if (!last_compound_ && this->GetDialect()!=PDB_DIALECT) {
+    last_compound_=compound_lib_->FindCompound(rh.GetName(), Compound::PDB);
+  }
 }
 
 void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
@@ -211,8 +215,17 @@ void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh)
       mol::AtomHandle a1=this->LocateAtom(atoms, bond.atom_one);
       mol::AtomHandle a2=this->LocateAtom(atoms, bond.atom_two);
       if (a1.IsValid() && a2.IsValid() && this->IsBondFeasible(a1, a2)) {
+        if (this->GetStrictHydrogenMode() && 
+            (a1.GetElement()=="H" || a2.GetElement()=="H")) {
+          continue;
+        }
         e.Connect(a1, a2, bond.order);
       }
+  }
+  for (mol::AtomHandleList::iterator i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
+    if ((*i).GetElement()=="H" && (*i).GetBondCount()==0) {
+      this->DistanceBasedConnect(*i);
+    }
   }
 }
 
@@ -222,9 +235,10 @@ void RuleBasedBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
   if (!next.IsValid()) {
     return;
   }
+  Compound::Dialect dialect=this->GetDialect()==PDB_DIALECT ? Compound::PDB : Compound::CHARMM;
   mol::XCSEditor e=rh.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
-  CompoundPtr mc=compound_lib_->FindCompound(rh.GetName());
-  CompoundPtr nc=compound_lib_->FindCompound(next.GetName());
+  CompoundPtr mc=compound_lib_->FindCompound(rh.GetName(), dialect);
+  CompoundPtr nc=compound_lib_->FindCompound(next.GetName(), dialect);
   if (!(mc && nc))
     return;
   // check if both of the residues are able to form a peptide bond.
@@ -300,10 +314,12 @@ void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom)
 {
   LookupCompound(atom.GetResidue());
   if (!last_compound_) {
+    this->OnUnknownAtom(atom);
     return;
   }
   int index=last_compound_->GetAtomSpecIndex(atom.GetName());
   if (index==-1) {
+    this->OnUnknownAtom(atom);
     return;
   }
   const AtomSpec& atom_spec=last_compound_->GetAtomSpecs()[index];

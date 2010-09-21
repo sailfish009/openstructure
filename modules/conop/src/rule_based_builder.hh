@@ -43,6 +43,14 @@ public:
     : compound_lib_(compound_lib), last_compound_() {
   }
   
+  virtual void SetDialect(Dialect dialect) {
+    if (this->GetDialect()!=dialect) {
+      Builder::SetDialect(dialect);
+      last_compound_=CompoundPtr();
+      compound_lib_->ClearCache();
+    }
+  }
+  
   /// \brief fill atom properties such as element and radius
   virtual void FillAtomProps(mol::AtomHandle atom);
   

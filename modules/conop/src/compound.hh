@@ -112,15 +112,39 @@ typedef boost::shared_ptr<Compound> CompoundPtr;
 /// \brief Knows about the atoms and bonds of a chemical compounds
 class DLLEXPORT_OST_CONOP Compound {
 public:
+  typedef enum {
+    PDB    ='P',
+    CHARMM ='C',
+    OPLS   ='O',
+    AMBER  ='A',
+  } Dialect;
+  
   Compound(const String& id)
-    : olc_('?'), tlc_(id), chem_class_() {
+    : olc_('?'), tlc_(id), chem_class_(), dialect_(Compound::PDB) {
   }
 
   /// \brief three-letter code that is unique for every compound 
   const String& GetID() const {
     return tlc_;
   }
-
+  Dialect GetDialect() const { return dialect_; }
+  
+  String GetDialectAsString() const { 
+    switch (dialect_) {
+      case CHARMM:
+        return "CHARMM";
+      case PDB:
+        return "PDB";
+      case OPLS:
+        return "OPLS";
+      case AMBER:
+        return "AMBER";
+      default:
+        return "";
+    }
+  }
+  void SetDialect(Dialect dialect) { dialect_=dialect; }
+  
   void SetOneLetterCode(char olc) {
     olc_=olc;
   }
@@ -192,6 +216,7 @@ private:
   AtomSpecList                 atom_specs_;
   BondSpecList                 bond_specs_;
   mol::ChemClass               chem_class_;
+  Dialect                      dialect_;  
   Date                         creation_date_;
   Date                         mod_date_;
 };

@@ -29,6 +29,10 @@
 
 namespace ost { namespace conop {
 
+typedef enum {
+  PDB_DIALECT,
+  CHARMM_DIALECT
+} Dialect;
 /// \brief  abstract builder interface
 /// 
 /// A builder serves several purposes: \li knows how to connect atoms of
@@ -49,14 +53,20 @@ namespace ost { namespace conop {
 ///  behaviour.
 class DLLEXPORT_OST_CONOP Builder {
 public:
-public:
+  
+  Builder(): dialect_(PDB_DIALECT), strict_(false) { }
   virtual ~Builder();
   
   ///  \brief add any missing atoms to the residue based on its key,
   ///      with coordinates set to zero
   virtual void CompleteAtoms(mol::ResidueHandle rh);
 
-
+  virtual void SetDialect(Dialect dialect) { dialect_=dialect; }
+  
+  virtual void SetStrictHydrogenMode(bool strict) { strict_=strict; }
+  bool GetStrictHydrogenMode() const { return strict_; }
+  
+  Dialect GetDialect() const { return dialect_; }
   /// \brief verify that the given residue has all atoms it
   ///     is supposed to have based on its key
   virtual void CheckResidueCompleteness(const mol::ResidueHandle& rh);
@@ -131,6 +141,9 @@ public:
   /// |brief Connect \p atom with all atoms for whith IsBondFeasible() and 
   ///    AreResiduesConsecutive() returns true
   void DistanceBasedConnect(mol::AtomHandle atom);
+private:
+  Dialect dialect_;
+  bool    strict_;
 };
 
 

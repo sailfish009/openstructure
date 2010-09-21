@@ -57,7 +57,7 @@ private:
 
   /// \brief parses the common part of ATOM, HETATM and ANISOU records
   bool ParseAtomIdent(const StringRef& line, int line_num, 
-                      char& chain_name, StringRef& res, 
+                      String& chain_name, StringRef& res, 
                       mol::ResNum& resnum, StringRef& atom_name, char& alt_loc,
                       const StringRef& record_type);
   void ParseAnisou(const StringRef& line, int line_num,

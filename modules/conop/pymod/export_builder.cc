@@ -25,8 +25,19 @@ using namespace boost::python;
 using namespace ost::conop;
 
 void export_Builder() {
+  
+  enum_<Dialect>("Dialect")
+    .value("PDB_DIALECT", PDB_DIALECT)
+    .value("CHARMM_DIALECT", CHARMM_DIALECT)
+    .export_values()
+  ;
   //TODO Export virtual calls as Default* (see export_visitor.cc)
   class_<Builder>("Builder", no_init)
+    .add_property("dialect", &Builder::GetDialect, &Builder::SetDialect)
+    .add_property("strict_hydrogens", &Builder::GetStrictHydrogenMode, 
+                  &Builder::SetStrictHydrogenMode)
+    .def("GetDialect", &Builder::GetDialect)
+    .def("SetDialect", &Builder::SetDialect)
     .def("CompleteAtoms", &Builder::CompleteAtoms)
     .def("CheckResidueCompleteness", &Builder::CheckResidueCompleteness)
     .def("IdentifyResidue", &Builder::IdentifyResidue)

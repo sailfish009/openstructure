@@ -47,7 +47,8 @@ def __GetModelFromPDB(model_id, output_dir, file_pattern='pdb%s.ent.gz'):
 
 def LoadPDB(filename, restrict_chains="", no_hetatms=False,
             fault_tolerant=False, load_multi=False,
-            join_spread_atom_records=False, calpha_only=False, remote=False):
+            join_spread_atom_records=False, calpha_only=False, 
+            remote=False, dialect='PDB', strict_hydrogens=False):
   """
   Load PDB file from disk and returns one or more entities. Several options 
   allow to customize the exact behaviour of the PDB import.
@@ -72,10 +73,26 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
      pdb repository www.pdb.org.
   :rtype: :class:`~ost.mol.EntityHandle` or a list thereof if `load_multi` is 
       True.
-      
+  :param dialect: Specifies the particular dialect to use. By default, the 
+     official PDB format is used. Alternatively, by setting the dialect to 
+     CHARMM, the loading is optimized for CHARMM PDB files.
+  :type dialect: :class:`str`
+  
+  :param strict_hydrogens: whether hydrogen names should be strictly checked.  
+      It is very common for PDB files to not follow the correct naming 
+      conventions for hydrogen atoms. That's why by default, the names of the 
+      hydrogens are not required to be correct. Rather, the connectivity is 
+      inferred with distance-based checks. By turning this flag on, the names 
+      of the hydrogen atoms are checked against the names in the database like 
+      all other atom types.
+
   :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
       inexistent file
   """
+  
+  if dialect not in ('PDB', 'CHARMM',):
+    raise ValueError('dialect must be PDB or CHARMM')
+
   if remote:
     output_dir = tempfile.gettempdir()
     if __GetModelFromPDB(filename, output_dir):
@@ -85,8 +102,12 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
   
   conop_inst=conop.Conopology.Instance()
   builder=conop_inst.GetBuilder("DEFAULT")
+  if dialect=='PDB':
+    builder.dialect=conop.PDB_DIALECT
+  elif dialect=='CHARMM':
+    builder.dialect=conop.CHARMM_DIALECT
+  builder.strict_hydrogens=strict_hydrogens
   reader=PDBReader(filename)
-
   flags=0
   if calpha_only:
     flags|=PDB.CALPHA_ONLY
@@ -96,6 +117,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
     flags|=PDB.NO_HETATMS
   if join_spread_atom_records:
     flags|=PDB.JOIN_SPREAD_ATOM_RECORDS
+  if dialect=='CHARMM':
+    flags|=PDB.CHARMM_FORMAT
   try:
     PDB.PushFlags(PDB.Flags() | flags)
     if load_multi:

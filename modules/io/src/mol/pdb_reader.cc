@@ -149,8 +149,10 @@ void PDBReader::Import(mol::EntityHandle& ent,
           this->ParseAndAddAtom(curr_line, line_num_, ent, 
                                 StringRef("ATOM", 4));
         } else if (IEquals(curr_line.substr(0, 6), StringRef("ANISOU", 6))) {
-          LOG_TRACE("processing ANISOU entry");
-          this->ParseAnisou(curr_line, line_num_, ent);
+          if (!(PDB::Flags() & PDB::CHARMM_FORMAT)) {
+            LOG_TRACE("processing ANISOU entry");
+            this->ParseAnisou(curr_line, line_num_, ent);            
+          }
         }
         break;
       case 'E':
@@ -183,7 +185,9 @@ void PDBReader::Import(mol::EntityHandle& ent,
           this->ParseAndAddAtom(curr_line, line_num_, ent, 
                                 StringRef("HETATM", 6));
         } else if (IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6))) {
-          this->ParseHelixEntry(curr_line);
+          if (!(PDB::Flags() & PDB::CHARMM_FORMAT)) {
+            this->ParseHelixEntry(curr_line);            
+          }
         }
         break;
       case 'M':
@@ -211,7 +215,9 @@ void PDBReader::Import(mol::EntityHandle& ent,
           continue;
         }
         if (IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6))) {
-          this->ParseStrandEntry(curr_line);
+          if (!(PDB::Flags() & PDB::CHARMM_FORMAT)) {
+            this->ParseStrandEntry(curr_line);
+          }
         }
         break;
       default:
@@ -291,18 +297,26 @@ bool PDBReader::EnsureLineLength(const StringRef& line, size_t size)
 }
 
 bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num, 
-                               char& chain_name,  StringRef& res_name,
+                               String& chain_name,  StringRef& res_name,
                                mol::ResNum& resnum, StringRef& atom_name, 
                                char& alt_loc, const StringRef& record_type)
 {
   if (!this->EnsureLineLength(line, 27)) {
     return false;
   }
-  chain_name=line[21];
-  if (restrict_chains_.size()>0 &&
-    restrict_chains_.find(chain_name)==String::npos) {
-    return false;
+  if (PDB::Flags() & PDB::CHARMM_FORMAT) {
+    if (line.size()>73) {
+      size_t width=std::min(line.size()-72, size_t(4));
+      chain_name=line.substr(72, width).trim().str();      
+    }
+  } else {
+    chain_name=String(1, line[21]);    
+    if (restrict_chains_.size()>0 &&
+      restrict_chains_.find(chain_name)==String::npos) {
+      return false;
+    }    
   }
+
   std::pair<bool, int> a_num=line.substr(6, 5).ltrim().to_int();
   if (!a_num.first) {
     if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
@@ -312,7 +326,7 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
   }
   atom_name=line.substr(12, 4).trim();
   alt_loc=line[16];
-  res_name=line.substr(17, 3).trim();
+  res_name=line.substr(17, (PDB::Flags() & PDB::CHARMM_FORMAT) ? 4 : 3).trim();
   std::pair<bool, int> res_num=line.substr(22, 4).ltrim().to_int();;
   if (!res_num.first) {
     if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
@@ -341,7 +355,7 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   if (!this->EnsureLineLength(line, 77)) {
     return;
   }  
-  char chain_name=0;
+  String chain_name;
   char alt_loc=0;
   StringRef res_name, atom_name;
   mol::ResNum res_num(0);
@@ -399,7 +413,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   }
   mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
   char alt_loc=0;
-  char chain_name=0;
+  String chain_name;
   StringRef res_name, atom_name;
   mol::ResNum res_num(0);
   if (!this->ParseAtomIdent(line, line_num, chain_name, res_name, res_num, 
@@ -440,31 +454,28 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   }
   LOG_TRACE( "line: [" << line << "]" );
   String s_ele;
-  String s_chain(1, chain_name);
-  String aname(atom_name.str());
-  // determine element from element column (77-78, right justified) if present
-  // otherwise set to empty String. It is up to the builder to determine the
-  // correct element in that case.
-  if (line.length()>=78) {                          // element column present
-    if(line[76]==' ' && line[77]==' ') {            // both characters are empty
-      s_ele="";
-    } else if(line[76]!=' ' || line[77]!=' ') {     // at least one character not
-                                                    // empty
-      if(line[76]==' ' && line[77]!=' ') {          // single character element,
-                                                    // right justified
-        s_ele=line.substr(77,1).str();
-      } else if(line[76]!=' ' && line[77]==' ') {   // single character element,
-                                                    // left justified
-        s_ele=line.substr(76,1).str();
-      } else {                                      // Real character element
-        s_ele=line.substr(76,2).str();
+  if (!(PDB::Flags() & PDB::CHARMM_FORMAT)) {
+    // determine element from element column (77-78, right justified) if 
+    // present otherwise set to empty String. It is up to the builder to 
+    // determine the correct element in that case.
+    if (line.length()>=78) {                       // element column present
+      if(line[76]==' ' && line[77]==' ') {         // both characters are empty
+        s_ele="";                                  
+      } else if(line[76]!=' ' || line[77]!=' ') {  // at least one character not
+                                                   // empty
+        if(line[76]==' ' && line[77]!=' ') {       // single character element,
+                                                   // right justified
+          s_ele=line.substr(77,1).str();           
+        } else if(line[76]!=' ' && line[77]==' ') {// single character element,
+                                                   // left justified
+          s_ele=line.substr(76,1).str();           
+        } else {                                   // Real character element
+          s_ele=line.substr(76,2).str();            
+        }
       }
-    }
+    }  
   }
-  else {
-    s_ele="";                                       // no element column present
-  }
-
+  String aname(atom_name.str());  
   // some postprocessing
   LOG_TRACE( "s_chain: [" << chain_name << "]" );
 
@@ -474,7 +485,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   if(!curr_chain_) {
     update_chain=true;
     update_residue=true;
-  } else if(curr_chain_.GetName()!=s_chain) {
+  } else if(curr_chain_.GetName()!=chain_name) {
     update_chain=true;
     update_residue=true;
   }
@@ -493,11 +504,11 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       curr_chain_=ent.FindChain(s_chain);
     }
 #else
-      curr_chain_=ent.FindChain(s_chain);
+      curr_chain_=ent.FindChain(chain_name);
 #endif
     if(!curr_chain_.IsValid()) {
-      LOG_DEBUG("new chain " << s_chain);
-      curr_chain_=editor.InsertChain(s_chain);
+      LOG_DEBUG("new chain " << chain_name);
+      curr_chain_=editor.InsertChain(chain_name);
       ++chain_count_;
     }
     assert(curr_chain_.IsValid());
@@ -554,22 +565,10 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     } else {
       mol::AtomHandle ah=editor.InsertAltAtom(curr_residue_, aname,
                                               String(1, alt_loc), apos, aprop);
-      /*
-	for now, this is not needed - the cg will use an global atom id sorted
-	list insteadx
-      if (PDB::Flags() & PDB::SEQUENTIAL_ATOM_IMPORT) {
-        sequential_atom_list_.push_back(ah);
-      }
-      */
       ++atom_count_;
     }
   } else {
     mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, aprop);
-    /*
-    if (PDB::Flags() & PDB::SEQUENTIAL_ATOM_IMPORT) {
-      sequential_atom_list_.push_back(ah);
-    }
-    */
     ++atom_count_;
   }
 }
