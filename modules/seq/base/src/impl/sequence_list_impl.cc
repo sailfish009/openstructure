@@ -68,6 +68,9 @@ String SequenceListImpl::ToString(int width) const
     label_size=std::max(label_size, static_cast<int>((*i)->GetName().size()));
   }
   label_size+=2;
+  if (label_size>width/4) {
+    label_size=width/4;
+  }  
   int offset=0;
   bool done=false;
   int text_len=width-label_size;
@@ -76,7 +79,12 @@ String SequenceListImpl::ToString(int width) const
     for (std::vector<SequenceImplPtr>::const_iterator i=list_.begin(),
          e=list_.end(); i!=e; ++i) {
       SequenceImplPtr s=*i;
-      buffer << s->GetName() << String(label_size-s->GetName().size(), ' ');
+      if (static_cast<int>(s->GetName().size())>label_size-2) {
+        buffer << s->GetName().substr(0, label_size-4) << "... ";
+      } else {
+        buffer << s->GetName() << String(label_size-s->GetName().size(), ' ');
+      }
+
       if (offset<s->GetLength()) {
         int rem=s->GetLength()-offset;
         int actual=text_len>rem ? rem : text_len;
