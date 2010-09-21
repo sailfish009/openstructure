@@ -31,7 +31,7 @@
 namespace ost { namespace conop {
 
 
-void RuleBasedBuilder::CompleteAtoms(const mol::ResidueHandle& rh) {}
+void RuleBasedBuilder::CompleteAtoms(mol::ResidueHandle rh) {}
 
 void RuleBasedBuilder::CheckResidueCompleteness(const mol::ResidueHandle& rh) {
   LookupCompound(rh);
@@ -91,7 +91,8 @@ struct OrdinalComp {
 };
 
 
-void RuleBasedBuilder::LookupCompound(const mol::ResidueHandle& rh) {
+void RuleBasedBuilder::LookupCompound(const mol::ResidueHandle& rh) 
+{
    if ((last_compound_) && (rh.GetName()==last_compound_->GetID())) {
      return;
    } else {
@@ -99,8 +100,9 @@ void RuleBasedBuilder::LookupCompound(const mol::ResidueHandle& rh) {
    }
 }
 
-void RuleBasedBuilder::ReorderAtoms(const mol::ResidueHandle& residue,
-                             CompoundPtr compound) {
+void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
+                                    CompoundPtr compound) 
+{
   mol::impl::ResidueImplPtr impl=residue.Impl();
   mol::impl::AtomImplList::iterator i=impl->GetAtomList().begin();
   for (; i!=impl->GetAtomList().end(); ++i) {
@@ -146,7 +148,7 @@ mol::AtomHandle RuleBasedBuilder::LocateAtom(const mol::AtomHandleList& ahl, int
   return  not_found ? mol::AtomHandle() : *r_it;
 }
 
-void RuleBasedBuilder::ConnectAtomsOfResidue(const mol::ResidueHandle& rh) {
+void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh) {
   LookupCompound(rh);
   if (!last_compound_) {
     mol::AtomHandleList atoms=rh.GetAtomList();
@@ -175,8 +177,8 @@ void RuleBasedBuilder::ConnectAtomsOfResidue(const mol::ResidueHandle& rh) {
   }
 }
 
-void RuleBasedBuilder::ConnectResidueToNext(const mol::ResidueHandle& rh,
-                                            const mol::ResidueHandle& next) {
+void RuleBasedBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
+                                            mol::ResidueHandle next) {
   if (!next.IsValid()) {
     return;
   }
@@ -204,7 +206,7 @@ void RuleBasedBuilder::ConnectResidueToNext(const mol::ResidueHandle& rh,
 }
 
 
-void RuleBasedBuilder::AssignTorsions(const mol::ChainHandle& chain) {
+void RuleBasedBuilder::AssignTorsions(mol::ChainHandle chain) {
   if (chain.GetResidueCount()==0)
     return;
   std::vector<mol::ResidueHandle> rlist = chain.GetResidueList();
@@ -215,11 +217,12 @@ void RuleBasedBuilder::AssignTorsions(const mol::ChainHandle& chain) {
   }
 }
 
-void RuleBasedBuilder::AssignTorsionsToResidue(const mol::ResidueHandle& residue) {
+void RuleBasedBuilder::AssignTorsionsToResidue(mol::ResidueHandle residue) {
   /// The only components having named torsions are the standard set of amino
   /// acids, plus some of compounds derived from them such as selenium
   /// methionine. Things are simplified a lot by only storing the torsions
-  /// of the side chains in the database. PHI, PSI and OMEGA torsions are    checked without a lookup in the database.
+  /// of the side chains in the database. PHI, PSI and OMEGA torsions are    
+  /// checked without a lookup in the database.
   LookupCompound(residue);
   if (!last_compound_)
     return;  

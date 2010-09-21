@@ -46,7 +46,7 @@ public:
   /// \brief fill atom properties such as element and radius
   virtual void FillAtomProps(mol::AtomHandle atom);
   
-  virtual void CompleteAtoms(const mol::ResidueHandle& rh);
+  virtual void CompleteAtoms(mol::ResidueHandle rh);
 
   /// \brief  Check residue completeness
   ///
@@ -68,7 +68,7 @@ public:
   virtual mol::ResidueKey IdentifyResidue(const mol::ResidueHandle& rh);
 
 
-  virtual void ConnectAtomsOfResidue(const mol::ResidueHandle& rh);
+  virtual void ConnectAtomsOfResidue(mol::ResidueHandle rh);
 
   /// \brief  Connects the two residues together.
   ///
@@ -79,11 +79,11 @@ public:
   ///         bond.
   /// \param next
   ///          is the C-terminal partner, donating the nitrogen to the bond.
-  virtual void ConnectResidueToNext(const mol::ResidueHandle& rh,
-                                    const mol::ResidueHandle& next);
+  virtual void ConnectResidueToNext(mol::ResidueHandle rh,
+                                    mol::ResidueHandle next);
   /// \brief requires chemical types
-  virtual void AssignTorsions(const mol::ChainHandle& ch);
-  virtual void AssignTorsionsToResidue(const mol::ResidueHandle& residue);
+  virtual void AssignTorsions(mol::ChainHandle ch);
+  virtual void AssignTorsionsToResidue(mol::ResidueHandle residue);
   /// \brief  Invoked whenever an unkknown atom has been encountered during a
   ///         residue completeness check.
   ///
@@ -118,11 +118,11 @@ private:
   CompoundPtr         last_compound_;
   void LookupCompound(const mol::ResidueHandle& rh);
   /// Change internal order of atoms in residue to the order given by compound
-  void ReorderAtoms(const mol::ResidueHandle& residue, CompoundPtr compound);
+  void ReorderAtoms(mol::ResidueHandle residue, CompoundPtr compound);
 
   mol::AtomHandle LocateAtom(const mol::AtomHandleList& ahl, int ordinal);
 
-  void AssignBackBoneTorsionsToResidue(const mol::ResidueHandle& residue);
+  void AssignBackBoneTorsionsToResidue(mol::ResidueHandle residue);
 
 
 };

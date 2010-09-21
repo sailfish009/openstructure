@@ -221,7 +221,7 @@ void HeuristicBuilder::ConnectivityFromAtomNames(const mol::ResidueHandle& res,
  }
 }
 
-void HeuristicBuilder::ConnectAtomsOfResidue(const mol::ResidueHandle& res)
+void HeuristicBuilder::ConnectAtomsOfResidue(mol::ResidueHandle res)
 {
   LOG_DEBUG("HeuristicBuilder: ConnectAtomsOfResidue on " << res.GetKey() << " " << res.GetNumber());
 
@@ -288,7 +288,8 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
   }
 
   if(!res1) return; // ignore if prev/next residue is invalid
-  LOG_DEBUG(fname << " found second residue " << res1.GetKey() << " " << res1.GetNumber());
+  LOG_DEBUG(fname << " found second residue " << res1.GetKey() 
+            << " " << res1.GetNumber());
 
   std::pair<detail::ConnResEntry,bool> res0_ret = builder->LookupResEntry(res0.GetKey());
   std::pair<detail::ConnResEntry,bool> res1_ret = builder->LookupResEntry(res1.GetKey());
@@ -322,7 +323,7 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
 
 }
 
-void HeuristicBuilder::AssignTorsionsToResidue(const mol::ResidueHandle& res)
+void HeuristicBuilder::AssignTorsionsToResidue(mol::ResidueHandle res)
 {
 
   mol::XCSEditor editor=res.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
@@ -390,7 +391,7 @@ void HeuristicBuilder::AssignTorsionsToResidue(const mol::ResidueHandle& res)
   }
 }
 
-void HeuristicBuilder::AssignTorsions(const mol::ChainHandle& chain)
+void HeuristicBuilder::AssignTorsions(mol::ChainHandle chain)
 {
   if (chain.GetResidueCount()==0)
     return;
@@ -405,13 +406,13 @@ void HeuristicBuilder::AssignTorsions(const mol::ChainHandle& chain)
   }
 }
 
-void HeuristicBuilder::ConnectResidueToPrev(const mol::ResidueHandle& rh,
-                                            const mol::ResidueHandle& prev) {
+void HeuristicBuilder::ConnectResidueToPrev(mol::ResidueHandle rh,
+                                            mol::ResidueHandle prev) {
   ConnectPrevNext<false>(this, rh, prev);
 }
 
-void HeuristicBuilder::ConnectResidueToNext(const mol::ResidueHandle& rh,
-                                            const mol::ResidueHandle& next) {
+void HeuristicBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
+                                            mol::ResidueHandle next) {
   ConnectPrevNext<true>(this, rh, next);
 }
 

@@ -54,7 +54,7 @@ public:
   
   ///  \brief add any missing atoms to the residue based on its key,
   ///      with coordinates set to zero
-  virtual void CompleteAtoms(const mol::ResidueHandle& rh);
+  virtual void CompleteAtoms(mol::ResidueHandle rh);
 
 
   /// \brief verify that the given residue has all atoms it
@@ -80,27 +80,27 @@ public:
   /// Connects atoms of residue based on residue and atom name. This method does
   /// not establish inter-residue bonds. To connect atoms that belong to 
   /// different residues, use ConnectResidueToPrev(), or ConnectResidueToNext().
-  virtual void ConnectAtomsOfResidue(const mol::ResidueHandle& rh);
+  virtual void ConnectAtomsOfResidue(mol::ResidueHandle rh);
   /// \brief connect atoms of residue to previous
   /// 
   /// The order of the parameters is important. In case of a polypeptide chain,
   /// the residues are thought to be ordered from N- to C- terminus.
   /// 
   /// \sa ConnectResidueToNext
-  virtual void ConnectResidueToPrev(const mol::ResidueHandle& rh,
-                                    const mol::ResidueHandle& prev);
+  virtual void ConnectResidueToPrev(mol::ResidueHandle rh,
+                                    mol::ResidueHandle prev);
   /// \sa ConnectResidueToPrev                                    
-  virtual void ConnectResidueToNext(const mol::ResidueHandle& rh,
-                                    const mol::ResidueHandle& next);
+  virtual void ConnectResidueToNext(mol::ResidueHandle rh, 
+                                    mol::ResidueHandle next);
 
   /// \brief assign named torsions to a complete chain
-  virtual void AssignTorsions(const mol::ChainHandle& ch);
+  virtual void AssignTorsions(mol::ChainHandle ch);
   
   /// \brief assign named torsions to single residue
-  virtual void AssignTorsionsToResidue(const mol::ResidueHandle& residue);
+  virtual void AssignTorsionsToResidue(mol::ResidueHandle residue);
   
   /// \brief assign Backbone torsions to single residue  
-  void AssignBackBoneTorsionsToResidue(const mol::ResidueHandle& res);
+  void AssignBackBoneTorsionsToResidue(mol::ResidueHandle res);
   
   /// \brief  Check if peptide bond is formed between the two atoms.
   /// 
@@ -130,7 +130,7 @@ public:
 
   /// |brief Connect \p atom with all atoms for whith IsBondFeasible() and 
   ///    AreResiduesConsecutive() returns true
-  void DistanceBasedConnect(const mol::AtomHandle& atom);
+  void DistanceBasedConnect(mol::AtomHandle atom);
 };
 
 
