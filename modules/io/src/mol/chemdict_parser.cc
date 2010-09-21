@@ -1,7 +1,9 @@
-#include <ost/conop/chemdict_parser.hh>
+#include <ost/io/mol/chemdict_parser.hh>
 
-namespace ost { namespace conop {
+namespace ost { namespace io {
 
+using namespace ost::conop;
+  
 bool ChemdictParser::OnBeginData(const StringRef& data_name) 
 {    
   compound_.reset(new Compound(data_name.str()));
@@ -15,7 +17,7 @@ bool ChemdictParser::OnBeginData(const StringRef& data_name)
   return true; 
 }
 
-bool ChemdictParser::OnBeginLoop(const io::StarLoopDesc& header)
+bool ChemdictParser::OnBeginLoop(const StarLoopDesc& header)
 { 
   if (header.GetCategory()=="chem_comp_atom") {
     loop_type_=ATOM_SPEC;
@@ -37,7 +39,7 @@ bool ChemdictParser::OnBeginLoop(const io::StarLoopDesc& header)
   return false;
 }
 
-void ChemdictParser::OnDataRow(const io::StarLoopDesc& header, 
+void ChemdictParser::OnDataRow(const StarLoopDesc& header, 
                                const std::vector<StringRef>& columns) 
 {                        
   if (loop_type_==ATOM_SPEC) {
@@ -65,7 +67,7 @@ void ChemdictParser::OnDataRow(const io::StarLoopDesc& header,
   }
 }
 
-void ChemdictParser::OnDataItem(const io::StarDataItem& item)
+void ChemdictParser::OnDataItem(const StarDataItem& item)
 {
   if (item.GetCategory()==StringRef("chem_comp", 9)) {
     if (item.GetName()==StringRef("type", 4)) {

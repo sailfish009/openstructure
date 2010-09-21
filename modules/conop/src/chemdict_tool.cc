@@ -29,7 +29,7 @@
 #include <boost/iostreams/filter/gzip.hpp>
 
 
-#include <ost/conop/chemdict_parser.hh>
+#include <ost/io/mol/chemdict_parser.hh>
 
 using namespace ost;
 
@@ -70,7 +70,7 @@ int main(int argc, char const *argv[])
     filtered_istream.push(boost::iostreams::gzip_decompressor());
   }
   filtered_istream.push(istream);  
-  conop::ChemdictParser cdp(filtered_istream, dialect);
+  io::ChemdictParser cdp(filtered_istream, dialect);
   conop::CompoundLibPtr compound_lib;
   if (!strcmp(argv[1], "create")) {
     compound_lib=conop::CompoundLib::Create(argv[3]);

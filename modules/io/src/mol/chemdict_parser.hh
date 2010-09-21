@@ -28,7 +28,7 @@
 #include <ost/io/mol/star_parser.hh>
 #include <ost/conop/compound_lib.hh>
  
-namespace ost { namespace conop {
+namespace ost { namespace io {
 
 typedef enum {
   ATOM_SPEC,
@@ -36,10 +36,10 @@ typedef enum {
   DONT_KNOW
 } LoopType;
 
-class DLLEXPORT_OST_CONOP ChemdictParser : public io::StarParser {
+class DLLEXPORT_OST_CONOP ChemdictParser : public StarParser {
 public:
-  ChemdictParser(std::istream& stream, Compound::Dialect dialect): 
-    io::StarParser(stream), compound_(new Compound("UNK")), 
+  ChemdictParser(std::istream& stream, conop::Compound::Dialect dialect): 
+    StarParser(stream), compound_(new conop::Compound("UNK")), 
     last_(0), loop_type_(DONT_KNOW), dialect_(dialect)
   {
     this->InitTypeMap();
@@ -47,23 +47,23 @@ public:
 
   virtual bool OnBeginData(const StringRef& data_name);
 
-  virtual bool OnBeginLoop(const io::StarLoopDesc& header);
+  virtual bool OnBeginLoop(const StarLoopDesc& header);
 
-  virtual void OnDataRow(const io::StarLoopDesc& header, 
+  virtual void OnDataRow(const StarLoopDesc& header, 
                          const std::vector<StringRef>& columns);
 
-  virtual void OnDataItem(const io::StarDataItem& item);
+  virtual void OnDataItem(const StarDataItem& item);
 
   virtual void OnEndData();
 
-  void SetCompoundLib(const CompoundLibPtr& lib) 
+  void SetCompoundLib(const conop::CompoundLibPtr& lib) 
   {
     lib_=lib;
   }
 private:
   void InitTypeMap();  
-  CompoundLibPtr                   lib_;
-  CompoundPtr                      compound_;
+  conop::CompoundLibPtr                   lib_;
+  conop::CompoundPtr                      compound_;
   typedef enum {
     ATOM_NAME=0,
     ALT_ATOM_NAME=1,
@@ -82,8 +82,8 @@ private:
   static std::map<String, mol::ChemClass> tm_;  
   std::map<String, int>                   atom_map_;
   LoopType                                loop_type_;  
-  AtomSpec                                atom_;
-  Compound::Dialect                       dialect_;
+  conop::AtomSpec                         atom_;
+  conop::Compound::Dialect                dialect_;
 };
 
 

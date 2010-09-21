@@ -8,11 +8,9 @@ compound_lib.hh
 module_config.hh
 rule_based_builder.hh
 ring_finder.hh
-chemdict_parser.hh
 )
 
 set(OST_CONOP_SOURCES
-chemdict_parser.cc
 builder.cc
 conop.cc
 heuristic_builder.cc
