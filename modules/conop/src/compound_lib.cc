@@ -161,7 +161,7 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
       assert(retval==SQLITE_DONE);
       atom_ids[i-al.begin()]=sqlite3_last_insert_rowid(conn_);
     } else {
-      std::cout << sqlite3_errmsg(conn_) << std::endl;
+      LOG_ERROR(sqlite3_errmsg(conn_));
     }
     sqlite3_finalize(stmt);
   }
@@ -179,7 +179,7 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
       retval=sqlite3_step(stmt);
       assert(retval==SQLITE_DONE);
     } else {
-      std::cout << sqlite3_errmsg(conn_) << std::endl;
+      LOG_ERROR(sqlite3_errmsg(conn_));
     }
     sqlite3_finalize(stmt);    
   }
@@ -321,7 +321,6 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
     }
     if (SQLITE_ROW==ret) {
       int pk=sqlite3_column_int(stmt, 0);
-      std::cout << pk << std::endl;
       const char* id=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
       CompoundPtr compound(new Compound(id));
       compound->SetOneLetterCode((sqlite3_column_text(stmt, 2))[0]);
