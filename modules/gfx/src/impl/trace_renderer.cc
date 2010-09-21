@@ -39,7 +39,7 @@ void TraceRenderer::PrepareRendering()
   sel_va_.Clear();
   if (this->HasSelection()) {
     this->PrepareRendering(sel_subset_, sel_va_, true);
-    sel_va_.SetLighting(false);    
+    sel_va_.SetLighting(false);
   }
 }
 
@@ -71,9 +71,11 @@ void TraceRenderer::PrepareRendering(TraceSubset& trace_subset,
         const geom::Vec3& p0=a1.GetPos();
         const geom::Vec3& p2=a2.GetPos();
         geom::Vec3 p1=(p0+p2)*0.5;
-        va.AddCylinder(CylinderPrim(p0,p1,options_->GetTubeRadius()+plus,nl[i-1].color1),
+        va.AddCylinder(CylinderPrim(p0,p1,options_->GetTubeRadius()+plus,
+                                    is_sel ? sel_clr : nl[i-1].color1),
                        options_->GetArcDetail());
-        va.AddCylinder(CylinderPrim(p1,p2,options_->GetTubeRadius()+plus,nl[i].color1),
+        va.AddCylinder(CylinderPrim(p1,p2,options_->GetTubeRadius()+plus,
+                                    is_sel ? sel_clr : nl[i].color1),
                        options_->GetArcDetail());
         a1=a2;
       }
