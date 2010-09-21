@@ -28,11 +28,12 @@
 #define OST_INFO_VISITOR_HH
 
 #include <ost/base.hh>
+#include "module_config.hh"
 #include "info_fw.hh"
 
 namespace ost { namespace info {
 
-class DLLEXPORT InfoVisitor {
+class DLLEXPORT_OST_INFO InfoVisitor {
 public:
   virtual ~InfoVisitor();
 
@@ -54,7 +55,7 @@ public:
   virtual void VisitGroupFinish(InfoGroup& group);
 };
 
-class DLLEXPORT InfoConstVisitor {
+class DLLEXPORT_OST_INFO InfoConstVisitor {
 public:
   virtual ~InfoConstVisitor();
 

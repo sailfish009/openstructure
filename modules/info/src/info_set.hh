@@ -25,12 +25,12 @@
 #include <map>
 
 #include <ost/base.hh>
-
+#include "module_config.hh"
 #include "info_group.hh"
 
 namespace ost { namespace info {
 
-class DLLEXPORT InfoSet {
+class DLLEXPORT_OST_INFO InfoSet {
 public:
   InfoSet(const String& name="");
 

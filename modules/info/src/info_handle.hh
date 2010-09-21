@@ -51,7 +51,7 @@ DLLEXPORT InfoHandle LoadInfo(const String& file);
   to an underlying info class, which is shared among copies of InfoHandles
   unless the Copy() method is used.
 */
-class DLLEXPORT InfoHandle {
+class DLLEXPORT_OST_INFO InfoHandle {
   friend InfoHandle CreateInfo();
   friend InfoHandle CreateInfo(const String& text);
   friend InfoHandle LoadInfo(const String&);

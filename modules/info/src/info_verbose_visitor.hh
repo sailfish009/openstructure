@@ -31,7 +31,7 @@
 
 namespace ost { namespace info {
 
-class DLLEXPORT VerboseInfoVisitor: public InfoVisitor {
+class DLLEXPORT_OST_INFO VerboseInfoVisitor: public InfoVisitor {
 public:
   virtual void VisitItem(InfoItem& item);
   virtual bool VisitGroup(InfoGroup& group);
