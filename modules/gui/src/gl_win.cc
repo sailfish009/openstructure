@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/gui/gosty_app.hh>
 #include <ost/log.hh>
 #include <ost/config.hh>
 #include <ost/gfx/scene.hh>
@@ -25,7 +26,6 @@
 #include <ost/gui/tools/selection_tool.hh>
 #include <ost/gui/tools/manipulator.hh>
 #include <ost/gui/tools/measure_tool.hh>
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
 
 #if OST_IMG_ENABLED

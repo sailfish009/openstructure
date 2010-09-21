@@ -20,10 +20,10 @@
 #define OST_GUI_TOOL_MANAGER_HH
 
 #include <ost/gui/module_config.hh>
-#include <QObject>
 
 #include <ost/gui/tools/tool.hh>
 
+#include <QObject>
 /*
   Author: Marco Biasini
  */

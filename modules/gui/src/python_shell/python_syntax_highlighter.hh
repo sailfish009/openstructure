@@ -22,12 +22,12 @@
   Authors: Marco Biasini, Andreas Schenk
  */
 
-#include <QSyntaxHighlighter>
-#include <QTextDocument>
 
 #include "python_shell_fw.hh"
 #include "python_tokenizer.hh"
 
+#include <QSyntaxHighlighter>
+#include <QTextDocument>
 namespace ost { namespace gui {
 
 /** 

@@ -27,13 +27,13 @@
 
 #include <map>
 
-#include <QMainWindow>
-#include <QMenu>
 
 #include <ost/base.hh>
 #include <ost/gui/module_config.hh>
 
 
+#include <QMainWindow>
+#include <QMenu>
 
 namespace ost { namespace gui {
 

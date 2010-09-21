@@ -16,13 +16,9 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include "gosty_app.hh"
 #include <iostream>
 
-#include <QApplication>
-#include <QMainWindow>
-
-#include <QMenuBar>
-#include <QDesktopWidget>
 
 #include <ost/gui/python_shell/python_shell.hh>
 #include <ost/gui/gl_win.hh>
@@ -30,8 +26,12 @@
 #include <ost/gui/perspective.hh>
 #include <ost/gui/main_area.hh>
 
-#include "gosty_app.hh"
 
+#include <QApplication>
+#include <QMainWindow>
+
+#include <QMenuBar>
+#include <QDesktopWidget>
 /*
   Author: Marco Biasini, Andreas Schenk, Stefan Scheuber
  */

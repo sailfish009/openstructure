@@ -19,10 +19,10 @@
 #ifndef OST_GUI_GOSTY_HH
 #define OST_GUI_GOSTY_HH
 
-#include <QObject>
 
 #include <ost/gui/module_config.hh>
 
+#include <QObject>
 namespace ost { namespace gui { namespace detail {
 
 /// \brief helper class for delayed script execution

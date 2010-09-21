@@ -16,12 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QtGui>
 
 #include <ost/gui/python_shell/python_syntax_highlighter.hh>
 
 #include "file_viewer.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 FileViewer::FileViewer(const QString& path, QWidget* parent):

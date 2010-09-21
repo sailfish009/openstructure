@@ -24,6 +24,20 @@ from ost import mol
 from ost import settings
 from ost import geom
 
+
+
+## \brief custom exception that substitutes CalledProcessError
+#
+# Python 2.4 does not include the CalledProcessError exception.
+# This one substitutes it 
+class MsmsProcessError(Exception):
+  def __init__(self, returncode,command):
+    self.returncode = returncode
+    self.command = command
+  def __str__(self):
+    return repr(self.returncode)
+
+
 ## \brief Method to check if MSMS executable is present
 #
 # \param msms_exe Explicit path to msms executable
@@ -106,7 +120,7 @@ def _RunMSMS(command):
   #check for successful completion of msms
   if proc.returncode!=0:
     print "WARNING: msms error\n", stdout_value
-    raise subprocess.CalledProcessError(proc.returncode, command)
+    raise subprocess.MsmsProcessError(proc.returncode, command)
 
   return stdout_value
   

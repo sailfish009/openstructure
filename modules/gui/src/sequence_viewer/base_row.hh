@@ -23,12 +23,12 @@
   Author: Stefan Scheuber
  */
 
-#include <QObject>
-#include <QModelIndex>
-#include <QList>
 
 #include "painter.hh"
 
+#include <QObject>
+#include <QModelIndex>
+#include <QList>
 namespace ost { namespace gui {
 
 class BaseRow : public QObject

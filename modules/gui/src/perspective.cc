@@ -16,6 +16,15 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+#include <ost/platform.hh>
+
+#include <ost/gui/widget_registry.hh>
+#include <ost/gui/perspective.hh>
+#include <ost/gui/file_browser.hh>
+#include <ost/gui/main_area.hh>
+#include <ost/gui/messages/message_box_widget.hh>
+
 #include <QTextEdit>
 #include <QSizeGrip>
 #include <QMainWindow>
@@ -28,15 +37,6 @@
 #include <QKeySequence>
 #include <QStatusBar>
 #include <QPushButton>
-
-#include <ost/platform.hh>
-
-#include <ost/gui/widget_registry.hh>
-#include <ost/gui/perspective.hh>
-#include <ost/gui/file_browser.hh>
-#include <ost/gui/main_area.hh>
-#include <ost/gui/messages/message_box_widget.hh>
-
 /*
   Author: Marco Biasini
  */

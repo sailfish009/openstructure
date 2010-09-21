@@ -23,15 +23,15 @@
   Author: Stefan Scheuber
  */
 
+
+#include <ost/mol/alg/sec_structure_segments.hh>
+
 #include <QObject>
 #include <QPainter>
 #include <QStyleOptionViewItem>
 #include <QModelIndex>
 #include <QVarLengthArray>
 #include <QList>
-
-#include <ost/mol/alg/sec_structure_segments.hh>
-
 namespace ost { namespace gui {
 
 class Painter : public QObject

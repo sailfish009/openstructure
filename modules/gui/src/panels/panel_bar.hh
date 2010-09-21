@@ -19,11 +19,6 @@
 #ifndef OST_GUI_PANEL_BAR_PANEL_BAR
 #define OST_GUI_PANEL_BAR_PANEL_BAR
 
-#include <QStackedLayout>
-#include <QWidget>
-#include <QString>
-#include <QAction>
-#include <QActionGroup>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget_pool.hh>
@@ -33,6 +28,11 @@
 #include "button_box.hh"
 
 
+#include <QStackedLayout>
+#include <QWidget>
+#include <QString>
+#include <QAction>
+#include <QActionGroup>
 namespace ost { namespace gui {
 
 class PanelWidgetContainer;

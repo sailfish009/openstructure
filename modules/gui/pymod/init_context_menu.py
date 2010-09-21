@@ -4,8 +4,6 @@ from PyQt4 import QtCore, QtGui
 
 import sip
 
-from subprocess import CalledProcessError
-
 from ost import geom, gfx, gui, seq
 from ost import settings
 from ost import LogError, mol
@@ -229,7 +227,7 @@ class SurfaceContextMenu(QtCore.QObject):
                                   no_hetatoms=nohet,
                                   no_waters=nowat)[0]
           gfx.Scene().Add(gfx.Surface("%s_%s"%(entity.GetName(),name),s))
-        except (RuntimeError, CalledProcessError):
+        except (RuntimeError, msms.MsmsProcessError):
           LogError("WARNING: Surface could not be calculated")
           return
         except UserWarning:

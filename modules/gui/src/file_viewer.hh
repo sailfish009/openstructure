@@ -19,12 +19,12 @@
 #ifndef OST_GUI_FILE_VIEWER_HH
 #define OST_GUI_FILE_VIEWER_HH
 
-#include <QMainWindow>
-#include <QSyntaxHighlighter>
-#include <QTextEdit>
 
 #include <ost/gui/module_config.hh>
 
+#include <QMainWindow>
+#include <QSyntaxHighlighter>
+#include <QTextEdit>
 namespace ost { namespace gui {
 
 /// \brief a simplistic file viewer

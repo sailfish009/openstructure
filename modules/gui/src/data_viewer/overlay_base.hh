@@ -25,18 +25,18 @@
 #ifndef IMG_GUI_OVERLAY_BASE_H
 #define IMG_GUI_OVERLAY_BASE_H
 
-#include <QObject>
-#include <QEvent>
-#include <QPainter>
-#include <QMenu>
-#include <QMouseEvent>
-#include <QKeyEvent>
 
 #include <ost/base.hh>
 
 #include <ost/gui/module_config.hh>
 #include "overlay_base_fw.hh"
 
+#include <QObject>
+#include <QEvent>
+#include <QPainter>
+#include <QMenu>
+#include <QMouseEvent>
+#include <QKeyEvent>
 namespace ost { namespace img { namespace gui {
 
 // fw decl

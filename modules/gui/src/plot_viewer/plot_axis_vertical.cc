@@ -20,11 +20,11 @@
   Author: Andreas Schenk
 */
 
-#include <QMouseEvent>
-#include <QPainter>
 
 #include "plot_axis_vertical.hh"
 
+#include <QMouseEvent>
+#include <QPainter>
 namespace ost{namespace gui{
 
 PlotAxisVertical::PlotAxisVertical(QWidget * parent):

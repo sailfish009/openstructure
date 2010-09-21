@@ -19,11 +19,6 @@
 #ifndef OST_GUI_PANEL_BAR_PANEL_MANAGER
 #define OST_GUI_PANEL_BAR_PANEL_MANAGER
 
-#include <QWidget>
-#include <QString>
-#include <QList>
-#include <QMenu>
-#include <QDragEnterEvent>
 
 #include <ost/gui/widget.hh>
 #include <ost/gui/widget_pool.hh>
@@ -32,6 +27,11 @@
 #include "panel_widget_container.hh"
 #include "button_box.hh"
 
+#include <QWidget>
+#include <QString>
+#include <QList>
+#include <QMenu>
+#include <QDragEnterEvent>
 namespace ost { namespace gui {
 
 enum PanelPosition

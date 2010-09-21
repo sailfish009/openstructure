@@ -19,12 +19,6 @@
 #ifndef OST_GUI_PERSPECTIVE_HH
 #define OST_GUI_PERSPECTIVE_HH
 
-#include <QObject>
-#include <QMenuBar>
-#include <QMap>
-#include <QString>
-#include <QMenu>
-#include <QStatusBar>
 
 class QMainWindow;
 class QTextEdit;
@@ -34,6 +28,12 @@ class QTextEdit;
 #include <ost/gui/panels/panel_bar.hh>
 #include <ost/gui/module_config.hh>
 
+#include <QObject>
+#include <QMenuBar>
+#include <QMap>
+#include <QString>
+#include <QMenu>
+#include <QStatusBar>
 /*
   Author: Marco Biasini, Stefan Scheuber
  */

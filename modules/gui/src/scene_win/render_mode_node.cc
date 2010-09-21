@@ -16,12 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QFont>
 
 #include <ost/mol/query_view_wrapper.hh>
 
 #include "render_mode_node.hh"
 
+#include <QFont>
 namespace ost { namespace gui {
 
 RenderModeNode::RenderModeNode(gfx::EntityP entity, gfx::RenderMode::Type render_mode, SceneNode* parent):EntityPartNode(entity->GetRenderModeName(render_mode).c_str(),entity,mol::QueryViewWrapper(entity->GetRenderView(render_mode)),parent),

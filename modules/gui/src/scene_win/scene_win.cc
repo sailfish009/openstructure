@@ -19,15 +19,15 @@
 /*
  Authors: Marco Biasini, Ansgar Philippsen, Stefan Scheuber
  */
-#include <QVBoxLayout>
-#include <QHeaderView>
 
-#include <ost/gui/widget_registry.hh>
 #include <ost/gui/gosty_app.hh>
+#include <ost/gui/widget_registry.hh>
 #include <ost/gui/scene_selection.hh>
 
 #include "scene_win.hh"
 
+#include <QVBoxLayout>
+#include <QHeaderView>
 namespace ost { namespace gui {
 
 class SceneWinFactory: public WidgetFactory {

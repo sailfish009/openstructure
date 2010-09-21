@@ -26,9 +26,6 @@
 #include <ost/gui/module_config.hh>
 
 
-#include <QDialog>
-#include <QTableWidget>
-#include <QLabel>
 
 #include <ost/io/entity_io_handler.hh>
 #include <ost/io/sequence_io_handler.hh>
@@ -36,6 +33,10 @@
 #if OST_IMG_ENABLED
 #include <ost/io/map_io_handler.hh>
 #endif
+
+#include <QDialog>
+#include <QTableWidget>
+#include <QLabel>
 
 namespace ost { namespace gui {
 

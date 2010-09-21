@@ -20,9 +20,6 @@
 #define OST_GUI_FILE_LOADER_HH
 #include <vector>
 
-#include <QString>
-#include <QList>
-#include <QMap>
 
 #include <ost/gfx/gfx_object.hh>
 
@@ -38,6 +35,9 @@
 #include <ost/io/map_io_handler.hh>
 #endif
 
+#include <QString>
+#include <QList>
+#include <QMap>
 namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI FileLoader {

@@ -23,14 +23,14 @@
   Author: Stefan Scheuber
  */
 
-#include <QFlags>
-#include <QMap>
-#include <QAbstractItemModel>
-#include <QTreeView>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/scene_win/scene_win_model.hh>
 
+#include <QFlags>
+#include <QMap>
+#include <QAbstractItemModel>
+#include <QTreeView>
 namespace ost { namespace gui {
 
 enum ContextActionType

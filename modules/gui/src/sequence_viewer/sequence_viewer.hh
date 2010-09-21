@@ -23,9 +23,6 @@
   Author: Stefan Scheuber
  */
 
-#include <QWidget>
-#include <QActionGroup>
-#include <QToolBar>
 
 #include <ost/seq/alignment_handle.hh>
 
@@ -40,6 +37,9 @@
 #include "sequence_model.hh"
 #include "sequence_table_view.hh"
 
+#include <QWidget>
+#include <QActionGroup>
+#include <QToolBar>
 namespace ost { namespace gui {
 
 /// \brief QTableView with first column not moving

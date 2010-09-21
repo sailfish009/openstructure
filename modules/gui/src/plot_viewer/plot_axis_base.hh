@@ -23,9 +23,9 @@
   Author: Andreas Schenk
 */
 
+#include "plot_ticker.hh"
 #include <QWidget>
 
-#include "plot_ticker.hh"
 
 namespace ost { namespace gui {
 

@@ -30,6 +30,9 @@
 //#include "bitmaps/rotate.xpm"
 //#include "bitmaps/arrowmove.xpm"
 
+#include "img2qt.hh"
+#include "data_viewer_panel_base.hh"
+
 #include <QResizeEvent>
 #include <QPainter>
 #include <QColor>
@@ -37,8 +40,6 @@
 #include <QPixmapCache>
 #include <ost/message.hh>
 
-#include "img2qt.hh"
-#include "data_viewer_panel_base.hh"
 
 #define USE_PIXMAP_CACHE
 

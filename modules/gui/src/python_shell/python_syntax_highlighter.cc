@@ -21,8 +21,6 @@
  */
 
 #include <iostream>
-#include <QDebug>
-#include <QTextCursor>
 
 #include "python_shell.hh"
 #include "string_literal_positions.hh"
@@ -31,6 +29,8 @@
 #include "python_context_parser.hh"
 
 
+#include <QDebug>
+#include <QTextCursor>
 
 namespace ost { namespace gui {    
 

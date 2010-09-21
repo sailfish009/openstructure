@@ -20,26 +20,26 @@
 #include <sys/time.h>
 #endif
 
+#include <ost/gui/python_shell/python_interpreter.hh>
 #include "gl_canvas.hh"
 #include "gl_win.hh"
 
 #include <ost/log.hh>
 #include <ost/dyn_cast.hh>
 #include <ost/mol/view_op.hh>
-#include <ost/gfx/scene.hh>
-#include <ost/gfx/entity.hh>
 
 #include <ost/seq/alignment_handle.hh>
 
-#include <ost/gui/python_shell/python_interpreter.hh>
 
-#include "tools/tool_manager.hh"
 
+#include <ost/gfx/scene.hh>
+#include <ost/gfx/entity.hh>
 #include <QTimer>
 #include <QStatusBar>
 #include <QApplication>
 #include <QClipboard>
 #include <QMenu>
+#include "tools/tool_manager.hh"
 
 namespace ost { namespace gui {
 

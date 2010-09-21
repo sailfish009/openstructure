@@ -26,6 +26,11 @@
 #ifndef IMG_OV_GUI_OVDIALOG_H
 #define IMG_OV_GUI_OVDIALOG_H
 
+
+#include <vector>
+#include <map>
+#include "overlay_manager_observer.hh"
+
 #include <QWidget>
 #include <QRadioButton>
 #include <QCheckBox>
@@ -34,11 +39,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QButtonGroup>
-
-#include <vector>
-#include <map>
-#include "overlay_manager_observer.hh"
-
 namespace ost { namespace img { namespace gui {
 
 class OverlayCustomActCheckBox: public QRadioButton

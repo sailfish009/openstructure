@@ -23,8 +23,8 @@
  */
 
 #include <vector>
-#include <QString>
 #include "python_shell_fw.hh"
+#include <QString>
 
 namespace ost { namespace gui {
 

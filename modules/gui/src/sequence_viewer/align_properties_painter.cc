@@ -22,10 +22,10 @@
  */
 
 
-#include <QtGui>
 
 #include "align_properties_painter.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 namespace {

@@ -22,10 +22,10 @@
  */
 
 
-#include <QtGui>
 
 #include "base_row.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 BaseRow::BaseRow(QObject *parent) : QObject(parent)

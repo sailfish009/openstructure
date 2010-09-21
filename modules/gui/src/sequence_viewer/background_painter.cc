@@ -22,10 +22,10 @@
  */
 
 
-#include <QtGui>
 
 #include "background_painter.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 BackgroundPainter::BackgroundPainter(QObject* parent)

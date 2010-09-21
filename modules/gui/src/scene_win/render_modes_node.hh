@@ -19,9 +19,6 @@
 #ifndef OST_GUI_SCENE_WIN_RENDER_MODES_NODE_HH
 #define OST_GUI_SCENE_WIN_RENDER_MODES_NODE_HH
 
-#include <QObject>
-#include <QVariant>
-#include <QSet>
 
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/entity_fw.hh>
@@ -36,6 +33,9 @@
 
 #include "render_mode_node.hh"
 
+#include <QObject>
+#include <QVariant>
+#include <QSet>
 /*
   Author: Stefan Scheuber
  */

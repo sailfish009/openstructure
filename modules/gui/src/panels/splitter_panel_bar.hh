@@ -19,10 +19,6 @@
 #ifndef OST_GUI_SPLITTER_PANEL_BAR
 #define OST_GUI_SPLITTER_PANEL_BAR
 
-#include <QHBoxLayout>
-#include <QWidget>
-#include <QString>
-#include <QAction>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget_pool.hh>
@@ -32,6 +28,10 @@
 #include "panel_widget_container.hh"
 #include "panel_bar_widget_holder.hh"
 
+#include <QHBoxLayout>
+#include <QWidget>
+#include <QString>
+#include <QAction>
 namespace ost { namespace gui {
 
 /// \brief bottom Bar

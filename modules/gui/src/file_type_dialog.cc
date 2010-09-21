@@ -18,15 +18,15 @@
 //------------------------------------------------------------------------------
 #include "file_type_dialog.hh"
 
+
+#include <ost/io/io_manager.hh>
+#include <ost/io/io_exception.hh>
+
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTableWidgetItem>
 #include <QHeaderView>
-
-#include <ost/io/io_manager.hh>
-#include <ost/io/io_exception.hh>
-
 namespace ost { namespace gui {
 
 FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):

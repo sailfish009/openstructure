@@ -17,9 +17,6 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <QApplication>
-#include <QSettings>
-#include <QDir>
 
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
@@ -27,6 +24,9 @@
 
 #include "tabbed_panel_bar.hh"
 
+#include <QApplication>
+#include <QSettings>
+#include <QDir>
 namespace ost { namespace gui {
 
 TabbedPanelBar::TabbedPanelBar(PanelBar* parent):

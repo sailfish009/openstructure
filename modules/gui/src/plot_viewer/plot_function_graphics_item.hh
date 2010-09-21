@@ -23,11 +23,11 @@
   Author: Andreas Schenk
 */
 
-#include <QGraphicsItem>
 #include "plot_data_graphics_item_base.hh"
 #include "plot_function.hh"
 #include "plot_function_info.hh"
 
+#include <QGraphicsItem>
 namespace ost{namespace gui{
 
 class DLLEXPORT_OST_GUI PlotFunctionGraphicsItem: public PlotDataGraphicsItemBase

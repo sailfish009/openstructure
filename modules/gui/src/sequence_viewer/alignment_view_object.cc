@@ -22,7 +22,6 @@
  */
 
 
-#include <QtGui>
 
 #include <ost/mol/mol.hh>
 #include <ost/mol/view_op.hh>
@@ -41,6 +40,7 @@
 
 #include "alignment_view_object.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 namespace {

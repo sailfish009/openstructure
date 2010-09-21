@@ -1,7 +1,7 @@
 #include <cassert>
-#include "state_machine.hh"
 #include "transition.hh"
 #include "state.hh"
+#include "state_machine.hh"
 
 namespace ost { namespace gui {
 

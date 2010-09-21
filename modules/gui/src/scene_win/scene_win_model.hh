@@ -23,10 +23,6 @@
   Author: Stefan Scheuber, Marco Biasini, Ansgar Philippsen
  */
 
-#include <QStringList>
-#include <QMimeData>
-#include <QMap>
-#include <QAbstractItemModel>
 
 #include <ost/mol/view_type_fw.hh>
 #include <ost/mol/query_view_wrapper.hh>
@@ -38,6 +34,10 @@
 #include <ost/gui/scene_win/scene_node.hh>
 #include <ost/gui/scene_win/render_modes_node.hh>
 
+#include <QStringList>
+#include <QMimeData>
+#include <QMap>
+#include <QAbstractItemModel>
 namespace ost { namespace gui {
 
 

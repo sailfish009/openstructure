@@ -22,8 +22,8 @@
   Author: Andreas Schenk
 */
 
-#include <QTimer>
 #include "output_redirector.hh"
+#include <QTimer>
 
 
 namespace ost { namespace gui {

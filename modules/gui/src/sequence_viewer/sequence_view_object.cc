@@ -22,7 +22,6 @@
  */
 
 
-#include <QtGui>
 
 #include <ost/mol/mol.hh>
 #include <ost/mol/view_op.hh>
@@ -32,6 +31,7 @@
 
 #include "sequence_view_object.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 const QString SequenceViewObject::properties_mode = "Highlight properties";

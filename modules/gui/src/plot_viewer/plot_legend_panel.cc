@@ -21,9 +21,9 @@
 */
 
 #include <ost/dyn_cast.hh>
-#include <QMetaType>
 #include "plot_legend_panel.hh"
 
+#include <QMetaType>
 Q_DECLARE_METATYPE(ost::gui::PlotInfoBasePtr)
 
 

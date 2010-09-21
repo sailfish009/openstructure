@@ -19,12 +19,12 @@
 #ifndef OST_GUI_MESSAGES_BOX_MESSAGE_WIDGET_HH
 #define OST_GUI_MESSAGES_BOX_MESSAGE_WIDGET_HH
 
-#include <QWidget>
-#include <QMap>
-#include <QMessageBox>
 
 #include <ost/gui/module_config.hh>
 
+#include <QWidget>
+#include <QMap>
+#include <QMessageBox>
 /*
   Author: Stefan Scheuber
 */

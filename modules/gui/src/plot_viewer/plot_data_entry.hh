@@ -24,8 +24,8 @@
   Author: Andreas Schenk
 */
 
-#include <QString>
 #include <ost/gui/module_config.hh>
+#include <QString>
 
 namespace ost{namespace gui{
 

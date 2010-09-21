@@ -20,10 +20,10 @@
   Author: Andreas Schenk
 */
 
-#include <QtGui>
 #include "plot_viewer_panel.hh"
 #include "plot_types.hh"
 #include "plot_function.hh"
+#include <QtGui>
 
 namespace ost{namespace gui{
 

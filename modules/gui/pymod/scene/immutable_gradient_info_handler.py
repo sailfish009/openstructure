@@ -24,7 +24,7 @@ from ost import info
 from PyQt4 import QtCore, QtGui
 
 #Gradient Editor
-class ImmutableGradientInfoHandler():
+class ImmutableGradientInfoHandler:
   def __init__(self, fileName):
     
     self.FILE_NAME = fileName    

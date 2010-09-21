@@ -22,13 +22,6 @@
 
 #include <iostream>
 
-#include <QApplication>
-#include <QFontMetrics>
-#include <QClipboard>
-#include <QPainter>
-#include <QScrollBar>
-#include <QDirModel>
-#include <QStringList>
 
 #include "python_shell_widget.hh"
 
@@ -42,6 +35,13 @@
 #include "path_completer.hh"
 #include "transition.hh"
 
+#include <QApplication>
+#include <QFontMetrics>
+#include <QClipboard>
+#include <QPainter>
+#include <QScrollBar>
+#include <QDirModel>
+#include <QStringList>
 
 
 /*

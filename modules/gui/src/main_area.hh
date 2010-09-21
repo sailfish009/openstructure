@@ -19,10 +19,10 @@
 #ifndef OST_GUI_MAIN_AREA_HH
 #define OST_GUI_MAIN_AREA_HH
 
-#include <QMdiArea>
 
 #include <ost/gui/module_config.hh>
 
+#include <QMdiArea>
 /*
   Author: Marco Biasini
  */

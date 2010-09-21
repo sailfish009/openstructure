@@ -23,12 +23,12 @@
   Author: Andreas Schenk
 */
 
-#include <QGraphicsItem>
-#include <QObject>
 
 #include <ost/gui/module_config.hh>
 #include "plot_info_base.hh"
 
+#include <QGraphicsItem>
+#include <QObject>
 namespace ost{namespace gui{
 
 class DLLEXPORT_OST_GUI PlotDataGraphicsItemBase: public QObject, public QGraphicsItem

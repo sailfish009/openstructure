@@ -22,11 +22,11 @@
  */
 
 
-#include <QtGui>
 
 #include "sequence_model.hh"
 #include "title_row.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 TitleRow::TitleRow(QObject* parent) : BaseRow(QFont("Courier",10),parent), font_("Verdana",9), small_font_("Verdana",7)

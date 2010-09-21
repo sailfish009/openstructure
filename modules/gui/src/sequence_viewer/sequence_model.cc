@@ -21,10 +21,6 @@
   Author: Stefan Scheuber
  */
 
-#include <QMap>
-#include <QMapIterator>
-
-#include <QtGui>
 
 #include "title_row.hh"
 
@@ -33,6 +29,10 @@
 
 #include "sequence_model.hh"
 
+#include <QMap>
+#include <QMapIterator>
+
+#include <QtGui>
 namespace ost { namespace gui {
 
 SequenceModel::SequenceModel(QObject *parent)

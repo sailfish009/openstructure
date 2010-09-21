@@ -22,8 +22,8 @@
  */
 
 
-#include <QtGui>
 #include "sequence_delegate.hh"
+#include <QtGui>
 
 namespace ost { namespace gui {
 

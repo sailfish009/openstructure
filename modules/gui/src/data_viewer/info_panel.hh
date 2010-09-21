@@ -25,9 +25,6 @@
 #ifndef IMG_GUI_DATAVIEWER_INFO_PANEL_H_
 #define IMG_GUI_DATAVIEWER_INFO_PANEL_H_
 
-#include <QWidget>
-#include <QLabel>
-#include <QMenu>
 
 #include <ost/img/data_types.hh>
 #include <ost/img/extent.hh>
@@ -35,6 +32,9 @@
 
 #include <ost/gui/module_config.hh>
 
+#include <QWidget>
+#include <QLabel>
+#include <QMenu>
 namespace ost { namespace img { namespace gui {
 
 class DLLEXPORT_OST_GUI InfoPanelLabel: public QLabel

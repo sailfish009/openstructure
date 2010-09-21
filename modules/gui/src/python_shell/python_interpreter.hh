@@ -29,16 +29,15 @@
 
 #include <vector>
 
-#include <QQueue>
-#include <QMetaType>
-
-
 #include <ost/gui/module_config.hh>
 
 #include <ost/gui/module_config.hh>
 #include "python_interpreter_worker.hh"
 #include "output_redirector.hh"
 #include "main_thread_runner.hh"
+
+#include <QQueue>
+#include <QMetaType>
 
 namespace ost { namespace gui {
 namespace bp = boost::python;

@@ -20,10 +20,9 @@
   Author: Andreas Schenk
 */
 
-#include <QtAlgorithms>
 
-#include <ost/dyn_cast.hh>
 #include <ost/gui/python_shell/python_interpreter.hh>
+#include <ost/dyn_cast.hh>
 #include "plot_data_info.hh"
 #include "plot_graphics_ellipse_item.hh"
 #include "plot_graphics_rectangle_item.hh"
@@ -31,6 +30,7 @@
 #include "plot_graphics_diagonal_cross_item.hh"
 #include "plot_data_graphics_item.hh"
 
+#include <QtAlgorithms>
 
 namespace ost{namespace gui{
 

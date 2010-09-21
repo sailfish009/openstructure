@@ -24,12 +24,12 @@
   Author: Andreas Schenk
 */
 
+#include "plot_axis_horizontal.hh"
+#include "plot_axis_vertical.hh"
 #include <QWidget>
 #include <QHash>
 #include <QPair>
 #include <QGraphicsView>
-#include "plot_axis_horizontal.hh"
-#include "plot_axis_vertical.hh"
 
 namespace ost{namespace gui{
 

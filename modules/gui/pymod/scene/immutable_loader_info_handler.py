@@ -25,7 +25,7 @@ from PyQt4 import QtCore, QtGui
 
 from file_loader import GenericLoader
 
-class ImmutableLoaderInfoHandler():
+class ImmutableLoaderInfoHandler:
   LOADERS_GROUP_NAME = "GenericLoaders"
   LOADER_GROUP_NAME = "GenericLoader"
   NAME_ATTRIBUTE_NAME = "Name"

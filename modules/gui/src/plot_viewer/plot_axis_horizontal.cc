@@ -19,11 +19,11 @@
 /*
   Author: Andreas Schenk
 */
-#include <QPainter>
-#include <QMouseEvent>
 
 #include "plot_axis_horizontal.hh"
 
+#include <QPainter>
+#include <QMouseEvent>
 namespace ost{namespace gui{
 
 PlotAxisHorizontal::PlotAxisHorizontal(QWidget * parent):

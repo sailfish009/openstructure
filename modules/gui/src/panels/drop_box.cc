@@ -17,11 +17,11 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <QHBoxLayout>
-#include <QLabel>
 
 #include "drop_box.hh"
 
+#include <QHBoxLayout>
+#include <QLabel>
 namespace ost { namespace gui {
 
 DropBox::DropBox(QWidget* parent):

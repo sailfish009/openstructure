@@ -21,10 +21,6 @@
 */
 #include <boost/pointer_cast.hpp>
 
-#include <QAction>
-#include <QMenu>
-#include <QItemSelection>
-#include <QItemSelectionModel>
 
 #include <ost/dyn_cast.hh>
 
@@ -43,6 +39,10 @@
 
 #include "context_menu.hh"
 
+#include <QAction>
+#include <QMenu>
+#include <QItemSelection>
+#include <QItemSelectionModel>
 namespace ost { namespace gui {
 
 ContextMenu::ContextMenu(QTreeView* view, SceneWinModel* model):

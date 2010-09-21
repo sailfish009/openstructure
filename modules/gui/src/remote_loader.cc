@@ -18,11 +18,6 @@
 //------------------------------------------------------------------------------
 #include <vector>
 
-#include <QString>
-#include <QSettings>
-#include <QNetworkReply>
-#include <QHBoxLayout>
-#include <QDir>
 #include <ost/platform.hh>
 
 #include <ost/gui/file_loader.hh>
@@ -31,6 +26,11 @@
 #include "widget_registry.hh"
 #include "remote_loader.hh"
 
+#include <QString>
+#include <QSettings>
+#include <QNetworkReply>
+#include <QHBoxLayout>
+#include <QDir>
 namespace ost { namespace gui {
 
 RemoteLoader::RemoteLoader(QWidget* parent):

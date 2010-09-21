@@ -23,10 +23,10 @@
   Author: Stefan Scheuber
  */
 
-#include <QItemDelegate>
-#include <QModelIndex>
 
 #include "sequence_model.hh"
+#include <QItemDelegate>
+#include <QModelIndex>
 
 namespace ost { namespace gui {
 

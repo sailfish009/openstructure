@@ -19,8 +19,6 @@
 #ifndef OST_GUI_SCENE_WIN_SCENE_WIN_HH
 #define OST_GUI_SCENE_WIN_SCENE_WIN_HH
 
-#include <QTreeView>
-#include <QItemSelection>
 
 #include <ost/mol/query_view_wrapper.hh>
 
@@ -31,6 +29,8 @@
 #include <ost/gui/scene_win/scene_win_model.hh>
 #include <ost/gui/scene_win/context_menu.hh>
 
+#include <QTreeView>
+#include <QItemSelection>
 /*
   Authors: Marco Biasini, Ansgar Philippsen, Stefan Scheuber
 */

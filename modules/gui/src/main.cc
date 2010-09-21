@@ -16,9 +16,20 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/gui/gosty_app.hh>
 #include "main.hh"
 
 #include <sstream>
+
+
+#include <ost/log.hh>
+#include <ost/gui/python_shell/python_shell.hh>
+#include <ost/gui/file_loader.hh>
+
+#include "gl_win.hh"
+//#include "entity_explorer/entity_explorer.hh"
+#include "tools/tool_options_win.hh"
+
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -34,19 +45,6 @@
 #include <QDragEnterEvent>
 #include <QList>
 #include <QUrl>
-
-#include <ost/log.hh>
-#include <ost/gui/python_shell/python_shell.hh>
-#include <ost/gui/gosty_app.hh>
-#include <ost/gui/file_loader.hh>
-
-#include "gl_win.hh"
-//#include "entity_explorer/entity_explorer.hh"
-#include "tools/tool_options_win.hh"
-#include "plot_viewer/plot_viewer_proxy.hh"
-#include "plot_viewer/plot_viewer.hh"
-
-
 //#include "xpm/ost_small.xpm"
 
 namespace ost { namespace gui {

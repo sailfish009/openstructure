@@ -19,13 +19,13 @@
 #ifndef OST_GUI_PANEL_BAR_WIDGET_HOLDER_HH
 #define OST_GUI_PANEL_BAR_WIDGET_HOLDER_HH
 
-#include <QWidget>
-#include <QMouseEvent>
 
 #include <ost/gui/module_config.hh>
 
 #include "panel_bar.hh"
 
+#include <QWidget>
+#include <QMouseEvent>
 class QToolBar;
 class QAction;
 

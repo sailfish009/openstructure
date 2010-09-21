@@ -24,13 +24,13 @@
 */
 
 #include <boost/shared_ptr.hpp>
+
+#include <ost/gui/module_config.hh>
+
 #include <QObject>
 #include <QColor>
 #include <QPen>
 #include <QBrush>
-
-#include <ost/gui/module_config.hh>
-
 namespace ost{namespace gui{
 
 //fw decl

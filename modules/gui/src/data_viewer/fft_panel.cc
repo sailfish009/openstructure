@@ -22,11 +22,11 @@
   Author: Andreas Schenk
 */
 
-#include <QInputDialog>
 #include <ost/img/alg/fft.hh>   
 #include "fft_panel.hh"
 
 
+#include <QInputDialog>
 
 
 namespace ost { namespace img { namespace gui {

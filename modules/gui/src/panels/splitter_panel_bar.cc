@@ -17,14 +17,14 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <QSettings>
-
-#include <QPalette>
 #include <ost/gui/widget_registry.hh>
 
 #include "panel_widget_container.hh"
 #include "splitter_panel_bar.hh"
 
+#include <QSettings>
+
+#include <QPalette>
 namespace ost { namespace gui {
 
 SplitterPanelBar::SplitterPanelBar(PanelBar* parent,Qt::Orientation orientation):

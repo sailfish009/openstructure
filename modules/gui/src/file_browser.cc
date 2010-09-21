@@ -16,14 +16,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QCoreApplication>
-#include <QCursor>
-#include <QVBoxLayout>
-#include <QDesktopServices>
-#include <QDir>
-#include <QFileInfo>
-#include <QUrl>
 
+#include <ost/gui/gosty_app.hh>
 #include <ost/platform.hh>
 #include <ost/config.hh>
 #include <ost/mol/mol.hh>
@@ -35,7 +29,6 @@
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/scene.hh>
 
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
 #include <ost/gui/panels/panel_manager.hh>
 #include <ost/gui/file_loader.hh>
@@ -51,6 +44,14 @@
 
 #include "widget_registry.hh"
 #include "file_browser.hh"
+
+#include <QCoreApplication>
+#include <QCursor>
+#include <QVBoxLayout>
+#include <QDesktopServices>
+#include <QDir>
+#include <QFileInfo>
+#include <QUrl>
 
 namespace ost { namespace gui {
 

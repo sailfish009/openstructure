@@ -20,10 +20,10 @@
   Author: Andreas Schenk
 */
 
-#include <QWheelEvent>
-#include <QMouseEvent>
 #include "plot_axis_base.hh"
 
+#include <QWheelEvent>
+#include <QMouseEvent>
 namespace ost{namespace gui{
 
 PlotAxisBase::PlotAxisBase(QWidget * parent):

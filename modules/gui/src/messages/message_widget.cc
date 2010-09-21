@@ -19,18 +19,19 @@
 /*
  Author: Stefan Scheuber
  */
+
+#include <ost/gui/gosty_app.hh>
+#include <ost/platform.hh>
+
+#include <ost/gui/widget_registry.hh>
+
+#include "log_reader.hh"
+#include "message_widget.hh"
+
 #include <QApplication>
 #include <QDir>
 #include <QMenu>
 #include <QVBoxLayout>
-
-#include <ost/platform.hh>
-
-#include <ost/gui/widget_registry.hh>
-#include <ost/gui/gosty_app.hh>
-
-#include "log_reader.hh"
-#include "message_widget.hh"
 
 namespace ost {namespace gui {
 

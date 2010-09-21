@@ -22,7 +22,6 @@
  */
 
 
-#include <QtGui>
 
 #include <ost/mol/mol.hh>
 #include <ost/mol/view_op.hh>
@@ -31,6 +30,7 @@
 
 #include "secstr_row.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 SecStrRow::SecStrRow(const QString& name, mol::ChainView& chain, SequenceViewObject* parent) : SequenceRow(name,parent)

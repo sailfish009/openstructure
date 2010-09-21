@@ -23,12 +23,12 @@
 #ifndef OST_GUI_SPNAV_INPUT_HH
 #define OST_GUI_SPNAV_INPUT_HH
 
-#include <QThread>
-#include <QMetaType>
 
 #include <ost/geom/geom.hh>
 #include <ost/gui/module_config.hh>
 
+#include <QThread>
+#include <QMetaType>
 Q_DECLARE_METATYPE(geom::Mat4);
 
 namespace ost { namespace gui {

@@ -26,9 +26,10 @@
 #include <limits>
 #include <vector>
 
-#include <QObject>
 
 #include <ost/gui/module_config.hh>
+#include <QObject>
+
 
 namespace ost { namespace gui {
 

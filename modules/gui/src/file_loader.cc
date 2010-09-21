@@ -16,15 +16,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/gui/gosty_app.hh>
 #include "file_loader.hh"
-
-#include <QDir>
-#include <QAction>
-#include <QMenu>
-#include <QFileInfo>
-#include <QMessageBox>
-#include <QMenuBar>
-
 
 #include <ost/config.hh>
 #include <ost/mol/mol.hh>
@@ -45,7 +38,6 @@
 #include <ost/gfx/surface.hh>
 #include <ost/gfx/scene.hh>
 
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
 #include <ost/gui/python_shell/python_interpreter.hh>
 #include <ost/gui/main_area.hh>
@@ -58,6 +50,12 @@
   #include <ost/img/extent.hh>
 #endif
 
+#include <QDir>
+#include <QAction>
+#include <QMenu>
+#include <QFileInfo>
+#include <QMessageBox>
+#include <QMenuBar>
 namespace ost { namespace gui {
 
 LoaderManagerPtr FileLoader::loader_manager_ = LoaderManagerPtr();

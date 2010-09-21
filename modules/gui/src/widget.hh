@@ -19,11 +19,11 @@
 #ifndef OST_GUI_WIDGET_HH
 #define OST_GUI_WIDGET_HH
 
-#include <QWidget>
-#include <QMetaType>
 
 #include <ost/gui/module_config.hh>
 
+#include <QWidget>
+#include <QMetaType>
 /*
   Author: Marco Biasini
  */

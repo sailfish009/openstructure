@@ -19,14 +19,14 @@
 #ifndef OST_GUI_MESSAGES_LOG_READER_HH
 #define OST_GUI_MESSAGES_LOG_READER_HH
 
-#include <QObject>
-#include <QMap>
-#include <QMessageBox>
 
 #include <ost/log_sink.hh>
 
 #include <ost/gui/module_config.hh>
 
+#include <QObject>
+#include <QMap>
+#include <QMessageBox>
 /*
   Author: Stefan Scheuber
 */

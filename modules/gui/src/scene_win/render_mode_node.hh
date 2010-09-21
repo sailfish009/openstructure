@@ -19,9 +19,6 @@
 #ifndef OST_GUI_SCENE_WIN_RENDER_MODE_NODE_HH
 #define OST_GUI_SCENE_WIN_RENDER_MODE_NODE_HH
 
-#include <QObject>
-#include <QVariant>
-#include <QModelIndex>
 
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/query_view_wrapper.hh>
@@ -36,6 +33,9 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/scene_win/entity_part_node.hh>
 
+#include <QObject>
+#include <QVariant>
+#include <QModelIndex>
 /*
   Author: Stefan Scheuber
  */

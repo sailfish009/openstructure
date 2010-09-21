@@ -17,13 +17,13 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <QAction>
 
 #include "side_bar.hh"
 
 #include "splitter_panel_bar.hh"
 #include "tabbed_panel_bar.hh"
 
+#include <QAction>
 namespace ost { namespace gui {
 
 SideBar::SideBar(QWidget* parent):

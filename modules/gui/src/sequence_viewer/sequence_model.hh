@@ -23,8 +23,6 @@
   Author: Stefan Scheuber
  */
 
-#include <QAbstractTableModel>
-#include <QItemSelection>
 
 #include <ost/mol/chain_view.hh>
 
@@ -37,6 +35,8 @@
 #include "alignment_view_object.hh"
 #include "sequence_view_object.hh"
 
+#include <QAbstractTableModel>
+#include <QItemSelection>
 namespace ost { namespace gui {
 
 class SequenceModel : public QAbstractTableModel

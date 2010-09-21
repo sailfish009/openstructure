@@ -22,10 +22,10 @@
  */
 
 
-#include <QtGui>
 
 #include "base_view_object.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 BaseViewObject::BaseViewObject(QObject* parent): QObject(parent)

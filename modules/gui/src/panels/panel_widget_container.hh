@@ -19,17 +19,17 @@
 #ifndef OST_GUI_PANEL_BAR_PANEL_WIDGET_CONTAINER
 #define OST_GUI_PANEL_BAR_PANEL_WIDGET_CONTAINER
 
-#include <QHBoxLayout>
-#include <QWidget>
-#include <QString>
-#include <QAction>
-#include <QMap>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
 
 #include "panel_bar.hh"
 
+#include <QHBoxLayout>
+#include <QWidget>
+#include <QString>
+#include <QAction>
+#include <QMap>
 namespace ost { namespace gui {
 
 /// \brief A PanelWidgetContainer can display various widgets

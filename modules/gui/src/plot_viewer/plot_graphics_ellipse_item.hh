@@ -23,10 +23,10 @@
   Author: Andreas Schenk
 */
 
-#include <QGraphicsItem>
-#include <QGraphicsSceneHoverEvent>
 #include "plot_data_entry.hh"
 #include "plot_data_info_fw.hh"
+#include <QGraphicsItem>
+#include <QGraphicsSceneHoverEvent>
 
 namespace ost{namespace gui{
 

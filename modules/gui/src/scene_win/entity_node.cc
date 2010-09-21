@@ -16,16 +16,14 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/gui/gosty_app.hh>
 #include <boost/pointer_cast.hpp>
 
-#include <QFont>
-#include <QString>
 
 #include <ost/mol/query.hh>
 #include <ost/mol/query_view_wrapper.hh>
 #include <ost/mol/view_type_fw.hh>
 
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_win/scene_win.hh>
 
 #include "current_selection_node.hh"
@@ -35,6 +33,8 @@
 
 #include "entity_node.hh"
 
+#include <QFont>
+#include <QString>
 
 
 namespace ost { namespace gui {

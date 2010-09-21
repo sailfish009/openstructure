@@ -23,9 +23,9 @@
   Author: Stefan Scheuber
  */
 
-#include <QObject>
 
 #include "base_row.hh"
+#include <QObject>
 
 namespace ost { namespace gui {
 

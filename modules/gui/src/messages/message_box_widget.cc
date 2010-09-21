@@ -19,14 +19,10 @@
 /*
  Author: Stefan Scheuber
  */
-#include <QDir>
-#include <QLabel>
-#include <QMenu>
-#include <QVBoxLayout>
-
-#include <ost/platform.hh>
 
 #include <ost/gui/gosty_app.hh>
+#include <ost/platform.hh>
+
 #include <ost/gui/perspective.hh>
 #include <ost/gui/widget_registry.hh>
 
@@ -35,6 +31,10 @@
 #include "log_reader.hh"
 #include "message_box_widget.hh"
 
+#include <QDir>
+#include <QLabel>
+#include <QMenu>
+#include <QVBoxLayout>
 namespace ost {namespace gui {
 
 MessageLevel::MessageLevel(QPixmap icon, QWidget* parent): QWidget(parent), message_count_(0), count_label_(new QLabel(QString::number(message_count_)+"  ",this)){

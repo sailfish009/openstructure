@@ -23,13 +23,13 @@
   Author: Stefan Scheuber
  */
 
-#include <QTableView>
-#include <QWheelEvent>
 
 #include <ost/gui/module_config.hh>
 
 #include "sequence_delegate.hh"
 
+#include <QTableView>
+#include <QWheelEvent>
 namespace ost { namespace gui {
 
 /// \brief QTableView with first column not moving

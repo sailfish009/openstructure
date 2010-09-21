@@ -19,12 +19,13 @@
 #ifndef OST_GUI_MESSAGES_MESSAGE_WIDGET_HH
 #define OST_GUI_MESSAGES_MESSAGE_WIDGET_HH
 
-#include <QListView>
-#include <QMessageBox>
-#include <QStandardItemModel>
 
 #include <ost/gui/widget.hh>
 #include <ost/gui/module_config.hh>
+
+#include <QListView>
+#include <QMessageBox>
+#include <QStandardItemModel>
 
 /*
   Author: Stefan Scheuber

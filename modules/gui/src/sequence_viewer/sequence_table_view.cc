@@ -21,13 +21,13 @@
   Author: Stefan Scheuber
  */
 
+
+#include "sequence_table_view.hh"
+#include "sequence_model.hh"
 #include <QHeaderView>
 #include <QScrollBar>
 #include <QTableWidgetItem>
 #include <QMouseEvent>
-
-#include "sequence_table_view.hh"
-#include "sequence_model.hh"
 
 namespace ost { namespace gui {
 

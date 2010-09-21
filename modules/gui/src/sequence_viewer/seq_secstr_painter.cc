@@ -22,10 +22,10 @@
  */
 
 
-#include <QtGui>
 
 #include "seq_secstr_painter.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 SeqSecStrPainter::SeqSecStrPainter(QObject* parent)

@@ -19,10 +19,6 @@
 #ifndef OST_GUI_BOTTOM_BAR_BUTTON_BAR
 #define OST_GUI_BOTTOM_BAR_BUTTON_BAR
 
-#include <QWidget>
-#include <QString>
-#include <QHBoxLayout>
-#include <QList>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
@@ -30,6 +26,10 @@
 #include "button_box.hh"
 #include "event_button.hh"
 
+#include <QWidget>
+#include <QString>
+#include <QHBoxLayout>
+#include <QList>
 namespace ost { namespace gui {
 
 /// \brief button box

@@ -19,11 +19,11 @@
 /*
   Author: Andreas Schenk
 */
-#include <QCursor>
-#include <QToolTip>
 #include "plot_data_info.hh"
 #include "plot_data_graphics_item.hh"
 #include "plot_graphics_diagonal_cross_item.hh"
+#include <QCursor>
+#include <QToolTip>
 
 namespace ost {namespace gui {
 

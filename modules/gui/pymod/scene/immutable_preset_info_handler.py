@@ -25,7 +25,7 @@ from PyQt4 import QtCore, QtGui
 from ost.gui.scene.preset import Preset
 
 #Gradient Editor
-class ImmutablePresetInfoHandler():
+class ImmutablePresetInfoHandler:
   PRESETS_GROUP_NAME = "Presets"
   PRESET_GROUP_NAME = "Preset"
   NAME_ATTRIBUTE_NAME = "Name"

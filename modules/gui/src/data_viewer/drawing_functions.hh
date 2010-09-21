@@ -25,11 +25,11 @@
 #ifndef IMG_GUI_DRAWING_FUNCTIONS_HH_
 #define IMG_GUI_DRAWING_FUNCTIONS_HH_
 
+#include <ost/geom/geom.hh>
 #include <QPainter>
 #include <QPoint>
 #include <QSize>
 
-#include <ost/geom/geom.hh>
 
 namespace ost { namespace img { namespace gui {
 

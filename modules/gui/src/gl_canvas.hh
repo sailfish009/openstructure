@@ -19,21 +19,21 @@
 #ifndef OST_GUI_GL_CANVAS_HH
 #define OST_GUI_GL_CANVAS_HH
 
-#include <ost/gfx/glwin_base.hh>
-#include <ost/gfx/input.hh>
 
 // must come before QGLWidget
 #include <ost/mol/mol.hh>
-#include <ost/gfx/gfx_object_fw.hh>
 
-#include <ost/gui/tools/tool.hh>
-#include <ost/gui/scene_menu.hh>
 
 // Qt includes must come last
 #include <QGLWidget>
 #include <QTime>
 #include <QBasicTimer>
 #include <QMouseEvent>
+#include <ost/gui/tools/tool.hh>
+#include <ost/gui/scene_menu.hh>
+#include <ost/gfx/glwin_base.hh>
+#include <ost/gfx/input.hh>
+#include <ost/gfx/gfx_object_fw.hh>
 
 class QMenu;
 

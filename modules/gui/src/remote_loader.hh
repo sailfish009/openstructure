@@ -19,16 +19,16 @@
 #ifndef OST_GUI_REMOTE_LOADER_HH
 #define OST_GUI_REMOTE_LOADER_HH
 
-#include <QToolButton>
-#include <QLineEdit>
-#include <QKeyEvent>
-#include <QProgressBar>
-#include <QActionGroup>
 
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
 
+#include <QToolButton>
+#include <QLineEdit>
+#include <QKeyEvent>
+#include <QProgressBar>
+#include <QActionGroup>
 namespace ost { namespace gui {
 
 

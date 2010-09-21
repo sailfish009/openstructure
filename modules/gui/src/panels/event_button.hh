@@ -19,16 +19,16 @@
 #ifndef OST_GUI_BOTTOM_BAR_EVENT_BUTTON
 #define OST_GUI_BOTTOM_BAR_EVENT_BUTTON
 
+
+#include <ost/gui/module_config.hh>
+#include <ost/gui/widget.hh>
+
 #include <QToolButton>
 #include <QMouseEvent>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QWidget>
 #include <QString>
-
-#include <ost/gui/module_config.hh>
-#include <ost/gui/widget.hh>
-
 namespace ost { namespace gui {
 
 /// \brief button box

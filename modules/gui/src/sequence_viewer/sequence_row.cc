@@ -22,7 +22,6 @@
  */
 
 
-#include <QtGui>
 
 #include <ost/mol/mol.hh>
 #include <ost/mol/view_op.hh>
@@ -32,6 +31,7 @@
 #include "sequence_view_object.hh"
 #include "sequence_row.hh"
 
+#include <QtGui>
 namespace ost { namespace gui {
 
 SequenceRow::SequenceRow(const QString& name, seq::SequenceHandle& sequence, SequenceViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11)), sequence_(sequence)

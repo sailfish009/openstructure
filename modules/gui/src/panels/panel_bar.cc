@@ -17,8 +17,6 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <QSettings>
-#include <QVariant>
 
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
@@ -31,6 +29,8 @@
 #include "splitter_panel_bar.hh"
 #include "tabbed_panel_bar.hh"
 
+#include <QSettings>
+#include <QVariant>
 namespace ost {
 namespace gui {
 

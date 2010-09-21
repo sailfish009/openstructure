@@ -17,9 +17,6 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <QSettings>
-#include <QMenu>
-#include <QDebug>
 
 #include <ost/gui/widget_registry.hh>
 
@@ -29,6 +26,9 @@
 #include "tabbed_panel_bar.hh"
 #include "splitter_panel_bar.hh"
 
+#include <QSettings>
+#include <QMenu>
+#include <QDebug>
 namespace ost { namespace gui {
 
 class ExternalWidgetFactory: public WidgetFactory {

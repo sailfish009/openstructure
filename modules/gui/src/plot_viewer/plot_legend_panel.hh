@@ -23,12 +23,12 @@
   Author: Andreas Schenk
 */
 
-#include <QTreeWidget>
-#include <QTreeWidgetItem>
 #include "plot_data_info.hh"
 #include "plot_group_info.hh"
 #include "plot_function_info.hh"
 
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 namespace ost{namespace gui{
 
 class DLLEXPORT_OST_GUI PlotLegendPanel:public  QTreeWidget

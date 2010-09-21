@@ -25,10 +25,10 @@
 #ifndef OST_GUI_DOCK_WIDGET_HH
 #define OST_GUI_DOCK_WIDGET_HH
 
-#include <QDockWidget>
 
 #include <ost/gui/module_config.hh>
 
+#include <QDockWidget>
 namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI DockWidget: public QDockWidget

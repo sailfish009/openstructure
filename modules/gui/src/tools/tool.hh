@@ -24,12 +24,13 @@
  */
 #include <vector>
 
-#include <QIcon>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gfx/gfx_node.hh>
 #include <ost/gui/tools/mouse_event.hh>
 #include <ost/gui/tools/tool_options.hh>
+
+#include <QIcon>
 
 namespace ost { namespace gui {
 

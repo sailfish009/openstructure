@@ -23,9 +23,6 @@
   Author: Marco Biasini, Andreas Schenk
  */
 
-#include <QObject>
-#include <QString>
-#include <QMap>
 
 #include <ost/config.hh>
 #include <ost/gui/module_config.hh>
@@ -40,6 +37,9 @@
 #endif
 
 
+#include <QObject>
+#include <QString>
+#include <QMap>
 
 
 class QMainWindow;

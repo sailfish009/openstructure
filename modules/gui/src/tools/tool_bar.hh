@@ -23,13 +23,13 @@
   Author: Marco Biasini
  */
 
-#include <QToolBar>
-#include <QList>
 
 #include <ost/gfx/gfx_node.hh>
 #include <ost/gui/module_config.hh>
 #include <ost/gui/tools/tool.hh>
 
+#include <QToolBar>
+#include <QList>
 
 class QActionGroup;
 

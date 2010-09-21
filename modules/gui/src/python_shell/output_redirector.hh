@@ -26,10 +26,10 @@
   Author: Andreas Schenk
 */
 
+#include <ost/gui/module_config.hh>
 #include <QTime>
 #include <QString>
 #include <QObject>
-#include <ost/gui/module_config.hh>
 
 namespace ost { namespace gui {
 

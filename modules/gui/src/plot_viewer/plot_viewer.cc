@@ -21,8 +21,6 @@
 */
 
 #include <limits>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
 
 #include "plot_viewer.hh"
 #include "plot_viewer_panel.hh"
@@ -32,6 +30,8 @@
 #include "plot_function_graphics_item.hh"
 #include "plot_group_graphics_item.hh"
 
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 namespace ost { namespace gui {
 
 PlotViewer::PlotViewer(QWidget* parent,const QString& name):

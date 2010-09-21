@@ -28,14 +28,6 @@
 //#include <cstring>
 //#include <sstream>
 
-#include <QLabel>
-#include <QStatusBar>
-#include <QMouseEvent>
-#include <QVariant>
-#include <QMenu>
-#include <QMenuBar>
-#include <QApplication>
-#include <QDesktopWidget>
 
 //#include <ost/img/io/io_manager.hh>
 #include <ost/message.hh>
@@ -48,6 +40,14 @@
 #include "overlay_base.hh"
 #include "overlay_manager.hh"
 
+#include <QLabel>
+#include <QStatusBar>
+#include <QMouseEvent>
+#include <QVariant>
+#include <QMenu>
+#include <QMenuBar>
+#include <QApplication>
+#include <QDesktopWidget>
 namespace ost { namespace img { namespace gui {
 
 namespace {

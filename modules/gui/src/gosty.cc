@@ -23,8 +23,6 @@
 #include <sstream>
 #include <ctime>
 
-#include <QDir>
-#include <QTimer>
 #include <ost/gui/module_config.hh>
 #include <ost/log.hh>
 #include <ost/platform.hh>
@@ -39,6 +37,8 @@
 #include <QApplication>
 #include <QResource>
 #include <QFileInfo>
+#include <QDir>
+#include <QTimer>
 
 using namespace ost;
 using namespace ost::gui;

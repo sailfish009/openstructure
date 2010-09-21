@@ -1,9 +1,9 @@
 #include <cassert>
+#include "python_shell_widget.hh"
+#include "transition.hh"
+#include "state.hh"
 #include <QKeyEvent>
 #include <QMouseEvent>
-#include "python_shell_widget.hh"
-#include "state.hh"
-#include "transition.hh"
 
 namespace ost { namespace gui {
 

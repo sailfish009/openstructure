@@ -1,9 +1,9 @@
 #ifndef TRANSITION_GUARD_HH
 #define TRANSITION_GUARD_HH
 
-#include <QObject>
 #include "python_shell_fw.hh"
 #include "python_interpreter.hh"
+#include <QObject>
 
 namespace ost { namespace gui {
 

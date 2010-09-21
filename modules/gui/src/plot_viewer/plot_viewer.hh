@@ -23,18 +23,18 @@
   Author: Andreas Schenk
 */
 
+
+
 #include <QStandardItemModel>
 #include <QGraphicsScene>
 #include <QWidget>
 #include <QString>
-
 #include "plot_data.hh"
+#include "plot_data_info_fw.hh"
+#include "plot_group_info.hh"
 #include "plot_function.hh"
 #include "plot_group.hh"
 #include "plot_function_info.hh"
-#include "plot_data_info_fw.hh"
-#include "plot_group_info.hh"
-
 namespace ost{namespace gui{
 
 

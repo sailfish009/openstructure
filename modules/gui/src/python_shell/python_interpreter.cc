@@ -30,12 +30,12 @@
 #include <fstream>
 
 #include <boost/filesystem/convenience.hpp>
+#include <ost/log.hh>
 
 #include <QFile>
 #include <QDebug>
 #include <QFile>
 #include <QStringList>
-#include <ost/log.hh>
 
 namespace ost { namespace gui {
 

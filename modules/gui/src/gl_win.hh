@@ -19,11 +19,6 @@
 #ifndef OST_GUI_GL_WIN_HH
 #define OST_GUI_GL_WIN_HH
 
-#include <QMainWindow>
-#include <QAction>
-
-#include <QActionGroup>
-#include <QStatusBar>
 
 #include <ost/gfx/scene_observer.hh>
 
@@ -33,6 +28,12 @@
 
 #include <ost/gui/tools/tool.hh>
 #include <ost/gui/tools/tool_bar.hh>
+
+#include <QMainWindow>
+#include <QAction>
+
+#include <QActionGroup>
+#include <QStatusBar>
 
 /*
   Authors: Ansgar Philippsen, Marco Biasini

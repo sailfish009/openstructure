@@ -24,11 +24,11 @@
 #ifndef OST_GUI_REMOTE_SITE_LOADER_HH
 #define OST_GUI_REMOTE_SITE_LOADER_HH
 
+#include <ost/gui/module_config.hh>
+
 #include <QObject>
 #include <QMenu>
 #include <QNetworkReply>
-#include <ost/gui/module_config.hh>
-
 namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI RemoteSiteLoader{

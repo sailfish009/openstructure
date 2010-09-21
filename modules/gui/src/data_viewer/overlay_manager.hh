@@ -28,9 +28,6 @@
 #include <vector>
 #include <list>
 
-#include <QWidget>
-#include <QPainter>
-#include <QEvent>
 
 
 #include <ost/base.hh>
@@ -41,6 +38,9 @@
 #include "overlay_manager_fw.hh"
 #include "overlay_manager_observer.hh"
 
+#include <QWidget>
+#include <QPainter>
+#include <QEvent>
 namespace ost { namespace img { namespace gui {
 
 class DataViewerPanel;

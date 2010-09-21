@@ -26,13 +26,6 @@
 #ifndef IMG_POINTLIST_OVERLAY_BASE_HH
 #define IMG_POINTLIST_OVERLAY_BASE_HH
 
-#include <QColor>
-#include <QAction>
-#include <QDialog>
-#include <QLineEdit>
-#include <QColorDialog>
-#include <QPushButton>
-#include <QVBoxLayout>
 
 
 #include <ost/img/point.hh>
@@ -43,6 +36,13 @@
 
 #include "strategies_fw.hh"
 
+#include <QColor>
+#include <QAction>
+#include <QDialog>
+#include <QLineEdit>
+#include <QColorDialog>
+#include <QPushButton>
+#include <QVBoxLayout>
 
 
 namespace ost { namespace img { namespace gui {

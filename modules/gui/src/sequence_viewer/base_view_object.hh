@@ -23,11 +23,11 @@
   Author: Stefan Scheuber
  */
 
-#include <QObject>
-#include <QList>
 
 #include "base_row.hh"
 
+#include <QObject>
+#include <QList>
 
 namespace ost { namespace gui {
 

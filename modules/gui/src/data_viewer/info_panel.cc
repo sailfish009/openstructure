@@ -24,14 +24,14 @@
 */
 #include <boost/format.hpp>
 
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QGroupBox>
 
 #include <ost/img/image.hh>
 
 #include "info_panel.hh"
 
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QGroupBox>
 namespace ost { namespace img { namespace gui {
 
 InfoPanelLabel::InfoPanelLabel(const QString& t, QWidget* parent):

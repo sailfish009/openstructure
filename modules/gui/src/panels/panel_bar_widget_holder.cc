@@ -18,6 +18,18 @@
 //------------------------------------------------------------------------------
 #include <cassert>
 
+
+#include <ost/gui/gosty_app.hh>
+#include <ost/platform.hh>
+
+#include <ost/gui/widget.hh>
+#include <ost/gui/widget_registry.hh>
+#include <ost/gui/perspective.hh>
+
+#include "panel_manager.hh"
+#include "panel_bar.hh"
+#include "panel_bar_widget_holder.hh"
+
 #include <QApplication>
 #include <QMenu>
 #include <QHBoxLayout>
@@ -30,18 +42,6 @@
 #include <QAction>
 #include <QComboBox>
 #include <QDebug>
-
-#include <ost/platform.hh>
-
-#include <ost/gui/widget.hh>
-#include <ost/gui/widget_registry.hh>
-#include <ost/gui/gosty_app.hh>
-#include <ost/gui/perspective.hh>
-
-#include "panel_manager.hh"
-#include "panel_bar.hh"
-#include "panel_bar_widget_holder.hh"
-
 /*
   Author: Marco Biasini, Stefan Scheuber
  */

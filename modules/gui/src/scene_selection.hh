@@ -19,9 +19,6 @@
 #ifndef OST_GUI_SCENE_SELECTION_HH
 #define OST_GUI_SCENE_SELECTION_HH
 
-#include <QObject>
-#include <QMenu>
-#include <QPoint>
 
 #include <ost/mol/query_view_wrapper.hh>
 
@@ -29,6 +26,9 @@
 #include <ost/gfx/gfx_node_fw.hh>
 #include <ost/gui/module_config.hh>
 
+#include <QObject>
+#include <QMenu>
+#include <QPoint>
 namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI SceneSelection : public QObject {

@@ -2,11 +2,11 @@
 #define PYTHON_SHELL_TRANSITION_HH
 
 #include <utility>
+#include <ost/gui/python_shell/python_interpreter.hh>
+
 #include <QObject>
 #include <QEvent>
-#include <ost/gui/python_shell/python_interpreter.hh>
 #include "transition_guard.hh"
-
 //fw decl
 class QKeyEvent;
 class QMouseEvent;

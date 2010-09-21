@@ -3,11 +3,11 @@
 
 #include <csignal>
 #include <utility>
-#include <QObject>
-#include <QQueue>
 #include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
 #include "output_redirector.hh"
+#include <QObject>
+#include <QQueue>
 
 namespace ost { namespace gui {
 namespace bp = boost::python;

@@ -20,18 +20,9 @@
 /*
   Author: Stefan Scheuber
  */
+#include <ost/gui/gosty_app.hh>
 #include <boost/pointer_cast.hpp>
 
-#include <QAbstractItemView>
-#include <QApplication>
-#include <QClipboard>
-#include <QDir>
-#include <QHeaderView>
-#include <QMenu>
-#include <QPushButton>
-#include <QShortcut>
-#include <QVBoxLayout>
-#include <QVarLengthArray>
 
 #include <ost/platform.hh>
 #include <ost/mol/chain_view.hh>
@@ -44,11 +35,20 @@
 #include <ost/gfx/gfx_node_visitor.hh>
 
 #include <ost/gui/widget_registry.hh>
-#include <ost/gui/gosty_app.hh>
 
 #include "sequence_model.hh"
 #include "sequence_viewer.hh"
 
+#include <QAbstractItemView>
+#include <QApplication>
+#include <QClipboard>
+#include <QDir>
+#include <QHeaderView>
+#include <QMenu>
+#include <QPushButton>
+#include <QShortcut>
+#include <QVBoxLayout>
+#include <QVarLengthArray>
 namespace ost { namespace gui {
 
 class SequenceViewerFactory: public WidgetFactory {

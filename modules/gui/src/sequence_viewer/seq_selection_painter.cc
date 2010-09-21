@@ -22,9 +22,9 @@
  */
 
 
-#include <QtGui>
 
 #include "seq_selection_painter.hh"
+#include <QtGui>
 
 namespace ost { namespace gui {
 

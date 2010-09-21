@@ -23,14 +23,14 @@
   Author: Stefan Scheuber
  */
 
-#include <QObject>
-#include <QVarLengthArray>
 
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/alg/sec_structure_segments.hh>
 
 #include "sequence_row.hh"
 
+#include <QObject>
+#include <QVarLengthArray>
 namespace ost { namespace gui {
 
 class SecStrRow : public SequenceRow

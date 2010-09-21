@@ -130,10 +130,6 @@ plot_legend_panel.hh
 plot_ticker.hh
 plot_ticker_fw.hh
 plot_types.hh
-plot_viewer.hh
-plot_viewer_panel.hh
-plot_viewer_proxy.hh
-plot_viewer_proxy_fw.hh
 )
 
 if (ENABLE_IMG)
@@ -265,30 +261,6 @@ tools/tool_options_widget.cc
 tools/tool_bar.cc
 tools/selection_tool.cc
 tools/measure_tool.cc
-plot_viewer/plot_axis_base.cc
-plot_viewer/plot_axis_vertical.cc
-plot_viewer/plot_axis_horizontal.cc
-plot_viewer/plot_data_graphics_item.cc
-plot_viewer/plot_data_graphics_item_base.cc
-plot_viewer/plot_graphics_ellipse_item.cc
-plot_viewer/plot_graphics_rectangle_item.cc
-plot_viewer/plot_graphics_diagonal_cross_item.cc
-plot_viewer/plot_graphics_cross_item.cc
-plot_viewer/plot_data.cc
-plot_viewer/plot_data_base.cc
-plot_viewer/plot_data_info.cc
-plot_viewer/plot_function.cc
-plot_viewer/plot_function_graphics_item.cc
-plot_viewer/plot_function_info.cc
-plot_viewer/plot_info_base.cc
-plot_viewer/plot_group.cc
-plot_viewer/plot_group_info.cc
-plot_viewer/plot_group_graphics_item.cc
-plot_viewer/plot_ticker.cc
-plot_viewer/plot_viewer.cc
-plot_viewer/plot_viewer_proxy.cc
-plot_viewer/plot_viewer_panel.cc
-plot_viewer/plot_legend_panel.cc
 python_shell/gutter.cc
 python_shell/main_thread_runner.cc
 python_shell/output_redirector.cc
@@ -369,12 +341,6 @@ sequence_viewer/title_row.hh
 sequence_viewer/alignment_view_object.hh
 sequence_viewer/base_view_object.hh
 sequence_viewer/sequence_view_object.hh
-plot_viewer/plot_axis_base.hh
-plot_viewer/plot_data_graphics_item_base.hh
-plot_viewer/plot_function_info.hh
-plot_viewer/plot_info_base.hh
-plot_viewer/plot_viewer_panel.hh
-plot_viewer/plot_legend_panel.hh
 python_shell/main_thread_runner.hh
 python_shell/completer_base.hh
 python_shell/gutter.hh
@@ -477,7 +443,6 @@ include(${QT_USE_FILE})
 qt4_wrap_cpp(OST_GUI_MOCS "${HEADERS_TO_BE_MOCCED}")
 module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
        HEADERS ${OST_GUI_TOOLS_HEADERS} IN_DIR tools
-               ${OST_GUI_PLOT_VIEWER_HEADERS} IN_DIR plot_viewer
                ${OST_GUI_SEQUENCE_VIEWER_HEADERS} IN_DIR sequence_viewer
                ${OST_GUI_PYTHON_SHELL_HEADERS} IN_DIR python_shell
                ${OST_GUI_PANEL_BAR_HEADERS} IN_DIR panels

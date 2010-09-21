@@ -19,13 +19,6 @@
 #ifndef OST_GUI_TABBED_PANEL_BAR
 #define OST_GUI_TABBED_PANEL_BAR
 
-#include <QHBoxLayout>
-#include <QWidget>
-#include <QString>
-#include <QAction>
-#include <QTabBar>
-#include <QTabWidget>
-#include <QToolBar>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget_pool.hh>
@@ -34,6 +27,13 @@
 #include "panel_widget_container.hh"
 #include "button_box.hh"
 
+#include <QHBoxLayout>
+#include <QWidget>
+#include <QString>
+#include <QAction>
+#include <QTabBar>
+#include <QTabWidget>
+#include <QToolBar>
 namespace ost { namespace gui {
 
 /// \brief tabbed drag widget

@@ -27,7 +27,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <QDir>
 
 #include <ost/platform.hh>
 #include <ost/gfx/scene.hh>
@@ -36,6 +35,7 @@
 
 #include <ost/geom/vec3.hh>
 
+#include <QDir>
 namespace ost { namespace gui {
 
 MeasureTool::MeasureTool()

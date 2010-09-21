@@ -21,6 +21,9 @@
 /*
   Authors: Ansgar Philippsen, Andreas Schenk
 */
+#include "data_viewer_panel.hh"
+#include "pointlist_overlay_base.hh"
+#include "strategies.hh"
 
 #include <QActionGroup>
 #include <QGridLayout>
@@ -33,9 +36,6 @@
 #include <QIcon>
 #include <QColorDialog>
 
-#include "data_viewer_panel.hh"
-#include "pointlist_overlay_base.hh"
-#include "strategies.hh"
 
 namespace ost { namespace img { namespace gui {
 

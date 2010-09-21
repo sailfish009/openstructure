@@ -26,7 +26,6 @@ using namespace boost::python;
 
 void export_AlignmentView();
 void export_Tool();
-void export_Plot();
 void export_GLWin();
 void export_MessageWidget();
 void export_Gosty();
@@ -109,7 +108,6 @@ BOOST_PYTHON_MODULE(_gui)
   export_Gosty();
   export_AlignmentView();
   export_Tool();
-  export_Plot();
   export_MessageWidget();
   export_GLWin();
   export_MainArea();

@@ -30,7 +30,7 @@ except ImportError:
   _img_present=False
   pass
 
-class SelHelper():
+class SelHelper:
   __shared_state = {}
   
   NO_SELECTION = 0

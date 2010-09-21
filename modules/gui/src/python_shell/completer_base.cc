@@ -20,6 +20,7 @@
   Authors: Marco Biasini, Andreas Schenk
  */
 
+#include "completer_base.hh"
 
 #include <QStringList>
 #include <QScrollBar>
@@ -27,7 +28,6 @@
 #include <QKeyEvent>
 #include <QApplication>
 
-#include "completer_base.hh"
 
 
 namespace ost { namespace gui {

@@ -23,10 +23,10 @@
   Author: Stefan Scheuber
  */
 
-#include <QObject>
 
 #include "painter.hh"
 
+#include <QObject>
 namespace ost { namespace gui {
 
 

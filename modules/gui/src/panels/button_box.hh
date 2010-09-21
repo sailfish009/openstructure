@@ -19,17 +19,17 @@
 #ifndef OST_GUI_BOTTOM_BAR_BUTTON_BOX
 #define OST_GUI_BOTTOM_BAR_BUTTON_BOX
 
-#include <QWidget>
-#include <QString>
-#include <QGridLayout>
-#include <QList>
-#include <QLabel>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
 
 #include "event_button.hh"
 
+#include <QWidget>
+#include <QString>
+#include <QGridLayout>
+#include <QList>
+#include <QLabel>
 namespace ost { namespace gui {
 
 /// \brief button box
