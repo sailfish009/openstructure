@@ -1,7 +1,8 @@
 import __main__
 import sys
+import os.path
 import optparse
-from ost import io, mol, seq, geom, conop, gui
+from ost import io, mol, seq, geom, conop, gui, settings
 import ost
 try: 
   from ost import img
@@ -197,6 +198,11 @@ else:
   rcfile.close()
 
 PushVerbosityLevel(options.vlevel)
+working_dir=settings.GetValue("DNG_WORKING_DIR",None)
+
+if working_dir != None and os.path.isdir(working_dir):
+  os.chdir(working_dir)
+
 _InitFrontEnd()
 
 if len(loading_list)!=0 or len(options.pdb_ids)!=0:
