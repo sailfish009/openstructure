@@ -309,11 +309,18 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
     if(res0_atom && res1_atom) {
       LOG_DEBUG(fname << ": found atoms, connecting");
       if(flag) {
-        if (builder->DoesPeptideBondExist(res0_atom, res1_atom))
+        if (builder->DoesPeptideBondExist(res0_atom, res1_atom)) {
           editor.Connect(res0_atom,res1_atom);
+          res0.SetIsProtein(true);
+          res1.SetIsProtein(true);
+        }
       } else {
-        if (builder->DoesPeptideBondExist(res1_atom, res0_atom))
+        if (builder->DoesPeptideBondExist(res1_atom, res0_atom)) {
           editor.Connect(res1_atom, res0_atom);
+          res0.SetIsProtein(true);
+          res1.SetIsProtein(true);
+        }
+
       }
     }
   } else {

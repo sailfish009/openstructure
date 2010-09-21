@@ -198,7 +198,7 @@ boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
         s_[*i]=cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));        
         break;
       case Prop::PEPTIDE:
-        int_value=r->GetChemClass().IsPeptideLinking() ? 1 : 0;
+        int_value=r->GetChemClass().IsPeptideLinking();
         s_[*i] = cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));        
         break;        
       case Prop::RBFAC:
@@ -208,6 +208,14 @@ boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
         float_value=r->GetAverageBFactor();
         s_[*i] = cmp_num<Real>(ss.comp_op, float_value,
                                  boost::get<float>(ss.param));        
+        break;
+      case Prop::PROTEIN:
+        int_value=r->IsProtein();
+        s_[*i]=cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));
+        break;
+      case Prop::WATER:
+        int_value=r->GetChemClass().IsWater();
+        s_[*i]=cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));
         break;
       case Prop::RTYPE:
         p=boost::get<String>(ss.param);

@@ -122,13 +122,19 @@ public:
         for (String::iterator i=type.begin(), e=type.end(); i!=e; ++i) {
           *i=toupper(*i);
         }
-        std::map<String, mol::ChemClass>::iterator i=tm_.find(type);
-        if (i!=tm_.end()) {
-          compound_->SetChemClass(i->second);          
+        // The type of water is set to "?". let's change it to water...
+        if (compound_->GetID()=="HOH") {
+          compound_->SetChemClass(mol::ChemClass(mol::ChemClass::Water));
         } else {
-          std::cout << "unknown type '" << type << "' for compound " 
-                    << compound_->GetID() << std::endl;
+          std::map<String, mol::ChemClass>::iterator i=tm_.find(type);
+          if (i!=tm_.end()) {
+            compound_->SetChemClass(i->second);          
+          } else {
+            std::cout << "unknown type '" << type << "' for compound " 
+                      << compound_->GetID() << std::endl;
+          }        
         }
+
       } else if (item.GetName()==StringRef("formula", 7)) {
         compound_->SetFormula(item.GetValue().str());
       } else if (item.GetName()==StringRef("one_letter_code", 15)) {

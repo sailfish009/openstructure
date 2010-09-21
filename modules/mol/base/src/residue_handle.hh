@@ -197,7 +197,7 @@ public:
   /// \brief return view based on query String.
   /// \sa Query
   EntityView Select(const String& query_string, QueryFlags flags=0) const;
-
+    
   bool operator==(const ResidueHandle& ref) const;
   bool operator!=(const ResidueHandle& ref) const;
   

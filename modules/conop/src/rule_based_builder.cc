@@ -202,6 +202,8 @@ void RuleBasedBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
   // the peptide bond.
   if (c.IsValid() && n.IsValid() && this->DoesPeptideBondExist(c, n)) {
     e.Connect(c, n, 1);
+    rh.SetIsProtein(true);
+    next.SetIsProtein(true);
   }
 }
 

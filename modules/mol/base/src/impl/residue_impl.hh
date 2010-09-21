@@ -199,6 +199,9 @@ public:
   
   int GetIntProperty(Prop::ID prop_id) const;
   
+  void SetProtein(bool protein) { protein_=protein; }
+  
+  bool IsProtein() const { return protein_; }
 private:
   void AddAltAtom(const String& group, const AtomImplPtr& atom,
                   const geom::Vec3& position);
@@ -207,13 +210,15 @@ private:
   AtomEntryGroups            alt_groups_;
   EntityImplW                ent_;
   ChainImplW                 chain_;
-  ResNum              num_;
+  ResNum                     num_;
   ResidueKey                 key_;
   AtomImplList               atom_list_;
   TorsionImplList            torsion_list_;
   SecStructure               sec_structure_;
   ChemClass                  chem_class_;
   char                       olc_;
+  // whether the residue is part of the protein.
+  bool                       protein_;
 };
 
 }}} // ns

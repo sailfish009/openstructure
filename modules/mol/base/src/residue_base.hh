@@ -139,7 +139,11 @@ public:
   
   /// \brief Get int property by id
   int GetIntProperty(Prop::ID prop_id) const;
-    
+  
+  /// \brief whether the residue is part of the protein.
+  bool IsProtein() const;
+  
+  void SetIsProtein(bool protein);
 public:
   impl::ResidueImplPtr& Impl();
 
