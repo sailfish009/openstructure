@@ -4,7 +4,6 @@ builder_fw.hh
 conop.hh
 heuristic_builder.hh
 compound.hh
-sanitizer.hh
 compound_lib.hh
 module_config.hh
 rule_based_builder.hh
@@ -16,7 +15,6 @@ builder.cc
 conop.cc
 heuristic_builder.cc
 compound.cc
-sanitizer.cc
 compound_lib.cc
 rule_based_builder.cc
 ring_finder.cc
