@@ -250,7 +250,8 @@ void PDBReader::AssignSecStructure(mol::EntityHandle ent)
     // two secondary structure segments to insert one residue of coil 
     // conformation.
     mol::ResNum start=i->start, end=i->end;
-    if (helix_list_.end()!=i+1 && (*(i+1)).start.GetNum()<=end.GetNum()+1) {
+    if (helix_list_.end()!=i+1 && (*(i+1)).start.GetNum()<=end.GetNum()+1 &&
+        (*(i+1)).end.GetNum()>end.GetNum()) {
       end=mol::ResNum((*(i+1)).start.GetNum()-2);
     }
     chain.AssignSecondaryStructure(alpha, start, end);
@@ -266,7 +267,8 @@ void PDBReader::AssignSecStructure(mol::EntityHandle ent)
     mol::SecStructure extended(mol::SecStructure::EXTENDED);
     mol::ResNum start=i->start, end=i->end;
     // see comment for helix assignment
-    if (strand_list_.end()!=i+1 && (*(i+1)).start.GetNum()<=end.GetNum()+1) {
+    if (strand_list_.end()!=i+1 && (*(i+1)).start.GetNum()<=end.GetNum()+1 &&
+        (*(i+1)).end.GetNum()>end.GetNum()) {
       end=mol::ResNum((*(i+1)).start.GetNum()-2);
     }    
     chain.AssignSecondaryStructure(extended, start, end);
@@ -612,7 +614,7 @@ void PDBReader::ParseStrandEntry(const StringRef& line)
     throw IOException(str(format("invalid strand entry on line %d")%line_num_));
   }
   LOG_DEBUG("making strand entry: " << start_num.second << ", " << line[26] 
-             << " " << end_num.second << " " << line[37]);
+            << " " << end_num.second << " " << line[37] << " chain=" << line[21]);
   HSEntry hse = {to_res_num(start_num.second, line[26]),
                  to_res_num(end_num.second, line[37]),
                  line.substr(21,1).str()};

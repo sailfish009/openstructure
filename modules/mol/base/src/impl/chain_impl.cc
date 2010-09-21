@@ -341,11 +341,23 @@ void ChainImpl::AssignSecondaryStructure(SecStructure ss,
                                          const ResNum& start, 
                                          const ResNum& end)
 {
-  int i=this->GetIndex(start);
-  int j=this->GetIndex(end);
-  if (i>=0 && j>=0 && i<=j && j<static_cast<int>(residue_list_.size())) {
-    std::for_each(residue_list_.begin()+i, residue_list_.begin()+j+1,
-                  bind(&ResidueImpl::SetSecStructure, _1, ss));
+  int start_index=this->GetIndex(start);
+  int i=start_index;
+  bool found_end=false;
+  if (i>=0) {
+    while (i<static_cast<int>(residue_list_.size())) {
+      if (residue_list_[i]->GetNumber()==end) {
+        found_end=true;
+        break;
+      }
+      ++i;
+    }
+  }
+  if (!found_end) {
+    return;
+  }
+  for (int end=i, i=start_index; i<=end; ++i) {
+    residue_list_[i]->SetSecStructure(ss);
   }
 }
 
