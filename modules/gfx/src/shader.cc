@@ -76,7 +76,7 @@ bool compile_shader(String shader_name, String shader_code, GLenum shader_type, 
   GLint sh_compiled;
   glGetShaderiv(shader_id, GL_COMPILE_STATUS, &sh_compiled);
   if(sh_compiled==GL_TRUE) {
-    LOG_ERROR("shader [" << shader_name << "] successfully compiled (" << shader_id << ")");
+    LOG_VERBOSE("shader [" << shader_name << "] successfully compiled (" << shader_id << ")");
   } else {
     GLint sh_log_length;
     glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &sh_log_length);
@@ -96,7 +96,7 @@ bool link_shader(const std::vector<GLuint>& code_list, String pr_name, GLuint& s
       LOG_WARNING("skipping shader [" << pr_name << "] due to missing compiled code");
       return false;
     }
-    LOG_INFO("attaching compiled shader id " << *it << " to " << shader_pr);
+    LOG_VERBOSE("attaching compiled shader id " << *it << " to " << shader_pr);
     glAttachShader(shader_pr,*it);
   }
     
@@ -104,7 +104,7 @@ bool link_shader(const std::vector<GLuint>& code_list, String pr_name, GLuint& s
   GLint pr_linked;
   glGetProgramiv(shader_pr,GL_LINK_STATUS,&pr_linked);
   if(pr_linked==GL_TRUE) {
-    LOG_INFO("shader [" << pr_name << "] sucessfully linked");
+    LOG_VERBOSE("shader [" << pr_name << "] sucessfully linked");
   } else {
     GLint pr_log_length;
     glGetProgramiv(shader_pr, GL_INFO_LOG_LENGTH, &pr_log_length);
@@ -275,7 +275,7 @@ void Shader::Activate(const String& name)
   if(!name.empty()) {
     std::map<String, GLuint>::iterator it = shader_program_map_.find(name);
     if(it!=shader_program_map_.end()) {
-      LOG_DEBUG("switching to shader [" << name << "]");
+      LOG_VERBOSE("switching to shader [" << name << "]");
       glUseProgram(it->second);
       current_program_=it->second;
       current_name_=name;
@@ -292,11 +292,11 @@ void Shader::Activate(const String& name)
       return;
 
     } else {
-      LOG_INFO("shader program [" << name << "] not present");
+      LOG_WARNING("shader program [" << name << "] not present");
       return;
     }
   }
-  LOG_DEBUG("switching to fixed pipeline");
+  LOG_VERBOSE("switching to fixed pipeline");
   glUseProgram(0);
   current_program_=0;
   current_name_="";
