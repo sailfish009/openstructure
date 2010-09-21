@@ -366,54 +366,6 @@ Quat Conjugate(const Quat& q)
   return Quat(q.w,-q.x,-q.y,-q.z);
 }
 
-namespace {
-
-
-/*
-  for a unit quaternion defined as (cos[theta],sin[theta] * [x,y,z])
-  the log is given by (0,theta * [x,y,z])
-*/
-Quat log(const Quat& q) 
-{
-  Quat nrvo;
-  Real sin_theta = std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z);
-  if(std::fabs(sin_theta)<1e-30) {
-    /*
-      for a theta of zero, cos(theta)=1, the log if which is zero,
-      and hence an all zero quat is the result, but this may lead to
-      trouble...
-    */
-    nrvo = Quat(0.0,0.0,0.0,0.0);
-  } else {
-
-    Real theta = std::atan2(sin_theta,q.w);
-    Real f = theta/sin_theta;
-    // assume cos(theta) == w, since we are supposed to have a unit quaternion
-    nrvo = Quat(0.0,q.x*f,q.y*f,q.z*f);
-
-  }
-  return nrvo;
-}
-
-Quat exp(const Quat& q)
-{
-  Quat nrvo;
-  Real theta = std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z);
-  if(std::fabs(theta)<1e-30) {
-    /*
-      see log special case above; this will now
-      return a 'proper' quaternion
-    */
-    nrvo = Quat(1.0,0.0,0.0,0.0);
-  } else {
-    Real f = sin(theta)/theta;
-    nrvo = Quat(cos(theta),f*q.x,f*q.y,f*q.z);
-  }
-  return nrvo;
-}
-
-}
-
 /*
   qt = q0 ( q0* q1) ^t
   qt  = q0 Exp[t Log[ Conj[q0] q1]]
