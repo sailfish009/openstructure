@@ -39,3 +39,24 @@ def CreateDataViewer(ih,flag=False):
 def ClearMessageWidget():
       gosty=GostyApp.Instance()
       gosty.message_widget.Clear()
+
+
+from PyQt4.QtGui import *
+from ost import gfx
+
+def PickColor(default=gfx.WHITE):
+  """
+  Pops up a color chooser that lets' the user pick a color and returns the 
+  selected color. If the user cancels the color chooser, None is returned.
+  
+  :rtype: :class:`~ost.gfx.Color`
+  """
+  dialog=QColorDialog()
+  qt_color=QColor(int(min(255,default.Red()*256)),
+                  int(min(255,default.Green()*256)),
+                  int(min(255,default.Blue()*256)))
+  qt_color=dialog.getColor(qt_color)
+  if not qt_color.isValid():
+    return None
+  return gfx.Color(qt_color.red()/256.0, qt_color.green()/256.0,
+                   qt_color.blue()/256.0)
