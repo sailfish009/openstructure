@@ -84,7 +84,7 @@ Graphical User Interface
 Extending OpenStructure
 --------------------------------------------------------------------------------
 
-**Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>`
+**Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>`
 
 
 

@@ -61,21 +61,21 @@ GLWin::GLWin(QWidget* p):
   }
 
   if(!gl_canvas_->isValid()) {
-    LOGN_ERROR("no valid GL context found, GL canvas could not be created");
+    LOG_ERROR("no valid GL context found, GL canvas could not be created");
     return;
   }
 
   this->SetInternalWidget(main);
   gfx::Scene::Instance().AttachObserver(this);
   QGLFormat format = gl_canvas_->format();
-  LOGN_VERBOSE("GLCanvas created with rbits=" << format.redBufferSize() 
-               << " gbits=" << format.greenBufferSize() 
-               << " bbits=" << format.blueBufferSize() 
-               << " abits=" << format.alphaBufferSize() 
-               << " dbits=" << format.depthBufferSize()
-               << " accumbits=" << format.accumBufferSize()
-               << " multisample=" << format.sampleBuffers()
-               << " with samples=" << format.samples());
+  LOG_VERBOSE("GLCanvas created with rbits=" << format.redBufferSize() 
+              << " gbits=" << format.greenBufferSize() 
+              << " bbits=" << format.blueBufferSize() 
+              << " abits=" << format.alphaBufferSize() 
+              << " dbits=" << format.depthBufferSize()
+              << " accumbits=" << format.accumBufferSize()
+              << " multisample=" << format.sampleBuffers()
+              << " with samples=" << format.samples());
   main->setCentralWidget(gl_canvas_);
   connect(gl_canvas_, SIGNAL(ReleaseFocus()), this, SIGNAL(ReleaseFocus()));
   connect(&ToolManager::Instance(), SIGNAL(ActiveToolChanged(Tool*)), this, SLOT(ActiveToolChanged(Tool*)));

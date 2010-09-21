@@ -181,7 +181,7 @@ void set_light_dir(Vec3 ld)
 
 void Scene::InitGL()
 {
-  LOG_DEBUG("scene: initializing GL state" << std::endl);
+  LOG_DEBUG("scene: initializing GL state");
 
 #if OST_SHADER_SUPPORT_ENABLED
   Shader::Instance().PreGLInit();
@@ -462,13 +462,13 @@ void Scene::RenderGL()
 
 void Scene::Register(GLWinBase* win)
 {
-  LOG_DEBUG("scene: registered win @" << win << std::endl);
+  LOG_DEBUG("scene: registered win @" << win);
   win_=win;
 }
 
 void Scene::Unregister(GLWinBase* win)
 {
-  LOG_DEBUG("scene: unregistered win @" << win << std::endl);
+  LOG_DEBUG("scene: unregistered win @" << win);
   win_=0;
 }
 
@@ -539,7 +539,7 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
     throw Error("Scene already has a node with name '"+n->GetName()+"'");
   }
 
-  LOG_DEBUG("scene: graphical object added @" << n.get() << std::endl);
+  LOG_DEBUG("scene: graphical object added @" << n.get());
   root_node_->Add(n);
   if (redraw) {
     this->RequestRedraw();
@@ -551,7 +551,7 @@ bool Scene::IsNameAvailable(String name)
   FindNode fn(name);
   Apply(fn);
   if(fn.node) {
-    LOGN_MESSAGE(name << " already exists as a scene node");
+    LOG_INFO(name << " already exists as a scene node");
     return false;
   }
   return true;
@@ -641,12 +641,12 @@ GfxObjP Scene::operator[](const String& name)
   FindNode fn(name);
   Apply(fn);
   if(!fn.node) {
-    LOGN_ERROR("error: " << name << " not found");
+    LOG_ERROR("error: " << name << " not found");
     return GfxObjP();
   }
   GfxObjP nrvo = dyn_cast<GfxObj>(fn.node);
   if(!nrvo) {
-    LOGN_ERROR("error: " << name << " points to invalid entry");
+    LOG_ERROR("error: " << name << " points to invalid entry");
   }
   return nrvo;
 }
@@ -660,7 +660,8 @@ bool Scene::HasNode(const String& name) const
 
 void Scene::Apply(const InputEvent& e, bool request_redraw)
 {
-  LOG_TRACE("Scene: received input: c=" << e.GetCommand() << " i=" << e.GetIndex() << " t=" << e.GetTarget() << std::endl);
+  LOG_TRACE("Scene: received input: c=" << e.GetCommand() 
+             << " i=" << e.GetIndex() << " t=" << e.GetTarget());
   /*
     TODO
     distribute event to transform that
@@ -763,7 +764,7 @@ void Scene::Pick(int mx, int my, int mask)
   Vec3 v1=UnProject(Vec3(mx,my,0.0));
   Vec3 v2=UnProject(Vec3(mx,my,1.0));
 
-  LOG_DUMP("Scene pick: " << v1 << " " << v2 << " " << mask << std::endl);
+  LOG_DEBUG("Scene pick: " << v1 << " " << v2 << " " << mask);
 
   Scene::Instance().StatusMessage("");
 
@@ -1139,13 +1140,13 @@ struct OffscreenSwitcher
 {
   OffscreenSwitcher()
   {
-    LOGN_TRACE("offscreen begin");
+    LOG_TRACE("offscreen begin");
     OffscreenBuffer::Instance().Begin();
   }
 
   ~OffscreenSwitcher()
   {
-    LOGN_TRACE("offscreen end");
+    LOG_TRACE("offscreen end");
     OffscreenBuffer::Instance().End();
   }
 };
@@ -1157,17 +1158,17 @@ void Scene::Export(const String& fname, unsigned int width,
 {
   int d_index=fname.rfind('.');
   if (d_index==-1) {
-    LOGN_ERROR("no file extension specified");
+    LOG_ERROR("no file extension specified");
     return;
   }
   String ext = fname.substr(d_index);
   if(!(ext==".png")) {
-    LOGN_ERROR("unknown file format (" << ext << ")");
+    LOG_ERROR("unknown file format (" << ext << ")");
     return;
   }
 
   offscreen_flag_=true;
-  LOGN_TRACE("offscreen resize");
+  LOG_TRACE("offscreen resize");
   OffscreenBuffer::Instance().Resize(width, height);
   try {
     // ensures that context is switched back when this goes out of scope
@@ -1176,27 +1177,27 @@ void Scene::Export(const String& fname, unsigned int width,
 #if OST_SHADER_SUPPORT_ENABLED
     String shader_name = Shader::Instance().GetCurrentName();
 #endif
-    LOGN_TRACE("initializing GL");
+    LOG_TRACE("initializing GL");
     this->InitGL();
-    LOGN_TRACE("setting viewport");
+    LOG_TRACE("setting viewport");
     SetViewport(width,height);
-    LOGN_TRACE("reseting projection");
+    LOG_TRACE("reseting projection");
     ResetProjection();
-    LOGN_TRACE("updating fog settings");
+    LOG_TRACE("updating fog settings");
     update_fog();
     glDrawBuffer(GL_FRONT);
     //this->flag_all_dirty();
 #if OST_SHADER_SUPPORT_ENABLED
-    LOGN_TRACE("activating shader");
+    LOG_TRACE("activating shader");
     Shader::Instance().Activate(shader_name);
 #endif
-    LOGN_TRACE("doing rendering");
+    LOG_TRACE("doing rendering");
     this->RenderGL();
     // make sure drawing operations are finished
     glFinish();
     boost::shared_array<uchar> img_data(new uchar[width*height*4]);
 
-    LOGN_TRACE("setting background transparency");
+    LOG_TRACE("setting background transparency");
     if (transparent) {
       glPixelTransferf(GL_ALPHA_BIAS, 0.0);
     } else {
@@ -1204,18 +1205,18 @@ void Scene::Export(const String& fname, unsigned int width,
       glPixelTransferf(GL_ALPHA_BIAS, 1.0);
     }
 
-    LOGN_TRACE("reading framebuffer pixels");
+    LOG_TRACE("reading framebuffer pixels");
     glReadBuffer(GL_FRONT);
     glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
 
-    LOGN_DEBUG("calling bitmap export");
+    LOG_DEBUG("calling bitmap export");
     BitmapExport(fname,ext,width,height,img_data.get());
   } catch (...) {
     // noop
   } // offscreen_switch goes out of scope
   offscreen_flag_=false;
   glDrawBuffer(GL_BACK);
-  LOGN_TRACE("updating fog");
+  LOG_TRACE("updating fog");
   update_fog();
 }
 
@@ -1223,12 +1224,12 @@ void Scene::Export(const String& fname, bool transparent)
 {
   int d_index=fname.rfind('.');
   if (d_index==-1) {
-    LOGN_ERROR("no file extension specified");
+    LOG_ERROR("no file extension specified");
     return;
   }
   String ext = fname.substr(d_index);
   if(ext!=".png") {
-    LOGN_ERROR("unknown file format (" << ext << ")");
+    LOG_ERROR("unknown file format (" << ext << ")");
     return;
   }
   GLint vp[4];
@@ -1268,7 +1269,7 @@ void Scene::ExportPov(const std::string& fname, const std::string& wdir)
 
 void Scene::ResetProjection()
 {
-  LOGN_TRACE("scene: projection matrix " << fov_ << " " << znear_ << " " << zfar_);
+  LOG_TRACE("scene: projection matrix " << fov_ << " " << znear_ << " " << zfar_);
   stereo_projection(stereo_eye_);
 }
 
@@ -1603,7 +1604,7 @@ void Scene::prep_glyphs()
   Bitmap bm = BitmapImport(tex_file.string(),".png");
   if(!bm.data) return;
 
-  LOGN_DEBUG("importing glyph tex with id " << glyph_tex_id_);
+  LOG_DEBUG("importing glyph tex with id " << glyph_tex_id_);
   glBindTexture(GL_TEXTURE_2D, glyph_tex_id_);
   glPixelStorei(GL_UNPACK_ALIGNMENT,1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -1617,7 +1618,7 @@ void Scene::prep_glyphs()
   } else if(bm.channels==4) {
     glTexImage2D(GL_TEXTURE_2D,0,GL_INTENSITY,bm.width,bm.height,0,GL_RGBA,GL_UNSIGNED_BYTE,bm.data.get());
   } else {
-    LOGN_ERROR("unsupported glyph texture channel count of " << bm.channels);
+    LOG_ERROR("unsupported glyph texture channel count of " << bm.channels);
     return;
   }
   float ir = 1.0/8.0;
@@ -1631,7 +1632,7 @@ void Scene::prep_glyphs()
   }
   for(int cc=128;cc<256;++cc) glyph_map_[cc]=Vec2(0.0,0.0);
 
-  LOGN_VERBOSE("done loading glyphs");
+  LOG_VERBOSE("done loading glyphs");
 
 }
 

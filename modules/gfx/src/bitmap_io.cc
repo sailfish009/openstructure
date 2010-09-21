@@ -35,7 +35,7 @@ void export_png(const String& filename, unsigned int width, unsigned int height,
   FILE *fp;
   
   if((fp=fopen(filename.c_str(),"wb"))==NULL) {
-    LOGN_ERROR("error opening" << filename << " for exporting");
+    LOG_ERROR("error opening" << filename << " for exporting");
     return;
   }
   
@@ -43,7 +43,7 @@ void export_png(const String& filename, unsigned int width, unsigned int height,
                                                 NULL, NULL, NULL);
   if (png_ptr == NULL) {
     fclose(fp);
-    LOGN_ERROR("error creating png write struct");
+    LOG_ERROR("error creating png write struct");
     return;
   }
   
@@ -51,14 +51,14 @@ void export_png(const String& filename, unsigned int width, unsigned int height,
   if (info_ptr == NULL) {
     fclose(fp);
     png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
-    LOGN_ERROR("error creating png info struct");
+    LOG_ERROR("error creating png info struct");
     return;
   }
   
   if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
     fclose(fp);
-    LOGN_ERROR("error in png setjmp");
+    LOG_ERROR("error in png setjmp");
     return;
   }
   
@@ -107,7 +107,7 @@ Bitmap import_png(const String& filename)
   png_uint_32 width,height,bpp;
   
   if((fp=fopen(filename.c_str(),"rb"))==NULL) {
-    LOGN_ERROR("error opening " << filename);
+    LOG_ERROR("error opening " << filename);
     return bm;
   }
   
@@ -115,7 +115,7 @@ Bitmap import_png(const String& filename)
 				   NULL,NULL,NULL);
   if (png_ptr == NULL) {
     fclose(fp);
-    LOGN_ERROR("unexpected error #1 in png lib");
+    LOG_ERROR("unexpected error #1 in png lib");
     return bm;
   }
   
@@ -123,14 +123,14 @@ Bitmap import_png(const String& filename)
   if (info_ptr == NULL) {
     fclose(fp);
     png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
-    LOGN_ERROR("unexpected error #2 in png lib");
+    LOG_ERROR("unexpected error #2 in png lib");
     return bm;
   }
   
   if (setjmp(png_jmpbuf(png_ptr))) {
     png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
     fclose(fp);
-    LOGN_ERROR("unexpected error #3 in png lib");
+    LOG_ERROR("unexpected error #3 in png lib");
     return bm;
   }
   
@@ -142,7 +142,7 @@ Bitmap import_png(const String& filename)
   channels=png_get_channels(png_ptr,info_ptr);
 
   if(channels<1 || channels>4) {
-    LOGN_ERROR("error importing bitmap: " << filename << " has " << channels << " channels, excpected 1-4");
+    LOG_ERROR("error importing bitmap: " << filename << " has " << channels << " channels, excpected 1-4");
     return bm;
   }
   
@@ -162,7 +162,7 @@ Bitmap import_png(const String& filename)
     }
   }
 
-  LOGN_VERBOSE("loaded " << width << "x" << height << ":" << channels << " bitmap");
+  LOG_DEBUG("loaded " << width << "x" << height << ":" << channels << " bitmap");
 
   bm.channels=channels;
   bm.width=width;

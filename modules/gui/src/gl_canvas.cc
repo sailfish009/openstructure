@@ -98,15 +98,15 @@ void GLCanvas::initializeGL()
     init=true;
   }
 
-  LOG_DEBUG("GLCanvas::initializeGL()"<<std::endl);
+  LOG_DEBUG("GLCanvas::initializeGL()");
   Scene::Instance().InitGL();
-  LOG_DEBUG("GLCanvas::registering with scene"<<std::endl);
+  LOG_DEBUG("GLCanvas::registering with scene");
   Scene::Instance().Register(this);
 }
 
 void GLCanvas::resizeGL(int w, int h)
 {
-  LOG_DUMP("GLCanvas::resizeGL("<<w<<","<<h<<")"<<std::endl);
+  LOG_DEBUG("GLCanvas::resizeGL("<<w<<","<<h<<")");
   Scene::Instance().Resize(w,h);
 }
 
@@ -414,7 +414,7 @@ void GLCanvas::timerEvent(QTimerEvent * event)
     if(count==20) {
       count=0;
       gettimeofday(&time1,NULL);
-      LOGN_ERROR(20.0/delta_time(time0,time1) << " fps");
+      LOG_ERROR(20.0/delta_time(time0,time1) << " fps");
       gettimeofday(&time0,NULL);
     }
   }

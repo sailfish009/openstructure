@@ -450,7 +450,7 @@ img::ImageHandle MapIso::DownsampleMap(const img::ImageHandle& mh)
   uint downsampling_fact = compute_downsampling_fact(mh);
   img:: ImageHandle ret_mh = mh;
   if (downsampling_fact != 1) {
-    LOG_MESSAGE("Downsampling map for more comfortable visualization")
+    LOG_INFO("Downsampling map for more comfortable visualization")
     img::alg::DiscreteShrink shrink_alg(img::Size(downsampling_fact,downsampling_fact,downsampling_fact));
     ret_mh = mh.Apply(shrink_alg);
   }

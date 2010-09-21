@@ -82,12 +82,12 @@ void SDFReader::Import(mol::EntityHandle& ent)
       }
       curr_chain_.SetStringProp(data_header, data_value);
     } else if (boost::iequals(line, "$$$$")) {
-      LOGN_MESSAGE("MOLECULE " << curr_chain_.GetName() << " (" << chain_count_ << ") added.")
+      LOG_INFO("MOLECULE " << curr_chain_.GetName() << " (" << chain_count_ << ") added.")
       NextMolecule();
     }
   }
 
-  LOGN_MESSAGE("imported " << chain_count_ << " chains, " << residue_count_
+  LOG_INFO("imported " << chain_count_ << " chains, " << residue_count_
                << " residues, " << atom_count_ << " atoms");
 }
 
@@ -113,7 +113,7 @@ void SDFReader::NextMolecule()
 void SDFReader::ParseAndAddHeader(const String& line, int line_num,
                                   mol::EntityHandle& ent, mol::XCSEditor& editor)
 {
-  LOGN_TRACE( "line: [" << line << "]" );
+  LOG_TRACE( "line: [" << line << "]" );
   format chain_fmter("%05i_%s");
   switch(line_num)
   {
@@ -129,12 +129,12 @@ void SDFReader::ParseAndAddHeader(const String& line, int line_num,
         throw IOException(str(format(msg) % line_num));
       }
       curr_chain_=editor.InsertChain(s_chain);
-      LOGN_DUMP("new chain " << s_chain);
+      LOG_DEBUG("new chain " << s_chain);
 
       mol::ResidueKey rkey=boost::trim_copy(s_title);
       mol::ResNum rnum(++residue_count_);
       curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
-      LOGN_DUMP("new residue " << rkey << "(" << rnum << ")");
+      LOG_DEBUG("new residue " << rkey << "(" << rnum << ")");
       break;
     }
     case 2:  // user information line
@@ -169,7 +169,7 @@ void SDFReader::ParseAndAddAtom(const String& line, int line_num,
                                 mol::XCSEditor& editor)
 {
 
-  LOGN_TRACE( "line: [" << line << "]" );
+  LOG_TRACE( "line: [" << line << "]" );
 
   if(line.length()<48 || line.length()>69) {
     String msg="Bad atom line %d: Not correct number of characters on the"
@@ -214,7 +214,7 @@ void SDFReader::ParseAndAddAtom(const String& line, int line_num,
     throw IOException(str(format(msg) % line_num % s_charge));
   }
 
-  LOGN_DUMP("adding atom " << aname << " (" << s_ele << ") @" << apos);
+  LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
 
   editor.InsertAtom(curr_residue_, aname,apos,aprop);
 }
@@ -224,7 +224,7 @@ void SDFReader::ParseAndAddBond(const String& line, int line_num,
                                 mol::EntityHandle& ent, mol::XCSEditor& editor)
 {
 
-  LOGN_TRACE( "line: [" << line << "]" );
+  LOG_TRACE( "line: [" << line << "]" );
 
   if(line.length()<18 || line.length()>21) {
     String msg="Bad bond line %d: Not correct number of characters on the"
@@ -269,7 +269,7 @@ void SDFReader::ParseAndAddBond(const String& line, int line_num,
     throw IOException(str(format(msg) % line_num % first % second));
   }
 
-  LOGN_DUMP("adding bond " << s_first_name << " " << s_second_name << " (" << s_type << ") ");
+  LOG_DEBUG("adding bond " << s_first_name << " " << s_second_name << " (" << s_type << ") ");
 }
 
 }}

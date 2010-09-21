@@ -31,7 +31,7 @@ void DLLEXPORT_OST_IO SaveEntity(const mol::EntityHandle& en,
 void DLLEXPORT_OST_IO SaveEntity(const mol::EntityView& en, 
                                 const String& filename,
                                 const String& format) {
-  LOG_DUMP("creating EntityIOHandle for " << filename << std::endl);
+  LOG_DEBUG("creating EntityIOHandle for " << filename);
   IOManager& manager=IOManager::Instance();
   EntityIOHandlerP ent_io=manager.FindEntityExportHandler(filename, format);
 
@@ -39,7 +39,7 @@ void DLLEXPORT_OST_IO SaveEntity(const mol::EntityView& en,
     throw IOUnknownFormatException("No IO handler for file='"+filename+"', format='"+
                       format+"' found.");
   }
-  LOG_DUMP("calling export on entity io handle" << std::endl);
+  LOG_DEBUG("calling export on entity io handle");
 
   ent_io->Export(en, filename);                                    
 }

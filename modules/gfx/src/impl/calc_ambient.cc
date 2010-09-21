@@ -353,8 +353,8 @@ namespace {
 void ost::gfx::CalcAmbientTerms(IndexedVertexArray& va)
 {
   AmbientOcclusionBuilder aob(va);
-  LOGN_VERBOSE("building component map");
+  LOG_DEBUG("building component map");
   aob.build_cmap();
-  LOGN_VERBOSE("calculating ambient terms");
+  LOG_DEBUG("calculating ambient terms");
   aob.calc_all();
 }

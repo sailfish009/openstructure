@@ -134,7 +134,7 @@ void MapIOTiffHandler::Import(img::MapHandle& image, const boost::filesystem::pa
     assert (formatstruct.GetFormatString()==UndefinedImageFormat::FORMAT_STRING);
   }
 
-  LOG_VERBOSE("I/O Tiff: using library version " << TIFFGetVersion() << std::endl);
+  LOG_VERBOSE("I/O Tiff: using library version " << TIFFGetVersion());
   detail::tiff_warning_handler_wrapper twhw;
   TIFF* tfile=open_subimage_file(location,formattif);
   load_image_data(tfile,image,formattif);
@@ -151,7 +151,7 @@ void MapIOTiffHandler::Import(img::ImageHandle& image, std::istream& location, c
     assert (formatstruct.GetFormatString()==UndefinedImageFormat::FORMAT_STRING);
   }
 
-  LOG_VERBOSE("I/O Tiff: using library version " << TIFFGetVersion() << std::endl);
+  LOG_VERBOSE("I/O Tiff: using library version " << TIFFGetVersion());
   detail::tiff_warning_handler_wrapper twhw;
   TIFF* tfile=open_subimage_stream(location,formattif);
   load_image_data(tfile,image,formattif);
@@ -219,18 +219,18 @@ void MapIOTiffHandler::do_export(const img::MapHandle& image,TIFF* tfile,TIF& fo
     case OST_BIT32_FORMAT:
     case OST_DEFAULT_FORMAT:
       norm = img::alg::CreateLinearRangeNormalizer(image,formattif.GetMinimum(),formattif.GetMaximum());
-      LOGN_VERBOSE("Autodetecting normalization for export: normalization on");
+      LOG_VERBOSE("Autodetecting normalization for export: normalization on");
       break;
     case OST_FLOAT_FORMAT:
     case OST_DOUBLE_FORMAT:
-    LOGN_VERBOSE("Autodetecting normalization for export: normalization off");
+    LOG_VERBOSE("Autodetecting normalization for export: normalization off");
       break;
     }
   } else if (formattif.GetNormalizeOnSave() == true) {
-    LOGN_VERBOSE("Normalization used for export.");
+    LOG_VERBOSE("Normalization used for export.");
     norm = img::alg::CreateLinearRangeNormalizer(image,formattif.GetMinimum(),formattif.GetMaximum());
   } else {
-    LOGN_VERBOSE("No normalization used for export.");
+    LOG_VERBOSE("No normalization used for export.");
   }
 
   detail::tiff_warning_handler_wrapper twhw;
@@ -440,9 +440,9 @@ TIFF* MapIOTiffHandler::open_subimage_file(const boost::filesystem::path& locati
   if(formattif.GetSubimage()!=-1){
     directory_number=formattif.GetSubimage();
   }
-  LOG_VERBOSE("I/O Tiff: using directory nr. " << directory_number<< std::endl);
+  LOG_VERBOSE("I/O Tiff: using directory nr. " << directory_number);
   const String& filename = location.string();
-  LOG_VERBOSE("I/O Tiff: calling TIFFOpen with " << filename.c_str() << std::endl);
+  LOG_VERBOSE("I/O Tiff: calling TIFFOpen with " << filename.c_str());
   TIFF* tfile=TIFFOpen(filename.c_str(),"r");
   if(!tfile) {
     throw IOException("could not open " + filename + String(" for reading"));
@@ -462,9 +462,9 @@ TIFF* MapIOTiffHandler::open_subimage_stream(std::istream& location,const TIF& f
   if(formattif.GetSubimage()!=-1){
     directory_number=formattif.GetSubimage();
   }
-  LOG_VERBOSE("I/O Tiff: using directory nr. " << directory_number<< std::endl);
+  LOG_VERBOSE("I/O Tiff: using directory nr. " << directory_number);
   const String& filename = "stream";
-  LOG_VERBOSE("I/O Tiff: calling TIFFClientOpen with " << filename.c_str() << std::endl);
+  LOG_VERBOSE("I/O Tiff: calling TIFFClientOpen with " << filename.c_str());
   TIFF* tfile=TIFFClientOpen(filename.c_str(),
                              "rm",
                              &location,
@@ -508,7 +508,7 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
   }
   TIFFGetField(tfile,TIFFTAG_ROWSPERSTRIP,&rps);
 
-  LOG_MESSAGE ("I/O Tiff: Header: " << width << "x" << height << " " << bpp << "bpp" << std::endl);
+  LOG_INFO("I/O Tiff: Header: " << width << "x" << height << " " << bpp << "bpp");
 
   img::Extent image_extent(img::Point(0,0),img::Size(width,height));
 
@@ -531,19 +531,19 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
   if(!TIFFGetField(tfile,TIFFTAG_SAMPLEFORMAT,&fmt))
   {
     // todo check subtype
-    LOG_MESSAGE("I/O Tiff: Unknown sample format: assuming uint" << std::endl);
+    LOG_INFO("I/O Tiff: Unknown sample format: assuming uint");
     fmt=SAMPLEFORMAT_UINT;
   }
 
-  LOG_MESSAGE("I/O Tiff: Header: spp=" << spp << "; rps=" << rps << "; plc=" << plc << "; ori=" << ori << std::endl);
-  LOG_MESSAGE("I/O Tiff: Header: pos= " << xpos << "," << ypos << "; reso= " << xreso << "," << yreso << ";" << std::endl);
+  LOG_INFO("I/O Tiff: Header: spp=" << spp << "; rps=" << rps << "; plc=" << plc << "; ori=" << ori);
+  LOG_INFO("I/O Tiff: Header: pos= " << xpos << "," << ypos << "; reso= " << xreso << "," << yreso << ";");
 
   if(bpp!=8 && bpp!=16 && bpp!=32 && bpp!=64 && bpp!=128) {
     throw IOException("bits per sample must be 8, 16, 32, 64 or 128");
   }
 
   if(spp==0) {
-    LOG_MESSAGE("I/O Tiff: Samples per pixel is zero, assuming one" << std::endl);
+    LOG_INFO("I/O Tiff: Samples per pixel is zero, assuming one");
     spp=1;
   }
 
@@ -551,7 +551,7 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
     if(spp>4) {
       throw IOException("I/O Tiff: unexpected spp>4 in header");
     }
-    LOG_MESSAGE("I/O Tiff: Samples per pixel>1, reading first channel only" << std::endl);
+    LOG_INFO("I/O Tiff: Samples per pixel>1, reading first channel only");
   }
 
   if(TIFFIsTiled(tfile)) {
@@ -563,12 +563,12 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
   uint stripsize=TIFFStripSize(tfile);
   uint stripcount=TIFFNumberOfStrips(tfile);
 
-  LOG_MESSAGE("I/O Tiff: " << "found " << stripcount << " strips in tiff file" << std::endl);
-  LOG_MESSAGE("I/O Tiff: " << "allocating " << stripsize << " bytes for temporary read buffer" << std::endl);
+  LOG_INFO("I/O Tiff: " << "found " << stripcount << " strips in tiff file");
+  LOG_INFO("I/O Tiff: " << "allocating " << stripsize << " bytes for temporary read buffer");
   buf = _TIFFmalloc(stripsize);
 
   if(image.GetType()==img::WORD) {
-    LOG_MESSAGE("I/O Tiff: " << "reseting target image to WORD " << image_extent << std::endl);
+    LOG_INFO("I/O Tiff: " << "reseting target image to WORD " << image_extent);
     image.Reset(image_extent, img::WORD, img::SPATIAL);
 
     img::image_state::WordSpatialImageState *is =
@@ -579,7 +579,7 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
 
     int current_row = 0;
 
-    LOG_VERBOSE("I/O Tiff: " << "importing data" << std::endl);
+    LOG_VERBOSE("I/O Tiff: " << "importing data");
     img::Progress::Instance().Register(this,stripcount,100);
     for (strip = 0; strip < stripcount; ++strip) {
       int cread=TIFFReadEncodedStrip(tfile, strip, buf, (tsize_t) -1);
@@ -596,7 +596,7 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
       }
       img::Progress::Instance().AdvanceProgress(this);
     }
-    LOG_VERBOSE("I/O Tiff: " << "done" << std::endl);
+    LOG_VERBOSE("I/O Tiff: " << "done");
     img::Progress::Instance().DeRegister(this);
     uint16 photometric;
     if(TIFFGetField(tfile,TIFFTAG_PHOTOMETRIC,&photometric)){
@@ -615,14 +615,14 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
     img::image_state::RealSpatialImageState *isr=0;
     img::image_state::ComplexSpatialImageState *isc=0;
     if(fmt==SAMPLEFORMAT_COMPLEXINT || fmt==SAMPLEFORMAT_COMPLEXIEEEFP){
-      LOG_MESSAGE("I/O Tiff: " << "reseting target image to complex spatial " << image_extent << std::endl);
+      LOG_INFO("I/O Tiff: " << "reseting target image to complex spatial " << image_extent);
       image.Reset(image_extent,img::COMPLEX,img::SPATIAL);
       isc = dynamic_cast<img::image_state::ComplexSpatialImageState*>(image.ImageStatePtr().get());
       if(!isc) {
         throw IOException("unexpected failure of dynamic_cast in tiff io");
       }
     }else{
-      LOG_MESSAGE("I/O Tiff: " << "reseting target image to Real img::SPATIAL" << image_extent << std::endl);
+      LOG_INFO("I/O Tiff: " << "reseting target image to Real img::SPATIAL" << image_extent);
       image.Reset(image_extent, img::REAL, img::SPATIAL);
 
       isr= dynamic_cast<img::image_state::RealSpatialImageState*>(image.ImageStatePtr().get());
@@ -634,7 +634,7 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
 
     int current_row = 0;
 
-    LOG_VERBOSE("I/O Tiff: " << "importing data" << std::endl);
+    LOG_VERBOSE("I/O Tiff: " << "importing data");
     img::Progress::Instance().Register(this,stripcount,100);
     for (strip = 0; strip < stripcount; ++strip) {
       int cread=TIFFReadEncodedStrip(tfile, strip, buf, (tsize_t) -1);
@@ -704,7 +704,7 @@ void MapIOTiffHandler::load_image_data(TIFF* tfile, img::ImageHandle& image,  co
       }
       img::Progress::Instance().AdvanceProgress(this);
     }
-    LOG_VERBOSE("I/O Tiff: " << "done" << std::endl);
+    LOG_VERBOSE("I/O Tiff: " << "done");
 
     img::Progress::Instance().DeRegister(this);
     uint16 photometric;

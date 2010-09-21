@@ -3,111 +3,187 @@ Logging
 
 .. currentmodule:: ost
 
-How to log messages
+OpenStructure has a logging system going beyond what print statements can offer. Messages can be logged to the terminal to the graphical user interface or a file. Depending on the needs, groups of messages can be turned and off.
+
+.. function:: LogError(message)  
+              LogWarning(message)      
+              LogInfo(message)
+              LogVerbose(message)
+  
+  Add a message to the log. For the choice of the appropriate logging level, 
+  see :ref:`picking-logging-level`.
+  
+  :param message: The message to be logged
+  :type  message: str
+  
+.. note::
+
+  In C++, the logging facility is implemented as a set of macros, called
+  `LOG_ERROR`, `LOG_WARNING`, `LOG_INFO`, `LOG_VERBOSE`, `LOG_DEBUG` and
+  `LOG_TRACE`. The last two are only active when compiling with debugging 
+  symbols. When debugging symbols are off, they expand to an empty macro and 
+  thus don't create any overhead.
+
+
+Verbosity Level
 --------------------------------------------------------------------------------
 
-OpenStructure has an easy to use Logging API. Depended on how severe the message 
-is, one of the following four methods can be used to log the message:
+You can change the verbosity level  with the following two methods:
 
-  .. method:: LogError(message)
-  
-    Use this Method to log whenever an error occured that may cause the 
-    application to fail
-    
-  .. method:: LogMessage(message)
-  
-    Use this Method to warn the user that something went wrong but generally does
-    not pose a threat to the stability of the application
-      
-  .. method:: LogVerbose(message)
-  
-    Use this Method to inform the user about processed data
-    
-  .. method:: LogDebug(message)
-  
-    Use this Method for informational messages that can help debug the program   
+.. function:: PushVerbosityLevel(verbosity)
 
+  Change the verbosity level to the given integer value. All log events 
+  which have a severity above verbosity will be ignored. By default, the log 
+  level is 2, meaning that errors, warnings and info logging events are 
+  visible.
 
+  :type  verbosity: :class:`int`
+
+.. function:: PopVerbosityLevel()
+
+  Change the log level back to the previous verbosity level. It is an error to 
+  pop the verbosity level without a matching call to 
+  :func:`PushVerbosityLevel`.
+         
 Log sinks
 --------------------------------------------------------------------------------
 
-It is possible to log into different log backends namely log sinks. Log sink classes
-define, how to handle log messages:
+When running OpenStructure from the command-line, the log messages are by 
+default output to stderr. When running DNG, the log messages are additionally 
+logged to the messages widget. However, it is also possible to log into a file 
+or theoretically even to a remote computer. All these are instances of so-called 
+log sinks: classes that derive from LogSink and implement the LogMessage method.
+
 
 .. class:: LogSink
 
   .. method:: LogMessage(message, severity)
 
-     This method is called whenever something has been logged. This i a pure virtual
-     function therefore it must be overloaded in base classes.
+     This method is called whenever something gets logged. This method must be 
+     implemented by all subclasses.
      
      :param message: The logged message
     
      :type  message: :class:`str`
      
-     :param severity: Marks how severe the logged message is, starts from 0 which 
-      is really important. Value is always 0 or larger 
+     :param severity: Marks how severe the logged message is. Errors have 
+          severity 0, warnings 1 etc.
     
      :type  severity: :data:`int`
 
-There are four LogSink implementations available in OpenStructure:
+For convenience, there are 3 LogSink implementations available in OpenStructure that are sufficient for most use cases.
 
-.. class:: FileLogSink
+.. class:: FileLogSink(filename)
 
-     The FileLogSink logs all messages into the given file.
+  The FileLogSink logs all messages into the given file.
+  
+  :param filename: The filename
+  :type filename: :class:`str`
 
-.. class:: NullLogSink
+.. class:: StreamLogSink(stream)
 
-     The NullLogSink suppresses all LogMessages
+  The stream log sink writes all log messages to the stream. stream must have a 
+  write method that accepts a string. To write messages to stderr, use
+  
+  .. code-block:: python
+  
+    stderr_sink=ost.StreamLogSink(sys.stderr)
+    ost.PushLogSink(stderr_sink)
+    ost.LogInfo('Welcome, master')
+  
+.. class:: MultiLogSink
 
-.. class:: ObservedLogSink
-
-     An observed LogSink allows to log into multiple sinks.
+     A LogSink for multiplexing the log messages into multiple sinks at the same 
+     time, e.g. the terminal and the messages widget.
      
-  .. method:: AttachObserver(sink)
+  .. method:: AddSink(sink)
   
-    Attach an Observer which will be called whenever something has been logged 
+    Add a new sink. The sink's :meth:`LogSink.LogMessage` method will be called 
+    every time something gets logged.
     
-  .. method:: RemoveObserver(sink)
-  
-    Removes the given sink it will no longer be called when something has been logged
+    :type sink: :class:`~ost.LogSink`
+    :param sink: the log sink to be added
 
-The following snippet explains how to create a custom log sink which logs to the python shell:
+  .. method:: RemoveSink(sink)
+  
+    Remove the given sink. If the doesn't exist, this method has no effect.
+    
+    :type sink: :class:`~ost.LogSink`
+    :param sink: the log sink to be removed
+    
+
+To change the current log sink you can use the following methods:
+
+.. method:: PushLogSink(sink)
+
+   Push the new sink onto the log sink stack. All of the messages will now be 
+   logged to the new sink. To switch back to the previous log sink, use 
+   :func:`PopLogSink`.
+
+.. method:: PopLogSink()
+
+   Change the log sink back to the previous one. It is an error to pop the log 
+   sink when there is only one log sink on the stack.
+
+.. _picking-logging-level:
+
+Guidelines for picking logging level
+--------------------------------------------------------------------------------
+
+Each logging event has an associated level that marks its importance. For example, users should always see errors, but they do not need to see detailed information on the loading process. Here is a list of guidelines that we use in the code. We encourage developers to adhere to these guidelines as closely as possible.
+
+ERROR: 
+  Cannot be silenced, very important message to the user, some command did not
+  complete as expected or was aborted. 
+
+WARNING:
+  Diagnose potential problems that do not abort the execution, but may 
+  point to a misconfiguration/misuse. This level is turned on by default.
+
+INFO: 
+  Informative and important messages that summarize a complex command, such as 
+  information on a loaded file, or results from an algorithm. These logging 
+  messages are turned on by default.
+
+VERBOSE: 
+  Grey-zone between user and developer need, and perhaps the hardest to get
+  right. This is the lowest logging level users will be able to see when they 
+  use an optimized build. An example for this is the OpenGL setup/info in gfx, 
+  or the path search during startup, or more detailed info on file IO. These 
+  messages are not turned on by default.
+
+DEBUG: 
+  For developers, but not quite at the trace level. This level is turned off by 
+  default, not available in Python and only enabled when compiling with 
+  debugging symbols.
+
+TRACE:
+  Used to debug inner loops. Once turned on, you will probably get more debug 
+  output that you will be able to handle. This  level is turned off by default, 
+  not available in python and only enabled when compiling with debugging 
+  symbols.
+
+
+Example
+--------------------------------------------------------------------------------
+
+The following snippet explains how to create a custom log sink which logs to the 
+terminal (or the python shell in DNG). The logger also prints the current time.
 
 .. code-block:: python
-  
+
+  import datetime
   class PyLogger(ost.LogSink):
     def __init__(self):
       ost.LogSink.__init__(self)
-  
+
     def LogMessage(self, message, severity):
-      print severity, message
+      levels=['ERROR', 'WARNING', 'INFO', 
+              'VERBOSE', 'DEBUG', 'TRACE']
+      level=levels[severity]
+      print '%s[%s]: %s' % (level, str(datetime.datetime.now()), message),
 
+  py_logger=PyLogger()
+  ost.PushLogSink(py_logger)
 
-To change the logger you can use the following methods:
-
-  .. method:: PushLogSink(sink)
-  
-     Change the log sink to the given sink
-
-  .. method:: PopLogSink()
-  
-     Change the log sink back to the previous sink
-     
-
-Verbosity Level
---------------------------------------------------------------------------------
-
-You can set the verbosity level of the Logger with the following methods:
-
-  .. method:: PushVerbosityLevel(verbosity):
-   
-     Change the Verbosity Level to the given integer value. All LoggedMethods which
-     have a severity above verbosity will not be passed to the current log sink.
-   
-    :type  verbosity: :data:`int`
-    
-  .. method:: PopVerbosityLevel():
-    
-     Change the log sink back to the previous verbosity level
-          
+  ost.LogInfo("amazing logging system")

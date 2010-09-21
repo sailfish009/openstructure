@@ -201,8 +201,8 @@ void print_header(const spider_header& h)
     s << format(" std dev: %1%") % h.fSig << std::endl;
   }
   s << format(" scale: %1%") %  h.fScale << std::endl;
-  s << format(" header size:  %1%") % h.fLabbyt << std::endl;
-  LOG_MESSAGE(s.str());
+  s << format(" header size:  %1%") % h.fLabbyt;
+  LOG_INFO(s.str());
 }
 
 int determine_byte_order(std::istream& f)
@@ -218,10 +218,10 @@ int determine_byte_order(std::istream& f)
     if (bs_iform<-22.0 ||bs_iform>3.0 ||static_cast<int>(bs_iform)==0) {
       throw(ost::io::IOException("error reading spider file (even tried byte-swapping"));
     }
-    LOG_VERBOSE("Spider IO: reading big endian data" << std::endl);
+    LOG_VERBOSE("Spider IO: reading big endian data");
     return OST_BIG_ENDIAN;
   }
-  LOG_VERBOSE("Spider IO: reading little endian data" << std::endl);
+  LOG_VERBOSE("Spider IO: reading little endian data");
   return OST_LITTLE_ENDIAN;
 }
 
@@ -432,7 +432,7 @@ void MapIOSpiHandler::Import(img::MapHandle& mh, std::istream& infile,const Imag
 
   mh.Reset(msize);
 
-  LOG_MESSAGE("density map extent: " << mh.GetExtent() << std::endl);
+  LOG_INFO("density map extent: " << mh.GetExtent());
 
 
   switch(detail::determine_byte_order(infile)){
@@ -449,7 +449,7 @@ void MapIOSpiHandler::Import(img::MapHandle& mh, std::istream& infile,const Imag
 
   if (header.fScale==0.0)  {
     mh.SetSpatialSampling(geom::Vec3(1.0,1.0,1.0));
-    LOG_MESSAGE("assuming 1 A spatial sampling" << std::endl);
+    LOG_INFO("assuming 1 A spatial sampling");
   } else {
     Real fscale=static_cast<Real>(header.fScale);
     mh.SetSpatialSampling(geom::Vec3(fscale,fscale,fscale));
@@ -457,8 +457,8 @@ void MapIOSpiHandler::Import(img::MapHandle& mh, std::istream& infile,const Imag
 
   mh.SetAbsoluteOrigin(geom::Vec3(0,0,0));
 
-  LOG_MESSAGE("assuming origin at the first voxel" << std::endl);
-  LOG_MESSAGE("assuming absolute origin at (0,0,0)" << std::endl);
+  LOG_INFO("assuming origin at the first voxel");
+  LOG_INFO("assuming absolute origin at (0,0,0)");
 
 }
 

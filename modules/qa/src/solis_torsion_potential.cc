@@ -72,7 +72,7 @@ public:
       num_torsions_++;
     } 
     else {
-      LOGN_MESSAGE("Amino acid not found in alphabets...");
+      LOG_INFO("Amino acid not found in alphabets...");
     }
     prev_=center_;
     center_=c;

@@ -184,7 +184,7 @@ ResidueImplPtr ChainImpl::AppendResidue(const ResidueKey& key,
       in_sequence_=false;
     }
     if (in_sequence_) {
-      LOGN_DUMP("appending residue " << num);    
+      LOG_DEBUG("appending residue " << num);    
       // update is only needed if we introduce a new gap.
       if (residue_list_.back()->GetNumber().GetNum()+1<num.GetNum()) {
         Shift s;
@@ -269,7 +269,7 @@ const ResidueImplList& ChainImpl::GetResidueList() const
 
 void ChainImpl::Apply(EntityVisitor& v)
 {
-  LOGN_TRACE("visitor @" << &v << " visiting chain impl @" << this);
+  LOG_TRACE("visitor @" << &v << " visiting chain impl @" << this);
   if (v.VisitChain(ChainHandle(shared_from_this()))) {
     for (ResidueImplList::iterator it=residue_list_.begin();
          it!=residue_list_.end();++it) {

@@ -21,32 +21,30 @@
 #include <iostream>
 namespace ost {
 
-ObservableLogSink::ObservableLogSink(){}
+MultiLogSink::MultiLogSink(){}
 
-bool ObservableLogSink::AddObserver(LogSinkPtr& observer){
-  if((std::find( this->observers_.begin(), this->observers_.end(), observer )) == this->observers_.end())
-  {
-    this->observers_.push_back( observer );
+bool MultiLogSink::AddSink(LogSinkPtr& sink) {
+  if ((std::find( sinks_.begin(), sinks_.end(), sink))==sinks_.end()) {
+    sinks_.push_back(sink);
     return true;
   }
   return false;
 }
 
-bool ObservableLogSink::RemoveObserver(LogSinkPtr& observer){
-  std::vector<LogSinkPtr>::iterator found = std::find( this->observers_.begin(), this->observers_.end(), observer);
-  if( found != this->observers_.end() ){
-    this->observers_.erase(found);
+bool MultiLogSink::RemoveSink(LogSinkPtr& sink){
+  std::vector<LogSinkPtr>::iterator found=std::find(sinks_.begin(), 
+                                                    sinks_.end(), sink);
+  if (found!=sinks_.end() ){
+    sinks_.erase(found);
     return true;
   }
   return false;
 }
 
-void ObservableLogSink::LogMessage(const String& message, int severity){
-  std::vector<LogSinkPtr>::const_iterator observers_it = this->observers_.begin() ;
-  while( observers_it != this->observers_.end() )
-  {
-    ( *observers_it )->LogMessage(message, severity);
-    observers_it++;
+void MultiLogSink::LogMessage(const String& message, int severity){
+  for (std::vector<LogSinkPtr>::const_iterator 
+       i=sinks_.begin(), e=sinks_.end(); i!=e; ++i) {
+    (*i)->LogMessage(message, severity);        
   }
 }
 

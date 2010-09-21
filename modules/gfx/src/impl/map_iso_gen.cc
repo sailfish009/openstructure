@@ -189,10 +189,9 @@ void IsosurfaceGenerator::Generate(const img::MapHandle& mh, IndexedVertexArray&
         if(static_cast<float>(rsis->Value(img::Point(us,vs+1,ws+1)))<level) pattern|=1<<5;
         if(static_cast<float>(rsis->Value(img::Point(us+1,vs+1,ws+1)))<level) pattern|=1<<6;
         if(static_cast<float>(rsis->Value(img::Point(us+1,vs,ws+1)))<level) pattern|=1<<7;
-        String msg;
-        std::stringstream msgs(msg);
-        msgs << u << " " << v << " " << w << ": " << pattern << " " << mh.GetReal(img::Point(u,v,w)) << std::endl;
-        LOG_VERBOSE(msgs);
+        
+        LOG_TRACE(u << " " << v << " " << w << ": " << pattern << " " 
+                  << mh.GetReal(img::Point(u,v,w)));
         
         /*
           set up already known vertex-ids from book keeping

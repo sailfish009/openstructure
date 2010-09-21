@@ -214,7 +214,7 @@ struct GradientLevelGetCol {
       float n=Normalize(epm_.Get(atom, minv_), minv_, maxv_);
       return gradient_.GetColorAt(n);
     }catch(std::exception&){
-      LOGN_DEBUG("property " << property_ << " not found");
+      LOG_DEBUG("property " << property_ << " not found");
       return Color();
     }
   }

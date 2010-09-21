@@ -84,7 +84,6 @@ inline ImageHandle g2a(const Data& d,const Extent& e)
 
 inline ImageHandle ih_copy1(ImageHandle& h) {return h.Copy();}
 inline ImageHandle ih_copy2(ImageHandle& h, bool cc) {return h.Copy(cc);}
-inline ImageHandle ih_copy3(ImageHandle& h, const Extent& e) {return h.Copy(e);}
 
 } // anon ns
 
@@ -112,7 +111,6 @@ void export_ImageHandle()
   class_<ImageHandle, bases<Data> >("ImageHandle", no_init )
     .def("Copy",ih_copy1) 
     .def("Copy",ih_copy2,args("content_flag")) 
-    .def("Copy",ih_copy3,args("extent")) 
     .def("Extract",&ImageHandle::Extract,args("extent"))
     .def("Paste",&ImageHandle::Paste,args("data"))
     .def("Set",&ImageHandle::Set,args("image"))

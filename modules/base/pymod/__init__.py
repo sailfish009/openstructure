@@ -36,3 +36,10 @@ try:
 except ImportError:
   pass
 
+
+class StreamLogSink(LogSink):
+  def __init__(self, stream):
+    LogSink.__init__(self)
+    self._stream=stream
+  def LogMessage(self, message, level):
+    self._stream.write(message)

@@ -12,24 +12,24 @@ geom::Vec3 geom_center(const H& h)
 template <typename H>
 geom::Vec3 geom_size(const H& h)
 {
-  LOGN_MESSAGE("GetBoundarySize()/boundary_size is deprecated. Use bounds.size"
-               " instead")
+  WARN_DEPRECATED("GetBoundarySize()/boundary_size is deprecated. Use "
+                  "bounds.size instead")
   return h.GetBounds().GetSize();
 }
 
 template <typename H>
 geom::Vec3 geom_start(const H& h)
 {
-  LOGN_MESSAGE("GetGeometricStart()/geometric_start is deprecated. Use "
-               "bounds.min instead")
+  WARN_DEPRECATED("GetGeometricStart()/geometric_start is deprecated. Use "
+                  "bounds.min instead")
   return h.GetBounds().GetMin();
 }
 
 template <typename H>
 geom::Vec3 geom_end(const H& h)
 {
-  LOGN_MESSAGE("GetGeometricEnd()/geometric_end is deprecated. Use "
-               "bounds.max instead")
+  WARN_DEPRECATED("GetGeometricEnd()/geometric_end is deprecated. Use "
+                  "bounds.max instead")
   return h.GetBounds().GetMax();
 }
 

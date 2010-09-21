@@ -42,16 +42,16 @@ std::pair<bf::path,bf::path> detect_files(const bf::path& loc)
 void SurfaceIOMSMSHandler::Import(mol::SurfaceHandle& sh, const bf::path& loc)
 {
   std::pair<bf::path,bf::path> pp = detect_files(loc);
-  LOGN_DEBUG("loading files " << pp.first.string() << " and " << pp.second.string());
+  LOG_DEBUG("loading files " << pp.first.string() << " and " << pp.second.string());
 
   std::ifstream fvert(pp.first.string().c_str());
   if(!fvert) {
-    LOGN_ERROR("could not open " << pp.first.string());
+    LOG_ERROR("could not open " << pp.first.string());
     return;
   }
   std::ifstream fface(pp.second.string().c_str());
   if(!fface) {
-    LOGN_ERROR("could not open " << pp.second.string());
+    LOG_ERROR("could not open " << pp.second.string());
     return;
   }
 
@@ -100,7 +100,7 @@ void SurfaceIOMSMSHandler::Import(mol::SurfaceHandle& sh, const bf::path& loc)
     sh.AddTri(vertice_map[id1],vertice_map[id2],vertice_map[id3]);
   }
 
-  LOGN_MESSAGE("loaded " << vertice_count << " vertices and " << face_count << " faces");
+  LOG_INFO("loaded " << vertice_count << " vertices and " << face_count << " faces");
 }
 
 void SurfaceIOMSMSHandler::Export(const mol::SurfaceHandle& sh,

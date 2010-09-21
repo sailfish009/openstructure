@@ -65,7 +65,7 @@ void AtomImpl::AddSecondaryConnector(const ConnectorImplP& bp)
 
 void AtomImpl::Apply(EntityVisitor& v)
 {
-  LOG_TRACE("visitor @" << &v << " visiting atom impl @" << this << std::endl);
+  LOG_TRACE("visitor @" << &v << " visiting atom impl @" << this);
   v.VisitAtom(AtomHandle(shared_from_this()));
 }
 
@@ -88,11 +88,11 @@ void AtomImpl::TraceDirectionality(FragmentImplP frag, ConnectorImplP conn,
   if (conn) {
 #if !defined(NDEBUG)    
     if (conn->GetFirst()==shared_from_this()) {
-      LOGN_DUMP("dir:" << String(n,' ') << " atom " << res_.lock()->GetNumber()
+      LOG_TRACE("dir:" << String(n,' ') << " atom " << res_.lock()->GetNumber()
                 << "." << GetName() << "  [" << conn->GetSecond()->GetQualifiedName()
                 << " ]");      
     } else {
-      LOGN_DUMP("dir:" << String(n,' ') << " atom " << res_.lock()->GetNumber()
+      LOG_TRACE("dir:" << String(n,' ') << " atom " << res_.lock()->GetNumber()
                 << "." << GetName() << "  [" << conn->GetFirst()->GetQualifiedName()
                 << " ]");
     }
@@ -100,7 +100,7 @@ void AtomImpl::TraceDirectionality(FragmentImplP frag, ConnectorImplP conn,
 
 #endif              
   } else {
-    LOGN_DUMP("dir:" << String(n,' ') << " atom " << res_.lock()->GetNumber()
+    LOG_TRACE("dir:" << String(n,' ') << " atom " << res_.lock()->GetNumber()
               << "." << GetName() << "  [ ]");
   }
   

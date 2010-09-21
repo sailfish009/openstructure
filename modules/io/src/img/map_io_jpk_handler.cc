@@ -89,8 +89,8 @@ void MapIOJpkHandler::Import(img::ImageHandle& image, const boost::filesystem::p
               }
               image*=(*scale*units_scale);
               image+=(*base*units_scale);
-              LOG_MESSAGE("jpk_plugin: scalefactor: " << *scale << "  offset: "
-                          << *base<< std::endl);
+              LOG_INFO("jpk_plugin: scalefactor: " << *scale 
+                           << "  offset: " << *base);
             } else {
               throw IOException("Missing scaling tags");
             }
@@ -107,7 +107,7 @@ void MapIOJpkHandler::Import(img::ImageHandle& image, const boost::filesystem::p
   }
   char* s;
   TIFFGetField(tfile, jpk_tags::EncoderUnit(newformat.GetSubimage()), &count, &s);
-  LOG_MESSAGE("jpk_plugin: units: " << s << std::endl);
+  LOG_INFO("jpk_plugin: units: " << s);
 
 
   Real* sx;
@@ -118,7 +118,7 @@ void MapIOJpkHandler::Import(img::ImageHandle& image, const boost::filesystem::p
       image.SetPixelSampling(geom::Vec3(*sx/static_cast<Real>(image.GetSize()[0])*Units::m,
                                         *sy/static_cast<Real>(image.GetSize()[1])*Units::m,
                                         1));
-    LOG_MESSAGE("jpk_plugin: sx: " << *sx << "  sy: "<< *sy<< std::endl);
+    LOG_INFO("jpk_plugin: sx: " << *sx << "  sy: "<< *sy);
   }
   else {
     throw IOException("Missing size tags");
@@ -184,8 +184,8 @@ void MapIOJpkHandler::Import(img::MapHandle& image, std::istream& loc,const Imag
               }
               image*=(*scale*units_scale);
               image+=(*base*units_scale);
-              LOG_MESSAGE("jpk_plugin: scalefactor: " << *scale << "  offset: "
-                          << *base<< std::endl);
+              LOG_INFO("jpk_plugin: scalefactor: " << *scale << "  offset: "
+                            << *base);
             }else {
               throw IOException("Missing scaling tags");
             }
@@ -202,7 +202,7 @@ void MapIOJpkHandler::Import(img::MapHandle& image, std::istream& loc,const Imag
   }
   char* s;
   TIFFGetField(tfile, jpk_tags::EncoderUnit(newformat.GetSubimage()), &count, &s);
-  LOG_MESSAGE("jpk_plugin: units: " << s << std::endl);
+  LOG_INFO("jpk_plugin: units: " << s);
 
 
   Real* sx;
@@ -213,7 +213,7 @@ void MapIOJpkHandler::Import(img::MapHandle& image, std::istream& loc,const Imag
       image.SetPixelSampling(geom::Vec3(*sx/static_cast<Real>(image.GetSize()[0])*Units::m,
                                         *sy/static_cast<Real>(image.GetSize()[1])*Units::m,
                                         1));
-    LOG_MESSAGE("jpk_plugin: sx: " << *sx << "  sy: "<< *sy<< std::endl);
+    LOG_INFO("jpk_plugin: sx: " << *sx << "  sy: "<< *sy);
   }
   else {
     throw IOException("Missing size tags");

@@ -126,7 +126,7 @@ bool PDBReader::HasNext()
 void PDBReader::Import(mol::EntityHandle& ent,
                        const String& restrict_chains)
 {
-  LOGN_DEBUG("PDBReader: current flags: " << PDB::Flags());
+  LOG_DEBUG("PDBReader: current flags: " << PDB::Flags());
 
   Profile profile_import("PDBReader::Import");
   this->ClearState();
@@ -145,11 +145,11 @@ void PDBReader::Import(mol::EntityHandle& ent,
           continue;
         }
         if (IEquals(curr_line.substr(0, 6), StringRef("ATOM  ", 6))) {
-          LOGN_TRACE("processing ATOM entry");
+          LOG_TRACE("processing ATOM entry");
           this->ParseAndAddAtom(curr_line, line_num_, ent, 
                                 StringRef("ATOM", 4));
         } else if (IEquals(curr_line.substr(0, 6), StringRef("ANISOU", 6))) {
-          LOGN_TRACE("processing ANISOU entry");
+          LOG_TRACE("processing ANISOU entry");
           this->ParseAnisou(curr_line, line_num_, ent);
         }
         break;
@@ -179,7 +179,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
         if (IEquals(curr_line.substr(0, 6), StringRef("HETATM", 6))) {
           if (PDB::Flags() & PDB::NO_HETATMS)
             continue;
-          LOGN_TRACE("processing HETATM entry");
+          LOG_TRACE("processing HETATM entry");
           this->ParseAndAddAtom(curr_line, line_num_, ent, 
                                 StringRef("HETATM", 6));
         } else if (IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6))) {
@@ -218,7 +218,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
         break;
     }
   }  while (std::getline(in_, curr_line_) && ++line_num_ && go_on);
-  LOGN_MESSAGE("imported "
+  LOG_INFO("imported "
                << chain_count_ << " chains, "
                << residue_count_ << " residues, "
                << atom_count_ << " atoms; with "
@@ -235,7 +235,7 @@ void PDBReader::AssignSecStructure(mol::EntityHandle ent)
        i!=e; ++i) {
     mol::ChainHandle chain=ent.FindChain(i->chain);
     if (!chain.IsValid()) {
-      LOGN_MESSAGE("ignoring helix record for unknown chain "+i->chain);
+      LOG_INFO("ignoring helix record for unknown chain "+i->chain);
       continue;
     }
     mol::SecStructure alpha(mol::SecStructure::ALPHA_HELIX);
@@ -254,7 +254,7 @@ void PDBReader::AssignSecStructure(mol::EntityHandle ent)
        i!=e; ++i) {
     mol::ChainHandle chain=ent.FindChain(i->chain);
     if (!chain.IsValid()) {
-      LOGN_MESSAGE("ignoring strand record for unknown chain "+i->chain);
+      LOG_INFO("ignoring strand record for unknown chain "+i->chain);
       continue;
     }
     mol::SecStructure extended(mol::SecStructure::EXTENDED);
@@ -438,7 +438,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       temp=line.substr(60, 6).ltrim().to_float();      
     }
   }
-  LOGN_TRACE( "line: [" << line << "]" );
+  LOG_TRACE( "line: [" << line << "]" );
   String s_ele;
   String s_chain(1, chain_name);
   String aname(atom_name.str());
@@ -466,7 +466,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   }
 
   // some postprocessing
-  LOGN_TRACE( "s_chain: [" << chain_name << "]" );
+  LOG_TRACE( "s_chain: [" << chain_name << "]" );
 
   // determine chain and residue update
   bool update_chain=false;
@@ -496,7 +496,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       curr_chain_=ent.FindChain(s_chain);
 #endif
     if(!curr_chain_.IsValid()) {
-      LOGN_DUMP("new chain " << s_chain);
+      LOG_DEBUG("new chain " << s_chain);
       curr_chain_=editor.InsertChain(s_chain);
       ++chain_count_;
     }
@@ -508,14 +508,14 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       curr_residue_=curr_chain_.FindResidue(res_num);
     }
     if (!curr_residue_.IsValid()) {
-      LOGN_DUMP("new residue " << res_name << " " << res_num);
+      LOG_DEBUG("new residue " << res_name << " " << res_num);
       curr_residue_=editor.AppendResidue(curr_chain_, res_name.str(), res_num);
       ++residue_count_; 
     }
     assert(curr_residue_.IsValid());
   }
   // finally add atom
-  LOGN_DUMP("adding atom " << aname << " (" << s_ele << ") @" << apos);
+  LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
   mol::AtomProp aprop;
   aprop.element=s_ele;
   if(is_pqr_) {
@@ -547,7 +547,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       try {
         editor.AddAltAtomPos(String(1, alt_loc), me, apos);
       } catch (Error) {
-        LOGN_MESSAGE("Ignoring atom alt location since there is already an atom "
+        LOG_INFO("Ignoring atom alt location since there is already an atom "
                      "with name " << aname << ", but without an alt loc");
         return;
       }
@@ -587,7 +587,7 @@ void PDBReader::ParseHelixEntry(const StringRef& line)
     }    
     throw IOException(str(format("invalid helix entry on line %d") % line_num_));
   }
-  LOGN_DEBUG("making helix entry: " << start_num.second << ", " 
+  LOG_DEBUG("making helix entry: " << start_num.second << ", " 
              << line[25] << " " << end_num.second << " " << line[37]);
   HSEntry hse = {to_res_num(start_num.second, line[25]),
                  to_res_num(end_num.second, line[37]),
@@ -612,7 +612,7 @@ void PDBReader::ParseStrandEntry(const StringRef& line)
     }
     throw IOException(str(format("invalid strand entry on line %d")%line_num_));
   }
-  LOGN_DEBUG("making strand entry: " << start_num.second << ", " << line[26] 
+  LOG_DEBUG("making strand entry: " << start_num.second << ", " << line[26] 
              << " " << end_num.second << " " << line[37]);
   HSEntry hse = {to_res_num(start_num.second, line[26]),
                  to_res_num(end_num.second, line[37]),

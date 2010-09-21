@@ -74,9 +74,9 @@ void value_convert(void* src_ptr, DEST* dest_ptr, size_t count)
 {
   SOURCE* r_src_ptr = reinterpret_cast<SOURCE*>(src_ptr);
   for(uint c=0;c<count;++c) {
-    LOG_VERBOSE(" " << c << " / " << count << " .");
+    LOG_TRACE(" " << c << " / " << count << " .");
     DEST val=static_cast<DEST>(r_src_ptr[c]);
-    LOG_VERBOSE(" ." << std::endl);
+    LOG_TRACE(" ." << std::endl);
     dest_ptr[c] = val;
   }
 }
@@ -216,7 +216,7 @@ void DM3Collector::ParseFile(const bf::path& loc)
   {
     throw IOException("could not open "+loc.string());
   }
-  LOG_VERBOSE("Starting DM3 Parsing" << std::endl);
+  LOG_DEBUG("Starting DM3 Parsing" << std::endl);
   this->ParseStream(ifile);
   ifile.close();
 }
@@ -231,16 +231,16 @@ void DM3Collector::ParseStream(std::istream& fp)
   uint endianess;
   file_read(&endianess,sizeof(uint),1,fp);
 
-  LOG_MESSAGE("version: " << version << std::endl);
-  LOG_MESSAGE("bytecount: " << bytecount << std::endl);
-  LOG_MESSAGE("endianess: " << endianess << std::endl);
+  LOG_INFO("version: " << version);
+  LOG_INFO("bytecount: " << bytecount);
+  LOG_INFO("endianess: " << endianess);
 
   parse_tag_group(0,"ROOT",fp);
   img::Progress::Instance().DeRegister(this);
   if(fp.eof()==0) {
-    LOG_ERROR("file not parsed completely" << std::endl);
+    LOG_ERROR("file not parsed completely");
   } else {
-    LOG_VERBOSE("file parsed completely" << std::endl);
+    LOG_INFO("file parsed completely");
   }
 
 }
@@ -320,7 +320,9 @@ void DM3Collector::check_image()
 
       image_handle_list_.push_back(ih);
     } else {
-      LOG_ERROR("missmatch in byte size of data (" << data_size*type_sizeof(image_number_type_) << " != " << image_data_byte_size_ << "), ignoring this image entry" << std::endl);
+      LOG_ERROR("missmatch in byte size of data (" 
+                << data_size*type_sizeof(image_number_type_) << " != " 
+                << image_data_byte_size_ << "), ignoring this image entry");
     }
 
     image_width_=0;
@@ -348,7 +350,7 @@ size_t DM3Collector::type_sizeof(uint n)
 
 void DM3Collector::parse_tag_group(int depth, const String& name,std::istream& fp)
 {
-  LOG_VERBOSE(String(depth,' ') << "parsing tag group [" << name << "]" << std::endl);
+  LOG_TRACE(String(depth,' ') << "parsing tag group [" << name << "]");
 
   uchar sorted;
   file_read(&sorted,sizeof(uchar),1,fp);
@@ -356,13 +358,14 @@ void DM3Collector::parse_tag_group(int depth, const String& name,std::istream& f
   uchar open;
   file_read(&open,sizeof(uchar),1,fp);
 
-  LOG_VERBOSE(String(depth,' ') << "s,o: " << static_cast<int>(sorted) << "," << static_cast<int>(open) << std::endl);
+  LOG_TRACE(String(depth,' ') << "s,o: " << static_cast<int>(sorted) << "," 
+            << static_cast<int>(open));
 
   uint tag_count;
   file_read(&tag_count,sizeof(uint),1,fp);
   if(swap_tag_) swap_uint(&tag_count,1);
 
-  LOG_VERBOSE(String(depth,' ') << "tag_count: " << tag_count << std::endl);
+  LOG_TRACE(String(depth,' ') << "tag_count: " << tag_count);
 
   handle_tag_group(name);
 
@@ -373,12 +376,12 @@ void DM3Collector::parse_tag_group(int depth, const String& name,std::istream& f
 
 void DM3Collector::parse_tag_entry(int depth,std::istream& fp)
 {
-  LOG_VERBOSE(String(depth,' ') << "parsing tag entry" << std::endl);
+  LOG_TRACE(String(depth,' ') << "parsing tag entry");
 
   uchar id;
   file_read(&id,sizeof(uchar),1,fp);
 
-  LOG_VERBOSE(String(depth,' ') << "id: " << static_cast<int>(id) << std::endl);
+  LOG_TRACE(String(depth,' ') << "id: " << static_cast<int>(id));
 
   if(!(id==20 || id==21)) {
     std::ostringstream msg("");
@@ -397,7 +400,8 @@ void DM3Collector::parse_tag_entry(int depth,std::istream& fp)
     label=String(&buffer[0],nlabel);
   }
 
-  LOG_MESSAGE(String(depth,' ') << "nlabel: " << nlabel << " label: '" << label << "'" << std::endl);
+  LOG_TRACE(String(depth,' ') << "nlabel: " << nlabel << " label: '" 
+            << label << "'" << std::endl);
 
   if(id==static_cast<uchar>(20)) {
     parse_tag_group(depth+1,label,fp);
@@ -409,7 +413,7 @@ void DM3Collector::parse_tag_entry(int depth,std::istream& fp)
 
 void DM3Collector::parse_tag_type(int depth, const String& name, std::istream& fp)
 {
-  LOG_VERBOSE(String(depth,' ') << "parsing tag type" << std::endl);
+  LOG_TRACE(String(depth,' ') << "parsing tag type");
 
   char dummy[4];
   file_read(dummy,sizeof(char),4,fp);
@@ -417,21 +421,21 @@ void DM3Collector::parse_tag_type(int depth, const String& name, std::istream& f
   if(String(dummy,4)!=String("%%%%")) {
     throw IOException("I/O Dm3: invalid tag_type magic number");
   } else {
-    LOG_VERBOSE(String(depth,' ') << "magic number %%%% found" << std::endl);
+    LOG_TRACE(String(depth,' ') << "magic number %%%% found");
   }
 
   uint ntype;
   file_read(&ntype,sizeof(uint),1,fp);
   if(swap_tag_) swap_uint(&ntype,1);
 
-  LOG_VERBOSE(String(depth,' ') << "ntype: " << ntype << std::endl);
+  LOG_TRACE(String(depth,' ') << "ntype: " << ntype);
 
   std::vector<uint> tag_type_info(ntype);
   file_read(&tag_type_info[0],sizeof(uint),ntype,fp);
   if(swap_tag_) swap_uint(&tag_type_info[0],ntype);
 
   for(uint i=0;i<ntype;++i) {
-    LOG_VERBOSE(String(depth,' ') << "type_info[" << i << "]: " << tag_type_info[i] << std::endl);
+    LOG_TRACE(String(depth,' ') << "type_info[" << i << "]: " << tag_type_info[i]);
   }
 
   if(ntype==1) { // simple type
@@ -452,7 +456,7 @@ void DM3Collector::parse_tag_type(int depth, const String& name, std::istream& f
 
 void DM3Collector::parse_tag_type_single(int depth, const String& name,TagTypeInfo& tag_type_info,std::istream& fp)
 {
-  LOG_VERBOSE(String(depth,' ') << "parsing simple tag [" << name << "]" << std::endl);
+  LOG_TRACE(String(depth,' ') << "parsing simple tag [" << name << "]");
 
   // tag_type_info[0] contains number type
   uint number_type=tag_type_info[0];
@@ -461,7 +465,7 @@ void DM3Collector::parse_tag_type_single(int depth, const String& name,TagTypeIn
     msg << "I/O Dm3: unexpected number type " << number_type << " for simple type";
     throw IOException(msg.str());
   } else {
-    LOG_VERBOSE(String(depth,' ') << "reading simple value of number_type " << number_type << std::endl);
+    LOG_TRACE(String(depth,' ') << "reading simple value of number_type " << number_type);
   }
 
   uchar buffer[16]; // sufficient for all primitive types
@@ -470,14 +474,14 @@ void DM3Collector::parse_tag_type_single(int depth, const String& name,TagTypeIn
   // TODO: swap data
   double tmp;
   tag_value_convert<double>(number_type,buffer,&tmp);
-  LOG_VERBOSE(String(depth,' ') << "value: " << tmp << std::endl);
+  LOG_TRACE(String(depth,' ') << "value: " << tmp);
 
   handle_single_tag(name,number_type,buffer);
 }
 
 void DM3Collector::parse_tag_type_String(int depth, const String& name, TagTypeInfo& tag_type_info,std::istream& fp)
 {
-  LOG_VERBOSE (String(depth,' ') << "parsing String tag [" << name << "]" << std::endl);
+  LOG_TRACE(String(depth,' ') << "parsing String tag [" << name << "]");
   // tag_type_info[0] contains number type 18
   // tag_type_info[1] contains String length
   std::vector<char> buffer(tag_type_info[1]*2);
@@ -486,7 +490,7 @@ void DM3Collector::parse_tag_type_String(int depth, const String& name, TagTypeI
 
 void DM3Collector::parse_tag_type_array(int depth, const String& name, TagTypeInfo& tag_type_info,std::istream& fp)
 {
-  LOG_VERBOSE(String(depth,' ') << "parsing array tag [" << name << "]" << std::endl);
+  LOG_TRACE(String(depth,' ') << "parsing array tag [" << name << "]");
   // tag_type_info[0] contains number type 20
   // tag_type_info[1] contains array number type
   // tag_type_info[2] contains array length
@@ -496,12 +500,12 @@ void DM3Collector::parse_tag_type_array(int depth, const String& name, TagTypeIn
     msg << "I/O Exception: unexpected number type " << number_type << " for array";
     throw IOException(msg.str());
   } else {
-    LOG_VERBOSE(String(depth,' ') << "parsing array of number_type " << number_type << std::endl);
+    LOG_TRACE(String(depth,' ') << "parsing array of number_type " << number_type);
   }
 
   size_t array_type_size = type_sizeof(number_type);
 
-  LOG_VERBOSE(String(depth,' ') << "array byte size: " << array_type_size*tag_type_info[2] << std::endl);
+  LOG_TRACE(String(depth,' ') << "array byte size: " << array_type_size*tag_type_info[2]);
 
   //std::vector<uchar> data(array_type_size*tag_type_info[2]);
   boost::shared_array<uchar> array_data(new uchar[array_type_size*tag_type_info[2]]);
@@ -512,7 +516,7 @@ void DM3Collector::parse_tag_type_array(int depth, const String& name, TagTypeIn
 
 void DM3Collector::parse_tag_type_simple_struct(int depth, const String& name, TagTypeInfo& tag_type_info,std::istream& fp)
 {
-  LOG_VERBOSE(String(depth,' ') << "parsing simple struct tag [" << name << "]" << std::endl);
+  LOG_TRACE(String(depth,' ') << "parsing simple struct tag [" << name << "]");
   // tag_type_info[0] contains number type 15
   if(tag_type_info[0]!=15) {
     std::ostringstream msg("");
@@ -521,7 +525,7 @@ void DM3Collector::parse_tag_type_simple_struct(int depth, const String& name, T
   }
 
   // tag_type_info[2] contains number of entries in struct
-  LOG_VERBOSE(String(depth,' ') << "reading in " << tag_type_info[2] << " values" << std::endl);
+  LOG_TRACE(String(depth,' ') << "reading in " << tag_type_info[2] << " values");
   std::vector<uint> number_types(tag_type_info[2]);
   std::vector<long> buffers(tag_type_info[2]);
   for(uint c=0;c<tag_type_info[2];++c) {
@@ -531,14 +535,14 @@ void DM3Collector::parse_tag_type_simple_struct(int depth, const String& name, T
       msg << "I/O Dm3: unexpected number type " << number_types[c] << " while parsing tag_type_struct";
       throw IOException(msg.str());
     } else {
-      LOG_VERBOSE("reading value of number_type " << number_types[c] << std::endl);
+      LOG_TRACE("reading value of number_type " << number_types[c]);
     }
     size_t bufsize = type_sizeof(number_types[c]);
     void* buffer = &buffers[c];
     file_read(buffer,bufsize,1,fp);
     double tmp;
     tag_value_convert<double>(number_types[c],buffer,&tmp);
-    LOG_VERBOSE(String(depth,' ') << "value " << c << ": " << tmp << std::endl);
+    LOG_TRACE(String(depth,' ') << "value " << c << ": " << tmp);
     // TODO: swap data
   }
   handle_struct_tag(name,number_types,buffers);
@@ -547,7 +551,7 @@ void DM3Collector::parse_tag_type_simple_struct(int depth, const String& name, T
 
 void DM3Collector::parse_tag_type_array_struct(int depth, const String& name, TagTypeInfo& tag_type_info,std::istream& fp)
 {
-  LOG_VERBOSE(String(depth,' ') << "parsing array struct tag [" << name << "]" << std::endl);
+  LOG_DEBUG(String(depth,' ') << "parsing array struct tag [" << name << "]");
   // tag_type_info[0] contains number type 20
   if(tag_type_info[0]!=20) {
     std::ostringstream msg("");
@@ -558,20 +562,22 @@ void DM3Collector::parse_tag_type_array_struct(int depth, const String& name, Ta
   // tag_type_info[size-1] contains length of array!
   uint array_size = tag_type_info[tag_type_info.size()-1];
 
-  LOG_VERBOSE(String(depth,' ') << "looping over " << array_size << " array elements" << std::endl);
+  LOG_TRACE(String(depth,' ') << "looping over " << array_size 
+            << " array elements");
 
   uchar buffer[16]; // sufficient for all primitive types
   for(uint ac=0;ac<array_size;++ac) {
     // tag_type_info[3] contains number of entries in struct
-    LOG_VERBOSE(String(depth,' ') << "reading in " << tag_type_info[3] << " values for array entry " << ac << std::endl);
+    LOG_TRACE(String(depth,' ') << "reading in " << tag_type_info[3] << " values for array entry ");
     for(uint c=0;c<tag_type_info[3];++c) {
       uint number_type=tag_type_info[c*2+5];
       if(number_type>10) {
-  std::ostringstream msg("");
-  msg << "I/O Dm3: unexpected number type " << number_type << " while parsing tag_type_struct";
-  throw IOException(msg.str());
+        std::ostringstream msg;
+        msg << "I/O Dm3: unexpected number type " << number_type 
+            << " while parsing tag_type_struct";
+        throw IOException(msg.str());
       } else {
-        LOG_VERBOSE(String(depth,' ') << "reading value of number_type " << number_type << std::endl);
+        LOG_TRACE(String(depth, ' ') << "reading value of number_type " << number_type);
       }
       size_t bufsize = type_sizeof(number_type);
       file_read(buffer,bufsize,1,fp);

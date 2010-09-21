@@ -61,9 +61,9 @@ GfxTestObj::GfxTestObj():
   bf::path tex_file(ost_root_dir / "textures/test_texture.png");
   Bitmap bm = BitmapImport(tex_file.string(),".png");
   if(!bm.data) {
-    LOGN_ERROR("error loading " << tex_file.string());
+    LOG_ERROR("error loading " << tex_file.string());
   } else {
-    LOGN_VERBOSE("importing tex with id " << tex_id);
+    LOG_DEBUG("importing tex with id " << tex_id);
     glBindTexture(GL_TEXTURE_2D, tex_id);
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

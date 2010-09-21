@@ -32,23 +32,17 @@ Logger& Logger::Instance()
 Logger::Logger():
   level_(0),
   level_stack_(),
-  sink_stack_(),
-  null_sink_(new NullLogSink()),
-  sink_()
+  sink_stack_()
 {
-  sink_stack_.push(LogSinkPtr(new StdLogSink(std::cerr)));
-  sink_= sink_stack_.top();
+  sink_stack_.push(LogSinkPtr(new StreamLogSink(std::cerr)));
 }
 
 Logger::Logger(const Logger&):
   level_(0),
   level_stack_(),
-  sink_stack_(),
-  null_sink_(new NullLogSink()),
-  sink_()
+  sink_stack_()
 {
-  sink_stack_.push(LogSinkPtr(new StdLogSink(std::cerr)));
-  sink_= sink_stack_.top();
+  sink_stack_.push(LogSinkPtr(new StreamLogSink(std::cerr)));
 }
 
 Logger& Logger::operator=(const Logger&)
@@ -74,39 +68,28 @@ void Logger::PopVerbosityLevel()
   }
 }
 
-LogSinkPtr& Logger::operator()(enum LogLevel l)
-{
-  if(l<=level_) {
-    return sink_;
-  }
-  return null_sink_;
-}
-
 void Logger::PushFile(const String& fn)
 {
   sink_stack_.push(LogSinkPtr(new FileLogSink(fn)));
-  sink_ = sink_stack_.top();
 }
 
 void Logger::PopFile()
 {
-  if(sink_stack_.size()>1) {
-    sink_stack_.pop();
-    sink_ = sink_stack_.top();
-  }
+  WARN_DEPRECATED("Logger::PopFile is deprecated. Use Logger::PopSink instead");
+  this->PopSink();
 }
 
 void Logger::PushSink(LogSinkPtr& sink)
 {
   sink_stack_.push(sink);
-  sink_ = sink_stack_.top();
 }
 
 void Logger::PopSink()
 {
   if(sink_stack_.size()>1) {
-      sink_stack_.pop();
-      sink_ = sink_stack_.top();
+    sink_stack_.pop();
+  } else {
+    LOG_ERROR("Can't pop sink. There is only one sink left on the stack");
   }
 }
 

@@ -37,7 +37,7 @@ bool Sanitizer::VisitResidue(const mol::ResidueHandle& residue) {
     this->VerifyCompleteness(residue, comp);
     return true;
   }
-  LOGN_ERROR("Unknown residue with name " << residue.GetName());
+  LOG_ERROR("Unknown residue with name " << residue.GetName());
   return false;
 }
 
@@ -45,8 +45,8 @@ void Sanitizer::FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec) {
   mol::AtomProp props=atom.GetAtomProps();
   if (props.element!=spec.element) {
     props.element=spec.element;
-    LOGN_MESSAGE("Correcting element for " << atom.GetQualifiedName() <<
-                 " (now " << spec.element << ", was " << props.element << ")");
+    LOG_INFO("Correcting element for " << atom.GetQualifiedName() <<
+             " (now " << spec.element << ", was " << props.element << ")");
     atom.SetAtomProps(props);
   }
 }

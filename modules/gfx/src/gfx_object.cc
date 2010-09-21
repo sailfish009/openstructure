@@ -375,11 +375,11 @@ void GfxObj::SetOutlineExpandColor(const Color& c)
 
 void GfxObj::RenderGL(RenderPass pass)
 {
-  LOGN_TRACE("object " << GetName() << ": RenderGL()");
+  LOG_TRACE("object " << GetName() << ": RenderGL()");
 
   if(pass==0) {
     if(mat_update_) {
-      LOGN_TRACE("updating material display list");
+      LOG_TRACE("updating material display list");
       if(mat_dlist_==0) {
         mat_dlist_=glGenLists(1);
       }
@@ -396,18 +396,18 @@ void GfxObj::RenderGL(RenderPass pass)
     }
   }
   if(IsVisible()) {
-    LOGN_TRACE("applying local transformation");
+    LOG_TRACE("applying local transformation");
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glMultMatrix(transform_.GetTransposedMatrix().Data());
     if(Scene::Instance().InOffscreenMode()) {
-      LOGN_TRACE("applying material");
+      LOG_TRACE("applying material");
       mat_.RenderGL();
     } else {
-      LOGN_TRACE("applying material display list");
+      LOG_TRACE("applying material display list");
       glCallList(mat_dlist_);
     }
-    LOGN_TRACE("calling custom render gl pass " << pass);
+    LOG_TRACE("calling custom render gl pass " << pass);
 
     CustomRenderGL(pass);
 
@@ -418,7 +418,7 @@ void GfxObj::RenderGL(RenderPass pass)
     }
 
     if(pass==1) {
-      LOGN_TRACE("drawing labels");
+      LOG_TRACE("drawing labels");
       render_labels();
     }
 
@@ -440,7 +440,7 @@ void GfxObj::RenderPov(PovState& pov)
 
 void GfxObj::PreRenderGL(bool f)
 {
-  LOGN_DUMP("object " << GetName() << ": PreRenderGL()");
+  LOG_DEBUG("object " << GetName() << ": PreRenderGL()");
   CustomPreRenderGL(f);
 }
 
@@ -621,8 +621,9 @@ void GfxObj::AmbientOcclusion(bool f)
 void GfxObj::ColorBy(const mol::EntityView& ev, 
                       const String& prop,
                       const Gradient& g, float minv, float maxv)
-{
-  LOGN_VERBOSE("ColorBy not implemented for this gfx object");
+{ 
+  // FIXME: Throw exception here...
+  LOG_ERROR("ColorBy not implemented for this gfx object");
 }
 
 
@@ -641,7 +642,8 @@ void GfxObj::ColorBy(const img::MapHandle& mh,
                       const String& prop,
                       const Gradient& g, float minv, float maxv)
 {
-  LOGN_VERBOSE("ColorBy not implemented for this gfx object");
+  // FIXME: Throw exception here
+  LOG_ERROR("ColorBy not implemented for this gfx object");
 }
 
 void GfxObj::ColorBy(const img::MapHandle& mh,

@@ -226,7 +226,7 @@ void to_vax_converter_float_helper(const unsigned int* in, unsigned int * out)
   if ( e == EXPONENT_MASK ) {
     // VAX's have no equivalents for IEEE +-Infinity and +-NaN [e=all-1's] 
     // Fixup to VAX +-extrema [e=all-1's] with zero mantissa [m=0] 
-    LOGN_ERROR("IEEE Infinity or NaN encountered. Fixup to VAX extrema");
+    LOG_ERROR("IEEE Infinity or NaN encountered. Fixup to VAX extrema");
     *out = (*in & SIGN_BIT) | EXPONENT_MASK;
   }else{
     e >>= MANTISSA_SIZE;   // Obtain the biased IEEE exponent 
@@ -243,7 +243,7 @@ void to_vax_converter_float_helper(const unsigned int* in, unsigned int * out)
       // Silent underflow 
       *out=0;;                                  
     }else if( e > ( 2 * VAX_F_EXPONENT_BIAS - 1 ) ){
-      LOGN_ERROR("Overflow. Fixup to VAX extrema");
+      LOG_ERROR("Overflow. Fixup to VAX extrema");
        *out = ( *in & SIGN_BIT ) | ~SIGN_BIT;
     }else{
       // VAX normalized form [e>0] (both mantissas are 23 bits) 
@@ -259,7 +259,7 @@ void from_vax_converter_float_helper(const unsigned int* in, unsigned int * out)
     // If the biased VAX exponent is zero [e=0] 
     if ( ( *in & SIGN_BIT ) == SIGN_BIT ){
       // If negative [s=1] 
-      LOGN_ERROR("VAX reserved operand fault; fixup to IEEE zero");
+      LOG_ERROR("VAX reserved operand fault; fixup to IEEE zero");
     }
     // Set VAX dirty [m<>0] or true [m=0] zero to IEEE +zero [s=e=m=0] 
     *out = 0;

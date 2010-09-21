@@ -120,16 +120,16 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
     date=ss.str();
     sqlite3_bind_text(stmt, 6, date.c_str(), date.length(), NULL);        
   } else {
-    LOGN_ERROR(sqlite3_errmsg(conn_));
+    LOG_ERROR(sqlite3_errmsg(conn_));
     sqlite3_finalize(stmt);    
     return;
   }
   retval=sqlite3_step(stmt);
   if (SQLITE_DONE!=retval) {
     if (sqlite3_errcode(conn_)==SQLITE_CONSTRAINT) {
-      LOGN_ERROR("Compound '" << compound->GetID() << "' already exists.");
+      LOG_ERROR("Compound '" << compound->GetID() << "' already exists.");
     } else {
-      LOGN_ERROR(sqlite3_errmsg(conn_));
+      LOG_ERROR(sqlite3_errmsg(conn_));
     }
   }
   sqlite3_finalize(stmt);  

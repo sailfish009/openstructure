@@ -89,7 +89,7 @@ unsigned int PythonInterpreter::RunScript(const QString& fname)
 {
   QFile script(fname);
   if (!script.open(QIODevice::ReadOnly | QIODevice::Text)){
-    LOGN_ERROR("could not open " << fname.toStdString());
+    LOG_ERROR("could not open " << fname.toStdString());
     return RunCommand("");
   }
   QString command=script.readAll();

@@ -54,12 +54,12 @@ CoordSource::~CoordSource()
 void CoordSource::CopyFrame(uint frame_id)
 {
   if (atoms_.empty()) {
-    LOGN_DEBUG("atom list empty, ignored");
+    LOG_DEBUG("atom list empty, ignored");
     return;
   }  
   CoordFramePtr frame=this->GetFrame(frame_id);
   if (!frame) {
-    LOGN_DEBUG("invalid frame given, ignored");
+    LOG_DEBUG("invalid frame given, ignored");
     return;
   }
   assert(frame->size()==atoms_.size());

@@ -130,10 +130,10 @@ template <typename T, class D>
   void HighestPeakSearch3DBase::VisitState(const ImageStateImpl<T,D>& isi)
   {
 
-    LOG_VERBOSE("highest peak search with the parameters" << std::endl);
-    LOG_VERBOSE(" max number of peaks: " << max_num_peaks_ << std::endl);
-    LOG_VERBOSE(" exclusion radius: " << exclusion_radius_ << std::endl);
-    LOG_VERBOSE(" threshold: " << threshold_ << std::endl);
+    LOG_DEBUG("highest peak search (" 
+              << "max number of peaks: " << max_num_peaks_ << ", "
+              << "exclusion radius: " << exclusion_radius_ << ", "
+              << "threshold: " << threshold_ << ")");
 
     if (max_num_peaks_ < 1)
     {
@@ -142,15 +142,16 @@ template <typename T, class D>
 
     if(ext_list_.size()==0)
     {
-      LOG_VERBOSE(" excluded regions: none" << std::endl);
+      LOG_DEBUG(" excluded regions: none");
     } 
     else 
     {
-      LOG_VERBOSE(" excluded regions:" << std::endl);
+      std::stringstream ss;
       for(ExtList::const_iterator it=ext_list_.begin();it!=ext_list_.end();++it) 
       {
-       LOG_VERBOSE("  " << (*it) << std::endl);
+        ss << " " << (*it);
       }
+      LOG_DEBUG("exluded regions:" << ss.str());
     }
 
     detail::PeakCollector peak_collector(max_num_peaks_,exclusion_radius_);

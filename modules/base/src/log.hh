@@ -33,12 +33,12 @@ typedef std::stack<LogSinkPtr> LogSinkStack;
 class DLLEXPORT_OST_BASE Logger {
 public:
   enum LogLevel {
-    QUIET=0,
-    NORMAL,
-    VERBOSE,
-    DEBUG,
-    DUMP,
-    TRACE
+    QUIET   =0,
+    WARNING =1,
+    INFO    =2,
+    VERBOSE =3,
+    DEBUG   =4,
+    TRACE   =5
   };
 
   void PushVerbosityLevel(int level);
@@ -48,12 +48,16 @@ public:
   //! DEPRECATED use PopSink() instead
   void PopFile();
   void PopSink();
-  LogSinkPtr& operator()(enum LogLevel);
 
   static Logger& Instance();
-
+  LogSinkPtr GetCurrentSink() { return sink_stack_.top(); }
   int GetLogLevel() const {return level_;}
-
+  
+  void ResetSinks() {
+    while (sink_stack_.size()>1) {
+      sink_stack_.pop();
+    }
+  }
 protected:
   Logger();
   Logger(const Logger&);
@@ -63,41 +67,29 @@ private:
   int level_;
   std::stack<int> level_stack_;
   LogSinkStack sink_stack_;
-  LogSinkPtr null_sink_;
-  LogSinkPtr sink_;
 };
 
+
+#define OST_DO_LOGGING_(m, l) if (::ost::Logger::Instance().GetLogLevel()>=l) {\
+    std::stringstream tmp_s__;                                                 \
+    tmp_s__ << m << std::endl;                                                 \
+    ::ost::Logger::Instance().GetCurrentSink()->LogMessage(tmp_s__.str(), l);  \
+  }
+
+#define WARN_DEPRECATED(m) OST_DO_LOGGING_(m, ::ost::Logger::WARNING)
 #define PUSH_VERBOSITY(n) ::ost::Logger::Instance().PushVerbosityLevel(n)
 #define POP_VERBOSITY(n) ::ost::Logger::Instance().PopVerbosityLevel()
 
-#define LOG_ERROR(m) if(true){std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::QUIET)->LogMessage(tmp_stream__.str());}
-#define LOGN_ERROR(m) if(true){std::stringstream tmp_stream__;tmp_stream__ << m << std::endl;::ost::Logger::Instance()(::ost::Logger::QUIET)->LogMessage(tmp_stream__.str());}
-
-#define LOG_MESSAGE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::NORMAL) {std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::NORMAL)->LogMessage(tmp_stream__.str(),::ost::Logger::NORMAL);}
-#define LOGN_MESSAGE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::NORMAL) {std::stringstream tmp_stream__; tmp_stream__ << m <<std::endl;::ost::Logger::Instance()(::ost::Logger::NORMAL)->LogMessage(tmp_stream__.str(),::ost::Logger::NORMAL);}
-
-#define LOG_VERBOSE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::VERBOSE) {std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::VERBOSE)->LogMessage(tmp_stream__.str(),::ost::Logger::VERBOSE);}
-#define LOGN_VERBOSE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::VERBOSE) {std::stringstream tmp_stream__; tmp_stream__ << m <<std::endl;::ost::Logger::Instance()(::ost::Logger::VERBOSE)->LogMessage(tmp_stream__.str(),::ost::Logger::VERBOSE);}
-
-#define LOG_DEBUG(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::DEBUG)->LogMessage(tmp_stream__.str(),::ost::Logger::DEBUG);}
-#define LOGN_DEBUG(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {std::stringstream tmp_stream__; tmp_stream__ << m <<std::endl;::ost::Logger::Instance()(::ost::Logger::DEBUG)->LogMessage(tmp_stream__.str(),::ost::Logger::DEBUG);}
-
+#define LOG_ERROR(m) OST_DO_LOGGING_(m, ::ost::Logger::QUIET)
+#define LOG_WARNING(m) OST_DO_LOGGING_(m, ::ost::Logger::WARNING)
+#define LOG_INFO(m) OST_DO_LOGGING_(m, ::ost::Logger::INFO)
+#define LOG_VERBOSE(m) OST_DO_LOGGING_(m, ::ost::Logger::VERBOSE)
 #ifdef NDEBUG
-
-#  define LOG_DUMP(m)
-#  define LOGN_DUMP(m)
-
+#  define LOG_DEBUG(m)
 #  define LOG_TRACE(m)
-#  define LOGN_TRACE(m)
-
 #else
-
-#  define LOG_DUMP(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DUMP) {std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::DUMP)->LogMessage(tmp_stream__.str(),::ost::Logger::DUMP);}
-#  define LOGN_DUMP(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DUMP) {std::stringstream tmp_stream__; tmp_stream__ << m <<std::endl;::ost::Logger::Instance()(::ost::Logger::DUMP)->LogMessage(tmp_stream__.str(),::ost::Logger::DUMP);}
-
-#  define LOG_TRACE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::TRACE) {std::stringstream tmp_stream__;tmp_stream__ << m ;::ost::Logger::Instance()(::ost::Logger::TRACE)->LogMessage(tmp_stream__.str(),::ost::Logger::TRACE);}
-#  define LOGN_TRACE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::TRACE) {std::stringstream tmp_stream__; tmp_stream__ << m <<std::endl;::ost::Logger::Instance()(::ost::Logger::TRACE)->LogMessage(tmp_stream__.str(),::ost::Logger::TRACE);}
-
+#  define LOG_DEBUG(m) OST_DO_LOGGING_(m, ::ost::Logger::DEBUG)
+#  define LOG_TRACE(m) OST_DO_LOGGING_(m, ::ost::Logger::TRACE)
 #endif
 
 }

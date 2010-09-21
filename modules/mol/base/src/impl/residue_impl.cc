@@ -123,7 +123,7 @@ AtomImplPtr ResidueImpl::InsertAltAtom(const String& name,
 
 void ResidueImpl::Apply(EntityVisitor& v)
 {
-  LOGN_TRACE("visitor @" << &v << " visiting residue ; @" << this);
+  LOG_TRACE("visitor @" << &v << " visiting residue ; @" << this);
   if(v.VisitResidue(ResidueHandle(shared_from_this()))) {
     for (AtomImplList::iterator it=atom_list_.begin();
          it!=atom_list_.end();++it) {
@@ -208,7 +208,7 @@ geom::Vec3 ResidueImpl::GetCentralNormal() const
       geom::Vec3 v0=GetCentralAtom()->GetPos();
       nrvo=geom::Cross(geom::Normalize(v0),
                        geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
-      LOGN_VERBOSE("warning: could not find atoms for proper central normal calculation");
+      LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
     }
     return nrvo;    
   } else if (chem_class_.IsNucleotideLinking()) {
@@ -222,7 +222,7 @@ geom::Vec3 ResidueImpl::GetCentralNormal() const
       geom::Vec3 v0=GetCentralAtom()->GetPos();
       nrvo=geom::Cross(geom::Normalize(v0),
                        geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
-      LOGN_VERBOSE("warning: could not find atoms for proper central normal calculation");
+      LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
     }
     return nrvo;
   }
@@ -263,7 +263,7 @@ TorsionImplP ResidueImpl::GetPsiTorsion() const {
       return t;
   }
 
-  LOGN_DUMP("Can't find torsion PSI for " <<
+  LOG_DEBUG("Can't find torsion PSI for " <<
            this->GetKey() << this->GetNumber());
   return TorsionImplP();
 
@@ -303,7 +303,7 @@ TorsionImplP ResidueImpl::GetOmegaTorsion() const {
       return t;
   }
 
-  LOGN_DUMP("Can't find torsion Omega for " <<
+  LOG_DEBUG("Can't find torsion Omega for " <<
            this->GetKey() << this->GetNumber());
   return TorsionImplP();
 }
@@ -327,7 +327,7 @@ TorsionImplP ResidueImpl::GetPhiTorsion() const {
       return t;
   }
 
-  LOGN_DUMP("Can't find torsion PHI for " <<
+  LOG_DEBUG("Can't find torsion PHI for " <<
            this->GetKey() << this->GetNumber());
   return TorsionImplP();
 }

@@ -84,7 +84,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   char dummy[4];
   bool swap_flag=false;
 
-  LOGN_MESSAGE("importing trajectory data");
+  LOG_INFO("importing trajectory data");
 
   if(gap_flag) ff.read(dummy,sizeof(dummy));
   ff.read(header.hdrr,sizeof(char)*4);
@@ -95,7 +95,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
     if(header.icntrl[1]<0 || header.icntrl[1]>1e8) {
       throw(IOException("LoadCHARMMTraj: nonsense atom count in header"));
     } else {
-      LOGN_MESSAGE("LoadCHARMMTraj: byte-swapping");
+      LOG_INFO("LoadCHARMMTraj: byte-swapping");
       swap_flag=true;
     }
   }
@@ -105,13 +105,13 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   if(header.icntrl[19]!=0) { // CHARMM format
     skip_flag=(header.icntrl[10]!=0);
     if(skip_flag) {
-      LOGN_VERBOSE("LoadCHARMMTraj: using CHARMM format with per-frame header");
+      LOG_VERBOSE("LoadCHARMMTraj: using CHARMM format with per-frame header");
     } else {
-      LOGN_VERBOSE("LoadCHARMMTraj: using CHARMM format");
+      LOG_VERBOSE("LoadCHARMMTraj: using CHARMM format");
     }
   } else {
     // XPLOR format
-    LOGN_VERBOSE("LoadCHARMMTraj: using XPLOR format");
+    LOG_VERBOSE("LoadCHARMMTraj: using XPLOR format");
   }
 
   if(gap_flag) ff.read(dummy,sizeof(dummy));
@@ -131,12 +131,12 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   header.f_atom_count=header.icntrl[8];
   header.atom_count=header.t_atom_count-header.f_atom_count;
 
-  LOGN_DEBUG("LoadCHARMMTraj: " << header.num << " trajectories with " 
+  LOG_DEBUG("LoadCHARMMTraj: " << header.num << " trajectories with " 
                << header.atom_count << " atoms (" << header.f_atom_count 
                << " fixed) each");
 
   if(alist.size() != static_cast<size_t>(header.t_atom_count)) {
-    LOGN_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
+    LOG_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
                << " in coordinate file, " << header.t_atom_count 
                << " in each traj frame");
     throw(IOException("invalid trajectory"));
@@ -161,7 +161,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
     // read each frame
     if(!ff) {
       /* premature EOF */
-      LOGN_ERROR("LoadCHARMMTraj: premature end of file, " << i 
+      LOG_ERROR("LoadCHARMMTraj: premature end of file, " << i 
                  << " frames read");
       break;
     }
@@ -200,11 +200,11 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
 
   ff.get();
   if(!ff.eof()) {
-    LOGN_VERBOSE("LoadCHARMMTraj: unexpected trailing file data, bytes read: " 
+    LOG_VERBOSE("LoadCHARMMTraj: unexpected trailing file data, bytes read: " 
                  << ff.tellg());
   }
 
-  LOGN_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with " << cg.GetAtomCount() << " atoms each");
+  LOG_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with " << cg.GetAtomCount() << " atoms each");
 
   return cg;
 }

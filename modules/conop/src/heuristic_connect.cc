@@ -133,7 +133,7 @@ void fill_map(ConnResEntryMap& em)
   for(int ec=0;ec<def_entry_count;++ec) {
     heuristic_connect::CONN_DEF_ENTRY& def_entry = heuristic_connect::def_entry_table[ec];
     ConnResEntry entry(def_entry.abbrev);
-    LOG_DUMP("creating default entry for " << def_entry.abbrev << std::endl);
+    LOG_DEBUG("creating default entry for " << def_entry.abbrev << std::endl);
     // first the connectivity entries
     for(int cc=0;cc<def_entry.conn_count;++cc) {
       int conn_id[] = {def_entry.conn_list[cc][0],def_entry.conn_list[cc][1]};
@@ -160,9 +160,9 @@ void fill_map(ConnResEntryMap& em)
         else if(conn_nam[1]==String("-")) { entry.SetPrev(conn_nam[0]);}
         else if(conn_nam[0]==String("+")) { entry.SetNext(conn_nam[1]);}
         else if(conn_nam[1]==String("+")) { entry.SetNext(conn_nam[0]);}
-        LOG_DUMP(" " << conn_nam[0] << " " << conn_nam[1] << std::endl);
+        LOG_DEBUG(" " << conn_nam[0] << " " << conn_nam[1] << std::endl);
       } else {
-        LOG_DUMP(" " << conn_nam[0] << " " << conn_nam[1] << std::endl);
+        LOG_DEBUG(" " << conn_nam[0] << " " << conn_nam[1] << std::endl);
         entry.AddConn(conn_nam[0],conn_nam[1]);
       }
     }
@@ -203,14 +203,14 @@ std::pair<ConnResEntry,bool> LookupResEntry(const ResidueKey& key)
     initialized=true;
   }
 
-  LOG_DUMP("Looking for reskey '" << key << "' in connectivity map... ");
+  LOG_DEBUG("Looking for reskey '" << key << "' in connectivity map... ");
 
   ConnResEntryMap::iterator pos = emap.find(key);
   if(pos!=emap.end()) {
-    LOG_DUMP("found" << std::endl);
+    LOG_DEBUG("found" << std::endl);
     return std::make_pair(pos->second,true);
   } else {
-    LOG_DUMP("not found" << std::endl);
+    LOG_DEBUG("not found" << std::endl);
   }
   return std::make_pair(dummy,false);
 }
@@ -222,7 +222,7 @@ public:
 
   // visitor interface
   virtual bool VisitChain(const ChainHandle& chain) {
-    LOG_DUMP("connect: setting current chain to " << chain.GetName() << std::endl);
+    LOG_DEBUG("connect: setting current chain to " << chain.GetName() << std::endl);
     curr_chain_=chain;
     curr_residue_=ResidueHandle();
     prev_residue_=ResidueHandle();
@@ -232,13 +232,13 @@ public:
   }
 
   virtual bool VisitResidue(const ResidueHandle& res) {
-    LOG_DUMP("connect: setting current residue to " << res.GetKey() << " " << res.GetNumber() << std::endl);
+    LOG_DEBUG("connect: setting current residue to " << res.GetKey() << " " << res.GetNumber() << std::endl);
     // residue has changed
     curr_residue_=res;
     AtomHandleList atomlist = res.GetAtomList();
-    LOG_DUMP( "using atom list:" << std::endl);
+    LOG_DEBUG( "using atom list:" << std::endl);
     for(AtomHandleList::iterator it=atomlist.begin();it!=atomlist.end();++it) {
-      LOG_DUMP( " " << it->GetName() << " @" << it->GetPos() << std::endl);
+      LOG_DEBUG( " " << it->GetName() << " @" << it->GetPos() << std::endl);
     }
     
     std::pair<ConnResEntry,bool> ret = LookupResEntry(res.GetKey());
@@ -251,16 +251,16 @@ public:
         ++it2;
         for(;it2!=atomlist.end();++it2) {
           bool ex1,ex2;
-          LOG_DUMP( "checking for atom pair (" << it1->GetName() << "," << it2->GetName() << ") in connectivity table of " << res.GetKey() << "... ");
+          LOG_DEBUG( "checking for atom pair (" << it1->GetName() << "," << it2->GetName() << ") in connectivity table of " << res.GetKey() << "... ");
           int conn=centry.Check(it1->GetName(),it2->GetName(),ex1,ex2);
           if (conn==1) {
-            LOG_DUMP( "found" << std::endl);
+            LOG_DEBUG( "found" << std::endl);
             res.GetEntity().Connect(*it1,*it2);
           } else if(conn==2) {
-            LOG_DUMP( "found (reversed)" << std::endl);
+            LOG_DEBUG( "found (reversed)" << std::endl);
             res.GetEntity().Connect(*it2,*it1);
           } else {
-            LOG_DUMP( "not found" << std::endl);
+            LOG_DEBUG( "not found" << std::endl);
             // check ex1 and/or ex2
           }
         }
@@ -272,7 +272,7 @@ public:
           - previous residue number is consecutive to this one
         */
         if(centry.GetPrev()==it1->GetName()) { // 'PREV' entry
-          LOG_DUMP( "found 'prev' atom entry: " << it1->GetName() << std::endl);
+          LOG_DEBUG( "found 'prev' atom entry: " << it1->GetName() << std::endl);
           if(prev_residue_) { // previous residue exists
             if(!next_atom_name_.empty()) { // previous residue 'NEXT' atom set
               if(InSequence(prev_residue_,res)) {
@@ -280,7 +280,7 @@ public:
                 for(AtomHandleList::iterator pit=prev_atomlist.begin();
                     pit!=prev_atomlist.end();++pit) {
                   if(pit->GetName()==next_atom_name_) {
-                    LOG_DUMP( "connecting previous atom " << pit->GetName() << " to "  << it1->GetName() << std::endl);
+                    LOG_DEBUG( "connecting previous atom " << pit->GetName() << " to "  << it1->GetName() << std::endl);
                     res.GetEntity().Connect(*pit,*it1);
                   }
                 }
@@ -290,7 +290,7 @@ public:
         }
 
         if(centry.GetNext()==it1->GetName()) {
-          LOG_DUMP( "found 'next' atom entry: " << it1->GetName() << std::endl);
+          LOG_DEBUG( "found 'next' atom entry: " << it1->GetName() << std::endl);
           // remember this atom for the next residue
           next_atom_name_=it1->GetName();
         }
@@ -386,9 +386,9 @@ public:
           if(ah[0] && ah[1] && ah[2] && ah[3]) {
             TorsionHandle th = chain.GetEntity().AddTorsion(tel[ti].name,ah[0],ah[1],ah[2],ah[3]);
             if(th) {
-              LOG_DUMP("added torsion entry for " << tel[ti].a[0] << " " << tel[ti].a[1] << " " << tel[ti].a[2] << " " << tel[ti].a[3] << std::endl);
+              LOG_DEBUG("added torsion entry for " << tel[ti].a[0] << " " << tel[ti].a[1] << " " << tel[ti].a[2] << " " << tel[ti].a[3] << std::endl);
             } else {
-              LOG_DUMP("no torsion entry for " << tel[ti].a[0] << " " << tel[ti].a[1] << " " << tel[ti].a[2] << " " << tel[ti].a[3] << std::endl);
+              LOG_DEBUG("no torsion entry for " << tel[ti].a[0] << " " << tel[ti].a[1] << " " << tel[ti].a[2] << " " << tel[ti].a[3] << std::endl);
             }
           }
         } // ti

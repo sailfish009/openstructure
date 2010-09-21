@@ -38,7 +38,7 @@ ConnectorImpl::ConnectorImpl(const EntityImplPtr& e, const AtomImplPtr& first,
 
 void ConnectorImpl::Apply(EntityVisitor& v)
 {
-  LOGN_TRACE("visitor @" << &v << " visiting bond impl @" << this);
+  LOG_TRACE("visitor @" << &v << " visiting bond impl @" << this);
   v.VisitBond(BondHandle(shared_from_this()));
 }
 
@@ -53,7 +53,7 @@ namespace {
 geom::Mat3 find_rotation(const geom::Vec3& d) {
   // assume the vectors are already normalized
   if (std::abs(Real(1.0-Length(d)))>0.00001) {
-    LOGN_DEBUG("connector find_rotation() has faulty length: " << Length(d));
+    LOG_DEBUG("connector find_rotation() has faulty length: " << Length(d));
     assert(0 && "error is big");
   }
   Real dot=d[2];

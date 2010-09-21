@@ -110,7 +110,7 @@ int setup_resources(QApplication& app)
 {
   QResource qr(":/images");
    if(!qr.isValid()) {
-     LOGN_ERROR("no valid /image Qt resource found");
+     LOG_ERROR("no valid /image Qt resource found");
      return -1;
    }
    int sizes[]={512,256,128,32,16, 0};

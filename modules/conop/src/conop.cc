@@ -279,15 +279,15 @@ private:
 void Conopology::ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flag)
 {
   Profile profile_connect("ConnectAll");
-  LOGN_DEBUG("Conopology: ConnectAll: building internal coordinate system");
+  LOG_DEBUG("Conopology: ConnectAll: building internal coordinate system");
   mol::XCSEditor xcs_e=eh.RequestXCSEditor(mol::BUFFERED_EDIT);
   PropAssigner a(b);
   eh.Apply(a);
-  LOGN_DUMP("Conopology: ConnectAll: connecting all bonds");
+  LOG_DEBUG("Conopology: ConnectAll: connecting all bonds");
   Connector connector(b);
   eh.Apply(connector);
 
-  LOGN_DUMP("Conopology: ConnectAll: assigning all torsions");
+  LOG_DEBUG("Conopology: ConnectAll: assigning all torsions");
   TorsionMaker tmaker(b);
   eh.Apply(tmaker);
 }

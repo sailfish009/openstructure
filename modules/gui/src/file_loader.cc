@@ -339,11 +339,11 @@ gfx::GfxObjP FileLoader::TryLoadAlignment(const QString& filename,
     try {
       handler->Import(seq_list,filename.toStdString());      
     } catch(io::IOException& e) {
-      LOGN_ERROR(e.what());
+      LOG_ERROR(e.what());
       return gfx::GfxObjP();
     }
     catch(seq::InvalidSequence& e) {
-      LOGN_ERROR(e.what());
+      LOG_ERROR(e.what());
       return gfx::GfxObjP();
     }
     seq::AlignmentHandle alignment = seq::AlignmentFromSequenceList(seq_list);
@@ -385,7 +385,7 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
     try {
       reader.Import(ent);      
     } catch (io::IOException &e) {
-      LOGN_ERROR(e.what());
+      LOG_ERROR(e.what());
       continue;
     }
     conop::Conopology::Instance().ConnectAll(builder,ent,0);

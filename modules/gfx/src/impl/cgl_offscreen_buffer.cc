@@ -42,7 +42,7 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height,
   GLint npix=0;
   CGLError err=CGLChoosePixelFormat(attributes, &pix_format_, &npix);
   if(err) {
-    LOGN_ERROR("error creating offscreen rendering context. "
+    LOG_ERROR("error creating offscreen rendering context. "
                "CGLChoosePixFormat failed:" << CGLErrorString(err));
     return;
   }
@@ -54,14 +54,14 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height,
     err=CGLCreateContext(pix_format_, NULL, &context_);
   }
   if(err) {
-    LOGN_ERROR("error creating offscreen rendering context. "
+    LOG_ERROR("error creating offscreen rendering context. "
                "CGLCreateContext failed" << CGLErrorString(err));
     return;
   }
   err=CGLCreatePBuffer(width, height, GL_TEXTURE_RECTANGLE_EXT, GL_RGBA, 0, 
                        &pbuffer_);
   if (err) {
-    LOGN_ERROR("error creating offscreen rendering context. "
+    LOG_ERROR("error creating offscreen rendering context. "
                "CGLCreatePBuffer failed: " << CGLErrorString(err));
     return;
   }
@@ -69,7 +69,7 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height,
   assert(CGLGetVirtualScreen(context_, &screen)==0);  
   err=CGLSetPBuffer(context_, pbuffer_, 0, 0, screen);
   if (err) {
-    LOGN_ERROR("error creating offscreen rendering context. "
+    LOG_ERROR("error creating offscreen rendering context. "
                "CGLSetPBuffer failed: " << CGLErrorString(err));
     return;
   }
@@ -83,7 +83,7 @@ bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
   CGLError err=CGLCreatePBuffer(width, height, GL_TEXTURE_RECTANGLE_EXT,
                                 GL_RGBA, 0,  &new_pbuffer);
   if (err) {
-    LOGN_ERROR("error resizing offscreen rendering context: "
+    LOG_ERROR("error resizing offscreen rendering context: "
                "CGLCreatePBuffer failed: " << CGLErrorString(err));
     return false;
   }
@@ -95,7 +95,7 @@ bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
 
   err=CGLSetPBuffer(context_, new_pbuffer, 0, 0, screen);
   if (err) {
-    LOGN_ERROR("error resizing offscreen rendering context. "
+    LOG_ERROR("error resizing offscreen rendering context. "
                "CGLSetPBuffer failed: " << CGLErrorString(err));
     return false;
   }
@@ -112,7 +112,7 @@ bool OffscreenBuffer::MakeActive()
   if(active_) return true;
 
   if (CGLError err=CGLSetCurrentContext(context_)) {
-    LOGN_ERROR("error switching to offscreen rendering context. "
+    LOG_ERROR("error switching to offscreen rendering context. "
 	       "CGLSetCurrentContext failed: " << CGLErrorString(err));
     return false;
   }

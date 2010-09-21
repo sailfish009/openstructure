@@ -448,13 +448,13 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
       if(smode==1) {
         AtomView av = sel_.FindAtom(sel.GetHandle());
         if(av.IsValid()) {
-          LOGN_DEBUG("de-selected atom: " << sel);
+          LOG_DEBUG("de-selected atom: " << sel);
           sel_.RemoveAtom(av);
           if(av.GetResidue().GetAtomCount()==0){
             av.GetResidue().GetChain().RemoveResidue(av.GetResidue());
           }
         } else {
-          LOGN_DEBUG("selected atom: " << sel);
+          LOG_DEBUG("selected atom: " << sel);
           sel_.AddAtom(sel.GetHandle());
         }
         result = sel.GetPos();
@@ -462,10 +462,10 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
         AtomView av=sel_.FindAtom(sel);
         ResidueView rv=sel_.FindResidue(sel.GetResidue());
         if(av.IsValid() && rv.IsValid()) {
-          LOGN_DEBUG("de-selected residue: " << sel.GetResidue());
+          LOG_DEBUG("de-selected residue: " << sel.GetResidue());
           sel_.RemoveResidue(rv);
         } else {
-          LOGN_DEBUG("selected residue: " << sel.GetResidue());
+          LOG_DEBUG("selected residue: " << sel.GetResidue());
           sel_.AddResidue(sel.GetResidue(),ViewAddFlag::INCLUDE_ALL);
         }
         AtomHandle ca=sel.GetHandle().GetResidue().GetCentralAtom();
@@ -477,10 +477,10 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
         ChainHandle chain=sel.GetHandle().GetResidue().GetChain();
         ChainView cv = sel_.FindChain(chain);
         if(cv.IsValid()) {
-          LOGN_DEBUG("de-selected chain: " << chain);
+          LOG_DEBUG("de-selected chain: " << chain);
           sel_.RemoveChain(cv);
         } else {
-          LOGN_DEBUG("selected chain: " << chain);
+          LOG_DEBUG("selected chain: " << chain);
           sel_.AddChain(chain, ViewAddFlag::INCLUDE_ALL);
         }
         result = geom::Vec3(); // todo calculate center of mass
@@ -496,7 +496,7 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
     }
   }
   if(sel) {
-    LOGN_MESSAGE("picked " << sel.GetResidue().GetChain().GetName() << " " 
+    LOG_INFO("picked " << sel.GetResidue().GetChain().GetName() << " " 
                  << sel.GetResidue().GetNumber() << " " << sel.GetName());
     return true;
   }
@@ -815,7 +815,7 @@ void Entity::RadiusBy(const String& prop,
         it->rad=clamp(normalize(epm.Get(it->atom), minv, maxv),0.0,1.0)*(rmax-rmin)+rmin;
         max_rad_=std::max(max_rad_,it->rad);
       } catch (std::exception&) {
-        LOGN_DEBUG("property " << prop << " not found");
+        LOG_DEBUG("property " << prop << " not found");
       }
     }
   }
