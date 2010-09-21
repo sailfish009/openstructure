@@ -18,7 +18,7 @@ void main()
     // ambient occlusion and color terms
     ambient_color = gl_MultiTexCoord0;
   } else {
-    ambient_color.rgb = gl_Color;
+    ambient_color = gl_Color;
     ambient_color.a = 1.0;
   }
   gl_FrontColor=gl_Color;
