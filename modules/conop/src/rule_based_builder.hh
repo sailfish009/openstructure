@@ -108,14 +108,16 @@ public:
   /// \brief Set residue properties such as chemical class
   virtual void FillResidueProps(mol::ResidueHandle residue);
 
-
-                              
+  /// \brief whether the residue has unknown atoms
+  bool HasUnknownAtoms(mol::ResidueHandle res);                              
   /// \brief Check whether the residue has all required atoms. This does not
   ///        include hydrogens and leaving atoms such as the terminal OXT.
   virtual bool IsResidueComplete(const mol::ResidueHandle& residue);
 private:
   CompoundLibPtr      compound_lib_;
   CompoundPtr         last_compound_;
+  mol::ResidueHandle  last_residue_;
+  bool                unknown_atoms_;
   void LookupCompound(const mol::ResidueHandle& rh);
   /// Change internal order of atoms in residue to the order given by compound
   void ReorderAtoms(mol::ResidueHandle residue, CompoundPtr compound);

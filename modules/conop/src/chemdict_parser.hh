@@ -1,0 +1,89 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2010 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
+#ifndef OST_CONOP_CHEMDICT_PARSER_HH
+#define OST_CONOP_CHEMDICT_PARSER_HH
+
+/*
+  Author: Marco Biasini
+ */
+ 
+ 
+#include <ost/mol/mol.hh>
+#include <ost/io/mol/star_parser.hh>
+#include <ost/conop/compound_lib.hh>
+ 
+namespace ost { namespace conop {
+
+typedef enum {
+  ATOM_SPEC,
+  BOND_SPEC,
+  DONT_KNOW
+} LoopType;
+
+class DLLEXPORT_OST_CONOP ChemdictParser : public io::StarParser {
+public:
+  ChemdictParser(std::istream& stream): 
+    io::StarParser(stream),
+    compound_(new Compound("UNK")), last_(0), loop_type_(DONT_KNOW)
+  {
+    this->InitTypeMap();
+  }
+
+  virtual bool OnBeginData(const StringRef& data_name);
+
+  virtual bool OnBeginLoop(const io::StarLoopDesc& header);
+
+  virtual void OnDataRow(const io::StarLoopDesc& header, 
+                         const std::vector<StringRef>& columns);
+
+  virtual void OnDataItem(const io::StarDataItem& item);
+
+  virtual void OnEndData();
+
+  void SetCompoundLib(const CompoundLibPtr& lib) 
+  {
+    lib_=lib;
+  }
+private:
+  void InitTypeMap();  
+  CompoundLibPtr                   lib_;
+  CompoundPtr                      compound_;
+  typedef enum {
+    ATOM_NAME=0,
+    ALT_ATOM_NAME=1,
+    IS_AROMATIC=2,
+    ORDINAL=3,
+    IS_LEAVING=4,
+    ELE=5,
+    STEREO_CONF=6,
+    ATOM_ID1=0,
+    ATOM_ID2=1,
+    BOND_ORDER=2
+  } PropIndex;
+  char                                    last_;
+  int                                     indices_[10];
+  bool                                    insert_;
+  static std::map<String, mol::ChemClass> tm_;  
+  std::map<String, int>                   atom_map_;
+  LoopType                                loop_type_;  
+  AtomSpec                                atom_;
+};
+
+
+}}

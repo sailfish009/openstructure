@@ -33,8 +33,9 @@ namespace ost { namespace conop {
 
 void RuleBasedBuilder::CompleteAtoms(mol::ResidueHandle rh) {}
 
-void RuleBasedBuilder::CheckResidueCompleteness(const mol::ResidueHandle& rh) {
-  LookupCompound(rh);
+void RuleBasedBuilder::CheckResidueCompleteness(const mol::ResidueHandle& rh) 
+{
+  this->LookupCompound(rh);
   if (!last_compound_) {
     mol::AtomHandleList atoms=rh.GetAtomList();    
     for (mol::AtomHandleList::const_iterator i=atoms.begin(), 
@@ -43,7 +44,7 @@ void RuleBasedBuilder::CheckResidueCompleteness(const mol::ResidueHandle& rh) {
     }
     return;
   }
-  ReorderAtoms(rh , last_compound_);
+  this->ReorderAtoms(rh , last_compound_);
   AtomSpecList::const_iterator j=last_compound_->GetAtomSpecs().begin();
   mol::AtomHandleList atoms=rh.GetAtomList();
   mol::AtomHandleList::iterator i=atoms.begin();
@@ -53,10 +54,28 @@ void RuleBasedBuilder::CheckResidueCompleteness(const mol::ResidueHandle& rh) {
     if ((*j).ordinal!=static_cast<int>((*i).Impl()->GetState())) {
       this->OnMissingAtom(rh, (*j).name);
     } else {
-      this->FillAtomProps(*i, *j);
       ++i;
     }
   }
+}
+
+bool RuleBasedBuilder::HasUnknownAtoms(mol::ResidueHandle res)
+{
+  this->LookupCompound(res);
+  if (!last_compound_) {
+    return true;
+  }
+  this->ReorderAtoms(res, last_compound_);
+  AtomSpecList::const_iterator j=last_compound_->GetAtomSpecs().begin();
+  mol::AtomHandleList atoms=res.GetAtomList();
+  mol::AtomHandleList::iterator i=atoms.begin();
+  for (mol::AtomHandleList::iterator 
+       i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
+    if ((*i).Impl()->GetState()==std::numeric_limits<unsigned int>::max()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec) 
@@ -75,8 +94,9 @@ void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec)
   atom.SetAtomProps(props);  
 }
 
-void RuleBasedBuilder::FillResidueProps(mol::ResidueHandle residue) {
-  LookupCompound(residue);
+void RuleBasedBuilder::FillResidueProps(mol::ResidueHandle residue) 
+{
+  this->LookupCompound(residue);
   if (!last_compound_)
     return;
   residue.SetChemClass(last_compound_->GetChemClass());
@@ -103,6 +123,9 @@ void RuleBasedBuilder::LookupCompound(const mol::ResidueHandle& rh)
 void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
                                     CompoundPtr compound) 
 {
+  if (last_residue_==residue) {
+    return;
+  }
   mol::impl::ResidueImplPtr impl=residue.Impl();
   mol::impl::AtomImplList::iterator i=impl->GetAtomList().begin();
   for (; i!=impl->GetAtomList().end(); ++i) {
@@ -110,7 +133,7 @@ void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
     int index=compound->GetAtomSpecIndex(atom->GetName());
     if (index==-1) {
       if (!this->OnUnknownAtom(mol::AtomHandle(atom))) {
-        atom->SetState(std::numeric_limits<int>::max());
+        atom->SetState(std::numeric_limits<unsigned int>::max());
       }
       continue;
     }
@@ -118,6 +141,14 @@ void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
   }
   std::sort(impl->GetAtomList().begin(), impl->GetAtomList().end(),
             OrdinalComp());
+  last_residue_=residue;
+  unknown_atoms_=this->HasUnknownAtoms(residue);
+  if (unknown_atoms_) {
+    LOG_WARNING("residue " << residue << " doesn't look like a standard " 
+                << residue.GetKey());
+    residue.SetChemClass(mol::ChemClass(mol::ChemClass::Unknown));
+    residue.SetOneLetterCode('?');
+  }
 }
 
 
@@ -132,7 +163,9 @@ mol::ResidueKey RuleBasedBuilder::IdentifyResidue(const mol::ResidueHandle& rh)
   }
 }
 
-mol::AtomHandle RuleBasedBuilder::LocateAtom(const mol::AtomHandleList& ahl, int ordinal) {
+mol::AtomHandle RuleBasedBuilder::LocateAtom(const mol::AtomHandleList& ahl, 
+                                             int ordinal) 
+{
   if (ahl.empty())
     return mol::AtomHandle();
   const mol::AtomHandle* r_it=&ahl.back();
@@ -148,14 +181,26 @@ mol::AtomHandle RuleBasedBuilder::LocateAtom(const mol::AtomHandleList& ahl, int
   return  not_found ? mol::AtomHandle() : *r_it;
 }
 
-void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh) {
+
+inline void dist_connect(RuleBasedBuilder* b, mol::AtomHandleList atoms)
+{
+  for (mol::AtomHandleList::const_iterator i=atoms.begin(), 
+       e=atoms.end(); i!=e; ++i) {
+    b->DistanceBasedConnect(*i);
+  }  
+}
+void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh) 
+{
+
   LookupCompound(rh);
+    
   if (!last_compound_) {
-    mol::AtomHandleList atoms=rh.GetAtomList();
-    for (mol::AtomHandleList::const_iterator i=atoms.begin(), 
-         e=atoms.end(); i!=e; ++i) {
-      this->DistanceBasedConnect(*i);
-    }
+    dist_connect(this, rh.GetAtomList());
+    return;
+  }
+  this->ReorderAtoms(rh, last_compound_);
+  if (unknown_atoms_) {
+    dist_connect(this, rh.GetAtomList());
     return;
   }
   mol::XCSEditor e=rh.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
@@ -166,19 +211,14 @@ void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh) {
       mol::AtomHandle a1=this->LocateAtom(atoms, bond.atom_one);
       mol::AtomHandle a2=this->LocateAtom(atoms, bond.atom_two);
       if (a1.IsValid() && a2.IsValid() && this->IsBondFeasible(a1, a2)) {
-          e.Connect(a1, a2, bond.order);
+        e.Connect(a1, a2, bond.order);
       }
-  }
-  for (mol::AtomHandleList::const_iterator i=atoms.begin(),
-       e=atoms.end(); i!=e; ++i) {
-    if (int((*i).Impl()->GetState())==std::numeric_limits<int>::max()) {
-      this->DistanceBasedConnect(*i);      
-    }
   }
 }
 
 void RuleBasedBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
-                                            mol::ResidueHandle next) {
+                                            mol::ResidueHandle next) 
+{
   if (!next.IsValid()) {
     return;
   }
@@ -208,7 +248,8 @@ void RuleBasedBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
 }
 
 
-void RuleBasedBuilder::AssignTorsions(mol::ChainHandle chain) {
+void RuleBasedBuilder::AssignTorsions(mol::ChainHandle chain) 
+{
   if (chain.GetResidueCount()==0)
     return;
   std::vector<mol::ResidueHandle> rlist = chain.GetResidueList();
@@ -219,7 +260,8 @@ void RuleBasedBuilder::AssignTorsions(mol::ChainHandle chain) {
   }
 }
 
-void RuleBasedBuilder::AssignTorsionsToResidue(mol::ResidueHandle residue) {
+void RuleBasedBuilder::AssignTorsionsToResidue(mol::ResidueHandle residue) 
+{
   /// The only components having named torsions are the standard set of amino
   /// acids, plus some of compounds derived from them such as selenium
   /// methionine. Things are simplified a lot by only storing the torsions

@@ -214,10 +214,13 @@ namespace {
 class PropAssigner: public mol::EntityVisitor {
 public:
   PropAssigner(const BuilderP& builder): builder_(builder) {}
+  
   virtual bool VisitResidue(const mol::ResidueHandle& res)
   {
     String key=builder_->IdentifyResidue(res);
-    builder_->CheckResidueCompleteness(res);
+    if (key=="UNK") {
+      unk_res_[res.GetKey()]+=1;
+    }
     builder_->FillResidueProps(res);
     return true;
   }
@@ -227,8 +230,23 @@ public:
     builder_->FillAtomProps(atom);
     return false;
   }
+  
+  virtual void OnExit()
+  {
+    for (std::map<String, int>::iterator i=unk_res_.begin(), 
+         e=unk_res_.end(); i!=e; ++i) {
+      if (i->second>1) {
+        LOG_WARNING("structure contains unknown residues with name " << i->first 
+                    << " ("<< i->second << "x)");
+      } else {        
+        LOG_WARNING("structure contains unknown residue with name " << i->first);
+      }
+
+    }
+  }
 private:
   BuilderP builder_;
+  std::map<String, int>  unk_res_;  
 };
 
 
@@ -247,8 +265,8 @@ public:
 
   virtual bool VisitResidue(const mol::ResidueHandle& res) {
     builder_->ConnectAtomsOfResidue(res);
-    if(prev_) {
-        builder_->ConnectResidueToPrev(res,prev_);
+    if (prev_) {
+      builder_->ConnectResidueToPrev(res,prev_);
     }
     prev_=res;
     return false;
