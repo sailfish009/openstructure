@@ -36,7 +36,7 @@ typedef enum {
   DONT_KNOW
 } LoopType;
 
-class DLLEXPORT_OST_CONOP ChemdictParser : public StarParser {
+class DLLEXPORT_OST_IO ChemdictParser : public StarParser {
 public:
   ChemdictParser(std::istream& stream, conop::Compound::Dialect dialect): 
     StarParser(stream), compound_(new conop::Compound("UNK")), 
