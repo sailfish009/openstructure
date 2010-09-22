@@ -72,7 +72,7 @@ bool RuleBasedBuilder::HasUnknownAtoms(mol::ResidueHandle res)
   for (mol::AtomHandleList::iterator 
        i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
     if ((*i).Impl()->GetState()==std::numeric_limits<unsigned int>::max()) {
-      if ((*i).GetElement()!="H" && this->GetStrictHydrogenMode()==false) {
+      if ((*i).GetElement()=="H" && this->GetStrictHydrogenMode()==false) {
         continue;
       }
       return true;
