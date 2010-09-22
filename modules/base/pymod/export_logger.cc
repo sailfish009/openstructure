@@ -116,6 +116,8 @@ void export_Logger()
   // the sink stack, we will get "Fatal Python error: PyEval_SaveThread: 
   // NULL tstate" upon exiting ost. I don't completely understand why, though.
   scope().attr("__dict__")["atexit"]=import("atexit");
+
   def("_reset_sinks", &reset_sinks);
-  exec("atexit.register(_reset_sinks)", scope().attr("__dict__"));
+  object r=scope().attr("_reset_sinks");
+  scope().attr("atexit").attr("register")(r);
 }
