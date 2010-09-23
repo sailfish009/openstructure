@@ -85,15 +85,15 @@ public:
 
   /// \brief Get sequence offset from N-terminus
   ///
-  /// \sa #SetSequenceOffset
-  int GetSequenceOffset() const;
+  /// \sa #SetOffset
+  int GetOffset() const;
 
   /// \brief Set sequence offset
   ///
   /// By default the sequence offset is zero, i.e. the beginning of the sequence
   /// lies exactly at the N-terminus. Setting the sequence offset to a positive
   /// number will shift the sequence towards the C-terminus.
-  void SetSequenceOffset(int offset);
+  void SetOffset(int offset);
 
   /// \brief Get lenght of sequence, including gaps.
   int GetLength() const;
@@ -155,7 +155,7 @@ private:
   String              seq_string_;
   std::list<Shift>    shifts_;
   bool                editing_;
-  int                 sequence_offset_;
+  int                 offset_;
   mol::EntityView          attached_view_;
 };
 

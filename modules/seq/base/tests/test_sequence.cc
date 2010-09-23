@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(seq_offset)
 {
   SequenceHandle s=CreateSequence("S1", "-afc--de-f");
   SequenceHandle s2=CreateSequence("S1", "-afc--de-f");
-  s.SetSequenceOffset(2);
+  s.SetOffset(2);
   BOOST_CHECK_THROW(s.GetPos(-1), Error);
   BOOST_CHECK_THROW(s.GetPos(0), Error);
   BOOST_CHECK_THROW(s.GetPos(1), Error);
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE(seq_offset)
   BOOST_CHECK_THROW(s.GetResidueIndex(10), std::out_of_range);
   BOOST_CHECK_THROW(s.GetResidueIndex(-1), std::out_of_range);
 
-  s.SetSequenceOffset(-1);
+  s.SetOffset(-1);
   BOOST_CHECK_THROW(s.GetPos(-2), Error);
   BOOST_CHECK_EQUAL(s.GetPos(-1), 1);
   BOOST_CHECK_EQUAL(s.GetPos(0), 2);

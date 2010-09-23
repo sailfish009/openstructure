@@ -66,9 +66,9 @@ ViewsFromSequences(const ConstSequenceHandle& seq1,
   mol::ResidueViewList res_b=src_b.GetResidueList();  
   int pos=0, index_a=0, index_b=0;
   while (skip_gaps(seq1, seq2, pos, index_a, index_b)) {
-    dst_a.AddResidue(res_a.at(seq1.GetSequenceOffset()+index_a), 
+    dst_a.AddResidue(res_a.at(seq1.GetOffset()+index_a), 
                      mol::ViewAddFlag::INCLUDE_ATOMS);
-    dst_b.AddResidue(res_b.at(seq2.GetSequenceOffset()+index_b), 
+    dst_b.AddResidue(res_b.at(seq2.GetOffset()+index_b), 
                      mol::ViewAddFlag::INCLUDE_ATOMS);
     pos+=1;
     index_a+=1;

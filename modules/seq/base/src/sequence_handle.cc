@@ -88,10 +88,10 @@ String ConstSequenceHandle::GetGaplessString() const
   return Impl()->GetGaplessString();
 }
 
-int ConstSequenceHandle::GetSequenceOffset() const
+int ConstSequenceHandle::GetOffset() const
 {
   this->CheckValidity();
-  return Impl()->GetSequenceOffset();  
+  return Impl()->GetOffset();  
 }
 
 
@@ -183,10 +183,10 @@ void SequenceHandle::SetString(const String& seq)
   return Impl()->SetString(seq);   
 }
 
-void SequenceHandle::SetSequenceOffset(int offset)
+void SequenceHandle::SetOffset(int offset)
 {
   this->CheckValidity();
-  return Impl()->SetSequenceOffset(offset);   
+  return Impl()->SetOffset(offset);   
 }
 
 
@@ -268,10 +268,10 @@ String SequenceHandle::GetGaplessString() const
   return Impl()->GetGaplessString();
 }
 
-int SequenceHandle::GetSequenceOffset() const
+int SequenceHandle::GetOffset() const
 {
   this->CheckValidity();
-  return Impl()->GetSequenceOffset();  
+  return Impl()->GetOffset();  
 }
 
 SequenceHandle::operator ConstSequenceHandle() const

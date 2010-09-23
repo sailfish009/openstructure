@@ -148,15 +148,15 @@ The SequenceHandle
     Returns the name of the sequence. Also available as the property
     :attr:`name`
   
-  .. method:: SetSequenceOffset()
+  .. method:: SetOffset()
   
     Set the :ref:`sequence offset <sequence-offset>`. By default, the offset is
-    0. Also available as the property :attr:`sequence_offset`.
+    0. Also available as the property :attr:`offset`.
     
-  .. method:: GetSequenceOffset()
+  .. method:: GetOffset()
     
     Returns the :ref:`sequence offset <sequence-offset>`. Also available as
-    :attr:`sequence_offset`.
+    :attr:`offset`.
     
     
   .. method:: GetGaplessString()
@@ -181,7 +181,7 @@ The SequenceHandle
   
     Shorthand for :meth:`GetAttachedView`.
 
-  .. attribute:: sequence_offset
+  .. attribute:: offset
   
     Shorthand for :meth:`GetSequenceOffset`/:meth:`SetSequenceOffset`
 

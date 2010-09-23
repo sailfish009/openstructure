@@ -89,7 +89,7 @@ SequenceHandle shift_reference(const SequenceHandle& ref_seq,
                                             new_sequence.str());
   if (ref_seq.HasAttachedView())
     s.AttachView(ref_seq.GetAttachedView());
-  s.SetSequenceOffset(s.GetSequenceOffset());
+  s.SetOffset(s.GetOffset());
   return s;
 }
 
@@ -123,7 +123,7 @@ SequenceHandle realign_sequence(const AlignmentHandle& aln,
   SequenceHandle s=CreateSequence(s2.GetName(), new_sequence.str());
   if (s2.HasAttachedView())
     s.AttachView(s2.GetAttachedView());
-  s.SetSequenceOffset(s2.GetSequenceOffset());
+  s.SetOffset(s2.GetOffset());
   return s;
 }  
 

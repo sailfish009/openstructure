@@ -74,7 +74,7 @@ void SequenceImpl::SetString(const String& seq)
 
 SequenceImpl::SequenceImpl(const String& seq_name,
                    const String& seq_string)
-  : seq_name_(seq_name), seq_string_(seq_string), sequence_offset_(0)
+  : seq_name_(seq_name), seq_string_(seq_string), offset_(0)
 {
   this->ShiftsFromSequence();
 }
@@ -82,7 +82,7 @@ SequenceImpl::SequenceImpl(const String& seq_name,
 SequenceImplPtr SequenceImpl::Copy() const
 {
   SequenceImplPtr new_seq(new SequenceImpl(seq_name_, seq_string_));
-  new_seq->sequence_offset_=sequence_offset_;
+  new_seq->offset_=offset_;
   new_seq->shifts_=shifts_;
   new_seq->attached_view_=attached_view_;
   return new_seq;
@@ -139,7 +139,7 @@ int SequenceImpl::GetResidueIndex(int pos) const
     if (s.start<=pos)
       shift+=s.shift;
   }
-  return pos-shift+sequence_offset_;
+  return pos-shift+offset_;
 }
 
 void SequenceImpl::SetName(const String& seq_name)
@@ -154,7 +154,7 @@ const String& SequenceImpl::GetName() const
 
 int SequenceImpl::GetPos(int index) const
 {
-  int shifted_index=index-sequence_offset_;
+  int shifted_index=index-offset_;
   int pos=this->GetPosNoBounds(shifted_index);
   if (pos<0 || pos>=static_cast<int>(seq_string_.length()))
     throw Error("number not covered in sequence");
@@ -174,15 +174,15 @@ int SequenceImpl::GetPosNoBounds(int index) const
 }
 
 /// \brief  Set offset for sequence alignment.
-void SequenceImpl::SetSequenceOffset(int offset)
+void SequenceImpl::SetOffset(int offset)
 {
-  sequence_offset_=offset;
+  offset_=offset;
 }
 
 /// \brief Get sequence offset
-int SequenceImpl::GetSequenceOffset() const
+int SequenceImpl::GetOffset() const
 {
-  return sequence_offset_;
+  return offset_;
 }
 
 int SequenceImpl::GetLength() const {
@@ -259,7 +259,7 @@ void SequenceImplToInfo(const SequenceImplPtr& sequence, info::InfoGroup& group)
   group.SetTextData(sequence->GetString());
   group.SetAttribute("name", sequence->GetName());
   std::ostringstream ss;
-  ss << sequence->GetSequenceOffset();
+  ss << sequence->GetOffset();
   group.SetAttribute("offset", ss.str());
 }
 
@@ -271,7 +271,7 @@ SequenceImplPtr SequenceImplFromInfo(const info::InfoGroup& group)
   ss >> offset;
   SequenceImplPtr sequence=SequenceImpl::FromString(group.GetAttribute("name"), 
                                                     text);
-  sequence->SetSequenceOffset(offset);
+  sequence->SetOffset(offset);
   return sequence;
 }
 

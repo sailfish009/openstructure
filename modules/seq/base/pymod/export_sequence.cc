@@ -209,7 +209,7 @@ void const_seq_handle_def(O& bp_class)
     .def("GetResidue", &C::GetResidue)
     .def("GetOneLetterCode", &C::GetOneLetterCode)
     .def("__getitem__", &C::GetOneLetterCode)
-    .def("GetSequenceOffset", &C::GetSequenceOffset)
+    .def("GetOffset", &C::GetOffset)
     .def("Copy", &C::Copy)
     .def("IsValid", &C::IsValid)
     .def("GetFirstNonGap", &C::GetFirstNonGap)
@@ -229,7 +229,7 @@ void const_seq_handle_def(O& bp_class)
     .add_property("name",
                   make_function(&C::GetName,
                                 return_value_policy<copy_const_reference>()))
-    .add_property("sequence_offset", &C::GetSequenceOffset)
+    .add_property("offset", &C::GetOffset)
     .add_property("gapless_string", &C::GetGaplessString)
     .add_property("string",
                   make_function(&C::GetString,
@@ -252,7 +252,7 @@ void export_sequence()
   seq_handle
     .def("__setitem__", &SequenceHandle::SetOneLetterCode)
     .def("SetOneLetterCode", &SequenceHandle::SetOneLetterCode)  
-    .def("SetSequenceOffset", &SequenceHandle::SetSequenceOffset)
+    .def("SetOffset", &SequenceHandle::SetOffset)
     .def("AttachView", attach_one)
     .def("AttachView", attach_two)
     .def("SetString", &SequenceHandle::SetString)
@@ -265,8 +265,8 @@ void export_sequence()
                   make_function(&SequenceHandle::GetName,
                                 return_value_policy<copy_const_reference>()),
                   &SequenceHandle::SetName)
-    .add_property("sequence_offset", &SequenceHandle::GetSequenceOffset,
-                  &SequenceHandle::SetSequenceOffset)
+    .add_property("offset", &SequenceHandle::GetOffset,
+                  &SequenceHandle::SetOffset)
   ;
 
   implicitly_convertible<SequenceHandle, ConstSequenceHandle>();

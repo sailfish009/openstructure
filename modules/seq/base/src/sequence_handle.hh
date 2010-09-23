@@ -84,8 +84,8 @@ public:
 
   /// \brief Get sequence offset from N-terminus
   ///
-  /// \sa SequenceHandle::SetSequenceOffset
-  int GetSequenceOffset() const;  
+  /// \sa SequenceHandle::SetOffset
+  int GetOffset() const;  
   
   /// \brief Get lenght of sequence, including gaps.
   int GetLength() const;
@@ -140,7 +140,7 @@ private:
 /// "multiple sequence alignment". The class allows for fast mapping between
 /// residue index and position in the sequence. The GetResidueIndex() method
 /// maps from position in the sequence to residue index, taking the
-/// \ref GetSequenceOffset() "sequence offset" into account. The reverse
+/// \ref GetOffset() "sequence offset" into account. The reverse
 /// mapping is done with GetPos().
 /// 
 /// Optionally, an entity view may be attached to the sequence with
@@ -195,8 +195,8 @@ public:
 
   /// \brief Get sequence offset from N-terminus
   ///
-  /// \sa SequenceHandle::SetSequenceOffset
-  int GetSequenceOffset() const;  
+  /// \sa SequenceHandle::GetOffset
+  int GetOffset() const;  
   
   /// \brief Get lenght of sequence, including gaps.
   int GetLength() const;
@@ -246,7 +246,7 @@ public:
   /// By default the sequence offset is zero, i.e. the beginning of the sequence
   /// lies exactly at the N-terminus. Setting the sequence offset to a positive
   /// number will shift the sequence towards the C-terminus.
-  void SetSequenceOffset(int offset);
+  void SetOffset(int offset);
 
   /// \brief attach entity view to sequence
   ///
