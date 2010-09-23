@@ -1,5 +1,4 @@
 set(OST_GFX_UNIT_TESTS
-  test_ent_pov_export.cc
   tests.cc
 )
 if (ENABLE_IMG)
