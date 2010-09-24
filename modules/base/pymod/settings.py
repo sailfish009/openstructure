@@ -58,6 +58,8 @@ def Locate(file_name, explicit_file_name=None, search_paths=[],
   error message is formatted in such a way that it can directly be presented to 
   the user.
   """
+  def _is_executable(filename):
+    return os.path.exists(filename) and os.access(filename, os.X_OK)
   if type(file_name) is str:
     file_names=[file_name]
   else:
@@ -66,14 +68,14 @@ def Locate(file_name, explicit_file_name=None, search_paths=[],
   epxl_inexistent='explicitly set file "%s" does not exist'
   set_env_var='set the environment variable %s to the absolute path to %s or '
   if explicit_file_name:
-    if os.path.exists(explicit_file_name):
+    if _is_executable(explicit_file_name):
       return explicit_file_name
     else:
       raise FileNotFound(file_name, epxl_inexistent % explicit_file_name)
   if env_name:
     file_env_name=os.getenv(env_name, None)
     if file_env_name:
-      if os.path.exists(file_env_name):
+      if _is_executable(file_env_name):
         return file_env_name
       else:
         raise FileNotFound(file_name, 
@@ -82,7 +84,7 @@ def Locate(file_name, explicit_file_name=None, search_paths=[],
   for search_path in search_paths:
     for file_name in file_names:
       full_file_name=os.path.join(search_path, file_name)
-      if os.path.exists(full_file_name):
+      if _is_executable(full_file_name):
         return full_file_name
 
   if search_system_paths:
@@ -94,7 +96,7 @@ def Locate(file_name, explicit_file_name=None, search_paths=[],
     for path in searched:
       for file_name in file_names:
         full_file_name=os.path.join(path, file_name)
-        if os.path.exists(full_file_name):
+        if _is_executable(full_file_name):
           return full_file_name
   msg=''        
   if len(searched)>0:
