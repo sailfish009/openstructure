@@ -107,19 +107,24 @@ QueryToken QueryLexer::LexQuotedStringLiteral()
 QueryToken QueryLexer::LexNumericToken() {
   Range range(current_, 0);
   static String allowed_chars("_");  
-  bool dot_present=false, is_string=false;
+  bool dot_present=false, is_string=false, last_was_dot=false;
   //TODO Better checking for duplicate -
   while(current_<query_string_.size()){
     if (isdigit(query_string_[current_]) || query_string_[current_]=='-') {
       current_++;
+      last_was_dot=false;
     } else if (query_string_[current_]=='.') {
       if (dot_present) {
         is_string=true;
         break;
       }
       dot_present = true;
+      last_was_dot=true;
       current_++;
     } else {
+      if (last_was_dot) {
+        break;
+      }
       is_string=isalnum(query_string_[current_]) || 
                 allowed_chars.find_first_of(query_string_[current_])!=String::npos;
       break;
@@ -128,6 +133,11 @@ QueryToken QueryLexer::LexNumericToken() {
   range.Length=current_-range.Loc;
   if (!is_string) {
     if (dot_present) {
+      if (last_was_dot) {
+        current_--;
+        return QueryToken(Range(range.Loc, range.Length-1), 
+                          tok::IntegralValue);
+      }
       return QueryToken(range, tok::FloatingValue);      
     } else {
       return QueryToken(range, tok::IntegralValue);      
@@ -173,7 +183,10 @@ QueryToken QueryLexer::LexToken() {
         return QueryToken(Range(current_-1, 1), tok::Coma);
       case ':':
         current_++;
-        return QueryToken(Range(current_-1, 1), tok::Colon);        
+        return QueryToken(Range(current_-1, 1), tok::Colon);
+      case '.':
+        current_++;
+        return QueryToken(Range(current_-1, 1), tok::Dot);           
       case '{':
         current_++;
         return QueryToken(Range(current_-1, 1), tok::LeftCurlyBrace);
@@ -605,6 +618,44 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
   String s=query_string_.substr(sname.GetRange().Loc,sname.GetRange().Length);
   Prop property=PropertyFromString(s);
   QueryToken op=lexer.NextToken();
+  
+  // this block deals with the cname.rnum.aname shortcut.
+  if (op.GetType()==tok::Dot) {
+    QueryToken cname=sname;
+    QueryToken rnum=lexer.NextToken();
+    if (!this->Expect(tok::IntegralValue, "residue number", rnum)) {
+      return NULL;
+    }
+    if (!this->Expect(tok::Dot, "'.'", lexer.NextToken())) {
+      return NULL;
+    }
+    QueryToken aname=lexer.NextToken();
+    if (!this->Expect(tok::Identifier, "atom name", aname)) {
+      return NULL;
+    }
+    LogicOP lop=inversion_stack_.back() ? LOP_OR : LOP_AND;
+    CompOP cop=inversion_stack_.back() ? COP_NEQ : COP_EQ;
+    ParamType cname_val(query_string_.substr(cname.GetValueRange().Loc,
+                        cname.GetValueRange().Length).c_str());
+    Prop cname_prop(Prop::CNAME, Prop::STRING, Prop::CHAIN);
+    SelNode* cname_node=new SelNode(cname_prop, cop, cname_val);
+    ParamType aname_val(query_string_.substr(aname.GetValueRange().Loc,
+                        aname.GetValueRange().Length).c_str());
+   Prop aname_prop(Prop::ANAME, Prop::STRING, Prop::ATOM);
+    SelNode* aname_node=new SelNode(aname_prop, cop, aname_val);
+    ParamType rnum_val(atoi(query_string_.substr(rnum.GetValueRange().Loc,
+                            rnum.GetValueRange().Length).c_str()));
+    Prop rnum_prop(Prop::RNUM, Prop::INT, Prop::RESIDUE);                            
+    SelNode* rnum_node=new SelNode(rnum_prop, cop, rnum_val);
+    LogicOPNode* and_one=new LogicOPNode(lop);
+    LogicOPNode* and_two=new LogicOPNode(lop);  
+    and_one->SetLHS(and_two);
+    and_one->SetRHS(cname_node);
+    and_two->SetLHS(rnum_node);
+    and_two->SetRHS(aname_node);
+    lexer.NextToken();
+    return and_one;
+  }
   if (property.id>=Prop::CUSTOM) {
     property.id=(Prop::ID)(Prop::CUSTOM+num_gen_prop_++);
     EntityPropertyMapper epm=EntityPropertyMapper(s.substr(2), property.level);
