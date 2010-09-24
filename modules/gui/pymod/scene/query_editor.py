@@ -91,8 +91,8 @@ class QueryEditorWidget(QtGui.QWidget):
       self.status_.setText("")
     else:      
       d=query.GetErrorDescription()
-      self.status_.setText("<font color='red'>%s</font>"%d.msg)
-      self.status_.setFixedSize(self.width(),self.status_.height())
+      self.status_.setText("<font color='red'>%s</font>"%d.msg.strip())
+      #self.status_.setFixedSize(self.width(),self.status_.height())
       cursor.movePosition(QtGui.QTextCursor.Start)
       if d.range.Loc<len(query.string):
         
