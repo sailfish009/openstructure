@@ -438,7 +438,8 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
 
       std::ostringstream os;
       os << GetName() << ": " << sel.GetQualifiedName() << " " 
-         << sel.GetPos();
+         << sel.GetPos() << " (ele=" << sel.GetElement() << ", bfactor=" 
+         << sel.GetBFactor() << ")";
       Scene::Instance().StatusMessage(os.str());
 
       if(!pick_flag) {
