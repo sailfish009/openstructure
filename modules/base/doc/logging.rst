@@ -19,10 +19,10 @@ OpenStructure has a logging system going beyond what print statements can offer.
 .. note::
 
   In C++, the logging facility is implemented as a set of macros, called
-  `LOG_ERROR`, `LOG_WARNING`, `LOG_INFO`, `LOG_VERBOSE`, `LOG_DEBUG` and
-  `LOG_TRACE`. The last two are only active when compiling with debugging 
-  symbols. When debugging symbols are off, they expand to an empty macro and 
-  thus don't create any overhead.
+  `LOG_ERROR`, `LOG_WARNING`, `LOG_SCRIPT`, `LOG_INFO`, `LOG_VERBOSE`,
+  `LOG_DEBUG` and `LOG_TRACE`. The last two are only active when compiling with 
+  debugging symbols. When debugging symbols are off, they expand to an empty 
+  macro and thus don't create any overhead.
 
 
 Verbosity Level
@@ -34,7 +34,7 @@ You can change the verbosity level  with the following two methods:
 
   Change the verbosity level to the given integer value. All log events 
   which have a severity above verbosity will be ignored. By default, the log 
-  level is 2, meaning that errors, warnings and info logging events are 
+  level is 2, meaning that errors, warnings and script logging events are 
   visible.
 
   :type  verbosity: :class:`int`
@@ -140,10 +140,14 @@ WARNING:
   Diagnose potential problems that do not abort the execution, but may 
   point to a misconfiguration/misuse. This level is turned on by default.
 
+SCRIPT: 
+  Logging level that should be used from scripts, e.g. to report progress. These 
+  logging messages are turned on by default.
+
 INFO: 
   Informative and important messages that summarize a complex command, such as 
   information on a loaded file, or results from an algorithm. These logging 
-  messages are turned on by default.
+  messages are not turned on by default.
 
 VERBOSE: 
   Grey-zone between user and developer need, and perhaps the hardest to get
@@ -178,7 +182,7 @@ terminal (or the python shell in DNG). The logger also prints the current time.
       ost.LogSink.__init__(self)
 
     def LogMessage(self, message, severity):
-      levels=['ERROR', 'WARNING', 'INFO', 
+      levels=['ERROR', 'WARNING', 'SCRIPT', 'INFO', 
               'VERBOSE', 'DEBUG', 'TRACE']
       level=levels[severity]
       print '%s[%s]: %s' % (level, str(datetime.datetime.now()), message),

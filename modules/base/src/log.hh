@@ -35,10 +35,11 @@ public:
   enum LogLevel {
     QUIET   =0,
     WARNING =1,
-    INFO    =2,
-    VERBOSE =3,
-    DEBUG   =4,
-    TRACE   =5
+    SCRIPT  =2,
+    INFO    =3,
+    VERBOSE =4,
+    DEBUG   =5,
+    TRACE   =6
   };
 
   void PushVerbosityLevel(int level);
@@ -82,6 +83,7 @@ private:
 
 #define LOG_ERROR(m) OST_DO_LOGGING_(m, ::ost::Logger::QUIET)
 #define LOG_WARNING(m) OST_DO_LOGGING_(m, ::ost::Logger::WARNING)
+#define LOG_SCRIPT(m) OST_DO_LOGGING_(m, ::ost::Logger::SCRIPT)
 #define LOG_INFO(m) OST_DO_LOGGING_(m, ::ost::Logger::INFO)
 #define LOG_VERBOSE(m) OST_DO_LOGGING_(m, ::ost::Logger::VERBOSE)
 #ifdef NDEBUG

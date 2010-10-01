@@ -73,6 +73,7 @@ void pop_log_sink()
 
 void log_error(const String& m) {LOG_ERROR(m);}
 void log_warning(const String& m) {LOG_WARNING(m);}
+void log_script(const String& m) {LOG_SCRIPT(m);}
 void log_info(const String& m) {LOG_INFO(m);}
 void log_verbose(const String& m) {LOG_VERBOSE(m);}
 
@@ -109,6 +110,7 @@ void export_Logger()
   def("LogError",log_error);
   def("LogWarning",log_warning);
   def("LogInfo",log_info);
+  def("LogScript", log_script)
   def("LogVerbose", log_verbose);
   
   // this relatively ugly construct is required to work around a problem with
