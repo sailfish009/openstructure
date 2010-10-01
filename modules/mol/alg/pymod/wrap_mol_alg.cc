@@ -22,6 +22,8 @@
  */
 #include <boost/python.hpp>
 #include <ost/config.hh>
+#include <ost/mol/alg/local_dist_test.hh>
+
 using namespace boost::python;
 
 void export_svdSuperPose();
@@ -36,4 +38,6 @@ BOOST_PYTHON_MODULE(_mol_alg)
   #if OST_IMG_ENABLED
   export_entity_to_density();
   #endif
+  
+  def("LocalDistTest", &ost::mol::alg::LocalDistTest);
 }
