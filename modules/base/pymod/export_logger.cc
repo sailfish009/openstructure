@@ -110,7 +110,7 @@ void export_Logger()
   def("LogError",log_error);
   def("LogWarning",log_warning);
   def("LogInfo",log_info);
-  def("LogScript", log_script)
+  def("LogScript", log_script);
   def("LogVerbose", log_verbose);
   
   // this relatively ugly construct is required to work around a problem with
