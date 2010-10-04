@@ -83,11 +83,11 @@ bool RuleBasedBuilder::HasUnknownAtoms(mol::ResidueHandle res)
 
 void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec) 
 {
+  Conopology& conop_inst=Conopology::Instance();
   mol::AtomProp props=atom.GetAtomProps();
-  if (props.element=="") {
+  if (!conop_inst.IsValidElement(props.element)) {
     props.element=spec.element;
   }
-  Conopology& conop_inst=Conopology::Instance();  
   if (props.radius==0.0) {
     props.radius=conop_inst.GetDefaultAtomRadius(spec.element);    
   }
@@ -331,10 +331,10 @@ void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom)
 bool RuleBasedBuilder::OnUnknownAtom(mol::AtomHandle atom)
 {
   mol::AtomProp props=atom.GetAtomProps();
-  if (props.element=="") {
+  Conopology& conop_inst=Conopology::Instance();
+  if (!conop_inst.IsValidElement(props.element)) {
     props.element=Builder::GuessAtomElement(atom.GetName(), props.is_hetatm);
   }
-  Conopology& conop_inst=Conopology::Instance();  
   if (props.radius==0.0) {
     props.radius=conop_inst.GetDefaultAtomRadius(props.element);    
   }

@@ -318,6 +318,15 @@ Real Conopology::GetDefaultAtomRadius(const String& element) const
   return it==ele_rad_map_.end() ? 1.5 : it->second;
 }
 
+bool Conopology::IsValidElement(const String& element) const
+{
+  String upper_ele=element;
+  std::transform(upper_ele.begin(),upper_ele.end(),upper_ele.begin(),toupper);  
+  
+  std::map<String,Real>::const_iterator it = ele_mass_map_.find(upper_ele);
+  return it!=ele_mass_map_.end();
+}
+
 Real Conopology::GetDefaultAtomMass(const String& element) const
 {
   String upper_ele=element;
