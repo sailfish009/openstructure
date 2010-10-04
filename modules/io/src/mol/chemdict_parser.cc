@@ -104,7 +104,12 @@ void ChemdictParser::OnDataItem(const StarDataItem& item)
   } else if (item.GetName()==StringRef("atom_id", 7)) {
     atom_.name=item.GetValue().str();
   } else if (item.GetName()==StringRef("alt_atom_id", 11)) {
-    atom_.alt_name=item.GetValue().str();
+    if (compound_->GetID()=="ILE" && item.GetValue()==StringRef("CD1", 3)) {
+      atom_.alt_name="CD";
+    } else {
+      atom_.alt_name=item.GetValue().str();       
+    }
+
   } else if (item.GetName()==StringRef("type_symbol", 11)) {
     atom_.element=item.GetValue().str();
   } else if (item.GetName()==StringRef("pdbx_ordinal", 12)) {
