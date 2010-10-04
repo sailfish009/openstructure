@@ -321,10 +321,10 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
 
   std::pair<bool, int> a_num=line.substr(6, 5).ltrim().to_int();
   if (!a_num.first) {
-    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
-      return false;
+    if (!(PDB::Flags() & PDB::SKIP_FAULTY_RECORDS)) {
+      throw IOException(str(format("invalid atom number on line %d") %line_num));      
     }
-    throw IOException(str(format("invalid atom number on line %d") %line_num));
+    LOG_WARNING("invalid atom number on line " << line_num);
   }
   atom_name=line.substr(12, 4).trim();
   alt_loc=line[16];
