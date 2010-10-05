@@ -16,7 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_SEQ_SEQUQENCE_IDENTIY_HH
+#ifndef OST_SEQ_SEQUENCE_IDENTITY_HH
 #define OST_SEQ_SEQUENCE_IDENTITY_HH
 
 /*  
