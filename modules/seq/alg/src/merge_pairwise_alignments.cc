@@ -34,7 +34,7 @@ typedef std::map<int, int> ShiftMap;
 namespace {
 
 void update_shifts(const AlignmentHandle& aln, 
-                   const SequenceHandle& ref_seq,
+                   const ConstSequenceHandle& ref_seq,
                    ShiftMap& shifts)
 {
   ConstSequenceHandle s1=aln.GetSequence(0);  
@@ -68,8 +68,8 @@ void update_shifts(const AlignmentHandle& aln,
   }  
 }
 
-SequenceHandle shift_reference(const SequenceHandle& ref_seq, 
-                                    const ShiftMap& shifts)
+SequenceHandle shift_reference(const ConstSequenceHandle& ref_seq, 
+                               const ShiftMap& shifts)
 {
   std::ostringstream new_sequence;
   String ref_str=ref_seq.GetString();
@@ -86,7 +86,7 @@ SequenceHandle shift_reference(const SequenceHandle& ref_seq,
   }
   new_sequence << ref_str.substr(last);
   SequenceHandle s=CreateSequence(ref_seq.GetName(), 
-                                            new_sequence.str());
+                                  new_sequence.str());
   if (ref_seq.HasAttachedView())
     s.AttachView(ref_seq.GetAttachedView());
   s.SetOffset(s.GetOffset());
@@ -94,7 +94,7 @@ SequenceHandle shift_reference(const SequenceHandle& ref_seq,
 }
 
 SequenceHandle realign_sequence(const AlignmentHandle& aln, 
-                                  const ShiftMap& shifts)
+                                const ShiftMap& shifts)
 {
   std::ostringstream new_sequence;
   ConstSequenceHandle s1=aln.GetSequence(0);  
@@ -130,7 +130,7 @@ SequenceHandle realign_sequence(const AlignmentHandle& aln,
 }
 
 AlignmentHandle MergePairwiseAlignments(const AlignmentList& pairwise_alns,
-                                        const SequenceHandle& ref_seq)
+                                        const ConstSequenceHandle& ref_seq)
 {
 
   ShiftMap shifts;
