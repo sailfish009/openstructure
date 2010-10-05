@@ -157,6 +157,8 @@ public:
   /// \brief Column iterator end-point
   iterator end() const;
 
+  bool IsValid() const { return impl_.get()!=0; }
+  
 private:
   void CheckValidity() const;
   impl::SequenceListImplPtr impl_;
