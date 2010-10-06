@@ -37,7 +37,7 @@ typedef std::map<String, CompoundPtr> CompoundMap;
 
 class DLLEXPORT_OST_CONOP CompoundLib {
 public:
-  static CompoundLibPtr Load(const String& database);
+  static CompoundLibPtr Load(const String& database, bool readonly=true);
   static CompoundLibPtr Create(const String& database);
   ~CompoundLib();
   
