@@ -58,12 +58,18 @@ std::pair<Real, Real> calc_overlap(ResidueView ref_res,
   AtomViewList ref_atoms=ref_res.GetAtomList();
 
   ResidueView mdl_res=mdl_chain.FindResidue(ref_res.GetNumber());
+  AtomViewList within;
+  if (max_dist<0){
+      within=ref.GetAtomList();
+  }
   for (AtomViewList::iterator ai=ref_atoms.begin(),
        ae=ref_atoms.end(); ai!=ae; ++ai) {
     if (ai->GetElement()=="H") { continue; }
     String name=swap ? swapped_name(ai->GetName()) : ai->GetName();
     AtomView av1=mdl_res ? mdl_res.FindAtom(name) : AtomView();
-    AtomViewList within=ref.FindWithin(ai->GetPos(), max_dist);
+    if (max_dist>=0){ 
+      within=ref.FindWithin(ai->GetPos(), max_dist);
+    }
     for (AtomViewList::iterator aj=within.begin(),
          ae2=within.end(); aj!=ae2; ++aj) {
       if (aj->GetElement()=="H") { continue; }
@@ -88,9 +94,6 @@ std::pair<Real, Real> calc_overlap(ResidueView ref_res,
         continue;
       }
       if (aj->GetResidue().GetNumber()>ref_res.GetNumber()) {
-        if (aj->GetResidue().GetNumber()<=ref_res.GetNumber()) {
-          continue;
-        }
         AtomView av2=mdl_chain.FindAtom(aj->GetResidue().GetNumber(), 
                                              aj->GetName());
         overlap.second+=1.0;
