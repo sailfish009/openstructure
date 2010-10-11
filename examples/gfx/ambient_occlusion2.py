@@ -1,4 +1,5 @@
-e=io.LoadPDB("../entity/sdh.pdb")
+
+e=io.LoadPDB("../demos/data/sdh.pdb")
 scene.Add(gfx.Entity("x",gfx.CPK,e.Select("chain=A")))
 
 # fast spheres with 3D sprites, default

@@ -1,4 +1,4 @@
-e=io.LoadPDB("../entity/sdh.pdb")
+e=io.LoadPDB("../demos/data/sdh.pdb")
 scene.Add(gfx.Entity("x",gfx.HSC,e.Select("chain=A")))
 scene["x"].GetOptions(gfx.HSC).SetTubeRadius(0.6)
 # spiral helices (default)
