@@ -57,7 +57,7 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
                                        bool)
 {
   if(options_==NULL) {
-    LOGN_DEBUG("CartoonRenderer: NULL options, not creating objects");
+    LOG_DEBUG("CartoonRenderer: NULL options, not creating objects");
   }
 
   va.Clear();
@@ -67,11 +67,11 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
   va.SetMode(0x4);
   va.SetPolyMode(options_->GetPolyMode());
 
-  LOGN_DEBUG("CartoonRenderer: starting object build");
+  LOG_DEBUG("CartoonRenderer: starting object build");
   int spline_detail=std::max((unsigned int) 1, options_->GetSplineDetail());
   SplineEntryListList tmp_sll;
   for (int node_list=0; node_list<subset.GetListCount(); ++node_list) {
-    LOGN_DEBUG("CartoonRenderer: collecting spline entries for node list " << node_list);
+    LOG_DEBUG("CartoonRenderer: collecting spline entries for node list " << node_list);
     // first build the spline
     SplineEntryList spl;
     const NodeEntryList& nl=subset.GetList(node_list);
@@ -95,13 +95,13 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
       ee.v1 = entry.v1;
       spl.push_back(ee);
     }
-    LOGN_DEBUG("CartoonRenderer: found " << spl.size() << " entries");
+    LOG_DEBUG("CartoonRenderer: found " << spl.size() << " entries");
     if(!spl.empty()) {
       tmp_sll.push_back(spl);
     }
   }
   if(!force_tube_) {
-    LOGN_DEBUG("CartoonRenderer: adjusting spline-entry-list lists for various modes");
+    LOG_DEBUG("CartoonRenderer: adjusting spline-entry-list lists for various modes");
     FudgeSplineObj(tmp_sll);
   }
   spline_list_list.clear();
@@ -111,7 +111,7 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
       // don't intpol cylinders
       spline_list_list.push_back(*sit);
     } else {
-      LOGN_DEBUG("CartoonRenderer: generating full spline for spline-entry-list " << tmp_count++);
+      LOG_DEBUG("CartoonRenderer: generating full spline for spline-entry-list " << tmp_count++);
       spline_list_list.push_back(Spline::Generate(*sit,spline_detail,options_->GetColorBlendMode()));
     }
   }
@@ -241,7 +241,7 @@ void CartoonRenderer::FudgeSplineObj(SplineEntryListList& olistlist)
   SplineEntryList nlist;
   
   for(unsigned int llc=0;llc<olistlist.size();++llc) {
-    LOGN_DEBUG("CartoonRenderer: fudging spline segment " << llc);
+    LOG_DEBUG("CartoonRenderer: fudging spline segment " << llc);
     SplineEntryList olist = olistlist[llc];
     for(unsigned int lc=0;lc<olist.size();++lc) {
       if(olist.at(lc).type==1) {
@@ -380,7 +380,7 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
                                        const SplineEntryListList& spline_list_list,
                                        bool is_sel)
 {
-  LOGN_DEBUG("CartoonRenderer: starting profile assembly");
+  LOG_DEBUG("CartoonRenderer: starting profile assembly");
   unsigned int detail = std::min(MAX_ARC_DETAIL,
                                  std::max(options_->GetArcDetail(),
                                  (unsigned int)1));
@@ -428,7 +428,7 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
     */
     SplineEntryList slist=*it;
     if(slist.empty()) continue;
-    LOGN_DEBUG("CartoonRenderer: assembling fragment " << tmp_count << " with " << slist.size() << " spline segments");
+    LOG_DEBUG("CartoonRenderer: assembling fragment " << tmp_count << " with " << slist.size() << " spline segments");
 
     if(slist.size()==2 && slist[0].type==6) {
       // make a cylinder

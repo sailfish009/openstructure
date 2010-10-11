@@ -80,10 +80,12 @@ void export_RenderOptions()
     .def("GetSphereDetail", &CPKRenderOptions::GetSphereDetail)
     .def("SetSphereMode", &CPKRenderOptions::SetSphereMode)
     .def("GetSphereMode", &CPKRenderOptions::GetSphereMode)
-    .def("SetCPKMode", &CPKRenderOptions::SetCPKMode)
-    .def("GetCPKMode", &CPKRenderOptions::GetCPKMode)
-    .add_property("cpk_mode", &CPKRenderOptions::GetCPKMode, 
-                  &CPKRenderOptions::SetCPKMode)
+    .def("SetCPKMode", &CPKRenderOptions::SetSphereMode)
+    .def("GetCPKMode", &CPKRenderOptions::GetSphereMode)
+    .add_property("cpk_mode", &CPKRenderOptions::GetSphereMode, 
+                  &CPKRenderOptions::SetSphereMode)
+    .add_property("sphere_mode", &CPKRenderOptions::GetSphereMode, 
+                  &CPKRenderOptions::SetSphereMode)
     .add_property("sphere_detail", &CPKRenderOptions::GetSphereDetail, 
                   &CPKRenderOptions::SetSphereDetail)
   ;

@@ -102,11 +102,11 @@ void GfxObj::DeepSwap(GfxObj& go)
 
 void GfxObj::RenderGL(RenderPass pass)
 {
-  LOGN_TRACE("object " << GetName() << ": RenderGL()");
+  LOG_TRACE("object " << GetName() << ": RenderGL()");
 
   if(pass==0) {
     if(mat_update_) {
-      LOGN_TRACE("updating material display list");
+      LOG_TRACE("updating material display list");
       if(mat_dlist_==0) {
         mat_dlist_=glGenLists(1);
       }
@@ -126,18 +126,18 @@ void GfxObj::RenderGL(RenderPass pass)
     }
   }
   if(IsVisible()) {
-    LOGN_TRACE("applying local transformation");
+    LOG_TRACE("applying local transformation");
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glMultMatrix(transform_.GetTransposedMatrix().Data());
     if(Scene::Instance().InOffscreenMode()) {
-      LOGN_TRACE("applying material");
+      LOG_TRACE("applying material");
       mat_.RenderGL();
     } else {
-      LOGN_TRACE("applying material display list");
+      LOG_TRACE("applying material display list");
       glCallList(mat_dlist_);
     }
-    LOGN_TRACE("calling custom render gl pass " << pass);
+    LOG_TRACE("calling custom render gl pass " << pass);
 
     /*
       only STANDARD_RENDER_PASS and GLOW_RENDER_PASS are
@@ -163,7 +163,7 @@ void GfxObj::RenderGL(RenderPass pass)
     } else if(pass==GLOW_RENDER_PASS) {
       CustomRenderGL(GLOW_RENDER_PASS);
     } else if(pass==OVERLAY_RENDER_PASS) {
-      LOGN_TRACE("drawing labels");
+      LOG_TRACE("drawing labels");
       render_labels();
     }
 
@@ -337,7 +337,7 @@ void GfxObj::ColorBy(const mol::EntityView& ev,
                       const String& prop,
                       const Gradient& g, float minv, float maxv)
 {
-  LOGN_VERBOSE("ColorBy not implemented for this gfx object");
+  LOG_VERBOSE("ColorBy not implemented for this gfx object");
 }
 
 #if OST_IMG_ENABLED
@@ -345,7 +345,7 @@ void GfxObj::ColorBy(const img::MapHandle& mh,
                       const String& prop,
                       const Gradient& g, float minv, float maxv)
 {
-  LOGN_VERBOSE("ColorBy not implemented for this gfx object");
+  LOG_VERBOSE("ColorBy not implemented for this gfx object");
 }
 #endif
 

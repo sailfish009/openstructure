@@ -50,12 +50,12 @@ namespace {
 
   void set_outline(GfxObjBase* b, bool f)
   {
-    LOGN_MESSAGE("Outline(bool) is deprecated, use SetOutline(bool) instead");
+    LOG_INFO("Outline(bool) is deprecated, use SetOutline(bool) instead");
     b->SetOutline(f);
   }
   void set_aalines(GfxObjBase* b, bool f)
   {
-    LOGN_MESSAGE("AALines(bool) is deprecated, use SetAALines(bool) instead");
+    LOG_INFO("AALines(bool) is deprecated, use SetAALines(bool) instead");
     b->SetAALines(f);
   }
 }

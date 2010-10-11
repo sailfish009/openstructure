@@ -174,7 +174,7 @@ void MapIso::CustomPreRenderGL(bool flag)
   if(flag) {
     Rebuild();
   }
-  RefreshVA(va_);
+  //RefreshVA(va_);
 }
 
 namespace {

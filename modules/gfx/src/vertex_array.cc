@@ -411,7 +411,7 @@ void IndexedVertexArray::RenderGL()
       use_buff=prep_buff();
     }
     if(!use_buff) {
-      LOGN_DUMP("buffer not available");
+      LOG_TRACE("buffer not available");
       glBindBuffer(GL_ARRAY_BUFFER,0);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
     } else {

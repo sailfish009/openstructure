@@ -63,7 +63,7 @@ GfxTestObj::GfxTestObj():
 
   Texture tex(BitmapImport(tex_file.string(),".png"));
   if(!tex.IsValid()) {
-    LOGN_ERROR("error loading " << tex_file.string());
+    LOG_ERROR("error loading " << tex_file.string());
   } else {
     LOG_DEBUG("importing tex with id " << tex_id);
     glBindTexture(GL_TEXTURE_2D, tex_id);

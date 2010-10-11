@@ -62,7 +62,7 @@ SceneFX::~SceneFX()
 void SceneFX::Setup()
 {
   if(!OST_GL_VERSION_2_0) return;
-  LOGN_DEBUG("SceneFX: setup");
+  LOG_DEBUG("SceneFX: setup");
 
   glGenTextures(1,&scene_tex_id_);
   glGenTextures(1,&depth_tex_id_);
@@ -201,7 +201,7 @@ void SceneFX::Resize(unsigned int w, unsigned int h)
 
   if(status!=GL_FRAMEBUFFER_COMPLETE) {
     use_fb_=false;
-    LOGN_VERBOSE("SceneFX: framebuffer error code " << status);
+    LOG_VERBOSE("SceneFX: framebuffer error code " << status);
   } else {
     use_fb_=true;
   }
@@ -380,7 +380,7 @@ void SceneFX::prep_shadow_map()
   GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   
   if(status!=GL_FRAMEBUFFER_COMPLETE) {
-    LOGN_DEBUG("fbo switch for shadow mapping failed, using fallback");
+    LOG_DEBUG("fbo switch for shadow mapping failed, using fallback");
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     smap_size=512;
@@ -397,7 +397,7 @@ void SceneFX::prep_shadow_map()
   GLenum status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
   
   if(status!=GL_FRAMEBUFFER_COMPLETE_EXT) {
-    LOGN_DEBUG("fbo switch for shadow mapping failed, using fallback");
+    LOG_DEBUG("fbo switch for shadow mapping failed, using fallback");
     glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     smap_size=512;

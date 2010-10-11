@@ -30,8 +30,8 @@
 
 #include <ost/img/map.hh>
 
-#include "glext_include.hh"
 #include "gfx_object.hh"
+#include "glext_include.hh"
 
 namespace ost { namespace gfx {
 

@@ -51,7 +51,7 @@ Shader::Shader():
   shader_program_map_()
 {
   if(!OST_GL_VERSION_2_0) {
-    LOGN_VERBOSE("OpenGL version smaller 2.0, deactivating shader functionality");
+    LOG_VERBOSE("OpenGL version smaller 2.0, deactivating shader functionality");
   }
 }
 

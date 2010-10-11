@@ -43,7 +43,7 @@ inline void check_gl_error()
 {
   GLenum error_code;
   if((error_code=glGetError())!=GL_NO_ERROR) {
-    LOGN_VERBOSE("GL error: " << gluErrorString(error_code));
+    LOG_VERBOSE("GL error: " << gluErrorString(error_code));
   }
 }
 

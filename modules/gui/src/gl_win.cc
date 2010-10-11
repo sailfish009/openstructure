@@ -53,7 +53,7 @@ gl_canvas_(NULL)
   QMainWindow* main=new QMainWindow;
   
   if(try_stereo) {
-    LOGN_VERBOSE("GLCanvas: trying stereo visuals first");
+    LOG_VERBOSE("GLCanvas: trying stereo visuals first");
     for(int format_id=3;format_id>=0;--format_id) {
       QGLFormat format=GLWin::CreateFormat(format_id);
       format.setStereo(true);
@@ -68,7 +68,7 @@ gl_canvas_(NULL)
   }
   if(!gl_canvas_) {
     if(try_stereo) {
-      LOGN_VERBOSE("GLCanvas: no stereo visual found, trying normal ones");
+      LOG_VERBOSE("GLCanvas: no stereo visual found, trying normal ones");
     }
     for(int format_id=3;format_id>=0;--format_id) {
       QGLFormat format=GLWin::CreateFormat(format_id);
@@ -83,7 +83,7 @@ gl_canvas_(NULL)
   }
 
   if(!gl_canvas_ || !gl_canvas_->isValid()) {
-    LOGN_ERROR("GLCanvas: no valid GL context found, this is pretty fatal");
+    LOG_ERROR("GLCanvas: no valid GL context found, this is pretty fatal");
     return;
   }
 
@@ -91,7 +91,7 @@ gl_canvas_(NULL)
   gfx::Scene::Instance().AttachObserver(this);
   QGLFormat format = gl_canvas_->format();
 
-  LOGN_DEBUG("GLCanvas: rbits=" << format.redBufferSize() 
+  LOG_DEBUG("GLCanvas: rbits=" << format.redBufferSize() 
                << " gbits=" << format.greenBufferSize() 
                << " bbits=" << format.blueBufferSize() 
                << " abits=" << format.alphaBufferSize() 
@@ -100,7 +100,7 @@ gl_canvas_(NULL)
                << " multisample=" << format.sampleBuffers()
                << " with samples=" << format.samples());
   if(gl_canvas_->format().stereo()) {
-    LOGN_VERBOSE("GLCanvas: using stereo visual");
+    LOG_VERBOSE("GLCanvas: using stereo visual");
   }
   main->setCentralWidget(gl_canvas_);
   connect(gl_canvas_, SIGNAL(ReleaseFocus()), this, SIGNAL(ReleaseFocus()));

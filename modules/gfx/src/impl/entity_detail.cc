@@ -266,7 +266,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
     xc[c]=static_cast<float>(c);
   }
 
-  LOGN_DEBUG("SplineGenerate: interpolating spline entry components");
+  LOG_DEBUG("SplineGenerate: interpolating spline entry components");
   
   // create sublist with enough entries
   SplineEntryList sublist(ipsize);
@@ -303,7 +303,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
 
   SPLINE_ENTRY_INTERPOLATE(rad);
 
-  LOGN_DEBUG("SplineGenerate: assigning direction and normal components");
+  LOG_DEBUG("SplineGenerate: assigning direction and normal components");
   // assign direction and normal
   // entity trace has the same algorithm
 
@@ -367,7 +367,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
     sublist.at(i).normal = sublist.at(i).v0;
   }
 
-  LOGN_DEBUG("SplineGenerate: assigning non-interpolated entry components");
+  LOG_DEBUG("SplineGenerate: assigning non-interpolated entry components");
   // finally the non-interpolated type
   // with some tweaks for proper strand rendering
   // part of this probably belongs into cartoon renderer
@@ -408,7 +408,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
 
   // the nflip flags for helices for correct inside/outside assignment
   // this probably belongs into cartoon renderer
-  LOGN_DEBUG("SplineGenerate: setting nflip flags for helices");
+  LOG_DEBUG("SplineGenerate: setting nflip flags for helices");
   unsigned int c=0;
   bool nflip=false;
   while(c<sublist.size()-1) {
@@ -443,7 +443,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   }
   sublist.back().nflip=nflip;
 
-  LOGN_DEBUG("SplineGenerate: done");
+  LOG_DEBUG("SplineGenerate: done");
 
   // done
   return sublist;

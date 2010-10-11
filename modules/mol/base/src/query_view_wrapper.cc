@@ -43,21 +43,10 @@ QueryViewWrapper::QueryViewWrapper(const EntityView& entity_view):
     query_(),
     flags_(0){}
 
-QueryViewWrapper::QueryViewWrapper(const Query& query, 
-                                   const EntityHandle& entity_handle,
-                                   QueryFlags f):
+QueryViewWrapper::QueryViewWrapper(const Query& query, const EntityHandle& entity_handle):
     view_set_(false),
     entity_handle_(entity_handle),
     entity_view_(),
-    query_(query),
-    flags_(0){}
-
-QueryViewWrapper::QueryViewWrapper(const Query& query, 
-                                   const EntityView& view,
-                                   QueryFlags f):
-    view_set_(true),
-    entity_handle_(),
-    entity_view_(view),
     query_(query),
     flags_(0){}
 
@@ -68,6 +57,13 @@ QueryViewWrapper::QueryViewWrapper(const Query& query, QueryFlags flags,
     entity_view_(),
     query_(query),
     flags_(flags){}
+
+QueryViewWrapper::QueryViewWrapper(const Query& query, const EntityView& view):
+    view_set_(true),
+    entity_handle_(),
+    entity_view_(view),
+    query_(query),
+    flags_(0){}
 
 QueryViewWrapper::QueryViewWrapper(const Query& query, QueryFlags flags,
                                    const EntityView& view):

@@ -314,13 +314,13 @@ void set_light_dir(Vec3 ld)
 
 void Scene::InitGL(bool full)
 {
-  LOGN_DEBUG("scene: initializing GL state");
+  LOG_DEBUG("scene: initializing GL state");
 
   if(full) {
-    LOGN_VERBOSE(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
+    LOG_VERBOSE(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
 
 #if OST_SHADER_SUPPORT_ENABLED
-    LOGN_DEBUG("scene: shader pre-gl");
+    LOG_DEBUG("scene: shader pre-gl");
     Shader::Instance().PreGLInit();
 #endif
   }
@@ -381,7 +381,7 @@ void Scene::InitGL(bool full)
   }
 
   if(mbufs>0 && msamples>0) {
-    LOGN_VERBOSE("Scene: enabling multisampling with: " << msamples << " samples");
+    LOG_VERBOSE("Scene: enabling multisampling with: " << msamples << " samples");
     glDisable(GL_LINE_SMOOTH);
     glDisable(GL_POINT_SMOOTH);
     glDisable(GL_POLYGON_SMOOTH);
@@ -410,10 +410,10 @@ void Scene::InitGL(bool full)
 
 #if OST_SHADER_SUPPORT_ENABLED
   if(full) {
-    LOGN_DEBUG("scene: shader setup");
+    LOG_DEBUG("scene: shader setup");
     Shader::Instance().Setup();
     SetShadingMode(def_shading_mode_);
-    LOGN_DEBUG("scene: scenefx setup");
+    LOG_DEBUG("scene: scenefx setup");
     impl::SceneFX::Instance().Setup();
   }
 #endif
@@ -448,7 +448,7 @@ void Scene::InitGL(bool full)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-  LOGN_DEBUG("scene: gl init done");
+  LOG_DEBUG("scene: gl init done");
   gl_init_=true;
 }
 
@@ -689,7 +689,7 @@ namespace {
         reg = boost::regex(rs);
         valid = true;
       } catch (boost::regex_error& e) {
-        LOGN_ERROR("invalid regex");
+        LOG_ERROR("invalid regex");
       }
     }
 
@@ -1282,7 +1282,7 @@ void Scene::Stereo(unsigned int m)
     if(win_ && win_->HasStereo()) {
       stereo_=1;
     } else {
-      LOGN_MESSAGE("No visual present for quad-buffered stereo");
+      LOG_INFO("No visual present for quad-buffered stereo");
       stereo_=0;
     }
   } else if(m==2) {
@@ -1376,7 +1376,7 @@ bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
   main_offscreen_buffer_ = new OffscreenBuffer(width,height,OffscreenBufferFormat(),true);
 
   if(!main_offscreen_buffer_->IsValid()) {
-    LOGN_ERROR("error during offscreen buffer creation");
+    LOG_ERROR("error during offscreen buffer creation");
     delete main_offscreen_buffer_;   
     main_offscreen_buffer_=0;
     return false;
@@ -1391,19 +1391,19 @@ bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
   String shader_name = Shader::Instance().GetCurrentName();
 #endif
 
-  LOGN_DEBUG("initializing GL");
+  LOG_DEBUG("initializing GL");
   if(gl_init_) {
     this->InitGL(false);
   } else {
     this->InitGL(true);
   }
-  LOGN_DEBUG("setting viewport");
+  LOG_DEBUG("setting viewport");
   Resize(width,height);
-  LOGN_DEBUG("updating fog settings");
+  LOG_DEBUG("updating fog settings");
   update_fog();
   glDrawBuffer(GL_FRONT);
 #if OST_SHADER_SUPPORT_ENABLED
-  LOGN_DEBUG("activating shader");
+  LOG_DEBUG("activating shader");
   Shader::Instance().Activate(shader_name);
 #endif
   return true;
@@ -1447,7 +1447,7 @@ void Scene::Export(const String& fname, unsigned int width,
       return;
     }
   }
-  LOGN_DEBUG("rendering into offscreen buffer");
+  LOG_DEBUG("rendering into offscreen buffer");
   this->RenderGL();
   // make sure drawing operations are finished
   glFlush();
@@ -1455,7 +1455,7 @@ void Scene::Export(const String& fname, unsigned int width,
 
   boost::shared_array<uchar> img_data(new uchar[width*height*4]);
       
-  LOGN_DEBUG("setting background transparency");
+  LOG_DEBUG("setting background transparency");
   if (transparent) {
     glPixelTransferf(GL_ALPHA_BIAS, 0.0);
   } else {
@@ -1463,12 +1463,12 @@ void Scene::Export(const String& fname, unsigned int width,
     glPixelTransferf(GL_ALPHA_BIAS, 1.0);
   }
   
-  LOGN_DEBUG("reading framebuffer pixels");
+  LOG_DEBUG("reading framebuffer pixels");
   glReadBuffer(GL_FRONT);
   glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
   glReadBuffer(GL_BACK);
 
-  LOGN_DEBUG("calling bitmap export");
+  LOG_DEBUG("calling bitmap export");
   BitmapExport(fname,ext,width,height,img_data.get());
 
   // only switch back if it was not on to begin with
@@ -1480,7 +1480,7 @@ void Scene::Export(const String& fname, unsigned int width,
 void Scene::Export(const String& fname, bool transparent)
 {
   if(!win_ && !main_offscreen_buffer_) {
-    LOGN_ERROR("Export without dimensions either requires an interactive session \nor an active offscreen mode (scene.StartOffscreenMode(W,H))");
+    LOG_ERROR("Export without dimensions either requires an interactive session \nor an active offscreen mode (scene.StartOffscreenMode(W,H))");
     return;
   }
   int d_index=fname.rfind('.');
