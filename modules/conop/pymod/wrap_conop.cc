@@ -29,6 +29,5 @@ BOOST_PYTHON_MODULE(_conop)
   export_Builder();
   export_Conop();
   export_Compound();
-  export_Sanitizer();
   export_RingFinder();
 }

@@ -26,7 +26,7 @@ PythonNamespaceTreeModel::PythonNamespaceTreeModel():
   QAbstractItemModel(),
   root_item_(new PythonNamespaceTreeItem(PythonInterpreter::Instance().GetMainModule(),"main"))
 {
-  connect(&PythonInterpreter::Instance(), SIGNAL(Done(int,const QString&)),
+  connect(&PythonInterpreter::Instance(), SIGNAL(Finished(unsigned int,bool)),
           this, SLOT(NamespaceChanged(void)));
 }
 
@@ -37,6 +37,7 @@ PythonNamespaceTreeModel::~PythonNamespaceTreeModel()
 
 void PythonNamespaceTreeModel::NamespaceChanged()
 {
+  // todo should only be called after all commands are executed
   delete root_item_;
   root_item_=new PythonNamespaceTreeItem(PythonInterpreter::Instance().GetMainModule(),"main");
   dataChanged(QModelIndex(),QModelIndex());

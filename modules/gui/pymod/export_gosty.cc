@@ -27,7 +27,6 @@ using namespace boost::python;
 #include <ost/gui/perspective.hh>
 #include <ost/gui/python_shell/python_shell.hh>
 #include <ost/gui/scene_win/scene_win.hh>
-#include <ost/gui/sequence_viewer/sequence_viewer.hh>
 #include <ost/gui/tools/tool_options_win.hh>
 
 #include "transfer_ownership.hh"
@@ -96,13 +95,13 @@ void export_Gosty()
         return_value_policy<reference_existing_object>())
     .add_property("seq_viewer", make_function(&GostyApp::GetSequenceViewer,
         return_value_policy<reference_existing_object>()))
-    .def("GetSequenceViewerV2", &GostyApp::GetSequenceViewerV2,
-        return_value_policy<reference_existing_object>())
-    .add_property("seq_viewer_v2", make_function(&GostyApp::GetSequenceViewerV2,
-        return_value_policy<reference_existing_object>()))
     .def("GetToolOptionsWin", &GostyApp::GetToolOptionsWin,
         return_value_policy<reference_existing_object>())
     .add_property("tool_options_win", make_function(&GostyApp::GetToolOptionsWin,
+        return_value_policy<reference_existing_object>()))
+    .def("GetMessageWidget", &GostyApp::GetMessageWidget,
+        return_value_policy<reference_existing_object>())
+    .add_property("message_widget", make_function(&GostyApp::GetMessageWidget,
         return_value_policy<reference_existing_object>()))
      #if OST_IMG_ENABLED
     .def("CreateDataViewer", &app_create_data_viewer1,return_value_policy<reference_existing_object>())

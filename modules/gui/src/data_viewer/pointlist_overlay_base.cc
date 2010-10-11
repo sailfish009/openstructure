@@ -21,6 +21,9 @@
 /*
   Authors: Ansgar Philippsen, Andreas Schenk
 */
+#include "data_viewer_panel.hh"
+#include "pointlist_overlay_base.hh"
+#include "strategies.hh"
 
 #include <QActionGroup>
 #include <QGridLayout>
@@ -33,9 +36,6 @@
 #include <QIcon>
 #include <QColorDialog>
 
-#include "data_viewer_panel.hh"
-#include "pointlist_overlay_base.hh"
-#include "strategies.hh"
 
 namespace ost { namespace img { namespace gui {
 
@@ -197,30 +197,39 @@ void PointlistOverlayBase::DrawPointList(QPainter& pnt, DataViewerPanel* dvp,
   }
   strategy_->SetSymbolSize(static_cast<int>((GetSymbolSize()-0.5) * dvp->GetZoomScale()));
 }
+void PointlistOverlayBase::DrawVariableSizePointList(QPainter& pnt, DataViewerPanel* dvp, 
+                                                     const QColor& color,
+                                                     const std::vector<std::pair<QPoint,double> >& pointlist)
+{
+  strategy_->SetPenColor(color);
+  strategy_->SetSymbolStrength(symbolstrength_);
+  for(unsigned int i = 0; i < pointlist.size(); i++) {
+    strategy_->SetSymbolSize(static_cast<int>((GetSymbolSize()-0.5) * dvp->GetZoomScale()*pointlist[i].second));
+    strategy_->Draw(pnt,pointlist[i].first);
+  }
+  strategy_->SetSymbolSize(static_cast<int>((GetSymbolSize()-0.5) * dvp->GetZoomScale()));
+}
 
 bool PointlistOverlayBase::GetCrosshair() const
 {
-  //return menu_->IsChecked(ID_Crosshair);
-  return false;
+  return a_cr_->isChecked();
 }
 
 void PointlistOverlayBase::SetCrosshair(bool flag)
 {
-  /*
-  if(menu_->IsChecked(ID_Crosshair))	{
-    if(menu_->IsChecked(ID_Square)){
+  if(a_cr_->isChecked())	{
+    if(a_sq_->isChecked()){
       ReplaceStrategy<CrosshairSquareDrawingStrategy>();
     }else{
       ReplaceStrategy<CrosshairCircleDrawingStrategy>();
     }
   } else {
-    if(menu_->IsChecked(ID_Square)){
+    if(a_sq_->isChecked()){
       ReplaceStrategy<SquareDrawingStrategy>();
     }else{
       ReplaceStrategy<CircleDrawingStrategy>();
     }
   }
-  */
 }
 
 unsigned int PointlistOverlayBase::GetSymbolSize() const 
@@ -235,30 +244,28 @@ void PointlistOverlayBase::SetSymbolSize(unsigned int symbolsize)
 
 unsigned int PointlistOverlayBase::GetSymbolShape() const
 {
-  //return menu_->IsChecked(ID_Circle) ? 0 : 1;
-  return 0;
+  return a_sq_->isChecked() ? 1 : 0;
 }
 
 void PointlistOverlayBase::SetSymbolShape(unsigned int symbolshape)
 {
-  /*
   switch(symbolshape){
   case 1:
-    if(menu_->IsChecked(ID_Crosshair)){
+    if(a_cr_->isChecked()){
       ReplaceStrategy<CrosshairSquareDrawingStrategy>();
     }else{
       ReplaceStrategy<SquareDrawingStrategy>();
     }
     break;
   case 0:
-    if(menu_->IsChecked(ID_Crosshair)){
+    if(a_cr_->isChecked()){
         ReplaceStrategy<CrosshairCircleDrawingStrategy>();
     }else{
       ReplaceStrategy<CircleDrawingStrategy>();
     }
     break;
   }
-  */
+  
 }
 
 template <class StrategyClass>
@@ -274,6 +281,16 @@ void PointlistOverlayBase::SetProps(PointlistOverlayBaseSettings* props)
   passive_color_=props->passive_color;
   symbolsize_=props->symbol_size;
   symbolstrength_=props->symbol_strength;
+}
+
+void PointlistOverlayBase::SetActiveColor(const QColor& col)
+{
+  active_color_=col;
+}
+
+void PointlistOverlayBase::SetPassiveColor(const QColor& col)
+{
+  passive_color_=col;
 }
 
 }}}  //ns

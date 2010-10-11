@@ -79,12 +79,15 @@ class SlineWidget(RenderModeWidget):
   
   def UpdateDetail(self, value):
     self.GetOptions().SetSplineDetail(value)
-  
+    self.ApplyOptions()
+    
   def UpdateAA(self, value):
     self.GetOptions().SetAALines(value)
+    self.ApplyOptions()
     
   def UpdateLineWidth(self, value):
     self.GetOptions().SetLineWidth(value)
+    self.ApplyOptions()
     
   def UpdateGui(self,options):
     self.detail_spinbox_.setValue(options.GetSplineDetail())

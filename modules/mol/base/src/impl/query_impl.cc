@@ -107,19 +107,24 @@ QueryToken QueryLexer::LexQuotedStringLiteral()
 QueryToken QueryLexer::LexNumericToken() {
   Range range(current_, 0);
   static String allowed_chars("_");  
-  bool dot_present=false, is_string=false;
+  bool dot_present=false, is_string=false, last_was_dot=false;
   //TODO Better checking for duplicate -
   while(current_<query_string_.size()){
     if (isdigit(query_string_[current_]) || query_string_[current_]=='-') {
       current_++;
+      last_was_dot=false;
     } else if (query_string_[current_]=='.') {
       if (dot_present) {
         is_string=true;
         break;
       }
       dot_present = true;
+      last_was_dot=true;
       current_++;
     } else {
+      if (last_was_dot) {
+        break;
+      }
       is_string=isalnum(query_string_[current_]) || 
                 allowed_chars.find_first_of(query_string_[current_])!=String::npos;
       break;
@@ -128,6 +133,11 @@ QueryToken QueryLexer::LexNumericToken() {
   range.Length=current_-range.Loc;
   if (!is_string) {
     if (dot_present) {
+      if (last_was_dot) {
+        current_--;
+        return QueryToken(Range(range.Loc, range.Length-1), 
+                          tok::IntegralValue);
+      }
       return QueryToken(range, tok::FloatingValue);      
     } else {
       return QueryToken(range, tok::IntegralValue);      
@@ -145,15 +155,9 @@ bool is_ident_or_str(char c) {
 QueryToken QueryLexer::LexIdentOrStringToken() {
   static IdentTokens ident_tokens;
   size_t start=current_;
-  bool is_string=false;
   while (current_<query_string_.length() && 
          is_ident_or_str(query_string_[current_])) {
-    if (!isalnum(query_string_[current_]))
-      is_string=true;
     current_++;
-  }
-  if (is_string) {
-    return QueryToken(Range(start, current_-start), tok::String);
   }
   String ident=query_string_.substr(start, current_-start);
   if (tok::Type* t=find(ident_tokens, ident.c_str())) {
@@ -179,7 +183,10 @@ QueryToken QueryLexer::LexToken() {
         return QueryToken(Range(current_-1, 1), tok::Coma);
       case ':':
         current_++;
-        return QueryToken(Range(current_-1, 1), tok::Colon);        
+        return QueryToken(Range(current_-1, 1), tok::Colon);
+      case '.':
+        current_++;
+        return QueryToken(Range(current_-1, 1), tok::Dot);           
       case '{':
         current_++;
         return QueryToken(Range(current_-1, 1), tok::LeftCurlyBrace);
@@ -384,7 +391,6 @@ QueryImpl::QueryImpl(const String& query_string)
     sel_values_.push_back(sel_value);    
     Node* ast_root = this->BuildAST();
     if (ast_root) {
-      // ast_root->Dump();      
       // Get all selection statements
       this->ExtractSelStmts(ast_root);
       this->ASTToSelStack(ast_root,Prop::CHAIN,
@@ -395,6 +401,7 @@ QueryImpl::QueryImpl(const String& query_string)
                           sel_stacks_[(int)Prop::ATOM]);        
       delete ast_root;
       empty_optimize_=false;
+      has_error_=false;
     } else {
       has_error_=true;
     }  
@@ -427,10 +434,12 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
       if (sel.type==Prop::INT) {
         // todo. Add check to test that the comparison operator is only one of
         // = and !=. The others don't make too much sense.
-        if (value_string=="true") {
+        if (value_string=="true" || value_string=="True" || 
+            value_string=="TRUE") {
           value=ParamType(int(1));
           break;
-        } else if (value_string=="false") {   
+        } else if (value_string=="false" || value_string=="False" || 
+                   value_string=="FALSE") {   
           value=ParamType(int(0));
           break;
         }
@@ -609,6 +618,44 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
   String s=query_string_.substr(sname.GetRange().Loc,sname.GetRange().Length);
   Prop property=PropertyFromString(s);
   QueryToken op=lexer.NextToken();
+  
+  // this block deals with the cname.rnum.aname shortcut.
+  if (op.GetType()==tok::Dot) {
+    QueryToken cname=sname;
+    QueryToken rnum=lexer.NextToken();
+    if (!this->Expect(tok::IntegralValue, "residue number", rnum)) {
+      return NULL;
+    }
+    if (!this->Expect(tok::Dot, "'.'", lexer.NextToken())) {
+      return NULL;
+    }
+    QueryToken aname=lexer.NextToken();
+    if (!this->Expect(tok::Identifier, "atom name", aname)) {
+      return NULL;
+    }
+    LogicOP lop=inversion_stack_.back() ? LOP_OR : LOP_AND;
+    CompOP cop=inversion_stack_.back() ? COP_NEQ : COP_EQ;
+    ParamType cname_val(query_string_.substr(cname.GetValueRange().Loc,
+                        cname.GetValueRange().Length).c_str());
+    Prop cname_prop(Prop::CNAME, Prop::STRING, Prop::CHAIN);
+    SelNode* cname_node=new SelNode(cname_prop, cop, cname_val);
+    ParamType aname_val(query_string_.substr(aname.GetValueRange().Loc,
+                        aname.GetValueRange().Length).c_str());
+   Prop aname_prop(Prop::ANAME, Prop::STRING, Prop::ATOM);
+    SelNode* aname_node=new SelNode(aname_prop, cop, aname_val);
+    ParamType rnum_val(atoi(query_string_.substr(rnum.GetValueRange().Loc,
+                            rnum.GetValueRange().Length).c_str()));
+    Prop rnum_prop(Prop::RNUM, Prop::INT, Prop::RESIDUE);                            
+    SelNode* rnum_node=new SelNode(rnum_prop, cop, rnum_val);
+    LogicOPNode* and_one=new LogicOPNode(lop);
+    LogicOPNode* and_two=new LogicOPNode(lop);  
+    and_one->SetLHS(and_two);
+    and_one->SetRHS(cname_node);
+    and_two->SetLHS(rnum_node);
+    and_two->SetRHS(aname_node);
+    lexer.NextToken();
+    return and_one;
+  }
   if (property.id>=Prop::CUSTOM) {
     property.id=(Prop::ID)(Prop::CUSTOM+num_gen_prop_++);
     EntityPropertyMapper epm=EntityPropertyMapper(s.substr(2), property.level);
@@ -777,8 +824,9 @@ Node* QueryImpl::ParseSubExpr(QueryLexer& lexer, bool paren) {
       error_desc_.range=t.GetRange();
       return NULL;
     }
-    if (t.IsEOF())
-      continue;
+    if (t.IsEOF()) {
+      return root_node.release();
+    }
     if (!this->ExpectLogicalOperator(t))
       return NULL;
     switch(t.GetType()) {
@@ -962,19 +1010,35 @@ Node* QueryImpl::ParseWithinExpr(QueryLexer& lexer) {
     return NULL;
   QueryToken ct=lexer.CurrentToken();
   if (ct.GetType()==tok::LeftCurlyBrace) {
-    geom::Vec3 point;
-    if (this->ParsePoint(lexer, point)) {
-      lexer.NextToken();  
-      ParamType pt(WithinParam(point, rv*rv));
-      CompOP comp_op= COP_LE;
-      if (inversion_stack_.back())
-        comp_op=COP_GE;
-      SelNode* within_node=new SelNode(Prop(Prop::WITHIN, Prop::VEC_DIST,
-                                            Prop::ATOM), 
-                                       comp_op, pt);
-      return within_node;
-    } else {
-      return NULL;
+    Node* points=NULL;
+    while (true) {
+      geom::Vec3 point;
+      if (this->ParsePoint(lexer, point)) {
+        ParamType pt(WithinParam(point, rv*rv));
+        CompOP comp_op= COP_LE;
+        if (inversion_stack_.back())
+          comp_op=COP_GE;
+        SelNode* within_node=new SelNode(Prop(Prop::WITHIN, Prop::VEC_DIST,
+                                              Prop::ATOM), 
+                                         comp_op, pt);
+        if (points) {
+          points=this->Concatenate(points, within_node, LOP_OR);
+        } else {
+          points=within_node;
+        }
+        QueryToken nt=lexer.NextToken();
+        if (nt.GetType()==tok::Coma) {
+          nt=lexer.NextToken();
+          if (!this->Expect(tok::LeftCurlyBrace, "'{'", nt)) {
+            delete points;
+            return NULL;
+          }
+          continue;
+        }
+        return points;
+      } else {
+        return NULL;
+      }
     }
   } else if (ct.GetType()==tok::LeftBracket) {
     // push false onto inversion stack to make sure we have a proper start for

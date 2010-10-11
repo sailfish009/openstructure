@@ -57,7 +57,7 @@ private:
 
   /// \brief parses the common part of ATOM, HETATM and ANISOU records
   bool ParseAtomIdent(const StringRef& line, int line_num, 
-                      char& chain_name, StringRef& res, 
+                      String& chain_name, StringRef& res, 
                       mol::ResNum& resnum, StringRef& atom_name, char& alt_loc,
                       const StringRef& record_type);
   void ParseAnisou(const StringRef& line, int line_num,
@@ -65,6 +65,7 @@ private:
   void ParseHelixEntry(const StringRef& line);
   void ParseStrandEntry(const StringRef& line);
   void Init(const boost::filesystem::path& loc);
+  bool EnsureLineLength(const StringRef& line, size_t size);
   mol::ChainHandle curr_chain_;
   mol::ResidueHandle curr_residue_;
   int chain_count_;

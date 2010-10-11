@@ -69,7 +69,16 @@ T Random() {
   return UniformRandom();
 }
  
-  
+typedef boost::variate_generator<boost::mt19937&, boost::uniform_int<> > UniformIntGenerator;
+
+inline
+UniformIntGenerator GetUniformIntGenerator(int min, int max)
+{
+  boost::uniform_int<> dist(min,max);
+  return UniformIntGenerator(RandomGenerator, dist);
+}
+
+
 // value to value conversion
   
 // declaration

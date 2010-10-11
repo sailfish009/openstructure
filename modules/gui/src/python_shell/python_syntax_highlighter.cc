@@ -22,8 +22,6 @@
 
 #include <iostream>
 
-#include <QTextCursor>
-
 #include "python_shell.hh"
 #include "string_literal_positions.hh"
 
@@ -31,6 +29,8 @@
 #include "python_context_parser.hh"
 
 
+#include <QDebug>
+#include <QTextCursor>
 
 namespace ost { namespace gui {    
 
@@ -44,6 +44,8 @@ PythonSyntaxHighlighter::PythonSyntaxHighlighter(QTextDocument* parent):
   formats_[PythonToken::END]=format;  
   format.setForeground(QBrush(QColor(150,0,0)));
   formats_[PythonToken::OPERATOR]=format;  
+  format.setForeground(QBrush(QColor(100,100,100)));  
+  formats_[PythonToken::COMMENT]=format;
   format.setForeground(QBrush(QColor(0,0,150)));
   formats_[PythonToken::GROUPING]=format;  
   format.setForeground(QBrush(QColor(35,107,142)));
@@ -72,11 +74,32 @@ PythonSyntaxHighlighter::PythonSyntaxHighlighter(QTextDocument* parent):
 
 void PythonSyntaxHighlighter::highlightBlock(const QString& text_block) { 
   QTextCursor cursor(currentBlock());
-  cursor.setBlockFormat(block_formats_[static_cast<BlockType>(currentBlockState())]);
-  if (currentBlockState() == BLOCKTYPE_BLOCKEDIT || currentBlockState() == BLOCKTYPE_ACTIVE || currentBlockState() == BLOCKTYPE_CODE){
+  int base_state=-1;  
+  if (currentBlockState() & BLOCKTYPE_OUTPUT) {
+    base_state=BLOCKTYPE_OUTPUT;
+  } else if (currentBlockState() & BLOCKTYPE_ERROR) {
+    base_state=BLOCKTYPE_ERROR;
+  } else if (currentBlockState() & BLOCKTYPE_ACTIVE) {
+    base_state=BLOCKTYPE_ACTIVE;
+  } else if (currentBlockState() & BLOCKTYPE_BLOCKEDIT) {
+    base_state=BLOCKTYPE_BLOCKEDIT;
+  } else if (currentBlockState() & BLOCKTYPE_CODE) {
+    base_state=BLOCKTYPE_CODE;
+  }
+  cursor.setBlockFormat(block_formats_[static_cast<BlockType>(base_state)]);
+  if (currentBlockState() & BLOCKTYPE_BLOCKEDIT || 
+      currentBlockState() & BLOCKTYPE_ACTIVE || 
+      currentBlockState() & BLOCKTYPE_CODE) {
     StringLiteralPositions* positions=new StringLiteralPositions();
     int blockposition=currentBlock().position();
-    PythonTokenizer pt(text_block,0);
+    int string_state=0;
+    int bs=previousBlockState()==-1 ? 0 : previousBlockState();
+    if (bs & BLOCKTYPE_MULTILINE_SQ) {
+      string_state=2;
+    } else if (bs & BLOCKTYPE_MULTILINE_DQ) {
+      string_state=1;
+    }
+    PythonTokenizer pt(text_block,string_state);
     PythonToken t;
     PythonToken last;
     int type_before_last=PythonToken::END;
@@ -84,14 +107,28 @@ void PythonSyntaxHighlighter::highlightBlock(const QString& text_block) {
     while((t = pt.NextToken()).GetType() != PythonToken::END) {
       setFormat(t.GetRange().location,t.GetRange().length,formats_[t.GetType()]);
       if(t.GetType()==PythonToken::STRING_LITERAL){
-        positions->Append(blockposition+t.GetRange().location,blockposition+t.GetRange().location+t.GetRange().length);
+        positions->Append(blockposition+t.GetRange().location,
+                          blockposition+t.GetRange().location+
+                          t.GetRange().length);
       }
       type_before_last=last.GetType();
       last=t;
     }
-    if(last.GetType()==PythonToken::STRING_DELIM && type_before_last!=PythonToken::STRING_LITERAL && type_before_last!=PythonToken::STRING_DELIM){
-      positions->Append(blockposition+last.GetRange().location+1,blockposition+last.GetRange().location+1);
+    if(last.GetType()==PythonToken::STRING_DELIM && 
+       type_before_last!=PythonToken::STRING_LITERAL && 
+       type_before_last!=PythonToken::STRING_DELIM){
+      positions->Append(blockposition+last.GetRange().location+1,
+                        blockposition+last.GetRange().location+1);
     }
+    int new_state=base_state;
+    if (pt.InString()) {
+      if (pt.GetDelim()=="'''") {
+        new_state|=BLOCKTYPE_MULTILINE_SQ;
+      } else if (pt.GetDelim()=="\"\"\""){
+        new_state|=BLOCKTYPE_MULTILINE_DQ;
+      }
+    }
+    setCurrentBlockState(new_state);
     currentBlock().setUserData(positions);
   }
 }

@@ -113,9 +113,9 @@ class TestSeq(unittest.TestCase):
   def testViewsFromSequences_09(self):
     seq_a=seq.CreateSequence("A", "B-D-FGH")
     seq_a.AttachView(self.ent.Select('rname=A,B,D,F,G,H'))
-    seq_a.SetSequenceOffset(1)
+    seq_a.offset=1
     seq_b=seq.CreateSequence("B", "B-DEF-H")
-    seq_b.SetSequenceOffset(1)
+    seq_b.offset=1
     seq_b.AttachView(self.ent.Select('rname=A,B,D,E,F,H'))
     a, b=seq.ViewsFromSequences(seq_a, seq_b)
     string_a=''.join([r.one_letter_code for r in a.residues])

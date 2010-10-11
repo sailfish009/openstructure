@@ -42,6 +42,7 @@ inline void apply_color_op(TraceRendererBase* rend, BackboneTrace& trace_subset,
 {
   rend->UpdateViews();
   ColorMask mask = op.GetMask();
+  mol::EntityView view;
   if(op.IsSelectionOnly()){
     mol::Query q(op.GetSelection());
     for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {

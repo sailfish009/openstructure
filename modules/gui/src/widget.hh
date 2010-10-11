@@ -19,11 +19,11 @@
 #ifndef OST_GUI_WIDGET_HH
 #define OST_GUI_WIDGET_HH
 
-#include <QWidget>
-#include <QMetaType>
 
 #include <ost/gui/module_config.hh>
 
+#include <QWidget>
+#include <QMetaType>
 /*
   Author: Marco Biasini
  */
@@ -56,11 +56,26 @@ public:
   QWidget* GetInternalWidget();
   void SetInternalWidget(QWidget* widget);
   
+  
+  const QString& GetUniqueID() const
+  {
+    if (unique_id_.size()==0) {
+      unique_id_=this->metaObject()->className();
+    }
+    return unique_id_;
+  }
+  
+  void SetUniqueID(const QString& id)
+  {
+    unique_id_=id;
+  }
+  
   virtual bool Restore(const QString& prefix)=0;
   
   virtual bool Save(const QString& prefix)=0;
   
 private:
+  mutable QString  unique_id_;
   QWidget* internal_;
   bool     destroy_on_close_;
 };

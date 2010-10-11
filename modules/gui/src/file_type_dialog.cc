@@ -18,29 +18,34 @@
 //------------------------------------------------------------------------------
 #include "file_type_dialog.hh"
 
+
+#include <ost/io/io_manager.hh>
+#include <ost/io/io_exception.hh>
+
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTableWidgetItem>
 #include <QHeaderView>
-
-#include <ost/io/io_manager.hh>
-#include <ost/io/io_exception.hh>
-
 namespace ost { namespace gui {
 
 FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
-  QDialog(parent),entity_handler_(), surf_handler_()
+  QDialog(parent),entity_handler_(),seq_handler_(), surf_handler_()
 #if OST_IMG_ENABLED
       ,map_handler_()
 #endif
 {
   this->setWindowTitle("File format not recognized");
+  this->setFixedSize(QSize(400, 300));
   QVBoxLayout* vb=new QVBoxLayout(this);
-  label_ = new QLabel("The file format could not be recognized, please select the type of the file from the list:");
+  label_ = new QLabel("The file format could not be recognized, "
+                      "please select the type of the file from the list:");
+  label_->setWordWrap(true);
   list_ = new QTableWidget(this);
+  list_->setShowGrid(false);
   list_->horizontalHeader()->setStretchLastSection(true);
   list_->setColumnCount(2);
+  list_->setAttribute(Qt::WA_MacSmallSize);
   list_->verticalHeader()->setVisible(false);
   list_->horizontalHeader()->setVisible(false);
   list_->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -64,6 +69,13 @@ FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
     QVariant handler = QVariant();
     handler.setValue(entity_handler[i]);
     this->AddRow(list_->rowCount(),entity_handler[i]->GetFormatName().c_str(),entity_handler[i]->GetFormatDescription().c_str(),handler);
+  }
+
+  io::AlignmentIOFList alignment_handler = io::IOManager::Instance().GetAvailableAlignmentHandler();
+  for(unsigned int i = 0 ; i < alignment_handler.size() ; i++){
+    QVariant handler = QVariant();
+    handler.setValue(alignment_handler[i]);
+    this->AddRow(list_->rowCount(),alignment_handler[i]->GetFormatName().c_str(),alignment_handler[i]->GetFormatDescription().c_str(),handler);
   }
 
 #if OST_IMG_ENABLED
@@ -106,6 +118,11 @@ void FileTypeDialog::accept(){
         entity_handler_ = ent_handler_fac->Create();
         break;
       }
+      io::SequenceIOHandlerFactoryBasePtr seq_handler_fac = variant.value<io::SequenceIOHandlerFactoryBasePtr>();
+      if(seq_handler_fac){
+        seq_handler_ = seq_handler_fac->Create();
+        break;
+      }
       io::SurfaceIOHandlerFactoryBasePtr surf_handler_fac = variant.value<io::SurfaceIOHandlerFactoryBasePtr>();
       if(surf_handler_fac){
         surf_handler_ = surf_handler_fac->Create();
@@ -127,6 +144,9 @@ io::EntityIOHandlerP FileTypeDialog::GetEntityHandler(){
  return entity_handler_;
 }
 
+io::SequenceIOHandlerPtr FileTypeDialog::GetSequenceHandler(){
+ return seq_handler_;
+}
 
 io::SurfaceIOHandlerPtr FileTypeDialog::GetSurfaceHandler(){
   return surf_handler_;

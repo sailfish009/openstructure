@@ -23,6 +23,7 @@
   Author: Marco Biasini
  */
 #include <ost/seq/module_config.hh>
+#include <ost/message.hh>
 namespace ost { namespace seq {
 
 class DLLEXPORT InvalidSequence : public Error {

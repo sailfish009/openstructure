@@ -29,6 +29,7 @@ extent_mask.cc
 spherical_mask.cc
 mask_op.cc
 circle_mask.cc
+mask_info_convert.cc
 image_list.cc
 physical_units.cc
 progress.cc
@@ -86,6 +87,7 @@ spherical_mask.hh
 mask_op.hh
 mask.hh
 circle_mask.hh
+mask_info_convert.hh
 image_list.hh
 physical_units.hh
 progress.hh
@@ -105,4 +107,4 @@ module(NAME img SOURCES "${OST_IMG_SOURCES}"
        HEADERS ${OST_IMG_RASTER_IMAGE_HEADERS} IN_DIR raster_image
                 ${OST_IMG_IMAGE_STATE_HEADERS} IN_DIR image_state
                 ${OST_IMG_HEADERS}
-       DEPENDS_ON geom base)
+       DEPENDS_ON geom base info)

@@ -31,15 +31,17 @@
 namespace ost { namespace img { namespace gui {
 
 PointlistOverlay::PointlistOverlay(const String& name):
-  PointlistOverlayBase(name)
+  PointlistOverlayBase(name),
+  pointlist_()
 {
-  build();
+  build_();
 }
 
 PointlistOverlay::PointlistOverlay(const PointList& pl, const String& name):
-  PointlistOverlayBase(name)
+  PointlistOverlayBase(name),
+  pointlist_()
 {
-  build();
+  build_();
   Add(pl);
 }
 
@@ -52,22 +54,22 @@ void PointlistOverlay::OnMenuEvent(QAction* e)
   }
 }
 
-void PointlistOverlay::Add(const Point& pnt)
+void PointlistOverlay::Add(const Point& pnt, double scale)
 {
-  pointlist_.push_back(pnt);
+  pointlist_.push_back(std::pair<Point,double>(pnt,scale));
 }
 
-void PointlistOverlay::Add(const PointList& pl)
+void PointlistOverlay::Add(const PointList& pl, double scale)
 {
   for(PointList::const_iterator it=pl.begin();it!=pl.end();++it) {
-    Add(*it);
+    Add(*it,scale);
   }
 }
 
 void PointlistOverlay::Remove(const Point& pnt)
 {
-  for(PointList::iterator it=pointlist_.begin();it!=pointlist_.end();++it){
-    if (*it==pnt) {
+  for(std::vector<std::pair<Point,double> >::iterator it=pointlist_.begin();it!=pointlist_.end();++it){
+    if (it->first==pnt) {
       pointlist_.erase(it);
     }
   }
@@ -80,13 +82,14 @@ void PointlistOverlay::Clear()
 
 void PointlistOverlay::OnDraw(QPainter& pnt, DataViewerPanel* dvp, bool is_active)
 {
-  std::vector<QPoint> qpointlist;
-  for(PointList::iterator it=pointlist_.begin();it!=pointlist_.end();++it){
-    qpointlist.push_back(dvp->FracPointToWinCenter((*it).ToVec2()));
+  std::vector<std::pair<QPoint,double> > qpointlist;
+  for(std::vector<std::pair<Point,double> >::iterator it=pointlist_.begin();it!=pointlist_.end();++it){
+    qpointlist.push_back(std::pair<QPoint,double> (dvp->FracPointToWinCenter((it->first).ToVec2()),it->second));
   }
   
-  DrawPointList(pnt,dvp, is_active? active_color_ : passive_color_,
-                qpointlist);
+  DrawVariableSizePointList(pnt,dvp,
+		is_active? active_color_ : passive_color_,
+		qpointlist);
 }
 
 bool PointlistOverlay::OnMouseEvent(QMouseEvent* e, 
@@ -96,19 +99,20 @@ bool PointlistOverlay::OnMouseEvent(QMouseEvent* e,
   if(e->buttons()==Qt::LeftButton && e->modifiers()&Qt::ShiftModifier) {
     // toggle point at mouse position
     Point mpoint = dvp->WinToPoint(e->x(),e->y());
-    PointList::iterator pos=find(pointlist_.begin(),
-                                       pointlist_.end(),mpoint);
-    if(pos!=pointlist_.end()) {
-      pointlist_.erase(pos);
-    } else {
-      pointlist_.push_back(mpoint);
+    for(std::vector<std::pair<Point,double> >::iterator it=pointlist_.begin();it!=pointlist_.end();++it){
+      if (it->first==mpoint) {
+        pointlist_.erase(it);
+        return true;
+      }
     }
+    pointlist_.push_back(std::pair<Point,double>(mpoint,1.0));
     return true;
   }
   return false;
 }
 
-void PointlistOverlay::build()
+
+void PointlistOverlay::build_()
 {
   menu_->addSeparator();
   a_clr_ = menu_->addAction("Clear");

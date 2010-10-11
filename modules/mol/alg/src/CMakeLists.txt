@@ -2,11 +2,13 @@ set(OST_MOL_ALG_HEADERS
   svd_superpose.hh
   module_config.hh
   sec_structure_segments.hh
+  local_dist_test.hh
 )
 
 set(OST_MOL_ALG_SOURCES
   svd_superpose.cc
   sec_structure_segments.cc
+  local_dist_test.cc
 )
 
 set(MOL_ALG_DEPS mol)

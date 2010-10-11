@@ -29,10 +29,9 @@ namespace {
 
 void ImportSurface(mol::SurfaceHandle& sh, const String& fname, const String& type)
 {
-  LOG_DUMP("creating EntityIOHandle for " << fname << std::endl);
+  LOG_DEBUG("creating EntityIOHandle for " << fname);
   SurfaceIOHandlerPtr surf_io = IOManager::Instance().FindSurfaceImportHandler(fname,type);
-
-  LOG_DUMP("calling import on surface io handle" << std::endl);
+  LOG_DEBUG("calling import on surface io handle");
   surf_io->Import(sh,fname);
 }
 

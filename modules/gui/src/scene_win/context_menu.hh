@@ -23,32 +23,34 @@
   Author: Stefan Scheuber
  */
 
-#include <QFlags>
-#include <QMap>
-#include <QAbstractItemModel>
-#include <QTreeView>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/scene_win/scene_win_model.hh>
 
+#include <QFlags>
+#include <QMap>
+#include <QAbstractItemModel>
+#include <QTreeView>
 namespace ost { namespace gui {
 
 enum ContextActionType
 {
-  GFX_OBJECT=0x1,
-  ENTITY=0x2,
-  ENTITY_VIEW=0x4,
-  CUSTOM_VIEW=0x8,
-  NOT_VISIBLE=0x10,
-  NOT_HIDDEN=0x20,
-  NOT_SCENE=0x40,
-  SINGLE=0x80,
-  MULTI=0x100
+  GFX_NODE=0x1,
+  GFX_OBJECT=0x2,
+  ENTITY=0x4,
+  ENTITY_VIEW=0x8,
+  CUSTOM_VIEW=0x10,
+  NOT_VISIBLE=0x20,
+  NOT_HIDDEN=0x40,
+  NOT_SCENE=0x80,
+  SINGLE=0x100,
+  MULTI=0x200,
+  VIEWS_SAME_OBJECT=0x400
 #if OST_IMG_ENABLED
-  ,MAP=0x200,
-  MAP_ORIGINAL=0x400,
-  MAP_DOWNSAMPLED=0x800,
-  MAP_DSAMPLED_AVAIL=0x1000
+  ,MAP=0x800,
+  MAP_ORIGINAL=0x1000,
+  MAP_DOWNSAMPLED=0x2000,
+  MAP_DSAMPLED_AVAIL=0x4000
 #endif
 };
 Q_DECLARE_FLAGS(ContextActionTypes, ContextActionType)
@@ -66,7 +68,6 @@ public:
   void AddAction(QAction* action,ContextActionTypes type);
 
 private slots:
-  void AddViewFromEntity();
   void AddView();
   void Rename();
   void DeleteView();

@@ -27,19 +27,19 @@
 
 namespace ost { namespace io {
 
-DLLEXPORT_OST_IO img::ImageHandle LoadImage(const boost::filesystem::path& loc)
+img::ImageHandle LoadImage(const boost::filesystem::path& loc)
 {
   UndefinedImageFormat undefined;
   return LoadImage(loc,undefined);
 }
 
-DLLEXPORT_OST_IO img::ImageHandle LoadImage(const boost::filesystem::path& loc, const ImageFormatBase& formatstruct)
+img::ImageHandle LoadImage(const boost::filesystem::path& loc, const ImageFormatBase& formatstruct)
 {
   if(!boost::filesystem::exists(loc)){
     throw IOException("file not found: " + loc.string());
   }
 
-  LOG_DUMP("creating MapIOHandler for " << loc.string() << std::endl);
+  LOG_DEBUG("creating MapIOHandler for " << loc.string());
 
   MapIOHandlerPtr map_io = IOManager::Instance().FindMapImportHandlerFile(loc,formatstruct);
 
@@ -49,7 +49,7 @@ DLLEXPORT_OST_IO img::ImageHandle LoadImage(const boost::filesystem::path& loc, 
 
   img::ImageHandle ih = CreateImage(img::Extent(),img::REAL,img::SPATIAL);
 
-  LOG_DUMP("calling import on map io handle" << std::endl);
+  LOG_DEBUG("calling import on map io handle");
   map_io->Import(ih,loc,formatstruct);
 
   // TODO: fix this in regard to automatic copy of ConstData info obj
@@ -59,40 +59,40 @@ DLLEXPORT_OST_IO img::ImageHandle LoadImage(const boost::filesystem::path& loc, 
   return ih;
 }
 
-DLLEXPORT_OST_IO void SaveImage(const img::ImageHandle& image, const boost::filesystem::path& loc)
+void SaveImage(const img::ImageHandle& image, const boost::filesystem::path& loc)
 {
   UndefinedImageFormat undefined;
   SaveImage(image,loc,undefined);
 }
 
-DLLEXPORT_OST_IO void SaveImage(const img::ImageHandle& image, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct)
+void SaveImage(const img::ImageHandle& image, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct)
 {
   MapIOHandlerPtr map_io = IOManager::Instance().FindMapExportHandlerFile(loc,formatstruct);
 
   if(!map_io) {
     throw IOUnknownFormatException("could not find io-plugin for " + loc.string());
   }
-  LOG_DUMP("calling export on map io handle" << std::endl);
+  LOG_DEBUG("calling export on map io handle");
   map_io->Export(image, loc,formatstruct);
 }
 
 
-DLLEXPORT_OST_IO img::MapHandle LoadMap(const boost::filesystem::path& loc, const ImageFormatBase& formatstruct)
+img::MapHandle LoadMap(const boost::filesystem::path& loc, const ImageFormatBase& formatstruct)
 {
   return LoadImage(loc,formatstruct);
 }
 
-DLLEXPORT_OST_IO img::MapHandle LoadMap(const boost::filesystem::path& loc)
+img::MapHandle LoadMap(const boost::filesystem::path& loc)
 {
   return LoadImage(loc);
 }
 
-DLLEXPORT_OST_IO void SaveMap(const img::ImageHandle& image, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct )
+void SaveMap(const img::ImageHandle& image, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct )
 {
   SaveImage(image,loc,formatstruct);
 }
 
-DLLEXPORT_OST_IO void SaveMap(const img::ImageHandle& image, const boost::filesystem::path& loc)
+void SaveMap(const img::ImageHandle& image, const boost::filesystem::path& loc)
 {
   SaveImage(image,loc);
 }

@@ -60,11 +60,12 @@ GfxTestObj::GfxTestObj():
   String ost_root=GetSharedDataPath();
   bf::path ost_root_dir(ost_root);
   bf::path tex_file(ost_root_dir / "textures/test_texture.png");
+
   Texture tex(BitmapImport(tex_file.string(),".png"));
   if(!tex.IsValid()) {
     LOGN_ERROR("error loading " << tex_file.string());
   } else {
-    LOGN_VERBOSE("importing tex with id " << tex_id);
+    LOG_DEBUG("importing tex with id " << tex_id);
     glBindTexture(GL_TEXTURE_2D, tex_id);
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

@@ -27,7 +27,6 @@
 
 #include "widget_state_saver.hh"
 
-#include "plot_viewer/plot_viewer_proxy_fw.hh"
 
 // Qt headers must come last
 #include <QMainWindow>

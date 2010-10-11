@@ -157,12 +157,14 @@ BOOST_PYTHON_MODULE(_gfx)
     ;
   
   class_<Gradient>("Gradient", init<>())
+    .def(init<const String&>())
     .def("SetColorAt", &Gradient::SetColorAt)
     .def("GetColorAt", &Gradient::GetColorAt)
     .def("GetStops", &Gradient::GetStops)
     .def("GradientToInfo", &Gradient::GradientToInfo)
     .def("GradientFromInfo", &Gradient::GradientFromInfo).staticmethod("GradientFromInfo")
   ;
+  implicitly_convertible<String, Gradient>();
 
   class_<StopList>("StopList", init<>())
     .def(vector_indexing_suite<StopList>())

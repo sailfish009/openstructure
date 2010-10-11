@@ -40,7 +40,8 @@ public:
   /// respectively.
   typedef enum {
     RNAME, ANAME, CNAME, ELE, RNUM, ANUM, AX, AY, AZ, OCC, RTYPE, ISHETATM,
-    RBFAC, ABFAC, PEPTIDE, ACHARGE, RINDEX, WITHIN, UNDEF, CUSTOM
+    RBFAC, ABFAC, PEPTIDE, ACHARGE, RINDEX, PROTEIN, WATER, WITHIN, 
+    UNDEF, CUSTOM
   } ID;
   
   typedef enum {

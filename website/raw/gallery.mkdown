@@ -1,8 +1,0 @@
-title: Gallery 
-
-# Gallery 
-|   |   |
-| - | - |
-| [![Loop modelling using our fragment library](100212_Loops_Tn.png "Loop Modelling")](100212_Loops.png "Loop Modelling")| [![BE Scroe](100212_BE_Score_Tn.png "BE Score")](100212_BE_Score.png "BE Score") |
-| [![Screenshot Mac OS](100212_Openstructure1.0a1_1622_Mac_Tn.png "Screenshot Mac OS")](100212_Openstructure1.0a1_1622_Mac.png "Screenshot Mac OS") | [![Screenshot Windows](100212_Openstructure1.0a1_1622_Win_Tn.png "Screenshot Windows")](100212_Openstructure1.0a1_1622_Win.png "Screenshot Windows")|
-| [![Screenshot Linux](100212_Openstructure1.0a1_1622_Linux_Tn.png "Screenshot Linux")](100212_Openstructure1.0a1_1622_Linux.png "Screenshot Linux") ||

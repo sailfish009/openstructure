@@ -22,12 +22,11 @@
 #include <ost/seq/alg/merge_pairwise_alignments.hh>
 #include <ost/seq/alg/sequence_identity.hh>
 #include <ost/seq/alg/ins_del.hh>
-
+#include <ost/seq/alg/conservation.hh>
+#include <ost/seq/alg/subst_weight_matrix.hh>
 using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
-
-void export_Align();
 
 BOOST_PYTHON_MODULE(_seq_alg)
 {
@@ -36,8 +35,8 @@ BOOST_PYTHON_MODULE(_seq_alg)
     .value("LONGER_SEQUENCE", RefMode::LONGER_SEQUENCE)
     .export_values()
   ;
-  def("SequenceIdentity", &SequenceIdentity, arg("seq_a")=0, arg("seq_b")=1);
-  
+  def("SequenceIdentity", &SequenceIdentity, 
+      (arg("ref_mode")=RefMode::ALIGNMENT, arg("seq_a")=0, arg("seq_b")=1));
   class_<AlignedRegionList>("AlignedRegionList", init<>())
     .def(vector_indexing_suite<AlignedRegionList>())
   ;
@@ -46,6 +45,12 @@ BOOST_PYTHON_MODULE(_seq_alg)
     .def("GetDeletions", &InsDel::GetDeletions)
     .def("GetInsertions", &InsDel::GetInsertions)
   ;
+  
+  class_<SubstWeightMatrix, SubstWeightMatrixPtr>("SubstWeightMatrix", init<>())
+    .def("GetWeight", &SubstWeightMatrix::GetWeight)
+    .def("SetWeight", &SubstWeightMatrix::SetWeight)
+  ;
   def("MergePairwiseAlignments", &MergePairwiseAlignments);
-  export_Align();  
+  def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons"));
+
 }

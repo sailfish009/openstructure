@@ -16,7 +16,6 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QFont>
 
 #include "custom_part_node.hh"
 
@@ -25,6 +24,7 @@
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/gfx_node.hh>
 
+#include <QFont>
 namespace ost { namespace gui {
 
 CustomPartNode::CustomPartNode(QString name, gfx::EntityP entity, mol::QueryViewWrapper part, SceneNode* parent):EntityPartNode(name,entity,part,parent){

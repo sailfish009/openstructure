@@ -16,16 +16,16 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/gui/gosty_app.hh>
 #include "loader_manager.hh"
+
+#include <ost/gui/perspective.hh>
 #include <QDir>
 #include <QAction>
 #include <QMenu>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QMenuBar>
-
-#include <ost/gui/gosty_app.hh>
-#include <ost/gui/perspective.hh>
 
 
 namespace ost { namespace gui {
@@ -97,6 +97,19 @@ std::vector<String> LoaderManager::GetSiteLoaderIdents()
 
 QMenu* LoaderManager::GetSiteMenu(){
   return site_menu_;
+}
+
+RemoteSiteLoader* LoaderManager::GetDefaultRemoteSiteLoader()
+{
+ return GetRemoteSiteLoader(GetDefaultRemoteSiteIdent());
+}
+
+QString LoaderManager::GetDefaultRemoteSiteIdent(){
+  return default_site_;
+}
+
+void LoaderManager::SetDefaultRemoteSiteIdent(const QString& ident){
+  default_site_ = ident;
 }
 
 LoaderManager::~LoaderManager(){}

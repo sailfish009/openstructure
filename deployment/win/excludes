@@ -4,3 +4,6 @@ prg_exec
 signals
 libboost
 create_archive
+.pdb
+markdown
+pygments

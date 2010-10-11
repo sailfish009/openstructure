@@ -119,7 +119,7 @@ void Dihedral::SetAngleICS(Real angle, bool update_other) {
   }
   // we operate under the assumption that conn2_->First and atom_1 are
   // connected and not conn2_->Second and atom1_.
-  LOGN_DEBUG("SetAngleICS: " << a1->GetQualifiedName() << " " 
+  LOG_DEBUG("SetAngleICS: " << a1->GetQualifiedName() << " " 
              << a2->GetQualifiedName() << " " << a3->GetQualifiedName() << " " 
              << a4->GetQualifiedName());
   assert(ConnectorExists(a1, conn2->GetFirst()));

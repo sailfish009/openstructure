@@ -22,12 +22,12 @@
 /*
   Author: Tobias Schmidt
  */
-#include <QList>
 
 #include <ost/gui/tools/tool.hh>
 #include <ost/mol/atom_handle.hh>
 #include <ost/gfx/color.hh>
 
+#include <QList>
 namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI Measurement {

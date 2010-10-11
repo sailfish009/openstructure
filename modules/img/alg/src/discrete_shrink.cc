@@ -72,8 +72,10 @@ ImageStateBasePtr DiscreteShrinkFnc::VisitState(const ImageStateImpl<T,D>& isi) 
 
   Extent new_ext(newsize);
 
-  LOG_VERBOSE("ds: " << isi.GetExtent() << " " << new_ext << std::endl);
+  LOG_DEBUG("extent of shrunken image" << isi.GetExtent() << " " << new_ext);
 
+
+  geom::Vec3 ao = isi.GetAbsoluteOrigin();
   PixelSampling new_ps = isi.GetSampling();
   new_ps.SetExtent(new_ext);
 
@@ -95,8 +97,7 @@ ImageStateBasePtr DiscreteShrinkFnc::VisitState(const ImageStateImpl<T,D>& isi) 
   dt = div(start[1],bs_[1]);  newstart[1] = dt.quot;
   dt = div(start[2],bs_[2]);  newstart[2] = dt.quot;
 
-  LOG_VERBOSE("ds: newstart: " << newstart << std::endl);
-
+  ni->SetAbsoluteOrigin(ao);
   ni->SetSpatialOrigin(newstart);
   ni->GetSampling().SetPixelSampling(CompMultiply(ni->GetSampling().GetPixelSampling(),Vec3(bs_[0],bs_[1],bs_[2])));
 

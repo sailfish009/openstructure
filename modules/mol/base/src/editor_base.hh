@@ -193,6 +193,9 @@ public:
     
   /// \brief Get edit mode of editor
   EditMode GetMode() const;
+  
+  /// \brief change the name of the atom to the new name  
+  void RenameAtom(AtomHandle atom, const String& new_name);
 protected:
   EditorBase(const EntityHandle& ent, EditMode mode);
   void UpdateTrace();

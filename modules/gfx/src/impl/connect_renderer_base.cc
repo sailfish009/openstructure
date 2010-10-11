@@ -137,21 +137,16 @@ inline void apply_color_op(ConnectRendererBase* rend, GfxView* v, T1 get_col, co
     return;
   }
   rend->UpdateViews();
+  mol::EntityView view;
   if(op.IsSelectionOnly()){
-    mol::Query q(op.GetSelection());
-    for (AtomEntryMap::iterator it=v->atom_map.begin();
-         it!=v->atom_map.end();++it) {
-      if (q.IsAtomSelected(it->second.atom)) {
-        it->second.color=get_col.ColorOfAtom(it->second.atom);
-      }
-    }
+    view = rend->GetEffectiveView().Select(op.GetSelection(),op.GetSelectionFlags());
   }
   else{
-    mol::EntityView view = op.GetView();
-    for(AtomEntryMap::iterator it=v->atom_map.begin();it!=v->atom_map.end();++it){
-      if(view.FindAtom(it->second.atom)){
-        it->second.color=get_col.ColorOfAtom(it->second.atom);
-      }
+    view = op.GetView();
+  }
+  for(AtomEntryMap::iterator it=v->atom_map.begin();it!=v->atom_map.end();++it){
+    if(view.FindAtom(it->second.atom)){
+      it->second.color=get_col.ColorOfAtom(it->second.atom);
     }
   }
 };

@@ -14,6 +14,7 @@ PARENT_SCOPE
 )
 
 set(OST_MOL_IMPL_HEADERS
+pointer_iterator.hh
 atom_group.hh
 atom_impl.hh
 atom_impl_fw.hh

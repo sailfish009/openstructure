@@ -22,10 +22,10 @@
 /*
   Author: Marco Biasini
  */
-#include <QList>
 
 #include <ost/gui/tools/tool.hh>
 
+#include <QList>
 
 namespace ost { namespace gui {
 

@@ -22,12 +22,12 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-
+#include <ost/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
-
+#include "bounds.hh"
 namespace {
   
   
@@ -109,6 +109,8 @@ void export_Residue()
                  &ResidueBase::SetOneLetterCode)  
     .def("GetQualifedName", &ResidueBase::GetQualifiedName)
     .def("IsPeptideLinking", &ResidueBase::IsPeptideLinking)
+    .add_property("peptide_linking", &ResidueBase::IsPeptideLinking)
+    
     .def("GetKey", &ResidueBase::GetKey,
          return_value_policy<copy_const_reference>())
      .def("GetName", &ResidueBase::GetName,
@@ -154,7 +156,6 @@ void export_Residue()
     .add_property("atoms", &ResidueHandle::GetAtomList)
     .def("FindAtom", &ResidueHandle::FindAtom, args("atom_name"))
     .def("FindTorsion", &ResidueHandle::FindTorsion)
-    .def("Apply", &ResidueHandle::Apply, args("visitor"))
     .def("GetAtomCount", &ResidueHandle::GetAtomCount)
     .def("GetBondCount", &ResidueHandle::GetBondCount)
     .add_property("atom_count", &ResidueHandle::GetAtomCount)
@@ -164,16 +165,26 @@ void export_Residue()
     .def("GetMass", &ResidueHandle::GetMass)
     .def("GetCenterOfMass", &ResidueHandle::GetCenterOfMass)
     .def("GetCenterOfAtoms", &ResidueHandle::GetCenterOfAtoms)
-    .def("GetGeometricCenter", &ResidueHandle::GetGeometricCenter)
-    .add_property("geometric_center", &ResidueHandle::GetGeometricCenter)
-    .def("GetGeometricStart", &ResidueHandle::GetGeometricStart)
-    .def("GetGeometricEnd", &ResidueHandle::GetGeometricEnd)
+    .def("GetGeometricCenter", geom_center<ResidueHandle>)
+    .add_property("mass", &ResidueHandle::GetMass)
+    .add_property("center_of_mass", &ResidueHandle::GetCenterOfMass)
+    .add_property("center_of_atoms", &ResidueHandle::GetCenterOfAtoms)  
+    .add_property("geometric_center", geom_center<ResidueHandle>)
+    .add_property("phi_torsion", &ResidueHandle::GetPhiTorsion)
+    .add_property("psi_torsion", &ResidueHandle::GetPsiTorsion)
+    .add_property("omega_torsion", &ResidueHandle::GetOmegaTorsion)
+    .add_property("valid", &ResidueHandle::IsValid) 
+    .def("GetGeometricStart", geom_start<ResidueHandle>)
+    .def("GetGeometricEnd", geom_end<ResidueHandle>)
     .def(self==self)
     .def(self!=self)
     .def("__hash__", &ResidueHandle::GetHashCode)
+    .def("GetBounds", &ResidueHandle::GetBounds)
+    .add_property("bounds", &ResidueHandle::GetBounds)    
   ;
 
   class_<ResidueHandleList>("ResidueHandleList", no_init)
     .def(vector_indexing_suite<ResidueHandleList>())
+    .def(ost::VectorAdditions<ResidueHandleList>())    
   ;
 }

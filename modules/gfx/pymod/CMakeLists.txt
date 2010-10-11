@@ -18,3 +18,11 @@ if (ENABLE_IMG)
 endif()
 
 pymod(NAME gfx CPP ${OST_GFX_PYMOD_SOURCES} PY __init__.py)
+
+set(GRADIENT_FILE
+  gradients.xml
+)
+copy_if_different("./" "${STAGE_DIR}/share/openstructure/scene" 
+                  "${GRADIENT_FILE}" "PRESET GRADIENTS" _gfx)
+                  
+install(FILES ${GRADIENT_FILE} DESTINATION "share/openstructure/scene")

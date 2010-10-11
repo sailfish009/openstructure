@@ -490,7 +490,7 @@ void GfxObj::OnRenderModeChange()
 
 void GfxObj::PreRenderGL(bool f)
 {
-  LOGN_DUMP("object " << GetName() << ": PreRenderGL()");
+  LOG_DEBUG("object " << GetName() << ": PreRenderGL()");
   CustomPreRenderGL(f);
 }
 

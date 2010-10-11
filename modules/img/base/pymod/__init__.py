@@ -18,3 +18,4 @@
 #------------------------------------------------------------------------------
 from _img import *
 MapHandle=ImageHandle
+from ost.img import alg

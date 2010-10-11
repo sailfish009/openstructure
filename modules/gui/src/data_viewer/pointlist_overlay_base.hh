@@ -26,13 +26,6 @@
 #ifndef IMG_POINTLIST_OVERLAY_BASE_HH
 #define IMG_POINTLIST_OVERLAY_BASE_HH
 
-#include <QColor>
-#include <QAction>
-#include <QDialog>
-#include <QLineEdit>
-#include <QColorDialog>
-#include <QPushButton>
-#include <QVBoxLayout>
 
 
 #include <ost/img/point.hh>
@@ -43,6 +36,13 @@
 
 #include "strategies_fw.hh"
 
+#include <QColor>
+#include <QAction>
+#include <QDialog>
+#include <QLineEdit>
+#include <QColorDialog>
+#include <QPushButton>
+#include <QVBoxLayout>
 
 
 namespace ost { namespace img { namespace gui {
@@ -85,6 +85,7 @@ public:
 
   // own virtual interface
   virtual void DrawPointList(QPainter& pnt, DataViewerPanel* dvp, const QColor& col ,const std::vector<QPoint>& pointlist);
+  virtual void DrawVariableSizePointList(QPainter& pnt, DataViewerPanel* dvp, const QColor& col ,const std::vector<std::pair<QPoint,double> >& pointlist);
 
   //
   unsigned int GetSymbolSize() const;
@@ -93,6 +94,8 @@ public:
   void SetSymbolShape(unsigned int symbolshape);
   bool GetCrosshair() const;
   void SetCrosshair(bool flag);
+  void SetActiveColor(const QColor& col);
+  void SetPassiveColor(const QColor& col);
 private:
 
   template <class StrategyClass> 

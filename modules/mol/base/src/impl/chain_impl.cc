@@ -184,7 +184,7 @@ ResidueImplPtr ChainImpl::AppendResidue(const ResidueKey& key,
       in_sequence_=false;
     }
     if (in_sequence_) {
-      LOGN_DUMP("appending residue " << num);    
+      LOG_DEBUG("appending residue " << num);    
       // update is only needed if we introduce a new gap.
       if (residue_list_.back()->GetNumber().GetNum()+1<num.GetNum()) {
         Shift s;
@@ -269,7 +269,7 @@ const ResidueImplList& ChainImpl::GetResidueList() const
 
 void ChainImpl::Apply(EntityVisitor& v)
 {
-  LOGN_TRACE("visitor @" << &v << " visiting chain impl @" << this);
+  LOG_TRACE("visitor @" << &v << " visiting chain impl @" << this);
   if (v.VisitChain(ChainHandle(shared_from_this()))) {
     for (ResidueImplList::iterator it=residue_list_.begin();
          it!=residue_list_.end();++it) {
@@ -341,11 +341,23 @@ void ChainImpl::AssignSecondaryStructure(SecStructure ss,
                                          const ResNum& start, 
                                          const ResNum& end)
 {
-  int i=this->GetIndex(start);
-  int j=this->GetIndex(end);
-  if (i>=0 && j>=0 && i<=j && j<static_cast<int>(residue_list_.size())) {
-    std::for_each(residue_list_.begin()+i, residue_list_.begin()+j+1,
-                  bind(&ResidueImpl::SetSecStructure, _1, ss));
+  int start_index=this->GetIndex(start);
+  int i=start_index;
+  bool found_end=false;
+  if (i>=0) {
+    while (i<static_cast<int>(residue_list_.size())) {
+      if (residue_list_[i]->GetNumber()==end) {
+        found_end=true;
+        break;
+      }
+      ++i;
+    }
+  }
+  if (!found_end) {
+    return;
+  }
+  for (int end=i, i=start_index; i<=end; ++i) {
+    residue_list_[i]->SetSecStructure(ss);
   }
 }
 
@@ -363,41 +375,27 @@ Real ChainImpl::GetMass() const
   return mass;
 }
 
-geom::Vec3 ChainImpl::GetGeometricStart() const 
+geom::AlignedCuboid ChainImpl::GetBounds() const 
 {
-  geom::Vec3 minimum(std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity());
+  geom::Vec3 mmin( std::numeric_limits<Real>::infinity());
+  geom::Vec3 mmax(-std::numeric_limits<Real>::infinity());
+  bool atoms=false;
   for (ResidueImplList::const_iterator i=residue_list_.begin(); 
         i!=residue_list_.end(); ++i) {
     ResidueImplPtr r=*i;
     for (AtomImplList::iterator j=r->GetAtomList().begin(); 
           j!=r->GetAtomList().end(); ++j) {
-      minimum=geom::Min(minimum,(*j)->GetPos());
+      mmin=geom::Min(mmin, (*j)->GetPos());
+      mmax=geom::Max(mmax, (*j)->GetPos());
+      atoms=true;
     }
   }
-  return minimum;
-}
-
-geom::Vec3 ChainImpl::GetGeometricEnd() const {
-  geom::Vec3 maximum(-std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity());
-  for (ResidueImplList::const_iterator i=residue_list_.begin(); 
-        i!=residue_list_.end(); ++i) {
-    ResidueImplPtr r=*i;
-    for (AtomImplList::iterator j=r->GetAtomList().begin(); 
-          j!=r->GetAtomList().end(); ++j) {
-      maximum=geom::Max(maximum,(*j)->GetPos());
-    }
+  if (!atoms) {
+    return geom::AlignedCuboid(geom::Vec3(), geom::Vec3());
   }
-  return maximum;
+  return geom::AlignedCuboid(mmin, mmax);
 }
 
-geom::Vec3 ChainImpl::GetGeometricCenter() const
-{
-  return (this->GetGeometricStart() + this->GetGeometricEnd()) / 2;
-}
 
 geom::Vec3 ChainImpl::GetCenterOfAtoms() const
 {

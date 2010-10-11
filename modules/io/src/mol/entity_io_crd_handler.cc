@@ -81,7 +81,7 @@ void CRDReader::Import(mol::EntityHandle& ent)
   while(std::getline(in_,line)) {
     ParseAndAddAtom(line,ent);
   }
-  LOGN_MESSAGE("imported " << chain_count_ << " chains, " << residue_count_
+  LOG_INFO("imported " << chain_count_ << " chains, " << residue_count_
                 << " residues, " << atom_count_ << " atoms");  
 }
 
@@ -89,7 +89,7 @@ void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
 {
   mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
 
-  LOGN_TRACE( "line: [" << line << "]" );
+  LOG_TRACE( "line: [" << line << "]" );
 
   //int anum = boost::lexical_cast<int>(boost::trim_copy(line.substr(0,5)));
   String aname = boost::trim_copy(line.substr(16,4));
@@ -104,7 +104,7 @@ void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
   mol::ResidueKey rkey(rname);
   
   // some postprocessing
-  LOGN_TRACE( "s_chain: [" << s_chain << "]" );
+  LOG_TRACE( "s_chain: [" << s_chain << "]" );
 
   mol::ResNum rnum(irnum);
   
@@ -127,21 +127,21 @@ void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
 
   if(update_chain) {  
     if (!(curr_chain_=ent.FindChain(s_chain))) {
-      LOGN_DUMP("new chain " << s_chain);      
+      LOG_DEBUG("new chain " << s_chain);      
       curr_chain_=editor.InsertChain(s_chain);
       ++chain_count_;      
     }
   }
 
   if(update_residue) {
-    LOGN_DUMP("new residue " << rkey << " " << rnum);
+    LOG_DEBUG("new residue " << rkey << " " << rnum);
     curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
     assert(curr_residue_.IsValid());
     ++residue_count_;
   }
 
   // finally add atom
-  LOGN_DUMP("adding atom " << aname << " (" << ele << ") @" << apos);
+  LOG_DEBUG("adding atom " << aname << " (" << ele << ") @" << apos);
   mol::AtomProp aprop;
   aprop.element=ele;
   aprop.radius=conop::Conopology::Instance().GetDefaultAtomRadius(ele);
@@ -186,9 +186,9 @@ bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
               << format("%5i") % res.GetNumber() << " "
               << format("%4s") % res.GetKey() << " "
               << format("%-4s") % atom.GetName()
-              << format("%10.5f") % atom.GetPos().GetX()
-              << format("%10.5f") % atom.GetPos().GetY()
-              << format("%10.5f") % atom.GetPos().GetZ() << " "
+              << format("%10.5f") % atom.GetPos().x
+              << format("%10.5f") % atom.GetPos().y
+              << format("%10.5f") % atom.GetPos().z << " "
               << format("%-4s") % e_name << " "
               << format("%-5i") % res.GetNumber() << " "
               << format("%8.5f") % atom.GetBFactor()

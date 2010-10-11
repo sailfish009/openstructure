@@ -20,14 +20,14 @@
 /* 
   Author: Marco Biasini
  */
-#include <QVBoxLayout>
 
-#include <ost/gui/widget_registry.hh>
 #include <ost/gui/gosty_app.hh>
+#include <ost/gui/widget_registry.hh>
 
 #include "python_shell.hh"
 #include "python_shell_widget.hh"
 
+#include <QVBoxLayout>
 namespace ost { namespace gui {
 
 class PythonShellFactory: public WidgetFactory {
@@ -63,10 +63,6 @@ bool PythonShell::Save(const QString& prefix)
   return true;  
 }
 
-void PythonShell::AddLogger(TextLogger* logger)
-{
-  this->PyShell()->AddLogger(logger);
-}
 
 PythonShellWidget* PythonShell::PyShell()
 {

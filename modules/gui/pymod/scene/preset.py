@@ -25,7 +25,7 @@ from PyQt4 import QtGui
 from ost.gfx import ColorOp
 
 #Rendering Preset
-class Preset():
+class Preset:
   NAME_ATTRIBUTE_NAME = "Name"
   OP_GROUP_NAME = "Op"
   CLASS_NAME_ATTRIBUTE_NAME = "ClassName"

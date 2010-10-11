@@ -38,7 +38,7 @@ typedef enum  {
 	Met, Trp, Tyr,
 	Thr, Val, Ile,
 	Leu, Gly, Pro,
-	His, Phe, Xxx,
+	His, Phe, Xxx
 	
 } AminoAcid;
 

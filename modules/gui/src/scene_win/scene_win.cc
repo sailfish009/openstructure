@@ -19,15 +19,15 @@
 /*
  Authors: Marco Biasini, Ansgar Philippsen, Stefan Scheuber
  */
-#include <QVBoxLayout>
-#include <QHeaderView>
 
-#include <ost/gui/widget_registry.hh>
 #include <ost/gui/gosty_app.hh>
+#include <ost/gui/widget_registry.hh>
 #include <ost/gui/scene_selection.hh>
 
 #include "scene_win.hh"
 
+#include <QVBoxLayout>
+#include <QHeaderView>
 namespace ost { namespace gui {
 
 class SceneWinFactory: public WidgetFactory {
@@ -52,12 +52,15 @@ SceneWin::SceneWin(QWidget* parent) :
   view_ = new QTreeView(this);
   context_menu_ = new ContextMenu(view_,model_);
   view_->setAttribute(Qt::WA_MacShowFocusRect, false);
+  view_->setAttribute(Qt::WA_MacSmallSize, true);
+  view_->setFrameShape(QFrame::NoFrame);
   view_->header()->hide();
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
   view_->setModel(model_);
   view_->setSelectionBehavior(QAbstractItemView::SelectRows);
   view_->setSelectionMode(QAbstractItemView::ExtendedSelection);
   view_->setEditTriggers(QAbstractItemView::EditKeyPressed);
+  view_->setDragEnabled(true);
   view_->expandAll();
 
   layout->addWidget(view_);

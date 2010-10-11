@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
 #include <ost/gfx/map_iso.hh>
@@ -60,7 +61,13 @@ void export_Map()
          boost::noncopyable>("MapIso", init<const String&, const ::img::MapHandle&, float, optional<uint> >())
     .def("SetLevel",&MapIso::SetLevel)
     .def("GetLevel",&MapIso::GetLevel)
+    .def("GetMinLevel",&MapIso::GetMinLevel)
+    .def("GetMaxLevel",&MapIso::GetMaxLevel)
     .def("GetMean", &MapIso::GetMean)
+    .def("GetHistogram",&MapIso::GetHistogram)
+    .def("SetHistogramBinCount",&MapIso::SetHistogramBinCount)
+    .def("GetHistogramBinCount",&MapIso::GetHistogramBinCount)
+
     .def("GetMap", &MapIso::GetMap,return_value_policy<reference_existing_object>())
     .def("GetOriginalMap", &MapIso::GetOriginalMap,return_value_policy<reference_existing_object>())
     .def("GetDownsampledMap", &MapIso::GetDownsampledMap,return_value_policy<reference_existing_object>())

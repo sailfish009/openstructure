@@ -80,7 +80,9 @@ public:
   /// \brief     Get sequence with given index.
   /// \return    sequence or invalid handle if the index is out of bounds
   ConstSequenceHandle GetSequence(int seq_id) const;
-
+  
+  /// \brief remove sequence at seq_index from alignment
+  void RemoveSequence(int seq_index);
   /// \brief   Convert multiple sequence alignment to string.
   String ToString(int width=80) const;
 
@@ -155,6 +157,8 @@ public:
   /// \brief Column iterator end-point
   iterator end() const;
 
+  bool IsValid() const { return impl_.get()!=0; }
+  
 private:
   void CheckValidity() const;
   impl::SequenceListImplPtr impl_;

@@ -32,6 +32,7 @@ glext_include.hh
 render_mode.hh
 material.hh
 gradient.hh
+gradient_manager.hh
 module_config.hh
 primitives.hh
 povray_fw.hh
@@ -102,6 +103,7 @@ scene.cc
 selection.cc
 surface.cc
 gradient.cc
+gradient_manager.cc
 vertex_array.cc
 vertex_array_helper.cc
 material.cc

@@ -22,10 +22,10 @@
 /*
   Author: Ansgar Philippsen
 */
-#include <QList>
 
 #include <ost/gui/tools/tool.hh>
 
+#include <QList>
 namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI MapTool : public Tool {

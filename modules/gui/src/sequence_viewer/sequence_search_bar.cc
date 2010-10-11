@@ -21,7 +21,6 @@
  */
 
 #include "sequence_search_bar.hh"
-#include "sequence_item.hh"
 
 #include <QHBoxLayout>
 #include <QLineEdit>
@@ -32,7 +31,7 @@
 
 namespace ost { namespace gui { 
 
-SequenceSearchBar::SequenceSearchBar(QWidget* parent):
+SeqSearchBar::SeqSearchBar(QWidget* parent):
   QWidget(parent)
 {
   subject_=new QLineEdit(this);
@@ -41,13 +40,13 @@ SequenceSearchBar::SequenceSearchBar(QWidget* parent):
   QHBoxLayout* l= new QHBoxLayout(this);
   l->addSpacing(2);
   l->addWidget(subject_, 0);
+  l->setStretch(0,1);
   l->addWidget(search_all_, 0);
   QLabel* label=new QLabel("search in:", this);
   l->addSpacing(10);
   l->addWidget(label, 0);
   l->addWidget(search_in_, 0);
-  l->addStretch(1);
-  subject_->setMaximumWidth(200);
+  //subject_->setMaximumWidth(200);
   setLayout(l);
   l->setSizeConstraint(QLayout::SetMaximumSize);
   l->setMargin(1);  
@@ -67,23 +66,22 @@ SequenceSearchBar::SequenceSearchBar(QWidget* parent):
           SLOT(OnSearchInChanged(int)));
 }
   
-void SequenceSearchBar::Show(const std::vector<SequenceItem*>& sequences)
+void SeqSearchBar::UpdateItems(const QStringList& sequences)
 {
   search_in_->clear();
-  
-  for (size_t i=0;i<sequences.size(); ++i) {
-    QString name(sequences[i]->GetSequence().GetName().c_str());
-    search_in_->addItem(name);
+
+  for(int i=0;i< sequences.size(); i++){
+  search_in_->addItem(sequences[i]);
   }
+
   if (sequences.empty()) {
     search_all_->setCheckState(Qt::Checked);  
     search_in_->setEnabled(false);
   }
-  this->show();
   subject_->setFocus(Qt::ActiveWindowFocusReason);  
   subject_->selectAll();  
 }
-void SequenceSearchBar::OnSearchAllChanged(int state)
+void SeqSearchBar::OnSearchAllChanged(int state)
 {
   if (state==Qt::Unchecked) {
     search_in_->setEnabled(true);
@@ -91,22 +89,22 @@ void SequenceSearchBar::OnSearchAllChanged(int state)
     search_in_->setEnabled(false);
   }
   emit Changed(subject_->text(), search_all_->checkState()==Qt::Checked, 
-               search_in_->currentIndex());
+               search_in_->currentText());
 }
 
-void SequenceSearchBar::OnSearchInChanged(int index)
+void SeqSearchBar::OnSearchInChanged(int index)
 {
   emit Changed(subject_->text(), search_all_->checkState()==Qt::Checked, 
-               search_in_->currentIndex());
+               search_in_->currentText());
 }
 
-void SequenceSearchBar::OnSubjectChanged(const QString& str)
+void SeqSearchBar::OnSubjectChanged(const QString& str)
 {
   emit Changed(str, search_all_->checkState()==Qt::Checked, 
-               search_in_->currentIndex());
+               search_in_->currentText());
 }
 
-void SequenceSearchBar::paintEvent(QPaintEvent* paint_event)
+void SeqSearchBar::paintEvent(QPaintEvent* paint_event)
 {
   QPainter p(this);
   p.setBrush(QBrush(QColor(Qt::blue).lighter(300)));
@@ -115,7 +113,7 @@ void SequenceSearchBar::paintEvent(QPaintEvent* paint_event)
   paint_event->accept();
 }
 
-void SequenceSearchBar::keyPressEvent(QKeyEvent* key_event)
+void SeqSearchBar::keyPressEvent(QKeyEvent* key_event)
 {
   if (key_event->key()==Qt::Key_Escape) {
     this->hide();

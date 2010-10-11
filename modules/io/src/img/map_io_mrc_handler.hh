@@ -46,7 +46,6 @@ class DLLEXPORT_OST_IO MRC: public ImageFormatBase
   Subformat subformat_;
   bool normalize_on_save_;
   Endianess endianess_on_save_;
-  Subformat subf_;
 };
 
 class DLLEXPORT_OST_IO CCP4: public MRC

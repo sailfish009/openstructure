@@ -93,12 +93,6 @@ ImageHandle ImageHandle::Copy(bool cc) const
   return ImageHandle(StatePtrPtr(new ImageStateBasePtr(ImageStatePtr()->Clone(cc))));
 }
 
-ImageHandle ImageHandle::Copy(const Extent& e) const
-{
-  LOG_MESSAGE("ImageHandle::Copy(Extent) ist deprecated, use Extract() instead" << std::endl);
-  return Extract(e);
-}
-
 ImageHandle ImageHandle::Extract(const Extent& e) const
 {
 #if 0
@@ -660,12 +654,6 @@ ConstImageHandle& ConstImageHandle::operator=(const ImageHandle& h)
 ImageHandle ConstImageHandle::Copy(bool cc) const
 {
   return handle_.Copy(cc);
-}
-
-ImageHandle ConstImageHandle::Copy(const Extent& e) const
-{
-  LOG_MESSAGE("ConstImageHandle::Copy(Extent) ist deprecated, use Extract() instead" << std::endl);
-  return handle_.Extract(e);
 }
 
 ImageHandle ConstImageHandle::Extract(const Extent& e) const

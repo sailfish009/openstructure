@@ -25,11 +25,25 @@
 
 namespace ost { namespace gfx {
 
-ByElementColorOp::ByElementColorOp() : ColorOp(){}
+ByElementColorOp::ByElementColorOp() : ColorOp()
+{
+  this->Init();
+}
 
-ByElementColorOp::ByElementColorOp(const String& selection, int mask) : ColorOp(selection,mask){}
+ByElementColorOp::ByElementColorOp(const String& selection, int mask) : ColorOp(selection,mask)
+{
+  this->Init();
+}
 
-ByElementColorOp::ByElementColorOp(const mol::QueryViewWrapper& query_view, int mask) : ColorOp(query_view,mask){}
+ByElementColorOp::ByElementColorOp(const mol::QueryViewWrapper& query_view, int mask) : ColorOp(query_view,mask)
+{
+  this->Init();
+}
+
+void ByElementColorOp::Init()
+{
+  this->SetName("By element");
+}
 
 bool ByElementColorOp::CanApplyTo(const GfxObjP& obj) const{
   if(dynamic_cast<Entity*>(obj.get()))
@@ -46,9 +60,9 @@ void ByElementColorOp::ApplyTo(GfxObjP& objP) const{
 
 gfx::ByElementColorOp ByElementColorOp::FromInfo(info::InfoGroup& group){
   gfx::ColorOp op = ColorOp::FromInfo(group);
-  String selection = op.GetSelection();
+  mol::QueryViewWrapper wrapper(op.GetSelection(),op.GetSelectionFlags());
   int mask = op.GetMask();
-  return gfx::ByElementColorOp(selection, mask);
+  return gfx::ByElementColorOp(wrapper, mask);
 }
 
 }}

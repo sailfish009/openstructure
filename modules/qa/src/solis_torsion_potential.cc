@@ -33,9 +33,9 @@ namespace ost { namespace qa {
   
 namespace {
 
-class TorsionEnergyCalc : public mol::EntityVisitor {
+class SolisTorsionEnergyCalc : public mol::EntityVisitor {
 public:
-  TorsionEnergyCalc(TorsionPotentialSolis::TorsionEnergies& energies,
+  SolisTorsionEnergyCalc(TorsionPotentialSolis::TorsionEnergies& energies,
                     TorsionPotentialOptsSolis opts):
     energies_(energies), prev_(Xxx), center_(Xxx), energy_(0.0),
     opts_(opts), num_torsions_(0)
@@ -72,7 +72,7 @@ public:
       num_torsions_++;
     } 
     else {
-      LOGN_MESSAGE("Amino acid not found in alphabets...");
+      LOG_INFO("Amino acid not found in alphabets...");
     }
     prev_=center_;
     center_=c;
@@ -193,7 +193,7 @@ void TorsionPotentialSolis::SaveToFile(const String& path)
 
 Real TorsionPotentialSolis::GetTotalEnergy(mol::EntityHandle entity)
 {
-  TorsionEnergyCalc c(energies_, options_);  
+  SolisTorsionEnergyCalc c(energies_, options_);  
   entity.Apply(c);
   num_torsions_ = c.GetEnergyCounts();
   return c.GetEnergy();
@@ -201,7 +201,7 @@ Real TorsionPotentialSolis::GetTotalEnergy(mol::EntityHandle entity)
 
 Real TorsionPotentialSolis::GetTotalEnergy(mol::EntityView entity)
 {
-  TorsionEnergyCalc c(energies_, options_);
+  SolisTorsionEnergyCalc c(energies_, options_);
   entity.Apply(c);
   num_torsions_ = c.GetEnergyCounts();
   return c.GetEnergy();

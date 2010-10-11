@@ -47,9 +47,9 @@ namespace ost { namespace io {
 String Nanoscope::FORMAT_STRING = "defined_nanoscope";
 
 Nanoscope::Nanoscope(int subimage):
-  ImageFormatBase(FORMAT_STRING)
+  ImageFormatBase(FORMAT_STRING),
+  subimage_(subimage)
 {
-  subimage_ = subimage;
 }
 
 int Nanoscope::GetSubimage() const
@@ -179,17 +179,17 @@ void header_filler(NHeader& h, std::istream& in, int inum)
 void print_header (const NHeader& header, int inum)
 {
   if(Logger::Instance().GetLogLevel()>2) {
-    LOG_MESSAGE("io_nanoscope: header dump for image " << inum << std::endl);
-    LOG_MESSAGE(" px      : " << header.px << std::endl);
-    LOG_MESSAGE(" py      : " << header.py << std::endl);
-    LOG_MESSAGE(" nmsize  : " << header.nmsize << std::endl);
-    LOG_MESSAGE(" sampling: " << header.sampling << " nm" << std::endl);
-    LOG_MESSAGE(" zscale  : " << header.zscale << std::endl);
-    LOG_MESSAGE(" multih  : " << header.multih << std::endl);
-    LOG_MESSAGE(" multid  : " << header.multid << std::endl);
-    LOG_MESSAGE(" multi   : " << header.multi << std::endl);
-    LOG_MESSAGE(" doffset : " << header.doffset << std::endl);
-    LOG_MESSAGE(" dlength : " << header.dlength << std::endl);
+    LOG_INFO("io_nanoscope: header dump for image " << inum);
+    LOG_INFO(" px      : " << header.px);
+    LOG_INFO(" py      : " << header.py);
+    LOG_INFO(" nmsize  : " << header.nmsize);
+    LOG_INFO(" sampling: " << header.sampling << " nm");
+    LOG_INFO(" zscale  : " << header.zscale);
+    LOG_INFO(" multih  : " << header.multih);
+    LOG_INFO(" multid  : " << header.multid);
+    LOG_INFO(" multi   : " << header.multi);
+    LOG_INFO(" doffset : " << header.doffset);
+    LOG_INFO(" dlength : " << header.dlength);
   }
 }
 

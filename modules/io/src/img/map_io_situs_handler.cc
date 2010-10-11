@@ -46,9 +46,9 @@ namespace ost { namespace io {
 String Situs::FORMAT_STRING="defined_situs";
 
 Situs::Situs(bool normalize_on_save):
-    ImageFormatBase(FORMAT_STRING)
+    ImageFormatBase(FORMAT_STRING),
+    normalize_on_save_(normalize_on_save)
 {
-    normalize_on_save_ = normalize_on_save;
 }
 
 bool Situs::GetNormalizeOnSave() const
@@ -89,8 +89,8 @@ void print_header(const situs_header& h)
   s << "situs header: " << std::endl;
   s << format(" voxel width: %1") % h.dwidth << std::endl;
   s << format(" size x y z: %1 %2 %3") % h.extx % h.exty % h.extz << std::endl;
-  s << format(" origin x y z: %1 %2 %3") % h.gridx % h.gridy % h.gridz << std::endl;
-  LOG_MESSAGE(s.str());
+  s << format(" origin x y z: %1 %2 %3") % h.gridx % h.gridy % h.gridz;
+  LOG_INFO(s.str());
 }
 
 
@@ -208,7 +208,7 @@ void MapIOSitusHandler::Import(img::MapHandle& mh, std::istream& infile,const Im
   mh.Reset(msize);
   mh.SetSpatialSampling(geom::Vec3(header.dwidth,header.dwidth,header.dwidth));
 
-  LOG_VERBOSE("resulting image extent: " << mh.GetExtent() << std::endl);
+  LOG_VERBOSE("resulting image extent: " << mh.GetExtent());
 
   detail::real_filler(infile,header,mh,1.0);
 

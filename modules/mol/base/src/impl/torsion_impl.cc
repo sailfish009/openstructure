@@ -51,7 +51,7 @@ void TorsionImpl::SetAngle(Real angle, bool up) {
 }
 
 void TorsionImpl::Apply(EntityVisitor& v) {
-  LOG_TRACE("visitor @" << &v << " visiting torsion impl @" << this << std::endl);
+  LOG_TRACE("visitor @" << &v << " visiting torsion impl @" << this);
   v.VisitTorsion(TorsionHandle(shared_from_this()));
 }
 

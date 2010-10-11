@@ -29,6 +29,10 @@
 
 namespace ost { namespace conop {
 
+typedef enum {
+  PDB_DIALECT,
+  CHARMM_DIALECT
+} Dialect;
 /// \brief  abstract builder interface
 /// 
 /// A builder serves several purposes: \li knows how to connect atoms of
@@ -49,14 +53,20 @@ namespace ost { namespace conop {
 ///  behaviour.
 class DLLEXPORT_OST_CONOP Builder {
 public:
-public:
+  
+  Builder(): dialect_(PDB_DIALECT), strict_(false) { }
   virtual ~Builder();
   
   ///  \brief add any missing atoms to the residue based on its key,
   ///      with coordinates set to zero
-  virtual void CompleteAtoms(const mol::ResidueHandle& rh);
+  virtual void CompleteAtoms(mol::ResidueHandle rh);
 
-
+  virtual void SetDialect(Dialect dialect) { dialect_=dialect; }
+  
+  virtual void SetStrictHydrogenMode(bool strict) { strict_=strict; }
+  bool GetStrictHydrogenMode() const { return strict_; }
+  
+  Dialect GetDialect() const { return dialect_; }
   /// \brief verify that the given residue has all atoms it
   ///     is supposed to have based on its key
   virtual void CheckResidueCompleteness(const mol::ResidueHandle& rh);
@@ -80,27 +90,27 @@ public:
   /// Connects atoms of residue based on residue and atom name. This method does
   /// not establish inter-residue bonds. To connect atoms that belong to 
   /// different residues, use ConnectResidueToPrev(), or ConnectResidueToNext().
-  virtual void ConnectAtomsOfResidue(const mol::ResidueHandle& rh);
+  virtual void ConnectAtomsOfResidue(mol::ResidueHandle rh);
   /// \brief connect atoms of residue to previous
   /// 
   /// The order of the parameters is important. In case of a polypeptide chain,
   /// the residues are thought to be ordered from N- to C- terminus.
   /// 
   /// \sa ConnectResidueToNext
-  virtual void ConnectResidueToPrev(const mol::ResidueHandle& rh,
-                                    const mol::ResidueHandle& prev);
+  virtual void ConnectResidueToPrev(mol::ResidueHandle rh,
+                                    mol::ResidueHandle prev);
   /// \sa ConnectResidueToPrev                                    
-  virtual void ConnectResidueToNext(const mol::ResidueHandle& rh,
-                                    const mol::ResidueHandle& next);
+  virtual void ConnectResidueToNext(mol::ResidueHandle rh, 
+                                    mol::ResidueHandle next);
 
   /// \brief assign named torsions to a complete chain
-  virtual void AssignTorsions(const mol::ChainHandle& ch);
+  virtual void AssignTorsions(mol::ChainHandle ch);
   
   /// \brief assign named torsions to single residue
-  virtual void AssignTorsionsToResidue(const mol::ResidueHandle& residue);
+  virtual void AssignTorsionsToResidue(mol::ResidueHandle residue);
   
   /// \brief assign Backbone torsions to single residue  
-  void AssignBackBoneTorsionsToResidue(const mol::ResidueHandle& res);
+  void AssignBackBoneTorsionsToResidue(mol::ResidueHandle res);
   
   /// \brief  Check if peptide bond is formed between the two atoms.
   /// 
@@ -130,7 +140,10 @@ public:
 
   /// |brief Connect \p atom with all atoms for whith IsBondFeasible() and 
   ///    AreResiduesConsecutive() returns true
-  void DistanceBasedConnect(const mol::AtomHandle& atom);
+  void DistanceBasedConnect(mol::AtomHandle atom);
+private:
+  Dialect dialect_;
+  bool    strict_;
 };
 
 

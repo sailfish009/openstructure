@@ -19,14 +19,14 @@
 #ifndef OST_GUI_FILE_BROWSER_HH
 #define OST_GUI_FILE_BROWSER_HH
 
-#include <QDirModel>
-#include <QListView>
-#include <QComboBox>
 
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
 
+#include <QDirModel>
+#include <QListView>
+#include <QComboBox>
 namespace ost { namespace gui {
 
 
@@ -51,6 +51,11 @@ private slots:
   void DoubleClicked(const QModelIndex& index);
   void ChangeToParentDirectory(int index);
   void Split();
+  void ShowContextMenu(const QPoint& pos);
+  void LoadCurrentObject();
+  void LoadWithSystemEditor();
+  void LoadWithSourceViewer();
+
 private:
   void LoadObject(const QModelIndex& index);
   void UpdateMenu(const QString& path);

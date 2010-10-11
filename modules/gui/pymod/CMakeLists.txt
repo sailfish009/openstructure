@@ -1,22 +1,22 @@
 set(OST_GUI_PYMOD_SOURCES
   wrap_gui.cc
   export_alignment_view.cc
+  export_message_widget.cc  
   export_gl_win.cc
-  export_plot.cc
   export_tool.cc
   export_py_shell.cc
   export_gosty.cc
   export_remote_site_loader.cc
   export_scene_win.cc
   export_sequence_viewer.cc
-  export_sequence_viewerV2.cc
   export_perspective.cc
   export_sip_handler.cc
   export_scene_selection.cc
   export_main_area.cc
-  export_panel_bar.cc
+  export_panels.cc
   export_menu_bar.cc
   export_file_loader.cc
+  export_file_viewer.cc
   export_widget.cc
 )
 set(OST_GUI_SCENE_PYMOD_MODULES
@@ -35,6 +35,7 @@ immutable_gradient_info_handler.py
 immutable_preset_info_handler.py
 init_inspector.py
 inspector_widget.py
+map_level_widget.py
 preset.py
 preset_editor_list_model.py
 preset_editor_widget.py
@@ -45,6 +46,7 @@ render_mode_widget.py
 render_op.py
 render_options_widget.py
 scene_observer_impl.py
+scene_selection_helper.py
 simple_widget.py
 sline_widget.py
 toolbar_options_widget.py
@@ -58,11 +60,14 @@ loader_list_model.py
 loader_manager_widget.py
 immutable_loader_info_handler.py
 line_trace_widget.py
+wireframe_widget.py
+query_editor.py
 )
 if (ENABLE_IMG)
   list(APPEND OST_GUI_PYMOD_SOURCES
   export_data_viewer.cc
   export_overlay.cc
+  export_overlay_manager.cc
   )
 endif()
 
@@ -77,14 +82,20 @@ set(OST_GUI_PYMOD_MODULES
   init_context_menu.py
   init_menubar.py
   init_spacenav.py
+  init_splash.py
+)
+
+set(OST_GUI_PYMOD_DNG_MODULES
+  __init__.py
+  termuse.py
 )
 
 pymod(NAME gui CPP ${OST_GUI_PYMOD_SOURCES} 
       PY ${OST_GUI_SCENE_PYMOD_MODULES} IN_DIR scene
+         ${OST_GUI_PYMOD_DNG_MODULES} IN_DIR dng
          ${OST_GUI_PYMOD_MODULES})
 
 set(PRESET_FILES
-  scene/gradients.xml
   scene/presets.xml
   scene/loaders.xml
 )

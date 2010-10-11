@@ -134,6 +134,55 @@ private:
   AlignedColumnIterator e_;
 };
 
+struct ConstSeqListIter {
+  ConstSeqListIter(ConstSequenceList& list):
+    l_(list), b_(l_.begin()), e_(l_.end())
+  { }
+
+  ConstSequenceHandle next()
+  {
+    if (b_==e_) {
+      boost::python::objects::stop_iteration_error();
+    }
+    ConstSequenceHandle s=*b_;  
+    ++b_;
+    return s;
+  }
+private:
+  ConstSequenceList           l_;
+  ConstSequenceList::iterator b_;
+  ConstSequenceList::iterator e_;
+};
+
+struct SeqListIter {
+  SeqListIter(SequenceList& list):
+    l_(list), b_(l_.begin()), e_(l_.end())
+  { }
+
+  SequenceHandle next()
+  {
+    if (b_==e_) {
+      boost::python::objects::stop_iteration_error();
+    }
+    SequenceHandle s=*b_;
+    ++b_;
+    return s;
+  }
+private:
+  SequenceList           l_;
+  SequenceList::iterator b_;
+  SequenceList::iterator e_;
+};
+
+ConstSeqListIter iter_cs(ConstSequenceList& sl) 
+{
+  return ConstSeqListIter(sl);
+}
+
+SeqListIter iter_sl(SequenceList& sl) 
+{
+  return SeqListIter(sl);
+}
 
 RegionRangeIter iter_range1(AlignmentHandle& aln)
 {
@@ -160,8 +209,9 @@ void const_seq_handle_def(O& bp_class)
     .def("GetResidue", &C::GetResidue)
     .def("GetOneLetterCode", &C::GetOneLetterCode)
     .def("__getitem__", &C::GetOneLetterCode)
-    .def("GetSequenceOffset", &C::GetSequenceOffset)
+    .def("GetOffset", &C::GetOffset)
     .def("Copy", &C::Copy)
+    .def("IsValid", &C::IsValid)
     .def("GetFirstNonGap", &C::GetFirstNonGap)
     .def("GetLastNonGap", &C::GetLastNonGap)
     .add_property("first_non_gap", &C::GetFirstNonGap)
@@ -179,7 +229,7 @@ void const_seq_handle_def(O& bp_class)
     .add_property("name",
                   make_function(&C::GetName,
                                 return_value_policy<copy_const_reference>()))
-    .add_property("sequence_offset", &C::GetSequenceOffset)
+    .add_property("offset", &C::GetOffset)
     .add_property("gapless_string", &C::GetGaplessString)
     .add_property("string",
                   make_function(&C::GetString,
@@ -200,7 +250,9 @@ void export_sequence()
   const_seq_handle_def<SequenceHandle>(seq_handle);
   generic_prop_def<SequenceHandle>(seq_handle);  
   seq_handle
-    .def("SetSequenceOffset", &SequenceHandle::SetSequenceOffset)
+    .def("__setitem__", &SequenceHandle::SetOneLetterCode)
+    .def("SetOneLetterCode", &SequenceHandle::SetOneLetterCode)  
+    .def("SetOffset", &SequenceHandle::SetOffset)
     .def("AttachView", attach_one)
     .def("AttachView", attach_two)
     .def("SetString", &SequenceHandle::SetString)
@@ -213,8 +265,8 @@ void export_sequence()
                   make_function(&SequenceHandle::GetName,
                                 return_value_policy<copy_const_reference>()),
                   &SequenceHandle::SetName)
-    .add_property("sequence_offset", &SequenceHandle::GetSequenceOffset,
-                  &SequenceHandle::SetSequenceOffset)
+    .add_property("offset", &SequenceHandle::GetOffset,
+                  &SequenceHandle::SetOffset)
   ;
 
   implicitly_convertible<SequenceHandle, ConstSequenceHandle>();
@@ -228,6 +280,12 @@ void export_sequence()
   ;
     class_<RevRegionRangeIter>("RevRegionRangeIter", no_init)
     .def("next", &RevRegionRangeIter::next)
+  ;
+  class_<ConstSeqListIter>("ConstSeqListIter", no_init)
+    .def("next", &ConstSeqListIter::next)
+  ;
+  class_<SeqListIter>("SeqListIter", no_init)
+    .def("next", &SeqListIter::next)
   ;
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)
@@ -246,6 +304,7 @@ void export_sequence()
     .def("AttachView", attach_view_b)
     .def("Cut", &AlignmentHandle::Cut)
     .def("MakeRegion", &AlignmentHandle::MakeRegion)
+    .def("RemoveSequence", &AlignmentHandle::RemoveSequence)
     .def("Replace",&AlignmentHandle::Replace)
     .def("__getitem__", &slice_aln)
     .def("__getitem__", &AlignmentHandle::operator[])
@@ -259,6 +318,7 @@ void export_sequence()
     .def("GetIndex", &AlignedColumn::GetIndex)
     .def("__getitem__", &AlignedColumn::operator[])
     .def("GetRowCount", &AlignedColumn::GetRowCount)
+    .def("GetResidue", &AlignedColumn::GetResidue)
     .def(self_ns::str(self))
   ;
   class_<AlignedRegion>("AlignedRegion", no_init)
@@ -277,17 +337,18 @@ void export_sequence()
     .def("__getitem__", &AlignedRegion::operator[])
     .def("__len__", &AlignedRegion::GetLength)
     .def("__iter__", iter_range2)
-    //~ .def("__reversed__", iter_range_rev)
     .add_property("start", &AlignedRegion::GetStart)
     .add_property("end", &AlignedRegion::GetEnd)
   ;
   class_<ConstSequenceList>("ConstSequenceList", init<>())
     CONST_SEQ_LIST_DEF(ConstSequenceList)
     .def("__getitem__", &do_slice_a)
+    .def("__iter__", &iter_cs)    
   ;
   class_<SequenceList>("SequenceList", init<>())
     CONST_SEQ_LIST_DEF(SequenceList)
     .def("__getitem__", &do_slice_b)
+    .def("__iter__", &iter_sl)
   ;
   class_<AlignmentList>("AlignmentList", init<>())
     .def(vector_indexing_suite<AlignmentList>())

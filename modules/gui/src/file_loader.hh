@@ -20,9 +20,6 @@
 #define OST_GUI_FILE_LOADER_HH
 #include <vector>
 
-#include <QString>
-#include <QList>
-#include <QMap>
 
 #include <ost/gfx/gfx_object.hh>
 
@@ -32,11 +29,15 @@
 
 #include <ost/io/io_exception.hh>
 #include <ost/io/entity_io_handler.hh>
+#include <ost/io/sequence_io_handler.hh>
 #include <ost/io/surface_io_handler.hh>
 #if OST_IMG_ENABLED
 #include <ost/io/map_io_handler.hh>
 #endif
 
+#include <QString>
+#include <QList>
+#include <QMap>
 namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI FileLoader {
@@ -45,19 +46,21 @@ private:
   enum ErrorType { DEFAULT = 0,
     IO_LOADING,
     GFX_ADD,
-    GFX_MULTIPLE_ADD
+    GFX_MULTIPLE_ADD,
+    INFO
   };
 
   FileLoader();
   static gfx::GfxObjP TryLoadEntity(const QString& filename, io::EntityIOHandlerP handler=io::EntityIOHandlerP(), const QString& selection=QString());
   static gfx::GfxObjP TryLoadSurface(const QString& filename, io::SurfaceIOHandlerPtr handler=io::SurfaceIOHandlerPtr());
+  static gfx::GfxObjP TryLoadAlignment(const QString& filename, io::SequenceIOHandlerPtr handler=io::SequenceIOHandlerPtr());
 #if OST_IMG_ENABLED
   static gfx::GfxObjP TryLoadMap(const QString& filename, io::MapIOHandlerPtr handler=io::MapIOHandlerPtr());
 #endif
   static void RunScript(const QString& filename);
   static void LoadPDB(const QString& filename, const QString& selection=QString());
   static void AddToScene(const QString& filename, gfx::GfxObjP obj);
-  static void HandleError(Message m, ErrorType type, const QString& filename, gfx::GfxObjP obj=gfx::GfxObjP());
+  static void HandleError(const Error& e, ErrorType type, const QString& filename, gfx::GfxObjP obj=gfx::GfxObjP());
   static gfx::GfxObjP NoHandlerFound(const QString& filename);
   virtual ~FileLoader();
 

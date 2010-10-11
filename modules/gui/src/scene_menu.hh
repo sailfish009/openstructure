@@ -19,15 +19,14 @@
 #ifndef OST_GUI_SCENE_MENU_HH
 #define OST_GUI_SCENE_MENU_HH
 
+
+#include <ost/mol/mol.hh>
+#include <ost/gfx/gfx_object_fw.hh>
+
 #include <QObject>
 #include <QPoint>
 #include <QMenu>
 #include <QString>
-
-#include <ost/mol/mol.hh>
-#include <ost/gfx/gfx_object_fw.hh>
-#include <ost/gui/scene_menu.hh>
-
 namespace ost { namespace gui {
 
 class SceneMenu : public QObject{
@@ -43,6 +42,9 @@ public slots:
   void SelectSidechains();
   void SelectLigands();
   void SelectAroundAtom();
+  void SelectAroundResidue();
+  void SelectAtom();
+  void SelectResidue();
   void Select(const String& str);
   void UnSelect();
   void CenterOnAtom();

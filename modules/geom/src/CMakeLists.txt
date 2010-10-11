@@ -32,9 +32,6 @@ set(OST_GEOM_SOURCES
 mat2.cc
 mat3.cc
 mat4.cc
-vec2.cc
-vec3.cc
-vec4.cc
 vecmat2_op.cc
 vecmat3_op.cc
 vecmat4_op.cc

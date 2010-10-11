@@ -92,16 +92,17 @@ class TraceWidget(RenderModeWidget):
     
   def UpdatePolyMode(self, value):
     self.GetOptions().SetPolyMode(value)
+    self.ApplyOptions()
         
   def UpdateArcDetail(self, value):
     self.GetOptions().SetArcDetail(value)
+    self.ApplyOptions()
     
   def UpdateTubeRadius(self, value):
     self.GetOptions().SetTubeRadius(value)
     
   def UpdateSliderTubeRadius(self, value):
     self.GetOptions().SetTubeRadius(value/10.0)
-
 
   def UpdateTubeRadiusGui(self,value):
     if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_spinbox_.singleStep()):

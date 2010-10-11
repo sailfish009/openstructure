@@ -27,20 +27,17 @@
 #ifndef PYTHON_INTERPRETER_HH
 #define PYTHON_INTERPRETER_HH
 
-#include <csignal>
 #include <vector>
 
-#include <QMutex>
-#include <QMetaType>
-
-#include <boost/python.hpp>
-
 #include <ost/gui/module_config.hh>
 
 #include <ost/gui/module_config.hh>
-#include "python_interpreter_proxy.hh"
+#include "python_interpreter_worker.hh"
 #include "output_redirector.hh"
 #include "main_thread_runner.hh"
+
+#include <QQueue>
+#include <QMetaType>
 
 namespace ost { namespace gui {
 namespace bp = boost::python;
@@ -52,34 +49,22 @@ enum InterpreterStatus{
 
 
 typedef enum {
-   CODE_BLOCK_COMPLETE,
-   CODE_BLOCK_ERROR,
-   CODE_BLOCK_INCOMPLETE  
+   CODE_BLOCK_COMPLETE=1,
+   CODE_BLOCK_ERROR=2,
+   CODE_BLOCK_INCOMPLETE=4
 } CodeBlockStatus;
 
 class DLLEXPORT_OST_GUI PythonInterpreter: public QObject
 {
   Q_OBJECT
 public:
-  static PythonInterpreter& Instance(bool set_sigint_handler=true, 
-                                     bool multitreaded=false);
+  static PythonInterpreter& Instance();
 
   ~PythonInterpreter();
   bool IsRunning();
-  bp::object RunInMainThread(const QString& widget);
   void AppendModulePath(const QString& entry);
   
   void AppendCommandlineArgument(const QString& arg);
-  /// \brief set command line arguments
-  /// 
-  /// Sets sys.argv to the given list of arguments
-  /// 
-  /// The method internally uses RunCommand and is thus appended to the command
-  /// list when execution is delayed due to an open ExecWait() ExecRelease() 
-  /// block
-  /// 
-  /// \todo escape arguments
-  void SetCommandLineArguments(const QList<QString>& args);
   
   bp::dict GetMainNamespace() const;
   bp::object GetMainModule() const;
@@ -88,62 +73,34 @@ public:
   /// Determines whether the command contains errors, is incomplete or ready
   /// to be run.
   CodeBlockStatus GetCodeBlockStatus(const QString& command);
-  void RunInitRC();
 
-  void RunScript(const String& script);
   
-  /// \brief delay execution of Python commands
+  /// \brief stop execution of Python commands
+  /// \sa Start
+  void Stop();
+  /// \brief start/continue execution of Python commands
   /// 
-  /// The execution of Python commands with RunCommand and methods that
-  /// make use of RunCommand is delayed until ExecRelease() is called.
-  /// ExecWait(), ExecRelease() calls can be nested.
-  /// 
-  /// \sa ExecRelease
-  void ExecWait();
-  /// \brief execute pending Python commands
-  /// 
-  /// \sa ExecWait
-  void ExecRelease();
+  /// \sa Stop
+  void Start();
   
-  /// \brief turn on output redirection
-  void RedirectOutput();
-  /// \brief whether the string can be interpreted as a simple expression
-  /// 
-  /// import and any kind of control structures don't count as simple 
-  /// expressions and will return false.
-  bool IsSimpleExpression(const QString& expr);
 
 public slots:
   /// \brief execute python command
-  bool RunCommand(const QString& command);
-  void CallFunction(const bp::object& func,const bp::object& args);
-  void Abort();
-protected slots:
-  void InitSlot(bool multitreaded);
+  unsigned int RunScript(const QString& script);
+  unsigned int RunCommand(const QString& command);
 signals:
-  void Done(int status,const QString& output);
+  void Output(unsigned int id,const QString& output);
+  void ErrorOutput(unsigned int id,const QString& output);
+  void Finished(unsigned int id, bool error_state);
   void Exit();
-  void InitSignal(bool multitreaded);
-  void RunInMainThreadSignal(const QString& widget);
+  void WakeWorker();
 protected:
-  void Init(bool multitreaded);
   PythonInterpreter();
   bp::object main_module_;
   bp::dict main_namespace_;
-#ifndef _MSC_VER
-  struct sigaction sig_act_;
-#endif
-  OutputRedirector  output_redirector_;
-  MainThreadRunner main_thread_runner_;
   bool running_;
-  QMutex mutex_;
-  PyGILState_STATE gstate_;
-  PyThreadState* main_thread_state_;
-  PythonInterpreterProxy proxy_;
   bp::object compile_command_;
-  int exec_wait_;
-  std::vector<QString>      exec_queue_;
-  bp::object parse_expr_cmd_;  
+  PythonInterpreterWorker worker_;
 };
 
 }} // ns

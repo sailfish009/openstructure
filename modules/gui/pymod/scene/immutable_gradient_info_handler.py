@@ -24,7 +24,7 @@ from ost import info
 from PyQt4 import QtCore, QtGui
 
 #Gradient Editor
-class ImmutableGradientInfoHandler():
+class ImmutableGradientInfoHandler:
   def __init__(self, fileName):
     
     self.FILE_NAME = fileName    
@@ -36,10 +36,7 @@ class ImmutableGradientInfoHandler():
         
     self.root_ = self.handle_.Root()
     
-    try:
-      self.gradients_ = self.root_.GetGroup(self.GRADIENTS_GROUP_NAME)
-    except UserWarning:
-      self.gradients_ = self.root_.CreateGroup(self.GRADIENTS_GROUP_NAME)
+    self.gradients_ = self.root_.RetrieveGroup(self.GRADIENTS_GROUP_NAME)
 
     
   def GetGfxGradient(self, name):

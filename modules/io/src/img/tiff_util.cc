@@ -19,7 +19,6 @@
 //------------------------------------------------------------------------------
 
 #include <stdarg.h>
-#include <sstream>
 #include <cassert>
 #include <complex>
 #include <ost/log.hh>
@@ -39,10 +38,7 @@ void tiff_warning_handler(const char *mod, const char* fmt, va_list ap)
 #else
   snprintf(message,1024,fmt,ap);
 #endif
-  String msg;
-  std::stringstream msgs(msg);
-  msgs << mod << ": " << message << std::endl;
-  LOG_MESSAGE(msg);
+  LOG_INFO(mod << ": " << message);
 }
 
 int32_t CustomTIFFReadProcIStream(void* thandle, void* tdata, int32_t tsize)

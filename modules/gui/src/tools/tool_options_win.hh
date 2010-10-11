@@ -21,13 +21,13 @@
 
 #include <map>
 
-#include <QStackedWidget>
  
 #include <ost/gui/module_config.hh>
 
 #include <ost/gui/tools/tool.hh>
 #include <ost/gui/widget.hh>
 
+#include <QStackedWidget>
 
 /*
   Author: Marco Biasini

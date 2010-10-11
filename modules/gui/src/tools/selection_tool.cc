@@ -21,13 +21,13 @@
  */
 #include "selection_tool.hh"
 
-#include <QDir>
 
 #include <ost/platform.hh>
 #include <ost/gfx/scene.hh>
 
 #include <ost/gui/gl_canvas.hh>
 
+#include <QDir>
 namespace ost { namespace gui {
 
 SelectionTool::SelectionTool()

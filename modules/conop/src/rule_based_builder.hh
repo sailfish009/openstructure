@@ -43,10 +43,18 @@ public:
     : compound_lib_(compound_lib), last_compound_() {
   }
   
+  virtual void SetDialect(Dialect dialect) {
+    if (this->GetDialect()!=dialect) {
+      Builder::SetDialect(dialect);
+      last_compound_=CompoundPtr();
+      compound_lib_->ClearCache();
+    }
+  }
+  
   /// \brief fill atom properties such as element and radius
   virtual void FillAtomProps(mol::AtomHandle atom);
   
-  virtual void CompleteAtoms(const mol::ResidueHandle& rh);
+  virtual void CompleteAtoms(mol::ResidueHandle rh);
 
   /// \brief  Check residue completeness
   ///
@@ -68,7 +76,7 @@ public:
   virtual mol::ResidueKey IdentifyResidue(const mol::ResidueHandle& rh);
 
 
-  virtual void ConnectAtomsOfResidue(const mol::ResidueHandle& rh);
+  virtual void ConnectAtomsOfResidue(mol::ResidueHandle rh);
 
   /// \brief  Connects the two residues together.
   ///
@@ -79,11 +87,11 @@ public:
   ///         bond.
   /// \param next
   ///          is the C-terminal partner, donating the nitrogen to the bond.
-  virtual void ConnectResidueToNext(const mol::ResidueHandle& rh,
-                                    const mol::ResidueHandle& next);
+  virtual void ConnectResidueToNext(mol::ResidueHandle rh,
+                                    mol::ResidueHandle next);
   /// \brief requires chemical types
-  virtual void AssignTorsions(const mol::ChainHandle& ch);
-  virtual void AssignTorsionsToResidue(const mol::ResidueHandle& residue);
+  virtual void AssignTorsions(mol::ChainHandle ch);
+  virtual void AssignTorsionsToResidue(mol::ResidueHandle residue);
   /// \brief  Invoked whenever an unkknown atom has been encountered during a
   ///         residue completeness check.
   ///
@@ -108,21 +116,23 @@ public:
   /// \brief Set residue properties such as chemical class
   virtual void FillResidueProps(mol::ResidueHandle residue);
 
-
-                              
+  /// \brief whether the residue has unknown atoms
+  bool HasUnknownAtoms(mol::ResidueHandle res);                              
   /// \brief Check whether the residue has all required atoms. This does not
   ///        include hydrogens and leaving atoms such as the terminal OXT.
   virtual bool IsResidueComplete(const mol::ResidueHandle& residue);
 private:
   CompoundLibPtr      compound_lib_;
   CompoundPtr         last_compound_;
+  mol::ResidueHandle  last_residue_;
+  bool                unknown_atoms_;
   void LookupCompound(const mol::ResidueHandle& rh);
   /// Change internal order of atoms in residue to the order given by compound
-  void ReorderAtoms(const mol::ResidueHandle& residue, CompoundPtr compound);
+  void ReorderAtoms(mol::ResidueHandle residue, CompoundPtr compound);
 
   mol::AtomHandle LocateAtom(const mol::AtomHandleList& ahl, int ordinal);
 
-  void AssignBackBoneTorsionsToResidue(const mol::ResidueHandle& residue);
+  void AssignBackBoneTorsionsToResidue(mol::ResidueHandle residue);
 
 
 };

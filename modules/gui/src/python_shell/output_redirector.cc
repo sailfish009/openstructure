@@ -23,22 +23,47 @@
 */
 
 #include "output_redirector.hh"
+#include <QTimer>
 
 
 namespace ost { namespace gui {
 
+OutputRedirector::OutputRedirector():
+ QObject(),
+ buffer_(),
+ timer_()
+{
+}
+
+
 void OutputRedirector::Write( String const& str )
 {
-  buffer_.append(str);
+  if(timer_.isValid()){
+    if(timer_.elapsed()>1000){
+      QString output = buffer_+QString::fromStdString(str);
+      buffer_="";
+      emit OnOutput(output);
+      timer_.restart();
+    }else{
+      buffer_+=QString::fromStdString(str);
+    }
+  }else{
+    buffer_+=QString::fromStdString(str);
+    timer_.start();
+    QTimer::singleShot(0, this, SLOT(Flush()));
+  }
 }
-QString OutputRedirector::GetOutput()
+
+void OutputRedirector::Flush()
 {
-  QString  ret=QString::fromStdString(buffer_);
-  ret.chop(1); // chop off additional newline
-  buffer_.clear();
-  return ret;
+  if(! timer_.isValid()){
+    return;
+  }
+  timer_=QTime();
+  QString output = buffer_;
+  buffer_="";
+  emit OnOutput(output);
 }
-String  OutputRedirector::buffer_; 
 
 
 

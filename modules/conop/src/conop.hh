@@ -53,6 +53,8 @@ public:
 
   void RegisterBuilder(const BuilderP& b, const String& name);
   void SetDefaultBuilder(const String& default_name);
+  
+  bool IsValidElement(const String& element) const;
 private:
   Conopology();
   Conopology(const Conopology&) {}

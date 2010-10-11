@@ -22,12 +22,13 @@
 /*
   Author: Marco Biasini
  */
-#include <QList>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gfx/input.hh>
 
 #include <ost/gui/tools/tool.hh>
+
+#include <QList>
 
 namespace ost { namespace gui {
 

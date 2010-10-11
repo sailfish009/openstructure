@@ -47,6 +47,8 @@ typedef image_state::ImageStateNonModAlgorithm<PasteFnc> PasteImpl;
 
 }
 
+OST_IMG_BASE_EXPLICIT_INST_DECL(class,image_state::ImageStateNonModAlgorithm<detail::PasteFnc>)
+
 }} // ns
 
 #endif

@@ -16,6 +16,9 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+#include "thin_splitter.hh"
+
 #include <QRegion>
 #include <QPainter>
 #include <QResizeEvent>
@@ -23,9 +26,6 @@
 #include <QSplitterHandle>
 #include <QApplication>
 #include <QPalette>
-
-#include "thin_splitter.hh"
-
 /*
    Author: Marco Biasini
  */
@@ -47,9 +47,17 @@ public:
   virtual void resizeEvent(QResizeEvent *event)
   {
     if (this->orientation()==Qt::Horizontal) {
+#if defined(__APPLE__)
+      this->setContentsMargins(1, 0, 0, 0);
+#else
       this->setContentsMargins(1, 0, 1, 0);
+#endif
     } else {
+#if defined(__APPLE__)
+      this->setContentsMargins(0, 1, 0, 0);
+#else                          
       this->setContentsMargins(0, 1, 0, 1);
+#endif
     }
     this->setMask(QRegion());
   }
@@ -58,8 +66,8 @@ public:
   {
     QPainter p(this);
     QPalette palette=qApp->palette();
-    p.setBrush(QBrush(palette.color(QPalette::Active, QPalette::Shadow)));
-    p.setPen(Qt::black);
+    p.setBrush(QBrush(QColor(120,120,120)));
+    p.setPen(QColor(120,120,120));
     p.drawRect(this->contentsRect());
   }
 };

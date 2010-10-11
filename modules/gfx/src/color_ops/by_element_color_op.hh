@@ -44,6 +44,8 @@ public:
   virtual void ApplyTo(GfxObjP& obj) const;
 
   static ost::gfx::ByElementColorOp FromInfo(info::InfoGroup& group);
+private:
+  void Init();
 };
 
 }}

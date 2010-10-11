@@ -126,13 +126,13 @@ class ToolBarOptionsWidget(QtGui.QWidget):
        self.current_action_ = action
     widget = action.data().toPyObject()[1]
     self.stackedWidget.setCurrentWidget(widget)
-    self.DoSomething(widget)
     if hasattr(widget, "Update"): 
       widget.Update()
     if(self.current_action_ == action):
       self.current_action_.setChecked(True)
     else:
       self.current_action_=action
+    self.DoSomething(widget)
   #Private Methods
   def __GetCurrentWidget(self):
       return self.stackedWidget.currentWidget();

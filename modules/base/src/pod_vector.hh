@@ -25,10 +25,11 @@
 
 #include <ost/module_config.hh>
 
+#include <cassert>
 #include <memory>
 #include <iterator>
 #include <string>
-
+#include <iostream>
 namespace ost {
 
 /// \brief vector container that treats its data as POD - even if it isn't in 
@@ -37,6 +38,17 @@ template <typename T>
 class TEMPLATE_DEF_EXPORT PodVector {
 public:
   PodVector(): begin_(NULL), end_(NULL), capacity_(NULL) {}
+  PodVector(const PodVector<T>& rhs)
+  {
+    this->do_reserve(rhs.capacity());
+    this->raw_set(rhs.data(), rhs.size());
+  }
+  ~PodVector()
+  {
+    if (begin_) {
+      free(begin_);
+    }
+  }
   typedef T value_type;
   typedef T& reference;
   typedef const T& const_reference;
@@ -75,7 +87,7 @@ public:
   
   void push_back(const_reference val)
   {
-    if (end_<=capacity_) {
+    if (end_>=capacity_) {
       this->do_reserve(this->capacity()*2);
     }
     memcpy(end_, &val, sizeof(value_type));
@@ -87,7 +99,11 @@ public:
     --end_;
   }
   
-  void clear() { return this->do_reserve(0); }
+  void clear()
+  {
+    this->do_reserve(0);
+    end_=begin_;
+  }
   
   void reserve(size_t n)
   {
@@ -101,6 +117,16 @@ public:
   const_reference operator[](size_t index) const
   {
     return begin_[index];
+  }
+  T* data() { return begin_; }
+
+  const T* data() const { return begin_; }
+
+  void raw_set(T* data, size_t n)
+  {
+    this->do_reserve(n);
+    memcpy(begin_, data, sizeof(T)*n);
+    end_=begin_+n;
   }
 private:
   void do_reserve(size_t n);

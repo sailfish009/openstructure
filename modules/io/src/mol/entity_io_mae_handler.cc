@@ -127,16 +127,16 @@ void MAEReader::Import(mol::EntityHandle& ent)
       if(in_atom_block) {
         if(parsing_atoms) {
           if(boost::regex_match(line,r_delim)) {
-            LOGN_DUMP( "stopping atom parsing" );
+            LOG_DEBUG( "stopping atom parsing" );
             parsing_atoms=false;
             prop_list.clear();
           } else {
             // parsing atom line
             std::vector<std::string> tokens=tokenize(line);
             for(size_t i=0;i<tokens.size();++i) {
-              LOG_DUMP( "[" << tokens[i] << "] ");
+              LOG_DEBUG( "[" << tokens[i] << "] ");
             }
-            LOGN_DUMP("");
+            LOG_DEBUG("");
             add_atom(ent,editor,
                      tokens[i_atom_name],
                      tokens[i_atom_xpos],
@@ -157,17 +157,17 @@ void MAEReader::Import(mol::EntityHandle& ent)
                i_chain_name==-1) {
               throw IOException("missing atom prop");
             }
-            LOGN_DUMP( "starting atom parsing" );
+            LOG_DEBUG( "starting atom parsing" );
             parsing_atoms=true;
           } else if(line[0]=='}') {
-            LOGN_DUMP( "exiting atom block" );
+            LOG_DEBUG( "exiting atom block" );
             in_atom_block=false;
           } else {
             // parsing property line
             if(line[0]!='#') {
               int pid=prop_list.size()+1;
               prop_list.push_back(line);
-              LOGN_DUMP( "found property '" << prop_list.back() << "' id=" << pid );
+              LOG_DEBUG( "found property '" << prop_list.back() << "' id=" << pid );
               if(line=="s_m_pdb_atom_name") i_atom_name=pid;
               else if(line=="r_m_x_coord") i_atom_xpos=pid;
               else if(line=="r_m_y_coord") i_atom_ypos=pid;
@@ -180,22 +180,22 @@ void MAEReader::Import(mol::EntityHandle& ent)
         }
       } else { // not in atom block
         if(boost::regex_match(line,r_atom_block)) {
-          LOGN_DUMP( "entering atom block" );
+          LOG_DEBUG( "entering atom block" );
           in_atom_block=true;
         } else if(line[0]=='}') {
-          LOGN_DUMP( "exiting ct block" );
+          LOG_DEBUG( "exiting ct block" );
           in_ct_block=false;
         }
       }
     } else { // not in ct block
       if(boost::regex_match(line,r_ct_block)) {
-        LOGN_DUMP( "entering ct block" );
+        LOG_DEBUG( "entering ct block" );
         in_ct_block=true;
       }
     }
   }
 
-  LOGN_MESSAGE("imported " << chain_count_ << " chains, " << residue_count_
+  LOG_INFO("imported " << chain_count_ << " chains, " << residue_count_
                 << " residues, " << atom_count_ << " atoms");  
 }
 
@@ -245,10 +245,10 @@ void MAEReader::add_atom(mol::EntityHandle ent,
   if(update_chain) {  
     if (!(curr_chain_=ent.FindChain(cname))) {
       curr_chain_=editor.InsertChain(cname);
-      LOGN_DUMP("new chain " << curr_chain_);      
+      LOG_DEBUG("new chain " << curr_chain_);      
       ++chain_count_;      
     } else {
-      LOGN_DUMP("old chain " << curr_chain_);      
+      LOG_DEBUG("old chain " << curr_chain_);      
     }
   }
 
@@ -256,15 +256,15 @@ void MAEReader::add_atom(mol::EntityHandle ent,
     if (!(curr_residue_=curr_chain_.FindResidue(rnum))) {
       curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
       assert(curr_residue_.IsValid());
-      LOGN_DUMP(" new residue " << curr_residue_);
+      LOG_DEBUG(" new residue " << curr_residue_);
       ++residue_count_;
     } else {
-      LOGN_DUMP(" old residue " << curr_residue_);
+      LOG_DEBUG(" old residue " << curr_residue_);
     }
   }
 
   // finally add atom
-  LOGN_DUMP("  atom " << aname << " (" << ele << ") @" << apos);
+  LOG_DEBUG("  atom " << aname << " (" << ele << ") @" << apos);
   mol::AtomProp aprop;
   aprop.element=ele;
   aprop.radius=conop::Conopology::Instance().GetDefaultAtomRadius(ele);

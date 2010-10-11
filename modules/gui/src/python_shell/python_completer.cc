@@ -22,9 +22,9 @@
 
 #include <iostream>
 
-#include <QStringList>
 #include "python_completer.hh"
 #include "python_namespace_tree_model.hh"
+#include <QStringList>
 
 
 namespace ost { namespace gui {

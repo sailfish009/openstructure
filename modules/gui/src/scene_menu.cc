@@ -29,8 +29,14 @@ namespace ost { namespace gui {
 SceneMenu::SceneMenu() {
   context_menu_=new QMenu();
   select_menu_=context_menu_->addMenu("Select");
-  QAction* a=select_menu_->addAction("Around Atom");
+  QAction* a=select_menu_->addAction("Atom");
+  connect(a, SIGNAL(triggered()), this, SLOT(SelectAtom()));
+  a=select_menu_->addAction("Residue");
+  connect(a, SIGNAL(triggered()), this, SLOT(SelectResidue()));
+  a=select_menu_->addAction("Around Atom");
   connect(a, SIGNAL(triggered()), this, SLOT(SelectAroundAtom()));
+  a=select_menu_->addAction("Around Residue");
+  connect(a, SIGNAL(triggered()), this, SLOT(SelectAroundResidue()));
   a=select_menu_->addAction("Backbone");
   connect(a, SIGNAL(triggered()), this, SLOT(SelectBackbone()));
   a=select_menu_->addAction("Sidechains");
@@ -76,6 +82,32 @@ void SceneMenu::SelectAroundAtom()
   e->SetSelection(v);
 }
 
+void SceneMenu::SelectAroundResidue()
+{
+  gfx::EntityP e=dyn_cast<gfx::Entity>(picked_.first);
+  mol::EntityView v=e->GetView().CreateEmptyView();
+  v.AddAtom(picked_.second);
+  v=v.ExtendViewToResidues();
+  v=v.ExtendViewToSurrounding(0.5);
+  e->SetSelection(v.ExtendViewToResidues());
+}
+
+void SceneMenu::SelectAtom()
+{
+  gfx::EntityP e=dyn_cast<gfx::Entity>(picked_.first);
+  mol::EntityView v=e->GetView().CreateEmptyView();
+  v.AddAtom(picked_.second);
+  e->SetSelection(v);
+}
+
+void SceneMenu::SelectResidue()
+{
+  gfx::EntityP e=dyn_cast<gfx::Entity>(picked_.first);
+  mol::EntityView v=e->GetView().CreateEmptyView();
+  v.AddAtom(picked_.second);
+  e->SetSelection(v.ExtendViewToResidues());
+}
+
 void SceneMenu::Select(const String& str)
 {
   gfx::EntityP e=dyn_cast<gfx::Entity>(picked_.first);
@@ -102,20 +134,20 @@ void SceneMenu::CenterOnResidue()
 void SceneMenu::CenterOnChain()
 {
   mol::ChainHandle chain=picked_.second.GetResidue().GetChain();
-  gfx::Scene::Instance().SetCenter(chain.GetGeometricCenter());
+  gfx::Scene::Instance().SetCenter(chain.GetBounds().GetCenter());
 }
 
 void SceneMenu::CenterOnView()
 {
   mol::ResidueHandle res=picked_.second.GetResidue();
-  gfx::Scene::Instance().SetCenter(res.GetGeometricCenter());
+  gfx::Scene::Instance().SetCenter(res.GetBounds().GetCenter());
 }
 
 void SceneMenu::CenterOnSelection()
 {
   gfx::EntityP e=dyn_cast<gfx::Entity>(picked_.first);
   if (e->GetSelection() && e->GetSelection().GetAtomCount()>0) {
-    geom::Vec3 center=e->GetSelection().GetGeometricCenter();
+    geom::Vec3 center=e->GetSelection().GetBounds().GetCenter();
     gfx::Scene::Instance().SetCenter(center);
   }
 }

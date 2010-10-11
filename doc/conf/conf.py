@@ -16,8 +16,10 @@ import sys, os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.append(os.path.abspath('.'))
-
+sys.path.append(os.path.join(os.path.abspath('../..'), 
+                             'stage/lib/openstructure'))
+sys.path.append(os.path.join(os.path.abspath('../..'), 
+                             'stage/lib64/openstructure'))
 # -- General configuration -----------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
@@ -86,7 +88,7 @@ exclude_trees = []
 pygments_style = 'sphinx'
 
 # A list of ignored prefixes for module index sorting.
-#modindex_common_prefix = []
+modindex_common_prefix = ['ost.']
 
 
 # -- Options for HTML output ---------------------------------------------------
@@ -161,7 +163,6 @@ html_static_path = ['_static']
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'openstructure-doc'
-
 
 # -- Options for LaTeX output --------------------------------------------------
 

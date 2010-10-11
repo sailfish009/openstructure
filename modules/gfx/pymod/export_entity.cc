@@ -198,11 +198,6 @@ RenderOptionsPtr ent_trace_opts(Entity* ent)
   return ent->GetOptions(RenderMode::TRACE);
 }
 
-RenderOptionsPtr ent_line_trace_opts(Entity* ent)
-{
-  return ent->GetOptions(RenderMode::LINE_TRACE);
-}
-
 RenderOptionsPtr ent_simple_opts(Entity* ent)
 {
   return ent->GetOptions(RenderMode::SIMPLE);
@@ -236,6 +231,11 @@ void set_query1(Entity* e, const mol::Query& q)
 void set_query2(Entity* e, const std::string& q)
 {
   e->SetQuery(mol::Query(q));
+}
+
+RenderOptionsPtr ent_ltrace_opts(Entity* ent)
+{
+  return ent->GetOptions(RenderMode::LINE_TRACE);
 }
 
 }
@@ -301,7 +301,7 @@ void export_Entity()
     .add_property("cartoon_options", &ent_hsc_opts)    
     .add_property("cpk_options", &ent_cpk_opts)
     .add_property("trace_options", &ent_trace_opts)
-    .add_property("line_trace_options", &ent_line_trace_opts)
+    .add_property("line_trace_options", &ent_ltrace_opts)
     .def("ApplyOptions", &Entity::ApplyOptions)
     .def("SetOptions", &Entity::SetOptions)
     .def("Apply",&ent_apply_11)

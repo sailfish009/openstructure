@@ -27,6 +27,7 @@
 #include <iostream>
 #include <ost/base.hh>
 #include <string.h>
+#include <vector>
 #include <ost/module_config.hh>
 
 
@@ -133,6 +134,8 @@ public:
   
   bool empty() const { return begin_==end_; }
 
+  /// \brief split string into chunks delimited by \p p
+  std::vector<StringRef> split(char p) const;
 private:
   const char* begin_;
   const char* end_;  

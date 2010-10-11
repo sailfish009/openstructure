@@ -24,9 +24,10 @@ using namespace boost::python;
 #include <ost/mol/query.hh>
 #include <ost/mol/chain_handle.hh>
 #include <ost/mol/entity_visitor.hh>
-
+#include <ost/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
+#include "bounds.hh"
 
 namespace {
 typedef ResidueView (ChainView::*RnumMethod)(const ResNum&) const;
@@ -58,10 +59,8 @@ void export_ChainView()
 {
   class_<ChainViewList>("ChainViewList", no_init)
     .def(vector_indexing_suite<ChainViewList>())
+    .def(ost::VectorAdditions<ChainViewList>())    
   ;
-
-  void (ChainView::* apply1)(EntityVisitor&) = &ChainView::Apply;
-  void (ChainView::* apply2)(EntityViewVisitor&) = &ChainView::Apply;
 
   class_<ChainView, bases<ChainBase> >("ChainView", init<>())
     .def("GetResidueList", &ChainView::GetResidueList,
@@ -80,8 +79,6 @@ void export_ChainView()
          X_add_residue_overloads(args("residue_handle", "view_add_flags")))
     .def("AddResidue", vm, 
          X_add_residue_overloads(args("residue_view", "view_add_flags")))         
-    .def("Apply", apply1, args("visitor"))
-    .def("Apply", apply2, args("visitor"))
     .def("RemoveResidue", &ChainView::RemoveResidue)
     .def("RemoveResidues", &ChainView::RemoveResidues)
     .def("InSequence", &ChainView::InSequence)
@@ -96,10 +93,19 @@ void export_ChainView()
     .def("GetMass", &ChainView::GetMass)
     .def("GetCenterOfMass", &ChainView::GetCenterOfMass)
     .def("GetCenterOfAtoms", &ChainView::GetCenterOfAtoms)
-    .def("GetGeometricCenter", &ChainView::GetGeometricCenter)
-    .add_property("geometric_center", &ChainView::GetGeometricCenter)
-    .def("GetGeometricStart", &ChainView::GetGeometricStart)
-    .def("GetGeometricEnd", &ChainView::GetGeometricEnd)
+    .def("GetGeometricCenter", geom_center<ChainView>)
+    .add_property("geometric_center", geom_center<ChainView>)
+    .add_property("mass", &ChainView::GetMass)
+    .add_property("center_of_mass", &ChainView::GetCenterOfMass)
+    .add_property("center_of_atoms", &ChainView::GetCenterOfAtoms)
+    .add_property("valid", &ChainView::IsValid)      
+    .add_property("in_sequence", &ChainView::InSequence)    
+    .def("GetGeometricStart", geom_start<ChainView>)
+    .def("GetGeometricEnd", geom_end<ChainView>)
+    .def("GetBounds", &ChainView::GetBounds)
+    .add_property("bounds", &ChainView::GetBounds)
+    .def(self==self)
+    .def(self!=self)
   ;
 
 

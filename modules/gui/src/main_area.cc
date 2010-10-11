@@ -17,12 +17,12 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <cassert>
-#include <QMdiSubWindow>
-#include <QSettings>
 
 #include <ost/gui/widget_geom_handler.hh>
 #include "main_area.hh"
 
+#include <QMdiSubWindow>
+#include <QSettings>
 /*
   Author: Marco Biasini
  */

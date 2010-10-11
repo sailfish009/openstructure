@@ -19,13 +19,15 @@
 #ifndef GEOM_VEC2_H
 #define GEOM_VEC2_H
 
+#include <stdexcept>
 #include <cstddef> // for size_t
 #include <ostream>
-
+#include <vector>
 #include <boost/operators.hpp>
 
-#include <ost/geom/module_config.hh>
+
 #include <ost/config.hh>
+#include <ost/geom/module_config.hh>
 
 namespace geom {
 
@@ -36,7 +38,7 @@ class Vec4;
 /*
   Two dimensional vector class, using Real precision.
 */
-class DLLEXPORT_OST_GEOM Vec2:
+class DLLEXPORT Vec2:
     private boost::equality_comparable<Vec2>,
     private boost::additive<Vec2>,
     private boost::additive<Vec2, Real>,
@@ -44,13 +46,13 @@ class DLLEXPORT_OST_GEOM Vec2:
 {
 public:
   //! Default initialization, all components are set to zero
-  Vec2();
+  Vec2(): x(0), y(0) { }
 
   //! Initialization with x, y and z component
-  Vec2(Real x, Real y);
+  Vec2(Real px, Real py): x(px), y(py) { }
 
   //! copy ctor
-  Vec2(const Vec2& v);
+  Vec2(const Vec2& v): x(v.x), y(v.y) { }
 
   //! explicit initialization with 3D vector
   explicit Vec2(const Vec3& v);
@@ -59,53 +61,127 @@ public:
   explicit Vec2(const Vec4& v);
 
   //! explicit initialization with an array of doubles
-  explicit Vec2(const Real[2]);
+  explicit Vec2(const float v[2]): x(v[0]), y(v[1]) { }
 
-#if OST_DOUBLE_PRECISION
+
   //! explicit initialization with an array of floats
-  explicit Vec2(const float[2]);
-#endif
-  //! assignement op
-  Vec2& operator=(const Vec2& v);
+  explicit Vec2(const double v[2]): x(v[0]), y(v[1]) { }
 
-  //! element access
-  Real& operator[](std::size_t indx);
-  //! const element access
-  const Real& operator[](std::size_t indx) const;
-  //! element access
-  Real GetX() const;
-  Real GetY() const;
-  void SetX(Real v);
-  void SetY(Real v);
+
+  Real GetX() const { return x; }
+  Real GetY() const { return y; }
+
+  void SetX(Real d) { x=d; }
+  void SetY(Real d) { y=d; }
 
   //! comparable
-  bool operator==(const Vec2& rhs) const;
+  bool operator==(const Vec2& rhs) const
+  {
+    return x==rhs.x && y==rhs.y;
+  }
 
+  //! element access
+  Real& operator[](std::size_t indx)
+  {
+    if (indx>1) {
+      throw std::out_of_range("Index must be in the range [0-1]");
+    }
+    return (&x)[indx];
+  }
+  
+  //! const element access
+  const Real& operator[](std::size_t indx) const
+  {
+    if (indx>1) {
+      throw std::out_of_range("Index must be in the range [0-1]");
+    }
+    return (&x)[indx];
+  }
+  
   //! addable op
-  Vec2& operator+=(const Vec2& rhs);
-  Vec2& operator+=(Real d);
+  Vec2& operator+=(const Vec2& rhs)
+  {
+    x+=rhs.x;
+    y+=rhs.y;
+    return *this;
+  }
+  
+  Vec2& operator+=(Real d)
+  {
+    x+=d;
+    y+=d;
+    return *this;
+  }
+  
   //! subtractable op
-  Vec2& operator-=(const Vec2& rhs);
-  Vec2& operator-=(Real d);
+  Vec2& operator-=(const Vec2& rhs)
+  {
+    x-=rhs.x;
+    y-=rhs.y;
+    return *this;
+  }
+  
+  Vec2& operator-=(Real d)
+  {
+    x-=d;
+    y-=d;
+    return *this;
+  }
   //! negateable
-  Vec2 operator-() const;
+  Vec2 operator-() const
+  {
+    return Vec2(-x, -y);
+  }
+
   //! multipliable
-  Vec2& operator*=(Real d);
+  Vec2& operator*=(Real d)
+  {
+    x*=d;
+    y*=d;
+    return *this;
+  }
+
   //! dividable
-  Vec2& operator/=(Real d);
+  Vec2& operator/=(Real d)
+  {
+    Real one_over_d=Real(1.0)/d;
+    x*=one_over_d;
+    y*=one_over_d;
+    return *this;
+  }
 
-  Real* Data() {return data_;}
-  const Real* Data() const {return data_;}
+  Real* Data() {return &x;}
+  const Real* Data() const { return &x; }
 
-private:
-  Real data_[2];
-
-  void set(Real x, Real y);
+  Real x;
+  Real y;
 };
 
-DLLEXPORT_OST_GEOM Vec2 operator/(Real d, const Vec2& v);
+inline Vec2 operator/(Real d, const Vec2& v)
+{
+  return Vec2(d/v.x, d/v.y);
+}
 
-DLLEXPORT_OST_GEOM std::ostream& operator<<(std::ostream&, const Vec2&);
+inline std::ostream& operator<<(std::ostream& os, const Vec2& v)
+{
+  os << "(" << v[0] << "," << v[1] << ")";
+  return os;  
+}
+
+}
+
+#include <ost/geom/vec3.hh>
+#include <ost/geom/vec4.hh>
+
+namespace geom {
+
+inline Vec2::Vec2(const Vec3& v): x(v.x), y(v.y) { }
+
+
+inline Vec2::Vec2(const Vec4& v): x(v.x), y(v.y) { }
+
+
+typedef std::vector<Vec2> Vec2List;
 
 } // namespace geom
 

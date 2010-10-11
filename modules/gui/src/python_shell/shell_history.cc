@@ -19,7 +19,6 @@
 /*
   Author: Andreas Schenk
  */
-
 #include "shell_history.hh"
 
 namespace ost { namespace gui {
@@ -77,29 +76,33 @@ bool ShellHistory::AtEnd()
   return index_>=history_list_.size();
 }
 
-void ShellHistory::operator--()
+void ShellHistory::MoveToPreviousMatch()
 {
-  if(index_>0){
-    --index_;
+  int newindex=index_-1;
+  while(newindex>=0){
+    if(history_list_[newindex].first.indexOf(current_)==0 || current_.size()==0){
+      index_=newindex;
+      break;
+    }
+    --newindex;
   }
 }
 
-void ShellHistory::operator--(int)
+void ShellHistory::MoveToNextMatch()
 {
-  operator--();
-}
-
-void ShellHistory::operator++()
-{
-  if(index_<history_list_.size()){
-    ++index_;
+  int newindex=index_+1;
+  while(static_cast<unsigned int>(newindex)<history_list_.size()){
+    if(history_list_[newindex].first.indexOf(current_)==0 || current_.size()==0){
+      index_=newindex;
+      break;
+    }
+    ++newindex;
+  }
+  if(static_cast<unsigned int>(newindex)!=index_){
+    index_=history_list_.size();
   }
 }
 
-void ShellHistory::operator++(int)
-{
-  operator++();
-}
 
 }}//ns
 

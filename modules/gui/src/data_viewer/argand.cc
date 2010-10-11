@@ -22,13 +22,13 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#include <QPainter>
-#include <QResizeEvent>
 
 #include <ost/base.hh>
 
 #include "argand.hh"
 
+#include <QPainter>
+#include <QResizeEvent>
 namespace ost { namespace img { namespace gui {
 
 Argand::Argand(const Data& data, QWidget* p):

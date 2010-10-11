@@ -113,13 +113,13 @@ HeuristicBuilder::HeuristicBuilder():
 {
   int def_entry_count = sizeof(heuristic_connect::def_entry_table)/sizeof(heuristic_connect::CONN_DEF_ENTRY);
 
-  LOGN_DEBUG("importing internal connectivity tables");
+  LOG_DEBUG("importing internal connectivity tables");
   for(int ec=0;ec<def_entry_count;++ec) {
     heuristic_connect::CONN_DEF_ENTRY& def_entry = heuristic_connect::def_entry_table[ec];
     detail::ConnResEntry entry(def_entry.abbrev, def_entry.single,
                                def_entry.chem_class);
-    LOGN_DUMP("creating table entry for " << def_entry.abbrev);
-    LOGN_DUMP("working on bond entries");
+    LOG_DEBUG("creating table entry for " << def_entry.abbrev);
+    LOG_DEBUG("working on bond entries");
     for (int xx=0;xx<def_entry.name_count;++xx) {
       String name=def_entry.name_list[xx];
       if (name!="OXT")
@@ -151,14 +151,14 @@ HeuristicBuilder::HeuristicBuilder():
         else if(conn_nam[1]==String("-")) { entry.SetPrev(conn_nam[0]);}
         else if(conn_nam[0]==String("+")) { entry.SetNext(conn_nam[1]);}
         else if(conn_nam[1]==String("+")) { entry.SetNext(conn_nam[0]);}
-        LOGN_DUMP(" " << conn_nam[0] << " " << conn_nam[1]);
+        LOG_DEBUG(" " << conn_nam[0] << " " << conn_nam[1]);
             } else {
-        LOGN_DUMP(" " << conn_nam[0] << " " << conn_nam[1]);
+        LOG_DEBUG(" " << conn_nam[0] << " " << conn_nam[1]);
         entry.AddConn(conn_nam[0],conn_nam[1]);
       }
     }
     // then the torsion entries
-    LOGN_DUMP("working on torsion entries");
+    LOG_DEBUG("working on torsion entries");
     for(int cc=0;cc<def_entry.tor_count;++cc) {
       int tor_id[] = {def_entry.tor_list[cc].n1,
                       def_entry.tor_list[cc].n2,
@@ -183,7 +183,7 @@ HeuristicBuilder::HeuristicBuilder():
 
     emap_[def_entry.abbrev]=entry;
   }
-  LOGN_DUMP("done importing internal tables");
+  LOG_DEBUG("done importing internal tables");
 }
 
 HeuristicBuilder::~HeuristicBuilder()
@@ -201,18 +201,18 @@ void HeuristicBuilder::ConnectivityFromAtomNames(const mol::ResidueHandle& res,
      mol::AtomHandleList::iterator it2=it1;
      ++it2;
      for (;it2!=atomlist.end();++it2) {
-       LOG_DUMP("checking for atom pair (" << it1->GetName() << ","
+       LOG_DEBUG("checking for atom pair (" << it1->GetName() << ","
                 << it2->GetName() << ") in connectivity table of "
                 << res.GetKey() << "... ");
        int conn=centry.Check(it1->GetName(),it2->GetName());
        if (conn==1 && this->IsBondFeasible(*it1, *it2)) {
-         LOGN_DUMP( "found");
+         LOG_DEBUG( "found");
          editor.Connect(*it1,*it2);
        } else if(conn==2 && this->IsBondFeasible(*it2, *it1)) {
-         LOGN_DUMP( "found (reversed)");
+         LOG_DEBUG( "found (reversed)");
          editor.Connect(*it2,*it1);
        } else {
-         LOGN_DUMP( "not found");
+         LOG_DEBUG( "not found");
        }
      }
    } else {
@@ -221,17 +221,20 @@ void HeuristicBuilder::ConnectivityFromAtomNames(const mol::ResidueHandle& res,
  }
 }
 
-void HeuristicBuilder::ConnectAtomsOfResidue(const mol::ResidueHandle& res)
+void HeuristicBuilder::ConnectAtomsOfResidue(mol::ResidueHandle res)
 {
-  LOGN_DUMP("HeuristicBuilder: ConnectAtomsOfResidue on " << res.GetKey() << " " << res.GetNumber());
+  LOG_DEBUG("HeuristicBuilder: ConnectAtomsOfResidue on " << res.GetKey() << " " << res.GetNumber());
 
   mol::AtomHandleList atomlist = res.GetAtomList();
   mol::AtomHandleList unk_atomlist;
-  LOGN_DUMP( "using atom list:");
+#if !defined(NDEBUG)
+  std::stringstream ss;
+  ss << "using atom list:";
   for(mol::AtomHandleList::iterator it=atomlist.begin();it!=atomlist.end();++it) {
-    LOGN_DUMP( " " << it->GetName() << " @" << it->GetPos());
+    ss << " " << it->GetName() << " @" << it->GetPos();
   }
-
+  LOG_DEBUG(ss.str());
+#endif
   std::pair<detail::ConnResEntry,bool> ret = LookupResEntry(res.GetKey());
 
   if(ret.second) {
@@ -241,11 +244,11 @@ void HeuristicBuilder::ConnectAtomsOfResidue(const mol::ResidueHandle& res)
     for(mol::AtomHandleList::iterator it1=unk_atomlist.begin();
         it1!=unk_atomlist.end();
         ++it1) {
-      LOGN_DUMP( "atom " << it1->GetName() << " not found, using distance based connect");
+      LOG_DEBUG( "atom " << it1->GetName() << " not found, using distance based connect");
       Builder::DistanceBasedConnect(*it1);
     }
   } else {
-    LOGN_DUMP("no residue entry found, using distance based connect");
+    LOG_DEBUG("no residue entry found, using distance based connect");
     for(mol::AtomHandleList::iterator it1=atomlist.begin();
         it1!=atomlist.end();
         ++it1) {
@@ -263,16 +266,16 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
   static String fname=flag ? "HeuristicBuilder: ConnectNextXCS" : "HeuristicBuilder: ConnectPrevXCS";
   if(!res0) return; // return if invalid
   mol::XCSEditor editor=res0.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
-  LOGN_DUMP(fname << " on " << res0.GetKey() << " " << res0.GetNumber());
+  LOG_DEBUG(fname << " on " << res0.GetKey() << " " << res0.GetNumber());
 
   if(!res1) {
     // auto-detect prev or next residue in chain
     // and perform sequence check
     if(flag) {
-      LOGN_DUMP(fname << " autodecting next residue");
+      LOG_DEBUG(fname << " autodecting next residue");
       res1 = res0.GetChain().GetNext(res0);
     } else {
-      LOGN_DUMP(fname << " autodecting next residue");
+      LOG_DEBUG(fname << " autodecting next residue");
       res1 = res0.GetChain().GetPrev(res0);
     }
   } else {
@@ -285,7 +288,8 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
   }
 
   if(!res1) return; // ignore if prev/next residue is invalid
-  LOGN_DUMP(fname << " found second residue " << res1.GetKey() << " " << res1.GetNumber());
+  LOG_DEBUG(fname << " found second residue " << res1.GetKey() 
+            << " " << res1.GetNumber());
 
   std::pair<detail::ConnResEntry,bool> res0_ret = builder->LookupResEntry(res0.GetKey());
   std::pair<detail::ConnResEntry,bool> res1_ret = builder->LookupResEntry(res1.GetKey());
@@ -297,19 +301,26 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
     String res1_atom_name = res1_centry.GetNext();
 
     if(res0_atom_name.empty() || res1_atom_name.empty()) return;
-    LOGN_DUMP(fname << ": looking up atom names " << res0_atom_name << " " << res1_atom_name);
+    LOG_DEBUG(fname << ": looking up atom names " << res0_atom_name << " " << res1_atom_name);
 
     // lookup both atoms in their respective residues
     mol::AtomHandle res0_atom = res0.FindAtom(res0_atom_name);
     mol::AtomHandle res1_atom = res1.FindAtom(res1_atom_name);
     if(res0_atom && res1_atom) {
-      LOGN_DUMP(fname << ": found atoms, connecting");
+      LOG_DEBUG(fname << ": found atoms, connecting");
       if(flag) {
-        if (builder->DoesPeptideBondExist(res0_atom, res1_atom))
+        if (builder->DoesPeptideBondExist(res0_atom, res1_atom)) {
           editor.Connect(res0_atom,res1_atom);
+          res0.SetIsProtein(true);
+          res1.SetIsProtein(true);
+        }
       } else {
-        if (builder->DoesPeptideBondExist(res1_atom, res0_atom))
+        if (builder->DoesPeptideBondExist(res1_atom, res0_atom)) {
           editor.Connect(res1_atom, res0_atom);
+          res0.SetIsProtein(true);
+          res1.SetIsProtein(true);
+        }
+
       }
     }
   } else {
@@ -319,7 +330,7 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
 
 }
 
-void HeuristicBuilder::AssignTorsionsToResidue(const mol::ResidueHandle& res)
+void HeuristicBuilder::AssignTorsionsToResidue(mol::ResidueHandle res)
 {
 
   mol::XCSEditor editor=res.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
@@ -374,11 +385,11 @@ void HeuristicBuilder::AssignTorsionsToResidue(const mol::ResidueHandle& res)
         mol::TorsionHandle th = editor.AddTorsion(tel[ti].name, ah[0], ah[1],
                                              ah[2], ah[3]);
         if(th) {
-          LOGN_DUMP("added torsion entry for " << tel[ti].a[0] << " "
+          LOG_DEBUG("added torsion entry for " << tel[ti].a[0] << " "
                     << tel[ti].a[1] << " " << tel[ti].a[2] << " "
                     << tel[ti].a[3]);
         } else {
-          LOGN_DUMP("no torsion entry for " << tel[ti].a[0] << " "
+          LOG_DEBUG("no torsion entry for " << tel[ti].a[0] << " "
                     << tel[ti].a[1] << " " << tel[ti].a[2]
                     << " " << tel[ti].a[3]);
         }
@@ -387,7 +398,7 @@ void HeuristicBuilder::AssignTorsionsToResidue(const mol::ResidueHandle& res)
   }
 }
 
-void HeuristicBuilder::AssignTorsions(const mol::ChainHandle& chain)
+void HeuristicBuilder::AssignTorsions(mol::ChainHandle chain)
 {
   if (chain.GetResidueCount()==0)
     return;
@@ -402,13 +413,13 @@ void HeuristicBuilder::AssignTorsions(const mol::ChainHandle& chain)
   }
 }
 
-void HeuristicBuilder::ConnectResidueToPrev(const mol::ResidueHandle& rh,
-                                            const mol::ResidueHandle& prev) {
+void HeuristicBuilder::ConnectResidueToPrev(mol::ResidueHandle rh,
+                                            mol::ResidueHandle prev) {
   ConnectPrevNext<false>(this, rh, prev);
 }
 
-void HeuristicBuilder::ConnectResidueToNext(const mol::ResidueHandle& rh,
-                                            const mol::ResidueHandle& next) {
+void HeuristicBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
+                                            mol::ResidueHandle next) {
   ConnectPrevNext<true>(this, rh, next);
 }
 
@@ -434,15 +445,14 @@ std::pair<detail::ConnResEntry,bool> HeuristicBuilder::LookupResEntry(const mol:
 {
   static detail::ConnResEntry dummy;
 
-  LOG_DUMP("Looking for reskey '" << key << "' in connectivity map... ");
+
 
   detail::ConnResEntryMap::iterator pos = emap_.find(key);
   if(pos!=emap_.end()) {
-    LOGN_DUMP("found");
+    LOG_DEBUG("reskey '" << key << "' found in connectivity map");
     return std::make_pair(pos->second,true);
-  } else {
-    LOGN_DUMP("not found");
   }
+  LOG_DEBUG("reskey '" << key << "' not found connectivity map");
   return std::make_pair(dummy,false);
 }
 

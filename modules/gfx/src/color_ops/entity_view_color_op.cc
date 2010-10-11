@@ -27,16 +27,21 @@
 namespace ost { namespace gfx {
 
 EntityViewColorOp::EntityViewColorOp() : GradientColorOp(), ev_(){
-
+  this->Init();
 }
 EntityViewColorOp::EntityViewColorOp(int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const mol::EntityView& ev) :
   GradientColorOp("", mask, property, gradient, minv, maxv), ev_(ev){
-
+  this->Init();
 }
 
 EntityViewColorOp::EntityViewColorOp(const String& property, const gfx::Gradient& gradient, float minv, float maxv, const mol::EntityView& ev) :
   GradientColorOp("", property, gradient, minv, maxv), ev_(ev){
+  this->Init();
+}
 
+void EntityViewColorOp::Init()
+{
+  this->SetName("EntityView gradient");
 }
 
 bool EntityViewColorOp::CanApplyTo(const GfxObjP& obj) const{
@@ -84,7 +89,6 @@ gfx::EntityViewColorOp EntityViewColorOp::FromInfo(info::InfoGroup& group){
   info::InfoGroup super_group = group.GetGroup("GradientColorOp");
   gfx::GradientColorOp gop = GradientColorOp::FromInfo(super_group);
   std::istringstream ss(group.GetTextData());
-  String selection = gop.GetSelection();
   gfx::Gradient gradient = gop.GetGradient();
   int mask = gop.GetMask();
   String property = gop.GetProperty();

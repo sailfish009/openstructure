@@ -22,73 +22,76 @@
 #include <ostream>
 #include <stack>
 
+#include <ost/log_sink.hh>
 #include <ost/module_config.hh>
 
 namespace ost {
+
+typedef std::stack<LogSinkPtr> LogSinkStack;
 
   // singleton
 class DLLEXPORT_OST_BASE Logger {
 public:
   enum LogLevel {
-    QUIET=0,
-    NORMAL,
-    VERBOSE,
-    DEBUG,
-    DUMP,
-    TRACE
+    QUIET   =0,
+    WARNING =1,
+    SCRIPT  =2,
+    INFO    =3,
+    VERBOSE =4,
+    DEBUG   =5,
+    TRACE   =6
   };
-  
+
   void PushVerbosityLevel(int level);
   void PopVerbosityLevel();
-
-  std::ostream& operator()(enum LogLevel);
+  void PushSink(LogSinkPtr& sink);
+  void PushFile(const String& filename);
+  //! DEPRECATED use PopSink() instead
+  void PopFile();
+  void PopSink();
 
   static Logger& Instance();
-
+  LogSinkPtr GetCurrentSink() { return sink_stack_.top(); }
   int GetLogLevel() const {return level_;}
   
+  void ResetSinks() {
+    while (sink_stack_.size()>1) {
+      sink_stack_.pop();
+    }
+  }
 protected:
   Logger();
   Logger(const Logger&);
   Logger& operator=(const Logger&);
-
+  
 private:
   int level_;
   std::stack<int> level_stack_;
-  std::ostream null_;
+  LogSinkStack sink_stack_;
 };
 
+
+#define OST_DO_LOGGING_(m, l) if (::ost::Logger::Instance().GetLogLevel()>=l) {\
+    std::stringstream tmp_s__;                                                 \
+    tmp_s__ << m << std::endl;                                                 \
+    ::ost::Logger::Instance().GetCurrentSink()->LogMessage(tmp_s__.str(), l);  \
+  }
+
+#define WARN_DEPRECATED(m) OST_DO_LOGGING_(m, ::ost::Logger::WARNING)
 #define PUSH_VERBOSITY(n) ::ost::Logger::Instance().PushVerbosityLevel(n)
 #define POP_VERBOSITY(n) ::ost::Logger::Instance().PopVerbosityLevel()
 
-#define LOG_ERROR(m) ::ost::Logger::Instance()(::ost::Logger::QUIET) << m;
-#define LOGN_ERROR(m) ::ost::Logger::Instance()(::ost::Logger::QUIET) << m << std::endl;
-
-#define LOG_MESSAGE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::NORMAL) {(::ost::Logger::Instance()(::ost::Logger::NORMAL)) << m ;}
-#define LOGN_MESSAGE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::NORMAL) {(::ost::Logger::Instance()(::ost::Logger::NORMAL)) << m << std::endl;}
-
-#define LOG_VERBOSE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::VERBOSE) {(::ost::Logger::Instance()(::ost::Logger::VERBOSE)) << m ;}
-#define LOGN_VERBOSE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::VERBOSE) {(::ost::Logger::Instance()(::ost::Logger::VERBOSE)) << m << std::endl;}
-
-#define LOG_DEBUG(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {(::ost::Logger::Instance()(::ost::Logger::DEBUG)) << m ;}
-#define LOGN_DEBUG(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DEBUG) {(::ost::Logger::Instance()(::ost::Logger::DEBUG)) << m << std::endl;}
-
+#define LOG_ERROR(m) OST_DO_LOGGING_(m, ::ost::Logger::QUIET)
+#define LOG_WARNING(m) OST_DO_LOGGING_(m, ::ost::Logger::WARNING)
+#define LOG_SCRIPT(m) OST_DO_LOGGING_(m, ::ost::Logger::SCRIPT)
+#define LOG_INFO(m) OST_DO_LOGGING_(m, ::ost::Logger::INFO)
+#define LOG_VERBOSE(m) OST_DO_LOGGING_(m, ::ost::Logger::VERBOSE)
 #ifdef NDEBUG
-
-#  define LOG_DUMP(m)
-#  define LOGN_DUMP(m)
-
+#  define LOG_DEBUG(m)
 #  define LOG_TRACE(m)
-#  define LOGN_TRACE(m)
-
 #else
-
-#  define LOG_DUMP(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DUMP) {(::ost::Logger::Instance()(::ost::Logger::DUMP)) << m ;}
-#  define LOGN_DUMP(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::DUMP) {(::ost::Logger::Instance()(::ost::Logger::DUMP)) << m << std::endl;}
-
-#  define LOG_TRACE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::TRACE) {(::ost::Logger::Instance()(::ost::Logger::TRACE)) << m ;}
-#  define LOGN_TRACE(m) if(::ost::Logger::Instance().GetLogLevel()>=::ost::Logger::TRACE) {(::ost::Logger::Instance()(::ost::Logger::TRACE)) << m << std::endl;}
-
+#  define LOG_DEBUG(m) OST_DO_LOGGING_(m, ::ost::Logger::DEBUG)
+#  define LOG_TRACE(m) OST_DO_LOGGING_(m, ::ost::Logger::TRACE)
 #endif
 
 }

@@ -43,7 +43,7 @@ namespace ost { namespace seq { namespace alg {
 ///      contain any gaps.
 AlignmentHandle DLLEXPORT_OST_SEQ_ALG 
 MergePairwiseAlignments(const AlignmentList& pairwise_alns,
-                        const SequenceHandle& ref_seq);
+                        const ConstSequenceHandle& ref_seq);
 }}}
 
 #endif

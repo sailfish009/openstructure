@@ -643,19 +643,14 @@ void Scene::RenderGL()
 
 void Scene::Register(GLWinBase* win)
 {
-  LOG_DEBUG("scene: registered win @" << win << std::endl);
+  LOG_DEBUG("scene: registered win @" << win);
   win_=win;
 }
 
 void Scene::Unregister(GLWinBase* win)
 {
-  LOG_DEBUG("scene: unregistered win @" << win << std::endl);
+  LOG_DEBUG("scene: unregistered win @" << win);
   win_=0;
-}
-
-template <typename ACTION>
-void Scene::NotifyObservers(const ACTION& action) {
-  std::for_each(observers_.begin(), observers_.end(), action);
 }
 
 namespace {
@@ -776,7 +771,7 @@ bool Scene::IsNameAvailable(String name)
   FindNode fn(name);
   Apply(fn);
   if(fn.node) {
-    LOGN_MESSAGE(name << " already exists as a scene node");
+    LOG_INFO(name << " already exists as a scene node");
     return false;
   }
   return true;
@@ -826,6 +821,12 @@ void Scene::Remove(const GfxNodeP& go)
   this->NotifyObservers(bind(&SceneObserver::NodeRemoved, _1,go));
 }
 
+void Scene::RemoveAll()
+{
+  root_node_->RemoveAll();
+  this->RequestRedraw();
+}
+
 void Scene::Remove(const String& name)
 {
   FindNode fn(name);
@@ -858,19 +859,27 @@ GfxObjP Scene::operator[](const String& name)
   FindNode fn(name);
   Apply(fn);
   if(!fn.node) {
-    LOGN_ERROR("error: " << name << " not found");
+    LOG_ERROR("error: " << name << " not found");
     return GfxObjP();
   }
   GfxObjP nrvo = dyn_cast<GfxObj>(fn.node);
   if(!nrvo) {
-    LOGN_ERROR("error: " << name << " points to invalid entry");
+    LOG_ERROR("error: " << name << " points to invalid entry");
   }
   return nrvo;
 }
 
+bool Scene::HasNode(const String& name) const
+{
+  FindNode fn(name);
+  this->Apply(fn);
+  return fn.node;
+}
+
 void Scene::Apply(const InputEvent& e, bool request_redraw)
 {
-  LOG_TRACE("Scene: received input: c=" << e.GetCommand() << " i=" << e.GetIndex() << " t=" << e.GetTarget() << std::endl);
+  LOG_TRACE("Scene: received input: c=" << e.GetCommand() 
+             << " i=" << e.GetIndex() << " t=" << e.GetTarget());
   /*
     TODO
     distribute event to transform that
@@ -973,7 +982,7 @@ void Scene::Pick(int mx, int my, int mask)
   Vec3 v1=UnProject(Vec3(mx,my,0.0));
   Vec3 v2=UnProject(Vec3(mx,my,1.0));
 
-  LOG_DUMP("Scene pick: " << v1 << " " << v2 << " " << mask << std::endl);
+  LOG_DEBUG("Scene pick: " << v1 << " " << v2 << " " << mask);
 
   Scene::Instance().StatusMessage("");
 
@@ -1421,12 +1430,12 @@ void Scene::Export(const String& fname, unsigned int width,
 {
   int d_index=fname.rfind('.');
   if (d_index==-1) {
-    LOGN_ERROR("no file extension specified");
+    LOG_ERROR("no file extension specified");
     return;
   }
   String ext = fname.substr(d_index);
   if(!(ext==".png")) {
-    LOGN_ERROR("unknown file format (" << ext << ")");
+    LOG_ERROR("unknown file format (" << ext << ")");
     return;
   }
 
@@ -1476,12 +1485,12 @@ void Scene::Export(const String& fname, bool transparent)
   }
   int d_index=fname.rfind('.');
   if (d_index==-1) {
-    LOGN_ERROR("no file extension specified");
+    LOG_ERROR("no file extension specified");
     return;
   }
   String ext = fname.substr(d_index);
   if(ext!=".png") {
-    LOGN_ERROR("unknown file format (" << ext << ")");
+    LOG_ERROR("unknown file format (" << ext << ")");
     return;
   }
   GLint vp[4];
@@ -1527,7 +1536,7 @@ void Scene::ExportPov(const std::string& fname, const std::string& wdir)
 
 void Scene::ResetProjection()
 {
-  LOGN_TRACE("scene: projection matrix " << fov_ << " " << znear_ << " " << zfar_);
+  LOG_TRACE("scene: projection matrix " << fov_ << " " << znear_ << " " << zfar_);
   stereo_projection(stereo_eye_);
 }
 
@@ -1709,7 +1718,7 @@ void Scene::prep_glyphs()
   Bitmap bm = BitmapImport(tex_file.string(),".png");
   if(!bm.data) return;
 
-  LOGN_DEBUG("importing glyph tex with id " << glyph_tex_id_);
+  LOG_DEBUG("importing glyph tex with id " << glyph_tex_id_);
   glBindTexture(GL_TEXTURE_2D, glyph_tex_id_);
   glPixelStorei(GL_UNPACK_ALIGNMENT,1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -1723,7 +1732,7 @@ void Scene::prep_glyphs()
   } else if(bm.channels==4) {
     glTexImage2D(GL_TEXTURE_2D,0,GL_INTENSITY,bm.width,bm.height,0,GL_RGBA,GL_UNSIGNED_BYTE,bm.data.get());
   } else {
-    LOGN_ERROR("unsupported glyph texture channel count of " << bm.channels);
+    LOG_ERROR("unsupported glyph texture channel count of " << bm.channels);
     return;
   }
   float ir = 1.0/8.0;
@@ -1737,7 +1746,7 @@ void Scene::prep_glyphs()
   }
   for(int cc=128;cc<256;++cc) glyph_map_[cc]=Vec2(0.0,0.0);
 
-  LOGN_DEBUG("done loading glyphs");
+  LOG_VERBOSE("done loading glyphs");
 }
 
 void Scene::prep_blur()

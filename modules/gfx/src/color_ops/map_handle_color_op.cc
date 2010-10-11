@@ -26,20 +26,33 @@
 namespace ost { namespace gfx {
 
 MapHandleColorOp::MapHandleColorOp() : GradientColorOp(), mh_(){
-
+  this->Init();
 }
 
 MapHandleColorOp::MapHandleColorOp(const String& selection, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh) :
-  GradientColorOp(selection, property, gradient, minv, maxv), mh_(mh){ }
+  GradientColorOp(selection, property, gradient, minv, maxv), mh_(mh){
+  this->Init();
+}
 
 MapHandleColorOp::MapHandleColorOp(const String& selection, int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh) :
-  GradientColorOp(selection, mask, property, gradient, minv, maxv), mh_(mh){ }
+  GradientColorOp(selection, mask, property, gradient, minv, maxv), mh_(mh){
+  this->Init();
+}
 
 MapHandleColorOp::MapHandleColorOp(const mol::QueryViewWrapper& query_view, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh) :
-  GradientColorOp(query_view, property, gradient, minv, maxv), mh_(mh){ }
+  GradientColorOp(query_view, property, gradient, minv, maxv), mh_(mh){
+  this->Init();
+}
 
 MapHandleColorOp::MapHandleColorOp(const mol::QueryViewWrapper& query_view, int mask, const String& property, const gfx::Gradient& gradient, float minv, float maxv, const img::MapHandle& mh) :
-  GradientColorOp(query_view, mask, property, gradient, minv, maxv), mh_(mh){ }
+  GradientColorOp(query_view, mask, property, gradient, minv, maxv), mh_(mh){
+  this->Init();
+}
+
+void MapHandleColorOp::Init()
+{
+  this->SetName("MapHandle gradient");
+}
 
 bool MapHandleColorOp::CanApplyTo(const GfxObjP& obj) const{
   if(dynamic_cast<Entity*>(obj.get())){
@@ -82,14 +95,14 @@ gfx::MapHandleColorOp MapHandleColorOp::FromInfo(info::InfoGroup& group){
   info::InfoGroup super_group = group.GetGroup("GradientColorOp");
   gfx::GradientColorOp gop = GradientColorOp::FromInfo(super_group);
   std::istringstream ss(group.GetTextData());
-  String selection = gop.GetSelection();
+  mol::QueryViewWrapper wrapper(gop.GetSelection(),gop.GetSelectionFlags());
   gfx::Gradient gradient = gop.GetGradient();
   int mask = gop.GetMask();
   String property = gop.GetProperty();
   float minv = gop.GetMinV();
   float maxv = gop.GetMaxV();
   //TODO load map handle
-  return gfx::MapHandleColorOp(selection, mask, property, gradient, minv, maxv, img::MapHandle());
+  return gfx::MapHandleColorOp(wrapper, mask, property, gradient, minv, maxv, img::MapHandle());
 }
 
 }}

@@ -107,10 +107,12 @@ class GradientPresetWidget(QtGui.QWidget):
         self.immucontextMenu_.popup(QtGui.QCursor.pos())
   
   def Add(self):
+    if(self.list_view_.currentIndex().isValid()):
+      self.list_view_.closePersistentEditor(self.list_view_.currentIndex())
     row = self.list_model_.GetLastRow()
     if self.list_model_.AddItem(datetime.now().isoformat(' '), self.gradient_edit_.GetGradient(), row, True, True):
       index = self.list_model_.index(row)
-      self.self.list_view__.setCurrentIndex(index)
+      self.list_view_.setCurrentIndex(index)
       self.Rename()
     else:
       QtGui.QMessageBox.information(self, "Gradient not added", "The gradient could not be added!")

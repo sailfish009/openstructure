@@ -21,7 +21,15 @@
 import sys
 from ost import gui
 from ost import gfx
+try: 
+  from ost import img
+  from wireframe_widget import WireframeWidget
+  _img_present=True
+except ImportError:
+  _img_present=False
+  pass
 from PyQt4 import QtCore, QtGui
+from scene_selection_helper import SelHelper
 from combo_options_widget import ComboOptionsWidget
 from custom_widget import CustomWidget
 from cpk_widget import CPKWidget
@@ -50,34 +58,41 @@ class RenderOptionsWidget(ComboOptionsWidget):
     self.grid_layout_.addWidget(self.stacked_widget_, 1, 0, 1, 2)
     
     #Add options to menu    
-    ComboOptionsWidget.AddWidget(self, "", EmptyMode())
-    ComboOptionsWidget.AddWidget(self, gfx.RenderMode.SIMPLE, SimpleWidget(self))
-    ComboOptionsWidget.AddWidget(self, gfx.RenderMode.CUSTOM, CustomWidget(self))
-    ComboOptionsWidget.AddWidget(self, gfx.RenderMode.CPK, CPKWidget(self))
-    ComboOptionsWidget.AddWidget(self, gfx.RenderMode.LINE_TRACE, LineTraceWidget(self))    
-    ComboOptionsWidget.AddWidget(self, gfx.RenderMode.TRACE, TraceWidget(self))
-    ComboOptionsWidget.AddWidget(self, gfx.RenderMode.SLINE, SlineWidget(self))
-    ComboOptionsWidget.AddWidget(self, gfx.RenderMode.TUBE, TubeWidget(self))
-    ComboOptionsWidget.AddWidget(self, gfx.RenderMode.HSC, HSCWidget(self))
+    self.entity_widgets_ = list()
+    self.entity_widgets_.append(["", EmptyMode()])
+    self.entity_widgets_.append([gfx.RenderMode.SIMPLE, SimpleWidget()])
+    self.entity_widgets_.append([gfx.RenderMode.CUSTOM, CustomWidget()])
+    self.entity_widgets_.append([gfx.RenderMode.CPK, CPKWidget()])
+    self.entity_widgets_.append([gfx.RenderMode.LINE_TRACE, LineTraceWidget()])
+    self.entity_widgets_.append([gfx.RenderMode.TRACE, TraceWidget()])
+    self.entity_widgets_.append([gfx.RenderMode.SLINE, SlineWidget()])
+    self.entity_widgets_.append([gfx.RenderMode.TUBE, TubeWidget()])
+    self.entity_widgets_.append([gfx.RenderMode.HSC, HSCWidget()])
 
+    self.img_widgets_ = list()
+    if _img_present:
+      self.img_widgets_.append(["", EmptyMode()])
+      self.img_widgets_.append([gfx.RenderMode.SIMPLE, WireframeWidget()])
+      self.img_widgets_.append([gfx.RenderMode.FILL, EmptyMode("Fill",gfx.RenderMode.FILL)])
+
+    self._in_view_method = False
     self.setMinimumSize(250,200)
     
   def DoSomething(self, item):
     scene_selection = gui.SceneSelection.Instance()
     for i in range(0,scene_selection.GetActiveNodeCount()):
       node = scene_selection.GetActiveNode(i)
-      if isinstance(node, gfx.Entity):
+      if isinstance(node, gfx.Entity) or (_img_present and isinstance(node, gfx.MapIso)):
         render_mode = item.GetRenderMode()
         if render_mode is not None:
           node.SetRenderMode(render_mode)     
     
     if(scene_selection.GetActiveViewCount() > 0):
       entity = scene_selection.GetViewEntity()
-      for i in range(0,scene_selection.GetActiveViewCount()):
-        view = scene_selection.GetActiveView(i)
-        render_mode = item.GetRenderMode()
-        if render_mode is not None:
-          entity.SetRenderMode(item.GetRenderMode(),view,self.keep_action_.isChecked())
+      view = scene_selection.GetViewUnion()        
+      render_mode = item.GetRenderMode()
+      if render_mode is not None:
+        entity.SetRenderMode(item.GetRenderMode(),view,self.keep_action_.isChecked())
         
     item.Update()
     self.DoResize()
@@ -85,49 +100,85 @@ class RenderOptionsWidget(ComboOptionsWidget):
   def Update(self):
     if hasattr(self, "keep_button_"):
       self.keep_button_.setEnabled(True)
-    scene_selection = gui.SceneSelection.Instance()
-    if scene_selection.GetActiveNodeCount() == 0 and scene_selection.GetActiveViewCount() == 0:
+    
+    ComboOptionsWidget.setEnabled(self,True)
+    
+    cur_widget = self.GetCurrentWidget()
+    new_render_mode = None
+    if cur_widget is not None:
+      new_render_mode = cur_widget.GetRenderMode()
+    
+    if SelHelper().CheckAllFlags(SelHelper.NO_SELECTION):
       ComboOptionsWidget.setEnabled(self,False)
       return
     
+    if not self._in_view_method:
+      for w in self.entity_widgets_:
+        self.RemoveWidget(w[0])
+      for w in self.img_widgets_:
+        self.RemoveWidget(w[0])
+
+    scene_selection = gui.SceneSelection.Instance()        
     if scene_selection.GetActiveNodeCount() > 0 :
       if hasattr(self, "keep_button_"):
         self.keep_button_.setEnabled(False)
       render_mode_valid = True
       render_mode = None
       for i in range(0,scene_selection.GetActiveNodeCount()):
-        entity = scene_selection.GetActiveNode(i)
-        if isinstance(scene_selection.GetActiveNode(i), gfx.Entity):
+        node = scene_selection.GetActiveNode(i)
+        if isinstance(scene_selection.GetActiveNode(i), gfx.GfxObj):
           if render_mode is None:
-            render_mode = entity.GetRenderMode()
-          elif render_mode != entity.GetRenderMode():
+            render_mode = node.GetRenderMode()
+          elif render_mode != node.GetRenderMode():
             render_mode_valid = False
-            break
-        else:
-          ComboOptionsWidget.setEnabled(self,False)
-          return
+ 
+    if SelHelper().CheckFlags(SelHelper.HAS_IMG | SelHelper.IS_ONE_TYPE):
+      for w in self.img_widgets_:
+        self.AddWidget(w[0], w[1])
+    elif SelHelper().CheckMinOneFlag(SelHelper.HAS_ENTITY| SelHelper.HAS_VIEW) and SelHelper().CheckNotFlags(SelHelper.HAS_IMG):
+      if not self._in_view_method:
+        for w in self.entity_widgets_:
+          self.AddWidget(w[0], w[1])
+    else:
+      ComboOptionsWidget.setEnabled(self,False)
+      return
+    
+    if SelHelper().CheckMinOneFlag(SelHelper.HAS_ENTITY| SelHelper.HAS_IMG) and SelHelper().CheckNotFlags(SelHelper.HAS_VIEW):
       if(render_mode_valid):
         ComboOptionsWidget.ChangeSelectedItem(self,render_mode)
       else:
         ComboOptionsWidget.ChangeSelectedItem(self,"")
-    
+    else:
+      if not self._in_view_method:
+        self._in_view_method = True
+      ComboOptionsWidget.ChangeSelectedItem(self,new_render_mode)
     self.GetCurrentWidget().Update()
-    
-    ComboOptionsWidget.setEnabled(self,True)
-  
+      
   def GetText(self):
     return self.text_
         
 class EmptyMode(QtGui.QWidget):
-  def __init__(self, parent=None):
+  def __init__(self, text="", render_mode=None, parent=None):
     QtGui.QLabel.__init__(self, parent)
     self.setMinimumSize(250,30)
-  
+    self.text = text
+    self.render_mode = render_mode
+    if(render_mode):
+      text_label = QtGui.QLabel(text)
+      font = text_label.font()
+      font.setBold(True)
+      grid = QtGui.QGridLayout()
+      grid.addWidget(text_label,0,0,1,1)
+      grid.addWidget(QtGui.QLabel("No Settings available"), 1, 0, 1, 3)
+      grid.setRowStretch(2,1)
+      self.setLayout(grid)
+      self.setMinimumSize(250,60)
+      
   def Update(self):
    True #Do Nothing
 
   def GetText(self):
-    return ""
+    return self.text
 
   def GetRenderMode(self):
-    return None
+    return self.render_mode

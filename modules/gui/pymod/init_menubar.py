@@ -26,9 +26,9 @@ import ost
 from PyQt4 import QtCore, QtGui
 from ost.gui import FileLoader
 from ost.gui.scene.file_loader import GenericLoader
-
 from ost.gui.scene.loader_manager_widget import LoaderManagerWidget
-
+from ost.gui.init_splash import _InitSplash
+from ost.gui.dng import termuse
 class InitMenuBar(QtCore.QObject):
   def __init__(self, menu_bar=None):
     QtCore.QObject.__init__(self, menu_bar)
@@ -50,8 +50,30 @@ class InitMenuBar(QtCore.QObject):
     webpage.setShortcut('Ctrl+D')
     self.connect(webpage, QtCore.SIGNAL('triggered()'), self.OpenDocs)
     help.addAction(webpage)
+    if sys.platform=='darwin':
+      install_ctl=QtGui.QAction('Install Command Line Tool', self)    
+      self.connect(install_ctl, QtCore.SIGNAL('triggered()'), 
+                   termuse.InstallTerminalPrograms)
+      help.addAction(install_ctl)
+    about = QtGui.QAction('&About', self)
+    about.setStatusTip('About')
+    about.setShortcut('Ctrl+A')
+    self.connect(about, QtCore.SIGNAL('triggered()'), self.About)
+    help.addAction(about)
+    
         
     window.addMenu(persp.panels.menu)
+    gl_win = QtGui.QAction('&GL Window', self)
+    gl_win.setStatusTip('Display gl windows')
+    gl_win.setShortcut('Ctrl+G')
+    self.connect(gl_win, QtCore.SIGNAL('triggered()'), self.ShowGLWin)
+    window.addAction(gl_win)
+    
+    reset = QtGui.QAction('Reset View', self)
+    reset.setStatusTip('Reset the Panels and Widgets')
+    self.connect(reset, QtCore.SIGNAL('triggered()'), self.ResetView)
+    window.addAction(reset)
+    
     #Options
     #Add file loader to menu
     loader_manager = QtGui.QAction('File &Loader', self)
@@ -75,8 +97,35 @@ class InitMenuBar(QtCore.QObject):
     self.loader_manager.exec_()
   
   def OpenDocs(self):
-    QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://www.openstructure.org/docs/index.html"))
+    QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://www.openstructure.org/docs/"))
     
+  def About(self):
+    _InitSplash()
+  
+  def ShowGLWin(self):
+    gosty=gui.GostyApp.Instance()
+    gl_win=gosty.GetGLWin()
+    if gl_win and gl_win.qobject.isHidden():
+      gl_win.Show()
+  
+  def ResetView(self):
+    msg_box = QtGui.QMessageBox()
+    msg_box.setWindowTitle("Reset the Panels and Widget");
+    msg_box.setIcon(QtGui.QMessageBox.Question)
+    msg_box.setText("Do you really want to reset the Panels and Widgets?");
+    msg_box.setStandardButtons(QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel);
+    msg_box.setDefaultButton(QtGui.QMessageBox.Cancel);
+    ret = msg_box.exec_();
+    if(ret == QtGui.QMessageBox.Yes):
+      settings = QtCore.QSettings()
+      settings.setValue("restore_settings",QtCore.QVariant(False))
+      info_box = QtGui.QMessageBox()
+      info_box.setStandardButtons(QtGui.QMessageBox.Ok)
+      info_box.setIcon(QtGui.QMessageBox.Information)
+      info_box.setWindowTitle("Restart OpenStructure")
+      info_box.setText("You must restart OpenStructure for the changes to take effect!");
+      info_box.exec_();
+            
 def _InitMenuBar(app):
   InitMenuBar(app.perspective.menubar)
   

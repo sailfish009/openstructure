@@ -22,15 +22,20 @@ from ost import info
 from ost import gfx
 from PyQt4 import QtGui
 
-class RenderOp():
+class RenderOp:
   RENDERMODE_ATTRIBUTE_NAME = "RenderMode"
   KEEP_ATTRIBUTE_NAME = "Keep"
+  FLAGS_ATTRIBUTE_NAME = "Flags"
     
-  def __init__(self, render_mode, selection, keep=False):
+  def __init__(self, render_mode, selection, flags, keep=False):
     self.render_mode_ = render_mode
     self.selection_ = selection
     self.keep_ = keep
-    
+    self.flags_ = flags
+
+  def GetName(self):
+    return "Render mode: %s"%str(self.GetRenderMode())
+
   def SetRenderMode(self, render_mode):
     self.render_mode_ = render_mode
     
@@ -43,6 +48,12 @@ class RenderOp():
   def GetSelection(self):
     return self.selection_
 
+  def SetSelectionFlags(self, flags):
+    self.flags_ = flags
+    
+  def GetSelectionFlags(self):
+    return self.flags_
+
   def SetKeep(self, keep):
     self.keep_ = keep
 
@@ -51,11 +62,12 @@ class RenderOp():
 
   def ApplyOn(self, entity):
     if (entity is not None) and isinstance(entity, gfx.Entity):
-      entity.SetRenderMode(self.GetRenderMode(),entity.view.Select(self.GetSelection()),self.IsKept())
+      entity.SetRenderMode(self.GetRenderMode(),entity.view.Select(self.GetSelection(),self.GetSelectionFlags()),self.IsKept())
   
   def ToInfo(self,group):
     group.SetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME, str(self.GetRenderMode().name))
     group.SetAttribute(RenderOp.KEEP_ATTRIBUTE_NAME, str(int(self.IsKept())))
+    group.SetAttribute(RenderOp.FLAGS_ATTRIBUTE_NAME, str(self.GetSelectionFlags()))
     group.SetTextData(str(self.GetSelection()))
     
   @staticmethod
@@ -65,6 +77,9 @@ class RenderOp():
     and  group.HasAttribute(RenderOp.KEEP_ATTRIBUTE_NAME)):
       render_mode = getattr(gfx.RenderMode, group.GetAttribute(RenderOp.RENDERMODE_ATTRIBUTE_NAME))
       keep = bool(int(group.GetAttribute(RenderOp.KEEP_ATTRIBUTE_NAME)))
+      flags=0
+      if group.HasAttribute(RenderOp.FLAGS_ATTRIBUTE_NAME):
+        flags = int(group.GetAttribute(RenderOp.FLAGS_ATTRIBUTE_NAME))
       selection = group.GetTextData()
-      render_op = RenderOp(render_mode,selection,keep)
+      render_op = RenderOp(render_mode,selection,flags,keep)
     return render_op

@@ -22,7 +22,6 @@
   Authors: Ansgar Philippsen, Andreas Schenk
 */
 
-#include <QScrollArea>
 
 #include <ost/message.hh>
 
@@ -30,6 +29,7 @@
 #include "overlay_manager.hh"
 #include "overlay.hh"
 
+#include <QScrollArea>
 namespace ost { namespace img { namespace gui {
 
 ////////////////////////////

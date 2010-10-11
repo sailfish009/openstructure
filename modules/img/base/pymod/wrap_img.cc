@@ -54,18 +54,9 @@ void export_Phase();
 void export_Progress();
 void export_Map();
 
-// exception translator
-void translator(const ost::Message& x) {
-  PyErr_SetString(PyExc_UserWarning, x.what() );
-}
-
 // actual module definitions
 BOOST_PYTHON_MODULE(_img)
 {
-  // exception translators
-  register_exception_translator<ost::Message>(&translator);
-  register_exception_translator<ost::Error>(&translator);
-
   export_Data();
   export_DataAlgorithm();
   export_Extent();

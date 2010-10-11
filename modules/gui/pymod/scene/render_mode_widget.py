@@ -44,7 +44,7 @@ class RenderModeWidget(QtGui.QWidget):
     
     scene_selection = gui.SceneSelection.Instance()
     if scene_selection.GetActiveNodeCount() == 0 and scene_selection.GetActiveViewCount() == 0:
-      ComboOptionsWidget.setEnabled(self,False)
+      self.setEnabled(False)
       return
     
     if scene_selection.GetActiveNodeCount() > 0 :
@@ -53,24 +53,24 @@ class RenderModeWidget(QtGui.QWidget):
         if isinstance(entity, gfx.Entity):
           self.entities_.add(entity)
         else:
-          ComboOptionsWidget.setEnabled(self,False)
+          self.setEnabled(False)
           return
 
     if scene_selection.GetActiveViewCount() > 0 :
       entity = scene_selection.GetViewEntity()
       self.entities_.add(entity)
     
-    for entity in self.entities_:
+    if len(self.entities_)>0:
+      entity = self.entities_.pop()
       self.options_=entity.GetOptions(self.GetRenderMode())
-      self.entities_.remove(entity)
-      break
-    self.UpdateGui(self.options_)
-    
-    QtGui.QWidget.setEnabled(self,True)
+      self.UpdateGui(self.options_)
+      QtGui.QWidget.setEnabled(self,True)
+    else:
+      QtGui.QWidget.setEnabled(self,False)
     
   def ApplyOptions(self):
     for entity in self.entities_:
-      entity.SetOptions(self.GetRenderMode(),self.options_)
+      entity.ApplyOptions(self.GetRenderMode(), self.GetOptions())
 
   def GetOptions(self):
     return self.options_

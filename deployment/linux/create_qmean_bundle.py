@@ -60,8 +60,15 @@ subprocess.call('sed "s/\#export LD_LIBRARY_PATH/ export LD_LIBRARY_PATH/g" scri
 subprocess.call('sed "s/\#export PYTHONHOME/ export PYTHONHOME/g" scripts/dng.in.preprepre > scripts/dng.in.prepre',shell=True,cwd='../../')
 subprocess.call('sed "s/\#export PYTHONPATH/ export PYTHONPATH/g" scripts/ost.in.prepre > scripts/ost.in.pre',shell=True,cwd='../../')
 subprocess.call('sed "s/\#export QT_PLUGIN_PATH/ export QT_PLUGIN_PATH/g" scripts/dng.in.pre > scripts/dng.in',shell=True,cwd='../../')
+print 'Downloading Chemlib dictionary'
+subprocess.call('wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif', shell=True, cwd='../../')
 print 'Compiling Openstructure/Qmean'
 subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DBoost_COMPILER='+boost_string+' -DONLY_QMEAN=ON -DENABLE_IMG=OFF -DENABLE_UI=OFF -DENABLE_GFX=OFF -DCOMPOUND_LIB=ChemLib/compounds.chemlib', shell=True,cwd='../../')
+subprocess.call('make',shell=True,cwd='../../')
+print 'Converting Chemlib dictionary'
+subprocess.call('stage/bin/chemdict_tool create components.cif compounds.chemlib', shell=True, cwd='../../')
+print '\nStaging Chemlib dictionary'
+subprocess.call('cmake ./ -DCOMPOUND_LIB=compounds.chemlib',shell=True,cwd='../../')
 subprocess.call('make',shell=True,cwd='../../')
 print 'Removing obsolete packages and package directory'
 subprocess.call('rm -fr qmean-*',shell=True,cwd='../../')
@@ -110,6 +117,8 @@ print 'Copy examples into package directory structure'
 subprocess.call('cp -pRL  examples  '+directory_name+'/share/openstructure/',shell=True,cwd='../../')
 print 'Removing headers from package directory structure'
 subprocess.call('rm -fr   '+directory_name+'/include',shell=True,cwd='../../')
+print 'Copying supplementary material into package directory structure'
+subprocess.call('cp -pRL  stage/share/openstructure  '+directory_name+'/share/',shell=True,cwd='../../')
 print 'Copy qmean examples into package directory structure'
 subprocess.call('cp -pRL  modules/scratch/qmean/examples '+directory_name+'',shell=True,cwd='../../')
 print 'Copy readme and license files into package directory structure'

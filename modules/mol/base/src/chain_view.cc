@@ -327,44 +327,29 @@ Real ChainView::GetMass() const {
   return mass;
 }
 
-geom::Vec3 ChainView::GetGeometricStart() const
+geom::AlignedCuboid ChainView::GetBounds() const
 {
   this->CheckValidity();
-  geom::Vec3 minimum(std::numeric_limits<Real>::max(),
-                     std::numeric_limits<Real>::max(),
-                     std::numeric_limits<Real>::max());
-  ResidueViewList::const_iterator i;
-  for (i=data_->residues.begin(); i!=data_->residues.end(); ++i) {
+  geom::Vec3 mmin( std::numeric_limits<Real>::max());
+  geom::Vec3 mmax(-std::numeric_limits<Real>::max());
+
+  
+  bool atoms=false;
+  for (ResidueViewList::const_iterator
+       i=data_->residues.begin(); i!=data_->residues.end(); ++i) {
     ResidueView r=*i;
     for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
          e2=r.GetAtomList().end(); j!=e2; ++j) {
-      minimum=geom::Min(minimum, j->GetPos());
+      mmin=geom::Min(mmin, j->GetPos());
+      mmax=geom::Max(mmax, j->GetPos());
+      atoms=true;
     }
   }
-  return minimum;
-}
-
-geom::Vec3 ChainView::GetGeometricEnd() const
-{
-  this->CheckValidity();
-  geom::Vec3 maximum(-std::numeric_limits<Real>::max(),
-                     -std::numeric_limits<Real>::max(),
-                     -std::numeric_limits<Real>::max());
-  ResidueViewList::const_iterator i;
-  for (i=data_->residues.begin(); i!=data_->residues.end(); ++i) {
-    ResidueView r=*i;
-    for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
-         e2=r.GetAtomList().end(); j!=e2; ++j) {
-      maximum=geom::Max(maximum, j->GetPos());
-    }
+  if (atoms) {
+    return geom::AlignedCuboid(mmin, mmax);
+  } else {
+    return geom::AlignedCuboid(geom::Vec3(), geom::Vec3());
   }
-  return maximum;
-}
-
-geom::Vec3 ChainView::GetGeometricCenter() const
-{
-  this->CheckValidity();
-  return (this->GetGeometricStart() + this->GetGeometricEnd())/2;
 }
 
 geom::Vec3 ChainView::GetCenterOfAtoms() const

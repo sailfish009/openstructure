@@ -16,18 +16,18 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/gui/gosty_app.hh>
 #include <boost/pointer_cast.hpp>
 
-#include <QFont>
 
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node.hh>
 
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_win/scene_win.hh>
 
 #include "render_modes_node.hh"
 #include "render_mode_node.hh"
+#include <QFont>
 
 namespace ost { namespace gui {
 
@@ -53,6 +53,9 @@ void RenderModesNode::Update(){
       RenderModeNode* node = new RenderModeNode(entity, render_modes[i],this);
       model->AddNode(this, node);
       render_types_.insert(render_modes[i],node);
+    }
+    else{
+      render_types_[render_modes[i]]->Update();
     }
   }
   QSet<gfx::RenderMode::Type> types_to_delete;

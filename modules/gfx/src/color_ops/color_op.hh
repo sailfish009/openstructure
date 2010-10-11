@@ -51,6 +51,8 @@ public:
   virtual bool CanApplyTo(const GfxObjP& obj) const;
   virtual void ApplyTo(GfxObjP& obj) const;
 
+  virtual const String& GetName() const;
+
   ColorMask GetMask() const;
   
   void SetMask(ColorMask mask);
@@ -58,15 +60,22 @@ public:
   virtual void SetSelection(const String& selection);
   virtual String GetSelection() const;
 
+  virtual void SetSelectionFlags(mol::QueryFlags flags);
+  virtual mol::QueryFlags GetSelectionFlags() const;
+
   virtual bool IsSelectionOnly() const;
   virtual void SetView(const mol::EntityView& view);
   virtual mol::EntityView GetView() const;
 
   virtual void ToInfo(info::InfoGroup& group) const;
   static gfx::ColorOp FromInfo(info::InfoGroup& group);
+
+protected:
+  virtual void SetName(const String& name);
+
 private:
+  String name_;
   mol::QueryViewWrapper query_view_;
-  mol::EntityView view_;
   ColorMask mask_;
 };
 

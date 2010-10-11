@@ -93,11 +93,11 @@ String MRC::FORMAT_STRING = "defined_mrc";
 
 
 MRC::MRC(bool normalize_on_save, Subformat subformat,Endianess endianess_on_save):
-  ImageFormatBase(FORMAT_STRING)
+  ImageFormatBase(FORMAT_STRING),
+  subformat_(subformat),
+  normalize_on_save_(normalize_on_save),
+  endianess_on_save_(endianess_on_save)
 {
-  normalize_on_save_ = normalize_on_save;
-  subformat_ = subformat;
-  endianess_on_save_ = endianess_on_save;
 }
 
 Endianess MRC::GetEndianessOnSave() const
@@ -306,14 +306,14 @@ public:
   }
   void Print()
   {
-    LOG_MESSAGE("ncrs: " << nc << " " << nr << " " << ns << std::endl);
-    LOG_MESSAGE("mode " << mode << std::endl);
-    LOG_MESSAGE("nxyz: " << nx << " " << ny << " " << nz << std::endl);
-    LOG_MESSAGE("cell: " << x << " " << y << " " << z);
-    LOG_MESSAGE(alpha << " " << beta << " " << gamma << std::endl);
-    LOG_MESSAGE("order: " << mapc << mapr << maps << std::endl);
-    LOG_MESSAGE("sg: " << ispg << " " << nsymbt << std::endl);
-    LOG_MESSAGE("nlabel: " << nlabel << std::endl);
+    LOG_INFO("ncrs: " << nc << " " << nr << " " << ns);
+    LOG_INFO("mode " << mode);
+    LOG_INFO("nxyz: " << nx << " " << ny << " " << nz);
+    LOG_INFO("cell: " << x << " " << y << " " << z);
+    LOG_INFO(alpha << " " << beta << " " << gamma);
+    LOG_INFO("order: " << mapc << mapr << maps);
+    LOG_INFO("sg: " << ispg << " " << nsymbt);
+    LOG_INFO("nlabel: " << nlabel);
   }
 
   int nc,nr,ns;
@@ -348,9 +348,9 @@ public:
   }
   void Print()
   {
-    LOG_MESSAGE("mrc header" << std::endl);
+    LOG_INFO("mrc header");
     header_base::Print();
-    LOG_MESSAGE("ori: " << xorigin << " " << yorigin << std::endl);
+    LOG_INFO("ori: " << xorigin << " " << yorigin);
   }
   static int DetermineDataFormat( std::istream& f)
   {
@@ -372,7 +372,7 @@ public:
     }else if(x>0.0 || x<1.0) {
       Convert<OST_VAX_DATA,float>::FromIP(&x);
       if(x<1.0) {
-        LOG_VERBOSE("suspicious floating Point value in mrc header" << std::endl);
+        LOG_VERBOSE("suspicious floating Point value in mrc header");
         return OST_LITTLE_ENDIAN;
       }else{
         return OST_VAX_DATA;
@@ -474,13 +474,13 @@ public:
     f.seekg(0,std::ios::beg); // seek to beginning
     char float_machst= machst[0] & 0x0f;
     if(float_machst == 1){
-      LOGN_DEBUG("CCP4Import: reading big endian data");
+      LOG_DEBUG("CCP4Import: reading big endian data");
       return OST_BIG_ENDIAN;
     }else if(float_machst == 2){
-      LOGN_DEBUG("CCP4Import: reading vax data");
+      LOG_DEBUG("CCP4Import: reading vax data");
       return OST_VAX_DATA;
     }else if(float_machst == 4){
-      LOGN_DEBUG("CCP4Import: reading little endian data");
+      LOG_DEBUG("CCP4Import: reading little endian data");
       return OST_LITTLE_ENDIAN;
     } else{
       throw(IOException("CCP4Import: Cray, Convex native and Fijitsu VP formats are not supported."));
@@ -493,9 +493,9 @@ public:
     using boost::format;
     namespace bf = boost::filesystem;
 
-    LOGN_MESSAGE("ccp4 header:");
+    LOG_INFO("ccp4 header:");
     header_base::Print();
-    LOGN_MESSAGE(" arms: " << arms);
+    LOG_INFO(" arms: " << arms);
   }
 
   int lskflag;
@@ -629,16 +629,16 @@ void complex_filler(img::image_state::ComplexHalfFrequencyImageState& isi,
           // complex conjugate
           fhandle >> real >> imag;
           isi.Value(p)=Complex(Real(real),-Real(imag));
-          LOG_DEBUG(" " << p  << " " << isi.Value(p) << std::endl);
+          LOG_DEBUG(" " << p  << " " << isi.Value(p));
         }
         if(sr==header.nr) {
         // why set point (py,header.ny/2,pz)?
         //  isi.Value(Point(py,header.ny/2,pz))=scale*Complex(Real(real),Real(imag));
-        //  LOG_DEBUG("+" << Point(py,header.ny/2,pz) << " <- " << Point(sx,cy,sz) << " " << " " << isi.Value(Point(py,header.ny/2,pz)) << std::endl);
+        //  LOG_DEBUG("+" << Point(py,header.ny/2,pz) << " <- " << Point(sx,cy,sz) << " " << " " << isi.Value(Point(py,header.ny/2,pz)));
           p[mapc]=p[header.mapr];
           p[mapr]=header.nr/2;
           isi.Value(p)=Complex(Real(real),Real(imag));
-          LOG_DEBUG("+" << p << " " << isi.Value(p) << std::endl);
+          LOG_DEBUG("+" << p << " " << isi.Value(p));
         }
         Progress::Instance().AdvanceProgress(&this_dummy);
       }
@@ -650,11 +650,11 @@ void complex_filler(img::image_state::ComplexHalfFrequencyImageState& isi,
           p[mapc]=sc;
           fhandle >> real >> imag;
           isi.Value(p)=Complex(Real(real),Real(imag));
-          LOG_DEBUG(" " << p << " " << isi.Value(p) << std::endl);
+          LOG_DEBUG(" " << p << " " << isi.Value(p));
         }
         p[mapc]=sc;
         isi.Value(p)=Complex(Real(real),-Real(imag));
-        LOG_DEBUG(" " << p << " " << isi.Value(p) << std::endl);
+        LOG_DEBUG(" " << p << " " << isi.Value(p));
         Progress::Instance().AdvanceProgress(&this_dummy);
       }
       // set second half of r=0 and r=nr/2 line
@@ -663,10 +663,10 @@ void complex_filler(img::image_state::ComplexHalfFrequencyImageState& isi,
         p[mapr]=0;
         p[maps]=ss;
         isi.Value(Point(-p[0],p[1],p[2]))=std::conj(isi.Value(p));
-        LOG_DEBUG(" " << Point(-p[0],p[1],p[2]) << " <- " << p << "**" << std::endl);
+        LOG_DEBUG(" " << Point(-p[0],p[1],p[2]) << " <- " << p << "**");
         p[mapr]=header.nr/2;
         isi.Value(p)=std::conj(isi.Value(Point(-p[0],p[1],p[2])));
-        LOG_DEBUG(" " << p << " <- " << Point(-p[0],p[1],p[2]) << "**" << std::endl);
+        LOG_DEBUG(" " << p << " <- " << Point(-p[0],p[1],p[2]) << "**");
       }
     }
     Progress::Instance().DeRegister(&this_dummy);
@@ -742,7 +742,7 @@ void complex_dumper(BinaryOStream<CONVERSIONTYPE>& f,
         pnt[mapc]=-sc;
         Complex val = conj(norm.Convert(isc->Value(pnt)));
         f << static_cast<B>(val.real()) << static_cast<B>(val.imag());
-        LOG_DEBUG(" " << pnt  << " " << val << std::endl);
+        LOG_DEBUG(" " << pnt  << " " << val);
       }
       f << static_cast<B>(0.0) << static_cast<B>(0.0);
       Progress::Instance().AdvanceProgress(&this_dummy);
@@ -755,12 +755,12 @@ void complex_dumper(BinaryOStream<CONVERSIONTYPE>& f,
         pnt[mapc]=sc;
         Complex  val =norm.Convert(isc->Value(pnt));
         f << static_cast<B>(val.real()) << static_cast<B>(val.imag());
-        LOG_DEBUG(" " << pnt << " " << val << std::endl);
+        LOG_DEBUG(" " << pnt << " " << val);
       }
       pnt[mapc]=sc;
       Complex  val = norm.Convert(conj(isc->Value(pnt)));
       f << static_cast<B>(val.real()) << static_cast<B>(val.imag());
-      LOG_DEBUG(" " << pnt << " " << val << std::endl);
+      LOG_DEBUG(" " << pnt << " " << val);
       Progress::Instance().AdvanceProgress(&this_dummy);
     }
   }
@@ -805,9 +805,9 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
                                           static_cast<Real>(header.y)/static_cast<Real>(header.ny),
                                           static_cast<Real>(header.z)/static_cast<Real>(header.nz)));
     }else{
-      LOG_MESSAGE("Suspicious dell dimensions found. Cannot set sampling.");
+      LOG_INFO("Suspicious dell dimensions found. Cannot set sampling.");
     }
-    LOG_MESSAGE("resulting image extent: " << image.GetExtent() << std::endl);
+    LOG_INFO("resulting image extent: " << image.GetExtent());
     if(img::image_state::RealSpatialImageState *rs=dynamic_cast<img::image_state::RealSpatialImageState*>(image.ImageStatePtr().get())) {
       if(header.mode==0) {
         detail::real_filler<uchar,CONVERSIONTYPE>(*rs,f,header);
@@ -939,22 +939,22 @@ void MapIOMrcHandler::Import(img::MapHandle& sh, std::istream& loc, const ImageF
    std::istream head_str(&head_strbuf);
    head_strbuf.push(boost::iostreams::basic_array_source<char>(headerptr,sizeof(header_)));
    if (formatmrc.GetSubformat()==MRC_OLD_FORMAT) {
-     LOGN_DEBUG("mrc io: importing old style format");
+     LOG_DEBUG("mrc io: importing old style format");
      detail::import_endianess_switcher<detail::mrc_header>(sh,loc,head_str,formatmrc);
    } else if (formatmrc.GetSubformat()==MRC_NEW_FORMAT) {
-     LOGN_DEBUG("mrc io: importing new style format");
+     LOG_DEBUG("mrc io: importing new style format");
      detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);
    } else if (is_file_ && (detail::FilenameEndsWith(filename_,".ccp4") || detail::FilenameEndsWith(filename_,".map") || detail::FilenameEndsWith(filename_,".map.gz"))) {
-     LOGN_DEBUG("mrc io: importing new style format");
+     LOG_DEBUG("mrc io: importing new style format");
      detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);
    } else {
 	 unsigned char header_content[256];
 	 memcpy(&header_content[0],&header_,256*sizeof(char));
      if (MatchContent(header_content) == true) {
-       LOGN_DEBUG("mrc io: importing new style format");
+       LOG_DEBUG("mrc io: importing new style format");
        detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);
      } else {
-       LOGN_DEBUG("mrc io: importing old style format");
+       LOG_DEBUG("mrc io: importing old style format");
        detail::import_endianess_switcher<detail::mrc_header>(sh,loc,head_str,formatmrc);
      }
   }
@@ -985,10 +985,10 @@ void MapIOMrcHandler::Export(const img::MapHandle& sh, std::ostream& loc,const I
     assert (formatstruct.GetFormatString()==UndefinedImageFormat::FORMAT_STRING);
   }
   if (formatmrc.GetSubformat()==MRC_OLD_FORMAT) {
-   LOGN_DEBUG("mrc io: exporting old style format");
+   LOG_DEBUG("mrc io: exporting old style format");
    detail::export_endianess_switcher<detail::mrc_header>(sh,loc,formatmrc);
   } else {
-   LOGN_DEBUG("mrc io: exporting new style format");
+   LOG_DEBUG("mrc io: exporting new style format");
    detail::export_endianess_switcher<detail::ccp4_header>(sh,loc,formatmrc);
   }
 }

@@ -22,13 +22,18 @@ from ost import info
 from ost import gfx
 from PyQt4 import QtGui
 
-class VisibilityOp():
+class VisibilityOp:
   VISIBLE_ATTRIBUTE_NAME = "Visible"
+  FLAGS_ATTRIBUTE_NAME = "Flags"
     
-  def __init__(self, selection, visible=False):    
+  def __init__(self, selection, flags, visible=False):    
     self.selection_ = selection
     self.visible_ = visible
+    self.flags_ = flags
     
+  def GetName(self):
+    return "Visible: %s"%str(self.IsVisible())
+  
   def SetSelection(self, selection):
     self.selection_ = selection
     
@@ -38,15 +43,22 @@ class VisibilityOp():
   def SetVisible(self, visible):
     self.visible_ = visible
 
+  def SetSelectionFlags(self, flags):
+    self.flags_ = flags
+    
+  def GetSelectionFlags(self):
+    return self.flags_
+
   def IsVisible(self):
     return self.visible_
 
   def ApplyOn(self, entity):
     if (entity is not None) and isinstance(entity, gfx.Entity):
-      entity.SetVisible(entity.view.Select(self.GetSelection()),self.IsVisible())
+      entity.SetVisible(entity.view.Select(self.GetSelection(),self.GetSelectionFlags()),self.IsVisible())
   
   def ToInfo(self,group):
       group.SetAttribute(VisibilityOp.VISIBLE_ATTRIBUTE_NAME, str(int(self.IsVisible())))
+      group.SetAttribute(VisibilityOp.FLAGS_ATTRIBUTE_NAME, str(self.GetSelectionFlags()))
       group.SetTextData(str(self.GetSelection()))
     
   @staticmethod
@@ -54,6 +66,9 @@ class VisibilityOp():
     visible_op = None
     if group.HasAttribute(VisibilityOp.VISIBLE_ATTRIBUTE_NAME):
       visible = bool(int(group.GetAttribute(VisibilityOp.VISIBLE_ATTRIBUTE_NAME)))
+      flags = 0
+      if group.HasAttribute(VisibilityOp.FLAGS_ATTRIBUTE_NAME):
+        flags = int(group.GetAttribute(VisibilityOp.FLAGS_ATTRIBUTE_NAME))
       selection = group.GetTextData()
-      visible_op = VisibilityOp(selection,visible)
+      visible_op = VisibilityOp(selection,flags,visible)
     return visible_op

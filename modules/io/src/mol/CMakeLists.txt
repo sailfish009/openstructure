@@ -12,12 +12,14 @@ save_entity.cc
 load_entity.cc
 surface_io_msms_handler.cc
 load_surface.cc
+chemdict_parser.cc
 dcd_io.cc
 star_parser.cc
 PARENT_SCOPE
 )
 
 set(OST_IO_MOL_HEADERS
+chemdict_parser.hh
 star_parser.hh
 dcd_io.hh
 entity_io_crd_handler.hh	

@@ -25,16 +25,16 @@
 #ifndef IMG_GUI_STRATEGIES_HH_
 #define IMG_GUI_STRATEGIES_HH_
 
-#include <QPainter>
-#include <QPoint>
-#include <QColor>
-#include <QPen>
-#include <QBrush>
 
 #include <ost/geom/geom.hh>
 
 #include "strategies_fw.hh"
 
+#include <QPainter>
+#include <QPoint>
+#include <QColor>
+#include <QPen>
+#include <QBrush>
 namespace ost { namespace img { namespace gui {
 
 

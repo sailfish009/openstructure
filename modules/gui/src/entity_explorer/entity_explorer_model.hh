@@ -24,11 +24,11 @@
 
 #include <ost/gfx/scene_observer.hh>
 #include <ost/gfx/gfx_object.hh>
+#include <ost/gui/module_config.hh>
 
 // Qt includes must come last
 #include <QAbstractItemModel>
 
-#include <ost/gui/module_config.hh>
 
 namespace ost { namespace gui {
 

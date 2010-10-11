@@ -39,7 +39,7 @@
 #include <ost/mol/impl/connector_impl_fw.hh>
 #include <ost/mol/impl/torsion_impl_fw.hh>
 #include <ost/mol/impl/fragment_impl_fw.hh>
-
+#include <ost/mol/impl/pointer_iterator.hh>
 #include <ost/mol/entity_visitor_fw.hh>
 #include <ost/mol/entity_observer_fw.hh>
 #include <ost/mol/entity_view.hh>
@@ -75,7 +75,7 @@ typedef enum {
   // dirty trace (implies dirty ICS)
   DirtyTrace=DirtyICS+4,
   DirtyOrganizer=8,
-  DisableICS=16,
+  DisableICS=16
 } EntityDirtyFlags;
 
 
@@ -93,10 +93,11 @@ public:
   Real GetMass() const;
   geom::Vec3 GetCenterOfMass() const;
   geom::Vec3 GetCenterOfAtoms() const;
-  geom::Vec3 GetGeometricCenter() const;
-  geom::Vec3 GetGeometricStart() const;
-  geom::Vec3 GetGeometricEnd() const;
-  geom::Vec3 GetBoundarySize() const;
+  
+  /// \brief returns the axis-aligned bounding box of the entity
+  geom::AlignedCuboid GetBounds() const;
+  
+
 
   // default copy ctor and assignment op should work for now
   AtomImplPtr CreateAtom(const ResidueImplPtr& rp, const String& name,
@@ -242,6 +243,7 @@ public:
 
   impl::ChainImplList::iterator GetChain(const String& name);
 
+  pointer_it<ChainImplPtr> GetChainIter(const String& name);
   void SetName(const String& ent_name);
 
   void ReorderAllResidues();

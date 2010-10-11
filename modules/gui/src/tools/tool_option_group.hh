@@ -23,11 +23,11 @@
   Author: Marco Biasini
  */
 
-#include <QObject>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/tools/tool_option.hh>
 
+#include <QObject>
 namespace ost { namespace gui {
 
 

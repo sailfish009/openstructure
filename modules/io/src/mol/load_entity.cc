@@ -32,12 +32,12 @@ namespace {
 void Import(mol::EntityHandle& eh, const String& filename, int flag)
 {
   Profile profile_import("import");
-  LOG_DUMP("creating EntityIOHandle for " << filename << std::endl);
+  LOG_DEBUG("creating EntityIOHandle for " << filename);
   EntityIOHandlerP ent_io = IOManager::Instance().FindEntityImportHandler(filename);
 
   // TODO: proper error handling
 
-  LOG_DUMP("calling import on entity io handle" << std::endl);
+  LOG_DEBUG("calling import on entity io handle");
   /*
     This should probably allow various parameters to be passed
     to adjust the loading behaviour for a particular filter.
@@ -46,7 +46,7 @@ void Import(mol::EntityHandle& eh, const String& filename, int flag)
   */
   ent_io->Import(eh,filename);
 
-  LOG_DUMP("running conopology" << std::endl);
+  LOG_DEBUG("running conopology");
 
   if(ent_io->RequiresBuilder()) {
     conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();
@@ -58,9 +58,7 @@ void Import(mol::EntityHandle& eh, const String& filename, int flag)
 
 mol::EntityHandle LoadEntity(const String& filename, int flag)
 {
-  LOG_DEBUG("entering LoadEntity (unmanaged)" << std::endl);
-
-  LOG_DUMP("creating emtpy entity" << std::endl);
+  LOG_DEBUG("creating emtpy entity");
   mol::EntityHandle eh=mol::CreateEntity();
   mol::XCSEditor xcs_lock=eh.RequestXCSEditor(mol::BUFFERED_EDIT);
   Import(eh,filename,flag);

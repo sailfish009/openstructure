@@ -331,7 +331,7 @@ public:
 private:
   template <typename T, class D>
   void T_Visit_(ImageStateImpl<T,D>& isi) {
-    VisitState(isi);
+    this->VisitState(isi);
   }
 };
 
@@ -376,7 +376,7 @@ public:
 private:
   template <typename T, class D>
   void T_Visit_(ImageStateImpl<T,D>& isi) const {
-    VisitState(isi);
+    this->VisitState(isi);
   }
 };
 
@@ -402,7 +402,7 @@ public:
 private:
   template <typename T, class D>
   ImageStateBasePtr T_Visit_(const ImageStateImpl<T,D>& isi) {
-    return VisitState(isi);
+    return this->VisitState(isi);
   }
 };
 
@@ -430,7 +430,7 @@ public:
 private:
   template <typename T, class D>
   ImageStateBasePtr T_Visit_(const ImageStateImpl<T,D>& isi) const {
-    return VisitState(isi);
+    return this->VisitState(isi);
   }
 };
 
@@ -457,7 +457,7 @@ public:
 private:
   template <typename T, class D>
   ImageStateBasePtr T_Visit_(ImageStateImpl<T,D>& isi) {
-    return VisitState(isi);
+    return this->VisitState(isi);
   }
 };
 

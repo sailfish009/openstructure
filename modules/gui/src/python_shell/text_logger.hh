@@ -49,7 +49,7 @@ public:
   
 public slots:
   void AppendCode(const QString& text); 
-  void AppendOutput(int status,const QString& text); 
+  void AppendOutput(unsigned int id,const QString& text); 
   
 protected:
   bool log_code_;

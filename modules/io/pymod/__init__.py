@@ -16,35 +16,98 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
+import os, tempfile, ftplib, httplib
+
 from _io import *
-from ost import mol,conop
+from ost import mol, conop
+
+def __GetModelFromPDB(model_id, output_dir, file_pattern='pdb%s.ent.gz'):
+  file_name = file_pattern % model_id
+  file_path = os.path.join(output_dir,file_name)
+  try:
+    server="ftp.wwpdb.org"
+    ftp=ftplib.FTP(server,"anonymous","user@")
+    ftp.cwd("pub/pdb/data/structures/all/pdb")
+    ftp_retrfile=open(file_path,"wb")
+    ftp.retrbinary("RETR "+file_name,ftp_retrfile.write)
+    ftp_retrfile.close()
+  except:
+    conn=httplib.HTTPConnection('www.pdb.org')
+    conn.request('GET', '/pdb/files/%s.pdb.gz' % model_id )
+    response=conn.getresponse()
+    if response.status==200:
+      data=response.read()
+      f=open(os.path.join(output_dir, file_pattern % model_id), 'w+')
+      f.write(data)
+      f.close()
+    else:
+      conn.close()
+      return False
+  return os.path.getsize(file_path) > 0
 
 def LoadPDB(filename, restrict_chains="", no_hetatms=False,
             fault_tolerant=False, load_multi=False,
-            join_spread_atom_records=False, calpha_only=False):
+            join_spread_atom_records=False, calpha_only=False, 
+            remote=False, dialect='PDB', strict_hydrogens=False):
   """
-  Load PDB file from disk.
+  Load PDB file from disk and returns one or more entities. Several options 
+  allow to customize the exact behaviour of the PDB import.
 
-  If restrict_chains is not an empty string, only chains listed in the
-  string will be imported.
+  :param restrict_chains: If not an empty string, only chains listed in the
+     string will be imported.
 
-  If fault_tolerant is set to true, the import will succeed, even if the
-  PDB contains faulty records. The faulty records will be ignored in that
-  case.
+  :param fault_tolerant: If True, the import will succeed, even if the
+     PDB contains faulty records. The faulty records will be ignored and import 
+     continues as if the records haven't been present.
 
-  If not_hetatms is set to True, HETATM records will be ignored
+  :param no_hetatms: If set to True, HETATM records will be ignored
 
-  If load_multi is set to true, a list of entities will be returned instead
-  of only the first.
+  :param load_multi: If set to True, a list of entities will be returned instead
+     of only the first. This is useful when dealing with multi-PDB files.
 
-  If join_spread_atom_records is set to true, atom records belonging to the
-  same residue are joined, even if they do not appear sequentially in the PDB
-  file.
+  :param join_spread_atom_records: If set to true, atom records belonging to the
+     same residue are joined, even if they do not appear sequentially in the PDB
+     file.
+  
+  :param remote: If set to true, the method tries to load the pdb from the remote
+     pdb repository www.pdb.org.
+  :rtype: :class:`~ost.mol.EntityHandle` or a list thereof if `load_multi` is 
+      True.
+  :param dialect: Specifies the particular dialect to use. By default, the 
+     official PDB format is used. Alternatively, by setting the dialect to 
+     CHARMM, the loading is optimized for CHARMM PDB files.
+  :type dialect: :class:`str`
+  
+  :param strict_hydrogens: whether hydrogen names should be strictly checked.  
+      It is very common for PDB files to not follow the correct naming 
+      conventions for hydrogen atoms. That's why by default, the names of the 
+      hydrogens are not required to be correct. Rather, the connectivity is 
+      inferred with distance-based checks. By turning this flag on, the names 
+      of the hydrogen atoms are checked against the names in the database like 
+      all other atom types.
+
+  :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
+      inexistent file
   """
+  
+  if dialect not in ('PDB', 'CHARMM',):
+    raise ValueError('dialect must be PDB or CHARMM')
+
+  if remote:
+    output_dir = tempfile.gettempdir()
+    if __GetModelFromPDB(filename, output_dir):
+      filename = os.path.join(output_dir, 'pdb%s.ent.gz' % filename)
+    else:
+      raise IOError('Can not load PDB %s from www.pdb.org'%filename) 
+  
   conop_inst=conop.Conopology.Instance()
   builder=conop_inst.GetBuilder("DEFAULT")
+  if dialect=='PDB':
+    builder.dialect=conop.PDB_DIALECT
+  elif dialect=='CHARMM':
+    builder.dialect=conop.CHARMM_DIALECT
+  builder.strict_hydrogens=strict_hydrogens
   reader=PDBReader(filename)
-
   flags=0
   if calpha_only:
     flags|=PDB.CALPHA_ONLY
@@ -54,6 +117,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
     flags|=PDB.NO_HETATMS
   if join_spread_atom_records:
     flags|=PDB.JOIN_SPREAD_ATOM_RECORDS
+  if dialect=='CHARMM':
+    flags|=PDB.CHARMM_FORMAT
   try:
     PDB.PushFlags(PDB.Flags() | flags)
     if load_multi:
@@ -63,6 +128,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
         reader.Import(ent, restrict_chains)
         conop_inst.ConnectAll(builder, ent, 0)
         ent_list.append(ent)
+      if len(ent_list)==0:
+        raise IOError("File doesn't contain any entities")
       PDB.PopFlags()
       return ent_list
     else:
@@ -70,6 +137,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
       if reader.HasNext():
         reader.Import(ent, restrict_chains)
         conop_inst.ConnectAll(builder, ent, 0)
+      else:
+        raise IOError("File doesn't contain any entities")
       PDB.PopFlags()
       return ent
   except:
@@ -78,7 +147,13 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
 
 def SavePDB(models, filename):
   """
-  Save entity or list of entities to disk
+  Save entity or list of entities to disk. If a list of entities is supplied the 
+  PDB file will be saved as a multi PDB file. Each of the entities is wrapped 
+  into a MODEL/ENDMDL pair.
+  
+  :param models: The entity or list of entities (handles or views) to be saved
+  :param filename: The filename
+  :type  filename: string
   """
   if not getattr(models, '__len__', None):
     models=[models]

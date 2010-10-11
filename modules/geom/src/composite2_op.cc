@@ -88,11 +88,11 @@ bool IsInPolygon(const Polygon2& p, const Vec2& v)
   }
   bool c = false;
   Vec2 old=p.GetNode(p.GetNodeCount()-1);
-  bool oldcomp= v.GetY()<old.GetY();
+  bool oldcomp= v.y<old.y;
   for (Polygon2::const_iterator it=p.begin();it!=p.end(); ++it) {
-    bool comp= v.GetY() < (*it).GetY();
+    bool comp= v.y < (*it).y;
     if( comp ^ oldcomp ) {
-      if( (v.GetX() < (old.GetX() - (*it).GetX()) * (v.GetY() - (*it).GetY()) / (old.GetY() - (*it).GetY()) + (*it).GetX()) ){
+      if( (v.x < (old.x - (*it).x) * (v.y - (*it).y) / (old.y - (*it).y) + (*it).x) ){
         c = !c;
       }
     }
@@ -123,7 +123,7 @@ DLLEXPORT bool IsInRectangle(const Rectangle2& r, const Vec2& v)
 {
   Vec2 start=r.GetStart();
   Vec2 end=r.GetEnd();
-  return v.GetX()>=start.GetX() && v.GetX()<=end.GetX() &&  v.GetY()>=start.GetY() && v.GetY()<=end.GetY();
+  return v.x>=start.x && v.x<=end.x &&  v.y>=start.y && v.y<=end.y;
 }
 DLLEXPORT bool IsInCircle(const Circle2& c, const Vec2& v)
 {

@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <boost/bind.hpp>
 #include <ost/dyn_cast.hh>
 #include "gfx_node.hh"
 #include "gfx_object.hh"
@@ -111,6 +112,17 @@ void GfxNode::Remove(GfxObjP obj)
   GfxNodeVector::iterator it = find (node_vector_.begin(), node_vector_.end(), obj);
   if(it!=node_vector_.end()) {
     node_vector_.erase(it);
+  }
+}
+using boost::bind;
+void GfxNode::RemoveAll()
+{
+  GfxNodeVector v=node_vector_;
+  node_vector_.clear();
+  for (GfxNodeVector::iterator i=v.begin(), e=v.end(); i!=e; ++i) {
+    if (GfxObjP o=dyn_cast<GfxObj>(*i)) {
+      Scene::Instance().NotifyObservers(bind(&SceneObserver::NodeRemoved, _1, o));
+    }
   }
 }
 

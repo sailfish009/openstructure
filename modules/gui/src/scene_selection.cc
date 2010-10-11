@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/gui/gosty_app.hh>
 #include <ost/dyn_cast.hh>
 
 #include <ost/geom/vec3.hh>
@@ -35,9 +36,7 @@
 
 #endif
 
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_win/scene_win.hh>
-#include <ost/gui/query_dialog.hh>
 
 #include "scene_selection.hh"
 
@@ -110,25 +109,20 @@ void SceneSelection::CenterOnObjects() {
     }
   }
   if(changed){
-    gfx::Scene::Instance().SetCenter(geom::Vec3(((max.GetX()+min.GetX())/2),
-                                                ((max.GetY()+min.GetY())/2),
-                                                ((max.GetZ()+min.GetZ())/2)));
+    gfx::Scene::Instance().SetCenter(geom::Vec3(((max.x+min.x)/2),
+                                                ((max.y+min.y)/2),
+                                                ((max.z+min.z)/2)));
   }
 }
 
 void SceneSelection::Delete() {
-  QList<gfx::GfxObjP> selected_objects;
+  QList<gfx::GfxNodeP> selected_objects;
   for(unsigned int i = 0; i < nodes_.size(); i++){
     gfx::GfxNodeP node = nodes_[i];
-    if (node) {
-      gfx::GfxObjP obj = dyn_cast<gfx::GfxObj> (node);
-      if (obj) {
-        selected_objects.append(obj);
-      }
-    }
+    selected_objects.append(node);
   }
   for(int i=0; i < selected_objects.size(); i++){
-      gfx::Scene::Instance().Remove(selected_objects[i]);
+    gfx::Scene::Instance().Remove(selected_objects[i]);
   }
 }
 
@@ -171,26 +165,6 @@ void SceneSelection::ShowOriginalMap()
 
 #endif // OST_IMG_ENABLED
 
-void SceneSelection::Select() {
-  QueryDialog d;
-  if (d.exec() == QDialog::Accepted) {
-    QString query = d.GetQueryString();
-    for(unsigned int i = 0; i < nodes_.size(); i++){
-      gfx::GfxNodeP node = nodes_[i];
-      if (node) {
-        gfx::Entity* obj = dynamic_cast<gfx::Entity*> (node.get());
-        if (obj) {
-          mol::Query q(query.toStdString());
-          if (q.IsValid()) {
-              mol::EntityView ent = obj->GetView().Select(q);
-              obj->SetSelection(ent);
-          }
-        }
-     }
-    }
-  }
-}
-
 void SceneSelection::Deselect(){
   for(unsigned int i = 0; i < nodes_.size(); i++){
     gfx::GfxNodeP node = nodes_[i];
@@ -199,32 +173,6 @@ void SceneSelection::Deselect(){
       if (obj) {
         obj->SetSelection(obj->GetView().CreateEmptyView());
       }
-    }
-  }
-}
-
-void SceneSelection::CopyViews() {
-  QueryDialog d;
-  QList<gfx::GfxObjP> objects_to_add;
-  if (d.exec() == QDialog::Accepted) {
-    QString query = d.GetQueryString();
-    for(unsigned int i = 0; i < nodes_.size(); i++){
-      gfx::GfxNodeP node = nodes_[i];
-      if (node) {
-        gfx::Entity* obj = dynamic_cast<gfx::Entity*> (node.get());
-        if (obj) {
-          mol::Query q(query.toStdString());
-          if (q.IsValid()) {
-            mol::EntityView ent = obj->GetView().Select(q);
-            gfx::EntityP new_obj(new gfx::Entity(obj->GetName()
-                                 + " *", ent));
-            objects_to_add.append(new_obj);
-          }
-        }
-      }
-    }
-    for(int i=0; i < objects_to_add.size(); i++){
-      gfx::Scene::Instance().Add(objects_to_add[i]);
     }
   }
 }
@@ -298,17 +246,6 @@ void SceneSelection::DeselectAllViews(){
   }
 }
 
-void SceneSelection::SelectViews(){
-  QueryDialog d;
-  if (d.exec() == QDialog::Accepted) {
-    QString query = d.GetQueryString();
-    mol::Query q(query.toStdString());
-    mol::EntityView union_view = this->GetViewUnion();
-    if(union_view.IsValid() && q.IsValid()){
-      view_entity_->SetSelection(union_view.Select(q));
-    }
-  }
-}
 
 
 gfx::EntityP SceneSelection::GetViewEntity() const{

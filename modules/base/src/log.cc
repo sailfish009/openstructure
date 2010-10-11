@@ -16,25 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <iostream>
-
-
+#include <ost/log_sink.hh>
 #include <ost/log.hh>
 
 namespace ost {
 
 Logger& Log = Logger::Instance();
-
-namespace {
-
-  class DevNull: public std::streambuf {
-  protected:
-    virtual int_type overflow(int_type c) {return c;}
-    virtual std::streamsize xsputn(const char* s, std::streamsize num) {return num;}
-  };
-
-} // anon ns
-
 
 Logger& Logger::Instance()
 {
@@ -45,15 +32,18 @@ Logger& Logger::Instance()
 Logger::Logger():
   level_(0),
   level_stack_(),
-  null_(new DevNull())
+  sink_stack_()
 {
+  sink_stack_.push(LogSinkPtr(new StreamLogSink(std::cerr)));
 }
 
 Logger::Logger(const Logger&):
   level_(0),
   level_stack_(),
-  null_(0)
-{}
+  sink_stack_()
+{
+  sink_stack_.push(LogSinkPtr(new StreamLogSink(std::cerr)));
+}
 
 Logger& Logger::operator=(const Logger&)
 {
@@ -78,15 +68,30 @@ void Logger::PopVerbosityLevel()
   }
 }
 
-std::ostream& Logger::operator()(enum LogLevel l)
+void Logger::PushFile(const String& fn)
 {
-  if(l<=level_) {
-    return std::cout;
-  }
-  return null_;
+  sink_stack_.push(LogSinkPtr(new FileLogSink(fn)));
 }
 
+void Logger::PopFile()
+{
+  WARN_DEPRECATED("Logger::PopFile is deprecated. Use Logger::PopSink instead");
+  this->PopSink();
+}
 
+void Logger::PushSink(LogSinkPtr& sink)
+{
+  sink_stack_.push(sink);
+}
+
+void Logger::PopSink()
+{
+  if(sink_stack_.size()>1) {
+    sink_stack_.pop();
+  } else {
+    LOG_ERROR("Can't pop sink. There is only one sink left on the stack");
+  }
+}
 
 } // ns
 

@@ -20,6 +20,7 @@
   Authors: Marco Biasini, Andreas Schenk
  */
 
+#include "completer_base.hh"
 
 #include <QStringList>
 #include <QScrollBar>
@@ -27,7 +28,6 @@
 #include <QKeyEvent>
 #include <QApplication>
 
-#include "completer_base.hh"
 
 
 namespace ost { namespace gui {
@@ -61,6 +61,7 @@ void OstCompleterBase::complete(const QRect & rect,bool inline_completion)
                            (popup()->verticalScrollBar()->isVisible() ? 
                             popup()->verticalScrollBar()->width():0);
   popup()->setFixedWidth(popup_width);
+  popup()->move(widget()->mapToGlobal(rect.topLeft()+QPoint(0,-popup()->height())));
 }
 
 QString OstCompleterBase::GetCommonMatch()
@@ -70,7 +71,7 @@ QString OstCompleterBase::GetCommonMatch()
   }
   QStringList matches;
   for(int i=0;i<completionCount();++i){
-  setCurrentRow(i);
+    setCurrentRow(i);
     matches.append(currentCompletion().remove(0,completionPrefix().length()));
   }
   QString common_match;

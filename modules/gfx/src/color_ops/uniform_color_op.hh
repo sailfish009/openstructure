@@ -50,6 +50,7 @@ public:
   virtual void ToInfo(info::InfoGroup& group) const;
   static gfx::UniformColorOp FromInfo(info::InfoGroup& group);
 private:
+  void Init();
   gfx::Color color_;
 };
 

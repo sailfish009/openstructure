@@ -36,7 +36,7 @@ PackingStatistics::PackingStatistics(Real cutoff,
    histogram_(IntegralClassifier(Xxx, 0),       // Xxx is the last object in enum and therefore corresponds to the total number of atom types
               IntegralClassifier((max_counts/bucket_size)+1, 0)) {      // since zero counts is possible, we have n+1 bins
    if (max_counts%bucket_size!=0) {
-     LOGN_MESSAGE("initialising packing statistics with max_count="
+     LOG_INFO("initialising packing statistics with max_count="
                   << max_counts << "which is not divisible by bucket_size="
                   << bucket_size << "without remainder. Will continue anyway.");
    }

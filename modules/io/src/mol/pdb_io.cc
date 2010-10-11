@@ -31,6 +31,7 @@ namespace ost { namespace io {
   const unsigned int PDB::PQR_FORMAT=0x8;
   const unsigned int PDB::JOIN_SPREAD_ATOM_RECORDS=0x10;
   const unsigned int PDB::CALPHA_ONLY=0x20;
+  const unsigned int PDB::CHARMM_FORMAT=0x40;  
 
   void PDB::PushFlags(unsigned int flags) {PDB::Instance().fstack.push(flags);}
   unsigned int PDB::Flags() {return PDB::Instance().fstack.empty() ? 0 : PDB::Instance().fstack.top();}

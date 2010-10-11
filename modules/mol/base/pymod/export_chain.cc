@@ -21,10 +21,11 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-
+#include <ost/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 #include <ost/export_helper/generic_property_def.hh>
+#include "bounds.hh"
 
 namespace {
   typedef void (ChainHandle::*RnumMethod)(const ResNum&);
@@ -65,7 +66,6 @@ void export_Chain()
     //.def("AppendResidue", append_one_arg, args("residue_key"))
     //.def("AppendResidue", append_two_arg, args("residue_key", 
     //                                            "residue_number"))
-    .def("Apply", &ChainHandle::Apply, args("visitor"))
     .def("GetNext", &ChainHandle::GetNext)
     .def("GetPrev", &ChainHandle::GetPrev)
     //.def("InsertResidueBefore", &ChainHandle::InsertResidueBefore, 
@@ -84,13 +84,23 @@ void export_Chain()
     .def("GetMass", &ChainHandle::GetMass)
     .def("GetCenterOfMass", &ChainHandle::GetCenterOfMass)
     .def("GetCenterOfAtoms", &ChainHandle::GetCenterOfAtoms)
-    .def("GetGeometricCenter", &ChainHandle::GetGeometricCenter)
-    .add_property("geometric_center", &ChainHandle::GetGeometricCenter)
-    .def("GetGeometricStart", &ChainHandle::GetGeometricStart)
-    .def("GetGeometricEnd", &ChainHandle::GetGeometricEnd)
+    .def("GetGeometricCenter", geom_center<ChainHandle>)
+    .add_property("geometric_center", geom_center<ChainHandle>)
+    .add_property("mass", &ChainHandle::GetMass)
+    .add_property("center_of_mass", &ChainHandle::GetCenterOfMass)
+    .add_property("center_of_atoms", &ChainHandle::GetCenterOfAtoms)  
+    .add_property("in_sequence", &ChainHandle::InSequence)  
+    .add_property("valid", &ChainHandle::IsValid)    
+    .def("GetBounds", &ChainHandle::GetBounds)
+    .add_property("bounds", &ChainHandle::GetBounds)
+    .def("GetGeometricStart", geom_start<ChainHandle>)
+    .def("GetGeometricEnd", geom_end<ChainHandle>)
+    .def(self==self)
+    .def(self!=self)
   ;
   
   class_<ChainHandleList>("ChainHandleList", no_init)
     .def(vector_indexing_suite<ChainHandleList>())
+    .def(ost::VectorAdditions<ChainHandleList>())    
   ;
 }

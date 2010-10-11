@@ -20,8 +20,8 @@
 
 namespace ost { namespace gui {
 
-template class DLLEXPORT_OST_GUI ToolOptionNum<int,ToolOption::INT>;
-template class DLLEXPORT_OST_GUI ToolOptionNum<float,ToolOption::FLOAT>;
+template class TEMPLATE_DEF_EXPORT ToolOptionNum<int,ToolOption::INT>;
+template class TEMPLATE_DEF_EXPORT ToolOptionNum<float,ToolOption::FLOAT>;
 
 ToolOption::ToolOption(const String& key, const String& verbose_name, 
                        Type type):

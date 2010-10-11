@@ -39,12 +39,14 @@ namespace {
 bool shift_left(const String& atom_name, bool is_hetatm, 
                 const String& element, float mass) 
 {
+  if (atom_name.length()==4) {
+    return true;
+  }
   if (is_hetatm==false) {
     return false;
   }
 
-  if (isdigit(atom_name[0]) || atom_name=="UNK" ||
-      atom_name.length()==4) {
+  if (isdigit(atom_name[0]) || atom_name=="UNK") {
     return true;
   }
   if (mass>34) {
@@ -198,6 +200,19 @@ public:
     return true;
   }
   
+  virtual bool VisitChain(const mol::ChainHandle& chain)
+  {
+    if (peptide_) {
+      this->WriteTer(prev_);
+    }
+    return true;
+  }
+  virtual void OnExit()
+  {
+    if (peptide_) {
+      this->WriteTer(prev_);
+    }
+  }
   void WriteTer(mol::ResidueHandle res)
   {
     counter_++;

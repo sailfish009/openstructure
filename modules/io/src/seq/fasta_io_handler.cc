@@ -92,17 +92,22 @@ void FastaIOHandler::Import(seq::SequenceList& aln,
       String error=str(format(error_msg) % line);
       throw IOException(error);
     }
-    String identifier=line.substr(1);
-    String sequence_str;
-    while (std::getline(instream, line) && line.size()>0 && line[0]!='>') {
-      if (line.find_first_not_of("\n\t ")==String::npos) {
-        continue;
+    String name=line.substr(1);
+    std::stringstream seq_string;
+    while (std::getline(instream, line)) {
+      if (!line.empty() && line[0]=='>') {
+        break;
       }
-      sequence_str+=line;
-    }
-    if (sequence_str.length()>0) {
+      for (String::iterator i=line.begin(), e=line.end(); i!=e; ++i) {
+        if (isspace(*i)) {
+          continue;
+        }
+        seq_string << *i;
+      }
+    }    
+    if (!seq_string.str().empty()) {
       try {
-        seq::SequenceHandle seq=seq::CreateSequence(identifier, sequence_str);
+        seq::SequenceHandle seq=seq::CreateSequence(name, seq_string.str());
         aln.AddSequence(seq);          
         seq_count+=1;
       } catch (seq::InvalidSequence& e) {

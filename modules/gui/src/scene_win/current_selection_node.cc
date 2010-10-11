@@ -16,18 +16,18 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QFont>
 
+#include <ost/gui/gosty_app.hh>
 #include <ost/mol/query_view_wrapper.hh>
 
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node.hh>
 
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_win/scene_win.hh>
 
 #include "current_selection_node.hh"
 
+#include <QFont>
 namespace ost { namespace gui {
 
 CurrentSelectionNode::CurrentSelectionNode(gfx::EntityP entity, SceneNode* parent):EntityPartNode("Current Selection",entity,mol::QueryViewWrapper(entity->GetSelection()),parent),wrapper_(mol::QueryViewWrapper(entity->GetSelection())){

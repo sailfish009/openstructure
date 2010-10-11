@@ -27,24 +27,21 @@ QueryViewWrapper::QueryViewWrapper():
         entity_handle_(),
         entity_view_(),
         query_(),
-        flags_(0)
-{}
+        flags_(0){}
 
 QueryViewWrapper::QueryViewWrapper(const EntityHandle& entity_handle):
     view_set_(false),
     entity_handle_(entity_handle),
     entity_view_(),
     query_(),
-    flags_(0)
-{}
+    flags_(0){}
 
 QueryViewWrapper::QueryViewWrapper(const EntityView& entity_view):
     view_set_(true),
     entity_handle_(),
     entity_view_(entity_view),
     query_(),
-    flags_(0)
-{}
+    flags_(0){}
 
 QueryViewWrapper::QueryViewWrapper(const Query& query, 
                                    const EntityHandle& entity_handle,
@@ -53,8 +50,7 @@ QueryViewWrapper::QueryViewWrapper(const Query& query,
     entity_handle_(entity_handle),
     entity_view_(),
     query_(query),
-    flags_(f)
-{}
+    flags_(0){}
 
 QueryViewWrapper::QueryViewWrapper(const Query& query, 
                                    const EntityView& view,
@@ -63,8 +59,23 @@ QueryViewWrapper::QueryViewWrapper(const Query& query,
     entity_handle_(),
     entity_view_(view),
     query_(query),
-    flags_(f)
-{}
+    flags_(0){}
+
+QueryViewWrapper::QueryViewWrapper(const Query& query, QueryFlags flags,
+                                   const EntityHandle& entity_handle):
+    view_set_(false),
+    entity_handle_(entity_handle),
+    entity_view_(),
+    query_(query),
+    flags_(flags){}
+
+QueryViewWrapper::QueryViewWrapper(const Query& query, QueryFlags flags,
+                                   const EntityView& view):
+    view_set_(true),
+    entity_handle_(),
+    entity_view_(view),
+    query_(query),
+    flags_(flags){}
 
 EntityView QueryViewWrapper::GetEntityView() const
 {
@@ -88,18 +99,14 @@ void QueryViewWrapper::SetQuery(const Query& query)
   query_ = query;
 }
 
-void QueryViewWrapper::SetQueryFlags(QueryFlags f)
-{
-  flags_=f;
+void QueryViewWrapper::SetFlags(QueryFlags flags){
+  flags_ = flags;
 }
-
-QueryFlags QueryViewWrapper::GetQueryFlags() const
-{
+QueryFlags QueryViewWrapper::GetFlags() const{
   return flags_;
 }
 
-bool QueryViewWrapper::IsDataValid() const
-{
+bool QueryViewWrapper::IsDataValid() const{
   if(view_set_){
     return entity_view_.IsValid();
   }

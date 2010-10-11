@@ -181,5 +181,17 @@ int ResidueBase::GetIntProperty(Prop::ID prop_id) const
   return Impl()->GetIntProperty(prop_id);
 }
 
+bool ResidueBase::IsProtein() const
+{
+  this->CheckValidity();
+  return Impl()->IsProtein();
+}
+
+void ResidueBase::SetIsProtein(bool protein)
+{
+  this->CheckValidity();
+  Impl()->SetProtein(protein);
+}
+
 }}
 

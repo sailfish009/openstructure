@@ -30,6 +30,9 @@
 //#include "bitmaps/rotate.xpm"
 //#include "bitmaps/arrowmove.xpm"
 
+#include "img2qt.hh"
+#include "data_viewer_panel_base.hh"
+
 #include <QResizeEvent>
 #include <QPainter>
 #include <QColor>
@@ -37,8 +40,6 @@
 #include <QPixmapCache>
 #include <ost/message.hh>
 
-#include "img2qt.hh"
-#include "data_viewer_panel_base.hh"
 
 #define USE_PIXMAP_CACHE
 
@@ -431,7 +432,7 @@ void DataViewerPanelBase::paintEvent(QPaintEvent* event)
   painter.drawPixmap(QPoint(0,0),*pixmap_);
 #endif
 
-  if(zoom_level_ >= 6 && display_pixel_values_) {
+  if(zoom_level_ >= 7 && display_pixel_values_) {
     draw_pixel_values(painter);
   }
 
@@ -554,9 +555,9 @@ void DataViewerPanelBase::mouseMoveEvent(QMouseEvent* event)
     Point max_pos=WinToPoint(vsize.width(),vsize.height());
     Point min_pos=WinToPoint(0,0);
     selection_=Extent(Point(std::max(min_pos[0],std::min(drag_start[0],mouse_pos[0])),
-                            std::max(min_pos[1],std::min(drag_start[1],mouse_pos[1]))),
+                            std::max(min_pos[1],std::min(drag_start[1],mouse_pos[1])), slab_),
                       Point(std::max(drag_start[0],std::min(max_pos[0],mouse_pos[0])),
-                            std::max(drag_start[1],std::min(max_pos[1],mouse_pos[1]))));
+                            std::max(drag_start[1],std::min(max_pos[1],mouse_pos[1])), slab_));
     if(selection_mode_>0){
       Size s=selection_.GetSize();
       int minsize=std::min<int>(s[0],s[1]);
@@ -1009,20 +1010,37 @@ void DataViewerPanelBase::draw_pixel_values(QPainter& painter)
 
   QFont fnt("Courier",(zoom_level_-6)*2+7);
   painter.setFont(fnt);
-  
-  for(int i = 0; i <= (b[0] - a[0]); ++i) {
-    for(int j = 0; j <= (b[1] - a[1]); ++j) {
-      Real pixel_value = GetObservedData().GetReal(Point(a[0]+i, 
-                                                               a[1]+j,slab_));
-      QString value_string = QString("%1").arg(pixel_value,0,'g',5);
-      Real rv = GetNormalizer()->Convert(pixel_value);
-      QPoint p = FracPointToWinCenter(geom::Vec2(static_cast<Real>(a[0]+i),
-                                                 static_cast<Real>(a[1]+j)));
-      unsigned char rgb = (rv>130.0) ? 0 : 255;
-      painter.setPen(QColor(rgb,rgb,rgb));
-      int string_h=painter.fontMetrics().height();
-      int string_w=painter.fontMetrics().width(value_string);
-      painter.drawText(p.x() - string_w/2, p.y() + string_h/2, value_string);
+  if(GetObservedData().GetType()==REAL){
+    for(int i = 0; i <= (b[0] - a[0]); ++i) {
+      for(int j = 0; j <= (b[1] - a[1]); ++j) {
+        Real pixel_value = GetObservedData().GetReal(Point(a[0]+i,
+                                                                 a[1]+j,slab_));
+        QString value_string = QString("%1").arg(pixel_value,0,'g',5);
+        Real rv = GetNormalizer()->Convert(pixel_value);
+        QPoint p = FracPointToWinCenter(geom::Vec2(static_cast<Real>(a[0]+i),
+                                                   static_cast<Real>(a[1]+j)));
+        unsigned char rgb = (rv>130.0) ? 0 : 255;
+        painter.setPen(QColor(rgb,rgb,rgb));
+        int string_h=painter.fontMetrics().height();
+        int string_w=painter.fontMetrics().width(value_string);
+        painter.drawText(p.x() - string_w/2, p.y() + string_h/2, value_string);
+      }
+    }
+  }else{
+    for(int i = 0; i <= (b[0] - a[0]); ++i) {
+      for(int j = 0; j <= (b[1] - a[1]); ++j) {
+        Complex pixel_value = GetObservedData().GetComplex(Point(a[0]+i,
+                                                                 a[1]+j,slab_));
+        QString value_string = QString("%1+i%2").arg(pixel_value.real(),0,'g',5).arg(pixel_value.imag(),0,'g',5);
+        Real rv = GetNormalizer()->Convert(abs(pixel_value));
+        QPoint p = FracPointToWinCenter(geom::Vec2(static_cast<Real>(a[0]+i),
+                                                   static_cast<Real>(a[1]+j)));
+        unsigned char rgb = (rv>130.0) ? 0 : 255;
+        painter.setPen(QColor(rgb,rgb,rgb));
+        int string_h=painter.fontMetrics().height();
+        int string_w=painter.fontMetrics().width(value_string);
+        painter.drawText(p.x() - string_w/2, p.y() + string_h/2, value_string);
+      }
     }
   }
 }

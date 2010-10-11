@@ -38,13 +38,15 @@ void export_Data()
     .value("REAL",REAL)
     .value("COMPLEX",COMPLEX)
     .value("WORD",WORD)
-    ;
+    .export_values()
+  ;
 
   enum_<DataDomain>("DataDomain")
     .value("SPATIAL",SPATIAL)
     .value("FREQUENCY",FREQUENCY)
     .value("HALF_FREQUENCY",HALF_FREQUENCY)
-    ;
+    .export_values()
+  ;
 
   // data wrapper
   void (ConstData::*apply1)(NonModAlgorithm&) const = &ConstData::Apply;
@@ -59,6 +61,7 @@ void export_Data()
 
   class_<ConstData, boost::noncopyable>("ConstData", no_init )
     .def("GetType",&ConstData::GetType)
+    .add_property("type", &ConstData::GetType)
     .def("GetDomain",&ConstData::GetDomain)
     .def("GetExtent",&ConstData::GetExtent)
     .def("GetReal",&ConstData::GetReal)
@@ -66,9 +69,18 @@ void export_Data()
     .def("Apply",apply1)
     .def("GetSize",&ConstData::GetSize)
     .def("IsSpatial",&ConstData::IsSpatial)
+    .add_property("is_spatial", &ConstData::IsSpatial)
+    .add_property("is_frequency", &ConstData::IsSpatial)
+    .add_property("size", &ConstData::GetSize)
+    .add_property("domain", &ConstData::GetDomain)
+    .add_property("extent", &ConstData::GetExtent)
+    .add_property("pixel_sampling", &ConstData::GetPixelSampling)
+    .add_property("spatial_sampling", &ConstData::GetSpatialSampling)
+    .add_property("frequency_sampling", &ConstData::GetFrequencySampling)    
     .def("IsFrequency",&ConstData::IsFrequency)
     .def("GetPixelSampling",&ConstData::GetPixelSampling)
     .def("GetSpatialSampling",&ConstData::GetSpatialSampling)
+
     .def("GetFrequencySampling",&ConstData::GetFrequencySampling)
     //.def("IndexToCoord",&ConstData::IndexToCoord)
     //.def("CoordToindex",&ConstData::CoordToIndex)
@@ -91,5 +103,7 @@ void export_Data()
     .def("SetPixelSampling",setpixelsampling1)
     .def("SetSpatialSampling",setspatialsampling0)
     .def("SetSpatialSampling",setspatialsampling1)
-    ;
+    .add_property("spatial_origin", &Data::GetSpatialOrigin, 
+                  &Data::SetSpatialOrigin)
+  ;
 }

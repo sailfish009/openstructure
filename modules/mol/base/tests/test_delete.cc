@@ -65,20 +65,16 @@ struct Fixture {
   AtomHandle ad;
   TorsionHandle t;
 };
-void test_atom_delete() {
+
+BOOST_AUTO_TEST_SUITE( mol_base )
+
+BOOST_AUTO_TEST_CASE(atom_delete) 
+{
   Fixture f;
   XCSEditor e=f.e.RequestXCSEditor();
   e.DeleteAtom(f.ab);
   E ev;
   BOOST_CHECK_NO_THROW(f.e.Apply(ev));
-
-}
-
-BOOST_AUTO_TEST_SUITE( mol_base )
-
-BOOST_AUTO_TEST_CASE(test_atom_delete) 
-{
-  test_atom_delete();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

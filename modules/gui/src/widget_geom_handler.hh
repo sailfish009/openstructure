@@ -19,10 +19,10 @@
 #ifndef OST_GUI_WIDGET_GEOM_HANDLER_HH
 #define OST_GUI_WIDGET_GEOM_HANDLER_HH
 
-#include <QWidget>
 
 #include <ost/gui/module_config.hh>
 
+#include <QWidget>
 namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI WidgetGeomHandler: public QObject{

@@ -20,7 +20,6 @@
   Author: Andreas Schenk
  */
 
-
 #include "dir_model.hh"
 
 

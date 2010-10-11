@@ -16,13 +16,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QVBoxLayout>
-#include <QDir>
-#include <QHeaderView>
-#include <QFileInfo>
-#include <QMessageBox>
-#include <QApplication>
 
+#include <ost/gui/gosty_app.hh>
 #include <ost/platform.hh>
 #include <ost/config.hh>
 #include <ost/mol/mol.hh>
@@ -34,10 +29,10 @@
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/scene.hh>
 
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
-#include <ost/gui/panel_bar/panels.hh>
+#include <ost/gui/panels/panel_manager.hh>
 #include <ost/gui/file_loader.hh>
+#include <ost/gui/file_viewer.hh>
 
 #include <ost/gui/python_shell/python_interpreter.hh>
 
@@ -50,48 +45,74 @@
 #include "widget_registry.hh"
 #include "file_browser.hh"
 
+#include <QCoreApplication>
+#include <QCursor>
+#include <QVBoxLayout>
+#include <QDesktopServices>
+#include <QDir>
+#include <QFileInfo>
+#include <QUrl>
+
 namespace ost { namespace gui {
 
 FileBrowser::FileBrowser(QWidget* parent):
- Widget(NULL, parent)
+ Widget(NULL, parent),
+ menu_(new QComboBox(this)),
+ model_(new QDirModel),
+ view_(new QListView(this)),
+ action_list_()
 {
   QString path=QDir::currentPath();
+  QDir dir(QCoreApplication::applicationDirPath());
 # if defined(_MSC_VER)
-    QDir dir(QCoreApplication::applicationDirPath());
     dir.cdUp();
     dir.cdUp();
     path=dir.path();
-    QString example_path=path+"/share/openstructure/examples/entity";
+    QString example_path=path+"/share/openstructure/examples/";
     if (QDir(example_path).exists()) {
       path=example_path;
     } 
 # elif defined(__APPLE__)
   if (path.contains("DNG.app") || path=="/") {
-    QString example_path="/Applications/OpenStructure/Examples/entity";    
+    QString example_path="/Applications/OpenStructure/Examples/";
     if (QDir(example_path).exists()) {
       path=example_path;
-    }    
+    }    else{
+      dir.cdUp();
+      example_path=dir.path()+"/examples";
+      if (QDir(example_path).exists()) {
+        path=example_path;
+      }
+    }
+  }
+# else
+  QString example_path=path+"/share/openstructure/examples/";
+  if (QDir(example_path).exists()) {
+    path=example_path;
   }
 #endif
   this->Init(path);
 }
 
 FileBrowser::FileBrowser(const QString& path, QWidget* parent):
- Widget(NULL, parent)
+ Widget(NULL, parent),
+ menu_(new QComboBox(this)),
+ model_(new QDirModel),
+ view_(new QListView(this)),
+ action_list_()
 {
   this->Init(path);
 }
 
 void FileBrowser::Init(const QString& path)
 {
-  model_=new QDirModel;
   model_->setSorting(QDir::Name|QDir::DirsFirst|QDir::IgnoreCase);
 
-  view_=new QListView(this);
   view_->setModel(model_);
   view_->setRootIndex(model_->index(path));
   view_->setAttribute(Qt::WA_MacShowFocusRect, false);
-  menu_= new QComboBox(this);
+  view_->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(view_,SIGNAL(customContextMenuRequested(const QPoint&)),this,SLOT(ShowContextMenu(const QPoint&)));
   UpdateMenu(path);
 
   QVBoxLayout* l=new QVBoxLayout(this);
@@ -137,13 +158,7 @@ bool FileBrowser::Restore(const QString& prefix)
 
 void FileBrowser::DoubleClicked(const QModelIndex& index)
 {
-  if(model_->isDir(index)){
-    view_->setRootIndex(index);
-    UpdateMenu(model_->filePath(index));
-  }
-  else{
-    LoadObject(index);
-  }
+  LoadObject(index);
 }
 
 void FileBrowser::ChangeToParentDirectory(int index){
@@ -176,7 +191,7 @@ void FileBrowser::UpdateMenu(const QString& path){
 }
 
 void FileBrowser::Split(){
-  Panels* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
+  PanelManager* panels = GostyApp::Instance()->GetPerspective()->GetPanels();
   QString current_path = model_->filePath(view_->rootIndex());
   Widget* new_file_browser = new FileBrowser(current_path);
   panels->MoveNextTo(qobject_cast<Widget*>(this), new_file_browser);
@@ -193,10 +208,15 @@ void FileBrowser::AddItem(const QDir& directory, const QString& mypath){
 }
 
 void FileBrowser::LoadObject(const QModelIndex& index){
-  gfx::GfxObjP obj;
   if (index.isValid()) {
-    QString file_name=model_->filePath(index);
-    FileLoader::LoadObject(file_name);
+    if(model_->isDir(index)){
+      view_->setRootIndex(index);
+      UpdateMenu(model_->filePath(index));
+    }
+    else{
+      QString file_name=model_->filePath(index);
+      FileLoader::LoadObject(file_name);
+    }
   }
 }
 
@@ -204,6 +224,55 @@ void FileBrowser::keyPressEvent(QKeyEvent* event){
   if (event->key() == Qt::Key_F5) {
     model_->refresh();
   }
+}
+
+void FileBrowser::ShowContextMenu(const QPoint& pos){
+
+  QModelIndex index = view_->selectionModel()->currentIndex();
+  QMenu* menu = new QMenu(this);
+  if(model_->isDir(index)){
+    QAction* open_action = new QAction(menu);
+    open_action->setText("Open");
+    connect(open_action,SIGNAL(triggered(bool)),this,SLOT(LoadCurrentObject()));
+    menu->addAction(open_action);
+  }
+  if(!model_->isDir(index)){
+    QAction* load_action = new QAction(menu);
+    load_action->setText("Load");
+    connect(load_action,SIGNAL(triggered(bool)),this,SLOT(LoadCurrentObject()));
+    menu->addAction(load_action);
+    QAction* system_open_action = new QAction(menu);
+    if(model_->filePath(index).endsWith(".py")){
+      system_open_action->setText("Show source");
+      connect(system_open_action,SIGNAL(triggered(bool)),this,SLOT(LoadWithSourceViewer()));
+    }
+    else{
+      system_open_action->setText("Open with system default");
+      connect(system_open_action,SIGNAL(triggered(bool)),this,SLOT(LoadWithSystemEditor()));
+    }
+    menu->addAction(system_open_action);
+  }
+  if(menu->actions().size()>0){
+    menu->exec(QCursor::pos());
+  }
+}
+
+void FileBrowser::LoadCurrentObject(){
+  QModelIndex index = view_->selectionModel()->currentIndex();
+  this->LoadObject(index);
+}
+
+void FileBrowser::LoadWithSystemEditor(){
+  QModelIndex index = view_->selectionModel()->currentIndex();
+  QString file_name=model_->filePath(index);
+  QDesktopServices::openUrl(QUrl::fromLocalFile(file_name));
+}
+
+void FileBrowser::LoadWithSourceViewer(){
+  QModelIndex index = view_->selectionModel()->currentIndex();
+  QString file_name=model_->filePath(index);
+  FileViewer* file_viewer = new FileViewer(file_name);
+  file_viewer->show();
 }
 
 OST_REGISTER_WIDGET_WITH_DEFAULT_FACTORY(ost::gui, FileBrowser, "File Browser");  

@@ -22,7 +22,7 @@ class OstOptionParser(optparse.OptionParser):
 parser=OstOptionParser(usage=usage,conflict_handler="resolve")
 parser.add_option("-i", "--interactive", action="callback", callback=interactive_flag, help="start interpreter interactively (must be first parameter, ignored otherwise)")
 parser.add_option("-h", "--help", action="callback", callback=show_help, help="show this help message and exit")
-parser.add_option("-v", "--verbosity_level", action="store", type="int", dest="vlevel", default=0, help="sets the verbosity level [default: %default]")
+parser.add_option("-v", "--verbosity_level", action="store", type="int", dest="vlevel", default=2, help="sets the verbosity level [default: %default]")
 parser.disable_interspersed_args()
 (options, args) = parser.parse_args()
 
@@ -60,6 +60,14 @@ if os.path.exists(_ostrc):
     exec(open(_ostrc))
   except Exception, e:
     print e
+else:
+  rcfile=open(_ostrc,"w")
+  print >> rcfile, '# This python file is parsed by ost and dng at startup'
+  print >> rcfile, '# Its content is be made available in the global namespace'
+  print >> rcfile, '# It can be used to define custom variables and functions'
+  print >> rcfile, '# For example:'
+  print >> rcfile, '# IMPORTANT_DIR="path/to/important/dir"'
+  rcfile.close()
 
 PushVerbosityLevel(options.vlevel)
 

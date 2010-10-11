@@ -92,7 +92,7 @@ class SimpleWidget(RenderModeWidget):
   def UpdateLineWidth(self, value):
     self.GetOptions().SetLineWidth(value)
     self.ApplyOptions()
-
+    
   def UpdateBO(self, value):
     self.GetOptions().SetBondOrderFlag(value)
     self.ApplyOptions()

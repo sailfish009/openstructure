@@ -51,17 +51,17 @@ void Gutter::paintEvent(QPaintEvent* paint_event)
   painter.fillRect(paint_event->rect(), QBrush(Qt::lightGray));
   for (GutterBlockList::const_iterator it=blocks.begin(); 
        it!=blocks.end(); ++it) {
-    if (it->type == BLOCKTYPE_ACTIVE) {
+    if (it->type & BLOCKTYPE_ACTIVE) {
       QColor green(Qt::green);
       painter.setPen(QPen(green.darker(), 3));
-    }else  if (it->type == BLOCKTYPE_BLOCKEDIT) {
+    }else  if (it->type & BLOCKTYPE_BLOCKEDIT) {
         painter.setPen(QPen(Qt::yellow, 3));
-    }else  if (it->type == BLOCKTYPE_CODE) {
+    }else  if (it->type & BLOCKTYPE_CODE) {
         QColor green(Qt::green);
         painter.setPen(QPen(green.darker(), 1));
-    } else if (it->type == BLOCKTYPE_OUTPUT) {
+    } else if (it->type & BLOCKTYPE_OUTPUT) {
       painter.setPen(QPen(Qt::blue, 1));
-    } else if (it->type == BLOCKTYPE_ERROR) {
+    } else if (it->type & BLOCKTYPE_ERROR) {
       painter.setPen(QPen(Qt::red, 1));
     } else {
       painter.setPen(QPen(Qt::black, 1));

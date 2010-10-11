@@ -17,6 +17,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/stdint.hh>
 #include <boost/shared_array.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -34,11 +35,33 @@ namespace ost { namespace io {
 
 String DAT::FORMAT_STRING = "defined_dat";
 
-DAT::DAT(bool normalize_on_save, Endianess end):
-    ImageFormatBase(FORMAT_STRING)
+DAT::DAT(bool normalize_on_save, Format bit_depth, bool sign, Endianess end):
+    ImageFormatBase(FORMAT_STRING),
+    normalize_on_save_(normalize_on_save),
+    bit_depth_(bit_depth),
+    signed_(sign),
+    endianness_(end)
 {
-    normalize_on_save_ = normalize_on_save;
-    endianness_ = end;
+}
+
+Format DAT::GetBitDepth() const
+{
+  return bit_depth_;
+}
+
+void DAT::SetBitDepth (Format bitdepth)
+{
+  bit_depth_ = bitdepth;
+}
+
+bool DAT::GetSigned () const
+{
+  return signed_;
+}
+
+void DAT::SetSigned (bool sign)
+{
+  signed_ = sign;
 }
 
 Endianess DAT::GetEndianess() const
@@ -92,7 +115,7 @@ void MapIODatHandler::Import(img::MapHandle& sh, const boost::filesystem::path& 
   infile.close();
 }
 
-template <int CONVERSIONTYPE>
+template <int CONVERSIONTYPE,typename DATATYPE>
 void real_filler(img::MapHandle& sh, std::istream& file)
 {
   BinaryIStream<CONVERSIONTYPE> file_bin(file);
@@ -101,7 +124,7 @@ void real_filler(img::MapHandle& sh, std::istream& file)
   img::Progress::Instance().Register(&this_dummy,size[1],100);
   for(unsigned int row=0;row<size[1];row++) {
     for(unsigned int column=0;column<size[0];column++) {
-      short value;
+      DATATYPE value;
       file_bin >> value;
       sh.SetReal(img::Point(column,row),static_cast<Real>(value));
     }
@@ -110,7 +133,7 @@ void real_filler(img::MapHandle& sh, std::istream& file)
   img::Progress::Instance().DeRegister(&this_dummy);
 }
 
-template <int CONVERSIONTYPE>
+template <int CONVERSIONTYPE,typename DATATYPE>
 void real_dumper(const img::MapHandle& sh, std::ostream& file, const DAT& formatdat)
 {
   BinaryOStream<CONVERSIONTYPE> file_bin(file);
@@ -124,7 +147,7 @@ void real_dumper(const img::MapHandle& sh, std::ostream& file, const DAT& format
     for(unsigned int row=0;row<size[1];row++) {
       for(unsigned int column=0;column<size[0];column++)
       {
-        file_bin << static_cast<short>(norm.Convert(sh.GetReal(img::Point(column,row))));
+        file_bin << static_cast<DATATYPE>(norm.Convert(sh.GetReal(img::Point(column,row))));
       }
       img::Progress::Instance().AdvanceProgress(&this_dummy);
     }
@@ -151,21 +174,168 @@ void MapIODatHandler::Import(img::MapHandle& sh, std::istream& file, const Image
   uint  filesize = end-start;
   file.seekg(curr_pos,std::ios::beg);
 
-  unsigned int size=static_cast<unsigned int>(sqrt(filesize/2.0));
+  double datasize=1.0;
+  switch(formatdat.GetBitDepth()){
+  case OST_BIT8_FORMAT:
+  case OST_DEFAULT_FORMAT:
+    datasize=1.0;
+    break;
+  case OST_BIT16_FORMAT:
+    datasize=2.0;
+    break;
+  case OST_BIT32_FORMAT:
+    datasize=4.0;
+    break;
+  case OST_FLOAT_FORMAT:
+    datasize=sizeof(float);
+    break;
+  case OST_DOUBLE_FORMAT:
+    datasize=sizeof(double);
+    break;
+  }
+  unsigned int size=static_cast<unsigned int>(sqrt(filesize/datasize));
    // default origin is top-left
   sh.Reset(img::Extent(img::Point(0,0),img::Size(size,size)), img::REAL, img::SPATIAL);
 
-  switch(formatdat.GetEndianess()) {
-  case OST_BIG_ENDIAN:
-    real_filler<OST_BIG_ENDIAN>(sh,file);
-    break;
-  case OST_LITTLE_ENDIAN:
-    real_filler<OST_LITTLE_ENDIAN>(sh,file);
-    break;
-  case OST_VAX_DATA:
-    real_filler<OST_VAX_DATA>(sh,file);
-    break;
- }
+  if(formatdat.GetSigned()){
+    switch(formatdat.GetBitDepth()){
+    case OST_BIT8_FORMAT:
+    case OST_DEFAULT_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_filler<OST_BIG_ENDIAN,int8_t>(sh,file);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_filler<OST_LITTLE_ENDIAN,int8_t>(sh,file);
+        break;
+      case OST_VAX_DATA:
+        real_filler<OST_VAX_DATA,int8_t>(sh,file);
+        break;
+      }
+      break;
+    case OST_BIT16_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_filler<OST_BIG_ENDIAN,int16_t>(sh,file);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_filler<OST_LITTLE_ENDIAN,int16_t>(sh,file);
+        break;
+      case OST_VAX_DATA:
+        real_filler<OST_VAX_DATA,int16_t>(sh,file);
+        break;
+      }
+      break;
+    case OST_BIT32_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_filler<OST_BIG_ENDIAN,int32_t>(sh,file);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_filler<OST_LITTLE_ENDIAN,int32_t>(sh,file);
+        break;
+      case OST_VAX_DATA:
+        real_filler<OST_VAX_DATA,int32_t>(sh,file);
+        break;
+      }
+      break;
+    case OST_FLOAT_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_filler<OST_BIG_ENDIAN,float>(sh,file);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_filler<OST_LITTLE_ENDIAN,float>(sh,file);
+        break;
+      case OST_VAX_DATA:
+        real_filler<OST_VAX_DATA,float>(sh,file);
+        break;
+      }
+      break;
+    case OST_DOUBLE_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_filler<OST_BIG_ENDIAN,double>(sh,file);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_filler<OST_LITTLE_ENDIAN,double>(sh,file);
+        break;
+      case OST_VAX_DATA:
+        real_filler<OST_VAX_DATA,double>(sh,file);
+        break;
+      }
+      break;
+    }
+  }else{
+    switch(formatdat.GetBitDepth()){
+    case OST_BIT8_FORMAT:
+    case OST_DEFAULT_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_filler<OST_BIG_ENDIAN,uint8_t>(sh,file);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_filler<OST_LITTLE_ENDIAN,uint8_t>(sh,file);
+        break;
+      case OST_VAX_DATA:
+        real_filler<OST_VAX_DATA,uint8_t>(sh,file);
+        break;
+      }
+      break;
+    case OST_BIT16_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_filler<OST_BIG_ENDIAN,uint16_t>(sh,file);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_filler<OST_LITTLE_ENDIAN,uint16_t>(sh,file);
+        break;
+      case OST_VAX_DATA:
+        real_filler<OST_VAX_DATA,uint16_t>(sh,file);
+        break;
+      }
+      break;
+    case OST_BIT32_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_filler<OST_BIG_ENDIAN,uint32_t>(sh,file);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_filler<OST_LITTLE_ENDIAN,uint32_t>(sh,file);
+        break;
+      case OST_VAX_DATA:
+        real_filler<OST_VAX_DATA,uint32_t>(sh,file);
+        break;
+      }
+      break;
+    case OST_FLOAT_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_filler<OST_BIG_ENDIAN,float>(sh,file);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_filler<OST_LITTLE_ENDIAN,float>(sh,file);
+        break;
+      case OST_VAX_DATA:
+        real_filler<OST_VAX_DATA,float>(sh,file);
+        break;
+      }
+      break;
+    case OST_DOUBLE_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_filler<OST_BIG_ENDIAN,double>(sh,file);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_filler<OST_LITTLE_ENDIAN,double>(sh,file);
+        break;
+      case OST_VAX_DATA:
+        real_filler<OST_VAX_DATA,double>(sh,file);
+        break;
+      }
+      break;
+    }
+  }
 }
 
 void MapIODatHandler::Export(const img::MapHandle& mh2,
@@ -197,17 +367,145 @@ void MapIODatHandler::Export(const img::MapHandle& sh, std::ostream& file,const 
     throw IOException("DAT IO: Dat format only supports square 2D images");
   }
 
-  switch(formatdat.GetEndianess()) {
-  case OST_BIG_ENDIAN:
-    real_dumper<OST_BIG_ENDIAN>(sh,file,formatdat);
-    break;
-  case OST_LITTLE_ENDIAN:
-    real_dumper<OST_LITTLE_ENDIAN>(sh,file,formatdat);
-    break;
-  case OST_VAX_DATA:
-    real_dumper<OST_VAX_DATA>(sh,file,formatdat);
-    break;
- }
+  if(formatdat.GetSigned()){
+    switch(formatdat.GetBitDepth()){
+    case OST_BIT8_FORMAT:
+    case OST_DEFAULT_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_dumper<OST_BIG_ENDIAN,int8_t>(sh,file,formatdat);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_dumper<OST_LITTLE_ENDIAN,int8_t>(sh,file,formatdat);
+        break;
+      case OST_VAX_DATA:
+        real_dumper<OST_VAX_DATA,int8_t>(sh,file,formatdat);
+        break;
+      }
+      break;
+    case OST_BIT16_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_dumper<OST_BIG_ENDIAN,int16_t>(sh,file,formatdat);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_dumper<OST_LITTLE_ENDIAN,int16_t>(sh,file,formatdat);
+        break;
+      case OST_VAX_DATA:
+        real_dumper<OST_VAX_DATA,int16_t>(sh,file,formatdat);
+        break;
+      }
+      break;
+    case OST_BIT32_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_dumper<OST_BIG_ENDIAN,int32_t>(sh,file,formatdat);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_dumper<OST_LITTLE_ENDIAN,int32_t>(sh,file,formatdat);
+        break;
+      case OST_VAX_DATA:
+        real_dumper<OST_VAX_DATA,int32_t>(sh,file,formatdat);
+        break;
+      }
+      break;
+    case OST_FLOAT_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_dumper<OST_BIG_ENDIAN,float>(sh,file,formatdat);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_dumper<OST_LITTLE_ENDIAN,float>(sh,file,formatdat);
+        break;
+      case OST_VAX_DATA:
+        real_dumper<OST_VAX_DATA,float>(sh,file,formatdat);
+        break;
+      }
+      break;
+    case OST_DOUBLE_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_dumper<OST_BIG_ENDIAN,double>(sh,file,formatdat);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_dumper<OST_LITTLE_ENDIAN,double>(sh,file,formatdat);
+        break;
+      case OST_VAX_DATA:
+        real_dumper<OST_VAX_DATA,double>(sh,file,formatdat);
+        break;
+      }
+      break;
+    }
+  }else{
+    switch(formatdat.GetBitDepth()){
+    case OST_BIT8_FORMAT:
+    case OST_DEFAULT_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_dumper<OST_BIG_ENDIAN,int8_t>(sh,file,formatdat);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_dumper<OST_LITTLE_ENDIAN,int8_t>(sh,file,formatdat);
+        break;
+      case OST_VAX_DATA:
+        real_dumper<OST_VAX_DATA,int8_t>(sh,file,formatdat);
+        break;
+      }
+      break;
+    case OST_BIT16_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_dumper<OST_BIG_ENDIAN,int16_t>(sh,file,formatdat);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_dumper<OST_LITTLE_ENDIAN,int16_t>(sh,file,formatdat);
+        break;
+      case OST_VAX_DATA:
+        real_dumper<OST_VAX_DATA,int16_t>(sh,file,formatdat);
+        break;
+      }
+      break;
+    case OST_BIT32_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_dumper<OST_BIG_ENDIAN,int32_t>(sh,file,formatdat);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_dumper<OST_LITTLE_ENDIAN,int32_t>(sh,file,formatdat);
+        break;
+      case OST_VAX_DATA:
+        real_dumper<OST_VAX_DATA,int32_t>(sh,file,formatdat);
+        break;
+      }
+      break;
+    case OST_FLOAT_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_dumper<OST_BIG_ENDIAN,float>(sh,file,formatdat);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_dumper<OST_LITTLE_ENDIAN,float>(sh,file,formatdat);
+        break;
+      case OST_VAX_DATA:
+        real_dumper<OST_VAX_DATA,float>(sh,file,formatdat);
+        break;
+      }
+      break;
+    case OST_DOUBLE_FORMAT:
+      switch(formatdat.GetEndianess()) {
+      case OST_BIG_ENDIAN:
+        real_dumper<OST_BIG_ENDIAN,double>(sh,file,formatdat);
+        break;
+      case OST_LITTLE_ENDIAN:
+        real_dumper<OST_LITTLE_ENDIAN,double>(sh,file,formatdat);
+        break;
+      case OST_VAX_DATA:
+        real_dumper<OST_VAX_DATA,double>(sh,file,formatdat);
+        break;
+      }
+      break;
+    }
+  }
 }
 
 }} // namespaces

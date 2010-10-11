@@ -16,15 +16,15 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+#include <ost/gui/gosty_app.hh>
+#include <ost/mol/query_view_wrapper.hh>
+#include <ost/gui/tools/tool_manager.hh>
+#include "tool_bar.hh"
+
 #include <QAction>
 #include <QDebug>
 #include <QActionGroup>
-
-#include <ost/mol/query_view_wrapper.hh>
-#include <ost/gui/tools/tool_manager.hh>
-#include <ost/gui/gosty_app.hh>
-#include "tool_bar.hh"
-
 namespace ost { namespace gui {
 
 ToolBar::ToolBar(QWidget* parent):

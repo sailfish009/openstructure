@@ -97,12 +97,7 @@ InfoImpl::InfoImpl(const String& fname):
   document_("EMDataInfo"),
   def_list_()
 {
-  QFile file(QS(fname));
-  if (!document_.setContent(&file)) {
-    file.close();
-    throw(InfoError("QDomDocument.setContent failed"));
-  }
-  file.close();
+  Import(fname);
 }
 
 RootPtr InfoImpl::Copy() const
@@ -117,9 +112,34 @@ void InfoImpl::Import(const String& fname)
 {
   document_=QDomDocument("EMDataInfo");
   QFile file(QS(fname));
-  if (!document_.setContent(&file)) {
+  if(!file.exists()){
     file.close();
-    throw(InfoError("QDomDocument.setContent failed"));
+    throw(InfoError("File: "+fname+" doesn't exist."));
+  }
+  QString errormessage;
+  int errorline,errorcolumn;
+  if (!document_.setContent(&file,&errormessage,&errorline,&errorcolumn)) {
+    file.close();
+    if(file.error()){
+      switch(file.error()){
+      case QFile::ReadError:
+        throw(InfoError("Error while reading file: "+fname));
+        break;
+      case QFile::OpenError:
+        throw(InfoError("File: "+fname+" could not be opened."));
+        break;
+      case QFile::PermissionsError:
+        throw(InfoError("Permission error accessing file: "+fname));
+        break;
+      default:
+        throw(InfoError("Unspecified error while accessing file: "+fname));
+        break;
+      }
+    }else{
+      std::ostringstream stream;
+      stream << "Error while accessing file " << fname << ": " << errormessage.toStdString() << " in line " << errorline << " column " << errorcolumn;
+      throw(InfoError(stream.str()));
+    }
   }
   file.close();
 }

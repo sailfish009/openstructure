@@ -16,55 +16,48 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_PYTHON_SHELL_WIDGET_HH
-#define OST_GUI_PYTHON_SHELL_WIDGET_HH
-
 /*
   Authors: Marco Biasini, Andreas Schenk
  */
 
+
+#ifndef OST_GUI_PYTHON_SHELL_WIDGET_HH
+#define OST_GUI_PYTHON_SHELL_WIDGET_HH
+
+
 #include <ost/gui/module_config.hh>
-
-
 #include "python_interpreter.hh"
 #include "shell_history.hh"
 #include  "python_shell_fw.hh"
-
 #include "python_syntax_highlighter.hh"
+#include "state_machine.hh"
+#include "state.hh"
 
 #include <QPlainTextEdit>
-
+#include <QHash>
 namespace ost { namespace gui {
 
 // fw decl
 class Gutter;
 class PythonCompleter;
 class PathCompleter;
-class TextLogger;
 
-typedef enum {
-  // to execute a command, the command must end with an empty line, or
-  // Cmd+Return must be pressed
-  SHELL_INTERACTION_MATHEMATICA=0,
-  // to execute a command, a single return key press is sufficient. Cmd+Return
-  // starts newline. This mode is the default
-  SHELL_INTERACTION_BASH=1
-} ShellInteractionMode;
 
 class DLLEXPORT_OST_GUI PythonShellWidget : public QPlainTextEdit {
+
+  typedef QHash<unsigned int,QTextBlock> OutputBlockList;
   Q_OBJECT
+
 public:
   PythonShellWidget(QWidget* parent=NULL);
   GutterBlockList GetGutterBlocks(const QRect& rect);
-  void SetOutputVisible(bool flag=true);
-  
-  void AddLogger(TextLogger* logger);
-  
-  void SetInteractionMode(ShellInteractionMode mode);
-
   void SetTabWidth(int width);
   int GetTabWidth() const;
+  QString GetCommand();
+  QTextBlock GetEditStartBlock();
+
   int tab_width_;
+
 signals:
   void Execute(const QString& command);
   void RequestCompletion(const QRect& rect,bool inline_completion);
@@ -74,30 +67,41 @@ signals:
 
 public slots:
   void InsertCompletion(const QString& completion);
-  void AppendOutput(int status,const QString& output);
-  void AquireFocus();
+  void InsertPathCompletion(const QString& completion);
+  void AppendOutput(unsigned int id,const QString& output);
+  void AppendError(unsigned int id,const QString& output);
+  void OutputFinished(unsigned int id, bool error);
   void Complete(bool inline_completion=true);
   void Recomplete(const QString& completion);
+  // slots for state machine
+  void OnSingleLineStateEntered();
+  void OnMultiLineActiveStateEntered();
+  void OnMultiLineInactiveStateEntered();
+  void OnHistoryUpStateEntered();
+  void OnHistoryDownStateEntered();
+  void OnExecuteStateEntered();
+  void OnEnterTransition();
+  void OnKeypadEnterTransition();
+  void OnReadonlyEntered();
+  void OnReadwriteEntered();
+  void OnMixedToReadwrite();
 
 protected:
   virtual void mouseReleaseEvent (QMouseEvent* event );
   virtual void keyPressEvent (QKeyEvent* event );
   virtual void resizeEvent(QResizeEvent* event);
   virtual void showEvent(QShowEvent* event);
-
-  void WrapIntoFunction(const QString& command);
-  void SetCommand(const QString& command);
-  QString GetCommand();
-  void insertFromMimeData( const QMimeData * source );
-  void SanitizeCursorPosition();
-  void SetBlockEditMode(BlockEditMode flag);
-  
-  bool HandleNav(QKeyEvent* event);
-  bool HandleCompletion(QKeyEvent* event);
-  bool HandleCustomCommands(QKeyEvent* event);
-  bool HandleReturnKey(QKeyEvent* event);
-  BlockEditMode GetBlockEditMode();
-  void ExecuteCommand();
+  virtual void insertFromMimeData( const QMimeData * source );
+  void set_output_visible_(bool flag=true);
+  void setup_readonly_state_machine_();
+  void setup_state_machine_();
+  void wrap_into_function_(const QString& command);
+  void set_command_(const QString& command);
+  void set_block_edit_mode_(BlockEditMode flag);
+  bool handle_completion_(QKeyEvent* event);
+  bool handle_custom_commands_(QKeyEvent* event);
+  BlockEditMode get_block_edit_mode_();
+  void set_block_type_(const QTextBlock& start,const QTextBlock& end, BlockType type);
 
   PythonSyntaxHighlighter highlighter_;
   PythonCompleter* completer_;
@@ -108,8 +112,12 @@ protected:
   bool output_visible_;
   int completion_start_;
   int completion_end_;
-  std::vector<TextLogger*>  loggers_;  
-  ShellInteractionMode mode_;  
+  QTextBlock block_edit_start_;
+  OutputBlockList output_blocks_;
+  StateMachine* machine_;
+  StateMachine* readonly_machine_;
+  State* readwrite_state_;
+  State* multiline_active_state_;
 };
 
 }}//ns

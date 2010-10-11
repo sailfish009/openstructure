@@ -153,9 +153,6 @@ public:
   */
   ImageHandle Copy(bool cc=true) const;
 
-  //! DEPRECATED
-  ImageHandle Copy(const Extent& e) const;
-
   //! return a handle to a new image containing a partial copy
   /*!
     The returning domain will match the type (ie REAL or COMPLEX), 
@@ -560,9 +557,6 @@ public:
   //@{
   //! see ImageHandle::Copy(bool)
   ImageHandle Copy(bool cc=true) const;
-
-  //! DEPRECATED
-  ImageHandle Copy(const Extent& e) const;
 
   //! see ImageHandle::Copy(const Extent&)
   ImageHandle Extract(const Extent& e) const;

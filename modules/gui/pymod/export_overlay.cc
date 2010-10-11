@@ -47,7 +47,7 @@ void plo_add2(PointlistOverlay& plo, const PointList& p)
   plo.Add(p);
 }
 
-/*void plo_add3(PointlistOverlay& plo, const Point& p, double scale)
+void plo_add3(PointlistOverlay& plo, const Point& p, double scale)
 {
   plo.Add(p,scale);
 }
@@ -56,7 +56,7 @@ void plo_add4(PointlistOverlay& plo, const PointList& p, double scale)
 {
   plo.Add(p,scale);
 }
-*/
+
 QColor qcolor_from_pyobj(boost::python::object& obj)
 {
 return QColor(boost::python::extract<int>(obj.attr("red")()),
@@ -64,7 +64,7 @@ return QColor(boost::python::extract<int>(obj.attr("red")()),
               boost::python::extract<int>(obj.attr("blue")()));
 }
 
-/*void set_active_color(PointlistOverlayBase& plo,boost::python::object& obj)
+void set_active_color(PointlistOverlayBase& plo,boost::python::object& obj)
 {
   QColor color=qcolor_from_pyobj(obj);
   plo.SetActiveColor(color);
@@ -73,7 +73,7 @@ void set_passive_color(PointlistOverlayBase& plo,boost::python::object& obj)
 {
   QColor color=qcolor_from_pyobj(obj);
   plo.SetPassiveColor(color);
-}*/
+}
 
 }//ns
 
@@ -94,16 +94,16 @@ void export_overlay()
     .def("GetSymbolShape",&PointlistOverlayBase::GetSymbolShape)
     .def("SetCrosshair",&PointlistOverlayBase::SetCrosshair)
     .def("GetCrosshair",&PointlistOverlayBase::GetCrosshair)
-   // .def("SetActiveColor",set_active_color)
-  //  .def("SetPassiveColor",set_passive_color)
+    .def("SetActiveColor",set_active_color)
+    .def("SetPassiveColor",set_passive_color)
     ;
 
   class_<PointlistOverlay,bases<PointlistOverlayBase>,boost::noncopyable>("PointlistOverlay",init<optional<const String&> >())
     .def(init<const PointList&,optional<const String&> >())
     .def("Add",plo_add1)
     .def("Add",plo_add2)
- //   .def("Add",plo_add3)
- //   .def("Add",plo_add4)
+    .def("Add",plo_add3)
+    .def("Add",plo_add4)
     .def("Remove",&PointlistOverlay::Remove)
     .def("Clear",&PointlistOverlay::Clear)
     ;
@@ -118,8 +118,8 @@ void export_overlay()
     .def("ClearMask",&MaskOverlay::ClearMask)
     .def("GetShift",&MaskOverlay::GetShift)
     .def("ClearShift",&MaskOverlay::ClearShift)
-   // .def("SetShift",&MaskOverlay::SetShift)
-   // .def("ApplyShiftToMask",&MaskOverlay::ApplyShiftToMask)
+    .def("SetShift",&MaskOverlay::SetShift)
+    .def("ApplyShiftToMask",&MaskOverlay::ApplyShiftToMask)
     ;
 
 /*  class_<Gauss2DOverlay,bases<Overlay>,boost::noncopyable>("Gauss2DOverlay",init<const alg::ParamsGauss2D&>())

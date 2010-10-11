@@ -28,7 +28,8 @@ from toolbar_options_widget import ToolBarOptionsWidget
 from render_options_widget import RenderOptionsWidget
 from color_options_widget import ColorOptionsWidget
 from ost.gui.scene.scene_observer_impl import SceneObserverImpl
-from preset_widget import PresetWidget
+from map_level_widget import AdditionalSettingsWidget
+from scene_selection_helper import SelHelper
 
 class InspectorWidget(ToolBarOptionsWidget):
   ICONS_PATH = os.path.join(ost.GetSharedDataPath(), "scene", "icons/")
@@ -38,7 +39,7 @@ class InspectorWidget(ToolBarOptionsWidget):
     options = [
                 [InspectorWidget.ICONS_PATH+"render_icon.png",RenderOptionsWidget(self),None], 
                 [InspectorWidget.ICONS_PATH+"color_icon.png",ColorOptionsWidget(self),None],
-                [InspectorWidget.ICONS_PATH+"preset_icon.png", PresetWidget(self),None],
+                [InspectorWidget.ICONS_PATH+"preset_icon.png", AdditionalSettingsWidget(self),"Additional Node Settings"],
                 [InspectorWidget.ICONS_PATH+"tool_icon.png",app.tool_options_win.qobject,"Tool Options"]
               ]
     for o in options:
@@ -46,8 +47,7 @@ class InspectorWidget(ToolBarOptionsWidget):
     
     self.obs = SceneObserverImpl()
     self.obs.AttachObserver(self)
-    ost.scene.AttachObserver(self.obs)    
-    self.scene_selection_ = gui.SceneSelection.Instance()
+    ost.scene.AttachObserver(self.obs)
     QtCore.QObject.connect(app.scene_win.qobject,QtCore.SIGNAL("ActiveNodesChanged()"),
                            self.ActiveNodesChanged)     
     
@@ -58,15 +58,19 @@ class InspectorWidget(ToolBarOptionsWidget):
         
   #Observer Methods    
   def NodeRemoved(self, node):
+    SelHelper().Update()
     ToolBarOptionsWidget.Update(self)  
   
   def RenderModeChanged(self, node):
+    SelHelper().Update()
     ToolBarOptionsWidget.Update(self)
    
   def NodeChanged(self, node):
+    SelHelper().Update()
     ToolBarOptionsWidget.Update(self)
 
   def ActiveNodesChanged(self):
+    SelHelper().Update()
     ToolBarOptionsWidget.Update(self)
 
 class InspectorDialog(QtGui.QDialog):
@@ -91,3 +95,11 @@ class InspectorDialog(QtGui.QDialog):
     
   def ToggleHide(self,checked):
     self.setHidden(not self.isHidden())
+
+  def hideEvent(self, event):
+    self.emit(QtCore.SIGNAL("visible"),False)
+    QtGui.QDialog.hideEvent(self,event)
+    
+  def showEvent(self, event):
+    self.emit(QtCore.SIGNAL("visible"),True)
+    QtGui.QDialog.showEvent(self,event)

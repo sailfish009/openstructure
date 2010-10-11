@@ -34,6 +34,7 @@
 #include <boost/variant.hpp>
 
 #include <ost/module_config.hh>
+#include <ost/invalid_handle.hh>
 
 namespace ost {
 
@@ -102,6 +103,12 @@ public:
     }
   }
   
+  void RemoveProp(const String& key)
+  {
+    if (map_) {
+      map_->erase(key);
+    }
+  }
   void Assign(const GenericPropContainerImpl& impl)
   {
     if (impl.map_) {
@@ -159,9 +166,11 @@ protected:
   {
     return static_cast<const H*>(this)->GpImpl();
   }  
+  
 public:
   /// \brief checks existence of property
   bool HasProp(const String& key) const {
+    CheckHandleValidity(*static_cast<const H*>(this));
     return this->GetImpl()->HasProp(key);
   }
     
@@ -174,6 +183,7 @@ public:
   /// a representation suitable for output.
   String GetPropAsString(const String& key) const
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     if(!HasProp(key)) return "";
     std::ostringstream rep("");
     rep << this->GetImpl()->GenericProp(key);
@@ -182,6 +192,7 @@ public:
     /// \brief returns String property, raises an exception if it does not exist
     String GetStringProp(const String& key) const
     {
+      CheckHandleValidity(*static_cast<const H*>(this));      
       return this->gp_get<String>(key);
     }
 
@@ -189,6 +200,7 @@ public:
   ///     not exist
   Real GetFloatProp(const String& key) const
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     if(HasProp(key)) {
       GenericPropValue value=this->GetImpl()->GenericProp(key);
       if (value.which()==1) {
@@ -210,18 +222,21 @@ public:
   /// \brief returns integer property, raises an exception if it does not exist
   int GetIntProp(const String& key) const
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     return this->gp_get<int>(key);
   }
 
   /// \brief returns boolean property, raises an exception if it does not exist
   bool GetBoolProp(const String& key) const
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     return this->gp_get<bool>(key);
   }
 
   /// \brief returns String property, or the given default if it does not exist
   String GetStringProp(const String& key, const String& def) const
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     return this->gp_get<String>(key,def);
   }
 
@@ -229,6 +244,7 @@ public:
   ///     not exist
   Real GetFloatProp(const String& key, Real def) const
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     if(this->HasProp(key)) {
       GenericPropValue value=GetImpl()->GenericProp(key);
       if (value.which()==1) {
@@ -247,17 +263,20 @@ public:
   /// \brief returns integer property, or the given default if it does not exist
   int GetIntProp(const String& key, int def) const
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     return this->gp_get<int>(key, def);
   }
 
   /// \brief returns boolean property, or the given default if it does not exist
   bool GetBoolProp(const String& key, bool def) const
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     return this->gp_get<bool>(key, def);
   }
 
   std::map<String,GenericPropValue> GetPropMap() const
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     return this->GetImpl()->GetPropMap();
   }  
 };
@@ -270,31 +289,42 @@ class  TEMPLATE_EXPORT GenericPropContainer :
 public:
   void ClearProps()
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     this->GetImpl()->ClearProps();
   }
   
   /// \brief sets String property
   void SetStringProp(const String& key, const String& value)
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     this->GetImpl()->GenericProp(key)=value;
   }
 
   /// \brief sets floating point property
   void SetFloatProp(const String& key, Real value)
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     this->GetImpl()->GenericProp(key)=value;
   }
 
   /// \brief sets integer property
   void SetIntProp(const String& key, int value)
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     this->GetImpl()->GenericProp(key)=value;
   }
 
   /// \ brief sets boolean property
   void SetBoolProp(const String& key, bool value)
   {
+    CheckHandleValidity(*static_cast<const H*>(this));    
     this->GetImpl()->GenericProp(key)=value;
+  }
+  
+  void RemoveProp(const String& key)
+  {
+    CheckHandleValidity(*static_cast<const H*>(this));
+    this->GetImpl()->RemoveProp(key);
   }
 };
 

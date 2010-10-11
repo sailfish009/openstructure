@@ -325,70 +325,92 @@ class HSCWidget(RenderModeWidget):
     
   def UpdatePolyMode(self, value):
     self.GetOptions().SetPolyMode(value)
+    self.ApplyOptions()
     
   def UpdateSplineDetail(self, value):
     self.GetOptions().SetSplineDetail(value)
+    self.ApplyOptions()
     
   def UpdateArcDetail(self, value):
     self.GetOptions().SetArcDetail(value)
+    self.ApplyOptions()
     
   def UpdateTubeRadius(self, value):
     self.GetOptions().SetTubeRadius(value)
+    self.ApplyOptions()
     
   def UpdateSliderTubeRadius(self, value):
     self.GetOptions().SetTubeRadius(value/10.0)
-
+    self.ApplyOptions()
+    
   def UpdateTubeRatio(self, value):
     self.GetOptions().SetTubeRatio(value)
-
+    self.ApplyOptions()
+    
   def UpdateSliderTubeRatio(self, value):
     self.GetOptions().SetTubeRatio(value/10.0)
-
+    self.ApplyOptions()
+    
   def UpdateTubeProfileType(self, value):
     self.GetOptions().SetTubeProfileType(value)
+    self.ApplyOptions()
     
   def UpdateHelixWidth(self, value):
     self.GetOptions().SetHelixWidth(value) 
+    self.ApplyOptions()
     
   def UpdateSliderHelixWidth(self, value):
     self.GetOptions().SetHelixWidth(value/10.0)
+    self.ApplyOptions()
     
   def UpdateHelixThickness(self, value):
     self.GetOptions().SetHelixThickness(value)
-
+    self.ApplyOptions()
+    
   def UpdateSliderHelixThickness(self, value):
     self.GetOptions().SetHelixThickness(value/10.0)
+    self.ApplyOptions()
     
   def UpdateHelixEcc(self, value):
     self.GetOptions().SetHelixEcc(value)
+    self.ApplyOptions()
     
   def UpdateHelixProfileType(self, value):
     self.GetOptions().SetHelixProfileType(value)
-
+    self.ApplyOptions()
+    
   def UpdateSliderHelixEcc(self, value):
     self.GetOptions().SetHelixEcc(value/10.0)
+    self.ApplyOptions()
     
   def UpdateStrandWidth(self, value):
     self.GetOptions().SetStrandWidth(value)
-
+    self.ApplyOptions()
+    
   def UpdateSliderStrandWidth(self, value):
     self.GetOptions().SetStrandWidth(value/10.0)
+    self.ApplyOptions()
     
   def UpdateStrandThickness(self, value):
     self.GetOptions().SetStrandThickness(value)
+    self.ApplyOptions()
     
   def UpdateSliderStrandThickness(self, value):
     self.GetOptions().SetStrandThickness(value/10.0)
+    self.ApplyOptions()
     
   def UpdateStrandEcc(self, value):
     self.GetOptions().SetStrandEcc(value)
+    self.ApplyOptions()
     
   def UpdateSliderStrandEcc(self, value):
     self.GetOptions().SetStrandEcc(value/10.0)
-
+    self.ApplyOptions()
+    
   def UpdateStrandProfileType(self, value):
     self.GetOptions().SetStrandProfileType(value)
-
+    self.ApplyOptions()
+    
   def UpdateTubeRadiusGui(self,value):
     if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_spinbox_.singleStep()):
       self.width_tube_slider_.setValue(value*10.0)

@@ -16,16 +16,14 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/gui/gosty_app.hh>
 #include <boost/pointer_cast.hpp>
 
-#include <QFont>
-#include <QString>
 
 #include <ost/mol/query.hh>
 #include <ost/mol/query_view_wrapper.hh>
 #include <ost/mol/view_type_fw.hh>
 
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_win/scene_win.hh>
 
 #include "current_selection_node.hh"
@@ -35,6 +33,8 @@
 
 #include "entity_node.hh"
 
+#include <QFont>
+#include <QString>
 
 
 namespace ost { namespace gui {
@@ -60,13 +60,13 @@ EntityNode::EntityNode(gfx::EntityP& entity, SceneNode* parent):
   SceneNode* quick_selection = new LabelNode("Quick Selection",this);
   model->AddNode(this, quick_selection);
 
-  SceneNode* node = new EntityPartNode("Backbone", entity, mol::QueryViewWrapper(entity->GetView().Select("aname=CA,C,N,O and peptide=true")), quick_selection);
+  SceneNode* node = new EntityPartNode("Backbone", entity, mol::QueryViewWrapper(mol::Query("aname=CA,C,N,O and peptide=true"),entity->GetView()), quick_selection);
   model->AddNode(quick_selection, node);
-  node = new EntityPartNode("Sidechains", entity, mol::QueryViewWrapper(entity->GetView().Select("aname!=CA,C,N,O and peptide=true",mol::QueryFlag::EXCLUSIVE_BONDS)), quick_selection);
+  node = new EntityPartNode("Sidechains", entity, mol::QueryViewWrapper(mol::Query("aname!=CA,C,N,O and peptide=true"),mol::QueryFlag::EXCLUSIVE_BONDS,entity->GetView()), quick_selection);
   model->AddNode(quick_selection, node);
-  node = new EntityPartNode("Ligands", entity, mol::QueryViewWrapper(entity->GetView().Select("ishetatm=1 and rname!=HOH,WAT")), quick_selection);
+  node = new EntityPartNode("Ligands", entity, mol::QueryViewWrapper(mol::Query("ishetatm=1 and rname!=HOH,WAT"),entity->GetView()), quick_selection);
   model->AddNode(quick_selection, node);
-  node = new EntityPartNode("Water", entity, mol::QueryViewWrapper(entity->GetView().Select("rname=HOH,WAT")), quick_selection);
+  node = new EntityPartNode("Water", entity, mol::QueryViewWrapper(mol::Query("rname=HOH,WAT"),entity->GetView()), quick_selection);
   model->AddNode(quick_selection, node);
 
 

@@ -30,16 +30,16 @@ namespace ost { namespace gfx {
 OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared):
   width_(width), height_(height), valid_(false), active_(false)
 {
-  LOGN_DEBUG("offscreen buffer: checking for DISPLAY");
+  LOG_DEBUG("offscreen buffer: checking for DISPLAY");
   if(getenv("DISPLAY")==NULL) {
-    LOGN_ERROR("error creating offscreen rendering context: missing DISPLAY environment variable");
+    LOG_ERROR("error creating offscreen rendering context: missing DISPLAY environment variable");
     return;
   }
 
-  LOGN_DEBUG("offscreen buffer: XOpenDisplay");
+  LOG_DEBUG("offscreen buffer: XOpenDisplay");
   dpy_ = XOpenDisplay(getenv("DISPLAY"));
   if(dpy_==NULL) {
-    LOGN_ERROR("error creating offscreen rendering context: XOpenDisplay failed");
+    LOG_ERROR("error creating offscreen rendering context: XOpenDisplay failed");
     return;
   }
 
@@ -63,10 +63,10 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
   attrib_list.push_back(0);
 
   int nelem=0;
-  LOGN_DEBUG("offscreen buffer: glXChooseFBConfig");
+  LOG_DEBUG("offscreen buffer: glXChooseFBConfig");
   fbconfig_ =glXChooseFBConfig(dpy_,0,&attrib_list[0],&nelem);
   if(fbconfig_==0 || nelem==0) {
-    LOGN_ERROR("error creating offscreen rendering context: glXChooseFBConfig failed");
+    LOG_ERROR("error creating offscreen rendering context: glXChooseFBConfig failed");
     return;
   }
 
@@ -77,26 +77,26 @@ OffscreenBuffer::OffscreenBuffer(unsigned int width, unsigned int height, const 
   attrib_list.push_back(height_);
   attrib_list.push_back(0);
   
-  LOGN_DEBUG("offscreen buffer: glXCreatePBuffer");
+  LOG_DEBUG("offscreen buffer: glXCreatePBuffer");
   pbuffer_ = glXCreatePbuffer(dpy_, fbconfig_[0], &attrib_list[0]);
   if(!pbuffer_) {
-    LOGN_ERROR("error creating offscreen rendering context: glXCreatePBuffer failed");
+    LOG_ERROR("error creating offscreen rendering context: glXCreatePBuffer failed");
     return;
   }
 
   if(shared) {
-    LOGN_DEBUG("offscreen buffer: glxCreateNewContext(shared=true)");
+    LOG_DEBUG("offscreen buffer: glxCreateNewContext(shared=true)");
     context_ = glXCreateNewContext(dpy_, fbconfig_[0], GLX_RGBA_TYPE, 
 				   glXGetCurrentContext(), True);
   } else {
-    LOGN_DEBUG("offscreen buffer: glxCreateNewContext(shared=false)");
+    LOG_DEBUG("offscreen buffer: glxCreateNewContext(shared=false)");
     context_ = glXCreateNewContext(dpy_, fbconfig_[0], GLX_RGBA_TYPE, 
 				   NULL, True);
     
   }
 
   if(!context_) {
-    LOGN_ERROR("error creating offscreen rendering context: glXCreateNewContext failed");
+    LOG_ERROR("error creating offscreen rendering context: glXCreateNewContext failed");
     glXDestroyPbuffer(dpy_, pbuffer_);
     return;
   }
@@ -126,7 +126,7 @@ bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
   GLXPbuffer new_pbuffer = glXCreatePbuffer(dpy_, fbconfig_[0], &attrib_list[0]);
 
   if(!new_pbuffer) {
-    LOGN_ERROR("offscreen rendering resize failed to allocate new pbuffer");
+    LOG_ERROR("offscreen rendering resize failed to allocate new pbuffer");
     return false;
   }
   
@@ -134,7 +134,7 @@ bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
                                                glXGetCurrentContext(), True);
   
   if(!new_context) {
-    LOGN_ERROR("offscreen rendering resize failed to get new context");
+    LOG_ERROR("offscreen rendering resize failed to get new context");
     return false;
   }
 
@@ -155,7 +155,7 @@ bool OffscreenBuffer::MakeActive()
   if(active_) return true;
 
   if(!glXMakeContextCurrent(dpy_, pbuffer_, pbuffer_, context_)) {
-    LOGN_ERROR("error switching to offscreen rendering context: glXMakeContextCurrent failed");
+    LOG_ERROR("error switching to offscreen rendering context: glXMakeContextCurrent failed");
     return false;
   }
   return true;

@@ -17,7 +17,6 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QImage>
 
 #include <ost/img/data.hh>
 #include <ost/img/algorithm.hh>
@@ -25,6 +24,7 @@
 #include <ost/stdint.hh>
 #include "img2qt.hh"
 
+#include <QImage>
 using namespace ost::img;
 
 

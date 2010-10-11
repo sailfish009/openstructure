@@ -20,26 +20,26 @@
 #include <sys/time.h>
 #endif
 
+#include <ost/gui/python_shell/python_interpreter.hh>
 #include "gl_canvas.hh"
 #include "gl_win.hh"
 
 #include <ost/log.hh>
 #include <ost/dyn_cast.hh>
 #include <ost/mol/view_op.hh>
-#include <ost/gfx/scene.hh>
-#include <ost/gfx/entity.hh>
 
 #include <ost/seq/alignment_handle.hh>
 
-#include <ost/gui/python_shell/python_interpreter.hh>
 
-#include "tools/tool_manager.hh"
 
+#include <ost/gfx/scene.hh>
+#include <ost/gfx/entity.hh>
 #include <QTimer>
 #include <QStatusBar>
 #include <QApplication>
 #include <QClipboard>
 #include <QMenu>
+#include "tools/tool_manager.hh"
 
 namespace ost { namespace gui {
 
@@ -96,15 +96,15 @@ void GLCanvas::initializeGL()
     init=true;
   }
 
-  LOG_DEBUG("GLCanvas::initializeGL()"<<std::endl);
+  LOG_DEBUG("GLCanvas::initializeGL()");
   Scene::Instance().InitGL();
-  LOG_DEBUG("GLCanvas::registering with scene"<<std::endl);
+  LOG_DEBUG("GLCanvas::registering with scene");
   Scene::Instance().Register(this);
 }
 
 void GLCanvas::resizeGL(int w, int h)
 {
-  LOG_DUMP("GLCanvas::resizeGL("<<w<<","<<h<<")"<<std::endl);
+  LOG_DEBUG("GLCanvas::resizeGL("<<w<<","<<h<<")");
   Scene::Instance().Resize(w,h);
 }
 
@@ -437,7 +437,7 @@ void GLCanvas::timerEvent(QTimerEvent * event)
     if(count==20) {
       count=0;
       gettimeofday(&time1,NULL);
-      LOGN_ERROR(20.0/delta_time(time0,time1) << " fps");
+      LOG_ERROR(20.0/delta_time(time0,time1) << " fps");
       gettimeofday(&time0,NULL);
     }
   }

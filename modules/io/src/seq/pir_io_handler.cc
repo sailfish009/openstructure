@@ -72,50 +72,79 @@ bool PirIOHandler::ProvidesExport(const boost::filesystem::path& loc,
   return PirIOHandler::ProvidesImport(loc, format);
 }
 
-void PirIOHandler::Import(seq::SequenceList& aln,
-                            std::istream& instream)
+void PirIOHandler::Import(seq::SequenceList& aln, std::istream& instream)
 {
-  const char* error_msg="Bad Pir file: Expected '>', but '%1%' found.";  
-  
+  const char* error_msg="Expected %1%, but '%2%' found.";  
+  const char* premature_end="Premature end in PIR file on line %1%";
+  const char* empty_seq="PIR file contains empty sequence on line %1%";
   String line;
-  std::getline(instream, line);    
-  int seq_count=0;
-  //not yet supported
-  throw IOException("Import of PIR format is not yet supported!");
+  int line_num=1, seq_count=0;
+  // we can't use a normal while(std::getline(...)) here, because the PIR format 
+  // requires us to perform a one-line look-ahead. 
+  std::getline(instream, line);  
   while (!instream.eof()) {
-    // parse header information. cut after first "|"
+    // skip empty lines
     if (line.find_first_not_of("\n\t ")==String::npos) {
-      std::getline(instream, line);
       continue;
     }
-    if (line.length()==0 || line[0]!='>') {
-      String error=str(format(error_msg) % line);
+    if (line[0]!='>') {
+      String error=str(format(error_msg) % "'>'" % line);
       throw IOException(error);
     }
-    String identifier=line.substr(1);
-    String sequence_str;
-    while (std::getline(instream, line) && line.size()>0 && line[0]!='>') {
-      if (line.find_first_not_of("\n\t ")==String::npos) {
-        continue;
-      }
-      sequence_str+=line;
+    if (line.length()<4) {
+      String error=str(format(error_msg) % "seq-type;identifier" % line);
+      throw IOException(error);
     }
-    if (sequence_str.length()>0) {
-      try {
-        seq::SequenceHandle seq=seq::CreateSequence(identifier, sequence_str);
-        aln.AddSequence(seq);          
-        seq_count+=1;
-      } catch (seq::InvalidSequence& e) {
-        throw e;
-      }
-    } else {
-      throw IOException("Bad Pir file: Sequence is empty.");
+    String seq_type=line.substr(1, 2);
+    if (!(seq_type=="P1" || seq_type=="F1" || seq_type=="DL" || 
+          seq_type=="DC" || seq_type=="RL" || seq_type=="RC" || 
+          seq_type=="XX")) {
+      throw IOException("Bad PIR file: Unknown sequence type"/*" '%1%' on line %2%" % seq_type % line_nu*m*/);
     }
-  }    
+    String name=line.substr(4);
+    int subject_line_num=line_num;
+    if (!std::getline(instream, line)) {
+      throw IOException(str(format(premature_end) % line_num));
+    }
+    line_num+=1;
+    std::stringstream seq_string;
+    bool end_seq=false;
+    while (!end_seq && std::getline(instream, line)) {
+      line_num+=1;
+      for (String::iterator i=line.begin(), e=line.end(); i!=e; ++i) {
+        if (isspace(*i)) {
+          continue;
+        }
+        if (*i=='*') {
+          end_seq=true;
+          break;
+        }
+        seq_string << *i;
+      }
+    }
+    while (std::getline(instream, line)) {
+      line_num+=1;
+      if (!line.empty() && line[0]=='>') {
+        break;
+      }
+    }
+    if (!end_seq) {
+      throw IOException(str(format(premature_end) % line_num));
+    }
+    if (seq_string.str().empty()) {
+      throw IOException(str(format(empty_seq) % subject_line_num));
+    }
+    try {
+      seq::SequenceHandle ss=seq::CreateSequence(name, seq_string.str());
+      aln.AddSequence(ss);          
+      seq_count+=1;
+    } catch (seq::InvalidSequence& e) {
+      throw e;
+    }
+  }
   if (seq_count==0) {
     throw IOException("Bad Pir file: File is empty");
-  }                        
-
+  }
 }
 
 void PirIOHandler::Export(const seq::ConstSequenceList& seqs,

@@ -46,6 +46,8 @@ void CustomRenderOptions::ApplyRenderOptions(RenderOptionsPtr render_options){
 
   sphere_detail_=options->GetSphereDetail();
   arc_detail_=options->GetArcDetail();
+  sphere_rad_=options->GetSphereRad();
+  bond_rad_=options->GetBondRad();
   this->NotifyStateChange();
 }
 

@@ -78,25 +78,24 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   bool gap_flag = true;
 
   boost::filesystem::path trj_f(trj_fn);
-  boost::filesystem::ifstream ff(trj_f);
+  boost::filesystem::ifstream ff(trj_f, std::ios::binary);
   
   DCDHeader header;
   char dummy[4];
   bool swap_flag=false;
 
-  LOGN_MESSAGE("importing trajectory data");
+  LOG_INFO("importing trajectory data");
 
   if(gap_flag) ff.read(dummy,sizeof(dummy));
   ff.read(header.hdrr,sizeof(char)*4);
   ff.read(reinterpret_cast<char*>(header.icntrl),sizeof(int)*20);
-
-  if(header.icntrl[1]<0 || header.icntrl[1]>1e6) {
+  if(header.icntrl[1]<0 || header.icntrl[1]>1e8) {
     // nonsense atom count, try swapping
     swap_int(header.icntrl,20);
-    if(header.icntrl[1]<0 || header.icntrl[1]>1e6) {
+    if(header.icntrl[1]<0 || header.icntrl[1]>1e8) {
       throw(IOException("LoadCHARMMTraj: nonsense atom count in header"));
     } else {
-      LOGN_MESSAGE("LoadCHARMMTraj: byte-swapping");
+      LOG_INFO("LoadCHARMMTraj: byte-swapping");
       swap_flag=true;
     }
   }
@@ -106,13 +105,13 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   if(header.icntrl[19]!=0) { // CHARMM format
     skip_flag=(header.icntrl[10]!=0);
     if(skip_flag) {
-      LOGN_VERBOSE("LoadCHARMMTraj: using CHARMM format with per-frame header");
+      LOG_VERBOSE("LoadCHARMMTraj: using CHARMM format with per-frame header");
     } else {
-      LOGN_VERBOSE("LoadCHARMMTraj: using CHARMM format");
+      LOG_VERBOSE("LoadCHARMMTraj: using CHARMM format");
     }
   } else {
     // XPLOR format
-    LOGN_VERBOSE("LoadCHARMMTraj: using XPLOR format");
+    LOG_VERBOSE("LoadCHARMMTraj: using XPLOR format");
   }
 
   if(gap_flag) ff.read(dummy,sizeof(dummy));
@@ -132,12 +131,12 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   header.f_atom_count=header.icntrl[8];
   header.atom_count=header.t_atom_count-header.f_atom_count;
 
-  LOGN_DEBUG("LoadCHARMMTraj: " << header.num << " trajectories with " 
+  LOG_DEBUG("LoadCHARMMTraj: " << header.num << " trajectories with " 
                << header.atom_count << " atoms (" << header.f_atom_count 
                << " fixed) each");
 
   if(alist.size() != static_cast<size_t>(header.t_atom_count)) {
-    LOGN_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
+    LOG_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
                << " in coordinate file, " << header.t_atom_count 
                << " in each traj frame");
     throw(IOException("invalid trajectory"));
@@ -147,13 +146,22 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   std::vector<geom::Vec3> clist(header.t_atom_count);
   std::vector<float> xlist(header.t_atom_count);
 
+  size_t frame_size=0;
+  if (skip_flag) {
+    frame_size+=14*4;
+  }
+  if (gap_flag) {
+    frame_size+=6*sizeof(dummy);
+  }
+  frame_size+=3*sizeof(float)*xlist.size();
+
   int i=0;
-  for(;i<header.num;++i) {
+  for(;i<header.num;i+=stride) {
     if(skip_flag) ff.seekg(14*4,std::ios_base::cur);
     // read each frame
     if(!ff) {
       /* premature EOF */
-      LOGN_ERROR("LoadCHARMMTraj: premature end of file, " << i 
+      LOG_ERROR("LoadCHARMMTraj: premature end of file, " << i 
                  << " frames read");
       break;
     }
@@ -163,36 +171,40 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
     if(swap_flag) swap_float(&xlist[0],xlist.size());
     if(gap_flag) ff.read(dummy,sizeof(dummy));
     for(uint j=0;j<clist.size();++j) {
-      clist[j].SetX(xlist[j]);
+      clist[j].x=xlist[j];
     }
+
     // y coord
     if(gap_flag) ff.read(dummy,sizeof(dummy));
     ff.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
     if(swap_flag) swap_float(&xlist[0],xlist.size());
     if(gap_flag) ff.read(dummy,sizeof(dummy));
     for(uint j=0;j<clist.size();++j) {
-      clist[j].SetY(xlist[j]);
+      clist[j].y=xlist[j];
     }
+
     // z coord
     if(gap_flag) ff.read(dummy,sizeof(dummy));
     ff.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
     if(swap_flag) swap_float(&xlist[0],xlist.size());
     if(gap_flag) ff.read(dummy,sizeof(dummy));
     for(uint j=0;j<clist.size();++j) {
-      clist[j].SetZ(xlist[j]);
+      clist[j].z=xlist[j];
     }
 
     cg.AddFrame(clist);
 
+    // skip frames (defined by stride)
+    if(stride>1) ff.seekg(frame_size*(stride-1),std::ios_base::cur);
   }
 
   ff.get();
   if(!ff.eof()) {
-    LOGN_VERBOSE("LoadCHARMMTraj: unexpected trailing file data, bytes read: " 
+    LOG_VERBOSE("LoadCHARMMTraj: unexpected trailing file data, bytes read: " 
                  << ff.tellg());
   }
 
-  LOGN_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with " << cg.GetAtomCount() << " atoms each");
+  LOG_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with " << cg.GetAtomCount() << " atoms each");
 
   return cg;
 }

@@ -52,6 +52,7 @@ public:
   static gfx::EntityViewColorOp FromInfo(info::InfoGroup& group);
 
 private:
+  void Init();
   mol::EntityView ev_;
 };
 

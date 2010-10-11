@@ -28,105 +28,105 @@
 template <typename C>
 String depr_get_string_a(C& c, const String& k, const String& v)
 {
-  LOGN_MESSAGE("GetGenericStringProperty is deprecated. Use GetStringProp");
+  WARN_DEPRECATED("GetGenericStringProperty is deprecated. Use GetStringProp");
   return c.GetStringProp(k, v);
 }
 
 template <typename C>
 String depr_get_string_b(C& c, const String& k)
 {
-  LOGN_MESSAGE("GetGenericStringProperty is deprecated. Use GetStringProp");
+  WARN_DEPRECATED("GetGenericStringProperty is deprecated. Use GetStringProp");
   return c.GetStringProp(k);
 }
 
 template <typename C>
 void depr_set_string(C& c, const String& k, const String& v)
 {
-  LOGN_MESSAGE("SetGenericStringProperty is deprecated. Use SetStringProp");
+  WARN_DEPRECATED("SetGenericStringProperty is deprecated. Use SetStringProp");
   return c.SetStringProp(k, v);
 }
 
 template <typename C>
 int depr_get_int_a(C& c, const String& k, const int& v)
 {
-  LOGN_MESSAGE("GetGenericIntProperty is deprecated. Use GetIntProp");
+  WARN_DEPRECATED("GetGenericIntProperty is deprecated. Use GetIntProp");
   return c.GetIntProp(k, v);
 }
 
 template <typename C>
 int depr_get_int_b(C& c, const String& k)
 {
-  LOGN_MESSAGE("GetGenericIntProperty is deprecated. Use GetIntProp");
+  WARN_DEPRECATED("GetGenericIntProperty is deprecated. Use GetIntProp");
   return c.GetIntProp(k);
 }
 
 template <typename C>
 void depr_set_int(C& c, const String& k, const int& v)
 {
-  LOGN_MESSAGE("SetGenericIntProperty is deprecated. Use SetIntProp");
+  WARN_DEPRECATED("SetGenericIntProperty is deprecated. Use SetIntProp");
   return c.SetIntProp(k, v);
 }
 
 template <typename C>
 bool depr_get_bool_a(C& c, const String& k, const bool& v)
 {
-  LOGN_MESSAGE("GetGenericBoolProperty is deprecated. Use GetBoolProp");
+  WARN_DEPRECATED("GetGenericBoolProperty is deprecated. Use GetBoolProp");
   return c.GetBoolProp(k, v);
 }
 
 template <typename C>
 bool depr_get_bool_b(C& c, const String& k)
 {
-  LOGN_MESSAGE("GetGenericBoolProperty is deprecated. Use GetBoolProp");
+  WARN_DEPRECATED("GetGenericBoolProperty is deprecated. Use GetBoolProp");
   return c.GetBoolProp(k);
 }
 
 template <typename C>
 void depr_set_bool(C& c, const String& k, const bool& v)
 {
-  LOGN_MESSAGE("SetGenericBoolProperty is deprecated. Use SetBoolProp");
+  WARN_DEPRECATED("SetGenericBoolProperty is deprecated. Use SetBoolProp");
   return c.SetBoolProp(k, v);
 }
 
 template <typename C>
 Real depr_get_float_a(C& c, const String& k, const float& v)
 {
-  LOGN_MESSAGE("GetGenericFloatProperty is deprecated. Use GetFloatProp");
+  WARN_DEPRECATED("GetGenericFloatProperty is deprecated. Use GetFloatProp");
   return c.GetFloatProp(k, v);
 }
 
 template <typename C>
 Real depr_get_float_b(C& c, const String& k)
 {
-  LOGN_MESSAGE("GetGenericFloatProperty is deprecated. Use GetFloatProp");
+  WARN_DEPRECATED("GetGenericFloatProperty is deprecated. Use GetFloatProp");
   return c.GetFloatProp(k);
 }
 
 template <typename C>
 void depr_set_float(C& c, const String& k, const Real& v)
 {
-  LOGN_MESSAGE("SetGenericFloatProperty is deprecated. Use SetFloatProp");
+  WARN_DEPRECATED("SetGenericFloatProperty is deprecated. Use SetFloatProp");
   return c.SetFloatProp(k, v);
 }
 
 template <typename C>
 void depr_clear_props(C& c)
 {
-  LOGN_MESSAGE("ClearGenericProperties is deprecated. Use ClearProps");
+  WARN_DEPRECATED("ClearGenericProperties is deprecated. Use ClearProps");
   c.ClearProps();  
 }
 
 template <typename C>
 bool depr_has_prop(C& c, const String& k)
 {
-  LOGN_MESSAGE("HasGenericProperty is deprecated. Use HasProp");
+  WARN_DEPRECATED("HasGenericProperty is deprecated. Use HasProp");
   return c.HasProp(k);  
 }
 
 template <typename C>
 String depr_prop_as_string(C& c, const String& k)
 {
-  LOGN_MESSAGE("GetGenericPropertyStringRepresentation is deprecated. Use GetPropAsString");
+  WARN_DEPRECATED("GetGenericPropertyStringRepresentation is deprecated. Use GetPropAsString");
   return c.GetPropAsString(k);  
 }
 
@@ -185,6 +185,7 @@ void generic_prop_def(O& bp_class)
     .def("SetGenericFloatProperty", &depr_set_float<C>)
     .def("SetGenericBoolProperty", &depr_set_bool<C>)
     .def("SetGenericStringProperty", &depr_set_string<C>)
+    .def("RemoveProp", &C::RemoveProp)
   ;
 }
 

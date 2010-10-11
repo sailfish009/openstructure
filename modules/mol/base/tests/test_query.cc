@@ -33,7 +33,7 @@ EntityHandle make_query_test_entity()
   EntityHandle eh = CreateEntity();
   XCSEditor e=eh.RequestXCSEditor();
   ChainHandle chain = e.InsertChain("A");
-  chain.SetFloatProp("testpropc", 1.0);
+  chain.SetFloatProp("testprop_c", 1.0);
   ResidueHandle res = e.AppendResidue(chain, "MET");
   res.SetFloatProp("testpropr", 1.0);
   AtomProp c_atom;
@@ -229,9 +229,9 @@ BOOST_AUTO_TEST_CASE(test_query_eval)
   ensure_counts(e, "grtestpropr:0=1", 1, 1, 8);
   ensure_counts(e, "grtestpropr:1.0=1", 1, 3, 27);
   ensure_counts(e, "grtestpropr:2.0=2", 1, 2, 19);
-  ensure_counts(e, "gctestpropc:0=1", 1, 3, 27);
-  ensure_counts(e, "gctestpropc:1.0=1", 1, 3, 27);
-  ensure_counts(e, "gctestpropc:2.0=2", 0, 0, 0);
+  ensure_counts(e, "gctestprop_c:0=1", 1, 3, 27);
+  ensure_counts(e, "gctestprop_c:1.0=1", 1, 3, 27);
+  ensure_counts(e, "gctestprop_c:2.0=2", 0, 0, 0);
 }
 
 BOOST_AUTO_TEST_CASE(test_query_eval_on_view) 
@@ -261,9 +261,9 @@ BOOST_AUTO_TEST_CASE(test_query_eval_on_view)
   ensure_counts_v(v, "grtestpropr:0=1", 1, 1, 8);
   ensure_counts_v(v, "grtestpropr:1.0=1", 1, 3, 27);
   ensure_counts_v(v, "grtestpropr:2.0=2", 1, 2, 19);
-  ensure_counts_v(v, "gctestpropc:0=1", 1, 3, 27);
-  ensure_counts_v(v, "gctestpropc:1.0=1", 1, 3, 27);
-  ensure_counts_v(v, "gctestpropc:2.0=2", 0, 0, 0);
+  ensure_counts_v(v, "gctestprop_c:0=1", 1, 3, 27);
+  ensure_counts_v(v, "gctestprop_c:1.0=1", 1, 3, 27);
+  ensure_counts_v(v, "gctestprop_c:2.0=2", 0, 0, 0);
 }
 
 BOOST_AUTO_TEST_CASE(test_query_throw) 
@@ -275,8 +275,8 @@ BOOST_AUTO_TEST_CASE(test_query_throw)
   BOOST_CHECK_NO_THROW(e.Select("grtestpropr:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("grtestpropr:1=1"));
   BOOST_CHECK_THROW(e.Select("grtestpropr=1"), std::exception);
-  BOOST_CHECK_NO_THROW(e.Select("gctestpropc:0=1"));
-  BOOST_CHECK_NO_THROW(e.Select("gctestpropc:1=1"));
+  BOOST_CHECK_NO_THROW(e.Select("gctestprop_c:0=1"));
+  BOOST_CHECK_NO_THROW(e.Select("gctestprop_c:1=1"));
   BOOST_CHECK_THROW(e.Select("ganotsetprop=1"), std::exception);
   BOOST_CHECK_THROW(e.Select("grnotsetprop=1"), std::exception);
   BOOST_CHECK_THROW(e.Select("gcnotsetprop=1"), std::exception);

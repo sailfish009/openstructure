@@ -26,17 +26,26 @@
   Author: Andreas Schenk
 */
 
-#include <QString>
 #include <ost/gui/module_config.hh>
+#include <QTime>
+#include <QString>
+#include <QObject>
 
 namespace ost { namespace gui {
 
-class DLLEXPORT_OST_GUI OutputRedirector {
+class DLLEXPORT_OST_GUI OutputRedirector: public QObject {
+Q_OBJECT
+
 public:
+  OutputRedirector();
   void Write(const String& str);
-  static QString GetOutput();
+public slots:
+  void Flush();
+signals:
+  void OnOutput(const QString& output);
 private:
-    static String  buffer_; 
+    QString  buffer_;
+    QTime timer_;
 };
 
 }}//ns

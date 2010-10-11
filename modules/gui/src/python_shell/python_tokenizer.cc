@@ -64,6 +64,8 @@ QString PythonToken::GetTypeAsString() const
     return "EOF";
   case GROUPING:
     return "grouping character";
+  case COMMENT:
+    return "comment";
   }
   return "unknown";
 }
@@ -137,11 +139,13 @@ PythonToken PythonTokenizer::GetOperatorToken()
 {
   static QString operators[] = {
     QString("+="), QString("-="), QString("*="), 
+    QString("**"), QString("&="), QString("|="),
     QString("/="), QString("+"), QString("-"), 
     QString("/"), QString("*"), QString("."),
     QString("%"), QString("="), QString("!="), 
     QString("!"), QString("<="), QString(">="), 
-    QString("<"), QString(":"), QString("?"),
+    QString("<"), QString(":"), QString("?"), 
+    QString("|"), QString("&"), QString("^"),
     QString("")
   };
   size_t index = -1;
@@ -205,7 +209,7 @@ PythonToken PythonTokenizer::GetStringDelim()
 {
   Range range(current_pos_,0);
   // Find out which type of delimiters are used for the String. i.e. <">, 
-  // <"""> or <'>
+  // <""">, <'''> or <'>
   QString delimiter = "\"";
   if (command_[current_pos_] == '\'')
     delimiter = "'";
@@ -275,6 +279,15 @@ PythonToken PythonTokenizer::NextToken()
     this->EatWhities();
     if (current_pos_ < command_.size()) {
       QChar current_char = command_[current_pos_];
+      if (current_char=='#') {
+        current_token_=PythonToken(PythonToken::COMMENT, 
+                                   Range(current_pos_, 
+                                         command_.size()-current_pos_),
+                                   command_.mid(current_pos_, 
+                                                command_.size()-current_pos_));
+        current_pos_=command_.size();
+        return current_token_;
+      }
       if (current_char.isDigit()) {
         current_token_ = GetNumberToken();
         return current_token_;

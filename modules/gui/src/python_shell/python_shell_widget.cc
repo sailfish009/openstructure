@@ -16,17 +16,13 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+/*
+  Authors: Marco Biasini, Andreas Schenk
+ */
+
 #include <iostream>
 
-#include <QDebug>
-#include <QFontMetrics>
-#include <QClipboard>
-#include <QPainter>
-#include <QScrollBar>
-#include <QDirModel>
-#include <QStringList>
 
-#include <ost/gui/python_shell/text_logger.hh>
 #include "python_shell_widget.hh"
 
 #include "gutter.hh"
@@ -37,7 +33,15 @@
 
 #include "python_completer.hh"
 #include "path_completer.hh"
+#include "transition.hh"
 
+#include <QApplication>
+#include <QFontMetrics>
+#include <QClipboard>
+#include <QPainter>
+#include <QScrollBar>
+#include <QDirModel>
+#include <QStringList>
 
 
 /*
@@ -58,9 +62,15 @@ PythonShellWidget::PythonShellWidget(QWidget* parent):
   output_visible_(true),
   completion_start_(0),
   completion_end_(0),
-  mode_(SHELL_INTERACTION_BASH)
+  block_edit_start_(document()->begin()),
+  output_blocks_(),
+  machine_(new StateMachine(this)),
+  readonly_machine_(new StateMachine(this)),
+  readwrite_state_(new State),
+  multiline_active_state_(new State)
 {
-  this->setLineWrapMode(QPlainTextEdit::NoWrap);
+  setLineWrapMode(QPlainTextEdit::WidgetWidth);
+  this->setFrameShape(QFrame::NoFrame);
   document()->setDocumentLayout(new PythonShellTextDocumentLayout(document()));
   setViewportMargins(Gutter::GUTTER_WIDTH, 0, 0, 0);
   setUndoRedoEnabled(false);
@@ -68,14 +78,17 @@ PythonShellWidget::PythonShellWidget(QWidget* parent):
   QFontMetrics metrics(font());
   setTabStopWidth(2*metrics.width(" "));
   setMaximumBlockCount(1000000);
-  connect(this, SIGNAL(updateRequest(QRect, int)) ,gutter_, 
-          SLOT(Update(QRect, int)));
-  connect(this, SIGNAL(Execute(QString)),&PythonInterpreter::Instance(), 
-          SLOT(RunCommand(QString)),Qt::QueuedConnection);
-  connect(&PythonInterpreter::Instance(), SIGNAL(Done(int,const QString&)),this, 
-          SLOT(AppendOutput(int,const QString&)),Qt::QueuedConnection);
+
   textCursor().block().setUserState(BLOCKTYPE_ACTIVE);
   completer_->setWidget(viewport());
+  connect(&PythonInterpreter::Instance(), SIGNAL(Output(unsigned int, const QString &)),
+          this,SLOT(AppendOutput(unsigned int, const QString &)));
+  connect(&PythonInterpreter::Instance(), SIGNAL(Finished(unsigned int, bool)),
+          this,SLOT(OutputFinished(unsigned int,bool)));
+  connect(&PythonInterpreter::Instance(), SIGNAL(ErrorOutput(unsigned int, const QString &)),
+          this,SLOT(AppendError(unsigned int, const QString &)));
+  connect(this,   SIGNAL(updateRequest(QRect, int)) ,
+          gutter_,SLOT(Update(QRect, int)));
   connect(completer_,SIGNAL(activated(const QString&)),this, 
           SLOT(InsertCompletion(const QString&)));
   connect(completer_,SIGNAL(recomplete(const QString&)),this, 
@@ -86,20 +99,392 @@ PythonShellWidget::PythonShellWidget(QWidget* parent):
           SLOT(SetCompletionPrefix(const QString&)));
   path_completer_->setWidget(viewport());
   connect(path_completer_,SIGNAL(activated(const QString&)),this, 
-          SLOT(InsertCompletion(const QString&)));
+          SLOT(InsertPathCompletion(const QString&)));
   connect(path_completer_,SIGNAL(recomplete(const QString&)),this, 
           SLOT(Recomplete(const QString&)));
   connect(this,SIGNAL(RequestPathCompletion(const QRect&,bool)),path_completer_, 
           SLOT(complete(const QRect&,bool)));
   connect(this,SIGNAL(SetPathCompletionPrefix(const QString&)),path_completer_, 
           SLOT(setCompletionPrefix(const QString&)));
-  if (mode_==SHELL_INTERACTION_BASH) {
-    SetBlockEditMode(EDITMODE_SINGLELINE);    
-  } else {
-    SetBlockEditMode(EDITMODE_MULTILINE_INACTIVE);
-  }
-  PythonInterpreter::Instance().RedirectOutput();
+  set_block_edit_mode_(EDITMODE_SINGLELINE);
+  setup_readonly_state_machine_();
+  setup_state_machine_();
 }
+
+void PythonShellWidget::setup_readonly_state_machine_()
+{
+  State* readonly=new State;
+  State* mixed=new State;
+  readonly_machine_->addState(mixed);
+  readonly_machine_->addState(readonly);
+  readonly_machine_->addState(readwrite_state_);
+  readonly->addTransition(new SignalTransition(this,
+                                                SIGNAL(cursorPositionChanged()),
+                                                readwrite_state_,
+                                                new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
+                                                                           EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
+  readonly->addTransition(new SignalTransition(this,
+                                                SIGNAL(cursorPositionChanged()),
+                                                mixed,
+                                                new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
+                                                                           EditPositionGuard::ANCHORSMALLER)));
+  readonly->addTransition(new SignalTransition(this,
+                                                SIGNAL(cursorPositionChanged()),
+                                                mixed,
+                                                new EditPositionGuard(this,EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER,
+                                                                           EditPositionGuard::SMALLER)));
+
+  readonly->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                  Qt::Key_Backspace,
+                                                  Qt::NoModifier,
+                                                  readwrite_state_,
+                                                  true));
+
+  readonly->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                  Qt::Key_Any,
+                                                  Qt::NoModifier,
+                                                  readwrite_state_,
+                                                  false));
+
+  readwrite_state_->addTransition(new SignalTransition(this,
+                                                      SIGNAL(cursorPositionChanged()),
+                                                      readonly,
+                                                      new EditPositionGuard(this,EditPositionGuard::SMALLER | EditPositionGuard::EQUAL,
+                                                                                 EditPositionGuard::ANCHORSMALLER)));
+  readwrite_state_->addTransition(new SignalTransition(this,
+                                                      SIGNAL(cursorPositionChanged()),
+                                                      readonly,
+                                                      new EditPositionGuard(this,EditPositionGuard::ANCHORSMALLER | EditPositionGuard::ANCHOREQUAL,
+                                                                                 EditPositionGuard::SMALLER)));
+
+  readwrite_state_->addTransition(new SignalTransition(this,
+                                                        SIGNAL(cursorPositionChanged()),
+                                                        mixed,
+                                                        new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
+                                                                                   EditPositionGuard::ANCHORSMALLER)));
+  readwrite_state_->addTransition(new SignalTransition(this,
+                                                        SIGNAL(cursorPositionChanged()),
+                                                        mixed,
+                                                        new EditPositionGuard(this,EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER,
+                                                                                   EditPositionGuard::SMALLER)));
+
+  readwrite_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                         Qt::Key_Backspace,
+                                                         Qt::NoModifier,
+                                                         readwrite_state_,
+                                                         true,
+                                                         new EditPositionGuard(this,EditPositionGuard::EQUAL,
+                                                                                    EditPositionGuard::ANCHOREQUAL)));
+
+  mixed->addTransition(new SignalTransition(this,
+                                             SIGNAL(cursorPositionChanged()),
+                                             readwrite_state_,
+                                             new EditPositionGuard(this,EditPositionGuard::EQUAL |EditPositionGuard::BIGGER,
+                                                                        EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
+
+  KeyEventTransition* kt1=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Backspace,
+                                                 Qt::NoModifier,
+                                                 readwrite_state_,
+                                                 true);
+  mixed->addTransition(kt1);
+  connect(kt1,SIGNAL(triggered()),this,SLOT(OnMixedToReadwrite()));
+
+  KeyEventTransition* kt2=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Any,
+                                                 Qt::NoModifier,
+                                                 readwrite_state_,
+                                                 false);
+  mixed->addTransition(kt2);
+  connect(kt2,SIGNAL(triggered()),this,SLOT(OnMixedToReadwrite()));
+
+  connect(readonly,SIGNAL(entered()),this,SLOT(OnReadonlyEntered()));
+  connect(readwrite_state_,SIGNAL(entered()),this,SLOT(OnReadwriteEntered()));
+  readonly_machine_->setInitialState(readwrite_state_);
+  readonly_machine_->start();
+}
+
+void PythonShellWidget::setup_state_machine_()
+{
+  #ifdef __APPLE__
+    QFlags<Qt::KeyboardModifier> DNG_ARROW_MODIFIERS = Qt::KeypadModifier;
+    QFlags<Qt::KeyboardModifier> DNG_ENTER_MODIFIERS = Qt::NoModifier;
+  #else
+    QFlags<Qt::KeyboardModifier> DNG_ARROW_MODIFIERS = Qt::NoModifier;
+    QFlags<Qt::KeyboardModifier> DNG_ENTER_MODIFIERS = Qt::KeypadModifier;
+  #endif
+  State* single_line=new State;
+  State* multi_line_inactive=new State;
+  State* completing=new State;
+  State* executing=new State;
+  State* history_up=new State;
+  State* history_down=new State;
+  machine_->addState(single_line);
+  machine_->addState(multiline_active_state_);
+  machine_->addState(multi_line_inactive);
+  machine_->addState(completing);
+  machine_->addState(executing);
+  machine_->addState(history_up);
+  machine_->addState(history_down);
+
+  connect(single_line,SIGNAL(entered()),this,SLOT(OnSingleLineStateEntered()));
+  connect(multiline_active_state_,SIGNAL(entered()),this,SLOT(OnMultiLineActiveStateEntered()));
+  connect(multi_line_inactive,SIGNAL(entered()),this,SLOT(OnMultiLineInactiveStateEntered()));
+  connect(history_up,SIGNAL(entered()),this,SLOT(OnHistoryUpStateEntered()));
+  connect(history_down,SIGNAL(entered()),this,SLOT(OnHistoryDownStateEntered()));
+  connect(executing,SIGNAL(entered()),this,SLOT(OnExecuteStateEntered()));
+
+  KeyEventTransition* tr1=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 executing,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
+  single_line->addTransition(tr1);
+  KeyEventTransition* tr3=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 multiline_active_state_,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
+  single_line->addTransition(tr3);
+  KeyEventTransition* keypad_enter1=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           DNG_ENTER_MODIFIERS| Qt::NoModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  single_line->addTransition(keypad_enter1);
+  connect(keypad_enter1,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter2=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           DNG_ENTER_MODIFIERS| Qt::ShiftModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  single_line->addTransition(keypad_enter2);
+  connect(keypad_enter2,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter3=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           DNG_ENTER_MODIFIERS| Qt::MetaModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  single_line->addTransition(keypad_enter3);
+  connect(keypad_enter3,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                    Qt::Key_Return,
+                                                    Qt::ControlModifier,
+                                                    multiline_active_state_,
+                                                    false));
+  // just to make OSX happy we also add the transitions with Meta (-> Ctrl o OSX)
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                    Qt::Key_Return,
+                                                    Qt::MetaModifier,
+                                                    multiline_active_state_,
+                                                    false));
+                                                 
+  connect(tr3,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
+  single_line->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
+
+  KeyEventTransition* tr4=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 executing,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
+  multi_line_inactive->addTransition(tr4);
+  KeyEventTransition* tr6=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 multiline_active_state_,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
+  multi_line_inactive->addTransition(tr6);
+  connect(tr6,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Left,DNG_ARROW_MODIFIERS,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Right,DNG_ARROW_MODIFIERS,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::ControlModifier,multiline_active_state_));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
+  KeyEventTransition* keypad_enter4=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           DNG_ENTER_MODIFIERS| Qt::NoModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multi_line_inactive->addTransition(keypad_enter4);
+  connect(keypad_enter4,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter5=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           DNG_ENTER_MODIFIERS| Qt::ShiftModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multi_line_inactive->addTransition(keypad_enter5);
+  connect(keypad_enter5,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter6=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           DNG_ENTER_MODIFIERS | Qt::MetaModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multi_line_inactive->addTransition(keypad_enter6);
+  connect(keypad_enter6,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                            Qt::Key_Return,
+                                                            Qt::ControlModifier,
+                                                            multiline_active_state_,
+                                                            false));
+  // just to make OSX happy we also add the transitions with Meta (-> Ctrl o OSX)
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,
+                                                            Qt::Key_Return,
+                                                            Qt::MetaModifier,
+                                                            multiline_active_state_,
+                                                            false));
+
+  KeyEventTransition* tr7=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 executing,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_COMPLETE | CODE_BLOCK_ERROR));
+  multiline_active_state_->addTransition(tr7);
+  KeyEventTransition* tr8=new KeyEventTransition(QEvent::KeyPress,
+                                                 Qt::Key_Return,
+                                                 Qt::NoModifier,
+                                                 multiline_active_state_,
+                                                 true,
+                                                 new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
+  multiline_active_state_->addTransition(tr8);
+  connect(tr8,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier,multi_line_inactive));
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_up));
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_down));
+  KeyEventTransition* keypad_enter7=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           DNG_ENTER_MODIFIERS | Qt::NoModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multiline_active_state_->addTransition(keypad_enter7);
+  connect(keypad_enter7,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter8=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           DNG_ENTER_MODIFIERS | Qt::ShiftModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multiline_active_state_->addTransition(keypad_enter8);
+  connect(keypad_enter8,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+  KeyEventTransition* keypad_enter9=new KeyEventTransition(QEvent::KeyPress,
+                                                           Qt::Key_Enter,
+                                                           DNG_ENTER_MODIFIERS | Qt::MetaModifier,
+                                                           multiline_active_state_,
+                                                           true);
+  multiline_active_state_->addTransition(keypad_enter9);
+  connect(keypad_enter9,SIGNAL(triggered()),this,SLOT(OnKeypadEnterTransition()));
+
+  history_up->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
+  history_up->addTransition(new AutomaticTransition(single_line,new HistoryGuard(&history_,EDITMODE_SINGLELINE)));
+  history_down->addTransition(new AutomaticTransition(multi_line_inactive,new HistoryGuard(&history_,EDITMODE_MULTILINE_INACTIVE)));
+  history_down->addTransition(new AutomaticTransition(single_line,new HistoryGuard(&history_,EDITMODE_SINGLELINE)));
+
+  executing->addTransition(new AutomaticTransition(single_line));
+
+  machine_->setInitialState(single_line);
+  machine_->start();
+}
+
+void PythonShellWidget::OnReadonlyEntered()
+{
+  setReadOnly(true);
+  setTextInteractionFlags(textInteractionFlags() | Qt::TextSelectableByKeyboard);
+}
+
+void PythonShellWidget::OnReadwriteEntered()
+{
+  if(textCursor().position()< GetEditStartBlock().position()){
+    moveCursor(QTextCursor::End);
+  }
+  setReadOnly(false);
+}
+void PythonShellWidget::OnMixedToReadwrite()
+{
+  QTextCursor tc=textCursor();
+  if(tc.position()< GetEditStartBlock().position()){
+    tc.setPosition(GetEditStartBlock().position(),QTextCursor::KeepAnchor);
+    setTextCursor(tc);
+  }else{
+    tc.setPosition(GetEditStartBlock().position(),QTextCursor::MoveAnchor);
+    tc.setPosition(textCursor().position(),QTextCursor::KeepAnchor);
+    setTextCursor(tc);
+  }
+
+}
+
+void PythonShellWidget::OnKeypadEnterTransition()
+{
+  insertPlainText(QString(QChar::LineSeparator));
+}
+void PythonShellWidget::OnEnterTransition()
+{
+  QTextCursor cursor=textCursor();
+  cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+  setTextCursor(cursor);
+  cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
+  bool new_indent=cursor.selectedText()==":";
+  cursor.movePosition(QTextCursor::StartOfLine);
+  cursor.movePosition(QTextCursor::NextWord, QTextCursor::KeepAnchor);
+  insertPlainText(QString(QChar::ParagraphSeparator));
+  if(cursor.selectedText()[0].isSpace() && ! cursor.atBlockEnd()){
+    insertPlainText(QString(cursor.selectedText()));
+  }
+  if (new_indent){
+    insertPlainText(QString("\t"));
+  }
+}
+void PythonShellWidget::OnSingleLineStateEntered()
+{
+  set_block_edit_mode_(EDITMODE_SINGLELINE);
+}
+void PythonShellWidget::OnMultiLineActiveStateEntered()
+{
+    set_block_edit_mode_(EDITMODE_MULTILINE_ACTIVE);
+}
+void PythonShellWidget::OnMultiLineInactiveStateEntered()
+{
+  set_block_edit_mode_(EDITMODE_MULTILINE_INACTIVE);
+}
+void PythonShellWidget::OnHistoryUpStateEntered()
+{
+  if(history_.AtEnd()){
+    history_.SetCurrentCommand(GetCommand(),get_block_edit_mode_());
+  }
+  history_.MoveToPreviousMatch();
+  set_command_(history_.GetCommand());
+  set_block_edit_mode_(history_.GetCommandMode());
+}
+void PythonShellWidget::OnHistoryDownStateEntered()
+{
+  history_.MoveToNextMatch();
+  set_command_(history_.GetCommand());
+  set_block_edit_mode_(history_.GetCommandMode());
+}
+void PythonShellWidget::OnExecuteStateEntered()
+{
+  QTextCursor cursor=textCursor();
+  cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+  setTextCursor(cursor);
+  set_block_type_(block_edit_start_,textCursor().block(),BLOCKTYPE_CODE);
+  insertPlainText(QString(QChar::ParagraphSeparator));
+  QString command=GetCommand();
+  QString command_trimmed=command.trimmed();
+  if (command_trimmed.size()>0) {
+    unsigned int id=PythonInterpreter::Instance().RunCommand(command);
+    output_blocks_.insert(id,textCursor().block());
+    history_.AppendCommand(command_trimmed,get_block_edit_mode_());
+    insertPlainText(QString(QChar::ParagraphSeparator));
+  }
+  block_edit_start_=textCursor().block();
+
+}
+
 
 void PythonShellWidget::SetTabWidth(int width) {
   tab_width_=width;
@@ -115,14 +500,14 @@ int PythonShellWidget::GetTabWidth() const {
 
 
 
-void PythonShellWidget::WrapIntoFunction(const QString& command)
+void PythonShellWidget::wrap_into_function_(const QString& command)
 {
   QString tmp_command=command;
   tmp_command.replace(QString(QChar::LineSeparator),
                       QString(QChar::LineSeparator)+QString("\t"));
   QString tmp="def func():"+QString(QChar::LineSeparator)+"\t";
   tmp+=tmp_command;
-  SetCommand(tmp);
+  set_command_(tmp);
   QTextCursor tc=textCursor();
   tc.setPosition(document()->lastBlock().position()+QString("def ").length());
   tc.setPosition(document()->lastBlock().position()+
@@ -144,53 +529,92 @@ void  PythonShellWidget::InsertCompletion(const QString& completion)
   tc.insertText(completion);
   setTextCursor(tc);
 }
-
-
-void PythonShellWidget::AppendOutput(int status,const QString& output)
+void  PythonShellWidget::InsertPathCompletion(const QString& completion)
 {
-  QStringList output_list=output.split("\n");
-  if (output_list.size()>=maximumBlockCount ()){
-    QTextCursor cursor=textCursor();
-    cursor.movePosition(QTextCursor::Start);
-    cursor.movePosition(QTextCursor::End,QTextCursor::KeepAnchor);
-    cursor.removeSelectedText();
-    output_list.erase(output_list.begin(),output_list.begin()+
-                      output_list.size()+1-maximumBlockCount());
-  } else if (output_list.size()+blockCount()>maximumBlockCount()){
-    QTextCursor cursor=textCursor();
-    cursor.movePosition(QTextCursor::Start);
-    cursor.movePosition(QTextCursor::NextBlock,QTextCursor::KeepAnchor,
-                        output_list.size()+1+blockCount()-maximumBlockCount());
-    cursor.removeSelectedText();
+  QString path=QDir::fromNativeSeparators(completion);
+  // append dir separator for directories if none present (Windows adds it already for the inline completion)
+  if(QFileInfo(path).isDir() && ! completion.endsWith("/")){
+    path+="/";
   }
-  moveCursor(QTextCursor::End);
-  QTextCursor cursor=textCursor();
-  cursor.beginEditBlock();
-  if (output!="" && output_list.size()>0) {
-    for(int i=0;i<output_list.size();++i){
-      document()->lastBlock().setUserState(status);
-      insertPlainText(output_list[i]);
-      insertPlainText(QString(QChar::ParagraphSeparator));
-    }
-  }
-  document()->lastBlock().setUserState(BLOCKTYPE_ACTIVE);
-  cursor.endEditBlock();
-  verticalScrollBar()->triggerAction(QAbstractSlider::SliderToMaximum);
-  this->ensureCursorVisible();  
+  InsertCompletion(path);
 }
 
 
-
-void PythonShellWidget::SetCommand(const QString& command)
+void PythonShellWidget::AppendOutput(unsigned int id,const QString& output)
 {
-  QTextCursor cursor=textCursor();
-  cursor.setPosition(document()->lastBlock().position());
+  OutputBlockList::iterator it=output_blocks_.find(id);
+  if(it==output_blocks_.end()){
+    return;
+  }
+  if(! it->isValid()){
+    return;
+  }
+  QTextCursor cursor(*it);
+  cursor.movePosition(QTextCursor::EndOfBlock);
+  cursor.insertText(output);
+  set_block_type_(output_blocks_[id],cursor.block(),BLOCKTYPE_OUTPUT);
+  output_blocks_[id]=cursor.block();
+  verticalScrollBar()->triggerAction(QAbstractSlider::SliderToMaximum);
+  ensureCursorVisible();
+  repaint();
+  QApplication::processEvents();
+}
+
+void PythonShellWidget::AppendError(unsigned int id,const QString& output)
+{
+  OutputBlockList::iterator it=output_blocks_.find(id);
+  if(it==output_blocks_.end()){
+    return;
+  }
+  if(! it->isValid()){
+    return;
+  }
+  QTextCursor cursor(*it);
+  cursor.movePosition(QTextCursor::EndOfBlock);
+  cursor.insertText(output);
+  set_block_type_(output_blocks_[id],cursor.block(),BLOCKTYPE_ERROR);
+  output_blocks_[id]=cursor.block();
+  verticalScrollBar()->triggerAction(QAbstractSlider::SliderToMaximum);
+  ensureCursorVisible();
+  repaint();
+  QApplication::processEvents();
+}
+
+void PythonShellWidget::set_block_type_(const QTextBlock& start, const QTextBlock& end, BlockType type)
+{
+  QTextBlock block=start;
+  while(block!=end){
+    block.setUserState(type);
+    block=block.next();
+  }
+  block.setUserState(type);
+  document()->markContentsDirty(start.position(),end.position()+end.length()-start.position());
+}
+
+void PythonShellWidget::OutputFinished(unsigned int id, bool error)
+{
+  OutputBlockList::iterator it=output_blocks_.find(id);
+  if(it==output_blocks_.end()){
+    return;
+  }
+  if(it->isValid()){
+    QTextCursor cursor(*it);
+    cursor.movePosition(QTextCursor::Left,QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+  }
+  output_blocks_.erase(it);
+}
+
+void PythonShellWidget::set_command_(const QString& command)
+{
+  QTextCursor cursor(block_edit_start_);
   cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
-  cursor.beginEditBlock();
   cursor.removeSelectedText();
+  if(block_edit_start_.isValid()){
+    block_edit_start_=document()->lastBlock();
+  }
   cursor.insertText(command);
-  cursor.endEditBlock();
-  QAbstractTextDocumentLayout* layout=document()->documentLayout();  
+  QAbstractTextDocumentLayout* layout=document()->documentLayout();
   dynamic_cast<PythonShellTextDocumentLayout*>(layout)->EmitSizeChange();
   verticalScrollBar()->triggerAction(QAbstractSlider::SliderToMaximum);
   ensureCursorVisible();
@@ -216,7 +640,7 @@ void PythonShellWidget::Complete(bool inline_completion)
     completion_end_=positions->GetEnd(literal_index);
     QTextCursor cp=textCursor();
     QString text=cursor.selectedText();        
-    int sep=text.lastIndexOf(QDir::separator());    
+    int sep=text.lastIndexOf("/");    
     cp.setPosition(positions->GetStart(literal_index));
     if (sep!=-1) {
       cp.movePosition(QTextCursor::NextCharacter,
@@ -225,7 +649,7 @@ void PythonShellWidget::Complete(bool inline_completion)
     if (QDir(text).isAbsolute()) {
       emit SetPathCompletionPrefix(text);
     } else {
-      emit SetPathCompletionPrefix(QDir::currentPath()+QDir::separator()+text);
+      emit SetPathCompletionPrefix(QDir::currentPath()+"/"+text);
     }
     emit RequestPathCompletion(cursorRect(cp), 
                                inline_completion);
@@ -253,69 +677,34 @@ void PythonShellWidget::Complete(bool inline_completion)
   }
 }
 
-bool PythonShellWidget::HandleNav(QKeyEvent* event)
-{
-  if(event->key() == Qt::Key_Up){
-     if (GetBlockEditMode()!=EDITMODE_MULTILINE_ACTIVE) {
-       SanitizeCursorPosition();
-       if(history_.AtEnd()){
-         history_.SetCurrentCommand(textCursor().block().text(),
-                                    GetBlockEditMode());
-       }
-       --history_;
-       SetCommand(history_.GetCommand());
-       this->SetBlockEditMode(history_.GetCommandMode());
-       return true;
-     }else{
-       QTextCursor temporary_cursor=textCursor();
-       int temp_position_before=temporary_cursor.position();
-       temporary_cursor.movePosition(QTextCursor::Up);
-       if (temporary_cursor.position()<document()->lastBlock().position() && 
-           temp_position_before>=document()->lastBlock().position() && 
-           !(event->modifiers() & Qt::ShiftModifier)) {
-         return true;
-       }
-     }
-   }
-   if (event->key() == Qt::Key_Down && 
-       GetBlockEditMode()!=EDITMODE_MULTILINE_ACTIVE) {
-     SanitizeCursorPosition();
-     ++history_;
-     SetCommand(history_.GetCommand());
-     this->SetBlockEditMode(history_.GetCommandMode());     
-     return true;
-   }  
-  return false;
-}
 
-bool PythonShellWidget::HandleCustomCommands(QKeyEvent* event)
+
+bool PythonShellWidget::handle_custom_commands_(QKeyEvent* event)
 {
-  // see ticket #38
-  #if 0
   if ((event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) && 
       event->key() == Qt::Key_H) {
-    SetOutputVisible(!output_visible_);
+    set_output_visible_(!output_visible_);
     return true;
   }
-  #endif
+
   if ((event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier)) && 
       event->key() == Qt::Key_W) {
-    WrapIntoFunction(textCursor().selectedText());
+    wrap_into_function_(textCursor().selectedText());
     return true;
   }
   // custom handling of CTRL+A to select only text in edit or output section
   if (event->modifiers() == Qt::ControlModifier && 
       event->key() == Qt::Key_A) {
     QTextCursor cursor=textCursor();
-    if(cursor.position()<document()->lastBlock().position()){
+    if(cursor.position()<GetEditStartBlock().position()){
       // select all output
       cursor.setPosition(0);
-      cursor.setPosition(document()->lastBlock().position(),QTextCursor::KeepAnchor);
+      cursor.setPosition(GetEditStartBlock().position(),QTextCursor::KeepAnchor);
       setTextCursor(cursor);
     }else{
       //select whole edit section
-      cursor.movePosition(QTextCursor::StartOfBlock);
-      cursor.movePosition(QTextCursor::EndOfBlock,QTextCursor::KeepAnchor);
+      cursor.setPosition(GetEditStartBlock().position());
+      cursor.movePosition(QTextCursor::End,QTextCursor::KeepAnchor);
       setTextCursor(cursor);
     }
     return true;
@@ -323,81 +712,8 @@ bool PythonShellWidget::HandleCustomCommands(QKeyEvent* event)
   return false;
 }
 
-bool PythonShellWidget::HandleReturnKey(QKeyEvent* event)
-{
-  if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
-    QString command=textCursor().block().text();    
-    SanitizeCursorPosition();
-    command.replace(QString(QChar::LineSeparator),QString("\n"));
-    bool execute_cmd=false;
-    bool insert_new_line=false;
-    bool move_to_end=false;
-    if (mode_==SHELL_INTERACTION_MATHEMATICA) {
-      if (event->modifiers() & Qt::ControlModifier ||
-          (command.endsWith("\n") && textCursor().atEnd())) {
-        execute_cmd=true;
-        move_to_end=(event->modifiers() & Qt::ControlModifier)==false;
-      } else {
-        if (textCursor().block().text().trimmed().length()==0) {
-          return true;
-        }
-        insert_new_line=true;
-        move_to_end=true;
-      }
-    } else {
-      if (event->modifiers() & Qt::ControlModifier) {
-        insert_new_line=true;
-        move_to_end=false;
-      } else {
-        PythonInterpreter& pi=PythonInterpreter::Instance();
-        CodeBlockStatus status=pi.GetCodeBlockStatus(command);
-        if (status!=CODE_BLOCK_INCOMPLETE) {
-          execute_cmd=true;
-          move_to_end=true;
-        } else {
-          insert_new_line=true;
-          move_to_end=true;
-        }
-      }
-    }
-    QTextCursor cursor=this->textCursor();      
-    if (move_to_end) {
-      cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
-      this->setTextCursor(cursor);
-    }    
-    if (insert_new_line) {
-      cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor);
-      bool new_indent=cursor.selectedText()==":";
-      cursor.movePosition(QTextCursor::StartOfLine);
-      cursor.movePosition(QTextCursor::NextWord, QTextCursor::KeepAnchor);
-      insertPlainText(QString(QChar::LineSeparator));
-      if(cursor.selectedText()[0].isSpace()){
-        insertPlainText(QString(cursor.selectedText()));
-      }
-      if (new_indent){
-        insertPlainText(QString("\t"));
-      }
-      QAbstractTextDocumentLayout* layout=document()->documentLayout();
-      dynamic_cast<PythonShellTextDocumentLayout*>(layout)->EmitSizeChange();
-      verticalScrollBar()->triggerAction(QAbstractSlider::SliderToMaximum);
-      SetBlockEditMode(EDITMODE_MULTILINE_ACTIVE);
-      return true;
-    }
-    if (execute_cmd) {
-      QKeyEvent new_event(event->type(),event->key(),
-                          Qt::NoModifier,
-                          event->text(),event->isAutoRepeat(),
-                          event->count());
-      QPlainTextEdit::keyPressEvent(&new_event);
-      ExecuteCommand();
-      return true;                          
-    }
-  }
-  return false;
-}
 
-
-bool PythonShellWidget::HandleCompletion(QKeyEvent* event)
+bool PythonShellWidget::handle_completion_(QKeyEvent* event)
 {
   if(event->key() == Qt::Key_Tab){
     QRegExp rx("^\\s*$"); // only white spaces from beginning of line
@@ -413,79 +729,32 @@ bool PythonShellWidget::HandleCompletion(QKeyEvent* event)
   return false;
 }
 
+QTextBlock PythonShellWidget::GetEditStartBlock()
+{
+  return block_edit_start_;
+}
+
 
 void PythonShellWidget::keyPressEvent(QKeyEvent* event)
 {
-  if (this->HandleCustomCommands(event))
-    return;
-    
-  if (this->HandleCompletion(event))
-    return;
-  if (this->HandleNav(event))
-    return;
-
-  if (this->HandleReturnKey(event))
-    return;
-  if ((event->text()!="" && !(event->modifiers() & Qt::ControlModifier)) || 
-      event->matches(QKeySequence::Cut)  ||  event->key()== Qt::Key_Delete){
-    SanitizeCursorPosition();
-    if(GetBlockEditMode()==EDITMODE_MULTILINE_INACTIVE){
-      SetBlockEditMode(EDITMODE_MULTILINE_ACTIVE);
-    }
-  }
-  if (GetBlockEditMode()==EDITMODE_MULTILINE_ACTIVE && event->key()==Qt::Key_Escape){
-    SetBlockEditMode(EDITMODE_MULTILINE_INACTIVE);
-  }
-  
-  if (GetBlockEditMode()==EDITMODE_MULTILINE_INACTIVE && (event->key()==Qt::Key_Right || 
-      event->key() == Qt::Key_Left)) {
-    SetBlockEditMode(EDITMODE_MULTILINE_ACTIVE);
-  }
-  
-  if (event->key()== Qt::Key_Backspace && 
-      textCursor().position()<=document()->lastBlock().position()
-     && !textCursor().hasSelection()){
+  if (this->handle_custom_commands_(event)){
     return;
   }
-  
-
-  if (event->key()== Qt::Key_Left && 
-      textCursor().position()==document()->lastBlock().position() && 
-      !(event->modifiers() & Qt::ShiftModifier)) {
+  if (this->handle_completion_(event)){
     return;
   }
   QPlainTextEdit::keyPressEvent(event);
 }
 
-void PythonShellWidget::ExecuteCommand()
-{
-  QString command=textCursor().block().previous().text();
-  textCursor().block().previous().setUserState(BLOCKTYPE_CODE);
-  document()->markContentsDirty(textCursor().block().previous().position(),
-                                textCursor().block().previous().length());
-  QString cmd=command;
-  cmd.replace(QString(QChar::LineSeparator),QString("\n"));
-  emit Execute(cmd);
-
-  command=command.trimmed();
-  if (command.size()>0) {
-    history_.AppendCommand(command,GetBlockEditMode());
-  }
-  if (mode_==SHELL_INTERACTION_MATHEMATICA) {
-    SetBlockEditMode(EDITMODE_MULTILINE_INACTIVE);
-  } else {
-    SetBlockEditMode(EDITMODE_SINGLELINE);
-  }  
-}
 
 void PythonShellWidget::mouseReleaseEvent(QMouseEvent * event)
 {
   QTextCursor mouse_cursor=cursorForPosition(event->pos());
-  if (GetBlockEditMode()==EDITMODE_MULTILINE_INACTIVE && 
+  if (get_block_edit_mode_()==EDITMODE_MULTILINE_INACTIVE &&
       event->button() == Qt::LeftButton &&
       mouse_cursor.position()>=document()->lastBlock().position()) {
     // switch to active edit mode upon mouse click in edit section
-    SetBlockEditMode(EDITMODE_MULTILINE_ACTIVE);
+    set_block_edit_mode_(EDITMODE_MULTILINE_ACTIVE);
   }
   if (event->button() == Qt::MidButton && 
       mouse_cursor.position()<document()->lastBlock().position()) {
@@ -496,51 +765,35 @@ void PythonShellWidget::mouseReleaseEvent(QMouseEvent * event)
   QPlainTextEdit::mouseReleaseEvent(event);
 }
 
-void PythonShellWidget::SanitizeCursorPosition()
-{
-  if(textCursor().position()<document()->lastBlock().position()){
-    if(textCursor().anchor()<document()->lastBlock().position()){
-      moveCursor(QTextCursor::End);
-    }else{
-      QTextCursor cursor=textCursor();
-      cursor.setPosition(document()->lastBlock().position(),
-                         QTextCursor::KeepAnchor);
-      setTextCursor(cursor);
-    }
-  }else{
-    if(textCursor().anchor()<document()->lastBlock().position()){
-      int current_position=textCursor().position();
-      QTextCursor cursor=textCursor();
-      cursor.setPosition(document()->lastBlock().position());
-      cursor.setPosition(current_position,QTextCursor::KeepAnchor);
-      setTextCursor(cursor);
-    }
-  }
-}
 
-void PythonShellWidget::SetBlockEditMode(BlockEditMode flag)
+
+void PythonShellWidget::set_block_edit_mode_(BlockEditMode flag)
 {
   block_edit_mode_=flag;
   if(flag==EDITMODE_MULTILINE_ACTIVE){
-    document()->lastBlock().setUserState(BLOCKTYPE_BLOCKEDIT);
+    set_block_type_(block_edit_start_,document()->lastBlock(),BLOCKTYPE_BLOCKEDIT);
   }else if(flag==EDITMODE_MULTILINE_INACTIVE){
-    document()->lastBlock().setUserState(BLOCKTYPE_ACTIVE);
+    set_block_type_(block_edit_start_,document()->lastBlock(),BLOCKTYPE_ACTIVE);
   }else {
-    document()->lastBlock().setUserState(BLOCKTYPE_ACTIVE);
+    set_block_type_(block_edit_start_,document()->lastBlock(),BLOCKTYPE_ACTIVE);
   }
   gutter_->update();
-  document()->markContentsDirty(document()->lastBlock().position(),
-                                document()->lastBlock().length());
 }
 
-BlockEditMode PythonShellWidget::GetBlockEditMode()
+BlockEditMode PythonShellWidget::get_block_edit_mode_()
 {
   return block_edit_mode_;
 }
 
 QString PythonShellWidget::GetCommand()
 {
-  return document()->lastBlock().text();
+
+  QTextCursor cursor(block_edit_start_);
+  cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+  QString text= cursor.selectedText();
+  text.replace(QChar::LineSeparator,"\n");
+  text.replace(QChar::ParagraphSeparator,"\n");
+  return text;
 }
 
 void PythonShellWidget::insertFromMimeData(const QMimeData * source)
@@ -549,7 +802,7 @@ void PythonShellWidget::insertFromMimeData(const QMimeData * source)
     return;
   }
   QString text=source->text();
-  SanitizeCursorPosition();
+  readonly_machine_->setActive(readwrite_state_);
   text=text.replace("\r\n", QString(1, QChar::LineSeparator))
            .replace('\n', QChar::LineSeparator)
            .replace('\r', QChar::LineSeparator);
@@ -568,19 +821,12 @@ void PythonShellWidget::insertFromMimeData(const QMimeData * source)
     lines[i]=QString(num_spaces, '\t')+right;
   }
   text=lines.join(QString(1, QChar::LineSeparator));
-  int line_sep=text.count(QChar::LineSeparator);
-  if(line_sep>0){
-    QString command=GetCommand();
-    int last_block_start=document()->lastBlock().position();
-    int last_block_end=last_block_start+document()->lastBlock().length();    
-    int shifted_start=textCursor().selectionStart()-last_block_start;
-    int shifted_end=last_block_end-textCursor().selectionEnd();
-    QString rpl_text=command.left(shifted_start)+text+
-                     command.right(shifted_end-1);
-    this->SetCommand(rpl_text);
-    SetBlockEditMode(EDITMODE_MULTILINE_ACTIVE);
-  }else{
-    QPlainTextEdit::insertFromMimeData(source);
+  if(lines.size()>0){
+    machine_->setActive(multiline_active_state_);
+  }
+  QPlainTextEdit::insertFromMimeData(source);
+  if(lines.size()>0){
+    set_block_type_(block_edit_start_,document()->lastBlock(),BLOCKTYPE_BLOCKEDIT);
   }
 }
 
@@ -602,17 +848,22 @@ GutterBlockList PythonShellWidget::GetGutterBlocks(const QRect& rect)
   return result;
 }
 
-void PythonShellWidget::SetOutputVisible(bool flag)
+void PythonShellWidget::set_output_visible_(bool flag)
 {
   output_visible_=flag;
   for (QTextBlock i=document()->begin(); i!=document()->end(); i=i.next()) {
     if(i.userState()==BLOCKTYPE_ERROR || i.userState()==BLOCKTYPE_OUTPUT){
       i.setVisible(flag);
+      i.setLineCount(flag ? qMax(1, i.layout()->lineCount()) : 0);
     }
   }
+  dynamic_cast<PythonShellTextDocumentLayout*>(document()->documentLayout())->requestUpdate();
+  dynamic_cast<PythonShellTextDocumentLayout*>(document()->documentLayout())->EmitSizeChange();
+  ensureCursorVisible();
+  repaint();
   gutter_->update();
-  viewport()->update();  
-  this->update();  
+  viewport()->update();
+  this->update();
 }
 
 void PythonShellWidget::resizeEvent(QResizeEvent* event)
@@ -631,19 +882,5 @@ void PythonShellWidget::showEvent(QShowEvent* event)
   }
 }
 
-void PythonShellWidget::AquireFocus()
-{
-  setFocus(Qt::OtherFocusReason);
-}
-
-void PythonShellWidget::AddLogger(TextLogger* logger)
-{
-  loggers_.push_back(logger);
-  logger->setParent(this);  
-  connect(this,SIGNAL(Execute(const QString&)),
-          logger,SLOT(AppendCode(const QString&)));
-  connect(&PythonInterpreter::Instance(),SIGNAL(Done(int,const QString&)),
-          logger,SLOT(AppendOutput(int,const QString&)));
-}
 
 }}

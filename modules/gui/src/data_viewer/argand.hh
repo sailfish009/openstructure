@@ -25,8 +25,6 @@
 #ifndef OST_GUI_ARGAND_H
 #define OST_GUI_ARGAND_H
 
-#include <QWidget>
-#include <QPixmap>
 
 #include <ost/base.hh>
 #include <ost/img/data.hh>
@@ -35,6 +33,8 @@
 
 #include <ost/gui/module_config.hh>
 
+#include <QWidget>
+#include <QPixmap>
 namespace ost { namespace img { namespace gui {
 
 class DLLEXPORT_OST_GUI Argand: public QWidget, public DataObserver 

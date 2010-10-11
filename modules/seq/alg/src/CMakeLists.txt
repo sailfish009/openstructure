@@ -3,19 +3,17 @@ sequence_identity.hh
 module_config.hh
 ins_del.hh
 subst_weight_matrix.hh
-local_align.hh
 alignment_opts.hh
-global_align.hh
 merge_pairwise_alignments.hh
+conservation.hh
 )
 
 set(OST_SEQ_ALG_SOURCES
 merge_pairwise_alignments.cc
-global_align.cc
 sequence_identity.cc
 ins_del.cc
 subst_weight_matrix.cc
-local_align.cc
+conservation.cc
 )
 
 module(NAME seq_alg HEADER_OUTPUT_DIR ost/seq/alg SOURCES ${OST_SEQ_ALG_SOURCES}

@@ -42,11 +42,12 @@ class PresetEditorListModel(QtCore.QAbstractListModel):
     if index.isValid() and index.row()< self.rowCount():
       data = self.preset_.GetOp(index.row())
       if role == QtCore.Qt.DisplayRole:
+        name=data.GetName()
         selection=str(data.GetSelection())
         if(len(selection)>0):
-          return QtCore.QVariant(selection)
+          return QtCore.QVariant(str("%s (%s)"%(name,selection.replace(os.linesep, " "))))
         else:
-          return QtCore.QVariant("all")
+          return QtCore.QVariant(str("%s (all)"%name))
     return QtCore.QVariant()
 
   def setData(self, index, value, role):

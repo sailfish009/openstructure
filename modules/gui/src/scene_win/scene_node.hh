@@ -19,11 +19,11 @@
 #ifndef OST_GUI_SCENE_WIN_SCENE_NODE_HH
 #define OST_GUI_SCENE_WIN_SCENE_NODE_HH
 
+#include <ost/gui/module_config.hh>
+
 #include <QObject>
 #include <QVariant>
 #include <QModelIndex>
-
-#include <ost/gui/module_config.hh>
 
 /*
   Author: Stefan Scheuber

@@ -16,21 +16,17 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <string>
 
 #include <boost/python.hpp>
+#include <string>
 #include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-using namespace boost::python;
+
 
 #include <ost/gui/widget.hh>
-#include <ost/gui/widget_registry.hh>
-#include <ost/gui/gosty_app.hh>
-#include <ost/gui/perspective.hh>
-#include <ost/gui/panel_bar/panels.hh>
 
 #include "sip_handler.hh"
 
+using namespace boost::python;
 using namespace ost;
 using namespace ost::gui;
 
@@ -39,22 +35,22 @@ struct WrappedWidget : public Widget
 {
   WrappedWidget(PyObject *p, object py_object):
        Widget(NULL,NULL){
-    if(QWidget* widget = get_cpp_qobject<QWidget>(py_object)){
+    if (QWidget* widget=get_cpp_qobject<QWidget>(py_object)) {
       this->SetInternalWidget(widget);
     }
   }
-
   virtual bool Restore(const QString& prefix){return true;}
 
   virtual bool Save(const QString& prefix){return true;}
 
   virtual ~WrappedWidget(){ }
-
+private:
+  QString   unique_id_;
 };
 
 void export_Widget()
 {
-  class_<Widget, WrappedWidget, boost::noncopyable>("WrappedWidget",init<object>())
+  class_<Widget, WrappedWidget, boost::noncopyable>("Widget", init<object>())
     .def("Save", &WrappedWidget::Save)
     .def("Restore", &WrappedWidget::Restore)
     .def("SetDestroyOnClose", &WrappedWidget::SetDestroyOnClose)

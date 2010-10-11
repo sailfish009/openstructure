@@ -77,11 +77,20 @@ if (USE_SHADER)
 else()
   set(_SHADER OFF)
 endif()
-
+if (COMPILE_TMTOOLS)
+  set(_TM_TOOLS ON)
+else()
+  set(_TM_TOOLS OFF)
+endif()
 if (ENABLE_IMG)
   set(_IMG ON)
 else()
   set(_IMG OFF)
+endif()
+if (PROFILE)
+  set(_PROFILE ON)
+else()
+  set(_PROFILE OFF)
 endif()
 
 if (COMPOUND_LIB)
@@ -194,11 +203,11 @@ set(BOOST_REGEX_LIBRARIES ${Boost_LIBRARIES})
 #find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS math REQUIRED)
 #set(BOOST_MATH_LIBRARIES ${Boost_LIBRARIES})
 
-find_package(Qt4 4.4.3 REQUIRED)
+find_package(Qt4 4.5.0 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Eigen 2.0.0 REQUIRED)
-find_package(Python 2.2.1 REQUIRED)
+find_package(Python 2.4 REQUIRED)
 
 if (ENABLE_IMG)
   find_package(FFTW REQUIRED)
@@ -247,14 +256,17 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
 
 message(STATUS 
         "OpenStructure will be built with the following options:\n"
+        "   Install Prefix                  (-PREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
         "   RPath in install            (-DUSE_RPATH) : ${_USE_RPATH}\n"
-        "   Graphical interface         (-DENABLE_UI) : ${_UI}\n"
+        "   Graphical interface        (-DENABLE_GUI) : ${_UI}\n"
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"        
+        "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support             (-DUSE_SHADER) : ${_SHADER}\n"
         "   Optimize                     (-DOPTIMIZE) : ${_OPT}\n"
+        "   Profiling support             (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
-        "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}")
+        "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
+        "   TMAlign and TMScore   (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}")
         
 # doc target to create HTML documentation
 #set(SPHINX sphinx-build)

@@ -122,7 +122,7 @@ Vec3 PixelSampling::Vec2Coord(const Vec3& p) const
 void PixelSampling::set_spat_scale(const Vec3& dim)
 {
   if(dim[0]<=0.0 || dim[1]<0.0 || dim[2]<0.0) {
-    LOG_ERROR("invalid spatial pixel sampling, must be >0" << std::endl);
+    LOG_ERROR("invalid spatial pixel sampling, must be >0");
     return;
   }
   spat_scale_=dim;

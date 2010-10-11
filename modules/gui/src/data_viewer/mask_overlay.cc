@@ -73,7 +73,7 @@ void MaskOverlay::OnDraw(QPainter& pnt, DataViewerPanel* dvp, bool is_active)
     geom::Polygon2 pol=polygons_[i];
     QPolygon qpol;
     for(int j=0;j<static_cast<int>(pol.GetNodeCount());++j){
-      qpol << dvp->FracPointToWinCenter(pol.GetNode(j));
+      qpol << dvp->FracPointToWinCenter(pol.GetNode(j)+shift_);
       pnt.drawEllipse(qpol.back(),3,3);
     }
     pnt.drawPolygon(qpol);
@@ -89,7 +89,7 @@ void MaskOverlay::OnDraw(QPainter& pnt, DataViewerPanel* dvp, bool is_active)
     }
     QPolygon qpol;
     for(int j=0;j<static_cast<int>(new_poly_.GetNodeCount());++j){
-      qpol << dvp->FracPointToWinCenter(new_poly_.GetNode(j));
+      qpol << dvp->FracPointToWinCenter(new_poly_.GetNode(j)+shift_);
       pnt.drawEllipse(qpol.back(),3,3);
     }
     pnt.drawPolygon(qpol);
@@ -103,11 +103,7 @@ bool MaskOverlay::OnMouseEvent(QMouseEvent* e,  DataViewerPanel* dvp,
 
   geom::Vec2 mousepos=dvp->WinToFracPoint(e->pos());
   geom::Vec2 diffpos=mousepos-old_mouse_pos_;
-  if(e->buttons() & Qt::RightButton){
-    for(std::vector<geom::Polygon2>::iterator it=polygons_.begin();it!=polygons_.end();++it){
-      (*it)=(*it)+diffpos;
-    }
-    new_poly_=new_poly_+diffpos;
+  if(e->buttons() & Qt::RightButton && e->button()==Qt::NoButton){
     shift_+=diffpos;
   }
   old_mouse_pos_=mousepos;
@@ -212,6 +208,20 @@ void MaskOverlay::ClearMask()
   polygons_.clear();
   active_=-1;
   add_mode_=false;
+}
+
+void MaskOverlay::SetShift(geom::Vec2 shift)
+{
+  shift_=shift;
+}
+
+void MaskOverlay::ApplyShiftToMask()
+{
+  for(std::vector<geom::Polygon2>::iterator it=polygons_.begin();it!=polygons_.end();++it){
+    (*it)=(*it)+shift_;
+  }
+  new_poly_=new_poly_+shift_;
+  shift_=geom::Vec2(0.0,0.0);
 }
 
 

@@ -26,7 +26,7 @@ namespace ost { namespace conop {
 
 Builder::~Builder() {}
 
-void Builder::CompleteAtoms(const mol::ResidueHandle& rh) {}
+void Builder::CompleteAtoms(mol::ResidueHandle rh) {}
 
 void Builder::CheckResidueCompleteness(const mol::ResidueHandle& rh) {}
 
@@ -34,10 +34,10 @@ mol::ResidueKey Builder::IdentifyResidue(const mol::ResidueHandle& rh) {
   return mol::ResidueKey();
 }
 void Builder::FillResidueProps(mol::ResidueHandle residue){};
-void Builder::ConnectAtomsOfResidue(const mol::ResidueHandle& rh) {}
+void Builder::ConnectAtomsOfResidue(mol::ResidueHandle rh) {}
 
-void Builder::ConnectResidueToPrev(const mol::ResidueHandle& rh, 
-                                   const mol::ResidueHandle& p) {
+void Builder::ConnectResidueToPrev(mol::ResidueHandle rh, 
+                                   mol::ResidueHandle p) {
   this->ConnectResidueToNext(p, rh);
 }
 
@@ -46,11 +46,11 @@ bool Builder::IsResidueComplete(const mol::ResidueHandle& rh)
   return true;
 }
 
-void Builder::ConnectResidueToNext(const mol::ResidueHandle& rh, 
-                                   const mol::ResidueHandle& n) {}
+void Builder::ConnectResidueToNext(mol::ResidueHandle rh, 
+                                   mol::ResidueHandle n) {}
 
-void Builder::AssignTorsions(const mol::ChainHandle& ch) {}
-void Builder::AssignTorsionsToResidue(const mol::ResidueHandle& rh) {}
+void Builder::AssignTorsions(mol::ChainHandle ch) {}
+void Builder::AssignTorsionsToResidue(mol::ResidueHandle rh) {}
 
 void Builder::FillAtomProps(mol::AtomHandle atom) {}
 
@@ -159,7 +159,7 @@ bool Builder::AreResiduesConsecutive(const mol::ResidueHandle& r1,
          r2.GetNumber().GetInsCode()==r1.GetNumber().NextInsertionCode().GetInsCode();
 }
 
-void Builder::AssignBackBoneTorsionsToResidue(const mol::ResidueHandle& res)
+void Builder::AssignBackBoneTorsionsToResidue(mol::ResidueHandle res)
 {
 
   mol::ResidueHandle prev=res.GetPrev();
@@ -202,7 +202,7 @@ void Builder::AssignBackBoneTorsionsToResidue(const mol::ResidueHandle& res)
 
 
 
-void Builder::DistanceBasedConnect(const mol::AtomHandle& atom)
+void Builder::DistanceBasedConnect(mol::AtomHandle atom)
 {
   mol::EntityHandle ent=atom.GetEntity();
   mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);

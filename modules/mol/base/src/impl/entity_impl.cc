@@ -262,60 +262,29 @@ EntityImpl::~EntityImpl()
     it->second->OnDestroy();
   }
 }
-
-geom::Vec3 EntityImpl::GetGeometricStart() const 
+geom::AlignedCuboid EntityImpl::GetBounds() const
 {
-  geom::Vec3 minimum(std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity());
-  if (this->GetAtomCount()>0) {
-    for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      minimum=geom::Min(minimum,it->second->GetPos());
-    }
-  }
-  return minimum;
-}
 
-geom::Vec3 EntityImpl::GetGeometricEnd() const {
-  geom::Vec3 maximum(-std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity());
   if (this->GetAtomCount()>0) {
-    for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      maximum=geom::Max(maximum,it->second->GetPos());
+    geom::Vec3 mmin, mmax;    
+    AtomImplMap::const_iterator it=atom_map_.begin();
+    mmin=mmax=it->second->GetPos();
+    for (++it; it!=atom_map_.end();++it) {
+      mmin=geom::Min(mmin,it->second->GetPos());
+      mmax=geom::Max(mmax,it->second->GetPos());
     }
+    return geom::AlignedCuboid(mmin, mmax);    
+  } else {
+    return geom::AlignedCuboid(geom::Vec3(), geom::Vec3());
   }
-  return maximum;
-}
 
-geom::Vec3 EntityImpl::GetBoundarySize() const {
-  geom::Vec3 size;
-  geom::Vec3 minimum(std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity(),
-                     std::numeric_limits<Real>::infinity());
-  geom::Vec3 maximum(-std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity(),
-                     -std::numeric_limits<Real>::infinity());
-  if (this->GetAtomCount()>0) {
-    for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      minimum=geom::Min(minimum,it->second->GetPos());
-      maximum=geom::Max(maximum,it->second->GetPos());
-    }
-  }
-  size=maximum-minimum;
-  return size;
-}
-
-geom::Vec3 EntityImpl::GetGeometricCenter() const {
-  geom::Vec3 center;
-  center = (this->GetGeometricEnd() + this->GetGeometricStart())/2;
-  return center;
 }
 
 geom::Vec3 EntityImpl::GetCenterOfAtoms() const {
   geom::Vec3 center;
   if (this->GetAtomCount()>0) {
-    for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
+    for (AtomImplMap::const_iterator it = atom_map_.begin();
+         it!=atom_map_.end();++it) {
       center+=it->second->GetPos();
     }
     center/=static_cast<Real>(atom_map_.size());
@@ -410,24 +379,24 @@ ConnectorImplP EntityImpl::Connect(const AtomImplPtr& first,
   // check for already existing connection
   if(first->GetPrimaryConnector() &&
      first->GetPrimaryConnector()->GetFirst()==second) {
-    LOGN_DUMP("connect: returning existing bond (1)");
+    LOG_DEBUG("connect: returning existing bond (1)");
     return first->GetPrimaryConnector();
   } else if(second->GetPrimaryConnector() &&
             second->GetPrimaryConnector()->GetFirst()==first) {
-    LOGN_DUMP("connect: returning existing bond (2)");
+    LOG_DEBUG("connect: returning existing bond (2)");
     return second->GetPrimaryConnector();
   } else {
     ConnectorImplList clist = first->GetSecondaryConnectors();
     for(ConnectorImplList::const_iterator it=clist.begin();it!=clist.end();++it) {
       if((*it)->GetSecond()==second) {
-        LOGN_DUMP("connect: returning existing bond (3)");
+        LOG_DEBUG("connect: returning existing bond (3)");
         return *it;
       }
     }
     clist = second->GetSecondaryConnectors();
     for(ConnectorImplList::const_iterator it=clist.begin();it!=clist.end();++it) {
       if((*it)->GetSecond()==first) {
-        LOGN_DUMP("connect: returning existing bond (4)");
+        LOG_DEBUG("connect: returning existing bond (4)");
         return *it;
       }
     }
@@ -447,7 +416,7 @@ ConnectorImplP EntityImpl::Connect(const AtomImplPtr& first,
   first->AddSecondaryConnector(bp);
   second->AddSecondaryConnector(bp);
 
-  LOG_DUMP("adding new connector " << bp << std::endl);
+  LOG_DEBUG("adding new connector " << bp);
   connector_map_.insert(ConnectorImplMap::value_type(bp.get(),bp));
   return bp;
 }
@@ -620,7 +589,7 @@ void EntityImpl::TraceDirectionality()
     for(AtomImplMap::iterator it=atom_map_.begin();it!=atom_map_.end();++it) {
       if (!it->second->IsVisited() && !it->second->HasPrevious()) {
         it->second->SetVisited(true);
-        LOGN_DUMP("dir: new fragment");
+        LOG_DEBUG("dir: new fragment");
 #if MAKE_SHARED_AVAILABLE
         FragmentImplP frag=boost::make_shared<FragmentImpl>(it->second);
 #else
@@ -632,7 +601,7 @@ void EntityImpl::TraceDirectionality()
       }
     }
     if(traced_atom_count<atom_map_.size()) {
-      LOGN_DUMP("entering closed loops search, since only " << traced_atom_count 
+      LOG_DEBUG("entering closed loops search, since only " << traced_atom_count 
                  << " from " << atom_map_.size() << " atoms were traced");
       /*
   identify closed loops that prohibit
@@ -659,7 +628,7 @@ void EntityImpl::TraceDirectionality()
           }
         }
       }
-      LOGN_DUMP("found pair [" << aip1 << "] [" << aip2 << "]");
+      LOG_DEBUG("found pair [" << aip1 << "] [" << aip2 << "]");
       // step 2: swap all connectors pointing to aip2
       // thus removing its 'visited' state
       for(ConnectorImplMap::iterator it=connector_map_.begin();
@@ -679,12 +648,12 @@ void EntityImpl::TraceDirectionality()
 
     // infinite loop safeguard
     if(traced_atom_count == traced_atom_count_prev) {
-      LOGN_VERBOSE("Encountered unbreakable locked state during directionality trace");
+      LOG_VERBOSE("Encountered unbreakable locked state during directionality trace");
       break;
     }
     traced_atom_count_prev=traced_atom_count;
   }
-  LOGN_VERBOSE("Directionality trace completed with " << fragment_list_.size()
+  LOG_VERBOSE("Directionality trace completed with " << fragment_list_.size()
                << " fragment(s)");
 }
 
@@ -695,7 +664,7 @@ bool EntityImpl::IsXCSDirty() const
 
 void EntityImpl::UpdateFromICS()
 {
-  LOG_DEBUG("updating external from internal coordinate system" << std::endl);
+  LOG_DEBUG("updating external from internal coordinate system");
   Profile prof_conv("update external from internal coordinate system");    
   // traverse through all atoms
   for(AtomImplMap::iterator it=atom_map_.begin();it!=atom_map_.end();++it) {
@@ -704,7 +673,7 @@ void EntityImpl::UpdateFromICS()
 
   for (FragmentImplList::iterator it=fragment_list_.begin();
        it!=fragment_list_.end();++it) {
-    LOG_DUMP("entering root of tree for ICS update" << std::endl;);
+    LOG_DEBUG("entering root of tree for ICS update");
     assert(*it);
     AtomImplPtr ap=(*it)->GetAtom();
     // recursive update, using position of first atom
@@ -712,10 +681,10 @@ void EntityImpl::UpdateFromICS()
     pmat=tmat*pmat;
     ap->SetICSMat(pmat);*/
     ap->UpdateFromICS();
-    LOG_DUMP("done with tree traversal for ICS update" << std::endl;);
+    LOG_DEBUG("done with tree traversal for ICS update");
   }
 
-  LOG_DEBUG("refreshing all connector positions" << std::endl;);
+  LOG_DEBUG("refreshing all connector positions");
   // refresh all connector positions
   /*
   for (ConnectorImplMap::iterator it=connector_map_.begin();
@@ -728,23 +697,23 @@ void EntityImpl::UpdateFromICS()
 
 void EntityImpl::UpdateFromXCS()
 {
-  LOGN_DEBUG("rebuilding internal from external coordinate system");
+  LOG_DEBUG("rebuilding internal from external coordinate system");
   Profile prof_conv("updating internal from external coordinate system");
   if(fragment_list_.empty()) {
     // this should have been handled by conopology after the
     // initial connectivity assignments - if not, then do it here
     Profile profile_trace("finished directionality trace");    
-    LOGN_DEBUG("warning: no fragment list, re-running directionality trace");
+    LOG_DEBUG("warning: no fragment list, re-running directionality trace");
     TraceDirectionality();
   }
 
-  if(Logger::Instance().GetLogLevel()>=Logger::DUMP) {
-    LOGN_DUMP("dumping directionality");
+  if(Logger::Instance().GetLogLevel()>Logger::DEBUG) {
+    LOG_TRACE("dumping directionality");
     for(AtomImplMap::iterator it=atom_map_.begin();it!=atom_map_.end();++it) {
-      LOGN_DUMP(" " << it->second << ":");
+      LOG_TRACE(" " << it->second << ":");
       ConnectorImplList clist = it->second->GetSecondaryConnectors();
       for(ConnectorImplList::const_iterator cit=clist.begin();cit!=clist.end();++cit) {
-        LOGN_DUMP("  " << (*cit)->GetFirst() << " -> " << (*cit)->GetSecond());
+        LOG_TRACE("  " << (*cit)->GetFirst() << " -> " << (*cit)->GetSecond());
       }
     }
   }
@@ -756,7 +725,7 @@ void EntityImpl::UpdateFromXCS()
 
   for (FragmentImplList::iterator it=fragment_list_.begin();
        it!=fragment_list_.end();++it) {
-    LOGN_DUMP("entering fragment tree traversal for XCS update");
+    LOG_DEBUG("entering fragment tree traversal for XCS update");
     FragmentImplP frag= *it;
     AtomImplPtr atom = frag->GetAtom();
     {
@@ -767,7 +736,7 @@ void EntityImpl::UpdateFromXCS()
 
 void EntityImpl::Apply(EntityVisitor& v)
 {
-  LOG_TRACE("visitor @" << &v << " visiting entity impl @" << this << std::endl);
+  LOG_TRACE("visitor @" << &v << " visiting entity impl @" << this);
   v.OnEntry();
   for(ChainImplList::iterator 
       it = chain_list_.begin();it!=chain_list_.end();++it) {
@@ -879,36 +848,36 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
 {
 
   BondTableType bond_table;
-  LOGN_DUMP("entering do selection");
+  LOG_DEBUG("entering do selection");
 
   size_t chain_count = 0, residue_count = 0, atom_count = 0;
   bool c_added, r_added;
-  LOGN_DUMP("creating view");
+  LOG_DEBUG("creating view");
   EntityView view(eh);
-  LOGN_DUMP("creating query state");
+  LOG_DEBUG("creating query state");
   EntityHandle myself(const_cast<impl::EntityImpl*>(this)->shared_from_this());
   QueryState qs(query.CreateQueryState(myself));
-  LOGN_DUMP("entering chain loop");
+  LOG_DEBUG("entering chain loop");
   for (ChainImplList::const_iterator 
        ch_it=chain_list_.begin(); ch_it!=chain_list_.end();++ch_it) {
-    LOGN_DUMP("checking chain " << (*ch_it)->GetName());
+    LOG_DEBUG("checking chain " << (*ch_it)->GetName());
     c_added = false;
     tribool c = always_true ? tribool(true) : qs.EvalChain(*ch_it);
     if (c == true) {
-      LOGN_DUMP("chain is selected");
+      LOG_DEBUG("chain is selected");
       // Include all residues
       const ChainImplPtr& ci=*ch_it;
       ++chain_count;
       ChainView chain=view.AddChain(ci);
       ResidueImplList::const_iterator re_it = ci->GetResidueList().begin();
       for ( ;re_it!=ci->GetResidueList().end();++re_it) {
-        LOGN_DUMP(" adding residue " << (*re_it)->GetNumber());
+        LOG_DEBUG(" adding residue " << (*re_it)->GetNumber());
         ResidueImplPtr& ri = const_cast<ResidueImplPtr&>(*re_it);
         ++residue_count;
         ResidueView res =chain.AddResidue(ri);
         AtomImplList::const_iterator at_it = ri->GetAtomList().begin();
         for (;at_it != ri->GetAtomList().end(); ++at_it) {
-          LOGN_DUMP("  adding atom " << (*at_it)->GetName());
+          LOG_DEBUG("  adding atom " << (*at_it)->GetName());
           ++atom_count;
           if (flags & QueryFlag::NO_BONDS) {
             res.AddAtom(*at_it);
@@ -925,11 +894,11 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
       ChainView chain;
       ResidueImplList::const_iterator re_it = ci->GetResidueList().begin();
       for ( ;re_it!=ci->GetResidueList().end();++re_it) {
-        LOGN_DUMP(" checking residue " << (*re_it)->GetNumber());
+        LOG_DEBUG(" checking residue " << (*re_it)->GetNumber());
         tribool r = qs.EvalResidue(*re_it);
         ResidueImplPtr& ri = const_cast<ResidueImplPtr&>(*re_it);
         if (r == true) {
-          LOGN_DUMP(" residue is selected");
+          LOG_DEBUG(" residue is selected");
           // Include all atoms
           ResidueImplPtr& ri = const_cast<ResidueImplPtr&>(*re_it);
           AtomImplList::const_iterator at_it = ri->GetAtomList().begin();
@@ -941,7 +910,7 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
           ++residue_count;
           ResidueView res=chain.AddResidue(ri);
           for (;at_it != ri->GetAtomList().end(); ++at_it) {
-            LOGN_DUMP("  adding atom " << (*at_it)->GetName());
+            LOG_DEBUG("  adding atom " << (*at_it)->GetName());
             ++atom_count;
             if (flags & QueryFlag::NO_BONDS) {
               res.AddAtom(*at_it);
@@ -972,7 +941,7 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
               if (flags & QueryFlag::MATCH_RESIDUES) {
                 AtomImplList::const_iterator at_it2 = ri->GetAtomList().begin();
                 for (;at_it2 != ri->GetAtomList().end(); ++at_it2) {
-                  LOGN_DUMP("  adding atom " << (*at_it2)->GetQualifiedName());
+                  LOG_DEBUG("  adding atom " << (*at_it2)->GetQualifiedName());
                   ++atom_count;                  
                   if (flags & QueryFlag::NO_BONDS) {
                     res.AddAtom(*at_it2);
@@ -983,7 +952,7 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
                 }          
                 break;
               } else {
-                LOGN_DUMP("  adding atom " << (*at_it)->GetName());
+                LOG_DEBUG("  adding atom " << (*at_it)->GetName());
                 ++atom_count;                
                 if (flags & QueryFlag::NO_BONDS) {
                   res.AddAtom(*at_it);
@@ -1004,7 +973,7 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
   }
   int bond_count=0;
   if (!(flags & QueryFlag::NO_BONDS)) {
-    LOGN_DUMP("adding bonds");
+    LOG_DEBUG("adding bonds");
     typedef BondTableType::MapType::const_iterator ConstIt;
     for (ConstIt it=bond_table.bonds.begin();it!=bond_table.bonds.end(); ++it) {
       if ((QueryFlag::EXCLUSIVE_BONDS & flags) || it->second.IsComplete()) {
@@ -1014,7 +983,7 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
       }
     }    
   }
-  LOGN_VERBOSE("selected " << chain_count << " chain(s), "
+  LOG_VERBOSE("selected " << chain_count << " chain(s), "
                << residue_count << " residue(s), " << atom_count
                << " atom(s)" << " " << bond_count << " bond(s)");
   return view;
@@ -1094,7 +1063,7 @@ void EntityImpl::UpdateXCSIfNeeded()
     dirty_flags_&=~DirtyTrace;
   }
   if (dirty_flags_ & DirtyXCS) {
-    LOGN_VERBOSE("XCS marked dirty. Updating");
+    LOG_VERBOSE("XCS marked dirty. Updating");
     this->UpdateFromICS();
     dirty_flags_&=~DirtyXCS;
   }
@@ -1132,12 +1101,12 @@ void EntityImpl::UpdateICSIfNeeded()
     return;    
   }
   if (dirty_flags_ & DirtyTrace) {
-    LOGN_VERBOSE("rerunning directionality trace");
+    LOG_VERBOSE("rerunning directionality trace");
     this->TraceDirectionality();
     this->UpdateFromXCS();
     dirty_flags_&=~DirtyTrace;
   } else if (dirty_flags_ & DirtyICS) {
-    LOGN_VERBOSE("updating internal from external coordinates");    
+    LOG_VERBOSE("updating internal from external coordinates");    
     this->UpdateFromXCS();    
     dirty_flags_&=~DirtyICS;    
   }
@@ -1156,7 +1125,7 @@ void EntityImpl::DecXCSEditorCount()
 void EntityImpl::UpdateOrganizerIfNeeded()
 {
   if (dirty_flags_ & DirtyOrganizer) {
-    LOGN_DEBUG("atom organizer marked as dirty. updating");
+    LOG_DEBUG("atom organizer marked as dirty. updating");
     this->UpdateOrganizer();
     dirty_flags_&=~DirtyOrganizer;
   }
@@ -1191,6 +1160,18 @@ impl::ChainImplList::iterator EntityImpl::GetChain(const String& name)
   }
   return  cc.end();
 }
+
+pointer_it<ChainImplPtr> EntityImpl::GetChainIter(const String& name)
+{
+  impl::ChainImplList& cc=this->GetChainList();
+  for (size_t i=0; i<cc.size(); ++i) {
+    if (cc[i]->GetName()==name) {
+      return &cc.front()+i;
+    }
+  }
+  return  pointer_it<ChainImplPtr>(NULL);
+}
+
 void EntityImpl::RenameChain(ChainImplPtr chain, const String& new_name)
 {
   ChainImplList::iterator i;

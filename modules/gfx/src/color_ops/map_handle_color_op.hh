@@ -52,6 +52,7 @@ public:
   static gfx::MapHandleColorOp FromInfo(info::InfoGroup& group);
 
 private:
+  void Init();
   img::MapHandle mh_;
 };
 

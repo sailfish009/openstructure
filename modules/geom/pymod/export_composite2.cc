@@ -42,6 +42,8 @@ void export_Composite2()
     .def("At",&Line2::At)
     .def("GetOrigin",&Line2::GetOrigin)
     .def("GetDirection",&Line2::GetDirection)
+    .add_property("direction", &Line2::GetDirection)
+    .add_property("origin", &Line2::GetOrigin)
   ;
 
   class_<Polygon2>("Polygon2",init<>())

@@ -22,7 +22,7 @@
 #include "impl/entity_impl.hh"
 #include "impl/chain_impl.hh"
 #include "impl/residue_impl.hh"
-
+#include "impl/atom_impl.hh"
 #include "mol.hh"
 
 /*
@@ -133,6 +133,12 @@ void EditorBase::ReorderResidues(const ChainHandle& chain)
 void EditorBase::ReorderAllResidues()
 {
   ent_.Impl()->ReorderAllResidues();
+}
+
+void EditorBase::RenameAtom(AtomHandle atom, const String& new_name)
+{
+  CheckHandleValidity(atom);
+  atom.Impl()->SetName(new_name);
 }
 
 BondHandle EditorBase::Connect(const AtomHandle& first,

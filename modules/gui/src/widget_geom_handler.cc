@@ -16,10 +16,10 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QSettings>
 #include <iostream>
 #include "widget_geom_handler.hh"
 
+#include <QSettings>
 namespace ost { namespace gui {
 
 WidgetGeomHandler::WidgetGeomHandler(const QString& name, QWidget* widget, QWidget* parent)

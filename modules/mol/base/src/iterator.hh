@@ -21,9 +21,7 @@
 
 #include <map>
 
-#include <ost/mol/impl/entity_impl_fw.hh>
-#include <ost/mol/impl/chain_impl_fw.hh>
-#include <ost/mol/impl/residue_impl_fw.hh>
+
 #include <ost/mol/chain_handle.hh>
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/residue_handle.hh>
@@ -32,6 +30,10 @@
 #include <ost/mol/atom_view.hh>
 #include <ost/mol/entity_handle.hh>
 #include <ost/mol/entity_view.hh>
+#include <ost/mol/impl/entity_impl_fw.hh>
+#include <ost/mol/impl/chain_impl_fw.hh>
+#include <ost/mol/impl/residue_impl_fw.hh>
+#include <ost/mol/impl/pointer_iterator.hh>
 
 namespace ost { namespace mol {
 
@@ -78,10 +80,12 @@ private:
   I cur_;
 };
 
+
 namespace impl {
-  // forward declearation of chain impl map.
+  // forward declearation of chain impl list.
   typedef std::vector<ChainImplPtr> ChainImplList;
 }
+
 class DLLEXPORT_OST_MOL ChainHandleIter : public std::iterator<std::forward_iterator_tag, 
                                              ChainHandle> {
 public: // internally used constructors
@@ -112,20 +116,20 @@ private:
 class DLLEXPORT_OST_MOL ResidueHandleIter : public std::iterator<std::forward_iterator_tag,
                                                ResidueHandle> {
 public:
-  ResidueHandleIter() {    
-  }
-  ResidueHandleIter(impl::ChainImplList::iterator chain_it, 
-                    impl::ResidueImplList::iterator res_it,
-                    impl::EntityImplPtr ent);
-  bool operator==(const ResidueHandleIter& rhs) const {
-#if defined(_MSC_VER)    
-    return cur_chain_==rhs.cur_chain_ && cur_res_==rhs.cur_res_;
-#else
+  ResidueHandleIter(): cur_chain_(NULL), cur_res_(NULL) { }
+  ResidueHandleIter(impl::pointer_it<impl::ChainImplPtr> chain_it, 
+                    impl::pointer_it<impl::ResidueImplPtr> res_it,
+                    impl::EntityImplPtr ent, bool skip_empty);
+  
+  bool operator==(const ResidueHandleIter& rhs) const 
+  {
     return cur_res_==rhs.cur_res_;
-#endif
   }
   
-  bool operator!=(const ResidueHandleIter& rhs) const {
+  void SkipEmpty();
+  
+  bool operator!=(const ResidueHandleIter& rhs) const 
+  {
     return !this->operator==(rhs);
   }
   ResidueHandleIter& operator++();
@@ -133,28 +137,24 @@ public:
   ResidueHandle operator*();
   
 private:
-  impl::ChainImplList::iterator cur_chain_;
-  impl::ResidueImplList::iterator cur_res_;
+  impl::pointer_it<impl::ChainImplPtr> cur_chain_;
+  impl::pointer_it<impl::ResidueImplPtr> cur_res_;
   impl::EntityImplPtr  ent_;
 };
 
 class DLLEXPORT_OST_MOL ResidueViewIter : public std::iterator<std::forward_iterator_tag,
                                              ResidueView> {
 public:
-  ResidueViewIter();
+  ResidueViewIter(): cur_chain_(NULL), cur_res_(NULL) { }
 
-  ResidueViewIter(ChainViewList::const_iterator chain_it,
-                  ResidueViewList::const_iterator res_it,
-                  EntityView ent);
+  ResidueViewIter(impl::pointer_it<ChainView> chain_it,
+                  impl::pointer_it<ResidueView> res_it,
+                  EntityView ent, bool skip_empty);
 
   bool operator==(const ResidueViewIter& rhs) const {
-#if defined(_MSC_VER)    
-    return cur_chain_==rhs.cur_chain_ && cur_res_==rhs.cur_res_;
-#else
-    return cur_res_==rhs.cur_res_;
-#endif    
     return cur_res_==rhs.cur_res_;
   }
+  void SkipEmpty();
   
   bool operator!=(const ResidueViewIter& rhs) const {
     return !this->operator==(rhs);
@@ -164,72 +164,70 @@ public:
   ResidueView operator*();
   
 private:
-  ChainViewList::const_iterator    cur_chain_;
-  ResidueViewList::const_iterator  cur_res_;
-  EntityView                       ent_;
+  impl::pointer_it<ChainView>    cur_chain_;
+  impl::pointer_it<ResidueView>  cur_res_;
+  EntityView                     ent_;
 };
 
 class DLLEXPORT_OST_MOL AtomHandleIter : public std::iterator<std::forward_iterator_tag,
                                             AtomHandle> {
 public:
-  AtomHandleIter(); 
+  AtomHandleIter(): cur_chain_(NULL), cur_res_(NULL), cur_atom_(NULL) { }
 
-  AtomHandleIter(impl::ChainImplList::iterator chain_it,
-                 impl::ResidueImplList::iterator res_it,
-                 impl::AtomImplList::iterator atom_it,
+  AtomHandleIter(impl::pointer_it<impl::ChainImplPtr> chain_it,
+                 impl::pointer_it<impl::ResidueImplPtr> res_it,
+                 impl::pointer_it<impl::AtomImplPtr> atom_it,
                  impl::EntityImplPtr ent, bool skip_empty);
                  
-  bool operator==(const AtomHandleIter& rhs) const {
-#if defined(_MSC_VER)    
-    return cur_chain_==rhs.cur_chain_ && cur_res_==rhs.cur_res_ &&
-           cur_atom_==rhs.cur_atom_;
-#else
+  bool operator==(const AtomHandleIter& rhs) const 
+  {
    return cur_atom_==rhs.cur_atom_;
-#endif
   }
-  bool operator!=(const AtomHandleIter& rhs) const {
-  return !this->operator==(rhs);
+  
+  bool operator!=(const AtomHandleIter& rhs) const 
+  {
+    return !this->operator==(rhs);
   }
+  
   AtomHandleIter& operator++();
 
   AtomHandle operator*();
 private:
   void SkipEmpty();
-  impl::ChainImplList::iterator cur_chain_;
-  impl::ResidueImplList::iterator cur_res_;
-  impl::AtomImplList::iterator cur_atom_;
+  impl::pointer_it<impl::ChainImplPtr> cur_chain_;
+  impl::pointer_it<impl::ResidueImplPtr> cur_res_;
+  impl::pointer_it<impl::AtomImplPtr> cur_atom_;
   impl::EntityImplPtr  ent_;
 };
 
 class DLLEXPORT_OST_MOL AtomViewIter : public std::iterator<std::forward_iterator_tag,
                                           AtomView> {
 public:
-  AtomViewIter();
+  AtomViewIter(): cur_chain_(NULL), cur_res_(NULL), cur_atom_(NULL) { }
 
-  AtomViewIter(ChainViewList::const_iterator chain_it,
-               ResidueViewList::const_iterator res_it,
-               AtomViewList::const_iterator atom_it,
+  AtomViewIter(impl::pointer_it<ChainView> chain_it,
+               impl::pointer_it<ResidueView> res_it,
+               impl::pointer_it<AtomView> atom_it,
                EntityView ent, bool skip_empty);
                  
-  bool operator==(const AtomViewIter& rhs) const {
-#if defined(_MSC_VER)    
-    return cur_chain_==rhs.cur_chain_ && cur_res_==rhs.cur_res_ &&
-           cur_atom_==rhs.cur_atom_;
-#else
+  bool operator==(const AtomViewIter& rhs) const 
+  {
    return cur_atom_==rhs.cur_atom_;
-#endif
   }
-  bool operator!=(const AtomViewIter& rhs) const {
+  
+  bool operator!=(const AtomViewIter& rhs) const 
+  {
     return !this->operator==(rhs);
   }
+  
   AtomViewIter& operator++();
 
   AtomView operator*();
 private:
   void SkipEmpty();
-  ChainViewList::const_iterator    cur_chain_;
-  ResidueViewList::const_iterator  cur_res_;
-  AtomViewList::const_iterator     cur_atom_;
+  impl::pointer_it<ChainView>    cur_chain_;
+  impl::pointer_it<ResidueView>  cur_res_;
+  impl::pointer_it<AtomView>     cur_atom_;
   EntityView                       ent_;
 };
 

@@ -16,7 +16,6 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QAction>
 
 #include <boost/python.hpp>
 
@@ -25,6 +24,7 @@
 
 #include "sip_handler.hh"
 
+#include <QAction>
 
 using namespace boost::python;
 using namespace ost;
@@ -53,6 +53,7 @@ void export_SceneWin()
       .value("NOT_VISIBLE", NOT_VISIBLE)
       .value("NOT_HIDDEN", NOT_HIDDEN)
       .value("NOT_SCENE", NOT_SCENE)
+      .value("VIEWS_SAME_OBJECT", VIEWS_SAME_OBJECT)
       .value("SINGLE", SINGLE)
       .value("MULTI", MULTI)
 #if OST_IMG_ENABLED

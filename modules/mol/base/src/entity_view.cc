@@ -171,13 +171,6 @@ geom::Vec3 EntityView::GetCenterOfAtoms() const
   return center;
 }
 
-geom::Vec3 EntityView::GetGeometricCenter() const 
-{
-  geom::Vec3 center;
-  center = (this->GetGeometricEnd() + this->GetGeometricStart())/2;
-  return center;
-}
-
 geom::Vec3 EntityView::GetCenterOfMass() const 
 {
   geom::Vec3 center;
@@ -472,8 +465,9 @@ AtomViewIter EntityView::AtomsBegin() const
   if (rvl.empty()) {
     return AtomViewIter();
   }
-  return AtomViewIter(data_->chains.begin(), rvl.begin(),
-                      rvl.front().GetAtomList().begin(), *this, true);
+  return AtomViewIter(impl::begin(data_->chains), impl::begin(rvl),
+                      impl::begin(rvl.front().GetAtomList()), 
+                      *this, true);
 }
 
 AtomViewIter EntityView::AtomsEnd() const {
@@ -485,26 +479,30 @@ AtomViewIter EntityView::AtomsEnd() const {
   if (rvl.empty()) {
     return AtomViewIter();
   }
-  return AtomViewIter(data_->chains.end(), rvl.end(),
-                      rvl.back().GetAtomList().end(), *this, false);
+  return AtomViewIter(impl::end(data_->chains), impl::end(rvl),
+                      impl::end(rvl.back().GetAtomList()), *this, false);
 }
 
-ResidueViewIter EntityView::ResiduesBegin() const {
+ResidueViewIter EntityView::ResiduesBegin() const 
+{
   this->CheckValidity();
   if (data_->chains.empty()) {
     return ResidueViewIter();
   }
   const ResidueViewList& rvl=data_->chains.front().GetResidueList();
-  return ResidueViewIter(data_->chains.begin(), rvl.begin(), *this);
+  return ResidueViewIter(impl::begin(data_->chains), 
+                         impl::begin(rvl), *this, true);
 }
 
-ResidueViewIter EntityView::ResiduesEnd() const {
+ResidueViewIter EntityView::ResiduesEnd() const 
+{
     this->CheckValidity();
     if (data_->chains.empty()) {
       return ResidueViewIter();
     }
     const ResidueViewList& rvl=data_->chains.back().GetResidueList();
-    return ResidueViewIter(data_->chains.end(), rvl.end(), *this);
+    return ResidueViewIter(impl::end(data_->chains), 
+                           impl::end(rvl), *this, false);
 }
 
 
@@ -690,9 +688,14 @@ std::pair<Real,Real> EntityView::GetMinMax(const String& prop,
   Real min_v=std::numeric_limits<Real>::max();
   Real max_v=-std::numeric_limits<Real>::max();  
   for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
-    Real v=epm.Get(*it);
-    max_v=std::max(v, max_v);
-    min_v=std::min(v, min_v);
+    try {
+      Real v=epm.Get(*it);
+      max_v=std::max(v, max_v);
+      min_v=std::min(v, min_v);      
+    } catch(...) {
+      // do nothing in case of missing property
+      continue;
+    }
   }
   return std::make_pair(min_v,max_v);
 }
@@ -721,17 +724,6 @@ AtomView EntityView::FindXAtom(const AtomHandle& ah)
 }
 #endif
 
-geom::Vec3 EntityView::GetGeometricStart() const
-{
-  this->CheckValidity();
-  geom::Vec3 m(std::numeric_limits<Real>::max(),
-               std::numeric_limits<Real>::max(),
-               std::numeric_limits<Real>::max());
-  for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
-    m=geom::Min(m, (*it).GetPos());
-  }
-  return m;
-}
 
 AtomView EntityView::FindAtom(const String& chain_name, 
                               const ResNum& num,
@@ -744,16 +736,20 @@ AtomView EntityView::FindAtom(const String& chain_name,
   }
   return AtomView();
 }
-geom::Vec3 EntityView::GetGeometricEnd() const
+geom::AlignedCuboid EntityView::GetBounds() const
 {
   this->CheckValidity();
-  geom::Vec3 m(-std::numeric_limits<Real>::max(),
-               -std::numeric_limits<Real>::max(),
-               -std::numeric_limits<Real>::max());
-  for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
-    m=geom::Max(m, (*it).GetPos());
+  geom::Vec3 mmin( std::numeric_limits<Real>::max());
+  geom::Vec3 mmax(-std::numeric_limits<Real>::max());
+  if (this->GetAtomCount()) {
+    for(AtomViewIter it=AtomsBegin(); it!=this->AtomsEnd(); ++it) {
+      mmax=geom::Max(mmax, (*it).GetPos());
+      mmin=geom::Min(mmin, (*it).GetPos());
+    }    
+    return geom::AlignedCuboid(mmin, mmax);
+  } else {
+    return geom::AlignedCuboid(geom::Vec3(), geom::Vec3());
   }
-  return m;
 }
 
 
@@ -775,6 +771,42 @@ void EntityView::AddAtomInternal(const AtomView& av)
 void EntityView::RemoveAtomInternal(const AtomView& av)
 {
   data_->handle_to_view.erase(av.GetHandle().GetHashCode());
+}
+
+EntityView EntityView::ExtendViewToResidues() const
+{
+  this->CheckValidity();
+  EntityView view=this->CreateEmptyView();
+  ResidueViewList residues=this->GetResidueList();
+  ResidueViewList::const_iterator res_it;
+  for (res_it=residues.begin(); res_it!=residues.end(); ++res_it) {
+    view.AddResidue((*res_it).GetHandle(),
+                    mol::ViewAddFlag::INCLUDE_ALL|mol::ViewAddFlag::CHECK_DUPLICATES);
+  }
+  view.AddAllInclusiveBonds();
+  return view;
+}
+
+EntityView EntityView::ExtendViewToSurrounding(Real gap) const
+{
+  this->CheckValidity();
+  EntityView view=this->CreateEmptyView();
+  AtomViewList atoms=this->GetAtomList();
+  AtomViewList::const_iterator atm_it;
+  Real max_dist=5+gap;
+  for (atm_it=atoms.begin(); atm_it!=atoms.end(); ++atm_it) {
+    view.AddAtom((*atm_it),mol::ViewAddFlag::INCLUDE_ALL|mol::ViewAddFlag::CHECK_DUPLICATES);
+    AtomHandleList prot_atoms=this->GetHandle().FindWithin((*atm_it).GetPos(),max_dist);
+    AtomHandleList::const_iterator protatm_it;
+    for (protatm_it=prot_atoms.begin(); protatm_it!=prot_atoms.end(); ++protatm_it){
+      Real dist=geom::Distance((*atm_it).GetPos(), (*protatm_it).GetPos());
+      if (dist <= (*atm_it).GetRadius() + (*protatm_it).GetRadius() + gap) {
+        view.AddAtom((*protatm_it),mol::ViewAddFlag::INCLUDE_ALL|mol::ViewAddFlag::CHECK_DUPLICATES);
+      }
+    }
+  }
+  view.AddAllInclusiveBonds();
+  return view;
 }
 
 namespace {

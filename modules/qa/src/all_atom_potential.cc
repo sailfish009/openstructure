@@ -81,7 +81,8 @@ public:
           if (d<0) d=0.0;
 
           if (d>options_.lower_cutoff) {
-            if (abs(atom_handle.GetResidue().GetIndex()-a.GetResidue().GetIndex())<options_.sequence_sep) {
+            // GetHandle() necessary to retriev original index of the view (as compared to index in the view):
+            if (abs(atom_handle.GetResidue().GetIndex()-a.GetResidue().GetHandle().GetIndex())<options_.sequence_sep) {
               continue;
             }
             energy_+=energies_.Get(type_a, type_b, d);

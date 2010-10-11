@@ -22,26 +22,23 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-
+#include <ost/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 
 void export_AtomView()
 {
-  void (AtomView::* apply1)(EntityVisitor&) = &AtomView::Apply;
-  void (AtomView::* apply2)(EntityViewVisitor&) = &AtomView::Apply;
 
   class_<AtomView, bases<AtomBase> >("AtomView", init<>())
     .def("GetResidue",&AtomView::GetResidue)
     .add_property("residue",&AtomView::GetResidue)
-    .def("Apply", apply1, args("visitor"))
-    .def("Apply", apply2, args("visitor"))
     .def(self==self)
     .def(self!=self)
     .add_property("handle", &AtomView::GetHandle)
     .def("RemoveBonds", &AtomView::RemoveBonds)
     .def("GetHandle", &AtomView::GetHandle)
     .def("GetBondCount", &AtomView::GetBondCount)
+    .add_property("valid", &AtomView::IsValid)    
     .def("GetBondList", &AtomView::GetBondList)
     .def("GetHashCode", &AtomView::GetHashCode)
     .def("__hash__", &AtomView::GetHashCode)
@@ -50,6 +47,7 @@ void export_AtomView()
   ;
   class_<AtomViewList>("AtomViewList", init<>())
     .def(vector_indexing_suite<AtomViewList>())
+    .def(ost::VectorAdditions<AtomViewList>())
   ;
 }
 

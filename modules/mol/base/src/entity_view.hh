@@ -108,14 +108,8 @@ public:
   /// similar to GetCenterOfMass(), but the atoms are not mass weighted
   geom::Vec3 GetCenterOfAtoms() const;
   
-  /// \brief Get entity's geometric center
-  ///
-  /// Returns the geometric center of the entity's bounding box
-  /// by calculating (GetGeometricStart()+GetGeometricEnd())/2
-  geom::Vec3 GetGeometricCenter() const;
-             
-  geom::Vec3 GetGeometricStart() const;
-  geom::Vec3 GetGeometricEnd() const;
+  geom::AlignedCuboid GetBounds() const;
+  
 public:
   /// \name Internal
   //@{
@@ -291,6 +285,16 @@ public:
   /// \brief  Get angle in radians between bonds a1-a2 and a2-a3
   Real GetAngle(const AtomView& a1, const AtomView& a2,
                 const AtomView& a3) const;
+
+  /// \brief  Extend current view to include all atoms of each residue where
+  ///         at least one atom is selected currently
+  EntityView ExtendViewToResidues() const;
+
+  /// \brief  Extend current view to include all atoms that are within the sum
+  ///         of their vdw radii + gap
+  ///
+  /// Include all atoms within: at1.GetRadius() + at2.GetRadius() + gap
+  EntityView ExtendViewToSurrounding(Real gap) const;
 
   /// \brief returns a string containing a human-readable summary of the
   ///     entity view

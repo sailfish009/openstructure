@@ -22,7 +22,15 @@ import sys
 from ost import mol
 from ost import gui
 from ost import gfx
+try: 
+  from ost import img
+  _img_present=True
+except ImportError:
+  _img_present=False
+  pass
+
 from PyQt4 import QtCore, QtGui
+from scene_selection_helper import SelHelper
 from gradient_editor_widget import GradientEditor
 from uniform_color_widget import UniformColorWidget
 from combo_options_widget import ComboOptionsWidget
@@ -35,15 +43,22 @@ class ColorOptionsWidget(ComboOptionsWidget):
     self.text_ = "Color Options"
     
     #Add options to menu
-    self.AddWidget("Color by Element", ByElementWidget("Color by Element"))
-    self.AddWidget("Color by Chain", ByChainWidget("Color by Chain"))
-    self.AddWidget("Color by Property", GradientEditor(self))
-    self.AddWidget("Uniform",UniformColorWidget(self))
+    self.entity_widgets_ = list()
+    self.entity_widgets_.append(["Color by Element", ByElementWidget("Color by Element")])
+    self.entity_widgets_.append(["Color by Chain", ByChainWidget("Color by Chain")])
+    self.entity_widgets_.append(["Color by Entity", ByEntityWidget("Color by Entity")])
+    self.entity_widgets_.append(["Color by Property", GradientEditor()])
+    self.entity_widgets_.append(["Uniform",UniformColorWidget()])
   
+    self.img_widgets_ = list()
+    self.img_widgets_.append(["Uniform",UniformColorWidget()])
+
     self.setMinimumSize(250,200)
     
   def DoSomething(self, item):
     scene_selection = gui.SceneSelection.Instance()
+    if hasattr(item,"PrepareColoring"):
+      item.PrepareColoring()
     for i in range(0,scene_selection.GetActiveNodeCount()):
       node = scene_selection.GetActiveNode(i)
       item.ChangeColor(node)
@@ -57,26 +72,38 @@ class ColorOptionsWidget(ComboOptionsWidget):
     
     
   def Update(self):
-    ComboOptionsWidget.setEnabled(self,True)
-    scene_selection = gui.SceneSelection.Instance()
     
-    if scene_selection.GetActiveNodeCount() == 0 and scene_selection.GetActiveViewCount() == 0:
+    ComboOptionsWidget.setEnabled(self,True)
+    
+    if SelHelper().CheckAllFlags(SelHelper.NO_SELECTION):
       ComboOptionsWidget.setEnabled(self,False)
       return
-        
-    for i in range(0,scene_selection.GetActiveNodeCount()):
-      node = scene_selection.GetActiveNode(i)
-      if not (isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface)):
-        ComboOptionsWidget.setEnabled(self,False)
-        return
-
+    
+    for w in self.entity_widgets_:
+      self.RemoveWidget(w[0])
+    for w in self.img_widgets_:
+      self.RemoveWidget(w[0])
+    
+    
+    if SelHelper().CheckFlags(SelHelper.HAS_IMG | SelHelper.IS_ONE_TYPE):
+      for w in self.img_widgets_:
+        self.AddWidget(w[0], w[1])
+    elif SelHelper().CheckMinOneFlag(SelHelper.HAS_ENTITY| SelHelper.HAS_VIEW| SelHelper.HAS_SURFACE) and SelHelper().CheckNotFlags(SelHelper.HAS_IMG):
+      for w in self.entity_widgets_:
+        self.AddWidget(w[0], w[1])
+    else:
+      ComboOptionsWidget.setEnabled(self,False)
+      return
+    
+    self.GetCurrentWidget().Update()
+    
   def GetText(self):
     return self.text_
   
 
 class ByElementWidget(QtGui.QWidget):
   def __init__(self, text, parent=None):
-    QtGui.QLabel.__init__(self, parent)
+    QtGui.QWidget.__init__(self, parent)
     
     #Title
     self.text_ = text
@@ -112,7 +139,7 @@ class ByElementWidget(QtGui.QWidget):
   
 class ByChainWidget(QtGui.QWidget):
   def __init__(self, text, parent=None):
-    QtGui.QLabel.__init__(self, parent)
+    QtGui.QWidget.__init__(self, parent)
     
     #Title
     self.text_ = text
@@ -136,6 +163,52 @@ class ByChainWidget(QtGui.QWidget):
     if isinstance(node, gfx.Entity):
       node.CleanColorOps()
       node.ColorByChain()
+     
+  def ChangeViewColor(self, entity, view):
+    if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
+      bco=gfx.ByChainColorOp(mol.QueryViewWrapper(view))
+      entity.Apply(bco)
+      
+  def GetText(self):
+    return self.text_
+
+class ByEntityWidget(QtGui.QWidget):
+  def __init__(self, text, parent=None):
+    QtGui.QWidget.__init__(self, parent)
+    
+    #Title
+    self.text_ = text
+    
+    #UI
+    text_label = QtGui.QLabel(text)
+    font = text_label.font()
+    font.setBold(True)
+    
+    grid = QtGui.QGridLayout()
+    grid.addWidget(text_label,0,0,1,1)
+    grid.addWidget(QtGui.QLabel("No Settings available"), 1, 0, 1, 3)
+    grid.setRowStretch(2,1)
+    self.setLayout(grid)
+    self.setMinimumSize(250,60)
+    
+    self.gradient_ = gfx.Gradient("RAINBOW")
+    
+  def Update(self):
+   pass #Do Nothing
+    
+  def PrepareColoring(self):
+    scene_selection = gui.SceneSelection.Instance()
+    entity_count = scene_selection.GetActiveNodeCount()
+    for i in range(0,scene_selection.GetActiveNodeCount()):
+      if i<=0:
+        color=self.gradient_.GetColorAt(0.0)
+      else:
+        color=self.gradient_.GetColorAt(float(i) / entity_count)
+      node = scene_selection.GetActiveNode(i)
+      node.SetColor(color)
+  
+  def ChangeColor(self, node):
+    pass
      
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):

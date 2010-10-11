@@ -17,6 +17,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#ifndef OST_IMG_ALG_HISTOGRAM_HH
+#define OST_IMG_ALG_HISTOGRAM_HH
 
 /*
   Author: Ansgar Philippsen
@@ -75,3 +77,5 @@ typedef ImageStateNonModAlgorithm<HistogramBase> Histogram;
 OST_IMG_ALG_EXPLICIT_INST_DECL(class,ImageStateNonModAlgorithm<alg::HistogramBase>)
 
 }} // namespaces
+
+#endif

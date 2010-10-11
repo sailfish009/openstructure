@@ -18,12 +18,6 @@
 //------------------------------------------------------------------------------
 #include <vector>
 
-#include <QString>
-#include <QSettings>
-#include <QNetworkReply>
-#include <QHBoxLayout>
-#include <QDir>
-
 #include <ost/platform.hh>
 
 #include <ost/gui/file_loader.hh>
@@ -32,6 +26,11 @@
 #include "widget_registry.hh"
 #include "remote_loader.hh"
 
+#include <QString>
+#include <QSettings>
+#include <QNetworkReply>
+#include <QHBoxLayout>
+#include <QDir>
 namespace ost { namespace gui {
 
 RemoteLoader::RemoteLoader(QWidget* parent):
@@ -39,8 +38,10 @@ RemoteLoader::RemoteLoader(QWidget* parent):
 {
   img_support_=OST_IMG_ENABLED;
   line_edit_ = new QLineEdit(this);
-  button_ = new QPushButton("Load",this);
+  button_ = new QToolButton(this);
+  button_->setAttribute(Qt::WA_MacSmallSize);
   progress_bar_ = new QProgressBar(this);
+  progress_bar_->setAttribute(Qt::WA_MacSmallSize);
   progress_bar_->setVisible(false);
   progress_bar_->setRange(0,0);
 
@@ -48,12 +49,9 @@ RemoteLoader::RemoteLoader(QWidget* parent):
   l->addWidget(line_edit_);
   l->addWidget(button_);
   l->addWidget(progress_bar_);
-  l->setMargin(0);
-  l->setSpacing(0);
+  l->setMargin(3);
+  l->setSpacing(2);
 
-  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-  this->setMinimumHeight(progress_bar_->height());
-  this->setMaximumHeight(progress_bar_->height());
   connect(button_, SIGNAL(clicked()), this,
           SLOT(Clicked()));
 
@@ -69,10 +67,14 @@ RemoteLoader::RemoteLoader(QWidget* parent):
   QAction* select_url_action = new QAction(this);
   select_url_action->setText("URL");
   select_url_action->setToolTip("Select remote URL");
-  select_url_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("site_icon.png")));
+  select_url_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+
+                                   QString("site_icon.png")));
   action_list_.append(select_url_action);
-
   connect(select_url_action, SIGNAL(triggered(bool)), this, SLOT(UrlClick()));
+  this->BuildMenu();
+  this->RenameButton();
+  this->setFixedHeight(button_->height());
+  this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);  
 }
 
 void RemoteLoader::UrlClick()
@@ -83,7 +85,7 @@ void RemoteLoader::UrlClick()
 
 void RemoteLoader::BuildMenu(String active_loader)
 {
-  if(active_loader.size()>0){
+  if(!active_loader.empty()){
     selected_site_loader_ = active_loader;
   }
   else if(site_actions_->checkedAction()!=NULL){
@@ -100,9 +102,10 @@ void RemoteLoader::BuildMenu(String active_loader)
     RemoteSiteLoader* loader = FileLoader::GetLoaderManager()->GetRemoteSiteLoader(loader_ident);
     if(loader && ((loader->IsImg() && img_support_) || !loader->IsImg())){
       QAction* action = new QAction(loader_ident,site_loader_menu_);
+      connect(action, SIGNAL(triggered()), this, SLOT(RenameButton()));
       action->setCheckable(true);
       site_actions_->addAction(action);
-      if(site_actions_->checkedAction()==NULL ||selected_site_loader_==loader_ident.toStdString() ){
+      if((site_actions_->checkedAction()==NULL && loader_ident == FileLoader::GetLoaderManager()->GetDefaultRemoteSiteIdent()) ||selected_site_loader_==loader_ident.toStdString() ){
         action->setChecked(true);
       }
       site_loader_menu_->addAction(action);
@@ -132,6 +135,10 @@ bool RemoteLoader::Restore(const QString& prefix)
   if (settings.contains("loader")) {
     this->BuildMenu(settings.value("loader").toString().toStdString());
   }
+  else{
+    this->BuildMenu();
+  }
+  this->RenameButton();
   return true;
 }
 
@@ -141,7 +148,7 @@ void RemoteLoader::Clicked()
   if(!line_edit_->text().isEmpty() && site_actions_->checkedAction()){
     RemoteSiteLoader* loader = FileLoader::GetLoaderManager()->GetRemoteSiteLoader(site_actions_->checkedAction()->text());
 
-    QString text = line_edit_->text();
+    QString text = line_edit_->text().simplified();
     QString id = text;
     QString selection = "";
     int pos = text.indexOf('[');
@@ -185,6 +192,14 @@ void RemoteLoader::UpdateProgress(qint64 read, qint64 total){
 
 void RemoteLoader::DownloadFinished(){
   this->ShowProgressBar(false);
+}
+
+
+void RemoteLoader::RenameButton(){
+  if(site_actions_->checkedAction()){
+    QString text = "Load (" + site_actions_->checkedAction()->text() + ")";
+    button_->setText(text);
+  }
 }
 
 OST_REGISTER_WIDGET_WITH_DEFAULT_FACTORY(ost::gui, RemoteLoader, "Remote Loader");

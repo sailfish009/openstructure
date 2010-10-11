@@ -1,6 +1,7 @@
 set(OST_BASE_SOURCES 
 generic_property.cc
 log.cc
+log_sink.cc
 profile.cc
 units.cc
 string_ref.cc
@@ -15,6 +16,7 @@ integrity_error.hh
 invalid_handle.hh
 ptr_observer.hh
 log.hh
+log_sink.hh
 profile.hh
 dyn_cast.hh
 stdint.hh
@@ -33,6 +35,7 @@ tri_matrix.hh
 set(OST_EXPORT_HELPERS
 generic_property_def.hh 
 pair_to_tuple_conv.hh 
+vector.hh
 )
 module(NAME base SOURCES ${OST_BASE_SOURCES} 
        HEADERS ${OST_EXPORT_HELPERS} IN_DIR export_helper 

@@ -16,13 +16,13 @@ class TestMSMSBindings(unittest.TestCase):
     surf=msms.CalculateSurface(self.protein, msms_env='MSMSSERVER')[0]
     assert self.num_vert==len(surf.GetVertexIDList()) \
        and self.num_tri==len(surf.GetTriIDList()), \
-       "Number of surface vertices or triangles do not match precalculated values"
+       "Number of surface vertices (%i) or triangles (%i) do not match precalculated values (%i/%i)"%(len(surf.GetVertexIDList()),len(surf.GetTriIDList()),self.num_vert,self.num_tri)
   
   def testCalculateSurfaceAres(self):
      (msms_ases, msms_asas)=msms.CalculateSurfaceArea(self.protein, \
                                                       msms_env='MSMSSERVER')
      assert self.ases==msms_ases[0] and self.asas==msms_asas[0], \
-     "SASA or SESA do not match precalculated values"
+     "SASA (%f) or SESA (%f) do not match precalculated values (%f/%f)"%(msms_asas[0],msms_ases[0],self.asas,self.ases)
 
 
 if __name__ == "__main__":

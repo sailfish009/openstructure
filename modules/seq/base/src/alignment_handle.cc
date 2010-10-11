@@ -82,6 +82,12 @@ String AlignmentHandle::ToString(int width) const
   return impl_->ToString(width);
 }
 
+void AlignmentHandle::RemoveSequence(int seq_index)
+{
+  this->CheckValidity();
+  impl_->RemoveSequence(seq_index);
+}
+
 int AlignmentHandle::GetLength() const
 {
   this->CheckValidity();
@@ -249,12 +255,12 @@ void AlignmentHandle::SetSequenceName(int seq_index, const String& name)
 void AlignmentHandle::SetSequenceOffset(int seq_index, int offset)
 {
   this->CheckValidity();
-  impl_->GetSequence(seq_index)->SetSequenceOffset(offset);
+  impl_->GetSequence(seq_index)->SetOffset(offset);
 }
 
 int AlignmentHandle::GetSequenceOffset(int seq_index)
 {
   this->CheckValidity();
-  return impl_->GetSequence(seq_index)->GetSequenceOffset();
+  return impl_->GetSequence(seq_index)->GetOffset();
 }
 }}

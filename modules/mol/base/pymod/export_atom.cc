@@ -27,7 +27,7 @@ using namespace ost;
 using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
-
+#include <ost/export_helper/vector.hh>
 void export_Atom()
 {
   class_<AtomBase> atom_base("AtomBase", no_init);
@@ -76,9 +76,9 @@ void export_Atom()
   class_<AtomHandle, bases<AtomBase> >("AtomHandle", init<>())
     .def("GetResidue",&AtomHandle::GetResidue)
     .add_property("residue",&AtomHandle::GetResidue)
-    .def("Apply", &AtomHandle::Apply, args("visitor"))
     .def("GetBondList", &AtomHandle::GetBondList)
     .def("GetBondCount", &AtomHandle::GetBondCount)
+    .add_property("valid", &AtomHandle::IsValid)    
     .def("GetEntity", &AtomHandle::GetEntity)
     .def("GetHandle", &AtomHandle::GetHandle)
     .add_property("handle", &AtomHandle::GetHandle)
@@ -94,6 +94,7 @@ void export_Atom()
 
   class_<AtomHandleList>("AtomHandleList", no_init)
     .def(vector_indexing_suite<AtomHandleList>())
+    .def(ost::VectorAdditions<AtomHandleList>())
   ;
   class_<AtomProp>("AtomProp", init<>())
     .def_readwrite("element", &AtomProp::element)

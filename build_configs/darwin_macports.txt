@@ -2,5 +2,6 @@
 # the dependencies installed over MacPorts
 set(BOOST_ROOT "/opt/local" CACHE PATH "prefix for the boost")
 set(PYTHON_ROOT "/opt/local" CACHE PATH "prefix for python")
-set(QT_QMAKE_EXECUTABLE "/opt/local/bin/qmake-mac" CACHE PATH 
+set(QT_QMAKE_EXECUTABLE "/opt/local/bin/qmake" CACHE PATH 
     "absolute path to qt executable")
+set(CMAKE_Fortran_FLAGS "-freal-loops" CACHE STRING "fortran compiler flags")

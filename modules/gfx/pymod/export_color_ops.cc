@@ -41,10 +41,14 @@ using namespace ost::gfx;
 void export_ColorOps()
 {
   class_<ColorOp>("ColorOp", init<const String& >())
+    .def(init<const ColorOp&>())
     .def(init<const mol::QueryViewWrapper&, int>())
     .def("CanApplyTo",&ColorOp::CanApplyTo)
+    .def("GetName",&ColorOp::GetName,return_value_policy<copy_const_reference>())
     .def("SetSelection",&ColorOp::SetSelection)
     .def("GetSelection",&ColorOp::GetSelection)
+    .def("SetSelectionFlags",&ColorOp::SetSelectionFlags)
+    .def("GetSelectionFlags",&ColorOp::GetSelectionFlags)
     .def("SetMask",&ColorOp::SetMask)
     .def("GetMask",&ColorOp::GetMask)
     .def("ToInfo",&ColorOp::ToInfo)
@@ -53,6 +57,7 @@ void export_ColorOps()
   ;
 
   class_<BasicGradientColorOp, bases<ColorOp> >("BasicGradientColorOp", init<const String& , const gfx::Gradient& , mol::Prop::Level>())
+    .def(init<const BasicGradientColorOp&>())
     .def("SetGradient",&BasicGradientColorOp::SetGradient)
     .def("GetGradient",&BasicGradientColorOp::GetGradient)
     .def("SetLevel",&BasicGradientColorOp::SetLevel)
@@ -62,6 +67,7 @@ void export_ColorOps()
   ;
 
   class_<ByElementColorOp, bases<ColorOp> >("ByElementColorOp", init<>())
+    .def(init<const ByElementColorOp&>())
     .def(init<const String&>())
     .def(init<const mol::QueryViewWrapper&>())
     .def(init<const String&, int>())
@@ -71,15 +77,19 @@ void export_ColorOps()
   ;
 
   class_<ByChainColorOp, bases<ColorOp> >("ByChainColorOp", init<>())
+    .def(init<const ByChainColorOp&>())
     .def(init<const String&>())
     .def(init<const mol::QueryViewWrapper&>())
     .def(init<const String&, int>())
     .def(init<const mol::QueryViewWrapper&, int>())
+    .def("GetChainCount",&ByChainColorOp::GetChainCount)
+    .def("SetChainCount",&ByChainColorOp::SetChainCount)
     .def("FromInfo",&ByChainColorOp::FromInfo)
     .staticmethod("FromInfo")
   ;
 
   class_<UniformColorOp, bases<ColorOp> >("UniformColorOp", init<>())
+    .def(init<const UniformColorOp&>())
     .def(init<const String&, const gfx::Color&>())
     .def(init<const String&, int, const gfx::Color&>())
     .def(init<const mol::QueryViewWrapper&, const gfx::Color&>())
@@ -91,6 +101,7 @@ void export_ColorOps()
   ;
 
   class_<GradientColorOp, bases<ColorOp> >("GradientColorOp", init<>())
+    .def(init<const GradientColorOp&>())
     .def(init<const String&, const String&, const gfx::Gradient&, float, float>())
     .def(init<const String&, int, const String&, const gfx::Gradient&, float, float>())
     .def(init<const mol::QueryViewWrapper&, const String&, const gfx::Gradient&, float, float>())
@@ -109,6 +120,7 @@ void export_ColorOps()
   ;
 
   class_<GradientLevelColorOp, bases<GradientColorOp> >("GradientLevelColorOp", init<>())
+    .def(init<const GradientLevelColorOp&>())
     .def(init<const String&, const String&, const gfx::Gradient&, float, float, mol::Prop::Level>())
     .def(init<const String&, int, const String&, const gfx::Gradient&, float, float, mol::Prop::Level>())
     .def(init<const String&, const String&, const gfx::Gradient&, mol::Prop::Level>())
@@ -125,6 +137,7 @@ void export_ColorOps()
 
 
   class_<EntityViewColorOp, bases<GradientColorOp> >("EntityViewColorOp", init<>())
+    .def(init<const EntityViewColorOp&>())
     .def(init<const String&, const gfx::Gradient&, float, float, const mol::EntityView&>())
     .def(init<int, const String&, const gfx::Gradient&, float, float, const mol::EntityView&>())
     .def("SetEntityView",&EntityViewColorOp::SetEntityView)
@@ -135,6 +148,7 @@ void export_ColorOps()
 
 #if OST_IMG_ENABLED
   class_<MapHandleColorOp, bases<GradientColorOp> >("MapHandleColorOp", init<>())
+    .def(init<const MapHandleColorOp&>())
     .def(init<const String&, const String&, const gfx::Gradient&, float, float, const img::MapHandle&>())
     .def(init<const String&, int, const String&, const gfx::Gradient&, float, float, const img::MapHandle&>())
     .def(init<const mol::QueryViewWrapper&, const String&, const gfx::Gradient&, float, float, const img::MapHandle&>())

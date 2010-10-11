@@ -19,8 +19,8 @@
 #ifndef OST_GUI_WIDGET_POOL_HH
 #define OST_GUI_WIDGET_POOL_HH
 
-#include <QSettings>
 #include <ost/gui/widget.hh>
+#include <QSettings>
 /*
   Author: Marco Biasini, Stefan Scheuber
  */

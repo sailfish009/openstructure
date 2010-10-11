@@ -23,8 +23,8 @@
  */
 
 #include <vector>
-#include <QString>
 #include "python_shell_fw.hh"
+#include <QString>
 
 namespace ost { namespace gui {
 
@@ -38,10 +38,8 @@ public:
  QString GetCommand();
  BlockEditMode GetCommandMode();
  bool AtEnd();
- void operator--();
- void operator--(int);
- void operator++();
- void operator++(int);
+ void MoveToPreviousMatch();
+ void MoveToNextMatch();
 protected:
  std::vector<std::pair<QString,BlockEditMode> > history_list_;
  QString current_;

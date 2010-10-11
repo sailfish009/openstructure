@@ -38,7 +38,7 @@ OffscreenBuffer& OffscreenBuffer::Instance()
 
 bool OffscreenBuffer::Begin() 
 {
-  LOGN_DEBUG("switching to offscreen rendering");
+  LOG_DEBUG("switching to offscreen rendering");
 
   if(active_) return true;
   
@@ -52,7 +52,7 @@ bool OffscreenBuffer::Begin()
     old_dr2_ = glXGetCurrentReadDrawable();
     
     if(!glXMakeContextCurrent(dpy_, pbuffer_, pbuffer_, context_)) {
-      LOGN_ERROR("error switching to offscreen rendering context: glXMakeContextCurrent failed");
+      LOG_ERROR("error switching to offscreen rendering context: glXMakeContextCurrent failed");
       return false;
     }
   }
@@ -62,7 +62,7 @@ bool OffscreenBuffer::Begin()
 
   if(context_ != old_context_) {
     if (CGLError err=CGLSetCurrentContext(context_)) {
-      LOGN_ERROR("error switching to offscreen rendering context. "
+      LOG_ERROR("error switching to offscreen rendering context. "
                  "CGLSetCurrentContext failed: " << CGLErrorString(err));
       return false;
     }
@@ -73,7 +73,7 @@ bool OffscreenBuffer::Begin()
   if(context_ != old_context_) {
     dev_context_=wglGetCurrentDC();
     if (BOOL err=wglMakeCurrent(dev_context_, context_)) {
-      LOGN_ERROR("error switching to offscreen rendering context. "
+      LOG_ERROR("error switching to offscreen rendering context. "
                  "wglMakeCurrent failed: ");
       return false;
     }
@@ -86,7 +86,7 @@ bool OffscreenBuffer::Begin()
 
 bool OffscreenBuffer::End() 
 {
-  LOGN_DEBUG("switching back to normal rendering");
+  LOG_DEBUG("switching back to normal rendering");
 
   if(!active_) return true;
 
@@ -132,7 +132,7 @@ bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
   GLXPbuffer new_pbuffer = glXCreatePbuffer(dpy_, fbconfig_[0], &attrib_list[0]);
 
   if(!new_pbuffer) {
-    LOGN_ERROR("offscreen rendering resize failed");
+    LOG_ERROR("offscreen rendering resize failed");
     return false;
   }
   
@@ -140,7 +140,7 @@ bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
                                                glXGetCurrentContext(), True);
   
   if(!new_context) {
-    LOGN_ERROR("offscreen rendering resize failed to get new context");
+    LOG_ERROR("offscreen rendering resize failed to get new context");
     return false;
   }
 
@@ -155,7 +155,7 @@ bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
   CGLError err=CGLCreatePBuffer(width, height, GL_TEXTURE_RECTANGLE_EXT,
                                 GL_RGBA, 0,  &new_pbuffer);
   if (err) {
-    LOGN_ERROR("error resizing offscreen rendering context: "
+    LOG_ERROR("error resizing offscreen rendering context: "
                "CGLCreatePBuffer failed: " << CGLErrorString(err));
     return false;
   }
@@ -163,7 +163,7 @@ bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
   assert(CGLGetVirtualScreen(context_, &screen)==0);  
   err=CGLSetPBuffer(context_, new_pbuffer, 0, 0, screen);
   if (err) {
-    LOGN_ERROR("error resizing offscreen rendering context. "
+    LOG_ERROR("error resizing offscreen rendering context. "
                "CGLSetPBuffer failed: " << CGLErrorString(err));
     return false;
   }
@@ -178,27 +178,27 @@ bool OffscreenBuffer::Resize(unsigned int width, unsigned int height)
   new_pbuffer = wglCreatePbufferARB(dev_context_, format, width, height, attribList);
   if (new_pbuffer == NULL) 
   {
-    LOGN_ERROR("Error resizing offscreen rendering context (wglCreatePbufferARB failed)\n");
+    LOG_ERROR("Error resizing offscreen rendering context (wglCreatePbufferARB failed)\n");
     return false;
   }
 
   dev_context_ = wglGetPbufferDCARB(new_pbuffer);
   if (dev_context_ == NULL) 
   {
-    LOGN_ERROR("Unable to retrieve handle to resized pbuffer device context\n");
+    LOG_ERROR("Unable to retrieve handle to resized pbuffer device context\n");
     return false;
   }
 
   context_ = wglCreateContext(dev_context_);
   if (context_ == NULL) 
   {
-    LOGN_ERROR("Unable to create a rendering context for the resized pbuffer\n");
+    LOG_ERROR("Unable to create a rendering context for the resized pbuffer\n");
     return false;
   }
   //
   //if (!wglShareLists(old_context_, context_)) 
   //{
-  //  LOGN_ERROR("Unable to share data between resized rendering contexts\n");
+  //  LOG_ERROR("Unable to share data between resized rendering contexts\n");
   //  return;
   //}
   */
@@ -228,12 +228,12 @@ OffscreenBuffer::OffscreenBuffer(int width, int height, int r_bits,
 #if defined(__linux__)
 
   if(getenv("DISPLAY")==NULL) {
-    LOGN_ERROR("error creating offscreen rendering context: missing DISPLAY environment variable");
+    LOG_ERROR("error creating offscreen rendering context: missing DISPLAY environment variable");
     return;
   }
   dpy_ = XOpenDisplay(getenv("DISPLAY"));
   if(dpy_==NULL) {
-    LOGN_ERROR("error creating offscreen rendering context: XOpenDisplay failed");
+    LOG_ERROR("error creating offscreen rendering context: XOpenDisplay failed");
     return;
   }
 
@@ -259,7 +259,7 @@ OffscreenBuffer::OffscreenBuffer(int width, int height, int r_bits,
   int nelem=0;
   fbconfig_ =glXChooseFBConfig(dpy_,0,&attrib_list[0],&nelem);
   if(fbconfig_==0 || nelem==0) {
-    LOGN_ERROR("error creating offscreen rendering context: glXChooseFBConfig failed");
+    LOG_ERROR("error creating offscreen rendering context: glXChooseFBConfig failed");
     return;
   }
 
@@ -272,14 +272,14 @@ OffscreenBuffer::OffscreenBuffer(int width, int height, int r_bits,
   
   pbuffer_ = glXCreatePbuffer(dpy_, fbconfig_[0], &attrib_list[0]);
   if(!pbuffer_) {
-    LOGN_ERROR("error creating offscreen rendering context: glXCreatePBuffer failed");
+    LOG_ERROR("error creating offscreen rendering context: glXCreatePBuffer failed");
     return;
   }
 
   context_ = glXCreateNewContext(dpy_, fbconfig_[0], GLX_RGBA_TYPE, 
                                  glXGetCurrentContext(), True);
   if(!context_) {
-    LOGN_ERROR("error creating offscreen rendering context: glXCreateNewContext failed");
+    LOG_ERROR("error creating offscreen rendering context: glXCreateNewContext failed");
     return;
   }
 
@@ -294,7 +294,7 @@ OffscreenBuffer::OffscreenBuffer(int width, int height, int r_bits,
   GLint npix=0;
   CGLError err=CGLChoosePixelFormat(attributes, &pix_format_, &npix);
   if(err) {
-    LOGN_ERROR("error creating offscreen rendering context. "
+    LOG_ERROR("error creating offscreen rendering context. "
                "CGLChoosePixFormat failed:" << CGLErrorString(err));
     return;
   }
@@ -302,14 +302,14 @@ OffscreenBuffer::OffscreenBuffer(int width, int height, int r_bits,
   // lists.
   err=CGLCreateContext(pix_format_, CGLGetCurrentContext(), &context_);
   if(err) {
-    LOGN_ERROR("error creating offscreen rendering context. "
+    LOG_ERROR("error creating offscreen rendering context. "
                "CGLCreateContext failed" << CGLErrorString(err));
     return;
   }
   err=CGLCreatePBuffer(width, height, GL_TEXTURE_RECTANGLE_EXT, GL_RGBA, 0, 
                        &pbuffer_);
   if (err) {
-    LOGN_ERROR("error creating offscreen rendering context. "
+    LOG_ERROR("error creating offscreen rendering context. "
                "CGLCreatePBuffer failed: " << CGLErrorString(err));
     return;
   }
@@ -317,7 +317,7 @@ OffscreenBuffer::OffscreenBuffer(int width, int height, int r_bits,
   assert(CGLGetVirtualScreen(context_, &screen)==0);  
   err=CGLSetPBuffer(context_, pbuffer_, 0, 0, screen);
   if (err) {
-    LOGN_ERROR("error creating offscreen rendering context. "
+    LOG_ERROR("error creating offscreen rendering context. "
                "CGLSetPBuffer failed: " << CGLErrorString(err));
     return;
   }
@@ -346,7 +346,7 @@ OffscreenBuffer::OffscreenBuffer(int width, int height, int r_bits,
   wglChoosePixelFormatARB(dev_context_, attribList, NULL, 1, &format, &nformats);
   if (nformats == 0)
   {
-    LOGN_ERROR("Unable to find any RGBA32 floating point pixel formats\n");
+    LOG_ERROR("Unable to find any RGBA32 floating point pixel formats\n");
     return;
   }
 
@@ -366,27 +366,27 @@ OffscreenBuffer::OffscreenBuffer(int width, int height, int r_bits,
   pbuffer_ = wglCreatePbufferARB(dev_context_, format, width, height, attribs);
   if (pbuffer_ == NULL) 
   {
-    LOGN_ERROR("Unable to create floating point pbuffer (wglCreatePbufferARB failed)\n");
+    LOG_ERROR("Unable to create floating point pbuffer (wglCreatePbufferARB failed)\n");
     return;
   }
 
   old_dev_context_ = wglGetPbufferDCARB(pbuffer_);
   if (dev_context_ == NULL) 
   {
-    LOGN_ERROR("Unable to retrieve handle to pbuffer device context\n");
+    LOG_ERROR("Unable to retrieve handle to pbuffer device context\n");
     return;
   }
 
   context_ = wglCreateContext(dev_context_);
   if (context_ == NULL) 
   {
-    LOGN_ERROR("Unable to create a rendering context for the pbuffer\n");
+    LOG_ERROR("Unable to create a rendering context for the pbuffer\n");
     return;
   }
   
   if (!wglShareLists(old_context_, context_)) 
   {
-    LOGN_ERROR("Unable to share data between rendering contexts\n");
+    LOG_ERROR("Unable to share data between rendering contexts\n");
     return;
   }
 */

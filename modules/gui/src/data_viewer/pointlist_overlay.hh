@@ -45,8 +45,8 @@ public:
   virtual bool OnMouseEvent(QMouseEvent* e,  DataViewerPanel* dvp, 
                             const QPoint& lastmouse);
   
-  void Add(const Point& pnt);
-  void Add(const PointList& pl);
+  void Add(const Point& pnt, double scale=1.0);
+  void Add(const PointList& pl, double scale=1.0);
   
   //! remove all points on the given point
   void Remove(const Point& pnt);
@@ -55,11 +55,11 @@ public:
   void Clear();
   
 private:
-  PointList pointlist_;
+  std::vector<std::pair<Point,double> > pointlist_;
 
   QAction* a_clr_;
 
-  void build();
+  void build_();
 };
 
 }}}  //ns

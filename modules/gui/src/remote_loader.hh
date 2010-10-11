@@ -19,16 +19,16 @@
 #ifndef OST_GUI_REMOTE_LOADER_HH
 #define OST_GUI_REMOTE_LOADER_HH
 
-#include <QPushButton>
-#include <QLineEdit>
-#include <QKeyEvent>
-#include <QProgressBar>
-#include <QActionGroup>
 
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
 
+#include <QToolButton>
+#include <QLineEdit>
+#include <QKeyEvent>
+#include <QProgressBar>
+#include <QActionGroup>
 namespace ost { namespace gui {
 
 
@@ -53,10 +53,11 @@ private slots:
   void UrlClick();
   void DownloadFinished();
   void UpdateProgress(qint64 read, qint64 total);
+  void RenameButton();
 
 private:
   QLineEdit* line_edit_;
-  QPushButton* button_;
+  QToolButton* button_;
   QProgressBar* progress_bar_;
   ActionList action_list_;
   QMenu* site_loader_menu_;

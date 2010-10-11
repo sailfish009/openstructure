@@ -16,12 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QFont>
 
 #include "root_node.hh"
 
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node.hh>
+#include <QFont>
 
 namespace ost { namespace gui {
 

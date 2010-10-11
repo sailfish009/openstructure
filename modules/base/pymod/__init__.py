@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 from _base import *
+from stutil import *
 
 from ost import geom
 from ost import io
@@ -35,3 +36,10 @@ try:
 except ImportError:
   pass
 
+
+class StreamLogSink(LogSink):
+  def __init__(self, stream):
+    LogSink.__init__(self)
+    self._stream=stream
+  def LogMessage(self, message, level):
+    self._stream.write(message)

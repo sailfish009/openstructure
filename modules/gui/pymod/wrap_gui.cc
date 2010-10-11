@@ -21,20 +21,18 @@
 #include <boost/python.hpp>
 #include <QString>
 #include <ost/config.hh>
-
-
+#include <ost/gui/admin.hh>
 using namespace boost::python;
 
 void export_AlignmentView();
 void export_Tool();
-void export_Plot();
 void export_GLWin();
+void export_MessageWidget();
 void export_Gosty();
 void export_PyShell();
 void export_SceneWin();
 void export_SequenceViewer();
-void export_SequenceViewerV2();
-void export_PanelBar();
+void export_Panels();
 void export_Perspective();
 void export_SipHandler();
 void export_SceneSelection();
@@ -42,6 +40,7 @@ void export_MainArea();
 void export_MenuBar();
 void export_RemoteSiteLoader();
 void export_FileLoader();
+void export_FileViewer();
 void export_Widget();
 
 #if OST_SPNAV_ENABLED
@@ -51,6 +50,7 @@ void export_Input();
 #ifdef OST_IMG_ENABLED
 void export_data_viewer();
 void export_overlay();
+void export_overlay_manager();
 #endif
 
 #include <boost/python/to_python_converter.hpp>
@@ -97,6 +97,7 @@ namespace {
 
 
 }
+using namespace ost::gui;
 
 BOOST_PYTHON_MODULE(_gui)
 {
@@ -107,19 +108,19 @@ BOOST_PYTHON_MODULE(_gui)
   export_Gosty();
   export_AlignmentView();
   export_Tool();
-  export_Plot();
+  export_MessageWidget();
   export_GLWin();
   export_MainArea();
   export_PyShell();
-  export_PanelBar();
+  export_Panels();
   export_MenuBar();
   export_Perspective();  
   export_SceneWin();
   export_SceneSelection();
   export_SequenceViewer();
-  export_SequenceViewerV2();
   export_RemoteSiteLoader();
   export_FileLoader();
+  export_FileViewer();
   export_Widget();
 
   #if OST_SPNAV_ENABLED
@@ -129,5 +130,12 @@ BOOST_PYTHON_MODULE(_gui)
   #if OST_IMG_ENABLED
   export_data_viewer();
   export_overlay();
+  export_overlay_manager();
   #endif
+  
+  class_<AdminRights>("AdminRights", init<>())
+    .def("Acquire", &AdminRights::Acquire)
+    .def("Release", &AdminRights::Release)
+    .def("CreateLink", &AdminRights::CreateLink)
+  ;
 }

@@ -315,6 +315,10 @@ class DLLEXPORT_OST_GFX Scene {
   void Remove(const GfxNodeP& go);
   /// remove graphical object from the scene
   void Remove(const String& name);
+  
+  /// \brief remove all objects from the scene
+  void RemoveAll();
+  
   /// \brief rename an existing graphical object
   /// defunct for now
   bool Rename(const String& old_name, const String& new_name);
@@ -322,6 +326,9 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief retrieve gfx object by name
   GfxObjP operator[](const String& name);
 
+  /// \brief whether the scene contains a node of the given name
+  bool HasNode(const String& name) const;
+  
   /// \brief actual event handling for scene (internal use)
   void Apply(const InputEvent& ie, bool request_redraw=true);
 
@@ -394,8 +401,11 @@ protected:
   void RenderModeChanged(const String& name);
 
 private:  
+
   template <typename ACTION>
-  void NotifyObservers(const ACTION& action);  
+  void NotifyObservers(const ACTION& action) {
+    std::for_each(observers_.begin(), observers_.end(), action);
+  }
   Scene();
   Scene(const Scene&) {}
   Scene& operator=(const Scene&) {return *this;}

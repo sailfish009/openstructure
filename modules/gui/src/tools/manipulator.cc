@@ -16,7 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QDir>
+#include <ost/gui/gosty_app.hh>
 
 #include <ost/platform.hh>
 
@@ -24,11 +24,11 @@
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gfx/gfx_node.hh>
 
-#include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_selection.hh>
 
 #include "manipulator.hh"
 
+#include <QDir>
 namespace ost { namespace gui {
 
 Manipulator::Manipulator():

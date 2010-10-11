@@ -63,7 +63,7 @@ bool QueryState::do_within(const geom::Vec3& pos, const impl::WithinParam& p,
     if (op==COP_LE)
       return geom::Dot(d, d) <= p.GetRadiusSquare();
     else
-      return geom::Dot(d, d) >= p.GetRadiusSquare();    
+      return geom::Dot(d, d) > p.GetRadiusSquare();
   } else {
     const LazilyBoundRef& r=this->GetBoundObject(p.GetRef());
     for (AtomViewIter i=r.view.AtomsBegin(), e=r.view.AtomsEnd(); i!=e; ++i) {
@@ -72,7 +72,7 @@ bool QueryState::do_within(const geom::Vec3& pos, const impl::WithinParam& p,
         if (geom::Dot(d, d) <= p.GetRadiusSquare()) {
           return true;
         }
-      } else if (geom::Dot(d, d) <= p.GetRadiusSquare()) {
+      } else if (geom::Dot(d, d) > p.GetRadiusSquare()) {
         return false;
       }
     }
@@ -198,7 +198,7 @@ boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
         s_[*i]=cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));        
         break;
       case Prop::PEPTIDE:
-        int_value=r->GetChemClass().IsPeptideLinking() ? 1 : 0;
+        int_value=r->GetChemClass().IsPeptideLinking();
         s_[*i] = cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));        
         break;        
       case Prop::RBFAC:
@@ -208,6 +208,14 @@ boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
         float_value=r->GetAverageBFactor();
         s_[*i] = cmp_num<Real>(ss.comp_op, float_value,
                                  boost::get<float>(ss.param));        
+        break;
+      case Prop::PROTEIN:
+        int_value=r->IsProtein();
+        s_[*i]=cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));
+        break;
+      case Prop::WATER:
+        int_value=r->GetChemClass().IsWater();
+        s_[*i]=cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));
         break;
       case Prop::RTYPE:
         p=boost::get<String>(ss.param);

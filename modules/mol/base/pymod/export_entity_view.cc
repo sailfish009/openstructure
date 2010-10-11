@@ -26,6 +26,7 @@ using namespace boost::python;
 #include <ost/mol/view_op.hh>
 using namespace ost;
 using namespace ost::mol;
+#include "bounds.hh"
 
 namespace {
 
@@ -80,25 +81,22 @@ void export_EntityView()
     .export_values()
   ;
 
-  void (EntityView::* apply1)(EntityVisitor&) = &EntityView::Apply;
-  void (EntityView::* apply2)(EntityViewVisitor&) = &EntityView::Apply;
-
   Real (EntityView::*get_angle1)(const AtomHandle&, const AtomHandle&, const AtomHandle&) const = &EntityView::GetAngle;
   Real (EntityView::*get_angle2)(const AtomView&, const AtomView&, const AtomView&) const = &EntityView::GetAngle;
 
   class_<EntityView, bases<EntityBase> >("EntityView", init<>())
-    .def("Apply",apply1)
-    .def("Apply",apply2)
     .def("Copy", &EntityView::Copy)
+    .def("ExtendViewToResidues", &EntityView::ExtendViewToResidues)
+    .def("ExtendViewToSurrounding", &EntityView::ExtendViewToSurrounding)
     .def("FindChain", find_chain_str)
     .def("FindResidue", &EntityView::FindResidue)
     .def("FindAtom", find_atom_a)
     .def("FindAtom", find_atom_b)    
     .def("GetAtomCount", &EntityView::GetAtomCount)
-    .def("GetGeometricStart", &EntityView::GetGeometricStart)
-    .def("GetGeometricEnd", &EntityView::GetGeometricEnd)
-    .def("GetGeometricCenter", &EntityView::GetGeometricCenter)
-    .add_property("geometric_center", &EntityView::GetGeometricCenter)
+    .def("GetGeometricStart", geom_start<EntityView>)
+    .def("GetGeometricEnd", geom_end<EntityView>)
+    .def("GetGeometricCenter", geom_center<EntityView>)
+    .add_property("geometric_center", geom_center<EntityView>)
     .def("GetCenterOfMass", &EntityView::GetCenterOfMass)
     .def("GetCenterOfAtoms", &EntityView::GetCenterOfAtoms)
     .def("GetMass", &EntityView::GetMass)
@@ -119,6 +117,10 @@ void export_EntityView()
     .add_property("residue_count", &EntityView::GetResidueCount)
     .add_property("atom_count", &EntityView::GetAtomCount)
     .add_property("bond_count", &EntityView::GetBondCount)
+    .add_property("mass", &EntityView::GetMass)
+    .add_property("center_of_mass", &EntityView::GetCenterOfMass)
+    .add_property("center_of_atoms", &EntityView::GetCenterOfAtoms)
+    .add_property("valid", &EntityView::IsValid)    
     .def("GetResidueList", &EntityView::GetResidueList)
     .def("GetAtomList", &EntityView::GetAtomList)
     .add_property("atoms", &EntityView::GetAtomList)
@@ -154,6 +156,8 @@ void export_EntityView()
     .def(self==self)
     .def(self!=self)
     .def("Dump", &EntityView::Dump)
+    .def("GetBounds", &EntityView::GetBounds)
+    .add_property("bounds", &EntityView::GetBounds)    
   ;
   def("Union", &Union);
   def("Difference", &Difference);

@@ -316,11 +316,20 @@ Quat& Quat::operator*=(Real s)
 }
 
 Quat& Quat::operator*=(const Quat& q)
-{
-  w = this->w*q.w - this->x*q.x - this->y*q.y - this->z*q.z;
-  x = this->w*q.x + this->x*q.w + this->y*q.z - this->z*q.y;
-  y = this->w*q.y + this->y*q.w - this->x*q.z + this->z*q.x;
-  z = this->w*q.z + this->z*q.w + this->x*q.y - this->y*q.x;
+{  
+  Vec3 v00 (x,y,z);
+  Vec3 v10 (q.x,q.y,q.z);
+
+  Real w2=w*q.w-Dot(v00,v10);
+  Vec3 v2=Cross(v00,v10);
+  Vec3 v3=v10;  v3 *= w;
+  Vec3 v4=v00;  v4 *= q.w;
+  Vec3 v5=v2+v3+v4;
+  
+  w=w2;
+  x=v5[0];
+  y=v5[1];
+  z=v5[2];
   return *this;
 }
 
@@ -355,54 +364,6 @@ Real Dot(const Quat& q0, const Quat& q1)
 Quat Conjugate(const Quat& q) 
 {
   return Quat(q.w,-q.x,-q.y,-q.z);
-}
-
-namespace {
-
-
-/*
-  for a unit quaternion defined as (cos[theta],sin[theta] * [x,y,z])
-  the log is given by (0,theta * [x,y,z])
-*/
-Quat log(const Quat& q) 
-{
-  Quat nrvo;
-  Real sin_theta = std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z);
-  if(std::fabs(sin_theta)<1e-30) {
-    /*
-      for a theta of zero, cos(theta)=1, the log if which is zero,
-      and hence an all zero quat is the result, but this may lead to
-      trouble...
-    */
-    nrvo = Quat(0.0,0.0,0.0,0.0);
-  } else {
-
-    Real theta = std::atan2(sin_theta,q.w);
-    Real f = theta/sin_theta;
-    // assume cos(theta) == w, since we are supposed to have a unit quaternion
-    nrvo = Quat(0.0,q.x*f,q.y*f,q.z*f);
-
-  }
-  return nrvo;
-}
-
-Quat exp(const Quat& q)
-{
-  Quat nrvo;
-  Real theta = std::sqrt(q.x*q.x+q.y*q.y+q.z*q.z);
-  if(std::fabs(theta)<1e-30) {
-    /*
-      see log special case above; this will now
-      return a 'proper' quaternion
-    */
-    nrvo = Quat(1.0,0.0,0.0,0.0);
-  } else {
-    Real f = sin(theta)/theta;
-    nrvo = Quat(cos(theta),f*q.x,f*q.y,f*q.z);
-  }
-  return nrvo;
-}
-
 }
 
 /*
@@ -453,21 +414,21 @@ Vec3 Quat::Rotate(const Vec3& vec) const {
 Quat Grassmann(const Quat& lhs, const Quat& rhs)
 {
   return Quat(lhs.GetAngle()*rhs.GetAngle()-
-              lhs.GetAxis().GetX()*rhs.GetAxis().GetX()-
-              lhs.GetAxis().GetY()*rhs.GetAxis().GetY()-
-              lhs.GetAxis().GetZ()*rhs.GetAxis().GetZ(),
-                    lhs.GetAngle()*rhs.GetAxis().GetX()+
-                    lhs.GetAxis().GetX()*rhs.GetAngle()+
-                    lhs.GetAxis().GetY()*rhs.GetAxis().GetZ()-
-                    lhs.GetAxis().GetZ()*rhs.GetAxis().GetY(),
-               lhs.GetAngle()*rhs.GetAxis().GetY()-
-               lhs.GetAxis().GetX()*rhs.GetAxis().GetZ()+
-               lhs.GetAxis().GetY()*rhs.GetAngle()+
-               lhs.GetAxis().GetZ()*rhs.GetAxis().GetX(),
-                    lhs.GetAngle()*rhs.GetAxis().GetZ()+
-                    lhs.GetAxis().GetX()*rhs.GetAxis().GetY()-
-                    lhs.GetAxis().GetY()*rhs.GetAxis().GetX()+
-                    lhs.GetAxis().GetZ()*rhs.GetAngle());
+              lhs.GetAxis().x*rhs.GetAxis().x-
+              lhs.GetAxis().y*rhs.GetAxis().y-
+              lhs.GetAxis().z*rhs.GetAxis().z,
+                    lhs.GetAngle()*rhs.GetAxis().x+
+                    lhs.GetAxis().x*rhs.GetAngle()+
+                    lhs.GetAxis().y*rhs.GetAxis().z-
+                    lhs.GetAxis().z*rhs.GetAxis().y,
+               lhs.GetAngle()*rhs.GetAxis().y-
+               lhs.GetAxis().x*rhs.GetAxis().z+
+               lhs.GetAxis().y*rhs.GetAngle()+
+               lhs.GetAxis().z*rhs.GetAxis().x,
+                    lhs.GetAngle()*rhs.GetAxis().z+
+                    lhs.GetAxis().x*rhs.GetAxis().y-
+                    lhs.GetAxis().y*rhs.GetAxis().x+
+                    lhs.GetAxis().z*rhs.GetAngle());
 }
 
 std::ostream& operator<<(std::ostream& str, const Quat& q)

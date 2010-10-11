@@ -17,11 +17,11 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
-using namespace boost::python;
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include <ost/geom/geom.hh>
 
-
+using namespace boost::python;
 
 const Real Vec3_getitem(const geom::Vec3& v, int i) {return v[i];}
 void Vec3_setitem(geom::Vec3& v,const  int i,const  Real val) {v[i]=val;}
@@ -65,4 +65,8 @@ void export_Vec3()
   ;
   def("Normalize", &NormalizeV3);
   def("Cross", &Cross);
+  
+  class_<Vec3List>("Vec3List", init<>())
+    .def(vector_indexing_suite<Vec3List>())
+  ;
 }

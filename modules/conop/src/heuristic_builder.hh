@@ -79,26 +79,28 @@ public:
   HeuristicBuilder();
   virtual ~HeuristicBuilder();
 
-  virtual void AssignTorsions(const mol::ChainHandle& ch);
+  virtual void AssignTorsions(mol::ChainHandle ch);
 
   //! \brief connect by using information in the heuristic connectivity table.
   //
   // This does not make any assumption on the correctness of internal or external
   // coordinates. Only the atom names and residue need to be known.
-  virtual void ConnectAtomsOfResidue(const mol::ResidueHandle& rh);
+  virtual void ConnectAtomsOfResidue(mol::ResidueHandle rh);
   
   virtual bool IsResidueComplete(const mol::ResidueHandle& rh);
 //  virtual char GetOneLetterCode(const mol::ResidueKey& residue) const;
 
   //!\brief connect to previous residue in chain.
-  virtual void ConnectResidueToPrev(const mol::ResidueHandle& rh, const mol::ResidueHandle& prev);
+  virtual void ConnectResidueToPrev(mol::ResidueHandle rh, 
+                                    mol::ResidueHandle prev);
   //!
-  virtual void AssignTorsionsToResidue(const mol::ResidueHandle& residue);
+  virtual void AssignTorsionsToResidue(mol::ResidueHandle residue);
 
   virtual void FillResidueProps(mol::ResidueHandle residue);
 
   //!\brief connect to next residue in chain.
-  virtual void ConnectResidueToNext(const mol::ResidueHandle& rh, const mol::ResidueHandle& next);
+  virtual void ConnectResidueToNext(mol::ResidueHandle rh, 
+                                    mol::ResidueHandle next);
 
   //!\brief get connectivity table for residues
   // Retrieve connectiviy information based on residue key. The returned

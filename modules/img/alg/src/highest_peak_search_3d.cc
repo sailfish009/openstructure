@@ -74,42 +74,43 @@ namespace detail {
         bool insert=true;
         bool remove_smaller=false;
         img::PeakList::iterator min_it;
+
         if(!list_.empty()) {
           min_it = list_.begin();
-        }
 
-        for(img::PeakList::iterator it=list_.begin();it!=list_.end();++it)
-        {
-          if(it->GetValue() < min_it->GetValue()) min_it = it;
-          if (it->GetValue() >= cand_peak.GetValue() && detail::is_within(cand_peak, *it, exclusion_radius_)) {
-            insert=false;
-          } else if (cand_peak.GetValue() >= it->GetValue() && detail::is_within(cand_peak, *it, exclusion_radius_)) {
-            remove_smaller=true;
+          for(img::PeakList::iterator it=list_.begin();it!=list_.end();++it)
+          {
+            if(it->GetValue() < min_it->GetValue()) min_it = it;
+            if (it->GetValue() >= cand_peak.GetValue() && detail::is_within(cand_peak, *it, exclusion_radius_)) {
+              insert=false;
+            } else if (cand_peak.GetValue() >= it->GetValue() && detail::is_within(cand_peak, *it, exclusion_radius_)) {
+              remove_smaller=true;
+            }
           }
-        }
 
-        if (!insert) return false;
+          if (!insert) return false;
 
-        if (cand_peak.GetValue() < min_it->GetValue()) {
-          return false;
-        }
+          if (cand_peak.GetValue() < min_it->GetValue()) {
+            return false;
+          }
 
-        if (remove_smaller)
-        {
-          img::PeakList::iterator new_end = remove_if(list_.begin(),list_.end(),
-          detail::is_smaller_and_within_radius(cand_peak,exclusion_radius_));
-          list_.erase(new_end,list_.end());
-        }
+          if (remove_smaller)
+          {
+            img::PeakList::iterator new_end = remove_if(list_.begin(),list_.end(),
+            detail::is_smaller_and_within_radius(cand_peak,exclusion_radius_));
+            list_.erase(new_end,list_.end());
+          }
 
-        if (list_.size() == max_num_peaks_) {
-          list_.erase(min_it);
+          if (list_.size() == max_num_peaks_) {
+            list_.erase(min_it);
+          }
         }
 
         list_.push_back(cand_peak);
         return true;
       }
 
-      //! Gets list of peaks from collector
+       //! Gets list of peaks from collector
       img::PeakList GetPeakList() const { return list_; }
 
       //! Clears the peak list removing all peaks in the list
@@ -117,7 +118,7 @@ namespace detail {
 
     private:
 
-      img::PeakList list_;
+      img::PeakList list_;      
       unsigned int max_num_peaks_;
       int exclusion_radius_;
 
@@ -129,22 +130,28 @@ template <typename T, class D>
   void HighestPeakSearch3DBase::VisitState(const ImageStateImpl<T,D>& isi)
   {
 
-    LOG_VERBOSE("highest peak search with the parameters" << std::endl);
-    LOG_VERBOSE(" max number of peaks: " << max_num_peaks_ << std::endl);
-    LOG_VERBOSE(" exclusion radius: " << exclusion_radius_ << std::endl);
-    LOG_VERBOSE(" threshold: " << threshold_ << std::endl);
- 
-    if(ext_list_.size()==0) 
+    LOG_DEBUG("highest peak search (" 
+              << "max number of peaks: " << max_num_peaks_ << ", "
+              << "exclusion radius: " << exclusion_radius_ << ", "
+              << "threshold: " << threshold_ << ")");
+
+    if (max_num_peaks_ < 1)
     {
-      LOG_VERBOSE(" excluded regions: none" << std::endl);
+      throw Error("Error: Maximum number of peaks smaller than 1. Cannot create peak list");
+    }
+
+    if(ext_list_.size()==0)
+    {
+      LOG_DEBUG(" excluded regions: none");
     } 
     else 
     {
-      LOG_VERBOSE(" excluded regions:" << std::endl);
+      std::stringstream ss;
       for(ExtList::const_iterator it=ext_list_.begin();it!=ext_list_.end();++it) 
       {
-       LOG_VERBOSE("  " << (*it) << std::endl);
+        ss << " " << (*it);
       }
+      LOG_DEBUG("exluded regions:" << ss.str());
     }
 
     detail::PeakCollector peak_collector(max_num_peaks_,exclusion_radius_);

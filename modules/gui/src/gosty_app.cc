@@ -16,24 +16,22 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include "gosty_app.hh"
 #include <iostream>
+
+
+#include <ost/gui/python_shell/python_shell.hh>
+#include <ost/gui/gl_win.hh>
+#include <ost/gui/tools/tool_options_win.hh>
+#include <ost/gui/perspective.hh>
+#include <ost/gui/main_area.hh>
+
 
 #include <QApplication>
 #include <QMainWindow>
 
 #include <QMenuBar>
 #include <QDesktopWidget>
-
-#include <ost/gui/mdi_sub_window.hh>
-#include <ost/gui/python_shell/python_shell.hh>
-#include <ost/gui/gl_win.hh>
-#include <ost/gui/tools/tool_options_win.hh>
-#include <ost/gui/python_shell/text_logger.hh>
-#include <ost/gui/perspective.hh>
-#include <ost/gui/main_area.hh>
-
-#include "gosty_app.hh"
-
 /*
   Author: Marco Biasini, Andreas Schenk, Stefan Scheuber
  */
@@ -45,11 +43,9 @@ GostyApp* GostyApp::app_=NULL;
 
 
 GostyApp::GostyApp():
-  py_shell_(NULL), w_py_shell_(NULL), gl_win_(NULL), w_gl_win_(NULL),
-  scene_win_(NULL), w_scene_win_(NULL), seq_viewer_(NULL), seq_viewer_v2_(NULL), tool_options_win_(NULL),
-  w_tool_options_(NULL), main_(new GostyMainWindow), 
-  perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>()),
-  try_stereo_(false)
+  py_shell_(NULL), gl_win_(NULL), scene_win_(NULL), message_widget_(NULL), seq_viewer_(NULL),
+  tool_options_win_(NULL), main_(new GostyMainWindow),
+  perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>())
 {
   assert(GostyApp::app_==NULL);
   GostyApp::app_=this;
@@ -99,19 +95,10 @@ SceneWin* GostyApp::GetSceneWin()
 SequenceViewer* GostyApp::GetSequenceViewer()
 {
   if (seq_viewer_==NULL) {
-  seq_viewer_=new SequenceViewer;
-  seq_viewer_->SetDestroyOnClose(false);
+    seq_viewer_=new SequenceViewer(false);
+    seq_viewer_->SetDestroyOnClose(false);
   }
   return seq_viewer_;
-}
-
-SequenceViewerV2* GostyApp::GetSequenceViewerV2()
-{
-  if (seq_viewer_v2_==NULL) {
-    seq_viewer_v2_=new SequenceViewerV2;
-    seq_viewer_v2_->SetDestroyOnClose(false);
-  }
-  return seq_viewer_v2_;
 }
 
 #if OST_IMG_ENABLED
@@ -120,33 +107,12 @@ ost::img::gui::DataViewer* GostyApp::CreateDataViewer(const ost::img::Data& d, c
   return new ost::img::gui::DataViewer(main_,d,name);
 }
 #endif
-
-void GostyApp::ReadLoggerSettings(const QString& group_name, TextLogger* logger)
-{
-  QSettings settings;
-  settings.beginGroup("logging");
-  settings.beginGroup(group_name);
-  logger->SetCodeLogging(settings.value("log_code",QVariant(false)).toBool());
-  logger->SetOutputLogging(settings.value("log_output",QVariant(true)).toBool());
-  logger->SetErrorLogging(settings.value("log_error",QVariant(true)).toBool());
-  settings.endGroup();
-  settings.endGroup();
-}
   
-void GostyApp::SetupPyShellLogging()
-{
-  TextLogger* console_logger=new TextLogger(stdout);
-  this->ReadLoggerSettings("console", console_logger);
-  py_shell_->AddLogger(console_logger);  
-  // TODO: Setup file logging
-}
-
 PythonShell* GostyApp::GetPyShell()
 {
   if (py_shell_==NULL) {
     py_shell_=new PythonShell;
-    this->SetupPyShellLogging();             
-    py_shell_->SetDestroyOnClose(false);                 
+    py_shell_->SetDestroyOnClose(false);
   }
   return py_shell_;
 }
@@ -171,6 +137,14 @@ Perspective* GostyApp::GetPerspective()
     perspective_=new Perspective(main_);
   }
   return perspective_;
+}
+
+MessageWidget* GostyApp::GetMessageWidget()
+{
+  if (message_widget_==NULL) {
+    message_widget_=new MessageWidget;
+  }
+  return message_widget_;
 }
 
 void GostyApp::AddWidgetToApp(const QString& ident, QWidget* widget)

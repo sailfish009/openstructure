@@ -45,7 +45,8 @@ namespace tok {
     IntegralValue,
     FloatingValue,
     Colon,
-    Coma, 
+    Coma,
+    Dot, 
     And,
     Or, 
     Not,
@@ -66,7 +67,7 @@ namespace tok {
     None,
     UnknownChar,
     UnterminatedQuote,
-    String,
+    String
   }
   Type;
 }

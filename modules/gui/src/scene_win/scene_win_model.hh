@@ -23,8 +23,6 @@
   Author: Stefan Scheuber, Marco Biasini, Ansgar Philippsen
  */
 
-#include <QMap>
-#include <QAbstractItemModel>
 
 #include <ost/mol/view_type_fw.hh>
 #include <ost/mol/query_view_wrapper.hh>
@@ -36,6 +34,10 @@
 #include <ost/gui/scene_win/scene_node.hh>
 #include <ost/gui/scene_win/render_modes_node.hh>
 
+#include <QStringList>
+#include <QMimeData>
+#include <QMap>
+#include <QAbstractItemModel>
 namespace ost { namespace gui {
 
 
@@ -87,6 +89,10 @@ public:
   virtual bool setData(const QModelIndex& index=QModelIndex(),
                        const QVariant& value=QVariant(), 
                        int role=Qt::DisplayRole);
+
+  virtual QStringList mimeTypes() const;
+  Qt::DropActions supportedDragActions() const;
+  virtual QMimeData* mimeData(const QModelIndexList& indexes) const;
 
   // scene observer interface
   virtual void NodeAdded(const gfx::GfxNodeP& node);

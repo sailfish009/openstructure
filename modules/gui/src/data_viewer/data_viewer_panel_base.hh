@@ -28,12 +28,6 @@
 #include <map>    
 #include <boost/shared_ptr.hpp>
 
-#include <QWidget>
-#include <QCursor>
-#include <QMenu>
-#include <QPen>
-#include <QBrush>
-#include <QRubberBand>
 
 
 #include <ost/base.hh>
@@ -46,6 +40,12 @@
 
 #include <ost/img/normalizer_impl.hh>
 
+#include <QWidget>
+#include <QCursor>
+#include <QMenu>
+#include <QPen>
+#include <QBrush>
+#include <QRubberBand>
 
 namespace ost { namespace img { namespace gui {
 

@@ -24,6 +24,20 @@ from ost import mol
 from ost import settings
 from ost import geom
 
+
+
+## \brief custom exception that substitutes CalledProcessError
+#
+# Python 2.4 does not include the CalledProcessError exception.
+# This one substitutes it 
+class MsmsProcessError(Exception):
+  def __init__(self, returncode,command):
+    self.returncode = returncode
+    self.command = command
+  def __str__(self):
+    return repr(self.returncode)
+
+
 ## \brief Method to check if MSMS executable is present
 #
 # \param msms_exe Explicit path to msms executable
@@ -106,7 +120,7 @@ def _RunMSMS(command):
   #check for successful completion of msms
   if proc.returncode!=0:
     print "WARNING: msms error\n", stdout_value
-    raise subprocess.CalledProcessError(proc.returncode, command)
+    raise subprocess.MsmsProcessError(proc.returncode, command)
 
   return stdout_value
   
@@ -134,7 +148,8 @@ def _RunMSMS(command):
 # \param attach_esa    Attaches per atom SESA to specified FloatProp at atom level
 # \return              Touplet of lists for (SES, SAS)
 def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
-                         no_hydrogens=False, selection="",
+                         no_hydrogens=False, no_hetatoms=False, no_waters=False,
+                         selection='',
                          msms_exe=None, msms_env=None, keep_files=False, 
                          attach_asa=None, attach_esa=None):
   import re 
@@ -144,7 +159,19 @@ def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
 
   # parse selection
   if no_hydrogens:
-    selection+=" and ele!=H"
+    if selection!='':
+      selection+=" and "
+    selection+="ele!=H"
+  
+  if no_hetatoms:
+    if selection!='':
+      selection+=" and "
+    selection+="ishetatm=False"
+  
+  if no_waters:
+    if selection!='':
+      selection+=" and "
+    selection+="rname!=HOH"
 
   # setup files for msms
   (msms_data_dir, msms_data_file)=_SetupFiles(entity, selection)
@@ -205,8 +232,10 @@ def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
 # \param keep_files    Do not delete temporary files
 # \return list of OST SurfaceHandle objects
 def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
-                     no_hydrogens=False, selection="",
+                     no_hydrogens=False, no_hetatoms=False, no_waters=False,
+                     selection='',
                      msms_exe=None, msms_env=None, keep_files=False):
+  
   import os
   import re
 
@@ -215,10 +244,21 @@ def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
 
   # parse selection
   if no_hydrogens:
-    selection+=" and ele!=H"
+    if selection!='':
+      selection+=" and "
+    selection+="ele!=H"
+      
+  if no_hetatoms:
+    if selection!='':
+      selection+=" and "
+    selection+="ishetatm=False"
+      
+  if no_waters:
+    if selection!='':
+      selection+=" and "
+    selection+="rname!=HOH"
 
   # setup files for msms
-  
   (msms_data_dir, msms_data_file)=_SetupFiles(entity, selection)
 
   # set command line

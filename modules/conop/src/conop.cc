@@ -42,7 +42,7 @@ Conopology::Conopology():
 
   ele_rad_map_["H"]  = 1.09;
                  
-  ele_rad_map_["C"]  = 1.75;
+  ele_rad_map_["C"]  = 1.70;  //was 1.75
   ele_rad_map_["N"]  = 1.55;
   ele_rad_map_["O"]  = 1.52;
   ele_rad_map_["F"]  = 1.47;
@@ -214,10 +214,13 @@ namespace {
 class PropAssigner: public mol::EntityVisitor {
 public:
   PropAssigner(const BuilderP& builder): builder_(builder) {}
+  
   virtual bool VisitResidue(const mol::ResidueHandle& res)
   {
     String key=builder_->IdentifyResidue(res);
-    builder_->CheckResidueCompleteness(res);
+    if (key=="UNK") {
+      unk_res_[res.GetKey()]+=1;
+    }
     builder_->FillResidueProps(res);
     return true;
   }
@@ -227,8 +230,23 @@ public:
     builder_->FillAtomProps(atom);
     return false;
   }
+  
+  virtual void OnExit()
+  {
+    for (std::map<String, int>::iterator i=unk_res_.begin(), 
+         e=unk_res_.end(); i!=e; ++i) {
+      if (i->second>1) {
+        LOG_WARNING("structure contains unknown residues with name " << i->first 
+                    << " ("<< i->second << "x)");
+      } else {        
+        LOG_WARNING("structure contains unknown residue with name " << i->first);
+      }
+
+    }
+  }
 private:
   BuilderP builder_;
+  std::map<String, int>  unk_res_;  
 };
 
 
@@ -247,8 +265,8 @@ public:
 
   virtual bool VisitResidue(const mol::ResidueHandle& res) {
     builder_->ConnectAtomsOfResidue(res);
-    if(prev_) {
-        builder_->ConnectResidueToPrev(res,prev_);
+    if (prev_) {
+      builder_->ConnectResidueToPrev(res,prev_);
     }
     prev_=res;
     return false;
@@ -279,15 +297,15 @@ private:
 void Conopology::ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flag)
 {
   Profile profile_connect("ConnectAll");
-  LOGN_DEBUG("Conopology: ConnectAll: building internal coordinate system");
+  LOG_DEBUG("Conopology: ConnectAll: building internal coordinate system");
   mol::XCSEditor xcs_e=eh.RequestXCSEditor(mol::BUFFERED_EDIT);
   PropAssigner a(b);
   eh.Apply(a);
-  LOGN_DUMP("Conopology: ConnectAll: connecting all bonds");
+  LOG_DEBUG("Conopology: ConnectAll: connecting all bonds");
   Connector connector(b);
   eh.Apply(connector);
 
-  LOGN_DUMP("Conopology: ConnectAll: assigning all torsions");
+  LOG_DEBUG("Conopology: ConnectAll: assigning all torsions");
   TorsionMaker tmaker(b);
   eh.Apply(tmaker);
 }
@@ -298,6 +316,15 @@ Real Conopology::GetDefaultAtomRadius(const String& element) const
   std::transform(upper_ele.begin(),upper_ele.end(),upper_ele.begin(),toupper);  
   std::map<String,Real>::const_iterator it = ele_rad_map_.find(upper_ele);
   return it==ele_rad_map_.end() ? 1.5 : it->second;
+}
+
+bool Conopology::IsValidElement(const String& element) const
+{
+  String upper_ele=element;
+  std::transform(upper_ele.begin(),upper_ele.end(),upper_ele.begin(),toupper);  
+  
+  std::map<String,Real>::const_iterator it = ele_mass_map_.find(upper_ele);
+  return it!=ele_mass_map_.end();
 }
 
 Real Conopology::GetDefaultAtomMass(const String& element) const

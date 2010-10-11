@@ -16,20 +16,20 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <string>
 
 #include <boost/python.hpp>
-#include <boost/python/register_ptr_to_python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <string>
 
-using namespace boost::python;
 
 #include <ost/gui/remote_site_loader.hh>
+#include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 #include "sip_handler.hh"
 
 using namespace ost;
 using namespace ost::gui;
+using namespace boost::python;
 
 struct WrappedRemoteSiteLoader : public RemoteSiteLoader
 {

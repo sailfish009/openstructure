@@ -57,6 +57,7 @@ char ConstSequenceHandle::operator[](int index) const
   return this->GetOneLetterCode(index);
 }
 
+
 void ConstSequenceHandle::CheckValidity() const
 {
   if (!impl_) {
@@ -87,10 +88,10 @@ String ConstSequenceHandle::GetGaplessString() const
   return Impl()->GetGaplessString();
 }
 
-int ConstSequenceHandle::GetSequenceOffset() const
+int ConstSequenceHandle::GetOffset() const
 {
   this->CheckValidity();
-  return Impl()->GetSequenceOffset();  
+  return Impl()->GetOffset();  
 }
 
 
@@ -182,10 +183,10 @@ void SequenceHandle::SetString(const String& seq)
   return Impl()->SetString(seq);   
 }
 
-void SequenceHandle::SetSequenceOffset(int offset)
+void SequenceHandle::SetOffset(int offset)
 {
   this->CheckValidity();
-  return Impl()->SetSequenceOffset(offset);   
+  return Impl()->SetOffset(offset);   
 }
 
 
@@ -267,10 +268,10 @@ String SequenceHandle::GetGaplessString() const
   return Impl()->GetGaplessString();
 }
 
-int SequenceHandle::GetSequenceOffset() const
+int SequenceHandle::GetOffset() const
 {
   this->CheckValidity();
-  return Impl()->GetSequenceOffset();  
+  return Impl()->GetOffset();  
 }
 
 SequenceHandle::operator ConstSequenceHandle() const
@@ -289,6 +290,12 @@ char SequenceHandle::GetOneLetterCode(int position) const
 {
   this->CheckValidity();
   return Impl()->GetOneLetterCode(position);
+}
+
+void SequenceHandle::SetOneLetterCode(int position, char new_char)
+{
+  this->CheckValidity();
+  Impl()->SetOneLetterCode(position, new_char);
 }
 
 mol::ResidueView SequenceHandle::GetResidue(int position) const

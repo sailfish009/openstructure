@@ -34,7 +34,13 @@ class DLLEXPORT_OST_IO DAT: public ImageFormatBase
 
  public:
 
-  DAT(bool normalize_on_save = true,Endianess endianness = OST_LOCAL_ENDIAN);
+  DAT(bool normalize_on_save = true, Format bit_depth = OST_DEFAULT_FORMAT, bool sign = false,Endianess endianness = OST_LOCAL_ENDIAN);
+
+  Format GetBitDepth() const;
+  void SetBitDepth ( Format bitdepth);
+
+  bool GetSigned () const;
+  void SetSigned (bool sign);
 
   Endianess GetEndianess() const;
   void SetEndianess(Endianess end);
@@ -45,6 +51,8 @@ class DLLEXPORT_OST_IO DAT: public ImageFormatBase
  private:
 
   bool normalize_on_save_;
+  Format bit_depth_;
+  bool signed_;
   Endianess endianness_;
 };
 

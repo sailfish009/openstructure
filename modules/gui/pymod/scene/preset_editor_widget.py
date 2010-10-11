@@ -20,6 +20,7 @@
 
 from ost import gui
 from ost import gfx
+from ost import mol
 from datetime import datetime
 from datetime import datetime
 from PyQt4 import QtCore, QtGui
@@ -29,6 +30,7 @@ from gradient_editor_widget import GradientPreview
 from gradient_editor_widget import GradientEdit
 from preset_editor_list_model import PresetEditorListModel
 from immutable_gradient_info_handler import ImmutableGradientInfoHandler
+from query_editor import QueryEditorWidget
 from ost.mol import Prop
 from ost.gfx import ByElementColorOp
 from ost.gfx import ByChainColorOp
@@ -181,8 +183,7 @@ class PresetEditor(QtGui.QDialog):
 class UniformColorOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
-    selection_label = QtGui.QLabel("Selection")
-    self.selection_edit_ = QtGui.QLineEdit()
+    self.query_editor_ = QueryEditorWidget(self)
 
     detail_label = QtGui.QLabel("Parts")
     self.detail_selection_cb_ = QtGui.QComboBox()
@@ -203,8 +204,7 @@ class UniformColorOpWidget(QtGui.QDialog):
         
     grid = QtGui.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
-    grid.addWidget(selection_label, 0, 0, 1, 1)
-    grid.addWidget(self.selection_edit_, 0, 1, 1, 1)
+    grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(detail_label, 1, 0, 1, 1)
     grid.addWidget(self.detail_selection_cb_, 1, 1, 1, 1)
     grid.addWidget(color_label, 2, 0, 1, 1)
@@ -217,18 +217,19 @@ class UniformColorOpWidget(QtGui.QDialog):
     QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
     
   def GetOp(self):
-    ufco = UniformColorOp("",gfx.Color(1,1,1,1))
+    qv=mol.QueryViewWrapper(self.query_editor_.GetQuery(),self.query_editor_.GetQueryFlags())
+    ufco = UniformColorOp(qv,gfx.Color(1,1,1,1))
     
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
     ufco.SetMask(detail)
     qcolor = self.color_select_widget_.GetColor()
     color=gfx.Color(qcolor.red()/255.0,qcolor.green()/255.0,qcolor.blue()/255.0,qcolor.alpha()/255.0)
     ufco.SetColor(color)
-    ufco.SetSelection(str(self.selection_edit_.text()))
     return ufco
 
   def SetOp(self, ufco):
-    self.selection_edit_.setText(ufco.GetSelection())
+    self.query_editor_.SetQuery(ufco.GetSelection())
+    self.query_editor_.SetQueryFlags(ufco.GetSelectionFlags())
     found=False
     for i in range(0,self.detail_selection_cb_.count()):
       mask = self.detail_selection_cb_.itemData(i).toPyObject()
@@ -253,8 +254,7 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
     
-    selection_label = QtGui.QLabel("Selection")
-    self.selection_edit_ = QtGui.QLineEdit()
+    self.query_editor_ = QueryEditorWidget(self)
     
     detail_label = QtGui.QLabel("Parts")
     self.detail_selection_cb_ = QtGui.QComboBox()
@@ -313,8 +313,7 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
         
     grid = QtGui.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
-    grid.addWidget(selection_label, 0, 0, 1, 1)
-    grid.addWidget(self.selection_edit_, 0, 1, 1, 1)
+    grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(detail_label, 1, 0, 1, 1)
     grid.addWidget(self.detail_selection_cb_, 1, 1, 1, 1)
     grid.addWidget(property_label, 2, 0, 1, 1)
@@ -347,7 +346,7 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
     gradient = self.gradient_edit_.GetGfxGradient()
     
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
-    selection = str(self.selection_edit_.text())
+    qv=mol.QueryViewWrapper(self.query_editor_.GetQuery(),self.query_editor_.GetQueryFlags())
     prop = str()
     level = Prop.Level()
     if(self.property_edit_.isEnabled()):
@@ -357,15 +356,16 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
       prop = str(self.prop_combo_box_.itemData(self.prop_combo_box_.currentIndex()).toPyObject())
     
     if(self.auto_calc_.isChecked()):
-      return GradientLevelColorOp(selection, detail, prop, gradient, level)
+      return GradientLevelColorOp(qv, detail, prop, gradient, level)
     else:
       minv = self.minv_.value()
       maxv = self.maxv_.value()
-      return GradientLevelColorOp(selection, detail, prop, gradient, minv, maxv, level)
+      return GradientLevelColorOp(qv, detail, prop, gradient, minv, maxv, level)
       
     
   def SetOp(self, glco):
-    self.selection_edit_.setText(glco.GetSelection())
+    self.query_editor_.SetQuery(glco.GetSelection())
+    self.query_editor_.SetQueryFlags(glco.GetSelectionFlags())
     found=False
     for i in range(0,self.detail_selection_cb_.count()):
       mask = self.detail_selection_cb_.itemData(i).toPyObject()
@@ -422,8 +422,7 @@ class GradientLevelColorOpWidget(QtGui.QDialog):
 class ByElementColorOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
-    selection_label = QtGui.QLabel("Selection")
-    self.selection_edit_ = QtGui.QLineEdit()
+    self.query_editor_ = QueryEditorWidget(self)
 
     detail_label = QtGui.QLabel("Parts")
     self.detail_selection_cb_ = QtGui.QComboBox()
@@ -440,8 +439,7 @@ class ByElementColorOpWidget(QtGui.QDialog):
     
     grid = QtGui.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
-    grid.addWidget(selection_label, 0, 0, 1, 1)
-    grid.addWidget(self.selection_edit_, 0, 1, 1, 1)
+    grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(detail_label, 1, 0, 1, 1)
     grid.addWidget(self.detail_selection_cb_, 1, 1, 1, 1)
     grid.addLayout(self.hbox_,2,0,1,2)
@@ -453,12 +451,13 @@ class ByElementColorOpWidget(QtGui.QDialog):
     
   def GetOp(self):
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
-    selection = str(self.selection_edit_.text())
-    beco = ByElementColorOp(selection, detail)
+    qv=mol.QueryViewWrapper(self.query_editor_.GetQuery(),self.query_editor_.GetQueryFlags())
+    beco = ByElementColorOp(qv, detail)
     return beco
 
   def SetOp(self, beco):
-    self.selection_edit_.setText(beco.GetSelection())
+    self.query_editor_.SetQuery(beco.GetSelection())
+    self.query_editor_.SetQueryFlags(beco.GetSelectionFlags())
     found=False
     for i in range(0,self.detail_selection_cb_.count()):
       mask = self.detail_selection_cb_.itemData(i).toPyObject()
@@ -479,8 +478,7 @@ class ByElementColorOpWidget(QtGui.QDialog):
 class ByChainColorOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
-    selection_label = QtGui.QLabel("Selection")
-    self.selection_edit_ = QtGui.QLineEdit()
+    self.query_editor_ = QueryEditorWidget(self)
 
     detail_label = QtGui.QLabel("Parts")
     self.detail_selection_cb_ = QtGui.QComboBox()
@@ -497,8 +495,7 @@ class ByChainColorOpWidget(QtGui.QDialog):
     
     grid = QtGui.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
-    grid.addWidget(selection_label, 0, 0, 1, 1)
-    grid.addWidget(self.selection_edit_, 0, 1, 1, 1)
+    grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(detail_label, 1, 0, 1, 1)
     grid.addWidget(self.detail_selection_cb_, 1, 1, 1, 1)
     grid.addLayout(self.hbox_,2,0,1,2)
@@ -510,12 +507,13 @@ class ByChainColorOpWidget(QtGui.QDialog):
     
   def GetOp(self):
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
-    selection = str(self.selection_edit_.text())
-    bcco = ByChainColorOp(selection, detail)
+    qv=mol.QueryViewWrapper(self.query_editor_.GetQuery(),self.query_editor_.GetQueryFlags())
+    bcco = ByChainColorOp(qv, detail)
     return bcco
 
   def SetOp(self, bcco):
-    self.selection_edit_.setText(bcco.GetSelection())
+    self.query_editor_.SetQuery(bcco.GetSelection())
+    self.query_editor_.SetQueryFlags(bcco.GetSelectionFlags())
     found=False
     for i in range(0,self.detail_selection_cb_.count()):
       mask = self.detail_selection_cb_.itemData(i).toPyObject()
@@ -536,8 +534,7 @@ class ByChainColorOpWidget(QtGui.QDialog):
 class RenderOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
-    selection_label = QtGui.QLabel("Selection")
-    self.selection_edit_ = QtGui.QLineEdit()
+    self.query_editor_ = QueryEditorWidget(self)
   
     self.keep_ = QtGui.QCheckBox("Keep")
     self.keep_.setChecked(False)
@@ -571,8 +568,7 @@ class RenderOpWidget(QtGui.QDialog):
     
     grid = QtGui.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
-    grid.addWidget(selection_label, 0, 0, 1, 1)
-    grid.addWidget(self.selection_edit_, 0, 1, 1, 1)
+    grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(self.keep_, 1, 1, 1, 1)
     grid.addWidget(render_label,2,0,1,1)
     grid.addWidget(self.render_modes_,2,1,1,1)
@@ -584,13 +580,15 @@ class RenderOpWidget(QtGui.QDialog):
     QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
     
   def GetOp(self):
-    selection = str(self.selection_edit_.text())
+    selection = self.query_editor_.GetQueryText()
+    flags = self.query_editor_.GetQueryFlags()
     render_mode = self.render_modes_list_[self.render_modes_.currentIndex()]
-    ro = RenderOp(render_mode, selection, self.keep_.isChecked())
+    ro = RenderOp(render_mode, selection, flags, self.keep_.isChecked())
     return ro
 
   def SetOp(self, ro):
-    self.selection_edit_.setText(ro.GetSelection())
+    self.query_editor_.SetQuery(ro.GetSelection())
+    self.query_editor_.SetQueryFlags(ro.GetSelectionFlags())
     found=False
     for i in range(0,self.render_modes_.count()):
       render_mode = self.render_modes_list_[i]
@@ -611,8 +609,7 @@ class RenderOpWidget(QtGui.QDialog):
 class VisibilityOpWidget(QtGui.QDialog):
   def __init__(self, parent=None):
     QtGui.QDialog.__init__(self, parent)
-    selection_label = QtGui.QLabel("Selection")
-    self.selection_edit_ = QtGui.QLineEdit()
+    self.query_editor_ = QueryEditorWidget(self)
   
     self.visible_ = QtGui.QCheckBox("Visible")
     self.visible_.setChecked(True)
@@ -626,8 +623,7 @@ class VisibilityOpWidget(QtGui.QDialog):
     
     grid = QtGui.QGridLayout()
     grid.setContentsMargins(0,5,0,0)
-    grid.addWidget(selection_label, 0, 0, 1, 1)
-    grid.addWidget(self.selection_edit_, 0, 1, 1, 1)
+    grid.addWidget(self.query_editor_, 0, 0, 1, 2)
     grid.addWidget(self.visible_, 1, 1, 1, 1)
     grid.addLayout(self.hbox_,2,0,1,2)
     grid.setRowStretch(1, 1)
@@ -637,13 +633,15 @@ class VisibilityOpWidget(QtGui.QDialog):
     QtCore.QObject.connect(self.cancel_button_, QtCore.SIGNAL("clicked()"), self.Cancel)
     
   def GetOp(self):
-    selection = str(self.selection_edit_.text())
-    vo = VisibilityOp(selection, self.visible_.isChecked())
+    selection = self.query_editor_.GetQueryText()
+    flags = self.query_editor_.GetQueryFlags()
+    vo = VisibilityOp(selection, flags, self.visible_.isChecked())
     return vo
 
-  def SetOp(self, ro):
-    self.selection_edit_.setText(ro.GetSelection())
-    self.visible_.setChecked(ro.IsVisible())
+  def SetOp(self, vo):
+    self.query_editor_.SetQuery(vo.GetSelection())
+    self.query_editor_.SetQueryFlags(vo.GetSelectionFlags())
+    self.visible_.setChecked(vo.IsVisible())
   
   def Ok(self):
     self.accept()

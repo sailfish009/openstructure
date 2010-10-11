@@ -190,6 +190,17 @@ BOOST_AUTO_TEST_CASE(no_endmdl_record)
   BOOST_CHECK_THROW(reader.Import(ent), IOException);
 }
 
+BOOST_AUTO_TEST_CASE(faulty_lines)
+{
+  String fname("testfiles/pdb/faulty.pdb");
+  PDBReader reader(fname);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+
+  PDB::PushFlags(PDB::SKIP_FAULTY_RECORDS);
+  reader.Import(ent);
+}
+
 BOOST_AUTO_TEST_CASE(write_atom)
 {
   std::stringstream out;
@@ -292,6 +303,48 @@ BOOST_AUTO_TEST_CASE(write_ter)
   }
   BOOST_CHECK(compare_files("testfiles/pdb/ter.pdb", 
                             "testfiles/pdb/ter-out.pdb"));
+}
+
+BOOST_AUTO_TEST_CASE(write_ter2)
+{
+  String fname("testfiles/pdb/ter2.pdb");  
+  // this scope is required to force the writer stream to be closed before 
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    PDBReader reader(fname);
+    PDBWriter writer(String("testfiles/pdb/ter2-out.pdb"));
+    
+    mol::EntityHandle ent=mol::CreateEntity();
+    reader.Import(ent);
+    // we use conopology to mark amino acids as peptide-linking. this is 
+    // require for proper TER output
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/ter2.pdb", 
+                            "testfiles/pdb/ter2-out.pdb"));
+}
+
+BOOST_AUTO_TEST_CASE(write_ter3)
+{
+  String fname("testfiles/pdb/ter3.pdb");  
+  // this scope is required to force the writer stream to be closed before 
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    PDBReader reader(fname);
+    PDBWriter writer(String("testfiles/pdb/ter3-out.pdb"));
+    
+    mol::EntityHandle ent=mol::CreateEntity();
+    reader.Import(ent);
+    // we use conopology to mark amino acids as peptide-linking. this is 
+    // require for proper TER output
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/ter3.pdb", 
+                            "testfiles/pdb/ter3-out.pdb"));
 }
 
 BOOST_AUTO_TEST_CASE(write_conect)

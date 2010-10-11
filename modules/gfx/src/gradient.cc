@@ -23,11 +23,23 @@
 #include <ost/info/info.hh>
 #include <ost/info/info_fw.hh>
 
+#include <ost/gfx/gradient_manager.hh>
+
 namespace ost { namespace gfx {
 
 
 Gradient::Gradient() 
 {
+}
+
+Gradient::Gradient(const String& name)
+{
+  Gradient gradient = GradientManager::Instance().GetGradient(name);
+  StopList stops = gradient.GetStops();
+  for(unsigned int i = 0; i < stops.size(); i++){
+    Stop stop = stops[i];
+    this->SetColorAt(stop.t, stop.color);
+  }
 }
 
 void Gradient::SetColorAt(float t, const Color& c)
@@ -44,7 +56,7 @@ void Gradient::SetColorAt(float t, const Color& c)
 Color Gradient::GetColorAt(float t) const
 {
   if (stops_.empty())
-    return Color(0.0, 0.0, 0.0, 1.0);
+    throw Error("Can not calculate color with 0 Stops set!");
   
   uint c=0;
   while (t>=stops_[c].t && c<stops_.size()) {

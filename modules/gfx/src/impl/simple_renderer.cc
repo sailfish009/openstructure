@@ -80,7 +80,7 @@ geom::Vec3 SimpleRenderer::GetDoubleBondPlane(mol::BondHandle b)
   GetBondPartnerNormal(vec, n, bond_vec, partner2, a1, a2);
   if(n==0) {
     //set vec into x direction if no partners are present
-    vec.SetX(1);
+    vec.x=1;
   }
   vec=geom::Normalize(geom::Cross(vec,bond_vec));
   return vec;
@@ -140,7 +140,7 @@ void SimpleRenderer::PrepareRendering(GfxView& view, IndexedVertexArray& va)
         if(it->bond.GetBondOrder()==2) {
           vec=GetDoubleBondPlane(it->bond);
         } else {
-          vec.SetX(1);
+          vec.x=1;
         }
         Real dbd=options_->GetBondOrderDistance();
         VertexID id00 = va.Add(p0+dbd*vec,geom::Vec3(),it->atom1->color);

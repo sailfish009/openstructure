@@ -27,7 +27,7 @@ namespace ost { namespace mol {
 
 SurfaceHandle BuildSurface(const EntityView& ev, Real probe_radius, Real patch_size)
 {
-  LOGN_ERROR("not yet implemented");
+  LOG_ERROR("not yet implemented");
   return SurfaceHandle();
 }
 

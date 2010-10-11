@@ -21,16 +21,16 @@
 
 namespace ost { namespace gfx {
 
-ColorOp::ColorOp(): query_view_(), mask_(DETAIL_COLOR|MAIN_COLOR)
+ColorOp::ColorOp():  name_("Abstract coloring"), query_view_(), mask_(DETAIL_COLOR|MAIN_COLOR)
 { }
 
 
 ColorOp::ColorOp(const String& selection, int mask):
-    query_view_(mol::Query(selection),mol::EntityView() ), mask_(mask)
+    name_("Abstract coloring"), query_view_(mol::Query(selection),mol::EntityView() ), mask_(mask)
 { }
 
 ColorOp::ColorOp(const mol::QueryViewWrapper& query_view, int mask):
-    query_view_(query_view), mask_(mask)
+    name_("Abstract coloring"), query_view_(query_view), mask_(mask)
 { }
 
 bool ColorOp::CanApplyTo(const GfxObjP& obj) const
@@ -43,6 +43,16 @@ void ColorOp::ApplyTo(GfxObjP& obj) const
   //Do Nothing
 }
 
+const String& ColorOp::GetName() const
+{
+  return name_;
+}
+
+void ColorOp::SetName(const String& name)
+{
+  name_=name;
+}
+
 void ColorOp::SetSelection(const String& selection)
 {
   query_view_.SetQuery(selection);
@@ -51,6 +61,16 @@ void ColorOp::SetSelection(const String& selection)
 String ColorOp::GetSelection() const
 {
   return query_view_.GetQuery().GetQueryString();
+}
+
+void ColorOp::SetSelectionFlags(mol::QueryFlags flags)
+{
+  query_view_.SetFlags(flags);
+}
+
+mol::QueryFlags ColorOp::GetSelectionFlags() const
+{
+  return query_view_.GetFlags();
 }
 
 bool ColorOp::IsSelectionOnly() const
@@ -71,7 +91,7 @@ void ColorOp::SetView(const mol::EntityView& view)
 void ColorOp::ToInfo(info::InfoGroup& group) const
 {
   std::ostringstream ss;
-  ss << (int)mask_ << "\t" << query_view_.GetQuery().GetQueryString();
+  ss << (int)mask_ << "\t" << query_view_.GetFlags() << "\t" << query_view_.GetQuery().GetQueryString();
   group.SetTextData(ss.str());
 }
 
@@ -80,7 +100,8 @@ gfx::ColorOp ColorOp::FromInfo(ost::info::InfoGroup& group)
   ColorOp op;
   std::istringstream ss(group.GetTextData());
   int mask;
-  ss >> mask;
+  mol::QueryFlags flags;
+  ss >> mask >> flags;
   op.SetMask(mask);
   String selection;
   String part;
@@ -91,6 +112,7 @@ gfx::ColorOp ColorOp::FromInfo(ost::info::InfoGroup& group)
     part.clear();
   }
   op.SetSelection(selection);
+  op.SetSelectionFlags(flags);
   return op;
 }
 

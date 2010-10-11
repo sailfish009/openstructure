@@ -24,8 +24,8 @@
 #include <ost/profile.hh>
 #include <ost/profile.hh>
 #include <ost/base.hh>
-#include <ost/img/alg/stat.hh>
 #include <ost/img/alg/discrete_shrink.hh>
+#include <ost/img/alg/histogram.hh>
 
 #include "gl_helper.hh"
 #include "glext_include.hh"
@@ -65,6 +65,9 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
   downsampled_mh_(),
   mh_(MapIso::DownsampleMap(mh)),
   octree_(mh_),
+  stat_calculated_(false),
+  histogram_calculated_(false),
+  histogram_bin_count_(100),
   level_(level),
   normals_calculated_(false),
   alg_(0),
@@ -95,6 +98,9 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   downsampled_mh_(),
   mh_(MapIso::DownsampleMap(mh)),
   octree_(mh_),
+  stat_calculated_(false),
+  histogram_calculated_(false),
+  histogram_bin_count_(100),
   level_(level),
   normals_calculated_(false),
   alg_(a),
@@ -129,8 +135,8 @@ geom::Vec3 MapIso::GetCenter() const
   geom::Vec3 nrvo = mh_.IndexToCoord(mh_.GetExtent().GetCenter());
   return nrvo;
 }
-  
-void MapIso::OnRenderModeChange()
+
+void MapIso::UpdateRenderParams()
 {
   if(GetRenderMode()==RenderMode::FILL ||
      GetRenderMode()==RenderMode::OUTLINE) {
@@ -153,7 +159,13 @@ void MapIso::OnRenderModeChange()
     va_.SetLineWidth(this->GetLineWidth());
     va_.SetMode(0x2); // only lines
     va_.SetTwoSided(true);
-  }
+  }  
+}
+
+void MapIso::OnRenderModeChange()
+{
+  this->UpdateRenderParams();
+  this->FlagRebuild();
   GfxObj::OnRenderModeChange();
 }
 
@@ -161,9 +173,8 @@ void MapIso::CustomPreRenderGL(bool flag)
 {
   if(flag) {
     Rebuild();
-  } else {
-    //RefreshVA(va_);
   }
+  RefreshVA(va_);
 }
 
 namespace {
@@ -284,7 +295,7 @@ void MapIso::Rebuild()
   va_.CalcNormals(1.0);
   va_.DrawNormals(true);
 #endif  
-  OnRenderModeChange();  
+  this->UpdateRenderParams();  
 }
 
 void MapIso::SetLevel(float l)
@@ -294,6 +305,32 @@ void MapIso::SetLevel(float l)
   Scene::Instance().RequestRedraw();
 }
 
+void MapIso::CalculateStat() const
+{
+  mh_.ApplyIP(stat_);
+  stat_calculated_=true;
+}
+
+void MapIso::CalculateHistogram() const
+{
+  histogram_ = img::alg::HistogramBase(histogram_bin_count_, 
+                                       this->GetMinLevel(), this->GetMaxLevel());
+  mh_.ApplyIP(histogram_);
+  histogram_calculated_=true;
+}
+
+float MapIso::GetMinLevel() const
+{
+  if(!stat_calculated_)CalculateStat();
+  return stat_.GetMinimum();
+}
+
+float MapIso::GetMaxLevel() const
+{
+  if(!stat_calculated_)CalculateStat();
+  return stat_.GetMaximum();
+}
+
 float MapIso::GetLevel() const
 {
   return level_;
@@ -301,9 +338,27 @@ float MapIso::GetLevel() const
 
 float MapIso::GetStdDev() const
 {
-  img::alg::Stat stat;
-  mh_.Apply(stat);
-  return stat.GetStandardDeviation();
+  if(!stat_calculated_)CalculateStat();
+  return stat_.GetStandardDeviation();
+}
+
+void MapIso::SetHistogramBinCount(int count)
+{
+  if (count > 0){
+    histogram_bin_count_ = count;
+    histogram_calculated_ = false;
+  }
+}
+
+int MapIso::GetHistogramBinCount() const
+{
+  return histogram_bin_count_;
+}
+
+std::vector<int> MapIso::GetHistogram() const
+{
+  if(!histogram_calculated_)CalculateHistogram();
+  return histogram_.GetBins();
 }
 
 img::ImageHandle& MapIso::GetMap()
@@ -323,9 +378,8 @@ img::ImageHandle& MapIso::GetDownsampledMap()
 
 float MapIso::GetMean() const
 {
-  img::alg::Stat stat;
-  mh_.Apply(stat);
-  return static_cast<float>(stat.GetMean());
+  if(!stat_calculated_)CalculateStat();
+  return static_cast<float>(stat_.GetMean());
 }
 
 void MapIso::SetNSF(float nsf)
@@ -340,6 +394,8 @@ void MapIso::ShowDownsampledMap()
 {
   if (downsampled_mh_.IsValid()) mh_ = downsampled_mh_;
   MakeOctreeDirty();
+  stat_calculated_ = false;
+  histogram_calculated_ = false;
   Rebuild();
   Scene::Instance().RequestRedraw();
 }
@@ -349,6 +405,8 @@ void MapIso::ShowOriginalMap()
 {
   if (original_mh_.IsValid()) mh_ = original_mh_;
   MakeOctreeDirty();
+  stat_calculated_ = false;
+  histogram_calculated_ = false;
   Rebuild();
   Scene::Instance().RequestRedraw();
 }
@@ -384,7 +442,7 @@ img::ImageHandle MapIso::DownsampleMap(const img::ImageHandle& mh)
   uint downsampling_fact = compute_downsampling_fact(mh);
   img:: ImageHandle ret_mh = mh;
   if (downsampling_fact != 1) {
-    LOG_MESSAGE("Downsampling map for more comfortable visualization")
+    LOG_INFO("Downsampling map for more comfortable visualization")
     img::alg::DiscreteShrink shrink_alg(img::Size(downsampling_fact,downsampling_fact,downsampling_fact));
     ret_mh = mh.Apply(shrink_alg);
   }

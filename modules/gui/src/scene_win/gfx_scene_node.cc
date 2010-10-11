@@ -16,13 +16,13 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <QFont>
 
 #include "gfx_scene_node.hh"
 
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node.hh>
 
+#include <QFont>
 namespace ost { namespace gui {
 
 GfxSceneNode::GfxSceneNode(gfx::GfxNodeP gfx_node, SceneNode* parent):SceneNode(parent),gfx_node_(gfx_node){}
@@ -71,10 +71,10 @@ bool GfxSceneNode::SetData(int column, const QVariant& value, int role){
 
 Qt::ItemFlags GfxSceneNode::Flags(int column) const{
   if(column==0){
-    return Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled;
+    return Qt::ItemIsSelectable|Qt::ItemIsUserCheckable|Qt::ItemIsEnabled|Qt::ItemIsDragEnabled;
   }
   else if(column==1){
-    return Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsEditable;
+    return Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsEditable|Qt::ItemIsDragEnabled;
   }
   return Qt::NoItemFlags;
 }

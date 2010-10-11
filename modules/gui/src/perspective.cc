@@ -16,7 +16,17 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+#include <ost/platform.hh>
+
+#include <ost/gui/widget_registry.hh>
+#include <ost/gui/perspective.hh>
+#include <ost/gui/file_browser.hh>
+#include <ost/gui/main_area.hh>
+#include <ost/gui/messages/message_box_widget.hh>
+
 #include <QTextEdit>
+#include <QSizeGrip>
 #include <QMainWindow>
 #include <QSettings>
 #include <QDebug>
@@ -26,14 +36,7 @@
 #include <QSizeGrip>
 #include <QKeySequence>
 #include <QStatusBar>
-
-#include <ost/platform.hh>
-
-#include <ost/gui/widget_registry.hh>
-#include <ost/gui/perspective.hh>
-#include <ost/gui/file_browser.hh>
-#include <ost/gui/main_area.hh>
-
+#include <QPushButton>
 /*
   Author: Marco Biasini
  */
@@ -53,8 +56,9 @@ Perspective::Perspective(QMainWindow* parent):
   parent->setCentralWidget(central_);
 
   status_bar_ = new QStatusBar(main_area_);
+  status_bar_->setSizeGripEnabled (false);
 
-  panels_ = new Panels(main_area_);
+  panels_ = new PanelManager(main_area_);
   l->addWidget(panels_,1);
   this->SetupQuickAccessBar();
   l->addWidget(quick_access_bar_, 0);
@@ -69,27 +73,35 @@ void Perspective::SetupQuickAccessBar()
   QHBoxLayout* l2=new QHBoxLayout(quick_access_bar_);
   l2->setMargin(0);
   l2->setSpacing(0);
-
-  QToolButton* toggle_side_bar=new QToolButton(quick_access_bar_);
-  toggle_side_bar->setText("A");
+  l2->setContentsMargins(0, 0, 0, 0);
+  QPushButton* toggle_side_bar=new QPushButton(quick_access_bar_);
+  toggle_side_bar->setAttribute(Qt::WA_MacSmallSize);
+  toggle_side_bar->setFlat(true);
   toggle_side_bar->setToolTip("Glory A-Button");
-  toggle_side_bar->setIconSize(QSize(20,20));
-  toggle_side_bar->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("show_sidebar_icon.png")));
+  toggle_side_bar->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+
+                                 QString("show_sidebar_icon.png")));
+  toggle_side_bar->setIconSize(QSize(10,10));  
   toggle_side_bar->setCheckable(true);
-  toggle_side_bar->setChecked(true);
+  toggle_side_bar->setFixedSize(QSize(20, 20));  
+  toggle_side_bar->setChecked(false);
   connect(toggle_side_bar, SIGNAL(clicked()), panels_,
           SLOT(ToggleHide()));
   l2->addWidget(toggle_side_bar, 0);
 
-  QToolButton* add_side_bar_widget=new QToolButton(quick_access_bar_);          
-  add_side_bar_widget->setText("+");
+  QPushButton* add_side_bar_widget=new QPushButton(quick_access_bar_);
+  add_side_bar_widget->setAttribute(Qt::WA_MacSmallSize);
+  add_side_bar_widget->setFlat(true);  
+  add_side_bar_widget->setFixedSize(QSize(20, 20));
   add_side_bar_widget->setToolTip("Add widget to left sidebar");
-  add_side_bar_widget->setIconSize(QSize(20,20));
-  add_side_bar_widget->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("add_icon.png")));
+  add_side_bar_widget->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+
+                                     QString("add_icon.png")));
+  add_side_bar_widget->setIconSize(QSize(10,10));  
   connect(add_side_bar_widget, SIGNAL(clicked()), this, 
           SLOT(AddSideBarWidget()));          
   l2->addWidget(add_side_bar_widget, 0);
   l2->addWidget(status_bar_);
+  l2->addWidget(new MessageBoxWidget(quick_access_bar_));
+  l2->addWidget(new QSizeGrip(quick_access_bar_));
 }
 
 void Perspective::StatusMessage(const String& m)
@@ -115,7 +127,7 @@ QMenu* Perspective::GetMenu(const QString& name)
   return menu;
 }
 
-Panels* Perspective::GetPanels()
+PanelManager* Perspective::GetPanels()
 {
   return panels_;
 }

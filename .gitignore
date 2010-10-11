@@ -1,3 +1,5 @@
+CTestConfig.cmake
+CTestTestfile.cmake
 CMakeFiles
 cmake_install.cmake
 stage
@@ -26,3 +28,8 @@ OpenStructure.cbp
 DartConfiguration.tcl
 Testing
 *~
+README.html
+CPackConfig.cmake
+CPackSourceConfig.cmake
+deployment/macos/DNG.app
+deployment/macos/standalone

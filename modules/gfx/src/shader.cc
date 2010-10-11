@@ -61,7 +61,7 @@ void Shader::PreGLInit()
 #if !defined(__APPLE__)
   GLenum err = glewInit();
   if (GLEW_OK != err) {
-    LOGN_ERROR("glew failure: " << glewGetErrorString(err));
+    LOG_ERROR("glew failure: " << glewGetErrorString(err));
     assert(false);
   }
 #endif
@@ -79,13 +79,13 @@ bool Shader::Compile(std::string shader_name, std::string shader_code,
   GLint sh_compiled;
   glGetShaderiv(shader_id, GL_COMPILE_STATUS, &sh_compiled);
   if(sh_compiled==GL_TRUE) {
-    LOGN_DEBUG("shader [" << shader_name << "] successfully compiled (" << shader_id << ")");
+    LOG_VERBOSE("shader [" << shader_name << "] successfully compiled (" << shader_id << ")");
   } else {
     GLint sh_log_length;
     glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &sh_log_length);
     std::vector<GLchar> sh_log(sh_log_length+1);
     glGetShaderInfoLog(shader_id, sh_log_length, NULL, &sh_log[0]);
-    LOGN_VERBOSE("shader [" << shader_name << "] compilation failed:" << std::endl << String(&sh_log[0]));
+    LOG_ERROR("shader [" << shader_name << "] compilation failed:" << std::endl << String(&sh_log[0]));
     return false;
   }
   return true;
@@ -96,10 +96,10 @@ bool Shader::Link(const std::vector<GLuint>& code_list, std::string pr_name, GLu
   shader_pr = glCreateProgram();
   for(std::vector<GLuint>::const_iterator it=code_list.begin();it!=code_list.end();++it) {
     if(*it == 0) {
-      LOGN_DEBUG("skipping shader [" << pr_name << "] due to missing compiled code");
+      LOG_WARNING("skipping shader [" << pr_name << "] due to missing compiled code");
       return false;
     }
-    LOGN_DEBUG("attaching compiled shader id " << *it << " to " << shader_pr);
+    LOG_VERBOSE("attaching compiled shader id " << *it << " to " << shader_pr);
     glAttachShader(shader_pr,*it);
   }
     
@@ -107,13 +107,13 @@ bool Shader::Link(const std::vector<GLuint>& code_list, std::string pr_name, GLu
   GLint pr_linked;
   glGetProgramiv(shader_pr,GL_LINK_STATUS,&pr_linked);
   if(pr_linked==GL_TRUE) {
-    LOGN_DEBUG("shader [" << pr_name << "] sucessfully linked");
+    LOG_VERBOSE("shader [" << pr_name << "] sucessfully linked");
   } else {
     GLint pr_log_length;
     glGetProgramiv(shader_pr, GL_INFO_LOG_LENGTH, &pr_log_length);
     std::vector<GLchar> pr_log(pr_log_length+1);
     glGetProgramInfoLog(shader_pr, pr_log_length, NULL, &pr_log[0]);
-    LOGN_VERBOSE("shader [" << pr_name << "] linking failed:" << std::endl << String(&pr_log[0]));
+    LOG_ERROR("shader [" << pr_name << "] linking failed:" << std::endl << String(&pr_log[0]));
     return false;
   }
   return true;
@@ -197,7 +197,7 @@ void Shader::Setup()
     bf::path shader_file(shader_dir / shader_name);
 
     if(!bf::exists(shader_file)){
-      LOGN_ERROR("not found: [" << shader_file.string() << "], cannot create shaders");
+      LOG_ERROR("not found: [" << shader_file.string() << "], cannot create shaders");
       continue;
     }
 
@@ -347,7 +347,7 @@ void Shader::Activate(const String& name)
   if(!name.empty()) {
     std::map<String, GLuint>::iterator it = shader_program_map_.find(name);
     if(it!=shader_program_map_.end()) {
-      LOGN_DUMP("switching to shader [" << name << "]");
+      LOG_VERBOSE("switching to shader [" << name << "]");
       glUseProgram(it->second);
       current_program_=it->second;
       current_name_=name;
@@ -356,11 +356,11 @@ void Shader::Activate(const String& name)
       return;
 
     } else {
-      LOGN_MESSAGE("shader program [" << name << "] not present");
+      LOG_WARNING("shader program [" << name << "] not present");
       return;
     }
   }
-  LOGN_DUMP("switching to fixed pipeline");
+  LOG_VERBOSE("switching to fixed pipeline");
   glUseProgram(0);
   current_program_=0;
   current_name_="";
@@ -410,14 +410,14 @@ void Shader::UpdateState()
     // update all settings
     GLint result;
     glGetIntegerv(GL_LIGHTING,&result);
-    LOGN_TRACE("setting lighting flag to " << result);
+    LOG_TRACE("setting lighting flag to " << result);
     glUniform1i(glGetUniformLocation(current_program_,"lighting_flag"),result);
     GLboolean bresult;
     glGetBooleanv(GL_LIGHT_MODEL_TWO_SIDE,&bresult);
-    LOGN_TRACE("setting two_sided flag to " << bresult);
+    LOG_TRACE("setting two_sided flag to " << bresult);
     glUniform1i(glGetUniformLocation(current_program_,"two_sided_flag"),bresult);
     glGetIntegerv(GL_FOG,&result);
-    LOGN_TRACE("setting fog flag to " << result);
+    LOG_TRACE("setting fog flag to " << result);
     glUniform1i(glGetUniformLocation(current_program_,"fog_flag"),result);
     glDisable(GL_COLOR_MATERIAL);
 

@@ -67,20 +67,6 @@ DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os, const ResNum& n);
 
 typedef String ResidueKey;
 
-/// \brief Residue properties
-/// 
-/// Small data structure to aggregate residue properties.
-struct DLLEXPORT_OST_MOL ResidueProp {
-  ResidueProp(const String& k, char a)
-    : key(k), abbrev(a) {    
-  }
-  ResidueProp()
-    :key(""), abbrev('\0') {   
-  }
-  ResidueKey   key;
-  char         abbrev;
-};
-
 }} // ns
 
 

@@ -37,6 +37,7 @@ struct ChemClass {
   const static char LSaccharide     ='X';
   const static char DSaccharide     ='Y';    
   const static char Saccharide      ='Z';
+  const static char Water           ='W';
   const static char Unknown         ='U';
   explicit ChemClass(char chem_class)
     : chem_class_(chem_class) {
@@ -62,6 +63,8 @@ struct ChemClass {
     return (chem_class_==ChemClass::DNALinking || 
             chem_class_==ChemClass::RNALinking);
   }
+  
+  bool IsWater() const { return chem_class_==ChemClass::Water; }
   operator char() const {
     return chem_class_;
   }

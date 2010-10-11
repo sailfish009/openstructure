@@ -25,9 +25,9 @@
 #if defined(OST_MODULE_OST_IMG)
 #  define DLLEXPORT_OST_IMG_BASE DLLEXPORT
 #  if defined(_MSC_VER)
-#    define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t)
+#    define OST_IMG_BASE_EXPLICIT_INST_DECL(c, t)
 #  else
-#    define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t) extern template c TEMPLATE_EXPORT t;
+#    define OST_IMG_BASE_EXPLICIT_INST_DECL(c, t) extern template c TEMPLATE_EXPORT t;
 #  endif
 #else
 #  define DLLEXPORT_OST_IMG_BASE DLLIMPORT

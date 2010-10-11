@@ -21,10 +21,12 @@
 
 #include <cstddef> // for size_t
 #include <ostream>
+#include <cassert>
 
 #include <boost/operators.hpp>
 
 #include <ost/geom/module_config.hh>
+#include <ost/geom/mat2.hh>
 
 namespace geom {
 
@@ -36,12 +38,12 @@ class DLLEXPORT_OST_GEOM Mat3:
     private boost::additive1<Mat3>,
     private boost::multiplicative2<Mat3, Real>
 {
-public:
-  static Mat3 Identity();
-  
-  //! Default initialization, identity matrix
-  Mat3();
-
+public:  
+  //! Default initialization, identity matrix  
+  Mat3()
+  {
+    this->set(1.0,0.0,0.0, 0.0,1.0,0.0, 0.0,0.0,1.0);
+  }
   //! In with 9 values in row-major order
   /*!
     row-major order means that the matrix
@@ -52,37 +54,138 @@ public:
 
     is initialized with (a,b,c, d,e,f, g,h,i)
   */
-  Mat3(Real i00, Real i01, Real i02,Real i10, Real i11, Real i12,Real i20, Real i21, Real i22);
+  Mat3(Real i00, Real i01, Real i02,
+       Real i10, Real i11, Real i12,
+       Real i20, Real i21, Real i22)
+  {
+    this->set(i00,i01,i02,i10,i11,i12,i20,i21,i22);
+  }
 
-  //! Copy ctor
-  Mat3(const Mat3& m);
+  Mat3(const Mat3& m)
+  {
+    this->set(m(0,0),m(0,1),m(0,2),m(1,0),m(1,1),m(1,2),m(2,0),m(2,1),m(2,2));
+  }
 
-  // initialization with 2d matrix
-  explicit Mat3(const Mat2& m);
-
-  //! initialization from array
-  explicit Mat3(const Real[9]);
-
-  //! assignement op
-  Mat3& operator=(const Mat3& m);
-
-  //! comparable
-  bool operator==(const Mat3& rhs) const;
+  Mat3(const Mat2& m)
+  {
+    this->set(m(0, 0), m(0, 1), Real(0.0),
+              m(1, 0), m(1, 1), Real(0.0),
+              Real(0.0), Real(0.0), Real(1.0));
+  }
+  
+  explicit Mat3(const Real arr[9])
+  {
+    this->set(arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8]);
+  }  
 
   //! element access
-  Real& operator()(std::size_t r, std::size_t c);
+  Real& operator()(std::size_t r, std::size_t c)
+  {
+    assert(r<=2 && c<=2);
+    return data_[r][c];
+  }
   //! const element access
-  const Real& operator()(std::size_t r, std::size_t c) const;
+  const Real& operator()(std::size_t r, std::size_t c) const
+  {
+    assert(r<=2 && c<=2);
+    return data_[r][c];
+  }
 
-  //! addable op
-  Mat3& operator+=(const Mat3& rhs);
-  //! subtractable op
-  Mat3& operator-=(const Mat3& rhs);
+  Mat3& operator=(const Mat3& m)
+  {
+    if(&m!=this) {
+      this->set(m(0,0),m(0,1),m(0,2),m(1,0),m(1,1),m(1,2),m(2,0),m(2,1),m(2,2));
+    }
+    return *this;
+  }
 
-  Mat3& operator*=(const Real d);
-  Mat3& operator/=(const Real d);
+  static Mat3 Identity() 
+  {
+    static Mat3 i(1.0,0.0,0.0,
+                  0.0,1.0,0.0,
+                  0.0,0.0,1.0);
+    return i;
+  }
 
-  Mat3& operator*=(const Mat3& m);
+  bool operator==(const Mat3& rhs) const
+  {
+    return data_[0][0] ==  rhs.data_[0][0] &&
+      data_[1][0] == rhs.data_[1][0] &&
+      data_[2][0] == rhs.data_[2][0] &&
+      data_[0][1] == rhs.data_[0][1] &&
+      data_[1][1] ==  rhs.data_[1][1] &&
+      data_[2][1] ==  rhs.data_[2][1] &&
+      data_[0][2] ==  rhs.data_[0][2] &&
+      data_[1][2] ==  rhs.data_[1][2] &&
+      data_[2][2] ==  rhs.data_[2][2];
+  }
+
+  Mat3& operator+=(const Mat3& rhs)
+  {
+    data_[0][0]+=rhs(0,0);
+    data_[0][1]+=rhs(0,1);
+    data_[0][2]+=rhs(0,2);
+    data_[1][0]+=rhs(1,0);
+    data_[1][1]+=rhs(1,1);
+    data_[1][2]+=rhs(1,2);
+    data_[2][0]+=rhs(2,0);
+    data_[2][1]+=rhs(2,1);
+    data_[2][2]+=rhs(2,2);
+    return *this;
+  }
+  Mat3& operator-=(const Mat3& rhs)
+  {
+    data_[0][0]-=rhs(0,0);
+    data_[0][1]-=rhs(0,1);
+    data_[0][2]-=rhs(0,2);
+    data_[1][0]-=rhs(1,0);
+    data_[1][1]-=rhs(1,1);
+    data_[1][2]-=rhs(1,2);
+    data_[2][0]-=rhs(2,0);
+    data_[2][1]-=rhs(2,1);
+    data_[2][2]-=rhs(2,2);
+    return *this;
+  }
+  Mat3& operator*=(const Real d)
+  {
+    data_[0][0]*=d;
+    data_[0][1]*=d;
+    data_[0][2]*=d;
+    data_[1][0]*=d;
+    data_[1][1]*=d;
+    data_[1][2]*=d;
+    data_[2][0]*=d;
+    data_[2][1]*=d;
+    data_[2][2]*=d;
+    return *this;
+  }
+  Mat3& operator/=(const Real d)
+  {
+    data_[0][0]/=d;
+    data_[0][1]/=d;
+    data_[0][2]/=d;
+    data_[1][0]/=d;
+    data_[1][1]/=d;
+    data_[1][2]/=d;
+    data_[2][0]/=d;
+    data_[2][1]/=d;
+    data_[2][2]/=d;
+    return *this;
+  }
+
+  Mat3& operator*=(const Mat3& m)
+  {
+    (*this)=Mat3((*this)(0,0)*m(0,0)+(*this)(0,1)*m(1,0)+(*this)(0,2)*m(2,0),
+                 (*this)(0,0)*m(0,1)+(*this)(0,1)*m(1,1)+(*this)(0,2)*m(2,1),
+                 (*this)(0,0)*m(0,2)+(*this)(0,1)*m(1,2)+(*this)(0,2)*m(2,2),
+                 (*this)(1,0)*m(0,0)+(*this)(1,1)*m(1,0)+(*this)(1,2)*m(2,0),
+                 (*this)(1,0)*m(0,1)+(*this)(1,1)*m(1,1)+(*this)(1,2)*m(2,1),
+                 (*this)(1,0)*m(0,2)+(*this)(1,1)*m(1,2)+(*this)(1,2)*m(2,2),                                   
+                 (*this)(2,0)*m(0,0)+(*this)(2,1)*m(1,0)+(*this)(2,2)*m(2,0),
+                 (*this)(2,0)*m(0,1)+(*this)(2,1)*m(1,1)+(*this)(2,2)*m(2,1),
+                 (*this)(2,0)*m(0,2)+(*this)(2,1)*m(1,2)+(*this)(2,2)*m(2,2));
+    return *this;
+  }
 
   Real* Data() {return &data_[0][0];}
   const Real* Data() const {return &data_[0][0];}
@@ -92,9 +195,16 @@ public:
 private:
   Real data_[3][3];
 
-  void set(Real i00, Real i01, Real i02,Real i10, Real i11, Real i12,Real i20, Real i21, Real i22);
+  void set(Real i00, Real i01, Real i02,
+           Real i10, Real i11, Real i12,
+           Real i20, Real i21, Real i22)
+  {
+    data_[0][0]=i00; data_[0][1]=i01; data_[0][2]=i02;
+    data_[1][0]=i10; data_[1][1]=i11; data_[1][2]=i12;
+    data_[2][0]=i20; data_[2][1]=i21; data_[2][2]=i22;
+  }
 };
-
+  
 DLLEXPORT_OST_GEOM std::ostream& operator<<(std::ostream& o, const Mat3& m);
 
 } // ns geom

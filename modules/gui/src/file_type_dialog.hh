@@ -26,15 +26,17 @@
 #include <ost/gui/module_config.hh>
 
 
-#include <QDialog>
-#include <QTableWidget>
-#include <QLabel>
 
 #include <ost/io/entity_io_handler.hh>
+#include <ost/io/sequence_io_handler.hh>
 #include <ost/io/surface_io_handler.hh>
 #if OST_IMG_ENABLED
 #include <ost/io/map_io_handler.hh>
 #endif
+
+#include <QDialog>
+#include <QTableWidget>
+#include <QLabel>
 
 namespace ost { namespace gui {
 
@@ -44,6 +46,7 @@ class DLLEXPORT_OST_GUI FileTypeDialog : public QDialog {
 public:
   FileTypeDialog(const QString& file_name, QWidget* parent=NULL);
   io::EntityIOHandlerP GetEntityHandler();
+  io::SequenceIOHandlerPtr GetSequenceHandler();
   io::SurfaceIOHandlerPtr GetSurfaceHandler();
 #if OST_IMG_ENABLED
   io::MapIOHandlerPtr GetMapHandler();
@@ -59,6 +62,7 @@ private:
   QTableWidget* list_;
   QLabel* label_;
   io::EntityIOHandlerP entity_handler_;
+  io::SequenceIOHandlerPtr seq_handler_;
   io::SurfaceIOHandlerPtr surf_handler_;
 #if OST_IMG_ENABLED
   io::MapIOHandlerPtr map_handler_;
@@ -69,6 +73,7 @@ private:
 }}
 
 Q_DECLARE_METATYPE(ost::io::EntityIOHandlerFactoryBaseP);
+Q_DECLARE_METATYPE(ost::io::SequenceIOHandlerFactoryBasePtr);
 Q_DECLARE_METATYPE(ost::io::SurfaceIOHandlerFactoryBasePtr);
 #if OST_IMG_ENABLED
 Q_DECLARE_METATYPE(ost::io::MapIOHandlerFactoryBasePtr);

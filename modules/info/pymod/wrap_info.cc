@@ -36,9 +36,6 @@ using namespace ost::info;
 
 namespace {
 
-void info_error_translator(const InfoError& x) {
-  PyErr_SetString(PyExc_UserWarning, x.what());
-}
 
 InfoHandle (*CreateInfoPtr1)()=CreateInfo;
 InfoHandle (*CreateInfoPtr2)(const String&)=CreateInfo;
@@ -63,7 +60,7 @@ void info_group_apply2b(InfoGroup* g, InfoConstVisitor& v, bool b)
   g->Apply(v,b);
 }
 
-void info_group_remove1(InfoGroup* g, InfoPath& path )
+void info_group_remove1(InfoGroup* g, const String& path )
 {
   g->Remove(path);
 }
@@ -72,7 +69,7 @@ void info_group_remove2(InfoGroup* g, InfoGroup& group )
 {
   g->Remove(group);
 }
-void info_group_remove3(InfoGroup* g, InfoPath& path, bool use_defaults )
+void info_group_remove3(InfoGroup* g, const String& path, bool use_defaults )
 {
   g->Remove(path,use_defaults);
 }
@@ -160,7 +157,6 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(retrieveitem_overloads, RetrieveItem, 1, 
 
 BOOST_PYTHON_MODULE(_info)
 {
-  register_exception_translator<InfoError>(&info_error_translator);
 
   enum_<Type>("ItemType")
     .value("STRING",IT_STRING)
