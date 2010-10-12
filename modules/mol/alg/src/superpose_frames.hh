@@ -16,31 +16,19 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#ifndef OST_MOL_ALG_SUPERPOSE_FRAMES_HH
+#define OST_MOL_ALG_SUPERPOSE_FRAMES_HH
 
-/*
- * Author Juergen Haas
- */
-#include <boost/python.hpp>
-#include <ost/config.hh>
-#include <ost/mol/alg/local_dist_test.hh>
-#include <ost/mol/alg/superpose_frames.hh>
-using namespace boost::python;
+#include <ost/mol/coord_group.hh>
+#include <ost/mol/entity_view.hh>
+#include <ost/mol/alg/module_config.hh>
+namespace ost { namespace mol { namespace alg {
 
-void export_svdSuperPose();
+/// \brief returns a superposed version of coord group
+CoordGroupHandle DLLEXPORT_OST_MOL_ALG SuperposeFrames(CoordGroupHandle cg, 
+                                                       EntityView sel,
+                                                       int begin=0, int end=-1, 
+                                                       int ref=-1);
+}}}
 
-#if OST_IMG_ENABLED
-void export_entity_to_density();
 #endif
-
-BOOST_PYTHON_MODULE(_mol_alg)
-{
-  export_svdSuperPose();
-  #if OST_IMG_ENABLED
-  export_entity_to_density();
-  #endif
-  
-  def("LocalDistTest", &ost::mol::alg::LocalDistTest);
-  def("SuperposeFrames", &ost::mol::alg::SuperposeFrames, 
-      (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
-       arg("end")=-1, arg("ref")=-1));  
-}

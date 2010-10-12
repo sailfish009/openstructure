@@ -3,12 +3,14 @@ set(OST_MOL_ALG_HEADERS
   module_config.hh
   sec_structure_segments.hh
   local_dist_test.hh
+  superpose_frames.hh
 )
 
 set(OST_MOL_ALG_SOURCES
   svd_superpose.cc
   sec_structure_segments.cc
   local_dist_test.cc
+  superpose_frames.cc
 )
 
 set(MOL_ALG_DEPS mol)

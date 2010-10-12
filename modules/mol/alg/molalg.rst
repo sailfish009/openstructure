@@ -23,3 +23,21 @@
   possible solutions to the fixed atoms, that is, everything that is not 
   ambigous is calculated. The solution that gives higher overlap is then used to 
   calculate the actual overlap score.
+  
+
+.. function:: SuperposeFrames(frames, sel, from=0, to=-1, ref=-1)
+
+  This function superposes the frames of the given coord group and returns them
+  as a new coord group.
+  
+  :param frames: The source coord group.
+  :param from: index of the first frame
+  :param to: index of the last frame plus one. If set to -1, the value is set to 
+     the number of frames in the coord group
+  :param sel: An entity view containing the selection of atoms to be used for     
+    superposition. If set to an invalid view, all atoms in the coord group are 
+    used.
+  :param ref: The index of the reference frame to use for superposition. If set 
+     to -1, the each frame is superposed to the previous frame.
+     
+  :returns: A newly created coord group containing the superposed frames.
