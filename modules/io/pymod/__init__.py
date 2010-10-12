@@ -187,11 +187,38 @@ def LoadImageList (files):
 
 LoadMapList=LoadImageList
 
+def LoadCHARMMTraj(crd, dcd_file=None, lazy_load=False, stride=1, 
+                   dialect='CHARMM'):
+  """
+  Load CHARMM trajectory file.
+  
+  :param crd: EntityHandle or filename of the CRD (PDB) file containing the
+      structure. The structure must have the same number of atoms as the 
+      trajectory
+  :param dcd_file: The filename of the DCD file. If not set, and crd is a string, 
+      the filename is set to the <crd>.dcd
+  :param layz_load: Whether the trajectory should be loaded on demand. Instead of 
+      loading the complete trajectory into memory, the trajectory frames are 
+      loaded from disk when requested.
+  :param stride: The spacing of the frames to load. When set to 2, for example, 
+      every second frame is loaded from the trajectory
+  """
+  if not isinstance(crd, mol.EntityHandle):
+    if dcd_file==None:
+      dcd_file='%s.dcd' % os.path.splitext(crd)[0]    
+    crd=LoadPDB(crd, dialect=dialect)
+
+  else:
+    if not dcd_file:
+      raise ValueError("No DCD filename given")
+  return LoadCHARMMTraj_(crd, dcd_file, stride, lazy_load)
+
 ## \example fft_li.py
 #
-# This scripts loads one or more images and shows their Fourier Transforms on the screen. A viewer
-# is opened for each loaded image. The Fourier Transform honors the origin of the reference system,
-# which is assumed to be at the center of the image.
+# This scripts loads one or more images and shows their Fourier Transforms on 
+# the screen. A viewer is opened for each loaded image. The Fourier Transform 
+# honors the origin of the reference system, which is assumed to be at the 
+# center of the image.
 #
 # Usage:
 #

@@ -33,9 +33,6 @@ namespace ost { namespace mol {
 
 /// \brief coordinate group, for trajectories and such
 class DLLEXPORT_OST_MOL CoordGroupHandle {
-  friend DLLEXPORT_OST_MOL 
-  CoordGroupHandle CreateCoordGroup(const std::vector<AtomHandle>&);
-
 public:
   /// \brief create empty, invalid handle
   CoordGroupHandle();
@@ -84,10 +81,10 @@ public:
   
   AtomHandleList GetAtomList() const;
   CoordFramePtr GetFrame(uint frame) const;
-private:
-  void CheckValidity() const;
   
   CoordGroupHandle(CoordSourcePtr source);
+private:
+  void CheckValidity() const;
 
   CoordSourcePtr source_;
 };

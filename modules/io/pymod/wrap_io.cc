@@ -69,11 +69,6 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_entity_view_ov,
 BOOST_PYTHON_FUNCTION_OVERLOADS(save_charmm_trj_ov,
                                 SaveCHARMMTraj, 3, 4)
 
-mol::CoordGroupHandle load_dcd1(const String& c, const String& t) {return LoadCHARMMTraj(c,t);}
-mol::CoordGroupHandle load_dcd2(const String& c, const String& t, unsigned int s) {return LoadCHARMMTraj(c,t,s);}
-mol::CoordGroupHandle load_dcd3(const mol::EntityHandle& e, const String& t) {return LoadCHARMMTraj(e,t);}
-mol::CoordGroupHandle load_dcd4(const mol::EntityHandle& e, const String& t, unsigned int s) {return LoadCHARMMTraj(e,t,s);}
-
 }
 
 void export_pdb_io();
@@ -115,10 +110,8 @@ BOOST_PYTHON_MODULE(_io)
   def("LoadSDF", &LoadSDF);
 
   def("LoadCRD", &LoadCRD);
-  def("LoadCHARMMTraj",load_dcd1);
-  def("LoadCHARMMTraj",load_dcd2);
-  def("LoadCHARMMTraj",load_dcd3);
-  def("LoadCHARMMTraj",load_dcd4);
+  def("LoadCHARMMTraj_", &LoadCHARMMTraj, (arg("ent"), arg("trj_filename"), 
+      arg("stride")=1, arg("lazy_load")=false));
   def("SaveCHARMMTraj",SaveCHARMMTraj,save_charmm_trj_ov());
 
   def("LoadMAE", &LoadMAE);

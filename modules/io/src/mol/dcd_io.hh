@@ -29,22 +29,14 @@
 
 namespace ost { namespace io {
 
-/*! \brief import a CHARMM trajectory in dcd format
-    requires the coordinate and the trajectory file; the format
-    of the coordinate file will be automatically deduced from the extension
-    the optional stride parameter will cause only every nth frame to be loaded
-*/
-mol::CoordGroupHandle DLLEXPORT_OST_IO LoadCHARMMTraj(const String& coord,
-						      const String& trj,
-						      unsigned int stride=1);
-
 /*! \brief import a CHARMM trajectory in dcd format with an existing entity
     requires the existing entity and the trajectory file - obviously the
     atom layout of the entity must match the trajectory file
 */
-mol::CoordGroupHandle DLLEXPORT_OST_IO LoadCHARMMTraj(const mol::EntityHandle& e,
-						      const String& trj,
-						      unsigned int stride=1);
+mol::CoordGroupHandle DLLEXPORT_OST_IO LoadCHARMMTraj(const mol::EntityHandle& ent,
+                                                       const String& trj_filename,
+                                                       unsigned int stride=1,
+                                                       bool lazy_load=false);
 
 
 /*! \brief export coord group as PDB file and DCD trajectory
