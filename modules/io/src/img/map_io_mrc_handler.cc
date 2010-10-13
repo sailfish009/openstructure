@@ -775,7 +775,7 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
   f >> header;
   if(header.mode==5) header.mode=0;
 
-  if(Logger::Instance().GetLogLevel()>=4) {
+  if(Logger::Instance().GetVerbosityLevel()>=4) {
     header.Print();
   }
   if(header.mode==3 || header.mode==4) {
@@ -864,7 +864,7 @@ void export_helper(const img::MapHandle& image,
       throw(IOException("MRC/CCP4 export: full complex export not supported."));
     }
   }
-  if(Logger::Instance().GetLogLevel()>=4) {
+  if(Logger::Instance().GetVerbosityLevel()>=4) {
     header.Print();
   }
 }

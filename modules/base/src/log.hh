@@ -52,7 +52,7 @@ public:
 
   static Logger& Instance();
   LogSinkPtr GetCurrentSink() { return sink_stack_.top(); }
-  int GetLogLevel() const {return level_;}
+  int GetVerbosityLevel() const {return level_;}
   
   void ResetSinks() {
     while (sink_stack_.size()>1) {
@@ -71,7 +71,7 @@ private:
 };
 
 
-#define OST_DO_LOGGING_(m, l) if (::ost::Logger::Instance().GetLogLevel()>=l) {\
+#define OST_DO_LOGGING_(m, l) if (::ost::Logger::Instance().GetVerbosityLevel()>=l) {\
     std::stringstream tmp_s__;                                                 \
     tmp_s__ << m << std::endl;                                                 \
     ::ost::Logger::Instance().GetCurrentSink()->LogMessage(tmp_s__.str(), l);  \

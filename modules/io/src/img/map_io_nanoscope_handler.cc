@@ -178,7 +178,7 @@ void header_filler(NHeader& h, std::istream& in, int inum)
 
 void print_header (const NHeader& header, int inum)
 {
-  if(Logger::Instance().GetLogLevel()>2) {
+  if(Logger::Instance().GetVerbosityLevel()>2) {
     LOG_INFO("io_nanoscope: header dump for image " << inum);
     LOG_INFO(" px      : " << header.px);
     LOG_INFO(" py      : " << header.py);

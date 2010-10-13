@@ -70,8 +70,10 @@ else
   if [ $1 == "-i" ] ;then
     interactive="-i"
   fi
+  if [ $1 == "-v" ] ;then
+    interactive="-i"
+  fi
 fi
-
 # finally pass control to python instance
 IFS="#"
 exec $pyexec $interactive "$DNG_ROOT/@LIBDIR@/openstructure/init_cl.py" $opts

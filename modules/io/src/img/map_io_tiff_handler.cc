@@ -450,7 +450,7 @@ TIFF* MapIOTiffHandler::open_subimage_file(const boost::filesystem::path& locati
   if(directory_number>0) {
     TIFFSetDirectory(tfile,directory_number);
   }
-  if(Logger::Instance().GetLogLevel()>=5) {
+  if(Logger::Instance().GetVerbosityLevel()>=5) {
     TIFFPrintDirectory(tfile,stderr,directory_number);
   }
   return tfile;
@@ -481,7 +481,7 @@ TIFF* MapIOTiffHandler::open_subimage_stream(std::istream& location,const TIF& f
   if(directory_number>0) {
     TIFFSetDirectory(tfile,directory_number);
   }
-  if(Logger::Instance().GetLogLevel()>=5) {
+  if(Logger::Instance().GetVerbosityLevel()>=5) {
     TIFFPrintDirectory(tfile,stderr,directory_number);
   }
   return tfile;
