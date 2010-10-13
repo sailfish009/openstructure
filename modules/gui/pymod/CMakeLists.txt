@@ -83,6 +83,7 @@ set(OST_GUI_PYMOD_MODULES
   init_menubar.py
   init_spacenav.py
   init_splash.py
+  traj.py
 )
 
 set(OST_GUI_PYMOD_DNG_MODULES
