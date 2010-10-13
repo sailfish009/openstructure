@@ -113,7 +113,7 @@ String Builder::GuessAtomElement(const String& aname, bool hetatm)
   }
 
   // two characters
-  if(ele.size()==2) {
+  if(aname.size()==2) {
     for(int i=0;i<l2c;i++) {
       if(ele==l2[i]) return ele;
     }
@@ -147,7 +147,7 @@ String Builder::GuessAtomElement(const String& aname, bool hetatm)
       if(ele==l3[i]) return ele;
     }
   }
-  return "";
+  return String(1, aname[0]);
 }
 
 bool Builder::AreResiduesConsecutive(const mol::ResidueHandle& r1, 
