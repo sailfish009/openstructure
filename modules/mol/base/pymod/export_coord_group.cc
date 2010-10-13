@@ -58,6 +58,7 @@ void export_CoordGroup()
     .def("GetAtomList",&CoordGroupHandle::GetAtomList)
     .def("__getitem__",cg_getitem)
     .def("__setitem__",cg_setitem)
+    .def("Filter", &CoordGroupHandle::Filter)
   ;
 
   def("CreateCoordGroup",CreateCoordGroup);

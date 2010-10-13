@@ -82,6 +82,10 @@ public:
   AtomHandleList GetAtomList() const;
   CoordFramePtr GetFrame(uint frame) const;
   
+  /// \brief return a filtered coord group, containing only the atoms in the 
+  ///     view
+  CoordGroupHandle Filter(const EntityView& selected) const;
+  
   CoordGroupHandle(CoordSourcePtr source);
 private:
   void CheckValidity() const;

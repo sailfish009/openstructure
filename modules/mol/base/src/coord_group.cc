@@ -18,10 +18,10 @@
 //------------------------------------------------------------------------------
 #include <ost/invalid_handle.hh>
 #include <ost/integrity_error.hh>
-
+#include <ost/log.hh>
 #include <ost/mol/in_mem_coord_source.hh>
-#include <ost/mol/entity_handle.hh>
-
+#include <ost/mol/view_op.hh>
+#include <ost/mol/mol.hh>
 #include "coord_group.hh"
 
 namespace ost { namespace mol {
@@ -152,6 +152,41 @@ void CoordGroupHandle::Capture(uint frame)
   } else {
     throw IntegrityError("Can't capture. CoordGroup is immutable");
   }  
+}
+
+CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected) const
+{
+  this->CheckValidity();
+  std::vector<unsigned long> indices;
+  EntityHandle new_ent;  
+  if (!selected.IsValid()) {
+    indices.reserve(this->GetAtomCount());
+    for (size_t i=0;i<this->GetAtomCount(); ++i) {
+      indices.push_back(i);
+    }
+    new_ent=this->GetEntity().Copy();
+  } else {
+    AtomViewList atoms=selected.GetAtomList();
+    indices.reserve(atoms.size());
+    for (AtomViewList::const_iterator i=atoms.begin(), 
+         e=atoms.end(); i!=e; ++i) {
+      indices.push_back(i->GetIndex());
+    }
+    new_ent=CreateEntityFromView(selected, false);
+  }
+
+  CoordGroupHandle filtered_cg=CreateCoordGroup(new_ent.GetAtomList());
+  std::vector<geom::Vec3> vecs(indices.size());
+  for (size_t i=0; i<this->GetFrameCount(); ++i) {
+    LOG_INFO("Filtering frame " << i << "/" << this->GetFrameCount());
+    CoordFramePtr frame=this->GetFrame(i);
+    for (std::vector<unsigned long>::const_iterator 
+         j=indices.begin(), e2=indices.end(); j!=e2; ++j) {
+      vecs[j-indices.begin()]=(*frame)[*j];
+    }
+    filtered_cg.AddFrame(vecs);
+  }
+  return filtered_cg;
 }
 
 }} // ns
