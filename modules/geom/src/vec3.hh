@@ -192,10 +192,32 @@ inline std::ostream& operator<<(std::ostream& os, const Vec3& v)
 
 #include <ost/geom/vec2.hh>
 #include <ost/geom/vec4.hh>
+#include <ost/geom/mat3.hh>
 
 namespace geom {
 
-typedef std::vector<Vec3> Vec3List;
+class Vec3List : public std::vector<Vec3> {
+public:
+  typedef std::vector<Vec3> base_type;
+  Vec3List() : base_type() {}
+  
+  Vec3List(size_t size, const Vec3& value=Vec3()) : base_type(size, value) {}
+  Vec3List(base_type::iterator b, base_type::iterator e): base_type(b, e) { }
+  
+  Vec3List(const Vec3List& rhs) : base_type(rhs) { }
+  
+  Vec3List& operator=(const Vec3List& rhs) 
+  {
+    *this=rhs;
+    return *this;
+  }
+  Mat3 GetInertia() const;
+  
+  Vec3 GetCenter() const;
+  
+  Mat3 GetPrincipalAxes() const;
+};
+
 
 inline Vec3::Vec3(const Vec2& v): x(v.x), y(v.y), z(0.0) { }
 inline Vec3::Vec3(const Vec4& v): x(v.x/v.w), y(v.y/v.w), z(v.z/v.w) { }

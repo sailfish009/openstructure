@@ -18,8 +18,9 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-
+#include <ost/geom/vec3.hh>
 #include <ost/geom/geom.hh>
+#include <ost/export_helper/vector.hh>
 
 using namespace boost::python;
 
@@ -63,10 +64,15 @@ void export_Vec3()
     .add_property("y", &Vec3::GetY, &Vec3::SetY)
     .add_property("z", &Vec3::GetZ, &Vec3::SetZ)
   ;
+  
   def("Normalize", &NormalizeV3);
   def("Cross", &Cross);
   
   class_<Vec3List>("Vec3List", init<>())
     .def(vector_indexing_suite<Vec3List>())
+    .def(ost::VectorAdditions<Vec3List>())
+    .add_property("center", &Vec3List::GetCenter)
+    .add_property("inertia", &Vec3List::GetInertia)
+    .add_property("principal_axes", &Vec3List::GetPrincipalAxes)
   ;
 }

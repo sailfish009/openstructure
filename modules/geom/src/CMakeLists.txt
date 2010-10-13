@@ -24,6 +24,7 @@ composite2_op.hh
 composite3_op.hh
 aligned_cuboid.hh
 quat.hh
+
 point_cloud.hh
 module_config.hh
 )
@@ -32,6 +33,7 @@ set(OST_GEOM_SOURCES
 mat2.cc
 mat3.cc
 mat4.cc
+vec3.cc
 vecmat2_op.cc
 vecmat3_op.cc
 vecmat4_op.cc
