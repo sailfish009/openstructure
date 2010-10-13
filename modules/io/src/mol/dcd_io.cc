@@ -242,6 +242,7 @@ public:
     mol::CoordSource(atoms), filename_(filename), 
     stream_(filename.c_str(), std::ios::binary), loaded_(false), stride_(stride)
   {
+    frame_count_=0;
     this->SetMutable(false);
     frame_=mol::CoordFramePtr(new mol::CoordFrame(atoms.size()));
   }
@@ -373,7 +374,7 @@ void SaveCHARMMTraj(const mol::CoordGroupHandle& coord_group,
 {  
   if(stepsize==0) stepsize=1;
   if(!pdb_filename.empty()) {
-    PDBWriter writer(pdb_filename);
+    PDBWriter writer(pdb_filename, true);
     writer.Write(coord_group.GetAtomList());
   }
   std::ofstream out(dcd_filename.c_str(), std::ios::binary);

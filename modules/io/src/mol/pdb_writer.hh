@@ -40,9 +40,9 @@ namespace ost { namespace io {
 
 class DLLEXPORT_OST_IO PDBWriter {
 public:
-  PDBWriter(const String& filename);
-  PDBWriter(const boost::filesystem::path& filename);
-  PDBWriter(std::ostream& outstream);
+  PDBWriter(const String& filename, bool charmm_style=false);
+  PDBWriter(const boost::filesystem::path& filename, bool charmm_style=false);
+  PDBWriter(std::ostream& outstream, bool charmm_style=false);
   
   void Write(const mol::EntityView& ent);
   void Write(const mol::EntityHandle& ent);
@@ -56,11 +56,12 @@ private:
   
   void WriteModelLeader();
   void WriteModelTrailer();
-  std::ofstream  outfile_;
-  std::ostream&   outstream_;
-  int mol_count_;
+  std::ofstream       outfile_;
+  std::ostream&       outstream_;
+  int                 mol_count_;
   std::map<long, int> atom_indices_;
   FormattedLine       line_;
+  bool                charmm_style_;
 };
  
 }}

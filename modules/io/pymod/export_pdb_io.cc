@@ -64,6 +64,7 @@ void export_pdb_io()
   ;
   
   class_<PDBWriter, boost::noncopyable>("PDBWriter", init<String>())
+    .def(init<String, bool>())
     .def("Write", write_a)
     .def("Write", write_b)    
   ;

@@ -145,7 +145,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
     PDB.PopFlags()
     raise
 
-def SavePDB(models, filename):
+def SavePDB(models, filename, dialect='PDB'):
   """
   Save entity or list of entities to disk. If a list of entities is supplied the 
   PDB file will be saved as a multi PDB file. Each of the entities is wrapped 
@@ -157,7 +157,7 @@ def SavePDB(models, filename):
   """
   if not getattr(models, '__len__', None):
     models=[models]
-  writer=PDBWriter(filename)
+  writer=PDBWriter(filename, dialect=='CHARMM')
   try:
     if len(models)>1:
       PDB.PushFlags(PDB.Flags() |PDB.WRITE_MULTIPLE_MODELS)

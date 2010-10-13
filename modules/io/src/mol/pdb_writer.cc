@@ -61,7 +61,7 @@ bool shift_left(const String& atom_name, bool is_hetatm,
 
 void write_atom(std::ostream& ostr, FormattedLine& line, 
                 const mol::AtomHandle& atom, int atomnum, 
-                bool is_pqr)
+                bool is_pqr, bool charmm_style)
 {
   mol::ResidueHandle res=atom.GetResidue();
   char ins_code=res.GetNumber().GetInsCode();
@@ -83,20 +83,32 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
   } else {
     line(13, 3)=fmt::RPadded(atom_name);
   }
-  if (res.GetKey().size()>3) {
-    throw IOException("Residue name '"+res.GetQualifiedName()+
-                      "' is too long for PDB output. At most 3 characters are "
-                      "allowed");
+  if (charmm_style) {
+    if (res.GetKey().size()>4) {
+      throw IOException("Residue name '"+res.GetName()+
+                        "' is too long for CHARMM-PDB output. At most 4 "
+                        "characters are allowed");
+    }
+    line(17, 4)=fmt::LPadded(res.GetKey());
+  } else {
+    if (res.GetKey().size()>3) {
+      throw IOException("Residue name '"+res.GetName()+
+                        "' is too long for PDB output. At most 3 characters "
+                        "are allowed");
+    }
+    line(17, 3)=fmt::LPadded(res.GetKey());    
   }
-  line(17, 3)=fmt::LPadded(res.GetKey());
+
   
   String chain_name=res.GetChain().GetName();
-  if (chain_name.size()>0) {
-    if (chain_name.size()==1) {
-      line[21]=chain_name[0];
-    } else {
-      throw IOException("PDB format only support single-letter chain names");
-    }
+  if (!charmm_style) {
+    if (chain_name.size()>0) {
+      if (chain_name.size()==1) {
+        line[21]=chain_name[0];
+      } else {
+        throw IOException("PDB format only support single-letter chain names");
+      }
+    }    
   }
   line(22, 4)=fmt::LPaddedInt(res.GetNumber().GetNum());
   if (ins_code!=0) {
@@ -116,7 +128,9 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
       line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
       line(60, 6)=fmt::LPaddedFloat(atom.GetBFactor(), 2);
     }
-    
+    if (charmm_style) {
+      line(72, 4)=fmt::RPadded(chain_name);
+    }
     line(76, 2)=fmt::LPadded(atom.GetElement());
     ostr << line;
   } else {
@@ -142,7 +156,9 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
        line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
        line(60, 6)=fmt::LPaddedFloat(atom.GetBFactor(), 2);
       }
-
+      if (charmm_style) {
+        line(72, 4)=fmt::RPadded(chain_name);
+      }
       line(76, 2)=fmt::LPadded(atom.GetElement());
       ostr << line;
     }
@@ -171,15 +187,16 @@ void write_conect(std::ostream& ostr, int atom_index,
 class PDBWriterImpl : public mol::EntityVisitor {
 public:
   PDBWriterImpl(std::ostream& ostream, FormattedLine& line, 
-                std::map<long,int>& atom_indices)
+                std::map<long,int>& atom_indices, bool charmm_style)
     : ostr_(ostream), counter_(0), is_pqr_(false),
-      atom_indices_(atom_indices), line_(line), peptide_(false) {
+      atom_indices_(atom_indices), line_(line), peptide_(false),
+      charmm_style_(charmm_style) {
   }
 private:
 public:
   virtual bool VisitAtom(const mol::AtomHandle& atom) {
     counter_++;
-    write_atom(ostr_, line_, atom, counter_, is_pqr_);
+    write_atom(ostr_, line_, atom, counter_, is_pqr_, charmm_style_);
     if (atom.GetAtomProps().is_hetatm) {
       atom_indices_[atom.GetHashCode()]=counter_;
     }
@@ -240,6 +257,7 @@ private:
   FormattedLine&      line_;
   mol::ResidueHandle  prev_;
   bool                peptide_;
+  bool                charmm_style_;
 };
 
 class PDBConectWriterImpl : public mol::EntityVisitor {
@@ -287,19 +305,21 @@ struct ForcePOSIX {
 
 }
 
-PDBWriter::PDBWriter(std::ostream& stream):
-  outfile_(), outstream_(stream), mol_count_(0), line_(80)
+PDBWriter::PDBWriter(std::ostream& stream, bool charmm_style):
+  outfile_(), outstream_(stream), mol_count_(0), line_(80), 
+  charmm_style_(charmm_style)
 {
   
 }
 
-PDBWriter::PDBWriter(const boost::filesystem::path& filename):
+PDBWriter::PDBWriter(const boost::filesystem::path& filename, bool charmm_style):
   outfile_(filename.file_string().c_str()), outstream_(outfile_), 
-  mol_count_(0), line_(80)
+  mol_count_(0), line_(80), charmm_style_(charmm_style)
 {}
 
-PDBWriter::PDBWriter(const String& filename):
-  outfile_(filename.c_str()), outstream_(outfile_), mol_count_(0), line_(80)
+PDBWriter::PDBWriter(const String& filename, bool charmm_style):
+  outfile_(filename.c_str()), outstream_(outfile_), mol_count_(0), line_(80),
+  charmm_style_(charmm_style)
 {}
 
 void PDBWriter::WriteModelLeader()
@@ -325,7 +345,7 @@ void PDBWriter::WriteModel(H ent)
 {
   ForcePOSIX posix = ForcePOSIX();
   this->WriteModelLeader();
-  PDBWriterImpl writer(outstream_,line_, atom_indices_);
+  PDBWriterImpl writer(outstream_,line_, atom_indices_, charmm_style_);
   if (PDB::Flags() & PDB::PQR_FORMAT) {
     writer.SetIsPQR(true);
   }
@@ -353,7 +373,8 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
   mol::ChainHandle last_chain;
   for (mol::AtomHandleList::const_iterator i=atoms.begin(),
        e=atoms.end(); i!=e; ++i, ++counter) {
-    write_atom(outstream_, line_, *i, counter, (PDB::Flags() & PDB::PQR_FORMAT) != 0);
+    write_atom(outstream_, line_, *i, counter, 
+               (PDB::Flags() & PDB::PQR_FORMAT) != 0, charmm_style_);
   }
   this->WriteModelTrailer();
 }
