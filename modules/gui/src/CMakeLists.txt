@@ -138,6 +138,8 @@ if (ENABLE_IMG)
   data_viewer.hh
   data_viewer_panel.hh
   data_viewer_panel_base.hh
+  data_viewer_tool_widget.hh
+  data_viewer_tool_widget_container.hh
   draw_overlay.hh
   drawing_functions.hh
   fft_panel.hh
@@ -399,6 +401,8 @@ if (ENABLE_IMG)
        data_viewer/data_viewer.cc
        data_viewer/data_viewer_panel.cc
        data_viewer/data_viewer_panel_base.cc
+       data_viewer/data_viewer_tool_widget.cc
+       data_viewer/data_viewer_tool_widget_container.cc
        data_viewer/draw_overlay.cc
        data_viewer/drawing_functions.cc
        data_viewer/fft_panel.cc
@@ -418,6 +422,8 @@ if (ENABLE_IMG)
     data_viewer/fft_panel.hh
     data_viewer/info_panel.hh
     data_viewer/data_viewer.hh
+    data_viewer/data_viewer_tool_widget.hh
+    data_viewer/data_viewer_tool_widget_container.hh
     data_viewer/overlay_manager_gui.hh
     data_viewer/data_viewer_panel_base.hh
     data_viewer/null_overlay.hh

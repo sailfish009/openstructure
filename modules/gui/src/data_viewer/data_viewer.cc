@@ -37,6 +37,7 @@
 
 #include "data_viewer.hh"
 #include "data_viewer_panel.hh"
+#include <ost/gui/data_viewer/data_viewer_tool_widget_container.hh>
 #include "overlay_base.hh"
 #include "overlay_manager.hh"
 
@@ -61,8 +62,9 @@ int ipow(int base, unsigned int exponent){
 }
 
 DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
-  ost::gui::MainWindow(p,0),
+  QMainWindow(p,0),
   name_(name),
+  container_(new DataViewerToolWidgetContainer(this)),
   panel_(new DataViewerPanel(data,this)),
   ov_manager_(new OverlayManager(this)),
   ov_manager_gui_(new OverlayManagerGUI(this, ov_manager_)),
@@ -73,7 +75,35 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
 {
   connect(ov_manager_gui_,SIGNAL(SettingsChanged()),this,SLOT(UpdateView()));
   setWindowTitle("OpenStructure Data Viewer");
-  build(data);
+  setAnimated(false);
+  QSplitter* splitter=new QSplitter(this);
+  setCentralWidget(splitter);
+  splitter->addWidget(panel_);
+  splitter->addWidget(container_);
+  splitter->setCollapsible(0,false);
+  splitter->setStretchFactor(0,1);
+  splitter->setCollapsible(1,true);
+  splitter->setStretchFactor(1,0);
+  panel_->installEventFilter(this);
+  zoomlabel_=new QLabel("1:1");
+  slablabel_=new QLabel("0");
+  statusBar()->addWidget(zoomlabel_);
+  statusBar()->addWidget(slablabel_);
+
+  container_->AddChildWidget(ov_manager_gui_,"Overlays",true);
+  container_->AddChildWidget(info_,"Info",true);
+  container_->AddChildWidget(argand_,"Argand",false);
+  container_->AddChildWidget(fft_,"Live FFT",false);
+  info_->SetImageInfo(data);
+
+  connect(panel_,SIGNAL(zoomed(int)),SLOT(OnZoomChange(int)));
+  connect(panel_,SIGNAL(slabChanged(int)),SLOT(OnSlabChange(int)));
+  connect(panel_,SIGNAL(selected(const Extent&)),argand_,SLOT(SetExtent(const Extent&)));
+  connect(panel_,SIGNAL(deselected()),argand_,SLOT(ClearExtent()));
+  connect(panel_,SIGNAL(selected(const Extent&)),info_,SLOT(SetSelection(const Extent&)));
+  connect(panel_,SIGNAL(deselected()),info_,SLOT(ClearSelection()));
+  connect(panel_,SIGNAL(released()),this,SLOT(close()));
+  show();
 }
 
 DataViewer::~DataViewer()
@@ -193,48 +223,21 @@ void DataViewer::SetAntialiasing(bool f)
   panel_->SetAntialiasing(f);
 }
 
+void DataViewer::AddDockWidget(QWidget* w, const QString& name, bool show)
+{
+  container_->AddChildWidget(w,name,show);
+}
+
+void DataViewer::RemoveDockWidget(QWidget* w)
+{
+  container_->RemoveWidget(w);
+}
+
+
 //////////////////////////
 // private methods
 
-void DataViewer::build(const Data& data) 
-{
-  build_menu();
 
-  setAnimated(false);
-  setCentralWidget(panel_);
-  panel_->installEventFilter(this);
-  show();
-  connect(panel_,SIGNAL(zoomed(int)),SLOT(OnZoomChange(int)));
-  connect(panel_,SIGNAL(slabChanged(int)),SLOT(OnSlabChange(int)));
-  zoomlabel_=new QLabel("1:1");
-  slablabel_=new QLabel("0");
-  statusBar()->addWidget(zoomlabel_);
-  statusBar()->addWidget(slablabel_);
-
-  AddDockWidget(ov_manager_gui_,"Overlays",true,0);
-  info_->SetImageInfo(data);
-  AddDockWidget(info_,"Info",true,1);
-  AddDockWidget(argand_,"Argand",false,1);
-  AddDockWidget(fft_,"FFT",false,1);
-
-  connect(panel_,SIGNAL(selected(const Extent&)),argand_,SLOT(SetExtent(const Extent&)));
-  connect(panel_,SIGNAL(deselected()),argand_,SLOT(ClearExtent()));
-
-  connect(panel_,SIGNAL(selected(const Extent&)),info_,SLOT(SetSelection(const Extent&)));
-  connect(panel_,SIGNAL(deselected()),info_,SLOT(ClearSelection()));
-  connect(panel_,SIGNAL(released()),this,SLOT(close()));
-  
-  if(!parentWidget()) {
-    resize(QApplication::desktop()->availableGeometry().adjusted(20,20,-20,-20).size());
-  } else {
-    resize(1100,800);
-  }
-}
-
-void DataViewer::build_menu()
-{
-  menuBar()->addMenu(WindowMenu());
-}
 
 bool DataViewer::eventFilter(QObject * object, QEvent *event)
 {
@@ -283,7 +286,7 @@ bool DataViewer::eventFilter(QObject * object, QEvent *event)
     }
     return false;
   }else{
-    return MainWindow::eventFilter(object, event);
+    return QMainWindow::eventFilter(object, event);
   }
 }
 

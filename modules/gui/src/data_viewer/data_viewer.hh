@@ -32,7 +32,6 @@
 #include <ost/img/data_observer.hh>
 #include <ost/img/alg/norm.hh>   
 
-#include <ost/gui/main_window.hh>
 
 #include "overlay_base_fw.hh"
 #include "overlay_manager_fw.hh"
@@ -41,6 +40,7 @@
 #include "info_panel.hh"
 #include "fft_panel.hh"
 #include <ost/gui/module_config.hh>
+#include <QMainWindow>
 
 //fw decl
 class QLabel;
@@ -55,9 +55,10 @@ namespace img { namespace gui {
 
 //fw decl
 class DataViewerPanel;
+class DataViewerToolWidgetContainer;
 
 //! Data viewer
-class DLLEXPORT_OST_GUI DataViewer: public ost::gui::MainWindow
+class DLLEXPORT_OST_GUI DataViewer: public QMainWindow
 {
   Q_OBJECT;
 
@@ -102,8 +103,13 @@ public:
   virtual bool eventFilter(QObject * object, QEvent *event);
 
   void SetSlab(int slab);
-  
   int GetSlab() const;
+
+  //! add a custom docking widget
+  void AddDockWidget(QWidget* w, const QString& name, bool show=true);
+  //! remove a previously added custom docking widget
+  void RemoveDockWidget(QWidget* w);
+
 public slots:
   //! update view
   void UpdateView();
@@ -122,6 +128,7 @@ public slots:
   DataViewer& operator=(const DataViewer& v) {return *this;}
 
   QString name_;
+  DataViewerToolWidgetContainer* container_;
   DataViewerPanel* panel_;
 
   OverlayManagerPtr ov_manager_;
@@ -135,9 +142,6 @@ public slots:
   QLabel* slablabel_;
   QPoint lastmouse_;
 
-  void build(const Data& data);
-
-  void build_menu();
 };
 
 }}}  //ns
