@@ -23,7 +23,7 @@
 #include <boost/python.hpp>
 #include <ost/config.hh>
 #include <ost/mol/alg/local_dist_test.hh>
-
+#include <ost/mol/alg/superpose_frames.hh>
 using namespace boost::python;
 
 void export_svdSuperPose();
@@ -40,4 +40,7 @@ BOOST_PYTHON_MODULE(_mol_alg)
   #endif
   
   def("LocalDistTest", &ost::mol::alg::LocalDistTest);
+  def("SuperposeFrames", &ost::mol::alg::SuperposeFrames, 
+      (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
+       arg("end")=-1, arg("ref")=-1));  
 }

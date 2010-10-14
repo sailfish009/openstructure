@@ -51,7 +51,7 @@ void export_Compound() {
   register_ptr_to_python<CompoundPtr>();  
   
   class_<CompoundLib>("CompoundLib", no_init)
-    .def("Load", &CompoundLib::Load).staticmethod("Load")
+    .def("Load", &CompoundLib::Load, arg("readonly")=true).staticmethod("Load")
     .def("FindCompound", &CompoundLib::FindCompound)
     .def("ClearCache", &CompoundLib::ClearCache)
   ;

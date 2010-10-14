@@ -707,7 +707,7 @@ void EntityImpl::UpdateFromXCS()
     TraceDirectionality();
   }
 
-  if(Logger::Instance().GetLogLevel()>Logger::DEBUG) {
+  if(Logger::Instance().GetVerbosityLevel()>Logger::DEBUG) {
     LOG_TRACE("dumping directionality");
     for(AtomImplMap::iterator it=atom_map_.begin();it!=atom_map_.end();++it) {
       LOG_TRACE(" " << it->second << ":");

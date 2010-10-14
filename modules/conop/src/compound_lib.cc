@@ -237,10 +237,11 @@ CompoundLibPtr CompoundLib::Create(const String& database)
 }
 
 
-CompoundLibPtr CompoundLib::Load(const String& database) 
+CompoundLibPtr CompoundLib::Load(const String& database, bool readonly) 
 {
+  int flags=readonly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE;
   CompoundLibPtr lib(new CompoundLib);
-  int retval=sqlite3_open(database.c_str(), &lib->conn_);
+  int retval=sqlite3_open_v2(database.c_str(), &lib->conn_, flags, NULL);
   if (SQLITE_OK==retval) {
     return lib;
   }

@@ -16,44 +16,19 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_CONOP_COMPOUND_LIB_HH
-#define OST_CONOP_COMPOUND_LIB_HH
+#ifndef OST_MOL_ALG_SUPERPOSE_FRAMES_HH
+#define OST_MOL_ALG_SUPERPOSE_FRAMES_HH
 
-#include <map>
-#include <boost/shared_ptr.hpp>
+#include <ost/mol/coord_group.hh>
+#include <ost/mol/entity_view.hh>
+#include <ost/mol/alg/module_config.hh>
+namespace ost { namespace mol { namespace alg {
 
-// our own local copy of sqlite3
-#include <ost/db/sqlite3.h>
-
-#include <ost/conop/module_config.hh>
-#include <ost/conop/compound.hh>
-
-namespace ost { namespace conop {
-
-class CompoundLib;
-
-typedef boost::shared_ptr<CompoundLib> CompoundLibPtr;
-typedef std::map<String, CompoundPtr> CompoundMap;
-
-class DLLEXPORT_OST_CONOP CompoundLib {
-public:
-  static CompoundLibPtr Load(const String& database, bool readonly=true);
-  static CompoundLibPtr Create(const String& database);
-  ~CompoundLib();
-  
-  CompoundPtr FindCompound(const String& id, Compound::Dialect dialect);
-  void AddCompound(const CompoundPtr& compound);
-  CompoundLibPtr Copy(const String& filename) const;
-  void ClearCache();
-private:
-    CompoundLib();
-    void LoadAtomsFromDB(CompoundPtr comp, int pk);
-    void LoadBondsFromDB(CompoundPtr comp, int pk);    
-private:
-  CompoundMap  compound_cache_;
-  sqlite3*     conn_;
-};
-
-}}
+/// \brief returns a superposed version of coord group
+CoordGroupHandle DLLEXPORT_OST_MOL_ALG SuperposeFrames(CoordGroupHandle cg, 
+                                                       EntityView sel,
+                                                       int begin=0, int end=-1, 
+                                                       int ref=-1);
+}}}
 
 #endif

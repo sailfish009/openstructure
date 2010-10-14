@@ -60,6 +60,12 @@ void pop_verb()
   Logger::Instance().PopVerbosityLevel();
 }
 
+int get_verb()
+{
+  return Logger::Instance().GetVerbosityLevel();
+}
+
+
 void push_log_sink(LogSinkPtr sink)
 {
   Logger::Instance().PushSink(sink);
@@ -105,6 +111,7 @@ void export_Logger()
 
   def("PushVerbosityLevel",push_verb);
   def("PopVerbosityLevel",pop_verb);
+  def("GetVerbosityLevel",get_verb);
   def("PushLogSink",push_log_sink);
   def("PopLogSink",pop_log_sink);
   def("LogError",log_error);

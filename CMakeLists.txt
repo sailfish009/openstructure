@@ -8,9 +8,6 @@ include(OST)
 
 project(OpenStructure CXX C)
 
-INCLUDE(CTest)
-ENABLE_TESTING()
-
 option(USE_SHADER "whether to compile with shader support"
        OFF)
 option(SET_RPATH "embed rpath upon make install"
@@ -112,7 +109,6 @@ if (NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-enable_testing()
 set(STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
 set(EXECUTABLE_OUTPUT_PATH ${STAGE_DIR}/bin)
 set(HEADER_STAGE_PATH ${STAGE_DIR}/include)
