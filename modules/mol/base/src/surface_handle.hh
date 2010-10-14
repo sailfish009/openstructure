@@ -70,6 +70,8 @@ public:
   // flip normals
   void Invert();
 
+  bool IsValid() const {return impl_;}
+
 private:
   impl::SurfaceImplP impl_;
 };

@@ -62,6 +62,7 @@ void export_Surface()
     .def("GetVertex", &SurfaceHandle::GetVertex)    
     .def("FindWithin", &SurfaceHandle::FindWithin)    
     .def("Invert",&SurfaceHandle::Invert)
+    .def("IsValid",&SurfaceHandle::IsValid)
   ;
 
   def("CreateSurface",create1);
