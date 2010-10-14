@@ -123,6 +123,11 @@ void DataViewer::SetName(const String& name)
   setWindowTitle(QString::fromStdString(name));
 }
 
+int DataViewer::GetSlab() const 
+{
+  return panel_->GetSlab();
+}
+
 int DataViewer::AddOverlay(const OverlayPtr& ov, bool make_active)
 {
   int retval= ov_manager_->AddOverlay(ov,make_active);
@@ -138,6 +143,11 @@ void DataViewer::ClearOverlays()
 OverlayManagerPtr DataViewer::GetOverlayManager() const
 {
   return ov_manager_;
+}
+
+void DataViewer::SetSlab(int slab)
+{
+  panel_->SetSlab(slab);
 }
 
 void DataViewer::OnSlabChange(int slab)
