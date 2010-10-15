@@ -456,26 +456,24 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   }
   LOG_TRACE( "line: [" << line << "]" );
   String s_ele;
-  if (!(PDB::Flags() & PDB::CHARMM_FORMAT)) {
-    // determine element from element column (77-78, right justified) if 
-    // present otherwise set to empty String. It is up to the builder to 
-    // determine the correct element in that case.
-    if (line.length()>=78) {                       // element column present
-      if(line[76]==' ' && line[77]==' ') {         // both characters are empty
-        s_ele="";                                  
-      } else if(line[76]!=' ' || line[77]!=' ') {  // at least one character not
-                                                   // empty
-        if(line[76]==' ' && line[77]!=' ') {       // single character element,
-                                                   // right justified
-          s_ele=line.substr(77,1).str();           
-        } else if(line[76]!=' ' && line[77]==' ') {// single character element,
-                                                   // left justified
-          s_ele=line.substr(76,1).str();           
-        } else {                                   // Real character element
-          s_ele=line.substr(76,2).str();            
-        }
+  // determine element from element column (77-78, right justified) if 
+  // present otherwise set to empty String. It is up to the builder to 
+  // determine the correct element in that case.
+  if (line.length()>=78) {                       // element column present
+    if(line[76]==' ' && line[77]==' ') {         // both characters are empty
+      s_ele="";                                  
+    } else if(line[76]!=' ' || line[77]!=' ') {  // at least one character not
+                                                 // empty
+      if(line[76]==' ' && line[77]!=' ') {       // single character element,
+                                                 // right justified
+        s_ele=line.substr(77,1).str();           
+      } else if(line[76]!=' ' && line[77]==' ') {// single character element,
+                                                 // left justified
+        s_ele=line.substr(76,1).str();           
+      } else {                                   // Real character element
+        s_ele=line.substr(76,2).str();            
       }
-    }  
+    }
   }
   String aname(atom_name.str());  
   // some postprocessing
