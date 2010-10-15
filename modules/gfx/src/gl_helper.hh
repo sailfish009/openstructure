@@ -111,6 +111,8 @@ inline void glLoadMatrix(double* arr) {
   glLoadMatrixd(arr);
 }
 
+#if OST_SHADER_SUPPORT_ENABLED
+
 inline void glLoadTransposeMatrix(float* arr) {
   glLoadTransposeMatrixf(arr);
 }
@@ -119,5 +121,6 @@ inline void glLoadTransposeMatrix(double* arr) {
   glLoadTransposeMatrixd(arr);
 }
 
+#endif
 
 #endif
