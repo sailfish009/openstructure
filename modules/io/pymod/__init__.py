@@ -75,7 +75,10 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
       True.
   :param dialect: Specifies the particular dialect to use. By default, the 
      official PDB format is used. Alternatively, by setting the dialect to 
-     CHARMM, the loading is optimized for CHARMM PDB files.
+     CHARMM, the loading is optimized for CHARMM PDB files. This turns on 
+     support for chain names with length up to 4 characters (column 72-76) and 
+     increase the size of the residue name to 4 residues.
+
   :type dialect: :class:`str`
   
   :param strict_hydrogens: whether hydrogen names should be strictly checked.  
@@ -192,16 +195,18 @@ def LoadCHARMMTraj(crd, dcd_file=None, lazy_load=False, stride=1,
   """
   Load CHARMM trajectory file.
   
-  :param crd: EntityHandle or filename of the CRD (PDB) file containing the
+  :param crd: EntityHandle or filename of the (PDB) file containing the
       structure. The structure must have the same number of atoms as the 
       trajectory
-  :param dcd_file: The filename of the DCD file. If not set, and crd is a string, 
-      the filename is set to the <crd>.dcd
-  :param layz_load: Whether the trajectory should be loaded on demand. Instead of 
-      loading the complete trajectory into memory, the trajectory frames are 
+  :param dcd_file: The filename of the DCD file. If not set, and crd is a 
+      string, the filename is set to the <crd>.dcd
+  :param layz_load: Whether the trajectory should be loaded on demand. Instead 
+      of loading the complete trajectory into memory, the trajectory frames are 
       loaded from disk when requested.
   :param stride: The spacing of the frames to load. When set to 2, for example, 
-      every second frame is loaded from the trajectory
+      every second frame is loaded from the trajectory. By default, every frame 
+      is loaded.
+  :param dialect: The dialect for the PDB file to use. See :func:`LoadPDB`.
   """
   if not isinstance(crd, mol.EntityHandle):
     if dcd_file==None:
