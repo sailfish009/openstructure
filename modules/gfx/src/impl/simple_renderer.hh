@@ -43,12 +43,10 @@ public:
   virtual void SetOptions(RenderOptionsPtr& render_options);
   virtual RenderOptionsPtr GetOptions();
   
-  virtual void Render(RenderPass pass);
-  virtual ~SimpleRenderer();
   virtual void RenderPov(PovState& pov, const std::string& name);
-  void BlurSnapshot();
+
+  BondEntryList& GetBondEntryList();
 private:
-  void RenderBlur();
   void PrepareRendering(GfxView& view, IndexedVertexArray& va);
   geom::Vec3 GetDoubleBondPlane(mol::BondHandle b);
   void GetBondPartnerNormal(geom::Vec3& vec, int& n, geom::Vec3& bond_vec,

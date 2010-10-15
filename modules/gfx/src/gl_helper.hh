@@ -36,19 +36,24 @@ Author: Juergen Haas
 #include <ost/geom/vec3.hh>
 
 #include "glext_include.hh"
-#include "gl_include.hh"
+
+#include <ost/log.hh>
+
+inline void check_gl_error()
+{
+  GLenum error_code;
+  if((error_code=glGetError())!=GL_NO_ERROR) {
+    LOG_VERBOSE("GL error: " << gluErrorString(error_code));
+  }
+}
 
 inline void glVertex3v(double* v){
   glVertex3dv(v);
 }
 
-
-
 inline void glVertex3v(const double* v){
   glVertex3dv(v);
 }
-
-
 
 inline void glVertex3v(float* v){
   glVertex3fv(v);
@@ -104,6 +109,14 @@ inline void glLoadMatrix(float* arr) {
 
 inline void glLoadMatrix(double* arr) {
   glLoadMatrixd(arr);
+}
+
+inline void glLoadTransposeMatrix(float* arr) {
+  glLoadTransposeMatrixf(arr);
+}
+
+inline void glLoadTransposeMatrix(double* arr) {
+  glLoadTransposeMatrixd(arr);
 }
 
 

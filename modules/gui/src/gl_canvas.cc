@@ -47,14 +47,19 @@ using gfx::Scene;
 
 GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QGLFormat& f):
   QGLWidget(f,parent),
-  glwin_(gl_win)
+  glwin_(gl_win),
+  mouse_key_mask_(),
+  refresh_(true),
+  master_timer_(),
+  bench_flag_(false),
+  last_pos_(),
+  scene_menu_(NULL),
+  show_beacon_(false)
 {
   if(!isValid()) return;
-  refresh_=true;
   master_timer_.start(10,this);
   setFocusPolicy(Qt::StrongFocus);
-  bench_flag_=false;
-  setMouseTracking(false);
+  setMouseTracking(true);
   scene_menu_=new SceneMenu();
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
@@ -74,13 +79,6 @@ void GLCanvas::DoRefresh()
 void GLCanvas::StatusMessage(const String& m)
 {
   glwin_->StatusMessage(m);
-}
-
-void GLCanvas::SetStereo(bool s)
-{
-  QGLFormat f=this->format();
-  f.setStereo(s);
-  this->setFormat(f);
 }
 
 void GLCanvas::OnTransform(gfx::InputCommand com, int indx, 
@@ -232,6 +230,10 @@ void GLCanvas::HandleMouseMoveEvent(QMouseEvent* event)
   int indx=0;
   gfx::TransformTarget trg=gfx::TRANSFORM_VIEW;  
 
+  if(show_beacon_) {
+    Scene::Instance().SetBeacon(event->x(),size().height()-event->y());
+  }
+
   QPoint delta=QPoint(event->x(), event->y())-last_pos_;
   if (event->buttons() & Qt::LeftButton) {
     if (event->buttons() & Qt::MidButton) {
@@ -327,6 +329,12 @@ void GLCanvas::CopySelectionToClipboard()
 
 void GLCanvas::keyPressEvent(QKeyEvent* event)
 {
+  if(event->key()==Qt::Key_Space) {
+    show_beacon_=true;
+    Scene::Instance().SetBeacon(last_pos_.x(),size().height()-last_pos_.y());
+    DoRefresh();
+    setCursor(Qt::BlankCursor);
+  }
   if((event->modifiers() & Qt::ControlModifier)) {
     // Ctrl pressed
     if(event->key()==Qt::Key_A) {
@@ -342,35 +350,43 @@ void GLCanvas::keyPressEvent(QKeyEvent* event)
       this->CopySelectionToClipboard();
       return;
     } else if(event->key()==Qt::Key_1) {
-      gfx::Scene::Instance().ActivateShader("");
+      gfx::Scene::Instance().SetShadingMode("fallback");
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_2) {
-      gfx::Scene::Instance().ActivateShader("basic");
+      gfx::Scene::Instance().SetShadingMode("basic");
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_3) {
-      gfx::Scene::Instance().ActivateShader("fraglight");
+      gfx::Scene::Instance().SetShadingMode("default");
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_4) {
-      gfx::Scene::Instance().ActivateShader("basic_shadow");
+      gfx::Scene::Instance().SetShadingMode("hf");
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_5) {
-      gfx::Scene::Instance().ActivateShader("fraglight_shadow");
+      gfx::Scene::Instance().SetShadingMode("toon1");
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_6) {
-      gfx::Scene::Instance().ActivateShader("hemilight");
+      gfx::Scene::Instance().SetShadingMode("toon2");
       DoRefresh();
       return;
-    } else if(event->key()==Qt::Key_7) {
-      gfx::Scene::Instance().ActivateShader("toon");
+    } else if(event->key()==Qt::Key_0) {
+      gfx::Scene::Instance().SetShadow(!gfx::Scene::Instance().GetShadow());
       DoRefresh();
       return;
-    } else if(event->key()==Qt::Key_8) {
-      gfx::Scene::Instance().ActivateShader("toon2");
+    } else if(event->key()==Qt::Key_9) {
+      gfx::Scene::Instance().SetAmbientOcclusion(!gfx::Scene::Instance().GetAmbientOcclusion());
+      DoRefresh();
+      return;
+    } else if(event->key()==Qt::Key_Equal) {
+      if(gfx::Scene::Instance().GetStereo()>0) {
+        gfx::Scene::Instance().Stereo(0);
+      } else {
+        gfx::Scene::Instance().Stereo(1);
+      }
       DoRefresh();
       return;
     }    
@@ -380,6 +396,13 @@ void GLCanvas::keyPressEvent(QKeyEvent* event)
 
 void GLCanvas::keyReleaseEvent(QKeyEvent* event)
 {
+  if(event->key()==Qt::Key_Space) {
+    show_beacon_=false;
+    Scene::Instance().SetBeaconOff();
+    DoRefresh();
+    setCursor(Qt::ArrowCursor);
+    return;
+  }
   if(event->key()==Qt::Key_Alt){
     emit ReleaseFocus();
     return;

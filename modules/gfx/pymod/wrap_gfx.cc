@@ -19,11 +19,14 @@
 #include <boost/python.hpp>
 using namespace boost::python;
 
+#include <ost/gfx/module_config.hh>
+#if OST_SHADER_SUPPORT_ENABLED
+#include <ost/gfx/shader.hh>
+#endif
 #include <ost/info/info.hh>
 #include <ost/gfx/prim_list.hh>
 #include <ost/gfx/gradient.hh>
 #include <ost/gfx/gfx_test_object.hh>
-
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 extern void export_Scene();
@@ -172,6 +175,15 @@ BOOST_PYTHON_MODULE(_gfx)
 	.def("GetRel", &Stop::GetRel)
   ;
 
+#if OST_SHADER_SUPPORT_ENABLED
+  class_<Shader, boost::noncopyable>("Shader", no_init)
+    .def("Instance",&Shader::Instance,
+         return_value_policy<reference_existing_object>()).staticmethod("Instance")
+    .def("PushProgram",&Shader::PushProgram)
+    .def("PopProgram",&Shader::PopProgram)
+    .def("Activate",&Shader::Activate)
+    ;
+#endif
 
   export_primitives();
 }

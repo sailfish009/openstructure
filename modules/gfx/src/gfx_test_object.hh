@@ -26,7 +26,7 @@
 */
 
 #include "gfx_object.hh"
-#include "gl_include.hh"
+#include "glext_include.hh"
 
 namespace ost { namespace gfx {
 

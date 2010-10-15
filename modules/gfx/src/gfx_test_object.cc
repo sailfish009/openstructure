@@ -26,6 +26,7 @@
 #include <boost/filesystem/fstream.hpp>
 
 #include <ost/platform.hh>
+#include "texture.hh"
 #include "glext_include.hh"
 #include "gfx_test_object.hh"
 #include "scene.hh"
@@ -59,8 +60,9 @@ GfxTestObj::GfxTestObj():
   String ost_root=GetSharedDataPath();
   bf::path ost_root_dir(ost_root);
   bf::path tex_file(ost_root_dir / "textures/test_texture.png");
-  Bitmap bm = BitmapImport(tex_file.string(),".png");
-  if(!bm.data) {
+
+  Texture tex(BitmapImport(tex_file.string(),".png"));
+  if(!tex.IsValid()) {
     LOG_ERROR("error loading " << tex_file.string());
   } else {
     LOG_DEBUG("importing tex with id " << tex_id);
@@ -70,11 +72,7 @@ GfxTestObj::GfxTestObj():
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if(bm.channels==3) {
-      glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,bm.width,bm.height,0,GL_RGB,GL_UNSIGNED_BYTE,bm.data.get());
-    } else if(bm.channels==4) {
-      glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,bm.width,bm.height,0,GL_RGBA,GL_UNSIGNED_BYTE,bm.data.get());
-    }
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,tex.width(),tex.height(),tex.border(),tex.format(),tex.type(),tex.data());
   }
 }
 

@@ -114,7 +114,6 @@ void EditorBase::DeleteChain(const ChainHandle& chain)
 
 void EditorBase::DeleteAtom(const AtomHandle& atom_handle) 
 {
-  
   CheckHandleValidity(atom_handle);
   atom_handle.GetResidue().Impl()->DeleteAtom(atom_handle.Impl());
 }
@@ -123,6 +122,17 @@ void EditorBase::DeleteResidue(const ResidueHandle& residue_handle)
 {
   CheckHandleValidity(residue_handle);
   residue_handle.GetChain().Impl()->DeleteResidue(residue_handle.Impl());
+}
+
+void EditorBase::ReorderResidues(const ChainHandle& chain)
+{
+  CheckHandleValidity(chain);
+  chain.Impl()->ReorderResidues();
+}
+
+void EditorBase::ReorderAllResidues()
+{
+  ent_.Impl()->ReorderAllResidues();
 }
 
 void EditorBase::RenameAtom(AtomHandle atom, const String& new_name)

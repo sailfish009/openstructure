@@ -74,8 +74,8 @@ void CPKRenderer::Render(RenderPass pass)
 {
   if(options_!=NULL){
 #if OST_SHADER_SUPPORT_ENABLED
-    if(options_->GetCPKMode()==1 || options_->GetCPKMode()==2) {
-      this->RenderCPK2();
+    if(pass==STANDARD_RENDER_PASS && (options_->GetSphereMode()==1 || options_->GetSphereMode()==2)) {
+      this->Render3DSprites();
       return;
     }
 #endif
@@ -86,6 +86,7 @@ void CPKRenderer::Render(RenderPass pass)
 
 void CPKRenderer::RenderPov(PovState& pov, const std::string& name)
 {
+  if(view_.atom_map.empty()) return;
   pov.write_merge_or_union(name);
   
   for (AtomEntryMap::const_iterator it=view_.atom_map.begin();it!=view_.atom_map.end();++it) {
@@ -110,78 +111,11 @@ RenderOptionsPtr CPKRenderer::GetOptions(){
  return options_;
 }
 
-std::vector<impl::AtomEntry*> CPKRenderer::CPKOcclusion()
-{
-
-  std::vector<impl::AtomEntry*> aelist;
-
-#if OST_SHADER_SUPPORT_ENABLED
-  static const float isq2 = 1.0/sqrt(2.0);
-  geom::Mat3 irot=geom::Transpose(Scene::Instance().GetTransform().GetRot());
-  geom::Vec3 cx=irot*geom::Vec3(isq2,0.0,0.0);
-  geom::Vec3 cy=irot*geom::Vec3(0.0,isq2,0.0);
-
-  Shader::Instance().PushProgram();
-  Shader::Instance().Activate("");
-
-  glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_FOG);
-  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
-
-  glBegin(GL_QUADS);
-  for(AtomEntryMap::const_iterator it=view_.atom_map.begin();
-      it!=view_.atom_map.end();++it) {
-    geom::Vec3 pos = it->second.atom.GetPos();
-    float rad = it->second.vdwr;
-    glVertex3v((pos-rad*cx-rad*cy).Data());
-    glVertex3v((pos-rad*cx+rad*cy).Data());
-    glVertex3v((pos+rad*cx+rad*cy).Data());
-    glVertex3v((pos+rad*cx-rad*cy).Data());
-  }
-  glEnd();
-
-  cx=irot*geom::Vec3(1.0,0.0,0.0);
-  cy=irot*geom::Vec3(0.0,1.0,0.0);
-
-  glDepthMask(GL_FALSE);
-
-  uint query_id;
-  glGenQueries(1,&query_id);
-
-  for(AtomEntryMap::iterator it=view_.atom_map.begin();
-      it!=view_.atom_map.end();++it) {
-    geom::Vec3 pos = it->second.atom.GetPos();
-    float rad = it->second.vdwr;
-    glBeginQuery(GL_SAMPLES_PASSED, query_id);
-    glBegin(GL_QUADS);
-    glVertex3v((pos-rad*cx-rad*cy).Data());
-    glVertex3v((pos-rad*cx+rad*cy).Data());
-    glVertex3v((pos+rad*cx+rad*cy).Data());
-    glVertex3v((pos+rad*cx-rad*cy).Data());
-    glEnd();
-    glEndQuery(GL_SAMPLES_PASSED);
-    GLint samples=0;
-    glGetQueryObjectiv(query_id,GL_QUERY_RESULT,&samples);
-    if(samples>0) aelist.push_back(&it->second);
-  }
-
-  glDeleteQueries(1,&query_id);
-
-  glPopAttrib();
-
-  Shader::Instance().PopProgram();
-#endif
-
-  return aelist;
-}
-
 namespace {
 
-void RenderCPK2InnerLoop(const AtomEntry* ae, const geom::Vec3& cx, 
-                         const geom::Vec3& cy, const geom::Vec3& cz, 
-                         GLdouble* gl_mmat, GLdouble* gl_pmat, GLint* gl_vp)
+void Render3DSpritesInnerLoop(const AtomEntry* ae, const geom::Vec3& cx, 
+			      const geom::Vec3& cy, const geom::Vec3& cz, 
+			      GLdouble* gl_mmat, GLdouble* gl_pmat, GLint* gl_vp)
 {
   geom::Vec3 pos = ae->atom.GetPos();
   float rad = ae->vdwr;
@@ -206,7 +140,7 @@ void RenderCPK2InnerLoop(const AtomEntry* ae, const geom::Vec3& cx,
 
 }
 
-void CPKRenderer::RenderCPK2()
+void CPKRenderer::Render3DSprites()
 {
 #if OST_SHADER_SUPPORT_ENABLED
   if(options_!=NULL){
@@ -215,16 +149,13 @@ void CPKRenderer::RenderCPK2()
     geom::Vec3 cy=irot*geom::Vec3(0.0,1.0,0.0);
     geom::Vec3 cz=irot*geom::Vec3(0.0,0.0,1.0);
 
-    std::vector<AtomEntry*> aelist;
-    if(options_->GetCPKMode()==2) {
-      aelist = CPKOcclusion();
-    }
-
+    uint write_normals = Shader::Instance().GetCurrentName()=="dumpnorm" ? 1 : 0;
     Shader::Instance().PushProgram();
     Shader::Instance().Activate("fast_sphere");
     Shader::Instance().UpdateState();
+    glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"write_normals"),write_normals);
 
-    glPushAttrib(GL_ENABLE_BIT);
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
     glDisable(GL_CULL_FACE);
 
@@ -236,71 +167,17 @@ void CPKRenderer::RenderCPK2()
 
     glBegin(GL_QUADS);
 
-    if(options_->GetCPKMode()==2) {
-      for(std::vector<AtomEntry*>::const_iterator it=aelist.begin();it!=aelist.end();++it) {
-        RenderCPK2InnerLoop(*it,cx,cy,cz,gl_mmat,gl_pmat,gl_vp);
-      }
-    } else {
-      for(AtomEntryMap::const_iterator it=view_.atom_map.begin();it!=view_.atom_map.end();++it) {
-        RenderCPK2InnerLoop(&it->second,cx,cy,cz,gl_mmat,gl_pmat,gl_vp);
-      }
+    for(AtomEntryMap::const_iterator it=view_.atom_map.begin();it!=view_.atom_map.end();++it) {
+      Render3DSpritesInnerLoop(&it->second,cx,cy,cz,gl_mmat,gl_pmat,gl_vp);
     }
 
     glEnd();
     glPopAttrib();
-    glPopMatrix();
 
     Shader::Instance().PopProgram();
     Shader::Instance().UpdateState();
   }
 #endif
-}
-
-void CPKRenderer::RenderCPK3()
-{
-#if OST_SHADER_SUPPORT_ENABLED
-  if(options_!= NULL){
-    std::vector<AtomEntry*> aelist = CPKOcclusion();
-
-    IndexedVertexArray cpk_va;
-    detail::PrebuildSphereEntry pre=detail::GetPrebuildSphere(options_->GetSphereDetail());
-    GLuint dlist;
-    dlist = glGenLists(1);
-    glNewList(dlist,GL_COMPILE);
-    glBegin(GL_TRIANGLES);
-    for(uint c=0;c<pre.ilist.size();c+=3) {
-      geom::Vec3 v0 = pre.vlist[pre.ilist[c+0]];
-      geom::Vec3 v1 = pre.vlist[pre.ilist[c+1]];
-      geom::Vec3 v2 = pre.vlist[pre.ilist[c+2]];
-      glNormal3v(v0.Data());
-      glVertex3v(v0.Data());
-      glNormal3v(v1.Data());
-      glVertex3v(v1.Data());
-      glNormal3v(v2.Data());
-      glVertex3v(v2.Data());
-    }
-    glEnd();
-    glEndList();
-
-    glEnable(GL_NORMALIZE);
-
-    for(std::vector<AtomEntry*>::const_iterator it=aelist.begin();it!=aelist.end();++it) {
-      geom::Vec3 pos = (*it)->atom.GetPos();
-      float rad = (*it)->vdwr;
-      glPushMatrix();
-      glColor3fv((*it)->color);
-      glTranslated(pos[0],pos[1],pos[2]);
-      glScaled(rad,rad,rad);
-      glCallList(dlist);
-      glPopMatrix();
-    }
-    glDisable(GL_NORMALIZE);
-  }
-#endif
-}
-
-CPKRenderer::~CPKRenderer() {
-
 }
 
 }}}

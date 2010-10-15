@@ -97,6 +97,7 @@ class DLLEXPORT_OST_GFX GfxNode: public boost::enable_shared_from_this<GfxNode>
   // return visibility state
   bool IsVisible() const;
 
+  virtual void ContextSwitch();
 
  private:
   GfxNode(const GfxNode& o);

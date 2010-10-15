@@ -28,8 +28,10 @@
 #include <string>
 #include <map>
 #include <stack>
+#include <vector>
+
 #include <ost/gfx/module_config.hh>
-#include "gl_include.hh"
+#include "glext_include.hh"
 
 namespace ost { namespace gfx {
 
@@ -37,6 +39,13 @@ class DLLEXPORT_OST_GFX Shader {
 public:
   // singleton implementation
   static Shader& Instance();
+
+  static bool Compile(std::string shader_name, std::string shader_code,
+                      GLenum shader_type, GLuint& shader_id);
+
+  static bool Link(const std::vector<GLuint>& code_list, std::string pr_name, GLuint& shader_pr);
+
+  bool Add(const std::string& name, const std::string& vs_code, const std::string& fs_code);
 
   void PreGLInit();
   void Setup();
@@ -52,7 +61,6 @@ public:
   void PopProgram();
 
   void UpdateState();
-  
 private:
   Shader();
 

@@ -60,7 +60,7 @@ protected:
   float GetFixedPickRadius() const { return pick_radius_; }
 
 protected:
- float     pick_radius_;
+  float     pick_radius_;
   GfxView  view_;
   GfxView  sel_view_;
 };

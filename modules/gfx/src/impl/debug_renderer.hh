@@ -30,10 +30,9 @@ namespace ost { namespace gfx { namespace impl {
 
 class DLLEXPORT_OST_GFX DebugRenderer: public TraceRendererBase {
 public:
-  DebugRenderer(BackboneTrace& trace);
+  DebugRenderer(BackboneTrace* trace);
 
   virtual void PrepareRendering();
-  virtual void Render();
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);
   virtual void SetOptions(RenderOptionsPtr& render_options);

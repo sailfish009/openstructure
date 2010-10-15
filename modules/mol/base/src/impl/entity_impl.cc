@@ -1198,4 +1198,11 @@ void EntityImpl::SetName(const String& ent_name){
   name_=ent_name;
 }
 
+void EntityImpl::ReorderAllResidues()
+{
+  for(ChainImplList::iterator cit=chain_list_.begin();cit!=chain_list_.end();++cit) {
+    (*cit)->ReorderResidues();
+  }
+}
+
 }}} // ns

@@ -225,7 +225,7 @@ void Quad::RenderGL(RenderPass pass)
   if (!this->IsVisible()) {
     return;
   }
-  if (!(pass==OPAQUE_RENDER_PASS || pass==STANDARD_RENDER_PASS)) {
+  if (!(pass==DEPTH_RENDER_PASS || pass==STANDARD_RENDER_PASS)) {
     return;
   }
     glDisable(GL_LIGHTING);

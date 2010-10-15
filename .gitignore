@@ -27,6 +27,7 @@ CMakeLists.txt.user
 OpenStructure.cbp
 DartConfiguration.tcl
 Testing
+*~
 README.html
 CPackConfig.cmake
 CPackSourceConfig.cmake

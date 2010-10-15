@@ -78,10 +78,14 @@ void export_RenderOptions()
     .def(init<const CPKRenderOptions&>())
     .def("SetSphereDetail", &CPKRenderOptions::SetSphereDetail)
     .def("GetSphereDetail", &CPKRenderOptions::GetSphereDetail)
-    .def("SetCPKMode", &CPKRenderOptions::SetCPKMode)
-    .def("GetCPKMode", &CPKRenderOptions::GetCPKMode)
-    .add_property("cpk_mode", &CPKRenderOptions::GetCPKMode, 
-                  &CPKRenderOptions::SetCPKMode)
+    .def("SetSphereMode", &CPKRenderOptions::SetSphereMode)
+    .def("GetSphereMode", &CPKRenderOptions::GetSphereMode)
+    .def("SetCPKMode", &CPKRenderOptions::SetSphereMode)
+    .def("GetCPKMode", &CPKRenderOptions::GetSphereMode)
+    .add_property("cpk_mode", &CPKRenderOptions::GetSphereMode, 
+                  &CPKRenderOptions::SetSphereMode)
+    .add_property("sphere_mode", &CPKRenderOptions::GetSphereMode, 
+                  &CPKRenderOptions::SetSphereMode)
     .add_property("sphere_detail", &CPKRenderOptions::GetSphereDetail, 
                   &CPKRenderOptions::SetSphereDetail)
   ;
@@ -128,6 +132,8 @@ void export_RenderOptions()
     .def("GetHelixEcc", &CartoonRenderOptions::GetHelixEcc)
     .def("SetHelixProfileType", &CartoonRenderOptions::SetHelixProfileType)
     .def("GetHelixProfileType", &CartoonRenderOptions::GetHelixProfileType)
+    .def("SetHelixMode", &CartoonRenderOptions::SetHelixMode)
+    .def("GetHelixMode", &CartoonRenderOptions::GetHelixMode)
     .def("SetStrandWidth", &CartoonRenderOptions::SetStrandWidth)
     .def("GetStrandWidth", &CartoonRenderOptions::GetStrandWidth)
     .def("SetStrandThickness", &CartoonRenderOptions::SetStrandThickness)
@@ -136,6 +142,10 @@ void export_RenderOptions()
     .def("GetStrandEcc", &CartoonRenderOptions::GetStrandEcc)
     .def("SetStrandProfileType", &CartoonRenderOptions::SetStrandProfileType)
     .def("GetStrandProfileType", &CartoonRenderOptions::GetStrandProfileType)
+    .def("SetStrandMode", &CartoonRenderOptions::SetStrandMode)
+    .def("GetStrandMode", &CartoonRenderOptions::GetStrandMode)
+    .def("SetColorBlendMode", &CartoonRenderOptions::SetColorBlendMode)
+    .def("GetColorBlendMode", &CartoonRenderOptions::GetColorBlendMode)
   ;
   
   class_<TraceRenderOptions, boost::shared_ptr<TraceRenderOptions>, bases<RenderOptions>, boost::noncopyable>("TraceRenderOptions")

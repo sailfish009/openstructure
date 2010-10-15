@@ -64,6 +64,7 @@ BOOST_PYTHON_MODULE(_mol)
   export_QueryViewWrapper();
   export_EntityPropertyMapper();
   class_<Transform>("Transform", init<>())
+    .def(init<const Transform&>()) // shouldn't this be there automatically ?
     .def("GetMatrix",&Transform::GetMatrix)
     .def("GetTransposedMatrix",&Transform::GetTransposedMatrix)
     .def("SetTrans",&Transform::SetTrans)

@@ -246,6 +246,8 @@ public:
   pointer_it<ChainImplPtr> GetChainIter(const String& name);
   void SetName(const String& ent_name);
 
+  void ReorderAllResidues();
+
 private:
   void DoCopy(EntityImplPtr dest);
   

@@ -117,10 +117,10 @@ PythonShell* GostyApp::GetPyShell()
   return py_shell_;
 }
 
-GLWin*  GostyApp::GetGLWin()
+GLWin* GostyApp::GetGLWin()
 {
   if (gl_win_==NULL) {
-    gl_win_=new GLWin(main_);
+    gl_win_=new GLWin(main_,try_stereo_);
     gl_win_->SetDestroyOnClose(false);    
   }
   return gl_win_;  

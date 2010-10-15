@@ -7,9 +7,12 @@ void main()
   // for some reason, the fog and z coordinate are sign toggled...
   gl_FogFragCoord = -ec_Pos.z;
 
-  vec3 normal = normalize(gl_NormalMatrix * gl_Normal);
+  vec3 normal = vec3(0,0,1);
+  if(dot(gl_Normal,gl_Normal)>0.001) {
+    normal = normalize(gl_NormalMatrix * gl_Normal);
+  }
   // since a directional light is used, the position is not needed
-  gl_TexCoord[0].stp=normal;
+  gl_TexCoord[2].stp=normal;
 
   gl_FrontColor=gl_Color;
   gl_BackColor=gl_Color;

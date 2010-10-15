@@ -42,7 +42,6 @@
 #include "gl_helper.hh"
 
 #include <ost/config.hh>
-#include "offscreen_buffer.hh"
 #include "scene.hh"
 #include "input.hh"
 #include "gfx_node.hh"
@@ -51,12 +50,12 @@
 #include "bitmap_io.hh"
 #include "entity.hh"
 #include "povray.hh"
+#include "offscreen_buffer.hh"
 
 #if OST_SHADER_SUPPORT_ENABLED
 # include "shader.hh"
+# include "impl/scene_fx.hh"
 #endif
-
-//#define DEBUG_SMAP
 
 using boost::bind;
 
@@ -95,10 +94,11 @@ Scene::Scene():
   root_node_(new GfxNode("Scene")),
   observers_(),
   transform_(),
+  gl_init_(false),
   fov_(30.0),
-  znear_(-200.0),zfar_(200.0),
-  fnear_(5.0), ffar_(0.0),
-  vp_width_(100),vp_height_(100),
+  znear_(1.0),zfar_(1000.0),
+  fnear_(1.0), ffar_(1000.0),
+  vp_width_(1000),vp_height_(1000),
   scene_view_stack_(),
   aspect_ratio_(1.0),
   background_(Color(0.0,0.0,0.0,0.0)),
@@ -110,11 +110,11 @@ Scene::Scene():
   axis_flag_(false),
   fog_flag_(true),
   fog_color_(0.0,0.0,0.0,0.0),
-  shadow_flag_(false),
-  shadow_quality_(1),
-  texture_id_(),
   auto_autoslab_(true),
   offscreen_flag_(false),
+  main_offscreen_buffer_(0),
+  old_vp_(),
+  def_shading_mode_("default"),
   selection_mode_(1),
   test_flag_(false),
   tmp_tex_(),
@@ -126,8 +126,10 @@ Scene::Scene():
   stereo_(0),
   stereo_inverted_(false),
   stereo_eye_(0),
-  stereo_eye_dist_(150.0),
-  stereo_eye_offset_(10.0)
+  stereo_eye_dist_(2.4),
+  stereo_eye_off_(0.0),
+  scene_left_tex_(),
+  scene_right_tex_()
 {
   transform_.SetTrans(Vec3(0,0,-100));
 }
@@ -143,6 +145,11 @@ void Scene::SetFog(bool f)
   RequestRedraw();
 }
 
+bool Scene::GetFog() const
+{
+  return fog_flag_;
+}
+
 void Scene::SetFogColor(const Color& c)
 {
   GLfloat fogc[]={c.Red(),c.Green(),c.Blue(),1.0};
@@ -151,21 +158,147 @@ void Scene::SetFogColor(const Color& c)
   RequestRedraw();
 }
 
-void Scene::SetShadow(bool f)
+Color Scene::GetFogColor() const
 {
-  shadow_flag_=f;
-  RequestRedraw();
+  return fog_color_;
 }
 
-bool Scene::GetShadow()
+void Scene::SetShadow(bool f)
 {
-  return shadow_flag_;
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().shadow_flag=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
+bool Scene::GetShadow() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().shadow_flag;
+#else
+  return false;
+#endif
 }
 
 void Scene::SetShadowQuality(int q)
 {
-  shadow_quality_=std::min(3,std::max(0,q));
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().shadow_quality=std::min(8,std::max(0,q));
   RequestRedraw();
+#endif
+}
+
+void Scene::SetShadowWeight(float w)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().shadow_weight=w;
+  RequestRedraw();
+#endif
+}
+
+void Scene::SetDepthDarkening(bool f)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().depth_dark_flag=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
+void Scene::SetDepthDarkeningWeight(float f)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().depth_dark_factor=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
+void Scene::SetAmbientOcclusion(bool f)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().amb_occl_flag=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+} 
+
+bool Scene::GetAmbientOcclusion() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_flag;
+#else
+  return false;
+#endif
+} 
+
+void Scene::SetAmbientOcclusionWeight(float f)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().amb_occl_factor=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
+void Scene::SetAmbientOcclusionMode(uint m)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().amb_occl_mode=m;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
+void Scene::SetAmbientOcclusionQuality(uint m)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().amb_occl_quality=m;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
+void Scene::SetShadingMode(const std::string& smode)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  // this here is required - in case SetShadingMode is called
+  // before GL is initialized (e.g. during batch mode rendering)
+  def_shading_mode_=smode;
+  if(smode=="fallback") {
+    Shader::Instance().Activate("");
+  } else if(smode=="basic") {
+    Shader::Instance().Activate("basic");
+  } else if(smode=="hf") {
+    Shader::Instance().Activate("hemilight");
+  } else if(smode=="toon1") {
+    Shader::Instance().Activate("toon1");
+  } else if(smode=="toon2") {
+    Shader::Instance().Activate("toon2");
+  } else if(smode=="test_tex") {
+    Shader::Instance().Activate("test_tex");
+  } else {
+    Shader::Instance().Activate("fraglight");
+  }
+  RequestRedraw();
+#endif
+}
+
+void Scene::SetBeacon(int wx, int wy)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().use_beacon=true;
+  impl::SceneFX::Instance().beacon.wx=static_cast<float>(wx);
+  impl::SceneFX::Instance().beacon.wy=static_cast<float>(wy);
+#endif  
+}
+
+void Scene::SetBeaconOff()
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().use_beacon=false;
+#endif  
 }
 
 namespace {
@@ -179,13 +312,18 @@ void set_light_dir(Vec3 ld)
 
 }
 
-void Scene::InitGL()
+void Scene::InitGL(bool full)
 {
   LOG_DEBUG("scene: initializing GL state");
 
+  if(full) {
+    LOG_VERBOSE(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
+
 #if OST_SHADER_SUPPORT_ENABLED
-  Shader::Instance().PreGLInit();
+    LOG_DEBUG("scene: shader pre-gl");
+    Shader::Instance().PreGLInit();
 #endif
+  }
 
   // TODO: add more lights
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_amb_);
@@ -234,9 +372,31 @@ void Scene::InitGL()
   glShadeModel(GL_SMOOTH);
 
   // line and point anti-aliasing
+
+#if OST_SHADER_SUPPORT_ENABLED
+  GLint mbufs=0,msamples=0;
+  if(OST_GL_VERSION_2_0) {
+    glGetIntegerv(GL_SAMPLE_BUFFERS, &mbufs);
+    glGetIntegerv(GL_SAMPLES, &msamples);
+  }
+
+  if(mbufs>0 && msamples>0) {
+    LOG_VERBOSE("Scene: enabling multisampling with: " << msamples << " samples");
+    glDisable(GL_LINE_SMOOTH);
+    glDisable(GL_POINT_SMOOTH);
+    glDisable(GL_POLYGON_SMOOTH);
+    glEnable(GL_MULTISAMPLE);
+  } else {
+    glEnable(GL_LINE_SMOOTH);
+    glDisable(GL_POINT_SMOOTH);
+    glDisable(GL_POLYGON_SMOOTH);
+  }
+#else
   glEnable(GL_LINE_SMOOTH);
   glDisable(GL_POINT_SMOOTH);
   glDisable(GL_POLYGON_SMOOTH);
+#endif
+
   // rendering hints
   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
   glHint(GL_FOG_HINT, GL_NICEST);
@@ -247,20 +407,54 @@ void Scene::InitGL()
   glDisable(GL_NORMALIZE);
   // double-buffer rendering requires this
   // glDrawBuffer(GL_BACK);
-  // initialize shaders
-#if OST_SHADER_SUPPORT_ENABLED
-  Shader::Instance().Setup();
-  Shader::Instance().Activate("fraglight");
 
-  glGenTextures(1,&texture_id_);
+#if OST_SHADER_SUPPORT_ENABLED
+  if(full) {
+    LOG_DEBUG("scene: shader setup");
+    Shader::Instance().Setup();
+    SetShadingMode(def_shading_mode_);
+    LOG_DEBUG("scene: scenefx setup");
+    impl::SceneFX::Instance().Setup();
+  }
 #endif
 
-  prep_glyphs();
+  if(full) {
+    prep_glyphs();
+  }
+
+  if(full) {
+    glGenTextures(1,&scene_left_tex_);
+    glGenTextures(1,&scene_right_tex_);
+  }
+
+  glEnable(GL_TEXTURE_2D);
+#if OST_SHADER_SUPPORT_ENABLED
+  if(OST_GL_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
+#endif
+
+  glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+  glBindTexture(GL_TEXTURE_2D, scene_right_tex_);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+  LOG_DEBUG("scene: gl init done");
+  gl_init_=true;
 }
 
 void Scene::RequestRedraw()
 {
-  if (win_) {
+  if (win_ && !offscreen_flag_) {
     win_->DoRefresh();
   }
 }
@@ -278,6 +472,11 @@ void Scene::SetBackground(const Color& c)
   RequestRedraw();
 }
 
+Color Scene::GetBackground() const
+{
+  return background_;
+}
+
 Viewport Scene::GetViewport() const
 {
   Viewport vp;
@@ -292,6 +491,9 @@ void Scene::SetViewport(int w, int h)
   vp_height_=h;
   aspect_ratio_=static_cast<float>(w)/static_cast<float>(h);
   ResetProjection();
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().Resize(w,h);
+#endif
 }
 
 void Scene::Resize(int w, int h)
@@ -306,6 +508,7 @@ void Scene::SetCenter(const Vec3& cen)
   float delta_z = tcen[2]-transform_.GetTrans()[2];
 
   transform_.SetCenter(cen);
+  transform_.SetTrans(Vec3(0,0,transform_.GetTrans()[2]));
   SetNearFar(znear_+delta_z,zfar_+delta_z);
   RequestRedraw();  
 }
@@ -428,36 +631,14 @@ void Scene::RenderGL()
 {
   if(auto_autoslab_) Autoslab(false, false);
 
-  #if OST_SHADER_SUPPORT_ENABLED
-    if(shadow_flag_) {
-      prep_shadow_map();
-  #if DEBUG_SMAP
-      return;
-  #endif
-    }
-  #endif
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   prep_blur();
 
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-
-  set_light_dir(light_dir_);
-
-  glMultMatrix(transform_.GetTransposedMatrix().Data());
-
-  if(stereo_==2 || stereo_==3) {
-    render_interlaced_stereo();
-  } else if (stereo_==1) {
-    this->render_quad_buffered_stereo();
+  if(stereo_==1 || stereo_==2) {
+    render_stereo();
   } else {
-    this->render_scene_with_glow();
+    render_scene();
   }
-  #if OST_SHADER_SUPPORT_ENABLED
-  if(shadow_flag_) {
-    glDisable(GL_TEXTURE_2D);
-  }
-  #endif
+  check_gl_error();
 }
 
 void Scene::Register(GLWinBase* win)
@@ -501,6 +682,37 @@ namespace {
     GfxObjP node;
   };
 
+#if 0
+  struct RegexFindObj: public GfxNodeVisitor {
+    RegexFindObj(const String& rs): reg(), valid(false), node() {
+      try {
+        reg = boost::regex(rs);
+        valid = true;
+      } catch (boost::regex_error& e) {
+        LOG_ERROR("invalid regex");
+      }
+    }
+
+    virtual bool VisitNode(GfxNode* n, const Stack& st) {
+      return true;
+    }
+
+    virtual void VisitObject(GfxObj* o, const Stack& st) {
+      if(boost::regex_match(o->GetName(),reg)) {
+        GfxNodeP nn = o->shared_from_this();
+        GfxObjP oo = dyn_cast<GfxObj>(nn);
+        if(oo) {
+          olist.push_back(oo);
+        }
+      }
+    }
+
+    boost::regex reg;
+    bool valid;
+    std::vector<GfxObjP> olist;
+  };
+#endif
+
   struct FindNode2: public GfxNodeVisitor {
     FindNode2(GfxNodeP n): node(n), found(false) {}
     virtual bool VisitNode(GfxNode* n, const Stack& st) {
@@ -539,7 +751,15 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
     throw Error("Scene already has a node with name '"+n->GetName()+"'");
   }
 
-  LOG_DEBUG("scene: graphical object added @" << n.get());
+  LOG_DEBUG("scene: graphical object added @" << n.get() << std::endl);
+
+  if(root_node_->GetChildCount()==0) {
+    GfxObjP go = boost::dynamic_pointer_cast<GfxObj>(n);
+    if(go) {
+      SetCenter(go->GetCenter());
+    }
+  }
+
   root_node_->Add(n);
   if (redraw) {
     this->RequestRedraw();
@@ -599,7 +819,6 @@ void Scene::Remove(const GfxNodeP& go)
   if(!go) return;
   root_node_->Remove(go);
   this->NotifyObservers(bind(&SceneObserver::NodeRemoved, _1,go));
-  this->RequestRedraw();
 }
 
 void Scene::RemoveAll()
@@ -616,7 +835,6 @@ void Scene::Remove(const String& name)
     root_node_->Remove(name);
     if(GfxObjP go = dyn_cast<GfxObj>(fn.node)) {
       this->NotifyObservers(bind(&SceneObserver::NodeRemoved, _1,go));
-      this->RequestRedraw();
     }
   }
 }
@@ -692,7 +910,6 @@ void Scene::Apply(GfxNodeVisitor& v) const
 
 void Scene::OnInput(const InputEvent& e)
 {
-  float sf=1.0;
   if(e.GetCommand()==INPUT_COMMAND_AUTOSLAB) {
     Autoslab();
   } else if(e.GetCommand()==INPUT_COMMAND_TOGGLE_FOG) {
@@ -728,7 +945,8 @@ void Scene::OnInput(const InputEvent& e)
       transform_.ApplyYAxisTranslation(e.GetDelta()*fxy[1]);
     }
   } else if(e.GetCommand()==INPUT_COMMAND_TRANSZ) {
-    float delta=e.GetDelta()*sf;
+    float currz=transform_.GetTrans()[2];
+    float delta=currz*pow(1.01,-e.GetDelta())-currz;
     transform_.ApplyZAxisTranslation(delta);
     SetNearFar(znear_-delta,zfar_-delta);
   } else if(e.GetCommand()==INPUT_COMMAND_SLABN) {
@@ -1061,14 +1279,16 @@ void Scene::SetFogOffsets(float no, float fo)
 void Scene::Stereo(unsigned int m)
 {
   if(m==1) {
-    stereo_=m;
-    if(win_) win_->SetStereo(true);
-  } else if(m==2 || m==3) {
-    stereo_=m;
-    if(win_) win_->SetStereo(false);
+    if(win_ && win_->HasStereo()) {
+      stereo_=1;
+    } else {
+      LOG_INFO("No visual present for quad-buffered stereo");
+      stereo_=0;
+    }
+  } else if(m==2) {
+    stereo_=2;
   } else {
     stereo_=0;
-    if(win_) win_->SetStereo(false);
   }
   RequestRedraw();
 }
@@ -1076,15 +1296,31 @@ void Scene::Stereo(unsigned int m)
 void Scene::SetStereoInverted(bool f)
 {
   stereo_inverted_=f;
+  RequestRedraw();
 }
 
-void Scene::SetStereoEye(unsigned int m)
+void Scene::SetStereoView(unsigned int m)
 {
   stereo_eye_= (m>2) ? 0: m;
   ResetProjection();
   RequestRedraw();
 }
 
+void Scene::SetStereoEyeDist(float d)
+{
+  stereo_eye_dist_=d;
+  if(stereo_>0) {
+    RequestRedraw();
+  }
+}
+
+void Scene::SetStereoEyeOff(float d)
+{
+  stereo_eye_off_=d;
+  if(stereo_>0) {
+    RequestRedraw();
+  }
+}
 
 void Scene::SetLightDir(const Vec3& dir)
 {
@@ -1134,24 +1370,60 @@ uint Scene::GetSelectionMode() const
   return selection_mode_;
 }
 
-namespace {
-
-struct OffscreenSwitcher
+bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
 {
-  OffscreenSwitcher()
-  {
-    LOG_TRACE("offscreen begin");
-    OffscreenBuffer::Instance().Begin();
-  }
+  if(main_offscreen_buffer_) return false;
+  main_offscreen_buffer_ = new OffscreenBuffer(width,height,OffscreenBufferFormat(),true);
 
-  ~OffscreenSwitcher()
-  {
-    LOG_TRACE("offscreen end");
-    OffscreenBuffer::Instance().End();
+  if(!main_offscreen_buffer_->IsValid()) {
+    LOG_ERROR("error during offscreen buffer creation");
+    delete main_offscreen_buffer_;   
+    main_offscreen_buffer_=0;
+    return false;
   }
-};
+  old_vp_[0]=vp_width_;
+  old_vp_[1]=vp_height_;
+  main_offscreen_buffer_->MakeActive();
+  offscreen_flag_=true;
+  root_node_->ContextSwitch();
 
-} // anon ns
+#if OST_SHADER_SUPPORT_ENABLED
+  String shader_name = Shader::Instance().GetCurrentName();
+#endif
+
+  LOG_DEBUG("initializing GL");
+  if(gl_init_) {
+    this->InitGL(false);
+  } else {
+    this->InitGL(true);
+  }
+  LOG_DEBUG("setting viewport");
+  Resize(width,height);
+  LOG_DEBUG("updating fog settings");
+  update_fog();
+  glDrawBuffer(GL_FRONT);
+#if OST_SHADER_SUPPORT_ENABLED
+  LOG_DEBUG("activating shader");
+  Shader::Instance().Activate(shader_name);
+#endif
+  return true;
+}
+
+void Scene::StopOffscreenMode()
+{
+  if(main_offscreen_buffer_) {
+    if (win_) {
+      win_->MakeActive();
+    }
+    delete main_offscreen_buffer_;
+    main_offscreen_buffer_=0;
+    Scene::Instance().SetViewport(old_vp_[0],old_vp_[1]);
+    offscreen_flag_=false;
+    root_node_->ContextSwitch();
+    glDrawBuffer(GL_BACK);
+    update_fog();
+  }
+}
 
 void Scene::Export(const String& fname, unsigned int width,
                    unsigned int height, bool transparent)
@@ -1167,61 +1439,50 @@ void Scene::Export(const String& fname, unsigned int width,
     return;
   }
 
-  offscreen_flag_=true;
-  LOG_TRACE("offscreen resize");
-  OffscreenBuffer::Instance().Resize(width, height);
-  try {
-    // ensures that context is switched back when this goes out of scope
-    OffscreenSwitcher offscreen_switch;
+  bool of_flag = (main_offscreen_buffer_==0);
 
-#if OST_SHADER_SUPPORT_ENABLED
-    String shader_name = Shader::Instance().GetCurrentName();
-#endif
-    LOG_TRACE("initializing GL");
-    this->InitGL();
-    LOG_TRACE("setting viewport");
-    SetViewport(width,height);
-    LOG_TRACE("reseting projection");
-    ResetProjection();
-    LOG_TRACE("updating fog settings");
-    update_fog();
-    glDrawBuffer(GL_FRONT);
-    //this->flag_all_dirty();
-#if OST_SHADER_SUPPORT_ENABLED
-    LOG_TRACE("activating shader");
-    Shader::Instance().Activate(shader_name);
-#endif
-    LOG_TRACE("doing rendering");
-    this->RenderGL();
-    // make sure drawing operations are finished
-    glFinish();
-    boost::shared_array<uchar> img_data(new uchar[width*height*4]);
-
-    LOG_TRACE("setting background transparency");
-    if (transparent) {
-      glPixelTransferf(GL_ALPHA_BIAS, 0.0);
-    } else {
-      // shift alpha channel by one to make sure pixels are read out as opaque
-      glPixelTransferf(GL_ALPHA_BIAS, 1.0);
+  // only switch if offscreen mode is not active
+  if(of_flag) {
+    if(!StartOffscreenMode(width,height)) {
+      return;
     }
+  }
+  LOG_DEBUG("rendering into offscreen buffer");
+  this->RenderGL();
+  // make sure drawing operations are finished
+  glFlush();
+  glFinish();
 
-    LOG_TRACE("reading framebuffer pixels");
-    glReadBuffer(GL_FRONT);
-    glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
+  boost::shared_array<uchar> img_data(new uchar[width*height*4]);
+      
+  LOG_DEBUG("setting background transparency");
+  if (transparent) {
+    glPixelTransferf(GL_ALPHA_BIAS, 0.0);
+  } else {
+    // shift alpha channel by one to make sure pixels are read out as opaque
+    glPixelTransferf(GL_ALPHA_BIAS, 1.0);
+  }
+  
+  LOG_DEBUG("reading framebuffer pixels");
+  glReadBuffer(GL_FRONT);
+  glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
+  glReadBuffer(GL_BACK);
 
-    LOG_DEBUG("calling bitmap export");
-    BitmapExport(fname,ext,width,height,img_data.get());
-  } catch (...) {
-    // noop
-  } // offscreen_switch goes out of scope
-  offscreen_flag_=false;
-  glDrawBuffer(GL_BACK);
-  LOG_TRACE("updating fog");
-  update_fog();
+  LOG_DEBUG("calling bitmap export");
+  BitmapExport(fname,ext,width,height,img_data.get());
+
+  // only switch back if it was not on to begin with
+  if(of_flag) {
+    StopOffscreenMode();
+  }
 }
 
 void Scene::Export(const String& fname, bool transparent)
 {
+  if(!win_ && !main_offscreen_buffer_) {
+    LOG_ERROR("Export without dimensions either requires an interactive session \nor an active offscreen mode (scene.StartOffscreenMode(W,H))");
+    return;
+  }
   int d_index=fname.rfind('.');
   if (d_index==-1) {
     LOG_ERROR("no file extension specified");
@@ -1234,6 +1495,12 @@ void Scene::Export(const String& fname, bool transparent)
   }
   GLint vp[4];
   glGetIntegerv(GL_VIEWPORT,vp);
+
+  if(main_offscreen_buffer_) {
+    this->RenderGL();
+    glFlush();
+    glFinish();
+  }
 
   if (transparent) {
     glPixelTransferf(GL_ALPHA_BIAS, 0.0);
@@ -1394,146 +1661,6 @@ void Scene::update_fog()
   glFogf(GL_FOG_END,zfar_+ffar_);
 }
 
-void Scene::prep_shadow_map()
-{
-#if OST_SHADER_SUPPORT_ENABLED
-  GLint smap_size=256 << shadow_quality_;
-
-  // modelview transform for the lightsource pov
-  mol::Transform ltrans(transform_);
-  ltrans.SetRot(light_rot_*transform_.GetRot());
-
-  // calculate encompassing box for ortho projection
-  geom::AlignedCuboid bb=this->GetBoundingBox(ltrans);
-  const Vec3& tmin=bb.GetMin();
-  const Vec3& tmax=bb.GetMax();
-
-  // render pass 1 - without shadows
-
-  // turn shadowing off for subsequent rendering
-  glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),
-              "shadow_flag"),0);
-  // save overall gl settings
-  glPushAttrib(GL_VIEWPORT_BIT | GL_ENABLE_BIT);
-  // maximize rendering for depth-only information
-#ifndef DEBUG_SMAP
-  glDisable(GL_LIGHTING);
-  glDisable(GL_FOG);
-  glDisable(GL_COLOR_MATERIAL);
-  glDisable(GL_NORMALIZE);
-  glColorMask(GL_FALSE,GL_FALSE,GL_FALSE,GL_FALSE);
-#endif
-
-  // render scene with only depth components
-  glViewport(0,0,smap_size,smap_size);
-  glClear(GL_DEPTH_BUFFER_BIT);
-
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glOrtho(tmin[0],tmax[0],tmin[1],tmax[1],-tmax[2],-tmin[2]);
-  //glFrustum(tmin[0],tmax[0],tmin[1],tmax[1],-tmax[2],-tmin[2]);
-  float glpmat[16];
-  glGetv(GL_PROJECTION_MATRIX, glpmat);
-  Mat4 pmat(Transpose(Mat4(glpmat)));
-
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-  glMultMatrix(ltrans.GetTransposedMatrix().Data());
-
-  // only render non-transparent objects for the shadow map
-  root_node_->RenderGL(OPAQUE_RENDER_PASS);
-
-  // now get the shadow map
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, texture_id_);
-
-  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
-                   0,0, smap_size,smap_size, 0);
-
-  ////////////////
-  // all of the following texture and shader params need to be moved
-  // to a one-time initialization place
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-  GLuint cpr=Shader::Instance().GetCurrentProgram();
-
-  // assign tex unit 0 to shadow map
-  glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"shadow_map"),0);
-  //int depth_bits;
-  //glGetIntegerv(GL_DEPTH_BITS, &depth_bits);
-  //float depth_bias = 1.0/static_cast<float>(1<<depth_bits);
-  glUniform1f(glGetUniformLocation(cpr,"depth_bias"),0.008);
-
-  glUniform1f(glGetUniformLocation(cpr,"epsilon"),0.002);
-
-  glUniform1f(glGetUniformLocation(cpr,"shadow_multiplier"),0.4);
-
-  //
-  //////////////////
-
-  // restore settings
-  glPopMatrix();
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-
-  glPopAttrib();
-  glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
-
-  glEnable(GL_TEXTURE_2D);
-
-  // and turn shadowing on for subsequent rendering
-  glUniform1i(glGetUniformLocation(cpr,"shadow_flag"),1);
-
-#ifndef DEBUG_SMAP
-  // set up appropriate texture matrix
-  Mat4 bias(0.5,0.0,0.0,0.5,
-                  0.0,0.5,0.0,0.5,
-                  0.0,0.0,0.5,0.5,
-                  0.0,0.0,0.0,1.0);
-
-  Mat4 texm = bias*pmat*ltrans.GetMatrix();
-
-  glMatrixMode(GL_TEXTURE);
-  // make explicit object instead of temporary to avoid potential crash with Data()
-  Mat4 ttmp=Transpose(texm);
-  glLoadMatrix(ttmp.Data());
-  glMatrixMode(GL_MODELVIEW);
-#else
-  // this debug code draws the depth map across the screen
-  Shader::Instance().Activate("");
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_FOG);
-  glEnable(GL_TEXTURE_2D);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(-1,11,-1,11,-1,1);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glColor3f(1.0,1.0,1.0);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0);
-  glVertex2f(0.0,0.0);
-  glTexCoord2f(0.0,1.0);
-  glVertex2f(0.0,10.0);
-  glTexCoord2f(1.0,1.0);
-  glVertex2f(10.0,10.0);
-  glTexCoord2f(1.0,0.0);
-  glVertex2f(10.0,0.0);
-  glEnd();
-  Shader::Instance().Activate("basic_shadow");
-#endif
-#endif
-}
 
 namespace {
 class DirtyAll: public GfxNodeVisitor
@@ -1560,11 +1687,6 @@ bool Scene::InOffscreenMode() const
   return offscreen_flag_;
 }
 
-void Scene::SetOffscreenMode()
-{
-  OffscreenBuffer::Instance().Begin();
-}
-
 float Scene::ElapsedTime() const
 {
 #ifndef _MSC_VER
@@ -1585,14 +1707,6 @@ void Scene::SetTestMode(bool f)
   } else {
     Remove("GfxTestObj");
   }
-}
-
-// temporary interface
-void Scene::ActivateShader(const String& name)
-{
-#if OST_SHADER_SUPPORT_ENABLED
-  Shader::Instance().Activate(name);
-#endif
 }
 
 void Scene::prep_glyphs()
@@ -1633,7 +1747,6 @@ void Scene::prep_glyphs()
   for(int cc=128;cc<256;++cc) glyph_map_[cc]=Vec2(0.0,0.0);
 
   LOG_VERBOSE("done loading glyphs");
-
 }
 
 void Scene::prep_blur()
@@ -1643,13 +1756,36 @@ void Scene::prep_blur()
   glFlush();
 }
 
-void Scene::render_scene_with_glow()
+void Scene::render_scene()
 {
-  glDepthFunc(GL_LEQUAL);    
-  glDepthMask(1);
-  glEnable(GL_DEPTH_TEST);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+
+  glMultMatrix(transform_.GetTransposedMatrix().Data());
+
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().Preprocess();
+#endif
+
   root_node_->RenderGL(STANDARD_RENDER_PASS);
-  glPushAttrib(GL_ENABLE_BIT);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  root_node_->RenderGL(TRANSPARENT_RENDER_PASS);
+  glDisable(GL_BLEND);
+  root_node_->RenderGL(OVERLAY_RENDER_PASS);
+
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().Postprocess();
+#endif
+
+  render_glow();
+}
+
+void Scene::render_glow()
+{
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glEnable(GL_COLOR_MATERIAL);
   glShadeModel(GL_FLAT);
   glDisable(GL_FOG);
@@ -1677,33 +1813,63 @@ void Scene::stereo_projection(unsigned int view)
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   
-  float zn=std::max(float(1.0),znear_);
-  float zf=std::max(float(1.1),zfar_);
+  GLdouble zn=std::max<float>(1.0,znear_);
+  GLdouble zf=std::max<float>(1.1,zfar_);
 
-  gluPerspective(fov_,aspect_ratio_,zn,zf);
+  GLdouble top = zn * std::tan(fov_*M_PI/360.0);
+  GLdouble bot = -top;
+  GLdouble right = top*aspect_ratio_;
+  GLdouble left = -right;
 
-  if(view>0) {
-    float iod = (view==1) ? -stereo_eye_dist_ : stereo_eye_dist_;
-    //float fr=(-stereo_eye_offset_-zn)/(zf-zn);
-    float angle=180.0f/M_PI*std::atan(stereo_eye_offset_/(2.0*iod));
-    glTranslated(0.0,0.0,transform_.GetTrans()[2]);
-    glRotated(-angle,0.0,1.0,0.0);
-    glTranslated(0.0,0.0,-transform_.GetTrans()[2]);
+  glFrustum(left,right,bot,top,zn,zf);
+
+  if(view==1 || view==2) {
+    float ff=(view==1 ? -1.0 : 1.0);
+    float dist=-transform_.GetTrans()[2];
+    geom::Mat4 skew=geom::Transpose(geom::Mat4(1.0,0.0,ff*stereo_eye_dist_/dist,ff*stereo_eye_dist_,
+                                               0.0,1.0,0.0,0.0,
+                                               0.0,0.0,1.0,0.0,
+                                               0.0,0.0,0.0,1.0));
+    glMultMatrix(skew.Data());
   }
+
 }
 
-void Scene::render_interlaced_stereo()
+void Scene::render_stereo()
 {
-  // set up stencil buffer
-  glPushAttrib(GL_STENCIL_BUFFER_BIT| GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glOrtho(0,vp_width_,0,vp_height_,-1,1);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-  glDrawBuffer(GL_NONE);
+  stereo_eye_=1;
+  stereo_projection(1);
+  render_scene();
+
+  glEnable(GL_TEXTURE_2D);
+#if OST_SHADER_SUPPORT_ENABLED
+  if(OST_GL_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
+#endif
+  glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
+
+  stereo_eye_=2;
+  stereo_projection(2);
+  render_scene();
+  glEnable(GL_TEXTURE_2D);
+#if OST_SHADER_SUPPORT_ENABLED
+  if(OST_GL_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
+#endif
+  glBindTexture(GL_TEXTURE_2D, scene_right_tex_);
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
+  stereo_eye_=0;
+  stereo_projection(0);
+
+#if OST_SHADER_SUPPORT_ENABLED
+  Shader::Instance().PushProgram();
+  Shader::Instance().Activate("");
+#endif
+
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
@@ -1712,63 +1878,89 @@ void Scene::render_interlaced_stereo()
   glDisable(GL_BLEND);
   glDisable(GL_LINE_SMOOTH);
   glDisable(GL_POINT_SMOOTH);
-  glLineWidth(1.0);
-  glEnable(GL_STENCIL_TEST);
-  glStencilMask(0x1);
-  glClearStencil(0x0);
-  glClear(GL_STENCIL_BUFFER_BIT);
-  glStencilFunc(GL_ALWAYS,0x1,0x1);
-  glStencilOp(GL_REPLACE,GL_REPLACE,GL_REPLACE);
-  glBegin(GL_LINES);
-  glColor3f(1.0,1.0,1.0);
-  for(unsigned int i=0;i<vp_height_;i+=2) {
-    glVertex2i(0,i);
-    glVertex2i(vp_width_-1,i);
-  } 
+  glDisable(GL_MULTISAMPLE);
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0,vp_width_,0,vp_height_,-1,1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  if(stereo_==2) {
+    // draw interlace lines in stencil buffer
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLineWidth(1.0);
+    glEnable(GL_STENCIL_TEST);
+    glStencilMask(0x1);
+    glClearStencil(0x0);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glStencilFunc(GL_ALWAYS,0x1,0x1);
+    glStencilOp(GL_REPLACE,GL_REPLACE,GL_REPLACE);
+    glBegin(GL_LINES);
+    glColor3f(1.0,1.0,1.0);
+    for(unsigned int i=0;i<vp_height_;i+=2) {
+      glVertex2i(0,i);
+      glVertex2i(vp_width_-1,i);
+    } 
+    glEnd();
+    
+    glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
+  }
+
+  // right eye
+  if(stereo_==1) {
+    glDrawBuffer(GL_BACK_RIGHT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  } else if(stereo_==2) {
+    glStencilFunc(GL_EQUAL,0x0,0x1);
+  }
+#if OST_SHADER_SUPPORT_ENABLED
+  if(OST_GL_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
+#endif
+  glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_left_tex_ : scene_right_tex_);
+  // draw
+  glColor3f(1.0,0.0,1.0);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
   glEnd();
-  glPopMatrix();
+
+  // left eye
+  if(stereo_==1) {
+    glDrawBuffer(GL_BACK_LEFT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  } else if(stereo_==2) {
+    glStencilFunc(GL_EQUAL,0x1,0x1);
+  }
+#if OST_SHADER_SUPPORT_ENABLED
+  if(OST_GL_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
+#endif
+  glBindTexture(GL_TEXTURE_2D, stereo_inverted_ ? scene_right_tex_ : scene_left_tex_);
+  // draw
+  glColor3f(1.0,0.0,1.0);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
+  glEnd();
+  
+  // restore settings
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
   glPopAttrib();
-
-  glEnable(GL_STENCIL_TEST);
-  glStencilOp(GL_KEEP,GL_KEEP,GL_KEEP);
-
-  glStencilFunc(GL_EQUAL,0x1,0x1);
-  stereo_projection(stereo_==2 ? 1 : 2);
-  root_node_->RenderGL(STANDARD_RENDER_PASS);
-  root_node_->RenderGL(GLOW_RENDER_PASS);
-
-  glStencilFunc(GL_EQUAL,0x0,0x1);
-  stereo_projection(stereo_==2 ? 2 : 1);
-  root_node_->RenderGL(STANDARD_RENDER_PASS);
-  root_node_->RenderGL(GLOW_RENDER_PASS);
-  glDisable(GL_STENCIL_TEST);
-  glPopAttrib();
-}
-
-void Scene::render_quad_buffered_stereo()
-{
-  glDrawBuffer(GL_BACK);
-  glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-  glDrawBuffer(GL_BACK_LEFT);
-  glClear(GL_DEPTH_BUFFER_BIT);
-  if (stereo_inverted_) {
-    stereo_projection(stereo_==1 ? 2 : 1);
-  } else {
-    stereo_projection(stereo_==1 ? 1 : 2);
-  }
-  this->render_scene_with_glow();
-  glDrawBuffer(GL_BACK_RIGHT);
-  glClear(GL_DEPTH_BUFFER_BIT);
-  if (stereo_inverted_) {
-    stereo_projection(stereo_==1 ? 1 : 2);
-  } else {
-    stereo_projection(stereo_==1 ? 2 : 1);
-  }
-  this->render_scene_with_glow();
-  glDrawBuffer(GL_BACK);
+#if OST_SHADER_SUPPORT_ENABLED
+  Shader::Instance().PopProgram();
+#endif
 }
 
 }} // ns

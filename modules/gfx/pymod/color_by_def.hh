@@ -22,13 +22,16 @@
 #include <ost/config.hh>
 #include <ost/gfx/gfx_object.hh>
 
+#if OST_IMG_ENABLED
+#include <ost/img/alg/stat.hh>
+#endif
+
 using namespace ost;
 using namespace ost::gfx;
 
 namespace ost_gfx {
 
-#if OST_IMG_ENABLED
-inline void color_by_01(GfxObj* go,
+inline void color_by_e0(GfxObj* go,
                 const mol::EntityView& ev, 
                 const String& prop,
                 const Gradient& g, float minv, float maxv)
@@ -36,117 +39,141 @@ inline void color_by_01(GfxObj* go,
   go->ColorBy(ev,prop,g,minv,maxv);
 }
 
-inline void color_by_02(GfxObj* go,
-                const ::img::MapHandle& mh, 
-                const String& prop,
-                const Gradient& g, float minv, float maxv)
+inline void color_by_e1(GfxObj* go,
+			const mol::EntityView& ev, 
+			const String& prop,
+			const Color& c1, const Color& c2, float minv, float maxv)
+{
+  Gradient g;
+  g.SetColorAt(0.0,c1);
+  g.SetColorAt(1.0,c2);
+  go->ColorBy(ev,prop,g,minv,maxv);
+}
+
+inline void color_by_e2(GfxObj* go,
+			const mol::EntityHandle& eh, 
+			const String& prop,
+			const Gradient& g, float minv, float maxv)
+{
+  go->ColorBy(eh.CreateFullView(),prop,g,minv,maxv);
+}
+
+inline void color_by_e3(GfxObj* go,
+			const mol::EntityHandle& eh, 
+			const String& prop,
+			const Color& c1, const Color& c2, float minv, float maxv)
+{
+  Gradient g;
+  g.SetColorAt(0.0,c1);
+  g.SetColorAt(1.0,c2);
+  go->ColorBy(eh.CreateFullView(),prop,g,minv,maxv);
+}
+
+inline void color_by_e4(GfxObj* go,
+			const mol::EntityView& ev, 
+			const String& prop,
+			const Gradient& g)
+{
+  std::pair<float,float> minmax = ev.GetMinMax(prop);
+  go->ColorBy(ev,prop,g,minmax.first, minmax.second);
+}
+
+inline void color_by_e5(GfxObj* go,
+			const mol::EntityView& ev, 
+			const String& prop,
+			const Color& c1, const Color& c2)
+{
+  Gradient g;
+  g.SetColorAt(0.0,c1);
+  g.SetColorAt(1.0,c2);
+  std::pair<float,float> minmax = ev.GetMinMax(prop);
+  go->ColorBy(ev,prop,g,minmax.first, minmax.second);
+}
+
+inline void color_by_e6(GfxObj* go,
+			const mol::EntityHandle& eh, 
+			const String& prop,
+			const Gradient& g)
+{
+  color_by_e4(go,eh.CreateFullView(),prop,g);
+}
+
+inline void color_by_e7(GfxObj* go,
+			const mol::EntityHandle& eh, 
+			const String& prop,
+			const Color& c1, const Color& c2)
+{
+  color_by_e5(go,eh.CreateFullView(),prop,c1,c2);
+}
+
+#if OST_IMG_ENABLED
+inline void color_by_m0(GfxObj* go,
+			const ::img::MapHandle& mh, 
+			const String& prop,
+			const Gradient& g, float minv, float maxv)
 {
   go->ColorBy(mh,prop,g,minv,maxv);
 }
 
-
-inline void color_by_11(GfxObj* go,
-                 const ::img::MapHandle& mh, 
-                 const String& prop,
-                 const Gradient& g)
+inline void color_by_m1(GfxObj* go,
+			  const ::img::MapHandle& mh, 
+			  const String& prop,
+			  const Gradient& g)
 {
-  go->ColorBy(mh,prop,g);
+  ost::img::alg::Stat stat;
+  mh.Apply(stat);
+  float min = static_cast<float>(stat.GetMinimum());
+  float max = static_cast<float>(stat.GetMaximum());
+  std::pair<float,float> minmax = std::make_pair(min,max);
+  go->ColorBy(mh,prop,g,minmax.first, minmax.second);
 }
 
-inline void color_by_12(GfxObj* go,
-                 const ::img::MapHandle& mh, 
-                 const String& prop,
-                 const Color& c1, const Color& c2)
+inline void color_by_m2(GfxObj* go,
+			const ::img::MapHandle& mh, 
+			const String& prop,
+			const Color& c1, const Color& c2)
 {
-  go->ColorBy(mh,prop,c1,c2);
+  Gradient g;
+  g.SetColorAt(0.0,c1);
+  g.SetColorAt(1.0,c2);
+  ost::img::alg::Stat stat;
+  mh.Apply(stat);
+  float min = static_cast<float>(stat.GetMinimum());
+  float max = static_cast<float>(stat.GetMaximum());
+  std::pair<float,float> minmax = std::make_pair(min,max);
+  go->ColorBy(mh,prop,g,minmax.first, minmax.second);
 }
 
-
-inline void color_by_04(GfxObj* go,
-                const ::img::MapHandle& mh, 
-                const String& prop,
-                const Color& c1, const Color& c2, float minv, float maxv)
+inline void color_by_m3(GfxObj* go,
+			const ::img::MapHandle& mh, 
+			const String& prop,
+			const Color& c1, const Color& c2, float minv, float maxv)
 {
-  go->ColorBy(mh,prop,c1,c2,minv,maxv);
+  Gradient g;
+  g.SetColorAt(0.0,c1);
+  g.SetColorAt(1.0,c2);
+  go->ColorBy(mh,prop,g,minv, maxv);
 }
-
 #endif
-
-inline void color_by_03(GfxObj* go,
-                const mol::EntityView& ev, 
-                const String& prop,
-                const Color& c1, const Color& c2, float minv, float maxv)
-{
-  go->ColorBy(ev,prop,c1,c2,minv,maxv);
-}
-
-
-
-inline void color_by_05(GfxObj* go,
-                const mol::EntityHandle& eh, 
-                const String& prop,
-                const Gradient& g, float minv, float maxv)
-{
-  go->ColorBy(eh,prop,g,minv,maxv);
-}
-
-inline void color_by_06(GfxObj* go,
-                const mol::EntityHandle& eh, 
-                const String& prop,
-                const Color& c1, const Color& c2, float minv, float maxv)
-{
-  go->ColorBy(eh,prop,c1,c2,minv,maxv);
-}
-
-inline void color_by_07(GfxObj* go,
-                const mol::EntityView& ev, 
-                const String& prop,
-                const Gradient& g){
-  go->ColorBy(ev,prop,g);
-}
-
-inline void color_by_08(GfxObj* go,
-                const mol::EntityView& ev, 
-                const String& prop,
-                const Color& c1, const Color& c2)
-{
-  go->ColorBy(ev,prop,c1,c2);
-}
-
-inline void color_by_09(GfxObj* go,
-                const mol::EntityHandle& ev, 
-                const String& prop,
-                const Gradient& g)
-{
-  go->ColorBy(ev,prop,g);
-}
-
-inline void color_by_10(GfxObj* go,
-                 const mol::EntityHandle& ev, 
-                 const String& prop,
-                 const Color& c1, const Color& c2)
-{
-  go->ColorBy(ev,prop,c1,c2);
-}
 
 }
 
 #define COLOR_BY_DEF_STD() \
-    .def("ColorBy",ost_gfx::color_by_03)\
-    .def("ColorBy",ost_gfx::color_by_05)\
-    .def("ColorBy",ost_gfx::color_by_06)\
-    .def("ColorBy",ost_gfx::color_by_07)\
-    .def("ColorBy",ost_gfx::color_by_08)\
-    .def("ColorBy",ost_gfx::color_by_09)\
-    .def("ColorBy",ost_gfx::color_by_10)
+    .def("ColorBy",ost_gfx::color_by_e0)\
+    .def("ColorBy",ost_gfx::color_by_e1)\
+    .def("ColorBy",ost_gfx::color_by_e2)\
+    .def("ColorBy",ost_gfx::color_by_e3)\
+    .def("ColorBy",ost_gfx::color_by_e4)\
+    .def("ColorBy",ost_gfx::color_by_e5)\
+    .def("ColorBy",ost_gfx::color_by_e6)\
+    .def("ColorBy",ost_gfx::color_by_e7)
 
 #if OST_IMG_ENABLED
 #  define COLOR_BY_DEF_MAP() \
-    .def("ColorBy",ost_gfx::color_by_01)\
-    .def("ColorBy",ost_gfx::color_by_02)\
-    .def("ColorBy",ost_gfx::color_by_04)\
-    .def("ColorBy",ost_gfx::color_by_11)\
-    .def("ColorBy",ost_gfx::color_by_12)
+    .def("ColorBy",ost_gfx::color_by_m0)\
+    .def("ColorBy",ost_gfx::color_by_m1)\
+    .def("ColorBy",ost_gfx::color_by_m2)\
+    .def("ColorBy",ost_gfx::color_by_m3)
 #else
 #  define COLOR_BY_DEF_MAP()
 #endif

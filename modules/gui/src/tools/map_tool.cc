@@ -17,13 +17,14 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <ost/gui/gosty_app.hh>
 #include <ost/platform.hh>
-#include <ost/gfx/map_iso.hh>
 #include <ost/gfx/map_slab.hh>
 #include <ost/gfx/scene.hh>
+#include <ost/gfx/map_iso.hh>
 
+#include <ost/gui/gosty_app.hh>
 #include <ost/gui/scene_selection.hh>
+
 #include "map_tool.hh"
 
 #include <QDir>
