@@ -233,26 +233,10 @@ mol::EntityView SequenceImpl::GetAttachedView() const
 
 void SequenceImpl::AttachView(const mol::EntityView& view)
 {
-  static const char* msg_1="Expected 1 chain, but %d chains found";
-  if (view.IsValid() && view.GetChainCount()!=1) {
-    throw IntegrityError(str(format(msg_1) % view.GetChainCount()));
-  }  
+  static const char* msg="Expected 1 chain, but %d chains found";
   attached_view_=view;
-  if (!attached_view_.IsValid()) {
-    return;
-  }
-  for (size_t i=0; i<seq_string_.size(); ++i) {
-    if (mol::ResidueView res=this->GetResidue(i)) {
-      char olc1=res.GetOneLetterCode();
-      char olc2=seq_string_[i];
-      if (olc1!='X' && olc2!='X' && olc1!=olc2) {
-        std::stringstream ss;
-        ss << "One letter code of residue and sequence does not agree "
-              "at position " <<  i << " in sequence (" << res.GetOneLetterCode() 
-              << "!=" << seq_string_[i] << ")";
-        throw IntegrityError(ss.str());
-      }
-    }
+  if (view.IsValid() && attached_view_.GetChainCount()!=1) {
+    throw IntegrityError(str(format(msg) % attached_view_.GetChainCount()));
   }
 }
 

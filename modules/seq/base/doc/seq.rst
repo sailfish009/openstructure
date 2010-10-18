@@ -322,12 +322,6 @@ an alignment:
     
     Attach the given view to the sequence at index `seq_index`.
     
-    The method now checks for agreement of the one letter code in the structure 
-    and the character in the sequence. If there is a mismatch, AttachView throws 
-    an IntegrityError telling you where in the sequence the problem was 
-    detected. The one letter code of the residue and the character in the 
-    sequence agree, if either one of the is X or they are identical.
-
   .. method:: Cut(start, end)
   
     Removes the columns in the half-closed interval `start`, `end` from the
