@@ -34,7 +34,9 @@
 
 uint qHash(const CacheKey& key)
 {
-  return qHash(QPair<QPair<ost::img::gui::GraphicsImageItem*,int>,QPair<int,int> >(QPair<ost::img::gui::GraphicsImageItem*,int>(key.item_,key.z_),QPair<int,int>(key.x_,key.y_)));
+  typedef QPair<int,int> IntPair;
+  typedef QPair<IntPair,IntPair> IntPairPair;
+  return qHash(QPair<ost::img::gui::GraphicsImageItem*,IntPairPair>(key.item_,IntPairPair(IntPair(key.x_,key.y_),IntPair(key.z_,key.binning_))));
 }
 
 namespace ost { namespace img { namespace gui {
@@ -49,10 +51,11 @@ class ImageFillerBase
 {
 public:
   ImageFillerBase() {}
-  ImageFillerBase(QImage* image,const Point& start,const NormalizerPtr& normalizer):
+  ImageFillerBase(QImage* image,const Point& start,const NormalizerPtr& normalizer,int binning):
     image_(image),
     start_(start),
-    norm_(normalizer)
+    norm_(normalizer),
+    binning_(binning)
   {
   }
 
@@ -62,19 +65,19 @@ public:
     image_->fill(QColor(0,0,0,0).rgba());
     Extent ext=isi.GetLogicalExtent();
     int xstart=std::max<int>(ext.GetStart()[0]-start_[0],0);
-    int xend=std::min<int>(ext.GetEnd()[0]-start_[0],image_->width()-1);
+    int xend=std::min<int>(ext.GetEnd()[0]-start_[0],image_->width()*binning_-1);
     int ystart=std::max<int>(ext.GetStart()[1]-start_[1],0);
-    int yend=std::min<int>(ext.GetEnd()[1]-start_[1],image_->height()-1);
-    for(int x=xstart;x<=xend;++x){
-      for(int y=ystart;y<=yend;++y){
+    int yend=std::min<int>(ext.GetEnd()[1]-start_[1],image_->height()*binning_-1);
+    for(int x=xstart;x<=xend;x+=binning_){
+      for(int y=ystart;y<=yend;y+=binning_){
         if(MODE==GraphicsImageItem::GREY){
           uchar v=(unsigned char)::round(norm_->Convert(Val2Val<T,Real>(isi.Value(Point(x,y)+start_))));
-          image_->setPixel(x,y, QColor(v,v,v).rgb());
+          image_->setPixel(x/binning_,y/binning_, QColor(v,v,v).rgb());
         }else if(MODE==GraphicsImageItem::SIGNCOLOR){
           Real rv = Val2Val<T,Real>(isi.Value(Point(x,y)+start_));
           bool sg = rv<0.0;
           QColor color=QColor::fromHsvF(sg ? 0.0 : 1.0/3.0,1.0,norm_->Convert(std::abs(rv))/255.0);
-          image_->setPixel(x,y, color.rgb());
+          image_->setPixel(x/binning_,y/binning_, color.rgb());
 
         }else if(MODE==GraphicsImageItem::PHASECOLOR){
           Complex cv=Val2Val<T,Complex>(isi.Value(Point(x,y)+start_));
@@ -82,7 +85,7 @@ public:
           // saturation is always 1
           // brightness is amplitude
           QColor color=QColor::fromHsvF(fmod(std::arg(cv)*0.5/M_PI+0.5,1.0),1.0,norm_->Convert(std::abs(cv))/255.0);
-          image_->setPixel(x,y, color.rgb());
+          image_->setPixel(x/binning_,y/binning_, color.rgb());
         }
       }
     }
@@ -94,20 +97,20 @@ public:
     image_->fill(QColor(0,0,0,0).rgba());
     Extent ext=isi.GetLogicalExtent();
     int xstart=std::max<int>(ext.GetStart()[0]-start_[0],0);
-    int xend=std::min<int>(ext.GetEnd()[0]-start_[0],image_->width()-1);
+    int xend=std::min<int>(ext.GetEnd()[0]-start_[0],image_->width()*binning_-1);
     int ystart=std::max<int>(ext.GetStart()[1]-start_[1],0);
-    int yend=std::min<int>(ext.GetEnd()[1]-start_[1],image_->height()-1);
-    for(int x=xstart;x<=xend;++x){
-      for(int y=ystart;y<=yend;++y){
+    int yend=std::min<int>(ext.GetEnd()[1]-start_[1],image_->height()*binning_-1);
+    for(int x=xstart;x<=xend;x+=binning_){
+      for(int y=ystart;y<=yend;y+=binning_){
         Point cp=CONJPOINT(Point(x,y)+start_);
         if(MODE==GraphicsImageItem::GREY){
           uchar v=(unsigned char)::round(norm_->Convert(Val2Val<Complex,Real>(isi.Value(cp))));
-          image_->setPixel(x,y, QColor(v,v,v).rgb());
+          image_->setPixel(x/binning_,y/binning_, QColor(v,v,v).rgb());
         }else if(MODE==GraphicsImageItem::SIGNCOLOR){
           Real rv = Val2Val<Complex,Real>(isi.Value(cp));
           bool sg = rv<0.0;
           QColor color=QColor::fromHsvF(sg ? 0.0 : 1.0/3.0,1.0,norm_->Convert(std::abs(rv))/255.0);
-          image_->setPixel(x,y, color.rgb());
+          image_->setPixel(x/binning_,y/binning_, color.rgb());
 
         }else if(MODE==GraphicsImageItem::PHASECOLOR){
           Complex cv;
@@ -120,7 +123,7 @@ public:
           // saturation is always 1
           // brightness is amplitude
           QColor color=QColor::fromHsvF(fmod(std::arg(cv)*0.5/M_PI+0.5,1.0),1.0,norm_->Convert(std::abs(cv))/255.0);
-          image_->setPixel(x,y, color.rgb());
+          image_->setPixel(x/binning_,y/binning_, color.rgb());
         }
       }
     }
@@ -138,6 +141,7 @@ private:
   QImage* image_;
   Point start_;
   NormalizerPtr norm_;
+  int binning_;
 };
 
 
@@ -148,21 +152,21 @@ private:
 
 
 
-  void greyscale_filler(QImage* image,const Data& data,const Point& start,const NormalizerPtr& normalizer)
+  void greyscale_filler(QImage* image,const Data& data,const Point& start,const NormalizerPtr& normalizer,int binning)
  {
-   ImageGreyFiller filler_alg(image,start,normalizer);
+   ImageGreyFiller filler_alg(image,start,normalizer,binning);
    data.Apply(filler_alg);
  }
 
- void signcolor_filler(QImage* image,const Data& data,const Point& start,const NormalizerPtr& normalizer)
+ void signcolor_filler(QImage* image,const Data& data,const Point& start,const NormalizerPtr& normalizer,int binning)
  {
-   ImageSignColorFiller filler_alg(image,start,normalizer);
+   ImageSignColorFiller filler_alg(image,start,normalizer,binning);
    data.Apply(filler_alg);
  }
 
- void phasecolor_filler(QImage* image,const Data& data,const Point& start,const NormalizerPtr& normalizer)
+ void phasecolor_filler(QImage* image,const Data& data,const Point& start,const NormalizerPtr& normalizer,int binning)
  {
-   ImagePhaseColorFiller filler_alg(image,start,normalizer);
+   ImagePhaseColorFiller filler_alg(image,start,normalizer,binning);
    data.Apply(filler_alg);
  }
 
@@ -175,7 +179,8 @@ GraphicsImageItem::GraphicsImageItem( const Data& data,QGraphicsItem* parent):
   slab_(GetObservedData().GetExtent().GetCenter()[2]),
   normalizer_(ViewerNormalizerPtr(new ViewerNormalizer)),
   rubberband_(new QGraphicsRectItem(this)),
-  cached_keys_()
+  cached_keys_(),
+  value_display_(new GraphicsImageValuesItem(data,this))
 {
   setFlag(QGraphicsItem::ItemUsesExtendedStyleOption);
   setFlag(QGraphicsItem::ItemIsFocusable);
@@ -184,7 +189,6 @@ GraphicsImageItem::GraphicsImageItem( const Data& data,QGraphicsItem* parent):
   rubberband_->setPen(QPen(QColor(255,255,0,255)));
   rubberband_->setVisible(false);
 
-  GraphicsImageValuesItem* values=new GraphicsImageValuesItem(data,this);
   Renormalize();
 }
 QCache<CacheKey,QImage> GraphicsImageItem::cache_(1000);
@@ -192,9 +196,10 @@ const int GraphicsImageItem::blocksize_=128;
 
 void 	GraphicsImageItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
 {
-
+  Real scale=painter->transform().m11();
+  int binning=std::max<int>(1,static_cast<int>(1/scale));
   //painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing, antialiasing_);
-  void (*filler)(QImage*,const Data&,const Point&,const NormalizerPtr&)=0;
+  void (*filler)(QImage*,const Data&,const Point&,const NormalizerPtr&,int)=0;
   switch(cmode_){
   case SIGNCOLOR:
     filler=detail::signcolor_filler;
@@ -208,26 +213,26 @@ void 	GraphicsImageItem::paint( QPainter * painter, const QStyleOptionGraphicsIt
   }
 
   QRectF intersect = option->exposedRect & boundingRect();
-  int xstart=static_cast<int>(floor(intersect.left()/blocksize_));
-  int xend=static_cast<int>(ceil(intersect.right()/blocksize_));
-  int ystart=static_cast<int>(floor(intersect.top()/blocksize_));
-  int yend=static_cast<int>(ceil(intersect.bottom()/blocksize_));
+  int xstart=static_cast<int>(floor(intersect.left()/(blocksize_*binning)));
+  int xend=static_cast<int>(ceil(intersect.right()/(blocksize_*binning)));
+  int ystart=static_cast<int>(floor(intersect.top()/(blocksize_*binning)));
+  int yend=static_cast<int>(ceil(intersect.bottom()/(blocksize_*binning)));
 
 
   for(int x=xstart;x<xend;++x){
     for(int y=ystart;y<yend;++y){
-      CacheKey cache_key(this,x,y,slab_);
+      CacheKey cache_key(this,x,y,slab_,binning);
       if (( !cache_.contains(cache_key))) {
         QImage* tile=new QImage(blocksize_,blocksize_,QImage::Format_ARGB32);
-        filler(tile,GetObservedData(),Point(x*blocksize_,y*blocksize_,slab_),normalizer_);
+        filler(tile,GetObservedData(),Point(x*(blocksize_*binning),y*(blocksize_*binning),slab_),normalizer_,binning);
         cache_.insert(cache_key,tile);
         cached_keys_<< cache_key;
-        painter->drawImage(x*blocksize_,y*blocksize_,*tile);
+        painter->drawImage(QRectF(QPointF(x*(blocksize_*binning),y*(blocksize_*binning)),QSize(blocksize_*binning,blocksize_*binning)),*tile);
         // next line only used for cache debugging
         //painter.drawLine(x*blocksize_,y*blocksize_,(x+1)*blocksize_,(y+1)*blocksize_-);
       }else{
         QImage* tile=cache_.object(cache_key);
-        painter->drawImage(x*blocksize_,y*blocksize_,*tile);
+        painter->drawImage(QRectF(QPointF(x*(blocksize_*binning),y*(blocksize_*binning)),QSize(blocksize_*binning,blocksize_*binning)),*tile);
       }
       // next line only used for cache debugging
       //painter.drawRect(x*blocksize_,y*blocksize_,blocksize_,blocksize_);
@@ -331,6 +336,10 @@ bool GraphicsImageItem::HasSelection() const
 void GraphicsImageItem::keyPressEvent(QKeyEvent* event)
 {
   switch(event->key()) {
+  case 'V':
+    value_display_->setVisible(! value_display_->isVisible());
+    update();
+    break;
   case 'I':
     SetInvert(!GetInvert());
     break;
@@ -373,8 +382,10 @@ void GraphicsImageItem::keyPressEvent(QKeyEvent* event)
     ClearCache();
     update();
     break;
+  default:
+    event->ignore();
+    break;
   }
-
 }
 
 void GraphicsImageItem::SetInvert(bool invert)
@@ -410,9 +421,11 @@ void GraphicsImageItem::ClearCacheRegion(const Extent& e)
   for(int x=xstart;x<xend;++x){
     for(int y=ystart;y<yend;++y){
       for(int z=zstart;z<zend;++z){
-        CacheKey cache_key(this,x,y,slab_);
-        cache_.remove(cache_key);
-        cached_keys_.removeOne(cache_key);
+        for(int binning=1;binning<=16; binning<<1){
+          CacheKey cache_key(this,x,y,slab_,binning);
+          cache_.remove(cache_key);
+          cached_keys_.removeOne(cache_key);
+        }
       }
     }
   }

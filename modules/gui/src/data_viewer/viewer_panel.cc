@@ -28,6 +28,7 @@
 #include <QGraphicsSceneWheelEvent>
 #include <QApplication>
 #include <QDebug>
+#include <QGLWidget>
 #include "viewer_panel.hh"
 
 namespace ost { namespace img { namespace gui {
@@ -36,6 +37,8 @@ ViewerPanel::ViewerPanel(QGraphicsScene* scene, QWidget* parent):
   QGraphicsView(scene,parent),
   last_mouse_()
 {
+  //doesn't work on properly OS X (clashes with 3D scene)
+  //setViewport(new QGLWidget);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setDragMode(QGraphicsView::ScrollHandDrag);
@@ -45,13 +48,17 @@ void 	ViewerPanel::keyPressEvent(QKeyEvent* event)
 {
   QGraphicsView::keyPressEvent(event);
   if(! event->isAccepted()){
-
+    switch(event->key()) {
+    case 'C':
+      centerOn(scene()->sceneRect().center());
+      break;
+    }
   }
 }
 
 
 
-void 	ViewerPanel::wheelEvent(QWheelEvent* event)
+void ViewerPanel::wheelEvent(QWheelEvent* event)
 {
   if (scene() && isInteractive()) {
     event->ignore();
@@ -76,5 +83,10 @@ void 	ViewerPanel::wheelEvent(QWheelEvent* event)
   }
 }
 
+void ViewerPanel::mouseDoubleClickEvent(QMouseEvent* event)
+{
+  centerOn(mapToScene(event->pos()));
+  update();
+}
 
 }}} //ns

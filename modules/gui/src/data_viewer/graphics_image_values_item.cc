@@ -34,7 +34,6 @@ GraphicsImageValuesItem::GraphicsImageValuesItem( const Data& data,QGraphicsItem
   DataObserver(data)
 {
   setFlag(QGraphicsItem::ItemUsesExtendedStyleOption);
-  //setFlag(QGraphicsItem::ItemIgnoresTransformations);
 }
 
 QRectF GraphicsImageValuesItem::boundingRect() const

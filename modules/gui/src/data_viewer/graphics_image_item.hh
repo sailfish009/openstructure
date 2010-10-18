@@ -33,28 +33,31 @@
 //fw decl
 namespace ost { namespace img { namespace gui {
 class GraphicsImageItem;
+class GraphicsImageValuesItem;
 }}} //ns
 
 
 class CacheKey
 {
 public:
-  CacheKey(ost::img::gui::GraphicsImageItem* item,int x, int y, int z):
+  CacheKey(ost::img::gui::GraphicsImageItem* item,int x, int y, int z,int binning):
     item_(item),
     x_(x),
     y_(y),
-    z_(z)
+    z_(z),
+    binning_(binning)
   {
   }
   bool operator==(const CacheKey& rhs) const
   {
-    return x_==rhs.x_ && y_==rhs.y_ && z_==rhs.z_ && item_==rhs.item_;
+    return x_==rhs.x_ && y_==rhs.y_ && z_==rhs.z_ && item_==rhs.item_ && binning_==rhs.binning_;
   }
 
   ost::img::gui::GraphicsImageItem* item_;
   int x_;
   int y_;
   int z_;
+  int binning_;
 };
 
 uint qHash(const CacheKey& key);
@@ -112,6 +115,8 @@ protected:
   QGraphicsRectItem* rubberband_;
   QList<CacheKey> cached_keys_;
   const static int blocksize_;
+  GraphicsImageValuesItem* value_display_;
+
 };
 
 

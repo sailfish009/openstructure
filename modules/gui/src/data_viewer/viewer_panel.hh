@@ -35,6 +35,7 @@ public:
   ViewerPanel(QGraphicsScene* scene, QWidget* parent=0);
   virtual void 	keyPressEvent (QKeyEvent * event);
   virtual void 	wheelEvent (QWheelEvent* event);
+  virtual void 	mouseDoubleClickEvent(QMouseEvent* event);
 protected:
   QPoint last_mouse_;
 };

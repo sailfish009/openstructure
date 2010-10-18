@@ -78,10 +78,9 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
 {
   setWindowTitle(name);
   GraphicsImageItem* image = new GraphicsImageItem(data);
-  //image->setOpacity(0.1);
   scene_->addItem(image);
   scene_->setBackgroundBrush(Qt::black);
-  panel_->scale(0.5,0.5);
+  scene_->setSceneRect(image->boundingRect());
   connect(ov_manager_gui_,SIGNAL(SettingsChanged()),this,SLOT(UpdateView()));
   setAnimated(false);
   QSplitter* splitter=new QSplitter(this);
@@ -92,7 +91,6 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   splitter->setStretchFactor(0,1);
   splitter->setCollapsible(1,true);
   splitter->setStretchFactor(1,0);
-  //panel_->installEventFilter(this);
   statusBar()->addWidget(zoomlabel_);
   statusBar()->addWidget(slablabel_);
 
