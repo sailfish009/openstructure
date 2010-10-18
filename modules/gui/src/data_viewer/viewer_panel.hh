@@ -18,58 +18,27 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Author: Andreas Schenk
 */
 
-#ifndef IMG_GUI_VIEWER_NORMALIZER_HH
-#define IMG_GUI_VIEWER_NORMALIZER_HH
+#ifndef VIEWER_PANEL_HH
+#define VIEWER_PANEL_HH
 
-
-#include <boost/shared_ptr.hpp>
-#include <ost/img/normalizer_impl.hh>
-
-#include <ost/gui/module_config.hh>
-
+#include <QGraphicsView>
 
 namespace ost { namespace img { namespace gui {
 
-class DLLEXPORT_OST_GUI ViewerNormalizer: public NormalizerImpl, 
-                                          public RangeHandler
+class ViewerPanel : public QGraphicsView
 {
 public:
-  ViewerNormalizer();
-  ViewerNormalizer(Real mininput, Real maxinput, Real minoutput, 
-                   Real maxoutput, Real gamma, bool invert);
-  ViewerNormalizer(const ViewerNormalizer& n);
-  virtual ~ViewerNormalizer();
-
-  
-  // normalizer interface
-  virtual Real BackConvert(Real v) const;
-  virtual Complex BackConvert(Complex v) const;
-  virtual Real Convert(Real v) const;
-  virtual Complex Convert(Complex v) const;
-  virtual NormalizerImpl* Clone() const {return new ViewerNormalizer((*this));}
-
-  Real GetGamma() const;
-  void SetInvert(bool invert);
-  bool GetInvert() const;
-  
-private:
-  Real p1_;
-  Real p2_;
-  Real p3_;
-  
-  Real gamma_;
-  Real invert_sign_;
-  Real clipmax_;
+  ViewerPanel(QGraphicsScene* scene, QWidget* parent=0);
+  virtual void 	keyPressEvent (QKeyEvent * event);
+  virtual void 	wheelEvent (QWheelEvent* event);
+protected:
+  QPoint last_mouse_;
 };
 
-typedef boost::shared_ptr<ViewerNormalizer> ViewerNormalizerPtr;
+}}} //ns
 
-
-}}}  //ns
-
-#endif
+#endif // VIEWER_PANEL_HH

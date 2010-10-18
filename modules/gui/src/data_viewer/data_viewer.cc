@@ -49,6 +49,7 @@
 #include <QMenuBar>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <ost/gui/data_viewer/graphics_image_item.hh>
 namespace ost { namespace img { namespace gui {
 
 namespace {
@@ -63,18 +64,25 @@ int ipow(int base, unsigned int exponent){
 
 DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   QMainWindow(p,0),
-  name_(name),
   container_(new DataViewerToolWidgetContainer(this)),
-  panel_(new DataViewerPanel(data,this)),
+  scene_(new QGraphicsScene(this)),
+  panel_(new ViewerPanel(scene_,this)),
   ov_manager_(new OverlayManager(this)),
   ov_manager_gui_(new OverlayManagerGUI(this, ov_manager_)),
   info_(new InfoPanel(this)),
   argand_(new Argand(data,this)),
   fft_(new FFTPanel(data,this)),
+  zoomlabel_(new QLabel("1:1")),
+  slablabel_(new QLabel("0")),
   lastmouse_()
 {
+  setWindowTitle(name);
+  GraphicsImageItem* image = new GraphicsImageItem(data);
+  //image->setOpacity(0.1);
+  scene_->addItem(image);
+  scene_->setBackgroundBrush(Qt::black);
+  panel_->scale(0.5,0.5);
   connect(ov_manager_gui_,SIGNAL(SettingsChanged()),this,SLOT(UpdateView()));
-  setWindowTitle("OpenStructure Data Viewer");
   setAnimated(false);
   QSplitter* splitter=new QSplitter(this);
   setCentralWidget(splitter);
@@ -84,9 +92,7 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   splitter->setStretchFactor(0,1);
   splitter->setCollapsible(1,true);
   splitter->setStretchFactor(1,0);
-  panel_->installEventFilter(this);
-  zoomlabel_=new QLabel("1:1");
-  slablabel_=new QLabel("0");
+  //panel_->installEventFilter(this);
   statusBar()->addWidget(zoomlabel_);
   statusBar()->addWidget(slablabel_);
 
@@ -96,13 +102,13 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   container_->AddChildWidget(fft_,"Live FFT",false);
   info_->SetImageInfo(data);
 
-  connect(panel_,SIGNAL(zoomed(int)),SLOT(OnZoomChange(int)));
+ /* connect(panel_,SIGNAL(zoomed(int)),SLOT(OnZoomChange(int)));
   connect(panel_,SIGNAL(slabChanged(int)),SLOT(OnSlabChange(int)));
   connect(panel_,SIGNAL(selected(const Extent&)),argand_,SLOT(SetExtent(const Extent&)));
   connect(panel_,SIGNAL(deselected()),argand_,SLOT(ClearExtent()));
   connect(panel_,SIGNAL(selected(const Extent&)),info_,SLOT(SetSelection(const Extent&)));
   connect(panel_,SIGNAL(deselected()),info_,SLOT(ClearSelection()));
-  connect(panel_,SIGNAL(released()),this,SLOT(close()));
+  connect(panel_,SIGNAL(released()),this,SLOT(close()));*/
   show();
 }
 
@@ -112,40 +118,40 @@ DataViewer::~DataViewer()
 
 void DataViewer::SetData(const Data& d)
 {
-  panel_->SetData(d);
-  info_->SetImageInfo(d);
+//  panel_->SetData(d);
+ // info_->SetImageInfo(d);
 }
 
 NormalizerPtr DataViewer::GetNormalizer() const 
 {
-  assert(panel_);
-  return (panel_->GetNormalizer());
+//  assert(panel_);
+//  return (panel_->GetNormalizer());
 }
 
 //! re-apply normalization using current normalizer
 void DataViewer::Renormalize() 
 {
-  assert(panel_);
-  panel_->Renormalize();
+ // assert(panel_);
+//  panel_->Renormalize();
 }
 
 void DataViewer::Recenter() 
 {
-  assert(panel_);
-  panel_->Recenter();
+//  assert(panel_);
+//  panel_->Recenter();
 }
 
 //! update view
 void DataViewer::UpdateView() 
 {
-  assert(panel_);
-  panel_->UpdateView(false);
+ // assert(panel_);
+//  panel_->UpdateView(false);
 }
 
 Extent DataViewer::GetSelection() const
 {
-  assert(panel_);
-  return panel_->GetSelection();
+//  assert(panel_);
+//  return panel_->GetSelection();
 }
 
 void DataViewer::SetName(const String& name)
@@ -155,14 +161,14 @@ void DataViewer::SetName(const String& name)
 
 int DataViewer::GetSlab() const 
 {
-  return panel_->GetSlab();
+  //return panel_->GetSlab();
 }
 
 int DataViewer::AddOverlay(const OverlayPtr& ov, bool make_active)
 {
-  int retval= ov_manager_->AddOverlay(ov,make_active);
+ /* int retval= ov_manager_->AddOverlay(ov,make_active);
   if(panel_) panel_->UpdateView(false);
-  return retval;
+  return retval;*/
 }
 
 void DataViewer::ClearOverlays()
@@ -177,7 +183,7 @@ OverlayManagerPtr DataViewer::GetOverlayManager() const
 
 void DataViewer::SetSlab(int slab)
 {
-  panel_->SetSlab(slab);
+ // panel_->SetSlab(slab);
 }
 
 void DataViewer::OnSlabChange(int slab)
@@ -197,7 +203,7 @@ void DataViewer::OnZoomChange(int zoomlevel)
 
 void DataViewer::OnPanelMouseEvent(QMouseEvent* event)
 {
-  geom::Vec2 mpos = panel_->WinToFracPoint(event->pos());
+/*  geom::Vec2 mpos = panel_->WinToFracPoint(event->pos());
   Point mposi(mpos);
   bool lmb=event->buttons() == Qt::LeftButton;
   bool cmd=event->modifiers()&Qt::ControlModifier;
@@ -214,13 +220,13 @@ void DataViewer::OnPanelMouseEvent(QMouseEvent* event)
     if(lmb && !cmd) {
       info_->SetClickPoint(mpos,val);
     }
-  }
+  }*/
 }
 
 
 void DataViewer::SetAntialiasing(bool f)
 {
-  panel_->SetAntialiasing(f);
+ // panel_->SetAntialiasing(f);
 }
 
 void DataViewer::AddDockWidget(QWidget* w, const QString& name, bool show)
@@ -241,7 +247,7 @@ void DataViewer::RemoveDockWidget(QWidget* w)
 
 bool DataViewer::eventFilter(QObject * object, QEvent *event)
 {
-  if (object == panel_) {
+  /*if (object == panel_) {
     switch (event->type()){
     case QEvent::KeyPress:
       {
@@ -287,7 +293,7 @@ bool DataViewer::eventFilter(QObject * object, QEvent *event)
     return false;
   }else{
     return QMainWindow::eventFilter(object, event);
-  }
+  }*/
 }
 
 }}}  //ns

@@ -87,12 +87,17 @@ Complex ViewerNormalizer::Convert(Complex v) const
   return invert_sign_*pow(ClipMinMax(p1_*v+p2_,0.0,clipmax_),Real(1.0)/gamma_)+p3_;
 }
 
-Real ViewerNormalizer::GetGamma()
+Real ViewerNormalizer::GetGamma() const
 {
   return gamma_;
 }
 
-bool ViewerNormalizer::GetInvert()
+void ViewerNormalizer::SetInvert(bool invert)
+{
+  invert_sign_=invert?-1.0:1.0;
+}
+
+bool ViewerNormalizer::GetInvert() const
 {
   return invert_sign_<0.0;
 }

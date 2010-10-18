@@ -40,7 +40,9 @@
 #include "info_panel.hh"
 #include "fft_panel.hh"
 #include <ost/gui/module_config.hh>
+#include <ost/gui/data_viewer/viewer_panel.hh>
 #include <QMainWindow>
+#include <QGraphicsScene>
 
 //fw decl
 class QLabel;
@@ -127,9 +129,10 @@ public slots:
 
   DataViewer& operator=(const DataViewer& v) {return *this;}
 
-  QString name_;
   DataViewerToolWidgetContainer* container_;
-  DataViewerPanel* panel_;
+
+  QGraphicsScene* scene_;
+  ViewerPanel* panel_;
 
   OverlayManagerPtr ov_manager_;
   OverlayManagerGUI* ov_manager_gui_;

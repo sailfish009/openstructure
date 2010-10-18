@@ -18,58 +18,29 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Author: Andreas Schenk
 */
 
-#ifndef IMG_GUI_VIEWER_NORMALIZER_HH
-#define IMG_GUI_VIEWER_NORMALIZER_HH
+#ifndef IMAGE_VIEWER_HH
+#define IMAGE_VIEWER_HH
 
-
-#include <boost/shared_ptr.hpp>
-#include <ost/img/normalizer_impl.hh>
-
-#include <ost/gui/module_config.hh>
-
+#include <QWidget>
 
 namespace ost { namespace img { namespace gui {
 
-class DLLEXPORT_OST_GUI ViewerNormalizer: public NormalizerImpl, 
-                                          public RangeHandler
+class ImageViewer : public QWidget
 {
+Q_OBJECT
 public:
-  ViewerNormalizer();
-  ViewerNormalizer(Real mininput, Real maxinput, Real minoutput, 
-                   Real maxoutput, Real gamma, bool invert);
-  ViewerNormalizer(const ViewerNormalizer& n);
-  virtual ~ViewerNormalizer();
+     ImageViewer(const Data& data, const QString& name="",QWidget *parent = 0);
 
-  
-  // normalizer interface
-  virtual Real BackConvert(Real v) const;
-  virtual Complex BackConvert(Complex v) const;
-  virtual Real Convert(Real v) const;
-  virtual Complex Convert(Complex v) const;
-  virtual NormalizerImpl* Clone() const {return new ViewerNormalizer((*this));}
+signals:
 
-  Real GetGamma() const;
-  void SetInvert(bool invert);
-  bool GetInvert() const;
-  
-private:
-  Real p1_;
-  Real p2_;
-  Real p3_;
-  
-  Real gamma_;
-  Real invert_sign_;
-  Real clipmax_;
+public slots:
+
 };
 
-typedef boost::shared_ptr<ViewerNormalizer> ViewerNormalizerPtr;
+}}} //ns
 
-
-}}}  //ns
-
-#endif
+#endif // IMAGE_VIEWER_HH

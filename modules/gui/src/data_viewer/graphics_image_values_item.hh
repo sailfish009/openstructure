@@ -18,58 +18,33 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Author: Andreas Schenk
 */
 
-#ifndef IMG_GUI_VIEWER_NORMALIZER_HH
-#define IMG_GUI_VIEWER_NORMALIZER_HH
+#ifndef GRAPHICS_IMAGE_VALUES_ITEM_HH
+#define GRAPHICS_IMAGE_VALUES_ITEM_HH
 
-
-#include <boost/shared_ptr.hpp>
-#include <ost/img/normalizer_impl.hh>
-
-#include <ost/gui/module_config.hh>
-
+#include <QGraphicsItem>
+#include <ost/img/data_observer.hh>
 
 namespace ost { namespace img { namespace gui {
 
-class DLLEXPORT_OST_GUI ViewerNormalizer: public NormalizerImpl, 
-                                          public RangeHandler
+class GraphicsImageValuesItem : public QGraphicsItem, public DataObserver
 {
 public:
-  ViewerNormalizer();
-  ViewerNormalizer(Real mininput, Real maxinput, Real minoutput, 
-                   Real maxoutput, Real gamma, bool invert);
-  ViewerNormalizer(const ViewerNormalizer& n);
-  virtual ~ViewerNormalizer();
+    GraphicsImageValuesItem( const Data& data,QGraphicsItem* parent=0);
+    virtual void 	paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+    QRectF boundingRect () const;
 
-  
-  // normalizer interface
-  virtual Real BackConvert(Real v) const;
-  virtual Complex BackConvert(Complex v) const;
-  virtual Real Convert(Real v) const;
-  virtual Complex Convert(Complex v) const;
-  virtual NormalizerImpl* Clone() const {return new ViewerNormalizer((*this));}
-
-  Real GetGamma() const;
-  void SetInvert(bool invert);
-  bool GetInvert() const;
-  
-private:
-  Real p1_;
-  Real p2_;
-  Real p3_;
-  
-  Real gamma_;
-  Real invert_sign_;
-  Real clipmax_;
+    //////////////////////
+    // observer interface
+    virtual void ObserverUpdate();
+    virtual void ObserverUpdate(const Extent& e);
+    virtual void ObserverUpdate(const Point& p);
+    virtual void ObserverRelease();
 };
 
-typedef boost::shared_ptr<ViewerNormalizer> ViewerNormalizerPtr;
+}}} //ns
 
-
-}}}  //ns
-
-#endif
+#endif // GRAPHICS_IMAGE_VALUES_ITEM_HH

@@ -143,6 +143,8 @@ if (ENABLE_IMG)
   draw_overlay.hh
   drawing_functions.hh
   fft_panel.hh
+  graphics_image_item.hh
+  graphics_image_values_item.hh
   info_panel.hh
   img2qt.hh
   mask_overlay.hh
@@ -159,6 +161,7 @@ if (ENABLE_IMG)
   strategies.hh
   strategies_fw.hh
   viewer_normalizer.hh
+  viewer_panel.hh
   IN_DIR data_viewer
   )
 endif()
@@ -406,6 +409,8 @@ if (ENABLE_IMG)
        data_viewer/draw_overlay.cc
        data_viewer/drawing_functions.cc
        data_viewer/fft_panel.cc
+       data_viewer/graphics_image_item.cc
+       data_viewer/graphics_image_values_item.cc
        data_viewer/info_panel.cc
        data_viewer/img2qt.cc
        data_viewer/mask_overlay.cc
@@ -416,7 +421,8 @@ if (ENABLE_IMG)
        data_viewer/pointlist_overlay.cc
        data_viewer/pointlist_overlay_base.cc
        data_viewer/strategies.cc
-       data_viewer/viewer_normalizer.cc)
+       data_viewer/viewer_normalizer.cc
+       data_viewer/viewer_panel.cc)
   list(APPEND HEADERS_TO_BE_MOCCED
     data_viewer/argand.hh
     data_viewer/fft_panel.hh
@@ -429,6 +435,7 @@ if (ENABLE_IMG)
     data_viewer/null_overlay.hh
     data_viewer/overlay_base.hh
     data_viewer/pointlist_overlay_base.hh
+    data_viewer/viewer_panel.hh
   )
 endif()
 
