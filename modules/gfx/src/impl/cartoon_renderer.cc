@@ -105,7 +105,9 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
     FudgeSplineObj(tmp_sll);
   }
   spline_list_list.clear();
+#if !defined(NDEBUG)
   unsigned int tmp_count=0;
+#endif
   for(SplineEntryListList::const_iterator sit=tmp_sll.begin();sit!=tmp_sll.end();++sit) {
     if(sit->size()==2 and sit->at(0).type==6) {
       // don't intpol cylinders
@@ -418,7 +420,10 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
   }
 
   // iterate over all spline segments
+  
+#if !defined(NDEBUG)
   unsigned int tmp_count=0;
+#endif
   for(SplineEntryListList::const_iterator it=spline_list_list.begin();
       it<spline_list_list.end();++it) {
     /*
@@ -560,7 +565,7 @@ void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
 
   // first get the best correction offset
   float accum[]={0.0,0.0,0.0,0.0,0.0};
-  for(int i=0;i<size;++i) {
+  for(size_t i=0;i<size;++i) {
     int i1=(i+0)%(size);
     int i2=(i+1)%(size);
     geom::Vec3 v1=va.GetVert(prof1[i1].id);

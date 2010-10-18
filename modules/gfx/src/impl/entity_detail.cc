@@ -390,7 +390,7 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   sublist.back().frac=0.0;
 
   float insub=1.0/static_cast<float>(nsub);
-  for(int c=0;c<sublist.size();++c) {
+  for(size_t c=0;c<sublist.size();++c) {
     sublist[c].running_length=static_cast<float>(c)*insub;
   }
 
