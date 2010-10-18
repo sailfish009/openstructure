@@ -196,7 +196,7 @@ inline std::ostream& operator<<(std::ostream& os, const Vec3& v)
 
 namespace geom {
 
-class Vec3List : public std::vector<Vec3> {
+class DLLEXPORT_OST_GEOM Vec3List : public std::vector<Vec3> {
 public:
   typedef std::vector<Vec3> base_type;
   Vec3List() : base_type() {}
