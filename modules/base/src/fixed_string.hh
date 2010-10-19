@@ -55,7 +55,9 @@ public:
   bool operator!=(const FixedString<LENGTH>& rhs) const {
     return !this->operator==(rhs);
   }
-
+  size_t capacity() const {
+    return LENGTH;
+  }
   FixedString<LENGTH>& operator=(const String& rhs) {
     this->assign(rhs);
     return *this;
@@ -68,6 +70,8 @@ public:
   const char* c_str() const {
     return bytes_;
   }
+  char* data() { return bytes_; }
+  const char* data() const { return bytes_; }
 private:
   void assign(const String& str) {
     assert(str.length()<=LENGTH);
