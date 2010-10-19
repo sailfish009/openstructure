@@ -26,7 +26,6 @@ query_error.cc
 query_state.cc
 residue_base.cc
 residue_handle.cc
-residue_prop.cc
 residue_view.cc
 surface_builder.cc
 surface_handle.cc
