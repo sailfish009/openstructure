@@ -50,7 +50,6 @@ class InfoPanel: public QWidget
 public:
   InfoPanel(QWidget* parent);
   void SetImageInfo(const ConstData& data);
-  void SetMousePoint(const geom::Vec2& point, Real val);
   void SetClickPoint(const geom::Vec2& point, Real val);
   void SetClickPoint(const geom::Vec2& point, Complex val);
   void ClearClickPosition();
@@ -58,6 +57,7 @@ public:
 public slots:
   void SetSelection(const Extent& e);
   void ClearSelection(); 
+  void SetMousePoint(const QPointF& point, Real val);
   void SetMousePoint(const QPointF& point, Complex val);
 private:
   void UpdateMouseAndDistances(const geom::Vec2& point);

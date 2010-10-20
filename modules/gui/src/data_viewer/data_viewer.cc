@@ -78,7 +78,8 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
 {
   setWindowTitle(name);
   GraphicsImageItem* image = new GraphicsImageItem(data);
-  connect(image,SIGNAL(MousePosition(const QPointF&,Complex)),info_,SLOT(SetMousePoint(const QPointF&,Complex)));
+  connect(image,SIGNAL(MousePositionReal(const QPointF&,Real)),info_,SLOT(SetMousePoint(const QPointF&,Real)));
+  connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),info_,SLOT(SetMousePoint(const QPointF&,Complex)));
   scene_->addItem(image);
   scene_->setBackgroundBrush(Qt::black);
   scene_->setSceneRect(image->boundingRect());

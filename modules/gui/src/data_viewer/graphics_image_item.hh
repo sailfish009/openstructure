@@ -109,7 +109,8 @@ public:
   virtual void ObserverRelease();
 
 signals:
-  void MousePosition(const QPointF& pos, Complex value);
+  void MousePositionComplex(const QPointF& pos, Complex value);
+  void MousePositionReal(const QPointF& pos, Real value);
 protected:
   virtual void hoverMoveEvent(QGraphicsSceneHoverEvent * event) ;
   static QCache<CacheKey,QImage> cache_;

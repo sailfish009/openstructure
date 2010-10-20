@@ -451,7 +451,11 @@ int GraphicsImageItem::GetSlab() const
 void GraphicsImageItem::hoverMoveEvent(QGraphicsSceneHoverEvent * event)
 {
   QPointF pos=event->scenePos();
- emit MousePosition(pos,GetObservedData().GetComplex(Point(floor(pos.x()),floor(pos.y()))));
+  if(GetObservedData().GetType()==REAL){
+    emit MousePositionReal(pos,GetObservedData().GetReal(Point(floor(pos.x()),floor(pos.y()))));
+  }else{
+    emit MousePositionComplex(pos,GetObservedData().GetComplex(Point(floor(pos.x()),floor(pos.y()))));
+  }
 }
 
 }}}  //ns
