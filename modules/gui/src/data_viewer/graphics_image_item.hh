@@ -27,7 +27,7 @@
 
 #include <ost/img/data_observer.hh>
 #include <ost/gui/data_viewer/viewer_normalizer.hh>
-#include <QGraphicsItem>
+#include <QGraphicsObject>
 #include <QCache>
 
 //fw decl
@@ -66,8 +66,9 @@ namespace ost { namespace img { namespace gui {
 
 
 
-class GraphicsImageItem : public QGraphicsItem, public DataObserver
+class GraphicsImageItem : public QGraphicsObject, public DataObserver
 {
+Q_OBJECT;
 public:
   //! coloring mode
   enum Mode {GREY=1, PHASECOLOR, SIGNCOLOR};
@@ -107,7 +108,10 @@ public:
   virtual void ObserverUpdate(const Point& p);
   virtual void ObserverRelease();
 
+signals:
+  void MousePosition(const QPointF& pos, Complex value);
 protected:
+  virtual void hoverMoveEvent(QGraphicsSceneHoverEvent * event) ;
   static QCache<CacheKey,QImage> cache_;
   Mode cmode_;
   int slab_;

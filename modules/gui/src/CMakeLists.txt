@@ -428,10 +428,11 @@ if (ENABLE_IMG)
     data_viewer/fft_panel.hh
     data_viewer/info_panel.hh
     data_viewer/data_viewer.hh
+    data_viewer/data_viewer_panel_base.hh
     data_viewer/data_viewer_tool_widget.hh
     data_viewer/data_viewer_tool_widget_container.hh
+    data_viewer/graphics_image_item.hh
     data_viewer/overlay_manager_gui.hh
-    data_viewer/data_viewer_panel_base.hh
     data_viewer/null_overlay.hh
     data_viewer/overlay_base.hh
     data_viewer/pointlist_overlay_base.hh

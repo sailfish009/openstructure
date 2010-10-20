@@ -173,7 +173,7 @@ private:
 } //ns
 
 GraphicsImageItem::GraphicsImageItem( const Data& data,QGraphicsItem* parent):
-  QGraphicsItem(parent),
+  QGraphicsObject(parent),
   DataObserver(data),
   cmode_(GREY),
   slab_(GetObservedData().GetExtent().GetCenter()[2]),
@@ -184,6 +184,7 @@ GraphicsImageItem::GraphicsImageItem( const Data& data,QGraphicsItem* parent):
 {
   setFlag(QGraphicsItem::ItemUsesExtendedStyleOption);
   setFlag(QGraphicsItem::ItemIsFocusable);
+  setAcceptHoverEvents(true);
 
   rubberband_->setBrush(QBrush(QColor(255,255,0,20)));
   rubberband_->setPen(QPen(QColor(255,255,0,255)));
@@ -421,7 +422,7 @@ void GraphicsImageItem::ClearCacheRegion(const Extent& e)
   for(int x=xstart;x<xend;++x){
     for(int y=ystart;y<yend;++y){
       for(int z=zstart;z<zend;++z){
-        for(int binning=1;binning<=16; binning<<1){
+        for(int binning=1;binning<=16; binning<<=1){
           CacheKey cache_key(this,x,y,slab_,binning);
           cache_.remove(cache_key);
           cached_keys_.removeOne(cache_key);
@@ -445,6 +446,12 @@ ViewerNormalizerPtr GraphicsImageItem::GetNormalizer() const
 int GraphicsImageItem::GetSlab() const
 {
   return slab_;
+}
+
+void GraphicsImageItem::hoverMoveEvent(QGraphicsSceneHoverEvent * event)
+{
+  QPointF pos=event->scenePos();
+ emit MousePosition(pos,GetObservedData().GetComplex(Point(floor(pos.x()),floor(pos.y()))));
 }
 
 }}}  //ns

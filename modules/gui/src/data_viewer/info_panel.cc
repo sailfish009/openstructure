@@ -155,10 +155,10 @@ void InfoPanel::SetMousePoint(const geom::Vec2& point, Real val)
   mouse_val_->setText(QString::fromStdString(str.str()));
 }
 
-void InfoPanel::SetMousePoint(const geom::Vec2& point, Complex val)
+void InfoPanel::SetMousePoint(const QPointF& point, Complex val)
 {
   std::ostringstream str;
-  UpdateMouseAndDistances(point);
+  UpdateMouseAndDistances(Vec2(point.x(),point.y()));
   str << "Pixel Value: ";
   if(amp_pha_){
     str << boost::format("%8.2e , %8.2f") % std::abs(val) % std::arg(val);

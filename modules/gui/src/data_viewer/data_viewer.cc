@@ -78,6 +78,7 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
 {
   setWindowTitle(name);
   GraphicsImageItem* image = new GraphicsImageItem(data);
+  connect(image,SIGNAL(MousePosition(const QPointF&,Complex)),info_,SLOT(SetMousePoint(const QPointF&,Complex)));
   scene_->addItem(image);
   scene_->setBackgroundBrush(Qt::black);
   scene_->setSceneRect(image->boundingRect());
@@ -99,6 +100,7 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   container_->AddChildWidget(argand_,"Argand",false);
   container_->AddChildWidget(fft_,"Live FFT",false);
   info_->SetImageInfo(data);
+
 
  /* connect(panel_,SIGNAL(zoomed(int)),SLOT(OnZoomChange(int)));
   connect(panel_,SIGNAL(slabChanged(int)),SLOT(OnSlabChange(int)));
