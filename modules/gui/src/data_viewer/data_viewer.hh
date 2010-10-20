@@ -117,7 +117,7 @@ public slots:
   void UpdateView();
 
   void OnSlabChange(int slab);
-  void OnZoomChange(int zoomlevel);
+  void OnZoomChange(qreal zoomlevel);
 
  protected:
   //! initialize with data to view, plus a name

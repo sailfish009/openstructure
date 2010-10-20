@@ -80,6 +80,9 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   GraphicsImageItem* image = new GraphicsImageItem(data);
   connect(image,SIGNAL(MousePositionReal(const QPointF&,Real)),info_,SLOT(SetMousePoint(const QPointF&,Real)));
   connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),info_,SLOT(SetMousePoint(const QPointF&,Complex)));
+  connect(image,SIGNAL(MousePositionReal(const QPointF&,Real)),fft_,SLOT(SetPosition(const QPointF&)));
+  connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),fft_,SLOT(SetPosition(const QPointF&)));
+  OnSlabChange(image->GetSlab());
   scene_->addItem(image);
   scene_->setBackgroundBrush(Qt::black);
   scene_->setSceneRect(image->boundingRect());
@@ -103,9 +106,9 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   info_->SetImageInfo(data);
 
 
- /* connect(panel_,SIGNAL(zoomed(int)),SLOT(OnZoomChange(int)));
-  connect(panel_,SIGNAL(slabChanged(int)),SLOT(OnSlabChange(int)));
-  connect(panel_,SIGNAL(selected(const Extent&)),argand_,SLOT(SetExtent(const Extent&)));
+  connect(panel_,SIGNAL(ZoomChanged(qreal)),SLOT(OnZoomChange(qreal)));
+  connect(image,SIGNAL(SlabChanged(int)),SLOT(OnSlabChange(int)));
+  /*connect(panel_,SIGNAL(selected(const Extent&)),argand_,SLOT(SetExtent(const Extent&)));
   connect(panel_,SIGNAL(deselected()),argand_,SLOT(ClearExtent()));
   connect(panel_,SIGNAL(selected(const Extent&)),info_,SLOT(SetSelection(const Extent&)));
   connect(panel_,SIGNAL(deselected()),info_,SLOT(ClearSelection()));
@@ -192,12 +195,12 @@ void DataViewer::OnSlabChange(int slab)
   slablabel_->setText(QString::number(slab));
 }
 
-void DataViewer::OnZoomChange(int zoomlevel)
+void DataViewer::OnZoomChange(qreal zoomlevel)
 {
-  if(zoomlevel>=0){
-    zoomlabel_->setText(QString::number(ipow(2,zoomlevel))+":1");	
+  if(zoomlevel>=1.0){
+    zoomlabel_->setText(QString::number(static_cast<int>(zoomlevel))+":1");
   }else{
-    zoomlabel_->setText("1:"+QString::number(ipow(2,-zoomlevel)));	
+    zoomlabel_->setText("1:"+QString::number(static_cast<int>(1.0/zoomlevel)));
   }
 }
 

@@ -111,6 +111,7 @@ public:
 signals:
   void MousePositionComplex(const QPointF& pos, Complex value);
   void MousePositionReal(const QPointF& pos, Real value);
+  void SlabChanged(int slab);
 protected:
   virtual void hoverMoveEvent(QGraphicsSceneHoverEvent * event) ;
   static QCache<CacheKey,QImage> cache_;

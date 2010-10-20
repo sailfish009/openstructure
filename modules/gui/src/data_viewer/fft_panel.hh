@@ -41,7 +41,7 @@ public:
   virtual void ObserverUpdate();
 
 public slots:
-  void SetPosition(const Point& p);
+  void SetPosition(const QPointF& p);
   void ShowSizeDialog();
 
 protected:

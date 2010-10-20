@@ -31,11 +31,15 @@ namespace ost { namespace img { namespace gui {
 
 class ViewerPanel : public QGraphicsView
 {
+Q_OBJECT;
 public:
   ViewerPanel(QGraphicsScene* scene, QWidget* parent=0);
   virtual void 	keyPressEvent (QKeyEvent * event);
   virtual void 	wheelEvent (QWheelEvent* event);
   virtual void 	mouseDoubleClickEvent(QMouseEvent* event);
+  virtual void scale(qreal sx,qreal sy);
+signals:
+  void ZoomChanged(qreal zoomlevel);
 protected:
   QPoint last_mouse_;
 };

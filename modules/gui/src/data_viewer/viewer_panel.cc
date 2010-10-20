@@ -89,4 +89,13 @@ void ViewerPanel::mouseDoubleClickEvent(QMouseEvent* event)
   update();
 }
 
+void ViewerPanel::scale(qreal sx,qreal sy)
+{
+  if((sx>1.0 && transform().m11()>=4096.0) || sx<1.0 &&  transform().m11()<=1/4096.0){
+    return;
+  }
+  QGraphicsView::scale(sx,sy);
+  emit ZoomChanged(transform().m11());
+}
+
 }}} //ns

@@ -436,6 +436,7 @@ void GraphicsImageItem::MoveSlab(int n)
 {
   slab_=std::min<int>(std::max<int>(slab_+n,GetObservedData().GetExtent().GetStart()[2]),GetObservedData().GetExtent().GetEnd()[2]);
   update();
+  emit SlabChanged(GetSlab());
 }
 
 ViewerNormalizerPtr GraphicsImageItem::GetNormalizer() const
