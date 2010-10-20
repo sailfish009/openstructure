@@ -6,6 +6,10 @@ using namespace ost::conop;
   
 bool ChemdictParser::OnBeginData(const StringRef& data_name) 
 {    
+  if (data_name==StringRef("UNL",3)) {
+    compound_=CompoundPtr();
+    return false;    
+  }
   compound_.reset(new Compound(data_name.str()));
   compound_->SetDialect(dialect_);
   if (last_!=data_name[0]) {
@@ -119,7 +123,7 @@ void ChemdictParser::OnDataItem(const StarDataItem& item)
 
 void ChemdictParser::OnEndData()
 {
-  if (insert_) {
+  if (insert_ && compound_) {
     if (compound_->GetAtomSpecs().empty()) {
       compound_->AddAtom(atom_);
     }
