@@ -181,7 +181,7 @@ public:
   virtual bool VisitResidue(const mol::ResidueHandle& res)
   {
     String key=builder_->IdentifyResidue(res);
-    if (key=="UNK") {
+    if (key=="UNK" && res.GetKey()!="UNK") {
       unk_res_[res.GetKey()]+=1;
     }
     builder_->FillResidueProps(res);
