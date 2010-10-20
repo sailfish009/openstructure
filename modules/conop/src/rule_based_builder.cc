@@ -84,17 +84,9 @@ bool RuleBasedBuilder::HasUnknownAtoms(mol::ResidueHandle res)
 void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec) 
 {
   Conopology& conop_inst=Conopology::Instance();
-  mol::AtomProp props=atom.GetAtomProps();
-  if (!conop_inst.IsValidElement(props.element)) {
-    props.element=spec.element;
-  }
-  if (props.radius==0.0) {
-    props.radius=conop_inst.GetDefaultAtomRadius(spec.element);    
-  }
-  if (props.mass==0.0) {
-    props.mass=conop_inst.GetDefaultAtomMass(spec.element);
-  }
-  atom.SetAtomProps(props);  
+  if (!conop_inst.IsValidElement(atom.GetElement())) {
+    atom.SetElement(spec.element);
+  } 
 }
 
 void RuleBasedBuilder::FillResidueProps(mol::ResidueHandle residue) 
@@ -330,18 +322,10 @@ void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom)
 
 bool RuleBasedBuilder::OnUnknownAtom(mol::AtomHandle atom)
 {
-  mol::AtomProp props=atom.GetAtomProps();
   Conopology& conop_inst=Conopology::Instance();
-  if (!conop_inst.IsValidElement(props.element)) {
-    props.element=Builder::GuessAtomElement(atom.GetName(), props.is_hetatm);
+  if (!conop_inst.IsValidElement(atom.GetElement())) {
+    atom.SetElement(Builder::GuessAtomElement(atom.GetName(), atom.IsHetAtom()));
   }
-  if (props.radius==0.0) {
-    props.radius=conop_inst.GetDefaultAtomRadius(props.element);    
-  }
-  if (props.mass==0.0) {
-    props.mass=conop_inst.GetDefaultAtomMass(props.element);
-  }
-  atom.SetAtomProps(props); 
   return false;
 }
 

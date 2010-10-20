@@ -135,7 +135,7 @@ public:
       bool found = false;
       while (found != true && table_iter!=scatt_props_table_.end())
       {
-        if ( (*table_iter).element == (*iterator).GetAtomProps().element)
+        if ( (*table_iter).element == (*iterator).GetElement())
         {        
           geom::Vec3 coord = (*iterator).GetPos();
 
@@ -287,7 +287,7 @@ public:
                                              scatt_props_table_.begin();
       bool found = false;
       while (found != true && table_iter!=scatt_props_table_.end()) {
-        if ((*table_iter).element == (*iterator).GetAtomProps().element) {
+        if ((*table_iter).element == (*iterator).GetElement()) {
           found = true;
           Real a = (*table_iter).atomic_weight;
           geom::Vec3 coord = (*iterator).GetPos();

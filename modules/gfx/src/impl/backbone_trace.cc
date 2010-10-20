@@ -78,8 +78,8 @@ public:
     // determine atom to add to list
     mol::AtomHandle ca = res.GetCentralAtom();
     if (ca) {
-      NodeEntry entry={ca, GfxObj::Ele2Color(ca.GetAtomProps().element),
-                       GfxObj::Ele2Color(ca.GetAtomProps().element),
+      NodeEntry entry={ca, GfxObj::Ele2Color(ca.GetElement()),
+                       GfxObj::Ele2Color(ca.GetElement()),
                        geom::Vec3(), // this will be set by the gfx trace obj
                        res.GetCentralNormal(),
                        1.0,

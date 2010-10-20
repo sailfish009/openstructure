@@ -42,13 +42,7 @@ void export_Atom()
     .add_property("qualified_name", &AtomBase::GetQualifiedName)
     .def("IsValid", &AtomBase::IsValid)
     .def(self_ns::str(self))
-    .def("GetAtomProps", &AtomBase::GetAtomProps,
-         return_value_policy<copy_const_reference>())
-    .def("SetAtomProps", &AtomBase::SetAtomProps, args("prop"))
     .def("GetIndex", &AtomBase::GetIndex)
-    .add_property("prop",
-                  make_function(&AtomBase::GetAtomProps,
-                                return_value_policy<copy_const_reference>()))
     .add_property("pos",
                   make_function(&AtomBase::GetPos,
                                 return_value_policy<copy_const_reference>()))
@@ -61,15 +55,19 @@ void export_Atom()
     .def("GetRadius", &AtomBase::GetRadius)
     .def("GetElement", &AtomBase::GetElement, 
          return_value_policy<copy_const_reference>())
+    .def("SetElement", &AtomBase::SetElement)
     .def("GetCharge", &AtomBase::GetCharge)
     .def("GetMass", &AtomBase::GetMass)
-    .def("IsHetAtom", &AtomBase::IsHetAtom)    
+    .def("IsHetAtom", &AtomBase::IsHetAtom)
+    .def("SetMass", &AtomBase::SetMass)
+    .def("SetCharge", &AtomBase::SetCharge)
     .add_property("radius", &AtomBase::GetRadius)
     .add_property("element", make_function(&AtomBase::GetElement, 
-                  return_value_policy<copy_const_reference>()))
-    .add_property("is_hetatom", &AtomBase::IsHetAtom)
-    .add_property("charge", &AtomBase::GetCharge)
-    .add_property("mass", &AtomBase::GetMass)
+                  return_value_policy<copy_const_reference>()),
+                  &AtomBase::SetElement)
+    .add_property("is_hetatom", &AtomBase::IsHetAtom, &AtomBase::SetHetAtom)
+    .add_property("charge", &AtomBase::GetCharge, &AtomBase::SetCharge)
+    .add_property("mass", &AtomBase::GetMass, &AtomBase::SetMass)
   ;
   generic_prop_def<AtomBase>(atom_base);
 
@@ -95,16 +93,6 @@ void export_Atom()
   class_<AtomHandleList>("AtomHandleList", no_init)
     .def(vector_indexing_suite<AtomHandleList>())
     .def(ost::VectorAdditions<AtomHandleList>())
-  ;
-  class_<AtomProp>("AtomProp", init<>())
-    .def_readwrite("element", &AtomProp::element)
-    .def_readwrite("radius", &AtomProp::radius)
-    .def_readwrite("charge", &AtomProp::charge)
-    .def_readwrite("mass", &AtomProp::mass)
-    .def_readwrite("occupancy", &AtomProp::occupancy)
-    .def_readwrite("b_factor", &AtomProp::b_factor)
-    .def_readwrite("is_hetatm", &AtomProp::is_hetatm)
-    .def_readwrite("anisou", &AtomProp::anisou)
   ;
 }
 

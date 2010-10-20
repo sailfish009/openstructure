@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(switch_pos)
   XCSEditor editor=ent.e.RequestXCSEditor();  
   BOOST_CHECK_THROW(editor.AddAltAtomPos("B", ent.aa, y),
                     Error);
-  AtomHandle xx=editor.InsertAltAtom(ent.r, "ZZ", "A", y, AtomProp()); 
+  AtomHandle xx=editor.InsertAltAtom(ent.r, "ZZ", "A", y); 
   BOOST_CHECK_NO_THROW(editor.AddAltAtomPos("B", xx, z));
   BOOST_CHECK_EQUAL(ent.r.GetCurrentAltGroupName(), "A");
   BOOST_CHECK(ent.r.SwitchAtomPos("B"));
@@ -56,10 +56,8 @@ BOOST_AUTO_TEST_CASE(delete_atom)
 {
   test::DummyEnt ent;
   XCSEditor editor=ent.e.RequestXCSEditor();       
-  AtomHandle xx=editor.InsertAltAtom(ent.r, "ZZ", "A", geom::Vec3(), 
-                                     AtomProp());
-  AtomHandle zz=editor.InsertAltAtom(ent.r, "XX", "A", geom::Vec3(), 
-                                     AtomProp());
+  AtomHandle xx=editor.InsertAltAtom(ent.r, "ZZ", "A", geom::Vec3());
+  AtomHandle zz=editor.InsertAltAtom(ent.r, "XX", "A", geom::Vec3());
   
   editor.AddAltAtomPos("B", xx, geom::Vec3());
   editor.AddAltAtomPos("B", zz, geom::Vec3());
@@ -78,8 +76,7 @@ BOOST_AUTO_TEST_CASE(atom_group_triv)
   std::vector<String> names=ent.r.GetAltAtomGroupNames();
   BOOST_CHECK(names.empty());
   XCSEditor editor=ent.e.RequestXCSEditor();
-  AtomHandle xx=editor.InsertAltAtom(ent.r, "A", "ZZ", geom::Vec3(0.0,1.0,0.0), 
-                                     AtomProp());   
+  AtomHandle xx=editor.InsertAltAtom(ent.r, "A", "ZZ", geom::Vec3(0.0,1.0,0.0));   
   editor.AddAltAtomPos("B", xx, geom::Vec3(1.0, 0.0, 0.0));
   BOOST_CHECK(ent.r.HasAltAtoms()==true);
   BOOST_CHECK(ent.r.HasAltAtomGroup("B")==true);

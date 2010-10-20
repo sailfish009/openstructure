@@ -101,7 +101,7 @@ public:
 
   // default copy ctor and assignment op should work for now
   AtomImplPtr CreateAtom(const ResidueImplPtr& rp, const String& name,
-                       const geom::Vec3& pos, const AtomProp& prop);
+                         const geom::Vec3& pos, const String& ele);
 
   ResidueImplPtr CreateResidue(const ChainImplPtr& cp,
                                const ResNum& n,

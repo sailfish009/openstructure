@@ -381,7 +381,7 @@ geom::Vec3 ChainView::GetCenterOfMass() const
       ResidueView r=*i;
       for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
           e2=r.GetAtomList().end(); j!=e2; ++j) {
-        center+=j->GetPos() * j->GetAtomProps().mass;
+        center+=j->GetPos() * j->GetMass();
       }
     }
     center/=mass;

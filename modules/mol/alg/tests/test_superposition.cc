@@ -33,21 +33,18 @@ using namespace ost::mol::alg;
 struct Fixture {
   Fixture() {
 
-    AtomProp prop;
-    prop.element="C";
-
     e=CreateEntity();
     XCSEditor ed=e.RequestXCSEditor();
     c=ed.InsertChain("A");
     r=ed.AppendResidue(c, "XXX");
-    ab=ed.InsertAtom(r, "A", geom::Vec3(-5,-5,-5), prop);
-    ac=ed.InsertAtom(r, "B", geom::Vec3(-5, 5,-5), prop);
-    ad=ed.InsertAtom(r, "C", geom::Vec3(-5, 5, 5), prop);
-    ae=ed.InsertAtom(r, "D", geom::Vec3(-5,-5, 5), prop);
-    af=ed.InsertAtom(r, "E", geom::Vec3(5,-5, 5), prop);
-    ag=ed.InsertAtom(r, "F", geom::Vec3(5,-5,-5), prop);
-    ah=ed.InsertAtom(r, "G", geom::Vec3(5, 5,-5), prop);
-    ai=ed.InsertAtom(r, "H", geom::Vec3(5, 5, 5), prop);
+    ab=ed.InsertAtom(r, "A", geom::Vec3(-5,-5,-5), "C");
+    ac=ed.InsertAtom(r, "B", geom::Vec3(-5, 5,-5), "C");
+    ad=ed.InsertAtom(r, "C", geom::Vec3(-5, 5, 5), "C");
+    ae=ed.InsertAtom(r, "D", geom::Vec3(-5,-5, 5), "C");
+    af=ed.InsertAtom(r, "E", geom::Vec3(5,-5, 5), "C");
+    ag=ed.InsertAtom(r, "F", geom::Vec3(5,-5,-5), "C");
+    ah=ed.InsertAtom(r, "G", geom::Vec3(5, 5,-5), "C");
+    ai=ed.InsertAtom(r, "H", geom::Vec3(5, 5, 5), "C");
 
 
     BondHandle b1=ed.Connect(ab, ad);

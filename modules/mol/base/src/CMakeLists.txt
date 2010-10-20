@@ -41,7 +41,6 @@ xcs_editor.cc)
 set(OST_MOL_HEADERS
 atom_base.hh
 atom_handle.hh
-atom_prop.hh
 atom_view.hh
 bond_handle.hh
 bond_table.hh

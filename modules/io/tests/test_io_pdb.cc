@@ -67,10 +67,10 @@ BOOST_AUTO_TEST_CASE(atom_record)
   BOOST_CHECK_EQUAL(a1.GetResidue().GetChain().GetName(), "A");  
   
   BOOST_CHECK_EQUAL(a1.GetPos(), geom::Vec3(16.0, 64.0, 8.0));
-  BOOST_CHECK_EQUAL(a1.GetAtomProps().b_factor, 1.0);
-  BOOST_CHECK_EQUAL(a1.GetAtomProps().occupancy, 0.5);  
-  BOOST_CHECK_EQUAL(a1.GetAtomProps().element, "N");
-  BOOST_CHECK_EQUAL(a1.GetAtomProps().is_hetatm, false);
+  BOOST_CHECK_EQUAL(a1.GetBFactor(), 1.0);
+  BOOST_CHECK_EQUAL(a1.GetOccupancy(), 0.5);  
+  BOOST_CHECK_EQUAL(a1.GetElement(), "N");
+  BOOST_CHECK_EQUAL(a1.IsHetAtom(), false);
   mol::AtomHandle a2=ent.FindAtom(" ", mol::ResNum(1), "CA");
   BOOST_REQUIRE(a2.IsValid());  
   BOOST_CHECK_EQUAL(a2.GetName(), "CA");
@@ -78,10 +78,10 @@ BOOST_AUTO_TEST_CASE(atom_record)
   BOOST_CHECK_EQUAL(a2.GetResidue().GetChain().GetName(), " ");  
   
   BOOST_CHECK_EQUAL(a2.GetPos(), geom::Vec3(32.0, -128.0, -2.5));
-  BOOST_CHECK_EQUAL(a2.GetAtomProps().b_factor, 128.0);
-  BOOST_CHECK_EQUAL(a2.GetAtomProps().occupancy, 1.0);  
-  BOOST_CHECK_EQUAL(a2.GetAtomProps().element, "C");
-  BOOST_CHECK_EQUAL(a2.GetAtomProps().is_hetatm, true);
+  BOOST_CHECK_EQUAL(a2.GetBFactor(), 128.0);
+  BOOST_CHECK_EQUAL(a2.GetOccupancy(), 1.0);  
+  BOOST_CHECK_EQUAL(a2.GetElement(), "C");
+  BOOST_CHECK_EQUAL(a2.IsHetAtom(), true);
 }
 
 BOOST_AUTO_TEST_CASE(end_record)
@@ -162,16 +162,16 @@ BOOST_AUTO_TEST_CASE(anisou_record)
   BOOST_REQUIRE(ent.GetAtomCount()==1);
   mol::AtomHandle a1=ent.FindAtom("A", mol::ResNum(7), "N");
   BOOST_REQUIRE(a1.IsValid());
-  mol::AtomProp props=a1.GetAtomProps();
-  BOOST_CHECK_CLOSE(Real( 0.0100), props.anisou(0, 0), Real(1e-4));
-  BOOST_CHECK_CLOSE(Real(-0.0016), props.anisou(1, 0), Real(1e-4));
-  BOOST_CHECK_CLOSE(Real(-0.0026), props.anisou(2, 0), Real(1e-4));
-  BOOST_CHECK_CLOSE(Real(-0.0016), props.anisou(0, 1), Real(1e-4));
-  BOOST_CHECK_CLOSE(Real( 0.0110), props.anisou(1, 1), Real(1e-4));
-  BOOST_CHECK_CLOSE(Real(-0.0054), props.anisou(2, 1), Real(1e-4));
-  BOOST_CHECK_CLOSE(Real(-0.0026), props.anisou(0, 2), Real(1e-4));
-  BOOST_CHECK_CLOSE(Real(-0.0054), props.anisou(1, 2), Real(1e-4));
-  BOOST_CHECK_CLOSE(Real( 0.0120), props.anisou(2, 2), Real(1e-4));    
+  const geom::Mat3& anisou=a1.GetAnisou();
+  BOOST_CHECK_CLOSE(Real( 0.0100), anisou(0, 0), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0016), anisou(1, 0), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0026), anisou(2, 0), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0016), anisou(0, 1), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real( 0.0110), anisou(1, 1), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0054), anisou(2, 1), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0026), anisou(0, 2), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real(-0.0054), anisou(1, 2), Real(1e-4));
+  BOOST_CHECK_CLOSE(Real( 0.0120), anisou(2, 2), Real(1e-4));    
 }
 
 BOOST_AUTO_TEST_CASE(only_66_cols)
@@ -210,12 +210,10 @@ BOOST_AUTO_TEST_CASE(write_atom)
   mol::XCSEditor edi=ent.RequestXCSEditor();
   mol::ChainHandle ch=edi.InsertChain("A");
   mol::ResidueHandle r=edi.AppendResidue(ch, "GLY");
-  mol::AtomProp c_prop;
-  c_prop.element="C";
-  c_prop.occupancy=1.0;
-  c_prop.b_factor=128.0;
-  mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), 
-                                   c_prop);
+
+  mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), "C");
+  a.SetOccupancy(1.0);
+  a.SetBFactor(128.0);
   writer.Write(ent);
   String s=out.str();
   BOOST_CHECK_EQUAL(s.substr(0, 54), 
@@ -233,14 +231,12 @@ BOOST_AUTO_TEST_CASE(write_hetatom)
   mol::XCSEditor edi=ent.RequestXCSEditor();
   mol::ChainHandle ch=edi.InsertChain("A");
   mol::ResidueHandle r=edi.AppendResidue(ch, "CA");
-  mol::AtomProp c_prop;
-  c_prop.element="CA";
-  c_prop.is_hetatm=true;
-  c_prop.mass=40.01;
-  c_prop.occupancy=1.0;
-  c_prop.b_factor=40.75;
   mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), 
-                                   c_prop);
+                                   "CA");
+  a.SetHetAtom(true);
+  a.SetMass(40.01);
+  a.SetOccupancy(1.0);
+  a.SetBFactor(40.75);
   writer.Write(ent);
   String s=out.str();
   BOOST_CHECK_EQUAL(s.substr(0, 54), 

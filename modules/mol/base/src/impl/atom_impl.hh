@@ -24,7 +24,7 @@
 #include <ost/mol/module_config.hh>
 #include <ost/geom/geom.hh>
 #include <ost/mol/entity_visitor_fw.hh>
-#include <ost/mol/atom_prop.hh>
+#include <ost/mol/impl/atom_prop.hh>
 
 #include <ost/mol/impl/atom_impl_fw.hh>
 #include <ost/mol/impl/residue_impl_fw.hh>
@@ -50,7 +50,7 @@ class AtomImpl: public GenericPropContainerImpl,
                 public boost::enable_shared_from_this<AtomImpl> {
 public:
    AtomImpl(const EntityImplPtr& ent, const ResidueImplPtr& res,
-            const String& name, const geom::Vec3& pos, const AtomProp& prop,
+            const String& name, const geom::Vec3& pos, const String& ele,
             unsigned long index);
 
   ~AtomImpl();
@@ -70,11 +70,7 @@ public:
   void SetTransformedPos(const geom::Vec3& pos) { tf_pos_=pos; }
 
   void SetOriginalPos(const geom::Vec3& pos) { pos_=pos; }
-  
-  const AtomProp& GetAtomProps() const {return prop_;}
-  
-  AtomProp& GetAtomProps() {return prop_;}
-  
+      
   ResidueImplPtr GetResidue() const;
 
   void SetPrimaryConnector(const ConnectorImplP& bp) {
@@ -111,11 +107,93 @@ public:
   void SetTraced(bool f) {set_state_bit(1,f);}
   bool IsTraced() const {return get_state_bit(1);}
 
-  unsigned int GetState() const {
+
+  Real GetBFactor() const { return b_factor_; }
+  
+  const String& GetElement() const { return element_; }  
+  
+  void SetElement(const String& ele) 
+  { 
+    if (element_!=ele) {
+      element_=ele;
+      prop_=impl::AtomProp::GetDefaultProps(element_);
+    }
+  }
+  
+  void SetAnisou(const geom::Mat3& anisou)
+  {
+    if (prop_->is_default && prop_->anisou!=anisou) {
+      prop_=new AtomProp(*prop_);
+      prop_->is_default=false;
+      prop_->has_anisou=true;
+    }
+
+    prop_->anisou=anisou;
+  }
+  
+  const geom::Mat3& GetAnisou() const
+  {
+    return prop_->anisou;
+  }
+  void SetBFactor(Real factor) 
+  { 
+    b_factor_=factor;
+  }  
+  
+  void SetOccupancy(Real occ)
+  {
+    occupancy_=occ;
+  }
+  
+  Real GetOccupancy() const 
+  { 
+    return occupancy_; 
+  }
+  
+  Real GetRadius() const { return prop_->radius; }
+  
+  Real GetMass() const { return prop_->mass; }
+  Real GetCharge() const { return prop_->charge; }
+  
+  bool IsHetAtom() { return is_hetatm_; }
+  
+  void SetHetAtom(bool het) { is_hetatm_=het; }
+  
+  void SetMass(Real mass)
+  {
+    if (prop_->is_default && prop_->mass!=mass) {
+      prop_=new AtomProp(*prop_);
+      prop_->is_default=false;
+    }
+    prop_->mass=mass;
+  }
+  
+  void SetRadius(Real radius)
+  {
+    if (prop_->is_default && prop_->radius!=radius) {
+      prop_=new AtomProp(*prop_);
+      prop_->is_default=false;
+    }
+    prop_->radius=radius;
+  }
+  
+  void SetCharge(Real charge)
+  {
+    if (prop_->is_default && prop_->charge!=charge) {
+      prop_=new AtomProp(*prop_);
+      prop_->is_default=false;
+    }
+    prop_->charge=charge;
+  }
+  
+  
+  unsigned int GetState() const 
+  {
     return state_;
   }
   
-  void SetState(int state) {
+  void SetState(int state) 
+  {
     state_=state;
   }
   
@@ -144,11 +222,14 @@ public:
                      
 private:
   ResidueImplW res_;
-  String name_;
-  geom::Vec3 pos_;
-  geom::Vec3 tf_pos_;
-  AtomProp prop_;
-
+  String       name_;
+  geom::Vec3   pos_;
+  geom::Vec3   tf_pos_;
+  Real         occupancy_;
+  Real         b_factor_;
+  String       element_;
+  AtomProp*    prop_;
+  bool         is_hetatm_;
   ConnectorImplP prim_connector_;
   ConnectorImplList connector_list_;
   FragmentImplP fragment_;

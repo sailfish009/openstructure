@@ -36,13 +36,6 @@ public:
   // retrieve a builder by name
   BuilderP GetBuilder(const String& name="DEFAULT");
 
-  // return default vdW radius
-  // temporary location until more elaborate chemical information is impl
-  Real GetDefaultAtomRadius(const String& element) const;
-
-  // return default mass
-  Real GetDefaultAtomMass(const String& element) const;
-
   /*
     convenience function, connect all atoms with given coordinates,
     such as after coordinate file import, based on a given builder
@@ -61,8 +54,7 @@ private:
   Conopology& operator=(const Conopology&) {return *this;}
 
   BuilderMap builder_map_;
-  std::map<String,Real> ele_rad_map_;
-  std::map<String,Real> ele_mass_map_;
+  std::set<String> known_elements_;
 };
 
 }} //

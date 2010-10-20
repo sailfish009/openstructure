@@ -23,7 +23,6 @@
 #include <map>
 #include <limits>
 
-#include <ost/mol/atom_prop.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/entity_property_mapper.hh>
 #include "surface.hh"
