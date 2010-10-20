@@ -334,17 +334,17 @@ boost::logic::tribool QueryState::EvalAtom(const impl::AtomImplPtr& a) {
                                boost::get<float>(ss.param));
         break;                
       case Prop::OCC:
-        float_value=a->GetAtomProps().occupancy;
+        float_value=a->GetOccupancy();
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
                                boost::get<float>(ss.param));
         break;                        
       case Prop::ELE:
-        str_value = a->GetAtomProps().element;
+        str_value = a->GetElement();
         s_[*i] = cmp_string(ss.comp_op,str_value,
           boost::get<String>(ss.param));                          
         break;
       case Prop::ABFAC:
-        float_value=a->GetAtomProps().b_factor;
+        float_value=a->GetBFactor();
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
                               boost::get<float>(ss.param));
         break;
@@ -354,11 +354,11 @@ boost::logic::tribool QueryState::EvalAtom(const impl::AtomImplPtr& a) {
                                 ss.comp_op);
         break;
       case Prop::ISHETATM:
-        int_value = a->GetAtomProps().is_hetatm;
+        int_value = a->IsHetAtom();
         s_[*i] = cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));
         break;
       case Prop::ACHARGE:
-        float_value=a->GetAtomProps().charge;
+        float_value=a->GetCharge();
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
                               boost::get<float>(ss.param));
         break;

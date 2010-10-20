@@ -75,16 +75,7 @@ public:
   geom::Vec3 GetAltPos(const String& alt_group) const;
   
   std::vector<String> GetAltGroupNames() const;
-    /// \name Atom properties
-  //@{
-  /// \brief Get atom properties such as element name, radius crystallographic
-  ///     occupancy and temperature factors.
-  ///
-  /// \sa      #SetAtomProps
-  const AtomProp& GetAtomProps() const;
-    
-  /// \brief  Set atom properties.
-  void SetAtomProps(const AtomProp& prop);
+
   //@} 
   
   /// \name Handle validity
@@ -134,6 +125,24 @@ public:
   /// The returned value may be zero for some structures
   Real GetBFactor() const;
   
+  
+  void SetBFactor(Real factor);
+  
+  void SetOccupancy(Real occ);
+  
+  
+  void SetCharge(Real charge);
+  
+  void SetMass(Real mass);
+  
+  void SetHetAtom(bool het);
+  
+  void SetRadius(Real radius);
+  
+  
+  const geom::Mat3& GetAnisou() const;
+  
+  void SetAnisou(const geom::Mat3& anisou);
   /// \brief get mass of atom
   /// 
   /// The returned value may be zero
@@ -153,6 +162,8 @@ public:
   /// \brief get atom implementation
   impl::AtomImplPtr& Impl();
 
+
+  void SetElement(const String& element);
 protected:
   
   GenericPropContainerImpl* GpImpl();

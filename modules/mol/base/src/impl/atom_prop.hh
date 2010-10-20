@@ -19,38 +19,42 @@
 #ifndef OST_ATOM_PROP_HH
 #define OST_ATOM_PROP_HH
 
+#include <map>
 #include <ost/mol/module_config.hh>
 #include <ost/geom/mat3.hh>
 
-namespace ost { namespace mol {
-
+namespace ost { namespace mol { namespace impl {
 
 
 class DLLEXPORT_OST_MOL AtomProp {
 public:
   AtomProp()
-    : element(""), radius(0.0), occupancy(1.0),
-      b_factor(0.0), charge(0.0), mass(0.0),
-      is_hetatm(false), has_anisou(false),
-      ordinal(0), anisou(geom::Mat3()) {
-
+    : radius(0.0), charge(0.0), mass(0.0), has_anisou(false), is_default(true),
+      anisou(geom::Mat3()) 
+  {
   }
-  String        element;
+  AtomProp(Real r, Real m, Real c=0.0): radius(r), charge(c), 
+     mass(m), has_anisou(false), is_default(true)
+  { }
+  AtomProp(const AtomProp& rhs): radius(rhs.radius), charge(rhs.charge),
+    mass(rhs.mass), has_anisou(rhs.has_anisou), is_default(rhs.is_default),
+    anisou(rhs.anisou)
+  { }
   Real          radius;
-  Real          occupancy;
-  Real          b_factor;
   Real          charge;
   Real          mass;
-  bool          is_hetatm;
   bool          has_anisou;
-  
-  int           ordinal;
+  bool          is_default;
   geom::Mat3    anisou;
+  
+  static AtomProp* GetDefaultProps(const String& ele);
+  
 private:
-  unsigned char flags;
+  static void Init();
+  static std::map<String, AtomProp> defaults_;
 };
 
-}} // ns
+}}} // ns
 
 #endif
 

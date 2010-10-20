@@ -26,7 +26,6 @@ query_error.cc
 query_state.cc
 residue_base.cc
 residue_handle.cc
-residue_prop.cc
 residue_view.cc
 surface_builder.cc
 surface_handle.cc
@@ -42,7 +41,6 @@ xcs_editor.cc)
 set(OST_MOL_HEADERS
 atom_base.hh
 atom_handle.hh
-atom_prop.hh
 atom_view.hh
 bond_handle.hh
 bond_table.hh

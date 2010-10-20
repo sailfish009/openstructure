@@ -142,14 +142,7 @@ void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
 
   // finally add atom
   LOG_DEBUG("adding atom " << aname << " (" << ele << ") @" << apos);
-  mol::AtomProp aprop;
-  aprop.element=ele;
-  aprop.radius=conop::Conopology::Instance().GetDefaultAtomRadius(ele);
-  aprop.is_hetatm=false;
-  aprop.b_factor=0.0;
-  aprop.occupancy=1.0;
-  
-  mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, aprop);
+  mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, ele);
   sequential_atom_list_.push_back(ah);
   ++atom_count_;
 }

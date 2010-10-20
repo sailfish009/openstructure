@@ -200,7 +200,7 @@ double ResidueView::GetMass() const
   double mass = 0;
   AtomViewList::const_iterator i;
   for (i=data_->atoms.begin(); i!=data_->atoms.end(); ++i) {
-    mass+=(*i).GetAtomProps().mass;
+    mass+=(*i).GetMass();
   }
   return mass;
 }
@@ -226,7 +226,7 @@ geom::Vec3 ResidueView::GetCenterOfMass() const
   if (!data_->atoms.empty() && mass > 0) {
     AtomViewList::const_iterator i;
     for (i=data_->atoms.begin(); i!=data_->atoms.end(); ++i) {
-      center+=(*i).GetPos()*(*i).GetAtomProps().mass;
+      center+=(*i).GetPos()*(*i).GetMass();
     }
       center/=mass;
   }

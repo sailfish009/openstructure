@@ -395,15 +395,13 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
     throw IOException(str(format(fmt_str) % line_num));      
   }
   //get properties which are already set and extend them by adding the ANISOU info
-  mol::AtomProp aprop=atom.GetAtomProps();
+  
+
   geom::Mat3 mat(anisou[0], anisou[3], anisou[4],
                  anisou[3], anisou[1], anisou[5],
                  anisou[4], anisou[5], anisou[2]);
-  aprop.anisou=mat;
-  //divide by 10**4 to actually reflect the real values
-  aprop.anisou/=10000;
-  aprop.has_anisou=true;
-  atom.SetAtomProps(aprop);
+  mat/=10000;
+  atom.SetAnisou(mat);
 }
 
 void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
@@ -527,30 +525,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   }
   // finally add atom
   LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
-  mol::AtomProp aprop;
-  aprop.element=s_ele;
-  if(is_pqr_) {
-    if (radius.first) {
-      aprop.radius=radius.second;
-    } else {
-      aprop.radius=0.0;
-    }
-  } else {
-    aprop.radius=0.0;
-  }
-
-  if (temp.first) {
-    aprop.b_factor=temp.second;
-  }
-  if (occ.first) {
-    aprop.occupancy=occ.second;
-  }
-  if (charge.first) {
-    aprop.charge=charge.second;
-  }
-
-  aprop.is_hetatm=record_type[0]=='H' ? true : false;
-
+  mol::AtomHandle ah;
   if (alt_loc!=' ') {
     // Check if there is already a atom with the same name.
     mol::AtomHandle me=curr_residue_.FindAtom(aname);
@@ -562,15 +537,31 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
                      "with name " << aname << ", but without an alt loc");
         return;
       }
+      return;
     } else {
-      mol::AtomHandle ah=editor.InsertAltAtom(curr_residue_, aname,
-                                              String(1, alt_loc), apos, aprop);
+      ah=editor.InsertAltAtom(curr_residue_, aname,
+                              String(1, alt_loc), apos, s_ele);
       ++atom_count_;
     }
   } else {
-    mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, aprop);
+    ah=editor.InsertAtom(curr_residue_, aname, apos, s_ele);
     ++atom_count_;
   }
+  if(is_pqr_) {
+    if (radius.first) {
+      ah.SetRadius(radius.second);
+    }
+  }
+  if (temp.first) {
+    ah.SetBFactor(temp.second);
+  }
+  if (occ.first) {
+    ah.SetOccupancy(occ.second);
+  }
+  if (charge.first) {
+    ah.SetCharge(charge.second);
+  }
+  ah.SetHetAtom(record_type[0]=='H');
 }
 
 void PDBReader::ParseHelixEntry(const StringRef& line)

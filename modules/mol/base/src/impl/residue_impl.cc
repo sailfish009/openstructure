@@ -47,10 +47,11 @@ ResidueImpl::ResidueImpl(const EntityImplPtr& ent,
 
 
 AtomImplPtr ResidueImpl::InsertAtom(const String& name,
-                                  const geom::Vec3& pos,
-                                  const AtomProp& prop)
+                                    const geom::Vec3& pos,
+                                    const String& ele)
 {
-  AtomImplPtr ap=ent_.lock()->CreateAtom(shared_from_this(),name, pos, prop);
+  AtomImplPtr ap=ent_.lock()->CreateAtom(shared_from_this(),
+                                         name, pos, ele);
   atom_list_.push_back(ap);
   return ap;
 }
@@ -59,7 +60,7 @@ AtomImplPtr ResidueImpl::InsertAtom(const AtomImplPtr& atom)
 {
   AtomImplPtr dst_atom=this->InsertAtom(atom->GetName(), 
                                         atom->GetPos(),
-                                        atom->GetAtomProps());
+                                        atom->GetElement());
   dst_atom->Assign(*atom.get());
   dst_atom->SetState(atom->GetState());
   return dst_atom;
@@ -70,7 +71,7 @@ Real ResidueImpl::GetAverageBFactor() const
   Real sum=0;
   for (AtomImplList::const_iterator i=atom_list_.begin(), 
        e=atom_list_.end(); i!=e; ++i) {
-    sum+=(*i)->GetAtomProps().b_factor;
+    sum+=(*i)->GetBFactor();
   }
   return atom_list_.size()>0 ? sum/atom_list_.size() : 0.0;
 }
@@ -115,8 +116,8 @@ geom::Vec3 ResidueImpl::GetAltAtomPos(const AtomImplPtr& atom,
 AtomImplPtr ResidueImpl::InsertAltAtom(const String& name,
                                        const String& alt_group,
                                        const geom::Vec3& pos,
-                                       const AtomProp& prop) {
-  AtomImplPtr atom=this->InsertAtom(name, pos, prop);
+                                       const String& ele) {
+  AtomImplPtr atom=this->InsertAtom(name, pos, ele);
   this->AddAltAtom(alt_group, atom, pos);
   return atom;
 }
@@ -422,7 +423,7 @@ Real ResidueImpl::GetMass() const
   Real mass = 0;
   for (AtomImplList::const_iterator i=atom_list_.begin(); 
        i!=atom_list_.end(); ++i) {
-    mass+=(*i)->GetAtomProps().mass;
+    mass+=(*i)->GetMass();
   }
   return mass;
 }
@@ -466,7 +467,7 @@ geom::Vec3 ResidueImpl::GetCenterOfMass() const
   if (this->GetAtomCount() > 0 && mass > 0) {
     for (AtomImplList::const_iterator i=atom_list_.begin(); 
         i!=atom_list_.end(); ++i) {
-      center+=(*i)->GetPos()*(*i)->GetAtomProps().mass;
+      center+=(*i)->GetPos()*(*i)->GetMass();
     }
   }
   return center/mass;

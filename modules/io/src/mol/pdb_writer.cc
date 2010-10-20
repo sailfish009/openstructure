@@ -197,7 +197,7 @@ public:
   virtual bool VisitAtom(const mol::AtomHandle& atom) {
     counter_++;
     write_atom(ostr_, line_, atom, counter_, is_pqr_, charmm_style_);
-    if (atom.GetAtomProps().is_hetatm) {
+    if (atom.IsHetAtom()) {
       atom_indices_[atom.GetHashCode()]=counter_;
     }
     return true;
@@ -268,7 +268,7 @@ public:
 private:
 public:
   virtual bool VisitAtom(const mol::AtomHandle& atom) {
-    if (atom.GetAtomProps().is_hetatm) {
+    if (atom.IsHetAtom()) {
       bool has_partner=false;
       int atom_index=atom_indices_[atom.GetHashCode()];
       mol::AtomHandleList partners=atom.GetBondPartners();

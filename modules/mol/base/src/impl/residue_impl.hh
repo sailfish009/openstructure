@@ -51,13 +51,13 @@ public:
   ResidueImpl(const EntityImplPtr& ent, const ChainImplPtr& ch,
               const ResNum& num, const ResidueKey& key);
 
-  AtomImplPtr InsertAtom(const String& name, const geom::Vec3& pos,
-                         const AtomProp& prop);
+  AtomImplPtr InsertAtom(const String& name, const geom::Vec3& pos, 
+                         const String& ele);
   /// \brief insert new residue with exactly the same parameters as atom, but 
   ///     no bonds
   AtomImplPtr InsertAtom(const AtomImplPtr& atom);
   AtomImplPtr InsertAltAtom(const String& name, const String& alt_group,
-                           const geom::Vec3& pos, const AtomProp& prop);
+                           const geom::Vec3& pos, const String& ele);
   const ResNum& GetNumber() const {return num_;}
   void SetNumber(const ResNum& num) {num_=num;}
 

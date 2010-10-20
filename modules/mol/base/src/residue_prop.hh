@@ -25,47 +25,111 @@
 
 namespace ost { namespace mol {
 
-/*
-  
-*/
-class DLLEXPORT_OST_MOL ResNum: private
+
+class DLLEXPORT ResNum: private
     boost::additive<ResNum, int,
     boost::totally_ordered<ResNum, 
     boost::totally_ordered<ResNum, int,
     boost::unit_steppable<ResNum> > > >
 {
 public:
-  ResNum(int num); // no explicit on purpose
-  ResNum(int num, char alt);
+  ResNum(int n):
+    num_(n), alt_('\0')
+  { }
 
-  bool operator==(const ResNum&) const;
-  bool operator<(const ResNum&) const;
-  int operator+=(int);
-  int operator-=(int);
-  int operator+=(const ResNum&);
-  int operator-=(const ResNum&);
-  ResNum& operator++();
-  ResNum& operator--();
+  ResNum(int n, char a):
+    num_(n), alt_(a)
+  {}
 
-  ResNum NextInsertionCode() const;
+  bool operator==(const ResNum& r) const
+  {
+    return num_==r.num_ && alt_==r.alt_;
+  }
 
-  int GetNum() const {return num_;}
-  char GetInsCode() const {return alt_;}
+  bool operator<(const ResNum& r) const
+  {
+    return num_==r.num_ ? alt_<r.alt_ : num_<r.num_;
+  }
+
+  int operator+=(int i)
+  {
+    num_+=i;
+    return num_;
+  }
+
+  int operator-=(int i)
+  {
+    num_-=i;
+    return num_;
+  }
+
+  int operator+=(const ResNum& r)
+  {
+    num_+=r.num_;
+    return num_;
+  }
+
+  int operator-=(const ResNum& r)
+  {
+    num_-=r.num_;
+    return num_;
+  }
+
+  ResNum& operator++()
+  {
+    ++num_;
+    return *this;
+  }
+
+  ResNum& operator--()
+  {
+    --num_;
+    return *this;
+  }
+
+  ResNum NextInsertionCode() const
+  {
+    char alt= alt_=='\0' ? 'a' : alt_+1;
+    ResNum nrvo(num_,alt);
+    return nrvo;
+  }
   
   /// \brief get residue number as String
   ///
   /// The returned String consists of both the numeric residue sequence number
   /// and the insertion code. If the insertion code is not defined, i.e. is 
   /// equal to the null character, only the residue sequence number is returned.
-  String AsString() const;
+  inline String AsString() const;
+  
+  int GetNum() const { return num_; }
+  
+  void SetNum(int num) { num_=num; }
+  
+  void SetInsCode(char ins_code) { alt_=ins_code; }
+  
+  char GetInsCode() const { return alt_; }  
+  
 private:
-  int num_;
-  char alt_;
+  int num_ : 24;
+  int alt_ :  8;
 };
 
-DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os, const ResNum& n);
-
 typedef String ResidueKey;
+
+inline std::ostream& operator<<(std::ostream& os, const ResNum& n)
+{
+  return os << n.GetNum();
+  if (n.GetInsCode()!='\0')
+    os << n.GetInsCode();
+  return os;
+}
+
+inline String ResNum::AsString() const
+{
+  std::stringstream ss;
+  ss << *this;
+  return ss.str();    
+}
 
 }} // ns
 

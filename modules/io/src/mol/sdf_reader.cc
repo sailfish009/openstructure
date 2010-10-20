@@ -196,17 +196,12 @@ void SDFReader::ParseAndAddAtom(const String& line, int line_num,
 
   String ele=boost::trim_copy(s_ele);
   String aname=boost::lexical_cast<String>(anum);
-
-  mol::AtomProp aprop;
-  aprop.element=ele;
-  aprop.radius=conop::Conopology::Instance().GetDefaultAtomRadius(ele);
-  aprop.mass=conop::Conopology::Instance().GetDefaultAtomMass(ele);
-  aprop.is_hetatm=hetatm;
-
+  
+  Real charge=0.0;  
   try {
-    aprop.charge=boost::lexical_cast<Real>(boost::trim_copy(s_charge));
-    if(aprop.charge != 0) {
-      aprop.charge=4-aprop.charge;
+    charge=boost::lexical_cast<Real>(boost::trim_copy(s_charge));
+    if (charge!=0) {
+      charge=4-charge;
     } //4-sdf_charge=real_charge if not 0
   } catch(boost::bad_lexical_cast&) {
     String msg="Bad atom line %d: Can't convert charge"
@@ -216,7 +211,9 @@ void SDFReader::ParseAndAddAtom(const String& line, int line_num,
 
   LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
 
-  editor.InsertAtom(curr_residue_, aname,apos,aprop);
+  mol::AtomHandle atom=editor.InsertAtom(curr_residue_, aname,apos, ele);  
+  atom.SetHetAtom(hetatm);
+  atom.SetCharge(charge);
 }
 
 
@@ -257,10 +254,12 @@ void SDFReader::ParseAndAddBond(const String& line, int line_num,
 
   mol::AtomHandle first,second;
 
-  first = ent.FindAtom(curr_chain_.GetName(), mol::ResNum(residue_count_), first_name);
-  second = ent.FindAtom(curr_chain_.GetName(), mol::ResNum(residue_count_), second_name);
+  first = ent.FindAtom(curr_chain_.GetName(), mol::ResNum(residue_count_), 
+                       first_name);
+  second = ent.FindAtom(curr_chain_.GetName(), mol::ResNum(residue_count_), 
+                        second_name);
 
-  if(first.IsValid() && second.IsValid()) {
+  if (first.IsValid() && second.IsValid()) {
     bond = editor.Connect(first, second);
     bond.SetBondOrder(type);
   } else {
@@ -269,7 +268,8 @@ void SDFReader::ParseAndAddBond(const String& line, int line_num,
     throw IOException(str(format(msg) % line_num % first % second));
   }
 
-  LOG_DEBUG("adding bond " << s_first_name << " " << s_second_name << " (" << s_type << ") ");
+  LOG_DEBUG("adding bond " << s_first_name << " " << s_second_name << " (" 
+            << s_type << ") ");
 }
 
 }}

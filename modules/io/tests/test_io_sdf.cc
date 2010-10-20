@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(simple_sdf)
   BOOST_CHECK_EQUAL(eh.GetChainCount(), 1);
   BOOST_CHECK_EQUAL(eh.GetAtomCount(),  6);
   BOOST_CHECK_EQUAL(eh.GetBondCount(),  6);
-  BOOST_CHECK_CLOSE(eh.GetMass(), Real(121.545502), Real(1e-4));
+  BOOST_CHECK_CLOSE(eh.GetMass(), Real(121.546997), Real(1e-4));
 
   // check atom/bond types
   mol::AtomHandle ah=eh.GetAtomList()[0];
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(simple_sdf)
   BOOST_CHECK_EQUAL(ah2.GetElement(), "Cl");
   BOOST_CHECK_CLOSE(ah.GetRadius(),  Real(1.55), Real(1e-2));
   BOOST_CHECK_CLOSE(ah2.GetRadius(), Real(1.75), Real(1e-2));
-  BOOST_CHECK_CLOSE(ah.GetMass(),  Real(14.0067), Real(1e-4));
+  BOOST_CHECK_CLOSE(ah.GetMass(),  Real(14.007), Real(1e-4));
   BOOST_CHECK_CLOSE(ah2.GetMass(), Real(35.453), Real(1e-3));
   BOOST_CHECK_EQUAL(ah.GetBondCount(),  3);
   BOOST_CHECK_EQUAL(ah2.GetBondCount(), 1);

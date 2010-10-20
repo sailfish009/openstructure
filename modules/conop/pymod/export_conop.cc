@@ -31,7 +31,6 @@ void export_Conop() {
      .def("Instance", &Conopology::Instance, return_value_policy<reference_existing_object>()).staticmethod("Instance")
     .def("ConnectAll", &Conopology::ConnectAll)
     .def("GetBuilder", &Conopology::GetBuilder)
-    .def("GetDefaultAtomRadius", &Conopology::GetDefaultAtomRadius)
     .def("ConnectAll", &Conopology::ConnectAll)
     .def("RegisterBuilder", &Conopology::RegisterBuilder)
     .def("SetDefaultBuilder", &Conopology::SetDefaultBuilder)

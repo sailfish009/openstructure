@@ -297,7 +297,7 @@ geom::Vec3 EntityImpl::GetCenterOfMass() const {
   Real mass = this->GetMass();
   if (this->GetAtomCount()>0 && mass>0) {
     for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      center+=it->second->GetPos()*it->second->GetAtomProps().mass;
+      center+=it->second->GetPos()*it->second->GetMass();
     }
     center/=mass;
   }
@@ -308,7 +308,7 @@ Real EntityImpl::GetMass() const {
   Real mass=0.0;
   for (AtomImplMap::const_iterator it = atom_map_.begin();
       it!=atom_map_.end();++it) {
-    mass+=it->second->GetAtomProps().mass;
+    mass+=it->second->GetMass();
   }
   return mass;
 }
@@ -316,13 +316,13 @@ Real EntityImpl::GetMass() const {
 AtomImplPtr EntityImpl::CreateAtom(const ResidueImplPtr& rp,
                                    const String& name,
                                    const geom::Vec3& pos,
-                                   const AtomProp& prop)
+                                   const String& ele)
 {
 #if MAKE_SHARED_AVAILABLE
   AtomImplPtr ap=boost::make_shared<AtomImpl>(shared_from_this(), rp, name, 
-                                              pos, prop,next_index_++);
+                                              pos, ele,next_index_++);
 #else
-  AtomImplPtr ap(new AtomImpl(shared_from_this(), rp, name, pos, prop,next_index_++));
+  AtomImplPtr ap(new AtomImpl(shared_from_this(), rp, name, pos, ele, next_index_++));
 #endif
   if (identity_transf_ == false) {
     geom::Vec3 transformed_pos = geom::Vec3(transformation_matrix_*geom::Vec4(pos));

@@ -25,7 +25,6 @@
 #include <ost/mol/query.hh>
 #include <ost/mol/module_config.hh>
 #include <ost/mol/residue_base.hh>
-#include <ost/mol/atom_prop.hh>
 #include <ost/mol/entity_visitor_fw.hh>
 #include <ost/mol/iterator_fw.hh>
 
