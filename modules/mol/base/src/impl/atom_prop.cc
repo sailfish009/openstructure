@@ -50,6 +50,7 @@ void AtomProp::Init()
   defaults_["CO"]=AtomProp(2.0000, 58.9330);
   defaults_["CR"]=AtomProp(2.0000, 51.9960);
   defaults_["CS"]=AtomProp(2.0000, 132.9050);
+  defaults_["D"]=AtomProp(1.0900, 2.0141);
   defaults_["CU"]=AtomProp(1.4000, 63.5460);
   defaults_["DB"]=AtomProp(2.0000, 262.0000);
   defaults_["DS"]=AtomProp(2.0000, 271.0000);

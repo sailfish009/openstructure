@@ -49,7 +49,7 @@ void RuleBasedBuilder::CheckResidueCompleteness(const mol::ResidueHandle& rh)
   mol::AtomHandleList atoms=rh.GetAtomList();
   mol::AtomHandleList::iterator i=atoms.begin();
   for (; j!=last_compound_->GetAtomSpecs().end() && i!=atoms.end(); ++j) {
-    if ((*j).is_leaving || (*j).element=="H")
+    if ((*j).is_leaving || (*j).element=="H" || (*j).element=="D")
       continue;
     if ((*j).ordinal!=static_cast<int>((*i).Impl()->GetState())) {
       this->OnMissingAtom(rh, (*j).name);
@@ -72,7 +72,8 @@ bool RuleBasedBuilder::HasUnknownAtoms(mol::ResidueHandle res)
   for (mol::AtomHandleList::iterator 
        i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
     if ((*i).Impl()->GetState()==std::numeric_limits<unsigned int>::max()) {
-      if ((*i).GetElement()=="H" && this->GetStrictHydrogenMode()==false) {
+      if (((*i).GetElement()=="H" || (*i).GetElement()=="D") && 
+          this->GetStrictHydrogenMode()==false) {
         continue;
       }
       return true;
@@ -210,14 +211,15 @@ void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh)
       mol::AtomHandle a2=this->LocateAtom(atoms, bond.atom_two);
       if (a1.IsValid() && a2.IsValid() && this->IsBondFeasible(a1, a2)) {
         if (this->GetStrictHydrogenMode() && 
-            (a1.GetElement()=="H" || a2.GetElement()=="H")) {
+            (a1.GetElement()=="H" || a2.GetElement()=="D")) {
           continue;
         }
         e.Connect(a1, a2, bond.order);
       }
   }
   for (mol::AtomHandleList::iterator i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
-    if ((*i).GetElement()=="H" && (*i).GetBondCount()==0) {
+    if (((*i).GetElement()=="H" || (*i).GetElement()=="D") && 
+        (*i).GetBondCount()==0) {
       this->DistanceBasedConnect(*i);
     }
   }
@@ -293,7 +295,7 @@ bool RuleBasedBuilder::IsResidueComplete(const mol::ResidueHandle& residue)
   mol::AtomHandleList::iterator i=atoms.begin();
   for (AtomSpecList::const_iterator j=last_compound_->GetAtomSpecs().begin(),
        e=last_compound_->GetAtomSpecs().end(); j!=e; ++j) {
-    if ((*j).is_leaving || (*j).element=="H") {
+    if ((*j).is_leaving || (*j).element=="H" || (*j).element=="D") {
       continue;      
     }
     if (!(residue.FindAtom(j->name) || residue.FindAtom(j->alt_name))) {
