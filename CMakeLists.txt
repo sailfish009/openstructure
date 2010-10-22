@@ -30,6 +30,19 @@ option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some 
 option(DEPLOYMENT "switch on deployment settings" OFF)
 option(COMPILE_TESTS "wheter unit tests should be compiled by default" OFF)
 
+if (CXX)
+  set(CMAKE_CXX_COMPILER ${CXX})
+endif()
+
+if (CC)
+  set(CMAKE_C_COMPILER ${CC})
+endif()
+
+if (FORTRAN_COMPILER)
+  set(CMAKE_FORTRAN_COMPILER ${FORTRAN_COMPILER})
+endif()
+
+
 if (PREFIX)
   set(CMAKE_INSTALL_PREFIX ${PREFIX})
 endif()
