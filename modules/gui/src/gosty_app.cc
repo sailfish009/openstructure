@@ -45,7 +45,8 @@ GostyApp* GostyApp::app_=NULL;
 GostyApp::GostyApp():
   py_shell_(NULL), gl_win_(NULL), scene_win_(NULL), message_widget_(NULL), seq_viewer_(NULL),
   tool_options_win_(NULL), main_(new GostyMainWindow),
-  perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>())
+  perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>()),
+  try_stereo_(false)
 {
   assert(GostyApp::app_==NULL);
   GostyApp::app_=this;

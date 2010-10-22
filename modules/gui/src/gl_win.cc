@@ -56,7 +56,9 @@ gl_canvas_(NULL)
     LOG_VERBOSE("GLCanvas: trying stereo visuals first");
     for(int format_id=3;format_id>=0;--format_id) {
       QGLFormat format=GLWin::CreateFormat(format_id);
-      format.setStereo(true);
+      if (try_stereo) {
+        format.setStereo(true);
+      }
       gl_canvas_=new GLCanvas(this, main, format);
       if(gl_canvas_->isValid() && gl_canvas_->format().stereo()) {
         break; // format is fine
