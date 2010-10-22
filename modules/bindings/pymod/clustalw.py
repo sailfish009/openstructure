@@ -41,7 +41,7 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False):
     for seq_num,aln_seq in enumerate(aln.sequences):
       if aln_seq.GetName()==sequence.GetName():
         break
-    aln.SetSequenceOffset(seq_num,sequence.GetSequenceOffset())
+    aln.SetSequenceOffset(seq_num,sequence.offset)
     if sequence.HasAttachedView():
       aln.AttachView(seq_num,sequence.GetAttachedView().Copy())
 
