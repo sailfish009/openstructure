@@ -190,6 +190,20 @@ BOOST_AUTO_TEST_CASE(no_endmdl_record)
   BOOST_CHECK_THROW(reader.Import(ent), IOException);
 }
 
+BOOST_AUTO_TEST_CASE(deuterium_import)
+{
+  String fname("testfiles/pdb/val-with-deuterium.pdb");
+  PDBReader reader(fname);
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  // we use conopology to mark amino acids as peptide-linking. 
+  conop::Conopology& conop_inst=conop::Conopology::Instance();
+  conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+  // this check makes sure that we correctly detect deal with the deuterium
+  // atoms in the residue.
+  BOOST_CHECK(ent.FindResidue("A", 297).IsPeptideLinking());
+}
+
 BOOST_AUTO_TEST_CASE(faulty_lines)
 {
   String fname("testfiles/pdb/faulty.pdb");
@@ -398,5 +412,7 @@ BOOST_AUTO_TEST_CASE(atom_name_too_long)
   mol::AtomHandle a=edi.InsertAtom(r, "CALCIUM", geom::Vec3(32.0, -128.0, -2.5));
   BOOST_CHECK_THROW(writer.Write(ent), IOException);
 }
+
+
 
 BOOST_AUTO_TEST_SUITE_END()

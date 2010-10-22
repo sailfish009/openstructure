@@ -55,6 +55,7 @@ Conopology::Conopology():
   known_elements_.insert("BR");
   known_elements_.insert("C");
   known_elements_.insert("CA");
+  known_elements_.insert("D");
   known_elements_.insert("CD");
   known_elements_.insert("CE");
   known_elements_.insert("CF");
