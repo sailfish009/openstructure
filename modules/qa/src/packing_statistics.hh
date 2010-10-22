@@ -69,10 +69,10 @@ public:
   template <typename DS>
   void Serialize(DS& ds)
   {
-  ds & cutoff_;
-  ds & max_counts_;
-  ds & bucket_size_;
-  ds & histogram_;
+    ds & cutoff_;
+    ds & max_counts_;
+    ds & bucket_size_;
+    ds & histogram_;
   }
 
   Real            cutoff_;
