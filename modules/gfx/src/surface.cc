@@ -318,7 +318,7 @@ void Surface::Apply(const gfx::GradientLevelColorOp& op, bool store)
   for(VMap::const_iterator it=vmap_.begin();it!=vmap_.end();++it) {
     mol::AtomHandle ah = sh_.GetVertex(it->first).atom;
     if(ah.IsValid()) {
-      va_.SetColor(it->second,gradient.GetColorAt(normalize(epm.Get(ah),minv,maxv)));
+      va_.SetColor(it->second,gradient.GetColorAt(normalize(epm.Get(ah,minv),minv,maxv)));
     }
   }
   FlagRefresh();
