@@ -26,12 +26,12 @@
 
 namespace ost { namespace gfx {
 
-Color::Color(int code)
+Color::Color(uint code)
 {
-  rgba[0]=static_cast<float>((code>>16)&0xff)/255.0;
-  rgba[1]=static_cast<float>((code>>8)&0xff)/255.0;
-  rgba[2]=static_cast<float>(code&0xff)/255.0;
-  rgba[3]=1.0;
+  rgba[0]=static_cast<float>((code>>24)&0xff)/255.0;
+  rgba[1]=static_cast<float>((code>>16)&0xff)/255.0;
+  rgba[2]=static_cast<float>((code>>8)&0xff)/255.0;
+  rgba[3]=static_cast<float>((code)&0xff)/255.0;
 }
 
 std::ostream& operator<<(std::ostream& s, const Color& c)

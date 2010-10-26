@@ -59,38 +59,6 @@ namespace ost {
 
 namespace gfx {
 
-MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
-  GfxObj(name),
-  original_mh_(mh),
-  downsampled_mh_(),
-  mh_(MapIso::DownsampleMap(mh)),
-  octree_(mh_),
-  stat_calculated_(false),
-  histogram_calculated_(false),
-  histogram_bin_count_(100),
-  level_(level),
-  normals_calculated_(false),
-  alg_(0),
-  smoothf_(0.2),
-  debug_octree_(false),
-  color_(Color::GREY)
-{
-  // TODO replace with def mat for this gfx obj type
-  if (mh_ != original_mh_) {
-    downsampled_mh_ = mh_;
-  }
-  octree_.Initialize();
-  SetMatAmb(Color(0,0,0));
-  SetMatDiff(Color(1,1,1));
-  SetMatSpec(Color(0.1,0.1,0.1));
-  SetMatShin(32);
-  mol::Transform tf=this->GetTF();
-  tf.SetCenter(this->GetCenter());
-  tf.SetTrans(this->GetCenter());
-  this->SetTF(tf);
-  Rebuild();
-}
-
 MapIso::MapIso(const String& name, const img::MapHandle& mh, 
                float level, uint a):
   GfxObj(name),
@@ -105,7 +73,7 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   normals_calculated_(false),
   alg_(a),
   debug_octree_(false),
-  color_(Color::GREY)  
+  color_(1.0,1.0,1.0)
 {
   // TODO replace with def mat for this gfx obj type
   if (mh_ != original_mh_) {

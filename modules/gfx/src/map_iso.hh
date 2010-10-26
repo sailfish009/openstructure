@@ -51,10 +51,7 @@ typedef boost::shared_ptr<MapIso> MapIsoP;
 /// \sa gfx::MapSlab
 class DLLEXPORT_OST_GFX MapIso: public GfxObj {
 public:
-  MapIso(const String& name, const img::MapHandle& mh,float level);
-
-  MapIso(const String& name, const img::MapHandle& mh,
-         float level, uint a);
+  MapIso(const String& name, const img::MapHandle& mh,float level, uint a=0);
 
   virtual geom::AlignedCuboid GetBoundingBox() const;
                              

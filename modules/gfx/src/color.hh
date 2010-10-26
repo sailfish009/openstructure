@@ -51,21 +51,7 @@ public:
     rgba[3]=a;
   }
 
-  enum COLOR_NAME {
-    WHITE=0xffffff,
-    LIGHT_GREY=0xaaaaff,
-    GREY=0x999999ff,
-    DARK_GREY=0x333333ff,
-    BLACK=0x000000,
-    RED=0xff0000,
-    GREEN=0x00ff00,
-    BLUE=0x0000ff,
-    CYAN=0x00ffff,
-    MAGENTA=0xff00ff,
-    YELLOW=0xffff00
-  };
-
-  Color(int hex_code);
+  explicit Color(uint hex_code);
 
   float& Red() {return rgba[0];}
   const float& Red() const {return rgba[0];}

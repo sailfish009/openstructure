@@ -30,8 +30,8 @@
 namespace ost { namespace gfx {
 
 Primitive::Primitive(const String& name):
-  GfxNode(name), fill_(true), line_(true), outline_color_(gfx::Color::WHITE), 
-  fill_color_(gfx::Color::LIGHT_GREY), line_width_(1.0)
+  GfxNode(name), fill_(true), line_(true), outline_color_(1.0,1.0,1.0), 
+  fill_color_(0.8,0.8,0.8), line_width_(1.0)
 {
   
 }
