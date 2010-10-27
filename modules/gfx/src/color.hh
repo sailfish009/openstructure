@@ -28,6 +28,7 @@
 #include <boost/operators.hpp>
 
 #include <ost/gfx/module_config.hh>
+#include <ost/geom/geom.hh>
 
 namespace ost { namespace gfx {
 
@@ -51,8 +52,6 @@ public:
     rgba[3]=a;
   }
 
-  explicit Color(uint hex_code);
-
   float& Red() {return rgba[0];}
   const float& Red() const {return rgba[0];}
   float& Green() {return rgba[1];}
@@ -68,7 +67,8 @@ public:
     return Color(f*static_cast<float>(r),f*static_cast<float>(g),
 		 f*static_cast<float>(b),f*static_cast<float>(a));
   }
-  //static Color HSB();
+
+  geom::Vec3 ToHSV();
 
   // these also take care of operator[](uint i) !
   operator float* () {return rgba;}
@@ -84,6 +84,8 @@ public:
 private:
   float rgba[4];
 };
+
+Color HSV(double h, double s, double v);
 
 DLLEXPORT_OST_GFX std::ostream& operator<<(std::ostream&, const Color& c);
 

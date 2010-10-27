@@ -147,14 +147,17 @@ BOOST_PYTHON_MODULE(_gfx)
 
   
   class_<Color>("Color",init<>())
-    .def(init<int>())
     .def(init<float, float, float, optional<float> >())
     .def(self_ns::str(self))
     .def("Red",color_get_red)
     .def("Green",color_get_green)
     .def("Blue",color_get_blue)
     .def("Alpha",color_get_alpha)
+    .def("ToHSV",&Color::ToHSV)
+    .def("FromRGBA",&Color::FromRGB)
     ;
+
+  def("HSV",HSV);
   
   class_<Gradient>("Gradient", init<>())
     .def(init<const String&>())
