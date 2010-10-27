@@ -20,8 +20,8 @@
 #define OST_VERSION_HH_
 
 #define OST_VERSION_MAJOR 1
-#define OST_VERSION_MINOR 0
+#define OST_VERSION_MINOR 1
 #define OST_VERSION_PATCH 0
-#define OST_VERSION_STRING "1.0.0"
+#define OST_VERSION_STRING "1.1.0"
 
 #endif /* OST_VERSION_HH_ */
