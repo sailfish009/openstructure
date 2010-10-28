@@ -65,7 +65,7 @@ public:
                        unsigned char b, unsigned char a = 0xff) {
     static float f=1.0/255.0;
     return Color(f*static_cast<float>(r),f*static_cast<float>(g),
-		 f*static_cast<float>(b),f*static_cast<float>(a));
+                 f*static_cast<float>(b),f*static_cast<float>(a));
   }
 
   geom::Vec3 ToHSV();
@@ -85,7 +85,7 @@ private:
   float rgba[4];
 };
 
-Color HSV(double h, double s, double v);
+Color DLLEXPORT_OST_GFX HSV(double h, double s, double v);
 
 DLLEXPORT_OST_GFX std::ostream& operator<<(std::ostream&, const Color& c);
 
