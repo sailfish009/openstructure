@@ -22,6 +22,7 @@ scratch
 pov_*test.pov
 pov_*test.inc
 *-out.pdb
+*-out.sdf
 CMakeLists.txt.user
 OpenStructure.cbp
 DartConfiguration.tcl
@@ -35,3 +36,4 @@ deployment/macos/standalone
 ChemLib
 components.cif
 compounds.chemlib
+deployment/macos/openstructure.dmg
