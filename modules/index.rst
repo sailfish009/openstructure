@@ -21,6 +21,7 @@ OpenStructure documentation
   gui/gui
   newmodule
   external
+  contributing
   
 For Starters
 --------------------------------------------------------------------------------
@@ -85,7 +86,7 @@ Graphical User Interface
 Extending OpenStructure
 --------------------------------------------------------------------------------
 
-**Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>`
+**Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>` | :doc:`instructions for developers <contributing>`
 
 
 
