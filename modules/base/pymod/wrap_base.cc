@@ -23,6 +23,7 @@
 #include <ost/base.hh>
 #include <ost/platform.hh>
 #include <ost/message.hh>
+#include <ost/version.hh>
 
 using namespace boost::python;
 
@@ -44,6 +45,11 @@ BOOST_PYTHON_MODULE(_base)
   def("SetPrefixPath", &ost::SetPrefixPath);
   def("GetPrefixPath", &ost::GetPrefixPath);
   def("GetSharedDataPath", &ost::GetSharedDataPath);  
+  
+  scope().attr("VERSION")=OST_VERSION_STRING;
+  scope().attr("VERSION_MAJOR")=OST_VERSION_MAJOR;
+  scope().attr("VERSION_MINOR")=OST_VERSION_MINOR;  
+  scope().attr("VERSION_PATCH")=OST_VERSION_PATCH;
   export_Logger();
   export_Range();
   export_Units();
