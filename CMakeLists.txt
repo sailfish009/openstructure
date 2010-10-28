@@ -183,9 +183,6 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     #  -fno-strict-aliasing
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
   endif()
-  if (APPLE AND NOT _GCC_VERSION MATCHES "42")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
-  endif()
 endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
