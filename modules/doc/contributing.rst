@@ -14,7 +14,7 @@ Even though, technically, there is no such a thing as a central repository in gi
 
 .. code-block:: bash
 
-  git clone https:/dng.biozentrum.unibas.ch/git/ost.git
+  git clone https://dng.biozentrum.unibas.ch/git/ost.git
 
 
 For information on how to install OpenStructure from source, refer to :doc:`install`. 
