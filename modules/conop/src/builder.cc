@@ -147,7 +147,11 @@ String Builder::GuessAtomElement(const String& aname, bool hetatm)
       if(ele==l3[i]) return ele;
     }
   }
-  return String(1, aname[0]);
+  size_t i=0;
+  while (i<aname.size() && isdigit(aname[i])) {
+    ++i;
+  }
+  return i<aname.size() ? String(1, aname[i]) : "";
 }
 
 bool Builder::AreResiduesConsecutive(const mol::ResidueHandle& r1, 
