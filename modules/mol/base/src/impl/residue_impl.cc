@@ -61,8 +61,19 @@ AtomImplPtr ResidueImpl::InsertAtom(const AtomImplPtr& atom)
   AtomImplPtr dst_atom=this->InsertAtom(atom->GetName(), 
                                         atom->GetPos(),
                                         atom->GetElement());
+
   dst_atom->Assign(*atom.get());
   dst_atom->SetState(atom->GetState());
+  dst_atom->SetBFactor(atom->GetBFactor());
+  dst_atom->SetOccupancy(atom->GetOccupancy());
+  dst_atom->SetHetAtom(atom->IsHetAtom());  
+
+  if (!atom->HasDefaultProps()) {
+    dst_atom->SetRadius(atom->GetRadius());
+    dst_atom->SetCharge(atom->GetCharge());
+    dst_atom->SetMass(atom->GetMass());
+    dst_atom->SetAnisou(atom->GetAnisou());
+  }
   return dst_atom;
 }
 

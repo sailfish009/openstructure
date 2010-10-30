@@ -87,7 +87,7 @@ void CRDReader::Import(mol::EntityHandle& ent)
 
 void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
 {
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
 
   LOG_TRACE( "line: [" << line << "]" );
 
@@ -257,7 +257,7 @@ mol::EntityHandle LoadCRD(const String& file_name)
   conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
   CRDReader reader(file_name);
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   reader.Import(ent);
   conop::Conopology::Instance().ConnectAll(builder,ent);    
   return ent;

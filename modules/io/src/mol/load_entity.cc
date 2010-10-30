@@ -60,7 +60,7 @@ mol::EntityHandle LoadEntity(const String& filename, int flag)
 {
   LOG_DEBUG("creating emtpy entity");
   mol::EntityHandle eh=mol::CreateEntity();
-  mol::XCSEditor xcs_lock=eh.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor xcs_lock=eh.EditXCS(mol::BUFFERED_EDIT);
   Import(eh,filename,flag);
   return eh;
 }

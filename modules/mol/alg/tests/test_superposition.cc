@@ -34,7 +34,7 @@ struct Fixture {
   Fixture() {
 
     e=CreateEntity();
-    XCSEditor ed=e.RequestXCSEditor();
+    XCSEditor ed=e.EditXCS();
     c=ed.InsertChain("A");
     r=ed.AppendResidue(c, "XXX");
     ab=ed.InsertAtom(r, "A", geom::Vec3(-5,-5,-5), "C");
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(superposition_svd)
 {
   Fixture f1, f2;
   EntityView ev1 = f1.e.CreateFullView();
-  XCSEditor ed=f1.e.RequestXCSEditor();
+  XCSEditor ed=f1.e.EditXCS();
   EntityView ev2 = f2.e.CreateFullView();
   ChainHandle ch1=f1.e.GetChainList()[0];
   ResidueHandleIter rit=ch1.ResiduesBegin();

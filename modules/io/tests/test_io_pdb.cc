@@ -221,7 +221,7 @@ BOOST_AUTO_TEST_CASE(write_atom)
   PDBWriter writer(out);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::XCSEditor edi=ent.EditXCS();
   mol::ChainHandle ch=edi.InsertChain("A");
   mol::ResidueHandle r=edi.AppendResidue(ch, "GLY");
 
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(write_hetatom)
   PDBWriter writer(out);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::XCSEditor edi=ent.EditXCS();
   mol::ChainHandle ch=edi.InsertChain("A");
   mol::ResidueHandle r=edi.AppendResidue(ch, "CA");
   mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), 
@@ -380,7 +380,7 @@ BOOST_AUTO_TEST_CASE(res_name_too_long)
   PDBWriter writer(out);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::XCSEditor edi=ent.EditXCS();
   mol::ChainHandle ch=edi.InsertChain("A");
   mol::ResidueHandle r=edi.AppendResidue(ch, "CALCIUM");
   mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5));
@@ -393,7 +393,7 @@ BOOST_AUTO_TEST_CASE(chain_name_too_long)
   PDBWriter writer(out);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::XCSEditor edi=ent.EditXCS();
   mol::ChainHandle ch=edi.InsertChain("AB");
   mol::ResidueHandle r=edi.AppendResidue(ch, "CA");
   mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5));
@@ -406,7 +406,7 @@ BOOST_AUTO_TEST_CASE(atom_name_too_long)
   PDBWriter writer(out);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::XCSEditor edi=ent.EditXCS();
   mol::ChainHandle ch=edi.InsertChain("A");
   mol::ResidueHandle r=edi.AppendResidue(ch, "CA");
   mol::AtomHandle a=edi.InsertAtom(r, "CALCIUM", geom::Vec3(32.0, -128.0, -2.5));

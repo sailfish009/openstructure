@@ -263,12 +263,12 @@ public:
   /// \brief Get editor for external coordinate system to manipulate atom 
   ///     positions
   /// \sa editors
-  XCSEditor RequestXCSEditor(EditMode mode=UNBUFFERED_EDIT) const;
+  XCSEditor EditXCS(EditMode mode=UNBUFFERED_EDIT) const;
   
   /// \brief Get editor for the internal coordinate system to manipulate 
   ///    torsions bond lengths and angles between bonds
   /// \sa editors
-  ICSEditor RequestICSEditor(EditMode mode=UNBUFFERED_EDIT) const;  
+  ICSEditor EditICS(EditMode mode=UNBUFFERED_EDIT) const;  
   
   /// \brief get this handle
   /// 

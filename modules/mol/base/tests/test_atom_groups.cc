@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(switch_pos)
   geom::Vec3 y=geom::Vec3(0.0, 1.0, 0.0);
   geom::Vec3 z=geom::Vec3(0.0, 0.0, 1.0);  
   // Should throw, since aa has no alt-location set.
-  XCSEditor editor=ent.e.RequestXCSEditor();  
+  XCSEditor editor=ent.e.EditXCS();  
   BOOST_CHECK_THROW(editor.AddAltAtomPos("B", ent.aa, y),
                     Error);
   AtomHandle xx=editor.InsertAltAtom(ent.r, "ZZ", "A", y); 
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(switch_pos)
 BOOST_AUTO_TEST_CASE(delete_atom) 
 {
   test::DummyEnt ent;
-  XCSEditor editor=ent.e.RequestXCSEditor();       
+  XCSEditor editor=ent.e.EditXCS();       
   AtomHandle xx=editor.InsertAltAtom(ent.r, "ZZ", "A", geom::Vec3());
   AtomHandle zz=editor.InsertAltAtom(ent.r, "XX", "A", geom::Vec3());
   
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(atom_group_triv)
   BOOST_CHECK(ent.r.HasAltAtomGroup("")==false);
   std::vector<String> names=ent.r.GetAltAtomGroupNames();
   BOOST_CHECK(names.empty());
-  XCSEditor editor=ent.e.RequestXCSEditor();
+  XCSEditor editor=ent.e.EditXCS();
   AtomHandle xx=editor.InsertAltAtom(ent.r, "A", "ZZ", geom::Vec3(0.0,1.0,0.0));   
   editor.AddAltAtomPos("B", xx, geom::Vec3(1.0, 0.0, 0.0));
   BOOST_CHECK(ent.r.HasAltAtoms()==true);

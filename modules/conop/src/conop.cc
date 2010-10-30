@@ -262,7 +262,7 @@ void Conopology::ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flag)
 {
   Profile profile_connect("ConnectAll");
   LOG_DEBUG("Conopology: ConnectAll: building internal coordinate system");
-  mol::XCSEditor xcs_e=eh.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor xcs_e=eh.EditXCS(mol::BUFFERED_EDIT);
   PropAssigner a(b);
   eh.Apply(a);
   LOG_DEBUG("Conopology: ConnectAll: connecting all bonds");

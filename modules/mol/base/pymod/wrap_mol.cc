@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 #include <ost/mol/transform.hh>
+#include <ost/mol/editor_base.hh>
 #include <ost/info/info.hh>
 
 using namespace boost::python;
@@ -44,6 +45,10 @@ void export_QueryViewWrapper();
 void export_EntityPropertyMapper();
 BOOST_PYTHON_MODULE(_mol)
 {
+  enum_<EditMode>("EditMode")
+    .value("BUFFERED_EDIT", BUFFERED_EDIT)
+    .value("UNBUFFERED_EDIT", UNBUFFERED_EDIT)
+  ;
   export_Entity();
   export_Surface();
   export_Query();

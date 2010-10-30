@@ -411,7 +411,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   if (!this->EnsureLineLength(line, 54)) {
     return;
   }
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   char alt_loc=0;
   String chain_name;
   StringRef res_name, atom_name;

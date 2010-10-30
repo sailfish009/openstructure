@@ -143,7 +143,7 @@ The Handle Classes
     
     See :attr:`atoms`
     
-  .. method:: RequestXCSEditor([edit_mode=mol.EditMode.BUFFERED_EDIT])
+  .. method:: EditXCS([edit_mode=mol.EditMode.BUFFERED_EDIT])
     
     Request :class:`XCSEditor` for editing the external coordinate system. This
     call will fail when there are pending changes of the internal coordinate
@@ -156,7 +156,7 @@ The Handle Classes
     
     :returns: :class:`XCSEditor`
     
-  .. method:: RequestICSEditor([edit_mode=mol.EditMode.BUFFERED_EDIT])
+  .. method:: EditICS([edit_mode=mol.EditMode.BUFFERED_EDIT])
     
     Request :class:`ICSEditor` for editing the internal coordinate system, such
     as torsions, bond lengths and angle between two bonds. This call will fail

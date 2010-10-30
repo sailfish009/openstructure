@@ -36,7 +36,7 @@ struct Structure {
   Structure()
   {
     e=CreateEntity();
-    ICSEditor editor=e.RequestICSEditor();
+    ICSEditor editor=e.EditICS();
     c=editor.InsertChain("A");
     r=editor.AppendResidue(c, "ANGELIN");
     a1=editor.InsertAtom(r, "CC", geom::Vec3(-1.0, 0.0,  0.0));
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 BOOST_AUTO_TEST_CASE(ics_angle_trivia) 
 {
   Structure s;
-  ICSEditor e=s.e.RequestICSEditor();
+  ICSEditor e=s.e.EditICS();
   BOOST_CHECK(!e.SetAngle(s.a1, s.a3, s.a2, 0));
   BOOST_CHECK(!e.SetAngle(s.a2, s.a3, s.a1, 0));
   BOOST_CHECK(e.SetAngle(s.a1, s.a2, s.a3, 0));
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(ics_set_angle_sec)
 {
   Structure s;
   // test for set angle of two secondary connectors
-  ICSEditor e=s.e.RequestICSEditor();  
+  ICSEditor e=s.e.EditICS();  
   geom::Plane p(s.a3.GetPos(), s.a2.GetPos(), s.a4.GetPos());
   e.SetAngle(s.a3, s.a2, s.a4, M_PI/4);
   e.UpdateXCS();  
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(ics_set_angle_prim)
 {
   Structure s;
   // test for set angle of two secondary connectors
-  ICSEditor e=s.e.RequestICSEditor();    
+  ICSEditor e=s.e.EditICS();    
   e.SetAngle(s.a1, s.a2, s.a4, M_PI/4);
   e.UpdateXCS();
   geom::Plane p(s.a1.GetPos(), s.a2.GetPos(), s.a4.GetPos());

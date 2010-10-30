@@ -49,7 +49,7 @@ namespace ost { namespace mol {
 /// EditorBase::InsertAtom() or EditorBase::InsertAltAtom()
 /// 
 /// \code
-/// XCSEditor edi=residue.GetEntity().RequestXCSEditor();
+/// XCSEditor edi=residue.GetEntity().EditXCS();
 /// edi.InsertAtom(residue, "CA", geom.Vec3(1.0, 0.0, 0.0));
 /// \endcode
 class DLLEXPORT_OST_MOL ResidueHandle : public ResidueBase {

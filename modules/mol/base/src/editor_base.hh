@@ -39,8 +39,8 @@ namespace ost { namespace mol {
 /// Editors are usually used as one of the concrete subclasses of EditorBase:
 /// XCSEditor and ICSEditor. The former operates on the external carthesian
 /// coordinate system while the latter operates on the internal coordinate
-/// system. To create a new editor, use EntityHandle::RequestXCSEditor() and
-/// EntityHandle::RequestICSEditor(), respectively.
+/// system. To create a new editor, use EntityHandle::EditXCS() and
+/// EntityHandle::EditICS(), respectively.
 /// 
 /// For an introduction to the concept of editors go \ref editors "here"
 class DLLEXPORT_OST_MOL EditorBase {

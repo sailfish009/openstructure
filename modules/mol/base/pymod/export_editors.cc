@@ -59,12 +59,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_insert_atom_overloads,
 }
 
 void export_Editors()
-{
-  enum_<EditMode>("EditMode")
-    .value("BUFFERED_EDIT", BUFFERED_EDIT)
-    .value("UNBUFFERED_EDIT", UNBUFFERED_EDIT)
-  ;
-  
+{  
   class_<EditorBase>("EditorBase", no_init)
     .def("InsertChain", &EditorBase::InsertChain)
     .def("InsertAtom", &EditorBase::InsertAtom,

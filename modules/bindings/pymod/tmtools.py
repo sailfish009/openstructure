@@ -120,10 +120,12 @@ def _RunTmScore(tmscore, tmp_dir):
   model2_filename=os.path.join(tmp_dir, 'model02.pdb')  
   if platform.system() == "Windows":
     tmscore_path=settings.Locate('tmscore.exe', explicit_file_name=tmscore)
-    command="\"%s\" %s %s" %(os.path.normpath(tmscore_path), model1_filename, model2_filename)
+    command="\"%s\" %s %s" %(os.path.normpath(tmscore_path), model1_filename, 
+                             model2_filename)
   else:
     tmscore_path=settings.Locate('tmscore', explicit_file_name=tmscore)
-    command="\"%s\" \"%s\" \"%s\"" %(tmscore_path, model1_filename, model2_filename)
+    command="\"%s\" \"%s\" \"%s\"" % (tmscore_path, model1_filename, 
+                                      model2_filename)
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   ps.wait()
   lines=ps.stdout.readlines()
@@ -137,7 +139,7 @@ def TMAlign(model1, model2, tmalign=None):
   """
   tmp_dir_name=_SetupFiles((model1, model2))
   result=_RunTmAlign(tmalign, tmp_dir_name)
-  model1.handle.RequestXCSEditor().ApplyTransform(result.transform)
+  model1.handle.EditXCS().ApplyTransform(result.transform)
   _CleanupFiles(tmp_dir_name)
   return result
 def TMScore(model1, model2, tmscore=None):
@@ -146,6 +148,6 @@ def TMScore(model1, model2, tmscore=None):
   """
   tmp_dir_name=_SetupFiles((model1, model2))
   result=_RunTmScore(tmscore, tmp_dir_name)
-  model1.handle.RequestXCSEditor().ApplyTransform(result.transform)  
+  model1.handle.EditXCS().ApplyTransform(result.transform)  
   _CleanupFiles(tmp_dir_name)
   return result

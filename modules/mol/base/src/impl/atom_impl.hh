@@ -119,7 +119,7 @@ public:
       prop_=impl::AtomProp::GetDefaultProps(element_);
     }
   }
-  
+  bool HasDefaultProps() const { return prop_->is_default; }
   void SetAnisou(const geom::Mat3& anisou)
   {
     if (prop_->is_default && prop_->anisou!=anisou) {

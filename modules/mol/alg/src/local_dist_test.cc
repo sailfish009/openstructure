@@ -121,7 +121,7 @@ Real LocalDistTest(const EntityView& mdl, const EntityView& ref,
   // Residues with symmetric side-chains require special treatment as there are 
   // two possible ways to name the atoms. We calculate the overlap with the 
   // fixed atoms and take the solution that gives bigger scores.
-  XCSEditor edi=ref.GetHandle().RequestXCSEditor(BUFFERED_EDIT);
+  XCSEditor edi=ref.GetHandle().EditXCS(BUFFERED_EDIT);
   for (ResidueViewList::iterator
        i=ref_residues.begin(), e=ref_residues.end(); i!=e; ++i) {
     const String rname=i->GetName();

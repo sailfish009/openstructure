@@ -202,7 +202,7 @@ void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh)
     dist_connect(this, rh.GetAtomList());
     return;
   }
-  mol::XCSEditor e=rh.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor e=rh.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   BondSpecList::const_iterator j=last_compound_->GetBondSpecs().begin();
   mol::AtomHandleList atoms=rh.GetAtomList();
   for(; j!=last_compound_->GetBondSpecs().end(); ++j) {
@@ -232,7 +232,7 @@ void RuleBasedBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
     return;
   }
   Compound::Dialect dialect=this->GetDialect()==PDB_DIALECT ? Compound::PDB : Compound::CHARMM;
-  mol::XCSEditor e=rh.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor e=rh.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   CompoundPtr mc=compound_lib_->FindCompound(rh.GetName(), dialect);
   CompoundPtr nc=compound_lib_->FindCompound(next.GetName(), dialect);
   if (!(mc && nc))

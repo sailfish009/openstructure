@@ -25,7 +25,7 @@ def Renumber(seq_handle):
   changed_residue_count=0
   renumberingFlag = False
   ent_n=mol.CreateEntity()
-  ed=ent_n.RequestXCSEditor()
+  ed=ent_n.EditXCS()
   c=ed.InsertChain(" ")
   for pos in range(len(seq_handle)):
     if seq_handle[pos]!='-':

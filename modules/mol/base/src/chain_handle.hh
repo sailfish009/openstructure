@@ -46,7 +46,7 @@ namespace ost { namespace mol {
 /// the residue numbers are in ascending order.
 ///
 /// New residues are inserted via one of the editors obtained from 
-/// EntityHandle::RequestXCSEditor() or EntityHandle::RequestICSEditor(). To
+/// EntityHandle::EditXCS() or EntityHandle::EditICS(). To
 /// append a residue to the C-terminal end, use EditorBase::AppendResidue, to
 /// insert after or before a specific residue, EditorBase::InsertResidueAfter
 /// and ditorBase::InsertResidueABefore will do the job, respectively.

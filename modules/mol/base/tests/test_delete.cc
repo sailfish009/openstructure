@@ -42,7 +42,7 @@ public:
 struct Fixture {
   Fixture() {
     e=CreateEntity();
-    XCSEditor editor=e.RequestXCSEditor();    
+    XCSEditor editor=e.EditXCS();    
     c=editor.InsertChain("A");
     r=editor.AppendResidue(c, "XXX");
     aa=editor.InsertAtom(r, "A", geom::Vec3());
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 BOOST_AUTO_TEST_CASE(atom_delete) 
 {
   Fixture f;
-  XCSEditor e=f.e.RequestXCSEditor();
+  XCSEditor e=f.e.EditXCS();
   e.DeleteAtom(f.ab);
   E ev;
   BOOST_CHECK_NO_THROW(f.e.Apply(ev));
