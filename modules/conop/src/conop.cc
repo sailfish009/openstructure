@@ -213,7 +213,19 @@ private:
   std::map<String, int>  unk_res_;  
 };
 
-
+class ChemClassAssigner : public mol::EntityVisitor {
+public:
+  ChemClassAssigner(BuilderP b): builder(b) { }
+  virtual bool VisitResidue(const mol::ResidueHandle& res)
+  {
+    if (res.GetChemClass()==mol::ChemClass()) {
+      builder->GuessChemClass(res);
+    }
+    return false;
+  }
+private:
+  BuilderP builder;
+};
 class Connector: public mol::EntityVisitor
 {
 public:
@@ -265,6 +277,8 @@ void Conopology::ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flag)
   mol::XCSEditor xcs_e=eh.EditXCS(mol::BUFFERED_EDIT);
   PropAssigner a(b);
   eh.Apply(a);
+  ChemClassAssigner cca(b);
+  eh.Apply(cca);
   LOG_DEBUG("Conopology: ConnectAll: connecting all bonds");
   Connector connector(b);
   eh.Apply(connector);

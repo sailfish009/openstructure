@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #include <ost/mol/mol.hh>
 #include <ost/conop/builder.hh>
+#include <ost/conop/heuristic_builder.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
@@ -29,6 +30,24 @@ using namespace ost::mol;
 
 BOOST_AUTO_TEST_SUITE( conop )
 
+BOOST_AUTO_TEST_CASE(test_guess_chem_class)
+{
+  HeuristicBuilder h;
+  EntityHandle ent=mol::CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  ChainHandle chain=edi.InsertChain("A");
+  ResidueHandle res=edi.AppendResidue(chain, "DUMMY");
+  AtomHandle n=edi.InsertAtom(res, "N", geom::Vec3(1, 0, 0), "N");
+  AtomHandle ca=edi.InsertAtom(res, "CA", geom::Vec3(2, 0, 0), "C");
+  AtomHandle c=edi.InsertAtom(res, "C", geom::Vec3(3, 0, 0), "C");
+  AtomHandle o=edi.InsertAtom(res, "O", geom::Vec3(4, 0, 0), "O");
+  h.GuessChemClass(res);
+  BOOST_CHECK(res.IsPeptideLinking());
+  res.SetChemClass(ChemClass());
+  edi.SetAtomPos(n, geom::Vec3(-1,0,0));
+  h.GuessChemClass(res);
+  BOOST_CHECK(!res.IsPeptideLinking());
+}
 
 BOOST_AUTO_TEST_CASE( test_builder )
 {

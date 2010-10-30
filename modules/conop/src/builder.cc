@@ -163,6 +163,25 @@ bool Builder::AreResiduesConsecutive(const mol::ResidueHandle& r1,
          r2.GetNumber().GetInsCode()==r1.GetNumber().NextInsertionCode().GetInsCode();
 }
 
+void Builder::GuessChemClass(mol::ResidueHandle res)
+{
+  // try peptide
+  res.SetChemClass(mol::ChemClass());
+  mol::AtomHandle ca=res.FindAtom("CA");
+  if (!ca.IsValid() || ca.GetElement()!="C") return;
+  mol::AtomHandle n=res.FindAtom("N");
+  if (!n.IsValid() || n.GetElement()!="N") return;
+  mol::AtomHandle c=res.FindAtom("C");
+  if (!c.IsValid() || c.GetElement()!="C") return;
+  mol::AtomHandle o=res.FindAtom("O");
+  if (!o.IsValid() || o.GetElement()!="O") return;
+  if (this->IsBondFeasible(n, ca) && this->IsBondFeasible(ca, c) &&
+      this->IsBondFeasible(c, o)) {
+    res.SetChemClass(mol::ChemClass(mol::ChemClass::PeptideLinking));
+  }
+}
+
+
 void Builder::AssignBackBoneTorsionsToResidue(mol::ResidueHandle res)
 {
 

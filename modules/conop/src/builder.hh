@@ -137,7 +137,9 @@ public:
   /// \brief whether the r1 and r2 have consecutive residue numbers
   static bool AreResiduesConsecutive(const mol::ResidueHandle& r1, 
                                      const mol::ResidueHandle& r2);
-
+  /// \brief guess and assign chemical class of residue based on atoms and
+  ///     connectivity
+  void GuessChemClass(mol::ResidueHandle res);
   /// |brief Connect \p atom with all atoms for whith IsBondFeasible() and 
   ///    AreResiduesConsecutive() returns true
   void DistanceBasedConnect(mol::AtomHandle atom);
