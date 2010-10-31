@@ -193,5 +193,17 @@ void ResidueBase::SetIsProtein(bool protein)
   Impl()->SetProtein(protein);
 }
 
+void ResidueBase::SetIsLigand(bool ligand)
+{
+  this->CheckValidity();
+  return Impl()->SetIsLigand(ligand);
+}
+
+bool ResidueBase::IsLigand() const
+{
+  this->CheckValidity();
+  return Impl()->IsLigand();
+}
+
 }}
 

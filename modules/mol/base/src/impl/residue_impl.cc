@@ -42,8 +42,10 @@ ResidueImpl::ResidueImpl(const EntityImplPtr& ent,
   key_(key),
   atom_list_(),
   sec_structure_(SecStructure::COIL),
-  olc_('?')
-{}
+  olc_('?'),
+  protein_(false), ligand_(false)
+{
+}
 
 
 AtomImplPtr ResidueImpl::InsertAtom(const String& name,

@@ -38,7 +38,13 @@ class DLLEXPORT_OST_IO PDBReader {
     mol::ResNum end;
     String chain;
   };
+  struct HetEntry {
+    HetEntry(char c, mol::ResNum n): chain(c), num(n) {}
+    char        chain;
+    mol::ResNum num;
+  };
   typedef std::vector<HSEntry> HSList;
+  typedef std::vector<HetEntry>  HetList;
 public:
   PDBReader(const String& filename);
   PDBReader(const boost::filesystem::path& loc);
@@ -77,12 +83,11 @@ private:
   String restrict_chains_;
   HSList helix_list_;
   HSList strand_list_;
-
   boost::filesystem::ifstream infile_;
   std::istream& instream_;
   boost::iostreams::filtering_stream<boost::iostreams::input>  in_;
   String curr_line_;
-  
+  HetList  hets_;
   // this needs to be set to true for reading pqr
   // file (i.e. pdb formatted file with charges in occupacy
   // column, and radii in b-factor column)

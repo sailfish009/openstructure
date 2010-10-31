@@ -47,7 +47,7 @@ bool IEquals(const StringRef& a, const StringRef& b)
     return false;
   }
   for (size_t i=0; i<a.size(); ++i) {
-    if (toupper(a[i])!=toupper(b[i])) {
+    if (toupper(a[i])!=b[i]) {
       return false;
     }
   }
@@ -113,7 +113,8 @@ bool PDBReader::HasNext()
           IEquals(curr_line.substr(0, 6),StringRef("ANISOU ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6)) ||
-         IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)))) {
+         IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6)))) {
        return true;
      } else if (IEquals(curr_line.rtrim(), StringRef("END", 3))) {
        hard_end_=true;
@@ -188,6 +189,21 @@ void PDBReader::Import(mol::EntityHandle& ent,
           if (!(PDB::Flags() & PDB::CHARMM_FORMAT)) {
             this->ParseHelixEntry(curr_line);            
           }
+        } else if (IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6))) {
+          // remember het entry to mark the residues as ligand during ATOM import
+          char chain=curr_line[12];
+          std::pair<bool, int> num=curr_line.substr(13, 4).ltrim().to_int();
+          if (!num.first) {
+            if (PDB::Flags() && PDB::SKIP_FAULTY_RECORDS) {
+              LOG_WARNING("Invalid HET entry on line " << line_num_);
+              continue;
+            } else {
+              String msg=str(format("Invalid HET entry on line %d")%line_num_);
+              throw IOException(msg);
+            }
+          }
+          hets_.push_back(HetEntry(chain, to_res_num(num.second,
+                                   curr_line[17])));
         }
         break;
       case 'M':
@@ -231,6 +247,12 @@ void PDBReader::Import(mol::EntityHandle& ent,
                << helix_list_.size() << " helices and "
                << strand_list_.size() << " strands");
   this->AssignSecStructure(ent);
+  for (HetList::const_iterator i=hets_.begin(), e=hets_.end(); i!=e; ++i) {
+    mol::ResidueHandle res=ent.FindResidue(String(1, i->chain), i->num);
+    if (res.IsValid()) {
+      res.SetIsLigand(true);
+    }      
+  }
 }
 
 
@@ -285,6 +307,7 @@ void PDBReader::ClearState()
   hard_end_=false;
   helix_list_.clear();
   strand_list_.clear();
+  hets_.clear();
 }
 
 bool PDBReader::EnsureLineLength(const StringRef& line, size_t size)

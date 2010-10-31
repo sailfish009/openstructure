@@ -337,6 +337,7 @@ BOOST_AUTO_TEST_CASE(copy_residue_props)
   ResidueHandle res=edi.AppendResidue(ch, "DUMMY", mol::ResNum(666, '6'));
   res.SetOneLetterCode('X');
   res.SetIsProtein(true);
+  res.SetIsLigand(true);
   ChemClass cl(ChemClass::LPeptideLinking);  
   res.SetSecStructure(SecStructure(SecStructure::ALPHA_HELIX));
   res.SetChemClass(cl);
@@ -348,6 +349,7 @@ BOOST_AUTO_TEST_CASE(copy_residue_props)
   BOOST_CHECK_EQUAL(res2.GetChemClass(), cl);
   BOOST_CHECK_EQUAL(res.GetSecStructure(), SecStructure::ALPHA_HELIX);
   BOOST_CHECK(res2.IsProtein()==true);
+  BOOST_CHECK(res2.IsLigand()==true);  
   BOOST_CHECK_EQUAL(res2.GetNumber(), ResNum(666, '6'));
 }
 

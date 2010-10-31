@@ -143,6 +143,15 @@ BOOST_AUTO_TEST_CASE(calpha_only_import_on)
   BOOST_CHECK_EQUAL(ent.GetAtomCount(), 1);
 }
 
+BOOST_AUTO_TEST_CASE(het_import)
+{
+  String fname("testfiles/pdb/het.pdb");
+  PDBReader reader(fname);
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_CHECK_EQUAL(ent.Select("ligand=true").GetResidueCount(), 1);
+}
+
 BOOST_AUTO_TEST_CASE(calpha_only_import_off)
 {
   String fname("testfiles/pdb/calpha.pdb");

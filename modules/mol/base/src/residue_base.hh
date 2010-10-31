@@ -144,6 +144,10 @@ public:
   bool IsProtein() const;
   
   void SetIsProtein(bool protein);
+  
+  void SetIsLigand(bool ligand);
+  
+  bool IsLigand() const;
 public:
   impl::ResidueImplPtr& Impl();
 
