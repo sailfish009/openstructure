@@ -500,7 +500,14 @@ The Handle Classes
   .. attribute:: sec_structure
   
     The secondary structure of the residue.
-    
+  
+  .. attribute:: is_ligand
+  
+    Whether the residue is a ligand. When loading PDB structures, this property 
+    is set based on the HET records. This also means, that this property will 
+    most likely not be set properly for all except PDB files coming from 
+    pdb.org.
+
   .. method:: FindAtom(atom_name)
 
     Get atom by atom name. See also :attr:`atoms`
