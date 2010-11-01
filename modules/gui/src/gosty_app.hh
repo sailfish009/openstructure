@@ -32,9 +32,6 @@
 #include <ost/gui/sequence_viewer/sequence_viewer.hh>
 #include <ost/gui/messages/message_widget.hh>
 
-#if OST_IMG_ENABLED
-  #include <ost/gui/data_viewer/data_viewer.hh>
-#endif
 
 #include <QObject>
 #include <QString>
@@ -45,7 +42,15 @@ class QMainWindow;
 class QMdiArea;
 class QWidget;
 
-namespace ost { namespace gui {
+namespace ost {
+#if OST_IMG_ENABLED
+namespace img { namespace gui {
+//fw decl
+class DataViewer;
+}} //ns
+#endif
+
+namespace gui {
 
 class PythonShell;
 class GLWin;

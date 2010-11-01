@@ -19,42 +19,37 @@
 //------------------------------------------------------------------------------
 
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Author: Andreas Schenk
 */
 
-#ifndef OST_GUI_ARGAND_H
-#define OST_GUI_ARGAND_H
-
-
-#include <ost/base.hh>
-#include <ost/img/data.hh>
-#include <ost/img/extent.hh>
-
-#include <ost/gui/module_config.hh>
-
-#include <QGraphicsWidget>
-#include <QPixmap>
+#include "area_changed_event.hh"
+#include "viewer_graphics_scene.hh"
+#include <QCoreApplication>
 
 namespace ost { namespace img { namespace gui {
 
-class DLLEXPORT_OST_GUI Argand: public QGraphicsWidget
+ViewerGraphicsScene::ViewerGraphicsScene(QObject* parent):
+  QGraphicsScene(parent)
 {
-  Q_OBJECT;
-public:
-  Argand(QGraphicsItem* p=0);
-  ~Argand();
+  setSceneRect(QRectF(QPointF(-100000,-100000),QPointF(100000,100000)));
+}
 
-  virtual void paint(QPainter* painter,const QStyleOptionGraphicsItem * option,QWidget * widget = 0);
+bool ViewerGraphicsScene::event(QEvent *event)
+{
+  if(event->type()==AreaChangedEvent::type){
+    areaChangedEvent(static_cast<AreaChangedEvent *>(event));
+    return true;
+  }else{
+    return QGraphicsScene::event(event);
+  }
+}
 
- public slots:
-  void SetCurrentPixel(const Point& p);
-  void SetExtent(const Extent& e, const Data& d);
-  void ClearExtent();
-private:
-  QPixmap buffer_;
+void ViewerGraphicsScene::areaChangedEvent(AreaChangedEvent * event)
+{
+  QList<QGraphicsItem *> childern= items();
+  for(unsigned int i=0;i<childern.size();++i){
+    QCoreApplication::sendEvent(this, event);
+  }
+}
 
-};
-
-}}}  //ns
-
-#endif
+}}} //ns

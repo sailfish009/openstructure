@@ -19,42 +19,25 @@
 //------------------------------------------------------------------------------
 
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Author: Andreas Schenk
 */
 
-#ifndef OST_GUI_ARGAND_H
-#define OST_GUI_ARGAND_H
+#ifndef WIDGET_LAYER_ITEM_HH
+#define WIDGET_LAYER_ITEM_HH
 
-
-#include <ost/base.hh>
-#include <ost/img/data.hh>
-#include <ost/img/extent.hh>
-
-#include <ost/gui/module_config.hh>
-
-#include <QGraphicsWidget>
-#include <QPixmap>
-
+#include <QGraphicsItem>
 namespace ost { namespace img { namespace gui {
 
-class DLLEXPORT_OST_GUI Argand: public QGraphicsWidget
+class WidgetLayerItem : public QGraphicsItem
 {
-  Q_OBJECT;
 public:
-  Argand(QGraphicsItem* p=0);
-  ~Argand();
-
-  virtual void paint(QPainter* painter,const QStyleOptionGraphicsItem * option,QWidget * widget = 0);
-
- public slots:
-  void SetCurrentPixel(const Point& p);
-  void SetExtent(const Extent& e, const Data& d);
-  void ClearExtent();
-private:
-  QPixmap buffer_;
-
+  WidgetLayerItem(QGraphicsItem* parent=0);
+  virtual void 	paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+  virtual QRectF boundingRect() const;
+  virtual void AddWidget(QWidget* widget);
+  virtual void AddWidget(QGraphicsWidget* widget);
 };
 
-}}}  //ns
+}}} //ns
 
-#endif
+#endif // WIDGET_LAYER_ITEM_HH

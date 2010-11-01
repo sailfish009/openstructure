@@ -19,42 +19,44 @@
 //------------------------------------------------------------------------------
 
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Author: Andreas Schenk
 */
 
-#ifndef OST_GUI_ARGAND_H
-#define OST_GUI_ARGAND_H
-
-
-#include <ost/base.hh>
-#include <ost/img/data.hh>
-#include <ost/img/extent.hh>
-
-#include <ost/gui/module_config.hh>
-
-#include <QGraphicsWidget>
-#include <QPixmap>
+#include <QDebug>
+#include <QPainter>
+#include "widget_layer_item.hh"
+#include <QGraphicsProxyWidget>
 
 namespace ost { namespace img { namespace gui {
 
-class DLLEXPORT_OST_GUI Argand: public QGraphicsWidget
+WidgetLayerItem::WidgetLayerItem(QGraphicsItem* parent):
+  QGraphicsItem(parent)
 {
-  Q_OBJECT;
-public:
-  Argand(QGraphicsItem* p=0);
-  ~Argand();
+}
 
-  virtual void paint(QPainter* painter,const QStyleOptionGraphicsItem * option,QWidget * widget = 0);
+void WidgetLayerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
+{
+}
 
- public slots:
-  void SetCurrentPixel(const Point& p);
-  void SetExtent(const Extent& e, const Data& d);
-  void ClearExtent();
-private:
-  QPixmap buffer_;
+QRectF WidgetLayerItem::boundingRect() const
+{
+  return QRectF();
+}
 
-};
+void WidgetLayerItem::AddWidget(QWidget* widget)
+{
+  QGraphicsProxyWidget* proxy=new QGraphicsProxyWidget(this,Qt::Tool);
+  proxy->setWidget(widget);
+  proxy->setFlag(QGraphicsItem::ItemIsMovable);
+  proxy->setOpacity(0.9);
+  proxy->setPos(30,30);
+}
+void WidgetLayerItem::AddWidget(QGraphicsWidget* widget)
+{
+  widget->setParentItem(this);
+  widget->setFlag(QGraphicsItem::ItemIsMovable);
+  widget->setOpacity(0.9);
+  widget->setPos(30,30);
+}
 
-}}}  //ns
-
-#endif
+}}} //ns

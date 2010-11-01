@@ -19,42 +19,38 @@
 //------------------------------------------------------------------------------
 
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Author: Andreas Schenk
 */
 
-#ifndef OST_GUI_ARGAND_H
-#define OST_GUI_ARGAND_H
+#ifndef IMAGE_LAYER_HH
+#define IMAGE_LAYER_HH
+
+#include <QSet>
+#include <QGraphicsItem>
 
 
-#include <ost/base.hh>
-#include <ost/img/data.hh>
-#include <ost/img/extent.hh>
+namespace ost { namespace img {
+//fw decl
+class Data;
 
-#include <ost/gui/module_config.hh>
+namespace gui {
 
-#include <QGraphicsWidget>
-#include <QPixmap>
+//fw decl
+class  GraphicsImageItem;
 
-namespace ost { namespace img { namespace gui {
-
-class DLLEXPORT_OST_GUI Argand: public QGraphicsWidget
+class ImageLayer : public QGraphicsItem
 {
-  Q_OBJECT;
 public:
-  Argand(QGraphicsItem* p=0);
-  ~Argand();
-
-  virtual void paint(QPainter* painter,const QStyleOptionGraphicsItem * option,QWidget * widget = 0);
-
- public slots:
-  void SetCurrentPixel(const Point& p);
-  void SetExtent(const Extent& e, const Data& d);
-  void ClearExtent();
+    ImageLayer(QGraphicsItem* parent=0);
+    GraphicsImageItem* AddImage( const Data& data);
+    void CenterOn(const QPointF& p);
+    QRectF boundingRect () const;
+    virtual void 	paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = 0 );
+    virtual QPointF GetCenteringPosition();
 private:
-  QPixmap buffer_;
-
+  QSet<GraphicsImageItem*> images_;
 };
 
-}}}  //ns
+}}} //ns
 
-#endif
+#endif // IMAGE_LAYER_HH

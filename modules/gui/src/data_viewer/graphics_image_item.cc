@@ -274,19 +274,17 @@ void GraphicsImageItem::ObserverRelease()
 
 void 	GraphicsImageItem::mouseMoveEvent(QGraphicsSceneMouseEvent * event)
 {
-  if(event->buttons() & Qt::RightButton){
+  if(event->buttons() & Qt::LeftButton){
     rubberband_->setVisible(true);
-    rubberband_->setRect(QRectF(event->buttonDownPos(Qt::RightButton).toPoint(),event->pos().toPoint()).normalized());
-    event->accept();
-  }else{
-    event->ignore();
+    rubberband_->setRect(QRectF(event->buttonDownPos(Qt::LeftButton).toPoint(),event->pos().toPoint()).normalized());
   }
 }
 
 void 	GraphicsImageItem::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
-  if(event->button()==Qt::RightButton){
+  if(event->button()==Qt::LeftButton){
     rubberband_->setVisible(false);
+    rubberband_->setRect(QRectF());
     event->accept();
   }else{
     event->ignore();
@@ -295,9 +293,13 @@ void 	GraphicsImageItem::mousePressEvent(QGraphicsSceneMouseEvent * event)
 
 void 	GraphicsImageItem::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 {
-  if(event->button()==Qt::RightButton){
-    if(rubberband_->rect().isNull()){
+  if(event->button()==Qt::LeftButton){
+    if(rubberband_->rect().width()==0 || rubberband_->rect().height()==0){
       rubberband_->setVisible(false);
+      emit deselected();
+    }else{
+      QRectF rect=rubberband_->rect();
+      emit selected(Extent(Point(rect.left(),rect.top()),Point(rect.right(),rect.bottom())),GetObservedData());
     }
     event->accept();
   }else{
@@ -436,6 +438,7 @@ void GraphicsImageItem::MoveSlab(int n)
 {
   slab_=std::min<int>(std::max<int>(slab_+n,GetObservedData().GetExtent().GetStart()[2]),GetObservedData().GetExtent().GetEnd()[2]);
   update();
+  emit slabChanged(slab_);
 }
 
 ViewerNormalizerPtr GraphicsImageItem::GetNormalizer() const
@@ -452,6 +455,11 @@ void GraphicsImageItem::hoverMoveEvent(QGraphicsSceneHoverEvent * event)
 {
   QPointF pos=event->scenePos();
  emit MousePosition(pos,GetObservedData().GetComplex(Point(floor(pos.x()),floor(pos.y()))));
+}
+
+void GraphicsImageItem::focusOutEvent(QFocusEvent* event)
+{
+  rubberband_->setVisible(false);
 }
 
 }}}  //ns

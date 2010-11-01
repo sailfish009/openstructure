@@ -16,6 +16,11 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+/*
+  Authors: Marco Biasini, Andreas Schenk, Stefan Scheuber
+ */
+
+
 #include "gosty_app.hh"
 #include <iostream>
 
@@ -32,9 +37,11 @@
 
 #include <QMenuBar>
 #include <QDesktopWidget>
-/*
-  Author: Marco Biasini, Andreas Schenk, Stefan Scheuber
- */
+
+#if OST_IMG_ENABLED
+#include <ost/gui/data_viewer/data_viewer.hh>
+#endif
+
 
 namespace ost { namespace gui {
 

@@ -97,9 +97,9 @@ public:
   void ClearCache();
   void ClearCacheRegion(const Extent& e);
 
-  virtual void 	mouseMoveEvent(QGraphicsSceneMouseEvent* event);
-  virtual void 	mousePressEvent(QGraphicsSceneMouseEvent* event);
-  virtual void 	mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
+  virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* event);
+  virtual void mousePressEvent(QGraphicsSceneMouseEvent* event);
+  virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent* event);
   virtual void keyPressEvent (QKeyEvent* keyEvent);
   //////////////////////
   // observer interface
@@ -110,8 +110,12 @@ public:
 
 signals:
   void MousePosition(const QPointF& pos, Complex value);
+  void selected(const Extent& selection,const Data& data);
+  void deselected();
+  void slabChanged(int slab);
 protected:
-  virtual void hoverMoveEvent(QGraphicsSceneHoverEvent * event) ;
+  virtual void hoverMoveEvent(QGraphicsSceneHoverEvent* event);
+  virtual void focusOutEvent(QFocusEvent* event);
   static QCache<CacheKey,QImage> cache_;
   Mode cmode_;
   int slab_;

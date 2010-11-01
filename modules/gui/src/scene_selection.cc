@@ -33,6 +33,7 @@
 #include <ost/gfx/map_iso.hh>
 #include <ost/gui/main_area.hh>
 #include <ost/gui/perspective.hh>
+#include <ost/gui/data_viewer/data_viewer.hh>
 
 #endif
 

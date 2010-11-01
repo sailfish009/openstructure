@@ -26,18 +26,45 @@
 #define VIEWER_PANEL_HH
 
 #include <QGraphicsView>
+#include <ost/geom/vec3.hh>
 
-namespace ost { namespace img { namespace gui {
+namespace ost { namespace img {
+
+//fw decl
+class Data;
+
+namespace gui {
+//fw decl
+class ImageLayer;
+class WidgetLayerItem;
+class GraphicsImageItem;
 
 class ViewerPanel : public QGraphicsView
 {
+Q_OBJECT;
 public:
-  ViewerPanel(QGraphicsScene* scene, QWidget* parent=0);
+  ViewerPanel(QWidget* parent=0);
+  virtual GraphicsImageItem* AddImage(const Data& data);
+  virtual void AddWidget(QWidget* widget);
+  virtual void AddWidget(QGraphicsWidget* widget);
+  virtual void CenterOn(const QPointF& p);
+protected:
   virtual void 	keyPressEvent (QKeyEvent * event);
   virtual void 	wheelEvent (QWheelEvent* event);
   virtual void 	mouseDoubleClickEvent(QMouseEvent* event);
-protected:
+  virtual void 	mousePressEvent(QMouseEvent* event);
+  virtual void 	mouseReleaseEvent(QMouseEvent* event);
+  virtual void 	mouseMoveEvent(QMouseEvent* event);
+  virtual void 	scrollContentsBy ( int dx, int dy );
+  ImageLayer* image_layer_;
+  WidgetLayerItem* widget_layer_;
   QPoint last_mouse_;
+  bool moving_image_;
+signals:
+  void clicked(const geom::Vec3& mousepos);
+  void zoomed(Real scale);
+  void released(void);
+
 };
 
 }}} //ns

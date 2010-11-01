@@ -23,138 +23,79 @@
 */
 
 
+#include <QPainter>
+#include <QPen>
+#include <QGraphicsLineItem>
 #include <ost/base.hh>
 
 #include "argand.hh"
 
-#include <QPainter>
-#include <QResizeEvent>
+
+
 namespace ost { namespace img { namespace gui {
 
-Argand::Argand(const Data& data, QWidget* p):
-  QWidget(p),
-  DataObserver(data),
-  extent_(),
-  current_(),
-  has_data_(false),
-  data_changed_(false),
-  buffer_(new QPixmap(250,250)),
-  sf_(1.0)
+Argand::Argand(QGraphicsItem* p):
+  QGraphicsWidget(p),
+  buffer_(100,100)
 {
   setMinimumSize(100,100);
+  buffer_.fill(QColor(0,0,0,0));
 }
 
 Argand::~Argand()
 {
-  delete buffer_;
 }
 
 void Argand::SetCurrentPixel(const Point& p)
 {
- current_=p;
- update();  
+ //current_=p;
+ //update();
 }
 
-void Argand::SetExtent(const Extent& e)
+void Argand::SetExtent(const Extent& extent, const Data& data)
 {
-  has_data_=true;
-  data_changed_=true;
-  extent_=e;
-  update();
-}
+  buffer_.fill(QColor(0,0,0,0));
+  QPainter painter(&buffer_);
 
-void Argand::ClearExtent()
-{
-  has_data_=false;
-  update();
-}
+  QPointF p0(size().width()/2,size().height()/2);
+  painter.drawLine(p0.x(),0,p0.x(),size().height());
+  painter.drawLine(0,p0.y(),size().width(),p0.y());
 
-void Argand::paintEvent(QPaintEvent* e)
-{
-  if(!IsDataValid()) return;
-  QPainter pnt(this);
-  if(has_data_) {
-    if(data_changed_){
-      data_changed_=false;
-      update_buffer();
-    }
-    pnt.drawPixmap(QPoint(0,0),*buffer_);
-  }
+  if (data.GetType()!=COMPLEX) return;
 
-  if(extent_.Contains(current_) && GetObservedData().GetType()==COMPLEX){
-    QPoint p0(size().width()/2,size().height()/2);
-    Complex v = GetObservedData().GetComplex(current_);
-    pnt.setPen(QPen(QColor::fromHsvF(fmod(std::arg(v)/(2*M_PI)+0.5,1.0),
-                                     1,1.0),2));
-    QPoint p((int)floor(v.real()*sf_),
-             (int)floor(v.imag()*sf_));
-    pnt.drawLine(p0,p0+p);
-  }
-}  
-
-void Argand::update_buffer()
-{
-  if(!IsDataValid()) return;
-  buffer_->fill();
-  QPainter pnt(buffer_);
-  QPoint p0(size().width()/2,size().height()/2);
-  pnt.setPen(QPen(QColor(0,0,0)));
-  pnt.drawLine(p0.x(),0,p0.x(),size().height());
-  pnt.drawLine(0,p0.y(),size().width(),p0.y());
-  if (!has_data_ || GetObservedData().GetType()!=COMPLEX) return;
-  
-  Real maxlen;
+  Real maxlen=0;
   std::vector<Complex> data_list;
-  for(ExtentIterator it(extent_); !it.AtEnd(); ++it) {
-    Complex v = GetObservedData().GetComplex(it);
-    pnt.setPen(QPen(QColor::fromHsvF(fmod(std::arg(v)/(2*M_PI)+0.5,1.0),1,0.8)));
+  for(ExtentIterator it(extent); !it.AtEnd(); ++it) {
+    Complex v = data.GetComplex(it);
     Real l = std::abs(v);
     maxlen = std::max(l,maxlen);
     data_list.push_back(v);
   }
 
   int dim=std::min(size().width(),size().height());
-  sf_=0.5*(Real)(dim-10)/maxlen;
+  Real sf=0.5*(Real)(dim-10)/maxlen;
 
-  for (std::vector<Complex>::iterator it=data_list.begin();
-       it!=data_list.end();++it) {
-    pnt.setPen(QPen(QColor::fromHsvF(fmod(std::arg(*it)/(2*M_PI)+0.5,1.0),
-                    1,0.8)));
-    QPoint p((int)floor(it->real()*sf_),
-             (int)floor(it->imag()*sf_));
-    pnt.drawLine(p0,p0+p);
+  for (std::vector<Complex>::iterator it=data_list.begin(); it!=data_list.end();++it) {
+    QPointF p((int)floor(it->real()*sf),(int)floor(it->imag()*sf));
+    painter.setPen(QPen(QColor::fromHsvF(fmod(std::arg(*it)/(2*M_PI)+0.5,1.0),1,0.8)));
+    painter.drawLine(p0,p0+p);
   }
-}
- 
-void Argand::resizeEvent(QResizeEvent* e)
-{
-  delete buffer_;
-  buffer_=new QPixmap(e->size());
-  data_changed_=true;
   update();
 }
+
+void Argand::ClearExtent()
+{
+  buffer_.fill(QColor(0,0,0,0));
+  update();
+}
+
+void Argand::paint(QPainter* painter,const QStyleOptionGraphicsItem * option,QWidget * widget)
+{
+  painter->drawPixmap(0,0,buffer_);
+}  
 
  
-void Argand::ObserverUpdate()
-{
-  data_changed_=true;
-  update();
-}
 
-void Argand::ObserverUpdate(const Extent& e)
-{
-  data_changed_=true;
-  update();
-}
 
-void Argand::ObserverUpdate(const Point& p)
-{
-  data_changed_=true;
-  update();
-}
-
-void Argand::ObserverRelease()
-{
-}
 
 }}}  //ns

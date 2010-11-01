@@ -48,7 +48,7 @@ class InfoPanel: public QWidget
 {
   Q_OBJECT;
 public:
-  InfoPanel(QWidget* parent);
+  InfoPanel(QWidget* parent=0);
   void SetImageInfo(const ConstData& data);
   void SetMousePoint(const geom::Vec2& point, Real val);
   void SetClickPoint(const geom::Vec2& point, Real val);

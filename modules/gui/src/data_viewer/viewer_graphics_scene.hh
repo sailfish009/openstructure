@@ -19,42 +19,32 @@
 //------------------------------------------------------------------------------
 
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Author: Andreas Schenk
 */
 
-#ifndef OST_GUI_ARGAND_H
-#define OST_GUI_ARGAND_H
+#ifndef VIEWER_GRAPHICS_SCENE_HH
+#define VIEWER_GRAPHICS_SCENE_HH
 
+#include <QGraphicsScene>
 
-#include <ost/base.hh>
-#include <ost/img/data.hh>
-#include <ost/img/extent.hh>
-
-#include <ost/gui/module_config.hh>
-
-#include <QGraphicsWidget>
-#include <QPixmap>
+//fw decl
+class QEvent;
 
 namespace ost { namespace img { namespace gui {
 
-class DLLEXPORT_OST_GUI Argand: public QGraphicsWidget
+//fw decl
+class AreaChangedEvent;
+
+class ViewerGraphicsScene : public QGraphicsScene
 {
-  Q_OBJECT;
 public:
-  Argand(QGraphicsItem* p=0);
-  ~Argand();
-
-  virtual void paint(QPainter* painter,const QStyleOptionGraphicsItem * option,QWidget * widget = 0);
-
- public slots:
-  void SetCurrentPixel(const Point& p);
-  void SetExtent(const Extent& e, const Data& d);
-  void ClearExtent();
-private:
-  QPixmap buffer_;
-
+  ViewerGraphicsScene(QObject* parent=0);
+protected:
+  virtual bool event(QEvent *event);
+  virtual void areaChangedEvent(AreaChangedEvent * event);
 };
 
-}}}  //ns
 
-#endif
+}}} //ns
+
+#endif // VIEWER_GRAPHICS_SCENE_HH

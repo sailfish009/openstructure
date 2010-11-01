@@ -36,13 +36,9 @@
 #include "overlay_base_fw.hh"
 #include "overlay_manager_fw.hh"
 #include "overlay_manager_gui.hh"
-#include "argand.hh"
-#include "info_panel.hh"
-#include "fft_panel.hh"
 #include <ost/gui/module_config.hh>
 #include <ost/gui/data_viewer/viewer_panel.hh>
 #include <QMainWindow>
-#include <QGraphicsScene>
 
 //fw decl
 class QLabel;
@@ -58,6 +54,9 @@ namespace img { namespace gui {
 //fw decl
 class DataViewerPanel;
 class DataViewerToolWidgetContainer;
+class Argand;
+class InfoPanel;
+class FFTPanel;
 
 //! Data viewer
 class DLLEXPORT_OST_GUI DataViewer: public QMainWindow
@@ -117,7 +116,7 @@ public slots:
   void UpdateView();
 
   void OnSlabChange(int slab);
-  void OnZoomChange(int zoomlevel);
+  void OnZoomChange(Real zoomlevel);
 
  protected:
   //! initialize with data to view, plus a name
@@ -130,8 +129,6 @@ public slots:
   DataViewer& operator=(const DataViewer& v) {return *this;}
 
   DataViewerToolWidgetContainer* container_;
-
-  QGraphicsScene* scene_;
   ViewerPanel* panel_;
 
   OverlayManagerPtr ov_manager_;

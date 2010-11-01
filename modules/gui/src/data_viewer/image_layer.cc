@@ -19,42 +19,54 @@
 //------------------------------------------------------------------------------
 
 /*
-  Authors: Ansgar Philippsen, Andreas Schenk
+  Author: Andreas Schenk
 */
 
-#ifndef OST_GUI_ARGAND_H
-#define OST_GUI_ARGAND_H
+#include "image_layer.hh"
+#include "graphics_image_item.hh"
 
-
-#include <ost/base.hh>
-#include <ost/img/data.hh>
-#include <ost/img/extent.hh>
-
-#include <ost/gui/module_config.hh>
-
-#include <QGraphicsWidget>
-#include <QPixmap>
 
 namespace ost { namespace img { namespace gui {
 
-class DLLEXPORT_OST_GUI Argand: public QGraphicsWidget
+ImageLayer::ImageLayer(QGraphicsItem* parent):
+  QGraphicsItem(parent),
+  images_()
 {
-  Q_OBJECT;
-public:
-  Argand(QGraphicsItem* p=0);
-  ~Argand();
+}
 
-  virtual void paint(QPainter* painter,const QStyleOptionGraphicsItem * option,QWidget * widget = 0);
+GraphicsImageItem* ImageLayer::AddImage( const Data& data)
+{
+  GraphicsImageItem* image=new GraphicsImageItem(data,this);
+  images_.insert(image);
+  return image;
+}
 
- public slots:
-  void SetCurrentPixel(const Point& p);
-  void SetExtent(const Extent& e, const Data& d);
-  void ClearExtent();
-private:
-  QPixmap buffer_;
+void ImageLayer::CenterOn(const QPointF& p)
+{
+}
 
-};
+QRectF ImageLayer::boundingRect() const
+{
+  return childrenBoundingRect();
+}
 
-}}}  //ns
 
-#endif
+void 	ImageLayer::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
+{
+}
+
+QPointF ImageLayer::GetCenteringPosition()
+{
+  QRectF rect;
+  foreach (GraphicsImageItem* image, images_){
+    if(image->HasSelection()){
+      Point center=image->GetSelection().GetCenter();
+      return QPointF(center[0],center[1]);
+    }else{
+      rect|=image->boundingRect();
+    }
+  }
+  return rect.center();
+}
+
+}}} //ns

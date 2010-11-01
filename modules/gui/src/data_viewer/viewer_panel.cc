@@ -30,18 +30,29 @@
 #include <QDebug>
 #include <QGLWidget>
 #include "viewer_panel.hh"
+#include "widget_layer_item.hh"
+#include "image_layer.hh"
+#include "viewer_graphics_scene.hh"
 
 namespace ost { namespace img { namespace gui {
 
-ViewerPanel::ViewerPanel(QGraphicsScene* scene, QWidget* parent):
-  QGraphicsView(scene,parent),
-  last_mouse_()
+ViewerPanel::ViewerPanel(QWidget* parent):
+  QGraphicsView(new ViewerGraphicsScene(),parent),
+  image_layer_(new ImageLayer()),
+  widget_layer_(new WidgetLayerItem()),
+  last_mouse_(),
+  moving_image_(false)
 {
   //doesn't work on properly OS X (clashes with 3D scene)
   //setViewport(new QGLWidget);
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-  setDragMode(QGraphicsView::ScrollHandDrag);
+  scene()->addItem(image_layer_);
+  scene()->addItem(widget_layer_);
+  scene()->setBackgroundBrush(Qt::black);
+  setAlignment(Qt::AlignLeft | Qt::AlignTop);
+  setTransformationAnchor(NoAnchor);
+  setResizeAnchor(NoAnchor);
 }
 
 void 	ViewerPanel::keyPressEvent(QKeyEvent* event)
@@ -50,7 +61,7 @@ void 	ViewerPanel::keyPressEvent(QKeyEvent* event)
   if(! event->isAccepted()){
     switch(event->key()) {
     case 'C':
-      centerOn(scene()->sceneRect().center());
+      CenterOn(image_layer_->GetCenteringPosition());
       break;
     }
   }
@@ -60,6 +71,7 @@ void 	ViewerPanel::keyPressEvent(QKeyEvent* event)
 
 void ViewerPanel::wheelEvent(QWheelEvent* event)
 {
+  // redirect wheel event to graphics items but don't call base class handler to avoid moving the scrollbars
   if (scene() && isInteractive()) {
     event->ignore();
     QGraphicsSceneWheelEvent wheelEvent(QEvent::GraphicsSceneWheel);
@@ -69,24 +81,90 @@ void ViewerPanel::wheelEvent(QWheelEvent* event)
     wheelEvent.setButtons(event->buttons());
     wheelEvent.setModifiers(event->modifiers());
     wheelEvent.setDelta(event->delta());
-    wheelEvent.setAccepted(event->isAccepted());
     wheelEvent.setAccepted(false);
     QApplication::sendEvent(scene(), &wheelEvent);
     event->setAccepted(wheelEvent.isAccepted());
   }
   if(! event->isAccepted()){
+    static const qreal scalemax=4096.0;
     if(event->delta()>0) {
-      scale(0.5,0.5);
+      if(image_layer_->scale()>1.0/scalemax){
+        image_layer_->setScale(0.5*image_layer_->scale());
+      }
     } else {
-      scale(2.0,2.0);
+      if(image_layer_->scale()<scalemax){
+        image_layer_->setScale(2.0*image_layer_->scale());
+      }
     }
+    emit zoomed(image_layer_->scale());
   }
 }
 
 void ViewerPanel::mouseDoubleClickEvent(QMouseEvent* event)
 {
-  centerOn(mapToScene(event->pos()));
-  update();
+  QGraphicsSceneMouseEvent mouseEvent(QEvent::GraphicsSceneMouseDoubleClick);
+  mouseEvent.setWidget(viewport());
+  mouseEvent.setScenePos(mapToScene(event->pos()));
+  mouseEvent.setScreenPos(event->globalPos());
+  mouseEvent.setButtons(event->buttons());
+  mouseEvent.setModifiers(event->modifiers());
+  mouseEvent.setAccepted(false);
+  QApplication::sendEvent(scene(), &mouseEvent);
+  event->setAccepted(mouseEvent.isAccepted());
+  if(!event->isAccepted()){
+    CenterOn(image_layer_->mapFromScene(event->pos()));
+  }
+}
+
+GraphicsImageItem* ViewerPanel::AddImage(const Data& data)
+{
+  return image_layer_->AddImage(data);
+}
+
+void ViewerPanel::AddWidget(QWidget* widget)
+{
+  widget_layer_->AddWidget(widget);
+}
+
+void ViewerPanel::AddWidget(QGraphicsWidget* widget)
+{
+  widget_layer_->AddWidget(widget);
+}
+
+void ViewerPanel::CenterOn(const QPointF& p)
+{
+  image_layer_->setPos(width()/2.0-p.x()*image_layer_->scale(),height()/2.0-p.y()*image_layer_->scale());
+}
+
+void 	ViewerPanel::scrollContentsBy ( int dx, int dy )
+{
+}
+
+void ViewerPanel::mousePressEvent(QMouseEvent* event)
+{
+  QGraphicsView::mousePressEvent(event);
+  last_mouse_=event->pos();
+  if(!event->isAccepted()&& event->button() == Qt::RightButton){
+    moving_image_=true;
+  }
+}
+
+void ViewerPanel::mouseReleaseEvent(QMouseEvent* event)
+{
+  QGraphicsView::mouseReleaseEvent(event);
+  last_mouse_=event->pos();
+  if(event->button() == Qt::RightButton){
+    moving_image_=false;
+  }
+}
+
+void ViewerPanel::mouseMoveEvent(QMouseEvent* event)
+{
+  QGraphicsView::mouseMoveEvent(event);
+  if(moving_image_){
+    image_layer_->setPos(image_layer_->pos().x()+event->pos().x()-last_mouse_.x(),image_layer_->pos().y()+event->pos().y()-last_mouse_.y());
+  }
+  last_mouse_=event->pos();
 }
 
 }}} //ns

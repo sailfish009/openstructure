@@ -48,6 +48,7 @@
   #include <ost/io/img/load_map.hh>
   #include <ost/gfx/map_iso.hh>
   #include <ost/img/extent.hh>
+  #include <ost/gui/data_viewer/data_viewer.hh>
 #endif
 
 #include <QDir>

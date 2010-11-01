@@ -134,6 +134,7 @@ plot_types.hh
 
 if (ENABLE_IMG)
   set(OST_GUI_DATA_VIEWER_HEADERS
+  area_changed_event.hh
   argand.hh
   data_viewer.hh
   data_viewer_panel.hh
@@ -145,6 +146,8 @@ if (ENABLE_IMG)
   fft_panel.hh
   graphics_image_item.hh
   graphics_image_values_item.hh
+  graphics_object_base.hh
+  image_layer.hh
   info_panel.hh
   img2qt.hh
   mask_overlay.hh
@@ -160,8 +163,10 @@ if (ENABLE_IMG)
   pointlist_overlay_base.hh
   strategies.hh
   strategies_fw.hh
+  viewer_graphics_scene.hh
   viewer_normalizer.hh
   viewer_panel.hh
+  widget_layer_item.hh
   IN_DIR data_viewer
   )
 endif()
@@ -400,6 +405,7 @@ if (ENABLE_IMG)
   list(APPEND OST_GUI_TOOLS_HEADERS map_tool.hh)
   list(APPEND OST_GUI_SOURCES
        tools/map_tool.cc
+       data_viewer/area_changed_event.cc
        data_viewer/argand.cc
        data_viewer/data_viewer.cc
        data_viewer/data_viewer_panel.cc
@@ -411,6 +417,8 @@ if (ENABLE_IMG)
        data_viewer/fft_panel.cc
        data_viewer/graphics_image_item.cc
        data_viewer/graphics_image_values_item.cc
+       data_viewer/graphics_object_base.cc
+       data_viewer/image_layer.cc
        data_viewer/info_panel.cc
        data_viewer/img2qt.cc
        data_viewer/mask_overlay.cc
@@ -421,8 +429,11 @@ if (ENABLE_IMG)
        data_viewer/pointlist_overlay.cc
        data_viewer/pointlist_overlay_base.cc
        data_viewer/strategies.cc
+       data_viewer/viewer_graphics_scene.cc
        data_viewer/viewer_normalizer.cc
-       data_viewer/viewer_panel.cc)
+       data_viewer/viewer_panel.cc
+       data_viewer/widget_layer_item.cc
+)
   list(APPEND HEADERS_TO_BE_MOCCED
     data_viewer/argand.hh
     data_viewer/fft_panel.hh
