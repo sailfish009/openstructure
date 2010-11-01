@@ -227,9 +227,9 @@ private:
   geom::Vec3   tf_pos_;
   Real         occupancy_;
   Real         b_factor_;
-  String       element_;
   AtomProp*    prop_;
   bool         is_hetatm_;
+  String       element_;  
   ConnectorImplP prim_connector_;
   ConnectorImplList connector_list_;
   FragmentImplP fragment_;

@@ -45,12 +45,16 @@ AtomImpl::AtomImpl(const EntityImplPtr& e,
   res_(r),
   name_(n),
   pos_(p),
+  occupancy_(0.0),
+  b_factor_(1.0),
+  prop_(NULL),  
+  is_hetatm_(false),  
   element_(ele),
-  is_hetatm_(false),
   prim_connector_(),
   connector_list_(),
   fragment_(),
   state_(0),
+
   index_(index)
 {
   EntityHandle ent = this->GetEntity();
@@ -206,6 +210,10 @@ void AtomImpl::UpdateFromXCS()
 }
 
 AtomImpl::~AtomImpl() {
+  if (prop_ && !prop_->is_default) {
+    delete prop_;
+    prop_=NULL;
+  }
 }
 
 EntityImplPtr AtomImpl::GetEntity() const
