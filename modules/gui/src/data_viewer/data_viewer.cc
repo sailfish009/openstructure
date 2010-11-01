@@ -57,23 +57,6 @@
 
 namespace ost { namespace img { namespace gui {
 
-/*class GraphicsProxyWidget: public QGraphicsProxyWidget{
-public:
-  GraphicsProxyWidget(QGraphicsItem* parent,Qt::WindowFlags flags):
-  QGraphicsProxyWidget(parent,flags)
-  {}
-  virtual void paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget){
-    //painter->setWorldMatrixEnabled (false);
-    //translate(20,10);
-    painter->setTransform(QTransform(),false);
-    QGraphicsProxyWidget::paint(painter,option,widget);
-  }
-  virtual void paintWindowFrame( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget){
-    //painter->setWorldMatrixEnabled (false);
-    painter->setTransform(QTransform(),false);
-    QGraphicsProxyWidget::paintWindowFrame(painter,option,widget);
-  }
-};*/
 
 namespace {
 int ipow(int base, unsigned int exponent){
@@ -104,6 +87,11 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   panel_->AddWidget(info_);
   panel_->AddWidget(argand_);
   //scene_->setSceneRect(image->boundingRect());
+  connect(image,SIGNAL(MousePositionReal(const QPointF&,Real)),info_,SLOT(SetMousePoint(const QPointF&,Real)));
+  connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),info_,SLOT(SetMousePoint(const QPointF&,Complex)));
+  connect(image,SIGNAL(MousePositionReal(const QPointF&,Real)),fft_,SLOT(SetPosition(const QPointF&)));
+  connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),fft_,SLOT(SetPosition(const QPointF&)));
+  OnSlabChange(image->GetSlab());
   connect(ov_manager_gui_,SIGNAL(SettingsChanged()),this,SLOT(UpdateView()));
   setAnimated(false);
   QSplitter* splitter=new QSplitter(this);
@@ -127,10 +115,8 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   connect(panel_,SIGNAL(zoomed(Real)),SLOT(OnZoomChange(Real)));
   connect(image,SIGNAL(selected(const Extent&, const Data&)),argand_,SLOT(SetExtent(const Extent&, const Data&)));
   connect(image,SIGNAL(deselected()),argand_,SLOT(ClearExtent()));
-  /*connect(panel_,SIGNAL(slabChanged(int)),SLOT(OnSlabChange(int)));
-  connect(panel_,SIGNAL(selected(const Extent&)),info_,SLOT(SetSelection(const Extent&)));
-  connect(panel_,SIGNAL(deselected()),info_,SLOT(ClearSelection()));
-  connect(panel_,SIGNAL(released()),this,SLOT(close()));*/
+  connect(image,SIGNAL(SlabChanged(int)),SLOT(OnSlabChange(int)));
+//  connect(panel_,SIGNAL(released()),this,SLOT(close()));
   show();
 }
 

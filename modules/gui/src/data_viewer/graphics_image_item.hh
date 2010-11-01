@@ -109,10 +109,12 @@ public:
   virtual void ObserverRelease();
 
 signals:
-  void MousePosition(const QPointF& pos, Complex value);
+  void MousePositionComplex(const QPointF& pos, Complex value);
+  void MousePositionReal(const QPointF& pos, Real value);
   void selected(const Extent& selection,const Data& data);
   void deselected();
   void slabChanged(int slab);
+  void SlabChanged(int slab);
 protected:
   virtual void hoverMoveEvent(QGraphicsSceneHoverEvent* event);
   virtual void focusOutEvent(QFocusEvent* event);

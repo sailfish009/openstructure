@@ -59,9 +59,9 @@ void FFTPanel::ObserverUpdate()
 
 
 
-void FFTPanel::SetPosition(const Point& p)
+void FFTPanel::SetPosition(const QPointF& p)
 {
-  parent_position_=p;
+  parent_position_=Point(p.x(),p.y());
   update_fft();
 }
 

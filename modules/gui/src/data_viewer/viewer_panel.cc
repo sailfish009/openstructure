@@ -167,4 +167,5 @@ void ViewerPanel::mouseMoveEvent(QMouseEvent* event)
   last_mouse_=event->pos();
 }
 
+
 }}} //ns
