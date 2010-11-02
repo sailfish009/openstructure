@@ -63,6 +63,7 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
                 const mol::AtomHandle& atom, int atomnum, 
                 bool is_pqr, bool charmm_style)
 {
+  std::cout << atom << std::endl;
   mol::ResidueHandle res=atom.GetResidue();
   char ins_code=res.GetNumber().GetInsCode();
   StringRef record_name(atom.IsHetAtom() ? "HETATM" : "ATOM  ", 6);
@@ -126,7 +127,12 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
       line(60, 6)=fmt::LPaddedFloat(atom.GetRadius(), 2);
     } else {
       line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
-      line(60, 6)=fmt::LPaddedFloat(atom.GetBFactor(), 2);
+      Real bfac=atom.GetBFactor();
+      if (bfac>999.99) {
+        line(60, 6)=fmt::LPaddedFloat(999.99, 2);
+      } else {
+        line(60, 6)=fmt::LPaddedFloat(bfac, 2);
+      }
     }
     if (charmm_style) {
       line(72, 4)=fmt::RPadded(chain_name);
@@ -154,7 +160,12 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
        line(60, 6)=fmt::LPaddedFloat(atom.GetRadius(), 2);
       } else {
        line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
-       line(60, 6)=fmt::LPaddedFloat(atom.GetBFactor(), 2);
+       Real bfac=atom.GetBFactor();
+       if (bfac>999.99) {
+         line(60, 6)=fmt::LPaddedFloat(999.99, 2);
+       } else {
+         line(60, 6)=fmt::LPaddedFloat(bfac, 2);
+       }
       }
       if (charmm_style) {
         line(72, 4)=fmt::RPadded(chain_name);
