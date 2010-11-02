@@ -28,8 +28,7 @@
 #include <ost/mol/mol.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/io/module_config.hh>
-#include <ost/io/mol/pdb_io.hh>
-
+#include <ost/io/mol/io_profile.hh>
 namespace ost { namespace io {
 
 class DLLEXPORT_OST_IO PDBReader {
@@ -46,9 +45,9 @@ class DLLEXPORT_OST_IO PDBReader {
   typedef std::vector<HSEntry> HSList;
   typedef std::vector<HetEntry>  HetList;
 public:
-  PDBReader(const String& filename);
-  PDBReader(const boost::filesystem::path& loc);
-  PDBReader(std::istream& instream);
+  PDBReader(const String& filename, const IOProfile& profile);
+  PDBReader(const boost::filesystem::path& loc, const IOProfile& profile);
+  PDBReader(std::istream& instream, const IOProfile& profile);
 
   bool HasNext();
 
@@ -92,6 +91,8 @@ private:
   // file (i.e. pdb formatted file with charges in occupacy
   // column, and radii in b-factor column)
   bool is_pqr_;
+  IOProfile profile_;
+  bool charmm_style_;
 };
 
 }}

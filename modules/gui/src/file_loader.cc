@@ -382,7 +382,7 @@ void FileLoader::RunScript(const QString& filename)
 
 void FileLoader::LoadPDB(const QString& filename, const QString& selection)
 {
-  io::PDBReader reader(filename.toStdString());
+  io::PDBReader reader(filename.toStdString(), io::IOProfile());
   QList<mol::EntityHandle> entities;
   conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
   while (reader.HasNext()){

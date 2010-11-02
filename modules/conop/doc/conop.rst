@@ -169,6 +169,14 @@ files to use the rule-based builder.
      :param residue: must be a valid residue
      :type  residue: mol.ResidueHandle
      
+  .. method:: GuessChemClass(residue)
+
+    Guesses the chemical class of the residue based on its atom and
+    connectivity.
+
+    So far, the method only guesses whether the residue is a peptide. A residue
+    is a peptide if all the backbone atoms N,CA,C,O are present, have the right
+    element and are in a suitable orientation to form bonds.
 
 .. class:: RuleBasedBuilder
    
