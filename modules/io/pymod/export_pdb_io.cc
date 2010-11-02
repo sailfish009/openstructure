@@ -32,12 +32,6 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(load_PDB_ov, LoadPDB, 1, 2)
 void (PDBWriter::*write_a)(const mol::EntityHandle&)=&PDBWriter::Write;
 void (PDBWriter::*write_b)(const mol::EntityView&)=&PDBWriter::Write;
 
-namespace {
-  void push_flags(unsigned int x) {PDB::PushFlags(x);}
-  unsigned int flags() {return PDB::Flags();}
-  void pop_flags() {PDB::PopFlags();}
-}
-
 void export_pdb_io()
 {
   {
