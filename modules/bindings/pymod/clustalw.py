@@ -3,7 +3,7 @@ from ost import settings, io, seq, LogError
 import os
 import subprocess
 
-def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False):
+def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False):
   clustalw_path=settings.Locate(('clustalw', 'clustalw2'), 
                                 explicit_file_name=clustalw)
   
@@ -32,8 +32,6 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False):
   command='%s -infile="%s" -output=fasta -outfile="%s"' % (clustalw_path,
                                                            temp_dir.files[0],
                                                            out)
-  if nopgap:
-    command+=" -nopgap"
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   ps.stdout.readlines()
   aln=io.LoadAlignment(out)
