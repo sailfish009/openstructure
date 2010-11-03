@@ -33,5 +33,3 @@ CPackSourceConfig.cmake
 deployment/macos/DNG.app
 deployment/macos/standalone
 ChemLib
-components.cif
-compounds.chemlib
