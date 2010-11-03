@@ -63,7 +63,6 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
                 const mol::AtomHandle& atom, int atomnum, 
                 bool is_pqr, bool charmm_style)
 {
-  std::cout << atom << std::endl;
   mol::ResidueHandle res=atom.GetResidue();
   char ins_code=res.GetNumber().GetInsCode();
   StringRef record_name(atom.IsHetAtom() ? "HETATM" : "ATOM  ", 6);
