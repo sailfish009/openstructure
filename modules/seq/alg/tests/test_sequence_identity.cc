@@ -42,18 +42,18 @@ BOOST_AUTO_TEST_CASE(seqid_one)
   aln.AddSequence(s2);
   
   Real seqid=alg::SequenceIdentity(aln, alg::RefMode::LONGER_SEQUENCE, 0, 1);
-  BOOST_CHECK_CLOSE(seqid, 50.0, 1e-6);
+  BOOST_CHECK_CLOSE(seqid, Real(50.0), Real(1e-6));
 
   // check the default sequence indices
   seqid=alg::SequenceIdentity(aln, alg::RefMode::LONGER_SEQUENCE);
-  BOOST_CHECK_CLOSE(seqid, 50.0, 1e-6);
+  BOOST_CHECK_CLOSE(seqid, Real(50.0), Real(1e-6));
 
   // check the default value for reference mode
   seqid=alg::SequenceIdentity(aln);
-  BOOST_CHECK_CLOSE(seqid, 50.0, 1e-6);  
+  BOOST_CHECK_CLOSE(seqid, Real(50.0), Real(1e-6));  
   
   seqid=alg::SequenceIdentity(aln, alg::RefMode::ALIGNMENT);
-  BOOST_CHECK_CLOSE(seqid, 100.0, 1e-6);  
+  BOOST_CHECK_CLOSE(seqid, Real(100.0), Real(1e-6));  
 }
 
 BOOST_AUTO_TEST_CASE(seqid_two) 
@@ -66,18 +66,18 @@ BOOST_AUTO_TEST_CASE(seqid_two)
   aln.AddSequence(s2);
   
   Real seqid=alg::SequenceIdentity(aln, alg::RefMode::LONGER_SEQUENCE, 0, 1);
-  BOOST_CHECK_CLOSE(seqid, 50.0, 1e-6);
+  BOOST_CHECK_CLOSE(seqid, Real(50.0), Real(1e-6));
 
   // check the default sequence indices
   seqid=alg::SequenceIdentity(aln, alg::RefMode::LONGER_SEQUENCE);
-  BOOST_CHECK_CLOSE(seqid, 50.0, 1e-6);
+  BOOST_CHECK_CLOSE(seqid, Real(50.0), Real(1e-6));
 
   // check the default value for reference mode
   seqid=alg::SequenceIdentity(aln);
-  BOOST_CHECK_CLOSE(seqid, 50.0, 1e-6);  
+  BOOST_CHECK_CLOSE(seqid, Real(50.0), Real(1e-6));  
   
   seqid=alg::SequenceIdentity(aln, alg::RefMode::ALIGNMENT);
-  BOOST_CHECK_CLOSE(seqid, 50.0, 1e-6);  
+  BOOST_CHECK_CLOSE(seqid, Real(50.0), Real(1e-6));  
 }
 
 BOOST_AUTO_TEST_CASE(seqid_three) 
@@ -90,18 +90,18 @@ BOOST_AUTO_TEST_CASE(seqid_three)
   aln.AddSequence(s2);
   
   Real seqid=alg::SequenceIdentity(aln, alg::RefMode::LONGER_SEQUENCE, 0, 1);
-  BOOST_CHECK_CLOSE(seqid, 0.0, 1e-6);
+  BOOST_CHECK_CLOSE(seqid, Real(0.0), Real(1e-6));
 
   // check the default sequence indices
   seqid=alg::SequenceIdentity(aln, alg::RefMode::LONGER_SEQUENCE);
-  BOOST_CHECK_CLOSE(seqid, 0.0, 1e-6);
+  BOOST_CHECK_CLOSE(seqid, Real(0.0), Real(1e-6));
 
   // check the default value for reference mode
   seqid=alg::SequenceIdentity(aln);
-  BOOST_CHECK_CLOSE(seqid, 0.0, 1e-6);  
+  BOOST_CHECK_CLOSE(seqid, Real(0.0), Real(1e-6));  
   
   seqid=alg::SequenceIdentity(aln, alg::RefMode::ALIGNMENT);
-  BOOST_CHECK_CLOSE(seqid, 0.0, 1e-6);  
+  BOOST_CHECK_CLOSE(seqid, Real(0.0), Real(1e-6));  
 }
 
 BOOST_AUTO_TEST_CASE(seqid_empty) 
@@ -114,18 +114,18 @@ BOOST_AUTO_TEST_CASE(seqid_empty)
   aln.AddSequence(s2);
   
   Real seqid=alg::SequenceIdentity(aln, alg::RefMode::LONGER_SEQUENCE, 0, 1);
-  BOOST_CHECK_CLOSE(seqid, 0.0, 1e-6);
+  BOOST_CHECK_CLOSE(seqid, Real(0.0), Real(1e-6));
 
   // check the default sequence indices
   seqid=alg::SequenceIdentity(aln, alg::RefMode::LONGER_SEQUENCE);
-  BOOST_CHECK_CLOSE(seqid, 0.0, 1e-6);
+  BOOST_CHECK_CLOSE(seqid, Real(0.0), Real(1e-6));
 
   // check the default value for reference mode
   seqid=alg::SequenceIdentity(aln);
-  BOOST_CHECK_CLOSE(seqid, 0.0, 1e-6);  
+  BOOST_CHECK_CLOSE(seqid, Real(0.0), Real(1e-6));  
   
   seqid=alg::SequenceIdentity(aln, alg::RefMode::ALIGNMENT);
-  BOOST_CHECK_CLOSE(seqid, 0.0, 1e-6);  
+  BOOST_CHECK_CLOSE(seqid, Real(0.0), Real(1e-6));  
 }
 
 
