@@ -13,7 +13,6 @@ class TestClustalWBindings(unittest.TestCase):
     self.templseq = io.LoadSequence("testfiles/similar.fasta")
     self.multseq = io.LoadSequenceList("testfiles/multiple.fasta")
     self.pw_alignment = io.LoadAlignment("testfiles/pairwise_aln.fasta")
-    self.nopgap_pw_alignment = io.LoadAlignment("testfiles/nopgap_pairwise_aln.fasta")
     self.mult_alignment = io.LoadAlignment("testfiles/multiple_aln.fasta")
     
   def testPairwiseClustalW(self):
@@ -21,11 +20,6 @@ class TestClustalWBindings(unittest.TestCase):
     assert self.pw_alignment.ToString(80) == aln.ToString(80), \
            "Pairwise alignment differs from precomputed one"
   
-  def testNoPGapPariwiseClustalW(self):
-    aln=clustalw.ClustalW(self.targetseq, self.templseq, nopgap=True)
-    assert self.nopgap_pw_alignment.ToString(80) == aln.ToString(80), \
-           "NoPGap pairwise alignment differs from precomputed one"
-
   def testAttachedViewClustalW(self):
     aln=clustalw.ClustalW(self.targetseq, self.templseq)
     assert aln.FindSequence("testseq").HasAttachedView(), \
