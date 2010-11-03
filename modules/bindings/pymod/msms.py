@@ -38,21 +38,6 @@ class MsmsProcessError(Exception):
     return repr(self.returncode)
 
 
-def GetVersion(msms_exe=None, msms_env=None):
-  msms_executable = _GetExecutable(msms_exe, msms_env)
-  command = "%s" % (msms_executable)
-  proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-  stdout_value, stderr_value = proc.communicate()
-
-  version = ""
-  for l in stdout_value.splitlines():
-    if l[0:4]=='MSMS':
-      version = l.split(' ')[1]
-      return version
-  if version=="":
-    LogWarning('Could not parse MSMS version string')
-    return
-
 ## \brief Method to check if MSMS executable is present
 #
 # \param msms_exe Explicit path to msms executable
@@ -135,7 +120,7 @@ def _RunMSMS(command):
   #check for successful completion of msms
   if proc.returncode!=0:
     print "WARNING: msms error\n", stdout_value
-    raise MsmsProcessError(proc.returncode, command)
+    raise subprocess.MsmsProcessError(proc.returncode, command)
 
   return stdout_value
   

@@ -33,15 +33,11 @@ class TestMSMSBindings(unittest.TestCase):
 
 if __name__ == "__main__":
   # test if msms package is available on system, otherwise ignore tests
-  VERSION_REQUIRED = '2.6.1'
   try:
     msms._GetExecutable(msms_exe=None, msms_env='MSMSSERVER')
   except(settings.FileNotFound):
     print "Could not find msms executable: ignoring unit tests"
     exit(0)
-  version = msms.GetVersion(msms_exe=None, msms_env='MSMSSERVER')
-  if version!=VERSION_REQUIRED:
-    print "MSMS version (%s) does not match required version %s: ignoring unit tests"%(version, VERSION_REQUIRED)
   try:
     unittest.main()
   except Exception, e:
