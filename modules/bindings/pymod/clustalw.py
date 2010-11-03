@@ -13,8 +13,8 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False):
       seq_list.AddSequence(seq1)
       seq_list.AddSequence(seq2)
     elif isinstance(seq1, str) and isinstance(seq2, str):
-      seqh1=CreateSequence("seq1", seq1)
-      seqh2=CreateSequence("seq2", seq2)
+      seqh1=seq.CreateSequence("seq1", seq1)
+      seqh2=seq.CreateSequence("seq2", seq2)
       seq_list=seq.CreateSequenceList()
       seq_list.AddSequence(seqh1)
       seq_list.AddSequence(seqh2)

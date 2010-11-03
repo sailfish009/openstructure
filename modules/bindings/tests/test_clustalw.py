@@ -15,6 +15,8 @@ class TestClustalWBindings(unittest.TestCase):
     self.pw_alignment = io.LoadAlignment("testfiles/pairwise_aln.fasta")
     self.nopgap_pw_alignment = io.LoadAlignment("testfiles/nopgap_pairwise_aln.fasta")
     self.mult_alignment = io.LoadAlignment("testfiles/multiple_aln.fasta")
+    self.strseq1 = self.targetseq.GetGaplessString()
+    self.strseq2 = self.templseq.GetGaplessString()
     
   def testPairwiseClustalW(self):
     aln=clustalw.ClustalW(self.targetseq, self.templseq)
@@ -36,6 +38,13 @@ class TestClustalWBindings(unittest.TestCase):
     assert self.mult_alignment.ToString(80) == aln.ToString(80), \
            "Multiple alignment differs from precomputed one"
 
+  def testStringClustalW(self):
+    aln=clustalw.ClustalW(self.strseq1, self.strseq2)
+    aln.SetSequenceName(0,self.targetseq.GetName())
+    aln.SetSequenceName(1,self.templseq.GetName())
+    assert self.pw_alignment.ToString(80) == aln.ToString(80), \
+           "Pairwise alignment using two strings differs from precomputed one \n%s \n%s" \
+           %(self.pw_alignment.ToString(80),aln.ToString(80))
 
 if __name__ == "__main__":
   # test if clustalw package is available on system, otherwise ignore tests
