@@ -48,6 +48,7 @@ BOOST_PYTHON_MODULE(_mol)
   enum_<EditMode>("EditMode")
     .value("BUFFERED_EDIT", BUFFERED_EDIT)
     .value("UNBUFFERED_EDIT", UNBUFFERED_EDIT)
+    .export_values()
   ;
   export_Entity();
   export_Surface();

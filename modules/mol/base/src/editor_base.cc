@@ -78,11 +78,17 @@ void EditorBase::RenameChain(ChainHandle chain, const String& new_name)
 
 
 AtomHandle EditorBase::InsertAtom(ResidueHandle res, const String& name,
-                                  const geom::Vec3& pos, const String& ele)
+                                  const geom::Vec3& pos, const String& ele,
+                                  Real occupancy, Real b_factor, 
+                                  bool is_hetatm)
 {
   CheckHandleValidity(res);
   ent_.Impl()->MarkTraceDirty();  
-  return AtomHandle(res.Impl()->InsertAtom(name, pos, ele));
+  AtomHandle atom(res.Impl()->InsertAtom(name, pos, ele));
+  atom.SetBFactor(b_factor);
+  atom.SetHetAtom(is_hetatm);
+  atom.SetOccupancy(occupancy);
+  return atom;
 }
 
 AtomHandle EditorBase::InsertAltAtom(ResidueHandle res, const String& name,

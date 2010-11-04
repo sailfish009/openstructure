@@ -116,7 +116,9 @@ public:
   ///     naming.
   /// \param pos is the position of the atom in global coordinates
   AtomHandle InsertAtom(ResidueHandle residue, const String& name, 
-                        const geom::Vec3& pos, const String& ele="");
+                        const geom::Vec3& pos, const String& ele="",
+                        Real occupancy=1.0, Real b_factor=0.0, 
+                        bool is_hetatm=false);
 
   /// \brief Insert new atom with alternative position indicator
   /// \sa EditorBase::AddAltAtomPos(), ResidueHandle

@@ -50,18 +50,25 @@ void export_Atom()
                   make_function(&AtomBase::GetName,
                                 return_value_policy<copy_const_reference>()),
                   &AtomBase::SetName)
-    .add_property("index",&AtomBase::GetIndex)
+    .add_property("index", &AtomBase::GetIndex)
     
     .def("GetRadius", &AtomBase::GetRadius)
     .def("GetElement", &AtomBase::GetElement, 
          return_value_policy<copy_const_reference>())
     .def("SetElement", &AtomBase::SetElement)
     .def("GetCharge", &AtomBase::GetCharge)
+    .def("GetBFactor", &AtomBase::GetBFactor)
+    .def("SetBFactor", &AtomBase::SetBFactor)
+    .def("SetOccupancy", &AtomBase::SetOccupancy)
+    .def("GetOccupancy", &AtomBase::GetOccupancy)
     .def("GetMass", &AtomBase::GetMass)
     .def("IsHetAtom", &AtomBase::IsHetAtom)
     .def("SetMass", &AtomBase::SetMass)
+    .add_property("b_factor", &AtomBase::GetBFactor, &AtomBase::SetBFactor)
+    .add_property("occupancy", &AtomBase::GetOccupancy, 
+                  &AtomBase::SetOccupancy)
     .def("SetCharge", &AtomBase::SetCharge)
-    .add_property("radius", &AtomBase::GetRadius)
+    .add_property("radius", &AtomBase::GetRadius, &AtomBase::SetRadius)
     .add_property("element", make_function(&AtomBase::GetElement, 
                   return_value_policy<copy_const_reference>()),
                   &AtomBase::SetElement)
