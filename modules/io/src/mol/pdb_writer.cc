@@ -246,7 +246,10 @@ public:
     line_(0, 6)=StringRef("TER   ", 6);
     line_( 6, 5)=fmt::LPaddedInt(counter_);
     line_(17, 3)=fmt::LPadded(res.GetKey());
-    line_[21]=res.GetChain().GetName()[0];
+    if (!res.GetChain().GetName().empty()) {
+      line_[21]=res.GetChain().GetName()[0];
+    }
+
     line_(22, 4)=fmt::LPaddedInt(res.GetNumber().GetNum());
     char ins_code=res.GetNumber().GetInsCode();
     if (ins_code!=0) {
