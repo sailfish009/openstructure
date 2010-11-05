@@ -286,7 +286,7 @@ void DCDCoordSource::FetchFrame(uint frame)
     read_dcd_header(stream_, header_, swap_flag_, skip_flag_, gap_flag_);
     frame_start_=stream_.tellg();
     loaded_=true;
-    frame_count_=header_.num;
+    frame_count_=header_.num/stride_;
   }
   size_t frame_size=calc_frame_size(skip_flag_, gap_flag_, 
                                     header_.t_atom_count);  
