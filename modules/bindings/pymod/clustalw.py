@@ -3,7 +3,8 @@ from ost import settings, io, seq, LogError
 import os
 import subprocess
 
-def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False):
+def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False, 
+             clustalw_option_string=False):
   clustalw_path=settings.Locate(('clustalw', 'clustalw2'), 
                                 explicit_file_name=clustalw)
   
@@ -34,6 +35,9 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False):
                                                            out)
   if nopgap:
     command+=" -nopgap"
+  if clustalw_option_string!=False:
+    command=command+" "+clustalw_option_string  #see useful flags: http://toolkit.tuebingen.mpg.de/clustalw/help_params
+
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   ps.stdout.readlines()
   aln=io.LoadAlignment(out)
