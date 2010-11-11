@@ -14,6 +14,10 @@ class TestClustalWBindings(unittest.TestCase):
     self.multseq = io.LoadSequenceList("testfiles/multiple.fasta")
     self.pw_alignment = io.LoadAlignment("testfiles/pairwise_aln.fasta")
     self.mult_alignment = io.LoadAlignment("testfiles/multiple_aln.fasta")
+    self.seq1 = io.LoadSequence("testfiles/seq1.fasta")
+    self.seq2 = io.LoadSequence("testfiles/seq2.fasta")
+    self.seq1_seq2_alignment = io.LoadAlignment("testfiles/seq1_seq2_aln.fasta")
+    self.seq1_seq2_alignment_options_changed = io.LoadAlignment("testfiles/seq1_seq2_aln_options_changed.fasta")
     
   def testPairwiseClustalW(self):
     aln=clustalw.ClustalW(self.targetseq, self.templseq)
@@ -29,6 +33,15 @@ class TestClustalWBindings(unittest.TestCase):
     aln=clustalw.ClustalW(self.multseq)
     assert self.mult_alignment.ToString(80) == aln.ToString(80), \
            "Multiple alignment differs from precomputed one"
+
+  def testPairwiseClustalWChangedOptions(self):
+    # five residues removed two positions before the end of seq2
+    aln=clustalw.ClustalW(self.seq1,self.seq2)
+    assert self.seq1_seq2_alignment.ToString(80) == aln.ToString(80), \
+           "Pairwise alignment with default gap penalties differs from precomputed one"
+    aln=clustalw.ClustalW(self.seq1,self.seq2,clustalw_option_string="-GAPOPEN=2 -GAPEXT=0")
+    assert self.seq1_seq2_alignment_options_changed.ToString(80) == aln.ToString(80), \
+           "Pairwise alignment with modified gap penalties differs from precomputed one"
 
 
 if __name__ == "__main__":
