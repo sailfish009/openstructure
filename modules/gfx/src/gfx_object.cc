@@ -603,6 +603,7 @@ void GfxObj::CleanColorOps(){
 
 void GfxObj::Debug(unsigned int flags)
 {
+  debug_flags_=flags;
   va_.DrawNormals(flags & 0x1);
 }
 

@@ -27,6 +27,7 @@
 namespace ost { 
 
 using namespace mol;
+using namespace geom; // this is used _so_ often, its worth pulling it in
 
 namespace gfx { namespace impl {
 
@@ -37,7 +38,7 @@ static const float default_radius=0.28;
 struct BlurQuadEntry
 {
   float zdist;
-  geom::Vec3 p1,p2,p3,p4;
+  Vec3 p1,p2,p3,p4;
   gfx::Color c1,c2,c3,c4;
 };
 
@@ -63,17 +64,17 @@ void DoRenderBlur(BondEntryList& bl, float bf1, float bf2)
 
     if(!it->atom1 || !it->atom2) continue;
 
-    const geom::Vec3 p0=tf.Apply(it->atom1->atom.GetPos());
-    const geom::Vec3 p2=tf.Apply(it->atom2->atom.GetPos());
-    geom::Vec3 p1=(p0+p2)*0.5;
+    const Vec3 p0=tf.Apply(it->atom1->atom.GetPos());
+    const Vec3 p2=tf.Apply(it->atom2->atom.GetPos());
+    Vec3 p1=(p0+p2)*0.5;
 
-    const geom::Vec3 q0=tf.Apply(it->pp1);
-    const geom::Vec3 q2=tf.Apply(it->pp2);
-    geom::Vec3 q1=(q0+q2)*0.5;
+    const Vec3 q0=tf.Apply(it->pp1);
+    const Vec3 q2=tf.Apply(it->pp2);
+    Vec3 q1=(q0+q2)*0.5;
 
-    float ll0 = geom::Length2(p0-q0);
-    float ll1 = geom::Length2(p1-q1);
-    float ll2 = geom::Length2(p2-q2);
+    float ll0 = Length2(p0-q0);
+    float ll1 = Length2(p1-q1);
+    float ll2 = Length2(p2-q2);
 
     if(ll0<1e-2 && ll1<1e-2 && ll2<1e-2) continue;
 
@@ -240,7 +241,7 @@ static int bsplineGet(float *xa, float *ya, float *y2a, int n, float x, float *y
       sublist.at((size-1)*nsub). COMPONENT = v;		\
     }                                                   
 
-SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, uint color_blend_mode)
+SplineEntryList Spline::Generate(SplineEntryList& entry_list, int nsub, uint color_blend_mode)
 {
   if(nsub<=0) {
     return entry_list;
@@ -304,44 +305,139 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   SPLINE_ENTRY_INTERPOLATE(rad);
 
   LOG_DEBUG("SplineGenerate: assigning direction and normal components");
+
+#if 1
+  std::vector<Quat> quats(size+3);
+
+  Vec3 prevn;
+  for(int c=0;c<size;++c) {
+    Vec3 d1,d2;
+    if(c==0) {
+      d1=Normalize(entry_list.at(c).position-entry_list.at(c+1).position);
+      d2=Normalize(entry_list.at(c+1).position-entry_list.at(c+2).position);
+    } else if(c==size-1) {
+      d1=Normalize(entry_list.at(c-2).position-entry_list.at(c-1).position);
+      d2=Normalize(entry_list.at(c-1).position-entry_list.at(c).position);
+    } else {
+      d1=Normalize(entry_list.at(c-1).position-entry_list.at(c).position);
+      d2=Normalize(entry_list.at(c).position-entry_list.at(c+1).position);
+    }
+    Vec3 d=d2;
+    Vec3 n=Normalize(Cross(d1,d2));
+    //Vec3 n=entry_list.at(c).v1;
+    Vec3 o = Normalize(Cross(d,n));
+
+    if(c>0) {
+      if(Dot(Normalize(Cross(d,prevn)),Normalize(Cross(d,n)))<0.0) {
+        n=-n;
+        o=-o;
+      }
+    }
+    prevn=n;
+
+    //n = Normalize(Cross(o,d));
+    Quat q(Mat3(d[0],n[0],o[0],
+                d[1],n[1],o[1],
+                d[2],n[2],o[2]));
+    quats[c+1]=q;
+  }
+  quats.at(0)=quats.at(1);
+  quats.at(size)=quats.at(size-1);
+  quats.at(size+1)=quats.at(size-1);
+  
+  std::vector<Quat> squats(size*nsub);
+  // now for the quaternion interpolation, using squad
+  for(int c=0;c<size;++c) {
+    Quat q0=quats.at(c+0);
+    Quat q1=quats.at(c+1);
+    Quat q2=quats.at(c+2);
+    Quat q3=quats.at(c+3);
+
+    Quat s1=q1*Exp(-0.25*Log(Inv(q1)*q2)+Log(Inv(q1)*q0));
+    Quat s2=q2*Exp(-0.25*Log(Inv(q2)*q3)+Log(Inv(q2)*q1));
+
+    for(int d=0;d<nsub;++d) {
+      float u=static_cast<float>(d)*i_nsub;
+      squats.at(c*nsub+d) = Slerp(Slerp(q1,q2,u),Slerp(s1,s2,u),2.0*u*(1.0-u));
+    }
+  }
+
+  assert(sublist.size()<=squats.size());
+
+  for(unsigned int i=0;i<sublist.size();++i) {
+    Mat3 m=squats[i].ToRotationMatrix();
+    sublist.at(i).direction=Normalize(Vec3(m(0,0),m(1,0),m(2,0)));
+    sublist.at(i).normal=Normalize(Vec3(m(0,1),m(1,1),m(2,1)));
+    sublist.at(i).v2=Normalize(Vec3(m(0,2),m(1,2),m(2,2)));
+  }
+
+  std::vector<Vec3> nlist(sublist.size());
+  for(uint i=0;i<sublist.size();++i) {
+    Vec3 p0,p1;
+    if(i<sublist.size()-1) {
+      p0 = sublist.at(i).position;
+      p1 = sublist.at(i+1).position;
+    } else {
+      p0 = sublist.at(i-1).position;
+      p1 = sublist.at(i).position;
+    }
+    sublist.at(i).direction=Normalize(p1-p0);
+    Vec3 orth = Normalize(Cross(sublist.at(i).direction,sublist.at(i).normal));
+    nlist[i] = Normalize(Cross(orth,sublist.at(i).direction));
+    sublist.at(i).v2=orth;
+    if(i>0) {
+      if(Dot(Normalize(Cross(sublist.at(i).direction,nlist[i-1])),orth)<0.0) {
+        nlist[i]=-nlist[i];
+        sublist.at(i).v2=-sublist.at(i).v2;
+      }
+    }
+  }
+
+  sublist.at(0).normal=nlist[0];
+  sublist.back().normal=nlist.back();
+  for(uint i=1;i<sublist.size()-1;++i) {
+    sublist.at(i).normal=(nlist[i-1]+nlist[i]+nlist[i+1])/3.0;   
+  }
+#else
+
   // assign direction and normal
   // entity trace has the same algorithm
 
-  geom::Vec3 p0 = sublist.at(0).position;
-  geom::Vec3 p1 = sublist.at(1).position;
-  geom::Vec3 p2 = ipsize>2 ? sublist.at(2).position : p1+(p1-p0);
+  Vec3 p0 = sublist.at(0).position;
+  Vec3 p1 = sublist.at(1).position;
+  Vec3 p2 = ipsize>2 ? sublist.at(2).position : p1+(p1-p0);
   // normal of 0 is set at the end
-  sublist.at(0).direction=geom::Normalize(p1-p0);
-  sublist.at(0).v1=geom::Normalize(sublist.at(0).v1);
-  geom::Vec3 orth = geom::Cross(sublist.at(0).direction,sublist.at(0).v1);
-  sublist.at(0).v0 = geom::Normalize(geom::Cross(orth,sublist.at(0).direction));
+  sublist.at(0).direction=Normalize(p1-p0);
+  sublist.at(0).v1=Normalize(sublist.at(0).v1);
+  Vec3 orth = Cross(sublist.at(0).direction,sublist.at(0).v1);
+  sublist.at(0).v0 = Normalize(Cross(orth,sublist.at(0).direction));
 
   // reference normal to avoid twisting
-  //geom::Vec3 nref=geom::Normalize(geom::Cross(p0-p1,p2-p1));
+  //Vec3 nref=Normalize(Cross(p0-p1,p2-p1));
   unsigned int i=1;
   for(;i<sublist.size()-1;++i) {
-    geom::Vec3 p10 = p0-p1;
-    geom::Vec3 p12 = p2-p1;
+    Vec3 p10 = p0-p1;
+    Vec3 p12 = p2-p1;
     // correction for perfectly aligned consecutive directions
-    if(p10==-p12 || p10==p12) p12+=geom::Vec3(0.001,0.001,0.001);
-    sublist.at(i).normal=geom::Normalize(geom::Cross(p10,p12));
+    if(p10==-p12 || p10==p12) p12+=Vec3(0.001,0.001,0.001);
+    sublist.at(i).normal=Normalize(Cross(p10,p12));
     // paranoid error checking due to occasional roundoff troubles
-    float cosw = geom::Dot(geom::Normalize(p10),geom::Normalize(p12));
+    float cosw = Dot(Normalize(p10),Normalize(p12));
     cosw = std::min(float(1.0),std::max(float(-1.0),cosw));
     float omega=0.5*acos(cosw);
-    orth=geom::AxisRotation(sublist.at(i).normal, -omega)*p12;
-    sublist.at(i).direction=geom::Normalize(geom::Cross(sublist.at(i).normal,orth));
+    orth=AxisRotation(sublist.at(i).normal, -omega)*p12;
+    sublist.at(i).direction=Normalize(Cross(sublist.at(i).normal,orth));
     // twist avoidance
-    sublist.at(i).v1=geom::Normalize(sublist.at(i).v1);
-    orth = geom::Cross(sublist.at(i).direction,sublist.at(i).v1);
-    sublist.at(i).v0 = geom::Normalize(geom::Cross(orth,sublist.at(i).direction));
-    if(geom::Dot(sublist.at(i-1).v0,sublist.at(i).v0)<0.0) {
+    sublist.at(i).v1=Normalize(sublist.at(i).v1);
+    orth = Cross(sublist.at(i).direction,sublist.at(i).v1);
+    sublist.at(i).v0 = Normalize(Cross(orth,sublist.at(i).direction));
+    if(Dot(sublist.at(i-1).v0,sublist.at(i).v0)<0.0) {
       sublist.at(i).v0=-sublist.at(i).v0;
       //sublist.at(i).nflip = !sublist.at(i).nflip;
     }
 
     // avoid twisting
-    //if(geom::Dot(sublist.at(i).normal,nref)<0.0) sublist.at(i).normal=-sublist.at(i).normal;
+    //if(Dot(sublist.at(i).normal,nref)<0.0) sublist.at(i).normal=-sublist.at(i).normal;
     //nref=sublist.at(i).normal;
     // skip over shift for the last iteration
     if(i==sublist.size()-2) break;
@@ -352,12 +448,12 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   }
   // assign remaining ones
   sublist.at(0).normal=sublist.at(1).normal;
-  sublist.at(i+1).direction=geom::Normalize(p2-p1);
+  sublist.at(i+1).direction=Normalize(p2-p1);
   sublist.at(i+1).normal=sublist.at(i).normal;
-  sublist.at(i+1).v1=geom::Normalize(sublist.at(i+1).v1);
-  orth = geom::Cross(sublist.at(i+1).direction,sublist.at(i+1).v1);
-  sublist.at(i+1).v0 = geom::Normalize(geom::Cross(orth,sublist.at(i+1).direction));
-  if(geom::Dot(sublist.at(i).v0,sublist.at(i+1).v0)<0.0) {
+  sublist.at(i+1).v1=Normalize(sublist.at(i+1).v1);
+  orth = Cross(sublist.at(i+1).direction,sublist.at(i+1).v1);
+  sublist.at(i+1).v0 = Normalize(Cross(orth,sublist.at(i+1).direction));
+  if(Dot(sublist.at(i).v0,sublist.at(i+1).v0)<0.0) {
     sublist.at(i+1).v0=-sublist.at(i+1).v0;
   }
 
@@ -366,6 +462,8 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   for(unsigned int i=0;i<sublist.size();++i) {
     sublist.at(i).normal = sublist.at(i).v0;
   }
+
+#endif
 
   LOG_DEBUG("SplineGenerate: assigning non-interpolated entry components");
   // finally the non-interpolated type
@@ -414,18 +512,18 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   while(c<sublist.size()-1) {
     int cstart=c;
     if(sublist.at(c).type==1 && sublist.at(c+1).type==1) {
-      geom::Vec3 n = geom::Normalize(geom::Cross(sublist.at(c).normal,
+      Vec3 n = Normalize(Cross(sublist.at(c).normal,
                                                  sublist.at(c).direction));
-      geom::Vec3 p0 = sublist.at(c).position+n;
-      geom::Vec3 q0 = sublist.at(c).position-n;
+      Vec3 p0 = sublist.at(c).position+n;
+      Vec3 q0 = sublist.at(c).position-n;
       float psum=0.0;
       float qsum=0.0;
       ++c;
       while(c<sublist.size() && sublist.at(c).type==1) {
-        n = geom::Normalize(geom::Cross(sublist.at(c).normal,
+        n = Normalize(Cross(sublist.at(c).normal,
                                         sublist.at(c).direction));
-        geom::Vec3 p1 = sublist.at(c).position+n;
-        geom::Vec3 q1 = sublist.at(c).position-n;
+        Vec3 p1 = sublist.at(c).position+n;
+        Vec3 q1 = sublist.at(c).position-n;
         psum+=Length(p1-p0);
         qsum+=Length(q1-q0);
         p0=p1;

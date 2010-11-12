@@ -404,6 +404,54 @@ Quat Slerp(const Quat& q0, const Quat& q1, Real t)
   return nrvo;
 }
 
+Quat Inv(const Quat& q)
+{
+  Real l=q.w*q.w+q.x*q.x+q.y*q.y+q.z*q.z;
+  Quat ret;
+  if(l>0.0) {
+    ret.w=q.w/l;
+    ret.x=-q.x/l;
+    ret.y=-q.y/l;
+    ret.z=-q.z/l;
+  }
+  return ret;
+}
+
+Quat Exp(const Quat& q)
+{
+  Real a = sqrt(q.x*q.x+q.y*q.y+q.z*q.z);
+  Real sina = sin(a);
+  Real cosa = cos(a);
+  Quat ret;
+
+  ret.w = cosa;
+  if(a>0.0) {
+    ret.x = sina * q.x/a;
+    ret.y = sina * q.y/a;
+    ret.z = sina * q.z/a;
+  } else {
+    ret.x = ret.y = ret.z = 0.0;
+  }
+  return ret;
+}
+
+Quat Log(const Quat& q)
+{
+  Real a = acos(q.w);
+  Real sina = sin(a);
+  Quat ret;
+
+  ret.w = 0.0;
+  if(sina>0.0) {
+    ret.x = a*q.x/sina;
+    ret.y = a*q.y/sina;
+    ret.z = a*q.z/sina;
+  } else {
+    ret.x= ret.y= ret.z= 0.0;
+  }
+  return ret;
+}
+
 Vec3 Quat::Rotate(const Vec3& vec) const {
   Quat tmp(0.0, vec[0], vec[1], vec[2]);
   Quat conj=Conjugate(*this);

@@ -37,6 +37,7 @@
 namespace ost { namespace img {
 
 // this pulls the geom namespace into the img one
+// which is a bad idea
 using namespace ::geom;
 
 

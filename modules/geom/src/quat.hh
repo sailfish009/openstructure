@@ -111,6 +111,10 @@ Real DLLEXPORT_OST_GEOM Dot(const Quat& q0, const Quat& q1);
 // spherical linear interpolation, with t in range [0,1]
 Quat DLLEXPORT_OST_GEOM Slerp(const Quat& q0, const Quat& q1, Real t);
 
+Quat DLLEXPORT_OST_GEOM Inv(const Quat& q);
+Quat DLLEXPORT_OST_GEOM Exp(const Quat& q);
+Quat DLLEXPORT_OST_GEOM Log(const Quat& q);
+
 Quat DLLEXPORT_OST_GEOM Grassmann(const Quat& lhs, const Quat& rhs);
 
 //normalize quaternion
