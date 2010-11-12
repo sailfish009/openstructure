@@ -61,55 +61,55 @@ void TraceRenderer::PrepareRendering(BackboneTrace& trace_subset,
     if(is_sel) {
       va.SetOpacity(GetSelectionColor().Alpha());
       for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
-	const NodeEntryList& nl=trace_subset.GetList(node_list);
-	for(unsigned int i=0;i<nl.size();++i) {
-	  mol::AtomHandle ah=nl[i].atom;
-	  if(sel_.FindAtom(ah).IsValid()) {
-	    geom::Vec3 apos = ah.GetPos();
-	    va.AddSphere(SpherePrim(apos,
-				    options_->GetTubeRadius()+0.05,
-				    sel_clr),
-			 options_->GetArcDetail());
-	    if(i>0) {
-	      va.AddCylinder(CylinderPrim(apos+0.5*(nl[i-1].atom.GetPos()-apos),
-					  apos,
-					  options_->GetTubeRadius()+0.05,
-					  sel_clr),
-			     options_->GetArcDetail());
-	    }
-	    if(i<nl.size()-1) {
-	      va.AddCylinder(CylinderPrim(apos,
-					  apos+0.5*(nl[i+1].atom.GetPos()-apos),
-					  options_->GetTubeRadius()+0.05,
-					  sel_clr),
-			     options_->GetArcDetail());
-	    }
-	  }
-	}
+        const NodeEntryList& nl=trace_subset.GetList(node_list);
+        for(unsigned int i=0;i<nl.size();++i) {
+          mol::AtomHandle ah=nl[i].atom;
+          if(sel_.FindAtom(ah).IsValid()) {
+            geom::Vec3 apos = ah.GetPos();
+            va.AddSphere(SpherePrim(apos,
+                                    options_->GetTubeRadius()+0.05,
+                                    sel_clr),
+                         options_->GetArcDetail());
+            if(i>0) {
+              va.AddCylinder(CylinderPrim(apos+0.5*(nl[i-1].atom.GetPos()-apos),
+                                          apos,
+                                          options_->GetTubeRadius()+0.05,
+                                          sel_clr),
+                             options_->GetArcDetail());
+            }
+            if(i<nl.size()-1) {
+              va.AddCylinder(CylinderPrim(apos,
+                                          apos+0.5*(nl[i+1].atom.GetPos()-apos),
+                                          options_->GetTubeRadius()+0.05,
+                                          sel_clr),
+                             options_->GetArcDetail());
+            }
+          }
+        }
       }
     } else {
       for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
-	const NodeEntryList& nl=trace_subset.GetList(node_list);
-	mol::AtomHandle a1=nl[0].atom;
-	va.AddSphere(SpherePrim(a1.GetPos(),
-				options_->GetTubeRadius(),
-				nl[0].color1),
-		     options_->GetArcDetail());
-	for(unsigned int i=1;i<nl.size();++i) {
-	  mol::AtomHandle a2=nl[i].atom;
-	  va.AddSphere(SpherePrim(a2.GetPos(),
-				  options_->GetTubeRadius(),
-				  nl[i].color1),
-		       options_->GetArcDetail());
-	  const geom::Vec3& p0=a1.GetPos();
-	  const geom::Vec3& p2=a2.GetPos();
-	  geom::Vec3 p1=(p0+p2)*0.5;
-	  va.AddCylinder(CylinderPrim(p0,p1,options_->GetTubeRadius(),nl[i-1].color1),
-			 options_->GetArcDetail());
-	  va.AddCylinder(CylinderPrim(p1,p2,options_->GetTubeRadius(),nl[i].color1),
-			 options_->GetArcDetail());
-	  a1=a2;
-	}
+        const NodeEntryList& nl=trace_subset.GetList(node_list);
+        mol::AtomHandle a1=nl[0].atom;
+        va.AddSphere(SpherePrim(a1.GetPos(),
+                                options_->GetTubeRadius(),
+                                nl[0].color1),
+                     options_->GetArcDetail());
+        for(unsigned int i=1;i<nl.size();++i) {
+          mol::AtomHandle a2=nl[i].atom;
+          va.AddSphere(SpherePrim(a2.GetPos(),
+                                  options_->GetTubeRadius(),
+                                  nl[i].color1),
+                       options_->GetArcDetail());
+          const geom::Vec3& p0=a1.GetPos();
+          const geom::Vec3& p2=a2.GetPos();
+          geom::Vec3 p1=(p0+p2)*0.5;
+          va.AddCylinder(CylinderPrim(p0,p1,options_->GetTubeRadius(),nl[i-1].color1),
+                         options_->GetArcDetail());
+          va.AddCylinder(CylinderPrim(p1,p2,options_->GetTubeRadius(),nl[i].color1),
+                         options_->GetArcDetail());
+          a1=a2;
+        }
       }
     }
   }

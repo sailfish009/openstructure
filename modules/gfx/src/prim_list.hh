@@ -74,6 +74,7 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
                              const mol::Transform& tf) const;
   /// \brief get center      
   virtual geom::Vec3 GetCenter() const;
+
   virtual void CustomRenderPov(PovState& pov);
 
   virtual void CustomRenderGL(RenderPass pass);

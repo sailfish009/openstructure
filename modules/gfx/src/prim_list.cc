@@ -23,6 +23,7 @@
 #include "scene.hh"
 
 #include "prim_list.hh"
+#include "povray.hh"
 
 namespace ost { namespace gfx {
 
@@ -31,7 +32,6 @@ PrimList::PrimList(const String& name):
   points_(),
   lines_(),
   radius_(0.5),
-  diameter_(0.5),
   sphere_detail_(4),
   arc_detail_(4)
 {}
@@ -136,7 +136,18 @@ void PrimList::CustomRenderGL(RenderPass pass)
 
 void PrimList::CustomRenderPov(PovState& pov)
 {
-  // TODO: add primlist pov export
+  if(points_.empty() && lines_.empty()) return;
+  pov.write_merge_or_union(GetName());
+
+  for(PointEntryList::const_iterator it=points_.begin();it!=points_.end();++it) {
+    pov.write_sphere(it->pos,radius_,it->color,GetName());
+  }
+  for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
+    pov.write_sphere(it->pos1,radius_,it->color,GetName());
+    pov.write_sphere(it->pos2,radius_,it->color,GetName());
+    pov.write_cyl(it->pos1,it->pos2,radius_,it->color,GetName(),true);
+  }
+  pov.inc() << " }\n";
 }
 
 void PrimList::AddPoint(geom::Vec3& p, const Color& col)
@@ -155,7 +166,7 @@ void PrimList::AddLine(geom::Vec3& p1, geom::Vec3& p2, const Color& col)
 
 void PrimList::SetDiameter(float d)
 {
-  diameter_=d;
+  radius_=d*0.5;
   Scene::Instance().RequestRedraw();
   FlagRebuild();
 }
@@ -229,11 +240,11 @@ void PrimList::render_custom()
   }
 
   for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
-    va_.AddSphere(SpherePrim(it->pos1, diameter_/2.0, it->color),
+    va_.AddSphere(SpherePrim(it->pos1, radius_, it->color),
                   GetSphereDetail());
-    va_.AddSphere(SpherePrim(it->pos2, diameter_/2.0, it->color),
+    va_.AddSphere(SpherePrim(it->pos2, radius_, it->color),
                   GetSphereDetail());
-    va_.AddCylinder(CylinderPrim(it->pos1,it->pos2,diameter_/2.0,it->color),
+    va_.AddCylinder(CylinderPrim(it->pos1,it->pos2,radius_,it->color),
                     GetArcDetail());
   }
 }
