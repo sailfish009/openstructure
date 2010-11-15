@@ -329,6 +329,12 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
   if (!this->EnsureLineLength(line, 27)) {
     return false;
   }
+  atom_name=line.substr(12, 4).trim();
+  if (PDB::Flags() & PDB::CALPHA_ONLY) {
+    if (atom_name!=StringRef("CA", 2)) {
+      return false;
+    }
+  }
   if (PDB::Flags() & PDB::CHARMM_FORMAT) {
     if (line.size()>73) {
       size_t width=std::min(line.size()-72, size_t(4));
@@ -349,7 +355,7 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
     }
     LOG_WARNING("invalid atom number on line " << line_num);
   }
-  atom_name=line.substr(12, 4).trim();
+
   alt_loc=line[16];
   res_name=line.substr(17, (PDB::Flags() & PDB::CHARMM_FORMAT) ? 4 : 3).trim();
   std::pair<bool, int> res_num=line.substr(22, 4).ltrim().to_int();;
@@ -362,15 +368,6 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
 
   char  ins_c=line[26];  
   resnum=to_res_num(res_num.second, ins_c);
-  if (PDB::Flags() & PDB::CALPHA_ONLY) {
-    if (record_type[0]=='H' || record_type[0]=='h') {
-      return false;
-    } 
-    if (atom_name!=StringRef("CA", 2)) {
-      return false;
-    }
-    return true;
-  }
   return true;
 }
 
