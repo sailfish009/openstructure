@@ -139,8 +139,8 @@ BOOST_AUTO_TEST_CASE(calpha_only_import_on)
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   PDB::PopFlags();
-  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);
-  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 1);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 2);
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 2);
 }
 
 BOOST_AUTO_TEST_CASE(het_import)
