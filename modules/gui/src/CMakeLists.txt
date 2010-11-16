@@ -453,7 +453,8 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
                ${OST_GUI_HEADERS}
        DEPENDS_ON gfx io mol_alg seq_alg
        LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES}
-            ${SPNAV_LIBRARIES})
+            ${SPNAV_LIBRARIES}
+        NO_STATIC)
             
 if (ADDITIONAL_LIBRARIES)
   target_link_libraries(ost_gui "${ADDITIONAL_LIBRARIES}")

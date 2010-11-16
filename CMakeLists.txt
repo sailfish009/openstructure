@@ -29,7 +29,7 @@ option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
 option(DEPLOYMENT "switch on deployment settings" OFF)
 option(COMPILE_TESTS "wheter unit tests should be compiled by default" OFF)
-
+option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
 if (CXX)
   set(CMAKE_CXX_COMPILER ${CXX})
 endif()
@@ -187,6 +187,17 @@ endif()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
 set(_BOOST_MIN_VERSION 1.37)
+
+find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)
+set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
+set(Boost_LIBRARIES)
+find_package(Boost ${_BOOST_MIN_VERSION} 
+             COMPONENTS unit_test_framework REQUIRED)
+set(BOOST_UNIT_TEST_LIBRARIES ${Boost_LIBRARIES})
+set(Boost_LIBRARIES)
+if (ENABLE_STATIC)
+  set(Boost_USE_STATIC_LIBS ON)
+endif()
 find_package(Boost ${_BOOST_MIN_VERSION} 
              COMPONENTS filesystem system REQUIRED)
 set(BOOST_LIBRARIES ${Boost_LIBRARIES})
@@ -194,21 +205,12 @@ set(Boost_LIBRARIES)
 find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS iostreams REQUIRED)
 set(BOOST_IOSTREAM_LIBRARIES ${Boost_LIBRARIES})
 set(Boost_LIBRARIES)
-find_package(Boost ${_BOOST_MIN_VERSION} 
-             COMPONENTS unit_test_framework REQUIRED)
-set(BOOST_UNIT_TEST_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)
-set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
 find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS program_options REQUIRED)
-set(BOOST_PROGRAM_OPTIONS_LIBRARIES ${Boost_LIBRARIES})
 set(Boost_LIBRARIES)
 find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS regex REQUIRED)
 set(BOOST_REGEX_LIBRARIES ${Boost_LIBRARIES})
-#find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS math REQUIRED)
-#set(BOOST_MATH_LIBRARIES ${Boost_LIBRARIES})
 
+        
 find_package(Qt4 4.5.0 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PNG REQUIRED)
@@ -218,6 +220,18 @@ find_package(Python 2.4 REQUIRED)
 if (ENABLE_IMG)
   find_package(FFTW REQUIRED)
   find_package(TIFF REQUIRED)
+endif()
+
+
+if (ENABLE_STATIC)
+  set(Boost_LIBRARIES)
+  set(Boost_USE_STATIC_LIBS ON)
+  find_package(Boost ${_BOOST_MIN_VERSION} 
+               COMPONENTS filesystem system iostreams regex REQUIRED)
+  message(${Boost_LIBRARIES})
+  find_package(ZLIB REQUIRED)
+  set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
+      ${PNG_LIBRARIES} ${ZLIB_LIBRARIES})
 endif()
 
 if (ENABLE_GUI)
@@ -272,11 +286,5 @@ message(STATUS
         "   Profiling support             (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
         "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
-        "   TMAlign and TMScore   (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}")
-        
-# doc target to create HTML documentation
-#set(SPHINX sphinx-build)
-#set(SPHINX_OPTIONS -c doc/conf -b html -d doc/html/doctrees)
-#add_custom_target(doc COMMAND 
-#                  ${SPHINX} ${SPHINX_OPTIONS} modules doc/html
-#                  VERBATIM)
+        "   TMAlign and TMScore   (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
+        "   Static Libraries       (-DENABLE_STATIC)  : ${ENABLE_STATIC}")
