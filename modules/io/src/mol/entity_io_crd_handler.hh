@@ -41,6 +41,7 @@ public:
 private:
 
   void ParseAndAddAtom(const String& line, mol::EntityHandle& h);
+  void ParseAndAddAtomExpanded(const String& line, mol::EntityHandle& h);
 
   std::vector<mol::AtomHandle> sequential_atom_list_;
   mol::ChainHandle curr_chain_;
@@ -67,6 +68,7 @@ private:
   std::ofstream   outfile_;
   std::ostream&   outstream_;
   int atom_count_;
+  int atom_total_;
 };
 
 class DLLEXPORT_OST_IO EntityIOCRDHandler: public EntityIOHandler {
