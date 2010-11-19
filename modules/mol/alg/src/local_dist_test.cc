@@ -1,3 +1,4 @@
+#include <ost/log.hh>
 #include <ost/mol/mol.hh>
 #include "local_dist_test.hh"
 
@@ -117,6 +118,14 @@ Real LocalDistTest(const EntityView& mdl, const EntityView& ref,
                    Real cutoff, Real max_dist)
 {
   ResidueViewList ref_residues=ref.GetResidueList();
+  if (!mdl.GetResidueCount()) {
+	LOG_WARNING("model structures doesn't contain any residues");
+	return 0.0;	
+  }
+  if (ref_residues.empty()) {
+	LOG_WARNING("reference structures doesn't contain any residues");
+	return 0.0;	
+  }
   ChainView mdl_chain=mdl.GetChainList()[0];  
   // Residues with symmetric side-chains require special treatment as there are 
   // two possible ways to name the atoms. We calculate the overlap with the 
