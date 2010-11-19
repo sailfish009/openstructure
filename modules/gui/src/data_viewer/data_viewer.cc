@@ -36,7 +36,6 @@
 
 #include "data_viewer.hh"
 #include "data_viewer_panel.hh"
-#include <ost/gui/data_viewer/data_viewer_tool_widget_container.hh>
 #include "overlay_base.hh"
 #include "overlay_manager.hh"
 
@@ -53,7 +52,6 @@
 #include <ost/gui/data_viewer/viewer_graphics_scene.hh>
 #include "argand.hh"
 #include "info_panel.hh"
-#include "fft_panel.hh"
 
 namespace ost { namespace img { namespace gui {
 
@@ -70,13 +68,11 @@ int ipow(int base, unsigned int exponent){
 
 DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   QMainWindow(p,0),
-  container_(new DataViewerToolWidgetContainer(this)),
   panel_(new ViewerPanel(this)),
   ov_manager_(new OverlayManager(this)),
-  ov_manager_gui_(new OverlayManagerGUI(this, ov_manager_)),
+  ov_manager_gui_(new OverlayManagerGUI(0, ov_manager_)),
   info_(new InfoPanel()),
   argand_(new Argand()),
-  fft_(new FFTPanel(data,this)),
   zoomlabel_(new QLabel("1:1")),
   slablabel_(new QLabel("0")),
   lastmouse_()
@@ -85,30 +81,32 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   GraphicsImageItem* image=panel_->AddImage(data);
   //connect(image,SIGNAL(MousePosition(const QPointF&,Complex)),info_,SLOT(SetMousePoint(const QPointF&,Complex)));
   panel_->AddWidget(info_);
+  panel_->AddWidget(ov_manager_gui_);
   panel_->AddWidget(argand_);
   //scene_->setSceneRect(image->boundingRect());
   connect(image,SIGNAL(MousePositionReal(const QPointF&,Real)),info_,SLOT(SetMousePoint(const QPointF&,Real)));
   connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),info_,SLOT(SetMousePoint(const QPointF&,Complex)));
-  connect(image,SIGNAL(MousePositionReal(const QPointF&,Real)),fft_,SLOT(SetPosition(const QPointF&)));
-  connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),fft_,SLOT(SetPosition(const QPointF&)));
+  //connect(image,SIGNAL(MousePositionReal(const QPointF&,Real)),fft_,SLOT(SetPosition(const QPointF&)));
+ // connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),fft_,SLOT(SetPosition(const QPointF&)));
   OnSlabChange(image->GetSlab());
   connect(ov_manager_gui_,SIGNAL(SettingsChanged()),this,SLOT(UpdateView()));
   setAnimated(false);
-  QSplitter* splitter=new QSplitter(this);
+  setCentralWidget(panel_);
+/*  QSplitter* splitter=new QSplitter(this);
   setCentralWidget(splitter);
   splitter->addWidget(panel_);
   splitter->addWidget(container_);
   splitter->setCollapsible(0,false);
   splitter->setStretchFactor(0,1);
   splitter->setCollapsible(1,true);
-  splitter->setStretchFactor(1,0);
+  splitter->setStretchFactor(1,0);*/
   statusBar()->addWidget(zoomlabel_);
   statusBar()->addWidget(slablabel_);
 
-  container_->AddChildWidget(ov_manager_gui_,"Overlays",true);
+  //container_->AddChildWidget(ov_manager_gui_,"Overlays",true);
   //container_->AddChildWidget(info_,"Info",true);
   //container_->AddChildWidget(argand_,"Argand",false);
-  container_->AddChildWidget(fft_,"Live FFT",false);
+ // container_->AddChildWidget(fft_,"Live FFT",false);
   info_->SetImageInfo(data);
 
 
@@ -239,12 +237,12 @@ void DataViewer::SetAntialiasing(bool f)
 
 void DataViewer::AddDockWidget(QWidget* w, const QString& name, bool show)
 {
-  container_->AddChildWidget(w,name,show);
+  panel_->AddWidget(w);
 }
 
 void DataViewer::RemoveDockWidget(QWidget* w)
 {
-  container_->RemoveWidget(w);
+//  container_->RemoveWidget(w);
 }
 
 

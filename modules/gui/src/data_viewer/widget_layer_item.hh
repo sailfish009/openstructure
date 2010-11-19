@@ -25,10 +25,10 @@
 #ifndef WIDGET_LAYER_ITEM_HH
 #define WIDGET_LAYER_ITEM_HH
 
-#include <QGraphicsItem>
+#include <QGraphicsWidget>
 namespace ost { namespace img { namespace gui {
 
-class WidgetLayerItem : public QGraphicsItem
+class WidgetLayerItem : public QGraphicsWidget
 {
 public:
   WidgetLayerItem(QGraphicsItem* parent=0);
@@ -36,6 +36,8 @@ public:
   virtual QRectF boundingRect() const;
   virtual void AddWidget(QWidget* widget);
   virtual void AddWidget(QGraphicsWidget* widget);
+protected:
+  void add_widget_to_layout(QGraphicsWidget* widget);
 };
 
 }}} //ns

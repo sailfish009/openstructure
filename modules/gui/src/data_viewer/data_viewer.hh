@@ -53,10 +53,8 @@ namespace img { namespace gui {
 
 //fw decl
 class DataViewerPanel;
-class DataViewerToolWidgetContainer;
 class Argand;
 class InfoPanel;
-class FFTPanel;
 
 //! Data viewer
 class DLLEXPORT_OST_GUI DataViewer: public QMainWindow
@@ -128,7 +126,6 @@ public slots:
 
   DataViewer& operator=(const DataViewer& v) {return *this;}
 
-  DataViewerToolWidgetContainer* container_;
   ViewerPanel* panel_;
 
   OverlayManagerPtr ov_manager_;
@@ -136,7 +133,6 @@ public slots:
 
   InfoPanel* info_;
   Argand* argand_;
-  FFTPanel* fft_;
   
   QLabel* zoomlabel_;
   QLabel* slablabel_;

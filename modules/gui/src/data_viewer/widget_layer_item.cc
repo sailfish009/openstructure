@@ -26,12 +26,15 @@
 #include <QPainter>
 #include "widget_layer_item.hh"
 #include <QGraphicsProxyWidget>
+#include <QGraphicsAnchorLayout>
 
 namespace ost { namespace img { namespace gui {
 
 WidgetLayerItem::WidgetLayerItem(QGraphicsItem* parent):
-  QGraphicsItem(parent)
+  QGraphicsWidget(parent)
 {
+  setLayout(new QGraphicsAnchorLayout);
+  dynamic_cast<QGraphicsAnchorLayout*>(layout())->setSpacing(25);
 }
 
 void WidgetLayerItem::paint( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget)
@@ -49,14 +52,28 @@ void WidgetLayerItem::AddWidget(QWidget* widget)
   proxy->setWidget(widget);
   proxy->setFlag(QGraphicsItem::ItemIsMovable);
   proxy->setOpacity(0.9);
-  proxy->setPos(30,30);
+//  proxy->setPos(30,30);
+  add_widget_to_layout(proxy);
 }
 void WidgetLayerItem::AddWidget(QGraphicsWidget* widget)
 {
-  widget->setParentItem(this);
   widget->setFlag(QGraphicsItem::ItemIsMovable);
   widget->setOpacity(0.9);
-  widget->setPos(30,30);
+  //widget->setPos(30,30);
+  add_widget_to_layout(widget);
+}
+
+
+
+void WidgetLayerItem::add_widget_to_layout(QGraphicsWidget* widget)
+{
+  if(layout()->count()>=1){
+  QGraphicsLayoutItem* last=layout()->itemAt(layout()->count()-1);
+  dynamic_cast<QGraphicsAnchorLayout*>(layout())->addCornerAnchors(last, Qt::BottomLeftCorner, widget, Qt::TopLeftCorner);
+  dynamic_cast<QGraphicsAnchorLayout*>(layout())->addCornerAnchors(last, Qt::BottomRightCorner, widget, Qt::TopRightCorner);
+  }else{
+    dynamic_cast<QGraphicsAnchorLayout*>(layout())->addCornerAnchors(layout(), Qt::TopLeftCorner, widget, Qt::TopLeftCorner);
+  }
 }
 
 }}} //ns
