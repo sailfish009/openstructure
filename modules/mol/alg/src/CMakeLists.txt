@@ -13,7 +13,7 @@ set(OST_MOL_ALG_SOURCES
   superpose_frames.cc
 )
 
-set(MOL_ALG_DEPS mol)
+set(MOL_ALG_DEPS mol seq)
 
 if (ENABLE_IMG)
   set(OST_MOL_ALG_HEADERS

@@ -17,20 +17,24 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-/*
- * Author Juergen Haas
- */
 #include <boost/python.hpp>
 #include <ost/config.hh>
 #include <ost/mol/alg/local_dist_test.hh>
 #include <ost/mol/alg/superpose_frames.hh>
 using namespace boost::python;
+using namespace ost;
 
 void export_svdSuperPose();
 
 #if OST_IMG_ENABLED
 void export_entity_to_density();
 #endif
+
+namespace {
+  
+Real (*ldt_a)(const mol::EntityView&, const mol::EntityView& ref, Real, Real)=&mol::alg::LocalDistTest;
+Real (*ldt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistTest;
+}
 
 BOOST_PYTHON_MODULE(_mol_alg)
 {
@@ -39,8 +43,9 @@ BOOST_PYTHON_MODULE(_mol_alg)
   export_entity_to_density();
   #endif
   
-  def("LocalDistTest", &ost::mol::alg::LocalDistTest);
+  def("LocalDistTest", ldt_a);
+  def("LocalDistTest", ldt_b, (arg("ref_index")=0, arg("mdl_index")=1));
   def("SuperposeFrames", &ost::mol::alg::SuperposeFrames, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
-       arg("end")=-1, arg("ref")=-1));  
+       arg("end")=-1, arg("ref")=-1));
 }
