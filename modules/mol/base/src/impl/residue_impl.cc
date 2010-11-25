@@ -390,7 +390,7 @@ void ResidueImpl::DeleteAllAtoms() {
 
 String ResidueImpl::GetQualifiedName() const {
   String chain_name=this->GetChain()->GetName();
-  return (chain_name==" " ? "" :  chain_name+".")+
+  return ((chain_name==" " || chain_name=="") ? "" :  chain_name+".")+
          this->GetKey()+
          this->GetNumber().AsString();
 }
