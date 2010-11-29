@@ -158,7 +158,7 @@ typedef std::vector<SplineEntryList> SplineEntryListList;
 
 class DLLEXPORT_OST_GFX Spline {
 public:
-  static SplineEntryList Generate(SplineEntryList& entry_list,int nsub,uint color_blend_mode=0);
+  static SplineEntryList Generate(const SplineEntryList& entry_list,int nsub,uint color_blend_mode=0);
 };
 
 }}} // ns

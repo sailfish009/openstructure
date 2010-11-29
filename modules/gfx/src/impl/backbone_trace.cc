@@ -38,8 +38,6 @@ bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2)
   if(n2.GetInsCode()!='\0') {
     if(n1.NextInsertionCode()==n2) return true;
   }
-  if(mol::InSequence(r1,r2)) return true;
-  // fallback, perhaps the wrong thing to do
   if(n1.GetNum()+1==n2.GetNum()) return true;
   return false;
 }
@@ -178,7 +176,7 @@ void BackboneTrace::PrepList(NodeEntryList& nelist)
   e0->v1 = e0->normal;
   
   //reference normal to avoid twisting
-  //geom::Vec3 nref=geom::Normalize(geom::Cross(p0-p1,p2-p1));
+  geom::Vec3 nref=geom::Normalize(geom::Cross(p0-p1,p2-p1));
   
   // start loop with the second
   unsigned int i=1;
@@ -187,18 +185,13 @@ void BackboneTrace::PrepList(NodeEntryList& nelist)
     geom::Vec3 p12 = p2-p1;
     if(p10==-p12 || p10==p12) p12+=geom::Vec3(0.001,0.001,0.001);
     e1->v1=e1->normal;
-    e1->normal=geom::Normalize(geom::Cross(p10,p12));
-
     // twist avoidance
-    if(geom::Dot(geom::Normalize(geom::Cross(nref,p10)),
-    		 geom::Normalize(geom::Cross(p10,e1->normal)))>0.0) {
+    if(geom::Dot(e0->v1,e1->v1)<0.0) {
       e1->v1=-e1->v1;
-      e1->normal=-e1->normal;
     }
-    nref = e1->normal;
-
+    e1->normal=geom::Normalize(geom::Cross(p10,p12));
     float omega=0.5*acos(geom::Dot(geom::Normalize(p10),geom::Normalize(p12)));
-    geom::Vec3 orth=geom::Normalize(geom::AxisRotation(e1->normal, -omega)*p12);
+    geom::Vec3 orth=geom::AxisRotation(e1->normal, -omega)*p12;
     e1->direction=geom::Normalize(geom::Cross(e1->normal,orth));
     
     // align normals to avoid twisting
