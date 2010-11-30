@@ -21,6 +21,7 @@
 #include <ost/config.hh>
 #include <ost/mol/alg/local_dist_test.hh>
 #include <ost/mol/alg/superpose_frames.hh>
+#include <ost/mol/alg/filter_clashes.hh>
 using namespace boost::python;
 using namespace ost;
 
@@ -34,6 +35,8 @@ namespace {
   
 Real (*ldt_a)(const mol::EntityView&, const mol::EntityView& ref, Real, Real)=&mol::alg::LocalDistTest;
 Real (*ldt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistTest;
+mol::EntityView (*fc_a)(const mol::EntityView&, Real)=&mol::alg::FilterClashes;
+mol::EntityView (*fc_b)(const mol::EntityHandle&, Real)=&mol::alg::FilterClashes;
 }
 
 BOOST_PYTHON_MODULE(_mol_alg)
@@ -45,6 +48,8 @@ BOOST_PYTHON_MODULE(_mol_alg)
   
   def("LocalDistTest", ldt_a);
   def("LocalDistTest", ldt_b, (arg("ref_index")=0, arg("mdl_index")=1));
+  def("FilterClashes", fc_a, (arg("ent"), arg("tolerance")=0.1));
+  def("FilterClashes", fc_b, (arg("ent"), arg("tolerance")=0.1));
   def("SuperposeFrames", &ost::mol::alg::SuperposeFrames, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
        arg("end")=-1, arg("ref")=-1));

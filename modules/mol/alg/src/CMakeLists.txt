@@ -4,6 +4,7 @@ set(OST_MOL_ALG_HEADERS
   sec_structure_segments.hh
   local_dist_test.hh
   superpose_frames.hh
+  filter_clashes.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -11,6 +12,7 @@ set(OST_MOL_ALG_SOURCES
   sec_structure_segments.cc
   local_dist_test.cc
   superpose_frames.cc
+  filter_clashes.cc
 )
 
 set(MOL_ALG_DEPS mol seq)
