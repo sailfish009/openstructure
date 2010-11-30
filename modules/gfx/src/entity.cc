@@ -274,12 +274,12 @@ void Entity::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc,
     geom::Vec3 mmax=coord_limits.GetMax();
     geom::Vec3 t1=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmin[2]));
     geom::Vec3 t2=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmin[2]));
-    geom::Vec3 t3=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmin[2]));
-    geom::Vec3 t4=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmin[2]));
+    geom::Vec3 t3=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmin[2]));
+    geom::Vec3 t4=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmin[2]));
     geom::Vec3 t5=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmax[2]));
     geom::Vec3 t6=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmax[2]));
-    geom::Vec3 t7=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmax[2]));
-    geom::Vec3 t8=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmax[2]));
+    geom::Vec3 t7=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmax[2]));
+    geom::Vec3 t8=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmax[2]));
     minc = geom::Min(minc, geom::Min(t1, geom::Min(t2, geom::Min(t3, 
                      geom::Min(t4, geom::Min(t5, geom::Min(t6, 
                      geom::Min(t7, t8))))))));
@@ -313,11 +313,11 @@ void Entity::CacheBoundingBox() const
     const impl::EntityRenderer* r=i->second;
     if (r->IsEnabled() && r->HasDataToRender()) {
       if (!has_data) {
-        coord_limits=r->GetBoundingBox();          
+        coord_limits=r->GetBoundingBox();
         has_data=true;
       } else {
         coord_limits=geom::Union(coord_limits, r->GetBoundingBox());
-      }      
+      }
     }
   }
   bbox_=coord_limits;  

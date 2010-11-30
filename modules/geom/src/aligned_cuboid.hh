@@ -48,6 +48,12 @@ private:
   Vec3 max_;
 };
 
+inline std::ostream& operator<<(std::ostream& os, const AlignedCuboid& c)
+{
+  os << "(" << c.GetMin() << "," << c.GetMax() << ")";
+  return os;
+}
+
 AlignedCuboid DLLEXPORT_OST_GEOM Union(const AlignedCuboid& lhs, const AlignedCuboid& rhs);
 
 }

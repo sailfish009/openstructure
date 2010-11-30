@@ -127,6 +127,7 @@ void Render3DSpritesInnerLoop(const AtomEntry* ae, const geom::Vec3& cx,
              gl_mmat,gl_pmat,gl_vp,
              &r2[0],&r2[1],&r2[2]);
   float scale = r1[2]-r2[2];
+  glVertex3fv(pos.Data());
   glColor3fv(ae->color);
   glTexCoord4f(0.0,0.0,-rad,scale);
   glVertex3v((pos-rad*cx-rad*cy).Data());
