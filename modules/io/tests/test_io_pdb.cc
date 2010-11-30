@@ -139,8 +139,17 @@ BOOST_AUTO_TEST_CASE(calpha_only_import_on)
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   PDB::PopFlags();
-  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);
-  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 1);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 2);
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 2);
+}
+
+BOOST_AUTO_TEST_CASE(het_import)
+{
+  String fname("testfiles/pdb/het.pdb");
+  PDBReader reader(fname);
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_CHECK_EQUAL(ent.Select("ligand=true").GetResidueCount(), 1);
 }
 
 BOOST_AUTO_TEST_CASE(calpha_only_import_off)
@@ -221,7 +230,7 @@ BOOST_AUTO_TEST_CASE(write_atom)
   PDBWriter writer(out);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::XCSEditor edi=ent.EditXCS();
   mol::ChainHandle ch=edi.InsertChain("A");
   mol::ResidueHandle r=edi.AppendResidue(ch, "GLY");
 
@@ -242,7 +251,7 @@ BOOST_AUTO_TEST_CASE(write_hetatom)
   PDBWriter writer(out);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::XCSEditor edi=ent.EditXCS();
   mol::ChainHandle ch=edi.InsertChain("A");
   mol::ResidueHandle r=edi.AppendResidue(ch, "CA");
   mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), 
@@ -374,13 +383,38 @@ BOOST_AUTO_TEST_CASE(write_conect)
                             "testfiles/pdb/conect-out.pdb"));
 }
 
+BOOST_AUTO_TEST_CASE(alt_loc_tf)
+{
+  String fname("testfiles/pdb/alt-loc.pdb");  
+  // this scope is required to force the writer stream to be closed before 
+  // opening the file again in compare_files. Avoids a race condition.
+  mol::EntityHandle ent=mol::CreateEntity();  
+  PDBReader reader(fname);
+  reader.Import(ent);
+  String out_name("testfiles/pdb/alt-loc-tf-out.pdb");
+  {
+    PDBWriter writer(out_name);
+    geom::Mat4 shift;
+    shift.PasteTranslation(geom::Vec3(10,20,30));
+    ent.EditXCS().ApplyTransform(shift);
+    writer.Write(ent);
+  }
+  PDBReader r2(out_name);
+  mol::EntityHandle ent2=mol::CreateEntity();
+  r2.Import(ent2);
+  mol::ResidueHandle res1=ent2.FindResidue("A", mol::ResNum(1));
+  mol::AtomHandle a1=res1.FindAtom("N");
+  BOOST_CHECK_EQUAL(res1.GetAltAtomPos(a1, "A"), geom::Vec3(26,84,30));
+  BOOST_CHECK_EQUAL(res1.GetAltAtomPos(a1, "B"), geom::Vec3(18,-108,30));  
+}
+
 BOOST_AUTO_TEST_CASE(res_name_too_long)
 {
   std::stringstream out;
   PDBWriter writer(out);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::XCSEditor edi=ent.EditXCS();
   mol::ChainHandle ch=edi.InsertChain("A");
   mol::ResidueHandle r=edi.AppendResidue(ch, "CALCIUM");
   mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5));
@@ -393,7 +427,7 @@ BOOST_AUTO_TEST_CASE(chain_name_too_long)
   PDBWriter writer(out);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::XCSEditor edi=ent.EditXCS();
   mol::ChainHandle ch=edi.InsertChain("AB");
   mol::ResidueHandle r=edi.AppendResidue(ch, "CA");
   mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5));
@@ -406,7 +440,7 @@ BOOST_AUTO_TEST_CASE(atom_name_too_long)
   PDBWriter writer(out);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor edi=ent.RequestXCSEditor();
+  mol::XCSEditor edi=ent.EditXCS();
   mol::ChainHandle ch=edi.InsertChain("A");
   mol::ResidueHandle r=edi.AppendResidue(ch, "CA");
   mol::AtomHandle a=edi.InsertAtom(r, "CALCIUM", geom::Vec3(32.0, -128.0, -2.5));

@@ -54,7 +54,7 @@ SDFReader::SDFReader(std::istream& instream)
 void SDFReader::Import(mol::EntityHandle& ent)
 {
   String line;
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   while (std::getline(instream_,line)) {
     ++line_num;
 

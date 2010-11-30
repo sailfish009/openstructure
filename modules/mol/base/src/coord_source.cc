@@ -63,7 +63,7 @@ void CoordSource::CopyFrame(uint frame_id)
     return;
   }
   assert(frame->size()==atoms_.size());
-  XCSEditor edi=atoms_.front().GetEntity().RequestXCSEditor(BUFFERED_EDIT);  
+  XCSEditor edi=atoms_.front().GetEntity().EditXCS(BUFFERED_EDIT);  
   CoordFrame::const_iterator c=frame->begin();
   for (AtomHandleList::iterator i=atoms_.begin(), 
        e=atoms_.end(); i!=e; ++i, ++c) {

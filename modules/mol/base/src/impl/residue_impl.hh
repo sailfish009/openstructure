@@ -202,6 +202,9 @@ public:
   void SetProtein(bool protein) { protein_=protein; }
   
   bool IsProtein() const { return protein_; }
+  
+  bool IsLigand() const { return ligand_; }
+  void SetIsLigand(bool flag) { ligand_=flag; }
 private:
   void AddAltAtom(const String& group, const AtomImplPtr& atom,
                   const geom::Vec3& position);
@@ -219,6 +222,7 @@ private:
   char                       olc_;
   // whether the residue is part of the protein.
   bool                       protein_;
+  bool                       ligand_;
 };
 
 }}} // ns

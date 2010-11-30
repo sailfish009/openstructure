@@ -55,7 +55,7 @@ void SceneSelection::SetActiveNodes(gfx::NodePtrList nodes, gfx::EntityP entity,
 }
 
 gfx::GfxNodeP SceneSelection::GetActiveNode(unsigned int pos) const{
-  if(pos >= 0 && pos < nodes_.size()){
+  if(pos < nodes_.size()){
     return nodes_[pos];
   }
   else{
@@ -72,7 +72,7 @@ int SceneSelection::GetActiveViewCount() const{
 }
 
 mol::EntityView SceneSelection::GetActiveView(unsigned int pos) const{
-  if(pos >=0 && pos < views_.size()){
+  if(pos < views_.size()){
     return views_[pos].GetEntityView();
   }
   else{

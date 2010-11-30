@@ -52,6 +52,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
   """
   Load PDB file from disk and returns one or more entities. Several options 
   allow to customize the exact behaviour of the PDB import.
+  
+  Residues are flagged as ligand if they are mentioned in a HET record.
 
   :param restrict_chains: If not an empty string, only chains listed in the
      string will be imported.

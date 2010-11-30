@@ -39,8 +39,8 @@ namespace ost { namespace mol {
 /// Editors are usually used as one of the concrete subclasses of EditorBase:
 /// XCSEditor and ICSEditor. The former operates on the external carthesian
 /// coordinate system while the latter operates on the internal coordinate
-/// system. To create a new editor, use EntityHandle::RequestXCSEditor() and
-/// EntityHandle::RequestICSEditor(), respectively.
+/// system. To create a new editor, use EntityHandle::EditXCS() and
+/// EntityHandle::EditICS(), respectively.
 /// 
 /// For an introduction to the concept of editors go \ref editors "here"
 class DLLEXPORT_OST_MOL EditorBase {
@@ -116,7 +116,9 @@ public:
   ///     naming.
   /// \param pos is the position of the atom in global coordinates
   AtomHandle InsertAtom(ResidueHandle residue, const String& name, 
-                        const geom::Vec3& pos, const String& ele="");
+                        const geom::Vec3& pos, const String& ele="",
+                        Real occupancy=1.0, Real b_factor=0.0, 
+                        bool is_hetatm=false);
 
   /// \brief Insert new atom with alternative position indicator
   /// \sa EditorBase::AddAltAtomPos(), ResidueHandle

@@ -46,7 +46,7 @@ void no_find_res(ChainHandle chain, const ResNum& n) {
 
 void test_res_pos() {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle ch1=e.InsertChain("A");
   e.AppendResidue(ch1, "A");
   e.AppendResidue(ch1, "B");
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 BOOST_AUTO_TEST_CASE(test_comparison) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle ch1=e.InsertChain("A");
   ChainHandle ch2=e.InsertChain("B");
   ChainHandle cc=ch1;
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(test_comparison)
 BOOST_AUTO_TEST_CASE(res_pos) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle ch1=e.InsertChain("A");
   e.AppendResidue(ch1, "A");
   e.AppendResidue(ch1, "B");
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(res_pos)
 BOOST_AUTO_TEST_CASE(res_pos_with_insertion_code) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle ch1=e.InsertChain("A");
   e.AppendResidue(ch1, "A");
   e.AppendResidue(ch1, "B");
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(res_pos_with_insertion_code)
 BOOST_AUTO_TEST_CASE(prev_next) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle ch1=e.InsertChain("A");
   e.AppendResidue(ch1, "A");
   e.AppendResidue(ch1, "B");

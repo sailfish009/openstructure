@@ -47,7 +47,7 @@ bool IEquals(const StringRef& a, const StringRef& b)
     return false;
   }
   for (size_t i=0; i<a.size(); ++i) {
-    if (toupper(a[i])!=toupper(b[i])) {
+    if (toupper(a[i])!=b[i]) {
       return false;
     }
   }
@@ -113,7 +113,8 @@ bool PDBReader::HasNext()
           IEquals(curr_line.substr(0, 6),StringRef("ANISOU ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6)) ||
-         IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)))) {
+         IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6)))) {
        return true;
      } else if (IEquals(curr_line.rtrim(), StringRef("END", 3))) {
        hard_end_=true;
@@ -188,6 +189,21 @@ void PDBReader::Import(mol::EntityHandle& ent,
           if (!(PDB::Flags() & PDB::CHARMM_FORMAT)) {
             this->ParseHelixEntry(curr_line);            
           }
+        } else if (IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6))) {
+          // remember het entry to mark the residues as ligand during ATOM import
+          char chain=curr_line[12];
+          std::pair<bool, int> num=curr_line.substr(13, 4).ltrim().to_int();
+          if (!num.first) {
+            if (PDB::Flags() && PDB::SKIP_FAULTY_RECORDS) {
+              LOG_WARNING("Invalid HET entry on line " << line_num_);
+              continue;
+            } else {
+              String msg=str(format("Invalid HET entry on line %d")%line_num_);
+              throw IOException(msg);
+            }
+          }
+          hets_.push_back(HetEntry(chain, to_res_num(num.second,
+                                   curr_line[17])));
         }
         break;
       case 'M':
@@ -231,6 +247,12 @@ void PDBReader::Import(mol::EntityHandle& ent,
                << helix_list_.size() << " helices and "
                << strand_list_.size() << " strands");
   this->AssignSecStructure(ent);
+  for (HetList::const_iterator i=hets_.begin(), e=hets_.end(); i!=e; ++i) {
+    mol::ResidueHandle res=ent.FindResidue(String(1, i->chain), i->num);
+    if (res.IsValid()) {
+      res.SetIsLigand(true);
+    }      
+  }
 }
 
 
@@ -285,6 +307,7 @@ void PDBReader::ClearState()
   hard_end_=false;
   helix_list_.clear();
   strand_list_.clear();
+  hets_.clear();
 }
 
 bool PDBReader::EnsureLineLength(const StringRef& line, size_t size)
@@ -306,6 +329,12 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
   if (!this->EnsureLineLength(line, 27)) {
     return false;
   }
+  atom_name=line.substr(12, 4).trim();
+  if (PDB::Flags() & PDB::CALPHA_ONLY) {
+    if (atom_name!=StringRef("CA", 2)) {
+      return false;
+    }
+  }
   if (PDB::Flags() & PDB::CHARMM_FORMAT) {
     if (line.size()>73) {
       size_t width=std::min(line.size()-72, size_t(4));
@@ -326,7 +355,7 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
     }
     LOG_WARNING("invalid atom number on line " << line_num);
   }
-  atom_name=line.substr(12, 4).trim();
+
   alt_loc=line[16];
   res_name=line.substr(17, (PDB::Flags() & PDB::CHARMM_FORMAT) ? 4 : 3).trim();
   std::pair<bool, int> res_num=line.substr(22, 4).ltrim().to_int();;
@@ -339,15 +368,6 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
 
   char  ins_c=line[26];  
   resnum=to_res_num(res_num.second, ins_c);
-  if (PDB::Flags() & PDB::CALPHA_ONLY) {
-    if (record_type[0]=='H' || record_type[0]=='h') {
-      return false;
-    } 
-    if (atom_name!=StringRef("CA", 2)) {
-      return false;
-    }
-    return true;
-  }
   return true;
 }
 
@@ -411,7 +431,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   if (!this->EnsureLineLength(line, 54)) {
     return;
   }
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   char alt_loc=0;
   String chain_name;
   StringRef res_name, atom_name;

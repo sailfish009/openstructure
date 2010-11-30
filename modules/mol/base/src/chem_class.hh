@@ -18,16 +18,13 @@
 //------------------------------------------------------------------------------
 #ifndef OST_BASE_CHEM_CLASS_HI
 #define OST_BASE_CHEM_CLASS_HI
-#include <vector>
-
-#include <boost/shared_ptr.hpp>
 
 #include <ost/mol/module_config.hh>
 
 
 namespace ost { namespace mol {
 
-struct ChemClass {
+struct DLLEXPORT ChemClass {
   const static char PeptideLinking  ='P';
   const static char DPeptideLinking ='D';
   const static char LPeptideLinking ='L';

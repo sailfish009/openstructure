@@ -195,7 +195,7 @@ void HeuristicBuilder::ConnectivityFromAtomNames(const mol::ResidueHandle& res,
                                                  mol::AtomHandleList& unknown_atoms) {
  unknown_atoms.clear();
  mol::AtomHandleList atomlist=res.GetAtomList();
- mol::XCSEditor editor=res.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
+ mol::XCSEditor editor=res.GetEntity().EditXCS(mol::BUFFERED_EDIT);
  for (mol::AtomHandleList::iterator it1=atomlist.begin();it1!=atomlist.end();++it1) {
    if (centry.HasAtom(it1->GetName())) {
      mol::AtomHandleList::iterator it2=it1;
@@ -265,7 +265,7 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
 {
   static String fname=flag ? "HeuristicBuilder: ConnectNextXCS" : "HeuristicBuilder: ConnectPrevXCS";
   if(!res0) return; // return if invalid
-  mol::XCSEditor editor=res0.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=res0.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   LOG_DEBUG(fname << " on " << res0.GetKey() << " " << res0.GetNumber());
 
   if(!res1) {
@@ -333,7 +333,7 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
 void HeuristicBuilder::AssignTorsionsToResidue(mol::ResidueHandle res)
 {
 
-  mol::XCSEditor editor=res.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=res.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   mol::ChainHandle chain=res.GetChain();
   std::pair<detail::ConnResEntry,bool> centry2 = LookupResEntry(res.GetKey());
   if (centry2.second) {

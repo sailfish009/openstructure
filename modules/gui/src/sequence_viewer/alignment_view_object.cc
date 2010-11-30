@@ -69,19 +69,6 @@ QMap<QString,int> GetGroupMap(){
   return map;
 }
 
-QColor GetColor(int cons){
-  int color = 255 - int((float(cons) / 100) * 200);
-  return QColor(color,color,color);
-}
-
-QColor GetForeGroundColor(QColor background){
-  if(background == Qt::transparent){
-    return Qt::black;
-  }
-  int gray = 255 - background.red();
-  return QColor(gray,gray,gray);
-}
-
 }
 
 QMap<QString,int> AlignmentViewObject::group_map_ = GetGroupMap();

@@ -126,7 +126,12 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
       line(60, 6)=fmt::LPaddedFloat(atom.GetRadius(), 2);
     } else {
       line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
-      line(60, 6)=fmt::LPaddedFloat(atom.GetBFactor(), 2);
+      Real bfac=atom.GetBFactor();
+      if (bfac>999.99) {
+        line(60, 6)=fmt::LPaddedFloat(999.99, 2);
+      } else {
+        line(60, 6)=fmt::LPaddedFloat(bfac, 2);
+      }
     }
     if (charmm_style) {
       line(72, 4)=fmt::RPadded(chain_name);
@@ -136,7 +141,8 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
   } else {
     for (std::vector<String>::const_iterator
          i=names.begin(), e=names.end(); i!=e; ++i) {
-      p=atom.GetAltPos(*i);
+      geom::Mat4 tf=atom.GetEntity().GetTransformationMatrix();
+      p=geom::Vec3(tf*geom::Vec4(atom.GetAltPos(*i)));
       line(30, 50).Clear();
 
       if (i->size()>1) {
@@ -154,7 +160,12 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
        line(60, 6)=fmt::LPaddedFloat(atom.GetRadius(), 2);
       } else {
        line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
-       line(60, 6)=fmt::LPaddedFloat(atom.GetBFactor(), 2);
+       Real bfac=atom.GetBFactor();
+       if (bfac>999.99) {
+         line(60, 6)=fmt::LPaddedFloat(999.99, 2);
+       } else {
+         line(60, 6)=fmt::LPaddedFloat(bfac, 2);
+       }
       }
       if (charmm_style) {
         line(72, 4)=fmt::RPadded(chain_name);
@@ -236,7 +247,10 @@ public:
     line_(0, 6)=StringRef("TER   ", 6);
     line_( 6, 5)=fmt::LPaddedInt(counter_);
     line_(17, 3)=fmt::LPadded(res.GetKey());
-    line_[21]=res.GetChain().GetName()[0];
+    if (!res.GetChain().GetName().empty()) {
+      line_[21]=res.GetChain().GetName()[0];
+    }
+
     line_(22, 4)=fmt::LPaddedInt(res.GetNumber().GetNum());
     char ins_code=res.GetNumber().GetInsCode();
     if (ins_code!=0) {

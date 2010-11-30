@@ -31,7 +31,7 @@ using namespace ost::mol;
 EntityHandle make_query_test_entity()
 {
   EntityHandle eh = CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle chain = e.InsertChain("A");
   chain.SetFloatProp("testprop_c", 1.0);
   ResidueHandle res = e.AppendResidue(chain, "MET");

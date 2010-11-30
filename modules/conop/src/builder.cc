@@ -147,7 +147,11 @@ String Builder::GuessAtomElement(const String& aname, bool hetatm)
       if(ele==l3[i]) return ele;
     }
   }
-  return String(1, aname[0]);
+  size_t i=0;
+  while (i<aname.size() && isdigit(aname[i])) {
+    ++i;
+  }
+  return i<aname.size() ? String(1, aname[i]) : "";
 }
 
 bool Builder::AreResiduesConsecutive(const mol::ResidueHandle& r1, 
@@ -164,7 +168,7 @@ void Builder::AssignBackBoneTorsionsToResidue(mol::ResidueHandle res)
 
   mol::ResidueHandle prev=res.GetPrev();
   mol::ResidueHandle next=res.GetNext();
-  mol::XCSEditor e=res.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor e=res.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   //psi
   if (next.IsValid() && next.IsPeptideLinking()){
     mol::AtomHandle ca_this=res.FindAtom("CA");
@@ -205,7 +209,7 @@ void Builder::AssignBackBoneTorsionsToResidue(mol::ResidueHandle res)
 void Builder::DistanceBasedConnect(mol::AtomHandle atom)
 {
   mol::EntityHandle ent=atom.GetEntity();
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   mol::AtomHandleList alist = ent.FindWithin(atom.GetPos(),4.0);
   mol::ResidueHandle res_a=atom.GetResidue();
   for (mol::AtomHandleList::const_iterator it=alist.begin(),

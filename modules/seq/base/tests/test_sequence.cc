@@ -34,7 +34,7 @@ struct Fixture {
   Fixture() {
     eh = CreateEntity();
     eh.SetName("TestEntity");
-    XCSEditor e=eh.RequestXCSEditor();
+    XCSEditor e=eh.EditXCS();
     chain = e.InsertChain("A");
     res1 = e.AppendResidue(chain, "ARG");
     e.InsertAtom(res1, "CA",geom::Vec3(1,0,0));

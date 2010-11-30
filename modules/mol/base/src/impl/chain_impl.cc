@@ -66,6 +66,8 @@ ResidueImplPtr ChainImpl::AppendResidue(const ResidueImplPtr& res)
   dst_res->SetOneLetterCode(res->GetOneLetterCode());
   dst_res->SetSecStructure(res->GetSecStructure());
   dst_res->SetChemClass(res->GetChemClass());  
+  dst_res->SetProtein(res->IsProtein());
+  dst_res->SetIsLigand(res->IsLigand());
   return dst_res;
 }
 

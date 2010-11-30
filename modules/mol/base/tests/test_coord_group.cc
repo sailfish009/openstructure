@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_SUITE( io )
 BOOST_AUTO_TEST_CASE(coord_group) 
 {
   EntityHandle e=CreateEntity();
-  XCSEditor editor=e.RequestXCSEditor();  
+  XCSEditor editor=e.EditXCS();  
   ChainHandle c=editor.InsertChain("A");
   ResidueHandle r=editor.AppendResidue(c, "XXX");
   AtomHandle aa=editor.InsertAtom(r, "A", geom::Vec3(0,1,2));

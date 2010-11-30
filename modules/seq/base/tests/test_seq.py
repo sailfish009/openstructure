@@ -6,7 +6,7 @@ from ost import seq
 
 def fixture():
   e=mol.CreateEntity()
-  ede=e.RequestXCSEditor()
+  ede=e.EditXCS()
   chain=ede.InsertChain('A')
   for res in 'ABCDEFGH':
     r=ede.AppendResidue(chain, res)

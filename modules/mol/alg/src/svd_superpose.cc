@@ -354,7 +354,7 @@ SuperpositionResult SuperposeAtoms(const mol::AtomViewList& atoms1,
   res.ncycles=1;
   mol::AtomView jv=atoms1.front();
   if (apply_transform){
-    mol::XCSEditor ed=jv.GetResidue().GetChain().GetEntity().GetHandle().RequestXCSEditor();
+    mol::XCSEditor ed=jv.GetResidue().GetChain().GetEntity().GetHandle().EditXCS();
     ed.ApplyTransform(res.transformation);
   }
   return res;
@@ -381,7 +381,7 @@ SuperpositionResult SuperposeSVD(const mol::EntityView& ev1,
   //save rmsd info
   res.rmsd=CalculateRMSD(ev1, ev2, res.transformation);
   if (apply_transform){
-    mol::XCSEditor ed=ev1.GetHandle().RequestXCSEditor();
+    mol::XCSEditor ed=ev1.GetHandle().EditXCS();
     ed.ApplyTransform(res.transformation);
   }
   return res;
@@ -457,7 +457,7 @@ SuperpositionResult IterativeSuperposition(mol::EntityView& ev1,
   result.entity_view2=CreateViewFromAtomList(atoms_b);
 
   if (apply_transform){
-    mol::XCSEditor ed=ev1.GetHandle().RequestXCSEditor();
+    mol::XCSEditor ed=ev1.GetHandle().EditXCS();
     ed.ApplyTransform(result.transformation);
   }
   return result;

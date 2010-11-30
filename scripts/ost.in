@@ -76,7 +76,9 @@ else
 fi
 # finally pass control to python instance
 IFS="#"
-exec $pyexec $interactive "$DNG_ROOT/@LIBDIR@/openstructure/init_cl.py" $opts
+$pyexec $interactive "$DNG_ROOT/@LIBDIR@/openstructure/init_cl.py" $opts
+RC=$?
 IFS=$' \t\n'
+exit $RC
 
 

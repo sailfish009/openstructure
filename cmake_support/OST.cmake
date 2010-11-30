@@ -136,7 +136,7 @@ macro(module)
   #-----------------------------------------------------------------------------
   set(_ARGS "NAME;SOURCES;HEADERS;DEPENDS_ON;LINK;HEADER_OUTPUT_DIR;PREFIX")
   set(_ARG_PREFIX ost)  
-  parse_argument_list(_ARG "${_ARGS}" "" ${ARGN})  
+  parse_argument_list(_ARG "${_ARGS}" "NO_STATIC" ${ARGN})  
   if (NOT _ARG_NAME)
     message(FATAL_ERROR 
             "invalid use of module(): a module name must be provided")
@@ -178,7 +178,7 @@ macro(module)
       endif()
     endforeach()
     add_library(${_LIB_NAME} SHARED ${_ABS_SOURCE_NAMES})
-    
+
     set_target_properties(${_LIB_NAME} 
                           PROPERTIES OUTPUT_NAME ${_LIB_NAME}
                                      PROJECT_LABEL ${_ARG_NAME}
@@ -191,6 +191,25 @@ macro(module)
                           LIBRARY_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
                           ARCHIVE_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
                           RUNTIME_OUTPUT_DIRECTORY ${LIB_STAGE_PATH})
+    if (ENABLE_STATIC AND NOT _ARG_NO_STATIC)
+      add_library(${_LIB_NAME}_static STATIC ${_ABS_SOURCE_NAMES})
+      set_target_properties(${_LIB_NAME}_static
+                            PROPERTIES OUTPUT_NAME ${_LIB_NAME}
+                                       PROJECT_LABEL ${_ARG_NAME}
+                                       EchoString   ${_ARG_NAME}
+                                       MODULE_DEPS "${_ARG_DEPENDS_ON}")
+      get_target_property(_DEFS ${_LIB_NAME}_static COMPILE_DEFINITIONS)
+      set_target_properties(${_LIB_NAME}_static PROPERTIES
+                            COMPILE_DEFINITIONS OST_MODULE_${_UPPER_LIB_NAME})
+      set_target_properties(${_LIB_NAME}_static PROPERTIES
+                            LIBRARY_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
+                            ARCHIVE_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
+                            RUNTIME_OUTPUT_DIRECTORY ${LIB_STAGE_PATH})
+      foreach(_DEPENDENCY ${_ARG_DEPENDS_ON})
+        target_link_libraries(${_LIB_NAME}_static ost_${_DEPENDENCY}_static)
+      endforeach()
+      target_link_libraries(${_LIB_NAME} ${ZLIB_LIBRARIES})
+    endif()
     if (APPLE)
       set_target_properties(${_LIB_NAME} PROPERTIES
                             LINK_FLAGS "-Wl,-rpath,."
@@ -268,20 +287,24 @@ endmacro()
 #-------------------------------------------------------------------------------
 macro(executable)
   parse_argument_list(_ARG 
-                      "NAME;SOURCES;LINK;DEPENDS_ON" "NO_RPATH" ${ARGN})
+                      "NAME;SOURCES;LINK;DEPENDS_ON" "NO_RPATH;STATIC" ${ARGN})
   if (NOT _ARG_NAME)
     message(FATAL_ERROR "invalid use of executable(): a name must be provided")
   endif()
   add_executable(${_ARG_NAME} ${_ARG_SOURCES})
-  if (APPLE AND NOT _ARG_NO_RPATH)
+  if (APPLE AND NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
     set_target_properties(${_ARG_NAME} PROPERTIES
                           LINK_FLAGS "-Wl,-rpath,@loader_path/../lib")
   endif()
   if (_ARG_LINK)
     target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
   endif()
+  if (ENABLE_STATIC AND _ARG_STATIC)
+    set(TARGET_SUFFIX _static)
+    target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
+  endif()
   foreach(_DEP ${_ARG_DEPENDS_ON})
-    target_link_libraries(${_ARG_NAME} ost_${_DEP})
+    target_link_libraries(${_ARG_NAME} ost_${_DEP}${TARGET_SUFFIX})
   endforeach()
   install(TARGETS ${_ARG_NAME} DESTINATION bin)
 endmacro()

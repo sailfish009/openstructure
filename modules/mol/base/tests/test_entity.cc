@@ -19,6 +19,8 @@
 /*
  *  Authors: Marco Biasini, Juergen Haas
  */
+ 
+#include <ost/mol/chem_class.hh>
 #include <ost/mol/mol.hh>
 #include <cmath>
 #define BOOST_TEST_DYN_LINK
@@ -42,10 +44,12 @@
 
 using namespace ost;
 using namespace ost::mol;
+
+
 EntityHandle make_test_entity()
 {
   EntityHandle eh = CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle chain = e.InsertChain("A");
   ResidueHandle res1 = e.AppendResidue(chain, "MET");
 
@@ -83,7 +87,7 @@ BOOST_AUTO_TEST_CASE(entity_creator)
   eh.SetName("TestEntity");
   BOOST_CHECK(eh.GetName()=="TestEntity");
 
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle chain = e.InsertChain("C");
   BOOST_CHECK(chain.GetName()=="C");
 
@@ -118,7 +122,7 @@ BOOST_AUTO_TEST_CASE(entity_creator)
 BOOST_AUTO_TEST_CASE(spatial_organizer) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle chain = e.InsertChain("A");
   ResidueHandle res = e.AppendResidue(chain, "X");
 
@@ -139,7 +143,7 @@ BOOST_AUTO_TEST_CASE(spatial_organizer)
 BOOST_AUTO_TEST_CASE(transformation) 
 {
   EntityHandle eh = CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle chain = e.InsertChain("A");
   ResidueHandle res = e.AppendResidue(chain, "X");
 
@@ -240,7 +244,7 @@ BOOST_AUTO_TEST_CASE(transformation)
 
   BOOST_CHECK(bond1.GetLength()==1.5);
   BOOST_CHECK(bond2.GetLength()==2.0);
-  ICSEditor i = eh.RequestICSEditor();
+  ICSEditor i = eh.EditICS();
   i.SetBondLength(bond1,1.0);
   i.SetBondLength(bond2,3.0);
 
@@ -324,5 +328,57 @@ BOOST_AUTO_TEST_CASE(copy)
   BOOST_CHECK(mol::BondExists(r2.FindAtom("C"), r2.FindAtom("O")));
   BOOST_CHECK(r2.GetPhiTorsion());
 }
+
+BOOST_AUTO_TEST_CASE(copy_residue_props)
+{
+  EntityHandle ent=mol::CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  ChainHandle ch=edi.InsertChain("A");
+  ResidueHandle res=edi.AppendResidue(ch, "DUMMY", mol::ResNum(666, '6'));
+  res.SetOneLetterCode('X');
+  res.SetIsProtein(true);
+  res.SetIsLigand(true);
+  ChemClass cl(ChemClass::LPeptideLinking);  
+  res.SetSecStructure(SecStructure(SecStructure::ALPHA_HELIX));
+  res.SetChemClass(cl);
+  EntityHandle copy=ent.Copy();
+  ResidueHandle res2=copy.GetResidueList()[0];
+  BOOST_CHECK_EQUAL(res2.GetName(), String("DUMMY"));
+  BOOST_CHECK_EQUAL(res2.GetOneLetterCode(), 'X');
+
+  BOOST_CHECK_EQUAL(res2.GetChemClass(), cl);
+  BOOST_CHECK_EQUAL(res.GetSecStructure(), SecStructure::ALPHA_HELIX);
+  BOOST_CHECK(res2.IsProtein()==true);
+  BOOST_CHECK(res2.IsLigand()==true);  
+  BOOST_CHECK_EQUAL(res2.GetNumber(), ResNum(666, '6'));
+}
+
+BOOST_AUTO_TEST_CASE(copy_atom_props)
+{
+  EntityHandle ent=mol::CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  ChainHandle ch=edi.InsertChain("A");
+  ResidueHandle res=edi.AppendResidue(ch, "DUMMY");
+  AtomHandle   atom=edi.InsertAtom(res, "X", geom::Vec3(1,2,3), "C");
+  atom.SetMass(100.0);
+  atom.SetBFactor(200.0);
+  atom.SetOccupancy(300.0);
+  atom.SetHetAtom(true);
+  atom.SetRadius(500);
+  atom.SetCharge(800);
+  atom.SetAnisou(geom::Mat3(100,200,300));
+  EntityHandle copy=ent.Copy();
+  AtomHandle atom2=copy.GetAtomList()[0];
+  BOOST_CHECK_EQUAL(atom2.GetPos(), geom::Vec3(1,2,3));
+  BOOST_CHECK_EQUAL(atom2.GetName(), String("X"));
+  BOOST_CHECK_EQUAL(atom2.GetElement(), String("C"));
+  BOOST_CHECK_EQUAL(atom2.GetMass(), Real(100.0));
+  BOOST_CHECK_EQUAL(atom2.GetCharge(), Real(800.0));  
+  BOOST_CHECK_EQUAL(atom2.GetBFactor(), Real(200.0)); 
+  BOOST_CHECK_EQUAL(atom2.IsHetAtom(), true);
+  BOOST_CHECK_EQUAL(atom2.GetAnisou(), geom::Mat3(100,200,300));
+  BOOST_CHECK_EQUAL(atom2.GetRadius(), Real(500.0));
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()

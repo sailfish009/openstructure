@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 BOOST_AUTO_TEST_CASE(test_in_sequence) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle ch1=e.InsertChain("A");
   ResidueHandle rA = e.AppendResidue(ch1, "A");
   ResidueHandle rB = e.AppendResidue(ch1, "B");
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(test_in_sequence)
 BOOST_AUTO_TEST_CASE(test_res_index)
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle ch1=e.InsertChain("A");
   ResidueHandle rA = e.AppendResidue(ch1, "A");
   ResidueHandle rB = e.AppendResidue(ch1, "B");

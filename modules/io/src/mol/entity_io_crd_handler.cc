@@ -74,20 +74,29 @@ void CRDReader::Import(mol::EntityHandle& ent)
   while(std::getline(in_,line)) {
     if(line[0]!='*') break;
   }
-  // line contains atom count
-  boost::trim(line);
-  //int acount = boost::lexical_cast<int>(line);
 
-  while(std::getline(in_,line)) {
-    ParseAndAddAtom(line,ent);
-  }
+  // line contains atom count
+  std::vector<String> line_content;
+  boost::trim(line);
+  boost::split(line_content,line,boost::is_any_of(" "));
+  
+  // expanded charmm CARD format check
+  if (line_content.size() > 1 || boost::lexical_cast<int>(line_content[0]) > 99999)
+    while(std::getline(in_,line)) {
+      ParseAndAddAtomExpanded(line,ent);
+    }
+  else
+    while(std::getline(in_,line)) {
+      ParseAndAddAtom(line,ent);
+    }
+  
   LOG_INFO("imported " << chain_count_ << " chains, " << residue_count_
                 << " residues, " << atom_count_ << " atoms");  
 }
 
 void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
 {
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
 
   LOG_TRACE( "line: [" << line << "]" );
 
@@ -146,6 +155,68 @@ void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
   sequential_atom_list_.push_back(ah);
   ++atom_count_;
 }
+	
+void CRDReader::ParseAndAddAtomExpanded(const String& line, mol::EntityHandle& ent)
+{
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
+  
+  LOG_TRACE( "line: [" << line << "]" );
+    
+  //int anum = boost::lexical_cast<int>(boost::trim_copy(line.substr(0,5)));
+  String aname = boost::trim_copy(line.substr(32,8));
+  String ele = aname.substr(0,1);
+  String rname = boost::trim_copy(line.substr(22,8));
+  int irnum = boost::lexical_cast<int>(boost::trim_copy(line.substr(112,8)));
+  String s_chain = boost::trim_copy(line.substr(102.8,8));
+  geom::Vec3 apos(boost::lexical_cast<Real>(boost::trim_copy(line.substr(40,20))),
+                  boost::lexical_cast<Real>(boost::trim_copy(line.substr(60,20))),
+                  boost::lexical_cast<Real>(boost::trim_copy(line.substr(80,20))));
+    
+  mol::ResidueKey rkey(rname);
+    
+  // some postprocessing
+  LOG_TRACE( "s_chain: [" << s_chain << "]" );
+    
+  mol::ResNum rnum(irnum);
+  
+  // determine chain and residue update
+  bool update_chain=false;
+  bool update_residue=false;
+  if(!curr_chain_) {
+    update_chain=true;
+    update_residue=true;
+  } else if(curr_chain_.GetName()!=s_chain) {
+    update_chain=true;
+    update_residue=true;
+  }
+    
+  if(!curr_residue_) {
+    update_residue=true;
+  } else if(curr_residue_.GetNumber()!=rnum) {
+    update_residue=true;
+  }
+    
+  if(update_chain) {  
+    if (!(curr_chain_=ent.FindChain(s_chain))) {
+      LOG_DEBUG("new chain " << s_chain);      
+      curr_chain_=editor.InsertChain(s_chain);
+      ++chain_count_;      
+    }
+  }
+    
+  if(update_residue) {
+    LOG_DEBUG("new residue " << rkey << " " << rnum);
+    curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+    assert(curr_residue_.IsValid());
+    ++residue_count_;
+  }
+    
+  // finally add atom
+  LOG_DEBUG("adding atom " << aname << " (" << ele << ") @" << apos);
+  mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, ele);
+  sequential_atom_list_.push_back(ah);
+  ++atom_count_;
+}
 
 CRDWriter::CRDWriter(std::ostream& ostream) :
      outfile_(), outstream_(ostream), atom_count_(0)
@@ -164,7 +235,15 @@ void CRDWriter::WriteHeader(const mol::EntityView& ent)
 {
   outstream_  << "* COOR FILE CREATED BY OPENSTRUCTURE" << std::endl;
   outstream_  << "*" << std::endl;
-  outstream_  << ent.GetAtomCount() << std::endl;
+  
+  atom_total_ = ent.GetAtomCount();
+	
+  if (atom_total_ > 99999) {
+    outstream_  << format("%10i") % ent.GetAtomCount() << "  EXT" << std::endl;
+  }
+  else {
+    outstream_  << format("%5i") % ent.GetAtomCount() << std::endl;
+  }
 }
 
 bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
@@ -174,19 +253,34 @@ bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
   if (e_name=="") {
     e_name="MOL";
   }
+	
   mol::ResidueHandle res=atom.GetResidue();
-  outstream_  << format("%5i") % atom_count_
-              << format("%5i") % res.GetNumber() << " "
-              << format("%4s") % res.GetKey() << " "
-              << format("%-4s") % atom.GetName()
-              << format("%10.5f") % atom.GetPos().x
-              << format("%10.5f") % atom.GetPos().y
-              << format("%10.5f") % atom.GetPos().z << " "
-              << format("%-4s") % e_name << " "
-              << format("%-5i") % res.GetNumber() << " "
-              << format("%8.5f") % atom.GetBFactor()
-              << std::endl;
 
+  if (atom_total_ > 99999) {
+    outstream_  << format("%10i") % atom_count_
+                << format("%10i") % res.GetNumber() << "  "
+          	    << format("%-8s") % res.GetKey() << "  "
+                << format("%-8s") % atom.GetName()
+                << format("%20.10f") % atom.GetPos().x
+                << format("%20.10f") % atom.GetPos().y
+                << format("%20.10f") % atom.GetPos().z << "  "
+                << format("%-8s") % e_name << "  "
+                << format("%-8i") % res.GetNumber()
+                << format("%20.10f") % atom.GetBFactor()
+                << std::endl;
+  } else {
+    outstream_  << format("%5i") % atom_count_
+                << format("%5i") % res.GetNumber() << " "
+			    << format("%4s") % res.GetKey() << " "
+                << format("%-4s") % atom.GetName()
+                << format("%10.5f") % atom.GetPos().x
+                << format("%10.5f") % atom.GetPos().y
+                << format("%10.5f") % atom.GetPos().z << " "
+                << format("%-4s") % e_name << " "
+                << format("%-5i") % res.GetNumber() << " "
+                << format("%8.5f") % atom.GetBFactor()
+                << std::endl;
+  }
   return true;
 }
 
@@ -257,7 +351,7 @@ mol::EntityHandle LoadCRD(const String& file_name)
   conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
   CRDReader reader(file_name);
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   reader.Import(ent);
   conop::Conopology::Instance().ConnectAll(builder,ent);    
   return ent;

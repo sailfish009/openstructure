@@ -217,6 +217,10 @@ boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
         int_value=r->GetChemClass().IsWater();
         s_[*i]=cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));
         break;
+      case Prop::LIGAND:
+        int_value=r->IsLigand();
+        s_[*i]=cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));
+        break;        
       case Prop::RTYPE:
         p=boost::get<String>(ss.param);
         if (p.length()>1) {

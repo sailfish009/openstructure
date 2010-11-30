@@ -245,7 +245,7 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHand
     else{
       QFileInfo file_info(filename);
       mol::EntityHandle eh=mol::CreateEntity();
-      mol::XCSEditor xcs_lock=eh.RequestXCSEditor(mol::BUFFERED_EDIT);
+      mol::XCSEditor xcs_lock=eh.EditXCS(mol::BUFFERED_EDIT);
       handler->Import(eh,filename.toStdString());
       if(handler->RequiresBuilder()) {
           conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();

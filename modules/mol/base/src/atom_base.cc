@@ -188,7 +188,7 @@ void AtomBase::SetCharge(Real charge)
 void AtomBase::SetRadius(Real radius)
 {
   this->CheckValidity();
-  Impl()->SetCharge(radius);
+  Impl()->SetRadius(radius);
 }
 
 const geom::Mat3& AtomBase::GetAnisou() const

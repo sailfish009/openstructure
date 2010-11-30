@@ -27,10 +27,8 @@
 
 #include <ost/geom/module_config.hh>
 #include <ost/geom/mat2.hh>
-
 namespace geom {
 
-class Mat2;
 class Vec3;
 
 class DLLEXPORT_OST_GEOM Mat3:
@@ -76,8 +74,12 @@ public:
   explicit Mat3(const Real arr[9])
   {
     this->set(arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8]);
-  }  
+  }
 
+  explicit Mat3(Real x, Real y, Real z)
+  {
+    this->set(x, 0.0, 0.0, 0.0, y, 0.0, 0.0, 0.0, z);
+  }
   //! element access
   Real& operator()(std::size_t r, std::size_t c)
   {

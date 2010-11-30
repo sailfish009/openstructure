@@ -304,13 +304,13 @@ AtomHandleIter EntityHandle::AtomsEnd() const
                         impl::end(r.back()->GetAtomList()), ent, false);
 }
 
-XCSEditor EntityHandle::RequestXCSEditor(EditMode mode) const
+XCSEditor EntityHandle::EditXCS(EditMode mode) const
 {
   this->CheckValidity();
   return XCSEditor(*this, mode);
 }
 
-ICSEditor EntityHandle::RequestICSEditor(EditMode mode) const
+ICSEditor EntityHandle::EditICS(EditMode mode) const
 {
   this->CheckValidity();
   Impl()->EnableICS();

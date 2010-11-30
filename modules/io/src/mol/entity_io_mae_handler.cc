@@ -119,7 +119,7 @@ void MAEReader::Import(mol::EntityHandle& ent)
   int i_res_num=-1;
   int i_chain_name=-1;
 
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
 
   while(std::getline(in_,line)) {
     line = boost::trim_copy(line);
@@ -325,7 +325,7 @@ mol::EntityHandle LoadMAE(const String& file_name)
   conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
   MAEReader reader(file_name);
   mol::EntityHandle ent=mol::CreateEntity();
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   reader.Import(ent);
   conop::Conopology::Instance().ConnectAll(builder,ent);    
   return ent;

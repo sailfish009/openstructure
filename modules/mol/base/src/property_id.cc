@@ -51,6 +51,7 @@ struct Properties : public boost::spirit::symbols<Prop> {
       ("peptide", Prop(Prop::PEPTIDE, Prop::INT, Prop::RESIDUE))
       ("rindex", Prop(Prop::RINDEX, Prop::INT, Prop::RESIDUE))
       ("protein", Prop(Prop::PROTEIN, Prop::INT, Prop::RESIDUE))
+      ("ligand", Prop(Prop::LIGAND, Prop::INT, Prop::RESIDUE))
       ("water", Prop(Prop::WATER, Prop::INT, Prop::RESIDUE))
       ("acharge", Prop(Prop::ACHARGE, Prop::FLOAT, Prop::ATOM));
   }
@@ -116,6 +117,8 @@ String Prop::GetName() const
       return "rindex";
     case PROTEIN:
       return "protein";
+    case LIGAND:
+      return "ligand";
     case WATER:
       return "water";
     default:
@@ -128,7 +131,7 @@ String Prop::GetTypeName() const
 
   switch(type) {
     case Prop::STRING:
-      return "String";
+      return "string";
     case Prop::FLOAT:
       return "floating point";
     case Prop::INT:

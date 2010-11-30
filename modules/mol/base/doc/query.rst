@@ -197,6 +197,10 @@ index is the same for views and handles.
 
 **rbfac** (float): average B (temperature) factor of residue
 
+**ligand** (bool) Whether the residue is a ligand. For official PDB files, the ligand property is set based on HET records.
+
+**water** (bool) Whether the residue is water.
+
 Properties of Atoms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

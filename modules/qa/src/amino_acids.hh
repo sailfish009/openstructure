@@ -50,6 +50,8 @@ DLLEXPORT_OST_QA AminoAcid ResidueToAminoAcid(const mol::ResidueHandle& r);
 // \brief from amino acid to residue name
 DLLEXPORT_OST_QA String AminoAcidToResidueName(AminoAcid aa);
 
+DLLEXPORT_OST_QA String OneLetterCodeToResidueName(char olc);
+
 class AminoAcidSetIterator : public std::iterator<std::forward_iterator_tag,
                                                   AminoAcid> {
 public:

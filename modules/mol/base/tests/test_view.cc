@@ -30,7 +30,7 @@ using namespace ost::mol;
 struct Fixture {
   Fixture() {
     e=CreateEntity();
-    XCSEditor editor=e.RequestXCSEditor();
+    XCSEditor editor=e.EditXCS();
     c=editor.InsertChain("A");
     r=editor.AppendResidue(c, "ANGELIN");
     aa=editor.InsertAtom(r, "X1", geom::Vec3( 0.0, 0.0,  0.0));
