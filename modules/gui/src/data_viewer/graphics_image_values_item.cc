@@ -59,8 +59,8 @@ void GraphicsImageValuesItem::paint( QPainter * painter, const QStyleOptionGraph
         QString value_string = QString("%1").arg(pixel_value,0,'g',5);
         Real rv = normalizer->Convert(pixel_value);
         painter->setPen((rv>130.0) ? Qt::black : Qt::white);
-        QPoint p1=deviceTransform(painter->transform()).map(QPoint(x,y));
-        QPoint p2=deviceTransform(painter->transform()).map(QPoint(x+1,y+1));
+        QPoint p1=mapToScene(QPoint(x,y)).toPoint();
+        QPoint p2=mapToScene(QPoint(x+1,y+1)).toPoint();
         painter->drawText(QRect(p1,p2),Qt::AlignCenter,value_string);
       }
     }
@@ -71,8 +71,8 @@ void GraphicsImageValuesItem::paint( QPainter * painter, const QStyleOptionGraph
         QString value_string = QString("%1+i%2").arg(pixel_value.real(),0,'g',5).arg(pixel_value.imag(),0,'g',5);
         Real rv = normalizer->Convert(abs(pixel_value));
         painter->setPen((rv>130.0) ? Qt::black : Qt::white);
-        QPoint p1=deviceTransform(painter->transform()).map(QPoint(x,y));
-        QPoint p2=deviceTransform(painter->transform()).map(QPoint(x+1,y+1));
+        QPoint p1=mapToScene(QPoint(x,y)).toPoint();
+        QPoint p2=mapToScene(QPoint(x+1,y+1)).toPoint();
         painter->drawText(QRect(p1,p2),Qt::AlignCenter,value_string);
       }
     }

@@ -89,11 +89,15 @@ void ViewerPanel::wheelEvent(QWheelEvent* event)
     static const qreal scalemax=4096.0;
     if(event->delta()>0) {
       if(image_layer_->scale()>1.0/scalemax){
+        QPointF p=image_layer_->pos()-geometry().center();
         image_layer_->setScale(0.5*image_layer_->scale());
+        image_layer_->setPos(geometry().center()+p*0.5);
       }
     } else {
       if(image_layer_->scale()<scalemax){
+        QPointF p=image_layer_->pos()-geometry().center();
         image_layer_->setScale(2.0*image_layer_->scale());
+        image_layer_->setPos(geometry().center()+p*2.0);
       }
     }
     emit zoomed(image_layer_->scale());
@@ -118,7 +122,9 @@ void ViewerPanel::mouseDoubleClickEvent(QMouseEvent* event)
 
 GraphicsImageItem* ViewerPanel::AddImage(const Data& data)
 {
-  return image_layer_->AddImage(data);
+  GraphicsImageItem* item = image_layer_->AddImage(data);
+  CenterOn(image_layer_->GetCenteringPosition());
+  return item;
 }
 
 void ViewerPanel::AddWidget(QWidget* widget)
@@ -138,6 +144,13 @@ void ViewerPanel::CenterOn(const QPointF& p)
 
 void 	ViewerPanel::scrollContentsBy ( int dx, int dy )
 {
+}
+
+void ViewerPanel::resizeEvent(QResizeEvent* event)
+{
+  QGraphicsView::resizeEvent(event);
+  QPointF p=image_layer_->pos()-QPointF(event->oldSize().width()/2.0,event->oldSize().height()/2.0);
+  image_layer_->setPos(QPointF(event->size().width()/2.0,event->size().height()/2.0)+p);
 }
 
 void ViewerPanel::mousePressEvent(QMouseEvent* event)

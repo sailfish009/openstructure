@@ -56,6 +56,7 @@ protected:
   virtual void 	mouseReleaseEvent(QMouseEvent* event);
   virtual void 	mouseMoveEvent(QMouseEvent* event);
   virtual void 	scrollContentsBy ( int dx, int dy );
+  virtual void   resizeEvent(QResizeEvent* event);
   ImageLayer* image_layer_;
   WidgetLayerItem* widget_layer_;
   QPoint last_mouse_;

@@ -32,24 +32,30 @@
 
 #include <ost/gui/module_config.hh>
 
-#include <QGraphicsWidget>
+#include <QWidget>
 #include <QPixmap>
 
 namespace ost { namespace img { namespace gui {
 
-class DLLEXPORT_OST_GUI Argand: public QGraphicsWidget
+class DLLEXPORT_OST_GUI Argand: public QWidget
 {
   Q_OBJECT;
 public:
-  Argand(QGraphicsItem* p=0);
+  Argand(QWidget* p=0);
   ~Argand();
 
-  virtual void paint(QPainter* painter,const QStyleOptionGraphicsItem * option,QWidget * widget = 0);
 
  public slots:
-  void SetCurrentPixel(const Point& p);
+  void SetCurrentPixel(const QPointF& p,Complex val );
   void SetExtent(const Extent& e, const Data& d);
   void ClearExtent();
+protected:
+  virtual void paintEvent(QPaintEvent* event);
+  Real scalefactor_;
+  Extent extent_;
+  Point current_pos_;
+  Complex current_val_;
+
 private:
   QPixmap buffer_;
 

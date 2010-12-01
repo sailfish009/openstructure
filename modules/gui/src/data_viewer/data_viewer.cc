@@ -86,6 +86,7 @@ DataViewer::DataViewer(QWidget* p, const Data& data, const QString& name):
   //scene_->setSceneRect(image->boundingRect());
   connect(image,SIGNAL(MousePositionReal(const QPointF&,Real)),info_,SLOT(SetMousePoint(const QPointF&,Real)));
   connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),info_,SLOT(SetMousePoint(const QPointF&,Complex)));
+  connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),argand_,SLOT(SetCurrentPixel(const QPointF&,Complex)));
   //connect(image,SIGNAL(MousePositionReal(const QPointF&,Real)),fft_,SLOT(SetPosition(const QPointF&)));
  // connect(image,SIGNAL(MousePositionComplex(const QPointF&,Complex)),fft_,SLOT(SetPosition(const QPointF&)));
   OnSlabChange(image->GetSlab());
