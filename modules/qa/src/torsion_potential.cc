@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
 #include "torsion_potential.hh"
 #include "amino_acids.hh"
 
@@ -39,10 +40,9 @@ namespace {
 
 class TorsionEnergyCalc : public mol::EntityVisitor {
 public:
-  TorsionEnergyCalc(TorsionPotential::TorsionEnergies& energies, 
+  TorsionEnergyCalc(const TorsionPotentialPtr& pot, 
                     TorsionPotentialOpts opts):
-    energies_(energies), energy_(0.0),
-    opts_(opts), num_torsions_(0)
+    pot_(pot), energy_(0.0), num_torsions_(0)
   {
   }
   
@@ -75,24 +75,16 @@ public:
     Real next_phi=next_phit.GetAngle()*180/M_PI - 0.001; if (next_phi<-180) next_phi=-180;
     Real next_psi=next_psit.GetAngle()*180/M_PI - 0.001; if (next_psi<-180) next_psi=-180;
 
+    
     // calculate position of the amino acid in the alphabet
-    int icenter=this->GetAAIndex(ca);
-
-    if (icenter >-1) {
-      energy_+=energies_.Get(icenter, prev_phi, prev_psi,
-                             central_phi, central_psi,
-                             next_phi, next_psi);
-      num_torsions_++;
-    } 
-    else {
-      LOG_INFO("Amino acid not found in alphabets...");
-    }
+    energy_+=pot_->GetTorsionEnergy(ca, prev_phi, prev_psi, central_phi, 
+                                    central_psi, next_phi, next_psi);
+    ++num_torsions_;
     return false;
   }
 
   Real GetEnergy() const {
     return energy_;
-    //return num_torsions_==0?0:energy_/num_torsions_;
   }
 
   int GetEnergyCounts() const {
@@ -100,29 +92,11 @@ public:
   }
 
 private:
-  int GetAAIndex(AminoAcid aa)
-  {
-    return this->GetIndex(aa, opts_.alphabet);
-  }
-
-  
-  int GetIndex(AminoAcid aa, AminoAcidAlphabet& alpha) {
-    AminoAcidAlphabet::iterator i=alpha.begin();
-    for (int index=0; i!=alpha.end(); ++i, ++index) {
-      if ((*i).Contains(aa)) {
-        return index;        
-      }
-
-    }
-    return -1;
-  }
-private:
-  TorsionPotential::TorsionEnergies& energies_;
+  TorsionPotentialPtr pot_;
   AminoAcid prev_;
   AminoAcid center_;
   mol::ResidueHandle cr_;
   Real energy_;  
-  TorsionPotentialOpts opts_;  
   int    num_torsions_;  
 };
 
@@ -150,6 +124,18 @@ TorsionPotentialOpts::TorsionPotentialOpts():
   next_angular_bucket_size(90), sigma(0.0005)
 {
   
+}
+
+
+int TorsionPotential::GetAAIndex(AminoAcid aa) const 
+{
+  AminoAcidAlphabet::const_iterator i=options_.alphabet.begin();
+  for (int index=0; i!=options_.alphabet.end(); ++i, ++index) {
+    if ((*i).Contains(aa)) {
+      return index;        
+    }
+  }
+  return -1;
 }
 
 
@@ -225,7 +211,7 @@ void TorsionPotential::SaveToFile(const String& path)
 
 Real TorsionPotential::GetTotalEnergy(mol::EntityHandle entity) 
 {
-  TorsionEnergyCalc c(energies_, options_);  
+  TorsionEnergyCalc c(this->shared_from_this(), options_);  
   entity.Apply(c);  
   num_torsions_ = c.GetEnergyCounts();
   return c.GetEnergy();
@@ -233,7 +219,7 @@ Real TorsionPotential::GetTotalEnergy(mol::EntityHandle entity)
 
 Real TorsionPotential::GetTotalEnergy(mol::EntityView entity) 
 {
-  TorsionEnergyCalc c(energies_, options_);
+  TorsionEnergyCalc c(this->shared_from_this(), options_);
   entity.Apply(c);
   num_torsions_ = c.GetEnergyCounts();
   return c.GetEnergy();

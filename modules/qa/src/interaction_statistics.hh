@@ -111,7 +111,7 @@ public:
   virtual bool VisitResidue(const mol::ResidueHandle& r);
   virtual bool VisitAtom(const mol::AtomHandle& a);
 
-  inline bool isCbetaStaistics() {return isCbetaStatisticsFlag_;}
+  inline bool IsCBetaOnly() {return isCbetaStatisticsFlag_;}
 
 
 private:

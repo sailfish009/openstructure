@@ -84,9 +84,16 @@ public:
   /// 
   /// See documentation for PackingStatistics::Extract()
   Real GetTotalEnergy(const mol::EntityView& view, 
-                        const mol::EntityViewList& views);
+                      const mol::EntityViewList& views);
 
   int GetEnergyCounts();
+  
+  
+  Real GetPackingEnergy(AminoAcid aa, int count) const
+  {
+    count=count>options_.max_counts ? options_.max_counts : count;
+    return energies_.Get(aa, count/options_.bucket_size);
+  }
   
   template <typename DS>
   void Serialize(DS& ds);
@@ -109,7 +116,7 @@ private:
   // used to calculate total energy...
   mol::EntityView        view_;
   mol::EntityViewList    views_;  
-  Real                 energy_;
+  Real                   energy_;
   int                    energy_counts_;
 };
 
