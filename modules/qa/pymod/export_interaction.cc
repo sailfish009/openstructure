@@ -237,7 +237,7 @@ void export_Interaction()
     .def("SaveToFile", &InteractionStatistics::SaveToFile, args("file_name"))
     .def("LoadFromFile", &InteractionStatistics::LoadFromFile).staticmethod("LoadFromFile")
     .def("RepairCbetaStatistics", &InteractionStatistics::RepairCbetaStatistics)
-    .def("isCbetaStaistics", &InteractionStatistics::isCbetaStaistics)
+    .def("IsCBetaOnly", &InteractionStatistics::IsCBetaOnly)
   ;  
   
   class_<AllAtomPotentialOpts>("AllAtomPotentialOpts", init<>())

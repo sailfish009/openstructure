@@ -153,19 +153,14 @@ AllAtomPotentialPtr AllAtomPotential::LoadFromFile(const String& filename)
   return all_atom_p;
 }
 
-
-float AllAtomPotential::GetTotalEnergy(mol::EntityView view, mol::EntityView target_view)
+float AllAtomPotential::GetTotalEnergy(mol::EntityView view,
+                                       mol::EntityView target_view)
 {
   AllAtomPotentialCalculator c(energies_, options_, target_view);
   mol::EntityHandle e=view.GetHandle();
   view.Apply(c);
-  interaction_counts_member_=c.GetEnergyCounts();
+  interaction_counts_=c.GetEnergyCounts();
   return c.GetEnergy();
-}
-
-float AllAtomPotential::GetEnergy(atom::ChemType type_a, atom::ChemType type_b, float distance)
-{
-  return energies_.Get(type_a, type_b, distance);
 }
 
 float AllAtomPotential::GetTotalEnergy(mol::EntityView view)
@@ -173,15 +168,9 @@ float AllAtomPotential::GetTotalEnergy(mol::EntityView view)
   AllAtomPotentialCalculator c(energies_, options_, view);
   mol::EntityHandle e=view.GetHandle();
   view.Apply(c);
-  interaction_counts_member_=c.GetEnergyCounts();
+  interaction_counts_=c.GetEnergyCounts();
   return c.GetEnergy();
 }
-
-
-int AllAtomPotential::GetEnergyCounts() const {
-  return interaction_counts_member_;
-}
-
 
 void AllAtomPotential::SetSequenceSeparation(int seq_sep) {
   options_.sequence_sep=seq_sep;
@@ -258,7 +247,7 @@ void AllAtomPotential::Fill(const InteractionStatisticsPtr& stats)
         // potential is only calculated for Cbeta atoms:
         // copy the potential for Calpha (Calphas are selected if 
         // Cbetas are not present)
-        if (stats->isCbetaStaistics() == true) {
+        if (stats->IsCBetaOnly() == true) {
           //check if Cbeta (has counts) and not Glycin-Calpha
           if (t3 != 0) {
              if (i==3) {
