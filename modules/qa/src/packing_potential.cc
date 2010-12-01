@@ -187,10 +187,7 @@ bool PackingPotential::VisitAtom(const mol::AtomHandle& atom)
        e=views_.end(); i!=e; ++i) {
     count+=i->FindWithin(atom.GetPos(), options_.cutoff).size();
   }
-
-  count=count>options_.max_counts ? options_.max_counts : count;
-
-  energy_+=energies_.Get(aa, count/options_.bucket_size);
+  energy_+=this->GetPackingEnergy(aa, count);
   energy_counts_++;
   return false;
 }

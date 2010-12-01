@@ -88,6 +88,13 @@ public:
 
   int GetEnergyCounts();
   
+  
+  Real GetPackingEnergy(AminoAcid aa, int count) const
+  {
+    count=count>options_.max_counts ? options_.max_counts : count;
+    return energies_.Get(aa, count/options_.bucket_size);
+  }
+  
   template <typename DS>
   void Serialize(DS& ds);
   
