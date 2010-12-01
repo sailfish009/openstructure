@@ -38,6 +38,8 @@ bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2)
   if(n2.GetInsCode()!='\0') {
     if(n1.NextInsertionCode()==n2) return true;
   }
+  if(mol::InSequence(r1,r2)) return true;
+  // perhaps this fallback is not so good...
   if(n1.GetNum()+1==n2.GetNum()) return true;
   return false;
 }

@@ -188,12 +188,18 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
                                const String& trj_fn,
                                unsigned int stride)
 {
+  std::ifstream istream(trj_fn.c_str(), std::ios::binary);
+  if(!istream) {
+    std::ostringstream msg;
+    msg << "LoadCHARMMTraj: cannot open " << trj_fn;
+    throw(IOException(msg.str()));
+  }
   Profile profile_load("LoadCHARMMTraj");
 
   mol::AtomHandleList alist(alist2);
   std::sort(alist.begin(),alist.end(),less_index);
   
-  std::ifstream istream(trj_fn.c_str(), std::ios::binary);
+  
   DCDHeader header; 
   bool swap_flag=false, skip_flag=false, gap_flag=false;
   read_dcd_header(istream, header, swap_flag, skip_flag, gap_flag);
@@ -315,7 +321,7 @@ mol::CoordGroupHandle LoadCHARMMTraj(const mol::EntityHandle& ent,
     DCDCoordSource* source=new DCDCoordSource(alist, trj_fn, stride);
     return mol::CoordGroupHandle(DCDCoordSourcePtr(source));
   }
-    LOG_INFO("Importing CHARMM trajectory with lazy_load=false");  
+  LOG_INFO("Importing CHARMM trajectory with lazy_load=false");  
   return load_dcd(alist, trj_fn, stride);
 }
 
