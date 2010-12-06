@@ -52,6 +52,8 @@ DLLEXPORT_OST_QA String AminoAcidToResidueName(AminoAcid aa);
 
 DLLEXPORT_OST_QA String OneLetterCodeToResidueName(char olc);
 
+DLLEXPORT_OST_QA AminoAcid OneLetterCodeToAminoAcid(char olc);
+
 class AminoAcidSetIterator : public std::iterator<std::forward_iterator_tag,
                                                   AminoAcid> {
 public:

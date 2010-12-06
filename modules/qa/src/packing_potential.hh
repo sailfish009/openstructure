@@ -94,7 +94,7 @@ public:
     count=count>options_.max_counts ? options_.max_counts : count;
     return energies_.Get(aa, count/options_.bucket_size);
   }
-  
+  const PackingPotentialOpts& GetOptions() const { return options_; }
   template <typename DS>
   void Serialize(DS& ds);
   

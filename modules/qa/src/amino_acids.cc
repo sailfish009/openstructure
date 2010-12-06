@@ -174,6 +174,55 @@ String OneLetterCodeToResidueName(char olc)
   }
 }
 
+AminoAcid OneLetterCodeToAminoAcid(char olc)
+{
+  char upper_olc=toupper(olc);
+  switch(upper_olc) {
+    case 'A':
+      return Ala;
+    case 'R':   
+      return Arg;
+    case 'N':   
+      return Asn;
+    case 'D':   
+      return Asp;
+    case 'Q':   
+      return Gln;
+    case 'E':   
+      return Glu;
+    case 'K':   
+      return Lys;
+    case 'S':   
+      return Ser;
+    case 'C':   
+      return Cys;
+    case 'Y':   
+      return Tyr;
+    case 'W':   
+      return Trp;
+    case 'T':   
+      return Thr;
+    case 'V':   
+      return Val;
+    case 'I':   
+      return Ile;
+    case 'M':   
+      return Met;
+    case 'L':   
+      return Leu;
+    case 'G':   
+      return Gly;
+    case 'P':   
+      return Pro;
+    case 'H':   
+      return His;
+    case 'F':   
+      return Phe;
+    default:
+      return Xxx;
+  }
+}
+
 AminoAcidSet AminoAcidSet::CreatePolarSet()
 {
   AminoAcidSet polar;
