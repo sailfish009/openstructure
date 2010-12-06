@@ -46,13 +46,8 @@ Dihedral::Dihedral(const AtomImplList& atoms)
 
 
 Real Dihedral::GetAngleXCS() const {
-  Vec3 r1=atoms_[1]->GetPos()-atoms_[0]->GetPos();
-  Vec3 r2=atoms_[2]->GetPos()-atoms_[1]->GetPos();
-  Vec3 r3=atoms_[3]->GetPos()-atoms_[2]->GetPos();
-  Vec3 r12cross = Cross(r1, r2);
-  Vec3 r23cross = Cross(r2, r3);
-  return atan2(Dot(r1*Length(r2), r23cross),
-               Dot(r12cross, r23cross));
+  return geom::DihedralAngle(atoms_[0]->GetPos(), atoms_[1]->GetPos(), 
+                             atoms_[2]->GetPos(), atoms_[3]->GetPos());
 }
 
 Real Dihedral::GetAngleICS() const {

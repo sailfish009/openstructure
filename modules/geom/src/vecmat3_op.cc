@@ -171,4 +171,17 @@ Mat3 AxisRotation(const Vec3& axis, Real angle)
           xz-ca*xz-sa*y, yz-ca*yz+sa*x,zz+ca-ca*zz);
 }
 
+
+Real DihedralAngle(const Vec3& p1, const Vec3& p2, const Vec3& p3, 
+                   const Vec3&p4)
+{
+  Vec3 r1=p2-p1;
+  Vec3 r2=p3-p2;
+  Vec3 r3=p4-p3;
+  Vec3 r12cross = Cross(r1, r2);
+  Vec3 r23cross = Cross(r2, r3);
+  return atan2(Dot(r1*Length(r2), r23cross),
+               Dot(r12cross, r23cross));
+}
+
 } // ns

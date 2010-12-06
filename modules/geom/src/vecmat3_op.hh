@@ -163,6 +163,10 @@ Mat3 DLLEXPORT_OST_GEOM AxisRotation(const Vec3& axis, Real angle);
 /// The returned vector is of length 1
 Vec3 DLLEXPORT_OST_GEOM OrthogonalVector(const Vec3& axis);
 
+
+Real DLLEXPORT_OST_GEOM DihedralAngle(const Vec3& p1, const Vec3& p2, 
+                                      const Vec3& p3, const Vec3&p4);
+
 //! returns std::min of each component
 inline Vec3 Min(const Vec3& v1, const Vec3& v2)
 {
