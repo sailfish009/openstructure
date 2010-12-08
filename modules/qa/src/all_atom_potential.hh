@@ -93,7 +93,7 @@ public:
   /// \brief set different seqeunce separation than used for training
   void SetSequenceSeparation(int seq_sep);
 
-  
+  const AllAtomPotentialOpts& GetOptions() const { return options_; }
   template <typename DS>
   void Serialize(DS& ds);
 public:
