@@ -97,7 +97,7 @@ Scene::Scene():
   gl_init_(false),
   fov_(30.0),
   znear_(1.0),zfar_(1000.0),
-  fnear_(1.0), ffar_(1000.0),
+  fnear_(0.0), ffar_(0.0),
   vp_width_(1000),vp_height_(1000),
   scene_view_stack_(),
   aspect_ratio_(1.0),
