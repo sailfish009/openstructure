@@ -29,6 +29,75 @@
 #include <QHeaderView>
 namespace ost { namespace gui {
 
+
+namespace {
+
+class FileTypeList : public QTableWidget {
+public:
+  FileTypeList(QWidget* parent=NULL): QTableWidget(parent)
+  {
+    this->setShowGrid(false);
+    this->horizontalHeader()->setStretchLastSection(true);
+    this->setColumnCount(2);
+    this->setAttribute(Qt::WA_MacSmallSize);
+    this->verticalHeader()->setVisible(false);
+    this->horizontalHeader()->setVisible(false);
+    this->setSelectionBehavior(QAbstractItemView::SelectRows);
+    this->setSelectionMode(QAbstractItemView::SingleSelection); 
+    io::EntityIOHFList entity_handler = io::IOManager::Instance().GetAvailableEntityHandler();
+    for(unsigned int i = 0 ; i < entity_handler.size() ; i++){
+      QVariant handler = QVariant();
+      handler.setValue(entity_handler[i]);
+      this->AddRow(this->rowCount(),entity_handler[i]->GetFormatName().c_str(),entity_handler[i]->GetFormatDescription().c_str(),handler);
+    }
+
+    io::AlignmentIOFList alignment_handler = io::IOManager::Instance().GetAvailableAlignmentHandler();
+    for(unsigned int i = 0 ; i < alignment_handler.size() ; i++){
+      QVariant handler = QVariant();
+      handler.setValue(alignment_handler[i]);
+      this->AddRow(this->rowCount(),alignment_handler[i]->GetFormatName().c_str(),alignment_handler[i]->GetFormatDescription().c_str(),handler);
+    }
+
+#if OST_IMG_ENABLED
+    io::MapIOFList map_handler = io::IOManager::Instance().GetAvailableMapHandler();
+    for(unsigned int i = 0 ; i < map_handler.size() ; i++){
+      QVariant handler = QVariant();
+      handler.setValue(map_handler[i]);
+      this->AddRow(this->rowCount(),map_handler[i]->GetFormatName().c_str(),map_handler[i]->GetFormatDescription().c_str(),handler);
+    }
+#endif
+
+    io::SurfaceIOFList surf_handler = io::IOManager::Instance().GetAvailableSurfaceHandler();
+    for(unsigned int i = 0 ; i < surf_handler.size() ; i++){
+      QVariant handler = QVariant();
+      handler.setValue(surf_handler[i]);
+      this->AddRow(this->rowCount(),surf_handler[i]->GetFormatName().c_str(),surf_handler[i]->GetFormatDescription().c_str(),handler);
+    }
+  }
+  
+  virtual void mouseDoubleClickEvent(QMouseEvent* event)
+  {
+    QTableWidget::mouseDoubleClickEvent(event);
+    dynamic_cast<QDialog*>(parent())->accept();
+  }
+  
+  void AddRow(int row, const QString& format_name, const QString& format_descr, 
+              QVariant& variant)
+  {
+    this->insertRow(row);
+    QTableWidgetItem* new_item = new QTableWidgetItem(format_name);
+    new_item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+    new_item->setData(Qt::UserRole,variant);
+    this->setItem(row, 0, new_item);
+    new_item = new QTableWidgetItem(format_descr);
+    new_item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+    this->setItem(row, 1, new_item);
+  }
+};
+
+}
+
+
 FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
   QDialog(parent),entity_handler_(),seq_handler_(), surf_handler_()
 #if OST_IMG_ENABLED
@@ -41,16 +110,9 @@ FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
   label_ = new QLabel("The file format could not be recognized, "
                       "please select the type of the file from the list:");
   label_->setWordWrap(true);
-  list_ = new QTableWidget(this);
-  list_->setShowGrid(false);
-  list_->horizontalHeader()->setStretchLastSection(true);
-  list_->setColumnCount(2);
-  list_->setAttribute(Qt::WA_MacSmallSize);
-  list_->verticalHeader()->setVisible(false);
-  list_->horizontalHeader()->setVisible(false);
-  list_->setSelectionBehavior(QAbstractItemView::SelectRows);
-  list_->setSelectionMode(QAbstractItemView::SingleSelection);
-  QHBoxLayout* hb=new QHBoxLayout();  
+  list_ = new FileTypeList(this);
+
+  QHBoxLayout* hb=new QHBoxLayout;  
   vb->addWidget(label_);
   vb->addWidget(list_);
   hb->setDirection(QBoxLayout::LeftToRight);
@@ -63,52 +125,11 @@ FileTypeDialog::FileTypeDialog(const QString& file_name, QWidget* parent):
   load_btn->setDefault(true);
   connect(load_btn, SIGNAL(clicked()), this, SLOT(accept()));
   connect(cancel_btn, SIGNAL(clicked()), this, SLOT(reject()));
-
-  io::EntityIOHFList entity_handler = io::IOManager::Instance().GetAvailableEntityHandler();
-  for(unsigned int i = 0 ; i < entity_handler.size() ; i++){
-    QVariant handler = QVariant();
-    handler.setValue(entity_handler[i]);
-    this->AddRow(list_->rowCount(),entity_handler[i]->GetFormatName().c_str(),entity_handler[i]->GetFormatDescription().c_str(),handler);
-  }
-
-  io::AlignmentIOFList alignment_handler = io::IOManager::Instance().GetAvailableAlignmentHandler();
-  for(unsigned int i = 0 ; i < alignment_handler.size() ; i++){
-    QVariant handler = QVariant();
-    handler.setValue(alignment_handler[i]);
-    this->AddRow(list_->rowCount(),alignment_handler[i]->GetFormatName().c_str(),alignment_handler[i]->GetFormatDescription().c_str(),handler);
-  }
-
-#if OST_IMG_ENABLED
-  io::MapIOFList map_handler = io::IOManager::Instance().GetAvailableMapHandler();
-  for(unsigned int i = 0 ; i < map_handler.size() ; i++){
-    QVariant handler = QVariant();
-    handler.setValue(map_handler[i]);
-    this->AddRow(list_->rowCount(),map_handler[i]->GetFormatName().c_str(),map_handler[i]->GetFormatDescription().c_str(),handler);
-  }
-#endif
-
-  io::SurfaceIOFList surf_handler = io::IOManager::Instance().GetAvailableSurfaceHandler();
-  for(unsigned int i = 0 ; i < surf_handler.size() ; i++){
-    QVariant handler = QVariant();
-    handler.setValue(surf_handler[i]);
-    this->AddRow(list_->rowCount(),surf_handler[i]->GetFormatName().c_str(),surf_handler[i]->GetFormatDescription().c_str(),handler);
-  }
-
   list_->resizeColumnsToContents();
 }
 
-void FileTypeDialog::AddRow(int row, const QString& format_name, const QString& format_descr, QVariant& variant){
-  list_->insertRow(row);
-  QTableWidgetItem* new_item = new QTableWidgetItem(format_name);
-  new_item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-  new_item->setData(Qt::UserRole,variant);
-  list_->setItem(row, 0, new_item);
-  new_item = new QTableWidgetItem(format_descr);
-  new_item->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-  list_->setItem(row, 1, new_item);
-}
-
-void FileTypeDialog::accept(){
+void FileTypeDialog::accept()
+{
   QList<QTableWidgetItem*> items = list_->selectedItems();
   for(int i=0; i<items.size();i++){
     if(items[i]->column()==0){
@@ -137,7 +158,7 @@ void FileTypeDialog::accept(){
 #endif
     }
   }
-  this->QDialog::accept();
+  QDialog::accept();
 }
 
 io::EntityIOHandlerP FileTypeDialog::GetEntityHandler(){
