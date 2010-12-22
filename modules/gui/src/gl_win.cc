@@ -115,10 +115,6 @@ gl_canvas_(NULL)
 #if OST_IMG_ENABLED
   ToolManager::Instance().AddTool(new MapTool);
 #endif
-  QBoxLayout* l=new QVBoxLayout(this);
-  l->setMargin(0);
-  l->setSpacing(0);
-  l->addWidget(main);
 }
 
 void GLWin::ActiveToolChanged(Tool* t)

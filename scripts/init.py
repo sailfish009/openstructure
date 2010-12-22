@@ -3,6 +3,7 @@ import sys
 import os.path
 import optparse
 from ost import io, mol, seq, geom, conop, gui, settings
+
 import ost
 try: 
   from ost import img
@@ -20,6 +21,7 @@ from ost.gui.init_spacenav import _InitSpaceNav
 from ost.gui.init_context_menu import _InitContextMenu
 from ost.gui.init_splash import _InitSplash
 from ost.gui.dng import termuse
+from ost.gui.helpwidget import help
 
 from PyQt4.QtGui import *
 def _my_exit(code):
