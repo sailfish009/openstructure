@@ -60,6 +60,7 @@ signals:
   void AllCleared();
 
 public slots:
+  void ErrorOutput(unsigned int id,const QString& output);
   void Clear();
   void RemoveSelected();
   void Update();
