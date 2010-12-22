@@ -371,7 +371,7 @@ void FileLoader::RunScript(const QString& filename)
   pi.RunCommand("sys.argv.append('"+QFileInfo(filename).fileName()+"')");
   pi.RunCommand("_dir=os.getcwd()");
   pi.RunCommand("os.chdir('"+QFileInfo(filename).absolutePath()+"')");
-  pi.RunScript(QFileInfo(filename).fileName());
+  pi.RunScript(QFileInfo(filename).absoluteFilePath());
   //pi.RunCommand("execfile('"+QFileInfo(filename).fileName()+"')");
   pi.RunCommand("os.chdir(_dir)");
   pi.RunCommand("del(_dir)");
