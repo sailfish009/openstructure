@@ -134,6 +134,9 @@ MouseEvent::Buttons GLCanvas::TranslateButtons(Qt::MouseButtons buttons) const
   
 void GLCanvas::mouseMoveEvent(QMouseEvent* event)
 {
+  if (!(show_beacon_ || event->buttons())) {
+    return;
+  }
   if (this->IsToolEvent(event)) {
     if (ToolManager::Instance().GetActiveTool()) {
       MouseEvent mouse_event(this->TranslateButtons(event->buttons()), 
@@ -163,7 +166,7 @@ void GLCanvas::mousePressEvent(QMouseEvent* event)
     this->HandleMousePressEvent(event);
   }
   last_pos_=QPoint(event->x(), event->y());
-  this->DoRefresh();  
+  this->DoRefresh();
 }
 
 void GLCanvas::mouseReleaseEvent(QMouseEvent* event)
@@ -181,7 +184,7 @@ void GLCanvas::mouseReleaseEvent(QMouseEvent* event)
     }
   }
   last_pos_=QPoint(event->x(), event->y());
-  this->DoRefresh();  
+  this->DoRefresh();
 }
 
 void GLCanvas::mouseDoubleClickEvent(QMouseEvent* event)
@@ -203,7 +206,9 @@ void GLCanvas::mouseDoubleClickEvent(QMouseEvent* event)
       scene.SetCenter(atom.GetPos());
     }
   }
-  this->DoRefresh();  
+  if (show_beacon_) {
+    this->DoRefresh();
+  }
 }
 
 void GLCanvas::RequestContextMenu(const QPoint& pos)

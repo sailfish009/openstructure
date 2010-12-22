@@ -55,7 +55,8 @@ void SelectionTool::Click(const MouseEvent& event)
   int sel_mode=this->GetSelectionMode();
   gfx::Scene& scene=gfx::Scene::Instance();
   scene.SetSelectionMode(sel_mode);
-  scene.Pick(event.GetPos().x(), scene.GetViewport().height-event.GetPos().y(), 8);
+  scene.Pick(event.GetPos().x(), 
+             scene.GetViewport().height-event.GetPos().y(), 8);
 }
 
 
