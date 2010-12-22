@@ -30,17 +30,22 @@
 #include "scene.hh"
 #include "vertex_array_helper.hh"
 #include "povray.hh"
+#include <ost/profile.hh>
 
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
 #endif
 
 
+#ifdef NDEBUG
+#define VERTEX_ARRAY_CHECK_GL_ERROR(m)
+#else
 #define VERTEX_ARRAY_CHECK_GL_ERROR(m) \
   if((glerr=glGetError())!=0) {  \
     LOG_ERROR("Error during va buffer prep: " << m << " : " << gluErrorString(glerr)); \
     return false; \
   }
+#endif
 
 namespace ost { 
 
@@ -315,6 +320,12 @@ Vec3 IndexedVertexArray::GetVert(VertexID id) const
   return nrvo;
 } 
 
+Real* IndexedVertexArray::GetVertP(VertexID id)
+{
+  if(id>=entry_list_.size()) id=0;
+  return entry_list_[id].v;
+}
+
 void IndexedVertexArray::SetVert(VertexID id, const Vec3& v) 
 {
   if(id>=entry_list_.size()) return;
@@ -388,7 +399,7 @@ void IndexedVertexArray::SetOpacity(float o)
 void IndexedVertexArray::RenderGL() 
 {
   static bool use_buff=false;
-  
+
   if(!initialized_) {
     LOG_DEBUG("initializing vertex array lists");
 #if OST_SHADER_SUPPORT_ENABLED
@@ -1073,10 +1084,14 @@ bool IndexedVertexArray::prep_buff()
 {
   if(Scene::Instance().InOffscreenMode()) return false;
 #if OST_SHADER_SUPPORT_ENABLED
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_COLOR_ARRAY);
-  glEnableClientState(GL_INDEX_ARRAY);
+  static bool init=false;
+  if(!init) {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_COLOR_ARRAY);
+    glEnableClientState(GL_INDEX_ARRAY);
+    init=true;
+  }
 
   int glerr=glGetError(); // clear error flag
   glBindBuffer(GL_ARRAY_BUFFER, buffer_id_[VA_VERTEX_BUFFER]);

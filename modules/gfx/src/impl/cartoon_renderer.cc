@@ -31,6 +31,8 @@
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/impl/tabulated_trig.hh>
 
+#include <ost/profile.hh>
+
 namespace ost {
 
 namespace gfx {
@@ -56,6 +58,7 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
                                        SplineEntryListList& spline_list_list,
                                        bool)
 {
+  Profile p0("CartoonRenderer::PrepareRendering(s,va,sll,f)");
   if(options_==NULL) {
     LOG_DEBUG("CartoonRenderer: NULL options, not creating objects");
   }
@@ -121,6 +124,7 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
 
 void CartoonRenderer::PrepareRendering()
 {
+  Profile p0("CartoonRenderer::PrepareRendering()");
   TraceRendererBase::PrepareRendering();
   if(state_>0) {
     va_.Clear();
@@ -382,6 +386,7 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
                                        const SplineEntryListList& spline_list_list,
                                        bool is_sel)
 {
+  Profile p0("CartoonRenderer::RebuildSplineObj");
   LOG_DEBUG("CartoonRenderer: starting profile assembly");
   unsigned int detail = std::min(MAX_ARC_DETAIL,
                                  std::max(options_->GetArcDetail(),
@@ -541,12 +546,14 @@ TraceProfile CartoonRenderer::TransformAndAddProfile(const std::vector<TraceProf
 
 namespace {
 
-  float spread(const geom::Vec3& v1, geom::Vec3& v2, geom::Vec3& v3, geom::Vec3& v4)
+  float spread(Real* v1, Real* v2, Real* v3, Real* v4)
   {
-    return geom::Dot(geom::Normalize(geom::Cross(geom::Normalize(v3-v1),geom::Normalize(v2-v1))),
-		     geom::Normalize(geom::Cross(geom::Normalize(v3-v4),geom::Normalize(v2-v4))));
+    geom::Vec3 a(v3[0]-v1[0],v3[1]-v1[1],v3[2]-v1[2]);
+    geom::Vec3 b(v2[0]-v1[0],v2[1]-v1[1],v2[2]-v1[2]);
+    geom::Vec3 c(v3[0]-v4[0],v3[1]-v4[1],v3[2]-v4[2]);
+    geom::Vec3 d(v2[0]-v4[0],v2[1]-v4[1],v2[2]-v4[2]);
+    return geom::Dot(geom::Normalize(geom::Cross(a,b)),geom::Normalize(geom::Cross(c,d)));
   }
-
 }
 
 void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
@@ -563,18 +570,19 @@ void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
   */
   size_t size=prof1.size()-1;
 
+#if 0
   // first get the best correction offset
   float accum[]={0.0,0.0,0.0,0.0,0.0};
   for(size_t i=0;i<size;++i) {
     int i1=(i+0)%(size);
     int i2=(i+1)%(size);
-    geom::Vec3 v1=va.GetVert(prof1[i1].id);
-    geom::Vec3 v2=va.GetVert(prof1[i2].id);
+    Real* v1=va.GetVertP(prof1[i1].id);
+    Real* v2=va.GetVertP(prof1[i2].id);
     for(int k=-2;k<=2;++k) {
       int i3=(i+k+0+size)%(size);
       int i4=(i+k+1+size)%(size);
-      geom::Vec3 v3=va.GetVert(prof2[i3].id);
-      geom::Vec3 v4=va.GetVert(prof2[i4].id);
+      Real* v3=va.GetVertP(prof2[i3].id);
+      Real* v4=va.GetVertP(prof2[i4].id);
       accum[k+2]+=spread(v1,v2,v3,v4);
     }
   }
@@ -588,6 +596,9 @@ void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
     }
   }
   best_off=(best_off+(size))%(size);
+#else
+  int best_off=0;
+#endif
 
   // now assemble the triangles
   for(unsigned int i1=0;i1<size;++i1) {
