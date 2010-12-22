@@ -138,6 +138,10 @@ def _SplitIDSel(name):
     return name[:pos], name[pos+1:-1]
   return name, ''  
 
+def stop():
+  gui.GostyApp.Instance().StopScript()
+
+
 loading_list=[]
 script_argv=[]
 images=[]

@@ -79,6 +79,7 @@ void export_Gosty()
     .def("Instance", &GostyApp::Instance,
          return_value_policy<reference_existing_object>()).staticmethod("Instance")
     .def("SetAppTitle", &GostyApp::SetAppTitle)
+    .def("StopScript",&GostyApp::StopScript)
     .def("GetPyShell", &GostyApp::GetPyShell,
         return_value_policy<reference_existing_object>())
     .add_property("py_shell", make_function(&GostyApp::GetPyShell,

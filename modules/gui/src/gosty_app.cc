@@ -25,6 +25,7 @@
 #include <ost/gui/tools/tool_options_win.hh>
 #include <ost/gui/perspective.hh>
 #include <ost/gui/main_area.hh>
+#include <ost/gui/python_shell/python_interpreter.hh>
 
 
 #include <QApplication>
@@ -117,6 +118,13 @@ PythonShell* GostyApp::GetPyShell()
   }
   return py_shell_;
 }
+
+
+void GostyApp::StopScript() 
+{
+  PythonInterpreter::Instance().StopScript();
+}
+
 
 GLWin* GostyApp::GetGLWin()
 {

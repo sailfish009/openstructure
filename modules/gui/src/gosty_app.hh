@@ -105,6 +105,11 @@ public:
   /// All subsequent calls will return the same MessageWidget instance.
   MessageWidget* GetMessageWidget();
 
+  /// \brief stop script execution
+  ///
+  /// Stops the execution of the script.
+  void StopScript(); 
+
 #if OST_IMG_ENABLED
   /// \brief create new DataViewer
   /// 
