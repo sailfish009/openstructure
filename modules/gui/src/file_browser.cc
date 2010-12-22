@@ -112,7 +112,8 @@ void FileBrowser::Init(const QString& path)
   view_->setRootIndex(model_->index(path));
   view_->setAttribute(Qt::WA_MacShowFocusRect, false);
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(view_,SIGNAL(customContextMenuRequested(const QPoint&)),this,SLOT(ShowContextMenu(const QPoint&)));
+  connect(view_,SIGNAL(customContextMenuRequested(const QPoint&)),this,
+          SLOT(ShowContextMenu(const QPoint&)));
   UpdateMenu(path);
 
   QVBoxLayout* l=new QVBoxLayout(this);

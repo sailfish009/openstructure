@@ -32,7 +32,8 @@ PythonInterpreterWorker::PythonInterpreterWorker():
   parse_expr_cmd_(),
   repr_(),
   main_namespace_(),
-  current_id_()
+  current_id_(),
+  awake_(false)
 {
   Py_InitializeEx(1);
   parse_expr_cmd_=bp::import("parser").attr("expr");
@@ -52,10 +53,14 @@ PythonInterpreterWorker::PythonInterpreterWorker():
 
 void PythonInterpreterWorker::Wake()
 {
+  if (awake_) return;
+
+  awake_=true;
   while (!exec_queue_.isEmpty()){
     std::pair<unsigned int, QString> pair=exec_queue_.dequeue();
     run_command_(pair);
   }
+  awake_=false;
 }
 
 unsigned int PythonInterpreterWorker::AddCommand(const QString& command)
