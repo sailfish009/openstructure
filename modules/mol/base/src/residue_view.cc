@@ -138,7 +138,10 @@ const AtomViewList& ResidueView::GetAtomList() const {
 
 ChainView ResidueView::GetChain() const {
   this->CheckValidity();
-  return ChainView(data_->chain.lock(), Impl()->GetChain());
+  if (!data_->chain.expired()) {
+    return ChainView(data_->chain.lock(), Impl()->GetChain());
+  }
+  throw InvalidHandle();
 }
 
 

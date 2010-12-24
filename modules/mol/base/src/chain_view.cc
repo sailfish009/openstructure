@@ -79,7 +79,11 @@ ChainView::ChainView() {
 }
 
 EntityView ChainView::GetEntity() const {
-  return EntityView(data_->entity.lock(), Impl()->GetEntity());
+  this->CheckValidity();
+  if (!data_->entity.expired()) {
+    return EntityView(data_->entity.lock(), Impl()->GetEntity());    
+  }
+  throw InvalidHandle();
 }
 
 ChainView::ChainView(const EntityView& entity,
