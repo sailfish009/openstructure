@@ -86,7 +86,9 @@ void PythonSyntaxHighlighter::highlightBlock(const QString& text_block) {
   } else if (currentBlockState() & BLOCKTYPE_CODE) {
     base_state=BLOCKTYPE_CODE;
   }
+#if QT_VERSION < 0x040700
   cursor.setBlockFormat(block_formats_[static_cast<BlockType>(base_state)]);
+#endif
   if (currentBlockState() & BLOCKTYPE_BLOCKEDIT || 
       currentBlockState() & BLOCKTYPE_ACTIVE || 
       currentBlockState() & BLOCKTYPE_CODE) {
