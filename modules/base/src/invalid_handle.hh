@@ -37,7 +37,7 @@ public:
 template <typename H>
 inline void CheckHandleValidity(const H& handle)
 {
-  if (!handle.IsValid())
+  if (!handle.Impl())
     throw InvalidHandle();
 }
 

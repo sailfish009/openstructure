@@ -102,6 +102,10 @@ public:
   impl::TorsionImplP& Impl() {
     return impl_;
   }
+  
+  const impl::TorsionImplP& Impl() const {
+    return impl_;
+  }
 protected:
     void CheckValidity() const; 
 private:

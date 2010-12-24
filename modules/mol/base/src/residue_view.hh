@@ -53,6 +53,21 @@ public:
               const ResidueHandle&  residue);
 
 public:
+  
+  /// \name Handle validity
+  //@{
+  /// \brief check validity of view
+  ///
+  /// check, whether the residue view points to a valid residue.
+  /// \note It is an error to use any method other than #IsValid, #Impl and
+  ///       #operator bool() when the handle is invalid. An InvalidHandle
+  ///       exception will be thrown.
+  operator bool() const { return this->IsValid(); }
+  /// \brief check validity of handle
+  /// \sa #operator bool()
+  bool IsValid() const { return data_.get()!=0; }
+  //@}
+  
   /// \name internal
   //@{
   /// \brief construct new view from view data and impl.

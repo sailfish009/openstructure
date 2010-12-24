@@ -47,7 +47,6 @@ void export_Chain()
   chain_base
     .def("GetName", &ChainBase::GetName)
     .add_property("name", &ChainBase::GetName)
-    .def("IsValid", &ChainBase::IsValid)    
     .def(self_ns::str(self))
   ;
   generic_prop_def<ChainBase>(chain_base);
@@ -81,6 +80,7 @@ void export_Chain()
     .def("InSequence", &ChainHandle::InSequence)
     .def("Select", select_string, arg("flags")=0)
     .def("Select", select_query, arg("flags")=0)
+    .def("IsValid", &ChainHandle::IsValid)
     .def("GetMass", &ChainHandle::GetMass)
     .def("GetCenterOfMass", &ChainHandle::GetCenterOfMass)
     .def("GetCenterOfAtoms", &ChainHandle::GetCenterOfAtoms)

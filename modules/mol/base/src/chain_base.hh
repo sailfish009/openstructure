@@ -44,19 +44,6 @@ public: // constructors
 public:
   friend class ConstGenericPropContainer<ChainBase>;
   String GetName() const;
-  /// \name Handle validity
-  //@{
-  /// \brief check validity of handle
-  /// 
-  /// check, whether the chain handle points to a valid handle.
-  /// \note It is an error to use any method other than #IsValid, #Impl() and 
-  ///       #operator bool() when the handle is invalid. An InvalidHandle
-  ///       exception will be thrown.
-  operator bool() const;
-  /// \brief check validity of handle
-  /// \sa #operator bool()
-  bool IsValid() const;
-  //@}
 
   const impl::ChainImplPtr& Impl() const {
     return impl_;

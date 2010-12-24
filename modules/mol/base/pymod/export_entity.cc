@@ -71,7 +71,6 @@ void export_Entity()
 {
   class_<EntityBase> ent_base("EntityBase", no_init);
   ent_base
-    .def("IsValid", &EntityBase::IsValid)
     .def(self_ns::str(self))
     .def("GetName", &EntityBase::GetName,
         return_value_policy<copy_const_reference>())
@@ -93,6 +92,7 @@ void export_Entity()
     .def("GetCenterOfAtoms", &EntityHandle::GetCenterOfAtoms)
     .def("GetGeometricCenter", geom_center<EntityHandle>)
     .add_property("geometric_center", geom_center<EntityHandle>)
+    .def("IsValid", &EntityHandle::IsValid)
     .add_property("geometric_end", geom_end<EntityHandle>)
     .add_property("geometric_start", geom_start<EntityHandle>)
     .def("GetGeometricStart", geom_start<EntityHandle>)

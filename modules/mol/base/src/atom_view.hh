@@ -35,6 +35,20 @@ class DLLEXPORT_OST_MOL AtomView : public AtomBase {
 
   friend class EntityView;
 public:
+  
+  /// \name View validity
+  //@{
+  /// \brief check validity of view
+  /// 
+  /// check, whether the atom view points to a valid atom.
+  /// \note It is an error to use any method other than #IsValid, Impl and 
+  ///       #operator bool() when the handle is invalid. An InvalidHandle
+  ///       exception will be thrown.
+  operator bool() const { return this->IsValid(); }
+  /// \brief check validity of handle
+  /// \sa #operator bool()
+  bool IsValid() const { return data_.get()!=0; }
+  //@}
   // constructors  
   AtomView();
   AtomView(const ResidueView& residue_view,

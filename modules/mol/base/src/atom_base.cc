@@ -85,16 +85,6 @@ const impl::AtomImplPtr& AtomBase::Impl() const
   return impl_;
 }
 
-bool AtomBase::IsValid() const 
-{
-  return (impl_.get()!=0);
-}
-
-AtomBase::operator bool() const 
-{
-  return (impl_.get()!=0);
-}
-
 String AtomBase::GetQualifiedName() const 
 {
   this->CheckValidity();
@@ -109,7 +99,7 @@ void AtomBase::CheckValidity() const
 
 std::ostream& operator<<(std::ostream& os, const AtomBase& atom) 
 {
-  if (atom.IsValid()) {
+  if (atom.Impl()) {
     os << atom.GetQualifiedName();
   } else {
     os << "invalid atom";

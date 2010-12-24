@@ -77,20 +77,7 @@ public:
   ///         residue name and residue number
   String GetQualifiedName() const;
 
-  /// \name Handle validity
-  //@{
-  /// \brief check validity of handle
-  ///
-  /// check, whether the residue handle points to a valid residue.
-  /// \note It is an error to use any method other than #IsValid, #Impl and
-  ///       #operator bool() when the handle is invalid. An InvalidHandle
-  ///       exception will be thrown.
-  operator bool() const;
-  /// \brief check validity of handle
-  /// \sa #operator bool()
-  bool IsValid() const;
-  //@}
-  
+
   /// \brief whether the residue can form peptide bonds
   bool IsPeptideLinking() const;
 

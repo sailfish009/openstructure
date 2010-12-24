@@ -77,21 +77,7 @@ public:
   std::vector<String> GetAltGroupNames() const;
 
   //@} 
-  
-  /// \name Handle validity
-  //@{
-  /// \brief check validity of handle
-  /// 
-  /// check, whether the bond handle points to a valid atom.
-  /// \note It is an error to use any method other than #IsValid, Impl and 
-  ///       #operator bool() when the handle is invalid. An InvalidHandle
-  ///       exception will be thrown.
-  operator bool() const;
-  /// \brief check validity of handle
-  /// \sa #operator bool()
-  bool IsValid() const;
-  //@}
-  
+    
   /// \brief Get qualified name for atom.
   /// 
   /// The qualified name consists of the atom name as well as a unique residue
