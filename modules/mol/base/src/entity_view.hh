@@ -93,8 +93,8 @@ public:
   ///
   /// \param entity The handle the view is created from.
   /// \param flags An ORed together list of ViewAddFlag
-  EntityView(const EntityHandle& entity,
-             ViewAddFlags flags=0);
+  explicit EntityView(const EntityHandle& entity,
+                      ViewAddFlags flags=0);
 
   /// \name View validity
   //@{
