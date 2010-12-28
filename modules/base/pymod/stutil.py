@@ -48,6 +48,19 @@ def Mean(xs):
   return sum(xs)/len(xs)
 
 @FloatValueExtract
+def Median(xs):
+  """
+  Calculate median of dataset
+  """
+  if len(xs)==0:
+    raise RuntimeError("Can't calculate median of empty sequence")
+  sorted_xs=sorted(xs)
+  if (len(xs) % 2)==0:
+    return (sorted_xs[len(xs)/2]+sorted_xs[len(xs)/2]+1)/2
+  else:
+    return sorted_xs[len(xs)/2]
+
+@FloatValueExtract
 def StdDev(xs):
   """
   Calculate standard-deviation of dataset
