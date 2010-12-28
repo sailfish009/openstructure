@@ -84,6 +84,7 @@ void export_Torsion()
     .value("His", His)
     .value("Phe", Phe)
     .value("Trp", Trp)
+    .export_values()
   ;
   
   class_<AminoAcidSet>("AminoAcidSet", init<>())

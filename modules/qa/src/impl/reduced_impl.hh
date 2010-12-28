@@ -16,18 +16,38 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
 
-void export_Torsion();
-void export_Interaction();
-void export_Packing();
-void export_Clash();
-void export_Reduced();
-BOOST_PYTHON_MODULE(_qa)
-{
-  export_Torsion();
-  export_Interaction();
-  export_Packing();
-  export_Clash();
-  export_Reduced();
-}
+#ifndef OST_QA_IMPL_REDUCED_HH
+#define OST_QA_IMPL_REDUCED_HH
+
+
+#include <ost/mol/mol.hh>
+
+#include <ost/qa/module_config.hh>
+#include <ost/qa/amino_acids.hh>
+#include <ost/qa/reduced_statistics.hh>
+
+namespace ost { namespace qa { namespace impl {
+
+class DLLEXPORT_OST_QA ReducedPotentialImpl : public mol::EntityVisitor {
+public:
+
+  ReducedPotentialImpl(const ReducedStatOptions& opts, mol::EntityHandle ent): 
+    opts_(opts), ent_(ent)
+  { }
+
+  virtual bool VisitResidue(const mol::ResidueHandle& res);
+
+  bool GetCAlphaCBetaPos(const mol::ResidueHandle& res, geom::Vec3& ca_pos, 
+                         geom::Vec3& cb_pos);
+                         
+  virtual void OnInteraction(AminoAcid aa_one, AminoAcid aa_two, 
+                             Real dist, Real angle)=0;
+private:
+  ReducedStatOptions opts_;
+  mol::EntityHandle  ent_;
+};
+
+}}}
+
+#endif
