@@ -51,8 +51,8 @@ Here is a skeleton of one of the files in  the directory , `modeling_new_class.h
 
 .. code-block:: cpp 
 
-  #ifndef OST_MOD_NEW_CLASS_H
-  #define OST_MOD_NEW_CLASS_H
+  #ifndef OST_MOD_NEW_CLASS_HH
+  #define OST_MOD_NEW_CLASS_HH
   
   #include <ost/mod/module_config.hh>
   
@@ -160,73 +160,47 @@ The Testing Framework
 The `tests` directory contains code for unit tests. The code is compiled and 
 executed when one invokes compilation using the 'make check' command.  Tests are 
 run by means of the `Boost Unitests Library 
-<http://www.boost.org/doc/libs/1_37_0/libs/test/doc/html/index.html>`_, which is 
-used throughout OpenStructure. Before coding the test routines, the required 
-skeleton needs to be put in place.
+<http://www.boost.org/doc/libs/1_37_0/libs/test/doc/html/index.html>`_. Before coding the test routines, the required skeleton needs to be put in place.
 
-The main code is put into 'tests.cc', which will become the test executable:
+The main code is put into 'tests.cc', which will become the test executable. There are only 3 lines required
     
 .. code-block:: cpp
 
+  #define BOOST_TEST_DYN_LINK
+  #define BOOST_TEST_MODULE ost_mod
   #include <boost/test/unit_test.hpp>
-  using boost::unit_test_framework::test_suite;
-  
-  #include "test_modeling.hh"
-  
-  test_suite*
-  unit_unit_test_suite( int argc, char * argv[] ) {
-    std::auto_ptr<test_suite> test(BOOST_TEST_SUITE( "Module Mod Test" ));
-  
-    test->add(CreateModelingTest()); 
-  
-    return test.release(); 
-  }
   
         
-The most relevant line adds the test suite for the new module to the global test 
-list. The test suite is created by the factory function CreateModelingTest(), 
-which is declared in the `test_modeling.hh` header file. 
-
-.. code-block:: cpp
-
-  #ifndef OST_MOD_TEST_MODELING_H
-  #define OST_MOD_TEST_MODELING_H
-  
-  #include <boost/test/unit_test.hpp>
-  using boost::unit_test_framework::test_suite;
-  
-  test_suite* CreateModelingTest();
-  
-  #endif
+Based on the two macros BOOST_TEST_DYN_LINK and BOOST_TEST_MODULE, the boost unit test framework will introduce a main function that executes all the unit tests that we will define next.
       
-The definition of the factory function is found in the actual test code,
-which we put in `test_modeling.cc`. Here is a skeleton version of that file:
+The definition of the actual unit tests is done in separate .cc files. Create the test_modeling_new_class.cc file and fill it with the following code:
 
 .. code-block:: cpp
 
-  #include "test_modeling.hh"
-  
-  // additional include statements will go here
-  
-  namespace test_modeling {
-  
-    void test() 
-    {
-      // test code will go here
-    }
-  
-  }
-  
-  test_suite* CreateModelingTest()
+  #define BOOST_TEST_DYN_LINK
+  #include <boost/test/unit_test.hpp>
+
+  #include <ost/mod/modeling_new_class.hh>
+
+	using namespace ost;
+  using namespace ost::mod;
+
+
+  BOOST_AUTO_TEST_SUITE(mod_new_class)
+
+  BOOST_AUTO_TEST_CASE(mode_trivial_case)
   {
-    using namespace test_modeling;
-    test_suite* ts=BOOST_TEST_SUITE("Modeling Test");
-     ts->add(BOOST_TEST_CASE(&test));
-  
-     return ts;
+    // ... your test code here...
   }
+
+  BOOST_AUTO_TEST_CASE(somewhat_more_involved_case)
+  {
+    // ... your test code here...
+  }
+
+  BOOST_AUTO_TEST_SUITE_END()
   
-In this file, all the normal Boost Test Library macros and functions can be used. (For example `BOOST_CHECK`, `BOOST_FAIL`, etc.)
+We again have to define the BOOST_TEST_DYN_LINK macro before including the bosot unit test headers. This will tell the boost unit test libraries that we intend to use dynamic linking. Then we include the functions and classes we would like to write unit tests for. In this file, all the normal Boost Test Library macros and functions can be used. (For example `BOOST_CHECK`, `BOOST_FAIL`, etc.)
 
 Here is finally the build script skeleton that needs to be put into 
 `mod/tests/`:
