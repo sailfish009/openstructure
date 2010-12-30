@@ -74,13 +74,7 @@ The IOProfile Class
 
 .. class:: IOProfile(quack_mode=False, dialect='PDB', strict_hydrogens=False, fault_tolerant=False)
 
-  Aggregates flags and methods that control the import of molecular structures.
-
-  .. method:: PostImport(ent)
-
-    Called after the import has completed. Useful to perform post processing of
-    the imported entity, e.g. to renumber the residues. The default
-    implementation does nothing.
+  Aggregates flags that control the import of molecular structures.
 
   .. attribute:: quack_mode
 
