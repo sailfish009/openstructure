@@ -319,37 +319,41 @@ struct ForcePOSIX {
 
 }
 
-PDBWriter::PDBWriter(std::ostream& stream, bool charmm_style):
-  outfile_(), outstream_(stream), mol_count_(0), line_(80), 
-  charmm_style_(charmm_style)
+PDBWriter::PDBWriter(std::ostream& stream, const IOProfile& profile):
+  outfile_(), outstream_(stream), mol_count_(0), line_(80),
+  multi_model_(false), charmm_style_(profile.dialect=="CHARMM"), is_pqr_(false),
+  profile_(profile)
 {
   
 }
 
-PDBWriter::PDBWriter(const boost::filesystem::path& filename, bool charmm_style):
+PDBWriter::PDBWriter(const boost::filesystem::path& filename, 
+                     const IOProfile& profile):
   outfile_(filename.file_string().c_str()), outstream_(outfile_), 
-  mol_count_(0), line_(80), charmm_style_(charmm_style)
+  mol_count_(0), line_(80), multi_model_(false), 
+  charmm_style_(profile.dialect=="CHARMM"), is_pqr_(false),
+  profile_(profile)
 {}
 
-PDBWriter::PDBWriter(const String& filename, bool charmm_style):
-  outfile_(filename.c_str()), outstream_(outfile_), mol_count_(0), line_(80),
-  charmm_style_(charmm_style)
+PDBWriter::PDBWriter(const String& filename, const IOProfile& profile):
+  outfile_(filename.c_str()), outstream_(outfile_), mol_count_(0), line_(80), 
+  multi_model_(false), charmm_style_(profile.dialect=="CHARMM"), 
+  is_pqr_(false), profile_(profile)
 {}
 
 void PDBWriter::WriteModelLeader()
 {
   ++mol_count_;
-  if (PDB::Flags() & PDB::WRITE_MULTIPLE_MODELS) {
+  if (multi_model_) {
     outstream_ << "MODEL     " << mol_count_ << std::endl;
   } else if (mol_count_>1) {
-    throw IOException("Please enable the PDB::WRITE_MULTIPLE_MODELS flag to "
-                      "write multiple models");
+    throw IOException("Trying to write several models into one file with ");
   }
 }
 
 void PDBWriter::WriteModelTrailer()
 {
-  if (PDB::Flags() & PDB::WRITE_MULTIPLE_MODELS) {
+  if (multi_model_) {
     outstream_ << "ENDMDL" << std::endl;
   }
 }
@@ -357,12 +361,10 @@ void PDBWriter::WriteModelTrailer()
 template <typename H>
 void PDBWriter::WriteModel(H ent)
 {
-  ForcePOSIX posix = ForcePOSIX();
+  ForcePOSIX posix;
   this->WriteModelLeader();
   PDBWriterImpl writer(outstream_,line_, atom_indices_, charmm_style_);
-  if (PDB::Flags() & PDB::PQR_FORMAT) {
-    writer.SetIsPQR(true);
-  }
+  writer.SetIsPQR(is_pqr_);
   ent.Apply(writer);
   PDBConectWriterImpl con_writer(outstream_,atom_indices_);
   ent.Apply(con_writer);
@@ -387,8 +389,7 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
   mol::ChainHandle last_chain;
   for (mol::AtomHandleList::const_iterator i=atoms.begin(),
        e=atoms.end(); i!=e; ++i, ++counter) {
-    write_atom(outstream_, line_, *i, counter, 
-               (PDB::Flags() & PDB::PQR_FORMAT) != 0, charmm_style_);
+    write_atom(outstream_, line_, *i, counter, is_pqr_, charmm_style_);
   }
   this->WriteModelTrailer();
 }

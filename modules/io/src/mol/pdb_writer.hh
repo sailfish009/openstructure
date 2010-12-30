@@ -32,18 +32,21 @@
 
 #include <ost/io/module_config.hh>
 #include <ost/io/formatted_line.hh>
-
-
-#include "pdb_io.hh"
+#include <ost/io/mol/io_profile.hh>
 
 namespace ost { namespace io {
 
 class DLLEXPORT_OST_IO PDBWriter {
 public:
-  PDBWriter(const String& filename, bool charmm_style=false);
-  PDBWriter(const boost::filesystem::path& filename, bool charmm_style=false);
-  PDBWriter(std::ostream& outstream, bool charmm_style=false);
-  
+  PDBWriter(const String& filename,
+            const IOProfile& profile);
+  PDBWriter(const boost::filesystem::path& filename,
+            const IOProfile& profile);
+  PDBWriter(std::ostream& outstream, const IOProfile& profile);
+  void SetWriteMultiModel(bool flag) { multi_model_=flag; }
+  bool GetWriteMultiModel() const { return multi_model_; }
+  void SetIsPQR(bool flag) { is_pqr_=flag; }
+  bool IsPQR() const { return is_pqr_; }
   void Write(const mol::EntityView& ent);
   void Write(const mol::EntityHandle& ent);
   
@@ -61,7 +64,10 @@ private:
   int                 mol_count_;
   std::map<long, int> atom_indices_;
   FormattedLine       line_;
+  bool                multi_model_;
   bool                charmm_style_;
+  bool                is_pqr_;
+  IOProfile           profile_;
 };
  
 }}

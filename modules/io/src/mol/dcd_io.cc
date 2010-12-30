@@ -376,11 +376,11 @@ void write_dcd_hdr(std::ofstream& out,
 
 void SaveCHARMMTraj(const mol::CoordGroupHandle& coord_group, 
                     const String& pdb_filename, const String& dcd_filename,
-                    unsigned int stepsize)
+                    unsigned int stepsize, const IOProfile& profile)
 {  
   if(stepsize==0) stepsize=1;
   if(!pdb_filename.empty()) {
-    PDBWriter writer(pdb_filename, true);
+    PDBWriter writer(pdb_filename, profile);
     writer.Write(coord_group.GetAtomList());
   }
   std::ofstream out(dcd_filename.c_str(), std::ios::binary);

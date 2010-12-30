@@ -25,10 +25,10 @@ using namespace ost;
 using namespace ost::io;
 using namespace ost::mol;
 
-EntityHandle load(const String& file)
+EntityHandle load(const String& file, const IOProfile& profile)
 {
   try {
-    PDBReader reader(file);
+    PDBReader reader(file, profile);
     if (reader.HasNext()) {
       EntityHandle ent=CreateEntity();
       reader.Import(ent);
@@ -56,18 +56,18 @@ void usage()
 
 int main (int argc, char* const *argv)
 {
+  IOProfile profile;
   // parse options
   String sel;
-  int flags=0;
   bool filter_clashes=false;
   char ch=0;
   while((ch=getopt(argc, argv, "ftcs:"))!=-1) {
     switch (ch) {
       case 'c':
-        flags|=PDB::CALPHA_ONLY;
+        profile.calpha_only=true;
         break;
       case 't':
-        flags|=PDB::SKIP_FAULTY_RECORDS;
+        profile.fault_tolerant=true;
         break;
       case 'f':
         filter_clashes=true;
@@ -87,18 +87,17 @@ int main (int argc, char* const *argv)
     usage();
     return -1;
   }  
-  PDB::PushFlags(flags);
 
   String ref_file=argv[argc-1];
-  EntityHandle ref=load(ref_file);
+  EntityHandle ref=load(ref_file, profile);
   if (!ref) {
     return -1;
   }
   EntityView ref_view=ref.Select(sel);
   for (int i=0; i<argc-1; ++i) {
-    EntityHandle model=load(argv[i]);
+    EntityHandle model=load(argv[i], profile);
     if (!model) {
-      if (!(flags&PDB::SKIP_FAULTY_RECORDS)) {
+      if (!profile.fault_tolerant) {
         return -1;
       }
       continue;

@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(test_pdb_import_handler)
 BOOST_AUTO_TEST_CASE(atom_record)
 {
   String fname("testfiles/pdb/atom.pdb");
-  PDBReader reader(fname); 
+  PDBReader reader(fname, IOProfile()); 
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   BOOST_REQUIRE_EQUAL(ent.GetChainCount(), 2);
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(atom_record)
 BOOST_AUTO_TEST_CASE(end_record)
 {
   String fname("testfiles/pdb/end.pdb");
-  PDBReader reader(fname); 
+  PDBReader reader(fname, IOProfile()); 
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   BOOST_CHECK_EQUAL(ent.GetAtomCount(), 1);
@@ -96,12 +96,13 @@ BOOST_AUTO_TEST_CASE(end_record)
 BOOST_AUTO_TEST_CASE(join_spread_records_on)
 {
   String fname("testfiles/pdb/join-spread-records.pdb");
-  PDBReader reader(fname);
+  IOProfile profile;
+  profile.join_spread_atom_records=true;
+  PDBReader reader(fname, profile);
   
   mol::EntityHandle ent=mol::CreateEntity();
-  PDB::PushFlags(PDB::JOIN_SPREAD_ATOM_RECORDS);
+
   reader.Import(ent);
-  PDB::PopFlags();
   BOOST_CHECK_EQUAL(ent.GetResidueCount(), 2);
   mol::ResidueHandle res1=ent.FindResidue("A", mol::ResNum(1));
   BOOST_CHECK(res1.IsValid());
@@ -117,7 +118,7 @@ BOOST_AUTO_TEST_CASE(join_spread_records_on)
 BOOST_AUTO_TEST_CASE(join_spread_records_off)
 {
   String fname("testfiles/pdb/join-spread-records.pdb");
-  PDBReader reader(fname);
+  PDBReader reader(fname, IOProfile());
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   BOOST_CHECK_EQUAL(ent.GetResidueCount(), 3);
@@ -134,11 +135,11 @@ BOOST_AUTO_TEST_CASE(join_spread_records_off)
 BOOST_AUTO_TEST_CASE(calpha_only_import_on)
 {
   String fname("testfiles/pdb/calpha.pdb");
-  PDBReader reader(fname);
-  PDB::PushFlags(PDB::CALPHA_ONLY);
+  IOProfile profile;
+  profile.calpha_only=true;
+  PDBReader reader(fname, profile);
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
-  PDB::PopFlags();
   BOOST_CHECK_EQUAL(ent.GetResidueCount(), 2);
   BOOST_CHECK_EQUAL(ent.GetAtomCount(), 2);
 }
@@ -146,7 +147,7 @@ BOOST_AUTO_TEST_CASE(calpha_only_import_on)
 BOOST_AUTO_TEST_CASE(het_import)
 {
   String fname("testfiles/pdb/het.pdb");
-  PDBReader reader(fname);
+  PDBReader reader(fname, IOProfile());
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   BOOST_CHECK_EQUAL(ent.Select("ligand=true").GetResidueCount(), 1);
@@ -155,7 +156,7 @@ BOOST_AUTO_TEST_CASE(het_import)
 BOOST_AUTO_TEST_CASE(calpha_only_import_off)
 {
   String fname("testfiles/pdb/calpha.pdb");
-  PDBReader reader(fname);
+  PDBReader reader(fname, IOProfile());
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   BOOST_CHECK_EQUAL(ent.GetResidueCount(), 2);
@@ -165,7 +166,7 @@ BOOST_AUTO_TEST_CASE(calpha_only_import_off)
 BOOST_AUTO_TEST_CASE(anisou_record)
 {
   String fname("testfiles/pdb/anisou.pdb");
-  PDBReader reader(fname);
+  PDBReader reader(fname, IOProfile());
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   BOOST_REQUIRE(ent.GetAtomCount()==1);
@@ -186,7 +187,7 @@ BOOST_AUTO_TEST_CASE(anisou_record)
 BOOST_AUTO_TEST_CASE(only_66_cols)
 {
   String fname("testfiles/pdb/short.pdb");
-  PDBReader reader(fname);
+  PDBReader reader(fname, IOProfile());
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
 }
@@ -194,7 +195,7 @@ BOOST_AUTO_TEST_CASE(only_66_cols)
 BOOST_AUTO_TEST_CASE(no_endmdl_record)
 {
   String fname("testfiles/pdb/model.pdb");
-  PDBReader reader(fname);
+  PDBReader reader(fname, IOProfile());
   mol::EntityHandle ent=mol::CreateEntity();
   BOOST_CHECK_THROW(reader.Import(ent), IOException);
 }
@@ -202,7 +203,7 @@ BOOST_AUTO_TEST_CASE(no_endmdl_record)
 BOOST_AUTO_TEST_CASE(deuterium_import)
 {
   String fname("testfiles/pdb/val-with-deuterium.pdb");
-  PDBReader reader(fname);
+  PDBReader reader(fname, IOProfile());
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   // we use conopology to mark amino acids as peptide-linking. 
@@ -216,18 +217,19 @@ BOOST_AUTO_TEST_CASE(deuterium_import)
 BOOST_AUTO_TEST_CASE(faulty_lines)
 {
   String fname("testfiles/pdb/faulty.pdb");
-  PDBReader reader(fname);
+  PDBReader reader(fname, IOProfile());
   mol::EntityHandle ent=mol::CreateEntity();
   BOOST_CHECK_THROW(reader.Import(ent), IOException);
-
-  PDB::PushFlags(PDB::SKIP_FAULTY_RECORDS);
-  reader.Import(ent);
+  IOProfile profile;
+  profile.fault_tolerant=true;
+  PDBReader reader2(fname, profile);
+  reader2.Import(ent);
 }
 
 BOOST_AUTO_TEST_CASE(write_atom)
 {
   std::stringstream out;
-  PDBWriter writer(out);
+  PDBWriter writer(out, IOProfile());
   
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor edi=ent.EditXCS();
@@ -248,7 +250,7 @@ BOOST_AUTO_TEST_CASE(write_atom)
 BOOST_AUTO_TEST_CASE(write_hetatom)
 {
   std::stringstream out;
-  PDBWriter writer(out);
+  PDBWriter writer(out, IOProfile());
   
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor edi=ent.EditXCS();
@@ -271,8 +273,9 @@ BOOST_AUTO_TEST_CASE(write_hetatom)
 BOOST_AUTO_TEST_CASE(no_endmdl_record_fault_tolerant)
 {
   String fname("testfiles/pdb/model.pdb");
-  PDBReader reader(fname);
-  PDB::PushFlags(PDB::SKIP_FAULTY_RECORDS);  
+  IOProfile profile;
+  profile.fault_tolerant=true;
+  PDBReader reader(fname, profile);
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   BOOST_CHECK_EQUAL(ent.GetChainCount(), 1);
@@ -283,7 +286,6 @@ BOOST_AUTO_TEST_CASE(no_endmdl_record_fault_tolerant)
   BOOST_CHECK_EQUAL(ent.GetChainCount(), 1);
   BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);  
   BOOST_CHECK_EQUAL(ent.GetAtomCount(), 2);  
-  PDB::PopFlags();
 }
 
 BOOST_AUTO_TEST_CASE(alt_loc_import_export)
@@ -292,8 +294,8 @@ BOOST_AUTO_TEST_CASE(alt_loc_import_export)
   // this scope is required to force the writer stream to be closed before 
   // opening the file again in compare_files. Avoids a race condition.
   {
-    PDBReader reader(fname);
-    PDBWriter writer(String("testfiles/pdb/alt-loc-out.pdb"));
+    PDBReader reader(fname, IOProfile());
+    PDBWriter writer(String("testfiles/pdb/alt-loc-out.pdb"), IOProfile());
     
     mol::EntityHandle ent=mol::CreateEntity();
     reader.Import(ent);
@@ -309,8 +311,8 @@ BOOST_AUTO_TEST_CASE(write_ter)
   // this scope is required to force the writer stream to be closed before 
   // opening the file again in compare_files. Avoids a race condition.
   {
-    PDBReader reader(fname);
-    PDBWriter writer(String("testfiles/pdb/ter-out.pdb"));
+    PDBReader reader(fname, IOProfile());
+    PDBWriter writer(String("testfiles/pdb/ter-out.pdb"), IOProfile());
     
     mol::EntityHandle ent=mol::CreateEntity();
     reader.Import(ent);
@@ -330,8 +332,8 @@ BOOST_AUTO_TEST_CASE(write_ter2)
   // this scope is required to force the writer stream to be closed before 
   // opening the file again in compare_files. Avoids a race condition.
   {
-    PDBReader reader(fname);
-    PDBWriter writer(String("testfiles/pdb/ter2-out.pdb"));
+    PDBReader reader(fname, IOProfile());
+    PDBWriter writer(String("testfiles/pdb/ter2-out.pdb"), IOProfile());
     
     mol::EntityHandle ent=mol::CreateEntity();
     reader.Import(ent);
@@ -351,8 +353,8 @@ BOOST_AUTO_TEST_CASE(write_ter3)
   // this scope is required to force the writer stream to be closed before 
   // opening the file again in compare_files. Avoids a race condition.
   {
-    PDBReader reader(fname);
-    PDBWriter writer(String("testfiles/pdb/ter3-out.pdb"));
+    PDBReader reader(fname, IOProfile());
+    PDBWriter writer(String("testfiles/pdb/ter3-out.pdb"), IOProfile());
     
     mol::EntityHandle ent=mol::CreateEntity();
     reader.Import(ent);
@@ -371,8 +373,8 @@ BOOST_AUTO_TEST_CASE(write_conect)
   // this scope is required to force the writer stream to be closed before
   // opening the file again in compare_files. Avoids a race condition.
   {
-    PDBReader reader(String("testfiles/pdb/conect.pdb"));
-    PDBWriter writer(String("testfiles/pdb/conect-out.pdb"));
+    PDBReader reader(String("testfiles/pdb/conect.pdb"), IOProfile());
+    PDBWriter writer(String("testfiles/pdb/conect-out.pdb"), IOProfile());
     mol::EntityHandle ent=mol::CreateEntity();
     reader.Import(ent);
     conop::Conopology& conop_inst=conop::Conopology::Instance();
@@ -389,17 +391,17 @@ BOOST_AUTO_TEST_CASE(alt_loc_tf)
   // this scope is required to force the writer stream to be closed before 
   // opening the file again in compare_files. Avoids a race condition.
   mol::EntityHandle ent=mol::CreateEntity();  
-  PDBReader reader(fname);
+  PDBReader reader(fname, IOProfile());
   reader.Import(ent);
   String out_name("testfiles/pdb/alt-loc-tf-out.pdb");
   {
-    PDBWriter writer(out_name);
+    PDBWriter writer(out_name, IOProfile());
     geom::Mat4 shift;
     shift.PasteTranslation(geom::Vec3(10,20,30));
     ent.EditXCS().ApplyTransform(shift);
     writer.Write(ent);
   }
-  PDBReader r2(out_name);
+  PDBReader r2(out_name, IOProfile());
   mol::EntityHandle ent2=mol::CreateEntity();
   r2.Import(ent2);
   mol::ResidueHandle res1=ent2.FindResidue("A", mol::ResNum(1));
@@ -411,7 +413,7 @@ BOOST_AUTO_TEST_CASE(alt_loc_tf)
 BOOST_AUTO_TEST_CASE(res_name_too_long)
 {
   std::stringstream out;
-  PDBWriter writer(out);
+  PDBWriter writer(out, IOProfile());
   
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor edi=ent.EditXCS();
@@ -424,7 +426,7 @@ BOOST_AUTO_TEST_CASE(res_name_too_long)
 BOOST_AUTO_TEST_CASE(chain_name_too_long)
 {
   std::stringstream out;
-  PDBWriter writer(out);
+  PDBWriter writer(out, IOProfile());
   
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor edi=ent.EditXCS();
@@ -437,7 +439,7 @@ BOOST_AUTO_TEST_CASE(chain_name_too_long)
 BOOST_AUTO_TEST_CASE(atom_name_too_long)
 {
   std::stringstream out;
-  PDBWriter writer(out);
+  PDBWriter writer(out, IOProfile());
   
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor edi=ent.EditXCS();
