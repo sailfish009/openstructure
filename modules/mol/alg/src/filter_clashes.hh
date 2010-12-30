@@ -26,10 +26,12 @@ namespace ost { namespace mol { namespace alg {
 
 
 EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityView& ent, 
-                                               Real tolerance=0.1);
+                                               Real tolerance=0.1,
+                                               bool always_remove_bb=false);
 
 EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityHandle& ent, 
-                                               Real tolerance=0.1);
+                                               Real tolerance=0.1,
+                                               bool always_remove_bb=false);
 }}}
 
 

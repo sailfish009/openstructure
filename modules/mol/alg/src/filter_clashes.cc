@@ -69,7 +69,8 @@ Real GetThreshold(const String& ele1, const String& ele2) {
 
 }
 
-EntityView FilterClashes(const EntityView& ent, Real tolerance)
+EntityView FilterClashes(const EntityView& ent, Real tolerance, 
+                         bool always_remove_bb)
 {
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
@@ -106,6 +107,10 @@ EntityView FilterClashes(const EntityView& ent, Real tolerance)
         Real threshold=GetThreshold(ele1, ele2)-tolerance;
         if (d<threshold*threshold) {
           remove_sc=true;
+          if (always_remove_bb==true) {
+            remove_bb=true;
+            continue;
+          }
           String name=atom.GetName();
           if (name=="CA" || name=="N" || name=="O" || name=="C") {
             remove_bb=true;
@@ -134,9 +139,10 @@ EntityView FilterClashes(const EntityView& ent, Real tolerance)
 }
 
 
-EntityView FilterClashes(const EntityHandle& ent, Real tolerance)
+EntityView FilterClashes(const EntityHandle& ent, Real tolerance, 
+                         bool always_remove_bb)
 {
-  return FilterClashes(ent.CreateFullView(), tolerance);
+  return FilterClashes(ent.CreateFullView(), tolerance, always_remove_bb);
 }
 
 
