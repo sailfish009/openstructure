@@ -95,24 +95,12 @@ public:
   ///        account.
   void Set(atom::ChemType a, atom::ChemType b, int distance_bin, int counts);
 
-  
-  /// for Cbeta potentials:
-  /// in the initial selection Cbetas are counted and, if a residue
-  /// has no Cbeta, the Calpha is taken instead.
-  /// Afterwards the statistics needs to be corrected:
-  /// Calpha counts are Cbeta counts ...
-  void RepairCbetaStatistics();
-
-
   /// \internal
   template <typename DS>
   void Serialize(DS& ds);
 public:
   virtual bool VisitResidue(const mol::ResidueHandle& r);
   virtual bool VisitAtom(const mol::AtomHandle& a);
-
-  inline bool IsCBetaOnly() {return isCbetaStatisticsFlag_;}
-
 
 private:
   InteractionStatistics();
@@ -128,8 +116,6 @@ private:
   mol::EntityView        view_b_;
   AminoAcid              amino_acid_;
   InteractionHistogram   histogram_;
-
-  bool        isCbetaStatisticsFlag_;
 };
 
 }}

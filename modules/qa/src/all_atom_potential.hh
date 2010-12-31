@@ -37,7 +37,9 @@ struct DLLEXPORT_OST_QA AllAtomPotentialOpts {
 
   AllAtomPotentialOpts();
 
-  AllAtomPotentialOpts(float lower_cutoff, float upper_cutoff, float distance_bucket_size, int sequence_sep, float sigma=0.02);
+  AllAtomPotentialOpts(float lower_cutoff, float upper_cutoff, 
+                       float distance_bucket_size, int sequence_sep, 
+                       float sigma=0.02);
 
  public: 
   /// \brief weight factor 

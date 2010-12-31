@@ -36,7 +36,8 @@ namespace {
 class AllAtomPotentialCalculator : public mol::EntityVisitor {
 public:
   AllAtomPotentialCalculator(AllAtomPotential::AllAtomEnergies& energies,
-                             AllAtomPotentialOpts& opts, mol::EntityView target_view):
+                             AllAtomPotentialOpts& opts, 
+                             mol::EntityView target_view):
     energies_(energies),
     options_(opts),
     energy_(0.0),
@@ -53,12 +54,6 @@ public:
   
   virtual bool VisitAtom(const mol::AtomHandle& atom_handle)
   {
-    //TODO: The handle contains all atoms of the original loded PDB file.
-    //i.e. the selection on C-beta atoms for the residue-based potential
-    //is lost. Therefore a first view contains all atoms of which the energy
-    //should be alculated and an additional (target-)view is provided which
-    //specifies the set of atoms against which the potential is calculated
-
     atom::ChemType type_a=GetAtomTypeByName(curr_aa_, atom_handle.GetName());
     if (type_a!=atom::UNKNOWN) {
       mol::AtomViewList nearby_atoms=target_view_.FindWithin(atom_handle.GetPos(),
@@ -75,24 +70,24 @@ public:
           float d=geom::Distance(atom_handle.GetPos(),
                                   a.GetPos());
 
-         // avoid rounding problems: distances very close to the cut-off may
-         // be rounded up the to cut-off and lead to an overflow in container energies_
+          // avoid rounding problems: distances very close to the cut-off may
+          // be rounded up the to cut-off and lead to an overflow in container 
+          // energies_
           d=d-0.0001; //used to prevent overflow if distance == upper_cutoff
           if (d<0) d=0.0;
 
           if (d>options_.lower_cutoff) {
-            // GetHandle() necessary to retriev original index of the view (as compared to index in the view):
-            if (abs(atom_handle.GetResidue().GetIndex()-a.GetResidue().GetHandle().GetIndex())<options_.sequence_sep) {
+            // GetHandle() necessary to retriev original index of the view (as 
+            // compared to index in the view):
+            int abs_sep=abs(atom_handle.GetResidue().GetIndex()-
+                            a.GetResidue().GetHandle().GetIndex());
+            if (abs_sep<options_.sequence_sep) {
               continue;
             }
             energy_+=energies_.Get(type_a, type_b, d);
             interaction_counts_++;
-            //std::cout << type_a << "(" << atom_handle.GetQualifiedName() << ")" << " " << type_b << "(" << a.GetQualifiedName() << ")" << " : " << d << "     " << energies_.Get(type_a, type_b, d) << std::endl;
           }
         }
-// 	else {
-// 	  std::cout << "Unknown type: " << type_b << std::endl;
-// 	}
       }
     }
     return false;
@@ -143,8 +138,13 @@ void AllAtomPotential::SaveToFile(const String& filename)
 
 AllAtomPotentialPtr AllAtomPotential::LoadFromFile(const String& filename)
 {
-  if(!boost::filesystem::exists(filename))
-  throw io::IOException("Could not open interaction potential data file.\nFile does not exist at: "+filename);
+  if (!boost::filesystem::exists(filename)) {
+    std::stringstream ss;
+    ss << "Could not open interaction potential. File '" 
+       << filename << "' does not exist";
+    throw io::IOException(ss.str());
+  }
+    
 
   std::ifstream stream(filename.c_str(), std::ios_base::binary);
   io::BinaryDataSource ds(stream);  
@@ -222,7 +222,6 @@ void AllAtomPotential::Fill(const InteractionStatisticsPtr& stats)
                                  options_.lower_cutoff+
                                  options_.distance_bucket_size*0.5);
   }
-//   std::cout << "total_counts: " << total_counts << std::endl; 
 
   for (int i=0; i<atom::UNKNOWN; ++i) {
     for (int j=0; j<atom::UNKNOWN; ++j) {
@@ -243,26 +242,6 @@ void AllAtomPotential::Fill(const InteractionStatisticsPtr& stats)
         // prop = (Nd_xy / Nxy) / (Nd / Ntot)
         float e=0.582*log(1+options_.sigma*t2)-0.582*log(1+options_.sigma*t2*d);
         energies_.Set(Index(i, j, k), e);
-
-        // potential is only calculated for Cbeta atoms:
-        // copy the potential for Calpha (Calphas are selected if 
-        // Cbetas are not present)
-        if (stats->IsCBetaOnly() == true) {
-          //check if Cbeta (has counts) and not Glycin-Calpha
-          if (t3 != 0) {
-             if (i==3) {
-              energies_.Set(Index(i, j-1, k), e);
-             }
-             else if (j==3) {
-              energies_.Set(Index(i-1, j, k), e);
-              }
-             else {
-              energies_.Set(Index(i-1, j, k), e);
-              energies_.Set(Index(i, j-1, k), e);
-              energies_.Set(Index(i-1, j-1, k), e);
-             }
-          }
-        }
       }
     }
   }

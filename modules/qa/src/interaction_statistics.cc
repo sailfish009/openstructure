@@ -28,7 +28,6 @@ using namespace ost::mol::impl;
 namespace ost { namespace qa {
 
 InteractionStatistics::InteractionStatistics()
-: isCbetaStatisticsFlag_(false)
 {
 
 }
@@ -87,8 +86,7 @@ InteractionStatistics::InteractionStatistics(Real lower_cutoff,
     histogram_(IntegralClassifier(atom::UNKNOWN, 0),
                IntegralClassifier(atom::UNKNOWN, 0),
                ContinuousClassifier(int((upper_cutoff_-lower_cutoff_)/bucket_size),
-                                    lower_cutoff_, upper_cutoff_)),
-    isCbetaStatisticsFlag_(false)
+                                    lower_cutoff_, upper_cutoff_))
 {
   upper_sqr_=upper_cutoff_*upper_cutoff_;
   lower_sqr_=lower_cutoff_*lower_cutoff_;
@@ -167,49 +165,6 @@ void InteractionStatistics::Set(atom::ChemType a, atom::ChemType b,
                                 int distance_bin, int counts) {
   typedef InteractionHistogram::IndexType Index;
   histogram_.Set(Index(a, b, distance_bin), counts);
-}
-
-
-void InteractionStatistics::RepairCbetaStatistics()
-{
- int num=int((upper_cutoff_-
-               lower_cutoff_)/bucket_size_);
-
- for (int k=0; k<num; ++k) {
-   for (int i=1; i<atom::UNKNOWN; ++i) {
-    for (int j=1; j<atom::UNKNOWN; ++j) {
-      //all C_alpha counts of non-glycine atome need to be asigned to Cbeta
-      if (this->GetCount(atom::ChemType(i), atom::ChemType(j),k) != 0 &&
-          this->GetCount(atom::ChemType(i-1), atom::ChemType(j-1),k) != 0) {
-        this->Set(atom::ChemType(i), atom::ChemType(j),k,
-                  this->GetCount(atom::ChemType(i), atom::ChemType(j), k) +
-                  this->GetCount(atom::ChemType(i-1), atom::ChemType(j-1),k));
-        this->Set(atom::ChemType(i-1), atom::ChemType(j-1),k,0);
-      }
-
-      if (this->GetCount(atom::ChemType(i), atom::ChemType(j),k) != 0 &&
-          this->GetCount(atom::ChemType(i), atom::ChemType(j-1),k) != 0) {
-        this->Set(atom::ChemType(i), atom::ChemType(j), k,
-                  this->GetCount(atom::ChemType(i), atom::ChemType(j),k) +
-                  this->GetCount(atom::ChemType(i), atom::ChemType(j-1),k));
-        this->Set(atom::ChemType(i), atom::ChemType(j-1),k,0);
-      }
-
-      if (this->GetCount(atom::ChemType(i), atom::ChemType(j),k) != 0 &&
-          this->GetCount(atom::ChemType(i-1), atom::ChemType(j),k) != 0) {
-        this->Set(atom::ChemType(i), atom::ChemType(j),k,
-                  this->GetCount(atom::ChemType(i), atom::ChemType(j), k) +
-                  this->GetCount(atom::ChemType(i-1), atom::ChemType(j),k));
-        this->Set(atom::ChemType(i-1), atom::ChemType(j),k,0);
-      }
-
-    }
-   }
-  }
-
-  isCbetaStatisticsFlag_ = true;
-
-
 }
 
 

@@ -236,11 +236,12 @@ void export_Interaction()
     .def("GetCount", f2, args("partner1", "partner2", "distance"))
     .def("SaveToFile", &InteractionStatistics::SaveToFile, args("file_name"))
     .def("LoadFromFile", &InteractionStatistics::LoadFromFile).staticmethod("LoadFromFile")
-    .def("RepairCbetaStatistics", &InteractionStatistics::RepairCbetaStatistics)
-    .def("IsCBetaOnly", &InteractionStatistics::IsCBetaOnly)
   ;  
   
   class_<AllAtomPotentialOpts>("AllAtomPotentialOpts", init<>())
+    .def(init<float,float,float,int,float>((arg("lower_cutoff"), 
+                                           arg("upper_cutoff"), arg("dist_bin_size"), 
+                                           arg("sequence_sep"), arg("sigma")=0.02)))
     .def_readwrite("LowerCutoff", &AllAtomPotentialOpts::lower_cutoff)
     .def_readwrite("UpperCutoff", &AllAtomPotentialOpts::upper_cutoff)
     .def_readwrite("DistanceBucketSize", 
@@ -257,6 +258,7 @@ void export_Interaction()
     .def("GetEnergyCounts", &AllAtomPotential::GetEnergyCounts)
     .def("GetEnergy", three_args, args("atom_type_1", "atom_type_1", "distance"))
     .def("SaveToFile", &AllAtomPotential::SaveToFile)
+    .add_property("options", make_function(&AllAtomPotential::GetOptions, return_value_policy<copy_const_reference>()))
     .def("SetSequenceSeparation", &AllAtomPotential::SetSequenceSeparation)
   ;
   register_ptr_to_python<AllAtomPotentialPtr>();  
