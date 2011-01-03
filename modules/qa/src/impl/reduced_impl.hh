@@ -35,6 +35,10 @@ public:
   ReducedPotentialImpl(const ReducedStatOptions& opts, mol::EntityHandle ent): 
     opts_(opts), ent_(ent)
   { }
+  
+  ReducedPotentialImpl(const ReducedStatOptions& opts, mol::EntityView ent): 
+    opts_(opts), view_(ent)
+  { }
 
   virtual bool VisitResidue(const mol::ResidueHandle& res);
 
@@ -44,9 +48,13 @@ public:
                          
   virtual void OnInteraction(AminoAcid aa_one, AminoAcid aa_two, 
                              Real dist, Real angle)=0;
-private:
+private:  
+  void HandleResidue(AminoAcid aa_one, const geom::Vec3& ca_pos_one, 
+                     const geom::Vec3& cb_pos_one, 
+                     uint index_one, const mol::AtomHandle& ca_two);
   ReducedStatOptions opts_;
   mol::EntityHandle  ent_;
+  mol::EntityView    view_;
 };
 
 }}}

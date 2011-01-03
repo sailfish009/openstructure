@@ -35,7 +35,11 @@ public:
     impl::ReducedPotentialImpl(opts, ent),
     energies_(energies), energy_(0.0), norm_(norm), count_(0)
   { }
-
+  ReducedEnergiesCalc(const ReducedStatOptions& opts, ReducedEnergies& energies,
+                      mol::EntityView ent, bool norm): 
+    impl::ReducedPotentialImpl(opts, ent),
+    energies_(energies), energy_(0.0), norm_(norm), count_(0)
+  { }
   virtual void OnInteraction(AminoAcid aa_one, AminoAcid aa_two, 
                              Real dist, Real angle)
   {
@@ -132,6 +136,13 @@ void ReducedPotential::Serialize(DS& ds)
 }
 
 Real ReducedPotential::GetTotalEnergy(ost::mol::EntityHandle ent, bool norm)
+{
+  ReducedEnergiesCalc calc(opts_, energies_, ent, norm);
+  ent.Apply(calc);
+  return calc.GetEnergy();
+}
+
+Real ReducedPotential::GetTotalEnergy(ost::mol::EntityView ent, bool norm)
 {
   ReducedEnergiesCalc calc(opts_, energies_, ent, norm);
   ent.Apply(calc);

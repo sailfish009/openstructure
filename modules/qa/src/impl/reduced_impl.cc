@@ -20,39 +20,65 @@ bool ReducedPotentialImpl::VisitResidue(const mol::ResidueHandle& res)
   if (!this->GetCAlphaCBetaPos(res, ca_pos_one, cb_pos_one)) {
     return false;
   }
+  
+  if (ent_) {
+    // we got a full entity handle.
+    mol::AtomHandleList within=ent_.FindWithin(ca_pos_one, 
+                                               opts_.upper_cutoff-0.00001);
+    for (mol::AtomHandleList::const_iterator 
+         i=within.begin(), e=within.end(); i!=e; ++i) {
+      if (i->GetName()=="CA") {
+        this->HandleResidue(aa_one, ca_pos_one, cb_pos_one, index, *i);
+      }
 
-  mol::AtomHandleList within=ent_.FindWithin(ca_pos_one, 
+    }
+    return false;
+  }
+  mol::AtomViewList within=view_.FindWithin(ca_pos_one, 
                                              opts_.upper_cutoff-0.00001);
-  for (mol::AtomHandleList::const_iterator 
+  for (mol::AtomViewList::const_iterator 
        i=within.begin(), e=within.end(); i!=e; ++i) {
-    mol::ResidueHandle res_two=i->GetResidue();
-    if (res_two.GetIndex()-index<opts_.sequence_sep) {
-      continue;
-    }
-    if (i->GetName()!="CA" || !res_two.IsPeptideLinking()) {
-      continue;
+    if (i->GetName()=="CA") {
+      this->HandleResidue(aa_one, ca_pos_one, cb_pos_one, index, i->GetHandle());
     }
 
-
-    AminoAcid aa_two=OneLetterCodeToAminoAcid(res_two.GetOneLetterCode());
-    if (aa_two==Xxx) {
-      continue;
-    }
-    geom::Vec3 ca_pos_two;
-    geom::Vec3 cb_pos_two;
-    if (!this->GetCAlphaCBetaPos(res_two, ca_pos_two, cb_pos_two)) {
-      continue;
-    }
-
-    Real dist=geom::Length(ca_pos_one-ca_pos_two);
-    if (dist<opts_.lower_cutoff) {
-      continue;
-    }
-    Real angle=geom::Angle(cb_pos_one-ca_pos_one, cb_pos_two-ca_pos_two);
-
-    this->OnInteraction(aa_one, aa_two, dist, angle);
   }
   return false;
+}
+
+void ReducedPotentialImpl::HandleResidue(AminoAcid aa_one, 
+                                         const geom::Vec3& ca_pos_one, 
+                                         const geom::Vec3& cb_pos_one, 
+                                         uint index_one, 
+                                         const mol::AtomHandle& ca_two)
+{
+  
+  mol::ResidueHandle res_two=ca_two.GetResidue();
+  if (res_two.GetIndex()-index_one<opts_.sequence_sep) {
+    return;
+  }
+  if (!res_two.IsPeptideLinking()) {
+    return;
+  }
+
+
+  AminoAcid aa_two=OneLetterCodeToAminoAcid(res_two.GetOneLetterCode());
+  if (aa_two==Xxx) {
+    return;
+  }
+  geom::Vec3 ca_pos_two;
+  geom::Vec3 cb_pos_two;
+  if (!this->GetCAlphaCBetaPos(res_two, ca_pos_two, cb_pos_two)) {
+    return;
+  }
+
+  Real dist=geom::Length(ca_pos_one-ca_pos_two);
+  if (dist<opts_.lower_cutoff) {
+    return;
+  }
+  Real angle=geom::Angle(cb_pos_one-ca_pos_one, cb_pos_two-ca_pos_two);
+
+  this->OnInteraction(aa_one, aa_two, dist, angle);
 }
   
 bool ReducedPotentialImpl::GetCAlphaCBetaPos(const mol::ResidueHandle& res, 

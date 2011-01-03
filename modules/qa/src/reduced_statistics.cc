@@ -41,6 +41,12 @@ public:
     histo_(histo)
   { }
   
+  ReducedStatExtractor(const ReducedStatOptions& opts, ReducedHistogram& histo,
+                       mol::EntityView ent): 
+    impl::ReducedPotentialImpl(opts, ent),
+    histo_(histo)
+  { }
+  
   virtual void OnInteraction(AminoAcid aa_one, AminoAcid aa_two, 
                              Real dist, Real angle)
   {
@@ -129,5 +135,18 @@ void ReducedStatistics::Extract(mol::EntityHandle ent)
   ReducedStatExtractor extractor(opts_, histo_, ent);
   ent.Apply(extractor);
 }
+
+void ReducedStatistics::Extract(mol::EntityView ent)
+{
+  if (ent.GetChainCount()!=1) {
+    std::stringstream ss;
+    ss << "Expected exactly one chain, but entity has " 
+       <<  ent.GetChainCount() << "chains";
+    throw std::runtime_error(ss.str());
+  }
+  ReducedStatExtractor extractor(opts_, histo_, ent);
+  ent.Apply(extractor);
+}
+
 
 }}

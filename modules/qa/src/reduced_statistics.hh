@@ -82,8 +82,11 @@ public:
   
   const ReducedStatOptions& GetOptions() const { return opts_; }
   
-  /// \brief extract the statistics from the given entity
+  /// \brief extract the statistics from the given entity (handle)
   void Extract(mol::EntityHandle ent);
+  
+  /// \brief extract statistics from given entity (view)
+  void Extract(mol::EntityView ent);
   
   void Save(const String& filename);
   
