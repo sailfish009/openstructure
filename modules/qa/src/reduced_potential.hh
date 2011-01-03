@@ -49,6 +49,11 @@ public:
   
   Real GetTotalEnergy(ost::mol::EntityHandle ent, bool normalize=true);
   
+  
+  static bool GetCAlphaCBetaPos(const mol::ResidueHandle& res, 
+                                geom::Vec3& ca_pos, 
+                                geom::Vec3& cb_pos);
+
   Real GetEnergy(AminoAcid aa_one, AminoAcid aa_two, 
                  Real ca_dist, Real angle) const
   {

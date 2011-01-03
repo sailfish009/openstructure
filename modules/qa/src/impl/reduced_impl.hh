@@ -38,8 +38,9 @@ public:
 
   virtual bool VisitResidue(const mol::ResidueHandle& res);
 
-  bool GetCAlphaCBetaPos(const mol::ResidueHandle& res, geom::Vec3& ca_pos, 
-                         geom::Vec3& cb_pos);
+  static bool GetCAlphaCBetaPos(const mol::ResidueHandle& res, 
+                                geom::Vec3& ca_pos, 
+                                geom::Vec3& cb_pos);
                          
   virtual void OnInteraction(AminoAcid aa_one, AminoAcid aa_two, 
                              Real dist, Real angle)=0;

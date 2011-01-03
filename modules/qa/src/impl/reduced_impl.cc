@@ -58,34 +58,35 @@ bool ReducedPotentialImpl::VisitResidue(const mol::ResidueHandle& res)
 bool ReducedPotentialImpl::GetCAlphaCBetaPos(const mol::ResidueHandle& res, 
                                              geom::Vec3& ca_pos, 
                                              geom::Vec3& cb_pos)
-  {
-    const static Real bond_length=1.5;
-    mol::AtomHandle ca=res.FindAtom("CA");
-    if (!ca.IsValid()) {
-      return false;
-    }
-    ca_pos=ca.GetPos();
-    mol::AtomHandle cb=res.FindAtom("CB");
-    if (cb.IsValid()) {
-      cb_pos=cb.GetPos();
-      return true;
-    }
-    mol::AtomHandle n=res.FindAtom("N");
-    mol::AtomHandle c=res.FindAtom("C");
-    if (!(ca.IsValid() && c.IsValid() && n.IsValid())) {
-      LOG_WARNING("residue " << res.GetQualifiedName() 
-                  << " doesn't have enough atoms to reconstruct Cbeta position");
-      return false;
-    }
-    geom::Vec3 v1=geom::Normalize(ca.GetPos()-n.GetPos());
-    geom::Vec3 v2=geom::Normalize(ca.GetPos()-c.GetPos());
-    geom::Vec3 in_plane_v=geom::Normalize(v1+v2);
-    geom::Plane p(ca.GetPos() ,n.GetPos(), c.GetPos());
-    // rotate around vector perpendicular  to p and in_plane_v
-    geom::Vec3 axis=geom::Normalize(geom::Cross(p.GetNormal(), in_plane_v));
-    geom::Mat3 rot_mat=geom::AxisRotation(axis, (-54/180.0)*M_PI);
-    cb_pos=ca.GetPos()+rot_mat*in_plane_v*bond_length;
+{
+  const static Real bond_length=1.5;
+  mol::AtomHandle ca=res.FindAtom("CA");
+  if (!ca.IsValid()) {
+    return false;
+  }
+  ca_pos=ca.GetPos();
+  mol::AtomHandle cb=res.FindAtom("CB");
+  if (cb.IsValid()) {
+    cb_pos=cb.GetPos();
     return true;
-  }  
+  }
+  mol::AtomHandle n=res.FindAtom("N");
+  mol::AtomHandle c=res.FindAtom("C");
+  if (!(ca.IsValid() && c.IsValid() && n.IsValid())) {
+    LOG_WARNING("residue " << res.GetQualifiedName() 
+                << " doesn't have enough atoms to reconstruct Cbeta position");
+    return false;
+  }
+  geom::Vec3 v1=geom::Normalize(ca.GetPos()-n.GetPos());
+  geom::Vec3 v2=geom::Normalize(ca.GetPos()-c.GetPos());
+  geom::Vec3 in_plane_v=geom::Normalize(v1+v2);
+  geom::Plane p(ca.GetPos() ,n.GetPos(), c.GetPos());
+  // rotate around vector perpendicular  to p and in_plane_v
+  geom::Vec3 axis=geom::Normalize(geom::Cross(p.GetNormal(), in_plane_v));
+  geom::Mat3 rot_mat=geom::AxisRotation(axis, (-54/180.0)*M_PI);
+  cb_pos=ca.GetPos()+rot_mat*in_plane_v*bond_length;
+  return true;
+}
+
 }}}
 

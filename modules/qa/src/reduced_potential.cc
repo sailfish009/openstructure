@@ -61,6 +61,13 @@ private:
 
 }
 
+bool ReducedPotential::GetCAlphaCBetaPos(const mol::ResidueHandle& res, 
+                                         geom::Vec3& ca_pos, 
+                                         geom::Vec3& cb_pos)
+{
+  return impl::ReducedPotentialImpl::GetCAlphaCBetaPos(res, ca_pos, cb_pos);
+}
+
 ReducedPotentialPtr ReducedPotential::Load(const String& filename)
 {
   std::ifstream stream(filename.c_str(), std::ios_base::binary);
