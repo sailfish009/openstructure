@@ -204,7 +204,7 @@ def SavePDB(models, filename, dialect=None,  pqr=False, profile='DEFAULT'):
   writer=PDBWriter(filename, profile)
   writer.SetIsPQR(pqr)
   if len(models)>1:
-    writer.SetMultiModel(True)
+    writer.write_multi_model=True
   for model in models:
     writer.Write(model)
 

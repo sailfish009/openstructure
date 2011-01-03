@@ -72,6 +72,10 @@ void export_pdb_io()
     .def("Write", write_a)
     .def("SetIsPQR", &PDBWriter::SetIsPQR)
     .def("IsPQR", &PDBWriter::IsPQR)
+    .def("SetWriteMultiModel", &PDBWriter::SetWriteMultiModel)
+    .def("GetWriteMultiModel", &PDBWriter::GetWriteMultiModel)
+    .add_property("write_multi_model", &PDBWriter::GetWriteMultiModel, 
+                  &PDBWriter::SetWriteMultiModel)
     .def("Write", write_b)    
   ;
 }
