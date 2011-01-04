@@ -90,6 +90,7 @@ set(OST_GUI_PYMOD_MODULES
 set(OST_GUI_PYMOD_DNG_MODULES
   __init__.py
   termuse.py
+  init.py
 )
 
 pymod(NAME gui CPP ${OST_GUI_PYMOD_SOURCES} 
