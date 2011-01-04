@@ -24,23 +24,6 @@ namespace ost { namespace qa {
 
 namespace {
   
-Real StericEnergy(const geom::Vec3& pos1, Real r1, 
-                  const geom::Vec3& pos2, Real r2)
-{
-  geom::Vec3 d=pos1-pos2;
-  // delay calculation of square root as long as possible. It is only needed
-  // in the rare case when 0.8254*rr <= d <= rr
-  Real distance_sqr=geom::Length2(d); 
-  Real rr=r1+r2;
-  if (distance_sqr>rr*rr) {
-    return 0.0;
-  }
-  if (distance_sqr<0.8254*0.8254*rr*rr) {
-    return 10.0;
-  }
-  return 57.273*(1.0-sqrt(distance_sqr)/rr);
-}
-
 template <typename T, typename I>
 Real do_clash_score(const T& ent_a, const mol::EntityView& ent_b)
 {
@@ -59,6 +42,23 @@ Real do_clash_score(const T& ent_a, const mol::EntityView& ent_b)
   return energy;  
 }
 
+}
+
+Real StericEnergy(const geom::Vec3& pos1, Real r1,
+                  const geom::Vec3& pos2, Real r2)
+{
+  geom::Vec3 d=pos1-pos2;
+  // delay calculation of square root as long as possible. It is only needed
+  // in the rare case when 0.8254*rr <= d <= rr
+  Real distance_sqr=geom::Length2(d); 
+  Real rr=r1+r2;
+  if (distance_sqr>rr*rr) {
+    return 0.0;
+  }
+  if (distance_sqr<0.8254*0.8254*rr*rr) {
+    return 10.0;
+  }
+  return 57.273*(1.0-sqrt(distance_sqr)/rr);
 }
 
 Real ClashScore(const mol::EntityView& ent_a, const mol::EntityView& ent_b)
