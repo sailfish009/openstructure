@@ -144,7 +144,7 @@ Real ReducedPotential::GetTotalEnergy(ost::mol::EntityHandle ent, bool norm)
 
 Real ReducedPotential::GetTotalEnergy(ost::mol::EntityView ent, bool norm)
 {
-  ReducedEnergiesCalc calc(opts_, energies_, ent, norm);
+  ReducedEnergiesCalc calc(opts_, energies_, ent.GetHandle(), norm);
   ent.Apply(calc);
   return calc.GetEnergy();
 }

@@ -129,7 +129,7 @@ void ReducedStatistics::Extract(mol::EntityHandle ent)
   if (ent.GetChainCount()!=1) {
     std::stringstream ss;
     ss << "Expected exactly one chain, but entity has " 
-       <<  ent.GetChainCount() << "chains";
+       <<  ent.GetChainCount() << " chains";
     throw std::runtime_error(ss.str());
   }
   ReducedStatExtractor extractor(opts_, histo_, ent);
@@ -141,10 +141,10 @@ void ReducedStatistics::Extract(mol::EntityView ent)
   if (ent.GetChainCount()!=1) {
     std::stringstream ss;
     ss << "Expected exactly one chain, but entity has " 
-       <<  ent.GetChainCount() << "chains";
+       <<  ent.GetChainCount() << " chains";
     throw std::runtime_error(ss.str());
   }
-  ReducedStatExtractor extractor(opts_, histo_, ent);
+  ReducedStatExtractor extractor(opts_, histo_, ent.GetHandle());
   ent.Apply(extractor);
 }
 
