@@ -43,3 +43,6 @@ class StreamLogSink(LogSink):
     self._stream=stream
   def LogMessage(self, message, level):
     self._stream.write(message)
+
+def stop():
+  sys.exit()
