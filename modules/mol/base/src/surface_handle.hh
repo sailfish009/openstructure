@@ -72,9 +72,19 @@ public:
 
   bool IsValid() const {return impl_;}
 
+  bool operator==(const SurfaceHandle& ref) const { return impl_==ref.impl_; }
+
+  bool operator!=(const SurfaceHandle& ref) const { return !this->operator==(ref); }
+
 private:
   impl::SurfaceImplP impl_;
+
 };
+
+DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os,
+                                           const SurfaceHandle& surf);
+
+typedef std::vector<SurfaceHandle> SurfaceHandleList;
 
 }} // ns
 

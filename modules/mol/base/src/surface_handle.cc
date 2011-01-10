@@ -88,4 +88,14 @@ void SurfaceHandle::Invert()
   impl_->Invert();
 }
 
+std::ostream& operator<<(std::ostream& os, const SurfaceHandle& surf)
+{
+  if (surf.IsValid()) {
+    os << "valid surface";
+  } else {
+    os << "invalid surface";
+  }
+  return os;
+}
+
 }} // ns
