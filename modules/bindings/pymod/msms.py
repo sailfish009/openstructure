@@ -197,7 +197,7 @@ def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
   if all_surf:
     command+=" -all"
   if attach_asa != None:
-      command+=" -af %s" % os.path.join(msms_data_dir, "asa_atom")
+    command+=" -af %s" % os.path.join(msms_data_dir, "asa_atom")
   # run msms
   stdout_value=_RunMSMS(command)
   
