@@ -21,6 +21,7 @@
  */
 
 #include "sdf_writer.hh"
+#include <boost/regex.hpp>
 
 namespace ost { namespace io {
 
@@ -116,11 +117,19 @@ bool SDFWriter::VisitChain(const mol::ChainHandle& chain) {
     atom_indices_.clear();
   }
 
-  // print header lines
-  ostr_ << chain.GetName().substr(6) << std::endl;
-  ostr_ << std::endl;
-  ostr_ << std::endl;
+  // remove chain number if added when reading from sdf file
+  String cname = chain.GetName();
+  if (cname.length()>6) {
+    boost::regex pattern = boost::regex("^[0-9]{5}_");
+    if (boost::regex_search(cname, pattern)) {
+      cname = cname.substr(6);
+    }
+  }
 
+  // print header lines
+  ostr_ << cname << std::endl;
+  ostr_ << std::endl;
+  ostr_ << std::endl;
   // print counts line
   ostr_ << format("%3d") % chain.GetAtomCount()
         << format("%3d") % chain.GetBondCount()
