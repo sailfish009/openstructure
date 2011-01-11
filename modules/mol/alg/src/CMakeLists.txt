@@ -37,7 +37,8 @@ executable(NAME ldt SOURCES ldt.cc
 module(NAME mol_alg SOURCES ${OST_MOL_ALG_SOURCES}
        HEADERS ${OST_MOL_ALG_HEADERS}
        HEADER_OUTPUT_DIR ost/mol/alg
-       DEPENDS_ON ${MOL_ALG_DEPS})
+       DEPENDS_ON ${MOL_ALG_DEPS}
+       LINK ${BOOST_PROGRAM_OPTIONS})
 
 copy_if_different("." "${STAGE_DIR}/share/openstructure"
                   "atom_scattering_properties.txt" "ATOM_SCATTERING_PROPS"

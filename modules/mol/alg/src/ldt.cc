@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <boost/program_options.hpp>
 #include <ost/mol/alg/local_dist_test.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/mol/pdb_reader.hh>
@@ -24,6 +25,7 @@
 using namespace ost;
 using namespace ost::io;
 using namespace ost::mol;
+namespace po=boost::program_options;
 
 EntityHandle load(const String& file, const IOProfile& profile)
 {
@@ -54,48 +56,52 @@ void usage()
   std::cerr << "   -t        fault tolerant parsing" << std::endl;  
 }
 
-int main (int argc, char* const *argv)
+int main (int argc, char **argv)
 {
   IOProfile profile;
   // parse options
   String sel;
   bool filter_clashes=false;
-  char ch=0;
-  while((ch=getopt(argc, argv, "ftcs:"))!=-1) {
-    switch (ch) {
-      case 'c':
-        profile.calpha_only=true;
-        break;
-      case 't':
-        profile.fault_tolerant=true;
-        break;
-      case 'f':
-        filter_clashes=true;
-        break;
-      case 's':
-        sel=optarg;
-        break;
-      case '?':
-      default:
-        usage();
-        return -1;
-    }
+  po::options_description desc("Options");
+  desc.add_options()
+    ("calpha,c", "consider only calpha atoms")
+    ("sel,s", po::value<String>(&sel)->default_value(""), "selection for reference")
+    ("tolerant,t", "fault tolerant mode")
+    ("filter-clashes,f", "filter clashes")
+    ("files", po::value< std::vector<String> >(), "input file")
+  ;
+  po::positional_options_description p;
+  p.add("files", -1);
+  po::variables_map vm;
+  po::store(po::command_line_parser(argc, argv).
+                options(desc).positional(p).run(),
+            vm);
+  po::notify(vm);
+  if (vm.count("calpha")) {
+    profile.calpha_only=true;
   }
-  argc-=optind;
-  argv+=optind;
-  if (argc<2) {
+  if (vm.count("filter-clashes")) {
+    filter_clashes=true;
+  }
+  if (vm.count("tolerant")) {
+    profile.fault_tolerant=true;
+  }
+  std::vector<String> files;
+  if (vm.count("files")) {
+    files=vm["files"].as<std::vector<String> >();
+  } else {
     usage();
-    return -1;
-  }  
-
-  String ref_file=argv[argc-1];
+    exit(-1);
+  }
+  String ref_file=files.back();
   EntityHandle ref=load(ref_file, profile);
   if (!ref) {
     return -1;
   }
+  files.pop_back();
   EntityView ref_view=ref.Select(sel);
-  for (int i=0; i<argc-1; ++i) {
-    EntityHandle model=load(argv[i], profile);
+  for (size_t i=0; i<files.size(); ++i) {
+    EntityHandle model=load(files[i], profile);
     if (!model) {
       if (!profile.fault_tolerant) {
         return -1;
@@ -112,7 +118,7 @@ int main (int argc, char* const *argv)
       ldt+=alg::LocalDistTest(v, ref_view, cutoffs[n], 8.0);
     }
     ldt/=4.0;
-    std::cout << argv[i] << " " << ldt << std::endl;
+    std::cout << files[i] << " " << ldt << std::endl;
   }
   return 0;
 }

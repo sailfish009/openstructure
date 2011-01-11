@@ -206,9 +206,11 @@ find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS iostreams REQUIRED)
 set(BOOST_IOSTREAM_LIBRARIES ${Boost_LIBRARIES})
 set(Boost_LIBRARIES)
 find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS program_options REQUIRED)
+set(BOOST_PROGRAM_OPTIONS ${Boost_LIBRARIES})
 set(Boost_LIBRARIES)
 find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS regex REQUIRED)
 set(BOOST_REGEX_LIBRARIES ${Boost_LIBRARIES})
+set(Boost_LIBRARIES)
 
         
 find_package(Qt4 4.5.0 REQUIRED)
