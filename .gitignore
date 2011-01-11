@@ -30,9 +30,10 @@ Testing
 README.html
 CPackConfig.cmake
 CPackSourceConfig.cmake
-deployment/macos/DNG.app
-deployment/macos/standalone
+/deployment/macos/DNG.app
+/deployment/macos/standalone
 ChemLib
 components.cif
 compounds.chemlib
-deployment/macos/openstructure.dmg
+/deployment/macos/openstructure.dmg
+/scripts/dng
