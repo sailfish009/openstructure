@@ -79,13 +79,13 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
       int type=0;
       const NodeEntry& entry=nl[i];
       if(!force_tube_) {
-	mol::ResidueHandle resh = entry.atom.GetResidue();
-	mol::SecStructure sst=resh.GetSecStructure();
-	if(sst.IsHelical()) {
-	  type=1;
-	} else if(sst.IsExtended()) {
-	  type=2;
-	}
+        mol::ResidueHandle resh = entry.atom.GetResidue();
+        mol::SecStructure sst=resh.GetSecStructure();
+        if(sst.IsHelical()) {
+          type=1;
+        } else if(sst.IsExtended()) {
+          type=2;
+        }
       }
       SplineEntry ee(entry.atom.GetPos(),entry.direction,
 		     entry.normal, entry.rad, 
@@ -137,7 +137,7 @@ void CartoonRenderer::PrepareRendering()
     for(int nlc=0;nlc<sel_subset_.GetListCount();++nlc) {
       const NodeEntryList& nelist=sel_subset_.GetList(nlc);
       for(NodeEntryList::const_iterator nit=nelist.begin();nit!=nelist.end();++nit) {
-	id_set.insert(nit->id);
+        id_set.insert(nit->id);
       }
     }
     // now find all matching spline segments
@@ -147,28 +147,28 @@ void CartoonRenderer::PrepareRendering()
       SplineEntryList nlist;
       unsigned int sc=0;
       while(sc<slist.size()) {
-	int curr_id=slist.at(sc).id;
-	if(id_set.count(curr_id)>0) {
-	  // if a match is found, add all until a new id is found
-	  while(sc<slist.size() &&  slist.at(sc).id==curr_id) {
-	    nlist.push_back(slist[sc++]);
-	    // override with the selection color
-	    nlist.back().color1=sel_color;
-	    nlist.back().color2=sel_color;
-	  }
-	} else {
-	  // introduce break
-	  if(!nlist.empty()) {
-	    sel_spline_list_list_.push_back(nlist);
-	    nlist.clear();
-	  }
-	  // and advance to the next id
-	  while(sc<slist.size() &&  slist.at(sc).id==curr_id) ++sc;
-	}
+        int curr_id=slist.at(sc).id;
+        if(id_set.count(curr_id)>0) {
+          // if a match is found, add all until a new id is found
+          while(sc<slist.size() &&  slist.at(sc).id==curr_id) {
+            nlist.push_back(slist[sc++]);
+            // override with the selection color
+            nlist.back().color1=sel_color;
+            nlist.back().color2=sel_color;
+          }
+        } else {
+          // introduce break
+          if(!nlist.empty()) {
+            sel_spline_list_list_.push_back(nlist);
+            nlist.clear();
+          }
+          // and advance to the next id
+          while(sc<slist.size() &&  slist.at(sc).id==curr_id) ++sc;
+        }
       }
       if(!nlist.empty()) {
-	sel_spline_list_list_.push_back(nlist);
-	nlist.clear();
+        sel_spline_list_list_.push_back(nlist);
+        nlist.clear();
       }
     }
     RebuildSplineObj(sel_va_, sel_spline_list_list_, true);
@@ -287,17 +287,17 @@ void CartoonRenderer::FudgeSplineObj(SplineEntryListList& olistlist)
               nlistlist.push_back(nlist);
               nlist.clear();
             }
-
-	    // make a two entry list with the cyl type
-	    nlist.push_back(SplineEntry(cyl.first,geom::Vec3(),geom::Vec3(),0.0,
-					olist[lstart].color1,olist[lstart].color1,
-					6,olist[lstart].id));
-	    nlist.push_back(SplineEntry(cyl.second,geom::Vec3(),geom::Vec3(),0.0,
-					olist[lend].color1,olist[lend].color1,
-					6,olist[lend].id));
-	    nlistlist.push_back(nlist);
-	    nlist.clear();
-
+            
+            // make a two entry list with the cyl type
+            nlist.push_back(SplineEntry(cyl.first,geom::Vec3(),geom::Vec3(),0.0,
+                                        olist[lstart].color1,olist[lstart].color1,
+                                        6,olist[lstart].id));
+            nlist.push_back(SplineEntry(cyl.second,geom::Vec3(),geom::Vec3(),0.0,
+                                        olist[lend].color1,olist[lend].color1,
+                                        6,olist[lend].id));
+            nlistlist.push_back(nlist);
+            nlist.clear();
+            
             if(lend+1<olist.size()) {
               // and get going with an entry at the end of the cylinder
               SplineEntry tmp_start(olist[lend]);
@@ -329,42 +329,42 @@ void CartoonRenderer::FudgeSplineObj(SplineEntryListList& olistlist)
         for(;lc<olist.size() && olist.at(lc).type==2;++lc,++kend) {
           nlist.push_back(olist.at(lc));
         }
-	if(kend-kstart<2) {
-	  // dont bother with too short strands
-	  for(unsigned int i=kstart;i<kend;++i) {
-	    nlist.at(i).type=0;
-	  }
-	} else {
-	  kend-=1;
-	  // these magic numbers are used in RebuildSplineObj for proper arrow rendering
-	  nlist.at(kend-1).type=3;
-	  nlist.at(kend).type=5;
-	  
-	  if(options_->GetStrandMode()==1) {
-	    // smooth the strands for mode 1
-	    nlist.at(kstart).direction = geom::Normalize(nlist.at(kend).position-nlist.at(kstart).position);
-	    nlist.at(kend).direction=nlist.at(kstart).direction;
-	    float invf=1.0/static_cast<float>(kend-kstart);
-	    for(unsigned int k=kstart;k<=kend;++k) {
-	      float f = static_cast<float>(k-kstart)*invf;
-	      nlist.at(k).position=nlist.at(kstart).position+f*(nlist.at(kend).position-nlist.at(kstart).position);
-	      nlist.at(k).direction=nlist.at(kstart).direction;
-	      geom::Vec3 tmpn=geom::Normalize(nlist.at(kstart).normal+f*(nlist.at(kend).normal-nlist.at(kstart).normal));
-	      geom::Vec3 tmpx=geom::Normalize(geom::Cross(nlist.at(kstart).direction,tmpn));
-	      nlist.at(k).normal=geom::Normalize(geom::Cross(tmpx,nlist.at(kstart).direction));
-	    }
-	  }
-	  
-	  // break nodelist, re-start at arrow tip for both modes
-	  if(lc+1<olist.size()) {
-	    nlistlist.push_back(nlist);
-	    nlist.clear();
-	    nlist.push_back(nlistlist.back().back());
-	    nlist.back().type=0;
-	    nlist.back().color1=olist[lc+1].color1;
-	    nlist.back().color2=olist[lc+1].color2;
-	  }
-	}
+        if(kend-kstart<2) {
+          // dont bother with too short strands
+          for(unsigned int i=kstart;i<kend;++i) {
+            nlist.at(i).type=0;
+          }
+        } else {
+          kend-=1;
+          // these magic numbers are used in RebuildSplineObj for proper arrow rendering
+          nlist.at(kend-1).type=3;
+          nlist.at(kend).type=5;
+          
+          if(options_->GetStrandMode()==1) {
+            // smooth the strands for mode 1
+            nlist.at(kstart).direction = geom::Normalize(nlist.at(kend).position-nlist.at(kstart).position);
+            nlist.at(kend).direction=nlist.at(kstart).direction;
+            float invf=1.0/static_cast<float>(kend-kstart);
+            for(unsigned int k=kstart;k<=kend;++k) {
+              float f = static_cast<float>(k-kstart)*invf;
+              nlist.at(k).position=nlist.at(kstart).position+f*(nlist.at(kend).position-nlist.at(kstart).position);
+              nlist.at(k).direction=nlist.at(kstart).direction;
+              geom::Vec3 tmpn=geom::Normalize(nlist.at(kstart).normal+f*(nlist.at(kend).normal-nlist.at(kstart).normal));
+              geom::Vec3 tmpx=geom::Normalize(geom::Cross(nlist.at(kstart).direction,tmpn));
+              nlist.at(k).normal=geom::Normalize(geom::Cross(tmpx,nlist.at(kstart).direction));
+            }
+          
+            // and break nodelist, re-starting at arrow tip, just for mode 1
+            if(lc+1<olist.size()) {
+              nlistlist.push_back(nlist);
+              nlist.clear();
+              nlist.push_back(nlistlist.back().back());
+              nlist.back().type=0;
+              nlist.back().color1=olist[lc+1].color1;
+              nlist.back().color2=olist[lc+1].color2;
+            }
+          }
+        }
       }
       if(lc<olist.size()) {
         nlist.push_back(olist.at(lc));
