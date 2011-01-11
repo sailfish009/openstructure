@@ -37,3 +37,14 @@ components.cif
 compounds.chemlib
 /deployment/macos/openstructure.dmg
 /scripts/dng
+*.vcproj
+*.user
+*.dir
+*.sln
+*.ncb
+*suo
+Release
+RelWithDebInfo
+Debug
+*.cxx_parameters
+/deployment/win/create_archive.bat
