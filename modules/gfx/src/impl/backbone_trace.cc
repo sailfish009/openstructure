@@ -83,7 +83,7 @@ public:
       NodeEntry entry={ca, GfxObj::Ele2Color(ca.GetElement()),
                        GfxObj::Ele2Color(ca.GetElement()),
                        geom::Vec3(), // this will be set by the gfx trace obj
-                       geom::Normalize(res.GetCentralNormal()),
+                       res.GetCentralNormal(),
                        1.0,
                        geom::Vec3(),geom::Vec3(),geom::Vec3(), // for later use in NA rendering
                        false,id_counter_++};
@@ -146,6 +146,17 @@ void BackboneTrace::Rebuild()
     node_list_list_.clear();
     TraceBuilder trace(this);    
     view_.Apply(trace);
+  }
+}
+
+void BackboneTrace::OnUpdatedPositions()
+{
+  for(NodeEntryListList::iterator nitnit=node_list_list_.begin();nitnit!=node_list_list_.end();++nitnit) {
+    NodeEntryList& nlist=*nitnit;
+    for(NodeEntryList::iterator nit=nlist.begin();nit!=nlist.end();++nit) {
+      nit->normal=nit->atom.GetResidue().GetCentralNormal();
+    }
+    PrepList(nlist);
   }
 }
 

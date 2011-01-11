@@ -65,6 +65,9 @@ public:
 
   // re-creates internal nodelist-list based on view
   void Rebuild();
+
+  // entity has new positions
+  void OnUpdatedPositions();
   
   // extract portions of this backbone trace for a subview
   // this is faster then re-generating a trace

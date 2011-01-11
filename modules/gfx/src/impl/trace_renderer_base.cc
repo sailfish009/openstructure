@@ -79,6 +79,12 @@ TraceRendererBase::TraceRendererBase(BackboneTrace* trace, int n):
 
 void TraceRendererBase::PrepareRendering()
 {
+  if (state_ & DIRTY_VA) {
+    trace_->OnUpdatedPositions();
+    trace_subset_.OnUpdatedPositions();
+    if(this->HasSelection()) sel_subset_.OnUpdatedPositions();
+    // don't clear DIRTY_VA flag - derived classed may depend on it
+  }
 }
 
 void TraceRendererBase::UpdateViews()
