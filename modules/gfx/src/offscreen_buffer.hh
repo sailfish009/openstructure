@@ -62,7 +62,7 @@ public:
 #include "impl/glx_offscreen_buffer.hh"
 #elif defined(__APPLE__)
 #include "impl/cgl_offscreen_buffer.hh"
-#elif defined(_WIN32)
+#elif defined(_MSC_VER)
 #include "impl/wgl_offscreen_buffer.hh"
 #else
 #error platform not found for offscreen rendering

@@ -109,7 +109,7 @@ void CartoonRenderer::PrepareRendering(const BackboneTrace& subset,
   unsigned int tmp_count=0;
 #endif
   for(SplineEntryListList::const_iterator sit=tmp_sll.begin();sit!=tmp_sll.end();++sit) {
-    if(sit->size()==2 and sit->at(0).type==6) {
+    if((sit->size()==2) && (sit->at(0).type==6)) {
       // don't intpol cylinders
       spline_list_list.push_back(*sit);
     } else {

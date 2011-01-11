@@ -48,7 +48,7 @@ struct DLLEXPORT ChemClass {
   }
 
   bool operator!=(const ChemClass& cc) const {
-    return this->operator!=(cc);
+    return !this->operator==(cc);
   }
 
   bool IsPeptideLinking() const {

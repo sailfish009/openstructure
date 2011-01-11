@@ -16,12 +16,16 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#if defined (_MSC_VER)
+#define BOOST_ALL_DYN_LINK 1
+#endif
 #include <boost/program_options.hpp>
 #include <ost/mol/alg/local_dist_test.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/conop/conop.hh>
+
 using namespace ost;
 using namespace ost::io;
 using namespace ost::mol;

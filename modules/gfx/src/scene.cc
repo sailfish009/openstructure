@@ -385,7 +385,9 @@ void Scene::InitGL(bool full)
     glDisable(GL_LINE_SMOOTH);
     glDisable(GL_POINT_SMOOTH);
     glDisable(GL_POLYGON_SMOOTH);
-    glEnable(GL_MULTISAMPLE);
+#if defined(OST_GL_VERSION_2_0)
+    glDisable(GL_MULTISAMPLE);
+#endif
   } else {
     glEnable(GL_LINE_SMOOTH);
     glDisable(GL_POINT_SMOOTH);
@@ -946,7 +948,7 @@ void Scene::OnInput(const InputEvent& e)
     }
   } else if(e.GetCommand()==INPUT_COMMAND_TRANSZ) {
     float currz=transform_.GetTrans()[2];
-    float delta=currz*pow(1.01,-e.GetDelta())-currz;
+    float delta=currz*pow(1.01f,-e.GetDelta())-currz;
     transform_.ApplyZAxisTranslation(delta);
     SetNearFar(znear_-delta,zfar_-delta);
   } else if(e.GetCommand()==INPUT_COMMAND_SLABN) {
@@ -1878,7 +1880,9 @@ void Scene::render_stereo()
   glDisable(GL_BLEND);
   glDisable(GL_LINE_SMOOTH);
   glDisable(GL_POINT_SMOOTH);
+#if defined(OST_GL_VERSION_2_0)
   glDisable(GL_MULTISAMPLE);
+#endif
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
