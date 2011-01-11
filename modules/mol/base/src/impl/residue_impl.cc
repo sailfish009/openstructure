@@ -212,24 +212,28 @@ ChainImplPtr ResidueImpl::GetChain() const
 
 geom::Vec3 ResidueImpl::GetCentralNormal() const
 {
+  geom::Vec3 nrvo(1,0,0);
   if (chem_class_.IsPeptideLinking()) {
     AtomImplPtr a1 = FindAtom("C");
     AtomImplPtr a2 = FindAtom("O"); 
-    geom::Vec3 nrvo;
     if(a1 && a2) {
-      nrvo = geom::Normalize(a1->GetPos()-a2->GetPos());
+      nrvo = geom::Normalize(a2->GetPos()-a1->GetPos());
     } else {
-      geom::Vec3 v0=GetCentralAtom()->GetPos();
-      nrvo=geom::Cross(geom::Normalize(v0),
-                       geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
-      LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
+      a1 = FindAtom("CB");
+      a2 = FindAtom("CA"); 
+      if(a1 && a2) {
+        nrvo = geom::Normalize(a2->GetPos()-a1->GetPos());
+      } else {
+        geom::Vec3 v0=GetCentralAtom()->GetPos();
+        nrvo=geom::Cross(geom::Normalize(v0),
+                         geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
+        LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
+      }
     }
-    return nrvo;    
   } else if (chem_class_.IsNucleotideLinking()) {
     AtomImplPtr a1 = FindAtom("P");
     AtomImplPtr a2 = FindAtom("OP1");
     AtomImplPtr a3 = FindAtom("OP2");
-    geom::Vec3 nrvo;
     if(a1 && a2 && a3) {
       nrvo = geom::Normalize(a1->GetPos()-(a2->GetPos()+a3->GetPos())*.5);
     } else {
@@ -238,9 +242,8 @@ geom::Vec3 ResidueImpl::GetCentralNormal() const
                        geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
       LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
     }
-    return nrvo;
   }
-  return geom::Vec3();
+  return nrvo;
 }
 
 

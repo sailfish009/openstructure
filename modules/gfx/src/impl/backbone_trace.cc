@@ -83,7 +83,7 @@ public:
       NodeEntry entry={ca, GfxObj::Ele2Color(ca.GetElement()),
                        GfxObj::Ele2Color(ca.GetElement()),
                        geom::Vec3(), // this will be set by the gfx trace obj
-                       res.GetCentralNormal(),
+                       geom::Normalize(res.GetCentralNormal()),
                        1.0,
                        geom::Vec3(),geom::Vec3(),geom::Vec3(), // for later use in NA rendering
                        false,id_counter_++};
@@ -159,46 +159,36 @@ void BackboneTrace::AddNodeEntryList(const NodeEntryList& l)
 
 void BackboneTrace::PrepList(NodeEntryList& nelist)
 {
-  // assign direction and normal vectors for each entry
-  // they are composed of the i-1 -> i and i->i+1 directions
-  //
-  // this same algorithm is used in the spline generation, so
-  // perhaps all of this here is not necessary ?!
-  //
+  // orthogonalize the residue normals with
+  // twist detection; important for later
+  // spline generation
+  if(nelist.size()<3) return;
   NodeEntry* e0=&nelist[0];
   NodeEntry* e1=&nelist[1];
   NodeEntry* e2=&nelist[2];
   geom::Vec3 p0 = e0->atom.GetPos();
   geom::Vec3 p1 = e1->atom.GetPos();
   geom::Vec3 p2 = e2->atom.GetPos();
-  
+
+  geom::Vec3 dir=geom::Normalize(p1-p0);
   e0->direction=geom::Normalize(p1-p0);
-  // e0->normal is set afterwards to normal of second one
-  // backup residue normal
-  e0->v1 = e0->normal;
-  
-  //reference normal to avoid twisting
-  geom::Vec3 nref=geom::Normalize(geom::Cross(p0-p1,p2-p1));
-  
-  // start loop with the second
+  geom::Vec3 orth=geom::Normalize(geom::Cross(e0->direction,e0->normal));
+  geom::Vec3 norm=geom::Normalize(geom::Cross(orth,dir));
+  e0->normal=norm;
+  // start loop with the second residue
   unsigned int i=1;
   for(;i<nelist.size()-1;++i) {
-    geom::Vec3 p10 = p0-p1;
-    geom::Vec3 p12 = p2-p1;
-    if(p10==-p12 || p10==p12) p12+=geom::Vec3(0.001,0.001,0.001);
-    e1->v1=e1->normal;
-    // twist avoidance
-    if(geom::Dot(e0->v1,e1->v1)<0.0) {
-      e1->v1=-e1->v1;
+    geom::Vec3 p10=p0-p1;
+    geom::Vec3 p12=p2-p1;
+    dir=geom::Normalize(p2-p0);
+    e1->direction = dir;
+    orth=geom::Normalize(geom::Cross(dir,e1->normal));
+    norm=geom::Normalize(geom::Cross(orth,dir));
+    // twist check
+    if(geom::Dot(geom::Cross(e0->normal,dir),geom::Cross(norm,dir))<0.0) {
+      norm=-norm;
     }
-    e1->normal=geom::Normalize(geom::Cross(p10,p12));
-    float omega=0.5*acos(geom::Dot(geom::Normalize(p10),geom::Normalize(p12)));
-    geom::Vec3 orth=geom::AxisRotation(e1->normal, -omega)*p12;
-    e1->direction=geom::Normalize(geom::Cross(e1->normal,orth));
-    
-    // align normals to avoid twisting
-    //if(geom::Dot(e1->normal,nref)<0.0) e1->normal=-e1->normal;
-    //nref=e1->normal;
+    e1->normal=norm;
     // skip over shift for the last iteration
     if(i==nelist.size()-2) break;
     // shift to i+1 for next iteration
@@ -209,16 +199,14 @@ void BackboneTrace::PrepList(NodeEntryList& nelist)
     p1 = e1->atom.GetPos();
     p2 = e2->atom.GetPos();
   }
-  // finish remaining values
-  // i is at size-2 due to break statement above
-  nelist[0].normal=nelist[1].normal;
-  nelist[i+1].direction=geom::Normalize(p2-p1);
-  nelist[i+1].v1=nelist[i+1].normal;
-  if (geom::Dot(nelist[i].v1,
-                nelist[i+1].v1)<0.0) {
-    nelist[i+1].v1=-nelist[i+1].v1;
+  dir=geom::Normalize(p2-p1);
+  e2->direction=dir;
+  orth=geom::Normalize(geom::Cross(dir,e2->normal));
+  norm=geom::Normalize(geom::Cross(orth,dir));
+  if(geom::Dot(geom::Cross(e1->normal,dir),geom::Cross(norm,dir))<0.0) {
+    norm=-norm;
   }
-  nelist[i+1].normal=nelist[i].normal;
+  e2->normal=norm;
 }
 
 BackboneTrace BackboneTrace::CreateSubset(const mol::EntityView& subview)

@@ -101,6 +101,14 @@ Real Angle(const Vec3& v1, const Vec3& v2)
   return std::acos(dot_product);
 }
 
+Real SignedAngle(const Vec3& v1, const Vec3& v2, const Vec3& ref_normal )
+{
+  Vec3 a=Normalize(v1);
+  Vec3 b=Normalize(v2);
+  Vec3 c=Normalize(ref_normal);
+  return std::atan2(Dot(c,Cross(a,b)), Dot(a,b));
+}
+
 Mat3 EulerTransformation(Real theta, Real phi, Real xi)
 {
   Real costheta=cos(theta);

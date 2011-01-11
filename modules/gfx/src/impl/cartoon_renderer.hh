@@ -66,7 +66,8 @@ private:
                   
   void AssembleProfile(const TraceProfile& prof1,
                        const TraceProfile& prof2, 
-                       IndexedVertexArray& va);
+                       IndexedVertexArray& va,
+                       size_t offset);
 
   TraceProfile TransformAndAddProfile(const std::vector<TraceProfile>& profiles, 
                                       const SplineEntry& se, 

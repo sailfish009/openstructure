@@ -72,7 +72,7 @@ void SlineRenderer::PrepareRendering(const BackboneTrace& trace_subset,
                        entry.normal, entry.rad, 
                        is_sel ? sel_clr : entry.color1, 
                        is_sel ? sel_clr : entry.color2,
-		       0, entry.id);
+                       0, entry.id);
         ee.v1 = entry.v1;
         spl.push_back(ee);
       }
@@ -83,13 +83,11 @@ void SlineRenderer::PrepareRendering(const BackboneTrace& trace_subset,
         VertexID p1 = va.Add(sit->position, geom::Vec3(),sit->color1);
         va.AddLine(p0,p1);
         p0=p1;
-#if 0
-        VertexID p2 = va.Add(sit->position+sit->direction,geom::Vec3(),Color(0,1,0));
-        VertexID p3 = va.Add(sit->position+sit->normal,geom::Vec3(),Color(1,0,0));
-        VertexID p4 = va.Add(sit->position+sit->v2,geom::Vec3(),Color(1,0,1));
+#if 1
+        VertexID p2 = va.Add(sit->position+sit->direction,geom::Vec3(),Color(1,0,0));
+        VertexID p3 = va.Add(sit->position+sit->normal,geom::Vec3(),Color(0,1,1));
         va.AddLine(p0,p2);
         va.AddLine(p0,p3);
-        va.AddLine(p0,p4);
 #endif
       }
     }

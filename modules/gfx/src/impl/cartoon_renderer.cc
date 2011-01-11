@@ -389,33 +389,33 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
   std::vector<TraceProfile> profiles;
   float factor=is_sel ? 0.2 : 0.0;
   profiles.push_back(GetCircProfile(detail,
-				    options_->GetTubeRadius()*options_->GetTubeRatio()+factor,
-				    options_->GetTubeRadius()+factor, 
-				    options_->GetTubeProfileType(),
-				    1.0)); // profile 0 = tube
+                                    options_->GetTubeRadius()*options_->GetTubeRatio()+factor,
+                                    options_->GetTubeRadius()+factor, 
+                                    options_->GetTubeProfileType(),
+                                    1.0)); // profile 0 = tube
   if (!force_tube_) {
     profiles.push_back(GetCircProfile(detail,
-				      options_->GetHelixWidth()+factor,
-				      options_->GetHelixThickness()+factor,
-				      options_->GetHelixProfileType(),
-				      options_->GetHelixEcc())); // profile 1 = helix
+                                      options_->GetHelixWidth()+factor,
+                                      options_->GetHelixThickness()+factor,
+                                      options_->GetHelixProfileType(),
+                                      options_->GetHelixEcc())); // profile 1 = helix
     profiles.push_back(GetCircProfile(detail,
-				      options_->GetStrandWidth()+factor,
-				      options_->GetStrandThickness()+factor,
-				      options_->GetStrandProfileType(),
-				      options_->GetStrandEcc())); // profile 2 = strand
+                                      options_->GetStrandWidth()+factor,
+                                      options_->GetStrandThickness()+factor,
+                                      options_->GetStrandProfileType(),
+                                      options_->GetStrandEcc())); // profile 2 = strand
     profiles.push_back(profiles.back()); // profile 3==2, strand
-
+    
     profiles.push_back(GetCircProfile(detail,
-				      1.7*options_->GetStrandWidth()+factor,
-				      1.1*options_->GetStrandThickness()+factor,
-				      options_->GetStrandProfileType(),
-				      options_->GetStrandEcc())); // profile 4 = arrow start
+                                      1.7*options_->GetStrandWidth()+factor,
+                                      1.1*options_->GetStrandThickness()+factor,
+                                      options_->GetStrandProfileType(),
+                                      options_->GetStrandEcc())); // profile 4 = arrow start
     profiles.push_back(GetCircProfile(detail,
-				      0.01*options_->GetStrandWidth()+factor,
-				      1.1*options_->GetStrandThickness()+factor,
-				      options_->GetStrandProfileType(),
-				      options_->GetStrandEcc())); // profile 5 = arrow end
+                                      0.01*options_->GetStrandWidth()+factor,
+                                      1.1*options_->GetStrandThickness()+factor,
+                                      options_->GetStrandProfileType(),
+                                      options_->GetStrandEcc())); // profile 5 = arrow end
 
   }
 
@@ -447,14 +447,23 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
     TraceProfile tprof1=TransformAndAddProfile(profiles,slist[0],va);
     CapProfile(tprof1,slist[0],true,va);
     TraceProfile tprof2;
-    unsigned int sc=1;
+    size_t sc=1;
+    size_t psize=tprof1.size()-1;
+    double psized=static_cast<double>(psize);
+    float of=static_cast<float>(psize)/(2.0*M_PI);
     for (; sc<slist.size(); ++sc) {
+      //double dd=geom::Dot(slist.at(sc-1).normal,slist.at(sc).normal);
+      geom::Vec3 dir=slist.at(sc).position-slist.at(sc-1).position;
+      double ang=-geom::SignedAngle(geom::Cross(slist.at(sc-1).normal,dir),
+                                    geom::Cross(slist.at(sc).normal,dir),
+                                    dir);
+      size_t offset=psize+static_cast<size_t>(round(ang*of)+psized);
       if(slist.at(sc).type==3) {
         if(slist.at(sc-1).type!=3) {
           // boundary to arrow
           SplineEntry se(slist[sc]);
           tprof2=TransformAndAddProfile(profiles,se, va);
-          AssembleProfile(tprof1,tprof2,va);
+          AssembleProfile(tprof1,tprof2,va,offset);
           tprof1=tprof2;
           se.type=2;
           se.type1=4;
@@ -469,7 +478,7 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
       } else {
         tprof2=TransformAndAddProfile(profiles,slist.at(sc), va);
       }
-      AssembleProfile(tprof1,tprof2,va);
+      AssembleProfile(tprof1,tprof2,va,offset);
       tprof1=tprof2;
     }
     CapProfile(tprof1,slist.at(sc-1),false,va);
@@ -551,49 +560,22 @@ namespace {
 
 void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
                                       const TraceProfile& prof2, 
-                                      IndexedVertexArray& va)
+                                      IndexedVertexArray& va,
+                                      size_t offset)
 {
   /*
     the wrap around algorithm used here needs to take into account
     that the TraceProfile has a duplicate entry for prof*[0] and
     prof*[N-1], which fall onto the same point except and have
     the same normal but a different texture coordinate. Hence
-    all the mods are done with size()-1, but in the assembly
-    routine prof*[0] is turned into prof*[N-1] if necessary
+    size()-1
   */
   size_t size=prof1.size()-1;
-
-  // first get the best correction offset
-  float accum[]={0.0,0.0,0.0,0.0,0.0};
-  for(size_t i=0;i<size;++i) {
-    int i1=(i+0)%(size);
-    int i2=(i+1)%(size);
-    geom::Vec3 v1=va.GetVert(prof1[i1].id);
-    geom::Vec3 v2=va.GetVert(prof1[i2].id);
-    for(int k=-2;k<=2;++k) {
-      int i3=(i+k+0+size)%(size);
-      int i4=(i+k+1+size)%(size);
-      geom::Vec3 v3=va.GetVert(prof2[i3].id);
-      geom::Vec3 v4=va.GetVert(prof2[i4].id);
-      accum[k+2]+=spread(v1,v2,v3,v4);
-    }
-  }
-
-  float best_spread=accum[0];
-  int best_off=-2;
-  for(int k=-1;k<=2;++k) {
-    if(accum[k+2]<best_spread) {
-      best_spread=accum[k+2];
-      best_off=k;
-    }
-  }
-  best_off=(best_off+(size))%(size);
-
   // now assemble the triangles
   for(unsigned int i1=0;i1<size;++i1) {
-    unsigned int i2=(i1+1)%(size);
-    unsigned int i3=(i1+best_off)%(size);
-    unsigned int i4=(i1+best_off+1)%(size);
+    size_t i2=(i1+1)%(size);
+    size_t i3=(i1+offset)%(size);
+    size_t i4=(i1+offset+1)%(size);
 
     // wrap around correction for proper texture coordinates
     i2 = (i2==0) ? size : i2;
