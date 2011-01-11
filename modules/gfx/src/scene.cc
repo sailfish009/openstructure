@@ -385,9 +385,7 @@ void Scene::InitGL(bool full)
     glDisable(GL_LINE_SMOOTH);
     glDisable(GL_POINT_SMOOTH);
     glDisable(GL_POLYGON_SMOOTH);
-#if defined(OST_GL_VERSION_2_0)
-    glDisable(GL_MULTISAMPLE);
-#endif
+    glEnable(GL_MULTISAMPLE);
   } else {
     glEnable(GL_LINE_SMOOTH);
     glDisable(GL_POINT_SMOOTH);
@@ -1880,9 +1878,7 @@ void Scene::render_stereo()
   glDisable(GL_BLEND);
   glDisable(GL_LINE_SMOOTH);
   glDisable(GL_POINT_SMOOTH);
-#if defined(OST_GL_VERSION_2_0)
   glDisable(GL_MULTISAMPLE);
-#endif
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
