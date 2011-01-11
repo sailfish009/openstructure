@@ -304,102 +304,6 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   SPLINE_ENTRY_INTERPOLATE(rad);
 
   LOG_DEBUG("SplineGenerate: assigning direction and normal components");
-
-#if 0
-  std::vector<Quat> quats(size+3);
-
-  Vec3 prevn;
-  for(int c=0;c<size;++c) {
-    Vec3 d1,d2;
-    if(c==0) {
-      d1=Normalize(entry_list.at(c).position-entry_list.at(c+1).position);
-      d2=Normalize(entry_list.at(c+1).position-entry_list.at(c+2).position);
-    } else if(c==size-1) {
-      d1=Normalize(entry_list.at(c-2).position-entry_list.at(c-1).position);
-      d2=Normalize(entry_list.at(c-1).position-entry_list.at(c).position);
-    } else {
-      d1=Normalize(entry_list.at(c-1).position-entry_list.at(c).position);
-      d2=Normalize(entry_list.at(c).position-entry_list.at(c+1).position);
-    }
-    Vec3 d=d2;
-    Vec3 n=Normalize(Cross(d1,d2));
-    //Vec3 n=entry_list.at(c).v1;
-    Vec3 o = Normalize(Cross(d,n));
-
-    if(c>0) {
-      if(Dot(Normalize(Cross(d,prevn)),Normalize(Cross(d,n)))<0.0) {
-        n=-n;
-        o=-o;
-      }
-    }
-    prevn=n;
-
-    //n = Normalize(Cross(o,d));
-    Quat q(Mat3(d[0],n[0],o[0],
-                d[1],n[1],o[1],
-                d[2],n[2],o[2]));
-    quats[c+1]=q;
-  }
-  quats.at(0)=quats.at(1);
-  quats.at(size)=quats.at(size-1);
-  quats.at(size+1)=quats.at(size-1);
-  
-  std::vector<Quat> squats(size*nsub);
-  // now for the quaternion interpolation, using squad
-  for(int c=0;c<size;++c) {
-    Quat q0=quats.at(c+0);
-    Quat q1=quats.at(c+1);
-    Quat q2=quats.at(c+2);
-    Quat q3=quats.at(c+3);
-
-    Quat s1=q1*Exp(-0.25*Log(Inv(q1)*q2)+Log(Inv(q1)*q0));
-    Quat s2=q2*Exp(-0.25*Log(Inv(q2)*q3)+Log(Inv(q2)*q1));
-
-    for(int d=0;d<nsub;++d) {
-      float u=static_cast<float>(d)*i_nsub;
-      squats.at(c*nsub+d) = Slerp(Slerp(q1,q2,u),Slerp(s1,s2,u),2.0*u*(1.0-u));
-    }
-  }
-
-  assert(sublist.size()<=squats.size());
-
-  for(unsigned int i=0;i<sublist.size();++i) {
-    Mat3 m=squats[i].ToRotationMatrix();
-    sublist.at(i).direction=Normalize(Vec3(m(0,0),m(1,0),m(2,0)));
-    sublist.at(i).normal=Normalize(Vec3(m(0,1),m(1,1),m(2,1)));
-    sublist.at(i).v2=Normalize(Vec3(m(0,2),m(1,2),m(2,2)));
-  }
-
-  std::vector<Vec3> nlist(sublist.size());
-  for(uint i=0;i<sublist.size();++i) {
-    Vec3 p0,p1;
-    if(i<sublist.size()-1) {
-      p0 = sublist.at(i).position;
-      p1 = sublist.at(i+1).position;
-    } else {
-      p0 = sublist.at(i-1).position;
-      p1 = sublist.at(i).position;
-    }
-    sublist.at(i).direction=Normalize(p1-p0);
-    Vec3 orth = Normalize(Cross(sublist.at(i).direction,sublist.at(i).normal));
-    nlist[i] = Normalize(Cross(orth,sublist.at(i).direction));
-    sublist.at(i).v2=orth;
-    if(i>0) {
-      if(Dot(Normalize(Cross(sublist.at(i).direction,nlist[i-1])),orth)<0.0) {
-        nlist[i]=-nlist[i];
-        sublist.at(i).v2=-sublist.at(i).v2;
-      }
-    }
-  }
-
-  sublist.at(0).normal=nlist[0];
-  sublist.back().normal=nlist.back();
-  for(uint i=1;i<sublist.size()-1;++i) {
-    sublist.at(i).normal=Normalize((nlist[i-1]+nlist[i]+nlist[i+1])/3.0);   
-  }
-
-#else
-
   // assign direction and normal
   // entity trace has the same algorithm
 
@@ -462,8 +366,6 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   for(unsigned int i=0;i<sublist.size();++i) {
     sublist.at(i).normal = sublist.at(i).v0;
   }
-
-#endif
 
   LOG_DEBUG("SplineGenerate: assigning non-interpolated entry components");
   // finally the non-interpolated type

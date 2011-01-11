@@ -140,8 +140,6 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   geom::Vec3 GetVert(VertexID id) const;
   void SetVert(VertexID id, const geom::Vec3& vert);
 
-  Real* GetVertP(VertexID id);
-
   geom::Vec3 GetNormal(VertexID id) const;
   void SetNormal(VertexID id, const geom::Vec3& norm);
 

@@ -42,7 +42,7 @@ Profile::~Profile()
 {
   struct timeval end;
   gettimeofday(&end,NULL);
-  std::cerr << msg_ << " finished in " <<delta_time(start_, end) 
+  std::cout << msg_ << " finished in " <<delta_time(start_, end) 
             << "s" << std::endl;
 }
 
