@@ -452,12 +452,14 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
     double psized=static_cast<double>(psize);
     float of=static_cast<float>(psize)/(2.0*M_PI);
     for (; sc<slist.size(); ++sc) {
-      //double dd=geom::Dot(slist.at(sc-1).normal,slist.at(sc).normal);
-      geom::Vec3 dir=slist.at(sc).position-slist.at(sc-1).position;
-      double ang=-geom::SignedAngle(geom::Cross(slist.at(sc-1).normal,dir),
-                                    geom::Cross(slist.at(sc).normal,dir),
-                                    dir);
-      size_t offset=psize+static_cast<size_t>(round(ang*of)+psized);
+      size_t offset=0;
+      if(slist.at(sc).type==0) {
+        geom::Vec3 dir=slist.at(sc).position-slist.at(sc-1).position;
+        double ang=-geom::SignedAngle(geom::Cross(slist.at(sc-1).normal,dir),
+                                      geom::Cross(slist.at(sc).normal,dir),
+                                      dir);
+        offset=psize+static_cast<size_t>(round(ang*of)+psized);
+      }
       if(slist.at(sc).type==3) {
         if(slist.at(sc-1).type!=3) {
           // boundary to arrow
@@ -718,9 +720,10 @@ namespace {
   for(unsigned int i=0;i<d4;++i) {
     unsigned int p1=(d4+i-1)%d4;
     unsigned int p2=(i+1)%d4;
-    float dx=prof[p2].v[0]-prof[p1].v[0];
-    float dy=prof[p2].v[1]-prof[p1].v[1];
-    prof[i].n=geom::Normalize(geom::Vec3(dy,-dx,0.0));
+    float f1=geom::Length2(prof[p1].v-prof[i].v);
+    float f2=geom::Length2(prof[p2].v-prof[i].v);
+    geom::Vec3 s = f2*(prof[p2].v-prof[i].v)-f1*(prof[p1].v-prof[i].v);
+    prof[i].n=geom::Normalize(geom::Vec3(s[1],-s[0],0.0));
   }
   return prof;
 }
