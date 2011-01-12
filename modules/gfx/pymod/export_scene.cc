@@ -80,6 +80,7 @@ void export_Scene()
     .def("RequestRedraw", &Scene::RequestRedraw)
     .def("SetCenter",&Scene::SetCenter)
     .def("GetCenter",&Scene::GetCenter)
+    .add_property("center", &Scene::GetCenter, &Scene::SetCenter)
     .def("CenterOn",center_on1)
     .def("CenterOn",center_on2)
     .def("UnProject",  &Scene::UnProject, arg("ignore_vp")=false)
@@ -88,18 +89,44 @@ void export_Scene()
     .def("RenderGL", &Scene::RenderGL)
     .def("Resize", &Scene::Resize)
     .def("HasNode", &Scene::HasNode)
-    .def("SetBackground", &Scene::SetBackground)
-    .add_property("transform", &Scene::GetTransform, &Scene::SetTransform)
-    .add_property("fov", &Scene::GetFOV, &Scene::SetFOV)
-    .add_property("center", &Scene::GetCenter, &Scene::SetCenter)
+    .def("GetBackground", &Scene::GetBackground)
+    .add_property("bg",
+                  &Scene::GetBackground, 
+                  &Scene::SetBackground)
+    .def("SetNear",&Scene::SetNear)
+    .def("GetNear",&Scene::GetNear)
     .add_property("near", &Scene::GetNear, &Scene::SetNear)
+    .def("SetFar",&Scene::SetFar)
+    .def("GetFar",&Scene::GetFar)
     .add_property("far", &Scene::GetFar, &Scene::SetFar)
     .def("SetNearFar",&Scene::SetNearFar)
     .def("SetFog",&Scene::SetFog)
+    .def("GetFog",&Scene::GetFog)
+    .add_property("fog", &Scene::GetFog, &Scene::SetFog)
     .def("SetFogColor",&Scene::SetFogColor)
+    .def("GetFogColor",&Scene::GetFogColor)
+    .add_property("fogcol", &Scene::GetFogColor, &Scene::SetFogColor)
     .def("SetFOV",&Scene::SetFOV)
     .def("GetFOV",&Scene::GetFOV)
+    .add_property("fov", &Scene::GetFOV, &Scene::SetFOV)
     .def("SetFogOffsets",&Scene::SetFogOffsets)
+    .add_property("fogno",
+                  &Scene::GetFogNearOffset, 
+                  &Scene::SetFogNearOffset)
+    .add_property("fogfo",
+                  &Scene::GetFogFarOffset, 
+                  &Scene::SetFogFarOffset)
+    .def("GetRTC",&Scene::GetRTC)
+    .def("SetRTC",&Scene::SetRTC)
+	.add_property("rtc",&Scene::GetRTC,&Scene::SetRTC)
+	.def("GetTransform",&Scene::GetTransform)
+	.def("SetTransform",&Scene::SetTransform)
+	.add_property("transform", &Scene::GetTransform, &Scene::SetTransform)
+	.def("SetSelectionMode",&Scene::SetSelectionMode)
+	.def("GetSelectionMode",&Scene::GetSelectionMode)
+	.add_property("smode",
+	             &Scene::GetSelectionMode,
+	             &Scene::SetSelectionMode)
     .def("Stereo",&Scene::Stereo)
     .def("SetStereoInverted",&Scene::SetStereoInverted)
     .def("SetStereoView",&Scene::SetStereoView)
@@ -113,14 +140,8 @@ void export_Scene()
     .def("Export",export2, arg("transparent")=true)
     .def("ExportPov",&Scene::ExportPov,
          scene_export_pov_overloads())
-    .def("GetRTC",&Scene::GetRTC)
-    .def("SetRTC",&Scene::SetRTC)
-    .def("GetTransform",&Scene::GetTransform)
-    .def("SetTransform",&Scene::SetTransform)
     .def("PushView",&Scene::PushView)
     .def("PopView",&Scene::PopView)
-    .def("SetSelectionMode",&Scene::SetSelectionMode)
-    .def("GetSelectionMode",&Scene::GetSelectionMode)
     .def("SetBlur",&Scene::SetBlur)
     .def("BlurSnapshot",&Scene::BlurSnapshot)
     .def("RemoveAll", &Scene::RemoveAll)
@@ -140,33 +161,5 @@ void export_Scene()
     .def("SetBeacon",&Scene::SetBeacon)
     .def("SetBeaconOff",&Scene::SetBeaconOff)
     .def("__getitem__",scene_getitem)
-    .add_property("bg",
-                  &Scene::GetBackground, 
-                  &Scene::SetBackground)
-    .add_property("center", &Scene::GetCenter, &Scene::SetCenter)
-    .add_property("near", &Scene::GetNear, &Scene::SetNear)
-    .add_property("far", &Scene::GetFar, &Scene::SetFar)
-    .add_property("fov", &Scene::GetFOV, &Scene::SetFOV)
-    .add_property("fog", &Scene::GetFog, &Scene::SetFog)
-    .add_property("fogcol", &Scene::GetFogColor, &Scene::SetFogColor)
-    .add_property("fogno",
-                  &Scene::GetFogNearOffset, 
-                  &Scene::SetFogNearOffset)
-    .add_property("fogfo",
-                  &Scene::GetFogFarOffset, 
-                  &Scene::SetFogFarOffset)
-    .add_property("smode",
-                  &Scene::GetSelectionMode,
-                  &Scene::SetSelectionMode)
-    // deprecated python properties!
-    .add_property("selection_mode", &Scene::GetSelectionMode,
-                   &Scene::SetSelectionMode)
-    .add_property("fog_near_offset",
-                  &Scene::GetFogNearOffset, 
-                  &Scene::SetFogNearOffset)
-    .add_property("fog_far_offset",
-                  &Scene::GetFogFarOffset, 
-                  &Scene::SetFogFarOffset)
-    
   ;
 }
