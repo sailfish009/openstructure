@@ -45,3 +45,81 @@ LIGHTPURPLE=LIGHTMAGENTA
 ORANGE=Color(1.0,0.5,0.0)
 DARKORANGE=Color(0.5,0.25,0.0)
 LIGHTORANGE=Color(1.0,0.75,0.5)
+
+
+
+def FitToScreen(gfx_ent, width=None, height=None, margin=0.01):
+  """
+  Setup camera such that it is centered on the graphical entity and the entity 
+  fits the entire viewport. The longest axes of the entity are aligned along 
+  the x- and y- axes of the screen.
+  
+  :param gfx_ent: The graphical entity
+  :type gfx_ent: str or :class:`Entity`
+  
+  
+  """
+  from ost import geom
+  import math
+  def _XYZ(view, axes):
+    """
+    returns the vectors in x, y and z direction respectively. The smallest 
+    vector is in z, then y, and the largest along x.
+    """
+    rows=[axes.GetRow(i) for i in range(3)]
+    lengths=[]
+    for axe in rows:
+      min_proj=geom.Dot(axe, view.atoms[0].pos)
+      max_proj=min_proj
+      for atom in view.atoms[1:]:
+        proj=geom.Dot(axe, atom.pos)
+        min_proj=min(proj, min_proj)
+        max_proj=max(proj, max_proj)
+      lengths.append(max_proj-min_proj)
+    def cmp_x(rhs, lhs):
+      return cmp(lhs[1], rhs[1])
+    sorted_axes=sorted(zip(rows, lengths), cmp_x)
+    return [r*l for r,l in sorted_axes]
+  scene=Scene()
+  if not isinstance(gfx_ent, Entity):
+    gfx_ent=scene[str(gfx_ent)]
+  width=width and width or scene.viewport.width
+  height=height and height or scene.viewport.height
+  atom_positions=geom.Vec3List([atom.pos for atom in gfx_ent.view.atoms])
+  axes=atom_positions.principal_axes
+  sorted_axes=_XYZ(gfx_ent.view, axes)
+  x_bigger_than_y=geom.Length(sorted_axes[0])>geom.Length(sorted_axes[1])
+  if x_bigger_than_y:
+    if width>height:    
+      x_axes=geom.Normalize(sorted_axes[0])
+      y_axes=geom.Normalize(sorted_axes[1])
+    else:
+      x_axes=geom.Normalize(sorted_axes[1])
+      y_axes=geom.Normalize(sorted_axes[0])
+  else:
+    if width>height:    
+      x_axes=geom.Normalize(sorted_axes[1])
+      y_axes=geom.Normalize(sorted_axes[0])
+    else:
+      x_axes=geom.Normalize(sorted_axes[0])
+      y_axes=geom.Normalize(sorted_axes[1])
+  z_axes=geom.Normalize(geom.Cross(x_axes, y_axes))
+  rotation=geom.Mat3(x_axes[0], x_axes[1], x_axes[2],
+                     y_axes[0], y_axes[1], y_axes[2],
+                     z_axes[0], z_axes[1], z_axes[2])
+  rtc=geom.Mat4(rotation)
+  
+  center=gfx_ent.center
+  aspect=float(width)/float(height)
+  factor_y=1.0/math.tan(math.radians(scene.fov))
+  factor_x=factor_y/aspect
+  z_off=geom.Length(sorted_axes[2])*0.5
+  rtc[0,3]=center[0]
+  rtc[1,3]=center[1]
+  rtc[2,3]=center[2]
+  rtc[3,0]=0
+  rtc[3,1]=0
+  rtc[3,2]=-(max(factor_x*(1+margin)*geom.Length(sorted_axes[0]), 
+                factor_y*(1+margin)*geom.Length(sorted_axes[1]))+z_off)
+  scene.SetRTC(rtc)
+

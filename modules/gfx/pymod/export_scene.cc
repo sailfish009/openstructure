@@ -67,7 +67,14 @@ void export_Scene()
   void (Scene::*remove2)(const String&) = &Scene::Remove;
   void (Scene::*center_on1)(const String&) = &Scene::CenterOn;
   void (Scene::*center_on2)(const GfxObjP&) = &Scene::CenterOn;
-
+  
+  class_<Viewport>("Viewport", init<>())
+    .def_readwrite("x", &Viewport::x)
+    .def_readwrite("y", &Viewport::y)
+    .def_readwrite("width", &Viewport::width)
+    .def_readwrite("height", &Viewport::height)
+  ;
+  
   class_<Scene, boost::noncopyable>("SceneSingleton",no_init)
     .def("Add", &Scene::Add, 
          scene_add_overloads())
@@ -77,6 +84,7 @@ void export_Scene()
     .def("AutoslabMax",&Scene::AutoslabMax)
     .def("Remove", remove1)
     .def("Remove", remove2)
+    .add_property("viewport", &Scene::GetViewport)
     .def("RequestRedraw", &Scene::RequestRedraw)
     .def("SetCenter",&Scene::SetCenter)
     .def("GetCenter",&Scene::GetCenter)
@@ -118,15 +126,15 @@ void export_Scene()
                   &Scene::SetFogFarOffset)
     .def("GetRTC",&Scene::GetRTC)
     .def("SetRTC",&Scene::SetRTC)
-	.add_property("rtc",&Scene::GetRTC,&Scene::SetRTC)
-	.def("GetTransform",&Scene::GetTransform)
-	.def("SetTransform",&Scene::SetTransform)
-	.add_property("transform", &Scene::GetTransform, &Scene::SetTransform)
-	.def("SetSelectionMode",&Scene::SetSelectionMode)
-	.def("GetSelectionMode",&Scene::GetSelectionMode)
-	.add_property("smode",
-	             &Scene::GetSelectionMode,
-	             &Scene::SetSelectionMode)
+    .add_property("rtc",&Scene::GetRTC,&Scene::SetRTC)
+    .def("GetTransform",&Scene::GetTransform)
+    .def("SetTransform",&Scene::SetTransform)
+    .add_property("transform", &Scene::GetTransform, &Scene::SetTransform)
+    .def("SetSelectionMode",&Scene::SetSelectionMode)
+    .def("GetSelectionMode",&Scene::GetSelectionMode)
+    .add_property("smode",
+                 &Scene::GetSelectionMode,
+                 &Scene::SetSelectionMode)
     .def("Stereo",&Scene::Stereo)
     .def("SetStereoInverted",&Scene::SetStereoInverted)
     .def("SetStereoView",&Scene::SetStereoView)
