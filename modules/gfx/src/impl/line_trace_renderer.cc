@@ -120,7 +120,7 @@ void LineTraceRenderer::PrepareRendering(const BackboneTrace& trace_subset,
                               entry.color1);
           va.AddLine(p0, p1);
           p0=p1;
-#if 1
+#if 0
           VertexID p2 =va.Add(entry.atom.GetPos()+entry.direction, geom::Vec3(), 
                               Color(1,0,0));
           VertexID p3 =va.Add(entry.atom.GetPos()+entry.normal, geom::Vec3(), 
