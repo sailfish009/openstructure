@@ -314,13 +314,13 @@ void set_light_dir(Vec3 ld)
 
 void Scene::InitGL(bool full)
 {
-  LOG_DEBUG("scene: initializing GL state");
+  LOG_VERBOSE("Scene: initializing GL state");
 
   if(full) {
-    LOG_VERBOSE(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
+    LOG_INFO(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
 
 #if OST_SHADER_SUPPORT_ENABLED
-    LOG_DEBUG("scene: shader pre-gl");
+    LOG_DEBUG("Scene: shader pre-gl");
     Shader::Instance().PreGLInit();
 #endif
   }
@@ -350,11 +350,14 @@ void Scene::InitGL(bool full)
 
   // background
   SetBackground(background_);
+
   // polygon orientation setting
   glFrontFace(GL_CCW);
+
   // blending
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);  
+
   // depth effect thru fog
   GLfloat fogc[]={fog_color_.Red(),fog_color_.Green(),fog_color_.Blue(),1.0};
   glFogfv(GL_FOG_COLOR,fogc);
@@ -371,17 +374,16 @@ void Scene::InitGL(bool full)
   // smooth shading across polygon faces
   glShadeModel(GL_SMOOTH);
 
-  // line and point anti-aliasing
-
-#if OST_SHADER_SUPPORT_ENABLED
+#if OST_SHADER_SUPPORT_ENABLED & defined(OST_GL_VERSION_2_0)
   GLint mbufs=0,msamples=0;
+
   if(OST_GL_VERSION_2_0) {
     glGetIntegerv(GL_SAMPLE_BUFFERS, &mbufs);
     glGetIntegerv(GL_SAMPLES, &msamples);
   }
 
   if(mbufs>0 && msamples>0) {
-    LOG_VERBOSE("Scene: enabling multisampling with: " << msamples << " samples");
+    LOG_INFO("Scene: enabling multisampling with: " << msamples << " samples");
     glDisable(GL_LINE_SMOOTH);
     glDisable(GL_POINT_SMOOTH);
     glDisable(GL_POLYGON_SMOOTH);
@@ -392,6 +394,7 @@ void Scene::InitGL(bool full)
     glDisable(GL_POLYGON_SMOOTH);
   }
 #else
+  // line and point anti-aliasing
   glEnable(GL_LINE_SMOOTH);
   glDisable(GL_POINT_SMOOTH);
   glDisable(GL_POLYGON_SMOOTH);
@@ -410,10 +413,10 @@ void Scene::InitGL(bool full)
 
 #if OST_SHADER_SUPPORT_ENABLED
   if(full) {
-    LOG_DEBUG("scene: shader setup");
+    LOG_DEBUG("Scene: shader setup");
     Shader::Instance().Setup();
     SetShadingMode(def_shading_mode_);
-    LOG_DEBUG("scene: scenefx setup");
+    LOG_DEBUG("Scene: scenefx setup");
     impl::SceneFX::Instance().Setup();
   }
 #endif
@@ -448,7 +451,7 @@ void Scene::InitGL(bool full)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
-  LOG_DEBUG("scene: gl init done");
+  LOG_DEBUG("Scene: gl init done");
   gl_init_=true;
 }
 
@@ -643,13 +646,13 @@ void Scene::RenderGL()
 
 void Scene::Register(GLWinBase* win)
 {
-  LOG_DEBUG("scene: registered win @" << win);
+  LOG_DEBUG("Scene: registered win @" << win);
   win_=win;
 }
 
 void Scene::Unregister(GLWinBase* win)
 {
-  LOG_DEBUG("scene: unregistered win @" << win);
+  LOG_DEBUG("Scene: unregistered win @" << win);
   win_=0;
 }
 
@@ -751,7 +754,7 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
     throw Error("Scene already has a node with name '"+n->GetName()+"'");
   }
 
-  LOG_DEBUG("scene: graphical object added @" << n.get() << std::endl);
+  LOG_DEBUG("Scene: graphical object added @" << n.get() << std::endl);
 
   if(root_node_->GetChildCount()==0) {
     GfxObjP go = boost::dynamic_pointer_cast<GfxObj>(n);
@@ -771,7 +774,7 @@ bool Scene::IsNameAvailable(String name)
   FindNode fn(name);
   Apply(fn);
   if(fn.node) {
-    LOG_INFO(name << " already exists as a scene node");
+    LOG_INFO("Scene: " << name << " already exists as a scene node");
     return false;
   }
   return true;
@@ -859,12 +862,12 @@ GfxObjP Scene::operator[](const String& name)
   FindNode fn(name);
   Apply(fn);
   if(!fn.node) {
-    LOG_ERROR("error: " << name << " not found");
+    LOG_ERROR("Scene: error: " << name << " not found");
     return GfxObjP();
   }
   GfxObjP nrvo = dyn_cast<GfxObj>(fn.node);
   if(!nrvo) {
-    LOG_ERROR("error: " << name << " points to invalid entry");
+    LOG_ERROR("Scene: error: " << name << " points to invalid entry");
   }
   return nrvo;
 }
@@ -982,7 +985,7 @@ void Scene::Pick(int mx, int my, int mask)
   Vec3 v1=UnProject(Vec3(mx,my,0.0));
   Vec3 v2=UnProject(Vec3(mx,my,1.0));
 
-  LOG_DEBUG("Scene pick: " << v1 << " " << v2 << " " << mask);
+  LOG_DEBUG("Scene: pick: " << v1 << " " << v2 << " " << mask);
 
   Scene::Instance().StatusMessage("");
 
@@ -1282,7 +1285,7 @@ void Scene::Stereo(unsigned int m)
     if(win_ && win_->HasStereo()) {
       stereo_=1;
     } else {
-      LOG_INFO("No visual present for quad-buffered stereo");
+      LOG_INFO("Scene: No visual present for quad-buffered stereo");
       stereo_=0;
     }
   } else if(m==2) {
@@ -1372,11 +1375,12 @@ uint Scene::GetSelectionMode() const
 
 bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
 {
+  LOG_DEBUG("Scene: starting offscreen rendering mode " << width << "x" << height);
   if(main_offscreen_buffer_) return false;
   main_offscreen_buffer_ = new OffscreenBuffer(width,height,OffscreenBufferFormat(),true);
 
   if(!main_offscreen_buffer_->IsValid()) {
-    LOG_ERROR("error during offscreen buffer creation");
+    LOG_ERROR("Scene: error during offscreen buffer creation");
     delete main_offscreen_buffer_;   
     main_offscreen_buffer_=0;
     return false;
@@ -1391,19 +1395,19 @@ bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
   String shader_name = Shader::Instance().GetCurrentName();
 #endif
 
-  LOG_DEBUG("initializing GL");
+  LOG_DEBUG("Scene: initializing GL");
   if(gl_init_) {
     this->InitGL(false);
   } else {
     this->InitGL(true);
   }
-  LOG_DEBUG("setting viewport");
+  LOG_DEBUG("Scene: setting viewport");
   Resize(width,height);
-  LOG_DEBUG("updating fog settings");
+  LOG_DEBUG("Scene: updating fog settings");
   update_fog();
   glDrawBuffer(GL_FRONT);
 #if OST_SHADER_SUPPORT_ENABLED
-  LOG_DEBUG("activating shader");
+  LOG_DEBUG("Scene: activating shader");
   Shader::Instance().Activate(shader_name);
 #endif
   return true;
@@ -1430,12 +1434,12 @@ void Scene::Export(const String& fname, unsigned int width,
 {
   int d_index=fname.rfind('.');
   if (d_index==-1) {
-    LOG_ERROR("no file extension specified");
+    LOG_ERROR("Scene: no file extension specified");
     return;
   }
   String ext = fname.substr(d_index);
   if(!(ext==".png")) {
-    LOG_ERROR("unknown file format (" << ext << ")");
+    LOG_ERROR("Scene: unknown file format (" << ext << ")");
     return;
   }
 
@@ -1447,7 +1451,7 @@ void Scene::Export(const String& fname, unsigned int width,
       return;
     }
   }
-  LOG_DEBUG("rendering into offscreen buffer");
+  LOG_DEBUG("Scene: rendering into offscreen buffer");
   this->RenderGL();
   // make sure drawing operations are finished
   glFlush();
@@ -1455,7 +1459,7 @@ void Scene::Export(const String& fname, unsigned int width,
 
   boost::shared_array<uchar> img_data(new uchar[width*height*4]);
       
-  LOG_DEBUG("setting background transparency");
+  LOG_DEBUG("Scene: setting background transparency");
   if (transparent) {
     glPixelTransferf(GL_ALPHA_BIAS, 0.0);
   } else {
@@ -1463,12 +1467,12 @@ void Scene::Export(const String& fname, unsigned int width,
     glPixelTransferf(GL_ALPHA_BIAS, 1.0);
   }
   
-  LOG_DEBUG("reading framebuffer pixels");
+  LOG_DEBUG("Scene: reading framebuffer pixels");
   glReadBuffer(GL_FRONT);
   glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
   glReadBuffer(GL_BACK);
 
-  LOG_DEBUG("calling bitmap export");
+  LOG_DEBUG("Scene: calling bitmap export");
   BitmapExport(fname,ext,width,height,img_data.get());
 
   // only switch back if it was not on to begin with
@@ -1480,17 +1484,17 @@ void Scene::Export(const String& fname, unsigned int width,
 void Scene::Export(const String& fname, bool transparent)
 {
   if(!win_ && !main_offscreen_buffer_) {
-    LOG_ERROR("Export without dimensions either requires an interactive session \nor an active offscreen mode (scene.StartOffscreenMode(W,H))");
+    LOG_ERROR("Scene: Export without dimensions either requires an interactive session \nor an active offscreen mode (scene.StartOffscreenMode(W,H))");
     return;
   }
   int d_index=fname.rfind('.');
   if (d_index==-1) {
-    LOG_ERROR("no file extension specified");
+    LOG_ERROR("Scene: no file extension specified");
     return;
   }
   String ext = fname.substr(d_index);
   if(ext!=".png") {
-    LOG_ERROR("unknown file format (" << ext << ")");
+    LOG_ERROR("Scene: unknown file format (" << ext << ")");
     return;
   }
   GLint vp[4];
@@ -1536,7 +1540,7 @@ void Scene::ExportPov(const std::string& fname, const std::string& wdir)
 
 void Scene::ResetProjection()
 {
-  LOG_TRACE("scene: projection matrix " << fov_ << " " << znear_ << " " << zfar_);
+  LOG_TRACE("Scene: projection matrix " << fov_ << " " << znear_ << " " << zfar_);
   stereo_projection(stereo_eye_);
 }
 
@@ -1718,7 +1722,7 @@ void Scene::prep_glyphs()
   Bitmap bm = BitmapImport(tex_file.string(),".png");
   if(!bm.data) return;
 
-  LOG_DEBUG("importing glyph tex with id " << glyph_tex_id_);
+  LOG_DEBUG("Scene: importing glyph tex with id " << glyph_tex_id_);
   glBindTexture(GL_TEXTURE_2D, glyph_tex_id_);
   glPixelStorei(GL_UNPACK_ALIGNMENT,1);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
@@ -1732,7 +1736,7 @@ void Scene::prep_glyphs()
   } else if(bm.channels==4) {
     glTexImage2D(GL_TEXTURE_2D,0,GL_INTENSITY,bm.width,bm.height,0,GL_RGBA,GL_UNSIGNED_BYTE,bm.data.get());
   } else {
-    LOG_ERROR("unsupported glyph texture channel count of " << bm.channels);
+    LOG_ERROR("Scene: unsupported glyph texture channel count of " << bm.channels);
     return;
   }
   float ir = 1.0/8.0;
@@ -1746,7 +1750,7 @@ void Scene::prep_glyphs()
   }
   for(int cc=128;cc<256;++cc) glyph_map_[cc]=Vec2(0.0,0.0);
 
-  LOG_VERBOSE("done loading glyphs");
+  LOG_DEBUG("Scene: done loading glyphs");
 }
 
 void Scene::prep_blur()
@@ -1878,7 +1882,9 @@ void Scene::render_stereo()
   glDisable(GL_BLEND);
   glDisable(GL_LINE_SMOOTH);
   glDisable(GL_POINT_SMOOTH);
+#if defined(OST_GL_VERSION_2_0)
   glDisable(GL_MULTISAMPLE);
+#endif
   glMatrixMode(GL_PROJECTION);
   glPushMatrix();
   glLoadIdentity();
