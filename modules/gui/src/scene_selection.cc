@@ -124,6 +124,7 @@ void SceneSelection::Delete() {
   for(int i=0; i < selected_objects.size(); i++){
     gfx::Scene::Instance().Remove(selected_objects[i]);
   }
+  gfx::Scene::Instance().RequestRedraw();
 }
 
 #if OST_IMG_ENABLED
