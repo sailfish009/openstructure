@@ -318,7 +318,7 @@ class HSCWidget(RenderModeWidget):
     QtCore.QObject.connect(self.strand_profile_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateStrandProfileType)
     QtCore.QObject.connect(self.strand_mode_spinbox_, QtCore.SIGNAL("valueChanged(int)"), self.UpdateStrandMode)
     
-    self.setMinimumSize(250,420) #14*30
+    self.setMinimumSize(250,550)
     ########/UI########
   
   def UpdateGui(self,options):
