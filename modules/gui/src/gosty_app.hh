@@ -28,13 +28,7 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/main.hh>
 #include <ost/gui/widget_geom_handler.hh>
-#include <ost/gui/scene_win/scene_win.hh>
-#include <ost/gui/sequence_viewer/sequence_viewer.hh>
-#include <ost/gui/messages/message_widget.hh>
 
-#if OST_IMG_ENABLED
-  #include <ost/gui/data_viewer/data_viewer.hh>
-#endif
 
 #include <QObject>
 #include <QString>
@@ -45,13 +39,30 @@ class QMainWindow;
 class QMdiArea;
 class QWidget;
 
-namespace ost { namespace gui {
+namespace ost { 
+
+
+// forward declarations
+
+namespace img { 
+
+class Data;
+
+namespace gui { 
+class DataViewer; 
+
+}}  
+
+namespace gui {
 
 class PythonShell;
 class GLWin;
 class TextLogger;
 class ToolOptionsWin;
 class Perspective;
+class SequenceViewer;
+class SceneWin;
+class MessageWidget;
 
 /// The gosty app serves as a GUI Manager. It distinguishes between two types of
 /// windows: Windows that can only exist once (singletons) and windows with 

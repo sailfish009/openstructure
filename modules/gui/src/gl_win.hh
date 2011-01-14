@@ -24,14 +24,9 @@
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
-#include <ost/gui/gl_canvas.hh>
 
-#include <ost/gui/tools/tool.hh>
-#include <ost/gui/tools/tool_bar.hh>
-
-#include <QMainWindow>
 #include <QAction>
-
+#include <QGLFormat>
 #include <QActionGroup>
 #include <QStatusBar>
 
@@ -39,6 +34,11 @@
   Authors: Ansgar Philippsen, Marco Biasini
  */
 namespace ost { namespace gui {
+
+
+class GLCanvas;
+class ToolBar;
+class Tool;
 
 class DLLEXPORT_OST_GUI GLWin: public Widget, public gfx::SceneObserver
 {

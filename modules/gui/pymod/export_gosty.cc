@@ -28,11 +28,15 @@ using namespace boost::python;
 #include <ost/gui/python_shell/python_shell.hh>
 #include <ost/gui/scene_win/scene_win.hh>
 #include <ost/gui/tools/tool_options_win.hh>
+#include <ost/gui/scene_win/scene_win.hh>
+#include <ost/gui/sequence_viewer/sequence_viewer.hh>
+#include <ost/gui/messages/message_widget.hh>
 
 #include "transfer_ownership.hh"
 #include "sip_handler.hh"
 
 #if OST_IMG_ENABLED
+  #include <ost/gui/data_viewer/data_viewer.hh>
 #include <ost/img/data.hh>
 #include <ost/gui/data_viewer/data_viewer.hh>
 using namespace ost::img::gui;
@@ -44,7 +48,9 @@ using namespace ost::gui;
 namespace {
 
 #if OST_IMG_ENABLED
-DataViewer* app_create_data_viewer1(GostyApp* app, const ost::img::Data& d, const QString& name)
+DataViewer* app_create_data_viewer1(GostyApp* app, 
+                                    const ost::img::Data& d, 
+                                    const QString& name)
 {
   return app->CreateDataViewer(d,name);
 }

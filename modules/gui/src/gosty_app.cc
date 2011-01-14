@@ -27,6 +27,13 @@
 #include <ost/gui/main_area.hh>
 #include <ost/gui/python_shell/python_interpreter.hh>
 
+#include <ost/gui/scene_win/scene_win.hh>
+#include <ost/gui/sequence_viewer/sequence_viewer.hh>
+#include <ost/gui/messages/message_widget.hh>
+
+#if OST_IMG_ENABLED
+  #include <ost/gui/data_viewer/data_viewer.hh>
+#endif
 
 #include <QApplication>
 #include <QMainWindow>

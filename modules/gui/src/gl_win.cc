@@ -27,6 +27,9 @@
 #include <ost/gui/tools/manipulator.hh>
 #include <ost/gui/tools/measure_tool.hh>
 #include <ost/gui/perspective.hh>
+#include <ost/gui/gl_canvas.hh>
+#include <ost/gui/tools/tool.hh>
+#include <ost/gui/tools/tool_bar.hh>
 
 #if OST_IMG_ENABLED
 #  include <ost/gui/tools/map_tool.hh>

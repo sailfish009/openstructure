@@ -25,6 +25,10 @@
 #include <ost/gui/main_area.hh>
 #include <ost/gui/messages/message_box_widget.hh>
 
+#include <ost/gui/panels/panel_manager.hh>
+#include <ost/gui/panels/button_bar.hh>
+#include <ost/gui/panels/panel_bar.hh>
+
 #include <QTextEdit>
 #include <QSizeGrip>
 #include <QMainWindow>
