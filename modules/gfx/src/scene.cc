@@ -123,11 +123,11 @@ Scene::Scene():
   def_text_size_(32.0),
   blur_count_(0),
   blur_buffer_(),
-  stereo_(0),
+  stereo_mode_(0),
+  stereo_alg_(0),
   stereo_inverted_(false),
   stereo_eye_(0),
-  stereo_eye_dist_(2.4),
-  stereo_eye_off_(0.0),
+  stereo_eye_dist_(40.0),
   scene_left_tex_(),
   scene_right_tex_()
 {
@@ -636,7 +636,7 @@ void Scene::RenderGL()
 
   prep_blur();
 
-  if(stereo_==1 || stereo_==2) {
+  if(stereo_mode_==1 || stereo_mode_==2) {
     render_stereo();
   } else {
     render_scene();
@@ -1279,48 +1279,52 @@ void Scene::SetFogOffsets(float no, float fo)
   RequestRedraw();
 }
 
-void Scene::Stereo(unsigned int m)
+void Scene::SetStereoMode(unsigned int m)
 {
   if(m==1) {
     if(win_ && win_->HasStereo()) {
-      stereo_=1;
+      stereo_mode_=1;
     } else {
       LOG_INFO("Scene: No visual present for quad-buffered stereo");
-      stereo_=0;
+      stereo_mode_=0;
     }
   } else if(m==2) {
-    stereo_=2;
+    stereo_mode_=2;
   } else {
-    stereo_=0;
+    stereo_mode_=0;
   }
   RequestRedraw();
 }
 
-void Scene::SetStereoInverted(bool f)
+void Scene::SetStereoFlip(bool f)
 {
   stereo_inverted_=f;
   RequestRedraw();
 }
 
-void Scene::SetStereoView(unsigned int m)
+void Scene::SetStereoView(int m)
 {
-  stereo_eye_= (m>2) ? 0: m;
+  stereo_eye_= m;
   ResetProjection();
   RequestRedraw();
 }
 
-void Scene::SetStereoEyeDist(float d)
+void Scene::SetStereoIOD(float d)
 {
   stereo_eye_dist_=d;
-  if(stereo_>0) {
+  if(stereo_mode_>0) {
     RequestRedraw();
   }
 }
 
-void Scene::SetStereoEyeOff(float d)
+void Scene::SetStereoAlg(unsigned int a)
 {
-  stereo_eye_off_=d;
-  if(stereo_>0) {
+  if(a==0 || a==1) {
+    stereo_alg_=a;
+  } else {
+    stereo_alg_=0;
+  }
+  if(stereo_mode_>0) {
     RequestRedraw();
   }
 }
@@ -1812,37 +1816,48 @@ void Scene::render_glow()
 #endif  
 }
 
-void Scene::stereo_projection(unsigned int view)
+void Scene::stereo_projection(int view)
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
+
+  Real zn=std::max<Real>(1.0,znear_);
+  Real zf=std::max<Real>(1.1,zfar_);
   
-  GLdouble zn=std::max<float>(1.0,znear_);
-  GLdouble zf=std::max<float>(1.1,zfar_);
-
-  GLdouble top = zn * std::tan(fov_*M_PI/360.0);
-  GLdouble bot = -top;
-  GLdouble right = top*aspect_ratio_;
-  GLdouble left = -right;
-
+  Real top = zn * std::tan(fov_*M_PI/360.0);
+  Real bot = -top;
+  Real right = top*aspect_ratio_;
+  Real left = -right;
+  
   glFrustum(left,right,bot,top,zn,zf);
-
-  if(view==1 || view==2) {
-    float ff=(view==1 ? -1.0 : 1.0);
-    float dist=-transform_.GetTrans()[2];
-    geom::Mat4 skew=geom::Transpose(geom::Mat4(1.0,0.0,ff*stereo_eye_dist_/dist,ff*stereo_eye_dist_,
-                                               0.0,1.0,0.0,0.0,
-                                               0.0,0.0,1.0,0.0,
-                                               0.0,0.0,0.0,1.0));
-    glMultMatrix(skew.Data());
+  
+  if(view!=0) {
+    Real ff=(view<0 ? 1.0 : -1.0);
+    Real dist=-transform_.GetTrans()[2];
+    if(stereo_alg_==1) {
+      // physically precise stereo with skew, does
+      // not handle z translation well
+      // the 100.0 comes from visual matching with mode 0 at a reasonable distance
+      Real iod2=100.0/stereo_eye_dist_;
+      geom::Mat4 skew=geom::Transpose(geom::Mat4(1.0,0.0,ff*iod2/dist,ff*iod2,
+                                                 0.0,1.0,0.0,0.0,
+                                                 0.0,0.0,1.0,0.0,
+                                                 0.0,0.0,0.0,1.0));
+      glMultMatrix(skew.Data());
+    } else {
+      // default, dino style stereo, less physically precise but visually more pleasing
+      glTranslated(0.0,0.0,-dist);
+      glRotated(180.0/M_PI*atan(ff/stereo_eye_dist_),0.0,1.0,0.0);
+      glTranslated(0.0,0.0,dist);
+    }
   }
-
 }
 
 void Scene::render_stereo()
 {
-  stereo_eye_=1;
-  stereo_projection(1);
+  int old_stereo_eye=stereo_eye_;
+  stereo_eye_=-1;
+  stereo_projection(-1);
   render_scene();
 
   glEnable(GL_TEXTURE_2D);
@@ -1854,8 +1869,8 @@ void Scene::render_stereo()
   glBindTexture(GL_TEXTURE_2D, scene_left_tex_);
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
 
-  stereo_eye_=2;
-  stereo_projection(2);
+  stereo_eye_=1;
+  stereo_projection(1);
   render_scene();
   glEnable(GL_TEXTURE_2D);
 #if OST_SHADER_SUPPORT_ENABLED
@@ -1865,7 +1880,7 @@ void Scene::render_stereo()
 #endif
   glBindTexture(GL_TEXTURE_2D, scene_right_tex_);
   glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, vp_width_, vp_height_, 0);
-  stereo_eye_=0;
+  stereo_eye_=old_stereo_eye;
   stereo_projection(0);
 
 #if OST_SHADER_SUPPORT_ENABLED
@@ -1893,7 +1908,7 @@ void Scene::render_stereo()
   glPushMatrix();
   glLoadIdentity();
 
-  if(stereo_==2) {
+  if(stereo_mode_==2) {
     // draw interlace lines in stencil buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLineWidth(1.0);
@@ -1915,10 +1930,10 @@ void Scene::render_stereo()
   }
 
   // right eye
-  if(stereo_==1) {
+  if(stereo_mode_==1) {
     glDrawBuffer(GL_BACK_RIGHT);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  } else if(stereo_==2) {
+  } else if(stereo_mode_==2) {
     glStencilFunc(GL_EQUAL,0x0,0x1);
   }
 #if OST_SHADER_SUPPORT_ENABLED
@@ -1937,10 +1952,10 @@ void Scene::render_stereo()
   glEnd();
 
   // left eye
-  if(stereo_==1) {
+  if(stereo_mode_==1) {
     glDrawBuffer(GL_BACK_LEFT);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  } else if(stereo_==2) {
+  } else if(stereo_mode_==2) {
     glStencilFunc(GL_EQUAL,0x1,0x1);
   }
 #if OST_SHADER_SUPPORT_ENABLED

@@ -47,6 +47,23 @@ DARKORANGE=Color(0.5,0.25,0.0)
 LIGHTORANGE=Color(1.0,0.75,0.5)
 
 
+def Stereo(mode,flip=None,alg=None):
+  """
+  Stereo control
+
+  :param mode: 0=off, 1=quad-buffered, 2=interlaced
+  :type mode: int
+  :param flip: invert order of left/right display
+  :type flip: bool
+  :param alg: stereo algorithm (0 or 1)
+  :type param: int
+  """
+  if(flip):
+    _gfx.Scene().SetStereoFlip(flip)
+  if(alg):
+    _gfx.Scene().SetStereoAlg(alg)
+  if(mode):
+    _gfx.Scene().SetStereoMode(mode)
 
 def FitToScreen(gfx_ent, width=None, height=None, margin=0.01):
   """

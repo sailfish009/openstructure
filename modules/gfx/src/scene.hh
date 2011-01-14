@@ -168,34 +168,46 @@ class DLLEXPORT_OST_GFX Scene {
   void SetFogOffsets(float no, float fo);
   
   /// \brief adjust near and far clipping plane to fit visible objects
+  // TODO: use mode aka fast, precise, max
   void Autoslab(bool fast=false, bool redraw=true);
-  // \brief adjust clipping planes to fix maximal extent of all objects
-  //        even under rotation
+
+  /// \brief adjust clipping planes to fix maximal extent of all objects
+  ///        even under rotation
+  // TODO: merge with Autoslab
   void AutoslabMax();
 
   /// \brief turn on automatic auto-slabbing (using the fast bounding box alg)
+  // TODO: more sophisticated mode, aka fast, precise, max
   void AutoAutoslab(bool f);
   //@}
   
-  /// \brief switch stereo mode
-  /*
-    0=off
-    1=quad-buffered
-    2=interlaced stereo
-  */
-  void Stereo(unsigned int);
-
-  int GetStereo() const {return stereo_;}
+  /// \brief set stereo mode
+  /// one of 0 (off), 1 (quad-buffered) 2 (interlaced (for special monitors))
+  void SetStereoMode(unsigned int mode);
+  int GetStereoMode() const {return stereo_mode_;}
 
   /// \brief invert stereo eyes for stereo mode=0
-  void SetStereoInverted(bool f);
+  void SetStereoFlip(bool f);
+  /// \brief return invert flag for stereo
+  bool GetStereoFlip() const {return stereo_inverted_;}
+  
+  /// \brief stereo view mode
+  /// one of 0 (center), -1 (left), 1 (right)
+  void SetStereoView(int);
+  /// \brief return current stereo view mode
+  int GetStereoView() const {return stereo_eye_;}
 
-  /// \brief stereo view mode, 0=center, 1=left, 2=right
-  void SetStereoView(unsigned int);
-
-  void SetStereoEyeDist(float);
-  void SetStereoEyeOff(float);
-
+  /// \brief set stereo eye distance
+  void SetStereoIOD(float);
+  /// \brief return current stereo eye distance
+  float GetStereoIOD() const {return stereo_eye_dist_;}
+  
+  /// \brief set stereo algorithm
+  /// one of 0 or 1
+  void SetStereoAlg(unsigned int);
+  /// \brief return current stereo algorithm
+  unsigned int GetStereoAlg() const {return stereo_alg_;}
+  
   /// \brief set main light direction
   void SetLightDir(const geom::Vec3& dir);
   /// \brief set ambient, diffuse and specular light color
@@ -458,10 +470,11 @@ private:
 
   uint blur_count_;
   std::vector<boost::shared_array<unsigned char> > blur_buffer_;
-  unsigned int stereo_;
+  unsigned int stereo_mode_;
+  unsigned int stereo_alg_;
   bool stereo_inverted_;
   unsigned int stereo_eye_;
-  float stereo_eye_dist_,stereo_eye_off_;
+  float stereo_eye_dist_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
 
@@ -471,7 +484,7 @@ private:
   void flag_all_dirty();
   void prep_glyphs();
   void prep_blur();
-  void stereo_projection(unsigned int view);
+  void stereo_projection(int view);
   void render_scene();
   void render_glow();
   void render_stereo();

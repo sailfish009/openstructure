@@ -436,10 +436,10 @@ void GLCanvas::keyPressEvent(QKeyEvent* event)
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_Equal) {
-      if(gfx::Scene::Instance().GetStereo()>0) {
-        gfx::Scene::Instance().Stereo(0);
+      if(gfx::Scene::Instance().GetStereoMode()>0) {
+        gfx::Scene::Instance().SetStereoMode(0);
       } else {
-        gfx::Scene::Instance().Stereo(1);
+        gfx::Scene::Instance().SetStereoMode(1);
       }
       DoRefresh();
       return;
