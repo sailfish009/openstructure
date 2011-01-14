@@ -71,6 +71,14 @@ public:
   /// \brief Get number of atoms in this chain view
   int GetAtomCount() const;
   
+  /// \brief   Get number of all inclusive bonds of this chain.
+  ///
+  /// \warning For a bond between two different chains, it is not clearly
+  ///          defined to which chain it belongs. Therefore, this method will
+  ///          only return the number of bonds where both bonded atoms are
+  ///          within the same chain (all inclusive bonds).
+  int GetBondCount() const;
+
 public:
   /// \brief Add residue to view
   ///

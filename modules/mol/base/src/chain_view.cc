@@ -138,6 +138,20 @@ int ChainView::GetAtomCount() const {
   return count;
 }
 
+int ChainView::GetBondCount() const {
+  this->CheckValidity();
+  int count=0;
+  EntityView ev = this->GetEntity();
+  const BondHandleList& bhl = ev.GetBondList();
+  for (BondHandleList::const_iterator i=bhl.begin(); i!=bhl.end(); ++i) {
+    if (i->GetFirst().GetResidue().GetChain().GetName()==this->GetName() &&
+        i->GetSecond().GetResidue().GetChain().GetName()==this->GetName()) {
+      count++;
+    }
+  }
+  return count;
+}
+
 ResidueView ChainView::FindResidue(const ResNum& number) const {
   this->CheckValidity();  
   const ResidueViewList& l=data_->residues;
