@@ -93,6 +93,7 @@ private:
   bool is_pqr_;
   IOProfile profile_;
   bool charmm_style_;
+  bool warned_name_mismatch_;
 };
 
 }}

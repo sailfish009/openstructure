@@ -82,6 +82,7 @@ PDBReader::PDBReader(const boost::filesystem::path& loc,
 
 void PDBReader::Init(const boost::filesystem::path& loc)
 {
+  warned_name_mismatch_=false;
   charmm_style_=profile_.dialect=="CHARMM";
   num_model_records_=0;
   if (boost::iequals(".gz", boost::filesystem::extension(loc))) {
@@ -531,6 +532,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     if (!curr_residue_.IsValid()) {
       LOG_DEBUG("new residue " << res_name << " " << res_num);
       curr_residue_=editor.AppendResidue(curr_chain_, res_name.str(), res_num);
+      warned_name_mismatch_=false;
       ++residue_count_; 
     }
     assert(curr_residue_.IsValid());
@@ -538,6 +540,20 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   // finally add atom
   LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
   mol::AtomHandle ah;
+  if (curr_residue_.GetName()!=res_name.str()) {
+    if (!profile_.fault_tolerant) {
+      std::stringstream ss;
+      ss << "error on line " << line_num << ": "
+         << "residue with number " << res_num << " has more than one name.";
+      throw IOException(ss.str());
+    }
+    if (!warned_name_mismatch_) {
+      LOG_INFO("Residue with number " << res_num << " has more than one name."
+               "Ignoring atoms for everything but the first");      
+    }
+    warned_name_mismatch_=true;
+    return;
+  }
   if (alt_loc!=' ') {
     // Check if there is already a atom with the same name.
     mol::AtomHandle me=curr_residue_.FindAtom(aname);

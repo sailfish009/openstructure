@@ -423,6 +423,30 @@ BOOST_AUTO_TEST_CASE(res_name_too_long)
   BOOST_CHECK_THROW(writer.Write(ent), IOException);
 }
 
+
+BOOST_AUTO_TEST_CASE(res_name_mismatch_tolerant)
+{
+  String fname("testfiles/pdb/arg-glu-gln.pdb");
+  IOProfile profile;
+  profile.fault_tolerant=true;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 1);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);  
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 11);
+}
+
+BOOST_AUTO_TEST_CASE(res_name_mismatch_pedantic)
+{
+  String fname("testfiles/pdb/arg-glu-gln.pdb");
+  IOProfile profile;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+
 BOOST_AUTO_TEST_CASE(chain_name_too_long)
 {
   std::stringstream out;
