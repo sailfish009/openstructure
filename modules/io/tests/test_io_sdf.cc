@@ -151,6 +151,21 @@ BOOST_AUTO_TEST_CASE(write_sdf)
                             "testfiles/sdf/compound-out.sdf"));
 }
 
+BOOST_AUTO_TEST_CASE(write_sdf_view)
+{
+  // this scope is required to force the writer stream to be closed before
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    EntityIOSDFHandler sdfh;
+    sdfh.Import(eh,"testfiles/sdf/compound.sdf");
+    mol::EntityView ev = eh.Select("(ele=C or ele=N) and aname!='1'");
+    SaveEntity(ev, "testfiles/sdf/compound-view-out.sdf");
+  }
+  BOOST_CHECK(compare_files("testfiles/sdf/compound-view.sdf",
+                            "testfiles/sdf/compound-view-out.sdf"));
+}
+
 BOOST_AUTO_TEST_CASE(nonexisting_file)
 {
   mol::EntityHandle eh=mol::CreateEntity();

@@ -29,7 +29,7 @@ using boost::format;
 
 namespace {
 
-  class SDFAtomWriter : public mol::EntityVisitor {
+  class SDFAtomWriter : public mol::EntityViewVisitor {
     public:
       SDFAtomWriter(std::ostream& ostream, std::map<long, int>& atom_indices)
       : ostr_(ostream), atom_indices_(atom_indices), counter_(0) {
@@ -37,7 +37,7 @@ namespace {
       }
     private:
     public:
-      virtual bool VisitAtom(const mol::AtomHandle& atom) {
+      virtual bool VisitAtom(const mol::AtomView& atom) {
         atom_indices_[atom.GetHashCode()] = ++counter_;
         ostr_ << format("%10.4f") % atom.GetPos()[0]
               << format("%10.4f") % atom.GetPos()[1]
@@ -53,22 +53,22 @@ namespace {
       int counter_;
   };
 
-  class SDFBondWriter : public mol::EntityVisitor {
+  class SDFBondWriter : public mol::EntityViewVisitor {
   public:
     SDFBondWriter(std::ostream& ostream, std::map<long, int>& atom_indices)
       : ostr_(ostream), atom_indices_(atom_indices), counter_(0) {
     }
   private:
   public:
-    virtual bool VisitAtom(const mol::AtomHandle& atom) {
+    virtual bool VisitAtom(const mol::AtomView& atom) {
       counter_++;
-      mol::AtomHandleList atoms = atom.GetBondPartners();
-      mol::AtomHandleList::iterator atom_iter = atoms.begin();
+      mol::AtomViewList atoms = atom.GetBondPartners();
+      mol::AtomViewList::iterator atom_iter = atoms.begin();
       for(; atom_iter != atoms.end(); ++atom_iter) {
         int atom_index = atom_indices_.find((*atom_iter).GetHashCode())->second;
         if(atom_index > counter_) {
           int type = 1;
-          mol::BondHandle bond = atom.FindBondToAtom(*atom_iter);
+          mol::BondHandle bond = atom.GetHandle().FindBondToAtom(atom_iter->GetHandle());
           if(bond.IsValid()) type = bond.GetBondOrder();
           ostr_ << format("%3i") % counter_
                 << format("%3i") % atom_index
@@ -105,11 +105,11 @@ void SDFWriter::Write(const mol::EntityView& ent) {
 }
 
 void SDFWriter::Write(const mol::EntityHandle& ent) {
-  mol::EntityHandle non_const_handle = ent;
-  non_const_handle.Apply(*this);
+  mol::EntityView non_const_view = ent.CreateFullView();
+  non_const_view.Apply(*this);
 }
 
-bool SDFWriter::VisitChain(const mol::ChainHandle& chain) {
+bool SDFWriter::VisitChain(const mol::ChainView& chain) {
   // print end of molecule line
   if(counter_ != 0) {
     ostr_ << "$$$$" << std::endl;
@@ -138,7 +138,7 @@ bool SDFWriter::VisitChain(const mol::ChainHandle& chain) {
 
   // write atom block
   SDFAtomWriter atom_writer(ostr_, atom_indices_);
-  mol::ChainHandle non_const_chain = chain;
+  mol::ChainView non_const_chain = chain;
   non_const_chain.Apply(atom_writer);
 
   // write bond block
