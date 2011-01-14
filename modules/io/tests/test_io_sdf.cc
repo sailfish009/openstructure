@@ -151,6 +151,13 @@ BOOST_AUTO_TEST_CASE(write_sdf)
                             "testfiles/sdf/compound-out.sdf"));
 }
 
+BOOST_AUTO_TEST_CASE(nonexisting_file)
+{
+  mol::EntityHandle eh=mol::CreateEntity();
+  EntityIOSDFHandler sdfh;
+  BOOST_CHECK_THROW(sdfh.Import(eh,"non-existing-file.sdf"), IOException);
+}
+
 BOOST_AUTO_TEST_CASE(wrong_atomcount_error_sdf)
 {
   mol::EntityHandle eh=mol::CreateEntity();

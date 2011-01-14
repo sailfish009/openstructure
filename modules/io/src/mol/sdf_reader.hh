@@ -39,7 +39,7 @@ public:
   void Import(mol::EntityHandle& ent);
 
 private:
-  void ClearState();
+  void ClearState(const boost::filesystem::path& loc);
   void NextMolecule();
 
   void ParseAndAddHeader(const String& line, int line_num, mol::EntityHandle& ent,

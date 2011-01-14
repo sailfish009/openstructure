@@ -36,18 +36,21 @@ namespace ost { namespace io {
 using boost::format;
 
 SDFReader::SDFReader(const String& filename)
-  : infile_(filename), instream_(infile_) {
-  this->ClearState();
+  : infile_(filename), instream_(infile_)
+{
+  this->ClearState(boost::filesystem::path(filename));
 }
 
 SDFReader::SDFReader(const boost::filesystem::path& loc)
-  : infile_(loc), instream_(infile_) {
-  this->ClearState();
+  : infile_(loc), instream_(infile_)
+{
+  this->ClearState(loc);
 }
 
 SDFReader::SDFReader(std::istream& instream)
-  : infile_(), instream_(instream) {
-  this->ClearState();
+  : infile_(), instream_(instream)
+{
+  this->ClearState(boost::filesystem::path(""));
 }
 
 // import data from provided stream
@@ -82,7 +85,7 @@ void SDFReader::Import(mol::EntityHandle& ent)
       }
       curr_chain_.SetStringProp(data_header, data_value);
     } else if (boost::iequals(line, "$$$$")) {
-      LOG_INFO("MOLECULE " << curr_chain_.GetName() << " (" << chain_count_ << ") added.")
+      LOG_VERBOSE("MOLECULE " << curr_chain_.GetName() << " (" << chain_count_ << ") added.")
       NextMolecule();
     }
   }
@@ -91,8 +94,9 @@ void SDFReader::Import(mol::EntityHandle& ent)
                << " residues, " << atom_count_ << " atoms");
 }
 
-void SDFReader::ClearState()
+void SDFReader::ClearState(const boost::filesystem::path& loc)
 {
+  if(!infile_) throw IOException("could not open "+loc.string());
   curr_chain_=mol::ChainHandle();
   curr_residue_=mol::ResidueHandle();
   chain_count_=0;
