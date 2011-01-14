@@ -39,6 +39,10 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QMenu>
+
+#if QT_VERSION >= 0x040600
+# include <QGesture>
+#endif
 #include "tools/tool_manager.hh"
 
 namespace ost { namespace gui {
@@ -54,7 +58,8 @@ GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QGLFormat& f):
   bench_flag_(false),
   last_pos_(),
   scene_menu_(NULL),
-  show_beacon_(false)
+  show_beacon_(false),
+  angular_speed_(0.0)
 {
   if(!isValid()) return;
   master_timer_.start(10,this);
@@ -64,7 +69,51 @@ GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QGLFormat& f):
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
           SLOT(RequestContextMenu(const QPoint&)));
+#if QT_VERSION >= 0x040600
+  this->grabGesture(Qt::PinchGesture);
+#endif
 }
+
+bool GLCanvas::event(QEvent* event)
+{
+#if QT_VERSION >= 0x040600
+  if (event->type()==QEvent::Gesture) {
+    return this->GestureEvent(static_cast<QGestureEvent*>(event));
+  }
+#endif
+  return QGLWidget::event(event);
+}
+
+
+#if QT_VERSION >= 0x040600
+
+bool GLCanvas::GestureEvent(QGestureEvent* event)
+{
+  if (QGesture* pinch=event->gesture(Qt::PinchGesture)) {
+    QPinchGesture* pinch_gesture=static_cast<QPinchGesture*>(pinch);
+    QPinchGesture::ChangeFlags changeFlags = pinch_gesture->changeFlags();
+    if (changeFlags & QPinchGesture::RotationAngleChanged) {
+      qreal value=pinch_gesture->rotationAngle();
+      qreal lastValue=pinch_gesture->lastRotationAngle();
+      this->OnTransform(gfx::INPUT_COMMAND_ROTZ, 0, gfx::TRANSFORM_VIEW, 
+                  static_cast<Real>(value - lastValue));
+      this->update();
+      event->accept();
+      if (pinch_gesture->state()==Qt::GestureFinished) {
+        angular_speed_=value-lastValue;
+        if (!gesture_timer_.isActive())
+          gesture_timer_.start(10, this);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+#endif
+
+
+
 
 void GLCanvas::MakeActive()
 {
@@ -425,6 +474,22 @@ Real delta_time(const timeval& t1, const timeval& t2)
 void GLCanvas::timerEvent(QTimerEvent * event)
 {
 
+#if QT_VERSION>= 0x040600
+  // gesture support
+  if (gesture_timer_.timerId()==event->timerId()) {
+    if (angular_speed_!=0.0) {
+      angular_speed_*=0.95;
+      this->OnTransform(gfx::INPUT_COMMAND_ROTZ, 0, gfx::TRANSFORM_VIEW, 
+                        static_cast<Real>(angular_speed_));
+      if (std::abs(angular_speed_)<0.001) {
+        angular_speed_=0.0;
+        gesture_timer_.stop();
+      }
+      this->update();
+    }
+    return;
+  }
+#endif
 #ifndef _MSC_VER
   static struct timeval time0,time1;
   static int count=0;
