@@ -16,32 +16,25 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_INVALID_HANDLE_HH
-#define OST_INVALID_HANDLE_HH
+ 
+#include <ost/mol/surface_handle.hh>
+#include <cmath>
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
-#include <ost/message.hh>
+using namespace ost;
+using namespace ost::mol;
 
-#include <ost/module_config.hh>
-#include <ost/message.hh>
+BOOST_AUTO_TEST_SUITE( mol_base )
 
-namespace ost {
 
-/// \brief Signals access of member functions of invalid handles
-class DLLEXPORT InvalidHandle : public Error {
-public:
-  InvalidHandle()
-    : Error("Can not access invalid handle or view") 
-  {}
-}; 
-
-template <typename H>
-inline void CheckHandleValidity(const H& handle)
+BOOST_AUTO_TEST_CASE(test_throw_invalid_surface)
 {
-  if (!handle.IsValid())
-    throw InvalidHandle();
+  SurfaceHandle surf;
+  BOOST_CHECK_THROW(CheckHandleValidity(surf), InvalidHandle);
+  
+  surf=CreateSurface();
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(surf));
 }
 
-}
-
-#endif
-
+BOOST_AUTO_TEST_SUITE_END()

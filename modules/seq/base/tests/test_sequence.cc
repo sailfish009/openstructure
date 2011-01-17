@@ -65,6 +65,14 @@ BOOST_AUTO_TEST_CASE(seq_triv)
   BOOST_CHECK_THROW(s.SetString("1"), InvalidSequence);
 }
 
+BOOST_AUTO_TEST_CASE(seq_throw_invalid)
+{
+  SequenceHandle s;
+  BOOST_CHECK_THROW(CheckHandleValidity(s), InvalidHandle);
+  s=CreateSequence("A", "abcd");
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(s));
+}
+
 BOOST_AUTO_TEST_CASE(seq_length)
 {
   SequenceHandle s=CreateSequence("S1", "abfcdadeaf");

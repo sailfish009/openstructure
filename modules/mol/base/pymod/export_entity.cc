@@ -75,6 +75,8 @@ void export_Entity()
     .def("GetName", &EntityBase::GetName,
         return_value_policy<copy_const_reference>())
     .def("SetName", &EntityBase::SetName)
+    .def("IsValid", &EntityBase::IsValid)
+    .add_property("valid", &EntityBase::IsValid)
   ;
   generic_prop_def<EntityBase>(ent_base);
   
@@ -92,7 +94,7 @@ void export_Entity()
     .def("GetCenterOfAtoms", &EntityHandle::GetCenterOfAtoms)
     .def("GetGeometricCenter", geom_center<EntityHandle>)
     .add_property("geometric_center", geom_center<EntityHandle>)
-    .def("IsValid", &EntityHandle::IsValid)
+
     .add_property("geometric_end", geom_end<EntityHandle>)
     .add_property("geometric_start", geom_start<EntityHandle>)
     .def("GetGeometricStart", geom_start<EntityHandle>)
@@ -122,7 +124,6 @@ void export_Entity()
     .add_property("atoms", &EntityHandle::GetAtomList)
     .add_property("chains", &EntityHandle::GetChainList)
     .add_property("bonds", &EntityHandle::GetBondList)
-    .add_property("valid", &EntityHandle::IsValid)
     .def("GetBounds", &EntityHandle::GetBounds)
     .add_property("bounds", &EntityHandle::GetBounds)
     .def("GetTransformationMatrix", &EntityHandle::GetTransformationMatrix,

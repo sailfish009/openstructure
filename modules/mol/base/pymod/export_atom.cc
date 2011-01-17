@@ -74,6 +74,8 @@ void export_Atom()
     .add_property("is_hetatom", &AtomBase::IsHetAtom, &AtomBase::SetHetAtom)
     .add_property("charge", &AtomBase::GetCharge, &AtomBase::SetCharge)
     .add_property("mass", &AtomBase::GetMass, &AtomBase::SetMass)
+    .add_property("valid", &AtomBase::IsValid)
+    .def("IsValid", &AtomBase::IsValid)
   ;
   generic_prop_def<AtomBase>(atom_base);
 
@@ -82,8 +84,6 @@ void export_Atom()
     .add_property("residue",&AtomHandle::GetResidue)
     .def("GetBondList", &AtomHandle::GetBondList)
     .def("GetBondCount", &AtomHandle::GetBondCount)
-    .add_property("valid", &AtomHandle::IsValid)
-    .def("IsValid", &AtomHandle::IsValid)
     .def("GetEntity", &AtomHandle::GetEntity)
     .def("GetHandle", &AtomHandle::GetHandle)
     .add_property("handle", &AtomHandle::GetHandle)

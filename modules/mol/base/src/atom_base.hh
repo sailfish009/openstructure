@@ -48,7 +48,20 @@ class DLLEXPORT_OST_MOL AtomBase: public GenericPropContainer<AtomBase> {
 public:
   AtomBase();
   AtomBase(const impl::AtomImplPtr& impl);
-public:  
+public:
+  /// \name Handle validity
+  //@{
+  /// \brief check validity of handle
+  /// 
+  /// check, whether the bond handle points to a valid atom.
+  /// \note It is an error to use any method other than #IsValid, Impl and 
+  ///       #operator bool() when the handle is invalid. An InvalidHandle
+  ///       exception will be thrown.
+  operator bool() const { return this->IsValid(); }
+  /// \brief check validity of handle
+  /// \sa #operator bool()
+  bool IsValid() const { return Impl().get()!=0; }
+  //@}
   friend class ConstGenericPropContainer<AtomBase>;  
   ///\brief Get atom name. 
   ///

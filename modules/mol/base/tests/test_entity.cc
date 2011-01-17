@@ -75,11 +75,28 @@ EntityHandle make_test_entity()
   res2.SetChemClass(ChemClass(ChemClass::LPeptideLinking));  
   e.AddTorsion("PHI", res1.FindAtom("C"), res2.FindAtom("N"), 
                res2.FindAtom("CA"), res2.FindAtom("C"));
-               
   return eh;
 }
 
 BOOST_AUTO_TEST_SUITE( mol_base )
+
+
+BOOST_AUTO_TEST_CASE(throw_invalid_ent_handle)
+{
+  EntityHandle ent;
+  BOOST_CHECK_THROW(CheckHandleValidity(ent), InvalidHandle);  
+  ent=CreateEntity();
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(ent));
+}
+
+BOOST_AUTO_TEST_CASE(throw_invalid_ent_view)
+{
+  EntityView ent_view;
+  BOOST_CHECK_THROW(CheckHandleValidity(ent_view), InvalidHandle);  
+  EntityHandle ent=CreateEntity();
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(ent.CreateFullView()));
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(ent.CreateEmptyView()));
+}
 
 BOOST_AUTO_TEST_CASE(entity_creator) 
 {

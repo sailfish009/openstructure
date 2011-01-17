@@ -74,6 +74,15 @@ BOOST_AUTO_TEST_CASE(alignment_triv)
   BOOST_CHECK_NO_THROW(AlignmentFromSequenceList(list));
 }
 
+BOOST_AUTO_TEST_CASE(aln_throw_invalid)
+{
+  AlignmentHandle s;
+  BOOST_CHECK_THROW(CheckHandleValidity(s), InvalidHandle);
+  s=CreateAlignment();
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(s));
+}
+
+
 BOOST_AUTO_TEST_CASE(alignment_count_and_length)
 {
   AlignmentHandle a = CreateAlignment();

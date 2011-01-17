@@ -86,6 +86,29 @@ BOOST_AUTO_TEST_CASE(test_comparison)
 }
 
 
+BOOST_AUTO_TEST_CASE(throw_invalid_chain_handle)
+{
+  EntityHandle ent=CreateEntity();
+  ChainHandle chain=ent.FindChain("A");
+  BOOST_CHECK_THROW(CheckHandleValidity(chain), InvalidHandle);
+  XCSEditor edi=ent.EditXCS();
+  edi.InsertChain("A");
+  chain=ent.FindChain("A");
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(chain));
+}
+
+BOOST_AUTO_TEST_CASE(throw_invalid_chain_view)
+{
+  EntityHandle ent=CreateEntity();
+  ChainHandle chain=ent.FindChain("A");
+  ChainView chain_view;
+  BOOST_CHECK_THROW(CheckHandleValidity(chain_view), InvalidHandle);
+  XCSEditor edi=ent.EditXCS();
+  edi.InsertChain("A");
+  EntityView ent_view=ent.CreateFullView();  
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(ent_view.FindChain("A")));
+}
+
 BOOST_AUTO_TEST_CASE(res_pos) 
 {
   EntityHandle eh=CreateEntity();
