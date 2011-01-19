@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/geom/vecmat3_op.hh>
 #include "unit_cell.hh"
 
 namespace ost {
@@ -37,9 +38,10 @@ UnitCell::UnitCell(Real a, Real b, Real c, Real alpha, Real beta, Real gamma,
   geom::Vec3 a_vec=a_dir*a;
   geom::Vec3 b_vec=b_dir*b;
   geom::Vec3 c_vec=c_dir*c;
-  dirs_=geom::Mat3(a_vec.x, b_vec.x, c_vec.x,
-                   a_vec.y, b_vec.y, c_vec.y,
-                   a_vec.z, b_vec.z, c_vec.z);
+  geom::Mat3 cs=geom::Mat3FromAngles(alpha, beta, gamma);
+  dirs_=geom::Mat3(cs(0, 0)*a, cs(0, 1)*b, cs(0, 2)*c,
+                   cs(1, 0)*a, cs(1, 1)*b, cs(1, 2)*c,
+                   cs(2, 0)*a, cs(2, 1)*b, cs(2, 2)*c);
   frac_=geom::Invert(dirs_);
   sym_=sym;
 }

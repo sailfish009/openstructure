@@ -51,6 +51,7 @@ void export_VecMat3_op()
   def("Equal",Mat3Equal);
   def("DihedralAngle", &DihedralAngle);
   def("Dot",Mat3Dot);
+  def("Mat3FromAngles", &Mat3FromAngles);
   def("Det",Mat3Det);
   def("Cross",Vec3Cross);
   def("Transpose",Mat3Transpose);

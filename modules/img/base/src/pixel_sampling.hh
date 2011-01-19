@@ -58,13 +58,21 @@ public:
   // initialize with spatial sampling always!
   PixelSampling(const Vec3& spat_sampling, DataDomain d, const Extent& e);
 
-  const Vec3& GetPixelSampling() const;
+  Vec3 GetPixelSampling() const;
   void SetPixelSampling(const Vec3&);
 
-  const Vec3& GetSpatialSampling() const;
+  Vec3 GetSpatialSampling() const;
   void SetSpatialSampling(const Vec3& d);
 
-  const Vec3& GetFrequencySampling() const;
+
+  void SetSpatialSamplingMat(const Mat3& d);
+  const Mat3& GetSpatialSamplingMat() const;
+  
+  
+  void SetFrequencySamplingMat(const Mat3& d);
+  const Mat3& GetFrequencySamplingMat() const;
+  
+  Vec3 GetFrequencySampling() const;
   void SetFrequencySampling(const Vec3& d);
 
   void SetDomain(DataDomain d);
@@ -77,12 +85,12 @@ public:
 
 private:
   DataDomain dom_;
-  Vec3 spat_scale_, i_spat_scale_;
-  Vec3 freq_scale_, i_freq_scale_;
+  Mat3 spat_scale_, i_spat_scale_;
+  Mat3 freq_scale_, i_freq_scale_;
   Vec3 fac_;
 
-  void set_spat_scale(const Vec3& d);
-  void set_freq_scale(const Vec3& d);
+  void set_spat_scale(const Mat3& d);
+  void set_freq_scale(const Mat3& d);
 };
 
 

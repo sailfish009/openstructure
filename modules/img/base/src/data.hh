@@ -199,6 +199,8 @@ public:
   //! return spatial pixel dimensions
   Vec3 GetSpatialSampling() const;
 
+  Mat3 GetSpatialSamplingMat() const;
+  
   //! return frequency pixel dimensions
   Vec3 GetFrequencySampling() const;
 
@@ -279,6 +281,9 @@ public:
   //! set spatial pixel dimensions (uniform)
   void SetSpatialSampling(Real d) {SetSpatialSampling(Vec3(d,d,d));}
 
+  void SetSpatialSamplingMat(const Mat3&);
+  
+  
   virtual void Apply(NonModAlgorithm& a) const=0;
   virtual void ApplyIP(NonModAlgorithm& a) const=0;
 

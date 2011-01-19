@@ -194,6 +194,13 @@ inline Real Distance(const Vec3& p1, const Vec3& p2)
     return Length(p1-p2);
 }
 
+/// \brief creates a Mat3 representing a coordinate system whose axes a, b, c 
+///    have angles alpha (between b and c), beta (between a and c) and gamma 
+///    (between a and b). 
+/// 
+/// The coordinate system is right handed and a is always along the x- axis.
+Mat3 DLLEXPORT_OST_GEOM Mat3FromAngles(Real alpha, Real beta, Real gamma);
+
 } // ns
 
 #endif

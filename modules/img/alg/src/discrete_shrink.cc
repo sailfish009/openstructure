@@ -99,7 +99,11 @@ ImageStateBasePtr DiscreteShrinkFnc::VisitState(const ImageStateImpl<T,D>& isi) 
 
   ni->SetAbsoluteOrigin(ao);
   ni->SetSpatialOrigin(newstart);
-  ni->GetSampling().SetPixelSampling(CompMultiply(ni->GetSampling().GetPixelSampling(),Vec3(bs_[0],bs_[1],bs_[2])));
+  Mat3 old_smpl=ni->GetSampling().GetSpatialSamplingMat();
+  Mat3 new_sampling(old_smpl(0, 0)*bs_[0], old_smpl(0, 1)*bs_[1],old_smpl(0, 2)*bs_[2],
+                    old_smpl(1, 0)*bs_[0], old_smpl(1, 1)*bs_[1],old_smpl(1, 2)*bs_[2],
+                    old_smpl(2, 0)*bs_[0], old_smpl(2, 1)*bs_[1],old_smpl(2, 2)*bs_[2]);
+  ni->GetSampling().SetSpatialSamplingMat(new_sampling);
 
   return ni;
 }

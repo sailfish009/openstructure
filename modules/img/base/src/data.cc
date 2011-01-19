@@ -54,6 +54,10 @@ ConstData& ConstData::operator=(const ConstData& d)
 }
 
 
+Mat3 ConstData::GetSpatialSamplingMat() const
+{
+  return Sampling().GetSpatialSamplingMat();
+}
 
 
 Vec3 ConstData::GetPixelSampling() const
@@ -149,6 +153,12 @@ void Data::SetPixelSampling(const Vec3& dim)
 void Data::SetSpatialSampling(const Vec3& dim)
 {
   Sampling().SetSpatialSampling(dim);
+  Notify();
+}
+
+void Data::SetSpatialSamplingMat(const Mat3& m)
+{
+  Sampling().SetSpatialSamplingMat(m);
   Notify();
 }
 

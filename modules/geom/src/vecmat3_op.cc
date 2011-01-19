@@ -192,4 +192,22 @@ Real DihedralAngle(const Vec3& p1, const Vec3& p2, const Vec3& p3,
                Dot(r12cross, r23cross));
 }
 
+Mat3 Mat3FromAngles(Real alpha, Real beta, Real gamma)
+{
+  Real cos_alpha=cos(alpha);
+  Real cos_beta=cos(beta);  
+  Real sin_beta=sin(beta);
+
+  Real cos_gamma=cos(gamma);
+  Real sin_gamma=sin(gamma);
+  Real cos_alpha_s=(cos_gamma*cos_beta-cos_alpha)/(sin_beta*sin_gamma);
+  Real sin_alpha_s=sqrt(1.0-cos_alpha_s*cos_alpha_s);
+  geom::Vec3 a_dir(1, 0, 0);
+  geom::Vec3 b_dir(cos_gamma, sin_gamma, 0.0);
+  geom::Vec3 c_dir(cos_beta, -sin_beta*cos_alpha_s, sin_beta*sin_alpha_s);
+  return geom::Mat3(a_dir.x, b_dir.x, c_dir.x,
+                    a_dir.y, b_dir.y, c_dir.y,
+                    a_dir.z, b_dir.z, c_dir.z);
+}
+
 } // ns
