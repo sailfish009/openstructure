@@ -69,6 +69,7 @@ private:
                    mol::EntityHandle& h);
   void ParseHelixEntry(const StringRef& line);
   void ParseStrandEntry(const StringRef& line);
+  void ParseCryst1(const StringRef& line, mol::EntityHandle ent);
   void Init(const boost::filesystem::path& loc);
   bool EnsureLineLength(const StringRef& line, size_t size);
   mol::ChainHandle curr_chain_;

@@ -30,7 +30,7 @@
 #include <ost/mol/impl/entity_impl_fw.hh>
 
 #include <ost/mol/entity_view.hh>
-
+#include <ost/unit_cell.hh>
 #include <ost/mol/transform.hh>
 #include <ost/mol/residue_prop.hh>
 #include <ost/mol/impl/atom_impl_fw.hh>
@@ -247,7 +247,11 @@ public:
   void SetName(const String& ent_name);
 
   void ReorderAllResidues();
-
+  
+  const UnitCell& GetUnitCell() const { return unit_cell_; }
+  
+  void SetUnitCell(const UnitCell& unit_cell) { unit_cell_=unit_cell; }
+  
 private:
   void DoCopy(EntityImplPtr dest);
   
@@ -273,7 +277,7 @@ private:
   int ics_editor_count_;
   int dirty_flags_;
   String name_;
-
+  UnitCell unit_cell_;
   unsigned long next_index_;
 
   template <bool always_true>

@@ -23,7 +23,7 @@
 
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-
+#include <ost/unit_cell.hh>
 #include <ost/profile.hh>
 #include <ost/log.hh>
 #include <ost/message.hh>
@@ -159,6 +159,14 @@ void PDBReader::Import(mol::EntityHandle& ent,
           }
         }
         break;
+      case 'C':
+      case 'c':
+      if (curr_line.size()<6) {
+        continue;
+      }
+      if (IEquals(curr_line.substr(0, 6), StringRef("CRYST1", 6))) {
+        this->ParseCryst1(curr_line, ent);
+      }
       case 'E':
       case 'e':
         if (curr_line.size()<3) {
@@ -258,6 +266,65 @@ void PDBReader::Import(mol::EntityHandle& ent,
   }
 }
 
+void PDBReader::ParseCryst1(const StringRef& line, mol::EntityHandle ent)
+{
+  if (line.size()<70) {
+    if (profile_.fault_tolerant) {
+      LOG_WARNING("Skipping over CRYST1 record that is too short on line " 
+                  << line_num_);
+      return;
+    }
+    std::stringstream ss;
+    ss << "faulty CRYST1 record on line " << line_num_ 
+       << ": record is too short. must be at least 70 characters";
+    throw IOException(ss.str());
+  }
+  Real lengths[3];
+  for (size_t i=0; i<3; ++i) {
+    std::pair<bool, float> result=line.substr(6+i*9, 9).ltrim().to_float();
+    if (!result.first) {
+      if (profile_.fault_tolerant) {
+        LOG_WARNING("Skipping over faulty CRYST1 record on line " << line_num_);
+        return;
+      }
+      std::stringstream ss;
+      ss << "faulty CRYST1 record on line " << line_num_ 
+          << ": Can't parse cell dimensions";
+      throw IOException(ss.str());
+    }
+    lengths[i]=result.second;
+  }
+  Real angles[3];
+  for (size_t i=0; i<3; ++i) {
+    std::pair<bool, float> result=line.substr(33+i*7, 7).ltrim().to_float();    
+    if (!result.first) {
+      if (profile_.fault_tolerant) {
+        LOG_WARNING("Skipping over faulty CRYST1 record on line " << line_num_);
+        return;
+      }
+      std::stringstream ss;
+      ss << "faulty CRYST1 record on line " << line_num_ 
+          << ": Can't parse unit cell angles";
+      throw IOException(ss.str());
+    }
+    angles[i]=result.second*M_PI/180.0;
+  }
+  String  space_group=line.substr(55, 10).trim().str();
+  SymmetryPtr sym=Symmetry::FromHermannMauguinSymbol(space_group);
+  if (!sym) {
+    if (profile_.fault_tolerant) {
+      LOG_WARNING("Skipping CRYST1 record with unknown space group '" 
+                  << space_group << "' on line " << line_num_ << ".");
+      return;
+    }
+    std::stringstream ss;
+    ss << "CRYST1 record has unknown space group '" << space_group 
+       << "' on line " << line_num_ << ".";
+    throw IOException(ss.str());
+  }
+  ent.SetUnitCell(UnitCell(lengths[0], lengths[1], lengths[2],
+                           angles[0], angles[1], angles[2], sym));
+}
 
 void PDBReader::AssignSecStructure(mol::EntityHandle ent)
 {

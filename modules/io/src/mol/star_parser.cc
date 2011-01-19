@@ -36,40 +36,8 @@ StarParser::StarParser(std::istream& stream):
 bool StarParser::SplitLine(const StringRef& line, 
                             std::vector<StringRef>& parts, bool clear)
 {
-  if (clear) {
-    parts.clear();    
-  }
-  const char* s=line.begin();
-  while (s!=line.end()) {
-    while (isspace(*s)) {
-      ++s;
-      if (s==line.end()) {
-        return true;
-      }
-    }
-    if (*s=='\'' || *s=='"') {
-      char delim=*s;
-      const char* start=++s;
-      while (s!=line.end()) {
-        ++s;
-        if (delim==*(s-1) && (s==line.end() || isspace(*s))) {
-          break;
-        }
-      }
-      parts.push_back(StringRef(start, s-start-1));
-    } else {
-      const char* start=s;
-      while (s!=line.end() && !isspace(*s)) {
-        ++s;
-      }
-      if (s-start) {       
-        parts.push_back(StringRef(start, s-start));
-      } else {
-        return false;
-      }
-    }
-  }
-  return true;
+  
+  return line.tokenize(parts, clear);
 }
 
 bool StarParser::ParseMultilineValue(String& value, bool skip)

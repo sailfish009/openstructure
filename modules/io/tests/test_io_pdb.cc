@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <ost/test_utils/compare_files.hh>
+#include <ost/unit_cell.hh>
 #include <ost/mol/mol.hh>
 #include <ost/conop/conop.hh>
 #include <ost/io/mol/entity_io_pdb_handler.hh>
@@ -440,6 +441,54 @@ BOOST_AUTO_TEST_CASE(res_name_mismatch_tolerant)
 BOOST_AUTO_TEST_CASE(res_name_mismatch_pedantic)
 {
   String fname("testfiles/pdb/arg-glu-gln.pdb");
+  IOProfile profile;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(parse_cryst1)
+{
+  String fname("testfiles/pdb/cryst1.pdb");
+  IOProfile profile;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_NO_THROW(reader.Import(ent));
+  Real length_a=geom::Length(ent.GetUnitCell().GetA());
+  Real length_b=geom::Length(ent.GetUnitCell().GetB());
+  Real length_c=geom::Length(ent.GetUnitCell().GetC());
+  BOOST_CHECK(std::fabs(length_a-57.360)<1e-4);
+  BOOST_CHECK(std::fabs(length_b-62.705)<1e-4);
+  BOOST_CHECK(std::fabs(length_c-68.243)<1e-4);
+  Real alpha=ent.GetUnitCell().GetAlpha();
+  Real beta=ent.GetUnitCell().GetBeta();
+  Real gamma=ent.GetUnitCell().GetGamma();
+  BOOST_CHECK(std::fabs(alpha-1.84342)<1e-4); // 105.62
+  BOOST_CHECK(std::fabs(beta-1.62734)<1e-4); // 93.24
+  BOOST_CHECK(std::fabs(gamma-2.01498)<1e-4); // 115.45 
+}
+
+BOOST_AUTO_TEST_CASE(parse_cryst1_too_short)
+{
+  String fname("testfiles/pdb/cryst1-too-short.pdb");
+  IOProfile profile;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(parse_cryst1_faulty_length)
+{
+  String fname("testfiles/pdb/cryst1-faulty-length.pdb");
+  IOProfile profile;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(parse_cryst1_faulty_angle)
+{
+  String fname("testfiles/pdb/cryst1-faulty-angle.pdb");
   IOProfile profile;
   PDBReader reader(fname, profile);
   mol::EntityHandle ent=mol::CreateEntity();

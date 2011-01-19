@@ -84,6 +84,25 @@ std::pair<bool, float> StringRef::to_float() const
   return std::make_pair(true, sig*n);
 }
 
+std::pair<bool, float> StringRef::parse_rational() const
+{
+  const_iterator delim_pos=this->find('/');
+  if (delim_pos==this->end()) {
+    return std::make_pair(false, 0.0f);
+  }
+  StringRef nom_str(begin_, delim_pos-begin_);
+  StringRef denom_str(delim_pos+1, end_-delim_pos-1);
+  std::pair<bool, int> nom=nom_str.rtrim().to_int();
+  std::pair<bool, int> denom=denom_str.ltrim().to_int();
+  if (!nom.first || !denom.first) {
+    return std::make_pair(false, 0.0f);
+  }
+  if (denom.second==0) {
+    return std::make_pair(false, 0.0f);
+  }
+  return std::make_pair(true, float(nom.second)/float(denom.second));
+}
+
 std::ostream& operator<<(std::ostream& stream, const StringRef& strref)
 {
   if (strref.empty()) {
@@ -111,6 +130,44 @@ std::vector<StringRef> StringRef::split(char p) const
     result.push_back(StringRef(l, s-l));
   }
   return result;
+}
+
+bool StringRef::tokenize(std::vector<StringRef>& parts, bool clear) const
+{
+  if (clear) {
+    parts.clear();    
+  }
+  const char* s=this->begin();
+  while (s!=this->end()) {
+    while (isspace(*s)) {
+      ++s;
+      if (s==this->end()) {
+        return true;
+      }
+    }
+    if (*s=='\'' || *s=='"') {
+      char delim=*s;
+      const char* start=++s;
+      while (s!=this->end()) {
+        ++s;
+        if (delim==*(s-1) && (s==this->end() || isspace(*s))) {
+          break;
+        }
+      }
+      parts.push_back(StringRef(start, s-start-1));
+    } else {
+      const char* start=s;
+      while (s!=this->end() && !isspace(*s)) {
+        ++s;
+      }
+      if (s-start) {       
+        parts.push_back(StringRef(start, s-start));
+      } else {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 }

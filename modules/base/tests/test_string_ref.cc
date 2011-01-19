@@ -84,6 +84,22 @@ BOOST_AUTO_TEST_CASE( test_string_ref)
   BOOST_CHECK(r2.first==false);
   r2=StringRef("12.34.", 6).to_float();
   BOOST_CHECK(r2.first==false);
+  
+  
+  // parse rational
+  
+  std::pair<bool, float> r3=StringRef("1/2", 3).parse_rational();
+  BOOST_CHECK(r3.first);
+  BOOST_CHECK_EQUAL(r3.second, 0.5f);
+  r3=StringRef("1 / 2", 5).parse_rational();
+  BOOST_CHECK(r3.first);
+  BOOST_CHECK_EQUAL(r3.second, 0.5f);
+  
+  r3=StringRef(" 1/2", 4).parse_rational();
+  BOOST_CHECK(r3.first==false);
+  
+  r3=StringRef("1/2 ", 4).parse_rational();
+  BOOST_CHECK(r3.first==false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

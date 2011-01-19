@@ -20,6 +20,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
+#include <ost/unit_cell.hh>
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/query.hh>
 #include <ost/mol/mol.hh>
@@ -77,6 +78,13 @@ void export_Entity()
     .def("SetName", &EntityBase::SetName)
     .def("IsValid", &EntityBase::IsValid)
     .add_property("valid", &EntityBase::IsValid)
+    .add_property("unit_cell", 
+                  make_function(&EntityBase::GetUnitCell, 
+                                return_value_policy<copy_const_reference>()),
+                  &EntityBase::SetUnitCell)
+    .def("SetUnitCell", &EntityBase::SetUnitCell)
+    .def("GetUnitCell", &EntityBase::GetUnitCell, 
+         return_value_policy<copy_const_reference>())
   ;
   generic_prop_def<EntityBase>(ent_base);
   

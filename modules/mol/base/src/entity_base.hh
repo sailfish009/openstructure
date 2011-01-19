@@ -24,7 +24,12 @@
 
 #include <ost/generic_property.hh>
 
-namespace ost { namespace mol {
+namespace ost { 
+  
+class UnitCell;
+
+namespace mol {
+
 
 /// \brief definition of EntityBase
 class DLLEXPORT_OST_MOL EntityBase: 
@@ -62,6 +67,10 @@ public:
   bool IsValid() const { return Impl().get()!=0; }
   impl::EntityImplPtr& Impl();
   const impl::EntityImplPtr& Impl() const;
+  
+  const UnitCell& GetUnitCell() const;
+  
+  void SetUnitCell(const UnitCell& unit_cell);
 protected:
   
   GenericPropContainerImpl* GpImpl();
@@ -69,6 +78,8 @@ protected:
   const GenericPropContainerImpl* GpImpl() const;
   
   void CheckValidity() const;  
+    
+
 private:
   impl::EntityImplPtr   impl_;
 };

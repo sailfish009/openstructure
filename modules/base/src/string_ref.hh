@@ -131,11 +131,19 @@ public:
   ///     the float if the conversion succeeds. If the conversion fails,
   ///     \c first is set to false.
   std::pair<bool, float> to_float() const;
-  
   bool empty() const { return begin_==end_; }
 
+  std::pair<bool, float> parse_rational() const;
   /// \brief split string into chunks delimited by \p p
   std::vector<StringRef> split(char p) const;
+  
+  /// \brief tokenizes the string
+  /// 
+  /// Values can be grouped by using quotes:
+  /// 
+  /// 'a b' c is split into 'a b' and 'c', whereas a b c is split into 
+  /// 'a', 'b', 'c'
+  bool tokenize(std::vector<StringRef>& parts, bool clear=true) const;
 private:
   const char* begin_;
   const char* end_;  

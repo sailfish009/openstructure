@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include "entity_base.hh"
+#include <ost/unit_cell.hh>
 #include <ost/mol/impl/entity_impl.hh>
 #include <ost/invalid_handle.hh>
 
@@ -71,5 +72,19 @@ DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os,
 
   return os;
 }
+
+const UnitCell& EntityBase::GetUnitCell() const
+{
+  this->CheckValidity();
+  return impl_->GetUnitCell();
+}
+
+
+void EntityBase::SetUnitCell(const UnitCell& unit_cell)
+{
+  this->CheckValidity();
+  impl_->SetUnitCell(unit_cell);
+}
+
 }} //ns
 

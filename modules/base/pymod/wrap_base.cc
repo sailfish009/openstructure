@@ -31,7 +31,9 @@ void export_Logger();
 void export_GenericProp();
 void export_Range();
 void export_Units();
-
+void export_UnitCell();
+void export_Symop();
+void export_Symmetry();
 // exception translator
 void translator(const ost::Error& x) {
   PyErr_SetString(PyExc_Exception, x.what() );
@@ -68,4 +70,8 @@ BOOST_PYTHON_MODULE(_base)
     .def(vector_indexing_suite<std::vector<int> >())
     .def(ost::VectorAdditions<IntList>())
   ;  
+  
+  export_UnitCell();
+  export_Symop();
+  export_Symmetry();
 }
