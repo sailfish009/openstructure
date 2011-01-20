@@ -22,6 +22,7 @@ OpenStructure documentation
   newmodule
   external
   contributing
+  base/symmetry
   
 For Starters
 --------------------------------------------------------------------------------
@@ -36,7 +37,7 @@ For Starters
 Molecules
 --------------------------------------------------------------------------------
 
-**Overview**: :doc:`molecules intro <intro-01>` | :doc:`mol overview <mol/base/mol>` | :doc:`graphical entity<gfx/entity>` | :doc:`entity <mol/base/entity>` | :doc:`queries <mol/base/query>`
+**Overview**: :doc:`molecules intro <intro-01>` | :doc:`mol overview <mol/base/mol>` | :doc:`graphical entity<gfx/entity>` | :doc:`entity <mol/base/entity>` | :doc:`queries <mol/base/query>` | :doc:`symmetry <base/symmetry>`
 
 **Input/Output**: :ref:`loading and saving molecules <mol-io>`
 
