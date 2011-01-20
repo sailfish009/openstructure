@@ -38,7 +38,7 @@ void MapTool::MouseMove(const MouseEvent& event)
 {
   int active_node_count = SceneSelection::Instance()->GetActiveNodeCount();
   if(active_node_count > 0){
-	for(int i = 0; i<active_node_count;i++){
+    for(int i = 0; i<active_node_count;i++){
       gfx::GfxNodeP np=SceneSelection::Instance()->GetActiveNode(i);
       if(np) {
         if(gfx::MapIso* mi = dynamic_cast<gfx::MapIso*>(np.get())) {
@@ -52,8 +52,17 @@ void MapTool::MouseMove(const MouseEvent& event)
             }
             mi->SetLevel(level);
             std::stringstream s;
-            s << "Isocontouring level: " << level;
             gfx::Scene::Instance().StatusMessage(s.str());
+          }
+          if (event.GetButtons()==MouseEvent::MiddleButton) {
+            if (event.GetDelta().x()==0) continue;
+            int delta=event.GetDelta().x() < 0 ? -2 : 2;
+            img::Extent ext=mi->GetVisibleExtent();
+            img::Extent new_ext(img::Point(ext.GetStart()[0]+delta, 
+                                           ext.GetStart()[1], ext.GetStart()[2]),
+                                img::Point(ext.GetEnd()[0]+delta, 
+                                           ext.GetEnd()[1], ext.GetEnd()[2]));
+            mi->SetVisibleExtent(new_ext);
           }
         } else if(gfx::MapSlab* ms = dynamic_cast<gfx::MapSlab*>(np.get())) {
           mol::Transform tf = gfx::Scene::Instance().GetTransform();

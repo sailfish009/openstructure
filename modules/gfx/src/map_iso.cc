@@ -88,13 +88,14 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   tf.SetCenter(this->GetCenter());
   tf.SetTrans(this->GetCenter());  
   this->SetTF(tf);
+  octree_.SetNewMap(mh_);  
   Rebuild();
 }
 
 geom::AlignedCuboid MapIso::GetBoundingBox() const
 {
-  geom::Vec3 minc = mh_.IndexToCoord(mh_.GetExtent().GetStart());
-  geom::Vec3 maxc = mh_.IndexToCoord(mh_.GetExtent().GetEnd());
+  geom::Vec3 minc = mh_.IndexToCoord(octree_.GetExtent().GetStart());
+  geom::Vec3 maxc = mh_.IndexToCoord(octree_.GetExtent().GetEnd());
   return geom::AlignedCuboid(minc,maxc);
 }
 
@@ -219,9 +220,8 @@ void MapIso::CustomRenderGL(RenderPass pass)
   if(pass==STANDARD_RENDER_PASS) {
     va_.RenderGL();
     if (debug_octree_) {
-      OctreeDebugger d(level_,
-		       mh_.IndexToCoord(img::Point(1,1,1))-
-		       mh_.IndexToCoord(img::Point(0,0,0)));
+      OctreeDebugger d(level_, mh_.IndexToCoord(img::Point(1,1,1))-
+                       mh_.IndexToCoord(img::Point(0,0,0)));
       glPushAttrib(GL_ENABLE_BIT);
       glDisable(GL_LIGHTING);
       octree_.VisitDF(d);
@@ -248,7 +248,6 @@ void MapIso::Rebuild()
     throw Error("Error: Map is too big for visualization");
   }
   if (IfOctreeDirty()==true) {
-    octree_.SetNewMap(mh_);
     octree_.Initialize();
   }
   va_.Clear();
@@ -256,7 +255,7 @@ void MapIso::Rebuild()
   normals_calculated_=false;
   bool triangles=this->GetRenderMode()!=gfx::RenderMode::SIMPLE;
   impl::OctreeIsocont cont(va_, level_, triangles, color_);
-  octree_.VisitDF(cont);
+  octree_.VisitDFFullExtent(cont);
   // for normal debugging
 #if 0  
   normals_calculated_=true;
@@ -360,7 +359,10 @@ void MapIso::SetNSF(float nsf)
 /// \brief sets the donsampled map to active
 void MapIso::ShowDownsampledMap()
 {
+  if (downsampled_mh_==mh_) return;
   if (downsampled_mh_.IsValid()) mh_ = downsampled_mh_;
+  
+  octree_.SetNewMap(mh_);
   MakeOctreeDirty();
   stat_calculated_ = false;
   histogram_calculated_ = false;
@@ -371,7 +373,13 @@ void MapIso::ShowDownsampledMap()
 /// \brief sets the original map to active
 void MapIso::ShowOriginalMap()
 {
-  if (original_mh_.IsValid()) mh_ = original_mh_;
+  if (original_mh_==mh_) 
+    return;
+  if (original_mh_.IsValid()) {
+    mh_ = original_mh_;
+  }
+  
+  octree_.SetNewMap(mh_);  
   MakeOctreeDirty();
   stat_calculated_ = false;
   histogram_calculated_ = false;
@@ -411,10 +419,24 @@ img::ImageHandle MapIso::DownsampleMap(const img::ImageHandle& mh)
   img:: ImageHandle ret_mh = mh;
   if (downsampling_fact != 1) {
     LOG_INFO("Downsampling map for more comfortable visualization")
-    img::alg::DiscreteShrink shrink_alg(img::Size(downsampling_fact,downsampling_fact,downsampling_fact));
+    img::alg::DiscreteShrink shrink_alg(img::Size(downsampling_fact,
+                                                  downsampling_fact,
+                                                  downsampling_fact));
     ret_mh = mh.Apply(shrink_alg);
   }
   return ret_mh;
+}
+
+void MapIso::SetVisibleExtent(const img::Extent& vis_extent)
+{
+  octree_.SetExtent(vis_extent);
+  this->FlagRebuild();
+}
+
+
+const img::Extent& MapIso::GetVisibleExtent() const
+{
+  return octree_.GetExtent();
 }
 
 }} // ns

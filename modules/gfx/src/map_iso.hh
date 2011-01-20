@@ -64,7 +64,11 @@ public:
   virtual void OnInput(const InputEvent& e);
 
   virtual void OnRenderModeChange();
-
+  
+  void SetVisibleExtent(const img::Extent& vis_extent);
+  
+  
+  const img::Extent& GetVisibleExtent() const;
   void Rebuild();
   
   /// \brief set isocontouring level

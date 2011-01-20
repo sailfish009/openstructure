@@ -28,7 +28,9 @@ namespace ost { namespace gfx { namespace impl {
 MapOctree::MapOctree(const img::ImageHandle& ih):
   map_(ih),
   built_(false)
-{}
+{
+  extent_=map_.GetExtent();
+}
 
 void MapOctree::Initialize()
 {
@@ -40,7 +42,9 @@ void MapOctree::Initialize()
 
 void MapOctree::SetNewMap(const img::ImageHandle& ih)
 {
+  std::cout << "SET NEW MAP???" << std::endl;
   map_=ih;
+  extent_=map_.GetExtent();
 }
 
 bool MapOctree::IsMapManageable (const img::ImageHandle ih)

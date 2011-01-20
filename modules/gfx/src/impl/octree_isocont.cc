@@ -75,8 +75,9 @@ VertexID OctreeIsocont::GetOrGenVert(img::RealSpatialImageState* map,
                                      const img::Point& p, 
                                      EdgeDesc* desc)
 {
+  img::Point point_plus_offset=p+offset_;
   img::Extent ext=map->GetExtent();
-  uint32_t key=desc->GetKey(p, ext);
+  /*uint32_t key=desc->GetKey(point_plus_offset, ext);
   EdgeMap::iterator k=edge_map_.find(key);
   if (k!=edge_map_.end()) {
     VertexID id=k->second;
@@ -84,17 +85,17 @@ VertexID OctreeIsocont::GetOrGenVert(img::RealSpatialImageState* map,
       edge_map_.erase(k);
     }
     return id;
-  }
+  }*/
   img::Point p1=p+OctreeIsocont::POINT_OFFSETS[desc->c1];
   img::Point p2=p+OctreeIsocont::POINT_OFFSETS[desc->c2];  
-  geom::Vec3 vert1=map->IndexToCoord(p1);
-  geom::Vec3 vert2=map->IndexToCoord(p2);
+  geom::Vec3 vert1=map->IndexToCoord(p1+offset_);
+  geom::Vec3 vert2=map->IndexToCoord(p2+offset_);
   float val1=map->Value(p1);
   float val2=map->Value(p2);
   float t=(level_-val1)/(val2-val1);
   VertexID id=va_.Add(vert1*(1.0f-t)+vert2*t, geom::Vec3(1,0,0), 
                       color_);
-  edge_map_.insert(std::make_pair(key, id));
+  //edge_map_.insert(std::make_pair(key, id));
   return id;
 }
 

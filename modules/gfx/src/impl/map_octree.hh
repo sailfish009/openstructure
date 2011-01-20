@@ -112,11 +112,15 @@ public:
   void Initialize();
   uint32_t GetNumNodesForLevel(uint8_t level) const;
   void SetNewMap(const img::ImageHandle& ih);
+  void SetExtent(const img::Extent& extent) { 
+    extent_=extent; 
+  }
+  const img::Extent& GetExtent() const { return extent_; }
   static bool IsMapManageable (const img::ImageHandle ih);
-
+  
   /// \brief depth-first visit of octree nodes
   template <typename F>
-  void VisitDF(F& f) const
+  void VisitDF(F& f, bool ignore_extent=false) const
   {
     if (levels_.empty()) {
       return;
@@ -126,10 +130,66 @@ public:
     map=dynamic_cast<img::RealSpatialImageState*>(map_.ImageStatePtr().get());
     assert(levels_[0].size()==1);
     if (f.VisitNode(levels_[0][0], 0, ext)) {
-      this->VisitDFRec<F>(levels_[0][0], f, 1, ext, map);
-    }    
+      this->VisitDFRec<F>(levels_[0][0], f, 1, ext, map, ignore_extent);
+    }
   }
-
+  
+  /// \brief wrapper around VisitDF to work with with maps that have apparent 
+  ///    infinite extensions, such as density maps coming from X-ray 
+  ///    crystallography. We basically split the visit into several runs 
+  ///    (up to two in each dimension)
+  // desperately in need of a better name!
+  template <typename F>
+  void VisitDFFullExtent(F& f)
+  {
+    if (levels_.empty()) {
+      return;
+    }
+    img::Extent map_extent=map_.GetExtent();
+    img::RealSpatialImageState* map=NULL;
+    map=dynamic_cast<img::RealSpatialImageState*>(map_.ImageStatePtr().get());
+    img::Point start=extent_.GetStart();
+    img::Point end=extent_.GetEnd();
+    img::Extent extent=extent_;
+    img::Size size=map_extent.GetSize();
+    int start_x_off=start[0]/static_cast<int>(size[0]);
+    int end_x_off=end[0]/static_cast<int>(size[0]);
+    std::cout << extent << " " << map_extent << " " << start_x_off << " " << end_x_off << std::endl;
+    if (start_x_off!=end_x_off) {
+      // determine where to split:
+      f.SetOffset(img::Point(start_x_off*size[0], 0, 0));
+      img::Extent x_extent_a=img::Extent(img::Point(start[0]-start_x_off*size[0], start[1], start[2]),
+                                         map_extent.GetEnd());
+      extent_=x_extent_a;
+      if (f.VisitNode(levels_[0][0], 0, map_extent)) {
+        this->VisitDFRec<F>(levels_[0][0], f, 1, map_extent, map, false);
+      }
+      int true_end=end[0]-end_x_off*size[0];
+      if (true_end<0) {
+        true_end=size[0]-true_end;git st
+      }
+      std::cout << true_end << std::endl;
+      img::Point new_end=img::Point(true_end, end[1], end[2]);
+      img::Extent x_extent_b=img::Extent(img::Point(0, 0, 0),
+                                         new_end);                                         
+      //std::cout << "XB: " << x_extent_b << " "  << start_x_off << " " << end_x_off << std::endl;
+      extent_=x_extent_b;
+      f.SetOffset(img::Point(end_x_off*size[0], 0, 0));
+      if (f.VisitNode(levels_[0][0], 0, map_extent)) {
+        this->VisitDFRec<F>(levels_[0][0], f, 1, map_extent, map, false);
+      }
+    } else {
+      img::Extent x_extent(img::Point(start[0]-start_x_off*size[0], start[1], start[2]),
+                           img::Point(end[0]-end_x_off*size[0], end[1], end[2]));
+      extent_=x_extent;
+      f.SetOffset(img::Point(start_x_off*size[0], 0, 0));
+      if (f.VisitNode(levels_[0][0], 0, map_extent)) {
+        this->VisitDFRec<F>(levels_[0][0], f, 1, map_extent, map, false);
+      }
+    }
+    assert(levels_[0].size()==1);
+    extent_=extent;
+  }
 protected:
   static inline int LastSetBit(uint16_t ch)
   {
@@ -145,7 +205,8 @@ protected:
   template <typename F>
   void VisitDFRec(const OctreeNode& node, F& f, uint8_t level, 
                   const img::Extent& ext, 
-                  img::RealSpatialImageState* map) const
+                  img::RealSpatialImageState* map,
+                  bool ignore_extent) const
   {
     if (node.GetChildCount()==0) { return; }
     uint32_t c=node.GetFirstChild();    
@@ -201,9 +262,11 @@ protected:
                                          range_z[k][0]),
                              img::Point(range_x[i][1], range_y[j][1], 
                                          range_z[k][1]));
-            if (f.VisitNode(cn, level, ext)) {
-              this->VisitDFRec<F>(cn, f, level+1, ext, map);
-            }            
+            if (ignore_extent || img::HasOverlap(ext, extent_)) {
+              if (f.VisitNode(cn, level, ext)) {
+                this->VisitDFRec<F>(cn, f, level+1, ext, map, ignore_extent);
+              }
+            }
           }
         }
       }    
@@ -217,9 +280,10 @@ private:
                                          const img::Extent& ext,
                                          OctreeNode& parent);
 
-  img::ImageHandle            map_;
-  std::vector<OcNodeEntryList>      levels_;
-  bool                        built_;
+  img::ImageHandle              map_;
+  std::vector<OcNodeEntryList>  levels_;
+  img::Extent                   extent_;
+  bool                          built_;
 };
 
 }}}

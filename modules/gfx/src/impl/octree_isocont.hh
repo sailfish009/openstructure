@@ -73,12 +73,16 @@ public:
   
   VertexID GetOrGenVert(img::RealSpatialImageState* map, const img::Point& p, 
                         EdgeDesc* desc);
+  void SetOffset(const img::Point& p) { offset_=p; }
+  
+  const img::Point& GetOffset() const { return offset_; }
 private:
   IndexedVertexArray& va_;
   float               level_;
   EdgeMap             edge_map_;
   bool                triangles_;
   Color               color_;
+  img::Point          offset_;
 };
 
 
