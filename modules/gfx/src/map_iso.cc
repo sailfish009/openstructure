@@ -35,6 +35,7 @@
 #include "impl/map_iso_gen_s.hh"
 #include "impl/map_iso_gen_o.hh"
 #include "impl/octree_isocont.hh"
+#include "impl/map_octree.hh"
 #include "scene.hh"
 
 #if OST_SHADER_SUPPORT_ENABLED
@@ -55,9 +56,7 @@ int compute_downsampling_fact(const ost::img::ImageHandle& mh)
 
 }
 
-namespace ost { 
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 MapIso::MapIso(const String& name, const img::MapHandle& mh, 
                float level, uint a):
@@ -65,7 +64,7 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   original_mh_(mh),
   downsampled_mh_(),
   mh_(MapIso::DownsampleMap(mh)),
-  octree_(mh_),
+  octree_(new impl::MapOctree(mh_, true)),
   stat_calculated_(false),
   histogram_calculated_(false),
   histogram_bin_count_(100),
@@ -79,7 +78,7 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   if (mh_ != original_mh_) {
     downsampled_mh_ = mh_;
   }
-  octree_.Initialize();
+  octree_->Initialize();
   SetMatAmb(Color(0,0,0));
   SetMatDiff(Color(1,1,1));
   SetMatSpec(Color(0.1,0.1,0.1));
@@ -87,15 +86,16 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   mol::Transform tf=this->GetTF();
   tf.SetCenter(this->GetCenter());
   tf.SetTrans(this->GetCenter());  
+  this->SetLineWidth(1.0);
   this->SetTF(tf);
-  octree_.SetNewMap(mh_);  
+  octree_->SetNewMap(mh_);  
   Rebuild();
 }
 
 geom::AlignedCuboid MapIso::GetBoundingBox() const
 {
-  geom::Vec3 minc = mh_.IndexToCoord(octree_.GetExtent().GetStart());
-  geom::Vec3 maxc = mh_.IndexToCoord(octree_.GetExtent().GetEnd());
+  geom::Vec3 minc = mh_.IndexToCoord(octree_->GetExtent().GetStart());
+  geom::Vec3 maxc = mh_.IndexToCoord(octree_->GetExtent().GetEnd());
   return geom::AlignedCuboid(minc,maxc);
 }
 
@@ -105,6 +105,14 @@ geom::Vec3 MapIso::GetCenter() const
   return nrvo;
 }
 
+
+MapIso::~MapIso()
+{
+  if (octree_) {
+    delete octree_;
+    octree_=NULL;
+  }
+}
 void MapIso::UpdateRenderParams()
 {
   if(GetRenderMode()==RenderMode::FILL ||
@@ -200,7 +208,7 @@ struct OctreeDebugger {
     glEnd();
   }
   
-  void VisitLeaf(img::RealSpatialImageState* map, 
+  void VisitLeaf(const impl::MapOctree& octree, img::RealSpatialImageState* map, 
                  const img::Point& point) 
   {
     glColor3f(1.0, 1.0, 0.0);
@@ -224,7 +232,7 @@ void MapIso::CustomRenderGL(RenderPass pass)
                        mh_.IndexToCoord(img::Point(0,0,0)));
       glPushAttrib(GL_ENABLE_BIT);
       glDisable(GL_LIGHTING);
-      octree_.VisitDF(d);
+      octree_->VisitDF(d);
       glPopAttrib();
     }
   }
@@ -244,18 +252,19 @@ void MapIso::Rebuild()
   if (mh_.IsFrequency() == true){
     throw Error("Error: Map not in real space. Cannot create of this map");
   }
-  if (octree_.IsMapManageable(mh_) == false) {
+  if (octree_->IsMapManageable(mh_) == false) {
     throw Error("Error: Map is too big for visualization");
   }
   if (IfOctreeDirty()==true) {
-    octree_.Initialize();
+    octree_->Initialize();
+    dirty_octree_=false;
   }
   va_.Clear();
   va_.SetMode(0x2);
   normals_calculated_=false;
   bool triangles=this->GetRenderMode()!=gfx::RenderMode::SIMPLE;
   impl::OctreeIsocont cont(va_, level_, triangles, color_);
-  octree_.VisitDFFullExtent(cont);
+  octree_->VisitDFFullExtent(cont);
   // for normal debugging
 #if 0  
   normals_calculated_=true;
@@ -362,7 +371,7 @@ void MapIso::ShowDownsampledMap()
   if (downsampled_mh_==mh_) return;
   if (downsampled_mh_.IsValid()) mh_ = downsampled_mh_;
   
-  octree_.SetNewMap(mh_);
+  octree_->SetNewMap(mh_);
   MakeOctreeDirty();
   stat_calculated_ = false;
   histogram_calculated_ = false;
@@ -375,11 +384,12 @@ void MapIso::ShowOriginalMap()
 {
   if (original_mh_==mh_) 
     return;
+
   if (original_mh_.IsValid()) {
     mh_ = original_mh_;
   }
   
-  octree_.SetNewMap(mh_);  
+  octree_->SetNewMap(mh_);  
   MakeOctreeDirty();
   stat_calculated_ = false;
   histogram_calculated_ = false;
@@ -429,14 +439,14 @@ img::ImageHandle MapIso::DownsampleMap(const img::ImageHandle& mh)
 
 void MapIso::SetVisibleExtent(const img::Extent& vis_extent)
 {
-  octree_.SetExtent(vis_extent);
+  octree_->SetExtent(vis_extent);
   this->FlagRebuild();
 }
 
 
 const img::Extent& MapIso::GetVisibleExtent() const
 {
-  return octree_.GetExtent();
+  return octree_->GetExtent();
 }
 
 }} // ns

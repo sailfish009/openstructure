@@ -801,7 +801,6 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
     mstart[header.maps-1]=header.nsstart;
     image.Reset(img::Extent(mstart,msize),img::REAL,img::SPATIAL);
     if(header.x>0.0 && header.y >0.0 && header.z>0.0){
-      std::cout << header.x << " " << header.y << " " << header.z << std::endl;
       geom::Mat3 cs=geom::Mat3FromAngles(M_PI*header.alpha/180.0, 
                                          M_PI*header.beta/180.0, 
                                          M_PI*header.gamma/180.0);
@@ -811,7 +810,6 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
       geom::Mat3 sampling=geom::Mat3(cs(0,0)*s[0], cs(0,1)*s[1], cs(0,2)*s[2],
                                      cs(1,0)*s[0], cs(1,1)*s[1], cs(1,2)*s[2],
                                      cs(2,0)*s[0], cs(2,1)*s[1], cs(2,2)*s[2]);
-      std::cout << "SAMPLING " << sampling << std::endl;
       image.SetSpatialSamplingMat(sampling);
     }else{
       LOG_INFO("Suspicious dell dimensions found. Cannot set sampling.");

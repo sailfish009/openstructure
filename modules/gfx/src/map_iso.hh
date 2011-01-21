@@ -24,16 +24,20 @@
 */
 
 #include <boost/shared_ptr.hpp>
-
 #include <ost/img/map.hh>
 #include <ost/img/alg/stat.hh>
 #include <ost/img/alg/histogram.hh>
 
-#include <ost/gfx/impl/map_octree.hh>
 #include "gfx_object.hh"
 #include "map_iso_prop.hh"
 
 namespace ost { namespace gfx {
+
+namespace impl {
+
+class MapOctree;
+  
+}
 
 enum MapIsoType {
   ORIGINAL_MAP,
@@ -52,7 +56,7 @@ typedef boost::shared_ptr<MapIso> MapIsoP;
 class DLLEXPORT_OST_GFX MapIso: public GfxObj {
 public:
   MapIso(const String& name, const img::MapHandle& mh,float level, uint a=0);
-
+  ~MapIso();
   virtual geom::AlignedCuboid GetBoundingBox() const;
                              
   virtual geom::Vec3 GetCenter() const;
@@ -154,26 +158,26 @@ protected:
   static img::ImageHandle DownsampleMap(const img::ImageHandle& mh);
 
 private:
-  img::MapHandle           original_mh_;
-  img::MapHandle           downsampled_mh_;
-  img::MapHandle           mh_;
-  impl::MapOctree          octree_;
-  mutable img::alg::Stat   stat_;
-  mutable bool             stat_calculated_;
+  img::MapHandle                original_mh_;
+  img::MapHandle                downsampled_mh_;
+  img::MapHandle                mh_;
+  impl::MapOctree*              octree_;
+  mutable img::alg::Stat        stat_;
+  mutable bool                  stat_calculated_;
   mutable img::alg::Histogram   histogram_;
-  mutable bool             histogram_calculated_;
-  int                      histogram_bin_count_;
-  float                    level_;
-  bool                     normals_calculated_;
-  uint                     alg_;
-  float                    smoothf_;
-  float                    min_;
-  float                    max_;
-  float                    std_dev_;
-  float                    min_max_;
-  bool                     debug_octree_;
-  Color                    color_;
-  bool                     dirty_octree_;
+  mutable bool                  histogram_calculated_;
+  int                           histogram_bin_count_;
+  float                         level_;
+  bool                          normals_calculated_;
+  uint                          alg_;
+  float                         smoothf_;
+  float                         min_;
+  float                         max_;
+  float                         std_dev_;
+  float                         min_max_;
+  bool                          debug_octree_;
+  Color                         color_;
+  bool                          dirty_octree_;
 };
 
 }}

@@ -68,11 +68,13 @@ public:
   {
     return (node.GetMin()<level_ && level_<=node.GetMax());
   }
-  void VisitLeaf(img::RealSpatialImageState* map, 
+  void VisitLeaf(const MapOctree& octree, img::RealSpatialImageState* map, 
                  const img::Point& point);
   
-  VertexID GetOrGenVert(img::RealSpatialImageState* map, const img::Point& p, 
-                        EdgeDesc* desc);
+  void SetVisibleExtent(const img::Extent& ext) { vis_extent_=ext; }
+  
+  VertexID GetOrGenVert(const MapOctree& octree, img::RealSpatialImageState* map, 
+                        const img::Point& p, EdgeDesc* desc);
   void SetOffset(const img::Point& p) { offset_=p; }
   
   const img::Point& GetOffset() const { return offset_; }
@@ -83,6 +85,7 @@ private:
   bool                triangles_;
   Color               color_;
   img::Point          offset_;
+  img::Extent         vis_extent_;
 };
 
 

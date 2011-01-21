@@ -43,16 +43,30 @@ void MapTool::MouseMove(const MouseEvent& event)
       if(np) {
         if(gfx::MapIso* mi = dynamic_cast<gfx::MapIso*>(np.get())) {
           if(event.GetButtons()==MouseEvent::LeftButton) {
-            float level = mi->GetLevel();
-            float std = mi->GetStdDev();
-            if(std::abs(event.GetDelta().x())>std::abs(event.GetDelta().y())) {
-              level+=0.02*std*static_cast<Real>(event.GetDelta().x());
+            if (event.IsShiftPressed()) {
+              gfx::Scene& scene=gfx::Scene::Instance();
+              
+              geom::Vec3 p1(-event.GetLastPos().x(), 
+                            event.GetLastPos().y(), 0);
+              geom::Vec3 p2(-event.GetPos().x(), 
+                             event.GetPos().y(), 0);
+              geom::Vec3 delta=scene.UnProject(p1)-scene.UnProject(p2);
+              img::ImageHandle the_map=mi->GetMap();
+              img::Extent vis=mi->GetVisibleExtent();
+              img::Extent new_vis(vis.GetStart()+img::Point(delta), 
+                                  vis.GetEnd()+img::Point(delta));
+              mi->SetVisibleExtent(new_vis);
             } else {
-              level+=0.002*std*static_cast<Real>(event.GetDelta().y());
+              float level = mi->GetLevel();
+              float std = mi->GetStdDev();
+              if(std::abs(event.GetDelta().x())>std::abs(event.GetDelta().y())) {
+                level+=0.01*std*static_cast<Real>(event.GetDelta().x());
+              } else {
+                level+=0.001*std*static_cast<Real>(event.GetDelta().y());
+              }
+              mi->SetLevel(level);              
             }
-            mi->SetLevel(level);
-            std::stringstream s;
-            gfx::Scene::Instance().StatusMessage(s.str());
+            gfx::Scene::Instance().StatusMessage("");
           }
           if (event.GetButtons()==MouseEvent::MiddleButton) {
             if (event.GetDelta().x()==0) continue;

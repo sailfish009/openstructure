@@ -46,16 +46,16 @@ struct OcRangeVector {
 class OctreeNode {
 public:
   OctreeNode(uint32_t first_child, bool branch_x, bool branch_y, bool branch_z):
-    first_child_(first_child), branch_x_(branch_x), 
+    first_child_(first_child), branch_(branch_x), 
     branch_y_(branch_y), branch_z_(branch_z), is_leaf_(false), 
     min_(0.0), max_(0.0)
   { }
   OctreeNode(): first_child_(0), 
-     branch_x_(false), branch_y_(false), branch_z_(false), is_leaf_(false),
+     branch_(false), branch_y_(false), branch_z_(false), is_leaf_(false),
      min_(0.0), max_(0.0)
   { }
   /// \brief whether the node branches in x direction
-  bool BranchInX() const { return branch_x_; }
+  bool BranchInX() const { return branch_; }
   /// \brief whether the node branches in y direction  
   bool BranchInY() const { return branch_y_; }  
   /// \brief whether the node branches in z direction  
@@ -63,7 +63,7 @@ public:
   
   /// \brief get number of children
   uint8_t GetChildCount() const { 
-    uint8_t sum=(uint8_t(branch_x_)+uint8_t(branch_y_)+uint8_t(branch_z_));
+    uint8_t sum=(uint8_t(branch_)+uint8_t(branch_y_)+uint8_t(branch_z_));
     switch (sum) {
       case 0:
         return 0;
@@ -89,7 +89,7 @@ public:
   void SetMax(float m) { max_=m; }  
 private:
   uint32_t first_child_ : 28; // < index of left-most child
-  bool     branch_x_    : 1;  // < whether to branch in x
+  bool     branch_    : 1;  // < whether to branch in x
   bool     branch_y_    : 1;  // < whether to branch in y
   bool     branch_z_    : 1;  // < whether to branch in z
   bool     is_leaf_     : 1;  // < whether the child nodes are leafs
@@ -108,7 +108,7 @@ typedef std::vector<OctreeNode> OcNodeEntryList;
 /// maximum value of the voxels it encloses.
 class DLLEXPORT_OST_GFX MapOctree {
 public:
-  MapOctree(const img::ImageHandle& map);
+  MapOctree(const img::ImageHandle& map, bool wrap_around);
   void Initialize();
   uint32_t GetNumNodesForLevel(uint8_t level) const;
   void SetNewMap(const img::ImageHandle& ih);
@@ -125,15 +125,16 @@ public:
     if (levels_.empty()) {
       return;
     }
-    img::Extent ext=map_.GetExtent();
     img::RealSpatialImageState* map=NULL;
     map=dynamic_cast<img::RealSpatialImageState*>(map_.ImageStatePtr().get());
     assert(levels_[0].size()==1);
-    if (f.VisitNode(levels_[0][0], 0, ext)) {
-      this->VisitDFRec<F>(levels_[0][0], f, 1, ext, map, ignore_extent);
+    if (f.VisitNode(levels_[0][0], 0, real_extent_)) {
+      this->VisitDFRec<F>(levels_[0][0], f, 1, real_extent_, map, 
+                          ignore_extent);
     }
   }
   
+
   /// \brief wrapper around VisitDF to work with with maps that have apparent 
   ///    infinite extensions, such as density maps coming from X-ray 
   ///    crystallography. We basically split the visit into several runs 
@@ -145,52 +146,22 @@ public:
     if (levels_.empty()) {
       return;
     }
-    img::Extent map_extent=map_.GetExtent();
     img::RealSpatialImageState* map=NULL;
     map=dynamic_cast<img::RealSpatialImageState*>(map_.ImageStatePtr().get());
-    img::Point start=extent_.GetStart();
-    img::Point end=extent_.GetEnd();
     img::Extent extent=extent_;
-    img::Size size=map_extent.GetSize();
-    int start_x_off=start[0]/static_cast<int>(size[0]);
-    int end_x_off=end[0]/static_cast<int>(size[0]);
-    std::cout << extent << " " << map_extent << " " << start_x_off << " " << end_x_off << std::endl;
-    if (start_x_off!=end_x_off) {
-      // determine where to split:
-      f.SetOffset(img::Point(start_x_off*size[0], 0, 0));
-      img::Extent x_extent_a=img::Extent(img::Point(start[0]-start_x_off*size[0], start[1], start[2]),
-                                         map_extent.GetEnd());
-      extent_=x_extent_a;
-      if (f.VisitNode(levels_[0][0], 0, map_extent)) {
-        this->VisitDFRec<F>(levels_[0][0], f, 1, map_extent, map, false);
-      }
-      int true_end=end[0]-end_x_off*size[0];
-      if (true_end<0) {
-        true_end=size[0]-true_end;git st
-      }
-      std::cout << true_end << std::endl;
-      img::Point new_end=img::Point(true_end, end[1], end[2]);
-      img::Extent x_extent_b=img::Extent(img::Point(0, 0, 0),
-                                         new_end);                                         
-      //std::cout << "XB: " << x_extent_b << " "  << start_x_off << " " << end_x_off << std::endl;
-      extent_=x_extent_b;
-      f.SetOffset(img::Point(end_x_off*size[0], 0, 0));
-      if (f.VisitNode(levels_[0][0], 0, map_extent)) {
-        this->VisitDFRec<F>(levels_[0][0], f, 1, map_extent, map, false);
-      }
-    } else {
-      img::Extent x_extent(img::Point(start[0]-start_x_off*size[0], start[1], start[2]),
-                           img::Point(end[0]-end_x_off*size[0], end[1], end[2]));
-      extent_=x_extent;
-      f.SetOffset(img::Point(start_x_off*size[0], 0, 0));
-      if (f.VisitNode(levels_[0][0], 0, map_extent)) {
-        this->VisitDFRec<F>(levels_[0][0], f, 1, map_extent, map, false);
-      }
-    }
-    assert(levels_[0].size()==1);
+    f.SetVisibleExtent(extent);
+    this->DispatchVisit(f, map, img::Point(0, 0, 0), extent, 0);
     extent_=extent;
   }
+  
+  const img::Extent& GetRealExtent() const { return real_extent_; }
 protected:
+  
+  template <typename F>
+  void DispatchVisit(F& func, img::RealSpatialImageState*, 
+                     const img::Point& offset, 
+                     const img::Extent& extent, int axis);
+  
   static inline int LastSetBit(uint16_t ch)
   {
     for (char i=15; i>=0; --i) {
@@ -206,72 +177,7 @@ protected:
   void VisitDFRec(const OctreeNode& node, F& f, uint8_t level, 
                   const img::Extent& ext, 
                   img::RealSpatialImageState* map,
-                  bool ignore_extent) const
-  {
-    if (node.GetChildCount()==0) { return; }
-    uint32_t c=node.GetFirstChild();    
-    int cx=1+int(node.BranchInX());
-    int cy=1+int(node.BranchInY());
-    int cz=1+int(node.BranchInZ());
-    int range_x[2][2];
-    int range_y[2][2];
-    int range_z[2][2];
-    // update ranges. this is basically the same code as in BuildOctreeRec()
-    if (node.BranchInX()) {
-      uint16_t ems=ext.GetEnd()[0]-ext.GetStart()[0];
-      uint16_t bit_mask=1<<(LastSetBit(ems));
-      range_x[0][0]=ext.GetStart()[0];
-      range_x[0][1]=range_x[0][0]+bit_mask-1;
-      range_x[1][0]=ext.GetEnd()[0]-(ems & ~bit_mask);
-      range_x[1][1]=ext.GetEnd()[0];
-    } else {
-      range_x[0][0]=ext.GetStart()[0];
-      range_x[0][1]=ext.GetEnd()[0];
-    }
-    if (node.BranchInY()) {
-      uint16_t ems=ext.GetEnd()[1]-ext.GetStart()[1];
-      uint16_t bit_mask=1<<(LastSetBit(ems));
-      range_y[0][0]=ext.GetStart()[1];
-      range_y[0][1]=range_y[0][0]+bit_mask-1;
-      range_y[1][0]=ext.GetEnd()[1]-(ems & ~bit_mask);
-      range_y[1][1]=ext.GetEnd()[1];
-    } else {
-      range_y[0][0]=ext.GetStart()[1];
-      range_y[0][1]=ext.GetEnd()[1];
-    }
-    if (node.BranchInZ()) {
-      uint16_t ems=ext.GetEnd()[2]-ext.GetStart()[2];
-      uint16_t bit_mask=1<<(LastSetBit(ems));
-      range_z[0][0]=ext.GetStart()[2];
-      range_z[0][1]=range_z[0][0]+bit_mask-1;
-      range_z[1][0]=ext.GetEnd()[2]-(ems & ~bit_mask);
-      range_z[1][1]=ext.GetEnd()[2];
-    } else {
-      range_z[0][0]=ext.GetStart()[2];
-      range_z[0][1]=ext.GetEnd()[2];
-    }    
-    for (int i=0; i<cx; ++i) {
-      for (int j=0; j<cy; ++j) {
-        for (int k=0; k<cz; ++k, ++c) {
-          if (node.IsLeaf()) {
-            f.VisitLeaf(map, img::Point(range_x[i][0], range_y[j][0], 
-                                         range_z[k][0]));
-           } else {
-            const OctreeNode& cn=levels_[level][c];
-            img::Extent ext(img::Point(range_x[i][0], range_y[j][0], 
-                                         range_z[k][0]),
-                             img::Point(range_x[i][1], range_y[j][1], 
-                                         range_z[k][1]));
-            if (ignore_extent || img::HasOverlap(ext, extent_)) {
-              if (f.VisitNode(cn, level, ext)) {
-                this->VisitDFRec<F>(cn, f, level+1, ext, map, ignore_extent);
-              }
-            }
-          }
-        }
-      }    
-    }    
-  }
+                  bool ignore_extent) const;
 private:
   void BuildOctree();
   std::pair<float, float> BuildOctreeRec(const OcRangeVector& range_vec,
@@ -284,7 +190,170 @@ private:
   std::vector<OcNodeEntryList>  levels_;
   img::Extent                   extent_;
   bool                          built_;
+  bool                          wrap_around_;
+  img::Extent                   real_extent_;
 };
+
+
+template <typename F>
+void MapOctree::DispatchVisit(F& f, img::RealSpatialImageState* map, 
+                              const img::Point& offset, 
+                              const img::Extent& extent, int axis)
+{
+  img::Point start=extent.GetStart();
+  img::Point end=extent.GetEnd();
+  img::Extent map_extent=map->GetExtent();
+  img::Size size=map_extent.GetSize();
+  img::Point map_start=map_extent.GetStart();
+  int start_off, start_mod;
+  int end_off, end_mod;
+  // calculate the unit cell index the start and end of the extent fall into.
+  // we have to distinguish between indices that are smaller than 0 and indices 
+  // larger than zero, since numbers above zero are rounded to the next smaller 
+  // int, whereas floats below zero are rounded to the next larger int.
+  if (start[axis]-map_start[axis]<0) {
+    start_off=((start[axis]-map_start[axis])/static_cast<int>(size[axis]))-1;
+    start_mod=size[axis]-(std::abs(start[axis]-map_start[axis]) % size[axis]);
+  } else {
+    start_off=(start[axis]-map_start[axis])/static_cast<int>(size[axis]);
+    start_mod=(start[axis]-map_start[axis]) % size[axis];
+  }
+  if (end[axis]-map_start[axis]<0) {
+    end_off=((end[axis]-map_start[axis])/static_cast<int>(size[axis]))-1;
+    end_mod=size[axis]-(std::abs(end[axis]-map_start[axis]) % size[axis]);
+  } else {
+    end_off=(end[axis]-map_start[axis])/static_cast<int>(size[axis]);
+    end_mod=(end[axis]-map_start[axis]) % size[axis];
+  }
+  if (start_off!=end_off) {
+    // split into two parts
+    img::Point new_offset_a=offset;
+    new_offset_a[axis]=start_off*size[axis];
+    img::Point extent_start=start;
+    extent_start[axis]=start_mod+map_start[axis];
+    img::Point extent_end=end;
+    extent_end[axis]=map_extent.GetEnd()[axis]+2;
+    img::Extent extent_a=img::Extent(extent_start, extent_end);
+    
+    img::Point new_end=end;
+    new_end[axis]=end_mod+map_start[axis];
+    img::Point new_start_b=start;
+    new_start_b[axis]=map_start[axis];
+    img::Extent extent_b=img::Extent(new_start_b,
+                                     new_end);
+    img::Point new_offset_b=offset;
+    new_offset_b[axis]=end_off*size[axis];
+    //std::cout << "SPLIT "  << axis  << " " << extent_a << " " << extent_b << std::endl;
+    if (axis<2) {
+      this->DispatchVisit(f, map, new_offset_a, extent_a, axis+1);
+      this->DispatchVisit(f, map, new_offset_b, extent_b, axis+1);
+    } else {
+      extent_=extent_a;
+      f.SetOffset(new_offset_a);
+      if (f.VisitNode(levels_[0][0], 0, real_extent_)) {
+        this->VisitDFRec<F>(levels_[0][0], f, 1, real_extent_, map, false);
+      }      
+      extent_=extent_b;
+      f.SetOffset(new_offset_b);
+      if (f.VisitNode(levels_[0][0], 0, real_extent_)) {
+        this->VisitDFRec<F>(levels_[0][0], f, 1, real_extent_, map, false);
+      }
+    }
+
+  } else {
+    // all is good. no reason to split
+    img::Point new_start(start);
+    new_start[axis]-=start_off*size[axis];
+    img::Point new_end(end);
+    new_end[axis]=end_mod;
+    img::Extent new_extent(new_start, new_end);
+    img::Point new_offset=offset;
+    new_offset[axis]=start_off*size[axis];
+    //std::cout << "NO_SPLIT "  << axis  << " " << new_extent << std::endl;    
+    if (axis<2) {
+      this->DispatchVisit(f, map, new_offset, new_extent, axis+1);
+    } else {
+      extent_=new_extent;
+      f.SetOffset(new_offset);
+      if (f.VisitNode(levels_[0][0], 0, real_extent_)) {
+        this->VisitDFRec<F>(levels_[0][0], f, 1, map->GetExtent(), map, false);
+      }      
+    }
+
+  }
+}
+
+
+template <typename F>
+void MapOctree::VisitDFRec(const OctreeNode& node, F& f, uint8_t level, 
+                           const img::Extent& ext, 
+                           img::RealSpatialImageState* map,
+                           bool ignore_extent) const
+{
+  if (node.GetChildCount()==0) { return; }
+  uint32_t c=node.GetFirstChild();    
+  int cx=1+int(node.BranchInX());
+  int cy=1+int(node.BranchInY());
+  int cz=1+int(node.BranchInZ());
+  int range_x[2][2];
+  int range_y[2][2];
+  int range_z[2][2];
+  // update ranges. this is basically the same code as in BuildOctreeRec()
+  if (node.BranchInX()) {
+    uint16_t ems=ext.GetEnd()[0]-ext.GetStart()[0];
+    uint16_t bit_mask=1<<(LastSetBit(ems));
+    range_x[0][0]=ext.GetStart()[0];
+    range_x[0][1]=range_x[0][0]+bit_mask-1;
+    range_x[1][0]=ext.GetEnd()[0]-(ems & ~bit_mask);
+    range_x[1][1]=ext.GetEnd()[0];
+  } else {
+    range_x[0][0]=ext.GetStart()[0];
+    range_x[0][1]=ext.GetEnd()[0];
+  }
+  if (node.BranchInY()) {
+    uint16_t ems=ext.GetEnd()[1]-ext.GetStart()[1];
+    uint16_t bit_mask=1<<(LastSetBit(ems));
+    range_y[0][0]=ext.GetStart()[1];
+    range_y[0][1]=range_y[0][0]+bit_mask-1;
+    range_y[1][0]=ext.GetEnd()[1]-(ems & ~bit_mask);
+    range_y[1][1]=ext.GetEnd()[1];
+  } else {
+    range_y[0][0]=ext.GetStart()[1];
+    range_y[0][1]=ext.GetEnd()[1];
+  }
+  if (node.BranchInZ()) {
+    uint16_t ems=ext.GetEnd()[2]-ext.GetStart()[2];
+    uint16_t bit_mask=1<<(LastSetBit(ems));
+    range_z[0][0]=ext.GetStart()[2];
+    range_z[0][1]=range_z[0][0]+bit_mask-1;
+    range_z[1][0]=ext.GetEnd()[2]-(ems & ~bit_mask);
+    range_z[1][1]=ext.GetEnd()[2];
+  } else {
+    range_z[0][0]=ext.GetStart()[2];
+    range_z[0][1]=ext.GetEnd()[2];
+  }    
+  for (int i=0; i<cx; ++i) {
+    for (int j=0; j<cy; ++j) {
+      for (int k=0; k<cz; ++k, ++c) {
+        if (node.IsLeaf()) {
+          f.VisitLeaf(*this, map, img::Point(range_x[i][0], range_y[j][0], 
+                                             range_z[k][0]));
+         } else {
+          const OctreeNode& cn=levels_[level][c];
+          img::Extent ext(img::Point(range_x[i][0], range_y[j][0], 
+                                       range_z[k][0]),
+                           img::Point(range_x[i][1], range_y[j][1], 
+                                       range_z[k][1]));
+          if (ignore_extent || img::HasOverlap(ext, extent_)) {
+            if (f.VisitNode(cn, level, ext)) {
+              this->VisitDFRec<F>(cn, f, level+1, ext, map, ignore_extent);
+            }
+          }
+        }
+      }
+    }    
+  }    
+}
 
 }}}
 

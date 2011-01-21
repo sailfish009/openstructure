@@ -76,6 +76,10 @@ void export_Map()
     .def("IsDownsampledMapAvailable", &MapIso::IsDownsampledMapAvailable)
     .def("GetShownMapType", &MapIso::GetShownMapType)
     .def("SetVisibleExtent", &MapIso::SetVisibleExtent)
+    .def("GetVisibleExtent", &MapIso::GetVisibleExtent, 
+         return_value_policy<copy_const_reference>())
+    .add_property("visible_extent", make_function(&MapIso::GetVisibleExtent, 
+         return_value_policy<copy_const_reference>()), &MapIso::SetVisibleExtent)         
     .def("MakeOctreeDirty", &MapIso::MakeOctreeDirty)
     .def("IfOctreeDirty", &MapIso::IfOctreeDirty)
     .def("Rebuild", &MapIso::Rebuild)

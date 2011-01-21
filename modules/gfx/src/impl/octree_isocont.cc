@@ -25,19 +25,19 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-void OctreeIsocont::VisitLeaf(img::RealSpatialImageState* map, 
+void OctreeIsocont::VisitLeaf(const MapOctree& octree, img::RealSpatialImageState* map, 
                               const img::Point& point) 
 {
   // if we get here we already know that we have to isocontour the damn 
   // thing.
-  img::Point end=map->GetExtent().GetEnd();
+  img::Point end=octree.GetRealExtent().GetEnd();
   if (point[0]>=end[0] || point[1]>=end[1] || point[2]>=end[2]) {
     return;
   }
   uint8_t pattern=0;
   for (int i=0; i<8; ++i) {
     img::Point p=point+POINT_OFFSETS[i];
-    if (map->Value(p)<level_) {
+    if (map->Value(map->GetExtent().WrapAround(p))<level_) {
       pattern|=1<<i;
     }
   }
@@ -49,7 +49,7 @@ void OctreeIsocont::VisitLeaf(img::RealSpatialImageState* map,
   VertexID vertex_ids[12];
   for (uint8_t i=0; i<12; ++i) {
     if (edge_flag & (1<<i)) {
-      vertex_ids[i]=this->GetOrGenVert(map, point, 
+      vertex_ids[i]=this->GetOrGenVert(octree, map, point, 
                                        &OctreeIsocont::EDGE_DESC[i]);
     }
   }
@@ -71,27 +71,29 @@ void OctreeIsocont::VisitLeaf(img::RealSpatialImageState* map,
 
 }
 
-VertexID OctreeIsocont::GetOrGenVert(img::RealSpatialImageState* map, 
+VertexID OctreeIsocont::GetOrGenVert(const MapOctree& octree,
+                                     img::RealSpatialImageState* map, 
                                      const img::Point& p, 
                                      EdgeDesc* desc)
 {
   img::Point point_plus_offset=p+offset_;
-  img::Extent ext=map->GetExtent();
-  /*uint32_t key=desc->GetKey(point_plus_offset, ext);
+  /*uint32_t key=desc->GetKey(point_plus_offset, vis_extent_);
   EdgeMap::iterator k=edge_map_.find(key);
   if (k!=edge_map_.end()) {
     VertexID id=k->second;
     if (desc->lv) {
+      // keep the hash table small and shiny.
       edge_map_.erase(k);
     }
     return id;
   }*/
+  img::Extent map_ext=map->GetExtent();
   img::Point p1=p+OctreeIsocont::POINT_OFFSETS[desc->c1];
   img::Point p2=p+OctreeIsocont::POINT_OFFSETS[desc->c2];  
   geom::Vec3 vert1=map->IndexToCoord(p1+offset_);
   geom::Vec3 vert2=map->IndexToCoord(p2+offset_);
-  float val1=map->Value(p1);
-  float val2=map->Value(p2);
+  float val1=map->Value(map_ext.WrapAround(p1));
+  float val2=map->Value(map_ext.WrapAround(p2));
   float t=(level_-val1)/(val2-val1);
   VertexID id=va_.Add(vert1*(1.0f-t)+vert2*t, geom::Vec3(1,0,0), 
                       color_);

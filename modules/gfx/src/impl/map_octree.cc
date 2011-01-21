@@ -25,9 +25,10 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-MapOctree::MapOctree(const img::ImageHandle& ih):
+MapOctree::MapOctree(const img::ImageHandle& ih, bool wrap_around):
   map_(ih),
-  built_(false)
+  built_(false),
+  wrap_around_(wrap_around)
 {
   extent_=map_.GetExtent();
 }
@@ -42,24 +43,20 @@ void MapOctree::Initialize()
 
 void MapOctree::SetNewMap(const img::ImageHandle& ih)
 {
-  std::cout << "SET NEW MAP???" << std::endl;
   map_=ih;
   extent_=map_.GetExtent();
 }
 
-bool MapOctree::IsMapManageable (const img::ImageHandle ih)
+bool MapOctree::IsMapManageable(const img::ImageHandle ih)
 {
- bool manageable = true;
- if (ih.GetExtent().GetWidth() > 256 ||
-     ih.GetExtent().GetHeight() > 256 ||
-     ih.GetExtent().GetDepth() > 256 ) manageable=false;
- return manageable;
+  return ih.GetExtent().GetWidth() < 256 && ih.GetExtent().GetHeight() < 256 &&
+         ih.GetExtent().GetDepth() < 256;
 }
 
 
 uint32_t MapOctree::GetNumNodesForLevel(uint8_t level) const
 {
-  img::Size size=map_.GetExtent().GetSize();
+  img::Size size=real_extent_.GetSize();
   OcRangeVector range_vec(size[0]-1, size[1]-1, size[2]-1);
   uint16_t mask=0;
   for (unsigned char i=0; i<level; ++i) {
@@ -71,13 +68,18 @@ uint32_t MapOctree::GetNumNodesForLevel(uint8_t level) const
 
 void MapOctree::BuildOctree()
 {
-  img::Size size=map_.GetExtent().GetSize();
+  real_extent_=map_.GetExtent();
+  if (wrap_around_) {
+    real_extent_.SetEnd(img::Point(real_extent_.GetEnd())+img::Point(1,1,1));
+  }
+  img::Size size=real_extent_.GetSize();
+  std::cout << "BUILDING OCTREE" << real_extent_ << std::endl;
   OcRangeVector range_vec(size[0]-1, size[1]-1, size[2]-1);
   img::RealSpatialImageState* p=NULL;
   p=dynamic_cast<img::RealSpatialImageState*>(map_.ImageStatePtr().get());
   assert(p && "Octree only supports real spatial images");
   OctreeNode dummy;
-  this->BuildOctreeRec(range_vec, 0, p, map_.GetExtent(), dummy);
+  this->BuildOctreeRec(range_vec, 0, p, real_extent_, dummy);
   built_=true;
 }
 
@@ -104,13 +106,13 @@ std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
 
   if (highest_order_bit==-1) {
     parent.SetLeaf();
-    img::Point mend=map->GetExtent().GetEnd();
-    float val=map->Value(ext.GetStart());
+    img::Point mend=real_extent_.GetEnd();
+    float val=map->Value(map->GetExtent().WrapAround(ext.GetStart()));
     std::pair<float, float> minmax(val, val);
     for (int i=0; i<7; ++i) {
       img::Point p=OFFSET[i]+ext.GetStart();
       if (mend[0]>=p[0] && mend[1]>=p[1] && mend[2]>=p[2]) {
-        val=map->Value(p);
+        val=map->Value(map->GetExtent().WrapAround(p));
         if (val<minmax.first) {
           minmax.first=val;
         } else if (minmax.second<val) {
@@ -179,15 +181,7 @@ std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
                                      range_z[k][0]),
                          img::Point(range_x[i][1], range_y[j][1], 
                                      range_z[k][1]));
-#if !defined(NDEBUG)                                     
-        if (!map_.GetExtent().Contains(ext)) {
-          std::cout << ext << " is not contained in " << map_.GetExtent() 
-                    <<  "(x=" << i << ", y=" << j << ", z=" << k 
-                    << ", branch_x=" << branch_x << ", branch_y=" << branch_y 
-                    << ", branch_z=" << branch_z << ")\n";
-          assert(0 && "Internal Octree Error");
-        }          
-#endif                           
+      
         OcRangeVector range(range_x[i][1]-range_x[i][0],
                             range_y[j][1]-range_y[j][0],
                             range_z[k][1]-range_z[k][0]);
