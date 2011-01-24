@@ -243,12 +243,16 @@ public:
     nlabel(1),
     label()
   {
+    geom::Mat3 smat=im.GetSpatialSamplingMat();
+    geom::Vec3 a=smat*geom::Vec3(1, 0, 0);
+    geom::Vec3 b=smat*geom::Vec3(0, 1, 0);
+    geom::Vec3 c=smat*geom::Vec3(0, 0, 1);
     if(im.GetType()==img::REAL){
       nc=static_cast<int>(im.GetExtent().GetSize().GetWidth());
       mode=2;
-      x=im.GetExtent().GetSize().GetWidth()*im.GetSpatialSampling()[0];
-      y=im.GetExtent().GetSize().GetHeight()*im.GetSpatialSampling()[1];
-      z=im.GetExtent().GetSize().GetDepth()*im.GetSpatialSampling()[2];
+      x=geom::Length(a)*im.GetExtent().GetSize().GetWidth();
+      y=geom::Length(b)*im.GetExtent().GetSize().GetHeight();
+      z=geom::Length(c)*im.GetExtent().GetSize().GetDepth();
     }else{
       nc=static_cast<int>(im.GetExtent().GetSize().GetWidth()/2 +1);
       mode=4;
@@ -256,6 +260,9 @@ public:
       y=1.0;
       z=1.0;
     }
+    alpha=geom::Angle(b, c)*180.0/M_PI;
+    beta=geom::Angle(a, c)*180.0/M_PI;
+    gamma=geom::Angle(a, b)*180.0/M_PI;
     ost::img::alg::Stat stat;
     im.Apply(stat);
     amin=stat.GetMinimum();
