@@ -104,6 +104,10 @@ ImageStateBasePtr PowerSpectrumFnc::VisitState(const ImageStateImpl<V,D>& isi) c
 }
 
 }
+
+namespace image_state {
+
 template class TEMPLATE_DEF_EXPORT ImageStateConstModOPAlgorithm<alg::PowerSpectrumFnc>;
-}} //
+
+}}} //
 

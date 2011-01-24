@@ -21,11 +21,9 @@
 
 
 
-namespace ost { namespace img {
-
-
+namespace ost { namespace img { namespace image_state {
 
 template class TEMPLATE_DEF_EXPORT ImageStateModIPAlgorithm<alg::ThresholdFnc>;
 
-}}
+}}}
 

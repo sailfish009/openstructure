@@ -91,7 +91,10 @@ ImageStateBasePtr ExplicitConvoluteFnc::VisitState(const ImageStateImpl<V,D>& is
 }
 
 }
-template class TEMPLATE_DEF_EXPORT ImageStateConstModOPAlgorithm<alg::ExplicitConvoluteFnc>;
 
-}} // ns
+namespace image_state {
+  
+template class TEMPLATE_DEF_EXPORT ImageStateConstModOPAlgorithm<alg::ExplicitConvoluteFnc>;  
+
+}}} // ns
 

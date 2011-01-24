@@ -74,7 +74,7 @@ typedef ImageStateNonModAlgorithm<HistogramBase> Histogram;
 
 }
 
-OST_IMG_ALG_EXPLICIT_INST_DECL(class,ImageStateNonModAlgorithm<alg::HistogramBase>)
+OST_IMG_ALG_EXPLICIT_INST_DECL(class,ImageStateNonModAlgorithm<ost::img::alg::HistogramBase>)
 
 }} // namespaces
 

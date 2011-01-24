@@ -98,5 +98,9 @@ std::ostream& operator<<(std::ostream& o, const StatMinMax& s)
 
 
 }
-template class TEMPLATE_DEF_EXPORT ImageStateNonModAlgorithm<alg::StatMinMaxBase>;
-}} // ns
+
+namespace image_state {
+  
+template class TEMPLATE_DEF_EXPORT ImageStateNonModAlgorithm<alg::StatMinMaxBase>;  
+
+}}} // ns

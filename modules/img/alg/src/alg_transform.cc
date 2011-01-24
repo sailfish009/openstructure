@@ -20,11 +20,9 @@
 
 #include "alg_transform.hh"
 
-namespace ost { namespace img {
-
+namespace ost { namespace img { namespace image_state {
 
 template class TEMPLATE_DEF_EXPORT ImageStateModOPAlgorithm<alg::TransformFnc>;
 
-
-}} // ns
+}}} // ns
 

@@ -20,11 +20,9 @@
 
 #include "alg_mirror.hh"
 
-namespace ost { namespace img {
+namespace ost { namespace img { namespace image_state {
 
-#ifndef NO_EXPL_INST
 template class TEMPLATE_DEF_EXPORT ImageStateConstModOPAlgorithm<alg::MirrorFnc>;
-#endif
 
-}} // ns
+}}} // ns
 
