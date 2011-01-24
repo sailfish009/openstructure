@@ -37,7 +37,7 @@ struct EdgeDesc {
            uint8_t ac1, uint8_t ac2, bool l):
            dir(d), off(o), c1(ac1), c2(ac2), lv(l)
   { }
-  uint32_t GetKey(const img::Point& p, img::Extent& ext)
+  uint32_t GetKey(const img::Point& p, const img::Extent& ext)
   {
     img::Point k=p+off;
     return 4*ext.Point2Offset(k)+dir;
@@ -69,13 +69,9 @@ public:
     return (node.GetMin()<level_ && level_<=node.GetMax());
   }
   void VisitLeaf(const MapOctree& octree, img::RealSpatialImageState* map, 
-                 const img::Point& point);
-  
-  void SetVisibleExtent(const img::Extent& ext) { vis_extent_=ext; }
-  
+                 const img::Point& point);  
   VertexID GetOrGenVert(const MapOctree& octree, img::RealSpatialImageState* map, 
                         const img::Point& p, EdgeDesc* desc);
-  void SetOffset(const img::Point& p) { offset_=p; }
   
   const img::Point& GetOffset() const { return offset_; }
 private:

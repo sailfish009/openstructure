@@ -182,6 +182,25 @@ void test_Overlap()
   BOOST_CHECK_THROW(Overlap(e1,e3), InvalidExtentException);
 }
 
+void test_HasOverlap()
+{
+  Extent e1(Point(1, 2), Point(2, 3));
+  Extent e2(Point(1,2), Point(1,2));  
+  BOOST_CHECK(HasOverlap(e1, e1));
+  BOOST_CHECK(HasOverlap(e2, e2));
+
+  BOOST_CHECK(HasOverlap(e1, e2));  
+  Extent e3(Point(-1,3), Point(2,5));
+  Extent e4(Point(0,-5), Point(1,10));
+  BOOST_CHECK(HasOverlap(e3, e4));
+  BOOST_CHECK(HasOverlap(e4, e3));
+  
+  Extent e5(Point(-10,-5), Point(-8, -3));
+  
+  BOOST_CHECK(!HasOverlap(e3, e5));
+}
+
+
 } // namespace 
 
 test_suite* CreateExtentTest()
@@ -195,6 +214,7 @@ test_suite* CreateExtentTest()
   ts->add(BOOST_TEST_CASE(&test_Mirror));
   ts->add(BOOST_TEST_CASE(&test_Iterator));
   ts->add(BOOST_TEST_CASE(&test_Overlap));
+  ts->add(BOOST_TEST_CASE(&test_HasOverlap));
 
   return ts;
 }

@@ -73,7 +73,6 @@ void MapOctree::BuildOctree()
     real_extent_.SetEnd(img::Point(real_extent_.GetEnd())+img::Point(1,1,1));
   }
   img::Size size=real_extent_.GetSize();
-  std::cout << "BUILDING OCTREE" << real_extent_ << std::endl;
   OcRangeVector range_vec(size[0]-1, size[1]-1, size[2]-1);
   img::RealSpatialImageState* p=NULL;
   p=dynamic_cast<img::RealSpatialImageState*>(map_.ImageStatePtr().get());
@@ -103,7 +102,6 @@ std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
       break;
     }
   } 
-
   if (highest_order_bit==-1) {
     parent.SetLeaf();
     img::Point mend=real_extent_.GetEnd();
@@ -130,9 +128,9 @@ std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
   }  
   // determine branch pattern
   uint16_t highest_order_mask=1 << highest_order_bit;
-  bool branch_x=(range_vec.x & highest_order_mask)!= 0;
-  bool branch_y=(range_vec.y & highest_order_mask)!= 0;
-  bool branch_z=(range_vec.z & highest_order_mask)!= 0;
+  bool branch_x=(range_vec.x & highest_order_mask)!=0;
+  bool branch_y=(range_vec.y & highest_order_mask)!=0;
+  bool branch_z=(range_vec.z & highest_order_mask)!=0;
   int range_x[2][2];
   int range_y[2][2];
   int range_z[2][2];
@@ -185,7 +183,6 @@ std::pair<float,float> MapOctree::BuildOctreeRec(const OcRangeVector& range_vec,
         OcRangeVector range(range_x[i][1]-range_x[i][0],
                             range_y[j][1]-range_y[j][0],
                             range_z[k][1]-range_z[k][0]);
-        
         local_minmax=this->BuildOctreeRec(range, level+1, map, ext, 
                                           levels_[level].back());
         if (i+j+k) {

@@ -94,8 +94,8 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
 
 geom::AlignedCuboid MapIso::GetBoundingBox() const
 {
-  geom::Vec3 minc = mh_.IndexToCoord(octree_->GetExtent().GetStart());
-  geom::Vec3 maxc = mh_.IndexToCoord(octree_->GetExtent().GetEnd());
+  geom::Vec3 minc = mh_.IndexToCoord(octree_->GetVisibleExtent().GetStart());
+  geom::Vec3 maxc = mh_.IndexToCoord(octree_->GetVisibleExtent().GetEnd());
   return geom::AlignedCuboid(minc,maxc);
 }
 
@@ -439,14 +439,14 @@ img::ImageHandle MapIso::DownsampleMap(const img::ImageHandle& mh)
 
 void MapIso::SetVisibleExtent(const img::Extent& vis_extent)
 {
-  octree_->SetExtent(vis_extent);
+  octree_->SetVisibleExtent(vis_extent);
   this->FlagRebuild();
 }
 
 
 const img::Extent& MapIso::GetVisibleExtent() const
 {
-  return octree_->GetExtent();
+  return octree_->GetVisibleExtent();
 }
 
 }} // ns

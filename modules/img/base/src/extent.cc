@@ -117,7 +117,7 @@ Extent Extent::Mirror(int planes)
   return Extent(new_start,size_);
 }
 
-unsigned int Extent::Point2Offset(const Point& p)
+unsigned int Extent::Point2Offset(const Point& p) const
 {
   if(this->Contains(p)) {
     Point d(p-start_);

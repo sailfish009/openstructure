@@ -68,7 +68,7 @@ void export_Map()
     .def("SetHistogramBinCount",&MapIso::SetHistogramBinCount)
     .def("GetHistogramBinCount",&MapIso::GetHistogramBinCount)
 
-    .def("GetMap", &MapIso::GetMap,return_value_policy<reference_existing_object>())
+    .def("GetMap", &MapIso::GetMap, return_value_policy<reference_existing_object>())
     .def("GetOriginalMap", &MapIso::GetOriginalMap,return_value_policy<reference_existing_object>())
     .def("GetDownsampledMap", &MapIso::GetDownsampledMap,return_value_policy<reference_existing_object>())
     .def("ShowDownsampledMap", &MapIso::ShowDownsampledMap)
@@ -76,6 +76,9 @@ void export_Map()
     .def("IsDownsampledMapAvailable", &MapIso::IsDownsampledMapAvailable)
     .def("GetShownMapType", &MapIso::GetShownMapType)
     .def("SetVisibleExtent", &MapIso::SetVisibleExtent)
+    .add_property("map", 
+                  make_function(&MapIso::GetMap,
+                                return_value_policy<reference_existing_object>()))
     .def("GetVisibleExtent", &MapIso::GetVisibleExtent, 
          return_value_policy<copy_const_reference>())
     .add_property("visible_extent", make_function(&MapIso::GetVisibleExtent, 

@@ -130,7 +130,7 @@ class DLLEXPORT_OST_IMG_BASE Extent {
   Extent Mirror(int planes);
 
   //! Generates a continues, uniqe index per point contained within extent
-  unsigned int Point2Offset(const Point& p);
+  unsigned int Point2Offset(const Point& p) const;
 
   // operators
   bool operator==(const Extent& b) const {return equal(b);}

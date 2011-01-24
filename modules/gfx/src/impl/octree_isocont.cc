@@ -76,9 +76,9 @@ VertexID OctreeIsocont::GetOrGenVert(const MapOctree& octree,
                                      const img::Point& p, 
                                      EdgeDesc* desc)
 {
-  img::Point point_plus_offset=p+offset_;
-  /*uint32_t key=desc->GetKey(point_plus_offset, vis_extent_);
-  EdgeMap::iterator k=edge_map_.find(key);
+  img::Point point_plus_offset=p+octree.GetOffset();
+  //int32_t key=desc->GetKey(point_plus_offset, octree.GetVisibleExtent());
+  /*EdgeMap::iterator k=edge_map_.find(key);
   if (k!=edge_map_.end()) {
     VertexID id=k->second;
     if (desc->lv) {
@@ -90,8 +90,8 @@ VertexID OctreeIsocont::GetOrGenVert(const MapOctree& octree,
   img::Extent map_ext=map->GetExtent();
   img::Point p1=p+OctreeIsocont::POINT_OFFSETS[desc->c1];
   img::Point p2=p+OctreeIsocont::POINT_OFFSETS[desc->c2];  
-  geom::Vec3 vert1=map->IndexToCoord(p1+offset_);
-  geom::Vec3 vert2=map->IndexToCoord(p2+offset_);
+  geom::Vec3 vert1=map->IndexToCoord(p1+octree.GetOffset());
+  geom::Vec3 vert2=map->IndexToCoord(p2+octree.GetOffset());
   float val1=map->Value(map_ext.WrapAround(p1));
   float val2=map->Value(map_ext.WrapAround(p2));
   float t=(level_-val1)/(val2-val1);
