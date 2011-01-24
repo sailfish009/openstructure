@@ -120,6 +120,14 @@ Real real_spatial_cross_correlation_2(const ConstImageHandle& image1,
   return RealSpatialCrossCorrelation(image1,image2,extent);
 }
 
+Real real_spatial_cross_correlation_3(const ConstImageHandle& image1,
+                                      const ConstImageHandle& image2,
+                                      const Extent& ext1,
+                                      const Extent& ext2)
+{
+  return RealSpatialCrossCorrelation(image1,image2,ext1, ext2);
+}
+
 } //anon ns
 
 BOOST_PYTHON_MODULE(_img_alg)
@@ -256,6 +264,7 @@ BOOST_PYTHON_MODULE(_img_alg)
   ;
   def("RealSpatialCrossCorrelation",real_spatial_cross_correlation_1);
   def("RealSpatialCrossCorrelation",real_spatial_cross_correlation_2);
+  def("RealSpatialCrossCorrelation",real_spatial_cross_correlation_3);
 
   class_<HighestPeakSearch3D, bases<NonModAlgorithm> >("HighestPeakSearch3D" ,init<int,int,Real>())
     .def(init<int,int>())

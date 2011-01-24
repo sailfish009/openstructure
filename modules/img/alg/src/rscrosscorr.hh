@@ -38,6 +38,17 @@ Real DLLEXPORT_IMG_ALG RealSpatialCrossCorrelation(const ConstImageHandle& image
                                                    const img::Extent& extent);
 
 
+/// \brief Computes cross correlation of images
+/// the cross correlation is computed only within the given extent.
+///
+/// Both input images must be real spatial and the extents must have the same
+/// size.
+Real DLLEXPORT_IMG_ALG RealSpatialCrossCorrelation(const ConstImageHandle& image1,
+                                                   const ConstImageHandle& image2,
+                                                   const img::Extent& ext1,
+                                                   const img::Extent& ext2);
+
+
 }}} // ns
 
 #endif

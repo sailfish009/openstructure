@@ -60,9 +60,7 @@ Real RealSpatialCrossCorrelation(const ConstImageHandle& image1,
       sum1 += v1 * v1;
       sum2 += v2 * v2;  
     }
-    
     return corr/(sqrt(sum1) * sqrt (sum2));
-
   }
 }
 
@@ -70,6 +68,46 @@ Real RealSpatialCrossCorrelation(const ConstImageHandle& image1,
                                  const ConstImageHandle& image2)
 {
   return RealSpatialCrossCorrelation(image1, image2, image2.GetExtent());
+}
+
+Real RealSpatialCrossCorrelation(const ConstImageHandle& image1,
+                                 const ConstImageHandle& image2,
+                                 const Extent& ext1, const Extent& ext2)
+{
+  if ( (image1.IsReal() && image2.IsReal())!=true ) {
+
+    throw Error("One of the input images is not of floating-point type");
+
+  } else if ( (image1.IsSpatial() && image2.IsSpatial()) !=true) {
+
+    throw Error("One of the input images is not in spatial domain");
+
+  } else if (ext1.GetSize()!=ext2.GetSize()) {
+
+    throw Error("The two extents are not of the same size");
+
+  } else {
+
+    ImageStateBasePtr base_is_pointer_image1 = image1.ImageStatePtr();
+    boost::shared_ptr<img::RealSpatialImageState> image1_pointer = boost::dynamic_pointer_cast<img::RealSpatialImageState>(base_is_pointer_image1);
+
+    ImageStateBasePtr base_is_pointer_image2 = image2.ImageStatePtr();
+    boost::shared_ptr<img::RealSpatialImageState> image2_pointer = boost::dynamic_pointer_cast<img::RealSpatialImageState>(base_is_pointer_image2);
+
+    Real corr=0.0;
+    Real sum1=0.0;
+    Real sum2=0.0;
+
+    // total of values
+    for(ExtentIterator it1(ext1), it2(ext2);!it1.AtEnd();++it1, ++it2) {
+      Real v1=image1_pointer->Value(image1_pointer->GetExtent().WrapAround(it1));
+      Real v2=image2_pointer->Value(image2_pointer->GetExtent().WrapAround(it2));
+      corr += v1 * v2;
+      sum1 += v1 * v1;
+      sum2 += v2 * v2;
+    }
+    return corr/(sqrt(sum1) * sqrt (sum2));
+  }
 }
 
 }}} // ns
