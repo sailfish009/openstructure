@@ -65,7 +65,6 @@ struct LeafCounter {
   void VisitLeaf(const MapOctree& o, img::RealSpatialImageState* map, 
                  const img::Point& point) 
   {
-    std::cout << "LEAF: " << (o.GetOffset()+point) << std::endl;
     leaf_count++;
   }
   
