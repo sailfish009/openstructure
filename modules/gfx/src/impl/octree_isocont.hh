@@ -40,7 +40,9 @@ struct EdgeDesc {
   uint32_t GetKey(const img::Point& p, const img::Extent& ext)
   {
     img::Point k=p+off;
-    return 4*ext.Point2Offset(k)+dir;
+    img::Size s=ext.GetSize();
+    img::Point p1=k-ext.GetStart();
+    return 4*(p1[0]*512*512+p1[1]*512+p1[2])+dir;
   }
   uint8_t      dir;
   img::Point  off;  
