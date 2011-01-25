@@ -72,7 +72,10 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   normals_calculated_(false),
   alg_(a),
   debug_octree_(false),
-  color_(1.0,1.0,1.0)
+  color_(1.0,1.0,1.0),
+  near_slab_(30),
+  far_slab_(60),
+  slabbing_(false)
 {
   // TODO replace with def mat for this gfx obj type
   if (mh_ != original_mh_) {
@@ -222,10 +225,29 @@ private:
 };
 
 }
-
+void MapIso::SetupSlabPlanes()
+{
+  if (!slabbing_) {
+    return;
+  }
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+  double far_plane[4]={ 0, 0, 1, far_slab_ };
+  double near_plane[4]={ 0, 0,-1, -near_slab_ };
+  glClipPlane(GL_CLIP_PLANE0, near_plane);
+  glClipPlane(GL_CLIP_PLANE1, far_plane);
+  glPopMatrix();
+}
 void MapIso::CustomRenderGL(RenderPass pass)
 {
   if(pass==STANDARD_RENDER_PASS) {
+    
+    this->SetupSlabPlanes();
+    if (slabbing_) {
+      glEnable(GL_CLIP_PLANE0);
+      glEnable(GL_CLIP_PLANE1);
+    }
     va_.RenderGL();
     if (debug_octree_) {
       OctreeDebugger d(level_, mh_.IndexToCoord(img::Point(1,1,1))-
@@ -234,6 +256,10 @@ void MapIso::CustomRenderGL(RenderPass pass)
       glDisable(GL_LIGHTING);
       octree_->VisitDF(d);
       glPopAttrib();
+    }
+    if (slabbing_) {
+      glDisable(GL_CLIP_PLANE0);
+      glDisable(GL_CLIP_PLANE1);
     }
   }
 }

@@ -129,6 +129,23 @@ public:
   /// \brief returns the type of map currently being show
   MapIsoType GetShownMapType() const;
 
+  /// \brief set near and far slab planes
+  /// 
+  /// To enable the slab planes, also call SetSlabbing();
+  void SetSlabPlanes(float znear, float zfar) {
+    near_slab_=znear;
+    far_slab_=zfar;
+    this->FlagRebuild();
+  }
+  
+  void EnableSlab(bool flag=true) 
+  { 
+    slabbing_=flag; 
+    this->FlagRebuild();
+  }
+  
+  bool IsSlabEnabled() const { return slabbing_; }
+  
   /// \brief set  color
   /// 
   /// By default, the color is white.
@@ -151,6 +168,7 @@ public:
   bool IfOctreeDirty() const;
 
 protected:
+  void SetupSlabPlanes();
   void UpdateRenderParams();
   void CalculateStat() const;
   void CalculateHistogram() const;
@@ -178,6 +196,9 @@ private:
   bool                          debug_octree_;
   Color                         color_;
   bool                          dirty_octree_;
+  float                         near_slab_;
+  float                         far_slab_;
+  bool                          slabbing_;
 };
 
 }}
