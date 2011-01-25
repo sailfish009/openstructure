@@ -358,11 +358,40 @@ void PDBWriter::WriteModelTrailer()
   }
 }
 
+
 template <typename H>
 void PDBWriter::WriteModel(H ent)
 {
   ForcePOSIX posix;
   this->WriteModelLeader();
+  std::map<String,GenericPropValue> pmap=ent.GetPropMap();
+  for (std::map<String,GenericPropValue>::const_iterator
+       i=pmap.begin(), e=pmap.end(); i!=e; ++i) {
+    line_.Clear();
+    line_(0, 6)=StringRef("OSTPRP", 6);
+    line_(6, 11)=fmt::LPadded(i->first);
+    if (i->second.type()==typeid(int)) {
+      line_[18]='I';
+    } else if (i->second.type()==typeid(Real)) {
+      line_[18]='F';
+    } else if (i->second.type()==typeid(String)) {
+      line_[18]='S';
+    } else if (i->second.type()==typeid(bool)) {
+      line_[18]='B';
+      if (boost::get<bool>(i->second)) {
+        line_(20, 4)=StringRef("TRUE", 4);
+      } else {
+        line_(20, 4)=StringRef("FALSE", 5);
+      }
+      outstream_ << line_;
+      continue;
+    }
+    std::stringstream ss;
+    ss << i->second;
+    line_(20, 60)=fmt::RPadded(ss.str());
+    outstream_ << line_;
+  }
+  line_.Clear();
   PDBWriterImpl writer(outstream_,line_, atom_indices_, charmm_style_);
   writer.SetIsPQR(is_pqr_);
   ent.Apply(writer);

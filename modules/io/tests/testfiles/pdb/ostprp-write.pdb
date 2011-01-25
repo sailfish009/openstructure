@@ -1,0 +1,6 @@
+OSTPRP      bool1 B TRUE
+OSTPRP      bool2 B FALSE
+OSTPRP float_prop F 0.5
+OSTPRP   int_prop I 12345
+OSTPRP   str_prop S string property value
+END

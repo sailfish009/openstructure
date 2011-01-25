@@ -117,6 +117,7 @@ bool PDBReader::HasNext()
          IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("OSTPRP", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6)))) {
        return true;
      } else if (IEquals(curr_line.rtrim(), StringRef("END", 3))) {
@@ -247,6 +248,11 @@ void PDBReader::Import(mol::EntityHandle& ent,
           }
         }
         break;
+      case 'O':
+      case 'o':
+        if (IEquals(curr_line.substr(0, 6), StringRef("OSTPRP", 6))) {
+          this->ParseOstProp(curr_line, ent);
+        }
       default:
         break;
     }
@@ -682,6 +688,83 @@ void PDBReader::ParseHelixEntry(const StringRef& line)
     helix_list_.push_back(hse);
   }
 
+}
+void PDBReader::ParseOstProp(const StringRef& line, mol::EntityHandle ent)
+{
+  if (line.size()<21) {
+    LOG_WARNING("Skipping OSTPRP record that is too short");
+    return;
+  }
+  char type=line[18];
+  String key=line.substr(6, 11).ltrim().str();
+  size_t val_length=line.size()-20;
+  switch (type) {
+    case 'B': {
+      StringRef val=line.substr(20,val_length).rtrim();
+      if (IEquals(val, StringRef("TRUE", 4))) {
+        ent.SetBoolProp(key, true);
+        return;
+      }
+      if (IEquals(val, StringRef("FALSE", 5))) {
+        ent.SetBoolProp(key, false);
+        return;
+      }
+      if (profile_.fault_tolerant) {
+        LOG_WARNING("Invalid OSTPRP record on line " << line_num_
+                    <<": Bool value must either be TRUE or FALSE");
+        return;
+      }
+      std::stringstream ss;
+      ss << "Invalid OSTPRP record on line: " << line_num_
+         << "Bool value must either be TRUE or FALSE";
+      throw IOException(ss.str());
+    }
+    case 'I': {
+      std::pair<bool, int> int_val=line.substr(20, val_length).rtrim().to_int();
+      if (!int_val.first) {
+        if (profile_.fault_tolerant) {
+          LOG_WARNING("Invalid OSTPRP record on line " << line_num_
+                      << ": Can't parse integer value");
+          return;
+        }
+        std::stringstream ss;
+        ss << "Error on line " << line_num_ << ": Can't parse integer value";
+        throw IOException(ss.str());
+      }
+      ent.SetIntProp(key, int_val.second);
+      return;
+    }
+    case 'F': {
+      std::pair<bool, float> float_val=line.substr(20, val_length).rtrim().to_float();
+      if (!float_val.first) {
+        if (profile_.fault_tolerant) {
+          LOG_WARNING("Invalid OSTPRP record on line " << line_num_
+                      << ": Can't parse floating-point value");
+          return;
+        }
+        std::stringstream ss;
+        ss << "Error on line " << line_num_ << ": Can't parse floating-point value";
+        throw IOException(ss.str());
+      }
+      ent.SetFloatProp(key, float_val.second);
+      return;
+    }
+    break;
+    case 'S': {
+      ent.SetStringProp(key, line.substr(20, val_length). rtrim().str());
+      return;
+    }
+    default: {
+      if (profile_.fault_tolerant) {
+        LOG_WARNING("Invalid OSTPRP record on line " << line_num_
+                    << ": Unknown type '" << type << "'");
+        return;
+      }
+      std::stringstream ss;
+      ss << "Error on line " << line_num_ << ": Unknown type '" << type << "'.";
+      throw IOException(ss.str());
+    }
+  }
 }
 
 void PDBReader::ParseStrandEntry(const StringRef& line)

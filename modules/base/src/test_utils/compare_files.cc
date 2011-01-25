@@ -19,10 +19,11 @@
 
 #include <iostream>
 #include <fstream>
+#include <ost/string_ref.hh>
 #include "compare_files.hh"
 
 namespace ost {
-bool compare_files(const String& test, const String& gold_standard)
+bool compare_files(const String& test, const String& gold_standard, bool rstrip)
 {
   std::ifstream test_stream(test.c_str());
   std::ifstream gold_stream(gold_standard.c_str());
@@ -43,7 +44,13 @@ bool compare_files(const String& test, const String& gold_standard)
                 << std::endl << test_line;
       return false;
     }
-    if (gold_line!=test_line) {
+    StringRef gold_ref(gold_line.data(), gold_line.size());
+    StringRef test_ref(test_line.data(), test_line.size());
+    if (rstrip) {
+      gold_ref=gold_ref.rtrim();
+      test_ref=test_ref.rtrim();
+    }
+    if (test_ref!=gold_ref) {
       std::cerr << "line mismatch:" << std::endl << "test: " << test_line
                 << std::endl << "gold: " << gold_line;
       return false;

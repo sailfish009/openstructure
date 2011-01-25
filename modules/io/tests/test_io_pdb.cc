@@ -523,5 +523,39 @@ BOOST_AUTO_TEST_CASE(atom_name_too_long)
 }
 
 
+BOOST_AUTO_TEST_CASE(read_ostprp)
+{
+  String fname("testfiles/pdb/ostprp.pdb");
+  IOProfile profile;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_NO_THROW(reader.Import(ent));
+  BOOST_CHECK_EQUAL(ent.GetFloatProp("float_prop"),Real(0.5));
+  BOOST_CHECK_EQUAL(ent.GetFloatProp("int_prop"),12345);
+  BOOST_CHECK_EQUAL(ent.GetStringProp("str_prop"),"string property value");
+  BOOST_CHECK(ent.GetBoolProp("bool1")==true);
+  BOOST_CHECK(ent.GetBoolProp("bool2")==false);
+  BOOST_CHECK(ent.GetBoolProp("bool3")==true);
+  BOOST_CHECK(ent.GetBoolProp("bool4")==false);
+}
+
+BOOST_AUTO_TEST_CASE(write_ostprp)
+{
+  {
+    PDBWriter writer(String("testfiles/pdb/ostprp-write-out.pdb"), IOProfile());
+
+    mol::EntityHandle ent=mol::CreateEntity();
+    ent.SetFloatProp("float_prop", 0.5);
+    ent.SetStringProp("str_prop", "string property value");
+    ent.SetIntProp("int_prop", 12345);
+    ent.SetBoolProp("bool1", true);
+    ent.SetBoolProp("bool2", false);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/ostprp-write.pdb",
+                            "testfiles/pdb/ostprp-write-out.pdb", true));
+}
+
+
 
 BOOST_AUTO_TEST_SUITE_END()

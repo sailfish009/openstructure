@@ -26,7 +26,8 @@
 namespace ost {
 
 bool DLLEXPORT_OST_BASE compare_files(const String& test, 
-                                      const String& gold_standard);  
+                                      const String& gold_standard,
+                                      bool rstrip=false);  
 }
 
 
