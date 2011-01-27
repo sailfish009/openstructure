@@ -245,6 +245,12 @@ void CartoonRenderer::FudgeSplineObj(SplineEntryListList& olistlist)
   for(unsigned int llc=0;llc<olistlist.size();++llc) {
     LOG_DEBUG("CartoonRenderer: fudging spline segment " << llc);
     SplineEntryList olist = olistlist[llc];
+
+    if(!olist.empty()) {
+      olist.front().type=0;
+      olist.back().type=0;
+    }
+
     for(unsigned int lc=0;lc<olist.size();++lc) {
       if(olist.at(lc).type==1) {
         if(options_->GetHelixMode()==1) {
