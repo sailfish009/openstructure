@@ -158,6 +158,13 @@ public:
   iterator end() const;
 
   bool IsValid() const { return impl_.get()!=0; }
+    
+  ///\brief get coverage of a specifi sequence 
+  ///
+  /// returns a value representing how extensively the specified sequence
+  /// covers the first sequence (sequence 0). The function return a value
+  /// between 0 (no coverage) and 1 (full coverage)
+  Real GetCoverage(int seq_index) const;
   
 private:
   void CheckValidity() const;
