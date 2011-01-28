@@ -211,6 +211,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   bool aalines_flag_;
   float point_size_;
   float line_halo_;
+  float opacity_;
 
   int outline_mode_;
   float outline_width_;

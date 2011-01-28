@@ -148,17 +148,22 @@ void GfxObj::RenderGL(RenderPass pass)
       render_depth_only();
     } else if(pass==TRANSPARENT_RENDER_PASS) {
       if(GetOpacity()<1.0) {
-	render_depth_only();
-	CustomRenderGL(STANDARD_RENDER_PASS);
+        render_depth_only();
+        CustomRenderGL(STANDARD_RENDER_PASS);
+        if(outline_flag_) {
+          va_.SetOutlineMode(outline_mode_);
+          CustomRenderGL(pass);
+          va_.SetOutlineMode(0);
+        }
       }
     } else if(pass==STANDARD_RENDER_PASS) {
       if(GetOpacity()>=1.0) {
-	CustomRenderGL(STANDARD_RENDER_PASS);
-      }
-      if(outline_flag_) {
-	va_.SetOutlineMode(outline_mode_);
-	CustomRenderGL(pass);
-	va_.SetOutlineMode(0);
+        CustomRenderGL(STANDARD_RENDER_PASS);
+        if(outline_flag_) {
+          va_.SetOutlineMode(outline_mode_);
+          CustomRenderGL(pass);
+          va_.SetOutlineMode(0);
+        }
       }
     } else if(pass==GLOW_RENDER_PASS) {
       CustomRenderGL(GLOW_RENDER_PASS);
