@@ -1,4 +1,5 @@
 import sys,unittest
+sys.path.append("../../../../stage/lib/openstructure")
 sys.path.append("../../../../stage/lib64/openstructure")
 from ost import *
 import numpy
