@@ -127,7 +127,8 @@ Scene::Scene():
   stereo_alg_(0),
   stereo_inverted_(false),
   stereo_eye_(0),
-  stereo_eye_dist_(40.0),
+  stereo_iod_(40.0),
+  stereo_distance_(100.0),
   scene_left_tex_(),
   scene_right_tex_()
 {
@@ -1311,7 +1312,15 @@ void Scene::SetStereoView(int m)
 
 void Scene::SetStereoIOD(float d)
 {
-  stereo_eye_dist_=d;
+  stereo_iod_=d;
+  if(stereo_mode_>0) {
+    RequestRedraw();
+  }
+}
+
+void Scene::SetStereoDistance(float d)
+{
+  stereo_distance_=d;
   if(stereo_mode_>0) {
     RequestRedraw();
   }
@@ -1319,11 +1328,7 @@ void Scene::SetStereoIOD(float d)
 
 void Scene::SetStereoAlg(unsigned int a)
 {
-  if(a==0 || a==1) {
-    stereo_alg_=a;
-  } else {
-    stereo_alg_=0;
-  }
+  stereo_alg_=a;
   if(stereo_mode_>0) {
     RequestRedraw();
   }
@@ -1833,12 +1838,15 @@ void Scene::stereo_projection(int view)
   
   if(view!=0) {
     Real ff=(view<0 ? 1.0 : -1.0);
-    Real dist=-transform_.GetTrans()[2];
-    if(stereo_alg_==1) {
+    if(stereo_alg_==2 || stereo_alg_==3 || stereo_alg_==4) {
       // physically precise stereo with skew, does
       // not handle z translation well
       // the 100.0 comes from visual matching with mode 0 at a reasonable distance
-      Real iod2=100.0/stereo_eye_dist_;
+      Real dist = -transform_.GetTrans()[2];
+      if(stereo_alg_==3) dist=znear_;
+      else if(stereo_alg_==4) dist=stereo_distance_;
+
+      Real iod2=100.0/stereo_iod_;
       geom::Mat4 skew=geom::Transpose(geom::Mat4(1.0,0.0,ff*iod2/dist,ff*iod2,
                                                  0.0,1.0,0.0,0.0,
                                                  0.0,0.0,1.0,0.0,
@@ -1846,8 +1854,9 @@ void Scene::stereo_projection(int view)
       glMultMatrix(skew.Data());
     } else {
       // default, dino style stereo, less physically precise but visually more pleasing
+      Real dist = stereo_alg_==1 ? znear_ : -transform_.GetTrans()[2];
       glTranslated(0.0,0.0,-dist);
-      glRotated(180.0/M_PI*atan(ff/stereo_eye_dist_),0.0,1.0,0.0);
+      glRotated(180.0/M_PI*atan(ff/stereo_iod_),0.0,1.0,0.0);
       glTranslated(0.0,0.0,dist);
     }
   }

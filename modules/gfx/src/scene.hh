@@ -200,7 +200,12 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief set stereo eye distance
   void SetStereoIOD(float);
   /// \brief return current stereo eye distance
-  float GetStereoIOD() const {return stereo_eye_dist_;}
+  float GetStereoIOD() const {return stereo_distance_;}
+
+  /// \brief set stereo distance
+  void SetStereoDistance(float);
+  /// \brief return current stereo distance
+  float GetStereoDistance() const {return stereo_distance_;}
   
   /// \brief set stereo algorithm
   /// one of 0 or 1
@@ -474,7 +479,7 @@ private:
   unsigned int stereo_alg_;
   bool stereo_inverted_;
   unsigned int stereo_eye_;
-  float stereo_eye_dist_;
+  float stereo_iod_,stereo_distance_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
 
