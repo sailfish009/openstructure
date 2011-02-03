@@ -227,9 +227,9 @@ void SDFReader::ParseAndAddBond(const String& line, int line_num,
 
   LOG_TRACE( "line: [" << line << "]" );
 
-  if(line.length()<18 || line.length()>21) {
+  if(line.length()<9 || line.length()>21) {
     String msg="Bad bond line %d: Not correct number of characters on the"
-               " line: %i (should be between 18 and 21)";
+               " line: %i (should be between 9 and 21)";
     throw IOException(str(format(msg) % line_num % line.length()));
   }
 
