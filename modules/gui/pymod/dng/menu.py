@@ -26,6 +26,42 @@ class FileMenu(QMenu):
     
 
 
+class ExportSceneDialog(QDialog):
+  def __init__(self, width=500, height=500):
+    QDialog.__init__(self)
+    l=QGridLayout(self)
+    l.setColumnMinimumWidth(0, 100)
+    l.addWidget(QLabel("Width (px)"), 0, 0)
+    l.addWidget(QLabel("Height (px)"), 1, 0)
+    self.width_=QLineEdit(str(width))
+    self.height_=QLineEdit((str(height)))
+    self.width_.setValidator(QIntValidator(50, 3000, self.width_))
+    self.height_.setValidator(QIntValidator(50, 3000, self.height_))
+    self.opaque_=QCheckBox("Force Opaque Background")
+    l.addWidget(self.width_, 0, 1)
+    l.addWidget(self.height_, 1, 1)
+    l.addWidget(self.opaque_, 2, 1)
+    hbox=QHBoxLayout()
+    cancel=QPushButton("Cancel")
+    QObject.connect(cancel, SIGNAL('clicked()'), self.reject)
+    hbox.addWidget(cancel)
+    export=QPushButton("Export")
+    hbox.addWidget(export)
+    export.setDefault(True)
+    l.addLayout(hbox, 3, 1, 2, 1)
+    QObject.connect(export, SIGNAL('clicked()'), self.accept)
+  @property
+  def transparent(self):
+    return not self.opaque_.isChecked()
+
+  @property
+  def width(self):
+    return int(self.width_.text())
+
+  @property
+  def height(self):
+    return int(self.height_.text())
+
 class SceneMenu(QMenu):
   def __init__(self, parent=None):
     QMenu.__init__(self, parent)
@@ -39,6 +75,17 @@ class SceneMenu(QMenu):
                   enabled=gui.ManyOf(gfx.GfxObj))
     gui.AddMenuAction(self, 'Fit To Screen', self._FitToScreen,
                   enabled=gui.OneOf(gfx.Entity))
+    gui.AddMenuAction(self, 'Save Snapshot', self._ExportScene)
+    
+  def _ExportScene(self):
+    qd=ExportSceneDialog()
+    if not qd.exec_():
+      return
+    filename=QFileDialog.getSaveFileName(None, 'Save Snapshot', 
+                                         'snapshot.png')
+    if filename:
+      gfx.Scene().Export(str(filename), qd.width, qd.height, qd.transparent)
+
   def _AboutToShow(self):
     self.fog_action.setChecked(gfx.Scene().fog)
     
