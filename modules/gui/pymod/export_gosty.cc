@@ -79,6 +79,11 @@ void app_add_widget_to_app_b(GostyApp* app, const QString& ident,
   }
 }
 
+object get_widget(GostyApp* app, const QString& ident)
+{
+  return get_py_qobject<QWidget>(app->GetWidget(ident));
+}
+
 void export_Gosty()
 {
   class_<GostyApp, boost::noncopyable>("GostyApp", no_init)
@@ -104,6 +109,7 @@ void export_Gosty()
         return_value_policy<reference_existing_object>()))
     .def("GetToolOptionsWin", &GostyApp::GetToolOptionsWin,
         return_value_policy<reference_existing_object>())
+    .def("GetWidget", &get_widget)
     .add_property("tool_options_win", make_function(&GostyApp::GetToolOptionsWin,
         return_value_policy<reference_existing_object>()))
     .def("GetMessageWidget", &GostyApp::GetMessageWidget,

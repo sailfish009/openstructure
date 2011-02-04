@@ -34,7 +34,7 @@ class DLLEXPORT_OST_GUI WidgetGeomHandler: public QObject{
 
     void LoadGeom(const QString& prefix);
     void SaveGeom(const QString& prefix);
-
+    QWidget* GetWidget() { return widget_; }
   private:
     QWidget* widget_;
 };

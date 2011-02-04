@@ -169,6 +169,14 @@ void GostyApp::AddWidgetToApp(const QString& ident, QWidget* widget)
   external_widgets_[ident]->LoadGeom("ui/external_widgets/");
 }
 
+QWidget* GostyApp::GetWidget(const QString& ident)
+{
+  if (external_widgets_.contains(ident)) {
+    return external_widgets_[ident]->GetWidget();
+  }
+  return NULL;
+}
+
 void GostyApp::RemoveWidgetFromApp(const QString& ident){
   if(external_widgets_.contains(ident)){
     external_widgets_[ident]->SaveGeom("ui/external_widgets/");

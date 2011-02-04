@@ -98,7 +98,6 @@ private:
   void SetupQuickAccessBar();
   QWidget*        central_;
   QMenuBar*        menu_bar_;
-  QMap<QString,QMenu*> menus_;
   MainArea*       main_area_;
   PanelManager*   panels_;
   QWidget*        quick_access_bar_;
