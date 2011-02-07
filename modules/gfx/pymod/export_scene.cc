@@ -98,6 +98,7 @@ void export_Scene()
     .def("Resize", &Scene::Resize)
     .def("HasNode", &Scene::HasNode)
     .def("GetBackground", &Scene::GetBackground)
+    .def("SetBackground", &Scene::SetBackground)
     .add_property("bg",
                   &Scene::GetBackground, 
                   &Scene::SetBackground)
