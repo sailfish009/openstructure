@@ -227,19 +227,21 @@ QModelIndex SequenceTableView::moveCursor(CursorAction action, Qt::KeyboardModif
 {
   QModelIndex current = QTableView::moveCursor(action, modifiers);
 
-  if(action == MoveLeft && current.column()>0
-     && this->visualRect(current).topLeft().x() < static_column_->columnWidth(0) ){
-   const int new_value = horizontalScrollBar()->value() + this->visualRect(current).topLeft().x() - static_column_->columnWidth(0);
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))
+  if (action == MoveLeft && current.column()>0
+     && this->visualRect(current).topLeft().x() < static_column_->columnWidth(0)){
+  int new_value = horizontalScrollBar()->value() + this->visualRect(current).topLeft().x();
+   new_value-=static_column_->columnWidth(0);
+
    horizontalScrollBar()->setValue(new_value);
   }
 
-
-  if(action == MoveUp && current.row()>0
-     && this->visualRect(current).bottomLeft().y() < static_row_->rowHeight(0) ){
-   const int new_value = verticalScrollBar()->value() + this->visualRect(current).bottomRight().y() - static_row_->rowHeight(0);
+  if (action == MoveUp && current.row()>0 && this->visualRect(current).bottomLeft().y() < static_row_->rowHeight(0)){
+    int new_value = verticalScrollBar()->value() + this->visualRect(current).bottomRight().y();
+    new_value-=static_row_->rowHeight(0);   
    verticalScrollBar()->setValue(new_value);
   }
-
+#endif
   return current;
 }
 
