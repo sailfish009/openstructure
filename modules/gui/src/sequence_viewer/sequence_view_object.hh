@@ -55,7 +55,7 @@ public:
 
   void Init();
 
-  void AddSequence(seq::SequenceHandle& sequence, const QString& name=QString());
+  void AddSequence(seq::ConstSequenceHandle sequence, const QString& name=QString());
   void AddChain(mol::ChainView& chain, const QString& name=QString());
 
   void AttachGfxObject(gfx::EntityP& ent);

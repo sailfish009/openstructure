@@ -28,37 +28,46 @@
 
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_object.hh>
-
+#include <ost/gfx/entity.hh>
 #include <ost/gui/widget.hh>
 
 #include <ost/gui/module_config.hh>
 
-#include "sequence_search_bar.hh"
-#include "sequence_model.hh"
-#include "sequence_table_view.hh"
 
 #include <QWidget>
 #include <QActionGroup>
 #include <QToolBar>
-namespace ost { namespace gui {
+#include <QModelIndex>
+#include <QItemSelection>
+
+namespace ost { 
+
+namespace gui {
+
+class SeqSearchBar;
+class SequenceModel;  
+class SequenceTableView;
+
 
 /// \brief QTableView with first column not moving
 class DLLEXPORT_OST_GUI SequenceViewer : public Widget, public gfx::SceneObserver  {
   Q_OBJECT
 public:
-  SequenceViewer(bool stand_alone=true, QWidget* parent=NULL);
+  SequenceViewer(bool stand_alone=true, bool observe_scene=false,
+                 QWidget* parent=NULL);
   ~SequenceViewer();
 
   virtual void SelectionChanged(const gfx::GfxObjP& o, const mol::EntityView& view);
 
   virtual void AddEntity(const gfx::EntityP& entity);
   virtual void RemoveEntity(const gfx::EntityP& entity);
-
+  void SetObserveScene(bool flag) { observe_scene_=flag; }
+  bool IsObservingScene() const { return observe_scene_; }
   virtual void AddAlignment(const seq::AlignmentHandle& alignment);
   virtual void RemoveAlignment(const seq::AlignmentHandle& alignment);
-
-  virtual bool Restore(const QString&){return true;};
-  virtual bool Save(const QString&){return true;};
+  
+  virtual bool Restore(const QString&){ return true; };
+  virtual bool Save(const QString&){ return true; };
 
   virtual const QStringList& GetDisplayModes();
   virtual const QStringList& GetDisplayModes(const seq::AlignmentHandle& alignment);
@@ -69,7 +78,8 @@ public:
   virtual const QString& GetCurrentDisplayMode(const gfx::EntityP& entity);
 
   virtual ActionList GetActions();
-
+signals:
+  void AlignmentChanged();
 public slots:
   void ChangeDisplayMode(const QString&);
   void ChangeDisplayMode(const seq::AlignmentHandle&, const QString&);
@@ -92,11 +102,11 @@ private:
   SeqSearchBar* seq_search_bar_;
   SequenceModel* model_;
   SequenceTableView* seq_table_view_;
-
+  
   ActionList action_list_;
 
   QActionGroup* display_mode_actions_;
-
+  bool observe_scene_;
 private slots:
   void ChangeDisplayMode();
   void FindInSequence();

@@ -186,7 +186,7 @@ const PainterList& SequenceModel::GetPainters(const QModelIndex& index) const{
   return empty_painter_list_;
 }
 
-QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(int row) const{
+QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(int row) const {
   if(!objects_.isEmpty()){
     int rows = 0;
     int i = -1;
@@ -201,6 +201,25 @@ QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(int row) const{
   }
   return QPair<int, BaseViewObject*>(-1, NULL);
 }
+
+void SequenceModel::EmitRowChanged(int row)
+{
+  emit this->dataChanged(this->index(row, 0), 
+                         this->index(row, this->columnCount()-1));
+}
+
+QPair<seq::AlignmentHandle, int> SequenceModel::GetAlignmentForRow(int row)
+{
+  QPair<int, BaseViewObject*> p=this->GetRowWithItem(row);
+  if (p.second) {
+    AlignmentViewObject* avo=dynamic_cast<AlignmentViewObject*>(p.second);
+    if (avo) {
+      return QPair<seq::AlignmentHandle, int>(avo->GetAlignment(), p.first);
+    }    
+  }
+  return QPair<seq::AlignmentHandle, int>(seq::AlignmentHandle(), -1);
+}
+
 
 QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(const QModelIndex& index) const{
   return this->GetRowWithItem(index.row());

@@ -104,7 +104,7 @@ SceneWin* GostyApp::GetSceneWin()
 SequenceViewer* GostyApp::GetSequenceViewer()
 {
   if (seq_viewer_==NULL) {
-    seq_viewer_=new SequenceViewer(false);
+    seq_viewer_=new SequenceViewer(false, true);
     seq_viewer_->SetDestroyOnClose(false);
   }
   return seq_viewer_;

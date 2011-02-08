@@ -80,7 +80,7 @@ const QString AlignmentViewObject::conservation_mode_2 = "Highlight conservation
 AlignmentViewObject::AlignmentViewObject(const seq::AlignmentHandle& alignment, QObject* parent): SequenceViewObject(parent), alignment_(alignment)
 {
   for(int i=0; i<alignment.GetCount(); i++){
-    seq::SequenceHandle seq_handle = alignment.GetSequence(i).Copy();
+    seq::ConstSequenceHandle seq_handle = alignment.GetSequence(i);
     this->AddSequence(seq_handle, seq_handle.GetName().c_str());
   }
 
