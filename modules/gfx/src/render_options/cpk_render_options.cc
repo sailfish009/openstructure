@@ -22,9 +22,7 @@
 
 #include "cpk_render_options.hh"
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 CPKRenderOptions::CPKRenderOptions(): sphere_detail_(4) {
 #if OST_SHADER_SUPPORT_ENABLED
@@ -72,8 +70,4 @@ uint CPKRenderOptions::GetSphereMode(){
   return cpk_mode_;
 }
 
-CPKRenderOptions::~CPKRenderOptions() {}
-
-}
-
-}
+}} // ns

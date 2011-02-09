@@ -1,3 +1,4 @@
+
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
@@ -22,9 +23,7 @@
 
 #include "cartoon_render_options.hh"
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 CartoonRenderOptions::CartoonRenderOptions(bool force_tube):
   force_tube_(force_tube),
@@ -290,8 +289,5 @@ float CartoonRenderOptions::GetMaxRad() const{
   return max_rad;
 }
 
-CartoonRenderOptions::~CartoonRenderOptions() {}
+}} // ns
 
-}
-
-}

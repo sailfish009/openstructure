@@ -29,7 +29,7 @@ namespace ost { namespace gfx { namespace impl {
 
 namespace {
 
-bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2)
+bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2, bool seqhack)
 {
   if(!r1.IsValid() || !r2.IsValid()) return false;
   if(r1.GetChain()!=r2.GetChain()) return false;
@@ -39,8 +39,7 @@ bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2)
     if(n1.NextInsertionCode()==n2) return true;
   }
   if(mol::InSequence(r1,r2)) return true;
-  // perhaps this fallback is not so good...
-  if(n1.GetNum()+1==n2.GetNum()) return true;
+  if(seqhack && n1.GetNum()+1==n2.GetNum()) return true;
   return false;
 }
 
@@ -48,11 +47,12 @@ bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2)
 
 class TraceBuilder: public mol::EntityVisitor {
 public:
-  TraceBuilder(BackboneTrace* bb_trace):
+  TraceBuilder(BackboneTrace* bb_trace, bool sh):
     backbone_trace_(bb_trace),
     last_residue_(),
     list_(),
-    id_counter_(0)
+    id_counter_(0),
+    seq_hack_(sh)
   {}
 
   virtual bool VisitChain(const mol::ChainHandle& chain)
@@ -70,7 +70,7 @@ public:
   virtual bool VisitResidue(const mol::ResidueHandle& res)
   {
     // check in-sequence
-    bool in_seq=in_sequence(last_residue_,res);
+    bool in_seq=in_sequence(last_residue_,res,seq_hack_);
     if(!in_seq) {
       if(!list_.empty()) {
         backbone_trace_->AddNodeEntryList(list_);
@@ -108,14 +108,20 @@ private:
   mol::ChainHandle   last_chain_;
   NodeEntryList      list_;
   int                id_counter_;
+  bool               seq_hack_;
 };
 
-BackboneTrace::BackboneTrace()
+BackboneTrace::BackboneTrace():
+  view_(),
+  node_list_list_(),
+  seq_hack_(false)
 {}
 
-BackboneTrace::BackboneTrace(const mol::EntityView& ent)
+BackboneTrace::BackboneTrace(const mol::EntityView& ent):
+  view_(ent),
+  node_list_list_(),
+  seq_hack_(false)
 {
-  view_=ent;
   Rebuild();
 }
 
@@ -144,7 +150,7 @@ void BackboneTrace::Rebuild()
 {
   if (view_) {
     node_list_list_.clear();
-    TraceBuilder trace(this);    
+    TraceBuilder trace(this,seq_hack_);    
     view_.Apply(trace);
   }
 }
@@ -238,6 +244,12 @@ BackboneTrace BackboneTrace::CreateSubset(const mol::EntityView& subview)
     }
   }
   return nrvo;
+}
+
+void BackboneTrace::SetSeqHack(bool f)
+{
+  seq_hack_=f;
+  Rebuild();
 }
 
 }}} // ns

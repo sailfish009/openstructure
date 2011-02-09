@@ -22,11 +22,10 @@
 
 #include "line_trace_render_options.hh"
 
-namespace ost {
+namespace ost { namespace gfx {
 
-namespace gfx {
-
-LineTraceRenderOptions::LineTraceRenderOptions(){}
+LineTraceRenderOptions::LineTraceRenderOptions()
+{}
 
 RenderMode::Type LineTraceRenderOptions::GetRenderMode(){
  return RenderMode::LINE_TRACE;
@@ -36,8 +35,4 @@ bool LineTraceRenderOptions::CanApplyRenderOptions(RenderOptionsPtr render_optio
   return render_options.get()->GetRenderMode()==RenderMode::LINE_TRACE;
 }
 
-LineTraceRenderOptions::~LineTraceRenderOptions() {}
-
-}
-
-}
+}} // ns

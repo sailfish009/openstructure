@@ -277,6 +277,9 @@ public:
   bool HasSelection() const;
 
   void UpdateView();
+
+  void SetSeqHack(bool b);
+  bool GetSeqHack() const;
   
 protected:
 

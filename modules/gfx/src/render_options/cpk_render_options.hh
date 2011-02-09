@@ -27,7 +27,8 @@
 #include <ost/base.hh>
 
 #include <ost/gfx/module_config.hh>
-#include <ost/gfx/render_options/render_options.hh>
+
+#include "render_options.hh"
 
 namespace ost { namespace gfx {
 
@@ -35,22 +36,20 @@ class DLLEXPORT_OST_GFX CPKRenderOptions: public RenderOptions {
 public:
   CPKRenderOptions();
 
+  // RenderOptions interface
   virtual RenderMode::Type GetRenderMode();
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options);
 
-  virtual void SetSphereDetail(uint detail);
-  virtual uint GetSphereDetail();
-
-  virtual void SetSphereMode(uint mode);
-  virtual uint GetSphereMode();
-
-  virtual ~CPKRenderOptions();
+  // own interface
+  void SetSphereDetail(uint detail);
+  uint GetSphereDetail();
+  void SetSphereMode(uint mode);
+  uint GetSphereMode();
 
 private:
   uint sphere_detail_;
   uint cpk_mode_;
-
 };
 
 typedef boost::shared_ptr<CPKRenderOptions> CPKRenderOptionsPtr;

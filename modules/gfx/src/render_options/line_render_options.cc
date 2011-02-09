@@ -22,9 +22,7 @@
 #include "line_render_options.hh"
 
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 LineRenderOptions::LineRenderOptions(): line_width_(2.0), aa_lines_(false){}
 
@@ -58,8 +56,4 @@ bool LineRenderOptions::GetAALines(){
   return aa_lines_;
 }
 
-LineRenderOptions::~LineRenderOptions() {}
-
-}
-
-}
+}} // ns

@@ -64,6 +64,10 @@ public:
   static void PrepList(NodeEntryList& nelist);
 
   // re-creates internal nodelist-list based on view
+  /*
+    seq_hack will apply an additional hackish N/N+1 rnum check
+    to determine if two consecutive residues are connected
+  */
   void Rebuild();
 
   // entity has new positions
@@ -73,9 +77,14 @@ public:
   // this is faster then re-generating a trace
   BackboneTrace CreateSubset(const mol::EntityView& subview);
 
+  void SetSeqHack(bool f);
+  bool GetSeqHack() const {return seq_hack_;}
+
 private:  
   mol::EntityView      view_;
   NodeEntryListList    node_list_list_;
+  bool seq_hack_;
+
 };
 
 }}}

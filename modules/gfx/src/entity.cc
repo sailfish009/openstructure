@@ -1013,4 +1013,17 @@ void Entity::UpdateView()
   UpdatePositions();
 }
 
+void Entity::SetSeqHack(bool b)
+{
+  if(b!=trace_.GetSeqHack()) {
+    trace_.SetSeqHack(b);
+    FlagRebuild();
+  }
+}
+
+bool Entity::GetSeqHack() const
+{
+  return trace_.GetSeqHack();
+}
+
 }} // ns

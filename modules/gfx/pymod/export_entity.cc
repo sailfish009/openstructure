@@ -318,6 +318,7 @@ void export_Entity()
     .def("Apply",&ent_apply_61)
     .def("Apply",&ent_apply_62)
 #endif //OST_IMG_ENABLED
+    .add_property("seq_hack",&Entity::GetSeqHack,&Entity::SetSeqHack)
   ;
   //register_ptr_to_python<EntityP>();
   
