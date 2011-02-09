@@ -86,6 +86,8 @@ public:
   QPair<seq::AlignmentHandle, int> GetAlignmentForRow(int row);
   
   void EmitRowChanged(int row);
+  
+  void Clear();
 public slots:
   void ZoomIn();
   void ZoomOut();

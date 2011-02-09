@@ -54,6 +54,7 @@ class DLLEXPORT_OST_GUI SequenceViewer : public Widget, public gfx::SceneObserve
   Q_OBJECT
 public:
   SequenceViewer(bool stand_alone=true, bool observe_scene=false,
+                 const QString& title="Sequence Viewer",
                  QWidget* parent=NULL);
   ~SequenceViewer();
 
@@ -64,6 +65,9 @@ public:
   void SetObserveScene(bool flag) { observe_scene_=flag; }
   bool IsObservingScene() const { return observe_scene_; }
   virtual void AddAlignment(const seq::AlignmentHandle& alignment);
+
+  void SetAlignment(const seq::AlignmentHandle& alignment);
+  
   virtual void RemoveAlignment(const seq::AlignmentHandle& alignment);
   
   virtual bool Restore(const QString&){ return true; };

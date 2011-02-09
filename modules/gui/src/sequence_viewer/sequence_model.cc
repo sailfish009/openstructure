@@ -208,6 +208,17 @@ void SequenceModel::EmitRowChanged(int row)
                          this->index(row, this->columnCount()-1));
 }
 
+void SequenceModel::Clear()
+{
+  // remove everything but the title row. 
+  this->beginRemoveRows(QModelIndex(), 1, this->rowCount());
+  objects_.erase(objects_.begin()+1, objects_.end());
+  this->endRemoveRows();
+  this->beginRemoveColumns(QModelIndex(), 0, this->max_columns);
+  this->max_columns=0;
+  this->endRemoveColumns();
+}
+
 QPair<seq::AlignmentHandle, int> SequenceModel::GetAlignmentForRow(int row)
 {
   QPair<int, BaseViewObject*> p=this->GetRowWithItem(row);

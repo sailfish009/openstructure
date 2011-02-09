@@ -77,11 +77,12 @@ struct GetNodesVisitor: public gfx::GfxNodeVisitor {
 };
 
 SequenceViewer::SequenceViewer(bool stand_alone, bool observe_scene,
+                               const QString& title,
                                QWidget* parent): Widget(NULL,parent)
 {
   observe_scene_=observe_scene;
   model_ = new SequenceModel(this);
-
+  this->setWindowTitle(title);
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
@@ -226,6 +227,12 @@ void SequenceViewer::AddAlignment(const seq::AlignmentHandle& alignment)
   }
 }
 
+void SequenceViewer::SetAlignment(const seq::AlignmentHandle& alignment)
+{
+  model_->Clear();
+  this->AddAlignment(alignment);
+}
+
 void SequenceViewer::RemoveAlignment(const seq::AlignmentHandle& alignment)
 {
   model_->RemoveAlignment(alignment);
@@ -251,7 +258,10 @@ void SequenceViewer::SelectionModelChanged(const QItemSelection& sel, const QIte
 void SequenceViewer::SelectionChanged(const gfx::GfxObjP& o,
                                       const mol::EntityView& view)
 {
-  disconnect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+  disconnect(seq_table_view_->selectionModel(), 
+             SIGNAL(selectionChanged(const QItemSelection&, 
+                                     const QItemSelection&)), 
+             this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
   gfx::EntityP entity=boost::dynamic_pointer_cast<gfx::Entity>(o);
   if(entity){
     const QModelIndexList& list = model_->GetModelIndexes(entity, view);

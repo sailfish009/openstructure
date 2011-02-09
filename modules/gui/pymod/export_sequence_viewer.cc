@@ -96,12 +96,14 @@ std::vector<String> get_display_modes_c(SequenceViewer* seq_viewer, const seq::A
 
 void export_SequenceViewer()
 {
-  class_<SequenceViewer, boost::noncopyable >("SequenceViewer",init<>())
-    .def(init<bool, optional<QWidget*> >())
+  class_<SequenceViewer, boost::noncopyable >("SequenceViewer")
+    .def(init<optional<bool, bool, const QString&, 
+              QWidget*> >())
     .def("Show", &SequenceViewer::show)
     .def("Hide", &SequenceViewer::hide)
     .def("AddEntity", &SequenceViewer::AddEntity)
     .def("RemoveEntity", &SequenceViewer::RemoveEntity)
+    .def("SetAlignment", &SequenceViewer::SetAlignment)
     .def("AddAlignment", &SequenceViewer::AddAlignment)
     .def("RemoveAlignment", &SequenceViewer::RemoveAlignment)
     .def("GetDisplayModes", &get_display_modes_a)
