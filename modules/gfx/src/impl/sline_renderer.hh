@@ -40,17 +40,17 @@ public:
   SlineRenderer(BackboneTrace* trace);
 
   virtual void PrepareRendering();
-
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);
   virtual void SetOptions(RenderOptionsPtr& render_options);
   virtual RenderOptionsPtr GetOptions();
 
-  virtual ~SlineRenderer();
-
 private:
-  void PrepareRendering(const BackboneTrace& subset, IndexedVertexArray& va, 
-                        bool is_sel);
+  void prepare_rendering(const BackboneTrace&, IndexedVertexArray&, SplineEntryListList&);
+  void rebuild_spline_obj(IndexedVertexArray&, const SplineEntryListList&, bool);
+
   SlineRenderOptionsPtr options_;
+  SplineEntryListList spline_list_list_;
+  SplineEntryListList sel_spline_list_list_;
 };
 
 }}}

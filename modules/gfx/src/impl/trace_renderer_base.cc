@@ -221,5 +221,53 @@ void TraceRendererBase::Apply(const gfx::MapHandleColorOp& op)
 }
 #endif
 
-}}}
+void TraceRendererBase::rebuild_sel(const SplineEntryListList& spline_list_list, 
+                                    SplineEntryListList& sel_spline_list_list,
+                                    const Color& sel_color)
+{
+  // extract spline segments from list_list that match 
+  // (via id) the selection subset
+  // first put all ids into a set for fast lookup
+  std::set<int> id_set;
+  for(int nlc=0;nlc<sel_subset_.GetListCount();++nlc) {
+    const NodeEntryList& nelist=sel_subset_.GetList(nlc);
+    for(NodeEntryList::const_iterator nit=nelist.begin();nit!=nelist.end();++nit) {
+      id_set.insert(nit->id);
+    }
+  }
+  // now find all matching spline segments
+  sel_spline_list_list.clear();
+  for(SplineEntryListList::const_iterator sit=spline_list_list.begin();sit!=spline_list_list.end();++sit) {
+    const SplineEntryList& slist=*sit;
+    SplineEntryList nlist;
+    unsigned int sc=0;
+    while(sc<slist.size()) {
+      int curr_id=slist.at(sc).id;
+      if(id_set.count(curr_id)>0) {
+        // if a match is found, add all until a new id is found
+        while(sc<slist.size() &&  slist.at(sc).id==curr_id) {
+          nlist.push_back(slist[sc++]);
+          // override with the selection color
+          nlist.back().color1=sel_color;
+          nlist.back().color2=sel_color;
+        }
+      } else {
+        // introduce break
+        if(!nlist.empty()) {
+          sel_spline_list_list.push_back(nlist);
+          nlist.clear();
+        }
+        // and advance to the next id
+        while(sc<slist.size() &&  slist.at(sc).id==curr_id) ++sc;
+      }
+    }
+    if(!nlist.empty()) {
+      sel_spline_list_list.push_back(nlist);
+      nlist.clear();
+    }
+  }
+}
+
+}}} // ns
+
 

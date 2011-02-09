@@ -72,7 +72,7 @@ public:
   // extract portions of this backbone trace for a subview
   // this is faster then re-generating a trace
   BackboneTrace CreateSubset(const mol::EntityView& subview);
-  
+
 private:  
   mol::EntityView      view_;
   NodeEntryListList    node_list_list_;

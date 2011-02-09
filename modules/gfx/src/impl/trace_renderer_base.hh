@@ -64,6 +64,10 @@ protected:
   
   void set_node_colors(const Color& c, const mol::Query& q, ColorMask mask);
 
+  void rebuild_sel(const SplineEntryListList& spline_list_list, 
+                   SplineEntryListList& sel_spline_list_list,
+                   const Color& sel_color);
+
   BackboneTrace* trace_;
   BackboneTrace trace_subset_;
   BackboneTrace sel_subset_;

@@ -51,127 +51,19 @@ void CartoonRenderer::SetForceTube(bool force_tube)
   force_tube_ = force_tube;
 }
 
-void CartoonRenderer::PrepareRendering(const BackboneTrace& subset, 
-                                       IndexedVertexArray& va,
-                                       SplineEntryListList& spline_list_list,
-                                       bool)
-{
-  if(options_==NULL) {
-    LOG_DEBUG("CartoonRenderer: NULL options, not creating objects");
-  }
-
-  va.Clear();
-  va.SetLighting(true);
-  va.SetCullFace(true);
-  va.SetColorMaterial(true);
-  va.SetMode(0x4);
-  va.SetPolyMode(options_->GetPolyMode());
-
-  LOG_DEBUG("CartoonRenderer: starting object build");
-  int spline_detail=std::max((unsigned int) 1, options_->GetSplineDetail());
-  SplineEntryListList tmp_sll;
-  for (int node_list=0; node_list<subset.GetListCount(); ++node_list) {
-    LOG_DEBUG("CartoonRenderer: collecting spline entries for node list " << node_list);
-    // first build the spline
-    SplineEntryList spl;
-    const NodeEntryList& nl=subset.GetList(node_list);
-    for (unsigned int i=0; i<nl.size();++i) {
-      int type=0;
-      const NodeEntry& entry=nl[i];
-      if(!force_tube_) {
-        mol::ResidueHandle resh = entry.atom.GetResidue();
-        mol::SecStructure sst=resh.GetSecStructure();
-        if(sst.IsHelical()) {
-          type=1;
-        } else if(sst.IsExtended()) {
-          type=2;
-        }
-      }
-      SplineEntry ee(entry.atom.GetPos(),entry.direction,
-		     entry.normal, entry.rad, 
-		     entry.color1, 
-		     entry.color2,
-		     type, entry.id);
-      ee.v1 = entry.v1;
-      spl.push_back(ee);
-    }
-    LOG_DEBUG("CartoonRenderer: found " << spl.size() << " entries");
-    if(!spl.empty()) {
-      tmp_sll.push_back(spl);
-    }
-  }
-  if(!force_tube_) {
-    LOG_DEBUG("CartoonRenderer: adjusting spline-entry-list lists for various modes");
-    FudgeSplineObj(tmp_sll);
-  }
-  spline_list_list.clear();
-#if !defined(NDEBUG)
-  unsigned int tmp_count=0;
-#endif
-  for(SplineEntryListList::const_iterator sit=tmp_sll.begin();sit!=tmp_sll.end();++sit) {
-    if((sit->size()==2) && (sit->at(0).type==6)) {
-      // don't intpol cylinders
-      spline_list_list.push_back(*sit);
-    } else {
-      LOG_DEBUG("CartoonRenderer: generating full spline for spline-entry-list " << tmp_count++);
-      spline_list_list.push_back(Spline::Generate(*sit,spline_detail,options_->GetColorBlendMode()));
-    }
-  }
-}
-
 void CartoonRenderer::PrepareRendering()
 {
   TraceRendererBase::PrepareRendering();
   if(state_>0) {
     va_.Clear();
-    this->PrepareRendering(trace_subset_, va_, spline_list_list_, false);
-    RebuildSplineObj(va_, spline_list_list_, false);
+    this->prepare_rendering(trace_subset_, va_, spline_list_list_);
+    rebuild_spline_obj(va_, spline_list_list_, false);
   }
   if (this->HasSelection() && (state_>0 || sel_state_>0)) {
     sel_va_.Clear();
     Color sel_color=GetSelectionColor();
-    // extract spline segments from list_list that match 
-    // (via id) the selection subset
-    // first put all ids into a set for fast lookup
-    std::set<int> id_set;
-    for(int nlc=0;nlc<sel_subset_.GetListCount();++nlc) {
-      const NodeEntryList& nelist=sel_subset_.GetList(nlc);
-      for(NodeEntryList::const_iterator nit=nelist.begin();nit!=nelist.end();++nit) {
-        id_set.insert(nit->id);
-      }
-    }
-    // now find all matching spline segments
-    sel_spline_list_list_.clear();
-    for(SplineEntryListList::const_iterator sit=spline_list_list_.begin();sit!=spline_list_list_.end();++sit) {
-      const SplineEntryList& slist=*sit;
-      SplineEntryList nlist;
-      unsigned int sc=0;
-      while(sc<slist.size()) {
-        int curr_id=slist.at(sc).id;
-        if(id_set.count(curr_id)>0) {
-          // if a match is found, add all until a new id is found
-          while(sc<slist.size() &&  slist.at(sc).id==curr_id) {
-            nlist.push_back(slist[sc++]);
-            // override with the selection color
-            nlist.back().color1=sel_color;
-            nlist.back().color2=sel_color;
-          }
-        } else {
-          // introduce break
-          if(!nlist.empty()) {
-            sel_spline_list_list_.push_back(nlist);
-            nlist.clear();
-          }
-          // and advance to the next id
-          while(sc<slist.size() &&  slist.at(sc).id==curr_id) ++sc;
-        }
-      }
-      if(!nlist.empty()) {
-        sel_spline_list_list_.push_back(nlist);
-        nlist.clear();
-      }
-    }
-    RebuildSplineObj(sel_va_, sel_spline_list_list_, true);
+    rebuild_sel(spline_list_list_,sel_spline_list_list_,sel_color);
+    rebuild_spline_obj(sel_va_, sel_spline_list_list_, true);
     sel_va_.SetColorMaterial(true);
     sel_va_.SetLighting(false);
     sel_va_.SetMode(0x4);
@@ -237,7 +129,7 @@ namespace {
   
 } // ns
 
-void CartoonRenderer::FudgeSplineObj(SplineEntryListList& olistlist)
+void CartoonRenderer::fudge_spline_obj(SplineEntryListList& olistlist)
 {
   SplineEntryListList nlistlist;
   SplineEntryList nlist;
@@ -342,7 +234,7 @@ void CartoonRenderer::FudgeSplineObj(SplineEntryListList& olistlist)
           }
         } else {
           kend-=1;
-          // these magic numbers are used in RebuildSplineObj for proper arrow rendering
+          // these magic numbers are used in rebuild_spline_obj for proper arrow rendering
           nlist.at(kend-1).type=3;
           nlist.at(kend).type=5;
           
@@ -384,9 +276,9 @@ void CartoonRenderer::FudgeSplineObj(SplineEntryListList& olistlist)
   olistlist.swap(nlistlist);
 }
 
-void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
-                                       const SplineEntryListList& spline_list_list,
-                                       bool is_sel)
+void CartoonRenderer::rebuild_spline_obj(IndexedVertexArray& va,
+                                         const SplineEntryListList& spline_list_list,
+                                         bool is_sel)
 {
   LOG_DEBUG("CartoonRenderer: starting profile assembly");
   unsigned int detail = std::min(MAX_ARC_DETAIL,
@@ -394,30 +286,30 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
                                  (unsigned int)1));
   std::vector<TraceProfile> profiles;
   float factor=is_sel ? 0.2 : 0.0;
-  profiles.push_back(GetCircProfile(detail,
+  profiles.push_back(get_circ_profile(detail,
                                     options_->GetTubeRadius()*options_->GetTubeRatio()+factor,
                                     options_->GetTubeRadius()+factor, 
                                     options_->GetTubeProfileType(),
                                     1.0)); // profile 0 = tube
   if (!force_tube_) {
-    profiles.push_back(GetCircProfile(detail,
+    profiles.push_back(get_circ_profile(detail,
                                       options_->GetHelixWidth()+factor,
                                       options_->GetHelixThickness()+factor,
                                       options_->GetHelixProfileType(),
                                       options_->GetHelixEcc())); // profile 1 = helix
-    profiles.push_back(GetCircProfile(detail,
+    profiles.push_back(get_circ_profile(detail,
                                       options_->GetStrandWidth()+factor,
                                       options_->GetStrandThickness()+factor,
                                       options_->GetStrandProfileType(),
                                       options_->GetStrandEcc())); // profile 2 = strand
     profiles.push_back(profiles.back()); // profile 3==2, strand
     
-    profiles.push_back(GetCircProfile(detail,
+    profiles.push_back(get_circ_profile(detail,
                                       1.7*options_->GetStrandWidth()+factor,
                                       1.1*options_->GetStrandThickness()+factor,
                                       options_->GetStrandProfileType(),
                                       options_->GetStrandEcc())); // profile 4 = arrow start
-    profiles.push_back(GetCircProfile(detail,
+    profiles.push_back(get_circ_profile(detail,
                                       0.01*options_->GetStrandWidth()+factor,
                                       1.1*options_->GetStrandThickness()+factor,
                                       options_->GetStrandProfileType(),
@@ -450,8 +342,8 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
       continue;
     }
 
-    TraceProfile tprof1=TransformAndAddProfile(profiles,slist[0],va);
-    CapProfile(tprof1,slist[0],true,va);
+    TraceProfile tprof1=transform_and_add_profile(profiles,slist[0],va);
+    cap_profile(tprof1,slist[0],true,va);
     TraceProfile tprof2;
     size_t sc=1;
     size_t psize=tprof1.size()-1;
@@ -470,30 +362,32 @@ void CartoonRenderer::RebuildSplineObj(IndexedVertexArray& va,
         if(slist.at(sc-1).type!=3) {
           // boundary to arrow
           SplineEntry se(slist[sc]);
-          tprof2=TransformAndAddProfile(profiles,se, va);
-          AssembleProfile(tprof1,tprof2,va,offset);
+          tprof2=transform_and_add_profile(profiles,se, va);
+          assemble_profile(tprof1,tprof2,va,offset);
           tprof1=tprof2;
           se.type=2;
           se.type1=4;
           se.type2=4;
-          tprof2=TransformAndAddProfile(profiles,se, va);
+          tprof2=transform_and_add_profile(profiles,se, va);
         } else {
           SplineEntry se(slist.at(sc));
           se.type1=4;
           if(options_->GetStrandMode()==1) se.type2=5;
-          tprof2=TransformAndAddProfile(profiles,se, va);
+          tprof2=transform_and_add_profile(profiles,se, va);
         }
       } else {
-        tprof2=TransformAndAddProfile(profiles,slist.at(sc), va);
+        tprof2=transform_and_add_profile(profiles,slist.at(sc), va);
       }
-      AssembleProfile(tprof1,tprof2,va,offset);
+      assemble_profile(tprof1,tprof2,va,offset);
       tprof1=tprof2;
     }
-    CapProfile(tprof1,slist.at(sc-1),false,va);
+    cap_profile(tprof1,slist.at(sc-1),false,va);
   }
 }
 
-TraceProfile CartoonRenderer::TransformAndAddProfile(const std::vector<TraceProfile>& profiles, const SplineEntry& se, IndexedVertexArray& va)
+TraceProfile CartoonRenderer::transform_and_add_profile(const std::vector<TraceProfile>& profiles,
+                                                        const SplineEntry& se,
+                                                        IndexedVertexArray& va)
 {
   assert(se.type1>=0 && se.type1<=5);
   assert(se.type2>=0 && se.type2<=5);
@@ -566,10 +460,10 @@ namespace {
 
 }
 
-void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
-                                      const TraceProfile& prof2, 
-                                      IndexedVertexArray& va,
-                                      size_t offset)
+void CartoonRenderer::assemble_profile(const TraceProfile& prof1,
+                                       const TraceProfile& prof2, 
+                                       IndexedVertexArray& va,
+                                       size_t offset)
 {
   /*
     the wrap around algorithm used here needs to take into account
@@ -598,9 +492,9 @@ void CartoonRenderer::AssembleProfile(const TraceProfile& prof1,
   }
 }
 
-void CartoonRenderer::CapProfile(const impl::TraceProfile& p,
-                                 const impl::SplineEntry& se,
-                                 bool flipn, IndexedVertexArray& va)
+void CartoonRenderer::cap_profile(const impl::TraceProfile& p,
+                                  const impl::SplineEntry& se,
+                                  bool flipn, IndexedVertexArray& va)
 {
   geom::Vec3 norm=flipn ? -se.direction : se.direction;
   VertexID pi0 = va.Add(se.position,norm, se.color1,geom::Vec2(0.5,0.5));
@@ -610,7 +504,7 @@ void CartoonRenderer::CapProfile(const impl::TraceProfile& p,
     float aa=fac*static_cast<float>(i%(p.size()-1));
     vertices[i]=va.Add(p[i].v,norm,se.color1,geom::Vec2(0.5*cos(aa)+0.5,0.5*sin(aa)+0.5));
   }
-  // taking first/last duplication into account again (see AssembleProfile)
+  // taking first/last duplication into account again (see assemble_profile)
   for(unsigned int i1=0;i1<p.size()-1;++i1) {
     unsigned int i2=i1+1;
     if(flipn) {
@@ -697,9 +591,9 @@ namespace {
       prof[3*detail+i]=TraceProfileEntry(geom::Vec3(py,-px,0),geom::Vec3());
     }
   }
-}
+} // anon ns
 
-  TraceProfile CartoonRenderer::GetCircProfile(unsigned int detail, float rx, float ry, unsigned int type, float ecc)
+TraceProfile CartoonRenderer::get_circ_profile(unsigned int detail, float rx, float ry, unsigned int type, float ecc)
 {
   unsigned int d4=detail*4;
   TraceProfile prof(d4);
@@ -734,8 +628,72 @@ namespace {
   return prof;
 }
 
-CartoonRenderer::~CartoonRenderer() {}
+void CartoonRenderer::prepare_rendering(const BackboneTrace& subset, 
+                                       IndexedVertexArray& va,
+                                       SplineEntryListList& spline_list_list)
+{
+  if(options_==NULL) {
+    LOG_DEBUG("CartoonRenderer: NULL options, not creating objects");
+  }
 
+  va.Clear();
+  va.SetLighting(true);
+  va.SetCullFace(true);
+  va.SetColorMaterial(true);
+  va.SetMode(0x4);
+  va.SetPolyMode(options_->GetPolyMode());
+
+  LOG_DEBUG("CartoonRenderer: starting object build");
+  int spline_detail=std::max((unsigned int) 1, options_->GetSplineDetail());
+  SplineEntryListList tmp_sll;
+  for (int node_list=0; node_list<subset.GetListCount(); ++node_list) {
+    LOG_DEBUG("CartoonRenderer: collecting spline entries for node list " << node_list);
+    // first build the spline
+    SplineEntryList spl;
+    const NodeEntryList& nl=subset.GetList(node_list);
+    for (unsigned int i=0; i<nl.size();++i) {
+      int type=0;
+      const NodeEntry& entry=nl[i];
+      if(!force_tube_) {
+        mol::ResidueHandle resh = entry.atom.GetResidue();
+        mol::SecStructure sst=resh.GetSecStructure();
+        if(sst.IsHelical()) {
+          type=1;
+        } else if(sst.IsExtended()) {
+          type=2;
+        }
+      }
+      SplineEntry ee(entry.atom.GetPos(),entry.direction,
+		     entry.normal, entry.rad, 
+		     entry.color1, 
+		     entry.color2,
+		     type, entry.id);
+      ee.v1 = entry.v1;
+      spl.push_back(ee);
+    }
+    LOG_DEBUG("CartoonRenderer: found " << spl.size() << " entries");
+    if(!spl.empty()) {
+      tmp_sll.push_back(spl);
+    }
+  }
+  if(!force_tube_) {
+    LOG_DEBUG("CartoonRenderer: adjusting spline-entry-list lists for various modes");
+    fudge_spline_obj(tmp_sll);
+  }
+  spline_list_list.clear();
+#if !defined(NDEBUG)
+  unsigned int tmp_count=0;
+#endif
+  for(SplineEntryListList::const_iterator sit=tmp_sll.begin();sit!=tmp_sll.end();++sit) {
+    if((sit->size()==2) && (sit->at(0).type==6)) {
+      // don't intpol cylinders
+      spline_list_list.push_back(*sit);
+    } else {
+      LOG_DEBUG("CartoonRenderer: generating full spline for spline-entry-list " << tmp_count++);
+      spline_list_list.push_back(Spline::Generate(*sit,spline_detail,options_->GetColorBlendMode()));
+    }
+  }
 }
 
-}
+
+}} // ns
