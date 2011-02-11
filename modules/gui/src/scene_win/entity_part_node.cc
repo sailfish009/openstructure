@@ -18,14 +18,19 @@
 //------------------------------------------------------------------------------
 
 #include "entity_part_node.hh"
-
+#include <ost/gui/scene_win/scene_win_model.hh>
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/gfx_node.hh>
 
 #include <QFont>
 namespace ost { namespace gui {
 
-EntityPartNode::EntityPartNode(QString name, gfx::EntityP entity, mol::QueryViewWrapper part, SceneNode* parent):SceneNode(parent),name_(name),entity_(entity),query_view_(part),visible_(true){
+EntityPartNode::EntityPartNode(QString name, gfx::EntityP entity, 
+                               mol::QueryViewWrapper part, 
+                               SceneNode* parent):
+  SceneNode(parent),name_(name),entity_(entity),
+  query_view_(part),visible_(true)
+{
 }
 
 QVariant EntityPartNode::GetData(int column, int role){

@@ -31,7 +31,8 @@ void export_GfxNode()
   void (GfxNode::* node_rem2)(GfxNodeP) = &GfxNode::Remove;
   void (GfxNode::* node_rem3)(const String&) = &GfxNode::Remove;
 
-  class_<GfxNode, boost::noncopyable>("GfxNode",no_init)
+  class_<GfxNode, GfxNodeP, 
+         boost::noncopyable>("GfxNode", init<const String&>())
     .def("GetName",&GfxNode::GetName)
     .def("Hide",&GfxNode::Hide)
     .def("Show",&GfxNode::Show)
@@ -43,5 +44,4 @@ void export_GfxNode()
     .def("Remove",node_rem2)
     .def("Remove",node_rem3)
     ;
-  register_ptr_to_python<GfxNodeP>();
 }

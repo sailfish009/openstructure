@@ -67,13 +67,21 @@ public:
 
 OST_REGISTER_WIDGET(SequenceViewer, SequenceViewerFactory);
 
+struct NodeParentPair {
+  NodeParentPair(gfx::GfxNodeP n, gfx::GfxNodeP p): node(n), parent(p) {}
+  
+  gfx::GfxNodeP node;
+  gfx::GfxNodeP parent;
+};
+
 struct GetNodesVisitor: public gfx::GfxNodeVisitor {
+
   GetNodesVisitor(): nodes_() {}
   virtual void VisitObject(gfx::GfxObj* o, const Stack& st) {
-    nodes_.push_back(o->shared_from_this());
+    nodes_.push_back(o->shared_from_this());    
   }
-  gfx::NodePtrList nodes_;
-  gfx::NodePtrList GetNodes(){return nodes_;}
+  gfx::GfxNodeVector nodes_;
+  gfx::GfxNodeVector GetNodes() {return nodes_; }
 };
 
 SequenceViewer::SequenceViewer(bool stand_alone, bool observe_scene,
@@ -101,7 +109,7 @@ SequenceViewer::SequenceViewer(bool stand_alone, bool observe_scene,
     gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
     GetNodesVisitor gnv;
     gfx::Scene::Instance().Apply(gnv);
-    gfx::NodePtrList list = gnv.GetNodes();
+    gfx::GfxNodeVector list=gnv.GetNodes();
     for(unsigned int i=0; i<list.size();i++){
       this->NodeAdded(list[i]);
     }    

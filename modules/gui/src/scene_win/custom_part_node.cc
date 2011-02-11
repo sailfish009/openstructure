@@ -20,7 +20,7 @@
 #include "custom_part_node.hh"
 
 #include "entity_part_node.hh"
-
+#include <ost/gui/scene_win/scene_win_model.hh>
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/gfx_node.hh>
 

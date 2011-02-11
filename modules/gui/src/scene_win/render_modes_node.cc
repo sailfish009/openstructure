@@ -24,7 +24,7 @@
 #include <ost/gfx/gfx_node.hh>
 
 #include <ost/gui/scene_win/scene_win.hh>
-
+#include <ost/gui/scene_win/scene_win_model.hh>
 #include "render_modes_node.hh"
 #include "render_mode_node.hh"
 #include <QFont>
