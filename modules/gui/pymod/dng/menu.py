@@ -24,7 +24,66 @@ class FileMenu(QMenu):
                                          '%s.pdb' % sel_node.name)
     io.SavePDB(sel_node.view, str(filename))
     
+class ClipWidget(QWidget):
+  def __init__(self, width=500, height=500):
+    QWidget.__init__(self)
+    self.setWindowFlags(Qt.Tool)
+    l = QGridLayout(self)
+    l.addWidget(QLabel("Near"), 0, 0)
+    l.addWidget(QLabel("Far"), 1, 0)
+    bounds_near = QLineEdit(str(0))
+    bounds_near.setValidator(QIntValidator(0, 9999, bounds_near))
+    bounds_near.setMaxLength(4)
+    bounds_near.setMaximumWidth(50)
+    bounds_far = QLineEdit(str(200))
+    bounds_far.setValidator(QIntValidator(0, 9999, bounds_far))
+    bounds_far.setMaxLength(4)
+    bounds_far.setMaximumWidth(50)
+    l.addWidget(bounds_near, 0, 1, 2, 1)
+    l.addWidget(bounds_far, 0, 3, 2, 1)
+    self.near_ = QSlider(Qt.Horizontal)
+    self.near_.setMinimum(int(bounds_near.text()))
+    self.near_.setMaximum(int(bounds_far.text()))
+    self.near_.setValue(int(gfx.Scene().near))
+    self.far_ = QSlider(Qt.Horizontal)
+    self.far_.setMinimum(int(bounds_near.text()))
+    self.far_.setMaximum(int(bounds_far.text()))
+    far = int(gfx.Scene().far)
+    if far>sys.maxint:
+      far = sys.maxint
+    self.far_.setValue(far)
+    self.auto_ = QCheckBox("Continuous Automatic Clipping")
+    self.auto_.setChecked(gfx.Scene().GetAutoAutoslab())
 
+    l.addWidget(self.near_, 0, 2)
+    l.addWidget(self.far_, 1, 2)
+    l.addWidget(self.auto_, 2, 0, 1, 4)
+    self.connect(self.near_, SIGNAL('valueChanged(int)'), self.SetNear)
+    self.connect(self.far_, SIGNAL('valueChanged(int)'), self.SetFar)
+    self.connect(self.auto_, SIGNAL('stateChanged(int)'), self.SetAuto)
+    self.connect(bounds_near, SIGNAL('textEdited(QString)'), self.SetNearBounds)
+    self.connect(bounds_far, SIGNAL('textEdited(QString)'), self.SetFarBounds)
+
+  def SetNear(self, val):
+    gfx.Scene().near = val
+
+  def SetFar(self, val):
+    gfx.Scene().far = val
+
+  def SetAuto(self, val):
+    gfx.Scene().AutoAutoslab(val)
+    gfx.Scene().near = int(self.near_.value())
+    gfx.Scene().far = int(self.far_.value())
+
+  def SetNearBounds(self, text):
+    if text!='':
+      self.near_.setMinimum(int(text))
+      self.far_.setMinimum(int(text))
+
+  def SetFarBounds(self, text):
+    if text!='':
+      self.near_.setMaximum(int(text))
+      self.far_.setMaximum(int(text))
 
 class ExportSceneDialog(QDialog):
   def __init__(self, width=500, height=500):
@@ -76,6 +135,7 @@ class SceneMenu(QMenu):
     gui.AddMenuAction(self, 'Fit To Screen', self._FitToScreen,
                   enabled=gui.OneOf(gfx.Entity))
     gui.AddMenuAction(self, 'Save Snapshot', self._ExportScene)
+    gui.AddMenuAction(self, 'Scene Clipping', self._ClipScene, shortcut='Ctrl+Shift+C')
     
   def _ExportScene(self):
     qd=ExportSceneDialog()
@@ -85,6 +145,10 @@ class SceneMenu(QMenu):
                                          'snapshot.png')
     if filename:
       gfx.Scene().Export(str(filename), qd.width, qd.height, qd.transparent)
+
+  def _ClipScene(self):
+    self.cw = ClipWidget()
+    self.cw.show()
 
   def _AboutToShow(self):
     self.fog_action.setChecked(gfx.Scene().fog)

@@ -81,6 +81,7 @@ void export_Scene()
     .def("Autoslab", &Scene::Autoslab, 
          scene_autoslab_overloads())
     .def("AutoAutoslab",&Scene::AutoAutoslab)
+    .def("GetAutoAutoslab",&Scene::GetAutoAutoslab)
     .def("AutoslabMax",&Scene::AutoslabMax)
     .def("Remove", remove1)
     .def("Remove", remove2)

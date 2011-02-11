@@ -181,6 +181,9 @@ class DLLEXPORT_OST_GFX Scene {
   void AutoAutoslab(bool f);
   //@}
   
+  /// \brief get current state of automatic auto-slabbing
+  bool GetAutoAutoslab() const { return auto_autoslab_; }
+
   /// \brief set stereo mode
   /// one of 0 (off), 1 (quad-buffered) 2 (interlaced (for special monitors))
   void SetStereoMode(unsigned int mode);
