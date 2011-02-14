@@ -41,6 +41,7 @@ void PrimList::Clear()
   points_.clear();
   lines_.clear();
   Scene::Instance().RequestRedraw();
+  this->FlagRebuild();
 }
 
 void PrimList::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
