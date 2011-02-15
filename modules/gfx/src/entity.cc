@@ -225,6 +225,7 @@ void Entity::Rebuild()
 
   if(update_view_) {
     EntityView nv=this->GetView();
+    trace_.ResetView(nv);
     for (RendererMap::iterator i=renderer_.begin(), 
            e=renderer_.end(); i!=e; ++i) {
       i->second->ClearViews();
