@@ -26,6 +26,12 @@
 
 namespace ost { namespace conop {
 
+
+typedef enum {
+  NO_PEPTIDE_BONDS=1,
+} ConopFlag;
+
+  
 class DLLEXPORT_OST_CONOP Conopology {
   typedef std::map<String,BuilderP> BuilderMap;
 
@@ -42,7 +48,8 @@ public:
 
     does this need to live within Conopology ?
   */
-  void ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flag=0);
+  void ConnectAll(const BuilderP& b, mol::EntityHandle eh, 
+                  int flags=0);
 
   void RegisterBuilder(const BuilderP& b, const String& name);
   void SetDefaultBuilder(const String& default_name);
