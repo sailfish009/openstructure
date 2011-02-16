@@ -111,6 +111,8 @@ Scene::Scene():
   fog_flag_(true),
   fog_color_(0.0,0.0,0.0,0.0),
   auto_autoslab_(true),
+  do_autoslab_(true),
+  do_autoslab_fast_(true),
   offscreen_flag_(false),
   main_offscreen_buffer_(0),
   old_vp_(),
@@ -127,8 +129,8 @@ Scene::Scene():
   stereo_alg_(0),
   stereo_inverted_(false),
   stereo_eye_(0),
-  stereo_iod_(40.0),
-  stereo_distance_(100.0),
+  stereo_iod_(4.0),
+  stereo_distance_(0.0),
   scene_left_tex_(),
   scene_right_tex_()
 {
@@ -633,7 +635,10 @@ void draw_lightdir(const Vec3& ldir, const mol::Transform& tf)
 
 void Scene::RenderGL()
 {
-  if(auto_autoslab_) Autoslab(false, false);
+  if(auto_autoslab_ || do_autoslab_) {
+    do_autoslab();
+    do_autoslab_=false;
+  }
 
   prep_blur();
 
@@ -762,6 +767,7 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
     if(go) {
       SetCenter(go->GetCenter());
     }
+    do_autoslab_=true;
   }
 
   root_node_->Add(n);
@@ -1310,7 +1316,7 @@ void Scene::SetStereoView(int m)
   RequestRedraw();
 }
 
-void Scene::SetStereoIOD(float d)
+void Scene::SetStereoIOD(Real d)
 {
   stereo_iod_=d;
   if(stereo_mode_>0) {
@@ -1318,7 +1324,7 @@ void Scene::SetStereoIOD(float d)
   }
 }
 
-void Scene::SetStereoDistance(float d)
+void Scene::SetStereoDistance(Real d)
 {
   stereo_distance_=d;
   if(stereo_mode_>0) {
@@ -1329,6 +1335,9 @@ void Scene::SetStereoDistance(float d)
 void Scene::SetStereoAlg(unsigned int a)
 {
   stereo_alg_=a;
+  if(stereo_alg_<0 || stereo_alg_>1) {
+    stereo_alg_=0;
+  }
   if(stereo_mode_>0) {
     RequestRedraw();
   }
@@ -1592,37 +1601,10 @@ public:
 
 } // anon ns
 
-void Scene::Autoslab(bool fast, bool update)
+void Scene::Autoslab(bool fast, bool)
 {
-  if(fast) {
-    geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
-    // necessary code duplication due to awkward slab limit impl
-    znear_=-(bb.GetMax()[2]-1.0);
-    zfar_=-(bb.GetMin()[2]+1.0);
-    set_near(-(bb.GetMax()[2]-1.0));
-    set_far(-(bb.GetMin()[2]+1.0));
-    ResetProjection();
-  } else {
-    LimCalc limcalc;
-    limcalc.transform=transform_;
-    limcalc.minc = Vec3(std::numeric_limits<float>::max(),
-                              std::numeric_limits<float>::max(),
-                              std::numeric_limits<float>::max());
-    limcalc.maxc = Vec3(-std::numeric_limits<float>::max(),
-                              -std::numeric_limits<float>::max(),
-                              -std::numeric_limits<float>::max());
-    this->Apply(limcalc);
-    float mynear=std::max(float(0.0), std::min(float(-limcalc.minc[2]),float(-limcalc.maxc[2])))-float(2.0);
-    float myfar=std::max(float(-limcalc.minc[2]),float(-limcalc.maxc[2]))+float(2.0);
-    znear_=mynear;
-    zfar_=myfar;
-    set_near(znear_);
-    set_far(zfar_);
-    ResetProjection();
-  }
-  if (update) {
-    this->RequestRedraw();
-  }
+  do_autoslab_=true;
+  do_autoslab_fast_=fast;
 }
 
 void Scene::AutoslabMax()
@@ -1827,38 +1809,47 @@ void Scene::stereo_projection(int view)
   glLoadIdentity();
 
   Real zn=std::max<Real>(1.0,znear_);
-  Real zf=std::max<Real>(1.1,zfar_);
-  
+  Real zf=std::max<Real>(1.2,zfar_);
   Real top = zn * std::tan(fov_*M_PI/360.0);
   Real bot = -top;
-  Real right = top*aspect_ratio_;
-  Real left = -right;
-  
-  glFrustum(left,right,bot,top,zn,zf);
-  
-  if(view!=0) {
-    Real ff=(view<0 ? 1.0 : -1.0);
-    if(stereo_alg_==2 || stereo_alg_==3 || stereo_alg_==4) {
-      // physically precise stereo with skew, does
-      // not handle z translation well
-      // the 100.0 comes from visual matching with mode 0 at a reasonable distance
-      Real dist = -transform_.GetTrans()[2];
-      if(stereo_alg_==3) dist=znear_;
-      else if(stereo_alg_==4) dist=stereo_distance_;
+  Real left = -top*aspect_ratio_;
+  Real right = -left;
 
-      Real iod2=100.0/stereo_iod_;
-      geom::Mat4 skew=geom::Transpose(geom::Mat4(1.0,0.0,ff*iod2/dist,ff*iod2,
-                                                 0.0,1.0,0.0,0.0,
-                                                 0.0,0.0,1.0,0.0,
-                                                 0.0,0.0,0.0,1.0));
-      glMultMatrix(skew.Data());
-    } else {
-      // default, dino style stereo, less physically precise but visually more pleasing
-      Real dist = stereo_alg_==1 ? znear_ : -transform_.GetTrans()[2];
+  if(view!=0) {
+    
+    Real ff=(view<0 ? -1.0 : 1.0);
+    Real iod=std::max<Real>(0.1,stereo_iod_);
+
+    if(stereo_alg_==1) {
+      // Toe-in method, easy but wrong
+      glFrustum(left,right,bot,top,zn,zf);
+      Real dist = -transform_.GetTrans()[2]+stereo_distance_;
       glTranslated(0.0,0.0,-dist);
-      glRotated(180.0/M_PI*atan(ff/stereo_iod_),0.0,1.0,0.0);
+      glRotated(180.0/M_PI*atan(0.1*ff/iod),0.0,1.0,0.0);
       glTranslated(0.0,0.0,dist);
+    } else {
+      // correct off-axis frustims
+
+      Real fo=-transform_.GetTrans()[2]+stereo_distance_;
+
+      // correction of near clipping plane to avoid extreme drifting
+      // of left and right view
+      if(iod*zn/fo<2.0) {
+        zn=2.0*fo/iod;
+        zf=std::max(zn+Real(0.2),zf);
+      }
+    
+      Real sd = -ff*0.5*iod*zn/fo;
+      left+=sd;
+      right+=sd;
+
+      glFrustum(left,right,bot,top,zn,zf);
+      glTranslated(-ff*iod*0.5,0.0,0.0);
     }
+
+  } else { // view==0
+    // standard viewing frustum
+    glFrustum(left,right,bot,top,zn,zf);
   }
 }
 
@@ -1991,6 +1982,36 @@ void Scene::render_stereo()
 #if OST_SHADER_SUPPORT_ENABLED
   Shader::Instance().PopProgram();
 #endif
+}
+
+void Scene::do_autoslab()
+{
+  if(do_autoslab_fast_) {
+    geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
+    // necessary code duplication due to awkward slab limit impl
+    znear_=-(bb.GetMax()[2]-1.0);
+    zfar_=-(bb.GetMin()[2]+1.0);
+    set_near(-(bb.GetMax()[2]-1.0));
+    set_far(-(bb.GetMin()[2]+1.0));
+    ResetProjection();
+  } else {
+    LimCalc limcalc;
+    limcalc.transform=transform_;
+    limcalc.minc = Vec3(std::numeric_limits<float>::max(),
+                              std::numeric_limits<float>::max(),
+                              std::numeric_limits<float>::max());
+    limcalc.maxc = Vec3(-std::numeric_limits<float>::max(),
+                              -std::numeric_limits<float>::max(),
+                              -std::numeric_limits<float>::max());
+    this->Apply(limcalc);
+    float mynear=std::max(float(0.0), std::min(float(-limcalc.minc[2]),float(-limcalc.maxc[2])))-float(2.0);
+    float myfar=std::max(float(-limcalc.minc[2]),float(-limcalc.maxc[2]))+float(2.0);
+    znear_=mynear;
+    zfar_=myfar;
+    set_near(znear_);
+    set_far(zfar_);
+    ResetProjection();
+  }
 }
 
 }} // ns

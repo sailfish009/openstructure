@@ -201,14 +201,14 @@ class DLLEXPORT_OST_GFX Scene {
   int GetStereoView() const {return stereo_eye_;}
 
   /// \brief set stereo eye distance
-  void SetStereoIOD(float);
+  void SetStereoIOD(Real);
   /// \brief return current stereo eye distance
-  float GetStereoIOD() const {return stereo_distance_;}
+  Real GetStereoIOD() const {return stereo_iod_;}
 
-  /// \brief set stereo distance
-  void SetStereoDistance(float);
-  /// \brief return current stereo distance
-  float GetStereoDistance() const {return stereo_distance_;}
+  /// \brief set stereo distance offset from COR
+  void SetStereoDistance(Real);
+  /// \brief return current stereo distance offset from COR
+  Real GetStereoDistance() const {return stereo_distance_;}
   
   /// \brief set stereo algorithm
   /// one of 0 or 1
@@ -461,6 +461,7 @@ private:
   bool fog_flag_;
   Color fog_color_;
   bool auto_autoslab_;
+  bool do_autoslab_,do_autoslab_fast_;
 
   bool offscreen_flag_; // a simple indicator whether in offscreen mode or not
   OffscreenBuffer* main_offscreen_buffer_; // not null if a main offscreen buffer is present
@@ -478,11 +479,12 @@ private:
 
   uint blur_count_;
   std::vector<boost::shared_array<unsigned char> > blur_buffer_;
+
   unsigned int stereo_mode_;
   unsigned int stereo_alg_;
   bool stereo_inverted_;
   unsigned int stereo_eye_;
-  float stereo_iod_,stereo_distance_;
+  Real stereo_iod_,stereo_distance_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
 
@@ -496,6 +498,7 @@ private:
   void render_scene();
   void render_glow();
   void render_stereo();
+  void do_autoslab();
   bool IsNameAvailable(String name);
 };
 

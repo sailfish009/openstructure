@@ -62,8 +62,8 @@ def Stereo(mode,flip=None,alg=None):
     _gfx.Scene().SetStereoFlip(flip)
   if(alg):
     _gfx.Scene().SetStereoAlg(alg)
-  if(mode):
-    _gfx.Scene().SetStereoMode(mode)
+
+  _gfx.Scene().SetStereoMode(mode)
 
 def FitToScreen(gfx_ent, width=None, height=None, margin=0.01):
   """
