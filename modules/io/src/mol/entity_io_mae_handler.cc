@@ -58,7 +58,7 @@ using boost::format;
         if(in_string) {
           if(line[p1]=='"') {
             in_string=false;
-            nrvo.push_back(line.substr(p0,p1-p0));
+            nrvo.push_back(std::string(line.substr(p0,p1-p0)));
             ++p1;
             p0=p1;
             while(isspace(line[p1]) && p1<line.size()) {++p0;++p1;}
@@ -66,7 +66,7 @@ using boost::format;
           }
         } else {
           if(isspace(line[p1])) {
-            nrvo.push_back(line.substr(p0+1,p1-p0-1));
+            nrvo.push_back(std::string(line.substr(p0+1,p1-p0-1)));
             ++p1;
             p0=p1;
             while(isspace(line[p1]) && p1<line.size()) {++p0;++p1;}
@@ -120,31 +120,39 @@ void MAEReader::Import(mol::EntityHandle& ent)
   int i_chain_name=-1;
 
   mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
-
+  
   while(std::getline(in_,line)) {
     line = boost::trim_copy(line);
     if(in_ct_block) {
       if(in_atom_block) {
         if(parsing_atoms) {
           if(boost::regex_match(line,r_delim)) {
-            //LOG_DEBUG( "stopping atom parsing" );
+            LOG_TRACE( "stopping atom parsing" );
             parsing_atoms=false;
             prop_list.clear();
+            i_atom_name=-1;
+            i_atom_xpos=-1;
+            i_atom_ypos=-1;
+            i_atom_zpos=-1;
+            i_res_name=-1;
+            i_res_num=-1;
+            i_chain_name=-1;
           } else {
             // parsing atom line
             std::vector<std::string> tokens=tokenize(line);
             for(size_t i=0;i<tokens.size();++i) {
-              //LOG_DEBUG( "[" << tokens[i] << "] ");
+              LOG_TRACE( "[" << tokens[i] << "] ");
             }
-            //LOG_DEBUG("");
+            LOG_TRACE("");
+
             add_atom(ent,editor,
-                     tokens[i_atom_name],
-                     tokens[i_atom_xpos],
-                     tokens[i_atom_ypos],
-                     tokens[i_atom_zpos],
-                     tokens[i_res_name],
-                     tokens[i_res_num],
-                     tokens[i_chain_name]);
+                     i_atom_name>=0 && i_atom_name<(int)tokens.size() ? tokens[i_atom_name] : "X",
+                     i_atom_xpos>=0 && i_atom_xpos<(int)tokens.size() ? tokens[i_atom_xpos] : "0",
+                     i_atom_ypos>=0 && i_atom_ypos<(int)tokens.size() ? tokens[i_atom_ypos] : "0",
+                     i_atom_zpos>=0 && i_atom_zpos<(int)tokens.size() ? tokens[i_atom_zpos] : "0",
+                     i_res_name>=0 && i_res_name<(int)tokens.size() ? tokens[i_res_name] : "X",
+                     i_res_num>=0 && i_res_num<(int)tokens.size() ? tokens[i_res_num] : "0",
+                     i_chain_name>=0 && i_chain_name<(int)tokens.size() ? tokens[i_chain_name] : "X");
           }
         } else { // not parsing atoms
           if(boost::regex_match(line,r_delim)) {
@@ -153,21 +161,20 @@ void MAEReader::Import(mol::EntityHandle& ent)
                i_atom_ypos==-1 ||
                i_atom_zpos==-1 ||
                i_res_name==-1 ||
-               i_res_num==-1 ||
-               i_chain_name==-1) {
+               i_res_num==-1) {
               throw IOException("missing atom prop");
             }
-            //LOG_DEBUG( "starting atom parsing" );
+            LOG_TRACE( "starting atom parsing" );
             parsing_atoms=true;
           } else if(line[0]=='}') {
-            //LOG_DEBUG( "exiting atom block" );
+            LOG_TRACE( "exiting atom block" );
             in_atom_block=false;
           } else {
             // parsing property line
             if(line[0]!='#') {
               int pid=prop_list.size()+1;
               prop_list.push_back(line);
-              //LOG_DEBUG( "found property '" << prop_list.back() << "' id=" << pid );
+              LOG_TRACE( "found property '" << prop_list.back() << "' id=" << pid );
               if(line=="s_m_pdb_atom_name") i_atom_name=pid;
               else if(line=="r_m_x_coord") i_atom_xpos=pid;
               else if(line=="r_m_y_coord") i_atom_ypos=pid;
@@ -180,16 +187,16 @@ void MAEReader::Import(mol::EntityHandle& ent)
         }
       } else { // not in atom block
         if(boost::regex_match(line,r_atom_block)) {
-          //LOG_DEBUG( "entering atom block" );
+          LOG_TRACE( "entering atom block" );
           in_atom_block=true;
         } else if(line[0]=='}') {
-          //LOG_DEBUG( "exiting ct block" );
+          LOG_TRACE( "exiting ct block" );
           in_ct_block=false;
         }
       }
     } else { // not in ct block
       if(boost::regex_match(line,r_ct_block)) {
-        //LOG_DEBUG( "entering ct block" );
+        LOG_TRACE( "entering ct block" );
         in_ct_block=true;
       }
     }
@@ -213,7 +220,7 @@ void MAEReader::add_atom(mol::EntityHandle ent,
   std::string aname=boost::trim_copy(aname2);
   std::string rname=boost::trim_copy(rname2);
   std::string cname=boost::trim_copy(cname2);
-  std::string ele=aname.substr(0,1);
+  std::string ele=aname.empty() ? "X" : aname.substr(0,1);
   if(isdigit(ele[0])) ele="H";
 
   int irnum = atoi(s_rnum.c_str());
@@ -245,10 +252,10 @@ void MAEReader::add_atom(mol::EntityHandle ent,
   if(update_chain) {  
     if (!(curr_chain_=ent.FindChain(cname))) {
       curr_chain_=editor.InsertChain(cname);
-      //LOG_DEBUG("new chain " << curr_chain_);      
+      LOG_TRACE("new chain " << curr_chain_);      
       ++chain_count_;      
     } else {
-      //LOG_DEBUG("old chain " << curr_chain_);      
+      LOG_TRACE("old chain " << curr_chain_);      
     }
   }
 
@@ -256,15 +263,15 @@ void MAEReader::add_atom(mol::EntityHandle ent,
     if (!(curr_residue_=curr_chain_.FindResidue(rnum))) {
       curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
       assert(curr_residue_.IsValid());
-      //LOG_DEBUG(" new residue " << curr_residue_);
+      LOG_TRACE(" new residue " << curr_residue_);
       ++residue_count_;
     } else {
-      //LOG_DEBUG(" old residue " << curr_residue_);
+      LOG_TRACE(" old residue " << curr_residue_);
     }
   }
 
   // finally add atom
-  //LOG_DEBUG("  atom " << aname << " (" << ele << ") @" << apos);
+  LOG_TRACE("  atom " << aname << " (" << ele << ") @" << apos);
   mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, ele);
 }
   
