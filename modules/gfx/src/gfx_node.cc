@@ -59,6 +59,17 @@ void GfxNode::DeepSwap(GfxNode& n)
   std::swap(show_,n.show_);
 }
 
+bool GfxNode::IsNameAvailable(const String& name) const
+{
+  for (GfxNodeVector::const_iterator it =node_vector_.begin();
+       it!=node_vector_.end();++it) {
+    if ((*it)->GetName()==name) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void GfxNode::Apply(GfxNodeVisitor& v,GfxNodeVisitor::Stack st)
 {
   if(!v.VisitNode(this,st)) return;
@@ -155,6 +166,16 @@ void GfxNode::RemoveAll()
 
 void GfxNode::Add(GfxNodeP node)
 {
+  if (!node) {
+    return;
+  }
+  if (!this->IsNameAvailable(node->GetName())) {
+    std::stringstream ss;
+    ss << "node '" << this->GetName() << "' has already a node with name '" 
+       << node->GetName() << "'";
+    throw Error(ss.str());
+  }
+
   node_vector_.push_back(node);
   if (!node->parent_.expired()) {
     node->GetParent()->Remove(node);

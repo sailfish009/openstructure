@@ -75,7 +75,13 @@ class DLLEXPORT_OST_GFX GfxNode: public boost::enable_shared_from_this<GfxNode>
 
   // add a graphical object - leaf
   void Add(GfxObjP obj);
-
+  
+  
+  /// \brief returns true if no scene node of the given name is a child
+  ///   of this node.
+  bool IsNameAvailable(const String& name) const;
+  
+  
   // remove given graphical object
   void Remove(GfxObjP obj);
 

@@ -498,8 +498,11 @@ private:
   void render_scene();
   void render_glow();
   void render_stereo();
+
   void do_autoslab();
-  bool IsNameAvailable(String name);
+
+  bool IsNameAvailable(const String& name) const;
+
 };
 
 }} // ns

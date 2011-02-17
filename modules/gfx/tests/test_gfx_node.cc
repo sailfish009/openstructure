@@ -75,32 +75,40 @@ BOOST_AUTO_TEST_CASE(gfx_node_add)
 {
   GfxNodeP n1(new GfxNode("1"));
   BOOST_CHECK_EQUAL(n1->GetParent(), GfxNodeP());
-  BOOST_CHECK_EQUAL(n1->GetChildCount(), 0);
+  BOOST_CHECK_EQUAL(n1->GetChildCount(), size_t(0));
   GfxNodeP n2(new GfxNode("2"));
   n1->Add(n2);
   BOOST_CHECK_EQUAL(n1->GetParent(), GfxNodeP());
-  BOOST_CHECK_EQUAL(n1->GetChildCount(), 1);   
+  BOOST_CHECK_EQUAL(n1->GetChildCount(), size_t(1));   
   BOOST_CHECK_EQUAL(n2->GetParent(), n1);
-  BOOST_CHECK_EQUAL(n2->GetChildCount(), 0);
+  BOOST_CHECK_EQUAL(n2->GetChildCount(), size_t(0));
   
   // "move" node 2 from 1 to 3
   GfxNodeP n3(new GfxNode("3"));
   n3->Add(n2);
-  BOOST_CHECK_EQUAL(n1->GetChildCount(), 0);
+  BOOST_CHECK_EQUAL(n1->GetChildCount(), size_t(0));
   BOOST_CHECK_EQUAL(n2->GetParent(), n3);
-  BOOST_CHECK_EQUAL(n3->GetChildCount(), 1);
+  BOOST_CHECK_EQUAL(n3->GetChildCount(), size_t(1));
 }
 
+BOOST_AUTO_TEST_CASE(gfx_node_add_duplicate) 
+{
+  GfxNodeP n1(new GfxNode("1"));
+  GfxNodeP n2(new GfxNode("2"));
+  GfxNodeP n3(new GfxNode("2"));
+  BOOST_CHECK_NO_THROW(n1->Add(n2));
+  BOOST_CHECK_THROW(n1->Add(n3), Error);
+}
 
 BOOST_AUTO_TEST_CASE(gfx_node_remove) 
 {
   GfxNodeP n1(new GfxNode("1"));
   BOOST_CHECK_EQUAL(n1->GetParent(), GfxNodeP());
-  BOOST_CHECK_EQUAL(n1->GetChildCount(), 0);
+  BOOST_CHECK_EQUAL(n1->GetChildCount(), size_t(0));
   GfxNodeP n2(new GfxNode("2"));
   n1->Add(n2);
   n1->Remove(n2);
-  BOOST_CHECK_EQUAL(n1->GetChildCount(), 0);
+  BOOST_CHECK_EQUAL(n1->GetChildCount(), size_t(0));
   BOOST_CHECK_EQUAL(n2->GetParent(), GfxNodeP());
 }
 
@@ -108,7 +116,7 @@ BOOST_AUTO_TEST_CASE(gfx_node_remove_all)
 {
   GfxNodeP n1(new GfxNode("1"));
   BOOST_CHECK_EQUAL(n1->GetParent(), GfxNodeP());
-  BOOST_CHECK_EQUAL(n1->GetChildCount(), 0);
+  BOOST_CHECK_EQUAL(n1->GetChildCount(), size_t(0));
   GfxNodeP n2(new GfxNode("2"));
   GfxNodeP n3(new GfxNode("3"));
   GfxNodeP n4(new GfxNode("4"));
@@ -116,7 +124,7 @@ BOOST_AUTO_TEST_CASE(gfx_node_remove_all)
   n1->Add(n3);
   n1->Add(n4);
   n1->RemoveAll();
-  BOOST_CHECK_EQUAL(n1->GetChildCount(), 0);
+  BOOST_CHECK_EQUAL(n1->GetChildCount(), size_t(0));
   BOOST_CHECK_EQUAL(n2->GetParent(), GfxNodeP());
 }
 

@@ -756,6 +756,8 @@ size_t Scene::GetNodeCount() const
 void Scene::Add(const GfxNodeP& n, bool redraw)
 {
   if(!n) return;
+  // even though IsNameAvailable() is called in GfxNode::Add, check here 
+  // as well to produce error message specific to adding a node to the scene.
   if(!this->IsNameAvailable(n->GetName())){
     throw Error("Scene already has a node with name '"+n->GetName()+"'");
   }
@@ -776,15 +778,9 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
   }
 }
 
-bool Scene::IsNameAvailable(String name)
+bool Scene::IsNameAvailable(const String& name) const
 {
-  FindNode fn(name);
-  Apply(fn);
-  if(fn.node) {
-    LOG_INFO("Scene: " << name << " already exists as a scene node");
-    return false;
-  }
-  return true;
+  return root_node_->IsNameAvailable(name);
 }
 
 void Scene::NodeAdded(const GfxNodeP& node)
