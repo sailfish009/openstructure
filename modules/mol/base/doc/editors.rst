@@ -28,9 +28,11 @@ zero, the dependent infomation is updated.
 
 In Python, one can not rely on the destructors being called. It is adviced to 
 always put a call to :meth:`XCSEditor.UpdateICS` or 
-:meth:`ICSEditor.UpdateXCS` when the editing is finished. Alternatively, starting from Python version 2.6, one can use the 
-`with <http://docs.python.org/reference/compound_stmts.html#with>`_  statement
-to make sure the destructor are called and the dependent information is updated.
+:meth:`ICSEditor.UpdateXCS` when the editing is finished. Alternatively, 
+starting from Python version 2.6, one can use the \
+`with <http://docs.python.org/reference/compound_stmts.html#with>`_  
+statement to make sure the destructor are called and the dependent information 
+is updated.
 
 
 Basic Editing Operations
