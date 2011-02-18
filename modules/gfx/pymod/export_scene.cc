@@ -182,6 +182,7 @@ void export_Scene()
     .def("StopOffscreenMode",&Scene::StopOffscreenMode)
     .def("SetShadingMode",&Scene::SetShadingMode)
     .def("SetBeacon",&Scene::SetBeacon)
+    .add_property("root_node", &Scene::GetRootNode)
     .def("SetBeaconOff",&Scene::SetBeaconOff)
     .def("__getitem__",scene_getitem)
   ;
