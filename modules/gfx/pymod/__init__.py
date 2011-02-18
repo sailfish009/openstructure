@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2011 by the OpenStructure authors
+# Copyright (C) 2008-2010 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -141,7 +141,7 @@ def FitToScreen(gfx_ent, width=None, height=None, margin=0.01):
   scene.SetRTC(rtc)
 
 
-class GfxNodeListAttrProxy(object):
+class GfxNodeListAttrProxy:
   def __init__(self, node_list, name):
     self._node_list=node_list
     self._name=name
@@ -164,11 +164,6 @@ class GfxNodeListProxy(object):
       return super(GfxNodeListProxy, self).__getattr__(name)
     return GfxNodeListAttrProxy(self._nodes, name)
 
-  def __dir__(self):
-    if len(self._nodes)==0:
-      return dir(None)
-    return dir(self._nodes[0])
-
   def __setattr__(self, name, value):
     if name.startswith('_'):
       super(GfxNodeListProxy, self).__setattr__(name, value)
@@ -188,4 +183,4 @@ def _Match(scene, pattern="*"):
     return matches
   return GfxNodeListProxy(_Recurse("", Scene().root_node, pattern))
 
-SceneSingleton.Match=_Match
+SceneSingleton.__getitem__=_Match
