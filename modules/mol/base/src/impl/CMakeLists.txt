@@ -30,6 +30,7 @@ entity_impl_fw.hh
 fragment_impl.hh
 fragment_impl_fw.hh
 query_ast.hh
+query_ast_fw.hh
 query_impl.hh
 query_impl_fw.hh
 residue_impl.hh

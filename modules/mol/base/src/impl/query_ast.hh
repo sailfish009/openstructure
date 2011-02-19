@@ -19,18 +19,22 @@
 #ifndef OST_QUERY_AST_HH
 #define OST_QUERY_AST_HH
 
+#include <boost/regex.hpp>
+
 #include <ost/mol/module_config.hh>
 #include <boost/variant.hpp>
 #include <ost/geom/vec3.hh>
 #include <ost/mol/view_type_fw.hh>
 #include <ost/mol/property_id.hh>
 
+#include "query_ast_fw.hh"
+
 namespace ost { namespace mol { namespace impl {
 
 /// holds the right and left hand operand of a within statement. The lefthand
-/// operand is a distance in Anstrom, the righthand parameter may both be 
-/// a lazily bound reference to a point cloud (that is only known at) 
-/// instantiation time or a vector.
+/// operand is a distance in Angstrom, the righthand parameter may both be 
+/// a lazily bound reference to a point cloud (that is only known at 
+/// instantiation time) or a vector.
 class DLLEXPORT_OST_MOL WithinParam {
 public:
   WithinParam(const geom::Vec3& center, float radius);
@@ -50,7 +54,21 @@ private:
   int           lazily_bound_ref_;
 };
 
-typedef boost::variant<int, float, String, WithinParam> ParamType;
+// holds either a simple string or a full regex, constructed from a glob-style string
+class DLLEXPORT_OST_MOL StringOrRegexParam {
+ public:
+  StringOrRegexParam();
+  explicit StringOrRegexParam(const String& s);
+  bool Match(const String& s) const;
+  bool operator==(const StringOrRegexParam&) const;
+  const String& str() const {return s_;}
+ private:
+  bool is_regex_;
+  boost::regex r_;
+  String s_;
+};
+
+typedef boost::variant<int, float, WithinParam, StringOrRegexParam> ParamType;
 
 // AST node, used internally for building the AST tree.
 class DLLEXPORT_OST_MOL Node {
@@ -65,10 +83,6 @@ public:
 private:
     Node*           parent_;
 };
-
-typedef enum {
-  LOP_OR, LOP_AND
-} LogicOP;
 
 
 
@@ -103,10 +117,6 @@ private:
   Node*           rhs_;
   LogicOP         op_;
 };
-
-typedef enum {
-  COP_EQ, COP_NEQ, COP_GE, COP_LE, COP_LT, COP_GT
-} CompOP;
 
 
 class DLLEXPORT_OST_MOL SelNode : public Node {

@@ -148,7 +148,7 @@ QueryToken QueryLexer::LexNumericToken() {
 }
 
 bool is_ident_or_str(char c) {
-  static String allowed_chars("_");
+  static String allowed_chars("_*?");
   return isalnum(c) || allowed_chars.find_first_of(c)!=String::npos;
 }
 
@@ -460,7 +460,7 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
         }
         return false;
       } else {
-        value=value_string;
+        value=StringOrRegexParam(value_string);
       }
 
       break;
@@ -471,13 +471,13 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
         error_desc_.range=v.GetRange();
         return false;
       } else if (sel.type==Prop::STRING) {
-        value=value_string;
+        value=StringOrRegexParam(value_string);
       } else
         value=ParamType(float(atof(value_string.c_str())));              
       break;      
     case tok::IntegralValue:
       if (sel.type==Prop::STRING) {
-        value=value_string;
+        value=StringOrRegexParam(value_string);
       } else {
         if (sel.type==Prop::INT) {
           value=ParamType(atoi(value_string.c_str()));
@@ -644,12 +644,12 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
     }
     LogicOP lop=inversion_stack_.back() ? LOP_OR : LOP_AND;
     CompOP cop=inversion_stack_.back() ? COP_NEQ : COP_EQ;
-    ParamType cname_val(query_string_.substr(cname.GetValueRange().Loc,
-                        cname.GetValueRange().Length).c_str());
+    ParamType cname_val(StringOrRegexParam(query_string_.substr(cname.GetValueRange().Loc,
+								cname.GetValueRange().Length).c_str()));
     Prop cname_prop(Prop::CNAME, Prop::STRING, Prop::CHAIN);
     SelNode* cname_node=new SelNode(cname_prop, cop, cname_val);
-    ParamType aname_val(query_string_.substr(aname.GetValueRange().Loc,
-                        aname.GetValueRange().Length).c_str());
+    ParamType aname_val(StringOrRegexParam(query_string_.substr(aname.GetValueRange().Loc,
+								aname.GetValueRange().Length).c_str()));
    Prop aname_prop(Prop::ANAME, Prop::STRING, Prop::ATOM);
     SelNode* aname_node=new SelNode(aname_prop, cop, aname_val);
     ParamType rnum_val(atoi(query_string_.substr(rnum.GetValueRange().Loc,

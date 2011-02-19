@@ -22,9 +22,11 @@
 /*
  Author: Marco Biasini
  */
+
+#include <ost/geom/geom.hh>
  
 #include <ost/mol/impl/query_impl_fw.hh>
-#include <ost/mol/impl/query_ast.hh>
+#include <ost/mol/impl/query_ast_fw.hh>
 
 #include <ost/mol/handle_type_fw.hh>
 #include <boost/logic/tribool.hpp>
@@ -37,7 +39,8 @@
 
 namespace ost { namespace mol {
 
-
+class EntityHandle;
+class EntityView;
 struct LazilyBoundData;
 struct LazilyBoundRef;
 
