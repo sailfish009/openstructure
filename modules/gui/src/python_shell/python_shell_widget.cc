@@ -737,6 +737,14 @@ QTextBlock PythonShellWidget::GetEditStartBlock()
 
 void PythonShellWidget::keyPressEvent(QKeyEvent* event)
 {
+  // BZDNG-173
+  if (event->key()==Qt::Key_Left) {
+    if (this->textCursor().position()==GetEditStartBlock().position() ||
+        this->textCursor().anchor()==GetEditStartBlock().position()) {
+      event->accept();
+      return;
+    }
+  }
   if (this->handle_custom_commands_(event)){
     return;
   }
