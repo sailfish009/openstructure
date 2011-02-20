@@ -1331,7 +1331,7 @@ void Scene::SetStereoDistance(Real d)
 void Scene::SetStereoAlg(unsigned int a)
 {
   stereo_alg_=a;
-  if(stereo_alg_<0 || stereo_alg_>1) {
+  if(stereo_alg_>1) {
     stereo_alg_=0;
   }
   if(stereo_mode_>0) {
