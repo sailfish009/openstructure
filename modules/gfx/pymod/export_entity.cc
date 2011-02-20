@@ -185,6 +185,7 @@ void ent_apply_61(Entity* e, MapHandleColorOp& mhco, bool store){
 void ent_apply_62(Entity* e, MapHandleColorOp& mhco){
   e->Apply(mhco);
 }
+
 #endif //OST_IMG_ENABLED
 
 RenderOptionsPtr ent_sline_opts(Entity* ent)
@@ -238,6 +239,18 @@ RenderOptionsPtr ent_ltrace_opts(Entity* ent)
   return ent->GetOptions(RenderMode::LINE_TRACE);
 }
 
+void set_selection(Entity* ent, object sel)
+{
+  try {
+    String sel_string=extract<String>(sel);
+    ent->SetSelection(ent->GetView().Select(sel_string));
+  } catch (error_already_set& e) {
+    PyErr_Clear();
+    mol::EntityView view=extract<mol::EntityView>(sel);
+    ent->SetSelection(view);
+  }
+}
+
 }
 
 void export_Entity()
@@ -259,7 +272,7 @@ void export_Entity()
     .def("SetSelection",&Entity::SetSelection)
     .def("GetSelection",&Entity::GetSelection)    
     .add_property("selection", &Entity::GetSelection, 
-                  &Entity::SetSelection)
+                  &set_selection)
     .def("GetView", &Entity::GetView)
     .def("UpdateView", &Entity::UpdateView)
     .def("SetQuery", set_query1)
