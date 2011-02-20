@@ -42,7 +42,7 @@
 #include <QScrollBar>
 #include <QDirModel>
 #include <QStringList>
-
+#include <QDebug>
 
 /*
  Authors: Marco Biasini, Andreas Schenk
@@ -469,7 +469,7 @@ void PythonShellWidget::OnHistoryDownStateEntered()
 void PythonShellWidget::OnExecuteStateEntered()
 {
   QTextCursor cursor=textCursor();
-  cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+  cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
   setTextCursor(cursor);
   set_block_type_(block_edit_start_,textCursor().block(),BLOCKTYPE_CODE);
   insertPlainText(QString(QChar::ParagraphSeparator));
@@ -791,7 +791,10 @@ QString PythonShellWidget::GetCommand()
   QTextCursor cursor(block_edit_start_);
   cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
   QString text= cursor.selectedText();
-  text.replace(QChar::LineSeparator,"\n");
+  // replace LineSeparator with an empty string, they are used by Qt to 
+  // designate soft line wraps
+  text.replace(QChar::LineSeparator,"");
+  // a real line end
   text.replace(QChar::ParagraphSeparator,"\n");
   return text;
 }
