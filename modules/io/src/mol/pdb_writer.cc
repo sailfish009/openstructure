@@ -136,8 +136,7 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
   } else {
     for (std::vector<String>::const_iterator
          i=names.begin(), e=names.end(); i!=e; ++i) {
-      geom::Mat4 tf=atom.GetEntity().GetTransformationMatrix();
-      p=geom::Vec3(tf*geom::Vec4(atom.GetAltPos(*i)));
+      p=atom.GetAltPos(*i);
       line(30, 50).Clear();
 
       if (i->size()>1) {
