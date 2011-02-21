@@ -318,22 +318,22 @@ boost::logic::tribool QueryState::EvalAtom(const impl::AtomImplPtr& a) {
     int int_value;
     switch (ss.sel_id) {
       case Prop::ANAME:
-        str_value = a->GetName();
+        str_value = a->Name();
         s_[*i] = cmp_string(ss.comp_op,str_value,
           boost::get<String>(ss.param));                  
         break;
       case Prop::AX:
-        float_value=(a->GetPos())[0];
+        float_value=(a->TransformedPos())[0];
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
                                boost::get<float>(ss.param));
         break;
       case Prop::AY:
-        float_value=(a->GetPos())[1];
+        float_value=(a->TransformedPos())[1];
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
                                boost::get<float>(ss.param));
         break;
       case Prop::AZ:
-        float_value=(a->GetPos())[2];
+        float_value=(a->TransformedPos())[2];
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
                                boost::get<float>(ss.param));
         break;                
@@ -353,7 +353,7 @@ boost::logic::tribool QueryState::EvalAtom(const impl::AtomImplPtr& a) {
                               boost::get<float>(ss.param));
         break;
       case Prop::WITHIN:
-        s_[*i]= this->do_within(a->GetPos(), 
+        s_[*i]= this->do_within(a->TransformedPos(), 
                                 boost::get<WithinParam>(ss.param),
                                 ss.comp_op);
         break;

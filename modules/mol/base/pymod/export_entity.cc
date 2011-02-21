@@ -68,18 +68,34 @@ ICSEditor depr_request_ics_editor(EntityHandle e, EditMode m)
   return e.EditICS(m);
 }
 
+bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
+{
+  return a1.GetIndex()<a2.GetIndex();
+}
 
-PyObject* get_pos(EntityHandle& entity)
+
+PyObject* get_pos2(EntityHandle& entity, bool id_sorted)
 {
 #if OST_NUMPY_SUPPORT_ENABLED
   npy_intp dims[]={entity.GetAtomCount(),3};
-  PyObject* na = PyArray_SimpleNew(2,dims,NPY_DOUBLE);
-  npy_double* nad = reinterpret_cast<npy_double*>(PyArray_DATA(na));
-  for(AtomHandleIter it=entity.AtomsBegin();it!=entity.AtomsEnd();++it,nad+=3) {
-    geom::Vec3 pos=(*it).GetPos();
-    nad[0]=static_cast<npy_double>(pos[0]);
-    nad[1]=static_cast<npy_double>(pos[1]);
-    nad[2]=static_cast<npy_double>(pos[2]);
+  PyObject* na = PyArray_SimpleNew(2,dims,NPY_FLOAT);
+  npy_float* nad = reinterpret_cast<npy_float*>(PyArray_DATA(na));
+  if(id_sorted) {
+    AtomHandleList alist = entity.GetAtomList();
+    std::sort(alist.begin(),alist.end(),less_index);
+    for(AtomHandleList::const_iterator it=alist.begin();it!=alist.end();++it,nad+=3) {
+      geom::Vec3 pos=(*it).GetPos();
+      nad[0]=static_cast<npy_float>(pos[0]);
+      nad[1]=static_cast<npy_float>(pos[1]);
+      nad[2]=static_cast<npy_float>(pos[2]);
+    }
+  } else {
+    for(AtomHandleIter it=entity.AtomsBegin();it!=entity.AtomsEnd();++it,nad+=3) {
+      geom::Vec3 pos=(*it).GetPos();
+      nad[0]=static_cast<npy_float>(pos[0]);
+      nad[1]=static_cast<npy_float>(pos[1]);
+      nad[2]=static_cast<npy_float>(pos[2]);
+    }
   }
   return na;
 #else
@@ -88,67 +104,9 @@ PyObject* get_pos(EntityHandle& entity)
 #endif
 }
 
-
-#if OST_NUMPY_SUPPORT_ENABLED
-template <typename T>
-void set_pos_t(PyArrayObject* na, EntityHandle& entity)
+PyObject* get_pos1(EntityHandle& entity)
 {
-  XCSEditor ed=entity.EditXCS(BUFFERED_EDIT);
-
-  if(PyArray_ISCONTIGUOUS(na)) {
-    T* data = reinterpret_cast<T*>(PyArray_DATA(na));
-    size_t count=0;
-    for(AtomHandleIter it=entity.AtomsBegin();it!=entity.AtomsEnd();++it,++count) {
-      ed.SetAtomPos(*it,geom::Vec3(static_cast<Real>(data[count*3+0]),
-                                   static_cast<Real>(data[count*3+1]),
-                                   static_cast<Real>(data[count*3+2])));
-    }
-  } else {
-    size_t count=0;
-    for(AtomHandleIter it=entity.AtomsBegin();it!=entity.AtomsEnd();++it,++count) {
-      ed.SetAtomPos(*it,geom::Vec3(static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,0))),
-                                   static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,1))),
-                                   static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,2)))));
-    }
-  }
-}
-#endif
-
-void set_pos(EntityHandle& entity, object& pyobj)
-{
-#if OST_NUMPY_SUPPORT_ENABLED
-  size_t acount = entity.GetAtomCount();
-  
-  if(!PyArray_Check(pyobj.ptr())) {
-    throw std::runtime_error(std::string("expected a numpy array"));
-    return;
-  }
-  PyArrayObject* na=reinterpret_cast<PyArrayObject*>(pyobj.ptr());
-
-  if(PyArray_NDIM(na)!=2 || PyArray_DIM(na,0)!=acount || PyArray_DIM(na,1)!=3) {
-    throw std::runtime_error("excpected a numpy array of shape (NAtoms, 3)");
-    return;
-  }
-
-  switch(PyArray_TYPE(na)) {
-  case NPY_FLOAT:
-    set_pos_t<float>(na,entity); break;
-  case NPY_DOUBLE:
-    set_pos_t<double>(na,entity); break;
-  case NPY_INT:
-    set_pos_t<int>(na,entity); break;
-  case NPY_LONG:
-    set_pos_t<long>(na,entity); break;
-  case NPY_SHORT:
-    set_pos_t<short>(na,entity); break;
-  default:
-    throw std::runtime_error("excpected a numpy array of type float, double, int, long or short");
-    return;
-  };
-
-#else
-  throw std::runtime_error("SetPositions disabled, since numpy support is not compiled in");
-#endif
+  return get_pos2(entity,true);
 }
 
 } // ns
@@ -230,9 +188,9 @@ void export_Entity()
     .def(self==self)
     .def(self!=self)
 #if OST_NUMPY_SUPPORT_ENABLED
-    .def("SetPositions",set_pos)
-    .def("GetPositions",get_pos)
-    .add_property("positions",get_pos,set_pos)
+    .def("GetPositions",get_pos1)
+    .def("GetPositions",get_pos2)
+    .add_property("positions",get_pos1)
 #endif
   ;
 

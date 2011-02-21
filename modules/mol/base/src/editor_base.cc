@@ -143,7 +143,7 @@ void EditorBase::ReorderAllResidues()
 void EditorBase::RenameAtom(AtomHandle atom, const String& new_name)
 {
   CheckHandleValidity(atom);
-  atom.Impl()->SetName(new_name);
+  atom.Impl()->Name()=new_name;
 }
 
 BondHandle EditorBase::Connect(const AtomHandle& first,

@@ -56,21 +56,21 @@ public:
   ~AtomImpl();
   void Apply(EntityVisitor& h);
 
+  // for efficiency reasons, the simple setter/getter methods are
+  // replaced by direct access - this is the impl layer after all
+
+  const String& Name() const {return name_;}
+  String& Name() {return name_;}
+
+  // DEPRECATED
   const String& GetName() const {return name_;}
 
-  void SetName(const String& atom_name) { 
-    name_=atom_name; 
-  }
+  const geom::Vec3& TransformedPos() const {return tf_pos_;}
+  geom::Vec3& TransformedPos() {return tf_pos_;}
 
+  const geom::Vec3& OriginalPos() const {return pos_;}
+  geom::Vec3& OriginalPos() {return pos_;}
 
-  const geom::Vec3& GetPos() const {return tf_pos_;}
-
-  const geom::Vec3& GetOriginalPos() const {return pos_;}
-
-  void SetTransformedPos(const geom::Vec3& pos) { tf_pos_=pos; }
-
-  void SetOriginalPos(const geom::Vec3& pos) { pos_=pos; }
-      
   ResidueImplPtr GetResidue() const;
 
   void SetPrimaryConnector(const ConnectorImplP& bp) {
