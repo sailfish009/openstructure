@@ -12,10 +12,6 @@ if len(sys.argv) < 2:
   print 'usage: create_bundle.py  additional_label'
   sys.exit()
 
-<<<<<<< HEAD
-#boost_string='\".so.1.42.0\"'
-=======
->>>>>>> Further updated to create_bundle.py
 system_python_version='python2.6'
 system_python_bin='/usr/bin/'+system_python_version
 system_python_libs='/usr/lib/'+system_python_version
