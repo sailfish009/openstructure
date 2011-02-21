@@ -21,9 +21,7 @@
 */
 #include "sline_render_options.hh"
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 SlineRenderOptions::SlineRenderOptions():
   spline_detail_(6)
@@ -55,8 +53,4 @@ uint SlineRenderOptions::GetSplineDetail(){
   return spline_detail_;
 }
 
-SlineRenderOptions::~SlineRenderOptions() {}
-
-}
-
-}
+}} // ns

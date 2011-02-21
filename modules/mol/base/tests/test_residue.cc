@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 BOOST_AUTO_TEST_CASE(test_in_sequence) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle ch1=e.InsertChain("A");
   ResidueHandle rA = e.AppendResidue(ch1, "A");
   ResidueHandle rB = e.AppendResidue(ch1, "B");
@@ -45,10 +45,38 @@ BOOST_AUTO_TEST_CASE(test_in_sequence)
   BOOST_CHECK(!InSequence(rA,rC));
 }
 
+
+BOOST_AUTO_TEST_CASE(throw_invalid_res_handle)
+{
+  ChainHandle chain;
+  EntityHandle ent=CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  chain=edi.InsertChain("A");
+  ResidueHandle res=chain.FindResidue(ResNum(1));
+  BOOST_CHECK_THROW(CheckHandleValidity(res), InvalidHandle);
+  edi.AppendResidue(chain, "GLY");
+  res=chain.FindResidue(ResNum(1));
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(res));
+}
+
+BOOST_AUTO_TEST_CASE(throw_invalid_res_view)
+{
+  ChainHandle chain;
+  EntityHandle ent=CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  chain=edi.InsertChain("A");
+  ResidueView res;
+  BOOST_CHECK_THROW(CheckHandleValidity(res), InvalidHandle);
+  edi.AppendResidue(chain, "GLY");
+  EntityView ent_view=ent.CreateFullView();
+  res=ent_view.FindChain("A").FindResidue(1);
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(res));
+}
+
 BOOST_AUTO_TEST_CASE(test_res_index)
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle ch1=e.InsertChain("A");
   ResidueHandle rA = e.AppendResidue(ch1, "A");
   ResidueHandle rB = e.AppendResidue(ch1, "B");

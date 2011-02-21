@@ -27,6 +27,9 @@
 #include <ost/gui/tools/manipulator.hh>
 #include <ost/gui/tools/measure_tool.hh>
 #include <ost/gui/perspective.hh>
+#include <ost/gui/gl_canvas.hh>
+#include <ost/gui/tools/tool.hh>
+#include <ost/gui/tools/tool_bar.hh>
 
 #if OST_IMG_ENABLED
 #  include <ost/gui/tools/map_tool.hh>
@@ -46,36 +49,64 @@
 
 namespace ost { namespace gui {
 
-GLWin::GLWin(QWidget* p):
-  Widget(NULL, p), 
-  gl_canvas_(NULL)
+GLWin::GLWin(QWidget* p, bool try_stereo):
+Widget(NULL, p), 
+gl_canvas_(NULL)
 {
   QMainWindow* main=new QMainWindow;
-  for(int format_id=2;format_id>=0;--format_id) {
-    gl_canvas_=new GLCanvas(this, main, GLWin::CreateFormat(format_id));
-    if(gl_canvas_->isValid()) {
-      break; // format is fine
-    } else {
-      delete gl_canvas_; // delete this canvas and try a less sophisticated format
+  
+  if(try_stereo) {
+    LOG_VERBOSE("GLCanvas: trying stereo visuals first");
+    for(int format_id=3;format_id>=0;--format_id) {
+      QGLFormat format=GLWin::CreateFormat(format_id);
+      if (try_stereo) {
+        format.setStereo(true);
+      }
+      gl_canvas_=new GLCanvas(this, main, format);
+      if(gl_canvas_->isValid() && gl_canvas_->format().stereo()) {
+        break; // format is fine
+      } else {
+        delete gl_canvas_; // delete this canvas and try a less sophisticated format
+        gl_canvas_=0;
+      }
+    }
+  }
+  if(!gl_canvas_) {
+    if(try_stereo) {
+      LOG_VERBOSE("GLCanvas: no stereo visual found, trying normal ones");
+    }
+    for(int format_id=3;format_id>=0;--format_id) {
+      QGLFormat format=GLWin::CreateFormat(format_id);
+      gl_canvas_=new GLCanvas(this, main, format);
+      if(gl_canvas_->isValid()) {
+        break; // format is fine
+      } else {
+        delete gl_canvas_; // delete this canvas and try a less sophisticated format
+        gl_canvas_=0;
+      }
     }
   }
 
-  if(!gl_canvas_->isValid()) {
-    LOG_ERROR("no valid GL context found, GL canvas could not be created");
+  if(!gl_canvas_ || !gl_canvas_->isValid()) {
+    LOG_ERROR("GLCanvas: no valid GL context found, this is pretty fatal");
     return;
   }
 
   this->SetInternalWidget(main);
   gfx::Scene::Instance().AttachObserver(this);
   QGLFormat format = gl_canvas_->format();
-  LOG_VERBOSE("GLCanvas created with rbits=" << format.redBufferSize() 
-              << " gbits=" << format.greenBufferSize() 
-              << " bbits=" << format.blueBufferSize() 
-              << " abits=" << format.alphaBufferSize() 
-              << " dbits=" << format.depthBufferSize()
-              << " accumbits=" << format.accumBufferSize()
-              << " multisample=" << format.sampleBuffers()
-              << " with samples=" << format.samples());
+
+  LOG_DEBUG("GLCanvas: rbits=" << format.redBufferSize() 
+               << " gbits=" << format.greenBufferSize() 
+               << " bbits=" << format.blueBufferSize() 
+               << " abits=" << format.alphaBufferSize() 
+               << " dbits=" << format.depthBufferSize()
+               << " accumbits=" << format.accumBufferSize()
+               << " multisample=" << format.sampleBuffers()
+               << " with samples=" << format.samples());
+  if(gl_canvas_->format().stereo()) {
+    LOG_VERBOSE("GLCanvas: using stereo visual");
+  }
   main->setCentralWidget(gl_canvas_);
   connect(gl_canvas_, SIGNAL(ReleaseFocus()), this, SIGNAL(ReleaseFocus()));
   connect(&ToolManager::Instance(), SIGNAL(ActiveToolChanged(Tool*)), this, SLOT(ActiveToolChanged(Tool*)));
@@ -87,10 +118,6 @@ GLWin::GLWin(QWidget* p):
 #if OST_IMG_ENABLED
   ToolManager::Instance().AddTool(new MapTool);
 #endif
-  QBoxLayout* l=new QVBoxLayout(this);
-  l->setMargin(0);
-  l->setSpacing(0);
-  l->addWidget(main);
 }
 
 void GLWin::ActiveToolChanged(Tool* t)
@@ -101,7 +128,16 @@ void GLWin::ActiveToolChanged(Tool* t)
 QGLFormat GLWin::CreateFormat(int fid)
 {
   QGLFormat format = QGLFormat::defaultFormat();
-  if(fid==2) {
+  if(fid==3) {
+    format.setDepthBufferSize(24);
+    format.setRedBufferSize(8);
+    format.setGreenBufferSize(8);
+    format.setBlueBufferSize(8);
+    format.setAlpha(true);
+    format.setAlphaBufferSize(8);
+    format.setAccum(true);
+    format.setSampleBuffers(true);
+  } else if(fid==2) {
     format.setDepthBufferSize(12);
     format.setRedBufferSize(8);
     format.setGreenBufferSize(8);

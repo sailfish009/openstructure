@@ -28,7 +28,7 @@ namespace ost { namespace test {
 struct DummyEnt {
   DummyEnt() {
     e=CreateEntity();
-    XCSEditor editor=e.RequestXCSEditor();
+    XCSEditor editor=e.EditXCS();
     c=editor.InsertChain("A");
     r=editor.AppendResidue(c, "XXX");
     aa=editor.InsertAtom(r, "A", geom::Vec3());

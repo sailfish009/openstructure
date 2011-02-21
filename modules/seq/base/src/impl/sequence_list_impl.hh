@@ -78,7 +78,7 @@ public:
     return this->GetMaxLength()==this->GetMinLength();
   }
 
-
+  Real GetCoverage(int seq_index) const;
 
   SequenceListImplPtr Copy() const;
 

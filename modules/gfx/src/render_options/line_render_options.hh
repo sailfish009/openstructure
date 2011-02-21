@@ -29,35 +29,30 @@
 
 #include "render_options.hh"
 
-namespace ost {
+namespace ost { namespace gfx {
 
-namespace gfx {
-
-class DLLEXPORT_OST_GFX LineRenderOptions: public ost::gfx::RenderOptions {
+class DLLEXPORT_OST_GFX LineRenderOptions: public RenderOptions {
 public:
   LineRenderOptions();
 
+  // partial RenderOptions interface
+  //virtual RenderMode::Type GetRenderMode()=0;
+  //virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options)=0;
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options);
 
-  virtual void SetLineWidth(float line_width);
-  virtual float GetLineWidth();
-
-  virtual void SetAALines(bool aa_lines);
-  virtual bool GetAALines();
-
-
-  virtual ~LineRenderOptions();
+  void SetLineWidth(float line_width);
+  float GetLineWidth();
+  void SetAALines(bool aa_lines);
+  bool GetAALines();
 
 private:
   float line_width_;
   bool aa_lines_;
-
 };
 
 typedef boost::shared_ptr<LineRenderOptions> LineRenderOptionsPtr;
 
-}
+}} // ns
 
-}
+#endif
 
-#endif /* OST_GFX_SIMPLE_RENDER_OPTIONS_HH */

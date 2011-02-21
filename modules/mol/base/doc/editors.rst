@@ -28,9 +28,11 @@ zero, the dependent infomation is updated.
 
 In Python, one can not rely on the destructors being called. It is adviced to 
 always put a call to :meth:`XCSEditor.UpdateICS` or 
-:meth:`ICSEditor.UpdateXCS` when the editing is finished. Alternatively, starting from Python version 2.6, one can use the 
-`with <http://docs.python.org/reference/compound_stmts.html#with>`_  statement
-to make sure the destructor are called and the dependent information is updated.
+:meth:`ICSEditor.UpdateXCS` when the editing is finished. Alternatively, 
+starting from Python version 2.6, one can use the \
+`with <http://docs.python.org/reference/compound_stmts.html#with>`_  
+statement to make sure the destructor are called and the dependent information 
+is updated.
 
 
 Basic Editing Operations
@@ -64,10 +66,14 @@ The basic functionality of editors is implemented in the EditorBase class.
      :type  residue_name: string
      :returns:     :class:`ResidueHandle`
   
-  .. method:: InsertAtom(residue, atom_name, pos, [prop=mol.AtomProp()])
+  .. method:: InsertAtom(residue, atom_name, pos, element="", occupancy=1.0, b_factor=0.0, is_hetatm=False)
   
     Insert new atom and add it to residue. For atoms with alternative atom
-    locations use :meth:`InsertAltAtom`.
+    locations use :meth:`InsertAltAtom`. If the element parameter is a valid 
+    element, the atom properties mass, charge, and radius are set to default 
+    values for that element. If element is an empty string (or an invalid 
+    element), the properties are set to rather meaningless default values. You 
+    may later set any of the properties manually.
     
     :param residue:   is the parent residue and must be valid
     :type residue:    :class:`ResidueHandle`
@@ -79,10 +85,18 @@ The basic functionality of editors is implemented in the EditorBase class.
     :type atom_name:  string
     :param pos:       is the position of the atom in global coordinates
     :type pos:        :class:`geom.Vec3`
-    :param prop:      are the atom's properties such as element, van der Waals 
-                      radius charge and so on. The default set of atom
-                      properties is rather meaningless.
-    :type prop:       class:`AtomProp`
+    :param element:   is the atom's element. If set to a a valid element,
+                      atom properties such as mass, charge, radius are set 
+                      based on default values for that element. If the element 
+                      string is empty, or unknown, the properties are filled 
+                      with rather meaningless default values.
+    :type element:    class:`string`
+    :param occupancy: The occupancy of the atom. between 0 and 1
+    :type occupancy:  float
+    :param b_factor:  temperature factor.
+    :type  b_factor:  float
+    :param is_hetatm: whether the atom is an atom coming from a HETATM record.
+    :type is_hetatm:  bool
     :returns:         :class:`AtomHandle`
 
 Editor for the External Coordinate System

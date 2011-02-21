@@ -80,5 +80,9 @@ void HistogramBase::VisitFunction(const Function& fnc)
 
 
 }
+
+namespace image_state {
+
 template class TEMPLATE_DEF_EXPORT ImageStateNonModAlgorithm<alg::HistogramBase>;
-}} // namespaces
+
+}}} // namespaces

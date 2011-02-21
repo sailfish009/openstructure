@@ -37,7 +37,9 @@ struct DLLEXPORT_OST_QA AllAtomPotentialOpts {
 
   AllAtomPotentialOpts();
 
-  AllAtomPotentialOpts(float lower_cutoff, float upper_cutoff, float distance_bucket_size, int sequence_sep, float sigma=0.02);
+  AllAtomPotentialOpts(float lower_cutoff, float upper_cutoff, 
+                       float distance_bucket_size, int sequence_sep, 
+                       float sigma=0.02);
 
  public: 
   /// \brief weight factor 
@@ -76,8 +78,11 @@ public:
 
   /// \brief extract energy of a specific interaction
   /// (for plotting pseudo Lennard-Jones potential).
-  float GetEnergy(atom::ChemType type_a, atom::ChemType type_b, float distance);
-
+  float GetEnergy(atom::ChemType type_a, atom::ChemType type_b, 
+                  float distance)
+  {
+    return energies_.Get(type_a, type_b, distance);
+  }
   /// \brief calculate all-atom interaction between two entities.
   /// Two entities need to be provided:
   /// the atoms for which the energy should be derived and
@@ -85,12 +90,12 @@ public:
   float GetTotalEnergy(mol::EntityView view, mol::EntityView target_view);
 
   /// \brief retrieve total number of interactions (for normalisation)
-  int GetEnergyCounts() const;
+  int GetEnergyCounts() const { return interaction_counts_; }
 
   /// \brief set different seqeunce separation than used for training
   void SetSequenceSeparation(int seq_sep);
 
-  
+  const AllAtomPotentialOpts& GetOptions() const { return options_; }
   template <typename DS>
   void Serialize(DS& ds);
 public:
@@ -102,7 +107,7 @@ private:
   AllAtomPotentialOpts   options_;  
   AllAtomEnergies        energies_;
   mol::EntityView        target_view_;
-  int                    interaction_counts_member_;
+  int                    interaction_counts_;
 }; 
 
 }}

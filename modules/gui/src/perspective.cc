@@ -25,6 +25,10 @@
 #include <ost/gui/main_area.hh>
 #include <ost/gui/messages/message_box_widget.hh>
 
+#include <ost/gui/panels/panel_manager.hh>
+#include <ost/gui/panels/button_bar.hh>
+#include <ost/gui/panels/panel_bar.hh>
+
 #include <QTextEdit>
 #include <QSizeGrip>
 #include <QMainWindow>
@@ -116,15 +120,17 @@ QMenuBar* Perspective::GetMenuBar()
 
 QMenu* Perspective::GetMenu(const QString& name)
 {
-  QMenu* menu;
-  if(!menus_.contains(name)){
-    menu = menu_bar_->addMenu(name);
-    menus_.insert(name,menu);
+  QMenu* menu=NULL;
+  QList<QAction *> actions=menu_bar_->actions();
+  for (QList<QAction*>::iterator i=actions.begin(),
+       e=actions.end(); i!=e; ++i) {
+    if ((*i)->text()==name) {
+      return (*i)->menu();
+    }
   }
-  else{
-    menu = menus_[name];
-  }
-  return menu;
+  QMenu* new_menu=new QMenu(name, menu_bar_);
+  menu_bar_->addMenu(new_menu);
+  return new_menu;
 }
 
 PanelManager* Perspective::GetPanels()

@@ -22,10 +22,12 @@ void export_Torsion();
 void export_Interaction();
 void export_Packing();
 void export_Clash();
+void export_Reduced();
 BOOST_PYTHON_MODULE(_qa)
 {
   export_Torsion();
   export_Interaction();
   export_Packing();
   export_Clash();
+  export_Reduced();
 }

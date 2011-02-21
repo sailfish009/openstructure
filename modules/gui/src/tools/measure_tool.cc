@@ -205,12 +205,17 @@ Measurement::Measurement(mol::AtomHandleList ahl, gfx::Color col, Real line_widt
       type_=DIHE;
       name_=ahl_[0].GetQualifiedName()+" - "+ahl_[1].GetQualifiedName()+" - "
              +ahl_[2].GetQualifiedName()+" - "+ahl_[3].GetQualifiedName();
-      measurement_=57.2958*geom::Angle(geom::Plane(ahl_[0].GetPos(),
-                                                   ahl_[1].GetPos(),
-                                                   ahl_[2].GetPos()),
-                                       geom::Plane(ahl_[1].GetPos(),
-                                                   ahl_[2].GetPos(),
-                                                   ahl_[3].GetPos()));
+      geom::Plane pl1 = geom::Plane(ahl_[0].GetPos(),
+                                    ahl_[1].GetPos(),
+                                    ahl_[2].GetPos());
+      geom::Plane pl2 = geom::Plane(ahl_[1].GetPos(),
+                                    ahl_[2].GetPos(),
+                                    ahl_[3].GetPos());
+      measurement_=57.2958*geom::Angle(pl1, pl2);
+      geom::Vec3 v = geom::Vec3(ahl_[2].GetPos()-ahl_[3].GetPos());
+      if (geom::Dot(v, pl1.GetNormal())>0) {
+        measurement_*=-1;
+      }
       valid_=true;
       break;
     }

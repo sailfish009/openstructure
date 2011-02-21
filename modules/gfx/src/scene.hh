@@ -32,6 +32,7 @@
 #include <ost/gfx/module_config.hh>
 #include <ost/mol/transform.hh>
 
+#include "gl_include.hh"
 #include "color.hh"
 #include "gfx_object_fw.hh"
 #include "gfx_node_fw.hh"
@@ -40,21 +41,23 @@
 #include "glwin_base.hh"
 #include "scene_observer.hh"
 #include "gfx_prim.hh"
-#include "gl_include.hh"
 #include "povray_fw.hh"
 
 namespace ost { namespace gfx {
 
 class InputEvent;
+class OffscreenBuffer;
 
 typedef std::vector<SceneObserver*>  SceneObserverList;
 
 struct Viewport {
-  int bottom;
-  int left;
+  int x;
+  int y;
   int width;
   int height;
 };
+
+namespace impl {class SceneFX;}
 
 /// \brief main class for organization and root for the graphical display
 /// 
@@ -73,6 +76,7 @@ struct Viewport {
 /// disabling the AutoAutoslab(). The near and far clipping plane can then be 
 /// adjusted manually.
 class DLLEXPORT_OST_GFX Scene {
+  friend class impl::SceneFX;
  private:
    
   // TODO: this struct may be the seed for a proper
@@ -92,18 +96,39 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief turn fog on or off
   void SetFog(bool f);
 
+  /// \brief check fog status
+  bool GetFog() const;
+
   /// \brief set the fog color
   void SetFogColor(const Color& c);
 
-  /// \brief turn shadow on and off
+  /// \brief get the fog color
+  Color GetFogColor() const;
+
+  /// \brief turn shadow mapping on and off
   void SetShadow(bool f);
 
-  /// \brief returns true if shadow is on
-  bool GetShadow();
+  /// \brief get shadow mapping status
+  bool GetShadow() const;
 
   /// \brief shadow quality from 0 (low) to 3 (high), default=1
   void SetShadowQuality(int q);
+
+  void SetShadowWeight(float w);
+
+  void SetDepthDarkening(bool f);
+  void SetDepthDarkeningWeight(float f);
+
+  void SetAmbientOcclusion(bool f);
+  bool GetAmbientOcclusion() const;
+  void SetAmbientOcclusionWeight(float f);
+  void SetAmbientOcclusionMode(uint m);
+  void SetAmbientOcclusionQuality(uint q);
   
+  /// \brief select shading mode
+  /// one of fallback, basic, default, hf, toon1, toon2
+  void SetShadingMode(const std::string& smode);
+
   /// \name clipping planes
   //@{
   /// \brief get near clipping plane
@@ -143,30 +168,54 @@ class DLLEXPORT_OST_GFX Scene {
   void SetFogOffsets(float no, float fo);
   
   /// \brief adjust near and far clipping plane to fit visible objects
+  // TODO: use mode aka fast, precise, max
   void Autoslab(bool fast=false, bool redraw=true);
-  // \brief adjust clipping planes to fix maximal extent of all objects
-  //        even under rotation
+
+  /// \brief adjust clipping planes to fix maximal extent of all objects
+  ///        even under rotation
+  // TODO: merge with Autoslab
   void AutoslabMax();
 
   /// \brief turn on automatic auto-slabbing (using the fast bounding box alg)
+  // TODO: more sophisticated mode, aka fast, precise, max
   void AutoAutoslab(bool f);
   //@}
   
-  /// \brief switch stereo mode
-  /*
-    0=off
-    1=quad-buffered
-    2=interlaced variant #1
-    3=interlaced variant #2
-  */
-  void Stereo(unsigned int);
+  /// \brief get current state of automatic auto-slabbing
+  bool GetAutoAutoslab() const { return auto_autoslab_; }
+
+  /// \brief set stereo mode
+  /// one of 0 (off), 1 (quad-buffered) 2 (interlaced (for special monitors))
+  void SetStereoMode(unsigned int mode);
+  int GetStereoMode() const {return stereo_mode_;}
 
   /// \brief invert stereo eyes for stereo mode=0
-  void SetStereoInverted(bool f);
+  void SetStereoFlip(bool f);
+  /// \brief return invert flag for stereo
+  bool GetStereoFlip() const {return stereo_inverted_;}
+  
+  /// \brief stereo view mode
+  /// one of 0 (center), -1 (left), 1 (right)
+  void SetStereoView(int);
+  /// \brief return current stereo view mode
+  int GetStereoView() const {return stereo_eye_;}
 
-  /// \brief eye mode, 0=center, 1=left, 2=right
-  void SetStereoEye(unsigned int);
+  /// \brief set stereo eye distance
+  void SetStereoIOD(Real);
+  /// \brief return current stereo eye distance
+  Real GetStereoIOD() const {return stereo_iod_;}
 
+  /// \brief set stereo distance offset from COR
+  void SetStereoDistance(Real);
+  /// \brief return current stereo distance offset from COR
+  Real GetStereoDistance() const {return stereo_distance_;}
+  
+  /// \brief set stereo algorithm
+  /// one of 0 or 1
+  void SetStereoAlg(unsigned int);
+  /// \brief return current stereo algorithm
+  unsigned int GetStereoAlg() const {return stereo_alg_;}
+  
   /// \brief set main light direction
   void SetLightDir(const geom::Vec3& dir);
   /// \brief set ambient, diffuse and specular light color
@@ -184,20 +233,22 @@ class DLLEXPORT_OST_GFX Scene {
   /// \name Export
   //@}
   /// \brief export scene into a bitmap, rendering into offscreen of given size
+  /// if a main offscreen buffer is active (\sa StartOffscreenMode), then the
+  /// dimensions here are ignored
   void Export(const String& fname, unsigned int w,
               unsigned int h, bool transparent=true);
 
   /// \brief export snapshot of current scene
   void Export(const String& fname, bool transparent=true);
 
-  /// \brief export scene into povray files names fname.pov and fname.inc
+  /// \brief export scene into povray files named fname.pov and fname.inc
   void ExportPov(const std::string& fname, const std::string& wdir=".");
   //@}
   /// \brief entry point for gui events (internal use)
   void OnInput(const InputEvent& e);
   
   /// \brief initialize OpenGL after context has been setup (internal use)
-  void InitGL();
+  void InitGL(bool full=true);
 
   /// \brief handle new viewport size (internal use)
   void Resize(int w, int h);
@@ -224,6 +275,9 @@ class DLLEXPORT_OST_GFX Scene {
 
   /// \brief set background color
   void SetBackground(const Color& c);
+
+  /// \brief get background color
+  Color GetBackground() const;
 
   /// \brief center rotation on the given point
   void SetCenter(const geom::Vec3& cen);
@@ -318,23 +372,40 @@ class DLLEXPORT_OST_GFX Scene {
   
   bool InOffscreenMode() const;
 
-  /// \brief internal use
-  static void SetOffscreenMode();
-
   /// \brief switch into test mode (internal use)
   void SetTestMode(bool t);
 
   float ElapsedTime() const;
 
   Viewport GetViewport() const;
-  
-  // temporary interface
-  void ActivateShader(const String& name);
 
+  /*!
+    This method has two different tasks. 
+
+    During interactive rendering, it facilitates export 
+    into an offscreen buffer with Scene::Export(file,width,height)
+    by avoiding repeated initializations of the GL state, e.g.
+    during animation rendering.
+
+    During batch mode, this is the only way to get meaningful
+    functionality with the gfx module
+
+    returns true upon success and false upon failure
+  */
+  bool StartOffscreenMode(unsigned int w, unsigned int h);
+  /// \brief stops offline rendering in interactive mode
+  void StopOffscreenMode();
+  
   void SetBlur(uint n);
   void BlurSnapshot();
 
   void RenderText(const TextPrim& t);
+
+  geom::Vec3 GetLightDir() const {return light_dir_;}
+  geom::Mat3 GetLightRot() const {return light_rot_;}
+
+  void SetBeacon(int wx, int wy);
+  void SetBeaconOff();
 
 protected:
   friend class GfxObj; 
@@ -366,6 +437,8 @@ private:
 
   mol::Transform transform_; // overall modelview transformation
 
+  bool gl_init_;
+
   float fov_; // field of view
   float znear_,zfar_; // near and far clipping plane
   float fnear_,ffar_; // fog near and far offsets
@@ -387,12 +460,13 @@ private:
   bool axis_flag_;
   bool fog_flag_;
   Color fog_color_;
-  bool shadow_flag_;
-  int shadow_quality_;
-  GLuint texture_id_;
   bool auto_autoslab_;
+  bool do_autoslab_,do_autoslab_fast_;
 
-  bool offscreen_flag_;
+  bool offscreen_flag_; // a simple indicator whether in offscreen mode or not
+  OffscreenBuffer* main_offscreen_buffer_; // not null if a main offscreen buffer is present
+  uint old_vp_[2]; // used by the offline rendering code
+  std::string def_shading_mode_;
 
   uint selection_mode_;
 
@@ -405,24 +479,30 @@ private:
 
   uint blur_count_;
   std::vector<boost::shared_array<unsigned char> > blur_buffer_;
-  GLuint  glow_tex_;
-  unsigned int stereo_;
+
+  unsigned int stereo_mode_;
+  unsigned int stereo_alg_;
   bool stereo_inverted_;
   unsigned int stereo_eye_;
-  float stereo_eye_dist_,stereo_eye_offset_;
+  Real stereo_iod_,stereo_distance_;
+  unsigned int scene_left_tex_;
+  unsigned int scene_right_tex_;
 
   void set_near(float n);
   void set_far(float f);
   void update_fog();
-  void prep_shadow_map();
   void flag_all_dirty();
   void prep_glyphs();
   void prep_blur();
-  void stereo_projection(unsigned int view);
-  void render_interlaced_stereo();
-  void render_quad_buffered_stereo();
-  void render_scene_with_glow();
-  bool IsNameAvailable(String name);
+  void stereo_projection(int view);
+  void render_scene();
+  void render_glow();
+  void render_stereo();
+
+  void do_autoslab();
+
+  bool IsNameAvailable(const String& name) const;
+
 };
 
 }} // ns

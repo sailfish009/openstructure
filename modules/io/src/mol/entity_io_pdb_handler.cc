@@ -48,20 +48,17 @@ bool EntityIOPDBHandler::RequiresBuilder() const
 void EntityIOPDBHandler::Export(const mol::EntityView& ent,
                                 const boost::filesystem::path& loc) const 
 {
-  PDBWriter writer(loc);
+  PDBWriter writer(loc, IOProfileRegistry::Instance().GetDefault());
   if (boost::iequals(boost::filesystem::extension(loc), ".pqr")) {
-    PDB::PushFlags(PDB::Flags() | PDB::PQR_FORMAT);
-    writer.Write(ent);
-    PDB::PopFlags();
-  } else {
-    writer.Write(ent);
+    writer.SetIsPQR(true);
   }
+  writer.Write(ent);
 }
 
 void EntityIOPDBHandler::Import(mol::EntityHandle& ent, 
                                 std::istream& stream)
 {
-  PDBReader reader(stream);
+  PDBReader reader(stream, IOProfileRegistry::Instance().GetDefault());
   if (reader.HasNext()) {
     reader.Import(ent, "");
   }
@@ -70,7 +67,7 @@ void EntityIOPDBHandler::Import(mol::EntityHandle& ent,
 void EntityIOPDBHandler::Export(const mol::EntityView& ent,
                                 std::ostream& stream) const 
 {
-  PDBWriter writer(stream);
+  PDBWriter writer(stream, IOProfileRegistry::Instance().GetDefault());
   writer.Write(ent);
 }
 
@@ -99,7 +96,7 @@ bool pdb_handler_is_responsible_for(const boost::filesystem::path& loc,
 void EntityIOPDBHandler::Import(mol::EntityHandle& ent,
                                 const boost::filesystem::path& loc)
 {
-  PDBReader reader(loc);
+  PDBReader reader(loc, IOProfileRegistry::Instance().GetDefault());
   if (reader.HasNext()) {
     reader.Import(ent, "");
   }

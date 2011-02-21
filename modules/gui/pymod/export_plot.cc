@@ -38,6 +38,7 @@ namespace {
 
 struct PlotFunctionWrap : PlotFunction, wrapper<PlotFunction>
 {
+  IOProfileWrap(PyObject*&, const ost::io::IOProfile&)
   Real  Func(Real val) const
   {
     return this->get_override("Func")(val);

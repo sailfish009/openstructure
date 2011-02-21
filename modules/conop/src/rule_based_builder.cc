@@ -49,7 +49,7 @@ void RuleBasedBuilder::CheckResidueCompleteness(const mol::ResidueHandle& rh)
   mol::AtomHandleList atoms=rh.GetAtomList();
   mol::AtomHandleList::iterator i=atoms.begin();
   for (; j!=last_compound_->GetAtomSpecs().end() && i!=atoms.end(); ++j) {
-    if ((*j).is_leaving || (*j).element=="H")
+    if ((*j).is_leaving || (*j).element=="H" || (*j).element=="D")
       continue;
     if ((*j).ordinal!=static_cast<int>((*i).Impl()->GetState())) {
       this->OnMissingAtom(rh, (*j).name);
@@ -72,7 +72,8 @@ bool RuleBasedBuilder::HasUnknownAtoms(mol::ResidueHandle res)
   for (mol::AtomHandleList::iterator 
        i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
     if ((*i).Impl()->GetState()==std::numeric_limits<unsigned int>::max()) {
-      if ((*i).GetElement()=="H" && this->GetStrictHydrogenMode()==false) {
+      if (((*i).GetElement()=="H" || (*i).GetElement()=="D") && 
+          this->GetStrictHydrogenMode()==false) {
         continue;
       }
       return true;
@@ -84,17 +85,9 @@ bool RuleBasedBuilder::HasUnknownAtoms(mol::ResidueHandle res)
 void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec) 
 {
   Conopology& conop_inst=Conopology::Instance();
-  mol::AtomProp props=atom.GetAtomProps();
-  if (!conop_inst.IsValidElement(props.element)) {
-    props.element=spec.element;
-  }
-  if (props.radius==0.0) {
-    props.radius=conop_inst.GetDefaultAtomRadius(spec.element);    
-  }
-  if (props.mass==0.0) {
-    props.mass=conop_inst.GetDefaultAtomMass(spec.element);
-  }
-  atom.SetAtomProps(props);  
+  if (!conop_inst.IsValidElement(atom.GetElement())) {
+    atom.SetElement(spec.element);
+  } 
 }
 
 void RuleBasedBuilder::FillResidueProps(mol::ResidueHandle residue) 
@@ -209,7 +202,7 @@ void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh)
     dist_connect(this, rh.GetAtomList());
     return;
   }
-  mol::XCSEditor e=rh.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor e=rh.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   BondSpecList::const_iterator j=last_compound_->GetBondSpecs().begin();
   mol::AtomHandleList atoms=rh.GetAtomList();
   for(; j!=last_compound_->GetBondSpecs().end(); ++j) {
@@ -218,14 +211,15 @@ void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh)
       mol::AtomHandle a2=this->LocateAtom(atoms, bond.atom_two);
       if (a1.IsValid() && a2.IsValid() && this->IsBondFeasible(a1, a2)) {
         if (this->GetStrictHydrogenMode() && 
-            (a1.GetElement()=="H" || a2.GetElement()=="H")) {
+            (a1.GetElement()=="H" || a2.GetElement()=="D")) {
           continue;
         }
         e.Connect(a1, a2, bond.order);
       }
   }
   for (mol::AtomHandleList::iterator i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
-    if ((*i).GetElement()=="H" && (*i).GetBondCount()==0) {
+    if (((*i).GetElement()=="H" || (*i).GetElement()=="D") && 
+        (*i).GetBondCount()==0) {
       this->DistanceBasedConnect(*i);
     }
   }
@@ -238,7 +232,7 @@ void RuleBasedBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
     return;
   }
   Compound::Dialect dialect=this->GetDialect()==PDB_DIALECT ? Compound::PDB : Compound::CHARMM;
-  mol::XCSEditor e=rh.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor e=rh.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   CompoundPtr mc=compound_lib_->FindCompound(rh.GetName(), dialect);
   CompoundPtr nc=compound_lib_->FindCompound(next.GetName(), dialect);
   if (!(mc && nc))
@@ -301,7 +295,7 @@ bool RuleBasedBuilder::IsResidueComplete(const mol::ResidueHandle& residue)
   mol::AtomHandleList::iterator i=atoms.begin();
   for (AtomSpecList::const_iterator j=last_compound_->GetAtomSpecs().begin(),
        e=last_compound_->GetAtomSpecs().end(); j!=e; ++j) {
-    if ((*j).is_leaving || (*j).element=="H") {
+    if ((*j).is_leaving || (*j).element=="H" || (*j).element=="D") {
       continue;      
     }
     if (!(residue.FindAtom(j->name) || residue.FindAtom(j->alt_name))) {
@@ -330,18 +324,10 @@ void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom)
 
 bool RuleBasedBuilder::OnUnknownAtom(mol::AtomHandle atom)
 {
-  mol::AtomProp props=atom.GetAtomProps();
   Conopology& conop_inst=Conopology::Instance();
-  if (!conop_inst.IsValidElement(props.element)) {
-    props.element=Builder::GuessAtomElement(atom.GetName(), props.is_hetatm);
+  if (!conop_inst.IsValidElement(atom.GetElement())) {
+    atom.SetElement(Builder::GuessAtomElement(atom.GetName(), atom.IsHetAtom()));
   }
-  if (props.radius==0.0) {
-    props.radius=conop_inst.GetDefaultAtomRadius(props.element);    
-  }
-  if (props.mass==0.0) {
-    props.mass=conop_inst.GetDefaultAtomMass(props.element);
-  }
-  atom.SetAtomProps(props); 
   return false;
 }
 

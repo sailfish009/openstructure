@@ -40,6 +40,7 @@ public:
   AtomHandle(const impl::AtomImplPtr& impl);
 
 public:  
+
   ResidueHandle GetResidue() const;
   
   EntityHandle GetEntity() const;  

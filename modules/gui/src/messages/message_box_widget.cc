@@ -25,7 +25,7 @@
 
 #include <ost/gui/perspective.hh>
 #include <ost/gui/widget_registry.hh>
-
+#include <ost/gui/messages/message_widget.hh>
 #include <ost/gui/panels/panel_manager.hh>
 
 #include "log_reader.hh"
@@ -35,6 +35,8 @@
 #include <QLabel>
 #include <QMenu>
 #include <QVBoxLayout>
+
+
 namespace ost {namespace gui {
 
 MessageLevel::MessageLevel(QPixmap icon, QWidget* parent): QWidget(parent), message_count_(0), count_label_(new QLabel(QString::number(message_count_)+"  ",this)){

@@ -67,6 +67,7 @@ public:
   /// \brief add frame 
   void AddFrame(const std::vector<geom::Vec3>& clist);
 
+  void AddFrames(const CoordGroupHandle& cg);
   /// \brief set an indidivial atom position in the given frame
   void SetAtomPos(uint frame, AtomHandle atom, const geom::Vec3& pos);
 

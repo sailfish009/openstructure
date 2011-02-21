@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 BOOST_AUTO_TEST_CASE(chain_handle_iterator) 
 {
   EntityHandle ent=CreateEntity();
-  XCSEditor editor=ent.RequestXCSEditor();  
+  XCSEditor editor=ent.EditXCS();  
   ChainHandle ch1=editor.InsertChain("A");
   ChainHandle ch2=editor.InsertChain("B");
   ChainHandle ch3=editor.InsertChain("C");
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(chain_handle_iterator)
 BOOST_AUTO_TEST_CASE(test_res_handle_iterator) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor editor=eh.RequestXCSEditor();  
+  XCSEditor editor=eh.EditXCS();  
   ChainHandle ch1=editor.InsertChain("A");
   editor.AppendResidue(ch1, "A");
   editor.AppendResidue(ch1, "B");
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(test_empty_iterators)
   BOOST_CHECK(eh.ChainsBegin()==eh.ChainsEnd());
   BOOST_CHECK(eh.ResiduesBegin()==eh.ResiduesEnd());  
   BOOST_CHECK(eh.AtomsBegin()==eh.AtomsEnd());    
-  XCSEditor editor=eh.RequestXCSEditor();
+  XCSEditor editor=eh.EditXCS();
   ChainHandle ch1=editor.InsertChain("A");  
   BOOST_CHECK(ch1.ResiduesBegin()==ch1.ResiduesEnd());
   BOOST_CHECK(ch1.AtomsBegin()==ch1.AtomsEnd());  
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(test_empty_iterators)
   BOOST_CHECK(r1.AtomsBegin()==r1.AtomsEnd());    
   
   eh=CreateEntity();
-  editor=eh.RequestXCSEditor();  
+  editor=eh.EditXCS();  
   ch1=editor.InsertChain("A");
   r1=editor.AppendResidue(ch1, "A");
   ResidueHandle r2=editor.AppendResidue(ch1, "B");
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(test_empty_iterators)
 BOOST_AUTO_TEST_CASE(test_atom_handle_iterator) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor editor=eh.RequestXCSEditor();  
+  XCSEditor editor=eh.EditXCS();  
   ChainHandle ch1=editor.InsertChain("A");
   ResidueHandle r1=editor.AppendResidue(ch1, "A");
   ResidueHandle r2=editor.AppendResidue(ch1, "B");

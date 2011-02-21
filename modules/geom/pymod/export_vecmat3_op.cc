@@ -49,6 +49,7 @@ void export_VecMat3_op()
   def("CompDivide",Vec3CompDivide);
   def("Distance",Vec3Distance);  
   def("Equal",Mat3Equal);
+  def("DihedralAngle", &DihedralAngle);
   def("Dot",Mat3Dot);
   def("Det",Mat3Det);
   def("Cross",Vec3Cross);

@@ -16,78 +16,24 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+/*
+  Authors: Marco Biasini, Ansgar Philippsen
+*/
+
 #include "sline_renderer.hh"
 
 #include <ost/gfx/entity.hh>
 
 namespace ost { namespace gfx { namespace impl {
 
-SlineRenderer::SlineRenderer(BackboneTrace& trace): 
-  TraceRendererBase(trace, 3), options_(new SlineRenderOptions()) 
+SlineRenderer::SlineRenderer(BackboneTrace* trace): 
+  TraceRendererBase(trace, 3), 
+  options_(new SlineRenderOptions()),
+  spline_list_list_(),
+  sel_spline_list_list_()
 {
   this->SetName("Fast Spline");
-}
-
-void SlineRenderer::PrepareRendering()
-{
-  TraceRendererBase::PrepareRendering();
-  va_.Clear();
-  this->PrepareRendering(trace_subset_, va_, false);
-  sel_va_.Clear();
-  if (this->HasSelection()) {
-    this->PrepareRendering(sel_subset_, sel_va_, true);
-    sel_va_.SetLineWidth(options_->GetLineWidth()+3.0);    
-  }
-}
-
-void SlineRenderer::PrepareRendering(TraceSubset& trace_subset, 
-                                     IndexedVertexArray& va, bool is_sel)
-{
-  const Color& sel_clr=this->GetSelectionColor();
-  
-  int spline_detail=std::max((unsigned int) 1, options_->GetSplineDetail());
-  if(options_!=NULL){
-    va.Clear();
-    va.SetLighting(false);
-    va.SetCullFace(false);
-    va.SetColorMaterial(false);
-    va.SetMode(0x2);
-    va.SetTwoSided(true);
-    va.SetLineWidth(options_->GetLineWidth());
-    va.SetPointSize(options_->GetLineWidth());
-    va.SetAALines(options_->GetAALines());
-    for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
-      // first build the spline
-      Spline spl;
-      const NodeListSubset& nl=trace_subset[node_list];
-      assert(nl.GetSize() && "node list subset with zero eles encountered!");
-      for (int i=0; i<nl.GetSize();++i) {
-        const NodeEntry& entry=nl[i];
-        SplineEntry& ee = spl.AddEntry(entry.atom.GetPos(), entry.direction,
-                                       entry.normal, entry.rad, 
-                                       is_sel ? sel_clr : entry.color1, 
-                                       is_sel ? sel_clr : entry.color2, 0);
-        ee.v1 = entry.v1;
-      }
-      SplineEntryList sel = spl.Generate(spline_detail);      
-      SplineEntryList::const_iterator sit=sel.begin(), 
-                                     send=sel.end()-spline_detail+1;
-      if (nl.AtStart()>0) {
-        sit+=nl.AtStart()*spline_detail-spline_detail/2;
-      }
-      if (nl.AtEnd()>0) {
-        send-=nl.AtEnd()*spline_detail-spline_detail/2;
-      }
-      VertexID p0=va.Add(sit->position, geom::Vec3(),sit->color1);
-      for (++sit; sit<send; ++sit) {
-        VertexID p1 = va.Add(sit->position, geom::Vec3(),sit->color1);
-        va.AddLine(p0,p1);
-        p0=p1;
-      }
-    }
-  }
-  sel_state_=0;
-  state_=0;
 }
 
 bool SlineRenderer::CanSetOptions(RenderOptionsPtr& render_options)
@@ -105,8 +51,84 @@ RenderOptionsPtr SlineRenderer::GetOptions()
  return options_;
 }
 
-SlineRenderer::~SlineRenderer() 
+void SlineRenderer::PrepareRendering()
 {
+  TraceRendererBase::PrepareRendering();
+  if(state_>0) {
+    prepare_rendering(trace_subset_, va_, spline_list_list_);
+    rebuild_spline_obj(va_, spline_list_list_, false);
+  }
+  if (this->HasSelection() && (state_>0 || sel_state_>0)) {
+    Color sel_color=GetSelectionColor();
+    rebuild_sel(spline_list_list_,sel_spline_list_list_,sel_color);
+    rebuild_spline_obj(sel_va_, sel_spline_list_list_, true);
+    va_.SetOpacity(sel_color.Alpha());
+  }
+  sel_state_=0;
+  state_=0;
+}
+
+void SlineRenderer::prepare_rendering(const BackboneTrace& subset, 
+                                      IndexedVertexArray& va,
+                                      SplineEntryListList& spline_list_list)
+{
+  if(options_==NULL) {
+    LOG_DEBUG("SlineRenderer: NULL options, not creating objects");
+  }
+
+  int spline_detail=std::max((unsigned int) 1, options_->GetSplineDetail());
+  SplineEntryListList tmp_sll;
+  for (int node_list=0; node_list<subset.GetListCount(); ++node_list) {
+    LOG_DEBUG("SplineRenderer: collecting spline entries for node list " << node_list);
+    // first build the spline
+    SplineEntryList spl;
+    const NodeEntryList& nl=subset.GetList(node_list);
+    for (unsigned int i=0; i<nl.size();++i) {
+      int type=0;
+      const NodeEntry& entry=nl[i];
+      SplineEntry ee(entry.atom.GetPos(),entry.direction,
+                     entry.normal, entry.rad, 
+                     entry.color1, 
+                     entry.color2,
+                     type, entry.id);
+      ee.v1 = entry.v1;
+      spl.push_back(ee);
+    }
+    LOG_DEBUG("SplineRenderer: found " << spl.size() << " entries");
+    if(!spl.empty()) {
+      tmp_sll.push_back(spl);
+    }
+  }
+  spline_list_list.clear();
+  for(SplineEntryListList::const_iterator sit=tmp_sll.begin();sit!=tmp_sll.end();++sit) {
+    spline_list_list.push_back(Spline::Generate(*sit,spline_detail));
+  }
+}
+
+void SlineRenderer::rebuild_spline_obj(IndexedVertexArray& va, const SplineEntryListList& spline_list_list, bool is_sel)
+{
+  va.Clear();
+  va.SetLighting(false);
+  va.SetCullFace(false);
+  va.SetColorMaterial(false);
+  va.SetMode(0x2);
+  va.SetTwoSided(true);
+  va.SetLineWidth(options_->GetLineWidth() + (is_sel ? 2.0 : 0.0));
+  va.SetPointSize(options_->GetLineWidth() + (is_sel ? 2.0 : 0.0));
+  va.SetAALines(options_->GetAALines());
+
+  for(SplineEntryListList::const_iterator it=spline_list_list.begin();
+      it<spline_list_list.end();++it) {
+    const SplineEntryList& slist=*it;
+
+    SplineEntryList::const_iterator sit=slist.begin();
+    VertexID p0=va.Add(sit->position, geom::Vec3(),sit->color1);
+    for (++sit; sit!=slist.end(); ++sit) {
+      VertexID p1 = va.Add(sit->position, geom::Vec3(),sit->color1);
+      va.AddLine(p0,p1);
+      p0=p1;
+    }
+  }
 
 }
 

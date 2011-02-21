@@ -20,7 +20,7 @@
 #define OST_GUI_FILE_TYPE_DIALOG_HH
 
 /*
-  Author: Stefan Scheuber
+  Author: Stefan Scheuber, Marco Biasini
  */
 
 #include <ost/gui/module_config.hh>
@@ -51,14 +51,9 @@ public:
 #if OST_IMG_ENABLED
   io::MapIOHandlerPtr GetMapHandler();
 #endif
-
 public slots:
-  virtual void accept ();
-
+  virtual void accept();
 private:
-  void AddRow(int row, const QString& format_name, const QString& format_descr, QVariant& variant);
-
-
   QTableWidget* list_;
   QLabel* label_;
   io::EntityIOHandlerP entity_handler_;

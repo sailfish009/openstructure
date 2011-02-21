@@ -22,9 +22,7 @@
 
 #include "simple_render_options.hh"
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 SimpleRenderOptions::SimpleRenderOptions(): 
   blur_flag_(false), blur_factors_(1.0, 0.8),
@@ -39,8 +37,6 @@ RenderMode::Type SimpleRenderOptions::GetRenderMode()
 bool SimpleRenderOptions::CanApplyRenderOptions(RenderOptionsPtr render_options){
   return render_options.get()->GetRenderMode()==RenderMode::SIMPLE;
 }
-
-SimpleRenderOptions::~SimpleRenderOptions() {}
 
 bool SimpleRenderOptions::GetBlurFlag() const
 {
@@ -86,6 +82,5 @@ void SimpleRenderOptions::SetBlurFactors(Real bf1, Real bf2)
   this->NotifyStateChange();
 }
 
-}
+}} // ns
 
-}

@@ -139,7 +139,7 @@ typedef ImageStateModIPAlgorithm<GaussianFilterBase> GaussianFilter;
 
 
 
-OST_IMG_ALG_EXPLICIT_INST_DECL(class,image_state::ImageStateModIPAlgorithm<alg::GaussianFilterBase>)
+OST_IMG_ALG_EXPLICIT_INST_DECL(class, ImageStateModIPAlgorithm<alg::GaussianFilterBase>)
 
 
 

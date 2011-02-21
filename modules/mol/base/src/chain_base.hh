@@ -42,8 +42,7 @@ public: // constructors
   ChainBase();
   ChainBase(const impl::ChainImplPtr& impl);
 public:
-  friend class ConstGenericPropContainer<ChainBase>;
-  String GetName() const;
+  
   /// \name Handle validity
   //@{
   /// \brief check validity of handle
@@ -52,11 +51,13 @@ public:
   /// \note It is an error to use any method other than #IsValid, #Impl() and 
   ///       #operator bool() when the handle is invalid. An InvalidHandle
   ///       exception will be thrown.
-  operator bool() const;
+  operator bool() const { return this->IsValid(); }
   /// \brief check validity of handle
   /// \sa #operator bool()
-  bool IsValid() const;
+  bool IsValid() const { return Impl().get()!=0; }
   //@}
+  friend class ConstGenericPropContainer<ChainBase>;
+  String GetName() const;
 
   const impl::ChainImplPtr& Impl() const {
     return impl_;

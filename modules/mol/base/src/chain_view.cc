@@ -79,7 +79,11 @@ ChainView::ChainView() {
 }
 
 EntityView ChainView::GetEntity() const {
-  return EntityView(data_->entity.lock(), Impl()->GetEntity());
+  this->CheckValidity();
+  if (!data_->entity.expired()) {
+    return EntityView(data_->entity.lock(), Impl()->GetEntity());    
+  }
+  throw InvalidHandle();
 }
 
 ChainView::ChainView(const EntityView& entity,
@@ -130,6 +134,20 @@ int ChainView::GetAtomCount() const {
   while(it!=data_->residues.end()) {
     count+=(*it).GetAtomCount();
     ++it;
+  }
+  return count;
+}
+
+int ChainView::GetBondCount() const {
+  this->CheckValidity();
+  int count=0;
+  EntityView ev = this->GetEntity();
+  const BondHandleList& bhl = ev.GetBondList();
+  for (BondHandleList::const_iterator i=bhl.begin(); i!=bhl.end(); ++i) {
+    if (i->GetFirst().GetResidue().GetChain().GetName()==this->GetName() &&
+        i->GetSecond().GetResidue().GetChain().GetName()==this->GetName()) {
+      count++;
+    }
   }
   return count;
 }
@@ -381,7 +399,7 @@ geom::Vec3 ChainView::GetCenterOfMass() const
       ResidueView r=*i;
       for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
           e2=r.GetAtomList().end(); j!=e2; ++j) {
-        center+=j->GetPos() * j->GetAtomProps().mass;
+        center+=j->GetPos() * j->GetMass();
       }
     }
     center/=mass;

@@ -54,7 +54,7 @@ public:
   virtual void MakeActive();
   virtual void DoRefresh();
   virtual void StatusMessage(const String& m);
-  virtual void SetStereo(bool s);
+  virtual bool HasStereo() const {return format().stereo();};
   virtual bool HasMultisample() const {return format().sampleBuffers();}
 
   // central point for sending input to the gfx layer
@@ -83,11 +83,14 @@ protected:
   virtual void keyReleaseEvent(QKeyEvent* event);
   virtual void timerEvent(QTimerEvent * event);
   virtual void wheelEvent(QWheelEvent* event);
-
+  virtual bool event(QEvent* event);
 private slots:
   virtual void RequestContextMenu(const QPoint& pos);
 
 private:
+#if QT_VERSION >= 0x040600  
+  bool GestureEvent(QGestureEvent* event);
+#endif
   bool IsToolEvent(QInputEvent* event) const;
   MouseEvent::Buttons TranslateButtons(Qt::MouseButtons buttons) const;
   void HandleMousePressEvent(QMouseEvent* event);
@@ -102,6 +105,11 @@ private:
   bool bench_flag_;
   QPoint last_pos_;
   SceneMenu* scene_menu_;
+  bool show_beacon_;
+  float angular_speed_;
+#if QT_VERSION>=0x04600
+  QBasicTimer gesture_timer_;
+#endif
 };
 
 }} // ns

@@ -1,3 +1,4 @@
+
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
@@ -22,9 +23,7 @@
 
 #include "cartoon_render_options.hh"
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 CartoonRenderOptions::CartoonRenderOptions(bool force_tube):
   force_tube_(force_tube),
@@ -39,10 +38,13 @@ CartoonRenderOptions::CartoonRenderOptions(bool force_tube):
   helix_thickness_(0.2),
   helix_ecc_(0.3),
   helix_profile_(1),
+  helix_mode_(0),
   strand_width_(1.2),
   strand_thickness_(0.2),
   strand_ecc_(0.3),
-  strand_profile_(1)
+  strand_profile_(1),
+  strand_mode_(0),
+  color_blend_mode_(0)
 {}
 
 RenderMode::Type CartoonRenderOptions::GetRenderMode(){
@@ -66,12 +68,17 @@ void CartoonRenderOptions::ApplyRenderOptions(RenderOptionsPtr render_options){
   smooth_factor_=options->GetNormalSmoothFactor();
   tube_radius_=options->GetTubeRadius();
   tube_ratio_=options->GetTubeRatio();
+  tube_profile_=options->GetTubeProfileType();
   helix_width_=options->GetHelixWidth();
   helix_thickness_=options->GetHelixThickness();
   helix_ecc_=options->GetHelixEcc();
+  helix_profile_=options->GetHelixProfileType();
+  helix_mode_=options->GetHelixMode();
   strand_width_=options->GetStrandWidth();
   strand_thickness_=options->GetStrandThickness();
   strand_ecc_=options->GetStrandEcc();
+  strand_profile_=options->GetStrandProfileType();
+  strand_mode_=options->GetStrandMode();
   this->NotifyStateChange();
 }
 
@@ -196,6 +203,17 @@ void CartoonRenderOptions::SetHelixProfileType(unsigned int t)
   this->NotifyStateChange();
 }
 
+unsigned int CartoonRenderOptions::GetHelixMode() const
+{
+  return helix_mode_;
+}
+
+void CartoonRenderOptions::SetHelixMode(unsigned int m)
+{
+  helix_mode_=m;
+  this->NotifyStateChange();
+}
+
 void CartoonRenderOptions::SetStrandWidth(float strand_width){
   if(strand_width_ != strand_width){
     strand_width_= strand_width>0.0 ? strand_width : strand_width_;
@@ -240,6 +258,27 @@ void CartoonRenderOptions::SetStrandProfileType(unsigned int t)
   this->NotifyStateChange();
 }
 
+unsigned int CartoonRenderOptions::GetStrandMode() const
+{
+  return strand_mode_;
+}
+
+void CartoonRenderOptions::SetStrandMode(unsigned int m)
+{
+  strand_mode_=m;
+  this->NotifyStateChange();
+}
+
+void CartoonRenderOptions::SetColorBlendMode(unsigned int m)
+{
+  color_blend_mode_=m;
+  this->NotifyStateChange();
+}
+unsigned int CartoonRenderOptions::GetColorBlendMode() const
+{
+  return color_blend_mode_;
+}
+
 float CartoonRenderOptions::GetMaxRad() const{
   float max_rad=std::max(float(3.0),tube_radius_*tube_ratio_);
   max_rad=std::max(max_rad,tube_radius_);
@@ -250,8 +289,5 @@ float CartoonRenderOptions::GetMaxRad() const{
   return max_rad;
 }
 
-CartoonRenderOptions::~CartoonRenderOptions() {}
+}} // ns
 
-}
-
-}

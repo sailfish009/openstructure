@@ -33,7 +33,7 @@ namespace {
 
 ResidueHandle make_arg(ChainHandle chain) 
 {
-  XCSEditor e=chain.GetEntity().RequestXCSEditor();
+  XCSEditor e=chain.GetEntity().EditXCS();
   ResidueHandle res = e.AppendResidue(chain, "ARG");
   e.InsertAtom(res, "N",geom::Vec3(20.202,33.112,58.011));
   e.InsertAtom(res, "CA",geom::Vec3(19.396,31.903,58.033));
@@ -51,7 +51,7 @@ ResidueHandle make_arg(ChainHandle chain)
 
 ResidueHandle make_leu(ChainHandle chain) 
 {
-  XCSEditor e=chain.GetEntity().RequestXCSEditor();  
+  XCSEditor e=chain.GetEntity().EditXCS();  
   ResidueHandle res=e.AppendResidue(chain, "LEU");
 
   e.InsertAtom(res, "N", geom::Vec3(19.003,32.473,60.366));
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_SUITE( conop )
 BOOST_AUTO_TEST_CASE(name_based_connect) 
 {
   EntityHandle e=CreateEntity();
-  ChainHandle c=e.RequestXCSEditor().InsertChain("A");
+  ChainHandle c=e.EditXCS().InsertChain("A");
   ResidueHandle ile=make_leu(c);
   ResidueHandle arg=make_arg(c);
   HeuristicBuilder heuristic_builder;  
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE(name_based_connect)
 
 BOOST_AUTO_TEST_CASE(test_assign_torsions){
   EntityHandle e=CreateEntity();
-  ChainHandle c=e.RequestXCSEditor().InsertChain("A");
+  ChainHandle c=e.EditXCS().InsertChain("A");
   ResidueHandle l1=make_leu(c);
   ResidueHandle a2=make_arg(c);
   ResidueHandle l3=make_leu(c);
@@ -178,7 +178,7 @@ BOOST_AUTO_TEST_CASE(test_assign_torsions){
   heuristic_builder.ConnectAtomsOfResidue(l1);
   heuristic_builder.ConnectAtomsOfResidue(a2);
   heuristic_builder.ConnectAtomsOfResidue(l3);
-  XCSEditor edi=e.RequestXCSEditor();
+  XCSEditor edi=e.EditXCS();
   edi.Connect(l1.FindAtom("C"), a2.FindAtom("N"));
   edi.Connect(a2.FindAtom("C"), l3.FindAtom("N"));  
   heuristic_builder.AssignTorsions(c);

@@ -84,11 +84,14 @@ set(OST_GUI_PYMOD_MODULES
   init_spacenav.py
   init_splash.py
   traj.py
+  helpwidget.py
 )
 
 set(OST_GUI_PYMOD_DNG_MODULES
   __init__.py
   termuse.py
+  init.py
+  menu.py
 )
 
 pymod(NAME gui CPP ${OST_GUI_PYMOD_SOURCES} 

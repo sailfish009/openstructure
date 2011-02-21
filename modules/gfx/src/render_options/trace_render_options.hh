@@ -27,30 +27,27 @@
 
 #include <ost/gfx/module_config.hh>
 
-#include <ost/gfx/render_options/render_options.hh>
+#include "render_options.hh"
 
 namespace ost { namespace gfx {
 
-class DLLEXPORT_OST_GFX TraceRenderOptions: public ost::gfx::RenderOptions {
+class DLLEXPORT_OST_GFX TraceRenderOptions: public RenderOptions {
 public:
   TraceRenderOptions();
 
+  // RenderOptions interface
   virtual RenderMode::Type GetRenderMode();
-
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options);
 
+  // own interface
   void SetArcDetail(uint arc_detail);
   uint GetArcDetail() const;
-
   void SetNormalSmoothFactor(float smooth_factor);
   float GetNormalSmoothFactor() const;
-
   void SetTubeRadius(float tube_radius);
   float GetTubeRadius() const;
   float GetMaxRad() const;
-
-  virtual ~TraceRenderOptions();
 
 private:
   uint spline_detail_;
@@ -62,6 +59,6 @@ private:
 
 typedef boost::shared_ptr<TraceRenderOptions> TraceRenderOptionsPtr;
 
-}}
+}} // ns
 
-#endif /* OST_GFX_CARTOON_RENDER_OPTIONS_HH */
+#endif

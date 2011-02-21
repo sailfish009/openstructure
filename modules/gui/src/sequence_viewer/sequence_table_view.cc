@@ -89,7 +89,6 @@ void SequenceTableView::InitStaticColumn()
   for(int col=1; col<this->model()->columnCount(); col++){
    static_column_->setColumnHidden(col, true);
   }
-
   static_column_->setColumnWidth(0, this->columnWidth(0) );
 
   static_column_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -227,19 +226,21 @@ QModelIndex SequenceTableView::moveCursor(CursorAction action, Qt::KeyboardModif
 {
   QModelIndex current = QTableView::moveCursor(action, modifiers);
 
-  if(action == MoveLeft && current.column()>0
-     && this->visualRect(current).topLeft().x() < static_column_->columnWidth(0) ){
-   const int new_value = horizontalScrollBar()->value() + this->visualRect(current).topLeft().x() - static_column_->columnWidth(0);
+#if !(defined(__APPLE__) && (QT_VERSION>=0x040600))
+  if (action == MoveLeft && current.column()>0
+     && this->visualRect(current).topLeft().x() < static_column_->columnWidth(0)){
+  int new_value = horizontalScrollBar()->value() + this->visualRect(current).topLeft().x();
+   new_value-=static_column_->columnWidth(0);
+
    horizontalScrollBar()->setValue(new_value);
   }
 
-
-  if(action == MoveUp && current.row()>0
-     && this->visualRect(current).bottomLeft().y() < static_row_->rowHeight(0) ){
-   const int new_value = verticalScrollBar()->value() + this->visualRect(current).bottomRight().y() - static_row_->rowHeight(0);
+  if (action == MoveUp && current.row()>0 && this->visualRect(current).bottomLeft().y() < static_row_->rowHeight(0)){
+    int new_value = verticalScrollBar()->value() + this->visualRect(current).bottomRight().y();
+    new_value-=static_row_->rowHeight(0);   
    verticalScrollBar()->setValue(new_value);
   }
-
+#endif
   return current;
 }
 
@@ -378,8 +379,86 @@ void SequenceTableView::wheelEvent(QWheelEvent* event)
   }
 }
 
+std::pair<int, int> SequenceTableView::GetSimpleSelection(int row)
+{
+  QModelIndexList sel=this->selectionModel()->selectedIndexes();
+  QModelIndexList row_sel;
+  for (QModelIndexList::const_iterator i=sel.begin(), e=sel.end(); i!=e; ++i) {
+    if (i->row()==row) {
+      row_sel.push_back(*i);
+    }
+  }
+  if (row_sel.empty()) {
+    return std::make_pair(-1, -1);
+  }
+  std::sort(row_sel.begin(), row_sel.end(), std::less<QModelIndex>());
+  for (QModelIndexList::const_iterator i=row_sel.begin()+1, 
+       e=row_sel.end(); i!=e; ++i) {
+    if ((i-1)->column()!=i->column()-1) {
+      return std::make_pair(-1, -1);
+    }
+  }
+  return std::make_pair(row_sel.front().column()-1, row_sel.back().column()-1);
+}
+
 void SequenceTableView::keyPressEvent(QKeyEvent* event)
 {
+  if (this->IsSingleAlignment()) {
+    if (event->key()==Qt::Key_Space || event->key()==Qt::Key_Backspace) {
+      std::vector<QItemSelection> new_sel;
+      int row_count=this->model()->rowCount();
+      seq::AlignmentHandle changed_aln;
+      for (int i=1; i<row_count; ++i) {
+        std::pair<int, int> sel=this->GetSimpleSelection(i);      
+        if (sel.first==-1 && sel.second==-1) {
+          continue;
+        }
+
+        SequenceModel* smodel=dynamic_cast<SequenceModel*>(this->model());
+        QPair<seq::AlignmentHandle, int> aln=smodel->GetAlignmentForRow(i);
+        new_sel.push_back(QItemSelection(smodel->index(i, sel.first+1), 
+                                         smodel->index(i, sel.second+1)));
+        if (aln.second==-1) {
+          continue;
+        }
+        int amount=0;
+        if (event->key()==Qt::Key_Space) {
+          amount=1;
+          if (aln.first.GetLength()==sel.second) {
+            continue;
+          }
+          if (aln.first.GetSequence(aln.second)[sel.second+1]!='-') {
+            continue;
+          }
+        }
+        if (event->key()==Qt::Key_Backspace) {
+          amount=-1;
+          if (sel.first==0) {
+            continue;
+          }
+          if (aln.first.GetSequence(aln.second)[sel.first-1]!='-') {
+            continue;
+          }
+        }
+        changed_aln=aln.first;
+        aln.first.ShiftRegion(sel.first, sel.second+1, amount, aln.second);
+        new_sel.back()=QItemSelection(smodel->index(i, sel.first+amount+1), 
+                                      smodel->index(i, sel.second+amount+1));
+        smodel->EmitRowChanged(i);
+      }
+      QItemSelectionModel* sel_model=this->selectionModel();
+      sel_model->clear();
+      for (size_t i=0; i<new_sel.size(); ++i) {
+        sel_model->select(new_sel[i], QItemSelectionModel::SelectCurrent);
+      }
+      if (changed_aln.IsValid()) {
+        emit this->AlignmentChanged();
+      }
+      return;
+    }
+
+  }
+
   if(event->matches(QKeySequence::Copy)){
     emit CopyEvent(event);
   }

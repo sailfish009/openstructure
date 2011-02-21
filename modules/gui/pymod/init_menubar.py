@@ -127,8 +127,8 @@ class InitMenuBar(QtCore.QObject):
       info_box.exec_();
             
 def _InitMenuBar(app):
-  InitMenuBar(app.perspective.menubar)
-  
+  #InitMenuBar(app.perspective.menubar)
+  pass
 ## \example menubar_example.py
 #
 # Shows how to use PyQt to add a menu from within Python and interact 

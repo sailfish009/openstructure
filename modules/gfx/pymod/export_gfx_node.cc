@@ -17,11 +17,19 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+
 using namespace boost::python;
 
+#include <ost/export_helper/vector.hh>
 #include <ost/gfx/gfx_node.hh>
+
+
 using namespace ost;
 using namespace ost::gfx;
+
+
+const GfxNodeVector& (GfxNode::*get_children)() const=&GfxNode::GetChildren;
 
 void export_GfxNode()
 {
@@ -31,7 +39,12 @@ void export_GfxNode()
   void (GfxNode::* node_rem2)(GfxNodeP) = &GfxNode::Remove;
   void (GfxNode::* node_rem3)(const String&) = &GfxNode::Remove;
 
-  class_<GfxNode, boost::noncopyable>("GfxNode",no_init)
+  class_<GfxNodeVector>("GfxNodeList", init<>())
+    .def(vector_indexing_suite<GfxNodeVector, true>())
+    .def(ost::VectorAdditions<GfxNodeVector>())
+  ;
+  class_<GfxNode, GfxNodeP, 
+         boost::noncopyable>("GfxNode", init<const String&>())
     .def("GetName",&GfxNode::GetName)
     .def("Hide",&GfxNode::Hide)
     .def("Show",&GfxNode::Show)
@@ -42,6 +55,8 @@ void export_GfxNode()
     .add_property("name", &GfxNode::GetName)    
     .def("Remove",node_rem2)
     .def("Remove",node_rem3)
+    .add_property("parent", &GfxNode::GetParent)
+    .add_property("children", make_function(get_children, 
+                                            return_value_policy<copy_const_reference>()))
     ;
-  register_ptr_to_python<GfxNodeP>();
 }

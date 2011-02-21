@@ -19,7 +19,7 @@
 
 #include <ost/gui/gosty_app.hh>
 #include <ost/mol/query_view_wrapper.hh>
-
+#include <ost/gui/scene_win/scene_win_model.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node.hh>
 

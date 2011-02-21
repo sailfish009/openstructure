@@ -40,97 +40,51 @@ class BackboneTraceBuilder;
 class DLLEXPORT_OST_GFX BackboneTrace {
 public:
 
-  BackboneTrace(const mol::EntityView& ent);
+  // empty trace
   BackboneTrace();
-  
+
+  // initialize with a view, and build
+  BackboneTrace(const mol::EntityView& ent);
+
+  // number of node-lists
   int GetListCount() const;
-  
+
+  // grab a list
   const NodeEntryList& GetList(int index) const;
+  // grab a list
   NodeEntryList& GetList(int index);
+
+  // reset the view and rebuild
+  void ResetView(const mol::EntityView& ent);
+
+  // used internally - adds a finished nodelist
+  void AddNodeEntryList(const NodeEntryList& entries);  
   
-  void SetView(const mol::EntityView& ent);
-  
-  // used internally
-  void AddNodeList(const NodeEntryList& entries);  
-  
+  // used internally - calculates some derived values for a nodelist
+  static void PrepList(NodeEntryList& nelist);
+
+  // re-creates internal nodelist-list based on view
+  /*
+    seq_hack will apply an additional hackish N/N+1 rnum check
+    to determine if two consecutive residues are connected
+  */
   void Rebuild();
+
+  // entity has new positions
+  void OnUpdatedPositions();
   
+  // extract portions of this backbone trace for a subview
+  // this is faster then re-generating a trace
+  BackboneTrace CreateSubset(const mol::EntityView& subview);
+
+  void SetSeqHack(bool f);
+  bool GetSeqHack() const {return seq_hack_;}
+
 private:  
   mol::EntityView      view_;
   NodeEntryListList    node_list_list_;
-};
+  bool seq_hack_;
 
-/// \internal
-/// \brief a subset of a node list
-class DLLEXPORT_OST_GFX NodeListSubset {
-public:
-  friend class TraceSubset;
-  
-  NodeListSubset(BackboneTrace& trace, int index);
-  
-  int GetSize() const 
-  {
-     return indices_.size();
-  }
-  int AtStart() const 
-  { 
-    return at_start_;
-  }
-  
-  int AtEnd() const 
-  { 
-    return at_end_;
-  }  
-  const NodeEntry& operator [](int index) const 
-  {
-    assert(index>=0 && index<static_cast<int>(indices_.size()));    
-    return trace_.GetList(list_index_)[indices_[index]];
-  }
-  NodeEntry& operator [](int index)
-  {
-    assert(index>=0 && index<static_cast<int>(indices_.size()));    
-    return trace_.GetList(list_index_)[indices_[index]];
-  }  
-  NodeListSubset& operator=(const NodeListSubset& rhs);    
-private:
-  BackboneTrace&    trace_;
-  int               list_index_;
-protected:
-  std::vector<int>  indices_;
-  int               at_start_;
-  int               at_end_;
-};
-
-/// \brief a subset of the trace
-class DLLEXPORT_OST_GFX TraceSubset {
-public:
-  TraceSubset(BackboneTrace& trace, const mol::EntityView& view, int n);
-  TraceSubset(BackboneTrace& trace, int n);
-  
-  const NodeListSubset& operator[](int index) const
-  {
-    return lists_[index];
-  }
-  
-  NodeListSubset& operator[](int index)
-  {
-    return lists_[index];
-  }
-  
-  int GetSize() const
-  {
-    return lists_.size();
-  }
-  void SetOvershoot(int n) { overshoot_=n; }
-  int GetOvershoot() const { return overshoot_; }
-  TraceSubset& operator=(const TraceSubset& rhs);  
-  void Update(const mol::EntityView& view);
-private:
-  void NodeListStart(NodeListSubset& nl, int c);
-  void NodeListEnd(NodeListSubset& nl, int c, int s);
-  BackboneTrace& trace_;
-  std::vector<NodeListSubset> lists_;
-  int overshoot_;
 };
 
 }}}

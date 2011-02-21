@@ -19,13 +19,11 @@
 #ifndef OST_GUI_PERSPECTIVE_HH
 #define OST_GUI_PERSPECTIVE_HH
 
+/*
+  Author: Marco Biasini, Stefan Scheuber
+ */
 
-class QMainWindow;
-class QTextEdit;
 
-#include <ost/gui/panels/panel_manager.hh>
-#include <ost/gui/panels/button_bar.hh>
-#include <ost/gui/panels/panel_bar.hh>
 #include <ost/gui/module_config.hh>
 
 #include <QObject>
@@ -34,15 +32,23 @@ class QTextEdit;
 #include <QString>
 #include <QMenu>
 #include <QStatusBar>
-/*
-  Author: Marco Biasini, Stefan Scheuber
- */
- 
+
+
+class QMenu;
+class QMenuBar; 
+class QStatusBar;
+class QMainWindow;
+class QTextEdit;
+
 namespace ost { namespace gui {
+
 
 class SideBar;
 class ThinSplitter;
 class MainArea;
+class PanelManager;
+class MainArea;
+class ButtonBar;
 
 /// The perspective manages the layout of the widgets inside the main window.
 /// It contains important classes which itself manages again a sub part of the whole layout.
@@ -92,7 +98,6 @@ private:
   void SetupQuickAccessBar();
   QWidget*        central_;
   QMenuBar*        menu_bar_;
-  QMap<QString,QMenu*> menus_;
   MainArea*       main_area_;
   PanelManager*   panels_;
   QWidget*        quick_access_bar_;

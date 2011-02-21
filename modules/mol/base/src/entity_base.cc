@@ -46,14 +46,6 @@ const GenericPropContainerImpl* EntityBase::GpImpl() const
   return Impl().get();
 }
 
-bool EntityBase::IsValid() const {
-  return impl_.get()!=0;
-}
-
-EntityBase::operator bool() const {
-  return impl_.get()!=0;
-}
-
 void EntityBase::CheckValidity() const {
   if (!impl_)
     throw InvalidHandle();
@@ -71,7 +63,7 @@ void EntityBase::SetName(const String& ent_name) {
 
 DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os,   
                                            const EntityBase& ent) {
-  if (ent.IsValid()) {
+  if (ent.Impl()) {
     os << "entity";
   } else {
     os << "invalid";

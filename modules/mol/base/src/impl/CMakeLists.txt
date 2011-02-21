@@ -10,12 +10,14 @@ query_impl.cc
 residue_impl.cc
 surface_impl.cc
 torsion_impl.cc
+atom_prop.cc
 PARENT_SCOPE
 )
 
 set(OST_MOL_IMPL_HEADERS
 pointer_iterator.hh
 atom_group.hh
+atom_prop.hh
 atom_impl.hh
 atom_impl_fw.hh
 chain_impl.hh

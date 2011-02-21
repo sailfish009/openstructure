@@ -76,7 +76,6 @@ util.cc
 module_config.hh
 value_util.hh
 vecmat.hh
-version.hh
 mask_base_fw.hh
 mask_base.hh
 composite_mask.hh

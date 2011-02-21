@@ -38,7 +38,8 @@ class SequenceRow : public BaseRow
   Q_OBJECT
 
 public:
-  SequenceRow(const QString& name, seq::SequenceHandle& sequence, SequenceViewObject* parent);
+  SequenceRow(const QString& name, seq::ConstSequenceHandle sequence, 
+              SequenceViewObject* parent);
   SequenceRow(const QString& name, SequenceViewObject* parent);
 
   virtual int GetColumnCount() const;
@@ -50,15 +51,15 @@ public:
   void SetName(const QString& name);
   const QString& GetName() const;
 
-  virtual void SetSequence(seq::SequenceHandle& sequence);
-  const seq::SequenceHandle& GetSequence() const;
+  virtual void SetSequence(seq::ConstSequenceHandle sequence);
+  const seq::ConstSequenceHandle& GetSequence() const;
 
   virtual void SetSelection(const QSet<int>& added, const QSet<int>& removed);
 
 private:
   QString name_;
   QFont name_font_;
-  seq::SequenceHandle sequence_;
+  seq::ConstSequenceHandle sequence_;
 };
 
 }}

@@ -19,3 +19,17 @@
 from _mol import *
 import ost.geom as _geom
 from ost.mol import alg
+
+
+def MergeCoordGroups(*coord_groups):
+  """
+  Merge several separate coord groups into one. The coord groups must have the 
+  same number of atoms. In case no coord group is supplied, None will be 
+  returned.
+  """
+  if len(coord_groups)==0:
+    return None
+  cg=CreateCoordGroup(coord_groups[0].atoms)
+  for coord_group in coord_groups:
+    cg.AddFrames(coord_group)
+  return cg

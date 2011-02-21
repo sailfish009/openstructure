@@ -33,7 +33,7 @@ namespace gfx {
 using namespace impl;
 using namespace mol;
 
-DebugRenderer::DebugRenderer(BackboneTrace& trace): 
+DebugRenderer::DebugRenderer(BackboneTrace* trace): 
   TraceRendererBase(trace, 2), options_(new SlineRenderOptions()) {
   this->SetName("Debug");
 }
@@ -51,7 +51,7 @@ void DebugRenderer::PrepareRendering()
 
   for(NodeEntryListList::const_iterator ll_it=node_list_list_->begin();ll_it!=node_list_list_->end();++ll_it) {
 
-    Spline spl;
+    SplineEntryList spl;
     for(NodeEntryList::const_iterator it=(*ll_it).begin();it!=(*ll_it).end();++it) {
       int type=0;
       ResidueHandle resh = it->atom.GetResidue();
@@ -62,12 +62,13 @@ void DebugRenderer::PrepareRendering()
         type=2;
       }
 
-      SplineEntry& ee = spl.AddEntry(it->atom.GetPos(),it->direction,it->normal,
-                                     it->rad,it->color1,it->color2,type);
+      SplineEntry ee(it->atom.GetPos(),it->direction,it->normal,
+                     it->rad,it->color1,it->color2,type,it->id);
       ee.v1 = it->v1;
+      spl.push_back(ee);
     }
 
-    SplineEntryList sel = spl.Generate(std::max((unsigned int) 1,options_->GetSplineDetail()));
+    SplineEntryList sel = Spline::Generate(spl,std::max((unsigned int) 1,options_->GetSplineDetail()));
 
     SplineEntryList::const_iterator sit = sel.begin();
     geom::Vec3 ap = sit->position;
@@ -102,8 +103,6 @@ void DebugRenderer::PrepareRendering()
   }
 #endif
 }
-
-void DebugRenderer::Render(){}
 
 bool DebugRenderer::CanSetOptions(RenderOptionsPtr& render_options){
  return render_options.get()->GetRenderMode()==RenderMode::SLINE;

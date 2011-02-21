@@ -112,7 +112,8 @@ void FileBrowser::Init(const QString& path)
   view_->setRootIndex(model_->index(path));
   view_->setAttribute(Qt::WA_MacShowFocusRect, false);
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(view_,SIGNAL(customContextMenuRequested(const QPoint&)),this,SLOT(ShowContextMenu(const QPoint&)));
+  connect(view_,SIGNAL(customContextMenuRequested(const QPoint&)),this,
+          SLOT(ShowContextMenu(const QPoint&)));
   UpdateMenu(path);
 
   QVBoxLayout* l=new QVBoxLayout(this);
@@ -138,9 +139,19 @@ void FileBrowser::Init(const QString& path)
   split_action->setToolTip("Split File Browser");
   split_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("split_icon.png")));
   action_list_.append(split_action);
-
-  connect(split_action, SIGNAL(triggered(bool)), this, SLOT(Split()));
+  connect(split_action, SIGNAL(triggered(bool)), this, SLOT(Split()));  
+  QAction* refresh_action=new QAction(this);
+  refresh_action->setText("refresh");
+  refresh_action->setIcon(QIcon(icon_path.absolutePath()+QDir::separator()+QString("refresh.png")));
+  action_list_.append(refresh_action);
+  connect(refresh_action, SIGNAL(triggered(bool)), this, SLOT(Refresh()));
 }
+
+void FileBrowser::Refresh()
+{
+  model_->refresh();
+}
+
 ActionList FileBrowser::GetActions()
 {
   return action_list_;

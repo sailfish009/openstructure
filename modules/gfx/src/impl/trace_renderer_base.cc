@@ -17,6 +17,10 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+/*
+  Authors: Marco Biasini, Ansgar Philippsen
+*/
+
 #include <ost/gfx/scene.hh>
 
 #include "trace_renderer_base.hh"
@@ -34,25 +38,32 @@ void set_node_entry_color(NodeEntry& e, ColorMask mask,
 }
 
 template <typename T1>
-inline void apply_color_op(TraceRendererBase* rend, 
-                           TraceSubset& trace_subset, T1 get_col, 
-                           const ColorOp& op)
+inline void apply_color_op(TraceRendererBase* rend, BackboneTrace& trace_subset, T1 get_col, const ColorOp& op)
 {
   rend->UpdateViews();
   ColorMask mask = op.GetMask();
   mol::EntityView view;
   if(op.IsSelectionOnly()){
-    view = rend->GetEffectiveView().Select(op.GetSelection(),op.GetSelectionFlags());
+    mol::Query q(op.GetSelection());
+    for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
+      NodeEntryList& nl=trace_subset.GetList(node_list);
+      for (unsigned int i=0; i<nl.size();++i) {
+        if (q.IsAtomSelected(nl[i].atom)) {
+          Color clr =get_col.ColorOfAtom(nl[i].atom);
+          set_node_entry_color(nl[i],mask,clr);
+        }
+      }
+    }
   }
   else{
-    view = op.GetView();
-  }
-  for (int node_list=0; node_list<trace_subset.GetSize(); ++node_list) {
-    NodeListSubset& nl=trace_subset[node_list];
-    for (int i=0; i<nl.GetSize();++i) {
-      if(view.FindAtom(nl[i].atom)){
-        Color clr =get_col.ColorOfAtom(nl[i].atom);
-        set_node_entry_color(nl[i],mask,clr);
+    mol::EntityView view = op.GetView();
+    for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
+      NodeEntryList& nl=trace_subset.GetList(node_list);
+      for (unsigned int i=0; i<nl.size();++i) {
+        if(view.FindAtom(nl[i].atom)){
+          Color clr =get_col.ColorOfAtom(nl[i].atom);
+          set_node_entry_color(nl[i],mask,clr);
+        }
       }
     }
   }
@@ -61,56 +72,55 @@ inline void apply_color_op(TraceRendererBase* rend,
 
 } //ns
 
-TraceRendererBase::TraceRendererBase(BackboneTrace& trace, int n):
-  trace_(trace), trace_subset_(trace, n), sel_subset_(trace, n)
+TraceRendererBase::TraceRendererBase(BackboneTrace* trace, int n):
+  trace_(trace), trace_subset_(), sel_subset_()
 {
 }
 
 void TraceRendererBase::PrepareRendering()
 {
+  if (state_ & DIRTY_VA) {
+    trace_->OnUpdatedPositions();
+    trace_subset_.OnUpdatedPositions();
+    if(this->HasSelection()) sel_subset_.OnUpdatedPositions();
+    // don't clear DIRTY_VA flag - derived classed may depend on it
+  }
 }
 
 void TraceRendererBase::UpdateViews()
 {
   if (state_ & DIRTY_VIEW) {
     mol::EntityView view=this->GetEffectiveView();
-    trace_subset_.Update(view);
+    trace_subset_=trace_->CreateSubset(view);
     state_&=~DIRTY_VIEW;    
   }
   if (this->HasSelection() && (sel_state_ & DIRTY_VIEW)) {
-    sel_subset_.Update(sel_);
+    sel_subset_ = trace_->CreateSubset(sel_);
     sel_state_&=~DIRTY_VIEW;    
   }
 }
 
 geom::AlignedCuboid TraceRendererBase::GetBoundingBox() const
 {
-  geom::Vec3 mmin, mmax;
+  geom::Vec3 mmin(std::numeric_limits<float>::max(),
+		  std::numeric_limits<float>::max(),
+		  std::numeric_limits<float>::max());
+  geom::Vec3 mmax(-std::numeric_limits<float>::max(),
+		  -std::numeric_limits<float>::max(),
+		  -std::numeric_limits<float>::max());
+		  
   assert(!(state_ & DIRTY_VIEW));
-  bool empty=true;
-  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
-    // first build the spline
-    Spline spl;
-    const NodeListSubset& nl=trace_subset_[node_list];
-    for (int i=0; i<nl.GetSize();++i) {
+  for (int node_list=0; node_list<trace_subset_.GetListCount(); ++node_list) {
+    const NodeEntryList& nl=trace_subset_.GetList(node_list);
+    for (unsigned int i=0; i<nl.size();++i) {
       const NodeEntry& entry=nl[i];      
-      empty=false;
       geom::Vec3 p=entry.atom.GetPos();
-      if (node_list+i==0) {
-        mmin=p;
-        mmax=p;
-      } else {
-        mmin=geom::Min(mmin, p);
-        mmax=geom::Max(mmax, p);
-      }
+      mmin=geom::Min(mmin, p);
+      mmax=geom::Max(mmax, p);
     }
   }  
-  if (empty) {
-    throw Error("Can't calculate bounding box of empty renderer");
-  }
   return geom::AlignedCuboid(mmin, mmax);
 }
-
 
 void TraceRendererBase::Apply(const gfx::ByElementColorOp& op)
 {
@@ -146,29 +156,22 @@ void TraceRendererBase::Apply(const gfx::EntityViewColorOp& op)
 bool TraceRendererBase::HasDataToRender() const
 {
   assert(!(state_ & DIRTY_VIEW));
-  return this->trace_subset_.GetSize()>0;
+  return this->trace_subset_.GetListCount()>0;
 }
 
 void TraceRendererBase::set_node_colors(const Color& col, const mol::Query& q, 
                                         ColorMask mask)
 {
   this->UpdateViews();
-  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
-    NodeListSubset& nl=trace_subset_[node_list];
-    for (int i=0; i<nl.GetSize();++i) {
+  for (int node_list=0; node_list<trace_subset_.GetListCount(); ++node_list) {
+    NodeEntryList& nl=trace_subset_.GetList(node_list);
+    for (unsigned int i=0; i<nl.size();++i) {
       if(q.IsAtomSelected(nl[i].atom)) {
         set_node_entry_color(nl[i],mask,col);
       }
     }
   }
   state_|=DIRTY_VA;  
-}
-
-void TraceRendererBase::set_node_entry_color(NodeEntry& e, ColorMask mask, 
-                                             const Color& c)
-{
-  if (mask & MAIN_COLOR) e.color1=c;
-  if (mask & DETAIL_COLOR) e.color2=c;
 }
 
 void TraceRendererBase::PickAtom(const geom::Line3& line, Real line_width,
@@ -184,9 +187,9 @@ void TraceRendererBase::PickAtom(const geom::Line3& line, Real line_width,
   }
 
   mol::AtomHandle atom;
-  for (int node_list=0; node_list<trace_subset_.GetSize(); ++node_list) {
-    NodeListSubset& nl=trace_subset_[node_list];
-    for (int i=0; i<nl.GetSize();++i) {
+  for (int node_list=0; node_list<trace_subset_.GetListCount(); ++node_list) {
+    NodeEntryList& nl=trace_subset_.GetList(node_list);
+    for (unsigned int i=0; i<nl.size();++i) {
       geom::Vec3 p=nl[i].atom.GetPos();
       float dist = geom::Distance(line, p);
       if(dist<=max_dist) {
@@ -218,5 +221,53 @@ void TraceRendererBase::Apply(const gfx::MapHandleColorOp& op)
 }
 #endif
 
-}}}
+void TraceRendererBase::rebuild_sel(const SplineEntryListList& spline_list_list, 
+                                    SplineEntryListList& sel_spline_list_list,
+                                    const Color& sel_color)
+{
+  // extract spline segments from list_list that match 
+  // (via id) the selection subset
+  // first put all ids into a set for fast lookup
+  std::set<int> id_set;
+  for(int nlc=0;nlc<sel_subset_.GetListCount();++nlc) {
+    const NodeEntryList& nelist=sel_subset_.GetList(nlc);
+    for(NodeEntryList::const_iterator nit=nelist.begin();nit!=nelist.end();++nit) {
+      id_set.insert(nit->id);
+    }
+  }
+  // now find all matching spline segments
+  sel_spline_list_list.clear();
+  for(SplineEntryListList::const_iterator sit=spline_list_list.begin();sit!=spline_list_list.end();++sit) {
+    const SplineEntryList& slist=*sit;
+    SplineEntryList nlist;
+    unsigned int sc=0;
+    while(sc<slist.size()) {
+      int curr_id=slist.at(sc).id;
+      if(id_set.count(curr_id)>0) {
+        // if a match is found, add all until a new id is found
+        while(sc<slist.size() &&  slist.at(sc).id==curr_id) {
+          nlist.push_back(slist[sc++]);
+          // override with the selection color
+          nlist.back().color1=sel_color;
+          nlist.back().color2=sel_color;
+        }
+      } else {
+        // introduce break
+        if(!nlist.empty()) {
+          sel_spline_list_list.push_back(nlist);
+          nlist.clear();
+        }
+        // and advance to the next id
+        while(sc<slist.size() &&  slist.at(sc).id==curr_id) ++sc;
+      }
+    }
+    if(!nlist.empty()) {
+      sel_spline_list_list.push_back(nlist);
+      nlist.clear();
+    }
+  }
+}
+
+}}} // ns
+
 

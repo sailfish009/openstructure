@@ -65,14 +65,6 @@ String ResidueBase::GetQualifiedName() const {
   return impl_->GetQualifiedName();
 }
 
-ResidueBase::operator bool() const {
-  return impl_.get()!=0;
-}
-
-bool ResidueBase::IsValid() const {
-  return impl_.get()!=0;
-}
-
 bool ResidueBase::IsPeptideLinking() const 
 {
   return this->GetChemClass().IsPeptideLinking();
@@ -142,7 +134,7 @@ void ResidueBase::CheckValidity() const
 }
 
 std::ostream& operator<<(std::ostream& os, const ResidueBase& residue) {
-  if (residue.IsValid()) {
+  if (residue.Impl()) {
     os << residue.GetQualifiedName();
   } else {
     os << "invalid residue"; 
@@ -191,6 +183,18 @@ void ResidueBase::SetIsProtein(bool protein)
 {
   this->CheckValidity();
   Impl()->SetProtein(protein);
+}
+
+void ResidueBase::SetIsLigand(bool ligand)
+{
+  this->CheckValidity();
+  return Impl()->SetIsLigand(ligand);
+}
+
+bool ResidueBase::IsLigand() const
+{
+  this->CheckValidity();
+  return Impl()->IsLigand();
 }
 
 }}

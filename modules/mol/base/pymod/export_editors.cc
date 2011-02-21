@@ -54,21 +54,15 @@ void (ICSEditor::*rotate_torsion_b)(const AtomHandle&, const AtomHandle&,
                                     const AtomHandle&, const AtomHandle&,
                                     Real)=&ICSEditor::RotateTorsionAngle;
                                  
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_insert_atom_overloads, 
-                                       EditorBase::InsertAtom, 3, 4)
 }
 
 void export_Editors()
-{
-  enum_<EditMode>("EditMode")
-    .value("BUFFERED_EDIT", BUFFERED_EDIT)
-    .value("UNBUFFERED_EDIT", UNBUFFERED_EDIT)
-  ;
-  
+{  
   class_<EditorBase>("EditorBase", no_init)
     .def("InsertChain", &EditorBase::InsertChain)
     .def("InsertAtom", &EditorBase::InsertAtom,
-         X_insert_atom_overloads())
+         (arg("residue"), arg("name"), arg("pos"), arg("element")="", 
+          arg("occupancy")=1.0, arg("b_factor")=0.0, arg("is_hetatm")=false))
     .def("InsertAltAtom", &EditorBase::InsertAltAtom)
     .def("DeleteResidue", &EditorBase::DeleteResidue)
     .def("DeleteChain", &EditorBase::DeleteChain)
@@ -83,6 +77,8 @@ void export_Editors()
     .def("Connect", connect_d)    
     .def("RenameChain", &EditorBase::RenameChain)
     .def("AddTorsion", &EditorBase::AddTorsion)
+    .def("ReorderResidues",&EditorBase::ReorderResidues)
+    .def("ReorderAllResidues",&EditorBase::ReorderAllResidues)
   ;
   
   class_<XCSEditor, bases<EditorBase> >("XCSEditor", no_init)

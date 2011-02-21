@@ -38,6 +38,8 @@
 
 #include "sequence_model.hh"
 #include "sequence_viewer.hh"
+#include "sequence_search_bar.hh"
+#include "sequence_table_view.hh"
 
 #include <QAbstractItemView>
 #include <QApplication>
@@ -49,6 +51,7 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QVarLengthArray>
+
 namespace ost { namespace gui {
 
 class SequenceViewerFactory: public WidgetFactory {
@@ -64,19 +67,30 @@ public:
 
 OST_REGISTER_WIDGET(SequenceViewer, SequenceViewerFactory);
 
-struct GetNodesVisitor: public gfx::GfxNodeVisitor {
-  GetNodesVisitor(): nodes_() {}
-  virtual void VisitObject(gfx::GfxObj* o, const Stack& st) {
-    nodes_.push_back(o->shared_from_this());
-  }
-  gfx::NodePtrList nodes_;
-  gfx::NodePtrList GetNodes(){return nodes_;}
+struct NodeParentPair {
+  NodeParentPair(gfx::GfxNodeP n, gfx::GfxNodeP p): node(n), parent(p) {}
+  
+  gfx::GfxNodeP node;
+  gfx::GfxNodeP parent;
 };
 
-SequenceViewer::SequenceViewer(bool stand_alone, QWidget* parent): Widget(NULL,parent)
-{
-  model_ = new SequenceModel(this);
+struct GetNodesVisitor: public gfx::GfxNodeVisitor {
 
+  GetNodesVisitor(): nodes_() {}
+  virtual void VisitObject(gfx::GfxObj* o, const Stack& st) {
+    nodes_.push_back(o->shared_from_this());    
+  }
+  gfx::GfxNodeVector nodes_;
+  gfx::GfxNodeVector GetNodes() {return nodes_; }
+};
+
+SequenceViewer::SequenceViewer(bool stand_alone, bool observe_scene,
+                               const QString& title,
+                               QWidget* parent): Widget(NULL,parent)
+{
+  observe_scene_=observe_scene;
+  model_ = new SequenceModel(this);
+  this->setWindowTitle(title);
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
@@ -90,17 +104,18 @@ SequenceViewer::SequenceViewer(bool stand_alone, QWidget* parent): Widget(NULL,p
   }
   this->InitSearchBar();
   this->InitView();
-
-  if(!stand_alone){
+  if (observe_scene_) {
     gfx::Scene::Instance().AttachObserver(this);
     gfx::GfxNodeP root_node = gfx::Scene::Instance().GetRootNode();
     GetNodesVisitor gnv;
     gfx::Scene::Instance().Apply(gnv);
-    gfx::NodePtrList list = gnv.GetNodes();
+    gfx::GfxNodeVector list=gnv.GetNodes();
     for(unsigned int i=0; i<list.size();i++){
       this->NodeAdded(list[i]);
-    }
+    }    
   }
+  connect(seq_table_view_, SIGNAL(AlignmentChanged()),
+          this, SIGNAL(AlignmentChanged()));
 }
 
 void SequenceViewer::InitMenuBar()
@@ -170,6 +185,10 @@ void SequenceViewer::InitActions()
 
 void SequenceViewer::AddEntity(const gfx::EntityP& entity)
 {
+  if (!observe_scene_) {
+    return;
+  }
+  seq_table_view_->SetSingleAlignment(false);
   model_->InsertGfxEntity(entity);
   this->FitToContents();
   this->UpdateSearchBar();
@@ -177,11 +196,17 @@ void SequenceViewer::AddEntity(const gfx::EntityP& entity)
 
 void SequenceViewer::RemoveEntity(const gfx::EntityP& entity)
 {
+  if (!observe_scene_) {
+    return;
+  }
   model_->RemoveGfxEntity(entity);
 }
 
 void SequenceViewer::NodeAdded(const gfx::GfxNodeP& n)
 {
+  if (!observe_scene_) {
+    return;
+  }
   if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(n)) {
     this->AddEntity(o);
   }
@@ -189,6 +214,9 @@ void SequenceViewer::NodeAdded(const gfx::GfxNodeP& n)
 
 void SequenceViewer::NodeRemoved(const gfx::GfxNodeP& node)
 {
+  if (!observe_scene_) {
+    return;
+  }
   if (gfx::EntityP o=boost::dynamic_pointer_cast<gfx::Entity>(node)) {
     this->RemoveEntity(o);
   }
@@ -197,9 +225,20 @@ void SequenceViewer::NodeRemoved(const gfx::GfxNodeP& node)
 void SequenceViewer::AddAlignment(const seq::AlignmentHandle& alignment)
 {
   if(alignment.GetCount()>0 && alignment.GetLength()>0){
+    if (model_->rowCount()>1) {
+      seq_table_view_->SetSingleAlignment(false);
+    } else {
+      seq_table_view_->SetSingleAlignment(true);
+    }
     model_->InsertAlignment(alignment);
     this->FitToContents();
   }
+}
+
+void SequenceViewer::SetAlignment(const seq::AlignmentHandle& alignment)
+{
+  model_->Clear();
+  this->AddAlignment(alignment);
 }
 
 void SequenceViewer::RemoveAlignment(const seq::AlignmentHandle& alignment)
@@ -227,7 +266,10 @@ void SequenceViewer::SelectionModelChanged(const QItemSelection& sel, const QIte
 void SequenceViewer::SelectionChanged(const gfx::GfxObjP& o,
                                       const mol::EntityView& view)
 {
-  disconnect(seq_table_view_->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
+  disconnect(seq_table_view_->selectionModel(), 
+             SIGNAL(selectionChanged(const QItemSelection&, 
+                                     const QItemSelection&)), 
+             this, SLOT(SelectionModelChanged(const QItemSelection&, const QItemSelection&)));
   gfx::EntityP entity=boost::dynamic_pointer_cast<gfx::Entity>(o);
   if(entity){
     const QModelIndexList& list = model_->GetModelIndexes(entity, view);

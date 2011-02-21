@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 #include <ost/mol/transform.hh>
+#include <ost/mol/editor_base.hh>
 #include <ost/info/info.hh>
 
 using namespace boost::python;
@@ -44,6 +45,11 @@ void export_QueryViewWrapper();
 void export_EntityPropertyMapper();
 BOOST_PYTHON_MODULE(_mol)
 {
+  enum_<EditMode>("EditMode")
+    .value("BUFFERED_EDIT", BUFFERED_EDIT)
+    .value("UNBUFFERED_EDIT", UNBUFFERED_EDIT)
+    .export_values()
+  ;
   export_Entity();
   export_Surface();
   export_Query();
@@ -64,14 +70,20 @@ BOOST_PYTHON_MODULE(_mol)
   export_QueryViewWrapper();
   export_EntityPropertyMapper();
   class_<Transform>("Transform", init<>())
+    .def(init<const Transform&>()) // shouldn't this be there automatically ?
     .def("GetMatrix",&Transform::GetMatrix)
+	.add_property("matrix",&Transform::GetMatrix)
     .def("GetTransposedMatrix",&Transform::GetTransposedMatrix)
+ 	.add_property("tmatrix",&Transform::GetTransposedMatrix)
     .def("SetTrans",&Transform::SetTrans)
     .def("GetTrans",&Transform::GetTrans)
+	.add_property("trans",&Transform::GetTrans,&Transform::SetTrans)
     .def("SetCenter",&Transform::SetCenter)
     .def("GetCenter",&Transform::GetCenter)
+	.add_property("center",&Transform::GetCenter,&Transform::SetCenter)
     .def("SetRot",&Transform::SetRot)
     .def("GetRot",&Transform::GetRot)
+	.add_property("rot",&Transform::GetRot,&Transform::SetRot)
     .def("ApplyXAxisRotation",&Transform::ApplyXAxisRotation)
     .def("ApplyYAxisRotation",&Transform::ApplyYAxisRotation)
     .def("ApplyZAxisRotation",&Transform::ApplyZAxisRotation)

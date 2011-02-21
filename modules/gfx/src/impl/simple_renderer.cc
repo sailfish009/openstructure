@@ -30,25 +30,6 @@
 namespace ost { namespace gfx { namespace impl {
 
 
-namespace {
-
-struct BlurQuadEntry
-{
-  float zdist;
-  geom::Vec3 p1,p2,p3,p4;
-  Color c1,c2,c3,c4;
-};
-
-struct BlurQuadEntryLess
-{
-  bool operator()(const BlurQuadEntry& e1, const BlurQuadEntry& e2)
-  {
-    // provides back-to-front sorting
-    return e1.zdist<e2.zdist;
-  }
-};
-
-}
   
 SimpleRenderer::SimpleRenderer(): options_(new SimpleRenderOptions()) 
 {
@@ -200,124 +181,14 @@ void SimpleRenderer::PrepareRendering(GfxView& view, IndexedVertexArray& va)
   }  
 }
 
-void SimpleRenderer::RenderBlur()
+BondEntryList& SimpleRenderer::GetBondEntryList()
 {
-  // add blur for this particular orientation!
-  // don't use vertex array, but on-the-fly oriented and z-sorted quads
-  mol::Transform tf = Scene::Instance().GetTransform();
-
-  std::vector<BlurQuadEntry> bql;
-  const std::pair<Real, Real>& bf=options_->GetBlurFactors();
-  for (BondEntryList::iterator it=view_.bond_list.begin();
-       it!=view_.bond_list.end();++it) {
-
-    const geom::Vec3 p0=tf.Apply(it->bond.GetFirst().GetPos());
-    const geom::Vec3 p2=tf.Apply(it->bond.GetSecond().GetPos());
-    geom::Vec3 p1=(p0+p2)*0.5;
-
-    const geom::Vec3 q0=tf.Apply(it->pp1);
-    const geom::Vec3 q2=tf.Apply(it->pp2);
-    geom::Vec3 q1=(q0+q2)*0.5;
-
-    float ll0 = geom::Length2(p0-q0);
-    float ll1 = geom::Length2(p1-q1);
-    float ll2 = geom::Length2(p2-q2);
-
-    if(ll0<1e-2 && ll1<1e-2 && ll2<1e-2) continue;
-
-    float x0 = exp(-bf.first*ll0);
-    float x1 = exp(-bf.first*ll1);
-    float x2 = exp(-bf.first*ll2);
-
-    BlurQuadEntry bqe;
-
-    bqe.zdist=0.25*(p0[2]+p2[2]+q0[2]+q2[2]);
-
-    // first half
-    bqe.p1 = p0;
-    bqe.p2 = p1;
-    bqe.p3 = q0;
-    bqe.p4 = q1;
-    bqe.c1 = it->atom1->color;
-    bqe.c2 = it->atom1->color;
-    bqe.c3 = it->atom1->color;
-    bqe.c4 = it->atom1->color;
-    bqe.c1[3] = x0;
-    bqe.c2[3] = x1;
-    bqe.c3[3]=x0*bf.second;
-    bqe.c4[3]=x1*bf.second;
-
-    bql.push_back(bqe);
-
-    // first half
-    bqe.p1 = p1;
-    bqe.p2 = p2;
-    bqe.p3 = q1;
-    bqe.p4 = q2;
-    bqe.c1 = it->atom2->color;
-    bqe.c2 = it->atom2->color;
-    bqe.c3 = it->atom2->color;
-    bqe.c4 = it->atom2->color;
-    bqe.c1[3] = x1;
-    bqe.c2[3] = x2;
-    bqe.c3[3]=x1*bf.second;
-    bqe.c4[3]=x2*bf.second;
-
-    bql.push_back(bqe);
-  }
-
-  std::sort(bql.begin(),bql.end(),BlurQuadEntryLess());
-
-  glPushAttrib(GL_ENABLE_BIT | GL_DEPTH_BUFFER_BIT);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_CULL_FACE);
-  glDepthFunc(GL_LESS);
-  glDepthMask(GL_FALSE);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-  glBegin(GL_QUADS);
-  glNormal3f(0.0,0.0,0.0);
-  for (std::vector<BlurQuadEntry>::const_iterator it=bql.begin();
-       it!=bql.end();++it) {
-    glColor4fv(it->c1);
-    glVertex3v(it->p1.Data());
-    glColor4fv(it->c2);
-    glVertex3v(it->p2.Data());
-    glColor4fv(it->c4);
-    glVertex3v(it->p4.Data());
-    glColor4fv(it->c3);
-    glVertex3v(it->p3.Data());
-  }
-
-  glEnd();
-  glPopMatrix();
-  glPopAttrib();
-}
-
-void SimpleRenderer::BlurSnapshot()
-{
-  for (BondEntryList::iterator it=view_.bond_list.begin();
-       it!=view_.bond_list.end();++it) {
-    it->pp1=it->atom1->atom.GetPos();
-    it->pp2=it->atom2->atom.GetPos();
-  }
-}
-void SimpleRenderer::Render(RenderPass pass)
-{
-  ConnectRendererBase::Render(pass);
-  if (pass==STANDARD_RENDER_PASS && options_->GetBlurFlag()) {
-    this->RenderBlur();
-  }
-}
-
-SimpleRenderer::~SimpleRenderer() 
-{
-
+  return view_.bond_list;
 }
 
 void SimpleRenderer::RenderPov(PovState& pov, const std::string& name)
 {
+  if(view_.atom_map.empty() && view_.bond_list.empty()) return;
   pov.write_merge_or_union(name);
   
   for (AtomEntryMap::const_iterator it=view_.atom_map.begin();

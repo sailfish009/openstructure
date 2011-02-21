@@ -60,7 +60,6 @@ public:
 
   int GetGlobalRow(BaseViewObject* obj, int row) const;
 
-
   const QStringList& GetDisplayModes();
   const QStringList& GetDisplayModes(const gfx::EntityP& entity);
   const QStringList& GetDisplayModes(const seq::AlignmentHandle& alignment);
@@ -84,7 +83,11 @@ public:
                       int role=Qt::DisplayRole) const;
 
   virtual Qt::ItemFlags flags(const QModelIndex& index=QModelIndex()) const;
-
+  QPair<seq::AlignmentHandle, int> GetAlignmentForRow(int row);
+  
+  void EmitRowChanged(int row);
+  
+  void Clear();
 public slots:
   void ZoomIn();
   void ZoomOut();

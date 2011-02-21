@@ -23,7 +23,6 @@
 #include <map>
 #include <limits>
 
-#include <ost/mol/atom_prop.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/entity_property_mapper.hh>
 #include "surface.hh"
@@ -43,14 +42,18 @@ Surface::Surface(const String& name, const mol::SurfaceHandle& sh):
   recalc_bb_(true)
 {
   // TODO replace with def mat for this gfx obj type
-  SetMat(0.0,1.0,0.2,48.0);
+  SetMatAmb(Color(0,0,0));
+  SetMatDiff(Color(1,1,1));
+  SetMatSpec(Color(0.2,0.2,0.2));
+  SetMatShin(48);
   Rebuild();
 }
 
 void Surface::CustomRenderGL(RenderPass pass)
 {
-  if(pass>0) return;
-  va_.RenderGL();
+  if(pass==STANDARD_RENDER_PASS) {
+    va_.RenderGL();
+  }
 }
 
 void Surface::CustomRenderPov(PovState& pov)
@@ -164,10 +167,11 @@ geom::AlignedCuboid Surface::GetBoundingBox() const
 
 void Surface::CustomPreRenderGL(bool flag)
 {
+  va_.FlagRefresh();
   if(flag) {
     //Rebuild();
   } else {
-    RefreshVA(va_);
+    //RefreshVA(va_);
   }
 }
 
@@ -244,28 +248,30 @@ void Surface::ColorBy(const String& prop,
 
 void Surface::Apply(const gfx::UniformColorOp& op, bool store){
   if(store){
-	UniformColorOp* op_ptr = new UniformColorOp(op);
+    UniformColorOp* op_ptr = new UniformColorOp(op);
     this->AppendColorOp(op_ptr);
   }
   mol::Query q(op.GetSelection());
   gfx::Color col = op.GetColor();
   if(op.GetSelection()=="") {
-	for(VMap::const_iterator it=vmap_.begin();it!=vmap_.end();++it) {
-	  va_.SetColor(it->second,col);
-	}
+    for(VMap::const_iterator it=vmap_.begin();it!=vmap_.end();++it) {
+      va_.SetColor(it->second,col);
+    }
   } else {
-	for(VMap::const_iterator it=vmap_.begin();it!=vmap_.end();++it) {
-	  mol::AtomHandle ah = sh_.GetVertex(it->first).atom;
-	  if(ah.IsValid()) {
-		if(q.IsAtomSelected(ah)) {
-		  va_.SetColor(it->second,col);
-		}
-	  }
-	}
+    for(VMap::const_iterator it=vmap_.begin();it!=vmap_.end();++it) {
+      mol::AtomHandle ah = sh_.GetVertex(it->first).atom;
+      if(ah.IsValid()) {
+        if(q.IsAtomSelected(ah)) {
+          va_.SetColor(it->second,col);
+        }
+      }
+    }
   }
   FlagRefresh();
 }
-void Surface::Apply(const gfx::BasicGradientColorOp& op, bool store){
+
+void Surface::Apply(const gfx::BasicGradientColorOp& op, bool store)
+{
   if(store){
     BasicGradientColorOp* op_ptr = new BasicGradientColorOp(op);
     this->AppendColorOp(op_ptr);
@@ -279,23 +285,24 @@ void Surface::Apply(const gfx::BasicGradientColorOp& op, bool store){
   mol::EntityPropertyMapper epm(prop, level);
   std::vector<std::pair<VertexID,float> > v2v;
   for(VMap::const_iterator it=vmap_.begin();it!=vmap_.end();++it) {
-	mol::AtomHandle ah = sh_.GetVertex(it->first).atom;
-	if(ah.IsValid()) {
-	  float v = epm.Get(ah);
-	  v2v.push_back(std::make_pair(it->second,v));
-	  minv=std::min(minv,v);
-	  maxv=std::max(maxv,v);
-	}
+    mol::AtomHandle ah = sh_.GetVertex(it->first).atom;
+    if(ah.IsValid()) {
+      float v = epm.Get(ah);
+      v2v.push_back(std::make_pair(it->second,v));
+      minv=std::min(minv,v);
+      maxv=std::max(maxv,v);
+    }
   }
-
+  
   // reuse values for speed optimization
   for(std::vector<std::pair<VertexID,float> >::const_iterator it=v2v.begin();it!=v2v.end();++it) {
-	va_.SetColor(it->first,gradient.GetColorAt(normalize(it->second,minv,maxv)));
+    va_.SetColor(it->first,gradient.GetColorAt(normalize(it->second,minv,maxv)));
   }
   FlagRefresh();
 }
 
-void Surface::Apply(const gfx::GradientLevelColorOp& op, bool store){
+void Surface::Apply(const gfx::GradientLevelColorOp& op, bool store)
+{
   if(store){
     GradientLevelColorOp* op_ptr = new GradientLevelColorOp(op);
     this->AppendColorOp(op_ptr);
@@ -309,16 +316,16 @@ void Surface::Apply(const gfx::GradientLevelColorOp& op, bool store){
   // for the attached atoms
   mol::EntityPropertyMapper epm(prop, level);
   for(VMap::const_iterator it=vmap_.begin();it!=vmap_.end();++it) {
-	mol::AtomHandle ah = sh_.GetVertex(it->first).atom;
-	if(ah.IsValid()) {
-	  va_.SetColor(it->second,gradient.GetColorAt(normalize(epm.Get(ah, minv),
-	                                              minv,maxv)));
-	}
+    mol::AtomHandle ah = sh_.GetVertex(it->first).atom;
+    if(ah.IsValid()) {
+      va_.SetColor(it->second,gradient.GetColorAt(normalize(epm.Get(ah,minv),minv,maxv)));
+    }
   }
   FlagRefresh();
 }
 
-void Surface::Apply(const gfx::EntityViewColorOp& op, bool store){
+void Surface::Apply(const gfx::EntityViewColorOp& op, bool store)
+{
   if(store){
     EntityViewColorOp* op_ptr = new EntityViewColorOp(op);
     this->AppendColorOp(op_ptr);
@@ -329,14 +336,15 @@ void Surface::Apply(const gfx::EntityViewColorOp& op, bool store){
   float minv = op.GetMinV();
   float maxv = op.GetMaxV();
   for(VMap::const_iterator it=vmap_.begin();it!=vmap_.end();++it) {
-  va_.SetColor(it->second,impl::MappedProperty(ev,prop,g,minv,maxv,
-                                               sh_.GetVertex(it->first).position));
+    va_.SetColor(it->second,impl::MappedProperty(ev,prop,g,minv,maxv,
+                                                 sh_.GetVertex(it->first).position));
   }
   FlagRefresh();
 }
-
+  
 #if OST_IMG_ENABLED
-void Surface::Apply(const gfx::MapHandleColorOp& op, bool store){
+void Surface::Apply(const gfx::MapHandleColorOp& op, bool store)
+{
   if(store){
     MapHandleColorOp* op_ptr = new MapHandleColorOp(op);
     this->AppendColorOp(op_ptr);
@@ -347,17 +355,19 @@ void Surface::Apply(const gfx::MapHandleColorOp& op, bool store){
   float minv = op.GetMinV();
   float maxv = op.GetMaxV();
   for(VMap::const_iterator it=vmap_.begin();it!=vmap_.end();++it) {
-	va_.SetColor(it->second,impl::MappedProperty(mh,prop,g,minv,maxv,sh_.GetVertex(it->first).position));
+    va_.SetColor(it->second,impl::MappedProperty(mh,prop,g,minv,maxv,sh_.GetVertex(it->first).position));
   }
   FlagRefresh();
 }
 #endif //OST_IMG_ENABLED
 
-void Surface::CleanColorOps(){
+void Surface::CleanColorOps()
+{
   GfxObj::CleanColorOps();
 }
 
-void Surface::ReapplyColorOps(){
+void Surface::ReapplyColorOps()
+{
   GfxObj::ReapplyColorOps();
 }
 

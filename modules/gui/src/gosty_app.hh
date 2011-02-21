@@ -28,13 +28,6 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/main.hh>
 #include <ost/gui/widget_geom_handler.hh>
-#include <ost/gui/scene_win/scene_win.hh>
-#include <ost/gui/sequence_viewer/sequence_viewer.hh>
-#include <ost/gui/messages/message_widget.hh>
-
-#if OST_IMG_ENABLED
-  #include <ost/gui/data_viewer/data_viewer.hh>
-#endif
 
 
 #include <QObject>
@@ -46,14 +39,30 @@ class QMainWindow;
 class QMdiArea;
 class QWidget;
 
+namespace ost { 
 
-namespace ost { namespace gui {
+
+// forward declarations
+
+namespace img { 
+
+class Data;
+
+namespace gui { 
+class DataViewer; 
+
+}}  
+
+namespace gui {
 
 class PythonShell;
 class GLWin;
 class TextLogger;
 class ToolOptionsWin;
 class Perspective;
+class SequenceViewer;
+class SceneWin;
+class MessageWidget;
 
 /// The gosty app serves as a GUI Manager. It distinguishes between two types of
 /// windows: Windows that can only exist once (singletons) and windows with 
@@ -82,7 +91,7 @@ public:
   /// The GL window is initialized when this method is first called. All 
   /// subsequent calls will return the same GLWin instance.
   GLWin* GetGLWin();
-  
+
   /// \brief get scene menu
   /// 
   /// The scene menu window is initialized when this method is first called. All 
@@ -107,6 +116,11 @@ public:
   /// All subsequent calls will return the same MessageWidget instance.
   MessageWidget* GetMessageWidget();
 
+  /// \brief stop script execution
+  ///
+  /// Stops the execution of the script.
+  void StopScript(); 
+
 #if OST_IMG_ENABLED
   /// \brief create new DataViewer
   /// 
@@ -130,7 +144,8 @@ public:
   /// \param ident the ident is used to identify a custom widget. It must be unique. Otherwise there might occur an unexpected behaviour.
   /// \param widget the widget which will be added to the GostyApp
   void AddWidgetToApp(const QString& ident, QWidget* widget);
-
+  
+  QWidget* GetWidget(const QString& ident);
   /// \brief remove a custom QWidget from the gosty_app
   ///
   /// This method removes a custom widget from OpenStructure. If the given ident is not known, nothing happens. Read more about custom widgets at \ref #AddWidgetToApp() .
@@ -146,6 +161,9 @@ public:
   /// \param app_title Title that will be displayed in the title bar
   void SetAppTitle(const QString& app_title);
 
+  /// \brief attempt to get a stereo visual upon startup
+  void TryStereo(bool f) {try_stereo_=f;}
+  
 public slots:
   /// \brief This slot must be called when the application is going to be terminated.
   void OnQuit();
@@ -167,6 +185,8 @@ private:
   Perspective*      perspective_;
   
   QMap<QString,WidgetGeomHandler *> external_widgets_;
+
+  bool try_stereo_;
 
   static GostyApp*  app_;
 };

@@ -27,8 +27,9 @@
 
 namespace ost { namespace gfx {
 
+class GfxObjBase;
+typedef boost::shared_ptr<GfxObjBase> GfxObjBaseP;
 class GfxObj;
-
 typedef boost::shared_ptr<GfxObj> GfxObjP;
 
 }} // ns

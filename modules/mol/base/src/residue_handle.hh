@@ -25,7 +25,6 @@
 #include <ost/mol/query.hh>
 #include <ost/mol/module_config.hh>
 #include <ost/mol/residue_base.hh>
-#include <ost/mol/atom_prop.hh>
 #include <ost/mol/entity_visitor_fw.hh>
 #include <ost/mol/iterator_fw.hh>
 
@@ -50,13 +49,14 @@ namespace ost { namespace mol {
 /// EditorBase::InsertAtom() or EditorBase::InsertAltAtom()
 /// 
 /// \code
-/// XCSEditor edi=residue.GetEntity().RequestXCSEditor();
+/// XCSEditor edi=residue.GetEntity().EditXCS();
 /// edi.InsertAtom(residue, "CA", geom.Vec3(1.0, 0.0, 0.0));
 /// \endcode
 class DLLEXPORT_OST_MOL ResidueHandle : public ResidueBase {
 public:
   ResidueHandle();
 
+  //@}
   ResidueHandle(const impl::ResidueImplPtr& impl)
     : ResidueBase(impl) {}
   EntityHandle GetEntity() const;

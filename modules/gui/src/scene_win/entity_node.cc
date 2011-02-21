@@ -25,7 +25,7 @@
 #include <ost/mol/view_type_fw.hh>
 
 #include <ost/gui/scene_win/scene_win.hh>
-
+#include <ost/gui/scene_win/scene_win_model.hh>
 #include "current_selection_node.hh"
 #include "entity_part_node.hh"
 #include "label_node.hh"
@@ -43,7 +43,6 @@ EntityNode::EntityNode(gfx::EntityP& entity, SceneNode* parent):
     GfxSceneNode(entity,parent),custom_view_(NULL){
   SceneWinModel* model = GostyApp::Instance()->GetSceneWin()->GetModel();
   model->AddNode(parent, this);
-
   new RenderModesNode(entity, this);
 
   SceneNode* chain_node = new LabelNode("Chains",this);

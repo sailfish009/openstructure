@@ -66,6 +66,8 @@ ResidueImplPtr ChainImpl::AppendResidue(const ResidueImplPtr& res)
   dst_res->SetOneLetterCode(res->GetOneLetterCode());
   dst_res->SetSecStructure(res->GetSecStructure());
   dst_res->SetChemClass(res->GetChemClass());  
+  dst_res->SetProtein(res->IsProtein());
+  dst_res->SetIsLigand(res->IsLigand());
   return dst_res;
 }
 
@@ -369,7 +371,7 @@ Real ChainImpl::GetMass() const
     ResidueImplPtr r=*i;
     for (AtomImplList::iterator j=r->GetAtomList().begin(); 
           j!=r->GetAtomList().end(); ++j) {
-      mass+=(*j)->GetAtomProps().mass;
+      mass+=(*j)->GetMass();
     }
   }
   return mass;
@@ -424,7 +426,7 @@ geom::Vec3 ChainImpl::GetCenterOfMass() const
       ResidueImplPtr r=*i;
       for (AtomImplList::iterator j=r->GetAtomList().begin(); 
            j!=r->GetAtomList().end(); ++j) {
-        center+=(*j)->GetPos() * (*j)->GetAtomProps().mass;
+        center+=(*j)->GetPos() * (*j)->GetMass();
       }
     }
     center/=mass;
@@ -435,6 +437,19 @@ geom::Vec3 ChainImpl::GetCenterOfMass() const
 void ChainImpl::SetName(const String& new_name)
 {
   name_=new_name;
+}
+
+namespace {
+  bool rnum_cmp(const ResidueImplPtr& r1, const ResidueImplPtr& r2)
+  {
+    return r1->GetNumber()<r2->GetNumber();
+  }
+}
+
+void ChainImpl::ReorderResidues()
+{
+  std::sort(residue_list_.begin(),residue_list_.end(),rnum_cmp);
+  UpdateShifts();
 }
 
 }}} // ns

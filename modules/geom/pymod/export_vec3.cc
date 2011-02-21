@@ -31,6 +31,13 @@ geom::Vec3 NormalizeV3(const geom::Vec3& v) {
   return geom::Normalize(v);
 }
 
+
+void vec_test(const geom::Vec3List& v)
+{
+  for (size_t i=0; i<v.size(); ++i) {
+    std::cout << i << v[i] << std::endl;
+  }
+}
 void export_Vec3()
 {
   using namespace geom;
@@ -75,4 +82,5 @@ void export_Vec3()
     .add_property("inertia", &Vec3List::GetInertia)
     .add_property("principal_axes", &Vec3List::GetPrincipalAxes)
   ;
+  def("vec_test", &vec_test);
 }

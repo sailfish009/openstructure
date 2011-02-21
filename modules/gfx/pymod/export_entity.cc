@@ -92,6 +92,16 @@ void color_by_08(Entity* e,
   e->ColorBy(prop,c1,c2);
 }
 
+// temporary, see comment in gfx/entity.hh
+void detail_color_by_02(Entity* e,
+                        const String& prop, 
+                        const Gradient& gradient,
+                        float minv,float maxv)
+{
+  e->DetailColorBy(prop,gradient,minv,maxv);
+}
+
+
 void radius_by_01(Entity* e,
                   const String& prop, 
                   float rmin,float rmax,
@@ -175,8 +185,8 @@ void ent_apply_61(Entity* e, MapHandleColorOp& mhco, bool store){
 void ent_apply_62(Entity* e, MapHandleColorOp& mhco){
   e->Apply(mhco);
 }
-#endif //OST_IMG_ENABLED
 
+#endif //OST_IMG_ENABLED
 
 RenderOptionsPtr ent_sline_opts(Entity* ent)
 {
@@ -214,17 +224,39 @@ RenderOptionsPtr ent_cpk_opts(Entity* ent)
   return ent->GetOptions(RenderMode::CPK);
 }
 
+void set_query1(Entity* e, const mol::Query& q)
+{
+  e->SetQuery(q);
+}
+
+void set_query2(Entity* e, const std::string& q)
+{
+  e->SetQuery(mol::Query(q));
+}
+
 RenderOptionsPtr ent_ltrace_opts(Entity* ent)
 {
   return ent->GetOptions(RenderMode::LINE_TRACE);
+}
+
+void set_selection(Entity* ent, object sel)
+{
+  try {
+    String sel_string=extract<String>(sel);
+    ent->SetSelection(ent->GetView().Select(sel_string));
+  } catch (error_already_set& e) {
+    PyErr_Clear();
+    mol::EntityView view=extract<mol::EntityView>(sel);
+    ent->SetSelection(view);
+  }
 }
 
 }
 
 void export_Entity()
 {
-  class_<Entity, boost::shared_ptr<Entity>, bases<GfxObj>, boost::noncopyable>("Entity", init<const String&, const mol:: EntityHandle&, optional<const mol:: Query&> >())
-    .def(init<const String&, RenderMode::Type, const mol::EntityHandle&, optional<const mol::Query&> >())
+  class_<Entity, boost::shared_ptr<Entity>, bases<GfxObj>, boost::noncopyable>("Entity", init<const String&, const mol:: EntityHandle&, optional<const mol:: Query&, mol::QueryFlags> >())
+    .def(init<const String&, RenderMode::Type, const mol::EntityHandle&, optional<const mol::Query&, mol::QueryFlags> >())
     .def(init<const String&, const mol::EntityView&>())
     .def(init<const String&, RenderMode::Type, const mol::EntityView&>())
     .def("SetColor",ent_set_color1)
@@ -240,8 +272,11 @@ void export_Entity()
     .def("SetSelection",&Entity::SetSelection)
     .def("GetSelection",&Entity::GetSelection)    
     .add_property("selection", &Entity::GetSelection, 
-                  &Entity::SetSelection)
+                  &set_selection)
     .def("GetView", &Entity::GetView)
+    .def("UpdateView", &Entity::UpdateView)
+    .def("SetQuery", set_query1)
+    .def("SetQuery", set_query2)
     .def("GetRenderModeName", &Entity::GetRenderModeName)
     .def("GetNotEmptyRenderModes", &Entity::GetNotEmptyRenderModes)
     .def("SetRenderMode", set_rm1, arg("keep")=false)
@@ -258,6 +293,7 @@ void export_Entity()
     .def("ColorBy", color_by_06)
     .def("ColorBy", color_by_07)
     .def("ColorBy", color_by_08)
+    .def("DetailColorBy", detail_color_by_02)
     COLOR_BY_DEF()
     .def("RadiusBy", radius_by_01)
     .def("RadiusBy", radius_by_02)
@@ -295,6 +331,7 @@ void export_Entity()
     .def("Apply",&ent_apply_61)
     .def("Apply",&ent_apply_62)
 #endif //OST_IMG_ENABLED
+    .add_property("seq_hack",&Entity::GetSeqHack,&Entity::SetSeqHack)
   ;
   //register_ptr_to_python<EntityP>();
   

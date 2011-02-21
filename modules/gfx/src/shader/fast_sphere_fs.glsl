@@ -1,6 +1,10 @@
 uniform bool lighting_flag;
 uniform bool two_sided_flag;
 uniform bool fog_flag;
+uniform bool write_normals;
+
+// gl_TexCoord[0] is from gl_MultiTexCoord0, which in turn
+// is custom crafted in the fast sphere prep routine
 
 // copy from basic_fl_vs !
 bool DirectionalLight(in vec3 normal,
@@ -32,6 +36,13 @@ void main()
   float z1 = gl_TexCoord[0].z*zz;
   float z2 = gl_TexCoord[0].w*zz;
 
+  gl_FragDepth = gl_FragCoord.z+z2;
+
+  if(write_normals) {
+    gl_FragColor.rgb=normal*0.5+0.5;
+    return;
+  }
+
   vec4 amb = vec4(0.0);
   vec4 diff = vec4(0.0);
   vec4 spec = vec4(0.0);
@@ -50,5 +61,4 @@ void main()
   gl_FragColor.rgb = color.rgb;
   gl_FragColor.a = 1.0;
 
-  gl_FragDepth = gl_FragCoord.z+z2;
 }

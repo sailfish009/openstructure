@@ -44,14 +44,6 @@ String ChainBase::GetName() const {
   return impl_->GetName();
 }
 
-ChainBase::operator bool() const {
-  return impl_.get()!=0;
-}
-
-bool ChainBase::IsValid() const {
-  return impl_.get()!=0;
-}
-
 void ChainBase::CheckValidity() const {
   if (!impl_)
     throw InvalidHandle();
@@ -59,7 +51,7 @@ void ChainBase::CheckValidity() const {
 
 std::ostream& operator<<(std::ostream& os, const ChainBase& chain) 
 {
-  if (chain.IsValid()) {
+  if (chain.Impl()) {
     os << chain.GetName();
   } else {
     os << "invalid chain";

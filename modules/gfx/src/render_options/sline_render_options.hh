@@ -26,28 +26,29 @@
 #include <boost/shared_ptr.hpp>
 
 #include <ost/gfx/module_config.hh>
-#include <ost/gfx/render_options/line_render_options.hh>
+
+#include "line_render_options.hh"
 
 namespace ost { namespace gfx {
 
-class DLLEXPORT_OST_GFX SlineRenderOptions: public ost::gfx::LineRenderOptions {
+class DLLEXPORT_OST_GFX SlineRenderOptions: public LineRenderOptions {
 public:
   SlineRenderOptions();
 
+  // RenderOptions interface
   virtual RenderMode::Type GetRenderMode();
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options);
 
-  virtual void SetSplineDetail(uint spline_detail);
-  virtual uint GetSplineDetail();
+  void SetSplineDetail(uint spline_detail);
+  uint GetSplineDetail();
 
-  virtual ~SlineRenderOptions();
 private:
   uint spline_detail_;
 };
 
 typedef boost::shared_ptr<SlineRenderOptions> SlineRenderOptionsPtr;
 
-}}
+}} // ns
 
-#endif /* OST_GFX_SIMPLE_RENDER_OPTIONS_HH */
+#endif

@@ -70,8 +70,8 @@ public:
                   Real next_phi_angle, Real next_psi_angle) const;
                   
   uint64_t GetCount(Real prev_phi_angle, Real prev_psi_angle,
-                  Real central_phi_angle, Real central_psi_angle,
-                  Real next_phi_angle, Real next_psi_angle) const;
+                    Real central_phi_angle, Real central_psi_angle,
+                    Real next_phi_angle, Real next_psi_angle) const;
 
   uint64_t GetCount(const AminoAcidSet& central_aa) const;
 

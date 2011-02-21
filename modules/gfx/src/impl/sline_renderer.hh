@@ -16,6 +16,11 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+/*
+  Authors: Marco Biasini, Ansgar Philippsen
+*/
+
 #ifndef OST_GFX_SLINE_RENDERER_HH
 #define OST_GFX_SLINE_RENDERER_HH
 
@@ -32,20 +37,20 @@ namespace ost { namespace gfx { namespace impl {
 /// \internal
 class DLLEXPORT_OST_GFX SlineRenderer: public TraceRendererBase {
 public:
-  SlineRenderer(BackboneTrace& trace);
+  SlineRenderer(BackboneTrace* trace);
 
   virtual void PrepareRendering();
-
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);
   virtual void SetOptions(RenderOptionsPtr& render_options);
   virtual RenderOptionsPtr GetOptions();
 
-  virtual ~SlineRenderer();
-
 private:
-  void PrepareRendering(TraceSubset& subset, IndexedVertexArray& va, 
-                        bool is_sel);
+  void prepare_rendering(const BackboneTrace&, IndexedVertexArray&, SplineEntryListList&);
+  void rebuild_spline_obj(IndexedVertexArray&, const SplineEntryListList&, bool);
+
   SlineRenderOptionsPtr options_;
+  SplineEntryListList spline_list_list_;
+  SplineEntryListList sel_spline_list_list_;
 };
 
 }}}

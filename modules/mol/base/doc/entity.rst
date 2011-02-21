@@ -143,7 +143,7 @@ The Handle Classes
     
     See :attr:`atoms`
     
-  .. method:: RequestXCSEditor([edit_mode=mol.EditMode.BUFFERED_EDIT])
+  .. method:: EditXCS([edit_mode=mol.EditMode.BUFFERED_EDIT])
     
     Request :class:`XCSEditor` for editing the external coordinate system. This
     call will fail when there are pending changes of the internal coordinate
@@ -156,7 +156,7 @@ The Handle Classes
     
     :returns: :class:`XCSEditor`
     
-  .. method:: RequestICSEditor([edit_mode=mol.EditMode.BUFFERED_EDIT])
+  .. method:: EditICS([edit_mode=mol.EditMode.BUFFERED_EDIT])
     
     Request :class:`ICSEditor` for editing the internal coordinate system, such
     as torsions, bond lengths and angle between two bonds. This call will fail
@@ -500,7 +500,14 @@ The Handle Classes
   .. attribute:: sec_structure
   
     The secondary structure of the residue.
-    
+  
+  .. attribute:: is_ligand
+  
+    Whether the residue is a ligand. When loading PDB structures, this property 
+    is set based on the HET records. This also means, that this property will 
+    most likely not be set properly for all except PDB files coming from 
+    pdb.org.
+
   .. method:: FindAtom(atom_name)
 
     Get atom by atom name. See also :attr:`atoms`
@@ -584,25 +591,32 @@ The Handle Classes
   .. attribute:: radius
   
     The van-der-Waals radius of the atom. Also available as :meth:`GetRadius`. 
-    Read-only.
+    Read/write.
     
     :type: float
   
   .. attribute:: occupancy
   
-    The atom's occupancy in the range 0 to 1. Also available as 
-    :meth:`GetOccupancy`. Read-only.
-    
+    The atom's occupancy in the range 0 to 1. Read/write. Also available as 
+    meth:`GetOccupancy`, :meth:`SetOccupancy`.
     :type: float
+    
+  .. attribute:: b_factor
+  
+    The atom's temperature factor. Read/write. Also available as 
+    :meth:`GetBFactor`, :meth:`SetBFactor`.
+    
+    :type: float    
+
   .. attribute:: charge
     
-    The atom's charge
+    The atom's charge. Also available as :meth:`GetCharge`, :meth:`SetCharge`.
     
     :type: float
 
   .. attribute:: residue
   
-    The residue this atom belongs to.
+    The residue this atom belongs to. Read-only.
     
     :type: :class:`ResidueHandle`
   
@@ -627,11 +641,7 @@ The Handle Classes
     :type  other_atom: :class:`AtomHandle`
     :rtype: :class:`BondHandle`
 
-  .. method:: GetAtomProps()
-    
-    Get atom properties such as mass, charge, element and occupancy.
-    
-    :rtype: :class:`AtomProp`
+
 
   .. method:: GetBondCount()
     

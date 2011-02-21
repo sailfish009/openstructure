@@ -25,7 +25,7 @@
 #include <iostream>
 
 #include "test_image.hh"
-
+#include <ost/invalid_handle.hh>
 #include <ost/img/image.hh>
 #include <ost/img/data_observer.hh>
 #include <ost/img/observable.hh>
@@ -612,6 +612,13 @@ void test_PointToCoord() {
   BOOST_CHECK(spatial.CoordToIndex(Vec3(11.0,11.0,11.0)) == Vec3(3.0,3.0,3.0));
 }
 
+void test_ThrowInvalidImageHandle() {
+  ImageHandle image;
+  BOOST_CHECK_THROW(ost::CheckHandleValidity(image), ost::InvalidHandle);
+  image=CreateImage(Size(1,1));
+  BOOST_CHECK_NO_THROW(ost::CheckHandleValidity(image));
+}
+
 } // ns
 
 test_suite* CreateImageTest()
@@ -633,6 +640,7 @@ test_suite* CreateImageTest()
   ts->add(BOOST_TEST_CASE(&test_Copy));
   ts->add(BOOST_TEST_CASE(&test_Extract));
   ts->add(BOOST_TEST_CASE(&test_Paste));
+  ts->add(BOOST_TEST_CASE(&test_ThrowInvalidImageHandle));
   ts->add(BOOST_TEST_CASE(&test_Mult));
   ts->add(BOOST_TEST_CASE(&test_AddSub));
   ts->add(BOOST_TEST_CASE(&test_Interpolation));

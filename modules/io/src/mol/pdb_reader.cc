@@ -47,7 +47,7 @@ bool IEquals(const StringRef& a, const StringRef& b)
     return false;
   }
   for (size_t i=0; i<a.size(); ++i) {
-    if (toupper(a[i])!=toupper(b[i])) {
+    if (toupper(a[i])!=b[i]) {
       return false;
     }
   }
@@ -61,26 +61,29 @@ mol::ResNum to_res_num(int num, char ins_code)
 
 }
 
-PDBReader::PDBReader(std::istream& instream):
-  infile_(), instream_(instream)
+PDBReader::PDBReader(std::istream& instream, const IOProfile& profile):
+  infile_(), instream_(instream), profile_(profile)
 {
   this->Init(boost::filesystem::path(""));
 }
 
-PDBReader::PDBReader(const String& filename)
-  : infile_(filename), instream_(infile_)
+PDBReader::PDBReader(const String& filename, const IOProfile& profile)
+  : infile_(filename), instream_(infile_), profile_(profile)
 {
   this->Init(boost::filesystem::path(filename));
 }
 
-PDBReader::PDBReader(const boost::filesystem::path& loc):
-  infile_(loc), instream_(infile_)
+PDBReader::PDBReader(const boost::filesystem::path& loc, 
+                     const IOProfile& profile):
+  infile_(loc), instream_(infile_), profile_(profile)
 {
   this->Init(loc);
 }
 
 void PDBReader::Init(const boost::filesystem::path& loc)
 {
+  warned_name_mismatch_=false;
+  charmm_style_=profile_.dialect=="CHARMM";
   num_model_records_=0;
   if (boost::iequals(".gz", boost::filesystem::extension(loc))) {
     in_.push(boost::iostreams::gzip_decompressor());
@@ -108,12 +111,13 @@ bool PDBReader::HasNext()
      StringRef curr_line(curr_line_.c_str(), curr_line_.length());
      if (curr_line.size()>5 && 
          (IEquals(curr_line.substr(0, 6), StringRef("ATOM  ", 6)) ||
-         (!(PDB::Flags() & PDB::NO_HETATMS) &&
+         (!profile_.no_hetatms &&
           IEquals(curr_line.substr(0, 6),StringRef("HETATM ", 6))) ||
           IEquals(curr_line.substr(0, 6),StringRef("ANISOU ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6)) ||
-         IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)))) {
+         IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6)))) {
        return true;
      } else if (IEquals(curr_line.rtrim(), StringRef("END", 3))) {
        hard_end_=true;
@@ -126,7 +130,7 @@ bool PDBReader::HasNext()
 void PDBReader::Import(mol::EntityHandle& ent,
                        const String& restrict_chains)
 {
-  LOG_DEBUG("PDBReader: current flags: " << PDB::Flags());
+  LOG_DEBUG("PDBReader: " << profile_);
 
   Profile profile_import("PDBReader::Import");
   this->ClearState();
@@ -149,7 +153,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
           this->ParseAndAddAtom(curr_line, line_num_, ent, 
                                 StringRef("ATOM", 4));
         } else if (IEquals(curr_line.substr(0, 6), StringRef("ANISOU", 6))) {
-          if (!(PDB::Flags() & PDB::CHARMM_FORMAT)) {
+          if (!charmm_style_) {
             LOG_TRACE("processing ANISOU entry");
             this->ParseAnisou(curr_line, line_num_, ent);            
           }
@@ -179,15 +183,30 @@ void PDBReader::Import(mol::EntityHandle& ent,
           continue;
         }
         if (IEquals(curr_line.substr(0, 6), StringRef("HETATM", 6))) {
-          if (PDB::Flags() & PDB::NO_HETATMS)
+          if (profile_.no_hetatms)
             continue;
           LOG_TRACE("processing HETATM entry");
           this->ParseAndAddAtom(curr_line, line_num_, ent, 
                                 StringRef("HETATM", 6));
         } else if (IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6))) {
-          if (!(PDB::Flags() & PDB::CHARMM_FORMAT)) {
+          if (!charmm_style_) {
             this->ParseHelixEntry(curr_line);            
           }
+        } else if (IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6))) {
+          // remember het entry to mark the residues as ligand during ATOM import
+          char chain=curr_line[12];
+          std::pair<bool, int> num=curr_line.substr(13, 4).ltrim().to_int();
+          if (!num.first) {
+            if (profile_.fault_tolerant) {
+              LOG_WARNING("Invalid HET entry on line " << line_num_);
+              continue;
+            } else {
+              String msg=str(format("Invalid HET entry on line %d")%line_num_);
+              throw IOException(msg);
+            }
+          }
+          hets_.push_back(HetEntry(chain, to_res_num(num.second,
+                                   curr_line[17])));
         }
         break;
       case 'M':
@@ -200,7 +219,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
           if (num_model_records_<2) {
             continue;
           }
-          if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+          if (profile_.fault_tolerant) {
             go_on=false;
             num_model_records_=1;
             break;
@@ -215,7 +234,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
           continue;
         }
         if (IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6))) {
-          if (!(PDB::Flags() & PDB::CHARMM_FORMAT)) {
+          if (!charmm_style_) {
             this->ParseStrandEntry(curr_line);
           }
         }
@@ -231,6 +250,12 @@ void PDBReader::Import(mol::EntityHandle& ent,
                << helix_list_.size() << " helices and "
                << strand_list_.size() << " strands");
   this->AssignSecStructure(ent);
+  for (HetList::const_iterator i=hets_.begin(), e=hets_.end(); i!=e; ++i) {
+    mol::ResidueHandle res=ent.FindResidue(String(1, i->chain), i->num);
+    if (res.IsValid()) {
+      res.SetIsLigand(true);
+    }      
+  }
 }
 
 
@@ -285,12 +310,13 @@ void PDBReader::ClearState()
   hard_end_=false;
   helix_list_.clear();
   strand_list_.clear();
+  hets_.clear();
 }
 
 bool PDBReader::EnsureLineLength(const StringRef& line, size_t size)
 {
   if (line.length()<size) {
-    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+    if (profile_.fault_tolerant) {
       return false;
     }    
     throw IOException(str(format("premature end of line %d") %line_num_));
@@ -306,7 +332,13 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
   if (!this->EnsureLineLength(line, 27)) {
     return false;
   }
-  if (PDB::Flags() & PDB::CHARMM_FORMAT) {
+  atom_name=line.substr(12, 4).trim();
+  if (profile_.calpha_only) {
+    if (atom_name!=StringRef("CA", 2)) {
+      return false;
+    }
+  }
+  if (charmm_style_) {
     if (line.size()>73) {
       size_t width=std::min(line.size()-72, size_t(4));
       chain_name=line.substr(72, width).trim().str();      
@@ -321,17 +353,17 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
 
   std::pair<bool, int> a_num=line.substr(6, 5).ltrim().to_int();
   if (!a_num.first) {
-    if (!(PDB::Flags() & PDB::SKIP_FAULTY_RECORDS)) {
+    if (!(profile_.fault_tolerant)) {
       throw IOException(str(format("invalid atom number on line %d") %line_num));      
     }
     LOG_WARNING("invalid atom number on line " << line_num);
   }
-  atom_name=line.substr(12, 4).trim();
+
   alt_loc=line[16];
-  res_name=line.substr(17, (PDB::Flags() & PDB::CHARMM_FORMAT) ? 4 : 3).trim();
+  res_name=line.substr(17, charmm_style_ ? 4 : 3).trim();
   std::pair<bool, int> res_num=line.substr(22, 4).ltrim().to_int();;
   if (!res_num.first) {
-    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+    if (profile_.fault_tolerant) {
       return false;
     }
     throw IOException(str(format("invalid res number on line %d") % line_num));
@@ -339,15 +371,6 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
 
   char  ins_c=line[26];  
   resnum=to_res_num(res_num.second, ins_c);
-  if (PDB::Flags() & PDB::CALPHA_ONLY) {
-    if (record_type[0]=='H' || record_type[0]=='h') {
-      return false;
-    } 
-    if (atom_name!=StringRef("CA", 2)) {
-      return false;
-    }
-    return true;
-  }
   return true;
 }
 
@@ -369,7 +392,7 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   for (int i=0;i<6; ++i) {
     std::pair<bool, int> result=line.substr(29+i*7, 6).ltrim().to_int();
     if (!result.first) {
-      if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+      if (profile_.fault_tolerant) {
         return;
       }
       throw IOException(str(format("invalid ANISOU record on line %d")%line_num));
@@ -378,8 +401,7 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   }
   String aname(atom_name.str());
   if (!curr_residue_.IsValid()) {
-    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS || 
-        PDB::Flags() & PDB::CALPHA_ONLY) {
+    if (profile_.fault_tolerant || profile_.calpha_only) {
       return;
     } 
     const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
@@ -387,23 +409,20 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   }
   mol::AtomHandle atom=curr_residue_.FindAtom(aname);
   if (!atom.IsValid()) {
-    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS ||
-        PDB::Flags() & PDB::CALPHA_ONLY) {
+    if (profile_.fault_tolerant || profile_.calpha_only) {
       return;
     } 
     const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
     throw IOException(str(format(fmt_str) % line_num));      
   }
   //get properties which are already set and extend them by adding the ANISOU info
-  mol::AtomProp aprop=atom.GetAtomProps();
+  
+
   geom::Mat3 mat(anisou[0], anisou[3], anisou[4],
                  anisou[3], anisou[1], anisou[5],
                  anisou[4], anisou[5], anisou[2]);
-  aprop.anisou=mat;
-  //divide by 10**4 to actually reflect the real values
-  aprop.anisou/=10000;
-  aprop.has_anisou=true;
-  atom.SetAtomProps(aprop);
+  mat/=10000;
+  atom.SetAnisou(mat);
 }
 
 void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
@@ -413,7 +432,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   if (!this->EnsureLineLength(line, 54)) {
     return;
   }
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   char alt_loc=0;
   String chain_name;
   StringRef res_name, atom_name;
@@ -429,7 +448,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   for (int i=0;i<3; ++i) {
     std::pair<bool, float> result=line.substr(30+i*8, 8).ltrim().to_float();
     if (!result.first) {
-      if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+      if (profile_.fault_tolerant) {
         return;
       }
       throw IOException(str(format("invalid coordinate on line %d")%line_num));
@@ -497,15 +516,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   }
 
   if(update_chain) {
-    curr_chain_=mol::ChainHandle();
-#if 0
-    // TODO: should this depend on JOIN_SPREAD as well?
-    if (PDB::Flags() & PDB::JOIN_SPREAD_ATOM_RECORDS) {
-      curr_chain_=ent.FindChain(s_chain);
-    }
-#else
-      curr_chain_=ent.FindChain(chain_name);
-#endif
+    curr_chain_=ent.FindChain(chain_name);
     if(!curr_chain_.IsValid()) {
       LOG_DEBUG("new chain " << chain_name);
       curr_chain_=editor.InsertChain(chain_name);
@@ -515,42 +526,34 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   }
   if(update_residue) {
     curr_residue_=mol::ResidueHandle();
-    if (PDB::Flags() & PDB::JOIN_SPREAD_ATOM_RECORDS) {
+    if (profile_.join_spread_atom_records) {
       curr_residue_=curr_chain_.FindResidue(res_num);
     }
     if (!curr_residue_.IsValid()) {
       LOG_DEBUG("new residue " << res_name << " " << res_num);
       curr_residue_=editor.AppendResidue(curr_chain_, res_name.str(), res_num);
+      warned_name_mismatch_=false;
       ++residue_count_; 
     }
     assert(curr_residue_.IsValid());
   }
   // finally add atom
   LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
-  mol::AtomProp aprop;
-  aprop.element=s_ele;
-  if(is_pqr_) {
-    if (radius.first) {
-      aprop.radius=radius.second;
-    } else {
-      aprop.radius=0.0;
+  mol::AtomHandle ah;
+  if (curr_residue_.GetName()!=res_name.str()) {
+    if (!profile_.fault_tolerant) {
+      std::stringstream ss;
+      ss << "error on line " << line_num << ": "
+         << "residue with number " << res_num << " has more than one name.";
+      throw IOException(ss.str());
     }
-  } else {
-    aprop.radius=0.0;
+    if (!warned_name_mismatch_) {
+      LOG_INFO("Residue with number " << res_num << " has more than one name."
+               "Ignoring atoms for everything but the first");      
+    }
+    warned_name_mismatch_=true;
+    return;
   }
-
-  if (temp.first) {
-    aprop.b_factor=temp.second;
-  }
-  if (occ.first) {
-    aprop.occupancy=occ.second;
-  }
-  if (charge.first) {
-    aprop.charge=charge.second;
-  }
-
-  aprop.is_hetatm=record_type[0]=='H' ? true : false;
-
   if (alt_loc!=' ') {
     // Check if there is already a atom with the same name.
     mol::AtomHandle me=curr_residue_.FindAtom(aname);
@@ -562,15 +565,31 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
                      "with name " << aname << ", but without an alt loc");
         return;
       }
+      return;
     } else {
-      mol::AtomHandle ah=editor.InsertAltAtom(curr_residue_, aname,
-                                              String(1, alt_loc), apos, aprop);
+      ah=editor.InsertAltAtom(curr_residue_, aname,
+                              String(1, alt_loc), apos, s_ele);
       ++atom_count_;
     }
   } else {
-    mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, aprop);
+    ah=editor.InsertAtom(curr_residue_, aname, apos, s_ele);
     ++atom_count_;
   }
+  if(is_pqr_) {
+    if (radius.first) {
+      ah.SetRadius(radius.second);
+    }
+  }
+  if (temp.first) {
+    ah.SetBFactor(temp.second);
+  }
+  if (occ.first) {
+    ah.SetOccupancy(occ.second);
+  }
+  if (charge.first) {
+    ah.SetCharge(charge.second);
+  }
+  ah.SetHetAtom(record_type[0]=='H');
 }
 
 void PDBReader::ParseHelixEntry(const StringRef& line)
@@ -581,7 +600,7 @@ void PDBReader::ParseHelixEntry(const StringRef& line)
   std::pair<bool, int>  start_num=line.substr(21, 4).ltrim().to_int();
   std::pair<bool, int>  end_num=line.substr(33, 4).ltrim().to_int();
   if (!start_num.first || !end_num.first) {
-    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+    if (profile_.fault_tolerant) {
       return;
     }    
     throw IOException(str(format("invalid helix entry on line %d") % line_num_));
@@ -606,7 +625,7 @@ void PDBReader::ParseStrandEntry(const StringRef& line)
   std::pair<bool, int>  start_num=line.substr(22, 4).ltrim().to_int();
   std::pair<bool, int>  end_num=line.substr(33, 4).ltrim().to_int();
   if (!start_num.first || !end_num.first) {
-    if (PDB::Flags() & PDB::SKIP_FAULTY_RECORDS) {
+    if (profile_.fault_tolerant) {
       return;
     }
     throw IOException(str(format("invalid strand entry on line %d")%line_num_));

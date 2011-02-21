@@ -74,6 +74,7 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
                              const mol::Transform& tf) const;
   /// \brief get center      
   virtual geom::Vec3 GetCenter() const;
+
   virtual void CustomRenderPov(PovState& pov);
 
   virtual void CustomRenderGL(RenderPass pass);
@@ -98,6 +99,12 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
   /// \brief set global prims color, overriding individual ones
   void SetColor(const Color& c);
 
+  void SetSphereDetail(unsigned int d);
+  unsigned int GetSphereDetail() const {return sphere_detail_;}
+
+  void SetArcDetail(unsigned int d);
+  unsigned int GetArcDetail() const {return arc_detail_;}
+
  protected:
   virtual void CustomPreRenderGL(bool flag);
 
@@ -106,6 +113,8 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
   LineEntryList lines_;
   float radius_;
   float diameter_;
+  unsigned int sphere_detail_;
+  unsigned int arc_detail_;
   
   void render_simple();
   void render_custom();

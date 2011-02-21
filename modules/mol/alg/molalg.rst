@@ -41,3 +41,29 @@
      to -1, the each frame is superposed to the previous frame.
      
   :returns: A newly created coord group containing the superposed frames.
+  
+  
+Steric Clashes
+--------------------------------------------------------------------------------
+
+The following function detects steric clashes in atomic structures. Two atoms are clashing if their euclidian distance is smaller than a threshold value. The threshold values are calculated from high-resolution X-ray structures for each possible element pair. The value is chosen such that 99.99% of observed distances between 0 and 5 Angstroem are above the threshold.
+
+
+.. function:: FilterClashes(ent, tolerance=0.0)
+
+  This function filters out residues with clashing atoms. If the clashing atom 
+  is a backbone atom, the complete residue is removed, if the atom is part of 
+  the sidechain, only the sidechain atoms are removed.
+  
+  Hydrogen and deuterium atoms are ignored.
+  
+  :param ent: The input entity
+  :type ent: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param tolerance: The tolerance in (Angstroem) is substracted from the 
+     thresholds calculated from high resolution X-ray structures to make the 
+     function less pedantic. Negative values are also allowed and make the 
+     function more stringent.
+
+  :returns: The filtered :class:`~ost.mol.EntityView`
+
+

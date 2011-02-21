@@ -66,5 +66,10 @@ ImageStateBasePtr LocalSigmaThresholdBase::VisitState(const ImageStateImpl<T,D>&
 
 
 }
-template class TEMPLATE_DEF_EXPORT ImageStateConstModOPAlgorithm<alg::LocalSigmaThresholdBase>;
-}} // ns
+
+namespace image_state {
+  
+template class TEMPLATE_DEF_EXPORT ImageStateConstModOPAlgorithm<alg::LocalSigmaThresholdBase>;  
+
+}}} // ns
+

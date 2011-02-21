@@ -82,6 +82,9 @@ public:
   /// 
   /// \sa Stop
   void Start();
+  /// \brief stop script execution
+  void StopScript();
+  
   
 
 public slots:

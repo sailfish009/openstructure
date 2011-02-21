@@ -15,6 +15,7 @@ set(GUI_ICONS
   icons/site_icon.png
   icons/split_icon.png
   icons/warning_icon.png
+  icons/refresh.png
 )
 
 set(GUI_IMAGES

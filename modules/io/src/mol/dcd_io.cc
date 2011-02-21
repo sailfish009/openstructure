@@ -188,12 +188,18 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
                                const String& trj_fn,
                                unsigned int stride)
 {
+  std::ifstream istream(trj_fn.c_str(), std::ios::binary);
+  if(!istream) {
+    std::ostringstream msg;
+    msg << "LoadCHARMMTraj: cannot open " << trj_fn;
+    throw(IOException(msg.str()));
+  }
   Profile profile_load("LoadCHARMMTraj");
 
   mol::AtomHandleList alist(alist2);
   std::sort(alist.begin(),alist.end(),less_index);
   
-  std::ifstream istream(trj_fn.c_str(), std::ios::binary);
+  
   DCDHeader header; 
   bool swap_flag=false, skip_flag=false, gap_flag=false;
   read_dcd_header(istream, header, swap_flag, skip_flag, gap_flag);
@@ -286,7 +292,7 @@ void DCDCoordSource::FetchFrame(uint frame)
     read_dcd_header(stream_, header_, swap_flag_, skip_flag_, gap_flag_);
     frame_start_=stream_.tellg();
     loaded_=true;
-    frame_count_=header_.num;
+    frame_count_=header_.num/stride_;
   }
   size_t frame_size=calc_frame_size(skip_flag_, gap_flag_, 
                                     header_.t_atom_count);  
@@ -315,7 +321,7 @@ mol::CoordGroupHandle LoadCHARMMTraj(const mol::EntityHandle& ent,
     DCDCoordSource* source=new DCDCoordSource(alist, trj_fn, stride);
     return mol::CoordGroupHandle(DCDCoordSourcePtr(source));
   }
-    LOG_INFO("Importing CHARMM trajectory with lazy_load=false");  
+  LOG_INFO("Importing CHARMM trajectory with lazy_load=false");  
   return load_dcd(alist, trj_fn, stride);
 }
 
@@ -370,11 +376,11 @@ void write_dcd_hdr(std::ofstream& out,
 
 void SaveCHARMMTraj(const mol::CoordGroupHandle& coord_group, 
                     const String& pdb_filename, const String& dcd_filename,
-                    unsigned int stepsize)
+                    unsigned int stepsize, const IOProfile& profile)
 {  
   if(stepsize==0) stepsize=1;
   if(!pdb_filename.empty()) {
-    PDBWriter writer(pdb_filename, true);
+    PDBWriter writer(pdb_filename, profile);
     writer.Write(coord_group.GetAtomList());
   }
   std::ofstream out(dcd_filename.c_str(), std::ios::binary);

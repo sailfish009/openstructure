@@ -93,6 +93,21 @@ void CoordGroupHandle::AddFrame(const std::vector<geom::Vec3>& clist)
   }
 }
 
+void CoordGroupHandle::AddFrames(const CoordGroupHandle& cg)
+{
+  this->CheckValidity();
+  if (source_->IsMutable()) {
+    if (cg.GetAtomCount()!=this->GetAtomCount()) {
+      throw IntegrityError("Atom number don't match");
+    }
+    for (size_t i=0; i<cg.GetFrameCount(); ++i) {
+      source_->AddFrame(*cg.GetFrame(i));
+    }
+  } else {
+    throw IntegrityError("Can't add frame to immutable CoordGroup");
+  }
+}
+
 void CoordGroupHandle::CheckValidity() const
 {
   if (!source_) {

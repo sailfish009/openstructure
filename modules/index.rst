@@ -21,13 +21,14 @@ OpenStructure documentation
   gui/gui
   newmodule
   external
+  contributing
   
 For Starters
 --------------------------------------------------------------------------------
 
 **Installation**: `install from binary <http://www.openstructure.org/download/>`_ | :doc:`install from source <install>`
 
-**Tutorial Style**: :doc:`introduction <intro>` | :doc:`molecules intro <intro-01>` | :doc:`images intro <intro-02>` | :doc:`graphics intro <intro-03>`
+**Tutorial Style**: :doc:`introduction <intro>` | :doc:`molecules intro <intro-01>` | :doc:`images intro <intro-02>` | :doc:`graphics intro <intro-03>` 
 
 
 
@@ -35,7 +36,7 @@ For Starters
 Molecules
 --------------------------------------------------------------------------------
 
-**Overview**: :doc:`molecules intro <intro-01>` | :doc:`mol overview <mol/base/mol>` | :doc:`graphical entity<gfx/entity>` | :doc:`entity <mol/base/entity>`
+**Overview**: :doc:`molecules intro <intro-01>` | :doc:`mol overview <mol/base/mol>` | :doc:`graphical entity<gfx/entity>` | :doc:`entity <mol/base/entity>` | :doc:`queries <mol/base/query>`
 
 **Input/Output**: :ref:`loading and saving molecules <mol-io>`
 
@@ -85,7 +86,7 @@ Graphical User Interface
 Extending OpenStructure
 --------------------------------------------------------------------------------
 
-**Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>`
+**Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>` | :doc:`instructions for developers <contributing>`
 
 
 

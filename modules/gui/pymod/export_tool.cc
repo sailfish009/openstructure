@@ -250,9 +250,5 @@ void export_Tool()
     .def("GetQObject",&get_py_qobject<ToolOptionsWin>)
     .add_property("qobject", &get_py_qobject<ToolOptionsWin>)
   ;
-
-  class_<gfx::NodePtrList>("NodePtrList", init<>())
-    .def(vector_indexing_suite<gfx::NodePtrList, true >())
-  ;
 }
 

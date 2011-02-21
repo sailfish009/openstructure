@@ -29,19 +29,17 @@
 
 #include "line_render_options.hh"
 
-namespace ost {
+namespace ost { namespace gfx {
 
-namespace gfx {
-
-class DLLEXPORT_OST_GFX SimpleRenderOptions: public ost::gfx::LineRenderOptions {
+class DLLEXPORT_OST_GFX SimpleRenderOptions: public LineRenderOptions {
 public:
   SimpleRenderOptions();
 
+  // remaining RenderOptions interface not define in LineRenderOptions
   virtual RenderMode::Type GetRenderMode();
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
 
-  virtual ~SimpleRenderOptions();
-  
+  // own interface
   bool GetBlurFlag() const;
   bool GetBondOrderFlag() const;
   Real GetBondOrderDistance() const;
@@ -50,6 +48,7 @@ public:
   void SetBlurFactors(Real bf1, Real bf2);
   void SetBondOrderFlag(bool flag);
   void SetBondOrderDistance(Real bod);
+
 private:
   bool                     blur_flag_;
   std::pair<Real, Real>    blur_factors_;

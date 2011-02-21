@@ -34,20 +34,6 @@ public:
   EntityBase(const impl::EntityImplPtr& impl);
   EntityBase();
   
-  /// \name Handle validity
-  //@{
-  /// \brief check validity of handle
-  /// 
-  /// check, whether the entity handle points to a valid entity.
-  /// \note It is an error to use any method other than #IsValid, #Impl and 
-  ///       #operator bool() when the handle is invalid. An InvalidHandle
-  ///       exception will be thrown.
-  operator bool() const;
-  /// \brief check validity of handle
-  /// \sa #operator bool()
-  bool IsValid() const;
-  //@}
-  
   ///\brief Get entity name.
   ///
   /// \sa      EntityBase::SetName
@@ -61,6 +47,19 @@ public:
   void SetName(const String& ent_name);
 
 public:
+  
+  /// \name Handle validity
+  //@{
+  /// \brief check validity of handle
+  /// 
+  /// check, whether the entity handle points to a valid entity.
+  /// \note It is an error to use any method other than #IsValid, #Impl and 
+  ///       #operator bool() when the handle is invalid. An InvalidHandle
+  ///       exception will be thrown.
+  operator bool() const { return this->IsValid(); }
+  /// \brief check validity of handle
+  /// \sa #operator bool()
+  bool IsValid() const { return Impl().get()!=0; }
   impl::EntityImplPtr& Impl();
   const impl::EntityImplPtr& Impl() const;
 protected:

@@ -52,7 +52,10 @@ Real DLLEXPORT_OST_QA ClashScore(const mol::EntityHandle& ent_a,
 /// \sa \ref the_hammer.py "The Hammer Example"
 Real DLLEXPORT_OST_QA ClashScore(const mol::AtomHandle& atom, 
                                  const mol::EntityView& ent_b);
-                                 
+
+/// \brief calculate steric energy of two atoms
+Real DLLEXPORT_OST_QA StericEnergy(const geom::Vec3& pos1, Real r1,
+                                   const geom::Vec3& pos2, Real r2);
 //@}
 
 /// \example the_hammer.py

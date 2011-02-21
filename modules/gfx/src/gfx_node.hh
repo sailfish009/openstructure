@@ -75,7 +75,13 @@ class DLLEXPORT_OST_GFX GfxNode: public boost::enable_shared_from_this<GfxNode>
 
   // add a graphical object - leaf
   void Add(GfxObjP obj);
-
+  
+  
+  /// \brief returns true if no scene node of the given name is a child
+  ///   of this node.
+  bool IsNameAvailable(const String& name) const;
+  
+  
   // remove given graphical object
   void Remove(GfxObjP obj);
 
@@ -97,15 +103,26 @@ class DLLEXPORT_OST_GFX GfxNode: public boost::enable_shared_from_this<GfxNode>
   // return visibility state
   bool IsVisible() const;
 
-
+  virtual void ContextSwitch();
+  
+  /// \brief whether the node (or one of it's parents) has been added to the
+  ///    scene
+  bool IsAttachedToScene() const;
+  
+  
+  gfx::GfxNodeP GetParent() const;
+  
+  const GfxNodeVector& GetChildren() const { return node_vector_; }
+  GfxNodeVector& GetChildren() { return node_vector_; }
  private:
   GfxNode(const GfxNode& o);
   GfxNode& operator=(const GfxNode&);
 
 
-  String name_;
-  bool show_;
-  GfxNodeVector node_vector_;
+  String                   name_;
+  bool                     show_;
+  GfxNodeVector            node_vector_;
+  boost::weak_ptr<GfxNode> parent_;
 };
 
 }}

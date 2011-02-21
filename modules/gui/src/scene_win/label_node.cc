@@ -21,7 +21,7 @@
 
 #include <ost/gfx/entity.hh>
 #include <ost/gfx/gfx_node.hh>
-
+#include <ost/gui/scene_win/scene_win_model.hh>
 #include <QFont>
 namespace ost { namespace gui {
 

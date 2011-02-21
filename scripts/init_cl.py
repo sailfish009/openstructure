@@ -10,6 +10,9 @@ def show_help(option, opt, value, parser):
 def interactive_flag(option, opt, value, parser):
   pass
 
+def stop():
+  sys.exit(0)
+
 usage = 'usage: ost [ost options] [script to execute] [script parameters]'
 class OstOptionParser(optparse.OptionParser):
   def __init__(self, **kwargs):

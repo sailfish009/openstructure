@@ -37,7 +37,7 @@ EditPositionGuard::EditPositionGuard(PythonShellWidget* shell, int flags1, int f
 
 bool EditPositionGuard::check()
 {
-  return check_flag(flags1_) &&  check_flag(flags2_);
+    return check_flag(flags1_) &&  check_flag(flags2_);
 }
 
 bool EditPositionGuard::check_flag(int flags)

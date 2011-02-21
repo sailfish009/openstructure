@@ -75,19 +75,6 @@ std::vector<String> AtomBase::GetAltGroupNames() const
   return impl_->GetResidue()->GetAltAtomGroupNames(Impl());
 }
 
-
-const AtomProp& AtomBase::GetAtomProps() const 
-{
-  this->CheckValidity();  
-  return impl_->GetAtomProps();
-}
-
-void AtomBase::SetAtomProps(const AtomProp& prop) 
-{
-  this->CheckValidity();  
-  impl_->GetAtomProps()=prop;
-}
-
 impl::AtomImplPtr& AtomBase::Impl() 
 {
   return impl_;
@@ -96,16 +83,6 @@ impl::AtomImplPtr& AtomBase::Impl()
 const impl::AtomImplPtr& AtomBase::Impl() const 
 {
   return impl_;
-}
-
-bool AtomBase::IsValid() const 
-{
-  return (impl_.get()!=0);
-}
-
-AtomBase::operator bool() const 
-{
-  return (impl_.get()!=0);
 }
 
 String AtomBase::GetQualifiedName() const 
@@ -122,7 +99,7 @@ void AtomBase::CheckValidity() const
 
 std::ostream& operator<<(std::ostream& os, const AtomBase& atom) 
 {
-  if (atom.IsValid()) {
+  if (atom.Impl()) {
     os << atom.GetQualifiedName();
   } else {
     os << "invalid atom";
@@ -134,47 +111,98 @@ std::ostream& operator<<(std::ostream& os, const AtomBase& atom)
 Real AtomBase::GetRadius() const
 {
   this->CheckValidity();
-  return Impl()->GetAtomProps().radius;
+  return Impl()->GetRadius();
 }
 
 
 const String& AtomBase::GetElement() const
 {
   this->CheckValidity();
-  return Impl()->GetAtomProps().element;
+  return Impl()->GetElement();
 }
 
 
 bool AtomBase::IsHetAtom() const
 {
   this->CheckValidity();
-  return Impl()->GetAtomProps().is_hetatm;
+  return Impl()->IsHetAtom();
 }
 
 Real AtomBase::GetBFactor() const
 {
   this->CheckValidity();
-  return Impl()->GetAtomProps().b_factor;
+  return Impl()->GetBFactor();
+}
+void AtomBase::SetElement(const String& element)
+{
+  this->CheckValidity();
+  Impl()->SetElement(element);
+}
+
+void AtomBase::SetBFactor(Real factor)
+{
+  this->CheckValidity();
+  Impl()->SetBFactor(factor);
+}
+
+void AtomBase::SetOccupancy(Real occ)
+{
+  this->CheckValidity();
+  Impl()->SetOccupancy(occ);
 }
 
 Real AtomBase::GetMass() const
 {
   this->CheckValidity();
-  return Impl()->GetAtomProps().mass;
+  return Impl()->GetMass();
 }
 
 Real AtomBase::GetCharge() const
 {
   this->CheckValidity();
-  return Impl()->GetAtomProps().charge;
+  return Impl()->GetCharge();
 }
 
 Real AtomBase::GetOccupancy() const
 {
   this->CheckValidity();
-  return Impl()->GetAtomProps().occupancy;
+  return Impl()->GetOccupancy();
 }
 
+void AtomBase::SetCharge(Real charge)
+{
+  this->CheckValidity();
+  Impl()->SetCharge(charge);
+}
+
+void AtomBase::SetRadius(Real radius)
+{
+  this->CheckValidity();
+  Impl()->SetRadius(radius);
+}
+
+const geom::Mat3& AtomBase::GetAnisou() const
+{
+  this->CheckValidity();
+  return Impl()->GetAnisou();
+}
+
+void AtomBase::SetAnisou(const geom::Mat3& anisou)
+{
+  this->CheckValidity();
+  Impl()->SetAnisou(anisou);
+}
+
+void AtomBase::SetMass(Real mass)
+{
+  this->CheckValidity();
+  Impl()->SetMass(mass);
+}
+void AtomBase::SetHetAtom(bool het)
+{
+  this->CheckValidity();
+  Impl()->SetHetAtom(het);
+}
 
 String AtomBase::GetStringProperty(Prop::ID prop_id) const
 {

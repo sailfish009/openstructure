@@ -84,33 +84,26 @@ class DLLEXPORT_OST_GFX GfxObjBase: public GfxNode
   virtual void SetPolyMode(unsigned int m) = 0;
 
   /// \brief turn on sophisticated line anti-aliasing, requires shader
-  virtual void AALines(bool f) = 0;
+  virtual void SetAALines(bool f) = 0;
 
   /// \brief turn on line halo of given strength
   virtual void SetLineHalo(float f) = 0;
 
   /// \brief turn outline rendering on or off
-  virtual void Outline(bool f) = 0;
-
+  virtual void SetOutline(bool f) = 0;
   /// \brief set outline mode
   virtual void SetOutlineMode(int m) = 0;
-  /// \brief set outline tweak factor
+  /// \brief set outline width (modes 1 + 2)
+  virtual void SetOutlineWidth(float f) = 0;
+  /// \brief set outline tweak factor (mode 3)
   virtual void SetOutlineExpandFactor(float f) = 0;
-  /// \brief set outline color
+  /// \brief set outline color (mode 3)
   virtual void SetOutlineExpandColor(const Color& c) = 0;
-
-  /// \brief ambient occlusion rendering
-  /// results are cached, but may be very slow on first call 
-  virtual void AmbientOcclusion(bool f) = 0;
-  
-  /// \brief blending weight of local color to fragment color
-  virtual void SetAmbientLocalWeight(float w) = 0;
-  
-  /// \brief blending weight of occlusion factor
-  virtual void SetAmbientOcclusionWeight(float w) = 0;
 
   /// \brief set opacity (1 = no transparency)
   virtual void SetOpacity(float f) = 0;
+  /// \brief returns a value smaller than 1.0 if transparency is used in this object
+  virtual float GetOpacity() const = 0;
 
   /// \brief color each component based on the gradient-mapped property of 
   ///    the given entity

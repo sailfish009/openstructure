@@ -59,6 +59,17 @@ void GfxNode::DeepSwap(GfxNode& n)
   std::swap(show_,n.show_);
 }
 
+bool GfxNode::IsNameAvailable(const String& name) const
+{
+  for (GfxNodeVector::const_iterator it =node_vector_.begin();
+       it!=node_vector_.end();++it) {
+    if ((*it)->GetName()==name) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void GfxNode::Apply(GfxNodeVisitor& v,GfxNodeVisitor::Stack st)
 {
   if(!v.VisitNode(this,st)) return;
@@ -101,44 +112,103 @@ void GfxNode::Rename(const String& name)
   Scene::Instance().ObjectChanged(name_);
 }
 
+bool GfxNode::IsAttachedToScene() const
+{
+  GfxNodeP root=Scene::Instance().GetRootNode();
+  if (root==this->shared_from_this()) { return true; }
+  GfxNodeP parent=this->GetParent();
+  while (parent) {
+    if (parent==root) {
+      return true;
+    }
+    parent=parent->GetParent();
+  }
+  return false;
+}
+
 void GfxNode::Add(GfxObjP obj)
 {
-  node_vector_.push_back(obj);
-  Scene::Instance().NodeAdded(obj);
+  GfxNodeP node=obj;
+  this->Add(obj);
 }
 
 void GfxNode::Remove(GfxObjP obj)
 {
-  GfxNodeVector::iterator it = find (node_vector_.begin(), node_vector_.end(), obj);
+  GfxNodeVector::iterator it = find(node_vector_.begin(), 
+                                    node_vector_.end(), obj);
   if(it!=node_vector_.end()) {
     node_vector_.erase(it);
+    obj->parent_.reset();
+    if (this->IsAttachedToScene()) {
+      Scene::Instance().NotifyObservers(bind(&SceneObserver::NodeRemoved, 
+                                             _1, obj));
+    }    
   }
+
 }
+
 using boost::bind;
+
+
 void GfxNode::RemoveAll()
 {
-  GfxNodeVector v=node_vector_;
-  node_vector_.clear();
-  for (GfxNodeVector::iterator i=v.begin(), e=v.end(); i!=e; ++i) {
-    if (GfxObjP o=dyn_cast<GfxObj>(*i)) {
-      Scene::Instance().NotifyObservers(bind(&SceneObserver::NodeRemoved, _1, o));
-    }
+  bool attached=this->IsAttachedToScene();
+  for (GfxNodeVector::iterator i=node_vector_.begin(), 
+       e=node_vector_.end(); i!=e; ++i) {
+    (*i)->parent_.reset();
+    if (!attached) 
+      continue;
+    Scene::Instance().NotifyObservers(bind(&SceneObserver::NodeRemoved, 
+                                           _1, *i));
   }
+  node_vector_.clear();
 }
 
 void GfxNode::Add(GfxNodeP node)
 {
+  if (!node) {
+    return;
+  }
+  if (!this->IsNameAvailable(node->GetName())) {
+    std::stringstream ss;
+    ss << "node '" << this->GetName() << "' has already a node with name '" 
+       << node->GetName() << "'";
+    throw Error(ss.str());
+  }
+
   node_vector_.push_back(node);
-  Scene::Instance().NodeAdded(node);    
+  if (!node->parent_.expired()) {
+    node->GetParent()->Remove(node);
+  }
+  node->parent_=this->shared_from_this();
+  if (this->IsAttachedToScene()) {
+    Scene::Instance().NodeAdded(node);
+  }
 }
 
 void GfxNode::Remove(GfxNodeP node)
 {
-  GfxNodeVector::iterator it = find (node_vector_.begin(), node_vector_.end(), node);
+  GfxNodeVector::iterator it=std::find(node_vector_.begin(), 
+                                       node_vector_.end(), node);
   if(it!=node_vector_.end()) {
+    node->parent_=GfxNodeP();
     node_vector_.erase(it);
   }
+  if (this->IsAttachedToScene()) {
+    Scene::Instance().NotifyObservers(bind(&SceneObserver::NodeRemoved, 
+                                           _1, node));
+  }
 }
+
+gfx::GfxNodeP GfxNode::GetParent() const
+{
+  if (parent_.expired()) {
+    return gfx::GfxNodeP();
+  }
+  return parent_.lock();
+}
+
+
 
 void GfxNode::Remove(const String& name)
 {
@@ -172,5 +242,11 @@ bool GfxNode::IsVisible() const
   return show_;
 }
 
+void GfxNode::ContextSwitch()
+{
+  for(GfxNodeVector::iterator it =node_vector_.begin();it!=node_vector_.end();++it) {
+    (*it)->ContextSwitch();
+  }
+}
 
 }} // ns

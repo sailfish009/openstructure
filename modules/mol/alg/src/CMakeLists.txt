@@ -4,6 +4,7 @@ set(OST_MOL_ALG_HEADERS
   sec_structure_segments.hh
   local_dist_test.hh
   superpose_frames.hh
+  filter_clashes.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -11,9 +12,10 @@ set(OST_MOL_ALG_SOURCES
   sec_structure_segments.cc
   local_dist_test.cc
   superpose_frames.cc
+  filter_clashes.cc
 )
 
-set(MOL_ALG_DEPS mol)
+set(MOL_ALG_DEPS mol seq)
 
 if (ENABLE_IMG)
   set(OST_MOL_ALG_HEADERS
@@ -29,10 +31,14 @@ if (ENABLE_IMG)
   set(MOL_ALG_DEPS ${MOL_ALG_DEPS} img img_alg)
 endif()
 
+executable(NAME ldt SOURCES ldt.cc 
+           DEPENDS_ON io mol_alg STATIC)
+
 module(NAME mol_alg SOURCES ${OST_MOL_ALG_SOURCES}
        HEADERS ${OST_MOL_ALG_HEADERS}
        HEADER_OUTPUT_DIR ost/mol/alg
-       DEPENDS_ON ${MOL_ALG_DEPS})
+       DEPENDS_ON ${MOL_ALG_DEPS}
+       LINK ${BOOST_PROGRAM_OPTIONS})
 
 copy_if_different("." "${STAGE_DIR}/share/openstructure"
                   "atom_scattering_properties.txt" "ATOM_SCATTERING_PROPS"

@@ -27,32 +27,29 @@
 #include <ost/base.hh>
 
 #include <ost/gfx/module_config.hh>
-#include <ost/gfx/render_options/render_options.hh>
+
+#include "render_options.hh"
 
 namespace ost {namespace gfx {
 
-class DLLEXPORT_OST_GFX CustomRenderOptions: public ost::gfx::RenderOptions {
+class DLLEXPORT_OST_GFX CustomRenderOptions: public RenderOptions {
 public:
   CustomRenderOptions();
 
+  // RenderOptions interface
   virtual RenderMode::Type GetRenderMode();
-
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options);
 
-  virtual void SetSphereDetail(uint sphere_detail);
-  virtual uint GetSphereDetail();
-
-  virtual void SetArcDetail(uint arc_detail);
-  virtual uint GetArcDetail();
-
+  // own interface
+  void SetSphereDetail(uint sphere_detail);
+  uint GetSphereDetail();
+  void SetArcDetail(uint arc_detail);
+  uint GetArcDetail();
   void SetSphereRad(float r);
   float GetSphereRad() const;
-
   void SetBondRad(float r);
   float GetBondRad() const;
-
-  virtual ~CustomRenderOptions();
 
 private:
   uint sphere_detail_;

@@ -55,10 +55,8 @@ typedef ImageStateConstModOPAlgorithm<DiscreteShrinkFnc> DiscreteShrink;
 
 }
 
-OST_IMG_ALG_EXPLICIT_INST_DECL(class,image_state::ImageStateConstModOPAlgorithm<alg::DiscreteShrinkFnc>)
-
 }} // ns
 
-
+OST_IMG_ALG_EXPLICIT_INST_DECL(class,ImageStateConstModOPAlgorithm<ost::img::alg::DiscreteShrinkFnc>)
 
 #endif

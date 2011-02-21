@@ -434,6 +434,7 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
       if (sel.type==Prop::INT) {
         // todo. Add check to test that the comparison operator is only one of
         // = and !=. The others don't make too much sense.
+
         if (value_string=="true" || value_string=="True" || 
             value_string=="TRUE") {
           value=ParamType(int(1));
@@ -444,11 +445,19 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
           break;
         }
       }
+      // yes, not having a break here is on purpose
     case tok::String:      
       if (sel.type!=Prop::STRING) {
-        error_desc_.msg="'"+sel.GetName()+"' takes "+sel.GetTypeName()+
-                       " argument, but String literal given";
-        error_desc_.range=v.GetValueRange();
+        if (sel.id>=Prop::CUSTOM) {
+          // BZDNG-204: issue specific warning when trying to use a string value 
+          //     for a generic property.
+          error_desc_.msg="only numeric generic properties can be used in queries";
+          error_desc_.range=v.GetValueRange();
+        } else {
+          error_desc_.msg="'"+sel.GetName()+"' takes "+sel.GetTypeName()+
+                         " argument, but string literal given";
+          error_desc_.range=v.GetValueRange();
+        }
         return false;
       } else {
         value=value_string;
@@ -662,7 +671,19 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
     GenProp gen_prop(epm);
     if (op.GetType()==tok::Colon) {
       op=lexer.NextToken();
-      if (!this->ExpectNumeric(op)) {
+      if (!this->ExpectNotEnd(op, "value")) {
+        return NULL;
+      }
+      if (tok::FloatingValue!=op.GetType() && 
+          tok::IntegralValue!=op.GetType()) {
+        // BZDNG-204: issue specific warning when trying to use a string value 
+        //     for a generic property. 
+        if (op.GetType()==tok::String || op.GetType()==tok::Identifier) {
+          error_desc_.msg="only numeric generic properties are supported in queries";
+          error_desc_.range=op.GetValueRange();
+          return NULL;
+        }
+        this->ExpectNumeric(op);
         return NULL;
       }
       gen_prop.default_val=atof(query_string_.substr(op.GetValueRange().Loc,
@@ -957,8 +978,9 @@ bool QueryImpl::ExpectNumeric(const QueryToken& token)
                            token.GetRange().Length)+"' found";
     error_desc_.range=token.GetRange();    
   }
-  return false;  
+  return false;
 }
+
 
 Node* QueryImpl::Concatenate(Node* lhs, Node* rhs, LogicOP logical_op) {
   assert(lhs && "lhs is NULL");

@@ -63,6 +63,19 @@ public:
   ResidueBase(const impl::ResidueImplPtr& impl);
   ResidueBase(const ResidueBase& rhs);
 public:
+  
+  /// \name Handle validity
+  //@{
+  /// \brief check validity of handle
+  ///
+  /// check, whether the residue handle points to a valid residue.
+  /// \note It is an error to use any method other than #IsValid, #Impl and
+  ///       #operator bool() when the handle is invalid. An InvalidHandle
+  ///       exception will be thrown.
+  operator bool() const { return this->IsValid(); }
+  /// \brief check validity of handle
+  /// \sa #operator bool()
+  bool IsValid() const { return Impl().get()!=0; }
   friend class ConstGenericPropContainer<ResidueBase>;
   /// \brief return residue number
   const ResNum& GetNumber() const;
@@ -77,20 +90,7 @@ public:
   ///         residue name and residue number
   String GetQualifiedName() const;
 
-  /// \name Handle validity
-  //@{
-  /// \brief check validity of handle
-  ///
-  /// check, whether the residue handle points to a valid residue.
-  /// \note It is an error to use any method other than #IsValid, #Impl and
-  ///       #operator bool() when the handle is invalid. An InvalidHandle
-  ///       exception will be thrown.
-  operator bool() const;
-  /// \brief check validity of handle
-  /// \sa #operator bool()
-  bool IsValid() const;
-  //@}
-  
+
   /// \brief whether the residue can form peptide bonds
   bool IsPeptideLinking() const;
 
@@ -144,6 +144,10 @@ public:
   bool IsProtein() const;
   
   void SetIsProtein(bool protein);
+  
+  void SetIsLigand(bool ligand);
+  
+  bool IsLigand() const;
 public:
   impl::ResidueImplPtr& Impl();
 

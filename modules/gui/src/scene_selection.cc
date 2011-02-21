@@ -29,11 +29,10 @@
 #include <ost/gfx/entity.hh>
 
 #if OST_IMG_ENABLED
-
-#include <ost/gfx/map_iso.hh>
-#include <ost/gui/main_area.hh>
-#include <ost/gui/perspective.hh>
-
+#  include <ost/gfx/map_iso.hh>
+#  include <ost/gui/main_area.hh>
+#  include <ost/gui/perspective.hh>
+#  include <ost/gui/data_viewer/data_viewer.hh>
 #endif
 
 #include <ost/gui/scene_win/scene_win.hh>
@@ -55,7 +54,7 @@ void SceneSelection::SetActiveNodes(gfx::NodePtrList nodes, gfx::EntityP entity,
 }
 
 gfx::GfxNodeP SceneSelection::GetActiveNode(unsigned int pos) const{
-  if(pos >= 0 && pos < nodes_.size()){
+  if(pos < nodes_.size()){
     return nodes_[pos];
   }
   else{
@@ -72,7 +71,7 @@ int SceneSelection::GetActiveViewCount() const{
 }
 
 mol::EntityView SceneSelection::GetActiveView(unsigned int pos) const{
-  if(pos >=0 && pos < views_.size()){
+  if(pos < views_.size()){
     return views_[pos].GetEntityView();
   }
   else{
@@ -124,6 +123,7 @@ void SceneSelection::Delete() {
   for(int i=0; i < selected_objects.size(); i++){
     gfx::Scene::Instance().Remove(selected_objects[i]);
   }
+  gfx::Scene::Instance().RequestRedraw();
 }
 
 #if OST_IMG_ENABLED

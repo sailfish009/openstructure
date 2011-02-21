@@ -30,6 +30,7 @@
 */
 #include <ost/qa/torsion_statistics.hh>
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 
@@ -67,7 +68,8 @@ typedef boost::shared_ptr<TorsionPotential> TorsionPotentialPtr;
 /// \brief Torsion potential
 /// 
 /// The torsion potential class is parametrisable by TorsionPotentialOpts.
-class DLLEXPORT_OST_QA TorsionPotential {
+class DLLEXPORT_OST_QA TorsionPotential : 
+   public boost::enable_shared_from_this<TorsionPotential> {
 public:
   /// \brief  create new torsion potential with the given torsion statistics 
   ///         and options
@@ -89,6 +91,18 @@ public:
 
   /// \brief retrieve total number of energy local (i.e. valid residues)
   int GetEnergyCounts() const;
+  
+  
+  
+  Real GetTorsionEnergy(AminoAcid central_aa, Real prev_phi, Real prev_psi,
+                        Real central_phi, Real central_psi,  
+                        Real next_phi, Real next_psi) const {
+    int icenter=this->GetAAIndex(central_aa);
+    return energies_.Get(icenter, prev_phi, prev_psi,
+                         central_phi, central_psi,
+                         next_phi, next_psi);
+  }
+                        
 
   /// \brief save torsion potential
   /// 
@@ -106,6 +120,9 @@ public:
   typedef MultiClassifier<float, int, Real, Real,
                           Real, Real, Real, Real> TorsionEnergies;
 private:
+  
+  int GetAAIndex(AminoAcid aa) const;
+  
   void Fill(const TorsionStatisticsPtr& stat,
             bool calculate_average_energy_flag);
 

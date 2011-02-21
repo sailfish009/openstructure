@@ -20,9 +20,9 @@
 
 #include "randomize.hh"
 
-namespace ost { namespace img { 
+namespace ost { namespace img { namespace image_state {
+  
+template class TEMPLATE_DEF_EXPORT ImageStateConstModIPAlgorithm<alg::RandomizeFnc>;  
 
-template class TEMPLATE_DEF_EXPORT ImageStateConstModIPAlgorithm<alg::RandomizeFnc>;
-
-}} // ns
+}}} // ns
 

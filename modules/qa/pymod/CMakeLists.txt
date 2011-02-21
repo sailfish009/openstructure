@@ -2,6 +2,7 @@ set(OST_QA_PYMOD_SOURCES
   export_interaction.cc
   export_torsion.cc
   export_packing.cc
+  export_reduced.cc
   wrap_qa.cc
   export_clash.cc
 )

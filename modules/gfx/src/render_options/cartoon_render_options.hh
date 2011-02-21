@@ -27,59 +27,65 @@
 
 #include <ost/gfx/module_config.hh>
 
-#include <ost/gfx/render_options/render_options.hh>
+#include "render_options.hh"
 
 namespace ost { namespace gfx {
 
-class DLLEXPORT_OST_GFX CartoonRenderOptions: public ost::gfx::RenderOptions {
+class DLLEXPORT_OST_GFX CartoonRenderOptions: public RenderOptions {
 public:
   CartoonRenderOptions(bool force_tube=false);
 
+  // RenderOptions interface
   virtual RenderMode::Type GetRenderMode();
-
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options);
 
-  virtual void SetSplineDetail(uint spline_detail);
-  virtual uint GetSplineDetail() const;
+  // own interface
+  void SetSplineDetail(uint spline_detail);
+  uint GetSplineDetail() const;
 
-  virtual void SetPolyMode(uint poly_mode);
-  virtual uint GetPolyMode() const;
+  void SetPolyMode(uint poly_mode);
+  uint GetPolyMode() const;
 
-  virtual void SetArcDetail(uint arc_detail);
-  virtual uint GetArcDetail() const;
+  void SetArcDetail(uint arc_detail);
+  uint GetArcDetail() const;
 
-  virtual void SetNormalSmoothFactor(float smooth_factor);
-  virtual float GetNormalSmoothFactor() const;
+  void SetNormalSmoothFactor(float smooth_factor);
+  float GetNormalSmoothFactor() const;
 
-  virtual void SetTubeRadius(float tube_radius);
-  virtual float GetTubeRadius() const;
-  virtual void SetTubeRatio(float tube_ratio);
-  virtual float GetTubeRatio() const;
-  virtual unsigned int GetTubeProfileType() const;
-  virtual void SetTubeProfileType(unsigned int);
+  void SetTubeRadius(float tube_radius);
+  float GetTubeRadius() const;
+  void SetTubeRatio(float tube_ratio);
+  float GetTubeRatio() const;
+  unsigned int GetTubeProfileType() const;
+  void SetTubeProfileType(unsigned int);
 
-  virtual void SetHelixWidth(float helix_width);
-  virtual float GetHelixWidth() const;
-  virtual void SetHelixThickness(float helix_thickness);
-  virtual float GetHelixThickness() const;
-  virtual void SetHelixEcc(float helix_ecc);
-  virtual float GetHelixEcc() const;
-  virtual unsigned int GetHelixProfileType() const;
-  virtual void SetHelixProfileType(unsigned int);
+  void SetHelixWidth(float helix_width);
+  float GetHelixWidth() const;
+  void SetHelixThickness(float helix_thickness);
+  float GetHelixThickness() const;
+  void SetHelixEcc(float helix_ecc);
+  float GetHelixEcc() const;
+  unsigned int GetHelixProfileType() const;
+  void SetHelixProfileType(unsigned int);
+  unsigned int GetHelixMode() const;
+  void SetHelixMode(unsigned int);
 
-  virtual void SetStrandWidth(float strand_width);
-  virtual float GetStrandWidth() const;
-  virtual void SetStrandThickness(float strand_thickness);
-  virtual float GetStrandThickness() const;
-  virtual void SetStrandEcc(float strand_ecc);
-  virtual float GetStrandEcc() const;
-  virtual unsigned int GetStrandProfileType() const;
-  virtual void SetStrandProfileType(unsigned int);
+  void SetStrandWidth(float strand_width);
+  float GetStrandWidth() const;
+  void SetStrandThickness(float strand_thickness);
+  float GetStrandThickness() const;
+  void SetStrandEcc(float strand_ecc);
+  float GetStrandEcc() const;
+  unsigned int GetStrandProfileType() const;
+  void SetStrandProfileType(unsigned int);
+  unsigned int GetStrandMode() const;
+  void SetStrandMode(unsigned int);
+
+  void SetColorBlendMode(unsigned int);
+  unsigned int GetColorBlendMode() const;
 
   float GetMaxRad() const;
-
-  virtual ~CartoonRenderOptions();
 
 private:
   bool force_tube_;
@@ -96,10 +102,14 @@ private:
   float helix_thickness_;
   float helix_ecc_;
   unsigned int helix_profile_;
+  unsigned int helix_mode_;
   float strand_width_;
   float strand_thickness_;
   float strand_ecc_;
   unsigned int strand_profile_;
+  unsigned int strand_mode_;
+
+  unsigned int color_blend_mode_;
 };
 
 typedef boost::shared_ptr<CartoonRenderOptions> CartoonRenderOptionsPtr;

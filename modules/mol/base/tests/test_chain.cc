@@ -46,7 +46,7 @@ void no_find_res(ChainHandle chain, const ResNum& n) {
 
 void test_res_pos() {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle ch1=e.InsertChain("A");
   e.AppendResidue(ch1, "A");
   e.AppendResidue(ch1, "B");
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 BOOST_AUTO_TEST_CASE(test_comparison) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle ch1=e.InsertChain("A");
   ChainHandle ch2=e.InsertChain("B");
   ChainHandle cc=ch1;
@@ -86,10 +86,33 @@ BOOST_AUTO_TEST_CASE(test_comparison)
 }
 
 
+BOOST_AUTO_TEST_CASE(throw_invalid_chain_handle)
+{
+  EntityHandle ent=CreateEntity();
+  ChainHandle chain=ent.FindChain("A");
+  BOOST_CHECK_THROW(CheckHandleValidity(chain), InvalidHandle);
+  XCSEditor edi=ent.EditXCS();
+  edi.InsertChain("A");
+  chain=ent.FindChain("A");
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(chain));
+}
+
+BOOST_AUTO_TEST_CASE(throw_invalid_chain_view)
+{
+  EntityHandle ent=CreateEntity();
+  ChainHandle chain=ent.FindChain("A");
+  ChainView chain_view;
+  BOOST_CHECK_THROW(CheckHandleValidity(chain_view), InvalidHandle);
+  XCSEditor edi=ent.EditXCS();
+  edi.InsertChain("A");
+  EntityView ent_view=ent.CreateFullView();  
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(ent_view.FindChain("A")));
+}
+
 BOOST_AUTO_TEST_CASE(res_pos) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle ch1=e.InsertChain("A");
   e.AppendResidue(ch1, "A");
   e.AppendResidue(ch1, "B");
@@ -118,7 +141,7 @@ BOOST_AUTO_TEST_CASE(res_pos)
 BOOST_AUTO_TEST_CASE(res_pos_with_insertion_code) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle ch1=e.InsertChain("A");
   e.AppendResidue(ch1, "A");
   e.AppendResidue(ch1, "B");
@@ -148,7 +171,7 @@ BOOST_AUTO_TEST_CASE(res_pos_with_insertion_code)
 BOOST_AUTO_TEST_CASE(prev_next) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle ch1=e.InsertChain("A");
   e.AppendResidue(ch1, "A");
   e.AppendResidue(ch1, "B");

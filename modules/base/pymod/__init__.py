@@ -27,6 +27,7 @@ from ost import seq
 try:
   from ost import gfx
   scene = gfx.Scene()
+  scene.Stereo=gfx.Stereo
 except ImportError:
   pass
   

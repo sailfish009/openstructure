@@ -162,5 +162,8 @@ std::ostream& operator<<(std::ostream& o, const Stat& s)
 
 
 }
+namespace image_state {
+  
 template class TEMPLATE_DEF_EXPORT ImageStateNonModAlgorithm<alg::StatBase>;
-}} // ns
+
+}}} // ns

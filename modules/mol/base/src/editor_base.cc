@@ -78,29 +78,34 @@ void EditorBase::RenameChain(ChainHandle chain, const String& new_name)
 
 
 AtomHandle EditorBase::InsertAtom(ResidueHandle res, const String& name,
-                                  const geom::Vec3& pos,
-                                  const AtomProp& prop)
+                                  const geom::Vec3& pos, const String& ele,
+                                  Real occupancy, Real b_factor, 
+                                  bool is_hetatm)
 {
   CheckHandleValidity(res);
   ent_.Impl()->MarkTraceDirty();  
-  return AtomHandle(res.Impl()->InsertAtom(name, pos,prop));
+  AtomHandle atom(res.Impl()->InsertAtom(name, pos, ele));
+  atom.SetBFactor(b_factor);
+  atom.SetHetAtom(is_hetatm);
+  atom.SetOccupancy(occupancy);
+  return atom;
 }
 
 AtomHandle EditorBase::InsertAltAtom(ResidueHandle res, const String& name,
                                      const String& alt_group,
                                      const geom::Vec3& pos,
-                                     const AtomProp& prop) 
+                                     const String& ele) 
 {
   CheckHandleValidity(res);
   ent_.Impl()->MarkTraceDirty();
-  AtomHandle atom(res.Impl()->InsertAltAtom(name, alt_group, pos, prop));
+  AtomHandle atom(res.Impl()->InsertAltAtom(name, alt_group, pos, ele));
   this->UpdateTrace();
   return atom;
 }
 
 void EditorBase::AddAltAtomPos(const String& group,
-                                    const AtomHandle& atom,
-                                    const geom::Vec3& position) 
+                               const AtomHandle& atom,
+                               const geom::Vec3& position) 
 {
   CheckHandleValidity(atom);
   atom.GetResidue().Impl()->AddAltAtomPos(group, atom.Impl(), position);
@@ -114,7 +119,6 @@ void EditorBase::DeleteChain(const ChainHandle& chain)
 
 void EditorBase::DeleteAtom(const AtomHandle& atom_handle) 
 {
-  
   CheckHandleValidity(atom_handle);
   atom_handle.GetResidue().Impl()->DeleteAtom(atom_handle.Impl());
 }
@@ -123,6 +127,17 @@ void EditorBase::DeleteResidue(const ResidueHandle& residue_handle)
 {
   CheckHandleValidity(residue_handle);
   residue_handle.GetChain().Impl()->DeleteResidue(residue_handle.Impl());
+}
+
+void EditorBase::ReorderResidues(const ChainHandle& chain)
+{
+  CheckHandleValidity(chain);
+  chain.Impl()->ReorderResidues();
+}
+
+void EditorBase::ReorderAllResidues()
+{
+  ent_.Impl()->ReorderAllResidues();
 }
 
 void EditorBase::RenameAtom(AtomHandle atom, const String& new_name)

@@ -49,11 +49,20 @@ StringMethod select_string=&EntityHandle::Select;
 
 Real (EntityHandle::*get_angle1)(const AtomHandle&, const AtomHandle&, const AtomHandle&) const = &EntityHandle::GetAngle;
 Real (EntityHandle::*get_angle2)(const AtomView&, const AtomView&, const AtomView&) const = &EntityHandle::GetAngle;
+                                      
+XCSEditor depr_request_xcs_editor(EntityHandle e, EditMode m)
+{
+  WARN_DEPRECATED("EntityHandle::RequestXCSEditor is deprecated. Use "
+                  "EntityHandle::EditXCS instead");
+  return e.EditXCS(m);
+}
 
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_xcs_editor_overloads, 
-                                      EntityHandle::RequestXCSEditor, 0, 1)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_ics_editor_overloads, 
-                                      EntityHandle::RequestICSEditor, 0, 1)                                      
+ICSEditor depr_request_ics_editor(EntityHandle e, EditMode m)
+{
+  WARN_DEPRECATED("EntityHandle::RequestICSEditor is deprecated. Use "
+                  "EntityHandle::EditICS instead");
+  return e.EditICS(m);
+}
 
 
 }
@@ -62,11 +71,12 @@ void export_Entity()
 {
   class_<EntityBase> ent_base("EntityBase", no_init);
   ent_base
-    .def("IsValid", &EntityBase::IsValid)
     .def(self_ns::str(self))
     .def("GetName", &EntityBase::GetName,
         return_value_policy<copy_const_reference>())
     .def("SetName", &EntityBase::SetName)
+    .def("IsValid", &EntityBase::IsValid)
+    .add_property("valid", &EntityBase::IsValid)
   ;
   generic_prop_def<EntityBase>(ent_base);
   
@@ -84,6 +94,7 @@ void export_Entity()
     .def("GetCenterOfAtoms", &EntityHandle::GetCenterOfAtoms)
     .def("GetGeometricCenter", geom_center<EntityHandle>)
     .add_property("geometric_center", geom_center<EntityHandle>)
+
     .add_property("geometric_end", geom_end<EntityHandle>)
     .add_property("geometric_start", geom_start<EntityHandle>)
     .def("GetGeometricStart", geom_start<EntityHandle>)
@@ -113,7 +124,6 @@ void export_Entity()
     .add_property("atoms", &EntityHandle::GetAtomList)
     .add_property("chains", &EntityHandle::GetChainList)
     .add_property("bonds", &EntityHandle::GetBondList)
-    .add_property("valid", &EntityHandle::IsValid)
     .def("GetBounds", &EntityHandle::GetBounds)
     .add_property("bounds", &EntityHandle::GetBounds)
     .def("GetTransformationMatrix", &EntityHandle::GetTransformationMatrix,
@@ -121,10 +131,11 @@ void export_Entity()
     .add_property("transform", 
                    make_function(&EntityHandle::GetTransformationMatrix, 
                                  return_value_policy<copy_const_reference>()))    
-    .def("RequestICSEditor", &EntityHandle::RequestICSEditor,
-         X_ics_editor_overloads(args("mode")))
-    .def("RequestXCSEditor", &EntityHandle::RequestXCSEditor,
-         X_xcs_editor_overloads(args("mode")))
+
+    .def("EditXCS", &EntityHandle::EditXCS, arg("mode")=UNBUFFERED_EDIT)
+    .def("EditICS", &EntityHandle::EditICS, arg("mode")=UNBUFFERED_EDIT)
+    .def("RequestXCSEditor", &depr_request_xcs_editor, arg("mode")=UNBUFFERED_EDIT)
+    .def("RequestICSEditor", &depr_request_ics_editor, arg("mode")=UNBUFFERED_EDIT)  
     .def("IsTransformationIdentity",&EntityHandle::IsTransformationIdentity)
     .def(self==self)
     .def(self!=self)

@@ -31,6 +31,7 @@
 #include <exception>
 #include <sstream>
 #include <map>
+#include <vector>
 #include <boost/variant.hpp>
 
 #include <ost/module_config.hh>
@@ -109,6 +110,7 @@ public:
       map_->erase(key);
     }
   }
+
   void Assign(const GenericPropContainerImpl& impl)
   {
     if (impl.map_) {
@@ -130,6 +132,17 @@ public:
     return *map_;
   }
       
+  std::vector<String> GetPropList() const
+  {
+    std::vector<String> prop_list;
+    if (map_) {
+      PropertyMap::const_iterator i;
+      for (i=map_->begin(); i!=map_->end(); ++i) {
+        prop_list.push_back(i->first);
+      }
+    }
+    return prop_list;
+  }
   
 private:
   mutable PropertyMap* map_;
@@ -189,12 +202,13 @@ public:
     rep << this->GetImpl()->GenericProp(key);
     return rep.str();
   }  
-    /// \brief returns String property, raises an exception if it does not exist
-    String GetStringProp(const String& key) const
-    {
-      CheckHandleValidity(*static_cast<const H*>(this));      
-      return this->gp_get<String>(key);
-    }
+
+  /// \brief returns String property, raises an exception if it does not exist
+  String GetStringProp(const String& key) const
+  {
+    CheckHandleValidity(*static_cast<const H*>(this));
+    return this->gp_get<String>(key);
+  }
 
   /// \brief returns floating point property, raises an exception if it does 
   ///     not exist
@@ -279,6 +293,12 @@ public:
     CheckHandleValidity(*static_cast<const H*>(this));    
     return this->GetImpl()->GetPropMap();
   }  
+
+  std::vector<String> GetPropList() const
+  {
+    CheckHandleValidity(*static_cast<const H*>(this));
+    return this->GetImpl()->GetPropList();
+  }
 };
 
 /// \brief base class for the handler classes

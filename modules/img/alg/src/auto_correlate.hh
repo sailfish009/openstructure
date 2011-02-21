@@ -43,10 +43,8 @@ private:
 
 typedef ImageStateConstModOPAlgorithm<AutoCorrelateFnc> AutoCorrelate;
 
-}
+}}} // ns
 
-OST_IMG_ALG_EXPLICIT_INST_DECL(class,ImageStateConstModOPAlgorithm<alg::AutoCorrelateFnc>)
-
-  }} // ns
+OST_IMG_ALG_EXPLICIT_INST_DECL(class,ImageStateConstModOPAlgorithm<ost::img::alg::AutoCorrelateFnc>)
 
 #endif

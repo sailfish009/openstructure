@@ -35,11 +35,21 @@
 #  if !defined(__APPLE__)
 #   include <ost/gfx/GL/glew.h>
 #  endif
-#  if defined(_WIN32)
+#  if defined(_MSC_VER)
 #    include <ost/gfx/GL/wglew.h>
 #  endif
 #endif
 
 #include <ost/gfx/gl_include.hh>
 
+#if defined(__APPLE__)
+// On all MacOS X version we support, OpenGL 2.0 is available, so it's safe to 
+// hardcode the value here...
+//same for windows vista and above, XP only has 1.1
+#define OST_GL_VERSION_2_0 1
+#else
+#ifdef GLEW_VERSION_2_0
+#define OST_GL_VERSION_2_0 1
+#endif
+#endif
 #endif

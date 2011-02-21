@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 BOOST_AUTO_TEST_CASE(connect) 
 {
   EntityHandle e=CreateEntity();
-  XCSEditor editor=e.RequestXCSEditor();  
+  XCSEditor editor=e.EditXCS();  
   ChainHandle c=editor.InsertChain("A");
   ResidueHandle r=editor.AppendResidue(c, "GLY");
 

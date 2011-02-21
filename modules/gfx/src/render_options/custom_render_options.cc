@@ -22,9 +22,7 @@
 
 #include "custom_render_options.hh"
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 CustomRenderOptions::CustomRenderOptions(): 
   sphere_detail_(4),
@@ -99,8 +97,4 @@ float CustomRenderOptions::GetBondRad() const
   return bond_rad_;
 }
 
-CustomRenderOptions::~CustomRenderOptions() {}
-
-}
-
-}
+}} // ns

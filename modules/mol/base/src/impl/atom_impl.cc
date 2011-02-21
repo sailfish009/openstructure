@@ -40,22 +40,28 @@ AtomImpl::AtomImpl(const EntityImplPtr& e,
                    const ResidueImplPtr& r,
                    const String& n,
                    const geom::Vec3& p,
-                   const AtomProp& prop,
+                   const String& ele,
                    unsigned long index):
   res_(r),
   name_(n),
   pos_(p),
-  prop_(prop),
+  occupancy_(0.0),
+  b_factor_(1.0),
+  prop_(NULL),  
+  is_hetatm_(false),  
+  element_(ele),
   prim_connector_(),
   connector_list_(),
   fragment_(),
   state_(0),
+
   index_(index)
 {
   EntityHandle ent = this->GetEntity();
   geom::Mat4 transf_matrix = ent.GetTransformationMatrix();
   geom::Vec3 transf_pos = geom::Vec3(transf_matrix*geom::Vec4(p));
   tf_pos_ = transf_pos;
+  prop_=AtomProp::GetDefaultProps(element_);
 }
 
 void AtomImpl::AddSecondaryConnector(const ConnectorImplP& bp)
@@ -204,6 +210,10 @@ void AtomImpl::UpdateFromXCS()
 }
 
 AtomImpl::~AtomImpl() {
+  if (prop_ && !prop_->is_default) {
+    delete prop_;
+    prop_=NULL;
+  }
 }
 
 EntityImplPtr AtomImpl::GetEntity() const
@@ -319,11 +329,11 @@ Real AtomImpl::GetFloatProperty(Prop::ID prop_id) const
     case Prop::AZ:
       return pos_[2];            
     case Prop::OCC:
-      return prop_.occupancy;
+      return occupancy_;
     case Prop::ABFAC:
-      return prop_.b_factor;
+      return b_factor_;
     case Prop::ACHARGE:
-      return prop_.charge;
+      return prop_->charge;
     default:
       throw PropertyError(prop_id);
   }
@@ -335,7 +345,7 @@ String AtomImpl::GetStringProperty(Prop::ID prop_id) const
     case Prop::ANAME:
       return name_;
     case Prop::ELE:
-      return prop_.element;
+      return element_;
     default:
       throw PropertyError(prop_id);
   }

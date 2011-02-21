@@ -24,8 +24,8 @@
 */
 
 
-#if defined(GetProp)
-#undef GetProp
+#if defined(GetAtomProps)
+#undef GetAtomProps
 #endif
 #include <vector>
 
@@ -56,11 +56,11 @@
 namespace ost { namespace gfx { namespace impl {
 
 typedef enum {
-  DIRTY_VIEW   =1,
-  DIRTY_VA     =2
+  DIRTY_VIEW   = 0x1,
+  DIRTY_VA     = 0x2
 } DirtyFlag;
 
-typedef char DirtyFlags;
+typedef unsigned int DirtyFlags;
 
 /// \internal
 class DLLEXPORT_OST_GFX EntityRenderer {
@@ -118,7 +118,7 @@ public:
   /// 
   /// The rendering buffers and vertex arrays should be prepared in 
   /// PrepareRendering()
-  virtual void Render(RenderPass pass=STANDARD_RENDER_PASS);
+  virtual void Render(RenderPass pass);
   
   ///\brief povray rendering call
   virtual void RenderPov(PovState& pov, const std::string& name);
@@ -160,6 +160,8 @@ public:
   void FlagPositionsDirty();
 
   void Debug(unsigned int flags);
+
+  IndexedVertexArray& VA() {return va_;}
 protected:
   virtual void SetName(const String& name);
 
@@ -178,12 +180,13 @@ protected:
   DirtyFlags            sel_state_;
   DirtyFlags            state_;
   unsigned int          debug_flags_;
+  float                 opacity_;
 };
 
 //Simplify color ops
 struct ByElementGetCol {
   Color ColorOfAtom(mol::AtomHandle& atom) const{
-    return GfxObj::Ele2Color(atom.GetAtomProps().element);
+    return GfxObj::Ele2Color(atom.GetElement());
   }
 };
 

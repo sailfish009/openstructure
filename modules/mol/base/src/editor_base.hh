@@ -28,7 +28,6 @@
 
 #include "entity_handle.hh"
 #include "residue_prop.hh"
-#include "atom_prop.hh"
 #include "editor_type_fw.hh"
 
 namespace ost { namespace mol {
@@ -40,8 +39,8 @@ namespace ost { namespace mol {
 /// Editors are usually used as one of the concrete subclasses of EditorBase:
 /// XCSEditor and ICSEditor. The former operates on the external carthesian
 /// coordinate system while the latter operates on the internal coordinate
-/// system. To create a new editor, use EntityHandle::RequestXCSEditor() and
-/// EntityHandle::RequestICSEditor(), respectively.
+/// system. To create a new editor, use EntityHandle::EditXCS() and
+/// EntityHandle::EditICS(), respectively.
 /// 
 /// For an introduction to the concept of editors go \ref editors "here"
 class DLLEXPORT_OST_MOL EditorBase {
@@ -116,17 +115,16 @@ public:
   ///     algorithms as well as most builders in the conop module rely on proper 
   ///     naming.
   /// \param pos is the position of the atom in global coordinates
-  /// \param prop are the atom's properties such as element, van der Waals 
-  ///     radius charge and so on. The default set of atom properties is  rather
-  ///     meaningless
   AtomHandle InsertAtom(ResidueHandle residue, const String& name, 
-                        const geom::Vec3& pos, const AtomProp& prop=AtomProp());
+                        const geom::Vec3& pos, const String& ele="",
+                        Real occupancy=1.0, Real b_factor=0.0, 
+                        bool is_hetatm=false);
 
   /// \brief Insert new atom with alternative position indicator
   /// \sa EditorBase::AddAltAtomPos(), ResidueHandle
   AtomHandle InsertAltAtom(ResidueHandle residue, const String& name, 
-                           const String& alt_group, const geom::Vec3& pos, 
-                           const AtomProp& prop=AtomProp());
+                           const String& alt_group, const geom::Vec3& pos,
+                           const String& ele="");
   /// \brief  Add alternative atom position
   /// \param group is the name of the alternative atom position group. If no 
   ///     group of that name exists, it will be created.
@@ -138,7 +136,7 @@ public:
   ///         is the alternative position
   /// \sa EditorBase::InsertAltAtom(), ResidueHandle
   void AddAltAtomPos(const String& group, const AtomHandle& atom, 
-                          const geom::Vec3& position);                           
+                     const geom::Vec3& position);
   //\}
   
   /// \brief connect two atoms with bond
@@ -184,6 +182,12 @@ public:
   ///
   /// \sa ChainHandle::DeleteResidue, DeleteAtom
   void DeleteResidue(const ResidueHandle& residue_handle);
+
+  /// \brief reorder residues of given chain based on their residue number
+  void ReorderResidues(const ChainHandle& chain);
+
+  /// \brief reorder residues of all chains based on their residue number
+  void ReorderAllResidues();
     
   /// \brief Get edit mode of editor
   EditMode GetMode() const;

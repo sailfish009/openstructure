@@ -263,4 +263,12 @@ int AlignmentHandle::GetSequenceOffset(int seq_index)
   this->CheckValidity();
   return impl_->GetSequence(seq_index)->GetOffset();
 }
+
+Real AlignmentHandle::GetCoverage(int seq_index) const
+{
+  this->CheckValidity();
+  return impl_->GetCoverage(seq_index);
+}
+
+
 }}

@@ -107,5 +107,8 @@ void GaussianFilterBase::calcBVals( Real q )
 
 } // ns
 
+namespace image_state {
+
 template class ImageStateModIPAlgorithm<alg::GaussianFilterBase>;
-}}
+  
+}}}

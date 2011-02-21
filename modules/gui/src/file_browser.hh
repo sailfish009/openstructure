@@ -45,7 +45,8 @@ public:
 
 protected:
   virtual void keyPressEvent(QKeyEvent* event);
-
+public slots:
+  void Refresh();
 private slots:
   void Init(const QString& path);
   void DoubleClicked(const QModelIndex& index);

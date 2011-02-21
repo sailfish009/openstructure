@@ -5,6 +5,7 @@
   :hidden:
   
   formats
+  profile
 
 .. module:: ost.io
   :synopsis: Input and output of sequences, alignments, structures, images and density maps.
@@ -60,6 +61,10 @@ Some of the formats have a dedicated function that allows you to tweak many
 parameters that affect the import. PDB files can be loaded with 
 :func:`~ost.io.LoadPDB`. It offers a tighter control over the exact loading 
 behaviour.
+
+
+:doc:`profile`
+
 
 .. autofunction:: ost.io.LoadPDB
 

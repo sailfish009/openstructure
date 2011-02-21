@@ -60,5 +60,4 @@ void RenderOptions::NotifyStateChange()
   }
 }
 
-
-}}
+}} // ns

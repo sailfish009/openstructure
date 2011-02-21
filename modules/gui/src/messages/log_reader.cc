@@ -57,6 +57,7 @@ void LogReader::LogMessage(const String& message, int severity){
       }
     }
   }
+  std::cerr << message;
 }
 
 QMessageBox::Icon LogReader::GetIconForSeverity(int severity){

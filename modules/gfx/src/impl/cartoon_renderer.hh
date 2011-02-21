@@ -16,6 +16,11 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+/*
+   Author: Ansgar Philippsen
+*/
+
 #ifndef OST_GFX_CARTOON_RENDERER_HH
 #define OST_GFX_CARTOON_RENDERER_HH
 
@@ -34,42 +39,42 @@ namespace ost { namespace gfx { namespace impl {
 /// \internal
 class DLLEXPORT_OST_GFX CartoonRenderer: public TraceRendererBase {
 public:
-  CartoonRenderer(BackboneTrace& trace, bool force_tube=false);
+  CartoonRenderer(BackboneTrace* trace, bool force_tube=false);
 
   virtual void PrepareRendering();
-  virtual void Render();
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);
   virtual void SetOptions(RenderOptionsPtr& render_options);
   virtual RenderOptionsPtr GetOptions();
 
-
   virtual void SetForceTube(bool force_tube);
-
-
-  virtual ~CartoonRenderer();
   
 private:
-  void RebuildSplineObj(const SplineEntryList& l, IndexedVertexArray& va,
-                        SplineEntryListList& spline_list_list,
-                        const TraceSubset& subset, bool is_sel);
+  void prepare_rendering(const BackboneTrace&,
+                         IndexedVertexArray&, 
+                         SplineEntryListList&);
+
+  void fudge_spline_obj(SplineEntryListList&);
+
+  void rebuild_spline_obj(IndexedVertexArray&,
+                          const SplineEntryListList&,
+                          bool);
   
-  void CapProfile(const impl::TraceProfile& p, 
-                  const impl::SplineEntry& se, 
-                  bool flipn, IndexedVertexArray& va);
+  void cap_profile(const impl::TraceProfile&, 
+                   const impl::SplineEntry&, 
+                   bool,
+                   IndexedVertexArray&);
                   
-  void AssembleProfile(const TraceProfile& prof1,
-                       const TraceProfile& prof2, 
-                       IndexedVertexArray& va);
+  void assemble_profile(const TraceProfile&,
+                        const TraceProfile&, 
+                        IndexedVertexArray&,
+                        size_t);
 
-  TraceProfile TransformAndAddProfile(const std::vector<TraceProfile>& profiles, 
-                                      const SplineEntry& se, 
-                                      IndexedVertexArray& va);
+  TraceProfile transform_and_add_profile(const std::vector<TraceProfile>&, 
+                                         const SplineEntry&, 
+                                         IndexedVertexArray&);
 
-  void PrepareRendering(TraceSubset& subset, IndexedVertexArray& va, 
-                        SplineEntryListList& spline_list_list, bool is_sel);
-
-  TraceProfile GetCircProfile(unsigned int detail, float rx, float ry, unsigned int type, float ecc);
+  TraceProfile get_circ_profile(unsigned int detail, float rx, float ry, unsigned int type, float ecc);
 
   bool force_tube_;
   CartoonRenderOptionsPtr options_;

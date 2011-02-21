@@ -20,8 +20,8 @@
 #define OST_GFX_IMPL_TRACE_RENDERER_BASE_HH
 
 /*
-  Author: Marco Biasini
- */
+  Authors: Marco Biasini, Ansgar Philippsen
+*/
 
 #include <ost/gfx/module_config.hh>
 #include <ost/gfx/impl/entity_renderer.hh>
@@ -35,11 +35,11 @@ namespace ost { namespace gfx { namespace impl {
 ///     \ref "line trace" LineTraceRenderer and 
 ///     \ref "smooth trace" SlineRenderer.
 /// 
-/// The trace-based entity renderer share a  common instance of BackboneTrace 
-/// that encapulates a smoothed C-alpha trace.
+/// All trace-based entity renderers share a  common instance of BackboneTrace
+/// (which is held by gfx::Entity); it encapulates a smoothed C-alpha trace.
 class DLLEXPORT_OST_GFX TraceRendererBase : public EntityRenderer {
 public:
-  TraceRendererBase(BackboneTrace& trace, int overshoot);
+  TraceRendererBase(BackboneTrace* trace, int overshoot);
   
   virtual geom::AlignedCuboid GetBoundingBox() const;  
   
@@ -63,12 +63,14 @@ public:
 protected:
   
   void set_node_colors(const Color& c, const mol::Query& q, ColorMask mask);
-  void set_node_entry_color(NodeEntry& e, ColorMask mask, const Color& c);
-  
 
-  BackboneTrace& trace_;
-  TraceSubset    trace_subset_;
-  TraceSubset    sel_subset_;
+  void rebuild_sel(const SplineEntryListList& spline_list_list, 
+                   SplineEntryListList& sel_spline_list_list,
+                   const Color& sel_color);
+
+  BackboneTrace* trace_;
+  BackboneTrace trace_subset_;
+  BackboneTrace sel_subset_;
 };
 
 }}}

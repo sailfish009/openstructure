@@ -23,7 +23,8 @@
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/widget_registry.hh>
 #include <ost/gui/scene_selection.hh>
-
+#include <ost/gui/scene_win/scene_win_model.hh>
+#include <ost/gui/scene_win/context_menu.hh>
 #include "scene_win.hh"
 
 #include <QVBoxLayout>

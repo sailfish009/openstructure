@@ -208,7 +208,7 @@ public:
   
   Vec3List& operator=(const Vec3List& rhs) 
   {
-    *this=rhs;
+    base_type::operator=(rhs);
     return *this;
   }
   Mat3 GetInertia() const;

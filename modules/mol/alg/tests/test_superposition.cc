@@ -33,21 +33,18 @@ using namespace ost::mol::alg;
 struct Fixture {
   Fixture() {
 
-    AtomProp prop;
-    prop.element="C";
-
     e=CreateEntity();
-    XCSEditor ed=e.RequestXCSEditor();
+    XCSEditor ed=e.EditXCS();
     c=ed.InsertChain("A");
     r=ed.AppendResidue(c, "XXX");
-    ab=ed.InsertAtom(r, "A", geom::Vec3(-5,-5,-5), prop);
-    ac=ed.InsertAtom(r, "B", geom::Vec3(-5, 5,-5), prop);
-    ad=ed.InsertAtom(r, "C", geom::Vec3(-5, 5, 5), prop);
-    ae=ed.InsertAtom(r, "D", geom::Vec3(-5,-5, 5), prop);
-    af=ed.InsertAtom(r, "E", geom::Vec3(5,-5, 5), prop);
-    ag=ed.InsertAtom(r, "F", geom::Vec3(5,-5,-5), prop);
-    ah=ed.InsertAtom(r, "G", geom::Vec3(5, 5,-5), prop);
-    ai=ed.InsertAtom(r, "H", geom::Vec3(5, 5, 5), prop);
+    ab=ed.InsertAtom(r, "A", geom::Vec3(-5,-5,-5), "C");
+    ac=ed.InsertAtom(r, "B", geom::Vec3(-5, 5,-5), "C");
+    ad=ed.InsertAtom(r, "C", geom::Vec3(-5, 5, 5), "C");
+    ae=ed.InsertAtom(r, "D", geom::Vec3(-5,-5, 5), "C");
+    af=ed.InsertAtom(r, "E", geom::Vec3(5,-5, 5), "C");
+    ag=ed.InsertAtom(r, "F", geom::Vec3(5,-5,-5), "C");
+    ah=ed.InsertAtom(r, "G", geom::Vec3(5, 5,-5), "C");
+    ai=ed.InsertAtom(r, "H", geom::Vec3(5, 5, 5), "C");
 
 
     BondHandle b1=ed.Connect(ab, ad);
@@ -87,7 +84,7 @@ BOOST_AUTO_TEST_CASE(superposition_svd)
 {
   Fixture f1, f2;
   EntityView ev1 = f1.e.CreateFullView();
-  XCSEditor ed=f1.e.RequestXCSEditor();
+  XCSEditor ed=f1.e.EditXCS();
   EntityView ev2 = f2.e.CreateFullView();
   ChainHandle ch1=f1.e.GetChainList()[0];
   ResidueHandleIter rit=ch1.ResiduesBegin();

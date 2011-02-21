@@ -54,10 +54,10 @@ typedef ImageStateConstModIPAlgorithm<MaskImageBase> MaskImage;
 
 }
 
-OST_IMG_ALG_EXPLICIT_INST_DECL(class,ImageStateConstModIPAlgorithm<alg::MaskImageBase>)
 
+}} // namespaces
 
-  }} // namespaces
+OST_IMG_ALG_EXPLICIT_INST_DECL(class,ImageStateConstModIPAlgorithm<ost::img::alg::MaskImageBase>)
 
 #endif /*MASK_IMAGE_HH_*/
 

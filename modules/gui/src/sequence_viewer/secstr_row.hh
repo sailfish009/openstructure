@@ -38,12 +38,13 @@ class SecStrRow : public SequenceRow
   Q_OBJECT
 
 public:
-  SecStrRow(const QString& name, mol::ChainView& chain, SequenceViewObject* parent);
+  SecStrRow(const QString& name, mol::ChainView& chain, 
+            SequenceViewObject* parent);
 
   virtual QVariant GetData(int column, int role) const;
   virtual void DoubleClicked(int column);
 
-  void SetSequence(seq::SequenceHandle& sequence);
+  void SetSequence(seq::ConstSequenceHandle sequence);
   void SetChain(mol::ChainView& chain);
   const mol::ChainView& GetChain() const;
 

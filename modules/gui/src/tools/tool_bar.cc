@@ -20,11 +20,15 @@
 #include <ost/gui/gosty_app.hh>
 #include <ost/mol/query_view_wrapper.hh>
 #include <ost/gui/tools/tool_manager.hh>
+
+#include <ost/gui/scene_win/scene_win.hh>
+
 #include "tool_bar.hh"
 
 #include <QAction>
 #include <QDebug>
 #include <QActionGroup>
+
 namespace ost { namespace gui {
 
 ToolBar::ToolBar(QWidget* parent):

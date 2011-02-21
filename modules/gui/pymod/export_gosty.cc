@@ -28,11 +28,15 @@ using namespace boost::python;
 #include <ost/gui/python_shell/python_shell.hh>
 #include <ost/gui/scene_win/scene_win.hh>
 #include <ost/gui/tools/tool_options_win.hh>
+#include <ost/gui/scene_win/scene_win.hh>
+#include <ost/gui/sequence_viewer/sequence_viewer.hh>
+#include <ost/gui/messages/message_widget.hh>
 
 #include "transfer_ownership.hh"
 #include "sip_handler.hh"
 
 #if OST_IMG_ENABLED
+  #include <ost/gui/data_viewer/data_viewer.hh>
 #include <ost/img/data.hh>
 #include <ost/gui/data_viewer/data_viewer.hh>
 using namespace ost::img::gui;
@@ -44,7 +48,9 @@ using namespace ost::gui;
 namespace {
 
 #if OST_IMG_ENABLED
-DataViewer* app_create_data_viewer1(GostyApp* app, const ost::img::Data& d, const QString& name)
+DataViewer* app_create_data_viewer1(GostyApp* app, 
+                                    const ost::img::Data& d, 
+                                    const QString& name)
 {
   return app->CreateDataViewer(d,name);
 }
@@ -73,12 +79,18 @@ void app_add_widget_to_app_b(GostyApp* app, const QString& ident,
   }
 }
 
+object get_widget(GostyApp* app, const QString& ident)
+{
+  return get_py_qobject<QWidget>(app->GetWidget(ident));
+}
+
 void export_Gosty()
 {
   class_<GostyApp, boost::noncopyable>("GostyApp", no_init)
     .def("Instance", &GostyApp::Instance,
          return_value_policy<reference_existing_object>()).staticmethod("Instance")
     .def("SetAppTitle", &GostyApp::SetAppTitle)
+    .def("StopScript",&GostyApp::StopScript)
     .def("GetPyShell", &GostyApp::GetPyShell,
         return_value_policy<reference_existing_object>())
     .add_property("py_shell", make_function(&GostyApp::GetPyShell,
@@ -97,6 +109,7 @@ void export_Gosty()
         return_value_policy<reference_existing_object>()))
     .def("GetToolOptionsWin", &GostyApp::GetToolOptionsWin,
         return_value_policy<reference_existing_object>())
+    .def("GetWidget", &get_widget)
     .add_property("tool_options_win", make_function(&GostyApp::GetToolOptionsWin,
         return_value_policy<reference_existing_object>()))
     .def("GetMessageWidget", &GostyApp::GetMessageWidget,
@@ -115,6 +128,7 @@ void export_Gosty()
     .def("AddWidgetToApp", &app_add_widget_to_app_b)
     .def("GetPerspective", &GostyApp::GetPerspective, 
          return_value_policy<reference_existing_object>())
+    .def("TryStereo",&GostyApp::TryStereo)
   ;
   register_ptr_to_python<GostyApp*>();
 }

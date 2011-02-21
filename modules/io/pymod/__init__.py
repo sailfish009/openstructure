@@ -21,6 +21,43 @@ import os, tempfile, ftplib, httplib
 from _io import *
 from ost import mol, conop
 
+profiles=None
+
+class IOProfiles:
+  def __init__(self):
+     self._dict={}
+
+  def __getitem__(self, key):
+    return IOProfileRegistry.Instance().Get(key)
+
+  def __setitem__(self, key, value):
+    if isinstance(value, str):
+      value=self[value]
+    IOProfileRegistry.Instance().Set(key, value)
+    self._dict[key]=value
+
+  def __len__(self):
+    return len(self._dict)
+
+  def __iter__(self):
+    return self._dict.__iter__()
+
+if not profiles:
+  profiles=IOProfiles()
+  profiles['STRICT']=IOProfile(dialect='PDB', fault_tolerant=False,
+                               strict_hydrogens=False, quack_mode=False)
+  profiles['SLOPPY']=IOProfile(dialect='PDB', fault_tolerant=True,
+                               strict_hydrogens=False, quack_mode=True)
+  profiles['CHARMM']=IOProfile(dialect='CHARMM', fault_tolerant=True,
+                               strict_hydrogens=False, quack_mode=False)
+  profiles['DEFAULT']='STRICT'
+
+def _override(val1, val2):
+  if val2!=None:
+    return val2
+  else:
+    return val1
+
 def __GetModelFromPDB(model_id, output_dir, file_pattern='pdb%s.ent.gz'):
   file_name = file_pattern % model_id
   file_path = os.path.join(output_dir,file_name)
@@ -45,56 +82,70 @@ def __GetModelFromPDB(model_id, output_dir, file_pattern='pdb%s.ent.gz'):
       return False
   return os.path.getsize(file_path) > 0
 
-def LoadPDB(filename, restrict_chains="", no_hetatms=False,
-            fault_tolerant=False, load_multi=False,
-            join_spread_atom_records=False, calpha_only=False, 
-            remote=False, dialect='PDB', strict_hydrogens=False):
+def LoadPDB(filename, restrict_chains="", no_hetatms=None,
+            fault_tolerant=None, load_multi=False, quack_mode=None,
+            join_spread_atom_records=None, calpha_only=None,
+            profile='DEFAULT', remote=False, dialect=None,
+            strict_hydrogens=None):
   """
   Load PDB file from disk and returns one or more entities. Several options 
-  allow to customize the exact behaviour of the PDB import.
+  allow to customize the exact behaviour of the PDB import. For more information 
+  on these options, see :doc:`profile`.
+  
+  Residues are flagged as ligand if they are mentioned in a HET record.
 
   :param restrict_chains: If not an empty string, only chains listed in the
      string will be imported.
 
-  :param fault_tolerant: If True, the import will succeed, even if the
-     PDB contains faulty records. The faulty records will be ignored and import 
-     continues as if the records haven't been present.
+  :param fault_tolerant: Enable/disable fault-tolerant import. If set, overrides 
+     the value of :attr:`IOProfile.fault_tolerant`.
 
-  :param no_hetatms: If set to True, HETATM records will be ignored
+  :param no_hetatms: If set to True, HETATM records will be ignored. Overrides 
+      the value of :attr:`IOProfile.no_hetatms`
 
   :param load_multi: If set to True, a list of entities will be returned instead
-     of only the first. This is useful when dealing with multi-PDB files.
+      of only the first. This is useful when dealing with multi-PDB files.
 
-  :param join_spread_atom_records: If set to true, atom records belonging to the
-     same residue are joined, even if they do not appear sequentially in the PDB
-     file.
+  :param join_spread_atom_records: If set, overrides the value of 
+      :attr:`IOProfile.join_spread_atom_records`.
   
-  :param remote: If set to true, the method tries to load the pdb from the remote
-     pdb repository www.pdb.org.
+  :param remote: If set to true, the method tries to load the pdb from the 
+     remote pdb repository www.pdb.org. The filename is then interpreted as the 
+     pdb id.
+     
   :rtype: :class:`~ost.mol.EntityHandle` or a list thereof if `load_multi` is 
       True.
-  :param dialect: Specifies the particular dialect to use. By default, the 
-     official PDB format is used. Alternatively, by setting the dialect to 
-     CHARMM, the loading is optimized for CHARMM PDB files. This turns on 
-     support for chain names with length up to 4 characters (column 72-76) and 
-     increase the size of the residue name to 4 residues.
+
+  :param dialect: Specifies the particular dialect to use. If set, overrides 
+    the value of :attr:`IOProfile.dialect`
 
   :type dialect: :class:`str`
   
-  :param strict_hydrogens: whether hydrogen names should be strictly checked.  
-      It is very common for PDB files to not follow the correct naming 
-      conventions for hydrogen atoms. That's why by default, the names of the 
-      hydrogens are not required to be correct. Rather, the connectivity is 
-      inferred with distance-based checks. By turning this flag on, the names 
-      of the hydrogen atoms are checked against the names in the database like 
-      all other atom types.
+  :param strict_hydrogens: If set, overrides the value of 
+     :attr:`IOProfile.strict_hydrogens`.
 
   :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
       inexistent file
   """
-  
-  if dialect not in ('PDB', 'CHARMM',):
+  def _override(val1, val2):
+    if val2!=None:
+      return val2
+    else:
+      return val1
+  if isinstance(profile, str):
+    prof=profiles[profile].Copy()
+  else:
+    prof=profile.Copy()
+  if dialect not in (None, 'PDB', 'CHARMM',):
     raise ValueError('dialect must be PDB or CHARMM')
+  prof.calpha_only=_override(prof.calpha_only, calpha_only)
+  prof.no_hetatms=_override(prof.no_hetatms, no_hetatms)
+  prof.dialect=_override(prof.dialect, dialect)
+  prof.quack_mode=_override(prof.quack_mode, quack_mode)
+  prof.strict_hydrogens=_override(prof.strict_hydrogens, strict_hydrogens)
+  prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
+  prof.join_spread_atom_records=_override(prof.join_spread_atom_records,
+                                          join_spread_atom_records)
 
   if remote:
     output_dir = tempfile.gettempdir()
@@ -105,25 +156,13 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
   
   conop_inst=conop.Conopology.Instance()
   builder=conop_inst.GetBuilder("DEFAULT")
-  if dialect=='PDB':
+  if prof.dialect=='PDB':
     builder.dialect=conop.PDB_DIALECT
-  elif dialect=='CHARMM':
+  elif prof.dialect=='CHARMM':
     builder.dialect=conop.CHARMM_DIALECT
-  builder.strict_hydrogens=strict_hydrogens
-  reader=PDBReader(filename)
-  flags=0
-  if calpha_only:
-    flags|=PDB.CALPHA_ONLY
-  if fault_tolerant:
-    flags|=PDB.SKIP_FAULTY_RECORDS
-  if no_hetatms:
-    flags|=PDB.NO_HETATMS
-  if join_spread_atom_records:
-    flags|=PDB.JOIN_SPREAD_ATOM_RECORDS
-  if dialect=='CHARMM':
-    flags|=PDB.CHARMM_FORMAT
+  builder.strict_hydrogens=prof.strict_hydrogens
+  reader=PDBReader(filename, prof)
   try:
-    PDB.PushFlags(PDB.Flags() | flags)
     if load_multi:
       ent_list=[]
       while reader.HasNext():
@@ -133,7 +172,6 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
         ent_list.append(ent)
       if len(ent_list)==0:
         raise IOError("File doesn't contain any entities")
-      PDB.PopFlags()
       return ent_list
     else:
       ent=mol.CreateEntity()
@@ -142,13 +180,11 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=False,
         conop_inst.ConnectAll(builder, ent, 0)
       else:
         raise IOError("File doesn't contain any entities")
-      PDB.PopFlags()
       return ent
   except:
-    PDB.PopFlags()
     raise
 
-def SavePDB(models, filename, dialect='PDB'):
+def SavePDB(models, filename, dialect=None,  pqr=False, profile='DEFAULT'):
   """
   Save entity or list of entities to disk. If a list of entities is supplied the 
   PDB file will be saved as a multi PDB file. Each of the entities is wrapped 
@@ -160,18 +196,18 @@ def SavePDB(models, filename, dialect='PDB'):
   """
   if not getattr(models, '__len__', None):
     models=[models]
-  writer=PDBWriter(filename, dialect=='CHARMM')
-  try:
-    if len(models)>1:
-      PDB.PushFlags(PDB.Flags() |PDB.WRITE_MULTIPLE_MODELS)
-    else:
-      PDB.PushFlags(0)
-    for model in models:
-      writer.Write(model)
-    PDB.PopFlags()
-  except:
-    PDB.PopFlags()
-    raise
+  if isinstance(profile, str):
+    profile=profiles[profile].Copy()
+  else:
+    profile.Copy()
+  profile.dialect=_override(profile.dialect, dialect)
+  writer=PDBWriter(filename, profile)
+  writer.SetIsPQR(pqr)
+  if len(models)>1:
+    writer.write_multi_model=True
+  for model in models:
+    writer.Write(model)
+
 try:
   from ost import img
   LoadMap = LoadImage
@@ -190,8 +226,9 @@ def LoadImageList (files):
 
 LoadMapList=LoadImageList
 
-def LoadCHARMMTraj(crd, dcd_file=None, lazy_load=False, stride=1, 
-                   dialect='CHARMM'):
+def LoadCHARMMTraj(crd, dcd_file=None, profile='CHARMM',
+                   lazy_load=False, stride=1, 
+                   dialect=None):
   """
   Load CHARMM trajectory file.
   
@@ -206,12 +243,15 @@ def LoadCHARMMTraj(crd, dcd_file=None, lazy_load=False, stride=1,
   :param stride: The spacing of the frames to load. When set to 2, for example, 
       every second frame is loaded from the trajectory. By default, every frame 
       is loaded.
-  :param dialect: The dialect for the PDB file to use. See :func:`LoadPDB`.
+  :param dialect: The dialect for the PDB file to use. See :func:`LoadPDB`. If 
+      set, overrides the value of the profile
+  :param profile: The IO profile to use for loading the PDB file. See 
+      :doc:`profile`.
   """
   if not isinstance(crd, mol.EntityHandle):
     if dcd_file==None:
       dcd_file='%s.dcd' % os.path.splitext(crd)[0]    
-    crd=LoadPDB(crd, dialect=dialect)
+    crd=LoadPDB(crd, profile=profile, dialect=dialect)
 
   else:
     if not dcd_file:

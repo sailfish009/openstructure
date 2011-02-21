@@ -59,7 +59,7 @@ public:
 
   SceneNode* GetItem(const QModelIndex &index) const;
 
-  SceneNode* FindGfxNode(gfx::GfxNodeP node) const;
+  SceneNode* FindGfxNode(gfx::GfxNodeP node);
 
 
   bool AddNode(SceneNode* parent, SceneNode* child);
@@ -107,6 +107,7 @@ private:
   SceneNode* scene_node_;
 
   QMap<gfx::GfxNodeP, RenderModesNode*> render_observers_;
+  QMap<gfx::GfxNode*, SceneNode*>       node_map_;
 };
 
 }}

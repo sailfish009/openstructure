@@ -76,7 +76,10 @@ MessageWidget::MessageWidget(QWidget* parent) :
       + QString("delete_icon.png")));
   connect(clear_action, SIGNAL(triggered(bool)), this, SLOT(Clear()));
   this->actions_.append(clear_action);
-
+  QObject::connect(&PythonInterpreter::Instance(),
+                   SIGNAL(ErrorOutput(unsigned int, const QString &)),
+                   this,
+                   SLOT(ErrorOutput(unsigned int, const QString &)));
   new LogReader(this);
 }
 
@@ -93,6 +96,11 @@ void MessageWidget::LogMessage(const QString& message, QMessageBox::Icon icon) {
   item->setEditable(false);
   this->model_->appendRow(item);
   this->Increase(icon);
+}
+
+void MessageWidget::ErrorOutput(unsigned int id,const QString& output)
+{
+  this->LogMessage(output, QMessageBox::Critical);
 }
 
 void MessageWidget::LogMessage(QStandardItem* item) {

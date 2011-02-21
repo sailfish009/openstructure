@@ -3,7 +3,8 @@ from ost import settings, io, seq, LogError
 import os
 import subprocess
 
-def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False):
+def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False, 
+             clustalw_option_string=False):
   clustalw_path=settings.Locate(('clustalw', 'clustalw2'), 
                                 explicit_file_name=clustalw)
   
@@ -13,8 +14,8 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False):
       seq_list.AddSequence(seq1)
       seq_list.AddSequence(seq2)
     elif isinstance(seq1, str) and isinstance(seq2, str):
-      seqh1=CreateSequence("seq1", seq1)
-      seqh2=CreateSequence("seq2", seq2)
+      seqh1=seq.CreateSequence("seq1", seq1)
+      seqh2=seq.CreateSequence("seq2", seq2)
       seq_list=seq.CreateSequenceList()
       seq_list.AddSequence(seqh1)
       seq_list.AddSequence(seqh2)
@@ -32,6 +33,11 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False):
   command='%s -infile="%s" -output=fasta -outfile="%s"' % (clustalw_path,
                                                            temp_dir.files[0],
                                                            out)
+  if nopgap:
+    command+=" -nopgap"
+  if clustalw_option_string!=False:
+    command=command+" "+clustalw_option_string  #see useful flags: http://toolkit.tuebingen.mpg.de/clustalw/help_params
+
   ps=subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   ps.stdout.readlines()
   aln=io.LoadAlignment(out)

@@ -265,6 +265,7 @@ ResidueView EntityView::FindResidue(const ResidueHandle& residue) const {
 
 AtomView EntityView::FindAtom(const AtomHandle& atom) const 
 {
+  this->CheckValidity();
   return data_->ViewForHandle(atom);
 }
 

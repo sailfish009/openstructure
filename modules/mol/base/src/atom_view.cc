@@ -67,7 +67,10 @@ AtomView::AtomView(const ResidueView& residue_view,
 ResidueView AtomView::GetResidue() const 
 {
   this->CheckValidity();
-  return ResidueView(data_->residue.lock(), Impl()->GetResidue());
+  if (!data_->residue.expired()) {
+    return ResidueView(data_->residue.lock(), Impl()->GetResidue());    
+  }
+  throw InvalidHandle();
 }
 
 void AtomView::Apply(EntityVisitor& visitor) 

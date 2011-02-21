@@ -34,7 +34,7 @@ struct Fixture {
   Fixture() {
     eh = CreateEntity();
     eh.SetName("TestEntity");
-    XCSEditor e=eh.RequestXCSEditor();
+    XCSEditor e=eh.EditXCS();
     chain = e.InsertChain("A");
     res1 = e.AppendResidue(chain, "ARG");
     e.InsertAtom(res1, "CA",geom::Vec3(1,0,0));
@@ -63,6 +63,14 @@ BOOST_AUTO_TEST_CASE(seq_triv)
   BOOST_CHECK_NO_THROW(s.SetString("-afc--de-f"));
   BOOST_CHECK_EQUAL(s.GetString(),"-afc--de-f");
   BOOST_CHECK_THROW(s.SetString("1"), InvalidSequence);
+}
+
+BOOST_AUTO_TEST_CASE(seq_throw_invalid)
+{
+  SequenceHandle s;
+  BOOST_CHECK_THROW(CheckHandleValidity(s), InvalidHandle);
+  s=CreateSequence("A", "abcd");
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(s));
 }
 
 BOOST_AUTO_TEST_CASE(seq_length)

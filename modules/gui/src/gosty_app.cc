@@ -25,7 +25,15 @@
 #include <ost/gui/tools/tool_options_win.hh>
 #include <ost/gui/perspective.hh>
 #include <ost/gui/main_area.hh>
+#include <ost/gui/python_shell/python_interpreter.hh>
 
+#include <ost/gui/scene_win/scene_win.hh>
+#include <ost/gui/sequence_viewer/sequence_viewer.hh>
+#include <ost/gui/messages/message_widget.hh>
+
+#if OST_IMG_ENABLED
+  #include <ost/gui/data_viewer/data_viewer.hh>
+#endif
 
 #include <QApplication>
 #include <QMainWindow>
@@ -45,7 +53,8 @@ GostyApp* GostyApp::app_=NULL;
 GostyApp::GostyApp():
   py_shell_(NULL), gl_win_(NULL), scene_win_(NULL), message_widget_(NULL), seq_viewer_(NULL),
   tool_options_win_(NULL), main_(new GostyMainWindow),
-  perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>())
+  perspective_(NULL), external_widgets_(QMap<QString,WidgetGeomHandler *>()),
+  try_stereo_(false)
 {
   assert(GostyApp::app_==NULL);
   GostyApp::app_=this;
@@ -95,7 +104,7 @@ SceneWin* GostyApp::GetSceneWin()
 SequenceViewer* GostyApp::GetSequenceViewer()
 {
   if (seq_viewer_==NULL) {
-    seq_viewer_=new SequenceViewer(false);
+    seq_viewer_=new SequenceViewer(false, true);
     seq_viewer_->SetDestroyOnClose(false);
   }
   return seq_viewer_;
@@ -117,10 +126,17 @@ PythonShell* GostyApp::GetPyShell()
   return py_shell_;
 }
 
-GLWin*  GostyApp::GetGLWin()
+
+void GostyApp::StopScript() 
+{
+  PythonInterpreter::Instance().StopScript();
+}
+
+
+GLWin* GostyApp::GetGLWin()
 {
   if (gl_win_==NULL) {
-    gl_win_=new GLWin(main_);
+    gl_win_=new GLWin(main_,try_stereo_);
     gl_win_->SetDestroyOnClose(false);    
   }
   return gl_win_;  
@@ -151,6 +167,14 @@ void GostyApp::AddWidgetToApp(const QString& ident, QWidget* widget)
 {
   external_widgets_[ident] = new WidgetGeomHandler(ident,widget);
   external_widgets_[ident]->LoadGeom("ui/external_widgets/");
+}
+
+QWidget* GostyApp::GetWidget(const QString& ident)
+{
+  if (external_widgets_.contains(ident)) {
+    return external_widgets_[ident]->GetWidget();
+  }
+  return NULL;
 }
 
 void GostyApp::RemoveWidgetFromApp(const QString& ident){

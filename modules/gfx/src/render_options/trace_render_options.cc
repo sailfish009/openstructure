@@ -29,7 +29,7 @@ TraceRenderOptions::TraceRenderOptions():
   arc_detail_(4),
   smooth_factor_(0.0),
   tube_radius_(0.4)
-{ }
+{}
 
 RenderMode::Type TraceRenderOptions::GetRenderMode()
 {
@@ -84,8 +84,4 @@ float TraceRenderOptions::GetTubeRadius() const{
   return tube_radius_;
 }
 
-TraceRenderOptions::~TraceRenderOptions() {}
-
-}
-
-}
+}}

@@ -83,6 +83,10 @@ void PythonInterpreter::Start()
     emit WakeWorker();
 }
 
+void PythonInterpreter::StopScript()
+{
+  PyErr_SetInterrupt();
+}
 
 
 unsigned int PythonInterpreter::RunScript(const QString& fname)

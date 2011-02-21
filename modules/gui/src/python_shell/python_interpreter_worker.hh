@@ -46,6 +46,7 @@ protected:
   bp::object repr_;
   bp::dict main_namespace_;
   unsigned int current_id_;
+  bool         awake_;
 };
 
 }} //ns

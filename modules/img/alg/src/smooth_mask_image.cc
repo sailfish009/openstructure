@@ -80,5 +80,10 @@ void SmoothMaskImageBase::VisitState(ImageStateImpl<T,D>& is)
 
 
 }
+
+namespace image_state {
+
 template class TEMPLATE_DEF_EXPORT ImageStateModIPAlgorithm<alg::SmoothMaskImageBase>;
-}} // namespaces
+
+
+}}} // namespaces

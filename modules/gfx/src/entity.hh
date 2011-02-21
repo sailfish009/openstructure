@@ -70,13 +70,15 @@ public:
   /// Rebuild() will re-apply the mol::Query to the given mol::EntityHandle
   Entity(const String& name,
          const mol::EntityHandle& eh,
-         const mol::Query& q=mol::Query());
+         const mol::Query& q=mol::Query(),
+         mol::QueryFlags f=0);
 
   /// \brief variant with explicit graphics mode instead of the default
   Entity(const String& name,
          RenderMode::Type m,
          const mol::EntityHandle& eh,
-         const mol::Query& q=mol::Query());
+         const mol::Query& q=mol::Query(),
+         mol::QueryFlags f=0);
 
   /// \brief Initialize with an object name and an explicit mol::Entity view; 
   ///    later calls to Rebuild always use this mol::Entity view
@@ -140,7 +142,16 @@ public:
 
   virtual void OptionsChanged(RenderMode::Type mode);
 
+  virtual void SetOpacity(float f);
+  virtual float GetOpacity() const {return opacity_;}
+  virtual void SetOutlineWidth(float f);
+  virtual void SetOutlineExpandFactor(float f);
+  virtual void SetOutlineExpandColor(const Color& c);
+
   /// \brief rebuild graphical object (see ctor comments)
+  /*
+    the naming here is misleading - this method WON'T be called upon FlagRebuild
+  */
   void Rebuild();
 
   /// \brief only grab updated positions, dont rebuild the whole thing
@@ -165,6 +176,7 @@ public:
   /// \brief get view
   mol::EntityView GetView() const;
 
+  void SetQuery(const mol::Query& q);
 
   // turn blur on or off
   void SetBlur(bool f);
@@ -198,6 +210,12 @@ public:
                const Gradient& gradient,
                float minv,float maxv,
                mol::Prop::Level hint=mol::Prop::UNSPECIFIED);
+
+  // temporary, should be incorporated with ColorBy
+  void DetailColorBy(const String& prop, 
+                     const Gradient& gradient,
+                     float minv,float maxv,
+                     mol::Prop::Level hint=mol::Prop::UNSPECIFIED);
 
   // convenience
   void ColorBy(const String& prop, 
@@ -257,6 +275,12 @@ public:
   void ApplyOptions(RenderMode::Type render_mode,
                           RenderOptionsPtr& render_options);
   bool HasSelection() const;
+
+  void UpdateView();
+
+  void SetSeqHack(bool b);
+  bool GetSeqHack() const;
+  
 protected:
 
   virtual void CustomPreRenderGL(bool flag);
@@ -282,6 +306,11 @@ private:
 
   typedef boost::ptr_map<RenderMode::Type, impl::EntityRenderer> RendererMap;
   mutable RendererMap renderer_;
+
+  float opacity_;
+  bool blur_;
+  float blurf1_;
+  float blurf2_;
 };
 
 

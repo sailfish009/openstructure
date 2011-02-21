@@ -47,8 +47,9 @@ void export_Chain()
   chain_base
     .def("GetName", &ChainBase::GetName)
     .add_property("name", &ChainBase::GetName)
-    .def("IsValid", &ChainBase::IsValid)    
     .def(self_ns::str(self))
+    .add_property("valid", &ChainBase::IsValid)
+    .def("IsValid", &ChainBase::IsValid)
   ;
   generic_prop_def<ChainBase>(chain_base);
   class_<ChainHandle, bases<ChainBase> >("ChainHandle", init<>())
@@ -90,7 +91,6 @@ void export_Chain()
     .add_property("center_of_mass", &ChainHandle::GetCenterOfMass)
     .add_property("center_of_atoms", &ChainHandle::GetCenterOfAtoms)  
     .add_property("in_sequence", &ChainHandle::InSequence)  
-    .add_property("valid", &ChainHandle::IsValid)    
     .def("GetBounds", &ChainHandle::GetBounds)
     .add_property("bounds", &ChainHandle::GetBounds)
     .def("GetGeometricStart", geom_start<ChainHandle>)

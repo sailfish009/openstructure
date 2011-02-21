@@ -122,4 +122,5 @@ void export_Surface()
     .def("CleanColorOps", &Surface::CleanColorOps)
     .def("ReapplyColorOps", &Surface::ReapplyColorOps)
     ;
+
 }

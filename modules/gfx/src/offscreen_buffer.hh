@@ -22,86 +22,54 @@
 /*
   Wraps GL offscreen rendering per platform
 
-  Authors: Ansgar Philippsen, Marco Biasini
+  boilerplate header, includes platform dependent stuff
 */
 
-#include <ost/gfx/gl_include.hh>
-
-#if defined(__linux__)
-#  include <GL/glx.h>
-#elif defined(__APPLE__)
-#  include <OpenGL/OpenGL.h>
-//#elif defined(_WIN32)
-//#  include <ost/gfx/GL/wglew.h>
-#endif
-
-#ifdef Complex
-#  undef Complex
-#endif
+#include <vector>
 
 namespace ost { namespace gfx {
 
-/// \brief offscreen management
-class OffscreenBuffer {
+class OffscreenBufferFormat
+{
 public:
-  
-  /// \brief singleton interface
-  static OffscreenBuffer& Instance();
+  OffscreenBufferFormat(): cbits(8),abits(8),dbits(12),accum(false),multisample(false),samples(0) {}
 
-  /// \brief activate offscreen context for rendering
-  bool Begin();
-  /// \brief switch back to normal rendering context
-  bool End();
-  /// \ brief resize offscreen rendering context
-  bool Resize(unsigned int width, unsigned int height);
+  unsigned int cbits,abits,dbits; // color, alpha, depth bits
+  bool accum;
+  bool multisample;
+  unsigned int samples;
+};
 
-  /// \brief returns true if offscreen rendering context is available
-  bool IsValid() const;
+}} // ns
 
-  /// \brief returns true between Begin/End bracket
-  bool IsActive() const;
+/* 
+   instead of creating an abstract base class and
+   making runtime polymorphic classes for each
+   platform, we do a bit more typing and copy
+   the minimal interface to each of the platform
+   specific OffscreenBuffer implementations
 
-private:
-  OffscreenBuffer(int width, int height, int r_bits, int b_bits, 
-                  int g_bits, int a_bits, int depth_bits);
+   OffscreenBuffer interface:
 
-  OffscreenBuffer(const OffscreenBuffer& b) {}
-  OffscreenBuffer& operator=(const OffscreenBuffer& b) {return *this;}
-  
-  int width_;
-  int height_;
-  bool valid_;
-  bool active_;
+   OffscreenBuffer(unsigned int width, unsigned int height, const OffscreenBufferFormat& f, bool shared=true);
+   bool Resize(unsigned int w, unsigned int h);
+   bool MakeActive();
+   bool IsActive();
+   bool IsValid();
+*/
 
 #if defined(__linux__)
-  Display*    dpy_;
-  GLXFBConfig* fbconfig_;
-  GLXPbuffer  pbuffer_;
-  GLXContext  context_;
-  GLXContext  old_context_;
-  GLXDrawable        old_dr1_;
-  GLXDrawable        old_dr2_;
-
+#include "impl/glx_offscreen_buffer.hh"
 #elif defined(__APPLE__)
-
-  CGLPBufferObj      pbuffer_;
-  CGLContextObj      context_;
-  CGLPixelFormatObj  pix_format_;
-  CGLContextObj      old_context_;
-
-#elif defined(_WIN32)
-/*  HPBUFFERARB        pbuffer_;
-  HGLRC              context_; //rendering context
-  HGLRC              old_context_;
-  
-  HDC                dev_context_;//device context
-  HDC                old_dev_context_;
-  */
+#include "impl/cgl_offscreen_buffer.hh"
+#elif defined(_MSC_VER)
+#include "impl/wgl_offscreen_buffer.hh"
+#else
+#error platform not found for offscreen rendering
 #endif
-
-  GLint       old_vp_[4];
-};
  
-}}
+#ifdef Complex
+#  undef Complex
+#endif
 
 #endif

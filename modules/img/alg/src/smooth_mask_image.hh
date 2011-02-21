@@ -55,8 +55,10 @@ typedef ImageStateModIPAlgorithm<SmoothMaskImageBase> SmoothMaskImage;
 
 }
 
-OST_IMG_ALG_EXPLICIT_INST_DECL(class,ImageStateModIPAlgorithm<alg::SmoothMaskImageBase>)
 
-  }} // namespaces
+
+}} // namespaces
+
+OST_IMG_ALG_EXPLICIT_INST_DECL(class,ImageStateModIPAlgorithm<ost::img::alg::SmoothMaskImageBase>)
 
 #endif /*SMOOTH_MASK_IMAGE_HH_*/

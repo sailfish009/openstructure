@@ -45,7 +45,20 @@ def Mean(xs):
   """
   if len(xs)==0:
     raise RuntimeError("Can't calculate mean of empty sequence")
-  return sum(xs)/len(xs)
+  return float(sum(xs))/len(xs)
+
+@FloatValueExtract
+def Median(xs):
+  """
+  Calculate median of dataset
+  """
+  if len(xs)==0:
+    raise RuntimeError("Can't calculate median of empty sequence")
+  sorted_xs=sorted(xs)
+  if (len(xs) % 2)==0:
+    return (sorted_xs[(len(xs)-1)/2]+sorted_xs[(len(xs)-1)/2+1])/2.0
+  else:
+    return sorted_xs[(len(xs)-1)/2]
 
 @FloatValueExtract
 def StdDev(xs):
@@ -73,7 +86,7 @@ def Correl(xs, ys):
   
     sum[(xi-<x>)*(yi-<y>)]
   r=----------------------
-          (n-1)*sx*sy
+          sx*sy
           
   where <x>, <y> are the mean of dataset xs and ys, and, sx and sy are the 
   standard deviations.
@@ -90,9 +103,9 @@ def Correl(xs, ys):
     cross_term+=(x-mean_x)*(y-mean_y)
     sigma_x+=(x-mean_x)**2
     sigma_y+=(y-mean_y)**2
-  sigma_x=math.sqrt(sigma_x/len(xs))
-  sigma_y=math.sqrt(sigma_y/len(ys))  
-  return cross_term/((len(xs)-1)*sigma_x*sigma_y)
+  sigma_x=math.sqrt(sigma_x)
+  sigma_y=math.sqrt(sigma_y)
+  return cross_term/(sigma_x*sigma_y)
 
 def Histogram(xs, bounds, num_bins):
   bins=[0 for i in range(num_bins)]

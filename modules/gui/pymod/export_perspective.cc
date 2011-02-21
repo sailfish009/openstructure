@@ -22,6 +22,9 @@
 
 #include <ost/gui/perspective.hh>
 #include <ost/gui/main_area.hh>
+#include <ost/gui/panels/panel_manager.hh>
+#include <ost/gui/panels/button_bar.hh>
+#include <ost/gui/panels/panel_bar.hh>
 
 #include "sip_handler.hh"
 

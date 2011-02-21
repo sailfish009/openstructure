@@ -3,6 +3,7 @@ import shutil
 import subprocess
 import string
 import sys
+import datetime
 
 
 # custom parameters
@@ -39,13 +40,10 @@ if uname_line[0].find('x86_64') !=-1:
 else: 
   libdir='lib'
   archstring='32bit'
-svninfo_output=subprocess.Popen('svn info', shell=True, cwd='../../',stdout=subprocess.PIPE).stdout
-svninfo_lines=svninfo_output.readlines()
-svninfo_split=string.split(svninfo_lines[4])
-revstring=svninfo_split[1]
-directory_name='openstructure-linux-'+archstring+'-'+additional_label+'-rev'+revstring
-print 'Stripping subversion information to avoid accidental commit'
-subprocess.call('rm -rf $(find . -name .svn)',shell=True,cwd='../../')
+date_pattern='%Y-%b-%d'
+build=str(datetime.datetime.now())
+stamp=datetime.datetime.strptime(build, date_pattern)
+directory_name='openstructure-linux-'+archstring+'-'+additional_label+stamp
 print 'Hardcoding package python binary path in openstructure executables'
 subprocess.call('mv scripts/ost.in scripts/ost.in.backup',shell=True,cwd='../../')
 subprocess.call('sed "s/@PYTHON_BINARY@/\$DNG_ROOT\/bin\/'+python_bin_in_bundle+'/g" scripts/ost.in.backup > scripts/ost.in.prepreprepre',shell=True,cwd='../../')

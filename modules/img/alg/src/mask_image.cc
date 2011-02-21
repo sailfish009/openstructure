@@ -59,6 +59,8 @@ void MaskImageBase::VisitState(ImageStateImpl<T,D>& is) const
 
 }
 
-template class TEMPLATE_DEF_EXPORT ImageStateConstModIPAlgorithm<alg::MaskImageBase>;
+namespace image_state {
 
-}} // namespaces
+template class TEMPLATE_DEF_EXPORT ImageStateConstModIPAlgorithm<alg::MaskImageBase>;
+  
+}}} // namespaces

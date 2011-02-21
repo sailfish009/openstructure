@@ -42,15 +42,18 @@ ResidueImpl::ResidueImpl(const EntityImplPtr& ent,
   key_(key),
   atom_list_(),
   sec_structure_(SecStructure::COIL),
-  olc_('?')
-{}
+  olc_('?'),
+  protein_(false), ligand_(false)
+{
+}
 
 
 AtomImplPtr ResidueImpl::InsertAtom(const String& name,
-                                  const geom::Vec3& pos,
-                                  const AtomProp& prop)
+                                    const geom::Vec3& pos,
+                                    const String& ele)
 {
-  AtomImplPtr ap=ent_.lock()->CreateAtom(shared_from_this(),name, pos, prop);
+  AtomImplPtr ap=ent_.lock()->CreateAtom(shared_from_this(),
+                                         name, pos, ele);
   atom_list_.push_back(ap);
   return ap;
 }
@@ -59,9 +62,20 @@ AtomImplPtr ResidueImpl::InsertAtom(const AtomImplPtr& atom)
 {
   AtomImplPtr dst_atom=this->InsertAtom(atom->GetName(), 
                                         atom->GetPos(),
-                                        atom->GetAtomProps());
+                                        atom->GetElement());
+
   dst_atom->Assign(*atom.get());
   dst_atom->SetState(atom->GetState());
+  dst_atom->SetBFactor(atom->GetBFactor());
+  dst_atom->SetOccupancy(atom->GetOccupancy());
+  dst_atom->SetHetAtom(atom->IsHetAtom());  
+
+  if (!atom->HasDefaultProps()) {
+    dst_atom->SetRadius(atom->GetRadius());
+    dst_atom->SetCharge(atom->GetCharge());
+    dst_atom->SetMass(atom->GetMass());
+    dst_atom->SetAnisou(atom->GetAnisou());
+  }
   return dst_atom;
 }
 
@@ -70,7 +84,7 @@ Real ResidueImpl::GetAverageBFactor() const
   Real sum=0;
   for (AtomImplList::const_iterator i=atom_list_.begin(), 
        e=atom_list_.end(); i!=e; ++i) {
-    sum+=(*i)->GetAtomProps().b_factor;
+    sum+=(*i)->GetBFactor();
   }
   return atom_list_.size()>0 ? sum/atom_list_.size() : 0.0;
 }
@@ -115,8 +129,8 @@ geom::Vec3 ResidueImpl::GetAltAtomPos(const AtomImplPtr& atom,
 AtomImplPtr ResidueImpl::InsertAltAtom(const String& name,
                                        const String& alt_group,
                                        const geom::Vec3& pos,
-                                       const AtomProp& prop) {
-  AtomImplPtr atom=this->InsertAtom(name, pos, prop);
+                                       const String& ele) {
+  AtomImplPtr atom=this->InsertAtom(name, pos, ele);
   this->AddAltAtom(alt_group, atom, pos);
   return atom;
 }
@@ -198,24 +212,28 @@ ChainImplPtr ResidueImpl::GetChain() const
 
 geom::Vec3 ResidueImpl::GetCentralNormal() const
 {
+  geom::Vec3 nrvo(1,0,0);
   if (chem_class_.IsPeptideLinking()) {
     AtomImplPtr a1 = FindAtom("C");
     AtomImplPtr a2 = FindAtom("O"); 
-    geom::Vec3 nrvo;
     if(a1 && a2) {
-      nrvo = geom::Normalize(a1->GetPos()-a2->GetPos());
+      nrvo = geom::Normalize(a2->GetPos()-a1->GetPos());
     } else {
-      geom::Vec3 v0=GetCentralAtom()->GetPos();
-      nrvo=geom::Cross(geom::Normalize(v0),
-                       geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
-      LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
+      a1 = FindAtom("CB");
+      a2 = FindAtom("CA"); 
+      if(a1 && a2) {
+        nrvo = geom::Normalize(a2->GetPos()-a1->GetPos());
+      } else {
+        geom::Vec3 v0=GetCentralAtom()->GetPos();
+        nrvo=geom::Cross(geom::Normalize(v0),
+                         geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
+        LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
+      }
     }
-    return nrvo;    
   } else if (chem_class_.IsNucleotideLinking()) {
     AtomImplPtr a1 = FindAtom("P");
     AtomImplPtr a2 = FindAtom("OP1");
     AtomImplPtr a3 = FindAtom("OP2");
-    geom::Vec3 nrvo;
     if(a1 && a2 && a3) {
       nrvo = geom::Normalize(a1->GetPos()-(a2->GetPos()+a3->GetPos())*.5);
     } else {
@@ -224,9 +242,8 @@ geom::Vec3 ResidueImpl::GetCentralNormal() const
                        geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
       LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
     }
-    return nrvo;
   }
-  return geom::Vec3();
+  return nrvo;
 }
 
 
@@ -376,7 +393,7 @@ void ResidueImpl::DeleteAllAtoms() {
 
 String ResidueImpl::GetQualifiedName() const {
   String chain_name=this->GetChain()->GetName();
-  return (chain_name==" " ? "" :  chain_name+".")+
+  return ((chain_name==" " || chain_name=="") ? "" :  chain_name+".")+
          this->GetKey()+
          this->GetNumber().AsString();
 }
@@ -422,7 +439,7 @@ Real ResidueImpl::GetMass() const
   Real mass = 0;
   for (AtomImplList::const_iterator i=atom_list_.begin(); 
        i!=atom_list_.end(); ++i) {
-    mass+=(*i)->GetAtomProps().mass;
+    mass+=(*i)->GetMass();
   }
   return mass;
 }
@@ -466,7 +483,7 @@ geom::Vec3 ResidueImpl::GetCenterOfMass() const
   if (this->GetAtomCount() > 0 && mass > 0) {
     for (AtomImplList::const_iterator i=atom_list_.begin(); 
         i!=atom_list_.end(); ++i) {
-      center+=(*i)->GetPos()*(*i)->GetAtomProps().mass;
+      center+=(*i)->GetPos()*(*i)->GetMass();
     }
   }
   return center/mass;

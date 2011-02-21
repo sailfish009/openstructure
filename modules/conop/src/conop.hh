@@ -26,6 +26,12 @@
 
 namespace ost { namespace conop {
 
+
+typedef enum {
+  NO_PEPTIDE_BONDS=1,
+} ConopFlag;
+
+  
 class DLLEXPORT_OST_CONOP Conopology {
   typedef std::map<String,BuilderP> BuilderMap;
 
@@ -36,20 +42,14 @@ public:
   // retrieve a builder by name
   BuilderP GetBuilder(const String& name="DEFAULT");
 
-  // return default vdW radius
-  // temporary location until more elaborate chemical information is impl
-  Real GetDefaultAtomRadius(const String& element) const;
-
-  // return default mass
-  Real GetDefaultAtomMass(const String& element) const;
-
   /*
     convenience function, connect all atoms with given coordinates,
     such as after coordinate file import, based on a given builder
 
     does this need to live within Conopology ?
   */
-  void ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flag=0);
+  void ConnectAll(const BuilderP& b, mol::EntityHandle eh, 
+                  int flags=0);
 
   void RegisterBuilder(const BuilderP& b, const String& name);
   void SetDefaultBuilder(const String& default_name);
@@ -61,8 +61,7 @@ private:
   Conopology& operator=(const Conopology&) {return *this;}
 
   BuilderMap builder_map_;
-  std::map<String,Real> ele_rad_map_;
-  std::map<String,Real> ele_mass_map_;
+  std::set<String> known_elements_;
 };
 
 }} //

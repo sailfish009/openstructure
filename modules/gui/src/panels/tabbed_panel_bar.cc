@@ -21,12 +21,13 @@
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
 #include <ost/gui/widget_registry.hh>
-
+#include <ost/gui/panels/panel_manager.hh>
 #include "tabbed_panel_bar.hh"
 
 #include <QApplication>
 #include <QSettings>
 #include <QDir>
+
 namespace ost { namespace gui {
 
 TabbedPanelBar::TabbedPanelBar(PanelBar* parent):

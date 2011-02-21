@@ -22,7 +22,6 @@
 
 #include "surface_handle.hh"
 #include "entity_view.hh"
-#include "iterator.hh"
 
 namespace ost { namespace mol {
 

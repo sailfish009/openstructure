@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "gfx_scene_node.hh"
-
+#include <ost/gui/scene_win/scene_win_model.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node.hh>
 
