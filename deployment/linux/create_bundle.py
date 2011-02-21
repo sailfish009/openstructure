@@ -12,6 +12,7 @@ if len(sys.argv) < 2:
   print 'usage: create_bundle.py  additional_label'
   sys.exit()
 
+#boost_string='\".so.1.42.0\"'
 system_python_version='python2.6'
 system_python_bin='/usr/bin/'+system_python_version
 system_python_libs='/usr/lib/'+system_python_version
@@ -20,7 +21,7 @@ second_system_python_libs='/usr/lib/pymodules/'+system_python_version
 python_bin_in_bundle='python'
 qt4_plugins='/usr/lib/qt4/plugins'
 additional_label=sys.argv[1]
-list_of_excluded_libraries=['ld-linux','libexpat','libgcc_s','libglib','cmov','libice','libSM','libX','libg','libGL.so','libfontconfig','libfreetype','libdrm','libxcb','libICE','libnvidia','libc']
+list_of_excluded_libraries=['ld-linux','libexpat','libgcc_s','libglib','cmov','libice','libSM','libX','libg','libGL.so','libfontconfig','libfreetype','libdrm','libxcb','libICE']
 currdir=os.getcwd()
 if currdir.find('deployment')==-1 or currdir.find('linux')==-1:
   print '\n'
