@@ -70,6 +70,16 @@ OpenStructure uses `git` as the revision control system. The main repository can
   
 The above command will clone OpenStructre into the directory called `directory-name`. If omitted, the directory will be called ost. Alternatively, you might consider getting one of the nightly source code snapshots from the `downloads section <http://www.openstructure.org/downloads/>`_.
 
+.. note::
+
+  Some version of curl have have trouble with the certificate of the 
+  OpenStructure git server and fail to clone the repository. To work around 
+  this, disable the SLL certificate verification with the following command:
+  
+  .. code-block:: bash
+  
+    git config --global http.sslVerify false
+
 
 Configuring
 --------------------------------------------------------------------------------
