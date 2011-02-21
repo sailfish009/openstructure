@@ -74,7 +74,7 @@ The above command will clone OpenStructre into the directory called `directory-n
 
   Some version of curl have have trouble with the certificate of the 
   OpenStructure git server and fail to clone the repository. To work around 
-  this, disable the SSL certificate verification with the following command:
+  this, disable the SLL certificate verification with the following command:
   
   .. code-block:: bash
   
