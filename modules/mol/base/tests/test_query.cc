@@ -279,7 +279,8 @@ BOOST_AUTO_TEST_CASE(test_glob)
   ensure_counts(e, "rname=ARG and aname=N?1", 1, 1, 1);
   ensure_counts(e, "rname=ARG and aname=NH?", 1, 1, 2);
   ensure_counts(e, "rname=ARG and aname=\"*2\"", 1, 1, 1);
-  //ensure_counts(e, "rname=ARG and aname=N?", 1, 1, 1);
+  ensure_counts(e, "rname=ARG and aname=N?", 1, 1, 1);
+  ensure_counts(e, "rname=LEU and aname=\"?D?\"", 1, 1, 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
