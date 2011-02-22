@@ -75,7 +75,8 @@ Entity::Entity(const String& name,
   opacity_(1.0),
   blur_(false),
   blurf1_(1.0),
-  blurf2_(0.8)
+  blurf2_(0.8),
+  needs_update_(true)
 {
   init(RenderMode::SIMPLE);
 }
@@ -327,26 +328,29 @@ void Entity::CacheBoundingBox() const
 bool Entity::UpdateIfNeeded() const
 {
   bool updated=false;
-  for (RendererMap::iterator i=renderer_.begin(), 
-       e=renderer_.end(); i!=e; ++i) {
-    EntityRenderer* renderer =i->second;
-    if (renderer->IsDirty()) {
-      renderer->PrepareRendering();
-      updated=true;
+  if(IsVisible()) {
+    for (RendererMap::iterator i=renderer_.begin(), 
+           e=renderer_.end(); i!=e; ++i) {
+      EntityRenderer* renderer =i->second;
+      if (renderer->IsDirty()) {
+        renderer->PrepareRendering();
+        updated=true;
+      }
+      renderer->VA().SetOpacity(opacity_);
     }
-    renderer->VA().SetOpacity(opacity_);
-  }
-  if (updated) {
-    this->CacheBoundingBox();
+    if (updated) {
+      this->CacheBoundingBox();
+    }
   }
   return updated;
 }
 
 void Entity::CustomPreRenderGL(bool update)
 {
-  if (update) {
+  if (update || needs_update_) {
     this->UpdateIfNeeded();
     RefreshVA();
+    needs_update_=false;
   }
 }
 

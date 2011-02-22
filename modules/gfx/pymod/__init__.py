@@ -183,4 +183,4 @@ def _Match(scene, pattern="*"):
     return matches
   return GfxNodeListProxy(_Recurse("", Scene().root_node, pattern))
 
-SceneSingleton.__getitem__=_Match
+SceneSingleton.Match=_Match

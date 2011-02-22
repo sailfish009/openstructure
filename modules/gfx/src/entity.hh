@@ -311,6 +311,7 @@ private:
   bool blur_;
   float blurf1_;
   float blurf2_;
+  bool needs_update_;
 };
 
 
