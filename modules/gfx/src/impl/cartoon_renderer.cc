@@ -302,8 +302,11 @@ void CartoonRenderer::rebuild_spline_obj(IndexedVertexArray& va,
                                       options_->GetStrandThickness()+factor,
                                       options_->GetStrandProfileType(),
                                       options_->GetStrandEcc())); // profile 2 = strand
-    profiles.push_back(profiles.back()); // profile 3==2, strand
-    
+ TraceProfile prof=profiles.back();
+// do not ever change this back to profiles.push_back(profiles.back()); it segfaults on windows
+// or you will meet two new friends of yours :)
+// looks like a compiler bug
+    profiles.push_back(prof); // profile 3==2, strand
     profiles.push_back(get_circ_profile(detail,
                                       1.7*options_->GetStrandWidth()+factor,
                                       1.1*options_->GetStrandThickness()+factor,
