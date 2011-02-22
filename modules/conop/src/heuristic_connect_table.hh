@@ -41,6 +41,14 @@ struct CONN_DEF_ENTRY {
 };
 
 CONN_DEF_ENTRY def_entry_table[]={
+  // the first entry must be this generic one
+  {"Generic","___",'_', mol::ChemClass(mol::ChemClass::LPeptideLinking),
+   {"N","CA","C"},3,
+   {{-2,1}, {1,2}, {2,3}, {3,-3}},4,
+   {
+   },0,
+   {0, 0, 0, 0, 0, 0},6
+  },
   {"Alanine","ALA",'A', mol::ChemClass(mol::ChemClass::LPeptideLinking),
    {"N","CA","C","O","CB","OXT"},6,
    {{-2,1}, {1,2}, {2,3}, {3,4}, {2,5}, {3,-3}, {6, 3}},7,

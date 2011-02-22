@@ -108,12 +108,15 @@ public:
   std::pair<detail::ConnResEntry,bool> LookupResEntry(const mol::ResidueKey& key);
   
   virtual void FillAtomProps(mol::AtomHandle atom);
+
+  const detail::ConnResEntry& DefaultPeptide() const {return default_peptide_;}
 protected:
   void ConnectivityFromAtomNames(const mol::ResidueHandle& res,
                                  detail::ConnResEntry& centry,
                                  mol::AtomHandleList& unknown_atoms);
 private:
   detail::ConnResEntryMap emap_;
+  detail::ConnResEntry default_peptide_;
 };
 
 

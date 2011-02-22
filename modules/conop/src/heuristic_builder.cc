@@ -109,7 +109,8 @@ ConnResEntry::TorsionEntryList ConnResEntry::GetTorsionList() const
 // actual builder
 
 HeuristicBuilder::HeuristicBuilder():
-  emap_()
+  emap_(),
+  default_peptide_()
 {
   int def_entry_count = sizeof(heuristic_connect::def_entry_table)/sizeof(heuristic_connect::CONN_DEF_ENTRY);
 
@@ -180,8 +181,11 @@ HeuristicBuilder::HeuristicBuilder():
 
       entry.AddTors(tor_nam[0],tor_nam[1],tor_nam[2],tor_nam[3],tor_nam2);
     }
-
-    emap_[def_entry.abbrev]=entry;
+    if(ec==0) { 
+      default_peptide_=entry;
+    } else {
+      emap_[def_entry.abbrev]=entry;
+    }
   }
   LOG_DEBUG("done importing internal tables");
 }
@@ -293,6 +297,22 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
 
   std::pair<detail::ConnResEntry,bool> res0_ret = builder->LookupResEntry(res0.GetKey());
   std::pair<detail::ConnResEntry,bool> res1_ret = builder->LookupResEntry(res1.GetKey());
+
+  if(!res0_ret.second) {
+    if(res0.FindAtom("N") && res0.FindAtom("CA") && res0.FindAtom("C")) {
+      LOG_DEBUG("using default peptide for " << res0.GetKey());
+      res0_ret.first=builder->DefaultPeptide();
+      res0_ret.second=true;
+    }
+  }
+
+  if(!res1_ret.second) {
+    if(res1.FindAtom("N") && res1.FindAtom("CA") && res1.FindAtom("C")) {
+      LOG_DEBUG("using default peptide for " << res1.GetKey());
+      res1_ret.first=builder->DefaultPeptide();
+      res1_ret.second=true;
+    }
+  }
 
   if(res0_ret.second && res1_ret.second) {
     detail::ConnResEntry& res0_centry=res0_ret.first;

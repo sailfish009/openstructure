@@ -35,6 +35,7 @@
 
 #include <ost/log.hh>
 #include <ost/conop/conop.hh>
+#include <ost/conop/heuristic_builder.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/profile.hh>
 
@@ -272,6 +273,7 @@ void MAEReader::add_atom(mol::EntityHandle ent,
 
   // finally add atom
   LOG_TRACE("  atom " << aname << " (" << ele << ") @" << apos);
+  ++atom_count_;
   mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, ele);
 }
   
@@ -329,7 +331,8 @@ bool EntityIOMAEHandler::ProvidesExport(const boost::filesystem::path& loc,
 mol::EntityHandle LoadMAE(const String& file_name) 
 {
   Profile profile_load("LoadMAE");
-  conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
+  //conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
+  conop::BuilderP builder(new conop::HeuristicBuilder);
   MAEReader reader(file_name);
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
