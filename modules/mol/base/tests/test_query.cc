@@ -123,6 +123,8 @@ BOOST_AUTO_TEST_CASE(test_query_parse_properties)
   BOOST_CHECK(Query("grtest:2=8").IsValid());
   BOOST_CHECK(Query("gctest:3.0=9").IsValid());
   BOOST_CHECK(Query("anita=3").IsValid()==false);
+  BOOST_CHECK(Query("gc*test=3").IsValid()==false);
+  BOOST_CHECK(Query("gc?test=3").IsValid()==false);
 }
 
 BOOST_AUTO_TEST_CASE(test_query_parse_value_type) 
@@ -279,8 +281,10 @@ BOOST_AUTO_TEST_CASE(test_glob)
   ensure_counts(e, "rname=ARG and aname=N?1", 1, 1, 1);
   ensure_counts(e, "rname=ARG and aname=NH?", 1, 1, 2);
   ensure_counts(e, "rname=ARG and aname=\"*2\"", 1, 1, 1);
+  ensure_counts(e, "rname=ARG and aname=*2", 1, 1, 1);
   ensure_counts(e, "rname=ARG and aname=N?", 1, 1, 1);
   ensure_counts(e, "rname=LEU and aname=\"?D?\"", 1, 1, 2);
+  ensure_counts(e, "rname=LEU and aname=?D?", 1, 1, 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

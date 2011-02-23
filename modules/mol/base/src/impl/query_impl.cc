@@ -155,15 +155,20 @@ bool is_ident_or_str(char c) {
 QueryToken QueryLexer::LexIdentOrStringToken() {
   static IdentTokens ident_tokens;
   size_t start=current_;
+  bool force_string=false;
   while (current_<query_string_.length() && 
          is_ident_or_str(query_string_[current_])) {
+    if (query_string_[current_]=='*' || query_string_[current_]=='?') {
+      force_string=true;
+    }
     current_++;
   }
   String ident=query_string_.substr(start, current_-start);
   if (tok::Type* t=find(ident_tokens, ident.c_str())) {
     return QueryToken(Range(start, current_-start), *t);
   }
-  return QueryToken(Range(start, current_-start), tok::Identifier);
+  return QueryToken(Range(start, current_-start), 
+                    force_string? tok::String : tok::Identifier);
 }
 
 QueryToken QueryLexer::LexToken() {
@@ -174,7 +179,7 @@ QueryToken QueryLexer::LexToken() {
     if (isdigit(current_char) || current_char=='-') {
       return this->LexNumericToken();
     }
-    if (isalpha(current_char)) {
+    if (isalpha(current_char) || current_char=='?' || current_char=='*') {
       return this->LexIdentOrStringToken();
     }
     switch (current_char) {
