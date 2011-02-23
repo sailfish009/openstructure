@@ -85,6 +85,7 @@ void ensure_counts(EntityHandle e, const String& qs, int cc, int rc, int ac) {
                       " for query String " << qs);
 }
 
+
 void ensure_counts_v(EntityView src, const String& qs,
                      int cc, int rc, int ac) {
   EntityView v;
@@ -122,6 +123,8 @@ BOOST_AUTO_TEST_CASE(test_query_parse_properties)
   BOOST_CHECK(Query("grtest:2=8").IsValid());
   BOOST_CHECK(Query("gctest:3.0=9").IsValid());
   BOOST_CHECK(Query("anita=3").IsValid()==false);
+  BOOST_CHECK(Query("gc*test=3").IsValid()==false);
+  BOOST_CHECK(Query("gc?test=3").IsValid()==false);
 }
 
 BOOST_AUTO_TEST_CASE(test_query_parse_value_type) 
@@ -269,6 +272,19 @@ BOOST_AUTO_TEST_CASE(test_query_throw)
   BOOST_CHECK_NO_THROW(e.Select("ganotsetprop:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("grnotsetprop:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("gcnotsetprop:0=1"));
+}
+
+BOOST_AUTO_TEST_CASE(test_glob) 
+{
+  EntityHandle e=make_query_test_entity();
+  ensure_counts(e, "rname=MET and aname=C*", 1, 1, 5);
+  ensure_counts(e, "rname=ARG and aname=N?1", 1, 1, 1);
+  ensure_counts(e, "rname=ARG and aname=NH?", 1, 1, 2);
+  ensure_counts(e, "rname=ARG and aname=\"*2\"", 1, 1, 1);
+  ensure_counts(e, "rname=ARG and aname=*2", 1, 1, 1);
+  ensure_counts(e, "rname=ARG and aname=N?", 1, 1, 1);
+  ensure_counts(e, "rname=LEU and aname=\"?D?\"", 1, 1, 2);
+  ensure_counts(e, "rname=LEU and aname=?D?", 1, 1, 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
