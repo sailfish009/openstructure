@@ -341,6 +341,9 @@ bool Entity::UpdateIfNeeded() const
     if (updated) {
       this->CacheBoundingBox();
     }
+    needs_update_=false;
+  } else {
+    needs_update_=true;
   }
   return updated;
 }
