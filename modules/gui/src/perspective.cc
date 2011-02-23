@@ -120,7 +120,6 @@ QMenuBar* Perspective::GetMenuBar()
 
 QMenu* Perspective::GetMenu(const QString& name)
 {
-  QMenu* menu=NULL;
   QList<QAction *> actions=menu_bar_->actions();
   for (QList<QAction*>::iterator i=actions.begin(),
        e=actions.end(); i!=e; ++i) {
