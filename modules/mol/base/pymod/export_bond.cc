@@ -26,7 +26,9 @@ using namespace boost::python;
 
 using namespace ost;
 using namespace ost::mol;
+
 #include <ost/export_helper/generic_property_def.hh>
+#include <ost/export_helper/vector.hh>
 
 void export_Bond()
 {
@@ -38,8 +40,6 @@ void export_Bond()
                   make_function(&BondHandle::GetFirst))
     .add_property("second", 
                   make_function(&BondHandle::GetSecond))
-    .add_property("other", 
-                  make_function(&BondHandle::GetOther))
     .add_property("length", 
                   &BondHandle::GetLength)
     .add_property("bond_order",
@@ -59,6 +59,7 @@ void export_Bond()
   generic_prop_def<BondHandle>(bond_handle);
   class_<BondHandleList>("BondHandleList", no_init)
     .def(vector_indexing_suite<BondHandleList>())
+    .def(ost::VectorAdditions<BondHandleList>())
   ;  
   def("BondExists", &BondExists);
 }

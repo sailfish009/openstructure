@@ -50,7 +50,6 @@ void export_Atom()
                                 return_value_policy<copy_const_reference>()),
                   &AtomBase::SetName)
     .add_property("index", &AtomBase::GetIndex)
-    
     .def("GetRadius", &AtomBase::GetRadius)
     .def("GetElement", &AtomBase::GetElement, 
          return_value_policy<copy_const_reference>())
@@ -85,6 +84,7 @@ void export_Atom()
     .def("GetBondList", &AtomHandle::GetBondList)
     .def("GetBondCount", &AtomHandle::GetBondCount)
     .def("GetEntity", &AtomHandle::GetEntity)
+    .add_property("bonds", &AtomHandle::GetBondList)
     .def("GetHandle", &AtomHandle::GetHandle)
     .add_property("handle", &AtomHandle::GetHandle)
     .add_property("entity", &AtomHandle::GetEntity)
