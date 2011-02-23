@@ -364,8 +364,14 @@ mol::EntityHandle LoadMAE(const String& file_name)
   MAEReader reader(file_name);
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
-  reader.Import(ent);
-  conop::Conopology::Instance().ConnectAll(builder,ent);    
+  {
+    Profile profile("import MAE");
+    reader.Import(ent);
+  }
+  {
+    Profile profile("connect all");
+    conop::Conopology::Instance().ConnectAll(builder,ent);    
+  }
   return ent;
 }
 
