@@ -241,6 +241,11 @@ RenderOptionsPtr ent_ltrace_opts(Entity* ent)
 
 void set_selection(Entity* ent, object sel)
 {
+  object none;
+  if (sel==none) {
+    ent->SetSelection(ent->GetView().CreateEmptyView());
+    return;
+  }
   try {
     String sel_string=extract<String>(sel);
     ent->SetSelection(ent->GetView().Select(sel_string));
