@@ -51,6 +51,27 @@ void CartoonRenderer::SetForceTube(bool force_tube)
   force_tube_ = force_tube;
 }
 
+geom::AlignedCuboid CartoonRenderer::GetBoundingBox() const
+{
+  geom::Vec3 mmin(std::numeric_limits<float>::max(),
+		  std::numeric_limits<float>::max(),
+		  std::numeric_limits<float>::max());
+  geom::Vec3 mmax(-std::numeric_limits<float>::max(),
+		  -std::numeric_limits<float>::max(),
+		  -std::numeric_limits<float>::max());
+		  
+  assert(!(state_ & DIRTY_VIEW));
+  for(unsigned int llc=0;llc<spline_list_list_.size();++llc) {
+    SplineEntryList slist = spline_list_list_[llc];
+    for(unsigned int lc=0;lc<slist.size();++lc) {
+      mmin=geom::Min(mmin, slist[lc].position);
+      mmax=geom::Max(mmax, slist[lc].position);
+    }
+  }
+
+  return geom::AlignedCuboid(mmin, mmax);
+}
+  
 void CartoonRenderer::PrepareRendering()
 {
   TraceRendererBase::PrepareRendering();
