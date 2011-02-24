@@ -119,8 +119,8 @@ HeuristicBuilder::HeuristicBuilder():
     heuristic_connect::CONN_DEF_ENTRY& def_entry = heuristic_connect::def_entry_table[ec];
     detail::ConnResEntry entry(def_entry.abbrev, def_entry.single,
                                def_entry.chem_class);
-    LOG_DEBUG("creating table entry for " << def_entry.abbrev);
-    LOG_DEBUG("working on bond entries");
+    LOG_TRACE("creating table entry for " << def_entry.abbrev);
+    LOG_TRACE("working on bond entries");
     for (int xx=0;xx<def_entry.name_count;++xx) {
       String name=def_entry.name_list[xx];
       if (name!="OXT")
@@ -152,9 +152,9 @@ HeuristicBuilder::HeuristicBuilder():
         else if(conn_nam[1]==String("-")) { entry.SetPrev(conn_nam[0]);}
         else if(conn_nam[0]==String("+")) { entry.SetNext(conn_nam[1]);}
         else if(conn_nam[1]==String("+")) { entry.SetNext(conn_nam[0]);}
-        LOG_DEBUG(" " << conn_nam[0] << " " << conn_nam[1]);
+        LOG_TRACE(" " << conn_nam[0] << " " << conn_nam[1]);
             } else {
-        LOG_DEBUG(" " << conn_nam[0] << " " << conn_nam[1]);
+        LOG_TRACE(" " << conn_nam[0] << " " << conn_nam[1]);
         entry.AddConn(conn_nam[0],conn_nam[1]);
       }
     }
@@ -205,18 +205,18 @@ void HeuristicBuilder::ConnectivityFromAtomNames(const mol::ResidueHandle& res,
      mol::AtomHandleList::iterator it2=it1;
      ++it2;
      for (;it2!=atomlist.end();++it2) {
-       LOG_DEBUG("checking for atom pair (" << it1->GetName() << ","
+       LOG_TRACE("checking for atom pair (" << it1->GetName() << ","
                 << it2->GetName() << ") in connectivity table of "
                 << res.GetKey() << "... ");
        int conn=centry.Check(it1->GetName(),it2->GetName());
        if (conn==1 && this->IsBondFeasible(*it1, *it2)) {
-         LOG_DEBUG( "found");
+         LOG_TRACE( "found");
          editor.Connect(*it1,*it2);
        } else if(conn==2 && this->IsBondFeasible(*it2, *it1)) {
-         LOG_DEBUG( "found (reversed)");
+         LOG_TRACE( "found (reversed)");
          editor.Connect(*it2,*it1);
        } else {
-         LOG_DEBUG( "not found");
+         LOG_TRACE( "not found");
        }
      }
    } else {
@@ -227,7 +227,7 @@ void HeuristicBuilder::ConnectivityFromAtomNames(const mol::ResidueHandle& res,
 
 void HeuristicBuilder::ConnectAtomsOfResidue(mol::ResidueHandle res)
 {
-  LOG_DEBUG("HeuristicBuilder: ConnectAtomsOfResidue on " << res.GetKey() << " " << res.GetNumber());
+  LOG_TRACE("HeuristicBuilder: ConnectAtomsOfResidue on " << res.GetKey() << " " << res.GetNumber());
 
   mol::AtomHandleList atomlist = res.GetAtomList();
   mol::AtomHandleList unk_atomlist;
@@ -237,7 +237,7 @@ void HeuristicBuilder::ConnectAtomsOfResidue(mol::ResidueHandle res)
   for(mol::AtomHandleList::iterator it=atomlist.begin();it!=atomlist.end();++it) {
     ss << " " << it->GetName() << " @" << it->GetPos();
   }
-  LOG_DEBUG(ss.str());
+  LOG_TRACE(ss.str());
 #endif
   std::pair<detail::ConnResEntry,bool> ret = LookupResEntry(res.GetKey());
 
@@ -248,11 +248,11 @@ void HeuristicBuilder::ConnectAtomsOfResidue(mol::ResidueHandle res)
     for(mol::AtomHandleList::iterator it1=unk_atomlist.begin();
         it1!=unk_atomlist.end();
         ++it1) {
-      LOG_DEBUG( "atom " << it1->GetName() << " not found, using distance based connect");
+      LOG_TRACE( "atom " << it1->GetName() << " not found, using distance based connect");
       Builder::DistanceBasedConnect(*it1);
     }
   } else {
-    LOG_DEBUG("no residue entry found, using distance based connect");
+    LOG_TRACE("no residue entry found, using distance based connect");
     for(mol::AtomHandleList::iterator it1=atomlist.begin();
         it1!=atomlist.end();
         ++it1) {
@@ -270,16 +270,16 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
   static String fname=flag ? "HeuristicBuilder: ConnectNextXCS" : "HeuristicBuilder: ConnectPrevXCS";
   if(!res0) return; // return if invalid
   mol::XCSEditor editor=res0.GetEntity().EditXCS(mol::BUFFERED_EDIT);
-  LOG_DEBUG(fname << " on " << res0.GetKey() << " " << res0.GetNumber());
+  LOG_TRACE(fname << " on " << res0.GetKey() << " " << res0.GetNumber());
 
   if(!res1) {
     // auto-detect prev or next residue in chain
     // and perform sequence check
     if(flag) {
-      LOG_DEBUG(fname << " autodecting next residue");
+      LOG_TRACE(fname << " autodecting next residue");
       res1 = res0.GetChain().GetNext(res0);
     } else {
-      LOG_DEBUG(fname << " autodecting next residue");
+      LOG_TRACE(fname << " autodecting next residue");
       res1 = res0.GetChain().GetPrev(res0);
     }
   } else {
@@ -292,7 +292,7 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
   }
 
   if(!res1) return; // ignore if prev/next residue is invalid
-  LOG_DEBUG(fname << " found second residue " << res1.GetKey() 
+  LOG_TRACE(fname << " found second residue " << res1.GetKey() 
             << " " << res1.GetNumber());
 
   std::pair<detail::ConnResEntry,bool> res0_ret = builder->LookupResEntry(res0.GetKey());
@@ -300,7 +300,7 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
 
   if(!res0_ret.second) {
     if(res0.FindAtom("N") && res0.FindAtom("CA") && res0.FindAtom("C")) {
-      LOG_DEBUG("using default peptide for " << res0.GetKey());
+      LOG_TRACE("using default peptide for " << res0.GetKey());
       res0_ret.first=builder->DefaultPeptide();
       res0_ret.second=true;
     }
@@ -308,7 +308,7 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
 
   if(!res1_ret.second) {
     if(res1.FindAtom("N") && res1.FindAtom("CA") && res1.FindAtom("C")) {
-      LOG_DEBUG("using default peptide for " << res1.GetKey());
+      LOG_TRACE("using default peptide for " << res1.GetKey());
       res1_ret.first=builder->DefaultPeptide();
       res1_ret.second=true;
     }
@@ -321,13 +321,13 @@ void ConnectPrevNext(HeuristicBuilder* builder,mol::ResidueHandle res0,
     String res1_atom_name = res1_centry.GetNext();
 
     if(res0_atom_name.empty() || res1_atom_name.empty()) return;
-    LOG_DEBUG(fname << ": looking up atom names " << res0_atom_name << " " << res1_atom_name);
+    LOG_TRACE(fname << ": looking up atom names " << res0_atom_name << " " << res1_atom_name);
 
     // lookup both atoms in their respective residues
     mol::AtomHandle res0_atom = res0.FindAtom(res0_atom_name);
     mol::AtomHandle res1_atom = res1.FindAtom(res1_atom_name);
     if(res0_atom && res1_atom) {
-      LOG_DEBUG(fname << ": found atoms, connecting");
+      LOG_TRACE(fname << ": found atoms, connecting");
       if(flag) {
         if (builder->DoesPeptideBondExist(res0_atom, res1_atom)) {
           editor.Connect(res0_atom,res1_atom);
@@ -405,11 +405,11 @@ void HeuristicBuilder::AssignTorsionsToResidue(mol::ResidueHandle res)
         mol::TorsionHandle th = editor.AddTorsion(tel[ti].name, ah[0], ah[1],
                                              ah[2], ah[3]);
         if(th) {
-          LOG_DEBUG("added torsion entry for " << tel[ti].a[0] << " "
+          LOG_TRACE("added torsion entry for " << tel[ti].a[0] << " "
                     << tel[ti].a[1] << " " << tel[ti].a[2] << " "
                     << tel[ti].a[3]);
         } else {
-          LOG_DEBUG("no torsion entry for " << tel[ti].a[0] << " "
+          LOG_TRACE("no torsion entry for " << tel[ti].a[0] << " "
                     << tel[ti].a[1] << " " << tel[ti].a[2]
                     << " " << tel[ti].a[3]);
         }
@@ -469,10 +469,10 @@ std::pair<detail::ConnResEntry,bool> HeuristicBuilder::LookupResEntry(const mol:
 
   detail::ConnResEntryMap::iterator pos = emap_.find(key);
   if(pos!=emap_.end()) {
-    LOG_DEBUG("reskey '" << key << "' found in connectivity map");
+    LOG_TRACE("reskey '" << key << "' found in connectivity map");
     return std::make_pair(pos->second,true);
   }
-  LOG_DEBUG("reskey '" << key << "' not found connectivity map");
+  LOG_TRACE("reskey '" << key << "' not found connectivity map");
   return std::make_pair(dummy,false);
 }
 

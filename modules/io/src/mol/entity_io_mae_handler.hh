@@ -34,14 +34,17 @@ public:
 
 private:
 
-  void add_atom(mol::EntityHandle ent,
-                mol::XCSEditor& editor,const std::string& s_aname, 
-                const std::string& s_axpos, 
-                const std::string& s_aypos, 
-                const std::string& s_azpos, 
-                const std::string& s_rname,
-                const std::string& s_rnum,
-                const std::string& s_cname);
+  void parse_and_add_atom(mol::EntityHandle ent,
+                          mol::XCSEditor& editor,
+                          char* line,
+                          size_t line_len,
+                          int i_atom_name,
+                          int i_atom_xpos,
+                          int i_atom_ypos,
+                          int i_atom_zpos,
+                          int i_res_name,
+                          int i_res_num,
+                          int i_chain_name);
 
   mol::ChainHandle curr_chain_;
   mol::ResidueHandle curr_residue_;
