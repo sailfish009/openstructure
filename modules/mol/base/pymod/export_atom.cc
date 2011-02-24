@@ -28,6 +28,14 @@ using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
 #include <ost/export_helper/vector.hh>
+
+namespace {
+  ChainHandle get_chain(AtomHandle& a)
+  {
+    return a.GetResidue().GetChain();
+  }
+}
+
 void export_Atom()
 {
   class_<AtomBase> atom_base("AtomBase", no_init);
@@ -81,6 +89,8 @@ void export_Atom()
   class_<AtomHandle, bases<AtomBase> >("AtomHandle", init<>())
     .def("GetResidue",&AtomHandle::GetResidue)
     .add_property("residue",&AtomHandle::GetResidue)
+    .def("GetChain",get_chain)
+    .add_property("chain",get_chain)
     .def("GetBondList", &AtomHandle::GetBondList)
     .def("GetBondCount", &AtomHandle::GetBondCount)
     .def("GetEntity", &AtomHandle::GetEntity)

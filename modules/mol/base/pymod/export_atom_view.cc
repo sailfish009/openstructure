@@ -26,12 +26,21 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol;
 
+namespace {
+  ChainView get_chain(AtomView& a)
+  {
+    return a.GetResidue().GetChain();
+  }
+}
+
 void export_AtomView()
 {
 
   class_<AtomView, bases<AtomBase> >("AtomView", init<>())
     .def("GetResidue",&AtomView::GetResidue)
     .add_property("residue",&AtomView::GetResidue)
+    .def("GetChain",get_chain)
+    .add_property("chain",get_chain)
     .def(self==self)
     .def(self!=self)
     .add_property("handle", &AtomView::GetHandle)
