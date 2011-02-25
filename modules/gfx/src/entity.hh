@@ -155,7 +155,11 @@ public:
   void Rebuild();
 
   /// \brief only grab updated positions, dont rebuild the whole thing
+  /// views won't be regenerated from stored queries
   void UpdatePositions();
+
+  /// \brief forces all views to be regenerated from stored queries
+  void UpdateView();
 
   /// \brief set color for selection
   void SetColor(const Color& col, const String& selection=String(""));
@@ -276,8 +280,6 @@ public:
                           RenderOptionsPtr& render_options);
   bool HasSelection() const;
 
-  void UpdateView();
-
   void SetSeqHack(bool b);
   bool GetSeqHack() const;
   
@@ -298,12 +300,13 @@ private:
   mutable geom::AlignedCuboid   bbox_;
   mol::EntityView               sel_;
   bool                          sel_update_;
-  impl::BackboneTrace           trace_;
+  mutable impl::BackboneTrace   trace_;
                            
   void init(RenderMode::Type);
 
   void set_static_max_rad();
-
+  void do_update_view() const;
+  
   typedef boost::ptr_map<RenderMode::Type, impl::EntityRenderer> RendererMap;
   mutable RendererMap renderer_;
 

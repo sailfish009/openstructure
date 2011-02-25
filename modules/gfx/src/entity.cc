@@ -222,31 +222,19 @@ void Entity::SetBlurFactors(float bf1,float bf2)
 
 void Entity::Rebuild()
 {
-  geom::Vec3 delta=GetTF().GetTrans()-GetTF().GetCenter();
+  do_update_view(); // if necessary, update the views
+  this->ReapplyColorOps(); // re-color everything
 
-  if(update_view_) {
-    EntityView nv=this->GetView();
-    trace_.ResetView(nv);
-    for (RendererMap::iterator i=renderer_.begin(), 
-           e=renderer_.end(); i!=e; ++i) {
-      impl::EntityRenderer* r=i->second;
-      if (r->IsEnabled() && r->HasDataToRender()) {
-        i->second->ClearViews();
-        i->second->AddView(nv);
-        i->second->UpdateViews();
-        i->second->PrepareRendering();
-      }
-    }
-  }
+  FlagRebuild(); // force renderer rebuilds in RenderGL call
+  Scene::Instance().RequestRedraw();
 
-  this->ReapplyColorOps();
-  FlagRebuild();
+  // update center in transformation
   geom::Vec3 center=this->GetCenter();
   Transform tf=this->GetTF();
   tf.SetCenter(center);
-  tf.SetTrans(center+delta);
+  tf.SetTrans(center+GetTF().GetTrans()-GetTF().GetCenter());
   this->SetTF(tf);  
-  Scene::Instance().RequestRedraw();
+
 }
 
 void Entity::UpdatePositions()
@@ -256,6 +244,7 @@ void Entity::UpdatePositions()
     impl::EntityRenderer* r=i->second;
     r->FlagPositionsDirty();
   }
+  // Rebuild() here causes an recursive loop...
   FlagRebuild();  
   Scene::Instance().RequestRedraw();
 }
@@ -845,10 +834,7 @@ void Entity::ColorBy(const String& prop,
 
 mol::EntityView Entity::GetView() const
 {
-  if (update_view_) {
-    update_view_=false;    
-    cached_view_=qv_.GetEntityView();
-  }
+  do_update_view();
   return cached_view_;
 }
 
@@ -1018,11 +1004,12 @@ void Entity::ReapplyColorOps()
   GfxObj::ReapplyColorOps();
 }
 
-void Entity::UpdateView() 
+void Entity::UpdateView()
 {
-  update_view_=true; 
+  update_view_=true;
   Rebuild();
-  UpdatePositions();
+  FlagRebuild();  
+  Scene::Instance().RequestRedraw();
 }
 
 void Entity::SetSeqHack(bool b)
@@ -1030,12 +1017,34 @@ void Entity::SetSeqHack(bool b)
   if(b!=trace_.GetSeqHack()) {
     trace_.SetSeqHack(b);
     FlagRebuild();
+    Scene::Instance().RequestRedraw();
   }
 }
 
 bool Entity::GetSeqHack() const
 {
   return trace_.GetSeqHack();
+}
+
+void Entity::do_update_view() const
+{
+  // also signals an update in positions
+  if (update_view_) {
+    update_view_=false;    
+    cached_view_=qv_.GetEntityView();
+    trace_.ResetView(cached_view_);
+    for (RendererMap::iterator i=renderer_.begin(), 
+           e=renderer_.end(); i!=e; ++i) {
+      impl::EntityRenderer* r=i->second;
+      if (r->IsEnabled() && r->HasDataToRender()) {
+        r->ClearViews();
+        r->AddView(cached_view_);
+        r->UpdateViews();
+        r->FlagPositionsDirty();
+        r->PrepareRendering();
+      }
+    }
+  }
 }
 
 }} // ns
