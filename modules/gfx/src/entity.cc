@@ -229,10 +229,13 @@ void Entity::Rebuild()
     trace_.ResetView(nv);
     for (RendererMap::iterator i=renderer_.begin(), 
            e=renderer_.end(); i!=e; ++i) {
-      i->second->ClearViews();
-      i->second->AddView(nv);
-      i->second->UpdateViews();
-      i->second->PrepareRendering();
+      impl::EntityRenderer* r=i->second;
+      if (r->IsEnabled() && r->HasDataToRender()) {
+        i->second->ClearViews();
+        i->second->AddView(nv);
+        i->second->UpdateViews();
+        i->second->PrepareRendering();
+      }
     }
   }
 
@@ -332,11 +335,13 @@ bool Entity::UpdateIfNeeded() const
     for (RendererMap::iterator i=renderer_.begin(), 
            e=renderer_.end(); i!=e; ++i) {
       EntityRenderer* renderer =i->second;
-      if (renderer->IsDirty()) {
-        renderer->PrepareRendering();
-        updated=true;
+      if (renderer->IsEnabled() && renderer->HasDataToRender()) {
+        if (renderer->IsDirty()) {
+          renderer->PrepareRendering();
+          updated=true;
+        }
+        renderer->VA().SetOpacity(opacity_);
       }
-      renderer->VA().SetOpacity(opacity_);
     }
     if (updated) {
       this->CacheBoundingBox();
@@ -361,7 +366,10 @@ void Entity::RefreshVA()
 {
   for (RendererMap::iterator i=renderer_.begin(), 
 	 e=renderer_.end(); i!=e; ++i) {
-    i->second->Debug(debug_flags_);
+    EntityRenderer* renderer =i->second;
+    if (renderer->IsEnabled() && renderer->HasDataToRender()) {
+      renderer->Debug(debug_flags_);
+    }
   }
 }
 
@@ -370,7 +378,7 @@ void Entity::CustomRenderGL(RenderPass pass)
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
-    if(r->IsEnabled()) {
+    if(r->IsEnabled() && r->HasDataToRender()) {
       if(pass==STANDARD_RENDER_PASS) {
         r->Render(pass);
         if(outline_flag_) {
@@ -398,7 +406,7 @@ void Entity::CustomRenderGL(RenderPass pass)
 void Entity::CustomRenderPov(PovState& pov)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
+    if(it->second->IsEnabled() && it->second->HasDataToRender()){
       it->second->RenderPov(pov,GetName());
     }
   }
@@ -524,7 +532,7 @@ RenderOptionsPtr Entity::GetOptions(RenderMode::Type render_mode)
 }
 
 void Entity::SetOptions(RenderMode::Type render_mode, 
-			RenderOptionsPtr& render_options)
+                        RenderOptionsPtr& render_options)
 {
   if(!render_options) return;
   RendererMap::iterator i=renderer_.find(render_mode);
@@ -534,13 +542,13 @@ void Entity::SetOptions(RenderMode::Type render_mode,
       EntityP e=boost::dynamic_pointer_cast<Entity>(shared_from_this());
       RenderOptionsPtr old_render_options = entity_renderer->GetOptions();
       if(old_render_options) {
-	old_render_options->RemoveObserver(e);
+        old_render_options->RemoveObserver(e);
       }
       entity_renderer->SetOptions(render_options);
       render_options->AddObserver(e);
       FlagRebuild();
       Scene::Instance().RequestRedraw();
-    } else{
+    } else {
       throw Error("These render options are not compatible with this render mode.");
     }
   } else {
@@ -549,7 +557,7 @@ void Entity::SetOptions(RenderMode::Type render_mode,
 }
 
 void Entity::ApplyOptions(RenderMode::Type render_mode,
-                                RenderOptionsPtr& render_options)
+                          RenderOptionsPtr& render_options)
 {
   RendererMap::iterator i=renderer_.find(render_mode);  
   if(i!=renderer_.end()) {
@@ -587,9 +595,7 @@ void Entity::SetOpacity(float f)
 void Entity::SetOutlineWidth(float f)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
-      it->second->VA().SetOutlineWidth(f);
-    }
+    it->second->VA().SetOutlineWidth(f);
   }
   Scene::Instance().RequestRedraw();
 }
@@ -597,9 +603,7 @@ void Entity::SetOutlineWidth(float f)
 void Entity::SetOutlineExpandFactor(float f)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
-      it->second->VA().SetOutlineExpandFactor(f);
-    }
+    it->second->VA().SetOutlineExpandFactor(f);
   }
   Scene::Instance().RequestRedraw();
 }
@@ -607,9 +611,7 @@ void Entity::SetOutlineExpandFactor(float f)
 void Entity::SetOutlineExpandColor(const Color& c)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
-      it->second->VA().SetOutlineExpandColor(c);
-    }
+    it->second->VA().SetOutlineExpandColor(c);
   }
   Scene::Instance().RequestRedraw();
 }
@@ -928,7 +930,9 @@ template <typename I, typename O>
 void apply_color_op_to_renderer_list(I begin, I end, const O& o)
 {
   for (I i=begin; i!=end; ++i) {
-    i->second->Apply(o);
+    if(i->second->IsEnabled() && i->second->HasDataToRender()) {
+      i->second->Apply(o);
+    }
   }
 }
 
