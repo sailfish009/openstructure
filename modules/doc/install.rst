@@ -71,6 +71,16 @@ OpenStructure uses `git` as the revision control system. The main repository can
 The above command will clone OpenStructre into the directory called `directory-name`. If omitted, the directory will be called ost. Alternatively, you might consider getting one of the nightly source code snapshots from the `downloads section <http://www.openstructure.org/downloads/>`_.
 
 
+Picking the right branch
+--------------------------------------------------------------------------------
+
+By default you are checking out the master branch. Master is, by definition a stable branch. It always points to the latest release. However, there are several other branches at your disposal. The main development is happening in the develop branch. It contains the newest features and bug fixes. However, we dont't make any guarantees that the develop branch is bug free and doesn't contain major bugs. After all, it's in constant flux. If you are developing new features, start your feature branch off develop. Besides that, there are several smaller features branches that are used to group together commits for one specific features. To change to a specific branch, use
+
+.. code-block:: bash
+
+  git checkout <branch-name>
+
+
 Configuring
 --------------------------------------------------------------------------------
 
@@ -162,7 +172,6 @@ run multiple jobs at once.
 On Windows run 'Build OpenStructure' from the build menu.
 
 
-
 What's next?
 --------------------------------------------------------------------------------
 
@@ -179,3 +188,14 @@ or, to start the command-line interpreter:
   stage/bin/ost
   
 If you repeatedly use OpenStructure, it is recommended to add /path/to/dng/stage/bin to your path.
+
+Getting the newest changes
+--------------------------------------------------------------------------------
+
+To get the newest changes from the central git repository, enter
+
+.. code-block:: bash
+
+  git pull
+
+in your terminal. This will fetch the newest changes.
