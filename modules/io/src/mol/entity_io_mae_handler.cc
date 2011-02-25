@@ -185,7 +185,7 @@ void MAEReader::parse_and_add_atom(mol::EntityHandle ent,
   std::string rname("UNK");
   std::string cname("X");
   geom::Vec3 apos;
-  int irnum;
+  int irnum=0;
 
   LOG_TRACE("[" << std::string(line) << "]");
 
