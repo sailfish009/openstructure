@@ -23,7 +23,6 @@
 
 #include <ost/config.hh>
 #include <ost/io/module_config.hh>
-#include <ost/mol/mol.hh>
 
 #include <ost/io/mol/entity_io_handler.hh>
 #include <ost/io/seq/sequence_io_handler.hh>

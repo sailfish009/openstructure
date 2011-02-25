@@ -29,7 +29,6 @@
 
 #include <ost/config.hh>
 #include <ost/mol/surface.hh>
-#include <ost/mol/mol.hh>
 #include "gfx_object.hh"
 #include "vertex_array.hh"
 

@@ -17,8 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include "interaction_statistics.hh"
-#include <ost/mol/impl/atom_impl.hh>
-#include <ost/mol/impl/entity_impl.hh>
+#include <ost/mol/atom_view.hh>
+#include <ost/mol/residue_view.hh>
 #include <ost/io/binary_data_source.hh>
 #include <ost/io/binary_data_sink.hh>
 #include <ost/io/container_serialization.hh>

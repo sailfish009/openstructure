@@ -25,8 +25,13 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <ost/string_ref.hh>
-#include <ost/mol/mol.hh>
+
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/entity_handle.hh>
+#include <ost/mol/chain_handle.hh>
+#include <ost/mol/atom_handle.hh>
 #include <ost/mol/xcs_editor.hh>
+
 #include <ost/io/module_config.hh>
 #include <ost/io/mol/io_profile.hh>
 namespace ost { namespace io {

@@ -26,6 +26,9 @@
  */
 namespace ost { namespace mol {
 
+class EntityHandle;
+class EntityView;
+
 /// \name create bounding box from entity
 //@{
 /// \brief create bounding box from entity handle

@@ -20,6 +20,8 @@
   Author: Ansgar Philippsen
 */
 
+#include <ost/mol/atom_handle.hh>
+
 #include "scene.hh"
 
 #include "prim_list.hh"

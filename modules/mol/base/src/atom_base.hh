@@ -19,8 +19,9 @@
 #ifndef OST_ATOM_BASE_HH
 #define OST_ATOM_BASE_HH
 
-#include <ost/mol/module_config.hh>
 #include <ost/geom/vec3.hh>
+
+#include <ost/mol/module_config.hh>
 #include <ost/mol/impl/atom_impl_fw.hh>
 #include <ost/generic_property.hh>
 

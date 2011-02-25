@@ -19,7 +19,7 @@
 #include <cmath>
 
 #include <ost/log.hh>
-
+#include <ost/mol/atom_handle.hh>
 #include "atom_impl.hh"
 #include "residue_impl.hh"
 #include "connector_impl.hh"

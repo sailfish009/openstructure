@@ -20,7 +20,9 @@
 
 #include <ost/log.hh>
 #include <ost/geom/geom.hh>
-#include <ost/mol/mol.hh>
+#include <ost/mol/atom_handle.hh>
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/atom_view.hh>
 #include <ost/io/binary_data_source.hh>
 #include <ost/io/binary_data_sink.hh>
 #include <ost/io/container_serialization.hh>

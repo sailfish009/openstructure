@@ -17,7 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <ost/log.hh>
-
+#include "atom_impl.hh"
 #include "chain_impl.hh"
 #include "residue_impl.hh"
 #include "entity_impl.hh"

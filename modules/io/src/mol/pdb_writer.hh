@@ -28,13 +28,20 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
-#include <ost/mol/mol.hh>
-
 #include <ost/io/module_config.hh>
 #include <ost/io/formatted_line.hh>
 #include <ost/io/mol/io_profile.hh>
 
-namespace ost { namespace io {
+namespace ost { 
+  
+namespace mol {
+
+class EntityView;
+class EntityHandle;
+
+}
+
+namespace io {
 
 class DLLEXPORT_OST_IO PDBWriter {
 public:

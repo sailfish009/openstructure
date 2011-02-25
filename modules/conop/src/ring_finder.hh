@@ -24,7 +24,8 @@
  */
 
 #include <ost/conop/module_config.hh>
-#include <ost/mol/mol.hh>
+#include <ost/mol/entity_handle.hh>
+#include <ost/mol/entity_view.hh>
 #include <map>
 
 namespace ost { namespace conop {

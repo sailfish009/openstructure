@@ -18,10 +18,18 @@
 //------------------------------------------------------------------------------
 #ifndef OST_IO_SAVE_ENTITY_HH
 #define OST_IO_SAVE_ENTITY_HH
-#include <ost/io/module_config.hh>
-#include <ost/mol/mol.hh>
 
-namespace ost { namespace io {
+#include <ost/io/module_config.hh>
+
+namespace ost { 
+  
+namespace mol {
+
+class EntityHandle;
+class EntityView;
+}
+
+namespace io {
   
 /// \brief  Save entity handle
 /// \param en is the entity to be saved

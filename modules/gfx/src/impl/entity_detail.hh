@@ -26,8 +26,8 @@
 
 #include <ost/geom/geom.hh>
 
-#include <ost/mol/mol.hh>
-#include <ost/mol/entity_view.hh>
+#include <ost/mol/atom_handle.hh>
+#include <ost/mol/bond_handle.hh>
 #include <ost/mol/query.hh>
 
 #include <ost/gfx/module_config.hh>

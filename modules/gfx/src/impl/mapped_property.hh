@@ -23,7 +23,7 @@
   Author: Marco Biasini
  */
 
-#include <ost/mol/mol.hh>
+#include <ost/mol/entity_view.hh>
 #if OST_IMG_ENABLED
 #include <ost/img/map.hh>
 #endif

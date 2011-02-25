@@ -21,6 +21,7 @@
 
 #include <boost/bind.hpp>
 
+#include <ost/mol/bond_handle.hh>
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/atom_view.hh>
 #include <ost/mol/entity_visitor.hh>

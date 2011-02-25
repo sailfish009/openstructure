@@ -22,7 +22,7 @@
 #include "connector_impl.hh"
 #include "atom_impl.hh"
 #include "entity_impl.hh"
-
+#include <ost/mol/bond_handle.hh>
 #include <ost/mol/entity_visitor.hh>
 
 namespace ost { namespace mol { namespace impl {

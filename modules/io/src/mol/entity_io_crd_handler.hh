@@ -23,6 +23,11 @@
   CHARMM coordinate file import
   Author: Ansgar Philippsen
  */
+ 
+#include <ost/mol/entity_handle.hh>
+#include <ost/mol/chain_handle.hh>
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/entity_visitor.hh>
 #include <ost/io/mol/entity_io_handler.hh>
 
 #include <boost/iostreams/filtering_stream.hpp>

@@ -23,6 +23,7 @@
 #include <boost/filesystem/convenience.hpp>
 #include <ost/message.hh>
 #include <sstream>
+#include <ost/mol/atom_view.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/integrity_error.hh>
 

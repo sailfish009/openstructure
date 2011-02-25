@@ -16,19 +16,14 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_ENTITY_VISITOR_HC
-#define OST_ENTITY_VISITOR_HC
+#ifndef OST_ENTITY_VISITOR_HH
+#define OST_ENTITY_VISITOR_HH
 
+#include "module_config.hh"
 #include "entity_visitor_fw.hh"
 
-#include <ost/mol/atom_handle.hh>
-#include <ost/mol/residue_handle.hh>
-#include <ost/mol/chain_handle.hh>
-#include <ost/mol/bond_handle.hh>
-#include <ost/mol/torsion_handle.hh>
-#include <ost/mol/atom_view.hh>
-#include <ost/mol/residue_view.hh>
-#include <ost/mol/chain_view.hh>
+#include <ost/mol/view_type_fw.hh>
+#include <ost/mol/handle_type_fw.hh>
 
 namespace ost { namespace mol {
 /// \section The Entity Visitor interface

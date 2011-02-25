@@ -23,7 +23,7 @@
   Authors: Ansgar Philippsen, Marco Biasini
  */
 
-#include <ost/mol/mol.hh>
+#include <ost/mol/entity_view.hh>
 
 #include <ost/gfx/module_config.hh>
 #include <ost/gfx/impl/entity_detail.hh>

@@ -25,7 +25,7 @@
 #include <ost/mol/impl/chain_impl.hh>
 #include <ost/mol/impl/entity_impl.hh>
 #include <ost/mol/iterator.hh>
-
+#include <ost/mol/bond_handle.hh>
 namespace ost { namespace mol {
 
 ResidueHandle::ResidueHandle()

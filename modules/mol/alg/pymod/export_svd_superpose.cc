@@ -21,10 +21,15 @@
  * Author Juergen Haas
  */
 #include <boost/python.hpp>
-using namespace boost::python;
-#include <ost/mol/alg/svd_superpose.hh>
+
 #include <ost/geom/mat4.hh>
+#include <ost/mol/alg/svd_superpose.hh>
+#include <ost/mol/entity_handle.hh>
+#include <ost/mol/iterator.hh>
+
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+
+using namespace boost::python;
 using namespace ost;
 using namespace ost::mol::alg;
 

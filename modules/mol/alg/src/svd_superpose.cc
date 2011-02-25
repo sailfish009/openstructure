@@ -35,7 +35,8 @@
 #include <ost/mol/alg/svd_superpose.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/view_op.hh>
-
+#include <ost/mol/atom_view.hh>
+#include <ost/mol/iterator.hh>
 namespace ost { namespace mol { namespace alg {
 
 

@@ -24,7 +24,7 @@
  */
  
  
-#include <ost/mol/mol.hh>
+#include <ost/mol/chem_class.hh>
 #include <ost/io/mol/star_parser.hh>
 #include <ost/conop/compound_lib.hh>
  

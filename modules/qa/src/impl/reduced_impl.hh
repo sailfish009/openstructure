@@ -21,8 +21,9 @@
 #define OST_QA_IMPL_REDUCED_HH
 
 
-#include <ost/mol/mol.hh>
-
+#include <ost/mol/entity_visitor.hh>
+#include <ost/mol/entity_handle.hh>
+#include <ost/mol/entity_view.hh>
 #include <ost/qa/module_config.hh>
 #include <ost/qa/amino_acids.hh>
 #include <ost/qa/reduced_statistics.hh>

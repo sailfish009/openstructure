@@ -23,8 +23,7 @@
 #include <ost/mol/alg/svd_superpose.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-#include <ost/mol/entity_handle.hh>
-
+#include <ost/mol/mol.hh>
 
 using namespace ost;
 using namespace ost::mol;

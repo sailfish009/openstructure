@@ -17,7 +17,10 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include "xcs_editor.hh"
-#include <ost/mol/mol.hh>
+#include <ost/mol/atom_handle.hh>
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/chain_handle.hh>
+#include <ost/mol/bond_handle.hh>
 
 #include "impl/atom_impl.hh"
 #include "impl/entity_impl.hh"

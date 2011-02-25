@@ -18,6 +18,8 @@
 //------------------------------------------------------------------------------
 
 #include "impl/entity_impl.hh"
+#include "bond_handle.hh"
+#include "torsion_handle.hh"
 #include "entity_visitor.hh"
 #include "atom_handle.hh"
 #include "chain_handle.hh"

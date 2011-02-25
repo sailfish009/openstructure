@@ -22,6 +22,8 @@
 #include <ost/mol/impl/connector_impl.hh>
 #include <ost/mol/impl/atom_impl.hh>
 #include <ost/mol/entity_visitor.hh>
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/torsion_handle.hh>
 #include <ost/mol/impl/entity_impl.hh>
 namespace ost { namespace mol { namespace impl {
 

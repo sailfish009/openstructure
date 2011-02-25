@@ -20,10 +20,6 @@
 #define OST_GUI_GL_CANVAS_HH
 
 
-// must come before QGLWidget
-#include <ost/mol/mol.hh>
-
-
 // Qt includes must come last
 #include <QGLWidget>
 #include <QTime>

@@ -31,13 +31,13 @@
 
 #include <ost/gfx/module_config.hh>
 #include <ost/mol/transform.hh>
+#include <ost/mol/atom_handle.hh>
 
 #include "gl_include.hh"
 #include "color.hh"
 #include "gfx_object_fw.hh"
 #include "gfx_node_fw.hh"
 #include "gfx_node_visitor.hh"
-#include "selection.hh"
 #include "glwin_base.hh"
 #include "scene_observer.hh"
 #include "gfx_prim.hh"

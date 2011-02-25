@@ -25,10 +25,14 @@
 
 #include <ost/base.hh>
 #include <ost/geom/geom.hh>
-#include <ost/mol/mol.hh>
+#include <ost/mol/entity_view.hh>
 #include <ost/mol/alg/module_config.hh>
 
-namespace ost { namespace mol { namespace alg {
+namespace ost { namespace mol { 
+  
+class EntityHandle;
+
+namespace alg {
 
 /// \brief stores the number of cycles and the two final EntityViews
 /// (in case IterativeSuperposition was applied),

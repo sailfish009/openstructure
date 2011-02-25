@@ -1,5 +1,7 @@
 #include <ost/log.hh>
-
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/atom_handle.hh>
+#include <ost/mol/atom_view.hh>
 #include "reduced_impl.hh"
 
 

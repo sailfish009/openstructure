@@ -23,7 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-
+#include <ost/mol/bond_handle.hh>
 #include <ost/conop/conop.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/log.hh>

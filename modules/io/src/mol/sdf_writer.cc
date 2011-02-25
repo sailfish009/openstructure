@@ -21,6 +21,11 @@
  */
 
 #include "sdf_writer.hh"
+
+#include <ost/mol/atom_view.hh>
+#include <ost/mol/residue_view.hh>
+#include <ost/mol/chain_view.hh>
+#include <ost/mol/bond_handle.hh>
 #include <boost/regex.hpp>
 
 namespace ost { namespace io {

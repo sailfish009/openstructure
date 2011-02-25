@@ -24,7 +24,10 @@
 #include <string.h>
 
 #include <ost/io/io_exception.hh>
-
+#include <ost/mol/atom_handle.hh>
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/chain_handle.hh>
+#include <ost/mol/entity_visitor.hh>
 #include "pdb_writer.hh"
 
 using boost::format;

@@ -23,7 +23,8 @@
 #define OST_IO_SDF_READER_HH
 
 #include <boost/filesystem/fstream.hpp>
-#include <ost/mol/mol.hh>
+#include <ost/mol/chain_handle.hh>
+#include <ost/mol/residue_handle.hh>
 #include <ost/io/module_config.hh>
 
 namespace ost { namespace io {
