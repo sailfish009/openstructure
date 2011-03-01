@@ -16,34 +16,26 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_INFO_PANEL_HH
-#define OST_GUI_INFO_PANEL_HH
+#ifndef OST_QUERY_AST_FW_HH
+#define OST_QUERY_AST_FW_HH
 
-#include <ost/gui/module_config.hh>
+namespace ost { namespace mol { namespace impl {
 
-#include <QWidget>
-#include <QTableWidget>
+      class WithinParam;
+      class StringOrRegexParam;
+      class Node;
+      class LogicOpNode;
+      class SelNode;
 
-namespace ost { namespace gui {
+      typedef enum {
+	LOP_OR, LOP_AND
+      } LogicOP;
 
-class MenuItem;
-
-/// \brief info panel
-class DLLEXPORT_OST_GUI InfoPanel : public QWidget {
-  Q_OBJECT;
-public:  
-  InfoPanel(QWidget* parent);
-  
-  void SetData(MenuItem* menu_item) {
-    menu_item_=menu_item;
-    this->Update();
-  }
-private:
-  void Update();
-  MenuItem*      menu_item_;
-  QTableWidget*  table_;
-};
-  
-}}
+      typedef enum {
+	COP_EQ, COP_NEQ, COP_GE, COP_LE, COP_LT, COP_GT
+      } CompOP;
+      
+      
+}}}
 
 #endif

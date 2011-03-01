@@ -24,7 +24,7 @@ To load a PDB file, simply type
    fragment=io.LoadPDB('/path/to/examples/code_fragments/entity/fragment.pdb')
 
 This will load the fragment from the specified file 'fragment.pdb' and store the 
-result in fragment.  The :func:`~ost.io.LoadPDB` has many option, which, for 
+result in fragment.  The :func:`~ost.io.LoadPDB` has many options, which, for
 simplicity will not be discussed here. If you want to know more about the 
 function, type:
 

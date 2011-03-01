@@ -140,3 +140,47 @@ def FitToScreen(gfx_ent, width=None, height=None, margin=0.01):
                 factor_y*(1+margin)*geom.Length(sorted_axes[1]))+z_off)
   scene.SetRTC(rtc)
 
+
+class GfxNodeListAttrProxy:
+  def __init__(self, node_list, name):
+    self._node_list=node_list
+    self._name=name
+
+  def __iter__(self):
+    for node in self._node_list:
+      yield getattr(node, self._name)
+
+  def __call__(self, *args, **kwargs):
+    for node in self._node_list:
+      bound_method=getattr(node, self._name)
+      bound_method(*args, **kwargs)
+
+class GfxNodeListProxy(object):
+  def __init__(self, node_list):
+    self._nodes=node_list
+
+  def __getattr__(self, name):
+    if name.startswith('_'):
+      return super(GfxNodeListProxy, self).__getattr__(name)
+    return GfxNodeListAttrProxy(self._nodes, name)
+
+  def __setattr__(self, name, value):
+    if name.startswith('_'):
+      super(GfxNodeListProxy, self).__setattr__(name, value)
+    for node in self._nodes:
+      setattr(node, name, value)
+
+def _Match(scene, pattern="*"):
+  import os
+  import fnmatch
+  def _Recurse(path, node, pattern):
+    matches=[]
+    for child in node.children:
+      full_name=os.path.join(path, child.name)
+      if fnmatch.fnmatchcase(full_name, pattern):
+        matches.append(child)
+      matches.extend(_Recurse(full_name, child, pattern))
+    return matches
+  return GfxNodeListProxy(_Recurse("", Scene().root_node, pattern))
+
+SceneSingleton.Match=_Match

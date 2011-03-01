@@ -12,7 +12,6 @@ if len(sys.argv) < 2:
   print 'usage: create_bundle.py  additional_label'
   sys.exit()
 
-boost_string='\".so.1.40.0\"'
 system_python_version='python2.6'
 system_python_bin='/usr/bin/'+system_python_version
 system_python_libs='/usr/lib/'+system_python_version
@@ -21,7 +20,7 @@ second_system_python_libs='/usr/lib/pymodules/'+system_python_version
 python_bin_in_bundle='python'
 qt4_plugins='/usr/lib/qt4/plugins'
 additional_label=sys.argv[1]
-list_of_excluded_libraries=['ld-linux','libexpat','libgcc_s','libglib','cmov','libice','libSM','libX','libg','libGL.so','libfontconfig','libfreetype','libdrm','libxcb','libICE']
+list_of_excluded_libraries=['ld-linux','libexpat','libgcc_s','libglib','cmov','libice','libSM','libX','libg','libGL.so','libfontconfig','libfreetype','libdrm','libxcb','libICE','libnvidia','libc']
 currdir=os.getcwd()
 if currdir.find('deployment')==-1 or currdir.find('linux')==-1:
   print '\n'
@@ -41,9 +40,8 @@ else:
   libdir='lib'
   archstring='32bit'
 date_pattern='%Y-%b-%d'
-build=str(datetime.datetime.now())
-stamp=datetime.datetime.strptime(build, date_pattern)
-directory_name='openstructure-linux-'+archstring+'-'+additional_label+stamp
+build=datetime.date.today()
+directory_name='openstructure-linux-'+archstring+'-'+additional_label+'-'+str(build)
 print 'Hardcoding package python binary path in openstructure executables'
 subprocess.call('mv scripts/ost.in scripts/ost.in.backup',shell=True,cwd='../../')
 subprocess.call('sed "s/@PYTHON_BINARY@/\$DNG_ROOT\/bin\/'+python_bin_in_bundle+'/g" scripts/ost.in.backup > scripts/ost.in.prepreprepre',shell=True,cwd='../../')
@@ -60,12 +58,14 @@ subprocess.call('sed "s/\#export QT_PLUGIN_PATH/ export QT_PLUGIN_PATH/g" script
 #subprocess.call('wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif', shell=True, cwd='../../')
 #print 'Compiling Openstructure'
 #subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DBoost_COMPILER='+boost_string+'-DENABLE_IMG=OFF -DENABLE_UI=OFF -DENABLE_GFX=OFF', shell=True,cwd='../../')
+#subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' s-DENABLE_IMG=OFF -DENABLE_UI=OFF -DENABLE_GFX=OFF', shell=True,cwd='../../')
 #subprocess.call('make -j5',shell=True,cwd='../../')
 #print 'Converting Chemlib dictionary'
 #subprocess.call('stage/bin/chemdict_tool create components.cif compounds.chemlib', shell=True, cwd='../../')
 #print '\nStaging Chemlib dictionary'
 print 'Compiling Openstructure'
-subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DBoost_COMPILER='+boost_string+' -DCOMPOUND_LIB=ChemLib/compounds.chemlib -DENABLE_IMG=ON -DENABLE_UI=ON -DENABLE_GFX=ON -DOPTIMIZE=ON',shell=True,cwd='../../')
+#subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DBoost_COMPILER='+boost_string+' -DCOMPOUND_LIB=ChemLib/compounds.chemlib -DENABLE_IMG=ON -DENABLE_UI=ON -DENABLE_GFX=ON -DOPTIMIZE=ON',shell=True,cwd='../../')
+subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DCOMPOUND_LIB=ChemLib/compounds.chemlib -DENABLE_IMG=ON -DENABLE_UI=ON -DENABLE_GFX=ON -DOPTIMIZE=ON',shell=True,cwd='../../')
 subprocess.call('make -j2',shell=True,cwd='../../')
 print 'Removing obsolete packages and package directory'
 subprocess.call('rm -fr openstructure-linux*',shell=True,cwd='../../')

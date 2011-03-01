@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -51,6 +51,27 @@ void CartoonRenderer::SetForceTube(bool force_tube)
   force_tube_ = force_tube;
 }
 
+geom::AlignedCuboid CartoonRenderer::GetBoundingBox() const
+{
+  geom::Vec3 mmin(std::numeric_limits<float>::max(),
+		  std::numeric_limits<float>::max(),
+		  std::numeric_limits<float>::max());
+  geom::Vec3 mmax(-std::numeric_limits<float>::max(),
+		  -std::numeric_limits<float>::max(),
+		  -std::numeric_limits<float>::max());
+		  
+  assert(!(state_ & DIRTY_VIEW));
+  for(unsigned int llc=0;llc<spline_list_list_.size();++llc) {
+    SplineEntryList slist = spline_list_list_[llc];
+    for(unsigned int lc=0;lc<slist.size();++lc) {
+      mmin=geom::Min(mmin, slist[lc].position);
+      mmax=geom::Max(mmax, slist[lc].position);
+    }
+  }
+
+  return geom::AlignedCuboid(mmin, mmax);
+}
+  
 void CartoonRenderer::PrepareRendering()
 {
   TraceRendererBase::PrepareRendering();
@@ -302,8 +323,11 @@ void CartoonRenderer::rebuild_spline_obj(IndexedVertexArray& va,
                                       options_->GetStrandThickness()+factor,
                                       options_->GetStrandProfileType(),
                                       options_->GetStrandEcc())); // profile 2 = strand
-    profiles.push_back(profiles.back()); // profile 3==2, strand
-    
+ TraceProfile prof=profiles.back();
+// do not ever change this back to profiles.push_back(profiles.back()); it segfaults on windows 
+// or you will meet two new friends of yours :)
+// looks like a compiler bug
+    profiles.push_back(prof); // profile 3==2, strand    
     profiles.push_back(get_circ_profile(detail,
                                       1.7*options_->GetStrandWidth()+factor,
                                       1.1*options_->GetStrandThickness()+factor,

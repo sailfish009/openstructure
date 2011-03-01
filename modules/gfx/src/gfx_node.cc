@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -57,6 +57,17 @@ void GfxNode::DeepSwap(GfxNode& n)
 {
   std::swap(name_,n.name_);
   std::swap(show_,n.show_);
+}
+
+bool GfxNode::IsNameAvailable(const String& name) const
+{
+  for (GfxNodeVector::const_iterator it =node_vector_.begin();
+       it!=node_vector_.end();++it) {
+    if ((*it)->GetName()==name) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void GfxNode::Apply(GfxNodeVisitor& v,GfxNodeVisitor::Stack st)
@@ -155,6 +166,16 @@ void GfxNode::RemoveAll()
 
 void GfxNode::Add(GfxNodeP node)
 {
+  if (!node) {
+    return;
+  }
+  if (!this->IsNameAvailable(node->GetName())) {
+    std::stringstream ss;
+    ss << "node '" << this->GetName() << "' has already a node with name '" 
+       << node->GetName() << "'";
+    throw Error(ss.str());
+  }
+
   node_vector_.push_back(node);
   if (!node->parent_.expired()) {
     node->GetParent()->Remove(node);

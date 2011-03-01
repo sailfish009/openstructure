@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -48,14 +48,15 @@ inline void apply_color_op(TraceRendererBase* rend, BackboneTrace& trace_subset,
     for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
       NodeEntryList& nl=trace_subset.GetList(node_list);
       for (unsigned int i=0; i<nl.size();++i) {
-        if (q.IsAtomSelected(nl[i].atom)) {
-          Color clr =get_col.ColorOfAtom(nl[i].atom);
-          set_node_entry_color(nl[i],mask,clr);
+        if(nl[i].atom.IsValid()) {
+          if (q.IsAtomSelected(nl[i].atom)) {
+            Color clr =get_col.ColorOfAtom(nl[i].atom);
+            set_node_entry_color(nl[i],mask,clr);
+          }
         }
       }
     }
-  }
-  else{
+  } else {
     mol::EntityView view = op.GetView();
     for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
       NodeEntryList& nl=trace_subset.GetList(node_list);

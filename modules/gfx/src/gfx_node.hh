@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -75,7 +75,13 @@ class DLLEXPORT_OST_GFX GfxNode: public boost::enable_shared_from_this<GfxNode>
 
   // add a graphical object - leaf
   void Add(GfxObjP obj);
-
+  
+  
+  /// \brief returns true if no scene node of the given name is a child
+  ///   of this node.
+  bool IsNameAvailable(const String& name) const;
+  
+  
   // remove given graphical object
   void Remove(GfxObjP obj);
 

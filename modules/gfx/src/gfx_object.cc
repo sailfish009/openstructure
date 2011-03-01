@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -58,7 +58,11 @@ GfxObj::GfxObj(const String& name):
   opacity_(1.0),
   smoothf_(0.0),
   outline_flag_(false),
+#if defined (__APPLE__)
+  outline_mode_(2),
+#else
   outline_mode_(1),
+#endif
   c_ops_(),
   labels_(),
   use_occlusion_(false)

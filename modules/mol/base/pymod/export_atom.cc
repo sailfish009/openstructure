@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -28,6 +28,14 @@ using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
 #include <ost/export_helper/vector.hh>
+
+namespace {
+  ChainHandle get_chain(AtomHandle& a)
+  {
+    return a.GetResidue().GetChain();
+  }
+}
+
 void export_Atom()
 {
   class_<AtomBase> atom_base("AtomBase", no_init);
@@ -50,7 +58,6 @@ void export_Atom()
                                 return_value_policy<copy_const_reference>()),
                   &AtomBase::SetName)
     .add_property("index", &AtomBase::GetIndex)
-    
     .def("GetRadius", &AtomBase::GetRadius)
     .def("GetElement", &AtomBase::GetElement, 
          return_value_policy<copy_const_reference>())
@@ -82,9 +89,12 @@ void export_Atom()
   class_<AtomHandle, bases<AtomBase> >("AtomHandle", init<>())
     .def("GetResidue",&AtomHandle::GetResidue)
     .add_property("residue",&AtomHandle::GetResidue)
+    .def("GetChain",get_chain)
+    .add_property("chain",get_chain)
     .def("GetBondList", &AtomHandle::GetBondList)
     .def("GetBondCount", &AtomHandle::GetBondCount)
     .def("GetEntity", &AtomHandle::GetEntity)
+    .add_property("bonds", &AtomHandle::GetBondList)
     .def("GetHandle", &AtomHandle::GetHandle)
     .add_property("handle", &AtomHandle::GetHandle)
     .add_property("entity", &AtomHandle::GetEntity)

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -42,7 +42,7 @@
 #include <QScrollBar>
 #include <QDirModel>
 #include <QStringList>
-
+#include <QDebug>
 
 /*
  Authors: Marco Biasini, Andreas Schenk
@@ -469,7 +469,7 @@ void PythonShellWidget::OnHistoryDownStateEntered()
 void PythonShellWidget::OnExecuteStateEntered()
 {
   QTextCursor cursor=textCursor();
-  cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
+  cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
   setTextCursor(cursor);
   set_block_type_(block_edit_start_,textCursor().block(),BLOCKTYPE_CODE);
   insertPlainText(QString(QChar::ParagraphSeparator));
@@ -737,6 +737,14 @@ QTextBlock PythonShellWidget::GetEditStartBlock()
 
 void PythonShellWidget::keyPressEvent(QKeyEvent* event)
 {
+  // BZDNG-173
+  if (event->key()==Qt::Key_Left) {
+    if (this->textCursor().position()==GetEditStartBlock().position() ||
+        this->textCursor().anchor()==GetEditStartBlock().position()) {
+      event->accept();
+      return;
+    }
+  }
   if (this->handle_custom_commands_(event)){
     return;
   }
@@ -791,7 +799,10 @@ QString PythonShellWidget::GetCommand()
   QTextCursor cursor(block_edit_start_);
   cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
   QString text= cursor.selectedText();
-  text.replace(QChar::LineSeparator,"\n");
+  // replace LineSeparator with an empty string, they are used by Qt to 
+  // designate soft line wraps
+  text.replace(QChar::LineSeparator,"");
+  // a real line end
   text.replace(QChar::ParagraphSeparator,"\n");
   return text;
 }

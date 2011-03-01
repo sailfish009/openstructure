@@ -18,7 +18,7 @@ selections in a convenient way. Selections are carried out mainly by calling the
 
   arginines=model.Select('rname=ARG')
 
-A simple selection query (called a predicate) consists in a property (here, 
+A simple selection query (called a predicate) consists of a property (here,
 `rname`), a comparison operator (here, `=`) and an argument (here, `ARG`).  The 
 return value of a call to the :meth:`EntityHandle.Select` method is always an 
 :class:`EntityView`. The :class:`EntityView` always contains a full hierarchy of 

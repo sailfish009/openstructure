@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -437,7 +437,7 @@ void IndexedVertexArray::RenderGL()
     glCullFace(GL_FRONT);
     glEnable(GL_CULL_FACE);
     glShadeModel(GL_FLAT);
-    if(outline_mode_==2) {
+    if(outline_mode_==1) {
       glCallList(outline_mat_dlist_);
       glEnable(GL_POLYGON_OFFSET_LINE);
       glEnable(GL_POLYGON_OFFSET_POINT);
@@ -447,7 +447,7 @@ void IndexedVertexArray::RenderGL()
       glEnable(GL_LINE_SMOOTH);
       glDisable(GL_POINT_SMOOTH); // kills selfx fragment shader if enabled
       glDisable(GL_POLYGON_SMOOTH);
-    } else if(outline_mode_==1) {
+    } else if(outline_mode_==2) {
       glCallList(outline_mat_dlist_);
       glEnable(GL_POLYGON_OFFSET_LINE);
       glPolygonOffset(10.0,1.0);

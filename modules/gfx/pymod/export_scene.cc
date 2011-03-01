@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -182,6 +182,7 @@ void export_Scene()
     .def("StopOffscreenMode",&Scene::StopOffscreenMode)
     .def("SetShadingMode",&Scene::SetShadingMode)
     .def("SetBeacon",&Scene::SetBeacon)
+    .add_property("root_node", &Scene::GetRootNode)
     .def("SetBeaconOff",&Scene::SetBeaconOff)
     .def("__getitem__",scene_getitem)
   ;

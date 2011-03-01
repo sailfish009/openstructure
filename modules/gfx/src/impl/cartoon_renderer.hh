@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -41,6 +41,8 @@ class DLLEXPORT_OST_GFX CartoonRenderer: public TraceRendererBase {
 public:
   CartoonRenderer(BackboneTrace* trace, bool force_tube=false);
 
+  virtual geom::AlignedCuboid GetBoundingBox() const;  
+  
   virtual void PrepareRendering();
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -63,7 +63,6 @@ bool Builder::DoesPeptideBondExist(const mol::AtomHandle& n,
 bool Builder::IsBondFeasible(const mol::AtomHandle& atom_a,
                              const mol::AtomHandle& atom_b)
 {
-  Real len=geom::Length2(atom_a.GetPos()-atom_b.GetPos());
   Real radii=0.0;
   if (atom_a.GetRadius()>0.0) {
     radii=atom_a.GetRadius();
@@ -75,9 +74,9 @@ bool Builder::IsBondFeasible(const mol::AtomHandle& atom_a,
   } else {
     return false;
   } 
-  radii*=0.5;
-  Real upper_bound=1.5*radii*radii;
-  Real lower_bound=0.25*radii*radii;
+  Real len=geom::Length2(atom_a.GetPos()-atom_b.GetPos());
+  Real lower_bound=radii*radii*0.0625;
+  Real upper_bound=lower_bound*6.0;
   return (len<=upper_bound && len>=lower_bound);
 }
 

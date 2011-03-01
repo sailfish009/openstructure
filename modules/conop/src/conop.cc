@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -229,9 +229,10 @@ private:
 class Connector: public mol::EntityVisitor
 {
 public:
-  Connector(const BuilderP& b):
+  Connector(const BuilderP& b, bool peptide_bonds):
     builder_(b),
-    prev_()
+    prev_(),
+    peptide_bonds_(peptide_bonds)
   {}
 
   virtual bool VisitChain(const mol::ChainHandle& chain) {
@@ -241,7 +242,7 @@ public:
 
   virtual bool VisitResidue(const mol::ResidueHandle& res) {
     builder_->ConnectAtomsOfResidue(res);
-    if (prev_) {
+    if (peptide_bonds_ && prev_) {
       builder_->ConnectResidueToPrev(res,prev_);
     }
     prev_=res;
@@ -251,6 +252,7 @@ public:
 private:
   BuilderP builder_;
   mol::ResidueHandle prev_;
+  bool peptide_bonds_;
 };
 
 class TorsionMaker: public mol::EntityVisitor
@@ -270,7 +272,7 @@ private:
 };
 } // ns
 
-void Conopology::ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flag)
+void Conopology::ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flags)
 {
   Profile profile_connect("ConnectAll");
   LOG_DEBUG("Conopology: ConnectAll: building internal coordinate system");
@@ -280,7 +282,7 @@ void Conopology::ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flag)
   ChemClassAssigner cca(b);
   eh.Apply(cca);
   LOG_DEBUG("Conopology: ConnectAll: connecting all bonds");
-  Connector connector(b);
+  Connector connector(b, !(flags & NO_PEPTIDE_BONDS));
   eh.Apply(connector);
 
   LOG_DEBUG("Conopology: ConnectAll: assigning all torsions");
