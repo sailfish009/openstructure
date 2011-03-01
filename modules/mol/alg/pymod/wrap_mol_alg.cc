@@ -22,6 +22,7 @@
 #include <ost/mol/alg/local_dist_test.hh>
 #include <ost/mol/alg/superpose_frames.hh>
 #include <ost/mol/alg/filter_clashes.hh>
+#include <ost/mol/alg/construct_cbeta.hh>
 using namespace boost::python;
 using namespace ost;
 
@@ -53,4 +54,6 @@ BOOST_PYTHON_MODULE(_mol_alg)
   def("SuperposeFrames", &ost::mol::alg::SuperposeFrames, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
        arg("end")=-1, arg("ref")=-1));
+//   def("ConstructCBetas", one_arg, args("entity_handle"));
+  def("ConstructCBetas", &ost::mol::alg::ConstructCBetas, (arg("entity_handle"), arg("include_gly")=false));
 }

@@ -5,6 +5,7 @@ set(OST_MOL_ALG_HEADERS
   local_dist_test.hh
   superpose_frames.hh
   filter_clashes.hh
+  construct_cbeta.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -13,6 +14,7 @@ set(OST_MOL_ALG_SOURCES
   local_dist_test.cc
   superpose_frames.cc
   filter_clashes.cc
+  construct_cbeta.cc
 )
 
 set(MOL_ALG_DEPS mol seq)

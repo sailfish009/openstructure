@@ -180,14 +180,18 @@ int PackingPotential::GetEnergyCounts()
 bool PackingPotential::VisitAtom(const mol::AtomHandle& atom)
 {
   AminoAcid aa=ResidueToAminoAcid(atom.GetResidue());
-  if (aa==Xxx)
+  if (aa==Xxx) {
+    atom.GetResidue().SetFloatProp("solvation_energy",0);
     return false;
+  }
   int count=0;
   for (mol::EntityViewList::iterator i=views_.begin(),
        e=views_.end(); i!=e; ++i) {
     count+=i->FindWithin(atom.GetPos(), options_.cutoff).size();
   }
-  energy_+=this->GetPackingEnergy(aa, count);
+  float local_energy=this->GetPackingEnergy(aa, count);
+  atom.GetResidue().SetFloatProp("solvation_energy",local_energy);
+  energy_+=local_energy;
   energy_counts_++;
   return false;
 }

@@ -74,7 +74,7 @@ public:
   void SaveToFile(const String& filename);
   
   /// \brief calculate all-atom interaction score for whole entity
-  float GetTotalEnergy(mol::EntityView view);
+  float GetTotalEnergy(mol::EntityView view, std::string property_identifier);
 
   /// \brief extract energy of a specific interaction
   /// (for plotting pseudo Lennard-Jones potential).
@@ -87,7 +87,7 @@ public:
   /// Two entities need to be provided:
   /// the atoms for which the energy should be derived and
   /// the atoms with respect to which the energy should be calculted.
-  float GetTotalEnergy(mol::EntityView view, mol::EntityView target_view);
+  float GetTotalEnergy(mol::EntityView view, mol::EntityView target_view, std::string property_identifier);
 
   /// \brief retrieve total number of interactions (for normalisation)
   int GetEnergyCounts() const { return interaction_counts_; }
@@ -99,6 +99,7 @@ public:
   template <typename DS>
   void Serialize(DS& ds);
 public:
+  void Repair();
   void Fill(const InteractionStatisticsPtr& stats);
   
   /// parameters: atom type one, atom type two, distance

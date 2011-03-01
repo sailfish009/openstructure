@@ -41,13 +41,15 @@ namespace {
 class TorsionEnergyCalc : public mol::EntityVisitor {
 public:
   TorsionEnergyCalc(const TorsionPotentialPtr& pot, 
-                    TorsionPotentialOpts opts):
-    pot_(pot), energy_(0.0), num_torsions_(0)
+                    TorsionPotentialOpts opts, int length):
+    pot_(pot), energy_(0.0), num_torsions_(0), score_vector_(std::vector<float>(length, 0.0)),
+    pos_counter_(0)
   {
   }
   
   virtual bool VisitResidue(const mol::ResidueHandle& rh)
   {
+    pos_counter_++;
     mol::ResidueHandle prev=rh.GetPrev();
     mol::ResidueHandle next=rh.GetNext();
     if (!(next && prev && next.IsPeptideLinking() &&
@@ -77,8 +79,11 @@ public:
 
     
     // calculate position of the amino acid in the alphabet
-    energy_+=pot_->GetTorsionEnergy(ca, prev_phi, prev_psi, central_phi, 
+    float local_energy=pot_->GetTorsionEnergy(ca, prev_phi, prev_psi, central_phi, 
                                     central_psi, next_phi, next_psi);
+    energy_+=local_energy;
+
+    score_vector_[pos_counter_-1]=local_energy;
     ++num_torsions_;
     return false;
   }
@@ -91,13 +96,19 @@ public:
     return num_torsions_;
   }
 
+  std::vector<float> GetResidueEnergyVector() const {
+    return score_vector_;
+  }
+
 private:
   TorsionPotentialPtr pot_;
   AminoAcid prev_;
   AminoAcid center_;
   mol::ResidueHandle cr_;
   Real energy_;  
-  int    num_torsions_;  
+  int    num_torsions_; 
+  std::vector<float> score_vector_;
+  int pos_counter_;
 };
 
 }
@@ -211,17 +222,27 @@ void TorsionPotential::SaveToFile(const String& path)
 
 Real TorsionPotential::GetTotalEnergy(mol::EntityHandle entity) 
 {
-  TorsionEnergyCalc c(this->shared_from_this(), options_);  
+  int res_count=entity.GetResidueList().size();
+  TorsionEnergyCalc c(this->shared_from_this(), options_, res_count);  
   entity.Apply(c);  
   num_torsions_ = c.GetEnergyCounts();
+  std::vector<float> rev=c.GetResidueEnergyVector();
+  for(int i=0;i<res_count;++i) {
+    entity.GetResidueList()[i].SetFloatProp("torsion_energy", rev[i]);
+  }
   return c.GetEnergy();
 }
 
 Real TorsionPotential::GetTotalEnergy(mol::EntityView entity) 
 {
-  TorsionEnergyCalc c(this->shared_from_this(), options_);
+  int res_count=entity.GetResidueList().size();
+  TorsionEnergyCalc c(this->shared_from_this(), options_, res_count);
   entity.Apply(c);
   num_torsions_ = c.GetEnergyCounts();
+  std::vector<float> rev=c.GetResidueEnergyVector();
+  for(int i=0;i<res_count;++i) {
+    entity.GetResidueList()[i].SetFloatProp("torsion_energy", rev[i]);
+  }
   return c.GetEnergy();
 }
 

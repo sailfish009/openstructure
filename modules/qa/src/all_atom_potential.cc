@@ -37,18 +37,24 @@ class AllAtomPotentialCalculator : public mol::EntityVisitor {
 public:
   AllAtomPotentialCalculator(AllAtomPotential::AllAtomEnergies& energies,
                              AllAtomPotentialOpts& opts, 
-                             mol::EntityView target_view):
+                             mol::EntityView target_view,
+                             int s):
     energies_(energies),
     options_(opts),
     energy_(0.0),
     target_view_(target_view),
-    interaction_counts_(0)
+    interaction_counts_(0),
+    interaction_counts_vector_(std::vector<int>(s, 0)),
+    score_vector_(std::vector<float>(s, 0.0)),
+    pos_counter(0)
   {
   }
 
   virtual bool VisitResidue(const mol::ResidueHandle& residue)
   {
+    if(curr_aa_!=Xxx) pos_counter++;
     curr_aa_=ResidueToAminoAcid(residue);
+//     std::cout <<  residue_energy_ << " " << interaction_counts_ << std::endl;
     return curr_aa_!=Xxx;
   }
   
@@ -85,13 +91,16 @@ public:
               continue;
             }
             energy_+=energies_.Get(type_a, type_b, d);
+            interaction_counts_vector_[pos_counter-1]++;
+            score_vector_[pos_counter-1]+=energies_.Get(type_a, type_b, d);
             interaction_counts_++;
-          }
+         }
         }
       }
     }
     return false;
   }
+
   float GetEnergy() const
   {
     return energy_;
@@ -102,13 +111,27 @@ public:
     return interaction_counts_;
   }
 
+  std::vector<float> GetResidueEnergyVector() const
+  {
+    return score_vector_;
+  }
+
+  std::vector<int> GetResidueCountsVector() const
+  {
+    return interaction_counts_vector_;
+    ;
+  }
+
 private:
   AllAtomPotential::AllAtomEnergies& energies_;
   AllAtomPotentialOpts                options_;
   AminoAcid                           curr_aa_;
-  float                               energy_;
+  float                                energy_;
   mol::EntityView                 target_view_;
   int                      interaction_counts_;
+  std::vector<int>  interaction_counts_vector_;
+  std::vector<float>             score_vector_;
+  int                              pos_counter;
 };
 
 }
@@ -154,22 +177,44 @@ AllAtomPotentialPtr AllAtomPotential::LoadFromFile(const String& filename)
 }
 
 float AllAtomPotential::GetTotalEnergy(mol::EntityView view,
-                                       mol::EntityView target_view)
+                                       mol::EntityView target_view, std::string property_identifier="")
 {
-  AllAtomPotentialCalculator c(energies_, options_, target_view);
   mol::EntityHandle e=view.GetHandle();
+  int res_count=view.GetResidueList().size();
+  AllAtomPotentialCalculator c(energies_, options_, target_view, res_count);
   view.Apply(c);
   interaction_counts_=c.GetEnergyCounts();
+
+  std::vector<float> rev=c.GetResidueEnergyVector();
+  std::vector<int> rcv=c.GetResidueCountsVector();
+
+  if(property_identifier!="") {
+  for(int i=0;i<res_count;++i) {
+    view.GetResidueList()[i].SetFloatProp(property_identifier, rev[i]);
+    view.GetResidueList()[i].SetIntProp(property_identifier+"_counts", rcv[i]);
+  }
+  }
   return c.GetEnergy();
 }
 
-float AllAtomPotential::GetTotalEnergy(mol::EntityView view)
+float AllAtomPotential::GetTotalEnergy(mol::EntityView view, std::string property_identifier="")
 {
-  AllAtomPotentialCalculator c(energies_, options_, view);
   mol::EntityHandle e=view.GetHandle();
+  int res_count=view.GetResidueList().size();
+  AllAtomPotentialCalculator c(energies_, options_, view, res_count);
   view.Apply(c);
   interaction_counts_=c.GetEnergyCounts();
-  return c.GetEnergy();
+  std::string a="";
+  std::vector<float> rev=c.GetResidueEnergyVector();
+  std::vector<int> rcv=c.GetResidueCountsVector();
+
+  if(property_identifier!="") {
+  for(int i=0;i<res_count;++i) {
+    view.GetResidueList()[i].SetFloatProp(property_identifier, rev[i]);
+    view.GetResidueList()[i].SetIntProp(property_identifier+"_counts", rcv[i]);
+  }
+  }
+  return c.GetEnergy();  
 }
 
 void AllAtomPotential::SetSequenceSeparation(int seq_sep) {
@@ -208,7 +253,46 @@ void AllAtomPotentialOpts::Serialize(DS& ds)
   ds & distance_bucket_size;
 } 
 
+void AllAtomPotential::Repair()
+{
+  // for C-apha (backbone only) models fill Calpha interactions with corresponding Cbeta values
+  typedef AllAtomPotential::AllAtomEnergies::IndexType Index;
+  int num=int((options_.upper_cutoff-
+               options_.lower_cutoff)/options_.distance_bucket_size);  
 
+  for (int i=0; i<atom::UNKNOWN-1; ++i) {
+    for (int j=0; j<atom::UNKNOWN-1; ++j) {
+
+      for (int k=0; k<num; ++k) {
+         float e=energies_.Get(Index(i, j, k));
+
+          //check if Cbeta (has counts) and not Glycin-Calpha
+             if(i==0 or j==0){ //mysteriously needed for one case of j=0 (TODO: check later, perhaps in RepairCbetaStatistics())
+              continue;
+             }
+             if (e!= 0 and i==3 and energies_.Get(Index(i, j+1, k))==0) {
+              energies_.Set(Index(i, j-1, k), e);
+//               std::cout << e << " ";
+             }
+             else if (e!= 0 and j==3 and energies_.Get(Index(i+1, j, k))==0) {
+              energies_.Set(Index(i-1, j, k), e);
+//               std::cout << e << " ";
+              }
+             else {
+               if(e!= 0 and energies_.Get(Index(i, j+1, k))==0 and energies_.Get(Index(i+1, j, k))==0) {
+//               std::cout << e << " ";
+
+              energies_.Set(Index(i-1, j, k), e);
+              energies_.Set(Index(i, j-1, k), e);
+              energies_.Set(Index(i-1, j-1, k), e);
+              }
+             }
+
+          }
+      }
+    
+  }
+}
 
 void AllAtomPotential::Fill(const InteractionStatisticsPtr& stats)
 {
