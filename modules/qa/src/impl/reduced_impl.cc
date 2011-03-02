@@ -2,6 +2,7 @@
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/atom_handle.hh>
 #include <ost/mol/atom_view.hh>
+#include <ost/mol/alg/construct_cbeta.hh>
 #include "reduced_impl.hh"
 
 
@@ -105,14 +106,7 @@ bool ReducedPotentialImpl::GetCAlphaCBetaPos(const mol::ResidueHandle& res,
                 << " doesn't have enough atoms to reconstruct Cbeta position");
     return false;
   }
-  geom::Vec3 v1=geom::Normalize(ca.GetPos()-n.GetPos());
-  geom::Vec3 v2=geom::Normalize(ca.GetPos()-c.GetPos());
-  geom::Vec3 in_plane_v=geom::Normalize(v1+v2);
-  geom::Plane p(ca.GetPos() ,n.GetPos(), c.GetPos());
-  // rotate around vector perpendicular  to p and in_plane_v
-  geom::Vec3 axis=geom::Normalize(geom::Cross(p.GetNormal(), in_plane_v));
-  geom::Mat3 rot_mat=geom::AxisRotation(axis, (-54/180.0)*M_PI);
-  cb_pos=ca.GetPos()+rot_mat*in_plane_v*bond_length;
+  cb_pos=mol::alg::CBetaPosition(n.GetPos(), ca.GetPos(), c.GetPos());
   return true;
 }
 
