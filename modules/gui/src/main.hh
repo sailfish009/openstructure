@@ -30,11 +30,10 @@
 
 // Qt headers must come last
 #include <QMainWindow>
-#include <QMdiArea>
-#include <QAction>
-#include <QFile>
-#include <QDragEnterEvent>
-#include <QDropEvent>
+
+class QDropEvent;
+class QDragEnterEvent;
+class QCloseEvent;
 
 namespace ost { namespace gui {
 

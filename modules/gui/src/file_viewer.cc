@@ -21,7 +21,11 @@
 
 #include "file_viewer.hh"
 
+#include <QMainWindow>
+#include <QSyntaxHighlighter>
+#include <QTextEdit>
 #include <QtGui>
+
 namespace ost { namespace gui {
 
 FileViewer::FileViewer(const QString& path, QWidget* parent):

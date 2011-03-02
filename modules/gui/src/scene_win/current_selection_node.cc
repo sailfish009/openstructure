@@ -22,6 +22,7 @@
 #include <ost/gui/scene_win/scene_win_model.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node.hh>
+#include <ost/gfx/entity.hh>
 
 #include <ost/gui/scene_win/scene_win.hh>
 
@@ -30,7 +31,11 @@
 #include <QFont>
 namespace ost { namespace gui {
 
-CurrentSelectionNode::CurrentSelectionNode(gfx::EntityP entity, SceneNode* parent):EntityPartNode("Current Selection",entity,mol::QueryViewWrapper(entity->GetSelection()),parent),wrapper_(mol::QueryViewWrapper(entity->GetSelection())){
+CurrentSelectionNode::CurrentSelectionNode(gfx::EntityP entity, 
+                                           SceneNode* parent):
+   EntityPartNode("Current Selection", entity, 
+                  mol::QueryViewWrapper(entity->GetSelection()),parent),
+   wrapper_(mol::QueryViewWrapper(entity->GetSelection())){
 }
 
 void CurrentSelectionNode::SetQueryView(mol::QueryViewWrapper part)

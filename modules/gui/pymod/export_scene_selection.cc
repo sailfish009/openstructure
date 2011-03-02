@@ -21,7 +21,8 @@ using namespace boost::python;
 
 #include <ost/gui/scene_selection.hh>
 #include <ost/gfx/gfx_node.hh>
-
+#include <ost/gfx/entity.hh>
+#include <ost/gfx/gfx_object.hh>
 using namespace ost;
 using namespace ost::gui;
 

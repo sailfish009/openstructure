@@ -20,18 +20,19 @@
 #define OST_GUI_GL_CANVAS_HH
 
 
-// Qt includes must come last
-#include <QGLWidget>
-#include <QTime>
-#include <QBasicTimer>
-#include <QMouseEvent>
+
 #include <ost/gui/tools/tool.hh>
 #include <ost/gui/scene_menu.hh>
 #include <ost/gfx/glwin_base.hh>
 #include <ost/gfx/input.hh>
 #include <ost/gfx/gfx_object_fw.hh>
 
+
+// Qt includes must come last
+#include <QGLWidget>
+#include <QBasicTimer>
 class QMenu;
+class QMouseEvent;
 
 namespace ost { namespace gui {
 

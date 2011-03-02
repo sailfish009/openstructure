@@ -52,6 +52,9 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QUrl>
+#include <QDirModel>
+#include <QListView>
+#include <QComboBox>
 
 namespace ost { namespace gui {
 

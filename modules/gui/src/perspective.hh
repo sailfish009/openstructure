@@ -27,12 +27,6 @@
 #include <ost/gui/module_config.hh>
 
 #include <QObject>
-#include <QMenuBar>
-#include <QMap>
-#include <QString>
-#include <QMenu>
-#include <QStatusBar>
-
 
 class QMenu;
 class QMenuBar; 

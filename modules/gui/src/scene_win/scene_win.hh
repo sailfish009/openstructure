@@ -23,7 +23,7 @@
 #include <ost/mol/query_view_wrapper.hh>
 
 #include <ost/gfx/gfx_node_fw.hh>
-#include <ost/gfx/entity.hh>
+#include <ost/gfx/entity_fw.hh>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>

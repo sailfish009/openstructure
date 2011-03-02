@@ -24,9 +24,13 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
 
-#include <QDirModel>
-#include <QListView>
-#include <QComboBox>
+#include <QModelIndex>
+#include <QDir>
+
+class QDirModel;
+class QListView;
+class QComboBox;
+
 namespace ost { namespace gui {
 
 

@@ -41,6 +41,11 @@
 #include <QKeySequence>
 #include <QStatusBar>
 #include <QPushButton>
+#include <QMenuBar>
+#include <QMap>
+#include <QString>
+#include <QStatusBar>
+
 /*
   Author: Marco Biasini
  */

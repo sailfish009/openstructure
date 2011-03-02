@@ -25,10 +25,11 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
 
-#include <QAction>
 #include <QGLFormat>
 #include <QActionGroup>
-#include <QStatusBar>
+
+class QStatusBar;
+class QAction;
 
 /*
   Authors: Ansgar Philippsen, Marco Biasini
