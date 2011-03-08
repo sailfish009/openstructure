@@ -76,13 +76,13 @@ void ensure_counts(EntityHandle e, const String& qs, int cc, int rc, int ac) {
   BOOST_CHECK_NO_THROW(v=e.Select(qs));
   BOOST_CHECK_MESSAGE(v.GetChainCount()==cc,
                       "wrong chain count " << v.GetChainCount()
-                      << " for query String " << qs);
+                      << " for query string " << qs);
   BOOST_CHECK_MESSAGE(v.GetResidueCount()==rc,
                       "wrong residue count " << v.GetResidueCount() <<
-                      " for query String " << qs);
+                      " for query string " << qs);
   BOOST_CHECK_MESSAGE(v.GetAtomCount()==ac,
                       "wrong atom count " << v.GetAtomCount() <<
-                      " for query String " << qs);
+                      " for query string " << qs);
 }
 
 void ensure_counts_v(EntityView src, const String& qs,
@@ -208,6 +208,9 @@ BOOST_AUTO_TEST_CASE(test_query_eval)
   ensure_counts(e, "rtype=C", 1, 3, 27);
   ensure_counts(e, "not (aname=CA and not aname=CA)", 1, 3, 27);
   ensure_counts(e, "3 <> {21.5,35,57.0}", 1, 2, 5);
+  ensure_counts(e, "not 3 <> {21.5,35,57.0}", 1, 3, 22);
+  ensure_counts(e, "3 <> {21.5,35,57} and not 0.5 <> {21.5,35,57} ", 1, 2, 4);
+  ensure_counts(e, "not 0.5 <> [rnum=3]", 1, 2, 19);
   ensure_counts(e, "1 <> {0,0,0}", 0, 0, 0);
   ensure_counts(e, "gatestpropa:0=1", 1, 1, 1);
   ensure_counts(e, "gatestpropa:1.0=1", 1, 3, 27);
