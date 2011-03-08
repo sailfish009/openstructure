@@ -73,7 +73,7 @@ bool QueryState::do_within(const geom::Vec3& pos, const WithinParam& p,
         if (geom::Dot(d, d) <= p.GetRadiusSquare()) {
           return true;
         }
-      } else if (geom::Dot(d, d) > p.GetRadiusSquare()) {
+      } else if (geom::Dot(d, d) < p.GetRadiusSquare()) {
         return false;
       }
     }
