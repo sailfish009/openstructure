@@ -95,8 +95,13 @@ SDFWriter::SDFWriter(const String& filename)
   : outfile_(filename.c_str()), ostr_(outfile_), counter_(0) {
 }
 
-SDFWriter::SDFWriter(const boost::filesystem::path& filename)
-  : outfile_(filename.file_string().c_str()), ostr_(outfile_), counter_(0) {
+SDFWriter::SDFWriter(const boost::filesystem::path& filename): 
+#if BOOST_FILESYSTEM_VERSION==3
+  outfile_(filename.filename().string().c_str()), 
+#else
+  outfile_(filename.file_string().c_str()), 
+#endif
+  ostr_(outfile_), counter_(0) {
 }
 
 void SDFWriter::Write(const mol::EntityView& ent) {
