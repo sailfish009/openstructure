@@ -30,7 +30,15 @@ MapOctree::MapOctree(const img::ImageHandle& ih, bool wrap_around):
   built_(false),
   wrap_around_(wrap_around)
 {
-  extent_=map_.GetExtent();
+  if (map_.IsValid()) {
+    extent_=map_.GetExtent();    
+  }
+}
+
+MapOctree::MapOctree(bool wrap_around): map_(), 
+  built_(false), wrap_around_(wrap_around)
+{
+  
 }
 
 void MapOctree::Initialize()

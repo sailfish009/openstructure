@@ -27,7 +27,7 @@
 #include <ost/img/map.hh>
 #include <ost/img/alg/stat.hh>
 #include <ost/img/alg/histogram.hh>
-
+#include <ost/img/xtal_map.hh>
 #include "gfx_object.hh"
 #include "map_iso_prop.hh"
 
@@ -47,7 +47,7 @@ enum MapIsoType {
 class MapIso;
 typedef boost::shared_ptr<MapIso> MapIsoP;
 
-/// \brief isocontour rendering for \ref img::ImageHandle "3D image data"
+/// \brief isocontour rendering for \ref img::ImageHandle "3D image data" 
 /// 
 /// Two render modes are supported: gfx::RenderMode::SIMPLE renders the map in
 /// wireframe mode, gfx::RenderMode::FILL renders a shaded isocontoured map.
@@ -55,7 +55,9 @@ typedef boost::shared_ptr<MapIso> MapIsoP;
 /// \sa gfx::MapSlab
 class DLLEXPORT_OST_GFX MapIso: public GfxObj {
 public:
-  MapIso(const String& name, const img::MapHandle& mh,float level, uint a=0);
+  MapIso(const String& name, const img::MapHandle& mh,float level);
+  MapIso(const String& name, const img::XtalMapPtr& map, float level);
+  
   ~MapIso();
   virtual geom::AlignedCuboid GetBoundingBox() const;
                              
@@ -72,7 +74,7 @@ public:
   void SetVisibleExtent(const img::Extent& vis_extent);
   
   
-  const img::Extent& GetVisibleExtent() const;
+  const img::Extent& GetVisibleExtent() const { return visible_extent_; }
   void Rebuild();
   
   /// \brief set isocontouring level
@@ -167,6 +169,7 @@ public:
   /// \brief checks is the octree needs to be rebuilt
   bool IfOctreeDirty() const;
 
+  bool HasXtalMap() const { return xtal_map_; }
 protected:
   void SetupSlabPlanes();
   void UpdateRenderParams();
@@ -174,12 +177,15 @@ protected:
   void CalculateHistogram() const;
   virtual void CustomPreRenderGL(bool flag);
   static img::ImageHandle DownsampleMap(const img::ImageHandle& mh);
-
+  void Init();
+  void RebuildOctree();
 private:
   img::MapHandle                original_mh_;
   img::MapHandle                downsampled_mh_;
   img::MapHandle                mh_;
   impl::MapOctree*              octree_;
+  img::XtalMapPtr               xtal_map_;
+  img::Extent                   visible_extent_;
   mutable img::alg::Stat        stat_;
   mutable bool                  stat_calculated_;
   mutable img::alg::Histogram   histogram_;
@@ -187,7 +193,6 @@ private:
   int                           histogram_bin_count_;
   float                         level_;
   bool                          normals_calculated_;
-  uint                          alg_;
   float                         smoothf_;
   float                         min_;
   float                         max_;

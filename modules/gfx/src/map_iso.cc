@@ -58,30 +58,47 @@ int compute_downsampling_fact(const ost::img::ImageHandle& mh)
 
 namespace ost { namespace gfx {
 
+
+MapIso::MapIso(const String& name, const img::XtalMapPtr& map, float level):
+  GfxObj(name),
+  original_mh_(),
+  downsampled_mh_(),
+  octree_(new impl::MapOctree(false)),
+  xtal_map_(map),
+  level_(level)
+{
+  this->SetVisibleExtent(img::Extent(img::Size(32,32,32)));
+  this->Init();
+}
+
+
 MapIso::MapIso(const String& name, const img::MapHandle& mh, 
-               float level, uint a):
+               float level):
   GfxObj(name),
   original_mh_(mh),
   downsampled_mh_(),
   mh_(MapIso::DownsampleMap(mh)),
-  octree_(new impl::MapOctree(mh_, true)),
-  stat_calculated_(false),
-  histogram_calculated_(false),
-  histogram_bin_count_(100),
-  level_(level),
-  normals_calculated_(false),
-  alg_(a),
-  debug_octree_(false),
-  color_(1.0,1.0,1.0),
-  near_slab_(30),
-  far_slab_(60),
-  slabbing_(false)
+  octree_(new impl::MapOctree(mh_, false)),
+  level_(level)
 {
+  this->Init();
+}
+
+void MapIso::Init()
+{
+  stat_calculated_=false;
+  histogram_calculated_=false;
+  histogram_bin_count_=100;
+  normals_calculated_=false;
+  debug_octree_=false;
+  color_=Color(1.0,1.0,1.0);
+  near_slab_=30;
+  far_slab_=60;
+  slabbing_=false;
   // TODO replace with def mat for this gfx obj type
-  if (mh_ != original_mh_) {
+  if (!xtal_map_ && mh_ != original_mh_) {
     downsampled_mh_ = mh_;
   }
-  octree_->Initialize();
   SetMatAmb(Color(0,0,0));
   SetMatDiff(Color(1,1,1));
   SetMatSpec(Color(0.1,0.1,0.1));
@@ -91,21 +108,36 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   tf.SetTrans(this->GetCenter());  
   this->SetLineWidth(1.0);
   this->SetTF(tf);
-  octree_->SetNewMap(mh_);  
-  Rebuild();
+  if (octree_) {
+    octree_->Initialize();
+    visible_extent_=mh_.GetExtent();
+    octree_->SetNewMap(mh_);
+  }
+  Rebuild();  
 }
 
 geom::AlignedCuboid MapIso::GetBoundingBox() const
 {
-  geom::Vec3 minc = mh_.IndexToCoord(octree_->GetVisibleExtent().GetStart());
-  geom::Vec3 maxc = mh_.IndexToCoord(octree_->GetVisibleExtent().GetEnd());
-  return geom::AlignedCuboid(minc,maxc);
+  if (this->HasXtalMap()) {
+    geom::Vec3 minc = xtal_map_->IndexToCoord(visible_extent_.GetStart());
+    geom::Vec3 maxc = xtal_map_->IndexToCoord(visible_extent_.GetEnd());
+    return geom::AlignedCuboid(minc,maxc);    
+  } else {
+    geom::Vec3 minc = mh_.IndexToCoord(visible_extent_.GetStart());
+    geom::Vec3 maxc = mh_.IndexToCoord(visible_extent_.GetEnd());
+    return geom::AlignedCuboid(minc,maxc);    
+  }
+
 }
 
 geom::Vec3 MapIso::GetCenter() const
 {
-  geom::Vec3 nrvo = mh_.IndexToCoord(mh_.GetExtent().GetCenter());
-  return nrvo;
+  if (this->HasXtalMap()) {
+    return xtal_map_->IndexToCoord(visible_extent_.GetCenter());
+  } else {
+    geom::Vec3 nrvo = mh_.IndexToCoord(mh_.GetExtent().GetCenter());
+    return nrvo;    
+  }
 }
 
 
@@ -154,7 +186,6 @@ void MapIso::CustomPreRenderGL(bool flag)
   if(flag) {
     Rebuild();
   }
-  //RefreshVA(va_);
 }
 
 namespace {
@@ -273,13 +304,13 @@ void MapIso::OnInput(const InputEvent& e)
   GfxObj::OnInput(e);
 }
 
-void MapIso::Rebuild()
+void MapIso::RebuildOctree()
 {
   if (mh_.IsFrequency() == true){
-    throw Error("Error: Map not in real space. Cannot create of this map");
+    throw Error("Map not in real space.");
   }
   if (octree_->IsMapManageable(mh_) == false) {
-    throw Error("Error: Map is too big for visualization");
+    throw Error("Map is too big for visualization");
   }
   if (IfOctreeDirty()==true) {
     octree_->Initialize();
@@ -290,8 +321,13 @@ void MapIso::Rebuild()
   normals_calculated_=false;
   bool triangles=this->GetRenderMode()!=gfx::RenderMode::SIMPLE;
   impl::OctreeIsocont cont(va_, level_, triangles, color_);
-  octree_->VisitDFFullExtent(cont);
-  // for normal debugging
+  octree_->VisitDF(cont);
+  // for normal debugging  
+}
+
+void MapIso::Rebuild()
+{
+  this->RebuildOctree();
 #if 0  
   normals_calculated_=true;
   va_.CalcNormals(1.0);
@@ -358,8 +394,11 @@ int MapIso::GetHistogramBinCount() const
 }
 
 std::vector<int> MapIso::GetHistogram() const
-{
-  if(!histogram_calculated_)CalculateHistogram();
+{  
+  std::vector<int> a;
+  return a;
+  if (!histogram_calculated_)
+    CalculateHistogram();
   return histogram_.GetBins();
 }
 
@@ -394,10 +433,14 @@ void MapIso::SetNSF(float nsf)
 /// \brief sets the donsampled map to active
 void MapIso::ShowDownsampledMap()
 {
+  if (this->HasXtalMap()) {
+    return;
+  }
   if (downsampled_mh_==mh_) return;
   if (downsampled_mh_.IsValid()) mh_ = downsampled_mh_;
   
-  octree_->SetNewMap(mh_);
+  octree_->SetNewMap(mh_);  
+  visible_extent_=octree_->GetVisibleExtent();
   MakeOctreeDirty();
   stat_calculated_ = false;
   histogram_calculated_ = false;
@@ -408,6 +451,9 @@ void MapIso::ShowDownsampledMap()
 /// \brief sets the original map to active
 void MapIso::ShowOriginalMap()
 {
+  if (this->HasXtalMap()) {
+    return;
+  }
   if (original_mh_==mh_) 
     return;
 
@@ -465,14 +511,18 @@ img::ImageHandle MapIso::DownsampleMap(const img::ImageHandle& mh)
 
 void MapIso::SetVisibleExtent(const img::Extent& vis_extent)
 {
-  octree_->SetVisibleExtent(vis_extent);
+
+  if (vis_extent==visible_extent_) {
+    return;
+  }
+  visible_extent_=vis_extent;
+  if (this->HasXtalMap()) {
+    mh_=xtal_map_->Extract(visible_extent_);
+    octree_->SetNewMap(mh_);
+    this->MakeOctreeDirty();
+  }
+  octree_->SetVisibleExtent(visible_extent_);
   this->FlagRebuild();
-}
-
-
-const img::Extent& MapIso::GetVisibleExtent() const
-{
-  return octree_->GetVisibleExtent();
 }
 
 }} // ns

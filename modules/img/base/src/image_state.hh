@@ -72,6 +72,12 @@ using image_state::ImageStateConstModOPAlgorithm;
 using image_state::ImageStateMorphAlgorithm;
 
 using image_state::ImageStateBasePtr;
+using image_state::RealSpatialImageStatePtr;
+using image_state::RealFrequencyImageStatePtr;
+using image_state::ComplexSpatialImageStatePtr;
+using image_state::ComplexFrequencyImageStatePtr;
+using image_state::ComplexHalfFrequencyImageStatePtr;
+using image_state::WordSpatialImageStatePtr;
 
 }}// namespace
 

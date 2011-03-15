@@ -97,7 +97,7 @@ void ExtentIterator::Inc()
     if(++current_[1]>=end_[1]) {
       current_[1]=start_[1];
       if(++current_[2]>=end_[2]) {
-	current_=end_;
+        current_=end_;
       }
     } 
   }

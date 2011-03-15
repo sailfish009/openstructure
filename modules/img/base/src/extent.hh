@@ -124,7 +124,7 @@ class DLLEXPORT_OST_IMG_BASE Extent {
      Ensures that the given point lies within Extent, 
      using wrap around if necessary
    */
-  Point WrapAround(const Point& p);  
+  Point WrapAround(const Point& p) const;  
 
   //! Return new extent mirrored according to planes
   Extent Mirror(int planes);
@@ -137,7 +137,8 @@ class DLLEXPORT_OST_IMG_BASE Extent {
   bool operator!=(const Extent& b) const {return !equal(b);}
   
   void Shift(const Point& p);
-
+  
+  void AddBorder(int border);
  private:
   Point start_,end_;
   Size size_;

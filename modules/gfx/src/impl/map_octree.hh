@@ -109,6 +109,7 @@ typedef std::vector<OctreeNode> OcNodeEntryList;
 class DLLEXPORT_OST_GFX MapOctree {
 public:
   MapOctree(const img::ImageHandle& map, bool wrap_around);
+  explicit MapOctree(bool wrap_around);
   void Initialize();
   uint32_t GetNumNodesForLevel(uint8_t level) const;
   void SetNewMap(const img::ImageHandle& ih);

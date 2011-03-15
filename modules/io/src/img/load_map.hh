@@ -22,6 +22,7 @@
 
 #include <ost/io/module_config.hh>
 #include <ost/img/map.hh>
+#include <ost/img/xtal_map.hh>
 #include <ost/img/alg/normalizer_factory.hh>
 #include <ost/io/img/image_format.hh>
 
@@ -42,6 +43,9 @@ DLLEXPORT_OST_IO img::ImageHandle LoadImage(const boost::filesystem::path& loc);
 /// This function reads an image file from disk and transfers the data into memory
 /// The function assumes that the file has the specified format
 DLLEXPORT_OST_IO img::ImageHandle LoadImage(const boost::filesystem::path& loc, const ImageFormatBase& formatstruct);
+
+
+DLLEXPORT_OST_IO img::XtalMapPtr LoadXtalMap(const String& filename);
 
 /// \brief Function that saves an image to a file
 ///

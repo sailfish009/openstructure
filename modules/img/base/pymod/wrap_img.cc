@@ -42,6 +42,7 @@ void export_Extent();
 void export_Function();
 void export_ImageHandle();
 void export_ImageList();
+void export_XtalMap();
 void export_ConstImageHandle();
 void export_Peak();
 void export_Point();
@@ -73,5 +74,5 @@ BOOST_PYTHON_MODULE(_img)
   export_Mask();
   export_Progress();
   export_Map();
-
+  export_XtalMap();
 }

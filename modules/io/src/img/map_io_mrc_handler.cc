@@ -775,7 +775,9 @@ void complex_dumper(BinaryOStream<CONVERSIONTYPE>& f,
 }
 
 template<class HEADER,int CONVERSIONTYPE>
-void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
+void import_helper(img::MapHandle& image, std::istream& in, 
+                   const MRC& formatmrc, UnitCell& unit_cell,
+                   img::Size& unit_cell_size)
 {
   BinaryIStream<CONVERSIONTYPE> f(in);
   HEADER header;
@@ -806,6 +808,12 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
     mstart[header.mapc-1]=header.ncstart;
     mstart[header.mapr-1]=header.nrstart;
     mstart[header.maps-1]=header.nsstart;
+    unit_cell_size=Size(header.nx, header.ny, header.nz);
+    SymmetryPtr sym=Symmetry::FromCCP4Symbol(header.ispg);
+    unit_cell=UnitCell(header.x, header.y, header.z, 
+                        M_PI*header.alpha/180.0, 
+                        M_PI*header.beta/180.0,
+                        M_PI*header.gamma/180.0, sym);
     image.Reset(img::Extent(mstart,msize),img::REAL,img::SPATIAL);
     if(header.x>0.0 && header.y >0.0 && header.z>0.0){
       geom::Mat3 cs=geom::Mat3FromAngles(M_PI*header.alpha/180.0, 
@@ -845,17 +853,19 @@ template<class HEADER>
 void import_endianess_switcher(img::MapHandle& image,
                              std::istream& f,
                              std::istream& header_str,
-                             const MRC& formatmrc)
+                             const MRC& formatmrc,
+                             UnitCell& unit_cell,
+                             img::Size& unit_cell_size)
 {
   switch(HEADER::DetermineDataFormat(header_str)){
   case OST_BIG_ENDIAN:
-   import_helper<HEADER,OST_BIG_ENDIAN>(image,f,formatmrc);
+   import_helper<HEADER,OST_BIG_ENDIAN>(image,f,formatmrc,unit_cell,unit_cell_size);
    break;
   case OST_LITTLE_ENDIAN:
-   import_helper<HEADER,OST_LITTLE_ENDIAN>(image,f,formatmrc);
+   import_helper<HEADER,OST_LITTLE_ENDIAN>(image,f,formatmrc,unit_cell,unit_cell_size);
    break;
   case OST_VAX_DATA:
-   import_helper<HEADER,OST_VAX_DATA>(image,f,formatmrc);
+   import_helper<HEADER,OST_VAX_DATA>(image,f,formatmrc,unit_cell,unit_cell_size);
    break;
   }
 }
@@ -905,7 +915,9 @@ void export_endianess_switcher(const img::MapHandle& image,
 
 namespace bf = boost::filesystem;
 
-void MapIOMrcHandler::Import(img::MapHandle& sh, const boost::filesystem::path& loc,const ImageFormatBase& formatstruct )
+void MapIOMrcHandler::Import(img::MapHandle& sh, 
+                             const boost::filesystem::path& loc,
+                             const ImageFormatBase& formatstruct)
 {
   boost::filesystem::ifstream infile(loc, std::ios::binary);
   if(!infile)
@@ -935,7 +947,8 @@ void MapIOMrcHandler::Import(img::MapHandle& sh, const boost::filesystem::path& 
   infile2.close();
 }
 
-void MapIOMrcHandler::Import(img::MapHandle& sh, std::istream& loc, const ImageFormatBase& formatstruct)
+void MapIOMrcHandler::Import(img::MapHandle& sh, std::istream& loc, 
+                             const ImageFormatBase& formatstruct)
 {
    MRC form;
    MRC& formatmrc = form;
@@ -952,30 +965,32 @@ void MapIOMrcHandler::Import(img::MapHandle& sh, std::istream& loc, const ImageF
    boost::iostreams::filtering_streambuf<boost::iostreams::input> head_strbuf;
    std::istream head_str(&head_strbuf);
    head_strbuf.push(boost::iostreams::basic_array_source<char>(headerptr,sizeof(header_)));
+
    if (formatmrc.GetSubformat()==MRC_OLD_FORMAT) {
      LOG_DEBUG("mrc io: importing old style format");
-     detail::import_endianess_switcher<detail::mrc_header>(sh,loc,head_str,formatmrc);
+     detail::import_endianess_switcher<detail::mrc_header>(sh,loc,head_str,formatmrc,unit_cell_,unit_cell_size_);
    } else if (formatmrc.GetSubformat()==MRC_NEW_FORMAT) {
      LOG_DEBUG("mrc io: importing new style format");
-     detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);
+     detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc,unit_cell_, unit_cell_size_);
    } else if (is_file_ && (detail::FilenameEndsWith(filename_,".ccp4") || detail::FilenameEndsWith(filename_,".map") || detail::FilenameEndsWith(filename_,".map.gz"))) {
      LOG_DEBUG("mrc io: importing new style format");
-     detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);
+     detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc,unit_cell_,unit_cell_size_);
    } else {
-	 unsigned char header_content[256];
-	 memcpy(&header_content[0],&header_,256*sizeof(char));
+     unsigned char header_content[256];
+     memcpy(&header_content[0],&header_,256*sizeof(char));
      if (MatchContent(header_content) == true) {
        LOG_DEBUG("mrc io: importing new style format");
-       detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc);
+       detail::import_endianess_switcher<detail::ccp4_header>(sh,loc,head_str,formatmrc,unit_cell_,unit_cell_size_);
      } else {
        LOG_DEBUG("mrc io: importing old style format");
-       detail::import_endianess_switcher<detail::mrc_header>(sh,loc,head_str,formatmrc);
+       detail::import_endianess_switcher<detail::mrc_header>(sh,loc,head_str,formatmrc,unit_cell_,unit_cell_size_);
      }
   }
 }
 
 void MapIOMrcHandler::Export(const img::MapHandle& image,
-                         const boost::filesystem::path& loc,const ImageFormatBase& formatstruct) const
+                             const boost::filesystem::path& loc,
+                             const ImageFormatBase& formatstruct) const
 {
   bf::ofstream outfile(loc, std::ios::binary);
   if(!outfile)
@@ -989,7 +1004,8 @@ void MapIOMrcHandler::Export(const img::MapHandle& image,
 }
 
 
-void MapIOMrcHandler::Export(const img::MapHandle& sh, std::ostream& loc,const ImageFormatBase& formatstruct) const
+void MapIOMrcHandler::Export(const img::MapHandle& sh, std::ostream& loc,
+                             const ImageFormatBase& formatstruct) const
 {
   MRC form;
   MRC& formatmrc = form;

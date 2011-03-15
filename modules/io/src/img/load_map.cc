@@ -20,6 +20,7 @@
 //------------------------------------------------------------------------------
 #include <ost/log.hh>
 #include <ost/img/map.hh>
+#include <ost/io/img/map_io_mrc_handler.hh>
 #include <ost/img/alg/stat_min_max.hh>
 #include <ost/io/io_manager.hh>
 #include "load_map.hh"
@@ -52,12 +53,27 @@ img::ImageHandle LoadImage(const boost::filesystem::path& loc, const ImageFormat
   LOG_DEBUG("calling import on map io handle");
   map_io->Import(ih,loc,formatstruct);
 
-  // TODO: fix this in regard to automatic copy of ConstData info obj
-  //info::InfoGroup g = ih.Info().Root().RetrieveGroup("file");
-  //g.CreateItem("filename",filename);
-
   return ih;
 }
+
+img::XtalMapPtr LoadXtalMap(const String& filename)
+{
+  boost::filesystem::path loc(filename);
+  if(!boost::filesystem::exists(loc)){
+    throw IOException("file not found: " + loc.string());
+  }
+  MapIOMrcHandler mrc_handler;
+
+  img::ImageHandle ih = CreateImage(img::Extent(),img::REAL,img::SPATIAL);
+
+  mrc_handler.Import(ih, loc, io::MRC());
+  if (!mrc_handler.GetUnitCell().GetSymmetry()) {
+    throw IOException(loc.string()+": Invalid symmetry");
+  }
+  return img::XtalMapPtr(new img::XtalMap(ih, mrc_handler.GetUnitCell(), 
+                                          mrc_handler.GetUnitCellSize()));
+}
+
 
 void SaveImage(const img::ImageHandle& image, const boost::filesystem::path& loc)
 {

@@ -86,6 +86,7 @@ ImageStateBasePtr ExplicitCorrelateFnc::VisitState(const ImageStateImpl<V,D>& is
 }
 
 }
-template class TEMPLATE_DEF_EXPORT ImageStateConstModOPAlgorithm<alg::ExplicitCorrelateFnc>;
+
+template class TEMPLATE_DEF_EXPORT image_state::ImageStateConstModOPAlgorithm<alg::ExplicitCorrelateFnc>;
 }} //  ns
 

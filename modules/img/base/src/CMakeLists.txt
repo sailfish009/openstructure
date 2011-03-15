@@ -16,6 +16,7 @@ image_impl.cc
 paste_impl.cc
 peak.cc
 pixel_sampling.cc
+isymop.cc
 phase.cc
 point.cc
 point_list.cc
@@ -28,6 +29,7 @@ polygon_mask.cc
 extent_mask.cc
 spherical_mask.cc
 mask_op.cc
+xtal_map.cc
 circle_mask.cc
 mask_info_convert.cc
 image_list.cc
@@ -40,7 +42,9 @@ set(OST_IMG_HEADERS
 algorithm.hh
 data_algorithm.hh
 data.hh
+xtal_map.hh
 data_types.hh
+isymop.hh
 data_observer.hh
 debug.hh
 dllexport.hh

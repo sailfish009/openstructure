@@ -16,26 +16,21 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_QUERY_AST_FW_HH
-#define OST_QUERY_AST_FW_HH
+#include "isymop.hh"
 
-namespace ost { namespace mol { namespace impl {
+namespace ost { namespace img {
 
-      class WithinParam;
-      class StringOrRegexParam;
-      class Node;
-      class LogicOpNode;
-      class SelNode;
 
-      typedef enum {
-	LOP_OR, LOP_AND
-      } LogicOP;
+ISymop::ISymop(const Symop& symop, const Size& size)
+{
+  for (size_t i=0; i<3; ++i) {
+    for (size_t j=0; j<3; ++j) {
+      rot_(i, j)=static_cast<int>(rint(symop.Rot()(i, j)));
+    }
+  }
+  trans_[0]=static_cast<int>(rint(symop.Trans()[0]*size[0]));
+  trans_[1]=static_cast<int>(rint(symop.Trans()[1]*size[1]));
+  trans_[2]=static_cast<int>(rint(symop.Trans()[2]*size[2]));
+}
 
-      typedef enum {
-	COP_EQ, COP_NEQ, COP_GE, COP_LE, COP_LT, COP_GT
-      } CompOP;
-      
-      
-}}}
-
-#endif
+}}

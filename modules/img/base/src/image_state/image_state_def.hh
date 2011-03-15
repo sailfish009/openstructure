@@ -43,6 +43,12 @@ typedef ImageStateImpl<Complex, FrequencyDomain> ComplexFrequencyImageState;
 typedef ImageStateImpl<Complex, HalfFrequencyDomain> ComplexHalfFrequencyImageState;
 typedef ImageStateImpl<Word, SpatialDomain> WordSpatialImageState;
 
+typedef boost::shared_ptr<RealSpatialImageState> RealSpatialImageStatePtr;
+typedef boost::shared_ptr<RealFrequencyImageState> RealFrequencyImageStatePtr;
+typedef boost::shared_ptr<ComplexSpatialImageState> ComplexSpatialImageStatePtr;
+typedef boost::shared_ptr<ComplexFrequencyImageState> ComplexFrequencyImageStatePtr;
+typedef boost::shared_ptr<ComplexHalfFrequencyImageState> ComplexHalfFrequencyImageStatePtr;
+typedef boost::shared_ptr<WordSpatialImageState> WordSpatialImageStatePtr;
 
 } // namespace image_state
 

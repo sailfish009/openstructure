@@ -9,6 +9,7 @@ export_phase.cc
 export_point.cc
 export_progress.cc
 export_raster_image.cc
+export_xtal_map.cc
 export_size.cc
 export_mask.cc
 export_image_list.cc

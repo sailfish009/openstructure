@@ -165,5 +165,6 @@ void export_map_io()
   def("SaveImage",save_image2);
   def("LoadImage",load_image1);
   def("LoadImage",load_image2);
+  def("LoadXtalMap", &LoadXtalMap);
 
 }

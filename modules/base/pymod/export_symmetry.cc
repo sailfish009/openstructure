@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -43,9 +43,7 @@ void export_Symmetry()
     .add_property("hermann_mauguin_symbol", 
                   make_function(&Symmetry::GetHermannMauguinSymbol, 
                                 return_value_policy<copy_const_reference>()))
-    .add_property("ccp4_symbol", 
-                  make_function(&Symmetry::GetCCP4Symbol, 
-                                return_value_policy<copy_const_reference>()))
+    .add_property("ccp4_symbol", &Symmetry::GetCCP4Symbol)
     .add_property("symops", 
                   make_function(&Symmetry::GetSymops,
                                 return_value_policy<reference_existing_object>()))

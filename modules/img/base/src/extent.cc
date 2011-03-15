@@ -99,7 +99,7 @@ int Extent::GetVolume() const {return size_.GetVolume();}
 int Extent::GetDim() const {return dim_;}
 
 
-Point Extent::WrapAround(const Point& p)
+Point Extent::WrapAround(const Point& p) const
 {
   Point r(p-start_);
   for(int i=0;i<3;i++) {
@@ -130,6 +130,12 @@ unsigned int Extent::Point2Offset(const Point& p) const
 void Extent::Shift(const Point& p)
 {
   set(start_+p,end_+p);
+}
+
+void Extent::AddBorder(int border)
+{
+  this->set(start_-img::Point(border,border,border), 
+            end_+img::Point(border,border,border));
 }
 
 // private methods

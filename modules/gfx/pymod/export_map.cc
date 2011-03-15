@@ -22,6 +22,7 @@ using namespace boost::python;
 
 #include <ost/gfx/map_iso.hh>
 #include <ost/gfx/map_slab.hh>
+
 using namespace ost;
 using namespace ost::gfx;
 
@@ -58,7 +59,10 @@ void export_Map()
   ;
 
   class_<MapIso, bases<GfxObj>, boost::shared_ptr<MapIso>,
-         boost::noncopyable>("MapIso", init<const String&, const ::img::MapHandle&, float, optional<uint> >())
+         boost::noncopyable>("MapIso", init<const String&, 
+                                             const ::img::MapHandle&, float>())
+    .def(init<const String&, const img::XtalMapPtr&, float>())
+    .def("HasXtalMap", &MapIso::HasXtalMap)
     .def("SetLevel",&MapIso::SetLevel)
     .def("GetLevel",&MapIso::GetLevel)
     .def("GetMinLevel",&MapIso::GetMinLevel)

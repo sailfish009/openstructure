@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -50,24 +50,24 @@ public:
   static String SYMOP_DATA;
   
   static SymmetryPtr FromHermannMauguinSymbol(const String& symbol);
-  static SymmetryPtr FromCCP4Symbol(const String& symbol);
+  static SymmetryPtr FromCCP4Symbol(int spacegroup);
   
   const SymopList& GetSymops() const { return symops_; }
   
   SymmetryType GetType() const { return type_; }
   const String& GetHermannMauguinSymbol() const { return hm_symbol_; }
   
-  const String& GetCCP4Symbol() const { return ccp4_symbol_; }
+  int GetCCP4Symbol() const { return ccp4_symbol_; }
 private:
   Symmetry();
   
   static SymmetryType TypeFromString(const StringRef& symmetry_type);
   static bool LoadSymmetryInfo();
   static std::map<String, SymmetryPtr>* hm_map_;
-  static std::map<String, SymmetryPtr>* ccp4_map_;
+  static std::map<int, SymmetryPtr>* ccp4_map_;
   SymopList symops_;
   String        hm_symbol_;
-  String        ccp4_symbol_;
+  int           ccp4_symbol_;
   SymmetryType  type_;
 };
 
