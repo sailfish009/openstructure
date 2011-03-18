@@ -92,10 +92,9 @@ Real Distance(const Plane& p, const Vec3& v)
 
 bool IsOnLine(const Line3& l, const Vec3& v, Real ephilon)
 {
-  Vec3 s=v-l.GetOrigin();
-  Vec3 s_on_line=Dot(s, l.GetDirection())*l.GetDirection();
-  return Length2(s-s_on_line)<(ephilon*ephilon);
+  return Length2(Cross(v-l.GetOrigin(), l.GetDirection()))<(ephilon*ephilon);
 }
+
 bool IsInPlane(const Plane& p,  const Line3& l,Real ephilon)
 {
   return Distance(p,l.GetOrigin())<ephilon && AreParallel(p,l,ephilon);  

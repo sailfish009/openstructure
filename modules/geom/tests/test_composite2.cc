@@ -27,28 +27,28 @@ using namespace geom;
 BOOST_AUTO_TEST_SUITE( geom )
 
 
-BOOST_AUTO_TEST_CASE(line_init3)
+BOOST_AUTO_TEST_CASE(line_init2)
 {
-  Line3 line(geom::Vec3(0,0,0), geom::Vec3(2,0,0));
+  Line3 line(geom::Vec2(0,0), geom::Vec2(2,0));
   BOOST_CHECK_EQUAL(geom::Length(line.GetDirection()), 1.0);
 }
 
-BOOST_AUTO_TEST_CASE(is_on_line3)
+BOOST_AUTO_TEST_CASE(is_on_line2)
 {
-  Line3 line(geom::Vec3(0,0,0), geom::Vec3(1,0,0));
-  BOOST_CHECK(IsOnLine(line, geom::Vec3(0.5,0.0,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec3(1.0,0.0,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec3(0.0,0.0,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec3(-5,0.0,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec3(10.0,0.0,0.0)));
-  BOOST_CHECK(!IsOnLine(line, geom::Vec3(0.5,0.1,0.0)));
-  BOOST_CHECK(!IsOnLine(line, geom::Vec3(1.0,0.0,0.1)));
+  Line2 line(geom::Vec2(0,0), geom::Vec2(1,0));
+  BOOST_CHECK(IsOnLine(line, geom::Vec2(0.5,0.0)));
+  BOOST_CHECK(IsOnLine(line, geom::Vec2(1.0,0.0)));
+  BOOST_CHECK(IsOnLine(line, geom::Vec2(0.0,0.0)));
+  BOOST_CHECK(IsOnLine(line, geom::Vec2(-5,0.0)));
+  BOOST_CHECK(IsOnLine(line, geom::Vec2(10.0,0.0)));
+  BOOST_CHECK(!IsOnLine(line, geom::Vec2(0.5,0.1)));
+  BOOST_CHECK(!IsOnLine(line, geom::Vec2(1.0,0.1)));
   
-  line=Line3(geom::Vec3(1,0,0), geom::Vec3(1,1,1));
+  line=Line2(geom::Vec2(1,0), geom::Vec2(3,2));
   for (int i=-10; i<10; ++i) {
     BOOST_CHECK(IsOnLine(line, line.At(i)));
   }
-  BOOST_CHECK(!IsOnLine(line, geom::Vec3(1,2,2.1)));
+  BOOST_CHECK(!IsOnLine(line, geom::Vec2(3,2.1)));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
