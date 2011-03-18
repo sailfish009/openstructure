@@ -33,36 +33,6 @@
 
 namespace ost { namespace img {
 
-Size::Size():
-  w_(1),
-  h_(1),
-  d_(1)
-{}
-
-Size::Size(const Size &s):
-  w_(s.w_),
-  h_(s.h_),
-  d_(s.d_)
-{}
-
-Size::Size(unsigned int w):
-  w_(w<1 ? 1 : w),
-  h_(1),
-  d_(1)
-{}
-
-Size::Size(unsigned int w, unsigned int h):
-  w_(w<1 ? 1 : w),
-  h_(h<1 ? 1 : h),
-  d_(1)
-{}
-
-Size::Size(unsigned int w, unsigned int h, unsigned int d):
-  w_(w<1 ? 1 : w),
-  h_(h<1 ? 1 : h),
-  d_(d<1 ? 1 : d)
-{}
-
 Size::Size(const Point& p1, const Point& p2):
   w_(std::abs(p2[0]-p1[0])+1<1 ? 1 : std::abs(p2[0]-p1[0])+1),
   h_(std::abs(p2[1]-p1[1])+1<1 ? 1 : std::abs(p2[1]-p1[1])+1),
@@ -74,97 +44,6 @@ Point Size::GetHalf() const
   return Point((w_&0x1) ? (w_-1)/2 : w_/2-1,
 	       (h_&0x1) ? (h_-1)/2 : h_/2-1,
 	       (d_&0x1) ? (d_-1)/2 : d_/2-1);
-}
-
-unsigned int Size::GetWidth() const {return w_;}
-
-unsigned int Size::GetHeight() const {return h_;}
-
-unsigned int Size::GetDepth() const {return d_;}
-
-unsigned int Size::GetSlab() const {return w_*h_;}
-
-unsigned int Size::GetVol() const {return GetVolume();}
-
-unsigned int Size::GetVolume() const {return w_*h_*d_;}
-
-
-unsigned int Size::GetDim() const 
-{
-  return d_>1 ? 3 : (h_>1 ? 2 : 1);
-}
-
-
-Size& Size::operator=(const Size& s)
-{
-  w_=s.w_;
-  h_=s.h_;
-  d_=s.d_;
-  return *this;
-}
-
-unsigned int& Size::operator[](unsigned int index) 
-{
-  if(index==0) return w_;
-  else if(index==1) return h_;
-  else if(index==2) return d_;
-  else throw std::range_error("Size index out of range");
-}
-
-unsigned int Size::operator[](unsigned int index) const 
-{
-  if(index==0) return w_;
-  else if(index==1) return h_;
-  else if(index==2) return d_;
-  else throw std::range_error("Size index out of range");
-}
-
-bool Size::operator==(const Size& s) const 
-{
-  return equal(s);
-}
-
-bool Size::operator!=(const Size& s) const 
-{
-  return !equal(s);
-}
-
-Size& Size::operator+=(const Size& s)
-{
-  w_+=s.w_;
-  h_+=s.h_;
-  d_+=s.d_;
-  return *this;
-}
-
-// clamped to 1
-Size& Size::operator-=(const Size& s)
-{
-  w_ = (w_>s.w_) ? w_-s.w_ : 1;
-  h_ = (h_>s.h_) ? h_-s.h_ : 1;
-  d_ = (d_>s.d_) ? d_-s.d_ : 1;
-  return *this;
-}
-
-bool Size::equal(const Size& s) const
-{
-  return (w_==s.w_ &&
-	  h_==s.h_ &&
-	  d_==s.d_);
-}
-
-// global functions
-
-Size operator+(const Size& s1, const Size& s2)
-{
-  Size tmp(s1);
-  return tmp+=s2;
-}
-
-Size operator-(const Size& s1, const Size& s2)
-{
-  Size tmp(s1);
-  return tmp-=s2;
 }
 
 std::ostream& operator<<(std::ostream& os, const img::Size &s) 
