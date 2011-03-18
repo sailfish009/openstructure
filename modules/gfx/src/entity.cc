@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -75,7 +75,8 @@ Entity::Entity(const String& name,
   opacity_(1.0),
   blur_(false),
   blurf1_(1.0),
-  blurf2_(0.8)
+  blurf2_(0.8),
+  needs_update_(true)
 {
   init(RenderMode::SIMPLE);
 }
@@ -221,27 +222,19 @@ void Entity::SetBlurFactors(float bf1,float bf2)
 
 void Entity::Rebuild()
 {
-  geom::Vec3 delta=GetTF().GetTrans()-GetTF().GetCenter();
+  do_update_view(); // if necessary, update the views
+  this->ReapplyColorOps(); // re-color everything
 
-  if(update_view_) {
-    EntityView nv=this->GetView();
-    for (RendererMap::iterator i=renderer_.begin(), 
-           e=renderer_.end(); i!=e; ++i) {
-      i->second->ClearViews();
-      i->second->AddView(nv);
-      i->second->UpdateViews();
-      i->second->PrepareRendering();
-    }
-  }
+  FlagRebuild(); // force renderer rebuilds in RenderGL call
+  Scene::Instance().RequestRedraw();
 
-  this->ReapplyColorOps();
-  FlagRebuild();
+  // update center in transformation
   geom::Vec3 center=this->GetCenter();
   Transform tf=this->GetTF();
   tf.SetCenter(center);
-  tf.SetTrans(center+delta);
+  tf.SetTrans(center+GetTF().GetTrans()-GetTF().GetCenter());
   this->SetTF(tf);  
-  Scene::Instance().RequestRedraw();
+
 }
 
 void Entity::UpdatePositions()
@@ -251,6 +244,7 @@ void Entity::UpdatePositions()
     impl::EntityRenderer* r=i->second;
     r->FlagPositionsDirty();
   }
+  // Rebuild() here causes an recursive loop...
   FlagRebuild();  
   Scene::Instance().RequestRedraw();
 }
@@ -326,26 +320,34 @@ void Entity::CacheBoundingBox() const
 bool Entity::UpdateIfNeeded() const
 {
   bool updated=false;
-  for (RendererMap::iterator i=renderer_.begin(), 
-       e=renderer_.end(); i!=e; ++i) {
-    EntityRenderer* renderer =i->second;
-    if (renderer->IsDirty()) {
-      renderer->PrepareRendering();
-      updated=true;
+  if(IsVisible()) {
+    for (RendererMap::iterator i=renderer_.begin(), 
+           e=renderer_.end(); i!=e; ++i) {
+      EntityRenderer* renderer =i->second;
+      if (renderer->IsEnabled() && renderer->HasDataToRender()) {
+        if (renderer->IsDirty()) {
+          renderer->PrepareRendering();
+          updated=true;
+        }
+        renderer->VA().SetOpacity(opacity_);
+      }
     }
-    renderer->VA().SetOpacity(opacity_);
-  }
-  if (updated) {
-    this->CacheBoundingBox();
+    if (updated) {
+      this->CacheBoundingBox();
+    }
+    needs_update_=false;
+  } else {
+    needs_update_=true;
   }
   return updated;
 }
 
 void Entity::CustomPreRenderGL(bool update)
 {
-  if (update) {
+  if (update || needs_update_) {
     this->UpdateIfNeeded();
     RefreshVA();
+    needs_update_=false;
   }
 }
 
@@ -353,7 +355,10 @@ void Entity::RefreshVA()
 {
   for (RendererMap::iterator i=renderer_.begin(), 
 	 e=renderer_.end(); i!=e; ++i) {
-    i->second->Debug(debug_flags_);
+    EntityRenderer* renderer =i->second;
+    if (renderer->IsEnabled() && renderer->HasDataToRender()) {
+      renderer->Debug(debug_flags_);
+    }
   }
 }
 
@@ -362,7 +367,7 @@ void Entity::CustomRenderGL(RenderPass pass)
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
-    if(r->IsEnabled()) {
+    if(r->IsEnabled() && r->HasDataToRender()) {
       if(pass==STANDARD_RENDER_PASS) {
         r->Render(pass);
         if(outline_flag_) {
@@ -390,7 +395,7 @@ void Entity::CustomRenderGL(RenderPass pass)
 void Entity::CustomRenderPov(PovState& pov)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
+    if(it->second->IsEnabled() && it->second->HasDataToRender()){
       it->second->RenderPov(pov,GetName());
     }
   }
@@ -516,7 +521,7 @@ RenderOptionsPtr Entity::GetOptions(RenderMode::Type render_mode)
 }
 
 void Entity::SetOptions(RenderMode::Type render_mode, 
-			RenderOptionsPtr& render_options)
+                        RenderOptionsPtr& render_options)
 {
   if(!render_options) return;
   RendererMap::iterator i=renderer_.find(render_mode);
@@ -526,13 +531,13 @@ void Entity::SetOptions(RenderMode::Type render_mode,
       EntityP e=boost::dynamic_pointer_cast<Entity>(shared_from_this());
       RenderOptionsPtr old_render_options = entity_renderer->GetOptions();
       if(old_render_options) {
-	old_render_options->RemoveObserver(e);
+        old_render_options->RemoveObserver(e);
       }
       entity_renderer->SetOptions(render_options);
       render_options->AddObserver(e);
       FlagRebuild();
       Scene::Instance().RequestRedraw();
-    } else{
+    } else {
       throw Error("These render options are not compatible with this render mode.");
     }
   } else {
@@ -541,7 +546,7 @@ void Entity::SetOptions(RenderMode::Type render_mode,
 }
 
 void Entity::ApplyOptions(RenderMode::Type render_mode,
-                                RenderOptionsPtr& render_options)
+                          RenderOptionsPtr& render_options)
 {
   RendererMap::iterator i=renderer_.find(render_mode);  
   if(i!=renderer_.end()) {
@@ -579,9 +584,7 @@ void Entity::SetOpacity(float f)
 void Entity::SetOutlineWidth(float f)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
-      it->second->VA().SetOutlineWidth(f);
-    }
+    it->second->VA().SetOutlineWidth(f);
   }
   Scene::Instance().RequestRedraw();
 }
@@ -589,9 +592,7 @@ void Entity::SetOutlineWidth(float f)
 void Entity::SetOutlineExpandFactor(float f)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
-      it->second->VA().SetOutlineExpandFactor(f);
-    }
+    it->second->VA().SetOutlineExpandFactor(f);
   }
   Scene::Instance().RequestRedraw();
 }
@@ -599,9 +600,7 @@ void Entity::SetOutlineExpandFactor(float f)
 void Entity::SetOutlineExpandColor(const Color& c)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
-      it->second->VA().SetOutlineExpandColor(c);
-    }
+    it->second->VA().SetOutlineExpandColor(c);
   }
   Scene::Instance().RequestRedraw();
 }
@@ -835,10 +834,7 @@ void Entity::ColorBy(const String& prop,
 
 mol::EntityView Entity::GetView() const
 {
-  if (update_view_) {
-    update_view_=false;    
-    cached_view_=qv_.GetEntityView();
-  }
+  do_update_view();
   return cached_view_;
 }
 
@@ -920,7 +916,9 @@ template <typename I, typename O>
 void apply_color_op_to_renderer_list(I begin, I end, const O& o)
 {
   for (I i=begin; i!=end; ++i) {
-    i->second->Apply(o);
+    if(i->second->IsEnabled() && i->second->HasDataToRender()) {
+      i->second->Apply(o);
+    }
   }
 }
 
@@ -1006,11 +1004,47 @@ void Entity::ReapplyColorOps()
   GfxObj::ReapplyColorOps();
 }
 
-void Entity::UpdateView() 
+void Entity::UpdateView()
 {
-  update_view_=true; 
+  update_view_=true;
   Rebuild();
-  UpdatePositions();
+  FlagRebuild();  
+  Scene::Instance().RequestRedraw();
+}
+
+void Entity::SetSeqHack(bool b)
+{
+  if(b!=trace_.GetSeqHack()) {
+    trace_.SetSeqHack(b);
+    FlagRebuild();
+    Scene::Instance().RequestRedraw();
+  }
+}
+
+bool Entity::GetSeqHack() const
+{
+  return trace_.GetSeqHack();
+}
+
+void Entity::do_update_view() const
+{
+  // also signals an update in positions
+  if (update_view_) {
+    update_view_=false;    
+    cached_view_=qv_.GetEntityView();
+    trace_.ResetView(cached_view_);
+    for (RendererMap::iterator i=renderer_.begin(), 
+           e=renderer_.end(); i!=e; ++i) {
+      impl::EntityRenderer* r=i->second;
+      if (r->IsEnabled() && r->HasDataToRender()) {
+        r->ClearViews();
+        r->AddView(cached_view_);
+        r->UpdateViews();
+        r->FlagPositionsDirty();
+        r->PrepareRendering();
+      }
+    }
+  }
 }
 
 }} // ns

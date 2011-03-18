@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -129,7 +129,7 @@ void ReducedStatistics::Extract(mol::EntityHandle ent)
   if (ent.GetChainCount()!=1) {
     std::stringstream ss;
     ss << "Expected exactly one chain, but entity has " 
-       <<  ent.GetChainCount() << "chains";
+       <<  ent.GetChainCount() << " chains";
     throw std::runtime_error(ss.str());
   }
   ReducedStatExtractor extractor(opts_, histo_, ent);
@@ -141,10 +141,10 @@ void ReducedStatistics::Extract(mol::EntityView ent)
   if (ent.GetChainCount()!=1) {
     std::stringstream ss;
     ss << "Expected exactly one chain, but entity has " 
-       <<  ent.GetChainCount() << "chains";
+       <<  ent.GetChainCount() << " chains";
     throw std::runtime_error(ss.str());
   }
-  ReducedStatExtractor extractor(opts_, histo_, ent);
+  ReducedStatExtractor extractor(opts_, histo_, ent.GetHandle());
   ent.Apply(extractor);
 }
 

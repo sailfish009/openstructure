@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -158,6 +158,13 @@ public:
   iterator end() const;
 
   bool IsValid() const { return impl_.get()!=0; }
+    
+  ///\brief get coverage of a specifi sequence 
+  ///
+  /// returns a value representing how extensively the specified sequence
+  /// covers the first sequence (sequence 0). The function return a value
+  /// between 0 (no coverage) and 1 (full coverage)
+  Real GetCoverage(int seq_index) const;
   
 private:
   void CheckValidity() const;

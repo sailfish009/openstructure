@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -21,6 +21,11 @@
  */
 
 #include "sdf_writer.hh"
+
+#include <ost/mol/atom_view.hh>
+#include <ost/mol/residue_view.hh>
+#include <ost/mol/chain_view.hh>
+#include <ost/mol/bond_handle.hh>
 #include <boost/regex.hpp>
 
 namespace ost { namespace io {
@@ -95,8 +100,13 @@ SDFWriter::SDFWriter(const String& filename)
   : outfile_(filename.c_str()), ostr_(outfile_), counter_(0) {
 }
 
-SDFWriter::SDFWriter(const boost::filesystem::path& filename)
-  : outfile_(filename.file_string().c_str()), ostr_(outfile_), counter_(0) {
+SDFWriter::SDFWriter(const boost::filesystem::path& filename): 
+#if BOOST_FILESYSTEM_VERSION==3
+  outfile_(filename.filename().string().c_str()), 
+#else
+  outfile_(filename.file_string().c_str()), 
+#endif
+  ostr_(outfile_), counter_(0) {
 }
 
 void SDFWriter::Write(const mol::EntityView& ent) {

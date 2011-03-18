@@ -17,3 +17,6 @@ set(OST_MOL_BASE_UNIT_TESTS
 
 ost_unittest(mol "${OST_MOL_BASE_UNIT_TESTS}")
 
+# for valgrind debugging
+# executable(NAME test_query_standalone SOURCES test_query_standalone.cc DEPENDS_ON mol)
+

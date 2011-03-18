@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -382,6 +382,7 @@ void IndexedVertexArray::SetOpacity(float o)
   for(EntryList::iterator it=entry_list_.begin();it!=entry_list_.end();++it) {
     it->c[3]=o;
   }
+  opacity_=o;
   FlagRefresh();
 }
 
@@ -459,7 +460,12 @@ void IndexedVertexArray::RenderGL()
       glDisable(GL_POLYGON_OFFSET_LINE);
       glDisable(GL_POLYGON_OFFSET_POINT);
       glDisable(GL_LINE_SMOOTH);
-      glDisable(GL_BLEND);
+      if(opacity_<1.0) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+      } else {
+        glDisable(GL_BLEND);
+      }
     }
   } else {
     // not in outline mode
@@ -473,16 +479,16 @@ void IndexedVertexArray::RenderGL()
     } else {
       glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
     }
-    if(color_mat_) {
-      glEnable(GL_COLOR_MATERIAL); 
-    } else {
-      glDisable(GL_COLOR_MATERIAL);
-    }
     if(cull_face_) {
       glEnable(GL_CULL_FACE);
     } else { 
       glDisable(GL_CULL_FACE); 
     }
+  }
+  if(color_mat_) {
+    glEnable(GL_COLOR_MATERIAL); 
+  } else {
+    glDisable(GL_COLOR_MATERIAL);
   }
   
   if(mode_&0x1) {
@@ -516,7 +522,7 @@ void IndexedVertexArray::RenderGL()
       glUniform1f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"scalef"),outline_exp_factor_);
       glUniform4f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"color"),
                   outline_exp_color_[0],outline_exp_color_[1],
-                  outline_exp_color_[2],outline_exp_color_[3]);
+                  outline_exp_color_[2],opacity_);
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       draw_ltq(use_buff);
 
@@ -663,6 +669,7 @@ void IndexedVertexArray::Reset()
   aalines_flag_=false;
   point_size_=2.0;
   line_halo_=0.0;
+  opacity_=1.0;
   outline_mode_=0;
   outline_width_=4.0;
   outline_mat_=Material(0.3,1.0,0.0,0.0,0.0);

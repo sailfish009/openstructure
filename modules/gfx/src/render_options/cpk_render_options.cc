@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,9 +22,7 @@
 
 #include "cpk_render_options.hh"
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 CPKRenderOptions::CPKRenderOptions(): sphere_detail_(4) {
 #if OST_SHADER_SUPPORT_ENABLED
@@ -72,8 +70,4 @@ uint CPKRenderOptions::GetSphereMode(){
   return cpk_mode_;
 }
 
-CPKRenderOptions::~CPKRenderOptions() {}
-
-}
-
-}
+}} // ns

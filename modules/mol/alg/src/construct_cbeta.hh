@@ -16,19 +16,27 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include "info_panel.hh"
+#ifndef OST_MOL_ALG_CONSTRUCT_CBETA_HH
+#define OST_MOL_ALG_CONSTRUCT_CBETA_HH
 
-namespace ost { namespace gui {
+#include <ost/mol/entity_view.hh>
+#include <ost/mol/alg/module_config.hh>
 
-InfoPanel::InfoPanel(QWidget* parent)
-  : QWidget(parent), menu_item_(NULL) {
-}  
+namespace ost { namespace mol { namespace alg {
 
-void InfoPanel::Update() {
-  if (!menu_item_)
-    return;
-  
-}
 
-}}
+geom::Vec3 DLLEXPORT_OST_MOL_ALG CBetaPosition(const ResidueHandle& residue, 
+                                     Real bond_length=1.5);
 
+geom::Vec3 DLLEXPORT_OST_MOL_ALG CBetaPosition(const geom::Vec3& n_pos, 
+                                     const geom::Vec3& ca_pos, 
+                                     const geom::Vec3& c_pos, 
+                                     Real bond_length=1.5);
+
+void DLLEXPORT_OST_MOL_ALG ConstructCBetas(EntityHandle& entity_handle, bool include_gly=false);
+
+bool include_gly_;
+
+}}} // ns
+
+#endif // OST_MOL_ALG_CONSTRUCT_CBETA_HH

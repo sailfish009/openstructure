@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -92,8 +92,9 @@ Real Distance(const Plane& p, const Vec3& v)
 
 bool IsOnLine(const Line3& l, const Vec3& v, Real ephilon)
 {
-  Vec3 tmp=CompDivide(v-l.GetOrigin(),l.GetDirection());
-  return std::fabs(tmp[0]-tmp[1])<ephilon && std::fabs(tmp[0]-tmp[2])<ephilon;
+  Vec3 s=v-l.GetOrigin();
+  Vec3 s_on_line=Dot(s, l.GetDirection())*l.GetDirection();
+  return Length2(s-s_on_line)<(ephilon*ephilon);
 }
 bool IsInPlane(const Plane& p,  const Line3& l,Real ephilon)
 {

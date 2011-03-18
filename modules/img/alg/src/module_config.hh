@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -26,10 +26,10 @@
 #  if defined(_MSC_VER)
 #    define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t)
 #  else
-#    define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t) extern template TEMPLATE_EXPORT c t;
+#    define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t) extern template TEMPLATE_EXPORT c ost::img::image_state::t;
 #  endif
 #else
 #  define DLLEXPORT_IMG_ALG DLLIMPORT
-#  define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t) extern template c DLLIMPORT t;
+#  define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t) extern template c DLLIMPORT ost::img::image_state::t;
 #endif
 #endif

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -38,6 +38,9 @@
 #include <QStatusBar>
 #include <QApplication>
 #include <QClipboard>
+#include <QTime>
+#include <QBasicTimer>
+#include <QMouseEvent>
 #include <QMenu>
 
 #if QT_VERSION >= 0x040600

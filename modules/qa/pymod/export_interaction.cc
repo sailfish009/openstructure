@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -34,9 +34,11 @@ F2 f2=&InteractionStatistics::GetCount;
 
 
 
-typedef float (AllAtomPotential::*oneArg)(mol::EntityView);
+typedef float (AllAtomPotential::*oneArg)(mol::EntityView,
+                                          std::string);
 typedef float (AllAtomPotential::*twoArgs)(mol::EntityView,
-                                          mol::EntityView);
+                                          mol::EntityView,
+                                          std::string);
 
 typedef float (AllAtomPotential::*threeArgs)(atom::ChemType,
                                              atom::ChemType, float);
@@ -251,6 +253,7 @@ void export_Interaction()
   ;
   class_<AllAtomPotential>("AllAtomPotential", no_init)
     .def("Create", &AllAtomPotential::Create).staticmethod("Create")
+    .def("Repair", &AllAtomPotential::Repair).staticmethod("Repair")
     .def("LoadFromFile", 
          &AllAtomPotential::LoadFromFile).staticmethod("LoadFromFile")    
     .def("GetTotalEnergy", one_arg, args("view"))

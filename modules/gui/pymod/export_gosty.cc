@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -79,6 +79,11 @@ void app_add_widget_to_app_b(GostyApp* app, const QString& ident,
   }
 }
 
+object get_widget(GostyApp* app, const QString& ident)
+{
+  return get_py_qobject<QWidget>(app->GetWidget(ident));
+}
+
 void export_Gosty()
 {
   class_<GostyApp, boost::noncopyable>("GostyApp", no_init)
@@ -104,6 +109,7 @@ void export_Gosty()
         return_value_policy<reference_existing_object>()))
     .def("GetToolOptionsWin", &GostyApp::GetToolOptionsWin,
         return_value_policy<reference_existing_object>())
+    .def("GetWidget", &get_widget)
     .add_property("tool_options_win", make_function(&GostyApp::GetToolOptionsWin,
         return_value_policy<reference_existing_object>()))
     .def("GetMessageWidget", &GostyApp::GetMessageWidget,

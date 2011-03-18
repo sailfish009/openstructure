@@ -56,9 +56,9 @@ def Median(xs):
     raise RuntimeError("Can't calculate median of empty sequence")
   sorted_xs=sorted(xs)
   if (len(xs) % 2)==0:
-    return (sorted_xs[len(xs)/2]+sorted_xs[len(xs)/2+1])/2
+    return (sorted_xs[(len(xs)-1)/2]+sorted_xs[(len(xs)-1)/2+1])/2.0
   else:
-    return sorted_xs[len(xs)/2]
+    return sorted_xs[(len(xs)-1)/2]
 
 @FloatValueExtract
 def StdDev(xs):

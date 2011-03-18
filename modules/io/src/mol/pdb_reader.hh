@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -25,8 +25,13 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <ost/string_ref.hh>
-#include <ost/mol/mol.hh>
+
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/entity_handle.hh>
+#include <ost/mol/chain_handle.hh>
+#include <ost/mol/atom_handle.hh>
 #include <ost/mol/xcs_editor.hh>
+
 #include <ost/io/module_config.hh>
 #include <ost/io/mol/io_profile.hh>
 namespace ost { namespace io {

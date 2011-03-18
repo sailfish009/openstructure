@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -42,10 +42,14 @@ public:
   QTableView* GetStaticField();
   ~SequenceTableView();
 
+
+  void SetSingleAlignment(bool flag) { single_alignment_=flag; }
+  
+  bool IsSingleAlignment() const { return single_alignment_; }
 signals:
   void MouseWheelEvent(QWheelEvent* event);
   void CopyEvent(QKeyEvent* event);
-
+  void AlignmentChanged();
 public slots:
   void columnCountChanged(const QModelIndex& index, int old_count, int new_count);
   void rowCountChanged(const QModelIndex& index, int old_count, int new_count);
@@ -69,11 +73,14 @@ private slots:
   void ResizeHeight(int index, int, int size);
 
 private:
+
+  std::pair<int, int> GetSimpleSelection(int row);
   QTableView* static_column_;
   QTableView* static_row_;
   QTableView* static_field_;
   SequenceDelegate* delegate_;
   QModelIndex last_double_click_;
+  bool        single_alignment_;
   void updateStaticColumn();
   void updateStaticRow();
   void updateStaticField();

@@ -37,5 +37,6 @@ impl/reduced_impl.cc
 
 
 module(NAME qa SOURCES ${OST_QA_SOURCES}
-       HEADERS reduced_impl.hh IN_DIR impl ${OST_QA_HEADERS} DEPENDS_ON io)
+       HEADERS reduced_impl.hh IN_DIR impl ${OST_QA_HEADERS} 
+       DEPENDS_ON io mol_alg)
 

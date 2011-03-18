@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -88,6 +88,21 @@ void CoordGroupHandle::AddFrame(const std::vector<geom::Vec3>& clist)
   this->CheckValidity();
   if (source_->IsMutable()) {
     source_->AddFrame(clist);    
+  } else {
+    throw IntegrityError("Can't add frame to immutable CoordGroup");
+  }
+}
+
+void CoordGroupHandle::AddFrames(const CoordGroupHandle& cg)
+{
+  this->CheckValidity();
+  if (source_->IsMutable()) {
+    if (cg.GetAtomCount()!=this->GetAtomCount()) {
+      throw IntegrityError("Atom number don't match");
+    }
+    for (size_t i=0; i<cg.GetFrameCount(); ++i) {
+      source_->AddFrame(*cg.GetFrame(i));
+    }
   } else {
     throw IntegrityError("Can't add frame to immutable CoordGroup");
   }

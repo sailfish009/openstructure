@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -211,6 +211,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   bool aalines_flag_;
   float point_size_;
   float line_halo_;
+  float opacity_;
 
   int outline_mode_;
   float outline_width_;

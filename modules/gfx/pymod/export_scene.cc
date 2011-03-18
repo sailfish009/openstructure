@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -81,6 +81,7 @@ void export_Scene()
     .def("Autoslab", &Scene::Autoslab, 
          scene_autoslab_overloads())
     .def("AutoAutoslab",&Scene::AutoAutoslab)
+    .def("GetAutoAutoslab",&Scene::GetAutoAutoslab)
     .def("AutoslabMax",&Scene::AutoslabMax)
     .def("Remove", remove1)
     .def("Remove", remove2)
@@ -98,6 +99,7 @@ void export_Scene()
     .def("Resize", &Scene::Resize)
     .def("HasNode", &Scene::HasNode)
     .def("GetBackground", &Scene::GetBackground)
+    .def("SetBackground", &Scene::SetBackground)
     .add_property("bg",
                   &Scene::GetBackground, 
                   &Scene::SetBackground)
@@ -147,6 +149,9 @@ void export_Scene()
     .def("SetStereoIOD",&Scene::SetStereoIOD)
     .def("GetStereoIOD",&Scene::GetStereoIOD)
     .add_property("stereo_iod",&Scene::GetStereoIOD,&Scene::SetStereoIOD)
+    .def("SetStereoDistance",&Scene::SetStereoDistance)
+    .def("GetStereoDistance",&Scene::GetStereoDistance)
+    .add_property("stereo_distance",&Scene::GetStereoDistance,&Scene::SetStereoDistance)
     .def("SetStereoAlg",&Scene::SetStereoAlg)
     .def("GetStereoAlg",&Scene::GetStereoAlg)
     .add_property("stereo_alg",&Scene::GetStereoAlg,&Scene::SetStereoAlg)
@@ -177,6 +182,7 @@ void export_Scene()
     .def("StopOffscreenMode",&Scene::StopOffscreenMode)
     .def("SetShadingMode",&Scene::SetShadingMode)
     .def("SetBeacon",&Scene::SetBeacon)
+    .add_property("root_node", &Scene::GetRootNode)
     .def("SetBeaconOff",&Scene::SetBeaconOff)
     .def("__getitem__",scene_getitem)
   ;

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -60,7 +60,6 @@ public:
 
   int GetGlobalRow(BaseViewObject* obj, int row) const;
 
-
   const QStringList& GetDisplayModes();
   const QStringList& GetDisplayModes(const gfx::EntityP& entity);
   const QStringList& GetDisplayModes(const seq::AlignmentHandle& alignment);
@@ -84,7 +83,11 @@ public:
                       int role=Qt::DisplayRole) const;
 
   virtual Qt::ItemFlags flags(const QModelIndex& index=QModelIndex()) const;
-
+  QPair<seq::AlignmentHandle, int> GetAlignmentForRow(int row);
+  
+  void EmitRowChanged(int row);
+  
+  void Clear();
 public slots:
   void ZoomIn();
   void ZoomOut();

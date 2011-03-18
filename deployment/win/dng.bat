@@ -2,7 +2,7 @@
 REM ------------------------------------------------------------------------------
 REM This file is part of the OpenStructure project <www.openstructure.org>
 REM
-REM Copyright (C) 2008-2010 by the OpenStructure authors
+REM Copyright (C) 2008-2011 by the OpenStructure authors
 REM
 REM This library is free software; you can redistribute it and/or modify it under
 REM the terms of the GNU Lesser General Public License as published by the Free

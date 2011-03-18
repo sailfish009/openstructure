@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -104,7 +104,7 @@ SceneWin* GostyApp::GetSceneWin()
 SequenceViewer* GostyApp::GetSequenceViewer()
 {
   if (seq_viewer_==NULL) {
-    seq_viewer_=new SequenceViewer(false);
+    seq_viewer_=new SequenceViewer(false, true);
     seq_viewer_->SetDestroyOnClose(false);
   }
   return seq_viewer_;
@@ -167,6 +167,14 @@ void GostyApp::AddWidgetToApp(const QString& ident, QWidget* widget)
 {
   external_widgets_[ident] = new WidgetGeomHandler(ident,widget);
   external_widgets_[ident]->LoadGeom("ui/external_widgets/");
+}
+
+QWidget* GostyApp::GetWidget(const QString& ident)
+{
+  if (external_widgets_.contains(ident)) {
+    return external_widgets_[ident]->GetWidget();
+  }
+  return NULL;
 }
 
 void GostyApp::RemoveWidgetFromApp(const QString& ident){

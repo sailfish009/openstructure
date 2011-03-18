@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -31,13 +31,13 @@
 
 #include <ost/gfx/module_config.hh>
 #include <ost/mol/transform.hh>
+#include <ost/mol/atom_handle.hh>
 
 #include "gl_include.hh"
 #include "color.hh"
 #include "gfx_object_fw.hh"
 #include "gfx_node_fw.hh"
 #include "gfx_node_visitor.hh"
-#include "selection.hh"
 #include "glwin_base.hh"
 #include "scene_observer.hh"
 #include "gfx_prim.hh"
@@ -181,6 +181,9 @@ class DLLEXPORT_OST_GFX Scene {
   void AutoAutoslab(bool f);
   //@}
   
+  /// \brief get current state of automatic auto-slabbing
+  bool GetAutoAutoslab() const { return auto_autoslab_; }
+
   /// \brief set stereo mode
   /// one of 0 (off), 1 (quad-buffered) 2 (interlaced (for special monitors))
   void SetStereoMode(unsigned int mode);
@@ -198,9 +201,14 @@ class DLLEXPORT_OST_GFX Scene {
   int GetStereoView() const {return stereo_eye_;}
 
   /// \brief set stereo eye distance
-  void SetStereoIOD(float);
+  void SetStereoIOD(Real);
   /// \brief return current stereo eye distance
-  float GetStereoIOD() const {return stereo_eye_dist_;}
+  Real GetStereoIOD() const {return stereo_iod_;}
+
+  /// \brief set stereo distance offset from COR
+  void SetStereoDistance(Real);
+  /// \brief return current stereo distance offset from COR
+  Real GetStereoDistance() const {return stereo_distance_;}
   
   /// \brief set stereo algorithm
   /// one of 0 or 1
@@ -453,6 +461,7 @@ private:
   bool fog_flag_;
   Color fog_color_;
   bool auto_autoslab_;
+  bool do_autoslab_,do_autoslab_fast_;
 
   bool offscreen_flag_; // a simple indicator whether in offscreen mode or not
   OffscreenBuffer* main_offscreen_buffer_; // not null if a main offscreen buffer is present
@@ -470,11 +479,12 @@ private:
 
   uint blur_count_;
   std::vector<boost::shared_array<unsigned char> > blur_buffer_;
+
   unsigned int stereo_mode_;
   unsigned int stereo_alg_;
   bool stereo_inverted_;
   unsigned int stereo_eye_;
-  float stereo_eye_dist_;
+  Real stereo_iod_,stereo_distance_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
 
@@ -488,7 +498,11 @@ private:
   void render_scene();
   void render_glow();
   void render_stereo();
-  bool IsNameAvailable(String name);
+
+  void do_autoslab();
+
+  bool IsNameAvailable(const String& name) const;
+
 };
 
 }} // ns

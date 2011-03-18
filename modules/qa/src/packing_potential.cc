@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -23,6 +23,7 @@
 #include <boost/filesystem/convenience.hpp>
 #include <ost/message.hh>
 #include <sstream>
+#include <ost/mol/atom_view.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/integrity_error.hh>
 
@@ -180,14 +181,18 @@ int PackingPotential::GetEnergyCounts()
 bool PackingPotential::VisitAtom(const mol::AtomHandle& atom)
 {
   AminoAcid aa=ResidueToAminoAcid(atom.GetResidue());
-  if (aa==Xxx)
+  if (aa==Xxx) {
+    atom.GetResidue().SetFloatProp("solvation_energy",0);
     return false;
+  }
   int count=0;
   for (mol::EntityViewList::iterator i=views_.begin(),
        e=views_.end(); i!=e; ++i) {
     count+=i->FindWithin(atom.GetPos(), options_.cutoff).size();
   }
-  energy_+=this->GetPackingEnergy(aa, count);
+  float local_energy=this->GetPackingEnergy(aa, count);
+  atom.GetResidue().SetFloatProp("solvation_energy",local_energy);
+  energy_+=local_energy;
   energy_counts_++;
   return false;
 }

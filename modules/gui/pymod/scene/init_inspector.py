@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2010 by the OpenStructure authors
+# Copyright (C) 2008-2011 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -23,28 +23,6 @@ from ost import gui
 from ost import gfx
 from PyQt4 import QtCore, QtGui
 from ost.gui.scene.inspector_widget import InspectorDialog
-
-class InitInspectorMenu(QtCore.QObject):
-  def __init__(self, inspectordialog, menu_bar=None):
-    QtCore.QObject.__init__(self, menu_bar)
-    
-    self.inspector_ = inspectordialog
-    persp=gui.GostyApp.Instance().perspective
-    options=persp.GetMenu("Options")
-    
-    self.show_ = options.addAction("&Inspector gadget")
-    self.show_.setShortcut('Ctrl+I')
-    self.show_.setCheckable(True)
-    self.show_.setChecked(not self.inspector_.isHidden())
-    self.connect(self.show_, QtCore.SIGNAL('triggered()'), self.Toggle)
-    self.connect(inspectordialog, QtCore.SIGNAL('visible'), self.UpdateCheckbox)
-  def Toggle(self):
-    self.inspector_.setVisible(not self.inspector_.isVisible())
-  
-  def UpdateCheckbox(self, visibility):
-    self.disconnect(self.show_, QtCore.SIGNAL('triggered()'), self.Toggle)
-    self.show_.setChecked(visibility)
-    self.connect(self.show_, QtCore.SIGNAL('triggered()'), self.Toggle)
   
 def _InitInspector(app):
   mywidget = InspectorDialog(app.gl_win.qobject)
@@ -52,5 +30,4 @@ def _InitInspector(app):
   mywidget.show()
   app.AddWidgetToApp("InspectorDialog", mywidget)  
   menu_bar=app.perspective.GetMenuBar()
-  InitInspectorMenu(mywidget,menu_bar)
 

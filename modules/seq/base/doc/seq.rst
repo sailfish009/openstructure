@@ -17,10 +17,11 @@ Attaching Structures to Sequences
 --------------------------------------------------------------------------------
 
 
-Being a structural biology framework, it is not surprising that the sequence 
-classes have been designed to work together with structural data. Each sequence 
-can have an attached :class:`~mol.EntityView` allowing for fast mapping between 
-residues in the entity view and position in the sequence. 
+As OpenStructure is a computational structural biology framework, it is not
+surprising that the sequence classes have been designed to work together with
+structural data. Each sequence can have an attached :class:`~mol.EntityView`
+allowing for fast mapping between residues in the entity view and position in
+the sequence.
 
 .. _sequence-offset:
 

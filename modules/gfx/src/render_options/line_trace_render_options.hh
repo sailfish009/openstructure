@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -26,20 +26,18 @@
 #include <boost/shared_ptr.hpp>
 
 #include <ost/gfx/module_config.hh>
-#include <ost/gfx/render_options/line_render_options.hh>
 
-namespace ost {
+#include "line_render_options.hh"
 
-namespace gfx {
+namespace ost { namespace gfx {
 
-class DLLEXPORT_OST_GFX LineTraceRenderOptions: public ost::gfx::LineRenderOptions {
+class DLLEXPORT_OST_GFX LineTraceRenderOptions: public LineRenderOptions {
 public:
   LineTraceRenderOptions();
 
+  // remaining RenderOptions interface not define in LineRenderOptions
   virtual RenderMode::Type GetRenderMode();
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
-
-  virtual ~LineTraceRenderOptions();
 };
 
 typedef boost::shared_ptr<LineTraceRenderOptions> LineTraceRenderOptionsPtr;

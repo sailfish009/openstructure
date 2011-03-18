@@ -22,16 +22,17 @@
 
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node.hh>
-
+#include <ost/gfx/entity.hh>
 #include <ost/gui/scene_win/scene_win.hh>
-
+#include <ost/gui/scene_win/scene_win_model.hh>
 #include "render_modes_node.hh"
 #include "render_mode_node.hh"
 #include <QFont>
 
 namespace ost { namespace gui {
 
-RenderModesNode::RenderModesNode(gfx::EntityP entity, SceneNode* parent):LabelNode("Render Modes",parent),node_(entity){
+RenderModesNode::RenderModesNode(gfx::EntityP entity, SceneNode* parent):
+  LabelNode("Render Modes",parent),node_(entity) {
   SceneWinModel* model = GostyApp::Instance()->GetSceneWin()->GetModel();
   model->AddNode(parent, this);
 

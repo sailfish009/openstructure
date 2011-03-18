@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -18,11 +18,13 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 
+
 void export_Torsion();
 void export_Interaction();
 void export_Packing();
 void export_Clash();
 void export_Reduced();
+void export_Utilties();
 BOOST_PYTHON_MODULE(_qa)
 {
   export_Torsion();
@@ -30,4 +32,5 @@ BOOST_PYTHON_MODULE(_qa)
   export_Packing();
   export_Clash();
   export_Reduced();
+  export_Utilties();
 }

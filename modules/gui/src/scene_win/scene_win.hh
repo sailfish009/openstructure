@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -23,19 +23,23 @@
 #include <ost/mol/query_view_wrapper.hh>
 
 #include <ost/gfx/gfx_node_fw.hh>
+#include <ost/gfx/entity_fw.hh>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
-#include <ost/gui/scene_win/scene_win_model.hh>
-#include <ost/gui/scene_win/context_menu.hh>
 
 #include <QTreeView>
 #include <QItemSelection>
+
+
 /*
   Authors: Marco Biasini, Ansgar Philippsen, Stefan Scheuber
 */
 
 namespace ost { namespace gui {
+
+class SceneWinModel;
+class ContextMenu;
 
 // the display window for all graphical objects
 class DLLEXPORT_OST_GUI SceneWin: public Widget

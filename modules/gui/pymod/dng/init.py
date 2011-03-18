@@ -22,7 +22,7 @@ from ost.gui.init_context_menu import _InitContextMenu
 from ost.gui.init_splash import _InitSplash
 from ost.gui.dng import termuse
 from ost.gui.helpwidget import help
-
+import ost.gui.dng.menu
 from PyQt4.QtGui import *
 def _my_exit(code):
   QtGui.QApplication.instance().quit()
@@ -78,18 +78,20 @@ def _InitFrontEnd(try_stereo):
   app.SetAppTitle("DNG")
   app.TryStereo(try_stereo)
   main_area=app.perspective.main_area
-  _InitMenuBar(app)
   _InitSpaceNav(app)
   _InitContextMenu(app)
-  main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win, int(QtCore.Qt.WindowMaximized))
+  main_area.AddPersistentWidget("3D Scene", "gl_win" , app.gl_win,
+                                int(QtCore.Qt.WindowMaximized))
+  _InitInspector(app)
+  ost.gui.dng.menu._InitMenu()
   app.perspective.Restore()
   additional_modules=getattr(__main__, 'ADDITIONAL_GUI_MODULES', [])
   for module_name in additional_modules:
     __import__(module_name)
   app.ProcessEvents()
-
-  _InitInspector(app)
   
+
+
   if not _InitPanels(app):
     _InitSplash()
   

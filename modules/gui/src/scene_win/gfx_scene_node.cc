@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include "gfx_scene_node.hh"
-
+#include <ost/gui/scene_win/scene_win_model.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/gfx_node.hh>
 

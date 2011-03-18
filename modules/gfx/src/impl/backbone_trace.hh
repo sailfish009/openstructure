@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -23,7 +23,7 @@
   Authors: Ansgar Philippsen, Marco Biasini
  */
 
-#include <ost/mol/mol.hh>
+#include <ost/mol/entity_view.hh>
 
 #include <ost/gfx/module_config.hh>
 #include <ost/gfx/impl/entity_detail.hh>
@@ -64,6 +64,10 @@ public:
   static void PrepList(NodeEntryList& nelist);
 
   // re-creates internal nodelist-list based on view
+  /*
+    seq_hack will apply an additional hackish N/N+1 rnum check
+    to determine if two consecutive residues are connected
+  */
   void Rebuild();
 
   // entity has new positions
@@ -72,10 +76,15 @@ public:
   // extract portions of this backbone trace for a subview
   // this is faster then re-generating a trace
   BackboneTrace CreateSubset(const mol::EntityView& subview);
-  
+
+  void SetSeqHack(bool f);
+  bool GetSeqHack() const {return seq_hack_;}
+
 private:  
   mol::EntityView      view_;
   NodeEntryListList    node_list_list_;
+  bool seq_hack_;
+
 };
 
 }}}

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -26,8 +26,11 @@
 #include <ost/mol/impl/residue_impl.hh>
 #include <ost/mol/impl/atom_impl.hh>
 #include <ost/mol/impl/query_impl.hh>
+#include <ost/mol/impl/query_ast.hh>
 
 namespace ost { namespace mol {
+
+using namespace impl;
 
 struct LazilyBoundRef {
   LazilyBoundRef& operator=(const LazilyBoundRef& rhs);
@@ -41,21 +44,19 @@ struct LazilyBoundData {
 
 
     
-using namespace impl;
-
-bool cmp_string(CompOP op,const String& lhs, const String& rhs) {
+bool cmp_string(CompOP op,const String& lhs, const StringOrRegexParam& rhs) {
   switch (op) {
     case COP_EQ:
-      return lhs == rhs;
+      return rhs.Match(lhs);
     case COP_NEQ:
-      return lhs != rhs;
+      return !rhs.Match(lhs);
     default:
       assert(0 && "should be checked during ast generation");
       return false;
   }
 }
 
-bool QueryState::do_within(const geom::Vec3& pos, const impl::WithinParam& p, 
+bool QueryState::do_within(const geom::Vec3& pos, const WithinParam& p, 
                            CompOP op) 
 {
   if (!p.HasValidRef()) {
@@ -72,7 +73,7 @@ bool QueryState::do_within(const geom::Vec3& pos, const impl::WithinParam& p,
         if (geom::Dot(d, d) <= p.GetRadiusSquare()) {
           return true;
         }
-      } else if (geom::Dot(d, d) > p.GetRadiusSquare()) {
+      } else if (geom::Dot(d, d) < p.GetRadiusSquare()) {
         return false;
       }
     }
@@ -142,7 +143,7 @@ const LazilyBoundRef& QueryState::GetBoundObject(int i) const {
 
 
 
-boost::logic::tribool QueryState::EvalChain(const impl::ChainImplPtr& c) {
+boost::logic::tribool QueryState::EvalChain(const ChainImplPtr& c) {
   if (q_.empty_optimize_)
     return true;
   const std::set<size_t>& indices = q_.indices_[(int)Prop::CHAIN];
@@ -155,7 +156,7 @@ boost::logic::tribool QueryState::EvalChain(const impl::ChainImplPtr& c) {
       case Prop::CNAME:
         value = c->GetName();
         s_[*i] = cmp_string(ss.comp_op,
-                            boost::get<String>(ss.param),value);
+                            value,boost::get<StringOrRegexParam>(ss.param));
         continue;
       default:
         if (ss.sel_id>=Prop::CUSTOM) {
@@ -176,7 +177,7 @@ boost::logic::tribool QueryState::EvalChain(const impl::ChainImplPtr& c) {
   return this->EvalStack(Prop::CHAIN);
 }
 
-boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
+boost::logic::tribool QueryState::EvalResidue(const ResidueImplPtr& r) {
   if (q_.empty_optimize_)
     return true;
   const std::set<size_t>& indices = q_.indices_[(int)Prop::RESIDUE];
@@ -191,7 +192,7 @@ boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
       case Prop::RNAME:
         str_value = r->GetKey();
         s_[*i] = cmp_string(ss.comp_op,str_value,
-                            boost::get<String>(ss.param));
+                            boost::get<StringOrRegexParam>(ss.param));
         continue;
       case Prop::RNUM:
         int_value=r->GetNumber().GetNum();
@@ -222,7 +223,7 @@ boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
         s_[*i]=cmp_num<int>(ss.comp_op,int_value,boost::get<int>(ss.param));
         break;        
       case Prop::RTYPE:
-        p=boost::get<String>(ss.param);
+        p=boost::get<StringOrRegexParam>(ss.param).str();
         if (p.length()>1) {
           bool b=false;
           if (p=="helix") {
@@ -238,7 +239,7 @@ boost::logic::tribool QueryState::EvalResidue(const impl::ResidueImplPtr& r) {
         } else {
           str_value= String(1, (char)r->GetSecStructure());
           s_[*i]=cmp_string(ss.comp_op,str_value,
-                            boost::get<String>(ss.param));          
+                            boost::get<StringOrRegexParam>(ss.param));          
         }
         break;
       case Prop::RINDEX:
@@ -306,7 +307,7 @@ QueryState::QueryState()
   : s_(), q_(dummy_query_impl) {
 }
 
-boost::logic::tribool QueryState::EvalAtom(const impl::AtomImplPtr& a) {
+boost::logic::tribool QueryState::EvalAtom(const AtomImplPtr& a) {
   if (q_.empty_optimize_)
     return true;  
   const std::set<size_t>& indices = q_.indices_[(int)Prop::ATOM];
@@ -320,32 +321,32 @@ boost::logic::tribool QueryState::EvalAtom(const impl::AtomImplPtr& a) {
       case Prop::ANAME:
         str_value = a->GetName();
         s_[*i] = cmp_string(ss.comp_op,str_value,
-          boost::get<String>(ss.param));                  
+			    boost::get<StringOrRegexParam>(ss.param));                  
         break;
       case Prop::AX:
         float_value=(a->GetPos())[0];
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
-                               boost::get<float>(ss.param));
+			     boost::get<float>(ss.param));
         break;
       case Prop::AY:
         float_value=(a->GetPos())[1];
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
-                               boost::get<float>(ss.param));
+			     boost::get<float>(ss.param));
         break;
       case Prop::AZ:
         float_value=(a->GetPos())[2];
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
-                               boost::get<float>(ss.param));
+			     boost::get<float>(ss.param));
         break;                
       case Prop::OCC:
         float_value=a->GetOccupancy();
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 
-                               boost::get<float>(ss.param));
+			     boost::get<float>(ss.param));
         break;                        
       case Prop::ELE:
         str_value = a->GetElement();
         s_[*i] = cmp_string(ss.comp_op,str_value,
-          boost::get<String>(ss.param));                          
+			    boost::get<StringOrRegexParam>(ss.param));                          
         break;
       case Prop::ABFAC:
         float_value=a->GetBFactor();

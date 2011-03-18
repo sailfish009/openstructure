@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -16,13 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_CONOP_HEURISTIC_CONNECT_H
-#define OST_CONOP_HEURISTIC_CONNECT_H
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE geom
+#include <boost/test/unit_test.hpp>
 
-namespace ost { namespace conop {
-
-void HeuristicConnect(EntityHandle& eh);
-
-}} // ns
-
-#endif

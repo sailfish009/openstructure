@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -53,6 +53,8 @@ DLLEXPORT_OST_QA String AminoAcidToResidueName(AminoAcid aa);
 DLLEXPORT_OST_QA String OneLetterCodeToResidueName(char olc);
 
 DLLEXPORT_OST_QA AminoAcid OneLetterCodeToAminoAcid(char olc);
+
+char DLLEXPORT_OST_QA ResidueNameToOneLetterCode(String rn);
 
 class AminoAcidSetIterator : public std::iterator<std::forward_iterator_tag,
                                                   AminoAcid> {

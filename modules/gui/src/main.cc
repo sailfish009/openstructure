@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -45,16 +45,13 @@
 #include <QDragEnterEvent>
 #include <QList>
 #include <QUrl>
-//#include "xpm/ost_small.xpm"
+#include <QMdiArea>
+#include <QAction>
+#include <QFile>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 
 namespace ost { namespace gui {
-#if 0
-namespace {
-
-static QString ost_about_str("The OpenStructure Project\n\nCodename OST\n\nLead Design and Programming\n  Ansgar Philippsen\n  Marco Biasini\n\nTeam\n  Pascal Benkert\n  Jurgen Haas\n  Valerio Mariani\n  Andreas Schenk\n  Tobias Schmidt\n  Torsten Schwede\n\n\n www.openstructure.org ");
-
-}
-#endif
 
 QSize GostyMainWindow::GetDefaultSize()
 {

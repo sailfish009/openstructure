@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -23,6 +23,7 @@
 
 #include "atom_view.hh"
 #include "residue_view.hh"
+#include <ost/mol/bond_handle.hh>
 #include <ost/mol/atom_handle.hh>
 #include <ost/mol/impl/atom_impl.hh>
 #include <ost/mol/entity_visitor.hh>

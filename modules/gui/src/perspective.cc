@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -41,6 +41,11 @@
 #include <QKeySequence>
 #include <QStatusBar>
 #include <QPushButton>
+#include <QMenuBar>
+#include <QMap>
+#include <QString>
+#include <QStatusBar>
+
 /*
   Author: Marco Biasini
  */
@@ -120,15 +125,16 @@ QMenuBar* Perspective::GetMenuBar()
 
 QMenu* Perspective::GetMenu(const QString& name)
 {
-  QMenu* menu;
-  if(!menus_.contains(name)){
-    menu = menu_bar_->addMenu(name);
-    menus_.insert(name,menu);
+  QList<QAction *> actions=menu_bar_->actions();
+  for (QList<QAction*>::iterator i=actions.begin(),
+       e=actions.end(); i!=e; ++i) {
+    if ((*i)->text()==name) {
+      return (*i)->menu();
+    }
   }
-  else{
-    menu = menus_[name];
-  }
-  return menu;
+  QMenu* new_menu=new QMenu(name, menu_bar_);
+  menu_bar_->addMenu(new_menu);
+  return new_menu;
 }
 
 PanelManager* Perspective::GetPanels()

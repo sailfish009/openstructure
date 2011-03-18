@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -26,12 +26,21 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol;
 
+namespace {
+  ChainView get_chain(AtomView& a)
+  {
+    return a.GetResidue().GetChain();
+  }
+}
+
 void export_AtomView()
 {
 
   class_<AtomView, bases<AtomBase> >("AtomView", init<>())
     .def("GetResidue",&AtomView::GetResidue)
     .add_property("residue",&AtomView::GetResidue)
+    .def("GetChain",get_chain)
+    .add_property("chain",get_chain)
     .def(self==self)
     .def(self!=self)
     .add_property("handle", &AtomView::GetHandle)

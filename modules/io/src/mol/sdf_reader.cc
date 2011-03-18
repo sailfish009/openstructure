@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -23,7 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-
+#include <ost/mol/bond_handle.hh>
 #include <ost/conop/conop.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/log.hh>
@@ -227,9 +227,9 @@ void SDFReader::ParseAndAddBond(const String& line, int line_num,
 
   LOG_TRACE( "line: [" << line << "]" );
 
-  if(line.length()<18 || line.length()>21) {
+  if(line.length()<9 || line.length()>21) {
     String msg="Bad bond line %d: Not correct number of characters on the"
-               " line: %i (should be between 18 and 21)";
+               " line: %i (should be between 9 and 21)";
     throw IOException(str(format(msg) % line_num % line.length()));
   }
 

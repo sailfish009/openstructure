@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,9 +22,7 @@
 
 #include "simple_render_options.hh"
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 SimpleRenderOptions::SimpleRenderOptions(): 
   blur_flag_(false), blur_factors_(1.0, 0.8),
@@ -39,8 +37,6 @@ RenderMode::Type SimpleRenderOptions::GetRenderMode()
 bool SimpleRenderOptions::CanApplyRenderOptions(RenderOptionsPtr render_options){
   return render_options.get()->GetRenderMode()==RenderMode::SIMPLE;
 }
-
-SimpleRenderOptions::~SimpleRenderOptions() {}
 
 bool SimpleRenderOptions::GetBlurFlag() const
 {
@@ -86,6 +82,5 @@ void SimpleRenderOptions::SetBlurFactors(Real bf1, Real bf2)
   this->NotifyStateChange();
 }
 
-}
+}} // ns
 
-}

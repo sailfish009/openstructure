@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -25,10 +25,11 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/widget.hh>
 
-#include <QAction>
 #include <QGLFormat>
 #include <QActionGroup>
-#include <QStatusBar>
+
+class QStatusBar;
+class QAction;
 
 /*
   Authors: Ansgar Philippsen, Marco Biasini

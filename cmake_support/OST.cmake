@@ -531,7 +531,7 @@ macro(ost_unittest MODULE SOURCE_FILES)
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
                             "ost_${MODULE}")
         add_custom_target("${_test_name}_run"
-                        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo 
+                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo 
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "running checks for module ${MODULE}"
                         DEPENDS ${_test_name})

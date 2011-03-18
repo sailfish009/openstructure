@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -76,14 +76,15 @@ void ensure_counts(EntityHandle e, const String& qs, int cc, int rc, int ac) {
   BOOST_CHECK_NO_THROW(v=e.Select(qs));
   BOOST_CHECK_MESSAGE(v.GetChainCount()==cc,
                       "wrong chain count " << v.GetChainCount()
-                      << " for query String " << qs);
+                      << " for query string " << qs);
   BOOST_CHECK_MESSAGE(v.GetResidueCount()==rc,
                       "wrong residue count " << v.GetResidueCount() <<
-                      " for query String " << qs);
+                      " for query string " << qs);
   BOOST_CHECK_MESSAGE(v.GetAtomCount()==ac,
                       "wrong atom count " << v.GetAtomCount() <<
-                      " for query String " << qs);
+                      " for query string " << qs);
 }
+
 
 void ensure_counts_v(EntityView src, const String& qs,
                      int cc, int rc, int ac) {
@@ -122,6 +123,8 @@ BOOST_AUTO_TEST_CASE(test_query_parse_properties)
   BOOST_CHECK(Query("grtest:2=8").IsValid());
   BOOST_CHECK(Query("gctest:3.0=9").IsValid());
   BOOST_CHECK(Query("anita=3").IsValid()==false);
+  BOOST_CHECK(Query("gc*test=3").IsValid()==false);
+  BOOST_CHECK(Query("gc?test=3").IsValid()==false);
 }
 
 BOOST_AUTO_TEST_CASE(test_query_parse_value_type) 
@@ -208,6 +211,9 @@ BOOST_AUTO_TEST_CASE(test_query_eval)
   ensure_counts(e, "rtype=C", 1, 3, 27);
   ensure_counts(e, "not (aname=CA and not aname=CA)", 1, 3, 27);
   ensure_counts(e, "3 <> {21.5,35,57.0}", 1, 2, 5);
+  ensure_counts(e, "not 3 <> {21.5,35,57.0}", 1, 3, 22);
+  ensure_counts(e, "3 <> {21.5,35,57} and not 0.5 <> {21.5,35,57} ", 1, 2, 4);
+  ensure_counts(e, "not 0.5 <> [rnum=3]", 1, 2, 19);
   ensure_counts(e, "1 <> {0,0,0}", 0, 0, 0);
   ensure_counts(e, "gatestpropa:0=1", 1, 1, 1);
   ensure_counts(e, "gatestpropa:1.0=1", 1, 3, 27);
@@ -269,6 +275,19 @@ BOOST_AUTO_TEST_CASE(test_query_throw)
   BOOST_CHECK_NO_THROW(e.Select("ganotsetprop:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("grnotsetprop:0=1"));
   BOOST_CHECK_NO_THROW(e.Select("gcnotsetprop:0=1"));
+}
+
+BOOST_AUTO_TEST_CASE(test_glob) 
+{
+  EntityHandle e=make_query_test_entity();
+  ensure_counts(e, "rname=MET and aname=C*", 1, 1, 5);
+  ensure_counts(e, "rname=ARG and aname=N?1", 1, 1, 1);
+  ensure_counts(e, "rname=ARG and aname=NH?", 1, 1, 2);
+  ensure_counts(e, "rname=ARG and aname=\"*2\"", 1, 1, 1);
+  ensure_counts(e, "rname=ARG and aname=*2", 1, 1, 1);
+  ensure_counts(e, "rname=ARG and aname=N?", 1, 1, 1);
+  ensure_counts(e, "rname=LEU and aname=\"?D?\"", 1, 1, 2);
+  ensure_counts(e, "rname=LEU and aname=?D?", 1, 1, 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

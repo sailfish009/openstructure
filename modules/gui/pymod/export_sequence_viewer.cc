@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -96,12 +96,14 @@ std::vector<String> get_display_modes_c(SequenceViewer* seq_viewer, const seq::A
 
 void export_SequenceViewer()
 {
-  class_<SequenceViewer, boost::noncopyable >("SequenceViewer",init<>())
-    .def(init<bool, optional<QWidget*> >())
+  class_<SequenceViewer, boost::noncopyable >("SequenceViewer")
+    .def(init<optional<bool, bool, const QString&, 
+              QWidget*> >())
     .def("Show", &SequenceViewer::show)
     .def("Hide", &SequenceViewer::hide)
     .def("AddEntity", &SequenceViewer::AddEntity)
     .def("RemoveEntity", &SequenceViewer::RemoveEntity)
+    .def("SetAlignment", &SequenceViewer::SetAlignment)
     .def("AddAlignment", &SequenceViewer::AddAlignment)
     .def("RemoveAlignment", &SequenceViewer::RemoveAlignment)
     .def("GetDisplayModes", &get_display_modes_a)

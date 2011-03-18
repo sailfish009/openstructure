@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -186,7 +186,7 @@ const PainterList& SequenceModel::GetPainters(const QModelIndex& index) const{
   return empty_painter_list_;
 }
 
-QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(int row) const{
+QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(int row) const {
   if(!objects_.isEmpty()){
     int rows = 0;
     int i = -1;
@@ -201,6 +201,36 @@ QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(int row) const{
   }
   return QPair<int, BaseViewObject*>(-1, NULL);
 }
+
+void SequenceModel::EmitRowChanged(int row)
+{
+  emit this->dataChanged(this->index(row, 0), 
+                         this->index(row, this->columnCount()-1));
+}
+
+void SequenceModel::Clear()
+{
+  // remove everything but the title row. 
+  this->beginRemoveRows(QModelIndex(), 1, this->rowCount());
+  objects_.erase(objects_.begin()+1, objects_.end());
+  this->endRemoveRows();
+  this->beginRemoveColumns(QModelIndex(), 0, this->max_columns);
+  this->max_columns=0;
+  this->endRemoveColumns();
+}
+
+QPair<seq::AlignmentHandle, int> SequenceModel::GetAlignmentForRow(int row)
+{
+  QPair<int, BaseViewObject*> p=this->GetRowWithItem(row);
+  if (p.second) {
+    AlignmentViewObject* avo=dynamic_cast<AlignmentViewObject*>(p.second);
+    if (avo) {
+      return QPair<seq::AlignmentHandle, int>(avo->GetAlignment(), p.first);
+    }    
+  }
+  return QPair<seq::AlignmentHandle, int>(seq::AlignmentHandle(), -1);
+}
+
 
 QPair<int, BaseViewObject*> SequenceModel::GetRowWithItem(const QModelIndex& index) const{
   return this->GetRowWithItem(index.row());

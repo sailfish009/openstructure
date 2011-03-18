@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -250,6 +250,7 @@ mol::EntityView assemble_view(const std::vector<T>& l, mol::EntityView v)
 {
   typedef typename std::vector<T>::const_iterator Iter;
   for (Iter i=l.begin(), e=l.end(); i!=e; ++i) {
+    if(!i->IsValid()) continue;
     if (!belongs_to_same_ent(*i, v))
       throw IntegrityError(combining_not_allowed);
     v.AddAtom(to_handle(*i), mol::ViewAddFlag::CHECK_DUPLICATES);

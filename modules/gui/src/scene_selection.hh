@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,7 +22,7 @@
 
 #include <ost/mol/query_view_wrapper.hh>
 
-#include <ost/gfx/entity.hh>
+#include <ost/gfx/entity_fw.hh>
 #include <ost/gfx/gfx_node_fw.hh>
 #include <ost/gui/module_config.hh>
 

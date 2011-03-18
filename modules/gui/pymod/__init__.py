@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2010 by the OpenStructure authors
+# Copyright (C) 2008-2011 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -42,6 +42,7 @@ def ClearMessageWidget():
 
 
 from PyQt4.QtGui import *
+from PyQt4.QtCore import *
 from ost import gfx
 
 def PickColor(default=gfx.WHITE):
@@ -60,3 +61,144 @@ def PickColor(default=gfx.WHITE):
     return None
   return gfx.Color(qt_color.red()/256.0, qt_color.green()/256.0,
                    qt_color.blue()/256.0)
+                   
+def GetMenu(menu_name, create=False):
+  persp=GostyApp.Instance().perspective
+  if isinstance(menu_name[0], QAction):
+    return menu_name[0]
+  else:
+    node=persp.GetMenu(menu_name[0])
+    for name in menu_name[1:]:
+      found=False
+      for action in node.actions():
+        if str(action.text())==str(name):
+          found=True
+          node=action
+          break
+      if not found:
+        if create:
+          node=node.addMenu(name)  
+        else:
+          raise ValueError("Menu '%s' doesn't exist" % ', '.join(menu_name))
+    return node
+
+
+
+def AddMenuAction(*args, **kwargs):
+  """
+  Add menu action to main menu.
+
+  This function lets you conveniently add actions to the main menu. To add a new 
+  new action "Background Color" to the "Scene" menu, simply use
+  
+  .. code-block:: python
+  
+    def SetBackgroundColor():
+      scene.bg=gfx.PickColor(scene.bg)
+
+    AddMenuAction('Scene', "Background Color", SetBackgroundColor)
+    
+  This will add the menu "Scene" if it does not exist yet, register the action 
+  "Background Color" and execute the function SetBackgroundColor whenever the 
+  action is triggered.
+  
+  To assign a keyboard shortcut to the action, you can use the shortcut 
+  argument:
+  
+  .. code-block:: python
+  
+    AddMenuAction('Scene', 'Background Color', SetBackgroundColor,
+                  shortcut='Ctrl+B')
+
+  Whenever you press Ctrl+B (Cmd+B on MacOS X), the action will be executed.
+  
+  Very often menu actions are coupled to the current selected objects in the 
+  scene menu. These menu actions are either enabled or disabled depending on the 
+  type of the selected objects. To easily support this scenario, the "enable" 
+  state of the menu action can be tightly coupled to the scene menu by providing 
+  a callable to the enabled argument. As an example, the following menu action 
+  is only enabled when exactly one gfx.Entity is selected.
+  
+  .. code-block:: python
+  
+    AddMenuAction('Scene', 'PrintAtomCount', PrintAtomCount,
+                  enabled=OneOf(gfx.Entity))
+  
+  OneOf is a simple function object that takes any number of classes and returns 
+  true when the selected object is an instance. Alterantively, you might want to 
+  use ManyOf or supply a custom function that evaluates the state of the menu 
+  action to suit your needs.
+  """
+  class MenuActionEnabler(QObject):
+    def __init__(self, predicate, action):
+      QObject.__init__(self, action)
+      self.predicate=predicate
+      self.action=action
+      app=GostyApp.Instance()
+      QObject.connect(app.scene_win.qobject, SIGNAL('ActiveNodesChanged()'),
+                      self.TestEnable)
+      self.TestEnable()
+
+    def TestEnable(self):
+      self.action.setEnabled(self.predicate())
+  persp=GostyApp.Instance().perspective
+  menu_name=args[:-1]
+  function=args[-1]
+  if isinstance(menu_name[0], QMenu):
+    node=menu_name[0]
+  else:
+    node=persp.GetMenu(args[0])
+    for name in menu_name[1:-1]:
+      found=False
+      for action in node.actions():
+        if str(action.text())==str(name):
+          node=action
+          break
+      if not found:
+        node=node.addMenu(name)
+  action=node.addAction(str(menu_name[-1]))
+  if 'shortcut' in kwargs:
+    action.setShortcut(QKeySequence(kwargs['shortcut']))
+  if 'checkable' in kwargs:
+    action.setCheckable(kwargs['checkable'])
+  if 'checked' in kwargs:
+    action.setChecked(kwargs['checked'])
+  if 'enabled' in kwargs:
+    if callable(kwargs['enabled']):
+      enabler=MenuActionEnabler(kwargs['enabled'], action)
+    else:
+      action.setEnabled(kwargs['enabled'])
+  QObject.connect(action, SIGNAL('triggered()'), function)
+  return action
+
+
+class OneOf:
+  def __init__(self, *classes):
+    self.classes=classes
+  def __call__(self):
+    sel=SceneSelection.Instance()
+    if sel.GetActiveNodeCount()!=1:
+      return False
+    node=sel.GetActiveNode(0)
+    for cl in self.classes:
+      if isinstance(node, cl):
+        return True
+    return False
+    
+class ManyOf:
+  def __init__(self, *classes):
+    self.classes=classes
+  def __call__(self):
+    sel=SceneSelection.Instance()
+    if sel.GetActiveNodeCount()==0:
+      return False
+    for  i in range(sel.GetActiveNodeCount()):
+      node=sel.GetActiveNode(i)
+      found=False
+      for cl in self.classes:
+        if isinstance(node, cl):
+          found=True
+          break
+      if not found:
+        return False
+    return True

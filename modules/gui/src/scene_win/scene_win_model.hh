@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -59,7 +59,7 @@ public:
 
   SceneNode* GetItem(const QModelIndex &index) const;
 
-  SceneNode* FindGfxNode(gfx::GfxNodeP node) const;
+  SceneNode* FindGfxNode(gfx::GfxNodeP node);
 
 
   bool AddNode(SceneNode* parent, SceneNode* child);
@@ -107,6 +107,7 @@ private:
   SceneNode* scene_node_;
 
   QMap<gfx::GfxNodeP, RenderModesNode*> render_observers_;
+  QMap<gfx::GfxNode*, SceneNode*>       node_map_;
 };
 
 }}

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -177,5 +177,23 @@ SequenceListImplPtr SequenceListImpl::Slice(int first, int n) const
     return SequenceListImplPtr(new SequenceListImpl);
   }
 }
+
+Real SequenceListImpl::GetCoverage(int seq_index) const
+{
+  int a=0, b=0;
+  String seq_string_0 = GetSequence(0)->GetString();
+  String seq_string_index = GetSequence(seq_index)->GetString();
+  for (int i=0; i<GetSequence(0)->GetLength(); ++i) {
+    if (seq_string_0[i]!='-') {
+      a+=1;
+      if (seq_string_index[i]!='-') {
+        b+=1;
+      }
+    }
+  }
+  Real coverage=Real(b)/Real(a);
+  return coverage;
+}
+
 
 }}}

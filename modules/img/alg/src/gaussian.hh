@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -139,7 +139,7 @@ typedef ImageStateModIPAlgorithm<GaussianFilterBase> GaussianFilter;
 
 
 
-OST_IMG_ALG_EXPLICIT_INST_DECL(class,image_state::ImageStateModIPAlgorithm<alg::GaussianFilterBase>)
+OST_IMG_ALG_EXPLICIT_INST_DECL(class, ImageStateModIPAlgorithm<alg::GaussianFilterBase>)
 
 
 

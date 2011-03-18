@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -25,10 +25,14 @@
 
 #include <ost/base.hh>
 #include <ost/geom/geom.hh>
-#include <ost/mol/mol.hh>
+#include <ost/mol/entity_view.hh>
 #include <ost/mol/alg/module_config.hh>
 
-namespace ost { namespace mol { namespace alg {
+namespace ost { namespace mol { 
+  
+class EntityHandle;
+
+namespace alg {
 
 /// \brief stores the number of cycles and the two final EntityViews
 /// (in case IterativeSuperposition was applied),

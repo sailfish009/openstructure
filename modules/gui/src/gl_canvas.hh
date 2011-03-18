@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,22 +20,19 @@
 #define OST_GUI_GL_CANVAS_HH
 
 
-// must come before QGLWidget
-#include <ost/mol/mol.hh>
 
-
-// Qt includes must come last
-#include <QGLWidget>
-#include <QTime>
-#include <QBasicTimer>
-#include <QMouseEvent>
 #include <ost/gui/tools/tool.hh>
 #include <ost/gui/scene_menu.hh>
 #include <ost/gfx/glwin_base.hh>
 #include <ost/gfx/input.hh>
 #include <ost/gfx/gfx_object_fw.hh>
 
+
+// Qt includes must come last
+#include <QGLWidget>
+#include <QBasicTimer>
 class QMenu;
+class QMouseEvent;
 
 namespace ost { namespace gui {
 

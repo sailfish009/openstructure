@@ -1,7 +1,8 @@
+
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,9 +23,7 @@
 
 #include "cartoon_render_options.hh"
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 CartoonRenderOptions::CartoonRenderOptions(bool force_tube):
   force_tube_(force_tube),
@@ -290,8 +289,5 @@ float CartoonRenderOptions::GetMaxRad() const{
   return max_rad;
 }
 
-CartoonRenderOptions::~CartoonRenderOptions() {}
+}} // ns
 
-}
-
-}

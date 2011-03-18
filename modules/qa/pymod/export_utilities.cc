@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -16,32 +16,19 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GUI_ENTITY_EXPLORER_HH
-#define OST_GUI_ENTITY_EXPLORER_HH
+#include <boost/python.hpp>
+#include <ost/qa/amino_acids.hh>
+using namespace boost::python;
+using namespace ost::qa;
 
-//#include <ost/signals.hh>
-#include <ost/gui/module_config.hh>
 
-// Qt includes must come last
-#include <QTreeView>
-#include <QMainWindow>
-
-namespace ost { namespace gui {
-
-class GLWin;
-  
-/// \brief Interactive scene menu
-class DLLEXPORT_OST_GUI EntityExplorer: public QTreeView 
+void export_Utilties()
 {
-  Q_OBJECT;
-public:
-  EntityExplorer(QWidget* p);
 
-public slots:
-  void OnAction(QAction* action);
-  void DoubleClicked(const QModelIndex& index);
-};  
+  def ("ResidueToAminoAcid",&ResidueToAminoAcid);
+  def ("AminoAcidToResidueName",&AminoAcidToResidueName);
+  def ("OneLetterCodeToResidueName",&OneLetterCodeToResidueName);
+  def ("ResidueNameToOneLetterCode",&ResidueNameToOneLetterCode); 
+  def ("OneLetterCodeToAminoAcid",&OneLetterCodeToAminoAcid);
 
-}} // ns
-
-#endif
+}

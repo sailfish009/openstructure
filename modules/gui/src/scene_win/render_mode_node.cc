@@ -18,7 +18,9 @@
 //------------------------------------------------------------------------------
 
 #include <ost/mol/query_view_wrapper.hh>
+#include <ost/gfx/entity.hh>
 
+#include <ost/gui/scene_win/scene_win_model.hh>
 #include "render_mode_node.hh"
 
 #include <QFont>

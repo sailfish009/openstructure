@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -29,19 +29,17 @@
 
 #include "line_render_options.hh"
 
-namespace ost {
+namespace ost { namespace gfx {
 
-namespace gfx {
-
-class DLLEXPORT_OST_GFX SimpleRenderOptions: public ost::gfx::LineRenderOptions {
+class DLLEXPORT_OST_GFX SimpleRenderOptions: public LineRenderOptions {
 public:
   SimpleRenderOptions();
 
+  // remaining RenderOptions interface not define in LineRenderOptions
   virtual RenderMode::Type GetRenderMode();
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
 
-  virtual ~SimpleRenderOptions();
-  
+  // own interface
   bool GetBlurFlag() const;
   bool GetBondOrderFlag() const;
   Real GetBondOrderDistance() const;
@@ -50,6 +48,7 @@ public:
   void SetBlurFactors(Real bf1, Real bf2);
   void SetBondOrderFlag(bool flag);
   void SetBondOrderDistance(Real bod);
+
 private:
   bool                     blur_flag_;
   std::pair<Real, Real>    blur_factors_;

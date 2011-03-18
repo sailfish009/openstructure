@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -24,7 +24,10 @@
 #include <string.h>
 
 #include <ost/io/io_exception.hh>
-
+#include <ost/mol/atom_handle.hh>
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/chain_handle.hh>
+#include <ost/mol/entity_visitor.hh>
 #include "pdb_writer.hh"
 
 using boost::format;
@@ -329,7 +332,11 @@ PDBWriter::PDBWriter(std::ostream& stream, const IOProfile& profile):
 
 PDBWriter::PDBWriter(const boost::filesystem::path& filename, 
                      const IOProfile& profile):
+#if BOOST_FILESYSTEM_VERSION==3                     
+  outfile_(filename.filename().string().c_str()), outstream_(outfile_), 
+#else
   outfile_(filename.file_string().c_str()), outstream_(outfile_), 
+#endif  
   mol_count_(0), line_(80), multi_model_(false), 
   charmm_style_(profile.dialect=="CHARMM"), is_pqr_(false),
   profile_(profile)

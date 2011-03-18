@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -46,11 +46,13 @@ void export_CoordGroup()
     .def("IsValid",&CoordGroupHandle::IsValid)
     .def("GetEntity",&CoordGroupHandle::GetEntity)
     .def("GetAtomCount",&CoordGroupHandle::GetAtomCount)
+    .def("AddFrames", &CoordGroupHandle::AddFrames)
     .def("GetFrameCount",&CoordGroupHandle::GetFrameCount)
     .def("SetFramePositions",&CoordGroupHandle::SetFramePositions)
     .def("SetAtomPos",&CoordGroupHandle::SetAtomPos)
     .def("GetAtomPos",&CoordGroupHandle::GetAtomPos)
     .def("CopyFrame",&CoordGroupHandle::CopyFrame)
+    .add_property("atoms", &CoordGroupHandle::GetAtomList)
     .def("IsValid", &CoordGroupHandle::IsValid)
     .def("Capture", capture1)
     .def("Capture", capture2)

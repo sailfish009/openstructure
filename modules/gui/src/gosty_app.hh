@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -144,7 +144,8 @@ public:
   /// \param ident the ident is used to identify a custom widget. It must be unique. Otherwise there might occur an unexpected behaviour.
   /// \param widget the widget which will be added to the GostyApp
   void AddWidgetToApp(const QString& ident, QWidget* widget);
-
+  
+  QWidget* GetWidget(const QString& ident);
   /// \brief remove a custom QWidget from the gosty_app
   ///
   /// This method removes a custom widget from OpenStructure. If the given ident is not known, nothing happens. Read more about custom widgets at \ref #AddWidgetToApp() .

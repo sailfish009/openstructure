@@ -7,11 +7,15 @@ class TestStUtils(unittest.TestCase):
     self.data1 = [0,1,2,3,4,5,6,-5,-4,-3,-2,-1,1]
     self.data2 = [1,2,3,4,5,6,7,8,9,10,11,12,13]
     self.data3 = [0.1,0.5,0.7,2.4,0.5,4.1,0.9,-1.1,-0.5,0.7,-1.4,-7.5,8.5]
+    self.data_short = [0,1]
+    self.data_short2 = [0,1,2]
 
     self.mean = 0.5384615385
     self.mean2 = 0.6076923077
     self.median = 1
     self.median2 = 0.5
+    self.median_short = 0.5
+    self.median_short2 = 1.0
     self.stddev = 3.3192998478
     self.stddev2 = 3.4192805223
     self.minimum = -5
@@ -42,6 +46,12 @@ class TestStUtils(unittest.TestCase):
     assert self.isSimilar(stutil.Median(self.data3), self.median2, 0.001), \
            "Median (%f) does not correspond to precalculated median (%f)" % \
            (stutil.Median(self.data3), self.median2)
+    assert self.isSimilar(stutil.Median(self.data_short), self.median_short, 0.001), \
+           "Median (%f) does not correspond to precalculated median (%f)" % \
+           (stutil.Median(self.data_short), self.median_short)
+    assert self.isSimilar(stutil.Median(self.data_short2), self.median_short2, 0.001), \
+           "Median (%f) does not correspond to precalculated median (%f)" % \
+           (stutil.Median(self.data_short2), self.median_short2)
 
   def testStddev(self):
     assert self.isSimilar(stutil.StdDev(self.data1), self.stddev, 0.001), \

@@ -52,6 +52,7 @@ scene.SetCenter(go1.GetCenter())
 
 go2 = gfx.MapSlab("slab",mh,geom.Plane(go1.GetCenter(),geom.Vec3(0.0,0.0,1.0)))
 scene.Add(go2)
-go2.ColorBy(gfx.YELLOW,gfx.GREEN,0.2,0.8)
+
+go2.ColorBy('HEAT_MAP',0.2,0.8)
 
 print 'Demo 4: Projecting the density of a map onto a plane...' 
