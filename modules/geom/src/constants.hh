@@ -22,7 +22,11 @@
 #include <ost/base.hh>
 namespace geom {
 
+#if OST_DOUBLE_PRECISION
 static const Real EPSILON=1e-10;
+#else
+static const Real EPSILON=1e-6;
+#endif
 
 } // ns
 
