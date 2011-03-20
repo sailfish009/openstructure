@@ -17,41 +17,48 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-
 #include <ost/geom/geom.hh>
 
 #include "helper.hh"
+using namespace geom;
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-using namespace geom;
-
 BOOST_AUTO_TEST_SUITE( geom )
 
 
-BOOST_AUTO_TEST_CASE(line_init2)
+BOOST_AUTO_TEST_CASE(init_mat2)
 {
-  Line3 line(geom::Vec2(0,0), geom::Vec2(2,0));
-  BOOST_CHECK_EQUAL(geom::Length(line.GetDirection()), 1.0);
+  // default
+  Mat2 m1;
+  BOOST_CHECK(match(m1,1.0,0.0, 0.0,1.0));
+
+  //with values
+  Mat2 m2(1.1,2.2,3.3,4.4);
+  BOOST_CHECK(match(m2,1.1,2.2,3.3,4.4));
+
+  // copy ctor
+  Mat2 m3(m2);
+  BOOST_CHECK(match(m3,1.1,2.2,3.3,4.4));
+
+  // array
+  Real arr[]={9.9,8.8,7.7,6.6};
+  Mat2 m4(arr);
+  BOOST_CHECK(match(m4,arr[0],arr[1],arr[2],arr[3]));
+
+  // assignement op
+  m1=m4;
+  BOOST_CHECK(match(m1,m4(0,0),m4(0,1),m4(1,0),m4(1,1)));
 }
 
-BOOST_AUTO_TEST_CASE(is_on_line2)
+
+
+BOOST_AUTO_TEST_CASE(access_mat2)
 {
-  Line2 line(geom::Vec2(0,0), geom::Vec2(1,0));
-  BOOST_CHECK(IsOnLine(line, geom::Vec2(0.5,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec2(1.0,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec2(0.0,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec2(-5,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec2(10.0,0.0)));
-  BOOST_CHECK(!IsOnLine(line, geom::Vec2(0.5,0.1)));
-  BOOST_CHECK(!IsOnLine(line, geom::Vec2(1.0,0.1)));
-  
-  line=Line2(geom::Vec2(1,0), geom::Vec2(3,2));
-  for (int i=-10; i<10; ++i) {
-    BOOST_CHECK(IsOnLine(line, line.At(i)));
-  }
-  BOOST_CHECK(!IsOnLine(line, geom::Vec2(3,2.1)));
+  Mat2 m;
+  BOOST_CHECK_THROW( m(2,2)=1.0, std::out_of_range);
+  BOOST_CHECK_THROW( m(2,2), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

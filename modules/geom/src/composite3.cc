@@ -62,14 +62,12 @@ Plane::Plane(const Vec3& p1, const Vec3& p2, const Vec3& p3)
   Vec3 ip2=p3-p1;
   n_=Normalize(Cross(ip1,ip2));
   p_=-Dot(n_,p1);
-  calc_ori();
 }
 
 Plane::Plane(const Vec3& p, const Vec3& n)
 {
   n_=Normalize(n);
   p_=-Dot(n_,p);
-  o_=p;
 }
 
 Plane::Plane(const Line3& l,const Vec3& p)
@@ -77,15 +75,13 @@ Plane::Plane(const Line3& l,const Vec3& p)
   Vec3 ip=l.GetOrigin()-p;
   n_=Normalize(Cross(ip,l.GetDirection()));
   p_=-Dot(n_,p);
-  calc_ori();
 }
 
-Plane::Plane( Real a, Real b, Real c, Real d)
+Plane::Plane(Real a, Real b, Real c, Real d)
 {
   n_=Vec3(a,b,c);
   p_=d/Length(n_);
   n_=Normalize(n_);
-  calc_ori();
 }
 
 Plane::Plane( Real x, Real y, Real z)
@@ -93,18 +89,6 @@ Plane::Plane( Real x, Real y, Real z)
   n_=Vec3(1.0/x,1.0/y,1.0/z);
   p_=-1.0/Length(n_);
   n_=Normalize(n_);
-  calc_ori();
-}
-
-Vec3 Plane::GetOrigin() const
-{
-  return o_;
-}
-
-void Plane::SetOrigin(const Vec3& o)
-{
-  o_=o;
-  p_=-Dot(n_,o_);
 }
 
 Vec3 Plane::GetNormal() const
@@ -115,7 +99,6 @@ Vec3 Plane::GetNormal() const
 void Plane::SetNormal(const Vec3& n)
 {
   n_=Normalize(n);
-  p_=-Dot(n_,o_);
 }
 
 Real Plane::GetP() const
@@ -127,13 +110,6 @@ Vec3 Plane::At(Real x,Real y) const
 {
   return n_[2]!=0.0 ? Vec3(x,y,-(n_[0]*x+n_[1]*y+p_)/n_[2]) : Vec3();
 }
-
-void Plane::calc_ori()
-{
-  o_=p_/3.0*Vec3(n_[0]==0.0 ? 0.0 : 1.0/n_[0],
-                 n_[1]==0.0 ? 0.0 : 1.0/n_[1],
-                 n_[2]==0.0 ? 0.0 : 1.0/n_[2]);
-};
 
 
 /************************************************************

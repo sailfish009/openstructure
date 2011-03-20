@@ -17,41 +17,35 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-
 #include <ost/geom/geom.hh>
 
 #include "helper.hh"
+using namespace geom;
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
-using namespace geom;
-
 BOOST_AUTO_TEST_SUITE( geom )
 
-
-BOOST_AUTO_TEST_CASE(line_init2)
+BOOST_AUTO_TEST_CASE(vecmat_mult3)
 {
-  Line3 line(geom::Vec2(0,0), geom::Vec2(2,0));
-  BOOST_CHECK_EQUAL(geom::Length(line.GetDirection()), 1.0);
-}
+  Vec3 v1(1.0,2.0,3.0);
+  Mat3 m(1.0,2.0,3.0, 
+         4.0,5.0,6.0, 
+         7.0,8.0,9.0);
 
-BOOST_AUTO_TEST_CASE(is_on_line2)
-{
-  Line2 line(geom::Vec2(0,0), geom::Vec2(1,0));
-  BOOST_CHECK(IsOnLine(line, geom::Vec2(0.5,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec2(1.0,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec2(0.0,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec2(-5,0.0)));
-  BOOST_CHECK(IsOnLine(line, geom::Vec2(10.0,0.0)));
-  BOOST_CHECK(!IsOnLine(line, geom::Vec2(0.5,0.1)));
-  BOOST_CHECK(!IsOnLine(line, geom::Vec2(1.0,0.1)));
-  
-  line=Line2(geom::Vec2(1,0), geom::Vec2(3,2));
-  for (int i=-10; i<10; ++i) {
-    BOOST_CHECK(IsOnLine(line, line.At(i)));
-  }
-  BOOST_CHECK(!IsOnLine(line, geom::Vec2(3,2.1)));
+  BOOST_CHECK(match(v1*m,30.0,36.0,42.0));
+  BOOST_CHECK(match(m*v1,14.0,32.0,50.0));
+
+  Vec3 v2(7.0,8.0,9.0);
+  BOOST_CHECK(match(CompMultiply(v1,v2),7.0,16.0,27.0));
+  BOOST_CHECK(match(CompDivide(v2,v1),7.0,4.0,3.0));
+
+  Mat3 m1=m;
+  Mat3 m2(-4,0,1,0,8,-10,8,3,0);
+  Mat3 m3=m1*m2;
+  Vec3 v3=v2*m1;
+  BOOST_CHECK(Equal(v3*m2,v2*m3));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

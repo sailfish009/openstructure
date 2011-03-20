@@ -45,7 +45,7 @@ class DLLEXPORT Vec4:
 {
 public:
   //! Default initialization, all components are set to zero
-  Vec4(): x(0), y(0), z(0), w(0) { }
+  Vec4(): x(0), y(0), z(0), w(1) { }
 
   //! Initialization with x, y and z component
   Vec4(Real px, Real py, Real pz, Real pw): x(px), y(py), z(pz), w(pw) { }

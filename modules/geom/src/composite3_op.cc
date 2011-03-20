@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <cmath>
+#include <iostream>
 #include "exc.hh"
 #include "composite3_op.hh"
 #include "vecmat3_op.hh"
@@ -101,7 +102,7 @@ bool IsInPlane(const Plane& p,  const Line3& l,Real ephilon)
 }
 bool IsInPlane(const Plane& p,  const Vec3& v,Real ephilon)
 {
-  return Distance(p,v)<ephilon;  
+  return std::fabs(Distance(p,v))<ephilon;  
 }
 int RelativePosition(const Plane& p,  const Vec3& v,Real ephilon)
 {
@@ -119,43 +120,58 @@ bool operator==(const Plane& p1, const Plane& p2)
 }
 bool Equal(const Plane& p1, const Plane& p2,Real ephilon)
 {
-  return std::fabs(p1.GetP()-p2.GetP())<ephilon && Equal(p1.GetNormal(),p2.GetNormal(),ephilon);
+  return std::fabs(p1.GetP()-p2.GetP())<ephilon && 
+         Equal(p1.GetNormal(),p2.GetNormal(),ephilon);
 }
 bool EqualPosition(const Plane& p1, const Plane& p2,Real ephilon)
 {
-  return  Equal(p1,p2,ephilon) || (std::fabs(p1.GetP()+p2.GetP())<ephilon && Equal(p1.GetNormal(),-1.0*p2.GetNormal(),ephilon));
+  return  Equal(p1,p2,ephilon) || 
+          (std::fabs(p1.GetP()+p2.GetP())<ephilon && Equal(p1.GetNormal(),
+                                                           -p2.GetNormal(),
+                                                           ephilon));
 }
 bool operator==(const Line3& l1, const Line3& l2)
 {
   return Equal(l1,l2);
 }
+
 bool Equal(const Line3& l1, const Line3& l2,Real ephilon)
 {
-  return  Equal(l1.GetDirection(),l2.GetDirection(),ephilon) && Equal(l1.GetOrigin(),l2.GetOrigin(),ephilon);
+  return Equal(l1.GetDirection(), l2.GetDirection(), ephilon) &&
+         Equal(l1.GetOrigin(), l2.GetOrigin(), ephilon);
 }
+
 bool EqualPosition(const Line3& l1, const Line3& l2,Real ephilon)
 {
-  return  IsOnLine(l1,l2.GetOrigin()) && AreParallel(l1,l2);
+  return IsOnLine(l1,l2.GetOrigin(), ephilon) && AreParallel(l1,l2, ephilon);
 }
 
 
 bool AreParallel(const Plane& p,  const Line3& l,Real ephilon)
 {
-  return std::fabs(Dot(l.GetDirection(),p.GetNormal()))<ephilon;  
+  return std::fabs(Dot(l.GetDirection(),p.GetNormal()))<ephilon;
 }
+
 bool AreParallel(const Plane& p1, const Plane& p2,Real ephilon)
 {
-  return std::fabs(1-Dot(p1.GetNormal(),p2.GetNormal()))<ephilon;  
+  return std::fabs(1-Dot(p1.GetNormal(),p2.GetNormal()))<ephilon;
 }
-bool AreParallel(const Line3& l1, const Line3& l2,Real ephilon)
+
+bool AreParallel(const Line3& l1, const Line3& l2, Real ephilon)
 {
-  return std::fabs(1-Dot(l1.GetDirection(),l1.GetDirection()))<ephilon;  
+  return std::fabs(1.0-std::fabs(Dot(l1.GetDirection(), 
+                                     l2.GetDirection())))<ephilon;
 }
 
 
-bool AreIntersecting( const Line3& l1, const Line3& l2, Real ephilon)
+bool AreIntersecting(const Line3& l1, const Line3& l2, Real ephilon)
 {
-  return IsInPlane(Plane(l1.GetOrigin(),l2.GetOrigin(),l1.At(1)),l2.At(1),ephilon);
+  if (AreParallel(l1, l2, ephilon)) {
+    return false;
+  }
+  Plane plane(l1.GetOrigin(), Cross(l1.GetDirection(), 
+                                    l2.GetDirection()));
+  return IsInPlane(plane, l2.GetOrigin(), ephilon);
 }
 
 bool IsInSphere(const Sphere& s, const Vec3& v){
