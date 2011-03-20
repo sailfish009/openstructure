@@ -60,13 +60,13 @@ struct DLLEXPORT InvalidExtentException: public Error
 class DLLEXPORT_OST_IMG_BASE Extent {
  public:
   //! default constructor
-  Extent();
+  Extent() {set(Point(),Point());}
 
   //! copy constructor
-  Extent(const Extent &r);
+  Extent(const Extent &r) {set(r.start_,r.end_);}
 
   //! initialize with start and end point
-  Extent(const Point& p1, const Point& p2);
+  Extent(const Point& p1, const Point& p2) {set(p1,p2);}
 
   //! initialize with Size
   /*!
@@ -75,7 +75,7 @@ class DLLEXPORT_OST_IMG_BASE Extent {
 
     not explicit on purpose, facilitates easier creation code
   */
-  Extent(const Size& s);
+  Extent(const Size& s) { set(Point(0,0,0), s-Point(1,1,1)); }
 
   //! initialize with center point and size
   /*
@@ -83,69 +83,136 @@ class DLLEXPORT_OST_IMG_BASE Extent {
     extent, with the size according to the even/odd rule
     as described for Extent(const Size& s)
   */
-  Extent(const Size& size, const Point& center);
+  Extent(const Size& size, const Point& center)
+  {
+    Point st = -size.GetHalf() + center;
+    set(st, size + st - Point(1,1,1));
+  }
 
   //! initialize with Size and start point
   /*
     The extent will go from start to (size-1)+start
   */
-  Extent(const Point& start, const Size& size);
+  Extent(const Point& start, const Size& size)
+  {
+    set(start, size + start - Point(1,1,1));
+  }
 
   //! Return lower/left/front corner
-  const Point& GetStart() const;
+  const Point& GetStart() const { return start_; }
   //! Return upper/right/back corner
-  const Point& GetEnd() const;
+  const Point& GetEnd() const { return end_; }
 
   //! Set start point, changing size
-  void SetStart(const Point& o);
+  void SetStart(const Point& o)
+  {
+    set(o,end_);
+  }
   //! Set end point, changing size
-  void SetEnd(const Point& e);
+  void SetEnd(const Point& e)
+  {
+    set(start_,e);
+  }
 
   //! Returns true if the given point is within extent
-  bool Contains(const Point& p) const;
+  bool Contains(const Point& p) const
+  {
+    return (p[0]>=start_[0] && p[0]<=end_[0] &&
+            p[1]>=start_[1] && p[1]<=end_[1] &&
+            p[2]>=start_[2] && p[2]<=end_[2]);
+  }
   //! Returns true if the given exten is within extent
-  bool Contains(const Extent& e) const;
+  bool Contains(const Extent& e) const
+  {
+    return Contains(e.GetStart()) && Contains(e.GetEnd());
+  }
 
   //! return center
-  Point GetCenter() const;
+  Point GetCenter() const
+  {
+    return size_.GetHalf()+start_;
+  }
 
   //! Return size of extent
-  const Size& GetSize() const;
-  int GetWidth() const;
-  int GetHeight() const;
-  int GetDepth() const;
-  int GetVolume() const;
-
-  //! Return dimension
-  int GetDim() const;
+  const Size& GetSize() const {return size_;}
+  
+  int GetWidth() const {return size_.GetWidth();}
+  int GetHeight() const {return size_.GetHeight();}
+  int GetDepth() const {return size_.GetDepth();}
+  int GetVolume() const {return size_.GetVolume();}
+  int GetDim() const {return dim_;}
 
   //! Wrap point around
   /* 
      Ensures that the given point lies within Extent, 
      using wrap around if necessary
    */
-  Point WrapAround(const Point& p) const;  
+  Point WrapAround(const Point& p) const
+  {
+    Point r(p-start_);
+    for(int i=0;i<3;i++) {
+      r[i] = start_[i] + (r[i]<0 ? size_[i]+std::div(r[i],size_[i]).rem : std::div(r[i],size_[i]).rem);
+    }
+    return r;
+  }
 
   //! Return new extent mirrored according to planes
-  Extent Mirror(int planes);
+  Extent Mirror(int planes)
+  {
+    Point new_start(planes & Plane::YZ ? -end_[0] : start_[0],
+                    planes & Plane::XZ ? -end_[1] : start_[1],
+                    planes & Plane::XY ? -end_[2] : start_[2]);
+    return Extent(new_start,size_);
+  }
 
   //! Generates a continues, uniqe index per point contained within extent
-  unsigned int Point2Offset(const Point& p) const;
+  unsigned int Point2Offset(const Point& p) const
+  {
+    if(this->Contains(p)) {
+      Point d(p-start_);
+      return d[0]+size_[0]*(d[1]+d[2]*size_[1]);
+    } else {
+      return 0;
+    }
+  }
 
   // operators
   bool operator==(const Extent& b) const {return equal(b);}
   bool operator!=(const Extent& b) const {return !equal(b);}
   
-  void Shift(const Point& p);
-  
-  void AddBorder(int border);
+  void Shift(const Point& p)
+  {
+    set(start_+p,end_+p);
+  }
+  void AddBorder(int border)
+  {
+    this->set(start_-img::Point(border,border,border), 
+              end_+img::Point(border,border,border));
+  }
  private:
   Point start_,end_;
   Size size_;
   int dim_;
 
-  void set(const Point& p1, const Point& p2);
-  bool equal(const Extent& b) const;
+  void set(const Point& p1, const Point& p2)
+  {
+    // order them automatically
+    for(int i=0;i<3;i++) {
+      if(p1[i]<=p2[i]) {
+        start_[i]=p1[i];
+        end_[i]=p2[i];
+      } else {
+        start_[i]=p2[i];
+        end_[i]=p1[i];
+      }
+    }
+    size_ = Size(start_,end_);
+    dim_ = size_.GetDim();
+  }
+  bool equal(const Extent& b) const
+  {
+    return (start_==b.start_ && end_==b.end_);
+  }
 
 };
 
