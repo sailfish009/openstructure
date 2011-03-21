@@ -189,7 +189,6 @@ if(WIN32)
 endif()
 
 if (USE_SHADER)
-  message("Compiling with Shader Support")
   list(APPEND OST_GFX_SOURCES shader.cc)
   list(APPEND OST_GFX_HEADERS shader.hh)
   list(APPEND OST_GFX_SOURCES impl/scene_fx.cc)
