@@ -516,7 +516,8 @@ void ResidueImpl::AddAltAtomPos(const String& group,
 }
 
 int ResidueImpl::GetIndex() const {
-  return this->GetChain()->GetIndex(this->GetNumber());
+  ResidueImplPtr res_impl=const_cast<ResidueImpl*>(this)->shared_from_this();
+  return this->GetChain()->GetIndex(res_impl);
 }
 
 bool ResidueImpl::HasAltAtomGroup(const String& group) const {
