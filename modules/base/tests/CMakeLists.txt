@@ -8,5 +8,5 @@ set(OST_BASE_UNIT_TESTS
 )
 
 ost_unittest(MODULE base 
-             SOURCES "${OST_BASE_UNIT_TESTS}")
-target_link_libraries(base_tests ost_mol)
+             SOURCES "${OST_BASE_UNIT_TESTS}"
+             LINK ost_mol)

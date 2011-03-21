@@ -17,7 +17,6 @@ tests.cc
 
 
 ost_unittest(MODULE img
-             SOURCES "${OST_IMG_BASE_UNIT_TESTS}")
-
-target_link_libraries(img_tests ost_img_alg)
+             SOURCES "${OST_IMG_BASE_UNIT_TESTS}"
+             LINK ost_img_alg)
 

@@ -7,6 +7,6 @@ if (ENABLE_IMG)
 endif()
 
 ost_unittest(MODULE gfx
-             SOURCES "${OST_GFX_UNIT_TESTS}")
+             SOURCES "${OST_GFX_UNIT_TESTS}"
+             LINK ost_io)
 
-target_link_libraries(gfx_tests ost_io)
