@@ -4,11 +4,11 @@ add_custom_target(ost_scripts ALL)
 
 # may god forgive us
 if (ENABLE_GUI)
-  add_dependencies(ost_scripts _gui)
+  add_dependencies(ost_scripts _ost_gui)
 elseif(ENABLE_GFX)
-  add_dependencies(ost_scripts _gfx)
+  add_dependencies(ost_scripts _ost_gfx)
 else()
-  add_dependencies(ost_scripts _io)
+  add_dependencies(ost_scripts _ost_io)
 endif()
 
 if(WIN32)
