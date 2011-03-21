@@ -96,7 +96,7 @@ public:
   XtalMap(const ImageHandle& map, const UnitCell& unit_cell,
           const Size& uc_size):
     map_(dyn_cast<RealSpatialImageState>(map.ImageStatePtr())), 
-    unit_cell_(unit_cell), uc_ext_(Point(0,0,0), uc_size)
+    unit_cell_(unit_cell), uc_ext_(map_->GetExtent().GetStart(), uc_size)
   {
     this->Init();
   }
@@ -139,15 +139,15 @@ protected:
   void FindSym(const Point& p, int& sym, Point& wp) const;
   Point ToUnitCell(const Point& p) const
   {
-    Point r;
+    Point r=p-uc_ext_.GetStart();
     Size s=uc_ext_.GetSize();
     for (size_t i=0; i<3; ++i) {
-      r[i]=p[i] % static_cast<int>(s[i]);
+      r[i]=r[i] % static_cast<int>(s[i]);
       if (r[i]<0) {
         r[i]+=s[i]-1;
       }
     }
-    return r;
+    return r+uc_ext_.GetStart();
   }
   struct SymDelta {
     SymDelta(const Point &u, const Point& v, const Point& w):

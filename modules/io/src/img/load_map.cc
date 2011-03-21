@@ -67,9 +67,12 @@ img::XtalMapPtr LoadXtalMap(const String& filename)
   img::ImageHandle ih = CreateImage(img::Extent(),img::REAL,img::SPATIAL);
 
   mrc_handler.Import(ih, loc, io::MRC());
-  if (!mrc_handler.GetUnitCell().GetSymmetry()) {
+  const UnitCell& uc=mrc_handler.GetUnitCell();
+  if (!uc.GetSymmetry()) {
     throw IOException(loc.string()+": Invalid symmetry");
   }
+  LOG_INFO("loaded xtal map with extent " << ih.GetExtent() << " and symmetry '" 
+            << uc.GetSymmetry()->GetHermannMauguinSymbol() << "'");
   return img::XtalMapPtr(new img::XtalMap(ih, mrc_handler.GetUnitCell(), 
                                           mrc_handler.GetUnitCellSize()));
 }

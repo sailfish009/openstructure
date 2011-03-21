@@ -157,6 +157,8 @@ void XtalMap::FindSym(const Point& p, int& sym, Point& wp) const
 ImageHandle XtalMap::Extract(const Extent& extent)
 {
   ImageHandle ex=CreateImage(extent);
+  ex.SetSpatialSamplingMat(map_->GetSampling().GetSpatialSamplingMat());
+  ex.SetAbsoluteOrigin(map_->GetAbsoluteOrigin());
   ImageStateBasePtr base_ptr=ex.ImageStatePtr();
   RealSpatialImageStatePtr ex_state=dyn_cast<RealSpatialImageState>(base_ptr);
   XtalExtentIterator iter=this->Iter(extent);
