@@ -17,4 +17,5 @@ test_transform.cc
 tests.cc
 )
 
-ost_unittest(img_alg "${IPLT_ALG_UNIT_TESTS}")
+ost_unittest(MODULE img_alg
+             SOURCES "${IPLT_ALG_UNIT_TESTS}")

@@ -532,8 +532,11 @@ endif()
 #
 # define a unit test
 #-------------------------------------------------------------------------------
-macro(ost_unittest MODULE SOURCE_FILES)
-    set(_SOURCES ${SOURCE_FILES})
+macro(ost_unittest)
+  set(_ARG_PREFIX ost)
+  parse_argument_list(_ARG 
+                      "MODULE;PREFIX;SOURCES" "" ${ARGN})
+    set(_SOURCES ${_ARG_SOURCES})
     set(CPP_TESTS)
     set(PY_TESTS)
     set(CMAKE_CURRENT_BINARY_DIR "${CMAKE_BINARY_DIR}/tests")
@@ -545,7 +548,7 @@ macro(ost_unittest MODULE SOURCE_FILES)
      endif()
     endforeach()
     set(_SOURCES ${CPP_TESTS})
-    set(_test_name "${MODULE}_tests")
+    set(_test_name "${_ARG_MODULE}_tests")
     if(DEFINED CPP_TESTS)
       if(COMPILE_TESTS)
         add_executable(${_test_name} ${_SOURCES})
@@ -553,20 +556,20 @@ macro(ost_unittest MODULE SOURCE_FILES)
         add_executable(${_test_name} EXCLUDE_FROM_ALL ${_SOURCES})
       endif()
       if (WIN32)
-        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${MODULE}")  
+        target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${_ARG_PREFIX}_${_ARG_MODULE}")  
         add_custom_target("${_test_name}_run"
                         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe || echo
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/..
-                        COMMENT "running checks for module ${MODULE}"
+                        COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})
         add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe)
       else()
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
-                            "${MODULE}")
+                            "${_ARG_PREFIX}_${_ARG_MODULE}")
         add_custom_target("${_test_name}_run"
                         COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo 
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                        COMMENT "running checks for module ${MODULE}"
+                        COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})
         add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} )
       endif()
@@ -593,7 +596,7 @@ macro(ost_unittest MODULE SOURCE_FILES)
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "running checks ${py_test}" VERBATIM)
       endif()
-      add_dependencies("${py_test}_run" ost_scripts "_${MODULE}")
+      add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
       add_dependencies(check "${py_test}_run")
       if (WIN32)
         set_target_properties("${py_test}_run" PROPERTIES EXCLUDE_FROM_ALL "1")

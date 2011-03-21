@@ -10,7 +10,8 @@ set(OST_IO_UNIT_TESTS
 )
 
 # missing: test_star_parser.cc
-ost_unittest(io "${OST_IO_UNIT_TESTS}")
+ost_unittest(MODULE io
+             SOURCES "${OST_IO_UNIT_TESTS}")
 target_link_libraries(io_tests ost_mol)
 target_link_libraries(io_tests ost_seq)
 

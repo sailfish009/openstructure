@@ -7,5 +7,6 @@ set(OST_BASE_UNIT_TESTS
   tests.cc
 )
 
-ost_unittest(base "${OST_BASE_UNIT_TESTS}")
+ost_unittest(MODULE base 
+             SOURCES "${OST_BASE_UNIT_TESTS}")
 target_link_libraries(base_tests ost_mol)
