@@ -135,6 +135,7 @@ public:
   {
     return map_->IndexToCoord(p);
   }
+  const UnitCell& GetUnitCell() const { return unit_cell_; }
 protected:
   void FindSym(const Point& p, int& sym, Point& wp) const;
   Point ToUnitCell(const Point& p) const
