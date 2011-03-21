@@ -88,7 +88,6 @@ bool ReducedPotentialImpl::GetCAlphaCBetaPos(const mol::ResidueHandle& res,
                                              geom::Vec3& ca_pos, 
                                              geom::Vec3& cb_pos)
 {
-  const static Real bond_length=1.5;
   mol::AtomHandle ca=res.FindAtom("CA");
   if (!ca.IsValid()) {
     return false;
