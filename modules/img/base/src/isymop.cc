@@ -23,14 +23,16 @@ namespace ost { namespace img {
 
 ISymop::ISymop(const Symop& symop, const Size& size)
 {
+  bool inv[]={false, false, false};
   for (size_t i=0; i<3; ++i) {
     for (size_t j=0; j<3; ++j) {
       rot_(i, j)=static_cast<int>(rint(symop.Rot()(i, j)));
+      inv[i]|=rot_(i, j)<0;
     }
   }
-  trans_[0]=static_cast<int>(rint(symop.Trans()[0]*size[0]));
-  trans_[1]=static_cast<int>(rint(symop.Trans()[1]*size[1]));
-  trans_[2]=static_cast<int>(rint(symop.Trans()[2]*size[2]));
+  trans_[0]=static_cast<int>(rint(symop.Trans()[0]*size[0]))-(inv[0] ? 1 : 0);
+  trans_[1]=static_cast<int>(rint(symop.Trans()[1]*size[1]))-(inv[1] ? 1 : 0);
+  trans_[2]=static_cast<int>(rint(symop.Trans()[2]*size[2]))-(inv[2] ? 1 : 0);
 }
 
 }}

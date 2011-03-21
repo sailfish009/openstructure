@@ -144,7 +144,7 @@ protected:
     for (size_t i=0; i<3; ++i) {
       r[i]=r[i] % static_cast<int>(s[i]);
       if (r[i]<0) {
-        r[i]+=s[i]-1;
+        r[i]+=s[i];
       }
     }
     return r+uc_ext_.GetStart();
