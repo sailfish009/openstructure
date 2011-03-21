@@ -332,14 +332,16 @@ macro(substitute)
                     ${CMAKE_COMMAND} ${_SUBST_DICT}
                     -P ${CMAKE_SOURCE_DIR}/cmake_support/substitute.cmake)
 endmacro()
+
 #-------------------------------------------------------------------------------
 # Synopsis:
 #   script(NAME script_name INPUT input_name SUBSTITUTE key=val key=val
-#         [TARGET target])
+#          [OUTPUT_DIR dir] [TARGET target])
 #-------------------------------------------------------------------------------
 macro(script)
+  set(_ARG_OUTPUT_DIR bin)
   parse_argument_list(_ARG 
-                      "NAME;INPUT;SUBSTITUTE;TARGET" "" ${ARGN})
+                      "NAME;INPUT;SUBSTITUTE;TARGET;OUTPUT_DIR" "" ${ARGN})
   if (NOT _ARG_NAME)
     message(FATAL_ERROR "invalid use of executable(): a name must be provided")
   endif()
@@ -354,10 +356,10 @@ macro(script)
     substitute(IN_FILE ${_INPUT} OUT_FILE ${_ARG_NAME} 
                DICT ${_ARG_SUBSTITUTE})
   endif()
-  install(FILES ${_ARG_NAME} DESTINATION bin 
+  install(FILES ${_ARG_NAME} DESTINATION ${_ARG_OUTPUT_DIR} 
           PERMISSIONS WORLD_EXECUTE GROUP_EXECUTE OWNER_EXECUTE 
                       WORLD_READ GROUP_READ OWNER_READ)
-  copy_if_different("./" "${EXECUTABLE_OUTPUT_PATH}" 
+  copy_if_different("./" "${STAGE_DIR}/${_ARG_OUTPUT_DIR}" 
                     "${_ARG_NAME}" "TARGETS" ${_ARG_TARGET})
   add_dependencies(${_ARG_TARGET} subst_${_ARG_NAME})
 endmacro()

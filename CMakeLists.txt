@@ -127,6 +127,7 @@ endif()
 set(STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
 set(EXECUTABLE_OUTPUT_PATH ${STAGE_DIR}/bin)
 set(HEADER_STAGE_PATH ${STAGE_DIR}/include)
+set(LIBEXEC_STAGE_PATH ${STAGE_DIR}/libexec/openstructure)
 set(SHARED_DATA_PATH ${STAGE_DIR}/share/openstructure)
 include_directories("${HEADER_STAGE_PATH}")
 link_directories(${LIB_STAGE_PATH})
@@ -148,7 +149,8 @@ endif()
 file(MAKE_DIRECTORY ${STAGE_DIR} 
      ${EXECUTABLE_OUTPUT_PATH} 
      ${HEADER_STAGE_PATH}
-     ${LIB_STAGE_PATH})
+     ${LIB_STAGE_PATH}
+     ${LIBEXEC_STAGE_PATH})
 
 if (WIN32)
    # add_definitions(-DBOOST_TEST_INCLUDED)
