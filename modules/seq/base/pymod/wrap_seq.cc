@@ -21,7 +21,7 @@ using namespace boost::python;
 
 void export_sequence();
 
-BOOST_PYTHON_MODULE(_seq)
+BOOST_PYTHON_MODULE(_ost_seq)
 {
   export_sequence();
 

@@ -28,7 +28,7 @@ using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
 
-BOOST_PYTHON_MODULE(_seq_alg)
+BOOST_PYTHON_MODULE(_ost_seq_alg)
 {
   enum_<RefMode::Type>("RefMode")
     .value("ALIGNMENT", RefMode::ALIGNMENT)

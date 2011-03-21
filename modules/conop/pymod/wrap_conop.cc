@@ -25,7 +25,7 @@ void export_Sanitizer();
 void export_Conop();
 void export_RingFinder();
 void export_AminoAcids();
-BOOST_PYTHON_MODULE(_conop)
+BOOST_PYTHON_MODULE(_ost_conop)
 {
   export_Builder();
   export_Conop();

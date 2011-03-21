@@ -1,1 +1,1 @@
-from _mol_alg import *
+from _ost_mol_alg import *

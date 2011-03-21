@@ -38,7 +38,7 @@ void translator(const ost::Error& x) {
 }
 
 
-BOOST_PYTHON_MODULE(_base)
+BOOST_PYTHON_MODULE(_ost_base)
 {
   register_exception_translator<ost::Error>(&translator);
 

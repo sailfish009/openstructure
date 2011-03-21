@@ -40,7 +40,7 @@ mol::EntityView (*fc_a)(const mol::EntityView&, Real,bool)=&mol::alg::FilterClas
 mol::EntityView (*fc_b)(const mol::EntityHandle&, Real, bool)=&mol::alg::FilterClashes;
 }
 
-BOOST_PYTHON_MODULE(_mol_alg)
+BOOST_PYTHON_MODULE(_ost_mol_alg)
 {
   export_svdSuperPose();
   #if OST_IMG_ENABLED

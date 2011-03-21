@@ -93,7 +93,7 @@ endmacro()
 #-------------------------------------------------------------------------------
 macro(check_for_python_lib)
   if(PYTHON_VERSION)
-    _find_python_lib("${PYTHON_ROOT}" "${PYTHON_VERSION}")
+    _find_python("${PYTHON_ROOT}" "${PYTHON_VERSION}")
   else()
     foreach(_VERSION ${PYTHON_VERSIONS})
      if(${PYTHON_MIN_VERSION} VERSION_LESS ${_VERSION})

@@ -18,7 +18,7 @@
 #------------------------------------------------------------------------------
 import os, tempfile, ftplib, httplib
 
-from _io import *
+from _ost_io import *
 from ost import mol, conop
 
 profiles=None

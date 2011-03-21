@@ -155,7 +155,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(hasitem_overloads, HasItem, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(retrieveitem_overloads, RetrieveItem, 1, 2)
 
 
-BOOST_PYTHON_MODULE(_info)
+BOOST_PYTHON_MODULE(_ost_info)
 {
 
   enum_<Type>("ItemType")

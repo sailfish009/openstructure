@@ -75,7 +75,7 @@ void export_pdb_io();
 #if OST_IMG_ENABLED
 void export_map_io();
 #endif
-BOOST_PYTHON_MODULE(_io)
+BOOST_PYTHON_MODULE(_ost_io)
 {
   class_<IOManager, boost::noncopyable>("IOManager", no_init)
   ;

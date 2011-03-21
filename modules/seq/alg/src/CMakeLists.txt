@@ -17,6 +17,6 @@ conservation.cc
 )
 
 module(NAME seq_alg HEADER_OUTPUT_DIR ost/seq/alg SOURCES ${OST_SEQ_ALG_SOURCES}
-       HEADERS ${OST_SEQ_ALG_HEADERS} DEPENDS_ON seq)
+       HEADERS ${OST_SEQ_ALG_HEADERS} DEPENDS_ON ost_seq)
 
 

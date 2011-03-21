@@ -68,7 +68,7 @@ float color_get_alpha(Color* c) {
 }
 
 
-BOOST_PYTHON_MODULE(_gfx)
+BOOST_PYTHON_MODULE(_ost_gfx)
 {
   export_Scene();
   export_GfxNode();

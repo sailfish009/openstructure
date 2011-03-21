@@ -18,11 +18,11 @@ if(WIN32)
          TARGET ost_scripts)
   script(NAME gipltng.bat INPUT gipltng.bat.in SUBSTITUTE ${SUBST_DICT})
 else()
+  script(NAME ost_config INPUT ost_config.in SUBSTITUTE ${SUBST_DICT}
+         TARGET ost_scripts)
   script(NAME ost INPUT ost.in SUBSTITUTE ${SUBST_DICT} 
          TARGET ost_scripts)
   script(NAME dng INPUT dng.in SUBSTITUTE ${SUBST_DICT}
-         TARGET ost_scripts)
-  script(NAME gipltng INPUT gipltng.in SUBSTITUTE ${SUBST_DICT}
          TARGET ost_scripts)
 endif()
 

@@ -43,7 +43,7 @@ void export_PropertyID();
 void export_BoundingBox();
 void export_QueryViewWrapper();
 void export_EntityPropertyMapper();
-BOOST_PYTHON_MODULE(_mol)
+BOOST_PYTHON_MODULE(_ost_mol)
 {
   enum_<EditMode>("EditMode")
     .value("BUFFERED_EDIT", BUFFERED_EDIT)

@@ -48,7 +48,7 @@ struct Axis_ {};
 #endif
 }
 
-BOOST_PYTHON_MODULE(_geom)
+BOOST_PYTHON_MODULE(_ost_geom)
 {
   export_Vec2();
   export_VecMat2_op();

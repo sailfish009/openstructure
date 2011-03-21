@@ -19,7 +19,7 @@ set(OST_MOL_ALG_SOURCES
   construct_cbeta.cc
 )
 
-set(MOL_ALG_DEPS mol seq)
+set(MOL_ALG_DEPS ost_mol ost_seq)
 
 if (ENABLE_IMG)
   set(OST_MOL_ALG_HEADERS
@@ -32,11 +32,11 @@ if (ENABLE_IMG)
     entity_to_density.cc
   )
 
-  set(MOL_ALG_DEPS ${MOL_ALG_DEPS} img img_alg)
+  set(MOL_ALG_DEPS ${MOL_ALG_DEPS} ost_img ost_img_alg)
 endif()
 
 executable(NAME ldt SOURCES ldt.cc 
-           DEPENDS_ON io mol_alg STATIC)
+           DEPENDS_ON ost_io ost_mol_alg STATIC)
 
 module(NAME mol_alg SOURCES ${OST_MOL_ALG_SOURCES}
        HEADERS ${OST_MOL_ALG_HEADERS}
