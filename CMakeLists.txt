@@ -281,7 +281,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
 
 message(STATUS 
         "OpenStructure will be built with the following options:\n"
-        "   Install Prefix                  (-PREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
+        "   Install Prefix                 (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
         "   RPath in install            (-DUSE_RPATH) : ${_USE_RPATH}\n"
         "   Graphical interface        (-DENABLE_GUI) : ${_UI}\n"
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
