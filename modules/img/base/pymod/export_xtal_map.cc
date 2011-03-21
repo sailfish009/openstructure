@@ -17,7 +17,7 @@ void export_XtalMap()
     .def("Extract", &XtalMap::Extract)
     .def("GetUnitCell", &XtalMap::GetUnitCell, 
          return_value_policy<copy_const_reference>())
-    .add_property("unit_cell", make_function(XtalMap:.GetUnitCell, 
+    .add_property("unit_cell", make_function(&XtalMap::GetUnitCell, 
                   return_value_policy<copy_const_reference>()))
   ;
 
