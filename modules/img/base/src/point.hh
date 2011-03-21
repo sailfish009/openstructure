@@ -52,7 +52,7 @@ public:
   //! 3D int constructor
   Point(int a, int b, int c) { data_[0]=a; data_[1]=b; data_[2]=c; }
   //! conversion from Vec2
-  explicit Point(const Vec2& v) { data_[0]=v.x; data_[1]=v.y; }
+  explicit Point(const Vec2& v) { data_[0]=v.x; data_[1]=v.y; data_[2]=0; }
 
   //! conversion from Vec3
   explicit Point(const Vec3& v) { data_[0]=v.x; data_[1]=v.y; data_[2]=v.z; }

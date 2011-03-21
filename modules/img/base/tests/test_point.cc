@@ -54,6 +54,11 @@ void Construction()
   BOOST_CHECK(p3[0]==4);
   BOOST_CHECK(p3[1]==-1);
   BOOST_CHECK(p3[2]==5);
+  
+  Point p4(geom::Vec2(4.0,5.0));
+  BOOST_CHECK(p4[0]==4);
+  BOOST_CHECK(p4[1]==5);
+  BOOST_CHECK(p4[2]==0);
 }
 
 } // namespace 
