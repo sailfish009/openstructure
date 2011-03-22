@@ -136,6 +136,13 @@ public:
     return map_->IndexToCoord(p);
   }
   const UnitCell& GetUnitCell() const { return unit_cell_; }
+  
+  const Size& GetUnitCellSize() const { return uc_ext_.GetSize(); }
+  
+  geom::Vec3 CoordToIndex(const Vec3& coord) const
+  {
+    return map_->CoordToIndex(coord);
+  }
 protected:
   void FindSym(const Point& p, int& sym, Point& wp) const;
   Point ToUnitCell(const Point& p) const
