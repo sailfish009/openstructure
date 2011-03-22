@@ -137,28 +137,27 @@ void test_Iterator()
 
   std::ostringstream msg;
 
-  for(int w=p1[2];w<=p2[2];++w) {
+  for(int u=p1[0];u<=p2[0];++u) {
     for(int v=p1[1];v<=p2[1];++v) {
-      for(int u=p1[0];u<=p2[0];++u) {
-	msg.str("");
-	msg << it << " != " << Point(u,v,w);
-	BOOST_CHECK_MESSAGE( (Point)it == Point(u,v,w),msg.str());
-	++it;
+      for(int w=p1[2];w<=p2[2];++w) {
+        msg.str("");
+        msg << it << " != " << Point(u,v,w);
+        BOOST_CHECK_MESSAGE( (Point)it == Point(u,v,w),msg.str());
+        ++it;
       }
     }
   }
-
   BOOST_CHECK(it.AtEnd());
 
   --it.ToEnd();
 
-  for(int w=p2[2];w>=p1[2];--w) {
+  for(int u=p2[0];u>=p1[0];--u) {
     for(int v=p2[1];v>=p1[1];--v) {
-      for(int u=p2[0];u>=p1[0];--u) {
-	msg.str("");
-	msg << it << " != " << Point(u,v,w);
-	BOOST_CHECK_MESSAGE( (Point)it == Point(u,v,w),msg.str());
-	--it;
+      for(int w=p2[2];w>=p1[2];--w) {
+        msg.str("");
+        msg << it << " != " << Point(u,v,w);
+        BOOST_CHECK_MESSAGE( (Point)it == Point(u,v,w),msg.str());
+        --it;
       }
     }
   }

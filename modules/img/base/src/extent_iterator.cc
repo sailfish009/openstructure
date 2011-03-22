@@ -92,11 +92,11 @@ ExtentIterator ExtentIterator::operator--(int)
 
 void ExtentIterator::Inc() 
 {
-  if(++current_[0]>=end_[0]) {
-    current_[0]=start_[0];
+  if(++current_[2]>=end_[2]) {
+    current_[2]=start_[2];
     if(++current_[1]>=end_[1]) {
       current_[1]=start_[1];
-      if(++current_[2]>=end_[2]) {
+      if(++current_[0]>=end_[0]) {
         current_=end_;
       }
     } 
@@ -111,13 +111,13 @@ void ExtentIterator::Dec()
     --current_[1];
     --current_[2];
   } else {
-    if(--current_[0]<start_[0]) {
-      current_[0]=end_[0]-1;
+    if(--current_[2]<start_[2]) {
+      current_[2]=end_[2]-1;
       if(--current_[1]<start_[1]) {
-	current_[1]=end_[1]-1;
-	if(--current_[2]<start_[2]) {
-	  current_=start_;
-	}
+        current_[1]=end_[1]-1;
+        if(--current_[0]<start_[0]) {
+          current_=start_;
+        }
       } 
     }
   }
