@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/dyn_cast.hh>
 #include <ost/img/image_state.hh>
 #include <ost/img/alg/rscrosscorr.hh>
 
@@ -64,10 +65,34 @@ Real RealSpatialCrossCorrelation(const ConstImageHandle& image1,
   }
 }
 
-Real RealSpatialCrossCorrelation(const ConstImageHandle& image1,
-                                 const ConstImageHandle& image2)
+Real RealSpatialCrossCorrelation(const ConstImageHandle& i1,
+                                 const ConstImageHandle& i2)
 {
-  return RealSpatialCrossCorrelation(image1, image2, image2.GetExtent());
+  if ( (i1.IsReal() && i2.IsReal())!=true ) {
+    throw(Error("One of the input images is not of Real type"));
+  }
+  if ((i1.IsSpatial() && i2.IsSpatial()) !=true) {
+    throw(Error("One of the input images is not in Spatial domain"));
+  }
+  if (i1.GetExtent()!=i2.GetExtent()) {
+    throw(Error("Input images and extent are not compatible with each other"));
+  }
+  RealSpatialImageStatePtr im1=dyn_cast<RealSpatialImageState>(i1.ImageStatePtr());
+  RealSpatialImageStatePtr im2=dyn_cast<RealSpatialImageState>(i2.ImageStatePtr());
+  Real corr=0.0;
+  Real sum1=0.0;
+  Real sum2=0.0;
+  Real* d1=im1->Data().GetData();
+  Real* d2=im2->Data().GetData();
+  Real* e1=d1+im1->Data().GetDataCount();
+  for (; d1!=e1; ++d1, ++d2) {
+    Real v1=*d1;
+    Real v2=*d2;
+    corr+=v1 * v2;
+    sum1+=v1 * v1;
+    sum2+=v2 * v2;
+  }
+  return corr/(sqrt(sum1) * sqrt(sum2));
 }
 
 Real RealSpatialCrossCorrelation(const ConstImageHandle& image1,
