@@ -29,7 +29,6 @@ endif()
 set(INIT_SCRIPTS 
   init.py
   init_cl.py
-  init_iplt.py
 )
 copy_if_different("./" "${STAGE_DIR}/${LIB_DIR}/openstructure" 
                   "${INIT_SCRIPTS}" "python init scripts" ost_scripts)
