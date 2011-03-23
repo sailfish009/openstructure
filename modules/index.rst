@@ -23,6 +23,7 @@ OpenStructure documentation
   external
   contributing
   base/symmetry
+  img/base/xtal
   
 For Starters
 --------------------------------------------------------------------------------
@@ -49,7 +50,7 @@ Molecules
 Density Maps and Images
 --------------------------------------------------------------------------------
 
-**Overview**: :doc:`images intro <intro-02>` | :doc:`img module <img/base/img>` | :doc:`img.alg module <img/alg/alg>`
+**Overview**: :doc:`images intro <intro-02>` | :doc:`img module <img/base/img>` | :doc:`img.alg module <img/alg/alg>` | :doc:`crystallographic density maps <img/base/xtal>`
 
 
 

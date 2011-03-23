@@ -1,6 +1,9 @@
 Unit Cell and symmetry information
 ================================================================================
 
+.. currentmodule:: ost
+
+
 This document describes the API to work with unit cells and symmetry information and shows how to use it together with molecular entities.
 
 
@@ -9,8 +12,8 @@ Unitcell
 
 The arrangement of atoms in a crystal can be described in terms of its unit cell. The unit cell contains one or more atoms. By replicating the unit cell in all 3 dimensions, the crystal is obtained. The atom positions are  described relative to a unit cell. The unit cell itself is defined by three edge lengths, a, b, and c as well as the angles between these base vectors. 
 
-.. class:: UnitCell(vec_a, vec_b, vec_c)
-           UnitCell(a, b, c, alpha, beta, gamma)
+.. class:: UnitCell(vec_a, vec_b, vec_c, symmetry=None)
+           UnitCell(a, b, c, alpha, beta, gamma, Symmetry=None)
            
   Initialise a new unit cell, either by specifying the 3 base vectors directly 
   or giving lengths and angles (in radians) between the vectors. In the latter 
@@ -58,7 +61,13 @@ The arrangement of atoms in a crystal can be described in terms of its unit cell
   
     The matrix converting orthogonal coordinates to fractional coordinates in 
     the unit cell. This is the inverse of :attr:`ortho_tf`
-
+    
+  .. attribute:: symmetry
+  
+    The symmetry operator that reconstructs the full unit cell from the 
+    asymmetric unit
+    
+    :type: :class:`Symmetry`
 
 Symmetry
 --------------------------------------------------------------------------------
