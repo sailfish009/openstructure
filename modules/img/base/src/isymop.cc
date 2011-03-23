@@ -27,7 +27,7 @@ ISymop::ISymop(const Symop& symop, const Size& size)
   for (size_t i=0; i<3; ++i) {
     for (size_t j=0; j<3; ++j) {
       rot_(i, j)=static_cast<int>(rint(symop.Rot()(i, j)));
-      inv[i]|=rot_(i, j)<0;
+      //inv[i]|=rot_(i, j)<0;
     }
   }
   trans_[0]=static_cast<int>(rint(symop.Trans()[0]*size[0]))-(inv[0] ? 1 : 0);
