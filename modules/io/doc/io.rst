@@ -168,7 +168,7 @@ Loading sequence or alignment files
 Saving Sequence Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. function:: SaveSequence(filename, format='auto')
+.. function:: SaveSequence(sequence, filename, format='auto')
 
   Saving sequence data is performed by calling :func:`SaveSequence`.
   For files with non-standard extensions, the format can be set explicitly 
@@ -193,13 +193,13 @@ Saving Sequence Data
       :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
       inexistent file
 
-.. function:: SaveSequenceList(filename, format='auto')
+.. function:: SaveSequenceList(seq_list, filename, format='auto')
 
   For a desription of how to use :func:`SaveSequenceList` please refer to 
   :func:`SaveSequence`. For a list of file formats supported by 
   :func:`SaveSequenceList` see :doc:`formats`.
 
-.. function:: SaveAlignment(filename, format='auto')
+.. function:: SaveAlignment(aln, filename, format='auto')
 
   For a desription of how to use :func:`SaveAlignment` please refer to 
   :func:`SaveSequence`.
