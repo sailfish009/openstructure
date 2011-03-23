@@ -25,11 +25,13 @@
 #include <iostream>
 
 #include "test_extent.hh"
-
+#include <ost/dyn_cast.hh>
 #include <ost/img/extent.hh>
 #include <ost/img/extent_iterator.hh>
-
+#include <ost/img/image_handle.hh>
+#include <ost/img/image_state.hh>
 using namespace ost::img;
+using namespace ost;
 
 namespace test_extent {
 
@@ -179,6 +181,37 @@ void test_Overlap()
 
   BOOST_CHECK(Overlap(e1,e2)==Extent(Point(-1,5),Point(8,7)));
   BOOST_CHECK_THROW(Overlap(e1,e3), InvalidExtentException);
+}
+
+void test_Point2Offset()
+{
+  // check if Point2Offset and ValueHolder use the same convention for 
+  // converting a point to a offset into the data array
+  
+  ImageHandle im=CreateImage(Size(4,4,4));
+  int count=0;
+  for (size_t i=0; i<4; ++i) {
+    for (size_t j=0; j<4; ++j) {
+      for (size_t k=0; k<4; ++k) {
+        im.SetReal(Point(i,j,k), count);
+        count+=1;
+      }
+    }
+  }
+  RealSpatialImageStatePtr s=dyn_cast<RealSpatialImageState>(im.ImageStatePtr());
+  Real* data=s->Data().GetData();
+  count=0;
+  Extent ext=im.GetExtent();
+  for (size_t i=0; i<4; ++i) {
+    for (size_t j=0; j<4; ++j) {
+      for (size_t k=0; k<4; ++k) {
+        BOOST_CHECK_EQUAL(static_cast<int>(data[ext.Point2Offset(Point(i,j,k))]), 
+                          count);
+        count+=1;
+        
+      }
+    }
+  }
 }
 
 void test_HasOverlap()

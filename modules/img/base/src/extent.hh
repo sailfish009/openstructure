@@ -170,7 +170,7 @@ class DLLEXPORT_OST_IMG_BASE Extent {
   {
     if(this->Contains(p)) {
       Point d(p-start_);
-      return d[0]+size_[0]*(d[1]+d[2]*size_[1]);
+      return d[2]+size_[2]*(d[1]+d[0]*size_[1]);
     } else {
       return 0;
     }
