@@ -92,8 +92,8 @@ SuperpositionResult DLLEXPORT_OST_MOL_ALG IterativeSuperposition(mol::EntityView
 
 /// \brief calculates RMSD for two entity view 
 Real DLLEXPORT_OST_MOL_ALG CalculateRMSD(const mol::EntityView& ev1,
-                                          const mol::EntityView& ev2,
-                                          const geom::Mat4& transformation);
+                                         const mol::EntityView& ev2,
+                                         const geom::Mat4& transformation=geom::Mat4());
 
 
 /// \example superpose.py
