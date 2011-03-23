@@ -22,14 +22,15 @@
   Author: Ansgar Philippsen
 */
 
-#include "test_image_state_visitor.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
 
 #include <ost/img/image_state.hh>
 
 using namespace ost::img;
 using namespace ost::img::image_state;
 
-namespace test_image_state_visitor {
 
 struct MyConstVisitorFnc
 {
@@ -61,8 +62,9 @@ struct MyOPVisitorFnc
 };
 typedef ImageStateModOPVisitor<MyOPVisitorFnc> MyOPVisitor;
 
+BOOST_AUTO_TEST_SUITE(ost_img_base)
 
-void test_all()
+BOOST_AUTO_TEST_CASE(image_state_visitor)
 {
   RealSpatialImageState rs_is;
   RealFrequencyImageState rf_is;
@@ -93,14 +95,4 @@ void test_all()
   hf_is.Apply(op_visitor);
 }
 
-} // namespace
-
-test_suite* CreateImageStateVisitorTest()
-{
-  using namespace test_image_state_visitor;
-  test_suite* ts=BOOST_TEST_SUITE("ImageStateVisitor Test");
-
-  ts->add(BOOST_TEST_CASE(&test_all));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

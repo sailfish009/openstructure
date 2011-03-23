@@ -24,7 +24,10 @@
 
 #include <iostream>
 
-#include "test_extent.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
+
 #include <ost/dyn_cast.hh>
 #include <ost/img/extent.hh>
 #include <ost/img/extent_iterator.hh>
@@ -33,9 +36,9 @@
 using namespace ost::img;
 using namespace ost;
 
-namespace test_extent {
+BOOST_AUTO_TEST_SUITE(ost_img_base)
 
-void test_Construction()
+BOOST_AUTO_TEST_CASE(extent_init)
 {
   // using explicit start and end points
   Extent e1(Point(-1,-2,-3),Point(3,2,1));
@@ -79,7 +82,7 @@ void test_Construction()
   BOOST_CHECK(e7.GetSize()==Size(4,2,3));
 }
 
-void test_Contains()
+BOOST_AUTO_TEST_CASE(extent_contains)
 {
   Extent e(Point(-1,-2,-3),Point(0,1,2));
   BOOST_CHECK(e.Contains(Point(0,0,0)));
@@ -95,7 +98,7 @@ void test_Contains()
   BOOST_CHECK(!e.Contains(Point(-2,-5,10)));
 }
 
-void test_WrapAround()
+BOOST_AUTO_TEST_CASE(extent_wrap_around)
 {
   Extent e(Point(-1,-2,-3),Point(1,3,3));
   Point p1(0,0,0);
@@ -113,7 +116,7 @@ void test_WrapAround()
   BOOST_CHECK_MESSAGE(p2c==p2w,msg.str());
 }
 
-void test_Mirror()
+BOOST_AUTO_TEST_CASE(extent_mirror)
 {
   Extent e(Point(-3,-4,2),Point(5,-1,8));
   BOOST_CHECK(e.Mirror(Plane::YZ)==Extent(Point(-5,-4,2),Point(3,-1,8)));
@@ -121,7 +124,7 @@ void test_Mirror()
   BOOST_CHECK(e.Mirror(Plane::XY)==Extent(Point(-3,-4,-8),Point(5,-1,-2)));
 }
 
-void test_Iterator()
+BOOST_AUTO_TEST_CASE(extent_iterator)
 {
   Point p1(-3,4,-1);
   Point p2(-1,7,3);
@@ -173,7 +176,7 @@ void test_Iterator()
   BOOST_CHECK(count==e.GetVolume());
 }
 
-void test_Overlap()
+BOOST_AUTO_TEST_CASE(extent_overlap)
 {
   Extent e1(Point(-10,5),Point(8,12));
   Extent e2(Point(-1,2),Point(12,7));
@@ -183,7 +186,7 @@ void test_Overlap()
   BOOST_CHECK_THROW(Overlap(e1,e3), InvalidExtentException);
 }
 
-void test_Point2Offset()
+BOOST_AUTO_TEST_CASE(extent_point2offset)
 {
   // check if Point2Offset and ValueHolder use the same convention for 
   // converting a point to a offset into the data array
@@ -214,7 +217,8 @@ void test_Point2Offset()
   }
 }
 
-void test_HasOverlap()
+
+BOOST_AUTO_TEST_CASE(extent_has_overlap)
 {
   Extent e1(Point(1, 2), Point(2, 3));
   Extent e2(Point(1,2), Point(1,2));  
@@ -233,20 +237,4 @@ void test_HasOverlap()
 }
 
 
-} // namespace 
-
-test_suite* CreateExtentTest()
-{
-  using namespace test_extent;
-  test_suite* ts=BOOST_TEST_SUITE("Extent Test");
-
-  ts->add(BOOST_TEST_CASE(&test_Construction)); 
-  ts->add(BOOST_TEST_CASE(&test_Contains));
-  ts->add(BOOST_TEST_CASE(&test_WrapAround));
-  ts->add(BOOST_TEST_CASE(&test_Mirror));
-  ts->add(BOOST_TEST_CASE(&test_Iterator));
-  ts->add(BOOST_TEST_CASE(&test_Overlap));
-  ts->add(BOOST_TEST_CASE(&test_HasOverlap));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

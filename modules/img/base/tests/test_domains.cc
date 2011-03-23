@@ -32,12 +32,13 @@ using boost::unit_test_framework::test_suite;
 #include <ost/img/image_state/image_state_frequency_domain.hh>
 #include <ost/img/image_state/image_state_half_frequency_domain.hh>
 
-namespace {
 
 using namespace ost::img;
 using namespace ost::img::image_state;
 
-void test_spatial()
+BOOST_AUTO_TEST_SUITE(ost_img_base)
+
+BOOST_AUTO_TEST_CASE(spatial)
 {
   std::ostringstream mesg;
 
@@ -70,7 +71,7 @@ void test_spatial()
   BOOST_CHECK(sd.GetPhysicalExtent()==pe);
 }
 
-void test_half_freq()
+BOOST_AUTO_TEST_CASE(half_freq)
 {
   std::ostringstream mesg;
 
@@ -117,14 +118,4 @@ void test_half_freq()
 }
 
 
-} // ns
-
-test_suite* CreateDomainsTest()
-{
-  test_suite* ts=BOOST_TEST_SUITE("Domains Test");
-
-  ts->add(BOOST_TEST_CASE(test_spatial));
-  ts->add(BOOST_TEST_CASE(test_half_freq));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

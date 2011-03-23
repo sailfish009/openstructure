@@ -22,20 +22,21 @@
   Author: Ansgar Philippsen
 */
 
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
+
 #include <iostream>
-
-#include "test_index.hh"
-
 #include <ost/img/image_state/index.hh>
 
 using namespace ost::img;
 using namespace ost::img::image_state;
 
-namespace test_index {
+BOOST_AUTO_TEST_SUITE(ost_img_base)
 
 // test both Index and IndexIterator 
 
-void TestIterator()
+BOOST_AUTO_TEST_CASE(index_iterator)
 {  
   IndexIterator it(5,6,7);
   std::ostringstream msg;
@@ -44,10 +45,10 @@ void TestIterator()
   for(int w=0; w<7;++w) {
     for(int v=0; v<6;++v) {
       for(int u=0; u<5;++u) {
-	msg.str("");
-	msg << Index(u,v,w) << " != " << it;
-	BOOST_REQUIRE_MESSAGE(it == Index(u,v,w),msg.str());
-	++it;
+        msg.str("");
+        msg << Index(u,v,w) << " != " << it;
+        BOOST_REQUIRE_MESSAGE(it == Index(u,v,w),msg.str());
+        ++it;
       }
     }
   }
@@ -58,10 +59,10 @@ void TestIterator()
   for(int w=6; w>=0;--w) {
     for(int v=5; v>=0;--v) {
       for(int u=4; u>=0;--u) {
-	msg.str("");
-	msg << Index(u,v,w) << " != " << it;
-	BOOST_REQUIRE_MESSAGE(it == Index(u,v,w),msg.str());
-	--it;
+        msg.str("");
+        msg << Index(u,v,w) << " != " << it;
+        BOOST_REQUIRE_MESSAGE(it == Index(u,v,w),msg.str());
+        --it;
       }
     }
   }
@@ -69,14 +70,4 @@ void TestIterator()
 
 }
 
-} // namespace 
-
-test_suite* CreateIndexTest()
-{
-  using namespace test_index;
-  test_suite* ts=BOOST_TEST_SUITE("Index Test");
-
-  ts->add(BOOST_TEST_CASE(&TestIterator));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

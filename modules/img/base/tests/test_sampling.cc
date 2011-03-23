@@ -22,7 +22,9 @@
   Author: Ansgar Philippsen
 */
 
-#include "test_sampling.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
 
 #include <ost/img/pixel_sampling.hh>
 #include <ost/img/extent.hh>
@@ -30,9 +32,9 @@
 
 using namespace ost::img;
 
-namespace test_sampling {
+BOOST_AUTO_TEST_SUITE(ost_img_base)
 
-void test()
+BOOST_AUTO_TEST_CASE(sampling)
 {
   PixelSampling ps(geom::Vec3(2.0,4.0,1.0),SPATIAL,Extent(Size(4,10,20)));
   BOOST_CHECK(geom::Length(ps.GetPixelSampling()-geom::Vec3(2.0,4.0,1.0))<1e-5);
@@ -47,14 +49,4 @@ void test()
   BOOST_CHECK(geom::Length(ps2.Point2Coord(Point(1,4,7))-geom::Vec3(0.0625,0.2,0.04375))<1e-5);
 }
 
-} // namespace 
-
-test_suite* CreateSamplingTest()
-{
-  using namespace test_sampling;
-  test_suite* ts=BOOST_TEST_SUITE("Sampling Test");
-
-  ts->add(BOOST_TEST_CASE(&test));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

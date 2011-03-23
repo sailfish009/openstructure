@@ -24,7 +24,10 @@
 
 #include <boost/mpl/vector.hpp>
 
-#include "test_value_holder.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
+
 
 #include <ost/img/image_state/value_holder.hh>
 #include <ost/img/image_state/index.hh>
@@ -33,10 +36,11 @@
 using namespace ost::img;
 using namespace ost::img::image_state;
 
-namespace value_holder_test {
+BOOST_AUTO_TEST_SUITE(ost_img_base)
+
 
 template <typename V>
-void Construction()
+void value_holder_construct()
 {
   ValueHolder<V> v(8,6,10);
   BOOST_CHECK (v.GetWidth()==8);
@@ -46,7 +50,7 @@ void Construction()
 }
 
 template <typename V>
-void ReadWrite()
+void value_holder_readwrite()
 {
   int wi=4;
   int he=3;
@@ -67,7 +71,7 @@ void ReadWrite()
 }
 
 template <typename V>
-void CopyCtor()
+void value_holder_copy()
 {
   int wi=4;
   int he=3;
@@ -78,8 +82,8 @@ void CopyCtor()
   for(int u=0;u<wi;++u) {
     for(int v=0;v<he;++v) {
       for(int w=0;w<de;++w) {
-	V val = Random<V>();
-	vh1.Value(Index(u,v,w))=val;
+        V val = Random<V>();
+        vh1.Value(Index(u,v,w))=val;
       }
     }
   }
@@ -88,29 +92,40 @@ void CopyCtor()
   for(int u=0;u<wi;++u) {
     for(int v=0;v<he;++v) {
       for(int w=0;w<de;++w) {
-	BOOST_REQUIRE(vh2.Value(Index(u,v,w))==vh1.Value(Index(u,v,w)));
+        BOOST_REQUIRE(vh2.Value(Index(u,v,w))==vh1.Value(Index(u,v,w)));
       }
     }
   }
 }
 
-}
-
-test_suite* CreateValueHolderTest()
+BOOST_AUTO_TEST_CASE(value_holder_construct_real)
 {
-  using namespace value_holder_test;
-  
-  typedef boost::mpl::vector<Real, Complex> values;
-
-  test_suite* ts=BOOST_TEST_SUITE("ValueHolder Test");
-
-  ts->add( BOOST_TEST_CASE(Construction<Real>) );
-  ts->add( BOOST_TEST_CASE(Construction<Complex>) );
-  ts->add( BOOST_TEST_CASE(ReadWrite<Real>) );
-  ts->add( BOOST_TEST_CASE(ReadWrite<Complex>) );
-  ts->add( BOOST_TEST_CASE(CopyCtor<Real>) );
-  ts->add( BOOST_TEST_CASE(CopyCtor<Complex>) );
-  
-
-  return ts;
+  value_holder_construct<Real>();
 }
+
+BOOST_AUTO_TEST_CASE(value_holder_construct_complex)
+{
+  value_holder_construct<Complex>();
+}
+
+BOOST_AUTO_TEST_CASE(value_holder_readwrite_real)
+{
+  value_holder_readwrite<Real>();
+}
+
+BOOST_AUTO_TEST_CASE(value_holder_readwrite_complex)
+{
+  value_holder_readwrite<Complex>();
+}
+
+BOOST_AUTO_TEST_CASE(value_holder_copy_ctor_real)
+{
+  value_holder_copy<Real>();
+}
+
+BOOST_AUTO_TEST_CASE(value_holder_copy_ctor_complex)
+{
+  value_holder_copy<Complex>();
+}
+
+BOOST_AUTO_TEST_SUITE_END()

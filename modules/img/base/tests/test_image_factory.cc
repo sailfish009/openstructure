@@ -22,7 +22,9 @@
   Author: Ansgar Philippsen
 */
 
-#include "test_image_factory.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
 
 #include <ost/img/image_factory.hh>
 #include <ost/img/function.hh>
@@ -30,9 +32,10 @@
 
 using namespace ost::img;
 
-namespace test_image_factory {
+BOOST_AUTO_TEST_SUITE(ost_img_base)
 
-void test_Generate()
+
+BOOST_AUTO_TEST_CASE(image_factory_generate)
 {
   class MyComplexFunc: public ComplexFunction {
   public:
@@ -64,14 +67,4 @@ void test_Generate()
 
 }
 
-} // namespace 
-
-test_suite* CreateImageFactoryTest()
-{
-  using namespace test_image_factory;
-  test_suite* ts=BOOST_TEST_SUITE("ImageFactory Test");
-
-  ts->add(BOOST_TEST_CASE(&test_Generate));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

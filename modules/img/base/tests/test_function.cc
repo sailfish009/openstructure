@@ -22,7 +22,9 @@
   Author: Ansgar Philippsen
 */
 
-#include "test_function.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
 
 #include <ost/img/function.hh>
 #include <ost/img/null_function.hh>

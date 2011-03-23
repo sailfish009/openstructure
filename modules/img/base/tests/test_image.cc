@@ -24,7 +24,10 @@
 
 #include <iostream>
 
-#include "test_image.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
+
 #include <ost/invalid_handle.hh>
 #include <ost/img/image.hh>
 #include <ost/img/data_observer.hh>
@@ -38,8 +41,6 @@ using namespace ost::img;
 /*
   black-box image tests
 */
-
-namespace test_image {
 
 template <typename T>
 bool check_close(const T& t1, const T& t2, Real eps);
@@ -59,7 +60,9 @@ bool check_close(const T& t1, const T& t2, Real eps)
   return std::abs(t1-t2)<eps;
 }
 
-void test_Creation()
+BOOST_AUTO_TEST_SUITE(ost_img_base)
+
+BOOST_AUTO_TEST_CASE(create_image)
 {
   // all default
   ImageHandle ih0=CreateImage();
@@ -91,7 +94,7 @@ void test_Creation()
   BOOST_CHECK(ih3.GetDomain()==FREQUENCY);
 }
 
-void test_Cctor_Assignement()
+BOOST_AUTO_TEST_CASE(image_handle_ctor_assignment)
 {
   ImageHandle ih1=CreateImage(Size(10,10,10));
   ih1.ApplyIP(alg::Randomize());
@@ -111,7 +114,7 @@ void test_Cctor_Assignement()
   }
 }
 
-void test_ConstHandle()
+BOOST_AUTO_TEST_CASE(const_image_handle)
 {
   ImageHandle i1 = CreateImage(Size(10));
   i1.ApplyIP(alg::Randomize());
@@ -130,8 +133,7 @@ void test_ConstHandle()
   BOOST_CHECK(c1.GetReal(Point(1))==3.0);
 }
 
-
-void test_Reset()
+BOOST_AUTO_TEST_CASE(reset_image)
 {
   ImageHandle ih=CreateImage();
   ih.Reset(Extent(Size(5,6,7)));
@@ -169,21 +171,17 @@ public:
   int release_count;
 };
 
-void test_Observer()
+
+BOOST_AUTO_TEST_CASE(image_handle_observe)
 {
   MyObserver* to1=0;
   MyObserver* to2=0;
   
   {
     ImageHandle ih = CreateImage();
-    BOOST_REQUIRE(ih.obs_);
-
-    BOOST_CHECK(ih.obs_.get()->GetListSize()==0);
 
     to1 = new MyObserver(ih);
-    BOOST_REQUIRE(ih.obs_.get()->GetListSize()==1);
     to2 = new MyObserver(ih);
-    BOOST_REQUIRE(ih.obs_.get()->GetListSize()==2);
 
     BOOST_CHECK(to1->update_count==0);
     BOOST_CHECK(to1->release_count==0);
@@ -197,14 +195,8 @@ void test_Observer()
 
     delete to2;
 
-    BOOST_REQUIRE(ih.obs_.get()->GetListSize()==1);
-
     ImageHandle ih2 = ih;
-
-    BOOST_CHECK(ih.obs_.get() == ih2.obs_.get());
-
     ih2.Notify();
-
     BOOST_CHECK(to1->update_count==2);
   }
   // ih and ih2 go out-of-scope
@@ -216,7 +208,8 @@ void test_Observer()
   delete to1;
 }
 
-void test_Interpolation()
+
+BOOST_AUTO_TEST_CASE(image_handle_interpolate)
 {
   Real dx=0.25,dy=0.75,dz=0.125;
   Real one=1.0;
@@ -266,7 +259,8 @@ void test_Interpolation()
 
 }
 
-void test_ScalarOps()
+
+BOOST_AUTO_TEST_CASE(image_handle_scalar_ops)
 {
   ImageHandle ih1=CreateImage(Size(10,10));
   ImageHandle ih2 = ih1.Copy();
@@ -298,7 +292,8 @@ void test_ScalarOps()
   }
 }
 
-void test_ImageOps()
+
+BOOST_AUTO_TEST_CASE(image_handle_ops)
 {
   alg::Randomize rnd;
   Extent ex1(Point(-3,-2),Point(2,2));
@@ -349,15 +344,13 @@ void test_ImageOps()
   }
 }
 
-void test_Empty()
+BOOST_AUTO_TEST_CASE(image_handle_empty)
 {
   ImageHandle ih;
-
   BOOST_CHECK_THROW(ih.GetExtent(),InvalidImageHandle);
 }
 
-
-void test_Origin() 
+BOOST_AUTO_TEST_CASE(image_handle_origin)
 {
   ImageHandle rs = CreateImage(Extent(Size(6,7),Point(0,0)));
   std::ostringstream msg;
@@ -382,7 +375,8 @@ void test_Origin()
   BOOST_CHECK_MESSAGE(rs.GetSpatialOrigin()==Point(-2,-3),msg.str());
 }
 
-void test_DataAlgorithms()
+
+BOOST_AUTO_TEST_CASE(image_handle_data)
 {
   class TestIPAlg: public ModIPAlgorithm {
   public:
@@ -429,7 +423,8 @@ void test_DataAlgorithms()
   BOOST_CHECK(ih3.GetReal(Point(0))==1.0);
 }
 
-void test_Huge()
+
+BOOST_AUTO_TEST_CASE(image_huge)
 {
   ImageHandle h1=CreateImage(Size(200,200,200));
   {
@@ -438,7 +433,8 @@ void test_Huge()
   }
 }
 
-void test_Mult() 
+
+BOOST_AUTO_TEST_CASE(image_mult)
 {
   ImageHandle im1=CreateImage(Extent(Point(-2,-1,-3),Point(1,2,1)),REAL);
   ImageHandle im2=CreateImage(Extent(Point(-1,-2,-1),Point(2,1,3)),COMPLEX);
@@ -468,7 +464,8 @@ void test_Mult()
   }
 }
 
-void test_AddSub() 
+
+BOOST_AUTO_TEST_CASE(image_sub)
 {
   ImageHandle im1=CreateImage(Extent(Point(-2,-1,-3),Point(1,2,1)),REAL);
   ImageHandle im2=CreateImage(Extent(Point(-1,-2,-1),Point(2,1,3)),COMPLEX);
@@ -520,8 +517,7 @@ void test_AddSub()
   }
 }
 
-
-void test_Copy()
+BOOST_AUTO_TEST_CASE(image_copy)
 {
   // real spatial
   ImageHandle i1=CreateImage(Extent(Point(0,0),Point(9,9)));
@@ -543,7 +539,7 @@ void test_Copy()
   BOOST_CHECK(i2.GetSpatialOrigin()==i2.GetSpatialOrigin());
 }
 
-void test_Extract()
+BOOST_AUTO_TEST_CASE(image_extract)
 {
   ImageHandle i1=CreateImage(Extent(Point(0,0),Point(9,9)));
   Vec3 ps(1.0,2.0,3.0);
@@ -581,7 +577,7 @@ void test_Extract()
   
 }
 
-void test_Paste()
+BOOST_AUTO_TEST_CASE(image_paste)
 {
   ImageHandle i1=CreateImage(Extent(Point(-3,-4),Point(2,5)));
   ImageHandle i2=CreateImage(Extent(Point(0,0),Point(2,2)));
@@ -599,7 +595,8 @@ void test_Paste()
   }
 }
 
-void test_PointToCoord() {
+BOOST_AUTO_TEST_CASE(image_point_to_coord)
+{
   ImageHandle spatial = CreateImage(Extent(Size(10,10,10)));
   spatial.SetSpatialSampling(2.0);
   ImageHandle frequency = CreateImage(Extent(Size(10,10,10)),COMPLEX,FREQUENCY);
@@ -612,38 +609,12 @@ void test_PointToCoord() {
   BOOST_CHECK(spatial.CoordToIndex(Vec3(11.0,11.0,11.0)) == Vec3(3.0,3.0,3.0));
 }
 
-void test_ThrowInvalidImageHandle() {
+BOOST_AUTO_TEST_CASE(image_throw_invalid)
+{
   ImageHandle image;
   BOOST_CHECK_THROW(ost::CheckHandleValidity(image), ost::InvalidHandle);
   image=CreateImage(Size(1,1));
   BOOST_CHECK_NO_THROW(ost::CheckHandleValidity(image));
 }
 
-} // ns
-
-test_suite* CreateImageTest()
-{
-  using namespace test_image;
-  test_suite* ts=BOOST_TEST_SUITE("Image Test");
-
-  ts->add(BOOST_TEST_CASE(&test_Creation));
-  ts->add(BOOST_TEST_CASE(&test_Cctor_Assignement));
-  ts->add(BOOST_TEST_CASE(&test_ConstHandle));
-  ts->add(BOOST_TEST_CASE(&test_Reset));
-  ts->add(BOOST_TEST_CASE(&test_Observer));
-  ts->add(BOOST_TEST_CASE(&test_ScalarOps));
-  ts->add(BOOST_TEST_CASE(&test_ImageOps));
-  ts->add(BOOST_TEST_CASE(&test_Empty));
-  ts->add(BOOST_TEST_CASE(&test_Origin));
-  ts->add(BOOST_TEST_CASE(&test_DataAlgorithms));
-  ts->add(BOOST_TEST_CASE(&test_Huge));
-  ts->add(BOOST_TEST_CASE(&test_Copy));
-  ts->add(BOOST_TEST_CASE(&test_Extract));
-  ts->add(BOOST_TEST_CASE(&test_Paste));
-  ts->add(BOOST_TEST_CASE(&test_ThrowInvalidImageHandle));
-  ts->add(BOOST_TEST_CASE(&test_Mult));
-  ts->add(BOOST_TEST_CASE(&test_AddSub));
-  ts->add(BOOST_TEST_CASE(&test_Interpolation));
-  ts->add(BOOST_TEST_CASE(&test_PointToCoord));
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

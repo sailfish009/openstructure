@@ -22,29 +22,22 @@
   Author: Ansgar Philippsen
 */
 
-#include "test_image_impl.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
 
 #include <ost/img/image_impl.hh>
 using namespace ost::img;
 using namespace ost::img::detail;
 
-namespace test_image_impl {
+BOOST_AUTO_TEST_SUITE(ost_img_base)
 
-void test_Creation()
+
+BOOST_AUTO_TEST_CASE(image_impl_init)
 {
   ImageImplPtr ii(ImageImpl::Create(Extent(),REAL,SPATIAL));
 
   BOOST_CHECK(ii.get()->GetExtent()==Extent());
 }
 
-} // namespace 
-
-test_suite* CreateImageImplTest()
-{
-  using namespace test_image_impl;
-  test_suite* ts=BOOST_TEST_SUITE("ImageImpl Test");
-
-  ts->add(BOOST_TEST_CASE(&test_Creation));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

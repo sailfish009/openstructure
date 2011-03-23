@@ -22,14 +22,16 @@
   Author: Ansgar Philippsen
 */
 
-#include "test_point.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
 
 #include <ost/img/point.hh>
 using namespace ost::img;
 
-namespace test_point {
+BOOST_AUTO_TEST_SUITE(ost_img_base)
 
-void Construction()
+BOOST_AUTO_TEST_CASE(init_point)
 {
   // default
   Point p0;
@@ -61,14 +63,4 @@ void Construction()
   BOOST_CHECK(p4[2]==0);
 }
 
-} // namespace 
-
-test_suite* CreatePointTest()
-{
-  using namespace test_point;
-  test_suite* ts=BOOST_TEST_SUITE("Point Test");
-
-  ts->add(BOOST_TEST_CASE(&Construction));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

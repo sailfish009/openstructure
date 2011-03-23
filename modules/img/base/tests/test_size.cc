@@ -22,14 +22,18 @@
   Author: Ansgar Philippsen
 */
 
-#include "test_size.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+using boost::unit_test_framework::test_suite;
 
 #include <ost/img/size.hh>
+
+
 using namespace ost::img;
 
-namespace test_size {
+BOOST_AUTO_TEST_SUITE(ost_img_base)
 
-void Construction()
+BOOST_AUTO_TEST_CASE(init_size)
 {
   // default
   Size s0;
@@ -60,14 +64,4 @@ void Construction()
   BOOST_CHECK(s3.GetDim()==3);
 }
 
-} // namespace 
-
-test_suite* CreateSizeTest()
-{
-  using namespace test_size;
-  test_suite* ts=BOOST_TEST_SUITE("Size Test");
-
-  ts->add(BOOST_TEST_CASE(&Construction));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()
