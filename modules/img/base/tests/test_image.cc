@@ -609,6 +609,16 @@ BOOST_AUTO_TEST_CASE(image_point_to_coord)
   BOOST_CHECK(spatial.CoordToIndex(Vec3(11.0,11.0,11.0)) == Vec3(3.0,3.0,3.0));
 }
 
+BOOST_AUTO_TEST_CASE(image_assign_invalid_dont_throw)
+{
+  ImageHandle im1;
+  ImageHandle im2;
+  BOOST_CHECK_NO_THROW(im1=im2);
+  im1=CreateImage(Size(4,4));
+  BOOST_CHECK_NO_THROW(im1=im2);
+}
+
+
 BOOST_AUTO_TEST_CASE(image_throw_invalid)
 {
   ImageHandle image;

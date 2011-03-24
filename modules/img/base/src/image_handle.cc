@@ -70,7 +70,8 @@ ImageHandle& ImageHandle::operator=(const ImageHandle& h)
   Data::operator=(h);
   impl_=h.impl_;
   obs_=h.obs_;
-  Notify();
+  if (impl_)
+    Notify();
   return *this;
 }
 
@@ -640,14 +641,16 @@ ConstImageHandle::ConstImageHandle(const ImageHandle& h):
 ConstImageHandle& ConstImageHandle::operator=(const ConstImageHandle& h)
 {
   handle_=h.handle_;
-  Notify();
+  if (handle_.IsValid())
+    Notify();
   return *this;
 }
 
 ConstImageHandle& ConstImageHandle::operator=(const ImageHandle& h)
 {
   handle_=h;
-  Notify();
+  if (handle_.IsValid())
+    Notify();
   return *this;
 }
 
