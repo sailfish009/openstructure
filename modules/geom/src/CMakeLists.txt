@@ -23,6 +23,7 @@ composite_op.hh
 composite2_op.hh
 composite3_op.hh
 aligned_cuboid.hh
+vec_mat_predicates.hh
 quat.hh
 
 point_cloud.hh

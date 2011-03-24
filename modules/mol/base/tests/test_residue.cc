@@ -48,7 +48,6 @@ BOOST_AUTO_TEST_CASE(test_in_sequence)
 
 BOOST_AUTO_TEST_CASE(test_res_index_bzdng227) 
 {
-  std::cout << "HERE" << std::endl;
   EntityHandle eh=CreateEntity();
   XCSEditor e=eh.EditXCS();
   ChainHandle ch1=e.InsertChain("A");

@@ -20,6 +20,7 @@
  *  Authors: Marco Biasini, Juergen Haas
  */
  
+#include <ost/geom/vec_mat_predicates.hh>
 #include <ost/mol/chem_class.hh>
 #include <ost/mol/mol.hh>
 #include <cmath>
@@ -27,20 +28,13 @@
 #include <boost/test/unit_test.hpp>
 
 #define CHECK_TRANSFORMED_ATOM_POSITION(ATOM,TARGET) \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetPos()[0]-TARGET[0])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetPos()[1]-TARGET[1])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetPos()[2]-TARGET[2])),0.000001);
+   BOOST_CHECK(vec3_is_close(ATOM.GetPos(), TARGET))
 
 #define CHECK_ORIGINAL_ATOM_POSITION(ATOM,TARGET) \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetOriginalPos()[0]-TARGET[0])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetOriginalPos()[1]-TARGET[1])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetOriginalPos()[2]-TARGET[2])),0.000001);
+ BOOST_CHECK(vec3_is_close(ATOM.GetOriginalPos(), TARGET))
 
 #define CHECK_ALTERNATE_ATOM_POSITION(ATOM,TARGET,GROUP) \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetAltPos(GROUP)[0]-TARGET[0])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetAltPos(GROUP)[1]-TARGET[1])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetAltPos(GROUP)[2]-TARGET[2])),0.000001);
-
+   BOOST_CHECK(vec3_is_close(ATOM.GetAltPos(GROUP), TARGET))
 
 using namespace ost;
 using namespace ost::mol;
