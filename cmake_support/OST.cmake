@@ -212,7 +212,7 @@ macro(module)
     endif()
     if (APPLE)
       set_target_properties(${_LIB_NAME} PROPERTIES
-                            LINK_FLAGS "-Wl,-rpath,."
+                            LINK_FLAGS "-Wl,-rpath,@@loader_path"
                             INSTALL_NAME_DIR "@rpath")
     endif()
     if (WIN32)
@@ -452,7 +452,7 @@ macro(pymod)
     if (APPLE)
       file(RELATIVE_PATH _REL_PATH "${PYMOD_STAGE_DIR}" "${LIB_STAGE_PATH}")
       set_target_properties("_${_LIB_NAME}" PROPERTIES
-                            LINK_FLAGS "-Wl,-rpath,@${_REL_PATH}"
+                            LINK_FLAGS "-Wl,-rpath,@loader_path/${_REL_PATH}"
                             INSTALL_NAME_DIR "@rpath")
     endif()                          
     if (NOT WIN32)
