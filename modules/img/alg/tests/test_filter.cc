@@ -33,6 +33,8 @@
 using namespace ost::img;
 using namespace ost::img::alg;
 
+BOOST_AUTO_TEST_SUITE(ost_img_alg)
+
 void LineIterator1DTest() 
 {
   ImageHandle image = CreateImage(Size(3));
@@ -463,3 +465,4 @@ boost::unit_test::test_suite* init_unit_test_suite( int argc, char* argv[] )
 
     return test;
 }
+BOOST_AUTO_TEST_SUITE_END()

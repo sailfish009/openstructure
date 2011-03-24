@@ -34,9 +34,11 @@
 using namespace ost::img;
 using namespace ost::img::alg;
 
-namespace test_histogram {
 
-void test()
+BOOST_AUTO_TEST_SUITE(ost_img_alg)
+
+
+BOOST_AUTO_TEST_CASE(alg_histogram)
 {
   ImageHandle i = CreateImage(Size(10));
   for (int k=0;k<10;++k) {
@@ -63,14 +65,4 @@ void test()
   }
 }
 
-} // namespace 
-
-test_suite* CreateHistogramTest()
-{
-  using namespace test_histogram;
-  test_suite* ts=BOOST_TEST_SUITE("Histogram Test");
-
-  ts->add(BOOST_TEST_CASE(&test));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

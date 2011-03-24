@@ -25,17 +25,21 @@
 #include <iostream>
 
 #include "tests.hh"
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
 #include <ost/img/image.hh>
 
 #include <ost/img/alg/stat.hh>
 
-namespace test_stat {
+BOOST_AUTO_TEST_SUITE(ost_img_alg)
 
 using namespace ost::img;
 using namespace ost::img::alg;
 
-void test() {
+
+BOOST_AUTO_TEST_CASE(alg_stat)
+{
   Real val[3][3] = {
     {3.0,1.0,5.0},{6.0,9.0,2.0},{4.0,7.0,8.0}
   };
@@ -60,16 +64,4 @@ void test() {
   
 }
 
-} // namespace
-
-test_suite* CreateStatTest()
-{
-  using namespace test_stat;
-  test_suite* ts=BOOST_TEST_SUITE("Stat Alg Test");
-
-  ts->add(BOOST_TEST_CASE(&test));
-
-  return ts;
-}
-
-
+BOOST_AUTO_TEST_SUITE_END()

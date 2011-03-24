@@ -31,11 +31,13 @@
 #include <ost/img/alg/fft.hh>
 #include <ost/img/alg/power_spectrum.hh>
 
-namespace {
+
 
 using namespace ost::img;
 
-void test_real() 
+BOOST_AUTO_TEST_SUITE(ost_img_alg)
+
+BOOST_AUTO_TEST_CASE(power_spectrum_real)
 {
   ImageHandle im = CreateImage(Size(8,9),REAL,SPATIAL);
   im.ApplyIP(alg::Randomize());
@@ -55,7 +57,7 @@ void test_real()
   }
 }
 
-void test_cmplx() 
+BOOST_AUTO_TEST_CASE(power_spectrum_complex)
 {
   ImageHandle im = CreateImage(Size(8,9),COMPLEX,SPATIAL);
   im.ApplyIP(alg::Randomize());
@@ -75,14 +77,4 @@ void test_cmplx()
   }
 }
 
-} // ns
-
-test_suite* CreatePowerSpectrumTest()
-{
-  test_suite* ts=BOOST_TEST_SUITE("Power Spectrum Test");
-
-  ts->add(BOOST_TEST_CASE(&test_real));
-  ts->add(BOOST_TEST_CASE(&test_cmplx));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

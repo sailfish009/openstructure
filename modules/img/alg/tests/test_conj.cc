@@ -22,6 +22,9 @@
   Author: Ansgar Philippsen
 */
 
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
 #include <iostream>
 
 #include "tests.hh"
@@ -30,11 +33,13 @@
 #include <ost/img/alg/randomize.hh>
 #include <ost/img/alg/conjugate.hh>
 
-namespace {
+
 
 using namespace ost::img;
 
-void test() 
+BOOST_AUTO_TEST_SUITE(ost_img_alg)
+
+BOOST_AUTO_TEST_CASE(alg_conj)
 {
   ImageHandle i=CreateImage(Size(10),COMPLEX);
   i.ApplyIP(alg::Randomize());
@@ -44,13 +49,4 @@ void test()
   }
 }
 
-} // ns
-
-test_suite* CreateConjugateTest()
-{
-  test_suite* ts=BOOST_TEST_SUITE("Conjugate Alg Test");
-
-  ts->add(BOOST_TEST_CASE(&test));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

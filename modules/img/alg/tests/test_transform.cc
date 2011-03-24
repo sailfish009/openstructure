@@ -30,18 +30,15 @@
 #include <ost/img/alg/randomize.hh>
 #include <ost/img/alg/transform.hh>
 
-namespace {
+
 
 using namespace ost::img;
 using namespace ost::img::alg;
 
-void test() 
-{
-  alg::Randomize rnd;
-  Transform transform;
-}
 
-void test_point()
+BOOST_AUTO_TEST_SUITE(ost_img_alg)
+
+BOOST_AUTO_TEST_CASE(transform_point)
 {
   Point p0(3,-2,1);
   Point p1a(9,-6,3);
@@ -57,7 +54,7 @@ void test_point()
   BOOST_CHECK_MESSAGE(p2a==p2b,msg.str());
 }
 
-void test_extent()
+BOOST_AUTO_TEST_CASE(transform_extent)
 {
   Extent e0(Point(0,0),Point(2,3));
   Extent e1a(Point(-1,-1),Point(7,10));
@@ -87,15 +84,4 @@ void test_extent()
   BOOST_CHECK_MESSAGE(e2a==e2b,msg.str());
 }
 
-} // ns
-
-test_suite* CreateTransformTest()
-{
-  test_suite* ts=BOOST_TEST_SUITE("tf transform Test");
-
-  ts->add(BOOST_TEST_CASE(&test));
-  ts->add(BOOST_TEST_CASE(&test_point));
-  ts->add(BOOST_TEST_CASE(&test_extent));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

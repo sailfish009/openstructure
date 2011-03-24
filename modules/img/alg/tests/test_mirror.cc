@@ -30,12 +30,14 @@
 #include <ost/img/alg/randomize.hh>
 #include <ost/img/alg/alg_mirror.hh>
 
-namespace {
-
 using namespace ost::img;
 using namespace ost::img::alg;
 
-void test() 
+
+BOOST_AUTO_TEST_SUITE(ost_img_alg)
+
+
+BOOST_AUTO_TEST_CASE(alg_mirror)
 {
   ImageHandle ih1 = CreateImage(Extent(Point(-2,-1,1),Size(4,3,2)));
   ih1.ApplyIP(alg::Randomize());
@@ -51,13 +53,4 @@ void test()
 
 }
 
-} // ns
-
-test_suite* CreateMirrorTest()
-{
-  test_suite* ts=BOOST_TEST_SUITE("tf mirror Test");
-
-  ts->add(BOOST_TEST_CASE(&test));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

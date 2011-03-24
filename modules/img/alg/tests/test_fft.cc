@@ -28,10 +28,12 @@
 #include <ost/img/alg/randomize.hh>
 #include <ost/img/alg/alg_shift.hh>
 
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
 #include "tests.hh"
 #include "test_utils.hh"
 
-namespace {
 
 template <typename V, class DP>
 void DumpStates(const image_state::ImageStateImpl<V,DP>& one,
@@ -46,6 +48,8 @@ void DumpStates(const image_state::ImageStateImpl<V,DP>& one,
   }
 }
 
+
+BOOST_AUTO_TEST_SUITE(ost_img_alg)
 
 void Test_C2C_1D_calc(int N)
 {
@@ -78,17 +82,11 @@ void Test_C2C_1D_calc(int N)
 
     BOOST_REQUIRE(out_state!=0);
 
-    //std::cout << "FFT" << std::endl;
-    //for (ExtentIterator ex_it(out_state->GetExtent());!ex_it.AtEnd();++ex_it) {
-    //  std::cout << ex_it[0] << " " << out_state->Value(ex_it) << std::endl;
-    //}
-
     BOOST_CHECK(out_state->GetExtent()==Extent(Size(N),Point(0)));
 
     Point peak(N/step,0);
     Complex peak_value = out_state->Value(peak);
     Complex calc_peak_value = Complex(sum,0.0);
-    std::cout << std::abs(peak_value-calc_peak_value);
     BOOST_REQUIRE(std::abs(peak_value-calc_peak_value)<1e-06);
 
   } catch (alg::FFTException& e) {
@@ -96,17 +94,18 @@ void Test_C2C_1D_calc(int N)
   }
 }
 
-void Test_C2C_1D_even_calc()
+BOOST_AUTO_TEST_CASE(C2C_1D_even_calc)
 {
   Test_C2C_1D_calc(64);
 }
 
-void Test_C2C_1D_odd_calc()
+BOOST_AUTO_TEST_CASE(C2C_1D_odd_calc)
 {
   Test_C2C_1D_calc(63);
 }
 
-void Test_C2C_3D_calc()
+
+BOOST_AUTO_TEST_CASE(C2C_3D_calc)
 {
   int N=16;
   try {
@@ -203,18 +202,18 @@ void Test_R2H_1D_calc(int N)
     BOOST_ERROR("FFT Exception caught in Test_R2H_1D_explicit!");
   }
 }
-
-void Test_R2H_1D_even_calc()
+BOOST_AUTO_TEST_CASE(fft_R2H_1D_even_calc)
 {
   Test_R2H_1D_calc(64);
 }
 
-void Test_R2H_1D_odd_calc()
+BOOST_AUTO_TEST_CASE(fft_R2H_1D_odd_calc)
+
 {
   Test_R2H_1D_calc(63);
 }
 
-void Test_R2H_2D_explicit()
+BOOST_AUTO_TEST_CASE(fft_R2H_2D_explicit)
 {
   try {
     static Real din[] = {
@@ -284,8 +283,7 @@ void Test_R2H_2D_explicit()
     BOOST_ERROR("FFT Exception caught in Test_R2H_2D_explicit!");
   }
 }
-
-void Test_R2H_2D_calc()
+BOOST_AUTO_TEST_CASE(fft_R2H_2D_calc)
 {
   int N=16;
   try {
@@ -328,8 +326,7 @@ void Test_R2H_2D_calc()
     BOOST_ERROR("FFT Exception caught in Test_R2H_2D_explicit!");
   }
 }
-
-void Test_R2H_3D_calc()
+BOOST_AUTO_TEST_CASE(fft_R2H_3D_calc)
 {
   int N=16;
   try {
@@ -412,23 +409,23 @@ void Test_DFT(DataType TYPE)
   }
 }
 
-void Test_DFT_REAL()
+BOOST_AUTO_TEST_CASE(dft_real)
 {
   Test_DFT(REAL);
 }
 
-void Test_DFT_COMPLEX()
+BOOST_AUTO_TEST_CASE(dft_complex)
 {
   Test_DFT(COMPLEX);
 }
-
-void Test_Invalid()
+BOOST_AUTO_TEST_CASE(fft_invalid)
 {
   RealFrequencyImageState rfs;
   BOOST_CHECK_THROW(rfs.Apply(alg::FFT()), alg::FFTException);
 }
 
-void Test_Sampling()
+
+BOOST_AUTO_TEST_CASE(fft_sampling)
 {
   std::ostringstream msg;
   ImageHandle ih1=CreateImage(Size(4,10,20));
@@ -470,7 +467,7 @@ struct test_memalloc_fnc {
 
 typedef ImageStateModIPAlgorithm<test_memalloc_fnc> test_memalloc_alg;
 
-void Test_Memalloc()
+BOOST_AUTO_TEST_CASE(fft_memalloc)
 {
   test_memalloc_alg talg;
   ImageHandle i1=CreateImage(Size(6,5,4));
@@ -499,27 +496,4 @@ void Test_Memalloc()
   i4.ApplyIP(talg);
 }
 
-
-} // namespace 
-
-test_suite* CreateFFTTest()
-{
-  test_suite* ts=BOOST_TEST_SUITE("FFT Test");
-
-  ts->add(BOOST_TEST_CASE(&Test_C2C_1D_even_calc));
-  ts->add(BOOST_TEST_CASE(&Test_C2C_1D_odd_calc));
-  ts->add(BOOST_TEST_CASE(&Test_C2C_3D_calc));
-  ts->add(BOOST_TEST_CASE(&Test_R2H_1D_even_calc));
-  ts->add(BOOST_TEST_CASE(&Test_R2H_1D_odd_calc));
-  ts->add(BOOST_TEST_CASE(&Test_R2H_2D_explicit));
-  ts->add(BOOST_TEST_CASE(&Test_R2H_2D_calc));
-  ts->add(BOOST_TEST_CASE(&Test_R2H_3D_calc));
-  ts->add(BOOST_TEST_CASE(&Test_DFT_REAL));
-  ts->add(BOOST_TEST_CASE(&Test_DFT_COMPLEX));
-  ts->add(BOOST_TEST_CASE(&Test_Sampling));
-  ts->add(BOOST_TEST_CASE(&Test_Invalid));
-  ts->add(BOOST_TEST_CASE(&Test_Memalloc));
-
-  return ts;
-}
-
+BOOST_AUTO_TEST_SUITE_END()

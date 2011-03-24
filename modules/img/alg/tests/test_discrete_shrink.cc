@@ -24,17 +24,22 @@
 
 #include <iostream>
 
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
 #include "tests.hh"
 
 #include <ost/img/image.hh>
 #include <ost/img/alg/randomize.hh>
 #include <ost/img/alg/discrete_shrink.hh>
 
-namespace {
-
 using namespace ost::img;
 using namespace ost::img::alg;
-void test() 
+
+BOOST_AUTO_TEST_SUITE(ost_img_alg)
+
+
+BOOST_AUTO_TEST_CASE(alg_discrete_shrink)
 {
   alg::Randomize rnd;
   DiscreteShrink discrete_shrink(Size(2,2));
@@ -53,18 +58,9 @@ void test()
       h.GetReal(p2+Point(1,0))+
       h.GetReal(p2+Point(0,1))+
       h.GetReal(p2+Point(1,1)));
-    BOOST_CHECK_SMALL(Real(std::fabs(sm-rh.GetReal(it))),Real(1e-7));
+    BOOST_CHECK_SMALL(Real(std::fabs(sm-rh.GetReal(it))),Real(1e-6));
   }
   
 }
 
-} // ns
-
-test_suite* CreateDiscreteShrinkTest()
-{
-  test_suite* ts=BOOST_TEST_SUITE("DiscreteShrink Alg Test");
-
-  ts->add(BOOST_TEST_CASE(&test));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()

@@ -1,7 +1,6 @@
 set(IPLT_ALG_UNIT_TESTS
 test_clear.cc
 test_conj.cc
-test_convolute.cc
 test_discrete_shrink.cc
 test_fft.cc
 test_fill.cc

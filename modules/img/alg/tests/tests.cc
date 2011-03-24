@@ -22,47 +22,6 @@
   Author: Ansgar Philippsen
 */
 
-#include <iostream>
-
 #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE ost_img_alg
 #include <boost/test/unit_test.hpp>
-#include <boost/test/framework.hpp>
-
-using namespace boost::unit_test;
-
-
-extern test_suite* CreateShiftTest();
-extern test_suite* CreateMirrorTest();
-extern test_suite* CreateTransformTest();
-extern test_suite* CreateDiscreteShrinkTest();
-extern test_suite* CreateFillTest();
-extern test_suite* CreateStatTest();
-extern test_suite* CreateClearTest();
-extern test_suite* CreateFFTTest();
-extern test_suite* CreateNegateTest();
-extern test_suite* CreateConjugateTest();
-
-bool init_ost_img_alg_unit_tests() {
-  try {
-    framework::master_test_suite().add(CreateShiftTest()); 
-    framework::master_test_suite().add(CreateMirrorTest()); 
-    framework::master_test_suite().add(CreateTransformTest()); 
-    framework::master_test_suite().add(CreateDiscreteShrinkTest()); 
-    framework::master_test_suite().add(CreateFillTest());
-    framework::master_test_suite().add(CreateStatTest()); 
-    framework::master_test_suite().add(CreateConjugateTest()); 
-    framework::master_test_suite().add(CreateClearTest());      
-    framework::master_test_suite().add(CreateNegateTest());
-    framework::master_test_suite().add(CreateFFTTest());          
-  } catch(std::exception& e) {
-    return false;
-  }
-  return true;
-}
-
-
-int main(int argc, char** argv)
-{
-  return boost::unit_test::unit_test_main(init_ost_img_alg_unit_tests, 
-                                          argc, argv);
-}

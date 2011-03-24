@@ -24,18 +24,23 @@
 
 #include <iostream>
 
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
 #include "tests.hh"
 
 #include <ost/img/image.hh>
 #include <ost/img/alg/randomize.hh>
 #include <ost/img/alg/negate.hh>
 
-namespace {
-
 using namespace ost::img;
 using namespace ost::img::alg;
 
-void test() 
+
+BOOST_AUTO_TEST_SUITE(ost_img_alg)
+
+
+BOOST_AUTO_TEST_CASE(alg_negate)
 {
   alg::Randomize rnd;
   alg::Negate negate;
@@ -47,13 +52,4 @@ void test()
   }
 }
 
-} // ns
-
-test_suite* CreateNegateTest()
-{
-  test_suite* ts=BOOST_TEST_SUITE("Negate Alg Test");
-
-  ts->add(BOOST_TEST_CASE(&test));
-
-  return ts;
-}
+BOOST_AUTO_TEST_SUITE_END()
