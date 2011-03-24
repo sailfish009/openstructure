@@ -33,7 +33,7 @@
 /*
  Author: Marco Biasini
  */
-namespace ost { namespace qa {
+namespace ost { namespace conop {
 
 using namespace boost::spirit;
 
@@ -41,26 +41,26 @@ namespace {
 
 struct AminoAcidKeys : public symbols<AminoAcid> {
   AminoAcidKeys() {
-    add("ALA", Ala)
-       ("ARG", Arg)
-       ("ASN", Asn)
-       ("ASP", Asp)
-       ("GLN", Gln) 
-       ("GLU", Glu)
-       ("LYS", Lys)
-       ("SER", Ser)
-       ("CYS", Cys)
-       ("TYR", Tyr)
-       ("THR", Thr)
-       ("VAL", Val)
-       ("ILE", Ile)
-       ("LEU", Leu)
-       ("PRO", Pro)
-       ("GLY", Gly)
-       ("MET", Met)
-       ("HIS", His)
-       ("TRP", Trp)
-       ("PHE", Phe);
+    add("ALA", ALA)
+       ("ARG", ARG)
+       ("ASN", ASN)
+       ("ASP", ASP)
+       ("GLN", GLN) 
+       ("GLU", GLU)
+       ("LYS", LYS)
+       ("SER", SER)
+       ("CYS", CYS)
+       ("TYR", TYR)
+       ("THR", THR)
+       ("VAL", VAL)
+       ("ILE", ILE)
+       ("LEU", LEU)
+       ("PRO", PRO)
+       ("GLY", GLY)
+       ("MET", MET)
+       ("HIS", HIS)
+       ("TRP", TRP)
+       ("PHE", PHE);
   }
 };
 } // anon namespace
@@ -74,51 +74,51 @@ AminoAcid ResidueToAminoAcid(const mol::ResidueHandle& r) {
   if (aa)
     return *aa;
     
-  return Xxx;
+  return XXX;
 }
 
 String AminoAcidToResidueName(AminoAcid aa)
 {
   switch(aa) {
-    case Ala:
+    case ALA:
       return "ALA";
-    case Arg:
+    case ARG:
       return "ARG";
-    case Asn:
+    case ASN:
       return "ASN";
-    case Asp:
+    case ASP:
       return "ASP";
-    case Gln:
+    case GLN:
       return "GLN";
-    case Glu:
+    case GLU:
       return "GLU";
-    case Lys:
+    case LYS:
       return "LYS";
-    case Ser:
+    case SER:
       return "SER";
-    case Cys:
+    case CYS:
       return "CYS";
-    case Tyr:  
+    case TYR:  
       return "TYR";
-    case Trp:
+    case TRP:
       return "TRP";
-    case Thr:
+    case THR:
       return "THR";
-    case Val:
+    case VAL:
       return "VAL";
-    case Ile:
+    case ILE:
       return "ILE";
-    case Met:
+    case MET:
       return "MET";
-    case Leu:  
+    case LEU:  
       return "LEU";
-    case Gly:  
+    case GLY:  
       return "GLY";
-    case Pro:  
+    case PRO:  
       return "PRO";
-    case His:  
+    case HIS:  
       return "HIS";
-    case Phe:
+    case PHE:
       return "PHE";
     default:
       return "UNK";
@@ -246,85 +246,85 @@ AminoAcid OneLetterCodeToAminoAcid(char olc)
   char upper_olc=toupper(olc);
   switch(upper_olc) {
     case 'A':
-      return Ala;
+      return ALA;
     case 'R':   
-      return Arg;
+      return ARG;
     case 'N':   
-      return Asn;
+      return ASN;
     case 'D':   
-      return Asp;
+      return ASP;
     case 'Q':   
-      return Gln;
+      return GLN;
     case 'E':   
-      return Glu;
+      return GLU;
     case 'K':   
-      return Lys;
+      return LYS;
     case 'S':   
-      return Ser;
+      return SER;
     case 'C':   
-      return Cys;
+      return CYS;
     case 'Y':   
-      return Tyr;
+      return TYR;
     case 'W':   
-      return Trp;
+      return TRP;
     case 'T':   
-      return Thr;
+      return THR;
     case 'V':   
-      return Val;
+      return VAL;
     case 'I':   
-      return Ile;
+      return ILE;
     case 'M':   
-      return Met;
+      return MET;
     case 'L':   
-      return Leu;
+      return LEU;
     case 'G':   
-      return Gly;
+      return GLY;
     case 'P':   
-      return Pro;
+      return PRO;
     case 'H':   
-      return His;
+      return HIS;
     case 'F':   
-      return Phe;
+      return PHE;
     default:
-      return Xxx;
+      return XXX;
   }
 }
 
 AminoAcidSet AminoAcidSet::CreatePolarSet()
 {
   AminoAcidSet polar;
-  polar.Add(Arg);
-  polar.Add(Asn);
-  polar.Add(Asp);
-  polar.Add(Gln);
-  polar.Add(Glu);
-  polar.Add(Ser);
-  polar.Add(His);
-  polar.Add(Lys);
-  polar.Add(Thr);
+  polar.Add(ARG);
+  polar.Add(ASN);
+  polar.Add(ASP);
+  polar.Add(GLN);
+  polar.Add(GLU);
+  polar.Add(SER);
+  polar.Add(HIS);
+  polar.Add(LYS);
+  polar.Add(THR);
   return polar;  
 }
 
 AminoAcidSet AminoAcidSet::CreateAromaticSet()
 {
   AminoAcidSet aromatic;
-  aromatic.Add(Trp);
-  aromatic.Add(Tyr);
-  aromatic.Add(Phe);
+  aromatic.Add(TRP);
+  aromatic.Add(TYR);
+  aromatic.Add(PHE);
   return aromatic;  
 }
 
 AminoAcidSet AminoAcidSet::CreateApolarSet()
 {
   AminoAcidSet apolar;
-  apolar.Add(Ala);
-  apolar.Add(Val);
-  apolar.Add(Leu);
-  apolar.Add(Ile);
-  apolar.Add(Gly);
-  apolar.Add(Pro);
-  apolar.Add(Cys);
-  apolar.Add(Met);
+  apolar.Add(ALA);
+  apolar.Add(VAL);
+  apolar.Add(LEU);
+  apolar.Add(ILE);
+  apolar.Add(GLY);
+  apolar.Add(PRO);
+  apolar.Add(CYS);
+  apolar.Add(MET);
   return apolar;
 }
 
@@ -338,26 +338,26 @@ AminoAcidSet AminoAcidSet::CreateSet(AminoAcid aa)
 std::vector<AminoAcidSet> AminoAcidSet::CreateCompleteSet() {
   std::vector<AminoAcidSet> alphabet;
 
-  alphabet.push_back(AminoAcidSet::CreateSet(Ala));
-  alphabet.push_back(AminoAcidSet::CreateSet(Arg));
-  alphabet.push_back(AminoAcidSet::CreateSet(Asn));
-  alphabet.push_back(AminoAcidSet::CreateSet(Asp));
-  alphabet.push_back(AminoAcidSet::CreateSet(Gln));
-  alphabet.push_back(AminoAcidSet::CreateSet(Glu));
-  alphabet.push_back(AminoAcidSet::CreateSet(Lys));
-  alphabet.push_back(AminoAcidSet::CreateSet(Ser));
-  alphabet.push_back(AminoAcidSet::CreateSet(Cys));
-  alphabet.push_back(AminoAcidSet::CreateSet(Met));
-  alphabet.push_back(AminoAcidSet::CreateSet(Trp));
-  alphabet.push_back(AminoAcidSet::CreateSet(Tyr));
-  alphabet.push_back(AminoAcidSet::CreateSet(Thr));
-  alphabet.push_back(AminoAcidSet::CreateSet(Val));
-  alphabet.push_back(AminoAcidSet::CreateSet(Ile));
-  alphabet.push_back(AminoAcidSet::CreateSet(Leu));
-  alphabet.push_back(AminoAcidSet::CreateSet(Gly));
-  alphabet.push_back(AminoAcidSet::CreateSet(Pro));
-  alphabet.push_back(AminoAcidSet::CreateSet(His));
-  alphabet.push_back(AminoAcidSet::CreateSet(Phe));
+  alphabet.push_back(AminoAcidSet::CreateSet(ALA));
+  alphabet.push_back(AminoAcidSet::CreateSet(ARG));
+  alphabet.push_back(AminoAcidSet::CreateSet(ASN));
+  alphabet.push_back(AminoAcidSet::CreateSet(ASP));
+  alphabet.push_back(AminoAcidSet::CreateSet(GLN));
+  alphabet.push_back(AminoAcidSet::CreateSet(GLU));
+  alphabet.push_back(AminoAcidSet::CreateSet(LYS));
+  alphabet.push_back(AminoAcidSet::CreateSet(SER));
+  alphabet.push_back(AminoAcidSet::CreateSet(CYS));
+  alphabet.push_back(AminoAcidSet::CreateSet(MET));
+  alphabet.push_back(AminoAcidSet::CreateSet(TRP));
+  alphabet.push_back(AminoAcidSet::CreateSet(TYR));
+  alphabet.push_back(AminoAcidSet::CreateSet(THR));
+  alphabet.push_back(AminoAcidSet::CreateSet(VAL));
+  alphabet.push_back(AminoAcidSet::CreateSet(ILE));
+  alphabet.push_back(AminoAcidSet::CreateSet(LEU));
+  alphabet.push_back(AminoAcidSet::CreateSet(GLY));
+  alphabet.push_back(AminoAcidSet::CreateSet(PRO));
+  alphabet.push_back(AminoAcidSet::CreateSet(HIS));
+  alphabet.push_back(AminoAcidSet::CreateSet(PHE));
   return alphabet;
 }
 
@@ -375,26 +375,26 @@ std::vector<AminoAcidSet> AminoAcidSet::CreatePseudoSet() {
   std::vector<AminoAcidSet> alphabet;
   AminoAcidSet full_alphabet;
 
-  full_alphabet.Add(Ala);
-  full_alphabet.Add(Val);
-  full_alphabet.Add(Leu);
-  full_alphabet.Add(Ile);
-  full_alphabet.Add(Gly);
-  full_alphabet.Add(Pro);
-  full_alphabet.Add(Cys);
-  full_alphabet.Add(Met);
-  full_alphabet.Add(Trp);
-  full_alphabet.Add(Tyr);
-  full_alphabet.Add(Phe);
-  full_alphabet.Add(Arg);
-  full_alphabet.Add(Asn);
-  full_alphabet.Add(Asp);
-  full_alphabet.Add(Gln);
-  full_alphabet.Add(Glu);
-  full_alphabet.Add(Ser);
-  full_alphabet.Add(His);
-  full_alphabet.Add(Lys);
-  full_alphabet.Add(Thr);
+  full_alphabet.Add(ALA);
+  full_alphabet.Add(VAL);
+  full_alphabet.Add(LEU);
+  full_alphabet.Add(ILE);
+  full_alphabet.Add(GLY);
+  full_alphabet.Add(PRO);
+  full_alphabet.Add(CYS);
+  full_alphabet.Add(MET);
+  full_alphabet.Add(TRP);
+  full_alphabet.Add(TYR);
+  full_alphabet.Add(PHE);
+  full_alphabet.Add(ARG);
+  full_alphabet.Add(ASN);
+  full_alphabet.Add(ASP);
+  full_alphabet.Add(GLN);
+  full_alphabet.Add(GLU);
+  full_alphabet.Add(SER);
+  full_alphabet.Add(HIS);
+  full_alphabet.Add(LYS);
+  full_alphabet.Add(THR);
 
   alphabet.push_back(full_alphabet);
   return alphabet;
@@ -431,7 +431,7 @@ AminoAcidSet::Iterator AminoAcidSet::Begin() const
 {
   // find first bit that is set
   int start=0;
-  while (start<=Xxx+1 && !(bits_ & (1 << start))) {
+  while (start<=XXX+1 && !(bits_ & (1 << start))) {
     ++start;
   }
   return AminoAcidSetIterator(bits_, start);
@@ -439,7 +439,7 @@ AminoAcidSet::Iterator AminoAcidSet::Begin() const
 
 AminoAcidSet::Iterator AminoAcidSet::End() const
 {
-  return AminoAcidSetIterator(bits_, Xxx+1);
+  return AminoAcidSetIterator(bits_, XXX+1);
 }
 
 bool AminoAcidSet::operator==(const AminoAcidSet& rhs) const

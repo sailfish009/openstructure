@@ -18,19 +18,26 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 
+using namespace boost::python;
 
-void export_Torsion();
-void export_Interaction();
-void export_Packing();
-void export_Clash();
-void export_Reduced();
-void export_Utilties();
-BOOST_PYTHON_MODULE(_qa)
+#include <ost/mol/alg/clash_score.hh>
+
+using namespace ost::mol::alg;  
+using namespace ost;
+namespace {
+
+Real (*clash_score_a)(const mol::EntityView&, 
+                        const mol::EntityView&)=&ClashScore;  
+Real (*clash_score_b)(const mol::EntityHandle&, 
+                        const mol::EntityView&)=&ClashScore;
+Real (*clash_score_c)(const mol::AtomHandle&, 
+                        const mol::EntityView&)=&ClashScore;                        
+}
+
+
+void export_Clash()
 {
-  export_Torsion();
-  export_Interaction();
-  export_Packing();
-  export_Clash();
-  export_Reduced();
-  export_Utilties();
+  def("ClashScore", clash_score_a);
+  def("ClashScore", clash_score_b);  
+  def("ClashScore", clash_score_c);    
 }

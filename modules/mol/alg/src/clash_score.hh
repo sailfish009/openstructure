@@ -16,8 +16,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_QA_CLASH_SCORE_HH
-#define OST_QA_CLASH_SCORE_HH
+#ifndef OST_MOL_ALG_CLASH_SCORE_HH
+#define OST_MOL_ALG_CLASH_SCORE_HH
 
 /*
   Author: Marco Biasini
@@ -25,9 +25,9 @@
 
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/entity_handle.hh>
-#include <ost/qa/module_config.hh>
+#include <ost/mol/alg/module_config.hh>
 
-namespace ost { namespace qa {
+namespace ost { namespace mol { namespace alg {
 
 /// \defgroup Clash Steric Clash Score Calculation
 /// 
@@ -41,20 +41,20 @@ namespace ost { namespace qa {
 /// For each atom of ent_a the interaction with atoms of ent_b calculated.
 /// \return 0.0 if there are no clashes and a positive clash score otherwise.
 /// \sa \ref the_hammer.py "The Hammer Example"
-Real DLLEXPORT_OST_QA ClashScore(const mol::EntityView& ent_a, const mol::EntityView& ent_b);
+Real DLLEXPORT_OST_MOL_ALG ClashScore(const mol::EntityView& ent_a, const mol::EntityView& ent_b);
 
 /// \brief calculate clash score between full entity and view
-Real DLLEXPORT_OST_QA ClashScore(const mol::EntityHandle& ent_a, 
+Real DLLEXPORT_OST_MOL_ALG ClashScore(const mol::EntityHandle& ent_a, 
                                  const mol::EntityView& ent_b);
 //// \brief calculate clash score of one single atom
 /// 
 /// \return floating point between 0 and 10
 /// \sa \ref the_hammer.py "The Hammer Example"
-Real DLLEXPORT_OST_QA ClashScore(const mol::AtomHandle& atom, 
+Real DLLEXPORT_OST_MOL_ALG ClashScore(const mol::AtomHandle& atom, 
                                  const mol::EntityView& ent_b);
 
 /// \brief calculate steric energy of two atoms
-Real DLLEXPORT_OST_QA StericEnergy(const geom::Vec3& pos1, Real r1,
+Real DLLEXPORT_OST_MOL_ALG StericEnergy(const geom::Vec3& pos1, Real r1,
                                    const geom::Vec3& pos2, Real r2);
 //@}
 
@@ -62,6 +62,6 @@ Real DLLEXPORT_OST_QA StericEnergy(const geom::Vec3& pos1, Real r1,
 /// 
 /// Dynamic recalculation of clash score for a moving object. The real-valued
 /// clash score is then color-mapped onto the objects. 
-}}
+}}}
 
 #endif
