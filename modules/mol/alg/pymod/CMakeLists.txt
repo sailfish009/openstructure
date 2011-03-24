@@ -1,6 +1,7 @@
 set(OST_MOL_ALG_PYMOD_SOURCES
   wrap_mol_alg.cc
   export_svd_superpose.cc
+  export_clash.cc
 )
 
 set(OST_MOL_ALG_PYMOD_MODULES

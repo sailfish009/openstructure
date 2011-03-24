@@ -16,8 +16,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_QA_AMINO_ACIDS_HH
-#define OST_QA_AMINO_ACIDS_HH
+#ifndef OST_CONOP_AMINO_ACIDS_HH
+#define OST_CONOP_AMINO_ACIDS_HH
 /*
   Author: Marco Biasini
  */
@@ -26,35 +26,35 @@
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/torsion_handle.hh>
 
-#include <ost/qa/module_config.hh>
-namespace ost { namespace qa {
+#include <ost/conop/module_config.hh>
+
+namespace ost { namespace conop {
 
 // convenience enum for standard set of 20 amino acids
 // Xxx signifies an unknown amino acid.
 typedef enum  {
-	Ala, Arg, Asn,
-	Asp, Gln, Glu,
-	Lys, Ser, Cys,
-	Met, Trp, Tyr,
-	Thr, Val, Ile,
-	Leu, Gly, Pro,
-	His, Phe, Xxx
-	
+  ALA, ARG, ASN,
+  ASP, GLN, GLU,
+  LYS, SER, CYS,
+  MET, TRP, TYR,
+  THR, VAL, ILE,
+  LEU, GLY, PRO,
+  HIS, PHE, XXX
 } AminoAcid;
 
 /// \brief from residue name to amino acid.
 /// 
 /// for non standard amino acids Xxx is returned.
-DLLEXPORT_OST_QA AminoAcid ResidueToAminoAcid(const mol::ResidueHandle& r);
+DLLEXPORT_OST_CONOP AminoAcid ResidueToAminoAcid(const mol::ResidueHandle& r);
 
 // \brief from amino acid to residue name
-DLLEXPORT_OST_QA String AminoAcidToResidueName(AminoAcid aa);
+DLLEXPORT_OST_CONOP String AminoAcidToResidueName(AminoAcid aa);
 
-DLLEXPORT_OST_QA String OneLetterCodeToResidueName(char olc);
+DLLEXPORT_OST_CONOP String OneLetterCodeToResidueName(char olc);
 
-DLLEXPORT_OST_QA AminoAcid OneLetterCodeToAminoAcid(char olc);
+DLLEXPORT_OST_CONOP AminoAcid OneLetterCodeToAminoAcid(char olc);
 
-char DLLEXPORT_OST_QA ResidueNameToOneLetterCode(String rn);
+char DLLEXPORT_OST_CONOP ResidueNameToOneLetterCode(String rn);
 
 class AminoAcidSetIterator : public std::iterator<std::forward_iterator_tag,
                                                   AminoAcid> {
@@ -86,16 +86,14 @@ private:
   void Advance()
   {
     ++curr_;
-    while (curr_<=Xxx && !(bits_ & (1 << curr_))) { ++curr_; }
+    while (curr_<=XXX && !(bits_ & (1 << curr_))) { ++curr_; }
   }
   unsigned int bits_;
   int          curr_;
 };
 
-
-
 /// \brief Amino acid bit set
-class DLLEXPORT_OST_QA AminoAcidSet {
+class DLLEXPORT_OST_CONOP AminoAcidSet {
 public:
   typedef AminoAcidSetIterator Iterator;
   
@@ -152,8 +150,10 @@ private:
   unsigned int bits_;
 };
 
-DLLEXPORT_OST_QA std::ostream& operator<<(std::ostream& os, 
+DLLEXPORT_OST_CONOP std::ostream& operator<<(std::ostream& os, 
                          const AminoAcidSet& aa_set);
+
+typedef std::vector<AminoAcidSet> AminoAcidAlphabet;
 
 }}
 

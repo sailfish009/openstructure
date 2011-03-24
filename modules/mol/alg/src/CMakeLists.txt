@@ -6,10 +6,12 @@ set(OST_MOL_ALG_HEADERS
   superpose_frames.hh
   filter_clashes.hh
   construct_cbeta.hh
+  clash_score.hh
 )
 
 set(OST_MOL_ALG_SOURCES
   svd_superpose.cc
+  clash_score.cc
   sec_structure_segments.cc
   local_dist_test.cc
   superpose_frames.cc
