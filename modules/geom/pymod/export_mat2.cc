@@ -26,7 +26,13 @@ using namespace boost::python;
 const Real Mat2_getitem(const geom::Mat2& m, tuple i) {return m(extract<int> (i[0]),extract<int> (i[1]));}
 void Mat2_setitem(geom::Mat2& m,const  tuple i,const  Real val) {m(extract<int> (i[0]),extract<int> (i[1]))=val;}
 
+String mat2_repr(const geom::Mat2& m) {
+  std::stringstream ss;
 
+  ss << "geom.Mat2(" << m(0,0) << ", " << m(0,1) << ", "
+     << m(1,0) << ", " << m(1,1) << ")";
+  return ss.str();
+}
 void export_Mat2()
 {
   using namespace geom;
@@ -36,6 +42,7 @@ void export_Mat2()
     .def(self += self)
     .def(self -= self)
     .def(self + self)
+    .def("__repr__", mat2_repr)
     .def(self - self)
     .def(self *= Real())
     .def(self /= Real())
