@@ -482,7 +482,7 @@ void PythonShellWidget::OnExecuteStateEntered()
     insertPlainText(QString(QChar::ParagraphSeparator));
   }
   block_edit_start_=textCursor().block();
-
+  std::cout << block_edit_start_.isValid() << std::endl;
 }
 
 
@@ -737,6 +737,27 @@ QTextBlock PythonShellWidget::GetEditStartBlock()
 
 void PythonShellWidget::keyPressEvent(QKeyEvent* event)
 {
+  // BZDNG-238
+  // Letting Qt do the handling of the backspace key leads to a crash when
+  // multiline block mode and doing the following:
+  // 
+  //   (a) Hit Ctrl+A
+  //   (b) Hit Backspace
+  //   (c) Hit Return
+  //
+  // If we emulate the deletion of the text manually all is fine.
+  if (event->key()==Qt::Key_Backspace) {
+    QTextCursor cursor=this->textCursor();
+    if (cursor.hasSelection()) {
+      cursor.removeSelectedText();
+    } else {
+      if (cursor.position()>this->GetEditStartBlock().position()) {
+        cursor.deletePreviousChar();
+      }
+    }
+    event->accept();
+    return;
+  }
   // BZDNG-173
   if (event->key()==Qt::Key_Left) {
     if (this->textCursor().position()==GetEditStartBlock().position() ||
