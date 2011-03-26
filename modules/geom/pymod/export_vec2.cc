@@ -27,6 +27,14 @@ using namespace boost::python;
 const Real Vec2_getitem(const geom::Vec2& v, int i) {return v[i];}
 void Vec2_setitem(geom::Vec2& v,const  int i,const  Real val) {v[i]=val;}
 
+
+String vec2_repr(const geom::Vec2& v)
+{
+  std::stringstream ss;
+  ss << "geom.Vec2(" << v[0] << ", " << v[1] << ")";
+  return ss.str();
+}
+
 void export_Vec2()
 {
   using namespace geom;
@@ -50,6 +58,7 @@ void export_Vec2()
     .def(self / Real())
     .def(self + self)
     .def(self - self)
+    .def("__repr__", vec2_repr)
     .def(self_ns::str(self))
     .def("__getitem__",Vec2_getitem)
     .def("__setitem__",Vec2_setitem)

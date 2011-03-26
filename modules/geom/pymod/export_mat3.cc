@@ -53,6 +53,17 @@ void Mat3_setslice(geom::Mat3& m,const  slice s,const  Mat2& m2)
   m(start0+1,start1+1)=m2(1,1);
 }
 
+String mat3_repr(const geom::Mat3& m) 
+{
+  std::stringstream ss;
+  
+  ss << "geom.Mat3(" << m(0,0) << ", " << m(0,1) << ", " << m(0,2) << ", " 
+     << m(1, 0) << ", " << m(1,1) << ", " << m(1, 2) << ", " 
+     << m(2, 0) << "," << m(2, 1) << ", " << m(2, 2) << ")";
+  return ss.str();
+}
+
+
 void export_Mat3()
 {
   class_<Mat3>("Mat3",init<>())
@@ -61,6 +72,7 @@ void export_Mat3()
     .def(init<Real,Real,Real>())
     .def(self += self)
     .def(self -= self)
+    .def("__repr__", mat3_repr)
     .def(self + self)
     .def(self - self)
     .def(self *= Real())

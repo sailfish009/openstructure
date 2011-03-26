@@ -42,10 +42,10 @@ void export_VecMat2_op()
   
   def("Length",Vec2Length);
   def("Length2",Vec2Length2);
-  def("Equal",Vec2Equal);
+  def("Equal",Vec2Equal, (arg("v1"), arg("v2"), arg("epsilon")=EPSILON));
   def("CompMultiply",Vec2CompMultiply);
   def("CompDivide",Vec2CompDivide);
-  def("Equal",Mat2Equal);
+  def("Equal",Mat2Equal, (arg("m1"), arg("m2"), arg("epsilon")=EPSILON));
   def("Dot",Mat2Dot);
   def("Det",Mat2Det);
   def("Invert",Mat2Invert);

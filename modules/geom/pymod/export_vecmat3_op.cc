@@ -44,11 +44,11 @@ void export_VecMat3_op()
   
   def("Length",Vec3Length);
   def("Length2",Vec3Length2);
-  def("Equal",Vec3Equal);
+  def("Equal",Vec3Equal, (arg("v1"), arg("v2"), arg("epsilon")=EPSILON));
   def("CompMultiply",Vec3CompMultiply);
   def("CompDivide",Vec3CompDivide);
   def("Distance",Vec3Distance);  
-  def("Equal",Mat3Equal);
+  def("Equal",Mat3Equal, (arg("m1"), arg("m2"), arg("epsilon")=EPSILON));
   def("DihedralAngle", &DihedralAngle);
   def("Dot",Mat3Dot);
   def("Mat3FromAngles", &Mat3FromAngles);

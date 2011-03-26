@@ -42,12 +42,12 @@ void export_VecMat4_op()
 {
   using namespace geom;
   
-  def("Length",Vec4Length);
+  def("Equal",Vec4Equal, (arg("v1"), arg("v2"), arg("epsilon")=EPSILON));
   def("Length2",Vec4Length2);
   def("Equal",Vec4Equal);
   def("CompMultiply",Vec4CompMultiply);
   def("CompDivide",Vec4CompDivide);
-  def("Equal",Mat4Equal);
+  def("Equal",Mat4Equal, (arg("m1"), arg("m2"), arg("epsilon")=EPSILON));
   def("Dot",Mat4Dot);
   def("Det",Mat4Det);
   def("Transpose",Mat4Transpose);
