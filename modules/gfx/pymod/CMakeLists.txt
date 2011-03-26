@@ -23,6 +23,6 @@ set(GRADIENT_FILE
   gradients.xml
 )
 copy_if_different("./" "${STAGE_DIR}/share/openstructure/scene" 
-                  "${GRADIENT_FILE}" "PRESET GRADIENTS" _gfx)
+                  "${GRADIENT_FILE}" "PRESET GRADIENTS" _ost_gfx)
                   
 install(FILES ${GRADIENT_FILE} DESTINATION "share/openstructure/scene")
