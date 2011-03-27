@@ -22,6 +22,7 @@
 #include <cstddef> // for size_t
 #include <ostream>
 #include <cassert>
+#include <stdexcept>
 
 #include <boost/operators.hpp>
 
@@ -66,13 +67,17 @@ public:
   //! element access
   Real& operator()(std::size_t r, std::size_t c)
   {
-    assert(r<=1 && c<=1);
+    if (r>1 || c >1) {
+      throw std::out_of_range("row and column must be in the range [0-1]");
+    }
     return data_[r][c];
   }
   //! const element access
   const Real& operator()(std::size_t r, std::size_t c) const
   {
-    assert(r<=1 && c<=1);
+    if (r>1 || c >1) {
+      throw std::out_of_range("row and column must be in the range [0-1]");
+    }
     return data_[r][c];
   }
 

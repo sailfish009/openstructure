@@ -28,7 +28,7 @@
 
 #include <ost/config.hh>
 #include <ost/geom/module_config.hh>
-
+#include <ost/geom/exc.hh>
 namespace geom {
 
 // fw decl
@@ -178,7 +178,14 @@ namespace geom {
 inline Vec2::Vec2(const Vec3& v): x(v.x), y(v.y) { }
 
 
-inline Vec2::Vec2(const Vec4& v): x(v.x), y(v.y) { }
+inline Vec2::Vec2(const Vec4& v): x(v.x), y(v.y) 
+{
+  if (std::fabs(v.w)<1e-10) {
+    throw DivideByZeroException();
+  }
+  x/=v.w;
+  y/=v.w;
+}
 
 
 typedef std::vector<Vec2> Vec2List;

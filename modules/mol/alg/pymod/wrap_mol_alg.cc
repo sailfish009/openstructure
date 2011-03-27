@@ -27,7 +27,7 @@ using namespace boost::python;
 using namespace ost;
 
 void export_svdSuperPose();
-
+void export_Clash();
 #if OST_IMG_ENABLED
 void export_entity_to_density();
 #endif
@@ -56,4 +56,6 @@ BOOST_PYTHON_MODULE(_mol_alg)
        arg("end")=-1, arg("ref")=-1));
 //   def("ConstructCBetas", one_arg, args("entity_handle"));
   def("ConstructCBetas", &ost::mol::alg::ConstructCBetas, (arg("entity_handle"), arg("include_gly")=false));
+  
+  export_Clash();
 }

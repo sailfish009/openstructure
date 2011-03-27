@@ -12,14 +12,16 @@ namespace detail {
 
 class CBetaInserter:public EntityVisitor {
 public:
-  CBetaInserter(mol::EntityHandle ent);
+  CBetaInserter(mol::EntityHandle ent, bool include_gly);
 
   virtual bool VisitResidue(const mol::ResidueHandle& res);
 private:
   XCSEditor edi_;
+  bool      include_gly_;
 };
-CBetaInserter::CBetaInserter(mol::EntityHandle ent) {
+CBetaInserter::CBetaInserter(mol::EntityHandle ent, bool include_gly) {
   edi_=ent.EditXCS(BUFFERED_EDIT);
+  include_gly_=include_gly;
 }
 
 bool CBetaInserter::VisitResidue(const mol::ResidueHandle& res)
@@ -53,8 +55,7 @@ bool CBetaInserter::VisitResidue(const mol::ResidueHandle& res)
 // ensure that C-betas are added to the view as well
 void ConstructCBetas(mol::EntityHandle& entity_handle, bool include_gly)
 {
-  include_gly_=include_gly;
-  detail::CBetaInserter cbi(entity_handle);
+  detail::CBetaInserter cbi(entity_handle, include_gly);
   entity_handle.Apply(cbi);
 }
 

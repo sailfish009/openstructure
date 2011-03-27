@@ -474,6 +474,7 @@ void PythonShellWidget::OnExecuteStateEntered()
   set_block_type_(block_edit_start_,textCursor().block(),BLOCKTYPE_CODE);
   insertPlainText(QString(QChar::ParagraphSeparator));
   QString command=GetCommand();
+
   QString command_trimmed=command.trimmed();
   if (command_trimmed.size()>0) {
     unsigned int id=PythonInterpreter::Instance().RunCommand(command);
@@ -482,7 +483,6 @@ void PythonShellWidget::OnExecuteStateEntered()
     insertPlainText(QString(QChar::ParagraphSeparator));
   }
   block_edit_start_=textCursor().block();
-
 }
 
 
@@ -737,6 +737,34 @@ QTextBlock PythonShellWidget::GetEditStartBlock()
 
 void PythonShellWidget::keyPressEvent(QKeyEvent* event)
 {
+  // BZDNG-238
+  // Letting Qt do the handling of the backspace key leads to a crash when
+  // editing a multiline block mode and doing the following:
+  // 
+  //   (a) Hit Ctrl+A
+  //   (b) Hit Backspace|Delete
+  //   (c) Hit Return
+  //
+  // If we emulate the deletion of the text manually all is fine.
+  if (event->key()==Qt::Key_Backspace || event->key()==Qt::Key_Delete) {
+    QTextCursor cursor=this->textCursor();
+    if (cursor.hasSelection()) {
+      cursor.removeSelectedText();
+    } else {
+      if (cursor.position()>this->GetEditStartBlock().position()) {
+        if (event->key()==Qt::Key_Backspace) {
+          cursor.deletePreviousChar();          
+        } else {
+          cursor.deleteChar();
+        }
+      }
+    }
+    QTextCursor tc=this->textCursor();
+    tc.setPosition(block_edit_start_.position());
+    block_edit_start_=tc.block();
+    event->accept();
+    return;
+  }
   // BZDNG-173
   if (event->key()==Qt::Key_Left) {
     if (this->textCursor().position()==GetEditStartBlock().position() ||
@@ -746,9 +774,11 @@ void PythonShellWidget::keyPressEvent(QKeyEvent* event)
     }
   }
   if (this->handle_custom_commands_(event)){
+    event->accept();
     return;
   }
   if (this->handle_completion_(event)){
+    event->accept();    
     return;
   }
   QPlainTextEdit::keyPressEvent(event);

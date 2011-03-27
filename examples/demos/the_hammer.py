@@ -1,7 +1,5 @@
 from PyQt4 import QtCore
 import math
-from ost import qa
-
 # remove all objects from scene, just in case
 scene.RemoveAll()
 
@@ -26,7 +24,7 @@ class Anim(QtCore.QTimer):
         self.edi.SetTransform(geom.Mat4(rot))
         self.edi.UpdateICS()
         for a in self.b.view.atoms:
-          score=qa.ClashScore(a.handle, self.a.view)
+          score=mol.alg.ClashScore(a.handle, self.a.view)
           a.SetFloatProp('clash', score)
         self.a.UpdatePositions()
         self.b.ReapplyColorOps()

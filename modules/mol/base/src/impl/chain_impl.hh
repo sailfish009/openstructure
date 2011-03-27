@@ -91,7 +91,7 @@ public:
   ResidueImplPtr FindResidue(const ResNum& number) const;
   
   AtomImplPtr FindAtom(const ResNum& number, 
-                     const String& atom_name) const;  
+                       const String& atom_name) const;  
                      
   //! Get number of residues of this chain
   int GetResidueCount() const;
@@ -114,12 +114,14 @@ public:
 
   void ReorderResidues();
   
-  int GetIndex(const ResNum& number) const;  
+  int GetIndex(const ResidueImplPtr& res) const;
+  void AssignSecondaryStructure(SecStructure ss,
+                                const ResNum& start,
+                                const ResNum& end); 
+  int GetIndexForResNum(const ResNum& number) const;
   
-  void AssignSecondaryStructure(SecStructure ss, 
-                                const ResNum& start, 
-                                const ResNum& end);  
 private:
+  int GetIndexForResNumInSequence(const ResNum& number) const;
   void UpdateShifts();
   typedef struct {
     int start;

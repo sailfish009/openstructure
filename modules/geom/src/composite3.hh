@@ -63,11 +63,11 @@ public:
   //! initialize based x-,y-,z- intercepts
   Plane(Real x, Real y, Real z);
 
-  Vec3 GetOrigin() const;
-  void SetOrigin(const Vec3& o);
+  Vec3 GetOrigin() const { return -p_*n_; }
   Vec3 GetNormal() const;
   void SetNormal(const Vec3& n);
   Real GetP()    const;
+  void SetP(Real p) { p_=p; }
   Vec3 At(Real x, Real y) const;
 
   enum PLANE_TYPE {
@@ -78,9 +78,6 @@ private:
   // planes are internally specified in HNF 
   Vec3 n_;
   Real p_;
-  Vec3 o_;
-
-  void calc_ori();
 };
 
 class DLLEXPORT Sphere {

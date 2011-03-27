@@ -16,27 +16,36 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
-using namespace boost::python;
 
-#include <ost/qa/clash_score.hh>
+#include <ost/geom/geom.hh>
 
-using namespace ost::qa;  
-using namespace ost;
-namespace {
+#include "helper.hh"
+using namespace geom;
 
-Real (*clash_score_a)(const mol::EntityView&, 
-                        const mol::EntityView&)=&ClashScore;  
-Real (*clash_score_b)(const mol::EntityHandle&, 
-                        const mol::EntityView&)=&ClashScore;
-Real (*clash_score_c)(const mol::AtomHandle&, 
-                        const mol::EntityView&)=&ClashScore;                        
-}
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
+BOOST_AUTO_TEST_SUITE( geom )
 
-void export_Clash()
+BOOST_AUTO_TEST_CASE(vecmat_mult3)
 {
-  def("ClashScore", clash_score_a);
-  def("ClashScore", clash_score_b);  
-  def("ClashScore", clash_score_c);    
+  Vec3 v1(1.0,2.0,3.0);
+  Mat3 m(1.0,2.0,3.0, 
+         4.0,5.0,6.0, 
+         7.0,8.0,9.0);
+
+  BOOST_CHECK(match(v1*m,30.0,36.0,42.0));
+  BOOST_CHECK(match(m*v1,14.0,32.0,50.0));
+
+  Vec3 v2(7.0,8.0,9.0);
+  BOOST_CHECK(match(CompMultiply(v1,v2),7.0,16.0,27.0));
+  BOOST_CHECK(match(CompDivide(v2,v1),7.0,4.0,3.0));
+
+  Mat3 m1=m;
+  Mat3 m2(-4,0,1,0,8,-10,8,3,0);
+  Mat3 m3=m1*m2;
+  Vec3 v3=v2*m1;
+  BOOST_CHECK(Equal(v3*m2,v2*m3));
 }
+
+BOOST_AUTO_TEST_SUITE_END()

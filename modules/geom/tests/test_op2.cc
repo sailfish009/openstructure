@@ -16,19 +16,35 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
-#include <ost/qa/amino_acids.hh>
-using namespace boost::python;
-using namespace ost::qa;
 
+#include <ost/geom/geom.hh>
 
-void export_Utilties()
+#include "helper.hh"
+using namespace geom;
+
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
+BOOST_AUTO_TEST_SUITE( geom )
+
+BOOST_AUTO_TEST_CASE(vecmat_mult2)
 {
+  Vec2 v1(1.0,2.0);
+  Mat2 m(1.0,2.0, 
+         3.0,4.0);
 
-  def ("ResidueToAminoAcid",&ResidueToAminoAcid);
-  def ("AminoAcidToResidueName",&AminoAcidToResidueName);
-  def ("OneLetterCodeToResidueName",&OneLetterCodeToResidueName);
-  def ("ResidueNameToOneLetterCode",&ResidueNameToOneLetterCode); 
-  def ("OneLetterCodeToAminoAcid",&OneLetterCodeToAminoAcid);
+  BOOST_CHECK(match(v1*m,7.0,10.0));
+  BOOST_CHECK(match(m*v1,5.0,11.0));
 
+  Vec2 v2(5.0,6.0);
+  BOOST_CHECK(match(CompMultiply(v1,v2),5.0,12.0));
+  BOOST_CHECK(match(CompDivide(v2,v1),5.0,3.0));
+
+  Mat2 m1=rnd_mat2();
+  Mat2 m2=rnd_mat2();
+  Mat2 m3=m1*m2;
+  Vec2 v3=v2*m1;
+  BOOST_CHECK(Equal(v3*m2,v2*m3));
 }
+
+BOOST_AUTO_TEST_SUITE_END()

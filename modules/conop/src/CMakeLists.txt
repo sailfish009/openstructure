@@ -3,6 +3,7 @@ builder.hh
 builder_fw.hh
 conop.hh
 heuristic_builder.hh
+amino_acids.hh
 compound.hh
 compound_lib.hh
 module_config.hh
@@ -12,6 +13,7 @@ ring_finder.hh
 
 set(OST_CONOP_SOURCES
 builder.cc
+amino_acids.cc
 conop.cc
 heuristic_builder.cc
 compound.cc

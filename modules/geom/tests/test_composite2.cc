@@ -16,18 +16,42 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef GEOM_CONSTANTS_HH
-#define GEOM_CONSTANTS_HH
 
-#include <ost/base.hh>
-namespace geom {
 
-#if OST_DOUBLE_PRECISION
-static const Real EPSILON=1e-10;
-#else
-static const Real EPSILON=1e-6;
-#endif
+#include <ost/geom/geom.hh>
 
-} // ns
+#include "helper.hh"
 
-#endif
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+
+using namespace geom;
+
+BOOST_AUTO_TEST_SUITE( geom )
+
+
+BOOST_AUTO_TEST_CASE(line_init2)
+{
+  Line3 line(geom::Vec2(0,0), geom::Vec2(2,0));
+  BOOST_CHECK_EQUAL(geom::Length(line.GetDirection()), 1.0);
+}
+
+BOOST_AUTO_TEST_CASE(is_on_line2)
+{
+  Line2 line(geom::Vec2(0,0), geom::Vec2(1,0));
+  BOOST_CHECK(IsOnLine(line, geom::Vec2(0.5,0.0)));
+  BOOST_CHECK(IsOnLine(line, geom::Vec2(1.0,0.0)));
+  BOOST_CHECK(IsOnLine(line, geom::Vec2(0.0,0.0)));
+  BOOST_CHECK(IsOnLine(line, geom::Vec2(-5,0.0)));
+  BOOST_CHECK(IsOnLine(line, geom::Vec2(10.0,0.0)));
+  BOOST_CHECK(!IsOnLine(line, geom::Vec2(0.5,0.1)));
+  BOOST_CHECK(!IsOnLine(line, geom::Vec2(1.0,0.1)));
+  
+  line=Line2(geom::Vec2(1,0), geom::Vec2(3,2));
+  for (int i=-10; i<10; ++i) {
+    BOOST_CHECK(IsOnLine(line, line.At(i)));
+  }
+  BOOST_CHECK(!IsOnLine(line, geom::Vec2(3,2.1)));
+}
+
+BOOST_AUTO_TEST_SUITE_END()

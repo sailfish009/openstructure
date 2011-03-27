@@ -16,18 +16,49 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef GEOM_CONSTANTS_HH
-#define GEOM_CONSTANTS_HH
 
-#include <ost/base.hh>
-namespace geom {
+#include <ost/geom/geom.hh>
 
-#if OST_DOUBLE_PRECISION
-static const Real EPSILON=1e-10;
-#else
-static const Real EPSILON=1e-6;
-#endif
+#include "helper.hh"
+using namespace geom;
 
-} // ns
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
 
-#endif
+BOOST_AUTO_TEST_SUITE( geom )
+
+
+BOOST_AUTO_TEST_CASE(init_mat2)
+{
+  // default
+  Mat2 m1;
+  BOOST_CHECK(match(m1,1.0,0.0, 0.0,1.0));
+
+  //with values
+  Mat2 m2(1.1,2.2,3.3,4.4);
+  BOOST_CHECK(match(m2,1.1,2.2,3.3,4.4));
+
+  // copy ctor
+  Mat2 m3(m2);
+  BOOST_CHECK(match(m3,1.1,2.2,3.3,4.4));
+
+  // array
+  Real arr[]={9.9,8.8,7.7,6.6};
+  Mat2 m4(arr);
+  BOOST_CHECK(match(m4,arr[0],arr[1],arr[2],arr[3]));
+
+  // assignement op
+  m1=m4;
+  BOOST_CHECK(match(m1,m4(0,0),m4(0,1),m4(1,0),m4(1,1)));
+}
+
+
+
+BOOST_AUTO_TEST_CASE(access_mat2)
+{
+  Mat2 m;
+  BOOST_CHECK_THROW( m(2,2)=1.0, std::out_of_range);
+  BOOST_CHECK_THROW( m(2,2), std::out_of_range);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
