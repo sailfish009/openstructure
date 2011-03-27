@@ -16,6 +16,7 @@ OpenStructure documentation
   img/base/img
   img/alg/alg
   seq/base/seq
+  seq/alg/seqalg
   io/io
   gfx/gfx
   gui/gui
@@ -56,7 +57,7 @@ Density Maps and Images
 Sequences and Alignments
 --------------------------------------------------------------------------------
 
-**Overview**: :doc:`sequence module <seq/base/seq>`
+**Overview**: :doc:`sequence module <seq/base/seq>` | :doc:`sequence algorithms <seq/alg/seqalg>`
 
 **Input/Output**: :ref:`loading and saving sequences <seq-io>`
 
