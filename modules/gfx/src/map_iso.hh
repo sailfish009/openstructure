@@ -162,7 +162,11 @@ public:
   const Color& GetColor() const { return color_; }
   void SetNSF(float smoothf);
   void SetDebugOctree(bool flag) { debug_octree_=flag; }
-
+  
+  void CenterOn(const geom::Vec3& center, const img::Size& size);
+  void CenterOn(const geom::Vec3& center, const geom::Vec3& size);
+  void CenterOn(const geom::Vec3& center, Real size);
+  
   /// \brief flags the octree to be rebuilt
   void MakeOctreeDirty();
 

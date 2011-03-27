@@ -34,10 +34,40 @@ MapTool::MapTool():
   Tool("Map Tool")
 {}
 
+void MapTool::DoubleClick(const MouseEvent& event)
+{
+  gfx::Scene& scene=gfx::Scene::Instance();
+  scene.SetSelectionMode(1);
+  int x=event.GetPos().x();
+  int y=scene.GetViewport().height-event.GetPos().y();
+  
+  mol::AtomHandle atom=scene.PickAtom(x, y).second;
+  if (!atom.IsValid()) {
+    return;
+  }
+  int active_node_count = SceneSelection::Instance()->GetActiveNodeCount();
+  for(int i = 0; i<active_node_count;i++){
+    gfx::GfxNodeP np=SceneSelection::Instance()->GetActiveNode(i);
+    if (!np) {
+      continue;
+    }
+    if (gfx::MapIso* mi = dynamic_cast<gfx::MapIso*>(np.get())) {
+      if (event.GetButtons()!=MouseEvent::LeftButton) {
+        continue;
+      }
+      if (!mi->HasXtalMap()) {
+        continue;
+      }
+      mi->CenterOn(atom.GetPos(), mi->GetVisibleExtent().GetSize());
+    }
+  }
+
+}
+
 void MapTool::MouseMove(const MouseEvent& event)
 {
   int active_node_count = SceneSelection::Instance()->GetActiveNodeCount();
-  if(active_node_count > 0){
+  if(active_node_count > 0) {
     for(int i = 0; i<active_node_count;i++){
       gfx::GfxNodeP np=SceneSelection::Instance()->GetActiveNode(i);
       if(np) {

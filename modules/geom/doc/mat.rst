@@ -165,3 +165,15 @@ Functions Operating on Matrices
   
   :param vec: A vector of arbitrary length
   :type vec: :class:`Vec3`
+  
+.. function:: Mat3FromAngles(alpha, beta, gamma)
+
+   creates a Mat3 representing a coordinate system whose axes a, b, c 
+   have angles alpha (between b and c), beta (between a and c) and gamma 
+   (between a and b). This is essentially the matrix that transforms a point 
+   in the coordinate system defined by a, b and c to global coordinates.
+   
+   The coordinate system is right handed, a is along the X-axis and b 
+   always lies in the XY-plane
+   
+   :rtype: `Mat3`

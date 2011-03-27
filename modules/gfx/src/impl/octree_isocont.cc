@@ -30,10 +30,10 @@ void OctreeIsocont::VisitLeaf(const MapOctree& octree, img::RealSpatialImageStat
 {
   // if we get here we already know that we have to isocontour the damn 
   // thing.
-  img::Point end=octree.GetRealExtent().GetEnd();
-  if (point[0]>=end[0] || point[1]>=end[1] || point[2]>=end[2]) {
-    return;
-  }
+  // img::Point end=octree.GetRealExtent().GetEnd();
+  // if (point[0]>=end[0] || point[1]>=end[1] || point[2]>=end[2]) {
+  //   return;
+  // }
   uint8_t pattern=0;
   for (int i=0; i<8; ++i) {
     img::Point p=point+POINT_OFFSETS[i];

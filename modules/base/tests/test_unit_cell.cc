@@ -97,7 +97,6 @@ BOOST_AUTO_TEST_CASE(fract_to_ortho)
   geom::Vec3 a=cell.GetOrthoTF()*geom::Vec3(1,0,0);
   geom::Vec3 b=cell.GetOrthoTF()*geom::Vec3(0,1,0);
   geom::Vec3 c=cell.GetOrthoTF()*geom::Vec3(0,0,1);
-  std::cout << a << b << c << std::endl ;
   CHECK_VEC3_CLOSE(a, geom::Vec3(1,0,0));
   CHECK_VEC3_CLOSE(b, geom::Vec3(cos(pi_quarter)*2, sin(pi_quarter)*2, 0));
   CHECK_VEC3_CLOSE(c, geom::Vec3(0, 0, 4));

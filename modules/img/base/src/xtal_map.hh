@@ -143,6 +143,13 @@ public:
   {
     return map_->CoordToIndex(coord);
   }
+  /// \brief the spacing of voxels along the a,b,c axes
+  const geom::Vec3& GetSamplingVec() const { return map_->GetSampling().GetSpatialSampling(); }
+  
+  
+  /// \brief the matrix to convert coordinates in the rectangular system of voxels to global coordinates
+  ///   (does not include absolute origin and offset due to shifted start of extent)
+  const geom::Mat3& GetSamplingMat() const { return map_->GetSampling().GetSpatialSamplingMat(); }
 protected:
   void FindSym(const Point& p, int& sym, Point& wp) const;
   Point ToUnitCell(const Point& p) const

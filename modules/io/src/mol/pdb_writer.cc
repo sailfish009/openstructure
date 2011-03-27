@@ -388,7 +388,7 @@ void PDBWriter::WriteModel(H ent)
       if (boost::get<bool>(i->second)) {
         line_(20, 4)=StringRef("TRUE", 4);
       } else {
-        line_(20, 4)=StringRef("FALSE", 5);
+        line_(20, 5)=StringRef("FALSE", 5);
       }
       outstream_ << line_;
       continue;

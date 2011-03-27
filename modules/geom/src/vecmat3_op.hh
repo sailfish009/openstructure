@@ -188,6 +188,17 @@ inline Vec3 Max(const Vec3& v1, const Vec3& v2)
   return nrvo;
 }
 
+inline Vec3 Frac(const geom::Vec3& v)
+{
+  return Vec3(fmod(v.x, 1), fmod(v.y, 1), fmod(v.z, 1));
+}
+
+inline Vec3 Mod(const geom::Vec3& v, Real f)
+{
+  return Vec3(fmod(v.x, f), fmod(v.y, f), fmod(v.z, f));
+}
+
+
 //! returns the distance between two points
 inline Real Distance(const Vec3& p1, const Vec3& p2)
 {

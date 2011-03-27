@@ -321,7 +321,7 @@ void MapIso::RebuildOctree()
   normals_calculated_=false;
   bool triangles=this->GetRenderMode()!=gfx::RenderMode::SIMPLE;
   impl::OctreeIsocont cont(va_, level_, triangles, color_);
-  octree_->VisitDF(cont);
+  octree_->VisitDF(cont, true);
   // for normal debugging  
 }
 
@@ -509,6 +509,38 @@ img::ImageHandle MapIso::DownsampleMap(const img::ImageHandle& mh)
   return ret_mh;
 }
 
+void MapIso::CenterOn(const geom::Vec3& center, const img::Size& size)
+{
+  if (!this->HasXtalMap()) {
+    return;
+  }
+  img::Point center_in_px(xtal_map_->CoordToIndex(center));
+  this->SetVisibleExtent(img::Extent(size, center_in_px));
+}
+
+
+void MapIso::CenterOn(const geom::Vec3& center, const geom::Vec3& size)
+{
+  if (!this->HasXtalMap()) {
+    return;
+  }
+  img::Point center_in_px(xtal_map_->CoordToIndex(center));
+  img::Size size_in_px(geom::CompDivide(size, xtal_map_->GetSamplingVec()));
+  this->SetVisibleExtent(img::Extent(size_in_px, center_in_px));
+  
+}
+
+void MapIso::CenterOn(const geom::Vec3& center, Real size)
+{
+  if (!this->HasXtalMap()) {
+    return;
+  }
+  img::Point center_in_px(xtal_map_->CoordToIndex(center));
+  const geom::Vec3& sampling=xtal_map_->GetSamplingVec();
+  img::Size size_in_px(size/sampling.x, size/sampling.y, size/sampling.z);
+  this->SetVisibleExtent(img::Extent(size_in_px, center_in_px));
+}
+
 void MapIso::SetVisibleExtent(const img::Extent& vis_extent)
 {
 
@@ -520,8 +552,8 @@ void MapIso::SetVisibleExtent(const img::Extent& vis_extent)
     mh_=xtal_map_->Extract(visible_extent_);
     octree_->SetNewMap(mh_);
     this->MakeOctreeDirty();
+    octree_->SetVisibleExtent(visible_extent_);    
   }
-  octree_->SetVisibleExtent(visible_extent_);
   this->FlagRebuild();
 }
 

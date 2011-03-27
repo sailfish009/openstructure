@@ -36,10 +36,10 @@ namespace ost { namespace img {
 
 PixelSampling::PixelSampling():
   dom_(SPATIAL),
-  spat_scale_(),
-  i_spat_scale_(),
-  freq_scale_(),
-  i_freq_scale_(),
+  spat_scale_mat_(),
+  i_spat_scale_mat_(),
+  freq_scale_mat_(),
+  i_freq_scale_mat_(),
   fac_(Vec3(1.0,1.0,1.0))
 {
   SetPixelSampling(Vec3(1.0,1.0,1.0));
@@ -47,10 +47,10 @@ PixelSampling::PixelSampling():
 
 PixelSampling::PixelSampling(const Vec3& sampling, DataDomain d, const Extent& e):
   dom_(d),
-  spat_scale_(),
-  i_spat_scale_(),
-  freq_scale_(),
-  i_freq_scale_(),
+  spat_scale_mat_(),
+  i_spat_scale_mat_(),
+  freq_scale_mat_(),
+  i_freq_scale_mat_(),
   fac_(Vec3(e.GetSize().GetWidth(),
 	     e.GetSize().GetHeight(),
 	     e.GetSize().GetDepth()))
@@ -62,10 +62,7 @@ PixelSampling::PixelSampling(const Vec3& sampling, DataDomain d, const Extent& e
                       0.0, 0.0, sampling[2]));
 }
 
-Vec3 PixelSampling::GetPixelSampling() const
-{
-  return (dom_==SPATIAL ? this->GetSpatialSampling() : this->GetFrequencySampling());
-}
+
 
 void PixelSampling::SetPixelSampling(const Vec3& d)
 {
@@ -75,16 +72,6 @@ void PixelSampling::SetPixelSampling(const Vec3& d)
                 : set_freq_scale(Mat3(d[0], 0.0, 0.0, 
                                       0.0, d[1], 0.0, 
                                       0.0, 0.0, d[2]));
-}
-  
-Vec3 PixelSampling::GetSpatialSampling() const
-{
-  return Vec3(spat_scale_(0, 0),spat_scale_(1, 1),spat_scale_(2, 2));
-}
-
-Vec3 PixelSampling::GetFrequencySampling() const
-{
-  return Vec3(freq_scale_(0, 0),freq_scale_(1, 1),freq_scale_(2, 2));
 }
 
 void PixelSampling::SetSpatialSampling(const Vec3& s)
@@ -110,57 +97,75 @@ void PixelSampling::SetDomain(DataDomain d)
 void PixelSampling::SetExtent(const Extent& e)
 {
   fac_=Vec3(e.GetSize().GetWidth(),
-	    e.GetSize().GetHeight(),
-	    e.GetSize().GetDepth());
+	          e.GetSize().GetHeight(),
+	          e.GetSize().GetDepth());
 }
 
 Vec3 PixelSampling::Point2Coord(const Point& p) const
 {
-  return dom_==SPATIAL ? spat_scale_*p.ToVec3() : freq_scale_*p.ToVec3();
+  return dom_==SPATIAL ? spat_scale_mat_*p.ToVec3() : freq_scale_mat_*p.ToVec3();
 }
 
 Vec3 PixelSampling::Coord2Point(const Vec3& c) const
 {
-  return dom_==SPATIAL ? i_spat_scale_*c : i_freq_scale_*c;
+  return dom_==SPATIAL ? i_spat_scale_mat_*c : i_freq_scale_mat_*c;
 }
 
 Vec3 PixelSampling::Vec2Coord(const Vec3& p) const
 {
-  return dom_==SPATIAL ? spat_scale_*p : freq_scale_*p;
+  return dom_==SPATIAL ? spat_scale_mat_*p : freq_scale_mat_*p;
 }
 
 
 void PixelSampling::set_spat_scale(const Mat3& dim)
 {
-  spat_scale_=dim;
-  i_spat_scale_=geom::Invert(spat_scale_);
-  freq_scale_=Mat3(i_spat_scale_(0, 0)/fac_[0], i_spat_scale_(0, 1)/fac_[1], 
-                   i_spat_scale_(0, 2)/fac_[2], i_spat_scale_(1, 0)/fac_[0], 
-                   i_spat_scale_(1, 1)/fac_[1], i_spat_scale_(1, 2)/fac_[2],
-                   i_spat_scale_(2, 0)/fac_[0], i_spat_scale_(2, 1)/fac_[1], 
-                   i_spat_scale_(2, 2)/fac_[2]);
-  i_freq_scale_=geom::Invert(freq_scale_);
+  spat_scale_mat_=dim;
+  spat_scale_vec_=Vec3(Length(dim*Vec3(1, 0, 0)),
+                       Length(dim*Vec3(0, 1, 0)),
+                       Length(dim*Vec3(0, 0, 1)));
+  i_spat_scale_mat_=geom::Invert(spat_scale_mat_);
+  i_spat_scale_vec_=Vec3(1.0/spat_scale_vec_.x, 1.0/spat_scale_vec_.y, 
+                         1.0/spat_scale_vec_.z);
+  freq_scale_mat_=Mat3(i_spat_scale_mat_(0, 0)/fac_[0], i_spat_scale_mat_(0, 1)/fac_[1], 
+                       i_spat_scale_mat_(0, 2)/fac_[2], i_spat_scale_mat_(1, 0)/fac_[0], 
+                       i_spat_scale_mat_(1, 1)/fac_[1], i_spat_scale_mat_(1, 2)/fac_[2],
+                       i_spat_scale_mat_(2, 0)/fac_[0], i_spat_scale_mat_(2, 1)/fac_[1], 
+                       i_spat_scale_mat_(2, 2)/fac_[2]);
+  freq_scale_vec_=Vec3(Length(freq_scale_mat_*Vec3(1, 0, 0)),
+                       Length(freq_scale_mat_*Vec3(0, 1, 0)),
+                       Length(freq_scale_mat_*Vec3(0, 0, 1)));
+  i_freq_scale_mat_=geom::Invert(freq_scale_mat_);
+  i_freq_scale_vec_=Vec3(1.0/freq_scale_vec_.x, 1.0/freq_scale_vec_.y, 
+                         1.0/freq_scale_vec_.z);
 }
 
 void PixelSampling::set_freq_scale(const Mat3& dim)
 {
-  freq_scale_ = dim;
-  i_freq_scale_ = geom::Invert(freq_scale_);
-  spat_scale_=Mat3(i_freq_scale_(0, 0)/fac_[0], i_freq_scale_(0, 1)/fac_[1], 
-                   i_freq_scale_(0, 2)/fac_[2], i_freq_scale_(1, 0)/fac_[0], 
-                   i_freq_scale_(1, 1)/fac_[1], i_freq_scale_(1, 2)/fac_[2],
-                   i_freq_scale_(2, 0)/fac_[0], i_freq_scale_(2, 1)/fac_[1], 
-                   i_freq_scale_(2, 2)/fac_[2]);
-  i_spat_scale_ = geom::Invert(spat_scale_);
+  freq_scale_mat_ = dim;
+  freq_scale_vec_ = Vec3(Length(dim*Vec3(1, 0, 0)), 
+                         Length(dim*Vec3(0, 1, 0)), 
+                         Length(dim*Vec3(0, 0, 1)));
+  i_freq_scale_mat_ = Invert(freq_scale_mat_);
+  i_freq_scale_vec_ = Vec3(1.0/freq_scale_vec_.x, 1.0/freq_scale_vec_.y, 
+                           1.0/freq_scale_vec_.z);
+  spat_scale_mat_=Mat3(i_freq_scale_mat_(0, 0)/fac_[0], i_freq_scale_mat_(0, 1)/fac_[1], 
+                       i_freq_scale_mat_(0, 2)/fac_[2], i_freq_scale_mat_(1, 0)/fac_[0], 
+                       i_freq_scale_mat_(1, 1)/fac_[1], i_freq_scale_mat_(1, 2)/fac_[2],
+                       i_freq_scale_mat_(2, 0)/fac_[0], i_freq_scale_mat_(2, 1)/fac_[1], 
+                       i_freq_scale_mat_(2, 2)/fac_[2]);
+  spat_scale_vec_ = Vec3(Length(spat_scale_mat_*Vec3(1, 0, 0)),
+                         Length(spat_scale_mat_*Vec3(0, 1, 0)),
+                         Length(spat_scale_mat_*Vec3(0, 0, 1)));
+  i_spat_scale_mat_ = geom::Invert(spat_scale_mat_);
+  i_spat_scale_vec_ = Vec3(1.0/spat_scale_vec_.x, 
+                           1.0/spat_scale_vec_.y, 
+                           1.0/spat_scale_vec_.z);
+  
 }
 
 void PixelSampling::SetFrequencySamplingMat(const Mat3& d)
 {
   set_freq_scale(d);
-}
-const Mat3& PixelSampling::GetFrequencySamplingMat() const
-{
-  return freq_scale_;
 }
 
 void PixelSampling::SetSpatialSamplingMat(const Mat3& d)
@@ -168,10 +173,7 @@ void PixelSampling::SetSpatialSamplingMat(const Mat3& d)
   set_spat_scale(d);
 }
 
-const Mat3& PixelSampling::GetSpatialSamplingMat() const
-{
-  return spat_scale_;
-}
+
 
 
 }} // namespace

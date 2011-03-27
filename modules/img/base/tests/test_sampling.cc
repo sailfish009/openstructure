@@ -34,8 +34,9 @@ using namespace ost::img;
 
 BOOST_AUTO_TEST_SUITE(ost_img_base)
 
-BOOST_AUTO_TEST_CASE(sampling)
+BOOST_AUTO_TEST_CASE(sampling_vec)
 {
+
   PixelSampling ps(geom::Vec3(2.0,4.0,1.0),SPATIAL,Extent(Size(4,10,20)));
   BOOST_CHECK(geom::Length(ps.GetPixelSampling()-geom::Vec3(2.0,4.0,1.0))<1e-5);
   BOOST_CHECK(geom::Length(ps.GetSpatialSampling()-geom::Vec3(2.0,4.0,1.0))<1e-5);

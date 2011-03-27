@@ -48,6 +48,10 @@ void ms_color_by_04(MapSlab *s, const Color& c1, const Color& c2)
   s->ColorBy(c1,c2);
 }
 
+
+void (MapIso::*center_on_a)(const geom::Vec3&, const geom::Vec3&)=&MapIso::CenterOn;
+void (MapIso::*center_on_b)(const geom::Vec3&, Real)=&MapIso::CenterOn;
+void (MapIso::*center_on_c)(const geom::Vec3&, const img::Size&)=&MapIso::CenterOn;
 } // anon ns
 
 void export_Map()
@@ -68,6 +72,9 @@ void export_Map()
     .def("GetMinLevel",&MapIso::GetMinLevel)
     .def("GetMaxLevel",&MapIso::GetMaxLevel)
     .def("GetMean", &MapIso::GetMean)
+    .def("CenterOn", center_on_a)
+    .def("CenterOn", center_on_b)
+    .def("CenterOn", center_on_c)    
     .def("EnableSlab", &MapIso::EnableSlab, arg("flag")=true)
     .def("SetSlabPlanes", &MapIso::SetSlabPlanes)
     .def("GetHistogram",&MapIso::GetHistogram)

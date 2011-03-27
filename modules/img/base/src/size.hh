@@ -29,7 +29,7 @@
 
 #include <iosfwd>
 #include <stdexcept>
-
+#include <ost/geom/vec3.hh>
 #include <ost/img/module_config.hh>
 
 namespace ost { namespace img {
@@ -45,6 +45,12 @@ class DLLEXPORT_OST_IMG_BASE Size {
 
   explicit Size(unsigned int w):
     w_(w<1 ? 1 : w), h_(1), d_(1)
+  { }
+  
+  explicit Size(const geom::Vec3& v):
+    w_(v.x<1.0 ? 1 : static_cast<int>(ceil(v.x))),
+    h_(v.y<1.0 ? 1 : static_cast<int>(ceil(v.y))),
+    d_(v.z<1.0 ? 1 : static_cast<int>(ceil(v.z)))
   { }
 
   Size(unsigned int w, unsigned int h):

@@ -35,6 +35,10 @@ using namespace ost;
 
 namespace {
 
+inline ImageHandle ci(int width, int height, int depth)
+{
+  return CreateImage(Size(width,height,depth));
+}
 inline ImageHandle c0() {return CreateImage();}
 
 inline ImageHandle c1a(const Extent& e) 
@@ -180,7 +184,7 @@ void export_ImageHandle()
     .def(self /= other<Function>())
     .def(self / other<Function>())
     ;
-
+  def("CreateImage",ci, (arg("width"), arg("height")=1, arg("depth")=1));
   def("CreateImage",c0);
   def("CreateImage",c1a);
   def("CreateImage",c2a);

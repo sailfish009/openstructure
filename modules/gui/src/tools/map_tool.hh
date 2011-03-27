@@ -20,7 +20,7 @@
 #define OST_GUI_MAP_TOOL_HH
 
 /*
-  Author: Ansgar Philippsen
+  Author: Ansgar Philippsen, Marco Biasini
 */
 
 #include <ost/gui/tools/tool.hh>
@@ -34,7 +34,14 @@ public:
   virtual bool CanOperateOn(gfx::NodePtrList nodes);
 
   virtual void MouseMove(const MouseEvent& event);
+  virtual void MousePress(const MouseEvent& event)
+  {
+    delta_=geom::Vec3(0,0,0);
+  }
+  virtual void DoubleClick(const MouseEvent& event);
   virtual QIcon GetIcon() const;
+private:
+  geom::Vec3 delta_;
 };
  
 }}

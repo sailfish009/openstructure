@@ -37,31 +37,39 @@ BOOST_AUTO_TEST_CASE(init_size)
 {
   // default
   Size s0;
-  BOOST_CHECK(s0[0]==1);
-  BOOST_CHECK(s0[1]==1);
-  BOOST_CHECK(s0[2]==1);
-  BOOST_CHECK(s0.GetDim()==1);
+  BOOST_CHECK_EQUAL(s0[0], 1);
+  BOOST_CHECK_EQUAL(s0[1], 1);
+  BOOST_CHECK_EQUAL(s0[2], 1);
+  BOOST_CHECK_EQUAL(s0.GetDim(), 1);
 
   // 1D
   Size s1(4);
-  BOOST_CHECK(s1[0]==4);
-  BOOST_CHECK(s1[1]==1);
-  BOOST_CHECK(s1[2]==1);
-  BOOST_CHECK(s1.GetDim()==1);
+  BOOST_CHECK_EQUAL(s1[0], 4);
+  BOOST_CHECK_EQUAL(s1[1], 1);
+  BOOST_CHECK_EQUAL(s1[2], 1);
+  BOOST_CHECK_EQUAL(s1.GetDim(), 1);
   
   // 2D
   Size s2(7,2);
-  BOOST_CHECK(s2[0]==7);
-  BOOST_CHECK(s2[1]==2);
-  BOOST_CHECK(s2[2]==1);
-  BOOST_CHECK(s2.GetDim()==2);
+  BOOST_CHECK_EQUAL(s2[0], 7);
+  BOOST_CHECK_EQUAL(s2[1], 2);
+  BOOST_CHECK_EQUAL(s2[2], 1);
+  BOOST_CHECK_EQUAL(s2.GetDim(), 2);
   
   // 3D
   Size s3(3,4,2);
-  BOOST_CHECK(s3[0]==3);
-  BOOST_CHECK(s3[1]==4);
-  BOOST_CHECK(s3[2]==2);
-  BOOST_CHECK(s3.GetDim()==3);
+  BOOST_CHECK_EQUAL(s3[0], 3);
+  BOOST_CHECK_EQUAL(s3[1], 4);
+  BOOST_CHECK_EQUAL(s3[2], 2);
+  BOOST_CHECK_EQUAL(s3.GetDim(), 3);
+  
+  // from Vec
+  
+  Size s4(geom::Vec3(1.1, 3.0, 4.5));
+  BOOST_CHECK_EQUAL(s4[0], 2);
+  BOOST_CHECK_EQUAL(s4[1], 3);
+  BOOST_CHECK_EQUAL(s4[2], 5);
+  
 }
 
 BOOST_AUTO_TEST_SUITE_END()
