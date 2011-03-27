@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include <ost/geom/geom.hh>
+#include <ost/geom/vec_mat_predicates.hh>
 
 #include "helper.hh"
 using namespace geom;
@@ -122,6 +123,12 @@ BOOST_AUTO_TEST_CASE(operators_vec3)
   // cross
   v2=Cross(v1,v3);
   BOOST_CHECK(match(v2,0.01,-0.02,0.01));
+  
+  Vec3 v4(4.25,-1.5,0.75);
+
+  BOOST_CHECK(vec3_is_close(Frac(v4), Vec3(0.25,-0.5,0.75)));
 }
+
+
 
 BOOST_AUTO_TEST_SUITE_END()

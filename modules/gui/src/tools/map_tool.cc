@@ -80,7 +80,8 @@ void MapTool::MouseMove(const MouseEvent& event)
                             event.GetLastPos().y(), 0);
               geom::Vec3 p2(-event.GetPos().x(), 
                              event.GetPos().y(), 0);
-              geom::Vec3 delta=scene.UnProject(p1)-scene.UnProject(p2);
+              geom::Vec3 delta=delta_+(scene.UnProject(p1)-scene.UnProject(p2));
+              delta_=Frac(delta);
               img::ImageHandle the_map=mi->GetMap();
               img::Extent vis=mi->GetVisibleExtent();
               img::Extent new_vis(vis.GetStart()+img::Point(delta), 

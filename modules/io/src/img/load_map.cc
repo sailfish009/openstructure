@@ -72,7 +72,8 @@ img::XtalMapPtr LoadXtalMap(const String& filename)
     throw IOException(loc.string()+": Invalid symmetry");
   }
   LOG_INFO("loaded xtal map with extent " << ih.GetExtent() << " and symmetry '" 
-            << uc.GetSymmetry()->GetHermannMauguinSymbol() << "'");
+            << uc.GetSymmetry()->GetHermannMauguinSymbol() << "'" 
+            << " unit cell size " << mrc_handler.GetUnitCellSize());
   return img::XtalMapPtr(new img::XtalMap(ih, mrc_handler.GetUnitCell(), 
                                           mrc_handler.GetUnitCellSize()));
 }
