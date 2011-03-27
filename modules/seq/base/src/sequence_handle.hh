@@ -89,6 +89,9 @@ public:
   
   /// \brief Get lenght of sequence, including gaps.
   int GetLength() const;
+  
+  /// \brief get index of substring
+  int GetIndex(const String& substr) const;
 
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
@@ -204,6 +207,9 @@ public:
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
 
+  /// \brief get index of substring
+  int GetIndex(const String& substr) const;
+  
   /// \brief get residue at position
   ///
   /// will return the residue view at the given sequence position or an invalid
@@ -255,6 +261,8 @@ public:
   
   void SetOneLetterCode(int position, char new_char);
   
+  
+  void Append(char olc);
   operator ConstSequenceHandle() const;
   /// \brief attach entity view to sequence
   ///

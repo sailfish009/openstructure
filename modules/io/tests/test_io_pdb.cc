@@ -17,8 +17,13 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <ost/test_utils/compare_files.hh>
+
+#include <ost/platform.hh>
+#include <ost/dyn_cast.hh>
 #include <ost/mol/mol.hh>
 #include <ost/conop/conop.hh>
+#include <ost/conop/rule_based_builder.hh>
+
 #include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/pdb_reader.hh>
 #include <ost/io/pdb_writer.hh>
@@ -444,6 +449,40 @@ BOOST_AUTO_TEST_CASE(res_name_mismatch_pedantic)
   PDBReader reader(fname, profile);
   mol::EntityHandle ent=mol::CreateEntity();
   BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(seqres_import)
+{
+  SetPrefixPath(getenv("OST_ROOT"));
+  String lib_path=GetSharedDataPath()+"/compounds.chemlib";
+  conop::CompoundLibPtr compound_lib;  
+  try {
+    compound_lib=conop::CompoundLib::Load(lib_path);
+  } catch(...) {
+    std::cout << "WARNING: skipping SEQRES import unit test. " 
+              << "Rule-based builder is required" << std::endl;
+    return;    
+  }
+  conop::RuleBasedBuilderPtr rbb(new conop::RuleBasedBuilder(compound_lib));
+  conop::Conopology::Instance().RegisterBuilder(rbb, "RBB");
+  conop::Conopology::Instance().SetDefaultBuilder("RBB");
+
+  String fname("testfiles/pdb/seqres.pdb");
+  IOProfile profile;
+  PDBReader reader(fname, profile);
+  reader.SetReadSeqRes(true);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_NO_THROW(reader.Import(ent));
+  seq::SequenceList seqres=reader.GetSeqRes();
+  BOOST_CHECK_EQUAL(seqres.GetCount(), 1);
+  BOOST_CHECK_EQUAL(seqres[0].GetName(), String("A"));
+  BOOST_CHECK_EQUAL(seqres[0].GetString(), 
+                    String("GSNIGETLGEKWKSRLNALGKSEFQIYKKSGIQEVDRTLAKEGIKRGETDHH"
+                           "AVSRGSAKLRWFVERNLVTPEGKVVDLGCGRGGWSYYCGGLKNVREVKGLTK"
+                           "GGPGHEEPIPMSTYGWNLVRLQSGVDVFFIPPERCDTLLCDIGESSPNPTVE"
+                           "AGRTLRVLNLVENWLSNNTQFCVKVLNPYMPSVIEKMEALQRKHGGALVRNP"
+                           "LSRNSTHEMYWVSNASGNIVSSVNMISRMLINRFTMRHKKATYEPDVDLGSG"
+                           "TRNIGIESETPNLDIIGKRIEKIKQEHETSWHYDQ"));
 }
 
 

@@ -25,7 +25,7 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <ost/string_ref.hh>
-
+#include <ost/seq/sequence_list.hh>
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/entity_handle.hh>
 #include <ost/mol/chain_handle.hh>
@@ -58,8 +58,12 @@ public:
 
   void Import(mol::EntityHandle& ent,
 	      const String& restrict_chains="");
-
+  void SetReadSeqRes(bool flag) { read_seqres_=flag; }
+  bool GetReadSeqRes() const { return read_seqres_; }
+  
+  seq::SequenceList GetSeqRes() const { return seqres_; }
 private:
+  void ParseSeqRes(const StringRef& line, int line_num);
   void ClearState();
   void AssignSecStructure(mol::EntityHandle ent);
   void ParseAndAddAtom(const StringRef& line, int line_num,
@@ -99,6 +103,9 @@ private:
   IOProfile profile_;
   bool charmm_style_;
   bool warned_name_mismatch_;
+  bool read_seqres_;
+  bool warned_rule_based_;
+  seq::SequenceList seqres_;
 };
 
 }}

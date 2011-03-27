@@ -354,6 +354,18 @@ const String& SequenceHandle::GetName() const
   this->CheckValidity();
   return Impl()->GetName();
 }
+void SequenceHandle::Append(char olc)
+{
+  this->CheckValidity();
+  Impl()->Append(olc);
+}
+
+int ConstSequenceHandle::GetIndex(const String& substr) const
+{
+  this->CheckValidity();
+  return Impl()->GetIndex(substr);
+}
+
 
 const String& SequenceHandle::GetString() const
 {
@@ -379,5 +391,11 @@ GenericPropContainerImpl* SequenceHandle::GpImpl()
 const GenericPropContainerImpl* SequenceHandle::GpImpl() const
 {
   return Impl().get();
+}
+
+int SequenceHandle::GetIndex(const String& substr) const
+{
+  this->CheckValidity();
+  return Impl()->GetIndex(substr);
 }
 }}

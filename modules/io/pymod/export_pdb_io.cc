@@ -66,6 +66,9 @@ void export_pdb_io()
     .def("HasNext", &PDBReader::HasNext)
     .def("Import", &PDBReader::Import, 
          X_import(args("entity", "restrict_chains")))
+    .add_property("read_seqres", &PDBReader::GetReadSeqRes, 
+                  &PDBReader::SetReadSeqRes)
+    .add_property("seqres", &PDBReader::GetSeqRes)
   ;
   
   class_<PDBWriter, boost::noncopyable>("PDBWriter", init<String, const IOProfile&>())

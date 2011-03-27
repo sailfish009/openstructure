@@ -87,7 +87,8 @@ public:
   ///
   /// \sa #SetOffset
   int GetOffset() const;
-
+  
+  int GetIndex(const String& substr) const;
   /// \brief Set sequence offset
   ///
   /// By default the sequence offset is zero, i.e. the beginning of the sequence
@@ -133,6 +134,9 @@ public:
 
   /// \brief whether the sequence has an attached view
   bool HasAttachedView() const;
+  
+  void Append(char olc);
+  
 private:
 
   /// \brief       Recalculates gap shifts from sequence.

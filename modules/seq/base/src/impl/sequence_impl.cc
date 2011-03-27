@@ -61,6 +61,32 @@ SequenceImplPtr SequenceImpl::FromString(const String& seq_name,
   throw InvalidSequence();
 }
 
+void SequenceImpl::Append(char olc)
+{
+  seq_string_.push_back(olc);
+  if (olc=='-') {
+    if (seq_string_.size()>1 && 
+        seq_string_[seq_string_.size()-2]=='-') {
+      shifts_.back().shift++;
+    } else {
+      Shift new_shift;
+      new_shift.start=seq_string_.size()-1;
+      new_shift.shift=1;
+      shifts_.push_back(new_shift);
+    }
+  }
+
+}
+
+int SequenceImpl::GetIndex(const String& substr) const
+{
+  size_t pos=seq_string_.find(substr);
+  if (pos==String::npos) {
+    return -1;
+  }
+  return pos;
+}
+
 void SequenceImpl::SetString(const String& seq)
 {
   if (SequenceImpl::IsSequenceStringSane(seq)) {

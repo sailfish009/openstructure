@@ -190,4 +190,6 @@ void export_Residue()
     .def(vector_indexing_suite<ResidueHandleList>())
     .def(ost::VectorAdditions<ResidueHandleList>())    
   ;
+  
+  def("InSequence", &InSequence);
 }

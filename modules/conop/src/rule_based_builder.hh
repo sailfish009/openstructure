@@ -121,6 +121,8 @@ public:
   /// \brief Check whether the residue has all required atoms. This does not
   ///        include hydrogens and leaving atoms such as the terminal OXT.
   virtual bool IsResidueComplete(const mol::ResidueHandle& residue);
+  
+  CompoundLibPtr GetCompoundLib() const { return compound_lib_; }
 private:
   CompoundLibPtr      compound_lib_;
   CompoundPtr         last_compound_;
@@ -137,7 +139,7 @@ private:
 
 };
 
-
+typedef boost::shared_ptr<RuleBasedBuilder> RuleBasedBuilderPtr;
 
 }}
 

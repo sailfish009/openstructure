@@ -86,7 +86,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
             fault_tolerant=None, load_multi=False, quack_mode=None,
             join_spread_atom_records=None, calpha_only=None,
             profile='DEFAULT', remote=False, dialect=None,
-            strict_hydrogens=None):
+            strict_hydrogens=None, seqres=False):
   """
   Load PDB file from disk and returns one or more entities. Several options 
   allow to customize the exact behaviour of the PDB import. For more information 
@@ -118,6 +118,9 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
 
   :param dialect: Specifies the particular dialect to use. If set, overrides 
     the value of :attr:`IOProfile.dialect`
+
+  :param seqres: Whether to read SEQRES records. If set to true, the loaded 
+    entity and seqres entry will be returned as a tuple.
 
   :type dialect: :class:`str`
   
@@ -162,6 +165,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
     builder.dialect=conop.CHARMM_DIALECT
   builder.strict_hydrogens=prof.strict_hydrogens
   reader=PDBReader(filename, prof)
+  reader.read_seqres=seqres
   try:
     if load_multi:
       ent_list=[]
@@ -180,6 +184,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
         conop_inst.ConnectAll(builder, ent, 0)
       else:
         raise IOError("File doesn't contain any entities")
+      if seqres:
+        return ent, reader.seqres
       return ent
   except:
     raise
