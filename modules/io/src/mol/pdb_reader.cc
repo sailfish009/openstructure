@@ -151,9 +151,12 @@ void PDBReader::ParseSeqRes(const StringRef& line, int line_num)
     conop::CompoundPtr compound=comp_lib->FindCompound(trimmed.str(), 
                                                        conop::Compound::PDB);
     if (!compound) {
-      LOG_WARNING("unknown residue '" << trimmed << "' in SEQRES record. "
-                  "Setting one-letter-code to X");
-      curr_seq.Append('X');
+      if (rname!=StringRef("UNK", 3)) {
+     
+        LOG_WARNING("unknown residue '" << trimmed << "' in SEQRES record. "
+                    "Setting one-letter-code to '?'");
+      }
+      curr_seq.Append('?');
       continue;
     }
     curr_seq.Append(compound->GetOneLetterCode());

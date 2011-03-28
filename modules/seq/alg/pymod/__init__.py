@@ -17,14 +17,13 @@ def AlignToSEQRES(chain, seqres):
   """
   from ost import seq
   from ost import mol
-  residues=chain.residues
+  view=chain.Select('ligand=false and peptide=true')
+  residues=view.residues
   if len(residues)==0:
-    return None
+    return seq.CreateAlignment()
   fragments=[residues[0].one_letter_code]
   for r1, r2 in zip(residues[:-2], residues[1:]):
-    if not r2.IsPeptideLinking() or r2.IsLigand():
-      continue
-    if not mol.InSequence(r1, r2):
+    if not mol.InSequence(r1.handle, r2.handle):
       fragments.append('')
     fragments[-1]+=r2.one_letter_code
   ss=str(seqres)
