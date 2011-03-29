@@ -20,6 +20,8 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
+#include <ost/export_helper/pair_to_tuple_conv.hh>
+
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/query.hh>
 #include <ost/mol/mol.hh>
@@ -184,6 +186,8 @@ void export_EntityView()
     .def("GetBounds", &EntityView::GetBounds)
     .add_property("bounds", &EntityView::GetBounds)    
   ;
+  to_python_converter<std::pair<EntityView, EntityView>, 
+                      PairToTupleConverter<EntityView, EntityView> >();  
   def("Union", &Union);
   def("Difference", &Difference);
   def("Intersection", &Intersection);

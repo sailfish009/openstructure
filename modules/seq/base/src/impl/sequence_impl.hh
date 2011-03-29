@@ -137,6 +137,15 @@ public:
   
   void Append(char olc);
   
+  char& operator[](size_t index)
+  {
+    return seq_string_[index];
+  }
+  char operator[](size_t index) const
+  {
+    return seq_string_[index];
+  }
+  
 private:
 
   /// \brief       Recalculates gap shifts from sequence.
@@ -160,7 +169,7 @@ private:
   std::list<Shift>    shifts_;
   bool                editing_;
   int                 offset_;
-  mol::EntityView          attached_view_;
+  mol::EntityView     attached_view_;
 };
 
 /// \internal

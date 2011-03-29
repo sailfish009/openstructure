@@ -357,3 +357,22 @@ an alignment:
     
     If master is set to -1, all sequences in the region are affected, otherwise 
     only the sequence at index equal to master is shifted.
+  
+  .. method:: GetMatchingBackboneViews(index1=0, index2=1)
+  
+    Returns a tuple of entity views containing matching backbone atoms for the 
+    two sequences at index1 and index2, respectively. For each aligned column in
+    the alignment, backbone atoms are added to the view if both aligned residues 
+    have them. It is guaranteed that the two views contain the same number of 
+    atoms and that the order of the atoms in the two views is the same.
+    
+    The output of this function can be used to superpose two structures with
+    :func:`~ost.mol.alg.SuperposeSVD`.
+    
+    
+    :param index1: The index of the first sequence
+    
+    :param index2: The index of the second sequence.
+    
+    :raises: In case one of the two sequences doesn't have an attached view, a 
+       :exc:`RuntimeError` is raised.

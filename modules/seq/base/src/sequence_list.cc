@@ -72,6 +72,12 @@ SequenceList::Iterator SequenceList::End() const
   return SequenceList::Iterator(impl_->End(), impl_->End());
 }
 
+SequenceHandle SequenceList::FindSequence(const String& name) const
+{
+  this->CheckValidity();
+  return SequenceHandle(impl_->FindSequence(name));
+}
+
 bool SequenceList::IsValid() const
 {
   return impl_.get()!=NULL;
@@ -224,6 +230,12 @@ ConstSequenceList ConstSequenceList::Slice(int first, int n) const
 {
   this->CheckValidity();
   return ConstSequenceList(impl_->Slice(first, n));
+}
+
+ConstSequenceHandle ConstSequenceList::FindSequence(const String& name) const
+{
+  this->CheckValidity();
+  return ConstSequenceHandle(impl_->FindSequence(name));
 }
 
 ConstSequenceList DLLEXPORT_OST_SEQ CreateConstSequenceList()
