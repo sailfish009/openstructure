@@ -258,8 +258,14 @@ The CompoundLib may be created from a MM CIF dictionary. The latest dictionary
 can be found on the `wwPDB site <http://www.wwpdb.org/ccd.html>`_. 
 
 After downloading the file in MM CIF use the :program:`chemdict_tool` to convert
-the MM CIF  dictionary into our internal format.
+the MM CIF  dictionary into our internal format. 
 
 .. code-block:: bash
   
   chemdict_tool create <components.cif> <compounds.chemlib>
+  
+If you are working with CHARMM trajectory files, you will also have to add the definitions for CHARMM. Assuming your are in the top-level source directory of OpenStructure, this can be achieved by:
+
+.. code-block:: bash
+
+  chemdict_tool update modules/conop/data/charmm.cif <compounds.chemlib> charmm
