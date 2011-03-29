@@ -620,9 +620,11 @@ The Handle Classes
     
     :type: :class:`ResidueHandle`
   
-  .. attribute:: is_hetatm
+  .. attribute:: is_hetatom
   
-    Indicates whether this atom is a hetatm.
+    Indicates whether this atom is a *HETATM*. When loading a structure from a 
+    PDB file, all non-standard aminoacid and nucleotide atoms as well as ligands 
+    are marked as HETATM. 
     
   .. attribute:: bonds
     
@@ -740,7 +742,7 @@ The Handle Classes
 
   .. method:: IsHetAtom()
     
-    See :attr:`is_hetatm`
+    See :attr:`is_hetatom`
     
     :rtype: bool
 
