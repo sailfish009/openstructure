@@ -3,9 +3,10 @@ Editors
 
 .. currentmodule:: ost.mol
 
-The structure, topology and connectivity of entities is edited via editors. This 
-includes operations such as changing atom positions, connecting atoms with bonds 
-as well as adding and removing chains, residues and atoms. 
+The structure, topology and connectivity of :class:`entities <EntityHandle>` is 
+edited via editors. This includes operations such as changing atom positions, 
+connecting atoms with bonds as well as adding and removing chains, residues and 
+atoms. There are two flavors of editors, one for the internal coordinate system (:class:`ICSEditor`) and one for the external coordinate system (:class:`XCSEditor`).
 
 Edit Modes
 --------------------------------------------------------------------------------
@@ -112,8 +113,8 @@ euclidian space.
    
   .. method:: ApplyTransform(transform)
   
-     Apply a transformation the entity transform. The entity transform is a
-     global transformation applied to all atoms.
+     Apply a transformation to the entity. The transformation is applied to all 
+     atoms positions.
      
      :param transform: The transformation to be applied
      :type  transform: :class:`geom.Mat4`
@@ -149,17 +150,88 @@ euclidian space.
   
 Editor for the Internal Coordinate System
 --------------------------------------------------------------------------------
+
 The :class:`ICSEditor` is used to manipulate the internal coordinate system that
-is defined by bond lengths and angles. By default the internal coordinate system
-is  not calculates. However, upon requesting an :class:`ICSEditor` for the first
-time, the internal coordinate system is initialized. This involves the build-up
-of a  directed-graph for the bond network as well as calculating the internal 
-coordinate matrices.
+is defined by bond lengths and angles. You can create an editor with the 
+:class:`~EntityHandle.EditICS` method of the :class:`EntityHandle`.
 
 The use :class:`XCSEditor` and :class:`ICSEditor` are mutually exclusive. This
 means that whenever a :class:`XCSEditor` has pending changes, the results of
 using an :class:`ICSEditor` is undefined and vice versa.
 
+.. note:: 
+
+  For speed reasons, the internal coordinate system is not initialised until the 
+  first call to :meth:`EntityHandle.EditICS`. This involves the build-up of a  
+  directed-graph for the bond network as well as calculating the internal  
+  coordinate matrices.
+
 .. class:: ICSEditor
    
-   Inherits :class:`EditorBase`
+  Inherits :class:`EditorBase`
+  
+  .. method:: SetTorsionAngle(torsion, angle)
+    
+    Set the angle of the given torsion. If the edit mode of the editor is set 
+    to buffered, the external coordinates remain unchanged. If set to 
+    unbuffered, the external coordinates are immediately recalculated.
+    
+    :see: :meth:`UpdateICS`
+    
+    :param torsion: A valid torsion
+    
+    :type torsion: :class:`TorsionHandle`
+    
+    :param angle: The angle in radians
+    
+    :type angle: :class:`float`
+    
+    :raises: :exc:`RuntimeError` when the torsion handle is invalid
+  
+  .. method:: UpdateXCS()
+  
+    Apply all remaining changes to the internal coordinate system and 
+    recalculate external coordinates. In unbuffered edit mode, calling this 
+    method has no effect.
+    
+    
+  .. method:: SetBondLength(bond, length)
+  
+    Sets the length of a bond. If the edit mode of the editor is set 
+    to buffered, the external coordinates remain unchanged. If set to 
+    unbuffered, the external coordinates are immediately recalculated.
+    
+    :see: :meth:`UpdateICS`
+    
+    :param bond: A valid bond handle
+    
+    :type bond: :class:`BondHandle`
+    
+    :param length: The bond length in Angstroem.
+    
+    :type length: :class:`float`
+    
+    :raises: :exc:`RuntimeError` when the bond handle is invalid
+
+  .. method:: SetAngle(atom1, atom2, atom3, angle)
+  
+    Sets the angle between 3 atoms. The first atom must be connected to the 
+    second, the second to the third with a bond. If the edit mode of the editor 
+    is set to buffered, the external coordinates remain unchanged. If set to 
+    unbuffered, the external coordinates are immediately recalculated.
+    
+    :see: :meth:`UpdateICS`
+    
+    :param atom1: The first atom. Must be valid
+    :type atom1: :class:`AtomHandle`
+    
+    :param atom2: The second atom. Must be valid
+    :type atom2: :class:`AtomHandle`
+    
+    :param atom3: The third atom. Must be valid
+    :type atom3: :class:`AtomHandle`
+    
+    :param angle: The angle in radians
+    
+    :raises: :exc:`RuntimeError` when one of the atoms is invalid or there is no 
+       bond between atom1 and atom2 or atom2 and atom3.
