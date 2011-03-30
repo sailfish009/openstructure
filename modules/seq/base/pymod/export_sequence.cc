@@ -21,6 +21,8 @@
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
+
+#include <ost/export_helper/pair_to_tuple_conv.hh>
 #include <ost/generic_property.hh>
 #include <ost/export_helper/generic_property_def.hh>
 #include <ost/info/info.hh>
@@ -206,6 +208,7 @@ void const_seq_handle_def(O& bp_class)
     .def("GetLength", &C::GetLength)
     .def("GetResidue", &C::GetResidue)
     .def("GetOneLetterCode", &C::GetOneLetterCode)
+    .def("__iter__", iterator<C>())
     .def("__getitem__", &C::GetOneLetterCode)
     .def("GetOffset", &C::GetOffset)
     .def("Copy", &C::Copy)
@@ -297,8 +300,6 @@ void export_sequence()
     .def("Copy", &AlignmentHandle::Copy)
     .def("ToString", &AlignmentHandle::ToString)
     .def("GetLength", &AlignmentHandle::GetLength)
-    .def("GetMatchingBackboneViews", &AlignmentHandle::GetMatchingBackboneViews,
-         (arg("index1")=0, arg("index2")=1))
     .def("__len__", &AlignmentHandle::GetLength)
     .def("GetSequences", &AlignmentHandle::GetSequences)
     .def("GetCoverage", &AlignmentHandle::GetSequences)
@@ -357,7 +358,7 @@ void export_sequence()
     .def("__getitem__", &do_slice_b)
   ;
   implicitly_convertible<SequenceList, ConstSequenceList>();
-
+  
   def("CreateSequenceList", &CreateSequenceList);
   def("SequenceFromChain", seq_from_chain_a);
   def("SequenceFromChain", seq_from_chain_b);

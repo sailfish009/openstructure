@@ -58,6 +58,8 @@ char ConstSequenceHandle::operator[](int index) const
 }
 
 
+
+
 void ConstSequenceHandle::CheckValidity() const
 {
   if (!impl_) {
@@ -398,4 +400,11 @@ int SequenceHandle::GetIndex(const String& substr) const
   this->CheckValidity();
   return Impl()->GetIndex(substr);
 }
+
+char SequenceHandle::operator[](size_t index) const
+{
+  this->CheckValidity();
+  return this->GetString()[index];
+}
+
 }}

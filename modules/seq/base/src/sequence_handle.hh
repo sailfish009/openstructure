@@ -49,6 +49,9 @@ public:
   friend class AlignmentHandle;
   friend class ConstSequenceList;
   friend class SequenceList;
+  
+  typedef String::const_iterator iterator;
+  
   /// \brief create invalid sequence handle
   /// 
   /// \sa IsValid()
@@ -121,6 +124,8 @@ public:
   
   char operator[](int index) const;
   
+  iterator begin() const { return this->GetString().begin(); }
+  iterator end() const { return this->GetString().end(); }
   
   /// \brief whether the sequence is valid
   bool IsValid() const;
@@ -162,6 +167,7 @@ private:
 class DLLEXPORT_OST_SEQ SequenceHandle : 
   public GenericPropContainer<SequenceHandle> {
 public:
+  typedef String::const_iterator iterator;
   friend class GenericPropContainer<SequenceHandle>;  
   friend class SequenceList;
 
@@ -261,6 +267,10 @@ public:
   
   void SetOneLetterCode(int position, char new_char);
   
+  char operator[](size_t index) const;
+    
+  iterator begin() const { return this->GetString().begin(); }
+  iterator end() const { return this->GetString().end(); }
   
   void Append(char olc);
   operator ConstSequenceHandle() const;
