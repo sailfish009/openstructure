@@ -67,7 +67,9 @@ The basic functionality of editors is implemented in the EditorBase class.
      :type  residue_name: string
      :returns:     :class:`ResidueHandle`
   
-  .. method:: InsertAtom(residue, atom_name, pos, element="", occupancy=1.0, b_factor=0.0, is_hetatm=False)
+  .. method:: InsertAtom(residue, atom_name, pos, 
+                         element="", occupancy=1.0, b_factor=0.0,
+                         is_hetatm=False)
   
     Insert new atom and add it to residue. For atoms with alternative atom
     locations use :meth:`InsertAltAtom`. If the element parameter is a valid 
@@ -85,7 +87,7 @@ The basic functionality of editors is implemented in the EditorBase class.
                       module rely on proper naming.
     :type atom_name:  string
     :param pos:       is the position of the atom in global coordinates
-    :type pos:        :class:`geom.Vec3`
+    :type pos:        :class:`~ost.geom.Vec3`
     :param element:   is the atom's element. If set to a a valid element,
                       atom properties such as mass, charge, radius are set 
                       based on default values for that element. If the element 
@@ -99,6 +101,74 @@ The basic functionality of editors is implemented in the EditorBase class.
     :param is_hetatm: whether the atom is an atom coming from a HETATM record.
     :type is_hetatm:  bool
     :returns:         :class:`AtomHandle`
+
+  .. method:: AddTorsion(name, atom1, atom2, atom3, atom4)
+  
+    Add a named torsion to the entity. The atoms must have bonds between 
+    atom1-atom2-atom3-atom4.
+
+    :param name: The torsion name, e.g. PHI or PSI
+    :type name: :class:`str`
+
+    :param atom1: First atom. must be valid
+    :type atom1: :class:`AtomHandle`
+
+    :param atom2: Second atom. must be valid
+    :type atom2: :class:`AtomHandle`
+
+    :param atom3: Third atom. must be valid
+    :type atom3: :class:`AtomHandle`
+
+    :param atom4: Fourth atom. must be valid
+    :type atom4: :class:`AtomHandle`
+      
+  .. method:: DeleteAtom(atom)
+  
+    Deletes the atom from the entity and removes all bonds and torsions this 
+    atom is involved.
+    
+    :param atom: A valid atom
+    :type atom: :class:`EntityHandle`
+    
+  .. method:: DeleteAllAtoms(residue)
+  
+    Deletes all atoms of this residue from the entity and remove all bonds and 
+    torsions for where an atom of the residue is involved.
+    
+    :type residue: :class:`ResidueHandle`
+    :param residue: A valid residue
+    
+    
+    :type atom: The atom to be deleted
+    
+    :type atom: :class:`EntityHandle`
+  
+  .. method:: DeleteResidue(residue)
+  
+    Deletes the residue, it's atoms and removes all bonds and torsion where one
+    atom of the residue is involved
+    
+    :type residue: :class:`ResidueHandle`
+    :param residue: A valid residue
+
+  .. method:: DeleteChain(chain)
+  
+    Delete the given chain, and all its residues
+    
+    :param chain: `A valid chain`
+    :type chain: :class:`ChainHandle`
+
+  .. method:: ReorderResidues(chain)
+              ReorderResidues()
+              
+    Reorder residues of the chain (the entity) such that their residues numbers 
+    are continuously increasing. This function might be useful in cases of PDB 
+    files that do not list the residues from N to C terminus but rather use the 
+    residue number to describe their position in the chain.
+    
+    :param chain: `A valid chain`
+    :type chain: :class:`ChainHandle`
+    
 
 Editor for the External Coordinate System
 --------------------------------------------------------------------------------
@@ -135,7 +205,7 @@ euclidian space.
      :param atom: must be a valid atom handle
      :type  atom: :class:`ost.mol.AtomHandle`
      :param pos: The new position
-     :type  pos: :class:`geom.Vec3`
+     :type  pos: :class:`~ost.geom.Vec3`
      
   .. method:: SetOriginalAtomPos(atom, pos)
      
@@ -146,7 +216,7 @@ euclidian space.
      :param atom: must be a valid atom handle
      :type  atom: :class:`ost.mol.AtomHandle`
      :param pos: The new untransformed position
-     :type  pos: :class:`geom.Vec3`
+     :type  pos: :class:`~ost.geom.Vec3`
   
 Editor for the Internal Coordinate System
 --------------------------------------------------------------------------------
@@ -176,7 +246,7 @@ using an :class:`ICSEditor` is undefined and vice versa.
     to buffered, the external coordinates remain unchanged. If set to 
     unbuffered, the external coordinates are immediately recalculated.
     
-    :see: :meth:`UpdateICS`
+    :see: :meth:`UpdateXCS`
     
     :param torsion: A valid torsion
     
