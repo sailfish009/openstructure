@@ -125,7 +125,14 @@ Entity API Reference
 
   Graphical representation of entitites. 
   
-  
+  :param name: Name of the entity
+  :type  name: str
+  :param render_mode: One of the :ref:`render-mode`.
+     Defaults to :obj:`SIMPLE`.
+  :param entity: The entity. Only atoms and bonds that part part of the entity
+     view (or handle) are rendered.
+  :type  entity: :class:`~ost.mol.EntityView`, or :class:`~ost.mol.EntityHandle`
+
   .. attribute:: name
   
     The name of the entity. Read-only. Also available as :meth:`GetName`
@@ -134,7 +141,14 @@ Entity API Reference
     
   .. attribute:: selection
   
-    The selection of the entity is rendered with a green halo. 
+    The selection of the entity is rendered with a green halo. As a shortcut, 
+    the property an also be set as a string. The following two statements are 
+    identical:
+    
+    .. code-block:: python
+    
+      go.selection=query
+      go.selection=go.view.Select(query)
     
     :type: :class:`~ost.mol.EntityView`
   
@@ -144,13 +158,6 @@ Entity API Reference
     
     :type: :class:`~ost.geom.Vec3`
   
-  :param name: Name of the entity
-  :type  name: str
-  :param render_mode: One of the :ref:`render-mode`.
-     Defaults to :obj:`SIMPLE`.
-  :param entity: The entity. Only atoms and bonds that part part of the entity
-     view (or handle) are rendered.
-  :type  entity: :class:`~ost.mol.EntityView`, or :class:`~ost.mol.EntityHandle`
   
   .. method:: SetRenderMode(render_mode)
               SetRenderMode(render_mode, view, keep=False)
@@ -212,3 +219,20 @@ Entity API Reference
     :param hint: When `prop` refers to a generic property, hint must be set to
        the hierarchy level at which the property is defined. 
     :type hint: str
+    
+  .. method:: UpdatePositions()
+  
+    Tells the graphical entity to update its vertex arrays. Use this functions 
+    when you modified coordinates of the underlying 
+    :class:`~ost.mol.EntityHandle` and would like to see the changes on the 
+    screen.
+    
+    :see: :meth:`UpdateViews`
+    
+  .. method:: UpdateView()
+  
+    Tells the graphical object to recalculate all views and vertex arrays. Use
+    this function when you added new chains, residues, atoms or bonds to the 
+    entity and would like to see the changes on the screen. 
+    
+    :see: :meth:`UpdatePositions`
