@@ -20,7 +20,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
 using namespace boost::python;
-
+#include <ost/mol/chem_class.hh>
 #include <ost/mol/mol.hh>
 #include <ost/export_helper/vector.hh>
 using namespace ost;
@@ -52,6 +52,7 @@ namespace {
 //                                       ResidueHandle::InsertAtom, 2, 3)
 void export_Residue()
 {
+  
   class_<ResNum>("ResNum", init<int>(args("num")))
     .def(init<int,char>(args("num", "ins_code")))
     .def("GetNum", &ResNum::GetNum)
@@ -72,6 +73,20 @@ void export_Residue()
     .def(self-int())    
   ;
   implicitly_convertible<int, ResNum>();
+  
+  scope().attr("PEPTIDE_LINKING")=char(ChemClass::PEPTIDE_LINKING);
+  scope().attr("D_PEPTIDE_LINKING")=char(ChemClass::D_PEPTIDE_LINKING);
+  scope().attr("L_PEPTIDE_LINKING")=char(ChemClass::L_PEPTIDE_LINKING);
+  scope().attr("RNA_LINKING")=char(ChemClass::RNA_LINKING);
+  scope().attr("DNA_LINKING")=char(ChemClass::DNA_LINKING);
+  scope().attr("NON_POLYMER")=char(ChemClass::NON_POLYMER);
+  scope().attr("L_SACCHARIDE")=char(ChemClass::L_SACCHARIDE);
+  scope().attr("D_SACCHARIDE")=char(ChemClass::D_SACCHARIDE);
+  scope().attr("SACCHARIDE")=char(ChemClass::SACCHARIDE);
+  scope().attr("WATER")=char(ChemClass::WATER);
+  scope().attr("UNKNOWN")=char(ChemClass::UNKNOWN);
+  
+
   {
     scope sec_struct_scope=class_<SecStructure>("SecStructure", init<>())
       .def(init<char>())

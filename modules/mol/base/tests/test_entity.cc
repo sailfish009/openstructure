@@ -65,8 +65,8 @@ EntityHandle make_test_entity()
   e.Connect(res2.FindAtom("N"), res2.FindAtom("CA"));
   e.Connect(res2.FindAtom("CA"), res2.FindAtom("C"));
   e.Connect(res2.FindAtom("C"), res2.FindAtom("O"));
-  res1.SetChemClass(ChemClass(ChemClass::LPeptideLinking));
-  res2.SetChemClass(ChemClass(ChemClass::LPeptideLinking));  
+  res1.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));
+  res2.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));  
   e.AddTorsion("PHI", res1.FindAtom("C"), res2.FindAtom("N"), 
                res2.FindAtom("CA"), res2.FindAtom("C"));
   return eh;
@@ -349,7 +349,7 @@ BOOST_AUTO_TEST_CASE(copy_residue_props)
   res.SetOneLetterCode('X');
   res.SetIsProtein(true);
   res.SetIsLigand(true);
-  ChemClass cl(ChemClass::LPeptideLinking);  
+  ChemClass cl(ChemClass::L_PEPTIDE_LINKING);  
   res.SetSecStructure(SecStructure(SecStructure::ALPHA_HELIX));
   res.SetChemClass(cl);
   EntityHandle copy=ent.Copy();

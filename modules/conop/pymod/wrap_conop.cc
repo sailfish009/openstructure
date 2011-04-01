@@ -24,10 +24,12 @@ void export_Compound();
 void export_Sanitizer();
 void export_Conop();
 void export_RingFinder();
+void export_AminoAcids();
 BOOST_PYTHON_MODULE(_conop)
 {
   export_Builder();
   export_Conop();
   export_Compound();
   export_RingFinder();
+  export_AminoAcids();
 }

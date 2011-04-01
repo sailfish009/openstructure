@@ -54,5 +54,6 @@ void export_Builder() {
   ;
   class_<RuleBasedBuilder, bases<Builder> >("RuleBasedBuilder", 
                                             init<const CompoundLibPtr&>())
+     .add_property("compound_lib", &RuleBasedBuilder::GetCompoundLib)
   ;
 }

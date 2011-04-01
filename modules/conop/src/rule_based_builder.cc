@@ -144,8 +144,8 @@ void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
   unknown_atoms_=this->HasUnknownAtoms(residue);
   if (unknown_atoms_) {
     LOG_WARNING("residue " << residue << " doesn't look like a standard " 
-                << residue.GetKey());
-    residue.SetChemClass(mol::ChemClass(mol::ChemClass::Unknown));
+                << residue.GetKey() << " (" << compound->GetFormula() << ")");
+    residue.SetChemClass(mol::ChemClass(mol::ChemClass::UNKNOWN));
     residue.SetOneLetterCode('?');
   }
 }

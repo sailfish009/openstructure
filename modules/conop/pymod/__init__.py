@@ -19,5 +19,41 @@
 from _conop import *
 
 def ConnectAll(ent):
+  '''
+  Uses the current default builder to connect the atoms of the entity, assign 
+  torsions, and fill in missing or correct erroneous information such as the 
+  chemical class of the residues and the atom's element.
+  
+  :param ent: A valid entity
+  :type ent: :class:`~ost.mol.EntityHandle`
+  '''
   conop_inst=Conopology.Instance()
   conop_inst.ConnectAll(conop_inst.GetBuilder("DEFAULT"), ent, 0)
+  
+def GetBuilder(name='DEFAULT'):
+  '''
+  Get registered builder by name
+  
+  :param name: The name of the builder
+  
+  :returns: The builder or None, if the builder doesn't exist
+  '''
+  return Conopology.Instance().GetBuilder(name)  
+
+def RegisterBuilder(builder, name):
+  '''
+  Register builder to OpenStructure
+  
+  :param builder: A instance of :class:`Builder`
+  
+  :param name: The name of the builder
+  '''
+  conop_inst=Conopology.Instance()
+  conop_inst.RegisterBuilder(builder, name)
+  
+def SetDefaultBuilder(builder_name):
+  '''
+  Set the builder with the given name as the default.
+  '''
+  conop_inst=Conopology.Instance()
+  conop_inst.SetDefaultBuilder(builder_name)

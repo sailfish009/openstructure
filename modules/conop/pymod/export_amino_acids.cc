@@ -47,6 +47,7 @@ void export_AminoAcids()
     .value("HIS", HIS)
     .value("PHE", PHE)
     .value("TRP", TRP)
+    .value("XXX", XXX)
     .export_values()
   ;
   

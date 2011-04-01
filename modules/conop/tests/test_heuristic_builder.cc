@@ -168,9 +168,9 @@ BOOST_AUTO_TEST_CASE(test_assign_torsions){
   ResidueHandle l1=make_leu(c);
   ResidueHandle a2=make_arg(c);
   ResidueHandle l3=make_leu(c);
-  l1.SetChemClass(ChemClass(ChemClass::LPeptideLinking));
-  a2.SetChemClass(ChemClass(ChemClass::LPeptideLinking));  
-  l3.SetChemClass(ChemClass(ChemClass::LPeptideLinking));
+  l1.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));
+  a2.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));  
+  l3.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));
   HeuristicBuilder heuristic_builder;
   for (AtomHandleIter i=e.AtomsBegin(),x=e.AtomsEnd(); i!=x; ++i) {
     heuristic_builder.FillAtomProps(*i);

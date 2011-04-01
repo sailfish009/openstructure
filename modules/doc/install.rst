@@ -197,7 +197,7 @@ or, to start the command-line interpreter:
 
   stage/bin/ost
   
-If you repeatedly use OpenStructure, it is recommended to add /path/to/dng/stage/bin to your path.
+If you repeatedly use OpenStructure, it is recommended to add /path/to/ost/stage/bin to your path.
 
 Getting the newest changes
 --------------------------------------------------------------------------------

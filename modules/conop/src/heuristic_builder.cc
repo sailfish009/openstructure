@@ -451,9 +451,9 @@ void HeuristicBuilder::FillResidueProps(mol::ResidueHandle residue) {
   } else {
     if (residue.FindAtom("N") && residue.FindAtom("CA") && 
         residue.FindAtom("C") && residue.FindAtom("O")) {
-      residue.SetChemClass(mol::ChemClass(mol::ChemClass::LPeptideLinking));
+      residue.SetChemClass(mol::ChemClass(mol::ChemClass::L_PEPTIDE_LINKING));
     } else {
-      residue.SetChemClass(mol::ChemClass(mol::ChemClass::Unknown));
+      residue.SetChemClass(mol::ChemClass(mol::ChemClass::UNKNOWN));
     }
 
     residue.SetOneLetterCode('?');

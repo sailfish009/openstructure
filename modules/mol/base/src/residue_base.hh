@@ -49,10 +49,10 @@ namespace ost { namespace mol {
 /// code is set to \c ?. 
 ///
 /// Residues have a \ref ChemClass "chemical class". For standard amino acids this
-/// class is ChemClass::LPeptideLinking, indicating that the residue is capable to
+/// class is ChemClass::L_PEPTIDE_LINKING, indicating that the residue is capable to
 /// participate in a peptide bond. For nucleotides, the chemical class is either
-/// ChemClass::RNALinking or ChemClass::DNALinking. For unknown compounds the 
-/// chemical class is ChemClass::Unknown.
+/// ChemClass::RNA_LINKING or ChemClass::DNA_LINKING. For unknown compounds the 
+/// chemical class is ChemClass::UNKNOWN.
 /// 
 /// When loading an entity from file, the one-letter and chemical class of a
 /// residue are assigned by the \ref conop::Builder "default builder".

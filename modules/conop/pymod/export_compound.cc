@@ -20,39 +20,105 @@
 #include <boost/python/register_ptr_to_python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
+
 #include <ost/conop/compound.hh>
 #include <ost/conop/compound_lib.hh>
-
+using namespace ost::mol;
 using namespace ost::conop;
 
+namespace {
+
+Compound::Dialect tr_dialect(const String& dialect)
+{
+  if (dialect=="PDB") {
+    return Compound::PDB;
+  }
+  if (dialect=="CHARMM") {
+    return Compound::CHARMM;
+  }
+  if (dialect=="OPLS") {
+    return Compound::OPLS;
+  }
+  if (dialect=="AMBER") {
+    return Compound::AMBER;
+  }
+  std::stringstream ss;
+  ss << "unknown compound dialect '" << dialect << "'";
+  throw std::runtime_error(ss.str());
+}
+
+void set_dialect(CompoundPtr compound, const String& dialect)
+{
+  compound->SetDialect(tr_dialect(dialect));
+}
+
+char get_chemclass(CompoundPtr compound)
+{
+  return char(compound->GetChemClass());
+}
+
+void set_chemclass(CompoundPtr compound, char cc)
+{
+  compound->SetChemClass(ChemClass(cc));
+}
+
+CompoundPtr find_compound(CompoundLibPtr comp_lib, 
+                          const String& tlc, const String& dialect)
+{
+  return comp_lib->FindCompound(tlc, tr_dialect(dialect));
+}
+
+}
 void export_Compound() {
-  class_<Compound>("Compound", no_init)
+
+  class_<Compound, CompoundPtr>("Compound", no_init)
     .def("GetID", &Compound::GetID, 
          return_value_policy<copy_const_reference>())
     .def("SetOneLetterCode", &Compound::SetOneLetterCode)
     .def("GetOneLetterCode", &Compound::GetOneLetterCode)
+
+    .add_property("three_letter_code", make_function(&Compound::GetID, return_value_policy<copy_const_reference>()))
+    .add_property("id", make_function(&Compound::GetID, return_value_policy<copy_const_reference>()))    
     .add_property("one_letter_code", &Compound::GetOneLetterCode, 
-                  &Compound::SetOneLetterCode)
+                  &Compound::SetOneLetterCode)                  
     .def("GetAtomSpecs", &Compound::GetAtomSpecs,
          return_value_policy<copy_const_reference>())
+    .def("bond_specs", make_function(&Compound::GetBondSpecs,
+         return_value_policy<copy_const_reference>()))         
+    .def("atom_specs", make_function(&Compound::GetAtomSpecs,
+         return_value_policy<copy_const_reference>()))
+    .def("AddAtom", &Compound::AddAtom)
+    .def("AddBond", &Compound::AddBond)
+    .def("IsPeptideLinking", &Compound::IsPeptideLinking)
+    .add_property("chem_class", &get_chemclass,
+                  &set_chemclass)
+    .add_property("formula",make_function(&Compound::GetFormula, 
+                  return_value_policy<copy_const_reference>()),
+                  &Compound::SetFormula)
+    .add_property("dialect", &Compound::GetDialectAsString, 
+                  &set_dialect)
   ;
   
   class_<AtomSpec>("AtomSpec", no_init)
     .def_readonly("element", &AtomSpec::element)
-    .def_readonly("name", &AtomSpec::name)    
+    .def_readonly("name", &AtomSpec::name)
     .def_readonly("alt_name", &AtomSpec::alt_name)
-    .def_readonly("is_leaving", &AtomSpec::is_leaving)    
+    .def_readonly("is_leaving", &AtomSpec::is_leaving)
+    .def_readonly("is_aromatic", &AtomSpec::is_aromatic)
+    .def_readonly("ordinal", &AtomSpec::ordinal)
   ;
   
   class_<BondSpec>("BondSpec", no_init)
     .def_readonly("atom_one", &BondSpec::atom_one)
     .def_readonly("atom_two", &BondSpec::atom_two)    
+    .def_readonly("border", &BondSpec::order)
+
   ;  
-  register_ptr_to_python<CompoundPtr>();  
-  
+
   class_<CompoundLib>("CompoundLib", no_init)
     .def("Load", &CompoundLib::Load, arg("readonly")=true).staticmethod("Load")
-    .def("FindCompound", &CompoundLib::FindCompound)
+    .def("FindCompound", &find_compound, 
+         (arg("tlc"), arg("dialect")="PDB"))
     .def("ClearCache", &CompoundLib::ClearCache)
   ;
   

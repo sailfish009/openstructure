@@ -495,7 +495,7 @@ The Handle Classes
   
     The chemical class of a residue is used to broadly categorize residues based 
     on their chemical properties. For example, peptides belong  to the 
-    `LPeptideLinking` or `DPeptideLinking` classes.
+    `L_PEPTIDE_LINKING` or `D_PEPTIDE_LINKING` classes.
   
   .. attribute:: sec_structure
   

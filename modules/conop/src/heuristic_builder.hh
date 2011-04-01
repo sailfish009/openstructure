@@ -43,7 +43,7 @@ public:
 
 public:
   ConnResEntry(const String& rname="", char single='\0',
-               const mol::ChemClass& chem_class=mol::ChemClass(mol::ChemClass::Unknown));
+               const mol::ChemClass& chem_class=mol::ChemClass(mol::ChemClass::UNKNOWN));
   int Check(const String& name1, const String& name2) const;
   bool HasAtom(const String& name);
   void AddAtom(const String& atom) { required_atoms_.push_back(atom); }

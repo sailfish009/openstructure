@@ -356,7 +356,7 @@ BOOST_AUTO_TEST_CASE(ent_from_view_residue_props)
   ResidueHandle res=edi.AppendResidue(ch, "DUMMY", mol::ResNum(666, '6'));
   res.SetOneLetterCode('X');
   res.SetIsProtein(true);
-  ChemClass cl(ChemClass::LPeptideLinking);  
+  ChemClass cl(ChemClass::L_PEPTIDE_LINKING);  
   res.SetSecStructure(SecStructure(SecStructure::ALPHA_HELIX));
   res.SetChemClass(cl);
   EntityHandle copy=mol::CreateEntityFromView(ent.Select(""), false);

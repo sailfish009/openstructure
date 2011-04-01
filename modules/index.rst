@@ -17,6 +17,7 @@ OpenStructure documentation
   img/alg/alg
   seq/base/seq
   seq/alg/seqalg
+
   io/io
   gfx/gfx
   gui/gui
@@ -41,7 +42,7 @@ Molecules
 
 **Input/Output**: :ref:`loading and saving molecules <mol-io>`
 
-**Connectivity**: :doc:`the conop module <conop/conop>`
+**Connectivity**: :doc:`the conop module <conop/conop>` | :doc:`compound library  <conop/compoundlib>`
 
 
 
