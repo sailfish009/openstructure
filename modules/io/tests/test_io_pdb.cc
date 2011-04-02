@@ -455,10 +455,8 @@ BOOST_AUTO_TEST_CASE(seqres_import)
 {
   SetPrefixPath(getenv("OST_ROOT"));
   String lib_path=GetSharedDataPath()+"/compounds.chemlib";
-  conop::CompoundLibPtr compound_lib;  
-  try {
-    compound_lib=conop::CompoundLib::Load(lib_path);
-  } catch(...) {
+  conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);  
+  if (!compound_lib) {
     std::cout << "WARNING: skipping SEQRES import unit test. " 
               << "Rule-based builder is required" << std::endl;
     return;    
