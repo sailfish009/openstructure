@@ -704,7 +704,23 @@ mol::EntityView Entity::GetRenderView(RenderMode::Type mode)
 
 void Entity::SetRenderMode(RenderMode::Type mode)
 {
+  EntityRenderer* rend = this->GetOrCreateRenderer(mode);
+  if(!rend) return;
+
+  // substract view from all renderers
+  for (RendererMap::iterator i=renderer_.begin(),
+       e=renderer_.end(); i!=e; ++i) {
+     impl::EntityRenderer* renderer=i->second;
+     renderer->ClearViews();
+     if (renderer==rend) {
+       renderer->AddView(qv_.GetEntityView());
+     }
+     renderer->UpdateViews();
+  }
+  this->ReapplyColorOps(); // done in rebuild?
+  this->FlagRebuild();  
   GfxObj::SetRenderMode(mode);
+  Scene::Instance().RenderModeChanged(GetName());  
 }
 
 void Entity::SetVisible(const mol::EntityView& view, bool visible){

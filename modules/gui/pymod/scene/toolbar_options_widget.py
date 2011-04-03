@@ -95,13 +95,13 @@ class ToolBarOptionsWidget(QtGui.QWidget):
       return True
     return False
   
-  def DoSomething(self, item):
+  def OnComboChange(self, item):
     """This abstract method is called whenever the View is updated.
     
      This abstract method must be implemented by all subclasses. 
      It can be used to do something ;-) whenever the combobox changes its value.
     """
-    raise NotImplementedError, "Subclasses must define DoSomething()"
+    raise NotImplementedError, "Subclasses must define OnComboChange()"
   
   def DoResize(self):
     item = self.__GetCurrentWidget()
@@ -132,7 +132,7 @@ class ToolBarOptionsWidget(QtGui.QWidget):
       self.current_action_.setChecked(True)
     else:
       self.current_action_=action
-    self.DoSomething(widget)
+    self.OnComboChange(widget)
   #Private Methods
   def __GetCurrentWidget(self):
       return self.stackedWidget.currentWidget();

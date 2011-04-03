@@ -55,7 +55,7 @@ class ColorOptionsWidget(ComboOptionsWidget):
 
     self.setMinimumSize(250,200)
     
-  def DoSomething(self, item):
+  def OnComboChange(self, item):
     scene_selection = gui.SceneSelection.Instance()
     if hasattr(item,"PrepareColoring"):
       item.PrepareColoring()
