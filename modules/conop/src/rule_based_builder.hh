@@ -117,7 +117,10 @@ public:
   virtual void FillResidueProps(mol::ResidueHandle residue);
 
   /// \brief whether the residue has unknown atoms
-  bool HasUnknownAtoms(mol::ResidueHandle res);                              
+  bool HasUnknownAtoms(mol::ResidueHandle res);
+  
+  mol::AtomHandleList GetUnknownAtoms(mol::ResidueHandle res);
+  
   /// \brief Check whether the residue has all required atoms. This does not
   ///        include hydrogens and leaving atoms such as the terminal OXT.
   virtual bool IsResidueComplete(const mol::ResidueHandle& residue);

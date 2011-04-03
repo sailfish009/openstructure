@@ -80,7 +80,9 @@ int main(int argc, char const *argv[])
     PrintUsage();
     return 0;
   }
-
+  if (!compound_lib) {
+    return 0;
+  }
   assert(compound_lib);
   conop::CompoundLibPtr in_mem_lib=compound_lib->Copy(":memory:");  
   compound_lib.reset();  

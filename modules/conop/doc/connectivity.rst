@@ -250,4 +250,11 @@ The RuleBasedBuilder class
       
       :param atom: The missing atom's name
       :type  atom: string
+    
+   .. method:: GetUnknownAtoms(residue)
+   
+     Returns the unknown atoms of this residue, that is all atoms that 
+     are not part of the compound lib definition.
+     
+     :rtype: list of :class:`~ost.mol.AtomHandle` instances
 
