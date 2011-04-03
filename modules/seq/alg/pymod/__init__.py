@@ -39,5 +39,40 @@ def AlignToSEQRES(chain, seqres):
   return seq.CreateAlignment(seq.CreateSequence('SEQRES', str(seqres)), 
                              seq.CreateSequence('atoms', aln_seq))
 
-    
+
+def AlignmentFromChainView(chain, handle_seq_name='handle', 
+                           view_seq_name='view'):
+  """
+  Creates and returns the sequence alignment of the given chain view to the 
+  chain handle. The alignment contains two sequences, the first containing all 
+  non-ligand peptide-linking residues, the second containing all non-ligand 
+  peptide-linking residues that are part of the view. 
   
+  :param chain: A valid chain
+  :type chain: :class:`~ost.mol.ChainView`
+  
+  :param handle_seq_name: Name of the handle sequence in the output alignment
+  :param view_seq_name: Name of the view sequence in the output alignment
+  :returns: The alignment
+  :rtype: :class:`~ost.seq.AlignmentHandle`
+  
+  """
+  from ost import seq
+  v0=chain.handle.Select('ligand=false and peptide=true')
+  v1=chain.Select('ligand=false and peptide=true')
+  s0=seq.CreateSequence(handle_seq_name, '')
+  s1=seq.CreateSequence(view_seq_name, '')
+  s0.AttachView(v0)
+  s1.AttachView(v1)
+  res0=v0.residues
+  res1=v1.residues
+  idx0, idx1=(0, 0)
+  while idx0<len(res0):
+    s0.Append(res0[idx0].one_letter_code)
+    if idx1<len(res1) and res1[idx1].handle==res0[idx0].handle:
+      s1.Append(res1[idx1].one_letter_code)
+      idx1+=1
+    else:
+      s1.Append('-')
+    idx0+=1
+  return seq.CreateAlignment(s0, s1)

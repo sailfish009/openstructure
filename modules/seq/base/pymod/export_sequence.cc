@@ -256,6 +256,7 @@ void export_sequence()
     .def("SetOffset", &SequenceHandle::SetOffset)
     .def("AttachView", attach_one)
     .def("AttachView", attach_two)
+    .def("Append", &SequenceHandle::Append)
     .def("SetString", &SequenceHandle::SetString)
     .add_property("string",
                   make_function(&SequenceHandle::GetString,

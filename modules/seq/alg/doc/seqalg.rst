@@ -1,4 +1,4 @@
-:mod:`mol.alg <ost.seq.alg>` -- Algorithms for Sequences
+:mod:`seq.alg <ost.seq.alg>` -- Algorithms for Sequences
 ================================================================================
 
 .. currentmodule:: ost.seq.alg
@@ -31,3 +31,5 @@
      guide the merging, the result is undefined.
 
 .. autofunction:: AlignToSEQRES
+
+.. autofunction:: AlignmentFromChainView
