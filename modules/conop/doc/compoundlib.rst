@@ -161,7 +161,7 @@ In this example we will translate the three-letter-codes given in the SEQRES rec
   seqres='ALA GLY MSE VAL PHE'
   sequence=''
   for tlc in seqres.split():
-    compound=compound_lib.FindCompound(compound_lib)
+    compound=compound_lib.FindCompound(tlc)
     if compound:
        sequence+=compound.one_letter_code
   print sequence # prints 'AGMVF'
