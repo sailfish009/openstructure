@@ -75,7 +75,7 @@ def _ParseAsaFile(entity, file, asa_atom):
       res_number = l[22:27]
       asa = l[54:63]
       atom_name = atom_name.strip()
-      chain_id = chain_id.strip()
+      chain_id = chain_id
       res_number = res_number.strip()
       asa = asa.strip()
       #print "res_number:", res_number
@@ -88,7 +88,10 @@ def _ParseAsaFile(entity, file, asa_atom):
         resNum = mol.ResNum(int(di["num"]), di["ins"])
       #print res_number, resNum.num, resNum.ins
       a = entity.FindAtom(chain_id, resNum, atom_name)
-      a.SetFloatProp(asa_atom, float(asa))
+      if(a.IsValid()):
+        a.SetFloatProp(asa_atom, float(asa))
+      else:
+        print chain_id, resNum, atom_name
       
 ## \brief Reads Area file (.rsa) and attach asa (absolute + relative) per residue to an entitiy
 #

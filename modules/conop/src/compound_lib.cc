@@ -308,7 +308,8 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
   if (i!=compound_cache_.end()) {
     return i->second;
   }
-  String query="SELECT id, tlc, olc, chem_class, dialect FROM chem_compounds"
+  String query="SELECT id, tlc, olc, chem_class, dialect, formula "
+               " FROM chem_compounds"
                " WHERE tlc='"+id+"' AND dialect='"+String(1, char(dialect))+"'";
   sqlite3_stmt* stmt;
   int retval=sqlite3_prepare_v2(conn_, query.c_str(), 
@@ -327,6 +328,8 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
       compound->SetOneLetterCode((sqlite3_column_text(stmt, 2))[0]);
       compound->SetChemClass(mol::ChemClass(sqlite3_column_text(stmt, 3)[0]));
       compound->SetDialect(Compound::Dialect(sqlite3_column_text(stmt, 4)[0]));
+      const char* f=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+      compound->SetFormula(f);
       // Load atoms and bonds      
       this->LoadAtomsFromDB(compound, pk);
       this->LoadBondsFromDB(compound, pk);

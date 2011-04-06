@@ -82,7 +82,7 @@ void ChemdictParser::OnDataItem(const StarDataItem& item)
       }
       // The type of water is set to "?". let's change it to water...
       if (compound_->GetID()=="HOH") {
-        compound_->SetChemClass(mol::ChemClass(mol::ChemClass::Water));
+        compound_->SetChemClass(mol::ChemClass(mol::ChemClass::WATER));
         compound_->SetOneLetterCode('.');
       } else {
         std::map<String, mol::ChemClass>::iterator i=tm_.find(type);
@@ -137,31 +137,31 @@ void ChemdictParser::InitTypeMap()
 {
   if (!tm_.empty())
     return;
-  tm_["L-PEPTIDE COOH CARBOXY TERMINUS"]=mol::ChemClass(mol::ChemClass::LPeptideLinking);
-  tm_["L-PEPTIDE NH3 AMINO TERMINUS"]=mol::ChemClass(mol::ChemClass::LPeptideLinking);   
-  tm_["D-PEPTIDE NH3 AMINO TERMINUS"]=mol::ChemClass(mol::ChemClass::DPeptideLinking);
-  tm_["L-SACCHARIDE 1,4 AND 1,4 LINKING"]=mol::ChemClass(mol::ChemClass::LSaccharide);
-  tm_["D-SACCHARIDE 1,4 AND 1,4 LINKING"]=mol::ChemClass(mol::ChemClass::DSaccharide);
-  tm_["L-SACCHARIDE"]=mol::ChemClass(mol::ChemClass::LSaccharide);
-  tm_["D-SACCHARIDE"]=mol::ChemClass(mol::ChemClass::DSaccharide);
-  tm_["SACCHARIDE"]=mol::ChemClass(mol::ChemClass::Saccharide);
-  tm_["D-PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::DPeptideLinking);
-  tm_["L-PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::LPeptideLinking);
-  tm_["L-PEPTIDE-LINKING"]=mol::ChemClass(mol::ChemClass::LPeptideLinking);
-  tm_["DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNALinking);
-  tm_["RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNALinking);
-  tm_["L-DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNALinking);
-  tm_["L-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNALinking);  
-  tm_["R-DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNALinking);
-  tm_["R-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNALinking);  
-  tm_["DNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::DNALinking);
-  tm_["PEPTIDE-LIKE"]=mol::ChemClass(mol::ChemClass::PeptideLinking);
-  tm_["PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::PeptideLinking);
-  tm_["PEPTIDE-LINKING"]=mol::ChemClass(mol::ChemClass::PeptideLinking);  
-  tm_["NON-POLYMER"]=mol::ChemClass(mol::ChemClass::NonPolymer);
-  tm_["RNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::RNALinking);
-  tm_["?"]=mol::ChemClass(mol::ChemClass::Unknown);  
-  tm_["WATER"]=mol::ChemClass(mol::ChemClass::Water);
+  tm_["L-PEPTIDE COOH CARBOXY TERMINUS"]=mol::ChemClass(mol::ChemClass::L_PEPTIDE_LINKING);
+  tm_["L-PEPTIDE NH3 AMINO TERMINUS"]=mol::ChemClass(mol::ChemClass::L_PEPTIDE_LINKING);   
+  tm_["D-PEPTIDE NH3 AMINO TERMINUS"]=mol::ChemClass(mol::ChemClass::D_PEPTIDE_LINKING);
+  tm_["L-SACCHARIDE 1,4 AND 1,4 LINKING"]=mol::ChemClass(mol::ChemClass::L_SACCHARIDE);
+  tm_["D-SACCHARIDE 1,4 AND 1,4 LINKING"]=mol::ChemClass(mol::ChemClass::D_SACCHARIDE);
+  tm_["L-SACCHARIDE"]=mol::ChemClass(mol::ChemClass::L_SACCHARIDE);
+  tm_["D-SACCHARIDE"]=mol::ChemClass(mol::ChemClass::D_SACCHARIDE);
+  tm_["SACCHARIDE"]=mol::ChemClass(mol::ChemClass::SACCHARIDE);
+  tm_["D-PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::D_PEPTIDE_LINKING);
+  tm_["L-PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::L_PEPTIDE_LINKING);
+  tm_["L-PEPTIDE-LINKING"]=mol::ChemClass(mol::ChemClass::L_PEPTIDE_LINKING);
+  tm_["DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
+  tm_["RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);
+  tm_["L-DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
+  tm_["L-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);  
+  tm_["R-DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
+  tm_["R-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);  
+  tm_["DNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
+  tm_["PEPTIDE-LIKE"]=mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);
+  tm_["PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);
+  tm_["PEPTIDE-LINKING"]=mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);  
+  tm_["NON-POLYMER"]=mol::ChemClass(mol::ChemClass::NON_POLYMER);
+  tm_["RNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);
+  tm_["?"]=mol::ChemClass(mol::ChemClass::UNKNOWN);  
+  tm_["WATER"]=mol::ChemClass(mol::ChemClass::WATER);
 }
 
 }}

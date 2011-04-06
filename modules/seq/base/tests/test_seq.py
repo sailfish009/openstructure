@@ -30,7 +30,10 @@ class TestSeq(unittest.TestCase):
     string_b=''.join([r.one_letter_code for r in b.residues])
     self.assertEqual(string_a, 'ABCDFGH')
     self.assertEqual(string_b, 'ABCDFGH')
- 
+  def testSeqIterBZDNG148(self):
+    s=seq.CreateSequence('A', 'abcdef')
+    for x in s: 
+      pass
   def testViewsFromSequences_02(self):
     seq_a=seq.CreateSequence("A", "ABCD-FGH")
     seq_a.AttachView(self.ent.Select('rname=A,B,C,D,F,G,H'))

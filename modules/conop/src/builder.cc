@@ -176,7 +176,7 @@ void Builder::GuessChemClass(mol::ResidueHandle res)
   if (!o.IsValid() || o.GetElement()!="O") return;
   if (this->IsBondFeasible(n, ca) && this->IsBondFeasible(ca, c) &&
       this->IsBondFeasible(c, o)) {
-    res.SetChemClass(mol::ChemClass(mol::ChemClass::PeptideLinking));
+    res.SetChemClass(mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING));
   }
 }
 

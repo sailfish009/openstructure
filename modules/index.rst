@@ -16,6 +16,8 @@ OpenStructure documentation
   img/base/img
   img/alg/alg
   seq/base/seq
+  seq/alg/seqalg
+
   io/io
   gfx/gfx
   gui/gui
@@ -42,7 +44,7 @@ Molecules
 
 **Input/Output**: :ref:`loading and saving molecules <mol-io>`
 
-**Connectivity**: :doc:`the conop module <conop/conop>`
+**Connectivity**: :doc:`the conop module <conop/conop>` | :doc:`compound library  <conop/compoundlib>`
 
 
 
@@ -58,7 +60,7 @@ Density Maps and Images
 Sequences and Alignments
 --------------------------------------------------------------------------------
 
-**Overview**: :doc:`sequence module <seq/base/seq>`
+**Overview**: :doc:`sequence module <seq/base/seq>` | :doc:`sequence algorithms <seq/alg/seqalg>`
 
 **Input/Output**: :ref:`loading and saving sequences <seq-io>`
 

@@ -35,7 +35,7 @@
    <Op ClassName="UniformColorOp" Index="5">
     <ColorOp>3  0 ishetatm=1 and ele=C</ColorOp>0 1 0 1</Op>
   </Preset>
-  <Preset Name="Property">
+  <Preset Name="Residue Type">
    <Op ClassName="UniformColorOp" Index="0">
     <ColorOp>3  0 rname=GLY,ALA,VAL,LEU,ILE</ColorOp>0.658824 0.658824  0.658824  1</Op>
    <Op ClassName="UniformColorOp" Index="1">

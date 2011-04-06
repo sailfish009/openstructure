@@ -53,7 +53,7 @@ class InspectorWidget(ToolBarOptionsWidget):
     
     self.setMinimumSize(250,215)
   #ToolBarOptionsWidget Method
-  def DoSomething(self, item):
+  def OnComboChange(self, item):
     self.DoResize()
         
   #Observer Methods    
@@ -84,14 +84,17 @@ class InspectorDialog(QtGui.QDialog):
     self.setLayout(self.layout)
     self.mywidget_ = InspectorWidget(self)
     self.layout.addWidget(self.mywidget_)
-    size_pol = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,QtGui.QSizePolicy.Expanding)
+    size_pol = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding,
+                                 QtGui.QSizePolicy.Expanding)
     self.setSizePolicy(size_pol)
     self.DoResize()
     
   def DoResize(self):
     if(hasattr(self, "mywidget_")):
-      self.setMinimumSize(self.mywidget_.minimumWidth(),self.mywidget_.minimumHeight())
-      self.resize(self.mywidget_.minimumWidth(),self.mywidget_.minimumHeight())
+      self.setMinimumSize(self.mywidget_.minimumWidth(),
+                          self.mywidget_.minimumHeight())
+      self.resize(self.mywidget_.minimumWidth(),
+                  self.mywidget_.minimumHeight())
     
   def ToggleHide(self,checked):
     self.setHidden(not self.isHidden())

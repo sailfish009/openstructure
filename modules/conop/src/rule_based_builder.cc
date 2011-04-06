@@ -82,6 +82,30 @@ bool RuleBasedBuilder::HasUnknownAtoms(mol::ResidueHandle res)
   return false;
 }
 
+mol::AtomHandleList RuleBasedBuilder::GetUnknownAtoms(mol::ResidueHandle res)
+{
+  mol::AtomHandleList unknown;
+  this->LookupCompound(res);
+  if (!last_compound_) {
+    return unknown;
+  }
+  this->ReorderAtoms(res, last_compound_);
+  AtomSpecList::const_iterator j=last_compound_->GetAtomSpecs().begin();
+  mol::AtomHandleList atoms=res.GetAtomList();
+  mol::AtomHandleList::iterator i=atoms.begin();
+  for (mol::AtomHandleList::iterator 
+       i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
+    if ((*i).Impl()->GetState()==std::numeric_limits<unsigned int>::max()) {
+      if (((*i).GetElement()=="H" || (*i).GetElement()=="D") && 
+          this->GetStrictHydrogenMode()==false) {
+        continue;
+      }
+      unknown.push_back(*i);
+    }
+  }
+  return unknown;
+}
+
 void RuleBasedBuilder::FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec) 
 {
   Conopology& conop_inst=Conopology::Instance();
@@ -144,8 +168,8 @@ void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
   unknown_atoms_=this->HasUnknownAtoms(residue);
   if (unknown_atoms_) {
     LOG_WARNING("residue " << residue << " doesn't look like a standard " 
-                << residue.GetKey());
-    residue.SetChemClass(mol::ChemClass(mol::ChemClass::Unknown));
+                << residue.GetKey() << " (" << compound->GetFormula() << ")");
+    residue.SetChemClass(mol::ChemClass(mol::ChemClass::UNKNOWN));
     residue.SetOneLetterCode('?');
   }
 }

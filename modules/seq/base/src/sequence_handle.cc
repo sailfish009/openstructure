@@ -58,6 +58,8 @@ char ConstSequenceHandle::operator[](int index) const
 }
 
 
+
+
 void ConstSequenceHandle::CheckValidity() const
 {
   if (!impl_) {
@@ -354,6 +356,18 @@ const String& SequenceHandle::GetName() const
   this->CheckValidity();
   return Impl()->GetName();
 }
+void SequenceHandle::Append(char olc)
+{
+  this->CheckValidity();
+  Impl()->Append(olc);
+}
+
+int ConstSequenceHandle::GetIndex(const String& substr) const
+{
+  this->CheckValidity();
+  return Impl()->GetIndex(substr);
+}
+
 
 const String& SequenceHandle::GetString() const
 {
@@ -380,4 +394,17 @@ const GenericPropContainerImpl* SequenceHandle::GpImpl() const
 {
   return Impl().get();
 }
+
+int SequenceHandle::GetIndex(const String& substr) const
+{
+  this->CheckValidity();
+  return Impl()->GetIndex(substr);
+}
+
+char SequenceHandle::operator[](size_t index) const
+{
+  this->CheckValidity();
+  return this->GetString()[index];
+}
+
 }}

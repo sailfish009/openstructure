@@ -24,11 +24,13 @@
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <ost/unit_cell.hh>
+#include <ost/dyn_cast.hh>
 #include <ost/profile.hh>
 #include <ost/log.hh>
 #include <ost/message.hh>
 
 #include <ost/conop/conop.hh>
+#include <ost/conop/rule_based_builder.hh>
 #include <ost/geom/mat3.hh>
 #include <ost/io/io_exception.hh>
 #include "pdb_reader.hh"
@@ -83,6 +85,8 @@ PDBReader::PDBReader(const boost::filesystem::path& loc,
 void PDBReader::Init(const boost::filesystem::path& loc)
 {
   warned_name_mismatch_=false;
+  read_seqres_=false;
+  warned_rule_based_=false;
   charmm_style_=profile_.dialect=="CHARMM";
   num_model_records_=0;
   if (boost::iequals(".gz", boost::filesystem::extension(loc))) {
@@ -99,6 +103,66 @@ void PDBReader::Init(const boost::filesystem::path& loc)
   hard_end_=false;
 }
 
+void PDBReader::ParseSeqRes(const StringRef& line, int line_num)
+{
+  conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
+  conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
+  if (!rbb) {
+    if (!warned_rule_based_) {
+      LOG_WARNING("SEQRES import requires the rule-based builder. Ignoring "
+                  "SEQRES records");      
+    }
+    warned_rule_based_=true;
+    return;
+  }
+  conop::CompoundLibPtr comp_lib=rbb->GetCompoundLib();  
+  if (!seqres_.IsValid()) {
+    seqres_=seq::CreateSequenceList();
+  }
+  if (line.size()<17) {
+    if (profile_.fault_tolerant) {
+      LOG_WARNING("invalid SEQRES record on line " << line_num 
+                  << ": record is too short");
+      return;
+    }
+    std::stringstream ss("invalid SEQRES record on line ");
+    ss << line_num <<": record is too short";
+    throw IOException(ss.str());
+  }
+  String chain(1, line[11]);
+  seq::SequenceHandle curr_seq;
+  if (seqres_.GetCount()==0 || 
+      seqres_[seqres_.GetCount()-1].GetName()!=chain) {
+    curr_seq=seq::CreateSequence(chain, "");
+    seqres_.AddSequence(curr_seq);
+
+  } else {
+    curr_seq=seqres_[seqres_.GetCount()-1];
+  }
+  for (int i=0; i<14; ++i) {
+    size_t start=19+i*4;
+    if (line.size()<start+3) {
+      return;
+    }
+    StringRef rname=line.substr(start, 3);
+    StringRef trimmed=rname.trim();
+    if (trimmed.empty()) {
+      return;
+    }
+    conop::CompoundPtr compound=comp_lib->FindCompound(trimmed.str(), 
+                                                       conop::Compound::PDB);
+    if (!compound) {
+      if (rname!=StringRef("UNK", 3)) {
+     
+        LOG_WARNING("unknown residue '" << trimmed << "' in SEQRES record. "
+                    "Setting one-letter-code to '?'");
+      }
+      curr_seq.Append('?');
+      continue;
+    }
+    curr_seq.Append(compound->GetOneLetterCode());
+  }
+}
 
 bool PDBReader::HasNext()
 {
@@ -118,6 +182,7 @@ bool PDBReader::HasNext()
          IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("OSTPRP", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("SEQRES", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6)))) {
        return true;
      } else if (IEquals(curr_line.rtrim(), StringRef("END", 3))) {
@@ -246,6 +311,9 @@ void PDBReader::Import(mol::EntityHandle& ent,
           if (!charmm_style_) {
             this->ParseStrandEntry(curr_line);
           }
+        }
+        if (IEquals(curr_line.substr(0, 6), StringRef("SEQRES", 6))) {
+          this->ParseSeqRes(curr_line, line_num_);
         }
         break;
       case 'O':
@@ -377,6 +445,7 @@ void PDBReader::ClearState()
 {
   curr_chain_=mol::ChainHandle();
   curr_residue_=mol::ResidueHandle();
+  seqres_=seq::SequenceList();
   chain_count_=0;
   residue_count_=0;
   atom_count_=0;

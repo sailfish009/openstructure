@@ -49,6 +49,9 @@ public:
   friend class AlignmentHandle;
   friend class ConstSequenceList;
   friend class SequenceList;
+  
+  typedef String::const_iterator iterator;
+  
   /// \brief create invalid sequence handle
   /// 
   /// \sa IsValid()
@@ -89,6 +92,9 @@ public:
   
   /// \brief Get lenght of sequence, including gaps.
   int GetLength() const;
+  
+  /// \brief get index of substring
+  int GetIndex(const String& substr) const;
 
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
@@ -118,6 +124,8 @@ public:
   
   char operator[](int index) const;
   
+  iterator begin() const { return this->GetString().begin(); }
+  iterator end() const { return this->GetString().end(); }
   
   /// \brief whether the sequence is valid
   bool IsValid() const;
@@ -159,6 +167,7 @@ private:
 class DLLEXPORT_OST_SEQ SequenceHandle : 
   public GenericPropContainer<SequenceHandle> {
 public:
+  typedef String::const_iterator iterator;
   friend class GenericPropContainer<SequenceHandle>;  
   friend class SequenceList;
 
@@ -204,6 +213,9 @@ public:
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
 
+  /// \brief get index of substring
+  int GetIndex(const String& substr) const;
+  
   /// \brief get residue at position
   ///
   /// will return the residue view at the given sequence position or an invalid
@@ -255,6 +267,12 @@ public:
   
   void SetOneLetterCode(int position, char new_char);
   
+  char operator[](size_t index) const;
+    
+  iterator begin() const { return this->GetString().begin(); }
+  iterator end() const { return this->GetString().end(); }
+  
+  void Append(char olc);
   operator ConstSequenceHandle() const;
   /// \brief attach entity view to sequence
   ///

@@ -196,6 +196,21 @@ BOOST_AUTO_TEST_CASE(seq_gaps)
   BOOST_CHECK_EQUAL(s.GetLastNonGap(),9);
 }
 
+BOOST_AUTO_TEST_CASE(seq_append_olc)
+{
+  SequenceHandle s=CreateSequence("S1", "");
+  // check if the shift-table gets setup properly
+  s.Append('-');
+  s.Append('-');
+  s.Append('a');
+  s.Append('b');
+  s.Append('-');
+  s.Append('c');
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(2), 0);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(3), 1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(5), 2);
+}
+
 BOOST_AUTO_TEST_CASE(seq_attach_view)
 {
   Fixture f;

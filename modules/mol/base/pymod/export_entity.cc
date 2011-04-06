@@ -89,8 +89,8 @@ void export_Entity()
   generic_prop_def<EntityBase>(ent_base);
   
   class_<EntityHandle, bases<EntityBase> >("EntityHandle", init<>())
-    .def("Select",select_query, arg("flags")=0)
-    .def("Select",select_string, arg("flags")=0)
+    .def("Select",select_query, (arg("query"), arg("flags")=0))
+    .def("Select",select_string, (arg("query"), arg("flags")=0))
     .def("FindChain", &EntityHandle::FindChain)
     .def("FindResidue", &EntityHandle::FindResidue)
     .def("FindAtom", &EntityHandle::FindAtom)

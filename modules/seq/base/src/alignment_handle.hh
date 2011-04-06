@@ -107,6 +107,8 @@ public:
   void AttachView(int seq_index, const mol::EntityView& view,
                   const String& chain_name);
 
+
+  mol::EntityViewPair GetMatchingBackboneViews(int idx0=0, int idx1=1) const;
   /// \brief set name of sequence
   void SetSequenceName(int seq_index, const String& name);
 
