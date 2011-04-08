@@ -609,15 +609,22 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
   LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
   mol::AtomHandle ah;
   if (curr_residue_.GetName()!=res_name.str()) {
-    if (!profile_.fault_tolerant) {
+    if (!profile_.fault_tolerant && alt_loc==' ') {
       std::stringstream ss;
       ss << "error on line " << line_num << ": "
          << "residue with number " << res_num << " has more than one name.";
       throw IOException(ss.str());
     }
     if (!warned_name_mismatch_) {
-      LOG_INFO("Residue with number " << res_num << " has more than one name."
-               "Ignoring atoms for everything but the first");      
+      if (alt_loc==' ') {
+        LOG_WARNING("Residue with number " << res_num << " has more than one name."
+                    "Ignoring atoms for everything but the first");        
+      } else {
+        LOG_WARNING("Residue with number " << res_num 
+                    << " contains a microheterogeneity. Everything but atoms for "
+                    << "the residue '" << curr_residue_.GetName() 
+                    << "' will be ignored");
+      }
     }
     warned_name_mismatch_=true;
     return;

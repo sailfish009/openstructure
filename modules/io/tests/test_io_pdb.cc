@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE(res_name_too_long)
 }
 
 
-BOOST_AUTO_TEST_CASE(res_name_mismatch_tolerant)
+BOOST_AUTO_TEST_CASE(res_name_mismatch_alt_loc)
 {
   String fname("testfiles/pdb/arg-glu-gln.pdb");
   IOProfile profile;
@@ -442,13 +442,38 @@ BOOST_AUTO_TEST_CASE(res_name_mismatch_tolerant)
   BOOST_CHECK_EQUAL(ent.GetAtomCount(), 11);
 }
 
-BOOST_AUTO_TEST_CASE(res_name_mismatch_pedantic)
+BOOST_AUTO_TEST_CASE(res_name_mismatch_alt_loc_pedantic)
 {
   String fname("testfiles/pdb/arg-glu-gln.pdb");
   IOProfile profile;
   PDBReader reader(fname, profile);
   mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_NO_THROW(reader.Import(ent));
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 1);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);  
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 11);
+}
+
+BOOST_AUTO_TEST_CASE(res_name_mismatch_pedantic)
+{
+  String fname("testfiles/pdb/more-than-one-name.pdb");
+  IOProfile profile;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
   BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(res_name_mismatch_tolerant)
+{
+  String fname("testfiles/pdb/more-than-one-name.pdb");
+  IOProfile profile;
+  profile.fault_tolerant=true;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_NO_THROW(reader.Import(ent));
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 1);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);  
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 4);
 }
 
 BOOST_AUTO_TEST_CASE(seqres_import)
