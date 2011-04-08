@@ -184,7 +184,7 @@ The SequenceHandle
 
   .. attribute:: offset
   
-    Shorthand for :meth:`GetSequenceOffset`/:meth:`SetSequenceOffset`
+    Shorthand for :meth:`GetOffset`/:meth:`SetOffset`
 
   .. method:: __len__()
     
@@ -194,6 +194,16 @@ The SequenceHandle
 
     Returns the sequence as a string.
 
+.. function:: Match(s1, s2)
+
+  :param s1: The first sequence
+  :param s2: The second sequence
+  :type s1: :class:`SequenceHandle`, or :class:`str`
+  :type s2: :class:`SequenceHandle`, or :class:`str`
+
+  Check whether the two sequences s1 and s2 match. This function performs are
+  case-insensitive comparison of the two sequences. The character  'X' is
+  interpreted as a wildcard character that always matches the other sequence.
 
 The SequenceList    
 --------------------------------------------------------------------------------

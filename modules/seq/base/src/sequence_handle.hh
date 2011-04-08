@@ -304,6 +304,12 @@ SequenceHandle DLLEXPORT_OST_SEQ SequenceFromInfo(info::InfoGroup& group);
 
 DLLEXPORT_OST_SEQ std::ostream& operator<<(std::ostream& os, 
                                            const ConstSequenceHandle& sequence);
+
+bool DLLEXPORT_OST_SEQ Match(const ConstSequenceHandle& s1,
+                             const ConstSequenceHandle& s2);
+
+bool DLLEXPORT_OST_SEQ Match(const String& s1,
+                             const String& s2);
 }}
 
 #endif

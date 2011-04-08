@@ -65,6 +65,15 @@ BOOST_AUTO_TEST_CASE(seq_triv)
   BOOST_CHECK_THROW(s.SetString("1"), InvalidSequence);
 }
 
+BOOST_AUTO_TEST_CASE(match)
+{
+  BOOST_CHECK(Match("abcdefghijkl", "ABcDeFgHiJkL"));
+  BOOST_CHECK(Match("abcxXxxxxjXl", "ABcDeFgHiJkL"));
+  BOOST_CHECK(Match("ABcDeFgHiJkL", "ABcDeFXxiJxL"));
+  BOOST_CHECK(!Match("abc", "abcd"));
+  BOOST_CHECK(!Match("abc", "aby"));
+}
+
 BOOST_AUTO_TEST_CASE(seq_throw_invalid)
 {
   SequenceHandle s;
