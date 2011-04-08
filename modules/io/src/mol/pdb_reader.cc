@@ -647,6 +647,16 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       ++atom_count_;
     }
   } else {
+    mol::AtomHandle atom=curr_residue_.FindAtom(aname);
+    if (atom.IsValid()) {
+      if (profile_.fault_tolerant) {
+        LOG_WARNING("duplicate atom '" << aname << "' in residue " 
+                    << curr_residue_);
+        return;
+      }
+      throw IOException("duplicate atom '"+aname+"' in residue "+
+                        curr_residue_.GetQualifiedName());
+    }
     ah=editor.InsertAtom(curr_residue_, aname, apos, s_ele);
     ++atom_count_;
   }

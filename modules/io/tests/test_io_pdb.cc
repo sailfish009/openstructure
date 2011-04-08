@@ -463,6 +463,28 @@ BOOST_AUTO_TEST_CASE(res_name_mismatch_pedantic)
   BOOST_CHECK_THROW(reader.Import(ent), IOException);
 }
 
+BOOST_AUTO_TEST_CASE(duplicate_atom_strict)
+{
+  String fname("testfiles/pdb/more-than-one-name.pdb");
+  IOProfile profile;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(duplicate_atom_tolerant)
+{
+  String fname("testfiles/pdb/duplicate-atom.pdb");
+  IOProfile profile;
+  profile.fault_tolerant=true;
+  PDBReader reader(fname, profile);
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_NO_THROW(reader.Import(ent));
+  BOOST_CHECK_EQUAL(ent.GetChainCount(), 1);
+  BOOST_CHECK_EQUAL(ent.GetResidueCount(), 1);  
+  BOOST_CHECK_EQUAL(ent.GetAtomCount(), 2);
+}
+
 BOOST_AUTO_TEST_CASE(res_name_mismatch_tolerant)
 {
   String fname("testfiles/pdb/more-than-one-name.pdb");
