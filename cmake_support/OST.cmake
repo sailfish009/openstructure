@@ -691,25 +691,74 @@ int main( int argc, char ** argv ) {
 endmacro()
 
 
-macro(get_ost_rev)
-  if (NOT OST_REV)
-    if (NOT WIN32)
-      if (EXISTS .svn)
-        exec_program("svn" 
-                     ARGS "info |grep Revision|awk '{print $2}'"
-                     OUTPUT_VARIABLE OST_REV
-        )
-      endif()
-    else()
-      exec_program("svnversion.exe"
-                   ARGS ""
-                   OUTPUT_VARIABLE OST_REV
-      )    
-      string(REGEX REPLACE "[0-9][0-9][0-9][0-9]:" "" OST_REV ${OST_REV})
-      string(REGEX REPLACE "[A-Za-z]" "" OST_REV ${OST_REV})
-    endif()
+#-------------------------------------------------------------------------------
+# this macro sets up the stage directories
+#-------------------------------------------------------------------------------
+macro(setup_stage)
+  set(STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
+  set(EXECUTABLE_OUTPUT_PATH ${STAGE_DIR}/bin  )
+  set(HEADER_STAGE_PATH ${STAGE_DIR}/include )
+  set(LIBEXEC_STAGE_PATH ${STAGE_DIR}/libexec/openstructure  )
+  set(SHARED_DATA_PATH ${STAGE_DIR}/share/openstructure  )
+
+  if (UNIX AND NOT APPLE)
+    check_architecture()
   endif()
-  if (OST_REV)
-    message("Revision: ${OST_REV}")
+  set (ARCH ${CMAKE_NATIVE_ARCH})
+  if ("${ARCH}" MATCHES "64")
+    set(LIB_DIR lib64  )
+    set(LIB_STAGE_PATH "${STAGE_DIR}/lib64"  )
+  else()
+    set(LIB_DIR lib  )
+    set(LIB_STAGE_PATH "${STAGE_DIR}/lib"  )
+  endif()
+
+  include_directories("${HEADER_STAGE_PATH}")
+  link_directories(${LIB_STAGE_PATH})
+
+endmacro()
+
+#-------------------------------------------------------------------------------
+# get compiler version
+#-------------------------------------------------------------------------------
+function(get_compiler_version _OUTPUT_VERSION)
+  exec_program(${CMAKE_CXX_COMPILER}
+               ARGS ${CMAKE_CXX_COMPILER_ARG1} -dumpversion
+               OUTPUT_VARIABLE _COMPILER_VERSION
+  )
+  string(REGEX REPLACE "([0-9])\\.([0-9])(\\.[0-9])?" "\\1\\2"
+    _COMPILER_VERSION ${_COMPILER_VERSION})
+
+  set(${_OUTPUT_VERSION} ${_COMPILER_VERSION} PARENT_SCOPE)
+endfunction()
+
+
+
+macro(setup_compiler_flags)
+  if (WIN32)
+     # add_definitions(-DBOOST_TEST_INCLUDED)
+
+     add_definitions(-D_USE_MATH_DEFINES -D_CRT_SECURE_NO_DEPRECATE
+                     -D_SCL_SECURE_NO_DEPRECATE -DNOMINMAX)
+     add_definitions(-Zc:wchar_t-)   #
+    # add_definitions(-MDd -vmg -EHsc -GR)
+    #GR:Uses the __fastcall calling convention (x86 only).
+    #-EHsc to specify the synchronous exception handling mode/
+    #-vmg Uses full generality for pointers to members.
+    add_definitions(-DBOOST_ZLIB_BINARY=zdll)
+    #add_definitions(-NODEFAULTLIB:LIBCMTD.lib)
+  endif()
+
+
+  if (CMAKE_COMPILER_IS_GNUCXX)
+    get_compiler_version(_GCC_VERSION)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
+    if (_GCC_VERSION MATCHES "44")
+      # gcc 4.4. is very strict about aliasing rules. the shared_count
+      # implementation that is used boost's shared_ptr violates these rules. To
+      # silence the warnings and prevent miscompiles, enable
+      #  -fno-strict-aliasing
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing" )
+    endif()
   endif()
 endmacro()
