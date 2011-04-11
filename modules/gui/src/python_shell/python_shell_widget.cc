@@ -301,6 +301,7 @@ void PythonShellWidget::setup_state_machine_()
                                                  new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
   multi_line_inactive->addTransition(tr6);
   connect(tr6,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
+  multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_D,Qt::ControlModifier,single_line,false));
   multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Left,DNG_ARROW_MODIFIERS,multiline_active_state_));
   multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Right,DNG_ARROW_MODIFIERS,multiline_active_state_));
   multi_line_inactive->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Return,Qt::ControlModifier,multiline_active_state_));
@@ -355,6 +356,7 @@ void PythonShellWidget::setup_state_machine_()
   multiline_active_state_->addTransition(tr8);
   connect(tr8,SIGNAL(triggered()),this,SLOT(OnEnterTransition()));
 
+  multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_D,Qt::ControlModifier,single_line,false));
   multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier,multi_line_inactive));
   multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Up,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_up));
   multiline_active_state_->addTransition(new KeyEventTransition(QEvent::KeyPress,Qt::Key_Down,Qt::ControlModifier | DNG_ARROW_MODIFIERS,history_down));
@@ -772,6 +774,17 @@ void PythonShellWidget::keyPressEvent(QKeyEvent* event)
       event->accept();
       return;
     }
+  }
+  if (event->key()==Qt::Key_D && event->modifiers() & Qt::ControlModifier) {
+    QTextCursor cursor=this->textCursor();
+    cursor.setPosition(block_edit_start_.position());
+    cursor.movePosition(QTextCursor::End,QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+    QTextCursor tc=this->textCursor();
+    tc.setPosition(block_edit_start_.position());
+    block_edit_start_=tc.block();
+    event->accept();
+    return;
   }
   if (this->handle_custom_commands_(event)){
     event->accept();
