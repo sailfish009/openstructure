@@ -22,7 +22,7 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 
@@ -57,7 +57,7 @@ void export_AtomView()
   ;
   class_<AtomViewList>("AtomViewList", init<>())
     .def(vector_indexing_suite<AtomViewList>())
-    .def(ost::VectorAdditions<AtomViewList>())
+    .def(geom::VectorAdditions<AtomViewList>())
   ;
 }
 

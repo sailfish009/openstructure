@@ -22,7 +22,7 @@
 using namespace boost::python;
 #include <ost/mol/chem_class.hh>
 #include <ost/mol/mol.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 
@@ -203,7 +203,7 @@ void export_Residue()
 
   class_<ResidueHandleList>("ResidueHandleList", no_init)
     .def(vector_indexing_suite<ResidueHandleList>())
-    .def(ost::VectorAdditions<ResidueHandleList>())    
+    .def(geom::VectorAdditions<ResidueHandleList>())    
   ;
   
   def("InSequence", &InSequence);

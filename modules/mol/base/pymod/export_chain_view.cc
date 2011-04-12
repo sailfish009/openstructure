@@ -24,7 +24,7 @@ using namespace boost::python;
 #include <ost/mol/query.hh>
 #include <ost/mol/chain_handle.hh>
 #include <ost/mol/entity_visitor.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 #include "bounds.hh"
@@ -59,7 +59,7 @@ void export_ChainView()
 {
   class_<ChainViewList>("ChainViewList", no_init)
     .def(vector_indexing_suite<ChainViewList>())
-    .def(ost::VectorAdditions<ChainViewList>())    
+    .def(geom::VectorAdditions<ChainViewList>())    
   ;
 
   class_<ChainView, bases<ChainBase> >("ChainView", init<>())

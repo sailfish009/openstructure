@@ -28,7 +28,7 @@ using namespace ost;
 using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 
 void export_Bond()
 {
@@ -59,7 +59,7 @@ void export_Bond()
   generic_prop_def<BondHandle>(bond_handle);
   class_<BondHandleList>("BondHandleList", no_init)
     .def(vector_indexing_suite<BondHandleList>())
-    .def(ost::VectorAdditions<BondHandleList>())    
+    .def(geom::VectorAdditions<BondHandleList>())    
   ;  
   def("BondExists", &BondExists);
 }

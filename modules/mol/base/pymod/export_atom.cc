@@ -27,7 +27,7 @@ using namespace ost;
 using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 
 namespace {
   ChainHandle get_chain(AtomHandle& a)
@@ -109,7 +109,7 @@ void export_Atom()
 
   class_<AtomHandleList>("AtomHandleList", no_init)
     .def(vector_indexing_suite<AtomHandleList>())
-    .def(ost::VectorAdditions<AtomHandleList>())
+    .def(geom::VectorAdditions<AtomHandleList>())
   ;
 }
 

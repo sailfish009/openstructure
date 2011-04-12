@@ -22,7 +22,7 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 #include "bounds.hh"
@@ -49,7 +49,7 @@ void export_ResidueView()
 {
   class_<ResidueViewList>("ResidueViewList", no_init)
     .def(vector_indexing_suite<ResidueViewList>())
-    .def(ost::VectorAdditions<ResidueViewList>()) 
+    .def(geom::VectorAdditions<ResidueViewList>()) 
   ;
 
   class_<ResidueView, bases<ResidueBase> >("ResidueView", init<>())

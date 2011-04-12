@@ -21,7 +21,7 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 #include <ost/export_helper/generic_property_def.hh>
@@ -101,6 +101,6 @@ void export_Chain()
   
   class_<ChainHandleList>("ChainHandleList", no_init)
     .def(vector_indexing_suite<ChainHandleList>())
-    .def(ost::VectorAdditions<ChainHandleList>())    
+    .def(geom::VectorAdditions<ChainHandleList>())    
   ;
 }

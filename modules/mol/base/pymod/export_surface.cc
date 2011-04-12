@@ -25,7 +25,7 @@ using namespace boost::python;
 #include <ost/mol/entity_handle.hh>
 #include <ost/mol/impl/surface_impl.hh>
 
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 
 using namespace ost;
 using namespace ost::mol;
@@ -68,7 +68,7 @@ void export_Surface()
 
   class_<SurfaceHandleList>("SurfaceHandleList", init<>())
     .def(vector_indexing_suite<SurfaceHandleList>())
-    .def(ost::VectorAdditions<SurfaceHandleList>())
+    .def(geom::VectorAdditions<SurfaceHandleList>())
   ;
 
   def("CreateSurface",create1);

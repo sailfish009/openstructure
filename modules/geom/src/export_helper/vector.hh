@@ -7,7 +7,7 @@
   Author: Marco Biasini
  */
 
-namespace ost {
+namespace geom {
 
 namespace bp=boost::python;
 template <typename Container>
