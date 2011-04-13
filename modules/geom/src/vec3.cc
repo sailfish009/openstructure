@@ -48,11 +48,11 @@ Mat3 Vec3List::GetInertia() const
 Mat3 Vec3List::GetPrincipalAxes() const
 {
   Mat3 inertia=this->GetInertia();  
-  EMat3 inertia_mat(*reinterpret_cast<EMat3*>(&inertia));
+  EMat3 inertia_mat(inertia.Data());
 
   Eigen::SVD<EMat3> svd(inertia_mat);
   EMat3 rot=svd.matrixU();
-  Mat3 axes(*reinterpret_cast<Mat3*>(&rot));
+  Mat3 axes(rot.data());
   return axes;
 }
 
