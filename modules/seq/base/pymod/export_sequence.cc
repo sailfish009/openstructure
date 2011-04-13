@@ -50,6 +50,8 @@ void (AlignmentHandle::*attach_view_b)(int, const mol::EntityView&,
 SequenceHandle (*seq_from_chain_a)(const String&,const mol::ChainView&)=&SequenceFromChain;
 SequenceHandle (*seq_from_chain_b)(const String&,const mol::ChainHandle&)=&SequenceFromChain;
 
+bool (*m1)(const String&, const String&)=&Match;
+bool (*m2)(const ConstSequenceHandle&, const ConstSequenceHandle&)=&Match;
 template <typename T>
 T do_slice(const T& t, slice& sl) {
   int start=0, end=t.GetCount();
@@ -270,6 +272,8 @@ void export_sequence()
     .add_property("offset", &SequenceHandle::GetOffset,
                   &SequenceHandle::SetOffset)
   ;
+  def("Match", m1);
+  def("Match", m2);
 
   implicitly_convertible<SequenceHandle, ConstSequenceHandle>();
   

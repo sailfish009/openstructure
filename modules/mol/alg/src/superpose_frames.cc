@@ -35,26 +35,26 @@ typedef Eigen::Matrix<Real, Eigen::Dynamic, 3> EMatX3;
 
 
 inline geom::Vec3 rvec_to_gvec(const ERVec3 &vec) {
-  return *reinterpret_cast<const geom::Vec3*>(&vec);
+  return geom::Vec3(vec.data());
 }
 
 inline geom::Vec3 cvec_to_gvec(const ECVec3 &vec) {
-  return *reinterpret_cast<const geom::Vec3*>(&vec);
+  return geom::Vec3(vec.data());
 }
 
 inline geom::Mat3 emat_to_gmat(const EMat3 &mat)
 {
-  return *reinterpret_cast<const geom::Mat3*>(&mat);
+  return geom::Mat3(mat.data());
 }
 
 inline ERVec3 gvec_to_rvec(const geom::Vec3 &vec)
 {
-  return *reinterpret_cast<const ERVec3*>(&vec);
+  return ERVec3(&vec[0]);
 }
 
 inline ECVec3 gvec_to_cvec(const geom::Vec3 &vec)
 {
-  return *reinterpret_cast<const ECVec3*>(&vec);
+  return ECVec3(&vec[0]);
 }
 
 inline EMat3X row_sub(const EMat3X& m, const ERVec3& s)

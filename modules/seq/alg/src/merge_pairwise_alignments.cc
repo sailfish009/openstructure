@@ -38,7 +38,7 @@ void update_shifts(const AlignmentHandle& aln,
                    ShiftMap& shifts)
 {
   ConstSequenceHandle s1=aln.GetSequence(0);  
-  if (s1.GetGaplessString()!=ref_seq.GetString()) {
+  if (!Match(s1.GetGaplessString(), ref_seq.GetString())) {
     throw IntegrityError("The gapless version of '"+s1.GetString()+
                          "' is not identical to the reference sequence.");
   }
