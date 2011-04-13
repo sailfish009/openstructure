@@ -25,7 +25,7 @@
 
 #include <vector>
 #include <boost/shared_array.hpp>
-
+//#include <ost/mol/alg/trajectory_analysis.hh>
 #include "atom_handle.hh"
 #include "coord_source.hh"
 
@@ -88,9 +88,14 @@ public:
   CoordGroupHandle Filter(const EntityView& selected) const;
   
   CoordGroupHandle(CoordSourcePtr source);
-private:
-  void CheckValidity() const;
 
+  /*
+  //friend geom::Vec3List mol::alg::ExtractAtomPosition(const CoordGroupHandle& traj, const AtomHandle& a1,unsigned int stride=1);
+  */
+
+//private:
+  void CheckValidity() const;
+private:
   CoordSourcePtr source_;
 };
 

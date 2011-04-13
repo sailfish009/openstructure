@@ -39,7 +39,15 @@ namespace {
   void (CoordGroupHandle::*capture1)()=&CoordGroupHandle::Capture;
   void (CoordGroupHandle::*capture2)(uint)=&CoordGroupHandle::Capture;
 }
-
+/*
+//"thin wrappers" for default parameters
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extractapos, ExtractAtomPosition, 1, 2)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extractdist, ExtractDistance, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extractang, ExtractAngle, 3, 4)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extractdih, ExtractDihedral, 4, 5)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extractcmdist, ExtractCMDistance, 2, 3)
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(extractrmsd, ExtractRMSD, 2, 3)
+*/
 void export_CoordGroup()
 {
   class_<CoordGroupHandle>("CoordGroupHandle",no_init)
@@ -61,6 +69,14 @@ void export_CoordGroup()
     .def("__getitem__",cg_getitem)
     .def("__setitem__",cg_setitem)
     .def("Filter", &CoordGroupHandle::Filter)
+  /*
+    .def("ExtractAtomPosition",&CoordGroupHandle::ExtractAtomPosition,extractapos())
+    .def("ExtractDistance",&CoordGroupHandle::ExtractDistance,extractdist())
+    .def("ExtractAngle",&CoordGroupHandle::ExtractAngle,extractang())
+    .def("ExtractDihedral",&CoordGroupHandle::ExtractDihedral,extractdih())
+    .def("ExtractCMDistance",&CoordGroupHandle::ExtractCMDistance,extractcmdist())
+    .def("ExtractRMSD",&CoordGroupHandle::ExtractRMSD,extractrmsd())
+  */
   ;
 
   def("CreateCoordGroup",CreateCoordGroup);

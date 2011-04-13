@@ -24,6 +24,7 @@
 #include <ost/mol/mol.hh>
 #include "coord_group.hh"
 
+
 namespace ost { namespace mol {
 
 CoordGroupHandle CreateCoordGroup(const AtomHandleList& atomlist)
@@ -203,5 +204,6 @@ CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected) const
   }
   return filtered_cg;
 }
-
+ 
+  
 }} // ns
