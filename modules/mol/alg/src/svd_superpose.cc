@@ -152,58 +152,24 @@ SuperposerSVD::SuperposerSVD(int natoms, bool alloc_atoms):
   
 }
 
-geom::Vec3 SuperposerSVDImpl::EigenVec3ToVec3(const EVec3 &vec){
-#if  defined _MSC_VER
-  geom::Vec3 myvec3;
-  for (int i=0; i<3; ++i) {
-      myvec3[i]=vec[i]; 
-  }
-  return myvec3;
-#else
-  return *reinterpret_cast<const geom::Vec3*>(&vec);
-#endif
+geom::Vec3 SuperposerSVDImpl::EigenVec3ToVec3(const EVec3 &vec)
+{
+  return geom::Vec3(vec.data());
 }
 
 geom::Mat3 SuperposerSVDImpl::EigenMat3ToMat3(const EMat3 &mat)
 {
-#if  defined _MSC_VER
-  geom::Mat3 mymat3;
-  for (int i=0; i<3; ++i) {
-    for (int j=0; j<3; ++j) {    
-      mymat3(j,i)=mat(i,j); 
-    }
-  }
-  return mymat3;
-#else
-  return *reinterpret_cast<const geom::Mat3*>(&mat);
-#endif
-
+  return geom::Mat3(mat.data());
 }
 
 EVec3 SuperposerSVDImpl::Vec3ToEigenRVec(const geom::Vec3 &vec)
 {
-#if  defined _MSC_VER
-  EVec3 myvec3=EVec3::Zero();
-  for (int counter=0; counter<3; ++counter) {
-    myvec3[counter]=vec[counter];
-  }
-  return myvec3;
-#else
-  return *reinterpret_cast<const ERVec3*>(&vec);
-#endif
+  return EVec3(&vec[0]);
 }
 
 EVec3 SuperposerSVDImpl::Vec3ToEigenVec(const geom::Vec3 &vec)
 {
-#if  defined _MSC_VER
-  EVec3 myvec3=EVec3::Zero();
-  for (int counter=0; counter<3; ++counter) {
-    myvec3[counter]=vec[counter];
-  }
-  return myvec3;
-#else
-  return *reinterpret_cast<const EVec3*>(&vec);  
-#endif
+  return EVec3(&vec[0]);
 }
 
 EMatX SuperposerSVDImpl::SubtractVecFromMatrixRows(EMatX Mat,
