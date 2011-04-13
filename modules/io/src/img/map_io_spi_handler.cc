@@ -77,7 +77,35 @@ namespace detail {
 
 using boost::format;
 
-struct spider_header {
+class spider_header {
+public:
+  spider_header():
+    fNslice(),fNrow(),fNrec(),fNlabel(),fIform(),fImami(),fFmax(),fFmin(),fAv(),fSig(),
+    fIhist(),fNcol(),fLabrec(),fIangle(),fPhi(),fTheta(),fPsi(),fXoff(),fYoff(),fZoff(),
+    fScale(),fLabbyt(),fLenbyt(),ffIstack(),fFlag(),fMaxim(),fImgnum(),fLastindx(),
+    fUn1(),fUn2(),Kangle(),fPhi1(),fTheta1(),fPsi1(),fPhi2(),fTheta2(),fPsi2(),
+    fEmpty1(),fRes(),fEmpty2(),szIDat(),szITim(),szITit()
+  {
+    for(unsigned i=0;i<12;++i){
+      fEmpty1[i]=0;
+    }
+    for(unsigned i=0;i<27;++i){
+      fRes[i]=0;
+    }
+    for(unsigned i=0;i<135;++i){
+      fEmpty2[i]=0;
+    }
+    for(unsigned i=0;i<12;++i){
+      szIDat[i]=0;
+    }
+    for(unsigned i=0;i<8;++i){
+      szITim[i]=0;
+    }
+    for(unsigned i=0;i<160;++i){
+      szITit[i]=0;
+    }
+  }
+
   float fNslice;  // nr of slices (1 for an image, negative nr of slices for new long label format
   float fNrow;    // nr row per slice (Y)
   float fNrec;    // total nr of records (unused).
@@ -184,7 +212,7 @@ void prep_header(spider_header& header, const img::Size& size, const geom::Vec3&
   for (int counter = 0; counter < 8; ++counter)  {
     header.szITim[counter] = time_for_header[counter];
   }
-  for (int counter = 0; counter < 160; ++counter)  {
+  for (int counter = 0; counter < title_for_header.size(); ++counter)  {
     header.szITit[counter] = title_for_header[counter];
   }
 }
@@ -280,23 +308,55 @@ void header_filler(std::istream& in,  spider_header& header)
 
 }
 
-void header_dumper(std::ostream& f, const spider_header& header,bool swap_flag)
+template<int CONVERSIONTYPE>
+void header_dumper(std::ostream& out, const spider_header& header)
 {
-  spider_header header_for_dumping;
-  header_for_dumping = header;
-
-  if (swap_flag) {
-    float * header_swap=reinterpret_cast<float*>(&header_for_dumping);
-    ost::io::swap_float(header_swap,sizeof(spider_header)/sizeof(float));
-  }
-
-  f.write(reinterpret_cast<const char*>(&header_for_dumping),sizeof(detail::spider_header));
-  unsigned char padding = 0;
-  for (int padding_counter=0; padding_counter < (static_cast<int>(header.fLabbyt)-static_cast<int>(sizeof(detail::spider_header))); ++padding_counter)
-  {
-    f.write(reinterpret_cast<char*>(&padding),sizeof(unsigned char));
-  }
+  BinaryOStream<CONVERSIONTYPE> f(out);
+  f << header.fNslice;  
+  f << header.fNrow;  
+  f << header.fNrec;    
+  f << header.fNlabel; 
+  f << header.fIform;   
+  f << header.fImami;  
+  f << header.fFmax;  
+  f << header.fFmin;  
+  f << header.fAv;      
+  f << header.fSig;    
+  f << header.fIhist;  
+  f << header.fNcol;    
+  f << header.fLabrec;
+  f << header.fIangle; 
+  f << header.fPhi;   
+  f << header.fTheta; 
+  f << header.fPsi;    
+  f << header.fXoff;  
+  f << header.fYoff;  
+  f << header.fZoff;    
+  f << header.fScale;  
+  f << header.fLabbyt; 
+  f << header.fLenbyt;
+  f << header.ffIstack;
+  f << header.fFlag;   
+  f << header.fMaxim;  
+  f << header.fImgnum; 
+  f << header.fLastindx;
+  f << header.fUn1;   
+  f << header.fUn2;   
+  f << header.Kangle;  
+  f << header.fPhi1;    
+  f << header.fTheta1; 
+  f << header.fPsi1;    
+  f << header.fPhi2;   
+  f << header.fTheta2; 
+  f << header.fPsi2;   
+  f.write(header.fEmpty1,12);
+  f.write(header.fRes,27);   
+  f.write(header.fEmpty2,135);
+  f.write(header.szIDat,12);   
+  f.write(header.szITim,8);  
+  f.write(header.szITit,160);  
 }
+
 
 template <int CONVERSIONTYPE,typename B>
 void real_filler(std::istream& in, const spider_header& header, img::ImageHandle& mh,double scale)
@@ -374,7 +434,7 @@ void ExportSpiderHelper(const img::MapHandle& mh2, std::ostream& outfile,const S
 
   detail::prep_header(header,mh2.GetSize(),mh2.GetSpatialSampling(),stat.GetMinimum(),stat.GetMaximum(),stat.GetMean(),stat.GetStandardDeviation());
 
-  header_dumper(outfile, header,swap_flag);
+  header_dumper<CONVERSIONTYPE>(outfile, header);
 
   detail::print_header(header);
 
