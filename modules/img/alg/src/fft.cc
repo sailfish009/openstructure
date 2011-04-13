@@ -64,6 +64,10 @@ FFTFnc::FFTFnc(bool f): ori_flag_(f)
   OST_FFTW_fftw_init_threads();
 }
 
+FFTFnc::~FFTFnc()
+{
+  OST_FFTW_fftw_cleanup();
+}
 
 // real spatial -> complex half-frequency
 template <>
