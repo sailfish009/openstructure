@@ -286,7 +286,7 @@ void MapIOPngHandler::Export(const img::MapHandle& image, std::ostream& f,const 
 
   png_write_end(png_ptr, info_ptr);
 
-  png_destroy_write_struct(&png_ptr, (png_infopp)NULL);
+  png_destroy_write_struct(&png_ptr, &info_ptr);
 
 }
 
