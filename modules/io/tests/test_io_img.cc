@@ -16,7 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <vector>
+#include <map>
 #include <ost/io/load_map.hh>
 #include <ost/img/image_factory.hh>
 #include <ost/img/alg/randomize.hh>
@@ -37,46 +37,87 @@
 using namespace ost;
 using namespace ost::io;
 
-
 BOOST_AUTO_TEST_SUITE( io )
 
 
 BOOST_AUTO_TEST_CASE(test_io_img) 
 {
+  //float tests
+  boost::test_tools::close_at_tolerance<Real> close_test(::boost::test_tools::percent_tolerance(0.0001));
   ost::img::ImageHandle testimage=ost::img::CreateImage(ost::img::Extent(ost::img::Point(0,0),ost::img::Point(3,3)));
   testimage.ApplyIP(ost::img::alg::Randomize());
+  testimage+=0.01; //if all values are > 0.0 we can use close_at_tolerance
   const String fname("temp_img.tmp");
-  std::vector<ImageFormatBase*> float_formats;
-  float_formats.push_back(new MRC);
-  float_formats.push_back(new MRC(false,MRC_OLD_FORMAT));
-  float_formats.push_back(new Spider);
-  float_formats.push_back(new JPK(false,OST_FLOAT_FORMAT));
-  float_formats.push_back(new JPK(false,OST_DOUBLE_FORMAT));
-  float_formats.push_back(new TIF(false,OST_FLOAT_FORMAT));
-  float_formats.push_back(new TIF(false,OST_DOUBLE_FORMAT));
-  for(std::vector<ImageFormatBase*>::iterator it=float_formats.begin();it!=float_formats.end();++it){
-    ost::io::SaveImage(testimage,fname,*(*it));
-    ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(*it));
-    for(ost::img::ExtentIterator eit(testimage.GetExtent());!eit.AtEnd();++eit) {
-      BOOST_CHECK_CLOSE(testimage.GetReal(eit),loadedimage.GetReal(eit),0.0001);
+  std::map<String,ImageFormatBase*> float_formats;
+  float_formats["CCP4 (float)"]=new MRC;
+  float_formats["MRC (float)"]=new MRC(false,MRC_OLD_FORMAT);
+  float_formats["SPIDER"]= new Spider;
+  float_formats["JPK (float)"]= new JPK(false,OST_FLOAT_FORMAT);
+  float_formats["JPK (double)"]= new JPK(false,OST_DOUBLE_FORMAT);
+  float_formats["TIF (float)"]= new TIF(false,OST_FLOAT_FORMAT);
+  float_formats["TIF (double)"]= new TIF(false,OST_DOUBLE_FORMAT);
+  for(std::map<String,ImageFormatBase*>::iterator it=float_formats.begin();it!=float_formats.end();++it){
+    ost::io::SaveImage(testimage,fname,*(it->second));
+    ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));
+    bool failed=false;
+    ost::img::ExtentIterator eit(testimage.GetExtent());
+    for(;!eit.AtEnd();++eit) {
+      if( ! close_test(testimage.GetReal(eit),loadedimage.GetReal(eit))){
+        failed=true;
+        break;
+      }
     }
-    delete *it;
+    if(failed){
+      BOOST_ERROR("Image IO failed for plugin " << it->first << "at point " << ost::img::Point(eit)<< ". The values are: " << testimage.GetReal(eit)<< ","<< loadedimage.GetReal(eit) );
+    }
+    delete it->second;
   }
-  std::vector<ImageFormatBase*> int_formats;
-  int_formats.push_back(new TIF);
-  int_formats.push_back(new JPK);
-  int_formats.push_back(new PNG);
-  for(std::vector<ImageFormatBase*>::iterator it=int_formats.begin();it!=int_formats.end();++it){
-    ost::io::SaveImage(testimage,fname,*(*it));
-    ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(*it));
-    ost::img::alg::Normalizer norm=ost::img::alg::CreateLinearRangeNormalizer(testimage,(*it)->GetMinimum(),(*it)->GetMaximum());
+  //int 16 formats
+  std::map<String,ImageFormatBase*> int_formats;
+  int_formats["TIF (16 bit)"]=new TIF;
+  int_formats["JPK (16 bit)"]=new JPK;
+  for(std::map<String,ImageFormatBase*>::iterator it=int_formats.begin();it!=int_formats.end();++it){
+    ost::io::SaveImage(testimage,fname,*(it->second));
+    ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));
+    ost::img::alg::Normalizer norm=ost::img::alg::CreateLinearRangeNormalizer(testimage,0.0,65535.0);
     ost::img::ImageHandle scaled_image=testimage.Apply(norm);
-    for(ost::img::ExtentIterator eit(testimage.GetExtent());!eit.AtEnd();++eit) {
-      BOOST_CHECK_CLOSE(scaled_image.GetReal(eit),loadedimage.GetReal(eit),0.0001);
+    bool failed=false;
+    ost::img::ExtentIterator eit(scaled_image.GetExtent());
+    for(;!eit.AtEnd();++eit) {
+      if( static_cast<int>(scaled_image.GetReal(eit))!=static_cast<int>(loadedimage.GetReal(eit))){
+        failed=true;
+        break;
+      }
     }
-    delete *it;
+    if(failed){
+      BOOST_ERROR("Image IO failed for plugin " << it->first << " at point " << ost::img::Point(eit)<< ". The values are: " << static_cast<int>(scaled_image.GetReal(eit))<< ","<< static_cast<int>(loadedimage.GetReal(eit)) );
+    }
+    delete it->second;
   }
-  
+
+  //byte formats  
+  std::map<String,ImageFormatBase*> byte_formats;
+  byte_formats["PNG"]=new PNG;
+  byte_formats["JPK (byte)"]= new JPK(false,OST_BIT8_FORMAT);
+  byte_formats["TIF (byte)"]= new TIF(false,OST_BIT8_FORMAT);
+  for(std::map<String,ImageFormatBase*>::iterator it=byte_formats.begin();it!=byte_formats.end();++it){
+    ost::io::SaveImage(testimage,fname,*(it->second));
+    ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));
+    ost::img::alg::Normalizer norm=ost::img::alg::CreateLinearRangeNormalizer(testimage,0.0,255.0);
+    ost::img::ImageHandle scaled_image=testimage.Apply(norm);
+    bool failed=false;
+    ost::img::ExtentIterator eit(scaled_image.GetExtent());
+    for(;!eit.AtEnd();++eit) {
+      if( static_cast<int>(scaled_image.GetReal(eit))!=static_cast<int>(loadedimage.GetReal(eit))){
+        failed=true;
+        break;
+      }
+    }
+    if(failed){
+      BOOST_ERROR("Image IO failed for plugin " << it->first << " at point " << ost::img::Point(eit)<< ". The values are: " << static_cast<int>(scaled_image.GetReal(eit))<< ","<< static_cast<int>(loadedimage.GetReal(eit)) );
+    }
+    delete it->second;
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
