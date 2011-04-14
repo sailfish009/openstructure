@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_SUITE( io )
 BOOST_AUTO_TEST_CASE(test_io_img) 
 {
   //float tests
-  boost::test_tools::close_at_tolerance<Real> close_test(::boost::test_tools::percent_tolerance(0.0001));
+  boost::test_tools::close_at_tolerance<Real> close_test(::boost::test_tools::percent_tolerance(0.001));
   ost::img::ImageHandle testimage=ost::img::CreateImage(ost::img::Extent(ost::img::Point(0,0),ost::img::Point(3,3)));
   testimage.ApplyIP(ost::img::alg::Randomize());
   testimage+=0.01; //if all values are > 0.0 we can use close_at_tolerance
@@ -82,6 +82,7 @@ BOOST_AUTO_TEST_CASE(test_io_img)
   int_formats["DAT (16 bit)"]=new DAT(true,OST_BIT16_FORMAT);
   int_formats["TIF (16 bit)"]=new TIF;
   int_formats["JPK (16 bit)"]=new JPK;
+  int_formats["DF3"]=new DF3;
   for(std::map<String,ImageFormatBase*>::iterator it=int_formats.begin();it!=int_formats.end();++it){
     ost::io::SaveImage(testimage,fname,*(it->second));
     ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));
@@ -105,9 +106,8 @@ BOOST_AUTO_TEST_CASE(test_io_img)
   std::map<String,ImageFormatBase*> byte_formats;
   byte_formats["DAT (byte)"]=new DAT(true,OST_BIT8_FORMAT);
   byte_formats["PNG"]=new PNG;
-  byte_formats["DF3"]=new DF3;
-  byte_formats["JPK (byte)"]= new JPK(false,OST_BIT8_FORMAT);
-  byte_formats["TIF (byte)"]= new TIF(false,OST_BIT8_FORMAT);
+  byte_formats["JPK (byte)"]= new JPK(true,OST_BIT8_FORMAT);
+  byte_formats["TIF (byte)"]= new TIF(true,OST_BIT8_FORMAT);
   for(std::map<String,ImageFormatBase*>::iterator it=byte_formats.begin();it!=byte_formats.end();++it){
     ost::io::SaveImage(testimage,fname,*(it->second));
     ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));

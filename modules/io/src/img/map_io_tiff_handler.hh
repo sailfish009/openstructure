@@ -59,6 +59,10 @@ class DLLEXPORT_OST_IO TIF: public  ImageFormatBase
   int GetSubimage() const;
   void SetSubimage(int subimage);
 
+
+  Real GetMaximum() const;
+  Real GetMinimum() const;
+
   static String FORMAT_STRING;
 
 

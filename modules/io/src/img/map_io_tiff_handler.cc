@@ -51,8 +51,7 @@ String TIF::FORMAT_STRING="defined_tiff";
   normalize_on_save_(normalize_on_save),
   bit_depth_(bit_depth),
   signed_(sign),
-  phasecolor_(phasecolor),
-  subimage_(-1)
+  phasecolor_(phasecolor)
 {
 }
 
@@ -61,8 +60,7 @@ TIF::TIF(String format_string, boost::logic::tribool  normalize_on_save, Format 
   normalize_on_save_(normalize_on_save),
   bit_depth_(bit_depth),
   signed_(sign),
-  phasecolor_(phasecolor),
-  subimage_(-1)
+  phasecolor_(phasecolor)
 {
 }
 
@@ -124,6 +122,66 @@ int TIF::GetSubimage () const
 void TIF::SetSubimage (int subimage)
 {
   subimage_ = subimage;
+}
+
+Real TIF::GetMaximum() const
+{
+  if(GetSigned()){
+    switch(GetBitDepth()){
+    case OST_BIT8_FORMAT:
+      return 127.0;
+      break;
+    case OST_BIT16_FORMAT:
+    case OST_DEFAULT_FORMAT:
+      return 32767.0;
+      break;
+    case OST_BIT32_FORMAT:
+      return 2147483647.0;
+      break;
+    default:
+      return 1.0;
+      break;
+    }
+  }else{
+    switch(GetBitDepth()){
+    case OST_BIT8_FORMAT:
+      return 255.0;
+      break;
+    case OST_BIT16_FORMAT:
+    case OST_DEFAULT_FORMAT:
+      return 65535.0;
+      break;
+    case OST_BIT32_FORMAT:
+      return 4294967295.0;
+      break;
+    default:
+      return 1.0;
+      break;
+    }
+  }
+  return 1.0;
+}
+
+Real TIF::GetMinimum() const
+{
+  if(GetSigned()){
+    switch(GetBitDepth()){
+    case OST_BIT8_FORMAT:
+      return -128.0;
+      break;
+    case OST_BIT16_FORMAT:
+    case OST_DEFAULT_FORMAT:
+      return -32768.0;
+      break;
+    case OST_BIT32_FORMAT:
+      return -2147483648.0;
+      break;
+    default:
+      return 0.0;
+      break;
+    }
+  }
+  return 0.0;
 }
 
 void MapIOTiffHandler::Import(img::MapHandle& image, const boost::filesystem::path& location,const ImageFormatBase& formatstruct)

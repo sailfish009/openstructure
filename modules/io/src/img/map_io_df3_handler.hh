@@ -35,6 +35,8 @@ class DLLEXPORT_OST_IO DF3: public ImageFormatBase
 
   bool GetNormalizeOnSave() const;
   void SetNormalizeOnSave(bool normalize_on_save);
+  Real GetMaximum() const;
+  Real GetMinimum() const;
   static String FORMAT_STRING;
   static String FORMAT_NAME_STRING;
   static String FORMAT_ALIGNMENT_STRING;

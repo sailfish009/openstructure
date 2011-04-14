@@ -32,6 +32,9 @@ class DLLEXPORT_OST_IO PNG: public ImageFormatBase
 
   bool GetNormalizeOnSave() const;
   void SetNormalizeOnSave(bool normalize_on_save);
+  Real GetMaximum() const;
+  Real GetMinimum() const;
+
   static String FORMAT_STRING;
 
  private:

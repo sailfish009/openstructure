@@ -46,6 +46,8 @@ class DLLEXPORT_OST_IO DAT: public ImageFormatBase
   void SetEndianess(Endianess end);
   bool GetNormalizeOnSave() const;
   void SetNormalizeOnSave(bool noralize_on_save);
+  Real GetMaximum() const;
+  Real GetMinimum() const;
   static String FORMAT_STRING;
 
  private:

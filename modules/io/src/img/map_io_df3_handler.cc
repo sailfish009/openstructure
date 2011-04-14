@@ -60,6 +60,15 @@ void DF3::SetNormalizeOnSave(bool normalize_on_save)
   normalize_on_save_ = normalize_on_save;
 }
 
+Real DF3::GetMaximum() const
+{
+  return 65535.0;
+}
+Real DF3::GetMinimum() const
+{
+  return 0.0;
+}
+
 void DF3MapIOHandler::Import(img::MapHandle& mh, const bf::path& loc,
                              const ImageFormatBase& formatstruct)
 {
@@ -90,7 +99,6 @@ void DF3MapIOHandler::Export(const img::MapHandle& mh2,
                              std::ostream& outfile,
                              const ImageFormatBase& format) const
 {  
-  static unsigned short max_val=std::numeric_limits<unsigned short>::max();
   DF3 default_df3;
   DF3& fmt=default_df3;
   if (format.GetFormatString()==DF3::FORMAT_STRING) {
@@ -104,8 +112,8 @@ void DF3MapIOHandler::Export(const img::MapHandle& mh2,
   img::alg::Normalizer norm=img::alg::CreateNoOpNormalizer();
   if (fmt.GetNormalizeOnSave() == true) {
     
-    norm=img::alg::CreateLinearRangeNormalizer(mh2, format.GetMinimum(), 
-                                               format.GetMaximum());
+    norm=img::alg::CreateLinearRangeNormalizer(mh2, fmt.GetMinimum(),
+                                               fmt.GetMaximum());
   }
   img::Size size=mh2.GetSize();
   for (size_t i=0; i<3; ++i) {
@@ -114,7 +122,7 @@ void DF3MapIOHandler::Export(const img::MapHandle& mh2,
     outfile.write(reinterpret_cast<const char*>(&v), sizeof(unsigned short));
   }
   for (img::ExtentIterator i(mh2.GetExtent()); !i.AtEnd(); ++i) {
-    Real norm_value=norm.Convert(mh2.GetReal(i))*max_val;
+    Real norm_value=norm.Convert(mh2.GetReal(i));
     unsigned short v=static_cast<unsigned short>(norm_value);
     Convert<OST_BIG_ENDIAN,unsigned short>::FromIP(&v);
     outfile.write(reinterpret_cast<const char*>(&v), sizeof(unsigned short));
