@@ -134,32 +134,8 @@ file(MAKE_DIRECTORY ${STAGE_DIR}
 setup_compiler_flags()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-set(_BOOST_MIN_VERSION 1.37)
 
-find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)
-set(BOOST_PYTHON_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-find_package(Boost ${_BOOST_MIN_VERSION} 
-             COMPONENTS unit_test_framework REQUIRED)
-set(BOOST_UNIT_TEST_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-if (ENABLE_STATIC)
-  set(Boost_USE_STATIC_LIBS ON)
-endif()
-find_package(Boost ${_BOOST_MIN_VERSION} 
-             COMPONENTS filesystem system REQUIRED)
-set(BOOST_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS iostreams REQUIRED)
-set(BOOST_IOSTREAM_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS program_options REQUIRED)
-set(BOOST_PROGRAM_OPTIONS ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS regex REQUIRED)
-set(BOOST_REGEX_LIBRARIES ${Boost_LIBRARIES})
-set(Boost_LIBRARIES)
-
+setup_boost()
         
 find_package(Qt4 4.5.0 REQUIRED)
 find_package(OpenGL REQUIRED)
