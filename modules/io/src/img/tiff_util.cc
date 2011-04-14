@@ -34,9 +34,9 @@ void tiff_warning_handler(const char *mod, const char* fmt, va_list ap)
 {
   static char message[1024];
 #ifdef _MSC_VER
-  _snprintf(message,1024,fmt,ap);
+  _vsnprintf(message,1024,fmt,ap);
 #else
-  snprintf(message,1024,fmt,ap);
+  vsnprintf(message,1024,fmt,ap);
 #endif
   LOG_INFO(mod << ": " << message);
 }
