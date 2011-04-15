@@ -303,7 +303,9 @@ void PDBReader::Import(mol::EntityHandle& ent,
           }
         }
         if (IEquals(curr_line.substr(0, 6), StringRef("SEQRES", 6))) {
-          this->ParseSeqRes(curr_line, line_num_);
+          if (read_seqres_) {
+            this->ParseSeqRes(curr_line, line_num_);
+          }
         }
         break;
       default:
