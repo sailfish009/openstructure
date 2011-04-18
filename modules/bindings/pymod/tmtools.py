@@ -83,6 +83,7 @@ def _RunTmAlign(tmalign, tmp_dir):
   ps.wait()
   lines=ps.stdout.readlines()
   if (len(lines))<22:
+    _CleanupFiles(tmp_dir)
     raise RuntimeError("tmalign superposition failed")
   return _ParseTmAlign(lines)
 
@@ -127,6 +128,7 @@ def _RunMmAlign(mmalign, tmp_dir):
   ps.wait()
   lines=ps.stdout.readlines()
   if (len(lines))<22:
+    _CleanupFiles(tmp_dir)
     raise RuntimeError("mmalign superposition failed")
   return _ParseMmAlign(lines)
 
@@ -173,6 +175,7 @@ def _RunTmScore(tmscore, tmp_dir):
   ps.wait()
   lines=ps.stdout.readlines()
   if (len(lines))<22:
+    _CleanupFiles(tmp_dir)
     raise RuntimeError("tmscore superposition failed")
   return _ParseTmScore(lines)
 
