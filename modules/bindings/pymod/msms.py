@@ -25,12 +25,11 @@ from ost import settings
 from ost import geom
 
 
-
-## \brief custom exception that substitutes CalledProcessError
-#
-# Python 2.4 does not include the CalledProcessError exception.
-# This one substitutes it 
 class MsmsProcessError(Exception):
+  """
+  Python 2.4 and older do not include the CalledProcessError exception. This
+  class substitutes it.
+  """
   def __init__(self, returncode,command):
     self.returncode = returncode
     self.command = command
@@ -39,6 +38,9 @@ class MsmsProcessError(Exception):
 
 
 def GetVersion(msms_exe=None, msms_env=None):
+  """
+  Get version of MSMS executable
+  """
   msms_executable = _GetExecutable(msms_exe, msms_env)
   command = "%s" % (msms_executable)
   proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
@@ -53,24 +55,32 @@ def GetVersion(msms_exe=None, msms_env=None):
     LogWarning('Could not parse MSMS version string')
     return
 
-## \brief Method to check if MSMS executable is present
-#
-# \param msms_exe Explicit path to msms executable
-# \param msms_env Environment variable pointing to msms executable
-# \return         Path to the executable
-# \exception      FileNotFound if executable is not found
+
 def _GetExecutable(msms_exe, msms_env):
+  """
+  Function to check if MSMS executable is present
+
+  :param msms_exe: Explicit path to msms executable
+  :param msms_env: Environment variable pointing to msms executable
+  :returns: Path to the executable
+  :raises:  :class:`~ost.FileNotFound` if executable is not found
+  """
   return settings.Locate('msms', explicit_file_name=msms_exe,
                          env_name=msms_env)
 
-## \brief Setup files for MSMS calculation in temporary directory
-#
-# \param entity      EntityHandle or EntityView to calculate surface
-# \param selection   Calculate surface for subset of entity 
-# \return            Touple containing temporary directory and msms input file
-# \exception         RuntimeError if selection is not valid
+
 def _SetupFiles(entity, selection):
-  # create temporary directory
+  """
+  Setup files for MSMS calculation in temporary directory
+
+  :param entity: The entity for which the surface is to be calculated
+  :type entity: :class:`~ost.mol.EntityHandle` or :class:`~ost.mol.EntityHandle`
+  :param selection:  Calculate surface for subset of entity
+  :type selection: :class:`str`
+  :returns: tuple containing temporary directory and msms input file
+  :raises:         :class:`RuntimeError` if selection is not valid
+  """
+  #   create temporary directory
   tmp_dir_name=tempfile.mkdtemp()
 
   # select only heavy atoms if no_hydrogens is true
@@ -89,46 +99,55 @@ def _SetupFiles(entity, selection):
   
   return (tmp_dir_name, tmp_file_name)
 
-## \brief Reads Area file (-af) and attach sasa and sesa per atom to an entitiy
-#
-# \param entity   EntityHandle or EntityView for attaching sasa and sesa on atom level
-# \param file     Filename of area file
-# \param asa_prop Name of the float property for SASA
-# \param esa_prop Name of the float property for SESA
-# \exception RuntimeError if number of atoms in file != number of atoms in entity 
+
 def _ParseAreaFile(entity,file, asa_prop, esa_prop):
-    area_fh = open(file)
-    area_lines = area_fh.readlines()
-    area_fh.close()
-    # shift first line
-    area_lines = area_lines[1:]
-    if entity.GetAtomCount() != len(area_lines):
-        raise RuntimeError, "Atom count (%d) unequeal to number of atoms in area file (%d)" % (entity.GetAtomCount(), len(area_lines))
-    for l in area_lines:
-        atom_no, sesa, sasa = l.split()
-        a = entity.atoms[int(atom_no)]
-        if asa_prop:
-          a.SetFloatProp(asa_prop, float(sasa))
-        if esa_prop:
-          a.SetFloatProp(esa_prop, float(sesa))
+  """
+   Reads Area file (-af) and attach sasa and sesa per atom to an entitiy
+
+  :param entity:   :class:`~ost.mol.EntityHandle` or :class:`~ost.mol.EntityView`
+                   for attaching sasa and sesa on atom level
+  :param file:     Filename of area file
+  :param asa_prop: Name of the float property for SASA
+  :param esa_prop: Name of the float property for SESA
+  :raises: :class:`RuntimeError` if number of atoms in file != number of atoms in entity
+  """
+  area_fh = open(file)
+  area_lines = area_fh.readlines()
+  area_fh.close()
+  # shift first line
+  area_lines = area_lines[1:]
+  if entity.GetAtomCount() != len(area_lines):
+      raise RuntimeError, "Atom count (%d) unequeal to number of atoms in area file (%d)" % (entity.GetAtomCount(), len(area_lines))
+  for l in area_lines:
+      atom_no, sesa, sasa = l.split()
+      a = entity.atoms[int(atom_no)]
+      if asa_prop:
+        a.SetFloatProp(asa_prop, float(sasa))
+      if esa_prop:
+        a.SetFloatProp(esa_prop, float(sesa))
     
     
-## \brief Method which recursively deletes a directory
-#
-# \warning This method removes also non-empty directories without asking, so
-#          be careful!
-def __CleanupFiles(dir_name):
+
+def _CleanupFiles(dir_name):
+  """
+  Function which recursively deletes a directory and all the files contained
+  in it. *Warning*: This method removes also non-empty directories without
+  asking, so be careful!
+  """
   import shutil
   shutil.rmtree(dir_name)
 
-## \brief Method to run the MSMS surface calculation
-#
-# This method starts the external MSMS executable and returns the stdout of MSMS
-#
-# \param command          Command to execute
-# \return                 stdout of MSMS
-# \exception              CalledProcessError for non-zero return value
 def _RunMSMS(command):
+  """
+  Run the MSMS surface calculation
+
+  This functions starts the external MSMS executable and returns the stdout of
+  MSMS.
+
+  :param command:          Command to execute
+  :returns:                 stdout of MSMS
+  :raises:              :class:`CalledProcessError` for non-zero return value
+  """
   proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
   stdout_value, stderr_value = proc.communicate()
 
@@ -140,33 +159,36 @@ def _RunMSMS(command):
   return stdout_value
   
 
-## \brief Calculates analytical solvent excluded and solvent accessible surface
-#  area by using the external MSMS program
-#
-# This method calculates the molecular surface areas by invoking the external
-# program MSMS. First, it is checked if the MSMS executable is present, then, 
-# the necessary files are prepared in a temporary directory and MSMS is
-# executed. The last step is to remove the temporary directory.
-# 
-#
-# \param entity        OST entity to calculate surface
-# \param density       Surface point density
-# \param radius        Surface probe radius
-# \param all_surf      Calculate surface area for all cavities (returns multiple
-#                      surfaces areas as a list)
-# \param no_hydrogens  Calculate surface only for hevy atoms
-# \param selection     Calculate surface for subset of entity
-# \param msms_exe      msms executable (full path to executable)
-# \param msms_env      msms environment variable
-# \param keep_files    Do not delete temporary files
-# \param attach_asa    Attaches per atom SASA to specified FloatProp at atom level
-# \param attach_esa    Attaches per atom SESA to specified FloatProp at atom level
-# \return              Touplet of lists for (SES, SAS)
+
 def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
                          no_hydrogens=False, no_hetatoms=False, no_waters=False,
                          selection='',
                          msms_exe=None, msms_env=None, keep_files=False, 
                          attach_asa=None, attach_esa=None):
+  """
+  Calculates analytical solvent excluded and solvent accessible surface
+  area by using the external MSMS program.
+
+  This method calculates the molecular surface areas by invoking the external
+  program MSMS. First, it is checked if the MSMS executable is present, then,
+  the necessary files are prepared in a temporary directory and MSMS is
+  executed. The last step is to remove the temporary directory.
+
+
+  :param entity:        OST entity to calculate surface
+  :param density:       Surface point density
+  :param radius:       Surface probe radius
+  :param all_surf:      Calculate surface area for all cavities (returns multiple
+      surfaces areas as a list)
+  :param no_hydrogens:  Calculate surface only for hevy atoms
+  :param selection:     Calculate surface for subset of entity
+  :param msms_exe:      msms executable (full path to executable)
+  :param msms_env:      msms environment variable
+  :param keep_files:    Do not delete temporary files
+  :param attach_asa:    Attaches per atom SASA to specified FloatProp at atom level
+  :param attach_esa:    Attaches per atom SESA to specified FloatProp at atom level
+  :returns:             Tuple of lists for (SES, SAS)
+  """
   import re 
 
   # check if msms executable is specified
@@ -222,35 +244,38 @@ def CalculateSurfaceArea(entity, density=1.0, radius=1.5,  all_surf=False,
 
   # clean up
   if not keep_files:
-    __CleanupFiles(msms_data_dir)
+    _CleanupFiles(msms_data_dir)
 
   return (msms_ases, msms_asas)
   
 
-## \brief Calculates molecular surface by using the external MSMS program
-#
-# This method calculates a molecular surface by invoking the external program
-# MSMS. First, it is checked if the MSMS executable is present, then, the
-# necessary files are prepared in a temporary directory and MSMS is executed.
-# The last step is to remove the temporary directory.
-# 
-#
-# \param entity        OST entity to calculate surface
-# \param density       Surface point density
-# \param radius        Surface probe radius
-# \param all_surf      Calculate surface for all cavities (returns multiple
-#                      surfaces as a list)
-# \param no_hydrogens  Calculate surface only for hevy atoms
-# \param selection     Calculate surface for subset of entity
-# \param msms_exe      msms executable (full path to executable)
-# \param msms_env      msms environment variable
-# \param keep_files    Do not delete temporary files
-# \return list of OST SurfaceHandle objects
+
 def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
                      no_hydrogens=False, no_hetatoms=False, no_waters=False,
                      selection='',
                      msms_exe=None, msms_env=None, keep_files=False):
   
+  """
+  Calculates molecular surface by using the external MSMS program
+
+  This method calculates a molecular surface by invoking the external program
+  MSMS. First, it is checked if the MSMS executable is present, then, the
+  necessary files are prepared in a temporary directory and MSMS is executed.
+  The last step is to remove the temporary directory.
+
+
+  :param entity:        Entity for which the surface is to be calculated
+  :param density:       Surface point density
+  :param radius:        Surface probe radius
+  :param all_surf:      Calculate surface for all cavities (returns multiple
+                        surfaces as a list)
+  :param no_hydrogens:  Calculate surface only for hevy atoms
+  :param selection:     Calculate surface for subset of entity
+  :param msms_exe:      msms executable (full path to executable)
+  :param msms_env:      msms environment variable
+  :param keep_files:    Do not delete temporary files
+  :returns:             list of :class:`~ost.mol.SurfaceHandle` objects
+  """
   import os
   import re
 
@@ -300,7 +325,7 @@ def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
 
   # clean up
   if not keep_files:
-    __CleanupFiles(msms_data_dir)
+    _CleanupFiles(msms_data_dir)
 
   return msms_surfaces
 

@@ -18,6 +18,8 @@ OpenStructure documentation
   seq/base/seq
   seq/alg/seqalg
 
+  bindings/bindings
+
   io/io
   gfx/gfx
   gui/gui

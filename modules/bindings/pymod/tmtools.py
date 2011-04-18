@@ -43,7 +43,35 @@ def _CleanupFiles(dir_name):
   shutil.rmtree(dir_name)
 
 class TMAlignResult:
-  def __init__(self, rmsd, tm_score, aligned_length, transform, ref_sequence, alignment):
+  """
+  Holds the result of running TMalign
+  
+  .. attribute:: rmsd
+    
+    The RMSD of the common Calpha atoms of both structures
+  
+  .. attribute:: transform
+  
+    The transform that superposes the model onto the reference structure.
+    
+    :type: :class:`~ost.geom.Mat4`
+  
+  .. attribute:: alignment
+  
+    The alignment of the structures, that is the pairing of Calphas of both 
+    structures. Since the programs only read ATOM records, residues consisting 
+    of HETATMs (MSE) are not included in the alignment.
+    
+    :type: :class:`~ost.seq.AlignmentHandle`
+
+  .. attribute:: tm_score
+
+    The TM-score of the structural superposition
+
+  """
+  def __init__(self, rmsd, tm_score, aligned_length, transform, 
+               ref_sequence, alignment):
+    
     self.rmsd=rmsd
     self.tm_score=tm_score    
     self.aligned_length=aligned_length
@@ -133,6 +161,36 @@ def _RunMmAlign(mmalign, tmp_dir):
   return _ParseMmAlign(lines)
 
 class TMScoreResult:
+  """
+  Holds the result of running TMscore
+  
+  .. attribute:: rmsd_common
+    
+    The RMSD of the common Calpha atoms of both structures
+
+    .. attribute:: rmsd_below_five
+
+      The RMSD of all Calpha atoms that can be superposed below five Angstroem
+    
+  .. attribute:: tm_score
+  
+    The TM-score of the structural superposition
+  
+  .. attribute:: transform
+  
+    The transform that superposes the model onto the reference structure.
+    
+    :type: :class:`~ost.geom.Mat4`
+  
+  .. attribute:: gdt_ha
+  
+    The GDT_HA of the model to the reference structure.
+
+  .. attribute:: gdt_ts
+
+    The GDT_TS of the model to the reference structure.
+
+  """
   def __init__(self, rmsd_common, tm_score, max_sub, 
                gdt_ts, gdt_ha, rmsd_below_five, transform):
     self.rmsd_common=rmsd_common
@@ -182,7 +240,21 @@ def _RunTmScore(tmscore, tmp_dir):
 
 def TMAlign(model1, model2, tmalign=None):
   """
-  Run tmalign on two protein structures
+  Performs a sequence independent superposition of model1 onto model2, the 
+  reference.
+  
+
+  :param model1: The model structure. If the superposition is successful, will 
+                 be superposed onto the reference structure
+  :type model1: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param model2: The reference structure
+  :type model2: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param tmalign: If not None, the path to the tmalign executable.
+  :returns: The result of the tmscore superposition
+  :rtype: :class:`TMAlignResult`
+  
+  :raises: :class:`~ost.settings.FileNotFound` if tmalign could not be located.
+  :raises: :class:`RuntimeError` if the superposition failed
   """
   tmp_dir_name=_SetupFiles((model1, model2))
   result=_RunTmAlign(tmalign, tmp_dir_name)
@@ -202,7 +274,20 @@ def MMAlign(model1, model2, mmalign=None):
 
 def TMScore(model1, model2, tmscore=None):
   """
-  Run tmscore on two protein structures
+  Performs a sequence dependent superposition of model1 onto model2, 
+  the reference.
+
+  :param model1: The model structure. If the superposition is successful, will 
+                 be superposed onto the reference structure
+  :type model1: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param model2: The reference structure
+  :type model2: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param tmscore: If not None, the path to the tmscore executable.
+  :returns: The result of the tmscore superposition
+  :rtype: :class:`TMScoreResult`
+  
+  :raises: :class:`~ost.settings.FileNotFound` if tmalign could not be located.
+  :raises: :class:`RuntimeError` if the superposition failed
   """
   tmp_dir_name=_SetupFiles((model1, model2))
   result=_RunTmScore(tmscore, tmp_dir_name)
