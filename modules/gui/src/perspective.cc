@@ -19,6 +19,8 @@
 
 #include <ost/platform.hh>
 
+#include <ost/log.hh>
+
 #include <ost/gui/widget_registry.hh>
 #include <ost/gui/perspective.hh>
 #include <ost/gui/file_browser.hh>
@@ -45,6 +47,7 @@
 #include <QMap>
 #include <QString>
 #include <QStatusBar>
+#include <QSlider>
 
 /*
   Author: Marco Biasini
@@ -55,7 +58,8 @@ Perspective::Perspective(QMainWindow* parent):
   QObject(parent), central_(new QWidget(parent)), 
   menu_bar_(new QMenuBar(parent)),
   main_area_(new MainArea),
-  quick_access_bar_(new QWidget)
+  quick_access_bar_(new QWidget),
+  verbosity_slider_(new QSlider(Qt::Horizontal,quick_access_bar_))
 {
   parent->setMenuBar(menu_bar_);
 
@@ -107,7 +111,19 @@ void Perspective::SetupQuickAccessBar()
   add_side_bar_widget->setIconSize(QSize(10,10));  
   connect(add_side_bar_widget, SIGNAL(clicked()), this, 
           SLOT(AddSideBarWidget()));          
+
   l2->addWidget(add_side_bar_widget, 0);
+
+  verbosity_slider_->setMinimum(0);
+  verbosity_slider_->setMaximum(5);
+  verbosity_slider_->setValue(Logger::Instance().GetVerbosityLevel());
+  verbosity_slider_->setToolTip("Verbosity Level");
+  verbosity_slider_->setTickPosition(QSlider::TicksBothSides);
+  verbosity_slider_->setFixedWidth(100);
+  connect(verbosity_slider_, SIGNAL(valueChanged(int)),
+          this,SLOT(VerbosityChanged(int)));
+  l2->addWidget(verbosity_slider_, 0);
+
   l2->addWidget(status_bar_);
   l2->addWidget(new MessageBoxWidget(quick_access_bar_));
   l2->addWidget(new QSizeGrip(quick_access_bar_));
@@ -155,6 +171,17 @@ void Perspective::AddSideBarWidget()
     panels_->AddWidget(LEFT_PANEL,wf->Create(str_val, NULL));
   }
   delete sb;
+}
+
+void Perspective::ChangeVerbositySlider(int value)
+{
+  verbosity_slider_->setValue(value);
+}
+
+
+void Perspective::VerbosityChanged(int value)
+{
+  Logger::Instance().PushVerbosityLevel(value);
 }
 
 bool Perspective::Restore()

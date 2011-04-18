@@ -202,3 +202,16 @@ class ManyOf:
       if not found:
         return False
     return True
+
+from ost import PushVerbosityLevel as _PushVerbosityLevel
+from ost import PopVerbosityLevel as _PopVerbosityLevel
+from ost import GetVerbosityLevel as _GetVerbosityLevel
+
+
+def PushVerbosityLevel(value):
+  GostyApp.Instance().perspective.ChangeVerbositySlider(value)
+
+def PopVerbosityLevel():
+  _PopVerbosityLevel()
+  GostyApp.Instance().perspective.ChangeVerbositySlider(_GetVerbosityLevel())
+  _PopVerbosityLevel() # the slider change pushes a new level :-(

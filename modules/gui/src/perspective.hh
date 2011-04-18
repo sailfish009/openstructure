@@ -33,6 +33,7 @@ class QMenuBar;
 class QStatusBar;
 class QMainWindow;
 class QTextEdit;
+class QSlider;
 
 namespace ost { namespace gui {
 
@@ -80,13 +81,17 @@ public:
   /// \return Returns true if it was successful. Otherwise false
   bool Save();
 
+  void ChangeVerbositySlider(int value);
+
 private slots:
   void AddSideBarWidget();
+  void VerbosityChanged(int value);
 
 public slots:
   /// \brief set status message
   /// \param m The message that will be displayed in the status bar.
   void StatusMessage(const String& m);
+
 
 private:
   void SetupQuickAccessBar();
@@ -96,6 +101,7 @@ private:
   PanelManager*   panels_;
   QWidget*        quick_access_bar_;
   QStatusBar*     status_bar_;
+  QSlider* verbosity_slider_;
 };
 
 }}

@@ -57,7 +57,8 @@ void export_Perspective()
     .def("StatusMessage", &Perspective::StatusMessage)
     .def("Restore", &Perspective::Restore)
     .def("Save", &Perspective::Save)
-    .add_property("main_area", make_function(&Perspective::GetMainArea, 
+    .def("ChangeVerbositySlider", &Perspective::ChangeVerbositySlider)
+    .add_property("main_area", make_function(&Perspective::GetMainArea,
                   return_value_policy<reference_existing_object>()))
     .add_property("panels", make_function(&Perspective::GetPanels,
                   return_value_policy<reference_existing_object>()))

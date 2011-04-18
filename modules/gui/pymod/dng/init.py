@@ -207,7 +207,7 @@ else:
   print >> rcfile, '# IMPORTANT_DIR="path/to/important/dir"'
   rcfile.close()
 
-ost.PushVerbosityLevel(options.vlevel)
+ost.gui.PushVerbosityLevel(options.vlevel)
 working_dir=settings.GetValue("DNG_WORKING_DIR",None)
 
 if working_dir != None and os.path.isdir(working_dir):
