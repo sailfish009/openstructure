@@ -19,6 +19,8 @@ void export_XtalMap()
          return_value_policy<copy_const_reference>())
     .add_property("unit_cell", make_function(&XtalMap::GetUnitCell, 
                   return_value_policy<copy_const_reference>()))
+    .add_property("unit_cell_size", make_function(&XtalMap::GetUnitCellSize, 
+                  return_value_policy<copy_const_reference>()))
   ;
 
 }
