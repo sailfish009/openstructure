@@ -19,6 +19,55 @@ class TestSeq(unittest.TestCase):
   
   def setUp(self):
     self.ent=fixture()
+    
+  def testSeqSlice(self):
+    seq_string='abcdefg'
+    s=seq.CreateSequence('A', seq_string)
+    self.assertEqual(s[1:5], seq_string[1:5])
+    self.assertEqual(s[:-1], seq_string[:-1])
+    self.assertEqual(s[-3:-2], seq_string[-3:-2])
+    self.assertEqual(s[-3:], seq_string[-3:])
+    self.assertEqual(s[3:4], seq_string[3:4])
+    
+  def testSeqListSlice(self):
+    a=seq.CreateSequence('A','aaaa')
+    b=seq.CreateSequence('B','bbbb')
+    c=seq.CreateSequence('C','cccc')
+    d=seq.CreateSequence('D','dddd')
+    sl=seq.CreateSequenceList(a, b, c, d)
+    sliced=sl[1:]
+    self.assertEqual(len(sliced), 3)
+    self.assertEqual(str(sliced[0]), str(b))
+    self.assertEqual(str(sliced[1]), str(c))
+    self.assertEqual(str(sliced[2]), str(d))
+    sliced=sl[:-1]
+    self.assertEqual(len(sliced), 3)
+    self.assertEqual(str(sliced[0]), str(a))
+    self.assertEqual(str(sliced[1]), str(b))
+    self.assertEqual(str(sliced[2]), str(c))
+    sliced=sl[-1:]
+    self.assertEqual(len(sliced), 1)
+    self.assertEqual(str(sliced[0]), str(d))
+    
+  def testAlnSlice(self):
+    a=seq.CreateSequence('A','abcd')
+    b=seq.CreateSequence('B','efgh')
+    c=seq.CreateSequence('C','ijkl')
+    d=seq.CreateSequence('D','mnop')
+    aln=seq.CreateAlignment(a, b, c, d)
+    sliced=aln[1:]
+    self.assertEqual(len(sliced), 3)
+    self.assertEqual(str(sliced[0]), 'bfjn')
+    self.assertEqual(str(sliced[1]), 'cgko')
+    self.assertEqual(str(sliced[2]), 'dhlp')
+    sliced=aln[:-1]
+    self.assertEqual(len(sliced), 3)
+    self.assertEqual(str(sliced[0]), 'aeim')
+    self.assertEqual(str(sliced[1]), 'bfjn')
+    self.assertEqual(str(sliced[2]), 'cgko')
+    sliced=aln[-1:]
+    self.assertEqual(len(sliced), 1)
+    self.assertEqual(str(sliced[0]), 'dhlp')
 
   def testViewsFromSequences_01(self):
     seq_a=seq.CreateSequence("A", "ABCD-FGH")

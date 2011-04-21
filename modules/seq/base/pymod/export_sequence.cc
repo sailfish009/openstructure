@@ -57,11 +57,17 @@ T do_slice(const T& t, slice& sl) {
   int start=0, end=t.GetCount();
   try {
     start=extract<int>(sl.start());
+    if (start<0) {
+      start=t.GetCount()+start;
+    }    
   } catch(error_already_set) {
     PyErr_Clear();
   }
   try {
     end=extract<int>(sl.stop());
+    if (end<0) {
+      end=t.GetCount()+end;
+    }    
   } catch(error_already_set) {
     PyErr_Clear();
   }
@@ -78,16 +84,43 @@ SequenceList do_slice_b(SequenceList& t, slice sl)
   return do_slice<SequenceList>(t, sl);
 }
 
-
-AlignedRegion slice_aln(const AlignmentHandle& aln, slice sl) {
-  int start=0, end=aln.GetLength();
+String slice_seq(const ConstSequenceHandle& sh, slice& sl) {
+  int start=0, end=sh.GetLength();
   try {
     start=extract<int>(sl.start());
+    if (start<0) {
+      start=sh.GetLength()+start;
+    }    
   } catch(error_already_set) {
     PyErr_Clear();
   }
   try {
     end=extract<int>(sl.stop());
+    if (end<0) {
+      end=sh.GetLength()+end;
+    }
+  } catch(error_already_set) {
+    PyErr_Clear();
+  }
+  String s=sh.GetString();
+  return s.substr(start, end-start);
+}
+
+AlignedRegion slice_aln(const AlignmentHandle& aln, slice sl) {
+  int start=0, end=aln.GetLength();
+  try {
+    start=extract<int>(sl.start());
+    if (start<0) {
+      start=aln.GetLength()+start;
+    }    
+  } catch(error_already_set) {
+    PyErr_Clear();
+  }
+  try {
+    end=extract<int>(sl.stop());
+    if (end<0) {
+      end=aln.GetLength()+end;
+    }
   } catch(error_already_set) {
     PyErr_Clear();
   }
@@ -212,6 +245,7 @@ void const_seq_handle_def(O& bp_class)
     .def("GetOneLetterCode", &C::GetOneLetterCode)
     .def("__iter__", iterator<C>())
     .def("__getitem__", &C::GetOneLetterCode)
+    .def("__getitem__", slice_seq)
     .def("GetOffset", &C::GetOffset)
     .def("Copy", &C::Copy)
     .def("IsValid", &C::IsValid)
