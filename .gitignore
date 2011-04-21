@@ -49,3 +49,4 @@ Debug
 *.cxx_parameters
 /deployment/win/create_archive.bat
 /install_manifest.txt
+*_out.csv
