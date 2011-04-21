@@ -50,3 +50,4 @@ Debug
 /deployment/win/create_archive.bat
 /install_manifest.txt
 *_out.csv
+/modules/io/tests/temp_img.tmp
