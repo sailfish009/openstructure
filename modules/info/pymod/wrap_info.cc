@@ -136,6 +136,15 @@ public:
   {
     return true;
   }  
+
+  virtual void VisitGroupFinish(InfoGroup& group)
+ {
+    call_method<void, InfoGroup>(self, "VisitGroupFinish", group);
+ }
+
+ void VisitGroupFinishDefault(const InfoGroup&) 
+ {
+ }  
 private:
   PyObject* self;
 };
@@ -301,6 +310,7 @@ BOOST_PYTHON_MODULE(_ost_info)
   class_<InfoVisitor, InfoVisitorProxy>("InfoVisitor",init<>())
     .def("VisitGroup", &InfoVisitorProxy::VisitGroupDefault)
     .def("VisitItem", &InfoVisitorProxy::VisitItemDefault)
+    .def("VisitGroupFinish", &InfoVisitorProxy::VisitGroupFinishDefault)
   ;
 
   class_<VerboseInfoVisitor, bases<InfoVisitor> >("VerboseInfoVisitor",init<>())
