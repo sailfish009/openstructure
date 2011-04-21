@@ -120,6 +120,7 @@ void Perspective::SetupQuickAccessBar()
   verbosity_slider_->setToolTip("Verbosity Level");
   verbosity_slider_->setTickPosition(QSlider::TicksBothSides);
   verbosity_slider_->setFixedWidth(100);
+  verbosity_slider_->setTracking(false);
   connect(verbosity_slider_, SIGNAL(valueChanged(int)),
           this,SLOT(VerbosityChanged(int)));
   l2->addWidget(verbosity_slider_, 0);
