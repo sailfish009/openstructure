@@ -770,7 +770,7 @@ void EntityImpl::SetTransform(const geom::Mat4 transfmat)
     identity_transf_ = false;    
   }
   this->UpdateTransformedPos();
-  this->MarkXCSDirty();
+  this->MarkOrganizerDirty();
 }
 
 void EntityImpl::AttachObserver(const EntityObserverPtr& o)
@@ -1049,6 +1049,7 @@ void EntityImpl::UpdateOrganizer()
        e=atom_map_.end(); i!=e; ++i) {
     atom_organizer_.Add(i->second, i->second->GetPos());
   }
+  dirty_flags_&=~DirtyOrganizer;
 }
 
 void EntityImpl::IncXCSEditorCount() 
