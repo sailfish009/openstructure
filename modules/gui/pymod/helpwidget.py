@@ -19,7 +19,7 @@ class DocWidget(QWidget):
 doc_widget=DocWidget()
 doc_widget_for_panel=gui.Widget(doc_widget)
 panels=gui.GostyApp.Instance().perspective.panels
-panels.AddWidgetToPool("Doc",doc_widget_for_panel)
+panels.AddWidgetToPool("OpenStructure Help",doc_widget_for_panel)
 
 
 class Help:
@@ -28,12 +28,14 @@ class Help:
     d=pydoc.HTMLDoc()
     if what==None:
       doc_widget.doctext.setHtml('')
-      doc_widget.show()
       doc_widget.searchbox.setText('')
-      return
-    s=d.document(pydoc.resolve(what)[0])
-    doc_widget.doctext.setHtml(s)
-    doc_widget.searchbox.setText('')
+    else:
+      try:
+        s=d.document(pydoc.resolve(what)[0])
+      except ImportError as detail:
+        s=str(detail)
+      doc_widget.doctext.setHtml(s)
+      doc_widget.searchbox.setText('')
     if not doc_widget.isVisible():
       panels.AddWidget(gui.PanelPosition.RIGHT_PANEL, doc_widget_for_panel, False)
   def __repr__(self):
