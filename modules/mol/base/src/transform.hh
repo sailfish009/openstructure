@@ -41,7 +41,8 @@ public:
   void SetCenter(const geom::Vec3& c);
   geom::Vec3 GetCenter() const;
 
-
+  // directly set tm, messing up rot/trans/cen !
+  void SetMatrix(const geom::Mat4& m);
 
   /// \name rotation
   //@{

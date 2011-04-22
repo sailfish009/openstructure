@@ -42,11 +42,16 @@ Mat4 Transform::GetMatrix() const
   return tm_;
 }
 
+void Transform::SetMatrix(const Mat4& m)
+{
+  tm_=m;
+  ttm_ = Transpose(tm_);
+}
+
 Mat4 Transform::GetTransposedMatrix() const
 {
   return ttm_;
 }
-
 
 void Transform::SetTrans(const Vec3& t) 
 {
