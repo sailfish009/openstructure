@@ -650,7 +650,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     }
   } else {
     mol::AtomHandle atom=curr_residue_.FindAtom(aname);
-    if (atom.IsValid()) {
+    if (atom.IsValid() && !profile_.quack_mode) {
       if (profile_.fault_tolerant) {
         LOG_WARNING("duplicate atom '" << aname << "' in residue " 
                     << curr_residue_);
