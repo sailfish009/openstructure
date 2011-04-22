@@ -237,6 +237,8 @@ void CartoonRenderer::fudge_spline_obj(SplineEntryListList& olistlist)
           for(;lc<olist.size() && olist.at(lc).type==1;++lc) {
             nlist.push_back(olist.at(lc));
           }
+          // and remove the last one (better graphical appearance)
+          nlist.back().type=0;
         }
       }
       if(lc>=olist.size()) break;
