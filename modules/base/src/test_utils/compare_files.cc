@@ -25,7 +25,16 @@ namespace ost {
 bool compare_files(const String& test, const String& gold_standard)
 {
   std::ifstream test_stream(test.c_str());
+  if (!test_stream) {
+    std::cerr << "output file '" << test << "' doesn't exist" << std::endl;
+    return false;
+  }
   std::ifstream gold_stream(gold_standard.c_str());
+  if (!gold_stream) {
+    std::cerr << "gold standard file '" << gold_standard 
+              << "' doesn't exist" << std::endl;
+    return false;
+  }
   String test_line, gold_line;
   while (true) {
     bool test_end=std::getline(test_stream, test_line) != 0;

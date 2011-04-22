@@ -97,7 +97,7 @@ SDFWriter::SDFWriter(const String& filename)
 
 SDFWriter::SDFWriter(const boost::filesystem::path& filename): 
 #if BOOST_FILESYSTEM_VERSION==3
-  outfile_(filename.filename().string().c_str()), 
+  outfile_(filename.string().c_str()), 
 #else
   outfile_(filename.file_string().c_str()), 
 #endif
@@ -105,11 +105,17 @@ SDFWriter::SDFWriter(const boost::filesystem::path& filename):
 }
 
 void SDFWriter::Write(const mol::EntityView& ent) {
+  if (!ostr_) {
+    throw IOException("Can't write SDF file. Bad output stream");
+  }
   mol::EntityView non_const_view = ent;
   non_const_view.Apply(*this);
 }
 
 void SDFWriter::Write(const mol::EntityHandle& ent) {
+  if (!ostr_) {
+    throw IOException("Can't write SDF file. Bad output stream");
+  }
   mol::EntityView non_const_view = ent.CreateFullView();
   non_const_view.Apply(*this);
 }

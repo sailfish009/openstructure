@@ -224,7 +224,7 @@ CRDWriter::CRDWriter(std::ostream& ostream) :
 
 CRDWriter::CRDWriter(const boost::filesystem::path& filename) :
 #if BOOST_FILESYSTEM_VERSION==3
-  outfile_(filename.filename().string().c_str()), outstream_(outfile_),
+  outfile_(filename.string().c_str()), outstream_(outfile_),
 #else
   outfile_(filename.file_string().c_str()), outstream_(outfile_),
 #endif
