@@ -147,8 +147,8 @@ BOOST_AUTO_TEST_CASE(write_sdf)
     sdfh.Import(eh,"testfiles/sdf/compound.sdf");
     SaveEntity(eh, "testfiles/sdf/compound-out.sdf");
   }
-  BOOST_CHECK(compare_files("testfiles/sdf/compound.sdf",
-                            "testfiles/sdf/compound-out.sdf"));
+  BOOST_CHECK(compare_files("testfiles/sdf/compound-out.sdf",
+                            "testfiles/sdf/compound.sdf"));
 }
 
 BOOST_AUTO_TEST_CASE(write_sdf_view)
@@ -162,8 +162,8 @@ BOOST_AUTO_TEST_CASE(write_sdf_view)
     mol::EntityView ev = eh.Select("(ele=C or ele=N) and aname!='1'");
     SaveEntity(ev, "testfiles/sdf/compound-view-out.sdf");
   }
-  BOOST_CHECK(compare_files("testfiles/sdf/compound-view.sdf",
-                            "testfiles/sdf/compound-view-out.sdf"));
+  BOOST_CHECK(compare_files("testfiles/sdf/compound-view-out.sdf",
+                            "testfiles/sdf/compound-view.sdf"));
 }
 
 BOOST_AUTO_TEST_CASE(nonexisting_file)
