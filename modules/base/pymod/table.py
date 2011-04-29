@@ -823,14 +823,17 @@ class Table:
     except:
       return None
 
-  def Count(self, col):
+  def Count(self, col, ignore_nan=True):
     """
     Count the number of cells in column that are not equal to None.
     """
     count=0
     idx=self.GetColIndex(col)
     for r in self.rows:
-      if r[idx]!=None:
+      if ignore_nan:
+        if r[idx]!=None:
+          count+=1
+      else:
         count+=1
     return count
 
@@ -1095,8 +1098,42 @@ class Table:
       LogError("Function needs numpy, but I could not import it.")
       raise
 
-
-
+  def IsEmpty(self, col_name=None, ignore_nan=True):
+    '''
+    Checks if a table is empty.
+    
+    If no column name is specified, the whole table is checked for being empty,
+    whereas if a column name is specified, only this column is checked.
+    
+    By default, all NAN (or None) values are ignored, and thus, a table
+    containing only NAN values is considered as empty. By specifying the 
+    option ignore_nan=False, NAN values are counted as 'normal' values.
+    '''
+    
+    # table with no columns and no rows
+    if len(self.col_names)==0:
+      if col_name:
+        raise ValueError('Table has no column named "%s"' % col_name)
+      return True
+    
+    # column name specified
+    if col_name:
+      if self.Count(col_name, ignore_nan=ignore_nan)==0:
+        return True
+      else:
+        return False
+      
+    # no column name specified -> test whole table
+    else:
+      for row in self.rows:
+        for cell in row:
+          if ignore_nan:
+            if cell!=None:
+              return False
+          else:
+            return False
+    return True
+    
 
 def Merge(table1, table2, by, only_matching=False):
   """
@@ -1196,3 +1233,5 @@ def Merge(table1, table2, by, only_matching=False):
         row[common1_index]=v[common2_index]
       new_tab.AddRow(row)
   return new_tab
+
+  

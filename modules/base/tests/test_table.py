@@ -131,6 +131,7 @@ class TestTable(unittest.TestCase):
     tab = Table()
     self.CompareColCount(tab, 0)
     self.CompareRowCount(tab, 0)
+    self.assertRaises(ValueError, tab.GetColIndex, 'a')
     
   def testTableInitSingleColEmpty(self):
     '''
@@ -831,6 +832,10 @@ class TestTable(unittest.TestCase):
     self.assertEquals(tab.Count('second'),2)
     self.assertEquals(tab.Count('third'),2)
     self.assertEquals(tab.Count('fourth'),3)
+    self.assertEquals(tab.Count('first', ignore_nan=False),3)
+    self.assertEquals(tab.Count('second', ignore_nan=False),3)
+    self.assertEquals(tab.Count('third', ignore_nan=False),3)
+    self.assertEquals(tab.Count('fourth', ignore_nan=False),3)
     self.assertRaises(ValueError,tab.Count,'fifth')
     
   def testCalcEnrichment(self):
@@ -974,6 +979,55 @@ class TestTable(unittest.TestCase):
     
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c','a','b',weight='d')
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c',weights='d')
+    
+  def testIsEmpty(self):
+    tab = Table()
+    self.assertTrue(tab.IsEmpty())
+    self.assertTrue(tab.IsEmpty(ignore_nan=False))
+    self.assertRaises(ValueError, tab.IsEmpty, 'a')
+    
+    # empty table
+    tab = Table(['a','b','c'], 'fff')
+    self.assertTrue(tab.IsEmpty())
+    self.assertTrue(tab.IsEmpty('a'))
+    self.assertTrue(tab.IsEmpty('b'))
+    self.assertTrue(tab.IsEmpty('c'))
+    self.assertTrue(tab.IsEmpty(ignore_nan=False))
+    self.assertTrue(tab.IsEmpty('a', ignore_nan=False))
+    self.assertTrue(tab.IsEmpty('b', ignore_nan=False))
+    self.assertTrue(tab.IsEmpty('c', ignore_nan=False))
+    self.assertRaises(ValueError, tab.IsEmpty, 'd')
+    
+    # fill row with NAN values
+    tab.AddRow([None,None,None])
+    self.assertTrue(tab.IsEmpty())
+    self.assertTrue(tab.IsEmpty('a'))
+    self.assertTrue(tab.IsEmpty('b'))
+    self.assertTrue(tab.IsEmpty('c'))
+    self.assertFalse(tab.IsEmpty(ignore_nan=False))
+    self.assertFalse(tab.IsEmpty('a', ignore_nan=False))
+    self.assertFalse(tab.IsEmpty('b', ignore_nan=False))
+    self.assertFalse(tab.IsEmpty('c', ignore_nan=False))
+    
+    # fill some values into column 'c' only
+    tab.AddRow([None,None,1.0])
+    self.assertFalse(tab.IsEmpty())
+    self.assertTrue(tab.IsEmpty('a'))
+    self.assertTrue(tab.IsEmpty('b'))
+    self.assertFalse(tab.IsEmpty('c'))
+    self.assertFalse(tab.IsEmpty('a', ignore_nan=False))
+    self.assertFalse(tab.IsEmpty('b', ignore_nan=False))
+    self.assertFalse(tab.IsEmpty('c', ignore_nan=False))
+    
+    # fill some values into all columns
+    tab.AddRow([2.0,3.0,1.0])
+    self.assertFalse(tab.IsEmpty())
+    self.assertFalse(tab.IsEmpty('a'))
+    self.assertFalse(tab.IsEmpty('b'))
+    self.assertFalse(tab.IsEmpty('c'))
+    self.assertFalse(tab.IsEmpty('a', ignore_nan=False))
+    self.assertFalse(tab.IsEmpty('b', ignore_nan=False))
+    self.assertFalse(tab.IsEmpty('c', ignore_nan=False))
       
 if __name__ == "__main__":
   try:
