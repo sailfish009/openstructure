@@ -149,9 +149,13 @@ class ByChainWidget(QtGui.QWidget):
     font = text_label.font()
     font.setBold(True)
     
+    conly_label = QtGui.QLabel('carbons only')
+    self.conly_box = QtGui.QCheckBox()
+    
     grid = QtGui.QGridLayout()
     grid.addWidget(text_label,0,0,1,1)
-    grid.addWidget(QtGui.QLabel("No Settings available"), 1, 0, 1, 3)
+    grid.addWidget(self.conly_box, 1,0,1,1)
+    grid.addWidget(conly_label, 1,1,1,3)
     grid.setRowStretch(2,1)
     self.setLayout(grid)
     self.setMinimumSize(250,60)
@@ -162,7 +166,11 @@ class ByChainWidget(QtGui.QWidget):
   def ChangeColor(self, node):
     if isinstance(node, gfx.Entity):
       node.CleanColorOps()
-      node.ColorByChain()
+      if self.conly_box.isChecked():
+        node.ColorByChain('ele=C')
+      else:
+        node.ColorByChain()
+      
      
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
@@ -184,9 +192,13 @@ class ByEntityWidget(QtGui.QWidget):
     font = text_label.font()
     font.setBold(True)
     
+    conly_label = QtGui.QLabel('carbons only')
+    self.conly_box = QtGui.QCheckBox()
+    
     grid = QtGui.QGridLayout()
     grid.addWidget(text_label,0,0,1,1)
-    grid.addWidget(QtGui.QLabel("No Settings available"), 1, 0, 1, 3)
+    grid.addWidget(self.conly_box, 1,0,1,1)
+    grid.addWidget(conly_label, 1,1,1,3)
     grid.setRowStretch(2,1)
     self.setLayout(grid)
     self.setMinimumSize(250,60)
@@ -205,7 +217,10 @@ class ByEntityWidget(QtGui.QWidget):
       else:
         color=self.gradient_.GetColorAt(float(i) / entity_count)
       node = scene_selection.GetActiveNode(i)
-      node.SetColor(color)
+      if self.conly_box.isChecked():
+        node.SetColor(color, 'ele=C')
+      else:
+        node.SetColor(color)
   
   def ChangeColor(self, node):
     pass

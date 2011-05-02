@@ -792,6 +792,12 @@ void Entity::ColorByChain()
   this->Apply(cop);
 }
 
+void Entity::ColorByChain(const String& selection)
+{
+  ByChainColorOp cop = ByChainColorOp(selection);
+  this->Apply(cop);
+}
+
 void Entity::ColorBy(const mol::EntityView& ev,
                      const String& prop,
                      const Gradient& g, float minv, float maxv)

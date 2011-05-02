@@ -28,6 +28,16 @@ using namespace ost::gfx;
 
 namespace {
 
+void color_by_chain_01(Entity* e)
+{
+  e->ColorByChain();
+}
+
+void color_by_chain_02(Entity* e, const String& selection)
+{
+  e->ColorByChain(selection);
+}
+
 void color_by_01(Entity* e,
                  const String& prop, 
                  const Gradient& gradient,
@@ -308,7 +318,8 @@ void export_Entity()
     .def("PickAtom", &Entity::PickAtom)
     .def("PickBond", &Entity::PickBond)
     .def("ColorByElement",&Entity::ColorByElement)
-    .def("ColorByChain",&Entity::ColorByChain)
+    .def("ColorByChain", color_by_chain_01)
+    .def("ColorByChain", color_by_chain_02)
     .def("CleanColorOps", &Entity::CleanColorOps)
     .def("ReapplyColorOps", &Entity::ReapplyColorOps)
     .def("GetOptions", &Entity::GetOptions)

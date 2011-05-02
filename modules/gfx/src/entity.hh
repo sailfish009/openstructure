@@ -177,6 +177,9 @@ public:
   /// \brief color by chain
   void ColorByChain();
 
+  /// \brief color by chain for a specific selection
+  void ColorByChain(const String& selection);
+
   /// \brief get view
   mol::EntityView GetView() const;
 
