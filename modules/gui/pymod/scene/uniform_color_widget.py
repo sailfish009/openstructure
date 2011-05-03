@@ -34,6 +34,7 @@ from color_select_widget import ColorSelectWidget
 class UniformColorWidget(QtGui.QWidget):
   def __init__(self, parent=None):
     QtGui.QWidget.__init__(self, parent)
+    self.parent_ = parent
     
     self.text_ = "Uniform Color"
     
@@ -41,9 +42,6 @@ class UniformColorWidget(QtGui.QWidget):
     uniform_label = QtGui.QLabel(self.text_)
     font = uniform_label.font()
     font.setBold(True)
-    
-    conly_label = QtGui.QLabel('carbons only')
-    self.conly_box = QtGui.QCheckBox()
     
     self.color_select_widget_ = ColorSelectWidget(1,1,QtGui.QColor("White"))
     
@@ -55,9 +53,6 @@ class UniformColorWidget(QtGui.QWidget):
     grid.setRowStretch(3, 1)
     grid.setColumnStretch(0,1)
     grid.setColumnStretch(2,1)
-    
-    grid.addWidget(self.conly_box, 4,0)
-    grid.addWidget(conly_label, 4,1)
     
     top_layout.addWidget(uniform_label)
     top_layout.addLayout(grid)
@@ -92,7 +87,7 @@ class UniformColorWidget(QtGui.QWidget):
     gfx_color = self.color_select_widget_.GetGfxColor()
     if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
         node.CleanColorOps()
-        if self.conly_box.isChecked():
+        if self.parent_.GetCarbonsOnly():
           node.SetColor(gfx_color,"ele=C")
         else:
           node.SetColor(gfx_color,"")

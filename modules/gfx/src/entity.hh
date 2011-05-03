@@ -174,6 +174,9 @@ public:
   /// \brief color by element
   void ColorByElement();
   
+  /// \brief color by element for a specific selection
+  void ColorByElement(const String& selection);
+
   /// \brief color by chain
   void ColorByChain();
 
@@ -228,6 +231,11 @@ public:
   void ColorBy(const String& prop, 
                const Gradient& gradient,
                mol::Prop::Level hint=mol::Prop::UNSPECIFIED);
+
+  // convenience
+  void ColorBy(const String& prop,
+               const Gradient& gradient,
+               const String& selection);
 
   // convenience
   void ColorBy(const String& prop, 

@@ -29,6 +29,7 @@ from gradient_preset_widget import GradientPresetWidget
 class GradientEditor(QtGui.QWidget):
   def __init__(self, parent=None):
     QtGui.QWidget.__init__(self, parent)
+    self.parent_ = parent
     
     #Create Ui elements
     gradient_label = QtGui.QLabel("Gradient Editor")
@@ -80,9 +81,13 @@ class GradientEditor(QtGui.QWidget):
   def ChangeColor(self,node):
     if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
       node.CleanColorOps()
-      node.ColorBy(self.props[self.prop_combo_box_.currentIndex()],
+      if self.parent_.GetCarbonsOnly():
+        node.ColorBy(self.props[self.prop_combo_box_.currentIndex()],
+                     self.gradient_edit_.GetGfxGradient(), "ele=C")
+      else:
+        node.ColorBy(self.props[self.prop_combo_box_.currentIndex()],
                      self.gradient_edit_.GetGfxGradient())
-  
+
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
       glco=gfx.GradientLevelColorOp(mol.QueryViewWrapper(view),self.props[self.prop_combo_box_.currentIndex()],self.gradient_edit_.GetGfxGradient(),mol.Prop.Level.UNSPECIFIED)

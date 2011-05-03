@@ -38,6 +38,16 @@ void color_by_chain_02(Entity* e, const String& selection)
   e->ColorByChain(selection);
 }
 
+void color_by_element_01(Entity* e)
+{
+  e->ColorByElement();
+}
+
+void color_by_element_02(Entity* e, const String& selection)
+{
+  e->ColorByElement(selection);
+}
+
 void color_by_01(Entity* e,
                  const String& prop, 
                  const Gradient& gradient,
@@ -100,6 +110,14 @@ void color_by_08(Entity* e,
                  const Color& c1, const Color& c2)
 {
   e->ColorBy(prop,c1,c2);
+}
+
+void color_by_09(Entity* e,
+                 const String& prop,
+                 const Gradient& gradient,
+                 const String& selection)
+{
+  e->ColorBy(prop,gradient,selection);
 }
 
 // temporary, see comment in gfx/entity.hh
@@ -308,6 +326,7 @@ void export_Entity()
     .def("ColorBy", color_by_06)
     .def("ColorBy", color_by_07)
     .def("ColorBy", color_by_08)
+    .def("ColorBy", color_by_09)
     .def("DetailColorBy", detail_color_by_02)
     COLOR_BY_DEF()
     .def("RadiusBy", radius_by_01)
@@ -317,7 +336,8 @@ void export_Entity()
     .def("ResetRadiusBy", &Entity::ResetRadiusBy)
     .def("PickAtom", &Entity::PickAtom)
     .def("PickBond", &Entity::PickBond)
-    .def("ColorByElement",&Entity::ColorByElement)
+    .def("ColorByElement", color_by_element_01)
+    .def("ColorByElement", color_by_element_02)
     .def("ColorByChain", color_by_chain_01)
     .def("ColorByChain", color_by_chain_02)
     .def("CleanColorOps", &Entity::CleanColorOps)

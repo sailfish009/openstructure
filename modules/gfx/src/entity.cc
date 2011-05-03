@@ -786,6 +786,12 @@ void Entity::ColorByElement()
   this->Apply(cop);
 }
 
+void Entity::ColorByElement(const String& selection)
+{
+  ByElementColorOp cop = ByElementColorOp(selection);
+  this->Apply(cop);
+}
+
 void Entity::ColorByChain()
 {
   ByChainColorOp cop = ByChainColorOp();
@@ -851,6 +857,14 @@ void Entity::ColorBy(const String& prop,
                      mol::Prop::Level level)
 {
   GradientLevelColorOp glop = GradientLevelColorOp("",prop, gradient,level);
+  this->Apply(glop);
+}
+
+void Entity::ColorBy(const String& prop,
+                     const Gradient& gradient,
+                     const String& selection)
+{
+  GradientLevelColorOp glop = GradientLevelColorOp(selection,prop,gradient);
   this->Apply(glop);
 }
 
