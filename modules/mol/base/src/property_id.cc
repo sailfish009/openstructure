@@ -39,6 +39,7 @@ struct Properties : public boost::spirit::symbols<Prop> {
       ("rtype", Prop(Prop::RTYPE, Prop::STRING, Prop::RESIDUE))        
       ("ele", Prop(Prop::ELE, Prop::STRING, Prop::ATOM))
       ("anum", Prop(Prop::ANUM, Prop::INT, Prop::ATOM))
+      ("aindex", Prop(Prop::AINDEX, Prop::INT, Prop::ATOM))
       ("x",Prop(Prop::AX, Prop::FLOAT, Prop::ATOM))
       ("y",Prop(Prop::AY, Prop::FLOAT, Prop::ATOM))
       ("z",Prop(Prop::AZ, Prop::FLOAT, Prop::ATOM))

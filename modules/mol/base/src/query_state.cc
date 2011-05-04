@@ -323,6 +323,10 @@ boost::logic::tribool QueryState::EvalAtom(const AtomImplPtr& a) {
         s_[*i] = cmp_string(ss.comp_op,str_value,
 			    boost::get<StringOrRegexParam>(ss.param));                  
         break;
+      case Prop::AINDEX:
+        int_value=(a->GetIndex());
+        s_[*i]=cmp_num<int>(ss.comp_op, int_value,boost::get<int>(ss.param));
+        break;
       case Prop::AX:
         float_value=(a->GetPos())[0];
         s_[*i]=cmp_num<Real>(ss.comp_op, float_value, 

@@ -650,12 +650,12 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
     LogicOP lop=inversion_stack_.back() ? LOP_OR : LOP_AND;
     CompOP cop=inversion_stack_.back() ? COP_NEQ : COP_EQ;
     ParamType cname_val(StringOrRegexParam(query_string_.substr(cname.GetValueRange().Loc,
-								cname.GetValueRange().Length).c_str()));
+                                                                cname.GetValueRange().Length).c_str()));
     Prop cname_prop(Prop::CNAME, Prop::STRING, Prop::CHAIN);
     SelNode* cname_node=new SelNode(cname_prop, cop, cname_val);
     ParamType aname_val(StringOrRegexParam(query_string_.substr(aname.GetValueRange().Loc,
-								aname.GetValueRange().Length).c_str()));
-   Prop aname_prop(Prop::ANAME, Prop::STRING, Prop::ATOM);
+                                                                aname.GetValueRange().Length).c_str()));
+    Prop aname_prop(Prop::ANAME, Prop::STRING, Prop::ATOM);
     SelNode* aname_node=new SelNode(aname_prop, cop, aname_val);
     ParamType rnum_val(atoi(query_string_.substr(rnum.GetValueRange().Loc,
                             rnum.GetValueRange().Length).c_str()));

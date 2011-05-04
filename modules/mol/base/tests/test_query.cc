@@ -116,6 +116,7 @@ BOOST_AUTO_TEST_CASE(test_query_parse_properties)
   BOOST_CHECK(Query("x=3").IsValid());
   BOOST_CHECK(Query("y=4").IsValid());
   BOOST_CHECK(Query("z=6").IsValid());
+  BOOST_CHECK(Query("aindex=1").IsValid());
   BOOST_CHECK(Query("gatest=7").IsValid());
   BOOST_CHECK(Query("grtest=8").IsValid());
   BOOST_CHECK(Query("gctest=9").IsValid());
@@ -151,6 +152,10 @@ BOOST_AUTO_TEST_CASE(test_query_parse_value_type)
   BOOST_CHECK(Query("rnum=WTF").IsValid()==false);
   BOOST_CHECK(Query("rnum=3.0").IsValid()==false);
   BOOST_CHECK(Query("ele>=XXX").IsValid()==false);
+
+  BOOST_CHECK(Query("aindex=1,2").IsValid());
+  BOOST_CHECK(Query("aindex=1:10,12:20").IsValid());
+  BOOST_CHECK(Query("aindex>7").IsValid());
 }
 
 BOOST_AUTO_TEST_CASE(test_query_parse_logical_op) 
@@ -198,6 +203,7 @@ BOOST_AUTO_TEST_CASE(test_query_eval)
   ensure_counts(e, "cname=A", 1, 3, 27);
   ensure_counts(e, "aname=CA", 1, 3, 3);
   ensure_counts(e, "aname=SD", 1, 1, 1);
+  ensure_counts(e, "aindex=1,3,99", 1, 1, 2);
   ensure_counts(e, "rnum=1:2", 1, 2, 19);
   ensure_counts(e, "rnum=1,2", 1, 2, 19);
   ensure_counts(e, "rnum>3", 0, 0, 0);
