@@ -316,8 +316,7 @@ void AtomImpl::DeleteConnector(const ConnectorImplP& conn,
 
 int AtomImpl::GetIntProperty(Prop::ID prop_id) const
 {
-  switch (prop_id) {
-  case Prop::AINDEX:
+  if (prop_id==Prop::AINDEX) {
     return index_;
   }
   throw PropertyError(prop_id);
