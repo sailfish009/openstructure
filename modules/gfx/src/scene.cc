@@ -1578,6 +1578,7 @@ void Scene::BlurSnapshot()
 void Scene::AutoAutoslab(bool f)
 {
   auto_autoslab_=f;
+  do_autoslab_=f;
   RequestRedraw();
 }
 
@@ -1982,6 +1983,8 @@ void Scene::render_stereo()
 
 void Scene::do_autoslab()
 {
+  // skip autoslab if nothing to show yet
+  if(root_node_->GetChildCount()==0) return;
   if(do_autoslab_fast_) {
     geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
     // necessary code duplication due to awkward slab limit impl
@@ -2008,6 +2011,7 @@ void Scene::do_autoslab()
     set_far(zfar_);
     ResetProjection();
   }
+  RequestRedraw();
 }
 
 }} // ns
