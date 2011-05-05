@@ -147,6 +147,7 @@ void EntityImpl::ReplicateHierarchy(EntityImplPtr dest)
            e3=src_res->GetAtomList().end(); k!=e3; ++k) {
         AtomImplPtr src_atom=*k;
         AtomImplPtr dst_atom=dst_res->InsertAtom(src_atom);
+        dst_atom->SetIndex(src_atom->GetIndex());
       }
     }
   }
@@ -229,6 +230,7 @@ void EntityImpl::DoCopy(EntityImplPtr dest)
   // first copy the chain - residue - atom hierarchy before replicating the 
   // bond network and the torsions
   dest->SetName(this->GetName());
+  dest->next_index_=0;
   this->ReplicateHierarchy(dest);
   this->DoCopyBondsAndTorsions(dest);
 }

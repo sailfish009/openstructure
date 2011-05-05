@@ -54,7 +54,6 @@ AtomImpl::AtomImpl(const EntityImplPtr& e,
   connector_list_(),
   fragment_(),
   state_(0),
-
   index_(index)
 {
   EntityHandle ent = this->GetEntity();
