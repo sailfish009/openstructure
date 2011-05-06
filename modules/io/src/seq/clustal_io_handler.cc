@@ -76,6 +76,10 @@ void ClustalIOHandler::Import(seq::SequenceList& aln,
   typedef std::map<String, seq::SequenceHandle> SeqMap;
   std::vector<seq::SequenceHandle> order;
   SeqMap seq_map;
+  if (!instream) {
+    throw IOException("Can't import CLUSTAL alignment. Inexisting file "
+                      "or invalid stream.");
+  }
   if (!std::getline(instream, line) || line.find("CLUSTAL")!=0) {
     throw IOException("bad CLUSTAL file. First line must contain CLUSTAL");
   }
