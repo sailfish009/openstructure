@@ -339,13 +339,14 @@ PDBWriter::PDBWriter(const boost::filesystem::path& filename,
 #endif  
   mol_count_(0), line_(80), multi_model_(false), 
   charmm_style_(profile.dialect=="CHARMM"), is_pqr_(false),
-  profile_(profile)
-{}
+  profile_(profile), filename_("")
+{
+}
 
 PDBWriter::PDBWriter(const String& filename, const IOProfile& profile):
   outfile_(filename.c_str()), outstream_(outfile_), mol_count_(0), line_(80), 
   multi_model_(false), charmm_style_(profile.dialect=="CHARMM"), 
-  is_pqr_(false), profile_(profile)
+  is_pqr_(false), profile_(profile), filename_(filename)
 {}
 
 void PDBWriter::WriteModelLeader()
@@ -368,6 +369,14 @@ void PDBWriter::WriteModelTrailer()
 template <typename H>
 void PDBWriter::WriteModel(H ent)
 {
+  if (!outstream_) {
+    if (!filename_.empty()) {
+      std::stringstream ss;
+      ss << "Can't write PDB to file '" << filename_ << "'";
+      throw IOException(ss.str());
+    }
+    throw IOException("Can't write PDB. Bad stream");
+  }
   ForcePOSIX posix;
   this->WriteModelLeader();
   PDBWriterImpl writer(outstream_,line_, atom_indices_, charmm_style_);

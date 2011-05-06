@@ -75,6 +75,7 @@ private:
   bool                charmm_style_;
   bool                is_pqr_;
   IOProfile           profile_;
+  String              filename_;
 };
  
 }}
