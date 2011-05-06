@@ -448,10 +448,26 @@ class Table:
     return filt_tab
 
   @staticmethod
-  def Load(stream):
+  def Load(stream_or_filename):
+    """
+    Load table from stream or file with given name. The file must contain a 
+    header line of the form
+    
+      col_name1[type1] <col_name2[type2]>...
+    
+    The types given in brackets must be one of the data types the :class:`Table` 
+    class understands. Each following line in the file then must contains exactly 
+    the same number of data items as listed in the header. The data items are 
+    automatically converted to the column format. Lines starting with a '#' and 
+    empty lines are ignored.
+    
+    :returns: A new :class:`Table` instance
+    """
     fieldname_pattern=re.compile(r'(?P<name>[A-Za-z0-9_]+)(\[(?P<type>\w+)\])?')
-    if not hasattr(stream, 'read'):
-      stream=open(stream, 'r')
+    if not hasattr(stream_or_filename, 'read'):
+      stream=open(stream_or_filename, 'r')
+    else:
+      stream=stream_or_filename
     header=False
     num_lines=0
     for line in stream:

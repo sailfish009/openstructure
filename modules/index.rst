@@ -26,7 +26,8 @@ OpenStructure documentation
   newmodule
   external
   contributing
-  
+  table
+
 For Starters
 --------------------------------------------------------------------------------
 
@@ -85,7 +86,10 @@ Graphical User Interface
 **Widgets**: :doc:`python shell <gui/python_shell>` | :doc:`sequence viewer <gui/sequence_viewer>`
 
 
+Varia
+--------------------------------------------------------------------------------
 
+**Datasets:** :doc:`tabular data <table>`
 
 Extending OpenStructure
 --------------------------------------------------------------------------------
