@@ -62,7 +62,7 @@ def collect_deps(stage_dir, components, binaries, site_packages,
 
 BINARIES=['gosty', 'chemdict_tool']
 COMPONENTS=['mol', 'geom', 'conop', 'gfx', 'gui', 'seq_alg', 'seq', 
-            'img', 'img_alg', 'qa', 'info', 'io', 'db', 'base']
+            'img', 'img_alg', 'info', 'io', 'db', 'base']
 SCRIPTS=['dng', 'ost']
 CHANGE_ID_RPATH='install_name_tool -id @rpath/%s %s'   
 CHANGE_ID='install_name_tool -id @executable_path/%s %s'   
