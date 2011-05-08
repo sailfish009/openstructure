@@ -47,7 +47,10 @@ BOOST_AUTO_TEST_CASE(test_io_img)
   //float tests
   boost::test_tools::close_at_tolerance<Real> close_test(::boost::test_tools::percent_tolerance(0.001));
   ost::img::ImageHandle testimage=ost::img::CreateImage(ost::img::Extent(ost::img::Point(0,0),ost::img::Point(3,3)));
-  testimage.ApplyIP(ost::img::alg::Randomize());
+  int counter=0;
+  for (img::ExtentIterator i(testimage.GetExtent()); !i.AtEnd(); ++i, ++counter) {
+   testimage.SetReal(i, counter);
+  }
   testimage+=0.01; //if all values are > 0.0 we can use close_at_tolerance
   const String fname("temp_img.tmp");
   std::map<String,ImageFormatBase*> float_formats;
@@ -82,7 +85,7 @@ BOOST_AUTO_TEST_CASE(test_io_img)
   int_formats["DAT (16 bit)"]=new DAT(true,OST_BIT16_FORMAT);
   int_formats["TIF (16 bit)"]=new TIF;
   int_formats["JPK (16 bit)"]=new JPK;
-  int_formats["DF3"]=new DF3;
+  // int_formats["DF3"]=new DF3(true);
   for(std::map<String,ImageFormatBase*>::iterator it=int_formats.begin();it!=int_formats.end();++it){
     ost::io::SaveImage(testimage,fname,*(it->second));
     ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));
@@ -97,7 +100,10 @@ BOOST_AUTO_TEST_CASE(test_io_img)
       }
     }
     if(failed){
-      BOOST_ERROR("Image IO failed for plugin " << it->first << " at point " << ost::img::Point(eit)<< ". The values are: " << static_cast<int>(scaled_image.GetReal(eit))<< ","<< static_cast<int>(loadedimage.GetReal(eit)) );
+      BOOST_ERROR("Image IO failed for plugin " << it->first << " at point " 
+                  << ost::img::Point(eit)<< ". Should be " 
+                  << static_cast<int>(scaled_image.GetReal(eit)) << ", but "
+                  << static_cast<int>(loadedimage.GetReal(eit)) << " found.");
     }
     delete it->second;
   }

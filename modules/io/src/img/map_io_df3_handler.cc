@@ -62,11 +62,12 @@ void DF3::SetNormalizeOnSave(bool normalize_on_save)
 
 Real DF3::GetMaximum() const
 {
-  return 65535.0;
+  return std::numeric_limits<unsigned short>::max();
 }
+
 Real DF3::GetMinimum() const
 {
-  return 0.0;
+  return 0;
 }
 
 void DF3MapIOHandler::Import(img::MapHandle& mh, const bf::path& loc,
@@ -110,7 +111,7 @@ void DF3MapIOHandler::Export(const img::MapHandle& mh2,
     throw IOException("DF3 doesn't support complex-valued maps");
   }
   img::alg::Normalizer norm=img::alg::CreateNoOpNormalizer();
-  if (fmt.GetNormalizeOnSave() == true) {
+  if (fmt.GetNormalizeOnSave()) {
     
     norm=img::alg::CreateLinearRangeNormalizer(mh2, fmt.GetMinimum(),
                                                fmt.GetMaximum());
