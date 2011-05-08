@@ -60,6 +60,10 @@ class DLLEXPORT_OST_IO DF3MapIOHandler: public MapIOHandler
   static bool MatchContent(unsigned char* header);
   static bool MatchType(const ImageFormatBase& type);
   static bool MatchSuffix(const String& loc);
+  
+  static bool ProvidesImport() { return false; }
+  static bool ProvidesExport() { return true; }  
+  
   static String GetFormatName() { return "DF3"; };
   static String GetFormatDescription() { return "PovRay Density file format"; };
 };

@@ -100,6 +100,8 @@ class DLLEXPORT_OST_IO MapIOTiffHandler: public MapIOHandler
     static bool MatchContent(unsigned char* header);
     static bool MatchType(const ImageFormatBase& type);
     static bool MatchSuffix(const String& loc);
+    static bool ProvidesImport() { return true; }
+    static bool ProvidesExport() { return true; }
     static String GetFormatName() { return String( "Tiff"); }
     static String GetFormatDescription() { return String("Tagged Image File Format"); }
 

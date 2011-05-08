@@ -212,7 +212,7 @@ void prep_header(spider_header& header, const img::Size& size, const geom::Vec3&
   for (int counter = 0; counter < 8; ++counter)  {
     header.szITim[counter] = time_for_header[counter];
   }
-  for (int counter = 0; counter < title_for_header.size(); ++counter)  {
+  for (size_t counter = 0; counter < title_for_header.size(); ++counter)  {
     header.szITit[counter] = title_for_header[counter];
   }
 }

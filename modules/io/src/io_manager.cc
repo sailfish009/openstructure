@@ -140,7 +140,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
 {
   if(formatstruct.GetFormatString()!="undefined" ){
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchType(formatstruct)) {
+      if((*it)->ProvidesImport() && (*it)->MatchType(formatstruct)) {
         return (*it)->Create();
       }
     }
@@ -149,7 +149,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
     String match_suf_string=loc.string();
     std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchSuffix(match_suf_string)) {
+      if((*it)->ProvidesImport() && (*it)->MatchSuffix(match_suf_string)) {
         return (*it)->Create();
       }
     }
@@ -163,7 +163,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
     infile.close();
 
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchContent(header)) {
+      if((*it)->ProvidesImport() && (*it)->MatchContent(header)) {
         return (*it)->Create();
       }
     }
@@ -177,7 +177,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerStream(std::istream& stream,
 {
   if(formatstruct.GetFormatString()!="undefined" ){
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchType(formatstruct)) {
+      if((*it)->ProvidesImport() && (*it)->MatchType(formatstruct)) {
         return (*it)->Create();;
       }
     }
@@ -188,7 +188,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerStream(std::istream& stream,
     stream.seekg(0,std::ios::beg);
 
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchContent(header)) {
+      if((*it)->ProvidesImport() && (*it)->MatchContent(header)) {
         return (*it)->Create();;
       }
     }
@@ -202,7 +202,7 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerFile(const boost::filesystem::pat
 {
   if(formatstruct.GetFormatString()!="undefined" ){
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchType(formatstruct)) {
+      if((*it)->ProvidesExport() && (*it)->MatchType(formatstruct)) {
         return (*it)->Create();
       }
     }
@@ -216,7 +216,7 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerFile(const boost::filesystem::pat
     String match_suf_string=loc.string();
     std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchSuffix(match_suf_string)) {
+      if((*it)->ProvidesExport() && (*it)->MatchSuffix(match_suf_string)) {
         return(*it)->Create();
       }
     }
@@ -229,7 +229,7 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerStream(std::istream& stream, cons
 {
   if(formatstruct.GetFormatString()!="undefined" ){
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchType(formatstruct)) {
+      if((*it)->ProvidesExport() && (*it)->MatchType(formatstruct)) {
         return (*it)->Create();
       }
     }
