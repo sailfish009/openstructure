@@ -32,7 +32,7 @@ class Help:
     else:
       try:
         s=d.document(pydoc.resolve(what)[0])
-      except ImportError as detail:
+      except ImportError, detail:
         s=str(detail)
       doc_widget.doctext.setHtml(s)
       doc_widget.searchbox.setText('')
