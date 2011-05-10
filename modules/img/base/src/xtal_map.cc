@@ -149,8 +149,10 @@ void XtalMap::FindSym(const Point& p, int& sym, Point& wp) const
       return;
     }
   }
-  LOG_ERROR("XtalMap::FindSym Internal Error: Could not find symmetry "
-            "equivalent for " << p);
+  std::stringstream ss;
+  ss << "XtalMap::FindSym Internal Error: Could not find symmetry "
+            "equivalent for " << p;
+  throw std::runtime_error(ss.str());
 }
 
 
