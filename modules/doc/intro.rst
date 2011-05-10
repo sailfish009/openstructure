@@ -36,7 +36,7 @@ that comes with OpenStructure. Depending on your platform, the examples are
 located at a different location:
 
  * on *MacOS X* the files are located inside the application bundle. The file 
-   browser fill automatically point to the examples.
+   browser will automatically point to the examples.
  * on *Linux* and *Windows* PREFIX/share/openstructure/examples, where PREFIX is 
    the path to the directory containing OpenStructure.
 

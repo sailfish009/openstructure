@@ -10,11 +10,11 @@ The code to load and save structures is not directly part of the mol module, but
 :mod:`~ost.io` module. We will be using functions of this module to load 
 structures. 
 
-One of the most commonly used file formats for macromolecular structures are PDB 
-(Brookhaven Protein Databank) files. The official name for  molecules stored in 
-a PDB file is an *entity* and we decided to follow this convention in 
-OpenStructure. You will hear this word all the time, but you can replace the 
-word entity with molecule (or most of the time even protein) in your head.
+One of the most commonly used file formats for macromolecular structures are 
+PDB (Brookhaven Protein Data Bank) files. The official name for  molecules 
+stored in a PDB file is an *entity* and we decided to follow this convention 
+in OpenStructure. You will hear this word all the time, but you can replace 
+the word entity with molecule (or most of the time even protein) in your head.
 
 
 To load a PDB file, simply type
@@ -95,7 +95,7 @@ of the entity. The graphical representation is completely separate from the :cla
 
 Now you will see the fragment in the 3D window.
 
-Use the mouse to rotate, zoom in an shift the camera. Double clicking on an 
+Use the mouse to rotate, zoom in and shift the camera. Double clicking on an 
 atom will center the camera on that atom. If you want to learn more about the 
 :mod:`~ost.gfx` module, you are encouraged to read :doc:`the gfx 
 intro<intro-03>` and the :mod:`gfx documentation<ost.gfx`.
@@ -106,7 +106,7 @@ Introduction to Views
 Often during processing and visualisation of data, only parts of a protein 
 structure are of interest. This realisation has had a major impact on the design 
 of OpenStructure and is tied very deeply into the core of the framework. 
-Subparts of structure are modeled as so-called :class:`EntityViews 
+Subparts of structure are modelled as so-called :class:`EntityViews 
 <ost.mol.EntityView>`. You can think of them as a selection of chains, residues, 
 atoms and bonds of an entity. A views has almost the same interface as the 
 underlying entity, making it very easy to mix entity views with handles in 
