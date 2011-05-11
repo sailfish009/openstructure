@@ -395,6 +395,27 @@ endmacro()
 
 #-------------------------------------------------------------------------------
 # Synopsis:
+#   compile_py_files(module out_files [input_file1 ...])
+# Description:
+#   Calls pyuic on every input file. The resulting python files are stored in
+#   the variable with name out_files.
+#-------------------------------------------------------------------------------
+macro(compile_py_files module out_dir)
+  set(_input_files ${ARGN})
+  foreach(input_file ${_input_files})
+    get_filename_component(_out_file ${input_file} NAME_WE)
+    get_filename_component(_in_file ${input_file} ABSOLUTE)
+    set(_out_file ${out_dir}/${_out_file}.pyc)
+    file(MAKE_DIRECTORY  ${out_dir})
+    add_custom_command(TARGET ${module}
+                       COMMAND ${PYTHON_BINARY} -c "import py_compile;py_compile.compile(\"${_in_file}\",\"${_out_file}\",doraise=True)"
+                       VERBATIM DEPENDS ${input_file}
+                       )
+  endforeach()
+endmacro()
+
+#-------------------------------------------------------------------------------
+# Synopsis:
 #   pymod(NAME name CPP source1 source2 PY source source2 [IN_DIR dir] 
 #         source3 source4 [IN_DIR dir] [LINK link] [OUTPUT_DIR dir] [UI user_interface_files])
 #
@@ -494,9 +515,10 @@ macro(pymod)
                   "${LIB_DIR}/${PYMOD_DIR}/${_DIR}")
           string(REPLACE "/" "_" _DIR_NO_SLASH "${_DIR}")
           add_custom_target("${_ARG_NAME}_${_DIR_NO_SLASH}_pymod" ALL)
-          copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}" 
-                            "${_ABS_PY_FILES}" "TARGETS"
-                            "${_ARG_NAME}_${_DIR_NO_SLASH}_pymod")
+          #copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}"
+          #                  "${_ABS_PY_FILES}" "TARGETS"
+          #                  "${_ARG_NAME}_${_DIR_NO_SLASH}_pymod")
+          compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR}/${_DIR} ${_ABS_PY_FILES})
           set(_PY_FILES)
         else()
           list(APPEND _PY_FILES "${_PY_FILE}")
@@ -508,9 +530,10 @@ macro(pymod)
       if (_ARG_UI)
         add_dependencies("${_LIB_NAME}_pymod" "${_LIB_NAME}_ui"})
       endif()
-      copy_if_different("./" "${PYMOD_STAGE_DIR}" "${_PY_FILES}" "TARGETS"
-                        "${_LIB_NAME}_pymod")
-      add_dependencies("_${_LIB_NAME}" "${_LIB_NAME}_pymod")
+      #copy_if_different("./" "${PYMOD_STAGE_DIR}" "${_PY_FILES}" "TARGETS"
+      #                  "${_LIB_NAME}_pymod")
+      #add_dependencies("_${_LIB_NAME}" "${_LIB_NAME}_pymod")
+      compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR} ${_PY_FILES})
       include_directories(${PYTHON_INCLUDE_PATH})
       install(FILES ${_PY_FILES} DESTINATION "${LIB_DIR}/${PYMOD_DIR}")
       endif()
