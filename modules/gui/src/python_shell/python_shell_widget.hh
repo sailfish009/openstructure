@@ -80,15 +80,21 @@ public slots:
   void OnHistoryUpStateEntered();
   void OnHistoryDownStateEntered();
   void OnExecuteStateEntered();
-  void OnEnterTransition();
-  void OnKeypadEnterTransition();
+  void NewLineAtEnd();
+  void NewLineAtCursor();
   void OnReadonlyEntered();
   void OnReadwriteEntered();
   void OnMixedToReadwrite();
+protected slots:
+  void handle_completion_();
+  void handle_output_toggle_();
+  void handle_wrap_to_function_();
+  void handle_select_all_();
+  void handle_select_all_rw_();
+  void handle_delete_();
+  void handle_backspace_();
 
 protected:
-  virtual void mouseReleaseEvent (QMouseEvent* event );
-  virtual void keyPressEvent (QKeyEvent* event );
   virtual void resizeEvent(QResizeEvent* event);
   virtual void showEvent(QShowEvent* event);
   virtual void insertFromMimeData( const QMimeData * source );
@@ -98,8 +104,6 @@ protected:
   void wrap_into_function_(const QString& command);
   void set_command_(const QString& command);
   void set_block_edit_mode_(BlockEditMode flag);
-  bool handle_completion_(QKeyEvent* event);
-  bool handle_custom_commands_(QKeyEvent* event);
   BlockEditMode get_block_edit_mode_();
   void set_block_type_(const QTextBlock& start,const QTextBlock& end, BlockType type);
 

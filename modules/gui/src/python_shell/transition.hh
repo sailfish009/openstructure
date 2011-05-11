@@ -49,10 +49,9 @@ protected slots:
 class KeyEventTransition: public TransitionBase{
 Q_OBJECT
 public:
-  KeyEventTransition(QEvent::Type type,int key,Qt::KeyboardModifiers modifiers, State* target, bool swallow_event=true, TransitionGuard* guard=new TransitionGuard());
+  KeyEventTransition(int key,Qt::KeyboardModifiers modifiers, State* target, bool swallow_event=true, TransitionGuard* guard=new TransitionGuard());
   virtual std::pair<bool,bool> checkEvent(QKeyEvent* event);
 protected:
-  QEvent::Type type_;
   int key_;
   Qt::KeyboardModifiers modifiers_;
   bool swallow_;
