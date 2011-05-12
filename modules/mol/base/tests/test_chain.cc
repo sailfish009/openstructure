@@ -21,6 +21,7 @@
  */
 #include <ost/mol/mol.hh>
 #include <ost/message.hh>
+#include <ost/integrity_error.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
@@ -192,8 +193,13 @@ BOOST_AUTO_TEST_CASE(rename_chain)
    EntityHandle eh=CreateEntity();
    XCSEditor e=eh.EditXCS();
    ChainHandle ch1=e.InsertChain("A");
-   e.RenameChain(ch1, "B");
-   BOOST_CHECK_EQUAL(ch1.GetName(), "B");
+   ChainHandle ch2=e.InsertChain("B");
+   e.RenameChain(ch1, "A"); // renaming chain with its current name should work
+   BOOST_CHECK_EQUAL(ch1.GetName(), "A");
+   BOOST_CHECK_THROW(e.RenameChain(ch1, "B"), IntegrityError);
+   e.RenameChain(ch2, "C");
+   BOOST_CHECK_EQUAL(ch2.GetName(), "C");
+   BOOST_CHECK_EQUAL(eh.GetChainCount(), 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -85,8 +85,8 @@ The basic functionality of editors is implemented in the EditorBase class.
      identifiers. If new_name is already in use by any chain, an exception will
      be generated.
 
-     :param chain:  Must be a valid chain
-     :type residue:   :class:`ChainHandle`
+     :param chain:    Must be a valid chain
+     :type chain:     :class:`ChainHandle`
      :param new_name: is the new name
      :type new_name:  string
 
@@ -196,8 +196,8 @@ The basic functionality of editors is implemented in the EditorBase class.
 
      Change the name of atom to new_name without changing anything else.
 
-     :param residue:  Must be a valid atom
-     :type residue:   :class:`AtomHandle`
+     :param atom:     Must be a valid atom
+     :type atom:      :class:`AtomHandle`
      :param new_name: is the new name. Free to choose and not verified to be a
                       valid atom identifier.
      :type new_name:  string

@@ -1177,9 +1177,9 @@ pointer_it<ChainImplPtr> EntityImpl::GetChainIter(const String& name)
 
 void EntityImpl::RenameChain(ChainImplPtr chain, const String& new_name)
 {
-  ChainImplList::iterator i;
+  //ChainImplList::iterator i;
   ChainImplPtr  ch=this->FindChain(new_name);
-  if (ch) {
+  if ((ch) && (ch != chain)) {
     throw IntegrityError("unable to rename chain '"+chain->GetName()+
                          "' to '"+new_name+"', since there is already a chain "
                          "with that name");
