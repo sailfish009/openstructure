@@ -78,7 +78,7 @@ class RenderOptionsWidget(ComboOptionsWidget):
     self._in_view_method = False
     self.setMinimumSize(250,200)
   def OnActivate(self, item):
-    pass
+    self.DoResize()
   def OnComboChange(self, item):
     scene_selection = gui.SceneSelection.Instance()
     for i in range(0,scene_selection.GetActiveNodeCount()):
