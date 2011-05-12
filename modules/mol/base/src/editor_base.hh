@@ -152,6 +152,8 @@ public:
                      Real len, Real theta, Real phi,
                      unsigned char bond_order);
 
+  void RenameResidue(ResidueHandle res, const String& new_name);
+
   void RenameChain(ChainHandle chain, const String& new_name);
   /// \brief   Delete all atoms of residue
   ///

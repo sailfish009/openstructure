@@ -22,12 +22,12 @@ following happens:
    explicitly.
 
 
-The editors follow the RIAA (resource allocation is initialisation) principle: 
+The editors follow the RIAA (resource allocation is initialization) principle: 
 Whenever an editor is requested an internal reference counter is incremented. In 
 the destructor, this reference count is decremented. When the count drops to 
-zero, the dependent infomation is updated.
+zero, the dependent information is updated.
 
-In Python, one can not rely on the destructors being called. It is adviced to 
+In Python, one can not rely on the destructors being called. It is advised to 
 always put a call to :meth:`XCSEditor.UpdateICS` or 
 :meth:`ICSEditor.UpdateXCS` when the editing is finished. Alternatively, 
 starting from Python version 2.6, one can use the \
@@ -66,7 +66,30 @@ The basic functionality of editors is implemented in the EditorBase class.
      :param residue_name: 3-letter-code of the residue, e.g. ``GLY``.
      :type  residue_name: string
      :returns:     :class:`ResidueHandle`
-  
+
+  .. method:: RenameResidue(residue, new_name)
+
+     Change the name of residue to new_name. Just overwrites the 3-letter-code
+     without changing anything else. Be aware that the sequence/ 1-letter-code
+     will not change automatically.
+
+     :param residue:  Must be a valid residue
+     :type residue:   :class:`ResidueHandle`
+     :param new_name: is the new name. Free to choose and not verified to be a
+                      valid identifier.
+     :type new_name:  string
+
+  .. method:: RenameChain(chain, new_name)
+
+     Change the name of a chain to new_name while avoiding duplicated
+     identifiers. If new_name is already in use by any chain, an exception will
+     be generated.
+
+     :param chain:  Must be a valid chain
+     :type residue:   :class:`ChainHandle`
+     :param new_name: is the new name
+     :type new_name:  string
+
   .. method:: InsertAtom(residue, atom_name, pos, 
                          element="", occupancy=1.0, b_factor=0.0,
                          is_hetatm=False)
@@ -81,7 +104,7 @@ The basic functionality of editors is implemented in the EditorBase class.
     :param residue:   is the parent residue and must be valid
     :type residue:    :class:`ResidueHandle`
     :param atom_name: is the atom name. While free to choose a name, it is
-                      adviced  to properly name the atoms according to IUPAC
+                      advised  to properly name the atoms according to IUPAC
                       rules as several algorithms as well as most
                       :class:`builders <conop.Builder>` in the :mod:`conop`
                       module rely on proper naming.
@@ -168,14 +191,24 @@ The basic functionality of editors is implemented in the EditorBase class.
     
     :param chain: `A valid chain`
     :type chain: :class:`ChainHandle`
-    
+
+  .. method:: RenameAtom(atom, new_name)
+
+     Change the name of atom to new_name without changing anything else.
+
+     :param residue:  Must be a valid atom
+     :type residue:   :class:`AtomHandle`
+     :param new_name: is the new name. Free to choose and not verified to be a
+                      valid atom identifier.
+     :type new_name:  string
+
 
 Editor for the External Coordinate System
 --------------------------------------------------------------------------------
 
 The XCSEditor defines the interface for manipulating the external coordinate 
 system. The external coordinate system directly operates on atom positions in 
-euclidian space. 
+Euclidian space. 
 
 .. class:: XCSEditor
    
@@ -209,7 +242,7 @@ euclidian space.
      
   .. method:: SetOriginalAtomPos(atom, pos)
      
-     Set the origininal (untransformed) position of the atom. This method will
+     Set the original (untransformed) position of the atom. This method will
      also update the transformed position by applying the entity transform to
      the original pos.
      
@@ -231,7 +264,7 @@ using an :class:`ICSEditor` is undefined and vice versa.
 
 .. note:: 
 
-  For speed reasons, the internal coordinate system is not initialised until the 
+  For speed reasons, the internal coordinate system is not initialized until the 
   first call to :meth:`EntityHandle.EditICS`. This involves the build-up of a  
   directed-graph for the bond network as well as calculating the internal  
   coordinate matrices.
@@ -277,7 +310,7 @@ using an :class:`ICSEditor` is undefined and vice versa.
     
     :type bond: :class:`BondHandle`
     
-    :param length: The bond length in Angstroem.
+    :param length: The bond length in Angstrom.
     
     :type length: :class:`float`
     

@@ -187,4 +187,13 @@ BOOST_AUTO_TEST_CASE(prev_next)
   BOOST_CHECK(!ch1.GetNext(ResidueHandle()).IsValid());
 }
 
+BOOST_AUTO_TEST_CASE(rename_chain)
+{
+   EntityHandle eh=CreateEntity();
+   XCSEditor e=eh.EditXCS();
+   ChainHandle ch1=e.InsertChain("A");
+   e.RenameChain(ch1, "B");
+   BOOST_CHECK_EQUAL(ch1.GetName(), "B");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

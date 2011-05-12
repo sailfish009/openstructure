@@ -114,4 +114,14 @@ BOOST_AUTO_TEST_CASE(test_res_index)
   BOOST_CHECK_EQUAL(rvC.GetIndex(),cv1.GetResidueIndex(rvC.GetNumber()));
 }
 
+BOOST_AUTO_TEST_CASE(rename_res)
+{
+   EntityHandle eh=CreateEntity();
+   XCSEditor e=eh.EditXCS();
+   ChainHandle ch1=e.InsertChain("A");
+   ResidueHandle rA2B = e.AppendResidue(ch1, "A");
+   e.RenameResidue(rA2B, "B");
+   BOOST_CHECK_EQUAL(rA2B.GetName(), "B");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -401,5 +401,15 @@ BOOST_AUTO_TEST_CASE(copy_atom_props)
   BOOST_CHECK_EQUAL(atom2.GetRadius(), Real(500.0));
 }
 
+BOOST_AUTO_TEST_CASE(rename_atom)
+{
+   EntityHandle ent=CreateEntity();
+   XCSEditor edi=ent.EditXCS();
+   ChainHandle ch1=edi.InsertChain("A");
+   ResidueHandle res = edi.AppendResidue(ch1, "A");
+   AtomHandle   atom=edi.InsertAtom(res, "A", geom::Vec3(1,2,3), "C");
+   edi.RenameAtom(atom, "B");
+   BOOST_CHECK_EQUAL(atom.GetName(), "B");
+}
 
 BOOST_AUTO_TEST_SUITE_END()

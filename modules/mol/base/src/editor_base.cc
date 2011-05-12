@@ -70,6 +70,12 @@ ResidueHandle EditorBase::InsertResidueAfter(ChainHandle chain, int index,
   return ResidueHandle(chain.Impl()->InsertResidueAfter(index, num, k));  
 }
 
+void EditorBase::RenameResidue(ResidueHandle res, const String& new_name)
+{
+  CheckHandleValidity(res);
+  res.Impl()->SetKey(new_name);
+}
+
 void EditorBase::RenameChain(ChainHandle chain, const String& new_name)
 {
   CheckHandleValidity(chain); 

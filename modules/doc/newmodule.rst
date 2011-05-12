@@ -200,7 +200,7 @@ The definition of the actual unit tests is done in separate .cc files. Create th
 
   BOOST_AUTO_TEST_SUITE_END()
   
-We again have to define the BOOST_TEST_DYN_LINK macro before including the bosot unit test headers. This will tell the boost unit test libraries that we intend to use dynamic linking. Then we include the functions and classes we would like to write unit tests for. In this file, all the normal Boost Test Library macros and functions can be used. (For example `BOOST_CHECK`, `BOOST_FAIL`, etc.)
+We again have to define the BOOST_TEST_DYN_LINK macro before including the boost unit test headers. This will tell the boost unit test libraries that we intend to use dynamic linking. Then we include the functions and classes we would like to write unit tests for. In this file, all the normal Boost Test Library macros and functions can be used. (For example `BOOST_CHECK`, `BOOST_FAIL`, etc.)
 
 Here is finally the build script skeleton that needs to be put into 
 `mod/tests/`:
