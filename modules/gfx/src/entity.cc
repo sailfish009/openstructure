@@ -670,6 +670,12 @@ RenderModeTypes Entity::GetNotEmptyRenderModes(){
   return render_modes;
 }
 
+
+void Entity::SetRenderMode(RenderMode::Type mode, 
+                           const String& sel, bool keep)
+{
+  this->SetRenderMode(mode, this->GetView().Select(sel), keep);
+}
 void Entity::SetRenderMode(RenderMode::Type mode, 
                            const mol::EntityView& view, bool keep)
 {
@@ -698,7 +704,7 @@ void Entity::SetRenderMode(RenderMode::Type mode,
 mol::EntityView Entity::GetRenderView(RenderMode::Type mode)
 {
   EntityRenderer* rend = this->GetOrCreateRenderer(mode);
-  if(!rend) return mol::EntityView();
+  if (!rend) return this->GetView().CreateEmptyView();
   return rend->GetFullView();
 }
 
@@ -732,6 +738,11 @@ void Entity::SetVisible(const mol::EntityView& view, bool visible){
   }
   this->ReapplyColorOps(); // done in rebuild?
   this->FlagRebuild();
+}
+
+void Entity::SetVisible(const String& sel, bool visible)
+{
+  this->SetVisible(this->GetView().Select(sel), visible);
 }
 
 void Entity::SetColor(const Color& col, const String& selection)

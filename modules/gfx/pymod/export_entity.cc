@@ -220,8 +220,13 @@ RenderOptionsPtr ent_sline_opts(Entity* ent)
 {
   return ent->GetOptions(RenderMode::SLINE);
 }
+
 void (Entity::*set_rm1)(RenderMode::Type, const mol::EntityView&, bool)=&Entity::SetRenderMode;
+void (Entity::*set_rm3)(RenderMode::Type, const String&, bool)=&Entity::SetRenderMode;
 void (Entity::*set_rm2)(RenderMode::Type)=&Entity::SetRenderMode;
+
+void (Entity::*set_vis1)(const mol::EntityView&, bool)=&Entity::SetVisible;
+void (Entity::*set_vis2)(const String&, bool)=&Entity::SetVisible;
 RenderOptionsPtr ent_trace_opts(Entity* ent)
 {
   return ent->GetOptions(RenderMode::TRACE);
@@ -312,12 +317,14 @@ void export_Entity()
     .def("SetQuery", set_query2)
     .def("GetRenderModeName", &Entity::GetRenderModeName)
     .def("GetNotEmptyRenderModes", &Entity::GetNotEmptyRenderModes)
-    .def("SetRenderMode", set_rm1, arg("keep")=false)
+    .def("SetRenderMode", set_rm1, (arg("mode"), arg("view"), arg("keep")=false))
     .def("SetRenderMode", set_rm2)
+    .def("SetRenderMode", set_rm3, (arg("mode"), arg("sel"), arg("keep")=false))    
     .def("SetEnableRenderMode", &Entity::SetEnableRenderMode)
     .def("IsRenderModeEnabled", &Entity::IsRenderModeEnabled)
     .add_property("view", &Entity::GetView)
-    .def("SetVisible", &Entity::SetVisible)
+    .def("SetVisible", set_vis1, (arg("view"), arg("flag")=true))
+    .def("SetVisible", set_vis2, (arg("sel"), arg("flag")=true))    
     .def("ColorBy", color_by_01)
     .def("ColorBy", color_by_02)
     .def("ColorBy", color_by_03)

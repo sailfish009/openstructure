@@ -133,13 +133,15 @@ public:
 
   void SetRenderMode(RenderMode::Type mode, const mol::EntityView& view, 
                      bool keep=false);
-  
+  void SetRenderMode(RenderMode::Type mode, const String& selection, 
+                     bool keep=false);
   virtual void SetRenderMode(RenderMode::Type mode);  
   
   mol::EntityView GetRenderView(RenderMode::Type mode);
 
   virtual void SetVisible(const mol::EntityView& view, bool visible);
 
+  virtual void SetVisible(const String& sel, bool visible);
   virtual void OptionsChanged(RenderMode::Type mode);
 
   virtual void SetOpacity(float f);
