@@ -84,8 +84,9 @@ CoordGroupHandle::operator bool() const
   return this->IsValid();
 }
 
-void CoordGroupHandle::AddFrame(const std::vector<geom::Vec3>& clist)
-{
+//void CoordGroupHandle::AddFrame(const std::vector<geom::Vec3>& clist)
+  void CoordGroupHandle::AddFrame(const geom::Vec3List& clist)
+  {
   this->CheckValidity();
   if (source_->IsMutable()) {
     source_->AddFrame(clist);    

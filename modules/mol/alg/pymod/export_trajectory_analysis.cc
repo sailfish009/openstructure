@@ -25,6 +25,7 @@ using namespace ost;
 using namespace ost::mol::alg;
 
 //"thin wrappers" for default parameters
+/*
 BOOST_PYTHON_FUNCTION_OVERLOADS(extractapos, ExtractAtomPosition, 2, 3)
 BOOST_PYTHON_FUNCTION_OVERLOADS(extractcmpos, ExtractCMPosition, 2, 3)
 BOOST_PYTHON_FUNCTION_OVERLOADS(extractdist, ExtractDistance, 3, 4)
@@ -32,14 +33,14 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(extractang, ExtractAngle, 4, 5)
 BOOST_PYTHON_FUNCTION_OVERLOADS(extractdih, ExtractDihedral, 5, 6)
 BOOST_PYTHON_FUNCTION_OVERLOADS(extractcmdist, ExtractCMDistance, 3, 4)
 BOOST_PYTHON_FUNCTION_OVERLOADS(extractrmsd, ExtractRMSD, 3, 4)
-
+*/
 void export_TrajectoryAnalysis()
 {
-  def("ExtractAtomPosition",ExtractAtomPosition,extractapos());
-  def("ExtractCMPosition",&ExtractCMPosition,extractcmpos());
-  def("ExtractDistance",&ExtractDistance,extractdist());
-  def("ExtractAngle",&ExtractAngle,extractang());
-  def("ExtractDihedral",&ExtractDihedral,extractdih());
-  def("ExtractCMDistance",&ExtractCMDistance,extractcmdist());
-  def("ExtractRMSD",&ExtractRMSD,extractrmsd());
+  def("AnalyzeAtomPos",&AnalyzeAtomPos, (arg("traj"), arg("atom"), arg("stride")=1));
+  def("AnalyzeCenterOfMassPos",&AnalyzeCenterOfMassPos, (arg("traj"), arg("selection"), arg("stride")=1));
+  def("AnalyzeDistanceBetwAtoms",&AnalyzeDistanceBetwAtoms, (arg("traj"), arg("atom"), arg("atom"), arg("stride")=1));
+  def("AnalyzeAngle",&AnalyzeAngle, (arg("traj"), arg("atom"), arg("atom"), arg("atom"), arg("stride")=1));
+  def("AnalyzeDihedralAngle",&AnalyzeDihedralAngle, (arg("traj"), arg("atom"), arg("atom"), arg("atom"), arg("atom"), arg("stride")=1));
+  def("AnalyzeDistanceBetwCenterOfMass",&AnalyzeDistanceBetwCenterOfMass, (arg("traj"), arg("selection"), arg("selection"), arg("stride")=1));
+  def("AnalyzeRMSD",&AnalyzeRMSD, (arg("traj"), arg("reference_view"), arg("selection"), arg("stride")=1));
 }

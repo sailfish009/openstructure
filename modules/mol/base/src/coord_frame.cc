@@ -31,36 +31,53 @@
 
 namespace ost { namespace mol {
 
-  geom::Vec3 CoordFrame::GetAtomPosition(const AtomHandle& atom){
-    return this->GetAtomPosition(atom.GetIndex());
-  }
-  geom::Vec3 CoordFrame::GetAtomPosition(const int& index){
-    return (*this)[index];
+  CoordFrame CreateCoordFrame(const geom::Vec3List& atom_pos)
+  {
+    return CoordFrame(atom_pos);
   }
   
-  Real CoordFrame::GetDistance(const AtomHandle& a1, const AtomHandle& a2){
-    return this->GetDistance(a1.GetIndex(),a2.GetIndex());
+  geom::Vec3 CoordFrame::GetAtomPos(const AtomHandle& atom){
+  //Returns the position of the atom in this frame
+    return this->GetAtomPos(atom.GetIndex());
   }
-  Real CoordFrame::GetDistance(const int& i1, const int& i2){
+  geom::Vec3 CoordFrame::GetAtomPos(int i1){
+  //Returns the position in this frame of the atom with index i1 
+    return (*this)[i1];
+  }
+  
+  Real CoordFrame::GetDistanceBetwAtoms(const AtomHandle& a1, const AtomHandle& a2){
+  //Return the distance in this frame between two atoms
+    return this->GetDistanceBetwAtoms(a1.GetIndex(),a2.GetIndex());
+  }
+  Real CoordFrame::GetDistanceBetwAtoms(int i1, int i2){
+  //Return the distance in this frame between the two atoms with indices i1 and i2 
     return geom::Distance((*this)[i1],(*this)[i2]);
   }
   
   Real CoordFrame::GetAngle(const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3){
+  //Returns the Angle between the three atoms, a2 being considered as the central atom
+  //i.e the angle between the vector (a1.pos-a2.pos) and (a3.pos-a2.pos)
     return this->GetAngle(a1.GetIndex(),a2.GetIndex(),a3.GetIndex());  
   }
-  Real CoordFrame::GetAngle(const int& i1, const int& i2, const int& i3){
+  Real CoordFrame::GetAngle(int i1, int i2, int i3){
+  //Returns the angl between the three atoms with indices i1,i2,i3
     return geom::Angle((*this)[i1]-(*this)[i2],(*this)[i3]-(*this)[i2]);
   }
   
-  Real CoordFrame::GetDihedralAngle(const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3, const AtomHandle& a4){
+  Real CoordFrame::GetDihedralAngle(const AtomHandle& a1, const AtomHandle& a2, 
+                                    const AtomHandle& a3, const AtomHandle& a4){
+  //Returns the Dihedral angle between the four atoms a1,a2,a3,a4
     return this->GetDihedralAngle(a1.GetIndex(),a2.GetIndex(),a3.GetIndex(),a4.GetIndex());
   }
-  Real CoordFrame::GetDihedralAngle(const int& i1, const int& i2, const int& i3, const int& i4){
+  Real CoordFrame::GetDihedralAngle(int i1, int i2, int i3, int i4){
+  //Returns the Dihedral angle between the four atoms with indices i1,i2,i3,i4
     return geom::DihedralAngle((*this)[i1],(*this)[i2],(*this)[i3],(*this)[i4]);
   }
 
-  void GetIndices(const EntityView& Sele, std::vector<unsigned long>& indices){
-    AtomViewList atoms=Sele.GetAtomList();
+  void GetIndices(const EntityView& sele, std::vector<unsigned long>& indices){
+  // This function returns a vector containing the atom indices of the atoms in an EntityView
+  // It is used to accelerate the extraction of information from a trajectory
+    AtomViewList atoms=sele.GetAtomList();
     indices.reserve(atoms.size());
     for (AtomViewList::const_iterator i=atoms.begin(), 
          e=atoms.end(); i!=e; ++i) {
@@ -68,9 +85,11 @@ namespace ost { namespace mol {
     }
   }
   
-  void GetMasses(const EntityView& Sele, std::vector<Real>& masses){
+  void GetMasses(const EntityView& sele, std::vector<Real>& masses){
+  // This function returns a vector containing the atom masses of the atoms in an EntityView
+  // It is used together with GetIndices to accelerate the extraction of RMSD from a trajectory
     Real mass_tot=0.0;
-    AtomViewList atoms=Sele.GetAtomList();
+    AtomViewList atoms=sele.GetAtomList();
     masses.reserve(atoms.size());
     for (AtomViewList::const_iterator i=atoms.begin(), 
          e=atoms.end(); i!=e; ++i) {
@@ -84,26 +103,30 @@ namespace ost { namespace mol {
   }
   
   
-  void GetIndicesAndMasses(const EntityView& Sele, std::vector<unsigned long>& indices,std::vector<Real>& masses){
-    GetIndices(Sele, indices);
-    GetMasses(Sele, masses);
+  void GetIndicesAndMasses(const EntityView& sele, std::vector<unsigned long>& indices,std::vector<Real>& masses){
+    GetIndices(sele, indices);
+    GetMasses(sele, masses);
   }
   
-  void GetPositions(const EntityView& Sele, std::vector<geom::Vec3>& ref_pos){
-    ref_pos.reserve(Sele.GetAtomCount());
-    for (mol::AtomViewIter a=Sele.AtomsBegin(),e=Sele.AtomsEnd(); a!=e; ++a) {
+  void GetPositions(const EntityView& sele, std::vector<geom::Vec3>& ref_pos){
+  //Returns the positions of all the atoms in the EntityView
+    ref_pos.reserve(sele.GetAtomCount());
+    for (mol::AtomViewIter a=sele.AtomsBegin(),e=sele.AtomsEnd(); a!=e; ++a) {
       ref_pos.push_back((*a).GetPos());
     }
   }
   
-  geom::Vec3 CoordFrame::GetCMPosition(const EntityView& Sele){
+  geom::Vec3 CoordFrame::GetCenterOfMassPos(const EntityView& sele){
+  //Returns the position of the centor of mass of the atoms in the EntityView
     std::vector<unsigned long> indices;
     std::vector<Real> masses;
-    GetIndicesAndMasses(Sele,indices,masses);
-    return this->GetCMPosition(indices,masses);
+    GetIndicesAndMasses(sele,indices,masses);
+    return this->GetCenterOfMassPos(indices,masses);
   }
   
-  geom::Vec3 CoordFrame::GetCMPosition(std::vector<unsigned long>& indices,std::vector<Real>& masses){
+  geom::Vec3 CoordFrame::GetCenterOfMassPos(std::vector<unsigned long>& indices,std::vector<Real>& masses){
+  //Returns the position of the centor of mass of the atoms from which the indices and masses are passed 
+  //as vectors in argument
     geom::Vec3 v;
     for (unsigned int i=0,e=indices.size();i!=e; i++) {
       v+=masses[i]*(*this)[indices[i]];
@@ -111,22 +134,27 @@ namespace ost { namespace mol {
     return v;
   }
   
-  Real CoordFrame::GetCMDistance(const EntityView& Sele1,const EntityView& Sele2){
+  Real CoordFrame::GetDistanceBetwCenterOfMass(const EntityView& sele1,const EntityView& sele2){
+  //Returns the distance between the centers of mass of the two EntityViews
     std::vector<unsigned long> indices1,indices2;
     std::vector<Real> masses1,masses2;
-    GetIndicesAndMasses(Sele1,indices1,masses1);
-    GetIndicesAndMasses(Sele2,indices2,masses2);
-    return this->GetCMDistance(indices1,masses1,indices2,masses2);
+    GetIndicesAndMasses(sele1,indices1,masses1);
+    GetIndicesAndMasses(sele2,indices2,masses2);
+    return this->GetDistanceBetwCenterOfMass(indices1,masses1,indices2,masses2);
   }
   
-  Real CoordFrame::GetCMDistance(std::vector<unsigned long>& indices1,std::vector<Real>& masses1,
+  Real CoordFrame::GetDistanceBetwCenterOfMass(std::vector<unsigned long>& indices1,std::vector<Real>& masses1,
                            std::vector<unsigned long>& indices2,std::vector<Real>& masses2){
-    geom::Vec3 v1=this->GetCMPosition(indices1, masses1);
-    geom::Vec3 v2=this->GetCMPosition(indices2, masses2);
+  //Returns the distance between the centers of mass of the two groups of atoms from which the
+  //indices and masses are given as vectors as argument
+    geom::Vec3 v1=this->GetCenterOfMassPos(indices1, masses1);
+    geom::Vec3 v2=this->GetCenterOfMassPos(indices2, masses2);
     return geom::Distance(v1,v2);
   }
   
   Real CoordFrame::GetRMSD(const std::vector<geom::Vec3>& ref_pos,const std::vector<unsigned long>& indices_sele){
+  //Returns the RMSD between the positions of the atoms whose indices are given in indices_sele and the positions
+  //given in ref_pos
     Real rmsd=0.0,val;
     for (unsigned int i1=0; i1!=indices_sele.size(); ++i1) {
       geom::Vec3 av_sele=(*this)[indices_sele[i1]];
@@ -134,19 +162,21 @@ namespace ost { namespace mol {
       val=geom::Length2(av_ref-av_sele);
       rmsd+=val;
     }
-    return rmsd/indices_sele.size();
+    return pow(rmsd/indices_sele.size(),0.5);
   }
   
-  Real CoordFrame::GetRMSD(const EntityView& Reference_View,const EntityView& Sele_View){
-    int count_ref=Reference_View.GetAtomCount();
-    int count_sele=Sele_View.GetAtomCount();
+  Real CoordFrame::GetRMSD(const EntityView& reference_view,const EntityView& sele_view){
+  //Return the rmsd between two EntityViews. The reference positions are taken directly from the reference_view
+  //whereas they are taken from this CoordFrame for the sele_view
+    int count_ref=reference_view.GetAtomCount();
+    int count_sele=sele_view.GetAtomCount();
     if (count_ref!=count_sele){
       throw std::runtime_error("atom counts of the two views are not equal");
     }
     std::vector<unsigned long> indices_sele;
     std::vector<geom::Vec3> ref_pos;
-    GetIndices(Sele_View,indices_sele);
-    GetPositions(Reference_View,ref_pos);
+    GetIndices(sele_view,indices_sele);
+    GetPositions(reference_view,ref_pos);
     return this->GetRMSD(ref_pos,indices_sele);
   }
   

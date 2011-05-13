@@ -25,7 +25,6 @@
 
 #include <vector>
 #include <boost/shared_array.hpp>
-//#include <ost/mol/alg/trajectory_analysis.hh>
 #include "atom_handle.hh"
 #include "coord_source.hh"
 
@@ -65,7 +64,8 @@ public:
   void Capture(uint frame);
   
   /// \brief add frame 
-  void AddFrame(const std::vector<geom::Vec3>& clist);
+  //void AddFrame(const std::vector<geom::Vec3>& clist);
+  void AddFrame(const geom::Vec3List& clist);
 
   void AddFrames(const CoordGroupHandle& cg);
   /// \brief set an indidivial atom position in the given frame
@@ -89,13 +89,9 @@ public:
   
   CoordGroupHandle(CoordSourcePtr source);
 
-  /*
-  //friend geom::Vec3List mol::alg::ExtractAtomPosition(const CoordGroupHandle& traj, const AtomHandle& a1,unsigned int stride=1);
-  */
 
-//private:
-  void CheckValidity() const;
 private:
+  void CheckValidity() const;
   CoordSourcePtr source_;
 };
 

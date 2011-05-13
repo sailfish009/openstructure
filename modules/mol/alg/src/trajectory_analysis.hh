@@ -33,13 +33,13 @@
 
 namespace ost { namespace mol { namespace alg {
   
-  geom::Vec3List DLLEXPORT_OST_MOL_ALG ExtractAtomPosition(const CoordGroupHandle& traj, const AtomHandle& a1,unsigned int stride=1);
-  geom::Vec3List DLLEXPORT_OST_MOL_ALG ExtractCMPosition(const CoordGroupHandle& traj, const EntityView& Sele,unsigned int stride=1);
-  std::vector<Real> DLLEXPORT_OST_MOL_ALG ExtractDistance(const CoordGroupHandle& traj, const AtomHandle& a1, const AtomHandle& a2,unsigned int stride=1);
-  std::vector<Real> DLLEXPORT_OST_MOL_ALG ExtractAngle(const CoordGroupHandle& traj, const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3,unsigned int stride=1);
-  std::vector<Real> DLLEXPORT_OST_MOL_ALG ExtractCMDistance(const CoordGroupHandle& traj, const EntityView& Sele1, const EntityView& Sele2,unsigned int stride=1);
-  std::vector<Real> DLLEXPORT_OST_MOL_ALG ExtractDihedral(const CoordGroupHandle& traj, const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3, const AtomHandle& a4,unsigned int stride=1);
-  std::vector<Real> DLLEXPORT_OST_MOL_ALG ExtractRMSD(const CoordGroupHandle& traj, const EntityView& Reference_View, const EntityView& Sele,unsigned int stride=1);
+  geom::Vec3List DLLEXPORT_OST_MOL_ALG AnalyzeAtomPos(const CoordGroupHandle& traj, const AtomHandle& a1,unsigned int stride=1);
+  geom::Vec3List DLLEXPORT_OST_MOL_ALG AnalyzeCenterOfMassPos(const CoordGroupHandle& traj, const EntityView& sele,unsigned int stride=1);
+  std::vector<Real> DLLEXPORT_OST_MOL_ALG AnalyzeDistanceBetwAtoms(const CoordGroupHandle& traj, const AtomHandle& a1, const AtomHandle& a2,unsigned int stride=1);
+  std::vector<Real> DLLEXPORT_OST_MOL_ALG AnalyzeAngle(const CoordGroupHandle& traj, const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3,unsigned int stride=1);
+  std::vector<Real> DLLEXPORT_OST_MOL_ALG AnalyzeDistanceBetwCenterOfMass(const CoordGroupHandle& traj, const EntityView& sele1, const EntityView& sele2,unsigned int stride=1);
+  std::vector<Real> DLLEXPORT_OST_MOL_ALG AnalyzeDihedralAngle(const CoordGroupHandle& traj, const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3, const AtomHandle& a4,unsigned int stride=1);
+  std::vector<Real> DLLEXPORT_OST_MOL_ALG AnalyzeRMSD(const CoordGroupHandle& traj, const EntityView& reference_view, const EntityView& sele,unsigned int stride=1);
   
   
 }}}//ns

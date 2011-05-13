@@ -40,30 +40,34 @@ public:
   CoordFrame(const base_type& rhs) : base_type(rhs) { }
   CoordFrame(const std::vector<geom::Vec3>& rhs) : base_type(rhs) { }
   
-  geom::Vec3 GetAtomPosition(const AtomHandle& atom);
-  geom::Vec3 GetAtomPosition(const int& atom_index);
-  Real GetDistance(const AtomHandle& a1, const AtomHandle& a2);
-  Real GetDistance(const int& atom1_index, const int& atom2_index);
+  geom::Vec3 GetAtomPos(const AtomHandle& atom);
+  geom::Vec3 GetAtomPos(int atom_index);
+  Real GetDistanceBetwAtoms(const AtomHandle& a1, const AtomHandle& a2);
+  Real GetDistanceBetwAtoms(int atom1_index, int atom2_index);
   Real GetAngle(const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3);
-  Real GetAngle(const int& atom1_index, const int& atom2_index, const int& atom3_index);  
+  Real GetAngle(int atom1_index, int atom2_index, int atom3_index);  
   Real GetDihedralAngle(const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3, const AtomHandle& a4);
-  Real GetDihedralAngle(const int& a1_index, const int& a2_index, const int& a3_index, const int& a4_index); 
-  geom::Vec3 GetCMPosition(const mol::EntityView& Sele);
-  geom::Vec3 GetCMPosition(std::vector<unsigned long>& indices,std::vector<Real>& masses);
-  Real GetCMDistance(const mol::EntityView& Sele1, const mol::EntityView& Sele2);
-  Real GetCMDistance(std::vector<unsigned long>& indices1,std::vector<Real>& masses1,std::vector<unsigned long>& indices2,std::vector<Real>& masses2);
-  Real GetRMSD(const std::vector<geom::Vec3>& ref_pos,const std::vector<unsigned long>& indices_sele);
-  Real GetRMSD(const mol::EntityView& Reference_View, const mol::EntityView& Sele_View);
+  Real GetDihedralAngle(int a1_index, int a2_index, int a3_index, int a4_index); 
+  geom::Vec3 GetCenterOfMassPos(const mol::EntityView& sele);
+  geom::Vec3 GetCenterOfMassPos(std::vector<unsigned long>& indices, std::vector<Real>& masses);
+  Real GetDistanceBetwCenterOfMass(const mol::EntityView& sele1, const mol::EntityView& sele2);
+  Real GetDistanceBetwCenterOfMass(std::vector<unsigned long>& indices1, std::vector<Real>& masses1, 
+                                   std::vector<unsigned long>& indices2, std::vector<Real>& masses2);
+  Real GetRMSD(const std::vector<geom::Vec3>& ref_pos, const std::vector<unsigned long>& indices_sele);
+  Real GetRMSD(const mol::EntityView& Reference_View, const mol::EntityView& sele_View);
 };
   
-  void GetIndices(const EntityView& Sele, std::vector<unsigned long>& indices);
-  void GetMasses(const EntityView& Sele,std::vector<Real>& masses);
-  void GetIndicesAndMasses(const EntityView& Sele, std::vector<unsigned long>& indices,std::vector<Real>& masses);
-  void GetPositions(const EntityView& Sele, std::vector<geom::Vec3>& ref_pos);
+  void GetIndices(const EntityView& sele, std::vector<unsigned long>& indices);
+  void GetMasses(const EntityView& sele, std::vector<Real>& masses);
+  void GetIndicesAndMasses(const EntityView& sele, std::vector<unsigned long>& indices,std::vector<Real>& masses);
+  void GetPositions(const EntityView& sele, std::vector<geom::Vec3>& ref_pos);
   
 typedef boost::shared_ptr<CoordFrame> CoordFramePtr;
 typedef std::vector<CoordFramePtr> CoordFrameList;
 
+// factory method
+// create a frame froma Vec3List containing the positions of the atoms
+  DLLEXPORT_OST_MOL CoordFrame CreateCoordFrame(const geom::Vec3List& atom_pos);
 
 }}
 
