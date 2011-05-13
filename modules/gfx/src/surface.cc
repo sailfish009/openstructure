@@ -371,4 +371,9 @@ void Surface::ReapplyColorOps()
   GfxObj::ReapplyColorOps();
 }
 
+ost::mol::SurfaceHandle Surface::GetHandle() const
+{
+  return this->sh_;
+}
+
 }} // ns

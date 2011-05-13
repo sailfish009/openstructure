@@ -58,6 +58,8 @@ public:
   virtual void CustomRenderPov(PovState& pov);
   virtual geom::AlignedCuboid GetBoundingBox() const;
 
+  mol::SurfaceHandle GetHandle() const;
+
   void Rebuild();
   void Replace(const mol::SurfaceHandle& sh);
 
