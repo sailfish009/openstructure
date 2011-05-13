@@ -121,6 +121,8 @@ void export_Surface()
     .def("SetColor", set_color2)
     .def("CleanColorOps", &Surface::CleanColorOps)
     .def("ReapplyColorOps", &Surface::ReapplyColorOps)
+    .def("GetHandle", &Surface::GetHandle)
+    .add_property("handle", &Surface::GetHandle)
     ;
 
 }
