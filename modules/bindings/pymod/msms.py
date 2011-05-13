@@ -317,11 +317,16 @@ def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
       num_surf=int(line.split()[2])
 
   # get surfaces
+  entity_sel = entity.Select(selection)
   msms_surfaces=[]
-  msms_surfaces.append(io.LoadSurface(msms_data_file, "msms"))
+  s = io.LoadSurface(msms_data_file, "msms")
+  s.Attach(entity_sel, 3+radius)
+  msms_surfaces.append(s)
   for n in range(1,num_surf+1):
     filename=msms_data_file+'_'+str(n)
-    msms_surfaces.append(io.LoadSurface(filename, "msms"))
+    s = io.LoadSurface(filename, "msms")
+    s.Attach(entity_sel, 3+radius)
+    msms_surfaces.append(s)
 
   # clean up
   if not keep_files:
