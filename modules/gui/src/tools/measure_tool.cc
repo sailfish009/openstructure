@@ -161,6 +161,8 @@ void MeasureTool::RenderGL()
   }
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
+  glColor3f(1.0f, 1.0f, 1.0f);
+  glDisable(GL_TEXTURE_2D);
 }
 
 
