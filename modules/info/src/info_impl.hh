@@ -74,6 +74,8 @@ public:
   String GetTextData() const;
   void SetTextData(const String& td);
 
+  String GetComment() const;
+
   /// \brief get sub elements with specified element name
   /// 
   /// does not throw. returns empty list if not elements have been found

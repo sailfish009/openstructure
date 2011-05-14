@@ -418,6 +418,11 @@ void InfoGroup::SetTextData(const String& td)
   impl_->SetTextData(td);
 }
 
+String InfoGroup::GetComment() const
+{
+  return impl_->GetComment();
+}
+
 bool InfoGroup::operator==(const InfoGroup& ref) const
 {
   return *impl_ == *ref.impl_;

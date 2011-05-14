@@ -199,6 +199,7 @@ BOOST_PYTHON_MODULE(_ost_info)
     .def("SetBool",&InfoItem::SetBool)
     .def("SetVector",&InfoItem::SetVector)
     .add_property("attribute",&InfoItem::GetAttribute,&InfoItem::SetAttribute)
+    .def("GetComment",&InfoItem::GetComment)
     ;
   class_<InfoGroupList>("InfoGroupList", no_init)
     .def(vector_indexing_suite<InfoGroupList>())
@@ -237,6 +238,7 @@ BOOST_PYTHON_MODULE(_ost_info)
     .def("Apply",info_group_apply2a)
     .def("Apply",info_group_apply2b)
     .def("GetTextData",&InfoGroup::GetTextData)
+    .def("GetComment",&InfoGroup::GetComment)
     .def("GetPath",&InfoGroup::GetPath)
     ;
 

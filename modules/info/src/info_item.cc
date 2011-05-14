@@ -177,6 +177,11 @@ bool InfoItem::operator!=(const InfoItem& rhs) const
   return !this->operator==(rhs);
 }
 
+String InfoItem::GetComment() const
+{
+  return impl_->GetComment();
+}
+
 Real GetFloatInfoItem(const InfoGroup& ig, const InfoPath& path, Real def)
 {
   if(ig.HasItem(path)) {
