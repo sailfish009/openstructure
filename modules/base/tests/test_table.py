@@ -100,7 +100,16 @@ class TestTable(unittest.TestCase):
                        ref,
                        "data (%s) in col (%s), row (%i) different from expected value (%s)" \
                        %(row[idx], col_name, i, ref))
-              
+  def testZip(self):
+    tab=Table(['col1', 'col2', 'col3'], 'sss')
+    tab.AddRow(['a', 'b', 'c'])
+    tab.AddRow(['x', 'y', 'z'])
+    z=tab.Zip('col1', 'col3')
+    self.assertEqual(len(z), 2)
+    self.assertEqual(z[0][0], 'a')
+    self.assertEqual(z[0][1], 'c')
+    self.assertEqual(z[1][0], 'x')
+    self.assertEqual(z[1][1], 'z')
   def CompareColTypes(self, t, col_names, ref_types):
     '''
     Compare the types of n columns specified by their names with reference

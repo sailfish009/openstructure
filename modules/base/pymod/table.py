@@ -508,6 +508,25 @@ class Table:
       return sign*cmp(lhs[key_index], rhs[key_index])
     self.rows=sorted(self.rows, _key_cmp)
     
+  def Zip(self, *args):
+    """
+    Allows to conveniently iterate over a selection of columns, e.g.
+    
+    .. code-block::python
+    
+      tab=Table.Load('...')
+      for col1, col in tab.Zip('col1', 'col2'):
+        print col1, col2
+    
+    is a shortcut for
+    
+    .. code-block::python
+    
+      tab=Table.Load('...')
+      for col1, col2 in zip(tab['col1'], tab['col2']):
+        print col1, col2
+    """
+    return zip(*[self[arg] for arg in args])
 
   def Plot(self, x, y=None, z=None, style='.', x_title=None, y_title=None,
            z_title=None, x_range=None, y_range=None, z_range=None,
