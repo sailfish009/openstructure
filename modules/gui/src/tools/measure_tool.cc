@@ -56,6 +56,8 @@ MeasureTool::MeasureTool()
   opts->AddOption(col_blue);
   ToolOptionFloat* line_width(new ToolOptionFloat("line_width", "Line Width", 4, 0.1, 10.0));
   opts->AddOption(line_width);
+  ToolOptionButton* clear_button(new ToolOptionButton("clear_button", "Clear", this, SLOT(ClearMeasurements())));
+  opts->AddOption(clear_button);
   mode_=meas_mode->GetValue();
 }
 
@@ -106,6 +108,11 @@ void MeasureTool::Click(const MouseEvent& event)
     sel_atoms_.clear();
   }
   scene.RequestRedraw();
+}
+
+void MeasureTool::ClearMeasurements()
+{
+  ml_.clear();
 }
 
 void MeasureTool::RenderGL()

@@ -389,6 +389,7 @@ tools/tool_bar.hh
 tools/tool_option.hh
 tools/tool_manager.hh
 tools/tool_options_widget.hh
+tools/measure_tool.hh
 tools/tool_options_win.hh
 )
 if (ENABLE_IMG)
