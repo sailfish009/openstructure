@@ -27,8 +27,8 @@
 using namespace ost;
 using namespace ost::mol;
 
-struct Fixture {
-  Fixture() {
+struct FixtureView {
+  FixtureView() {
     e=CreateEntity();
     XCSEditor editor=e.EditXCS();
     c=editor.InsertChain("A");
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 
 BOOST_AUTO_TEST_CASE(gen_full_view) 
 {
-  Fixture f;
+  FixtureView f;
 
   EntityView ev = f.e.CreateFullView();
   BOOST_CHECK_EQUAL(ev.GetChainCount(),f.e.GetChainCount());

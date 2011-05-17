@@ -356,20 +356,21 @@ String AtomImpl::GetStringProperty(Prop::ID prop_id) const
 void AtomImpl::DeleteAllTorsions() {
   EntityImplPtr e=this->GetEntity();
   TorsionImplMap::iterator i;
-  while (true) {
-    for (i=e->GetTorsionMap().begin(); i!=e->GetTorsionMap().end(); ++i) {
-      if (i->second->IsAtomInvolved(shared_from_this())) {
-        e->GetTorsionMap().erase(i);
-        continue;
-      }
-    }
-    break;
+  std::vector<TorsionImplMap::iterator> t_rm_vec;
+  for (i=e->GetTorsionMap().begin(); i!=e->GetTorsionMap().end(); ++i) {
+     if (i->second->IsAtomInvolved(shared_from_this())) {
+        t_rm_vec.push_back(i);
+     }
+  }
+  std::vector<TorsionImplMap::iterator>::iterator it_rm;
+  for (it_rm=t_rm_vec.begin(); it_rm!=t_rm_vec.end(); ++it_rm) {
+     e->GetTorsionMap().erase(*it_rm);
   }
   TorsionImplList& l=this->GetResidue()->GetTorsionList();
   TorsionImplList::iterator j;
   j=std::remove_if(l.begin(), l.end(),
                    bind(&TorsionImpl::IsAtomInvolved, _1, shared_from_this()));
-   l.erase(j, l.end());
+  l.erase(j, l.end());
 }
 
 }}} // ns
