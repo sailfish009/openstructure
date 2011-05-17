@@ -65,7 +65,7 @@ def Stereo(mode,flip=None,alg=None):
 
   _gfx.Scene().SetStereoMode(mode)
 
-def FitToScreen(gfx_ent, width=None, height=None, margin=0.01):
+def FitToScreen(gfx_ent, width=None, height=None, margin=0.05):
   """
   Setup camera such that it is centered on the graphical entity and the entity 
   fits the entire viewport. The longest axes of the entity are aligned along 
