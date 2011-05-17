@@ -124,7 +124,6 @@ private:
 };
 
 class DLLEXPORT_OST_GUI ToolOptionButton : public ToolOption {
-  Q_OBJECT
 public:
   ToolOptionButton(const String& key,
                    const String& verbose_name,
@@ -132,8 +131,6 @@ public:
                    const char *slot_method);
   const char* GetSlotMethod() const { return slot_method_; }
   QObject* GetReceiver() const { return receiver_; }
-public slots:
-  void RunMe();
 private:
   const char *slot_method_;
   QObject* receiver_;

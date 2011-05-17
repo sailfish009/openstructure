@@ -68,9 +68,4 @@ ToolOptionButton::ToolOptionButton(const String& key,
 
 }
 
-void ToolOptionButton::RunMe()
-{
-  std::cout << "TOOL RUN ME RUN ME" << std::endl;
-}
-
 }}
