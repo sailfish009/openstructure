@@ -25,6 +25,7 @@
 
 #include <limits>
 #include <vector>
+#include <iostream>
 
 
 #include <ost/gui/module_config.hh>
@@ -37,7 +38,7 @@ class DLLEXPORT_OST_GUI ToolOption : public QObject {
   Q_OBJECT
 public:
   typedef enum {
-    INT, FLOAT, ENUM
+    INT, FLOAT, ENUM, BUTTON
   } Type;  
 protected:
   ToolOption(const String& key, const String& verbose_name, Type type);
@@ -116,10 +117,28 @@ public:
   ConstIterator Begin() const { return tuples_.begin(); }
   ConstIterator End() const { return tuples_.end(); }  
   size_t Size() { return tuples_.size(); }
+
 private:  
   std::vector<Tuple>  tuples_;
   int                 index_;
 };
+
+class DLLEXPORT_OST_GUI ToolOptionButton : public ToolOption {
+  Q_OBJECT
+public:
+  ToolOptionButton(const String& key,
+                   const String& verbose_name,
+                   QObject* receiver,
+                   const char *slot_method);
+  const char* GetSlotMethod() const { return slot_method_; }
+  QObject* GetReceiver() const { return receiver_; }
+public slots:
+  void RunMe();
+private:
+  const char *slot_method_;
+  QObject* receiver_;
+};
+
 
 typedef std::vector<ToolOption*> ToolOptionList;
 
