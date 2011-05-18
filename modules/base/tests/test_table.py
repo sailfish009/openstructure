@@ -100,16 +100,7 @@ class TestTable(unittest.TestCase):
                        ref,
                        "data (%s) in col (%s), row (%i) different from expected value (%s)" \
                        %(row[idx], col_name, i, ref))
-  def testZip(self):
-    tab=Table(['col1', 'col2', 'col3'], 'sss')
-    tab.AddRow(['a', 'b', 'c'])
-    tab.AddRow(['x', 'y', 'z'])
-    z=tab.Zip('col1', 'col3')
-    self.assertEqual(len(z), 2)
-    self.assertEqual(z[0][0], 'a')
-    self.assertEqual(z[0][1], 'c')
-    self.assertEqual(z[1][0], 'x')
-    self.assertEqual(z[1][1], 'z')
+
   def CompareColTypes(self, t, col_names, ref_types):
     '''
     Compare the types of n columns specified by their names with reference
@@ -132,6 +123,35 @@ class TestTable(unittest.TestCase):
                        ref_type,
                        "column type (%s) at column %i, different from reference col type (%s)" \
                        %(t.col_types[idx], idx, ref_type))
+
+  def testZip(self):
+    tab=Table(['col1', 'col2', 'col3', 'col4'], 'sssi')
+    tab.AddRow(['a', 'b', 'c', 1])
+    tab.AddRow(['x', 'y', 'z', 2])
+    z=tab.Zip('col1', 'col3')
+    self.assertEqual(len(z), 2)
+    self.assertEqual(z[0][0], 'a')
+    self.assertEqual(z[0][1], 'c')
+    self.assertEqual(z[1][0], 'x')
+    self.assertEqual(z[1][1], 'z')
+    z=tab.Zip('col3', 'col1')
+    self.assertEqual(len(z), 2)
+    self.assertEqual(z[0][0], 'c')
+    self.assertEqual(z[0][1], 'a')
+    self.assertEqual(z[1][0], 'z')
+    self.assertEqual(z[1][1], 'x')
+    z=tab.Zip('col1', 'col1')
+    self.assertEqual(len(z), 2)
+    self.assertEqual(z[0][0], 'a')
+    self.assertEqual(z[0][1], 'a')
+    self.assertEqual(z[1][0], 'x')
+    self.assertEqual(z[1][1], 'x')
+    z=tab.Zip('col1', 'col4')
+    self.assertEquals(type(z[0][0]),str)
+    self.assertEquals(type(z[1][0]),str)
+    self.assertEquals(type(z[0][1]),int)
+    self.assertEquals(type(z[1][1]),int)
+    self.assertRaises(ValueError, tab.Zip, 'col5', 'col3')
 
   def testTableInitEmpty(self):
     '''
