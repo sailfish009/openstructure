@@ -39,13 +39,19 @@ def _SkipHeader(stream):
     return False
 
 
-def _ExecuteDSSP(path, temp_dir=None):
+def _ExecuteDSSP(path, dssp_bin, temp_dir=None):
   # use of mktemp is a safty problem (use mkstemp and provide file handle to 
   # subsequent process
   temp_dssp_path=tempfile.mktemp(suffix=".out",prefix="dssp", dir=temp_dir)
-  dssp_abs_path=settings.Locate('dssp', env_name='DSSP_EXECUTABLE')
-  command=dssp_abs_path+" "+path+" "+temp_dssp_path
-  ps=subprocess.Popen(command, shell=True, stderr=subprocess.PIPE)
+  dssp_abs_path=settings.Locate(['dsspcmbi','dssp'], env_name='DSSP_EXECUTABLE', 
+                                explicit_file_name=dssp_bin)
+  if os.path.isdir(dssp_abs_path):
+    raise RuntimeError('"%s" is a directory. Specify path to DSSP binary' % dssp_abs_path)
+  if not os.access(dssp_abs_path, os.X_OK):
+    raise RuntimeError('"%s" is not executable' % dssp_abs_path)
+
+  ps=subprocess.Popen([dssp_abs_path, path, temp_dssp_path], 
+                      stderr=subprocess.PIPE)
   err_lines=ps.stderr.readlines()
 
   return temp_dssp_path
@@ -64,8 +70,27 @@ def _CalcRelativeSA(residue_type, absolute_sa):
   return rel
   
 
-def AssignDSSP(ent, pdb_path="", extract_burial_status_flag=0, tmp_dir=None):
-  entity_saved_flag = 0
+def AssignDSSP(ent, pdb_path="", extract_burial_status=False, tmp_dir=None, 
+               dssp_bin=None):
+  """
+  Assign secondary structure states to peptide residues in the structure. This
+  function uses the DSSP command line program.
+
+  If you already have a DSSP output file and would like to assign the secondary 
+  structure states to an entity, use :func:`LoadDSSP`.
+  
+  :param ent: The entity for which the secondary structure should be calculated
+  :type ent: :class:`~ost.mol.EntityHandle` or :class:`~ost.mol.EntityView`
+  :param extract_burial_status: If true, also extract burial status
+  :param tmp_dir: If set, overrides the default tmp directory of the
+                  operating system
+  :param dssp_bin: The path to the DSSP executable
+  :raises: :class:`~ost.settings.FileNotFound` if the dssp executable is not 
+      in the path.
+  :raises: :class:`RuntimeError` when dssp is executed with errors
+  """
+  entity_saved = False
+
   # use of mktemp is a safty problem (use mkstemp and provide file handle to 
   # subsequent process
   pdb_path=tempfile.mktemp(suffix=".pdb",prefix="temp_entity", 
@@ -75,8 +100,9 @@ def AssignDSSP(ent, pdb_path="", extract_burial_status_flag=0, tmp_dir=None):
 
   #TODO: exception handling (currently errors occuring here
   # are handled in the parser LoadDSSP)
-  temp_dssp_path=_ExecuteDSSP(pdb_path)
-
+  temp_dssp_path=_ExecuteDSSP(pdb_path, dssp_bin)
+  if not os.path.exists(temp_dssp_path):
+    raise RuntimeEror('DSSP output file does not exist.')
   # assign DSSP to entity
   try:
     LoadDSSP(temp_dssp_path, ent, extract_burial_status_flag, 
