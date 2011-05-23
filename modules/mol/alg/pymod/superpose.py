@@ -27,6 +27,7 @@ def ParseAtomNames(atoms):
   :param atoms: Identifier or list of atoms
   :type atoms: :class:`str`, :class:`list`, :class:`set`
   """
+  ## get a set of atoms or None
   if atoms==None:
     return None
   if isinstance(atoms, str):
@@ -62,6 +63,16 @@ def _fetch_atoms(r_a, r_b, result_a, result_b, atmset):
   return result_a, result_b
 
 
+def _no_of_chains(ent_a, ent_b):
+  """
+  for internal use, only
+  """
+  ## get lower no. of chains
+  if ent_a.chain_count < ent_b.chain_count:
+    return ent_a.chain_count
+  return ent_b.chain_count
+
+
 def MatchResidueByNum(ent_a, ent_b, atoms='all'):
   """
   Returns a tuple of views containing exactly the same number of atoms.
@@ -82,20 +93,15 @@ def MatchResidueByNum(ent_a, ent_b, atoms='all'):
   ## init. final views
   result_a=_EmptyView(ent_a)
   result_b=_EmptyView(ent_b)
-  ## get lower no. of chains
-  if ent_a.chain_count < ent_b.chain_count:
-    n_chains=ent_a.chain_count
-  else:
-    n_chains=ent_b.chain_count
-  ## get a set of atoms or None
+  n_chains=_no_of_chains(ent_a, ent_b)
   atmset=ParseAtomNames(atoms)
   ## iterate chains
   for i in range(0, n_chains):
     chain_a=ent_a.chains[i]
     chain_b=ent_b.chains[i]
-    ## residues of chains need to be consecutively numbered (sorted)
+    residues_a=iter(chain_a.residues)
+    ## decide on order of residues
     if chain_a.InSequence() and chain_b.InSequence():
-      residues_a=iter(chain_a.residues)
       residues_b=iter(chain_b.residues)
       ## check residues & copy to views
       try:
@@ -112,7 +118,6 @@ def MatchResidueByNum(ent_a, ent_b, atoms='all'):
         pass
     else:
       ## iterate one list of residues, search in other list
-      residues_a=iter(chain_a.residues)
       try:
         while True:
           r_a=residues_a.next()
@@ -121,6 +126,46 @@ def MatchResidueByNum(ent_a, ent_b, atoms='all'):
             result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
       except StopIteration:
         pass
+  result_a.AddAllInclusiveBonds()
+  result_b.AddAllInclusiveBonds()
+  return result_a, result_b
+
+
+def MatchResidueByIdx(ent_a, ent_b, atoms='all'):
+  """
+  Returns a tuple of views containing exactly the same number of atoms.
+  Residues are matched by position in the chains of an entity. A subset of
+  atoms to be included in the views can be specified in the **atoms** argument.
+  Regardless of what the list of **atoms** says, only those present in two
+  matched residues will be included in the views. Chains are processed in order
+  of appearance. If **ent_a** and **ent_b** contain a different number of
+  chains, processing stops with the lower count. The number of residues per
+  chain is supposed to be the same.
+
+  :param ent_a: The first entity
+  :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param ent_b: The second entity
+  :type ent_b: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param atoms: The subset of atoms to be included in the two views.
+  :type atoms: :class:`str`, :class:`list`, :class:`set`
+  """
+  not_supported="MatchResidueByIdx has no support for chains of different "\
+               +"lengths"
+  ## init. final views
+  result_a=_EmptyView(ent_a)
+  result_b=_EmptyView(ent_b)
+  n_chains=_no_of_chains(ent_a, ent_b)
+  atmset=ParseAtomNames(atoms)
+  ## iterate chains
+  for i in range(0, n_chains):
+    chain_a=ent_a.chains[i]
+    chain_b=ent_b.chains[i]
+    ## check equal no. of residues
+    if chain_a.residue_count!=chain_b.residue_count:
+      raise RuntimeError(not_supported)
+    ## iterate residues & copy to views
+    for r_a,r_b in zip(chain_a.residues, chain_b.residues):
+      result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
   result_a.AddAllInclusiveBonds()
   result_b.AddAllInclusiveBonds()
   return result_a, result_b
@@ -137,6 +182,9 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
   * ``number`` - select residues by residue number, includes **atoms**, calls
     :func:`~ost.mol.alg.MatchResidueByNum`
 
+  * ``index`` - select residues by index in chain, includes **atoms**, calls
+    :func:`~ost.mol.alg.MatchResidueByIdx`
+
   :param ent_a: The first entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
   :param ent_b: The second entity
@@ -150,6 +198,8 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
   ## create views to superpose
   if match.upper()=='NUMBER':
     view_a, view_b=MatchResidueByNum(ent_a, ent_b, atoms)
+  elif match.upper()=='INDEX':
+    view_a, view_b=MatchResidueByIdx(ent_a, ent_b, atoms)
   else:
     raise ValueError(not_supported)
   ## action

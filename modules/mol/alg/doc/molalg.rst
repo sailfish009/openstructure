@@ -46,6 +46,8 @@
 
 .. autofunction:: MatchResidueByNum
 
+.. autofunction:: MatchResidueByIdx
+
 .. autofunction:: Superpose
 
 

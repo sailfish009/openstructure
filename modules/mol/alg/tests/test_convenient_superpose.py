@@ -7,11 +7,6 @@ class TestConvenientSuperpose(unittest.TestCase):
   def setUp(self):
     pass
   
-  def runAtomOrdering(self, view1, view2):
-    # call atom ordering function here
-    view1, view2 = ost.mol.alg.MatchResidueByNum(view1, view2)
-    return view1, view2
-  
   def assertEqualAtomOrder(self, view1, view2):
     self.assertEquals(len(view1.atoms),len(view2.atoms))
     for a1, a2 in zip(view1.atoms, view2.atoms):
@@ -30,45 +25,74 @@ class TestConvenientSuperpose(unittest.TestCase):
   def testCorrectlyOrdered(self):
     ent1_ent = io.LoadEntity(os.path.join("testfiles","1aho.pdb"))
     ent1_view = ent1_ent.Select("")
-    view1, view2 = self.runAtomOrdering(ent1_ent, ent1_ent)
+    ## test MatchResidueByNum
+    view1, view2 = mol.alg.MatchResidueByNum(ent1_ent, ent1_ent)
     self.assertEqualAtomOrder(view1, view2)    
-    view1, view2 = self.runAtomOrdering(ent1_view, ent1_ent)
+    view1, view2 = mol.alg.MatchResidueByNum(ent1_view, ent1_ent)
     self.assertEqualAtomOrder(view1, view2)
-    view1, view2 = self.runAtomOrdering(ent1_ent, ent1_view)
+    view1, view2 = mol.alg.MatchResidueByNum(ent1_ent, ent1_view)
     self.assertEqualAtomOrder(view1, view2)
-    view1, view2 = self.runAtomOrdering(ent1_view, ent1_view)
+    view1, view2 = mol.alg.MatchResidueByNum(ent1_view, ent1_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByIdx
+    view1, view2 = mol.alg.MatchResidueByIdx(ent1_ent, ent1_ent)
+    self.assertEqualAtomOrder(view1, view2)    
+    view1, view2 = mol.alg.MatchResidueByIdx(ent1_view, ent1_ent)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByIdx(ent1_ent, ent1_view)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByIdx(ent1_view, ent1_view)
     self.assertEqualAtomOrder(view1, view2)
     
   def testMissingFirstAtom(self):
     ent_view = io.LoadEntity(os.path.join("testfiles","1aho.pdb")).Select("")
     ent_view_missing = ent_view.Select("not (cname=A and rnum=1 and aname=N)")
-    view1, view2 = self.runAtomOrdering(ent_view, ent_view_missing)
+    ## test MatchResidueByNum
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view, ent_view_missing)
     self.assertEqualAtomOrder(view1, view2)
-    view1, view2 = self.runAtomOrdering(ent_view_missing, ent_view)
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view_missing, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByIdx
+    view1, view2 = mol.alg.MatchResidueByIdx(ent_view, ent_view_missing)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByIdx(ent_view_missing, ent_view)
     self.assertEqualAtomOrder(view1, view2)
     
   def testMissingManyAtoms(self):
     ent_view = io.LoadEntity(os.path.join("testfiles","1aho.pdb")).Select("")
     ent_view_missing = ent_view.Select("not (cname=A and rnum=3,19,32 and aname=CB,CA,CD)")
-    view1, view2 = self.runAtomOrdering(ent_view, ent_view_missing)
+    ## test MatchResidueByNum
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view, ent_view_missing)
     self.assertEqualAtomOrder(view1, view2)
-    view1, view2 = self.runAtomOrdering(ent_view_missing, ent_view)
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view_missing, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByIdx
+    view1, view2 = mol.alg.MatchResidueByIdx(ent_view, ent_view_missing)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByIdx(ent_view_missing, ent_view)
     self.assertEqualAtomOrder(view1, view2)
     
   def testMissingFirstResidue(self):
     ent_view = io.LoadEntity(os.path.join("testfiles","1aho.pdb")).Select("")
     ent_view_missing = ent_view.Select("not (cname=A and rnum=1)")
-    view1, view2 = self.runAtomOrdering(ent_view, ent_view_missing)
+    ## test MatchResidueByNum
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view, ent_view_missing)
     self.assertEqualAtomOrder(view1, view2)
-    view1, view2 = self.runAtomOrdering(ent_view_missing, ent_view)
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view_missing, ent_view)
     self.assertEqualAtomOrder(view1, view2)
-  
+
   def testMissingHydrogens(self):
     ent_view = io.LoadEntity(os.path.join("testfiles","1aho.pdb")).Select("")
     ent_view_missing = ent_view.Select("ele!=H")
-    view1, view2 = self.runAtomOrdering(ent_view, ent_view_missing)
+    ## test MatchResidueByNum
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view, ent_view_missing)
     self.assertEqualAtomOrder(view1, view2)
-    view1, view2 = self.runAtomOrdering(ent_view_missing, ent_view)
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view_missing, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByIdx
+    view1, view2 = mol.alg.MatchResidueByIdx(ent_view, ent_view_missing)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByIdx(ent_view_missing, ent_view)
     self.assertEqualAtomOrder(view1, view2)
   
   def testWrongAtomOrder(self):
@@ -82,9 +106,15 @@ class TestConvenientSuperpose(unittest.TestCase):
         random.shuffle(atoms)
         for a in atoms:
           ent_view_wrong.AddAtom(a)
-    view1, view2 = self.runAtomOrdering(ent_view, ent_view_wrong)
+    ## test MatchResidueByNum
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view, ent_view_wrong)
     self.assertEqualAtomOrder(view1, view2)
-    view1, view2 = self.runAtomOrdering(ent_view_wrong, ent_view)
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view_wrong, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByIdx
+    view1, view2 = mol.alg.MatchResidueByIdx(ent_view, ent_view_wrong)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByIdx(ent_view_wrong, ent_view)
     self.assertEqualAtomOrder(view1, view2)
   
   def testWrongResidueOrder(self): 
@@ -98,9 +128,10 @@ class TestConvenientSuperpose(unittest.TestCase):
         ent_view_wrong.AddResidue(r)
         for a in r.atoms:
           av=ent_view_wrong.AddAtom(a)
-    view1, view2 = self.runAtomOrdering(ent_view, ent_view_wrong)
+    ## test MatchResidueByNum
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view, ent_view_wrong)
     self.assertEqualAtomOrder(view1, view2)
-    view1, view2 = self.runAtomOrdering(ent_view_wrong, ent_view)
+    view1, view2 = mol.alg.MatchResidueByNum(ent_view_wrong, ent_view)
     self.assertEqualAtomOrder(view1, view2)
     
 if __name__ == "__main__":
