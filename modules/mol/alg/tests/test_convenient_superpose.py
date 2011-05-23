@@ -9,6 +9,7 @@ class TestConvenientSuperpose(unittest.TestCase):
   
   def runAtomOrdering(self, view1, view2):
     # call atom ordering function here
+    view1, view2 = ost.mol.alg.MatchResidueByNum(view1, view2)
     return view1, view2
   
   def assertEqualAtomOrder(self, view1, view2):
@@ -77,7 +78,7 @@ class TestConvenientSuperpose(unittest.TestCase):
       ent_view_wrong.AddChain(c)
       for r in c.residues:
         ent_view_wrong.AddResidue(r)
-        atoms = r.atoms
+        atoms = list(r.atoms)
         random.shuffle(atoms)
         for a in atoms:
           ent_view_wrong.AddAtom(a)
@@ -86,17 +87,12 @@ class TestConvenientSuperpose(unittest.TestCase):
     view1, view2 = self.runAtomOrdering(ent_view_wrong, ent_view)
     self.assertEqualAtomOrder(view1, view2)
   
-  def testWrongResidueOrder(self):
-    '''
-    there is a bug in ost (BZDNG-260) that gives weird atom counts here, thus
-    this test is skipped for the moment
-    
-    
+  def testWrongResidueOrder(self): 
     ent_view = io.LoadEntity(os.path.join("testfiles","1aho.pdb")).Select("")
     ent_view_wrong = ent_view.CreateEmptyView()
     for c in ent_view.chains:
       ent_view_wrong.AddChain(c)
-      residues = c.residues
+      residues = list(c.residues)
       random.shuffle(residues)
       for r in residues:
         ent_view_wrong.AddResidue(r)
@@ -106,8 +102,6 @@ class TestConvenientSuperpose(unittest.TestCase):
     self.assertEqualAtomOrder(view1, view2)
     view1, view2 = self.runAtomOrdering(ent_view_wrong, ent_view)
     self.assertEqualAtomOrder(view1, view2)
-    '''
-    pass
     
 if __name__ == "__main__":
   unittest.main()

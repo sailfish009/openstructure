@@ -41,8 +41,14 @@
      to -1, the each frame is superposed to the previous frame.
      
   :returns: A newly created coord group containing the superposed frames.
-  
-  
+
+.. autofunction:: ParseAtomNames
+
+.. autofunction:: MatchResidueByNum
+
+.. autofunction:: Superpose
+
+
 Steric Clashes
 --------------------------------------------------------------------------------
 

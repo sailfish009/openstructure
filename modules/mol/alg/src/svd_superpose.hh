@@ -51,7 +51,7 @@ struct DLLEXPORT_OST_MOL_ALG SuperpositionResult {
 
 class SuperposerSVDImpl;
 
-/// \brief effiently superpose a bunch of models with the same number of atoms
+/// \brief efficiently superpose a bunch of models with the same number of atoms
 /// Choose either two EntityViews or two AtomViewLists.
 class DLLEXPORT_OST_MOL_ALG SuperposerSVD {
 public:
