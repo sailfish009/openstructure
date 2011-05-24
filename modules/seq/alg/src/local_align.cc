@@ -180,7 +180,7 @@ AlignmentList LocalAlign(const ConstSequenceHandle& s1,
   AlignmentList alignments;
   while (CollectPatches(mat, 0, mat.GetWidth(), 0, mat.GetHeight(), 
          s1, s2, alignments)) {
-    LOG_DEBUG(alignments.back().aln.ToString(80));
+    LOG_DEBUG(alignments.back().ToString(80));
   }
   return alignments;
 }
