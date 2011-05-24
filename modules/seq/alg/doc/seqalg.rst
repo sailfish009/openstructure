@@ -1,7 +1,8 @@
 :mod:`seq.alg <ost.seq.alg>` -- Algorithms for Sequences
 ================================================================================
 
-.. currentmodule:: ost.seq.alg
+.. module:: ost.seq.alg
+  :synopsis: Algorithms for sequences
 
 
 .. function:: MergePairwiseAlignments(pairwise_alns, ref_seq)
@@ -33,3 +34,34 @@
 .. autofunction:: AlignToSEQRES
 
 .. autofunction:: AlignmentFromChainView
+
+
+
+.. function:: LocalAlign(seq1, seq2, subst_weight, gap_open=-5, gap_ext=-2)
+
+  Performs a Smith/Waterman local alignment of *seq1* and *seq2* and returns the 
+  best-scoring alignments as a list of pairwise alignments.
+  
+  **Example:**
+  
+  .. code-block:: python
+  
+    seq_a=seq.CreateSequence('A', 'acdefghiklmn')
+    seq_b=seq.CreateSequence('B', 'acdhiklmn')
+    alns=seq.alg.LocalAlign(seq_a, seq_b, seq.alg.BLOSUM62)
+    print alns[0].ToString(80)
+    # >>> A acdefghiklmn
+    # >>> B acd---hiklmn
+
+  :param seq1: A valid sequence
+  :type seq1: :class:`~ost.seq.ConstSequenceHandle`
+  :param seq2: A valid sequence  
+  :type seq2: :class:`~ost.seq.ConstSequenceHandle`
+  
+  :param subst_weigth: The substitution weights matrix
+  :type subst_weight: :class:`SubstWeightMatrix`
+  :param gap_open: The gap opening penalty. Must be a negative number
+  :param gap_ext: The gap extension penalty. Must be a negative number
+  :returns: list of best-scoring, non-overlapping alignments of *seq1* and 
+     *seq2*. The start of the alignments is stored in the sequence offset of the 
+     two sequences.

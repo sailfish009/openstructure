@@ -24,6 +24,7 @@
 #include <ost/seq/alg/ins_del.hh>
 #include <ost/seq/alg/conservation.hh>
 #include <ost/seq/alg/subst_weight_matrix.hh>
+#include <ost/seq/alg/local_align.hh>
 using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
@@ -52,5 +53,7 @@ BOOST_PYTHON_MODULE(_seq_alg)
   ;
   def("MergePairwiseAlignments", &MergePairwiseAlignments);
   def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons"));
+  def("LocalAlign", &LocalAlign, (arg("seq1"), arg("seq2"), arg("subst_weight"), 
+      arg("gap_open")=-10, arg("gap_ext")=-5));
 
 }
