@@ -30,8 +30,9 @@ export DNG_INITDIR="$DNG_LIBDIR/openstructure"
 #export DYLD_FRAMEWORK_PATH="$BIN_LIBDIR:${DYLD_FRAMEWORK_PATH}"
 #export DYLD_LIBRARY_PATH="$BIN_LIBDIR:${DYLD_LIBRARY_PATH}"
 #export LD_LIBRARY_PATH="$DNG_LIBDIR:$LD_LIBRARY_PATH"
-# set QT_PLUGIN_PATH and pythonpath for bundle (commented except in linux bundles)
-#export PYTHONPATH="$DNG_ROOT/@LIBDIR@/python2.6"
+# set QT_PLUGIN_PATH PYTHONHOME and PYTHONPATH for bundle (commented except in linux bundles)
+#export PYTHONHOME=$DNG_ROOT
+#export PYTHONPATH=
 #export QT_PLUGIN_PATH="$BIN_DIR/plugins"
 
 # retrieve absolute path to python executable
@@ -39,7 +40,7 @@ pyexec=""
 if [ -z "$DNG_ATTACH_VALGRIND" ]; then
   pyexec="@PYTHON_BINARY@"
 else
-  pyexec="valgrind --leak-check=full @PYTHON_BINARY@"
+  pyexec="valgrind --leak-check=full $pyexec"
 fi
 
 if [ ! -f "$pyexec" ]; then 
