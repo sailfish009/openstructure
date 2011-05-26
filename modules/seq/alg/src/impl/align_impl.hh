@@ -25,39 +25,39 @@
 
 namespace ost { namespace seq { namespace alg { namespace impl {
 
-  typedef enum {
-    DIAG,
-    INS1,
-    INS2,
-    UNKN
-  } Path;
+typedef enum {
+  DIAG,
+  INS1,
+  INS2,
+  UNKN
+} Path;
 
-  struct DLLEXPORT AlnPos {
-    AlnPos(): score(0), from(impl::UNKN) { }
-    int score;
-    impl::Path  from;
-  };
-
-  struct DLLEXPORT AlnMat {
-    AlnMat(int width, int height): 
-      mat_(width*height), width_(width), height_(height)
-    { }
-  
-    impl::AlnPos& operator()(int x, int y) { return mat_[x*height_+y]; }
-  
-    const impl::AlnPos& operator()(int x, int y) const {
-      return mat_[x*height_+y];
-    } 
-  
-    int GetWidth() const { return width_; }
-    int GetHeight() const { return height_; }
-  
-  private:
-    std::vector<impl::AlnPos>  mat_;
-    int               width_;
-    int               height_;  
+struct DLLEXPORT AlnPos {
+  AlnPos(): score(0), from(impl::UNKN) { }
+  int score;
+  impl::Path  from;
 };
 
+struct DLLEXPORT AlnMat {
+  AlnMat(int width, int height): 
+    mat_(width*height), width_(width), height_(height)
+  { }
+  
+  impl::AlnPos& operator()(int x, int y) { return mat_[x*height_+y]; }
+  
+  const impl::AlnPos& operator()(int x, int y) const {
+    return mat_[x*height_+y];
+  } 
+  
+  int GetWidth() const { return width_; }
+  int GetHeight() const { return height_; }
+  
+ private:
+  std::vector<impl::AlnPos>  mat_;
+  int               width_;
+  int               height_;  
+};
+        
 inline void DLLEXPORT SetRoute(impl::AlnMat& mat, int& i, int& j,
                      const ConstSequenceHandle& s1, 
                      const ConstSequenceHandle& s2,
