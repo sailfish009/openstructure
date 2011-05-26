@@ -7,11 +7,13 @@ alignment_opts.hh
 merge_pairwise_alignments.hh
 conservation.hh
 local_align.hh
+global_align.hh
 )
 
 set(OST_SEQ_ALG_SOURCES
 merge_pairwise_alignments.cc
 local_align.cc
+global_align.cc
 sequence_identity.cc
 ins_del.cc
 subst_weight_matrix.cc
