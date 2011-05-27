@@ -51,6 +51,8 @@
 
 .. autofunction:: MatchResidueByIdx
 
+.. autofunction:: MatchResidueByLocalAln
+
 .. autofunction:: Superpose
 
 

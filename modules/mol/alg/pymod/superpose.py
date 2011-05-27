@@ -6,7 +6,7 @@ Authors: Stefan Bienert
 
 import math
 import ost.mol.alg
-
+import ost.seq.alg
 
 def ParseAtomNames(atoms):
   """
@@ -26,6 +26,7 @@ def ParseAtomNames(atoms):
 
   :param atoms: Identifier or list of atoms
   :type atoms: :class:`str`, :class:`list`, :class:`set`
+  :returns: A :class:`set` of atoms.
   """
   ## get a set of atoms or None
   if atoms==None:
@@ -89,6 +90,9 @@ def MatchResidueByNum(ent_a, ent_b, atoms='all'):
   :type ent_b: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
   :param atoms: The subset of atoms to be included in the two views.
   :type atoms: :class:`str`, :class:`list`, :class:`set`
+  :returns: Two :class:`~ost.mol.EntityView` instances with the same amount of
+            residues matched by number. Each residue will have the same number
+            & type of atoms.
   """
   ## init. final views
   result_a=_EmptyView(ent_a)
@@ -148,6 +152,9 @@ def MatchResidueByIdx(ent_a, ent_b, atoms='all'):
   :type ent_b: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
   :param atoms: The subset of atoms to be included in the two views.
   :type atoms: :class:`str`, :class:`list`, :class:`set`
+  :returns: Two :class:`~ost.mol.EntityView` instances with the same amount of
+            residues matched by position. Each residue will have the same number
+            & type of atoms.
   """
   not_supported="MatchResidueByIdx has no support for chains of different "\
                +"lengths"
@@ -164,12 +171,65 @@ def MatchResidueByIdx(ent_a, ent_b, atoms='all'):
     if chain_a.residue_count!=chain_b.residue_count:
       raise RuntimeError(not_supported)
     ## iterate residues & copy to views
-    for r_a,r_b in zip(chain_a.residues, chain_b.residues):
+    for r_a, r_b in zip(chain_a.residues, chain_b.residues):
       result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
   result_a.AddAllInclusiveBonds()
   result_b.AddAllInclusiveBonds()
   return result_a, result_b
 
+
+def MatchResidueByLocalAln(ent_a, ent_b, atoms='all'):
+  """
+  Match residues by local alignment. Takes **ent_a** and **ent_b**, extracts
+  the sequences chain-wise and aligns them in Smith/Waterman manner. This local
+  alignment is then used to gather residues from both entities, only touching
+  atoms as defined by **atoms**. Regardless of what the list of **atoms** says,
+  only those present in two matched residues will be included in the returned
+  views. Chains are processed in order of appearance. If **ent_a** and
+  **ent_b** contain a different number of chains, processing stops with the
+  lower count.
+
+  :param ent_a: The first entity
+  :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param ent_b: The second entity
+  :type ent_b: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param atoms: The subset of atoms to be included in the two views.
+  :type atoms: :class:`str`, :class:`list`, :class:`set`
+  :returns: Two :class:`~ost.mol.EntityView` instances with the same number of
+            residues. Each residue will have the same number & type of atoms.
+  """
+  ## init. final views
+  result_a = _EmptyView(ent_a)
+  result_b = _EmptyView(ent_b)
+  n_chains = _no_of_chains(ent_a, ent_b)
+  atmset = ParseAtomNames(atoms)
+  ## iterate chains
+  for i in range(0, n_chains):
+    chain_a = ent_a.chains[i]
+    chain_b = ent_b.chains[i]
+    ## fetch residues
+    s_a = ''.join([r.one_letter_code
+                   for r in chain_a.Select('protein=True').residues])
+    s_b = ''.join([r.one_letter_code
+                   for r in chain_b.Select('protein=True').residues])
+    ## create sequence from residue lists & alignment
+    seq_a = ost.seq.CreateSequence(chain_a.name, s_a)
+    seq_b = ost.seq.CreateSequence(chain_b.name, s_b)
+    aln_a_b = ost.seq.alg.LocalAlign(seq_a, seq_b, ost.seq.alg.BLOSUM62)
+    ## evaluate alignment
+    for aln in aln_a_b:
+      ## bind chain to alignment
+      aln.AttachView(0, chain_a.Select(""))
+      aln.AttachView(1, chain_b.Select(""))
+      ## select residues (only replacement edges)
+      for i in range(0, aln.GetLength()):
+        if aln.sequences[0][i]!='-' and aln.sequences[1][i]!='-':
+          r_a = aln.GetResidue(0,i)
+          r_b = aln.GetResidue(1,i)
+          result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
+  result_a.AddAllInclusiveBonds()
+  result_b.AddAllInclusiveBonds()
+  return result_a, result_b
 
 def Superpose(ent_a, ent_b, match='number', atoms='all'):
   """
@@ -185,6 +245,9 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
   * ``index`` - select residues by index in chain, includes **atoms**, calls
     :func:`~ost.mol.alg.MatchResidueByIdx`
 
+  * ``local`` - select residues from a Smith/Waterman alignment, includes
+    **atoms**, calls :func:`~ost.mol.alg.MatchResidueByLocalAln`
+
   :param ent_a: The first entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
   :param ent_b: The second entity
@@ -193,13 +256,22 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
   :type match: :class:`str`
   :param atoms: The subset of atoms to be used in the superposition.
   :type atoms: :class:`str`, :class:`list`, :class:`set`
+  :returns: An instance of :class:`SuperpositionResult`, containing members
+
+            * ``rmsd`` - Rmsd of the superposed entities
+
+            * ``view1`` - First :class:`~ost.mol.EntityView` used
+
+            * ``view2`` - Second :class:`~ost.mol.EntityView` used
   """
   not_supported="Superpose called with unsupported matching request."
   ## create views to superpose
-  if match.upper()=='NUMBER':
-    view_a, view_b=MatchResidueByNum(ent_a, ent_b, atoms)
-  elif match.upper()=='INDEX':
+  if match.upper() == 'NUMBER':
+    view_a, view_b = MatchResidueByNum(ent_a, ent_b, atoms)
+  elif match.upper() == 'INDEX':
     view_a, view_b=MatchResidueByIdx(ent_a, ent_b, atoms)
+  elif match.upper() == 'LOCAL':
+    view_a, view_b=MatchResidueByLocalAln(ent_a, ent_b, atoms)
   else:
     raise ValueError(not_supported)
   ## action
