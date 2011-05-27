@@ -35,8 +35,8 @@ public:
   PythonNamespaceTreeItem(const bp::object& ns, const QString& name, PythonNamespaceTreeItem* parent=0);
   virtual ~PythonNamespaceTreeItem();
   PythonNamespaceTreeItem* GetParent() const;
-  PythonNamespaceTreeItem* GetChild(unsigned int index) const;
-  unsigned int ChildCount() const;
+  PythonNamespaceTreeItem* GetChild(unsigned int index);
+  unsigned int ChildCount();
   void DeleteChildren();
   unsigned int GetRow() const;
   QString GetName()  const;

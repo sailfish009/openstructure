@@ -65,7 +65,6 @@ QString PythonCompleter::pathFromIndex(const QModelIndex & index) const
 void PythonCompleter::SetCompletionPrefix(const QString& prefix)
 {
   dynamic_cast<PythonNamespaceTreeModel*>(this->model())->Reset();  
-  this->setCompletionPrefix("");
   this->setCompletionPrefix(prefix);
 }
 
