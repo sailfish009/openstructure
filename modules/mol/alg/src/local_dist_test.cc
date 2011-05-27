@@ -53,7 +53,7 @@ std::pair<Real, Real> calc_overlap1(ResidueView ref_res,
                                     EntityView ref,
                                     ChainView mdl_chain, 
                                     Real tol, Real max_dist, bool only_fixed, 
-                                    bool swap)
+                                    bool swap,std::vector<std::pair<Real, Real> >& overlap_list )
 {
   std::pair<Real, Real> overlap(0.0, 0.0);
   AtomViewList ref_atoms=ref_res.GetAtomList();
@@ -98,6 +98,8 @@ std::pair<Real, Real> calc_overlap1(ResidueView ref_res,
         AtomView av2=mdl_chain.FindAtom(aj->GetResidue().GetNumber(), 
                                              aj->GetName());
         overlap.second+=1.0;
+        overlap_list[ref_res.GetIndex()].second+=1.0;
+        overlap_list[aj->GetResidue().GetIndex()].second+=1.0;
         if (!(av1 && av2)) {
           continue;
         }
@@ -105,6 +107,8 @@ std::pair<Real, Real> calc_overlap1(ResidueView ref_res,
         Real ref_dist=geom::Length(ai->GetPos()-aj->GetPos());
         if (std::abs(mdl_dist-ref_dist)<tol) {
           overlap.first+=1;
+          overlap_list[ref_res.GetIndex()].first+=1.0;
+          overlap_list[aj->GetResidue().GetIndex()].first+=1.0;
         }
       }
     }      
@@ -195,8 +199,9 @@ std::pair<Real, Real> calc_overlap2(const seq::ConstSequenceHandle& ref_seq,
 }
 
 Real LocalDistTest(const EntityView& mdl, const EntityView& ref,
-                   Real cutoff, Real max_dist)
+                   Real cutoff, Real max_dist, const String& local_ldt_property_string)
 {
+    
   if (!mdl.GetResidueCount()) {
     LOG_WARNING("model structures doesn't contain any residues");
     return 0.0;
@@ -207,6 +212,7 @@ Real LocalDistTest(const EntityView& mdl, const EntityView& ref,
     return 0.0;
   }
   ResidueViewList ref_residues=ref.GetResidueList();  
+  std::vector<std::pair<Real, Real> > overlap_list(ref_residues.size(), std::pair<Real, Real>(0.0, 0.0));
   ChainView mdl_chain=mdl.GetChainList()[0];  
   // Residues with symmetric side-chains require special treatment as there are 
   // two possible ways to name the atoms. We calculate the overlap with the 
@@ -226,10 +232,10 @@ Real LocalDistTest(const EntityView& mdl, const EntityView& ref,
 
     std::pair<Real, Real> ov1=calc_overlap1(*i, ref, mdl_chain, 
                                           cutoff, max_dist, true, 
-                                          false);
+                                          false, overlap_list);
     std::pair<Real, Real> ov2=calc_overlap1(*i, ref, mdl_chain, 
                                           cutoff, max_dist, true, 
-                                          true); 
+                                          true, overlap_list); 
     if (ov1.first/ov1.second<ov2.first/ov2.second) {
      AtomViewList atoms=mdl_res.GetAtomList();
      for (AtomViewList::iterator j=atoms.begin(), 
@@ -244,10 +250,29 @@ Real LocalDistTest(const EntityView& mdl, const EntityView& ref,
   for (ResidueViewList::iterator
        i=ref_residues.begin(), e=ref_residues.end(); i!=e; ++i) {
      std::pair<Real, Real> ov1=calc_overlap1(*i, ref, mdl_chain, cutoff, 
-                                            max_dist, false, false);
+                                            max_dist, false, false, overlap_list);
      total_ov.first+=ov1.first;
      total_ov.second+=ov1.second;
   }
+
+  // attach local per-residue LDT as property:
+  if(local_ldt_property_string!="") {
+    for (ResidueViewList::iterator
+       i=ref_residues.begin(), e=ref_residues.end(); i!=e; ++i) {
+     std::pair<Real, Real> ov1=calc_overlap1(*i, ref, mdl_chain, cutoff, 
+                                            max_dist, false, false, overlap_list);
+     total_ov.first+=ov1.first;
+     total_ov.second+=ov1.second;
+     Real local_ldt=overlap_list[(*i).GetIndex()].first/(overlap_list[(*i).GetIndex()].second ? overlap_list[(*i).GetIndex()].second : 1);
+     if (mdl_chain.FindResidue((*i).GetNumber()).IsValid()) {
+      ResidueView mdl_res=mdl_chain.FindResidue((*i).GetNumber());
+      mdl_res.SetFloatProp(local_ldt_property_string, local_ldt);
+     }
+    }
+      mdl_chain.SetFloatProp(local_ldt_property_string, total_ov.first/(total_ov.second ? total_ov.second : 1));
+  }
+  overlap_list.clear();
+
   return total_ov.first/(total_ov.second ? total_ov.second : 1);
 }
 

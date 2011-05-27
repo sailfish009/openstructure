@@ -27,12 +27,15 @@ namespace ost { namespace mol { namespace alg {
   
 Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const EntityView& mdl,
                                          const EntityView& ref,
-                                         Real cutoff, Real max_dist);
+                                         Real cutoff, Real max_dist,
+                                         const String& local_ldt_property_string="");
 
 Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const ost::seq::AlignmentHandle& aln,
                                          Real cutoff, Real max_dist, 
                                          int ref_index=0, int mdl_index=1);
+
 }}}
 
 #endif
+
 

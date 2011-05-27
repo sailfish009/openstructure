@@ -22,19 +22,18 @@
 #include <ost/mol/alg/local_dist_test.hh>
 #include <ost/mol/alg/superpose_frames.hh>
 #include <ost/mol/alg/filter_clashes.hh>
-#include <ost/mol/alg/construct_cbeta.hh>
 using namespace boost::python;
 using namespace ost;
 
 void export_svdSuperPose();
-void export_Clash();
+
 #if OST_IMG_ENABLED
 void export_entity_to_density();
 #endif
 
 namespace {
   
-Real (*ldt_a)(const mol::EntityView&, const mol::EntityView& ref, Real, Real)=&mol::alg::LocalDistTest;
+Real (*ldt_a)(const mol::EntityView&, const mol::EntityView& ref, Real, Real, const String&)=&mol::alg::LocalDistTest;
 Real (*ldt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistTest;
 mol::EntityView (*fc_a)(const mol::EntityView&, Real,bool)=&mol::alg::FilterClashes;
 mol::EntityView (*fc_b)(const mol::EntityHandle&, Real, bool)=&mol::alg::FilterClashes;
@@ -47,15 +46,11 @@ BOOST_PYTHON_MODULE(_mol_alg)
   export_entity_to_density();
   #endif
   
-  def("LocalDistTest", ldt_a);
+  def("LocalDistTest", ldt_a, (arg("local_ldt_property_string")=""));
   def("LocalDistTest", ldt_b, (arg("ref_index")=0, arg("mdl_index")=1));
   def("FilterClashes", fc_a, (arg("ent"), arg("tolerance")=0.1, arg("always_remove_bb")=false));
   def("FilterClashes", fc_b, (arg("ent"), arg("tolerance")=0.1, arg("always_remove_bb")=false));
   def("SuperposeFrames", &ost::mol::alg::SuperposeFrames, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
        arg("end")=-1, arg("ref")=-1));
-//   def("ConstructCBetas", one_arg, args("entity_handle"));
-  def("ConstructCBetas", &ost::mol::alg::ConstructCBetas, (arg("entity_handle"), arg("include_gly")=false));
-  
-  export_Clash();
 }
