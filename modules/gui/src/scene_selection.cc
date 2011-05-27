@@ -137,10 +137,7 @@ void SceneSelection::ViewDensitySlices() {
         // The following is a hack. I need to pass a reference to an ImagHandle
         // that never goes out of scope, so I get a reference from the MapIso using
         // GetMap and pass it to the CreateDataViewer
-        img::gui::DataViewer* dv = GostyApp::Instance()->CreateDataViewer(obj->GetOriginalMap());
-          MainArea* ma = GostyApp::Instance()->GetPerspective()->GetMainArea();
-          ma->AddWidget(QString(obj->GetName().c_str()), dv) ;
-        dv->show();
+        GostyApp::Instance()->CreateDataViewer(obj->GetOriginalMap(),QString(obj->GetName().c_str()));
       }
     }
   }

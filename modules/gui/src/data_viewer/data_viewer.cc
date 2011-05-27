@@ -213,7 +213,7 @@ void DataViewer::build(const Data& data)
 
   AddDockWidget(ov_manager_gui_,"Overlays",true,0);
   info_->SetImageInfo(data);
-  AddDockWidget(info_,"Info",true,1);
+  AddDockWidget(info_,"Info",true,0);
   AddDockWidget(argand_,"Argand",false,1);
   AddDockWidget(fft_,"FFT",false,1);
 
@@ -222,7 +222,7 @@ void DataViewer::build(const Data& data)
 
   connect(panel_,SIGNAL(selected(const Extent&)),info_,SLOT(SetSelection(const Extent&)));
   connect(panel_,SIGNAL(deselected()),info_,SLOT(ClearSelection()));
-  connect(panel_,SIGNAL(released()),this,SLOT(close()));
+  connect(panel_,SIGNAL(released()),this,SIGNAL(released()));
   
   if(!parentWidget()) {
     resize(QApplication::desktop()->availableGeometry().adjusted(20,20,-20,-20).size());

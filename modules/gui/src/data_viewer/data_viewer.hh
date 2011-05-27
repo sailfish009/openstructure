@@ -101,9 +101,12 @@ public:
   //! event filter for DataViewerPanel
   virtual bool eventFilter(QObject * object, QEvent *event);
 
-  void SetSlab(int slab);
-  
+  void SetSlab(int slab);  
   int GetSlab() const;
+
+signals:
+  void released();
+
 public slots:
   //! update view
   void UpdateView();

@@ -86,6 +86,7 @@ public:
 
   //! update view
   void UpdateView(bool update_raster_image=true);
+  void UpdateView(const QRect& rect,bool update_raster_image=true);
 
   //! retrieve ptr to internal normalizer
   ViewerNormalizerPtr GetNormalizer() const;
@@ -148,8 +149,6 @@ public:
   //! re-center with spatial origin in the middle of the window
   void Recenter();
 
-  //! re-center with center of selection (if any) in the middle of the window
-  void CenterSelection();
   
   /////////////////
   // other methods
@@ -202,11 +201,10 @@ private:
   ViewerNormalizerPtr normalizer_;
   QImage* image_;
   QPixmap* pixmap_;
+  QRubberBand* rubberband_;
   QPoint lastmouse_;
   int zoom_level_;
   bool update_raster_image_;
-
-  Real center_x_, center_y_;
   Real offset_x_, offset_y_;
 
   geom::Vec3 clicked_position_; 
@@ -222,12 +220,7 @@ private:
 
   int last_x_,last_y_;
   int right_press_x_,right_press_y_;
-  bool selection_dragging_;
-  QRect selection_rect_;
   Extent selection_;
-  QPen selection_pen_;
-  QBrush selection_brush_;
-  bool selection_state_;
   int selection_mode_;
   
   RasterImage::Mode cmode_;
@@ -243,13 +236,12 @@ private:
   void move(int dx, int dy);
   void slab(int dz);
   void zoom(int d);
-  void on_resize(int w, int h);
   void extract_ri();
 
   void draw_extent(QPainter& p);
   void draw_pixel_values(QPainter& p);
-  void set_clippingregion(QPainter& p);
   void update_min_max();
+  void update_rubberband_from_selection_();
 };
 
 }}}  //ns
