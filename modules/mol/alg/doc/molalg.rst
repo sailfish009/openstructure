@@ -4,7 +4,7 @@
 .. module:: ost.mol.alg
    :synopsis: Algorithms operating on molecular structures
 
-.. function:: LocalDistTest(model, reference, tolerance, radius)
+.. function:: LocalDistTest(model, reference, tolerance, radius, local_ldt_property_string="")
   
   This function calculates the agreement of local contacts between the model and 
   the reference structure. The overlap is a number between zero and one, where 
@@ -23,8 +23,11 @@
   possible solutions to the fixed atoms, that is, everything that is not 
   ambigous is calculated. The solution that gives higher overlap is then used to 
   calculate the actual overlap score.
-  
 
+  If a string is passed as last parameter, the function computes the overlap score for
+  each residue and saves it as a float property in the ResidueHandle, with the passed string
+  as property name
+  
 .. function:: SuperposeFrames(frames, sel, from=0, to=-1, ref=-1)
 
   This function superposes the frames of the given coord group and returns them
