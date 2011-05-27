@@ -178,25 +178,9 @@ def MatchResidueByIdx(ent_a, ent_b, atoms='all'):
   return result_a, result_b
 
 
-def MatchResidueByLocalAln(ent_a, ent_b, atoms='all'):
+def _MatchResidueByAln(ent_a, ent_b, atoms, alnmethod):
   """
-  Match residues by local alignment. Takes **ent_a** and **ent_b**, extracts
-  the sequences chain-wise and aligns them in Smith/Waterman manner. This local
-  alignment is then used to gather residues from both entities, only touching
-  atoms as defined by **atoms**. Regardless of what the list of **atoms** says,
-  only those present in two matched residues will be included in the returned
-  views. Chains are processed in order of appearance. If **ent_a** and
-  **ent_b** contain a different number of chains, processing stops with the
-  lower count.
-
-  :param ent_a: The first entity
-  :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
-  :param ent_b: The second entity
-  :type ent_b: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
-  :param atoms: The subset of atoms to be included in the two views.
-  :type atoms: :class:`str`, :class:`list`, :class:`set`
-  :returns: Two :class:`~ost.mol.EntityView` instances with the same number of
-            residues. Each residue will have the same number & type of atoms.
+  For internal use, only
   """
   ## init. final views
   result_a = _EmptyView(ent_a)
@@ -215,7 +199,7 @@ def MatchResidueByLocalAln(ent_a, ent_b, atoms='all'):
     ## create sequence from residue lists & alignment
     seq_a = ost.seq.CreateSequence(chain_a.name, s_a)
     seq_b = ost.seq.CreateSequence(chain_b.name, s_b)
-    aln_a_b = ost.seq.alg.LocalAlign(seq_a, seq_b, ost.seq.alg.BLOSUM62)
+    aln_a_b = alnmethod(seq_a, seq_b, ost.seq.alg.BLOSUM62)
     ## evaluate alignment
     for aln in aln_a_b:
       ## bind chain to alignment
@@ -230,6 +214,51 @@ def MatchResidueByLocalAln(ent_a, ent_b, atoms='all'):
   result_a.AddAllInclusiveBonds()
   result_b.AddAllInclusiveBonds()
   return result_a, result_b
+
+def MatchResidueByLocalAln(ent_a, ent_b, atoms='all'):
+  """
+  Match residues by local alignment. Takes **ent_a** and **ent_b**, extracts
+  the sequences chain-wise and aligns them in Smith/Waterman manner. For
+  scoring, the BLOSUM62 matrix is used. The local alignment is used to gather
+  residues from both entities, only touching atoms as defined by **atoms**.
+  Regardless of what the list of **atoms** says, only those present in two
+  matched residues will be included in the returned views. Chains are processed
+  in order of appearance. If **ent_a** and **ent_b** contain a different number
+  of chains, processing stops with the lower count.
+
+  :param ent_a: The first entity
+  :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param ent_b: The second entity
+  :type ent_b: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param atoms: The subset of atoms to be included in the two views.
+  :type atoms: :class:`str`, :class:`list`, :class:`set`
+  :returns: Two :class:`~ost.mol.EntityView` instances with the same number of
+            residues. Each residue will have the same number & type of atoms.
+  """
+  return _MatchResidueByAln(ent_a, ent_b, atoms, ost.seq.alg.LocalAlign)
+
+def MatchResidueByGlobalAln(ent_a, ent_b, atoms='all'):
+  """
+  Match residues by global alignment. Takes **ent_a** and **ent_b**, extracts
+  the sequences chain-wise and aligns them in Needleman/Wunsch manner. For
+  scoring, the BLOSUM62 matrix is used. The global alignment is used to gather
+  residues from both entities, only touching atoms as defined by **atoms**.
+  Regardless of what the list of **atoms** says, only those present in two
+  matched residues will be included in the returned views. Chains are processed
+  in order of appearance. If **ent_a** and **ent_b** contain a different number
+  of chains, processing stops with the lower count.
+
+  :param ent_a: The first entity
+  :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param ent_b: The second entity
+  :type ent_b: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param atoms: The subset of atoms to be included in the two views.
+  :type atoms: :class:`str`, :class:`list`, :class:`set`
+  :returns: Two :class:`~ost.mol.EntityView` instances with the same number of
+            residues. Each residue will have the same number & type of atoms.
+  """
+  return _MatchResidueByAln(ent_a, ent_b, atoms, ost.seq.alg.GlobalAlign)
+
 
 def Superpose(ent_a, ent_b, match='number', atoms='all'):
   """
@@ -247,6 +276,9 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
 
   * ``local`` - select residues from a Smith/Waterman alignment, includes
     **atoms**, calls :func:`~ost.mol.alg.MatchResidueByLocalAln`
+
+  * ``global`` - select residues from a Needleman/Wunsch alignment, includes
+    **atoms**, calls :func:`~ost.mol.alg.MatchResidueByGlobalAln`
 
   :param ent_a: The first entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
@@ -271,7 +303,11 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
   elif match.upper() == 'INDEX':
     view_a, view_b=MatchResidueByIdx(ent_a, ent_b, atoms)
   elif match.upper() == 'LOCAL':
-    view_a, view_b=MatchResidueByLocalAln(ent_a, ent_b, atoms)
+    view_a, view_b=_MatchResidueByAln(ent_a, ent_b, atoms,
+                                      ost.seq.alg.LocalAlign)
+  elif match.upper() == 'GLOBAL':
+    view_a, view_b=_MatchResidueByAln(ent_a, ent_b, atoms,
+                                      ost.seq.alg.GlobalAlign)
   else:
     raise ValueError(not_supported)
   ## action

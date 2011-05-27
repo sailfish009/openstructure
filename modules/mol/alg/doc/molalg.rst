@@ -53,6 +53,8 @@
 
 .. autofunction:: MatchResidueByLocalAln
 
+.. autofunction:: MatchResidueByGlobalAln
+
 .. autofunction:: Superpose
 
 
