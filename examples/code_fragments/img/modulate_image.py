@@ -20,6 +20,4 @@ im3 = img.CreateImage(img.Size(400,400))
 im3.Paste(im)
 im3.Paste(im2)
 
-v=gui.CreateDataViewer(im3)
-main_area=gui.GostyApp.Instance().perspective.main_area
-main_area.AddWidget("Modulated Image", v)
+v=gui.CreateDataViewer(im3,"Modulated Image")

@@ -23,9 +23,9 @@ ring_finder.cc
 )
 
 module(NAME conop SOURCES ${OST_CONOP_SOURCES}
-       HEADERS ${OST_CONOP_HEADERS} DEPENDS_ON mol geom db)
+       HEADERS ${OST_CONOP_HEADERS} DEPENDS_ON ost_mol ost_geom ost_db)
 
-executable(NAME chemdict_tool SOURCES chemdict_tool.cc DEPENDS_ON io STATIC)
+executable(NAME chemdict_tool SOURCES chemdict_tool.cc DEPENDS_ON ost_io STATIC)
 
 if (COMPOUND_LIB)
   if (EXISTS "${COMPOUND_LIB}")

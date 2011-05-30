@@ -4,5 +4,6 @@ set(OST_BINDINGS_UNIT_TESTS
   test_blast.py
 )
 
-ost_unittest(bindings "${OST_BINDINGS_UNIT_TESTS}")
+ost_unittest(MODULE bindings 
+             SOURCES "${OST_BINDINGS_UNIT_TESTS}")
 

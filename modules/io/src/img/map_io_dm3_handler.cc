@@ -238,7 +238,7 @@ void DM3Collector::ParseStream(std::istream& fp)
   parse_tag_group(0,"ROOT",fp);
   img::Progress::Instance().DeRegister(this);
   if(fp.eof()==0) {
-    LOG_ERROR("file not parsed completely");
+    LOG_INFO("file not parsed completely");
   } else {
     LOG_INFO("file parsed completely");
   }

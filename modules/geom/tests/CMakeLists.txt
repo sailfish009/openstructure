@@ -14,4 +14,5 @@ set(GEOM_UNITTESTS
   test_repr.py
 )
 
-ost_unittest(geom "${GEOM_UNITTESTS}")
+ost_unittest(MODULE geom
+             SOURCES "${GEOM_UNITTESTS}")

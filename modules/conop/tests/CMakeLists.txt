@@ -5,5 +5,6 @@ set(OST_CONOP_UNIT_TESTS
   test_compound.py
 )
 
-ost_unittest(conop "${OST_CONOP_UNIT_TESTS}")
+ost_unittest(MODULE conop
+             SOURCES "${OST_CONOP_UNIT_TESTS}")
 

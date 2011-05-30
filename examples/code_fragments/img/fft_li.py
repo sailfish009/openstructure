@@ -10,7 +10,6 @@ main_area=gui.GostyApp.Instance().perspective.main_area
 for im in images:
    im.CenterSpatialOrigin()
    im.ApplyIP(img.alg.DFT()) 
-   v=gui.CreateDataViewer(im)
+   v=gui.CreateDataViewer(im,"Image")
    viewers.append(v)
-   main_area.AddWidget('Image' + str(i), v)
    i+=1

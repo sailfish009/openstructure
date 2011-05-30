@@ -40,10 +40,8 @@
 #include <QPixmapCache>
 #include <ost/message.hh>
 
-
-#define USE_PIXMAP_CACHE
-
 namespace ost { namespace img { namespace gui {
+
 
 DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   QWidget(parent),
@@ -56,10 +54,9 @@ DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   normalizer_(ViewerNormalizerPtr(new ViewerNormalizer)),
   image_(new QImage(1,1,QImage::Format_RGB32)),
   pixmap_(new QPixmap(QPixmap::fromImage(*image_))),
+  rubberband_(new QRubberBand(QRubberBand::Rectangle,this)),
   zoom_level_(0),
   update_raster_image_(false),
-  center_x_(0.0),
-  center_y_(0.0),
   offset_x_(0.0),
   offset_y_(0.0),
   clicked_position_(),
@@ -72,12 +69,7 @@ DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   mouseposition_(),
   last_x_(0),last_y_(0),
   right_press_x_(0),right_press_y_(0),
-  selection_dragging_(false),
-  selection_rect_(),
   selection_(),
-  selection_pen_(QPen(QColor(255,255,0),1,Qt::DashLine)),
-  selection_brush_(QBrush(Qt::NoBrush)),
-  selection_state_(false),
   selection_mode_(0),
   cmode_(RasterImage::GREY),
   cursors_(),
@@ -90,16 +82,13 @@ DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   update_min_max();
   UpdateNormalizer(data_min_,data_max_,1.0,false);
   // placeholder for image
-  Recenter();
   slab_=GetObservedData().GetExtent().GetCenter()[2];
 
   emit slabChanged(slab_);
 
-  setMinimumSize(200,200);
-  on_resize(size().width(),size().height()); // needed for proper initialization
-
+  Recenter();
   setMouseTracking(true);
-  setFocusPolicy(Qt::StrongFocus);
+  setFocusPolicy(Qt::WheelFocus);
   //TODO cursors
   setCursor(cursor_);
   /*
@@ -128,6 +117,8 @@ DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   popupmenu_->AppendCheckItem(ID_DISP_PIXEL_VAL,QT("Display pixel values"));
   popupmenu_->AppendCheckItem(ID_SHOW_CLICK_POS,QT("Show last clicked point"));
   */
+  QPixmapCache::setCacheLimit(51200);
+
 }
 
 DataViewerPanelBase::~DataViewerPanelBase()
@@ -140,6 +131,7 @@ void DataViewerPanelBase::SetData(const Data& d)
 {
   SetObservedData(d);
   update_min_max();
+  Recenter();
   UpdateView(true);
 }
 
@@ -238,7 +230,7 @@ void DataViewerPanelBase::OnUpdateMenu(QUpdateUIEvent& e)
 void DataViewerPanelBase::Renormalize() 
 {
   if(!IsDataValid()) return;
-  if(selection_state_) {    
+  if(HasSelection()) {    
     alg::StatMinMax s;
     ImageHandle tmp=CreateImage(GetSelection());
     tmp.Paste(GetObservedData());
@@ -363,87 +355,82 @@ void DataViewerPanelBase::ObserverRelease()
 
 void DataViewerPanelBase::resizeEvent(QResizeEvent* event)
 {
-  on_resize(event->size().width(),event->size().height());
+  if(event->oldSize().width()<0 || event->oldSize().height()<0){
+   Recenter();
+   }else{
+    offset_x_+=static_cast<Real>((event->oldSize().width()-event->size().width()))*0.5*i_zoom_scale_;
+    offset_y_+=static_cast<Real>((event->oldSize().height()-event->size().height()))*0.5*i_zoom_scale_;
+    UpdateView(false);
+  }
 }
 
 void DataViewerPanelBase::paintEvent(QPaintEvent* event)
 {
-  static const int blocksize=256;
+  static const int blocksize=128;
 
-  if(!IsDataValid()) return;
+  if(!IsDataValid() ) return;
   QPainter painter(this);
-  painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing,
-                         antialiasing_);
-#ifdef USE_PIXMAP_CACHE
+  painter.setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing, antialiasing_);
   if(update_raster_image_) {
     QPixmapCache::clear();
   }
-
-  int uc=1+static_cast<int>(floor(static_cast<Real>(size().width())/static_cast<Real>(blocksize)));
-  int vc=1+static_cast<int>(floor(static_cast<Real>(size().height())/static_cast<Real>(blocksize)));
-  
-  geom::Vec2 cen=zoom_scale_*geom::Vec2(center_x_+offset_x_,
-                                        center_y_+offset_y_)/static_cast<Real>(blocksize);
-  Point i(static_cast<int>(floor(cen[0])),
-          static_cast<int>(floor(cen[1])));
-  Point i0 = i-Point((uc-1)/2-1,(vc-1)/2-1);
+  painter.fillRect(0,0,width(),height(),Qt::black);
+  Size imsize=GetObservedData().GetSize();
+  Point start=GetObservedData().GetExtent().GetStart();
+  geom::Vec2 cen=zoom_scale_*(geom::Vec2(offset_x_,offset_y_)-start.ToVec2())/static_cast<Real>(blocksize);
+  // o = offet of the block grid compared to (0,0)
   Point o(static_cast<int>(static_cast<Real>(blocksize)*(cen[0]-floor(cen[0]))),
           static_cast<int>(static_cast<Real>(blocksize)*(cen[1]-floor(cen[1]))));
-  
+
+  Point i(static_cast<int>(floor(cen[0])),static_cast<int>(floor(cen[1])));
+  int ustart=std::max<int>(0,std::max<int>((event->rect().left()+o[0])/blocksize,-i[0]));
+  int vstart=std::max<int>(0,std::max<int>((event->rect().top()+o[1])/blocksize,-i[1]));
+  int uend=std::min<int>((event->rect().right()+o[0])/blocksize,
+                  static_cast<int>(zoom_scale_*imsize[0]+1)/blocksize-i[0]);
+  int vend=std::min<int>((event->rect().bottom()+o[1])/blocksize,
+                  static_cast<int>(zoom_scale_*imsize[1]+1)/blocksize-i[1]);
   painter.setPen(QColor(255,255,255));
-  for(int v=0;v<=vc;++v) {
-    for(int u=0;u<=uc;++u) {
+  for(int v=vstart;v<=vend;++v) {
+    for(int u=ustart;u<=uend;++u) {
       QString cache_key = QString("%1,%2,%3,%4")
         .arg(reinterpret_cast<unsigned long>(this))
-        .arg(i0[0]+u)
-        .arg(i0[1]+v)
+        .arg(i[0]+u)
+        .arg(i[1]+v)
         .arg(zoom_level_);
       QPixmap pm;
-      if (update_raster_image_ || !QPixmapCache::find(cache_key, pm)) {
+      #ifdef __APPLE__
+      // Partial fix for buggy MDI on OSX. QMdiSubwindows hidden behind the opaque active window
+      // still receive QPaintEvents. Redrawing the hidden windows may deplete the pixmap cache.
+      // hasFocus() avoids the depletion but doesn't avoid the redraw.
+      if (update_raster_image_ || ( !QPixmapCache::find(cache_key, pm) && hasFocus())) {
+      #else
+      if (update_raster_image_ || ( !QPixmapCache::find(cache_key, pm))) {
+      #endif
         RasterImage ri(blocksize,blocksize);
         ri.Fill(GetObservedData(),zoom_level_,
                 geom::Vec3(WinToFracPoint(u*blocksize-o[0],v*blocksize-o[1])),
                 slab_,normalizer_,cmode_,fast_low_mag_,fast_high_mag_);
-        QImage im(blocksize,blocksize,QImage::Format_RGB32);
-        for(int b=0;b<blocksize;++b) {
-          for(int a=0;a<blocksize;++a) {
-            RasterImage::Pixel p=ri.GetPixel(a,b);
-            im.setPixel(a,b,qRgb(p.r,p.g,p.b));
-          }
-        }
+        QImage im(ri.GetDataPtr(),blocksize,blocksize,blocksize*3,QImage::Format_RGB888);
         pm=QPixmap::fromImage(im);
         QPixmapCache::insert(cache_key,pm);
+        painter.drawPixmap(u*blocksize-o[0],v*blocksize-o[1],pm);
+        // next line only used for cache debugging
+        //painter.drawLine(u*blocksize-o[0],v*blocksize-o[1],(u+1)*blocksize-o[0],(v+1)*blocksize-o[1]);
+      }else{
+        painter.drawPixmap(u*blocksize-o[0],v*blocksize-o[1],pm);
       }
-      painter.drawPixmap(u*blocksize-o[0],v*blocksize-o[1],pm);
+      // next line only used for cache debugging
       //painter.drawRect(u*blocksize-o[0],v*blocksize-o[1],blocksize,blocksize);
     }
   }
   update_raster_image_=false;
-#else
-  if(update_raster_image_) {
-    image_->fill(127);
-    extract_ri();
-    update_raster_image_=false;
-    delete pixmap_;
-    pixmap_ = new QPixmap(QPixmap::fromImage(*image_));
-  }
-  // this is an optimization for overlays
-  //painter.drawImage(QPoint(0,0),*image_);
-  painter.drawPixmap(QPoint(0,0),*pixmap_);
-#endif
 
   if(zoom_level_ >= 7 && display_pixel_values_) {
     draw_pixel_values(painter);
   }
 
-  if(zoom_level_<6) {
+  if(zoom_level_<7) {
     draw_extent(painter);
-  }
-
-  if(selection_dragging_ || selection_state_) {
-    painter.setPen(selection_pen_);
-    painter.setBrush(selection_brush_);
-    painter.drawRect(selection_rect_);
   }
 }
 
@@ -486,20 +473,14 @@ void DataViewerPanelBase::mousePressEvent(QMouseEvent* event)
 {
   if(!IsDataValid()) return;
   if(event->button() == Qt::LeftButton && event->modifiers()==Qt::NoModifier) {
-    selection_state_=false;
-    selection_dragging_=false;
     selection_=Extent();
-    selection_rect_.setX(event->x());
-    selection_rect_.setY(event->y());
-    selection_rect_.setWidth(0);
-    selection_rect_.setHeight(0);
+    rubberband_->setGeometry(QRect(event->pos(),QSize(0,0)));
+    rubberband_->hide();
     last_x_=event->x();
     last_y_=event->y();
     QPoint cp=FracPointToWin(geom::Vec2(clicked_position_));
     clicked_position_ = geom::Vec3(WinToFracPoint(QPoint(event->x(),event->y())));
     clicked_position_[2]=slab_;
-    UpdateView(false);
-    
     emit clicked(clicked_position_);
 
   }
@@ -516,13 +497,10 @@ void DataViewerPanelBase::mouseReleaseEvent(QMouseEvent* event)
 {
   if(!IsDataValid()) return;
   if(event->button() == Qt::LeftButton && event->modifiers()==Qt::NoModifier) {
-    if(selection_dragging_) {
-      selection_dragging_=false;
-      selection_state_=true;
-      UpdateView(false);
+    if(HasSelection()){
       emit selected(selection_);
     } else {
-      UpdateView(false);
+      rubberband_->hide();
       emit deselected();
     }
   } else if(event->button() & Qt::RightButton) {
@@ -538,18 +516,18 @@ void DataViewerPanelBase::mouseReleaseEvent(QMouseEvent* event)
 void DataViewerPanelBase::mouseMoveEvent(QMouseEvent* event)
 {
   if(!IsDataValid()) return;
-  static Point drag_start;
   if(event->buttons() == Qt::RightButton && event->modifiers()==Qt::NoModifier) {
     // right mouse drag translates pic
     int dx = event->x()-last_x_;
     int dy = event->y()-last_y_;
     move(dx,dy);
   } else if(event->buttons() == Qt::LeftButton  && event->modifiers()==Qt::NoModifier) {
+    static Point drag_start;
     // left mouse drag does selection box
-    if(!selection_dragging_){
-      drag_start=WinToPoint(event->x(),event->y());
+    if(!rubberband_->isVisible()){
+      drag_start=WinToPoint(rubberband_->geometry().topLeft());
+      rubberband_->show();
     }
-    selection_dragging_=true;
     QSize vsize=size();
     Point mouse_pos=WinToPoint(event->x(),event->y());
     Point max_pos=WinToPoint(vsize.width(),vsize.height());
@@ -577,20 +555,9 @@ void DataViewerPanelBase::mouseMoveEvent(QMouseEvent* event)
         selection_.SetEnd(selection_.GetStart()+Point(minsize,minsize)-Point(1,1));
       }
     }
-    QRect new_selection_rect_(PointToWin(selection_.GetStart()),PointToWin(selection_.GetEnd()+Point(1,1)));
-    selection_rect_=new_selection_rect_;
-    UpdateView(false);
+    update_rubberband_from_selection_();
   } else if((event->buttons() == Qt::MidButton) && HasSelection()) {
-    int dx=static_cast<int>(i_zoom_scale_*(event->x()-last_x_));
-    int dy=static_cast<int>(i_zoom_scale_*(event->y()-last_y_));
-    selection_.SetStart(selection_.GetStart()+Point(dx,dy));
-    QRect new_selection_rect_(PointToWin(selection_.GetStart()),PointToWin(selection_.GetEnd()+Point(1,1)));
-    selection_rect_=new_selection_rect_;
-    UpdateView(false);
-    emit selected(Extent(Point(selection_rect_.left(),
-                                           selection_rect_.top()),
-                                Point(selection_rect_.bottom(),
-                                            selection_rect_.right())));
+    update_rubberband_from_selection_();
   }
   last_x_=event->x();
   last_y_=event->y();
@@ -629,16 +596,16 @@ geom::Vec2 DataViewerPanelBase::WinToFracPointCenter(const QPoint& p) const
 
 geom::Vec2 DataViewerPanelBase::WinToFracPoint(int mx, int my) const
 {
-  Real px = i_zoom_scale_*static_cast<Real>(mx)+(center_x_+offset_x_);
-  Real py = i_zoom_scale_*static_cast<Real>(my)+(center_y_+offset_y_);
+  Real px = i_zoom_scale_*static_cast<Real>(mx)+offset_x_;
+  Real py = i_zoom_scale_*static_cast<Real>(my)+offset_y_;
 
   return geom::Vec2(px,py);
 }
 
 geom::Vec2 DataViewerPanelBase::WinToFracPointCenter(int mx, int my) const
 {
-  Real px = i_zoom_scale_*static_cast<Real>(mx)+(center_x_+offset_x_)-0.5;
-  Real py = i_zoom_scale_*static_cast<Real>(my)+(center_y_+offset_y_)-0.5;
+  Real px = i_zoom_scale_*static_cast<Real>(mx)+offset_x_-0.5;
+  Real py = i_zoom_scale_*static_cast<Real>(my)+offset_y_-0.5;
 
   return geom::Vec2(px,py);
 }
@@ -661,14 +628,14 @@ QPoint DataViewerPanelBase::PointToWin(const Point& p) const
 
 QPoint DataViewerPanelBase::FracPointToWin(const geom::Vec2& v) const
 {
-  return QPoint(static_cast<int>(zoom_scale_*(v[0]-(center_x_+offset_x_))),
-		static_cast<int>(zoom_scale_*(v[1]-(center_y_+offset_y_))));
+  return QPoint(static_cast<int>(zoom_scale_*(v[0]-offset_x_)),
+		static_cast<int>(zoom_scale_*(v[1]-offset_y_)));
 }
 
 QPoint DataViewerPanelBase::FracPointToWinCenter(const geom::Vec2& v) const
 {
-  return QPoint(static_cast<int>(zoom_scale_*(v[0]+0.5-(center_x_+offset_x_))),
-		static_cast<int>(zoom_scale_*(v[1]+0.5-(center_y_+offset_y_))));
+  return QPoint(static_cast<int>(zoom_scale_*(v[0]+0.5-offset_x_)),
+		static_cast<int>(zoom_scale_*(v[1]+0.5-offset_y_)));
 }
 
 Extent DataViewerPanelBase::GetSelection() const 
@@ -724,28 +691,28 @@ void DataViewerPanelBase::SetDisplayPixelValues(bool show)
 void DataViewerPanelBase::Recenter()
 {
   if(!IsDataValid()) return;
+  zoom_scale_ = ldexp(1.0,zoom_level_);
+  i_zoom_scale_ = 1.0/zoom_scale_;
+
   if (!HasSelection())  {
     if(GetObservedData().IsSpatial()) {
-    
-      Point cen = GetObservedData().GetSpatialOrigin();
       Size siz = GetObservedData().GetSize();
-
-      center_x_=static_cast<Real>(siz[0])/2.0+static_cast<Real>(cen[0]);
-      center_y_=static_cast<Real>(siz[1])/2.0+static_cast<Real>(cen[1]);
+      Point start=GetObservedData().GetExtent().GetStart();
+      offset_x_ = static_cast<Real>(siz[0])/2.0+start[0]-0.5*i_zoom_scale_*static_cast<Real>(size().width());
+      offset_y_ = static_cast<Real>(siz[1])/2.0+start[1]-0.5*i_zoom_scale_*static_cast<Real>(size().height());
     } else {
-      center_x_=0.0;
-      center_y_=0.0;
+      offset_x_ = -0.5*i_zoom_scale_*static_cast<Real>(size().width());
+      offset_y_ = -0.5*i_zoom_scale_*static_cast<Real>(size().height());
     }
 
-    offset_x_ = -center_x_;
-    offset_y_ = -center_y_;
   
   } else {
     Extent selection = GetSelection();
-    center_x_=static_cast<Real>(selection.GetCenter()[0]);
-    center_y_=static_cast<Real>(selection.GetCenter()[1]);
+    offset_x_=static_cast<Real>(selection.GetCenter()[0])-0.5*i_zoom_scale_*static_cast<Real>(size().width());
+    offset_y_=static_cast<Real>(selection.GetCenter()[1])-0.5*i_zoom_scale_*static_cast<Real>(size().height());
   }
-  zoom(0);// force refresh without changing zoom level
+ update_rubberband_from_selection_();
+ UpdateView(false);
 }
 
 bool DataViewerPanelBase::IsWithin(const QPoint& qp) const
@@ -766,13 +733,6 @@ void DataViewerPanelBase::draw_extent(QPainter& painter)
                          PointToWin(GetObservedData().GetExtent().GetEnd()+Point(1,1))));
 }
 
-void DataViewerPanelBase::set_clippingregion(QPainter& painter)
-{
-  if(!IsDataValid()) return;
-  QPoint p1=PointToWin(GetObservedData().GetExtent().GetStart());
-  QPoint p2=PointToWin(GetObservedData().GetExtent().GetEnd()+Point(1,1));
-  //painter.SetClippingRegion(p1.x,p1.y,p2.x-p1.x,p2.y-p1.y);
-}
 
 
 void DataViewerPanelBase::extract_ri()
@@ -790,7 +750,7 @@ void DataViewerPanelBase::extract_ri()
     RasterImage ri(w,h,image_->bits());
     ri.Fill(GetObservedData(),
             zoom_level_, 
-            geom::Vec3(center_x_+offset_x_, center_y_+offset_y_, 0.0),
+            geom::Vec3(offset_x_, offset_y_, 0.0),
             slab_,
             normalizer_,cmode_,fast_low_mag_,fast_high_mag_,
             std::min(w,std::max(0,tl.x())),std::min(h,std::max(0,tl.y())),
@@ -799,14 +759,14 @@ void DataViewerPanelBase::extract_ri()
     if(zoom_level_==0) {
       img2qt(GetObservedData(),image_,
               zoom_level_,
-              geom::Vec3(center_x_+offset_x_, center_y_+offset_y_, 0.0),
+              geom::Vec3(offset_x_,offset_y_, 0.0),
               slab_,
               normalizer_);
     } else {
       RasterImage ri(size().width(),size().height());
       ri.Fill(GetObservedData(),
               zoom_level_, 
-              geom::Vec3(center_x_+offset_x_, center_y_+offset_y_, 0.0),
+              geom::Vec3(offset_x_, offset_y_, 0.0),
               slab_,
               normalizer_,cmode_,fast_low_mag_,fast_high_mag_);
       
@@ -822,54 +782,43 @@ void DataViewerPanelBase::extract_ri()
 
 void DataViewerPanelBase::zoom(int d)
 {
-  if((d>0 && INT_MAX-d >zoom_level_)|| (d<0 && INT_MIN-d <zoom_level_)){
-    zoom_level_+=d;
-    // maximal zoom = 2^8
-    zoom_level_=std::min(zoom_level_,8);
-    zoom_level_=std::max(zoom_level_,-8);
-    
-  }
+  // maximal zoom = 2^8, therefore zoom_level_ goes from 8 to 8 and delta from -16 to 16
+  int old_zoom_level=zoom_level_;
+  int dl=std::max(d,-16);
+  dl=std::min(dl,16);
+  zoom_level_+=dl;
+  zoom_level_=std::min(zoom_level_,8);
+  zoom_level_=std::max(zoom_level_,-8);
+  Real old_zoom_scale = ldexp(1.0,old_zoom_level);
+  Real old_i_zoom_scale = 1.0/old_zoom_scale;
 
   zoom_scale_ = ldexp(1.0,zoom_level_);
   i_zoom_scale_ = 1.0/zoom_scale_;
 
-  offset_x_ = -0.5*i_zoom_scale_*static_cast<Real>(size().width());
-  offset_y_ = -0.5*i_zoom_scale_*static_cast<Real>(size().height());
+  offset_x_ += static_cast<Real>(size().width())/2.0*(old_i_zoom_scale-i_zoom_scale_);
+  offset_y_ += static_cast<Real>(size().height())/2.0*(old_i_zoom_scale-i_zoom_scale_);
 
-  selection_rect_=QRect(PointToWin(selection_.GetStart()),
-                        PointToWin(selection_.GetEnd()+Point(1,1)));
-#ifdef USE_PIXMAP_CACHE
+  update_rubberband_from_selection_();
   UpdateView(false);
-#else
-  UpdateView(true);
-#endif
   emit zoomed(zoom_level_);
 }
 
 
 void DataViewerPanelBase::move(int dx, int dy)
 {
-  center_x_-=i_zoom_scale_*(Real)dx;
-  center_y_-=i_zoom_scale_*(Real)dy;
-  selection_rect_=QRect(PointToWin(selection_.GetStart()),
-                        PointToWin(selection_.GetEnd()+Point(1,1)));
-#ifdef USE_PIXMAP_CACHE
+  offset_x_-=i_zoom_scale_*(Real)dx;
+  offset_y_-=i_zoom_scale_*(Real)dy;
+  update_rubberband_from_selection_();
   UpdateView(false);
-#else
-  UpdateView(true);
-#endif
 }
 
 void DataViewerPanelBase::MoveTo(const geom::Vec2& p)
 {
-  center_x_=p[0];
-  center_y_=p[1];
+  offset_x_=p[0];
+  offset_y_=p[1];
 
-#ifdef USE_PIXMAP_CACHE
+  update_rubberband_from_selection_();
   UpdateView(false);
-#else
-  UpdateView(true);
-#endif
 }
 
 int DataViewerPanelBase::GetSlab()
@@ -898,16 +847,6 @@ void DataViewerPanelBase::SetColorMode(RasterImage::Mode m)
   UpdateView(true);
 }
 
-void DataViewerPanelBase::on_resize(int width, int height)
-{
-#ifdef USE_PIXMAP_CACHE
-  UpdateView(true);
-#else
-  delete image_;
-  image_ = new QImage(width,height,QImage::Format_RGB32);
-#endif
-  zoom(0);
-}
 
 ImageHandle DataViewerPanelBase::Extract(const Extent& e)
 {
@@ -942,7 +881,7 @@ geom::Vec3 DataViewerPanelBase::GetClickedPosition()
 
 bool DataViewerPanelBase::HasSelection()
 {
-  return selection_state_;
+  return !rubberband_->geometry().isNull() && rubberband_->isVisible();
 }
 
 Real DataViewerPanelBase::GetDataMin() const
@@ -1005,8 +944,12 @@ void DataViewerPanelBase::draw_pixel_values(QPainter& painter)
   Extent visible = Extent(WinToPoint(0, 0), 
                                       WinToPoint(this->size().width(),
                                                  this->size().height()));
-  Point a = visible.GetStart();
-  Point b = visible.GetEnd();
+  if(!HasOverlap(visible,GetObservedData().GetExtent())){
+    return;
+  }
+  Extent overlap=Overlap(visible,GetObservedData().GetExtent());
+  Point a = overlap.GetStart();
+  Point b = overlap.GetEnd();
 
   QFont fnt("Courier",(zoom_level_-6)*2+7);
   painter.setFont(fnt);
@@ -1043,6 +986,11 @@ void DataViewerPanelBase::draw_pixel_values(QPainter& painter)
       }
     }
   }
+}
+
+void DataViewerPanelBase::update_rubberband_from_selection_()
+{
+  rubberband_->setGeometry(QRect(PointToWin(selection_.GetStart()),PointToWin(selection_.GetEnd()+Point(1,1))));
 }
 
 }}}  //ns

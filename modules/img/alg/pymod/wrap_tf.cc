@@ -56,7 +56,7 @@ void    (tf::FractionalShift::*setshift1)(Real,Real,Real)    = &tf::FractionalSh
 void    (tf::FractionalShift::*setshift2)(const Vec3&)                    = &tf::FractionalShift::SetShift;
 
 
-BOOST_PYTHON_MODULE(_tf)
+BOOST_PYTHON_MODULE(_ost_tf)
 {
   class_<tf::Transformation>("Transformation", init<>())
     .def(init<const Mat4&>())

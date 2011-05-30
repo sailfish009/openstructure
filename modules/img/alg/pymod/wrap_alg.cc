@@ -122,7 +122,7 @@ Real real_spatial_cross_correlation_2(const ConstImageHandle& image1,
 
 } //anon ns
 
-BOOST_PYTHON_MODULE(_img_alg)
+BOOST_PYTHON_MODULE(_ost_img_alg)
 {
   class_<AutoCorrelate, bases<ConstModOPAlgorithm> >("AutoCorrelate",init<>());
 

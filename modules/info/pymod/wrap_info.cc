@@ -136,6 +136,15 @@ public:
   {
     return true;
   }  
+
+  virtual void VisitGroupFinish(InfoGroup& group)
+ {
+    call_method<void, InfoGroup>(self, "VisitGroupFinish", group);
+ }
+
+ void VisitGroupFinishDefault(const InfoGroup&) 
+ {
+ }  
 private:
   PyObject* self;
 };
@@ -155,7 +164,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(hasitem_overloads, HasItem, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(retrieveitem_overloads, RetrieveItem, 1, 2)
 
 
-BOOST_PYTHON_MODULE(_info)
+BOOST_PYTHON_MODULE(_ost_info)
 {
 
   enum_<Type>("ItemType")
@@ -190,6 +199,7 @@ BOOST_PYTHON_MODULE(_info)
     .def("SetBool",&InfoItem::SetBool)
     .def("SetVector",&InfoItem::SetVector)
     .add_property("attribute",&InfoItem::GetAttribute,&InfoItem::SetAttribute)
+    .def("GetComment",&InfoItem::GetComment)
     ;
   class_<InfoGroupList>("InfoGroupList", no_init)
     .def(vector_indexing_suite<InfoGroupList>())
@@ -228,6 +238,7 @@ BOOST_PYTHON_MODULE(_info)
     .def("Apply",info_group_apply2a)
     .def("Apply",info_group_apply2b)
     .def("GetTextData",&InfoGroup::GetTextData)
+    .def("GetComment",&InfoGroup::GetComment)
     .def("GetPath",&InfoGroup::GetPath)
     ;
 
@@ -301,6 +312,7 @@ BOOST_PYTHON_MODULE(_info)
   class_<InfoVisitor, InfoVisitorProxy>("InfoVisitor",init<>())
     .def("VisitGroup", &InfoVisitorProxy::VisitGroupDefault)
     .def("VisitItem", &InfoVisitorProxy::VisitItemDefault)
+    .def("VisitGroupFinish", &InfoVisitorProxy::VisitGroupFinishDefault)
   ;
 
   class_<VerboseInfoVisitor, bases<InfoVisitor> >("VerboseInfoVisitor",init<>())

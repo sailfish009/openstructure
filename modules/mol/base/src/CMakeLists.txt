@@ -100,4 +100,4 @@ endforeach()
 module(NAME mol SOURCES ${OST_MOL_SOURCES}
        HEADERS ${OST_MOL_IMPL_HEADERS} IN_DIR impl
        ${OST_MOL_HEADERS} HEADER_OUTPUT_DIR ost/mol
-       DEPENDS_ON geom base info)
+       DEPENDS_ON ost_geom ost_base ost_info)

@@ -189,7 +189,6 @@ if(WIN32)
 endif()
 
 if (USE_SHADER)
-  message("Compiling with Shader Support")
   list(APPEND OST_GFX_SOURCES shader.cc)
   list(APPEND OST_GFX_HEADERS shader.hh)
   list(APPEND OST_GFX_SOURCES impl/scene_fx.cc)
@@ -205,9 +204,9 @@ if (USE_SHADER)
   endif()  
 endif()
 
-set(OST_GFX_DEPENDENCIES "conop;seq")
+set(OST_GFX_DEPENDENCIES "ost_conop;ost_seq")
 if (ENABLE_IMG)
-  set(OST_GFX_DEPENDENCIES "${OST_GFX_DEPENDENCIES};img;img_alg")
+  set(OST_GFX_DEPENDENCIES "${OST_GFX_DEPENDENCIES};ost_img;ost_img_alg")
 endif()
 
 module(NAME gfx SOURCES ${OST_GFX_SOURCES} ${OST_GFX_MAP_SOURCES} 

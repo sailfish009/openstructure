@@ -4,11 +4,11 @@ add_custom_target(ost_scripts ALL)
 
 # may god forgive us
 if (ENABLE_GUI)
-  add_dependencies(ost_scripts _gui)
+  add_dependencies(ost_scripts _ost_gui)
 elseif(ENABLE_GFX)
-  add_dependencies(ost_scripts _gfx)
+  add_dependencies(ost_scripts _ost_gfx)
 else()
-  add_dependencies(ost_scripts _io)
+  add_dependencies(ost_scripts _ost_io)
 endif()
 
 if(WIN32)
@@ -18,18 +18,17 @@ if(WIN32)
          TARGET ost_scripts)
   script(NAME gipltng.bat INPUT gipltng.bat.in SUBSTITUTE ${SUBST_DICT})
 else()
+  script(NAME ost_config INPUT ost_config.in SUBSTITUTE ${SUBST_DICT}
+         TARGET ost_scripts OUTPUT_DIR libexec/openstructure)
   script(NAME ost INPUT ost.in SUBSTITUTE ${SUBST_DICT} 
          TARGET ost_scripts)
   script(NAME dng INPUT dng.in SUBSTITUTE ${SUBST_DICT}
-         TARGET ost_scripts)
-  script(NAME gipltng INPUT gipltng.in SUBSTITUTE ${SUBST_DICT}
          TARGET ost_scripts)
 endif()
 
 set(INIT_SCRIPTS 
   init.py
   init_cl.py
-  init_iplt.py
 )
 copy_if_different("./" "${STAGE_DIR}/${LIB_DIR}/openstructure" 
                   "${INIT_SCRIPTS}" "python init scripts" ost_scripts)

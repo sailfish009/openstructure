@@ -32,5 +32,5 @@ views_from_sequences.cc
 module(NAME seq SOURCES ${OST_SEQ_SOURCES} 
        HEADERS ${OST_SEQ_IMPL_HEADERS} IN_DIR impl
                ${OST_SEQ_HEADERS}
-       DEPENDS_ON info mol)
+       DEPENDS_ON ost_info ost_mol)
 

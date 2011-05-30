@@ -38,6 +38,7 @@ compounds.chemlib
 /deployment/macos/openstructure.dmg
 /scripts/dng
 *.vcproj
+/scripts/ost_config
 *.user
 *.dir
 *.sln

@@ -452,7 +452,7 @@ module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
                ${OST_GUI_INPUT_HEADERS}
                ${OST_GUI_DATA_VIEWER_HEADERS}
                ${OST_GUI_HEADERS}
-       DEPENDS_ON gfx io mol_alg seq_alg
+       DEPENDS_ON ost_gfx ost_io ost_mol_alg ost_seq_alg
        LINK ${QT_LIBRARIES} ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES}
             ${SPNAV_LIBRARIES}
         NO_STATIC)
@@ -472,4 +472,4 @@ if (NOT WIN32)
 endif()
 
 executable(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
-           DEPENDS_ON gui ${LINK})
+           DEPENDS_ON ost_gui ${LINK})
