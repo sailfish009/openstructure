@@ -27,7 +27,7 @@ class TestConvenientSuperpose(unittest.TestCase):
     ent1_view = ent1_ent.Select("")
     ## test MatchResidueByNum
     view1, view2 = mol.alg.MatchResidueByNum(ent1_ent, ent1_ent)
-    self.assertEqualAtomOrder(view1, view2)    
+    self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByNum(ent1_view, ent1_ent)
     self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByNum(ent1_ent, ent1_view)
@@ -36,14 +36,32 @@ class TestConvenientSuperpose(unittest.TestCase):
     self.assertEqualAtomOrder(view1, view2)
     ## test MatchResidueByIdx
     view1, view2 = mol.alg.MatchResidueByIdx(ent1_ent, ent1_ent)
-    self.assertEqualAtomOrder(view1, view2)    
+    self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByIdx(ent1_view, ent1_ent)
     self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByIdx(ent1_ent, ent1_view)
     self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByIdx(ent1_view, ent1_view)
     self.assertEqualAtomOrder(view1, view2)
-    
+    ## test MatchResidueByGlobalAln
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent1_ent, ent1_ent)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent1_view, ent1_ent)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent1_ent, ent1_view)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent1_view, ent1_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByLocalAln
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent1_ent, ent1_ent)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent1_view, ent1_ent)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent1_ent, ent1_view)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent1_view, ent1_view)
+    self.assertEqualAtomOrder(view1, view2)
+
   def testMissingFirstAtom(self):
     ent_view = io.LoadEntity(os.path.join("testfiles","1aho.pdb")).Select("")
     ent_view_missing = ent_view.Select("not (cname=A and rnum=1 and aname=N)")
@@ -57,7 +75,17 @@ class TestConvenientSuperpose(unittest.TestCase):
     self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByIdx(ent_view_missing, ent_view)
     self.assertEqualAtomOrder(view1, view2)
-    
+    ## test MatchResidueByGlobalAln
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_view, ent_view_missing)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_view_missing, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByLocalAln
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_view, ent_view_missing)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_view_missing, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+
   def testMissingManyAtoms(self):
     ent_view = io.LoadEntity(os.path.join("testfiles","1aho.pdb")).Select("")
     ent_view_missing = ent_view.Select("not (cname=A and rnum=3,19,32 and aname=CB,CA,CD)")
@@ -71,7 +99,17 @@ class TestConvenientSuperpose(unittest.TestCase):
     self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByIdx(ent_view_missing, ent_view)
     self.assertEqualAtomOrder(view1, view2)
-    
+    ## test MatchResidueByGlobalAln
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_view, ent_view_missing)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_view_missing, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByLocalAln
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_view, ent_view_missing)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_view_missing, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+
   def testMissingFirstResidue(self):
     ent_view = io.LoadEntity(os.path.join("testfiles","1aho.pdb")).Select("")
     ent_view_missing = ent_view.Select("not (cname=A and rnum=1)")
@@ -79,6 +117,16 @@ class TestConvenientSuperpose(unittest.TestCase):
     view1, view2 = mol.alg.MatchResidueByNum(ent_view, ent_view_missing)
     self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByNum(ent_view_missing, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByGlobalAln
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_view, ent_view_missing)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_view_missing, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByLocalAln
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_view, ent_view_missing)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_view_missing, ent_view)
     self.assertEqualAtomOrder(view1, view2)
 
   def testMissingHydrogens(self):
@@ -116,7 +164,17 @@ class TestConvenientSuperpose(unittest.TestCase):
     self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByIdx(ent_view_wrong, ent_view)
     self.assertEqualAtomOrder(view1, view2)
-  
+    ## test MatchResidueByGlobalAln
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_view, ent_view_wrong)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByGlobalAln(ent_view_wrong, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+    ## test MatchResidueByLocalAln
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_view, ent_view_wrong)
+    self.assertEqualAtomOrder(view1, view2)
+    view1, view2 = mol.alg.MatchResidueByLocalAln(ent_view_wrong, ent_view)
+    self.assertEqualAtomOrder(view1, view2)
+
   def testWrongResidueOrder(self): 
     ent_view = io.LoadEntity(os.path.join("testfiles","1aho.pdb")).Select("")
     ent_view_wrong = ent_view.CreateEmptyView()
@@ -133,6 +191,6 @@ class TestConvenientSuperpose(unittest.TestCase):
     self.assertEqualAtomOrder(view1, view2)
     view1, view2 = mol.alg.MatchResidueByNum(ent_view_wrong, ent_view)
     self.assertEqualAtomOrder(view1, view2)
-    
+
 if __name__ == "__main__":
   unittest.main()

@@ -203,8 +203,8 @@ def _MatchResidueByAln(ent_a, ent_b, atoms, alnmethod):
     ## evaluate alignment
     for aln in aln_a_b:
       ## bind chain to alignment
-      aln.AttachView(0, chain_a.Select(""))
-      aln.AttachView(1, chain_b.Select(""))
+      aln.AttachView(0, chain_a.Select('protein=True'))
+      aln.AttachView(1, chain_b.Select('protein=True'))
       ## select residues (only replacement edges)
       for i in range(0, aln.GetLength()):
         if aln.sequences[0][i]!='-' and aln.sequences[1][i]!='-':
@@ -218,13 +218,12 @@ def _MatchResidueByAln(ent_a, ent_b, atoms, alnmethod):
 def MatchResidueByLocalAln(ent_a, ent_b, atoms='all'):
   """
   Match residues by local alignment. Takes **ent_a** and **ent_b**, extracts
-  the sequences chain-wise and aligns them in Smith/Waterman manner. For
-  scoring, the BLOSUM62 matrix is used. The local alignment is used to gather
-  residues from both entities, only touching atoms as defined by **atoms**.
-  Regardless of what the list of **atoms** says, only those present in two
-  matched residues will be included in the returned views. Chains are processed
-  in order of appearance. If **ent_a** and **ent_b** contain a different number
-  of chains, processing stops with the lower count.
+  the sequences chain-wise and aligns them in Smith/Waterman manner using the
+  BLOSUM62 matrix for scoring. The residues of the entities are then matched
+  based on this alignment. Only atoms present in both residues are included in
+  the views. Chains are processed in order of appearance. If **ent_a** and
+  **ent_b** contain a different number of chains, processing stops with
+  the lower count.
 
   :param ent_a: The first entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
@@ -240,13 +239,12 @@ def MatchResidueByLocalAln(ent_a, ent_b, atoms='all'):
 def MatchResidueByGlobalAln(ent_a, ent_b, atoms='all'):
   """
   Match residues by global alignment. Takes **ent_a** and **ent_b**, extracts
-  the sequences chain-wise and aligns them in Needleman/Wunsch manner. For
-  scoring, the BLOSUM62 matrix is used. The global alignment is used to gather
-  residues from both entities, only touching atoms as defined by **atoms**.
-  Regardless of what the list of **atoms** says, only those present in two
-  matched residues will be included in the returned views. Chains are processed
-  in order of appearance. If **ent_a** and **ent_b** contain a different number
-  of chains, processing stops with the lower count.
+  the sequences chain-wise and aligns them in Needleman/Wunsch manner using the
+  BLOSUM62 matrix for scoring. The residues of the entities are then matched
+  based on this alignment. Only atoms present in both residues are included in
+  the views. Chains are processed in order of appearance. If **ent_a** and
+  **ent_b** contain a different number of chains, processing stops with
+  the lower count.
 
   :param ent_a: The first entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
@@ -274,10 +272,10 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
   * ``index`` - select residues by index in chain, includes **atoms**, calls
     :func:`~ost.mol.alg.MatchResidueByIdx`
 
-  * ``local`` - select residues from a Smith/Waterman alignment, includes
+  * ``local-aln`` - select residues from a Smith/Waterman alignment, includes
     **atoms**, calls :func:`~ost.mol.alg.MatchResidueByLocalAln`
 
-  * ``global`` - select residues from a Needleman/Wunsch alignment, includes
+  * ``global-aln`` - select residues from a Needleman/Wunsch alignment, includes
     **atoms**, calls :func:`~ost.mol.alg.MatchResidueByGlobalAln`
 
   :param ent_a: The first entity
@@ -290,7 +288,7 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
   :type atoms: :class:`str`, :class:`list`, :class:`set`
   :returns: An instance of :class:`SuperpositionResult`, containing members
 
-            * ``rmsd`` - Rmsd of the superposed entities
+            * ``rmsd`` - RMSD of the superposed entities
 
             * ``view1`` - First :class:`~ost.mol.EntityView` used
 
@@ -302,10 +300,10 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
     view_a, view_b = MatchResidueByNum(ent_a, ent_b, atoms)
   elif match.upper() == 'INDEX':
     view_a, view_b=MatchResidueByIdx(ent_a, ent_b, atoms)
-  elif match.upper() == 'LOCAL':
+  elif match.upper() == 'LOCAL-ALN':
     view_a, view_b=_MatchResidueByAln(ent_a, ent_b, atoms,
                                       ost.seq.alg.LocalAlign)
-  elif match.upper() == 'GLOBAL':
+  elif match.upper() == 'GLOBAL-ALN':
     view_a, view_b=_MatchResidueByAln(ent_a, ent_b, atoms,
                                       ost.seq.alg.GlobalAlign)
   else:
