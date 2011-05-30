@@ -214,4 +214,4 @@ message(STATUS
         "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
         "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
         "   TMAlign and TMScore   (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
-        "   Static Libraries       (-DENABLE_STATIC)  : ${ENABLE_STATIC}")
+        "   Static Libraries        (-DENABLE_STATIC) : ${ENABLE_STATIC}")
