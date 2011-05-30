@@ -30,7 +30,7 @@ bool CBetaInserter::VisitResidue(const mol::ResidueHandle& res)
     return false;
   }
   try { 
-    if(res.GetOneLetterCode()=='G' and include_gly_==false) {
+    if(res.GetOneLetterCode()=='G' && include_gly_==false) {
       return false;
     }
     if (res.FindAtom("CB").IsValid()) {
