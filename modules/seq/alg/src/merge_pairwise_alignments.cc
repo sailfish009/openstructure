@@ -141,9 +141,13 @@ AlignmentHandle MergePairwiseAlignments(const AlignmentList& pairwise_alns,
 
   AlignmentHandle merged=CreateAlignment();
   merged.AddSequence(shift_reference(ref_seq, shifts));
+  size_t ref_len=merged.GetSequence(0).GetLength();
   for (AlignmentList::const_iterator i=pairwise_alns.begin(),
        e=pairwise_alns.end(); i!=e; ++i) {
     SequenceHandle new_seq=realign_sequence(*i, shifts);
+    for (size_t j=new_seq.GetLength(); j<ref_len; ++j) {
+      new_seq.Append('-');
+    }
     merged.AddSequence(new_seq);
   }  
   return merged;
