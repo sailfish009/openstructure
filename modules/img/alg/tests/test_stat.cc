@@ -49,14 +49,8 @@ void test() {
 
   Stat stat;
   im.Apply(stat);
-
-  std::ostringstream msg;
-
-  msg << "expected 5.0 as mean but found " << stat.GetMean();
-  BOOST_CHECK_MESSAGE(stat.GetMean()==5.0,msg.str());
-  msg.str("");
-  msg << "expected 2.73861 as stdev but found " << stat.GetStandardDeviation();
-  BOOST_CHECK_MESSAGE((stat.GetStandardDeviation()-2.73861)<1e-5,msg.str());
+  BOOST_CHECK_CLOSE(stat.GetMean(),5.0,0.0001);
+  BOOST_CHECK_CLOSE(stat.GetStandardDeviation(),2.58198889747,0.0001);
   
 }
 
