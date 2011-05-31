@@ -7,5 +7,5 @@ set(OST_SEQ_ALG_UNIT_TESTS
   test_global_align.py
 )
 
-ost_unittest(seq_alg "${OST_SEQ_ALG_UNIT_TESTS}")
+ost_unittest(MODULE seq_alg SOURCES "${OST_SEQ_ALG_UNIT_TESTS}")
 
