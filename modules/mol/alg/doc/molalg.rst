@@ -82,6 +82,8 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   :returns: The filtered :class:`~ost.mol.EntityView`
 
 
+.. _traj-analysis:
+
 Trajectory Analysis
 --------------------------------------------------------------------------------
 

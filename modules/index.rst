@@ -41,7 +41,9 @@ For Starters
 Molecules
 --------------------------------------------------------------------------------
 
-**Overview**: :doc:`molecules intro <intro-01>` | :doc:`mol overview <mol/base/mol>` | :doc:`graphical entity<gfx/entity>` | :doc:`entity <mol/base/entity>` | :doc:`queries <mol/base/query>`
+**Overview**: :doc:`molecules intro <intro-01>` | :doc:`mol overview <mol/base/mol>` | :doc:`graphical entity<gfx/entity>` | :doc:`entity <mol/base/entity>` | :doc:`queries <mol/base/query>` | :doc:`algorithms <mol/alg/molalg>`
+
+**Trajectories**: :doc:`basics <mol/base/traj>` | :ref:`analysis <traj-analysis>`
 
 **Input/Output**: :ref:`loading and saving molecules <mol-io>`
 

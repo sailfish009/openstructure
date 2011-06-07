@@ -583,7 +583,18 @@ The Handle Classes
     
   .. attribute:: pos
   
-    The atom's position in global coordinates. Also available as :meth:`GetPos`.
+    The atom's position in global coordinates, transformed by the entity 
+    transformation. Also available as :meth:`GetPos`.
+    
+    Read-only.
+    
+    :type: :class:`~ost.geom.Vec3`
+    
+  .. attribute:: original_pos
+  
+    The atom's untransformed position in global coordinates. Also available as 
+    :meth:`GetOriginalPos`.
+    
     Read-only.
     
     :type: :class:`~ost.geom.Vec3`
