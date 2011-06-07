@@ -132,6 +132,7 @@ EntityView FilterClashes(const EntityView& ent, Real tolerance,
          filtered.AddAtom(atom);
        }
       }
+      continue;
     }
     filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
   }
