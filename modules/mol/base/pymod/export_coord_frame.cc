@@ -20,7 +20,7 @@
 using namespace boost::python;
 
 #include <ost/mol/coord_frame.hh>
-#include <ost/geom/Vec3.hh>
+#include <ost/geom/vec3.hh>
 #include <ost/mol/entity_handle.hh>
 
 using namespace ost;
