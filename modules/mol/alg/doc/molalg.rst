@@ -82,15 +82,17 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   :returns: The filtered :class:`~ost.mol.EntityView`
 
 
-Trajectory Analyses
+Trajectory Analysis
 --------------------------------------------------------------------------------
 
-This is a set of funcitons used for basic trajectory analysis such as extracting positions, 
-distances, angles and RMSDs. The organization is such that most functions have their counterpart 
-at the individual frame level (CoordFrame) so that they can alsobe called on one frame instead 
+This is a set of functions used for basic trajectory analysis such as extracting 
+positions, distances, angles and RMSDs. The organization is such that most 
+functions have their counterpart at the individual :class:`frame level 
+<ost.mol.CoordFrame>` so that they can also be called on one frame instead 
 of the whole trajectory.
 
-All these functions have a "stride" argument that defaults to stride=1, which is used to skip frames in the anlysis.
+All these functions have a "stride" argument that defaults to stride=1, which is 
+used to skip frames in the analysis.
 
 
 .. function:: AnalyzeAtomPos(traj, atom1, stride=1)
@@ -101,7 +103,8 @@ All these functions have a "stride" argument that defaults to stride=1, which is
   :param traj: The trajectory to be analyzed.
   :type traj: :class:`~ost.mol.CoordGroupHandle`
   :param atom1: The :class:`~ost.mol.AtomHandle`.
-  :param stride: Size of the increment of the frame's index between two consecutive frames analyzed.
+  :param stride: Size of the increment of the frame's index between two 
+      consecutive frames analyzed.
   
   
 .. function:: AnalyzeCenterOfMassPos(traj, sele, stride=1)
@@ -113,7 +116,8 @@ All these functions have a "stride" argument that defaults to stride=1, which is
   :type traj: :class:`~ost.mol.CoordGroupHandle`
   :param sele: The selection from which the center of mass is computed
   :type sele: :class:`~ost.mol.EntityView`.
-  :param stride: Size of the increment of the frame's index between two consecutive frames analyzed.
+  :param stride: Size of the increment of the frame's index between two 
+     consecutive frames analyzed.
   
 
 .. function:: AnalyzeDistanceBetwAtoms(traj, atom1, atom2, stride=1)
@@ -125,7 +129,8 @@ All these functions have a "stride" argument that defaults to stride=1, which is
   :type traj: :class:`~ost.mol.CoordGroupHandle`
   :param atom1: The first :class:`~ost.mol.AtomHandle`.
   :param atom2: The second :class:`~ost.mol.AtomHandle`.
-  :param stride: Size of the increment of the frame's index between two consecutive frames analyzed.  
+  :param stride: Size of the increment of the frame's index between two 
+      consecutive frames analyzed.  
 
 
 .. function:: AnalyzeAngle(traj, atom1, atom2, atom3, stride=1)
@@ -140,14 +145,15 @@ All these functions have a "stride" argument that defaults to stride=1, which is
   :param atom1: The first :class:`~ost.mol.AtomHandle`.
   :param atom2: The second :class:`~ost.mol.AtomHandle`.
   :param atom3: The third :class:`~ost.mol.AtomHandle`.
-  :param stride: Size of the increment of the frame's index between two consecutive frames analyzed.
+  :param stride: Size of the increment of the frame's index between two 
+     consecutive frames analyzed.
 
 
 .. function:: AnalyzeDihedralAngle(traj, atom1, atom2, atom3, atom4, stride=1)
 
   This function extracts the dihedral angle between four atoms from a trajectory 
-  and returns it as a vector. The angle is between the planes containing the first 
-  three and the last three atoms.
+  and returns it as a vector. The angle is between the planes containing the  
+  first three and the last three atoms.
   
   :param traj: The trajectory to be analyzed.
   :type traj: :class:`~ost.mol.CoordGroupHandle`
@@ -155,12 +161,14 @@ All these functions have a "stride" argument that defaults to stride=1, which is
   :param atom2: The second :class:`~ost.mol.AtomHandle`.
   :param atom3: The third :class:`~ost.mol.AtomHandle`.
   :param atom4: The fourth :class:`~ost.mol.AtomHandle`.
-  :param stride: Size of the increment of the frame's index between two consecutive frames analyzed.
+  :param stride: Size of the increment of the frame's index between two 
+      consecutive frames analyzed.
 
 .. function:: AnalyzeDistanceBetwCenterOfMass(traj, sele1, sele2, stride=1)
 
-  This function extracts the distance between the center-of-mass of two selections 
-  (:class:`~ost.mol.EntityView`) from a trajectory and returns it as a vector.
+  This function extracts the distance between the center-of-mass of two 
+  selections (:class:`~ost.mol.EntityView`) from a trajectory and returns it as 
+  a vector.
 
   :param traj: The trajectory to be analyzed.
   :type traj: :class:`~ost.mol.CoordGroupHandle`
@@ -168,17 +176,26 @@ All these functions have a "stride" argument that defaults to stride=1, which is
   :type sele1: :class:`~ost.mol.EntityView`.
   :param sele2: The selection from which the second center of mass is computed
   :type sele2: :class:`~ost.mol.EntityView`.
-  :param stride: Size of the increment of the frame's index between two consecutive frames analyzed.
+  :param stride: Size of the increment of the frame's index between two 
+     consecutive frames analyzed.
 
 
 .. function:: AnalyzeRMSD(traj, reference_view, sele_view)
 
-  This function extracts the rmsd between two :class:`~ost.mol.EntityView` and returns it as a vector
-  The views don't have to be from the same entity. The reference positions are taken directly
-  from the reference_view, evaluated only once. The positions from the sele_view are evaluated for
-  each frame.
-  If you want to compare to frame i of the trajectory t, first use t.CopyFrame(i) for example:
-  eh=io.LoadPDB(...),t=io.LoadCHARMMTraj(eh,...);sele=eh.Select(...);t.CopyFrame(0);mol.alg.AnalyzeRMSD(t,sele,sele)
+  This function extracts the rmsd between two :class:`~ost.mol.EntityView` and 
+  returns it as a vector. The views don't have to be from the same entity. The 
+  reference positions are taken directly from the reference_view, evaluated only 
+  once. The positions from the sele_view are evaluated for each frame.
+  If you want to compare to frame i of the trajectory t, first use 
+  t.CopyFrame(i) for example:
+ 
+  .. code-block:: python
+     
+    eh=io.LoadPDB(...)
+    t=io.LoadCHARMMTraj(eh,...)
+    sele=eh.Select(...)
+    t.CopyFrame(0)
+    mol.alg.AnalyzeRMSD(t,sele,sele)
 
   :param traj: The trajectory to be analyzed.
   :type traj: :class:`~ost.mol.CoordGroupHandle`
@@ -186,7 +203,8 @@ All these functions have a "stride" argument that defaults to stride=1, which is
   :type reference_view: :class:`~ost.mol.EntityView`.
   :param sele_view: The selection compared to the reference_view
   :type sele_view: :class:`~ost.mol.EntityView`.
-  :param stride: Size of the increment of the frame's index between two consecutive frames analyzed.
+  :param stride: Size of the increment of the frame's index between two 
+      consecutive frames analyzed.
 
 
 
