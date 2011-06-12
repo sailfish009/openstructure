@@ -68,7 +68,7 @@ XCSEditor& XCSEditor::operator=(const XCSEditor& rhs)
 }
 
 void XCSEditor::SetAtomTransformedPos(const AtomHandle& atom,
-				      const geom::Vec3& position)
+                                      const geom::Vec3& position)
 {
   CheckHandleValidity(atom);
   atom.Impl()->TransformedPos()=position;
@@ -88,15 +88,17 @@ namespace {
   {
     bool has_tf=ent->IsTransfIdentity();
     for(AtomHandleList::const_iterator ait=alist.begin();ait!=alist.end();++ait) {
-      ait->Impl()->TransformedPos()[0]=static_cast<Real>(positions[0]);
-      ait->Impl()->TransformedPos()[1]=static_cast<Real>(positions[1]);
-      ait->Impl()->TransformedPos()[2]=static_cast<Real>(positions[2]);
-      positions+=3;
-      if(has_tf) {
-	ait->Impl()->OriginalPos()=ait->Impl()->TransformedPos();
-      } else {
-	ait->Impl()->OriginalPos() = geom::Vec3(ent->GetInvTransfMatrix()*geom::Vec4(ait->Impl()->TransformedPos()));
+      if(ait->IsValid()) {
+        ait->Impl()->TransformedPos()[0]=static_cast<Real>(positions[0]);
+        ait->Impl()->TransformedPos()[1]=static_cast<Real>(positions[1]);
+        ait->Impl()->TransformedPos()[2]=static_cast<Real>(positions[2]);
+        if(has_tf) {
+          ait->Impl()->OriginalPos()=ait->Impl()->TransformedPos();
+        } else {
+          ait->Impl()->OriginalPos() = geom::Vec3(ent->GetInvTransfMatrix()*geom::Vec4(ait->Impl()->TransformedPos()));
+        }
       }
+      positions+=3;
     }
     ent->MarkICSDirty();
     ent->MarkOrganizerDirty();
@@ -116,7 +118,7 @@ void XCSEditor::SetAtomTransformedPos(const AtomHandleList& alist, double *posit
 }
 
 void XCSEditor::SetAtomOriginalPos(const AtomHandle& atom,
-				   const geom::Vec3& position)
+                                   const geom::Vec3& position)
 {
   CheckHandleValidity(atom);
   atom.Impl()->OriginalPos()=position;
@@ -136,15 +138,17 @@ namespace {
   {
     bool has_tf=ent->IsTransfIdentity();
     for(AtomHandleList::const_iterator ait=alist.begin();ait!=alist.end();++ait) {
-      ait->Impl()->OriginalPos()[0]=static_cast<Real>(positions[0]);
-      ait->Impl()->OriginalPos()[1]=static_cast<Real>(positions[1]);
-      ait->Impl()->OriginalPos()[2]=static_cast<Real>(positions[2]);
-      positions+=3;
-      if(has_tf) {
-	ait->Impl()->TransformedPos()=ait->Impl()->OriginalPos();
-      } else {
-	ait->Impl()->TransformedPos() = geom::Vec3(ent->GetTransfMatrix()*geom::Vec4(ait->Impl()->OriginalPos()));
+      if(ait->IsValid()) {
+        ait->Impl()->OriginalPos()[0]=static_cast<Real>(positions[0]);
+        ait->Impl()->OriginalPos()[1]=static_cast<Real>(positions[1]);
+        ait->Impl()->OriginalPos()[2]=static_cast<Real>(positions[2]);
+        if(has_tf) {
+          ait->Impl()->TransformedPos()=ait->Impl()->OriginalPos();
+        } else {
+          ait->Impl()->TransformedPos() = geom::Vec3(ent->GetTransfMatrix()*geom::Vec4(ait->Impl()->OriginalPos()));
+        }
       }
+      positions+=3;
     }
     ent->MarkICSDirty();
     ent->MarkOrganizerDirty();

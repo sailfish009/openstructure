@@ -190,8 +190,11 @@ public:
   void ReorderAllResidues();
     
   /// \brief Get edit mode of editor
-  EditMode GetMode() const;
+  EditMode GetMode() const {return mode_;}
   
+  /// \ brief return entity this editor works on
+  EntityHandle GetEntity() const {return ent_;}
+
   /// \brief change the name of the atom to the new name  
   void RenameAtom(AtomHandle atom, const String& new_name);
 protected:

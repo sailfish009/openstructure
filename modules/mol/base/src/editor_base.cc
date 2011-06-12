@@ -196,11 +196,6 @@ TorsionHandle EditorBase::AddTorsion(const String& name, const AtomHandle& a1,
 }
 
 
-EditMode EditorBase::GetMode() const 
-{
-  return mode_;
-}
-
 void EditorBase::UpdateTrace()
 {
   if (mode_==UNBUFFERED_EDIT) {

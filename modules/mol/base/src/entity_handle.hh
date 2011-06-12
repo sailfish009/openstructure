@@ -137,7 +137,7 @@ public:
   ///
   /// The two iterators returned by ResiduesBegin() and ResiduesEnd() form a
   /// half-closed range. It is cheaper to cache the iterator returned by
-  /// ResiduesEnd() than to call ResiduesEnd() after very loop, i.e. like
+  /// ResiduesEnd() than to call ResiduesEnd() after every loop, i.e. like
   /// \code
   /// // e is an instance of EntityHandle
   /// for (ResidueHandleIter i=e.ResiduesBegin(), x=e.ResiduesEnd(); i!=x; ++i) {

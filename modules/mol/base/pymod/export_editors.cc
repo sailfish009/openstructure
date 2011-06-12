@@ -58,10 +58,6 @@ void (ICSEditor::*rotate_torsion_b)(const AtomHandle&, const AtomHandle&,
                                     const AtomHandle&, const AtomHandle&,
                                     Real)=&ICSEditor::RotateTorsionAngle;
 
-void (XCSEditor::*set_pos1)(const AtomHandle&, const geom::Vec3&) = &XCSEditor::SetAtomPos;
-void (XCSEditor::*set_t_pos1)(const AtomHandle&, const geom::Vec3&) = &XCSEditor::SetAtomTransformedPos;
-void (XCSEditor::*set_o_pos1)(const AtomHandle&, const geom::Vec3&) = &XCSEditor::SetAtomOriginalPos;
-
 #if OST_NUMPY_SUPPORT_ENABLED
 template<typename T, bool O>
 void set_pos2_nc_t(XCSEditor& e, const AtomHandleList& alist, PyArrayObject* na)
@@ -70,12 +66,12 @@ void set_pos2_nc_t(XCSEditor& e, const AtomHandleList& alist, PyArrayObject* na)
   for(AtomHandleList::const_iterator ait=alist.begin();ait!=alist.end();++ait,++count) {
     if(O) {
       e.SetAtomOriginalPos(*ait,geom::Vec3(static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,0))),
-					   static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,1))),
-					   static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,2)))));
+                                           static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,1))),
+                                           static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,2)))));
     } else {
       e.SetAtomTransformedPos(*ait,geom::Vec3(static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,0))),
-					      static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,1))),
-					      static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,2)))));
+                                              static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,1))),
+                                              static_cast<Real>(*reinterpret_cast<T*>(PyArray_GETPTR2(na,count,2)))));
     }
   }
 }
@@ -84,46 +80,46 @@ template<bool O>
 void set_pos2_t(XCSEditor& e, const AtomHandleList& alist, object pyobj)
 {
   size_t acount = alist.size();
- 
+  
   if(!PyArray_Check(pyobj.ptr())) {
     throw std::runtime_error("expected a numpy array");
     return;
   }
   PyArrayObject* na=reinterpret_cast<PyArrayObject*>(pyobj.ptr());
-
-  if(PyArray_NDIM(na)!=2 || PyArray_DIM(na,0)!=acount || PyArray_DIM(na,1)!=3) {
+  
+  if(PyArray_NDIM(na)!=2 || PyArray_DIM(na,0)!=int(acount) || PyArray_DIM(na,1)!=3) {
     throw std::runtime_error("excpected a numpy array of shape (NAtoms, 3)");
     return;
   }
-
+  
   if(PyArray_ISCONTIGUOUS(na)) {
     if(PyArray_TYPE(na)==NPY_FLOAT) {
       if(O) {
-	e.SetAtomOriginalPos(alist,reinterpret_cast<float*>(PyArray_DATA(na)));
+        e.SetAtomOriginalPos(alist,reinterpret_cast<float*>(PyArray_DATA(na)));
       } else {
-	e.SetAtomTransformedPos(alist,reinterpret_cast<float*>(PyArray_DATA(na)));
+        e.SetAtomTransformedPos(alist,reinterpret_cast<float*>(PyArray_DATA(na)));
       }
     } else if(PyArray_TYPE(na)==NPY_DOUBLE) {
       if(O) {
-	e.SetAtomOriginalPos(alist,reinterpret_cast<double*>(PyArray_DATA(na)));
+        e.SetAtomOriginalPos(alist,reinterpret_cast<double*>(PyArray_DATA(na)));
       } else {
-	e.SetAtomTransformedPos(alist,reinterpret_cast<double*>(PyArray_DATA(na)));
+        e.SetAtomTransformedPos(alist,reinterpret_cast<double*>(PyArray_DATA(na)));
       }
     } else {
-      throw std::runtime_error("excpected a numpy array of type float or double");
+      throw std::runtime_error("expected a numpy array of type float or double");
       return;
     }
   } else {
     // non-contiguous
 #if 0
-    throw std::runtime_error("excpected contiguous numpy array");
+    throw std::runtime_error("expected contiguous numpy array");
 #else
     if(PyArray_TYPE(na)==NPY_FLOAT) {
       set_pos2_nc_t<float,O>(e,alist,na);
     } else if(PyArray_TYPE(na)==NPY_DOUBLE) {
       set_pos2_nc_t<double,O>(e,alist,na);
     } else {
-      throw std::runtime_error("excpected a numpy array of type float or double");
+      throw std::runtime_error("expected a numpy array of type float or double");
       return;
     }
 #endif
@@ -131,27 +127,63 @@ void set_pos2_t(XCSEditor& e, const AtomHandleList& alist, object pyobj)
 }
 #endif
 
-void set_t_pos2(XCSEditor& e, const AtomHandleList& alist, object pyobj)
+void set_pos(XCSEditor& e, object o1, object o2, bool trans)
 {
+  extract<AtomHandle> eah(o1);
+  extract<geom::Vec3> ev3(o2);
+  if(eah.check() && ev3.check()) {
+    if(trans) {
+      e.SetAtomTransformedPos(eah(),ev3());
+    } else {
+      e.SetAtomOriginalPos(eah(),ev3());
+    }
+    return;
+  }
+
 #if OST_NUMPY_SUPPORT_ENABLED
-  set_pos2_t<false>(e,alist,pyobj);
+
+  extract<AtomHandleList> eal(o1);
+  if(eal.check()) {
+    if(trans) {
+      set_pos2_t<false>(e,eal(),o2);
+    } else {
+      set_pos2_t<true>(e,eal(),o2);
+    }
+    return;
+  }
+
+  std::map<unsigned long,AtomHandle> amap;
+  EntityHandle eh=e.GetEntity();
+  for(AtomHandleIter ait=eh.AtomsBegin(), aite=eh.AtomsEnd(); ait!=aite; ++ait) {
+    amap[(*ait).GetIndex()]=*ait;
+  }
+
+  AtomHandleList alist;
+  for(int i=0;i<len(o1);++i) {
+    int gid = extract<int>(o1[i]);
+    std::map<unsigned long,AtomHandle>::iterator ait=amap.find(static_cast<unsigned long>(gid));
+    alist.push_back(ait==amap.end() ? AtomHandle() : ait->second);
+  }
+
+  if(trans) {
+    set_pos2_t<false>(e,alist,o2);
+  } else {
+    set_pos2_t<true>(e,alist,o2);
+  }
+
 #else
-  throw std::runtime_error("SetAtomTransformedPos(alist,ndarray) disabled, since numpy support is not compiled in");
+  throw std::runtime_error("SetAtom*Pos(...,ndarray) not available, because numpy support not compiled in");
 #endif
 }
 
-void set_o_pos2(XCSEditor& e, const AtomHandleList& alist, object pyobj)
+void set_o_pos(XCSEditor& e, object o1, object o2)
 {
-#if OST_NUMPY_SUPPORT_ENABLED
-  set_pos2_t<true>(e,alist,pyobj);
-#else
-  throw std::runtime_error("SetAtomOriginalPos(alist,ndarray) disabled, since numpy support is not compiled in");
-#endif
+  set_pos(e,o1,o2,false);
 }
 
-void set_pos2(XCSEditor& e, const AtomHandleList& alist, object pyobj)
+void set_t_pos(XCSEditor& e, object o1, object o2)
 {
-  set_t_pos2(e,alist,pyobj);
+  set_pos(e,o1,o2,true);
 }
 
 }
@@ -186,12 +218,9 @@ void export_Editors()
   ;
   
   class_<XCSEditor, bases<EditorBase> >("XCSEditor", no_init)
-    .def("SetAtomPos", set_pos1)
-    .def("SetAtomPos", set_pos2)
-    .def("SetAtomTransformedPos", set_t_pos1)
-    .def("SetAtomTransformedPos", set_t_pos2)
-    .def("SetAtomOriginalPos", set_o_pos1)
-    .def("SetAtomOriginalPos", set_o_pos2)
+    .def("SetAtomPos", set_t_pos)
+    .def("SetAtomTransformedPos", set_t_pos)
+    .def("SetAtomOriginalPos", set_o_pos)
     .def("ApplyTransform", &XCSEditor::ApplyTransform)
     .def("SetTransform", &XCSEditor::SetTransform)
     .def("UpdateICS", &XCSEditor::UpdateICS)
