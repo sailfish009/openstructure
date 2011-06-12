@@ -30,6 +30,10 @@ using namespace ost::mol;
 
 #include <ost/export_helper/generic_property_def.hh>
 
+#if OST_NUMPY_SUPPORT_ENABLED
+#include <numpy/arrayobject.h>
+#endif
+
 namespace {
 EntityHandle create1() {  return CreateEntity(); }
 
@@ -64,11 +68,55 @@ ICSEditor depr_request_ics_editor(EntityHandle e, EditMode m)
   return e.EditICS(m);
 }
 
-
+bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
+{
+  return a1.GetIndex()<a2.GetIndex();
 }
+
+
+PyObject* get_pos2(EntityHandle& entity, bool id_sorted)
+{
+#if OST_NUMPY_SUPPORT_ENABLED
+  npy_intp dims[]={entity.GetAtomCount(),3};
+  PyObject* na = PyArray_SimpleNew(2,dims,NPY_FLOAT);
+  npy_float* nad = reinterpret_cast<npy_float*>(PyArray_DATA(na));
+  if(id_sorted) {
+    AtomHandleList alist = entity.GetAtomList();
+    std::sort(alist.begin(),alist.end(),less_index);
+    for(AtomHandleList::const_iterator it=alist.begin();it!=alist.end();++it,nad+=3) {
+      geom::Vec3 pos=(*it).GetPos();
+      nad[0]=static_cast<npy_float>(pos[0]);
+      nad[1]=static_cast<npy_float>(pos[1]);
+      nad[2]=static_cast<npy_float>(pos[2]);
+    }
+  } else {
+    for(AtomHandleIter it=entity.AtomsBegin();it!=entity.AtomsEnd();++it,nad+=3) {
+      geom::Vec3 pos=(*it).GetPos();
+      nad[0]=static_cast<npy_float>(pos[0]);
+      nad[1]=static_cast<npy_float>(pos[1]);
+      nad[2]=static_cast<npy_float>(pos[2]);
+    }
+  }
+  return na;
+#else
+  throw std::runtime_error("GetPositions disabled, since numpy support is not compiled in");
+  return 0;
+#endif
+}
+
+PyObject* get_pos1(EntityHandle& entity)
+{
+  return get_pos2(entity,true);
+}
+
+} // ns
 
 void export_Entity()
 {
+#if OST_NUMPY_SUPPORT_ENABLED
+  import_array();
+#endif
+
   class_<EntityBase> ent_base("EntityBase", no_init);
   ent_base
     .def(self_ns::str(self))
@@ -139,6 +187,11 @@ void export_Entity()
     .def("IsTransformationIdentity",&EntityHandle::IsTransformationIdentity)
     .def(self==self)
     .def(self!=self)
+#if OST_NUMPY_SUPPORT_ENABLED
+    .def("GetPositions",get_pos1)
+    .def("GetPositions",get_pos2)
+    .add_property("positions",get_pos1)
+#endif
   ;
 
   def("CreateEntity",create1);

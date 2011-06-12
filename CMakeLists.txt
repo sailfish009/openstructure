@@ -22,6 +22,8 @@ option(ENABLE_GFX "whether graphics support should be enabled"
       ON)
 option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
+option(USE_NUMPY "whether numpy support is added"
+      OFF)
 option(USE_DOUBLE_PRECISION "whether to compile in double precision" 
        OFF)
 option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
@@ -87,6 +89,11 @@ if (USE_SHADER)
 else()
   set(_SHADER OFF)
 endif()
+if (USE_NUMPY)
+  set(_NUMPY ON)
+else()
+  set(_NUMPY OFF)
+endif()
 if (COMPILE_TMTOOLS)
   set(_TM_TOOLS ON)
 else()
@@ -143,6 +150,10 @@ find_package(PNG REQUIRED)
 find_package(Eigen 2.0.0 REQUIRED)
 find_package(Python 2.4 REQUIRED)
 
+if(USE_NUMPY)
+  find_package(Numpy REQUIRED)
+endif()
+
 if (ENABLE_IMG)
   find_package(FFTW REQUIRED)
   find_package(TIFF REQUIRED)
@@ -177,6 +188,10 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${SPNAV_INCLUDE_DIR}
                     ${PNG_INCLUDE_DIR}
                     )
+if(USE_NUMPY)
+include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
+endif()
+
 if (UNIX)
   SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
   SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
@@ -209,6 +224,7 @@ message(STATUS
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
         "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support             (-DUSE_SHADER) : ${_SHADER}\n"
+        "   Numpy support              (-DUSE_NUMPY)  : ${_NUMPY}\n"
         "   Optimize                     (-DOPTIMIZE) : ${_OPT}\n"
         "   Profiling support             (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"

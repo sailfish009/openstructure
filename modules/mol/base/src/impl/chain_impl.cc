@@ -420,8 +420,8 @@ geom::AlignedCuboid ChainImpl::GetBounds() const
     ResidueImplPtr r=*i;
     for (AtomImplList::iterator j=r->GetAtomList().begin(); 
           j!=r->GetAtomList().end(); ++j) {
-      mmin=geom::Min(mmin, (*j)->GetPos());
-      mmax=geom::Max(mmax, (*j)->GetPos());
+      mmin=geom::Min(mmin, (*j)->TransformedPos());
+      mmax=geom::Max(mmax, (*j)->TransformedPos());
       atoms=true;
     }
   }
@@ -441,7 +441,7 @@ geom::Vec3 ChainImpl::GetCenterOfAtoms() const
       ResidueImplPtr r=*i;
       for (AtomImplList::iterator j=r->GetAtomList().begin(); 
           j!=r->GetAtomList().end(); ++j) {
-          sum+=(*j)->GetPos();
+          sum+=(*j)->TransformedPos();
       }
     }
     sum/=this->GetAtomCount();
@@ -459,7 +459,7 @@ geom::Vec3 ChainImpl::GetCenterOfMass() const
       ResidueImplPtr r=*i;
       for (AtomImplList::iterator j=r->GetAtomList().begin(); 
            j!=r->GetAtomList().end(); ++j) {
-        center+=(*j)->GetPos() * (*j)->GetMass();
+        center+=(*j)->TransformedPos() * (*j)->GetMass();
       }
     }
     center/=mass;

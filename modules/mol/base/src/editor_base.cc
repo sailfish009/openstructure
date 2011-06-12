@@ -149,7 +149,7 @@ void EditorBase::ReorderAllResidues()
 void EditorBase::RenameAtom(AtomHandle atom, const String& new_name)
 {
   CheckHandleValidity(atom);
-  atom.Impl()->SetName(new_name);
+  atom.Impl()->Name()=new_name;
 }
 
 BondHandle EditorBase::Connect(const AtomHandle& first,
@@ -201,11 +201,6 @@ TorsionHandle EditorBase::AddTorsion(const String& name, const AtomHandle& a1,
                                                a3.Impl(), a4.Impl()));
 }
 
-
-EditMode EditorBase::GetMode() const 
-{
-  return mode_;
-}
 
 void EditorBase::UpdateTrace()
 {

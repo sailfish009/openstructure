@@ -270,10 +270,10 @@ geom::AlignedCuboid EntityImpl::GetBounds() const
   if (this->GetAtomCount()>0) {
     geom::Vec3 mmin, mmax;    
     AtomImplMap::const_iterator it=atom_map_.begin();
-    mmin=mmax=it->second->GetPos();
+    mmin=mmax=it->second->TransformedPos();
     for (++it; it!=atom_map_.end();++it) {
-      mmin=geom::Min(mmin,it->second->GetPos());
-      mmax=geom::Max(mmax,it->second->GetPos());
+      mmin=geom::Min(mmin,it->second->TransformedPos());
+      mmax=geom::Max(mmax,it->second->TransformedPos());
     }
     return geom::AlignedCuboid(mmin, mmax);    
   } else {
@@ -287,7 +287,7 @@ geom::Vec3 EntityImpl::GetCenterOfAtoms() const {
   if (this->GetAtomCount()>0) {
     for (AtomImplMap::const_iterator it = atom_map_.begin();
          it!=atom_map_.end();++it) {
-      center+=it->second->GetPos();
+      center+=it->second->TransformedPos();
     }
     center/=static_cast<Real>(atom_map_.size());
   }
@@ -299,7 +299,7 @@ geom::Vec3 EntityImpl::GetCenterOfMass() const {
   Real mass = this->GetMass();
   if (this->GetAtomCount()>0 && mass>0) {
     for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      center+=it->second->GetPos()*it->second->GetMass();
+      center+=it->second->TransformedPos()*it->second->GetMass();
     }
     center/=mass;
   }
@@ -326,12 +326,12 @@ AtomImplPtr EntityImpl::CreateAtom(const ResidueImplPtr& rp,
 #else
   AtomImplPtr ap(new AtomImpl(shared_from_this(), rp, name, pos, ele, next_index_++));
 #endif
-  if (identity_transf_ == false) {
+  if (!identity_transf_) {
     geom::Vec3 transformed_pos = geom::Vec3(transformation_matrix_*geom::Vec4(pos));
-    ap->SetTransformedPos(transformed_pos);
+    ap->TransformedPos()=transformed_pos;
     atom_organizer_.Add(ap,transformed_pos);
   } else {
-    ap->SetTransformedPos(pos);
+    ap->TransformedPos()=pos;
     atom_organizer_.Add(ap,pos);
   }
   atom_map_.insert(AtomImplMap::value_type(ap.get(),ap));
@@ -498,8 +498,8 @@ Real EntityImpl::GetAngleXCS(const AtomImplPtr& a1, const AtomImplPtr& a2,
   ConnectorImplP c23=GetConnector(a2, a3);
   if (c12 && c12->GetFirst() && c12->GetSecond()) {
     if (c23 && c23->GetFirst() && c23->GetSecond()) {
-      return Angle(a2->GetPos()-a1->GetPos(),
-                   a2->GetPos()-a3->GetPos());
+      return Angle(a2->TransformedPos()-a1->TransformedPos(),
+                   a2->TransformedPos()-a3->TransformedPos());
     } else {
       AtomHandle ah2(a2), ah3(a3);
       throw NotConnectedError(ah2, ah3);
@@ -765,12 +765,7 @@ void EntityImpl::SetTransform(const geom::Mat4 transfmat)
 {
   transformation_matrix_=transfmat;
   inverse_transformation_matrix_=Invert(transformation_matrix_);
-  geom::Mat4 identity = geom::Mat4();
-  if (transformation_matrix_ == identity) {
-    identity_transf_ = true;
-  } else {
-    identity_transf_ = false;    
-  }
+  identity_transf_ = (transformation_matrix_==geom::Mat4());
   this->UpdateTransformedPos();
   this->MarkOrganizerDirty();
 }
@@ -1049,7 +1044,7 @@ void EntityImpl::UpdateOrganizer()
   atom_organizer_.Clear();
   for (AtomImplMap::const_iterator i=atom_map_.begin(), 
        e=atom_map_.end(); i!=e; ++i) {
-    atom_organizer_.Add(i->second, i->second->GetPos());
+    atom_organizer_.Add(i->second, i->second->TransformedPos());
   }
   dirty_flags_&=~DirtyOrganizer;
 }
@@ -1189,7 +1184,7 @@ void EntityImpl::RenameChain(ChainImplPtr chain, const String& new_name)
 
 void EntityImpl::UpdateTransformedPos(){
   for(AtomImplMap::iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-    it->second->SetTransformedPos(geom::Vec3(transformation_matrix_*geom::Vec4(it->second->GetOriginalPos())));
+    it->second->TransformedPos()=geom::Vec3(transformation_matrix_*geom::Vec4(it->second->OriginalPos()));
   }
 }
 

@@ -5,12 +5,18 @@ dllexport.hh
 version.hh
 )
 
-
 set(animations_enabled 0)
+
 if (USE_SHADER)
   set(shader_support 1)
 else()
   set(shader_support 0)
+endif()
+
+if (USE_NUMPY)
+  set(numpy_support 1)
+else()
+  set(numpy_support 0)
 endif()
 
 if (PROFILE)
