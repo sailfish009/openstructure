@@ -70,21 +70,43 @@ endmacro()
 
 macro(_find_python_bin PYTHON_ROOT VERSION)
   string(REPLACE "." "" _VERSION_NO_DOTS ${VERSION})
-  if(PYTHON_ROOT)
-    find_program(PYTHON_BINARY
-      NAMES "python" "python${_VERSION_NO_DOTS}" "python${VERSION}"
-      HINTS "${PYTHON_ROOT}"
-      PATH_SUFFIXES bin
-      NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH
-    )
-  else()
-    find_program(PYTHON_BINARY
-      NAMES "python" "python${_VERSION_NO_DOTS}" "python${VERSION}"
-      HINTS "${CMAKE_PREFIX_PATH}"
-      PATH_SUFFIXES bin
-    )  
-  endif()  
+  foreach(_NAME "python" "python${_VERSION_NO_DOTS}" "python${VERSION}")
+    if(PYTHON_ROOT)
+      find_program(PYTHON_BINARY
+                   NAMES ${_NAME}
+                   HINTS "${PYTHON_ROOT}"
+                   PATH_SUFFIXES bin
+                   NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH)
+      if(PYTHON_BINARY)
+        execute_process(COMMAND ${PYTHON_BINARY} -V
+                        OUTPUT_VARIABLE PY_VERSION
+                        ERROR_VARIABLE PY_VERSION)
+        if(PY_VERSION MATCHES ${VERSION})
+          break()
+        else()
+          unset(PYTHON_BINARY CACHE)
+        endif()
+      endif()
+    else()
+      find_program(PYTHON_BINARY
+                   NAMES  $_NAME
+                   HINTS "${CMAKE_PREFIX_PATH}"
+                   PATH_SUFFIXES bin)  
+      if(PYTHON_BINARY)
+        execute_process(COMMAND ${PYTHON_BINARY} -V
+                        OUTPUT_VARIABLE PY_VERSION
+                        ERROR_VARIABLE PY_VERSION)
+        if(${PY_VERSION} matches ${VERSION})
+          break()
+        else()
+          unset(PYTHON_BINARY CACHE)
+        endif()
+      endif()
+    endif()  
+  endforeach()
 endmacro()
+
+
 
 #-------------------------------------------------------------------------------
 # check for python lib
@@ -114,7 +136,7 @@ macro(check_for_python_binary)
     foreach(_VERSION ${PYTHON_VERSIONS})
       if(${PYTHON_MIN_VERSION} VERSION_LESS ${_VERSION})
         _find_python_bin("${PYTHON_ROOT}" "${_VERSION}")
-        if(PYTHON_LIBRARIES)
+        if(PYTHON_BINARY)
           set(PYTHON_VERSION "${_VERSION}")
           break()
         endif()
