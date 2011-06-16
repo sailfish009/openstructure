@@ -77,14 +77,14 @@ geom::Mat3 find_rotation(const geom::Vec3& d) {
 
 geom::Vec3 ConnectorImpl::GetPos() const 
 {
-  return (GetFirst()->GetPos()+GetSecond()->GetPos())*0.5;
+  return (GetFirst()->TransformedPos()+GetSecond()->TransformedPos())*0.5;
 }
 
 Real ConnectorImpl::GetLength() const
 {
   Real length;
   if (this->GetFirst()->GetEntity()->HasICS()==false) {
-    length=geom::Distance(this->GetFirst()->GetOriginalPos(),this->GetSecond()->GetOriginalPos());
+    length=geom::Distance(this->GetFirst()->OriginalPos(),this->GetSecond()->OriginalPos());
   } else {
     length=len_;
   }
@@ -110,8 +110,8 @@ bool ConnectorImpl::IsConnectorOf(const AtomImplPtr& a,
 
 geom::Vec3 ConnectorImpl::GetOriginalPos() const 
 {
-  return (this->GetFirst()->GetOriginalPos()+
-          this->GetSecond()->GetOriginalPos())*0.5;
+  return (this->GetFirst()->OriginalPos()+
+          this->GetSecond()->OriginalPos())*0.5;
 }
 
 void ConnectorImpl::Switch()

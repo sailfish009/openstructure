@@ -5,6 +5,7 @@ export_bond.cc
 export_chain.cc
 export_chain_view.cc
 export_coord_group.cc
+export_coord_frame.cc
 export_editors.cc
 export_entity.cc
 export_entity_view.cc

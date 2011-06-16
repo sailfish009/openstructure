@@ -55,7 +55,8 @@ void update_shifts(const AlignmentHandle& aln,
         res_index=-1;
       }
       else if (i > 0) {
-        res_index=s1.GetResidueIndex(i-1);
+        res_index=s1.GetResidueIndex(i-1)-s1.GetOffset();
+//        res_index=s1.GetResidueIndex(i-1);
       }
       ShiftMap::iterator p=shifts.find(res_index);
       if (p!=shifts.end()) {
@@ -111,7 +112,8 @@ SequenceHandle realign_sequence(const AlignmentHandle& aln,
       p=shifts.find(-1);
     }
     else if (i>0 && s1.GetOneLetterCode(i-1)!='-') {
-      p=shifts.find(s1.GetResidueIndex(i-1));
+      p=shifts.find(s1.GetResidueIndex(i-1)-s1.GetOffset());
+//      p=shifts.find(s1.GetResidueIndex(i-1));
     }
     if (p!=shifts.end()) {
       int d=p->second-shift;
@@ -139,11 +141,16 @@ AlignmentHandle MergePairwiseAlignments(const AlignmentList& pairwise_alns,
     update_shifts(*i, ref_seq, shifts);
   }
 
+ 
   AlignmentHandle merged=CreateAlignment();
   merged.AddSequence(shift_reference(ref_seq, shifts));
+  size_t ref_len=merged.GetSequence(0).GetLength();
   for (AlignmentList::const_iterator i=pairwise_alns.begin(),
        e=pairwise_alns.end(); i!=e; ++i) {
     SequenceHandle new_seq=realign_sequence(*i, shifts);
+    for (size_t j=new_seq.GetLength(); j<ref_len; ++j) {
+      new_seq.Append('-');
+    }
     merged.AddSequence(new_seq);
   }  
   return merged;

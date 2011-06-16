@@ -21,6 +21,7 @@ from ost.gui.init_spacenav import _InitSpaceNav
 from ost.gui.init_context_menu import _InitContextMenu
 from ost.gui.init_splash import _InitSplash
 from ost.gui.dng import termuse
+from ost.gui.dng import superpositiondialog
 import ost.gui.dng.menu
 from PyQt4.QtGui import *
 def _my_exit(code):

@@ -26,7 +26,8 @@ using namespace boost::python;
 using namespace ost;
 
 void export_svdSuperPose();
-
+void export_TrajectoryAnalysis();
+void export_Clash();
 #if OST_IMG_ENABLED
 void export_entity_to_density();
 #endif
@@ -42,6 +43,7 @@ mol::EntityView (*fc_b)(const mol::EntityHandle&, Real, bool)=&mol::alg::FilterC
 BOOST_PYTHON_MODULE(_ost_mol_alg)
 {
   export_svdSuperPose();
+  export_TrajectoryAnalysis();
   #if OST_IMG_ENABLED
   export_entity_to_density();
   #endif

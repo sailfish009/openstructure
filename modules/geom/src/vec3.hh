@@ -205,7 +205,7 @@ public:
   Vec3List(base_type::iterator b, base_type::iterator e): base_type(b, e) { }
   
   Vec3List(const Vec3List& rhs) : base_type(rhs) { }
-  
+  Vec3List(const base_type& rhs) : base_type(rhs) { }
   Vec3List& operator=(const Vec3List& rhs) 
   {
     base_type::operator=(rhs);

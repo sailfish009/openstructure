@@ -120,6 +120,7 @@ StringOrRegexParam::StringOrRegexParam():
 StringOrRegexParam::StringOrRegexParam(const String& s):
   is_regex_(false),r_(),s_(s)
 {
+  String special("[]{}()");
   for(String::const_iterator it=s.begin();it!=s.end();++it) {
     if((*it)=='?' || (*it)=='*') {
       is_regex_=true;
@@ -130,12 +131,16 @@ StringOrRegexParam::StringOrRegexParam(const String& s):
   if(is_regex_) {
     std::ostringstream e;
     for(String::const_iterator it=s.begin();it!=s.end();++it) {
-      if((*it)=='?') {
-	e << ".";
-      } else if((*it)=='*') {
-	e << ".*";
+      
+      if((*it)=='?' && (it==s.begin() || (*(it-1))!='\\')) {
+        e << ".";
+      } else if((*it)=='*' && (it==s.begin() || (*(it-1))!='\\')) {
+        e << ".*";
       } else {
-	e << *it;
+        if (special.find(*it)!=String::npos) {
+          e << '\\';
+        }
+        e << *it;
       }
     }
     //std::cerr << "assembling regex [" << e.str() << "]... ";

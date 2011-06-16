@@ -184,7 +184,27 @@ class OneOf:
       if isinstance(node, cl):
         return True
     return False
-    
+
+class TwoOf:
+  def __init__(self, *classes):
+    self.classes=classes
+  def __call__(self):
+    sel=SceneSelection.Instance()
+    act_count=sel.GetActiveNodeCount()
+    if act_count<2:
+      return False
+    found=0
+    for i in range(0, act_count):
+      node=sel.GetActiveNode(i)
+      for cl in self.classes:
+        if isinstance(node, cl):
+          found += 1
+      if found > 2:
+        return False
+    if found == 2:
+      return True
+    return False
+
 class ManyOf:
   def __init__(self, *classes):
     self.classes=classes

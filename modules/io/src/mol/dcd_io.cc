@@ -184,7 +184,7 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
 }
 
 
-mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
+mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom list is already sorted!
                                const String& trj_fn,
                                unsigned int stride)
 {
@@ -196,10 +196,6 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   }
   Profile profile_load("LoadCHARMMTraj");
 
-  mol::AtomHandleList alist(alist2);
-  std::sort(alist.begin(),alist.end(),less_index);
-  
-  
   DCDHeader header; 
   bool swap_flag=false, skip_flag=false, gap_flag=false;
   read_dcd_header(istream, header, swap_flag, skip_flag, gap_flag);

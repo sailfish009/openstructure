@@ -25,7 +25,6 @@
 
 #include <vector>
 #include <boost/shared_array.hpp>
-
 #include "atom_handle.hh"
 #include "coord_source.hh"
 
@@ -65,7 +64,8 @@ public:
   void Capture(uint frame);
   
   /// \brief add frame 
-  void AddFrame(const std::vector<geom::Vec3>& clist);
+  //void AddFrame(const std::vector<geom::Vec3>& clist);
+  void AddFrame(const geom::Vec3List& clist);
 
   void AddFrames(const CoordGroupHandle& cg);
   /// \brief set an indidivial atom position in the given frame
@@ -88,9 +88,10 @@ public:
   CoordGroupHandle Filter(const EntityView& selected) const;
   
   CoordGroupHandle(CoordSourcePtr source);
+
+
 private:
   void CheckValidity() const;
-
   CoordSourcePtr source_;
 };
 

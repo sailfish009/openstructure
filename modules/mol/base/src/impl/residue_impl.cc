@@ -60,8 +60,8 @@ AtomImplPtr ResidueImpl::InsertAtom(const String& name,
 
 AtomImplPtr ResidueImpl::InsertAtom(const AtomImplPtr& atom)
 {
-  AtomImplPtr dst_atom=this->InsertAtom(atom->GetName(), 
-                                        atom->GetPos(),
+  AtomImplPtr dst_atom=this->InsertAtom(atom->Name(), 
+                                        atom->TransformedPos(),
                                         atom->GetElement());
 
   dst_atom->Assign(*atom.get());
@@ -166,12 +166,12 @@ AtomImplPtr ResidueImpl::GetCentralAtom() const
   if (chem_class_.IsNucleotideLinking()) {
     for (AtomImplList::const_iterator it=atom_list_.begin();
          it!=atom_list_.end();++it) {
-      if((*it)->GetName()=="P") return *it;
+      if((*it)->Name()=="P") return *it;
     }    
   } else if (chem_class_.IsPeptideLinking()) {
     for (AtomImplList::const_iterator it=atom_list_.begin();
          it!=atom_list_.end();++it) {
-      if((*it)->GetName()=="CA") return *it;
+      if((*it)->Name()=="CA") return *it;
     }    
   }
 
@@ -217,14 +217,14 @@ geom::Vec3 ResidueImpl::GetCentralNormal() const
     AtomImplPtr a1 = FindAtom("C");
     AtomImplPtr a2 = FindAtom("O"); 
     if(a1 && a2) {
-      nrvo = geom::Normalize(a2->GetPos()-a1->GetPos());
+      nrvo = geom::Normalize(a2->TransformedPos()-a1->TransformedPos());
     } else {
       a1 = FindAtom("CB");
       a2 = FindAtom("CA"); 
       if(a1 && a2) {
-        nrvo = geom::Normalize(a2->GetPos()-a1->GetPos());
+        nrvo = geom::Normalize(a2->TransformedPos()-a1->TransformedPos());
       } else {
-        geom::Vec3 v0=GetCentralAtom()->GetPos();
+        geom::Vec3 v0=GetCentralAtom()->TransformedPos();
         nrvo=geom::Cross(geom::Normalize(v0),
                          geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
         LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
@@ -235,9 +235,9 @@ geom::Vec3 ResidueImpl::GetCentralNormal() const
     AtomImplPtr a2 = FindAtom("OP1");
     AtomImplPtr a3 = FindAtom("OP2");
     if(a1 && a2 && a3) {
-      nrvo = geom::Normalize(a1->GetPos()-(a2->GetPos()+a3->GetPos())*.5);
+      nrvo = geom::Normalize(a1->TransformedPos()-(a2->TransformedPos()+a3->TransformedPos())*.5);
     } else {
-      geom::Vec3 v0=GetCentralAtom()->GetPos();
+      geom::Vec3 v0=GetCentralAtom()->TransformedPos();
       nrvo=geom::Cross(geom::Normalize(v0),
                        geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
       LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
@@ -251,7 +251,7 @@ AtomImplPtr ResidueImpl::FindAtom(const String& aname) const
 {
   for (AtomImplList::const_iterator it=atom_list_.begin();
        it!=atom_list_.end();++it) {
-    if ((*it)->GetName()==aname) {
+    if ((*it)->Name()==aname) {
       return *it;
     }
   }
@@ -366,18 +366,25 @@ void ResidueImpl::DeleteAtom(const AtomImplPtr& atom) {
   }
 }
 
+namespace {
+  struct aname_matcher {
+    aname_matcher(const String& n): aname(n) {}
+    bool operator()(AtomImplPtr& a) {return a->Name()==aname;}
+    String aname;
+  };
+}
+
 void ResidueImpl::DeleteAtoms(const String& atom_name) {
   AtomImplList::iterator i=atom_list_.begin();
   for (; i!=atom_list_.end(); ++i) {
-    if ((*i)->GetName()==atom_name) {
+    if ((*i)->Name()==atom_name) {
       (*i)->DeleteAllTorsions();
       (*i)->DeleteAllConnectors();
       this->GetEntity()->DeleteAtom(*i);
     }
   }
   AtomImplList::iterator new_end;
-  new_end=std::remove_if(atom_list_.begin(), atom_list_.end(),
-                         bind(&AtomImpl::GetName, _1)==atom_name);
+  new_end=std::remove_if(atom_list_.begin(), atom_list_.end(), aname_matcher(atom_name));
   atom_list_.erase(new_end, atom_list_.end());
 }
 
@@ -452,10 +459,10 @@ geom::AlignedCuboid ResidueImpl::GetBounds() const
 
   if (atom_list_.size()>0) {
     AtomImplList::const_iterator i=atom_list_.begin();
-    mmin=mmax=(*i)->GetPos();
+    mmin=mmax=(*i)->TransformedPos();
     for (++i; i!=atom_list_.end(); ++i) {
-      mmax=geom::Max(mmax,(*i)->GetPos());
-      mmin=geom::Min(mmin,(*i)->GetPos());      
+      mmax=geom::Max(mmax,(*i)->TransformedPos());
+      mmin=geom::Min(mmin,(*i)->TransformedPos());      
     }    
     return geom::AlignedCuboid(mmin, mmax);
   } else {
@@ -469,7 +476,7 @@ geom::Vec3 ResidueImpl::GetCenterOfAtoms() const
   if (!atom_list_.empty()) {
     for (AtomImplList::const_iterator i=atom_list_.begin(); 
         i!=atom_list_.end(); ++i) {
-      sum+=(*i)->GetPos();
+      sum+=(*i)->TransformedPos();
     }
     sum/=atom_list_.size();
   }
@@ -483,7 +490,7 @@ geom::Vec3 ResidueImpl::GetCenterOfMass() const
   if (this->GetAtomCount() > 0 && mass > 0) {
     for (AtomImplList::const_iterator i=atom_list_.begin(); 
         i!=atom_list_.end(); ++i) {
-      center+=(*i)->GetPos()*(*i)->GetMass();
+      center+=(*i)->TransformedPos()*(*i)->GetMass();
     }
   }
   return center/mass;
@@ -566,7 +573,7 @@ bool ResidueImpl::SwitchAtomPos(const String& group) {
     for (; k!=gr.atoms.end(); ++k) {
       AtomGroupEntry& entry=*k;
       assert(!entry.atom.expired());
-      entry.pos=entry.atom.lock()->GetOriginalPos();
+      entry.pos=entry.atom.lock()->OriginalPos();
     }
   }
   AtomGroup& agr=i->second;
@@ -575,11 +582,11 @@ bool ResidueImpl::SwitchAtomPos(const String& group) {
 
     AtomGroupEntry& entry=*j;
     assert(!entry.atom.expired());
-    entry.atom.lock()->SetOriginalPos(entry.pos);
+    entry.atom.lock()->OriginalPos()=entry.pos;
     EntityHandle ent = entry.atom.lock()->GetEntity();
     geom::Mat4 transf_matrix = ent.GetTransformationMatrix();
     geom::Vec3 transf_pos = geom::Vec3(transf_matrix*geom::Vec4(entry.pos));
-    entry.atom.lock()->SetTransformedPos(transf_pos);
+    entry.atom.lock()->TransformedPos()=transf_pos;
   }
   curr_group_=group;
   return true;

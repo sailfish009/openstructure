@@ -1,8 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2011 by the OpenStructure authors
-// Copyright (C) 2003-2010 by the IPLT authors
+// Copyright (C) 2008-2010 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -19,51 +18,17 @@
 //------------------------------------------------------------------------------
 
 /*
-  Author: Ansgar Philippsen
-*/
+ * Author Marco Biasini
+ */
+#include <boost/python.hpp>
+using namespace boost::python;
+#include <ost/mol/alg/superpose_frames.hh>
 
-#include <iostream>
+using namespace ost;
+using namespace ost::mol::alg;
 
-#include "tests.hh"
-
-#include <ost/img/image.hh>
-
-#include <ost/img/alg/stat.hh>
-
-namespace test_stat {
-
-using namespace ost::img;
-using namespace ost::img::alg;
-
-void test() {
-  Real val[3][3] = {
-    {3.0,1.0,5.0},{6.0,9.0,2.0},{4.0,7.0,8.0}
-  };
-  ImageHandle im = CreateImage(Extent(Point(0,0),Size(3,3)));
-
-  for(int u=0;u<3;++u) {
-    for(int v=0;v<3;++v) {
-      im.SetReal(Point(u,v),val[u][v]);
-    }
-  }
-
-  Stat stat;
-  im.Apply(stat);
-  BOOST_CHECK_CLOSE(stat.GetMean(),5.0,0.0001);
-  BOOST_CHECK_CLOSE(stat.GetStandardDeviation(),2.58198889747,0.0001);
-  
-}
-
-} // namespace
-
-test_suite* CreateStatTest()
+void export_SuperposeFrames()
 {
-  using namespace test_stat;
-  test_suite* ts=BOOST_TEST_SUITE("Stat Alg Test");
-
-  ts->add(BOOST_TEST_CASE(&test));
-
-  return ts;
+  def("SuperposeFrames", &SuperposeFrames);
 }
-
 

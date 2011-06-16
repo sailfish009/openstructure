@@ -39,6 +39,7 @@ void export_AtomView();
 void export_ResidueView();
 void export_Editors();
 void export_CoordGroup();
+void export_CoordFrame();
 void export_PropertyID();
 void export_BoundingBox();
 void export_QueryViewWrapper();
@@ -65,6 +66,7 @@ BOOST_PYTHON_MODULE(_ost_mol)
   export_EntityView(); 
   export_Editors();
   export_CoordGroup();
+  export_CoordFrame();
   export_PropertyID();  
   export_BoundingBox();
   export_QueryViewWrapper();

@@ -187,12 +187,12 @@ BOOST_PYTHON_MODULE(_ost_img_alg)
     .def(self_ns::str(self))
   ;
   class_<StatMinMax, bases<NonModAlgorithm> >("StatMinMax", init<>() )
-    .def("GetMinimum",&Stat::GetMinimum)
-    .def("GetMinimumPosition",&Stat::GetMinimumPosition)
-    .def("SetMinimum",&Stat::SetMinimum)
-    .def("GetMaximum",&Stat::GetMaximum)
-    .def("GetMaximumPosition",&Stat::GetMaximumPosition)
-    .def("SetMaximum",&Stat::SetMaximum)
+    .def("GetMinimum",&StatMinMax::GetMinimum)
+    .def("GetMinimumPosition",&StatMinMax::GetMinimumPosition)
+    .def("SetMinimum",&StatMinMax::SetMinimum)
+    .def("GetMaximum",&StatMinMax::GetMaximum)
+    .def("GetMaximumPosition",&StatMinMax::GetMaximumPosition)
+    .def("SetMaximum",&StatMinMax::SetMaximum)
     .def(self_ns::str(self))
   ;
 

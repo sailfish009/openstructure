@@ -53,6 +53,9 @@ void export_Atom()
     .add_property("pos",
                   make_function(&AtomBase::GetPos,
                                 return_value_policy<copy_const_reference>()))
+    .add_property("original_pos",
+                  make_function(&AtomBase::GetOriginalPos,
+                                return_value_policy<copy_const_reference>()))
     .add_property("name",
                   make_function(&AtomBase::GetName,
                                 return_value_policy<copy_const_reference>()),
