@@ -167,6 +167,7 @@ int init_python_interpreter()
   }  
   setup_python_search_path(root, py);
   py.RunCommand("from ost import *");
+  py.RunCommand("gui_mode=True");
   return 0;
 }
 

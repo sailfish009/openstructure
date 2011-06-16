@@ -1,8 +1,6 @@
 import sys, os, platform
 import optparse
 
-interactive=False
-
 def show_help(option, opt, value, parser):
   parser.print_help()
   sys.exit(-1)
@@ -49,7 +47,11 @@ def _InitRuleBasedBuilder():
 _InitRuleBasedBuilder()
 import os.path
 HistoryFile=os.path.expanduser('~/.ost_history')
+
+# this is a silly name...
 InGUIMode=False
+# ... lets be more pythonic
+gui_mode=False
 
 sys.ps1='ost> '
 sys.ps2='..... '
