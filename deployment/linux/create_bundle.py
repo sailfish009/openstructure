@@ -8,11 +8,11 @@ import datetime
 
 # custom parameters
 
-if len(sys.argv) < 2:
-  print 'usage: create_bundle.py  additional_label'
+if len(sys.argv) < 3:
+  print 'usage: create_bundle.py  additional_label system_python_version'
   sys.exit()
 
-system_python_version='python2.6'
+system_python_version=sys.argv[2]
 system_python_bin='/usr/bin/'+system_python_version
 system_python_libs='/usr/lib/'+system_python_version
 second_system_python_libs_flag=True
