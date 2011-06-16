@@ -148,7 +148,7 @@ QueryToken QueryLexer::LexNumericToken() {
 }
 
 bool is_ident_or_str(char c) {
-  static String allowed_chars("_*?");
+  static String allowed_chars("_*?\\");
   return isalnum(c) || allowed_chars.find_first_of(c)!=String::npos;
 }
 
@@ -158,7 +158,8 @@ QueryToken QueryLexer::LexIdentOrStringToken() {
   bool force_string=false;
   while (current_<query_string_.length() && 
          is_ident_or_str(query_string_[current_])) {
-    if (query_string_[current_]=='*' || query_string_[current_]=='?') {
+    if (query_string_[current_]=='*' || query_string_[current_]=='?' ||
+        query_string_[current_]=='\\') {
       force_string=true;
     }
     current_++;
