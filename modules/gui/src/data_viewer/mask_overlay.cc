@@ -118,7 +118,7 @@ bool MaskOverlay::OnMouseEvent(QMouseEvent* e,  DataViewerPanel* dvp,
       if(active_>=0){
         geom::Polygon2 pol=polygons_[active_];
         for(unsigned int j=0;j<pol.GetNodeCount();++j){
-          if(Length(mousepos-pol.GetNode(j))<3){
+          if(Length(mousepos-(pol.GetNode(j)+shift_))<3){
             active_node_=j;
             return true;
           }
