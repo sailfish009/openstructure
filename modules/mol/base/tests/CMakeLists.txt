@@ -13,6 +13,7 @@ set(OST_MOL_BASE_UNIT_TESTS
   test_view.cc
   test_view_op.cc
   tests.cc
+  test_numpy.py
 )
 
 ost_unittest(MODULE mol SOURCES "${OST_MOL_BASE_UNIT_TESTS}")

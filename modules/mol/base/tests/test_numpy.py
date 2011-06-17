@@ -1,8 +1,11 @@
-import sys,unittest
-sys.path.append("../../../../stage/lib/openstructure")
-sys.path.append("../../../../stage/lib64/openstructure")
+import unittest
 from ost import *
-import numpy
+
+has_numpy=True
+try:
+  import numpy
+except ImportError:
+  has_numpy=False
 
 def v2v(v):
   return geom.Vec3(float(v[0]),float(v[1]),float(v[2]))
@@ -15,6 +18,8 @@ class TestNumpy(unittest.TestCase):
     pass
 
   def test_(self):
+    if not has_numpy:
+      return
     entity=mol.CreateEntity()
     ed=entity.EditXCS()
     ch=ed.InsertChain("X")
