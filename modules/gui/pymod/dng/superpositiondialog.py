@@ -25,7 +25,7 @@ from ost.mol.alg import Superpose
 from ost import mol
 
 class ChainComboBox(QComboBox):
-  def __init__(self, ent, parent=None):
+  def __init__(self, ent, gfx, parent=None):
     # class variables
     self.all_chains = 'All'
     QComboBox.__init__(self, parent)
@@ -35,8 +35,13 @@ class ChainComboBox(QComboBox):
       self.addItem(chain.name)
     if self.count()>0:
       self.setCurrentIndex(0)
+    if gfx:
+      self.gfx = gfx
+      QObject.connect(self,
+                      SIGNAL('highlighted (const QString&)'),
+                      self._HighlightChain)
 
-  def SetItems(self, ent):
+  def SetItems(self, ent, gfx):
     self.clear()
     self.entity = ent
     self.addItem(self.all_chains)
@@ -44,7 +49,14 @@ class ChainComboBox(QComboBox):
       self.addItem(chain.name)
     if self.count()>0:
       self.setCurrentIndex(0)
-    return
+    if gfx:
+      self.gfx = gfx
+
+  def _HighlightChain(self, chain):
+    if str(chain) != 'All':
+      self.gfx.SetSelection(self.entity.Select('cname=' + str(chain)))
+    else:
+      self.gfx.SetSelection(self.entity.Select(''))
 
   def _GetSelectedChain(self):
     if self.currentIndex() == -1:
@@ -63,6 +75,9 @@ class ChainComboBox(QComboBox):
         self.setCurrentIndex(i)
         break
   selected_chain = property(_GetSelectedChain, _SetSelectedChain)
+
+  def focusOutEvent (self, event):
+    self.gfx.SetSelection(self.entity.Select('cname=All'))
 
 class SuperpositionDialog(QDialog):
   """
@@ -107,11 +122,17 @@ class SuperpositionDialog(QDialog):
                           'index': 'index',
                           'local alignment': 'local-aln',
                           'global alignment': 'global-aln'}
+    self.gfx_one = None
+    self.gfx_two = None
+    self.gfx_select_one = None
+    self.gfx_select_two = None
     QDialog.__init__(self, parent)
     self.setWindowTitle('Superpose structures')
     if not isinstance(ent_one, mol.EntityHandle) and \
        not isinstance(ent_one, mol.EntityView):
       n_one = ent_one.GetName()
+      self.gfx_one = ent_one
+      self.gfx_select_one = self.gfx_one.GetSelection()
       self.ent_one = ent_one.GetView()
     else:
       if isinstance(ent_one, mol.EntityHandle):
@@ -124,6 +145,8 @@ class SuperpositionDialog(QDialog):
     if not isinstance(ent_two, mol.EntityHandle) and \
        not isinstance(ent_two, mol.EntityView):
       n_two = ent_two.GetName()
+      self.gfx_two = ent_two
+      self.gfx_select_two = self.gfx_two.GetSelection()
       self.ent_two = ent_two.GetView()
     else:
       if isinstance(ent_two, mol.EntityHandle):
@@ -135,7 +158,7 @@ class SuperpositionDialog(QDialog):
       n_two = '2'
     if n_one == n_two:
       n_one = n_one + ' 1'
-      n_two = n_two + ' 2'
+      n_two = n_two + ' 2' 
     layout = QGridLayout(self)
     # select reference molecule
     self.reference = 0;
@@ -145,8 +168,8 @@ class SuperpositionDialog(QDialog):
     layout.addWidget(self._reference, grow, 1)
     grow += 1
     # chains
-    self._chain_one = ChainComboBox(self.ent_one, self)
-    self._chain_two = ChainComboBox(self.ent_two, self)
+    self._chain_one = ChainComboBox(self.ent_one, self.gfx_one, self)
+    self._chain_two = ChainComboBox(self.ent_two, self.gfx_two, self)
     layout.addWidget(QLabel("reference chain"), grow, 0)
     layout.addWidget(self._chain_one, grow, 1)
     grow += 1
@@ -183,6 +206,11 @@ class SuperpositionDialog(QDialog):
     hbox_layout.addWidget(ok_button, 0)
     ok_button.setDefault(True)
     self.exec_()
+    # restore old selections
+    if self.gfx_one:
+      self.gfx_one.SetSelection(self.gfx_select_one)
+    if self.gfx_two:
+      self.gfx_two.SetSelection(self.gfx_select_two)
 
   def _Superpose(self):
     view_one = self._chain_one.selected_chain
@@ -266,12 +294,12 @@ class SuperpositionDialog(QDialog):
 
   def _ChangeChainSelection(self, index):
     if index == 0:
-      self._chain_one.SetItems(self.ent_one)
-      self._chain_two.SetItems(self.ent_two)
+      self._chain_one.SetItems(self.ent_one, self.gfx_one)
+      self._chain_two.SetItems(self.ent_two, self.gfx_two)
       self.reference = 0;
     elif index == 1:
-      self._chain_one.SetItems(self.ent_two)
-      self._chain_two.SetItems(self.ent_one)
+      self._chain_one.SetItems(self.ent_two, self.gfx_two)
+      self._chain_two.SetItems(self.ent_one, self.gfx_one)
       self.reference = 1;
     return
 
