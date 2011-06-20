@@ -41,6 +41,10 @@ class ChainComboBox(QComboBox):
                       SIGNAL('highlighted (const QString&)'),
                       self._HighlightChain)
 
+  def focusOutEvent (self, event):
+    if self.gfx:
+      self.gfx.SetSelection(self.entity.Select('cname=All'))
+
   def SetItems(self, ent, gfx):
     self.clear()
     self.entity = ent
@@ -75,9 +79,6 @@ class ChainComboBox(QComboBox):
         self.setCurrentIndex(i)
         break
   selected_chain = property(_GetSelectedChain, _SetSelectedChain)
-
-  def focusOutEvent (self, event):
-    self.gfx.SetSelection(self.entity.Select('cname=All'))
 
 class SuperpositionDialog(QDialog):
   """
