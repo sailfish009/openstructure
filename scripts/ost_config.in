@@ -36,17 +36,22 @@ export DNG_INITDIR="$DNG_LIBDIR/openstructure"
 #export QT_PLUGIN_PATH="$BIN_DIR/plugins"
 
 # retrieve absolute path to python executable
-pyexec=""
-if [ -z "$DNG_ATTACH_VALGRIND" ]; then
-  pyexec="@PYTHON_BINARY@"
-else
-  pyexec="valgrind --leak-check=full $pyexec"
-fi
+pyexec="@PYTHON_BINARY@"
 
-if [ ! -f "$pyexec" ]; then 
+if [ ! -x "$pyexec" ]; then 
   echo "Error: Python executable '$pyexec' not found!"
   exit
 fi
+
+
+if [ -n "$DNG_ATTACH_VALGRIND" ]; then
+  if [ ! -x `which valgrind` ]; then 
+    echo "Error: valgrind not found!"
+    exit
+  fi
+  pyexec="`which valgrind`#--leak-check=full#$pyexec"
+fi
+
 
 set -o noglob
 
