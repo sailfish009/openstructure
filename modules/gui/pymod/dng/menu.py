@@ -191,13 +191,14 @@ class SceneMenu(QMenu):
       i += 1
       gfx_ent_2 = sel.GetActiveNode(i)
     sd = superpositiondialog.SuperpositionDialog(gfx_ent_1, gfx_ent_2)
-    if sd.reference == 0:
-      gfx_ent_1.UpdatePositions()
-      gfx.Scene().CenterOn(gfx_ent_1)
-    else:
-      gfx_ent_2.UpdatePositions()
-      gfx.Scene().CenterOn(gfx_ent_2)
-    LogScript('RMSD: %.3f'%sd.rmsd)
+    if sd.rmsd != None:
+      if sd.reference == 0:
+        gfx_ent_1.UpdatePositions()
+        gfx.Scene().CenterOn(gfx_ent_1)
+      else:
+        gfx_ent_2.UpdatePositions()
+        gfx.Scene().CenterOn(gfx_ent_2)
+      LogScript('RMSD: %.3f'%sd.rmsd)
 
 class WindowMenu(QMenu):
   def __init__(self, parent=None):

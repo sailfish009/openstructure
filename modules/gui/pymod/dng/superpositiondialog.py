@@ -118,7 +118,7 @@ class SuperpositionDialog(QDialog):
 
   def __init__(self, ent_one, ent_two, parent=None):
     # class variables
-    self.rmsd = 0.0
+    self.rmsd = None
     self._mmethod_dict = {'number': 'number',
                           'index': 'index',
                           'local alignment': 'local-aln',
@@ -302,7 +302,6 @@ class SuperpositionDialog(QDialog):
       self._chain_one.SetItems(self.ent_two, self.gfx_two)
       self._chain_two.SetItems(self.ent_one, self.gfx_one)
       self.reference = 1;
-    return
 
   def _MatchMethods(self):
     methods=QComboBox(self)
