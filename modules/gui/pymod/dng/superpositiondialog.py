@@ -43,7 +43,7 @@ class ChainComboBox(QComboBox):
 
   def focusOutEvent (self, event):
     if self.gfx:
-      self.gfx.SetSelection(self.entity.Select('cname=All'))
+      self.gfx.selection = None
 
   def SetItems(self, ent, gfx):
     self.clear()
