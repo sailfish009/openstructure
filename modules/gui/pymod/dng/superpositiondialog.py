@@ -40,6 +40,8 @@ class ChainComboBox(QComboBox):
       QObject.connect(self,
                       SIGNAL('highlighted (const QString&)'),
                       self._HighlightChain)
+    else:
+      self.gfx = None
 
   def focusOutEvent (self, event):
     if self.gfx:
@@ -113,7 +115,8 @@ class SuperpositionDialog(QDialog):
     else:
       scene.CenterOn(g2)
 
-    LogScript('RMSD: %.3f'%sd.rmsd)
+    if sd.rmsd != None:
+      LogScript('RMSD: %.3f'%sd.rmsd)
   """
 
   def __init__(self, ent_one, ent_two, parent=None):
