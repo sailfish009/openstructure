@@ -767,8 +767,12 @@ void Entity::SetSelection(const mol::EntityView& view)
     sel_=view;
   }
   this->UpdateSelection();
-  this->FlagRebuild();  
-  Scene::Instance().SelectionChanged(GetName(), view);  
+  this->FlagRebuild();
+  // SB: The following function was found do to nothing.
+  // It just makes selecting entities in dng window slow.
+  // If at some point, selecting requires a certain action to be carried out on
+  // each observer, comment in again.
+  //Scene::Instance().SelectionChanged(GetName(), view);
   Scene::Instance().RequestRedraw();
 }
 
