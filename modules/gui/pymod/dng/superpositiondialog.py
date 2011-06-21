@@ -101,7 +101,7 @@ class SuperpositionDialog(QDialog):
     e1=io.LoadPDB('examples/code_fragments/entity/pdb1ake.ent')
     e2=io.LoadPDB('examples/code_fragments/entity/pdb4ake.ent')
 
-    sd = superpositiondialog.SuperpositionDialog(e1, e2)
+    sd = ost.gui.dng.superpositiondialog.SuperpositionDialog(e1, e2)
 
     g1=gfx.Entity('G1', e1)
     g2=gfx.Entity('G2', e2)
