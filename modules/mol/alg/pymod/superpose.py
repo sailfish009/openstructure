@@ -260,9 +260,9 @@ def MatchResidueByGlobalAln(ent_a, ent_b, atoms='all'):
 
 def Superpose(ent_a, ent_b, match='number', atoms='all'):
   """
-  Superposes the first entity onto the second. To do so, two views are created,
-  returned with the result. **atoms** describes what goes in to these views and
-  **match** the selection method. For superposition,
+  Superposes the model entity onto the reference. To do so, two views are
+  created, returned with the result. **atoms** describes what goes in to these
+  views and **match** the selection method. For superposition,
   :func:`~ost.mol.alg.SuperposeSVD` is called. For matching, following methods
   are recognised:
 
@@ -278,9 +278,9 @@ def Superpose(ent_a, ent_b, match='number', atoms='all'):
   * ``global-aln`` - select residues from a Needleman/Wunsch alignment, includes
     **atoms**, calls :func:`~ost.mol.alg.MatchResidueByGlobalAln`
 
-  :param ent_a: The first entity
+  :param ent_a: The model entity
   :type ent_a: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
-  :param ent_b: The second entity
+  :param ent_b: The reference entity
   :type ent_b: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
   :param match: Method to gather residues/ atoms
   :type match: :class:`str`
