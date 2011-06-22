@@ -387,8 +387,28 @@ void SequenceViewer::SelectList(const QModelIndexList& list)
       rows_visited.insert(row);
     }
   }
-  for(int i = 0; i<list.size(); i++){
-    model->select(list[i],QItemSelectionModel::Select);
+  if (list.size() > 0) {
+    int last_row = 0;
+    int last_col = 0;
+    QModelIndex topleft_idx;
+    QItemSelection *selection = new QItemSelection();
+    int i = 1;
+    topleft_idx = list[0];
+    last_row = list[0].row();
+    last_col = list[0].column();
+    for (i = 1; i < list.size(); i++) {
+      // store block on discontinued row or unequal column
+      if (((last_col + 1) != list[i].column()) || (last_row != list[i].row())) {
+        selection->select(topleft_idx, list[i-1]);
+        model->select(*selection, QItemSelectionModel::Select);
+        topleft_idx = list[i];
+      }
+      last_row = list[i].row();
+      last_col = list[i].column();
+    }
+    // store last block
+    selection->select(topleft_idx, list[i-1]);
+    model->select(*selection, QItemSelectionModel::Select);
   }
 }
 
