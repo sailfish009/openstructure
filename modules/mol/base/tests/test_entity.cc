@@ -98,6 +98,16 @@ BOOST_AUTO_TEST_CASE(throw_invalid_ent_view)
   BOOST_CHECK_NO_THROW(CheckHandleValidity(ent.CreateEmptyView()));
 }
 
+BOOST_AUTO_TEST_CASE(bzdng250)
+{
+  EntityHandle eh=make_test_entity();
+  eh.EditXCS().ApplyTransform(geom::Mat4(-1, 0, 0, 0,
+                                          0, 1, 0, 0,
+                                          0, 0,-1, 0,
+                                          0, 0, 0, 1));
+  BOOST_CHECK_NO_THROW(eh.FindResidue("A", 1).FindTorsion("PHI").GetAngle());
+}
+
 BOOST_AUTO_TEST_CASE(entity_creator) 
 {
   EntityHandle eh = CreateEntity();

@@ -17,20 +17,18 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
+#include <ost/qa/amino_acids.hh>
+using namespace boost::python;
+using namespace ost::qa;
 
 
-void export_Torsion();
-void export_Interaction();
-void export_Packing();
-void export_Clash();
-void export_Reduced();
-void export_Utilties();
-BOOST_PYTHON_MODULE(_qa)
+void export_Utilties()
 {
-  export_Torsion();
-  export_Interaction();
-  export_Packing();
-  export_Clash();
-  export_Reduced();
-  export_Utilties();
+
+  def ("ResidueToAminoAcid",&ResidueToAminoAcid);
+  def ("AminoAcidToResidueName",&AminoAcidToResidueName);
+  def ("OneLetterCodeToResidueName",&OneLetterCodeToResidueName);
+  def ("ResidueNameToOneLetterCode",&ResidueNameToOneLetterCode); 
+  def ("OneLetterCodeToAminoAcid",&OneLetterCodeToAminoAcid);
+
 }

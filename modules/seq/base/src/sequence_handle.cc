@@ -58,6 +58,8 @@ char ConstSequenceHandle::operator[](int index) const
 }
 
 
+
+
 void ConstSequenceHandle::CheckValidity() const
 {
   if (!impl_) {
@@ -380,4 +382,11 @@ const GenericPropContainerImpl* SequenceHandle::GpImpl() const
 {
   return Impl().get();
 }
+
+char SequenceHandle::operator[](size_t index) const
+{
+  this->CheckValidity();
+  return this->GetString()[index];
+}
+
 }}

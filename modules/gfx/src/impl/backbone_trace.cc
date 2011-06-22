@@ -32,14 +32,18 @@ namespace {
 bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2, bool seqhack)
 {
   if(!r1.IsValid() || !r2.IsValid()) return false;
-  if(r1.GetChain()!=r2.GetChain()) return false;
-  mol::ResNum n1 = r1.GetNumber();
-  mol::ResNum n2 = r2.GetNumber();
-  if(n2.GetInsCode()!='\0') {
-    if(n1.NextInsertionCode()==n2) return true;
+  if(seqhack) {
+    if(r1.GetChain()!=r2.GetChain()) return false;
+    mol::ResNum n1 = r1.GetNumber();
+    mol::ResNum n2 = r2.GetNumber();
+    if(n2.GetInsCode()!='\0') {
+      if(n1.NextInsertionCode()==n2) return true;
+    }
+    if(mol::InSequence(r1,r2)) return true;
+    if(n1.GetNum()+1==n2.GetNum()) return true;
+  } else {
+    return mol::InSequence(r1,r2);
   }
-  if(mol::InSequence(r1,r2)) return true;
-  if(seqhack && n1.GetNum()+1==n2.GetNum()) return true;
   return false;
 }
 
@@ -236,11 +240,21 @@ BackboneTrace BackboneTrace::CreateSubset(const mol::EntityView& subview)
     const NodeEntryList& nlist=*nitnit;
     for(NodeEntryList::const_iterator nit=nlist.begin();nit!=nlist.end();++nit) {
       if(subview.FindAtom(nit->atom).IsValid()) {
+        if(!new_nlist.empty()) {
+          if(!in_sequence(new_nlist.back().atom.GetResidue(),nit->atom.GetResidue(),seq_hack_)) {
+            if(new_nlist.size()>1) {
+              nrvo.node_list_list_.push_back(new_nlist);
+            }
+            new_nlist.clear();
+          }
+        }
         new_nlist.push_back(*nit);
       }
     }
     if(!new_nlist.empty()) {
-      nrvo.node_list_list_.push_back(new_nlist);
+      if(new_nlist.size()>1) {
+        nrvo.node_list_list_.push_back(new_nlist);
+      }
     }
   }
   return nrvo;

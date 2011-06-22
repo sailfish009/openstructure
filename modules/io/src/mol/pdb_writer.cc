@@ -329,7 +329,11 @@ PDBWriter::PDBWriter(std::ostream& stream, const IOProfile& profile):
 
 PDBWriter::PDBWriter(const boost::filesystem::path& filename, 
                      const IOProfile& profile):
+#if BOOST_FILESYSTEM_VERSION==3                     
+  outfile_(filename.string().c_str()), outstream_(outfile_), 
+#else
   outfile_(filename.file_string().c_str()), outstream_(outfile_), 
+#endif  
   mol_count_(0), line_(80), multi_model_(false), 
   charmm_style_(profile.dialect=="CHARMM"), is_pqr_(false),
   profile_(profile)

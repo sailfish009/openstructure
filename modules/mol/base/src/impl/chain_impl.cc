@@ -154,7 +154,7 @@ void ChainImpl::DeleteAllResidues() {
 }
 
 void ChainImpl::DeleteResidue(const ResNum& number) {
-  int index=this->GetIndex(number);
+  int index=this->GetIndexForResNum(number);
   if (index>=0) {
     ResidueImplPtr r=residue_list_[index];
     r->DeleteAllAtoms();
@@ -166,7 +166,13 @@ void ChainImpl::DeleteResidue(const ResNum& number) {
 void ChainImpl::DeleteResidue(const ResidueImplPtr& residue) {
   if (residue->GetChain().get()!=this)
     return;
-  this->DeleteResidue(residue->GetNumber());
+  int index=this->GetIndex(residue);
+  if (index>=0) {
+    ResidueImplPtr r=residue_list_[index];
+    r->DeleteAllAtoms();
+    residue_list_.erase(residue_list_.begin()+index);
+    this->UpdateShifts();    
+  }
 }
 
 ResidueImplPtr ChainImpl::AppendResidue(const ResidueKey& key, 
@@ -220,7 +226,7 @@ ResidueImplPtr ChainImpl::GetPrev(const ResidueImplPtr& r) const
 {
   if (!r)
     return ResidueImplPtr();
-  int index=this->GetIndex(r->GetNumber())-1;
+  int index=this->GetIndex(r)-1;
   if (index>-1 && index<static_cast<int>(residue_list_.size())-1) {
     return residue_list_[index];
   }
@@ -256,7 +262,7 @@ ResidueImplPtr ChainImpl::GetNext(const ResidueImplPtr& r) const
 {
   if (!r)
     return ResidueImplPtr();
-  int index=this->GetIndex(r->GetNumber())+1;
+  int index=this->GetIndex(r)+1;
   if (index>0 && index<=static_cast<int>(residue_list_.size())-1) {
     return residue_list_[index];
   }
@@ -282,7 +288,7 @@ void ChainImpl::Apply(EntityVisitor& v)
 
 ResidueImplPtr ChainImpl::FindResidue(const ResNum& number) const 
 {
-  int index=this->GetIndex(number);
+  int index=this->GetIndexForResNum(number);
   bool invalid=index<0 || index>static_cast<int>(residue_list_.size())-1;
   return   invalid ? ResidueImplPtr() : residue_list_[index];
 }
@@ -301,36 +307,63 @@ EntityImplPtr ChainImpl::GetEntity() const
 {
   return ent_.lock();
 }
-
-int ChainImpl::GetIndex(const ResNum& number) const 
+int ChainImpl::GetIndexForResNum(const ResNum& number) const
 {
-
   if (in_sequence_) {
-    int pos=number.GetNum()-1;    
-    std::list<Shift>::const_iterator i;
-    for (i=shifts_.begin(); i!=shifts_.end(); ++i) {
-      const Shift& s=*i;
-      if (pos<s.start) {
-        break;
-      } else if (pos<s.start+s.shift) {
-        return -1;
-      }
-      pos-=s.shift;
-    }
-    while (pos>=0 && pos<static_cast<int>(residue_list_.size()) && 
-           residue_list_[pos]->GetNumber()<number) {
-      pos++;
-    }
-    if (pos<0 || pos>=static_cast<int>(residue_list_.size())) {
-      return -1;
-    }
-    assert(residue_list_[pos]->GetNumber()==number);
-    return pos;    
+    return this->GetIndexForResNumInSequence(number);
   } else {
-      ResidueImplList::const_iterator k;
+      ResidueImplList::const_iterator k;    
       k=std::find_if(residue_list_.begin(), 
                      residue_list_.end(), 
                      bind(&ResidueImpl::GetNumber, _1)==number);
+
+      if (k==residue_list_.end())
+        return -1;
+      int pos=std::distance(residue_list_.begin(), k);
+      assert(residue_list_[pos]->GetNumber()==number);
+      return pos;
+  }
+}
+
+int ChainImpl::GetIndexForResNumInSequence(const ResNum& number) const
+{
+  int pos=number.GetNum()-1;    
+  std::list<Shift>::const_iterator i;
+  for (i=shifts_.begin(); i!=shifts_.end(); ++i) {
+    const Shift& s=*i;
+    if (pos<s.start) {
+      break;
+    } else if (pos<s.start+s.shift) {
+      return -1;
+    }
+    pos-=s.shift;
+  }
+  while (pos>=0 && pos<static_cast<int>(residue_list_.size()) && 
+         residue_list_[pos]->GetNumber()<number) {
+    pos++;
+  }
+  if (pos<0 || pos>=static_cast<int>(residue_list_.size())) {
+    return -1;
+  }
+  assert(residue_list_[pos]->GetNumber()==number);
+  return pos;
+}
+
+int ChainImpl::GetIndex(const ResidueImplPtr& res) const 
+{
+  if (!res) {
+    return -1;
+  }
+  ResNum number=res->GetNumber();
+  if (in_sequence_) {
+    return this->GetIndexForResNumInSequence(number);
+  } else {
+      ResidueImplList::const_iterator k=residue_list_.begin()-1;
+      do {
+        k=std::find_if(k+1, residue_list_.end(), 
+                       bind(&ResidueImpl::GetNumber, _1)==number);
+      } while(k!=residue_list_.end() && (*k)!=res);
+
       if (k==residue_list_.end())
         return -1;
       int pos=std::distance(residue_list_.begin(), k);
@@ -343,7 +376,7 @@ void ChainImpl::AssignSecondaryStructure(SecStructure ss,
                                          const ResNum& start, 
                                          const ResNum& end)
 {
-  int start_index=this->GetIndex(start);
+  int start_index=this->GetIndexForResNum(start);
   int i=start_index;
   bool found_end=false;
   if (i>=0) {

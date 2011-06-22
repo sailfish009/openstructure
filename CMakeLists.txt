@@ -103,6 +103,8 @@ else()
   set(_PROFILE OFF)
 endif()
 
+add_definitions(-DEIGEN2_SUPPORT)
+
 if (COMPOUND_LIB)
   set(_COMP_LIB "${COMPOUND_LIB}")
   if (NOT IS_ABSOLUTE "${COMPOUND_LIB}")
@@ -251,6 +253,7 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${EIGEN2_INCLUDE_DIR}
                     ${TIFF_INCLUDE_DIR}
                     ${SPNAV_INCLUDE_DIR}
+                    ${PNG_INCLUDE_DIR}
                     )
 if (UNIX)
   SET(CMAKE_SKIP_BUILD_RPATH  FALSE)

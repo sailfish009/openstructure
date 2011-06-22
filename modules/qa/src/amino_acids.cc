@@ -174,6 +174,73 @@ String OneLetterCodeToResidueName(char olc)
   }
 }
 
+char ResidueNameToOneLetterCode(String rn)
+{
+  String upper_rn=rn;
+  std::transform(rn.begin(),rn.end(),rn.begin(),toupper);
+  if (upper_rn == "ALA") {    
+    return 'A';
+  }  
+  if (upper_rn == "ARG") {
+    return 'R';
+  }
+  if (upper_rn == "ASN") {
+    return 'N';
+  }  
+  if (upper_rn == "ASP") {
+    return 'D';
+  }  
+  if (upper_rn == "GLN") {
+    return 'Q';
+  }  
+  if (upper_rn == "GLU") {
+    return 'E';
+  }  
+  if (upper_rn == "LYS") {
+    return 'K';
+  }  
+  if (upper_rn == "SER") {
+    return 'S';
+  }  
+  if (upper_rn == "CYS") {      
+    return 'C';
+  }  
+  if (upper_rn == "TYR") {  
+    return 'Y';
+  }  
+  if (upper_rn == "TRP") {
+    return 'W';
+  }  
+  if (upper_rn == "THR") {
+    return 'T';
+  }  
+  if (upper_rn == "VAL") {
+    return 'V';
+  }  
+  if (upper_rn == "ILE") {
+    return 'I';
+  }  
+  if (upper_rn == "MET") {
+    return 'M';
+  }  
+  if (upper_rn == "LEU") {  
+    return 'L';
+  }  
+  if (upper_rn == "GLY") {  
+    return 'G';
+  }  
+  if (upper_rn == "PRO") {  
+    return 'P';
+  }  
+  if (upper_rn == "HIS") {  
+    return 'H';
+  }  
+  if (upper_rn == "PHE") {
+    return 'F';
+  }  
+  return 'X';
+}
+
 AminoAcid OneLetterCodeToAminoAcid(char olc)
 {
   char upper_olc=toupper(olc);

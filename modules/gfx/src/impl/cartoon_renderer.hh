@@ -41,6 +41,8 @@ class DLLEXPORT_OST_GFX CartoonRenderer: public TraceRendererBase {
 public:
   CartoonRenderer(BackboneTrace* trace, bool force_tube=false);
 
+  virtual geom::AlignedCuboid GetBoundingBox() const;  
+  
   virtual void PrepareRendering();
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options);

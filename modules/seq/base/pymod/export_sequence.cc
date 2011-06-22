@@ -208,6 +208,7 @@ void const_seq_handle_def(O& bp_class)
     .def("GetLength", &C::GetLength)
     .def("GetResidue", &C::GetResidue)
     .def("GetOneLetterCode", &C::GetOneLetterCode)
+    .def("__iter__", iterator<C>())
     .def("__getitem__", &C::GetOneLetterCode)
     .def("GetOffset", &C::GetOffset)
     .def("Copy", &C::Copy)
@@ -287,6 +288,9 @@ void export_sequence()
   class_<SeqListIter>("SeqListIter", no_init)
     .def("next", &SeqListIter::next)
   ;
+  to_python_converter<std::pair<mol::EntityView, mol::EntityView>, 
+                      PairToTupleConverter<mol::EntityView, mol::EntityView> >();
+  
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)
     .add_property("sequence_count", &AlignmentHandle::GetCount)
@@ -357,8 +361,7 @@ void export_sequence()
     .def("__getitem__", &do_slice_b)
   ;
   implicitly_convertible<SequenceList, ConstSequenceList>();
-  to_python_converter<std::pair<mol::EntityView, mol::EntityView>, 
-                      PairToTupleConverter<mol::EntityView, mol::EntityView> >();
+
   def("CreateSequenceList", &CreateSequenceList);
   def("SequenceFromChain", seq_from_chain_a);
   def("SequenceFromChain", seq_from_chain_b);

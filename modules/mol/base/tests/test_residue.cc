@@ -46,6 +46,22 @@ BOOST_AUTO_TEST_CASE(test_in_sequence)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_res_index_bzdng227) 
+{
+  std::cout << "HERE" << std::endl;
+  EntityHandle eh=CreateEntity();
+  XCSEditor e=eh.EditXCS();
+  ChainHandle ch1=e.InsertChain("A");
+  ResidueHandle ra = e.AppendResidue(ch1, "A", 1);
+  ResidueHandle rb = e.AppendResidue(ch1, "B", 2);
+  ResidueHandle rc = e.AppendResidue(ch1, "C", 1);  
+  
+  BOOST_CHECK_EQUAL(ra.GetIndex(), 0);
+  BOOST_CHECK_EQUAL(rb.GetIndex(), 1);
+  BOOST_CHECK_EQUAL(rc.GetIndex(), 2);
+}
+
+
 BOOST_AUTO_TEST_CASE(throw_invalid_res_handle)
 {
   ChainHandle chain;

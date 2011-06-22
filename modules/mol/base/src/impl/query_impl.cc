@@ -1037,7 +1037,7 @@ Node* QueryImpl::ParseWithinExpr(QueryLexer& lexer) {
       geom::Vec3 point;
       if (this->ParsePoint(lexer, point)) {
         ParamType pt(WithinParam(point, rv*rv));
-        CompOP comp_op= COP_LE;
+        CompOP comp_op=COP_LE;
         if (inversion_stack_.back())
           comp_op=COP_GE;
         SelNode* within_node=new SelNode(Prop(Prop::WITHIN, Prop::VEC_DIST,
@@ -1077,8 +1077,11 @@ Node* QueryImpl::ParseWithinExpr(QueryLexer& lexer) {
     ParamType pt(WithinParam(bracketed_expr_.size()-1, rv*rv));    
     inversion_stack_.pop_back();    
     CompOP comp_op= COP_LE;
-    if (inversion_stack_.back())
+    if (inversion_stack_.back()) {
+      std::cout << "INV" << std::endl;
       comp_op=COP_GE;
+    }
+      
     SelNode* within_node=new SelNode(Prop(Prop::WITHIN, Prop::VEC_DIST,
                                           Prop::ATOM), 
                                      comp_op, pt);

@@ -156,10 +156,10 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
       sqlite3_bind_int(stmt, 5, a.is_aromatic);
       sqlite3_bind_int(stmt, 6, 0);                  
       sqlite3_bind_int(stmt, 7, a.is_leaving);
-      sqlite3_bind_int(stmt, 8, i-al.begin());      
+      sqlite3_bind_int(stmt, 8, a.ordinal);
       retval=sqlite3_step(stmt);
       assert(retval==SQLITE_DONE);
-      atom_ids[i-al.begin()]=sqlite3_last_insert_rowid(conn_);
+      atom_ids[a.ordinal]=sqlite3_last_insert_rowid(conn_);
     } else {
       LOG_ERROR(sqlite3_errmsg(conn_));
     }
