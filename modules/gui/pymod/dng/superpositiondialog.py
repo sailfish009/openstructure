@@ -220,7 +220,7 @@ class SuperpositionDialog(QDialog):
     view_one = self._chain_one.selected_chain
     view_two = self._chain_two.selected_chain
     atoms = self._GetAtomSelection()
-    sp = Superpose(view_one, view_two,
+    sp = Superpose(view_two, view_one,
                    self._mmethod_dict[str(self._methods.currentText())],
                    atoms)
     self.rmsd = sp.rmsd
