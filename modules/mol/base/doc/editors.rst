@@ -264,9 +264,9 @@ using an :class:`ICSEditor` is undefined and vice versa.
 
 .. note:: 
 
-  For speed reasons, the internal coordinate system is not initialized until the 
-  first call to :meth:`EntityHandle.EditICS`. This involves the build-up of a  
-  directed-graph for the bond network as well as calculating the internal  
+  For speed reasons, the internal coordinate system is not initialised until
+  the first call to :meth:`EntityHandle.EditICS`. This involves the build-up of
+  a directed-graph for the bond network as well as calculating the internal
   coordinate matrices.
 
 .. class:: ICSEditor
@@ -336,5 +336,5 @@ using an :class:`ICSEditor` is undefined and vice versa.
     
     :param angle: The angle in radians
     
-    :raises: :exc:`RuntimeError` when one of the atoms is invalid or there is no 
-       bond between atom1 and atom2 or atom2 and atom3.
+    :raises: :exc:`RuntimeError` when one of the atoms is invalid or there is
+    no bond between atom1 and atom2 or atom2 and atom3.

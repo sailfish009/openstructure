@@ -501,6 +501,7 @@ void PythonShellWidget::OnExecuteStateEntered()
   set_block_type_(block_edit_start_,textCursor().block(),BLOCKTYPE_CODE);
   insertPlainText(QString(QChar::ParagraphSeparator));
   QString command=GetCommand();
+
   QString command_trimmed=command.trimmed();
   if (command_trimmed.size()>0) {
     unsigned int id=PythonInterpreter::Instance().RunCommand(command);
@@ -509,7 +510,6 @@ void PythonShellWidget::OnExecuteStateEntered()
     insertPlainText(QString(QChar::ParagraphSeparator));
   }
   block_edit_start_=textCursor().block();
-
 }
 
 

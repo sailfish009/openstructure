@@ -186,8 +186,6 @@ void export_EntityView()
     .def("GetBounds", &EntityView::GetBounds)
     .add_property("bounds", &EntityView::GetBounds)    
   ;
-  to_python_converter<std::pair<EntityView, EntityView>, 
-                      PairToTupleConverter<EntityView, EntityView> >();  
   def("Union", &Union);
   def("Difference", &Difference);
   def("Intersection", &Intersection);

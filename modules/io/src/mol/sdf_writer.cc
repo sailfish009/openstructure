@@ -145,8 +145,7 @@ SDFWriter::SDFWriter(const boost::filesystem::path& filename):
 #else
   outfile_(filename.file_string().c_str()), 
 #endif
-  ostr_(outfile_), counter_(0), atom_indices_() {
-}
+  ostr_(outfile_), counter_(0), atom_indices_() {}
 
 void SDFWriter::Write(const mol::EntityView& ent) {
   if (!ostr_) {

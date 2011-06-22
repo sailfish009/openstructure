@@ -273,6 +273,7 @@ public:
   iterator end() const { return this->GetString().end(); }
   
   void Append(char olc);
+
   operator ConstSequenceHandle() const;
   /// \brief attach entity view to sequence
   ///

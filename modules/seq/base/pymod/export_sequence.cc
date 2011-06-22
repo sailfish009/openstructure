@@ -327,6 +327,9 @@ void export_sequence()
   class_<SeqListIter>("SeqListIter", no_init)
     .def("next", &SeqListIter::next)
   ;
+  to_python_converter<std::pair<mol::EntityView, mol::EntityView>, 
+                      PairToTupleConverter<mol::EntityView, mol::EntityView> >();
+  
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)
     .add_property("sequence_count", &AlignmentHandle::GetCount)
@@ -397,7 +400,7 @@ void export_sequence()
     .def("__getitem__", &do_slice_b)
   ;
   implicitly_convertible<SequenceList, ConstSequenceList>();
-  
+
   def("CreateSequenceList", &CreateSequenceList);
   def("SequenceFromChain", seq_from_chain_a);
   def("SequenceFromChain", seq_from_chain_b);

@@ -59,8 +59,6 @@ void export_Bond()
   generic_prop_def<BondHandle>(bond_handle);
   class_<BondHandleList>("BondHandleList", no_init)
     .def(vector_indexing_suite<BondHandleList>())
-    .def(geom::VectorAdditions<BondHandleList>())    
-  ;  
+    .def(geom::VectorAdditions<BondHandleList>());  
   def("BondExists", &BondExists);
 }
-

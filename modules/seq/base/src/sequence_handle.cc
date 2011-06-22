@@ -407,7 +407,6 @@ char SequenceHandle::operator[](size_t index) const
   return this->GetString()[index];
 }
 
-
 bool Match(const ConstSequenceHandle& s1, const ConstSequenceHandle& s2)
 {
   return Match(s1.GetString(), s2.GetString());
@@ -427,5 +426,4 @@ bool Match(const String& s1, const String& s2)
   }
   return true;
 }
-
 }}

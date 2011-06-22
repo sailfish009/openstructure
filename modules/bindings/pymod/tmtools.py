@@ -96,7 +96,7 @@ def _ParseTmAlign(lines):
   alignment = seq.CreateAlignment()
   alignment.AddSequence(seq2)
   alignment.AddSequence(seq1)
-  return TMAlignResult(rmsd, aln_length, tm_score, tf, seq2, alignment)
+  return TMAlignResult(rmsd, tm_score, aln_length, tf, seq2, alignment)
 
 def _RunTmAlign(tmalign, tmp_dir):
   model1_filename=os.path.join(tmp_dir, 'model01.pdb')
