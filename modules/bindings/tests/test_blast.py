@@ -43,7 +43,7 @@ if __name__ == "__main__":
     blastpath=settings.Locate('blastall')
   except(settings.FileNotFound):
     print "Could not find blastall executable: ignoring unit tests"
-    exit(0)
+    sys.exit(0)
   try:
     unittest.main()
   except Exception, e:
