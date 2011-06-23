@@ -13,8 +13,11 @@ set(OST_MOL_BASE_UNIT_TESTS
   test_view.cc
   test_view_op.cc
   tests.cc
-  test_numpy.py
 )
+
+if (USE_NUMPY)
+   set(OST_MOST_BASE_UNIT_TESTS "${OST_MOST_BASE_UNIT_TESTS}" test_numpy.py)
+endif (USE_NUMPY)
 
 ost_unittest(MODULE mol SOURCES "${OST_MOL_BASE_UNIT_TESTS}")
 
