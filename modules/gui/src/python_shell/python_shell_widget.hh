@@ -93,6 +93,7 @@ protected slots:
   void handle_select_all_rw_();
   void handle_delete_();
   void handle_backspace_();
+  void handle_clear_all_();
 
 protected:
   virtual void resizeEvent(QResizeEvent* event);

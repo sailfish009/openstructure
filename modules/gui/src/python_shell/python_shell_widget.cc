@@ -328,6 +328,10 @@ void PythonShellWidget::setup_state_machine_()
   single_line->addTransition(new KeyEventTransition(Qt::Key_Up,DNG_ARROW_MODIFIERS,history_up));
   single_line->addTransition(new KeyEventTransition(Qt::Key_Down,DNG_ARROW_MODIFIERS,history_down));
 
+  KeyEventTransition* clear_all_tr_sl=new KeyEventTransition(Qt::Key_D,Qt::ControlModifier,single_line);
+  single_line->addTransition(clear_all_tr_sl);
+  connect(clear_all_tr_sl,SIGNAL(triggered()),this,SLOT(handle_clear_all_()));
+
   //multi line inactive transitions
   multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Return,
                                                             Qt::NoModifier,
@@ -342,6 +346,10 @@ void PythonShellWidget::setup_state_machine_()
                                                  new BlockStatusGuard(this,CODE_BLOCK_INCOMPLETE));
   multi_line_inactive->addTransition(tr6);
   connect(tr6,SIGNAL(triggered()),this,SLOT(NewLineAtEnd()));
+
+  KeyEventTransition* clear_all_tr_mli=new KeyEventTransition(Qt::Key_D,Qt::ControlModifier,single_line);
+  multi_line_inactive->addTransition(clear_all_tr_mli);
+  connect(clear_all_tr_mli,SIGNAL(triggered()),this,SLOT(handle_clear_all_()));
 
   multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Left,DNG_ARROW_MODIFIERS,multiline_active_state_));
   multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Right,DNG_ARROW_MODIFIERS,multiline_active_state_));
@@ -395,6 +403,9 @@ void PythonShellWidget::setup_state_machine_()
   multiline_active_state_->addTransition(tr8);
   connect(tr8,SIGNAL(triggered()),this,SLOT(NewLineAtEnd()));
 
+  KeyEventTransition* clear_all_tr_mla=new KeyEventTransition(Qt::Key_D,Qt::ControlModifier,single_line);
+  multiline_active_state_->addTransition(clear_all_tr_mla);
+  connect(clear_all_tr_mla,SIGNAL(triggered()),this,SLOT(handle_clear_all_()));
   multiline_active_state_->addTransition(new KeyEventTransition(Qt::Key_Escape,Qt::NoModifier,multi_line_inactive));
   multiline_active_state_->addTransition(new KeyEventTransition(Qt::Key_Up,Qt::ControlModifier,history_up));
   multiline_active_state_->addTransition(new KeyEventTransition(Qt::Key_Down,Qt::ControlModifier,history_down));
@@ -747,6 +758,12 @@ void PythonShellWidget::handle_completion_()
 }
 
 
+void PythonShellWidget::handle_clear_all_()
+{
+  handle_select_all_rw_();
+  handle_delete_();
+}
+
 void PythonShellWidget::handle_delete_()
 {
   // BZDNG-238
@@ -761,13 +778,14 @@ void PythonShellWidget::handle_delete_()
   //
   // If we emulate the deletion of the text manually all is fine.
   QTextCursor cursor=this->textCursor();
+  int pos=block_edit_start_.position();
   if (cursor.hasSelection()) {
     cursor.removeSelectedText();
   } else {
     cursor.deleteChar();
   }
   QTextCursor tc=this->textCursor();
-  tc.setPosition(block_edit_start_.position());
+  tc.setPosition(pos);
   block_edit_start_=tc.block();
 }
 
@@ -776,6 +794,7 @@ void PythonShellWidget::handle_backspace_()
   // BZDNG-238
   // see above
   QTextCursor cursor=this->textCursor();
+  int pos=block_edit_start_.position();
   if (cursor.hasSelection()) {
     cursor.removeSelectedText();
   } else {
@@ -784,7 +803,7 @@ void PythonShellWidget::handle_backspace_()
     }
   }
   QTextCursor tc=this->textCursor();
-  tc.setPosition(block_edit_start_.position());
+  tc.setPosition(pos);
   block_edit_start_=tc.block();
 }
 
