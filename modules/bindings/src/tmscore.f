@@ -1,19 +1,30 @@
 *************************************************************************
 *     This program is to compare two protein structures and identify the 
-*     best superposition that has the maximum TM-score. The program can 
-*     be freely copied or modified.
-*     For comments, please email to: yzhang@ku.edu
-*
+*     best superposition that has the highest TM-score. Input structures 
+*     must be in the PDB format. By default, TM-score is normalized by 
+*     the second protein. Users can obtain a brief instruction by simply
+*     running the program without arguments. For comments/suggestions,
+*     please contact email: zhng@umich.edu.
+*     
 *     Reference: 
 *     Yang Zhang, Jeffrey Skolnick, Proteins, 2004 57:702-10.
-*
+*     
+*     Permission to use, copy, modify, and distribute this program for 
+*     any purpose, with or without fee, is hereby granted, provided that
+*     the notices on the head, the reference information, and this
+*     copyright notice appear in all copies or substantial portions of 
+*     the Software. It is provided "as is" without express or implied 
+*     warranty.
 ******************* Updating history ************************************
-*     2005/10/19: the program was reformed so that the score values
+*     2005/10/19: the program was reformed so that the score values.
 *                 are not dependent on the specific compilers.
-*     2006/06/20: select 'A' if there is altLoc when reading PDB file
-*     2007/02/05: fix a bug with length<15 in TMscore_32
-*     2007/02/27: rotation matrix from Chain-1 to Chain-2 is added
-*     2007/12/06: GDT-HA score is added, fixed a bug for reading PDB
+*     2006/06/20: selected 'A' if there is altLoc when reading PDB file.
+*     2007/02/05: fixed a bug with length<15 in TMscore_32.
+*     2007/02/27: rotation matrix from Chain-1 to Chain-2 was added.
+*     2007/12/06: GDT-HA score was added, fixed a bug for reading PDB.
+*     2010/08/02: A new RMSD matrix was used and obsolete statement removed.
+*     2011/01/03: The length of pdb file names were extended to 500.
+*     2011/01/30: An open source license is attached to the program.
 *************************************************************************
       
       program TMscore
@@ -26,9 +37,9 @@
       common/nscore/i_ali(nmax),n_cut ![1,n_ali],align residues for the score
       dimension k_ali(nmax),k_ali0(nmax)
 
-      character*100 fnam,pdb(100),outname
+      character*500 fnam,pdb(100),outname
       character*3 aa(-1:20),seqA(nmax),seqB(nmax)
-      character*100 s,du
+      character*500 s,du
       character seq1A(nmax),seq1B(nmax),ali(nmax)
       character sequenceA(nmax),sequenceB(nmax),sequenceM(nmax)
 
@@ -62,19 +73,22 @@ ccc
       if(fnam.eq.' '.or.fnam.eq.'?'.or.fnam.eq.'-h')then
          write(*,*)
          write(*,*)'Brief instruction for running TM-score program:'
+         write(*,*)'(For detail: Zhang & Skolnick,  Proteins, 2004',
+     &        ' 57:702-10)'
          write(*,*)
-       write(*,*)'1. Run TM-score to compare ''model'' and ''native'':'
-         write(*,*)'  TMscore model native'
+         write(*,*)'1. Run TM-score to compare ''model'' and ''native',
+     &        ':'
+         write(*,*)'   >TMscore model native'
          write(*,*)
-      write(*,*)'2. Run TM-score with an assigned d0, e.g. 5 Angstroms:'
-         write(*,*)'  TMscore model native -d 5'
+         write(*,*)'2. Run TM-score with an assigned d0, e.g. 5',
+     &        ' Angstroms:'
+         write(*,*)'   >TMscore model native -d 5'
          write(*,*)
          write(*,*)'3. Run TM-score with superposition output, e.g. ',
      &        '''TM.sup'':'
-         write(*,*)'  TMscore model native -o TM.sup'
-         write(*,*)
-      write(*,*)'4, To view the superimposed structures by rasmol:'
-         write(*,*)'   rasmol -script TM.sup'
+         write(*,*)'   >TMscore model native -o TM.sup'
+         write(*,*)'   To view the superimposed structures by rasmol:'
+         write(*,*)'      >rasmol -script TM.sup'
          write(*,*)
          goto 9999
       endif
@@ -314,7 +328,6 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
               if(n_GDT2_max.lt.n_GDT2)n_GDT2_max=n_GDT2
               if(n_GDT4_max.lt.n_GDT4)n_GDT4_max=n_GDT4
               if(n_GDT8_max.lt.n_GDT8)n_GDT8_max=n_GDT8
- 303          format(i5,i5,i5,f17.14,f17.14,i5,f7.3)
               if(it.eq.n_it)goto 302
               if(n_cut.eq.ka)then
                  neq=0
@@ -337,17 +350,17 @@ c^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
      &     '************************'
       write(*,*)'*                                 TM-SCORE           ',
      &     '                       *'
-      write(*,*)'* A scoring function to assess the quality of protein',
-     &     ' structure predictions *'
+      write(*,*)'* A scoring function to assess the similarity of prot',
+     &     'ein structures         *'
       write(*,*)'* Based on statistics:                               ',
      &     '                       *'
-      write(*,*)'*       0.0 < TM-score < 0.17, Random predictions    ',
-     &     '                       *'
-      write(*,*)'*       0.4 < TM-score < 1.00, Meaningful predictions',
+      write(*,*)'*       0.0 < TM-score < 0.17, random structural simi',
+     &     'larity                 *'
+      write(*,*)'*       0.5 < TM-score < 1.00, in about the same fold',
      &     '                       *'
       write(*,*)'* Reference: Yang Zhang and Jeffrey Skolnick, ',
      &     'Proteins 2004 57: 702-710     *'
-      write(*,*)'* For comments, please email to: yzhang@ku.edu       ',
+      write(*,*)'* For comments, please email to: zhng@umich.edu      ',
      &     '                       *'
       write(*,*)'*****************************************************',
      &     '************************'
@@ -648,240 +661,260 @@ c       -2: no result obtained because of negative weights w
 c           or all weights equal to zero.
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       subroutine u3b(w, x, y, n, mode, rms, u, t, ier)
-      integer ip(9), ip2312(4), i, j, k, l, m1, m, ier, n, mode
-      double precision w(1), x(3, 1), y(3, 1), u(3, 3), t(3), rms, sigma
-      double precision r(3, 3), xc(3), yc(3), wc, a(3, 3), b(3, 3), e0, 
-     &e(3), e1, e2, e3, d, spur, det, cof, h, g, cth, sth, sqrth, p, tol
-     &, rr(6), rr1, rr2, rr3, rr4, rr5, rr6, ss(6), ss1, ss2, ss3, ss4, 
-     &ss5, ss6, zero, one, two, three, sqrt3
-      equivalence (rr(1), rr1), (rr(2), rr2), (rr(3), rr3), (rr(4), rr4)
-     &, (rr(5), rr5), (rr(6), rr6), (ss(1), ss1), (ss(2), ss2), (ss(3), 
-     &ss3), (ss(4), ss4), (ss(5), ss5), (ss(6), ss6), (e(1), e1), (e(2)
-     &, e2), (e(3), e3)
+      double precision w(*), x(3,*), y(3,*)
+      integer n, mode
+      
+      double precision rms, u(3,3), t(3)
+      integer ier
+      
+      integer i, j, k, l, m1, m
+      integer ip(9), ip2312(4)
+      double precision r(3,3), xc(3), yc(3), wc
+      double precision a(3,3), b(3,3), e(3), rr(6), ss(6)
+      double precision e0, d, spur, det, cof, h, g
+      double precision cth, sth, sqrth, p, sigma
+      
+      double precision sqrt3, tol, zero
+      
       data sqrt3 / 1.73205080756888d+00 /
       data tol / 1.0d-2 /
       data zero / 0.0d+00 /
-      data one / 1.0d+00 /
-      data two / 2.0d+00 /
-      data three / 3.0d+00 /
       data ip / 1, 2, 4, 2, 3, 5, 4, 5, 6 /
       data ip2312 / 2, 3, 1, 2 /
-c 156 "rms.for"
+      
       wc = zero
-      rms = 0.0
+      rms = zero
       e0 = zero
-      do 1 i = 1, 3
-      xc(i) = zero
-      yc(i) = zero
-      t(i) = 0.0
-      do 1 j = 1, 3
-      d = zero
-      if (i .eq. j) d = one
-      u(i,j) = d
-      a(i,j) = d
-    1 r(i,j) = zero
+      
+      do i=1, 3
+         xc(i) = zero
+         yc(i) = zero
+         t(i) = zero
+         do j=1, 3
+            r(i,j) = zero
+            u(i,j) = zero
+            a(i,j) = zero
+            if( i .eq. j ) then
+               u(i,j) = 1.0
+               a(i,j) = 1.0
+            end if
+         end do
+      end do
+      
       ier = -1
-c**** DETERMINE CENTROIDS OF BOTH VECTOR SETS X AND Y
-c 170 "rms.for"
-      if (n .lt. 1) return 
-c 172 "rms.for"
+      if( n .lt. 1 ) return
       ier = -2
-      do 2 m = 1, n
-      if (w(m) .lt. 0.0) return 
-      wc = wc + w(m)
-      do 2 i = 1, 3
-      xc(i) = xc(i) + (w(m) * x(i,m))
-    2 yc(i) = yc(i) + (w(m) * y(i,m))
-      if (wc .le. zero) return 
-      do 3 i = 1, 3
-      xc(i) = xc(i) / wc
-c**** DETERMINE CORRELATION MATRIX R BETWEEN VECTOR SETS Y AND X
-c 182 "rms.for"
-    3 yc(i) = yc(i) / wc
-c 184 "rms.for"
-      do 4 m = 1, n
-      do 4 i = 1, 3
-      e0 = e0 + (w(m) * (((x(i,m) - xc(i)) ** 2) + ((y(i,m) - yc(i)) ** 
-     &2)))
-c 187 "rms.for"
-      d = w(m) * (y(i,m) - yc(i))
-      do 4 j = 1, 3
-c**** CALCULATE DETERMINANT OF R(I,J)
-c 189 "rms.for"
-    4 r(i,j) = r(i,j) + (d * (x(j,m) - xc(j)))
-c 191 "rms.for"
-      det = ((r(1,1) * ((r(2,2) * r(3,3)) - (r(2,3) * r(3,2)))) - (r(1,2
-     &) * ((r(2,1) * r(3,3)) - (r(2,3) * r(3,1))))) + (r(1,3) * ((r(2,1)
-     & * r(3,2)) - (r(2,2) * r(3,1))))
-c**** FORM UPPER TRIANGLE OF TRANSPOSED(R)*R
-c 194 "rms.for"
+      do m=1, n
+         if( w(m) .lt. 0.0 ) return
+         wc = wc + w(m)
+         do i=1, 3
+            xc(i) = xc(i) + w(m)*x(i,m)
+            yc(i) = yc(i) + w(m)*y(i,m)
+         end do
+      end do
+      if( wc .le. zero ) return
+      do i=1, 3
+         xc(i) = xc(i) / wc
+         yc(i) = yc(i) / wc
+      end do
+      
+      do m=1, n
+         do i=1, 3
+            e0=e0+w(m)*((x(i,m)-xc(i))**2+(y(i,m)-yc(i))**2)
+            d = w(m) * ( y(i,m) - yc(i) )
+            do j=1, 3
+               r(i,j) = r(i,j) + d*( x(j,m) - xc(j) )
+            end do
+         end do
+      end do
+      
+      det = r(1,1) * ( (r(2,2)*r(3,3)) - (r(2,3)*r(3,2)) )
+     &     - r(1,2) * ( (r(2,1)*r(3,3)) - (r(2,3)*r(3,1)) )
+     &     + r(1,3) * ( (r(2,1)*r(3,2)) - (r(2,2)*r(3,1)) )
+      
       sigma = det
-c 196 "rms.for"
+      
       m = 0
-      do 5 j = 1, 3
-      do 5 i = 1, j
-      m = m + 1
-c***************** EIGENVALUES *****************************************
-c**** FORM CHARACTERISTIC CUBIC  X**3-3*SPUR*X**2+3*COF*X-DET=0
-c 200 "rms.for"
-    5 rr(m) = ((r(1,i) * r(1,j)) + (r(2,i) * r(2,j))) + (r(3,i) * r(3,j)
-     &)
-c 203 "rms.for"
-      spur = ((rr1 + rr3) + rr6) / three
-      cof = ((((((rr3 * rr6) - (rr5 * rr5)) + (rr1 * rr6)) - (rr4 * rr4)
-     &) + (rr1 * rr3)) - (rr2 * rr2)) / three
-c 205 "rms.for"
-      det = det * det
-      do 6 i = 1, 3
-    6 e(i) = spur
-c**** REDUCE CUBIC TO STANDARD FORM Y**3-3HY+2G=0 BY PUTTING X=Y+SPUR
-c 208 "rms.for"
-      if (spur .le. zero) goto 40
-c 210 "rms.for"
-      d = spur * spur
+      do j=1, 3
+         do i=1, j
+            m = m+1
+            rr(m) = r(1,i)*r(1,j) + r(2,i)*r(2,j) + r(3,i)*r(3,j)
+         end do
+      end do
+      
+      spur = (rr(1)+rr(3)+rr(6)) / 3.0
+      cof = (((((rr(3)*rr(6) - rr(5)*rr(5)) + rr(1)*rr(6))
+     &     - rr(4)*rr(4)) + rr(1)*rr(3)) - rr(2)*rr(2)) / 3.0
+      det = det*det
+      
+      do i=1, 3
+         e(i) = spur
+      end do
+      if( spur .le. zero ) goto 40
+      d = spur*spur
       h = d - cof
-c**** SOLVE CUBIC. ROOTS ARE E1,E2,E3 IN DECREASING ORDER
-c 212 "rms.for"
-      g = (((spur * cof) - det) / two) - (spur * h)
-c 214 "rms.for"
-      if (h .le. zero) goto 8
+      g = (spur*cof - det)/2.0 - spur*h
+      if( h .le. zero ) then
+         if( mode .eq. 0 ) then
+            goto 50
+         else
+            goto 30
+         end if
+      end if
       sqrth = dsqrt(h)
-      d = ((h * h) * h) - (g * g)
-      if (d .lt. zero) d = zero
-      d = datan2(dsqrt(d),- g) / three
+      d = h*h*h - g*g
+      if( d .lt. zero ) d = zero
+      d = datan2( dsqrt(d), -g ) / 3.0
       cth = sqrth * dcos(d)
-      sth = (sqrth * sqrt3) * dsin(d)
-      e1 = (spur + cth) + cth
-      e2 = (spur - cth) + sth
-      e3 = (spur - cth) - sth
-c.....HANDLE SPECIAL CASE OF 3 IDENTICAL ROOTS
-c 224 "rms.for"
-      if (mode) 10, 50, 10
-c**************** EIGENVECTORS *****************************************
-c 226 "rms.for"
-    8 if (mode) 30, 50, 30
-c 228 "rms.for"
-   10 do 15 l = 1, 3, 2
-      d = e(l)
-      ss1 = ((d - rr3) * (d - rr6)) - (rr5 * rr5)
-      ss2 = ((d - rr6) * rr2) + (rr4 * rr5)
-      ss3 = ((d - rr1) * (d - rr6)) - (rr4 * rr4)
-      ss4 = ((d - rr3) * rr4) + (rr2 * rr5)
-      ss5 = ((d - rr1) * rr5) + (rr2 * rr4)
-      ss6 = ((d - rr1) * (d - rr3)) - (rr2 * rr2)
-      j = 1
-      if (dabs(ss1) .ge. dabs(ss3)) goto 12
-      j = 2
-      if (dabs(ss3) .ge. dabs(ss6)) goto 13
-   11 j = 3
-      goto 13
-   12 if (dabs(ss1) .lt. dabs(ss6)) goto 11
-   13 d = zero
-      j = 3 * (j - 1)
-      do 14 i = 1, 3
-      k = ip(i + j)
-      a(i,l) = ss(k)
-   14 d = d + (ss(k) * ss(k))
-      if (d .gt. zero) d = one / dsqrt(d)
-      do 15 i = 1, 3
-   15 a(i,l) = a(i,l) * d
-      d = ((a(1,1) * a(1,3)) + (a(2,1) * a(2,3))) + (a(3,1) * a(3,3))
-      m1 = 3
-      m = 1
-      if ((e1 - e2) .gt. (e2 - e3)) goto 16
-      m1 = 1
-      m = 3
-   16 p = zero
-      do 17 i = 1, 3
-      a(i,m1) = a(i,m1) - (d * a(i,m))
-   17 p = p + (a(i,m1) ** 2)
-      if (p .le. tol) goto 19
-      p = one / dsqrt(p)
-      do 18 i = 1, 3
-   18 a(i,m1) = a(i,m1) * p
-      goto 21
-   19 p = one
-      do 20 i = 1, 3
-      if (p .lt. dabs(a(i,m))) goto 20
-      p = dabs(a(i,m))
-      j = i
-   20 continue
-      k = ip2312(j)
-      l = ip2312(j + 1)
-      p = dsqrt((a(k,m) ** 2) + (a(l,m) ** 2))
-      if (p .le. tol) goto 40
-      a(j,m1) = zero
-      a(k,m1) = - (a(l,m) / p)
-      a(l,m1) = a(k,m) / p
-   21 a(1,2) = (a(2,3) * a(3,1)) - (a(2,1) * a(3,3))
-      a(2,2) = (a(3,3) * a(1,1)) - (a(3,1) * a(1,3))
-c****************** ROTATION MATRIX ************************************
-c 282 "rms.for"
-      a(3,2) = (a(1,3) * a(2,1)) - (a(1,1) * a(2,3))
-c 284 "rms.for"
-   30 do 32 l = 1, 2
-      d = zero
-      do 31 i = 1, 3
-      b(i,l) = ((r(i,1) * a(1,l)) + (r(i,2) * a(2,l))) + (r(i,3) * a(3,l
-     &))
-c 288 "rms.for"
-   31 d = d + (b(i,l) ** 2)
-      if (d .gt. zero) d = one / dsqrt(d)
-      do 32 i = 1, 3
-   32 b(i,l) = b(i,l) * d
-      d = ((b(1,1) * b(1,2)) + (b(2,1) * b(2,2))) + (b(3,1) * b(3,2))
+      sth = sqrth*sqrt3*dsin(d)
+      e(1) = (spur + cth) + cth
+      e(2) = (spur - cth) + sth
+      e(3) = (spur - cth) - sth
+	
+      if( mode .eq. 0 ) then
+         goto 50
+      end if
+      
+      do l=1, 3, 2
+         d = e(l)
+         ss(1) = (d-rr(3)) * (d-rr(6))  - rr(5)*rr(5)
+         ss(2) = (d-rr(6)) * rr(2)      + rr(4)*rr(5)
+         ss(3) = (d-rr(1)) * (d-rr(6))  - rr(4)*rr(4)
+         ss(4) = (d-rr(3)) * rr(4)      + rr(2)*rr(5)
+         ss(5) = (d-rr(1)) * rr(5)      + rr(2)*rr(4)
+         ss(6) = (d-rr(1)) * (d-rr(3))  - rr(2)*rr(2)
+         
+         if( dabs(ss(1)) .ge. dabs(ss(3)) ) then
+            j=1
+            if( dabs(ss(1)) .lt. dabs(ss(6)) ) j = 3
+         else if( dabs(ss(3)) .ge. dabs(ss(6)) ) then
+            j = 2
+         else
+            j = 3
+         end if
+         
+         d = zero
+         j = 3 * (j - 1)
+         
+         do i=1, 3
+            k = ip(i+j)
+            a(i,l) = ss(k)
+            d = d + ss(k)*ss(k)
+         end do
+         if( d .gt. zero ) d = 1.0 / dsqrt(d)
+         do i=1, 3
+            a(i,l) = a(i,l) * d
+         end do
+      end do
+      
+      d = a(1,1)*a(1,3) + a(2,1)*a(2,3) + a(3,1)*a(3,3)
+      if ((e(1) - e(2)) .gt. (e(2) - e(3))) then
+         m1 = 3
+         m = 1
+      else
+         m1 = 1
+         m = 3
+      endif
+      
       p = zero
-      do 33 i = 1, 3
-      b(i,2) = b(i,2) - (d * b(i,1))
-   33 p = p + (b(i,2) ** 2)
-      if (p .le. tol) goto 35
-      p = one / dsqrt(p)
-      do 34 i = 1, 3
-   34 b(i,2) = b(i,2) * p
-      goto 37
-   35 p = one
-      do 36 i = 1, 3
-      if (p .lt. dabs(b(i,1))) goto 36
-      p = dabs(b(i,1))
-      j = i
-   36 continue
-      k = ip2312(j)
-      l = ip2312(j + 1)
-      p = dsqrt((b(k,1) ** 2) + (b(l,1) ** 2))
-      if (p .le. tol) goto 40
-      b(j,2) = zero
-      b(k,2) = - (b(l,1) / p)
-      b(l,2) = b(k,1) / p
-   37 b(1,3) = (b(2,1) * b(3,2)) - (b(2,2) * b(3,1))
-      b(2,3) = (b(3,1) * b(1,2)) - (b(3,2) * b(1,1))
-      b(3,3) = (b(1,1) * b(2,2)) - (b(1,2) * b(2,1))
-      do 39 i = 1, 3
-      do 39 j = 1, 3
-c****************** TRANSLATION VECTOR *********************************
-c 320 "rms.for"
-   39 u(i,j) = ((b(i,1) * a(j,1)) + (b(i,2) * a(j,2))) + (b(i,3) * a(j,3
-     &))
-   40 do 41 i = 1, 3
-c********************** RMS ERROR **************************************
-c 323 "rms.for"
-   41 t(i) = ((yc(i) - (u(i,1) * xc(1))) - (u(i,2) * xc(2))) - (u(i,3)
-     & * xc(3))
-   50 do 51 i = 1, 3
-      if (e(i) .lt. zero) e(i) = zero
-   51 e(i) = dsqrt(e(i))
+      do i=1, 3
+         a(i,m1) = a(i,m1) - d*a(i,m)
+         p = p + a(i,m1)**2
+      end do
+      if( p .le. tol ) then
+         p = 1.0
+         do 21 i=1, 3
+            if (p .lt. dabs(a(i,m))) goto 21
+            p = dabs( a(i,m) )
+            j = i
+ 21      continue
+         k = ip2312(j)
+         l = ip2312(j+1)
+         p = dsqrt( a(k,m)**2 + a(l,m)**2 )
+         if( p .le. tol ) goto 40
+         a(j,m1) = zero
+         a(k,m1) = -a(l,m)/p
+         a(l,m1) =  a(k,m)/p
+      else
+         p = 1.0 / dsqrt(p)
+         do i=1, 3
+            a(i,m1) = a(i,m1)*p
+         end do
+      end if
+      
+      a(1,2) = a(2,3)*a(3,1) - a(2,1)*a(3,3)
+      a(2,2) = a(3,3)*a(1,1) - a(3,1)*a(1,3)
+      a(3,2) = a(1,3)*a(2,1) - a(1,1)*a(2,3)
+      
+ 30   do l=1, 2
+         d = zero
+         do i=1, 3
+            b(i,l) = r(i,1)*a(1,l) + r(i,2)*a(2,l) + r(i,3)*a(3,l)
+            d = d + b(i,l)**2
+         end do
+         if( d .gt. zero ) d = 1.0 / dsqrt(d)
+         do i=1, 3
+            b(i,l) = b(i,l)*d
+         end do
+      end do
+      d = b(1,1)*b(1,2) + b(2,1)*b(2,2) + b(3,1)*b(3,2)
+      p = zero
+      
+      do i=1, 3
+         b(i,2) = b(i,2) - d*b(i,1)
+         p = p + b(i,2)**2
+      end do
+      if( p .le. tol ) then
+         p = 1.0
+         do 22 i=1, 3
+            if(p.lt.dabs(b(i,1)))goto 22
+            p = dabs( b(i,1) )
+            j = i
+ 22      continue
+         k = ip2312(j)
+         l = ip2312(j+1)
+         p = dsqrt( b(k,1)**2 + b(l,1)**2 )
+         if( p .le. tol ) goto 40
+         b(j,2) = zero
+         b(k,2) = -b(l,1)/p
+         b(l,2) =  b(k,1)/p
+      else
+         p = 1.0 / dsqrt(p)
+         do i=1, 3
+            b(i,2) = b(i,2)*p
+         end do
+      end if
+      
+      b(1,3) = b(2,1)*b(3,2) - b(2,2)*b(3,1)
+      b(2,3) = b(3,1)*b(1,2) - b(3,2)*b(1,1)
+      b(3,3) = b(1,1)*b(2,2) - b(1,2)*b(2,1)
+      
+      do i=1, 3
+         do j=1, 3
+            u(i,j) = b(i,1)*a(j,1) + b(i,2)*a(j,2) + b(i,3)*a(j,3)
+         end do
+      end do
+      
+ 40   do i=1, 3
+         t(i) = ((yc(i) - u(i,1)*xc(1)) - u(i,2)*xc(2)) - u(i,3)*xc(3)
+      end do
+ 50   do i=1, 3
+         if( e(i) .lt. zero ) e(i) = zero
+         e(i) = dsqrt( e(i) )
+      end do
+      
       ier = 0
-      if (e2 .le. (e1 * 1.0d-05)) ier = -1
-      d = e3
-      if (sigma .ge. 0.0) goto 52
-      d = - d
-      if ((e2 - e3) .le. (e1 * 1.0d-05)) ier = -1
-   52 d = (d + e2) + e1
+      if( e(2) .le. (e(1) * 1.0d-05) ) ier = -1
+      
+      d = e(3)
+      if( sigma .lt. 0.0 ) then
+         d = - d
+         if( (e(2) - e(3)) .le. (e(1) * 1.0d-05) ) ier = -1
+      end if
+      d = (d + e(2)) + e(1)
+      
       rms = (e0 - d) - d
-      if (rms .lt. 0.0) rms = 0.0
-      return 
-c.....END U3B...........................................................
-c----------------------------------------------------------
-c                       THE END
-c----------------------------------------------------------
-c 338 "rms.for"
+      if( rms .lt. 0.0 ) rms = 0.0
+      
+      return
       end
