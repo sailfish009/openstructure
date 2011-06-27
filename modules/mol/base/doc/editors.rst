@@ -337,4 +337,4 @@ using an :class:`ICSEditor` is undefined and vice versa.
     :param angle: The angle in radians
     
     :raises: :exc:`RuntimeError` when one of the atoms is invalid or there is
-    no bond between atom1 and atom2 or atom2 and atom3.
+             no bond between atom1 and atom2 or atom2 and atom3.
