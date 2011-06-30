@@ -224,7 +224,7 @@ message(STATUS
         "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
         "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support             (-DUSE_SHADER) : ${_SHADER}\n"
-        "   Numpy support              (-DUSE_NUMPY)  : ${_NUMPY}\n"
+        "   Numpy support               (-DUSE_NUMPY) : ${_NUMPY}\n"
         "   Optimize                     (-DOPTIMIZE) : ${_OPT}\n"
         "   Profiling support             (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
