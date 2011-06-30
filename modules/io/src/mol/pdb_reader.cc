@@ -479,9 +479,11 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   }
   mol::AtomHandle atom=curr_residue_.FindAtom(aname);
   if (!atom.IsValid()) {
-    if (profile_.fault_tolerant || profile_.calpha_only) {
+    if (profile_.fault_tolerant ||
+        profile_.calpha_only  ||
+        warned_name_mismatch_) {
       return;
-    } 
+    }
     const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
     throw IOException(str(format(fmt_str) % line_num));      
   }

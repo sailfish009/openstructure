@@ -557,6 +557,12 @@ BOOST_AUTO_TEST_CASE(atom_name_too_long)
   BOOST_CHECK_THROW(writer.Write(ent), IOException);
 }
 
-
+BOOST_AUTO_TEST_CASE(anisou_BZDNG_274)
+{
+  String fname("testfiles/pdb/bzdng274.pdb");
+  PDBReader reader(fname, IOProfile());
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_NO_THROW(reader.Import(ent));
+}
 
 BOOST_AUTO_TEST_SUITE_END()
