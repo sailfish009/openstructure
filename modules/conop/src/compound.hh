@@ -169,6 +169,11 @@ public:
   bool IsPeptideLinking() const {
     return chem_class_.IsPeptideLinking();
   }
+
+  bool IsNucleotideLinking() const {
+    return chem_class_.IsNucleotideLinking();
+  }
+
   void AddAtom(const AtomSpec& atom) {
     atom_specs_.push_back(atom);
   }

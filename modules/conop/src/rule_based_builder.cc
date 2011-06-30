@@ -255,29 +255,36 @@ void RuleBasedBuilder::ConnectResidueToNext(mol::ResidueHandle rh,
   if (!next.IsValid()) {
     return;
   }
+
   Compound::Dialect dialect=this->GetDialect()==PDB_DIALECT ? Compound::PDB : Compound::CHARMM;
+
   mol::XCSEditor e=rh.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   CompoundPtr mc=compound_lib_->FindCompound(rh.GetName(), dialect);
   CompoundPtr nc=compound_lib_->FindCompound(next.GetName(), dialect);
   if (!(mc && nc))
     return;
+
   // check if both of the residues are able to form a peptide bond.
-  if (!mc->IsPeptideLinking())
-    return;
-  if (!nc->IsPeptideLinking())
-    return;
-  // If we have an OXT then there is no peptide bond connecting the two
-  // residues.
-  if (rh.FindAtom("OXT"))
-    return;
-  mol::AtomHandle c=rh.FindAtom("C");
-  mol::AtomHandle n=next.FindAtom("N");
-  // Give subclasses a chance to give us their opinions on the feasibility of
-  // the peptide bond.
-  if (c.IsValid() && n.IsValid() && this->DoesPeptideBondExist(c, n)) {
-    e.Connect(c, n, 1);
-    rh.SetIsProtein(true);
-    next.SetIsProtein(true);
+  if (mc->IsPeptideLinking() && nc->IsPeptideLinking()) {
+    // If we have an OXT then there is no peptide bond connecting the two
+    // residues.
+    if (rh.FindAtom("OXT"))
+      return;
+    mol::AtomHandle c=rh.FindAtom("C");
+    mol::AtomHandle n=next.FindAtom("N");
+    // Give subclasses a chance to give us their opinions on the feasibility of
+    // the peptide bond.
+    if (c.IsValid() && n.IsValid() && this->DoesPeptideBondExist(c, n)) {
+      e.Connect(c, n, 1);
+      rh.SetIsProtein(true);
+      next.SetIsProtein(true);
+    }
+  } else if (mc->IsNucleotideLinking() && nc->IsNucleotideLinking()) {
+    mol::AtomHandle c=rh.FindAtom("O3'");
+    mol::AtomHandle n=next.FindAtom("P");
+    if (c.IsValid() && n.IsValid() && this->IsBondFeasible(c, n)) {
+      e.Connect(c, n, 1);
+    }
   }
 }
 
