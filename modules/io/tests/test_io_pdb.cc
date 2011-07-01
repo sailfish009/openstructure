@@ -373,6 +373,48 @@ BOOST_AUTO_TEST_CASE(write_ter3)
                             "testfiles/pdb/ter3-out.pdb"));
 }
 
+BOOST_AUTO_TEST_CASE(write_ter4)
+{
+  {
+    PDBWriter writer(String("testfiles/pdb/ter_emptychain-out.pdb"), IOProfile());
+
+    mol::EntityHandle ent=mol::CreateEntity();
+    mol::XCSEditor edi=ent.EditXCS();
+    mol::ChainHandle ch=edi.InsertChain("A");
+    mol::ResidueHandle r=edi.AppendResidue(ch, "ALA");
+    mol::AtomHandle a=edi.InsertAtom(r, "N", geom::Vec3(32.0, -128.0, -2.5));
+    mol::ResidueHandle r2=edi.AppendResidue(ch, "GLY");
+    mol::AtomHandle a2=edi.InsertAtom(r2, "N", geom::Vec3(35.0, -99.0, -10.5));
+    mol::ChainHandle ch2=edi.InsertChain("B");
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/ter_emptychain.pdb",
+                            "testfiles/pdb/ter_emptychain-out.pdb"));
+}
+
+BOOST_AUTO_TEST_CASE(write_ter5)
+{
+  {
+    PDBWriter writer(String("testfiles/pdb/ter_view-emptychain-out.pdb"), IOProfile());
+
+    mol::EntityHandle ent=mol::CreateEntity();
+    mol::XCSEditor edi=ent.EditXCS();
+    mol::ChainHandle ch=edi.InsertChain("A");
+    mol::ResidueHandle r=edi.AppendResidue(ch, "ALA");
+    mol::AtomHandle a=edi.InsertAtom(r, "N", geom::Vec3(32.0, -128.0, -2.5));
+    mol::ResidueHandle r2=edi.AppendResidue(ch, "GLY");
+    mol::AtomHandle a2=edi.InsertAtom(r2, "N", geom::Vec3(35.0, -99.0, -10.5));
+    mol::ChainHandle ch2=edi.InsertChain("B");
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent.Select(""));
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/ter_view-emptychain.pdb",
+                            "testfiles/pdb/ter_view-emptychain-out.pdb"));
+}
+
 BOOST_AUTO_TEST_CASE(write_conect)
 {
   // this scope is required to force the writer stream to be closed before
