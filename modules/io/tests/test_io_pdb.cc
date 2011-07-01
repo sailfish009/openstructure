@@ -647,4 +647,26 @@ BOOST_AUTO_TEST_CASE(charmm_longcname)
                             "testfiles/pdb/charmm_longcname-out.pdb"));
 }
 
+BOOST_AUTO_TEST_CASE(write_charmm_ter)
+{
+  {
+    PDBWriter writer(String("testfiles/pdb/charmm_ter-out.pdb"),
+                     IOProfile("CHARMM", true, false, false,
+                               false, false, false));
+
+    mol::EntityHandle ent=mol::CreateEntity();
+    mol::XCSEditor edi=ent.EditXCS();
+    mol::ChainHandle ch=edi.InsertChain("A");
+    mol::ResidueHandle r=edi.AppendResidue(ch, "ALA");
+    mol::AtomHandle a=edi.InsertAtom(r, "N", geom::Vec3(32.0, -128.0, -2.5));
+    mol::ResidueHandle r2=edi.AppendResidue(ch, "GLY");
+    mol::AtomHandle a2=edi.InsertAtom(r2, "N", geom::Vec3(35.0, -99.0, -10.5));
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/charmm_ter.pdb",
+                            "testfiles/pdb/charmm_ter-out.pdb"));
+}
+
 BOOST_AUTO_TEST_SUITE_END()

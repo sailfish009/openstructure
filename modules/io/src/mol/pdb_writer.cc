@@ -254,7 +254,7 @@ public:
     line_(0, 6)=StringRef("TER   ", 6);
     line_( 6, 5)=fmt::LPaddedInt(counter_);
     line_(17, 3)=fmt::LPadded(res.GetKey());
-    if (!res.GetChain().GetName().empty()) {
+    if (!res.GetChain().GetName().empty() && !charmm_style_) {
       line_[21]=res.GetChain().GetName()[0];
     }
 
