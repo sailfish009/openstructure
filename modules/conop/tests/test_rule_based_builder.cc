@@ -196,6 +196,12 @@ void verify_nucleotide_link(const ResidueHandle& p3, const ResidueHandle& p5)
                          p5.FindAtom("P")));
 }
 
+void verify_nucleotide_nolink(const ResidueHandle& p3, const ResidueHandle& p5) 
+{
+  BOOST_CHECK(!BondExists(p3.FindAtom("O3'"),
+                          p5.FindAtom("P")));
+}
+
 BOOST_AUTO_TEST_SUITE( conop )
 
 
@@ -221,6 +227,7 @@ BOOST_AUTO_TEST_CASE(nucleotide_based_connect)
     rb_builder.FillAtomProps(*i);
   }
 
+  // running positive test
   BOOST_MESSAGE("running distance based checks on cytosine");
   rb_builder.ConnectAtomsOfResidue(c0);
   verify_nucleotide_connectivity(c0);
@@ -236,6 +243,10 @@ BOOST_AUTO_TEST_CASE(nucleotide_based_connect)
   BOOST_MESSAGE("connecting first uracil to second uracil");
   rb_builder.ConnectResidueToNext(u1, u2);
   verify_nucleotide_link(u1, u2);
+  // one negative test
+  BOOST_MESSAGE("connecting cytosine to second uracil");
+  rb_builder.ConnectResidueToNext(c0, u2);
+  verify_nucleotide_nolink(c0, u2);
 }
 
 BOOST_AUTO_TEST_SUITE_END( )
