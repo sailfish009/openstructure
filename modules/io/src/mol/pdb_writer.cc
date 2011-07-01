@@ -92,7 +92,7 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
                         "' is too long for CHARMM-PDB output. At most 4 "
                         "characters are allowed");
     }
-    line(17, 4)=fmt::LPadded(res.GetKey());
+    line(17, 4)=fmt::RPadded(res.GetKey());
   } else {
     if (res.GetKey().size()>3) {
       throw IOException("Residue name '"+res.GetName()+
