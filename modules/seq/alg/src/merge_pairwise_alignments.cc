@@ -90,7 +90,7 @@ SequenceHandle shift_reference(const ConstSequenceHandle& ref_seq,
                                   new_sequence.str());
   if (ref_seq.HasAttachedView())
     s.AttachView(ref_seq.GetAttachedView());
-  s.SetOffset(s.GetOffset());
+  s.SetOffset(ref_seq.GetOffset());
   return s;
 }
 
@@ -134,7 +134,23 @@ SequenceHandle realign_sequence(const AlignmentHandle& aln,
 AlignmentHandle MergePairwiseAlignments(const AlignmentList& pairwise_alns,
                                         const ConstSequenceHandle& ref_seq)
 {
-
+   
+  int ref_offset=ref_seq.GetOffset();
+  int alignment_counter=0;
+  for (AlignmentList::const_iterator i=pairwise_alns.begin(), e=pairwise_alns.end(); i!=e; ++i) {
+    AlignmentHandle ali_handle=*i;
+    ConstSequenceHandle seq_handle=ali_handle.GetSequence(0);
+    if (seq_handle.GetOffset()!=ref_offset) {
+      String error_string;
+      std::ostringstream error_ss(error_string);
+      error_ss << "The offset of the first sequence in alignment " << alignment_counter << 
+        "is not identical to the offset of the reference sequence." << std::endl;
+      throw IntegrityError(error_string);
+    }
+    alignment_counter+=1;
+  }
+  
+  
   ShiftMap shifts;
   for (AlignmentList::const_iterator i=pairwise_alns.begin(),
        e=pairwise_alns.end(); i!=e; ++i) {

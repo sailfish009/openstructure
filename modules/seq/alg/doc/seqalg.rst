@@ -22,6 +22,10 @@
    - The first sequence of each pairwise alignments corresponds to the reference 
      sequence. Apart from the presence of gaps, these two sequences must be 
      completely identical.
+
+   - If the reference sequence has an offset, the first sequence of each pairwise alignment 
+     must have the same offset. This offset is inherited by the first sequence of the final
+     output alignment.
    
    - The resulting multiple sequence alignment is by no means optimal. For 
      better results, consider using a multiple-sequence alignment program such 
