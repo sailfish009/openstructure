@@ -159,9 +159,11 @@ class CustomWidget(RenderModeWidget):
     self.radius_sphere_spinbox_.setValue(value)
 
   def UpdateBondRadiusGui(self,value):
-    if(abs(value*100.0 - self.radius_bond_slider_.value())>=self.radius_bond_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*100.0 - self.radius_bond_slider_.value())>=self.radius_bond_slider_.singleStep()):
       self.radius_bond_slider_.setValue(value*100.0)
-    self.radius_bond_spinbox_.setValue(value)
+    if (abs(value - self.radius_bond_spinbox_.value()/100)>=self.radius_bond_spinbox_.singleStep()):
+      self.radius_bond_spinbox_.setValue(value)
 
   def UpdateGui(self,options):
     self.sphere_spinbox_.setValue(options.GetSphereDetail())    
