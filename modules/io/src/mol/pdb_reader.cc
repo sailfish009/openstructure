@@ -102,6 +102,83 @@ void PDBReader::Init(const boost::filesystem::path& loc)
   hard_end_=false;
 }
 
+void PDBReader::ParseCompndEntry (const StringRef& line, int line_num)
+{
+  if (line.size()<20) {
+    if (profile_.fault_tolerant) {
+      LOG_WARNING("invalid COMPND record on line " << line_num 
+                  << ": record is too short");
+      return;
+    }
+    std::stringstream ss("invalid COMPND record on line ");
+    ss << line_num <<": record is too short";
+    throw IOException(ss.str());
+  }
+  if (line.rtrim().size()>71) {
+    if (profile_.fault_tolerant) {
+      LOG_WARNING("invalid COMPND record on line " << line_num 
+                  << ": record is too long");
+      return;
+    }
+    std::stringstream ss("invalid COMPND record on line ");
+    ss << line_num <<": record is too long";
+    throw IOException(ss.str());
+  }
+  StringRef entry=line.substr(11,59);
+  
+  std::vector<StringRef> fields=entry.split(':');
+  StringRef key=fields[0].trim();
+  fields[1]=fields[1].rtrim();
+  fields[1]=fields[1].substr(0, fields[1].size()-1);
+  //currently only these are parsed
+ 
+  if (!(IEquals(key, StringRef("OL_ID", 5)))&&
+      !(IEquals(key, StringRef("MOL_ID", 6)))&&
+      !(IEquals(key, StringRef("CHAIN", 5)))){
+    LOG_TRACE("reading COMPND record on line " << line_num<< "is not supported");
+    return;
+  }
+  std::vector<StringRef> chain_list;
+  std::vector<String> chains;
+  if ((IEquals(key, StringRef("OL_ID", 5))) ||
+      (IEquals(key, StringRef("MOL_ID", 6)))) {
+      mol_id_=fields[1].trim().to_int();
+      if (mol_id_.first) {
+        LOG_TRACE("COMPND record on line " << line_num<< " MOL_ID: "<<mol_id_.second);
+      }
+      if (!mol_id_.first) {
+        if (profile_.fault_tolerant) {
+          return;
+        }
+        throw IOException(str(format("invalid COMPND record on line %d")%line_num));
+      }
+  }
+  if (IEquals(key, StringRef("CHAIN", 5))) {
+    if (!mol_id_.first) {
+      if (profile_.fault_tolerant) {
+        return;
+      }
+      throw IOException(str(format("invalid COMPND record on line %d, CHAIN must be succeeding MOL_ID ")%line_num));
+    }
+
+    chain_list=fields[1].split(',');
+    //~ PDBReader::CompndEntry cc;
+    //~ cc.chains=chains;
+    //~ cc.mol_id=mol_id_.second;
+
+    //~ std::cout << "COMPDNsssssssss: "<<fields[1] << " " << mol_id_.second<<std::endl;
+    //~ int ii=0;
+    //~ for (CompndList::const_iterator i=compnds_.begin(); i!=compnds_.end(); ++i, ++ii) {
+    for (std::vector<StringRef>::const_iterator it = chain_list.begin(); it != chain_list.end(); ++it) {
+      chains.push_back(it->trim().str());
+      //~ std::cout << it->str() << " Hoi " << ii <<std::endl;
+    }
+    compnds_.push_back(CompndEntry(chains, mol_id_.second));
+  //~ }
+  }
+}
+
+
 void PDBReader::ParseSeqRes(const StringRef& line, int line_num)
 {
   conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
@@ -223,6 +300,17 @@ void PDBReader::Import(mol::EntityHandle& ent,
           }
         }
         break;
+      case 'C':
+      case 'c':
+        if (curr_line.size()<20) {
+          LOG_TRACE("skipping entry");
+          continue;
+        }
+        if (IEquals(curr_line.substr(0, 6), StringRef("COMPND", 6))) {
+          LOG_TRACE("processing COMPND entry");
+          this->ParseCompndEntry(curr_line, line_num_);
+        }
+        break;
       case 'E':
       case 'e':
         if (curr_line.size()<3) {
@@ -319,6 +407,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
                << helix_list_.size() << " helices and "
                << strand_list_.size() << " strands");
   this->AssignSecStructure(ent);
+  this->AssignMolIds(ent);
   for (HetList::const_iterator i=hets_.begin(), e=hets_.end(); i!=e; ++i) {
     mol::ResidueHandle res=ent.FindResidue(String(1, i->chain), i->num);
     if (res.IsValid()) {
@@ -327,6 +416,17 @@ void PDBReader::Import(mol::EntityHandle& ent,
   }
 }
 
+void PDBReader::AssignMolIds(mol::EntityHandle ent) {
+  for (CompndList::const_iterator compnd_iterator=compnds_.begin(), e=compnds_.end();
+       compnd_iterator!=e; ++compnd_iterator) {
+    for (std::vector<String>::const_iterator chain_iterator = compnd_iterator->chains.begin();
+                                             chain_iterator!= compnd_iterator->chains.end();
+                                             ++chain_iterator) {
+      mol::ChainHandle chain=ent.FindChain(*chain_iterator);
+      chain.SetIntProp("molID", compnd_iterator->mol_id);
+    }
+  }
+}
 
 void PDBReader::AssignSecStructure(mol::EntityHandle ent)
 {

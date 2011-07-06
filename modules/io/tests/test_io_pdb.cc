@@ -56,6 +56,28 @@ BOOST_AUTO_TEST_CASE(test_pdb_import_handler)
   pdbh.Import(eh,"testfiles/pdb/simple.pdb");
 }
 
+BOOST_AUTO_TEST_CASE(test_parse_compnd_record) 
+{
+  String fname("testfiles/pdb/compnd.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_REQUIRE_EQUAL(ent.GetChainCount(), 28);
+  BOOST_REQUIRE_EQUAL(ent.GetResidueCount(), 9273);
+
+  mol::ChainHandle ch = ent.FindChain("A");
+  BOOST_CHECK(ch.HasProp("molID")==true);
+  BOOST_CHECK(ch.GetIntProp("molID")==1);
+}
+
+//~ BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_comma_chain_record) 
+//~ {
+  //~ String fname("testfiles/pdb/compnd_missing_comma_chain_record.pdb");
+  //~ PDBReader reader(fname, IOProfile()); 
+  //~ mol::EntityHandle ent=mol::CreateEntity();
+  //~ reader.Import(ent);
+//~ }
+
 BOOST_AUTO_TEST_CASE(atom_record)
 {
   String fname("testfiles/pdb/atom.pdb");
