@@ -261,7 +261,7 @@ The `mod/pymod` directory must obviously contain a `CMakeLists.txt` file:
   pymod(NAME mod OUTPUT_DIR ost/mod 
         CPP ${OST_MOD_PYMOD_SOURCES} PY __init__.py)
   
-The directory should also contain an `__init.py__` file with the
+The directory should also contain an `__init__.py` file with the
 following content:
 
 .. code-block:: python
@@ -269,7 +269,7 @@ following content:
   from _mod import *
     
 In case one wants to implement Python-only functionality for the new module, any
-number of function definitions can be added to the `__init.py__` file.
+number of function definitions can be added to the `__init__.py` file.
 
 That's it!. The next time the OpenStructure project is compiled, the new module 
 will be built and made available at both the C++ and the Python level.
