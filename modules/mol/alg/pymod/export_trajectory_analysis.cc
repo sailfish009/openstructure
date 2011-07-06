@@ -43,4 +43,7 @@ void export_TrajectoryAnalysis()
   def("AnalyzeDihedralAngle",&AnalyzeDihedralAngle, (arg("traj"), arg("atom"), arg("atom"), arg("atom"), arg("atom"), arg("stride")=1));
   def("AnalyzeDistanceBetwCenterOfMass",&AnalyzeDistanceBetwCenterOfMass, (arg("traj"), arg("selection"), arg("selection"), arg("stride")=1));
   def("AnalyzeRMSD",&AnalyzeRMSD, (arg("traj"), arg("reference_view"), arg("selection"), arg("stride")=1));
+  def("AnalyzeMinDistance", &AnalyzeMinDistance, (arg("traj"), arg("view1"), arg("view2"), arg("stride")=1));
+  def("AnalyzeMinDistanceBetwCenterOfMassAndView", &AnalyzeMinDistanceBetwCenterOfMassAndView, (arg("traj"), arg("view_cm"), arg("view_atoms"), arg("stride")=1));
+  def("AnalyzeAromaticRingInteraction", &AnalyzeAromaticRingInteraction, (arg("traj"), arg("view_ring1"), arg("view_ring2"), arg("stride")=1));
 }

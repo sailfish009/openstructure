@@ -48,4 +48,18 @@ BOOST_AUTO_TEST_CASE(vecmat_mult3)
   BOOST_CHECK(Equal(v3*m2,v2*m3));
 }
 
+BOOST_AUTO_TEST_CASE(vec3list_op)
+{
+  Vec3List l1,l2;
+  BOOST_CHECK_THROW(MinDistance(l1,l2),std::runtime_error);
+  l1.push_back(Vec3(0.0,0.0,0.0));
+  l1.push_back(Vec3(1.0,0.0,0.0));
+  BOOST_CHECK_THROW(MinDistance(l1,l2),std::runtime_error);
+  BOOST_CHECK_THROW(MinDistance(l2,l1),std::runtime_error);
+  l2.push_back(Vec3(4.0,4.0,0.0));
+  l2.push_back(Vec3(2.0,4.0,5.0));
+  l2.push_back(Vec3(0.0,3.0,6.0));
+  BOOST_CHECK(MinDistance(l1,l2)==5.0);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

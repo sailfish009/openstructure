@@ -180,4 +180,43 @@ namespace ost { namespace mol {
     return this->GetRMSD(ref_pos,indices_sele);
   }
   
+  Real CoordFrame::GetMinDistance(std::vector<unsigned long>& index_list1, std::vector<unsigned long>& index_list2){
+  //Returns the minimal distance between two groups of atoms with indices given by index_list1 and index_list2
+    geom::Vec3List pos_list1,pos_list2;
+    for (std::vector<unsigned long>::const_iterator i1=index_list1.begin(),e=index_list1.end(); i1!=e; ++i1) {
+      pos_list1.push_back((*this)[*i1]);
+    }
+    for (std::vector<unsigned long>::const_iterator i1=index_list2.begin(),e=index_list2.end(); i1!=e; ++i1) {
+      pos_list2.push_back((*this)[*i1]);
+    }
+    return geom::MinDistance(pos_list1,pos_list2);
+  }
+  Real CoordFrame::GetMinDistance(const mol::EntityView& view1, const mol::EntityView& view2){
+  //Returns the minimal distance between the atoms of two views (view1 and view2)
+    std::vector<unsigned long> index_list1,index_list2;
+    GetIndices(view1,index_list1);
+    GetIndices(view2,index_list2);
+    return this->GetMinDistance(index_list1,index_list2);
+  }
+  
+  Real CoordFrame::GetMinDistBetwCenterOfMassAndView(std::vector<unsigned long>& indices_cm, std::vector<Real>& masses_cm,
+                                                     std::vector<unsigned long>& indices_atoms){
+  //Returns the minimal distance between the center of mass of a group of atoms (with indices given in indices_cm and masses
+  //in masses_cm) and the atoms of another group (with indices given in indices_atoms)
+    geom::Vec3List cm_pos,atoms_pos_list;
+    cm_pos.push_back(this->GetCenterOfMassPos(indices_cm, masses_cm));
+    for (std::vector<unsigned long>::const_iterator i1=indices_atoms.begin(),e=indices_atoms.end(); i1!=e; ++i1) {
+      atoms_pos_list.push_back((*this)[*i1]);
+    }
+    return geom::MinDistance(cm_pos,atoms_pos_list);
+  }
+  Real CoordFrame::GetMinDistBetwCenterOfMassAndView(const mol::EntityView& view_cm, const mol::EntityView& view_atoms){
+  //Returns the minimal distance between the center of mass of a view (view_cm) and the atoms of another view (view_atoms)
+    std::vector<unsigned long> indices_cm,indices_atoms;
+    std::vector<Real> masses_cm;
+    GetIndices(view_atoms,indices_atoms);
+    GetIndicesAndMasses(view_cm,indices_cm,masses_cm);
+    return this->GetMinDistBetwCenterOfMassAndView(indices_cm,masses_cm,indices_atoms);
+  }
 }}//ns
+

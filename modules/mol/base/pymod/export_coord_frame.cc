@@ -33,7 +33,7 @@ Real (CoordFrame::*get_dihedral)(const AtomHandle& a1, const AtomHandle& a2, con
 geom::Vec3 (CoordFrame::*get_cm)(const mol::EntityView& sele) = &CoordFrame::GetCenterOfMassPos;
 Real (CoordFrame::*get_dist_cm)(const mol::EntityView& sele1, const mol::EntityView& sele2) = &CoordFrame::GetDistanceBetwCenterOfMass;
 Real (CoordFrame::*get_rmsd)(const mol::EntityView& Reference_View, const mol::EntityView& sele_View) = &CoordFrame::GetRMSD;
-
+Real (CoordFrame::*get_min_dist)(const mol::EntityView& view1, const mol::EntityView& view2) = &CoordFrame::GetMinDistance;
 
 void export_CoordFrame()
 {
@@ -45,6 +45,7 @@ void export_CoordFrame()
     .def("GetCenterOfMassPos", get_cm)
     .def("GetDistanceBetwCenterOfMass", get_dist_cm)
     .def("GetRMSD",get_rmsd)
+    .def("GetMinDistance",get_min_dist)
   ;
   def("CreateCoordFrame",CreateCoordFrame);
 }

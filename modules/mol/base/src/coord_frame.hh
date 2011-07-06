@@ -54,7 +54,12 @@ public:
   Real GetDistanceBetwCenterOfMass(std::vector<unsigned long>& indices1, std::vector<Real>& masses1, 
                                    std::vector<unsigned long>& indices2, std::vector<Real>& masses2);
   Real GetRMSD(const std::vector<geom::Vec3>& ref_pos, const std::vector<unsigned long>& indices_sele);
-  Real GetRMSD(const mol::EntityView& Reference_View, const mol::EntityView& sele_View);
+  Real GetRMSD(const mol::EntityView& reference_view, const mol::EntityView& sele_view);
+  Real GetMinDistance(std::vector<unsigned long>& index_list1, std::vector<unsigned long>& index_list2);
+  Real GetMinDistance(const mol::EntityView& view1, const mol::EntityView& view2);
+  Real GetMinDistBetwCenterOfMassAndView(std::vector<unsigned long>& indices_cm, std::vector<Real>& masses_cm,
+                                         std::vector<unsigned long>& indices_atoms);
+  Real GetMinDistBetwCenterOfMassAndView(const mol::EntityView& view_cm, const mol::EntityView& view_atoms);
 };
   
   void GetIndices(const EntityView& sele, std::vector<unsigned long>& indices);

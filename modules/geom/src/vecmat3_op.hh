@@ -194,6 +194,9 @@ inline Real Distance(const Vec3& p1, const Vec3& p2)
     return Length(p1-p2);
 }
 
+//! returns the minimal distance between the points in two Vec3List
+Real MinDistance(const Vec3List& l1, const Vec3List& l2);
+
 } // ns
 
 #endif

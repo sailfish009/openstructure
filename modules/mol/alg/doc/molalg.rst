@@ -182,7 +182,7 @@ used to skip frames in the analysis.
      consecutive frames analyzed.
 
 
-.. function:: AnalyzeRMSD(traj, reference_view, sele_view)
+.. function:: AnalyzeRMSD(traj, reference_view, sele_view, stride=1)
 
   This function extracts the rmsd between two :class:`~ost.mol.EntityView` and 
   returns it as a vector. The views don't have to be from the same entity. The 
@@ -210,9 +210,49 @@ used to skip frames in the analysis.
 
 
 
+.. function:: AnalyzeMinDistance(traj, view1, view2, stride=1)
 
+  This function extracts the minimal distance between two sets of atoms 
+  (view1 and view2) for each frame in a trajectory and returns it as a vector.
 
+  :param traj: The trajectory to be analyzed.
+  :type traj: :class:`~ost.mol.CoordGroupHandle`
+  :param view1: The first group of atoms
+  :type view1: :class:`~ost.mol.EntityView`.
+  :param view2: The second group of atoms
+  :type view2: :class:`~ost.mol.EntityView`.
+  :param stride: Size of the increment of the frame's index between two 
+     consecutive frames analyzed.
+     
+.. function:: AnalyzeMinDistanceBetwCenterOfMassAndView(traj, view_cm, view_atoms, stride=1)
 
+  This function extracts the minimal distance between a set of atoms 
+  (view_atoms) and the center of mass of a second set of atoms (view_cm) 
+  for each frame in a trajectory and returns it as a vector.
 
+  :param traj: The trajectory to be analyzed.
+  :type traj: :class:`~ost.mol.CoordGroupHandle`
+  :param view_cm: The group of atoms from which the center of mass is taken
+  :type view_cm: :class:`~ost.mol.EntityView`.
+  :param view_atoms: The second group of atoms
+  :type view_atoms: :class:`~ost.mol.EntityView`.
+  :param stride: Size of the increment of the frame's index between two 
+     consecutive frames analyzed.
 
+.. function:: AnalyzeAromaticRingInteraction(traj, view_ring1, view_ring2, stride=1)
+
+  This function is a crude analysis of aromatic ring interactions. For each frame in a trajectory, it calculates
+  the minimal distance between the atoms in one view and the center of mass of the other
+  and vice versa, and returns the minimum between these two minimal distances.
+  Concretely, if the two views are the heavy atoms of two rings, then it returns the minimal
+  center of mass - heavy atom distance betweent he two rings
+
+  :param traj: The trajectory to be analyzed.
+  :type traj: :class:`~ost.mol.CoordGroupHandle`
+  :param view_ring1: First group of atoms
+  :type view_ring1: :class:`~ost.mol.EntityView`.
+  :param view_ring2: Second group of atoms
+  :type view_ring2: :class:`~ost.mol.EntityView`.
+  :param stride: Size of the increment of the frame's index between two 
+     consecutive frames analyzed.  
 

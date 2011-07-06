@@ -29,7 +29,6 @@
 #include <ost/mol/coord_group.hh>
 #include "trajectory_analysis.hh"
 
-
 namespace ost { namespace mol { namespace alg {
 
 geom::Vec3List AnalyzeAtomPos(const CoordGroupHandle& traj, const AtomHandle& a1, unsigned int stride)
@@ -92,7 +91,7 @@ std::vector<Real> AnalyzeDihedralAngle(const CoordGroupHandle& traj, const AtomH
   return ang;
 }
 
-geom::Vec3List AnalyzeCenterOfMassPos(const CoordGroupHandle& traj, const EntityView& Sele,unsigned int stride)
+geom::Vec3List AnalyzeCenterOfMassPos(const CoordGroupHandle& traj, const EntityView& sele,unsigned int stride)
 //This function extracts the position of the CenterOfMass of a selection (entity view) from a trajectory 
 //and returns it as a vector. 
   {
@@ -101,7 +100,7 @@ geom::Vec3List AnalyzeCenterOfMassPos(const CoordGroupHandle& traj, const Entity
   pos.reserve(ceil(traj.GetFrameCount()/float(stride)));
   std::vector<unsigned long> indices;
   std::vector<Real> masses;
-  GetIndicesAndMasses(Sele, indices, masses);
+  GetIndicesAndMasses(sele, indices, masses);
   for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
     CoordFramePtr frame=traj.GetFrame(i);
     pos.push_back(frame->GetCenterOfMassPos(indices,masses));
@@ -109,8 +108,8 @@ geom::Vec3List AnalyzeCenterOfMassPos(const CoordGroupHandle& traj, const Entity
   return pos;
 }
 
-std::vector<Real> AnalyzeDistanceBetwCenterOfMass(const CoordGroupHandle& traj, const EntityView& Sele1,
-                                    const EntityView& Sele2, unsigned int stride)
+std::vector<Real> AnalyzeDistanceBetwCenterOfMass(const CoordGroupHandle& traj, const EntityView& sele1,
+                                    const EntityView& sele2, unsigned int stride)
 //This function extracts the distance between the CenterOfMass of two selection (entity views) from a trajectory 
 //and returns it as a vector. 
   {
@@ -119,8 +118,8 @@ std::vector<Real> AnalyzeDistanceBetwCenterOfMass(const CoordGroupHandle& traj, 
   dist.reserve(ceil(traj.GetFrameCount()/float(stride)));
   std::vector<unsigned long> indices1,indices2;
   std::vector<Real> masses1,masses2;
-  GetIndicesAndMasses(Sele1, indices1, masses1);
-  GetIndicesAndMasses(Sele2, indices2, masses2);
+  GetIndicesAndMasses(sele1, indices1, masses1);
+  GetIndicesAndMasses(sele2, indices2, masses2);
   for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
     CoordFramePtr frame=traj.GetFrame(i);
     dist.push_back(frame->GetDistanceBetwCenterOfMass(indices1,masses1,indices2,masses2));
@@ -153,5 +152,82 @@ std::vector<Real> AnalyzeRMSD(const CoordGroupHandle& traj, const EntityView& re
   }
   return rmsd;
 }
+ 
+std::vector<Real>  AnalyzeMinDistance(const CoordGroupHandle& traj, const EntityView& view1,
+                                      const EntityView& view2,unsigned int stride)
+// This function extracts the minimal distance between two sets of atoms (view1 and view2) for
+// each frame in a trajectory and returns it as a vector.
+  {
+  CheckHandleValidity(traj);
+  if (view1.GetAtomCount()==0){
+    throw std::runtime_error("first EntityView is empty");
+  }
+  if (view2.GetAtomCount()==0){
+    throw std::runtime_error("second EntityView is empty");
+  }  
+  std::vector<Real> dist;
+  dist.reserve(ceil(traj.GetFrameCount()/float(stride)));
+  std::vector<unsigned long> indices1,indices2;
+  GetIndices(view1, indices1);
+  GetIndices(view2, indices2);
+  for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+    CoordFramePtr frame=traj.GetFrame(i);
+    dist.push_back(frame->GetMinDistance(indices1,indices2));
+  }
+    return dist;
+}
   
+std::vector<Real> AnalyzeMinDistanceBetwCenterOfMassAndView(const CoordGroupHandle& traj, const EntityView& view_cm,
+                                            const EntityView& view_atoms,unsigned int stride)
+  // This function extracts the minimal distance between a set of atoms (view_atoms) and the center of mass
+  // of a second set of atoms (view_cm) for each frame in a trajectory and returns it as a vector.
+  {
+  CheckHandleValidity(traj);
+  if (view_cm.GetAtomCount()==0){
+    throw std::runtime_error("first EntityView is empty");
+  }
+  if (view_atoms.GetAtomCount()==0){
+    throw std::runtime_error("second EntityView is empty");
+  } 
+  std::vector<Real> dist, masses_cm;
+  dist.reserve(ceil(traj.GetFrameCount()/float(stride)));
+  std::vector<unsigned long> indices_cm,indices_atoms;
+  GetIndicesAndMasses(view_cm, indices_cm,masses_cm);
+  GetIndices(view_atoms, indices_atoms);
+  for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+    CoordFramePtr frame=traj.GetFrame(i);
+    dist.push_back(frame->GetMinDistBetwCenterOfMassAndView(indices_cm, masses_cm, indices_atoms));
+  }
+  return dist;
+  }
+
+std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, const EntityView& view_ring1,
+                                                   const EntityView& view_ring2,unsigned int stride)
+  // This function is a crude analysis of aromatic ring interactions. For each frame in a trajectory, it calculates
+  // the minimal distance between the atoms in one view and the center of mass of the other
+  // and vice versa, and returns the minimum between these two minimal distances.
+  // Concretely, if the two views are the heavy atoms of two rings, then it returns the minimal
+  // center of mass - heavy atom distance betweent he two rings
+  {
+  CheckHandleValidity(traj);
+  if (view_ring1.GetAtomCount()==0){
+    throw std::runtime_error("first EntityView is empty");
+  }
+  if (view_ring2.GetAtomCount()==0){
+    throw std::runtime_error("second EntityView is empty");
+  } 
+  std::vector<Real> dist, masses_ring1,masses_ring2;
+  dist.reserve(ceil(traj.GetFrameCount()/float(stride)));
+  std::vector<unsigned long> indices_ring1,indices_ring2;
+  Real d1,d2;
+  GetIndicesAndMasses(view_ring1, indices_ring1,masses_ring1);
+  GetIndicesAndMasses(view_ring2, indices_ring2,masses_ring2);
+  for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+    CoordFramePtr frame=traj.GetFrame(i);
+    d1=frame->GetMinDistBetwCenterOfMassAndView(indices_ring1, masses_ring1, indices_ring2);
+    d2=frame->GetMinDistBetwCenterOfMassAndView(indices_ring2, masses_ring2, indices_ring1);
+    dist.push_back(std::min(d1,d2));
+  }
+  return dist;  
+  }
 }}} //ns
