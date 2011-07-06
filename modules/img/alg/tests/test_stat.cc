@@ -49,8 +49,8 @@ void test() {
 
   Stat stat;
   im.Apply(stat);
-  BOOST_CHECK_CLOSE(stat.GetMean(),5.0,0.0001);
-  BOOST_CHECK_CLOSE(stat.GetStandardDeviation(),2.58198889747,0.0001);
+  BOOST_CHECK_CLOSE(stat.GetMean(),Real(5.0),Real(0.0001));
+  BOOST_CHECK_CLOSE(stat.GetStandardDeviation(),Real(2.58198889747),Real(0.0001));
   
 }
 
