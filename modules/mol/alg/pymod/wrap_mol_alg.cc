@@ -38,7 +38,11 @@ Real (*ldt_a)(const mol::EntityView&, const mol::EntityView& ref, Real, Real, co
 Real (*ldt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistTest;
 mol::EntityView (*fc_a)(const mol::EntityView&, Real,bool)=&mol::alg::FilterClashes;
 mol::EntityView (*fc_b)(const mol::EntityHandle&, Real, bool)=&mol::alg::FilterClashes;
+mol::CoordGroupHandle (*superpose_frames1)(mol::CoordGroupHandle&, mol::EntityView&, int, int, int)=&mol::alg::SuperposeFrames;
+mol::CoordGroupHandle (*superpose_frames2)(mol::CoordGroupHandle&,  mol::EntityView&, mol::EntityView&, int, int)=&mol::alg::SuperposeFrames;
 }
+
+
 
 BOOST_PYTHON_MODULE(_ost_mol_alg)
 {
@@ -52,7 +56,10 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("LocalDistTest", ldt_b, (arg("ref_index")=0, arg("mdl_index")=1));
   def("FilterClashes", fc_a, (arg("ent"), arg("tolerance")=0.1, arg("always_remove_bb")=false));
   def("FilterClashes", fc_b, (arg("ent"), arg("tolerance")=0.1, arg("always_remove_bb")=false));
-  def("SuperposeFrames", &ost::mol::alg::SuperposeFrames, 
+  def("SuperposeFrames", superpose_frames1, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
        arg("end")=-1, arg("ref")=-1));
+  def("SuperposeFrames", superpose_frames2, 
+  (arg("source"), arg("sel")=ost::mol::EntityView(), arg("ref_view")=ost::mol::EntityView(),arg("begin")=0, 
+   arg("end")=-1));
 }
