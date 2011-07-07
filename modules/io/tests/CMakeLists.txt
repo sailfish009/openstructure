@@ -8,9 +8,9 @@ set(OST_IO_UNIT_TESTS
   test_pir.cc
   test_iomanager.cc
   tests.cc
+  test_star_parser.cc
 )
 
-# missing: test_star_parser.cc
 ost_unittest(MODULE io
              SOURCES "${OST_IO_UNIT_TESTS}"
              LINK ost_mol ost_seq)
