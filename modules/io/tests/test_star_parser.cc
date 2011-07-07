@@ -21,6 +21,7 @@
  */
 #include <fstream>
 #include <ost/mol/mol.hh>
+#include <ost/io/io_exception.hh>
 #include <ost/io/mol/star_parser.hh>
 
 #define BOOST_AUTO_TEST_DYN_LINK
@@ -178,6 +179,13 @@ BOOST_AUTO_TEST_CASE(star_loop)
   BOOST_CHECK_EQUAL(star_p.lines[4][0], "13");
   BOOST_CHECK_EQUAL(star_p.lines[4][1], "14");
   BOOST_CHECK_EQUAL(star_p.lines[4][2], "15");
+}
+
+BOOST_AUTO_TEST_CASE(star_missing_data)
+{
+  std::ifstream s("testfiles/missing_data.cif");
+  LoopTestParser star_p(s);
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
 }
 BOOST_AUTO_TEST_SUITE_END();
 

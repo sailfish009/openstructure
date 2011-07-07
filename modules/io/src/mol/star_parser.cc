@@ -331,6 +331,7 @@ void StarParser::ParseGlobal()
 void StarParser::Parse()
 {
   StringRef line;
+  std::stringstream ss;
   while (this->GetLine(line)) {
     StringRef tline=line.rtrim();
     if (tline.empty()) {
@@ -353,8 +354,8 @@ void StarParser::Parse()
         this->ConsumeLine();
         break;
       default:
-        std::cout << "ERROR:" << line_num_ << ":" << tline << std::endl;
-        assert(0 && "unhandled top-level construct in StarParser::Parse()");
+        ss << "Missing 'data_' control structure." << std::endl;
+        throw IOException(ss.str());
         break;
     }
   }
