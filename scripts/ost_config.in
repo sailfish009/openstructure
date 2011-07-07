@@ -31,8 +31,9 @@ export DNG_INITDIR="$DNG_LIBDIR/openstructure"
 #export DYLD_LIBRARY_PATH="$BIN_LIBDIR:${DYLD_LIBRARY_PATH}"
 #export LD_LIBRARY_PATH="$DNG_LIBDIR:$LD_LIBRARY_PATH"
 # set QT_PLUGIN_PATH PYTHONHOME and PYTHONPATH for bundle (commented except in linux bundles)
-#export PYTHONHOME=$DNG_ROOT
-#export PYTHONPATH=
+# set QT_PLUGIN_PATH and pythonpath for bundle (commented except in linux bundles)
+#export QT_PLUGIN_PATH="$BIN_DIR/plugins"
+#export PYTHONPATH="$DNG_ROOT/@LIBDIR@/python2.6:$OST_ADDITIONAL_PYTHONPATH"
 #export QT_PLUGIN_PATH="$BIN_DIR/plugins"
 
 # retrieve absolute path to python executable
