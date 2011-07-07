@@ -48,7 +48,7 @@ def _ExecuteDSSP(path, dssp_bin, temp_dir=None):
   # use of mktemp is a safty problem (use mkstemp and provide file handle to 
   # subsequent process
   temp_dssp_path=tempfile.mktemp(suffix=".out",prefix="dssp", dir=temp_dir)
-  dssp_abs_path=settings.Locate('dssp', env_name='DSSP_EXECUTABLE', 
+  dssp_abs_path=settings.Locate(['dsspcmbi','dssp'], env_name='DSSP_EXECUTABLE', 
                                 explicit_file_name=dssp_bin)
   if os.path.isdir(dssp_abs_path):
     raise RuntimeError('"%s" is a directory. Specify path to DSSP binary' % dssp_abs_path)
