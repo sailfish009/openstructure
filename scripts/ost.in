@@ -36,7 +36,8 @@ export DYLD_LIBRARY_PATH="$BIN_DIR/../@LIBDIR@:${DYLD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH"
 # set QT_PLUGIN_PATH and pythonpath for bundle (commented except in linux bundles)
 #export QT_PLUGIN_PATH="$BIN_DIR/plugins"
-#export PYTHONPATH="$DNG_ROOT/@LIBDIR@/python2.6"
+#export PYTHONPATH="$DNG_ROOT/@LIBDIR@/python2.6:${OST_ADDITIONAL_PYTHONPATH}"
+#export PYTHONHOME="$DNG_ROOT/@LIBDIR@/python2.6"
 
 # retrieve absolute path to python executable
 pyexec=""
