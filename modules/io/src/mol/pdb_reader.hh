@@ -70,13 +70,15 @@ public:
   seq::SequenceList GetSeqRes() const { return seqres_; }
 private:
   void ParseSeqRes(const StringRef& line, int line_num);
+   /// \brief parses the CHAIN and MOL_ID part of COMPND records
   void ParseCompndEntry(const StringRef& line, int line_num);
   void ClearState();
   void AssignSecStructure(mol::EntityHandle ent);
+  /// \brief Adds an IntProp "mol_id" to the ChainHandle based on COMPND records
   void AssignMolIds(mol::EntityHandle ent);
   void ParseAndAddAtom(const StringRef& line, int line_num,
                        mol::EntityHandle& h, const StringRef& record_type);
-
+  void ThrowFaultTolerant(const String& msg);
   /// \brief parses the common part of ATOM, HETATM and ANISOU records
   bool ParseAtomIdent(const StringRef& line, int line_num, 
                       String& chain_name, StringRef& res, 
@@ -106,6 +108,9 @@ private:
   HetList  hets_;
   CompndList compnds_;
   std::pair <bool, int> mol_id_;
+  bool skip_next_;
+  bool data_continues_;
+  String old_key_;
   // this needs to be set to true for reading pqr
   // file (i.e. pdb formatted file with charges in occupacy
   // column, and radii in b-factor column)

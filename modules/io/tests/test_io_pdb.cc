@@ -63,20 +63,165 @@ BOOST_AUTO_TEST_CASE(test_parse_compnd_record)
   mol::EntityHandle ent=mol::CreateEntity();
   reader.Import(ent);
   BOOST_REQUIRE_EQUAL(ent.GetChainCount(), 28);
-  BOOST_REQUIRE_EQUAL(ent.GetResidueCount(), 9273);
+  BOOST_REQUIRE_EQUAL(ent.GetResidueCount(), 28);
 
   mol::ChainHandle ch = ent.FindChain("A");
-  BOOST_CHECK(ch.HasProp("molID")==true);
-  BOOST_CHECK(ch.GetIntProp("molID")==1);
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+  
+  ch = ent.FindChain("B");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==2);
+
+  ch = ent.FindChain("W");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==2);
+
+  
 }
 
-//~ BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_comma_chain_record) 
-//~ {
-  //~ String fname("testfiles/pdb/compnd_missing_comma_chain_record.pdb");
-  //~ PDBReader reader(fname, IOProfile()); 
-  //~ mol::EntityHandle ent=mol::CreateEntity();
-  //~ reader.Import(ent);
-//~ }
+BOOST_AUTO_TEST_CASE(test_parse_compnd_record2) 
+{
+  String fname("testfiles/pdb/1AKE.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+
+  mol::ChainHandle ch = ent.FindChain("A");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+}
+
+BOOST_AUTO_TEST_CASE(test_parse_compnd_record3) 
+{
+  String fname("testfiles/pdb/1AKE.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent, "B");
+
+  mol::ChainHandle ch = ent.FindChain("B");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+}
+
+BOOST_AUTO_TEST_CASE(test_parse_compnd_record4) 
+{
+  String fname("testfiles/pdb/3mk3.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+
+  mol::ChainHandle ch = ent.FindChain("B");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+  
+  ch = ent.FindChain("y");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+  
+  ch = ent.FindChain("3");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+  
+  ch = ent.FindChain("U");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+  
+  ch = ent.FindChain("i");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+}
+
+//COMPND CHAIN record misses B chain
+BOOST_AUTO_TEST_CASE(test_parse_compnd_record5) 
+{
+  String fname("testfiles/pdb/1AKE_noBchain.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+
+//COMPND   3 CHAIN: A V; 
+BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_comma_chain_record) 
+{
+  String fname("testfiles/pdb/compnd_missing_comma_chain_record.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+//COMPND   3 CHAIN A, V; 
+BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_colon_chain_record) 
+{
+  String fname("testfiles/pdb/compnd_missing_colon_chain_record.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+//COMPND    MOL_ID: ;
+BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_mol_id_complete_mol_id_record) 
+{
+  String fname("testfiles/pdb/compnd_missing_mol_id_complete_mol_id_record.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+//COMPND    MOL_ID 1;
+BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_colon_mol_id_record) 
+{
+  String fname("testfiles/pdb/compnd_missing_colon_mol_id_record.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+//COMPND    MOL_ID: 1 
+BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_semicolon_mol_id_record) 
+{
+  String fname("testfiles/pdb/compnd_missing_semicolon_mol_id_record.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+//COMPND   3 CHAIN: A, V  
+BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_semicolon_chain_record) 
+{
+  String fname("testfiles/pdb/compnd_missing_semicolon_chain_record.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+//COMPND   3 CHAIN: 
+BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_chains_chain_record) 
+{
+  String fname("testfiles/pdb/compnd_missing_chains_chain_record.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+
+//no chain record
+BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_complete_chain_record) 
+{
+  String fname("testfiles/pdb/compnd_missing_complete_chain_record.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
+//no MOL_ID record
+BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_complete_mol_id_record) 
+{
+  String fname("testfiles/pdb/compnd_missing_complete_mol_id_record.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+}
 
 BOOST_AUTO_TEST_CASE(atom_record)
 {

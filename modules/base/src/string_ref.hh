@@ -28,6 +28,7 @@
 #include <ost/base.hh>
 #include <string.h>
 #include <vector>
+#include <ost/message.hh>
 #include <ost/module_config.hh>
 
 
@@ -59,7 +60,8 @@ public:
     assert(!this->empty());
     return *begin_; 
   }
-
+ /// \brief find character in StringRef
+ /// \return iterator position when found, else iterator pointing to the end 
   const_iterator find(char p) const {
     const char* s=begin_;
     while (s!=end_) {
@@ -73,10 +75,16 @@ public:
   StringRef substr(size_t pos, size_t n=std::string::npos) const
   {
     if (n==std::string::npos) {
-      assert(pos>=0 && begin_+pos<=end_);      
+      assert(pos>=0 && begin_+pos<=end_);
+      if(!(pos>=0 && begin_+pos<=end_)){
+        throw Error("out of bounds");
+      }    
       return StringRef(begin_+pos, this->length()-pos);
     } else {
-      assert(pos>=0 && begin_+pos+n<=end_);      
+      assert(pos>=0 && begin_+pos+n<=end_);
+      if(!(pos>=0 && begin_+pos+n<=end_)){
+        throw Error("out of bounds");
+      }
       return StringRef(begin_+pos, n);
     }
   }

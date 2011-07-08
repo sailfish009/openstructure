@@ -63,20 +63,20 @@ mol::ResNum to_res_num(int num, char ins_code)
 }
 
 PDBReader::PDBReader(std::istream& instream, const IOProfile& profile):
-  infile_(), instream_(instream), profile_(profile)
+  infile_(), instream_(instream), compnds_(), profile_(profile)
 {
   this->Init(boost::filesystem::path(""));
 }
 
 PDBReader::PDBReader(const String& filename, const IOProfile& profile)
-  : infile_(filename), instream_(infile_), profile_(profile)
+  : infile_(filename), instream_(infile_), compnds_(), profile_(profile)
 {
   this->Init(boost::filesystem::path(filename));
 }
 
 PDBReader::PDBReader(const boost::filesystem::path& loc, 
                      const IOProfile& profile):
-  infile_(loc), instream_(infile_), profile_(profile)
+  infile_(loc), instream_(infile_), compnds_(), profile_(profile)
 {
   this->Init(loc);
 }
@@ -102,6 +102,14 @@ void PDBReader::Init(const boost::filesystem::path& loc)
   hard_end_=false;
 }
 
+void PDBReader::ThrowFaultTolerant(const String& msg) {
+  if (profile_.fault_tolerant) {
+    LOG_WARNING(msg);
+    return;
+  }
+  throw IOException(msg);
+}
+
 void PDBReader::ParseCompndEntry (const StringRef& line, int line_num)
 {
   if (line.size()<20) {
@@ -114,67 +122,97 @@ void PDBReader::ParseCompndEntry (const StringRef& line, int line_num)
     ss << line_num <<": record is too short";
     throw IOException(ss.str());
   }
-  if (line.rtrim().size()>71) {
+  if (line.rtrim().size()>80) {
     if (profile_.fault_tolerant) {
       LOG_WARNING("invalid COMPND record on line " << line_num 
                   << ": record is too long");
       return;
     }
     std::stringstream ss("invalid COMPND record on line ");
-    ss << line_num <<": record is too long";
+    ss << line_num <<": whole record is too long";
     throw IOException(ss.str());
   }
-  StringRef entry=line.substr(11,59);
-  
-  std::vector<StringRef> fields=entry.split(':');
-  StringRef key=fields[0].trim();
-  fields[1]=fields[1].rtrim();
-  fields[1]=fields[1].substr(0, fields[1].size()-1);
-  //currently only these are parsed
- 
-  if (!(IEquals(key, StringRef("OL_ID", 5)))&&
-      !(IEquals(key, StringRef("MOL_ID", 6)))&&
-      !(IEquals(key, StringRef("CHAIN", 5)))){
-    LOG_TRACE("reading COMPND record on line " << line_num<< "is not supported");
-    return;
+  StringRef entry=line.substr(10,line.size()-10).trim();
+
+  StringRef data, key;
+  if (entry.size()<2){
+    ThrowFaultTolerant(str(format("invalid COMPND record on line %d, compnd record too small")%line_num));
   }
+  char last_letter=entry[entry.size()-1];
+  if((last_letter==',') ||
+      (last_letter==';')) {
+      entry=entry.substr(0, entry.size()-1); //trim last char
+  }
+  if((entry.find(':')!=entry.end())){
+    std::vector<StringRef> fields=entry.split(':');
+    key=fields[0].trim();
+    old_key_=key.str();
+    data=fields[1].trim();
+
+    if(data.size()<1){
+      ThrowFaultTolerant(str(format("invalid COMPND record on line %d, record after ':' too small")%line_num));
+    }
+    data_continues_=true;
+    if (last_letter==';') {
+      data_continues_=false;
+    }
+  } else if(skip_next_) {
+    if (last_letter==';'){
+      skip_next_=false;
+      data_continues_=false;
+      old_key_="";
+    } else if (last_letter==','){
+      data_continues_=true;
+    }
+    return;
+  } else if (data_continues_){
+    data=entry.trim();
+    
+    if(data.size()<1){
+      ThrowFaultTolerant(str(format("invalid COMPND record on line %d, record after\
+                                    ':' was empty")%line_num));
+    }
+    key=StringRef(old_key_.data(), old_key_.size());
+
+  } 
+      //currently only these are parsed
+  if (!(key.str()=="MOL_ID")&&!(key.str()=="CHAIN")){
+    LOG_TRACE("reading COMPND record on line " << line_num<< "is not supported");
+    if (data_continues_) {
+      skip_next_=true;
+    } else {
+      return;
+    }
+  }
+  
   std::vector<StringRef> chain_list;
   std::vector<String> chains;
-  if ((IEquals(key, StringRef("OL_ID", 5))) ||
-      (IEquals(key, StringRef("MOL_ID", 6)))) {
-      mol_id_=fields[1].trim().to_int();
-      if (mol_id_.first) {
-        LOG_TRACE("COMPND record on line " << line_num<< " MOL_ID: "<<mol_id_.second);
-      }
-      if (!mol_id_.first) {
-        if (profile_.fault_tolerant) {
-          return;
-        }
-        throw IOException(str(format("invalid COMPND record on line %d")%line_num));
-      }
+  if ((IEquals(key, StringRef("MOL_ID", 6)))) {
+    mol_id_=data.trim().to_int();
+    if (mol_id_.first) {
+      LOG_TRACE("COMPND record on line " << line_num<< " MOL_ID: "<<mol_id_.second);
+    }
+    if (!mol_id_.first) {
+     ThrowFaultTolerant(str(format("invalid COMPND record on line %d")%line_num));
+    }
   }
   if (IEquals(key, StringRef("CHAIN", 5))) {
     if (!mol_id_.first) {
-      if (profile_.fault_tolerant) {
-        return;
-      }
-      throw IOException(str(format("invalid COMPND record on line %d, CHAIN must be succeeding MOL_ID ")%line_num));
+    ThrowFaultTolerant(str(format("invalid COMPND record on line %d, CHAIN must be succeeding MOL_ID ")%line_num));
     }
-
-    chain_list=fields[1].split(',');
-    //~ PDBReader::CompndEntry cc;
-    //~ cc.chains=chains;
-    //~ cc.mol_id=mol_id_.second;
-
-    //~ std::cout << "COMPDNsssssssss: "<<fields[1] << " " << mol_id_.second<<std::endl;
-    //~ int ii=0;
-    //~ for (CompndList::const_iterator i=compnds_.begin(); i!=compnds_.end(); ++i, ++ii) {
+    if (data.find(',')!=data.end()) {
+      chain_list=data.split(',');
+    } else {
+      if(data.size()==1){
+        chain_list.push_back(data);
+      } else {
+       ThrowFaultTolerant(str(format("invalid COMPND record on line %d, CHAIN must be succeeding MOL_ID ")%line_num));
+      }
+    }
     for (std::vector<StringRef>::const_iterator it = chain_list.begin(); it != chain_list.end(); ++it) {
       chains.push_back(it->trim().str());
-      //~ std::cout << it->str() << " Hoi " << ii <<std::endl;
     }
     compnds_.push_back(CompndEntry(chains, mol_id_.second));
-  //~ }
   }
 }
 
@@ -256,6 +294,7 @@ bool PDBReader::HasNext()
           IEquals(curr_line.substr(0, 6),StringRef("ANISOU ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("COMPND", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("SEQRES", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6)))) {
@@ -417,13 +456,34 @@ void PDBReader::Import(mol::EntityHandle& ent,
 }
 
 void PDBReader::AssignMolIds(mol::EntityHandle ent) {
+  LOG_INFO("Assigning MOL_IDs");
   for (CompndList::const_iterator compnd_iterator=compnds_.begin(), e=compnds_.end();
        compnd_iterator!=e; ++compnd_iterator) {
     for (std::vector<String>::const_iterator chain_iterator = compnd_iterator->chains.begin();
                                              chain_iterator!= compnd_iterator->chains.end();
                                              ++chain_iterator) {
-      mol::ChainHandle chain=ent.FindChain(*chain_iterator);
-      chain.SetIntProp("molID", compnd_iterator->mol_id);
+      if (restrict_chains_.size()==0 ||
+        (restrict_chains_.find(*chain_iterator)!=String::npos)) {
+        mol::ChainHandle chain=ent.FindChain(*chain_iterator);
+        if (chain) {
+          chain.SetIntProp("mol_id", compnd_iterator->mol_id);
+        }else{
+          std::stringstream ss("could not map COMPND record MOL_ID onto chain");
+          ss <<*chain_iterator;
+          ThrowFaultTolerant(ss.str());
+        }
+      }
+    }
+  }
+  if (compnds_.size()>0){
+    mol::ChainHandleList ch_list=ent.GetChainList();
+    for (mol::ChainHandleList::const_iterator chain=ch_list.begin();
+         chain!=ch_list.end(); ++chain) {
+      if(chain->IsValid()){
+        if (!chain->HasProp("mol_id")) {
+          ThrowFaultTolerant("found chain without MOL_ID");
+        }
+      }
     }
   }
 }
