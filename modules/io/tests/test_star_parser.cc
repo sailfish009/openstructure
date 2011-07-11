@@ -134,9 +134,10 @@ BOOST_AUTO_TEST_CASE(star_split3)
   BOOST_REQUIRE(parts.size()==1);
   BOOST_CHECK_EQUAL(parts[0], StringRef("1 2", 3));
 }
-    
+
 BOOST_AUTO_TEST_CASE(star_data_item)
 {
+  BOOST_MESSAGE("  Running star_data_item tests...");
   std::ifstream s("testfiles/data-item.cif");
   DataItemTestParser star_p(s);
   star_p.Parse();

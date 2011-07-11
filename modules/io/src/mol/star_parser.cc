@@ -171,6 +171,8 @@ void StarParser::ParseLoop()
         if (StringRef("loop_", 5)==tline) {
           return;
         }
+      case '_':
+        return;
       default:
         if (process_rows) {
           int before=columns.size();
@@ -270,7 +272,7 @@ void StarParser::ParseData()
     if (tline.empty()) {
       this->ConsumeLine();
       continue;
-    }    
+    }
     switch (tline[0]) {
       case '_':
         if (skip) {
