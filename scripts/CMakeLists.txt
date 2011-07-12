@@ -22,14 +22,19 @@ else()
          TARGET ost_scripts OUTPUT_DIR libexec/openstructure)
   script(NAME ost INPUT ost.in SUBSTITUTE ${SUBST_DICT} 
          TARGET ost_scripts)
-  script(NAME dng INPUT dng.in SUBSTITUTE ${SUBST_DICT}
-         TARGET ost_scripts)
+  if (ENABLE_GUI)
+    script(NAME dng INPUT dng.in SUBSTITUTE ${SUBST_DICT}
+           TARGET ost_scripts)
+  endif()
 endif()
 
 set(INIT_SCRIPTS 
-  init.py
   init_cl.py
 )
+
+if (ENABLE_GUI)
+  list(APPEND INIT_SCRIPTS init.py)
+endif()
 copy_if_different("./" "${STAGE_DIR}/${LIB_DIR}/openstructure" 
                   "${INIT_SCRIPTS}" "python init scripts" ost_scripts)
 
