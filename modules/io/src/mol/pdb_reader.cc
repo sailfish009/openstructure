@@ -100,6 +100,8 @@ void PDBReader::Init(const boost::filesystem::path& loc)
     is_pqr_=false;
   }
   hard_end_=false;
+  skip_next_=false;
+  data_continues_=false;
 }
 
 void PDBReader::ThrowFaultTolerant(const String& msg) {
