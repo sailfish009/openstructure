@@ -28,11 +28,44 @@
 namespace ost { namespace io {
 
 StarParser::StarParser(std::istream& stream, bool items_as_row):
-  stream_(stream), line_num_(0), has_current_line_(false), current_line_(),
+  stream_(stream), filename_("<stream>"), line_num_(0),
+  has_current_line_(false), current_line_(),
+  items_row_header_(), items_row_columns_(),
+  items_row_values_()
+{
+  items_as_row_ = items_as_row;
+}
+
+StarParser::StarParser(const String& filename, bool items_as_row):
+  fstream_(filename.c_str()), stream_(fstream_), filename_(filename),
+  line_num_(0), has_current_line_(false), current_line_(),
   items_row_header_(), items_row_columns_(), items_row_values_()
 {
   items_as_row_ = items_as_row;
 }
+
+String StarParser::FormatDiagnostic(StarDiagType type, const String& message,
+                                    int line)
+{
+  std::stringstream ss;
+  ss << filename_ << ":";
+  if (line!=-1) {
+    ss << line << ": ";
+  } else {
+    ss << " ";
+  }
+  switch (type) {
+    case STAR_DIAG_ERROR:
+      ss << "error: ";
+      break;
+    case STAR_DIAG_WARNING:
+      ss << "warning: ";
+      break;
+  }
+  ss << message;
+  return ss.str();
+}
+
 
 bool StarParser::SplitLine(const StringRef& line, 
                             std::vector<StringRef>& parts, bool clear)
@@ -363,10 +396,9 @@ void StarParser::DiagnoseUnknown()
   StringRef line;
   bool r=this->GetLine(line);
   assert(r);r=r;
-  
-  ss << "unknown control structure '"<< line.rtrim() << "' on line " 
-     << line_num_ << "." << std::endl;
-  throw IOException(ss.str());
+  ss << "unknown control structure '"<< line.rtrim() << "'";
+  throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR, ss.str(),
+                                           line_num_));
 }
 
 void StarParser::ParseGlobal()
@@ -400,8 +432,7 @@ void StarParser::Parse()
         this->ConsumeLine();
         break;
       default:
-        ss << "Missing 'data_' control structure." << std::endl;
-        throw IOException(ss.str());
+        throw IOException("Missing 'data_' control structure");
         break;
     }
   }

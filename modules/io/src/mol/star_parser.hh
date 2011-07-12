@@ -24,12 +24,20 @@
   Author: Marco Biasini
  */
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <map>
 #include <ost/string_ref.hh>
 #include <ost/io/module_config.hh>
 
 namespace ost { namespace io {
+
+
+typedef enum {
+  STAR_DIAG_WARNING,
+  STAR_DIAG_ERROR
+} StarDiagType;
+
 
 class DLLEXPORT_OST_IO StarDataItem {
 public:
@@ -108,7 +116,7 @@ public:
   ///                    header, values as row) and then parsed like a loop
   ///                    (OnBeginLoop(), OnDataRow(), OnEndLoop())
   explicit StarParser(std::istream& stream, bool items_as_row=false);
-
+  explicit StarParser(const String& filename, bool items_as_row=false);
   virtual ~StarParser() { }
 // callback interface
 public:
@@ -139,6 +147,10 @@ public:
   /// \brief called when leaving a datasection. Will only be invoked when 
   ///     OnBeginData() returned true.
   virtual void OnEndData() { }
+
+  /// \brief format diagnostic and returns it as a string.
+  String FormatDiagnostic(StarDiagType type, const String& message,
+                          int line=-1);
 public:
   void Parse();
   
@@ -187,7 +199,9 @@ private:
   void ParseDataItem();
   void DiagnoseUnknown();
   bool ParseMultilineValue(String& value, bool skip=false);
+  std::ifstream fstream_;
   std::istream& stream_;
+  String        filename_;
   int           line_num_;
   bool          has_current_line_;
   String        current_line_;

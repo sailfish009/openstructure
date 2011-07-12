@@ -37,6 +37,9 @@ class DataItemTestParser: public StarParser {
 public:
   DataItemTestParser(std::istream& stream): StarParser(stream)
   { }
+
+  DataItemTestParser(const String& filename): StarParser(filename)
+  { }
   virtual void OnDataItem(const StarDataItem& item)
   {
     BOOST_CHECK_EQUAL(item.GetCategory().str(), "data-item");
@@ -240,6 +243,31 @@ BOOST_AUTO_TEST_CASE(star_data_item)
   BOOST_CHECK_EQUAL(star_p.s2, "a b c");
   BOOST_CHECK_EQUAL(star_p.s3, "a\nb\nc");
   BOOST_CHECK_EQUAL(star_p.s4, "a'b");
+}
+
+BOOST_AUTO_TEST_CASE(format_diag_stream)
+{
+  BOOST_MESSAGE("  Running star_data_item tests...");
+  std::ifstream s("testfiles/data-item.cif");
+  DataItemTestParser star_p(s);
+  BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_WARNING, "bad", -1),
+                    "<stream>: warning: bad");
+  BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_ERROR, "really bad", -1),
+                    "<stream>: error: really bad");
+  BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_ERROR, "bad", 55),
+                    "<stream>:55: error: bad");
+}
+
+BOOST_AUTO_TEST_CASE(format_diag_filename)
+{
+  BOOST_MESSAGE("  Running star_data_item tests...");
+  DataItemTestParser star_p("testfiles/data-item.cif");
+  BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_WARNING, "bad", -1),
+                    "testfiles/data-item.cif: warning: bad");
+  BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_ERROR, "really bad", -1),
+                    "testfiles/data-item.cif: error: really bad");
+  BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_ERROR, "bad", 55),
+                    "testfiles/data-item.cif:55: error: bad");
 }
 
 BOOST_AUTO_TEST_CASE(star_multi)
