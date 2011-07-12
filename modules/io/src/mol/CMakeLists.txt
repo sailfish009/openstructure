@@ -12,6 +12,7 @@ load_entity.cc
 surface_io_msms_handler.cc
 load_surface.cc
 chemdict_parser.cc
+mmcif_parser.cc
 io_profile.cc
 dcd_io.cc
 star_parser.cc
@@ -20,6 +21,7 @@ PARENT_SCOPE
 
 set(OST_IO_MOL_HEADERS
 chemdict_parser.hh
+mmcif_parser.hh
 star_parser.hh
 io_profile.hh
 dcd_io.hh

@@ -27,10 +27,11 @@
 
 namespace ost { namespace io {
 
-StarParser::StarParser(std::istream& stream):
-  stream_(stream), line_num_(0), has_current_line_(false), current_line_()
+StarParser::StarParser(std::istream& stream, bool items_as_row):
+  stream_(stream), line_num_(0), has_current_line_(false), current_line_(),
+  items_row_header_(), items_row_columns_(), items_row_values_()
 {
-  
+  items_as_row_ = items_as_row;
 }
 
 bool StarParser::SplitLine(const StringRef& line, 
@@ -200,6 +201,47 @@ void StarParser::ParseLoop()
   }
 }
 
+void StarParser::ParseLastDataItemRow()
+{
+  if (items_row_header_.GetCategory().size() > 0) {
+    if (this->OnBeginLoop(items_row_header_)) {
+      this->OnDataRow(items_row_header_, items_row_columns_);
+      this->OnEndLoop();
+    }
+    items_row_values_.clear();
+    items_row_columns_.clear();
+    items_row_header_.Clear();
+  }
+}
+
+void StarParser::ParseDataItemOrRow(StarDataItem& item)
+{
+  if (items_as_row_) {
+    // header
+    if (StringRef(items_row_header_.GetCategory().c_str(),
+                 items_row_header_.GetCategory().size())!=item.GetCategory()) {
+      this->ParseLastDataItemRow();
+      // set category for new section
+      items_row_header_.SetCategory(item.GetCategory());
+    }
+    
+    // row
+    items_row_header_.Add(item.GetName());
+    items_row_values_.push_back(item.GetValue().str());
+    items_row_columns_.push_back(StringRef(items_row_values_.back().data(), 
+                                     items_row_values_.back().length()).trim());
+  } else {
+    this->OnDataItem(item);
+  }
+}
+
+void StarParser::ParseEndDataItemRow()
+{
+  if (items_as_row_) {
+    this->ParseLastDataItemRow();
+  }
+}
+
 void StarParser::ParseDataItem()
 {
   StringRef line;
@@ -242,7 +284,7 @@ void StarParser::ParseDataItem()
     StringRef value_ref=StringRef(value.data(),
                                   value.length()).trim();
     StarDataItem data_item(cat, name, value_ref);
-    this->OnDataItem(data_item);
+    this->ParseDataItemOrRow(data_item);
   } else {
     if (nv.size()!=2) {
       std::cout << "ERROR:" << line_num_ << ":" << line << std::endl;
@@ -253,10 +295,9 @@ void StarParser::ParseDataItem()
     StringRef cat=nv[0].substr(1, i-nv[0].begin()-1);
     StringRef name=nv[0].substr(i-nv[0].begin()+1);
     StarDataItem data_item(cat, name, nv[1]);
-    this->OnDataItem(data_item);
+    this->ParseDataItemOrRow(data_item);
     this->ConsumeLine();
   }
-  
 }
 
 void StarParser::ParseData()
@@ -283,6 +324,7 @@ void StarParser::ParseData()
         break;
       case 'd':
         if (tline.length()>=5 && StringRef("data_", 5)==tline.substr(0, 5)) {
+          this->ParseEndDataItemRow();
           this->OnEndData();
           return;
         }
@@ -297,6 +339,7 @@ void StarParser::ParseData()
         break;
       case 'l':
         if (tline==StringRef("loop_", 5)) {
+          this->ParseEndDataItemRow();
           this->ParseLoop();
           break;
         }
@@ -310,6 +353,7 @@ void StarParser::ParseData()
         return;
     }
   }
+  this->ParseEndDataItemRow();
   this->OnEndData();
 }
 

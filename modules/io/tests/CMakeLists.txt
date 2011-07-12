@@ -9,6 +9,7 @@ set(OST_IO_UNIT_TESTS
   test_iomanager.cc
   tests.cc
   test_star_parser.cc
+  test_mmcif_parser.cc
 )
 
 ost_unittest(MODULE io

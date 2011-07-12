@@ -71,6 +71,12 @@ public:
   {
     return index_map_.size();
   }
+  void Clear()
+  {
+    category_.clear();
+    index_map_.clear();
+  }
+
   const String& GetCategory() const { return category_; }
 private:
   String                category_;
@@ -95,8 +101,14 @@ private:
 ///     a list of column names and values.
 class DLLEXPORT_OST_IO StarParser {
 public:
-  StarParser(std::istream& istream);
-  
+  /// \brief create a StarParser
+  ///
+  /// \param stream input stream
+  /// \param item_as_row if true, data-items are first gathered (identifier as
+  ///                    header, values as row) and then parsed like a loop
+  ///                    (OnBeginLoop(), OnDataRow(), OnEndLoop())
+  explicit StarParser(std::istream& stream, bool items_as_row=false);
+
   virtual ~StarParser() { }
 // callback interface
 public:
@@ -108,7 +120,7 @@ public:
   /// \brief invoked when leaving a loop
   /// 
   /// OnEndLoop() is only invoked, when OnBeginLoop() returned true.
-  virtual void OnEndLoop() { }  
+  virtual void OnEndLoop() { }
   /// \brief invoked when a data row in a loop is encountered.
   /// \param header describes the row format
   /// \param columns contains the data columns
@@ -135,6 +147,14 @@ public:
                         std::vector<StringRef>& parts, bool clear=true);
 private:
   void ParseLoop();
+  /// \brief Calls the loop parsing functions on the last data item fetched to
+  ///        be read as loop
+  void ParseLastDataItemRow();
+  /// \brief Calls functions for parsing a data item, either as singleton
+  ///        (default) or loop.
+  void ParseDataItemOrRow(StarDataItem& item);
+  /// \brief If enabled, calls ParseLastDataItemRow()
+  void ParseEndDataItemRow();
 private:
   /// \brief read next line, replacing the current line
   bool NextLine(StringRef& str)
@@ -171,6 +191,10 @@ private:
   int           line_num_;
   bool          has_current_line_;
   String        current_line_;
+  bool          items_as_row_;
+  StarLoopDesc  items_row_header_;
+  std::vector<StringRef> items_row_columns_;
+  std::vector<String> items_row_values_;
 };
  
 }}

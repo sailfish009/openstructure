@@ -20,6 +20,7 @@
   Author: Marco Biasini
  */
 #include <fstream>
+#include <math.h>
 #include <ost/mol/mol.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/io/mol/star_parser.hh>
@@ -52,6 +53,16 @@ public:
       s4=item.GetValue().str();
     }    
   }
+  virtual bool OnBeginLoop(const StarLoopDesc& header)
+  {
+    return true;
+  }
+  virtual void OnDataRow(const StarLoopDesc& header, 
+                         const std::vector<StringRef>& columns) 
+  {
+    BOOST_CHECK_EQUAL(header.GetCategory(), "loop");
+    BOOST_CHECK_EQUAL(columns.size(), size_t(4));
+  }
   String s1;
   String s2;
   String s3;
@@ -66,7 +77,7 @@ public:
   {
     BOOST_CHECK_EQUAL(header.GetCategory(), "loop");
     return true;
-  }  
+  }
   virtual void OnDataRow(const StarLoopDesc& header, 
                          const std::vector<StringRef>& columns) 
   {
@@ -101,6 +112,90 @@ public:
   
   bool visit_one;
   bool visit_two;
+};
+
+class ItemsAsRowTestParser : public StarParser {
+public:
+  ItemsAsRowTestParser(std::istream& stream): StarParser(stream, true),
+                                              category("")
+  { }
+
+  virtual bool OnBeginLoop(const StarLoopDesc& header)
+  {
+    if ((header.GetCategory() == "data-item1") ||
+        (header.GetCategory() == "data-item2") ||
+        (header.GetCategory() == "data-item3") ||
+        (header.GetCategory() == "data-item4")) {
+      return true;
+    }
+    return false;
+  }  
+
+  virtual void OnDataRow(const StarLoopDesc& header, 
+                         const std::vector<StringRef>& columns) 
+  {
+    BOOST_CHECK_EQUAL(columns.size(), size_t(4));
+    category = header.GetCategory();
+    if (header.GetCategory() == "data-item1") {
+      s1 = columns[header.GetIndex("s1")].str();
+      s2 = columns[header.GetIndex("s2")].str();
+      s3 = columns[header.GetIndex("s3")].str();
+      s4 = columns[header.GetIndex("s4")].str();
+      return;
+    }
+    if (header.GetCategory() == "data-item2") {
+      i1 = columns[header.GetIndex("i1")].to_int().second;
+      i2 = columns[header.GetIndex("i2")].to_int().second;
+      i3 = columns[header.GetIndex("i3")].to_int().second;
+      i4 = columns[header.GetIndex("i4")].to_int().second;
+      return;
+    }
+    if (header.GetCategory() == "data-item3") {
+      f1 = columns[header.GetIndex("f1")].to_float().second;
+      f2 = columns[header.GetIndex("f2")].to_float().second;
+      f3 = columns[header.GetIndex("f3")].to_float().second;
+      f4 = columns[header.GetIndex("f4")].to_float().second;
+      return;
+    }
+    if (header.GetCategory() == "data-item4") {
+      s5 = columns[header.GetIndex("s1")].str();
+      s6 = columns[header.GetIndex("s2")].str();
+      s7 = columns[header.GetIndex("s3")].str();
+      s8 = columns[header.GetIndex("s4")].str();
+      return;
+    }
+  }
+
+  void OnEndLoop()
+  {
+    if (category == "data-item3") {
+      f1 = ceil(f1*2);
+      f2 = ceil(f2*2);
+      f3 = ceil(f3*2);
+      f4 = ceil(f4*2);
+    }
+  }
+
+  String category;
+
+  String s1;
+  String s2;
+  String s3;
+  String s4;
+  String s5;
+  String s6;
+  String s7;
+  String s8;
+
+  int i1;
+  int i2;
+  int i3;
+  int i4;
+
+  float f1;
+  float f2;
+  float f3;
+  float f4;
 };
 
 BOOST_AUTO_TEST_SUITE( io );
@@ -180,6 +275,30 @@ BOOST_AUTO_TEST_CASE(star_loop)
   BOOST_CHECK_EQUAL(star_p.lines[4][0], "13");
   BOOST_CHECK_EQUAL(star_p.lines[4][1], "14");
   BOOST_CHECK_EQUAL(star_p.lines[4][2], "15");
+}
+
+BOOST_AUTO_TEST_CASE(star_items_as_row)
+{
+  std::ifstream s("testfiles/items-as-row.cif");
+  ItemsAsRowTestParser star_p(s);
+  star_p.Parse();
+  BOOST_CHECK_EQUAL(star_p.s1, "a");
+  BOOST_CHECK_EQUAL(star_p.s2, "a b c");
+  BOOST_CHECK_EQUAL(star_p.s3, "a\nb\nc");
+  BOOST_CHECK_EQUAL(star_p.s4, "a'b");
+  BOOST_CHECK_EQUAL(star_p.i1, 1);
+  BOOST_CHECK_EQUAL(star_p.i2, 2);
+  BOOST_CHECK_EQUAL(star_p.i3, 3);
+  BOOST_CHECK_EQUAL(star_p.i4, 4);
+  BOOST_CHECK_EQUAL(ceil(star_p.f1), ceil(2.22));
+  BOOST_CHECK_EQUAL(ceil(star_p.f2), ceil(2.44));
+  BOOST_CHECK_EQUAL(ceil(star_p.f3), ceil(2.66));
+  BOOST_CHECK_EQUAL(ceil(star_p.f4), ceil(2.88));
+
+  BOOST_CHECK_EQUAL(star_p.s5, "1.11");
+  BOOST_CHECK_EQUAL(star_p.s6, "1.22");
+  BOOST_CHECK_EQUAL(star_p.s7, "1.33");
+  BOOST_CHECK_EQUAL(star_p.s8, "1.44");
 }
 
 BOOST_AUTO_TEST_CASE(star_missing_data)
