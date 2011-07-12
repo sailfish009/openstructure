@@ -83,9 +83,9 @@ void export_Compound() {
                   &Compound::SetOneLetterCode)                  
     .def("GetAtomSpecs", &Compound::GetAtomSpecs,
          return_value_policy<copy_const_reference>())
-    .def("bond_specs", make_function(&Compound::GetBondSpecs,
+    .add_property("bond_specs", make_function(&Compound::GetBondSpecs,
          return_value_policy<copy_const_reference>()))         
-    .def("atom_specs", make_function(&Compound::GetAtomSpecs,
+    .add_property("atom_specs", make_function(&Compound::GetAtomSpecs,
          return_value_policy<copy_const_reference>()))
     .def("AddAtom", &Compound::AddAtom)
     .def("AddBond", &Compound::AddBond)
