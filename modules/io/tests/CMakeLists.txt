@@ -4,13 +4,14 @@ set(OST_IO_UNIT_TESTS
   test_io_pdb.cc
   test_io_crd.cc
   test_io_sdf.cc
-  test_io_img.cc
   test_pir.cc
   test_iomanager.cc
   tests.cc
   test_star_parser.cc
 )
-
+if (ENABLE_IMG)
+  list(APPEND OST_IO_UNIT_TESTS test_io_img.cc)
+endif()
 ost_unittest(MODULE io
              SOURCES "${OST_IO_UNIT_TESTS}"
              LINK ost_mol ost_seq)
