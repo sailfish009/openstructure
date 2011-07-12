@@ -582,6 +582,25 @@ BOOST_AUTO_TEST_CASE(write_ter5)
                             "testfiles/pdb/ter_view-emptychain-out.pdb"));
 }
 
+BOOST_AUTO_TEST_CASE(write_ter6)
+{
+  String fname("testfiles/pdb/ter4.pdb");  
+  // this scope is required to force the writer stream to be closed before 
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    PDBReader reader(fname, IOProfile());
+    PDBWriter writer(String("testfiles/pdb/ter4-out.pdb"), IOProfile());
+    
+    mol::EntityHandle ent=mol::CreateEntity();
+    reader.Import(ent);
+    conop::Conopology& conop_inst=conop::Conopology::Instance();
+    conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+    writer.Write(ent);
+  }
+  BOOST_CHECK(compare_files("testfiles/pdb/ter4.pdb", 
+                            "testfiles/pdb/ter4-out.pdb"));
+}
+
 BOOST_AUTO_TEST_CASE(write_conect)
 {
   // this scope is required to force the writer stream to be closed before
