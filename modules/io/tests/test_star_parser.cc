@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(star_data_item)
 
 BOOST_AUTO_TEST_CASE(format_diag_stream)
 {
-  BOOST_MESSAGE("  Running star_data_item tests...");
+  BOOST_MESSAGE("  Running format_diag_stream tests...");
   std::ifstream s("testfiles/data-item.cif");
   DataItemTestParser star_p(s);
   BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_WARNING, "bad", -1),
@@ -256,11 +256,14 @@ BOOST_AUTO_TEST_CASE(format_diag_stream)
                     "<stream>: error: really bad");
   BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_ERROR, "bad", 55),
                     "<stream>:55: error: bad");
+  star_p.SetFilename("testname");
+  BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_ERROR, "bad", 55),
+                    "testname:55: error: bad");
 }
 
 BOOST_AUTO_TEST_CASE(format_diag_filename)
 {
-  BOOST_MESSAGE("  Running star_data_item tests...");
+  BOOST_MESSAGE("  Running format_diag_filename tests...");
   DataItemTestParser star_p("testfiles/data-item.cif");
   BOOST_CHECK_EQUAL(star_p.FormatDiagnostic(STAR_DIAG_WARNING, "bad", -1),
                     "testfiles/data-item.cif: warning: bad");
@@ -335,5 +338,62 @@ BOOST_AUTO_TEST_CASE(star_missing_data)
   LoopTestParser star_p(s);
   BOOST_CHECK_THROW(star_p.Parse(), IOException);
 }
+
+BOOST_AUTO_TEST_CASE(star_unterminated_dataitem)
+{
+  std::ifstream s("testfiles/unterminated_dataitem.cif");
+  LoopTestParser star_p(s);
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(star_incomplete_dataitem)
+{
+  std::ifstream s("testfiles/incomplete_dataitem.cif");
+  LoopTestParser star_p(s);
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(star_singleline_multiple_values)
+{
+  std::ifstream s("testfiles/singleline_multivalue_dataitem.cif");
+  DataItemTestParser star_p(s);
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(star_multiline_multiple_values)
+{
+  std::ifstream s("testfiles/multiline_multivalue_dataitem.cif");
+  DataItemTestParser star_p(s);
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(star_multiline_invalid_ident)
+{
+  std::ifstream s("testfiles/multiline_invalid_ident.cif");
+  DataItemTestParser star_p(s);
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(star_singleline_invalid_ident)
+{
+  std::ifstream s("testfiles/singleline_invalid_ident.cif");
+  DataItemTestParser star_p(s);
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(star_loop_category_change)
+{
+  std::ifstream s("testfiles/loop_category_change.cif");
+  DataItemTestParser star_p(s);
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
+}
+
+BOOST_AUTO_TEST_CASE(star_loop_category_change_inplace)
+{
+  std::ifstream s("testfiles/loop_category_change_inplace.cif");
+  DataItemTestParser star_p(s);
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
+}
+
 BOOST_AUTO_TEST_SUITE_END();
 

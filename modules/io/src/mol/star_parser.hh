@@ -151,6 +151,11 @@ public:
   /// \brief format diagnostic and returns it as a string.
   String FormatDiagnostic(StarDiagType type, const String& message,
                           int line=-1);
+
+  void SetFilename(const String& filename)
+  {
+    filename_ = filename;
+  }
 public:
   void Parse();
   
@@ -194,6 +199,9 @@ private:
     assert(has_current_line_);
     has_current_line_=false;
   }
+
+  void ParseDataItemIdent(const StringRef ident,
+                          StringRef& cat, StringRef& name);
   void ParseGlobal();
   void ParseData();
   void ParseDataItem();

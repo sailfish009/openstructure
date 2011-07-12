@@ -96,11 +96,7 @@ bool StarParser::SplitLine(const StringRef& line,
       while (s!=line.end() && !isspace(*s)) {
         ++s;
       }
-      if (s-start) {       
-        parts.push_back(StringRef(start, s-start));
-      } else {
-        return false;
-      }
+      parts.push_back(StringRef(start, s-start));
     }
   }
   return true;
@@ -110,18 +106,28 @@ bool StarParser::ParseMultilineValue(String& value, bool skip)
 {
   std::stringstream valuebuf;
   StringRef line;
-  bool r=this->GetLine(line);
-  assert(r);r=r;
+  if (!this->GetLine(line)) {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                               "Unexpected end of input",
+                                               line_num_));
+  }
   valuebuf << line.substr(1);
+  bool found_semicolon = false;
   while (this->NextLine(line)) {
     StringRef tline=line.rtrim();
     if (!tline.empty() && tline[0]==';') {
+      found_semicolon = true;
       break;
     }
     if (!skip) {
       valuebuf << tline << "\n";      
     }
-  }  
+  }
+  if (!found_semicolon) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                             "Unterminated multiline value",
+                                             line_num_));
+  }
   if (!skip) {
     value=valuebuf.str();
   }
@@ -148,7 +154,14 @@ void StarParser::ParseLoop()
           prefix_len=tline.find('.')-tline.begin();
           header.SetCategory(tline.substr(1, prefix_len-1));
         } else {
-          assert(tline[prefix_len]=='.');
+          if (tline[prefix_len] != '.' ||
+              StringRef(header.GetCategory().data(),
+                        header.GetCategory().size())!=tline.substr(1,
+                                                                prefix_len-1)) {
+            throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                                   "Change of category in loop",
+                                                     line_num_));
+          }
         }
         header.Add(tline.substr(prefix_len+1));
         this->ConsumeLine();
@@ -182,8 +195,7 @@ void StarParser::ParseLoop()
       case ';':
         if (process_rows) {
           tmp_values.push_back(String());
-          bool r=this->ParseMultilineValue(tmp_values.back());
-          assert(r);r=r;
+          this->ParseMultilineValue(tmp_values.back());
           columns.push_back(StringRef(tmp_values.back().data(), 
                                       tmp_values.back().length()).trim());
           if (columns.size()==header.GetSize()) {
@@ -193,8 +205,7 @@ void StarParser::ParseLoop()
           }          
         } else {
           String s;
-          bool r=this->ParseMultilineValue(s, true);
-          assert(r);r=r;
+          this->ParseMultilineValue(s, true);
         }
         break;
         case 'd':
@@ -210,8 +221,7 @@ void StarParser::ParseLoop()
       default:
         if (process_rows) {
           int before=columns.size();
-          bool r=StarParser::SplitLine(tline, columns, false);
-          assert(r);r=r;
+          StarParser::SplitLine(tline, columns, false);
           if (columns.size()==header.GetSize()) {
             this->OnDataRow(header, columns);            
             tmp_values.clear();
@@ -278,8 +288,7 @@ void StarParser::ParseEndDataItemRow()
 void StarParser::ParseDataItem()
 {
   StringRef line;
-  bool r=this->GetLine(line);
-  assert(r);r=r;
+  this->GetLine(line);
   // optimize for common case when name/value are present on the same line. 
   // We don't have to allocate any additional strings in that case.
   std::vector<StringRef> nv;
@@ -302,42 +311,59 @@ void StarParser::ParseDataItem()
         StarParser::SplitLine(StringRef(value.data(), value.length()), 
                               nv, false);
         if (nv.size()!=2) {
-          std::cout << "ERROR:" << line_num_ << ":" << tline << std::endl;
+          throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                "More than 1 value for data item "+ identifier,
+                                                   line_num_));
         }
-        assert(nv.size()==2);
         this->ConsumeLine();        
       }
       break;
     }
-    size_t i=identifier.find('.');
-    assert(i!=String::npos);
+    if (value.empty()) {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                               "Unexpected end of input",
+                                               line_num_));
+    }
     StringRef id_ref(identifier.data(), identifier.size());
-    StringRef cat=StringRef(id_ref.substr(1, i-1));
-    StringRef name=id_ref.substr(i+1);
+    StringRef cat;
+    StringRef name;
     StringRef value_ref=StringRef(value.data(),
                                   value.length()).trim();
+    this->ParseDataItemIdent(id_ref, cat, name);
     StarDataItem data_item(cat, name, value_ref);
     this->ParseDataItemOrRow(data_item);
   } else {
     if (nv.size()!=2) {
-      std::cout << "ERROR:" << line_num_ << ":" << line << std::endl;
-    }    
-    assert(nv.size()==2);
-    StringRef::const_iterator i=nv[0].find('.');
-    assert(i!=nv[0].end());
-    StringRef cat=nv[0].substr(1, i-nv[0].begin()-1);
-    StringRef name=nv[0].substr(i-nv[0].begin()+1);
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                 "More than 1 value for data item "+ line.str(),
+                                               line_num_));
+    }
+    StringRef cat;
+    StringRef name;
+    this->ParseDataItemIdent(nv[0], cat, name);
     StarDataItem data_item(cat, name, nv[1]);
     this->ParseDataItemOrRow(data_item);
     this->ConsumeLine();
   }
 }
 
+void StarParser::ParseDataItemIdent(const StringRef ident,
+                                    StringRef& cat, StringRef& name)
+{
+    StringRef::const_iterator i=ident.find('.');
+    if (i == ident.end()) {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                           "Invalid data-item identifier '" + ident.str() + "'",
+                                               line_num_));
+    }
+    cat=ident.substr(1, i-ident.begin()-1);
+    name=ident.substr(i-ident.begin()+1);
+}
+
 void StarParser::ParseData()
 {
   StringRef line;
-  bool r=this->GetLine(line);
-  assert(r);r=r;
+  this->GetLine(line);
   StringRef data_id=line.rtrim().substr(5);
   bool skip=!this->OnBeginData(data_id);
   this->ConsumeLine();
@@ -364,10 +390,7 @@ void StarParser::ParseData()
       case ';':
         if (skip) {
           String s;
-          bool r=this->ParseMultilineValue(s, true);
-          assert(r);r=r;
-        } else {
-          assert(0 && "';' when skip==false");
+          this->ParseMultilineValue(s, true);
         }
         break;
       case 'l':
@@ -394,8 +417,7 @@ void StarParser::DiagnoseUnknown()
 {
   std::stringstream ss;
   StringRef line;
-  bool r=this->GetLine(line);
-  assert(r);r=r;
+  this->GetLine(line);
   ss << "unknown control structure '"<< line.rtrim() << "'";
   throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR, ss.str(),
                                            line_num_));
