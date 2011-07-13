@@ -1649,8 +1649,10 @@ void Scene::set_far(float f)
 
 void Scene::update_fog()
 {
-  glFogf(GL_FOG_START,znear_+fnear_);
-  glFogf(GL_FOG_END,zfar_+ffar_);
+  if(gl_init_) {
+    glFogf(GL_FOG_START,znear_+fnear_);
+    glFogf(GL_FOG_END,zfar_+ffar_);
+  }
 }
 
 
@@ -1802,6 +1804,7 @@ void Scene::render_glow()
 
 void Scene::stereo_projection(int view)
 {
+  if(!gl_init_) return;
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
