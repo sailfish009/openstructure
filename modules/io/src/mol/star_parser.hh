@@ -148,9 +148,33 @@ public:
   ///     OnBeginData() returned true.
   virtual void OnEndData() { }
 
+  /// \brief try to convert a value to float, on failure raise an exception.
+  ///
+  /// \param data value to be converted
+  /// \param name to be included in the message
+  ///
+  /// \return converted value
+  float TryGetFloat(const StringRef& data, const String& name) const;
+
+  /// \brief try to convert a value to integer, on failure raise an exception.
+  ///
+  /// \param data value to be converted
+  /// \param name to be included in the message
+  ///
+  /// \return converted value
+  int TryGetInt(const StringRef& data, const String& name) const;
+
+  /// \brief try to convert a value to bool, on failure raise an exception.
+  ///
+  /// \param data value to be converted
+  /// \param name to be included in the message
+  ///
+  /// \return converted value
+  bool TryGetBool(const StringRef& data, const String& name) const;
+
   /// \brief format diagnostic and returns it as a string.
   String FormatDiagnostic(StarDiagType type, const String& message,
-                          int line=-1);
+                          int line=-1) const;
 
   void SetFilename(const String& filename)
   {

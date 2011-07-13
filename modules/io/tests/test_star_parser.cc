@@ -395,5 +395,54 @@ BOOST_AUTO_TEST_CASE(star_loop_category_change_inplace)
   BOOST_CHECK_THROW(star_p.Parse(), IOException);
 }
 
+BOOST_AUTO_TEST_CASE(star_try_float_conversions)
+{
+  BOOST_MESSAGE("  Running star_try_float_conversions tests...");
+  std::ifstream s("testfiles/loop_category_change_inplace.cif");
+  DataItemTestParser star_p(s);
+  StringRef data = StringRef("1.5", 3);
+  BOOST_CHECK_CLOSE(star_p.TryGetFloat(data,"positive float test"),1.5f,0.001f);
+  data = StringRef("foo", 3);
+  BOOST_CHECK_THROW(star_p.TryGetFloat(data, "negative float test"),
+                    IOException);
+  BOOST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(star_try_int_conversions)
+{
+  BOOST_MESSAGE("  Running star_try_int_conversions tests...");
+  std::ifstream s("testfiles/loop_category_change_inplace.cif");
+  DataItemTestParser star_p(s);
+  StringRef data = StringRef("101", 3);
+  BOOST_CHECK_EQUAL(star_p.TryGetInt(data, "positive int test"), 101);
+  data = StringRef("foo", 3);
+  BOOST_CHECK_THROW(star_p.TryGetInt(data, "negative int test"),
+                    IOException);
+  BOOST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(star_try_bool_conversions)
+{
+  BOOST_MESSAGE("  Running star_try_bool_conversions tests...");
+  std::ifstream s("testfiles/loop_category_change_inplace.cif");
+  DataItemTestParser star_p(s);
+  StringRef data = StringRef("Y", 1);
+  BOOST_CHECK(star_p.TryGetBool(data, "positive bool test ("+data.str()+")"));
+  data = StringRef("y", 1);
+  BOOST_CHECK(star_p.TryGetBool(data, "positive bool test ("+data.str()+")"));
+  data = StringRef("N", 1);
+  BOOST_CHECK(!star_p.TryGetBool(data, "positive bool test ("+data.str()+")"));
+  data = StringRef("n", 1);
+  BOOST_CHECK(!star_p.TryGetBool(data, "positive bool test ("+data.str()+")"));
+  data = StringRef("J", 1);
+  BOOST_CHECK_THROW(star_p.TryGetInt(data,
+                                     "negative bool test ("+data.str()+")"),
+                    IOException);
+  data = StringRef("Foo", 3);
+  BOOST_CHECK_THROW(star_p.TryGetInt(data,
+                                     "negative bool test ("+data.str()+")"),
+                    IOException);
+  BOOST_MESSAGE("  done.");
+}
 BOOST_AUTO_TEST_SUITE_END();
 

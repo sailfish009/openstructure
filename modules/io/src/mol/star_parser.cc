@@ -45,7 +45,7 @@ StarParser::StarParser(const String& filename, bool items_as_row):
 }
 
 String StarParser::FormatDiagnostic(StarDiagType type, const String& message,
-                                    int line)
+                                    int line) const
 {
   std::stringstream ss;
   ss << filename_ << ":";
@@ -66,6 +66,45 @@ String StarParser::FormatDiagnostic(StarDiagType type, const String& message,
   return ss.str();
 }
 
+float StarParser::TryGetFloat(const StringRef& data, const String& name) const
+{
+  std::pair<bool, float> value = data.to_float();
+  if (!value.first) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                         "Expecting floating point value for " +
+                                               name + ", found '" + data.str() +
+                                             "' instead.", line_num_));
+  }
+  return value.second;
+}
+
+int StarParser::TryGetInt(const StringRef& data, const String& name) const
+{
+  std::pair<bool, int> value = data.to_int();
+  if (!value.first) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                         "Expecting integer value for " +
+                                               name + ", found '" + data.str() +
+                                             "' instead.", line_num_));
+  }
+  return value.second;
+}
+
+bool StarParser::TryGetBool(const StringRef& data, const String& name) const
+{
+  if (data.length() == 1) {
+    if (data[0] == 'Y' || data[0] == 'y') {
+      return true;
+    } else if (data[0] == 'N' || data[0] == 'n') {
+      return false;
+    }
+  }
+
+  throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                           "Expecting Boolean (Y/N) value for "+
+                                           name + ", found '" + data.str() +
+                                           "' instead.", line_num_));
+}
 
 bool StarParser::SplitLine(const StringRef& line, 
                             std::vector<StringRef>& parts, bool clear)
