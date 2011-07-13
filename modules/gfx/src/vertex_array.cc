@@ -78,7 +78,7 @@ IndexedVertexArray::IndexedVertexArray()
 {
   initialized_=false;
   Reset(); // replaces ctor initialization list
-  glGenTextures(1,&tex_id_);
+  //glGenTextures(1,&tex_id_);
 }
 
 IndexedVertexArray::~IndexedVertexArray()
@@ -88,7 +88,7 @@ IndexedVertexArray::~IndexedVertexArray()
 IndexedVertexArray::IndexedVertexArray(const IndexedVertexArray& va)
 {
   copy(va);
-  glGenTextures(1,&tex_id_);
+  //glGenTextures(1,&tex_id_);
 }
 
 IndexedVertexArray& IndexedVertexArray::operator=(const IndexedVertexArray& va)
@@ -248,7 +248,7 @@ void IndexedVertexArray::AddIcoSphere(const SpherePrim& prim, unsigned int detai
   }
 }
 
-void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail,bool cap)
+void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail, bool cap)
 {
   dirty_=true;
   
@@ -266,12 +266,19 @@ void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int deta
   // prepare first vertices to add
   std::vector<Vec3>::const_iterator it=vlist.begin();
   Vec3 v0 = (*it);
-  Vec3 n0 = prim.rotmat * v0; 
-  v0*=prim.radius;
+  bool slant=(prim.radius1!=prim.radius2);
+  // adjust for slant
+  float beta = slant ? atan2(prim.radius1-prim.radius2,prim.length) : 0.0;
+  float cosb = slant ? cos(beta) : 1.0;
+  float sinb = slant ? sin(beta) : 0.0;
+  Vec3 n0 = slant ? prim.rotmat * (cosb*v0+geom::Vec3(0.0,0.0,sinb)) : prim.rotmat*v0;
+
+  v0*=prim.radius1;
+  Vec3 v1 = (*it)*prim.radius2+off;
   VertexID id1 = Add(prim.rotmat * v0 + prim.start, n0, prim.color1);
-  VertexID id2 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color2);
+  VertexID id2 = Add(prim.rotmat * v1 + prim.start, n0, prim.color2);
   VertexID cid1 = cap ? Add(prim.rotmat * v0 + prim.start, cn0, prim.color1) : 0;
-  VertexID cid2 = cap ? Add(prim.rotmat * (v0+off) + prim.start, cn1, prim.color2) : 0;
+  VertexID cid2 = cap ? Add(prim.rotmat * v1 + prim.start, cn1, prim.color2) : 0;
   
   // now for the loop around the circle
   VertexID id3=id1;
@@ -281,15 +288,16 @@ void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int deta
   ++it;
   for(;it!=vlist.end();++it) {
     v0 = (*it);
-    n0 = prim.rotmat * v0; 
-    v0 *= prim.radius;
+    Vec3 n0 = slant ? prim.rotmat * (cosb*v0+geom::Vec3(0.0,0.0,sinb)) : prim.rotmat*v0;
+    v0 *= prim.radius1;
+    Vec3 v1 = (*it)*prim.radius2+off;
     VertexID id5 = Add(prim.rotmat * v0 + prim.start, n0, prim.color1);
-    VertexID id6 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color2);
+    VertexID id6 = Add(prim.rotmat * v1 + prim.start, n0, prim.color2);
     AddTri(id3,id5,id4);
     AddTri(id5,id6,id4);
     if(cap) {
       VertexID cid5 = Add(prim.rotmat * v0 + prim.start, cn0, prim.color1);
-      VertexID cid6 = Add(prim.rotmat * (v0+off) + prim.start, cn1, prim.color2);
+      VertexID cid6 = Add(prim.rotmat * v1 + prim.start, cn1, prim.color2);
       AddTri(cid0,cid5,cid3);
       AddTri(cid7,cid4,cid6);
       cid3=cid5;

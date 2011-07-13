@@ -7,6 +7,7 @@ set(OST_GFX_PYMOD_SOURCES
   export_entity.cc
   export_surface.cc
   export_primitives.cc
+  export_primlist.cc
   export_scene_observer.cc
   export_render_options.cc
   export_color_ops.cc

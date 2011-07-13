@@ -34,6 +34,7 @@ extern void export_GfxNode();
 extern void export_GfxObj();
 extern void export_Entity();
 extern void export_Surface();
+extern void export_primlist();
 extern void export_primitives();
 #if OST_IMG_ENABLED
   extern void export_Map();
@@ -134,17 +135,8 @@ BOOST_PYTHON_MODULE(_ost_gfx)
   class_<InputEvent>("InputEvent", init<InputDevice, InputCommand, float>())
    .def(init<InputDevice,InputCommand,int,int,float>())
   ;
-  class_<PrimList, bases<GfxObj>, PrimListP, boost::noncopyable>("PrimList", init<const String& >())
-    .def("Clear",&PrimList::Clear)
-    .def("AddLine",&PrimList::AddLine)
-    .def("AddPoint",&PrimList::AddPoint)
-    .def("SetColor",&PrimList::SetColor)
-    .def("SetDiameter",&PrimList::SetDiameter)
-    .def("SetRadius",&PrimList::SetRadius)
-  ;
 
   class_<GfxTestObj, bases<GfxObj>, boost::noncopyable>("GfxTestObj", init<>());
-
   
   class_<Color>("Color",init<>())
     .def(init<float, float, float, optional<float> >())
@@ -189,6 +181,7 @@ BOOST_PYTHON_MODULE(_ost_gfx)
 #endif
 
   export_primitives();
+  export_primlist();
 }
 
 

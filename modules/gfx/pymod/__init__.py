@@ -59,11 +59,11 @@ def Stereo(mode,flip=None,alg=None):
   :type param: int
   """
   if(flip):
-    _gfx.Scene().SetStereoFlip(flip)
+    Scene().SetStereoFlip(flip)
   if(alg):
-    _gfx.Scene().SetStereoAlg(alg)
+    Scene().SetStereoAlg(alg)
 
-  _gfx.Scene().SetStereoMode(mode)
+  Scene().SetStereoMode(mode)
 
 def FitToScreen(gfx_ent, width=None, height=None, margin=0.05):
   """
@@ -184,3 +184,59 @@ def _Match(scene, pattern="*"):
   return GfxNodeListProxy(_Recurse("", Scene().root_node, pattern))
 
 SceneSingleton.Match=_Match
+
+def _to_vec3(p):
+  import ost.geom
+  if isinstance(p,ost.geom.Vec3):
+    return p
+  else:
+    try:
+      return ost.geom.Vec3(p[0],p[1],p[2])
+    except:
+      raise TypeError("expected either a sequence or a geom.Vec3 object")
+  
+
+def _primlist_add_point(self,pos,col=None):
+  pos=_to_vec3(pos)
+  if not col:
+    col=WHITE
+  self._add_point(pos,col)
+  
+def _primlist_add_line(self,pos1,pos2,col=None,col1=None,col2=None):
+  pos1=_to_vec3(pos1)
+  pos2=_to_vec3(pos2)
+  if not col:
+    col=WHITE
+  if not col1:
+    col1=col
+  if not col2:
+    col2=col
+  self._add_line(pos1,pos2,col1,col2)
+
+def _primlist_add_sphere(self,cen,rad=1.0,col=None):
+  pos=_to_vec3(cen)
+  if not col:
+    col=WHITE
+  self._add_sphere(pos,rad,col)
+  
+def _primlist_add_cyl(self,pos1,pos2,rad=None,rad1=None,rad2=None,col=None,col1=None,col2=None):
+  pos1=_to_vec3(pos1)
+  pos2=_to_vec3(pos2)
+  if rad is None:
+    rad=1.0
+  if rad1 is None:
+    rad1=rad
+  if rad2 is None:
+    rad2=rad
+  if not col:
+    col=WHITE
+  if not col1:
+    col1=col
+  if not col2:
+    col2=col
+  self._add_cyl(pos1,pos2,rad1,rad2,col1,col2)
+
+PrimList.AddPoint=_primlist_add_point
+PrimList.AddLine=_primlist_add_line
+PrimList.AddSphere=_primlist_add_sphere
+PrimList.AddCyl=_primlist_add_cyl
