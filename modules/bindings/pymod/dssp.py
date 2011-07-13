@@ -105,7 +105,7 @@ def AssignDSSP(ent, pdb_path="", extract_burial_status=False, tmp_dir=None,
     raise RuntimeEror('DSSP output file does not exist.')
   # assign DSSP to entity
   try:
-    LoadDSSP(temp_dssp_path, ent, extract_burial_status_flag, 
+    LoadDSSP(temp_dssp_path, ent, extract_burial_status, 
              entity_saved_flag)
   except Exception, e:
     # clean up
@@ -125,7 +125,7 @@ def AssignDSSP(ent, pdb_path="", extract_burial_status=False, tmp_dir=None,
 
 
 
-def LoadDSSP(file_name, model, extract_burial_status_flag=0, 
+def LoadDSSP(file_name, model, extract_burial_status=0, 
              entity_saved_flag=0, calculate_relative_sa=True):
     if model.IsValid() == 0:
       print "DSSP: model is not valid"
@@ -161,7 +161,7 @@ def LoadDSSP(file_name, model, extract_burial_status_flag=0,
           residue=chain.FindResidue(mol.ResNum(int(num),ins_code))
 
         # set property "burial status:
-        if extract_burial_status_flag == 1:
+        if extract_burial_status == 1:
          #set default (dummy) burial status for incomplete residues:
          residue.SetStringProp("burial_status", 'X')
 
