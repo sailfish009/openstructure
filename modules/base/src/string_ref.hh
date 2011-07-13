@@ -72,19 +72,22 @@ public:
     }
     return s;
   }
+  
+  /// \brief returns a substring of the string
+  ///
+  /// \param pos the starting position of the substring
+  /// \param length is the length of the string. if std::string::npos, the 
+  ///     substring goes from \p pos to the end of the string
+  /// The function does on purpose not perform any boundary check in release 
+  /// mode. It's the duty of the caller to make sure the string has the required 
+  /// length.
   StringRef substr(size_t pos, size_t n=std::string::npos) const
   {
     if (n==std::string::npos) {
-      assert(pos>=0 && begin_+pos<=end_);
-      if(!(pos>=0 && begin_+pos<=end_)){
-        throw Error("out of bounds");
-      }    
+      assert(begin_+pos<=end_);
       return StringRef(begin_+pos, this->length()-pos);
     } else {
-      assert(pos>=0 && begin_+pos+n<=end_);
-      if(!(pos>=0 && begin_+pos+n<=end_)){
-        throw Error("out of bounds");
-      }
+      assert(begin_+pos+n<=end_);
       return StringRef(begin_+pos, n);
     }
   }
