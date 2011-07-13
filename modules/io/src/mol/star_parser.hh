@@ -156,6 +156,12 @@ public:
   {
     filename_ = filename;
   }
+
+  /// \brief retrieve the line, the parser is currently working on
+  int GetCurrentLinenum()
+  {
+    return line_num_;
+  }
 public:
   void Parse();
   
