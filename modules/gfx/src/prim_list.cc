@@ -84,16 +84,16 @@ void PrimList::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc,
   }
   for(PointEntryList::const_iterator it=spheres_.begin();it!=spheres_.end();++it) {
     geom::Vec3 tpos = tf.Apply(it->pos);
-    minc=geom::Min(minc,tpos);
-    maxc=geom::Max(maxc,tpos);
+    minc=geom::Min(minc,tpos-it->rad);
+    maxc=geom::Max(maxc,tpos+it->rad);
   }
   for(LineEntryList::const_iterator it=cyls_.begin();it!=cyls_.end();++it) {
     geom::Vec3 tpos = tf.Apply(it->pos1);
-    minc=geom::Min(minc,tpos);
-    maxc=geom::Max(maxc,tpos);
+    minc=geom::Min(minc,tpos-it->rad1);
+    maxc=geom::Max(maxc,tpos+it->rad1);
     tpos = tf.Apply(it->pos2);
-    minc=geom::Min(minc,tpos);
-    maxc=geom::Max(maxc,tpos);
+    minc=geom::Min(minc,tpos-it->rad2);
+    maxc=geom::Max(maxc,tpos+it->rad2);
   }
   minc-=1.0;
   maxc+=1.0;
