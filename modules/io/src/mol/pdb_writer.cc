@@ -237,6 +237,7 @@ public:
       if (peptide_) {
         this->WriteTer(prev_);
       }
+      peptide_=false;
     }
     return true;
   }
