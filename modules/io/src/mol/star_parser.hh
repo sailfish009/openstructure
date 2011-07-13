@@ -158,7 +158,7 @@ public:
   }
 
   /// \brief retrieve the line, the parser is currently working on
-  int GetCurrentLinenum()
+  int GetCurrentLinenum() const
   {
     return line_num_;
   }
