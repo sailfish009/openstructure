@@ -196,45 +196,45 @@ def _to_vec3(p):
       raise TypeError("expected either a sequence or a geom.Vec3 object")
   
 
-def _primlist_add_point(self,pos,col=None):
+def _primlist_add_point(self,pos,color=None):
   pos=_to_vec3(pos)
-  if not col:
-    col=WHITE
-  self._add_point(pos,col)
+  if not color:
+    color=WHITE
+  self._add_point(pos,color)
   
-def _primlist_add_line(self,pos1,pos2,col=None,col1=None,col2=None):
+def _primlist_add_line(self,pos1,pos2,color=None,color1=None,color2=None):
   pos1=_to_vec3(pos1)
   pos2=_to_vec3(pos2)
-  if not col:
-    col=WHITE
-  if not col1:
-    col1=col
-  if not col2:
-    col2=col
-  self._add_line(pos1,pos2,col1,col2)
+  if not color:
+    color=WHITE
+  if not color1:
+    color1=color
+  if not color2:
+    color2=color
+  self._add_line(pos1,pos2,color1,color2)
 
-def _primlist_add_sphere(self,cen,rad=1.0,col=None):
+def _primlist_add_sphere(self,cen,radius=1.0,color=None):
   pos=_to_vec3(cen)
-  if not col:
-    col=WHITE
-  self._add_sphere(pos,rad,col)
+  if not color:
+    color=WHITE
+  self._add_sphere(pos,radius,color)
   
-def _primlist_add_cyl(self,pos1,pos2,rad=None,rad1=None,rad2=None,col=None,col1=None,col2=None):
+def _primlist_add_cyl(self,pos1,pos2,radius=None,radius1=None,radius2=None,color=None,color1=None,color2=None):
   pos1=_to_vec3(pos1)
   pos2=_to_vec3(pos2)
-  if rad is None:
-    rad=1.0
-  if rad1 is None:
-    rad1=rad
-  if rad2 is None:
-    rad2=rad
-  if not col:
-    col=WHITE
-  if not col1:
-    col1=col
-  if not col2:
-    col2=col
-  self._add_cyl(pos1,pos2,rad1,rad2,col1,col2)
+  if radius is None:
+    radius=1.0
+  if radius1 is None:
+    radius1=radius
+  if radius2 is None:
+    radius2=radius
+  if not color:
+    color=WHITE
+  if not color1:
+    color1=color
+  if not color2:
+    color2=color
+  self._add_cyl(pos1,pos2,radius1,radius2,color1,color2)
 
 PrimList.AddPoint=_primlist_add_point
 PrimList.AddLine=_primlist_add_line
