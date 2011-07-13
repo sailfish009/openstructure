@@ -114,22 +114,30 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief shadow quality from 0 (low) to 3 (high), default=1
   void SetShadowQuality(int q);
 
+  /// \brief multiplier for shadow strength
   void SetShadowWeight(float w);
 
+  /// experimental feature
   void SetDepthDarkening(bool f);
+  /// experimental feature
   void SetDepthDarkeningWeight(float f);
 
+  /// experimental feature
   void SetAmbientOcclusion(bool f);
+  /// experimental feature
   bool GetAmbientOcclusion() const;
+  /// experimental feature
   void SetAmbientOcclusionWeight(float f);
+  /// experimental feature
   void SetAmbientOcclusionMode(uint m);
+  /// experimental feature
   void SetAmbientOcclusionQuality(uint q);
   
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
   void SetShadingMode(const std::string& smode);
 
-  /// \name clipping planes
+  /// \name clipping planes, fog and field-of-view
   //@{
   /// \brief get near clipping plane
   float GetNear() const;
@@ -179,10 +187,11 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief turn on automatic auto-slabbing (using the fast bounding box alg)
   // TODO: more sophisticated mode, aka fast, precise, max
   void AutoAutoslab(bool f);
-  //@}
   
   /// \brief get current state of automatic auto-slabbing
   bool GetAutoAutoslab() const { return auto_autoslab_; }
+
+  //@}
 
   /// \brief set stereo mode
   /// one of 0 (off), 1 (quad-buffered) 2 (interlaced (for special monitors))
@@ -211,7 +220,7 @@ class DLLEXPORT_OST_GFX Scene {
   Real GetStereoDistance() const {return stereo_distance_;}
   
   /// \brief set stereo algorithm
-  /// one of 0 or 1
+  /// one of 0 (default) or 1
   void SetStereoAlg(unsigned int);
   /// \brief return current stereo algorithm
   unsigned int GetStereoAlg() const {return stereo_alg_;}
@@ -222,6 +231,10 @@ class DLLEXPORT_OST_GFX Scene {
   void SetLightProp(const Color& amb, const Color& diff, const Color& spec);
   /// \brief set ambient, diffuse and specular light intensity
   void SetLightProp(float amb, float diff, float spec);
+  /// \brief get main light direction
+  geom::Vec3 GetLightDir() const {return light_dir_;}
+  /// \brief get main light orientation (internal debugging use)
+  geom::Mat3 GetLightRot() const {return light_rot_;}
 
   /// \brief set the selection mode
   /*
@@ -395,16 +408,18 @@ class DLLEXPORT_OST_GFX Scene {
   bool StartOffscreenMode(unsigned int w, unsigned int h);
   /// \brief stops offline rendering in interactive mode
   void StopOffscreenMode();
-  
+
+  /// experimental feature
   void SetBlur(uint n);
+  /// experimental feature
   void BlurSnapshot();
 
+  /// internal use
   void RenderText(const TextPrim& t);
 
-  geom::Vec3 GetLightDir() const {return light_dir_;}
-  geom::Mat3 GetLightRot() const {return light_rot_;}
-
+  /// experimental feature
   void SetBeacon(int wx, int wy);
+  /// experimental feature
   void SetBeaconOff();
 
 protected:

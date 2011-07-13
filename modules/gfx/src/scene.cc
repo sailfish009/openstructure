@@ -1615,6 +1615,7 @@ void Scene::Autoslab(bool fast, bool)
 {
   do_autoslab_=true;
   do_autoslab_fast_=fast;
+  RequestRedraw();
 }
 
 void Scene::AutoslabMax()
