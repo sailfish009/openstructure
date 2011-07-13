@@ -5,6 +5,7 @@ set(OST_SEQ_ALG_UNIT_TESTS
   test_renumber.py
   test_local_align.py
   test_global_align.py
+  test_weight_matrix.py
 )
 
 ost_unittest(MODULE seq_alg SOURCES "${OST_SEQ_ALG_UNIT_TESTS}")

@@ -47,24 +47,43 @@ public:
     ::memset(weights_, 0, sizeof(WeightType)*ALPHABET_SIZE*ALPHABET_SIZE);
   }
 
+  /// \brief Get the substitution weight between two amino acids
+  ///
+  /// If the amino acid single letter code is unknown (e.g. '?')
+  /// a weight of 0 is returned
   WeightType GetWeight(char aa_one, char aa_two) const 
   {
+    if (!(IsAlpha(aa_one) && IsAlpha(aa_two))) {
+      return 0;
+    }
     int i=Index(aa_one, aa_two); 
-    assert(i>=0 && i<ALPHABET_SIZE*ALPHABET_SIZE);    
-    return weights_[i];
+    return (i>=0 && i<ALPHABET_SIZE*ALPHABET_SIZE) ? weights_[i] : 0;
   }
 
+  /// \brief Set the substitution weight between two amino acids
+  ///
+  /// The weight is only set if the amino acid single letter code
+  /// is known (e.g. no weight is set for '?')
   void SetWeight(char aa_one, char aa_two, WeightType weight) 
   {
-    int i=Index(aa_one, aa_two);
-    assert(i>=0 && i<ALPHABET_SIZE*ALPHABET_SIZE);
-    weights_[i]=weight;
+    if ((IsAlpha(aa_one) && IsAlpha(aa_two))) {
+      int i=Index(aa_one, aa_two);
+      if (i>=0 && i<ALPHABET_SIZE*ALPHABET_SIZE) {
+        weights_[i]=weight;
+      }
+    }
   }
+
 private:
   int Index(char aa_one, char aa_two) const {
     return (toupper(aa_one)-'A')*ALPHABET_SIZE+(toupper(aa_two)-'A');
   }
-   WeightType weights_[ALPHABET_SIZE*ALPHABET_SIZE];
+
+  /// \brief Check if uppercase character is one of [A-Z]
+  bool IsAlpha(char aa) const {
+    return (toupper(aa)>='A' && toupper(aa)<='Z');
+  }
+  WeightType weights_[ALPHABET_SIZE*ALPHABET_SIZE];
 };
 
 SubstWeightMatrixPtr DLLEXPORT_OST_SEQ_ALG
