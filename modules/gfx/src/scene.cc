@@ -1109,46 +1109,54 @@ namespace {
 class BBCalc: public GfxNodeVisitor
 {
 public:
+  BBCalc(const geom::Vec3& mmin, const geom::Vec3& mmax, const mol::Transform& tf): 
+    minc(mmin),maxc(mmax),tf(tf),valid(false) {}
+
   bool VisitNode(GfxNode* node, const Stack& st) {
     return node->IsVisible(); // only descend into visible nodes
   }
   void VisitObject(GfxObj* obj, const Stack& st) {
     if(obj->IsVisible()) {
       geom::AlignedCuboid bb=obj->GetBoundingBox();
-      Vec3 t1 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMin()[2]));
-      Vec3 t2 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMin()[2]));
-      Vec3 t3 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMin()[2]));
-      Vec3 t4 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMin()[2]));
-      Vec3 t5 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMax()[2]));
-      Vec3 t6 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMax()[2]));
-      Vec3 t7 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMax()[2]));
-      Vec3 t8 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMax()[2]));
-      minc = Min(minc,Min(t1,Min(t2,Min(t3,Min(t4,Min(t5,Min(t6,Min(t7,t8))))))));
-      maxc = Max(maxc,Max(t1,Max(t2,Max(t3,Max(t4,Max(t5,Max(t6,Max(t7,t8))))))));
+      if(bb.GetVolume()>0.0) {
+        Vec3 t1 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMin()[2]));
+        Vec3 t2 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMin()[2]));
+        Vec3 t3 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMin()[2]));
+        Vec3 t4 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMin()[2]));
+        Vec3 t5 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMax()[2]));
+        Vec3 t6 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMax()[2]));
+        Vec3 t7 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMax()[2]));
+        Vec3 t8 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMax()[2]));
+        minc = Min(minc,Min(t1,Min(t2,Min(t3,Min(t4,Min(t5,Min(t6,Min(t7,t8))))))));
+        maxc = Max(maxc,Max(t1,Max(t2,Max(t3,Max(t4,Max(t5,Max(t6,Max(t7,t8))))))));
+        valid=true;
+      }
     }
   }
 
   Vec3 minc,maxc;
   mol::Transform tf;
+  bool valid;
 };
 
 }
 
 geom::AlignedCuboid Scene::GetBoundingBox(const mol::Transform& tf) const
 {
-  BBCalc bbcalc;
-
-  bbcalc.tf = tf;
-  bbcalc.minc = Vec3(std::numeric_limits<float>::max(),
-                           std::numeric_limits<float>::max(),
-                           std::numeric_limits<float>::max());
-  bbcalc.maxc = Vec3(-std::numeric_limits<float>::max(),
-                           -std::numeric_limits<float>::max(),
-                           -std::numeric_limits<float>::max());
+  BBCalc bbcalc(Vec3(std::numeric_limits<float>::max(),
+                     std::numeric_limits<float>::max(),
+                     std::numeric_limits<float>::max()),
+                Vec3(-std::numeric_limits<float>::max(),
+                     -std::numeric_limits<float>::max(),
+                     -std::numeric_limits<float>::max()),
+                tf);
 
   Apply(bbcalc);
 
-  return geom::AlignedCuboid(bbcalc.minc,bbcalc.maxc);
+  if(bbcalc.valid) {
+    return geom::AlignedCuboid(bbcalc.minc,bbcalc.maxc);
+  }
+  return geom::AlignedCuboid(geom::Vec3(),geom::Vec3());
 }
 
 mol::Transform Scene::GetTransform() const
@@ -1587,13 +1595,18 @@ namespace {
 class LimCalc: public GfxNodeVisitor
 {
 public:
+  LimCalc(): minc(),maxc(),transform(),valid(false) {}
   void VisitObject(GfxObj* obj, const Stack& st) {
     if(obj->IsVisible()) {
       obj->ProcessLimits(minc,maxc, transform);
+      // this is buggy - ProcessLimits should really return a boolean 
+      // indicating whether it could succesfully apply limits or not
+      valid=true;
     }
   }
   Vec3 minc,maxc;
   mol::Transform transform;
+  bool valid;
 };
 
 } // anon ns
@@ -1608,23 +1621,31 @@ void Scene::AutoslabMax()
 {
   geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
 
-  Vec3 cen = transform_.Apply(transform_.GetCenter());
+  if(bb.GetVolume()==0.0) {
+    znear_=1;
+    zfar_=100;
+    set_near(1);
+    set_far(100);
+  } else {
 
-  float bmax = std::max(std::abs(cen[0]-bb.GetMin()[0]),
-                        std::abs(cen[0]-bb.GetMax()[0]));
-  bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMin()[1])));
-  bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMax()[1])));
-  bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMin()[2])));
-  bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMax()[2])));
-
-  float nnear = -(cen[2]+bmax*1.5);
-  float nfar = -(cen[2]-bmax*1.5);
-
-  // necessary code duplication due to awkward slab limit impl
-  znear_=nnear;
-  zfar_=nfar;
-  set_near(nnear);
-  set_far(nfar);
+    Vec3 cen = transform_.Apply(transform_.GetCenter());
+    
+    float bmax = std::max(std::abs(cen[0]-bb.GetMin()[0]),
+                          std::abs(cen[0]-bb.GetMax()[0]));
+    bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMin()[1])));
+    bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMax()[1])));
+    bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMin()[2])));
+    bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMax()[2])));
+    
+    float nnear = -(cen[2]+bmax*1.5);
+    float nfar = -(cen[2]-bmax*1.5);
+    
+    // necessary code duplication due to awkward slab limit impl
+    znear_=nnear;
+    zfar_=nfar;
+    set_near(nnear);
+    set_far(nfar);
+  }
   ResetProjection();
 }
 
@@ -1991,11 +2012,17 @@ void Scene::do_autoslab()
   if(do_autoslab_fast_) {
     geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
     // necessary code duplication due to awkward slab limit impl
-    znear_=-(bb.GetMax()[2]-1.0);
-    zfar_=-(bb.GetMin()[2]+1.0);
-    set_near(-(bb.GetMax()[2]-1.0));
-    set_far(-(bb.GetMin()[2]+1.0));
-    ResetProjection();
+    if(bb.GetVolume()==0.0) {
+      // skip if empty BB
+      return;
+    } else {
+      float mynear=-(bb.GetMax()[2])-1.0;
+      float myfar=-(bb.GetMin()[2])+1.0;
+      znear_=mynear;
+      zfar_=myfar;
+      set_near(mynear);
+      set_far(myfar);
+    }
   } else {
     LimCalc limcalc;
     limcalc.transform=transform_;
@@ -2006,14 +2033,17 @@ void Scene::do_autoslab()
                               -std::numeric_limits<float>::max(),
                               -std::numeric_limits<float>::max());
     this->Apply(limcalc);
-    float mynear=std::max(float(0.0), std::min(float(-limcalc.minc[2]),float(-limcalc.maxc[2])))-float(2.0);
-    float myfar=std::max(float(-limcalc.minc[2]),float(-limcalc.maxc[2]))+float(2.0);
+    if(!limcalc.valid) {
+      return;
+    }
+    float mynear=std::max(float(0.0), std::min(float(-limcalc.minc[2]),float(-limcalc.maxc[2])))-float(1.0);
+    float myfar=std::max(float(-limcalc.minc[2]),float(-limcalc.maxc[2]))+float(1.0);
     znear_=mynear;
     zfar_=myfar;
-    set_near(znear_);
-    set_far(zfar_);
-    ResetProjection();
+    set_near(mynear);
+    set_far(myfar);
   }
+  ResetProjection();
   RequestRedraw();
 }
 

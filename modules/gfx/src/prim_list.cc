@@ -53,6 +53,9 @@ void PrimList::Clear()
 
 geom::AlignedCuboid PrimList::GetBoundingBox() const
 {
+  if(points_.empty() && lines_.empty() && spheres_.empty() && cyls_.empty()) {
+    return geom::AlignedCuboid(geom::Vec3(-1,-1,-1),geom::Vec3(1,1,1));
+  }
   geom::Vec3 minc(std::numeric_limits<float>::max(),
                   std::numeric_limits<float>::max(),
                   std::numeric_limits<float>::max());
