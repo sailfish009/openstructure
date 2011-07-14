@@ -73,7 +73,9 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   normals_calculated_(false),
   alg_(a),
   debug_octree_(false),
-  color_(1.0,1.0,1.0)
+  color_(1.0,1.0,1.0),
+  bb_(),
+  recalc_bb_(true)
 {
   // TODO replace with def mat for this gfx obj type
   if (mh_ != original_mh_) {
@@ -93,15 +95,17 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
 
 geom::AlignedCuboid MapIso::GetBoundingBox() const
 {
-  geom::Vec3 minc = mh_.IndexToCoord(mh_.GetExtent().GetStart());
-  geom::Vec3 maxc = mh_.IndexToCoord(mh_.GetExtent().GetEnd());
-  return geom::AlignedCuboid(minc,maxc);
+  if(recalc_bb_) {
+    bb_=va_.GetBoundingBox();
+    recalc_bb_=false;
+  }
+  return bb_;
 }
 
 geom::Vec3 MapIso::GetCenter() const
 {
-  geom::Vec3 nrvo = mh_.IndexToCoord(mh_.GetExtent().GetCenter());
-  return nrvo;
+  if(recalc_bb_) GetBoundingBox();
+  return bb_.GetCenter();
 }
 
 void MapIso::UpdateRenderParams()
@@ -242,7 +246,7 @@ void MapIso::OnInput(const InputEvent& e)
 void MapIso::Rebuild()
 {
   if (mh_.IsFrequency() == true){
-    throw Error("Error: Map not in real space. Cannot create of this map");
+    throw Error("Error: Map not in real space");
   }
   if (octree_.IsMapManageable(mh_) == false) {
     throw Error("Error: Map is too big for visualization");
@@ -264,6 +268,7 @@ void MapIso::Rebuild()
   va_.DrawNormals(true);
 #endif  
   this->UpdateRenderParams();  
+  recalc_bb_=true;
 }
 
 void MapIso::SetLevel(float l)

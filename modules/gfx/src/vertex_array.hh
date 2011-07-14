@@ -32,6 +32,7 @@
 
 #include <ost/log.hh>
 #include <ost/geom/geom.hh>
+#include <ost/geom/aligned_cuboid.hh>
 
 
 #include "color.hh"
@@ -182,13 +183,18 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   // experimental, do not use
   void SmoothVertices(float smoothf);
 
+  /// experimental
   void UseTex(bool b) {use_tex_=b;}
+  /// experimental
   uint& TexID() {return tex_id_;}
 
   const EntryList& GetEntries() const {return entry_list_;}
   const IndexList& GetQuadIndices() const {return quad_index_list_;}
   const IndexList& GetTriIndices() const {return tri_index_list_;}
   const IndexList& GetLineIndices() const {return line_index_list_;}
+
+  /// return min/max of vertex entries - this call is not cached!
+  geom::AlignedCuboid GetBoundingBox() const;
 
  private:
   bool initialized_;

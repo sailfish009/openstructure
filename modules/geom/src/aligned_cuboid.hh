@@ -34,6 +34,7 @@ namespace geom {
 /// For an arbitrarily oriented cuboid see \ref Cuboid
 class DLLEXPORT_OST_GEOM AlignedCuboid {
 public:
+  AlignedCuboid() :min_(), max_() {}
   AlignedCuboid(const Vec3& mmin, const Vec3& mmax) :min_(mmin), max_(mmax) {}
   
   Vec3 GetSize() const {return max_-min_;}

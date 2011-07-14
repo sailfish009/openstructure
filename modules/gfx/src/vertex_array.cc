@@ -1413,4 +1413,24 @@ void IndexedVertexArray::draw_line_halo(bool use_buff)
   glLineWidth(line_width_);
 }
 
+geom::AlignedCuboid IndexedVertexArray::GetBoundingBox() const
+{
+  if(entry_list_.empty()) {
+    return geom::AlignedCuboid(geom::Vec3(0,0,0),geom::Vec3(0,0,0));
+  } else {
+    geom::Vec3 minc(std::numeric_limits<float>::max(),
+                    std::numeric_limits<float>::max(),
+                    std::numeric_limits<float>::max());
+    geom::Vec3 maxc(-std::numeric_limits<float>::max(),
+                    -std::numeric_limits<float>::max(),
+                    -std::numeric_limits<float>::max());
+    for(EntryList::const_iterator it=entry_list_.begin();it!=entry_list_.end();++it) {
+      geom::Vec3 p(it->v[0],it->v[1],it->v[2]);
+      minc=geom::Min(minc,p);
+      maxc=geom::Max(maxc,p);
+    }
+    return geom::AlignedCuboid(minc-1.0,maxc+1.0);
+  }
+}
+
 }} // ns
