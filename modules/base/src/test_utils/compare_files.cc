@@ -44,17 +44,17 @@ bool compare_files(const String& test, const String& gold_standard)
     }
     if (!test_end) {
       std::cerr << gold_standard << " contains additional line(s):"
-                << std::endl << gold_line;
+                << std::endl << gold_line << std::endl;
       return false;
     }
     if (!gold_end) {
       std::cerr << test << " contains additional line(s):"
-                << std::endl << test_line;
+                << std::endl << test_line << std::endl;
       return false;
     }
     if (gold_line!=test_line) {
       std::cerr << "line mismatch:" << std::endl << "test: " << test_line
-                << std::endl << "gold: " << gold_line;
+                << std::endl << "gold: " << gold_line << std::endl;
       return false;
     }
   }

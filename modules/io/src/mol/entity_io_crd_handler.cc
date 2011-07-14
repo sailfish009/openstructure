@@ -43,6 +43,11 @@ namespace ost { namespace io {
 
 using boost::format;
 
+
+/// \brief Reader for CHARMM crd file format
+///
+/// Standard and extended CHARMM format is supported, and file format is
+/// automatically detected based on file header or atom number
 CRDReader::CRDReader(const boost::filesystem::path& loc):
   sequential_atom_list_(),
   curr_chain_(),
@@ -60,11 +65,14 @@ CRDReader::CRDReader(const boost::filesystem::path& loc):
   if(!infile_) throw IOException("could not open "+loc.string());
 }
 
+/// \brief Returns an vector containing all atom handles as observed in the file
 std::vector<mol::AtomHandle> CRDReader::GetSequentialAtoms() const
 {
   return sequential_atom_list_;
 }
 
+
+/// \brief Performes file import
 void CRDReader::Import(mol::EntityHandle& ent)
 {
   Profile profile_import("CRDReader::Import");
@@ -79,21 +87,24 @@ void CRDReader::Import(mol::EntityHandle& ent)
   std::vector<String> line_content;
   boost::trim(line);
   boost::split(line_content,line,boost::is_any_of(" "));
-  
+
   // expanded charmm CARD format check
   if (line_content.size() > 1 || boost::lexical_cast<int>(line_content[0]) > 99999)
     while(std::getline(in_,line)) {
-      ParseAndAddAtomExpanded(line,ent);
+      if (!boost::trim_copy(line).empty())
+        ParseAndAddAtomExpanded(line,ent);
     }
   else
     while(std::getline(in_,line)) {
-      ParseAndAddAtom(line,ent);
+      if (!boost::trim_copy(line).empty())
+        ParseAndAddAtom(line,ent);
     }
-  
+
   LOG_INFO("imported " << chain_count_ << " chains, " << residue_count_
                 << " residues, " << atom_count_ << " atoms");  
 }
 
+/// \brief Parsing for standard format
 void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
 {
   mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
@@ -103,7 +114,7 @@ void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
   //int anum = boost::lexical_cast<int>(boost::trim_copy(line.substr(0,5)));
   String aname = boost::trim_copy(line.substr(16,4));
   String ele = aname.substr(0,1);
-  String rname = boost::trim_copy(line.substr(11,3));
+  String rname = boost::trim_copy(line.substr(11,4));
   int irnum = boost::lexical_cast<int>(boost::trim_copy(line.substr(55,4)));
   String s_chain = boost::trim_copy(line.substr(51,4));
   geom::Vec3 apos(boost::lexical_cast<Real>(boost::trim_copy(line.substr(21,9))),
@@ -155,7 +166,8 @@ void CRDReader::ParseAndAddAtom(const String& line, mol::EntityHandle& ent)
   sequential_atom_list_.push_back(ah);
   ++atom_count_;
 }
-	
+
+/// \brief Parsing for extended format
 void CRDReader::ParseAndAddAtomExpanded(const String& line, mol::EntityHandle& ent)
 {
   mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
@@ -167,10 +179,11 @@ void CRDReader::ParseAndAddAtomExpanded(const String& line, mol::EntityHandle& e
   String ele = aname.substr(0,1);
   String rname = boost::trim_copy(line.substr(22,8));
   int irnum = boost::lexical_cast<int>(boost::trim_copy(line.substr(112,8)));
-  String s_chain = boost::trim_copy(line.substr(102.8,8));
+  String s_chain = boost::trim_copy(line.substr(102,8));
   geom::Vec3 apos(boost::lexical_cast<Real>(boost::trim_copy(line.substr(40,20))),
                   boost::lexical_cast<Real>(boost::trim_copy(line.substr(60,20))),
                   boost::lexical_cast<Real>(boost::trim_copy(line.substr(80,20))));
+  Real b_factor = boost::lexical_cast<Real>(boost::trim_copy(line.substr(128,12)));
     
   mol::ResidueKey rkey(rname);
     
@@ -213,28 +226,38 @@ void CRDReader::ParseAndAddAtomExpanded(const String& line, mol::EntityHandle& e
     
   // finally add atom
   LOG_DEBUG("adding atom " << aname << " (" << ele << ") @" << apos);
-  mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, ele);
+  mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, ele,
+                                         1.0, b_factor);
   sequential_atom_list_.push_back(ah);
   ++atom_count_;
 }
 
-CRDWriter::CRDWriter(std::ostream& ostream) :
-     outfile_(), outstream_(ostream), atom_count_(0)
+/// \brief CHARMM format writer
+///
+/// The charmm format writer supports both the standard and the extended
+/// format. Standard format supports at maximum 99999 atoms. If less atoms than
+/// that are present, the default format is standard format, otherwise the
+/// extended format is used. Extended format can be requested by setting the
+/// parameter ext to true.
+CRDWriter::CRDWriter(std::ostream& ostream, bool ext) :
+     outfile_(), outstream_(ostream), ext_(ext), atom_count_(0), res_count_(0)
 {}
 
-CRDWriter::CRDWriter(const boost::filesystem::path& filename) :
+CRDWriter::CRDWriter(const boost::filesystem::path& filename, bool ext) :
 #if BOOST_FILESYSTEM_VERSION==3
   outfile_(filename.string().c_str()), outstream_(outfile_),
 #else
   outfile_(filename.file_string().c_str()), outstream_(outfile_),
 #endif
-  atom_count_(0)
+  ext_(ext), atom_count_(0), res_count_(0)
 {}
 
-CRDWriter::CRDWriter(const String& filename) :
-  outfile_(filename.c_str()), outstream_(outfile_), atom_count_(0)
+CRDWriter::CRDWriter(const String& filename, bool ext) :
+  outfile_(filename.c_str()), outstream_(outfile_), ext_(ext), atom_count_(0),
+  res_count_(0)
 {}
 
+/// \brief Write header containing standard title and atom count/format row
 void CRDWriter::WriteHeader(const mol::EntityView& ent)
 {
   outstream_  << "* COOR FILE CREATED BY OPENSTRUCTURE" << std::endl;
@@ -242,12 +265,49 @@ void CRDWriter::WriteHeader(const mol::EntityView& ent)
   
   atom_total_ = ent.GetAtomCount();
 	
-  if (atom_total_ > 99999) {
+  if (atom_total_ > 99999 || ext_) {
     outstream_  << format("%10i") % ent.GetAtomCount() << "  EXT" << std::endl;
   }
   else {
     outstream_  << format("%5i") % ent.GetAtomCount() << std::endl;
   }
+}
+
+/// \brief Performs re-initialisation for writer
+///
+/// Currently, this only sets the residue count to zero
+void CRDWriter::Init()
+{
+  res_count_ = 0;
+}
+
+void CRDWriter::Write(const mol::EntityView& ent)
+{
+  if (!outstream_) {
+    throw IOException("Can't write CRD file. Bad output stream");
+  }
+  this->Init();
+  mol::EntityView non_const_view = ent;
+  this->WriteHeader(non_const_view);
+  non_const_view.Apply(*this);
+}
+
+void CRDWriter::Write(const mol::EntityHandle& ent)
+{
+  if (!outstream_) {
+    throw IOException("Can't write CRD file. Bad output stream");
+  }
+  this->Init();
+  mol::EntityView non_const_view = ent.CreateFullView();
+  this->WriteHeader(non_const_view);
+  non_const_view.Apply(*this);
+}
+
+
+bool CRDWriter::VisitResidue(const mol::ResidueHandle& r)
+{
+  res_count_++;
+  return true;
 }
 
 bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
@@ -260,27 +320,27 @@ bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
 	
   mol::ResidueHandle res=atom.GetResidue();
 
-  if (atom_total_ > 99999) {
+  if (atom_total_ > 99999 || ext_) {
     outstream_  << format("%10i") % atom_count_
-                << format("%10i") % res.GetNumber() << "  "
+                << format("%10i") % res_count_ << "  "
           	    << format("%-8s") % res.GetKey() << "  "
                 << format("%-8s") % atom.GetName()
                 << format("%20.10f") % atom.GetPos().x
                 << format("%20.10f") % atom.GetPos().y
                 << format("%20.10f") % atom.GetPos().z << "  "
-                << format("%-8s") % e_name << "  "
+                << format("%-8s") % res.GetChain().GetName() << "  "
                 << format("%-8i") % res.GetNumber()
                 << format("%20.10f") % atom.GetBFactor()
                 << std::endl;
   } else {
     outstream_  << format("%5i") % atom_count_
-                << format("%5i") % res.GetNumber() << " "
-			    << format("%4s") % res.GetKey() << " "
+                << format("%5i") % res_count_ << " "
+			          << format("%-4s") % res.GetKey() << " "
                 << format("%-4s") % atom.GetName()
                 << format("%10.5f") % atom.GetPos().x
                 << format("%10.5f") % atom.GetPos().y
                 << format("%10.5f") % atom.GetPos().z << " "
-                << format("%-4s") % e_name << " "
+                << format("%-4s") % res.GetChain().GetName() << " "
                 << format("%-5i") % res.GetNumber() << " "
                 << format("%8.5f") % atom.GetBFactor()
                 << std::endl;
@@ -288,6 +348,7 @@ bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
   return true;
 }
 
+/// \brief CHARMM file format requires builder
 bool EntityIOCRDHandler::RequiresBuilder() const
 {
   return true;
@@ -304,18 +365,14 @@ void EntityIOCRDHandler::Export(const mol::EntityView& ent,
                                 std::ostream& stream) const
 {
   CRDWriter writer(stream);
-  writer.WriteHeader(ent);
-  mol::EntityView non_const_view = ent;
-  non_const_view.Apply(writer);
+  writer.Write(ent);
 }
 
 void EntityIOCRDHandler::Export(const mol::EntityView& ent,
                                 const boost::filesystem::path& loc) const
 {
   CRDWriter writer(loc);
-  writer.WriteHeader(ent);
-  mol::EntityView non_const_view = ent;
-  non_const_view.Apply(writer);
+  writer.Write(ent);
 }
 
 namespace {
