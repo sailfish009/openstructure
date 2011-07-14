@@ -19,18 +19,21 @@
 #include <boost/python.hpp>
 using namespace boost::python;
 
+#include <boost/shared_ptr.hpp>
+
 #include <ost/gfx/prim_list.hh>
 using namespace ost;
 using namespace ost::gfx;
 
 void export_primlist()
 {
-  class_<PrimList, bases<GfxObj>, PrimListP, boost::noncopyable>("PrimList", init<const String& >())
+  class_<PrimList, bases<GfxObj>, boost::shared_ptr<PrimList>, boost::noncopyable>("PrimList", init<const String& >())
     .def("Clear",&PrimList::Clear)
     .def("_add_line",&PrimList::AddLine)
     .def("_add_point",&PrimList::AddPoint)
     .def("_add_sphere",&PrimList::AddSphere)
     .def("_add_cyl",&PrimList::AddCyl)
+    .def("_add_text",&PrimList::AddText)
     .def("SetColor",&PrimList::SetColor)
     .def("SetDiameter",&PrimList::SetDiameter)
     .def("SetRadius",&PrimList::SetRadius)

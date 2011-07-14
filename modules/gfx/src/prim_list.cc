@@ -35,6 +35,7 @@ PrimList::PrimList(const String& name):
   lines_(),
   spheres_(),
   cyls_(),
+  texts_(),
   sphere_detail_(4),
   arc_detail_(4),
   simple_va_()
@@ -46,10 +47,10 @@ void PrimList::Clear()
   lines_.clear();
   spheres_.clear();
   cyls_.clear();
+  texts_.clear();
   Scene::Instance().RequestRedraw();
   this->FlagRebuild();
 }
-
 
 geom::AlignedCuboid PrimList::GetBoundingBox() const
 {
@@ -69,31 +70,36 @@ geom::AlignedCuboid PrimList::GetBoundingBox() const
 void PrimList::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
                              const mol::Transform& tf) const
 {
-  for(PointEntryList::const_iterator it=points_.begin();it!=points_.end();++it) {
-    geom::Vec3 tpos = tf.Apply(it->pos);
+  for(SpherePrimList::const_iterator it=points_.begin();it!=points_.end();++it) {
+    geom::Vec3 tpos = tf.Apply(it->position);
     minc=geom::Min(minc,tpos);
     maxc=geom::Max(maxc,tpos);
   }
-  for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
-    geom::Vec3 tpos = tf.Apply(it->pos1);
+  for(CylinderPrimList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
+    geom::Vec3 tpos = tf.Apply(it->start);
     minc=geom::Min(minc,tpos);
     maxc=geom::Max(maxc,tpos);
-    tpos = tf.Apply(it->pos2);
+    tpos = tf.Apply(it->end);
     minc=geom::Min(minc,tpos);
     maxc=geom::Max(maxc,tpos);
   }
-  for(PointEntryList::const_iterator it=spheres_.begin();it!=spheres_.end();++it) {
-    geom::Vec3 tpos = tf.Apply(it->pos);
-    minc=geom::Min(minc,tpos-it->rad);
-    maxc=geom::Max(maxc,tpos+it->rad);
+  for(SpherePrimList::const_iterator it=spheres_.begin();it!=spheres_.end();++it) {
+    geom::Vec3 tpos = tf.Apply(it->position);
+    minc=geom::Min(minc,tpos-it->radius);
+    maxc=geom::Max(maxc,tpos+it->radius);
   }
-  for(LineEntryList::const_iterator it=cyls_.begin();it!=cyls_.end();++it) {
-    geom::Vec3 tpos = tf.Apply(it->pos1);
-    minc=geom::Min(minc,tpos-it->rad1);
-    maxc=geom::Max(maxc,tpos+it->rad1);
-    tpos = tf.Apply(it->pos2);
-    minc=geom::Min(minc,tpos-it->rad2);
-    maxc=geom::Max(maxc,tpos+it->rad2);
+  for(CylinderPrimList::const_iterator it=cyls_.begin();it!=cyls_.end();++it) {
+    geom::Vec3 tpos = tf.Apply(it->start);
+    minc=geom::Min(minc,tpos-it->radius1);
+    maxc=geom::Max(maxc,tpos+it->radius1);
+    tpos = tf.Apply(it->end);
+    minc=geom::Min(minc,tpos-it->radius2);
+    maxc=geom::Max(maxc,tpos+it->radius2);
+  }
+  for(TextPrimList::const_iterator it=texts_.begin();it!=texts_.end();++it) {
+    geom::Vec3 tpos = tf.Apply(it->position);
+    minc=geom::Min(minc,tpos);
+    maxc=geom::Max(maxc,tpos);
   }
   minc-=1.0;
   maxc+=1.0;
@@ -103,22 +109,26 @@ geom::Vec3 PrimList::GetCenter() const
 {
   geom::Vec3 cen;
   size_t sum=0;
-  for(PointEntryList::const_iterator it=points_.begin();it!=points_.end();++it) {
-    cen+=it->pos;
+  for(SpherePrimList::const_iterator it=points_.begin();it!=points_.end();++it) {
+    cen+=it->position;
   }
   sum+=points_.size();
-  for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
-    cen+=0.5*(it->pos1+it->pos2);
+  for(CylinderPrimList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
+    cen+=0.5*(it->start+it->end);
   }
   sum+=lines_.size();
-  for(PointEntryList::const_iterator it=spheres_.begin();it!=spheres_.end();++it) {
-    cen+=it->pos;
+  for(SpherePrimList::const_iterator it=spheres_.begin();it!=spheres_.end();++it) {
+    cen+=it->position;
   }
   sum+=spheres_.size();
-  for(LineEntryList::const_iterator it=cyls_.begin();it!=cyls_.end();++it) {
-    cen+=0.5*(it->pos1+it->pos2);
+  for(CylinderPrimList::const_iterator it=cyls_.begin();it!=cyls_.end();++it) {
+    cen+=0.5*(it->start+it->end);
   }
   sum+=cyls_.size();
+  for(TextPrimList::const_iterator it=texts_.begin();it!=texts_.end();++it) {
+    cen+=it->position;
+  }
+  sum+=texts_.size();
   if(sum>0) {
     cen/=static_cast<float>(sum);
   }
@@ -141,6 +151,7 @@ void PrimList::CustomRenderGL(RenderPass pass)
   if(pass==STANDARD_RENDER_PASS || pass==TRANSPARENT_RENDER_PASS) {
     va_.RenderGL();
     simple_va_.RenderGL();
+    render_text();
   }
 }
 
@@ -149,49 +160,57 @@ void PrimList::CustomRenderPov(PovState& pov)
   if(points_.empty() && lines_.empty()) return;
   pov.write_merge_or_union(GetName());
 
-  for(PointEntryList::const_iterator it=points_.begin();it!=points_.end();++it) {
-    pov.write_sphere(it->pos,0.1,it->col,GetName());
+  for(SpherePrimList::const_iterator it=points_.begin();it!=points_.end();++it) {
+    pov.write_sphere(it->position,0.1,it->color,GetName());
   }
-  for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
-    pov.write_sphere(it->pos1,0.1,it->col1,GetName());
-    pov.write_sphere(it->pos2,0.1,it->col2,GetName());
-    pov.write_cyl(it->pos1,it->pos2,0.1,it->col1,GetName(),true);
+  for(CylinderPrimList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
+    pov.write_sphere(it->start,0.1,it->color1,GetName());
+    pov.write_sphere(it->end,0.1,it->color2,GetName());
+    pov.write_cyl(it->start,it->end,0.1,it->color1,GetName(),true);
   }
-  for(PointEntryList::const_iterator it=spheres_.begin();it!=spheres_.end();++it) {
-    pov.write_sphere(it->pos,it->rad,it->col,GetName());
+  for(SpherePrimList::const_iterator it=spheres_.begin();it!=spheres_.end();++it) {
+    pov.write_sphere(it->position,it->radius,it->color,GetName());
   }
-  for(LineEntryList::const_iterator it=cyls_.begin();it!=cyls_.end();++it) {
-    pov.write_sphere(it->pos1,it->rad1,it->col1,GetName());
-    pov.write_sphere(it->pos2,it->rad2,it->col2,GetName());
-    pov.write_cyl(it->pos1,it->pos2,it->rad1,it->col1,GetName(),true);
+  for(CylinderPrimList::const_iterator it=cyls_.begin();it!=cyls_.end();++it) {
+    pov.write_sphere(it->start,it->radius1,it->color1,GetName());
+    pov.write_sphere(it->end,it->radius2,it->color2,GetName());
+    pov.write_cyl(it->start,it->end,it->radius1,it->color1,GetName(),true);
   }
+  // TODO text
   pov.inc() << " }\n";
 }
 
 void PrimList::AddPoint(const geom::Vec3& p, const Color& col)
 {
-  points_.push_back(PointEntry(p, 0.0, col));
+  points_.push_back(SpherePrim(p, 0.0, col));
   Scene::Instance().RequestRedraw();
   FlagRebuild();
 }
 
 void PrimList::AddLine(const geom::Vec3& p1, const geom::Vec3& p2, const Color& col1, const Color& col2)
 {
-  lines_.push_back(LineEntry(p1,p2,0.0,0.0,col1,col2));
+  lines_.push_back(CylinderPrim(p1,p2,0.0,0.0,col1,col2));
   Scene::Instance().RequestRedraw();
   FlagRebuild();
 }
 
 void PrimList::AddSphere(const geom::Vec3& c, float r, const Color& col)
 {
-  spheres_.push_back(PointEntry(c, r, col));
+  spheres_.push_back(SpherePrim(c, r, col));
   Scene::Instance().RequestRedraw();
   FlagRebuild();
 }
 
 void PrimList::AddCyl(const geom::Vec3& p1, const geom::Vec3& p2, float r1, float r2, const Color& col1, const Color& col2)
 {
-  cyls_.push_back(LineEntry(p1, p2, r1, r2, col1, col2));
+  cyls_.push_back(CylinderPrim(p1, p2, r1, r2, col1, col2));
+  Scene::Instance().RequestRedraw();
+  FlagRebuild();
+}
+
+void PrimList::AddText(const std::string& text, const geom::Vec3& pos, const Color& col, float point_size)
+{
+  texts_.push_back(TextPrim(text,pos,col,point_size));
   Scene::Instance().RequestRedraw();
   FlagRebuild();
 }
@@ -222,19 +241,22 @@ void PrimList::SetArcDetail(unsigned int d)
 
 void PrimList::SetColor(const Color& c)
 {
-  for(PointEntryList::iterator it=points_.begin();it!=points_.end();++it) {
-    it->col=c;
+  for(SpherePrimList::iterator it=points_.begin();it!=points_.end();++it) {
+    it->color=c;
   }
-  for(LineEntryList::iterator it=lines_.begin();it!=lines_.end();++it) {
-    it->col1=c;
-    it->col2=c;
+  for(CylinderPrimList::iterator it=lines_.begin();it!=lines_.end();++it) {
+    it->color1=c;
+    it->color2=c;
   }
-  for(PointEntryList::iterator it=spheres_.begin();it!=spheres_.end();++it) {
-    it->col=c;
+  for(SpherePrimList::iterator it=spheres_.begin();it!=spheres_.end();++it) {
+    it->color=c;
   }
-  for(LineEntryList::iterator it=cyls_.begin();it!=cyls_.end();++it) {
-    it->col1=c;
-    it->col2=c;
+  for(CylinderPrimList::iterator it=cyls_.begin();it!=cyls_.end();++it) {
+    it->color1=c;
+    it->color2=c;
+  }
+  for(TextPrimList::iterator it=texts_.begin();it!=texts_.end();++it) {
+    it->color=c;
   }
   Scene::Instance().RequestRedraw();
   FlagRebuild();
@@ -255,13 +277,13 @@ void PrimList::prep_simple_va()
   simple_va_.SetAALines(GetAALines());
   simple_va_.SetOpacity(GetOpacity());
 
-  for(PointEntryList::const_iterator it=points_.begin();it!=points_.end();++it) {
-    simple_va_.Add(it->pos,geom::Vec3(),it->col);
+  for(SpherePrimList::const_iterator it=points_.begin();it!=points_.end();++it) {
+    simple_va_.Add(it->position,geom::Vec3(),it->color);
   }
 
-  for(LineEntryList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
-    VertexID id0 = simple_va_.Add(it->pos1,geom::Vec3(),it->col1);
-    VertexID id1 = simple_va_.Add(it->pos2,geom::Vec3(),it->col2);
+  for(CylinderPrimList::const_iterator it=lines_.begin();it!=lines_.end();++it) {
+    VertexID id0 = simple_va_.Add(it->start,geom::Vec3(),it->color1);
+    VertexID id1 = simple_va_.Add(it->end,geom::Vec3(),it->color2);
     simple_va_.AddLine(id0,id1);
   }
 }
@@ -274,15 +296,22 @@ void PrimList::prep_va()
   va_.SetColorMaterial(true);
   va_.SetMode(0x4);
 
-  for(PointEntryList::const_iterator it=spheres_.begin();it!=spheres_.end();++it) {
-    va_.AddSphere(SpherePrim(it->pos, it->rad, it->col), 
+  for(SpherePrimList::const_iterator it=spheres_.begin();it!=spheres_.end();++it) {
+    va_.AddSphere(SpherePrim(it->position, it->radius, it->color), 
                   GetSphereDetail());
   }
 
-  for(LineEntryList::const_iterator it=cyls_.begin();it!=cyls_.end();++it) {
-    va_.AddCylinder(CylinderPrim(it->pos1, it->pos2, it->rad1, it->rad2, it->col1, it->col2),
+  for(CylinderPrimList::const_iterator it=cyls_.begin();it!=cyls_.end();++it) {
+    va_.AddCylinder(CylinderPrim(it->start, it->end, it->radius1, it->radius2, it->color1, it->color2),
                     GetArcDetail(),
                     true);
+  }
+}
+
+void PrimList::render_text()
+{
+  for(TextPrimList::const_iterator it=texts_.begin();it!=texts_.end();++it) {
+    Scene::Instance().RenderText(*it);
   }
 }
 

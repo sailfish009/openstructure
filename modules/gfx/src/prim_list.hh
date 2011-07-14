@@ -27,13 +27,10 @@
 
 #include <ost/geom/geom.hh>
 
-#include "gfx.hh"
+#include "gfx_object.hh"
+#include "gfx_prim.hh"
 
 namespace ost { namespace gfx {
-
-class PrimList;
-
-typedef boost::shared_ptr<PrimList> PrimListP;
 
 /// \see gfx::Cuboid, \ref primitives.py "Displaying Lines and Quads",
 ///      gfx::Quad, \ref gradient.py "Gradient Example",
@@ -94,7 +91,7 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
 
     Python interface:
 
-    PrimList.AddLine(pos1,pos2,col=gfx.WHITE,col1=gfx.WHITE,col2=gfx.WHITE)
+    PrimList.AddLine(pos1,pos2,color=gfx.WHITE,color1=gfx.WHITE,color2=gfx.WHITE)
   */
   void AddLine(const geom::Vec3& p1, const geom::Vec3& p2, const Color& col1, const Color& col2);
 
@@ -103,7 +100,7 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
 
     Python interface:
 
-    PrimList.AddSphere(cen,rad,col=gfx.WHITE)
+    PrimList.AddSphere(cen,radius=1.0,color=gfx.WHITE)
   */
   void AddSphere(const geom::Vec3& cen, float rad, const Color& col);
 
@@ -112,9 +109,18 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
 
     Python interface:
 
-    PrimList.AddCyl(pos1,pos2,rad=1.0,rad1=1.0,rad2=1.0,col=gfx.WHITE,col1=gfx.WHITE,col2=gfx.WHITE)
+    PrimList.AddCyl(pos1,pos2,radius=1.0,radius1=1.0,radius2=1.0,color=gfx.WHITE,color1=gfx.WHITE,color2=gfx.WHITE)
   */
   void AddCyl(const geom::Vec3& p0, const geom::Vec3& p1, float r1, float r2, const Color& col1, const Color& col2);
+
+  /*!
+    \brief add text
+
+    Python interface:
+
+    PrimList.AddText(text,pos,color=gfx.WHITE,point_size=1.0)
+  */
+  void AddText(const std::string& text, const geom::Vec3& pos, const Color& col, float point_size);
 
   /// defunct
   void SetDiameter(float d);
@@ -137,10 +143,11 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
   virtual void CustomPreRenderGL(bool flag);
 
  private:
-  PointEntryList points_;
-  LineEntryList lines_;
-  PointEntryList spheres_;
-  LineEntryList cyls_;
+  SpherePrimList points_;
+  CylinderPrimList lines_;
+  SpherePrimList spheres_;
+  CylinderPrimList cyls_;
+  TextPrimList texts_;
   unsigned int sphere_detail_;
   unsigned int arc_detail_;
 
@@ -148,6 +155,7 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
   
   void prep_simple_va();
   void prep_va();
+  void render_text();
 };
 
 /// \example primitives.py

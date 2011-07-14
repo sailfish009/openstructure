@@ -236,7 +236,16 @@ def _primlist_add_cyl(self,pos1,pos2,radius=None,radius1=None,radius2=None,color
     color2=color
   self._add_cyl(pos1,pos2,radius1,radius2,color1,color2)
 
+def _primlist_add_text(self,text,pos,color=None,point_size=None):
+  pos=_to_vec3(pos)
+  if not color:
+    color=WHITE
+  if not point_size:
+    point_size=1.0
+  self._add_text(text,pos,color,point_size)
+  
 PrimList.AddPoint=_primlist_add_point
 PrimList.AddLine=_primlist_add_line
 PrimList.AddSphere=_primlist_add_sphere
 PrimList.AddCyl=_primlist_add_cyl
+PrimList.AddText=_primlist_add_text
