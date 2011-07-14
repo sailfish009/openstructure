@@ -36,6 +36,7 @@ extern void export_Entity();
 extern void export_Surface();
 extern void export_primlist();
 extern void export_primitives();
+extern void export_color();
 #if OST_IMG_ENABLED
   extern void export_Map();
 #endif
@@ -51,26 +52,9 @@ extern void export_GLWinBase();
 using namespace ost;
 using namespace ost::gfx;
 
-
-float color_get_red(Color* c) {
-  return c->Red();
-}
-
-float color_get_green(Color* c) {
-  return c->Green();
-}
-
-float color_get_blue(Color* c) {
-  return c->Blue();
-}
-
-float color_get_alpha(Color* c) {
-  return c->Alpha();
-}
-
-
 BOOST_PYTHON_MODULE(_ost_gfx)
 {
+  export_color();
   export_Scene();
   export_GfxNode();
   export_GfxObj();
@@ -137,19 +121,6 @@ BOOST_PYTHON_MODULE(_ost_gfx)
   ;
 
   class_<GfxTestObj, bases<GfxObj>, boost::noncopyable>("GfxTestObj", init<>());
-  
-  class_<Color>("Color",init<>())
-    .def(init<float, float, float, optional<float> >())
-    .def(self_ns::str(self))
-    .def("Red",color_get_red)
-    .def("Green",color_get_green)
-    .def("Blue",color_get_blue)
-    .def("Alpha",color_get_alpha)
-    .def("ToHSV",&Color::ToHSV)
-    .def("FromRGBA",&Color::FromRGB)
-    ;
-
-  def("HSV",HSV);
   
   class_<Gradient>("Gradient", init<>())
     .def(init<const String&>())
