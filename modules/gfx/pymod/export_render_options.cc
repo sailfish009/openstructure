@@ -105,9 +105,11 @@ void export_RenderOptions()
     .def("SetSphereRad", &CustomRenderOptions::SetSphereRad)
     .def("GetSphereRad", &CustomRenderOptions::GetSphereRad)
     .add_property("sphere_rad", &CustomRenderOptions::GetSphereRad, &CustomRenderOptions::SetSphereRad)    
+    .add_property("sphere_radius", &CustomRenderOptions::GetSphereRad, &CustomRenderOptions::SetSphereRad)    
     .def("SetBondRad", &CustomRenderOptions::SetBondRad)
     .def("GetBondRad", &CustomRenderOptions::GetBondRad)
     .add_property("bond_rad", &CustomRenderOptions::GetBondRad, &CustomRenderOptions::SetBondRad)
+    .add_property("bond_radius", &CustomRenderOptions::GetBondRad, &CustomRenderOptions::SetBondRad)
   ;
 
   class_<CartoonRenderOptions, boost::shared_ptr<CartoonRenderOptions>, bases<RenderOptions>, boost::noncopyable>("CartoonRenderOptions")

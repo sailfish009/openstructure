@@ -39,8 +39,8 @@ class CustomWidget(RenderModeWidget):
     max_arc_detail = 20
     
     min_rad = 0.05
-    max_bond_rad = 0.5
-    max_sphere_rad = 1
+    max_bond_rad = 1.0
+    max_sphere_rad = 1.0
     
     
     
