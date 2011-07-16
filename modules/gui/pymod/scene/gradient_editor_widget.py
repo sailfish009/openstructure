@@ -176,7 +176,7 @@ class GradientEdit(QtGui.QWidget):
       QtGui.QMessageBox.question(self, "Information", "Please keep in mind, at least two stops are needed for a gradient!")
 
   def AddStop(self, pos, color=None):
-    stop = GradientStop(pos, self.border_offset_, self, color)
+    stop = MyGradientStop(pos, self.border_offset_, self, color)
     QtCore.QObject.connect(stop, QtCore.SIGNAL("gradientChanged"), self.UpdateGradient)
     QtCore.QObject.connect(stop, QtCore.SIGNAL("colorChanged"), self.UpdateGradient)
     QtCore.QObject.connect(stop, QtCore.SIGNAL("colorChanged"), self.parent().Update)
@@ -231,7 +231,7 @@ class GradientEdit(QtGui.QWidget):
       self.width_ = event.size().width()
     
 #Gradient Stop  
-class GradientStop(ColorSelectWidget):
+class MyGradientStop(ColorSelectWidget):
   def __init__(self, pos, offset, parent, color=None):
     #Defaults
     self.length_ = 20

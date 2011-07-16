@@ -1,8 +1,7 @@
 set(OST_GFX_UNIT_TESTS
   tests.cc
   test_gfx_node.cc
-  test_primlist.py
-  test_color.py
+  test_gfx.py
 )
 if (ENABLE_IMG)
   list(APPEND OST_GFX_UNIT_TESTS test_map_octree.cc)
