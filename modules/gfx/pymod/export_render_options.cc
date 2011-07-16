@@ -186,6 +186,8 @@ void export_RenderOptions()
     .def("GetColorBlendMode", &CartoonRenderOptions::GetColorBlendMode)
     .add_property("color_blend_mode",&CartoonRenderOptions::GetColorBlendMode,
                   &CartoonRenderOptions::SetColorBlendMode)
+    .add_property("twist_hack",&CartoonRenderOptions::GetTwistHack,
+                  &CartoonRenderOptions::SetTwistHack)
   ;
   
   class_<TraceRenderOptions, boost::shared_ptr<TraceRenderOptions>, bases<RenderOptions>, boost::noncopyable>("TraceRenderOptions")

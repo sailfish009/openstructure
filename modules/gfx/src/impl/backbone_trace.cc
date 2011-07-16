@@ -178,7 +178,7 @@ void BackboneTrace::AddNodeEntryList(const NodeEntryList& l)
   }
 }
 
-void BackboneTrace::PrepList(NodeEntryList& nelist)
+void BackboneTrace::PrepList(NodeEntryList& nelist) const
 {
   // orthogonalize the residue normals with
   // twist detection; important for later
@@ -206,8 +206,10 @@ void BackboneTrace::PrepList(NodeEntryList& nelist)
     orth=geom::Normalize(geom::Cross(dir,e1->normal));
     norm=geom::Normalize(geom::Cross(orth,dir));
     // twist check
-    if(geom::Dot(geom::Cross(e0->normal,dir),geom::Cross(norm,dir))<0.0) {
-      norm=-norm;
+    if(twist_hack_) {
+      if(geom::Dot(geom::Cross(e0->normal,dir),geom::Cross(norm,dir))<0.0) {
+        norm=-norm;
+      }
     }
     e1->normal=norm;
     // skip over shift for the last iteration
@@ -224,8 +226,10 @@ void BackboneTrace::PrepList(NodeEntryList& nelist)
   e2->direction=dir;
   orth=geom::Normalize(geom::Cross(dir,e2->normal));
   norm=geom::Normalize(geom::Cross(orth,dir));
-  if(geom::Dot(geom::Cross(e1->normal,dir),geom::Cross(norm,dir))<0.0) {
-    norm=-norm;
+  if(twist_hack_) {
+    if(geom::Dot(geom::Cross(e1->normal,dir),geom::Cross(norm,dir))<0.0) {
+      norm=-norm;
+    }
   }
   e2->normal=norm;
 }
@@ -264,6 +268,12 @@ void BackboneTrace::SetSeqHack(bool f)
 {
   seq_hack_=f;
   Rebuild();
+}
+
+void BackboneTrace::SetTwistHack(bool f)
+{
+  twist_hack_=f;
+  // don't issue Rebuild()
 }
 
 }}} // ns

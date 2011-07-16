@@ -78,8 +78,11 @@ TraceRendererBase::TraceRendererBase(BackboneTrace* trace, int n):
 {
 }
 
-void TraceRendererBase::PrepareRendering()
+void TraceRendererBase::PrepareRendering(bool twist_hack)
 {
+  trace_->SetTwistHack(twist_hack);
+  trace_subset_.SetTwistHack(twist_hack);
+  if(this->HasSelection()) sel_subset_.SetTwistHack(twist_hack);
   if (state_ & DIRTY_VA) {
     trace_->OnUpdatedPositions();
     trace_subset_.OnUpdatedPositions();

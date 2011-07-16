@@ -74,7 +74,7 @@ geom::AlignedCuboid CartoonRenderer::GetBoundingBox() const
   
 void CartoonRenderer::PrepareRendering()
 {
-  TraceRendererBase::PrepareRendering();
+  TraceRendererBase::PrepareRendering(options_->GetTwistHack());
   if(state_>0) {
     va_.Clear();
     this->prepare_rendering(trace_subset_, va_, spline_list_list_);
