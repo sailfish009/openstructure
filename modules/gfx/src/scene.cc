@@ -269,11 +269,12 @@ void Scene::SetShadingMode(const std::string& smode)
   // this here is required - in case SetShadingMode is called
   // before GL is initialized (e.g. during batch mode rendering)
   def_shading_mode_=smode;
+  if (!gl_init_) return;
   if(smode=="fallback") {
     Shader::Instance().Activate("");
   } else if(smode=="basic") {
     Shader::Instance().Activate("basic");
-  } else if(smode=="hf") {
+  } else if(smode=="hf" || smode=="hemilight") {
     Shader::Instance().Activate("hemilight");
   } else if(smode=="toon1") {
     Shader::Instance().Activate("toon1");
@@ -1414,7 +1415,7 @@ bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
   root_node_->ContextSwitch();
 
 #if OST_SHADER_SUPPORT_ENABLED
-  String shader_name = Shader::Instance().GetCurrentName();
+  String shader_name = !def_shading_mode_.empty() ? def_shading_mode_ : Shader::Instance().GetCurrentName();
 #endif
 
   LOG_DEBUG("Scene: initializing GL");
@@ -1429,7 +1430,7 @@ bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
   update_fog();
   glDrawBuffer(GL_FRONT);
 #if OST_SHADER_SUPPORT_ENABLED
-  LOG_DEBUG("Scene: activating shader");
+  LOG_DEBUG("Scene: activating shader " << shader_name);
   Shader::Instance().Activate(shader_name);
 #endif
   return true;

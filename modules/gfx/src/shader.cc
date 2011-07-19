@@ -237,6 +237,8 @@ void Shader::Setup()
   shader_program_list.push_back(shader_code_map_["basic_fs.glsl"]);
   if(Shader::Link(shader_program_list,"hemilight",shader_program_id)) {
     shader_program_map_["hemilight"]=shader_program_id;
+    // alias
+    shader_program_map_["hf"]=shader_program_id;
   }
   // selfx shader
   shader_program_list.clear();
