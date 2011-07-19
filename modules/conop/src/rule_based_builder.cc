@@ -89,9 +89,10 @@ mol::AtomHandleList RuleBasedBuilder::GetUnknownAtoms(mol::ResidueHandle res)
   if (!last_compound_) {
     return unknown;
   }
+  mol::AtomHandleList atoms=res.GetAtomList();
+  last_residue_=mol::ResidueHandle();
   this->ReorderAtoms(res, last_compound_);
   AtomSpecList::const_iterator j=last_compound_->GetAtomSpecs().begin();
-  mol::AtomHandleList atoms=res.GetAtomList();
   mol::AtomHandleList::iterator i=atoms.begin();
   for (mol::AtomHandleList::iterator 
        i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
@@ -153,6 +154,7 @@ void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
   mol::impl::AtomImplList::iterator i=impl->GetAtomList().begin();
   for (; i!=impl->GetAtomList().end(); ++i) {
     mol::impl::AtomImplPtr atom=*i;
+    atom->SetState(std::numeric_limits<unsigned int>::max());
     int index=compound->GetAtomSpecIndex(atom->GetName());
     if (index==-1) {
       if (!this->OnUnknownAtom(mol::AtomHandle(atom))) {
