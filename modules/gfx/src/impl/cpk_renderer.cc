@@ -150,10 +150,12 @@ void CPKRenderer::Render3DSprites()
     geom::Vec3 cz=irot*geom::Vec3(0.0,0.0,1.0);
 
     uint write_normals = Shader::Instance().GetCurrentName()=="dumpnorm" ? 1 : 0;
+    uint use_hemimodel = Shader::Instance().GetCurrentName()=="hemilight" ? 1 : 0;
     Shader::Instance().PushProgram();
     Shader::Instance().Activate("fast_sphere");
     Shader::Instance().UpdateState();
     glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"write_normals"),write_normals);
+    glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"use_hemimodel"),use_hemimodel);
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
