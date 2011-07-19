@@ -201,13 +201,31 @@ public:
   /// \brief use atom hash to perform fast within lookup
   AtomHandleList FindWithin(const geom::Vec3& pos, Real radius) const;
 
+  /// \brief set default query flags
+  /// these will be used if flags are not explicitely specified as
+  /// a second argument to a Select call
+  void SetDefaultQueryFlags(QueryFlags flags);
+
+  /// \brief return default query flags
+  QueryFlags GetDefaultQueryFlags() const;
+
   /// \brief return view based on a query object
   /// \sa Query
-  EntityView Select(const Query& q, QueryFlags flags=0) const;
+  /// The default query flags will be used for the selection
+  EntityView Select(const Query& q) const;
 
   /// \brief return view based on query String.
   /// \sa Query
-  EntityView Select(const String& query_string, QueryFlags flags=0) const;
+  /// The default query flags will be used for the selection
+  EntityView Select(const String& query_string) const;
+
+  /// \brief return view based on a query object, specifying behavior flags
+  /// \sa Query
+  EntityView Select(const Query& q, QueryFlags flags) const;
+
+  /// \brief return view based on query String, specifying behavior flags
+  /// \sa Query
+  EntityView Select(const String& query_string, QueryFlags flags) const;
 
   /// \brief return a (new) full view of this entity
   EntityView CreateFullView() const;

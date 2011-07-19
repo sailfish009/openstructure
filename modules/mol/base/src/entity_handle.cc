@@ -115,13 +115,38 @@ AtomHandleList EntityHandle::FindWithin(const geom::Vec3& pos,
   return handles;
 }
 
+void EntityHandle::SetDefaultQueryFlags(QueryFlags flags)
+{
+  this->CheckValidity();
+  Impl()->SetDefaultQueryFlags(flags);
+}
+
+QueryFlags EntityHandle::GetDefaultQueryFlags() const
+{
+  this->CheckValidity();
+  return Impl()->GetDefaultQueryFlags();
+}
+
+EntityView EntityHandle::Select(const Query& q) const
+{
+  this->CheckValidity();
+  return Impl()->Select(*this, q);
+}
+
+EntityView EntityHandle::Select(const String& q) const
+{
+  this->CheckValidity();
+  return Impl()->Select(*this, Query(q));
+}
+
 EntityView EntityHandle::Select(const Query& q, QueryFlags flags) const
 {
   this->CheckValidity();
   return Impl()->Select(*this, q, flags);
 }
 
-EntityView EntityHandle::Select(const String& q, QueryFlags flags) const {
+EntityView EntityHandle::Select(const String& q, QueryFlags flags) const 
+{
   this->CheckValidity();
   return Impl()->Select(*this, Query(q), flags);
 }

@@ -45,11 +45,6 @@ typedef BondHandle (EntityHandle::*Connect2)(const AtomHandle&,
                                              Real, Real);
 
 typedef EntityView (EntityHandle::*QueryMethod)(const Query&, uint) const;
-QueryMethod select_query=&EntityHandle::Select;
-StringMethod select_string=&EntityHandle::Select;
-//Connect1 conn1=&EntityHandle::Connect;
-//Connect2 conn2=&EntityHandle::Connect;
-
 
 Real (EntityHandle::*get_angle1)(const AtomHandle&, const AtomHandle&, const AtomHandle&) const = &EntityHandle::GetAngle;
 Real (EntityHandle::*get_angle2)(const AtomView&, const AtomView&, const AtomView&) const = &EntityHandle::GetAngle;
@@ -127,10 +122,22 @@ void export_Entity()
     .add_property("valid", &EntityBase::IsValid)
   ;
   generic_prop_def<EntityBase>(ent_base);
+
+  EntityView (EntityHandle::*select1)(const Query&) const = &EntityHandle::Select;
+  EntityView (EntityHandle::*select2)(const Query&, QueryFlags) const = &EntityHandle::Select;
+  EntityView (EntityHandle::*select3)(const String&) const = &EntityHandle::Select;
+  EntityView (EntityHandle::*select4)(const String&, QueryFlags) const = &EntityHandle::Select;
   
   class_<EntityHandle, bases<EntityBase> >("EntityHandle", init<>())
-    .def("Select",select_query, (arg("query"), arg("flags")=0))
-    .def("Select",select_string, (arg("query"), arg("flags")=0))
+    .def("Select",select1)
+    .def("Select",select2)
+    .def("Select",select3)
+    .def("Select",select4)
+    .def("SetDefaultQueryFlags",&EntityHandle::SetDefaultQueryFlags)
+    .def("GetDefaultQueryFlags",&EntityHandle::GetDefaultQueryFlags)
+    .add_property("default_query_flags",
+                  &EntityHandle::GetDefaultQueryFlags,
+                  &EntityHandle::SetDefaultQueryFlags)
     .def("FindChain", &EntityHandle::FindChain)
     .def("FindResidue", &EntityHandle::FindResidue)
     .def("FindAtom", &EntityHandle::FindAtom)

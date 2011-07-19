@@ -77,7 +77,8 @@ EntityImpl::EntityImpl():
   ics_editor_count_(0),  
   dirty_flags_(DisableICS),
   name_(""),
-  next_index_(0L)
+  next_index_(0L),
+  default_query_flags_(0)
 {    
 }
 
@@ -984,6 +985,11 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
                << residue_count << " residue(s), " << atom_count
                << " atom(s)" << " " << bond_count << " bond(s)");
   return view;
+}
+
+EntityView EntityImpl::Select(const EntityHandle& h, const Query& q) const
+{
+  return do_selection<false>(h, q, default_query_flags_);
 }
 
 EntityView EntityImpl::Select(const EntityHandle& h, const Query& q, 
