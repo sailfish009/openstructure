@@ -144,8 +144,8 @@ std::vector<Real> AnalyzeRMSD(const CoordGroupHandle& traj, const EntityView& re
   rmsd.reserve(ceil(traj.GetFrameCount()/float(stride)));
   std::vector<unsigned long> sele_indices;
   std::vector<geom::Vec3> ref_pos;
-  GetIndices(reference_view, sele_indices);
-  GetPositions(sele_view, ref_pos);
+  GetIndices(sele_view, sele_indices);
+  GetPositions(reference_view, ref_pos);
   for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
     CoordFramePtr frame=traj.GetFrame(i);
     rmsd.push_back(frame->GetRMSD(ref_pos,sele_indices));
