@@ -146,7 +146,7 @@ inline void apply_color_op(ConnectRendererBase* rend, GfxView* v, T1 get_col, co
   }
   for(AtomEntryMap::iterator it=v->atom_map.begin();it!=v->atom_map.end();++it){
     if(view.FindAtom(it->second.atom)){
-      it->second.color=get_col.ColorOfAtom(it->second.atom);
+      it->second.color=get_col.ColorOfAtom(it->second.atom).second;
     }
   }
 };

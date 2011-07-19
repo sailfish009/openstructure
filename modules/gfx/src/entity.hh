@@ -223,6 +223,12 @@ public:
                float minv,float maxv,
                mol::Prop::Level hint=mol::Prop::UNSPECIFIED);
 
+  // temporarily here, will be moved to py interface
+  void ColorBy(const String& prop, 
+               const Gradient& gradient,
+               float minv,float maxv,
+               bool clamp);
+
   // temporary, should be incorporated with ColorBy
   void DetailColorBy(const String& prop, 
                      const Gradient& gradient,

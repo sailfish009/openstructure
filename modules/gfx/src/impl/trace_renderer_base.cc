@@ -50,8 +50,10 @@ inline void apply_color_op(TraceRendererBase* rend, BackboneTrace& trace_subset,
       for (unsigned int i=0; i<nl.size();++i) {
         if(nl[i].atom.IsValid()) {
           if (q.IsAtomSelected(nl[i].atom)) {
-            Color clr =get_col.ColorOfAtom(nl[i].atom);
-            set_node_entry_color(nl[i],mask,clr);
+            std::pair<bool,Color> clr =get_col.ColorOfAtom(nl[i].atom);
+            if(clr.first) {
+              set_node_entry_color(nl[i],mask,clr.second);
+            }
           }
         }
       }
@@ -62,8 +64,10 @@ inline void apply_color_op(TraceRendererBase* rend, BackboneTrace& trace_subset,
       NodeEntryList& nl=trace_subset.GetList(node_list);
       for (unsigned int i=0; i<nl.size();++i) {
         if(view.FindAtom(nl[i].atom)){
-          Color clr =get_col.ColorOfAtom(nl[i].atom);
-          set_node_entry_color(nl[i],mask,clr);
+          std::pair<bool,Color> clr =get_col.ColorOfAtom(nl[i].atom);
+          if(clr.first) {
+            set_node_entry_color(nl[i],mask,clr.second);
+          }
         }
       }
     }

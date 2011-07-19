@@ -842,6 +842,16 @@ void Entity::ColorBy(const String& prop,
   this->Apply(glop);
 }
 
+void Entity::ColorBy(const String& prop,
+                     const Gradient& gradient,
+                     float minv,float maxv,
+                     bool clamp)
+{
+  GradientLevelColorOp glop = GradientLevelColorOp("",prop, gradient,minv,maxv,mol::Prop::UNSPECIFIED);
+  glop.SetClamp(clamp);
+  this->Apply(glop);
+}
+
 void Entity::DetailColorBy(const String& prop,
                            const Gradient& gradient,
                            float minv,float maxv,

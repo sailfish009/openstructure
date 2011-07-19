@@ -120,6 +120,15 @@ void color_by_09(Entity* e,
   e->ColorBy(prop,gradient,selection);
 }
 
+void color_by_10(Entity* e,
+                 const String& prop,
+                 const Gradient& gradient,
+                 float minv, float maxv,
+                 bool clamp)
+{
+  e->ColorBy(prop,gradient,minv,maxv,clamp);
+}
+
 // temporary, see comment in gfx/entity.hh
 void detail_color_by_02(Entity* e,
                         const String& prop, 
@@ -334,6 +343,7 @@ void export_Entity()
     .def("ColorBy", color_by_07)
     .def("ColorBy", color_by_08)
     .def("ColorBy", color_by_09)
+    .def("ColorBy", color_by_10)
     .def("DetailColorBy", detail_color_by_02)
     COLOR_BY_DEF()
     .def("RadiusBy", radius_by_01)
