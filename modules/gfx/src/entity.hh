@@ -150,6 +150,18 @@ public:
   virtual void SetOutlineExpandFactor(float f);
   virtual void SetOutlineExpandColor(const Color& c);
 
+  /// \brief resets used entity handle
+  /// replaces underlying entity, keeps query and flags intact
+  void Reset(const mol::EntityHandle& eh);
+  /// \brief resets used entity handle and query
+  /// replaces underlying entity and query, keeps flags intact
+  void Reset(const mol::EntityHandle& eh, const mol::Query& q);
+  /// \brief resets used entity handle, query and flags
+  /// this has the same effect as the ctor call with the same parameters
+  void Reset(const mol::EntityHandle& eh, const mol::Query& q, mol::QueryFlags flags);
+  /// \brief resets entity view
+  /// this as the same effect as the ctor call with the same parameters
+  void Reset(const mol::EntityView& ev);
   /// \brief rebuild graphical object (see ctor comments)
   /*
     the naming here is misleading - this method WON'T be called upon FlagRebuild
@@ -188,13 +200,23 @@ public:
   /// \brief get view
   mol::EntityView GetView() const;
 
+  /// \brief set a new query to use (deprecated)
+  /// this will re-create the object based on the given selection
   void SetQuery(const mol::Query& q);
 
-  // turn blur on or off
+  /// return internally used query view
+  mol::QueryViewWrapper GetQueryView() const;
+  /// set new query view, rebuilding object
+  void SetQueryView(const mol::QueryViewWrapper& qv);
+
+  /// return underlying entity
+  mol::EntityHandle GetEntity() const;
+
+  // turn blur on or off (experimental feature)
   void SetBlur(bool f);
-  // set atom positions as n-1 for blur
+  // set atom positions as n-1 for blur (experimental feature)
   void BlurSnapshot();
-  // blur transparency falloffs
+  // blur transparency falloffs (experimental feature)
   void SetBlurFactors(float bf1,float bf2);
 
   /// \brief set selection

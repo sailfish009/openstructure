@@ -2,8 +2,10 @@ import unittest
 if __name__== '__main__':
   import sys
   sys.path.insert(0,"../../../stage/lib64/openstructure/")
+  sys.path.insert(0,"../../../stage/lib/openstructure/")
 
 import ost
+import ost.mol as mol
 import ost.gfx as gfx
 import ost.geom as geom
 
@@ -15,6 +17,18 @@ class TestGfx(unittest.TestCase):
     self.test_gradient()
     self.test_color()
     self.test_primlist()
+    self.test_entity_reset()
+
+  def test_entity_reset(self):
+    eh=mol.CreateEntity()
+    eh2=mol.CreateEntity()
+    go=gfx.Entity("foo",eh)
+    go.Reset(eh)
+    go.Reset("rnum=1")
+    go.Reset(entity=eh2)
+    go.Reset(eh.Select("rnum=2"))
+    go.Reset(eh,"rnum=3",mol.MATCH_RESIDUES)
+    go.Reset("rnum=4",eh2)
 
   def test_gradient(self):
     gs=[gfx.Gradient(),

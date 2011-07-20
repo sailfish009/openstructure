@@ -249,3 +249,83 @@ PrimList.AddLine=_primlist_add_line
 PrimList.AddSphere=_primlist_add_sphere
 PrimList.AddCyl=_primlist_add_cyl
 PrimList.AddText=_primlist_add_text
+
+# entity reset
+
+def _entity_reset(self,*args,**kwargs):
+  import ost.mol as mol
+  eh=None
+  ev=None
+  qr=None
+  qf=None
+  for a in args:
+    if isinstance(a,mol.Query):
+      if qr:
+        raise TypeError("Reset: more than one query string given")
+      qr=a
+    elif isinstance(a,mol.EntityHandle):
+      if eh:
+        raise TypeError("Reset: more than one entity handle given")
+      eh=a
+    elif isinstance(a,mol.EntityView):
+      if ev:
+        raise TypeError("Reset: more than one entity view given")
+      ev=a
+    elif isinstance(a,str):
+      if qr:
+        raise TypeError("Reset: more than one query string given")
+      qr=mol.Query(a)
+    elif isinstance(a,int):
+      if qf:
+        raise TypeError("Reset: more than one QueryFlags given")
+      qf=a
+    else:
+      raise TypeError("Reset: unknown option of type '%s' given"%type(a))
+
+  for key,val in kwargs.iteritems():
+    if key=="entity":
+      if not isinstance(val,mol.EntityHandle):
+        raise TypeError("Reset: expected mol.EntityHandle for 'entity' option")
+      if eh:
+        raise TypeError("Reset: more than one entity handle given")
+      eh=val
+    elif key=="view":
+      if not isinstance(val,mol.EntityView):
+        raise TypeError("Reset: expected mol.EntityView for 'view' option")
+      if ev:
+        raise TypeError("Reset: more than one entity view given")
+      ev=val
+    elif key=="query":
+      if isinstance(val,mol.Query):
+        pass
+      elif isinstance(val,str):
+        val=mol.Query(val)
+      else:
+        raise TypeError("Reset: expected mol.Query or string for 'query' option")
+      if qr:
+        raise TypeError("Reset: more than one query string given")
+      qr=val
+    elif key=="query_flags":
+      if not isinstance(val,int):
+        raise TypeError("Reset: expected integer for 'query_flags' option")
+      if qf:
+        raise TypeError("Reset: more than one query flags given")
+      qf=val
+    else:
+      raise TypeError("Reset: unknown key '%s'"%key)
+        
+  if eh and ev:
+    raise TypeError("Reset: entity and view are mutually exclusive options")
+
+  if ev:
+    self._reset4(ev)
+  else:
+    if not eh:
+      eh = self.query_view.entity
+    if not qr:
+      qr = self.query_view.query
+    if not qf:
+      qf = self.query_view.GetFlags()
+    self._reset3(eh,qr,qf)
+
+Entity.Reset=_entity_reset

@@ -266,14 +266,28 @@ RenderOptionsPtr ent_cpk_opts(Entity* ent)
   return ent->GetOptions(RenderMode::CPK);
 }
 
-void set_query1(Entity* e, const mol::Query& q)
+void set_query(Entity* e, object o)
 {
-  e->SetQuery(q);
-}
+  LOG_WARNING("SetQuery is deprecated, use source property instead");
 
-void set_query2(Entity* e, const std::string& q)
-{
-  e->SetQuery(mol::Query(q));
+  if(o==object()) {
+    e->SetQuery(mol::Query());
+    return;
+  }
+
+  extract<String> str(o);
+  if(str.check()) {
+    e->SetQuery(mol::Query(str()));
+    return;
+  }
+
+  extract<mol::Query> qry(o);
+  if(qry.check()) {
+    e->SetQuery(qry());
+    return;
+  }
+
+  throw Error("expected string or mol::Query as parameter");
 }
 
 RenderOptionsPtr ent_ltrace_opts(Entity* ent)
@@ -302,10 +316,19 @@ void set_selection(Entity* ent, object sel)
 
 void export_Entity()
 {
+  void (Entity::*reset1)(const mol::EntityHandle&) = &Entity::Reset;
+  void (Entity::*reset2)(const mol::EntityHandle&, const mol::Query&) = &Entity::Reset;
+  void (Entity::*reset3)(const mol::EntityHandle&, const mol::Query&, mol::QueryFlags) = &Entity::Reset;
+  void (Entity::*reset4)(const mol::EntityView&) = &Entity::Reset;
+
   class_<Entity, boost::shared_ptr<Entity>, bases<GfxObj>, boost::noncopyable>("Entity", init<const String&, const mol:: EntityHandle&, optional<const mol:: Query&, mol::QueryFlags> >())
     .def(init<const String&, RenderMode::Type, const mol::EntityHandle&, optional<const mol::Query&, mol::QueryFlags> >())
     .def(init<const String&, const mol::EntityView&>())
     .def(init<const String&, RenderMode::Type, const mol::EntityView&>())
+    .def("_reset1",reset1)
+    .def("_reset2",reset2)
+    .def("_reset3",reset3)
+    .def("_reset4",reset4)
     .def("SetColor",ent_set_color1)
     .def("SetColor",ent_set_color2)
     .def("SetDetailColor", &Entity::SetDetailColor, arg("sel")=String(""))
@@ -322,8 +345,10 @@ void export_Entity()
                   &set_selection)
     .def("GetView", &Entity::GetView)
     .def("UpdateView", &Entity::UpdateView)
-    .def("SetQuery", set_query1)
-    .def("SetQuery", set_query2)
+    .def("SetQuery", set_query)
+    .def("SetQueryView",&Entity::SetQueryView)
+    .def("GetQueryView",&Entity::GetQueryView)
+    .add_property("query_view",&Entity::GetQueryView,&Entity::SetQueryView)
     .def("GetRenderModeName", &Entity::GetRenderModeName)
     .def("GetNotEmptyRenderModes", &Entity::GetNotEmptyRenderModes)
     .def("SetRenderMode", set_rm1, (arg("mode"), arg("view"), arg("keep")=false))

@@ -758,7 +758,6 @@ void Entity::SetDetailColor(const Color& col, const String& selection)
   this->Apply(cop);
 }
 
-/// \brief set selection
 void Entity::SetSelection(const mol::EntityView& view)
 {
   if (!view.IsValid()) {
@@ -900,6 +899,51 @@ void Entity::SetQuery(const mol::Query& q)
   qv_.SetQuery(q);
   update_view_=true;
   Rebuild();
+}
+
+void Entity::Reset(const mol::EntityHandle& eh)
+{
+  qv_=mol::QueryViewWrapper(qv_.GetQuery(),qv_.GetFlags(),eh);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::Reset(const mol::EntityHandle& eh, const mol::Query& q)
+{
+  qv_=mol::QueryViewWrapper(q,qv_.GetFlags(),eh);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::Reset(const mol::EntityHandle& eh, const mol::Query& q, mol::QueryFlags f)
+{
+  qv_=mol::QueryViewWrapper(q,f,eh);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::Reset(const mol::EntityView& ev)
+{
+  qv_=mol::QueryViewWrapper(ev);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::SetQueryView(const mol::QueryViewWrapper& qv)
+{
+  qv_=qv;
+  update_view_=true;
+  Rebuild();
+}
+
+mol::QueryViewWrapper Entity::GetQueryView() const
+{
+  return qv_;
+}
+
+mol::EntityHandle Entity::GetEntity() const
+{
+  return qv_.GetEntity();
 }
 
 void Entity::ColorBy(const String& prop,
