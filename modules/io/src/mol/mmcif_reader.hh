@@ -29,13 +29,6 @@
 
 namespace ost { namespace io {
 
-/// \enum categories of the mmcif format
-typedef enum {
-  ATOM_SITE,
-  DONT_KNOW
-} MMCifCategory;
-
-
 /// \brief reader for the mmcif file format
 /// 
 /// \section mmcif_format mmcif format description/ coverage
@@ -183,6 +176,12 @@ private:
     GROUP_PDB          ///< record name
   } AtomSiteItems;
 
+  /// \enum categories of the mmcif format
+  typedef enum {
+    ATOM_SITE,
+    DONT_KNOW
+  } MMCifCategory;
+
   // members
   MMCifCategory category_;
   int           indices_[MAX_ITEMS_IN_ROW]; ///< map items to values in loops
@@ -196,7 +195,6 @@ private:
   int residue_count_;
   int atom_count_;
   bool warned_name_mismatch_;
-  String record_type_;
   bool go_on_; ///< flow control within the parser hooks
   //from pdbdreader
   //entity als member, fill in ondatarow

@@ -53,7 +53,6 @@ void MMCifParser::Init()
   warned_name_mismatch_ = false;
   category_             = DONT_KNOW;
   chain_count_          = 0;
-  record_type_          = "";
   atom_count_           = 0;
   residue_count_        = 0;
   auth_chain_id_        = false;
@@ -72,7 +71,6 @@ void MMCifParser::ClearState()
   residue_count_        = 0;
   atom_count_           = 0;
   category_             = DONT_KNOW;
-  record_type_          = "";
   warned_name_mismatch_ = false;
 }
 
@@ -170,11 +168,6 @@ bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
                                  StringRef& atom_name,
                                  char& alt_loc)
 {
-  // is checking really neccessary? just by using OnBeginData, enough columns
-  // should be available!
-  if (!this->EnsureEnoughColumns(columns, 12)) {
-    return false;
-  }
   // ATOM name
   atom_name = columns[indices_[LABEL_ATOM_ID]];
   if (profile_.calpha_only) { // unit test profile
@@ -187,12 +180,12 @@ bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
     chain_name = columns[indices_[AUTH_ASYM_ID]].str();
   } else {
     chain_name = columns[indices_[LABEL_ASYM_ID]].str();
-    if (restrict_chains_.size() > 0 && // unit test
-        restrict_chains_.find(chain_name) == String::npos) { // unit test
-      return false;
-    }
   }
- 
+  if (restrict_chains_.size() > 0 && // unit test
+      restrict_chains_.find(chain_name) == String::npos) { // unit test
+    return false;
+  } 
+
   std::pair<bool, int> a_num = this->TryGetInt(columns[indices_[ID]],
                                                "_atom_site.id",
                                           profile_.fault_tolerant); // unit test
@@ -236,7 +229,7 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
                             alt_loc)) {
     return;                            
   }
-  Real occ, temp;
+  Real occ = 1.00f, temp = 0;
   geom::Vec3 apos;
   
   for (int i = CARTN_X; i <= CARTN_Z; ++i) {
@@ -253,14 +246,10 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
 
   if (indices_[OCCUPANCY] != -1) { // unit test
     occ = this->TryGetReal(columns[indices_[OCCUPANCY]], "atom_site.occupancy");
-  } else {
-    occ = 1.00f;
   }
   if (indices_[B_ISO_OR_EQUIV] != -1) { // unit test
     temp = this->TryGetReal(columns[indices_[B_ISO_OR_EQUIV]],
                             "atom_site.B_iso_or_equiv");
-  } else {
-    temp = 0;
   }
 
   // determine element
@@ -370,20 +359,14 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
     ah = editor.InsertAtom(curr_residue_, aname, apos, s_ele);
     ++atom_count_;
   }
-  if (indices_[B_ISO_OR_EQUIV] != -1) {// unit test
-    ah.SetBFactor(temp);
-  }
-  if (indices_[OCCUPANCY] != -1) {// unit test
-    ah.SetOccupancy(occ);
-  }
+  ah.SetBFactor(temp);
+
+  ah.SetOccupancy(occ);
 
   // record type
-  if (indices_[GROUP_PDB] != -1) {
-    record_type_ = columns[indices_[GROUP_PDB]].str();
-  } else {
-    record_type_ = "ATOM";
-  }
-  ah.SetHetAtom(record_type_[0]=='H');
+  ah.SetHetAtom(indices_[GROUP_PDB] == -1 ? false :  
+                columns[indices_[GROUP_PDB]][0]=='H');
+
 }
 
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 
