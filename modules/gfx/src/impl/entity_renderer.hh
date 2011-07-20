@@ -233,6 +233,7 @@ struct GradientLevelGetCol {
       LOG_DEBUG("property " << property_ << " not found");
       return std::make_pair(false,Color());
     }
+    return std::make_pair(false,Color());
   }
   String property_;
   mol::EntityPropertyMapper epm_;
