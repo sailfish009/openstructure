@@ -20,28 +20,40 @@
 /*
   Author: Marco Biasini
  */
+#include <boost/iostreams/filter/gzip.hpp>
+
 #include <cassert>
 #include <sstream>
+#include <ost/log.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/io/mol/star_parser.hh>
 
 namespace ost { namespace io {
 
 StarParser::StarParser(std::istream& stream, bool items_as_row):
-  stream_(stream), filename_("<stream>"), line_num_(0),
+  filename_("<stream>"), line_num_(0),
   has_current_line_(false), current_line_(),
   items_row_header_(), items_row_columns_(),
   items_row_values_()
 {
   items_as_row_ = items_as_row;
+
+  stream_.push(stream);
 }
 
 StarParser::StarParser(const String& filename, bool items_as_row):
-  fstream_(filename.c_str()), stream_(fstream_), filename_(filename),
+  fstream_(filename.c_str()), filename_(filename),
   line_num_(0), has_current_line_(false), current_line_(),
   items_row_header_(), items_row_columns_(), items_row_values_()
 {
   items_as_row_ = items_as_row;
+
+  if (filename.length() >= 3 &&
+      filename.substr(filename.length() - 3) == ".gz") {
+    stream_.push(boost::iostreams::gzip_decompressor());
+  }
+
+  stream_.push(fstream_);
 }
 
 String StarParser::FormatDiagnostic(StarDiagType type, const String& message,
@@ -66,6 +78,18 @@ String StarParser::FormatDiagnostic(StarDiagType type, const String& message,
   return ss.str();
 }
 
+Real StarParser::TryGetReal(const StringRef& data, const String& name) const
+{
+  std::pair<bool, Real> value = data.to_float();
+  if (!value.first) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                         "Expecting real number for " +
+                                               name + ", found '" + data.str() +
+                                             "' instead.", line_num_));
+  }
+  return value.second;
+}
+
 float StarParser::TryGetFloat(const StringRef& data, const String& name) const
 {
   std::pair<bool, float> value = data.to_float();
@@ -78,6 +102,28 @@ float StarParser::TryGetFloat(const StringRef& data, const String& name) const
   return value.second;
 }
 
+std::pair<bool, float> StarParser::TryGetFloat(const StringRef& data,
+                                               const String& name,
+                                               bool may_fail) const
+{
+  std::pair<bool, float> value = data.to_float();
+  if (!value.first) {
+    if (!may_fail) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                         "Expecting floating point value for " +
+                                               name + ", found '" + data.str() +
+                                             "' instead.", line_num_));
+    }
+    else {
+      LOG_WARNING(this->FormatDiagnostic(STAR_DIAG_WARNING,
+                                         "Expecting floating point value for " +
+                                         name + ", found '" + data.str() +
+                                         "' instead.", line_num_));
+    }
+  }
+  return value;
+}
+
 int StarParser::TryGetInt(const StringRef& data, const String& name) const
 {
   std::pair<bool, int> value = data.to_int();
@@ -88,6 +134,27 @@ int StarParser::TryGetInt(const StringRef& data, const String& name) const
                                              "' instead.", line_num_));
   }
   return value.second;
+}
+
+std::pair<bool, int> StarParser::TryGetInt(const StringRef& data,
+                                           const String& name,
+                                           bool may_fail) const
+{
+  std::pair<bool, int> value = data.to_int();
+  if (!value.first) {
+    if (!may_fail) {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                               "Expecting integer value for " +
+                                               name + ", found '" + data.str() +
+                                               "' instead.", line_num_));
+    } else {
+      LOG_WARNING(this->FormatDiagnostic(STAR_DIAG_WARNING,
+                                         "Expecting integer value for " +
+                                         name + ", found '" + data.str() +
+                                         "' instead.", line_num_));
+    }
+  }
+  return value;
 }
 
 bool StarParser::TryGetBool(const StringRef& data, const String& name) const
