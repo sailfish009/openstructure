@@ -170,7 +170,6 @@ private:
     CARTN_X,           ///< Coordinates ||IMPORTANT: This 3 entries have to stay
     CARTN_Y,           ///< Coordinates ||together for the parser to work!
     CARTN_Z,           ///< Coordinates ||
-    PDBX_PDB_INS_CODE,
     OCCUPANCY,
     B_ISO_OR_EQUIV,
     GROUP_PDB          ///< record name
