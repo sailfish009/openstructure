@@ -129,7 +129,6 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     this->TryStoreIdx(CARTN_Y, "Cartn_y", header);
     this->TryStoreIdx(CARTN_Z, "Cartn_z", header);
     // optional
-    indices_[PDBX_PDB_INS_CODE] = header.GetIndex("pdbx_PDB_ins_code");
     indices_[OCCUPANCY] = header.GetIndex("occupancy");
     indices_[B_ISO_OR_EQUIV] = header.GetIndex("B_iso_or_equiv");
     indices_[GROUP_PDB] = header.GetIndex("group_PDB");
@@ -201,12 +200,7 @@ bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
     }
   }
 
-  if (indices_[PDBX_PDB_INS_CODE] != -1) { // unit test
-    resnum=to_res_num(res_num.second, columns[indices_[PDBX_PDB_INS_CODE]][0]);
-  }
-  else {
-    resnum=to_res_num(res_num.second, ' ');
-  }
+  resnum=to_res_num(res_num.second, ' ');
 
   return true;
 }
