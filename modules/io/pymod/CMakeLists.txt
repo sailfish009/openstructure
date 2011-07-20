@@ -1,6 +1,7 @@
 set(OST_IO_PYMOD_SOURCES
   wrap_io.cc
   export_pdb_io.cc
+  export_mmcif_io.cc
 )
 
 if (ENABLE_IMG)
