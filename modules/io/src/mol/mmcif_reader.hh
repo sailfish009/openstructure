@@ -125,14 +125,6 @@ public:
   /// \return true for a valid id, false otherwise
   bool IsValidPDBIdent(const StringRef& pdbid);
 
-  /// \brief Check no. of columns available.
-  ///
-  /// \param columns fields
-  /// \param size required no. of columns
-  ///
-  /// \return true if there are enough columns, false otherwise
-  bool EnsureEnoughColumns(const std::vector<StringRef>& columns, size_t size);
-
   /// \brief ...
   ///
   /// \param columns data row

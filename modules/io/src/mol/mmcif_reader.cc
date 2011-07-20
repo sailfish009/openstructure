@@ -141,20 +141,6 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
   return false;
 }
 
-bool MMCifParser::EnsureEnoughColumns(const std::vector<StringRef>& columns,
-                                      size_t size)
-{
-  if (columns.size() < size) {
-    if (profile_.fault_tolerant) {
-      return false;
-    }
-    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
-                                             "Not enough data fields",
-                                             this->GetCurrentLinenum()));
-  }  
-  return true;
-}
-
 mol::ResNum to_res_num(int num, char ins_code)
 {
   return mol::ResNum(num, ins_code==' ' ? '\0' : ins_code);
@@ -207,9 +193,6 @@ bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
 
 void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
 {
-  if (!this->EnsureEnoughColumns(columns, 12)) {
-    return;
-  }
   mol::XCSEditor editor=ent_handle_.EditXCS(mol::BUFFERED_EDIT); // potbl
   char alt_loc=0;
   String chain_name;
