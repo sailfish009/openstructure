@@ -91,6 +91,7 @@ void export_RenderOptions()
     .def("GetCPKMode", &CPKRenderOptions::GetSphereMode)
     .add_property("cpk_mode", &CPKRenderOptions::GetSphereMode, 
                   &CPKRenderOptions::SetSphereMode)
+    .add_property("radius_mult",&CPKRenderOptions::GetRadiusMult,&CPKRenderOptions::SetRadiusMult)
   ;
 
   class_<CustomRenderOptions, boost::shared_ptr<CustomRenderOptions>, bases<RenderOptions>, boost::noncopyable>("CustomRenderOptions")
