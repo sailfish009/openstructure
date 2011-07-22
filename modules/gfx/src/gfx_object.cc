@@ -322,16 +322,31 @@ void GfxObj::SetOutlineWidth(float f)
   Scene::Instance().RequestRedraw();
 }
 
+float GfxObj::GetOutlineWidth() const
+{
+  return va_.GetOutlineWidth();
+}
+
 void GfxObj::SetOutlineExpandFactor(float f)
 {
   va_.SetOutlineExpandFactor(f);
   Scene::Instance().RequestRedraw();
 }
 
+float GfxObj::GetOutlineExpandFactor() const
+{
+  return va_.GetOutlineExpandFactor();
+}
+
 void GfxObj::SetOutlineExpandColor(const Color& c)
 {
   va_.SetOutlineExpandColor(c);
   Scene::Instance().RequestRedraw();
+}
+
+Color GfxObj::GetOutlineExpandColor() const
+{
+  return va_.GetOutlineExpandColor();
 }
 
 void GfxObj::SetOpacity(float o)

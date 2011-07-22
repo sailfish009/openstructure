@@ -107,10 +107,14 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   void SetLineHalo(float lh);
 
   void SetOutlineMode(int m);
+  int GetOutlineMode() const {return outline_mode_;}
   void SetOutlineWidth(float f);
+  float GetOutlineWidth() const {return outline_width_;}
   void SetOutlineMaterial(const Material& m);
   void SetOutlineExpandFactor(float f);
+  float GetOutlineExpandFactor() const {return outline_exp_factor_;}
   void SetOutlineExpandColor(const Color& c);
+  Color GetOutlineExpandColor() const {return outline_exp_color_;}
 
   // vertex, normal, color and texcoord (T2F_C4F_N3F_V3F)
   VertexID Add(const geom::Vec3& vert, const geom::Vec3& norm, const Color& col, const geom::Vec2& tex=geom::Vec2());

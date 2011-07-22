@@ -75,10 +75,15 @@ public:
   virtual void SetAALines(bool f);
   virtual void SetLineHalo(float f);
   virtual void SetOutline(bool f);
+  virtual bool GetOutline() const {return outline_flag_;};
   virtual void SetOutlineMode(int m);
+  virtual int GetOutlineMode() const {return outline_mode_;}
   virtual void SetOutlineWidth(float f);
+  virtual float GetOutlineWidth() const;
   virtual void SetOutlineExpandFactor(float f);
+  virtual float GetOutlineExpandFactor() const;
   virtual void SetOutlineExpandColor(const Color& c);
+  virtual Color GetOutlineExpandColor() const;
   virtual void SetOpacity(float f);
   virtual float GetOpacity() const {return opacity_;}
   virtual void ColorBy(const mol::EntityView& ev, 
