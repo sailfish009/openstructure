@@ -202,7 +202,7 @@ def _primlist_add_point(self,pos,color=None):
     color=WHITE
   self._add_point(pos,color)
   
-def _primlist_add_line(self,pos1,pos2,color=None,color1=None,color2=None):
+def _primlist_add_line(self,pos1,pos2,color1=None,color2=None,color=None):
   pos1=_to_vec3(pos1)
   pos2=_to_vec3(pos2)
   if not color:
@@ -210,7 +210,7 @@ def _primlist_add_line(self,pos1,pos2,color=None,color1=None,color2=None):
   if not color1:
     color1=color
   if not color2:
-    color2=color
+    color2=color1
   self._add_line(pos1,pos2,color1,color2)
 
 def _primlist_add_sphere(self,cen,radius=1.0,color=None):
@@ -219,7 +219,7 @@ def _primlist_add_sphere(self,cen,radius=1.0,color=None):
     color=WHITE
   self._add_sphere(pos,radius,color)
   
-def _primlist_add_cyl(self,pos1,pos2,radius=None,radius1=None,radius2=None,color=None,color1=None,color2=None):
+def _primlist_add_cyl(self,pos1,pos2,radius1=None,radius2=None,radius=None,color1=None,color2=None,color=None,):
   pos1=_to_vec3(pos1)
   pos2=_to_vec3(pos2)
   if radius is None:
@@ -227,13 +227,13 @@ def _primlist_add_cyl(self,pos1,pos2,radius=None,radius1=None,radius2=None,color
   if radius1 is None:
     radius1=radius
   if radius2 is None:
-    radius2=radius
+    radius2=radius1
   if not color:
     color=WHITE
   if not color1:
     color1=color
   if not color2:
-    color2=color
+    color2=color1
   self._add_cyl(pos1,pos2,radius1,radius2,color1,color2)
 
 def _primlist_add_text(self,text,pos,color=None,point_size=None):
