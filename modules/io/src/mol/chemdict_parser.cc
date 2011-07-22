@@ -96,6 +96,10 @@ void ChemdictParser::OnDataItem(const StarDataItem& item)
 
     } else if (item.GetName()==StringRef("formula", 7)) {
       compound_->SetFormula(item.GetValue().str());
+      if (compound_->GetFormula()=="H2 O") {
+        compound_->SetChemClass(mol::ChemClass(mol::ChemClass::WATER));
+        compound_->SetOneLetterCode('.');
+      }
     } else if (item.GetName()==StringRef("one_letter_code", 15)) {
       if (item.GetValue().length()==1) {
         compound_->SetOneLetterCode(item.GetValue()[0]);   
