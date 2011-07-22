@@ -107,7 +107,7 @@ bool MaskOverlay::OnMouseEvent(QMouseEvent* e,  DataViewerPanel* dvp,
     shift_+=diffpos;
   }
   old_mouse_pos_=mousepos;
-  if(e->button() == Qt::LeftButton){
+  if(e->button() == Qt::LeftButton && e->type()==QEvent::MouseButtonPress){
     if(e->modifiers() & Qt::ShiftModifier) {
       if(!add_mode_) {
         new_poly_=geom::Polygon2();
