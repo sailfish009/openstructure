@@ -49,3 +49,5 @@ module(NAME mol_alg SOURCES ${OST_MOL_ALG_SOURCES}
 copy_if_different("." "${STAGE_DIR}/share/openstructure"
                   "atom_scattering_properties.txt" "ATOM_SCATTERING_PROPS"
                   "ost_mol_alg")
+install(FILES "atom_scattering_properties.txt" DESTINATION "share/openstructure/")
+
