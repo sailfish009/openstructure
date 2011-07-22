@@ -29,7 +29,7 @@ if (COMPOUND_LIB)
   if (EXISTS "${COMPOUND_LIB}")
     copy_if_different("./" "${STAGE_DIR}/share/openstructure" 
                       "${COMPOUND_LIB}" "COMPOUND_LIB" ost_conop)
-    install(FILES ${INSPECTOR_ICONS} DESTINATION "share/openstructure")
+    install(FILES ${COMPOUND_LIB} DESTINATION "share/openstructure")
   else()
     message(FATAL_ERROR "${COMPOUND_LIB} does not exist. \n"
             "Pass -DCOMPOUND_LIB=NONE if you would like to build "
