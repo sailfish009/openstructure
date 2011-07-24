@@ -140,6 +140,7 @@ Scene::Scene():
 void Scene::SetFog(bool f)
 {
   fog_flag_=f;
+  if(!gl_init_) return;
   if(f) {
     glEnable(GL_FOG);
   } else {
@@ -156,8 +157,9 @@ bool Scene::GetFog() const
 void Scene::SetFogColor(const Color& c)
 {
   GLfloat fogc[]={c.Red(),c.Green(),c.Blue(),1.0};
-  glFogfv(GL_FOG_COLOR,fogc);
   fog_color_=c;
+  if(!gl_init_) return;
+  glFogfv(GL_FOG_COLOR,fogc);
   RequestRedraw();
 }
 
@@ -473,10 +475,12 @@ void Scene::StatusMessage(const String& s)
 
 void Scene::SetBackground(const Color& c)
 {
-  glClearColor(c.Red(),c.Green(),c.Blue(),c.Alpha());
   background_=c;
-  SetFogColor(c);
-  RequestRedraw();
+  if(gl_init_) {
+    glClearColor(c.Red(),c.Green(),c.Blue(),c.Alpha());
+    SetFogColor(c);
+    RequestRedraw();
+  }
 }
 
 Color Scene::GetBackground() const
@@ -487,16 +491,19 @@ Color Scene::GetBackground() const
 Viewport Scene::GetViewport() const
 {
   Viewport vp;
-  glGetIntegerv(GL_VIEWPORT, reinterpret_cast<GLint*>(&vp));
+  if(gl_init_) {
+    glGetIntegerv(GL_VIEWPORT, reinterpret_cast<GLint*>(&vp));
+  }
   return vp;
 }
 
 void Scene::SetViewport(int w, int h)
 {
-  glViewport(0,0,w,h);
   vp_width_=w;
   vp_height_=h;
   aspect_ratio_=static_cast<float>(w)/static_cast<float>(h);
+  if(!gl_init_) return;
+  glViewport(0,0,w,h);
   ResetProjection();
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().Resize(w,h);
@@ -539,6 +546,7 @@ void Scene::CenterOn(const GfxObjP& go)
 
 void Scene::RenderText(const TextPrim& t)
 {
+  if(!gl_init_) return;
   if(t.str.empty() || t.points<=0.0) return;
   Vec3 ppos = Project(t.position,false);
 
@@ -1067,6 +1075,7 @@ void Scene::DetachObserver(SceneObserver* o) {
 
 Vec3 Scene::Project(const Vec3& v, bool ignore_vp) const
 {
+  if(!gl_init_) return Vec3();
   GLdouble gl_mmat[16];
   glGetDoublev(GL_MODELVIEW_MATRIX,gl_mmat);
   GLdouble gl_pmat[16];
@@ -1087,6 +1096,7 @@ Vec3 Scene::Project(const Vec3& v, bool ignore_vp) const
 
 Vec3 Scene::UnProject(const Vec3& v, bool ignore_vp) const
 {
+  if(!gl_init_) return Vec3();
   GLdouble gl_mmat[16];
   glGetDoublev(GL_MODELVIEW_MATRIX,gl_mmat);
   GLdouble gl_pmat[16];
@@ -1364,6 +1374,7 @@ void Scene::SetLightProp(const Color& amb, const Color& diff,
   light_amb_=amb;
   light_diff_=diff;
   light_spec_=spec;
+  if(!gl_init_) return;
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_amb_);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diff_);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_spec_);
@@ -1375,6 +1386,7 @@ void Scene::SetLightProp(float amb, float diff, float spec)
   light_amb_=Color(amb,amb,amb,1.0);
   light_diff_=Color(diff,diff,diff,1.0);
   light_spec_=Color(spec,spec,spec,1.0);
+  if(!gl_init_) return;
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_amb_);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diff_);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_spec_);
@@ -1570,6 +1582,7 @@ void Scene::ResetProjection()
 void Scene::SetBlur(uint n)
 {
   blur_count_=std::min(n,3u);
+  if(!gl_init_) return;
   glClearAccum(0.0,0.0,0.0,0.0);
   glClear(GL_ACCUM_BUFFER_BIT);
   RequestRedraw();
@@ -1577,6 +1590,7 @@ void Scene::SetBlur(uint n)
 
 void Scene::BlurSnapshot()
 {
+  if(!gl_init_) return;
   if(blur_count_==0) return;
   glFinish();
   glAccum(GL_MULT, 0.5);
