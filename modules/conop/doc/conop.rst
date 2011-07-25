@@ -20,3 +20,4 @@ In this module
  aminoacid
  connectivity
  compoundlib
+ cleanup

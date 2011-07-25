@@ -64,6 +64,13 @@ namespace {
 
 void export_Residue()
 {
+  class_<ChemClass>("ChemClass", init<char>(args("chem_class")))
+    .def(self!=self)
+    .def(self==self)
+    .def("IsPeptideLinking", &ChemClass::IsPeptideLinking)
+    .def("IsNucleotideLinking", &ChemClass::IsNucleotideLinking)
+  ;
+  implicitly_convertible<char, ChemClass>();
   
   class_<ResNum>("ResNum", init<int>(args("num")))
     .def(init<int,char>(args("num", "ins_code")))
@@ -149,8 +156,8 @@ void export_Residue()
     .def("GetNumber", &ResidueBase::GetNumber,
          return_value_policy<copy_const_reference>())
     .def("GetChemClass", &ResidueBase::GetChemClass)
+    .add_property("chem_class", &ResidueBase::GetChemClass, set_chemclass)
     .def("SetChemClass", set_chemclass)
-    .add_property("chem_class",&ResidueBase::GetChemClass,set_chemclass)
     .add_property("is_ligand", &ResidueBase::IsLigand, &ResidueBase::SetIsLigand)
     .def("IsLigand", &ResidueBase::IsLigand)
     .def("SetIsLigand", &ResidueBase::SetIsLigand)
