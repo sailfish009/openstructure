@@ -23,8 +23,6 @@
 /*
   Author: Marco Biasini
  */
-#include <boost/iostreams/filtering_stream.hpp>
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -150,14 +148,6 @@ public:
   ///     OnBeginData() returned true.
   virtual void OnEndData() { }
 
-  /// \brief try to convert a value to Real, on failure raise an exception.
-  ///
-  /// \param data value to be converted
-  /// \param name to be included in the message
-  ///
-  /// \return converted value
-  Real TryGetReal(const StringRef& data, const String& name) const;
-
   /// \brief try to convert a value to float, on failure raise an exception.
   ///
   /// \param data value to be converted
@@ -166,17 +156,6 @@ public:
   /// \return converted value
   float TryGetFloat(const StringRef& data, const String& name) const;
 
-  /// \brief try to convert a value to float, on failure raise an exception.
-  ///
-  /// \param data value to be converted
-  /// \param name to be included in the message
-  /// \param may_fail decides if an exception is raised (false) or not (true)
-  ///
-  /// \return converted value
-  std::pair<bool, float> TryGetFloat(const StringRef& data,
-                                     const String& name,
-                                     bool may_fail) const;
-
   /// \brief try to convert a value to integer, on failure raise an exception.
   ///
   /// \param data value to be converted
@@ -184,17 +163,6 @@ public:
   ///
   /// \return converted value
   int TryGetInt(const StringRef& data, const String& name) const;
-
-  /// \brief try to convert a value to integer, exception can be turned off.
-  ///
-  /// \param data value to be converted
-  /// \param name to be included in the message
-  /// \param may_fail decides if an exception is raised (false) or not (true)
-  ///
-  /// \return pair with value and indicator if conversion worked
-  std::pair<bool, int> TryGetInt(const StringRef& data,
-                                 const String& name,
-                                 bool may_fail) const;
 
   /// \brief try to convert a value to bool, on failure raise an exception.
   ///
@@ -270,7 +238,7 @@ private:
   void DiagnoseUnknown();
   bool ParseMultilineValue(String& value, bool skip=false);
   std::ifstream fstream_;
-  boost::iostreams::filtering_stream<boost::iostreams::input> stream_;
+  std::istream& stream_;
   String        filename_;
   int           line_num_;
   bool          has_current_line_;

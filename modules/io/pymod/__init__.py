@@ -88,7 +88,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
             profile='DEFAULT', remote=False, dialect=None,
             strict_hydrogens=None, seqres=False):
   """
-  Load PDB file from disk and return one or more entities. Several options 
+  Load PDB file from disk and returns one or more entities. Several options 
   allow to customize the exact behaviour of the PDB import. For more information 
   on these options, see :doc:`profile`.
   
@@ -263,105 +263,6 @@ def LoadCHARMMTraj(crd, dcd_file=None, profile='CHARMM',
     if not dcd_file:
       raise ValueError("No DCD filename given")
   return LoadCHARMMTraj_(crd, dcd_file, stride, lazy_load)
-
-def LoadMMCIF(filename, restrict_chains="", no_hetatms=None,
-            fault_tolerant=None, load_multi=False, quack_mode=None,
-            join_spread_atom_records=None, calpha_only=None,
-            profile='DEFAULT', remote=False, strict_hydrogens=None,
-              seqres=False):
-  """
-  Load MMCIF file from disk and return one or more entities. Several options 
-  allow to customize the exact behaviour of the MMCIF import. For more
-  information on these options, see :doc:`profile`.
-  
-  Residues are flagged as ligand if they are mentioned in a HET record.
-
-  :param restrict_chains: If not an empty string, only chains listed in the
-     string will be imported.
-
-  :param fault_tolerant: Enable/disable fault-tolerant import. If set, overrides
-     the value of :attr:`IOProfile.fault_tolerant`.
-
-  :param no_hetatms: If set to True, HETATM records will be ignored. Overrides 
-      the value of :attr:`IOProfile.no_hetatms`
-
-  :param load_multi: If set to True, a list of entities will be returned instead
-      of only the first. This is useful when dealing with multi-PDB files.
-
-  :param join_spread_atom_records: If set, overrides the value of 
-      :attr:`IOProfile.join_spread_atom_records`.
-  
-  :param remote: If set to true, the method tries to load the pdb from the 
-     remote pdb repository www.pdb.org. The filename is then interpreted as the 
-     pdb id.
-     
-  :rtype: :class:`~ost.mol.EntityHandle` or a list thereof if `load_multi` is 
-      True.
-
-  :param seqres: Whether to read SEQRES records. If set to true, the loaded 
-    entity and seqres entry will be returned as a tuple.
-  
-  :param strict_hydrogens: If set, overrides the value of 
-     :attr:`IOProfile.strict_hydrogens`.
-
-  :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
-      inexistent file
-  """
-  def _override(val1, val2):
-    if val2!=None:
-      return val2
-    else:
-      return val1
-  if isinstance(profile, str):
-    prof = profiles[profile].Copy()
-  else:
-    prof = profile.Copy()
-
-  prof.calpha_only=_override(prof.calpha_only, calpha_only)
-  prof.no_hetatms=_override(prof.no_hetatms, no_hetatms)
-  prof.quack_mode=_override(prof.quack_mode, quack_mode)
-  prof.strict_hydrogens=_override(prof.strict_hydrogens, strict_hydrogens)
-  prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
-  prof.join_spread_atom_records=_override(prof.join_spread_atom_records,
-                                          join_spread_atom_records)
-
-  if remote:
-    output_dir = tempfile.gettempdir()
-    if __GetModelFromPDB(filename, output_dir):
-      filename = os.path.join(output_dir, 'pdb%s.ent.gz' % filename)
-    else:
-      raise IOError('Can not load PDB %s from www.pdb.org'%filename) 
-  
-  conop_inst = conop.Conopology.Instance()
-  builder = conop_inst.GetBuilder("DEFAULT")
-
-  builder.strict_hydrogens = prof.strict_hydrogens
-
-  try:
-    #if load_multi:
-    #  ent_list=[]
-    #  while reader.HasNext():
-    #    ent=mol.CreateEntity()
-    #    reader.Import(ent, restrict_chains)
-    #    conop_inst.ConnectAll(builder, ent, 0)
-    #    ent_list.append(ent)
-    #  if len(ent_list)==0:
-    #    raise IOError("File doesn't contain any entities")
-    #  return ent_list
-    #else:
-    ent = mol.CreateEntity()
-    reader = MMCifParser(filename, ent, prof)
-    #reader.read_seqres = seqres
-    #if reader.HasNext():
-    reader.Parse()
-    conop_inst.ConnectAll(builder, ent, 0)
-    #else:
-    #  raise IOError("File doesn't contain any entities")
-    #if seqres:
-    #  return ent, reader.seqres
-    return ent
-  except:
-    raise
 
 ## \example fft_li.py
 #

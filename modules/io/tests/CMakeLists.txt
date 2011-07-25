@@ -8,7 +8,6 @@ set(OST_IO_UNIT_TESTS
   test_iomanager.cc
   tests.cc
   test_star_parser.cc
-  test_mmcif_reader.cc
 )
 if (ENABLE_IMG)
   list(APPEND OST_IO_UNIT_TESTS test_io_img.cc)

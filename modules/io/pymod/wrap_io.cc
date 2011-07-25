@@ -72,7 +72,6 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(save_charmm_trj_ov,
 }
 
 void export_pdb_io();
-void export_mmcif_io();
 #if OST_IMG_ENABLED
 void export_map_io();
 #endif
@@ -118,7 +117,6 @@ BOOST_PYTHON_MODULE(_ost_io)
   def("LoadMAE", &LoadMAE);
 
   export_pdb_io();
-  export_mmcif_io();
 #if OST_IMG_ENABLED  
   export_map_io();
 #endif

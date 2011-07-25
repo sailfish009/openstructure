@@ -15,14 +15,12 @@ chemdict_parser.cc
 io_profile.cc
 dcd_io.cc
 star_parser.cc
-mmcif_reader.cc
 PARENT_SCOPE
 )
 
 set(OST_IO_MOL_HEADERS
 chemdict_parser.hh
 star_parser.hh
-mmcif_reader.hh
 io_profile.hh
 dcd_io.hh
 entity_io_crd_handler.hh
