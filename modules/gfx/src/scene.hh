@@ -249,10 +249,10 @@ class DLLEXPORT_OST_GFX Scene {
   /// if a main offscreen buffer is active (\sa StartOffscreenMode), then the
   /// dimensions here are ignored
   void Export(const String& fname, unsigned int w,
-              unsigned int h, bool transparent=true);
+              unsigned int h, bool transparent=false);
 
   /// \brief export snapshot of current scene
-  void Export(const String& fname, bool transparent=true);
+  void Export(const String& fname, bool transparent=false);
 
   /// \brief export scene into povray files named fname.pov and fname.inc
   void ExportPov(const std::string& fname, const std::string& wdir=".");
