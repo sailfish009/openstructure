@@ -284,10 +284,11 @@ BOOST_AUTO_TEST_CASE(star_multi)
   
 BOOST_AUTO_TEST_CASE(star_loop)
 {
+  BOOST_MESSAGE("  Running star_loop tests...");
   std::ifstream s("testfiles/loop.cif");
   LoopTestParser star_p(s);
   star_p.Parse();
-  BOOST_CHECK_EQUAL(star_p.lines[0][0], "1");
+  BOOST_CHECK_EQUAL(star_p.lines[0][0], "d");
   BOOST_CHECK_EQUAL(star_p.lines[0][1], "2");
   BOOST_CHECK_EQUAL(star_p.lines[0][2], "3");
   
@@ -306,12 +307,15 @@ BOOST_AUTO_TEST_CASE(star_loop)
   BOOST_CHECK_EQUAL(star_p.lines[4][0], "13");
   BOOST_CHECK_EQUAL(star_p.lines[4][1], "14");
   BOOST_CHECK_EQUAL(star_p.lines[4][2], "15");
+  BOOST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(star_items_as_row)
 {
+  BOOST_MESSAGE("  Running star_items_as_row tests...");
   std::ifstream s("testfiles/items-as-row.cif");
   ItemsAsRowTestParser star_p(s);
+  BOOST_MESSAGE("          checking parsing abilities...");
   star_p.Parse();
   BOOST_CHECK_EQUAL(star_p.s1, "a");
   BOOST_CHECK_EQUAL(star_p.s2, "a b c");
@@ -330,6 +334,8 @@ BOOST_AUTO_TEST_CASE(star_items_as_row)
   BOOST_CHECK_EQUAL(star_p.s6, "1.22");
   BOOST_CHECK_EQUAL(star_p.s7, "1.33");
   BOOST_CHECK_EQUAL(star_p.s8, "1.44");
+  BOOST_MESSAGE("          done.");
+  BOOST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(star_missing_data)

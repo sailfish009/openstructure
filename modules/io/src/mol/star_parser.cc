@@ -247,7 +247,9 @@ void StarParser::ParseLoop()
           this->ParseMultilineValue(s, true);
         }
         break;
-        case 'd':
+      case '_':
+        return;
+      case 'd':
           if (tline.length()>=5 && StringRef("data_", 5)==tline.substr(0, 5)) {
             return;
           }
@@ -255,8 +257,6 @@ void StarParser::ParseLoop()
         if (StringRef("loop_", 5)==tline) {
           return;
         }
-      case '_':
-        return;
       default:
         if (process_rows) {
           int before=columns.size();
