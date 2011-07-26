@@ -355,7 +355,8 @@ void Scene::InitGL(bool full)
   glClearDepth(1.0);
 
   // background
-  SetBackground(background_);
+  glClearColor(background_.Red(),background_.Green(),background_.Blue(),background_.Alpha());
+  fog_color_=background_;
 
   // polygon orientation setting
   glFrontFace(GL_CCW);
@@ -459,6 +460,8 @@ void Scene::InitGL(bool full)
 
   LOG_DEBUG("Scene: gl init done");
   gl_init_=true;
+  
+  if(!def_shading_mode_.empty()) SetShadingMode(def_shading_mode_);
 }
 
 void Scene::RequestRedraw()
