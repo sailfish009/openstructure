@@ -146,7 +146,7 @@ private:
   /// \enum magic numbers of this class
   typedef enum {
     PDBID_LEN=4,        ///< length of a PDB id
-    MAX_ITEMS_IN_ROW=16 ///< count for possible items in a loop row
+    MAX_ITEMS_IN_ROW=17 ///< count for possible items in a loop row
   } MMCifMagicNos;
 
   /// \enum items of the atom_site category
