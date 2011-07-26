@@ -42,7 +42,6 @@ public:
   using MMCifParser::IsValidPDBIdent;
   using MMCifParser::ParseAtomIdent;
   using MMCifParser::ParseAndAddAtom;
-  using MMCifParser::EnsureEnoughColumns;
   using MMCifParser::TryStoreIdx;
 };
 
@@ -134,26 +133,6 @@ BOOST_AUTO_TEST_CASE(mmcif_atom_site_header)
   BOOST_MESSAGE("  done.");
 }
 
-BOOST_AUTO_TEST_CASE(mmcif_ensureenoughcolumns)
-{
-  mol::EntityHandle eh=mol::CreateEntity();
-
-  BOOST_MESSAGE("  Running mmcif_ensureenoughcolumns tests...");
-  std::ifstream s("testfiles/mmcif/atom_site.mmcif");
-  IOProfile profile;
-  TestMMCifParserProtected tmmcif_p(s, eh, profile);
-  std::vector<StringRef> cols;
-  BOOST_MESSAGE("    testing short atom_site entry");
-  cols.push_back(StringRef("ATOM", 4));
-  BOOST_CHECK_THROW(tmmcif_p.EnsureEnoughColumns(cols, 2), IOException);
-  BOOST_MESSAGE("    testing correct number");
-  BOOST_CHECK(tmmcif_p.EnsureEnoughColumns(cols, 1));
-  BOOST_MESSAGE("    testing fault tolerant profile");
-  profile.fault_tolerant = true;
-  BOOST_CHECK(!tmmcif_p.EnsureEnoughColumns(cols, 2));
-  BOOST_MESSAGE("  done.");
-}
-
 BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
 {
   mol::EntityHandle eh = mol::CreateEntity();
@@ -167,20 +146,20 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   StringRef res_name;
   mol::ResNum resnum(0);
   StringRef atom_name;
-  char alt_loc;
+  //char alt_loc;
 
-  BOOST_MESSAGE("    testing short atom_site entry");
+  //BOOST_MESSAGE("    testing short atom_site entry");
   // negative
-  cols.push_back(StringRef("ATOM", 4));
-  BOOST_CHECK_THROW(tmmcif_p.ParseAtomIdent(cols,
-                                            chain_name,
-                                            res_name,
-                                            resnum,
-                                            atom_name,
-                                            alt_loc), IOException);
+  //cols.push_back(StringRef("ATOM", 4));
+  //BOOST_CHECK_THROW(tmmcif_p.ParseAtomIdent(cols,
+  //                                          chain_name,
+  //                                          res_name,
+  //                                          resnum,
+  //                                          atom_name,
+  //                                         alt_loc), IOException);
   // positive
-  StarLoopDesc tmmcif_h;
-  tmmcif_h.SetCategory(StringRef("atom_site", 9));
+  //StarLoopDesc tmmcif_h;
+  //tmmcif_h.SetCategory(StringRef("atom_site", 9));
   // build header
   //mmcif_h.Add(StringRef("AUTH_ASYM_ID", 12));
   /*
@@ -210,10 +189,10 @@ BOOST_AUTO_TEST_CASE(mmcif_parseandaddatom)
   TestMMCifParserProtected tmmcif_p(s, eh, IOProfile());
   std::vector<StringRef> cols;
 
-  BOOST_MESSAGE("    testing short atom_site entry");
-  cols.push_back(StringRef("ATOM", 4));
-  BOOST_CHECK_THROW(tmmcif_p.ParseAndAddAtom(cols), IOException);
-  BOOST_MESSAGE("  done.");
+  //BOOST_MESSAGE("    testing short atom_site entry");
+  //cols.push_back(StringRef("ATOM", 4));
+  //BOOST_CHECK_THROW(tmmcif_p.ParseAndAddAtom(cols), IOException);
+  //BOOST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_testreader)

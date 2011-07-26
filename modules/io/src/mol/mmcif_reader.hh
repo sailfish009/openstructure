@@ -133,6 +133,7 @@ public:
                       String& chain_name,
                       StringRef& res_name,
                       mol::ResNum& resnum,
+                      bool& valid_res_num,
                       StringRef& atom_name,
                       char& alt_loc);
 
@@ -158,12 +159,14 @@ private:
     LABEL_COMP_ID,
     LABEL_ENTITY_ID,
     LABEL_SEQ_ID,      ///< residue no.
+    AUTH_SEQ_ID,       ///< residue no. by author
     TYPE_SYMBOL,       ///< chemical element
     CARTN_X,           ///< Coordinates ||IMPORTANT: This 3 entries have to stay
     CARTN_Y,           ///< Coordinates ||together for the parser to work!
     CARTN_Z,           ///< Coordinates ||
     OCCUPANCY,
     B_ISO_OR_EQUIV,
+    PDBX_PDB_INS_CODE,
     GROUP_PDB          ///< record name
   } AtomSiteItems;
 
@@ -187,6 +190,7 @@ private:
   int atom_count_;
   bool warned_name_mismatch_;
   bool go_on_; ///< flow control within the parser hooks
+  String subst_res_id_; ///< work around for missing label_seq_id's
   //from pdbdreader
   //entity als member, fill in ondatarow
   //import function

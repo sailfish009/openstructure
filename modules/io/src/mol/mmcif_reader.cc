@@ -59,6 +59,7 @@ void MMCifParser::Init()
   go_on_                = true;
   //memset(indices_, -1, MAX_ITEMS_IN_ROW * sizeof(int));
   restrict_chains_      = "";
+  subst_res_id_         = "";
   //curr_chain_           = mol::ChainHandle();
   //curr_residue_         = mol::ResidueHandle();
 }
@@ -132,8 +133,11 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     indices_[OCCUPANCY] = header.GetIndex("occupancy");
     indices_[B_ISO_OR_EQUIV] = header.GetIndex("B_iso_or_equiv");
     indices_[GROUP_PDB] = header.GetIndex("group_PDB");
+    indices_[AUTH_SEQ_ID] = header.GetIndex("auth_seq_id");
+    indices_[PDBX_PDB_INS_CODE] = header.GetIndex("pdbx_PDB_ins_code");
     return true;
-  } /*else if (header.GetCategory()=="entity_poly") {
+  }
+  /*else if (header.GetCategory()=="entity_poly") {
   } else if (header.GetCategory()=="pdbx_poly_seq_scheme") {
   } else if (header.GetCategory()=="pdbx_struct_assembly") {
   } else if (header.GetCategory()=="struct_conf") {
@@ -150,6 +154,7 @@ bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
                                  String& chain_name,
                                  StringRef& res_name,
                                  mol::ResNum& resnum,
+                                 bool& valid_res_num,
                                  StringRef& atom_name,
                                  char& alt_loc)
 {
@@ -172,21 +177,28 @@ bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
   } 
 
   std::pair<bool, int> a_num = this->TryGetInt(columns[indices_[ID]],
-                                               "_atom_site.id",
+                                               "atom_site.id",
                                           profile_.fault_tolerant); // unit test
 
   alt_loc = columns[indices_[LABEL_ALT_ID]][0];
   res_name = columns[indices_[LABEL_COMP_ID]];
-  std::pair<bool, int> res_num =this->TryGetInt(columns[indices_[LABEL_SEQ_ID]],
-                                               "_atom_site.label_seq_id",
-                                          profile_.fault_tolerant); // unit test
-  if (!res_num.first) { // unit test
-    if (profile_.fault_tolerant) {
-      return false;
+  std::pair<bool, int> res_num;
+  if (columns[indices_[LABEL_SEQ_ID]][0] != '.') {
+    res_num =this->TryGetInt(columns[indices_[LABEL_SEQ_ID]],
+                             "atom_site.label_seq_id",
+                             profile_.fault_tolerant); // unit test
+    if (!res_num.first) { // unit test
+      if (profile_.fault_tolerant) {
+        return false;
+      }
     }
+    valid_res_num = true;
+  } else {
+    valid_res_num = false;
+    return true;
   }
 
-  resnum=to_res_num(res_num.second, ' ');
+  resnum = to_res_num(res_num.second, ' ');
 
   return true;
 }
@@ -198,10 +210,12 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
   String chain_name;
   StringRef res_name, atom_name;
   mol::ResNum res_num(0);
+  bool valid_res_num = false;
   if (!this->ParseAtomIdent(columns,
                             chain_name,
                             res_name,
                             res_num,
+                            valid_res_num,
                             atom_name,
                             alt_loc)) {
     return;                            
@@ -249,6 +263,24 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
 
   if(!curr_residue_) { // unit test
     update_residue=true;
+  } else if (!valid_res_num) {
+    if (indices_[AUTH_SEQ_ID] != -1 &&
+        indices_[PDBX_PDB_INS_CODE] != -1) {
+      if (subst_res_id_ !=
+          chain_name +
+          columns[indices_[AUTH_SEQ_ID]].str() +
+          columns[indices_[PDBX_PDB_INS_CODE]].str()) {
+        update_residue=true;
+
+        subst_res_id_ = chain_name +
+                        columns[indices_[AUTH_SEQ_ID]].str() +
+                        columns[indices_[PDBX_PDB_INS_CODE]].str();
+      }
+    } else {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                           "Missing residue number information",
+                                               this->GetCurrentLinenum()));
+    }
   } else if(curr_residue_.GetNumber() != res_num) { // unit test
     update_residue=true;
   }
@@ -265,12 +297,18 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
 
   if(update_residue) { // unit test
     curr_residue_=mol::ResidueHandle();
-    if (profile_.join_spread_atom_records) { // unit test
+    if (valid_res_num && profile_.join_spread_atom_records) { // unit test
       curr_residue_=curr_chain_.FindResidue(res_num);
     }
     if (!curr_residue_.IsValid()) { // unit test
       LOG_DEBUG("new residue " << res_name << " " << res_num);
-      curr_residue_ =editor.AppendResidue(curr_chain_, res_name.str(), res_num);
+      if (valid_res_num) {
+        curr_residue_ = editor.AppendResidue(curr_chain_,
+                                             res_name.str(),
+                                             res_num);
+      } else {
+        curr_residue_ = editor.AppendResidue(curr_chain_, res_name.str());
+      }
       warned_name_mismatch_=false;
       ++residue_count_; 
     }
