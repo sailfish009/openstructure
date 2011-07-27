@@ -72,6 +72,13 @@ public:
   ChainImplPtr GetChain() const;
 
   AtomImplPtr GetCentralAtom() const;
+  /*!
+    explicitely set central atom
+
+    if this is set, it will override the heuristic encoded
+    in GetCentralAtom; pass an invalid ptr to deactivate again
+  */
+  void SetCentralAtom(const AtomImplPtr& a);
 
   geom::Vec3 GetCentralNormal() const;
 
@@ -209,6 +216,7 @@ private:
   void AddAltAtom(const String& group, const AtomImplPtr& atom,
                   const geom::Vec3& position);
   void RemoveAltPositionsForAtom(const AtomImplPtr& atom);
+
   String                     curr_group_;
   AtomEntryGroups            alt_groups_;
   EntityImplW                ent_;
@@ -221,8 +229,13 @@ private:
   ChemClass                  chem_class_;
   char                       olc_;
   // whether the residue is part of the protein.
+  // TODO: this should be fixed to be a enum'ed type aka
+  // RESIDUE_TYPE type_;
+  // where enum is one of protein, ligand, dna, lipid, etc
   bool                       protein_;
   bool                       ligand_;
+  AtomImplPtr                central_atom_;
+ 
 };
 
 }}} // ns

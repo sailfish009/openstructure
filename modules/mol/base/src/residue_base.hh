@@ -19,6 +19,8 @@
 #ifndef OST_RESIDUE_BASE_HH
 #define OST_RESIDUE_BASE_HH
 
+#include <ost/geom/geom.hh>
+
 #include <ost/mol/module_config.hh>
 #include <ost/mol/residue_prop.hh>
 #include <ost/mol/impl/residue_impl_fw.hh>
@@ -90,6 +92,20 @@ public:
   ///         residue name and residue number
   String GetQualifiedName() const;
 
+  /// \brief  returns main atom, ie CA for amino acids
+  AtomHandle GetCentralAtom() const;
+
+  /*!
+    \brief set explicit central atom
+
+    overrides the heuristic of GetCentralAtom to explicitely
+    use the given one as the central atom; passing in an
+    invalid handle reverts back to the heurstic determination
+  */
+  void SetCentralAtom(const AtomHandle& a);
+
+  /// \return return specific normal of residue, usually CA-CB dir for AA
+  geom::Vec3 GetCentralNormal() const;
 
   /// \brief whether the residue can form peptide bonds
   bool IsPeptideLinking() const;
