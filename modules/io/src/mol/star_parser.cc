@@ -30,18 +30,27 @@ namespace ost { namespace io {
 StarParser::StarParser(std::istream& stream, bool items_as_row):
   stream_(stream), filename_("<stream>"), line_num_(0),
   has_current_line_(false), current_line_(),
-  items_row_header_(), items_row_columns_(),
+  items_row_header_(), file_open_(true), items_row_columns_(),
   items_row_values_()
 {
   items_as_row_ = items_as_row;
+
+  if (!fstream_) {
+    file_open_ = false;
+  }
 }
 
 StarParser::StarParser(const String& filename, bool items_as_row):
   fstream_(filename.c_str()), stream_(fstream_), filename_(filename),
   line_num_(0), has_current_line_(false), current_line_(),
-  items_row_header_(), items_row_columns_(), items_row_values_()
+  items_row_header_(), file_open_(true), items_row_columns_(),
+  items_row_values_()
 {
   items_as_row_ = items_as_row;
+
+  if (!fstream_) {
+    file_open_ = false;
+  }
 }
 
 String StarParser::FormatDiagnostic(StarDiagType type, const String& message,
@@ -469,6 +478,11 @@ void StarParser::ParseGlobal()
 
 void StarParser::Parse()
 {
+  if (!file_open_) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                             "Failed to open file '" +
+                                             filename_ + "'!"));
+  }
   StringRef line;
   std::stringstream ss;
   while (this->GetLine(line)) {

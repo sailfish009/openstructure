@@ -238,11 +238,12 @@ BOOST_AUTO_TEST_CASE(star_data_item)
   BOOST_MESSAGE("  Running star_data_item tests...");
   std::ifstream s("testfiles/data-item.cif");
   DataItemTestParser star_p(s);
-  star_p.Parse();
+  BOOST_CHECK_NO_THROW(star_p.Parse());
   BOOST_CHECK_EQUAL(star_p.s1, "a");
   BOOST_CHECK_EQUAL(star_p.s2, "a b c");
   BOOST_CHECK_EQUAL(star_p.s3, "a\nb\nc");
   BOOST_CHECK_EQUAL(star_p.s4, "a'b");
+  BOOST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_CASE(format_diag_stream)
@@ -450,5 +451,14 @@ BOOST_AUTO_TEST_CASE(star_try_bool_conversions)
                     IOException);
   BOOST_MESSAGE("  done.");
 }
+
+BOOST_AUTO_TEST_CASE(star_wrong_filename)
+{
+  BOOST_MESSAGE("  Running star_wrong_filename tests...");
+  DataItemTestParser star_p("testfiles/doesnotexist.foo");
+  BOOST_CHECK_THROW(star_p.Parse(), IOException);
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_SUITE_END();
 
