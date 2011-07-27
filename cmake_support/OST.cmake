@@ -189,7 +189,7 @@ macro(module)
                           COMPILE_DEFINITIONS OST_MODULE_${_UPPER_LIB_NAME})
     set_target_properties(${_LIB_NAME} PROPERTIES
                           VERSION ${OST_VERSION_STRING}
-                          SOVERSION ${OST_VERSION_MAJOR})    
+                          SOVERSION ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR})    
     set_target_properties(${_LIB_NAME} PROPERTIES
                           LIBRARY_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
                           ARCHIVE_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
