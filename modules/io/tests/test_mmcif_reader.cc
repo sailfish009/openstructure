@@ -47,12 +47,12 @@ public:
 
 BOOST_AUTO_TEST_SUITE( io );
 
-BOOST_AUTO_TEST_CASE(mmcif_isvalidpdbid)
+BOOST_AUTO_TEST_CASE(mmcif_isvalidpdbident)
 {
   mol::EntityHandle eh=mol::CreateEntity();
 
   // on changing the tests for a PDB id in mmcif files, extend this unit test
-  BOOST_MESSAGE("  Running mmcif_isvalidpdbid tests...");
+  BOOST_MESSAGE("  Running mmcif_isvalidpdbident tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   TestMMCifParserProtected tmmcif_p(s, eh);
   StringRef id = StringRef("1FOO", 4);
@@ -85,11 +85,12 @@ BOOST_AUTO_TEST_CASE(mmcif_trystoreidx)
   BOOST_CHECK_NO_THROW(tmmcif_p.TryStoreIdx(0, "bar", mmcif_h));
 }
 
-BOOST_AUTO_TEST_CASE(mmcif_atom_site_header)
+BOOST_AUTO_TEST_CASE(mmcif_onbeginloop)
 {
   mol::EntityHandle eh=mol::CreateEntity();
 
-  BOOST_MESSAGE("  Running mmcif_atom_site_header tests...");
+  // add more tests on new mandatory items
+  BOOST_MESSAGE("  Running mmcif_onbeginloop tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   MMCifParser mmcif_p(s, eh, IOProfile());
   StarLoopDesc mmcif_h;
@@ -133,6 +134,50 @@ BOOST_AUTO_TEST_CASE(mmcif_atom_site_header)
   BOOST_MESSAGE("  done.");
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_parse_models)
+{
+  BOOST_MESSAGE("  Running mmcif_parse_models tests...");
+  IOProfile profile;
+
+  // positive w models
+  BOOST_MESSAGE("          true positive test for models...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    MMCifParser mmcif_p("testfiles/mmcif/model_truepos.mmcif", eh, profile);
+    BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+    BOOST_REQUIRE_EQUAL(eh.GetChainCount(),   2);
+    BOOST_REQUIRE_EQUAL(eh.GetResidueCount(), 2);
+    BOOST_REQUIRE_EQUAL(eh.GetAtomCount(),   26);
+  }
+  BOOST_MESSAGE("          done.");
+
+  // positive wo models atom_site.mmcif
+  BOOST_MESSAGE("          test absent atom_site.pdbx_PDB_model_num entry...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+    BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+  }
+  BOOST_MESSAGE("          done.");
+  // negative, more than 1 atom_site category
+  BOOST_MESSAGE("          testing more than one atom_site block...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    MMCifParser mmcif_p("testfiles/mmcif/model_multi_atom_site.mmcif", eh,
+                        profile);
+    BOOST_CHECK_THROW(mmcif_p.Parse(), IOException);
+  }
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    MMCifParser mmcif_p("testfiles/mmcif/model_multi_atom_site_inverted.mmcif",
+                        eh, profile);
+    BOOST_CHECK_THROW(mmcif_p.Parse(), IOException);
+  }
+  BOOST_MESSAGE("          done.");
+
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
 {
   mol::EntityHandle eh = mol::CreateEntity();
@@ -141,14 +186,16 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   IOProfile profile;
   TestMMCifParserProtected tmmcif_p(s, eh, profile);
-  std::vector<StringRef> cols;
-  String chain_name;
-  StringRef res_name;
-  mol::ResNum resnum(0);
-  StringRef atom_name;
+  //std::vector<StringRef> cols;
+  //String chain_name;
+  //StringRef res_name;
+  //mol::ResNum resnum(0);
+  //StringRef atom_name;
   //char alt_loc;
 
-  //BOOST_MESSAGE("    testing short atom_site entry");
+  BOOST_MESSAGE("          testing valid line");
+  //tmmcif_p.ParseAtomIdent();
+  BOOST_MESSAGE("          done.");
   // negative
   //cols.push_back(StringRef("ATOM", 4));
   //BOOST_CHECK_THROW(tmmcif_p.ParseAtomIdent(cols,
@@ -197,16 +244,36 @@ BOOST_AUTO_TEST_CASE(mmcif_parseandaddatom)
 
 BOOST_AUTO_TEST_CASE(mmcif_testreader)
 {
+  BOOST_MESSAGE("  Running mmcif_testreader tests...");
   mol::EntityHandle eh = mol::CreateEntity();
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   IOProfile profile;
   MMCifParser mmcif_p(s, eh, profile);
 
-  mmcif_p.Parse();
+  BOOST_MESSAGE("          testing Parse()...");
+  BOOST_CHECK_NO_THROW(mmcif_p.Parse());
 
-  BOOST_REQUIRE_EQUAL(eh.GetChainCount(),   2);
-  BOOST_REQUIRE_EQUAL(eh.GetResidueCount(), 4);
-  BOOST_REQUIRE_EQUAL(eh.GetAtomCount(),   25);
+  BOOST_REQUIRE_EQUAL(eh.GetChainCount(),    3);
+  BOOST_REQUIRE_EQUAL(eh.GetResidueCount(), 14);
+  BOOST_REQUIRE_EQUAL(eh.GetAtomCount(),    35);
+
+  mol::ChainHandle ch = eh.FindChain("A");
+  BOOST_CHECK(ch.IsValid());
+  BOOST_MESSAGE("          done.");
+
+  BOOST_MESSAGE("          testing numbering water...");
+  ch = eh.FindChain("O");
+  BOOST_CHECK(ch.IsValid());
+  mol::ResidueHandleList rl = ch.GetResidueList();
+  mol::ResidueHandleList::const_iterator rs;
+  int i = 1;
+  for (rs = rl.begin(); rs != rl.end(); ++rs, ++i) {
+    BOOST_CHECK_EQUAL(rs->GetNumber().GetNum(), i);
+  }
+
+  BOOST_MESSAGE("          done.");
+
+  BOOST_MESSAGE("  done.");
 }
 
 BOOST_AUTO_TEST_SUITE_END();

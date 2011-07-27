@@ -83,7 +83,7 @@ public:
   /// \param header categories of the upcoming loop block
   ///
   /// \return bool
-  virtual bool OnBeginLoop(const StarLoopDesc& header);
+  virtual bool OnBeginLoop(const StarLoopDesc& header); // tested
 
   /// \brief read a row of data
   ///
@@ -116,18 +116,21 @@ public:
                                                "' header",
                                                this->GetCurrentLinenum()));
      }
-  }
+  } // tested
 
   /// \brief Check a PDB id to be of length 4 and start with a digit
   ///
   /// \param pdbid putative PDB id
   ///
   /// \return true for a valid id, false otherwise
-  bool IsValidPDBIdent(const StringRef& pdbid);
+  bool IsValidPDBIdent(const StringRef& pdbid); // tested
 
-  /// \brief ...
+  /// \brief fetch values identifying atoms
   ///
-  /// \param columns data row
+  /// \param[in] columns data row
+  /// \param[out] chain_name takes atom_site.label_asym_id or, if
+  ///             auth_chain_id_ is set, atom_site.auth_asym_id as a chain name
+
   /// \param atom_name corresponds to label_atom_id
   bool ParseAtomIdent(const std::vector<StringRef>& columns,
                       String& chain_name,
@@ -145,8 +148,8 @@ public:
 private:
   /// \enum magic numbers of this class
   typedef enum {
-    PDBID_LEN=4,        ///< length of a PDB id
-    MAX_ITEMS_IN_ROW=17 ///< count for possible items in a loop row
+    PDBID_LEN=4,         ///< length of a PDB id
+    MAX_ITEMS_IN_ROW=18, ///< count for possible items in a loop row
   } MMCifMagicNos;
 
   /// \enum items of the atom_site category
@@ -167,7 +170,8 @@ private:
     OCCUPANCY,
     B_ISO_OR_EQUIV,
     PDBX_PDB_INS_CODE,
-    GROUP_PDB          ///< record name
+    GROUP_PDB,         ///< record name
+    PDBX_PDB_MODEL_NUM ///< model no. (especially NMR structures)
   } AtomSiteItems;
 
   /// \enum categories of the mmcif format
@@ -178,7 +182,8 @@ private:
 
   // members
   MMCifCategory category_;
-  int           indices_[MAX_ITEMS_IN_ROW]; ///< map items to values in loops
+  int category_counts_[DONT_KNOW]; ///< overall no. of atom_site loops
+  int indices_[MAX_ITEMS_IN_ROW]; ///< map items to values in loops
   const IOProfile& profile_;
   mol::EntityHandle& ent_handle_;
   String restrict_chains_;
@@ -189,8 +194,9 @@ private:
   int residue_count_;
   int atom_count_;
   bool warned_name_mismatch_;
-  bool go_on_; ///< flow control within the parser hooks
   String subst_res_id_; ///< work around for missing label_seq_id's
+  bool has_model_;      ///< keep track of models through different atom_sites
+  int curr_model_;      ///< if we have pdbx_PDB_model_num, store no.
   //from pdbdreader
   //entity als member, fill in ondatarow
   //import function

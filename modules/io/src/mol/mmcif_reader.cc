@@ -52,11 +52,12 @@ void MMCifParser::Init()
 {
   warned_name_mismatch_ = false;
   category_             = DONT_KNOW;
+  memset(category_counts_, 0, DONT_KNOW * sizeof(int));
   chain_count_          = 0;
   atom_count_           = 0;
   residue_count_        = 0;
   auth_chain_id_        = false;
-  go_on_                = true;
+  has_model_            = false;
   //memset(indices_, -1, MAX_ITEMS_IN_ROW * sizeof(int));
   restrict_chains_      = "";
   subst_res_id_         = "";
@@ -103,8 +104,6 @@ bool MMCifParser::OnBeginData(const StringRef& data_name)
 
   this->ClearState();
 
-  go_on_ = true;
-
   return true;
 }
 
@@ -115,6 +114,7 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
   // walk through possible categories
   if (header.GetCategory() == "atom_site") {
     category_ = ATOM_SITE;
+    category_counts_[category_]++;
     // mandatory items
     this->TryStoreIdx(AUTH_ASYM_ID,    "auth_asym_id",    header);
     this->TryStoreIdx(ID,              "id",              header);
@@ -130,11 +130,22 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     this->TryStoreIdx(CARTN_Y, "Cartn_y", header);
     this->TryStoreIdx(CARTN_Z, "Cartn_z", header);
     // optional
-    indices_[OCCUPANCY] = header.GetIndex("occupancy");
-    indices_[B_ISO_OR_EQUIV] = header.GetIndex("B_iso_or_equiv");
-    indices_[GROUP_PDB] = header.GetIndex("group_PDB");
-    indices_[AUTH_SEQ_ID] = header.GetIndex("auth_seq_id");
-    indices_[PDBX_PDB_INS_CODE] = header.GetIndex("pdbx_PDB_ins_code");
+    indices_[OCCUPANCY]          = header.GetIndex("occupancy");
+    indices_[B_ISO_OR_EQUIV]     = header.GetIndex("B_iso_or_equiv");
+    indices_[GROUP_PDB]          = header.GetIndex("group_PDB");
+    indices_[AUTH_SEQ_ID]        = header.GetIndex("auth_seq_id");
+    indices_[PDBX_PDB_INS_CODE]  = header.GetIndex("pdbx_PDB_ins_code");
+    indices_[PDBX_PDB_MODEL_NUM] = header.GetIndex("pdbx_PDB_model_num");
+
+    // post processing
+    if (category_counts_[category_] > 1) {
+      if ((has_model_ && (indices_[PDBX_PDB_MODEL_NUM] == -1))||
+          (!has_model_ && (indices_[PDBX_PDB_MODEL_NUM] != -1))) { // unit test
+        throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                              "Not all atom_site entries carry a model number.",
+                                                 this->GetCurrentLinenum()));
+      }
+    }
     return true;
   }
   /*else if (header.GetCategory()=="entity_poly") {
@@ -211,13 +222,26 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
   StringRef res_name, atom_name;
   mol::ResNum res_num(0);
   bool valid_res_num = false;
+  if (indices_[PDBX_PDB_MODEL_NUM] != -1) {
+    if (has_model_) {
+      if (curr_model_ != TryGetInt(columns[indices_[PDBX_PDB_MODEL_NUM]],
+                                   "atom_site.pdbx_PDB_model_num")) {
+        return;
+      }
+    } else {
+      has_model_ = true;
+      curr_model_ = TryGetInt(columns[indices_[PDBX_PDB_MODEL_NUM]],
+      "atom_site.pdbx_PDB_model_num");
+    }
+  }
+
   if (!this->ParseAtomIdent(columns,
                             chain_name,
                             res_name,
                             res_num,
                             valid_res_num,
                             atom_name,
-                            alt_loc)) {
+                            alt_loc)) {// unit test
     return;                            
   }
   Real occ = 1.00f, temp = 0;
@@ -451,7 +475,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
             continue;
           LOG_TRACE("processing HETATM entry");
           this->ParseAndAddAtom(curr_line, line_num_, ent, 
-                                StringRef("HETATM", 6));
+          StringRef("HETATM", 6));
         } else if (IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6))) {
           if (!charmm_style_) {
             this->ParseHelixEntry(curr_line);            
