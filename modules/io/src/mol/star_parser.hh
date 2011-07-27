@@ -277,6 +277,7 @@ private:
   String        current_line_;
   bool          items_as_row_;
   StarLoopDesc  items_row_header_;
+  bool          file_open_;
   std::vector<StringRef> items_row_columns_;
   std::vector<String> items_row_values_;
 };
