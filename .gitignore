@@ -12,6 +12,7 @@ CTestTestfile.cmake
 .*
 !.gitignore
 CMakeCache.txt
+version.hh
 config.hh
 *.pyc
 index.txt

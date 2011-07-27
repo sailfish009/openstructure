@@ -82,13 +82,27 @@ String get_ost_root()
 {
   QDir dir(QApplication::applicationDirPath());
 
+#if OST_DEBIAN_STYLE_LIBEXEC  
   #ifdef _MSC_VER
+    dir.cdUp();
+    dir.cdUp();
     dir.cdUp();
     dir.cdUp();
   #else
     dir.cdUp();
+    dir.cdUp();
+    dir.cdUp();
   #endif
-
+#else
+  #ifdef _MSC_VER
+    dir.cdUp();
+    dir.cdUp();
+    dir.cdUp();
+  #else
+    dir.cdUp();
+    dir.cdUp();
+  #endif
+#endif
   return dir.path().toStdString();
 }
 

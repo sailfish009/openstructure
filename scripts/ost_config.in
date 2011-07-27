@@ -26,10 +26,10 @@ export DNG_BINDIR="$DNG_ROOT/bin"
 export DNG_LIBDIR="$DNG_ROOT/@LIBDIR@"
 export DNG_INITDIR="$DNG_LIBDIR/openstructure"
 
-#export PATH="$DNG_BINDIR:$PATH"
-#export DYLD_FRAMEWORK_PATH="$BIN_LIBDIR:${DYLD_FRAMEWORK_PATH}"
-#export DYLD_LIBRARY_PATH="$BIN_LIBDIR:${DYLD_LIBRARY_PATH}"
-#export LD_LIBRARY_PATH="$DNG_LIBDIR:$LD_LIBRARY_PATH"
+export PATH="$DNG_BINDIR:$PATH"
+export DYLD_FRAMEWORK_PATH="$BIN_LIBDIR:${DYLD_FRAMEWORK_PATH}"
+export DYLD_LIBRARY_PATH="$BIN_LIBDIR:${DYLD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="$DNG_LIBDIR:$LD_LIBRARY_PATH"
 # set QT_PLUGIN_PATH PYTHONHOME and PYTHONPATH for bundle (commented except in linux bundles)
 # set QT_PLUGIN_PATH and pythonpath for bundle (commented except in linux bundles)
 #export QT_PLUGIN_PATH="$BIN_DIR/plugins"

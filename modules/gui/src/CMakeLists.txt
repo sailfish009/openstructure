@@ -471,5 +471,5 @@ if (NOT WIN32)
   set(LINK LINK ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
 endif()
 
-executable(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
+executable_libexec(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
            DEPENDS_ON ost_gui ${LINK})

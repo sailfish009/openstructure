@@ -32,4 +32,6 @@
 #define OST_SPNAV_ENABLED @spnav_enabled@
 #define OST_FFT_USE_THREADS @fftw_use_threads@
 #define OST_NUMPY_SUPPORT_ENABLED @numpy_support@
+#define OST_DEBIAN_STYLE_LIBEXEC @debian_style_libexec@
+
 #endif

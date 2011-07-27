@@ -314,6 +314,40 @@ endmacro()
 
 
 #-------------------------------------------------------------------------------
+# Synopsis
+#   executable_libexec(NAME exe_name SOURCES source1 source2 LINK link1 link2)
+#
+# Description:
+#  Compile, link and stage a C++ executable into the libexec directory
+#-------------------------------------------------------------------------------
+macro(executable_libexec)
+  parse_argument_list(_ARG 
+                      "NAME;SOURCES;LINK;DEPENDS_ON" "NO_RPATH;STATIC" ${ARGN})
+  if (NOT _ARG_NAME)
+    message(FATAL_ERROR "invalid use of executable(): a name must be provided")
+  endif()   
+  add_executable(${_ARG_NAME} ${_ARG_SOURCES})
+  set_target_properties(${_ARG_NAME}
+                        PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                       "${LIBEXEC_STAGE_PATH}")  
+  if (APPLE AND NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
+    set_target_properties(${_ARG_NAME} PROPERTIES
+                          LINK_FLAGS "-Wl,-rpath,@loader_path/../lib")
+  endif()
+  if (_ARG_LINK)
+    target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
+  endif()
+  if (ENABLE_STATIC AND _ARG_STATIC)
+    set(TARGET_SUFFIX _static)
+    target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
+  endif()
+  foreach(_DEP ${_ARG_DEPENDS_ON})
+    target_link_libraries(${_ARG_NAME} ${_DEP}${TARGET_SUFFIX})
+  endforeach()
+  install(TARGETS ${_ARG_NAME} DESTINATION ${LIBEXEC_PATH})
+endmacro()
+
+#-------------------------------------------------------------------------------
 # Synopsis:
 #   substitute(IN_FILE in_file OUT_FILE out_file DICT a=b c=d)
 #
@@ -586,7 +620,7 @@ macro(ost_unittest)
       endif()
       if (WIN32)
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${_ARG_PREFIX}_${_ARG_MODULE}")  
-        add_custom_target("${_test_name}_run"
+        add_custom_target("${_test_name}_run":
                         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe || echo
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/..
                         COMMENT "running checks for module ${_ARG_MODULE}"
@@ -725,7 +759,6 @@ macro(setup_stage)
   set(STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
   set(EXECUTABLE_OUTPUT_PATH ${STAGE_DIR}/bin  )
   set(HEADER_STAGE_PATH ${STAGE_DIR}/include )
-  set(LIBEXEC_STAGE_PATH ${STAGE_DIR}/libexec/openstructure  )
   set(SHARED_DATA_PATH ${STAGE_DIR}/share/openstructure  )
 
   if (UNIX AND NOT APPLE)
@@ -738,6 +771,16 @@ macro(setup_stage)
   else()
     set(LIB_DIR lib  )
     set(LIB_STAGE_PATH "${STAGE_DIR}/lib"  )
+  endif()
+  if (_DEBIAN_STYLE_LIBEXEC)
+    set(LIBEXEC_PATH ${LIB_DIR}/openstructure/libexec  )
+  else()
+    set(LIBEXEC_PATH libexec/openstructure  )
+  endif()
+  if (_DEBIAN_STYLE_LIBEXEC)
+    set(LIBEXEC_STAGE_PATH ${LIB_STAGE_PATH}/openstructure/libexec  )
+  else()
+    set(LIBEXEC_STAGE_PATH ${STAGE_DIR}/libexec/openstructure  )
   endif()
 
   include_directories("${HEADER_STAGE_PATH}")
