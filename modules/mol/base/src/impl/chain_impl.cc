@@ -36,7 +36,8 @@ ChainImpl::ChainImpl(const EntityImplPtr& e, const String& name):
   ent_(e), 
   name_(name),
   residue_list_(),
-  in_sequence_(true)
+  in_sequence_(true),
+  chain_type_(CHAINTYPE_UNKNOWN)
 {}
 
 String ChainImpl::GetName() const

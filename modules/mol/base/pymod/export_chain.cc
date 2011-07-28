@@ -21,6 +21,7 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
+#include <ost/mol/chain_type.hh>
 #include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
@@ -50,6 +51,7 @@ void export_Chain()
     .def(self_ns::str(self))
     .add_property("valid", &ChainBase::IsValid)
     .def("IsValid", &ChainBase::IsValid)
+    .def("GetChainType", &ChainBase::GetChainType)
   ;
   generic_prop_def<ChainBase>(chain_base);
   class_<ChainHandle, bases<ChainBase> >("ChainHandle", init<>())
@@ -78,7 +80,8 @@ void export_Chain()
     .def("GetAtomCount", &ChainHandle::GetAtomCount)
     .def("GetBondCount", &ChainHandle::GetBondCount)   
     .add_property("residue_count", &ChainHandle::GetResidueCount)
-    .add_property("atom_count", &ChainHandle::GetAtomCount)    
+    .add_property("atom_count", &ChainHandle::GetAtomCount)
+    .add_property("chain_type", &ChainHandle::GetChainType)
     .def("InSequence", &ChainHandle::InSequence)
     .def("Select", select_string, arg("flags")=0)
     .def("Select", select_query, arg("flags")=0)
@@ -103,4 +106,15 @@ void export_Chain()
     .def(vector_indexing_suite<ChainHandleList>())
     .def(geom::VectorAdditions<ChainHandleList>())    
   ;
+
+  {
+    enum_<ChainType>("ChainType")
+      .value("CHAINTYPE_POLY",         CHAINTYPE_POLY)
+      .value("CHAINTYPE_AA",           CHAINTYPE_AA)
+      .value("CHAINTYPE_NT",           CHAINTYPE_NT)
+      .value("CHAINTYPE_UNKNOWN",      CHAINTYPE_UNKNOWN)
+      .value("CHAINTYPE_N_CHAINTYPES", CHAINTYPE_N_CHAINTYPES)
+      .export_values()
+    ;
+  }
 }

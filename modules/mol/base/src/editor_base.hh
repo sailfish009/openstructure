@@ -155,6 +155,13 @@ public:
   void RenameResidue(ResidueHandle res, const String& new_name);
 
   void RenameChain(ChainHandle chain, const String& new_name);
+
+  /// \brief Assign type of chain according to ChainType.
+  ///
+  /// \param chain chain to assign to
+  /// \param type type of the chain
+  void SetChainType(ChainHandle chain, const ChainType type);
+
   /// \brief   Delete all atoms of residue
   ///
   /// All associated torsions and bonds will also be removed

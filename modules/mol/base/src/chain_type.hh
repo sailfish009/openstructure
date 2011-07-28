@@ -16,52 +16,16 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include "chain_base.hh"
-#include <ost/mol/impl/chain_impl.hh>
-#include <ost/invalid_handle.hh>
+#ifndef OST_CHAIN_TYPE_HH
+#define OST_CHAIN_TYPE_HH
 
-namespace ost { namespace mol {
+/// \enum different kinds of chains
+typedef enum {
+  CHAINTYPE_POLY,         ///< chain name by author as in PDB
+  CHAINTYPE_AA,           ///< amino acid sequence
+  CHAINTYPE_NT,           ///< nucleotides
+  CHAINTYPE_UNKNOWN,      ///< guess what
+  CHAINTYPE_N_CHAINTYPES  ///< no. of chain types
+} ChainType;
 
-ChainBase::ChainBase()
-{ }
-
-ChainBase::ChainBase(const impl::ChainImplPtr& impl): 
-  impl_(impl) 
-{}
-GenericPropContainerImpl* ChainBase::GpImpl()
-{
-  return impl_.get();
-}
-
-
-const GenericPropContainerImpl* ChainBase::GpImpl() const
-{
-  return impl_.get();
-}
-
-String ChainBase::GetName() const {
-  this->CheckValidity();
-  return impl_->GetName();
-}
-
-ChainType ChainBase::GetChainType() const {
-  return impl_->GetChainType();
-}
-
-void ChainBase::CheckValidity() const {
-  if (!impl_)
-    throw InvalidHandle();
-}
-
-std::ostream& operator<<(std::ostream& os, const ChainBase& chain) 
-{
-  if (chain.Impl()) {
-    os << chain.GetName();
-  } else {
-    os << "invalid chain";
-  }
-  return os;
-}
-
-}} // ns
-
+#endif

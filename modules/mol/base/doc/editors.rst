@@ -90,6 +90,12 @@ The basic functionality of editors is implemented in the EditorBase class.
      :param new_name: is the new name
      :type new_name:  string
 
+  .. method:: SetChainType(chain, type)
+
+     :param chain: Must be a valid chain
+     :param type:  Must be a value of enum ChainType
+                   (see :attr:`ChainHandle.chain_type`)   
+
   .. method:: InsertAtom(residue, atom_name, pos, 
                          element="", occupancy=1.0, b_factor=0.0,
                          is_hetatm=False)

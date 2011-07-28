@@ -22,6 +22,7 @@
 #include <ost/mol/module_config.hh>
 #include <ost/mol/impl/chain_impl_fw.hh>
 
+#include <ost/mol/chain_type.hh>
 #include <ost/generic_property.hh>
 
 namespace ost { namespace mol {
@@ -58,6 +59,11 @@ public:
   //@}
   friend class ConstGenericPropContainer<ChainBase>;
   String GetName() const;
+
+  /// \brief Get the type of a chain.
+  ///
+  /// \return chain type of ChainType
+  ChainType GetChainType() const;
 
   const impl::ChainImplPtr& Impl() const {
     return impl_;

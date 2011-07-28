@@ -47,6 +47,7 @@ bond_table.hh
 chain_base.hh
 chain_handle.hh
 chain_view.hh
+chain_type.hh
 chem_class.hh
 coord_group.hh
 coord_source.hh

@@ -25,6 +25,7 @@
 #include <ost/geom/geom.hh>
 
 #include <ost/mol/residue_prop.hh>
+#include <ost/mol/chain_type.hh>
 #include <ost/mol/impl/chain_impl_fw.hh>
 #include <ost/mol/impl/residue_impl_fw.hh>
 #include <ost/mol/impl/entity_impl_fw.hh>
@@ -46,7 +47,23 @@ public:
 
   void SetName(const String& new_name);
   String GetName() const;
-  
+
+  /// \brief Assign a type to a chain.
+  ///
+  /// \param type chain type of ChainType
+  void SetChainType(const ChainType type)
+  {
+    chain_type_ = type;
+  }
+
+  /// \brief Get the type of a chain.
+  ///
+  /// \return chain type of ChainType
+  ChainType GetChainType() const
+  {
+    return chain_type_;
+  }
+
   /// \brief append new residue with exactly the same parameters as res, but 
   ///     no atoms and bonds                               
   ResidueImplPtr AppendResidue(const ResidueImplPtr& res);
@@ -134,6 +151,7 @@ private:
   /// \brief whether the residue numbers are in ascending order or not. Used
   ///        to optimize residue by number lookup.
   bool             in_sequence_;
+  ChainType        chain_type_;
 };
 
 }}} // ns

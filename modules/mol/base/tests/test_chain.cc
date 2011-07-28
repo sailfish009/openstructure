@@ -202,4 +202,21 @@ BOOST_AUTO_TEST_CASE(rename_chain)
    BOOST_CHECK_EQUAL(eh.GetChainCount(), 2);
 }
 
+BOOST_AUTO_TEST_CASE(chain_type)
+{
+   EntityHandle eh=CreateEntity();
+   XCSEditor e=eh.EditXCS();
+   ChainHandle ch1=e.InsertChain("A");
+
+   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_UNKNOWN);
+   e.SetChainType(ch1, CHAINTYPE_POLY);
+   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_POLY);
+   e.SetChainType(ch1, CHAINTYPE_AA);
+   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_AA);
+   e.SetChainType(ch1, CHAINTYPE_NT);
+   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_NT);
+   e.SetChainType(ch1, CHAINTYPE_UNKNOWN);
+   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_UNKNOWN);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -82,6 +82,11 @@ void EditorBase::RenameChain(ChainHandle chain, const String& new_name)
   ent_.Impl()->RenameChain(chain.Impl(), new_name);
 }
 
+void EditorBase::SetChainType(ChainHandle chain, const ChainType type)
+{
+  CheckHandleValidity(chain);
+  chain.Impl()->SetChainType(type);
+}
 
 AtomHandle EditorBase::InsertAtom(ResidueHandle res, const String& name,
                                   const geom::Vec3& pos, const String& ele,

@@ -285,6 +285,16 @@ The Handle Classes
      
      :type: str
 
+  .. attribute:: chain_type
+
+     Describes the type of the chain. Is one of enum ChainType:
+
+        ``CHAINTYPE_POLY``, ``CHAINTYPE_AA``, ``CHAINTYPE_NT``,
+        ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``
+
+     Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types
+     available.
+
   .. attribute:: residues
    
      List of all residues of this chain. The residues are sorted from N- to 
@@ -389,11 +399,14 @@ The Handle Classes
   .. method:: GetAtomList()
     
     See :attr:`atoms`
-    
+
   .. method:: GetName()
   
     See :attr:`name`
 
+  .. method:: GetChainType()
+
+    See :attr:`chain_type`
 
 .. class:: ResidueHandle
 
