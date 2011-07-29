@@ -87,18 +87,6 @@ public:
     /// \brief get position, i.e midpoint between the second and third atom (original coordinates)
   geom::Vec3 GetOriginalPos() const;
 
-  /// \brief  set absolute torsion angle
-  /// 
-  ///  All connectors at the third atom (A3) will be adjusted accordingly. If
-  /// you only want to adjust the bond between A3 and A4, and leave the other
-  /// bonds untouched, use the ost::SetDihedralAngle() function
-  /// 
-  /// \sa     RotateAngle
-  void SetAngle(Real a, bool up=true);
-
-  /// relative rotation, either upstream or downstream
-  void RotateAngle(Real angle, bool up=true);
-
   impl::TorsionImplP& Impl() {
     return impl_;
   }

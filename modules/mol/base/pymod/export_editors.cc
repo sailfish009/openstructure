@@ -48,15 +48,15 @@ ResidueHandle (EditorBase::*append_a)(ChainHandle ch,
 ResidueHandle (EditorBase::*append_b)(ChainHandle ch, const ResidueKey&, 
                                       const ResNum&)=&EditorBase::AppendResidue;
 
-void (ICSEditor::*set_torsion_a)(TorsionHandle, Real)=&ICSEditor::SetTorsionAngle;
+void (ICSEditor::*set_torsion_a)(TorsionHandle, Real, bool)=&ICSEditor::SetTorsionAngle;
 void (ICSEditor::*set_torsion_b)(const AtomHandle&, const AtomHandle&,
                                  const AtomHandle&, const AtomHandle&,
-                                 Real)=&ICSEditor::SetTorsionAngle;
+                                 Real, bool)=&ICSEditor::SetTorsionAngle;
 
-void (ICSEditor::*rotate_torsion_a)(TorsionHandle, Real)=&ICSEditor::RotateTorsionAngle;
+void (ICSEditor::*rotate_torsion_a)(TorsionHandle, Real, bool)=&ICSEditor::RotateTorsionAngle;
 void (ICSEditor::*rotate_torsion_b)(const AtomHandle&, const AtomHandle&,
                                     const AtomHandle&, const AtomHandle&,
-                                    Real)=&ICSEditor::RotateTorsionAngle;
+                                    Real, bool)=&ICSEditor::RotateTorsionAngle;
 
 #if OST_NUMPY_SUPPORT_ENABLED
 template<typename T, bool O>
@@ -234,10 +234,16 @@ void export_Editors()
   class_<ICSEditor, bases<EditorBase> >("ICSEditor", no_init)
     .def("SetAngle", &ICSEditor::SetAngle)
     .def("SetBondLength", &ICSEditor::SetBondLength)
-    .def("SetTorsionAngle", set_torsion_a)
-    .def("SetTorsionAngle", set_torsion_b)    
-    .def("RotateTorsionAngle", rotate_torsion_a)
-    .def("RotateTorsionAngle", rotate_torsion_b)
+    .def("SetTorsionAngle", set_torsion_a,
+          (arg("torsion"),arg("angle"), arg("update_others")=true))
+    .def("SetTorsionAngle", set_torsion_b,
+         (arg("atom_a"), arg("atom_b"), arg("atom_c"), arg("atom_d"),
+          arg("angle"), arg("update_others")))
+    .def("RotateTorsionAngle", rotate_torsion_a,
+          (arg("torsion"),arg("angle"), arg("update_others")=true))
+    .def("RotateTorsionAngle", rotate_torsion_b,
+         (arg("atom_a"), arg("atom_b"), arg("atom_c"), arg("atom_d"),
+          arg("angle"), arg("update_others")))
     .def("UpdateXCS", &ICSEditor::UpdateXCS)
     .def("__exit__", &ICSEditor::UpdateXCS)
   ;  
