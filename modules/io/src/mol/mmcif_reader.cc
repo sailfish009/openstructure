@@ -58,11 +58,12 @@ void MMCifParser::Init()
   residue_count_        = 0;
   auth_chain_id_        = false;
   has_model_            = false;
-  //memset(indices_, -1, MAX_ITEMS_IN_ROW * sizeof(int));
   restrict_chains_      = "";
   subst_res_id_         = "";
-  //curr_chain_           = mol::ChainHandle();
-  //curr_residue_         = mol::ResidueHandle();
+  curr_chain_           = mol::ChainHandle();
+  curr_residue_         = mol::ResidueHandle();
+  //chain_id_pairs_       = 
+  //entity_desc_map_
 }
 
 void MMCifParser::ClearState()
@@ -117,7 +118,7 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     category_counts_[category_]++;
     // mandatory items
     this->TryStoreIdx(AUTH_ASYM_ID,    "auth_asym_id",    header);
-    this->TryStoreIdx(ID,              "id",              header);
+    this->TryStoreIdx(AS_ID,           "id",              header);
     this->TryStoreIdx(LABEL_ALT_ID,    "label_alt_id",    header);
     this->TryStoreIdx(LABEL_ASYM_ID,   "label_asym_id",   header);
     this->TryStoreIdx(LABEL_ATOM_ID,   "label_atom_id",   header);
@@ -146,6 +147,14 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
                                                  this->GetCurrentLinenum()));
       }
     }
+    return true;
+  } else if (header.GetCategory()=="entity") {
+    category_ = ENTITY;
+    category_counts_[category_]++;
+    // mandatory items
+    this->TryStoreIdx(E_ID, "id",    header);
+    // optional
+    indices_[E_TYPE] = header.GetIndex("type");
     return true;
   }
   /*else if (header.GetCategory()=="entity_poly") {
@@ -187,7 +196,7 @@ bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
     return false;
   } 
 
-  std::pair<bool, int> a_num = this->TryGetInt(columns[indices_[ID]],
+  std::pair<bool, int> a_num = this->TryGetInt(columns[indices_[AS_ID]],
                                                "atom_site.id",
                                           profile_.fault_tolerant); // unit test
 
@@ -275,8 +284,8 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
   LOG_TRACE( "s_chain: [" << chain_name << "]" );
 
   // determine chain and residue update
-  bool update_chain=false;
-  bool update_residue=false;
+  bool update_chain = false;
+  bool update_residue = false;
   if(!curr_chain_) { // unit test
       update_chain=true;
       update_residue=true;
@@ -315,8 +324,19 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
       LOG_DEBUG("new chain " << chain_name);
       curr_chain_=editor.InsertChain(chain_name);
       ++chain_count_;
+      // store entity id
+      chain_id_pairs_.push_back(std::pair<mol::ChainHandle,String>(curr_chain_,
+                                     columns[indices_[LABEL_ENTITY_ID]].str()));
     }
     assert(curr_chain_.IsValid());
+  } else if (chain_id_pairs_.back().second != // unit test
+             columns[indices_[LABEL_ENTITY_ID]].str()) {
+    // check that label_entity_id stays the same
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+        "Change of 'atom_site.label_entity_id' item for chain " +
+        curr_chain_.GetName() + "! Expected: " + chain_id_pairs_.back().second +
+        ", found: " + columns[indices_[LABEL_ENTITY_ID]].str() + ".",
+                                             this->GetCurrentLinenum()));
   }
 
   if(update_residue) { // unit test
@@ -408,6 +428,37 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
 
 }
 
+void MMCifParser::ParseEntity(const std::vector<StringRef>& columns)
+{
+  bool store = false; // is it worth storing this record?
+  MMCifEntityDesc desc;
+
+  // type
+  if (indices_[E_TYPE] != -1) {
+    if(StringRef("polymer", 7) == columns[indices_[E_TYPE]]) {
+      desc.type = CHAINTYPE_POLY;
+    } else if(StringRef("non-polymer", 11) == columns[indices_[E_TYPE]]) {
+      desc.type = CHAINTYPE_NON_POLY;
+    } else if(StringRef("water", 5) == columns[indices_[E_TYPE]]) {
+      desc.type = CHAINTYPE_WATER;
+    } else {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                               "Unrecognised chain type '" +
+                                               columns[indices_[E_TYPE]].str() +
+                                               "' found.",
+                                               this->GetCurrentLinenum()));
+    }
+    store = true;
+  }
+
+  if (store) {
+    entity_desc_map_.insert(
+                   MMCifEntityDescMap::value_type(columns[indices_[E_ID]].str(),
+                                                  desc)
+                            );
+  }
+}
+
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
@@ -416,6 +467,9 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
     LOG_TRACE("processing atom_site entry");
     this->ParseAndAddAtom(columns);
     break;
+  case ENTITY:
+    LOG_TRACE("processing entity entry");
+    this->ParseEntity(columns);
   default:
     return;
   }
@@ -563,6 +617,22 @@ void PDBReader::Import(mol::EntityHandle& ent,
 
 void MMCifParser::OnEndData()
 {
+  mol::XCSEditor editor=ent_handle_.EditXCS(mol::BUFFERED_EDIT);
+
+  // process chain types
+  std::vector<std::pair<mol::ChainHandle, String> >::const_iterator css;
+  MMCifEntityDescMap::const_iterator edm_it;
+  for (css = chain_id_pairs_.begin(); css != chain_id_pairs_.end(); ++css) {
+    edm_it = entity_desc_map_.find(css->second);
+
+    if (edm_it != entity_desc_map_.end()) {
+      editor.SetChainType(css->first, edm_it->second.type);
+    } else {
+      LOG_WARNING("No entity description found for atom_site.label_entity_id '"
+                  << css->second << "'");
+    }
+  }
+
   LOG_INFO("imported "
            << chain_count_ << " chains, "
            << residue_count_ << " residues, "

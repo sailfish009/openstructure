@@ -3,6 +3,20 @@ data_1BAR
 # this file is also used in the mmcif_parse_models tests for a true negative
 # test, hence it is not allowed to carry atom_site.pdbx_PDB_model_num entries
 
+# this file is also used in the mmcif_mmcif_chaintype_setting test for a true
+# positive test, hence the entity category is not to be changed
+
+loop_
+_entity.id
+_entity.type
+_entity.details
+1 polymer 
+;              The enzymatically competent form of HIV
+               protease is a dimer. This entity
+               corresponds to one monomer of an active dimer.
+;
+5 water        .
+
 loop_
 _atom_site.group_PDB
 _atom_site.type_symbol

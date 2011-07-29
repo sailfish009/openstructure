@@ -39,9 +39,16 @@ public:
     MMCifParser(stream, ent_handle, profile)
   { }
 
+  TestMMCifParserProtected(const String& filename,
+                           mol::EntityHandle& ent_handle):
+    MMCifParser(filename, ent_handle, IOProfile())
+  { }
+
+  using MMCifParser::OnBeginLoop;
   using MMCifParser::IsValidPDBIdent;
   using MMCifParser::ParseAtomIdent;
   using MMCifParser::ParseAndAddAtom;
+  using MMCifParser::ParseEntity;
   using MMCifParser::TryStoreIdx;
 };
 
@@ -94,43 +101,54 @@ BOOST_AUTO_TEST_CASE(mmcif_onbeginloop)
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   MMCifParser mmcif_p(s, eh, IOProfile());
   StarLoopDesc mmcif_h;
+  BOOST_MESSAGE("          testing atom_site items...");
   mmcif_h.SetCategory(StringRef("atom_site", 9));
-  BOOST_MESSAGE("    auth_asym_id");
+  BOOST_MESSAGE("             auth_asym_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("auth_asym_id", 12));
-  BOOST_MESSAGE("    id");
+  BOOST_MESSAGE("             id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("id", 2));
-  BOOST_MESSAGE("    label_alt_id");
+  BOOST_MESSAGE("             label_alt_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_alt_id", 12));
-  BOOST_MESSAGE("    label_asym_id");
+  BOOST_MESSAGE("             label_asym_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_asym_id", 13));
-  BOOST_MESSAGE("    label_atom_id");
+  BOOST_MESSAGE("             label_atom_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_atom_id", 13));
-  BOOST_MESSAGE("    label_comp_id");
+  BOOST_MESSAGE("             label_comp_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_comp_id", 13));
-  BOOST_MESSAGE("    label_entity_id");
+  BOOST_MESSAGE("             label_entity_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_entity_id", 15));
-  BOOST_MESSAGE("    label_seq_id");
+  BOOST_MESSAGE("             label_seq_id");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("label_seq_id", 12));
-  BOOST_MESSAGE("    type_symbol");
+  BOOST_MESSAGE("             type_symbol");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("type_symbol", 11));
-  BOOST_MESSAGE("    Cartn_x");
+  BOOST_MESSAGE("             Cartn_x");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("Cartn_x", 7));
-  BOOST_MESSAGE("    Cartn_y");
+  BOOST_MESSAGE("             Cartn_y");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("Cartn_y", 7));
-  BOOST_MESSAGE("    Cartn_z");
+  BOOST_MESSAGE("             Cartn_z");
   BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
   mmcif_h.Add(StringRef("Cartn_z", 7));
+  BOOST_CHECK_NO_THROW(mmcif_p.OnBeginLoop(mmcif_h));
+  BOOST_MESSAGE("          done.");
+  mmcif_h.Clear();
+  BOOST_MESSAGE("          testing entity items...");
+  mmcif_h.SetCategory(StringRef("entity", 6));
+  BOOST_MESSAGE("             id");
+  BOOST_CHECK_THROW(mmcif_p.OnBeginLoop(mmcif_h), IOException);
+  mmcif_h.Add(StringRef("id", 2));
+  BOOST_CHECK_NO_THROW(mmcif_p.OnBeginLoop(mmcif_h));
+  BOOST_MESSAGE("          done.");
   BOOST_MESSAGE("  done.");
 }
 
@@ -178,23 +196,133 @@ BOOST_AUTO_TEST_CASE(mmcif_parse_models)
   BOOST_MESSAGE("  done.");
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_changing_label_entity_id)
+{
+  BOOST_MESSAGE("  Running mmcif_changing_label_entity_id tests...");
+  IOProfile profile;
+
+  // positive
+  BOOST_MESSAGE("          true positive test...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+    BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+  }
+  BOOST_MESSAGE("          done.");
+
+  // negative
+  BOOST_MESSAGE("          true negative test...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    MMCifParser mmcif_p("testfiles/mmcif/changing_label_entity_id.mmcif", eh,
+                        profile);
+    BOOST_CHECK_THROW(mmcif_p.Parse(), IOException);
+  }
+  BOOST_MESSAGE("          done.");
+
+  BOOST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
+{
+  BOOST_MESSAGE("  Running mmcif_unknown_entity_type tests...");
+
+  mol::EntityHandle eh = mol::CreateEntity();
+  std::vector<StringRef> columns;
+  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  StarLoopDesc tmmcif_h;
+
+  // build dummy header
+  tmmcif_h.SetCategory(StringRef("entity", 6));
+  tmmcif_h.Add(StringRef("id", 2));
+  tmmcif_h.Add(StringRef("type", 4));
+  tmmcif_p.OnBeginLoop(tmmcif_h);
+
+  // positive
+  BOOST_MESSAGE("          known type...");
+  // build datarow
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("polymer", 7));
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntity(columns));
+  columns.pop_back();
+  columns.push_back(StringRef("non-polymer", 11));
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntity(columns));
+  columns.pop_back();
+  columns.push_back(StringRef("water", 5));
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntity(columns));
+  BOOST_MESSAGE("          done.");
+
+  // negative
+  BOOST_MESSAGE("          unknown type...");
+  columns.pop_back();
+  columns.push_back(StringRef("foo", 3));
+  BOOST_CHECK_THROW(tmmcif_p.ParseEntity(columns), IOException);
+  BOOST_MESSAGE("          done.");
+
+  BOOST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_chaintype_setting)
+{
+  BOOST_MESSAGE("  Running mmcif_chaintype_setting tests...");
+  mol::ChainHandle ch;
+  IOProfile profile;
+
+  // positive
+  BOOST_MESSAGE("          check correct settings...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+    mmcif_p.Parse();
+    ch = eh.FindChain("A");
+    BOOST_CHECK(ch.IsValid());
+    BOOST_CHECK(ch.GetChainType() == CHAINTYPE_POLY);
+    ch = eh.FindChain("C");
+    BOOST_CHECK(ch.IsValid());
+    BOOST_CHECK(ch.GetChainType() == CHAINTYPE_POLY);
+    ch = eh.FindChain("O");
+    BOOST_CHECK(ch.IsValid());
+    BOOST_CHECK(ch.GetChainType() == CHAINTYPE_WATER);
+  }
+  BOOST_MESSAGE("          done.");
+  // negative: no entity description
+  BOOST_MESSAGE("          check missing entity description...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    MMCifParser mmcif_p("testfiles/mmcif/model_truepos.mmcif",
+                        eh,
+                        profile);
+    mmcif_p.Parse();
+    ch = eh.FindChain("A");
+    BOOST_CHECK(ch.IsValid());
+    BOOST_CHECK(ch.GetChainType() == CHAINTYPE_UNKNOWN);
+    ch = eh.FindChain("B");
+    BOOST_CHECK(ch.IsValid());
+    BOOST_CHECK(ch.GetChainType() == CHAINTYPE_UNKNOWN);
+  }
+  BOOST_MESSAGE("          done.");
+
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
 {
+  BOOST_MESSAGE("  Running mmcif_parseatomident tests...");
+
   mol::EntityHandle eh = mol::CreateEntity();
 
-  BOOST_MESSAGE("  Running mmcif_parseatomident tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   IOProfile profile;
   TestMMCifParserProtected tmmcif_p(s, eh, profile);
-  //std::vector<StringRef> cols;
-  //String chain_name;
-  //StringRef res_name;
+  std::vector<StringRef> columns;
+  String chain_name;
+  StringRef res_name;
   //mol::ResNum resnum(0);
   //StringRef atom_name;
   //char alt_loc;
 
   BOOST_MESSAGE("          testing valid line");
-  //tmmcif_p.ParseAtomIdent();
+  //tmmcif_p.ParseAtomIdent(columns, chain_name, res_name);
   BOOST_MESSAGE("          done.");
   // negative
   //cols.push_back(StringRef("ATOM", 4));

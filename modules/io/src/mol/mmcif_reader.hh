@@ -19,10 +19,13 @@
 #ifndef OST_MMCIF_PARSER_HH
 #define OST_MMCIF_PARSER_HH
 
+#include <map>
+
 //#include <boost/iostreams/filtering_stream.hpp>
 //#include <boost/filesystem/fstream.hpp>
 
 #include <ost/mol/residue_handle.hh>
+#include <ost/mol/chain_type.hh>
 #include <ost/io/mol/io_profile.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/io/mol/star_parser.hh>
@@ -127,11 +130,12 @@ public:
 
   /// \brief fetch values identifying atoms
   ///
-  /// \param[in] columns data row
+  /// \param[in]  columns data row
   /// \param[out] chain_name takes atom_site.label_asym_id or, if
   ///             auth_chain_id_ is set, atom_site.auth_asym_id as a chain name
+  /// \param[out] res_name fetches atom_site.label_comp_id
 
-  /// \param atom_name corresponds to label_atom_id
+  /// \param[out] atom_name corresponds to label_atom_id
   bool ParseAtomIdent(const std::vector<StringRef>& columns,
                       String& chain_name,
                       StringRef& res_name,
@@ -145,6 +149,11 @@ public:
   /// \param columns data row
   void ParseAndAddAtom(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch MMCif entity information
+  ///
+  /// \param columns data row
+  void ParseEntity(const std::vector<StringRef>& columns);
+
 private:
   /// \enum magic numbers of this class
   typedef enum {
@@ -155,12 +164,12 @@ private:
   /// \enum items of the atom_site category
   typedef enum {
     AUTH_ASYM_ID,      ///< chain name by author as in PDB
-    ID,                ///< atom serial id
+    AS_ID,             ///< atom serial id
     LABEL_ALT_ID,      ///< AltLoc
     LABEL_ASYM_ID,     ///< chain name by PDB
     LABEL_ATOM_ID,
     LABEL_COMP_ID,
-    LABEL_ENTITY_ID,
+    LABEL_ENTITY_ID,   ///< link to category entity
     LABEL_SEQ_ID,      ///< residue no.
     AUTH_SEQ_ID,       ///< residue no. by author
     TYPE_SYMBOL,       ///< chemical element
@@ -174,11 +183,25 @@ private:
     PDBX_PDB_MODEL_NUM ///< model no. (especially NMR structures)
   } AtomSiteItems;
 
+  /// \enum items of the entity category
+  typedef enum {
+    E_ID,              ///< unique identifier
+    E_TYPE             ///< polymer, non-polymer or water
+  } EntityItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
+    ENTITY,
     DONT_KNOW
   } MMCifCategory;
+
+  /// \struct keeping track of entity information
+  typedef struct {
+    ChainType type; ///< characterise entity
+  } MMCifEntityDesc;
+
+  typedef std::map<String, MMCifEntityDesc> MMCifEntityDescMap;
 
   // members
   MMCifCategory category_;
@@ -197,9 +220,9 @@ private:
   String subst_res_id_; ///< work around for missing label_seq_id's
   bool has_model_;      ///< keep track of models through different atom_sites
   int curr_model_;      ///< if we have pdbx_PDB_model_num, store no.
-  //from pdbdreader
-  //entity als member, fill in ondatarow
-  //import function
+  std::vector<std::pair<mol::ChainHandle, String> > chain_id_pairs_;
+  ///< chain and label_entity_id
+  MMCifEntityDescMap entity_desc_map_; ///< stores entity items
 };
 
 }}
