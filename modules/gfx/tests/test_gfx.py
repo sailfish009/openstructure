@@ -9,6 +9,11 @@ import ost.mol as mol
 import ost.gfx as gfx
 import ost.geom as geom
 
+has_numpy=True
+import numpy
+if not has_numpy:
+  has_numpy=False
+ 
 def col_delta(c1,c2):
   return geom.Distance(geom.Vec3(c1[0],c1[1],c1[2]),geom.Vec3(c2[0],c2[1],c2[2]))
 
@@ -71,6 +76,16 @@ class TestGfx(unittest.TestCase):
     pl.AddCyl(geom.Vec3(0,0,0),geom.Vec3(1,2,3),radius1=0.5,radius2=0.1,color1=gfx.BLUE,color2=gfx.GREEN)
     pl.AddText("foo",[0,2,3])
     pl.AddText("bar",[-2,0,0],color=gfx.WHITE,point_size=8)
+    if has_numpy:
+      pl.AddMesh(numpy.zeros((5,3),dtype=numpy.float32),
+                 numpy.zeros((5,3),dtype=numpy.float32),
+                 numpy.zeros((5,4),dtype=numpy.float32),
+                 numpy.zeros((2,3),dtype=numpy.uint32))
+      pl.AddMesh(numpy.zeros((7,3),dtype=numpy.float32),
+                 None,
+                 None,
+                 numpy.zeros((4,3),dtype=numpy.uint32))
+                 
 
 if __name__== '__main__':
   unittest.main()

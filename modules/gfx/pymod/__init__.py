@@ -243,7 +243,7 @@ def _primlist_add_text(self,text,pos,color=None,point_size=None):
   if not point_size:
     point_size=1.0
   self._add_text(text,pos,color,point_size)
-  
+
 PrimList.AddPoint=_primlist_add_point
 PrimList.AddLine=_primlist_add_line
 PrimList.AddSphere=_primlist_add_sphere
