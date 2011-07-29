@@ -105,7 +105,9 @@ namespace {
 
 void export_primlist()
 {
+#if OST_NUMPY_SUPPORT_ENABLED
   import_array(); // magic handshake for numpy module
+#endif
 
   class_<PrimList, bases<GfxObj>, boost::shared_ptr<PrimList>, boost::noncopyable>("PrimList", init<const String& >())
     .def("Clear",&PrimList::Clear)
