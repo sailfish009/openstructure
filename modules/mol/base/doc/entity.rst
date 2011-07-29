@@ -289,8 +289,11 @@ The Handle Classes
 
      Describes the type of the chain. Is one of enum ChainType:
 
-        ``CHAINTYPE_POLY``, ``CHAINTYPE_AA``, ``CHAINTYPE_NT``,
-        ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``
+       ``CHAINTYPE_POLY``, ``CHAINTYPE_NON_POLY``, ``CHAINTYPE_WATER``,
+       ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
+       ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
+       ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
+       ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``  
 
      Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types
      available.

@@ -21,11 +21,19 @@
 
 /// \enum different kinds of chains
 typedef enum {
-  CHAINTYPE_POLY,         ///< chain name by author as in PDB
-  CHAINTYPE_AA,           ///< amino acid sequence
-  CHAINTYPE_NT,           ///< nucleotides
-  CHAINTYPE_UNKNOWN,      ///< guess what
-  CHAINTYPE_N_CHAINTYPES  ///< no. of chain types
+  CHAINTYPE_POLY,           ///< polymer
+  CHAINTYPE_NON_POLY,       ///< non-polymer
+  CHAINTYPE_WATER,          ///< water
+  CHAINTYPE_POLY_PEPTIDE_D, ///< (D) amino acid sequence
+  CHAINTYPE_POLY_PEPTIDE_L, ///< (L) amino acid sequence
+  CHAINTYPE_POLY_DN,        ///< polydeoxyribonucleotide
+  CHAINTYPE_POLY_RN,        ///< polyribonucleotide
+  CHAINTYPE_POLY_SAC_D,     ///< polysaccharide(D)
+  CHAINTYPE_POLY_SAC_L,     ///< polysaccharide(L)
+  CHAINTYPE_POLY_DN_RN,     ///<polydeoxyribonucleotide/ -ribonucleotide hybrid
+  CHAINTYPE_UNKNOWN,        ///< guess what
+  CHAINTYPE_N_CHAINTYPES    ///< no. of chain types
 } ChainType;
+
 
 #endif

@@ -109,11 +109,18 @@ void export_Chain()
 
   {
     enum_<ChainType>("ChainType")
-      .value("CHAINTYPE_POLY",         CHAINTYPE_POLY)
-      .value("CHAINTYPE_AA",           CHAINTYPE_AA)
-      .value("CHAINTYPE_NT",           CHAINTYPE_NT)
-      .value("CHAINTYPE_UNKNOWN",      CHAINTYPE_UNKNOWN)
-      .value("CHAINTYPE_N_CHAINTYPES", CHAINTYPE_N_CHAINTYPES)
+      .value("CHAINTYPE_POLY",           CHAINTYPE_POLY)
+      .value("CHAINTYPE_NON_POLY",       CHAINTYPE_NON_POLY)
+      .value("CHAINTYPE_WATER",          CHAINTYPE_WATER)
+      .value("CHAINTYPE_POLY_PEPTIDE_D", CHAINTYPE_POLY_PEPTIDE_D)
+      .value("CHAINTYPE_POLY_PEPTIDE_L", CHAINTYPE_POLY_PEPTIDE_L)
+      .value("CHAINTYPE_POLY_DN",        CHAINTYPE_POLY_DN)
+      .value("CHAINTYPE_POLY_RN",        CHAINTYPE_POLY_RN)
+      .value("CHAINTYPE_POLY_SAC_D",     CHAINTYPE_POLY_SAC_D)
+      .value("CHAINTYPE_POLY_SAC_L",     CHAINTYPE_POLY_SAC_L)
+      .value("CHAINTYPE_POLY_DN_RN",     CHAINTYPE_POLY_DN_RN)
+      .value("CHAINTYPE_UNKNOWN",        CHAINTYPE_UNKNOWN)
+      .value("CHAINTYPE_N_CHAINTYPES",   CHAINTYPE_N_CHAINTYPES)
       .export_values()
     ;
   }
