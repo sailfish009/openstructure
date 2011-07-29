@@ -217,6 +217,7 @@ void EditorBase::UpdateTrace()
 {
   if (mode_==UNBUFFERED_EDIT) {
     ent_.Impl()->TraceDirectionality();
+    ent_.Impl()->UpdateICSIfNeeded();
   }
 }
 

@@ -103,6 +103,13 @@ bool test_angle(Real a, Real e) {
 
 BOOST_AUTO_TEST_SUITE( mol_base )
 
+BOOST_AUTO_TEST_CASE(ics_update_icsbondlength)
+{
+  TorsionStructure s;
+  mol::BondHandle bond = s.a2.FindBondToAtom(s.a3);
+  BOOST_CHECK_CLOSE(bond.GetLength(), 1.0, EPSILON);
+}
+
 BOOST_AUTO_TEST_CASE(ics_settorsion_unbuffered)
 {
   Real eps = 0.0001;
