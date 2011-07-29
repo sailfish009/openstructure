@@ -12,7 +12,7 @@ if len(sys.argv) < 3:
   print 'usage: create_bundle.py  additional_label system_python_version'
   sys.exit()
 
-system_python_version=sys.argv[2]
+system_python_version='python'+sys.argv[2]
 system_python_bin='/usr/bin/'+system_python_version
 system_python_libs='/usr/lib/'+system_python_version
 second_system_python_libs_flag=True
@@ -43,28 +43,21 @@ date_pattern='%Y-%b-%d'
 build=datetime.date.today()
 directory_name='openstructure-linux-'+archstring+'-'+additional_label+'-'+str(build)
 print 'Hardcoding package python binary path in openstructure executables'
-subprocess.call('mv scripts/ost.in scripts/ost.in.backup',shell=True,cwd='../../')
-subprocess.call('sed "s/@PYTHON_BINARY@/\$DNG_ROOT\/bin\/'+python_bin_in_bundle+'/g" scripts/ost.in.backup > scripts/ost.in.prepreprepre',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export LD_LIBRARY_PATH/ export LD_LIBRARY_PATH/g" scripts/ost.in.prepreprepre > scripts/ost.in.preprepre',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export PYTHONHOME/ export PYTHONHOME/g" scripts/ost.in.preprepre > scripts/ost.in.prepre',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export PYTHONPATH/ export PYTHONPATH/g" scripts/ost.in.prepre > scripts/ost.in.pre',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export QT_PLUGIN_PATH/ export QT_PLUGIN_PATH/g" scripts/ost.in.pre > scripts/ost.in',shell=True,cwd='../../')
-subprocess.call('mv scripts/dng.in scripts/dng.in.backup',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export LD_LIBRARY_PATH/ export LD_LIBRARY_PATH/g" scripts/dng.in.backup > scripts/dng.in.preprepre',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export PYTHONHOME/ export PYTHONHOME/g" scripts/dng.in.preprepre > scripts/dng.in.prepre',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export PYTHONPATH/ export PYTHONPATH/g" scripts/dng.in.prepre > scripts/dng.in.pre',shell=True,cwd='../../')
-subprocess.call('sed "s/\#export QT_PLUGIN_PATH/ export QT_PLUGIN_PATH/g" scripts/dng.in.pre > scripts/dng.in',shell=True,cwd='../../')
+subprocess.call('mv scripts/ost_config.in scripts/ost_config.in.backup',shell=True,cwd='../../')
+subprocess.call('sed "s/@PYTHON_BINARY@/\$DNG_ROOT\/bin\/'+python_bin_in_bundle+'/g" scripts/ost_config.in.backup > scripts/ost_config.in.preprepre',shell=True,cwd='../../')
+subprocess.call('sed "s/\#export PYTHONHOME/ export PYTHONHOME/g" scripts/ost_config.in.preprepre > scripts/ost_config.in.prepre',shell=True,cwd='../../')
+subprocess.call('sed "s/\#export PYTHONPATH/ export PYTHONPATH/g" scripts/ost_config.in.prepre > scripts/ost_config.in.pre',shell=True,cwd='../../')
+subprocess.call('sed "s/\#export QT_PLUGIN_PATH/ export QT_PLUGIN_PATH/g" scripts/ost_config.in.pre > scripts/ost_config.in',shell=True,cwd='../../')
 #print 'Downloading Chemlib dictionary'
 #subprocess.call('wget ftp://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif', shell=True, cwd='../../')
 #print 'Compiling Openstructure'
 #subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DBoost_COMPILER='+boost_string+'-DENABLE_IMG=OFF -DENABLE_UI=OFF -DENABLE_GFX=OFF', shell=True,cwd='../../')
 #subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' s-DENABLE_IMG=OFF -DENABLE_UI=OFF -DENABLE_GFX=OFF', shell=True,cwd='../../')
 #subprocess.call('make -j5',shell=True,cwd='../../')
-#print 'Converting Chemlib dictionary'
-#subprocess.call('stage/bin/chemdict_tool create components.cif compounds.chemlib', shell=True, cwd='../../')
-#print '\nStaging Chemlib dictionary'
+##print 'Converting Chemlib dictionary'
+##subprocess.call('stage/bin/chemdict_tool create components.cif compounds.chemlib', shell=True, cwd='../../')
+print '\nStaging Chemlib dictionary'
 print 'Compiling Openstructure'
-#subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DBoost_COMPILER='+boost_string+' -DCOMPOUND_LIB=ChemLib/compounds.chemlib -DENABLE_IMG=ON -DENABLE_UI=ON -DENABLE_GFX=ON -DOPTIMIZE=ON',shell=True,cwd='../../')
 subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DCOMPOUND_LIB=ChemLib/compounds.chemlib -DENABLE_IMG=ON -DENABLE_UI=ON -DENABLE_GFX=ON -DOPTIMIZE=ON',shell=True,cwd='../../')
 subprocess.call('make -j2',shell=True,cwd='../../')
 print 'Removing obsolete packages and package directory'
@@ -73,13 +66,14 @@ print 'Creating new package directory'
 subprocess.call('mkdir '+directory_name,shell=True,cwd='../../')
 subprocess.call('mkdir '+directory_name+'/bin',shell=True,cwd='../../')
 print 'Copy python executable into stage for dependency detection'
+print system_python_bin
 subprocess.call('cp '+system_python_bin+ ' stage/bin/python',shell=True,cwd='../../')
 print 'Copy python libraries into the stage for dependency detection'
-subprocess.call('cp -pRL '+system_python_libs+' stage/'+libdir,shell=True,cwd='../../')
-subprocess.call('rm -fr stage/'+libdir+'/'+system_python_version+'/dist-packages',shell=True,cwd='../../')
+subprocess.call('cp -pRL '+system_python_libs+' stage/'+libdir+'/python',shell=True,cwd='../../')
+subprocess.call('rm -fr stage/'+libdir+'/python/dist-packages',shell=True,cwd='../../')
 if second_system_python_libs_flag==True:
-  subprocess.call('cp -pRL '+second_system_python_libs+'/sip* stage/'+libdir+'/'+system_python_version,shell=True,cwd='../../')
-  subprocess.call('cp -pRL '+second_system_python_libs+'/PyQt* stage/'+libdir+'/'+system_python_version,shell=True,cwd='../../')
+  subprocess.call('cp -pRL '+second_system_python_libs+'/sip* stage/'+libdir+'/python/',shell=True,cwd='../../')
+  subprocess.call('cp -pRL '+second_system_python_libs+'/PyQt* stage/'+libdir+'/python/',shell=True,cwd='../../')
 print 'Creating new dependency list'
 so_list=[]
 walk_list=os.walk('../../stage')
@@ -104,22 +98,21 @@ for entry in sorted_dep_list:
        exclude=True
    if exclude==False: 
      filtered_dep_list.append(entry)
+print 'Installing OpenStructure into package directory structure'
+subprocess.call('make install',shell=True,cwd='../../')
 print 'Copy libraries in the package directory structure'
-subprocess.call('mkdir '+directory_name+'/'+libdir,shell=True,cwd='../../')
 for entry in filtered_dep_list:
   subprocess.call('cp '+entry+' '+directory_name+'/'+libdir,shell=True,cwd='../../')
 print 'Copy python executable into package directory structure'
 subprocess.call('cp '+system_python_bin+ ' '+directory_name+'/bin/python',shell=True,cwd='../../')
 print 'Copy python libraries into package directory structure'
-subprocess.call('cp -pRL '+system_python_libs+' '+directory_name+'/'+libdir,shell=True,cwd='../../')
-subprocess.call('rm -fr '+directory_name+'/'+libdir+'/'+system_python_version+'/dist-packages',shell=True,cwd='../../')
+subprocess.call('cp -pRL '+system_python_libs+' '+directory_name+'/'+libdir+'/python',shell=True,cwd='../../')
+subprocess.call('rm -fr '+directory_name+'/'+libdir+'/python/dist-packages',shell=True,cwd='../../')
 if second_system_python_libs_flag==True:
-  subprocess.call('cp -pRL '+second_system_python_libs+'/sip* '+directory_name+'/'+libdir+'/'+system_python_version,shell=True,cwd='../../')
-  subprocess.call('cp -pRL '+second_system_python_libs+'/PyQt* '+directory_name+'/'+libdir+'/'+system_python_version,shell=True,cwd='../../')
+  subprocess.call('cp -pRL '+second_system_python_libs+'/sip* '+directory_name+'/'+libdir+'/python/',shell=True,cwd='../../')
+  subprocess.call('cp -pRL '+second_system_python_libs+'/PyQt* '+directory_name+'/'+libdir+'/python/',shell=True,cwd='../../')
 print 'Copy Qt 4 plugins into package directory structure'
 subprocess.call('cp -pRL '+qt4_plugins+' '+directory_name+'/bin/',shell=True,cwd='../../')
-print 'Installing OpenStructure into package directory structure'
-subprocess.call('make install',shell=True,cwd='../../')
 print 'Copying supplementary material into package directory structure'
 subprocess.call('cp -pRL  stage/share/openstructure  '+directory_name+'/share/',shell=True,cwd='../../')
 print 'Copying examples into package directory structure'
@@ -140,11 +133,8 @@ print 'removing dokk and harmony examples from bundle'
 subprocess.call('rm -rf '+directory_name+'/share/openstructure/examples/code_fragments/dokk',shell=True,cwd='../../')
 subprocess.call('rm -rf '+directory_name+'/share/openstructure/examples/code_fragments/harmony',shell=True,cwd='../../')
 print 'De-hardcoding package python binary path from openstructure executables'
-subprocess.call('rm scripts/ost.in',shell=True,cwd='../../')
-subprocess.call('rm scripts/ost.in.pre*',shell=True,cwd='../../')
-subprocess.call('rm scripts/dng.in',shell=True,cwd='../../')
-subprocess.call('rm scripts/dng.in.pre*',shell=True,cwd='../../')
-subprocess.call('mv scripts/ost.in.backup scripts/ost.in',shell=True,cwd='../../')
-subprocess.call('mv scripts/dng.in.backup scripts/dng.in',shell=True,cwd='../../')
+subprocess.call('rm scripts/ost_config.in',shell=True,cwd='../../')
+subprocess.call('rm scripts/ost_config.in.pre*',shell=True,cwd='../../')
+subprocess.call('mv scripts/ost_config.in.backup scripts/ost_config.in',shell=True,cwd='../../')
 subprocess.call('tar cfz '+directory_name+'.tgz '+directory_name,shell=True,cwd='../../')
 
