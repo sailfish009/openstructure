@@ -1,0 +1,23 @@
+Source: openstructure
+Section: science
+Priority: extra
+Maintainer: Valerio Mariani <valerio.mariani@unibas.ch>
+Build-Depends: debhelper (>= 7.0.50~),cmake,desktop-file-utils,libboost-all-dev,libeigen2-dev,qt4-dev-tools,libqt4-dev,libqt4-opengl-dev,python-qt4-dev,pyqt4-dev-tools,libfftw3-dev,libpng12-dev,libtiff4-dev,python-dev
+Standards-Version: 3.9.1
+Homepage: http://www.openstructure.org
+          
+Package: openstructure
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, python-sip, python-qt4
+Description: Open-source computational structural biology framework
+ The Openstructure  project aims to provide an open-source, modular, flexible, 
+ molecular modelling and visualization environment. It is targeted at 
+ interested method developers in the field of structural bioinformatics.
+
+Package: openstructure-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, openstructure
+Description: Open-source computational structural biology framework
+ The Openstructure  project aims to provide an open-source, modular, flexible, 
+ molecular modelling and visualization environment. It is targeted at 
+ interested method developers in the field of structural bioinformatics.
