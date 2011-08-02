@@ -117,6 +117,46 @@ public:
   bool visit_two;
 };
 
+class HardLoopTestParser : public StarParser {
+public:
+  HardLoopTestParser(std::istream& stream): StarParser(stream), cur_char_('A')
+  { }
+  
+  virtual bool OnBeginLoop(const StarLoopDesc& header)
+  {
+    return true;
+  }  
+
+  virtual void OnDataRow(const StarLoopDesc& header, 
+                         const std::vector<StringRef>& columns) 
+  {
+    BOOST_CHECK_EQUAL(columns[0][0], cur_char_);
+    BOOST_CHECK_EQUAL(columns[0].size(), 1);
+    ++cur_char_;
+    BOOST_CHECK_EQUAL(columns[1][0], cur_char_);
+    BOOST_CHECK_EQUAL(columns[1].size(), 1);
+    ++cur_char_;
+    BOOST_CHECK_EQUAL(columns[2][0], cur_char_);
+    BOOST_CHECK_EQUAL(columns[2].size(), 1);    
+    ++cur_char_;
+    BOOST_CHECK_EQUAL(columns[3][0], cur_char_);
+    BOOST_CHECK_EQUAL(columns[3].size(), 1);    
+    ++cur_char_;
+    BOOST_CHECK_EQUAL(columns[4][0], cur_char_);
+    BOOST_CHECK_EQUAL(columns[4].size(), 1);    
+    ++cur_char_;
+    BOOST_CHECK_EQUAL(columns[5][0], cur_char_);
+    BOOST_CHECK_EQUAL(columns[5].size(), 1);
+    ++cur_char_;
+  }
+  
+  virtual void OnEndLoop()
+  {
+    BOOST_CHECK_EQUAL(cur_char_, 'S');
+  }
+  char cur_char_;
+};
+
 class ItemsAsRowTestParser : public StarParser {
 public:
   ItemsAsRowTestParser(std::istream& stream): StarParser(stream, true),
@@ -281,6 +321,13 @@ BOOST_AUTO_TEST_CASE(star_multi)
   star_p.Parse();
   BOOST_CHECK(star_p.visit_one);
   BOOST_CHECK(star_p.visit_two);
+}
+
+BOOST_AUTO_TEST_CASE(star_multiline_loop)
+{
+  std::ifstream s("testfiles/multiline-loop.cif");
+  HardLoopTestParser star_p(s);
+  star_p.Parse();
 }
   
 BOOST_AUTO_TEST_CASE(star_loop)
