@@ -298,6 +298,10 @@ The Handle Classes
      Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types
      available.
 
+  .. attribute:: description
+
+     Details about the chain. Not categorised, just text.
+
   .. attribute:: residues
    
      List of all residues of this chain. The residues are sorted from N- to 
@@ -410,6 +414,10 @@ The Handle Classes
   .. method:: GetChainType()
 
     See :attr:`chain_type`
+
+  .. method:: GetChainDescription()
+
+    See :attr:`description`
 
 .. class:: ResidueHandle
 
