@@ -344,7 +344,7 @@ void StarParser::ParseLoop()
           } else {
             tmp_values.push_back(tline.str());
             const char* d=tmp_values.back().c_str();
-            for (size_t i=std::max(before-1, 0); i<columns.size(); ++i) {
+            for (size_t i=before; i<columns.size(); ++i) {
               columns[i]=StringRef(d+(columns[i].begin()-tline.begin()), 
                                    columns[i].size());
             }
