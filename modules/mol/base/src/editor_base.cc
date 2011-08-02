@@ -88,6 +88,12 @@ void EditorBase::SetChainType(ChainHandle chain, const ChainType type)
   chain.Impl()->SetChainType(type);
 }
 
+void EditorBase::SetChainDescription(ChainHandle chain, const String desc)
+{
+  CheckHandleValidity(chain);
+  chain.Impl()->SetChainDescription(desc);
+}
+
 AtomHandle EditorBase::InsertAtom(ResidueHandle res, const String& name,
                                   const geom::Vec3& pos, const String& ele,
                                   Real occupancy, Real b_factor, 

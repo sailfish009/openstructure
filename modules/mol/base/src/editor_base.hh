@@ -162,6 +162,12 @@ public:
   /// \param type type of the chain
   void SetChainType(ChainHandle chain, const ChainType type);
 
+  /// \brief Assign a description to a chain.
+  ///
+  /// \param chain chain to assign to
+  /// \param desc description
+  void SetChainDescription(ChainHandle chain, const String desc);
+
   /// \brief   Delete all atoms of residue
   ///
   /// All associated torsions and bonds will also be removed

@@ -65,6 +65,11 @@ public:
   /// \return chain type of ChainType
   ChainType GetChainType() const;
 
+  /// \brief Get information about a chain.
+  ///
+  /// \return description
+  String GetChainDescription() const;
+
   const impl::ChainImplPtr& Impl() const {
     return impl_;
   }

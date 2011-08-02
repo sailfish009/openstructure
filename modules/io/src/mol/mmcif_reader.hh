@@ -186,7 +186,8 @@ private:
   /// \enum items of the entity category
   typedef enum {
     E_ID,              ///< unique identifier
-    E_TYPE             ///< polymer, non-polymer or water
+    E_TYPE,            ///< polymer, non-polymer or water
+    DETAILS            ///< special aspects of the entity
   } EntityItems;
 
   /// \enum categories of the mmcif format
@@ -199,6 +200,7 @@ private:
   /// \struct keeping track of entity information
   typedef struct {
     ChainType type; ///< characterise entity
+    String details; ///< description of this entity
   } MMCifEntityDesc;
 
   typedef std::map<String, MMCifEntityDesc> MMCifEntityDescMap;

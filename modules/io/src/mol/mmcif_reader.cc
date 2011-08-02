@@ -154,7 +154,8 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     // mandatory items
     this->TryStoreIdx(E_ID, "id",    header);
     // optional
-    indices_[E_TYPE] = header.GetIndex("type");
+    indices_[E_TYPE]  = header.GetIndex("type");
+    indices_[DETAILS] = header.GetIndex("details");
     return true;
   }
   /*else if (header.GetCategory()=="entity_poly") {
@@ -449,6 +450,11 @@ void MMCifParser::ParseEntity(const std::vector<StringRef>& columns)
                                                this->GetCurrentLinenum()));
     }
     store = true;
+  }
+
+  // description
+  if (indices_[DETAILS] != -1) {
+    desc.details = columns[indices_[E_TYPE]].str();
   }
 
   if (store) {

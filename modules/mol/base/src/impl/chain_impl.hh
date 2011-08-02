@@ -64,6 +64,22 @@ public:
     return chain_type_;
   }
 
+  /// \brief Assign a description to a chain.
+  ///
+  /// \param desc description
+  void SetChainDescription(const String desc)
+  {
+    description_ = desc;
+  }
+
+  /// \brief Get information about a chain
+  ///
+  /// \return description
+  String GetChainDescription() const
+  {
+    return description_;
+  }
+
   /// \brief append new residue with exactly the same parameters as res, but 
   ///     no atoms and bonds                               
   ResidueImplPtr AppendResidue(const ResidueImplPtr& res);
@@ -152,6 +168,7 @@ private:
   ///        to optimize residue by number lookup.
   bool             in_sequence_;
   ChainType        chain_type_;
+  String           description_; ///< special aspects of the chain
 };
 
 }}} // ns

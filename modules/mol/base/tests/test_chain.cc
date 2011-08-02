@@ -204,9 +204,9 @@ BOOST_AUTO_TEST_CASE(rename_chain)
 
 BOOST_AUTO_TEST_CASE(chain_type)
 {
-   EntityHandle eh=CreateEntity();
-   XCSEditor e=eh.EditXCS();
-   ChainHandle ch1=e.InsertChain("A");
+   EntityHandle eh = CreateEntity();
+   XCSEditor e = eh.EditXCS();
+   ChainHandle ch1 = e.InsertChain("A");
 
    BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_UNKNOWN);
    e.SetChainType(ch1, CHAINTYPE_POLY);
@@ -233,6 +233,16 @@ BOOST_AUTO_TEST_CASE(chain_type)
    BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_N_CHAINTYPES);
    e.SetChainType(ch1, CHAINTYPE_UNKNOWN);
    BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_UNKNOWN);
+}
+
+BOOST_AUTO_TEST_CASE(chain_description)
+{
+  EntityHandle eh=CreateEntity();
+  XCSEditor e = eh.EditXCS();
+  ChainHandle ch1 = e.InsertChain("A");
+  String description = "Very important information";
+  e.SetChainDescription(ch1, description);
+  BOOST_CHECK(ch1.GetChainDescription() == description);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -48,6 +48,10 @@ ChainType ChainBase::GetChainType() const {
   return impl_->GetChainType();
 }
 
+String ChainBase::GetChainDescription() const {
+  return impl_->GetChainDescription();
+}
+
 void ChainBase::CheckValidity() const {
   if (!impl_)
     throw InvalidHandle();
