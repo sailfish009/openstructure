@@ -9,11 +9,15 @@ import ost.mol as mol
 import ost.gfx as gfx
 import ost.geom as geom
 
-has_numpy=True
-import numpy
-if not has_numpy:
+if ost.WITH_NUMPY:
+  has_numpy=True
+  try:
+    import numpy
+  except ImportError, e:
+    has_numpy=False
+else:
   has_numpy=False
- 
+
 def col_delta(c1,c2):
   return geom.Distance(geom.Vec3(c1[0],c1[1],c1[2]),geom.Vec3(c2[0],c2[1],c2[2]))
 
