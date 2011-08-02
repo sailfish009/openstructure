@@ -280,12 +280,12 @@ The Handle Classes
      want to save them as PDB files
      
      This property is read-only. To change the name, use an :class:`XCSEditor`. 
-     
+
      Also available as :meth:`GetName`
      
      :type: str
 
-  .. attribute:: chain_type
+  .. attribute:: type
 
      Describes the type of the chain. Is one of enum ChainType:
 
@@ -411,11 +411,11 @@ The Handle Classes
   
     See :attr:`name`
 
-  .. method:: GetChainType()
+  .. method:: GetType()
 
-    See :attr:`chain_type`
+    See :attr:`type`
 
-  .. method:: GetChainDescription()
+  .. method:: GetDescription()
 
     See :attr:`description`
 

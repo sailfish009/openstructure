@@ -44,12 +44,12 @@ String ChainBase::GetName() const {
   return impl_->GetName();
 }
 
-ChainType ChainBase::GetChainType() const {
-  return impl_->GetChainType();
+ChainType ChainBase::GetType() const {
+  return impl_->GetType();
 }
 
-String ChainBase::GetChainDescription() const {
-  return impl_->GetChainDescription();
+String ChainBase::GetDescription() const {
+  return impl_->GetDescription();
 }
 
 void ChainBase::CheckValidity() const {

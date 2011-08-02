@@ -51,23 +51,23 @@ public:
   /// \brief Assign a type to a chain.
   ///
   /// \param type chain type of ChainType
-  void SetChainType(const ChainType type)
+  void SetType(const ChainType type)
   {
-    chain_type_ = type;
+    type_ = type;
   }
 
   /// \brief Get the type of a chain.
   ///
   /// \return chain type of ChainType
-  ChainType GetChainType() const
+  ChainType GetType() const
   {
-    return chain_type_;
+    return type_;
   }
 
   /// \brief Assign a description to a chain.
   ///
   /// \param desc description
-  void SetChainDescription(const String desc)
+  void SetDescription(const String desc)
   {
     description_ = desc;
   }
@@ -75,7 +75,7 @@ public:
   /// \brief Get information about a chain
   ///
   /// \return description
-  String GetChainDescription() const
+  String GetDescription() const
   {
     return description_;
   }
@@ -167,7 +167,7 @@ private:
   /// \brief whether the residue numbers are in ascending order or not. Used
   ///        to optimize residue by number lookup.
   bool             in_sequence_;
-  ChainType        chain_type_;
+  ChainType        type_;
   String           description_; ///< special aspects of the chain
 };
 

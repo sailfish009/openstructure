@@ -85,13 +85,13 @@ void EditorBase::RenameChain(ChainHandle chain, const String& new_name)
 void EditorBase::SetChainType(ChainHandle chain, const ChainType type)
 {
   CheckHandleValidity(chain);
-  chain.Impl()->SetChainType(type);
+  chain.Impl()->SetType(type);
 }
 
 void EditorBase::SetChainDescription(ChainHandle chain, const String desc)
 {
   CheckHandleValidity(chain);
-  chain.Impl()->SetChainDescription(desc);
+  chain.Impl()->SetDescription(desc);
 }
 
 AtomHandle EditorBase::InsertAtom(ResidueHandle res, const String& name,

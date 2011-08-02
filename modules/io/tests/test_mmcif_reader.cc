@@ -276,13 +276,13 @@ BOOST_AUTO_TEST_CASE(mmcif_chaintype_setting)
     mmcif_p.Parse();
     ch = eh.FindChain("A");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetChainType() == CHAINTYPE_POLY);
+    BOOST_CHECK(ch.GetType() == CHAINTYPE_POLY);
     ch = eh.FindChain("C");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetChainType() == CHAINTYPE_POLY);
+    BOOST_CHECK(ch.GetType() == CHAINTYPE_POLY);
     ch = eh.FindChain("O");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetChainType() == CHAINTYPE_WATER);
+    BOOST_CHECK(ch.GetType() == CHAINTYPE_WATER);
   }
   BOOST_MESSAGE("          done.");
   // negative: no entity description
@@ -295,10 +295,10 @@ BOOST_AUTO_TEST_CASE(mmcif_chaintype_setting)
     mmcif_p.Parse();
     ch = eh.FindChain("A");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetChainType() == CHAINTYPE_UNKNOWN);
+    BOOST_CHECK(ch.GetType() == CHAINTYPE_UNKNOWN);
     ch = eh.FindChain("B");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetChainType() == CHAINTYPE_UNKNOWN);
+    BOOST_CHECK(ch.GetType() == CHAINTYPE_UNKNOWN);
   }
   BOOST_MESSAGE("          done.");
 

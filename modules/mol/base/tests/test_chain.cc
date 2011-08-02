@@ -208,31 +208,31 @@ BOOST_AUTO_TEST_CASE(chain_type)
    XCSEditor e = eh.EditXCS();
    ChainHandle ch1 = e.InsertChain("A");
 
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_UNKNOWN);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_UNKNOWN);
    e.SetChainType(ch1, CHAINTYPE_POLY);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_POLY);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY);
    e.SetChainType(ch1, CHAINTYPE_NON_POLY);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_NON_POLY);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_NON_POLY);
    e.SetChainType(ch1, CHAINTYPE_WATER);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_WATER);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_WATER);
    e.SetChainType(ch1, CHAINTYPE_POLY_PEPTIDE_D);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_POLY_PEPTIDE_D);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_PEPTIDE_D);
    e.SetChainType(ch1, CHAINTYPE_POLY_PEPTIDE_L);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_POLY_PEPTIDE_L);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_PEPTIDE_L);
    e.SetChainType(ch1, CHAINTYPE_POLY_DN);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_POLY_DN);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_DN);
    e.SetChainType(ch1, CHAINTYPE_POLY_RN);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_POLY_RN);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_RN);
    e.SetChainType(ch1, CHAINTYPE_POLY_SAC_D);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_POLY_SAC_D);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_SAC_D);
    e.SetChainType(ch1, CHAINTYPE_POLY_SAC_L);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_POLY_SAC_L);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_SAC_L);
    e.SetChainType(ch1, CHAINTYPE_POLY_DN_RN);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_POLY_DN_RN);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_DN_RN);
    e.SetChainType(ch1, CHAINTYPE_N_CHAINTYPES);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_N_CHAINTYPES);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_N_CHAINTYPES);
    e.SetChainType(ch1, CHAINTYPE_UNKNOWN);
-   BOOST_CHECK(ch1.GetChainType() == CHAINTYPE_UNKNOWN);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_UNKNOWN);
 }
 
 BOOST_AUTO_TEST_CASE(chain_description)
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE(chain_description)
   ChainHandle ch1 = e.InsertChain("A");
   String description = "Very important information";
   e.SetChainDescription(ch1, description);
-  BOOST_CHECK(ch1.GetChainDescription() == description);
+  BOOST_CHECK(ch1.GetDescription() == description);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
