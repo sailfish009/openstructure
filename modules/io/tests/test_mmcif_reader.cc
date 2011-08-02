@@ -49,6 +49,7 @@ public:
   using MMCifParser::ParseAtomIdent;
   using MMCifParser::ParseAndAddAtom;
   using MMCifParser::ParseEntity;
+  using MMCifParser::ParseEntityPoly;
   using MMCifParser::TryStoreIdx;
 };
 
@@ -276,10 +277,10 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
     mmcif_p.Parse();
     ch = eh.FindChain("A");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetType() == CHAINTYPE_POLY);
+    BOOST_CHECK(ch.GetType() == CHAINTYPE_POLY_PEPTIDE_L);
     ch = eh.FindChain("C");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetType() == CHAINTYPE_POLY);
+    BOOST_CHECK(ch.GetType() == CHAINTYPE_POLY_PEPTIDE_L);
     ch = eh.FindChain("O");
     BOOST_CHECK(ch.IsValid());
     BOOST_CHECK(ch.GetType() == CHAINTYPE_WATER);
@@ -309,6 +310,94 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
     ch = eh.FindChain("A");
     BOOST_CHECK(ch.IsValid());
     BOOST_CHECK(ch.GetDescription() == "Very important information.");
+  }
+  BOOST_MESSAGE("          done.");
+
+  BOOST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
+{
+  BOOST_MESSAGE("  Running mmcif_entity_poly_tests...");
+  mol::ChainHandle ch;
+  IOProfile profile;
+  StarLoopDesc tmmcif_h;
+  // positive
+  // negative: unknown polymer type
+  mol::EntityHandle eh = mol::CreateEntity();
+  MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+
+  mmcif_p.Parse();
+
+
+  BOOST_MESSAGE("          testing missing corresponding entity entry...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    std::vector<StringRef> columns;
+    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+
+    tmmcif_h.SetCategory(StringRef("entity_poly", 11));
+    tmmcif_h.Add(StringRef("entity_id", 9));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+
+    columns.push_back(StringRef("1", 1));
+    BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), IOException);
+  }
+  BOOST_MESSAGE("          done.");
+  BOOST_MESSAGE("          testing type recognition...");
+  {
+    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    std::vector<StringRef> columns;
+
+    // create corresponding entity entry
+    tmmcif_h.Clear();
+    tmmcif_h.SetCategory(StringRef("entity", 6));
+    tmmcif_h.Add(StringRef("id", 2));
+    tmmcif_h.Add(StringRef("type", 4));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+    columns.push_back(StringRef("1", 1));
+    columns.push_back(StringRef("polymer", 7));
+    tmmcif_p.ParseEntity(columns);
+    columns.pop_back();
+    columns.pop_back();
+
+    // build dummy entity_poly header
+    tmmcif_h.Clear();
+    tmmcif_h.SetCategory(StringRef("entity_poly", 11));
+    tmmcif_h.Add(StringRef("entity_id", 9));
+    tmmcif_h.Add(StringRef("type", 4));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+
+    columns.push_back(StringRef("1", 1));
+    columns.push_back(StringRef("polypeptide(D)", 14));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
+    columns.pop_back();
+    columns.push_back(StringRef("polypeptide(L)", 14));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
+    columns.pop_back();
+    columns.push_back(StringRef("polydeoxyribonucleotide", 23));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
+    columns.pop_back();
+    columns.push_back(StringRef("polyribonucleotide", 18));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
+    columns.pop_back();
+    columns.push_back(StringRef("polysaccharide(D)", 17));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
+    columns.pop_back();
+    columns.push_back(StringRef("polysaccharide(L)", 17));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
+    columns.pop_back();
+columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
+                                49));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
+    columns.pop_back();
+    columns.push_back(StringRef("other", 5));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
+    columns.pop_back();
+    columns.pop_back();
+    columns.push_back(StringRef("badbadprion", 11));
+    BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), IOException);
+    columns.pop_back();
   }
   BOOST_MESSAGE("          done.");
 

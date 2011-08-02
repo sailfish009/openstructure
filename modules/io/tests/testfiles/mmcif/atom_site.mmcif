@@ -15,6 +15,11 @@ _entity.details
 ;
 5 water        .
 
+_entity_poly.entity_id                      1
+_entity_poly.type                           'polypeptide(L)'
+_entity_poly.nstd_linkage                   no
+_entity_poly.nstd_monomer                   no
+
 loop_
 _atom_site.group_PDB
 _atom_site.type_symbol

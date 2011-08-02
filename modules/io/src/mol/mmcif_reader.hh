@@ -155,6 +155,11 @@ public:
   /// \param columns data row
   void ParseEntity(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch MMCif entity_poly information
+  ///
+  /// \param columns data row
+  void ParseEntityPoly(const std::vector<StringRef>& columns);
+
 private:
   /// \enum magic numbers of this class
   typedef enum {
@@ -191,10 +196,17 @@ private:
     DETAILS            ///< special aspects of the entity
   } EntityItems;
 
+  /// \enum items of the entity_poly category
+  typedef enum {
+    ENTITY_ID,         ///< pointer to entity.id
+    EP_TYPE            ///< type of polymer
+  } EntityPolyItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
     ENTITY,
+    ENTITY_POLY,
     DONT_KNOW
   } MMCifCategory;
 

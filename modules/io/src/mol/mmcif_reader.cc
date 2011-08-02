@@ -157,9 +157,15 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     indices_[E_TYPE]  = header.GetIndex("type");
     indices_[DETAILS] = header.GetIndex("details");
     return true;
-  }
-  /*else if (header.GetCategory()=="entity_poly") {
-  } else if (header.GetCategory()=="pdbx_poly_seq_scheme") {
+  } else if (header.GetCategory()=="entity_poly") {
+    category_ = ENTITY_POLY;
+    category_counts_[category_]++;
+    // mandatory
+    this->TryStoreIdx(ENTITY_ID, "entity_id",    header);
+    // optional
+    indices_[EP_TYPE]  = header.GetIndex("type");
+    return true;
+  } /*else if (header.GetCategory()=="pdbx_poly_seq_scheme") {
   } else if (header.GetCategory()=="pdbx_struct_assembly") {
   } else if (header.GetCategory()=="struct_conf") {
   }*/
@@ -467,6 +473,55 @@ void MMCifParser::ParseEntity(const std::vector<StringRef>& columns)
   }
 }
 
+void MMCifParser::ParseEntityPoly(const std::vector<StringRef>& columns)
+{
+  // we assume that the entity cat. ALWAYS comes before the entity_poly cat.
+  // search entity
+  MMCifEntityDescMap::iterator edm_it =
+    entity_desc_map_.find(columns[indices_[ENTITY_ID]].str());
+
+  // store values in description map
+  if (edm_it != entity_desc_map_.end()) {
+    if (indices_[EP_TYPE] != -1) {
+      if(StringRef("polypeptide(D)", 14) == columns[indices_[EP_TYPE]]) {
+        edm_it->second.type = CHAINTYPE_POLY_PEPTIDE_D;
+      } else if(StringRef("polypeptide(L)", 14) == columns[indices_[EP_TYPE]]) {
+        edm_it->second.type = CHAINTYPE_POLY_PEPTIDE_L;
+      } else if(StringRef("polydeoxyribonucleotide", 23) ==
+                columns[indices_[EP_TYPE]]) {
+        edm_it->second.type = CHAINTYPE_POLY_DN;
+      } else if(StringRef("polyribonucleotide", 18) ==
+                columns[indices_[EP_TYPE]]) {
+        edm_it->second.type = CHAINTYPE_POLY_RN;
+      } else if(StringRef("polysaccharide(D)", 17) ==
+                columns[indices_[EP_TYPE]]) {
+        edm_it->second.type = CHAINTYPE_POLY_SAC_D;
+      } else if(StringRef("polysaccharide(L)", 17) ==
+                columns[indices_[EP_TYPE]]) {
+        edm_it->second.type = CHAINTYPE_POLY_SAC_L;
+      } else if(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
+                          49) == columns[indices_[EP_TYPE]]) {
+        edm_it->second.type = CHAINTYPE_POLY_DN_RN;
+      } else if(StringRef("other",
+                          5) == columns[indices_[EP_TYPE]]) {
+        edm_it->second.type = CHAINTYPE_UNKNOWN;
+      } else {
+        throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                                "Unrecognised polymner type '" +
+                                              columns[indices_[EP_TYPE]].str() +
+                                                 "' found.",
+                                                 this->GetCurrentLinenum()));
+      }
+    }
+  } else {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                     "'entity_poly' category defined before 'entity' for id '" +
+                                            columns[indices_[ENTITY_ID]].str() +
+                                             "' or missing.",
+                                             this->GetCurrentLinenum()));
+  }
+}
+
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
@@ -478,6 +533,11 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
   case ENTITY:
     LOG_TRACE("processing entity entry");
     this->ParseEntity(columns);
+    break;
+  case ENTITY_POLY:
+    LOG_TRACE("processing entity_poly entry");
+    this->ParseEntityPoly(columns);
+    break;
   default:
     return;
   }
