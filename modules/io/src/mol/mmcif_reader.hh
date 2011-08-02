@@ -134,7 +134,8 @@ public:
   /// \param[out] chain_name takes atom_site.label_asym_id or, if
   ///             auth_chain_id_ is set, atom_site.auth_asym_id as a chain name
   /// \param[out] res_name fetches atom_site.label_comp_id
-
+  /// \param[out] resnum gets atom_site.label_seq_id if available, consecutive
+  ///             numbers, otherwise
   /// \param[out] atom_name corresponds to label_atom_id
   bool ParseAtomIdent(const std::vector<StringRef>& columns,
                       String& chain_name,

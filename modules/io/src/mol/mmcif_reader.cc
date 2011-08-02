@@ -454,7 +454,9 @@ void MMCifParser::ParseEntity(const std::vector<StringRef>& columns)
 
   // description
   if (indices_[DETAILS] != -1) {
-    desc.details = columns[indices_[E_TYPE]].str();
+    desc.details = columns[indices_[DETAILS]].str();
+  } else {
+    desc.details = "";
   }
 
   if (store) {
@@ -633,6 +635,7 @@ void MMCifParser::OnEndData()
 
     if (edm_it != entity_desc_map_.end()) {
       editor.SetChainType(css->first, edm_it->second.type);
+      editor.SetChainDescription(css->first, edm_it->second.details);
     } else {
       LOG_WARNING("No entity description found for atom_site.label_entity_id '"
                   << css->second << "'");

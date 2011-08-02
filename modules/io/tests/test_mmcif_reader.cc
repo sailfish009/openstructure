@@ -262,14 +262,14 @@ BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
   BOOST_MESSAGE("  done.");
 }
 
-BOOST_AUTO_TEST_CASE(mmcif_chaintype_setting)
+BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
 {
-  BOOST_MESSAGE("  Running mmcif_chaintype_setting tests...");
+  BOOST_MESSAGE("  Running mmcif_entity_tests...");
   mol::ChainHandle ch;
   IOProfile profile;
 
   // positive
-  BOOST_MESSAGE("          check correct settings...");
+  BOOST_MESSAGE("          fetching chain type...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
     MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
@@ -301,6 +301,16 @@ BOOST_AUTO_TEST_CASE(mmcif_chaintype_setting)
     BOOST_CHECK(ch.GetType() == CHAINTYPE_UNKNOWN);
   }
   BOOST_MESSAGE("          done.");
+  BOOST_MESSAGE("          fetch details...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+    mmcif_p.Parse();
+    ch = eh.FindChain("A");
+    BOOST_CHECK(ch.IsValid());
+    BOOST_CHECK(ch.GetDescription() == "Very important information.");
+  }
+  BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");
 }
@@ -317,7 +327,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   std::vector<StringRef> columns;
   String chain_name;
   StringRef res_name;
-  //mol::ResNum resnum(0);
+  mol::ResNum resnum(0);
   //StringRef atom_name;
   //char alt_loc;
 
