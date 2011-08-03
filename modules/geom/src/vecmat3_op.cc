@@ -142,16 +142,16 @@ Mat3 EulerTransformation(Real theta, Real phi, Real xi)
 }
 
 Vec3 OrthogonalVector(const Vec3& vec) {
-  if (vec[0] < vec[1]) {
-    if (vec[0] < vec[2])
+  if (std::abs(vec[0]) < std::abs(vec[1])) {
+    if (std::abs(vec[0]) < std::abs(vec[2]))
       return Normalize(Cross(vec, Vec3(1, 0, 0)+vec));
     else
       return Normalize(Cross(vec, Vec3(0, 0, 1)+vec));
   } else {
-    if (vec[1] < vec[2]) 
+    if (std::abs(vec[1]) < std::abs(vec[2]))
       return Normalize(Cross(vec, Vec3(0, 1, 0)+vec));
     else
-      return Normalize(Cross(vec, Vec3(0, 0, 2)+vec));     
+      return Normalize(Cross(vec, Vec3(0, 0, 1)+vec));
   }
 }
 
