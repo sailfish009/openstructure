@@ -24,6 +24,7 @@
 //#include <boost/iostreams/filtering_stream.hpp>
 //#include <boost/filesystem/fstream.hpp>
 
+#include <ost/seq/sequence_list.hh>
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/chain_type.hh>
 #include <ost/io/mol/io_profile.hh>
@@ -68,6 +69,15 @@ public:
   /// \param restrict_chains chain name
   void SetRestrictChains(const String& restrict_chains);
 
+  /// \brief Enable reading of canonical sequence residues
+  ///        (entity_poly.pdbx_seq_one_letter_code_can instead of
+  ///        entity_poly.pdbx_seq_one_letter_code). This flag is exclusive.
+  ///
+  void SetReadCanonicalSeqRes()
+  {
+    seqres_can_ = true;
+  }
+
   const String& GetRestrictChains() const
   {
     return restrict_chains_;
@@ -97,6 +107,13 @@ public:
 
   /// \brief Finalise parsing.
   virtual void OnEndData();
+
+  /// \brief Return sequences
+  ///
+  /// \return List of sequences
+  seq::SequenceList GetSeqRes() const {
+    return seqres_;
+  }
 
  protected:
   /// \brief Store an item index from loop header in preparation for reading a 
@@ -198,8 +215,10 @@ private:
 
   /// \enum items of the entity_poly category
   typedef enum {
-    ENTITY_ID,         ///< pointer to entity.id
-    EP_TYPE            ///< type of polymer
+    ENTITY_ID,                    ///< pointer to entity.id
+    EP_TYPE,                      ///< type of polymer
+    PDBX_SEQ_ONE_LETTER_CODE,     ///< sequence, 1-letter code
+    PDBX_SEQ_ONE_LETTER_CODE_CAN  ///< canonical sequence, 1-letter code
   } EntityPolyItems;
 
   /// \enum categories of the mmcif format
@@ -214,6 +233,7 @@ private:
   typedef struct {
     ChainType type; ///< characterise entity
     String details; ///< description of this entity
+    String seqres;  ///< chain of monomers
   } MMCifEntityDesc;
 
   typedef std::map<String, MMCifEntityDesc> MMCifEntityDescMap;
@@ -226,6 +246,7 @@ private:
   mol::EntityHandle& ent_handle_;
   String restrict_chains_;
   bool auth_chain_id_;       ///< use chain IDs given by authors rather than pdb
+  bool seqres_can_;          ///< read canonical 1-letter residues?
   mol::ChainHandle curr_chain_;
   mol::ResidueHandle curr_residue_;
   int chain_count_;
@@ -238,6 +259,7 @@ private:
   std::vector<std::pair<mol::ChainHandle, String> > chain_id_pairs_;
   ///< chain and label_entity_id
   MMCifEntityDescMap entity_desc_map_; ///< stores entity items
+  seq::SequenceList seqres_;
 };
 
 }}

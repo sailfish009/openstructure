@@ -57,13 +57,13 @@ void MMCifParser::Init()
   atom_count_           = 0;
   residue_count_        = 0;
   auth_chain_id_        = false;
+  seqres_can_           = false;
   has_model_            = false;
   restrict_chains_      = "";
   subst_res_id_         = "";
   curr_chain_           = mol::ChainHandle();
   curr_residue_         = mol::ResidueHandle();
-  //chain_id_pairs_       = 
-  //entity_desc_map_
+  seqres_               = seq::CreateSequenceList();
 }
 
 void MMCifParser::ClearState()
@@ -75,6 +75,7 @@ void MMCifParser::ClearState()
   atom_count_           = 0;
   category_             = DONT_KNOW;
   warned_name_mismatch_ = false;
+  seqres_               = seq::CreateSequenceList();
 }
 
 void MMCifParser::SetRestrictChains(const String& restrict_chains)
@@ -164,6 +165,10 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     this->TryStoreIdx(ENTITY_ID, "entity_id",    header);
     // optional
     indices_[EP_TYPE]  = header.GetIndex("type");
+    indices_[PDBX_SEQ_ONE_LETTER_CODE] =
+      header.GetIndex("pdbx_seq_one_letter_code");
+    indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN] =
+      header.GetIndex("pdbx_seq_one_letter_code_can");
     return true;
   } /*else if (header.GetCategory()=="pdbx_poly_seq_scheme") {
   } else if (header.GetCategory()=="pdbx_struct_assembly") {
@@ -466,6 +471,7 @@ void MMCifParser::ParseEntity(const std::vector<StringRef>& columns)
   }
 
   if (store) {
+    desc.seqres = "";
     entity_desc_map_.insert(
                    MMCifEntityDescMap::value_type(columns[indices_[E_ID]].str(),
                                                   desc)
@@ -480,45 +486,61 @@ void MMCifParser::ParseEntityPoly(const std::vector<StringRef>& columns)
   MMCifEntityDescMap::iterator edm_it =
     entity_desc_map_.find(columns[indices_[ENTITY_ID]].str());
 
-  // store values in description map
-  if (edm_it != entity_desc_map_.end()) {
-    if (indices_[EP_TYPE] != -1) {
-      if(StringRef("polypeptide(D)", 14) == columns[indices_[EP_TYPE]]) {
-        edm_it->second.type = CHAINTYPE_POLY_PEPTIDE_D;
-      } else if(StringRef("polypeptide(L)", 14) == columns[indices_[EP_TYPE]]) {
-        edm_it->second.type = CHAINTYPE_POLY_PEPTIDE_L;
-      } else if(StringRef("polydeoxyribonucleotide", 23) ==
-                columns[indices_[EP_TYPE]]) {
-        edm_it->second.type = CHAINTYPE_POLY_DN;
-      } else if(StringRef("polyribonucleotide", 18) ==
-                columns[indices_[EP_TYPE]]) {
-        edm_it->second.type = CHAINTYPE_POLY_RN;
-      } else if(StringRef("polysaccharide(D)", 17) ==
-                columns[indices_[EP_TYPE]]) {
-        edm_it->second.type = CHAINTYPE_POLY_SAC_D;
-      } else if(StringRef("polysaccharide(L)", 17) ==
-                columns[indices_[EP_TYPE]]) {
-        edm_it->second.type = CHAINTYPE_POLY_SAC_L;
-      } else if(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
-                          49) == columns[indices_[EP_TYPE]]) {
-        edm_it->second.type = CHAINTYPE_POLY_DN_RN;
-      } else if(StringRef("other",
-                          5) == columns[indices_[EP_TYPE]]) {
-        edm_it->second.type = CHAINTYPE_UNKNOWN;
-      } else {
-        throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
-                                                "Unrecognised polymner type '" +
-                                              columns[indices_[EP_TYPE]].str() +
-                                                 "' found.",
-                                                 this->GetCurrentLinenum()));
-      }
-    }
-  } else {
+  if (edm_it == entity_desc_map_.end()) {
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                      "'entity_poly' category defined before 'entity' for id '" +
                                             columns[indices_[ENTITY_ID]].str() +
                                              "' or missing.",
                                              this->GetCurrentLinenum()));
+  }
+
+  // store type
+  if (indices_[EP_TYPE] != -1) {
+    if(StringRef("polypeptide(D)", 14) == columns[indices_[EP_TYPE]]) {
+      edm_it->second.type = CHAINTYPE_POLY_PEPTIDE_D;
+    } else if(StringRef("polypeptide(L)", 14) == columns[indices_[EP_TYPE]]) {
+      edm_it->second.type = CHAINTYPE_POLY_PEPTIDE_L;
+    } else if(StringRef("polydeoxyribonucleotide", 23) ==
+              columns[indices_[EP_TYPE]]) {
+      edm_it->second.type = CHAINTYPE_POLY_DN;
+    } else if(StringRef("polyribonucleotide", 18) ==
+              columns[indices_[EP_TYPE]]) {
+      edm_it->second.type = CHAINTYPE_POLY_RN;
+    } else if(StringRef("polysaccharide(D)", 17) ==
+              columns[indices_[EP_TYPE]]) {
+      edm_it->second.type = CHAINTYPE_POLY_SAC_D;
+    } else if(StringRef("polysaccharide(L)", 17) ==
+              columns[indices_[EP_TYPE]]) {
+      edm_it->second.type = CHAINTYPE_POLY_SAC_L;
+    } else if(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
+                        49) == columns[indices_[EP_TYPE]]) {
+      edm_it->second.type = CHAINTYPE_POLY_DN_RN;
+    } else if(StringRef("other",
+                        5) == columns[indices_[EP_TYPE]]) {
+      edm_it->second.type = CHAINTYPE_UNKNOWN;
+    } else {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                               "Unrecognised polymner type '" +
+                                              columns[indices_[EP_TYPE]].str() +
+                                               "' found.",
+                                               this->GetCurrentLinenum()));
+    }
+  }
+
+  // store seqres
+  if (edm_it->second.seqres.length() > 0) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+     "entity_poly.pdbx_seq_one_letter_code[_can] clash: sequence for entry '" +
+                                            columns[indices_[ENTITY_ID]].str() +
+                                             "' is already set to '" +
+                                             edm_it->second.seqres + "'.",
+                                             this->GetCurrentLinenum()));
+  }
+  if ((seqres_can_) && (indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN] != -1)) {
+    edm_it->second.seqres =
+      columns[indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN]].str();
+  } else  if (indices_[PDBX_SEQ_ONE_LETTER_CODE] != -1) {
+    edm_it->second.seqres = columns[indices_[PDBX_SEQ_ONE_LETTER_CODE]].str();
   }
 }
 
@@ -696,6 +718,10 @@ void MMCifParser::OnEndData()
     if (edm_it != entity_desc_map_.end()) {
       editor.SetChainType(css->first, edm_it->second.type);
       editor.SetChainDescription(css->first, edm_it->second.details);
+      if (edm_it->second.seqres.length() > 0) {
+        seqres_.AddSequence(seq::CreateSequence(css->first.GetName(),
+                                                edm_it->second.seqres));
+      }
     } else {
       LOG_WARNING("No entity description found for atom_site.label_entity_id '"
                   << css->second << "'");

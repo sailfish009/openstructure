@@ -30,9 +30,12 @@ void export_mmcif_io()
   class_<MMCifParser, boost::noncopyable>("MMCifParser", init<const String&, EntityHandle&, const IOProfile&>())
     .def("Parse", &MMCifParser::Parse)
     .def("SetRestrictChains", &MMCifParser::SetRestrictChains)
+    .def("SetReadCanonicalSeqRes", &MMCifParser::SetReadCanonicalSeqRes)
+    .def("GetSeqRes", &MMCifParser::GetSeqRes)
     .add_property("restrict_chains",
                   make_function(&MMCifParser::GetRestrictChains,
                                 return_value_policy<copy_const_reference>()),
                   &MMCifParser::SetRestrictChains)
+    .add_property("seqres", &MMCifParser::GetSeqRes)
   ;
 }

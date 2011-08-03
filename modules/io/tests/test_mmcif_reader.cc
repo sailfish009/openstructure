@@ -322,13 +322,15 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
   mol::ChainHandle ch;
   IOProfile profile;
   StarLoopDesc tmmcif_h;
-  // positive
-  // negative: unknown polymer type
+
   mol::EntityHandle eh = mol::CreateEntity();
   MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
 
   mmcif_p.Parse();
 
+  seq::SequenceList seqres = mmcif_p.GetSeqRes();
+  seq::SequenceHandle curr = seqres.FindSequence("A");
+  BOOST_CHECK(curr.GetString() == "VTI");
 
   BOOST_MESSAGE("          testing missing corresponding entity entry...");
   {
@@ -398,6 +400,36 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
     columns.push_back(StringRef("badbadprion", 11));
     BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), IOException);
     columns.pop_back();
+  }
+  BOOST_MESSAGE("          done.");
+  BOOST_MESSAGE("          testing pdbx_seq_one_letter_code reading...");
+  {
+    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    std::vector<StringRef> columns;
+
+    tmmcif_h.Clear();
+    tmmcif_h.SetCategory(StringRef("entity", 6));
+    tmmcif_h.Add(StringRef("id", 2));
+    tmmcif_h.Add(StringRef("type", 4));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+    columns.push_back(StringRef("1", 1));
+    columns.push_back(StringRef("polymer", 7));
+    tmmcif_p.ParseEntity(columns);
+    columns.pop_back();
+    columns.pop_back();
+
+    tmmcif_h.Clear();
+    tmmcif_h.SetCategory(StringRef("entity_poly", 11));
+    tmmcif_h.Add(StringRef("entity_id", 9));
+    tmmcif_h.Add(StringRef("type", 4));
+    tmmcif_h.Add(StringRef("pdbx_seq_one_letter_code", 24));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+
+    columns.push_back(StringRef("1", 1));
+    columns.push_back(StringRef("other", 5));
+    columns.push_back(StringRef("ABRND", 5));
+    BOOST_CHECK_NO_THROW(tmmcif_p.ParseEntityPoly(columns));
+    BOOST_CHECK_THROW(tmmcif_p.ParseEntityPoly(columns), IOException);
   }
   BOOST_MESSAGE("          done.");
 
