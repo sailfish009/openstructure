@@ -93,6 +93,7 @@ public:
   Quat& operator/=(const Quat& q);
   // comparable
   bool operator==(const Quat& q) const;
+  bool operator!=(const Quat& q) const { return !this->operator==(q); }
 
   // Apply rotation to vector.
   Vec3 Rotate(const Vec3& vec) const;
