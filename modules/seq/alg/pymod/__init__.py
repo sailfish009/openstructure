@@ -1,7 +1,7 @@
 from _ost_seq_alg import *
 from ost.seq.alg.mat import *
 
-def AlignToSEQRES(chain, seqres):
+def AlignToSEQRES(chain, seqres, try_resnum_first=False):
   """
   Aligns the residues of chain to the SEQRES sequence, inserting gaps where 
   needed. The function uses the connectivity of the protein backbone to find 
@@ -9,35 +9,52 @@ def AlignToSEQRES(chain, seqres):
   sequence.
   
   All the non-ligand, peptide-linking residues of the chain must be listed in 
-  SEQRES. If there are any additional residues in the chain, the function raises 
-  a ValueError.
-  
+  SEQRES. If there are any additional residues in the chain, the function
+  raises a ValueError.
+
+  If 'try_resnum_first' is set, building the alignment following residue numbers
+  is tried first.
+
   :returns: The alignment of the residues in the chain and the SEQRES entries.
   :rtype: :class:`~ost.seq.AlignmentHandle`
   """
   from ost import seq
   from ost import mol
+  from ost import LogWarning
   view=chain.Select('ligand=false and peptide=true')
   residues=view.residues
   if len(residues)==0:
     return seq.CreateAlignment()
-  fragments=[residues[0].one_letter_code]
-  for r1, r2 in zip(residues[:-2], residues[1:]):
-    if not mol.InSequence(r1.handle, r2.handle):
-      fragments.append('')
-    fragments[-1]+=r2.one_letter_code
-  ss=str(seqres)
-  pos=0
-  aln_seq=''
-  for frag in fragments:
-    new_pos=ss.find(frag, pos)
-    if new_pos==-1:
-      raise ValueError('"%s" is not a substring of "%s"' % (frag, ss))
-    aln_seq+='-'*(new_pos-pos)+frag
-    pos=new_pos+len(frag)
-  aln_seq+='-'*(len(seqres)-len(aln_seq))
+  if try_resnum_first:
+    aln_seq = seq.CreateSequence('atoms', '-'*len(seqres))
+    for r1 in residues:
+      if r1.number.num <= len(seqres) and r1.number.num > 0:
+        if seqres[r1.number.num - 1] == r1.one_letter_code:
+          aln_seq[r1.number.num - 1] = r1.one_letter_code
+        else:
+          LogWarning('Sequence mismatch: chain has "' + r1.one_letter_code +
+                     '", while SEQRES is "' + seqres[r1.number.num - 1] +
+                     '" at the corresponding position.')
+          try_resnum_first = False
+  if not try_resnum_first:
+    fragments=[residues[0].one_letter_code]
+    for r1, r2 in zip(residues[:-1], residues[1:]):
+      if not mol.InSequence(r1.handle, r2.handle):
+        fragments.append('')
+      fragments[-1]+=r2.one_letter_code
+    ss=str(seqres)
+    pos=0
+    aln_seq=''
+    for frag in fragments:
+      new_pos=ss.find(frag, pos)
+      if new_pos==-1:
+        raise ValueError('"%s" is not a substring of "%s"' % (frag, ss))
+      aln_seq+='-'*(new_pos-pos)+frag
+      pos=new_pos+len(frag)
+    aln_seq = seq.CreateSequence('atoms',
+                                 aln_seq+('-'*(len(seqres)-len(aln_seq))))
   return seq.CreateAlignment(seq.CreateSequence('SEQRES', str(seqres)), 
-                             seq.CreateSequence('atoms', aln_seq))
+                             aln_seq)
 
 
 def AlignmentFromChainView(chain, handle_seq_name='handle', 
