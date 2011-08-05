@@ -64,6 +64,7 @@ void MMCifParser::Init()
   curr_chain_           = mol::ChainHandle();
   curr_residue_         = mol::ResidueHandle();
   seqres_               = seq::CreateSequenceList();
+  read_seqres_          = false;
 }
 
 void MMCifParser::ClearState()
@@ -76,6 +77,7 @@ void MMCifParser::ClearState()
   category_             = DONT_KNOW;
   warned_name_mismatch_ = false;
   seqres_               = seq::CreateSequenceList();
+  entity_desc_map_.clear();
 }
 
 void MMCifParser::SetRestrictChains(const String& restrict_chains)
@@ -536,11 +538,23 @@ void MMCifParser::ParseEntityPoly(const std::vector<StringRef>& columns)
                                              edm_it->second.seqres + "'.",
                                              this->GetCurrentLinenum()));
   }
-  if ((seqres_can_) && (indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN] != -1)) {
-    edm_it->second.seqres =
-      columns[indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN]].str();
-  } else  if (indices_[PDBX_SEQ_ONE_LETTER_CODE] != -1) {
-    edm_it->second.seqres = columns[indices_[PDBX_SEQ_ONE_LETTER_CODE]].str();
+  if (read_seqres_) {
+    if (seqres_can_) {
+      if (indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN] != -1) {
+      edm_it->second.seqres =
+        columns[indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN]].str();
+      } else {
+        throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                   "'entity_poly.pdbx_seq_one_letter_code_can' not available.'",
+                                                 this->GetCurrentLinenum()));
+      }
+    } else if (indices_[PDBX_SEQ_ONE_LETTER_CODE] != -1) {
+      edm_it->second.seqres = columns[indices_[PDBX_SEQ_ONE_LETTER_CODE]].str();
+    } else {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                       "'entity_poly.pdbx_seq_one_letter_code' not available.'",
+                                               this->GetCurrentLinenum()));
+    }
   }
 }
 
@@ -668,11 +682,6 @@ void PDBReader::Import(mol::EntityHandle& ent,
         if (IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6))) {
           if (!charmm_style_) {
             this->ParseStrandEntry(curr_line);
-          }
-        }
-        if (IEquals(curr_line.substr(0, 6), StringRef("SEQRES", 6))) {
-          if (read_seqres_) {
-            this->ParseSeqRes(curr_line, line_num_);
           }
         }
         break;

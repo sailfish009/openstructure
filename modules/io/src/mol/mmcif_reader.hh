@@ -69,13 +69,14 @@ public:
   /// \param restrict_chains chain name
   void SetRestrictChains(const String& restrict_chains);
 
-  /// \brief Enable reading of canonical sequence residues
+  /// \brief Toggle reading of canonical sequence residues
   ///        (entity_poly.pdbx_seq_one_letter_code_can instead of
   ///        entity_poly.pdbx_seq_one_letter_code). This flag is exclusive.
   ///
-  void SetReadCanonicalSeqRes()
+  /// \param flag True for reading canonical sequences.
+  void SetReadCanonicalSeqRes(bool flag)
   {
-    seqres_can_ = true;
+    seqres_can_ = flag;
   }
 
   const String& GetRestrictChains() const
@@ -113,6 +114,22 @@ public:
   /// \return List of sequences
   seq::SequenceList GetSeqRes() const {
     return seqres_;
+  }
+
+  /// \brief Toggle reading of SEQRES
+  ///
+  /// \param flag True enables, False disables reading SEQRES
+  void SetReadSeqRes(bool flag)
+  {
+    read_seqres_ = flag;
+  }
+
+  /// \brief Check if reading of SEQRES is enabled
+  ///
+  /// \return True if reading of SEQRES is enabled
+  bool GetReadSeqRes() const
+  {
+    return read_seqres_;
   }
 
  protected:
@@ -260,6 +277,7 @@ private:
   ///< chain and label_entity_id
   MMCifEntityDescMap entity_desc_map_; ///< stores entity items
   seq::SequenceList seqres_;
+  bool read_seqres_;
 };
 
 }}

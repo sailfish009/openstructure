@@ -37,5 +37,7 @@ void export_mmcif_io()
                                 return_value_policy<copy_const_reference>()),
                   &MMCifParser::SetRestrictChains)
     .add_property("seqres", &MMCifParser::GetSeqRes)
+    .add_property("read_seqres", &MMCifParser::GetReadSeqRes, 
+                  &MMCifParser::SetReadSeqRes)
   ;
 }

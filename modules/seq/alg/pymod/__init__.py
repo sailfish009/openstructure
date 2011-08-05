@@ -1,7 +1,56 @@
 from _ost_seq_alg import *
 from ost.seq.alg.mat import *
 
-def AlignToSEQRES(chain, seqres, try_resnum_first=False):
+def ValidateSEQRESAlignment(aln, chain=None):
+  """
+  Checks a sequence aligned to a SEQRES sequence to be free of strand breaks.
+  Residues divided by gaps are not considered as breakage but may also not be
+  connected.
+
+  :param aln: Alignment
+  :type aln: :class:`~ost.seq.AlignmentHandle`
+  :param chain: Source of the sequence
+  :type chain: :class:`~ost.mol.ChainHandle`
+
+  :returns: True if all residues (beside gaped ones) are connected, False
+            otherwise.
+  """
+  from ost import seq
+  from ost import mol
+  if aln.GetCount() != 2:
+    raise ValueError('Alignment contains more than 2 sequences!')
+  sequence = aln.GetSequence(1)
+  if len(sequence) == 0:
+    return True
+  if chain == None:
+    if sequence.HasAttachedView() == False:
+      raise ValueError("Alignment is missing an attached chain view.")
+    chain = sequence.GetAttachedView()
+  residues = chain.residues
+  # eat up all beginning gaps
+  j = 1
+  for s in sequence:
+    if s != '-':
+      break
+    j += 1;
+  l = sequence[j-1]
+  i = 0
+  # run over sequence & alignment
+  for s in sequence[j:]:
+    if s != '-':
+      i += 1
+      r1 = residues[i-1]
+      r2 = residues[i]
+      if l != '-':
+        if not mol.InSequence(r1.handle, r2.handle):
+          return False
+      else:
+        if mol.InSequence(r1.handle, r2.handle):
+          return False
+    l = s
+  return True
+
+def AlignToSEQRES(chain, seqres, try_resnum_first=False, validate=True):
   """
   Aligns the residues of chain to the SEQRES sequence, inserting gaps where 
   needed. The function uses the connectivity of the protein backbone to find 
@@ -14,6 +63,19 @@ def AlignToSEQRES(chain, seqres, try_resnum_first=False):
 
   If 'try_resnum_first' is set, building the alignment following residue numbers
   is tried first.
+
+  If 'validate' is set (default), the alignment is checked using
+  :func:`~ost.seq.alg.ValidateSEQRESAlignment`.
+
+  :param chain: Source of the sequence
+  :type chain: :class:`~ost.mol.ChainHandle`
+  :param seqres: SEQRES sequence
+  :type seqres: :class:`str`
+  :param try_resnum_first: Try to align by residue number
+  :type try_resnum_first: :class:`bool`
+  :param validate: Validate alignment by
+                   :func:`~ost.seq.alg.ValidateSEQRESAlignment`
+  :type validate: :class:`bool`
 
   :returns: The alignment of the residues in the chain and the SEQRES entries.
   :rtype: :class:`~ost.seq.AlignmentHandle`
@@ -53,8 +115,11 @@ def AlignToSEQRES(chain, seqres, try_resnum_first=False):
       pos=new_pos+len(frag)
     aln_seq = seq.CreateSequence('atoms',
                                  aln_seq+('-'*(len(seqres)-len(aln_seq))))
-  return seq.CreateAlignment(seq.CreateSequence('SEQRES', str(seqres)), 
-                             aln_seq)
+  alignment = seq.CreateAlignment(seq.CreateSequence('SEQRES', str(seqres)), 
+                                  aln_seq)
+  if validate and not ValidateSEQRESAlignment(alignment, view):
+    raise ValueError("SEQRES cannot be aligned with its corresponding chain.")
+  return alignment
 
 
 def AlignmentFromChainView(chain, handle_seq_name='handle', 

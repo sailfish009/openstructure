@@ -35,6 +35,8 @@
      considered as aligned. There is no information in the pairwise alignment to 
      guide the merging, the result is undefined.
 
+.. autofunction:: ValidateSEQRESAlignment
+
 .. autofunction:: AlignToSEQRES
 
 .. autofunction:: AlignmentFromChainView
