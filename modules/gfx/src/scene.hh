@@ -42,6 +42,7 @@
 #include "scene_observer.hh"
 #include "gfx_prim.hh"
 #include "povray_fw.hh"
+#include "exporter_fw.hh"
 
 namespace ost { namespace gfx {
 
@@ -256,6 +257,10 @@ class DLLEXPORT_OST_GFX Scene {
 
   /// \brief export scene into povray files named fname.pov and fname.inc
   void ExportPov(const std::string& fname, const std::string& wdir=".");
+
+  /// \rbrief export scene via exporter
+  void Export(Exporter* ex) const;
+
   //@}
   /// \brief entry point for gui events (internal use)
   void OnInput(const InputEvent& e);

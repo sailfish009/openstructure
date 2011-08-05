@@ -19,32 +19,20 @@
 #include <boost/python.hpp>
 using namespace boost::python;
 
-#include <ost/gfx/primitives.hh>
+#include <ost/gfx/exporter.hh>
+#include <ost/gfx/gost_exporter.hh>
+#include <ost/gfx/collada_exporter.hh>
+
 using namespace ost;
 using namespace ost::gfx;
 
-void export_primitives()
+void export_Exporter()
 {
-  class_<Primitive, bases<GfxNode>, boost::noncopyable>("Primitive", no_init)
-    .def("HasOutline", &Primitive::HasOutline)
-    .def("HasFill", &Primitive::HasFill)    
-    .def("SetFill", &Primitive::SetFill)
-    .def("SetFillColor", &Primitive::SetFillColor)    
-    .def("SetOutlineColor", &Primitive::SetOutlineColor)
-    .def("SetOutline", &Primitive::SetOutline)            
-    .def("SetLineWidth", &Primitive::SetLineWidth)
-    .def("GetLineWidth", &Primitive::GetLineWidth)
-    .def("GetFillColor", &Primitive::GetFillColor, 
-         return_value_policy<copy_const_reference>())
-    .def("GetOutlineColor", &Primitive::GetOutlineColor,
-         return_value_policy<copy_const_reference>())
-  ;
-  class_<Cuboid, bases<Primitive>, 
-         boost::noncopyable>("Cuboid", init<const String&, const geom::Cuboid>())
-  ; 
-  class_<Quad, bases<Primitive>, 
-       boost::noncopyable>("Quad", init<const String&, const geom::Vec3&,
-                                        const geom::Vec3&, const geom::Vec3&,
-                                        const geom::Vec3&>())
-  ;  
+  class_<Exporter, boost::noncopyable>("Exporter", no_init);
+
+  class_<GostExporter, bases<Exporter>, boost::noncopyable>("GostExporter", init<const std::string&>())
+    ;
+
+  class_<ColladaExporter, bases<Exporter>, boost::noncopyable>("ColladaExporter", init<const std::string&, optional<float> >())
+    ;
 }

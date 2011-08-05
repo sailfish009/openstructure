@@ -21,6 +21,7 @@ using namespace boost::python;
 
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gfx/scene.hh>
+#include <ost/gfx/exporter.hh>
 using namespace ost;
 using namespace ost::gfx;
 
@@ -63,6 +64,7 @@ void export_Scene()
 
   void (Scene::* export1)(const String&, uint, uint, bool) = &Scene::Export;
   void (Scene::* export2)(const String&, bool) = &Scene::Export;
+  void (Scene::* export3)(Exporter*) const = &Scene::Export;
   void (Scene::*remove1)(const GfxNodeP&) = &Scene::Remove;
   void (Scene::*remove2)(const String&) = &Scene::Remove;
   void (Scene::*center_on1)(const String&) = &Scene::CenterOn;
@@ -161,6 +163,7 @@ void export_Scene()
     .def("Apply", apply)
     .def("Export",export1, arg("transparent")=true)
     .def("Export",export2, arg("transparent")=true)
+    .def("Export",export3)
     .def("ExportPov",&Scene::ExportPov,
          scene_export_pov_overloads())
     .def("PushView",&Scene::PushView)

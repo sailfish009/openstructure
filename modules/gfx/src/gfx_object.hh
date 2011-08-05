@@ -40,6 +40,7 @@
 #include "gfx_prim.hh"
 #include "vertex_array.hh"
 #include "input.hh"
+#include "exporter_fw.hh"
 
 namespace ost { namespace gfx {
 
@@ -56,7 +57,8 @@ public:
   virtual void DeepSwap(GfxObj& go);
   virtual void RenderGL(RenderPass pass);
   virtual void RenderPov(PovState& pov);
-  virtual void Apply(GfxNodeVisitor& v,GfxNodeVisitor::Stack st);
+  virtual void Export(Exporter* ex);
+  virtual void Apply(GfxNodeVisitor& v, GfxNodeVisitor::Stack st);
   virtual int GetType() const;
   //
 

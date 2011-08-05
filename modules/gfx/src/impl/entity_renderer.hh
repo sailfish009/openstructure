@@ -39,8 +39,9 @@
 #include <ost/gfx/module_config.hh>
 #include <ost/gfx/render_pass.hh>
 #include <ost/gfx/vertex_array.hh>
+#include <ost/gfx/exporter_fw.hh>
+
 #include <ost/gfx/render_options/render_options.hh>
-#include <ost/gfx/impl/mapped_property.hh>
 
 #include <ost/gfx/color_ops/color_op.hh>
 #include <ost/gfx/color_ops/by_element_color_op.hh>
@@ -51,7 +52,9 @@
 #if OST_IMG_ENABLED
 #include <ost/gfx/color_ops/map_handle_color_op.hh>
 #endif //OST_IMG_ENABLED
-#include <ost/gfx/impl/entity_renderer_fw.hh>
+
+#include "mapped_property.hh"
+#include "entity_renderer_fw.hh"
 
 namespace ost { namespace gfx { namespace impl {
 
@@ -122,6 +125,9 @@ public:
   
   ///\brief povray rendering call
   virtual void RenderPov(PovState& pov, const std::string& name);
+
+  ///\brief scene exporter interface
+  virtual void Export(Exporter* ex);
 
   virtual bool CanSetOptions(RenderOptionsPtr& render_options)=0;
   virtual void SetOptions(RenderOptionsPtr& render_options)=0;

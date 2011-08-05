@@ -30,6 +30,7 @@
 #include "scene.hh"
 #include "vertex_array_helper.hh"
 #include "povray.hh"
+#include "exporter.hh"
 
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
@@ -652,6 +653,14 @@ void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
   pov.inc() << "\n }\n";
 
   pov.inc() << "}\n";
+}
+
+void IndexedVertexArray::Export(Exporter* ex) const
+{
+  ex->WriteVertexData(entry_list_[0].v,entry_list_[0].n, entry_list_[0].c, entry_list_[0].t, sizeof(Entry), entry_list_.size());
+  ex->WriteLineData(&line_index_list_[0],line_index_list_.size()/2);
+  ex->WriteTriData(&tri_index_list_[0],tri_index_list_.size()/3);
+  ex->WriteQuadData(&quad_index_list_[0],quad_index_list_.size()/4);
 }
 
 void IndexedVertexArray::Clear()

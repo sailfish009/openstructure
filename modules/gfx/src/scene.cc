@@ -42,6 +42,7 @@
 #include "gl_helper.hh"
 
 #include <ost/config.hh>
+
 #include "scene.hh"
 #include "input.hh"
 #include "gfx_node.hh"
@@ -49,6 +50,7 @@
 #include "gfx_test_object.hh"
 #include "bitmap_io.hh"
 #include "entity.hh"
+#include "exporter.hh"
 #include "povray.hh"
 #include "offscreen_buffer.hh"
 
@@ -1574,6 +1576,13 @@ void Scene::ExportPov(const std::string& fname, const std::string& wdir)
   // descend into scene graph
   root_node_->RenderPov(pov);
   pov.write_postamble();
+}
+
+void Scene::Export(Exporter* ex) const
+{
+  ex->SceneStart(this);
+  root_node_->Export(ex);
+  ex->SceneEnd(this);
 }
 
 void Scene::ResetProjection()

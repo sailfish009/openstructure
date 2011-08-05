@@ -33,6 +33,7 @@
 
 #include "povray.hh"
 #include "impl/mapped_property.hh"
+#include "exporter.hh"
 
 #if OST_IMG_ENABLED
 #  include <ost/img/alg/stat.hh>
@@ -192,6 +193,20 @@ void GfxObj::RenderPov(PovState& pov)
     }
     CustomRenderPov(pov);
     pov.end_obj();
+  }
+}
+
+
+void GfxObj::Export(Exporter* ex)
+{
+  if(IsVisible()) {
+    ex->NodeStart(GetName(),Exporter::OBJ);
+    // in the simplest case, just export va
+    if(rebuild_ || refresh_) {
+      PreRenderGL(true);
+    }
+    va_.Export(ex);
+    ex->NodeEnd(GetName());
   }
 }
 
