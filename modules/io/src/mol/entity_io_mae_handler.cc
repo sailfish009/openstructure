@@ -143,7 +143,13 @@ void MAEReader::Import(mol::EntityHandle& ent)
               else if(line2=="r_m_z_coord") i_atom_zpos=pid;
               else if(line2=="s_m_pdb_residue_name") i_res_name=pid;
               else if(line2=="i_m_residue_number") i_res_num=pid;
-              else if(line2=="s_m_pdb_segment_name") i_chain_name=pid;
+              else if(line2=="s_m_chain_name") i_chain_name=pid;
+              else if(line2=="s_m_pdb_segment_name") {
+                // only use this one if s_m_chain_name is not present
+                if(i_chain_name<0) {
+                  i_chain_name=pid;
+                }
+              }
             }
           }
         }
