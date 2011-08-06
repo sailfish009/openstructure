@@ -85,6 +85,13 @@ private:
   float rgba[4];
 };
 
+/*!
+  \brief HSV color spec
+
+  h: Hue from 0 to 360 (0=red, 120=green, 240=blue)
+  s: Saturation from 0 (no color) to 100 (full color)
+  v: Value from 0 (no light, black) to 100 (full light)
+*/
 Color DLLEXPORT_OST_GFX HSV(double h, double s, double v);
 
 DLLEXPORT_OST_GFX std::ostream& operator<<(std::ostream&, const Color& c);
