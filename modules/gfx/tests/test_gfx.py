@@ -41,7 +41,8 @@ class TestGfx(unittest.TestCase):
 
   def test_gradient(self):
     gs=[gfx.Gradient(),
-        gfx.Gradient({0.0: [1,0,0], 1.0: gfx.Color(0,1,0)})]
+        gfx.Gradient({0.0: [1,0,0], 1.0: gfx.Color(0,1,0)}),
+        gfx.Gradient([[1,0,0], gfx.Color(0,1,0)])]
     gs[0].SetColorAt(0.0,gfx.Color(1.0,0.0,0.0))
     gs[0].SetColorAt(1.0,gfx.Color(0.0,1.0,0.0))
     for g in gs:
