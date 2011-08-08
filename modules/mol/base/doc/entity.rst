@@ -287,16 +287,7 @@ The Handle Classes
 
   .. attribute:: type
 
-     Describes the type of the chain. Is one of enum ChainType:
-
-       ``CHAINTYPE_POLY``, ``CHAINTYPE_NON_POLY``, ``CHAINTYPE_WATER``,
-       ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
-       ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
-       ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
-       ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``  
-
-     Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types
-     available.
+     Describes the type of the chain. See :ref:`chaintype`.
 
   .. attribute:: description
 
@@ -1546,3 +1537,59 @@ Other Entity-Related Functions
             encountered
    
    :returns: :class:`EntityView`
+
+.. _chaintype:
+
+ChainType
+--------------------------------------------------------------------------------
+
+A ChainType fills the :attr:`ChainHandle.type` attribute. Different types are
+described in the :ref:`ChainType enum <chaintype_enum>`. Functions for setting
+a type belong to the :class:`EditorBase` class, getting is provided by the
+:class:`ChainHandle` class, further convenience functions are described here.
+
+.. _chaintype_enum:
+
+The ChainType enum
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ChainType enum enumerates all types defined by the PDB for the MMCif file
+format. Following values are supported:
+
+  ``CHAINTYPE_POLY``, ``CHAINTYPE_NON_POLY``, ``CHAINTYPE_WATER``,
+  ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
+  ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
+  ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
+  ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``  
+
+Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types available.
+
+Setter & Getter functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:func:`EditorBase.SetChainType`, :func:`ChainHandle.GetType`
+
+
+ChainType functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. function:: ChainTypeFromString(identifier)
+
+   Create a ChainType item for a given string.
+
+   :param identifier: String to request a type for.
+   :type identifier: :class:`str`
+   :raises: :class:`runtime_error` if **identifier** is unrecognised.
+
+   :returns: :class:`ChainType`
+
+.. function:: StringFromChainType(type)
+
+   Return the String identifier for a given **type**.
+
+   :param type: To be translated
+   :type type: :class:`ChainType`
+   :raises: :class:`runtime_error` if **type** is unrecognised.
+
+   :returns: :class:`str`
+

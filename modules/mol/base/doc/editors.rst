@@ -94,7 +94,7 @@ The basic functionality of editors is implemented in the EditorBase class.
 
      :param chain: Must be a valid chain
      :param type:  Must be a value of enum ChainType
-                   (see :attr:`ChainHandle.chain_type`)   
+                   (see :attr:`ChainHandle.type`)   
 
   .. method:: SetChainDescription(chain, description)
 

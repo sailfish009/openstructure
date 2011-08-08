@@ -39,7 +39,9 @@ namespace {
   typedef EntityView (ChainHandle::*QueryMethod)(const Query&, uint) const;
   typedef EntityView (ChainHandle::*StringMethod)(const String&, uint) const;  
   QueryMethod select_query=&ChainHandle::Select;
-  StringMethod select_string=&ChainHandle::Select; 
+  StringMethod select_string=&ChainHandle::Select;
+  ChainType (*ChainTypeFromStringPtr)(const String& identifier) =
+    &ChainTypeFromString;
 }
 
 void export_Chain()
@@ -126,4 +128,7 @@ void export_Chain()
       .export_values()
     ;
   }
+
+  def("ChainTypeFromString", ChainTypeFromStringPtr);
+  def("StringFromChainType", &StringFromChainType);
 }

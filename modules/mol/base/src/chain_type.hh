@@ -19,6 +19,11 @@
 #ifndef OST_CHAIN_TYPE_HH
 #define OST_CHAIN_TYPE_HH
 
+#include <ost/base.hh>
+#include <ost/string_ref.hh>
+
+namespace ost { namespace mol {
+
 /// \enum different kinds of chains
 typedef enum {
   CHAINTYPE_POLY,           ///< polymer
@@ -35,5 +40,30 @@ typedef enum {
   CHAINTYPE_N_CHAINTYPES    ///< no. of chain types
 } ChainType;
 
+/// \brief Create a ChainType item for a given string
+///
+/// \param identifier StringRef to be translated
+///
+/// \return The ChainType corresponding to the input, throws a
+///         std::runtime_error on unknown type
+ChainType ChainTypeFromString(const StringRef identifier);
+
+/// \brief Create a ChainType item for a given string
+///
+/// \param identifier String to be translated
+///
+/// \return The ChainType corresponding to the input, throws a
+///         std::runtime_error on unknown type
+ChainType ChainTypeFromString(const String& identifier);
+
+/// \brief Return the String identifier for a given type
+///
+/// \param type ChainType to be translated
+///
+/// \return String corresponding to the input, throws a std::runtime_error on
+///         unknown type
+String StringFromChainType(ChainType type);
+
+}} //ns
 
 #endif

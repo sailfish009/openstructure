@@ -8,6 +8,7 @@ bond_handle.cc
 chain_base.cc
 chain_handle.cc
 chain_view.cc
+chain_type.cc
 coord_frame.cc
 coord_group.cc
 editor_base.cc
