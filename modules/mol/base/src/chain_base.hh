@@ -74,6 +74,21 @@ public:
     return impl_;
   }
 
+  /// \brief whether the chain is a polymer
+  ///
+  /// True if one of IsPolysaccharide(), IsPolynucleotide(), IsPolypeptide() is 
+  /// true or the chain is of type CHAINTYPE_POLYMER.
+  bool IsPolymer() const;
+  
+  /// \brief whether the chain is a polysaccharide
+  bool IsPolysaccharide() const;
+  
+  /// \brief whether the chain is a polypeptide
+  bool IsPolypeptide() const;
+  
+  /// \brief whether the chain is a polynucleotide
+  bool IsPolynucleotide() const;
+  
   impl::ChainImplPtr& Impl() {
     return impl_;
   }

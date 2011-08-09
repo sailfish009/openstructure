@@ -63,6 +63,29 @@ public:
   {
     return type_;
   }
+  
+  /// \brief whether the chain is a polymer
+  bool IsPolymer() const
+  {
+    return type_==CHAINTYPE_POLY || this->IsPolypeptide() || 
+          this->IsPolynucleotide() || this->IsPolysaccharide();
+  }
+  /// \brief whether the chain is a polysaccharide
+  bool IsPolysaccharide() const
+  {
+    return type_==CHAINTYPE_POLY_SAC_D || type_==CHAINTYPE_POLY_SAC_L;
+  }
+  /// \brief whether the chain is a polypeptide
+  bool IsPolypeptide() const
+  {
+    return type_==CHAINTYPE_POLY_PEPTIDE_D || type_==CHAINTYPE_POLY_PEPTIDE_L;
+  }
+  /// \brief whether the chain is a polynucleotide
+  bool IsPolynucleotide() const
+  {
+    return type_==CHAINTYPE_POLY_DN || type_==CHAINTYPE_POLY_RN || 
+           type_==CHAINTYPE_POLY_DN_RN;
+  }
 
   /// \brief Assign a description to a chain.
   ///

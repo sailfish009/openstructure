@@ -67,5 +67,32 @@ std::ostream& operator<<(std::ostream& os, const ChainBase& chain)
   return os;
 }
 
+bool ChainBase::IsPolymer() const
+{
+  this->CheckValidity();
+  return impl_->IsPolymer();
+  
+}
+
+bool ChainBase::IsPolysaccharide() const
+{
+  this->CheckValidity();
+  return impl_->IsPolysaccharide();
+  
+}
+
+bool ChainBase::IsPolypeptide() const
+{
+  this->CheckValidity();
+  return impl_->IsPolypeptide();
+  
+}
+
+bool ChainBase::IsPolynucleotide() const
+{
+  this->CheckValidity();
+  return impl_->IsPolynucleotide();
+}
+
 }} // ns
 
