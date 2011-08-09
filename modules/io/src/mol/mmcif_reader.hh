@@ -171,6 +171,7 @@ public:
   /// \param[out] resnum gets atom_site.label_seq_id if available, consecutive
   ///             numbers, otherwise
   /// \param[out] atom_name corresponds to label_atom_id
+  /// \param[out] alt_loc gets first letter of atom_site.label_alt_id
   bool ParseAtomIdent(const std::vector<StringRef>& columns,
                       String& chain_name,
                       StringRef& res_name,
@@ -193,6 +194,11 @@ public:
   ///
   /// \param columns data row
   void ParseEntityPoly(const std::vector<StringRef>& columns);
+
+  /// \brief Fetch MMCif citation information
+  ///
+  /// \param columns data row
+  void ParseCitation(const std::vector<StringRef>& columns);
 
 private:
   /// \enum magic numbers of this class
@@ -238,26 +244,43 @@ private:
     PDBX_SEQ_ONE_LETTER_CODE_CAN  ///< canonical sequence, 1-letter code
   } EntityPolyItems;
 
+  /// \enum items of the citation category
+  typedef enum {
+    CITATION_ID,                  ///< unique identifier
+    ABSTRACT_ID_CAS,              ///< CAS identifier
+    BOOK_ID_ISBN,                 ///< ISBN code assigned, if book cited
+    BOOK_TITLE,                   ///< title of book storing the citation
+    JOURNAL_FULL,                 ///< full journal title for articles
+    JOURNAL_VOLUME,               ///< volume of cited journal
+    PAGE_FIRST,                   ///< first page of citation
+    PAGE_LAST,                    ///< last page of citation
+    PDBX_DATABASE_ID_DOI,         ///< Document Object Identifier of doi.org
+    PDBX_DATABASE_ID_PUBMED,      ///< Ascession number of PubMed
+    YEAR,                         ///< year of the citation
+    TITLE                         ///< title of the citation
+  } CitationItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
     ENTITY,
     ENTITY_POLY,
+    CITATION,
     DONT_KNOW
   } MMCifCategory;
 
   /// \struct keeping track of entity information
   typedef struct {
-    ChainType type; ///< characterise entity
-    String details; ///< description of this entity
-    String seqres;  ///< chain of monomers
+    mol::ChainType type; ///< characterise entity
+    String details;      ///< description of this entity
+    String seqres;       ///< chain of monomers
   } MMCifEntityDesc;
 
   typedef std::map<String, MMCifEntityDesc> MMCifEntityDescMap;
 
   // members
   MMCifCategory category_;
-  int category_counts_[DONT_KNOW]; ///< overall no. of atom_site loops
+  int category_counts_[DONT_KNOW+1]; ///< overall no. of atom_site loops
   int indices_[MAX_ITEMS_IN_ROW]; ///< map items to values in loops
   const IOProfile& profile_;
   mol::EntityHandle& ent_handle_;

@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
   BOOST_MESSAGE("          unknown type...");
   columns.pop_back();
   columns.push_back(StringRef("foo", 3));
-  BOOST_CHECK_THROW(tmmcif_p.ParseEntity(columns), IOException);
+  BOOST_CHECK_THROW(tmmcif_p.ParseEntity(columns), std::runtime_error);
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");
@@ -280,13 +280,13 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
     mmcif_p.Parse();
     ch = eh.FindChain("A");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetType() == CHAINTYPE_POLY_PEPTIDE_L);
+    BOOST_CHECK(ch.GetType() == mol::CHAINTYPE_POLY_PEPTIDE_L);
     ch = eh.FindChain("C");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetType() == CHAINTYPE_POLY_PEPTIDE_L);
+    BOOST_CHECK(ch.GetType() == mol::CHAINTYPE_POLY_PEPTIDE_L);
     ch = eh.FindChain("O");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetType() == CHAINTYPE_WATER);
+    BOOST_CHECK(ch.GetType() == mol::CHAINTYPE_WATER);
   }
   BOOST_MESSAGE("          done.");
   // negative: no entity description
@@ -299,10 +299,10 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
     mmcif_p.Parse();
     ch = eh.FindChain("A");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetType() == CHAINTYPE_UNKNOWN);
+    BOOST_CHECK(ch.GetType() == mol::CHAINTYPE_UNKNOWN);
     ch = eh.FindChain("B");
     BOOST_CHECK(ch.IsValid());
-    BOOST_CHECK(ch.GetType() == CHAINTYPE_UNKNOWN);
+    BOOST_CHECK(ch.GetType() == mol::CHAINTYPE_UNKNOWN);
   }
   BOOST_MESSAGE("          done.");
   BOOST_MESSAGE("          fetch details...");
@@ -490,8 +490,8 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   String chain_name;
   StringRef res_name;
   mol::ResNum resnum(0);
+  char alt_loc;
   //StringRef atom_name;
-  //char alt_loc;
 
   BOOST_MESSAGE("          testing valid line");
   //tmmcif_p.ParseAtomIdent(columns, chain_name, res_name);
@@ -503,7 +503,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   //                                          res_name,
   //                                          resnum,
   //                                          atom_name,
-  //                                         alt_loc), IOException);
+  //                                          alt_loc), IOException);
   // positive
   //StarLoopDesc tmmcif_h;
   //tmmcif_h.SetCategory(StringRef("atom_site", 9));

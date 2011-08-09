@@ -113,12 +113,13 @@ bool MMCifParser::OnBeginData(const StringRef& data_name)
 
 bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
 {
+  bool cat_available = false;
+  category_ = DONT_KNOW;
   // set whole array to -1
   memset(indices_, -1, MAX_ITEMS_IN_ROW * sizeof(int));
   // walk through possible categories
   if (header.GetCategory() == "atom_site") {
     category_ = ATOM_SITE;
-    category_counts_[category_]++;
     // mandatory items
     this->TryStoreIdx(AUTH_ASYM_ID,    "auth_asym_id",    header);
     this->TryStoreIdx(AS_ID,           "id",              header);
@@ -142,7 +143,7 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     indices_[PDBX_PDB_MODEL_NUM] = header.GetIndex("pdbx_PDB_model_num");
 
     // post processing
-    if (category_counts_[category_] > 1) {
+    if (category_counts_[category_] > 0) {
       if ((has_model_ && (indices_[PDBX_PDB_MODEL_NUM] == -1))||
           (!has_model_ && (indices_[PDBX_PDB_MODEL_NUM] != -1))) { // unit test
         throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
@@ -150,19 +151,17 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
                                                  this->GetCurrentLinenum()));
       }
     }
-    return true;
-  } else if (header.GetCategory()=="entity") {
+    cat_available = true;
+  } else if (header.GetCategory() == "entity") {
     category_ = ENTITY;
-    category_counts_[category_]++;
     // mandatory items
-    this->TryStoreIdx(E_ID, "id",    header);
+    this->TryStoreIdx(E_ID, "id", header);
     // optional
     indices_[E_TYPE]  = header.GetIndex("type");
     indices_[DETAILS] = header.GetIndex("details");
-    return true;
-  } else if (header.GetCategory()=="entity_poly") {
+    cat_available = true;
+  } else if (header.GetCategory() == "entity_poly") {
     category_ = ENTITY_POLY;
-    category_counts_[category_]++;
     // mandatory
     this->TryStoreIdx(ENTITY_ID, "entity_id",    header);
     // optional
@@ -171,12 +170,32 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
       header.GetIndex("pdbx_seq_one_letter_code");
     indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN] =
       header.GetIndex("pdbx_seq_one_letter_code_can");
-    return true;
-  } /*else if (header.GetCategory()=="pdbx_poly_seq_scheme") {
+    cat_available = true;
+  } else if (header.GetCategory() == "citation") {
+    category_ = CITATION;
+    // mandatory items
+    this->TryStoreIdx(CITATION_ID, "id",    header);
+    // optional
+    indices_[ABSTRACT_ID_CAS]         = header.GetIndex("abstract_id_CAS");
+    indices_[BOOK_ID_ISBN]            = header.GetIndex("book_id_ISBN");
+    indices_[BOOK_TITLE]              = header.GetIndex("book_title");
+    indices_[JOURNAL_FULL]            = header.GetIndex("journal_full");
+    indices_[YEAR]                    = header.GetIndex("year");
+    indices_[TITLE]                   = header.GetIndex("title");
+    indices_[JOURNAL_VOLUME]          = header.GetIndex("journal_volume");
+    indices_[PAGE_FIRST]              = header.GetIndex("page_first");
+    indices_[PAGE_LAST]               = header.GetIndex("page_last");
+    indices_[PDBX_DATABASE_ID_DOI]    = header.GetIndex("pdbx_database_id_DOI");
+    indices_[PDBX_DATABASE_ID_PUBMED] =
+      header.GetIndex("pdbx_database_id_PubMed");
+    cat_available = true;
+  }
+  /*else if (header.GetCategory()=="pdbx_poly_seq_scheme") {
   } else if (header.GetCategory()=="pdbx_struct_assembly") {
   } else if (header.GetCategory()=="struct_conf") {
   }*/
-  return false;
+  category_counts_[category_]++;
+  return cat_available;
 }
 
 mol::ResNum to_res_num(int num, char ins_code)
@@ -449,19 +468,7 @@ void MMCifParser::ParseEntity(const std::vector<StringRef>& columns)
 
   // type
   if (indices_[E_TYPE] != -1) {
-    if(StringRef("polymer", 7) == columns[indices_[E_TYPE]]) {
-      desc.type = CHAINTYPE_POLY;
-    } else if(StringRef("non-polymer", 11) == columns[indices_[E_TYPE]]) {
-      desc.type = CHAINTYPE_NON_POLY;
-    } else if(StringRef("water", 5) == columns[indices_[E_TYPE]]) {
-      desc.type = CHAINTYPE_WATER;
-    } else {
-      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
-                                               "Unrecognised chain type '" +
-                                               columns[indices_[E_TYPE]].str() +
-                                               "' found.",
-                                               this->GetCurrentLinenum()));
-    }
+    desc.type = mol::ChainTypeFromString(columns[indices_[E_TYPE]]);
     store = true;
   }
 
@@ -498,35 +505,7 @@ void MMCifParser::ParseEntityPoly(const std::vector<StringRef>& columns)
 
   // store type
   if (indices_[EP_TYPE] != -1) {
-    if(StringRef("polypeptide(D)", 14) == columns[indices_[EP_TYPE]]) {
-      edm_it->second.type = CHAINTYPE_POLY_PEPTIDE_D;
-    } else if(StringRef("polypeptide(L)", 14) == columns[indices_[EP_TYPE]]) {
-      edm_it->second.type = CHAINTYPE_POLY_PEPTIDE_L;
-    } else if(StringRef("polydeoxyribonucleotide", 23) ==
-              columns[indices_[EP_TYPE]]) {
-      edm_it->second.type = CHAINTYPE_POLY_DN;
-    } else if(StringRef("polyribonucleotide", 18) ==
-              columns[indices_[EP_TYPE]]) {
-      edm_it->second.type = CHAINTYPE_POLY_RN;
-    } else if(StringRef("polysaccharide(D)", 17) ==
-              columns[indices_[EP_TYPE]]) {
-      edm_it->second.type = CHAINTYPE_POLY_SAC_D;
-    } else if(StringRef("polysaccharide(L)", 17) ==
-              columns[indices_[EP_TYPE]]) {
-      edm_it->second.type = CHAINTYPE_POLY_SAC_L;
-    } else if(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
-                        49) == columns[indices_[EP_TYPE]]) {
-      edm_it->second.type = CHAINTYPE_POLY_DN_RN;
-    } else if(StringRef("other",
-                        5) == columns[indices_[EP_TYPE]]) {
-      edm_it->second.type = CHAINTYPE_UNKNOWN;
-    } else {
-      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
-                                               "Unrecognised polymner type '" +
-                                              columns[indices_[EP_TYPE]].str() +
-                                               "' found.",
-                                               this->GetCurrentLinenum()));
-    }
+    edm_it->second.type = mol::ChainTypeFromString(columns[indices_[EP_TYPE]]);
   }
 
   // store seqres
@@ -558,6 +537,11 @@ void MMCifParser::ParseEntityPoly(const std::vector<StringRef>& columns)
   }
 }
 
+void MMCifParser::ParseCitation(const std::vector<StringRef>& columns)
+{
+  // fetch dependencies from dscription, like article requires year
+}
+
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
@@ -574,7 +558,14 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
     LOG_TRACE("processing entity_poly entry");
     this->ParseEntityPoly(columns);
     break;
+  case CITATION:
+    LOG_TRACE("processing citation entry")
+    this->ParseCitation(columns);
+    break;
   default:
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                       "Uncatched category '"+ header.GetCategory() +"' found.",
+                                             this->GetCurrentLinenum()));
     return;
   }
 }
