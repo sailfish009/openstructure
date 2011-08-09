@@ -518,22 +518,23 @@ void MMCifParser::ParseEntityPoly(const std::vector<StringRef>& columns)
                                              this->GetCurrentLinenum()));
   }
   if (read_seqres_) {
+    StringRef seqres;
     if (seqres_can_) {
       if (indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN] != -1) {
-      edm_it->second.seqres =
-        columns[indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN]].str();
+        seqres=columns[indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN]];
       } else {
         throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                    "'entity_poly.pdbx_seq_one_letter_code_can' not available.'",
                                                  this->GetCurrentLinenum()));
       }
     } else if (indices_[PDBX_SEQ_ONE_LETTER_CODE] != -1) {
-      edm_it->second.seqres = columns[indices_[PDBX_SEQ_ONE_LETTER_CODE]].str();
+      seqres=columns[indices_[PDBX_SEQ_ONE_LETTER_CODE]];
     } else {
       throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                        "'entity_poly.pdbx_seq_one_letter_code' not available.'",
                                                this->GetCurrentLinenum()));
     }
+    edm_it->second.seqres = seqres.str_no_whitespace();
   }
 }
 

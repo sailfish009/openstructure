@@ -113,4 +113,17 @@ std::vector<StringRef> StringRef::split(char p) const
   return result;
 }
 
+std::string StringRef::str_no_whitespace() const
+{
+  std::string whitespaceless_string;
+  whitespaceless_string.reserve(this->size());
+  for (const char* s=begin_; s!=end_; ++s) {
+    if (isspace(*s)) {
+      continue;
+    }
+    whitespaceless_string.push_back(*s);
+    
+  }
+  return whitespaceless_string;
+}
 }

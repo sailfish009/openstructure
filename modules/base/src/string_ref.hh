@@ -147,6 +147,10 @@ public:
 
   /// \brief split string into chunks delimited by \p p
   std::vector<StringRef> split(char p) const;
+  
+  /// \brief returns a new string with all whitespace removed from 
+  ///    this StringRef
+  std::string str_no_whitespace() const;
 private:
   const char* begin_;
   const char* end_;  
