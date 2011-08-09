@@ -410,7 +410,7 @@ void StarParser::ParseDataItem()
   StarParser::SplitLine(line, nv);
   if (nv.size()==1) {
     // remember identifier. 
-    String identifier=line.str();
+    String identifier=line.trim().str();
     String value;
 
     while (this->NextLine(line)) {
