@@ -63,6 +63,8 @@ void export_Chain()
     .add_property("is_polynucleotide", &ChainBase::IsPolynucleotide)
     .add_property("is_polysaccharide", &ChainBase::IsPolysaccharide)
     .add_property("is_polymer", &ChainBase::IsPolymer)
+    .add_property("type", &ChainBase::GetType)
+    .add_property("description", &ChainBase::GetDescription)
   ;
   generic_prop_def<ChainBase>(chain_base);
   class_<ChainHandle, bases<ChainBase> >("ChainHandle", init<>())
