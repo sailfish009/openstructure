@@ -158,7 +158,7 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     this->TryStoreIdx(E_ID, "id", header);
     // optional
     indices_[E_TYPE]  = header.GetIndex("type");
-    indices_[DETAILS] = header.GetIndex("details");
+    indices_[PDBX_DESCRIPTION] = header.GetIndex("pdbx_description");
     cat_available = true;
   } else if (header.GetCategory() == "entity_poly") {
     category_ = ENTITY_POLY;
@@ -473,8 +473,8 @@ void MMCifParser::ParseEntity(const std::vector<StringRef>& columns)
   }
 
   // description
-  if (indices_[DETAILS] != -1) {
-    desc.details = columns[indices_[DETAILS]].str();
+  if (indices_[PDBX_DESCRIPTION] != -1) {
+    desc.details = columns[indices_[PDBX_DESCRIPTION]].str();
   } else {
     desc.details = "";
   }

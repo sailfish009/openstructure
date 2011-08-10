@@ -9,7 +9,7 @@ data_1BAR
 loop_
 _entity.id
 _entity.type
-_entity.details
+_entity.pdbx_description
 1 polymer 
 ;              Very important information.
 ;

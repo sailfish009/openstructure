@@ -233,7 +233,7 @@ private:
   typedef enum {
     E_ID,              ///< unique identifier
     E_TYPE,            ///< polymer, non-polymer or water
-    DETAILS            ///< special aspects of the entity
+    PDBX_DESCRIPTION   ///< special aspects of the entity
   } EntityItems;
 
   /// \enum items of the entity_poly category
