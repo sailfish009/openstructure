@@ -181,6 +181,9 @@ void GfxObj::RenderGL(RenderPass pass)
   }
 }
 
+void GfxObj::InitGL()
+{
+}
 
 void GfxObj::RenderPov(PovState& pov)
 {

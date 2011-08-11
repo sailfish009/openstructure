@@ -311,12 +311,18 @@ void Scene::SetBeaconOff()
 
 namespace {
 
-void set_light_dir(Vec3 ld)
-{
-  GLfloat l_pos[]={0.0, 0.0, 0.0, 0.0};
-  l_pos[0]=-ld[0]; l_pos[1]=-ld[1]; l_pos[2]=-ld[2];
-  glLightfv(GL_LIGHT0, GL_POSITION, l_pos);
-}
+  void set_light_dir(Vec3 ld)
+  {
+    GLfloat l_pos[]={0.0, 0.0, 0.0, 0.0};
+    l_pos[0]=-ld[0]; l_pos[1]=-ld[1]; l_pos[2]=-ld[2];
+    glLightfv(GL_LIGHT0, GL_POSITION, l_pos);
+  }
+
+  struct GfxObjInitGL: public GfxNodeVisitor {
+    virtual void VisitObject(GfxObj* o, const Stack& st) {
+      o->InitGL();
+    }
+  };
 
 }
 
@@ -459,6 +465,10 @@ void Scene::InitGL(bool full)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+  LOG_DEBUG("Scene: calling gl init for all objects");
+  GfxObjInitGL initgl;
+  this->Apply(initgl);
 
   LOG_DEBUG("Scene: gl init done");
   gl_init_=true;
@@ -778,9 +788,13 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
 
   LOG_DEBUG("Scene: graphical object added @" << n.get() << std::endl);
 
-  if(root_node_->GetChildCount()==0) {
-    GfxObjP go = boost::dynamic_pointer_cast<GfxObj>(n);
-    if(go) {
+  GfxObjP go = boost::dynamic_pointer_cast<GfxObj>(n);
+
+  if(go) {
+    if(gl_init_) {
+      go->InitGL();
+    }
+    if(root_node_->GetChildCount()==0) {
       SetCenter(go->GetCenter());
     }
     do_autoslab_=true;

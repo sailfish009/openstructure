@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 from _ost_gfx import *
+from py_gfx_obj import PyGfxObj
 
 WHITE=Color(1.0,1.0,1.0)
 BLACK=Color(0.0,0.0,0.0)

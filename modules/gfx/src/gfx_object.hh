@@ -120,6 +120,15 @@ public:
   */
   virtual void CustomRenderGL(RenderPass pass);
 
+  // implemented in derived classes to deal with initialization etc
+  // called just before CustomRenderGL is called
+  // the boolean flag indicated that a re-build was requested
+  virtual void CustomPreRenderGL(bool rebuild);
+
+  // implemented in derived classes for first GL initialization
+  // which should be done here, not in the ctor
+  virtual void InitGL();
+
   // implemented in derived classes for the actual POVray export
   virtual void CustomRenderPov(PovState& pov);
 
@@ -188,7 +197,6 @@ public:
  protected:
   
   void PreRenderGL(bool flag);
-  virtual void CustomPreRenderGL(bool flag);
 
  private:
   GfxObj(const GfxObj& o);

@@ -21,12 +21,26 @@ else:
 def col_delta(c1,c2):
   return geom.Distance(geom.Vec3(c1[0],c1[1],c1[2]),geom.Vec3(c2[0],c2[1],c2[2]))
 
+class MyGfxObj(gfx.GfxObj):
+  def __init__(self,name):
+    gfx.GfxObj.__init__(self,name)
+    self.rendered=False
+    
+  def CustomRenderGL(self,render_pass):
+    self.rendered=True
+
 class TestGfx(unittest.TestCase):
   def runTest(self):
     self.test_gradient()
     self.test_color()
     self.test_primlist()
     self.test_entity_reset()
+    self.test_custom_gfx_obj()
+
+  def test_custom_gfx_obj(self):
+    myobj=MyGfxObj("foo")
+    gfx.Scene().Add(myobj)
+    #self.assertTrue(myobj.rendered)
 
   def test_entity_reset(self):
     eh=mol.CreateEntity()
