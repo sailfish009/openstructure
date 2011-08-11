@@ -19,17 +19,13 @@
 
 #include <ctype.h>
 
-//#include <boost/iostreams/filter/gzip.hpp>
-//#include <boost/filesystem/convenience.hpp>
-//#include <boost/algorithm/string.hpp>
-//#include <boost/algorithm/string/trim.hpp>
-
-//#include <boost/format.hpp>
-//#include <boost/lexical_cast.hpp>
-
 #include <ost/profile.hh>
 #include <ost/log.hh>
+#include <ost/dyn_cast.hh>
 #include <ost/mol/xcs_editor.hh>
+#include <ost/conop/conop.hh>
+
+#include <ost/conop/rule_based_builder.hh>
 #include <ost/io/mol/mmcif_reader.hh>
 
 namespace ost { namespace io {
@@ -65,6 +61,7 @@ void MMCifParser::Init()
   curr_residue_         = mol::ResidueHandle();
   seqres_               = seq::CreateSequenceList();
   read_seqres_          = false;
+  warned_rule_based_    = false;
 }
 
 void MMCifParser::ClearState()
@@ -522,6 +519,7 @@ void MMCifParser::ParseEntityPoly(const std::vector<StringRef>& columns)
     if (seqres_can_) {
       if (indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN] != -1) {
         seqres=columns[indices_[PDBX_SEQ_ONE_LETTER_CODE_CAN]];
+        edm_it->second.seqres = seqres.str_no_whitespace();        
       } else {
         throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                    "'entity_poly.pdbx_seq_one_letter_code_can' not available.'",
@@ -529,13 +527,65 @@ void MMCifParser::ParseEntityPoly(const std::vector<StringRef>& columns)
       }
     } else if (indices_[PDBX_SEQ_ONE_LETTER_CODE] != -1) {
       seqres=columns[indices_[PDBX_SEQ_ONE_LETTER_CODE]];
+      conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
+      conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
+      if (!rbb) {
+        if (!warned_rule_based_) {
+          LOG_WARNING("SEQRES import requires the rule-based builder. Ignoring "
+                      "SEQRES records");      
+        }
+        warned_rule_based_=true;
+        return;
+      }
+      conop::CompoundLibPtr comp_lib=rbb->GetCompoundLib();
+      edm_it->second.seqres = this->ConvertSEQRES(seqres.str_no_whitespace(),
+                                                  comp_lib);
     } else {
       throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                        "'entity_poly.pdbx_seq_one_letter_code' not available.'",
                                                this->GetCurrentLinenum()));
     }
-    edm_it->second.seqres = seqres.str_no_whitespace();
   }
+}
+
+String MMCifParser::ConvertSEQRES(const String& seqres, 
+                                  conop::CompoundLibPtr comp_lib)
+{
+  String can_seqres;
+  for (String::const_iterator i=seqres.begin(), e=seqres.end(); i!=e; ++i) {
+    if (*i=='(') {
+      bool found_end_paren=false;
+      String tlc;
+      tlc.reserve(3);
+      while ((++i)!=seqres.end()) {
+        if (*i==')') {
+          found_end_paren=true;
+          break;
+        }
+        tlc.push_back(*i);
+      }
+      if (!found_end_paren) {
+        throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                          "'entity_poly.pdbx_seq_one_letter_code' contains "
+                          "unmatched '('", this->GetCurrentLinenum()));
+      }
+      conop::CompoundPtr compound=comp_lib->FindCompound(tlc, 
+                                                         conop::Compound::PDB);
+      if (!compound) {
+        if (tlc!="UNK") {
+
+          LOG_WARNING("unknown residue '" << tlc << "' in SEQRES record. "
+                      "Setting one-letter-code to '?'");
+        }
+        can_seqres.push_back('?');
+        continue;
+      }
+      can_seqres.push_back(compound->GetOneLetterCode());
+    } else {
+      can_seqres.push_back(*i);
+    }
+  }
+  return can_seqres;
 }
 
 void MMCifParser::ParseCitation(const std::vector<StringRef>& columns)

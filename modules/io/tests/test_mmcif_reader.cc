@@ -18,8 +18,11 @@
 //------------------------------------------------------------------------------
 
 #include <fstream>
+#include <ost/platform.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/io/mol/mmcif_reader.hh>
+#include <ost/conop/conop.hh>
+#include <ost/conop/rule_based_builder.hh>
 
 #define BOOST_AUTO_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -54,6 +57,7 @@ public:
   using MMCifParser::SetReadSeqRes;
   using MMCifParser::SetReadCanonicalSeqRes;
   using MMCifParser::ClearState;
+  using MMCifParser::ConvertSEQRES;
 };
 
 BOOST_AUTO_TEST_SUITE( io );
@@ -94,6 +98,30 @@ BOOST_AUTO_TEST_CASE(mmcif_trystoreidx)
   // positive
   mmcif_h.Add(StringRef("bar", 3));
   BOOST_CHECK_NO_THROW(tmmcif_p.TryStoreIdx(0, "bar", mmcif_h));
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_convert_seqres)
+{
+  SetPrefixPath(getenv("OST_ROOT"));
+  String lib_path=GetSharedDataPath()+"/compounds.chemlib";
+  conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);  
+  if (!compound_lib) {
+    std::cout << "WARNING: skipping SEQRES import unit test. " 
+              << "Rule-based builder is required" << std::endl;
+    return;    
+  }
+  conop::RuleBasedBuilderPtr rbb(new conop::RuleBasedBuilder(compound_lib));
+  conop::Conopology::Instance().RegisterBuilder(rbb, "RBB");
+  conop::Conopology::Instance().SetDefaultBuilder("RBB");
+  mol::EntityHandle eh=mol::CreateEntity();
+  
+  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  std::vector<StringRef> columns;
+  StarLoopDesc tmmcif_h;  
+  BOOST_CHECK_EQUAL(tmmcif_p.ConvertSEQRES("A(MSE)Y", compound_lib), "AMY");
+  BOOST_CHECK_THROW(tmmcif_p.ConvertSEQRES("A(MSEY", compound_lib), 
+                    IOException);
+  conop::Conopology::Instance().SetDefaultBuilder("HEURISTIC");
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_onbeginloop)
@@ -321,6 +349,7 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
 
 BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
 {
+  conop::Conopology::Instance().SetDefaultBuilder("RBB");
   BOOST_MESSAGE("  Running mmcif_entity_poly_tests...");
   mol::ChainHandle ch;
   IOProfile profile;
@@ -462,7 +491,7 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
     tmmcif_h.Add(StringRef("type", 4));
     tmmcif_h.Add(StringRef("pdbx_seq_one_letter_code_can", 28));
     tmmcif_p.OnBeginLoop(tmmcif_h);
-
+    tmmcif_p.SetReadCanonicalSeqRes(false);
     columns.push_back(StringRef("1", 1));
     columns.push_back(StringRef("other", 5));
     columns.push_back(StringRef("ABRND", 5));
@@ -475,6 +504,7 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");
+  conop::Conopology::Instance().SetDefaultBuilder("HEURISTIC");  
 }
 
 BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
@@ -490,7 +520,6 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   String chain_name;
   StringRef res_name;
   mol::ResNum resnum(0);
-  char alt_loc;
   //StringRef atom_name;
 
   BOOST_MESSAGE("          testing valid line");

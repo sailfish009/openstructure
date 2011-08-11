@@ -27,6 +27,7 @@
 #include <ost/seq/sequence_list.hh>
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/chain_type.hh>
+#include <ost/conop/compound_lib.hh>
 #include <ost/io/mol/io_profile.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/io/mol/star_parser.hh>
@@ -200,6 +201,15 @@ public:
   /// \param columns data row
   void ParseCitation(const std::vector<StringRef>& columns);
 
+  /// \brief convert the seqres data item to canonical form. 
+  /// 
+  /// The seqres sequence lists non-standard residues in paranthesis. For 
+  /// proper handling of our sequence classes, these need to be converted to 
+  /// one-letter-codes. Ideally, we would use the canonical SEQRES. This is 
+  /// not possible, however, since the PDB assigns multiple one letter codes 
+  /// to some of the residues. To be consistent, we have to do the conversion on 
+  /// our own.
+  String ConvertSEQRES(const String& seqres, conop::CompoundLibPtr compound_lib);
 private:
   /// \enum magic numbers of this class
   typedef enum {
@@ -293,6 +303,7 @@ private:
   int residue_count_;
   int atom_count_;
   bool warned_name_mismatch_;
+  bool warned_rule_based_;
   String subst_res_id_; ///< work around for missing label_seq_id's
   bool has_model_;      ///< keep track of models through different atom_sites
   int curr_model_;      ///< if we have pdbx_PDB_model_num, store no.
