@@ -92,5 +92,7 @@ void export_Vec3()
     .add_property("center", &Vec3List::GetCenter)
     .add_property("inertia", &Vec3List::GetInertia)
     .add_property("principal_axes", &Vec3List::GetPrincipalAxes)
+    .def("GetODRLine", &Vec3List::GetODRLine)
+    .def("FitCylinder", &Vec3List::FitCylinder)
   ;
 }

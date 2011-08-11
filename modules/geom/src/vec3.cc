@@ -68,5 +68,12 @@ Vec3 Vec3List::GetCenter() const
   return center/=this->size();
 }
 
+Line3 Vec3List::GetODRLine()
+{
+  Vec3 center=this->GetCenter();
+  Vec3 direction=this->GetPrincipalAxes().GetRow(2);
+  return Line3(center,center+direction);
+}
+
 
 }

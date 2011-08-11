@@ -230,4 +230,51 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
   }
   return dist;  
   }
+
+  void AnalyzeAlphaHelixAxis(const CoordGroupHandle& traj, const EntityView& prot_seg, geom::Vec3List& directions,
+                             geom::Vec3List& centers, unsigned int stride)
+  {
+    CheckHandleValidity(traj);
+    if (prot_seg.GetAtomCount()==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    std::vector<unsigned long> indices_ca;
+    geom::Line3 axis;
+    directions.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    centers.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    GetCaIndices(prot_seg, indices_ca);
+    for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      axis=frame->FitCylinder(indices_ca);
+      directions.push_back(axis.GetDirection());
+      centers.push_back(axis.GetOrigin());
+    }
+    return;
+  }
+ 
+  //std::vector<geom::Line3> AnalyzeBestFitLine(const CoordGroupHandle& traj, const EntityView& prot_seg,
+  //                                               unsigned int stride)
+  void AnalyzeBestFitLine(const CoordGroupHandle& traj, const EntityView& prot_seg, geom::Vec3List& directions,
+                          geom::Vec3List& centers, unsigned int stride)
+  {
+    CheckHandleValidity(traj);
+    if (prot_seg.GetAtomCount()==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    std::vector<unsigned long> indices_ca;
+    geom::Line3 axis;
+    directions.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    centers.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    GetCaIndices(prot_seg, indices_ca);
+    for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      axis=frame->GetODRLine(indices_ca);
+      directions.push_back(axis.GetDirection());
+      centers.push_back(axis.GetOrigin());
+    }
+    return;
+  }
+ 
+
+
 }}} //ns

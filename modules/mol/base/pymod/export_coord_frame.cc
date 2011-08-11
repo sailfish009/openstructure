@@ -46,6 +46,7 @@ void export_CoordFrame()
     .def("GetDistanceBetwCenterOfMass", get_dist_cm)
     .def("GetRMSD",get_rmsd)
     .def("GetMinDistance",get_min_dist)
+    .def("GetODRLine",&geom::Vec3List::GetODRLine)
   ;
   def("CreateCoordFrame",CreateCoordFrame);
 }

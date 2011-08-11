@@ -178,5 +178,50 @@ bool IsInSphere(const Sphere& s, const Vec3& v){
   return Length(s.GetOrigin()-v)<=s.GetRadius();
 }
 
+Line3 Vec3List::FitCylinder(){
+  Line3 axis=this->GetODRLine(),axis_old;
+  Real radius,res_sum_old,res_sum,delta=0.01,prec=0.001,err;
+  unsigned long n_step=1000, n_res=this->size();
+  Vec3 v,gradient;
+  radius=0.0;
+  for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+    radius+=geom::Distance(axis,(*i));
+  }
+  radius/=Real(n_res);
+  res_sum=0.0;
+  for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+    res_sum+=pow(Distance(axis,(*i))-radius,2.);
+  }
+  unsigned long k=0;
+  err=2.0*prec;
+  while (err>prec and k<n_step) {
+    res_sum_old=res_sum;
+    axis_old=axis;
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      radius+=Distance(axis,(*i));
+    }
+    radius/=Real(n_res);
+    for (int j=0; j!=3; ++j){
+      res_sum=0.0;
+      v=Vec3(0.0,0.0,0.0);
+      v[j]=delta;
+      axis=Line3(axis_old.GetOrigin(),axis_old.GetOrigin()+axis_old.GetDirection()+v);
+      for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+        res_sum+=pow(Distance(axis,(*i))-radius,2.);
+      }
+      gradient[j]=res_sum-res_sum_old;
+    }
+    gradient=Normalize(gradient);
+    axis=Line3(axis_old.GetOrigin(),axis_old.GetOrigin()+axis_old.GetDirection()-delta*gradient);
+    res_sum=0.0;
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      res_sum+=pow(Distance(axis,(*i))-radius,2.);
+    }
+    err=fabs((res_sum-res_sum_old)/float(n_res));
+    k++;
+  }
+  return axis;
+}
+
 } // ns
 

@@ -46,4 +46,6 @@ void export_TrajectoryAnalysis()
   def("AnalyzeMinDistance", &AnalyzeMinDistance, (arg("traj"), arg("view1"), arg("view2"), arg("stride")=1));
   def("AnalyzeMinDistanceBetwCenterOfMassAndView", &AnalyzeMinDistanceBetwCenterOfMassAndView, (arg("traj"), arg("view_cm"), arg("view_atoms"), arg("stride")=1));
   def("AnalyzeAromaticRingInteraction", &AnalyzeAromaticRingInteraction, (arg("traj"), arg("view_ring1"), arg("view_ring2"), arg("stride")=1));
+  def("AnalyzeAlphaHelixAxis", &AnalyzeAlphaHelixAxis, (arg("traj"), arg("protein_segment"), arg("directions"), arg("centers"), arg("stride")=1));
+  def("AnalyzeBestFitLine", &AnalyzeBestFitLine, (arg("traj"), arg("protein_segment"), arg("directions"), arg("centers"), arg("stride")=1));
 }

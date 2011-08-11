@@ -84,6 +84,22 @@ namespace ost { namespace mol {
       indices.push_back(i->GetIndex());
     }
   }
+
+  void GetCaIndices(const EntityView& segment, std::vector<unsigned long>& indices_ca){
+    mol::AtomView ca;
+    ResidueViewList residues=segment.GetResidueList();
+    indices_ca.reserve(residues.size());
+    //for (ResidueViewList::const_iterator res=residues.begin()+1,
+    //     e=residues.end(); res!=e-1; ++res){
+    //  if (!InSequence((*res).GetHandle(),(*(res+1)).GetHandle())) throw std::runtime_error("Residues are not in a continuous sequence");
+    //}
+    for (ResidueViewList::const_iterator res=residues.begin(),
+         e=residues.end(); res!=e; ++res) {
+      ca=res->FindAtom("CA");
+      CheckHandleValidity(ca);
+      indices_ca.push_back(ca.GetIndex());
+      }
+  }
   
   void GetMasses(const EntityView& sele, std::vector<Real>& masses){
   // This function returns a vector containing the atom masses of the atoms in an EntityView
@@ -218,5 +234,29 @@ namespace ost { namespace mol {
     GetIndicesAndMasses(view_cm,indices_cm,masses_cm);
     return this->GetMinDistBetwCenterOfMassAndView(indices_cm,masses_cm,indices_atoms);
   }
+
+  geom::Line3 CoordFrame::GetODRLine(std::vector<unsigned long>& indices_ca){
+  //Returns the best fit line to atoms with indices in indices_ca
+    geom::Vec3List atoms_pos_list;
+    atoms_pos_list.reserve(indices_ca.size());
+    for (std::vector<unsigned long>::const_iterator i1=indices_ca.begin(),e=indices_ca.end(); i1!=e; ++i1) {
+      atoms_pos_list.push_back((*this)[*i1]);
+    }
+    return atoms_pos_list.GetODRLine();
+  }
+ 
+  geom::Line3 CoordFrame::FitCylinder(std::vector<unsigned long>& indices_ca){
+  //Returns a line which is the axis of a fitted cylinder to the atoms with indices given in indices_ca
+    geom::Vec3List atoms_pos_list;
+    atoms_pos_list.reserve(indices_ca.size());
+    for (std::vector<unsigned long>::const_iterator i1=indices_ca.begin(),e=indices_ca.end(); i1!=e; ++i1) {
+      atoms_pos_list.push_back((*this)[*i1]);
+    }
+    return atoms_pos_list.FitCylinder();
+  }
+ 
+ 
+
+
 }}//ns
 
