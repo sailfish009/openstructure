@@ -15,6 +15,7 @@ def ValidateSEQRESAlignment(aln, chain=None):
   :returns: True if all residues (beside gaped ones) are connected, False
             otherwise.
   """
+  from ost import LogWarning
   from ost import seq
   from ost import mol
   if aln.GetCount() != 2:
@@ -41,11 +42,15 @@ def ValidateSEQRESAlignment(aln, chain=None):
       i += 1
       r1 = residues[i-1]
       r2 = residues[i]
+      if r1.one_letter_code=='?' or r2.one_letter_code=='?':
+        continue
       if l != '-':
         if not mol.InSequence(r1.handle, r2.handle):
+          LogWarning('%s and %s are not connected by peptide bond' % (str(r1), str(r2)))
           return False
       else:
         if mol.InSequence(r1.handle, r2.handle):
+          LogWarning('%s and %s are connected by peptide bond' % (str(r1), str(r2)))
           return False
     l = s
   return True
@@ -98,6 +103,7 @@ def AlignToSEQRES(chain, seqres, try_resnum_first=False, validate=True):
                      '", while SEQRES is "' + seqres[r1.number.num - 1] +
                      '" at the corresponding position.')
           try_resnum_first = False
+          break
   if not try_resnum_first:
     fragments=[residues[0].one_letter_code]
     for r1, r2 in zip(residues[:-1], residues[1:]):
