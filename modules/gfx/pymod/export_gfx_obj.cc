@@ -66,6 +66,19 @@ namespace {
       GfxObj(name)
     {}
 
+    virtual geom::AlignedCuboid GetBoundingBox() const
+    {
+      if(override f = this->get_override("GetBoundingBox")) {
+        return f();
+      } else {
+        return GfxObj::GetBoundingBox();
+      }
+    }
+
+    geom::AlignedCuboid default_GetBoundingBox() const {
+      return GfxObj::GetBoundingBox();
+    }
+
     virtual void CustomRenderGL(RenderPass pass) {
       if(override f = this->get_override("_CustomRenderGL")) {
         f(pass);
@@ -164,6 +177,7 @@ void export_GfxObj()
     .def("GetAALines",&GfxObj::GetAALines)
     .def("GetLineWidth",&GfxObj::GetLineWidth)
     .def("GetLineHalo",&GfxObj::GetLineHalo)
+    .def("GetBoundingBox",&GfxObj::GetBoundingBox, &GfxObjWrap::default_GetBoundingBox)
     .def("_CustomRenderGL",&GfxObj::CustomRenderGL, &GfxObjWrap::default_CustomRenderGL)
     .def("_CustomPreRenderGL",&GfxObj::CustomPreRenderGL, &GfxObjWrap::default_CustomPreRenderGL)
     .def("_InitGL",&GfxObj::InitGL, &GfxObjWrap::default_InitGL)
