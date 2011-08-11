@@ -62,6 +62,9 @@ public:
   Real GetMinDistBetwCenterOfMassAndView(const mol::EntityView& view_cm, const mol::EntityView& view_atoms);
   geom::Line3 GetODRLine(std::vector<unsigned long>& indices_ca);
   geom::Line3 FitCylinder(std::vector<unsigned long>& indices_ca);
+  Real GetAlphaHelixContent(std::vector<unsigned long>& indices_ca, std::vector<unsigned long>& indices_ca,
+                             std::vector<unsigned long>& indices_o, std::vector<unsigned long>& indices_n);
+  Real GetAlphaHelixContent(const mol::EntityView& segment);
 };
   
   void GetIndices(const EntityView& sele, std::vector<unsigned long>& indices);
@@ -69,6 +72,8 @@ public:
   void GetIndicesAndMasses(const EntityView& sele, std::vector<unsigned long>& indices,std::vector<Real>& masses);
   void GetPositions(const EntityView& sele, std::vector<geom::Vec3>& ref_pos);
   void GetCaIndices(const EntityView& segment, std::vector<unsigned long>& indices_ca);
+  void GetCaCONIndices(const EntityView& segment, std::vector<unsigned long>& indices_ca, std::vector<unsigned long>& indices_c,
+                      std::vector<unsigned long>& indices_o, std::vector<unsigned long>& indices_n);
 
 typedef boost::shared_ptr<CoordFrame> CoordFramePtr;
 typedef std::vector<CoordFramePtr> CoordFrameList;

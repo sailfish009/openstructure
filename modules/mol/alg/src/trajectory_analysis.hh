@@ -45,5 +45,6 @@ namespace ost { namespace mol { namespace alg {
   std::vector<Real> DLLEXPORT_OST_MOL_ALG AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, const EntityView& view_ring1, const EntityView& view_ring2,unsigned int stride=1);
   void  DLLEXPORT_OST_MOL_ALG AnalyzeAlphaHelixAxis(const CoordGroupHandle& traj, const EntityView& prot_seg, geom::Vec3List& directions, geom::Vec3List& centers, unsigned int stride=1);
   void  DLLEXPORT_OST_MOL_ALG AnalyzeBestFitLine(const CoordGroupHandle& traj, const EntityView& prot_seg, geom::Vec3List& directions, geom::Vec3List& centers, unsigned int stride=1);
+  std::vector<Real> DLLEXPORT_OST_MOL_ALG AnalyzeHelicity(const CoordGroupHandle& traj, const EntityView& prot_seg, unsigned int stride=1);
 }}}//ns
 #endif

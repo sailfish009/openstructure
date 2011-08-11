@@ -28,6 +28,7 @@
 #include <ost/mol/view_op.hh>
 #include <ost/mol/mol.hh>
 #include "coord_frame.hh"
+#include <ost/base.hh>
 
 namespace ost { namespace mol {
 
@@ -101,6 +102,35 @@ namespace ost { namespace mol {
       }
   }
   
+  void GetCaCONIndices(const EntityView& segment, std::vector<unsigned long>& indices_ca,
+                      std::vector<unsigned long>& indices_c, std::vector<unsigned long>& indices_o, std::vector<unsigned long>& indices_n){
+    mol::AtomView a,n,c,o;
+    ResidueViewList residues=segment.GetResidueList();
+    indices_ca.reserve(residues.size());
+    indices_n.reserve(residues.size());
+    indices_c.reserve(residues.size());
+    indices_o.reserve(residues.size());
+    for (ResidueViewList::const_iterator res=residues.begin()+1,
+         e=residues.end(); res!=e-1; ++res){
+      if (!InSequence((*res).GetHandle(),(*(res+1)).GetHandle())) throw std::runtime_error("Residues are not in a continuous sequence");
+    }
+    for (ResidueViewList::const_iterator res=residues.begin(),
+         e=residues.end(); res!=e; ++res) {
+      a=res->FindAtom("CA");
+      CheckHandleValidity(a);
+      indices_ca.push_back(a.GetIndex());
+      c=res->FindAtom("C");
+      CheckHandleValidity(c);
+      indices_c.push_back(c.GetIndex());
+      o=res->FindAtom("O");
+      CheckHandleValidity(o);
+      indices_o.push_back(o.GetIndex());
+      n=res->FindAtom("N");
+      CheckHandleValidity(n);
+      indices_n.push_back(n.GetIndex());
+    }
+  }
+
   void GetMasses(const EntityView& sele, std::vector<Real>& masses){
   // This function returns a vector containing the atom masses of the atoms in an EntityView
   // It is used together with GetIndices to accelerate the extraction of RMSD from a trajectory
@@ -255,6 +285,87 @@ namespace ost { namespace mol {
     return atoms_pos_list.FitCylinder();
   }
  
+  Real CoordFrame::GetAlphaHelixContent(const mol::EntityView& segment){
+    //Returns the percentage of residues in the EntityView (segment) that are in an alpha-helix
+    //Each residue is assigned as being in an alpha-helix or not, based on and backbone torsion angles
+    //and the hydrogen bonding (O-N) (this term is used only if the segment contains at least 8 residues
+    //The entity view should be a single segment with no gaps and no missing N,CA,C,O backbone atoms
+    //the first and last residues will not be asessed for helicity
+    CheckHandleValidity(segment);
+    std::vector<unsigned long> indices_c, indices_n, indices_ca, indices_o;
+    GetCaCONIndices(segment, indices_ca, indices_c, indices_o, indices_n);
+    return CoordFrame::GetAlphaHelixContent(indices_ca,indices_c,indices_o,indices_n);
+  }
+
+  Real Eval2AngleDist(Real phi, Real phi0, Real psi, Real psi0, Real delta){
+    //Returns a score between 0 and 1 measuring the distance between
+    //a pair of angles and a pair of reference angles
+    Real d1,d2,d;
+    d1=abs(phi-phi0);
+    d2=abs(psi-psi0);
+    if (d1>M_PI) d1=abs(d1-2.*M_PI);
+    if (d2>M_PI) d1=abs(d2-2.*M_PI);
+    d=(pow(d1,2.)+pow(d2,2.))/pow(delta,2.);
+    return 1./(1+d);
+  }
+
+  Real CoordFrame::GetAlphaHelixContent(std::vector<unsigned long>& indices_ca, std::vector<unsigned long>& indices_c,
+                                         std::vector<unsigned long>& indices_o, std::vector<unsigned long>& indices_n){
+  //See CoordFrame::GetAlphaHelixContent(const mol::EntityView) above.
+  unsigned long n_atoms=indices_ca.size();
+  geom::Vec3 c_previous,n,ca,c,n_next;
+  Real phi,psi,phi_0=-1.2,psi_0=-0.785,delta=0.8,d_0=3.3;
+  unsigned long n_helical_res=0;
+  std::vector<Real> score,dist,score2,dist2;
+  score.reserve(n_atoms-2);
+  score2.reserve(n_atoms-2);
+  dist.reserve(n_atoms-2);
+  dist2.reserve(n_atoms-2);
+  if (n_atoms!=indices_n.size()||n_atoms!=indices_c.size()||n_atoms!=indices_o.size()){
+    throw std::runtime_error("not same numbers of CA, C, O and N atoms in the selection");
+  }
+  if (n_atoms<=5){
+    throw std::runtime_error("At least five residues are needed to calulate an alpha helix similarity");
+  }
+  c=(*this)[indices_c[0]];
+  n_next=(*this)[indices_n[1]];
+  for (unsigned long i=1; i!=n_atoms-1; ++i){
+    c_previous=c;
+    n=n_next;
+    ca=(*this)[indices_ca[i]];
+    c=(*this)[indices_c[i]];
+    n_next=(*this)[indices_n[i+1]];
+    phi=geom::DihedralAngle(c_previous,n,ca,c);
+    psi=geom::DihedralAngle(n,ca,c,n_next);
+    score.push_back(Eval2AngleDist(phi,phi_0,psi,psi_0,delta));
+  }
+  score2[0]=pow(score[0]*score[1],3./2.);
+  score2[n_atoms-3]=pow(score[n_atoms-3]*score[n_atoms-4],3./2.);
+  for (unsigned long i=1; i!=n_atoms-3; ++i){
+    score2[i]=score[i-1]*score[i]*score[i+1];
+  }
+  if (n_atoms>=8){
+    for (unsigned long i=1; i!=n_atoms-1; ++i){
+      if (i<n_atoms-4){
+        dist.push_back(geom::Distance((*this)[indices_o[i]],(*this)[indices_n[i+4]]));
+        if (i>=5) {
+          dist2.push_back(std::min(dist[i-1],dist[i-5]));
+        }
+        else dist2.push_back(dist[i-1]);
+      }
+      else dist2.push_back(geom::Distance((*this)[indices_n[i]],(*this)[indices_o[i-4]]));
+    }
+    for (unsigned long i=0; i!=n_atoms-2; ++i){
+      if (dist2[i]<=d_0 || score2[i]>=0.3)n_helical_res+=1;
+    }
+  }
+  else {
+    for (unsigned long i=0; i!=n_atoms-2; ++i){
+      if (score2[i]>=0.3)n_helical_res+=1;
+    }
+  }
+  return Real(n_helical_res)/Real(n_atoms-2);
+  }
  
 
 

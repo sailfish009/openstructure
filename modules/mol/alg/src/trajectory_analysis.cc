@@ -275,6 +275,24 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     return;
   }
  
+  std::vector<Real> AnalyzeHelicity(const CoordGroupHandle& traj, const EntityView& prot_seg,
+                                    unsigned int stride)
+  {
+    CheckHandleValidity(traj);
+    if (prot_seg.GetAtomCount()==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    std::vector<unsigned long> indices_c,indices_o, indices_n, indices_ca;
+    std::vector<Real> helicity;
+    helicity.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    GetCaCONIndices(prot_seg, indices_ca, indices_c, indices_o, indices_n);
+    for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      helicity.push_back(frame->GetAlphaHelixContent(indices_ca,indices_c,indices_o,indices_n));
+    }
+    return helicity;
+  }
+
 
 
 }}} //ns
