@@ -31,6 +31,7 @@
 #include <ost/io/mol/io_profile.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/io/mol/star_parser.hh>
+#include <ost/io/mol/mmcif_info.hh>
 
 namespace ost { namespace io {
 
@@ -43,6 +44,9 @@ namespace ost { namespace io {
 /// parser:
 /// 
 /// \li atom_site
+/// \li entity
+/// \li entity_poly
+/// \li citation
 class DLLEXPORT_OST_IO MMCifParser : public StarParser  {
 public:
   /// \brief create a MMCifParser
@@ -133,7 +137,12 @@ public:
     return read_seqres_;
   }
 
- protected:
+  /// \brief Get additional information of the MMCif file.
+  ///
+  /// \return MMCitfInfo object
+  const MMCifInfo& GetInfo() { return info_; }
+
+protected:
   /// \brief Store an item index from loop header in preparation for reading a 
   ///        row. Throws an exception if the item does not exist.
   ///
@@ -171,6 +180,8 @@ public:
   /// \param[out] res_name fetches atom_site.label_comp_id
   /// \param[out] resnum gets atom_site.label_seq_id if available, consecutive
   ///             numbers, otherwise
+  /// \param[out] valid_res_num shows if we have a valid residue number or if
+  ///             we have to invent our own
   /// \param[out] atom_name corresponds to label_atom_id
   /// \param[out] alt_loc gets first letter of atom_site.label_alt_id
   bool ParseAtomIdent(const std::vector<StringRef>& columns,
@@ -210,6 +221,11 @@ public:
   /// to some of the residues. To be consistent, we have to do the conversion on 
   /// our own.
   String ConvertSEQRES(const String& seqres, conop::CompoundLibPtr compound_lib);
+  /// \brief Fetch MMCif citation_author information
+  ///
+  /// \param columns data row
+  void ParseCitationAuthor(const std::vector<StringRef>& columns);
+
 private:
   /// \enum magic numbers of this class
   typedef enum {
@@ -270,12 +286,20 @@ private:
     TITLE                         ///< title of the citation
   } CitationItems;
 
+  /// \enum items of the citation_author category
+  typedef enum {
+    AUTHOR_CITATION_ID,           ///< link to CITATION_ID
+    AUTHOR_NAME,                  ///< name of an author
+    ORDINAL                       ///< position in author list
+  } CitationAuthorItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
     ENTITY,
     ENTITY_POLY,
     CITATION,
+    CITATION_AUTHOR,
     DONT_KNOW
   } MMCifCategory;
 
@@ -287,6 +311,9 @@ private:
   } MMCifEntityDesc;
 
   typedef std::map<String, MMCifEntityDesc> MMCifEntityDescMap;
+  //typedef std::map<String, std::pair<std::vector<int>, std::vector<String> > >
+  typedef std::map<String, std::pair<std::vector<int>, std::vector<String> > >
+    MMCifCitationAuthorMap;
 
   // members
   MMCifCategory category_;
@@ -312,6 +339,8 @@ private:
   MMCifEntityDescMap entity_desc_map_; ///< stores entity items
   seq::SequenceList seqres_;
   bool read_seqres_;
+  MMCifInfo info_;      ///< info container
+  MMCifCitationAuthorMap authors_map_;
 };
 
 }}

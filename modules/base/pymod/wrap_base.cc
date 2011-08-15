@@ -21,6 +21,7 @@
 #include <vector>
 #include <ost/geom/export_helper/vector.hh>
 #include <ost/base.hh>
+#include <ost/string_ref.hh>
 #include <ost/platform.hh>
 #include <ost/message.hh>
 #include <ost/version.hh>
@@ -38,8 +39,48 @@ void translator(const ost::Error& x) {
 }
 
 
+struct stringref_to_python_string
+{
+  static PyObject* convert(ost::StringRef const& s)
+  {
+    return boost::python::incref(boost::python::object(s.str()).ptr());
+  }
+};
+
+struct stringref_from_python_string
+{
+  stringref_from_python_string()
+  {
+    boost::python::converter::registry::push_back(&convertible,
+                                                  &construct,
+                                      boost::python::type_id<ost::StringRef>());
+  }
+  
+  static void* convertible(PyObject* obj_ptr)
+  {
+    if (!PyString_Check(obj_ptr)) return 0;
+    return obj_ptr;
+  }
+  
+  static void construct(PyObject* obj_ptr,
+                 boost::python::converter::rvalue_from_python_stage1_data* data)
+  {
+    const char* value = PyString_AsString(obj_ptr);
+    if (value == 0) boost::python::throw_error_already_set();
+    void* storage = (
+         (boost::python::converter::rvalue_from_python_storage<ost::StringRef>*)
+                     data)->storage.bytes;
+    new (storage) ost::StringRef(value, strlen(value));
+    data->convertible = storage;
+  }
+};
+
+
 BOOST_PYTHON_MODULE(_ost_base)
 {
+  boost::python::to_python_converter<ost::StringRef,
+                                     stringref_to_python_string>();
+  stringref_from_python_string();
   register_exception_translator<ost::Error>(&translator);
 
   def("SetPrefixPath", &ost::SetPrefixPath);
@@ -67,5 +108,5 @@ BOOST_PYTHON_MODULE(_ost_base)
   class_<std::vector<int> >("IntList", init<>())
     .def(vector_indexing_suite<std::vector<int> >())
     .def(geom::VectorAdditions<IntList>())
-  ;  
+  ;
 }

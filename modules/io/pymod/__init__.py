@@ -264,7 +264,7 @@ def LoadCHARMMTraj(crd, dcd_file=None, profile='CHARMM',
       raise ValueError("No DCD filename given")
   return LoadCHARMMTraj_(crd, dcd_file, stride, lazy_load)
 
-def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=None, profile='DEFAULT', remote=False, strict_hydrogens=None, seqres=False):
+def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=None, profile='DEFAULT', remote=False, strict_hydrogens=None, seqres=False, info=False):
   """
   Load MMCIF file from disk and return one or more entities. Several options 
   allow to customize the exact behaviour of the MMCIF import. For more
@@ -283,12 +283,15 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
      pdb id.
      
   :rtype: :class:`~ost.mol.EntityHandle`.
-
-  :param seqres: Whether to read SEQRES records. If set to true, the loaded 
-    entity and seqres entry will be returned as a tuple.
   
   :param strict_hydrogens: If set, overrides the value of 
      :attr:`IOProfile.strict_hydrogens`.
+
+  :param seqres: Whether to read SEQRES records. If set to true, the loaded 
+    entity and seqres entry will be returned as second item.
+
+  :param info: Whether to return an info container with the other output.
+               Returns a :class:`MMCifInfo` object as last item.
 
   :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous
   or inexistent file
@@ -328,8 +331,12 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
     conop_inst.ConnectAll(builder, ent, 0)
     #else:
     #  raise IOError("File doesn't contain any entities")
+    if seqres and info:
+      return ent, reader.seqres, reader.info
     if seqres:
       return ent, reader.seqres
+    if info:
+      return ent, reader.info
     return ent
   except:
     raise

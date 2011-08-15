@@ -16,6 +16,7 @@ io_profile.cc
 dcd_io.cc
 star_parser.cc
 mmcif_reader.cc
+mmcif_info.cc
 PARENT_SCOPE
 )
 
@@ -23,6 +24,7 @@ set(OST_IO_MOL_HEADERS
 chemdict_parser.hh
 star_parser.hh
 mmcif_reader.hh
+mmcif_info.hh
 io_profile.hh
 dcd_io.hh
 entity_io_crd_handler.hh

@@ -53,6 +53,7 @@ public:
   using MMCifParser::ParseAndAddAtom;
   using MMCifParser::ParseEntity;
   using MMCifParser::ParseEntityPoly;
+  using MMCifParser::ParseCitation;
   using MMCifParser::TryStoreIdx;
   using MMCifParser::SetReadSeqRes;
   using MMCifParser::SetReadCanonicalSeqRes;
@@ -507,6 +508,65 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
   conop::Conopology::Instance().SetDefaultBuilder("HEURISTIC");  
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
+{
+  BOOST_MESSAGE("  Running mmcif_citation_tests...");
+  //build dummy citation
+  mol::EntityHandle eh;
+  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  StarLoopDesc tmmcif_h;
+  std::vector<StringRef> columns;
+
+  tmmcif_h.SetCategory(StringRef("citation", 8));
+  tmmcif_h.Add(StringRef("id", 2));
+  tmmcif_h.Add(StringRef("book_title", 10));
+  tmmcif_h.Add(StringRef("journal_full", 12));
+  tmmcif_p.OnBeginLoop(tmmcif_h);
+
+  columns.push_back(StringRef("Foo", 3));
+  columns.push_back(StringRef("The Guide", 9));
+  columns.push_back(StringRef(".", 1));
+
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
+
+  columns.pop_back();
+  columns.pop_back();
+  columns.push_back(StringRef(".", 1));
+  columns.push_back(StringRef("Hitch", 5));
+
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParseCitation(columns));
+
+  columns.pop_back();
+  columns.pop_back();
+  columns.push_back(StringRef("The Guide", 9));
+  columns.push_back(StringRef("Hitch", 5));
+
+  BOOST_CHECK_THROW(tmmcif_p.ParseCitation(columns), IOException);
+
+  BOOST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_citation_author_tests)
+{
+  BOOST_MESSAGE("  Running mmcif_citation_author_tests...");
+
+  mol::EntityHandle eh = mol::CreateEntity();
+  std::ifstream s("testfiles/mmcif/atom_site.mmcif");
+  IOProfile profile;
+  MMCifParser mmcif_p(s, eh, profile);
+  BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+
+  std::vector<String> authors =
+    mmcif_p.GetInfo().GetCitations().back().GetAuthorList();
+
+  BOOST_CHECK(authors.size() == 3);
+  BOOST_CHECK(authors[0] == "Whiskers, P.D.");
+  BOOST_CHECK(authors[1] == "McCheese, B.M.");
+  BOOST_CHECK(authors[2] == "Van Hummel, J.F.");
+
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
 {
   BOOST_MESSAGE("  Running mmcif_parseatomident tests...");
@@ -520,6 +580,8 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   String chain_name;
   StringRef res_name;
   mol::ResNum resnum(0);
+  bool valid_res_num = false;
+  char alt_loc;
   //StringRef atom_name;
 
   BOOST_MESSAGE("          testing valid line");

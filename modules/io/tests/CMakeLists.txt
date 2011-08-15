@@ -1,5 +1,6 @@
 set(OST_IO_UNIT_TESTS
   test_io_pdb.py
+  test_io_mmcif.py
   test_clustal.cc
   test_io_pdb.cc
   test_io_crd.cc
@@ -9,6 +10,7 @@ set(OST_IO_UNIT_TESTS
   tests.cc
   test_star_parser.cc
   test_mmcif_reader.cc
+  test_mmcif_info.cc
 )
 if (ENABLE_IMG)
   list(APPEND OST_IO_UNIT_TESTS test_io_img.cc)

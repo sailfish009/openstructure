@@ -62,6 +62,7 @@ void MMCifParser::Init()
   seqres_               = seq::CreateSequenceList();
   read_seqres_          = false;
   warned_rule_based_    = false;
+  info_                 = MMCifInfo();
 }
 
 void MMCifParser::ClearState()
@@ -74,7 +75,9 @@ void MMCifParser::ClearState()
   category_             = DONT_KNOW;
   warned_name_mismatch_ = false;
   seqres_               = seq::CreateSequenceList();
+  info_                 = MMCifInfo();
   entity_desc_map_.clear();
+  authors_map_.clear();
 }
 
 void MMCifParser::SetRestrictChains(const String& restrict_chains)
@@ -160,7 +163,7 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
   } else if (header.GetCategory() == "entity_poly") {
     category_ = ENTITY_POLY;
     // mandatory
-    this->TryStoreIdx(ENTITY_ID, "entity_id",    header);
+    this->TryStoreIdx(ENTITY_ID, "entity_id", header);
     // optional
     indices_[EP_TYPE]  = header.GetIndex("type");
     indices_[PDBX_SEQ_ONE_LETTER_CODE] =
@@ -171,7 +174,7 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
   } else if (header.GetCategory() == "citation") {
     category_ = CITATION;
     // mandatory items
-    this->TryStoreIdx(CITATION_ID, "id",    header);
+    this->TryStoreIdx(CITATION_ID, "id", header);
     // optional
     indices_[ABSTRACT_ID_CAS]         = header.GetIndex("abstract_id_CAS");
     indices_[BOOK_ID_ISBN]            = header.GetIndex("book_id_ISBN");
@@ -186,9 +189,15 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     indices_[PDBX_DATABASE_ID_PUBMED] =
       header.GetIndex("pdbx_database_id_PubMed");
     cat_available = true;
-  }
-  /*else if (header.GetCategory()=="pdbx_poly_seq_scheme") {
-  } else if (header.GetCategory()=="pdbx_struct_assembly") {
+  } else if (header.GetCategory()=="citation_author") {
+    category_ = CITATION_AUTHOR;
+    // mandatory items
+    this->TryStoreIdx(AUTHOR_CITATION_ID, "citation_id", header);
+    this->TryStoreIdx(AUTHOR_NAME, "name", header);
+    this->TryStoreIdx(ORDINAL, "ordinal", header);
+    cat_available = true;
+  } /*
+else if (header.GetCategory()=="pdbx_struct_assembly") {
   } else if (header.GetCategory()=="struct_conf") {
   }*/
   category_counts_[category_]++;
@@ -590,7 +599,109 @@ String MMCifParser::ConvertSEQRES(const String& seqres,
 
 void MMCifParser::ParseCitation(const std::vector<StringRef>& columns)
 {
-  // fetch dependencies from dscription, like article requires year
+  // create citation object
+  MMCifInfoCitation cit = MMCifInfoCitation();
+  // just add info
+  cit.SetID(columns[indices_[CITATION_ID]].str());
+  if (indices_[ABSTRACT_ID_CAS] != -1) {
+    cit.SetCAS(columns[indices_[ABSTRACT_ID_CAS]].str());
+  }
+  if (indices_[BOOK_ID_ISBN] != -1) {
+    cit.SetISBN(columns[indices_[BOOK_ID_ISBN]].str());
+  }
+  if (indices_[BOOK_TITLE] != -1) {
+    if (columns[indices_[BOOK_TITLE]] != StringRef(".", 1)) {
+      cit.SetPublishedIn(columns[indices_[BOOK_TITLE]].str());
+    }
+  }
+  if (indices_[JOURNAL_FULL] != -1) {
+    if (columns[indices_[JOURNAL_FULL]] != StringRef(".", 1)) {
+      if (cit.GetPublishedIn().length() > 0) {
+        throw IOException(this->FormatDiagnostic(STAR_DIAG_WARNING,
+                                                 "citation.book_title already occupies the 'published_in' field of this citation, cannot add " +
+                                                 columns[indices_[JOURNAL_FULL]].str() +
+                                                 ".",
+                                                 this->GetCurrentLinenum()));
+      } else {
+        cit.SetPublishedIn(columns[indices_[JOURNAL_FULL]].str());
+      }
+    }
+  }
+  if (indices_[JOURNAL_VOLUME] != -1) {
+    cit.SetVolume(columns[indices_[JOURNAL_VOLUME]].str());
+  }
+  if (indices_[PAGE_FIRST] != -1) {
+    cit.SetPageFirst(columns[indices_[PAGE_FIRST]].str());
+  }
+  if (indices_[PAGE_LAST] != -1) {
+    cit.SetPageLast(columns[indices_[PAGE_LAST]].str());
+  }
+  if (indices_[PDBX_DATABASE_ID_DOI] != -1) {
+    cit.SetDOI(columns[indices_[PDBX_DATABASE_ID_DOI]].str());
+  }
+  if (indices_[PDBX_DATABASE_ID_PUBMED] != -1) {
+    cit.SetPubMed(this->TryGetInt(columns[indices_[PDBX_DATABASE_ID_PUBMED]],
+                                  "citation.pdbx_database_id_PubMed"));
+  }
+  if (indices_[YEAR] != -1) {
+    cit.SetPubMed(this->TryGetInt(columns[indices_[YEAR]], "citation.year"));
+  }
+  if (indices_[TITLE] != -1) {
+    cit.SetTitle(columns[indices_[TITLE]].str());
+  }
+
+  // store citation (wo author, yet)
+  info_.AddCitation(cit);
+}
+
+void MMCifParser::ParseCitationAuthor(const std::vector<StringRef>& columns)
+{
+  // get/ pack values
+  MMCifCitationAuthorMap::iterator atm_it;
+  std::vector<String> at_vec;
+  std::vector<int> pos_vec;
+  atm_it = authors_map_.find(columns[indices_[AUTHOR_CITATION_ID]].str());
+  if (atm_it != authors_map_.end()) {
+    at_vec = atm_it->second.second;
+    pos_vec = atm_it->second.first;
+  }
+  at_vec.push_back(columns[indices_[AUTHOR_NAME]].str());
+  pos_vec.push_back(this->TryGetInt(columns[indices_[ORDINAL]],
+                            "citation_author.ordinal"));
+
+  // sort new author into right position
+  std::vector<int>::iterator pos_it;
+  std::vector<String>::iterator atv_it;
+  int ti;
+  String ts; 
+  pos_it = pos_vec.end();
+  atv_it = at_vec.end();
+  --pos_it;
+  --atv_it;
+  for (; pos_it != pos_vec.begin(); --pos_it, --atv_it) {
+    if (*pos_it < *(pos_it-1)) {
+      ti = *pos_it;
+      *pos_it = *(pos_it-1);
+      *(pos_it-1) = ti;
+      ts = *atv_it;
+      *atv_it = *(atv_it-1);
+      *(atv_it-1) = ts;
+    }
+    else {
+      break;
+    }
+  }
+
+  // store new values in map
+  if (atm_it != authors_map_.end()) {
+    atm_it->second.second = at_vec;
+    atm_it->second.first  = pos_vec;
+  } else {
+    authors_map_.insert(MMCifCitationAuthorMap::value_type(
+                               columns[indices_[AUTHOR_CITATION_ID]].str(),
+              std::pair<std::vector<int>, std::vector<String> >(pos_vec, at_vec)
+                               ));
+  }
 }
 
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 
@@ -610,8 +721,12 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
     this->ParseEntityPoly(columns);
     break;
   case CITATION:
-    LOG_TRACE("processing citation entry")
+    LOG_TRACE("processing citation entry");
     this->ParseCitation(columns);
+    break;
+  case CITATION_AUTHOR:
+    LOG_TRACE("processing citation_author entry")
+    this->ParseCitationAuthor(columns);
     break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
@@ -620,141 +735,6 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
     return;
   }
 }
-
-    /*
-void PDBReader::Import(mol::EntityHandle& ent,
-                       const String& restrict_chains)
-{
-  do {
-    switch(curr_line[0]) {
-      case 'A':
-      case 'a':
-        if (IEquals(curr_line.substr(0, 6), StringRef("ANISOU", 6))) {
-          if (!charmm_style_) {
-            LOG_TRACE("processing ANISOU entry");
-            this->ParseAnisou(curr_line, line_num_, ent);            
-          }
-        }
-        break;
-      case 'C':
-      case 'c':
-        if (curr_line.size()<20) {
-          LOG_TRACE("skipping entry");
-          continue;
-        }
-        if (IEquals(curr_line.substr(0, 6), StringRef("COMPND", 6))) {
-          LOG_TRACE("processing COMPND entry");
-          this->ParseCompndEntry(curr_line, line_num_);
-        }
-        break;
-      case 'E':
-      case 'e':
-        if (curr_line.size()<3) {
-          continue;
-        }
-        if (IEquals(curr_line.rtrim(), StringRef("END", 3))) {
-          hard_end_=true;
-          go_on=false;
-          break;
-        }
-        if (curr_line.size()<6) {
-          continue;
-        }
-        if (IEquals(curr_line.substr(0, 6), StringRef("ENDMDL", 6))) {
-          go_on=false;
-          num_model_records_=0;
-          break;
-        }
-      case 'H':
-      case 'h':
-        if (curr_line.size()<6) {
-          continue;
-        }
-        if (IEquals(curr_line.substr(0, 6), StringRef("HETATM", 6))) {
-          if (profile_.no_hetatms)
-            continue;
-          LOG_TRACE("processing HETATM entry");
-          this->ParseAndAddAtom(curr_line, line_num_, ent, 
-          StringRef("HETATM", 6));
-        } else if (IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6))) {
-          if (!charmm_style_) {
-            this->ParseHelixEntry(curr_line);            
-          }
-        } else if (IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6))) {
-          // remember het entry to mark the residues as ligand during ATOM import
-          char chain=curr_line[12];
-          std::pair<bool, int> num=curr_line.substr(13, 4).ltrim().to_int();
-          if (!num.first) {
-            if (profile_.fault_tolerant) {
-              LOG_WARNING("Invalid HET entry on line " << line_num_);
-              continue;
-            } else {
-              String msg=str(format("Invalid HET entry on line %d")%line_num_);
-              throw IOException(msg);
-            }
-          }
-          hets_.push_back(HetEntry(chain, to_res_num(num.second,
-                                   curr_line[17])));
-        }
-        break;
-      case 'M':
-      case 'm':
-        if (curr_line.size()<6) {
-          continue;
-        }
-        if (IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6))) {
-          ++num_model_records_;          
-          if (num_model_records_<2) {
-            continue;
-          }
-          if (profile_.fault_tolerant) {
-            go_on=false;
-            num_model_records_=1;
-            break;
-          }
-          String msg=str(format("MODEL record without matching ENDMDL on line %d")%line_num_);
-          throw IOException(msg);
-        }
-        break;
-      case 'S':
-      case 's':
-        if (curr_line.size()<6) {
-          continue;
-        }
-        if (IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6))) {
-          if (!charmm_style_) {
-            this->ParseStrandEntry(curr_line);
-          }
-        }
-        break;
-      default:
-        break;
-    }
-  }  while (std::getline(in_, curr_line_) && ++line_num_ && go_on);
-  LOG_INFO("imported "
-               << chain_count_ << " chains, "
-               << residue_count_ << " residues, "
-               << atom_count_ << " atoms; with "
-               << helix_list_.size() << " helices and "
-               << strand_list_.size() << " strands");
-  this->AssignSecStructure(ent);
-  this->AssignMolIds(ent);
-  for (HetList::const_iterator i=hets_.begin(), e=hets_.end(); i!=e; ++i) {
-    mol::ResidueHandle res=ent.FindResidue(String(1, i->chain), i->num);
-    if (res.IsValid()) {
-      res.SetIsLigand(true);
-    }      
-  }
-}
-     */
-
-  
-  /*
-  virtual void OnEndLoop() { }
-
-  virtual void OnDataItem(const StarDataItem& item) { }
-
-  };*/
 
 void MMCifParser::OnEndData()
 {
@@ -777,6 +757,17 @@ void MMCifParser::OnEndData()
       LOG_WARNING("No entity description found for atom_site.label_entity_id '"
                   << css->second << "'");
     }
+  }
+
+  // process citations (couple with authors
+  // iterate citations
+  MMCifCitationAuthorMap::const_iterator atm_it;
+  std::vector<String>::const_iterator atv_it;
+  std::vector<int>::const_iterator pos_it;
+  for (atm_it = authors_map_.begin(); atm_it != authors_map_.end(); ++atm_it) {
+    info_.AddAuthorsToCitation(StringRef(atm_it->first.c_str(),
+                                         atm_it->first.length()),
+                               atm_it->second.second);
   }
 
   LOG_INFO("imported "

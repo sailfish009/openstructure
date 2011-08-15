@@ -22,6 +22,28 @@ _entity_poly.nstd_monomer                   no
 _entity_poly.pdbx_seq_one_letter_code       'VTI'
 
 loop_
+_citation.id
+_citation.abstract_id_CAS
+_citation.title
+_citation.journal_volume
+_citation.journal_full
+_citation.page_first
+_citation.page_last
+_citation.pdbx_database_id_DOI  
+_citation.pdbx_database_id_PubMed
+_citation.year
+primary 58-08-2 'Very important, but we won't tell' 1 'Some Journal' 0 10 0815 0815 2011
+
+# the authors are not ordered on purpose for unit tests
+loop_
+_citation_author.citation_id
+_citation_author.ordinal
+_citation_author.name
+  primary  1  'Whiskers, P.D.'
+  primary  3  'Van Hummel, J.F.'
+  primary  2  'McCheese, B.M.'
+
+loop_
 _atom_site.group_PDB
 _atom_site.type_symbol
 _atom_site.label_atom_id
