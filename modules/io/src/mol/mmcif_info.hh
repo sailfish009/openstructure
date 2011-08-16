@@ -245,7 +245,7 @@ private:
 class DLLEXPORT_OST_IO MMCifInfo {
 public:
   /// \brief Create an info object.
-  MMCifInfo() {};
+  MMCifInfo(): exptl_method_("") {};
 
   /// \brief Add an item to the list of citations
   ///
@@ -269,10 +269,24 @@ public:
     return citations_;
   }
 
+  /// \brief Set an experimental method.
+  ///
+  /// \param method Method description
+  void SetMethod(String method) { exptl_method_ = method; }
+
+  /// \brief Get an experimental method.
+  ///
+  /// \return Method description
+  const StringRef GetMethod() const
+  { 
+    return StringRef(exptl_method_.c_str(), exptl_method_.length());
+  }
+
 //protected:
 
 private:
   // members
+  String exptl_method_;
   std::vector<MMCifInfoCitation> citations_; ///< list of citations
 };
 

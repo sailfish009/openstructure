@@ -226,6 +226,11 @@ protected:
   /// \param columns data row
   void ParseCitationAuthor(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch MMCif exptl information
+  ///
+  /// \param columns data row
+  void ParseExptl(const std::vector<StringRef>& columns);
+
 private:
   /// \enum magic numbers of this class
   typedef enum {
@@ -293,6 +298,12 @@ private:
     ORDINAL                       ///< position in author list
   } CitationAuthorItems;
 
+  /// \enum items of the exptl category
+  typedef enum {
+    EXPTL_ENTRY_ID,               ///< identifier
+    METHOD                        ///< method of the experiment
+  } ExptlItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
@@ -300,6 +311,7 @@ private:
     ENTITY_POLY,
     CITATION,
     CITATION_AUTHOR,
+    EXPTL,
     DONT_KNOW
   } MMCifCategory;
 

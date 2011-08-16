@@ -43,6 +43,9 @@ _citation_author.name
   primary  3  'Van Hummel, J.F.'
   primary  2  'McCheese, B.M.'
 
+_exptl.entry_id           experiment1
+_exptl.method             'Deep-fry'
+
 loop_
 _atom_site.group_PDB
 _atom_site.type_symbol

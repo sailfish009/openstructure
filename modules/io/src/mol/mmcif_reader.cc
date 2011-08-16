@@ -196,9 +196,13 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     this->TryStoreIdx(AUTHOR_NAME, "name", header);
     this->TryStoreIdx(ORDINAL, "ordinal", header);
     cat_available = true;
-  } /*
-else if (header.GetCategory()=="pdbx_struct_assembly") {
-  } else if (header.GetCategory()=="struct_conf") {
+  } else if (header.GetCategory() == "exptl") {
+    category_ = EXPTL;
+    // mandatory items
+    this->TryStoreIdx(CITATION_ID, "entry_id", header);
+    this->TryStoreIdx(METHOD, "method", header);
+    cat_available = true;
+  } /* else if (header.GetCategory()=="struct_conf") {
   }*/
   category_counts_[category_]++;
   return cat_available;
@@ -704,6 +708,11 @@ void MMCifParser::ParseCitationAuthor(const std::vector<StringRef>& columns)
   }
 }
 
+void MMCifParser::ParseExptl(const std::vector<StringRef>& columns)
+{
+  info_.SetMethod(columns[indices_[METHOD]].str());
+}
+
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
@@ -727,6 +736,10 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
   case CITATION_AUTHOR:
     LOG_TRACE("processing citation_author entry")
     this->ParseCitationAuthor(columns);
+    break;
+  case EXPTL:
+    LOG_TRACE("processing exptl entry")
+    this->ParseExptl(columns);
     break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,

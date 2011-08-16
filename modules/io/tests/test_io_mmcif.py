@@ -47,6 +47,7 @@ class TestPDB(unittest.TestCase):
     self.assertEquals(s2[0], 'Foo')
 
     i = io.MMCifInfo()
+    i.SetMethod('Deep-Fry')
     i.AddCitation(c)
     s.append('Bar')
     i.AddAuthorsToCitation('ID', s)
@@ -57,6 +58,8 @@ class TestPDB(unittest.TestCase):
     self.assertEquals(len(al), 2)
     self.assertEquals(al[0], 'Foo')
     self.assertEquals(al[1], 'Bar')
+
+    self.assertEquals(i.GetMethod(), 'Deep-Fry')
 
 if __name__== '__main__':
     unittest.main()

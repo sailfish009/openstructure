@@ -664,6 +664,10 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
 
   BOOST_MESSAGE("          done.");
 
+  BOOST_MESSAGE("          reading data fields which should not fail...");
+  BOOST_CHECK(mmcif_p.GetInfo().GetMethod().str() == "Deep-fry");
+  BOOST_MESSAGE("          done.");
+
   BOOST_MESSAGE("  done.");
 }
 

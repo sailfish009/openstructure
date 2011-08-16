@@ -34,6 +34,13 @@ of the annotation available.
 
     Also available as :meth:`GetCitations`.
 
+  .. attribute:: method
+
+    Stores the experimental method used to create the structure.
+
+    Also available as :meth:`GetMethod`. May also be modified by
+    :meth:`SetMethod`.
+
   .. method:: AddCitation(citation)
 
     Add a citation to the citation list of an info object.
@@ -53,6 +60,14 @@ of the annotation available.
   .. method:: GetCitations()
 
     See :attr:`citations`
+
+  .. method:: SetMethod(method)
+
+    See :attr:`method`
+
+  .. method:: GetMethod()
+
+    See :attr:`method`
 
 .. class:: MMCifInfoCitation
 

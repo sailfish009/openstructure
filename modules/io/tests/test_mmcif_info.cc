@@ -79,4 +79,17 @@ BOOST_AUTO_TEST_CASE(mmcif_info_citation)
   BOOST_MESSAGE("  done.");
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_info)
+{
+  BOOST_MESSAGE("  Running mmcif_info tests...");
+
+  MMCifInfo info = MMCifInfo();
+
+  info.SetMethod("Cooking.");
+  BOOST_CHECK(info.GetMethod() == StringRef("Cooking.", 8));
+
+  BOOST_MESSAGE("  done.");
+}
+
+
 BOOST_AUTO_TEST_SUITE_END();
