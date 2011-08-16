@@ -46,6 +46,10 @@ _citation_author.name
 _exptl.entry_id           experiment1
 _exptl.method             'Deep-fry'
 
+_refine.entry_id       '1BAR'
+_refine.ls_d_res_high  2.0
+_refine.ls_d_res_low   1.5
+
 loop_
 _atom_site.group_PDB
 _atom_site.type_symbol

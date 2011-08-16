@@ -231,6 +231,11 @@ protected:
   /// \param columns data row
   void ParseExptl(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch MMCif refine information
+  ///
+  /// \param columns data row
+  void ParseRefine(const std::vector<StringRef>& columns);
+
 private:
   /// \enum magic numbers of this class
   typedef enum {
@@ -304,6 +309,13 @@ private:
     METHOD                        ///< method of the experiment
   } ExptlItems;
 
+  /// \enum items of the refine category
+  typedef enum {
+    REFINE_ENTRY_ID,
+    LS_D_RES_HIGH,
+    LS_D_RES_LOW
+  } RefineItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
@@ -312,6 +324,7 @@ private:
     CITATION,
     CITATION_AUTHOR,
     EXPTL,
+    REFINE,
     DONT_KNOW
   } MMCifCategory;
 

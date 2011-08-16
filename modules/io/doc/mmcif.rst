@@ -41,6 +41,13 @@ of the annotation available.
     Also available as :meth:`GetMethod`. May also be modified by
     :meth:`SetMethod`.
 
+  .. attribute:: resolution
+
+    Stores the resolution of the crystal structure.
+
+    Also available as :meth:`GetResolution`. May also be modified by
+    :meth:`SetResolution`.
+
   .. method:: AddCitation(citation)
 
     Add a citation to the citation list of an info object.
@@ -68,6 +75,14 @@ of the annotation available.
   .. method:: GetMethod()
 
     See :attr:`method`
+
+  .. method:: SetResolution(resolution)
+
+    See :attr:`resolution`
+
+  .. method:: GetResolution()
+
+    See :attr:`resolution`
 
 .. class:: MMCifInfoCitation
 

@@ -108,9 +108,13 @@ void export_mmcif_io()
                                    return_value_policy<copy_const_reference>()))
     .def("SetMethod", &MMCifInfo::SetMethod)
     .def("GetMethod", &MMCifInfo::GetMethod)
+    .def("SetResolution", &MMCifInfo::SetResolution)
+    .def("GetResolution", &MMCifInfo::GetResolution)
     .def("AddAuthorsToCitation", &MMCifInfo::AddAuthorsToCitation)
     .add_property("citations", make_function(&MMCifInfo::GetCitations,
                                    return_value_policy<copy_const_reference>()))
     .add_property("method", &MMCifInfo::GetMethod, &MMCifInfo::SetMethod)
+    .add_property("resolution", &MMCifInfo::GetResolution,
+                  &MMCifInfo::SetResolution)
   ;
 }

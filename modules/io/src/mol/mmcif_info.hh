@@ -245,7 +245,7 @@ private:
 class DLLEXPORT_OST_IO MMCifInfo {
 public:
   /// \brief Create an info object.
-  MMCifInfo(): exptl_method_("") {};
+  MMCifInfo(): exptl_method_(""), resolution_(0.0f) {};
 
   /// \brief Add an item to the list of citations
   ///
@@ -282,11 +282,22 @@ public:
     return StringRef(exptl_method_.c_str(), exptl_method_.length());
   }
 
+  /// \brief Set resolution.
+  ///
+  /// \param res experiment resolution
+  void SetResolution(Real res) { resolution_ = res; }
+
+  /// \brief Get resolution.
+  ///
+  /// \return experiment resolution
+  Real GetResolution() const { return resolution_; }
+
 //protected:
 
 private:
   // members
   String exptl_method_;
+  Real resolution_;
   std::vector<MMCifInfoCitation> citations_; ///< list of citations
 };
 

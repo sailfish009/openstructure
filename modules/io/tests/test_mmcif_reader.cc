@@ -54,6 +54,7 @@ public:
   using MMCifParser::ParseEntity;
   using MMCifParser::ParseEntityPoly;
   using MMCifParser::ParseCitation;
+  using MMCifParser::ParseRefine;
   using MMCifParser::TryStoreIdx;
   using MMCifParser::SetReadSeqRes;
   using MMCifParser::SetReadCanonicalSeqRes;
@@ -567,6 +568,42 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_author_tests)
   BOOST_MESSAGE("  done.");
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
+{
+  BOOST_MESSAGE("  Running mmcif_refine_tests...");
+  BOOST_MESSAGE("         positive test...");
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    std::ifstream s("testfiles/mmcif/atom_site.mmcif");
+    IOProfile profile;
+    MMCifParser mmcif_p(s, eh, profile);
+    BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0f, 0.001f);
+  }
+  BOOST_MESSAGE("         done.");
+  BOOST_MESSAGE("         capturing fishy data lines...");
+  {
+    mol::EntityHandle eh;
+    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    StarLoopDesc tmmcif_h;
+    std::vector<StringRef> columns;
+    
+    tmmcif_h.SetCategory(StringRef("refine", 6));
+    tmmcif_h.Add(StringRef("entry_id", 8));
+    tmmcif_h.Add(StringRef("ls_d_res_high", 13));
+    tmmcif_h.Add(StringRef("ls_d_res_low", 12));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+    
+    columns.push_back(StringRef("1Foo", 4));
+    columns.push_back(StringRef("Foo", 3));
+    columns.push_back(StringRef("1", 1));
+    
+    BOOST_CHECK_THROW(tmmcif_p.ParseRefine(columns), IOException);
+  }
+  BOOST_MESSAGE("         done.");
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
 {
   BOOST_MESSAGE("  Running mmcif_parseatomident tests...");
@@ -585,7 +622,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   //StringRef atom_name;
 
   BOOST_MESSAGE("          testing valid line");
-  //tmmcif_p.ParseAtomIdent(columns, chain_name, res_name);
+  //tmmcif_p.ParseAtomIdent();
   BOOST_MESSAGE("          done.");
   // negative
   //cols.push_back(StringRef("ATOM", 4));

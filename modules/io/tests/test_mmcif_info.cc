@@ -86,7 +86,10 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   MMCifInfo info = MMCifInfo();
 
   info.SetMethod("Cooking.");
+  info.SetResolution(1.9f);
+
   BOOST_CHECK(info.GetMethod() == StringRef("Cooking.", 8));
+  BOOST_CHECK_CLOSE(info.GetResolution(), 1.9f, 0.001f);
 
   BOOST_MESSAGE("  done.");
 }

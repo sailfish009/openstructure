@@ -193,17 +193,23 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     category_ = CITATION_AUTHOR;
     // mandatory items
     this->TryStoreIdx(AUTHOR_CITATION_ID, "citation_id", header);
-    this->TryStoreIdx(AUTHOR_NAME, "name", header);
-    this->TryStoreIdx(ORDINAL, "ordinal", header);
+    this->TryStoreIdx(AUTHOR_NAME,        "name", header);
+    this->TryStoreIdx(ORDINAL,            "ordinal", header);
     cat_available = true;
   } else if (header.GetCategory() == "exptl") {
     category_ = EXPTL;
     // mandatory items
     this->TryStoreIdx(CITATION_ID, "entry_id", header);
-    this->TryStoreIdx(METHOD, "method", header);
+    this->TryStoreIdx(METHOD,      "method", header);
     cat_available = true;
-  } /* else if (header.GetCategory()=="struct_conf") {
-  }*/
+  } else if (header.GetCategory() == "refine") {
+    category_ = REFINE;
+    // mandatory items
+    this->TryStoreIdx(REFINE_ENTRY_ID, "entry_id", header);
+    this->TryStoreIdx(LS_D_RES_HIGH,   "ls_d_res_high", header);
+    this->TryStoreIdx(LS_D_RES_LOW,    "ls_d_res_low", header);
+    cat_available = true;
+  }
   category_counts_[category_]++;
   return cat_available;
 }
@@ -713,6 +719,12 @@ void MMCifParser::ParseExptl(const std::vector<StringRef>& columns)
   info_.SetMethod(columns[indices_[METHOD]].str());
 }
 
+void MMCifParser::ParseRefine(const std::vector<StringRef>& columns)
+{
+  info_.SetResolution(this->TryGetReal(columns[indices_[LS_D_RES_HIGH]],
+                                       "refine.ls_d_res_high"));
+}
+
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
@@ -740,6 +752,10 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
   case EXPTL:
     LOG_TRACE("processing exptl entry")
     this->ParseExptl(columns);
+    break;
+  case REFINE:
+    LOG_TRACE("processing refine entry")
+    this->ParseRefine(columns);
     break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
