@@ -79,6 +79,56 @@ BOOST_AUTO_TEST_CASE(mmcif_info_citation)
   BOOST_MESSAGE("  done.");
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_info_biounit)
+{
+  BOOST_MESSAGE("  Running mmcif_info_biounit tests...");
+
+  MMCifInfoBioUnit bu = MMCifInfoBioUnit();
+
+  bu.SetDetails("author_defined_assembly");
+  bu.AddChain("A");
+
+  BOOST_CHECK(bu.GetDetails() == "author_defined_assembly");
+  BOOST_CHECK(bu.GetChainList().back() == "A");
+
+  MMCifInfo info = MMCifInfo();
+  info.AddBioUnit(bu);
+  std::vector<MMCifInfoBioUnit> biounits = info.GetBioUnits();
+  BOOST_CHECK(biounits.size() == 1);
+  BOOST_CHECK(biounits.back() == bu);
+
+  BOOST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_info_transoperation)
+{
+  BOOST_MESSAGE("  Running mmcif_info_transoperation tests...");
+
+  MMCifInfoTransOpPtr op(new MMCifInfoTransOp);
+
+  op->SetID("1");
+  op->SetType("identity operation");
+  op->SetVector(1, 2, 3);
+  op->SetMatrix(1, 2, 3, 4, 5, 6, 7 ,8, 9);
+
+  BOOST_CHECK(op->GetID() == "1");
+  BOOST_CHECK(op->GetVector() == geom::Vec3(1, 2, 3));
+  BOOST_CHECK(op->GetMatrix() == geom::Mat3(1, 2, 3, 4, 5, 6, 7, 8, 9));
+  BOOST_CHECK(op->GetType() == "identity operation");
+
+  MMCifInfo info = MMCifInfo();
+  info.AddOperation(op);
+  BOOST_CHECK(info.GetOperations().back() == op);
+
+  std::vector<MMCifInfoTransOpPtr> ops;
+  ops.push_back(*(info.GetOperations().begin()));
+  MMCifInfoBioUnit bu = MMCifInfoBioUnit();
+  bu.AddOperations(ops);
+  BOOST_CHECK((*(bu.GetOperations().begin()->begin())) == op);
+
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_info)
 {
   BOOST_MESSAGE("  Running mmcif_info tests...");

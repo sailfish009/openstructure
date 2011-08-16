@@ -1,11 +1,11 @@
 import unittest
 from ost import *
 
-class TestPDB(unittest.TestCase):
+class TestMMCifInfo(unittest.TestCase):
   def setUp(self):
     pass
 
-  def test_mmcifinfo(self):
+  def test_mmcifinfo_citation(self):
     c = io.MMCifInfoCitation()
     # test ID setting/ getting
     c.SetID('ID')
@@ -62,6 +62,46 @@ class TestPDB(unittest.TestCase):
 
     self.assertEquals(i.GetMethod(), 'Deep-Fry')
     self.assertEquals(i.GetResolution(), 2.0)
+
+
+  def test_mmcifinfo_biounit(self):
+    b = io.MMCifInfoBioUnit()
+    b.SetDetails('Details')
+    self.assertEquals(b.GetDetails(), 'Details')
+    b.AddChain('A')
+    cl = b.GetChainList()
+    self.assertEquals(cl[0], 'A')
+
+    i = io.MMCifInfo()
+    i.AddBioUnit(b)
+
+    bl = i.GetBioUnits()
+    self.assertEquals(len(bl), 1)
+
+
+  def test_mmcifinfo_transoperation(self):
+    o = io.MMCifInfoTransOp()
+    o.SetID("1")
+    self.assertEquals(o.GetID(), '1')
+    o.SetType("identity operation")
+    self.assertEquals(o.GetType(), 'identity operation')
+    o.SetVector(1.0, 2.0, 3.0)
+    self.assertEquals(o.GetVector().x, 1.0)
+    self.assertEquals(o.GetVector().y, 2.0)
+    self.assertEquals(o.GetVector().z, 3.0)
+    o.SetMatrix(1, 2, 3, 4, 5, 6, 7, 8, 9)
+    self.assertEquals(geom.Equal(o.GetMatrix(),
+                                 geom.Mat3(1, 2, 3, 4, 5, 6, 7, 8, 9)), True)
+
+    i = io.MMCifInfo()
+    i.AddOperation(o)
+    ol = i.GetOperations()
+    self.assertEquals(ol[0].GetID(), '1')
+
+    b = io.MMCifInfoBioUnit()
+    b.AddOperations(ol)
+    oll = b.GetOperations()
+    self.assertEquals(oll[0][0].GetID(), '1')
 
 if __name__== '__main__':
     unittest.main()

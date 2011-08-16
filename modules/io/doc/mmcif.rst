@@ -34,6 +34,12 @@ of the annotation available.
 
     Also available as :meth:`GetCitations`.
 
+  .. attribute:: biounits
+
+    Stores a list of biounits (:class:`MMCifInfoBioUnit`).
+
+    Also available as :meth:`GetBioUnits`.
+
   .. attribute:: method
 
     Stores the experimental method used to create the structure.
@@ -47,6 +53,14 @@ of the annotation available.
 
     Also available as :meth:`GetResolution`. May also be modified by
     :meth:`SetResolution`.
+
+  .. attribute:: operations
+
+    Stores the operations needed to transform a crystal structure into a
+    biounit.
+
+    Also available as :meth:`GetOperations`. May also be modified by
+    :meth:`AddOperation`.
 
   .. method:: AddCitation(citation)
 
@@ -68,6 +82,17 @@ of the annotation available.
 
     See :attr:`citations`
 
+  .. method:: AddBioUnit(biounit)
+
+    Add a biounit to the biounit list of an info object.
+
+    :param biounit: Biounit to be added.
+    :type biounit: :class:`MMCifInfoBioUnit`
+
+  .. method:: GetBioUnits()
+
+    See :attr:`citations`
+
   .. method:: SetMethod(method)
 
     See :attr:`method`
@@ -83,6 +108,14 @@ of the annotation available.
   .. method:: GetResolution()
 
     See :attr:`resolution`
+
+  .. method:: AddOperation(operation)
+
+    See :attr:`operations`
+
+  .. method:: GetOperations()
+
+    See :attr:`operations`
 
 .. class:: MMCifInfoCitation
 
@@ -265,3 +298,113 @@ of the annotation available.
   .. method:: SetAuthorList(list)
 
     See :attr:`authors`
+
+
+.. class:: MMCifInfoTransOperation
+
+  This stores operations needed to transform an
+  :class:`entity <ost.mol.EntityHandle>` into a biounit.
+
+  .. attribute:: id
+
+    A unique identifier. If not provided, resembles an empty string.
+
+    Also available as :meth:`GetID`. May also be modified by
+    :meth:`SetID`.
+
+  .. attribute:: type
+
+    Describes the operation. If not provided, resembles an empty string.
+
+    Also available as :meth:`GetType`. May also be modified by
+    :meth:`SetType`.
+
+  .. attribute:: translation
+
+    The translational vector. Also available as :meth:`GetVector`. May also be
+
+    modified by :meth:`SetVector`.
+
+  .. attribute:: rotation
+
+    The rotational matrix. Also available as :meth:`GetMatrix`. May also be
+
+    modified by :meth:`SetMatrix`.
+
+  .. method:: GetID()
+
+    See :attr:`id`
+
+  .. method:: SetID(id)
+
+    See :attr:`id`
+
+  .. method:: GetType()
+
+    See :attr:`type`
+
+  .. method:: SetType(type)
+
+    See :attr:`type`
+
+  .. method:: GetVector()
+
+    See :attr:`translation`
+
+  .. method:: SetVector(x, y, z)
+
+    See :attr:`translation`
+
+  .. method:: GetMatrix()
+
+    See :attr:`rotation`
+
+  .. method:: SetMatrix(i00,i01, i02, i10,i11, i12, i20,i21, i22)
+
+    See :attr:`rotation`
+
+.. class:: MMCifInfoBioUnit
+
+  This stores information how a structure is to be assembled to form the
+  biounit.
+
+  .. attribute:: details
+
+    Special asepcts of the biological assembly. If not provided, resembles an
+    empty string.
+
+    Also available as :meth:`GetDetails`. May also be modified by
+    :meth:`SetDetails`.
+
+  .. attribute:: chains
+
+    Chains involved in this biounit. If not provided, resembles an empty list.
+
+    Also available as :meth:`GetChainList`. May also be modified by
+    :meth:`AddChain`.
+
+  .. attribute:: operations
+
+    Translations and rotations needed to create the biounit.
+
+    May be modified by :meth:`AddOperations`
+
+  .. method:: GetDetails()
+
+    See :attr:`details`
+
+  .. method:: SetDetails(details)
+
+    See :attr:`details`
+
+  .. method:: GetChainList()
+
+    See :attr:`chains`
+
+  .. method:: AddChain(chain name)
+
+    See :attr:`chains`
+
+  .. method:: AddOperations(list of operations)
+
+    See :attr:`operations`

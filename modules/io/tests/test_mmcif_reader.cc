@@ -48,6 +48,7 @@ public:
   { }
 
   using MMCifParser::OnBeginLoop;
+  using MMCifParser::OnEndData;
   using MMCifParser::IsValidPDBIdent;
   using MMCifParser::ParseAtomIdent;
   using MMCifParser::ParseAndAddAtom;
@@ -55,6 +56,9 @@ public:
   using MMCifParser::ParseEntityPoly;
   using MMCifParser::ParseCitation;
   using MMCifParser::ParseRefine;
+  using MMCifParser::ParsePdbxStructAssemblyGen;
+  using MMCifParser::ParsePdbxStructAssembly;
+  using MMCifParser::ParsePdbxStructOperList;
   using MMCifParser::TryStoreIdx;
   using MMCifParser::SetReadSeqRes;
   using MMCifParser::SetReadCanonicalSeqRes;
@@ -604,6 +608,127 @@ BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
   BOOST_MESSAGE("  done.");
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_biounit_tests)
+{
+  BOOST_MESSAGE("  Running mmcif_biounit_tests...");
+  //build dummy biounit
+  mol::EntityHandle eh = mol::CreateEntity();
+  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  StarLoopDesc tmmcif_h;
+  std::vector<StringRef> columns;
+
+  tmmcif_h.SetCategory(StringRef("pdbx_struct_assembly_gen", 24));
+  tmmcif_h.Add(StringRef("assembly_id", 11));
+  tmmcif_h.Add(StringRef("asym_id_list", 12));
+  tmmcif_h.Add(StringRef("oper_expression", 15));
+  tmmcif_p.OnBeginLoop(tmmcif_h);
+
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("A", 1));
+  columns.push_back(StringRef("1", 1));
+
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParsePdbxStructAssemblyGen(columns));
+  BOOST_CHECK_THROW(tmmcif_p.OnEndData(), IOException);
+
+  tmmcif_h.Clear();
+  tmmcif_h.SetCategory(StringRef("pdbx_struct_assembly", 20));
+  tmmcif_h.Add(StringRef("id", 2));
+  columns.pop_back();
+  columns.pop_back();
+  columns.pop_back();
+  columns.push_back(StringRef("1", 1));
+  tmmcif_p.OnBeginLoop(tmmcif_h);
+  tmmcif_p.ParsePdbxStructAssembly(columns);
+
+  tmmcif_h.Clear();
+  tmmcif_h.SetCategory(StringRef("pdbx_struct_assembly_gen", 24));
+  tmmcif_h.Add(StringRef("assembly_id", 11));
+  tmmcif_h.Add(StringRef("asym_id_list", 12));
+  tmmcif_h.Add(StringRef("oper_expression", 15));
+  tmmcif_p.OnBeginLoop(tmmcif_h);
+
+  columns.pop_back();
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("A", 1));
+  columns.push_back(StringRef("1", 1));
+
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParsePdbxStructAssemblyGen(columns));
+  BOOST_CHECK_THROW(tmmcif_p.OnEndData(), IOException);
+
+  tmmcif_h.Clear();
+  tmmcif_h.SetCategory(StringRef("pdbx_struct_assembly_gen", 24));
+  tmmcif_h.Add(StringRef("assembly_id", 11));
+  tmmcif_h.Add(StringRef("asym_id_list", 12));
+  tmmcif_h.Add(StringRef("oper_expression", 15));
+  tmmcif_p.OnBeginLoop(tmmcif_h);
+
+  columns.pop_back();
+  columns.push_back(StringRef("1-Z", 3));
+  BOOST_CHECK_THROW(tmmcif_p.ParsePdbxStructAssemblyGen(columns), IOException);
+
+  columns.pop_back();
+  columns.push_back(StringRef("--", 3));
+  BOOST_CHECK_THROW(tmmcif_p.ParsePdbxStructAssemblyGen(columns), IOException);
+
+  columns.pop_back();
+  columns.push_back(StringRef("A-3", 3));
+  BOOST_CHECK_THROW(tmmcif_p.ParsePdbxStructAssemblyGen(columns), IOException);
+
+  tmmcif_h.Clear();
+  tmmcif_h.SetCategory(StringRef("pdbx_struct_oper_list", 21));
+  tmmcif_h.Add(StringRef("id", 2));
+  tmmcif_h.Add(StringRef("type", 4));
+  tmmcif_h.Add(StringRef("vector[1]", 9));
+  tmmcif_h.Add(StringRef("vector[2]", 9));
+  tmmcif_h.Add(StringRef("vector[3]", 9));
+  tmmcif_h.Add(StringRef("matrix[1][1]", 12));
+  tmmcif_h.Add(StringRef("matrix[1][2]", 12));
+  tmmcif_h.Add(StringRef("matrix[1][3]", 12));
+  tmmcif_h.Add(StringRef("matrix[2][1]", 12));
+  tmmcif_h.Add(StringRef("matrix[2][2]", 12));
+  tmmcif_h.Add(StringRef("matrix[2][3]", 12));
+  tmmcif_h.Add(StringRef("matrix[3][1]", 12));
+  tmmcif_h.Add(StringRef("matrix[3][2]", 12));
+  tmmcif_h.Add(StringRef("matrix[3][3]", 12));
+
+
+
+  tmmcif_p.OnBeginLoop(tmmcif_h);
+
+  columns.pop_back();
+  columns.pop_back();
+  columns.pop_back();
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("Nan", 3));
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("A", 1));
+  columns.push_back(StringRef("3", 1));
+  BOOST_CHECK_THROW(tmmcif_p.ParsePdbxStructOperList(columns), IOException);
+
+  columns.pop_back();
+  columns.pop_back();
+  columns.pop_back();
+  columns.pop_back();
+  columns.pop_back();
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("Nan", 3));
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("2", 1));
+  columns.push_back(StringRef("3", 1));
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("2", 1));
+  columns.push_back(StringRef("3", 1));
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("2", 1));
+  columns.push_back(StringRef("3", 1));
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("A", 1));
+  columns.push_back(StringRef("3", 1));
+  BOOST_CHECK_THROW(tmmcif_p.ParsePdbxStructOperList(columns), IOException);
+
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
 {
   BOOST_MESSAGE("  Running mmcif_parseatomident tests...");
@@ -703,6 +828,13 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
 
   BOOST_MESSAGE("          reading data fields which should not fail...");
   BOOST_CHECK(mmcif_p.GetInfo().GetMethod().str() == "Deep-fry");
+  BOOST_CHECK(mmcif_p.GetInfo().GetBioUnits().back().GetDetails() ==
+              "author_defined_assembly");
+  BOOST_CHECK(mmcif_p.GetInfo().GetBioUnits().back().GetChainList().back() ==
+              "F");
+  MMCifInfoBioUnit bu = mmcif_p.GetInfo().GetBioUnits().back();
+  BOOST_CHECK(bu.GetOperations().back().back()->GetType() ==
+              "identity operation");
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");

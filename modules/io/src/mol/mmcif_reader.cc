@@ -78,6 +78,8 @@ void MMCifParser::ClearState()
   info_                 = MMCifInfo();
   entity_desc_map_.clear();
   authors_map_.clear();
+  bu_origin_map_.clear();
+  bu_assemblies_.clear();
 }
 
 void MMCifParser::SetRestrictChains(const String& restrict_chains)
@@ -208,6 +210,40 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     this->TryStoreIdx(REFINE_ENTRY_ID, "entry_id", header);
     this->TryStoreIdx(LS_D_RES_HIGH,   "ls_d_res_high", header);
     this->TryStoreIdx(LS_D_RES_LOW,    "ls_d_res_low", header);
+    cat_available = true;
+  } else if (header.GetCategory() == "pdbx_struct_assembly") {
+    category_ = PDBX_STRUCT_ASSEMBLY;
+    // mandatory items
+    this->TryStoreIdx(PSA_ID, "id", header);
+    // optional
+    indices_[PSA_DETAILS] = header.GetIndex("details");
+    //indices_[METHOD_DETAILS] = header.GetIndex("method_details");
+    cat_available = true;
+  } else if (header.GetCategory() == "pdbx_struct_assembly_gen") {
+    category_ = PDBX_STRUCT_ASSEMBLY_GEN;
+    // mandatory items
+    this->TryStoreIdx(ASSEMBLY_ID,     "assembly_id", header);
+    this->TryStoreIdx(ASYM_ID_LIST,    "asym_id_list", header);
+    this->TryStoreIdx(OPER_EXPRESSION, "oper_expression", header);
+    cat_available = true;
+  } else if (header.GetCategory() == "pdbx_struct_oper_list") {
+    category_ = PDBX_STRUCT_OPER_LIST;
+    // mandatory items
+    this->TryStoreIdx(PSOL_ID,   "id",   header);
+    this->TryStoreIdx(PSOL_TYPE, "type", header);
+    // optional items
+    indices_[VECTOR_1]   = header.GetIndex("vector[1]");
+    indices_[VECTOR_2]   = header.GetIndex("vector[2]");
+    indices_[VECTOR_3]   = header.GetIndex("vector[3]");
+    indices_[MATRIX_1_1] = header.GetIndex("matrix[1][1]");
+    indices_[MATRIX_1_2] = header.GetIndex("matrix[1][2]");
+    indices_[MATRIX_1_3] = header.GetIndex("matrix[1][3]");
+    indices_[MATRIX_2_1] = header.GetIndex("matrix[2][1]");
+    indices_[MATRIX_2_2] = header.GetIndex("matrix[2][2]");
+    indices_[MATRIX_2_3] = header.GetIndex("matrix[2][3]");
+    indices_[MATRIX_3_1] = header.GetIndex("matrix[3][1]");
+    indices_[MATRIX_3_2] = header.GetIndex("matrix[3][2]");
+    indices_[MATRIX_3_3] = header.GetIndex("matrix[3][3]");
     cat_available = true;
   }
   category_counts_[category_]++;
@@ -729,6 +765,184 @@ void MMCifParser::ParseRefine(const std::vector<StringRef>& columns)
                                        "refine.ls_d_res_high"));
 }
 
+void MMCifParser::ParsePdbxStructAssembly(const std::vector<StringRef>& columns)
+{
+  if (indices_[PSA_DETAILS] != -1) {
+    bu_origin_map_.insert(std::pair<String,
+                                    String>(columns[indices_[PSA_ID]].str(),
+                                         columns[indices_[PSA_DETAILS]].str()));
+  } else {
+    bu_origin_map_.insert(std::pair<String,
+                                    String>(columns[indices_[PSA_ID]].str(),
+                                            "?"));
+  }
+}
+
+void MMCifParser::StoreExpression(const char* l, const char* s,
+                                  bool& is_range, int lborder,
+                                  std::vector<String>& single_block)
+{
+  std::stringstream ss;
+  int rborder;
+
+  if (l != s) {
+    if (is_range) {
+      is_range = false;
+      rborder = this->TryGetInt(StringRef(l, s-l),
+                                "pdbx_struct_assembly_gen.oper_expression");
+      for (lborder += 1; lborder < rborder; lborder++) {
+        ss << lborder;
+        single_block.push_back(ss.str());
+        ss.str("");
+      }
+    }
+    single_block.push_back(String(l, s-l));
+  }
+}
+
+void MMCifParser::StoreRange(const char*& l, const char* s, bool& is_range,
+                             int& lborder, std::vector<String>& single_block)
+{
+  if (is_range) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_WARNING,
+                                             "pdbx_struct_assembly_gen.oper_expression is missing a right border for a range expression.",
+                                             this->GetCurrentLinenum()));
+  }
+  is_range = true;
+  if (l != s) {
+    lborder = this->TryGetInt(StringRef(l, s-l),
+                              "pdbx_struct_assembly_gen.oper_expression");
+    single_block.push_back(String(l, s-l));
+  }
+  l = s+1;
+}
+
+std::vector<std::vector<String> > MMCifParser::UnPackOperExperession(StringRef expression)
+{
+  std::vector<std::vector<String> > unpacked;
+  std::vector<String> single_block;
+  int lborder;
+  bool is_range = false;
+  std::stringstream ss;
+  const char* s = expression.begin();
+  const char* e = expression.end();
+  const char* l = expression.begin();
+
+  if (*s == '(') {
+    ++s;
+    ++l;
+    // multiple blocks
+    while (s != e) {
+      if (*s == ',') {
+        StoreExpression(l, s, is_range, lborder, single_block);
+        l = s+1;
+      } else if (*s == '-') {
+        StoreRange(l, s, is_range, lborder, single_block);
+      } else if (*s == '(') {
+        ++l;
+      } else if (*s == ')') {
+        StoreExpression(l, s, is_range, lborder, single_block);
+        l = s+1;
+        if (single_block.size() > 0) {
+          unpacked.push_back(single_block);
+        }
+        single_block.clear();
+      }
+      ++s;
+    }
+  } else {
+    // single block
+    while (s != e) {
+      if (*s == ',') {
+        StoreExpression(l, s, is_range, lborder, single_block);
+        l = s+1;
+      } else if (*s == '-') {
+        StoreRange(l, s, is_range, lborder, single_block);
+      }
+      ++s;
+    }
+    StoreExpression(l, s, is_range, lborder, single_block);
+
+    if (is_range) {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_WARNING,
+                                               "pdbx_struct_assembly_gen.oper_expression is missing a right border for a range expression.",
+                                               this->GetCurrentLinenum()));
+    }
+    unpacked.push_back(single_block);
+  }
+
+  return unpacked;
+}
+
+void MMCifParser::ParsePdbxStructAssemblyGen(const std::vector<StringRef>& columns)
+{
+  MMCifBioUAssembly assembly;
+  assembly.biounit = MMCifInfoBioUnit();
+
+  assembly.biounit.SetDetails(columns[indices_[ASSEMBLY_ID]].str());
+
+  std::vector<StringRef> tmp_chains=columns[indices_[ASYM_ID_LIST]].split(',');
+  std::vector<StringRef>::const_iterator tc_it;
+  for (tc_it = tmp_chains.begin(); tc_it != tmp_chains.end(); ++tc_it) {
+    assembly.biounit.AddChain(tc_it->str());
+  }
+
+  assembly.operations =
+    this->UnPackOperExperession(columns[indices_[OPER_EXPRESSION]]);
+
+  bu_assemblies_.push_back(assembly);
+}
+
+void MMCifParser::ParsePdbxStructOperList(const std::vector<StringRef>& columns)
+{
+  MMCifInfoTransOpPtr op(new MMCifInfoTransOp);
+
+  op->SetID(columns[indices_[PSOL_ID]].str());
+  op->SetType(columns[indices_[PSOL_TYPE]].str());
+
+  if ((indices_[VECTOR_1] != -1)&&
+      (indices_[VECTOR_2] != -1)&&
+      (indices_[VECTOR_3] != -1)) {
+    op->SetVector(this->TryGetReal(columns[indices_[VECTOR_1]],
+                                   "pdbx_struct_oper_list.vector[1]"),
+                  this->TryGetReal(columns[indices_[VECTOR_2]],
+                                   "pdbx_struct_oper_list.vector[2]"),
+                  this->TryGetReal(columns[indices_[VECTOR_3]],
+                                   "pdbx_struct_oper_list.vector[3]"));
+  }
+
+  if ((indices_[MATRIX_1_1] != -1)&&
+      (indices_[MATRIX_1_2] != -1)&&
+      (indices_[MATRIX_1_3] != -1)&&
+      (indices_[MATRIX_2_1] != -1)&&
+      (indices_[MATRIX_2_2] != -1)&&
+      (indices_[MATRIX_2_3] != -1)&&
+      (indices_[MATRIX_3_1] != -1)&&
+      (indices_[MATRIX_3_2] != -1)&&
+      (indices_[MATRIX_3_3] != -1)) {
+    op->SetMatrix(this->TryGetReal(columns[indices_[MATRIX_1_1]],
+                                   "pdbx_struct_oper_list.matrix[1][1]"),
+                  this->TryGetReal(columns[indices_[MATRIX_1_2]],
+                                   "pdbx_struct_oper_list.matrix[1][2]"),
+                  this->TryGetReal(columns[indices_[MATRIX_1_3]],
+                                   "pdbx_struct_oper_list.matrix[1][3]"),
+                  this->TryGetReal(columns[indices_[MATRIX_2_1]],
+                                   "pdbx_struct_oper_list.matrix[2][1]"),
+                  this->TryGetReal(columns[indices_[MATRIX_2_2]],
+                                   "pdbx_struct_oper_list.matrix[2][2]"),
+                  this->TryGetReal(columns[indices_[MATRIX_2_3]],
+                                   "pdbx_struct_oper_list.matrix[2][3]"),
+                  this->TryGetReal(columns[indices_[MATRIX_3_1]],
+                                   "pdbx_struct_oper_list.matrix[3][1]"),
+                  this->TryGetReal(columns[indices_[MATRIX_3_2]],
+                                   "pdbx_struct_oper_list.matrix[3][2]"),
+                  this->TryGetReal(columns[indices_[MATRIX_3_3]],
+                                   "pdbx_struct_oper_list.matrix[3][3]"));
+  }
+
+  info_.AddOperation(op);
+}
+
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
@@ -760,6 +974,18 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
   case REFINE:
     LOG_TRACE("processing refine entry")
     this->ParseRefine(columns);
+    break;
+  case PDBX_STRUCT_ASSEMBLY:
+    LOG_TRACE("processing pdbx_struct_assembly entry")
+    this->ParsePdbxStructAssembly(columns);
+    break;
+  case PDBX_STRUCT_ASSEMBLY_GEN:
+    LOG_TRACE("processing pdbx_struct_assembly_gen entry")
+    this->ParsePdbxStructAssemblyGen(columns);
+    break;
+  case PDBX_STRUCT_OPER_LIST:
+    LOG_TRACE("processing pdbx_struct_oper_list entry")
+    this->ParsePdbxStructOperList(columns);
     break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
@@ -795,13 +1021,61 @@ void MMCifParser::OnEndData()
   // process citations (couple with authors
   // iterate citations
   MMCifCitationAuthorMap::const_iterator atm_it;
-  std::vector<String>::const_iterator atv_it;
-  std::vector<int>::const_iterator pos_it;
   for (atm_it = authors_map_.begin(); atm_it != authors_map_.end(); ++atm_it) {
     info_.AddAuthorsToCitation(StringRef(atm_it->first.c_str(),
                                          atm_it->first.length()),
                                atm_it->second.second);
   }
+
+  bool found;
+  MMCifBioUAssemblyVector::iterator bua_it;
+  std::vector<std::vector<String> >::const_iterator aol_it;
+  std::vector<String>::const_iterator aob_it;
+  std::vector<MMCifInfoTransOpPtr> operation_list;
+  std::map<String, String>::const_iterator buom_it;
+  std::vector<MMCifInfoTransOpPtr> operations = info_.GetOperations();
+  std::vector<MMCifInfoTransOpPtr>::const_iterator buop_it;
+  for (bua_it = bu_assemblies_.begin();
+       bua_it != bu_assemblies_.end();
+       ++bua_it) {
+    // pair with pdbx_struct_assembly entry
+    buom_it = bu_origin_map_.find(bua_it->biounit.GetDetails());
+    if (buom_it == bu_origin_map_.end()) {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                               "No pdbx_struct_assembly.id '"+
+                                               bua_it->biounit.GetDetails() +
+                         "' found as requested by pdbx_struct_assembly_gen.")); 
+    }
+    bua_it->biounit.SetDetails(buom_it->second);
+
+    // pair with pdbx_struct_oper_list
+    for (aol_it = bua_it->operations.begin();
+         aol_it != bua_it->operations.end();
+         ++aol_it) {
+      operation_list.clear();
+      for (aob_it = aol_it->begin(); aob_it != aol_it->end(); aob_it++) {
+        found = false;
+        for (buop_it = operations.begin();
+             buop_it != operations.end();
+             ++buop_it) {
+          if ((*buop_it)->GetID() == *aob_it) {
+            operation_list.push_back(*buop_it);
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                                "No pdbx_struct_oper_list.id '"+
+                                                   *aob_it +
+                          "' found as requested by pdbx_struct_assembly_gen."));
+        }
+      }
+      bua_it->biounit.AddOperations(operation_list);
+    }
+    info_.AddBioUnit(bua_it->biounit);
+  }
+  bu_assemblies_.clear();
 
   LOG_INFO("imported "
            << chain_count_ << " chains, "

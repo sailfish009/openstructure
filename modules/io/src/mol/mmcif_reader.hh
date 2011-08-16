@@ -21,9 +21,7 @@
 
 #include <map>
 
-//#include <boost/iostreams/filtering_stream.hpp>
-//#include <boost/filesystem/fstream.hpp>
-
+#include <ost/geom/geom.hh>
 #include <ost/seq/sequence_list.hh>
 #include <ost/mol/residue_handle.hh>
 #include <ost/mol/chain_type.hh>
@@ -47,6 +45,9 @@ namespace ost { namespace io {
 /// \li entity
 /// \li entity_poly
 /// \li citation
+/// \li pdbx_struct_assembly
+/// \li pdbx_struct_assembly_gen
+/// \li pdbx_struct_oper_list
 class DLLEXPORT_OST_IO MMCifParser : public StarParser  {
 public:
   /// \brief create a MMCifParser
@@ -236,6 +237,31 @@ protected:
   /// \param columns data row
   void ParseRefine(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch MMCif pdbx_struct_assembly information
+  ///
+  /// \param columns data row
+  void ParsePdbxStructAssembly(const std::vector<StringRef>& columns);
+
+  /// \brief Fetch MMCif pdbx_struct_assembly_gen information
+  ///
+  /// \param columns data row
+  void ParsePdbxStructAssemblyGen(const std::vector<StringRef>& columns);
+
+  std::vector<std::vector<String> > UnPackOperExperession(StringRef expression);
+
+  void StoreExpression(const char* l, const char* s,
+                       bool& is_range, int lborder,
+                       std::vector<String>& single_block);
+
+  void StoreRange(const char*& l, const char* s, bool& is_range, int& lborder,
+                  std::vector<String>& single_block);
+
+  /// \brief Fetch MMCif pdbx_struct_oper_list information
+  ///
+  /// \param columns data row
+  void ParsePdbxStructOperList(const std::vector<StringRef>& columns);
+
+
 private:
   /// \enum magic numbers of this class
   typedef enum {
@@ -311,10 +337,42 @@ private:
 
   /// \enum items of the refine category
   typedef enum {
-    REFINE_ENTRY_ID,
-    LS_D_RES_HIGH,
+    REFINE_ENTRY_ID,              ///< id
+    LS_D_RES_HIGH,                ///< crystal resolution
     LS_D_RES_LOW
   } RefineItems;
+
+  /// \enum items of the pdbx_struct_assembly category
+  typedef enum {
+    PSA_DETAILS,                  ///< special aspects of the assembly
+    PSA_ID,                       ///< unique identifier
+    METHOD_DETAILS                ///< details about assembly computation
+  } PdbxStructAssemblyItems;
+
+  /// \enum items of the pdbx_struct_assembly_gen category
+  typedef enum {
+    ASSEMBLY_ID,                  ///< link to pdbx_struct_assembly.id
+    ASYM_ID_LIST,                 ///< list of chains
+    OPER_EXPRESSION               ///< list of pdbx_struct_oper_list.ids
+  } PdbxStructAssemblyGenItems;
+
+  /// \enum items of the pdbx_struct_oper_list category
+  typedef enum {
+    PSOL_ID,    ///< unique identifier
+    PSOL_TYPE,  ///< type of operation
+    VECTOR_1,   ///< vector component
+    VECTOR_2,   ///< vector component
+    VECTOR_3,   ///< vector component
+    MATRIX_1_1, ///< matrix component
+    MATRIX_1_2, ///< matrix component
+    MATRIX_1_3, ///< matrix component
+    MATRIX_2_1, ///< matrix component
+    MATRIX_2_2, ///< matrix component
+    MATRIX_2_3, ///< matrix component
+    MATRIX_3_1, ///< matrix component
+    MATRIX_3_2, ///< matrix component
+    MATRIX_3_3  ///< matrix component
+  } PdbxStructOperListItems;
 
   /// \enum categories of the mmcif format
   typedef enum {
@@ -325,6 +383,9 @@ private:
     CITATION_AUTHOR,
     EXPTL,
     REFINE,
+    PDBX_STRUCT_ASSEMBLY,
+    PDBX_STRUCT_ASSEMBLY_GEN,
+    PDBX_STRUCT_OPER_LIST,
     DONT_KNOW
   } MMCifCategory;
 
@@ -334,9 +395,16 @@ private:
     String details;      ///< description of this entity
     String seqres;       ///< chain of monomers
   } MMCifEntityDesc;
-
   typedef std::map<String, MMCifEntityDesc> MMCifEntityDescMap;
-  //typedef std::map<String, std::pair<std::vector<int>, std::vector<String> > >
+
+  /// \struct assembly information
+  typedef struct {
+    MMCifInfoBioUnit biounit;
+    std::vector<std::vector<String> > operations;   ///< list of links to
+                                                     /// MMCifBioUOperation
+  } MMCifBioUAssembly;
+  typedef std::vector<MMCifBioUAssembly> MMCifBioUAssemblyVector;
+
   typedef std::map<String, std::pair<std::vector<int>, std::vector<String> > >
     MMCifCitationAuthorMap;
 
@@ -366,6 +434,8 @@ private:
   bool read_seqres_;
   MMCifInfo info_;      ///< info container
   MMCifCitationAuthorMap authors_map_;
+  MMCifBioUAssemblyVector bu_assemblies_;
+  std::map<String, String> bu_origin_map_; ///< pdbx_struct_assembly.details
 };
 
 }}

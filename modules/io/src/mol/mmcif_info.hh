@@ -20,10 +20,155 @@
 #define OST_MMCIF_INFO_HH
 
 #include <vector>
+#include <boost/shared_ptr.hpp>
+#include <ost/geom/geom.hh>
 #include <ost/string_ref.hh>
 #include <ost/io/module_config.hh>
 
 namespace ost { namespace io {
+
+class DLLEXPORT_OST_IO MMCifInfoTransOp {
+public:
+  /// \brief Create an operation
+  MMCifInfoTransOp(): id_(""), type_("")
+  {
+    translation_ = geom::Vec3();
+  };
+
+  /// \brief Set id
+  ///
+  /// \param id id
+  void SetID(String id) { id_ = id; }
+  /// \brief Get id
+  ///
+  /// \return id
+  String GetID() const { return id_; }
+
+  /// \brief Set type
+  ///
+  /// \param type
+  void SetType(String type) { type_ = type; }
+  /// \brief Get type
+  ///
+  /// \return type
+  String GetType() const { return type_; }
+
+  /// \brief Set the translational vector
+  ///
+  /// \param 
+  void SetVector(Real x, Real y, Real z)
+  {
+    translation_.SetX(x);
+    translation_.SetY(y);
+    translation_.SetZ(z);
+  }
+  /// \brief Get the translational vector
+  ///
+  /// \return vector
+  geom::Vec3 GetVector() const { return translation_; }
+
+  /// \brief Set the rotational matrix
+  ///
+  /// \param 
+  void SetMatrix(Real i00, Real i01, Real i02,
+                 Real i10, Real i11, Real i12,
+                 Real i20, Real i21, Real i22)
+  {
+    rotation_ = geom::Mat3(i00,i01,i02, i10,i11,i12, i20,i21,i22);
+  }
+  /// \brief Get the rotational matrix
+  ///
+  /// \return matrix
+  geom::Mat3 GetMatrix() const { return rotation_; }
+
+  bool operator==(const MMCifInfoTransOp& op) const {
+    if (this->id_ != op.id_) {
+      return false;
+    }
+    if (this->type_ != op.type_) {
+      return false;
+    }
+    if (this->translation_ != op.translation_) {
+      return false;
+    }
+    if (this->rotation_ != op.rotation_) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool operator!=(const MMCifInfoTransOp& op) const {
+    return !this->operator==(op);
+  }
+
+private:
+  String id_;              ///< identifier
+  String type_;            ///< type of operation
+  geom::Vec3 translation_; ///< translational vector
+  geom::Mat3 rotation_;    ///< rotational matrix
+};
+typedef boost::shared_ptr<MMCifInfoTransOp> MMCifInfoTransOpPtr;
+
+
+class DLLEXPORT_OST_IO MMCifInfoBioUnit {
+public:
+  /// \brief Create a biounit.
+  MMCifInfoBioUnit(): details_("") {};
+
+  /// \brief Set details
+  ///
+  /// \param details details
+  void SetDetails(String details) { details_ = details; }
+  /// \brief Get details
+  ///
+  /// \return details
+  String GetDetails() const { return details_; }
+
+  /// \brief Add a chain name
+  ///
+  /// \param chain chain name
+  void AddChain(String chain) { chains_.push_back(chain); }
+  /// \brief Get vector of chain names
+  ///
+  /// \return chains
+  const std::vector<String>& GetChainList() const { return chains_; }
+
+  /// \brief Add a set of operations
+  ///
+  /// \param operations vector of operations to be added
+  void AddOperations(std::vector<MMCifInfoTransOpPtr> operations)
+  {
+    operations_.push_back(operations);
+  }
+  /// \brief Get the list of operations
+  ///
+  /// \return vector of vectors of iterators.
+  const std::vector<std::vector<MMCifInfoTransOpPtr> >& GetOperations()
+  {
+    return operations_;
+  }
+
+  bool operator==(const MMCifInfoBioUnit& bu) const {
+    if (this->details_ != bu.details_) {
+      return false;
+    }
+    if (this->chains_ != bu.chains_) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool operator!=(const MMCifInfoBioUnit& bu) const {
+    return !this->operator==(bu);
+  }
+
+private:
+  String details_;             ///< pdbx_struct_assembly.details
+  std::vector<String> chains_; ///< chains involved in this assembly
+  std::vector<std::vector<MMCifInfoTransOpPtr> > operations_;
+};
 
 class DLLEXPORT_OST_IO MMCifInfoCitation {
 public:
@@ -218,7 +363,6 @@ private:
     UNKNOWN
   } MMCifInfoCType;
 
-  //CITATION_ID
   String              id_;           ///< internal identifier
   MMCifInfoCType      where_;        ///< journal or book?
   String              cas_;          ///< CAS identifier
@@ -292,13 +436,47 @@ public:
   /// \return experiment resolution
   Real GetResolution() const { return resolution_; }
 
+  /// \brief Add a biounit
+  ///
+  /// \param bu biounit to be added
+  void AddBioUnit(MMCifInfoBioUnit bu) // unit test
+  {
+    biounits_.push_back(bu);
+  }
+
+  /// \brief Get the list of biounits stored in an info object.
+  ///
+  /// \return vector of MMCifInfoBioUnit objects
+  const std::vector<MMCifInfoBioUnit>& GetBioUnits() const
+  {
+    return biounits_;
+  }
+
+  /// \brief Add a operation
+  ///
+  /// \param op operation to be added
+  void AddOperation(MMCifInfoTransOpPtr op) // unit test
+  {
+    transops_.push_back(op);
+  }
+
+  /// \brief Get the list of operations stored in an info object.
+  ///
+  /// \return vector of MMCifInfoTransOp objects
+  const std::vector<MMCifInfoTransOpPtr>& GetOperations() const
+  {
+    return transops_;
+  }
+
 //protected:
 
 private:
   // members
   String exptl_method_;
   Real resolution_;
-  std::vector<MMCifInfoCitation> citations_; ///< list of citations
+  std::vector<MMCifInfoCitation> citations_;  ///< list of citations
+  std::vector<MMCifInfoBioUnit>  biounits_;   ///< list of biounits
+  std::vector<MMCifInfoTransOpPtr> transops_;
 };
 
 }} // ns
