@@ -55,7 +55,13 @@ class TestGfx(unittest.TestCase):
     self.test_primlist()
     self.test_entity_reset()
     self.test_custom_gfx_obj()
+    self.test_gfxobj_conv()
 
+  def test_gfxobj_conv(self):
+    e=mol.CreateEntity()
+    gfx.Scene().Add(gfx.Entity("foo2",e))
+    gfx.Scene()["foo2"].SetColor(gfx.YELLOW)
+    
   def test_custom_gfx_obj(self):
     myobj=MyGfxObj("foo")
     gfx.Scene().Add(myobj)

@@ -165,7 +165,7 @@ void export_GfxObj()
     .value("TRANSPARENT_RENDER_PASS",TRANSPARENT_RENDER_PASS)
     ;        
 
-  class_<GfxObjWrap, bases<GfxObjBase>, boost::noncopyable>("GfxObj",init<const std::string&>())
+  class_<GfxObjWrap, boost::shared_ptr<GfxObj>, bases<GfxObjBase>, boost::noncopyable>("GfxObj",init<const std::string&>())
     .def("GetTF", &GfxObj::GetTF, return_value_policy<copy_const_reference>())
     .def("SetTF", &GfxObj::SetTF)
     .def("FlagRebuild",&GfxObj::FlagRebuild)
