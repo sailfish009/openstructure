@@ -35,6 +35,8 @@ Mat2   (*Mat2Transpose)(const Mat2& m)                                  = &Trans
 Real (*Vec2Angle)(const Vec2& v1, const Vec2& v2)                     = &Angle;
 Vec2   (*Vec2Normalize)(const Vec2& v1)                                 = &Normalize;
 Vec2   (*Vec2Rotate)(const Vec2& v1,Real ang)                         = &Rotate;
+Vec2 (*Vec2Min)(const Vec2&, const Vec2&) = &Min;
+Vec2 (*Vec2Max)(const Vec2&, const Vec2&) = &Max;
 
 void export_VecMat2_op()
 {
@@ -53,4 +55,6 @@ void export_VecMat2_op()
   def("Angle",Vec2Angle);
   def("Normalize",Vec2Normalize);
   def("Rotate",Vec2Rotate);
+  def("Min",Vec2Min);
+  def("Max",Vec2Max);
 }
