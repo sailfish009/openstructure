@@ -1888,7 +1888,7 @@ void Scene::stereo_projection(int view)
       glFrustum(left,right,bot,top,zn,zf);
       Real dist = -transform_.GetTrans()[2]+stereo_distance_;
       glTranslated(0.0,0.0,-dist);
-      glRotated(180.0/M_PI*atan(0.1*ff/iod),0.0,1.0,0.0);
+      glRotated(-180.0/M_PI*atan(0.1*ff/iod),0.0,1.0,0.0);
       glTranslated(0.0,0.0,dist);
     } else {
       // correct off-axis frustims
@@ -1897,10 +1897,12 @@ void Scene::stereo_projection(int view)
 
       // correction of near clipping plane to avoid extreme drifting
       // of left and right view
+#if 0
       if(iod*zn/fo<2.0) {
         zn=2.0*fo/iod;
         zf=std::max(zn+Real(0.2),zf);
       }
+#endif
     
       Real sd = -ff*0.5*iod*zn/fo;
       left+=sd;
