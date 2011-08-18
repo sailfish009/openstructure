@@ -650,8 +650,10 @@ void MMCifParser::ParseCitation(const std::vector<StringRef>& columns)
     cit.SetDOI(columns[indices_[PDBX_DATABASE_ID_DOI]].str());
   }
   if (indices_[PDBX_DATABASE_ID_PUBMED] != -1) {
-    cit.SetPubMed(this->TryGetInt(columns[indices_[PDBX_DATABASE_ID_PUBMED]],
-                                  "citation.pdbx_database_id_PubMed"));
+    if (columns[indices_[PDBX_DATABASE_ID_PUBMED]][0]!='?') {
+      cit.SetPubMed(this->TryGetInt(columns[indices_[PDBX_DATABASE_ID_PUBMED]],
+                                    "citation.pdbx_database_id_PubMed"));
+    }
   }
   if (indices_[YEAR] != -1) {
     cit.SetPubMed(this->TryGetInt(columns[indices_[YEAR]], "citation.year"));
