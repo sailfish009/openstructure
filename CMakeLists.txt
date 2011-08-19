@@ -14,7 +14,7 @@ include(OST)
 
 option(USE_SHADER "whether to compile with shader support"
        OFF)
-option(SET_RPATH "embed rpath upon make install"
+option(USE_RPATH "embed rpath upon make install"
        OFF)
 option(COMPILE_TMTOOLS "whether to compile the tmalign and tmscore programs"
        OFF)
