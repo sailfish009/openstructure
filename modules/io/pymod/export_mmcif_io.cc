@@ -47,7 +47,7 @@ void export_mmcif_io()
                                    return_value_policy<copy_const_reference>()))
     ;
 
-  class_<MMCifInfoCitation, boost::noncopyable>("MMCifInfoCitation", init<>())
+  class_<MMCifInfoCitation>("MMCifInfoCitation", init<>())
     .def("SetID", &MMCifInfoCitation::SetID)
     .def("GetID", &MMCifInfoCitation::GetID)
     .def("SetCAS", &MMCifInfoCitation::SetCAS)
@@ -102,7 +102,7 @@ void export_mmcif_io()
     .def(vector_indexing_suite<std::vector<MMCifInfoCitation> >())
   ;  
 
-  class_<MMCifInfo, boost::noncopyable>("MMCifInfo", init<>())
+  class_<MMCifInfo>("MMCifInfo", init<>())
     .def("AddCitation", &MMCifInfo::AddCitation)
     .def("GetCitations", make_function(&MMCifInfo::GetCitations,
                                    return_value_policy<copy_const_reference>()))
