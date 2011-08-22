@@ -656,7 +656,9 @@ void MMCifParser::ParseCitation(const std::vector<StringRef>& columns)
     }
   }
   if (indices_[YEAR] != -1) {
-    cit.SetPubMed(this->TryGetInt(columns[indices_[YEAR]], "citation.year"));
+    if (columns[indices_[YEAR]][0]!='?') {
+      cit.SetPubMed(this->TryGetInt(columns[indices_[YEAR]], "citation.year"));
+    }
   }
   if (indices_[TITLE] != -1) {
     cit.SetTitle(columns[indices_[TITLE]].str());
