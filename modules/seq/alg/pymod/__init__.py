@@ -88,7 +88,7 @@ def AlignToSEQRES(chain, seqres, try_resnum_first=False, validate=True):
   from ost import seq
   from ost import mol
   from ost import LogWarning
-  view=chain.Select('ligand=false and peptide=true')
+  view=chain
   residues=view.residues
   if len(residues)==0:
     return seq.CreateAlignment()
