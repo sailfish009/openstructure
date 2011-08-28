@@ -109,7 +109,8 @@ Scene::Scene():
   light_amb_(0.1,0.1,0.1),
   light_diff_(0.9,0.9,0.9),
   light_spec_(0.5,0.5,0.5),
-  axis_flag_(false),
+  cor_flag_(false),
+  fix_cor_flag_(true),
   fog_flag_(true),
   fog_color_(0.0,0.0,0.0,0.0),
   auto_autoslab_(true),
@@ -973,10 +974,18 @@ void Scene::OnInput(const InputEvent& e)
     gluUnProject(wx+2.0,wy+2.0,wz,mm,pm,vp,&ox,&oy,&oz);
     Vec2 fxy = Vec2(ox,oy);
 
-    if(e.GetCommand()==INPUT_COMMAND_TRANSX) {
-      transform_.ApplyXAxisTranslation(e.GetDelta()*fxy[0]);
+    if(fix_cor_flag_) {
+      if(e.GetCommand()==INPUT_COMMAND_TRANSX) {
+        transform_.SetCenter(transform_.GetCenter()+Transpose(transform_.GetRot())*Vec3(-fxy[0]*e.GetDelta(),0.0,0.0));
+      } else {
+        transform_.SetCenter(transform_.GetCenter()+Transpose(transform_.GetRot())*Vec3(0.0,-fxy[1]*e.GetDelta(),0.0));
+      }
     } else {
-      transform_.ApplyYAxisTranslation(e.GetDelta()*fxy[1]);
+      if(e.GetCommand()==INPUT_COMMAND_TRANSX) {
+        transform_.ApplyXAxisTranslation(e.GetDelta()*fxy[0]);
+      } else {
+        transform_.ApplyYAxisTranslation(e.GetDelta()*fxy[1]);
+      }
     }
   } else if(e.GetCommand()==INPUT_COMMAND_TRANSZ) {
     float currz=transform_.GetTrans()[2];
@@ -1766,6 +1775,12 @@ void Scene::SetTestMode(bool f)
   }
 }
 
+void Scene::SetShowCenter(bool f)
+{
+  cor_flag_=f;
+  RequestRedraw();
+}
+
 void Scene::prep_glyphs()
 {
   glGenTextures(1,&glyph_tex_id_);
@@ -1825,6 +1840,32 @@ void Scene::render_scene()
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().Preprocess();
 #endif
+
+  if(cor_flag_) {
+    geom::Vec3 cen=transform_.GetCenter();
+    glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT);
+#if OST_SHADER_SUPPORT_ENABLED
+    Shader::Instance().PushProgram();
+    Shader::Instance().Activate("");
+#endif
+    glLineWidth(1.5);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+    
+    glBegin(GL_LINES);
+    glColor3f(0.5,0.5,0.5);
+    glVertex3f(cen[0]-1.0,cen[1],cen[2]);
+    glVertex3f(cen[0]+1.0,cen[1],cen[2]);
+    glVertex3f(cen[0],cen[1]-1.0,cen[2]);
+    glVertex3f(cen[0],cen[1]+1.0,cen[2]);
+    glVertex3f(cen[0],cen[1],cen[2]-1.0);
+    glVertex3f(cen[0],cen[1],cen[2]+1.0);
+    glEnd();
+    glPopAttrib();
+#if OST_SHADER_SUPPORT_ENABLED
+    Shader::Instance().PopProgram();
+#endif
+  }
 
   root_node_->RenderGL(STANDARD_RENDER_PASS);
   glEnable(GL_BLEND);

@@ -414,6 +414,17 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief stops offline rendering in interactive mode
   void StopOffscreenMode();
 
+  /// \brief show center of rotation of true
+  void SetShowCenter(bool f);
+
+  bool GetShowCenter() const {return cor_flag_;}
+
+  /// \brief if true fix center of rotation upon input induced shift
+  void SetFixCenter(bool f) {fix_cor_flag_=f;}
+
+  /// \brief return flag
+  bool GetFixCenter() const {return fix_cor_flag_;}
+  
   /// experimental feature
   void SetBlur(uint n);
   /// experimental feature
@@ -477,7 +488,8 @@ private:
   Color light_diff_;
   Color light_spec_;
 
-  bool axis_flag_;
+  bool cor_flag_;
+  bool fix_cor_flag_;
   bool fog_flag_;
   Color fog_color_;
   bool auto_autoslab_;

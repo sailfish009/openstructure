@@ -188,5 +188,7 @@ void export_Scene()
     .add_property("root_node", &Scene::GetRootNode)
     .def("SetBeaconOff",&Scene::SetBeaconOff)
     .def("__getitem__",scene_getitem)
+    .add_property("show_center",&Scene::GetShowCenter, &Scene::SetShowCenter)
+    .add_property("fix_center",&Scene::GetFixCenter, &Scene::SetFixCenter)
   ;
 }
