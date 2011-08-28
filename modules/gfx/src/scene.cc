@@ -1961,6 +1961,9 @@ void Scene::stereo_projection(int view)
 
 void Scene::render_stereo()
 {
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
+  glPushClientAttrib(GL_ALL_ATTRIB_BITS);
+
   int old_stereo_eye=stereo_eye_;
   stereo_eye_=-1;
   stereo_projection(-1);
@@ -1978,6 +1981,7 @@ void Scene::render_stereo()
   stereo_eye_=1;
   stereo_projection(1);
   render_scene();
+
   glEnable(GL_TEXTURE_2D);
 #if OST_SHADER_SUPPORT_ENABLED
   if(OST_GL_VERSION_2_0) {
@@ -1994,7 +1998,6 @@ void Scene::render_stereo()
   Shader::Instance().Activate("");
 #endif
 
-  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
@@ -2015,7 +2018,7 @@ void Scene::render_stereo()
   glLoadIdentity();
 
   if(stereo_mode_==2) {
-    // draw interlace lines in stencil buffer
+    // draw interlaced lines in stencil buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLineWidth(1.0);
     glEnable(GL_STENCIL_TEST);
@@ -2080,10 +2083,14 @@ void Scene::render_stereo()
   glEnd();
   
   // restore settings
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 0, 0, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
+  glPopClientAttrib();
   glPopAttrib();
 #if OST_SHADER_SUPPORT_ENABLED
   Shader::Instance().PopProgram();
