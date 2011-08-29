@@ -385,7 +385,8 @@ of the annotation available.
 
   .. attribute:: operations
 
-    Translations and rotations needed to create the biounit.
+    Translations and rotations needed to create the biounit. Filled with
+    objects of class :class:`MMCifInfoTransOperation`.
 
     Also available as :meth:`GetOperations`. May be modified by
     :meth:`AddOperations`
