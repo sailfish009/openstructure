@@ -370,7 +370,7 @@ of the annotation available.
 
   .. attribute:: details
 
-    Special asepcts of the biological assembly. If not provided, resembles an
+    Special aspects of the biological assembly. If not provided, resembles an
     empty string.
 
     Also available as :meth:`GetDetails`. May also be modified by
@@ -387,7 +387,8 @@ of the annotation available.
 
     Translations and rotations needed to create the biounit.
 
-    May be modified by :meth:`AddOperations`
+    Also available as :meth:`GetOperations`. May be modified by
+    :meth:`AddOperations`
 
   .. method:: GetDetails()
 
@@ -404,6 +405,10 @@ of the annotation available.
   .. method:: AddChain(chain name)
 
     See :attr:`chains`
+
+  .. method:: GetOperations()
+
+    See :attr:`operations`
 
   .. method:: AddOperations(list of operations)
 
