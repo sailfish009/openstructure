@@ -761,8 +761,11 @@ void MMCifParser::ParseExptl(const std::vector<StringRef>& columns)
 
 void MMCifParser::ParseRefine(const std::vector<StringRef>& columns)
 {
-  info_.SetResolution(this->TryGetReal(columns[indices_[LS_D_RES_HIGH]],
-                                       "refine.ls_d_res_high"));
+  StringRef col=columns[indices_[LS_D_RES_HIGH]];
+  if (col.size()!=1 || (col[0]!='?' && col[0]!='.')) {
+    info_.SetResolution(this->TryGetReal(columns[indices_[LS_D_RES_HIGH]],
+                                         "refine.ls_d_res_high"));
+  }
 }
 
 void MMCifParser::ParsePdbxStructAssembly(const std::vector<StringRef>& columns)
