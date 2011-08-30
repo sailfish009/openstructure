@@ -1,12 +1,12 @@
-MMCif File Format
+mmCIF File Format
 --------------------------------------------------------------------------------
 
-The MMCif file format is an alternate container for structural entities, also
+The mmCIF file format is an alternate container for structural entities, also
 provided by the PDB. Here we describe how to load those files and how to deal
 with information provided above the common PDB format.
 
 
-Loading MMCif Files
+Loading mmCIF Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. autofunction:: ost.io.LoadMMCIF
@@ -15,17 +15,31 @@ Loading MMCif Files
 Categories Available
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+The following categories of a mmCIF file are considered by the parser:
+
+* ``atom_site``: Used to build the :class:`entity <ost.mol.EntityHandle>`
+* ``entity``: Involved in setting ChainTypes
+* ``entity_poly``: Involved in setting ChainTypes
+* ``citation``: Goes into :class:`MMCifInfoCitation`
+* ``citation_author``: Goes into :class:`MMCifInfoCitation`
+* ``exptl``: Goes into :class:`MMCifInfo` as :attr:`method <MMCifInfo.method>`.
+* ``refine``: Goes into :class:`MMCifInfo` as
+  :attr:`resolution <MMCifInfo.resolution>`.
+* ``pdbx_struct_assembly``: Used for :class:`MMCifInfoBioUnit`.
+* ``pdbx_struct_assembly_gen``: Used for :class:`MMCifInfoBioUnit`.
+* ``pdbx_struct_oper_list``: Used for :class:`MMCifInfoBioUnit`.
+
 
 Info Classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Information from MMCif files which goes beyond structural data, is kept in a
+Information from mmCIF files which goes beyond structural data, is kept in a
 special container, the :class:`MMCifInfo` class. Here is a detailed description
 of the annotation available.
 
 .. class:: MMCifInfo
 
-  This is the container for all bits of non-molecular data pulled from a MMCif
+  This is the container for all bits of non-molecular data pulled from a mmCIF
   file.
 
   .. attribute:: citations

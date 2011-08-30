@@ -45,6 +45,9 @@ namespace ost { namespace io {
 /// \li entity
 /// \li entity_poly
 /// \li citation
+/// \li citation_author
+/// \li exptl
+/// \li refine
 /// \li pdbx_struct_assembly
 /// \li pdbx_struct_assembly_gen
 /// \li pdbx_struct_oper_list
