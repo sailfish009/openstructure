@@ -57,43 +57,46 @@ MaskOverlay::MaskOverlay(const MaskPtr& m):
 
 void MaskOverlay::OnDraw(QPainter& pnt, DataViewerPanel* dvp, bool is_active)
 {
+  QPainter::RenderHints render_hints=pnt.renderHints();
+  pnt.setRenderHints(render_hints | QPainter::Antialiasing);
   for (int i=0;i<static_cast<int>(polygons_.size());++i){
     if(is_active){
       if(i==active_){
-        pnt.setPen(QPen(QColor(255,255,0),2));
+        pnt.setPen(QPen(QColor(255,255,0),1));
         pnt.setBrush(QColor(255,255,0,30));
       }else{
-        pnt.setPen(QPen(QColor(255,0,0),2));
+        pnt.setPen(QPen(QColor(255,0,0),1));
         pnt.setBrush(QColor(255,0,0,30));
       }
     }else{
-      pnt.setPen(QPen(QColor(100,100,100),2));
+      pnt.setPen(QPen(QColor(100,100,100),1));
       pnt.setBrush(QColor(100,100,100,30));
     }
     geom::Polygon2 pol=polygons_[i];
     QPolygon qpol;
     for(int j=0;j<static_cast<int>(pol.GetNodeCount());++j){
       qpol << dvp->FracPointToWinCenter(pol.GetNode(j)+shift_);
-      pnt.drawEllipse(qpol.back(),3,3);
+      pnt.drawEllipse(qpol.back(),4,4);
     }
     pnt.drawPolygon(qpol);
   }
 
   if(add_mode_) {
     if(is_active){
-      pnt.setPen(QPen(QColor(255,0,255),3));
+      pnt.setPen(QPen(QColor(255,0,255),1));
       pnt.setBrush(QColor(255,0,255,30));
     }else{
-      pnt.setPen(QPen(QColor(100,100,100),2));
+      pnt.setPen(QPen(QColor(100,100,100),1));
       pnt.setBrush(QColor(100,100,100,30));
     }
     QPolygon qpol;
     for(int j=0;j<static_cast<int>(new_poly_.GetNodeCount());++j){
       qpol << dvp->FracPointToWinCenter(new_poly_.GetNode(j)+shift_);
-      pnt.drawEllipse(qpol.back(),3,3);
+      pnt.drawEllipse(qpol.back(),4,4);
     }
     pnt.drawPolygon(qpol);
   }
+  pnt.setRenderHints(render_hints);
 }
 
 bool MaskOverlay::OnMouseEvent(QMouseEvent* e,  DataViewerPanel* dvp, 
@@ -118,7 +121,7 @@ bool MaskOverlay::OnMouseEvent(QMouseEvent* e,  DataViewerPanel* dvp,
       if(active_>=0){
         geom::Polygon2 pol=polygons_[active_];
         for(unsigned int j=0;j<pol.GetNodeCount();++j){
-          if(Length(mousepos-(pol.GetNode(j)+shift_))<3){
+          if(Length(mousepos-(pol.GetNode(j)+shift_))<4){
             active_node_=j;
             return true;
           }
@@ -128,7 +131,7 @@ bool MaskOverlay::OnMouseEvent(QMouseEvent* e,  DataViewerPanel* dvp,
         if(i!=active_){
           geom::Polygon2 pol=polygons_[i];
           for(unsigned int j=0;j<pol.GetNodeCount();++j){
-            if(Length(mousepos-pol.GetNode(j))<3){
+            if(Length(mousepos-(pol.GetNode(j)+shift_))<4){
               active_=i;
               active_node_=j;
               return true;
@@ -142,7 +145,7 @@ bool MaskOverlay::OnMouseEvent(QMouseEvent* e,  DataViewerPanel* dvp,
     }
   }
   if(e->buttons() & Qt::LeftButton && active_>=0 && active_node_>=0 && ! (e->modifiers() & Qt::ShiftModifier)){
-    polygons_[active_].SetNode(active_node_,mousepos);
+    polygons_[active_].SetNode(active_node_,mousepos-shift_);
   }
   return false;
 }
