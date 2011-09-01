@@ -80,7 +80,8 @@ of the annotation available.
 
   .. attribute:: struct_details
 
-    Stores details about the structure.
+    Stores details about the structure in a :class:`MMCifInfoStructDetails`
+    object.
 
     Also available as :meth:`GetStructDetails`. May also be modified by
     :meth:`SetStructDetails`.
