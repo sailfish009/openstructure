@@ -85,6 +85,15 @@ _pdbx_struct_oper_list.matrix[3][3]         1.0000000000
 _pdbx_struct_oper_list.vector[3]            23.3000000000 
 # biounit end
 
+_struct.entry_id                   1BAR
+_struct.title                      'A Title'
+_struct.pdbx_CASP_flag             Y
+_struct.pdbx_descriptor            'ADENYLATE KINASE'
+_struct.pdbx_formula_weight        1.0
+_struct.pdbx_formula_weight_method 'Good Guess'
+_struct.pdbx_model_details         'Even better guessing'
+_struct.pdbx_model_type_details    'Guess'
+
 loop_
 _atom_site.group_PDB
 _atom_site.type_symbol

@@ -245,6 +245,21 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     indices_[MATRIX_3_2] = header.GetIndex("matrix[3][2]");
     indices_[MATRIX_3_3] = header.GetIndex("matrix[3][3]");
     cat_available = true;
+  } else if (header.GetCategory() == "struct") {
+    category_ = STRUCT;
+    // mandatory items
+    this->TryStoreIdx(STRUCT_ENTRY_ID, "entry_id", header);
+    // optional items
+    indices_[PDBX_CASP_FLAG]             = header.GetIndex("pdbx_CASP_flag");
+    indices_[PDBX_DESCRIPTOR]            = header.GetIndex("pdbx_descriptor");
+    indices_[PDBX_FORMULA_WEIGHT]      = header.GetIndex("pdbx_formula_weight");
+    indices_[PDBX_FORMULA_WEIGHT_METHOD]
+       = header.GetIndex("pdbx_formula_weight_method");
+    indices_[PDBX_MODEL_DETAILS]        = header.GetIndex("pdbx_model_details");
+    indices_[PDBX_MODEL_TYPE_DETAILS]
+       = header.GetIndex("pdbx_model_type_details");
+    indices_[STRUCT_TITLE]               = header.GetIndex("title");
+    cat_available = true;
   }
   category_counts_[category_]++;
   return cat_available;
@@ -946,6 +961,48 @@ void MMCifParser::ParsePdbxStructOperList(const std::vector<StringRef>& columns)
   info_.AddOperation(op);
 }
 
+void MMCifParser::ParseStruct(const std::vector<StringRef>& columns)
+{
+  MMCifInfoStructDetails details = MMCifInfoStructDetails();
+
+  details.SetEntryID(columns[indices_[STRUCT_ENTRY_ID]].str());
+
+  if (indices_[STRUCT_TITLE] != -1) {
+    details.SetTitle(columns[indices_[STRUCT_TITLE]].str());
+  }
+
+  if ((indices_[PDBX_CASP_FLAG] != -1) &&
+      (columns[indices_[PDBX_CASP_FLAG]][0] != '?')) {
+    details.SetCASPFlag(columns[indices_[PDBX_CASP_FLAG]][0]);
+  }
+
+  if (indices_[PDBX_DESCRIPTOR] != -1) {
+    details.SetDescriptor(columns[indices_[PDBX_DESCRIPTOR]].str());
+  }
+
+  if (indices_[PDBX_FORMULA_WEIGHT] != -1) {
+    details.SetMass(this->TryGetReal(columns[indices_[PDBX_FORMULA_WEIGHT]],
+                                     "struct.pdbx_formula_weight"));
+  }
+
+  if (indices_[PDBX_FORMULA_WEIGHT_METHOD] != -1) {
+    details.SetMassMethod(columns[indices_[PDBX_FORMULA_WEIGHT_METHOD]].str());
+  }
+
+  if ((indices_[PDBX_MODEL_DETAILS] != -1) &&
+      (columns[indices_[PDBX_MODEL_DETAILS]][0] != '?')) {
+    details.SetModelDetails(columns[indices_[PDBX_MODEL_DETAILS]].str());
+  }
+
+  if ((indices_[PDBX_MODEL_TYPE_DETAILS] != -1) &&
+      (columns[indices_[PDBX_MODEL_TYPE_DETAILS]][0] != '?')) {
+    details.SetModelTypeDetails(
+                              columns[indices_[PDBX_MODEL_TYPE_DETAILS]].str());
+  }
+
+  info_.SetStructDetails(details);
+}
+
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
@@ -989,6 +1046,10 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
   case PDBX_STRUCT_OPER_LIST:
     LOG_TRACE("processing pdbx_struct_oper_list entry")
     this->ParsePdbxStructOperList(columns);
+    break;
+  case STRUCT:
+    LOG_TRACE("processing struct entry")
+    this->ParseStruct(columns);
     break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,

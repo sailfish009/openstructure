@@ -161,6 +161,42 @@ void export_mmcif_io()
     .def(vector_indexing_suite<std::vector<MMCifInfoBioUnit> >())
   ;
 
+  class_<MMCifInfoStructDetails>("MMCifInfoStructDetails", init<>())
+    .def("SetEntryID", &MMCifInfoStructDetails::SetEntryID)
+    .def("GetEntryID", &MMCifInfoStructDetails::GetEntryID)
+    .def("SetTitle", &MMCifInfoStructDetails::SetTitle)
+    .def("GetTitle", &MMCifInfoStructDetails::GetTitle)
+    .def("SetCASPFlag", &MMCifInfoStructDetails::SetCASPFlag)
+    .def("GetCASPFlag", &MMCifInfoStructDetails::GetCASPFlag)
+    .def("SetDescriptor", &MMCifInfoStructDetails::SetDescriptor)
+    .def("GetDescriptor", &MMCifInfoStructDetails::GetDescriptor)
+    .def("SetMass", &MMCifInfoStructDetails::SetMass)
+    .def("GetMass", &MMCifInfoStructDetails::GetMass)
+    .def("SetMassMethod", &MMCifInfoStructDetails::SetMassMethod)
+    .def("GetMassMethod", &MMCifInfoStructDetails::GetMassMethod)
+    .def("SetModelDetails", &MMCifInfoStructDetails::SetModelDetails)
+    .def("GetModelDetails", &MMCifInfoStructDetails::GetModelDetails)
+    .def("SetModelTypeDetails", &MMCifInfoStructDetails::SetModelTypeDetails)
+    .def("GetModelTypeDetails", &MMCifInfoStructDetails::GetModelTypeDetails)
+    .add_property("entry_id", &MMCifInfoStructDetails::GetEntryID,
+                  &MMCifInfoStructDetails::SetEntryID)
+    .add_property("title", &MMCifInfoStructDetails::GetTitle,
+                  &MMCifInfoStructDetails::SetTitle)
+    .add_property("casp_flag", &MMCifInfoStructDetails::GetCASPFlag,
+                  &MMCifInfoStructDetails::SetCASPFlag)
+    .add_property("descriptor", &MMCifInfoStructDetails::GetDescriptor,
+                  &MMCifInfoStructDetails::SetDescriptor)
+    .add_property("mass", &MMCifInfoStructDetails::GetMass,
+                  &MMCifInfoStructDetails::SetMass)
+    .add_property("mass_method", &MMCifInfoStructDetails::GetMassMethod,
+                  &MMCifInfoStructDetails::SetMassMethod)
+    .add_property("model_details", &MMCifInfoStructDetails::GetModelDetails,
+                  &MMCifInfoStructDetails::SetModelDetails)
+    .add_property("model_type_details",
+                  &MMCifInfoStructDetails::GetModelTypeDetails,
+                  &MMCifInfoStructDetails::SetModelTypeDetails)
+;
+
   class_<MMCifInfo>("MMCifInfo", init<>())
     .def("AddCitation", &MMCifInfo::AddCitation)
     .def("GetCitations", make_function(&MMCifInfo::GetCitations,
@@ -176,6 +212,8 @@ void export_mmcif_io()
     .def("AddOperation", &MMCifInfo::AddOperation)
     .def("GetOperations", make_function(&MMCifInfo::GetOperations,
                                    return_value_policy<copy_const_reference>()))
+    .def("SetStructDetails", &MMCifInfo::SetStructDetails)
+    .def("GetStructDetails", &MMCifInfo::GetStructDetails)
     .add_property("citations", make_function(&MMCifInfo::GetCitations,
                                    return_value_policy<copy_const_reference>()))
     .add_property("biounits", make_function(&MMCifInfo::GetBioUnits,
@@ -185,5 +223,7 @@ void export_mmcif_io()
                   &MMCifInfo::SetResolution)
     .add_property("operations", make_function(&MMCifInfo::GetOperations,
                                    return_value_policy<copy_const_reference>()))
+    .add_property("struct_details", &MMCifInfo::GetStructDetails,
+                  &MMCifInfo::SetStructDetails)
   ;
 }

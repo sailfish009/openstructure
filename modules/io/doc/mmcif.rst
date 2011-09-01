@@ -28,6 +28,8 @@ The following categories of a mmCIF file are considered by the parser:
 * ``pdbx_struct_assembly``: Used for :class:`MMCifInfoBioUnit`.
 * ``pdbx_struct_assembly_gen``: Used for :class:`MMCifInfoBioUnit`.
 * ``pdbx_struct_oper_list``: Used for :class:`MMCifInfoBioUnit`.
+* ``struct``: Details about a structure, stored in
+  :class:`MMCifInfoStructDetails`.
 
 
 Info Classes
@@ -75,6 +77,13 @@ of the annotation available.
 
     Also available as :meth:`GetOperations`. May also be modified by
     :meth:`AddOperation`.
+
+  .. attribute:: struct_details
+
+    Stores details about the structure.
+
+    Also available as :meth:`GetStructDetails`. May also be modified by
+    :meth:`SetStructDetails`.
 
   .. method:: AddCitation(citation)
 
@@ -130,6 +139,12 @@ of the annotation available.
   .. method:: GetOperations()
 
     See :attr:`operations`
+
+  .. method:: SetStructDetails(details)
+
+    See :attr:`struct_details`
+
+  .. method:: GetStructDetails()
 
 .. class:: MMCifInfoCitation
 
@@ -428,3 +443,129 @@ of the annotation available.
   .. method:: AddOperations(list of operations)
 
     See :attr:`operations`
+
+.. class:: MMCifInfoStructDetails
+
+  Holds details about the structure.
+
+  .. attribute:: entry_id
+
+    Identifier for a curtain data block. If not provided, resembles an empty
+    string.
+
+    Also available as :meth:`GetEntryID`. May also be modified by
+    :meth:`SetEntryID`.
+
+  .. attribute:: title
+
+    Set a title for the structure.
+
+    Also available as :meth:`GetTitle`. May also be modified by
+    :meth:`SetTitle`.
+
+  .. attribute:: casp_flag
+
+    Tells whether this structure was target in some competition.
+
+    Also available as :meth:`GetCASPFlag`. May also be modified by
+    :meth:`SetCASPFlag`.
+
+  .. attribute:: descriptor
+
+    Descriptor for an NDB structure or the unstructured content of a PDB COMPND
+    record.
+
+    Also available as :meth:`GetDescriptor`. May also be modified by
+    :meth:`SetDescriptor`.
+
+  .. attribute:: mass
+
+    Molecular mass of a molecule.
+
+    Also available as :meth:`GetMass`. May also be modified by
+    :meth:`SetMass`.
+
+  .. attribute:: mass_method
+
+    Method used to determine the molecular weight.
+
+    Also available as :meth:`GetMassMethod`. May also be modified by
+    :meth:`SetMassMethod`.
+
+  .. attribute:: model_details
+
+    Details about how the structure was determined.
+
+    Also available as :meth:`GetModelDetails`. May also be modified by
+    :meth:`SetModelDetails`.
+
+  .. attribute:: model_type_details
+
+    Details about how the type of the structure.
+
+    Also available as :meth:`GetModelTypeDetails`. May also be modified by
+    :meth:`SetModelTypeDetails`.
+
+  .. method:: GetEntryID()
+
+    See :attr:`entry_id`
+
+  .. method:: SetEntryID(id)
+
+    See :attr:`entry_id`
+
+  .. method:: GetTitle()
+
+    See :attr:`title`
+
+  .. method:: SetTitle(title)
+
+    See :attr:`title`
+
+  .. method:: GetCASPFlag()
+
+    See :attr:`casp_flag`
+
+  .. method:: SetCASPFlag(flag)
+
+    See :attr:`casp_flag`
+
+  .. method:: GetDescriptor()
+
+    See :attr:`descriptor`
+
+  .. method:: SetDescriptor(descriptor)
+
+    See :attr:`descriptor`
+
+  .. method:: GetMass()
+
+    See :attr:`mass`
+
+  .. method:: SetMass(mass)
+
+    See :attr:`mass`
+
+  .. method:: GetMassMethod()
+
+    See :attr:`mass_method`
+
+  .. method:: SetMassMethod(method)
+
+    See :attr:`mass_method`
+
+  .. method:: GetModelDetails()
+
+    See :attr:`model_details`
+
+  .. method:: SetModelDetails(details)
+
+    See :attr:`model_details`
+
+  .. method:: GetModelTypeDetails()
+
+    See :attr:`model_type_details`
+
+  .. method:: SetModelTypeDetails(details)
+
+    See :attr:`model_type_details`

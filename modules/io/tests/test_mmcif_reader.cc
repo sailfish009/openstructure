@@ -59,11 +59,13 @@ public:
   using MMCifParser::ParsePdbxStructAssemblyGen;
   using MMCifParser::ParsePdbxStructAssembly;
   using MMCifParser::ParsePdbxStructOperList;
+  using MMCifParser::ParseStruct;
   using MMCifParser::TryStoreIdx;
   using MMCifParser::SetReadSeqRes;
   using MMCifParser::SetReadCanonicalSeqRes;
   using MMCifParser::ClearState;
   using MMCifParser::ConvertSEQRES;
+  using MMCifParser::GetInfo;
 };
 
 BOOST_AUTO_TEST_SUITE( io );
@@ -729,6 +731,44 @@ BOOST_AUTO_TEST_CASE(mmcif_biounit_tests)
   BOOST_MESSAGE("  done.");
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_struct_tests)
+{
+  BOOST_MESSAGE("  Running mmcif_struct_tests...");
+
+  mol::EntityHandle eh = mol::CreateEntity();
+  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  StarLoopDesc tmmcif_h;
+  std::vector<StringRef> columns;
+
+  tmmcif_h.SetCategory(StringRef("struct", 6));
+  tmmcif_h.Add(StringRef("entry_id", 8));
+  tmmcif_h.Add(StringRef("pdbx_CASP_flag", 14));
+  tmmcif_h.Add(StringRef("pdbx_model_details", 18));
+  tmmcif_h.Add(StringRef("pdbx_model_type_details", 23));
+  tmmcif_h.Add(StringRef("pdbx_formula_weight", 19));
+  tmmcif_p.OnBeginLoop(tmmcif_h);
+
+  columns.push_back(StringRef("1BAR", 4));
+  columns.push_back(StringRef("?", 1));
+  columns.push_back(StringRef("?", 1));
+  columns.push_back(StringRef("?", 1));
+  columns.push_back(StringRef("1.0", 3));
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParseStruct(columns));
+
+  MMCifInfoStructDetails sd = MMCifInfoStructDetails();
+  sd = tmmcif_p.GetInfo().GetStructDetails();
+
+  BOOST_CHECK(sd.GetCASPFlag() == '\0');
+  BOOST_CHECK(sd.GetModelDetails() == "");
+  BOOST_CHECK(sd.GetModelTypeDetails() == "");
+
+  columns.pop_back();
+  columns.push_back(StringRef("A", 1));
+  BOOST_CHECK_THROW(tmmcif_p.ParseStruct(columns), IOException);
+
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
 {
   BOOST_MESSAGE("  Running mmcif_parseatomident tests...");
@@ -835,6 +875,15 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   MMCifInfoBioUnit bu = mmcif_p.GetInfo().GetBioUnits().back();
   BOOST_CHECK(bu.GetOperations().back().back()->GetType() ==
               "identity operation");
+  MMCifInfoStructDetails sd = mmcif_p.GetInfo().GetStructDetails();
+  BOOST_CHECK(sd.GetEntryID() == "1BAR");
+  BOOST_CHECK(sd.GetTitle() == "A Title");
+  BOOST_CHECK(sd.GetCASPFlag() == 'Y');
+  BOOST_CHECK(sd.GetDescriptor() == "ADENYLATE KINASE");
+  BOOST_CHECK_CLOSE(sd.GetMass(), 1.0f, 0.001f);
+  BOOST_CHECK(sd.GetMassMethod() == "Good Guess");
+  BOOST_CHECK(sd.GetModelDetails() == "Even better guessing");
+  BOOST_CHECK(sd.GetModelTypeDetails() == "Guess");
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");

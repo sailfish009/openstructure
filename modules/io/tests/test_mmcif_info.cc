@@ -129,6 +129,37 @@ BOOST_AUTO_TEST_CASE(mmcif_info_transoperation)
   BOOST_MESSAGE("  done.");
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_info_structdetails)
+{
+  BOOST_MESSAGE("  Running mmcif_info_structdetails tests...");
+
+  MMCifInfoStructDetails sd = MMCifInfoStructDetails();
+
+  sd.SetEntryID("1BAR");
+  sd.SetTitle("More than a structure");
+  sd.SetCASPFlag('Y');
+  sd.SetDescriptor("ADENYLATE KINASE");
+  sd.SetMass(1.0);
+  sd.SetMassMethod("Good Guess");
+  sd.SetModelDetails("Even more guessing");
+  sd.SetModelTypeDetails("MINIMIZED AVERAGE");
+
+  BOOST_CHECK(sd.GetEntryID() == "1BAR");
+  BOOST_CHECK(sd.GetTitle() == "More than a structure");
+  BOOST_CHECK(sd.GetCASPFlag() == 'Y');
+  BOOST_CHECK(sd.GetDescriptor() == "ADENYLATE KINASE");
+  BOOST_CHECK_CLOSE(sd.GetMass(), 1.0f, 0.001f);
+  BOOST_CHECK(sd.GetMassMethod() == "Good Guess");
+  BOOST_CHECK(sd.GetModelDetails() == "Even more guessing");
+  BOOST_CHECK(sd.GetModelTypeDetails() == "MINIMIZED AVERAGE");
+
+  MMCifInfo info = MMCifInfo();
+  info.SetStructDetails(sd);
+  BOOST_CHECK(info.GetStructDetails() == sd);
+
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_info)
 {
   BOOST_MESSAGE("  Running mmcif_info tests...");

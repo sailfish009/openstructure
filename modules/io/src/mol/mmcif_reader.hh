@@ -51,6 +51,7 @@ namespace ost { namespace io {
 /// \li pdbx_struct_assembly
 /// \li pdbx_struct_assembly_gen
 /// \li pdbx_struct_oper_list
+/// \li struct
 class DLLEXPORT_OST_IO MMCifParser : public StarParser  {
 public:
   /// \brief create a MMCifParser
@@ -264,6 +265,10 @@ protected:
   /// \param columns data row
   void ParsePdbxStructOperList(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch MMCif struct information
+  ///
+  /// \param columns data row
+  void ParseStruct(const std::vector<StringRef>& columns);
 
 private:
   /// \enum magic numbers of this class
@@ -377,6 +382,18 @@ private:
     MATRIX_3_3  ///< matrix component
   } PdbxStructOperListItems;
 
+  /// \enum items of the struct category
+  typedef enum {
+     STRUCT_ENTRY_ID,     ///< name of the structure
+     PDBX_CASP_FLAG,      ///< CASP/ CASD-NMR/ other contest target
+     PDBX_DESCRIPTOR,     ///< descriptor for NDB structure/ PDB COMPND record
+     PDBX_FORMULA_WEIGHT, ///< mass in daltons
+     PDBX_FORMULA_WEIGHT_METHOD, ///< how mass was determined
+     PDBX_MODEL_DETAILS,  ///< methodology
+     PDBX_MODEL_TYPE_DETAILS, ///< type of structure model
+     STRUCT_TITLE         ///< title for the data block
+  } StructItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
@@ -389,6 +406,7 @@ private:
     PDBX_STRUCT_ASSEMBLY,
     PDBX_STRUCT_ASSEMBLY_GEN,
     PDBX_STRUCT_OPER_LIST,
+    STRUCT,
     DONT_KNOW
   } MMCifCategory;
 

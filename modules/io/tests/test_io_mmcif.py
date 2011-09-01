@@ -103,6 +103,38 @@ class TestMMCifInfo(unittest.TestCase):
     oll = b.GetOperations()
     self.assertEquals(oll[0][0].GetID(), '1')
 
+  def test_mmcifinfo_structdetails(self):
+    d = io.MMCifInfoStructDetails()
+
+    d.SetEntryID('1BAR')
+    d.SetTitle('A Title')
+    d.SetCASPFlag('N')
+    d.SetDescriptor('FooBar')
+    d.SetMass(1.0)
+    d.SetMassMethod('Good Guess')
+    d.SetModelDetails('Created with SwissModel')
+    d.SetModelTypeDetails('Average')
+    self.assertEquals(d.GetEntryID(), '1BAR')
+    self.assertEquals(d.GetTitle(), 'A Title')
+    self.assertEquals(d.GetCASPFlag(), 'N')
+    self.assertEquals(d.GetDescriptor(), 'FooBar')
+    self.assertEquals(d.GetMass(), 1.0)
+    self.assertEquals(d.GetMassMethod(), 'Good Guess')
+    self.assertEquals(d.GetModelDetails(), 'Created with SwissModel')  
+    self.assertEquals(d.GetModelTypeDetails(), 'Average') 
+
+    i = io.MMCifInfo()
+    i.SetStructDetails(d)
+    self.assertEquals(i.GetStructDetails().GetEntryID(), '1BAR')
+    self.assertEquals(i.GetStructDetails().GetTitle(), 'A Title')
+    self.assertEquals(i.GetStructDetails().GetCASPFlag(), 'N')
+    self.assertEquals(i.GetStructDetails().GetDescriptor(), 'FooBar')
+    self.assertEquals(i.GetStructDetails().GetMass(), 1.0)
+    self.assertEquals(i.GetStructDetails().GetMassMethod(), 'Good Guess')
+    self.assertEquals(i.GetStructDetails().GetModelDetails(),
+                      'Created with SwissModel')
+    self.assertEquals(i.GetStructDetails().GetModelTypeDetails(), 'Average')
+
 if __name__== '__main__':
     unittest.main()
 

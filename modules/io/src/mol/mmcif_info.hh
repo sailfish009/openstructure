@@ -27,6 +27,129 @@
 
 namespace ost { namespace io {
 
+class DLLEXPORT_OST_IO MMCifInfoStructDetails {
+public:
+  /// \brief Create a details object.
+  MMCifInfoStructDetails(): entry_id_(""), title_(""), casp_flag_('\0'),
+    descriptor_(""), mass_(0.0), mass_method_(""), model_details_(""),
+    model_type_details_("") {};
+
+  /// \brief Set id.
+  ///
+  /// \param id id
+  void SetEntryID(String id) { entry_id_ = id; }
+  /// \brief Get id.
+  ///
+  /// \return id
+  String GetEntryID() const { return entry_id_; }
+
+  /// \brief Set CASP flag.
+  ///
+  /// \param flag flag
+  void SetCASPFlag(char flag) { casp_flag_ = flag; }
+  /// \brief Get CASP flag.
+  ///
+  /// \return flag
+  char GetCASPFlag() const { return casp_flag_; }
+
+  /// \brief Set descriptor.
+  ///
+  /// \param desc descriptor for an NDB structure or PDB COMPND record
+  void SetDescriptor(String desc) { descriptor_ = desc; }
+  /// \brief Get CASP flag.
+  ///
+  /// \return flag
+  String GetDescriptor() const { return descriptor_; }
+
+  /// \brief Set mass.
+  ///
+  /// \param mass molecular mass
+  void SetMass(Real mass) { mass_ = mass; }
+  /// \brief Get molecular weight.
+  ///
+  /// \return mass
+  Real GetMass() const { return mass_; }
+
+  /// \brief Set the method how the molecular weight was detected.
+  ///
+  /// \param method detection method
+  void SetMassMethod(String method) { mass_method_ = method; }
+  /// \brief Get the method how the molecular weight was determined.
+  ///
+  /// \return method
+  String GetMassMethod() const { return mass_method_; }
+
+  /// \brief Set the description about the production of this structure.
+  ///
+  /// \param desc explaination
+  void SetModelDetails(String desc) { model_details_ = desc; }
+  /// \brief Get the details how the structure was determined.
+  ///
+  /// \return details
+  String GetModelDetails() const { return model_details_; }
+
+  /// \brief Set a description for the type of the structure model.
+  ///
+  /// \param desc explaination
+  void SetModelTypeDetails(String desc) { model_type_details_ = desc; }
+  /// \brief Get the description for the type of the structure model.
+  ///
+  /// \return details
+  String GetModelTypeDetails() const { return model_type_details_; }
+
+  /// \brief Set a title for the data block.
+  ///
+  /// \param title title
+  void SetTitle(String title) { title_ = title; }
+  /// \brief Get the title of the structure model.
+  ///
+  /// \return title
+  String GetTitle() const { return title_; }
+
+  bool operator==(const MMCifInfoStructDetails& sd) const {
+    if (this->entry_id_ != sd.entry_id_) {
+      return false;
+    }
+    if (this->casp_flag_ != sd.casp_flag_) {
+      return false;
+    }
+    if (this->descriptor_ != sd.descriptor_) {
+      return false;
+    }
+    if (this->mass_ != sd.mass_) {
+      return false;
+    }
+    if (this->mass_method_ != sd.mass_method_) {
+      return false;
+    }
+    if (this->model_details_ != sd.model_details_) {
+      return false;
+    }
+    if (this->model_type_details_ != sd.model_type_details_) {
+      return false;
+    }
+    if (this->title_ != sd.title_) {
+      return false;
+    }
+
+    return true;
+  }
+
+  bool operator!=(const MMCifInfoStructDetails& sd) const {
+    return !this->operator == (sd);
+  }
+
+private:
+  String entry_id_;
+  String title_;
+  char   casp_flag_;
+  String descriptor_;
+  Real   mass_;
+  String mass_method_;
+  String model_details_;
+  String model_type_details_;
+};
+
 class DLLEXPORT_OST_IO MMCifInfoTransOp {
 public:
   /// \brief Create an operation
@@ -154,6 +277,31 @@ public:
       return false;
     }
     if (this->chains_ != bu.chains_) {
+      return false;
+    }
+    if (this->operations_.size() == bu.operations_.size()) {
+      std::vector<std::vector<MMCifInfoTransOpPtr> >::const_iterator th_ops_it;
+      std::vector<std::vector<MMCifInfoTransOpPtr> >::const_iterator bu_ops_it;
+      std::vector<MMCifInfoTransOpPtr>::const_iterator th_op_it;
+      std::vector<MMCifInfoTransOpPtr>::const_iterator bu_op_it;
+
+      for (th_ops_it = this->operations_.begin(),
+             bu_ops_it = bu.operations_.begin();
+           th_ops_it != this->operations_.end();
+           ++th_ops_it, ++bu_ops_it) {
+        if (th_ops_it->size() == bu_ops_it->size()) {
+          for (th_op_it = th_ops_it->begin(), bu_op_it = bu_ops_it->begin();
+               th_op_it != th_ops_it->end();
+               ++th_op_it, ++bu_op_it) {
+            if (*th_op_it != *bu_op_it) {
+              return false;
+            }
+          }
+        } else {
+          return false;
+        }
+      }
+    } else {
       return false;
     }
 
@@ -468,12 +616,29 @@ public:
     return transops_;
   }
 
+  /// \brief Add a set of structure details
+  ///
+  /// \param details info block to be added
+  void SetStructDetails(MMCifInfoStructDetails details)
+  {
+    struct_details_ = details;
+  }
+
+  /// \brief Get the list of details about structures.
+  ///
+  /// \return vector of MMCifInfoStructDetails objects
+  const MMCifInfoStructDetails GetStructDetails() const
+  {
+    return struct_details_;
+  }
+
 //protected:
 
 private:
   // members
   String exptl_method_;
   Real resolution_;
+  MMCifInfoStructDetails struct_details_;     ///< mmCIF struct category
   std::vector<MMCifInfoCitation> citations_;  ///< list of citations
   std::vector<MMCifInfoBioUnit>  biounits_;   ///< list of biounits
   std::vector<MMCifInfoTransOpPtr> transops_;
