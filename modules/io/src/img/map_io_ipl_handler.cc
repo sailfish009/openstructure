@@ -20,6 +20,7 @@
 #include <cassert>
 #include <ctime>
 #include <iomanip>
+#include <cstring>
 
 #include <boost/shared_array.hpp>
 #include <boost/filesystem/operations.hpp>
