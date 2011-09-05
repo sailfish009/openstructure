@@ -3,7 +3,9 @@ mmCIF File Format
 
 The mmCIF file format is an alternate container for structural entities, also
 provided by the PDB. Here we describe how to load those files and how to deal
-with information provided above the common PDB format.
+with information provided above the common PDB format (:class:`MMCifInfo`,
+:class:`MMCifInfoCitation`, :class:`MMCifInfoTransOperation`,
+:class:`MMCifInfoBioUnit`, :class:`MMCifInfoStructDetails`).
 
 
 Loading mmCIF Files
