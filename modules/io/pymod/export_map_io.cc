@@ -27,6 +27,7 @@
 #include  <ost/io/img/map_io_dat_handler.hh>
 #include  <ost/io/img/map_io_jpk_handler.hh>
 #include  <ost/io/img/map_io_nanoscope_handler.hh>
+#include  <ost/io/img/map_io_ipl_handler.hh>
 #include  <ost/io/img/image_format.hh>
 #include  <ost/io/img/load_map.hh>
 
@@ -79,18 +80,17 @@ void export_map_io()
         .export_values()
   ;
 
-  enum_<Subformat>("Format")
+  enum_<Subformat>("Subformat")
         .value("MRC_NEW_FORMAT", MRC_NEW_FORMAT)
         .value("MRC_OLD_FORMAT", MRC_OLD_FORMAT)
         .value("MRC_AUTO_FORMAT", MRC_AUTO_FORMAT)
         .export_values()
   ;
 
+
   class_<ImageFormatBase>("ImageFormatBase",no_init)
     .def("GetMaximum", &ImageFormatBase::GetMaximum)
-    .def("SetMaximum", &ImageFormatBase::GetMaximum)
     .def("GetMinimum", &ImageFormatBase::GetMinimum)
-    .def("SetMinimum", &ImageFormatBase::GetMinimum)
   ;
 
   class_<DX, bases<ImageFormatBase> >("DX", init<bool>(arg("normalize_on_save") = false))
@@ -152,6 +152,13 @@ void export_map_io()
     .def("GetSigned", &DAT::GetSigned)
     .def("SetBitDepth", &DAT::SetBitDepth)
     .def("GetBitDepth", &DAT::GetBitDepth)
+  ;
+
+  class_<IPL, bases<ImageFormatBase> >("IPL", init<bool,Format>((arg("normalize_on_save") = true,arg("format")=OST_DEFAULT_FORMAT)))
+    .def("SetNormalizeOnSave", &IPL::SetNormalizeOnSave)
+    .def("GetNormalizeOnSave", &IPL::GetNormalizeOnSave)
+    .def("SetBitDepth", &IPL::SetBitDepth)
+    .def("GetBitDepth", &IPL::GetBitDepth)
   ;
 
   class_<JPK, bases<TIF> >("JPK", init<boost::logic::tribool,Format,bool,bool,int>
