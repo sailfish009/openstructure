@@ -647,10 +647,15 @@ String MMCifParser::ConvertSEQRES(const String& seqres,
           LOG_WARNING("unknown residue '" << tlc << "' in SEQRES record. "
                       "Setting one-letter-code to '?'");
         }
-        can_seqres.push_back('?');
+        can_seqres.push_back('X');
         continue;
       }
-      can_seqres.push_back(compound->GetOneLetterCode());
+      if (compound->GetOneLetterCode()=='?') {
+        can_seqres.push_back('X');
+      } else {
+        can_seqres.push_back(compound->GetOneLetterCode());
+      }
+
     } else {
       can_seqres.push_back(*i);
     }
