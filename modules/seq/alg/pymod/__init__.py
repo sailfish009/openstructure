@@ -85,6 +85,10 @@ def AlignToSEQRES(chain, seqres, try_resnum_first=False, validate=True):
   :returns: The alignment of the residues in the chain and the SEQRES entries.
   :rtype: :class:`~ost.seq.AlignmentHandle`
   """
+
+  def IsEqual(olc1, olc2):
+    return olc1 in ('X', '?') or olc2 in ('X', '?') or olc1 == olc2
+
   from ost import seq
   from ost import mol
   from ost import LogWarning
@@ -96,7 +100,7 @@ def AlignToSEQRES(chain, seqres, try_resnum_first=False, validate=True):
     aln_seq = seq.CreateSequence('atoms', '-'*len(seqres))
     for r1 in residues:
       if r1.number.num <= len(seqres) and r1.number.num > 0:
-        if seqres[r1.number.num - 1] == r1.one_letter_code:
+        if IsEqual(seqres[r1.number.num - 1], r1.one_letter_code):
           aln_seq[r1.number.num - 1] = r1.one_letter_code
         else:
           LogWarning('Sequence mismatch: chain has "' + r1.one_letter_code +
