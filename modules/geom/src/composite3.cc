@@ -224,25 +224,12 @@ Vec3 Rotation3::GetRotationAxis() const
 }
 Real Rotation3::GetRotationAngle() const
 {
-  return 2.0*acos(q_.GetAngle());
+  //return 2.0*acos(q_.GetAngle());
+  return q_.GetAngle();
 }
 Mat3 Rotation3::GetRotationMatrix() const
 {
-  Real ww = q_.GetAngle()*q_.GetAngle();
-  Real wx = q_.GetAngle()*q_.GetAxis().GetX();
-  Real wy = q_.GetAngle()*q_.GetAxis().GetY();
-  Real wz = q_.GetAngle()*q_.GetAxis().GetZ();
-  Real xx = q_.GetAxis().GetX()*q_.GetAxis().GetX();
-  Real xy = q_.GetAxis().GetX()*q_.GetAxis().GetY();
-  Real xz = q_.GetAxis().GetX()*q_.GetAxis().GetZ();
-  Real yy = q_.GetAxis().GetY()*q_.GetAxis().GetY();
-  Real yz = q_.GetAxis().GetY()*q_.GetAxis().GetZ();
-  Real zz = q_.GetAxis().GetZ()*q_.GetAxis().GetZ();
-
-
-  return Mat3((ww+xx-yy-zz), 2.0*(-wz+xy), 2.0*(wy+xz),
-                 2.0*(wz+xy), (ww-xx+yy-zz), 2.0*(-wx+yz),
-                 2.0*(-wy+xz), 2.0*(wx+yz),(ww-xx-yy+zz));
+  return q_.ToRotationMatrix();
 }
 
 void Rotation3::SetOrigin(const Vec3& o)
@@ -299,7 +286,8 @@ Quat Rotation3::generate_from_eulers(Real phi, Real theta, Real psi)
 }
 Quat Rotation3::generate_from_axis_angle(const Vec3& axis, Real angle)
 {
-  return Quat(cos(angle/2.0),sin(angle/2.0)*Normalize(axis));
+  //return Quat(cos(angle/2.0),sin(angle/2.0)*Normalize(axis));
+  return Quat(angle, axis);
 }
 
 /*
