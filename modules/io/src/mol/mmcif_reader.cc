@@ -181,7 +181,7 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     indices_[ABSTRACT_ID_CAS]         = header.GetIndex("abstract_id_CAS");
     indices_[BOOK_ID_ISBN]            = header.GetIndex("book_id_ISBN");
     indices_[BOOK_TITLE]              = header.GetIndex("book_title");
-    indices_[JOURNAL_FULL]            = header.GetIndex("journal_full");
+    indices_[JOURNAL_ABBREV]          = header.GetIndex("journal_abbrev");
     indices_[YEAR]                    = header.GetIndex("year");
     indices_[TITLE]                   = header.GetIndex("title");
     indices_[JOURNAL_VOLUME]          = header.GetIndex("journal_volume");
@@ -645,7 +645,7 @@ String MMCifParser::ConvertSEQRES(const String& seqres,
         if (tlc!="UNK") {
 
           LOG_WARNING("unknown residue '" << tlc << "' in SEQRES record. "
-                      "Setting one-letter-code to '?'");
+                      "Setting one-letter-code to 'X'");
         }
         can_seqres.push_back('X');
         continue;
@@ -680,16 +680,16 @@ void MMCifParser::ParseCitation(const std::vector<StringRef>& columns)
       cit.SetPublishedIn(columns[indices_[BOOK_TITLE]].str());
     }
   }
-  if (indices_[JOURNAL_FULL] != -1) {
-    if (columns[indices_[JOURNAL_FULL]] != StringRef(".", 1)) {
+  if (indices_[JOURNAL_ABBREV] != -1) {
+    if (columns[indices_[JOURNAL_ABBREV]] != StringRef(".", 1)) {
       if (cit.GetPublishedIn().length() > 0) {
         throw IOException(this->FormatDiagnostic(STAR_DIAG_WARNING,
                                                  "citation.book_title already occupies the 'published_in' field of this citation, cannot add " +
-                                                 columns[indices_[JOURNAL_FULL]].str() +
+                                                 columns[indices_[JOURNAL_ABBREV]].str() +
                                                  ".",
                                                  this->GetCurrentLinenum()));
       } else {
-        cit.SetPublishedIn(columns[indices_[JOURNAL_FULL]].str());
+        cit.SetPublishedIn(columns[indices_[JOURNAL_ABBREV]].str());
       }
     }
   }
@@ -713,7 +713,7 @@ void MMCifParser::ParseCitation(const std::vector<StringRef>& columns)
   }
   if (indices_[YEAR] != -1) {
     if (columns[indices_[YEAR]][0]!='?') {
-      cit.SetPubMed(this->TryGetInt(columns[indices_[YEAR]], "citation.year"));
+      cit.SetYear(this->TryGetInt(columns[indices_[YEAR]], "citation.year"));
     }
   }
   if (indices_[TITLE] != -1) {

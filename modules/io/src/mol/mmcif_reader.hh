@@ -320,7 +320,7 @@ private:
     ABSTRACT_ID_CAS,              ///< CAS identifier
     BOOK_ID_ISBN,                 ///< ISBN code assigned, if book cited
     BOOK_TITLE,                   ///< title of book storing the citation
-    JOURNAL_FULL,                 ///< full journal title for articles
+    JOURNAL_ABBREV,               ///< abbreviated journal title for articles
     JOURNAL_VOLUME,               ///< volume of cited journal
     PAGE_FIRST,                   ///< first page of citation
     PAGE_LAST,                    ///< last page of citation
