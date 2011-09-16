@@ -49,4 +49,5 @@ void export_TrajectoryAnalysis()
   def("AnalyzeAlphaHelixAxis", &AnalyzeAlphaHelixAxis, (arg("traj"), arg("protein_segment"), arg("directions"), arg("centers"), arg("stride")=1));
   def("AnalyzeBestFitLine", &AnalyzeBestFitLine, (arg("traj"), arg("protein_segment"), arg("directions"), arg("centers"), arg("stride")=1));
   def("AnalyzeHelicity", &AnalyzeHelicity, (arg("traj"), arg("protein_segment"), arg("stride")=1));
+  def("CreateMeanStructure", &CreateMeanStructure, (arg("traj"), arg("selection"), arg("from")=0, arg("to")=-1, arg("stride")=1 ));
 }
