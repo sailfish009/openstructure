@@ -215,7 +215,7 @@ macro(module)
     endif()
     if (APPLE)
       set_target_properties(${_LIB_NAME} PROPERTIES
-                            LINK_FLAGS "-Wl,-rpath,@@loader_path"
+                            LINK_FLAGS "-Wl,-rpath,@loader_path"
                             INSTALL_NAME_DIR "@rpath")
     endif()
     if (WIN32)
@@ -332,7 +332,7 @@ macro(executable_libexec)
                        "${LIBEXEC_STAGE_PATH}")  
   if (APPLE AND NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
     set_target_properties(${_ARG_NAME} PROPERTIES
-                          LINK_FLAGS "-Wl,-rpath,@loader_path/../lib")
+                          LINK_FLAGS "-Wl,-rpath,@loader_path/../../lib")
   endif()
   if (_ARG_LINK)
     target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
