@@ -197,11 +197,29 @@ void Scene::SetShadowQuality(int q)
 #endif
 }
 
+int Scene::GetShadowQuality() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().shadow_quality;
+#else
+  return 0;
+#endif
+}
+
 void Scene::SetShadowWeight(float w)
 {
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().shadow_weight=w;
   RequestRedraw();
+#endif
+}
+
+float Scene::GetShadowWeight() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().shadow_weight;
+#else
+  return 0.0;
 #endif
 }
 
@@ -250,6 +268,15 @@ void Scene::SetAmbientOcclusionWeight(float f)
 #endif
 }
 
+float Scene::GetAmbientOcclusionWeight() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_factor;
+#else
+  return 1.0;
+#endif
+}
+
 void Scene::SetAmbientOcclusionMode(uint m)
 {
 #if OST_SHADER_SUPPORT_ENABLED
@@ -259,12 +286,30 @@ void Scene::SetAmbientOcclusionMode(uint m)
 #endif
 }
 
+uint Scene::GetAmbientOcclusionMode() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_mode;
+#else
+  return 0;
+#endif
+}
+
 void Scene::SetAmbientOcclusionQuality(uint m)
 {
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().amb_occl_quality=m;
   // the redraw routine will deal with the Shader
   RequestRedraw();
+#endif
+}
+
+uint Scene::GetAmbientOcclusionQuality() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_quality;
+#else
+  return 0;
 #endif
 }
 

@@ -96,27 +96,25 @@ class DLLEXPORT_OST_GFX Scene {
 
   /// \brief turn fog on or off
   void SetFog(bool f);
-
   /// \brief check fog status
   bool GetFog() const;
-
   /// \brief set the fog color
   void SetFogColor(const Color& c);
-
   /// \brief get the fog color
   Color GetFogColor() const;
 
   /// \brief turn shadow mapping on and off
   void SetShadow(bool f);
-
   /// \brief get shadow mapping status
   bool GetShadow() const;
-
   /// \brief shadow quality from 0 (low) to 3 (high), default=1
   void SetShadowQuality(int q);
-
+  /// \brief get shadow quality
+  int GetShadowQuality() const;
   /// \brief multiplier for shadow strength
   void SetShadowWeight(float w);
+  /// \brief get shadow strength
+  float GetShadowWeight() const;
 
   /// experimental feature
   void SetDepthDarkening(bool f);
@@ -130,9 +128,15 @@ class DLLEXPORT_OST_GFX Scene {
   /// experimental feature
   void SetAmbientOcclusionWeight(float f);
   /// experimental feature
+  float GetAmbientOcclusionWeight() const;
+  /// experimental feature
   void SetAmbientOcclusionMode(uint m);
   /// experimental feature
+  uint GetAmbientOcclusionMode() const;
+  /// experimental feature
   void SetAmbientOcclusionQuality(uint q);
+  /// experimental feature
+  uint GetAmbientOcclusionQuality() const;
   
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
