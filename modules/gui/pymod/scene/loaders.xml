@@ -5,7 +5,7 @@
    Url="http://www.pdb.org/pdb/files/${ID}.cif.gz" Default="1" 
    FileType="cif.gz"/>
   <GenericLoader ExtName="pdbredo" Name="pdbredo" Url="http://www.cmbi.ru.nl/pdb_redo/ak/${ID}/${ID}_besttls.pdb" />
-  <GenericLoader ExtName="" Name="pdb.org" Url="http://www.pdb.org/pdb/files/${ID}.pdb.gz"/>
+  <GenericLoader ExtName="" Name="pdb.org" FileType="pdb.gz" Url="http://www.pdb.org/pdb/files/${ID}.pdb.gz"/>
   <GenericLoader ExtName="emdb" Name="emdb" Url="ftp://emdb.rutgers.edu/structures/EMD-${ID}/map/emd_${ID}.map.gz" FileType="map.gz" Img="1"/>  
  </GenericLoaders>
 </EMDataInfo>
