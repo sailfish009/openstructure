@@ -43,7 +43,8 @@ ResidueImpl::ResidueImpl(const EntityImplPtr& ent,
   atom_list_(),
   sec_structure_(SecStructure::COIL),
   olc_('?'),
-  protein_(false), ligand_(false)
+  protein_(false), ligand_(false),
+  central_atom_()
 {
 }
 
@@ -163,6 +164,7 @@ EntityImplPtr ResidueImpl::GetEntity() const
 
 AtomImplPtr ResidueImpl::GetCentralAtom() const
 {
+  if(central_atom_) return central_atom_;
   if (chem_class_.IsNucleotideLinking()) {
     for (AtomImplList::const_iterator it=atom_list_.begin();
          it!=atom_list_.end();++it) {
@@ -177,6 +179,12 @@ AtomImplPtr ResidueImpl::GetCentralAtom() const
 
   return AtomImplPtr();
 }
+
+void ResidueImpl::SetCentralAtom(const AtomImplPtr& a)
+{
+  central_atom_=a;
+}
+
 
 char ResidueImpl::GetOneLetterCode() const
 {

@@ -471,5 +471,13 @@ if (NOT WIN32)
   set(LINK LINK ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
 endif()
 
-executable(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
+executable_libexec(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
            DEPENDS_ON ost_gui ${LINK})
+           
+file(GLOB MOC_CXX_FILES moc_*.cxx)
+
+if (MOC_CXX_FILES)
+  set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+                           "${MOC_CXX_FILES}")
+endif()
+

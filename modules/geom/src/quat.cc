@@ -287,7 +287,8 @@ Vec3 Quat::GetAxis() const
 
 Real Quat::GetAngle() const
 {
-  Real ww = std::acos(w/Length(Vec3(x,y,z)));
+  //Real ww = std::acos(w/Length(Vec3(x,y,z)));
+  Real ww = 2.0*std::acos(w);
   return ww;
 }
 

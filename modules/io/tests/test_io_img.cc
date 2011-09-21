@@ -34,6 +34,7 @@
 #include  <ost/io/img/map_io_dat_handler.hh>
 #include  <ost/io/img/map_io_jpk_handler.hh>
 #include  <ost/io/img/map_io_nanoscope_handler.hh>
+#include  <ost/io/img/map_io_ipl_handler.hh>
 #include  <ost/img/alg/normalizer_factory.hh>
 
 using namespace ost;
@@ -82,6 +83,7 @@ BOOST_AUTO_TEST_CASE(test_io_img)
   }
   //int 16 formats
   std::map<String,ImageFormatBase*> int_formats;
+  int_formats["IPL (16 bit)"]=new IPL(true,OST_BIT16_FORMAT);
   int_formats["DAT (16 bit)"]=new DAT(true,OST_BIT16_FORMAT);
   int_formats["TIF (16 bit)"]=new TIF;
   int_formats["JPK (16 bit)"]=new JPK;
@@ -102,6 +104,31 @@ BOOST_AUTO_TEST_CASE(test_io_img)
     if(failed){
       BOOST_ERROR("Image IO failed for plugin " << it->first << " at point " 
                   << ost::img::Point(eit)<< ". Should be " 
+                  << static_cast<int>(scaled_image.GetReal(eit)) << ", but "
+                  << static_cast<int>(loadedimage.GetReal(eit)) << " found.");
+    }
+    delete it->second;
+  }
+
+  //int 32 formats
+  std::map<String,ImageFormatBase*> int32_formats;
+  int32_formats["IPL (16 bit)"]=new IPL(true,OST_BIT32_FORMAT);
+  for(std::map<String,ImageFormatBase*>::iterator it=int32_formats.begin();it!=int32_formats.end();++it){
+    ost::io::SaveImage(testimage,fname,*(it->second));
+    ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));
+    ost::img::alg::Normalizer norm=ost::img::alg::CreateLinearRangeNormalizer(testimage,0.0,4294967295.0);
+    ost::img::ImageHandle scaled_image=testimage.Apply(norm);
+    bool failed=false;
+    ost::img::ExtentIterator eit(scaled_image.GetExtent());
+    for(;!eit.AtEnd();++eit) {
+      if( static_cast<int>(scaled_image.GetReal(eit))!=static_cast<int>(loadedimage.GetReal(eit))){
+        failed=true;
+        break;
+      }
+    }
+    if(failed){
+      BOOST_ERROR("Image IO failed for plugin " << it->first << " at point "
+                  << ost::img::Point(eit)<< ". Should be "
                   << static_cast<int>(scaled_image.GetReal(eit)) << ", but "
                   << static_cast<int>(loadedimage.GetReal(eit)) << " found.");
     }

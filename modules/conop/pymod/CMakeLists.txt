@@ -7,4 +7,4 @@ set(OST_CONOP_PYMOD_SOURCES
   export_ring_finder.cc
 )
 
-pymod(NAME conop CPP ${OST_CONOP_PYMOD_SOURCES} PY __init__.py)
+pymod(NAME conop CPP ${OST_CONOP_PYMOD_SOURCES} PY __init__.py cleanup.py)

@@ -1,4 +1,4 @@
-set(SUBST_DICT BUILD_TYPE=${CMAKE_BUILD_TYPE} PYTHON_BINARY=${PYTHON_BINARY} LIBDIR=${LIB_DIR})
+set(SUBST_DICT BUILD_TYPE=${CMAKE_BUILD_TYPE} PYTHON_BINARY=${PYTHON_BINARY} LIBDIR=${LIB_DIR} LIBEXEC_PATH=${LIBEXEC_PATH})
 message("${BUILD_TYPE}")
 add_custom_target(ost_scripts ALL)
 
@@ -19,7 +19,7 @@ if(WIN32)
   script(NAME gipltng.bat INPUT gipltng.bat.in SUBSTITUTE ${SUBST_DICT})
 else()
   script(NAME ost_config INPUT ost_config.in SUBSTITUTE ${SUBST_DICT}
-         TARGET ost_scripts OUTPUT_DIR libexec/openstructure)
+         TARGET ost_scripts OUTPUT_DIR ${LIBEXEC_PATH})
   script(NAME ost INPUT ost.in SUBSTITUTE ${SUBST_DICT} 
          TARGET ost_scripts)
   if (ENABLE_GUI)

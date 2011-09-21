@@ -63,6 +63,14 @@ String mat3_repr(const geom::Mat3& m)
   return ss.str();
 }
 
+list mat3_data(const geom::Mat3& m)
+{
+  list nrvo;
+  for(size_t k=0;k<9;++k) {
+    nrvo.append(m.Data()[k]);
+  }
+  return nrvo;
+}
 
 void export_Mat3()
 {
@@ -88,6 +96,7 @@ void export_Mat3()
     .def("__setitem__",Mat3_setitem)
     .def("__setitem__",Mat3_setslice)
     .def("GetCol", &Mat3::GetCol)
-    .def("GetRow", &Mat3::GetRow)    
+    .def("GetRow", &Mat3::GetRow)
+    .add_property("data",mat3_data)
   ;
 }

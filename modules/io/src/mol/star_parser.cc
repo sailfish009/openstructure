@@ -37,7 +37,7 @@ StarParser::StarParser(std::istream& stream, bool items_as_row):
   items_row_values_()
 {
   items_as_row_ = items_as_row;
-
+  
   if (!stream) {
     file_open_ = false;
   }
@@ -51,8 +51,6 @@ StarParser::StarParser(const String& filename, bool items_as_row):
   items_row_header_(), file_open_(true), items_row_columns_(),
   items_row_values_()
 {
-  items_as_row_ = items_as_row;
-
   if (filename.length() >= 3 &&
       filename.substr(filename.length() - 3) == ".gz") {
     stream_.push(boost::iostreams::gzip_decompressor());

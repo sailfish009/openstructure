@@ -1,3 +1,6 @@
+set(SUBST_DICT OST_VERSION_MAJOR=${OST_VERSION_MAJOR} OST_VERSION_MINOR=${OST_VERSION_MINOR} 
+    OST_VERSION_PATCH=${OST_VERSION_PATCH})
+
 set(OST_CONFIG_HEADERS
 base.hh
 config.hh
@@ -54,10 +57,17 @@ if (FFTW_USE_THREADS)
 else()
   set(fftw_use_threads 0)
 endif()
+if (_DEBIAN_STYLE_LIBEXEC)
+  set(debian_style_libexec 1)
+else()
+  set(debian_style_libexec 0)
+endif()
 
 set(config_hh_generator "CMake")
 set(CONFIG_HH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/config.hh")
+set(VERSION_HH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/version.hh")
 configure_file(config.hh.in ${CONFIG_HH_FILE})
+configure_file(version.hh.in ${VERSION_HH_FILE})
 add_custom_target(ost_config)
 stage_headers("${OST_CONFIG_HEADERS}" "ost" 
               "ost_config" "" "ost")

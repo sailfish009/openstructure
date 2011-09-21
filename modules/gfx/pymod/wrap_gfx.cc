@@ -37,6 +37,8 @@ extern void export_primlist();
 extern void export_primitives();
 extern void export_color();
 extern void export_gradient();
+extern void export_Exporter();
+
 #if OST_IMG_ENABLED
   extern void export_Map();
 #endif
@@ -135,6 +137,8 @@ BOOST_PYTHON_MODULE(_ost_gfx)
     ;
 #endif
 
+  export_primitives();
+  export_Exporter();
 }
 
 

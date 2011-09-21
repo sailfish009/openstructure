@@ -42,6 +42,7 @@
 #include "scene_observer.hh"
 #include "gfx_prim.hh"
 #include "povray_fw.hh"
+#include "exporter_fw.hh"
 
 namespace ost { namespace gfx {
 
@@ -95,27 +96,25 @@ class DLLEXPORT_OST_GFX Scene {
 
   /// \brief turn fog on or off
   void SetFog(bool f);
-
   /// \brief check fog status
   bool GetFog() const;
-
   /// \brief set the fog color
   void SetFogColor(const Color& c);
-
   /// \brief get the fog color
   Color GetFogColor() const;
 
   /// \brief turn shadow mapping on and off
   void SetShadow(bool f);
-
   /// \brief get shadow mapping status
   bool GetShadow() const;
-
   /// \brief shadow quality from 0 (low) to 3 (high), default=1
   void SetShadowQuality(int q);
-
+  /// \brief get shadow quality
+  int GetShadowQuality() const;
   /// \brief multiplier for shadow strength
   void SetShadowWeight(float w);
+  /// \brief get shadow strength
+  float GetShadowWeight() const;
 
   /// experimental feature
   void SetDepthDarkening(bool f);
@@ -129,9 +128,15 @@ class DLLEXPORT_OST_GFX Scene {
   /// experimental feature
   void SetAmbientOcclusionWeight(float f);
   /// experimental feature
+  float GetAmbientOcclusionWeight() const;
+  /// experimental feature
   void SetAmbientOcclusionMode(uint m);
   /// experimental feature
+  uint GetAmbientOcclusionMode() const;
+  /// experimental feature
   void SetAmbientOcclusionQuality(uint q);
+  /// experimental feature
+  uint GetAmbientOcclusionQuality() const;
   
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
@@ -249,13 +254,17 @@ class DLLEXPORT_OST_GFX Scene {
   /// if a main offscreen buffer is active (\sa StartOffscreenMode), then the
   /// dimensions here are ignored
   void Export(const String& fname, unsigned int w,
-              unsigned int h, bool transparent=true);
+              unsigned int h, bool transparent=false);
 
   /// \brief export snapshot of current scene
-  void Export(const String& fname, bool transparent=true);
+  void Export(const String& fname, bool transparent=false);
 
   /// \brief export scene into povray files named fname.pov and fname.inc
   void ExportPov(const std::string& fname, const std::string& wdir=".");
+
+  /// \rbrief export scene via exporter
+  void Export(Exporter* ex) const;
+
   //@}
   /// \brief entry point for gui events (internal use)
   void OnInput(const InputEvent& e);
@@ -409,6 +418,17 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief stops offline rendering in interactive mode
   void StopOffscreenMode();
 
+  /// \brief show center of rotation of true
+  void SetShowCenter(bool f);
+
+  bool GetShowCenter() const {return cor_flag_;}
+
+  /// \brief if true fix center of rotation upon input induced shift
+  void SetFixCenter(bool f) {fix_cor_flag_=f;}
+
+  /// \brief return flag
+  bool GetFixCenter() const {return fix_cor_flag_;}
+  
   /// experimental feature
   void SetBlur(uint n);
   /// experimental feature
@@ -472,7 +492,8 @@ private:
   Color light_diff_;
   Color light_spec_;
 
-  bool axis_flag_;
+  bool cor_flag_;
+  bool fix_cor_flag_;
   bool fog_flag_;
   Color fog_color_;
   bool auto_autoslab_;

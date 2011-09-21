@@ -29,7 +29,7 @@ else
 fi
 BIN_DIR=`dirname "$SCRIPT_NAME"`
 
-source $BIN_DIR/../libexec/openstructure/ost_config
+source $BIN_DIR/../@LIBEXEC_PATH@/ost_config
 
 $pyexec $interactive "$DNG_ROOT/@LIBDIR@/openstructure/init_cl.py" $opts
 RC=$?

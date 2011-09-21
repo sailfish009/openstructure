@@ -82,13 +82,27 @@ String get_ost_root()
 {
   QDir dir(QApplication::applicationDirPath());
 
+#if OST_DEBIAN_STYLE_LIBEXEC  
   #ifdef _MSC_VER
+    dir.cdUp();
+    dir.cdUp();
     dir.cdUp();
     dir.cdUp();
   #else
     dir.cdUp();
+    dir.cdUp();
+    dir.cdUp();
   #endif
-
+#else
+  #ifdef _MSC_VER
+    dir.cdUp();
+    dir.cdUp();
+    dir.cdUp();
+  #else
+    dir.cdUp();
+    dir.cdUp();
+  #endif
+#endif
   return dir.path().toStdString();
 }
 
@@ -186,10 +200,11 @@ void prepare_scripts(int argc, char** argv, PythonInterpreter& py)
 int main(int argc, char** argv)
 {
   int dummy_argc=1;
+  
   QApplication app(dummy_argc,argv);
   QCoreApplication::setOrganizationName("OpenStructure");
   QCoreApplication::setOrganizationDomain("openstructure.org");
-  QCoreApplication::setApplicationName(argv[0]);
+  QCoreApplication::setApplicationName(QString(argv[2]));
 	app.setLibraryPaths(QStringList());
   if (int rv=setup_resources(app)<0) {
     return rv;

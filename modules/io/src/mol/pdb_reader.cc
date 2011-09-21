@@ -781,19 +781,21 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
          << "residue with number " << res_num << " has more than one name.";
       throw IOException(ss.str());
     }
-    if (!warned_name_mismatch_) {
-      if (alt_loc==' ') {
-        LOG_WARNING("Residue with number " << res_num << " has more than one name."
-                    "Ignoring atoms for everything but the first");        
-      } else {
-        LOG_WARNING("Residue with number " << res_num 
-                    << " contains a microheterogeneity. Everything but atoms for "
-                    << "the residue '" << curr_residue_.GetName() 
-                    << "' will be ignored");
+    if(!profile_.quack_mode) {
+      if (!warned_name_mismatch_) {
+        if (alt_loc==' ') {
+          LOG_WARNING("Residue with number " << res_num << " has more than one name. "
+                      "Ignoring atoms for everything but the first");        
+        } else {
+          LOG_WARNING("Residue with number " << res_num 
+                      << " contains a microheterogeneity. Everything but atoms for "
+                      << "the residue '" << curr_residue_.GetName() 
+                      << "' will be ignored");
+        }
       }
+      warned_name_mismatch_=true;
+      return;
     }
-    warned_name_mismatch_=true;
-    return;
   }
   if (alt_loc!=' ') {
     // Check if there is already a atom with the same name.

@@ -38,7 +38,8 @@ PrimList::PrimList(const String& name):
   texts_(),
   sphere_detail_(4),
   arc_detail_(4),
-  simple_va_()
+  simple_va_(),
+  vas_()
 {}
 
 void PrimList::Clear()
@@ -48,13 +49,14 @@ void PrimList::Clear()
   spheres_.clear();
   cyls_.clear();
   texts_.clear();
+  vas_.clear();
   Scene::Instance().RequestRedraw();
   this->FlagRebuild();
 }
 
 geom::AlignedCuboid PrimList::GetBoundingBox() const
 {
-  if(points_.empty() && lines_.empty() && spheres_.empty() && cyls_.empty()) {
+  if(points_.empty() && lines_.empty() && spheres_.empty() && cyls_.empty() && texts_.empty() && vas_.empty()) {
     return geom::AlignedCuboid(geom::Vec3(-1,-1,-1),geom::Vec3(1,1,1));
   }
   geom::Vec3 minc(std::numeric_limits<float>::max(),
@@ -100,6 +102,11 @@ void PrimList::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc,
     geom::Vec3 tpos = tf.Apply(it->position);
     minc=geom::Min(minc,tpos);
     maxc=geom::Max(maxc,tpos);
+  }
+  for(std::vector<IndexedVertexArray>::const_iterator it=vas_.begin();it!=vas_.end();++it) {
+    geom::AlignedCuboid bb=it->GetBoundingBox();
+    minc=geom::Min(minc,bb.GetMin());
+    maxc=geom::Max(maxc,bb.GetMax());
   }
   minc-=1.0;
   maxc+=1.0;
@@ -152,12 +159,15 @@ void PrimList::CustomRenderGL(RenderPass pass)
     va_.RenderGL();
     simple_va_.RenderGL();
     render_text();
+    for(std::vector<IndexedVertexArray>::iterator it=vas_.begin();it!=vas_.end();++it) {
+      it->RenderGL();
+    }
   }
 }
 
 void PrimList::CustomRenderPov(PovState& pov)
 {
-  if(points_.empty() && lines_.empty()) return;
+  if(points_.empty() && lines_.empty() && spheres_.empty() && cyls_.empty()) return;
   pov.write_merge_or_union(GetName());
 
   for(SpherePrimList::const_iterator it=points_.begin();it!=points_.end();++it) {
@@ -262,6 +272,42 @@ void PrimList::SetColor(const Color& c)
   FlagRebuild();
 }
 
+void PrimList::AddMesh(float* v, float* n, float* c, size_t nv, unsigned int* i, size_t ni)
+{
+  static float dummy_normal[]={0.0,0.0,1.0};
+  static float dummy_color[]={1.0,1.0,1.0,1.0};
+  vas_.push_back(IndexedVertexArray());
+  IndexedVertexArray& va=vas_.back();
+  va.SetLighting(true);
+  va.SetTwoSided(true);
+  va.SetColorMaterial(true);
+  va.SetCullFace(false);
+  float* vv=v;
+  float* nn=n;
+  if(!n) {
+    nn=dummy_normal;
+    va.SetLighting(false);
+  }
+  float* cc=c;
+  if(!c) {
+    cc=dummy_color;
+  }
+  for(size_t k=0;k<nv;++k) {
+    va.Add(geom::Vec3(vv[0],vv[1],vv[2]),
+           geom::Vec3(nn[0],nn[1],nn[2]),
+           Color(cc[0],cc[1],cc[2],cc[3]));
+    vv+=3;
+    if(n) nn+=3;
+    if(c) cc+=4;
+  }
+  unsigned int* ii=i;
+  for(size_t k=0;k<ni;++k) {
+    va.AddTri(ii[0],ii[1],ii[2]);
+    ii+=3;
+  }
+  Scene::Instance().RequestRedraw();
+  FlagRebuild();
+}
 
 ////////////////////////////////
 // private methods

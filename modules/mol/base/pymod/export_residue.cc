@@ -43,15 +43,34 @@ namespace {
 
   void set_sec_struct1(ResidueBase* b, const SecStructure& s) {b->SetSecStructure(s);}
   void set_sec_struct2(ResidueBase* b, char c) {b->SetSecStructure(SecStructure(c));}
-  void set_chemclass1(ResidueBase* b, const ChemClass& cc) {b->SetChemClass(cc);}
-  void set_chemclass2(ResidueBase* b, char c) {b->SetChemClass(ChemClass(c));}
 
+  void set_chemclass(ResidueBase* b, object po)
+  {
+    extract<ChemClass> ex1(po);
+    if(ex1.check()) {
+      b->SetChemClass(ex1());
+    }
+    extract<char> ex2(po);
+    if(ex2.check()) {
+      b->SetChemClass(ChemClass(ex2()));
+    }
+    std::string st=extract<std::string>(po);
+    if(st.empty()) {
+      throw Error("expected non-empty string as chem class");
+    }
+    b->SetChemClass(ChemClass(st[0]));
+  }
 }
 
-//BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(X_insert_overloads,
-//                                       ResidueHandle::InsertAtom, 2, 3)
 void export_Residue()
 {
+  class_<ChemClass>("ChemClass", init<char>(args("chem_class")))
+    .def(self!=self)
+    .def(self==self)
+    .def("IsPeptideLinking", &ChemClass::IsPeptideLinking)
+    .def("IsNucleotideLinking", &ChemClass::IsNucleotideLinking)
+  ;
+  implicitly_convertible<char, ChemClass>();
   
   class_<ResNum>("ResNum", init<int>(args("num")))
     .def(init<int,char>(args("num", "ins_code")))
@@ -125,6 +144,11 @@ void export_Residue()
     .def("IsPeptideLinking", &ResidueBase::IsPeptideLinking)
     .add_property("peptide_linking", &ResidueBase::IsPeptideLinking)
     
+    .def("GetCentralAtom", &ResidueBase::GetCentralAtom)
+    .def("SetCentralAtom", &ResidueBase::SetCentralAtom)
+    .add_property("central_atom", &ResidueBase::GetCentralAtom, &ResidueBase::SetCentralAtom)
+    .add_property("central_normal", &ResidueBase::GetCentralNormal)
+
     .def("GetKey", &ResidueBase::GetKey,
          return_value_policy<copy_const_reference>())
      .def("GetName", &ResidueBase::GetName,
@@ -132,8 +156,8 @@ void export_Residue()
     .def("GetNumber", &ResidueBase::GetNumber,
          return_value_policy<copy_const_reference>())
     .def("GetChemClass", &ResidueBase::GetChemClass)
-    .def("SetChemClass", set_chemclass1)
-    .def("SetChemClass", set_chemclass2)
+    .add_property("chem_class", &ResidueBase::GetChemClass, set_chemclass)
+    .def("SetChemClass", set_chemclass)
     .add_property("is_ligand", &ResidueBase::IsLigand, &ResidueBase::SetIsLigand)
     .def("IsLigand", &ResidueBase::IsLigand)
     .def("SetIsLigand", &ResidueBase::SetIsLigand)
@@ -186,7 +210,6 @@ void export_Residue()
     .def("GetCenterOfMass", &ResidueHandle::GetCenterOfMass)
     .def("GetCenterOfAtoms", &ResidueHandle::GetCenterOfAtoms)
     .def("GetGeometricCenter", geom_center<ResidueHandle>)
-    .def("GetCentralAtom", &ResidueHandle::GetCentralAtom)
     .add_property("mass", &ResidueHandle::GetMass)
     .add_property("center_of_mass", &ResidueHandle::GetCenterOfMass)
     .add_property("center_of_atoms", &ResidueHandle::GetCenterOfAtoms)  

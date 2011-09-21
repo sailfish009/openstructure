@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2009 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -16,12 +16,13 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_VERSION_HH_
-#define OST_VERSION_HH_
+#ifndef OST_GFX_EXPORTER_FW_HH
+#define OST_GFX_EXPORTER_FW_HH
 
-#define OST_VERSION_MAJOR 1
-#define OST_VERSION_MINOR 2
-#define OST_VERSION_PATCH 0
-#define OST_VERSION_STRING "1.2.0"
+namespace ost { namespace gfx {
 
-#endif /* OST_VERSION_HH_ */
+  class Exporter;
+
+}} // ns
+
+#endif

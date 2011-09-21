@@ -34,7 +34,7 @@ geom::Vec3 (CoordFrame::*get_cm)(const mol::EntityView& sele) = &CoordFrame::Get
 Real (CoordFrame::*get_dist_cm)(const mol::EntityView& sele1, const mol::EntityView& sele2) = &CoordFrame::GetDistanceBetwCenterOfMass;
 Real (CoordFrame::*get_rmsd)(const mol::EntityView& Reference_View, const mol::EntityView& sele_View) = &CoordFrame::GetRMSD;
 Real (CoordFrame::*get_min_dist)(const mol::EntityView& view1, const mol::EntityView& view2) = &CoordFrame::GetMinDistance;
-
+Real (CoordFrame::*get_alpha)(const mol::EntityView& segment) = &CoordFrame::GetAlphaHelixContent;
 void export_CoordFrame()
 {
   class_<CoordFrame>("CoordFrame",no_init)
@@ -46,6 +46,8 @@ void export_CoordFrame()
     .def("GetDistanceBetwCenterOfMass", get_dist_cm)
     .def("GetRMSD",get_rmsd)
     .def("GetMinDistance",get_min_dist)
+    .def("GetODRLine",&geom::Vec3List::GetODRLine)
+    .def("GetAlphaHelixContent",get_alpha)
   ;
   def("CreateCoordFrame",CreateCoordFrame);
 }

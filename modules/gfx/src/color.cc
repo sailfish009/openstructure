@@ -81,9 +81,9 @@ geom::Vec3 HSVtoRGB(const geom::Vec3& hsv)
 geom::Vec3 RGBtoHSV(const geom::Vec3& rgb)
 {
   geom::Vec3 hsv;
-  double var_R = ( rgb[0] / 255.0 );
-  double var_G = ( rgb[1] / 255.0 );
-  double var_B = ( rgb[2] / 255.0 );
+  double var_R = ( rgb[0] );
+  double var_G = ( rgb[1] );
+  double var_B = ( rgb[2] );
 
   double var_Min = std::min(std::min( var_R, var_G), var_B );
   double var_Max = std::max(std::max( var_R, var_G), var_B );
@@ -107,13 +107,18 @@ geom::Vec3 RGBtoHSV(const geom::Vec3& rgb)
     } else if ( var_B == var_Max ){
       hsv[0] = ( 2.0 / 3.0 ) + del_G - del_R;
     }
-    if ( hsv[0] < 0 ){
-      hsv[0] += 1;
+    if ( hsv[0] < 0.0 ){
+      hsv[0] += 1.0;
     }
-    if ( hsv[0] > 1 ){
-      hsv[0] -= 1;
+    if ( hsv[0] > 1.0 ){
+      hsv[0] -= 1.0;
     }
   }
+
+  hsv[0]=hsv[0]*360.0;
+  hsv[1]=hsv[1]*100.0;
+  hsv[2]=hsv[2]*100.0;
+
   return hsv;
 }
 } // anon ns
@@ -126,6 +131,11 @@ geom::Vec3 Color::ToHSV()
 
 Color HSV(double h, double s, double v)
 {
+  if(h>1.0 || s>1.0 || v>1.0) {
+    h=h/360.0;
+    s=s/100.0;
+    v=v/100.0;
+  }
   geom::Vec3 rgb=HSVtoRGB(geom::Vec3(h,s,v));
   return Color(rgb[0],rgb[1],rgb[2]);
 }

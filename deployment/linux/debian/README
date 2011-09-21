@@ -1,0 +1,8 @@
+1. Checkout OpenStructure into a directory called strictly:'openstructure-<version>' (currently is 1.1d - 1.1 develop)
+2. Remove all the .git* files and directories from the source
+3. Create a compressed file with the source directory called strictly 'openstructure_<version>.orig.tar.gz' 
+   (At the same level as the source directory)
+4. Copy the 'debian' directory into the top level of the source directory
+5. Go into the top level of the source directory
+6. Build package with 'debuilder -uc -us'
+7. You can find the built package at the same level as the source directory and the source zipped file

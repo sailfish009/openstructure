@@ -91,6 +91,7 @@ BOOST_PYTHON_MODULE(_ost_base)
   scope().attr("VERSION_MAJOR")=OST_VERSION_MAJOR;
   scope().attr("VERSION_MINOR")=OST_VERSION_MINOR;  
   scope().attr("VERSION_PATCH")=OST_VERSION_PATCH;
+  scope().attr("WITH_NUMPY")= OST_NUMPY_SUPPORT_ENABLED;
   export_Logger();
   export_Range();
   export_Units();

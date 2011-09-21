@@ -130,18 +130,6 @@ bool ResidueHandle::operator!=(const ResidueHandle& ref) const
   return Impl()!=ref.Impl();
 }
 
-AtomHandle ResidueHandle::GetCentralAtom() const 
-{
-  this->CheckValidity();
-  return AtomHandle(Impl()->GetCentralAtom());
-}
-
-geom::Vec3 ResidueHandle::GetCentralNormal() const 
-{
-  this->CheckValidity();
-  return Impl()->GetCentralNormal();
-}
-
 int ResidueHandle::GetIndex() const 
 {
   this->CheckValidity();

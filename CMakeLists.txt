@@ -4,13 +4,17 @@
 
 cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(OpenStructure CXX C)
+set (OST_VERSION_MAJOR 1)
+set (OST_VERSION_MINOR 2)
+set (OST_VERSION_PATCH 0)
+set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_PATCH} )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
 
 
 option(USE_SHADER "whether to compile with shader support"
        OFF)
-option(SET_RPATH "embed rpath upon make install"
+option(USE_RPATH "embed rpath upon make install"
        OFF)
 option(COMPILE_TMTOOLS "whether to compile the tmalign and tmscore programs"
        OFF)
@@ -30,8 +34,10 @@ option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
       OFF)
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
 option(DEPLOYMENT "switch on deployment settings" OFF)
-option(COMPILE_TESTS "wheter unit tests should be compiled by default" OFF)
+option(COMPILE_TESTS "whether unit tests should be compiled by default" OFF)
 option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
+option(DEBIAN_STYLE_LIBEXEC "whether 'libexec' should be put under 'lib/openstructure" OFF)
+
 if (CXX)
   set(CMAKE_CXX_COMPILER ${CXX})
 endif()
@@ -108,6 +114,12 @@ if (PROFILE)
   set(_PROFILE ON)
 else()
   set(_PROFILE OFF)
+endif()
+
+if (DEBIAN_STYLE_LIBEXEC)
+  set(_DEBIAN_STYLE_LIBEXEC ON)
+else()
+  set(_DEBIAN_STYLE_LIBEXEC OFF)
 endif()
 
 add_definitions(-DEIGEN2_SUPPORT)
@@ -218,16 +230,17 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
 
 message(STATUS 
         "OpenStructure will be built with the following options:\n"
-        "   Install Prefix                 (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
-        "   RPath in install            (-DUSE_RPATH) : ${_USE_RPATH}\n"
-        "   Graphical interface        (-DENABLE_GUI) : ${_UI}\n"
-        "   OpenGL support             (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   Image Processing support   (-DENABLE_IMG) : ${_IMG}\n"
-        "   Shader support             (-DUSE_SHADER) : ${_SHADER}\n"
-        "   Numpy support               (-DUSE_NUMPY) : ${_NUMPY}\n"
-        "   Optimize                     (-DOPTIMIZE) : ${_OPT}\n"
-        "   Profiling support             (-DPROFILE) : ${_PROFILE}\n"
-        "   Double Precision (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
-        "   Compound Lib             (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
-        "   TMAlign and TMScore   (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
-        "   Static Libraries        (-DENABLE_STATIC) : ${ENABLE_STATIC}")
+        "   Install Prefix                       (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
+        "   RPath in install                  (-DUSE_RPATH) : ${_USE_RPATH}\n"
+        "   Graphical interface              (-DENABLE_GUI) : ${_UI}\n"
+        "   OpenGL support                   (-DENABLE_GFX) : ${_OPENGL}\n"
+        "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
+        "   Shader support                   (-DUSE_SHADER) : ${_SHADER}\n"
+        "   Numpy support                     (-DUSE_NUMPY) : ${_NUMPY}\n"
+        "   Optimize                           (-DOPTIMIZE) : ${_OPT}\n"
+        "   Profiling support                   (-DPROFILE) : ${_PROFILE}\n"
+        "   Double Precision       (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
+        "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
+        "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
+        "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")

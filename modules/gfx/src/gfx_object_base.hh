@@ -91,14 +91,26 @@ class DLLEXPORT_OST_GFX GfxObjBase: public GfxNode
 
   /// \brief turn outline rendering on or off
   virtual void SetOutline(bool f) = 0;
-  /// \brief set outline mode
+  /// \brief get state of outline rendering
+  virtual bool GetOutline() const = 0;
+  /// \brief set outline mode, 1, 2 or 3
   virtual void SetOutlineMode(int m) = 0;
-  /// \brief set outline width (modes 1 + 2)
+  /// \brief get current outline mode
+  virtual int GetOutlineMode() const = 0;
+  /// \brief set outline width in pixels (modes 1 + 2)
+  /// this does not scale with resolution
   virtual void SetOutlineWidth(float f) = 0;
-  /// \brief set outline tweak factor (mode 3)
+  /// \brief get current outline width
+  virtual float GetOutlineWidth() const = 0;
+  /// \brief set outline expansion factor (mode 3)
+  /// this scales with resolution
   virtual void SetOutlineExpandFactor(float f) = 0;
+  /// \brief get current outline expand factor (mode 3)
+  virtual float GetOutlineExpandFactor() const = 0;
   /// \brief set outline color (mode 3)
   virtual void SetOutlineExpandColor(const Color& c) = 0;
+  /// \brief get current outline color (mode 3)
+  virtual Color GetOutlineExpandColor() const = 0;
 
   /// \brief set opacity (1 = no transparency)
   virtual void SetOpacity(float f) = 0;

@@ -36,6 +36,8 @@ Mat3   (*Mat3Invert)(const Mat3& m)                                     = &Inver
 Mat3   (*Mat3Transpose)(const Mat3& m)                                  = &Transpose;
 Real (*Mat3Comp)(const Mat3& m, unsigned int i, unsigned int j)       = &Comp;
 Real (*Mat3Minor)(const Mat3& m, unsigned int i, unsigned int j)      = &Minor;
+Vec3 (*Vec3Min)(const Vec3&, const Vec3&) = &Min;
+Vec3 (*Vec3Max)(const Vec3&, const Vec3&) = &Max;
 
 
 void export_VecMat3_op()
@@ -60,4 +62,6 @@ void export_VecMat3_op()
   def("EulerTransformation",EulerTransformation);
   def("AxisRotation",AxisRotation);
   def("OrthogonalVector",OrthogonalVector);
+  def("Min",Vec3Min);
+  def("Max",Vec3Max);
 }

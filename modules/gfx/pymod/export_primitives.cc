@@ -25,8 +25,7 @@ using namespace ost::gfx;
 
 void export_primitives()
 {
-  class_<Primitive, boost::shared_ptr<Primitive>, 
-         bases<GfxNode>, boost::noncopyable>("Primitive", no_init)
+  class_<Primitive, bases<GfxNode>, boost::noncopyable>("Primitive", no_init)
     .def("HasOutline", &Primitive::HasOutline)
     .def("HasFill", &Primitive::HasFill)    
     .def("SetFill", &Primitive::SetFill)
@@ -40,10 +39,10 @@ void export_primitives()
     .def("GetOutlineColor", &Primitive::GetOutlineColor,
          return_value_policy<copy_const_reference>())
   ;
-  class_<Cuboid, boost::shared_ptr<Cuboid>, bases<Primitive>, 
+  class_<Cuboid, bases<Primitive>, 
          boost::noncopyable>("Cuboid", init<const String&, const geom::Cuboid>())
   ; 
-  class_<Quad, boost::shared_ptr<Quad>, bases<Primitive>, 
+  class_<Quad, bases<Primitive>, 
        boost::noncopyable>("Quad", init<const String&, const geom::Vec3&,
                                         const geom::Vec3&, const geom::Vec3&,
                                         const geom::Vec3&>())
