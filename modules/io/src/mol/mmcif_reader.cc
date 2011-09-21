@@ -1080,6 +1080,15 @@ void MMCifParser::OnEndData()
       if (edm_it->second.seqres.length() > 0) {
         seqres_.AddSequence(seq::CreateSequence(css->first.GetName(),
                                                 edm_it->second.seqres));
+      } else if (edm_it->second.type!=mol::CHAINTYPE_WATER) {
+        // mark everything that doesn't have SEQRES as ligand and isn't of type 
+        // water as ligand
+        mol::ChainHandle chain=css->first;
+        mol::ResidueHandleList residues=chain.GetResidueList();
+        for (mol::ResidueHandleList::iterator 
+             i=residues.begin(), e=residues.end(); i!=e; ++i) {
+          (*i).SetIsLigand(true);
+        }
       }
     } else {
       LOG_WARNING("No entity description found for atom_site.label_entity_id '"
