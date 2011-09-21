@@ -68,6 +68,24 @@ public:
   using MMCifParser::GetInfo;
 };
 
+void SetAtomSiteHeader(StarLoopDesc* mmcif_h)
+{
+  mmcif_h->Clear();
+  mmcif_h->SetCategory(StringRef("atom_site", 9));
+  mmcif_h->Add(StringRef("auth_asym_id", 12));
+  mmcif_h->Add(StringRef("id", 2));
+  mmcif_h->Add(StringRef("label_alt_id", 12));
+  mmcif_h->Add(StringRef("label_asym_id", 13));
+  mmcif_h->Add(StringRef("label_atom_id", 13));
+  mmcif_h->Add(StringRef("label_comp_id", 13));
+  mmcif_h->Add(StringRef("label_entity_id", 15));
+  mmcif_h->Add(StringRef("label_seq_id", 12));
+  mmcif_h->Add(StringRef("type_symbol", 11));
+  mmcif_h->Add(StringRef("Cartn_x", 7));
+  mmcif_h->Add(StringRef("Cartn_y", 7));
+  mmcif_h->Add(StringRef("Cartn_z", 7));
+}
+
 BOOST_AUTO_TEST_SUITE( io );
 
 BOOST_AUTO_TEST_CASE(mmcif_isvalidpdbident)
@@ -239,19 +257,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parse_models)
     mol::EntityHandle eh = mol::CreateEntity();
     StarLoopDesc tmmcif_h;
     TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
-    tmmcif_h.SetCategory(StringRef("atom_site", 9));
-    tmmcif_h.Add(StringRef("auth_asym_id", 12));
-    tmmcif_h.Add(StringRef("id", 2));
-    tmmcif_h.Add(StringRef("label_alt_id", 12));
-    tmmcif_h.Add(StringRef("label_asym_id", 13));
-    tmmcif_h.Add(StringRef("label_atom_id", 13));
-    tmmcif_h.Add(StringRef("label_comp_id", 13));
-    tmmcif_h.Add(StringRef("label_entity_id", 15));
-    tmmcif_h.Add(StringRef("label_seq_id", 12));
-    tmmcif_h.Add(StringRef("type_symbol", 11));
-    tmmcif_h.Add(StringRef("Cartn_x", 7));
-    tmmcif_h.Add(StringRef("Cartn_y", 7));
-    tmmcif_h.Add(StringRef("Cartn_z", 7));
+    SetAtomSiteHeader(&tmmcif_h);
     tmmcif_p.OnBeginLoop(tmmcif_h);
     tmmcif_h.Add(StringRef("pdbx_PDB_model_num", 18));
     BOOST_CHECK_THROW(tmmcif_p.OnBeginLoop(tmmcif_h), IOException);
@@ -802,6 +808,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
 
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   IOProfile profile;
+  StarLoopDesc tmmcif_h;
   TestMMCifParserProtected tmmcif_p(s, eh, profile);
   std::vector<StringRef> columns;
   String chain_name;
@@ -809,7 +816,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   mol::ResNum resnum(0);
   bool valid_res_num = false;
   char alt_loc;
-  //StringRef atom_name;
+  StringRef atom_name;
 
   BOOST_MESSAGE("          testing valid line");
   //tmmcif_p.ParseAtomIdent();
@@ -841,6 +848,50 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
     this->TryStoreIdx(CARTN_Y, "Cartn_y", header);
     this->TryStoreIdx(CARTN_Z, "Cartn_z", header);
 */
+
+  BOOST_MESSAGE("          testing profile to read calpha only");
+  {
+    profile.calpha_only = true;
+    // set up dummy header to pre-set indices
+    SetAtomSiteHeader(&tmmcif_h);
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+    // create CA dummy line
+    columns.push_back(StringRef("A", 1));
+    columns.push_back(StringRef("2", 1));
+    columns.push_back(StringRef(".", 1));
+    columns.push_back(StringRef("A", 1));
+    columns.push_back(StringRef("CA", 2));
+    columns.push_back(StringRef("VAL", 3));
+    columns.push_back(StringRef("1", 1));      // label_entity_id
+    columns.push_back(StringRef("11", 2));     // label_seq_id
+    columns.push_back(StringRef("C", 1));      // type_symbol
+    columns.push_back(StringRef("25.369", 6)); // Cartn_x
+    columns.push_back(StringRef("30.691", 6)); // Cartn_y
+    columns.push_back(StringRef("11.795", 6)); // Cartn_z
+    BOOST_CHECK_EQUAL(tmmcif_p.ParseAtomIdent(columns, chain_name, res_name,
+                                              resnum, valid_res_num, atom_name,
+                                              alt_loc), true);
+    columns.pop_back();
+    columns.pop_back();
+    columns.pop_back();
+    columns.pop_back();
+    columns.pop_back();
+    columns.pop_back();
+    columns.pop_back();
+    columns.pop_back();
+    columns.push_back(StringRef("CB", 2));
+    columns.push_back(StringRef("VAL", 3));
+    columns.push_back(StringRef("1", 1));      // label_entity_id
+    columns.push_back(StringRef("11", 2));     // label_seq_id
+    columns.push_back(StringRef("C", 1));      // type_symbol
+    columns.push_back(StringRef("25.369", 6)); // Cartn_x
+    columns.push_back(StringRef("30.691", 6)); // Cartn_y
+    columns.push_back(StringRef("11.795", 6)); // Cartn_z
+    BOOST_CHECK_EQUAL(tmmcif_p.ParseAtomIdent(columns, chain_name, res_name,
+                                              resnum, valid_res_num, atom_name,
+                                              alt_loc), false);
+  }
+  BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");
 }

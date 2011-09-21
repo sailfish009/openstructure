@@ -280,7 +280,7 @@ bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
 {
   // ATOM name
   atom_name = columns[indices_[LABEL_ATOM_ID]];
-  if (profile_.calpha_only) { // unit test profile
+  if (profile_.calpha_only) {
     if (atom_name != StringRef("CA", 2)) {
       return false;
     }
