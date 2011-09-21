@@ -527,7 +527,7 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   tmmcif_h.SetCategory(StringRef("citation", 8));
   tmmcif_h.Add(StringRef("id", 2));
   tmmcif_h.Add(StringRef("book_title", 10));
-  tmmcif_h.Add(StringRef("journal_full", 12));
+  tmmcif_h.Add(StringRef("journal_abbrev", 14));
   tmmcif_p.OnBeginLoop(tmmcif_h);
 
   columns.push_back(StringRef("Foo", 3));
