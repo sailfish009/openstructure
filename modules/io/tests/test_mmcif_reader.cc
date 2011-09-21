@@ -233,6 +233,31 @@ BOOST_AUTO_TEST_CASE(mmcif_parse_models)
   }
   BOOST_MESSAGE("          done.");
 
+  BOOST_MESSAGE("          testing single model with model no. entry...");
+  {
+    // build dummy header
+    mol::EntityHandle eh = mol::CreateEntity();
+    StarLoopDesc tmmcif_h;
+    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    tmmcif_h.SetCategory(StringRef("atom_site", 9));
+    tmmcif_h.Add(StringRef("auth_asym_id", 12));
+    tmmcif_h.Add(StringRef("id", 2));
+    tmmcif_h.Add(StringRef("label_alt_id", 12));
+    tmmcif_h.Add(StringRef("label_asym_id", 13));
+    tmmcif_h.Add(StringRef("label_atom_id", 13));
+    tmmcif_h.Add(StringRef("label_comp_id", 13));
+    tmmcif_h.Add(StringRef("label_entity_id", 15));
+    tmmcif_h.Add(StringRef("label_seq_id", 12));
+    tmmcif_h.Add(StringRef("type_symbol", 11));
+    tmmcif_h.Add(StringRef("Cartn_x", 7));
+    tmmcif_h.Add(StringRef("Cartn_y", 7));
+    tmmcif_h.Add(StringRef("Cartn_z", 7));
+    tmmcif_p.OnBeginLoop(tmmcif_h);
+    tmmcif_h.Add(StringRef("pdbx_PDB_model_num", 18));
+    BOOST_CHECK_THROW(tmmcif_p.OnBeginLoop(tmmcif_h), IOException);
+  }
+  BOOST_MESSAGE("          done.");
+
   BOOST_MESSAGE("  done.");
 }
 

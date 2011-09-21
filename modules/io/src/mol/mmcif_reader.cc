@@ -147,7 +147,7 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     // post processing
     if (category_counts_[category_] > 0) {
       if ((has_model_ && (indices_[PDBX_PDB_MODEL_NUM] == -1))||
-          (!has_model_ && (indices_[PDBX_PDB_MODEL_NUM] != -1))) { // unit test
+          (!has_model_ && (indices_[PDBX_PDB_MODEL_NUM] != -1))) {
         throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                               "Not all atom_site entries carry a model number.",
                                                  this->GetCurrentLinenum()));
