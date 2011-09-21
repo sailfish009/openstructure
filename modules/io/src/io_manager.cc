@@ -21,6 +21,7 @@
 #include <ost/io/mol/entity_io_crd_handler.hh>
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/mol/entity_io_mae_handler.hh>
+#include <ost/io/mol/entity_io_mmcif_handler.hh>
 #include <ost/io/seq/fasta_io_handler.hh>
 #include <ost/io/seq/pir_io_handler.hh>
 #include <ost/io/seq/promod_io_handler.hh>
@@ -44,6 +45,7 @@ namespace ost { namespace io {
 
 IOManager::IOManager()
 {
+  RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOMMCIFHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOPDBHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOCRDHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOSDFHandlerFactory));
