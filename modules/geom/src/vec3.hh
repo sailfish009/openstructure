@@ -218,7 +218,7 @@ public:
   
   Mat3 GetPrincipalAxes() const;
   Line3 GetODRLine();
-  Line3 FitCylinder();
+  Line3 FitCylinder(const Vec3 initial_direction, const Vec3 center);
 
 };
 

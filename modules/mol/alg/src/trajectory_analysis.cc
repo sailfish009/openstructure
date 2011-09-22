@@ -233,6 +233,9 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
 
   void AnalyzeAlphaHelixAxis(const CoordGroupHandle& traj, const EntityView& prot_seg, geom::Vec3List& directions,
                              geom::Vec3List& centers, unsigned int stride)
+  //This function calculates the best fitting cylinder to the C-alpha atoms of an EntityView and returns
+  //the geometric center as well as the axis of that cylinder. We take care to have the axis point towards
+  //the last residue of the selection, usually the direction of the alpha-helix
   {
     CheckHandleValidity(traj);
     if (prot_seg.GetAtomCount()==0){
@@ -240,13 +243,17 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     }
     std::vector<unsigned long> indices_ca;
     geom::Line3 axis;
+    Real sign;
     directions.reserve(ceil(traj.GetFrameCount()/float(stride)));
     centers.reserve(ceil(traj.GetFrameCount()/float(stride)));
     GetCaIndices(prot_seg, indices_ca);
+    unsigned int n_atoms=indices_ca.size();
     for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
       CoordFramePtr frame=traj.GetFrame(i);
       axis=frame->FitCylinder(indices_ca);
-      directions.push_back(axis.GetDirection());
+      sign=geom::Dot(axis.GetDirection(),(*frame)[indices_ca[n_atoms-1]]-axis.GetOrigin());
+      sign=sign/fabs(sign);
+      directions.push_back(sign*axis.GetDirection());
       centers.push_back(axis.GetOrigin());
     }
     return;

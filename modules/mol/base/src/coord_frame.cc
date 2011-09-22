@@ -277,12 +277,29 @@ namespace ost { namespace mol {
  
   geom::Line3 CoordFrame::FitCylinder(std::vector<unsigned long>& indices_ca){
   //Returns a line which is the axis of a fitted cylinder to the atoms with indices given in indices_ca
+  //It is assumed that we fit an alpha-helix and that the CA atoms are oredered sequentially
+  //This is used for the initial guess of the helix axis
     geom::Vec3List atoms_pos_list;
-    atoms_pos_list.reserve(indices_ca.size());
+    int n_atoms=indices_ca.size();
+    atoms_pos_list.reserve(n_atoms);
     for (std::vector<unsigned long>::const_iterator i1=indices_ca.begin(),e=indices_ca.end(); i1!=e; ++i1) {
       atoms_pos_list.push_back((*this)[*i1]);
     }
-    return atoms_pos_list.FitCylinder();
+    //Initial guess
+    geom::Vec3 initial_axis=geom::Vec3(0.0,0.0,0.0),center=geom::Vec3(0.0,0.0,0.0);
+    if (n_atoms<5) {
+      initial_axis=atoms_pos_list[n_atoms-1]-atoms_pos_list[0];
+    }
+    else {
+      for (geom::Vec3List::const_iterator i=atoms_pos_list.begin(),e=atoms_pos_list.end()-4; i!=e; ++i) {
+        initial_axis+=(*(i+4))-(*i);
+      }
+    }
+    for (geom::Vec3List::const_iterator i=atoms_pos_list.begin(),e=atoms_pos_list.end(); i!=e; ++i) {
+      center+=(*i);
+    }
+    center/=atoms_pos_list.size();
+    return atoms_pos_list.FitCylinder(initial_axis,center);
   }
  
   Real CoordFrame::GetAlphaHelixContent(const mol::EntityView& segment){
