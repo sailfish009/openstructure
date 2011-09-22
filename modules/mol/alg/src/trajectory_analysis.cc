@@ -25,10 +25,8 @@
 #include <ost/geom/vec3.hh>
 #include <ost/base.hh>
 #include <ost/geom/geom.hh>
-#include <ost/gfx/entity.hh>
-#include <ost/mol/entity_view.hh>
+#include <ost/mol/mol.hh>
 #include <ost/mol/view_op.hh>
-#include <ost/mol/coord_group.hh>
 #include "trajectory_analysis.hh"
 
 namespace ost { namespace mol { namespace alg {
