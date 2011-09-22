@@ -95,6 +95,27 @@ _struct.pdbx_model_details         'Even better guessing'
 _struct.pdbx_model_type_details    'Guess'
 
 loop_
+_struct_conf.id
+_struct_conf.conf_type_id
+_struct_conf.beg_label_comp_id
+_struct_conf.beg_label_asym_id
+_struct_conf.beg_label_seq_id
+_struct_conf.end_label_comp_id
+_struct_conf.end_label_asym_id
+_struct_conf.end_label_seq_id
+_struct_conf.details
+HELX1  HELX_RH_AL_P  ARG  A   87  GLN  A   92  .
+HELX2  HELX_RH_AL_P  ARG  B  287  GLN  B  292  .
+STRN1  STRN_P        PRO  A    1  LEU  A    5  .
+STRN2  STRN_P        CYS  B  295  PHE  B  299  .
+STRN3  STRN_P        CYS  A   95  PHE  A  299  .
+STRN4  STRN_P        PRO  B  201  LEU  B  205  .
+TURN1  TURN_TY1P_P   ILE  A   15  GLN  A   18  .
+TURN2  TURN_TY2_P    GLY  A   49  GLY  A   52  .
+TURN3  TURN_TY1P_P   ILE  A   55  HIS  A   69  .
+TURN4  TURN_TY1_P    THR  A   91  GLY  A   94  .
+
+loop_
 _atom_site.group_PDB
 _atom_site.type_symbol
 _atom_site.label_atom_id

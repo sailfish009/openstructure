@@ -724,8 +724,6 @@ BOOST_AUTO_TEST_CASE(mmcif_biounit_tests)
   tmmcif_h.Add(StringRef("matrix[3][2]", 12));
   tmmcif_h.Add(StringRef("matrix[3][3]", 12));
 
-
-
   tmmcif_p.OnBeginLoop(tmmcif_h);
 
   columns.pop_back();
@@ -939,6 +937,8 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   for (rs = rl.begin(); rs != rl.end(); ++rs, ++i) {
     BOOST_CHECK_EQUAL(rs->GetNumber().GetNum(), i);
   }
+
+  // add checking of struct_conf info, here
 
   BOOST_MESSAGE("          done.");
 

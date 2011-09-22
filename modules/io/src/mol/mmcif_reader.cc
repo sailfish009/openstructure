@@ -80,6 +80,7 @@ void MMCifParser::ClearState()
   authors_map_.clear();
   bu_origin_map_.clear();
   bu_assemblies_.clear();
+  secstruct_list_.clear();
 }
 
 void MMCifParser::SetRestrictChains(const String& restrict_chains)
@@ -259,6 +260,20 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     indices_[PDBX_MODEL_TYPE_DETAILS]
        = header.GetIndex("pdbx_model_type_details");
     indices_[STRUCT_TITLE]               = header.GetIndex("title");
+    cat_available = true;
+  } else if (header.GetCategory() == "struct_conf") {
+    category_ = STRUCT_CONF;
+    // mandatory items
+    this->TryStoreIdx(BEG_LABEL_ASYM_ID, "beg_label_asym_id", header);
+    this->TryStoreIdx(BEG_LABEL_COMP_ID, "beg_label_comp_id", header);
+    this->TryStoreIdx(BEG_LABEL_SEQ_ID,  "beg_label_seq_id", header);
+    this->TryStoreIdx(CONF_TYPE_ID,      "conf_type_id", header);
+    this->TryStoreIdx(END_LABEL_ASYM_ID, "end_label_asym_id", header);
+    this->TryStoreIdx(END_LABEL_COMP_ID, "end_label_comp_id", header);
+    this->TryStoreIdx(END_LABEL_SEQ_ID,  "end_label_seq_id", header);
+    this->TryStoreIdx(STRUCT_CONF_ID,    "id", header);
+    // optional items
+    indices_[BEG_AUTH_ASYM_ID] = header.GetIndex("beg_auth_asym_id");
     cat_available = true;
   }
   category_counts_[category_]++;
@@ -1008,6 +1023,34 @@ void MMCifParser::ParseStruct(const std::vector<StringRef>& columns)
   info_.SetStructDetails(details);
 }
 
+void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
+{
+  StringRef chain_name;
+  int s_res_num;
+  int e_res_num;
+  // fetch start and end
+  s_res_num = this->TryGetInt(columns[indices_[BEG_LABEL_SEQ_ID]],
+                              "struct_conf.beg_label_seq_id"); // unit test
+  e_res_num = this->TryGetInt(columns[indices_[END_LABEL_SEQ_ID]],
+                              "struct_conf.end_label_seq_id"); // unit test
+  if(auth_chain_id_) { // unit test both ways
+    if (indices_[BEG_AUTH_ASYM_ID] != -1) { // unit test
+      chain_name = columns[indices_[BEG_AUTH_ASYM_ID]];
+    } else { // unit test
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                               "foo",
+                                               this->GetCurrentLinenum()));
+    }
+  } else { // unit test
+    chain_name = columns[indices_[BEG_LABEL_ASYM_ID]];
+  }
+  MMCifHSEntry hse = {to_res_num(s_res_num, ' '),
+                      to_res_num(e_res_num, ' '),
+                      chain_name.str(),
+                      columns[indices_[CONF_TYPE_ID]].str()};
+  secstruct_list_.push_back(hse);
+}
+
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
@@ -1056,12 +1099,28 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
     LOG_TRACE("processing struct entry")
     this->ParseStruct(columns);
     break;
+  case STRUCT_CONF:
+    LOG_TRACE("processing struct_conf entry")
+    this->ParseStructConf(columns);
+    break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                        "Uncatched category '"+ header.GetCategory() +"' found.",
                                              this->GetCurrentLinenum()));
     return;
   }
+}
+
+void MMCifParser::AssignSecStructure(mol::EntityHandle ent)
+{
+  // for each helix, take chain
+  // check for overlaps (visual artifacts)
+  // assign helix to chain
+
+  // for all strands
+  // take chain
+  // check for overlaps
+  // assign strand to chain
 }
 
 void MMCifParser::OnEndData()
@@ -1154,6 +1213,8 @@ void MMCifParser::OnEndData()
     info_.AddBioUnit(bua_it->biounit);
   }
   bu_assemblies_.clear();
+
+  // create secondary structure from struct_conf info
 
   LOG_INFO("imported "
            << chain_count_ << " chains, "

@@ -270,6 +270,14 @@ protected:
   /// \param columns data row
   void ParseStruct(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch MMCif struct_conf (secondary structure) information
+  ///
+  /// \param columns data row
+  void ParseStructConf(const std::vector<StringRef>& columns);
+
+  /// \brief Transform data from struct_conf entry into secondary structure
+  void AssignSecStructure(mol::EntityHandle ent);
+
 private:
   /// \enum magic numbers of this class
   typedef enum {
@@ -394,6 +402,19 @@ private:
      STRUCT_TITLE         ///< title for the data block
   } StructItems;
 
+  /// \enum items of the struct_conf category
+  typedef enum {
+    BEG_AUTH_ASYM_ID,  ///< Starting residue, points to atom_site.auth_asym_id
+    BEG_LABEL_ASYM_ID, ///< Starting residue, points to atom_site.label_asym_id
+    BEG_LABEL_COMP_ID, ///< Starting residue, points to atom_site.label_comp_id
+    BEG_LABEL_SEQ_ID,  ///< Starting residue, points to atom_site.label_seq_id
+    CONF_TYPE_ID,      ///< Pointer to struct_conf_type.id
+    END_LABEL_ASYM_ID, ///< Ending residue, points to atom_site.label_asym_id
+    END_LABEL_COMP_ID, ///< Ending residue, points to atom_site.label_comp_id
+    END_LABEL_SEQ_ID,  ///< Ending residue, points to atom_site.label_seq_id
+    STRUCT_CONF_ID,    ///< Unique identifier
+  } StructConfItems;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
@@ -407,6 +428,7 @@ private:
     PDBX_STRUCT_ASSEMBLY_GEN,
     PDBX_STRUCT_OPER_LIST,
     STRUCT,
+    STRUCT_CONF,
     DONT_KNOW
   } MMCifCategory;
 
@@ -428,6 +450,15 @@ private:
 
   typedef std::map<String, std::pair<std::vector<int>, std::vector<String> > >
     MMCifCitationAuthorMap;
+
+  /// \struct store struct_conf info (secondary structure)
+  typedef struct {
+    mol::ResNum start;
+    mol::ResNum end;
+    String chain_name;
+    String type;
+  } MMCifHSEntry;
+  typedef std::vector<MMCifHSEntry> MMCifHSVector;
 
   // members
   MMCifCategory category_;
@@ -457,6 +488,7 @@ private:
   MMCifCitationAuthorMap authors_map_;
   MMCifBioUAssemblyVector bu_assemblies_;
   std::map<String, String> bu_origin_map_; ///< pdbx_struct_assembly.details
+  MMCifHSVector secstruct_list_; ///< for storing struct_conf sec.struct. data
 };
 
 }}
