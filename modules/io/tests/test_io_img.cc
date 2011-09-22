@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(test_io_img)
 
   //int 32 formats
   std::map<String,ImageFormatBase*> int32_formats;
-  int32_formats["IPL (16 bit)"]=new IPL(true,OST_BIT32_FORMAT);
+  int32_formats["IPL (32 bit)"]=new IPL(true,OST_BIT32_FORMAT);
   for(std::map<String,ImageFormatBase*>::iterator it=int32_formats.begin();it!=int32_formats.end();++it){
     ost::io::SaveImage(testimage,fname,*(it->second));
     ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));
@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(test_io_img)
     bool failed=false;
     ost::img::ExtentIterator eit(scaled_image.GetExtent());
     for(;!eit.AtEnd();++eit) {
-      if( static_cast<int>(scaled_image.GetReal(eit))!=static_cast<int>(loadedimage.GetReal(eit))){
+      if( static_cast<uint>(scaled_image.GetReal(eit))!=static_cast<uint>(loadedimage.GetReal(eit))){
         failed=true;
         break;
       }
@@ -129,8 +129,8 @@ BOOST_AUTO_TEST_CASE(test_io_img)
     if(failed){
       BOOST_ERROR("Image IO failed for plugin " << it->first << " at point "
                   << ost::img::Point(eit)<< ". Should be "
-                  << static_cast<int>(scaled_image.GetReal(eit)) << ", but "
-                  << static_cast<int>(loadedimage.GetReal(eit)) << " found.");
+                  << static_cast<uint>(scaled_image.GetReal(eit)) << ", but "
+                  << static_cast<uint>(loadedimage.GetReal(eit)) << " found.");
     }
     delete it->second;
   }
