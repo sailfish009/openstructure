@@ -275,7 +275,21 @@ protected:
   /// \param columns data row
   void ParseStructConf(const std::vector<StringRef>& columns);
 
+  /// \struct types of secondary structure
+  typedef enum {
+    MMCIF_HELIX,
+    MMCIF_STRAND,
+    MMCIF_TURN
+  } MMCifSecStructElement;
+
+  /// \brief Check whether an element was classified sheet or helix
+  ///
+  /// \param type Type to be classified
+  MMCifSecStructElement DetermineSecStructType(const StringRef& type) const;
+
   /// \brief Transform data from struct_conf entry into secondary structure
+  ///
+  /// \param ent Entity to assign secondary structure to
   void AssignSecStructure(mol::EntityHandle ent);
 
 private:

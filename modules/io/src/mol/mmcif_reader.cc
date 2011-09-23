@@ -1023,6 +1023,138 @@ void MMCifParser::ParseStruct(const std::vector<StringRef>& columns)
   info_.SetStructDetails(details);
 }
 
+MMCifParser::MMCifSecStructElement MMCifParser::DetermineSecStructType(
+                                                    const StringRef& type) const
+{
+  if (type == StringRef("HELX_P", 6)) {
+    return MMCIF_HELIX;
+  } else if (type == StringRef("HELX_OT_P", 9)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_P", 9)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_OT_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_AL_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_GA_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_OM_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_PI_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_27_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_3T_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_PP_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_P",     9)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_OT_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_AL_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_GA_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_OM_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_PI_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_27_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_3T_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_PP_P", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_N", 6)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_OT_N", 9)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_N", 9)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_OT_N", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_A_N", 11)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_B_N", 11)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_RH_Z_N", 11)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_N", 9)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_OT_N", 12)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_A_N", 11)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_B_N", 11)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("HELX_LH_Z_N", 11)) {
+    return MMCIF_HELIX;
+  }
+  else if (type == StringRef("TURN_P", 6)) {
+    return MMCIF_TURN;
+  }
+  else if (type == StringRef("TURN_OT_P", 9)) {
+    return MMCIF_TURN;
+  }
+  else if (type == StringRef("TURN_TY1_P", 10)) {
+    return MMCIF_TURN;
+  }
+  else if (type == StringRef("TURN_TY1P_P", 11)) {
+    return MMCIF_TURN;
+  }
+  else if (type == StringRef("TURN_TY2_P", 10)) {
+    return MMCIF_TURN;
+  }
+  else if (type == StringRef("TURN_TY2P_P", 11)) {
+    return MMCIF_TURN;
+  }
+  else if (type == StringRef("TURN_TY3_P", 10)) {
+    return MMCIF_TURN;
+  }
+  else if (type == StringRef("TURN_TY3P_P", 11)) {
+    return MMCIF_TURN;
+  }
+  else if (type == StringRef("STRN", 4)) {
+    return MMCIF_STRAND;
+  }
+
+  throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                    "Unknown secondary structure class found: "+
+                                           type.str(),
+                                           this->GetCurrentLinenum()));
+}
+
 void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
 {
   StringRef chain_name;
@@ -1038,7 +1170,7 @@ void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
       chain_name = columns[indices_[BEG_AUTH_ASYM_ID]];
     } else { // unit test
       throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
-                                               "foo",
+"Chain name by author requested but 'struct_conf.beg_auth_asym_id' is not set.",
                                                this->GetCurrentLinenum()));
     }
   } else { // unit test
@@ -1048,7 +1180,14 @@ void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
                       to_res_num(e_res_num, ' '),
                       chain_name.str(),
                       columns[indices_[CONF_TYPE_ID]].str()};
-  secstruct_list_.push_back(hse);
+  
+  MMCifSecStructElement type =
+    DetermineSecStructType(columns[indices_[CONF_TYPE_ID]]);
+  if (type == MMCIF_HELIX) { // unit test helix and strand reading
+    secstruct_list_.push_back(hse);
+  } else if (type == MMCIF_STRAND) {
+    secstruct_list_.push_back(hse);
+  }
 }
 
 void MMCifParser::OnDataRow(const StarLoopDesc& header, 

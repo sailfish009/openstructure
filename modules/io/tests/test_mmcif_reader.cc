@@ -66,6 +66,11 @@ public:
   using MMCifParser::ClearState;
   using MMCifParser::ConvertSEQRES;
   using MMCifParser::GetInfo;
+  using MMCifParser::DetermineSecStructType;
+  using MMCifParser::MMCifSecStructElement;
+  using MMCifParser::MMCIF_HELIX;
+  using MMCifParser::MMCIF_TURN;
+  using MMCifParser::MMCIF_STRAND;
 };
 
 void SetAtomSiteHeader(StarLoopDesc* mmcif_h)
@@ -794,6 +799,144 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_tests)
   columns.pop_back();
   columns.push_back(StringRef("A", 1));
   BOOST_CHECK_THROW(tmmcif_p.ParseStruct(columns), IOException);
+
+  BOOST_MESSAGE("  done.");
+}
+
+BOOST_AUTO_TEST_CASE(mmcif_struct_conf_tests)
+{
+  BOOST_MESSAGE("  Running mmcif_struct_conf_tests...");
+  mol::EntityHandle eh = mol::CreateEntity();
+  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+
+  BOOST_MESSAGE("          testing type validation");
+  StringRef type = StringRef("HELX_P", 6);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_OT_P", 9);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_P", 9);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_OT_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_AL_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_GA_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_OM_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_PI_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_27_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_3T_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_PP_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_P",     9);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_OT_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_AL_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_GA_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_OM_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_PI_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_27_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+ type = StringRef("HELX_LH_3T_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_PP_P", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_N", 6);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_OT_N", 9);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_N", 9);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_OT_N", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_A_N", 11);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_B_N", 11);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_RH_Z_N", 11);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_N", 9);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_OT_N", 12);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_A_N", 11);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_B_N", 11);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("HELX_LH_Z_N", 11);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_HELIX);
+  type = StringRef("TURN_P", 6);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_TURN);
+  type = StringRef("TURN_OT_P", 9);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_TURN);
+  type = StringRef("TURN_TY1_P", 10);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_TURN);
+  type = StringRef("TURN_TY1P_P", 11);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_TURN);
+  type = StringRef("TURN_TY2_P", 10);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_TURN);
+  type = StringRef("TURN_TY2P_P", 11);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_TURN);
+  type = StringRef("TURN_TY3_P", 10);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_TURN);
+  type = StringRef("TURN_TY3P_P", 11);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_TURN);
+  type = StringRef("STRN", 4);
+  BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
+              TestMMCifParserProtected::MMCIF_STRAND);
+  type = StringRef("Foo", 3);
+  BOOST_CHECK_THROW(tmmcif_p.DetermineSecStructType(type), IOException);
+
+  BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");
 }
