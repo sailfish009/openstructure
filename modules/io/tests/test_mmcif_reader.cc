@@ -1136,13 +1136,9 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   // pick chains, iterate residues, check for correct sec.struct.
   ch = eh.FindChain("A");
   rl = ch.GetResidueList();
-  for (rs = rl.begin(); rs != rl.end(); ++rs) {
-    std::cout << "Foo " << (char)rs->GetSecStructure() << std::endl;
-    if (rs->GetSecStructure().IsExtended()) {
-      std::cout << "Bar" << std::endl;
-    }
-    //BOOST_CHECK_EQUAL(rs->GetSecStructure().IsHelical());
-  }
+  BOOST_CHECK_EQUAL(rl[0].GetSecStructure().IsHelical(), true);
+  BOOST_CHECK_EQUAL(rl[1].GetSecStructure().IsHelical(), true);
+  BOOST_CHECK_EQUAL(rl[2].GetSecStructure().IsExtended(), true);
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("          reading data fields which should not fail...");

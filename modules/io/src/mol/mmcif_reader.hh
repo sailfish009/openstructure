@@ -53,6 +53,7 @@ namespace ost { namespace io {
 /// \li pdbx_struct_oper_list
 /// \li struct
 /// \li struct_conf
+/// \li struct_sheet_range
 class DLLEXPORT_OST_IO MMCifParser : public StarParser  {
 public:
   /// \brief create a MMCifParser
@@ -428,16 +429,16 @@ private:
 
   /// \enum items of the struct_conf category
   typedef enum {
-    BEG_AUTH_ASYM_ID,  ///< Starting residue, points to atom_site.auth_asym_id
-    BEG_LABEL_ASYM_ID, ///< Starting residue, points to atom_site.label_asym_id
-    BEG_LABEL_COMP_ID, ///< Starting residue, points to atom_site.label_comp_id
-    BEG_LABEL_SEQ_ID,  ///< Starting residue, points to atom_site.label_seq_id
-    CONF_TYPE_ID,      ///< Pointer to struct_conf_type.id
-    END_AUTH_ASYM_ID,  ///< Ending residue, points to atom_site.auth_asym_id
-    END_LABEL_ASYM_ID, ///< Ending residue, points to atom_site.label_asym_id
-    END_LABEL_COMP_ID, ///< Ending residue, points to atom_site.label_comp_id
-    END_LABEL_SEQ_ID,  ///< Ending residue, points to atom_site.label_seq_id
-    STRUCT_CONF_ID,    ///< Unique identifier
+    SC_BEG_AUTH_ASYM_ID,  ///< Starting residue (atom_site.auth_asym_id)
+    SC_BEG_LABEL_ASYM_ID, ///< Starting residue (atom_site.label_asym_id)
+    SC_BEG_LABEL_COMP_ID, ///< Starting residue (atom_site.label_comp_id)
+    SC_BEG_LABEL_SEQ_ID,  ///< Starting residue (atom_site.label_seq_id)
+    SC_CONF_TYPE_ID,      ///< Pointer to struct_conf_type.id
+    SC_END_AUTH_ASYM_ID,  ///< Ending residue, points to atom_site.auth_asym_id
+    SC_END_LABEL_ASYM_ID, ///< Ending residue, points to atom_site.label_asym_id
+    SC_END_LABEL_COMP_ID, ///< Ending residue, points to atom_site.label_comp_id
+    SC_END_LABEL_SEQ_ID,  ///< Ending residue, points to atom_site.label_seq_id
+    SC_ID,                ///< Unique identifier
   } StructConfItems;
 
   /// \enum categories of the mmcif format
@@ -454,6 +455,7 @@ private:
     PDBX_STRUCT_OPER_LIST,
     STRUCT,
     STRUCT_CONF,
+    STRUCT_SHEET_RANGE,
     DONT_KNOW
   } MMCifCategory;
 

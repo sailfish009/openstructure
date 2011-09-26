@@ -265,17 +265,17 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
   } else if (header.GetCategory() == "struct_conf") {
     category_ = STRUCT_CONF;
     // mandatory items
-    this->TryStoreIdx(BEG_LABEL_ASYM_ID, "beg_label_asym_id", header);
-    this->TryStoreIdx(BEG_LABEL_COMP_ID, "beg_label_comp_id", header);
-    this->TryStoreIdx(BEG_LABEL_SEQ_ID,  "beg_label_seq_id", header);
-    this->TryStoreIdx(CONF_TYPE_ID,      "conf_type_id", header);
-    this->TryStoreIdx(END_LABEL_ASYM_ID, "end_label_asym_id", header);
-    this->TryStoreIdx(END_LABEL_COMP_ID, "end_label_comp_id", header);
-    this->TryStoreIdx(END_LABEL_SEQ_ID,  "end_label_seq_id", header);
-    this->TryStoreIdx(STRUCT_CONF_ID,    "id", header);
+    this->TryStoreIdx(SC_BEG_LABEL_ASYM_ID, "beg_label_asym_id", header);
+    this->TryStoreIdx(SC_BEG_LABEL_COMP_ID, "beg_label_comp_id", header);
+    this->TryStoreIdx(SC_BEG_LABEL_SEQ_ID,  "beg_label_seq_id", header);
+    this->TryStoreIdx(SC_CONF_TYPE_ID,      "conf_type_id", header);
+    this->TryStoreIdx(SC_END_LABEL_ASYM_ID, "end_label_asym_id", header);
+    this->TryStoreIdx(SC_END_LABEL_COMP_ID, "end_label_comp_id", header);
+    this->TryStoreIdx(SC_END_LABEL_SEQ_ID,  "end_label_seq_id", header);
+    this->TryStoreIdx(SC_ID,                "id", header);
     // optional items
-    indices_[BEG_AUTH_ASYM_ID] = header.GetIndex("beg_auth_asym_id");
-    indices_[END_AUTH_ASYM_ID] = header.GetIndex("end_auth_asym_id");
+    indices_[SC_BEG_AUTH_ASYM_ID] = header.GetIndex("beg_auth_asym_id");
+    indices_[SC_END_AUTH_ASYM_ID] = header.GetIndex("end_auth_asym_id");
     cat_available = true;
   }
   category_counts_[category_]++;
@@ -1163,20 +1163,20 @@ void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
   int s_res_num;
   int e_res_num;
   // fetch start and end
-  s_res_num = this->TryGetInt(columns[indices_[BEG_LABEL_SEQ_ID]],
+  s_res_num = this->TryGetInt(columns[indices_[SC_BEG_LABEL_SEQ_ID]],
                               "struct_conf.beg_label_seq_id");
-  e_res_num = this->TryGetInt(columns[indices_[END_LABEL_SEQ_ID]],
+  e_res_num = this->TryGetInt(columns[indices_[SC_END_LABEL_SEQ_ID]],
                               "struct_conf.end_label_seq_id");
   if(auth_chain_id_) {
-    if (indices_[BEG_AUTH_ASYM_ID] != -1) {
-      chain_name = columns[indices_[BEG_AUTH_ASYM_ID]];
+    if (indices_[SC_BEG_AUTH_ASYM_ID] != -1) {
+      chain_name = columns[indices_[SC_BEG_AUTH_ASYM_ID]];
     } else {
       throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
 "Chain name by author requested but 'struct_conf.beg_auth_asym_id' is not set.",
                                                this->GetCurrentLinenum()));
     }
   } else {
-    chain_name = columns[indices_[BEG_LABEL_ASYM_ID]];
+    chain_name = columns[indices_[SC_BEG_LABEL_ASYM_ID]];
   }
 
   if (restrict_chains_.size() == 0 ||
@@ -1186,7 +1186,7 @@ void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
                         chain_name.str()};
     
     MMCifSecStructElement type =
-      DetermineSecStructType(columns[indices_[CONF_TYPE_ID]]);
+      DetermineSecStructType(columns[indices_[SC_CONF_TYPE_ID]]);
     if (type == MMCIF_HELIX) {
       helix_list_.push_back(hse);
     } else if (type == MMCIF_STRAND) {
