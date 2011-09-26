@@ -80,7 +80,8 @@ void MMCifParser::ClearState()
   authors_map_.clear();
   bu_origin_map_.clear();
   bu_assemblies_.clear();
-  secstruct_list_.clear();
+  helix_list_.clear();
+  strand_list_.clear();
 }
 
 void MMCifParser::SetRestrictChains(const String& restrict_chains)
@@ -274,6 +275,7 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     this->TryStoreIdx(STRUCT_CONF_ID,    "id", header);
     // optional items
     indices_[BEG_AUTH_ASYM_ID] = header.GetIndex("beg_auth_asym_id");
+    indices_[END_AUTH_ASYM_ID] = header.GetIndex("end_auth_asym_id");
     cat_available = true;
   }
   category_counts_[category_]++;
@@ -306,8 +308,8 @@ bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
   } else {
     chain_name = columns[indices_[LABEL_ASYM_ID]].str();
   }
-  if (restrict_chains_.size() > 0 && // unit test
-      restrict_chains_.find(chain_name) == String::npos) { // unit test
+  if (restrict_chains_.size() > 0 &&
+      restrict_chains_.find(chain_name) == String::npos) {
     return false;
   } 
 
@@ -1162,31 +1164,34 @@ void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
   int e_res_num;
   // fetch start and end
   s_res_num = this->TryGetInt(columns[indices_[BEG_LABEL_SEQ_ID]],
-                              "struct_conf.beg_label_seq_id"); // unit test
+                              "struct_conf.beg_label_seq_id");
   e_res_num = this->TryGetInt(columns[indices_[END_LABEL_SEQ_ID]],
-                              "struct_conf.end_label_seq_id"); // unit test
-  if(auth_chain_id_) { // unit test both ways
-    if (indices_[BEG_AUTH_ASYM_ID] != -1) { // unit test
+                              "struct_conf.end_label_seq_id");
+  if(auth_chain_id_) {
+    if (indices_[BEG_AUTH_ASYM_ID] != -1) {
       chain_name = columns[indices_[BEG_AUTH_ASYM_ID]];
-    } else { // unit test
+    } else {
       throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
 "Chain name by author requested but 'struct_conf.beg_auth_asym_id' is not set.",
                                                this->GetCurrentLinenum()));
     }
-  } else { // unit test
+  } else {
     chain_name = columns[indices_[BEG_LABEL_ASYM_ID]];
   }
-  MMCifHSEntry hse = {to_res_num(s_res_num, ' '),
-                      to_res_num(e_res_num, ' '),
-                      chain_name.str(),
-                      columns[indices_[CONF_TYPE_ID]].str()};
-  
-  MMCifSecStructElement type =
-    DetermineSecStructType(columns[indices_[CONF_TYPE_ID]]);
-  if (type == MMCIF_HELIX) { // unit test helix and strand reading
-    secstruct_list_.push_back(hse);
-  } else if (type == MMCIF_STRAND) {
-    secstruct_list_.push_back(hse);
+
+  if (restrict_chains_.size() == 0 ||
+      restrict_chains_.find(chain_name.str()) != String::npos) {
+    MMCifHSEntry hse = {to_res_num(s_res_num, ' '),
+                        to_res_num(e_res_num, ' '),
+                        chain_name.str()};
+    
+    MMCifSecStructElement type =
+      DetermineSecStructType(columns[indices_[CONF_TYPE_ID]]);
+    if (type == MMCIF_HELIX) {
+      helix_list_.push_back(hse);
+    } else if (type == MMCIF_STRAND) {
+      strand_list_.push_back(hse);
+    }
   }
 }
 
@@ -1252,14 +1257,45 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
 
 void MMCifParser::AssignSecStructure(mol::EntityHandle ent)
 {
-  // for each helix, take chain
-  // check for overlaps (visual artifacts)
-  // assign helix to chain
+  for (MMCifHSVector::const_iterator i=helix_list_.begin(), e=helix_list_.end();
+       i!=e; ++i) {
+    mol::ChainHandle chain = ent.FindChain(i->chain_name);
+    if (!chain.IsValid()) {
+      LOG_INFO("ignoring helix record for unknown chain " + i->chain_name);
+      continue;
+    }
+    mol::SecStructure alpha(mol::SecStructure::ALPHA_HELIX);
+    // some PDB files contain helix/strand entries that are adjacent to each 
+    // other. To avoid visual artifacts, we effectively shorten the first of
+    // the two secondary structure segments to insert one residue of coil 
+    // conformation.
+    mol::ResNum start = i->start, end = i->end;
+    if (helix_list_.end() != i+1 && // unit test
+        (*(i+1)).start.GetNum() <= end.GetNum()+1 &&
+        (*(i+1)).end.GetNum() > end.GetNum()) {
+      end = mol::ResNum((*(i+1)).start.GetNum()-2);
+    }
+    chain.AssignSecondaryStructure(alpha, start, end);
+  }
 
-  // for all strands
-  // take chain
-  // check for overlaps
-  // assign strand to chain
+  for (MMCifHSVector::const_iterator i=strand_list_.begin(),
+         e=strand_list_.end();
+       i!=e; ++i) {
+    mol::ChainHandle chain=ent.FindChain(i->chain_name);
+    if (!chain.IsValid()) {
+      LOG_INFO("ignoring strand record for unknown chain " + i->chain_name);
+      continue;
+    }
+    mol::SecStructure extended(mol::SecStructure::EXTENDED);
+    mol::ResNum start = i->start, end = i->end;
+    // see comment for helix assignment
+    if (strand_list_.end() != i+1 && // unit test
+        (*(i+1)).start.GetNum() <= end.GetNum()+1 &&
+        (*(i+1)).end.GetNum() > end.GetNum()) {
+      end=mol::ResNum((*(i+1)).start.GetNum()-2);
+    }
+    chain.AssignSecondaryStructure(extended, start, end);
+  }
 }
 
 void MMCifParser::OnEndData()
@@ -1354,11 +1390,14 @@ void MMCifParser::OnEndData()
   bu_assemblies_.clear();
 
   // create secondary structure from struct_conf info
+  this->AssignSecStructure(ent_handle_);
 
   LOG_INFO("imported "
            << chain_count_ << " chains, "
            << residue_count_ << " residues, "
-           << atom_count_ << " atoms;");
+           << atom_count_ << " atoms;"
+           << helix_list_.size() << " helices and "
+           << strand_list_.size() << " strands");
 }
 
 }}

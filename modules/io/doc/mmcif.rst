@@ -32,6 +32,8 @@ The following categories of a mmCIF file are considered by the parser:
 * ``pdbx_struct_oper_list``: Used for :class:`MMCifInfoBioUnit`.
 * ``struct``: Details about a structure, stored in
   :class:`MMCifInfoStructDetails`.
+* ``struct_conf``: Stores secondary structure information (practically helices)
+  in the :class:`entity <ost.mol.EntityHandle>`
 
 
 Info Classes

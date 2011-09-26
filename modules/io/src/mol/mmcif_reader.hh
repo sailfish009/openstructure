@@ -52,6 +52,7 @@ namespace ost { namespace io {
 /// \li pdbx_struct_assembly_gen
 /// \li pdbx_struct_oper_list
 /// \li struct
+/// \li struct_conf
 class DLLEXPORT_OST_IO MMCifParser : public StarParser  {
 public:
   /// \brief create a MMCifParser
@@ -92,6 +93,15 @@ public:
   const String& GetRestrictChains() const
   {
     return restrict_chains_;
+  }
+
+  /// \brief Enable or disable reading of auth_chain_id instead aof label_chain
+  /// id (default)
+  ///
+  /// \param id enable (true) or disable (false) reading of auth_chain_id.
+  void SetAuthChainID(bool id)
+  {
+    auth_chain_id_ = id;
   }
 
   /// \brief check mmcif input to be read. Substitutional function for
@@ -175,7 +185,7 @@ protected:
   /// \param pdbid putative PDB id
   ///
   /// \return true for a valid id, false otherwise
-  bool IsValidPDBIdent(const StringRef& pdbid); // tested
+  bool IsValidPDBIdent(const StringRef& pdbid);
 
   /// \brief fetch values identifying atoms
   ///
@@ -423,6 +433,7 @@ private:
     BEG_LABEL_COMP_ID, ///< Starting residue, points to atom_site.label_comp_id
     BEG_LABEL_SEQ_ID,  ///< Starting residue, points to atom_site.label_seq_id
     CONF_TYPE_ID,      ///< Pointer to struct_conf_type.id
+    END_AUTH_ASYM_ID,  ///< Ending residue, points to atom_site.auth_asym_id
     END_LABEL_ASYM_ID, ///< Ending residue, points to atom_site.label_asym_id
     END_LABEL_COMP_ID, ///< Ending residue, points to atom_site.label_comp_id
     END_LABEL_SEQ_ID,  ///< Ending residue, points to atom_site.label_seq_id
@@ -470,7 +481,6 @@ private:
     mol::ResNum start;
     mol::ResNum end;
     String chain_name;
-    String type;
   } MMCifHSEntry;
   typedef std::vector<MMCifHSEntry> MMCifHSVector;
 
@@ -502,7 +512,8 @@ private:
   MMCifCitationAuthorMap authors_map_;
   MMCifBioUAssemblyVector bu_assemblies_;
   std::map<String, String> bu_origin_map_; ///< pdbx_struct_assembly.details
-  MMCifHSVector secstruct_list_; ///< for storing struct_conf sec.struct. data
+  MMCifHSVector helix_list_; ///< for storing struct_conf sec.struct. data
+  MMCifHSVector strand_list_; ///< for storing struct_conf sec.struct. data
 };
 
 }}

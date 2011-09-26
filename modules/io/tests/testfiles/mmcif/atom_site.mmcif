@@ -94,6 +94,7 @@ _struct.pdbx_formula_weight_method 'Good Guess'
 _struct.pdbx_model_details         'Even better guessing'
 _struct.pdbx_model_type_details    'Guess'
 
+# do not change anything, here
 loop_
 _struct_conf.id
 _struct_conf.conf_type_id
@@ -104,16 +105,9 @@ _struct_conf.end_label_comp_id
 _struct_conf.end_label_asym_id
 _struct_conf.end_label_seq_id
 _struct_conf.details
-HELX1  HELX_RH_AL_P  ARG  A   87  GLN  A   92  .
-HELX2  HELX_RH_AL_P  ARG  B  287  GLN  B  292  .
-STRN1  STRN          PRO  A    1  LEU  A    5  .
-STRN2  STRN          CYS  B  295  PHE  B  299  .
-STRN3  STRN          CYS  A   95  PHE  A  299  .
-STRN4  STRN          PRO  B  201  LEU  B  205  .
-TURN1  TURN_TY1P_P   ILE  A   15  GLN  A   18  .
-TURN2  TURN_TY2_P    GLY  A   49  GLY  A   52  .
-TURN3  TURN_TY1P_P   ILE  A   55  HIS  A   69  .
-TURN4  TURN_TY1_P    THR  A   91  GLY  A   94  .
+HELX1  HELX_RH_AL_P  VAL  A   11  THR  A   12  .
+STRN1  STRN          ILE  A   13  ILE  A   13  .
+HELX1  HELX_RH_AL_P  ILE  Z   1   ILE  Z   1   .
 
 loop_
 _atom_site.group_PDB
@@ -163,6 +157,15 @@ HETATM C C2 APS  C  14  1  1  4.949  27.758   6.793  0.58  16.95  1 300  102 ? A
 HETATM O O3 APS  C  14  1  1  4.800  26.678   7.393  0.58  16.85  1 300  103 ? A
 HETATM N N4 APS  C  14  1  1  5.930  27.841   5.869  0.58  16.43  1 300  104 ? A
 # - - - - data truncated for brevity - - - -
+# chain to be ignored by 'restrict_chains' feature
+ATOM N  N   ILE  Z  1  . 1  23.664  33.855  16.884  1.00  22.08  .  1  17  ? Z
+ATOM C  CA  ILE  Z  1  . 1  22.623  34.850  17.093  1.00  23.44  .  1  18  ? Z
+ATOM C  C   ILE  Z  1  . 1  22.657  35.113  18.610  1.00  25.77  .  1  19  ? Z
+ATOM O  O   ILE  Z  1  . 1  23.123  34.250  19.406  1.00  26.28  .  1  20  ? Z
+ATOM C  CB  ILE  Z  1  . 1  21.236  34.463  16.492  1.00  22.67  .  1  21  ? Z
+ATOM C  CG1 ILE  Z  1  . 1  20.478  33.469  17.371  1.00  22.14  .  1  22  ? Z
+ATOM C  CG2 ILE  Z  1  . 1  21.357  33.986  15.016  1.00  21.75  .  1  23  ? Z
+# 
 # H2O
 HETATM O O    HOH O  . . 5  -5.322  10.972 9.720  0.95 7.25  . 2001 2731 ? B
 HETATM O O    HOH O  . . 5  4.148   4.008  12.383 0.64 14.61 . 2002 2732 ? B

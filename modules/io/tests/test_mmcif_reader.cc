@@ -60,7 +60,9 @@ public:
   using MMCifParser::ParsePdbxStructAssembly;
   using MMCifParser::ParsePdbxStructOperList;
   using MMCifParser::ParseStruct;
+  using MMCifParser::ParseStructConf;
   using MMCifParser::TryStoreIdx;
+  using MMCifParser::SetRestrictChains;
   using MMCifParser::SetReadSeqRes;
   using MMCifParser::SetReadCanonicalSeqRes;
   using MMCifParser::ClearState;
@@ -71,6 +73,7 @@ public:
   using MMCifParser::MMCIF_HELIX;
   using MMCifParser::MMCIF_TURN;
   using MMCifParser::MMCIF_STRAND;
+  using MMCifParser::SetAuthChainID;
 };
 
 void SetAtomSiteHeader(StarLoopDesc* mmcif_h)
@@ -937,6 +940,51 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_conf_tests)
   BOOST_CHECK_THROW(tmmcif_p.DetermineSecStructType(type), IOException);
 
   BOOST_MESSAGE("          done.");
+  BOOST_MESSAGE("          testing auth_chain_id switch...");
+
+  StarLoopDesc tmmcif_h;
+  std::vector<StringRef> columns;
+  tmmcif_h.SetCategory(StringRef("struct_conf", 11));
+  tmmcif_h.Add(StringRef("beg_label_asym_id", 17));
+  tmmcif_h.Add(StringRef("beg_label_comp_id", 17));
+  tmmcif_h.Add(StringRef("beg_label_seq_id", 16));
+  tmmcif_h.Add(StringRef("conf_type_id", 12));
+  tmmcif_h.Add(StringRef("end_label_asym_id", 17));
+  tmmcif_h.Add(StringRef("end_label_comp_id", 17));
+  tmmcif_h.Add(StringRef("end_label_seq_id", 16));
+  tmmcif_h.Add(StringRef("id", 2));
+  tmmcif_h.Add(StringRef("beg_auth_asym_id", 16));
+  tmmcif_p.OnBeginLoop(tmmcif_h);
+  columns.push_back(StringRef("A", 1));
+  columns.push_back(StringRef("ARG", 3));
+  columns.push_back(StringRef("1", 1));
+  columns.push_back(StringRef("HELX_RH_AL_P", 12));
+  columns.push_back(StringRef("A", 1));
+  columns.push_back(StringRef("ARG", 3));
+  columns.push_back(StringRef("2", 1));
+  columns.push_back(StringRef("DHLX1", 5));
+  columns.push_back(StringRef("A", 1));
+  tmmcif_p.SetAuthChainID(true);
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParseStructConf(columns));
+  tmmcif_p.SetAuthChainID(false);
+  BOOST_CHECK_NO_THROW(tmmcif_p.ParseStructConf(columns));
+  tmmcif_h.Clear();
+  tmmcif_h.SetCategory(StringRef("struct_conf", 11));
+  tmmcif_h.Add(StringRef("beg_label_asym_id", 17));
+  tmmcif_h.Add(StringRef("beg_label_comp_id", 17));
+  tmmcif_h.Add(StringRef("beg_label_seq_id", 16));
+  tmmcif_h.Add(StringRef("conf_type_id", 12));
+  tmmcif_h.Add(StringRef("end_label_asym_id", 17));
+  tmmcif_h.Add(StringRef("end_label_comp_id", 17));
+  tmmcif_h.Add(StringRef("end_label_seq_id", 16));
+  tmmcif_h.Add(StringRef("id", 2));
+  tmmcif_p.OnBeginLoop(tmmcif_h);
+  columns.pop_back();
+  tmmcif_p.SetAuthChainID(true);
+  BOOST_CHECK_THROW(tmmcif_p.ParseStructConf(columns), IOException);
+  tmmcif_p.SetAuthChainID(false);
+
+  BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");
 }
@@ -1060,6 +1108,8 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   IOProfile profile;
   MMCifParser mmcif_p(s, eh, profile);
 
+  mmcif_p.SetRestrictChains("A O C");
+
   BOOST_MESSAGE("          testing Parse()...");
   BOOST_CHECK_NO_THROW(mmcif_p.Parse());
 
@@ -1080,9 +1130,19 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   for (rs = rl.begin(); rs != rl.end(); ++rs, ++i) {
     BOOST_CHECK_EQUAL(rs->GetNumber().GetNum(), i);
   }
+  BOOST_MESSAGE("          done.");
 
-  // add checking of struct_conf info, here
-
+  BOOST_MESSAGE("          testing secondary structure...");
+  // pick chains, iterate residues, check for correct sec.struct.
+  ch = eh.FindChain("A");
+  rl = ch.GetResidueList();
+  for (rs = rl.begin(); rs != rl.end(); ++rs) {
+    std::cout << "Foo " << (char)rs->GetSecStructure() << std::endl;
+    if (rs->GetSecStructure().IsExtended()) {
+      std::cout << "Bar" << std::endl;
+    }
+    //BOOST_CHECK_EQUAL(rs->GetSecStructure().IsHelical());
+  }
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("          reading data fields which should not fail...");
