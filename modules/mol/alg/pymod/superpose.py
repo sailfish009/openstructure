@@ -112,10 +112,11 @@ def MatchResidueByNum(ent_a, ent_b, atoms='all'):
         while True:
           r_a=residues_a.next()
           r_b=residues_b.next()
-          while r_a.number<r_b.number:
-            r_a=residues_a.next()
-          while r_b.number<r_a.number:
-            r_b=residues_b.next()
+          while r_a.number!=r_b.number:
+            while r_a.number<r_b.number:
+              r_a=residues_a.next()
+            while r_b.number<r_a.number:
+              r_b=residues_b.next()
           assert r_a.number==r_b.number
           result_a,result_b=_fetch_atoms(r_a, r_b, result_a, result_b, atmset)
       except StopIteration:
