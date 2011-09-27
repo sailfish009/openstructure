@@ -1133,6 +1133,136 @@ class Table:
       LogError("Function needs numpy, but I could not import it.")
       raise
 
+  def ComputeROC(self, score_col, class_col, score_dir='-',
+                 class_dir='-', class_cutoff=2.0):
+    '''
+    Computes the receiver operating characteristics of one column (e.g. score)
+    over all data points.
+
+    For this it is necessary, that the datapoints are classified into positive
+    and negative points. This can be done in two ways:
+
+     - by using one 'bool' column (class_col) which contains True for positives
+       and False for negatives
+     - by using a non-bool column (class_col), a cutoff value (class_cutoff)
+       and the classification columns direction (class_dir). This will generate
+       the classification on the fly
+
+       * if class_dir=='-': values in the classification column that are
+                            less than or equal to class_cutoff will be counted
+                            as positives
+       * if class_dir=='+': values in the classification column that are
+                            larger than or equal to class_cutoff will be counted
+                            as positives
+
+    During the calculation, the table will be sorted according to score_dir,
+    where a '-' values means smallest values first and therefore, the smaller
+    the value, the better.
+
+    '''
+
+    ALLOWED_DIR = ['+','-']
+
+    score_idx = self.GetColIndex(score_col)
+    score_type = self.col_types[score_idx]
+    if score_type!='int' and score_type!='float':
+      raise TypeError("Score column must be numeric type")
+
+    class_idx = self.GetColIndex(class_col)
+    class_type = self.col_types[class_idx]
+    if class_type!='int' and class_type!='float' and class_type!='bool':
+      raise TypeError("Classifier column must be numeric or bool type")
+
+    if (score_dir not in ALLOWED_DIR) or (class_dir not in ALLOWED_DIR):
+      raise ValueError("Direction must be one of %s"%str(ALLOWED_DIR))
+
+    self.Sort(score_col, score_dir)
+
+    x = [0]
+    y = [0]
+    tp = 0
+    fp = 0
+    old_score_val = None
+
+    for i,row in enumerate(self.rows):
+      class_val = row[class_idx]
+      score_val = row[score_idx]
+      if class_val!=None:
+        if class_type=='bool':
+          if class_val==True:
+            tp += 1
+          else:
+            fp += 1
+        else:
+          if (class_dir=='-' and class_val<=class_cutoff) or (class_dir=='+' and class_val>=class_cutoff):
+            tp += 1
+          else:
+            fp += 1
+        if score_val!=old_score_val:
+          x.append(fp)
+          y.append(tp)
+          old_score_val = score_val
+    x = [float(v)/x[-1] for v in x]
+    y = [float(v)/y[-1] for v in y]
+    return x,y
+
+  def ComputeROCAUC(self, score_col, class_col, score_dir='-',
+                    class_dir='-', class_cutoff=2.0):
+    '''
+    Computes the area under the curve of the receiver operating characteristics
+    using the trapezoidal rule
+    '''
+    try:
+      import numpy as np
+
+      rocx, rocy = self.ComputeROC(score_col, class_col, score_dir,
+                                   class_dir, class_cutoff)
+
+      return np.trapz(rocy, rocx)
+    except ImportError:
+      LogError("Function needs numpy, but I could not import it.")
+      raise
+
+  def PlotROC(self, score_col, class_col, score_dir='-',
+              class_dir='-', class_cutoff=2.0,
+              style='-', title=None, x_title=None, y_title=None,
+              clear=True, save=None):
+    '''
+    Plot an ROC curve using matplotlib
+    '''
+
+    try:
+      import matplotlib.pyplot as plt
+
+      enrx, enry = self.ComputeROC(score_col, class_col, score_dir,
+                                   class_dir, class_cutoff)
+
+      if not title:
+        title = 'ROC of %s'%score_col
+
+      if not x_title:
+        x_title = 'false positive rate'
+
+      if not y_title:
+        y_title = 'true positive rate'
+
+      if clear:
+        plt.clf()
+
+      plt.plot(enrx, enry, style)
+
+      plt.title(title, size='x-large', fontweight='bold')
+      plt.ylabel(y_title, size='x-large')
+      plt.xlabel(x_title, size='x-large')
+
+      if save:
+        plt.savefig(save)
+
+      return plt
+    except ImportError:
+      LogError("Function needs matplotlib, but I could not import it.")
+      raise
+
   def IsEmpty(self, col_name=None, ignore_nan=True):
     '''
     Checks if a table is empty.

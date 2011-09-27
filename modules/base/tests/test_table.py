@@ -11,16 +11,26 @@ import ost
 
 HAS_NUMPY=True
 HAS_MPL=True
+HAS_PIL=True
 try:
   import numpy as np
 except ImportError:
   HAS_NUMPY=False
+  print "Could not find numpy: ignoring some table class unit tests"
 
 try:
   import matplotlib
   matplotlib.use('Agg')
 except ImportError:
   HAS_MPL=False
+  print "Could not find matplotlib: ignoring some table class unit tests"
+
+try:
+  import Image
+  import ImageChops
+except ImportError:
+  HAS_PIL=False
+  print "Could not find python imagine library: ignoring some table class unit tests"
 
 class TestTable(unittest.TestCase):
   
@@ -123,6 +133,17 @@ class TestTable(unittest.TestCase):
                        ref_type,
                        "column type (%s) at column %i, different from reference col type (%s)" \
                        %(t.col_types[idx], idx, ref_type))
+
+  def CompareImages(self, img1, img2):
+    '''
+    Compares two images based on all pixel values. This function needs the
+    python imaging library (PIL) package.
+    '''
+    if not HAS_PIL:
+      return
+    diff = ImageChops.difference(img1, img2)
+    self.assertEqual(diff.getbbox(),None)
+
 
   def testZip(self):
     tab=Table(['col1', 'col2', 'col3', 'col4'], 'sssi')
@@ -914,7 +935,7 @@ class TestTable(unittest.TestCase):
                       class_dir='y')
     
   def testPlotEnrichment(self):
-    if not HAS_MPL:
+    if not HAS_MPL or not HAS_PIL:
       return
     tab = Table(['score', 'rmsd', 'classific'], 'ffb',
                 score=[2.64,1.11,2.17,0.45,0.15,0.85,1.13,2.90,0.50,1.03,1.46,2.83,1.15,2.04,0.67,1.27,2.22,1.90,0.68,0.36,1.04,2.46,0.91,0.60],
@@ -923,7 +944,11 @@ class TestTable(unittest.TestCase):
  
     pl = tab.PlotEnrichment(score_col='score', score_dir='-',
                             class_col='rmsd', class_cutoff=2.0,
-                            class_dir='-')
+                            class_dir='-',
+                            save=os.path.join("testfiles","enrichment-out.png"))
+    img1 = Image.open(os.path.join("testfiles","enrichment-out.png"))
+    img2 = Image.open(os.path.join("testfiles","enrichment.png"))
+    self.CompareImages(img1, img2)
     #pl.show()
     
   def testCalcEnrichmentAUC(self):
@@ -940,7 +965,55 @@ class TestTable(unittest.TestCase):
                                    class_dir='-')
     
     self.assertAlmostEquals(auc, auc_ref)
-  
+
+  def testPlotROC(self):
+    if not HAS_MPL or not HAS_PIL:
+      return
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, True, False, True, True, True, False, False, True, False, True, False, True, False, False, False, True, False, True, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    pl = tab.PlotROC(score_col='score', score_dir='+',
+                     class_col='classific',
+                     save=os.path.join("testfiles","roc-out.png"))
+    img1 = Image.open(os.path.join("testfiles","roc-out.png"))
+    img2 = Image.open(os.path.join("testfiles","roc.png"))
+    self.CompareImages(img1, img2)
+    #pl.show()
+
+  def testPlotROCSameValue(self):
+    if not HAS_MPL or not HAS_PIL:
+      return
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, True, False, True, True, True, False, False, True, False, True, False, True, False, False, False, True, False, True, False],
+                score=[0.9, 0.8, 0.7, 0.7, 0.7, 0.7, 0.53, 0.52, 0.51, 0.505, 0.4, 0.4, 0.4, 0.4, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    pl = tab.PlotROC(score_col='score', score_dir='+',
+                     class_col='classific',
+                     save=os.path.join("testfiles","roc-same-val-out.png"))
+    img1 = Image.open(os.path.join("testfiles","roc-same-val-out.png"))
+    img2 = Image.open(os.path.join("testfiles","roc-same-val.png"))
+    self.CompareImages(img1, img2)
+    #pl.show()
+
+  def testCalcROCAUC(self):
+    if not HAS_NUMPY:
+      return
+    auc_ref = 0.68
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, True, False, True, True, True, False, False, True, False, True, False, True, False, False, False, True, False, True, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+
+  def testCalcROCAUCSameValue(self):
+    if not HAS_NUMPY:
+      return
+    auc_ref = 0.66
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[True, True, False, True, True, True, False, False, True, False, True, False, True, False, False, False, True, False, True, False],
+                score=[0.9, 0.8, 0.7, 0.7, 0.7, 0.7, 0.53, 0.52, 0.51, 0.505, 0.4, 0.4, 0.4, 0.4, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertAlmostEquals(auc, auc_ref)
+
   def testTableAsNumpyMatrix(self):
 
     '''

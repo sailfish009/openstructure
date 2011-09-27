@@ -24,6 +24,7 @@ pov_*test.inc
 *-out.pdb
 *-out.sdf
 *-out.crd
+*-out.png
 CMakeLists.txt.user
 OpenStructure.cbp
 DartConfiguration.tcl
