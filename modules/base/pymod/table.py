@@ -508,6 +508,21 @@ class Table:
       return sign*cmp(lhs[key_index], rhs[key_index])
     self.rows=sorted(self.rows, _key_cmp)
     
+  def GetUnique(self, col, ignore_nan=True):
+    """
+    Extract a list of all unique values from one column
+    """
+    idx = self.GetColIndex(col)
+    seen = {}
+    result = []
+    for row in self.rows:
+      item = row[idx]
+      if item!=None or ignore_nan==False:
+        if item in seen: continue
+        seen[item] = 1
+        result.append(item)
+    return result
+    
   def Zip(self, *args):
     """
     Allows to conveniently iterate over a selection of columns, e.g.

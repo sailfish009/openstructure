@@ -1130,6 +1130,17 @@ class TestTable(unittest.TestCase):
     self.assertFalse(tab.IsEmpty('a', ignore_nan=False))
     self.assertFalse(tab.IsEmpty('b', ignore_nan=False))
     self.assertFalse(tab.IsEmpty('c', ignore_nan=False))
+    
+  def testUnique(self):
+    tab = self.CreateTestTable()
+    tab.AddRow(['foo',4, 3.3])
+    tab.AddRow([None,5, 6.3])
+    self.assertEquals(tab.GetUnique('first'), ['x','foo'])
+    self.assertEquals(tab.GetUnique('first', ignore_nan=False), ['x','foo', None])
+    self.assertEquals(tab.GetUnique('second'), [3,9,4,5])
+    self.assertEquals(tab.GetUnique('second', ignore_nan=False), [3,None,9,4,5])
+    self.assertEquals(tab.GetUnique('third'), [2.2, 3.3, 6.3])
+    self.assertEquals(tab.GetUnique('third', ignore_nan=False), [None, 2.2, 3.3, 6.3])
       
 if __name__ == "__main__":
   try:
