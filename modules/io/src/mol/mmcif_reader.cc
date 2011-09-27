@@ -277,6 +277,21 @@ bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
     indices_[SC_BEG_AUTH_ASYM_ID] = header.GetIndex("beg_auth_asym_id");
     indices_[SC_END_AUTH_ASYM_ID] = header.GetIndex("end_auth_asym_id");
     cat_available = true;
+  } else if (header.GetCategory() == "struct_sheet_range") {
+    category_ = STRUCT_SHEET_RANGE;
+    // mandatory items
+    this->TryStoreIdx(SSR_BEG_LABEL_ASYM_ID,     "beg_label_asym_id", header);
+    this->TryStoreIdx(SSR_BEG_LABEL_COMP_ID,     "beg_label_comp_id", header);
+    this->TryStoreIdx(SSR_BEG_LABEL_SEQ_ID,      "beg_label_seq_id", header);
+    this->TryStoreIdx(SSR_END_LABEL_ASYM_ID,     "end_label_asym_id", header);
+    this->TryStoreIdx(SSR_END_LABEL_COMP_ID,     "end_label_comp_id", header);
+    this->TryStoreIdx(SSR_END_LABEL_SEQ_ID,      "end_label_seq_id", header);
+    this->TryStoreIdx(SSR_SHEET_ID,              "sheet_id", header);
+    this->TryStoreIdx(SSR_ID,                    "id", header);
+    // optional items
+    indices_[SSR_BEG_AUTH_ASYM_ID] = header.GetIndex("beg_auth_asym_id");
+    indices_[SSR_END_AUTH_ASYM_ID] = header.GetIndex("end_auth_asym_id");
+    cat_available = true;
   }
   category_counts_[category_]++;
   return cat_available;
@@ -1162,11 +1177,8 @@ void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
   StringRef chain_name;
   int s_res_num;
   int e_res_num;
-  // fetch start and end
-  s_res_num = this->TryGetInt(columns[indices_[SC_BEG_LABEL_SEQ_ID]],
-                              "struct_conf.beg_label_seq_id");
-  e_res_num = this->TryGetInt(columns[indices_[SC_END_LABEL_SEQ_ID]],
-                              "struct_conf.end_label_seq_id");
+
+  // fetch chain name, first
   if(auth_chain_id_) {
     if (indices_[SC_BEG_AUTH_ASYM_ID] != -1) {
       chain_name = columns[indices_[SC_BEG_AUTH_ASYM_ID]];
@@ -1181,6 +1193,11 @@ void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
 
   if (restrict_chains_.size() == 0 ||
       restrict_chains_.find(chain_name.str()) != String::npos) {
+    // fetch start and end
+    s_res_num = this->TryGetInt(columns[indices_[SC_BEG_LABEL_SEQ_ID]],
+                                "struct_conf.beg_label_seq_id");
+    e_res_num = this->TryGetInt(columns[indices_[SC_END_LABEL_SEQ_ID]],
+                                "struct_conf.end_label_seq_id");
     MMCifHSEntry hse = {to_res_num(s_res_num, ' '),
                         to_res_num(e_res_num, ' '),
                         chain_name.str()};
@@ -1192,6 +1209,41 @@ void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
     } else if (type == MMCIF_STRAND) {
       strand_list_.push_back(hse);
     }
+  }
+}
+
+void MMCifParser::ParseStructSheetRange(const std::vector<StringRef>& columns)
+{
+  StringRef chain_name;
+  int s_res_num;
+  int e_res_num;
+
+  if(auth_chain_id_) {
+    if (indices_[SSR_BEG_AUTH_ASYM_ID] != -1) {
+      chain_name = columns[indices_[SSR_BEG_AUTH_ASYM_ID]];
+    } else {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+"Chain name by author requested but 'struct_sheet_range.beg_auth_asym_id' is not set.",
+                                               this->GetCurrentLinenum()));
+    }
+  } else {
+    chain_name = columns[indices_[SSR_BEG_LABEL_ASYM_ID]];
+  }
+
+  // restrict_chains feature not unit tested, since its about to be changed in
+  // the future
+  if (restrict_chains_.size() == 0 ||
+      restrict_chains_.find(chain_name.str()) != String::npos) {
+
+    s_res_num = this->TryGetInt(columns[indices_[SSR_BEG_LABEL_SEQ_ID]],
+                                "struct_sheet_range.beg_label_seq_id");
+    e_res_num = this->TryGetInt(columns[indices_[SSR_END_LABEL_SEQ_ID]],
+                                "struct_sheet_range.end_label_seq_id");
+
+    MMCifHSEntry hse = {to_res_num(s_res_num, ' '),
+                        to_res_num(e_res_num, ' '),
+                        chain_name.str()};
+    strand_list_.push_back(hse);
   }
 }
 
@@ -1246,6 +1298,10 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
   case STRUCT_CONF:
     LOG_TRACE("processing struct_conf entry")
     this->ParseStructConf(columns);
+    break;
+  case STRUCT_SHEET_RANGE:
+    LOG_TRACE("processing struct_sheet_range entry")
+    this->ParseStructSheetRange(columns);
     break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,

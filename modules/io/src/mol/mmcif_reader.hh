@@ -286,6 +286,11 @@ protected:
   /// \param columns data row
   void ParseStructConf(const std::vector<StringRef>& columns);
 
+  /// \brief Fetch MMCif struct_sheet_range (beta sheets) information
+  ///
+  /// \param columns data row
+  void ParseStructSheetRange(const std::vector<StringRef>& columns);
+
   /// \struct types of secondary structure
   typedef enum {
     MMCIF_HELIX,
@@ -440,6 +445,20 @@ private:
     SC_END_LABEL_SEQ_ID,  ///< Ending residue, points to atom_site.label_seq_id
     SC_ID,                ///< Unique identifier
   } StructConfItems;
+
+  /// \enum items of the struct_sheet_range category
+  typedef enum {
+    SSR_BEG_LABEL_ASYM_ID,     ///< start, chain name (atom_site.label_asym_id)
+    SSR_BEG_LABEL_COMP_ID,     ///< start, atom_site.label_comp_id
+    SSR_BEG_LABEL_SEQ_ID,    ///< start, residue number (atom_site.label_seq_id)
+    SSR_END_LABEL_ASYM_ID,     ///< end, chain name (atom_site.label_asym_id)
+    SSR_END_LABEL_COMP_ID,     ///< end, atom_site.label_comp_id
+    SSR_END_LABEL_SEQ_ID,      ///< end, residue number (atom_site.label_seq_id)
+    SSR_SHEET_ID,              ///< unique identifier
+    SSR_ID,                    ///< link to struct_sheet.id
+    SSR_BEG_AUTH_ASYM_ID,      ///< alternative start, (atom_site.auth_asym_id)
+    SSR_END_AUTH_ASYM_ID,      ///< alternative end, (atom_site.auth_asym_id)
+    } StructSheetRangeItems;
 
   /// \enum categories of the mmcif format
   typedef enum {

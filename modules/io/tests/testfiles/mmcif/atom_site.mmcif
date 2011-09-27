@@ -110,6 +110,17 @@ STRN1  STRN          ILE  A   13  ILE  A   13  .
 HELX1  HELX_RH_AL_P  ILE  Z   1   ILE  Z   1   .
 
 loop_
+_struct_sheet_range.sheet_id
+_struct_sheet_range.id
+_struct_sheet_range.beg_label_comp_id
+_struct_sheet_range.beg_label_asym_id
+_struct_sheet_range.beg_label_seq_id
+_struct_sheet_range.end_label_comp_id
+_struct_sheet_range.end_label_asym_id
+_struct_sheet_range.end_label_seq_id
+sheet_1 strand_a APS C 1 APS C 1
+
+loop_
 _atom_site.group_PDB
 _atom_site.type_symbol
 _atom_site.label_atom_id
@@ -152,10 +163,10 @@ ATOM C  CB  ILE  A  13  . 1  21.236  34.463  16.492  1.00  22.67  .  13  21  ? A
 ATOM C  CG1 ILE  A  13  . 1  20.478  33.469  17.371  1.00  22.14  .  13  22  ? A
 ATOM C  CG2 ILE  A  13  . 1  21.357  33.986  15.016  1.00  21.75  .  13  23  ? A
 # - - - - data truncated for brevity - - - -
-HETATM C C1 APS  C  14  1  1  4.171  29.012   7.116  0.58  17.27  1 300  101 ? A
-HETATM C C2 APS  C  14  1  1  4.949  27.758   6.793  0.58  16.95  1 300  102 ? A
-HETATM O O3 APS  C  14  1  1  4.800  26.678   7.393  0.58  16.85  1 300  103 ? A
-HETATM N N4 APS  C  14  1  1  5.930  27.841   5.869  0.58  16.43  1 300  104 ? A
+HETATM C C1 APS  C  1  1  1  4.171  29.012   7.116  0.58  17.27  1 300  101 ? A
+HETATM C C2 APS  C  1  1  1  4.949  27.758   6.793  0.58  16.95  1 300  102 ? A
+HETATM O O3 APS  C  1  1  1  4.800  26.678   7.393  0.58  16.85  1 300  103 ? A
+HETATM N N4 APS  C  1  1  1  5.930  27.841   5.869  0.58  16.43  1 300  104 ? A
 # - - - - data truncated for brevity - - - -
 # chain to be ignored by 'restrict_chains' feature
 ATOM N  N   ILE  Z  1  . 1  23.664  33.855  16.884  1.00  22.08  .  1  17  ? Z

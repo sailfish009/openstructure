@@ -34,7 +34,8 @@ The following categories of a mmCIF file are considered by the parser:
   :class:`MMCifInfoStructDetails`.
 * ``struct_conf``: Stores secondary structure information (practically helices)
   in the :class:`entity <ost.mol.EntityHandle>`
-* ``struct_sheet_range``
+* ``struct_sheet_range``: Stores secondary structure information for sheets in
+  the :class:`entity <ost.mol.EntityHandle>`
 
 
 Info Classes
