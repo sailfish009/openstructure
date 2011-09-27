@@ -272,7 +272,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     geom::Line3 axis;
     directions.reserve(ceil(traj.GetFrameCount()/float(stride)));
     centers.reserve(ceil(traj.GetFrameCount()/float(stride)));
-    GetCaIndices(prot_seg, indices_ca);
+    GetIndices(prot_seg, indices_ca);
     for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
       CoordFramePtr frame=traj.GetFrame(i);
       axis=frame->GetODRLine(indices_ca);
@@ -281,7 +281,28 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     }
     return;
   }
- 
+  
+  void AnalyzeBestFitPlane(const CoordGroupHandle& traj, const EntityView& prot_seg, geom::Vec3List& normals,
+                          geom::Vec3List& origins, unsigned int stride)
+  {
+    CheckHandleValidity(traj);
+    if (prot_seg.GetAtomCount()==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    std::vector<unsigned long> indices_ca;
+    geom::Plane best_plane;
+    normals.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    origins.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    GetIndices(prot_seg, indices_ca);
+    for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      best_plane=frame->GetODRPlane(indices_ca);
+      normals.push_back(best_plane.GetNormal());
+      origins.push_back(best_plane.GetOrigin());
+    }
+    return;
+  }
+  
   std::vector<Real> AnalyzeHelicity(const CoordGroupHandle& traj, const EntityView& prot_seg,
                                     unsigned int stride)
   {

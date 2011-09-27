@@ -274,6 +274,16 @@ namespace ost { namespace mol {
     }
     return atoms_pos_list.GetODRLine();
   }
+  
+  geom::Plane CoordFrame::GetODRPlane(std::vector<unsigned long>& indices_ca){
+    //Returns the normal to the best fit plane to atoms with indices in indices_ca
+    geom::Vec3List atoms_pos_list;
+    atoms_pos_list.reserve(indices_ca.size());
+    for (std::vector<unsigned long>::const_iterator i1=indices_ca.begin(),e=indices_ca.end(); i1!=e; ++i1) {
+      atoms_pos_list.push_back((*this)[*i1]);
+    }
+    return atoms_pos_list.GetODRPlane();
+  }
  
   geom::Line3 CoordFrame::FitCylinder(std::vector<unsigned long>& indices_ca){
   //Returns a line which is the axis of a fitted cylinder to the atoms with indices given in indices_ca

@@ -35,6 +35,7 @@ namespace geom {
 class Vec2;
 class Vec4;
 class Line3;
+class Plane;
 
 /// \brief Three dimensional vector class, using Real precision.
 class DLLEXPORT_OST_GEOM Vec3:
@@ -218,6 +219,7 @@ public:
   
   Mat3 GetPrincipalAxes() const;
   Line3 GetODRLine();
+  Plane GetODRPlane();
   Line3 FitCylinder(const Vec3 initial_direction, const Vec3 center);
 
 };

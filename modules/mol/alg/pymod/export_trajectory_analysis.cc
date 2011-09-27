@@ -48,6 +48,7 @@ void export_TrajectoryAnalysis()
   def("AnalyzeAromaticRingInteraction", &AnalyzeAromaticRingInteraction, (arg("traj"), arg("view_ring1"), arg("view_ring2"), arg("stride")=1));
   def("AnalyzeAlphaHelixAxis", &AnalyzeAlphaHelixAxis, (arg("traj"), arg("protein_segment"), arg("directions"), arg("centers"), arg("stride")=1));
   def("AnalyzeBestFitLine", &AnalyzeBestFitLine, (arg("traj"), arg("protein_segment"), arg("directions"), arg("centers"), arg("stride")=1));
+  def("AnalyzeBestFitPlane", &AnalyzeBestFitPlane, (arg("traj"), arg("protein_segment"), arg("normals"), arg("origins"), arg("stride")=1));
   def("AnalyzeHelicity", &AnalyzeHelicity, (arg("traj"), arg("protein_segment"), arg("stride")=1));
   def("CreateMeanStructure", &CreateMeanStructure, (arg("traj"), arg("selection"), arg("from")=0, arg("to")=-1, arg("stride")=1 ));
 }
