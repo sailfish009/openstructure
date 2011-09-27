@@ -30,21 +30,21 @@ using namespace ost::mol;
 
 void export_mmcif_io()
 {
-  class_<MMCifParser, boost::noncopyable>("MMCifParser", init<const String&, EntityHandle&, const IOProfile&>())
-    .def("Parse", &MMCifParser::Parse)
-    .def("SetRestrictChains", &MMCifParser::SetRestrictChains)
-    .def("SetReadCanonicalSeqRes", &MMCifParser::SetReadCanonicalSeqRes)
-    .def("GetSeqRes", &MMCifParser::GetSeqRes)
-    .def("GetInfo", make_function(&MMCifParser::GetInfo,
+  class_<MMCifReader, boost::noncopyable>("MMCifReader", init<const String&, EntityHandle&, const IOProfile&>())
+    .def("Parse", &MMCifReader::Parse)
+    .def("SetRestrictChains", &MMCifReader::SetRestrictChains)
+    .def("SetReadCanonicalSeqRes", &MMCifReader::SetReadCanonicalSeqRes)
+    .def("GetSeqRes", &MMCifReader::GetSeqRes)
+    .def("GetInfo", make_function(&MMCifReader::GetInfo,
                                   return_value_policy<copy_const_reference>()))
     .add_property("restrict_chains",
-                  make_function(&MMCifParser::GetRestrictChains,
+                  make_function(&MMCifReader::GetRestrictChains,
                                 return_value_policy<copy_const_reference>()),
-                  &MMCifParser::SetRestrictChains)
-    .add_property("seqres", &MMCifParser::GetSeqRes)
-    .add_property("read_seqres", &MMCifParser::GetReadSeqRes, 
-                  &MMCifParser::SetReadSeqRes)
-    .add_property("info", make_function(&MMCifParser::GetInfo,
+                  &MMCifReader::SetRestrictChains)
+    .add_property("seqres", &MMCifReader::GetSeqRes)
+    .add_property("read_seqres", &MMCifReader::GetReadSeqRes, 
+                  &MMCifReader::SetReadSeqRes)
+    .add_property("info", make_function(&MMCifReader::GetInfo,
                                    return_value_policy<copy_const_reference>()))
     ;
 

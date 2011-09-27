@@ -324,7 +324,7 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
 
   try:
     ent = mol.CreateEntity()
-    reader = MMCifParser(filename, ent, prof)
+    reader = MMCifReader(filename, ent, prof)
     reader.read_seqres = seqres
     #if reader.HasNext():
     reader.Parse()

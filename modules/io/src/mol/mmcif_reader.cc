@@ -30,21 +30,21 @@
 
 namespace ost { namespace io {
 
-MMCifParser::MMCifParser(std::istream& stream, mol::EntityHandle& ent_handle,
+MMCifReader::MMCifReader(std::istream& stream, mol::EntityHandle& ent_handle,
                          const IOProfile& profile):
   StarParser(stream, true), profile_(profile), ent_handle_(ent_handle)
 {
   this->Init();
 }
 
-MMCifParser::MMCifParser(const String& filename, mol::EntityHandle& ent_handle,
+MMCifReader::MMCifReader(const String& filename, mol::EntityHandle& ent_handle,
                          const IOProfile& profile):
   StarParser(filename, true), profile_(profile), ent_handle_(ent_handle)
 {
   this->Init();
 }
 
-void MMCifParser::Init()
+void MMCifReader::Init()
 {
   warned_name_mismatch_ = false;
   category_             = DONT_KNOW;
@@ -65,7 +65,7 @@ void MMCifParser::Init()
   info_                 = MMCifInfo();
 }
 
-void MMCifParser::ClearState()
+void MMCifReader::ClearState()
 {
   curr_chain_           = mol::ChainHandle();
   curr_residue_         = mol::ResidueHandle();
@@ -84,12 +84,12 @@ void MMCifParser::ClearState()
   strand_list_.clear();
 }
 
-void MMCifParser::SetRestrictChains(const String& restrict_chains)
+void MMCifReader::SetRestrictChains(const String& restrict_chains)
 {
   restrict_chains_ = restrict_chains;
 }
 
-bool MMCifParser::IsValidPDBIdent(const StringRef& pdbid)
+bool MMCifReader::IsValidPDBIdent(const StringRef& pdbid)
 {
   if (pdbid.length() == PDBID_LEN && isdigit(pdbid[0])) {
     return true;
@@ -97,7 +97,7 @@ bool MMCifParser::IsValidPDBIdent(const StringRef& pdbid)
   return false;
 }
 
-bool MMCifParser::OnBeginData(const StringRef& data_name) 
+bool MMCifReader::OnBeginData(const StringRef& data_name) 
 {
   LOG_DEBUG("MCIFFReader: " << profile_);
   Profile profile_import("MMCifReader::OnBeginData");
@@ -115,7 +115,7 @@ bool MMCifParser::OnBeginData(const StringRef& data_name)
   return true;
 }
 
-bool MMCifParser::OnBeginLoop(const StarLoopDesc& header)
+bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
 {
   bool cat_available = false;
   category_ = DONT_KNOW;
@@ -302,7 +302,7 @@ mol::ResNum to_res_num(int num, char ins_code)
   return mol::ResNum(num, ins_code==' ' ? '\0' : ins_code);
 }
 
-bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
+bool MMCifReader::ParseAtomIdent(const std::vector<StringRef>& columns,
                                  String& chain_name,
                                  StringRef& res_name,
                                  mol::ResNum& resnum,
@@ -355,7 +355,7 @@ bool MMCifParser::ParseAtomIdent(const std::vector<StringRef>& columns,
   return true;
 }
 
-void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
+void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
 {
   mol::XCSEditor editor=ent_handle_.EditXCS(mol::BUFFERED_EDIT); // potbl
   char alt_loc=0;
@@ -560,7 +560,7 @@ void MMCifParser::ParseAndAddAtom(const std::vector<StringRef>& columns)
 
 }
 
-void MMCifParser::ParseEntity(const std::vector<StringRef>& columns)
+void MMCifReader::ParseEntity(const std::vector<StringRef>& columns)
 {
   bool store = false; // is it worth storing this record?
   MMCifEntityDesc desc;
@@ -587,7 +587,7 @@ void MMCifParser::ParseEntity(const std::vector<StringRef>& columns)
   }
 }
 
-void MMCifParser::ParseEntityPoly(const std::vector<StringRef>& columns)
+void MMCifReader::ParseEntityPoly(const std::vector<StringRef>& columns)
 {
   // we assume that the entity cat. ALWAYS comes before the entity_poly cat.
   // search entity
@@ -650,7 +650,7 @@ void MMCifParser::ParseEntityPoly(const std::vector<StringRef>& columns)
   }
 }
 
-String MMCifParser::ConvertSEQRES(const String& seqres, 
+String MMCifReader::ConvertSEQRES(const String& seqres, 
                                   conop::CompoundLibPtr comp_lib)
 {
   String can_seqres;
@@ -695,7 +695,7 @@ String MMCifParser::ConvertSEQRES(const String& seqres,
   return can_seqres;
 }
 
-void MMCifParser::ParseCitation(const std::vector<StringRef>& columns)
+void MMCifReader::ParseCitation(const std::vector<StringRef>& columns)
 {
   // create citation object
   MMCifInfoCitation cit = MMCifInfoCitation();
@@ -756,7 +756,7 @@ void MMCifParser::ParseCitation(const std::vector<StringRef>& columns)
   info_.AddCitation(cit);
 }
 
-void MMCifParser::ParseCitationAuthor(const std::vector<StringRef>& columns)
+void MMCifReader::ParseCitationAuthor(const std::vector<StringRef>& columns)
 {
   // get/ pack values
   MMCifCitationAuthorMap::iterator atm_it;
@@ -806,12 +806,12 @@ void MMCifParser::ParseCitationAuthor(const std::vector<StringRef>& columns)
   }
 }
 
-void MMCifParser::ParseExptl(const std::vector<StringRef>& columns)
+void MMCifReader::ParseExptl(const std::vector<StringRef>& columns)
 {
   info_.SetMethod(columns[indices_[METHOD]].str());
 }
 
-void MMCifParser::ParseRefine(const std::vector<StringRef>& columns)
+void MMCifReader::ParseRefine(const std::vector<StringRef>& columns)
 {
   StringRef col=columns[indices_[LS_D_RES_HIGH]];
   if (col.size()!=1 || (col[0]!='?' && col[0]!='.')) {
@@ -820,7 +820,7 @@ void MMCifParser::ParseRefine(const std::vector<StringRef>& columns)
   }
 }
 
-void MMCifParser::ParsePdbxStructAssembly(const std::vector<StringRef>& columns)
+void MMCifReader::ParsePdbxStructAssembly(const std::vector<StringRef>& columns)
 {
   if (indices_[PSA_DETAILS] != -1) {
     bu_origin_map_.insert(std::pair<String,
@@ -833,7 +833,7 @@ void MMCifParser::ParsePdbxStructAssembly(const std::vector<StringRef>& columns)
   }
 }
 
-void MMCifParser::StoreExpression(const char* l, const char* s,
+void MMCifReader::StoreExpression(const char* l, const char* s,
                                   bool& is_range, int lborder,
                                   std::vector<String>& single_block)
 {
@@ -855,7 +855,7 @@ void MMCifParser::StoreExpression(const char* l, const char* s,
   }
 }
 
-void MMCifParser::StoreRange(const char*& l, const char* s, bool& is_range,
+void MMCifReader::StoreRange(const char*& l, const char* s, bool& is_range,
                              int& lborder, std::vector<String>& single_block)
 {
   if (is_range) {
@@ -872,7 +872,7 @@ void MMCifParser::StoreRange(const char*& l, const char* s, bool& is_range,
   l = s+1;
 }
 
-std::vector<std::vector<String> > MMCifParser::UnPackOperExperession(StringRef expression)
+std::vector<std::vector<String> > MMCifReader::UnPackOperExperession(StringRef expression)
 {
   std::vector<std::vector<String> > unpacked;
   std::vector<String> single_block;
@@ -929,7 +929,7 @@ std::vector<std::vector<String> > MMCifParser::UnPackOperExperession(StringRef e
   return unpacked;
 }
 
-void MMCifParser::ParsePdbxStructAssemblyGen(const std::vector<StringRef>& columns)
+void MMCifReader::ParsePdbxStructAssemblyGen(const std::vector<StringRef>& columns)
 {
   MMCifBioUAssembly assembly;
   assembly.biounit = MMCifInfoBioUnit();
@@ -948,7 +948,7 @@ void MMCifParser::ParsePdbxStructAssemblyGen(const std::vector<StringRef>& colum
   bu_assemblies_.push_back(assembly);
 }
 
-void MMCifParser::ParsePdbxStructOperList(const std::vector<StringRef>& columns)
+void MMCifReader::ParsePdbxStructOperList(const std::vector<StringRef>& columns)
 {
   MMCifInfoTransOpPtr op(new MMCifInfoTransOp);
 
@@ -998,7 +998,7 @@ void MMCifParser::ParsePdbxStructOperList(const std::vector<StringRef>& columns)
   info_.AddOperation(op);
 }
 
-void MMCifParser::ParseStruct(const std::vector<StringRef>& columns)
+void MMCifReader::ParseStruct(const std::vector<StringRef>& columns)
 {
   MMCifInfoStructDetails details = MMCifInfoStructDetails();
 
@@ -1040,7 +1040,7 @@ void MMCifParser::ParseStruct(const std::vector<StringRef>& columns)
   info_.SetStructDetails(details);
 }
 
-MMCifParser::MMCifSecStructElement MMCifParser::DetermineSecStructType(
+MMCifReader::MMCifSecStructElement MMCifReader::DetermineSecStructType(
                                                     const StringRef& type) const
 {
   if (type == StringRef("HELX_P", 6)) {
@@ -1172,7 +1172,7 @@ MMCifParser::MMCifSecStructElement MMCifParser::DetermineSecStructType(
                                            this->GetCurrentLinenum()));
 }
 
-void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
+void MMCifReader::ParseStructConf(const std::vector<StringRef>& columns)
 {
   StringRef chain_name;
   int s_res_num;
@@ -1212,7 +1212,7 @@ void MMCifParser::ParseStructConf(const std::vector<StringRef>& columns)
   }
 }
 
-void MMCifParser::ParseStructSheetRange(const std::vector<StringRef>& columns)
+void MMCifReader::ParseStructSheetRange(const std::vector<StringRef>& columns)
 {
   StringRef chain_name;
   int s_res_num;
@@ -1247,7 +1247,7 @@ void MMCifParser::ParseStructSheetRange(const std::vector<StringRef>& columns)
   }
 }
 
-void MMCifParser::OnDataRow(const StarLoopDesc& header, 
+void MMCifReader::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
   switch(category_) {
@@ -1311,7 +1311,7 @@ void MMCifParser::OnDataRow(const StarLoopDesc& header,
   }
 }
 
-void MMCifParser::AssignSecStructure(mol::EntityHandle ent)
+void MMCifReader::AssignSecStructure(mol::EntityHandle ent)
 {
   for (MMCifHSVector::const_iterator i=helix_list_.begin(), e=helix_list_.end();
        i!=e; ++i) {
@@ -1354,7 +1354,7 @@ void MMCifParser::AssignSecStructure(mol::EntityHandle ent)
   }
 }
 
-void MMCifParser::OnEndData()
+void MMCifReader::OnEndData()
 {
   mol::XCSEditor editor=ent_handle_.EditXCS(mol::BUFFERED_EDIT);
 

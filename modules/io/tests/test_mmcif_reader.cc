@@ -31,50 +31,50 @@
 using namespace ost;
 using namespace ost::io;
 
-class TestMMCifParserProtected : MMCifParser {
+class TestMMCifReaderProtected : MMCifReader {
 public:
-  TestMMCifParserProtected(std::istream& stream, mol::EntityHandle& ent_handle):
-    MMCifParser(stream, ent_handle, IOProfile())
+  TestMMCifReaderProtected(std::istream& stream, mol::EntityHandle& ent_handle):
+    MMCifReader(stream, ent_handle, IOProfile())
   { }
 
-  TestMMCifParserProtected(std::istream& stream, mol::EntityHandle& ent_handle,
+  TestMMCifReaderProtected(std::istream& stream, mol::EntityHandle& ent_handle,
                            const IOProfile& profile):
-    MMCifParser(stream, ent_handle, profile)
+    MMCifReader(stream, ent_handle, profile)
   { }
 
-  TestMMCifParserProtected(const String& filename,
+  TestMMCifReaderProtected(const String& filename,
                            mol::EntityHandle& ent_handle):
-    MMCifParser(filename, ent_handle, IOProfile())
+    MMCifReader(filename, ent_handle, IOProfile())
   { }
 
-  using MMCifParser::OnBeginLoop;
-  using MMCifParser::OnEndData;
-  using MMCifParser::IsValidPDBIdent;
-  using MMCifParser::ParseAtomIdent;
-  using MMCifParser::ParseAndAddAtom;
-  using MMCifParser::ParseEntity;
-  using MMCifParser::ParseEntityPoly;
-  using MMCifParser::ParseCitation;
-  using MMCifParser::ParseRefine;
-  using MMCifParser::ParsePdbxStructAssemblyGen;
-  using MMCifParser::ParsePdbxStructAssembly;
-  using MMCifParser::ParsePdbxStructOperList;
-  using MMCifParser::ParseStruct;
-  using MMCifParser::ParseStructConf;
-  using MMCifParser::ParseStructSheetRange;
-  using MMCifParser::TryStoreIdx;
-  using MMCifParser::SetRestrictChains;
-  using MMCifParser::SetReadSeqRes;
-  using MMCifParser::SetReadCanonicalSeqRes;
-  using MMCifParser::ClearState;
-  using MMCifParser::ConvertSEQRES;
-  using MMCifParser::GetInfo;
-  using MMCifParser::DetermineSecStructType;
-  using MMCifParser::MMCifSecStructElement;
-  using MMCifParser::MMCIF_HELIX;
-  using MMCifParser::MMCIF_TURN;
-  using MMCifParser::MMCIF_STRAND;
-  using MMCifParser::SetAuthChainID;
+  using MMCifReader::OnBeginLoop;
+  using MMCifReader::OnEndData;
+  using MMCifReader::IsValidPDBIdent;
+  using MMCifReader::ParseAtomIdent;
+  using MMCifReader::ParseAndAddAtom;
+  using MMCifReader::ParseEntity;
+  using MMCifReader::ParseEntityPoly;
+  using MMCifReader::ParseCitation;
+  using MMCifReader::ParseRefine;
+  using MMCifReader::ParsePdbxStructAssemblyGen;
+  using MMCifReader::ParsePdbxStructAssembly;
+  using MMCifReader::ParsePdbxStructOperList;
+  using MMCifReader::ParseStruct;
+  using MMCifReader::ParseStructConf;
+  using MMCifReader::ParseStructSheetRange;
+  using MMCifReader::TryStoreIdx;
+  using MMCifReader::SetRestrictChains;
+  using MMCifReader::SetReadSeqRes;
+  using MMCifReader::SetReadCanonicalSeqRes;
+  using MMCifReader::ClearState;
+  using MMCifReader::ConvertSEQRES;
+  using MMCifReader::GetInfo;
+  using MMCifReader::DetermineSecStructType;
+  using MMCifReader::MMCifSecStructElement;
+  using MMCifReader::MMCIF_HELIX;
+  using MMCifReader::MMCIF_TURN;
+  using MMCifReader::MMCIF_STRAND;
+  using MMCifReader::SetAuthChainID;
 };
 
 void SetAtomSiteHeader(StarLoopDesc* mmcif_h)
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(mmcif_isvalidpdbident)
   // on changing the tests for a PDB id in mmcif files, extend this unit test
   BOOST_MESSAGE("  Running mmcif_isvalidpdbident tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
-  TestMMCifParserProtected tmmcif_p(s, eh);
+  TestMMCifReaderProtected tmmcif_p(s, eh);
   StringRef id = StringRef("1FOO", 4);
   BOOST_MESSAGE("    Testing valid id ('"+ id.str() +"')...");
   BOOST_CHECK(tmmcif_p.IsValidPDBIdent(id));
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(mmcif_trystoreidx)
 
   BOOST_MESSAGE("  Running mmcif_trystoreidx tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
-  TestMMCifParserProtected tmmcif_p(s, eh, IOProfile());
+  TestMMCifReaderProtected tmmcif_p(s, eh, IOProfile());
   StarLoopDesc mmcif_h;
   mmcif_h.SetCategory(StringRef("Foo", 3));
   // negative
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(mmcif_convert_seqres)
   conop::Conopology::Instance().SetDefaultBuilder("RBB");
   mol::EntityHandle eh=mol::CreateEntity();
   
-  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
   std::vector<StringRef> columns;
   StarLoopDesc tmmcif_h;  
   BOOST_CHECK_EQUAL(tmmcif_p.ConvertSEQRES("A(MSE)Y", compound_lib), "AMY");
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(mmcif_onbeginloop)
   // add more tests on new mandatory items
   BOOST_MESSAGE("  Running mmcif_onbeginloop tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
-  MMCifParser mmcif_p(s, eh, IOProfile());
+  MMCifReader mmcif_p(s, eh, IOProfile());
   StarLoopDesc mmcif_h;
   BOOST_MESSAGE("          testing atom_site items...");
   mmcif_h.SetCategory(StringRef("atom_site", 9));
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parse_models)
   BOOST_MESSAGE("          true positive test for models...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
-    MMCifParser mmcif_p("testfiles/mmcif/model_truepos.mmcif", eh, profile);
+    MMCifReader mmcif_p("testfiles/mmcif/model_truepos.mmcif", eh, profile);
     BOOST_CHECK_NO_THROW(mmcif_p.Parse());
     BOOST_REQUIRE_EQUAL(eh.GetChainCount(),   2);
     BOOST_REQUIRE_EQUAL(eh.GetResidueCount(), 2);
@@ -240,7 +240,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parse_models)
   BOOST_MESSAGE("          test absent atom_site.pdbx_PDB_model_num entry...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
-    MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+    MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
     BOOST_CHECK_NO_THROW(mmcif_p.Parse());
   }
   BOOST_MESSAGE("          done.");
@@ -248,13 +248,13 @@ BOOST_AUTO_TEST_CASE(mmcif_parse_models)
   BOOST_MESSAGE("          testing more than one atom_site block...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
-    MMCifParser mmcif_p("testfiles/mmcif/model_multi_atom_site.mmcif", eh,
+    MMCifReader mmcif_p("testfiles/mmcif/model_multi_atom_site.mmcif", eh,
                         profile);
     BOOST_CHECK_THROW(mmcif_p.Parse(), IOException);
   }
   {
     mol::EntityHandle eh = mol::CreateEntity();
-    MMCifParser mmcif_p("testfiles/mmcif/model_multi_atom_site_inverted.mmcif",
+    MMCifReader mmcif_p("testfiles/mmcif/model_multi_atom_site_inverted.mmcif",
                         eh, profile);
     BOOST_CHECK_THROW(mmcif_p.Parse(), IOException);
   }
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parse_models)
     // build dummy header
     mol::EntityHandle eh = mol::CreateEntity();
     StarLoopDesc tmmcif_h;
-    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
     SetAtomSiteHeader(&tmmcif_h);
     tmmcif_p.OnBeginLoop(tmmcif_h);
     tmmcif_h.Add(StringRef("pdbx_PDB_model_num", 18));
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE(mmcif_changing_label_entity_id)
   BOOST_MESSAGE("          true positive test...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
-    MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+    MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
     BOOST_CHECK_NO_THROW(mmcif_p.Parse());
   }
   BOOST_MESSAGE("          done.");
@@ -294,7 +294,7 @@ BOOST_AUTO_TEST_CASE(mmcif_changing_label_entity_id)
   BOOST_MESSAGE("          true negative test...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
-    MMCifParser mmcif_p("testfiles/mmcif/changing_label_entity_id.mmcif", eh,
+    MMCifReader mmcif_p("testfiles/mmcif/changing_label_entity_id.mmcif", eh,
                         profile);
     BOOST_CHECK_THROW(mmcif_p.Parse(), IOException);
   }
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
 
   mol::EntityHandle eh = mol::CreateEntity();
   std::vector<StringRef> columns;
-  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
   StarLoopDesc tmmcif_h;
 
   // build dummy header
@@ -352,7 +352,7 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
   BOOST_MESSAGE("          fetching chain type...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
-    MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+    MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
     mmcif_p.Parse();
     ch = eh.FindChain("A");
     BOOST_CHECK(ch.IsValid());
@@ -369,7 +369,7 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
   BOOST_MESSAGE("          check missing entity description...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
-    MMCifParser mmcif_p("testfiles/mmcif/model_truepos.mmcif",
+    MMCifReader mmcif_p("testfiles/mmcif/model_truepos.mmcif",
                         eh,
                         profile);
     mmcif_p.Parse();
@@ -384,7 +384,7 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
   BOOST_MESSAGE("          fetch details...");
   {
     mol::EntityHandle eh = mol::CreateEntity();
-    MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+    MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
     mmcif_p.Parse();
     ch = eh.FindChain("A");
     BOOST_CHECK(ch.IsValid());
@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
   StarLoopDesc tmmcif_h;
 
   mol::EntityHandle eh = mol::CreateEntity();
-  MMCifParser mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
+  MMCifReader mmcif_p("testfiles/mmcif/atom_site.mmcif", eh, profile);
 
   mmcif_p.SetReadSeqRes(true);
   mmcif_p.Parse();
@@ -417,7 +417,7 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
   {
     mol::EntityHandle eh = mol::CreateEntity();
     std::vector<StringRef> columns;
-    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
 
     tmmcif_h.SetCategory(StringRef("entity_poly", 11));
     tmmcif_h.Add(StringRef("entity_id", 9));
@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
   BOOST_MESSAGE("          done.");
   BOOST_MESSAGE("          testing type recognition...");
   {
-    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
     std::vector<StringRef> columns;
 
     // create corresponding entity entry
@@ -485,7 +485,7 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
   BOOST_MESSAGE("          done.");
   BOOST_MESSAGE("          testing pdbx_seq_one_letter_code reading...");
   {
-    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
     std::vector<StringRef> columns;
 
     tmmcif_h.Clear();
@@ -519,7 +519,7 @@ columns.push_back(StringRef("polydeoxyribonucleotide/polyribonucleotide hybrid",
   BOOST_MESSAGE("          done.");
   BOOST_MESSAGE("          testing pdbx_seq_one_letter_code_can reading...");
   {
-    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
     std::vector<StringRef> columns;
 
     tmmcif_h.Clear();
@@ -560,7 +560,7 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_tests)
   BOOST_MESSAGE("  Running mmcif_citation_tests...");
   //build dummy citation
   mol::EntityHandle eh;
-  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
   StarLoopDesc tmmcif_h;
   std::vector<StringRef> columns;
 
@@ -600,7 +600,7 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_author_tests)
   mol::EntityHandle eh = mol::CreateEntity();
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   IOProfile profile;
-  MMCifParser mmcif_p(s, eh, profile);
+  MMCifReader mmcif_p(s, eh, profile);
   BOOST_CHECK_NO_THROW(mmcif_p.Parse());
 
   std::vector<String> authors =
@@ -622,7 +622,7 @@ BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
     mol::EntityHandle eh = mol::CreateEntity();
     std::ifstream s("testfiles/mmcif/atom_site.mmcif");
     IOProfile profile;
-    MMCifParser mmcif_p(s, eh, profile);
+    MMCifReader mmcif_p(s, eh, profile);
     BOOST_CHECK_NO_THROW(mmcif_p.Parse());
     BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0f, 0.001f);
   }
@@ -630,7 +630,7 @@ BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
   BOOST_MESSAGE("         capturing fishy data lines...");
   {
     mol::EntityHandle eh;
-    TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+    TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
     StarLoopDesc tmmcif_h;
     std::vector<StringRef> columns;
     
@@ -655,7 +655,7 @@ BOOST_AUTO_TEST_CASE(mmcif_biounit_tests)
   BOOST_MESSAGE("  Running mmcif_biounit_tests...");
   //build dummy biounit
   mol::EntityHandle eh = mol::CreateEntity();
-  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
   StarLoopDesc tmmcif_h;
   std::vector<StringRef> columns;
 
@@ -774,7 +774,7 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_tests)
   BOOST_MESSAGE("  Running mmcif_struct_tests...");
 
   mol::EntityHandle eh = mol::CreateEntity();
-  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
   StarLoopDesc tmmcif_h;
   std::vector<StringRef> columns;
 
@@ -811,132 +811,132 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_conf_tests)
 {
   BOOST_MESSAGE("  Running mmcif_struct_conf_tests...");
   mol::EntityHandle eh = mol::CreateEntity();
-  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
 
   BOOST_MESSAGE("          testing type validation");
   StringRef type = StringRef("HELX_P", 6);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_OT_P", 9);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_P", 9);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_OT_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_AL_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_GA_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_OM_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_PI_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_27_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_3T_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_PP_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_P",     9);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_OT_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_AL_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_GA_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_OM_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_PI_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_27_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
  type = StringRef("HELX_LH_3T_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_PP_P", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_N", 6);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_OT_N", 9);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_N", 9);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_OT_N", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_A_N", 11);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_B_N", 11);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_RH_Z_N", 11);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_N", 9);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_OT_N", 12);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_A_N", 11);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_B_N", 11);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("HELX_LH_Z_N", 11);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_HELIX);
+              TestMMCifReaderProtected::MMCIF_HELIX);
   type = StringRef("TURN_P", 6);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_TURN);
+              TestMMCifReaderProtected::MMCIF_TURN);
   type = StringRef("TURN_OT_P", 9);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_TURN);
+              TestMMCifReaderProtected::MMCIF_TURN);
   type = StringRef("TURN_TY1_P", 10);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_TURN);
+              TestMMCifReaderProtected::MMCIF_TURN);
   type = StringRef("TURN_TY1P_P", 11);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_TURN);
+              TestMMCifReaderProtected::MMCIF_TURN);
   type = StringRef("TURN_TY2_P", 10);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_TURN);
+              TestMMCifReaderProtected::MMCIF_TURN);
   type = StringRef("TURN_TY2P_P", 11);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_TURN);
+              TestMMCifReaderProtected::MMCIF_TURN);
   type = StringRef("TURN_TY3_P", 10);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_TURN);
+              TestMMCifReaderProtected::MMCIF_TURN);
   type = StringRef("TURN_TY3P_P", 11);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_TURN);
+              TestMMCifReaderProtected::MMCIF_TURN);
   type = StringRef("STRN", 4);
   BOOST_CHECK(tmmcif_p.DetermineSecStructType(type) ==
-              TestMMCifParserProtected::MMCIF_STRAND);
+              TestMMCifReaderProtected::MMCIF_STRAND);
   type = StringRef("Foo", 3);
   BOOST_CHECK_THROW(tmmcif_p.DetermineSecStructType(type), IOException);
 
@@ -995,7 +995,7 @@ BOOST_AUTO_TEST_CASE(mmcif_struct_sheet_range_tests)
 {
   BOOST_MESSAGE("  Running mmcif_struct_sheet_range_tests...");
   mol::EntityHandle eh = mol::CreateEntity();
-  TestMMCifParserProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
+  TestMMCifReaderProtected tmmcif_p("testfiles/mmcif/atom_site.mmcif", eh);
 
   BOOST_MESSAGE("          testing auth_chain_id switch...");
   StarLoopDesc tmmcif_h;
@@ -1055,7 +1055,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   IOProfile profile;
   StarLoopDesc tmmcif_h;
-  TestMMCifParserProtected tmmcif_p(s, eh, profile);
+  TestMMCifReaderProtected tmmcif_p(s, eh, profile);
   std::vector<StringRef> columns;
   String chain_name;
   StringRef res_name;
@@ -1148,7 +1148,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parseandaddatom)
 
   BOOST_MESSAGE("  Running mmcif_parseandaddatom tests...");
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
-  TestMMCifParserProtected tmmcif_p(s, eh, IOProfile());
+  TestMMCifReaderProtected tmmcif_p(s, eh, IOProfile());
   std::vector<StringRef> cols;
 
   //BOOST_MESSAGE("    testing short atom_site entry");
@@ -1163,7 +1163,7 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   mol::EntityHandle eh = mol::CreateEntity();
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   IOProfile profile;
-  MMCifParser mmcif_p(s, eh, profile);
+  MMCifReader mmcif_p(s, eh, profile);
 
   mmcif_p.SetRestrictChains("A O C");
 

@@ -52,7 +52,7 @@ void EntityIOMMCIFHandler::Export(const mol::EntityView& ent,
 void EntityIOMMCIFHandler::Import(mol::EntityHandle& ent, 
                                 std::istream& stream)
 {
-  MMCifParser reader(stream,ent,  
+  MMCifReader reader(stream,ent,  
                      IOProfileRegistry::Instance().GetDefault());
   reader.Parse();
 }
@@ -66,7 +66,7 @@ void EntityIOMMCIFHandler::Import(mol::EntityHandle& ent,
                                 const boost::filesystem::path& loc)
 {
   std::string filename=loc.string();
-  MMCifParser reader(filename, ent,  
+  MMCifReader reader(filename, ent,  
                      IOProfileRegistry::Instance().GetDefault());
   reader.Parse();
 }

@@ -17,7 +17,7 @@ Loading mmCIF Files
 Categories Available
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The following categories of a mmCIF file are considered by the parser:
+The following categories of a mmCIF file are considered by the reader:
 
 * ``atom_site``: Used to build the :class:`entity <ost.mol.EntityHandle>`
 * ``entity``: Involved in setting ChainTypes

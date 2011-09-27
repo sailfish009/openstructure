@@ -16,8 +16,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_MMCIF_PARSER_HH
-#define OST_MMCIF_PARSER_HH
+#ifndef OST_MMCIF_READER_HH
+#define OST_MMCIF_READER_HH
 
 #include <map>
 
@@ -39,7 +39,7 @@ namespace ost { namespace io {
 /// 
 /// mmcif is an instance of the \link StarParser STAR format\endlink to store
 /// entries of the PDB. The following data categories should be covered by this
-/// parser:
+/// reader:
 /// 
 /// \li atom_site
 /// \li entity
@@ -54,21 +54,21 @@ namespace ost { namespace io {
 /// \li struct
 /// \li struct_conf
 /// \li struct_sheet_range
-class DLLEXPORT_OST_IO MMCifParser : public StarParser  {
+class DLLEXPORT_OST_IO MMCifReader : public StarParser  {
 public:
-  /// \brief create a MMCifParser
+  /// \brief create a MMCifReader
   ///
   /// \param stream input stream
-  MMCifParser(std::istream& stream, mol::EntityHandle& ent_handle,
+  MMCifReader(std::istream& stream, mol::EntityHandle& ent_handle,
               const IOProfile& profile);
 
-  /// \brief create a MMCifParser
+  /// \brief create a MMCifReader
   ///
   /// \param filename input file
-  MMCifParser(const String& filename, mol::EntityHandle& ent_handle,
+  MMCifReader(const String& filename, mol::EntityHandle& ent_handle,
               const IOProfile& profile);
 
-  /// \brief Initialise the parser.
+  /// \brief Initialise the reader.
   ///
   /// \param loc Location of the file
   void Init();
@@ -76,7 +76,7 @@ public:
   /// \brief Set up a fresh instance
   void ClearState();
 
-  /// \brief Set names of restricted chains for the parser.
+  /// \brief Set names of restricted chains for the reader.
   ///
   /// \param restrict_chains chain name
   void SetRestrictChains(const String& restrict_chains);
@@ -328,7 +328,7 @@ private:
     AUTH_SEQ_ID,       ///< residue no. by author
     TYPE_SYMBOL,       ///< chemical element
     CARTN_X,           ///< Coordinates ||IMPORTANT: This 3 entries have to stay
-    CARTN_Y,           ///< Coordinates ||together for the parser to work!
+    CARTN_Y,           ///< Coordinates ||together for the reader to work!
     CARTN_Z,           ///< Coordinates ||
     OCCUPANCY,
     B_ISO_OR_EQUIV,
