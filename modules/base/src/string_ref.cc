@@ -113,6 +113,26 @@ std::vector<StringRef> StringRef::split(char p) const
   return result;
 }
 
+std::vector<StringRef> StringRef::split() const
+{
+  std::vector<StringRef> result;
+  const char* s=begin_;
+  const char* l=begin_;
+  while (s!=end_) {
+    if (isspace(*s)) {
+      if (l!=s) {
+        result.push_back(StringRef(l, s-l));
+      }
+      l=s+1;
+    }
+    ++s;
+  }
+  if (l!=s) {
+    result.push_back(StringRef(l, s-l));
+  }
+  return result;
+}
+
 std::string StringRef::str_no_whitespace() const
 {
   std::string whitespaceless_string;
