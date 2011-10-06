@@ -34,8 +34,6 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::info;
 
-namespace {
-
 
 InfoHandle (*CreateInfoPtr1)()=CreateInfo;
 InfoHandle (*CreateInfoPtr2)(const String&)=CreateInfo;
@@ -145,7 +143,6 @@ InfoItem (InfoGroup::*create_item_b)(const String&, int)=&InfoGroup::CreateItem;
 InfoItem (InfoGroup::*create_item_c)(const String&, bool)=&InfoGroup::CreateItem;
 InfoItem (InfoGroup::*create_item_d)(const String&, Real)=&InfoGroup::CreateItem;
 
-}
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getgroup_overloads, GetGroup, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(retrievegroup_overloads, RetrieveGroup, 1, 2)

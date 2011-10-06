@@ -23,8 +23,6 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol;
 
-namespace {
-
 struct WrappedVisitor : EntityVisitor
 {
     WrappedVisitor(PyObject *p)
@@ -63,7 +61,6 @@ struct WrappedVisitor : EntityVisitor
     PyObject* self;
 };
 
-}
 void export_Visitor()
 {
   class_<EntityVisitor, WrappedVisitor>("EntityVisitor", init<>())
