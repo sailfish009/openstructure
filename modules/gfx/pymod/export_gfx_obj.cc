@@ -25,7 +25,6 @@ using namespace ost::gfx;
 
 #include "color_by_def.hh"
 
-namespace {
   // convenience for python
   void set_mat_amb2(GfxObjBase* b, float c) {b->SetMatAmb(Color(c,c,c,1.0));}
   void set_mat_diff2(GfxObjBase* b, float c) {b->SetMatDiff(Color(c,c,c,1.0));}
@@ -58,7 +57,63 @@ namespace {
     LOG_INFO("AALines(bool) is deprecated, use SetAALines(bool) instead");
     b->SetAALines(f);
   }
-}
+
+  class GfxObjWrap: public GfxObj, public wrapper<GfxObj>
+  {
+  public:
+    GfxObjWrap(const std::string& name):
+      GfxObj(name)
+    {}
+
+    virtual geom::AlignedCuboid GetBoundingBox() const
+    {
+      if(override f = this->get_override("GetBoundingBox")) {
+        return f();
+      } else {
+        return GfxObj::GetBoundingBox();
+      }
+    }
+
+    geom::AlignedCuboid default_GetBoundingBox() const {
+      return GfxObj::GetBoundingBox();
+    }
+
+    virtual void CustomRenderGL(RenderPass pass) {
+      if(override f = this->get_override("_CustomRenderGL")) {
+        f(pass);
+      } else {
+        GfxObj::CustomRenderGL(pass);
+      }
+    }
+
+    void default_CustomRenderGL(RenderPass pass) {
+        GfxObj::CustomRenderGL(pass);
+    }
+
+    virtual void CustomPreRenderGL(bool rebuild) {
+      if(override f = this->get_override("_CustomPreRenderGL")) {
+        f(rebuild);
+      } else {
+        GfxObj::CustomPreRenderGL(rebuild);
+      }
+    }
+
+    void default_CustomPreRenderGL(bool rebuild) {
+        GfxObj::CustomPreRenderGL(rebuild);
+    }
+
+    virtual void InitGL() {
+      if(override f = this->get_override("_InitGL")) {
+        f();
+      } else {
+        GfxObj::InitGL();
+      }
+    }
+
+    void default_InitGL() {
+        GfxObj::InitGL();
+    }
+  };
 
 void export_GfxObj()
 {

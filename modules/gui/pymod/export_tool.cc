@@ -32,7 +32,6 @@ using namespace boost::python;
 using namespace ost::gui;
 using namespace ost;
 
-namespace {
   
 struct WrappedTool : public Tool
 {
@@ -81,7 +80,6 @@ struct WrappedTool : public Tool
 };
                                 
 
-namespace {
   
 void tm_add_tool(ToolManager& tm, QPtr<WrappedTool> tool)
 {
@@ -127,13 +125,10 @@ object get_delta_wrapper(MouseEvent& me)
   return qpoint_to_bp_object(delta);
 }
 
-}
-
 
 ToolOption* (ToolOptions::*get_option_a)(const String&, 
                                            const String&) const=&ToolOptions::GetOption;
 ToolOption* (ToolOptions::*get_option_b)(const String&) const=&ToolOptions::GetOption;
-}
 
 void export_Tool()
 {
