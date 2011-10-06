@@ -38,7 +38,6 @@
 using namespace ost;
 using namespace ost::seq;
 using namespace boost::python;
-namespace {
 
 void (SequenceHandle::*attach_one)(const mol::EntityView&)=&SequenceHandle::AttachView;
 void (SequenceHandle::*attach_two)(const mol::EntityView&,
@@ -276,7 +275,6 @@ void const_seq_handle_def(O& bp_class)
   ;
 }
 
-}
 
 void export_sequence()
 {

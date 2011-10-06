@@ -25,9 +25,6 @@ using namespace boost::python;
 
 using namespace ost;
 
-
-namespace {
-
 struct WrappedLogSink : public LogSink {
   WrappedLogSink(PyObject* self): self_(self)
   { }
@@ -87,7 +84,6 @@ void log_verbose(const String& m) {LOG_VERBOSE(m);}
 void reset_sinks()
 {
   Logger::Instance().ResetSinks();
-}
 }
 
 void export_Logger()
