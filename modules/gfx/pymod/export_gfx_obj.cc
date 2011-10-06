@@ -25,7 +25,6 @@ using namespace ost::gfx;
 
 #include "color_by_def.hh"
 
-namespace {
   // convenience for python
   void set_mat_amb2(GfxObjBase* b, float c) {b->SetMatAmb(Color(c,c,c,1.0));}
   void set_mat_diff2(GfxObjBase* b, float c) {b->SetMatDiff(Color(c,c,c,1.0));}
@@ -115,7 +114,6 @@ namespace {
         GfxObj::InitGL();
     }
   };
-}
 
 void export_GfxObj()
 {
