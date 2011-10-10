@@ -470,8 +470,9 @@ void PDBReader::AssignMolIds(mol::EntityHandle ent) {
         if (chain) {
           chain.SetIntProp("mol_id", compnd_iterator->mol_id);
         }else{
-          std::stringstream ss("could not map COMPND record MOL_ID onto chain");
-          ss <<*chain_iterator;
+          std::stringstream ss;
+          ss << "could not map COMPND record MOL_ID onto chain "
+             <<*chain_iterator;
           ThrowFaultTolerant(ss.str());
         }
       }
