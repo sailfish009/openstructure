@@ -25,7 +25,11 @@ using namespace boost::python;
 
 using namespace ost;
 
-struct WrappedLogSink : public LogSink {
+struct PyLogSink: public LogSink {
+
+};
+
+struct WrappedLogSink : public PyLogSink, public wrapper<PyLogSink> {
   WrappedLogSink(PyObject* self): self_(self)
   { }
   virtual void LogMessage(const String& message , int severity) 
@@ -73,6 +77,10 @@ void pop_log_sink()
   Logger::Instance().PopSink();
 }
 
+LogSinkPtr get_log_sink()
+{
+  return Logger::Instance().GetCurrentSink();
+}
 
 void log_error(const String& m) {LOG_ERROR(m);}
 void log_warning(const String& m) {LOG_WARNING(m);}
@@ -88,11 +96,13 @@ void reset_sinks()
 
 void export_Logger()
 {
-  class_<LogSink, WrappedLogSinkPtr, 
+  class_<LogSink, LogSinkPtr, boost::noncopyable>("_LogSink", no_init)
+    .def("LogMessage", &LogSink::LogMessage)
+  ;
+  class_<PyLogSink, WrappedLogSinkPtr, bases<LogSink>,
          boost::noncopyable>("LogSink")
     .def("LogMessage", &WrappedLogSink::LogMessageDefault)
   ;
-
   class_<MultiLogSink, MultiLogSinkPtr, bases<LogSink>, 
          boost::noncopyable >("MultiLogSink", init<>())
     .def("AddSink",&MultiLogSink::AddSink)
@@ -109,6 +119,7 @@ void export_Logger()
   def("PopVerbosityLevel",pop_verb);
   def("GetVerbosityLevel",get_verb);
   def("PushLogSink",push_log_sink);
+  def("GetCurrentLogSink",get_log_sink);
   def("PopLogSink",pop_log_sink);
   def("LogError",log_error);
   def("LogWarning",log_warning);

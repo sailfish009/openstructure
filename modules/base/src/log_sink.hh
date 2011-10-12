@@ -35,7 +35,7 @@ class DLLEXPORT LogSink {
 public:
   LogSink(){};
   virtual ~LogSink() { }
-  virtual void LogMessage(const String& message, int severity=0)=0;
+  virtual void LogMessage(const String& message, int severity=0) {};
 };
 
 typedef boost::shared_ptr<LogSink> LogSinkPtr;
