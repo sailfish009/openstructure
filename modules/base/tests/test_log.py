@@ -34,6 +34,9 @@ class TestLog(unittest.TestCase):
     ost.LogError('error message')
     self.assertEqual(ls.message, 'error message\n')
     self.assertEqual(ls.severity, 0)
+    ost.LogWarning(1, 2, 3)
+    self.assertEqual(ls.message, '1 2 3\n')
+    self.assertEqual(ls.severity, 1)
     ost.PopLogSink()
 if __name__ == "__main__":
   try:
