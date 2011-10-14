@@ -135,6 +135,25 @@ class TestMMCifInfo(unittest.TestCase):
                       'Created with SwissModel')
     self.assertEquals(i.GetStructDetails().GetModelTypeDetails(), 'Average')
 
+  def test_mmcifinfo_obsolete(self):
+    obs = io.MMCifInfoObsolete()
+    obs.SetDate('2011-08-31')
+    obs.SetID('SPRSDE')
+    obs.SetPDBID('1FOO')
+    obs.SetReplacedPDBID('2BAR')
+    self.assertEquals(obs.GetDate(), '2011-08-31')
+    self.assertEquals(obs.GetID(), 'Supersede')
+    self.assertEquals(obs.GetPDBID(), '1FOO')
+    self.assertEquals(obs.GetReplacedPDBID(), '2BAR')
+
+    i = io.MMCifInfo()
+    obs.id = 'OBSLTE'
+    i.SetObsoleteInfo(obs)
+    self.assertEquals(i.GetObsoleteInfo().GetDate(), '2011-08-31')
+    self.assertEquals(i.GetObsoleteInfo().GetID(), 'Obsolete')
+    self.assertEquals(i.GetObsoleteInfo().GetPDBID(), '1FOO')
+    self.assertEquals(i.GetObsoleteInfo().GetReplacedPDBID(), '2BAR')
+
 if __name__== '__main__':
     unittest.main()
 

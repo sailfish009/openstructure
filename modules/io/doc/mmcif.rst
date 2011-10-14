@@ -36,7 +36,8 @@ The following categories of a mmCIF file are considered by the reader:
   in the :class:`entity <ost.mol.EntityHandle>`
 * ``struct_sheet_range``: Stores secondary structure information for sheets in
   the :class:`entity <ost.mol.EntityHandle>`
-
+* ``pdbx_database_PDB_obs_spr``: Verbose information on obsoleted/ superseded
+  entries, stored in :class:`MMCifInfoObsolete`.
 
 Info Classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -576,3 +577,68 @@ of the annotation available.
   .. method:: SetModelTypeDetails(details)
 
     See :attr:`model_type_details`
+
+.. class:: MMCifInfoObsolete
+
+  Holds details on obsolete/ superseded structures.
+
+  .. attribute:: date
+
+    When was the entry replaced?
+
+    Also available as :meth:`GetDate`. May also be modified by
+    :meth:`SetDate`.
+
+  .. attribute:: id
+
+    Type of change. Either *Obsolete* or *Supersede*. Returns a string starting
+    upper case. Has to be set via ``OBSLTE`` or ``SPRSDE``.
+
+    Also available as :meth:`GetID`. May also be modified by
+    :meth:`SetID`.
+
+  .. attribute:: pdb_id
+
+    ID of the replacing entry.
+
+    Also available as :meth:`GetPDBID`. May also be modified by
+    :meth:`SetPDBID`.
+
+  .. attribute:: replace_pdb_id
+
+    ID of the replaced entry.
+
+    Also available as :meth:`GetReplacedPDBID`. May also be modified by
+    :meth:`SetReplacedPDBID`.
+
+  .. method:: GetDate()
+
+    See :attr:`date`
+
+  .. method:: SetDate(date)
+
+    See :attr:`date`
+
+  .. method:: GetID()
+
+    See :attr:`id`
+
+  .. method:: SetID(id)
+
+    See :attr:`id`
+
+  .. method:: GetPDBID()
+
+    See :attr:`pdb_id`
+
+  .. method:: SetPDBID(flag)
+
+    See :attr:`pdb_id`
+
+  .. method:: GetReplacedPDBID()
+
+    See :attr:`replace_pdb_id`
+
+  .. method:: SetReplacedPDBID(descriptor)
+
+    See :attr:`replace_pdb_id`

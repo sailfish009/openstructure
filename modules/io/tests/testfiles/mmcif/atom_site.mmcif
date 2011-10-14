@@ -6,6 +6,11 @@ data_1BAR
 # this file is also used in the mmcif_mmcif_chaintype_setting test for a true
 # positive test, hence the entity category is not to be changed
 
+_pdbx_database_PDB_obs_spr.id               OBSLTE 
+_pdbx_database_PDB_obs_spr.date             2011-08-31 
+_pdbx_database_PDB_obs_spr.pdb_id           1FOO 
+_pdbx_database_PDB_obs_spr.replace_pdb_id   2BAR 
+
 loop_
 _entity.id
 _entity.type

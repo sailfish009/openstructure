@@ -54,6 +54,7 @@ namespace ost { namespace io {
 /// \li struct
 /// \li struct_conf
 /// \li struct_sheet_range
+/// \li pdbx_database_PDB_obs_spr
 class DLLEXPORT_OST_IO MMCifReader : public StarParser  {
 public:
   /// \brief create a MMCifReader
@@ -153,7 +154,7 @@ public:
     return read_seqres_;
   }
 
-  /// \brief Get additional information of the MMCif file.
+  /// \brief Get additional information of the mmCIF file.
   ///
   /// \return MMCitfInfo object
   const MMCifInfo& GetInfo() { return info_; }
@@ -213,17 +214,17 @@ protected:
   /// \param columns data row
   void ParseAndAddAtom(const std::vector<StringRef>& columns);
 
-  /// \brief Fetch MMCif entity information
+  /// \brief Fetch mmCIF entity information
   ///
   /// \param columns data row
   void ParseEntity(const std::vector<StringRef>& columns);
 
-  /// \brief Fetch MMCif entity_poly information
+  /// \brief Fetch mmCIF entity_poly information
   ///
   /// \param columns data row
   void ParseEntityPoly(const std::vector<StringRef>& columns);
 
-  /// \brief Fetch MMCif citation information
+  /// \brief Fetch mmCIF citation information
   ///
   /// \param columns data row
   void ParseCitation(const std::vector<StringRef>& columns);
@@ -237,27 +238,27 @@ protected:
   /// to some of the residues. To be consistent, we have to do the conversion on 
   /// our own.
   String ConvertSEQRES(const String& seqres, conop::CompoundLibPtr compound_lib);
-  /// \brief Fetch MMCif citation_author information
+  /// \brief Fetch mmCIF citation_author information
   ///
   /// \param columns data row
   void ParseCitationAuthor(const std::vector<StringRef>& columns);
 
-  /// \brief Fetch MMCif exptl information
+  /// \brief Fetch mmCIF exptl information
   ///
   /// \param columns data row
   void ParseExptl(const std::vector<StringRef>& columns);
 
-  /// \brief Fetch MMCif refine information
+  /// \brief Fetch mmCIF refine information
   ///
   /// \param columns data row
   void ParseRefine(const std::vector<StringRef>& columns);
 
-  /// \brief Fetch MMCif pdbx_struct_assembly information
+  /// \brief Fetch mmCIF pdbx_struct_assembly information
   ///
   /// \param columns data row
   void ParsePdbxStructAssembly(const std::vector<StringRef>& columns);
 
-  /// \brief Fetch MMCif pdbx_struct_assembly_gen information
+  /// \brief Fetch mmCIF pdbx_struct_assembly_gen information
   ///
   /// \param columns data row
   void ParsePdbxStructAssemblyGen(const std::vector<StringRef>& columns);
@@ -271,25 +272,30 @@ protected:
   void StoreRange(const char*& l, const char* s, bool& is_range, int& lborder,
                   std::vector<String>& single_block);
 
-  /// \brief Fetch MMCif pdbx_struct_oper_list information
+  /// \brief Fetch mmCIF pdbx_struct_oper_list information
   ///
   /// \param columns data row
   void ParsePdbxStructOperList(const std::vector<StringRef>& columns);
 
-  /// \brief Fetch MMCif struct information
+  /// \brief Fetch mmCIF struct information
   ///
   /// \param columns data row
   void ParseStruct(const std::vector<StringRef>& columns);
 
-  /// \brief Fetch MMCif struct_conf (secondary structure) information
+  /// \brief Fetch mmCIF struct_conf (secondary structure) information
   ///
   /// \param columns data row
   void ParseStructConf(const std::vector<StringRef>& columns);
 
-  /// \brief Fetch MMCif struct_sheet_range (beta sheets) information
+  /// \brief Fetch mmCIF struct_sheet_range (beta sheets) information
   ///
   /// \param columns data row
   void ParseStructSheetRange(const std::vector<StringRef>& columns);
+
+  /// \brief Fetch mmCIF pdbx_database_PDB_obs_spr information
+  ///
+  /// \param columns data row
+  void ParsePdbxDatabasePdbObsSpr(const std::vector<StringRef>& columns);
 
   /// \struct types of secondary structure
   typedef enum {
@@ -460,6 +466,14 @@ private:
     SSR_END_AUTH_ASYM_ID,      ///< alternative end, (atom_site.auth_asym_id)
     } StructSheetRangeItems;
 
+  /// \enum items of the pdbx_database_PDB_obs_spr category
+  typedef enum {
+    DATE,           ///< date of replacement
+    PDPOS_ID,       ///< type of obsolete of this entry
+    PDB_ID,         ///< NEW PDB ID
+    REPLACE_PDB_ID, ///< OLD PDB ID
+  } PdbxDatabasePDBObsSpr;
+
   /// \enum categories of the mmcif format
   typedef enum {
     ATOM_SITE,
@@ -475,6 +489,7 @@ private:
     STRUCT,
     STRUCT_CONF,
     STRUCT_SHEET_RANGE,
+    PDBX_DATABASE_PDB_OBS_SPR,
     DONT_KNOW
   } MMCifCategory;
 

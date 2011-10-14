@@ -292,6 +292,14 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     indices_[SSR_BEG_AUTH_ASYM_ID] = header.GetIndex("beg_auth_asym_id");
     indices_[SSR_END_AUTH_ASYM_ID] = header.GetIndex("end_auth_asym_id");
     cat_available = true;
+  } else if (header.GetCategory() == "pdbx_database_PDB_obs_spr") {
+    category_ = PDBX_DATABASE_PDB_OBS_SPR;
+    // mandatory items
+    this->TryStoreIdx(DATE,           "date", header);
+    this->TryStoreIdx(PDPOS_ID,       "id", header);
+    this->TryStoreIdx(PDB_ID,         "pdb_id", header);
+    this->TryStoreIdx(REPLACE_PDB_ID, "replace_pdb_id", header);
+    cat_available = true;
   }
   category_counts_[category_]++;
   return cat_available;
@@ -1247,6 +1255,19 @@ void MMCifReader::ParseStructSheetRange(const std::vector<StringRef>& columns)
   }
 }
 
+void MMCifReader::ParsePdbxDatabasePdbObsSpr(const std::vector<StringRef>&
+                                             columns)
+{
+  MMCifInfoObsolete obs_data = MMCifInfoObsolete();
+
+  obs_data.SetDate(columns[indices_[DATE]].str());
+  obs_data.SetID(columns[indices_[PDPOS_ID]]);
+  obs_data.SetPDBID(columns[indices_[PDB_ID]].str());
+  obs_data.SetReplacedPDBID(columns[indices_[REPLACE_PDB_ID]].str());
+
+  info_.SetObsoleteInfo(obs_data);
+}
+
 void MMCifReader::OnDataRow(const StarLoopDesc& header, 
                             const std::vector<StringRef>& columns)
 {
@@ -1302,6 +1323,10 @@ void MMCifReader::OnDataRow(const StarLoopDesc& header,
   case STRUCT_SHEET_RANGE:
     LOG_TRACE("processing struct_sheet_range entry")
     this->ParseStructSheetRange(columns);
+    break;
+  case PDBX_DATABASE_PDB_OBS_SPR:
+    LOG_TRACE("processing pdbx_database_PDB_obs_spr entry")
+    this->ParsePdbxDatabasePdbObsSpr(columns);
     break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,

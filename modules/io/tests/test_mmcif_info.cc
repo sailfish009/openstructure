@@ -29,6 +29,28 @@ using namespace ost::io;
 
 BOOST_AUTO_TEST_SUITE( io );
 
+BOOST_AUTO_TEST_CASE(mmcif_info_obsolete)
+{
+  BOOST_MESSAGE("  Running mmcif_info_obsolete tests...");
+
+  MMCifInfoObsolete obs = MMCifInfoObsolete();
+
+  obs.SetDate("2011-08-31");
+  obs.SetID(StringRef("OBSLTE", 6));
+  obs.SetPDBID("1FOO");
+  obs.SetReplacedPDBID("1BAR");
+
+  BOOST_CHECK(obs.GetDate() == "2011-08-31");
+  BOOST_CHECK(obs.GetID() == "Obsolete");
+  BOOST_CHECK(obs.GetPDBID() == "1FOO");
+  BOOST_CHECK(obs.GetReplacedPDBID() == "1BAR");
+
+  obs.SetID(StringRef("SPRSDE", 6));
+  BOOST_CHECK(obs.GetID() == "Supersede");
+
+  BOOST_MESSAGE("  done.");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_info_citation)
 {
   BOOST_MESSAGE("  Running mmcif_info_citation tests...");

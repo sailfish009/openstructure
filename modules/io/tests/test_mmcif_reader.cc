@@ -1142,6 +1142,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parseatomident)
   BOOST_MESSAGE("  done.");
 }
 
+/*
 BOOST_AUTO_TEST_CASE(mmcif_parseandaddatom)
 {
   mol::EntityHandle eh = mol::CreateEntity();
@@ -1156,6 +1157,7 @@ BOOST_AUTO_TEST_CASE(mmcif_parseandaddatom)
   //BOOST_CHECK_THROW(tmmcif_p.ParseAndAddAtom(cols), IOException);
   //BOOST_MESSAGE("  done.");
 }
+*/
 
 BOOST_AUTO_TEST_CASE(mmcif_testreader)
 {
@@ -1219,6 +1221,11 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   BOOST_CHECK(sd.GetMassMethod() == "Good Guess");
   BOOST_CHECK(sd.GetModelDetails() == "Even better guessing");
   BOOST_CHECK(sd.GetModelTypeDetails() == "Guess");
+  MMCifInfoObsolete obs = mmcif_p.GetInfo().GetObsoleteInfo();
+  BOOST_CHECK(obs.GetDate() == "2011-08-31");
+  BOOST_CHECK(obs.GetID() == "Obsolete");
+  BOOST_CHECK(obs.GetPDBID() == "1FOO");
+  BOOST_CHECK(obs.GetReplacedPDBID() == "2BAR");
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");

@@ -526,6 +526,85 @@ private:
   std::vector<String> authors_;       ///< author information
 };
 
+/// \brief container class for information on obsolete entries
+/// 
+class DLLEXPORT_OST_IO MMCifInfoObsolete {
+public:
+  /// \brief Create an object of information baout an obsolete entry.
+  MMCifInfoObsolete(): date_(""), id_(UNKNOWN), pdb_id_(""),
+    replaced_pdb_id_("") {};
+
+  /// \brief Set date of replacement.
+  ///
+  /// \param date
+  void SetDate(String date) { date_ = date; }
+
+  /// \brief Get the date string.
+  ///
+  /// \return date as string.
+  String GetDate() { return date_; }
+
+  /// \brief Set type of entry.
+  ///
+  /// \param type
+  void SetID(StringRef type)
+  {
+    if (type == StringRef("OBSLTE", 6)) {
+      id_ = OBSLTE;
+    }
+    else if (type == StringRef("SPRSDE", 6)) {
+      id_ = SPRSDE;
+    }
+  }
+
+  /// \brief Get type of entry.
+  ///
+  /// \return type as string, starting with an upper case letter.
+  String GetID()
+  {
+    if (id_ == OBSLTE) {
+      return "Obsolete";
+    }
+    if (id_ == SPRSDE) {
+      return "Supersede";
+    }
+    return "Unknown";
+  }
+
+  /// \brief Set id of replacement.
+  ///
+  /// \param id
+  void SetPDBID(String id) { pdb_id_ = id; }
+
+  /// \brief Get id of replacement.
+  ///
+  /// \return id
+  String GetPDBID() { return pdb_id_; }
+
+  /// \brief Set id of replaced entry.
+  ///
+  /// \param id
+  void SetReplacedPDBID(String id) { replaced_pdb_id_ = id; }
+
+  /// \brief Get id of replaced entry.
+  ///
+  /// \return id
+  String GetReplacedPDBID() { return replaced_pdb_id_; }
+
+private:
+  /// \enum types of obsolete entries
+  typedef enum {
+    OBSLTE,
+    SPRSDE,
+    UNKNOWN
+  } MMCifObsoleteType;
+
+  String date_;            ///< date of replacement
+  MMCifObsoleteType id_;   ///< type of entry
+  String pdb_id_;          ///< replacing entry
+  String replaced_pdb_id_; ///< replaced entry
+};
+
 /// \brief container class for additional information from MMCif files
 /// 
 /// \section mmcif annotation information
@@ -534,6 +613,11 @@ private:
 /// This class is set up to capture some of it. In detail, we have:
 /// 
 /// \li citations
+/// \li biounits
+/// \li transformation information from asym. unit to biounit
+/// \li structure information
+/// \li resolution
+/// \li method
 class DLLEXPORT_OST_IO MMCifInfo {
 public:
   /// \brief Create an info object.
@@ -632,6 +716,22 @@ public:
     return struct_details_;
   }
 
+  /// \brief Add a block of information on obsolete entries
+  ///
+  /// \param obsolete
+  void SetObsoleteInfo(MMCifInfoObsolete obsolete)
+  {
+    obsolete_ = obsolete;
+  }
+
+  /// \brief Get information on an obsolete entries
+  ///
+  /// \return MMCifInfoObsolete object
+  MMCifInfoObsolete GetObsoleteInfo() const
+  {
+    return obsolete_;
+  }
+
 //protected:
 
 private:
@@ -639,6 +739,7 @@ private:
   String exptl_method_;
   Real resolution_;
   MMCifInfoStructDetails struct_details_;     ///< mmCIF struct category
+  MMCifInfoObsolete obsolete_;                ///< obsolete/ superseded entry
   std::vector<MMCifInfoCitation> citations_;  ///< list of citations
   std::vector<MMCifInfoBioUnit>  biounits_;   ///< list of biounits
   std::vector<MMCifInfoTransOpPtr> transops_;

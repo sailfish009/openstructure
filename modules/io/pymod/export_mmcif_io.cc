@@ -195,7 +195,26 @@ void export_mmcif_io()
     .add_property("model_type_details",
                   &MMCifInfoStructDetails::GetModelTypeDetails,
                   &MMCifInfoStructDetails::SetModelTypeDetails)
-;
+  ;
+
+  class_<MMCifInfoObsolete>("MMCifInfoObsolete", init<>())
+    .def("SetDate", &MMCifInfoObsolete::SetDate)
+    .def("GetDate", &MMCifInfoObsolete::GetDate)
+    .def("SetID", &MMCifInfoObsolete::SetID)
+    .def("GetID", &MMCifInfoObsolete::GetID)
+    .def("SetPDBID", &MMCifInfoObsolete::SetPDBID)
+    .def("GetPDBID", &MMCifInfoObsolete::GetPDBID)
+    .def("SetReplacedPDBID", &MMCifInfoObsolete::SetReplacedPDBID)
+    .def("GetReplacedPDBID", &MMCifInfoObsolete::GetReplacedPDBID)
+    .add_property("date", &MMCifInfoObsolete::GetDate,
+                  &MMCifInfoObsolete::SetDate)
+    .add_property("id", &MMCifInfoObsolete::GetID,
+                  &MMCifInfoObsolete::SetID)
+    .add_property("pdb_id", &MMCifInfoObsolete::GetPDBID,
+                  &MMCifInfoObsolete::SetPDBID)
+    .add_property("replace_pdb_id", &MMCifInfoObsolete::GetReplacedPDBID,
+                  &MMCifInfoObsolete::SetReplacedPDBID)
+  ;
 
   class_<MMCifInfo>("MMCifInfo", init<>())
     .def("AddCitation", &MMCifInfo::AddCitation)
@@ -214,6 +233,8 @@ void export_mmcif_io()
                                    return_value_policy<copy_const_reference>()))
     .def("SetStructDetails", &MMCifInfo::SetStructDetails)
     .def("GetStructDetails", &MMCifInfo::GetStructDetails)
+    .def("SetObsoleteInfo", &MMCifInfo::SetObsoleteInfo)
+    .def("GetObsoleteInfo", &MMCifInfo::GetObsoleteInfo)
     .add_property("citations", make_function(&MMCifInfo::GetCitations,
                                    return_value_policy<copy_const_reference>()))
     .add_property("biounits", make_function(&MMCifInfo::GetBioUnits,
@@ -225,5 +246,7 @@ void export_mmcif_io()
                                    return_value_policy<copy_const_reference>()))
     .add_property("struct_details", &MMCifInfo::GetStructDetails,
                   &MMCifInfo::SetStructDetails)
+    .add_property("obsolete", &MMCifInfo::GetObsoleteInfo,
+                  &MMCifInfo::SetObsoleteInfo)
   ;
 }
