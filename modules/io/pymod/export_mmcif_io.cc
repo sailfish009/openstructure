@@ -16,8 +16,8 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/shared_ptr.hpp>
 #include <boost/python.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
@@ -248,5 +248,5 @@ void export_mmcif_io()
                   &MMCifInfo::SetStructDetails)
     .add_property("obsolete", &MMCifInfo::GetObsoleteInfo,
                   &MMCifInfo::SetObsoleteInfo)
-  ;
+ ;
 }
