@@ -331,11 +331,11 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     if (to<from) {
       throw std::runtime_error("to smaller than from");
     }
-    unsigned int n_frames=to-from;
+    unsigned int n_frames=ceil((to-from)/stride);
     if (n_atoms==0){
       throw std::runtime_error("EntityView is empty");
     }
-    if (n_frames<=stride) {
+    if (n_frames<=1) {
       throw std::runtime_error("number of frames is too small");
     }
     std::vector<unsigned long> indices;
@@ -358,4 +358,45 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
     return eh;
   }
 
+  Real AnalyzeRMSF(const CoordGroupHandle& traj, const EntityView& selection, int from, int to, unsigned int stride)
+  // This function extracts the rmsf between two entity views and assigns it 
+  // The views don't have to be from the same entity
+  // If you want to compare to frame i of the trajectory t, first use t.CopyFrame(i) for example:
+  // eh=io.LoadPDB(...),t=io.LoadCHARMMTraj(eh,...);Sele=eh.Select(...);t.CopyFrame(0);mol.alg.AnalyzeRMSD(t,Sele,Sele)
+  {
+    CheckHandleValidity(traj);
+    if (to==-1)to=traj.GetFrameCount();
+    unsigned int n_atoms=selection.GetAtomCount();
+    if (to<from) {
+      throw std::runtime_error("to smaller than from");
+    }
+    unsigned int n_frames=ceil((to-from)/stride);
+    if (n_atoms==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    if (n_frames<=1) {
+      throw std::runtime_error("number of frames is too small");
+    }
+    Real rmsf=0.0;
+    geom::Vec3 v;
+    std::vector<unsigned long> sele_indices;
+    std::vector<geom::Vec3> ref_pos(n_atoms,geom::Vec3(0.,0.,0.));
+    GetIndices(selection, sele_indices);
+    for (unsigned int j=0; j<n_atoms; ++j) {
+      for (int i=from; i<to; i+=stride) {
+        CoordFramePtr frame=traj.GetFrame(i);
+        ref_pos[j]+=frame->GetAtomPos(sele_indices[j]);
+      }
+      ref_pos[j]/=n_frames;
+    }
+    for (int i=from; i<to; i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      for (unsigned int j=0; j<n_atoms; ++j) {
+        v=frame->GetAtomPos(sele_indices[j])-ref_pos[j];
+        rmsf+=geom::Dot(v,v);
+      }
+    }
+    return pow(rmsf/float(n_atoms*n_frames),0.5);
+  }
+  
 }}} //ns
