@@ -400,14 +400,11 @@ void ChainImpl::AssignSecondaryStructure(SecStructure ss,
 
 Real ChainImpl::GetMass() const
 {
-  Real mass = 0;
+  double mass = 0;
   for (ResidueImplList::const_iterator i=residue_list_.begin(); 
         i!=residue_list_.end(); ++i) {
     ResidueImplPtr r=*i;
-    for (AtomImplList::iterator j=r->GetAtomList().begin(); 
-          j!=r->GetAtomList().end(); ++j) {
-      mass+=(*j)->GetMass();
-    }
+    mass+=r->GetMass();
   }
   return mass;
 }

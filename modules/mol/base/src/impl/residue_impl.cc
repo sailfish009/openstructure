@@ -451,7 +451,7 @@ void ResidueImpl::RemoveAltPositionsForAtom(const AtomImplPtr& atom) {
 
 Real ResidueImpl::GetMass() const
 {
-  Real mass = 0;
+  double mass = 0;
   for (AtomImplList::const_iterator i=atom_list_.begin(); 
        i!=atom_list_.end(); ++i) {
     mass+=(*i)->GetMass();
