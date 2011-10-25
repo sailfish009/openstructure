@@ -511,6 +511,12 @@ The Handle Classes
     The chemical class of a residue is used to broadly categorize residues based 
     on their chemical properties. For example, peptides belong  to the 
     `L_PEPTIDE_LINKING` or `D_PEPTIDE_LINKING` classes.
+
+  .. attribute:: chem_type
+
+    The chemical type of a residue is a classification of all compounds
+    obtained from the PDB component dictionary. For example, ions belong to the
+    class `ChemType::IONS`, amino acids to `ChemType::AMINOACIDS`.
   
   .. attribute:: sec_structure
   
@@ -559,6 +565,9 @@ The Handle Classes
   
     See :attr:`psi_torsion`
   
+  .. method:: GetChemType()
+    
+    See :attr:`chem_type`
   
 
 .. class:: AtomHandle
