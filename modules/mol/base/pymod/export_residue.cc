@@ -21,6 +21,7 @@
 
 using namespace boost::python;
 #include <ost/mol/chem_class.hh>
+#include <ost/mol/chem_type.hh>
 #include <ost/mol/mol.hh>
 #include <ost/geom/export_helper/vector.hh>
 using namespace ost;
@@ -72,6 +73,21 @@ void export_Residue()
   ;
   implicitly_convertible<char, ChemClass>();
   
+  class_<ChemType>("ChemType", init<char>(args("chem_type")))
+    .def(self!=self)
+    .def(self==self)
+    .def(self_ns::str(self))
+    .def("IsIon", &ChemType::IsIon)
+    .def("IsNucleotide", &ChemType::IsNucleotide)
+    .def("IsSaccharide", &ChemType::IsSaccharide)
+    .def("IsAminoAcid", &ChemType::IsAminoAcid)
+    .def("IsCoenzyme", &ChemType::IsCoenzyme)
+    .def("IsDrug", &ChemType::IsDrug)
+    .def("IsNonCanonical", &ChemType::IsNonCanonical)
+    .def("IsKnown", &ChemType::IsKnown)
+  ;
+  implicitly_convertible<char, ChemType>();
+
   class_<ResNum>("ResNum", init<int>(args("num")))
     .def(init<int,char>(args("num", "ins_code")))
     .def("GetNum", &ResNum::GetNum)
@@ -151,13 +167,15 @@ void export_Residue()
 
     .def("GetKey", &ResidueBase::GetKey,
          return_value_policy<copy_const_reference>())
-     .def("GetName", &ResidueBase::GetName,
+    .def("GetName", &ResidueBase::GetName,
          return_value_policy<copy_const_reference>())
     .def("GetNumber", &ResidueBase::GetNumber,
          return_value_policy<copy_const_reference>())
     .def("GetChemClass", &ResidueBase::GetChemClass)
     .add_property("chem_class", &ResidueBase::GetChemClass, set_chemclass)
     .def("SetChemClass", set_chemclass)
+    .def("GetChemType", &ResidueBase::GetChemType)
+    .add_property("chem_type", &ResidueBase::GetChemType)
     .add_property("is_ligand", &ResidueBase::IsLigand, &ResidueBase::SetIsLigand)
     .def("IsLigand", &ResidueBase::IsLigand)
     .def("SetIsLigand", &ResidueBase::SetIsLigand)

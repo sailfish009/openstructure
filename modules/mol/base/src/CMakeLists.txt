@@ -50,6 +50,7 @@ chain_handle.hh
 chain_view.hh
 chain_type.hh
 chem_class.hh
+chem_type.hh
 coord_group.hh
 coord_source.hh
 in_mem_coord_source.hh

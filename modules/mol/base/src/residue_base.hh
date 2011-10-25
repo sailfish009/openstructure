@@ -27,6 +27,7 @@
 #include <ost/mol/sec_structure.hh>
 #include <ost/mol/handle_type_fw.hh>
 #include <ost/mol/chem_class.hh>
+#include <ost/mol/chem_type.hh>
 
 #include <ost/generic_property.hh>
 #include "property_id.hh"
@@ -55,7 +56,12 @@ namespace ost { namespace mol {
 /// participate in a peptide bond. For nucleotides, the chemical class is either
 /// ChemClass::RNA_LINKING or ChemClass::DNA_LINKING. For unknown compounds the 
 /// chemical class is ChemClass::UNKNOWN.
-/// 
+///
+/// In addition, residues have a ChemType. A classification of all components into
+/// nine categories (ions, non-canonical molecules, saccharised, nucleotides,
+/// amino acids, co-enzymes, water coordinated ions, drugs, solvents) as obtained
+/// from the PDB.
+///
 /// When loading an entity from file, the one-letter and chemical class of a
 /// residue are assigned by the \ref conop::Builder "default builder".
 class DLLEXPORT_OST_MOL ResidueBase: 
@@ -116,7 +122,12 @@ public:
   ChemClass GetChemClass() const;
   
   void SetChemClass(ChemClass cc);
-  
+
+  /// \brief PDB ligand classification from component dictionary
+  ChemType GetChemType() const;
+
+  void SetChemType(ChemType ct);
+
   /// \brief    Get secondary structure type. By default, the residue is in COIL
   ///           conformation.
   SecStructure GetSecStructure() const;

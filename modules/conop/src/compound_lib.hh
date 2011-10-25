@@ -52,6 +52,7 @@ private:
 private:
   CompoundMap  compound_cache_;
   sqlite3*     conn_;
+  bool         chem_type_available_; // weather pdbx_type is available in db
 };
 
 }}

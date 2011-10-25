@@ -34,6 +34,7 @@
 #include <ost/mol/impl/torsion_impl_fw.hh>
 #include <ost/mol/impl/atom_group.hh>
 #include <ost/mol/chem_class.hh>
+#include <ost/mol/chem_type.hh>
 
 #include <ost/generic_property.hh>
 #include <ost/mol/property_id.hh>
@@ -196,6 +197,12 @@ public:
   ChemClass GetChemClass() const {
     return chem_class_;
   }
+  ChemType GetChemType() const {
+    return chem_type_;
+  }
+  void SetChemType(ChemType ct) {
+    chem_type_=ct;
+  }
 
   TorsionImplP FindTorsion(const String& torsion_name) const;
   
@@ -227,6 +234,7 @@ private:
   TorsionImplList            torsion_list_;
   SecStructure               sec_structure_;
   ChemClass                  chem_class_;
+  ChemType                   chem_type_;
   char                       olc_;
   // whether the residue is part of the protein.
   // TODO: this should be fixed to be a enum'ed type aka

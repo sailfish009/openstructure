@@ -121,6 +121,7 @@ void RuleBasedBuilder::FillResidueProps(mol::ResidueHandle residue)
   if (!last_compound_)
     return;
   residue.SetChemClass(last_compound_->GetChemClass());
+  residue.SetChemType(last_compound_->GetChemType());
   residue.SetOneLetterCode(last_compound_->GetOneLetterCode());
 };
 
@@ -172,6 +173,7 @@ void RuleBasedBuilder::ReorderAtoms(mol::ResidueHandle residue,
     LOG_WARNING("residue " << residue << " doesn't look like a standard " 
                 << residue.GetKey() << " (" << compound->GetFormula() << ")");
     residue.SetChemClass(mol::ChemClass(mol::ChemClass::UNKNOWN));
+    residue.SetChemType(mol::ChemType(mol::ChemType::UNKNOWN));
     residue.SetOneLetterCode('?');
   }
 }
