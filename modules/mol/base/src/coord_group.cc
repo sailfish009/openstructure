@@ -171,7 +171,7 @@ void CoordGroupHandle::Capture(uint frame)
   }  
 }
 
-CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected) const
+CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected, int first, int last) const
 {
   this->CheckValidity();
   std::vector<unsigned long> indices;
@@ -194,8 +194,9 @@ CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected) const
 
   CoordGroupHandle filtered_cg=CreateCoordGroup(new_ent.GetAtomList());
   std::vector<geom::Vec3> vecs(indices.size());
-  for (size_t i=0; i<this->GetFrameCount(); ++i) {
-    LOG_INFO("Filtering frame " << i << "/" << this->GetFrameCount());
+  if (last==-1) last=this->GetFrameCount();
+  for (int i=first; i<last; ++i) {
+    LOG_INFO("Filtering frame " << i << "/" << last);
     CoordFramePtr frame=this->GetFrame(i);
     for (std::vector<unsigned long>::const_iterator 
          j=indices.begin(), e2=indices.end(); j!=e2; ++j) {

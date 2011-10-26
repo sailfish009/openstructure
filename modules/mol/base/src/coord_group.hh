@@ -85,7 +85,7 @@ public:
   
   /// \brief return a filtered coord group, containing only the atoms in the 
   ///     view
-  CoordGroupHandle Filter(const EntityView& selected) const;
+  CoordGroupHandle Filter(const EntityView& selected,int first=0,int last=-1) const;
   
   CoordGroupHandle(CoordSourcePtr source);
 
