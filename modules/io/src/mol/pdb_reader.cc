@@ -773,7 +773,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     assert(curr_residue_.IsValid());
   }
   // finally add atom
-  LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
+  LOG_DEBUG("adding atom " << aname << " (" << s_ele << " '" << alt_loc << "'" << ") @" << apos);
   mol::AtomHandle ah;
   if (curr_residue_.GetName()!=res_name.str()) {
     if (!profile_.fault_tolerant && alt_loc==' ') {
@@ -798,7 +798,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       return;
     }
   }
-  if (alt_loc!=' ') {
+  if (!profile_.quack_mode && alt_loc!=' ') {
     // Check if there is already a atom with the same name.
     mol::AtomHandle me=curr_residue_.FindAtom(aname);
     if (me.IsValid()) {
