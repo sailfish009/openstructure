@@ -73,7 +73,7 @@ void export_Residue()
   ;
   implicitly_convertible<char, ChemClass>();
   
-  class_<ChemType>("ChemType", init<char>(args("chem_type")))
+  object ct_class = class_<ChemType>("ChemType", init<char>(args("chem_type")))
     .def(self!=self)
     .def(self==self)
     .def(self_ns::str(self))
@@ -85,8 +85,19 @@ void export_Residue()
     .def("IsDrug", &ChemType::IsDrug)
     .def("IsNonCanonical", &ChemType::IsNonCanonical)
     .def("IsKnown", &ChemType::IsKnown)
+    .def("IsWater", &ChemType::IsWater)
   ;
   implicitly_convertible<char, ChemType>();
+  ct_class.attr("IONS")=char(ChemType::IONS);
+  ct_class.attr("NONCANONICALMOLS")=char(ChemType::NONCANONICALMOLS);
+  ct_class.attr("SACCHARIDES")=char(ChemType::SACCHARIDES);
+  ct_class.attr("NUCLEOTIDES")=char(ChemType::NUCLEOTIDES);
+  ct_class.attr("AMINOACIDS")=char(ChemType::AMINOACIDS);
+  ct_class.attr("COENZYMES")=char(ChemType::COENZYMES);
+  ct_class.attr("WATERCOORDIONS")=char(ChemType::WATERCOORDIONS);
+  ct_class.attr("DRUGS")=char(ChemType::DRUGS);
+  ct_class.attr("WATERS")=char(ChemType::WATERS);
+  ct_class.attr("UNKNOWN")=char(ChemType::UNKNOWN);
 
   class_<ResNum>("ResNum", init<int>(args("num")))
     .def(init<int,char>(args("num", "ins_code")))
