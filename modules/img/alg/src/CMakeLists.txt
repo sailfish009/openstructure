@@ -25,6 +25,7 @@ power_spectrum.cc
 randomize.cc
 smooth_mask_image.cc
 stat.cc
+stat_accumulator.cc
 stat_min_max.cc
 alg_transform.cc
 alg_mirror.cc
@@ -75,6 +76,7 @@ power_spectrum.hh
 randomize.hh
 smooth_mask_image.hh
 stat.hh
+stat_accumulator.hh
 stat_min_max.hh
 threshold.hh
 transcendentals.hh
