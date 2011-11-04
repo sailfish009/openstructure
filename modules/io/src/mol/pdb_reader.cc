@@ -695,10 +695,10 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     occ=std::make_pair(true, Real(1.0));
     temp=std::make_pair(true, Real(0.0));
     if (line.length()>=60) {
-      charge=line.substr(54,6).ltrim().to_float();      
+      charge=line.substr(55,7).ltrim().to_float();
     }
-    if (line.length()>=66) {
-      radius=line.substr(60, 6).ltrim().to_float();      
+    if (line.length()>=68) {
+      radius=line.substr(63,6).ltrim().to_float();
     }
   } else {
     if (line.length()>=60) {

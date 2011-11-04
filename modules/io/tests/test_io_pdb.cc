@@ -855,4 +855,88 @@ BOOST_AUTO_TEST_CASE(write_charmm_ter)
                             "testfiles/pdb/charmm_ter-out.pdb"));
 }
 
+BOOST_AUTO_TEST_CASE(test_pqr_import_handler)
+{
+  String fname("testfiles/test_in.pqr");
+
+  mol::EntityHandle eh=mol::CreateEntity();
+  EntityIOPDBHandler pdbh;
+
+  BOOST_CHECK(EntityIOPDBHandler::ProvidesImport(fname));
+  BOOST_CHECK(EntityIOPDBHandler::ProvidesImport("test_in.PQR"));
+
+  BOOST_CHECK(EntityIOPDBHandler::ProvidesExport(fname));
+  BOOST_CHECK(EntityIOPDBHandler::ProvidesExport("test_in.PQR"));
+
+  pdbh.Import(eh,"testfiles/pdb/simple.pqr");
+}
+
+
+BOOST_AUTO_TEST_CASE(test_pqr_read_atom)
+{
+  String fname("testfiles/pdb/simple.pqr");
+  PDBReader reader(fname, IOProfile());
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_REQUIRE_EQUAL(ent.GetChainCount(), 1);
+  BOOST_REQUIRE_EQUAL(ent.GetResidueCount(), 5);
+  BOOST_REQUIRE_EQUAL(ent.GetAtomCount(), 91);
+  mol::AtomHandle a1=ent.FindAtom(" ", mol::ResNum(1), "N");
+  BOOST_REQUIRE(a1.IsValid());
+  BOOST_CHECK_EQUAL(a1.GetName(), "N");
+  BOOST_CHECK_EQUAL(a1.GetResidue().GetName(), "MET");
+  BOOST_CHECK_EQUAL(a1.GetResidue().GetChain().GetName(), " ");
+
+
+  BOOST_CHECK_EQUAL(a1.GetPos(), geom::Vec3(21.6, 35.3, 56.7));
+  BOOST_CHECK_EQUAL(a1.GetElement(), "");
+  BOOST_CHECK_EQUAL(a1.IsHetAtom(), false);
+  BOOST_CHECK_CLOSE(a1.GetCharge(), Real(-0.3755), Real(1e-4));
+  BOOST_CHECK_CLOSE(a1.GetRadius(), Real(2.0005), Real(1e-4));
+
+  mol::AtomHandle a2=ent.FindAtom(" ", mol::ResNum(2), "CZ");
+  BOOST_REQUIRE(a2.IsValid());
+  BOOST_CHECK_EQUAL(a2.GetName(), "CZ");
+  BOOST_CHECK_EQUAL(a2.GetResidue().GetName(), "ARG");
+  BOOST_CHECK_EQUAL(a2.GetResidue().GetChain().GetName(), " ");
+
+  BOOST_CHECK_EQUAL(a2.GetPos(), geom::Vec3(23.9, 28.7, 56.5));
+  BOOST_CHECK_EQUAL(a2.GetElement(), "");
+  BOOST_CHECK_EQUAL(a2.IsHetAtom(), false);
+  BOOST_CHECK_CLOSE(a2.GetCharge(), Real(0.2507), Real(1e-4));
+  BOOST_CHECK_CLOSE(a2.GetRadius(), Real(1.7503), Real(1e-4));
+}
+
+BOOST_AUTO_TEST_CASE(test_pqr_write_atom)
+{
+  std::stringstream out;
+  PDBWriter writer(out, IOProfile());
+  writer.SetIsPQR(true);
+
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.EditXCS();
+  mol::ChainHandle ch=edi.InsertChain("A");
+  mol::ResidueHandle r=edi.AppendResidue(ch, "GLY");
+
+  mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), "C");
+  a.SetOccupancy(1.0);
+  a.SetBFactor(128.0);
+  a.SetCharge(-0.6543);
+  a.SetRadius(1.2345);
+  mol::AtomHandle a2=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), "C");
+  a2.SetOccupancy(1.0);
+  a2.SetBFactor(128.0);
+  a2.SetCharge(0.1234);
+  a2.SetRadius(2.5432);
+  writer.Write(ent);
+  String s=out.str();
+  BOOST_CHECK_EQUAL(s.substr(0, 54),
+                    "ATOM      1  CA  GLY A   1      32.000-128.000  -2.500");
+  BOOST_CHECK_EQUAL(s.substr(54, 26),
+                    " -0.6543 1.2345        C  ");
+
+  PDBWriter fwriter(String("testfiles/pdb/pqr_atom-out.pqr"), IOProfile());
+  BOOST_CHECK_EQUAL(fwriter.IsPQR(), true);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

@@ -130,8 +130,8 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
     line(46, 8)=fmt::LPaddedFloat(p[2],  3);
     
     if (is_pqr) {
-      line(54, 6)=fmt::LPaddedFloat(atom.GetCharge(), 2);
-      line(60, 6)=fmt::LPaddedFloat(atom.GetRadius(), 2);
+      line(55, 7)=fmt::LPaddedFloat(atom.GetCharge(), 4);
+      line(63, 6)=fmt::LPaddedFloat(atom.GetRadius(), 4);
     } else {
       line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
       Real bfac=atom.GetBFactor();
@@ -351,6 +351,9 @@ PDBWriter::PDBWriter(const boost::filesystem::path& filename,
   charmm_style_(profile.dialect=="CHARMM"), is_pqr_(false),
   profile_(profile), filename_("")
 {
+  if (boost::iequals(".pqr", boost::filesystem::extension(filename))) {
+    is_pqr_=true;
+  }
   if (boost::iequals(".gz", boost::filesystem::extension(filename))) {
     out_.push(boost::iostreams::gzip_compressor());
   }
@@ -362,6 +365,9 @@ PDBWriter::PDBWriter(const String& filename, const IOProfile& profile):
   multi_model_(false), charmm_style_(profile.dialect=="CHARMM"), 
   is_pqr_(false), profile_(profile), filename_(filename)
 {
+  if (boost::iequals(".pqr", boost::filesystem::extension(filename))) {
+    is_pqr_=true;
+  }
   if (boost::iequals(".gz", boost::filesystem::extension(filename))) {
     out_.push(boost::iostreams::gzip_compressor());
   }
