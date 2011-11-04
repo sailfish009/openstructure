@@ -64,7 +64,7 @@ void StatBase::VisitState(const ImageStateImpl<T,D>& isi)
   ValIndex maxindex(-std::numeric_limits<Real>::max(),Point(0,0,0));
   min_ = std::numeric_limits<Real>::max();
   max_ = -std::numeric_limits<Real>::max();
-  StatAccumulator acc;
+  StatAccumulator<> acc;
 
   int wi=isi.GetSize()[0];
   int he=isi.GetSize()[1];
@@ -124,7 +124,7 @@ void StatBase::VisitFunction(const Function& fnc)
   ValIndex maxindex(-std::numeric_limits<Real>::max(),Point(0,0,0));
   min_ = std::numeric_limits<Real>::max();
   max_ = -std::numeric_limits<Real>::max();
-  StatAccumulator acc;
+  StatAccumulator<> acc;
 
   for(ExtentIterator it(fnc.GetExtent());!it.AtEnd(); ++it) {
     Real val=fnc.GetReal(it);

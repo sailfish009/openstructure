@@ -25,7 +25,6 @@ power_spectrum.cc
 randomize.cc
 smooth_mask_image.cc
 stat.cc
-stat_accumulator.cc
 stat_min_max.cc
 alg_transform.cc
 alg_mirror.cc

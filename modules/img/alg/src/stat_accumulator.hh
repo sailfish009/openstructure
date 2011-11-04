@@ -25,21 +25,168 @@
 
 namespace ost { namespace img { namespace alg {
 
+template<unsigned int MAX_MOMENT=4>
 class DLLEXPORT_IMG_ALG StatAccumulator
 {
 public:
-  StatAccumulator();
-  void operator()(Real val);
-  StatAccumulator operator+(const StatAccumulator& acc) const;
-  StatAccumulator& operator+=(const StatAccumulator& acc);
+  StatAccumulator():
+    mean_(0.0),
+    sum_(0.0),
+    sum2_(0.0),
+    m2_(0.0),
+    m3_(0.0),
+    m4_(0.0),
+    n_(1)
+  {}
 
-  Real GetMean() const ;
-  Real GetSum() const ;
-  Real GetVariance() const;
-  Real GetStandardDeviation() const ;
-  Real GetRootMeanSquare() const;
-  Real GetSkewness() const ;
-  Real GetKurtosis() const;
+  void operator()(Real val)
+  {
+    Real delta,delta_n,delta_n2,term;
+    if(MAX_MOMENT>0){
+      delta = val - mean_;
+      delta_n = delta / n_;
+    }
+    if(MAX_MOMENT>3){
+      delta_n2 = delta_n * delta_n;
+    }
+    if(MAX_MOMENT>1){
+      term = delta * delta_n * (n_-1);
+    }
+    if(MAX_MOMENT>3){
+      m4_ += term * delta_n2 * (n_*n_ - 3*n_ + 3) + 6 * delta_n2 * m2_ - 4 * delta_n * m3_;
+    }
+    if(MAX_MOMENT>2){
+      m3_ += term * delta_n * (n_ - 2) - 3 * delta_n * m2_;
+    }
+    if(MAX_MOMENT>1){
+      m2_ += term;
+    }
+    if(MAX_MOMENT>0){
+      mean_ += delta_n;
+    }
+    n_+=1;
+    sum_+=val;
+    sum2_+=val*val;
+  }
+
+  StatAccumulator operator+(const StatAccumulator& acc2) const
+  {
+    StatAccumulator acc(acc2);
+    acc+=*this;
+    return acc;
+  }
+
+  StatAccumulator& operator+=(const StatAccumulator& acc)
+  {
+    if(acc.n_==1){
+      return *this;
+    }
+    if(n_==1){
+      mean_=acc.mean_;
+      sum_=acc.sum_;
+      sum2_=acc.sum2_;
+      m2_=acc.m2_;
+      m3_=acc.m3_;
+      m4_=acc.m4_;
+      n_=acc.n_;
+      return *this;
+    }
+    Real delta,delta_n,delta_n2,na,nanb;
+    Real nb=acc.n_-1;
+    if(MAX_MOMENT>0){
+      na=n_-1;
+      delta = acc.mean_ - mean_;
+      delta_n = delta / (na+nb);
+    }
+    if(MAX_MOMENT>1){
+      nanb=na*nb;
+    }
+    if(MAX_MOMENT>2){
+      delta_n2 = delta_n * delta_n;
+    }
+    if(MAX_MOMENT>3){
+      m4_+=acc.m4_+delta*delta_n*delta_n2*nanb*(na*na-nanb+nb*nb)+6.0*delta_n2*(na*na*acc.m2_+nb*nb*m2_)+4.0*delta_n*(na*acc.m3_-nb*m3_);
+    }
+    if(MAX_MOMENT>2){
+      m3_+=acc.m3_+delta*delta_n2*nanb*(na-nb)+3.0*delta_n*(na*acc.m2_-nb*m2_);
+    }
+    if(MAX_MOMENT>1){
+      m2_ += acc.m2_+delta*delta_n*nanb;
+    }
+    if(MAX_MOMENT>0){
+      mean_ += nb*delta_n;
+    }
+    sum_+=acc.sum_;
+    sum2_+=acc.sum2_;
+    n_+=nb;
+    return *this;
+  }
+
+  Real GetNumSamples() const
+  {
+    return n_-1.0;
+  }
+
+  Real GetMean() const
+  {
+    if(MAX_MOMENT<1){
+      throw Error("Mean was not calculated.");
+    }
+    return mean_;
+  }
+
+  Real GetSum() const
+  {
+    return sum_;
+  }
+
+  Real GetVariance() const
+  {
+    if(MAX_MOMENT<2){
+      throw Error("Variance was not calculated.");
+    }
+    if(n_==1.0){
+      return 0.0;
+    }
+    return m2_/(n_-1);
+  }
+
+  Real GetStandardDeviation() const
+  {
+    return sqrt(GetVariance());
+  }
+
+  Real GetRootMeanSquare() const
+  {
+    if(n_==1.0){
+      return 0.0;
+    }
+    return sqrt(sum2_/(n_-1));
+  }
+
+  Real GetSkewness() const
+  {
+    if(MAX_MOMENT<3){
+      throw Error("Skewness was not calculated.");
+    }
+    if(m2_<1e-20){
+      return 0.0;
+    }else{
+      return m3_/sqrt(m2_*m2_*m2_);
+    }
+  }
+
+  Real GetKurtosis() const
+  {
+    if(MAX_MOMENT<4){
+      throw Error("Kurtosis was not calculated.");
+    }
+    if(m2_<1e-20){
+      return 0.0;
+    }else{
+      return ((n_-1)*m4_) / (m2_*m2_);
+    }
+  }
 
 private:
   Real mean_;
