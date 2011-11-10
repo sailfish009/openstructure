@@ -166,6 +166,11 @@ ConstSequenceHandle AlignmentHandle::FindSequence(const String& name) const
   return ConstSequenceHandle(impl_->FindSequence(name));
 }
 
+int AlignmentHandle::FindSequenceIndex(const String& name) const
+{
+  this->CheckValidity();
+  return impl_->FindSequenceIndex(name);
+}  
 
 void AlignmentHandle::Cut(int start, int end)
 {

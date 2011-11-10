@@ -58,6 +58,18 @@ SequenceImplPtr SequenceListImpl::FindSequence(const String& name) const
   return SequenceImplPtr();
 }
 
+
+int SequenceListImpl::FindSequenceIndex(const String& name) const
+{
+  for (size_t i=0; i<list_.size(); ++i) {
+    if (list_[i]->GetName()==name) {
+      return int(i);
+    }
+  }
+  return -1;
+}
+  
+  
 String SequenceListImpl::ToString(int width) const
 {
   std::stringstream buffer;

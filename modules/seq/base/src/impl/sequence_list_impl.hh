@@ -65,6 +65,8 @@ public:
 
   SequenceImplPtr FindSequence(const String& name) const;
 
+  int FindSequenceIndex(const String& name) const;
+  
   String ToString(int width=80) const;
 
   SequenceListImplPtr Slice(int first, int n) const;

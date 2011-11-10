@@ -97,7 +97,9 @@ public:
   /// If several sequences have the same name, the first matching sequence will
   /// be returned.
   ConstSequenceHandle FindSequence(const String& name) const;
-
+  
+  int FindSequenceIndex(const String& name) const;
+  
   /// \brief attach view to given sequence
   /// \sa SequenceHandle::AttachView(const mol::EntityView&)
   void AttachView(int seq_index, const mol::EntityView& view);
