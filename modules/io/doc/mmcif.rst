@@ -122,7 +122,7 @@ of the annotation available.
 
   .. method:: GetBioUnits()
 
-    See :attr:`citations`
+    See :attr:`biounits`
 
   .. method:: SetMethod(method)
 
