@@ -153,7 +153,7 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   if(!istream) {
     /* premature EOF */
     LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
-              << frame_num);
+              << frame_num << "Nothing left to be read");
     return false;
   }
   // x coord
@@ -164,7 +164,12 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   for(uint j=0;j<frame.size();++j) {
     frame[j].x=xlist[j];
   }
-
+  if(!istream) {
+    /* premature EOF */
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num << ". No y coordinates");
+    return false;
+  }
   // y coord
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
@@ -173,7 +178,12 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   for(uint j=0;j<frame.size();++j) {
     frame[j].y=xlist[j];
   }
-
+  if(!istream) {
+    /* premature EOF */
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num << ". No z coordinates");
+    return false;
+  }
   // z coord
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
@@ -181,6 +191,12 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   for(uint j=0;j<frame.size();++j) {
     frame[j].z=xlist[j];
+  }
+  if(!istream) {
+    /* premature EOF */
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num);
+    return false;
   }
   return true;
 }
@@ -201,10 +217,6 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
   DCDHeader header; 
   bool swap_flag=false, skip_flag=false, gap_flag=false;
   read_dcd_header(istream, header, swap_flag, skip_flag, gap_flag);
-  LOG_DEBUG("LoadCHARMMTraj: " << header.num << " trajectories with " 
-               << header.atom_count << " atoms (" << header.f_atom_count 
-               << " fixed) each");
-
   if(alist.size() != static_cast<size_t>(header.t_atom_count)) {
     LOG_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
                << " in coordinate file, " << header.t_atom_count 
@@ -218,6 +230,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
   size_t frame_size=calc_frame_size(skip_flag, gap_flag, xlist.size());
   int i=0;
   for(;i<header.num;i+=stride) {
+    std::cout << i << " " << header.num << std::endl;
     if (!read_frame(istream, header, frame_size, skip_flag, gap_flag, 
                     swap_flag, xlist, clist, i)) {
       break;
@@ -234,7 +247,8 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
                  << istream.tellg());
   }
 
-  LOG_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with " << cg.GetAtomCount() << " atoms each");
+  LOG_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with "
+              << cg.GetAtomCount() << " atoms each");
 
   return cg;
 }
