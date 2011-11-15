@@ -143,6 +143,42 @@ BOOST_AUTO_TEST_CASE(test_parse_compnd_record5)
 }
 
 
+//~ BOOST_AUTO_TEST_CASE(test_parse_compnd_record6) 
+//~ {
+  //~ String fname("testfiles/pdb/1oax.pdb");
+  //~ PDBReader reader(fname, IOProfile()); 
+  //~ mol::EntityHandle ent=mol::CreateEntity();
+  //~ 
+  //~ reader.Import(ent);
+  //~ mol::ChainHandle ch = ent.FindChain("I");
+  //~ BOOST_CHECK(ch.HasProp("mol_id")==true);
+  //~ BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+//~ 
+  //~ ch = ent.FindChain("L");
+  //~ BOOST_CHECK(ch.HasProp("mol_id")==true);
+  //~ BOOST_CHECK(ch.GetIntProp("mol_id")==2);
+//~ }
+
+BOOST_AUTO_TEST_CASE(test_parse_compnd_record7) 
+{
+  String fname("testfiles/pdb/2p6a.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  
+  reader.Import(ent);
+  mol::ChainHandle ch = ent.FindChain("A");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+  ch = ent.FindChain("D");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==2);
+
+  ch = ent.FindChain("E");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==3);
+}
+
+
 //COMPND   3 CHAIN: A V; 
 BOOST_AUTO_TEST_CASE(test_parse_compnd_missing_comma_chain_record) 
 {
