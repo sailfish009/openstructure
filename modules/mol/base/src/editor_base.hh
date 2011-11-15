@@ -153,7 +153,9 @@ public:
                      unsigned char bond_order);
 
   void RenameResidue(ResidueHandle res, const String& new_name);
-
+  
+  void SetResidueNumber(ResidueHandle res, const ResNum& num);
+  
   void RenameChain(ChainHandle chain, const String& new_name);
 
   /// \brief Assign type of chain according to ChainType.
