@@ -144,14 +144,16 @@ size_t calc_frame_size(bool skip_flag, bool gap_flag, size_t num_atoms)
 bool read_frame(std::istream& istream, const DCDHeader& header, 
                 size_t frame_size, bool skip_flag, bool gap_flag, 
                 bool swap_flag, std::vector<float>& xlist,
-                std::vector<geom::Vec3>& frame)
+                std::vector<geom::Vec3>& frame,
+                uint frame_num)
 {
   char dummy[4];
   if(skip_flag) istream.seekg(14*4,std::ios_base::cur);
   // read each frame
   if(!istream) {
     /* premature EOF */
-    LOG_ERROR("LoadCHARMMTraj: premature end of file, frames read");
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num);
     return false;
   }
   // x coord
@@ -217,7 +219,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
   int i=0;
   for(;i<header.num;i+=stride) {
     if (!read_frame(istream, header, frame_size, skip_flag, gap_flag, 
-                    swap_flag, xlist, clist)) {
+                    swap_flag, xlist, clist, i)) {
       break;
     }
     cg.AddFrame(clist);
@@ -296,7 +298,7 @@ void DCDCoordSource::FetchFrame(uint frame)
   stream_.seekg(pos,std::ios_base::beg);
   std::vector<float> xlist(header_.t_atom_count);
   if (!read_frame(stream_, header_, frame_size, skip_flag_, gap_flag_, 
-                  swap_flag_, xlist, *frame_.get())) {
+                  swap_flag_, xlist, *frame_.get(), frame)) {
   }  
 }
 
