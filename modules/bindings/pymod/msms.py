@@ -121,7 +121,7 @@ def _ParseAreaFile(entity, selection, file, asa_prop, esa_prop):
       raise RuntimeError, "Atom count (%d) unequeal to number of atoms in area file (%d)" % (view.GetAtomCount(), len(area_lines))
   for l in area_lines:
       atom_no, sesa, sasa = l.split()
-      a = entity.atoms[int(atom_no)]
+      a = view.atoms[int(atom_no)]
       if asa_prop:
         a.SetFloatProp(asa_prop, float(sasa))
       if esa_prop:
