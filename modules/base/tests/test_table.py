@@ -980,7 +980,7 @@ class TestTable(unittest.TestCase):
     self.CompareImages(img1, img2)
     #pl.show()
 
-  def testPlotROCSameValue(self):
+  def testPlotROCSameValues(self):
     if not HAS_MPL or not HAS_PIL:
       return
     tab = Table(['classific', 'score'], 'bf',
@@ -1004,10 +1004,25 @@ class TestTable(unittest.TestCase):
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
     self.assertAlmostEquals(auc, auc_ref)
 
-  def testCalcROCAUCSameValue(self):
+  def testCalcROC(self):
     if not HAS_NUMPY:
       return
-    auc_ref = 0.66
+    tab = Table(['classific', 'score'], 'ff',
+                classific=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    auc = tab.ComputeROCAUC(score_col='score', class_col='classific', class_cutoff=0.5)
+    self.assertEquals(auc, 1.0)
+
+  def testCalcROCFromFile(self):
+    tab = Table.Load(os.path.join('testfiles','roc_table.dat'))
+    auc = tab.ComputeROCAUC(score_col='prediction', class_col='reference', class_cutoff=0.4)
+    self.assertEquals(auc, 1.0)
+      
+
+  def testCalcROCAUCSameValues(self):
+    if not HAS_NUMPY:
+      return
+    auc_ref = 0.685
     tab = Table(['classific', 'score'], 'bf',
                 classific=[True, True, False, True, True, True, False, False, True, False, True, False, True, False, False, False, True, False, True, False],
                 score=[0.9, 0.8, 0.7, 0.7, 0.7, 0.7, 0.53, 0.52, 0.51, 0.505, 0.4, 0.4, 0.4, 0.4, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])

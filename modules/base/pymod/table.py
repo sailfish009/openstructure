@@ -894,6 +894,9 @@ class Table:
     there are not enough data points to calculate a correlation coefficient, 
     None is returned.
     """
+    if IsStringLike(col1) and IsStringLike(col2):
+      col1 = self.GetColIndex(col1)
+      col2 = self.GetColIndex(col2)
     vals1, vals2=([],[])
     for v1, v2 in zip(self[col1], self[col2]):
       if v1!=None and v2!=None:
@@ -1203,6 +1206,12 @@ class Table:
       class_val = row[class_idx]
       score_val = row[score_idx]
       if class_val!=None:
+        if old_score_val==None:
+          old_score_val = score_val
+        if score_val!=old_score_val:
+          x.append(fp)
+          y.append(tp)
+          old_score_val = score_val
         if class_type=='bool':
           if class_val==True:
             tp += 1
@@ -1213,10 +1222,8 @@ class Table:
             tp += 1
           else:
             fp += 1
-        if score_val!=old_score_val:
-          x.append(fp)
-          y.append(tp)
-          old_score_val = score_val
+    x.append(fp)
+    y.append(tp)
     x = [float(v)/x[-1] for v in x]
     y = [float(v)/y[-1] for v in y]
     return x,y
