@@ -907,6 +907,34 @@ class Table:
     except:
       return None
 
+  def SpearmanCorrel(self, col1, col2):
+    """
+    Calculate the Spearman correlation coefficient between col1 and col2, only 
+    taking rows into account where both of the values are not equal to None. If 
+    there are not enough data points to calculate a correlation coefficient, 
+    None is returned.
+    """
+    try:
+      import scipy.stats.mstats
+      
+      if IsStringLike(col1) and IsStringLike(col2):
+        col1 = self.GetColIndex(col1)
+        col2 = self.GetColIndex(col2)
+      vals1, vals2=([],[])
+      for v1, v2 in zip(self[col1], self[col2]):
+        if v1!=None and v2!=None:
+          vals1.append(v1)
+          vals2.append(v2)
+      try:
+        return scipy.stats.mstats.spearmanr(vals1, vals2)[0]
+      except:
+        return None
+
+    except ImportError:
+      LogError("Function needs scipy, but I could not import it.")
+      raise
+    
+
   def Save(self, stream):
     """
     Save the table to stream or filename

@@ -10,6 +10,7 @@ from ost.table import *
 import ost
 
 HAS_NUMPY=True
+HAS_SCIPY=True
 HAS_MPL=True
 HAS_PIL=True
 try:
@@ -19,12 +20,18 @@ except ImportError:
   print "Could not find numpy: ignoring some table class unit tests"
 
 try:
+  import scipy
+except ImportError:
+  HAS_SCIPY=False
+  print "Could not find scipy: ignoring some table class unit tests"
+  
+try:
   import matplotlib
   matplotlib.use('Agg')
 except ImportError:
   HAS_MPL=False
   print "Could not find matplotlib: ignoring some table class unit tests"
-
+  
 try:
   import Image
   import ImageChops
@@ -1156,7 +1163,25 @@ class TestTable(unittest.TestCase):
     self.assertEquals(tab.GetUnique('second', ignore_nan=False), [3,None,9,4,5])
     self.assertEquals(tab.GetUnique('third'), [2.2, 3.3, 6.3])
     self.assertEquals(tab.GetUnique('third', ignore_nan=False), [None, 2.2, 3.3, 6.3])
-      
+    
+  def testCorrel(self):
+    tab = self.CreateTestTable()
+    self.assertEquals(tab.Correl('second','third'), None)
+    tab.AddRow(['foo',4, 3.3])
+    tab.AddRow([None,5, 6.3])
+    tab.AddRow([None,8, 2])
+    self.assertAlmostEquals(tab.Correl('second','third'), -0.4954982578)
+    
+  def testSpearmanCorrel(self):
+    if not HAS_SCIPY:
+      return
+    tab = self.CreateTestTable()
+    self.assertEquals(tab.SpearmanCorrel('second','third'), None)
+    tab.AddRow(['foo',4, 3.3])
+    tab.AddRow([None,5, 6.3])
+    tab.AddRow([None,8, 2])
+    self.assertAlmostEquals(tab.SpearmanCorrel('second','third'), -0.316227766)
+    
 if __name__ == "__main__":
   try:
     unittest.main()
