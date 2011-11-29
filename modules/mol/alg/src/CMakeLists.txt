@@ -51,3 +51,7 @@ copy_if_different("." "${STAGE_DIR}/share/openstructure"
                   "ost_mol_alg")
 install(FILES "atom_scattering_properties.txt" DESTINATION "share/openstructure/")
 
+copy_if_different("." "${STAGE_DIR}/share/openstructure"
+                  "stereo_chemical_props.txt" "STEREO_CHEMICAL_PROPS"
+                  "ost_mol_alg")
+install(FILES "stereo_chemical_props.txt" DESTINATION "share/openstructure/")

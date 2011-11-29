@@ -20,16 +20,111 @@
 #define BOOST_ALL_DYN_LINK 1
 #endif
 #include <boost/program_options.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <ost/mol/alg/local_dist_test.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/conop/conop.hh>
+#include <ost/platform.hh>
 
 using namespace ost;
 using namespace ost::io;
 using namespace ost::mol;
+using namespace ost::mol::alg;
 namespace po=boost::program_options;
+
+
+
+void FillStereoChemicalParams(const String& header, StereoChemicalParams& table, std::vector<String>& stereo_chemical_props_file)
+{
+  std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
+  while (line_iter!=stereo_chemical_props_file.end()) {
+    if ((*line_iter).length()!=0) {
+      StringRef line_string_ref(line_iter->data(),(*line_iter).length());
+      std::vector<StringRef> line_str_vec = line_string_ref.split();
+      if (line_str_vec[0].str()==header) {
+        line_iter++;
+        while ((*line_iter)[0]!='-') {
+	  if ((*line_iter)[0]!='#') {
+	    StringRef second_line_string_ref(line_iter->data(),(*line_iter).length());
+	    std::vector<StringRef> second_line_str_vec = second_line_string_ref.split();
+	    if (second_line_str_vec.size()!=4) {
+	      throw Error("");            
+	    } 
+	    String item = second_line_str_vec[0].str();
+	    String res = second_line_str_vec[1].str();	  
+	    std::pair<bool,float> parse_value = second_line_str_vec[2].to_float();
+	    std::pair<bool,float> parse_stddev = second_line_str_vec[3].to_float();
+	    Real value,stddev;
+	    if (parse_value.first==true) {
+	      value=static_cast<Real>(parse_value.second);
+	    } else {
+	      throw Error("");
+	    };
+	    if (parse_stddev.first==true) {
+	      stddev=static_cast<Real>(parse_stddev.second);
+	    } else {
+	      throw Error("");
+	    };
+	    table.SetParam(item,res,value,stddev);
+	    line_iter++;
+	  }  
+        }
+      }  
+    }
+    line_iter++;    
+  }  
+};  
+
+void FillClashingDistances(ClashingDistances& table,  std::vector<String>& stereo_chemical_props_file)
+{
+  std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
+  while (line_iter!=stereo_chemical_props_file.end()) {
+    if ((*line_iter).length()!=0) {
+      StringRef line_string_ref(line_iter->data(),(*line_iter).length());
+      std::vector<StringRef> line_str_vec = line_string_ref.split();
+      if (line_str_vec[0].str()=="Non-bonded") {
+        line_iter++;
+        while ((*line_iter)[0]!='-') {
+	  if ((*line_iter)[0]!='#') {
+	    StringRef second_line_string_ref(line_iter->data(),(*line_iter).length());
+	    std::vector<StringRef> second_line_str_vec = second_line_string_ref.split();
+	    if (second_line_str_vec.size()!=3) {
+	      throw Error("The number of elements in one of the lines is wrong");            
+	    } 
+	    String item = second_line_str_vec[0].str();
+
+	    std::pair<bool,float> parse_value = second_line_str_vec[1].to_float();
+	    std::pair<bool,float> parse_stddev = second_line_str_vec[2].to_float();
+	    Real value,stddev;
+	    if (parse_value.first==true) {
+	      value=static_cast<Real>(parse_value.second);
+	    } else {
+	      throw Error("One of the distance values is not a number");
+	    };
+	    if (parse_stddev.first==true) {
+	      stddev=static_cast<Real>(parse_stddev.second);
+	    } else {
+	      throw Error("One of the tolerance values is not a number");
+	    }
+	    StringRef itemsr(item.data(),item.length());
+	    std::vector<StringRef> eles = itemsr.split('-');
+            if (itemsr.size() != 3) {
+	      throw Error("One of the strings describing the interacting atoms has the wrong format");
+	    }  
+	    String ele1=eles[0].str();
+	    String ele2=eles[1].str();
+	    table.SetClashingDistance(ele1,ele2,value,stddev);
+	    line_iter++;
+	  }  
+        }
+      }  
+    }
+    line_iter++;    
+  }  
+};  
 
 EntityHandle load(const String& file, const IOProfile& profile)
 {
@@ -56,12 +151,18 @@ void usage()
   std::cerr << "usage: ldt [options] <mod1> [mod1 [mod2]] <ref>" << std::endl;
   std::cerr << "   -s        selection performed on ref" << std::endl;
   std::cerr << "   -c        use Calphas only" << std::endl;
-  std::cerr << "   -f        filter clashes (not implemented yet)" << std::endl;
+  std::cerr << "   -f        filter clashes" << std::endl;
   std::cerr << "   -t        fault tolerant parsing" << std::endl;  
 }
 
 int main (int argc, char **argv)
 {
+  
+  Real min_default_distance = 1.5;
+  Real min_distance_t = 0.0;
+  Real bond_tolerance = 3.0;
+  Real angle_tolerance = 3.0;
+  
   IOProfile profile;
   // parse options
   String sel;
@@ -72,6 +173,7 @@ int main (int argc, char **argv)
     ("sel,s", po::value<String>(&sel)->default_value(""), "selection for reference")
     ("tolerant,t", "fault tolerant mode")
     ("filter-clashes,f", "filter clashes")
+    ("parameter-file,p", po::value<String>(), "stereo chemical parameter file")
     ("files", po::value< std::vector<String> >(), "input file")
   ;
   po::positional_options_description p;
@@ -90,6 +192,14 @@ int main (int argc, char **argv)
   if (vm.count("tolerant")) {
     profile.fault_tolerant=true;
   }
+  String parameter_filename;  
+  if (vm.count("parameter-file")) {
+    parameter_filename=vm["parameter-file"].as<String>();
+  } else {
+    std::cout << "Please specify a stereo-chemical parameter file" << std::endl;
+    return -1;
+
+  }
   std::vector<String> files;
   if (vm.count("files")) {
     files=vm["files"].as<std::vector<String> >();
@@ -97,6 +207,20 @@ int main (int argc, char **argv)
     usage();
     exit(-1);
   }
+  boost::filesystem::path loc(parameter_filename);
+  boost::filesystem::ifstream infile(loc);
+  if (!infile) {
+    std::cout << "Couldn't find " << parameter_filename << std::endl;
+    return -1;
+  }
+  std::vector<String> stereo_chemical_props;
+  String line;
+  while (std::getline(infile, line))
+  {
+   std::stringstream line_stream(line);
+   stereo_chemical_props.push_back(line);
+  }
+
   String ref_file=files.back();
   EntityHandle ref=load(ref_file, profile);
   if (!ref) {
@@ -112,9 +236,38 @@ int main (int argc, char **argv)
       }
       continue;
     }
+    
+    StereoChemicalParams bond_table, angle_table;
+    ClashingDistances nonbonded_table(1.5,0.0);
+    
     EntityView v=model.CreateFullView();
     if (filter_clashes) {
-      v=alg::FilterClashes(v);
+      try {
+	FillStereoChemicalParams("Bond",bond_table,stereo_chemical_props);
+      }	
+      catch (Error) {
+	std::cout << "Error reading 'Bond Lengths' section of the stereo-chemical parameter file. Check that the section is present and the format is correct." << std::endl;
+	return -1;
+      } 
+      try {
+	FillStereoChemicalParams("Angles",angle_table,stereo_chemical_props); 
+      }  
+      catch (Error) {
+	std::cout << "Error reading 'Angles' section of the stereo-chemical parameter file. Check that the section is present and the format is correct." << std::endl;
+	return -1;
+      }    
+      
+      try {
+	FillClashingDistances(nonbonded_table,stereo_chemical_props);  
+      } 
+      catch (Error) {
+	std::cout << "Error reading 'Non-bonded Distances' section of the stereo-chemical parameter file. Check that the section is present and the format is correct." << std::endl;
+	return -1;
+      }  
+      
+      v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+   
+      v=alg::FilterClashes(v,nonbonded_table);
     }
     float cutoffs[]={0.5,1,2,4};
     float ldt=0.0;

@@ -36,8 +36,8 @@ namespace {
   
 Real (*ldt_a)(const mol::EntityView&, const mol::EntityView& ref, Real, Real, const String&)=&mol::alg::LocalDistTest;
 Real (*ldt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistTest;
-mol::EntityView (*fc_a)(const mol::EntityView&, Real,bool)=&mol::alg::FilterClashes;
-mol::EntityView (*fc_b)(const mol::EntityHandle&, Real, bool)=&mol::alg::FilterClashes;
+mol::EntityView (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
+mol::EntityView (*fc_b)(const mol::EntityHandle&, const mol::alg::ClashingDistances&, bool)=&mol::alg::FilterClashes;
 mol::CoordGroupHandle (*superpose_frames1)(mol::CoordGroupHandle&, mol::EntityView&, int, int, int)=&mol::alg::SuperposeFrames;
 mol::CoordGroupHandle (*superpose_frames2)(mol::CoordGroupHandle&,  mol::EntityView&, mol::EntityView&, int, int)=&mol::alg::SuperposeFrames;
 }

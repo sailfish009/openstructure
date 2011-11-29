@@ -24,14 +24,67 @@
 
 namespace ost { namespace mol { namespace alg {
 
+class ClashingDistances
+{
 
+public:
+  ClashingDistances(Real default_dist, Real tolerance): default_min_distance_(default_dist), default_min_distance_tolerance_(tolerance) {}
+  void SetClashingDistance(const String& ele1,const String& ele2, Real min_distance, Real tolerance);
+  std::pair<Real,Real> GetClashingDistance(const String& ele1,const String& ele2) const;
+  Real GetMaxAdjustedDistance() const;  
+  
+  //DEBUG
+  void PrintAllDistances() const;
+  
+private:
+
+  std::map <String,std::pair<float,float> > min_distance_;
+  Real default_min_distance_;
+  Real default_min_distance_tolerance_;
+  
+};
+  
+class StereoChemicalParams
+{
+
+public:
+  void SetParam(const String& param, const String& residue, Real value, Real st_dev);
+  std::pair<Real,Real> GetParam(const String& element,const String& residue) const;
+
+  //DEBUG
+  void PrintAllParameters() const;
+  
+private:
+
+  std::map<std::pair<String,String>,std::pair<float,float> >  params_;
+  
+}; 
+  
+  
+  
+  
 EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityView& ent, 
-                                               Real tolerance=0.1,
-                                               bool always_remove_bb=false);
+                                               const ClashingDistances& min_distances, bool always_remove_bb=false);
 
 EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityHandle& ent, 
-                                               Real tolerance=0.1,
-                                               bool always_remove_bb=false);
+                                               const ClashingDistances& min_distances, bool always_remove_bb=false);
+
+  
+EntityView DLLEXPORT_OST_MOL_ALG CheckStereoChemistry(const EntityView& ent, 
+                                                      const StereoChemicalParams& bond_table, 
+						      const StereoChemicalParams& angle_table,
+						      Real bond_tolerance,
+						      Real angle_tolerance,
+						      bool always_remove_bb=false);
+
+EntityView DLLEXPORT_OST_MOL_ALG CheckStereoChemistry(const EntityHandle& ent, 
+						      const StereoChemicalParams& bond_table, 
+						      const StereoChemicalParams& angle_table,
+						      Real bond_tolerance,
+						      Real angle_tolerance,
+				                      bool always_remove_bb=false);
+
+
 }}}
 
 
