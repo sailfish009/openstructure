@@ -51,9 +51,9 @@ void FillStereoChemicalParams(const String& header, StereoChemicalParams& table,
 	    StringRef second_line_string_ref(line_iter->data(),(*line_iter).length());
 	    std::vector<StringRef> second_line_str_vec = second_line_string_ref.split();
 	    if (second_line_str_vec.size()!=4) {
-	      throw Error("");            
+	      throw Error("The number of elements in one of the lines is wrong");            
 	    } 
-	    String item = second_line_str_vec[0].str();
+	    StringRef item = second_line_str_vec[0];
 	    String res = second_line_str_vec[1].str();	  
 	    std::pair<bool,float> parse_value = second_line_str_vec[2].to_float();
 	    std::pair<bool,float> parse_stddev = second_line_str_vec[3].to_float();
@@ -61,16 +61,42 @@ void FillStereoChemicalParams(const String& header, StereoChemicalParams& table,
 	    if (parse_value.first==true) {
 	      value=static_cast<Real>(parse_value.second);
 	    } else {
-	      throw Error("");
+	      throw Error("One of the values in the third column is not a number");
 	    };
 	    if (parse_stddev.first==true) {
 	      stddev=static_cast<Real>(parse_stddev.second);
 	    } else {
-	      throw Error("");
+	      throw Error("One of the values in the fourth column is not a number");
 	    };
-	    table.SetParam(item,res,value,stddev);
-	    line_iter++;
-	  }  
+	    std::vector<StringRef> split_item = item.split('-');
+	    String rearranged_item;
+	    if (split_item.size() == 2) {
+	      String atom1 = split_item[0].str();
+	      String atom2 = split_item[1].str();
+              if (atom2 < atom1) {
+	         std::stringstream srearr;
+	         srearr << atom2 << "-" << atom1;
+	         rearranged_item=srearr.str();		     
+	      } else {
+		 rearranged_item = item.str();
+              }	  
+            } else if (split_item.size() == 3) {
+              String atom1 = split_item[0].str();
+              String atom = split_item[0].str();
+              String atom2 = split_item[1].str();
+              if (atom2 < atom1) {
+                 std::stringstream srearr;
+                 srearr << atom2 << "-" << atom << "-" << atom1;
+                 rearranged_item=srearr.str();                
+              } else {
+                 rearranged_item = item.str();
+              }                
+            } else {
+              throw Error("One of the strings describing the parameter has the wrong format");
+            }   
+            table.SetParam(rearranged_item,res,value,stddev);
+            line_iter++;
+            }  
         }
       }  
     }
@@ -116,7 +142,11 @@ void FillClashingDistances(ClashingDistances& table,  std::vector<String>& stere
 	    }  
 	    String ele1=eles[0].str();
 	    String ele2=eles[1].str();
-	    table.SetClashingDistance(ele1,ele2,value,stddev);
+            if (ele2 < ele1) {
+              table.SetClashingDistance(ele2,ele1,value,stddev);
+            } else {
+              table.SetClashingDistance(ele1,ele2,value,stddev);
+            }  
 	    line_iter++;
 	  }  
         }
@@ -159,7 +189,7 @@ int main (int argc, char **argv)
 {
   
   Real min_default_distance = 1.5;
-  Real min_distance_t = 0.0;
+  Real min_distance_tolerance = 0.0;
   Real bond_tolerance = 3.0;
   Real angle_tolerance = 3.0;
   
@@ -238,7 +268,7 @@ int main (int argc, char **argv)
     }
     
     StereoChemicalParams bond_table, angle_table;
-    ClashingDistances nonbonded_table(1.5,0.0);
+    ClashingDistances nonbonded_table(min_default_distance,min_distance_tolerance);
     
     EntityView v=model.CreateFullView();
     if (filter_clashes) {
@@ -250,7 +280,7 @@ int main (int argc, char **argv)
 	return -1;
       } 
       try {
-	FillStereoChemicalParams("Angles",angle_table,stereo_chemical_props); 
+	FillStereoChemicalParams("Angle",angle_table,stereo_chemical_props); 
       }  
       catch (Error) {
 	std::cout << "Error reading 'Angles' section of the stereo-chemical parameter file. Check that the section is present and the format is correct." << std::endl;
