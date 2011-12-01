@@ -985,7 +985,15 @@ class TestTable(unittest.TestCase):
     img1 = Image.open(os.path.join("testfiles","roc-out.png"))
     img2 = Image.open(os.path.join("testfiles","roc.png"))
     self.CompareImages(img1, img2)
-    #pl.show()
+
+    # no true positives
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    pl = tab.PlotROC(score_col='score', score_dir='+',
+                     class_col='classific',
+                     save=os.path.join("testfiles","roc-out.png"))
+    self.assertEquals(pl, None)
 
   def testPlotROCSameValues(self):
     if not HAS_MPL or not HAS_PIL:
@@ -1011,7 +1019,14 @@ class TestTable(unittest.TestCase):
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
     self.assertAlmostEquals(auc, auc_ref)
 
-  def testCalcROC(self):
+    # no true positives
+    tab = Table(['classific', 'score'], 'bf',
+                classific=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False],
+                score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
+    auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
+    self.assertEquals(auc, None)
+
+  def testCalcROCAUCWithCutoff(self):
     if not HAS_NUMPY:
       return
     tab = Table(['classific', 'score'], 'ff',
@@ -1019,6 +1034,10 @@ class TestTable(unittest.TestCase):
                 score=[0.9, 0.8, 0.7, 0.6, 0.55, 0.54, 0.53, 0.52, 0.51, 0.505, 0.4, 0.39, 0.38, 0.37, 0.36, 0.35, 0.34, 0.33, 0.30, 0.1])
     auc = tab.ComputeROCAUC(score_col='score', class_col='classific', class_cutoff=0.5)
     self.assertEquals(auc, 1.0)
+
+    # no true positives
+    auc = tab.ComputeROCAUC(score_col='score', class_col='classific', class_cutoff=1.0)
+    self.assertEquals(auc, None)
 
   def testCalcROCFromFile(self):
     tab = Table.Load(os.path.join('testfiles','roc_table.dat'))

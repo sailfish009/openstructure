@@ -1252,6 +1252,11 @@ class Table:
             fp += 1
     x.append(fp)
     y.append(tp)
+
+    # if no false positives or false negatives values are found return None
+    if x[-1]==0 or y[-1]==0:
+      return None
+
     x = [float(v)/x[-1] for v in x]
     y = [float(v)/y[-1] for v in y]
     return x,y
@@ -1265,10 +1270,12 @@ class Table:
     try:
       import numpy as np
 
-      rocx, rocy = self.ComputeROC(score_col, class_col, score_dir,
-                                   class_dir, class_cutoff)
+      roc = self.ComputeROC(score_col, class_col, score_dir,
+                            class_dir, class_cutoff)
 
-      return np.trapz(rocy, rocx)
+      if not roc:
+        return None
+      return np.trapz(roc[1], roc[0])
     except ImportError:
       LogError("Function needs numpy, but I could not import it.")
       raise
@@ -1284,8 +1291,13 @@ class Table:
     try:
       import matplotlib.pyplot as plt
 
-      enrx, enry = self.ComputeROC(score_col, class_col, score_dir,
+      roc = self.ComputeROC(score_col, class_col, score_dir,
                                    class_dir, class_cutoff)
+
+      if not roc:
+        return None
+
+      enrx, enry = roc
 
       if not title:
         title = 'ROC of %s'%score_col
