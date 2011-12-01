@@ -17,22 +17,34 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
+#include <ost/mol/mol.hh>
+#include <ost/conop/nonstandard.hh>
+
 using namespace boost::python;
 
-void export_Builder();
-void export_Compound();
-void export_Sanitizer();
-void export_Conop();
-void export_RingFinder();
-void export_AminoAcids();
-void export_NonStandard();
-
-BOOST_PYTHON_MODULE(_ost_conop)
-{
-  export_Builder();
-  export_Conop();
-  export_Compound();
-  export_RingFinder();
-  export_AminoAcids();
-  export_NonStandard();
+using namespace ost::conop;
+using namespace ost::mol;
+                   
+object copy_conserved_handle(ResidueHandle src_res, ResidueHandle dst_res,
+                          XCSEditor edi) {
+  bool has_cbeta = false;
+  bool ret = CopyConserved(src_res, dst_res, edi, has_cbeta);
+  return make_tuple(ret, has_cbeta);
 }
+
+object copy_non_conserved_handle(ResidueHandle src_res, ResidueHandle dst_res,
+                          XCSEditor edi) {
+  bool has_cbeta = false;
+  bool ret = CopyNonConserved(src_res, dst_res, edi, has_cbeta);
+  return make_tuple(ret, has_cbeta);
+}
+
+
+
+void export_NonStandard()
+{
+  def("CopyNonConserved",&copy_non_conserved_handle);
+  def("CopyConserved", copy_conserved_handle);
+  def("CopyResidue", &CopyResidue);
+ }
+
