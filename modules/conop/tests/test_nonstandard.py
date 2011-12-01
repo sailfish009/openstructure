@@ -117,7 +117,11 @@ class TestNonStandard(unittest.TestCase):
     
 
 if __name__ == "__main__":
-  suite = unittest.TestLoader().loadTestsFromTestCase(TestNonStandard)
-  unittest.TextTestRunner().run(suite)
+  builder=conop.GetBuilder()
+  if not hasattr(builder, 'compound_lib'):
+    print 'default builder does not use compound library. ignoring unit tests'
+  else:
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestNonStandard)
+    unittest.TextTestRunner().run(suite)
 
 
