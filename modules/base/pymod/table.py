@@ -926,7 +926,10 @@ class Table:
           vals1.append(v1)
           vals2.append(v2)
       try:
-        return scipy.stats.mstats.spearmanr(vals1, vals2)[0]
+        correl = scipy.stats.mstats.spearmanr(vals1, vals2)[0]
+        if scipy.isnan(correl):
+          return None
+        return correl
       except:
         return None
 
@@ -1252,11 +1255,11 @@ class Table:
             fp += 1
     x.append(fp)
     y.append(tp)
-
+    
     # if no false positives or false negatives values are found return None
     if x[-1]==0 or y[-1]==0:
       return None
-
+    
     x = [float(v)/x[-1] for v in x]
     y = [float(v)/y[-1] for v in y]
     return x,y
@@ -1293,7 +1296,7 @@ class Table:
 
       roc = self.ComputeROC(score_col, class_col, score_dir,
                                    class_dir, class_cutoff)
-
+      
       if not roc:
         return None
 
