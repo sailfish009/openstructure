@@ -139,26 +139,28 @@ BOOST_AUTO_TEST_CASE(test_parse_compnd_record5)
   PDBReader reader(fname, IOProfile()); 
   mol::EntityHandle ent=mol::CreateEntity();
   
-  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+  BOOST_CHECK_NO_THROW(reader.Import(ent));
+  
+  mol::ChainHandle ch = ent.FindChain("A");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+  
+  ch = ent.FindChain("B");
+  BOOST_CHECK(ch.HasProp("mol_id")==false);
 }
 
+//chain I in MOL_ID record but no chain I
+BOOST_AUTO_TEST_CASE(test_parse_compnd_record6) 
+{
+  String fname("testfiles/pdb/1oax.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  
+  BOOST_CHECK_THROW(reader.Import(ent), IOException);
+  
+}
 
-//~ BOOST_AUTO_TEST_CASE(test_parse_compnd_record6) 
-//~ {
-  //~ String fname("testfiles/pdb/1oax.pdb");
-  //~ PDBReader reader(fname, IOProfile()); 
-  //~ mol::EntityHandle ent=mol::CreateEntity();
-  //~ 
-  //~ reader.Import(ent);
-  //~ mol::ChainHandle ch = ent.FindChain("I");
-  //~ BOOST_CHECK(ch.HasProp("mol_id")==true);
-  //~ BOOST_CHECK(ch.GetIntProp("mol_id")==1);
-//~ 
-  //~ ch = ent.FindChain("L");
-  //~ BOOST_CHECK(ch.HasProp("mol_id")==true);
-  //~ BOOST_CHECK(ch.GetIntProp("mol_id")==2);
-//~ }
-
+// has an empy MOLECULE record (unsupported ATM anyway, but crashed ost)
 BOOST_AUTO_TEST_CASE(test_parse_compnd_record7) 
 {
   String fname("testfiles/pdb/2p6a.pdb");

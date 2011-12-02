@@ -150,11 +150,22 @@ void PDBReader::ParseCompndEntry (const StringRef& line, int line_num)
   }
   if((entry.find(':')!=entry.end())){
     std::vector<StringRef> fields=entry.split(':');
-    key=fields[0].trim();
-    old_key_=key.str();
-    data=fields[1].trim();
+      key=fields[0].trim();
+      old_key_=key.str();
+    if (fields.size()>1) {
+      data=fields[1].trim();
+    }
+
 
     if(data.size()<1){
+      if (!(key.str()=="MOL_ID")&&!(key.str()=="CHAIN")){
+        LOG_WARNING("skipping unsupported COMPND record on line " << line_num<< ": record value"<< key.str()<<" too small");
+        if (data_continues_) {
+          skip_next_=true;
+        } else {
+          return;
+        }
+      }
       ThrowFaultTolerant(str(format("invalid COMPND record on line %d, record after ':' too small")%line_num));
     }
     data_continues_=true;
@@ -182,7 +193,7 @@ void PDBReader::ParseCompndEntry (const StringRef& line, int line_num)
   } 
       //currently only these are parsed
   if (!(key.str()=="MOL_ID")&&!(key.str()=="CHAIN")){
-    LOG_TRACE("reading COMPND record on line " << line_num<< "is not supported");
+    LOG_INFO("reading COMPND record on line " << line_num<< "is not supported");
     if (data_continues_) {
       skip_next_=true;
     } else {
@@ -474,7 +485,7 @@ void PDBReader::AssignMolIds(mol::EntityHandle ent) {
         if (chain) {
           chain.SetIntProp("mol_id", compnd_iterator->mol_id);
         }else{
-          std::cout << "failedchain: "<<*chain_iterator <<":: "<<std::endl;
+          std::cout << "failed to assign MOL_ID to chain: "<<*chain_iterator <<std::endl;
 
           std::stringstream ss;
           ss << "could not map COMPND record MOL_ID onto chain";
