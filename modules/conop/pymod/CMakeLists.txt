@@ -4,6 +4,7 @@ set(OST_CONOP_PYMOD_SOURCES
   export_compound.cc
   export_amino_acids.cc
   export_conop.cc
+  export_non_standard.cc
   export_ring_finder.cc
 )
 

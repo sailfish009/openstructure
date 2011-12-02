@@ -7,6 +7,7 @@ amino_acids.hh
 compound.hh
 compound_lib.hh
 module_config.hh
+nonstandard.hh
 rule_based_builder.hh
 ring_finder.hh
 )
@@ -18,12 +19,13 @@ conop.cc
 heuristic_builder.cc
 compound.cc
 compound_lib.cc
+nonstandard.cc
 rule_based_builder.cc
 ring_finder.cc
 )
 
 module(NAME conop SOURCES ${OST_CONOP_SOURCES}
-       HEADERS ${OST_CONOP_HEADERS} DEPENDS_ON ost_mol ost_geom ost_db)
+       HEADERS ${OST_CONOP_HEADERS} DEPENDS_ON ost_mol ost_mol_alg ost_geom ost_db)
 
 executable(NAME chemdict_tool SOURCES chemdict_tool.cc DEPENDS_ON ost_io STATIC)
 

@@ -28,7 +28,6 @@
 #include <ost/base.hh>
 #include <string.h>
 #include <vector>
-#include <ost/message.hh>
 #include <ost/module_config.hh>
 
 
@@ -60,8 +59,9 @@ public:
     assert(!this->empty());
     return *begin_; 
   }
- /// \brief find character in StringRef
- /// \return iterator position when found, else iterator pointing to the end 
+  
+  /// \brief find character in StringRef
+  /// \return iterator position when found, else iterator pointing to the end 
   const_iterator find(char p) const {
     const char* s=begin_;
     while (s!=end_) {
@@ -72,7 +72,7 @@ public:
     }
     return s;
   }
-  
+
   /// \brief returns a substring of the string
   ///
   /// \param pos the starting position of the substring
