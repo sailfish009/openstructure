@@ -52,7 +52,7 @@ void test() {
   im.Apply(stat);
   BOOST_CHECK_CLOSE(stat.GetMean(),Real(5.0),Real(0.0001));
   BOOST_CHECK_CLOSE(stat.GetStandardDeviation(),Real(2.58198889747),Real(0.0001));
-  BOOST_CHECK_CLOSE(stat.GetSkewness()+0.5,Real(0.5),Real(0.0001));
+  BOOST_CHECK_CLOSE(stat.GetSkewness()+Real(0.5),Real(0.5),Real(0.0001));
   BOOST_CHECK_CLOSE(stat.GetKurtosis(),Real(1.77),Real(0.0001));
 
   // check for rounding errors
@@ -60,7 +60,7 @@ void test() {
   im.Apply(stat);
   BOOST_CHECK_CLOSE(stat.GetMean(),Real(10005.0),Real(0.0001));
   BOOST_CHECK_CLOSE(stat.GetStandardDeviation(),Real(2.58198889747),Real(0.01));
-  BOOST_CHECK_CLOSE(stat.GetSkewness()+0.5,Real(0.5),Real(0.01));
+  BOOST_CHECK_CLOSE(stat.GetSkewness()+Real(0.5),Real(0.5),Real(0.01));
   BOOST_CHECK_CLOSE(stat.GetKurtosis(),Real(1.77),Real(0.01));
 
 
@@ -72,7 +72,7 @@ void test() {
   }
   BOOST_CHECK_CLOSE(acc.GetMean(),Real(5.0),Real(0.0001));
   BOOST_CHECK_CLOSE(acc.GetStandardDeviation(),Real(2.58198889747),Real(0.0001));
-  BOOST_CHECK_CLOSE(acc.GetSkewness()+0.5,Real(0.5),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc.GetSkewness()+Real(0.5),Real(0.5),Real(0.0001));
   BOOST_CHECK_CLOSE(acc.GetKurtosis(),Real(1.77),Real(0.0001));
 
   StatAccumulator<> acc1,acc2,acc3;
@@ -84,7 +84,7 @@ void test() {
   StatAccumulator<> acc_c=acc1+acc2+acc3;
   BOOST_CHECK_CLOSE(acc_c.GetMean(),Real(5.0),Real(0.0001));
   BOOST_CHECK_CLOSE(acc_c.GetStandardDeviation(),Real(2.58198889747),Real(0.0001));
-  BOOST_CHECK_CLOSE(acc_c.GetSkewness()+0.5,Real(0.5),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc_c.GetSkewness()+Real(0.5),Real(0.5),Real(0.0001));
   BOOST_CHECK_CLOSE(acc_c.GetKurtosis(),Real(1.77),Real(0.0001));
 }
 
