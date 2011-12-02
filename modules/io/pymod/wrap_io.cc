@@ -113,9 +113,6 @@ BOOST_PYTHON_MODULE(_ost_io)
   def("LoadCRD", &LoadCRD);
   def("LoadCHARMMTraj_", &LoadCHARMMTraj, (arg("ent"), arg("trj_filename"), 
       arg("stride")=1, arg("lazy_load")=false));
-  def("SaveCHARMMTraj", &SaveCHARMMTraj, 
-      (arg("traj"), arg("pdb_filename"), arg("dcd_filename"), arg("stride")=1, 
-       arg("profile")=IOProfile()));
 
   def("LoadMAE", &LoadMAE);
 
@@ -124,4 +121,7 @@ BOOST_PYTHON_MODULE(_ost_io)
 #if OST_IMG_ENABLED  
   export_map_io();
 #endif
+  def("SaveCHARMMTraj", &SaveCHARMMTraj, 
+      (arg("traj"), arg("pdb_filename"), arg("dcd_filename"), arg("stride")=1, 
+       arg("profile")=IOProfile()));
 }
