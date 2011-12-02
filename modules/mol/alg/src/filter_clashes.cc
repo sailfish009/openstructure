@@ -20,6 +20,7 @@
 #include <ost/mol/mol.hh>
 #include <sstream>
 #include "filter_clashes.hh"
+#include <ost/units.hh>
 
 namespace {
   
@@ -51,7 +52,7 @@ String angle_string(const ost::mol::AtomHandle& atom1, const ost::mol::AtomView&
     string2 = atom1_str;
   }
   std::stringstream stkey;
-  stkey << string1 << "-" << atom << "-" << string2;
+  stkey << string1 << "-" << atom.GetName() << "-" << string2;
   return stkey.str();  
 }
 
@@ -74,7 +75,11 @@ std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,c
   std::stringstream stkey;
   stkey << ele1 << "--" << ele2;
   String key=stkey.str();
-  return min_distance_.find(key)->second;
+  std::map <String,std::pair<float,float> >::const_iterator find_ci= min_distance_.find(key);
+  if (find_ci == min_distance_.end()) {
+    return std::make_pair<Real,Real> (default_min_distance_,default_min_distance_tolerance_);
+  }    
+  return find_ci->second;
 }
 
 void ClashingDistances::PrintAllDistances() const
@@ -106,7 +111,13 @@ void StereoChemicalParams::SetParam(const String& param, const String& residue, 
 std::pair<Real,Real> StereoChemicalParams::GetParam(const String& param,const String& residue) const
 {
   std::pair<String,String> key = std::make_pair<String,String>(param,residue);
-  return params_.find(key)->second;
+  std::map<std::pair<String,String>,std::pair<float,float> >::const_iterator find_ci = params_.find(key);
+  if (find_ci == params_.end()) {
+      std::stringstream serr;
+      serr << "Entry " << param <<  " for residue " << residue << " not found in the parameter table";   
+      throw Error(serr.str());
+  }    
+  return find_ci->second;
 }
 
 void StereoChemicalParams::PrintAllParameters() const 
@@ -118,7 +129,6 @@ void StereoChemicalParams::PrintAllParameters() const
 
 EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
 {
-  
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
   for (ResidueViewList::iterator i=residues.begin(), e=residues.end(); i!=e; ++i) {
@@ -133,14 +143,18 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
         continue;
       }
       BondHandleList bonds = atom.GetBondList();
+      
       for (BondHandeList::const_iterator bi = bonds.begin();bi!=bonds.end();++bi) {
-	  BondHandle bond = *bi;
-	  AtomHandle other_atom = bond.GetOther(atom.GetHandle());
+	  BondHandle bond = *bi;          
+	  AtomHandle other_atom = bond.GetOther(atom.GetHandle());    
+          if (other_atom.GetResidue()!=res.GetHandle()) {
+            continue;     
+          }       
 	  String ele2 = other_atom.GetElement();
           if (ele2=="H" || ele2=="D") {
             continue;
-          }
- 	  if (other_atom.GetHashCode() > atom.GetHashCode()) {
+          }      
+ 	  if (other_atom.GetHashCode() > atom.GetHandle().GetHashCode()) {
 	    Real blength = bond.GetLength();
 	    String bond_str = bond_string(atom,other_atom);
 	    std::pair<Real,Real> length_stddev = bond_table.GetParam(bond_str,residue_str);
@@ -162,7 +176,6 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
 	  }  
       }
       
-    
       for (BondHandeList::const_iterator bond_iter1=bonds.begin(); bond_iter1!=bonds.end(); ++bond_iter1) {
         BondHandle bond1=*bond_iter1;
         AtomHandle atom1= bond1.GetOther(atom.GetHandle());
@@ -170,9 +183,9 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
         if (ele_atom1=="H" || ele_atom1=="D") {
           continue;
         }
-        if (atom1.GetResidue()!=res) {
+        if (atom1.GetResidue()!=res.GetHandle()) {
           continue;	
-        }	
+        }        
         for (BondHandeList::const_iterator bond_iter2=bonds.begin(); bond_iter2!=bonds.end(); ++bond_iter2) {
           BondHandle bond2=*bond_iter2;
           AtomHandle atom2 = bond2.GetOther(atom.GetHandle());
@@ -180,18 +193,23 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
           if (ele_atom2=="H" || ele_atom2=="D") {
             continue;
           }
-          if (atom2.GetResidue()!=res) {
+          if (atom2.GetResidue()!=res.GetHandle()) {
             continue;	
           }	
           if (atom1.GetHashCode() > atom2.GetHashCode()) {
-            Real awidth = ent.GetAngle(atom1,atom.GetHandle(),atom2);
+	    Real awidth;
+	    if (atom1.GetName()<atom2.GetName()) {
+              awidth = ent.GetAngle(atom1,atom.GetHandle(),atom2);
+	    } else {
+              awidth = ent.GetAngle(atom2,atom.GetHandle(),atom1);
+	    }  
             String angle_str = angle_string(atom1,atom,atom2);
-            std::pair<Real,Real> width_stddev = bond_table.GetParam(angle_str,residue_str);
+            std::pair<Real,Real> width_stddev = angle_table.GetParam(angle_str,residue_str);
             Real ref_width = width_stddev.first;  
 	    Real ref_stddev = width_stddev.second;	   
             Real min_width = ref_width - angle_tolerance*ref_stddev;
      	    Real max_width = ref_width + angle_tolerance*ref_stddev;
-            if (awidth < min_width || awidth > max_width) {
+	    if (awidth < min_width*(ost::Units::deg) || awidth > max_width*(ost::Units::deg)) {
               remove_sc=true;
               if (always_remove_bb==true) {
                 remove_bb=true;
@@ -204,8 +222,9 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             }  
 	  }  
         }
-      } 
-    }  
+      }         
+    }
+    
     if (remove_bb) {
       LOG_VERBOSE("removing whole residue " << res);
       continue;
@@ -236,10 +255,6 @@ EntityView CheckStereoChemistry(const EntityHandle& ent, const StereoChemicalPar
 
 EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_distances, bool always_remove_bb)
 {
-  std::cout << "Clashing Distances" << std::endl;
-  min_distances.PrintAllDistances();
-  exit(0);
-  
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
   for (ResidueViewList::iterator 

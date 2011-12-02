@@ -82,8 +82,8 @@ void FillStereoChemicalParams(const String& header, StereoChemicalParams& table,
               }	  
             } else if (split_item.size() == 3) {
               String atom1 = split_item[0].str();
-              String atom = split_item[0].str();
-              String atom2 = split_item[1].str();
+              String atom = split_item[1].str();
+              String atom2 = split_item[2].str();
               if (atom2 < atom1) {
                  std::stringstream srearr;
                  srearr << atom2 << "-" << atom << "-" << atom1;
@@ -190,8 +190,8 @@ int main (int argc, char **argv)
   
   Real min_default_distance = 1.5;
   Real min_distance_tolerance = 0.0;
-  Real bond_tolerance = 3.0;
-  Real angle_tolerance = 3.0;
+  Real bond_tolerance = 20.0;
+  Real angle_tolerance = 20.0;
   
   IOProfile profile;
   // parse options
@@ -265,11 +265,9 @@ int main (int argc, char **argv)
         return -1;
       }
       continue;
-    }
-    
+    }    
     StereoChemicalParams bond_table, angle_table;
-    ClashingDistances nonbonded_table(min_default_distance,min_distance_tolerance);
-    
+    ClashingDistances nonbonded_table(min_default_distance,min_distance_tolerance);    
     EntityView v=model.CreateFullView();
     if (filter_clashes) {
       try {
@@ -296,12 +294,11 @@ int main (int argc, char **argv)
       }  
       
       v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
-   
       v=alg::FilterClashes(v,nonbonded_table);
     }
     float cutoffs[]={0.5,1,2,4};
     float ldt=0.0;
-    for (int n=0; n<4; ++n) {
+    for (int n=0; n<4; ++n) { 
       ldt+=alg::LocalDistTest(v, ref_view, cutoffs[n], 8.0);
     }
     ldt/=4.0;
