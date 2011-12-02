@@ -483,7 +483,8 @@ void PDBReader::AssignMolIds(mol::EntityHandle ent) {
         mol::ChainHandle chain=ent.FindChain(*chain_iterator);
         if (chain) {
           chain.SetIntProp("mol_id", compnd_iterator->mol_id);
-        } else {
+        }else{
+          LOG_WARNING("failed to assign MOL_ID to chain: "<<*chain_iterator <<std::endl);
           std::stringstream ss;
           ss << "could not map COMPND record MOL_ID onto chain";
           ss <<*chain_iterator;

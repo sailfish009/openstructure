@@ -27,6 +27,8 @@
 #include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/pdb_reader.hh>
 #include <ost/io/pdb_writer.hh>
+#include <ost/log.hh>
+
 #include <ost/io/io_exception.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -36,7 +38,6 @@ using namespace ost;
 using namespace ost::io;
 
 BOOST_AUTO_TEST_SUITE( io )
-
 
 BOOST_AUTO_TEST_CASE(test_pdb_import_handler) 
 {
@@ -135,6 +136,8 @@ BOOST_AUTO_TEST_CASE(test_parse_compnd_record4)
 //COMPND CHAIN record misses B chain
 BOOST_AUTO_TEST_CASE(test_parse_compnd_record5) 
 {
+  Logger::Instance().PushVerbosityLevel(0);
+
   String fname("testfiles/pdb/1AKE_noBchain.pdb");
   PDBReader reader(fname, IOProfile()); 
   mol::EntityHandle ent=mol::CreateEntity();
@@ -152,6 +155,7 @@ BOOST_AUTO_TEST_CASE(test_parse_compnd_record5)
 //chain I in MOL_ID record but no chain I
 BOOST_AUTO_TEST_CASE(test_parse_compnd_record6) 
 {
+  Logger::Instance().PushVerbosityLevel(0);
   String fname("testfiles/pdb/1oax.pdb");
   PDBReader reader(fname, IOProfile()); 
   mol::EntityHandle ent=mol::CreateEntity();
@@ -163,6 +167,7 @@ BOOST_AUTO_TEST_CASE(test_parse_compnd_record6)
 // has an empy MOLECULE record (unsupported ATM anyway, but crashed ost)
 BOOST_AUTO_TEST_CASE(test_parse_compnd_record7) 
 {
+  Logger::Instance().PushVerbosityLevel(0);
   String fname("testfiles/pdb/2p6a.pdb");
   PDBReader reader(fname, IOProfile()); 
   mol::EntityHandle ent=mol::CreateEntity();
