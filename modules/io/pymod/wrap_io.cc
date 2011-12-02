@@ -113,7 +113,9 @@ BOOST_PYTHON_MODULE(_ost_io)
   def("LoadCRD", &LoadCRD);
   def("LoadCHARMMTraj_", &LoadCHARMMTraj, (arg("ent"), arg("trj_filename"), 
       arg("stride")=1, arg("lazy_load")=false));
-  def("SaveCHARMMTraj",SaveCHARMMTraj,save_charmm_trj_ov());
+  def("SaveCHARMMTraj", &SaveCHARMMTraj, 
+      (arg("traj"), arg("pdb_filename"), arg("dcd_filename"), arg("stride")=1, 
+       arg("profile")=IOProfile()));
 
   def("LoadMAE", &LoadMAE);
 
