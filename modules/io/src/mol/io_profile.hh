@@ -27,13 +27,13 @@ namespace ost { namespace io {
 
 struct DLLEXPORT IOProfile {
 public:
-  IOProfile(String d, bool sh, bool qm, bool ft, bool js, bool nh, bool co):
+  IOProfile(String d, bool sh, bool qm, bool ft, bool js, bool nh, bool co, bool bf):
     dialect(d), strict_hydrogens(sh), quack_mode(qm), fault_tolerant(ft),
-    join_spread_atom_records(js), no_hetatms(nh), calpha_only(co)
+    join_spread_atom_records(js), no_hetatms(nh), calpha_only(co), bond_feasibilty(bf)
   { }
   IOProfile(): dialect("PDB"), strict_hydrogens(true), quack_mode(false),
     fault_tolerant(false), join_spread_atom_records(false), no_hetatms(false),
-    calpha_only(false)
+    calpha_only(false), bond_feasibilty(true)
   { }
   virtual ~IOProfile() { }
 
@@ -44,11 +44,12 @@ public:
   bool   join_spread_atom_records;
   bool   no_hetatms;
   bool   calpha_only;
+  bool   bond_feasibilty;
 
   IOProfile Copy()
   {
     return IOProfile(dialect, strict_hydrogens, quack_mode, fault_tolerant,
-                     join_spread_atom_records, no_hetatms, calpha_only);
+                     join_spread_atom_records, no_hetatms, calpha_only, bond_feasibilty);
   }
   virtual void PostImport(mol::EntityHandle ent) { }
 };
@@ -61,7 +62,8 @@ inline  std::ostream& operator<<(std::ostream& stream, const IOProfile& p)
          << (p.join_spread_atom_records ? "True" : "False") << ", no_hetatms="
          << (p.no_hetatms ? "True" : "False") << ", calpha_only="
          << (p.calpha_only ? "True" : "False") << ", fault_tolerant="
-         << (p.fault_tolerant ? "True" : "False") << ")";
+         << (p.fault_tolerant ? "True" : "False") << ", bond_feasibilty="
+	 << (p.bond_feasibilty ? "True" : "False") << ")";
   return stream;
 }
 

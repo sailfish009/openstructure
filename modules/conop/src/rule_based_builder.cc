@@ -237,12 +237,20 @@ void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh)
       const BondSpec& bond=*j;
       mol::AtomHandle a1=this->LocateAtom(atoms, bond.atom_one);
       mol::AtomHandle a2=this->LocateAtom(atoms, bond.atom_two);
-      if (a1.IsValid() && a2.IsValid() && this->IsBondFeasible(a1, a2)) {
-        if (this->GetStrictHydrogenMode() && 
-            (a1.GetElement()=="H" || a2.GetElement()=="D")) {
-          continue;
+      if (a1.IsValid() && a2.IsValid()) { 
+	if (this->GetBondFeasibilityCheck()==false) {
+          if (this->GetStrictHydrogenMode() && (a1.GetElement()=="H" || a2.GetElement()=="D")) {
+            continue;
+          }
+          e.Connect(a1, a2, bond.order);
+	} else { 
+	  if (IsBondFeasible(a1, a2)) {
+	    if (this->GetStrictHydrogenMode() && (a1.GetElement()=="H" || a2.GetElement()=="D")) {
+              continue;
+	    }
+            e.Connect(a1, a2, bond.order);
+	  }
         }
-        e.Connect(a1, a2, bond.order);
       }
   }
   for (mol::AtomHandleList::iterator i=atoms.begin(), e=atoms.end(); i!=e; ++i) {

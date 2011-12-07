@@ -36,13 +36,14 @@ void (PDBWriter::*write_b)(const mol::EntityView&)=&PDBWriter::Write;
 void export_pdb_io()
 {
   class_<IOProfile>("IOProfile",
-         init<String,bool,bool,bool,bool,bool,bool>((arg("dialect")="PDB",
-                                                     arg("strict_hydrogens")=false,
-                                                     arg("quack_mode")=false,
-                                                     arg("fault_tolerant")=false,
-                                                     arg("join_spread_atom_records")=false,
-                                                     arg("no_hetatms")=false,
-                                                     arg("calpha_only")=false)))
+         init<String,bool,bool,bool,bool,bool,bool,bool>((arg("dialect")="PDB",
+                                                          arg("strict_hydrogens")=false,
+                                                          arg("quack_mode")=false,
+                                                          arg("fault_tolerant")=false,
+                                                          arg("join_spread_atom_records")=false,
+                                                          arg("no_hetatms")=false,
+                                                          arg("calpha_only")=false,
+						          arg("bond_feasibility")=true)))
     .def_readwrite("dialect", &IOProfile::dialect)
     .def_readwrite("fault_tolerant", &IOProfile::fault_tolerant)
     .def_readwrite("quack_mode", &IOProfile::quack_mode)
@@ -50,6 +51,7 @@ void export_pdb_io()
     .def_readwrite("no_hetatms", &IOProfile::no_hetatms)
     .def_readwrite("calpha_only", &IOProfile::calpha_only)
     .def_readwrite("join_spread_atom_records", &IOProfile::join_spread_atom_records)
+    .def_readwrite("bond_feasibility", &IOProfile::bond_feasibilty)
     .def("Copy", &IOProfile::Copy)
     .def(self_ns::str(self))
   ;

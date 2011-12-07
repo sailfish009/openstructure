@@ -36,6 +36,8 @@ void export_Builder() {
     .add_property("dialect", &Builder::GetDialect, &Builder::SetDialect)
     .add_property("strict_hydrogens", &Builder::GetStrictHydrogenMode, 
                   &Builder::SetStrictHydrogenMode)
+    .add_property("feasibility_check", &Builder::GetBondFeasibilityCheck, 
+                  &Builder::SetBondFeasibilityCheck)
     .def("GetDialect", &Builder::GetDialect)
     .def("SetDialect", &Builder::SetDialect)
     .def("CompleteAtoms", &Builder::CompleteAtoms)
@@ -48,6 +50,8 @@ void export_Builder() {
     .def("AssignTorsionsToResidue", &Builder::AssignTorsionsToResidue)
     .def("FillAtomProps", &Builder::FillAtomProps)
     .def("IsResidueComplete", &Builder::IsResidueComplete)
+    .def("SetBondFeasibilityFlag", &Builder::SetBondFeasibilityCheck)
+    .def("GetBondFeasibilityFlag", &Builder::GetBondFeasibilityCheck)    
   ;
 
   class_<HeuristicBuilder, bases<Builder> >("HeuristicBuilder", init<>())
@@ -56,5 +60,6 @@ void export_Builder() {
                                             init<const CompoundLibPtr&>())
      .add_property("compound_lib", &RuleBasedBuilder::GetCompoundLib)
      .def("GetUnknownAtoms", &RuleBasedBuilder::GetUnknownAtoms)
+ 
   ;
 }

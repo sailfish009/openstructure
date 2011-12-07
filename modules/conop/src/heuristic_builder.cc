@@ -209,21 +209,37 @@ void HeuristicBuilder::ConnectivityFromAtomNames(const mol::ResidueHandle& res,
                 << it2->GetName() << ") in connectivity table of "
                 << res.GetKey() << "... ");
        int conn=centry.Check(it1->GetName(),it2->GetName());
-       if (conn==1 && this->IsBondFeasible(*it1, *it2)) {
-         LOG_TRACE( "found");
-         editor.Connect(*it1,*it2);
-       } else if(conn==2 && this->IsBondFeasible(*it2, *it1)) {
-         LOG_TRACE( "found (reversed)");
-         editor.Connect(*it2,*it1);
+       if (conn==1) {
+	 if (this->GetBondFeasibilityCheck()==false) {
+           LOG_TRACE( "found");
+           editor.Connect(*it1,*it2);
+	 } else {  
+	   if (this->IsBondFeasible(*it1, *it2)) {
+	     LOG_TRACE( "found");
+             editor.Connect(*it1,*it2);
+	   } else {
+             LOG_TRACE( "not found");
+	   }  
+	 }	 
+       } else if (conn==2) {
+	 if (this->GetBondFeasibilityCheck()==false) {
+             LOG_TRACE( "found (reversed)");
+             editor.Connect(*it2,*it1);
+	 } else {
+           if(this->IsBondFeasible(*it2, *it1)) {
+             LOG_TRACE( "found (reversed)");
+             editor.Connect(*it2,*it1);
+           } else {
+             LOG_TRACE( "not found");
+	   }  
+         }
        } else {
-         LOG_TRACE( "not found");
-       }
+         unknown_atoms.push_back(*it1);
+       }	 
      }
-   } else {
-     unknown_atoms.push_back(*it1);
    }
  }
-}
+} 
 
 void HeuristicBuilder::ConnectAtomsOfResidue(mol::ResidueHandle res)
 {

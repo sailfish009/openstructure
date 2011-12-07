@@ -836,7 +836,7 @@ BOOST_AUTO_TEST_CASE(charmm_rname)
   {
     PDBWriter writer(String("testfiles/pdb/charmm_rname-out.pdb"),
                      IOProfile("CHARMM", true, false, false,
-                               false, false, false));
+                               false, false, false, true));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -856,7 +856,7 @@ BOOST_AUTO_TEST_CASE(charmm_longcname)
   {
     PDBWriter writer(String("testfiles/pdb/charmm_longcname-out.pdb"),
                      IOProfile("CHARMM", true, false, false,
-                               false, false, false));
+                               false, false, false, true));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -876,7 +876,7 @@ BOOST_AUTO_TEST_CASE(write_charmm_ter)
   {
     PDBWriter writer(String("testfiles/pdb/charmm_ter-out.pdb"),
                      IOProfile("CHARMM", true, false, false,
-                               false, false, false));
+                               false, false, false, true));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
