@@ -33,6 +33,7 @@ Real (*Mat2Det)(const Mat2& m)                                        = &Det;
 Mat2   (*Mat2Invert)(const Mat2& m)                                     = &Invert;
 Mat2   (*Mat2Transpose)(const Mat2& m)                                  = &Transpose;
 Real (*Vec2Angle)(const Vec2& v1, const Vec2& v2)                     = &Angle;
+Real (*Vec2SignedAngle)(const Vec2& v1, const Vec2& v2)                     = &SignedAngle;
 Vec2   (*Vec2Normalize)(const Vec2& v1)                                 = &Normalize;
 Vec2   (*Vec2Rotate)(const Vec2& v1,Real ang)                         = &Rotate;
 Vec2 (*Vec2Min)(const Vec2&, const Vec2&) = &Min;
@@ -53,6 +54,7 @@ void export_VecMat2_op()
   def("Invert",Mat2Invert);
   def("Transpose",Mat2Transpose);
   def("Angle",Vec2Angle);
+  def("SignedAngle",Vec2SignedAngle);
   def("Normalize",Vec2Normalize);
   def("Rotate",Vec2Rotate);
   def("Min",Vec2Min);
