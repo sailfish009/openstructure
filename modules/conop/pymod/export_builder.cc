@@ -36,7 +36,7 @@ void export_Builder() {
     .add_property("dialect", &Builder::GetDialect, &Builder::SetDialect)
     .add_property("strict_hydrogens", &Builder::GetStrictHydrogenMode, 
                   &Builder::SetStrictHydrogenMode)
-    .add_property("feasibility_check", &Builder::GetBondFeasibilityCheck, 
+    .add_property("bond_feasibility_check", &Builder::GetBondFeasibilityCheck, 
                   &Builder::SetBondFeasibilityCheck)
     .def("GetDialect", &Builder::GetDialect)
     .def("SetDialect", &Builder::SetDialect)

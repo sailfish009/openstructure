@@ -86,7 +86,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
             fault_tolerant=None, load_multi=False, quack_mode=None,
             join_spread_atom_records=None, calpha_only=None,
             profile='DEFAULT', remote=False, dialect=None,
-            strict_hydrogens=None, seqres=False, bond_feasibility=None):
+            strict_hydrogens=None, seqres=False, bond_feasibility_check=None):
   """
   Load PDB file from disk and return one or more entities. Several options 
   allow to customize the exact behaviour of the PDB import. For more information 
@@ -147,7 +147,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   prof.quack_mode=_override(prof.quack_mode, quack_mode)
   prof.strict_hydrogens=_override(prof.strict_hydrogens, strict_hydrogens)
   prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
-  prof.bond_feasibility=_override(prof.bond_feasibility, bond_feasibility)
+  prof.bond_feasibility_check=_override(prof.bond_feasibility_check, bond_feasibility_check)
   prof.join_spread_atom_records=_override(prof.join_spread_atom_records,
                                           join_spread_atom_records)
 
@@ -165,7 +165,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   elif prof.dialect=='CHARMM':
     builder.dialect=conop.CHARMM_DIALECT
   builder.strict_hydrogens=prof.strict_hydrogens
-  builder.bond_feasibility=prof.bond_feasibility
+  builder.bond_feasibility_check=prof.bond_feasibility_check
   reader=PDBReader(filename, prof)
   reader.read_seqres=seqres
   try:
