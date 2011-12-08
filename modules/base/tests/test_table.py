@@ -190,6 +190,14 @@ class TestTable(unittest.TestCase):
     self.CompareRowCount(tab, 0)
     self.assertRaises(ValueError, tab.GetColIndex, 'a')
     
+  def testGuessColumnType(self):
+    self.assertEqual(GuessColumnType(['1', '1.3', '2']), 'float')
+    self.assertEqual(GuessColumnType(['1', '1', '2']), 'int')
+    self.assertEqual(GuessColumnType(['NONE', '1', '1', '2']), 'int')
+    self.assertEqual(GuessColumnType(['NONE', '1', '1', '2']), 'int')
+    self.assertEqual(GuessColumnType(['NONE', '1', '1', 'a']), 'string')
+    self.assertEqual(GuessColumnType(['NONE', 'TRUE', 'False']), 'bool')
+    self.assertEqual(GuessColumnType(['NONE']), 'string')
   def testTableInitSingleColEmpty(self):
     '''
     empty table with one float column:
@@ -705,21 +713,21 @@ class TestTable(unittest.TestCase):
     tab.Sort('third', '+')
     self.CompareDataFromDict(tab, {'first': [None,'foo','x'], 'second': [9,None,3], 'third': [3.3,2.2,None]})
 
-  def testSaveLoadTable(self):
+  def testSaveLoadTableOST(self):
     tab = self.CreateTestTable()
     self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
     
     # write to disc
-    tab.Save("saveloadtable_filename_out.csv")
-    out_stream = open("saveloadtable_stream_out.csv", 'w')
+    tab.Save("saveloadtable_filename_out.tab")
+    out_stream = open("saveloadtable_stream_out.tab", 'w')
     tab.Save(out_stream)
     out_stream.close()
     
     # read from disc
-    in_stream = open("saveloadtable_stream_out.csv", 'r')
+    in_stream = open("saveloadtable_stream_out.tab", 'r')
     tab_loaded_stream = Table.Load(in_stream)
     in_stream.close()
-    tab_loaded_fname = Table.Load('saveloadtable_filename_out.csv')
+    tab_loaded_fname = Table.Load('saveloadtable_filename_out.tab')
     
     # check content
     self.CompareDataFromDict(tab_loaded_stream, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
@@ -727,10 +735,47 @@ class TestTable(unittest.TestCase):
     
     # check Errors for empty/non existing files
     self.assertRaises(IOError, Table.Load, 'nonexisting.file')
-    self.assertRaises(IOError, Table.Load, os.path.join('testfiles','emptytable.csv'))
+    self.assertRaises(IOError, Table.Load, os.path.join('testfiles','emptytable.tab'))
     in_stream = open(os.path.join('testfiles','emptytable.csv'), 'r')
     self.assertRaises(IOError, Table.Load, in_stream)
+  def testSaveLoadTableCSV(self):
+    tab = self.CreateTestTable()
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+
+    # write to disc
+    tab.Save("saveloadtable_filename_out.csv", format='csv')
+    out_stream = open("saveloadtable_stream_out.csv", 'w')
+    tab.Save(out_stream, format='csv')
+    out_stream.close()
     
+    # read from disc
+    in_stream = open("saveloadtable_stream_out.csv", 'r')
+    tab_loaded_stream = Table.Load(in_stream, format='csv')
+    in_stream.close()
+    tab_loaded_fname = Table.Load('saveloadtable_filename_out.csv', format='csv')
+
+    # check content
+    self.CompareDataFromDict(tab_loaded_stream, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+    self.CompareDataFromDict(tab_loaded_fname, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+  def testSaveLoadTablePickle(self):
+    tab = self.CreateTestTable()
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+    # write to disc
+    tab.Save("saveloadtable_filename_out.pickle", format='pickle')
+    out_stream = open("saveloadtable_stream_out.pickle", 'wb')
+    tab.Save(out_stream, format='pickle')
+    out_stream.close()
+
+    # read from disc
+    in_stream = open("saveloadtable_stream_out.pickle", 'rb')
+    tab_loaded_stream = Table.Load(in_stream, format='pickle')
+    in_stream.close()
+    tab_loaded_fname = Table.Load('saveloadtable_filename_out.pickle', format='pickle')
+
+    # check content
+    self.CompareDataFromDict(tab_loaded_stream, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+    self.CompareDataFromDict(tab_loaded_fname, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+
   def testMergeTable(self):
     '''
     Merge the following two tables:

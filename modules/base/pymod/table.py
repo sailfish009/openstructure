@@ -3,6 +3,7 @@ import re
 from ost import stutil
 import itertools
 import operator
+import cPickle
 from ost import LogError, LogWarning, LogInfo, LogVerbose
 
 def MakeTitle(col_name):
@@ -16,7 +17,11 @@ def IsStringLike(value):
     return True
   except:
     return False
-  
+
+def IsNullString(value):
+  value=value.strip().upper()
+  return value in ('', 'NULL', 'NONE', 'NA')
+
 def IsScalar(value):
   if IsStringLike(value):
     return True
@@ -27,6 +32,38 @@ def IsScalar(value):
     return False
   except:
     return True
+
+def GuessColumnType(iterator):
+  empty=True
+  possibilities=set(['bool', 'int', 'float'])
+  for ele in iterator:
+    str_ele=str(ele).upper()
+    if IsNullString(str_ele):
+      continue
+    empty=False
+    if 'int' in possibilities:
+      try:
+        int(str_ele)
+      except ValueError:
+        possibilities.remove('int')
+
+    if 'float' in possibilities:
+      try:
+        float(str_ele)
+      except ValueError:
+        possibilities.remove('float')
+    if 'bool' in possibilities:
+      if str_ele not in set(['YES', 'NO', 'TRUE', 'FALSE']):
+        possibilities.remove('bool')
+
+    if len(possibilities)==0:
+      return 'string'
+  if len(possibilities)==2:
+    return 'int'
+  if empty:
+    return 'string'
+  # return the last element available
+  return possibilities.pop()
 
 class BinaryColExpr:
   def __init__(self, op, lhs, rhs):
@@ -85,7 +122,7 @@ class TableCol:
     return BinaryColExpr(operator.div, self, rhs)
 
 
-class Table:
+class Table(object):
   """
   
   The table class provides convenient access to data in tabular form. An empty 
@@ -448,21 +485,7 @@ class Table:
     return filt_tab
 
   @staticmethod
-  def Load(stream_or_filename):
-    """
-    Load table from stream or file with given name. The file must contain a 
-    header line of the form
-    
-      col_name1[type1] <col_name2[type2]>...
-    
-    The types given in brackets must be one of the data types the :class:`Table` 
-    class understands. Each following line in the file then must contains exactly 
-    the same number of data items as listed in the header. The data items are 
-    automatically converted to the column format. Lines starting with a '#' and 
-    empty lines are ignored.
-    
-    :returns: A new :class:`Table` instance
-    """
+  def _LoadOST(stream_or_filename):
     fieldname_pattern=re.compile(r'(?P<name>[A-Za-z0-9_]+)(\[(?P<type>\w+)\])?')
     if not hasattr(stream_or_filename, 'read'):
       stream=open(stream_or_filename, 'r')
@@ -495,6 +518,89 @@ class Table:
     if num_lines==0:
       raise IOError("Cannot read table from empty stream")
     return tab
+
+  def _GuessColumnTypes(self):
+    for col_idx in range(len(self.col_names)):
+      self.col_types[col_idx]=GuessColumnType(self[self.col_names[col_idx]])
+    for row in self.rows:
+      for idx in range(len(row)):
+        row[idx]=self._Coerce(row[idx], self.col_types[idx])
+  @staticmethod
+  def _LoadCSV(stream_or_filename, sep):
+    if not hasattr(stream_or_filename, 'read'):
+      stream=open(stream_or_filename, 'r')
+    else:
+      stream=stream_or_filename
+    reader=csv.reader(stream, delimiter=sep)
+    first=True
+    for row in reader:
+      if first:
+        header=row
+        types='s'*len(row)
+        tab=Table(header, types)
+        first=False
+      else:
+        tab.AddRow(row)
+    if first:
+      raise IOError('trying to load table from empty CSV stream/file')
+
+    tab._GuessColumnTypes()
+    return tab
+
+  @staticmethod
+  def _LoadPickle(stream_or_filename):
+    if not hasattr(stream_or_filename, 'read'):
+      stream=open(stream_or_filename, 'rb')
+    else:
+      stream=stream_or_filename
+    return cPickle.load(stream)
+
+  @staticmethod
+  def Load(stream_or_filename, format='ost', sep=','):
+    """
+    Load table from stream or file with given name.
+
+    The following file formats are understood:
+
+     ost
+
+      This is an ost-specific, but still human readable file format. The file
+      (stream) must start with header line of the form
+
+        col_name1[type1] <col_name2[type2]>...
+
+      The types given in brackets must be one of the data types the
+      :class:`Table` class understands. Each following line in the file then must
+      contains exactly the same number of data items as listed in the header. The
+      data items are automatically converted to the column format. Lines starting
+      with a '#' and empty lines are ignored.
+
+    pickle
+
+      Deserializes the table from a pickled byte stream
+
+    csv
+
+      Reads the table from comma separated values stream. Since there is no
+      explicit type information in the csv file, the column types are guessed,
+      using the following simple rules:
+
+      * if all values are either NA/NULL/NONE the type is set to string
+      * if all non-null values are convertible to float/int the type is set to
+        float/int
+      * if all non-null values are true/false/yes/no, the value is set to bool
+      * for all other cases, the column type is set to string
+
+    :returns: A new :class:`Table` instance
+    """
+    format=format.lower()
+    if format=='ost':
+      return Table._LoadOST(stream_or_filename)
+    if format=='csv':
+      return Table._LoadCSV(stream_or_filename, sep=sep)
+    if format=='pickle':
+      return Table._LoadPickle(stream_or_filename)
+    raise ValueError('unknown format ""' % format)
 
   def Sort(self, by, order='+'):
     """
@@ -938,10 +1044,38 @@ class Table:
       raise
     
 
-  def Save(self, stream):
+  def Save(self, stream, format='ost', sep=','):
     """
     Save the table to stream or filename
     """
+    format=format.lower()
+    if format=='ost':
+      return self._SaveOST(stream)
+    if format=='csv':
+      return self._SaveCSV(stream, sep=sep)
+    if format=='pickle':
+      return self._SavePickle(stream)
+    raise ValueError('unknown format "%s"' % format)
+
+  def _SavePickle(self, stream):
+    if not hasattr(stream, 'write'):
+      stream=open(stream, 'wb')
+    cPickle.dump(self, stream, cPickle.HIGHEST_PROTOCOL)
+
+  def _SaveCSV(self, stream, sep):
+    if not hasattr(stream, 'write'):
+      stream=open(stream, 'wb')
+
+    writer=csv.writer(stream, delimiter=sep)
+    writer.writerow(['%s' % n for n in self.col_names])
+    for row in self.rows:
+      row=list(row)
+      for i, c in enumerate(row):
+        if c==None:
+          row[i]='NA'
+      writer.writerow(row)
+
+  def _SaveOST(self, stream):
     if hasattr(stream, 'write'):
       writer=csv.writer(stream, delimiter=' ')
     else:
