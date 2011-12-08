@@ -478,15 +478,12 @@ void PDBReader::AssignMolIds(mol::EntityHandle ent) {
     for (std::vector<String>::const_iterator chain_iterator = compnd_iterator->chains.begin();
                                              chain_iterator!= compnd_iterator->chains.end();
                                              ++chain_iterator) {
-      //~ std::cout << "chain: "<<*chain_iterator <<":: "<<std::endl;
       if (restrict_chains_.size()==0 ||
         (restrict_chains_.find(*chain_iterator)!=String::npos)) {
         mol::ChainHandle chain=ent.FindChain(*chain_iterator);
         if (chain) {
           chain.SetIntProp("mol_id", compnd_iterator->mol_id);
-        }else{
-          std::cout << "failed to assign MOL_ID to chain: "<<*chain_iterator <<std::endl;
-
+        } else {
           std::stringstream ss;
           ss << "could not map COMPND record MOL_ID onto chain";
           ss <<*chain_iterator;
