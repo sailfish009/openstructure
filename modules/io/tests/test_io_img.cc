@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(test_io_img)
   for (img::ExtentIterator i(testimage.GetExtent()); !i.AtEnd(); ++i, ++counter) {
    testimage.SetReal(i, counter);
   }
-  testimage+=0.01; //if all values are > 0.0 we can use close_at_tolerance
+  testimage+=5.01; //if all values are > 0.0 we can use close_at_tolerance
   const String fname("temp_img.tmp");
   std::map<String,ImageFormatBase*> float_formats;
   float_formats["DX"]=new DX;
