@@ -651,8 +651,9 @@ class Table(object):
 
   def Plot(self, x, y=None, z=None, style='.', x_title=None, y_title=None,
            z_title=None, x_range=None, y_range=None, z_range=None,
+           color=None, plot_if=None, legend=None,
            num_z_levels=10, diag_line=False, labels=None, title=None,
-           clear=True, save=False):
+           clear=True, save=False, **kwargs):
     """
     Plot x against y using matplot lib
     """
@@ -688,15 +689,19 @@ class Table(object):
           nice_z = MakeTitle(z)
         else:
           nice_z = None
-      
+      if color:
+        kwargs['color']=color
+      if legend:
+        kwargs['label']=legend
       if y and z:
         idx3 = self.GetColIndex(z)
         idx2 = self.GetColIndex(y)
         for row in self.rows:
           if row[idx1]!=None and row[idx2]!=None and row[idx3]!=None:
-            xs.append(row[idx1])
-            ys.append(row[idx2])
-            zs.append(row[idx3])
+            if plot_if and not plot_if(self, row):
+              xs.append(row[idx1])
+              ys.append(row[idx2])
+              zs.append(row[idx3])
         levels = []
         if z_range:
           z_spacing = (z_range[1] - z_range[0]) / num_z_levels
@@ -721,9 +726,11 @@ class Table(object):
         idx2=self.GetColIndex(y)
         for row in self.rows:
           if row[idx1]!=None and row[idx2]!=None:
+            if plot_if and not plot_if(self, row):
+              continue
             xs.append(row[idx1])
             ys.append(row[idx2])
-        plt.plot(xs, ys, style)
+        plt.plot(xs, ys, style, **kwargs)
         
       else:
         label_vals=[]
@@ -732,10 +739,12 @@ class Table(object):
           label_idx=self.GetColIndex(labels)
         for row in self.rows:
           if row[idx1]!=None:
+            if plot_if and not plot_if(self, row):
+              continue
             xs.append(row[idx1])
             if labels:
               label_vals.append(row[label_idx])
-        plt.plot(xs, style)
+        plt.plot(xs, style, **kwargs)
         if labels:
           plt.xticks(np.arange(len(xs)), label_vals, rotation=45, size='x-small')
       
@@ -747,7 +756,8 @@ class Table(object):
         else:
           title = nice_x
   
-      plt.title(title, size='x-large', fontweight='bold')
+      plt.title(title, size='x-large', fontweight='bold',
+                verticalalignment='bottom')
       if x and y:
         plt.xlabel(nice_x, size='x-large')
         if x_range:
