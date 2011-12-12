@@ -667,7 +667,7 @@ class Table(object):
       zs = []
       
       if clear:
-        plt.clf()
+        plt.figure(figsize=[8, 6])
       
       if x_title:
         nice_x=x_title
