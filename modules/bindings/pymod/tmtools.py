@@ -34,8 +34,17 @@ from ost import settings, io, geom, seq
 def _SetupFiles(models):
   # create temporary directory
   tmp_dir_name=tempfile.mkdtemp()
+  dia = 'PDB'
   for index, model in enumerate(models):
-    io.SavePDB(model, os.path.join(tmp_dir_name, 'model%02d.pdb' % (index+1)))
+    for chain in model.chains:
+      if len(chain.name) > 1:
+        dia = 'CHARMM'
+        break;
+      for res in chain.residues:
+        if len(res.name) > 3:
+          dia = 'CHARMM'
+          break;
+    io.SavePDB(model, os.path.join(tmp_dir_name, 'model%02d.pdb' % (index+1)), dialect=dia)
   return tmp_dir_name
 
 def _CleanupFiles(dir_name):
