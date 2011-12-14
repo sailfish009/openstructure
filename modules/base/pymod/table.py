@@ -1,5 +1,6 @@
 import csv
 import re
+import math
 from ost import stutil
 import itertools
 import operator
@@ -652,8 +653,8 @@ class Table(object):
   def Plot(self, x, y=None, z=None, style='.', x_title=None, y_title=None,
            z_title=None, x_range=None, y_range=None, z_range=None,
            color=None, plot_if=None, legend=None,
-           num_z_levels=10, diag_line=False, labels=None, title=None,
-           clear=True, save=False, **kwargs):
+           num_z_levels=10, diag_line=False, labels=None, max_num_labels=None,
+           title=None, clear=True, save=False, **kwargs):
     """
     Plot x against y using matplot lib
     """
@@ -746,7 +747,13 @@ class Table(object):
               label_vals.append(row[label_idx])
         plt.plot(xs, style, **kwargs)
         if labels:
-          plt.xticks(np.arange(len(xs)), label_vals, rotation=45, size='x-small')
+          interval = 1
+          if max_num_labels:
+            if len(label_vals)>max_num_labels:
+              interval = int(math.ceil(float(len(label_vals))/max_num_labels))
+              label_vals = label_vals[::interval]
+          plt.xticks(np.arange(0, len(xs), interval), label_vals, rotation=45,
+                     size='x-small')
       
       if not title:
         if nice_z:
