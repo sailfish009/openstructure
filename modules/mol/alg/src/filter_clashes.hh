@@ -50,7 +50,8 @@ class StereoChemicalParams
 public:
   void SetParam(const String& param, const String& residue, Real value, Real st_dev);
   std::pair<Real,Real> GetParam(const String& element,const String& residue) const;
-
+  bool ContainsParam(const String& param,const String& residue) const;
+  
   //DEBUG
   void PrintAllParameters() const;
   

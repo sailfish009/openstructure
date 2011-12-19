@@ -27,7 +27,10 @@
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/conop/conop.hh>
+#include <ost/mol/iterator.hh>
 #include <ost/platform.hh>
+#include <ost/log.hh>
+
 
 using namespace ost;
 using namespace ost::io;
@@ -93,7 +96,7 @@ void FillStereoChemicalParams(const String& header, StereoChemicalParams& table,
               }                
             } else {
               throw Error("One of the strings describing the parameter has the wrong format");
-            }   
+            }            
             table.SetParam(rearranged_item,res,value,stddev);
             line_iter++;
             }  
@@ -179,10 +182,15 @@ EntityHandle load(const String& file, const IOProfile& profile)
 void usage()
 {
   std::cerr << "usage: ldt [options] <mod1> [mod1 [mod2]] <ref>" << std::endl;
-  std::cerr << "   -s        selection performed on ref" << std::endl;
-  std::cerr << "   -c        use Calphas only" << std::endl;
-  std::cerr << "   -f        filter clashes" << std::endl;
-  std::cerr << "   -t        fault tolerant parsing" << std::endl;  
+  std::cerr << "   -s         selection performed on ref" << std::endl;
+  std::cerr << "   -c         use Calphas only" << std::endl;
+  std::cerr << "   -f         filter clashes" << std::endl;
+  std::cerr << "   -t         fault tolerant parsing" << std::endl;
+  std::cerr << "   -p <file>  use specified parmeter file. Mandatory" << std::endl;
+  std::cerr << "   -v <level> verbosity level (0=results only,1=problems reported, 2=full report)" << std::endl;
+  std::cerr << "   -b <value> tolerance in stddevs for bonds" << std::endl;
+  std::cerr << "   -a <value> tolerance in stddevs for angles" << std::endl;
+  std::cerr << "   -m <value> clashing distance for unknwon atom types" << std::endl;
 }
 
 int main (int argc, char **argv)
@@ -190,10 +198,11 @@ int main (int argc, char **argv)
   
   Real min_default_distance = 1.5;
   Real min_distance_tolerance = 0.0;
-  Real bond_tolerance = 20.0;
-  Real angle_tolerance = 20.0;
+  Real bond_tolerance = 5.0;
+  Real angle_tolerance = 5.0;
   
   IOProfile profile;
+  profile.bond_feasibility_check=false;
   // parse options
   String sel;
   bool filter_clashes=false;
@@ -204,7 +213,11 @@ int main (int argc, char **argv)
     ("tolerant,t", "fault tolerant mode")
     ("filter-clashes,f", "filter clashes")
     ("parameter-file,p", po::value<String>(), "stereo chemical parameter file")
-    ("files", po::value< std::vector<String> >(), "input file")
+    ("verbosity,v", po::value<int>(), "verbosity level")    
+    ("tolerance_bonds,b", po::value<Real>(), "tolerance in stddev for bonds")    
+    ("tolerance_angles,a", po::value<Real>(), "tolerance in stddev for angles") 
+    ("default_clash,m", po::value<Real>(), "clashing distance for unknown atom types")     
+    ("files", po::value< std::vector<String> >(), "input file")    
   ;
   po::positional_options_description p;
   p.add("files", -1);
@@ -213,6 +226,13 @@ int main (int argc, char **argv)
                 options(desc).positional(p).run(),
             vm);
   po::notify(vm);
+  std::vector<String> files;
+  if (vm.count("files")) {
+    files=vm["files"].as<std::vector<String> >();
+  } else {
+    usage();
+    exit(-1);
+  }
   if (vm.count("calpha")) {
     profile.calpha_only=true;
   }
@@ -227,21 +247,36 @@ int main (int argc, char **argv)
     parameter_filename=vm["parameter-file"].as<String>();
   } else {
     std::cout << "Please specify a stereo-chemical parameter file" << std::endl;
-    return -1;
-
-  }
-  std::vector<String> files;
-  if (vm.count("files")) {
-    files=vm["files"].as<std::vector<String> >();
-  } else {
-    usage();
     exit(-1);
+  }
+  int verbosity_level=0;
+  if (vm.count("verbosity")) {
+    verbosity_level=vm["verbosity"].as<int>();
+    if (verbosity_level==0) {
+      Logger::Instance().PushVerbosityLevel(0);
+    } else if (verbosity_level==1) {
+      Logger::Instance().PushVerbosityLevel(3);
+    } else if (verbosity_level==2) {
+      Logger::Instance().PushVerbosityLevel(4);
+    } else {
+      std::cout << "Verbosity level " << verbosity_level << " is not available" << std::endl;
+      exit(-1);
+    }
+  }  
+  if (vm.count("tolerance_bonds")) {
+    bond_tolerance=vm["tolerance_bonds"].as<Real>();
+  }
+  if (vm.count("tolerance_angles")) {
+    angle_tolerance=vm["tolerance_angles"].as<Real>();
+  }
+  if (vm.count("default_clash")) {
+    min_default_distance=vm["default_clash"].as<Real>();
   }
   boost::filesystem::path loc(parameter_filename);
   boost::filesystem::ifstream infile(loc);
   if (!infile) {
     std::cout << "Couldn't find " << parameter_filename << std::endl;
-    return -1;
+    exit(-1);
   }
   std::vector<String> stereo_chemical_props;
   String line;
@@ -254,15 +289,27 @@ int main (int argc, char **argv)
   String ref_file=files.back();
   EntityHandle ref=load(ref_file, profile);
   if (!ref) {
-    return -1;
+    exit(-1);
   }
   files.pop_back();
   EntityView ref_view=ref.Select(sel);
+  std::cout << "Parameter filename: " << parameter_filename << std::endl;
+  std::cout << "Verbosiy level: " << verbosity_level << std::endl;
+  if (filter_clashes) {
+    std::cout << "Clash filtering: On " << std::endl;
+  } else {
+    std::cout << "Clash filtering: Off " << std::endl;
+  }
+  if (filter_clashes) {
+    std::cout << "Tolerance in stddevs for bonds: " << bond_tolerance << std::endl;
+    std::cout << "Tolerance in stddevs for angles: " << angle_tolerance << std::endl;
+    std::cout << "Clashing distance for unknown atom types: " << min_default_distance << std::endl;
+  }    
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);
     if (!model) {
       if (!profile.fault_tolerant) {
-        return -1;
+        exit(-1);
       }
       continue;
     }    
@@ -273,36 +320,54 @@ int main (int argc, char **argv)
       try {
 	FillStereoChemicalParams("Bond",bond_table,stereo_chemical_props);
       }	
-      catch (Error) {
-	std::cout << "Error reading 'Bond Lengths' section of the stereo-chemical parameter file. Check that the section is present and the format is correct." << std::endl;
-	return -1;
+      catch (Error& e) {
+	std::cout << "Error reading 'Bond Lengths' section of the stereo-chemical parameter file." << std::endl;
+        std::cout << e.what() << std::endl;
+        exit(-1);
       } 
       try {
 	FillStereoChemicalParams("Angle",angle_table,stereo_chemical_props); 
       }  
-      catch (Error) {
-	std::cout << "Error reading 'Angles' section of the stereo-chemical parameter file. Check that the section is present and the format is correct." << std::endl;
-	return -1;
+      catch (Error& e) {
+	std::cout << "Error reading 'Angles' section of the stereo-chemical parameter file." << std::endl;
+        std::cout << e.what() << std::endl;
+        exit(-1);
       }    
       
       try {
 	FillClashingDistances(nonbonded_table,stereo_chemical_props);  
       } 
-      catch (Error) {
-	std::cout << "Error reading 'Non-bonded Distances' section of the stereo-chemical parameter file. Check that the section is present and the format is correct." << std::endl;
-	return -1;
+      catch (Error& e) {
+	std::cout << "Error reading 'Non-bonded Distances' section of the stereo-chemical parameter file." << std::endl;
+        std::cout << e.what() << std::endl;
+        exit(-1);
       }  
       
       v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
       v=alg::FilterClashes(v,nonbonded_table);
     }
     float cutoffs[]={0.5,1,2,4};
-    float ldt=0.0;
+    String labels[]={"localldt0.5","localldt1","localldt2","ldtlocal4"};
+    float ldt=0.0;    
     for (int n=0; n<4; ++n) { 
-      ldt+=alg::LocalDistTest(v, ref_view, cutoffs[n], 8.0);
-    }
+      ldt+=alg::LocalDistTest(v, ref_view, cutoffs[n], 8.0,labels[n]);
+    }      
     ldt/=4.0;
-    std::cout << files[i] << " " << ldt << std::endl;
+    std::cout << "File: " << files[i] << std::endl; 
+    std::cout << "Global LDT score: " << ldt << std::endl;
+    std::cout << "Local LDT Score:" << std::endl;
+    std::cout << "Chain\tResName\tResNum\tScore" << std::endl;
+    
+    for (ResidueViewIter rit=v.ResiduesBegin();rit!=v.ResiduesEnd();++rit){
+      ResidueView ritv = *rit;
+      Real ldt_local_sum = 0;
+      for (int n=0; n<4; ++n) { 
+        ldt_local_sum+=ritv.GetFloatProp(labels[n]);
+      }      
+      ldt_local_sum/=4.0;
+      std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << ldt_local_sum << std::endl;
+    }  
+    std::cout << std::endl;
   }
   return 0;
-}
+}      
