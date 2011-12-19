@@ -143,8 +143,8 @@ void StereoChemicalParams::PrintAllParameters() const
 EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
 {
   LOG_INFO("Checking stereo-chemistry")
-  LOG_INFO("BOND INFO FORMAT:" << " " << "Atom Chain" << " " << "Atom Residue" << " " << "Bond" << " " << "Min value" << " " << "Max value" << " " << "Observed Distance" << " " << "Z-score" << " " << "Status")
-  LOG_INFO("ANGLE INFO FORMAT:" << " " << "Atom Chain" << " " << "Atom Residue" << " " << "Angle" << " " << "Min value" << " " << "Max value" << " " << "Observed Distance" << " " << "Z-score" << " " << "Status")
+  LOG_INFO("BOND INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Bond" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status")
+  LOG_INFO("ANGLE INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Angle" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status")
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
   for (ResidueViewList::iterator i=residues.begin(), e=residues.end(); i!=e; ++i) {
@@ -184,7 +184,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             Real max_length = ref_length + bond_tolerance*ref_stddev;
             Real zscore = (blength - ref_length)/ref_stddev;
             if (blength < min_length || blength > max_length) {
-              LOG_INFO("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "FAIL")
+              LOG_INFO("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "FAIL")
               remove_sc=true;
               if (always_remove_bb==true) {
                 remove_bb=true;
@@ -195,7 +195,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
                 remove_bb=true;
               }
             } else {
-              LOG_VERBOSE("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "PASS")
+              LOG_VERBOSE("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "PASS")
             }  
           }  
       }
@@ -236,7 +236,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             Real max_width = ref_width + angle_tolerance*ref_stddev;
             Real zscore = (awidth - ref_width)/ref_stddev;
             if (awidth < min_width || awidth > max_width) {
-              LOG_INFO("ANGLE:" << res.GetChain() << " " << res.GetName() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "FAIL")
+              LOG_INFO("ANGLE:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "FAIL")
               remove_sc=true;
               if (always_remove_bb==true) {
                 remove_bb=true;
@@ -247,7 +247,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
                 remove_bb=true;
               }
             } else {
-                LOG_VERBOSE("ANGLE:" << " " << res.GetChain() << " " << res.GetName() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "PASS")
+                LOG_VERBOSE("ANGLE:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "PASS")
             }
           }  
         }
@@ -285,7 +285,7 @@ EntityView CheckStereoChemistry(const EntityHandle& ent, const StereoChemicalPar
 EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_distances, bool always_remove_bb)
 {
   LOG_INFO("Filtering non-bonded clashes")
-  LOG_INFO("CLASH INFO FORMAT:" << " " << "Atom1 Chain" << " " << "Atom1 Residue" << " " << "Atom1 Name" << " " << "Atom2 Chain" << " " << "Atom2 Residue" << " " << "Atom2 Name" << " " << "Min distance" << " " << "Observed Distance" << " " << "Z-score" << " " << "Status")
+  LOG_INFO("CLASH INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "Observed" << " " << "Difference" << " " << "Status")
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
   for (ResidueViewList::iterator 
@@ -309,25 +309,29 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
            k=within.begin(), e3=within.end(); k!=e3; ++k) {
         AtomView atom2=*k;
         if (atom2==atom) {
+           LOG_VERBOSE("CLASH:" << " " << atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << "None" << " " << "None" << " " << "None" << " " << "None" << " " << "None" << " " << "None " << " " << "0.0" << " " << "PASS")
+
           continue;
         }
         String ele2=atom2.GetElement();
         if (ele2=="H" || ele2=="D") {
           continue;
         }
+
         // In theory, this should also trigger for disulfide bonds, but 
         // since we don't detect disulfides correctly, we can't count on that 
         // and we instead allow S-S distances down to 1.8.
         if (atom.GetHandle().FindBondToAtom(atom2.GetHandle()).IsValid()) {
           continue;
         }
+
         Real d=geom::Length2(atom.GetPos()-atom2.GetPos());
         std::pair <Real,Real> distance_tolerance=min_distances.GetClashingDistance(ele1, ele2);
 	Real distance=distance_tolerance.first;
 	Real tolerance=distance_tolerance.second;
 	Real threshold=distance-tolerance;
         if (d<threshold*threshold) {
-          LOG_INFO(atom.GetResidue().GetChain() << " " << atom.GetResidue() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << "FAIL")
+          LOG_INFO(atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetName() << " " << atom2.GetResidue().GetName() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "FAIL")
        
           remove_sc=true;
           if (always_remove_bb==true) {
@@ -339,7 +343,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
             remove_bb=true;
           }
         } else {
-          LOG_VERBOSE("CLASH:" << " " << atom.GetResidue().GetChain() << " " << atom.GetResidue() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << "PASS")
+          LOG_VERBOSE("CLASH:" << " " << atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetNumber() << " " << atom2.GetResidue().GetName() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "PASS")
         }  
       }
     }
