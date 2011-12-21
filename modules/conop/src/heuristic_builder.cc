@@ -227,19 +227,20 @@ void HeuristicBuilder::ConnectivityFromAtomNames(const mol::ResidueHandle& res,
              editor.Connect(*it2,*it1);
 	 } else {
            if(this->IsBondFeasible(*it2, *it1)) {
-             LOG_TRACE( "found (reversed)");
+             LOG_TRACE( "found (reversed)");             
              editor.Connect(*it2,*it1);
-           } else {
-             LOG_TRACE( "not found");
-	   }  
-         }
+           }
+         }  
        } else {
-         unknown_atoms.push_back(*it1);
-       }	 
+          LOG_TRACE( "not found");
+       }
      }
-   }
+   } else {
+     unknown_atoms.push_back(*it1);
+     LOG_TRACE( "atom not found, pushing it to unknown atoms");
+   }	 
  }
-} 
+}
 
 void HeuristicBuilder::ConnectAtomsOfResidue(mol::ResidueHandle res)
 {
