@@ -18,6 +18,6 @@ set(OST_IO_PYMOD_MODULES
 pymod(NAME io CPP ${OST_IO_PYMOD_SOURCES} PY ${OST_IO_PYMOD_MODULES})
 if (STATIC_LIBRARIES)
   message("adding zlib libraries")
-  target_link_libraries(_io ${ZLIB_LIBRARIES})
+  target_link_libraries(_ost_io ${ZLIB_LIBRARIES})
 endif()
 
