@@ -330,3 +330,16 @@ CG1-CB-CG2		VAL		110.9		1.6
 N-CA-C			VAL		111.0		2.7
 CA-C-O			VAL		120.1		2.1
 -
+
+Non-bonded distance     Minimum Dist    Tolerance
+C-C                     3.4             1.5
+C-N                     3.25            1.5
+C-S                     3.5             1.5
+C-O                     3.22            1.5
+N-N                     3.1             1.5
+N-S                     3.35            1.5
+N-O                     3.07            1.5
+O-S                     3.32            1.5
+O-O                     3.04            1.5
+S-S                     2.03            1.0
+-

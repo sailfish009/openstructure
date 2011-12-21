@@ -22,11 +22,11 @@
 #include <math.h>
 #include "filter_clashes.hh"
 #include <ost/units.hh>
-#include <ost/conop/amino_acids.hh>
+
 
 
 namespace {
-  
+
 String bond_string(const ost::mol::AtomView& atom1, const ost::mol::AtomHandle& atom2) {
   String atom1_str = atom1.GetName();
   String atom2_str = atom2.GetName();
@@ -76,7 +76,11 @@ void ClashingDistances::SetClashingDistance(const String& ele1,const String& ele
 std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,const String& ele2) const
 {
   std::stringstream stkey;
-  stkey << ele1 << "--" << ele2;
+  if (ele1<ele2) {
+    stkey << ele1 << "--" << ele2;
+  } else {
+    stkey << ele2 << "--" << ele1;
+  }  
   String key=stkey.str();
   std::map <String,std::pair<float,float> >::const_iterator find_ci= min_distance_.find(key);
   if (find_ci == min_distance_.end()) {
@@ -150,7 +154,8 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
   for (ResidueViewList::iterator i=residues.begin(), e=residues.end(); i!=e; ++i) {
     bool remove_sc=false, remove_bb=false;
     ResidueView res=*i;
-    if (ost::conop::ResidueNameToOneLetterCode(res.GetName())=='X') {
+    std::cout << res.GetOneLetterCode() << std::endl;
+    if (res.GetOneLetterCode()=='?') {
       filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
       continue;
     }  
@@ -292,7 +297,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
        i=residues.begin(), e=residues.end(); i!=e; ++i) {
     bool remove_sc=false, remove_bb=false;
     ResidueView res=*i;
-    if (ost::conop::ResidueNameToOneLetterCode(res.GetName())=='X') {
+    if (res.GetOneLetterCode()=='?') {
       filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
       continue;
     }  
@@ -309,8 +314,6 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
            k=within.begin(), e3=within.end(); k!=e3; ++k) {
         AtomView atom2=*k;
         if (atom2==atom) {
-           LOG_VERBOSE("CLASH:" << " " << atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << "None" << " " << "None" << " " << "None" << " " << "None" << " " << "None" << " " << "None " << " " << "0.0" << " " << "PASS")
-
           continue;
         }
         String ele2=atom2.GetElement();

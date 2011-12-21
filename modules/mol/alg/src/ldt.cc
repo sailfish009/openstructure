@@ -31,6 +31,8 @@
 #include <ost/platform.hh>
 #include <ost/log.hh>
 
+#include <ost/conop/rule_based_builder.hh>
+#include <ost/dyn_cast.hh>
 
 using namespace ost;
 using namespace ost::io;
@@ -42,12 +44,14 @@ namespace po=boost::program_options;
 
 void FillStereoChemicalParams(const String& header, StereoChemicalParams& table, std::vector<String>& stereo_chemical_props_file)
 {
+  bool found=false;
   std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
   while (line_iter!=stereo_chemical_props_file.end()) {
     if ((*line_iter).length()!=0) {
       StringRef line_string_ref(line_iter->data(),(*line_iter).length());
       std::vector<StringRef> line_str_vec = line_string_ref.split();
       if (line_str_vec[0].str()==header) {
+        found=true;
         line_iter++;
         while ((*line_iter)[0]!='-') {
 	  if ((*line_iter)[0]!='#') {
@@ -104,17 +108,22 @@ void FillStereoChemicalParams(const String& header, StereoChemicalParams& table,
       }  
     }
     line_iter++;    
-  }  
+  }
+  if (found==false) {
+    throw Error("Could not find the relevant section in the stereo-chemical parameter file");
+  };    
 };  
 
 void FillClashingDistances(ClashingDistances& table,  std::vector<String>& stereo_chemical_props_file)
 {
+  bool found=false;
   std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
   while (line_iter!=stereo_chemical_props_file.end()) {
     if ((*line_iter).length()!=0) {
       StringRef line_string_ref(line_iter->data(),(*line_iter).length());
       std::vector<StringRef> line_str_vec = line_string_ref.split();
       if (line_str_vec[0].str()=="Non-bonded") {
+        found=true;
         line_iter++;
         while ((*line_iter)[0]!='-') {
 	  if ((*line_iter)[0]!='#') {
@@ -156,8 +165,11 @@ void FillClashingDistances(ClashingDistances& table,  std::vector<String>& stere
       }  
     }
     line_iter++;    
-  }  
-};  
+  }
+  if (found==false) {
+    throw Error("Could not find the relevant section in the stereo-chemical parameter file");
+  }    
+}  
 
 EntityHandle load(const String& file, const IOProfile& profile)
 {
@@ -167,6 +179,15 @@ EntityHandle load(const String& file, const IOProfile& profile)
       EntityHandle ent=CreateEntity();
       reader.Import(ent);
       conop::Conopology& conop_inst=conop::Conopology::Instance();
+
+      conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
+      conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
+      if (!rbb) {
+       std::cout << "Nope,not rule-based" << std::endl;
+      } else {
+       std::cout << "Yep,rule-based" << std::endl;
+      }
+
       conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
       return ent;
     }
