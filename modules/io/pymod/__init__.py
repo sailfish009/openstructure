@@ -177,7 +177,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
         conop_inst.ConnectAll(builder, ent, 0)
         ent_list.append(ent)
       if len(ent_list)==0:
-        raise IOError("File doesn't contain any entities")
+        raise IOError("File '%s' doesn't contain any entities" % filename)
       return ent_list
     else:
       ent=mol.CreateEntity()
@@ -185,7 +185,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
         reader.Import(ent, restrict_chains)
         conop_inst.ConnectAll(builder, ent, 0)
       else:
-        raise IOError("File doesn't contain any entities")
+        raise IOError("File '%s' doesn't contain any entities" % filename)
       if seqres:
         return ent, reader.seqres
       return ent

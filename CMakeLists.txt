@@ -177,7 +177,6 @@ if (ENABLE_STATIC)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost ${_BOOST_MIN_VERSION} 
                COMPONENTS filesystem system iostreams regex REQUIRED)
-  message(${Boost_LIBRARIES})
   find_package(ZLIB REQUIRED)
   set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
       ${PNG_LIBRARIES} ${ZLIB_LIBRARIES})

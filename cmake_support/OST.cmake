@@ -211,7 +211,7 @@ macro(module)
       foreach(_DEPENDENCY ${_ARG_DEPENDS_ON})
         target_link_libraries(${_LIB_NAME}_static ${_DEPENDENCY}_static)
       endforeach()
-      target_link_libraries(${_LIB_NAME} ${ZLIB_LIBRARIES})
+      target_link_libraries(${_LIB_NAME}_static ${ZLIB_LIBRARIES} ${_ARG_LINK})
     endif()
     if (APPLE)
       set_target_properties(${_LIB_NAME} PROPERTIES
