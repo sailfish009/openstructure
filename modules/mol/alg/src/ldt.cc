@@ -179,15 +179,6 @@ EntityHandle load(const String& file, const IOProfile& profile)
       EntityHandle ent=CreateEntity();
       reader.Import(ent);
       conop::Conopology& conop_inst=conop::Conopology::Instance();
-
-      conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
-      conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
-      if (!rbb) {
-       std::cout << "Nope,not rule-based" << std::endl;
-      } else {
-       std::cout << "Yep,rule-based" << std::endl;
-      }
-
       conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
       return ent;
     }
@@ -205,7 +196,7 @@ void usage()
   std::cerr << "usage: ldt [options] <mod1> [mod1 [mod2]] <ref>" << std::endl;
   std::cerr << "   -s         selection performed on ref" << std::endl;
   std::cerr << "   -c         use Calphas only" << std::endl;
-  std::cerr << "   -f         filter clashes" << std::endl;
+  std::cerr << "   -f         perform structural checks and filter input data" << std::endl;
   std::cerr << "   -t         fault tolerant parsing" << std::endl;
   std::cerr << "   -p <file>  use specified parmeter file. Mandatory" << std::endl;
   std::cerr << "   -v <level> verbosity level (0=results only,1=problems reported, 2=full report)" << std::endl;
@@ -226,13 +217,13 @@ int main (int argc, char **argv)
   profile.bond_feasibility_check=false;
   // parse options
   String sel;
-  bool filter_clashes=false;
+  bool structural_checks=false;
   po::options_description desc("Options");
   desc.add_options()
     ("calpha,c", "consider only calpha atoms")
     ("sel,s", po::value<String>(&sel)->default_value(""), "selection for reference")
     ("tolerant,t", "fault tolerant mode")
-    ("filter-clashes,f", "filter clashes")
+    ("structural-checks,f", "structural checks")
     ("parameter-file,p", po::value<String>(), "stereo chemical parameter file")
     ("verbosity,v", po::value<int>(), "verbosity level")    
     ("tolerance_bonds,b", po::value<Real>(), "tolerance in stddev for bonds")    
@@ -258,7 +249,7 @@ int main (int argc, char **argv)
     profile.calpha_only=true;
   }
   if (vm.count("filter-clashes")) {
-    filter_clashes=true;
+    structural_checks=true;
   }
   if (vm.count("tolerant")) {
     profile.fault_tolerant=true;
@@ -316,12 +307,12 @@ int main (int argc, char **argv)
   EntityView ref_view=ref.Select(sel);
   std::cout << "Parameter filename: " << parameter_filename << std::endl;
   std::cout << "Verbosiy level: " << verbosity_level << std::endl;
-  if (filter_clashes) {
-    std::cout << "Clash filtering: On " << std::endl;
+  if (structural_checks) {
+    std::cout << "Stereo-chemical and steric clash checks: On " << std::endl;
   } else {
-    std::cout << "Clash filtering: Off " << std::endl;
+    std::cout << "Stereo-chemical and steric clash checks: Off " << std::endl;
   }
-  if (filter_clashes) {
+  if (structural_checks) {
     std::cout << "Tolerance in stddevs for bonds: " << bond_tolerance << std::endl;
     std::cout << "Tolerance in stddevs for angles: " << angle_tolerance << std::endl;
     std::cout << "Clashing distance for unknown atom types: " << min_default_distance << std::endl;
@@ -337,7 +328,7 @@ int main (int argc, char **argv)
     StereoChemicalParams bond_table, angle_table;
     ClashingDistances nonbonded_table(min_default_distance,min_distance_tolerance);    
     EntityView v=model.CreateFullView();
-    if (filter_clashes) {
+    if (structural_checks) {
       try {
 	FillStereoChemicalParams("Bond",bond_table,stereo_chemical_props);
       }	

@@ -154,7 +154,6 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
   for (ResidueViewList::iterator i=residues.begin(), e=residues.end(); i!=e; ++i) {
     bool remove_sc=false, remove_bb=false;
     ResidueView res=*i;
-    std::cout << res.GetOneLetterCode() << std::endl;
     if (res.GetOneLetterCode()=='?') {
       filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
       continue;
