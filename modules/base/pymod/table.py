@@ -487,7 +487,7 @@ class Table(object):
 
   @staticmethod
   def _LoadOST(stream_or_filename):
-    fieldname_pattern=re.compile(r'(?P<name>[A-Za-z0-9_]+)(\[(?P<type>\w+)\])?')
+    fieldname_pattern=re.compile(r'(?P<name>[^[]+)(\[(?P<type>\w+)\])?')
     if not hasattr(stream_or_filename, 'read'):
       stream=open(stream_or_filename, 'r')
     else:
@@ -510,7 +510,7 @@ class Table(object):
             if match.group('type'):
               fieldtypes.append(match.group('type'))
             else:
-              fieldtypes.append('str')
+              fieldtypes.append('string')
             fieldnames.append(match.group('name'))
         tab=Table(fieldnames, fieldtypes)
         header=True
@@ -526,6 +526,7 @@ class Table(object):
     for row in self.rows:
       for idx in range(len(row)):
         row[idx]=self._Coerce(row[idx], self.col_types[idx])
+        
   @staticmethod
   def _LoadCSV(stream_or_filename, sep):
     if not hasattr(stream_or_filename, 'read'):
