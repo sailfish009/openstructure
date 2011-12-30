@@ -701,9 +701,10 @@ class Table(object):
         for row in self.rows:
           if row[idx1]!=None and row[idx2]!=None and row[idx3]!=None:
             if plot_if and not plot_if(self, row):
-              xs.append(row[idx1])
-              ys.append(row[idx2])
-              zs.append(row[idx3])
+              continue
+            xs.append(row[idx1])
+            ys.append(row[idx2])
+            zs.append(row[idx3])
         levels = []
         if z_range:
           z_spacing = (z_range[1] - z_range[0]) / num_z_levels
@@ -718,7 +719,7 @@ class Table(object):
   
         xi = np.linspace(min(xs)-0.1,max(xs)+0.1,len(xs)*10)
         yi = np.linspace(min(ys)-0.1,max(ys)+0.1,len(ys)*10)
-        zi = mlab.griddata(xs, ys, zs, xi, yi, interp='linear')
+        zi = mlab.griddata(xs, ys, zs, xi, yi)
   
         plt.contour(xi,yi,zi,levels,linewidths=0.5,colors='k')
         plt.contourf(xi,yi,zi,levels,cmap=plt.cm.jet)
