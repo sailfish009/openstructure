@@ -487,7 +487,7 @@ class Table(object):
 
   @staticmethod
   def _LoadOST(stream_or_filename):
-    fieldname_pattern=re.compile(r'(?P<name>[A-Za-z0-9_]+)(\[(?P<type>\w+)\])?')
+    fieldname_pattern=re.compile(r'(?P<name>[^[]+)(\[(?P<type>\w+)\])?')
     if not hasattr(stream_or_filename, 'read'):
       stream=open(stream_or_filename, 'r')
     else:
@@ -510,7 +510,7 @@ class Table(object):
             if match.group('type'):
               fieldtypes.append(match.group('type'))
             else:
-              fieldtypes.append('str')
+              fieldtypes.append('string')
             fieldnames.append(match.group('name'))
         tab=Table(fieldnames, fieldtypes)
         header=True
@@ -526,6 +526,7 @@ class Table(object):
     for row in self.rows:
       for idx in range(len(row)):
         row[idx]=self._Coerce(row[idx], self.col_types[idx])
+        
   @staticmethod
   def _LoadCSV(stream_or_filename, sep):
     if not hasattr(stream_or_filename, 'read'):
@@ -700,9 +701,10 @@ class Table(object):
         for row in self.rows:
           if row[idx1]!=None and row[idx2]!=None and row[idx3]!=None:
             if plot_if and not plot_if(self, row):
-              xs.append(row[idx1])
-              ys.append(row[idx2])
-              zs.append(row[idx3])
+              continue
+            xs.append(row[idx1])
+            ys.append(row[idx2])
+            zs.append(row[idx3])
         levels = []
         if z_range:
           z_spacing = (z_range[1] - z_range[0]) / num_z_levels
@@ -717,7 +719,7 @@ class Table(object):
   
         xi = np.linspace(min(xs)-0.1,max(xs)+0.1,len(xs)*10)
         yi = np.linspace(min(ys)-0.1,max(ys)+0.1,len(ys)*10)
-        zi = mlab.griddata(xs, ys, zs, xi, yi, interp='linear')
+        zi = mlab.griddata(xs, ys, zs, xi, yi)
   
         plt.contour(xi,yi,zi,levels,linewidths=0.5,colors='k')
         plt.contourf(xi,yi,zi,levels,cmap=plt.cm.jet)

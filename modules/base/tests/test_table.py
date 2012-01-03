@@ -713,6 +713,17 @@ class TestTable(unittest.TestCase):
     tab.Sort('third', '+')
     self.CompareDataFromDict(tab, {'first': [None,'foo','x'], 'second': [9,None,3], 'third': [3.3,2.2,None]})
 
+  def testLoadTableOSTUnknownType(self):
+    self.assertRaises(ValueError, Table.Load, os.path.join('testfiles','ost-table-unknown-type.tab'))
+
+  def testLoadTableOSTNoType(self):
+    tab = Table.Load(os.path.join('testfiles','ost-table-notype.tab'))
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+    
+  def testLoadOSTDifficultHeaders(self):
+    tab = Table.Load(os.path.join('testfiles','ost-table-difficult-headers.tab'))
+    self.assertEquals(tab.col_types, ['float','float','float','float','float'])
+
   def testSaveLoadTableOST(self):
     tab = self.CreateTestTable()
     self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
@@ -738,6 +749,7 @@ class TestTable(unittest.TestCase):
     self.assertRaises(IOError, Table.Load, os.path.join('testfiles','emptytable.tab'))
     in_stream = open(os.path.join('testfiles','emptytable.csv'), 'r')
     self.assertRaises(IOError, Table.Load, in_stream)
+    
   def testSaveLoadTableCSV(self):
     tab = self.CreateTestTable()
     self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
@@ -757,6 +769,7 @@ class TestTable(unittest.TestCase):
     # check content
     self.CompareDataFromDict(tab_loaded_stream, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
     self.CompareDataFromDict(tab_loaded_fname, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+  
   def testSaveLoadTablePickle(self):
     tab = self.CreateTestTable()
     self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
