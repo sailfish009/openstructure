@@ -316,6 +316,11 @@ int main (int argc, char **argv)
     std::cout << "Tolerance in stddevs for bonds: " << bond_tolerance << std::endl;
     std::cout << "Tolerance in stddevs for angles: " << angle_tolerance << std::endl;
     std::cout << "Clashing distance for unknown atom types: " << min_default_distance << std::endl;
+    LOG_INFO("Log entries format:"); 
+    LOG_INFO("BOND INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Bond" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status");
+    LOG_INFO("ANGLE INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Angle" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status");
+    LOG_INFO("CLASH INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "Observed" << " " << "Difference" << " " << "Status");
+    LOG_INFO("LDT INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "ModelDist" << " " << "TargetDist" << " " << "Difference" <<  " " << "Tolerance" << " " << "Status");
   }    
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);

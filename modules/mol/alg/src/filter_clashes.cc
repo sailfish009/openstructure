@@ -147,8 +147,6 @@ void StereoChemicalParams::PrintAllParameters() const
 EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
 {
   LOG_INFO("Checking stereo-chemistry")
-  LOG_INFO("BOND INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Bond" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status")
-  LOG_INFO("ANGLE INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Angle" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status")
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
   for (ResidueViewList::iterator i=residues.begin(), e=residues.end(); i!=e; ++i) {
@@ -289,7 +287,6 @@ EntityView CheckStereoChemistry(const EntityHandle& ent, const StereoChemicalPar
 EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_distances, bool always_remove_bb)
 {
   LOG_INFO("Filtering non-bonded clashes")
-  LOG_INFO("CLASH INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "Observed" << " " << "Difference" << " " << "Status")
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
   for (ResidueViewList::iterator 
