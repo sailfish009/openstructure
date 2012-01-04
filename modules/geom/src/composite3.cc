@@ -266,10 +266,7 @@ void Rotation3::SetRotationMatrix(const Mat3& rot)
 }
 Vec3 Rotation3::Apply(const Vec3& v) const
 {
-  // We can use Conjugate instead of Invert because q is guaranteed to
-  // be unit Quat
-  return origin_+(Grassmann(Grassmann(q_,Quat(0,v-origin_)),
-                            Conjugate(q_))).GetAxis();
+  return origin_+q_.Rotate(v-origin_);
 }
 
 bool Rotation3::operator==(const Rotation3& rhs) const

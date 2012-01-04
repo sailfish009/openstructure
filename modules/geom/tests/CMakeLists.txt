@@ -7,6 +7,7 @@ set(GEOM_UNITTESTS
   test_op2.cc
   test_op3.cc
   test_op4.cc
+  test_quat.cc
   test_vec2.cc
   test_vec3.cc
   test_vec4.cc

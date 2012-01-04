@@ -116,8 +116,6 @@ Quat DLLEXPORT_OST_GEOM Inv(const Quat& q);
 Quat DLLEXPORT_OST_GEOM Exp(const Quat& q);
 Quat DLLEXPORT_OST_GEOM Log(const Quat& q);
 
-Quat DLLEXPORT_OST_GEOM Grassmann(const Quat& lhs, const Quat& rhs);
-
 //normalize quaternion
 Quat DLLEXPORT_OST_GEOM Normalize(const Quat& q);
 
