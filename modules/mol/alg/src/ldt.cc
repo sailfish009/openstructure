@@ -248,7 +248,7 @@ int main (int argc, char **argv)
   if (vm.count("calpha")) {
     profile.calpha_only=true;
   }
-  if (vm.count("filter-clashes")) {
+  if (vm.count("structural-checks")) {
     structural_checks=true;
   }
   if (vm.count("tolerant")) {
@@ -320,7 +320,8 @@ int main (int argc, char **argv)
     LOG_INFO("BOND INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Bond" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status");
     LOG_INFO("ANGLE INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Angle" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status");
     LOG_INFO("CLASH INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "Observed" << " " << "Difference" << " " << "Status");
-    LOG_INFO("LDT INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "ModelDist" << " " << "TargetDist" << " " << "Difference" <<  " " << "Tolerance" << " " << "Status");
+    LOG_INFO("LDT INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "ModelDist" << " " << "TargetDist" << " " << "Difference" <<  " " << "Tolerance"
+    << " " << "Status");
   }    
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);
