@@ -26,7 +26,10 @@
 using namespace boost::python;
 
 #include <ost/img/mask.hh>
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/img/mask_info_convert.hh>
+#endif
 
 namespace ost { namespace img {
 
@@ -101,7 +104,10 @@ void export_Mask()
   def("Mask",mask2);
   def("Mask",mask3);
   def("Mask",mask4);
+  
+#if(OST_INFO_ENABLED)
   def("InfoToMask",InfoToMask);
   def("MaskToInfo",MaskToInfo);
-
+#endif
+  
 }

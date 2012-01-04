@@ -21,8 +21,11 @@
  */
 
 #include <boost/format.hpp>
-
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
+#endif
+
 #include <ost/integrity_error.hh>
 #include <ost/mol/chain_view.hh>
 
@@ -280,6 +283,7 @@ bool SequenceImpl::HasAttachedView() const
   return attached_view_.IsValid();
 }
 
+#if(OST_INFO_ENABLED)
 void SequenceImplToInfo(const SequenceImplPtr& sequence, info::InfoGroup& group)
 {
   group.SetTextData(sequence->GetString());
@@ -300,6 +304,7 @@ SequenceImplPtr SequenceImplFromInfo(const info::InfoGroup& group)
   sequence->SetOffset(offset);
   return sequence;
 }
+#endif
 
 int SequenceImpl::GetFirstNonGap() const
 {

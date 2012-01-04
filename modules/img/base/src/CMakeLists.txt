@@ -29,7 +29,6 @@ extent_mask.cc
 spherical_mask.cc
 mask_op.cc
 circle_mask.cc
-mask_info_convert.cc
 image_list.cc
 physical_units.cc
 progress.cc
@@ -86,13 +85,16 @@ spherical_mask.hh
 mask_op.hh
 mask.hh
 circle_mask.hh
-mask_info_convert.hh
 image_list.hh
 physical_units.hh
 progress.hh
 map.hh
 )
 
+if (ENABLE_INFO)
+  list(APPEND OST_IMG_SOURCES mask_info_convert.cc)
+  list(APPEND OST_IMG_HEADERS mask_info_convert.hh)
+endif()
 
 foreach(fname ${OST_IMG_IMAGE_STATE_SOURCES})
   set(OST_IMG_SOURCES ${OST_IMG_SOURCES} image_state/${fname})

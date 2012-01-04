@@ -27,7 +27,10 @@
 
 #include <boost/shared_ptr.hpp>
 #include <ost/generic_property.hh>
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info_fw.hh>
+#endif
 #include <ost/mol/residue_prop.hh>
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/residue_view.hh>
@@ -175,14 +178,15 @@ private:
 /// \internal
 typedef std::vector<SequenceImplPtr>  SequenceList;
 
+#if(OST_INFO_ENABLED)
 /// \internal
-void DLLEXPORT_OST_SEQ SequenceImplToInfo(const SequenceImplPtr& sequence,
-                                      info::InfoGroup& group);
-/// \internal
-SequenceImplPtr DLLEXPORT_OST_SEQ 
+SequenceImplPtr DLLEXPORT_OST_SEQ SequenceImplFromInfo(const info::InfoGroup& group);
 
 /// \internal
-SequenceImplFromInfo(const info::InfoGroup& group);
+void DLLEXPORT_OST_SEQ SequenceImplToInfo(const SequenceImplPtr& sequence,
+                                     info::InfoGroup& group);
+#endif
+
 
 }}} //ns
 #endif

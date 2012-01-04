@@ -26,6 +26,8 @@ option(ENABLE_GFX "whether graphics support should be enabled"
       ON)
 option(ENABLE_IMG "whether the image processing module should be compiled"
        ON)
+option(ENABLE_INFO "whether openstructure should be compiled with support for the info library"
+       ON)
 option(USE_NUMPY "whether numpy support is added"
       OFF)
 option(USE_DOUBLE_PRECISION "whether to compile in double precision" 
@@ -74,8 +76,18 @@ else()
   set(_DOUBLE_PREC OFF)
 endif()
 
+if (NOT ENABLE_INFO)
+  set(ENABLE_GFX OFF)
+endif()
+
 if (NOT ENABLE_GFX)
   set(ENABLE_GUI OFF)
+endif()
+
+if (ENABLE_INFO)
+  set(_INFO ON)
+else()
+  set(_INFO OFF)
 endif()
 
 if (ENABLE_GUI)
@@ -155,9 +167,15 @@ setup_compiler_flags()
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
 
 setup_boost()
-        
-find_package(Qt4 4.5.0 REQUIRED)
-find_package(OpenGL REQUIRED)
+
+if (ENABLE_INFO)        
+  find_package(Qt4 4.5.0 REQUIRED)
+endif()
+
+if (ENABLE_GFX)
+  find_package(OpenGL REQUIRED)
+endif()
+
 find_package(PNG REQUIRED)
 find_package(Eigen 2.0.0 REQUIRED)
 find_package(Python 2.4 REQUIRED)
@@ -231,6 +249,7 @@ message(STATUS
         "OpenStructure will be built with the following options:\n"
         "   Install Prefix                       (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
         "   RPath in install                  (-DUSE_RPATH) : ${_USE_RPATH}\n"
+        "   Info support                    (-DENABLE_INFO) : ${_INFO}\n"
         "   Graphical interface              (-DENABLE_GUI) : ${_UI}\n"
         "   OpenGL support                   (-DENABLE_GFX) : ${_OPENGL}\n"
         "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
@@ -242,4 +261,4 @@ message(STATUS
         "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}" )
