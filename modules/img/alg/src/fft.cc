@@ -25,8 +25,12 @@
 #include <boost/shared_ptr.hpp>
 
 #include <fftw3.h>
+#if OST_INFO_ENABLED
 #include <QThread>
-
+#define IDEAL_NUMBER_OF_THREADS() QThread::idealThreadCount()
+#else
+#define IDEAL_NUMBER_OF_THREADS() 1
+#endif
 #include <ost/message.hh>
 #include <ost/img/value_util.hh>
 #include <ost/img/image_state/image_state_def.hh>
@@ -130,7 +134,7 @@ reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
   for(size_t i=0;i<block_count;i++) {
     std::copy(&in_ptr[i*src_size],&in_ptr[(i+1)*src_size],&fftw_in[i*2*dst_size]);
   }
-  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,QThread::idealThreadCount()));
+  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
   OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft_r2c(rank,n,
 				     fftw_in,fftw_out,
 				     FFTW_ESTIMATE);
@@ -213,7 +217,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,HalfFrequencyDomain>(const ComplexH
   Real* fftw_out = reinterpret_cast<Real*>(out_ptr);
   
   assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
-  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,QThread::idealThreadCount()));
+  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
   OST_FFTW_fftw_complex* fftw_in =
 reinterpret_cast<OST_FFTW_fftw_complex*>(out_ptr);
 
@@ -259,7 +263,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,SpatialDomain>(const ComplexSpatial
 reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
 
   // in place transform
-  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,QThread::idealThreadCount()));
+  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
   OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft(rank,n,
 				 fftw_out, fftw_out, 
 				 dir, 
@@ -297,7 +301,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,FrequencyDomain>(const ComplexFrequ
 reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
 
   // in place transform
-  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,QThread::idealThreadCount()));
+  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
   OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft(rank,n,
 				 fftw_out, fftw_out, 
 				 dir, 

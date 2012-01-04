@@ -94,6 +94,7 @@ map.hh
 if (ENABLE_INFO)
   list(APPEND OST_IMG_SOURCES mask_info_convert.cc)
   list(APPEND OST_IMG_HEADERS mask_info_convert.hh)
+  set(INFO_DEPS ost_info)
 endif()
 
 foreach(fname ${OST_IMG_IMAGE_STATE_SOURCES})
@@ -108,4 +109,4 @@ module(NAME img SOURCES "${OST_IMG_SOURCES}"
        HEADERS ${OST_IMG_RASTER_IMAGE_HEADERS} IN_DIR raster_image
                 ${OST_IMG_IMAGE_STATE_HEADERS} IN_DIR image_state
                 ${OST_IMG_HEADERS}
-       DEPENDS_ON ost_geom ost_base ost_info)
+       DEPENDS_ON ost_geom ost_base ${INFO_DEPS})
