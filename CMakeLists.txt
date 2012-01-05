@@ -191,6 +191,9 @@ endif()
 
 
 if (ENABLE_STATIC)
+  if (UNIX AND NOT APPLE)
+     find_package(DL REQUIRED)
+  endif()
   set(Boost_LIBRARIES)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost ${_BOOST_MIN_VERSION} 
@@ -262,3 +265,4 @@ message(STATUS
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
         "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}" )
+

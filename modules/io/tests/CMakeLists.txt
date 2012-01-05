@@ -22,3 +22,4 @@ ost_unittest(MODULE io
 add_executable(test_mae_standalone test_mae_standalone.cc)
 target_link_libraries(test_mae_standalone ost_mol)
 target_link_libraries(test_mae_standalone ost_io)
+target_link_libraries(test_mae_standalone ${Boost_REGEX_LIBRARY})
