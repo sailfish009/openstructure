@@ -161,6 +161,9 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
     for (AtomViewList::const_iterator j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
       AtomView atom=*j;
       String ele1=atom.GetElement();
+      if (atom.GetName()=="OXT") {
+        continue;
+      } 
       if (ele1=="H" || ele1=="D") {
         continue;
       }
@@ -171,7 +174,10 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
           AtomHandle other_atom = bond.GetOther(atom.GetHandle());    
           if (other_atom.GetResidue()!=res.GetHandle()) {
             continue;     
-          }       
+          }         
+          if (other_atom.GetName()=="OXT") {
+            continue;
+          }  
           String ele2 = other_atom.GetElement();
           if (ele2=="H" || ele2=="D") {
             continue;
@@ -206,6 +212,9 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
         BondHandle bond1=*bond_iter1;
         AtomHandle atom1= bond1.GetOther(atom.GetHandle());
         String ele_atom1=atom1.GetElement();
+        if (atom1.GetName()=="OXT") {
+          continue;
+        } 
         if (ele_atom1=="H" || ele_atom1=="D") {
           continue;
         }
@@ -216,6 +225,9 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
           BondHandle bond2=*bond_iter2;
           AtomHandle atom2 = bond2.GetOther(atom.GetHandle());
           String ele_atom2=atom2.GetElement();
+          if (atom2.GetName()=="OXT") {
+            continue;
+          } 
           if (ele_atom2=="H" || ele_atom2=="D") {
             continue;
           }
@@ -302,6 +314,9 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
          j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
       AtomView atom=*j;
       String ele1=atom.GetElement();
+      if (atom.GetName()=="OXT") {
+        continue;
+      } 
       if (ele1=="H" || ele1=="D") {
         continue;
       }
@@ -313,6 +328,9 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
           continue;
         }
         String ele2=atom2.GetElement();
+        if (atom2.GetName()=="OXT") {
+          continue;
+        } 
         if (ele2=="H" || ele2=="D") {
           continue;
         }
