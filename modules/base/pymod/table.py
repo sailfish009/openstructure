@@ -670,7 +670,7 @@ class Table(object):
       xs = []
       ys = []
       zs = []
-      
+           
       if clear:
         plt.figure(figsize=[8, 6])
       
@@ -760,7 +760,7 @@ class Table(object):
           plt.xticks(np.arange(0, len(xs), interval), label_vals, rotation=45,
                      size='x-small')
       
-      if not title:
+      if title==None:
         if nice_z:
           title = '%s of %s vs. %s' % (nice_z, nice_x, nice_y)
         elif nice_y:
@@ -770,6 +770,10 @@ class Table(object):
   
       plt.title(title, size='x-large', fontweight='bold',
                 verticalalignment='bottom')
+      
+      if legend:
+        plt.legend(loc=0)
+      
       if x and y:
         plt.xlabel(nice_x, size='x-large')
         if x_range:
@@ -781,7 +785,11 @@ class Table(object):
         
         plt.ylabel(nice_y, size='x-large')
       else:
-        plt.ylabel(nice_x, size='x-large')
+        if y_range:
+          plt.ylim(y_range[0], y_range[1])
+        if x_title:
+          plt.xlabel(x_title, size='x-large')
+        plt.ylabel(nice_y, size='x-large')
       if save:
         plt.savefig(save)
       return plt
