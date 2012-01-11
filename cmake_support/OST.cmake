@@ -258,6 +258,10 @@ macro(module)
           set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}/${_DIR}")
           stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
                         "${_LIB_NAME}" "${_DIR}")
+          if (ENABLE_STATIC)
+            stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
+                          "${_LIB_NAME}_static" "${_DIR}")
+          endif()
           set(_HEADERS)
         else()
           list(APPEND _HEADERS "${_HEADER}")
@@ -276,6 +280,10 @@ macro(module)
       set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}")
       stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
                     "${_LIB_NAME}" "")
+      if (ENABLE_STATIC)
+        stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
+                      "${_LIB_NAME}_static" "")
+      endif()
     endif()
   endif()
 endmacro()
