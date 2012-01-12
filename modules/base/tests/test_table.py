@@ -112,11 +112,18 @@ class TestTable(unittest.TestCase):
     '''
     self.CompareRowCount(t, len(ref_data))
     idx = t.GetColIndex(col_name)
+    col_type = t.col_types[idx]
     for i, (row, ref) in enumerate(zip(t.rows, ref_data)):
-      self.assertEqual(row[idx],
-                       ref,
-                       "data (%s) in col (%s), row (%i) different from expected value (%s)" \
-                       %(row[idx], col_name, i, ref))
+      if (isinstance(ref, float) or isinstance(ref, int)) and (isinstance(row[idx], float) or isinstance(row[idx], int)):
+        self.assertAlmostEqual(row[idx],
+                               ref,
+                               msg="data (%s) in col (%s), row (%i) different from expected value (%s)" \
+                               %(row[idx], col_name, i, ref))
+      else:
+        self.assertEqual(row[idx],
+                         ref,
+                         "data (%s) in col (%s), row (%i) different from expected value (%s)" \
+                         %(row[idx], col_name, i, ref))
 
   def CompareColTypes(self, t, col_names, ref_types):
     '''
@@ -928,6 +935,28 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(tab.Mean('third'),2.75)
     self.assertRaises(TypeError,tab.Mean,'fourth')
     self.assertRaises(ValueError,tab.Mean,'fifth')
+    
+  def testRowMeanTable(self):
+    '''
+      first  second  third fourth
+    -----------------------------
+     x            3     NA      1
+     foo         NA  2.200      2
+     NA           9  3.300      3
+     NA          NA     NA     NA
+    '''
+    tab = self.CreateTestTable()
+    tab.AddCol('fourth','float',[1,2,3])
+    tab.AddRow([None, None, None, None])
+    
+    self.assertRaises(TypeError, tab.RowMean, 'mean', ['first', 'second'])
+    tab.RowMean('mean', ['third', 'second', 'fourth'])
+    self.CompareDataFromDict(tab, {'mean': [2,2.1,5.1,None],
+                                   'first': ['x','foo',None,None],
+                                   'second': [3,None,9,None],
+                                   'third': [None,2.2,3.3,None],
+                                   'fourth': [1,2,3,None]})
+    
     
   def testStdDevTable(self):
     tab = self.CreateTestTable()

@@ -274,6 +274,9 @@ class Table(object):
       raise ValueError('Table has no column named "%s"' % col)
     return self.col_names.index(col)
   
+  def GetColNames(self):
+    return self.col_names
+  
   def HasCol(self, col):
     return col in self.col_names
   
@@ -667,7 +670,7 @@ class Table(object):
       xs = []
       ys = []
       zs = []
-      
+           
       if clear:
         plt.figure(figsize=[8, 6])
       
@@ -757,7 +760,7 @@ class Table(object):
           plt.xticks(np.arange(0, len(xs), interval), label_vals, rotation=45,
                      size='x-small')
       
-      if not title:
+      if title==None:
         if nice_z:
           title = '%s of %s vs. %s' % (nice_z, nice_x, nice_y)
         elif nice_y:
@@ -767,6 +770,10 @@ class Table(object):
   
       plt.title(title, size='x-large', fontweight='bold',
                 verticalalignment='bottom')
+      
+      if legend:
+        plt.legend(loc=0)
+      
       if x and y:
         plt.xlabel(nice_x, size='x-large')
         if x_range:
@@ -778,7 +785,11 @@ class Table(object):
         
         plt.ylabel(nice_y, size='x-large')
       else:
-        plt.ylabel(nice_x, size='x-large')
+        if y_range:
+          plt.ylim(y_range[0], y_range[1])
+        if x_title:
+          plt.xlabel(x_title, size='x-large')
+        plt.ylabel(nice_y, size='x-large')
       if save:
         plt.savefig(save)
       return plt
@@ -958,6 +969,71 @@ class Table(object):
       return stutil.Mean(vals)
     except:
       return None
+    
+  def RowMean(self, mean_col_name, cols):
+    """
+    Adds a new column of type 'float' with a specified name (mean_col),
+    containing the mean of all specified columns for each row.
+    
+    Cols are specified by their names and must be of numeric column
+    type ('float', 'int'). Cells with None are ignored. Adds None if the row
+    doesn't contain any values.
+    
+    
+    == Example ==
+   
+    Staring with the following table:
+    
+    ==== ==== ====
+    x     y    u           
+    ==== ==== ====
+     1    10  100 
+     2    15  None 
+     3    20  400 
+    ==== ==== ====
+    
+    the code here adds a column with the name 'mean' to yield the table below:
+    
+    .. code-block::python
+    
+      tab.RowMean('mean', 'x', 'u')
+    
+    
+    ==== ==== ==== ===== 
+    x     y    u   mean           
+    ==== ==== ==== =====
+     1    10  100  50.5 
+     2    15  None 2
+     3    20  400  201.5 
+    ==== ==== ==== =====
+      
+    """
+    
+    if IsScalar(cols):
+      cols = [cols]
+    
+    cols_idxs = []
+    for col in cols:
+      idx = self.GetColIndex(col)
+      col_type = self.col_types[idx]
+      if col_type!='int' and col_type!='float':
+        raise TypeError("RowMean can only be used on numeric column types")
+      cols_idxs.append(idx)
+      
+    mean_rows = []
+    for row in self.rows:
+      vals = []
+      for idx in cols_idxs:
+        v = row[idx]
+        if v!=None:
+          vals.append(v)
+      try:
+        mean = stutil.Mean(vals)
+        mean_rows.append(mean)
+      except:
+        mean_rows.append(None)
+    
+    self.AddCol(mean_col_name, 'f', mean_rows)
     
   def Median(self, col):
     """
