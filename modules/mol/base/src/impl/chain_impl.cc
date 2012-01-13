@@ -484,4 +484,19 @@ void ChainImpl::ReorderResidues()
   UpdateShifts();
 }
 
+void ChainImpl::SetInSequence(const int index)
+{
+  ResNum num=residue_list_[index]->GetNumber();
+  //Check if rp is in sequence
+  if (in_sequence_) {
+    if (index>0 && residue_list_[index-1]->GetNumber()>=num)
+      in_sequence_=false;
+    if (index<static_cast<int>(residue_list_.size())-1 && residue_list_[index+1]->GetNumber()<=num)
+      in_sequence_=false;
+  }
+  if (in_sequence_) {
+    this->UpdateShifts();
+  }
+}
+  
 }}} // ns

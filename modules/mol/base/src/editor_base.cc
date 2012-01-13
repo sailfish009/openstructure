@@ -79,7 +79,9 @@ void EditorBase::RenameResidue(ResidueHandle res, const String& new_name)
 void EditorBase::SetResidueNumber(ResidueHandle res, const ResNum& new_num)
 {
   CheckHandleValidity(res);
+  int index=res.GetIndex();
   res.Impl()->SetNumber(new_num);
+  res.GetChain().SetInSequence(index);
 }
   
 void EditorBase::RenameChain(ChainHandle chain, const String& new_name)
