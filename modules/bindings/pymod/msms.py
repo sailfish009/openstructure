@@ -348,7 +348,7 @@ def CalculateSurface(entity, density=1.0, radius=1.5, all_surf=False,
   :param radius:        Surface probe radius
   :param all_surf:      Calculate surface for all cavities (returns multiple
                         surfaces as a list)
-  :param no_hydrogens:  Calculate surface only for hevy atoms
+  :param no_hydrogens:  Calculate surface only for heavy atoms
   :param selection:     Calculate surface for subset of entity
   :param msms_exe:      msms executable (full path to executable)
   :param msms_env:      msms environment variable
