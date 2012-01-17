@@ -203,11 +203,12 @@ void usage()
   std::cerr << "   -b <value> tolerance in stddevs for bonds" << std::endl;
   std::cerr << "   -a <value> tolerance in stddevs for angles" << std::endl;
   std::cerr << "   -m <value> clashing distance for unknwon atom types" << std::endl;
+  std::cerr << "   -e         print version" << std::endl;
 }
 
 int main (int argc, char **argv)
 {
-  
+  String version = "Beta - 2012-01-17"; 
   Real min_default_distance = 1.5;
   Real min_distance_tolerance = 0.0;
   Real bond_tolerance = 8.0;
@@ -224,6 +225,7 @@ int main (int argc, char **argv)
     ("sel,s", po::value<String>(&sel)->default_value(""), "selection for reference")
     ("tolerant,t", "fault tolerant mode")
     ("structural-checks,f", "structural checks")
+    ("version,e", "version")
     ("parameter-file,p", po::value<String>(), "stereo chemical parameter file")
     ("verbosity,v", po::value<int>(), "verbosity level")    
     ("tolerance_bonds,b", po::value<Real>(), "tolerance in stddev for bonds")    
@@ -238,6 +240,10 @@ int main (int argc, char **argv)
                 options(desc).positional(p).run(),
             vm);
   po::notify(vm);
+  if (vm.count("version")) {
+    std::cout << "Version: " << version << std::endl;
+    exit(0);
+  } 
   std::vector<String> files;
   if (vm.count("files")) {
     files=vm["files"].as<std::vector<String> >();
@@ -275,6 +281,8 @@ int main (int argc, char **argv)
       exit(-1);
     }
   }  
+  
+
   if (vm.count("tolerance_bonds")) {
     bond_tolerance=vm["tolerance_bonds"].as<Real>();
   }
@@ -292,22 +300,22 @@ int main (int argc, char **argv)
   }
   files.pop_back();
   EntityView ref_view=ref.Select(sel);
-  std::cout << "Parameter filename: " << parameter_filename << std::endl;
-  std::cout << "Verbosiy level: " << verbosity_level << std::endl;
+  std::cout << "#Parameter filename: " << parameter_filename << std::endl;
+  std::cout << "#Verbosity level: " << verbosity_level << std::endl;
   if (structural_checks) {
-    std::cout << "Stereo-chemical and steric clash checks: On " << std::endl;
+    std::cout << "#Stereo-chemical and steric clash checks: On " << std::endl;
   } else {
-    std::cout << "Stereo-chemical and steric clash checks: Off " << std::endl;
+    std::cout << "#Stereo-chemical and steric clash checks: Off " << std::endl;
   }
   if (structural_checks) {
-    std::cout << "Tolerance in stddevs for bonds: " << bond_tolerance << std::endl;
-    std::cout << "Tolerance in stddevs for angles: " << angle_tolerance << std::endl;
-    std::cout << "Clashing distance for unknown atom types: " << min_default_distance << std::endl;
-    LOG_INFO("Log entries format:"); 
-    LOG_INFO("BOND INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Bond" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status");
-    LOG_INFO("ANGLE INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Angle" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status");
-    LOG_INFO("CLASH INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "Observed" << " " << "Difference" << " " << "Status");
-    LOG_INFO("LDT INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "ModelDist" << " " << "TargetDist" << " " << "Difference" <<  " " << "Tolerance"
+    std::cout << "#Tolerance in stddevs for bonds: " << bond_tolerance << std::endl;
+    std::cout << "#Tolerance in stddevs for angles: " << angle_tolerance << std::endl;
+    std::cout << "#Clashing distance for unknown atom types: " << min_default_distance << std::endl;
+    LOG_INFO("#Log entries format:"); 
+    LOG_INFO("#BOND INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Bond" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status");
+    LOG_INFO("#ANGLE INFO FORMAT:" << " " << "Chain" << " " << "Residue" << " " << "ResNum" << " " << "Angle" << " " << "Min" << " " << "Max" << " " << "Observed" << " " << "Z-score" << " " << "Status");
+    LOG_INFO("#CLASH INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "Observed" << " " << "Difference" << " " << "Status");
+    LOG_INFO("#LDT INFO FORMAT:" << " " << "Chain1" << " " << "Residue1" << " " << "ResNum1" << " " << "Atom1" << " " << "Chain2" << " " << "Residue2" << " " << "ResNum2" << " " << "Atom2" << " " << "Min" << " " << "ModelDist" << " " << "TargetDist" << " " << "Difference" <<  " " << "Tolerance"
     << " " << "Status");
   }    
   for (size_t i=0; i<files.size(); ++i) {
@@ -371,10 +379,10 @@ int main (int argc, char **argv)
       ldt+=alg::LocalDistTest(v, ref_view, cutoffs[n], 8.0,labels[n]);
     }      
     ldt/=4.0;
-    std::cout << "File: " << files[i] << std::endl; 
+    std::cout << "#File: " << files[i] << std::endl; 
     std::cout << "Global LDT score: " << ldt << std::endl;
     std::cout << "Local LDT Score:" << std::endl;
-    std::cout << "Chain\tResName\tResNum\tScore" << std::endl;
+    std::cout << "#Chain\tResName\tResNum\tScore" << std::endl;
     
     for (ResidueViewIter rit=v.ResiduesBegin();rit!=v.ResiduesEnd();++rit){
       ResidueView ritv = *rit;
