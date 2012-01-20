@@ -43,7 +43,5 @@ class TestLocalAlign(unittest.TestCase):
     self.assertEqual(alns[0].sequences[1].offset, 2)
 
 if __name__ == "__main__":
-  try:
-    unittest.main()
-  except Exception, e:
-    print e
+  from ost import testutils
+  testutils.RunTests()

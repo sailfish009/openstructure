@@ -12,6 +12,7 @@ class TestPDB(unittest.TestCase):
     self.assertEquals(ch.GetIntProp("mol_id"), 1)
 
 if __name__== '__main__':
-    unittest.main()
+  from ost import testutils
+  testutils.RunTests()
 
 

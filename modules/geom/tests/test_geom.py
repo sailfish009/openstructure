@@ -80,5 +80,6 @@ class TestGeom(unittest.TestCase):
                       13,14,15,16])
     
 if __name__== '__main__':
-  unittest.main()
+  from ost import testutils
+  testutils.RunTests()
 

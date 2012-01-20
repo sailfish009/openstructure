@@ -193,4 +193,5 @@ class TestConvenientSuperpose(unittest.TestCase):
     self.assertEqualAtomOrder(view1, view2)
 
 if __name__ == "__main__":
-  unittest.main()
+  from ost import testutils
+  testutils.RunTests()
