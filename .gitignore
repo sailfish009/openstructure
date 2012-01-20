@@ -58,3 +58,5 @@ Debug
 *_out.tab
 *_out.pickle
 /modules/io/tests/temp_img.tmp
+PYTEST-*.xml
+ost_*_tests_log.xml
