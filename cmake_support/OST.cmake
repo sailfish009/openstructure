@@ -596,6 +596,7 @@ macro(pymod)
 endmacro()
 
 add_custom_target(check)
+add_custom_target(check_xml)
 if (WIN32)
   set_target_properties(check PROPERTIES EXCLUDE_FROM_ALL "1")
 endif()
@@ -640,7 +641,12 @@ macro(ost_unittest)
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
                             "${_ARG_PREFIX}_${_ARG_MODULE}")
         add_custom_target("${_test_name}_run"
-                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo 
+                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        COMMENT "running checks for module ${_ARG_MODULE}"
+                        DEPENDS ${_test_name})
+        add_custom_target("${_test_name}_run_xml"
+                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} --log_format=xml --log_level=all > ${_test_name}_log.xml || echo
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})
@@ -652,6 +658,7 @@ macro(ost_unittest)
       endif()
 
       add_dependencies(check "${_test_name}_run")
+      add_dependencies(check_xml "${_test_name}_run_xml")
       set_target_properties(${_test_name}
                             PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                             "${CMAKE_CURRENT_BINARY_DIR}")
@@ -672,9 +679,15 @@ macro(ost_unittest)
                   sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "running checks ${py_test}" VERBATIM)
+        add_custom_target("${py_test}_run_xml"
+                  sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} xml || echo"
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                  COMMENT "running checks ${py_test}" VERBATIM)
       endif()
       add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
+      add_dependencies("${py_test}_run_xml" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
       add_dependencies(check "${py_test}_run")
+      add_dependencies(check_xml "${py_test}_run_xml")
       if (WIN32)
         set_target_properties("${py_test}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
       endif()

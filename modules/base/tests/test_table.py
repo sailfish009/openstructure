@@ -40,7 +40,7 @@ except ImportError:
   print "Could not find python imagine library: ignoring some table class unit tests"
 
 class TestTable(unittest.TestCase):
-  
+
   def setUp(self):
     ost.PushVerbosityLevel(3)
 
@@ -1289,7 +1289,5 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(tab.SpearmanCorrel('second','third'), -0.316227766)
     
 if __name__ == "__main__":
-  try:
-    unittest.main()
-  except Exception, e:
-    print e
+  from ost import testutils
+  testutils.RunTests()

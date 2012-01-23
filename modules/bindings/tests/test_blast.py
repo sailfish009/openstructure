@@ -44,7 +44,5 @@ if __name__ == "__main__":
   except(settings.FileNotFound):
     print "Could not find blastall executable: ignoring unit tests"
     sys.exit(0)
-  try:
-    unittest.main()
-  except Exception, e:
-    print e
+  from ost import testutils
+  testutils.RunTests()

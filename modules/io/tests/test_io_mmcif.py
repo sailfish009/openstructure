@@ -155,6 +155,7 @@ class TestMMCifInfo(unittest.TestCase):
     self.assertEquals(i.GetObsoleteInfo().GetReplacedPDBID(), '2BAR')
 
 if __name__== '__main__':
-    unittest.main()
+  from ost import testutils
+  testutils.RunTests()
 
 

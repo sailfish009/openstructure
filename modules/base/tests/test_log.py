@@ -39,7 +39,5 @@ class TestLog(unittest.TestCase):
     self.assertEqual(ls.severity, 1)
     ost.PopLogSink()
 if __name__ == "__main__":
-  try:
-    unittest.main()
-  except Exception, e:
-    print e
+  from ost import testutils
+  testutils.RunTests()

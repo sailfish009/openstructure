@@ -158,5 +158,7 @@ class TestCleanUp(unittest.TestCase):
 if not hasattr(conop.GetBuilder(), 'compound_lib'):
   print 'Default builder without compound lib. Ignoring test_cleanup.py tests'
   sys.exit()
-suite = unittest.TestLoader().loadTestsFromTestCase(TestCleanUp)
-unittest.TextTestRunner().run(suite)
+
+if __name__== '__main__':
+  from ost import testutils
+  testutils.RunTests()

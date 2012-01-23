@@ -68,7 +68,5 @@ class TestAlignToSeqRes(unittest.TestCase):
     self.assertEqual(seq.alg.ValidateSEQRESAlignment(seqres_aln, chain), False)
 
 if __name__ == "__main__":
-  try:
-    unittest.main()
-  except Exception, e:
-    print e
+  from ost import testutils
+  testutils.RunTests()
