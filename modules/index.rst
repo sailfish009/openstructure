@@ -93,6 +93,9 @@ Varia
 
 **Datasets:** :doc:`tabular data <table>`
 
+**File Formats:** :doc:`supported file formats <io/formats>`
+
+
 Extending OpenStructure
 --------------------------------------------------------------------------------
 
