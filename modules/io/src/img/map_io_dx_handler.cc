@@ -24,6 +24,8 @@
 #include <sstream>
 
 #include <ost/log.hh>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/lexical_cast.hpp>
@@ -68,8 +70,12 @@ void MapIODxHandler::Import(img::MapHandle& mh, const bf::path& loc,const ImageF
   {
     throw IOException("could not open "+loc.string());
   }
-
-  this->Import(mh,infile,form);
+  boost::iostreams::filtering_stream<boost::iostreams::input> in;
+  if (boost::iequals(".gz", boost::filesystem::extension(loc))) {
+    in.push(boost::iostreams::gzip_decompressor());
+  }
+  in.push(infile);
+  this->Import(mh,in,form);
   infile.close();
 }
 
@@ -266,10 +272,10 @@ bool MapIODxHandler::MatchType(const ImageFormatBase& formatstruct)
 }
 bool MapIODxHandler::MatchSuffix(const String& loc)
 {
-	if(detail::FilenameEndsWith(loc,".dx") ) {
-      return true;
-    }
-    return false;
+	if(detail::FilenameEndsWith(loc,".dx") || detail::FilenameEndsWith(loc,".dx.gz")) {
+    return true;
+  }
+  return false;
 }
 
 }} // ns
