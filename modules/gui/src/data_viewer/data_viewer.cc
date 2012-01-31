@@ -118,6 +118,12 @@ Extent DataViewer::GetSelection() const
   return panel_->GetSelection();
 }
 
+void DataViewer::SetSelection(const Extent& selection)
+{
+  assert(panel_);
+  panel_->SetSelection(selection);
+}
+
 void DataViewer::SetName(const String& name)
 {
   setWindowTitle(QString::fromStdString(name));
