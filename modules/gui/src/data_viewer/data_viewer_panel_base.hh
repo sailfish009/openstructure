@@ -101,6 +101,9 @@ public:
   */
   Extent GetSelection() const;
 
+  //! set currently active selection
+  void SetSelection(const Extent& extent);
+
   //! convert window coordinates to image point
   Point WinToPoint(int mx, int my) const;
   Point WinToPoint(const QPoint& p) const;

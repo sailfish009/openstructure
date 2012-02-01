@@ -643,6 +643,18 @@ Extent DataViewerPanelBase::GetSelection() const
   return selection_;
 }
 
+void DataViewerPanelBase::SetSelection(const Extent& selection)
+{
+  selection_=selection;
+  update_rubberband_from_selection_();
+  if(selection==Extent()){
+    rubberband_->hide();
+  }else{
+    rubberband_->show();
+  }
+  UpdateView(false);
+}
+
 Real DataViewerPanelBase::GetZoomScale() const 
 {
   return zoom_scale_;

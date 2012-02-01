@@ -80,6 +80,9 @@ public:
   //! return currently active selection
   Extent GetSelection() const;
 
+  //! set currently active selection
+  void SetSelection(const Extent& selection);
+
   //! set the name, displayed as the window title
   void SetName(const String& name);
 

@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include <ost/string_ref.hh>
+#include <math.h>
 
 namespace ost {
   
@@ -53,6 +54,11 @@ std::pair<bool, float> StringRef::to_float() const
   int sig=1;
   bool after_dot=false;
   float factor=0.1;
+  bool after_exponent=false;
+  float exponent=0.0;
+  int exponent_sig=1;
+  bool after_exponent_sign=false;
+
   for (const char* c=begin_; c!=end_; ++c) {
     if (*c=='-' && empty) {
       empty=false;
@@ -71,9 +77,29 @@ std::pair<bool, float> StringRef::to_float() const
       if (after_dot==true) {
         n+=factor*int(*c-'0');
         factor*=0.1;
+      } else if (after_exponent==true) {
+        exponent=exponent*10+int(*c-'0');
       } else {
         n=n*10+int(*c-'0');
       }
+      continue;
+    }
+    if ((*c=='+' || *c=='-') && after_exponent==true) {
+      if (after_exponent_sign==true) {
+        return std::make_pair(false, 0.0f);
+      }
+      if (*c=='-') {
+        exponent_sig=-1;
+      }
+      after_exponent_sign=true;
+      continue;
+    }
+    if (*c=='e' || *c=='E') {
+      if (after_exponent==true) {
+        return std::make_pair(false, 0.0f);
+      }
+      after_exponent=true;
+      after_dot=false;
       continue;
     }
     return std::make_pair(false, 0.0f);
@@ -81,7 +107,11 @@ std::pair<bool, float> StringRef::to_float() const
   if (empty) {
     return std::make_pair(false, 0.0f);
   }
-  return std::make_pair(true, sig*n);
+  if (after_exponent==false) {
+    return std::make_pair(true, sig*n);
+  } else {
+    return std::make_pair(true, sig*n*float(pow(10,exponent_sig*exponent)));
+  }
 }
 
 std::ostream& operator<<(std::ostream& stream, const StringRef& strref)
