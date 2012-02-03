@@ -19,7 +19,7 @@
 import os, tempfile, ftplib, httplib
 
 from _ost_io import *
-from ost import mol, conop
+from ost import mol, geom, conop
 
 profiles=None
 
@@ -340,6 +340,141 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
     return ent
   except:
     raise
+
+# this function uses a dirty trick: should be a member of MMCifInfoBioUnit
+# which is totally C++, but we want the method in Python... so we define it
+# here (__init__) and add it as a member to the class. With this, the first
+# arguement is the usual 'self'.
+def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
+  """
+  Returns the biological assembly (biounit) for an entity. The new entity
+  created is well suited to be saved as a PDB file. Therefore the function
+  tries to meet the requirements of single-character chain names. The following
+  measures are taken.
+  
+    - All ligands are put into one chain (_)
+    - Water is put into one chain (-)
+    - Each polymer gets its own chain, named A-Z 0-9 a-z.
+    - The description of non-polymer chains will be put into a generic string
+      property called description on the residue level.
+    - ligands which resemble a polymer but have less than min_polymer_size
+      residues are assigned the same numeric residue number. The residues are
+      distinguished by insertion code.
+
+  Since this function is at the moment mainly used to create biounits from
+  mmCIF files to be saved as PDBs, the function assumes that the ChainType
+  properties are set correctly. conop.ConnectAll is used to derive connectivity.
+
+  :param asu:  Asymmetric unit to work on. Should be created from a mmCIF file.
+  :type asu: :class:`~ost.mol.EntityHandle>`
+  :param seqres: If set to a valid sequence list, the length of the seqres 
+    records will be used to determine if a certain chain has the minimally 
+    required length.
+  :type seqres: :class:'~ost.seq.SequenceList'
+  :param min_polymer_size:  The minimal number of residues a polymer needs to 
+    get its own chain. Everything below that number will be sorted into the 
+    ligand chain.
+  :type min_polymer_size: int
+  """
+  def _CopyAtoms(src_res, dst_res, edi, trans=geom.Mat4()):
+    for atom in src_res.atoms:
+      tmp_pos = geom.Vec4(atom.pos)
+      new_atom=edi.InsertAtom(dst_res, atom.name, geom.Vec3(trans*tmp_pos), 
+                              element=atom.element,
+                              occupancy=atom.occupancy, 
+                              b_factor=atom.b_factor,
+                              is_hetatm=atom.is_hetatom)
+
+  chain_names='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'
+  # create list of operations
+  # for cartesian products, operations are stored in a list, multiplied with
+  # the next list of operations and re-stored... until all lists of operations
+  # are multiplied in an all-against-all manner.
+  operations = biounit.GetOperations()
+  trans_matrices = list()
+  if len(operations) > 0:
+    for op in operations[0]:
+      rot = geom.Mat4()
+      rot.PasteRotation(op.rotation)
+      trans = geom.Mat4()
+      trans.PasteTranslation(op.translation)
+      tr = geom.Mat4()
+      tr = trans * rot
+      trans_matrices.append(tr)
+      for op_n in range(1, len(operations)):
+        tmp_ops = list()
+        for o in operations[op_n]:
+          rot = geom.Mat4()
+          rot.PasteRotation(o.rotation)
+          trans = geom.Mat4()
+          trans.PasteTranslation(o.translation)
+          tr = geom.Mat4()
+          tr = trans * rot
+          for t_o in trans_matrices:
+            tp = t_o * tr
+            tmp_ops.append(tp)
+        trans_matrices = tmp_ops
+  # select chains into a view as basis for each transformation
+  assu = asu.Select('cname=' + ','.join(biounit.GetChainList()))
+  # use each transformation on the view, store as entity and transform, PDBize
+  # the result while adding everything to one large entity
+  pdb_bu = mol.CreateEntity()
+  edi = pdb_bu.EditXCS(mol.BUFFERED_EDIT)
+  cur_chain_name = 0
+  water_chain = mol.ChainHandle()
+  ligand_chain = mol.ChainHandle()
+  for tr in trans_matrices:
+    # do a PDBize, add each new entity to the end product
+    for chain in assu.chains:
+      residue_count = len(chain.residues)
+      if seqres:
+        seqres_chain = seqres.FindSequence(chain.name)
+        if seqres_chain.IsValid():
+          residue_count = len(seqres_chain)
+      if chain.is_polymer and residue_count >= min_polymer_size:
+        if len(chain_names) == cur_chain_name:
+          raise RuntimeError('Running out of chain names')
+        new_chain = edi.InsertChain(chain_names[cur_chain_name])
+        cur_chain_name += 1
+        edi.SetChainDescription(new_chain, chain.description)
+        edi.SetChainType(new_chain, chain.type)
+        new_chain.SetStringProp('original_name', chain.name)
+        for res in chain.residues:
+          new_res = edi.AppendResidue(new_chain, res.name, res.number)
+          _CopyAtoms(res, new_res, edi, tr)
+      elif chain.type == mol.CHAINTYPE_WATER:
+        if not water_chain.IsValid():
+          # water gets '-' as name
+          water_chain = edi.InsertChain('-')
+          edi.SetChainDescription(water_chain, chain.description)
+          edi.SetChainType(water_chain, chain.type)
+        for res in chain.residues:
+          new_res = edi.AppendResidue(water_chain, res.name)
+          new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
+          new_res.SetStringProp('description', chain.description)
+          _CopyAtoms(res, new_res, edi, tr)
+      else:
+        if not ligand_chain.IsValid():
+          # all ligands, put in one chain, are named '_'
+          ligand_chain = edi.InsertChain('_')
+          last_rnum = 0
+        else:
+          last_rnum = ligand_chain.residues[-1].number.num
+        residues=chain.residues
+        ins_code='\0'
+        if len(residues)>1:
+          ins_code='A'
+        for res in chain.residues:
+          new_res = edi.AppendResidue(ligand_chain, res.name, 
+                                      mol.ResNum(last_rnum+1, ins_code))
+          new_res.SetStringProp('description', chain.description)
+          new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
+          ins_code = chr(ord(ins_code)+1)
+          _CopyAtoms(res, new_res, edi, tr)
+  conop.ConnectAll(pdb_bu)
+  return pdb_bu
+
+MMCifInfoBioUnit.PDBize = _PDBize
 
 ## \example fft_li.py
 #
