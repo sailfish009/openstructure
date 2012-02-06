@@ -31,16 +31,16 @@ BOOST_AUTO_TEST_CASE(init_quat)
 {
   // default
   Quat q1;
-  BOOST_CHECK_CLOSE(q1.w,1.0,1.0e-5);
-  BOOST_CHECK_CLOSE(q1.x,0.0,1.0e-5);
-  BOOST_CHECK_CLOSE(q1.y,0.0,1.0e-5);
-  BOOST_CHECK_CLOSE(q1.z,0.0,1.0e-5);
+  BOOST_CHECK_CLOSE(Real(q1.w), Real(1.0), Real(1.0e-5));
+  BOOST_CHECK_CLOSE(Real(q1.x), Real(0.0), Real(1.0e-5));
+  BOOST_CHECK_CLOSE(Real(q1.y), Real(0.0), Real(1.0e-5));
+  BOOST_CHECK_CLOSE(Real(q1.z), Real(0.0), Real(1.0e-5));
 
   Quat q2(2.0,3.0,4.0,5.0);
-  BOOST_CHECK_CLOSE(q2.w,2.0,1.0e-5);
-  BOOST_CHECK_CLOSE(q2.x,3.0,1.0e-5);
-  BOOST_CHECK_CLOSE(q2.y,4.0,1.0e-5);
-  BOOST_CHECK_CLOSE(q2.z,5.0,1.0e-5);
+  BOOST_CHECK_CLOSE(Real(q2.w), Real(2.0), Real(1.0e-5));
+  BOOST_CHECK_CLOSE(Real(q2.x), Real(3.0), Real(1.0e-5));
+  BOOST_CHECK_CLOSE(Real(q2.y), Real(4.0), Real(1.0e-5));
+  BOOST_CHECK_CLOSE(Real(q2.z), Real(5.0), Real(1.0e-5));
 }
 
 BOOST_AUTO_TEST_CASE(quat_rotate)
@@ -48,9 +48,9 @@ BOOST_AUTO_TEST_CASE(quat_rotate)
   Vec3 v(1,0,0);
   Quat q(30.0*M_PI/180.0,Vec3(0,1,0));
   Vec3 vrot=q.Rotate(v);
-  BOOST_CHECK_CLOSE(cos(30.0*M_PI/180.0),vrot[0],float(1e-5));
+  BOOST_CHECK_CLOSE(Real(cos(30.0*M_PI/180.0)), Real(vrot[0]), Real(1e-5));
   BOOST_CHECK_SMALL(vrot[1],float(1e-5));
-  BOOST_CHECK_CLOSE(-sin(30.0*M_PI/180.0),vrot[2],float(1e-5));
+  BOOST_CHECK_CLOSE(Real(-sin(30.0*M_PI/180.0)), Real(vrot[2]), Real(1e-5));
 }
 
 
