@@ -78,7 +78,12 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
   
   geom::Vec3 p=atom.GetPos();
   line( 0, 6)=record_name;
-  line( 6, 5)=fmt::LPaddedInt(atomnum);
+  // Avoid writing out atomnumbers larger than 5 digits
+  if (atomnum > 99999) {
+    line( 6, 5)=fmt::LPaddedInt(atomnum - 100000 * (atomnum / 100000));
+  } else {
+    line( 6, 5)=fmt::LPaddedInt(atomnum);
+  }
   String atom_name=atom.GetName();
   if (atom_name.size()>4) {
     throw IOException("Atom name '"+atom.GetQualifiedName()+
