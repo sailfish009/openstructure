@@ -939,6 +939,53 @@ void DataViewerPanelBase::SetInvert(bool invert)
   UpdateView(true);
 }
 
+Real DataViewerPanelBase::GetGamma() const
+{
+  return normalizer_->GetGamma();
+}
+
+void DataViewerPanelBase::SetGamma(Real gamma)
+{
+  UpdateNormalizer(normalizer_->GetMinimum(),
+                   normalizer_->GetMaximum(),
+                   gamma,normalizer_->GetInvert());
+  UpdateView(true);
+}
+
+Real DataViewerPanelBase::GetViewerMin() const
+{
+  return normalizer_->GetMinimum();
+}
+
+void DataViewerPanelBase::SetViewerMin(Real min)
+{
+  UpdateNormalizer(min,normalizer_->GetMaximum(),normalizer_->GetGamma(),normalizer_->GetInvert());
+  UpdateView(true);
+}
+
+Real DataViewerPanelBase::GetViewerMax() const
+{
+  return normalizer_->GetMaximum();
+}
+
+void DataViewerPanelBase::SetViewerMax(Real max)
+{
+  UpdateNormalizer(normalizer_->GetMinimum(),max,normalizer_->GetGamma(),normalizer_->GetInvert());
+  UpdateView(true);
+}
+
+geom::Vec2 DataViewerPanelBase::GetOffset() const
+{
+  return geom::Vec2(offset_x_,offset_y_);
+}
+
+void DataViewerPanelBase::SetOffset(const geom::Vec2& offset)
+{
+  offset_x_=offset[0];
+  offset_y_=offset[1];
+  UpdateView(true);
+}
+
 void DataViewerPanelBase::SetAntialiasing(bool f)
 {
   antialiasing_=f;
