@@ -51,6 +51,12 @@ PythonInterpreterWorker::PythonInterpreterWorker():
   main_namespace_["sys"].attr("stdout") = output_redirector_;
 }
 
+PythonInterpreterWorker::~PythonInterpreterWorker()
+{
+  // we have to manually run the exit functions because we cannot use Py_Finalize due to some problems in boost python
+  run_command_(std::pair<unsigned int, QString>(0,"import atexit\natexit._run_exitfuncs()\n"));
+}
+
 void PythonInterpreterWorker::Wake()
 {
   if (awake_) return;

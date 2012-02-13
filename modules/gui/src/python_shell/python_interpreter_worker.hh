@@ -20,6 +20,7 @@ class PythonInterpreterWorker: public QObject
 Q_OBJECT
 public:
   PythonInterpreterWorker();
+  ~PythonInterpreterWorker();
   unsigned int AddCommand(const QString& command);
 
 signals:
