@@ -73,6 +73,14 @@ void CoordGroupHandle::SetFramePositions(uint frame,
   //source_->SetFramePositions(frame, clist);
 }
 
+  
+geom::Vec3List CoordGroupHandle::GetFramePositions(uint frame)
+  {
+    this->CheckValidity();
+    return *(this->GetFrame(frame));
+  }
+    
+  
 void CoordGroupHandle::CopyFrame(uint frame)
 {
   this->CheckValidity();
