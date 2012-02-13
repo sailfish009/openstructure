@@ -3,8 +3,11 @@
 
 #include <csignal>
 #include <utility>
-#include <boost/python.hpp>
-#include <boost/shared_ptr.hpp>
+// workaround for QTBUG-22829: https://bugreports.qt-project.org/browse/QTBUG-22829
+#ifndef Q_MOC_RUN
+  #include <boost/python.hpp>
+  #include <boost/shared_ptr.hpp>
+#endif
 #include "output_redirector.hh"
 #include <QObject>
 #include <QQueue>
