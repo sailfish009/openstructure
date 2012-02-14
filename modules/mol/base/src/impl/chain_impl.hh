@@ -175,7 +175,10 @@ public:
                                 const ResNum& start,
                                 const ResNum& end); 
   int GetIndexForResNum(const ResNum& number) const;
-  
+  ///\brief checks if the residue with that index breaks the in_sequence
+  ///       property and updates it accordingly      
+  void SetInSequence(int index);
+
 private:
   int GetIndexForResNumInSequence(const ResNum& number) const;
   void UpdateShifts();

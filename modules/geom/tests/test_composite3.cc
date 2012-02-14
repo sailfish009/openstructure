@@ -199,9 +199,9 @@ BOOST_AUTO_TEST_CASE(rotation3)
   Vec3 v(1,0,0);
   Rotation3 r(Vec3(0,1,0), 30.0*M_PI/180.0);
   Vec3 vrot=r.Apply(v);
-  BOOST_CHECK_CLOSE(cos(30.0*M_PI/180.0),vrot[0],float(1e-5));
+  BOOST_CHECK_CLOSE(Real(cos(30.0*M_PI/180.0)), Real(vrot[0]), Real(1e-5));
   BOOST_CHECK_SMALL(vrot[1],float(1e-5));
-  BOOST_CHECK_CLOSE(-sin(30.0*M_PI/180.0),vrot[2],float(1e-5));
+  BOOST_CHECK_CLOSE(Real(-sin(30.0*M_PI/180.0)), Real(vrot[2]), Real(1e-5));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

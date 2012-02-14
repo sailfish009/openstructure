@@ -113,7 +113,6 @@ BOOST_PYTHON_MODULE(_ost_io)
   def("LoadCRD", &LoadCRD);
   def("LoadCHARMMTraj_", &LoadCHARMMTraj, (arg("ent"), arg("trj_filename"), 
       arg("stride")=1, arg("lazy_load")=false));
-
   def("LoadMAE", &LoadMAE);
 
   export_pdb_io();

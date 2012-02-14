@@ -52,6 +52,9 @@ public:
   ///      initial atomlist
   void SetFramePositions(uint frame, const std::vector<geom::Vec3>& clist);
 
+  /// \brief get the positions of all the atoms in the given frame
+  geom::Vec3List GetFramePositions(uint frame);  
+  
   /// \brief copy atom positions of given frame to stored atoms in entity
   void CopyFrame(uint frame);
   

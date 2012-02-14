@@ -265,4 +265,4 @@ message(STATUS
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
         "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}" )
-
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")

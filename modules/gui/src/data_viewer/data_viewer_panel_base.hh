@@ -177,6 +177,12 @@ public:
   Real GetDataMax() const;
   bool GetInvert() const;
   void SetInvert(bool invert);
+  Real GetGamma() const;
+  void SetGamma(Real gamma);
+  void SetViewerMin(Real min);
+  Real GetViewerMin() const;
+  void SetViewerMax(Real max);
+  Real GetViewerMax() const;
   void UpdateNormalizer(Real min, Real max, Real gamma, bool invert);
   int GetSlab();
   void SetSlab(int slab);
@@ -184,6 +190,10 @@ public:
   int GetSelectionMode();
   void SetAntialiasing(bool f);
   bool GetAntialiasing() const;
+  geom::Vec2 GetOffset() const;
+  void SetOffset(const geom::Vec2& offset);
+
+
 
 signals:
   void clicked(const geom::Vec3& mousepos);

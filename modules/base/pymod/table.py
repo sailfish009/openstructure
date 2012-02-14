@@ -270,14 +270,25 @@ class Table(object):
     raise ValueError('Unknown type %s' % ty)
 
   def GetColIndex(self, col):
+    '''
+    Returns the column index for the column with the given name.
+
+    :raises: ValueError if no column with the name is found
+    '''
     if col not in self.col_names:
       raise ValueError('Table has no column named "%s"' % col)
     return self.col_names.index(col)
   
   def GetColNames(self):
+    '''
+    Returns a list containing all column names.
+    '''
     return self.col_names
   
   def HasCol(self, col):
+    '''
+    Checks if the column with a given name is present in the table.
+    '''
     return col in self.col_names
   
   def __getitem__(self, k):
@@ -296,6 +307,14 @@ class Table(object):
       r[col_index]=v
 
   def ToString(self, float_format='%.3f', int_format='%d', rows=None):
+    '''
+    Convert the table into a string representation.
+    The output format can be modified for int and float type columns by
+    specifying a formatting string for the parameters 'float_format' and
+    'int_format'.
+    The option 'rows' specify the range of rows to be printed. The parameter
+    must be a iterable containing two elements, e.g. [start_row, end_row].
+    '''
     widths=[len(cn) for cn in self.col_names]
     sel_rows=self.rows
     if rows:
@@ -1597,8 +1616,10 @@ class Table(object):
 def Merge(table1, table2, by, only_matching=False):
   """
   Returns a new table containing the data from both tables. The rows are 
-  combined based on the common values in the column by. For example, the two 
-  tables below
+  combined based on the common values in the column(s) by. The option 'by' can
+  be a list of column names. When this is the case, merging is based on
+  multiple columns.
+  For example, the two tables below
 
   ==== ====
   x     y            

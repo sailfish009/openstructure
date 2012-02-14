@@ -104,8 +104,40 @@ public:
   //! event filter for DataViewerPanel
   virtual bool eventFilter(QObject * object, QEvent *event);
 
-  void SetSlab(int slab);  
+  //! set z slab
+  void SetSlab(int slab);
+  //! get z slab
   int GetSlab() const;
+
+  //! set zoom scale (range: 1e-8 to 1e8)
+  void SetZoomScale(Real zoomscale);
+  //! get zoom scale (range: 1e-8 to 1e8)
+  Real GetZoomScale() const;
+
+  //! set minimum level of the viewer (e.g. the value that will be displayed as black)
+  void SetViewerMin(Real min);
+  //! get minimum level of the viewer (e.g. the value that will be displayed as black)
+  Real GetViewerMin() const;
+
+  //! set maximum level of the viewer (e.g. the value that will be displayed as white)
+  void SetViewerMax(Real max);
+  //! get maximum level of the viewer (e.g. the value that will be displayed as white)
+  Real GetViewerMax() const;
+
+  //! set viewer gamma
+  void SetGamma(Real gamma);
+  //! get viewer gamma
+  Real GetGamma() const;
+
+  //! set invert flag
+  void SetInvert(bool invert);
+  //! get invert flag
+  bool GetInvert() const;
+
+  //! set image offset
+  void SetOffset(const geom::Vec2& offset);
+  //! get image offset
+  geom::Vec2 GetOffset() const;
 
 signals:
   void released();

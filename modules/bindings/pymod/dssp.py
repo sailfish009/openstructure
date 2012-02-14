@@ -88,7 +88,10 @@ def AssignDSSP(ent, pdb_path="", extract_burial_status=False, tmp_dir=None,
   
   :param ent: The entity for which the secondary structure should be calculated
   :type ent: :class:`~ost.mol.EntityHandle` or :class:`~ost.mol.EntityView`
-  :param extract_burial_status: If true, also extract burial status
+  :param extract_burial_status: If true, also extract burial status and store
+                                as float-property
+                                ``relative_solvent_accessibility`` at residue
+                                level
   :param tmp_dir: If set, overrides the default tmp directory of the
                   operating system
   :param dssp_bin: The path to the DSSP executable
