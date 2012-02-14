@@ -1,0 +1,3 @@
+set(PYTHON_BINARY "/usr/bin/python2"  CACHE PATH "")
+set(TIFF_LIBRARY "${OST_LOCAL_LIBS}/lib/libtiff.so"  CACHE PATH "")
+set(TIFF_INCLUDE_DIR "${OST_LOCAL_LIBS}/include/" CACHE PATH "")

@@ -11,32 +11,34 @@ else()
   add_dependencies(ost_scripts _ost_io)
 endif()
 
-if(WIN32)
-  script(NAME  dng.bat INPUT dng.bat.in SUBSTITUTE ${SUBST_DICT}
-         TARGET ost_scripts)
-  script(NAME ost.bat INPUT ost.bat.in SUBSTITUTE ${SUBST_DICT}
-         TARGET ost_scripts)
-  script(NAME gipltng.bat INPUT gipltng.bat.in SUBSTITUTE ${SUBST_DICT})
-else()
-  script(NAME ost_config INPUT ost_config.in SUBSTITUTE ${SUBST_DICT}
-         TARGET ost_scripts OUTPUT_DIR ${LIBEXEC_PATH})
-  script(NAME ost INPUT ost.in SUBSTITUTE ${SUBST_DICT} 
-         TARGET ost_scripts)
-  if (ENABLE_GUI)
-    script(NAME dng INPUT dng.in SUBSTITUTE ${SUBST_DICT}
+if (NOT ENABLE_STATIC)
+  if(WIN32)
+    script(NAME  dng.bat INPUT dng.bat.in SUBSTITUTE ${SUBST_DICT}
            TARGET ost_scripts)
+    script(NAME ost.bat INPUT ost.bat.in SUBSTITUTE ${SUBST_DICT}
+           TARGET ost_scripts)
+    script(NAME gipltng.bat INPUT gipltng.bat.in SUBSTITUTE ${SUBST_DICT})
+  else()
+    script(NAME ost_config INPUT ost_config.in SUBSTITUTE ${SUBST_DICT}
+           TARGET ost_scripts OUTPUT_DIR ${LIBEXEC_PATH})
+    script(NAME ost INPUT ost.in SUBSTITUTE ${SUBST_DICT} 
+           TARGET ost_scripts)
+    if (ENABLE_GUI)
+      script(NAME dng INPUT dng.in SUBSTITUTE ${SUBST_DICT}
+             TARGET ost_scripts)
+    endif()
   endif()
-endif()
 
-set(INIT_SCRIPTS 
-  init_cl.py
-)
+  set(INIT_SCRIPTS 
+    init_cl.py
+  )
 
-if (ENABLE_GUI)
-  list(APPEND INIT_SCRIPTS init.py)
-endif()
-copy_if_different("./" "${STAGE_DIR}/${LIB_DIR}/openstructure" 
+  if (ENABLE_GUI)
+    list(APPEND INIT_SCRIPTS init.py)
+  endif()
+  copy_if_different("./" "${STAGE_DIR}/${LIB_DIR}/openstructure" 
                   "${INIT_SCRIPTS}" "python init scripts" ost_scripts)
 
-install(FILES ${INIT_SCRIPTS} DESTINATION "${LIB_DIR}/openstructure")
+  install(FILES ${INIT_SCRIPTS} DESTINATION "${LIB_DIR}/openstructure")
 
+endif()

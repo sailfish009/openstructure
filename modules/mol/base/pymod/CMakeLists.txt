@@ -22,4 +22,6 @@ wrap_mol.cc
 export_entity_property_mapper.cc
 )
 
-pymod(NAME mol CPP ${OST_BASE_PYMOD_SOURCES} PY __init__.py)
+if (NOT ENABLE_STATIC)
+  pymod(NAME mol CPP ${OST_BASE_PYMOD_SOURCES} PY __init__.py)
+endif()

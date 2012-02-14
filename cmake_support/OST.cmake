@@ -177,8 +177,11 @@ macro(module)
         list(APPEND _ABS_SOURCE_NAMES "${CMAKE_CURRENT_SOURCE_DIR}/${_SOURCE}")
       endif()
     endforeach()
-    add_library(${_LIB_NAME} SHARED ${_ABS_SOURCE_NAMES})
-
+    if (ENABLE_STATIC AND NOT _ARG_NO_STATIC)
+      add_library(${_LIB_NAME} STATIC ${_ABS_SOURCE_NAMES})
+    else()
+      add_library(${_LIB_NAME} SHARED ${_ABS_SOURCE_NAMES})
+    endif()
     set_target_properties(${_LIB_NAME} 
                           PROPERTIES OUTPUT_NAME ${_LIB_NAME}
                                      PROJECT_LABEL ${_ARG_NAME}
@@ -194,25 +197,6 @@ macro(module)
                           LIBRARY_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
                           ARCHIVE_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
                           RUNTIME_OUTPUT_DIRECTORY ${LIB_STAGE_PATH})
-    if (ENABLE_STATIC AND NOT _ARG_NO_STATIC)
-      add_library(${_LIB_NAME}_static STATIC ${_ABS_SOURCE_NAMES})
-      set_target_properties(${_LIB_NAME}_static
-                            PROPERTIES OUTPUT_NAME ${_LIB_NAME}
-                                       PROJECT_LABEL ${_ARG_NAME}
-                                       EchoString   ${_ARG_NAME}
-                                       MODULE_DEPS "${_ARG_DEPENDS_ON}")
-      get_target_property(_DEFS ${_LIB_NAME}_static COMPILE_DEFINITIONS)
-      set_target_properties(${_LIB_NAME}_static PROPERTIES
-                            COMPILE_DEFINITIONS OST_MODULE_${_UPPER_LIB_NAME})
-      set_target_properties(${_LIB_NAME}_static PROPERTIES
-                            LIBRARY_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
-                            ARCHIVE_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
-                            RUNTIME_OUTPUT_DIRECTORY ${LIB_STAGE_PATH})
-      foreach(_DEPENDENCY ${_ARG_DEPENDS_ON})
-        target_link_libraries(${_LIB_NAME}_static ${_DEPENDENCY}_static)
-      endforeach()
-      target_link_libraries(${_LIB_NAME}_static ${ZLIB_LIBRARIES} ${_ARG_LINK} ${DL_LIBRARIES})
-    endif()
     if (APPLE)
       set_target_properties(${_LIB_NAME} PROPERTIES
                             LINK_FLAGS "-Wl,-rpath,@@loader_path"
@@ -222,7 +206,11 @@ macro(module)
       #set_target_properties(${_LIB_NAME} PROPERTIES PREFIX "../")
       install(TARGETS ${_LIB_NAME} ARCHIVE DESTINATION "${LIB_DIR}")
     else()
-      install(TARGETS ${_LIB_NAME} LIBRARY DESTINATION "${LIB_DIR}")
+      if (ENABLE_STATIC)
+        install(TARGETS ${_LIB_NAME} ARCHIVE DESTINATION "${LIB_DIR}")
+      else()
+        install(TARGETS ${_LIB_NAME} LIBRARY DESTINATION "${LIB_DIR}")
+      endif()
     endif()                          
     if (_ARG_LINK)
       target_link_libraries(${_LIB_NAME} ${_ARG_LINK})
@@ -230,6 +218,10 @@ macro(module)
     foreach(_DEPENDENCY ${_ARG_DEPENDS_ON})
       target_link_libraries(${_LIB_NAME} ${_DEPENDENCY})
     endforeach()
+    if (ENABLE_STATIC)
+      target_link_libraries(${_LIB_NAME} ${STATIC_LIBRARIES})
+    endif()
+  
   else()
     add_custom_target("${_LIB_NAME}" ALL)
     set_target_properties("${_LIB_NAME}" PROPERTIES HEADER_ONLY 1 
@@ -258,10 +250,6 @@ macro(module)
           set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}/${_DIR}")
           stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
                         "${_LIB_NAME}" "${_DIR}")
-          if (ENABLE_STATIC)
-            stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
-                          "${_LIB_NAME}_static" "${_DIR}")
-          endif()
           set(_HEADERS)
         else()
           list(APPEND _HEADERS "${_HEADER}")
@@ -280,10 +268,6 @@ macro(module)
       set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}")
       stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
                     "${_LIB_NAME}" "")
-      if (ENABLE_STATIC)
-        stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
-                      "${_LIB_NAME}_static" "")
-      endif()
     endif()
   endif()
 endmacro()
@@ -310,14 +294,20 @@ macro(executable)
   if (_ARG_LINK)
     target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
   endif()
-  if (ENABLE_STATIC AND _ARG_STATIC)
-    set(TARGET_SUFFIX _static)
-  endif()
   foreach(_DEP ${_ARG_DEPENDS_ON})
-    target_link_libraries(${_ARG_NAME} ${_DEP}${TARGET_SUFFIX})
+    target_link_libraries(${_ARG_NAME} ${_DEP})
   endforeach()
   if (ENABLE_STATIC AND _ARG_STATIC)
     target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
+    if (OST_GCC_45)    
+      set_target_properties(${_ARG_NAME}
+                            PROPERTIES LINK_SEARCH_END_STATIC TRUE  
+                            LINK_FLAGS "-static-libgcc -static-libstdc++ -static -pthread")
+    else()
+      set_target_properties(${_ARG_NAME}
+                            PROPERTIES LINK_SEARCH_END_STATIC TRUE  
+                            LINK_FLAGS "-static-libgcc -static -pthread")
+    endif()        
   endif()
   install(TARGETS ${_ARG_NAME} DESTINATION bin)
 endmacro()
@@ -348,11 +338,13 @@ macro(executable_libexec)
     target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
   endif()
   if (ENABLE_STATIC AND _ARG_STATIC)
-    set(TARGET_SUFFIX _static)
     target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
+    set_target_properties(${_ARG_NAME}
+                          PROPERTIES LINK_SEARCH_END_STATIC TRUE)  
+
   endif()
   foreach(_DEP ${_ARG_DEPENDS_ON})
-    target_link_libraries(${_ARG_NAME} ${_DEP}${TARGET_SUFFIX})
+    target_link_libraries(${_ARG_NAME} ${_DEP})
   endforeach()
   install(TARGETS ${_ARG_NAME} DESTINATION ${LIBEXEC_PATH})
 endmacro()
@@ -509,14 +501,18 @@ macro(pymod)
     endif()
     target_link_libraries("_${_LIB_NAME}" ${_PARENT_LIB_NAME} 
                           ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
-    if (_USE_RPATH)
-      set_target_properties("_${_LIB_NAME}"
-                            PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR}
-                            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
-    else()
-      set_target_properties("_${_LIB_NAME}"
-                            PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR}
-                            INSTALL_RPATH "")
+
+    set_target_properties("_${_LIB_NAME}"
+                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR})
+ 
+    if (NOT ENABLE_STATIC)
+      if (_USE_RPATH)
+        set_target_properties("_${_LIB_NAME}"
+                              PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
+      else()
+        set_target_properties("_${_LIB_NAME}"
+                              PROPERTIES INSTALL_RPATH "")
+      endif()
     endif()
     if (APPLE)
       file(RELATIVE_PATH _REL_PATH "${PYMOD_STAGE_DIR}" "${LIB_STAGE_PATH}")
@@ -592,7 +588,6 @@ macro(pymod)
        add_dependencies("_${_LIB_NAME}" "_${dep}")
     endforeach()
   endif()
-
 endmacro()
 
 add_custom_target(check)
@@ -855,7 +850,7 @@ macro(setup_compiler_flags)
     endif()
   endif()
 endmacro()
-set(_BOOST_MIN_VERSION 1.37)
+set(_BOOST_MIN_VERSION 1.31)
 
 macro(setup_boost)
   find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)

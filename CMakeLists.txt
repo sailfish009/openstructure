@@ -12,6 +12,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
 
 
+if (CMAKE_COMPILER_IS_GNUCXX)  
+  exec_program(gcc ARGS --version OUTPUT_VARIABLE CMAKE_C_COMPILER_VERSION)
+  if(CMAKE_C_COMPILER_VERSION MATCHES ".*4\\.[5-9].*")
+    set(OST_GCC_45 true)
+  else()   
+    set(OST_GCC_45 false)  
+  endif()
+endif()
+
 option(USE_SHADER "whether to compile with shader support"
        OFF)
 option(USE_RPATH "embed rpath upon make install"
@@ -51,6 +60,7 @@ endif()
 if (FORTRAN_COMPILER)
   set(CMAKE_FORTRAN_COMPILER ${FORTRAN_COMPILER})
 endif()
+
 
 
 if (PREFIX)
@@ -166,6 +176,10 @@ setup_compiler_flags()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
 
+if (ENABLE_STATIC)
+  set (CMAKE_FIND_LIBRARY_SUFFIXES .a)
+endif()
+
 setup_boost()
 
 if (ENABLE_INFO)        
@@ -176,7 +190,12 @@ if (ENABLE_GFX)
   find_package(OpenGL REQUIRED)
 endif()
 
-find_package(PNG REQUIRED)
+if (ENABLE_IMG OR ENABLE_GFX)
+  find_package(PNG REQUIRED)
+else()
+  set (PNG_LIBRARY "")
+endif()
+
 find_package(Eigen 2.0.0 REQUIRED)
 find_package(Python 2.4 REQUIRED)
 
@@ -191,16 +210,19 @@ endif()
 
 
 if (ENABLE_STATIC)
-  if (UNIX AND NOT APPLE)
-     find_package(DL REQUIRED)
-  endif()
   set(Boost_LIBRARIES)
   set(Boost_USE_STATIC_LIBS ON)
   find_package(Boost ${_BOOST_MIN_VERSION} 
                COMPONENTS filesystem system iostreams regex REQUIRED)
   find_package(ZLIB REQUIRED)
-  set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
-      ${PNG_LIBRARIES} ${ZLIB_LIBRARIES})
+   
+  if (UNIX AND NOT APPLE)
+    set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
+        ${PNG_LIBRARY} ${ZLIB_LIBRARY})
+  else ()
+    set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
+        ${PNG_LIBRARY} ${ZLIB_LIBRARY})
+  endif()
 endif()
 
 if (ENABLE_GUI)
@@ -238,6 +260,10 @@ if (UNIX)
   endif() 
 endif()
 
+if (ENABLE_STATIC)
+  SET(CMAKE_SKIP_BUILD_RPATH TRUE)
+  SET(LINK_SEARCH_END_STATIC TRUE) 
+endif()
 
 add_subdirectory(modules)
 add_subdirectory(scripts)
@@ -265,4 +291,4 @@ message(STATUS
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
         "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}" )
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")
+

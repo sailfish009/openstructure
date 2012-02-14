@@ -19,7 +19,7 @@ if (ENABLE_IMG)
   )
 
 endif()
-
-pymod(NAME mol_alg OUTPUT_DIR ost/mol/alg CPP ${OST_MOL_ALG_PYMOD_SOURCES}
-      PY ${OST_MOL_ALG_PYMOD_MODULES})
-
+if (NOT ENABLE_STATIC)
+  pymod(NAME mol_alg OUTPUT_DIR ost/mol/alg CPP ${OST_MOL_ALG_PYMOD_SOURCES}
+        PY ${OST_MOL_ALG_PYMOD_MODULES})
+endif()
