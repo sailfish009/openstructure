@@ -607,7 +607,9 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
     if (!(profile_.fault_tolerant)) {
       throw IOException(str(format("invalid atom number on line %d") %line_num));      
     }
-    LOG_WARNING("invalid atom number on line " << line_num);
+    if (!(charmm_style_)) {
+      LOG_WARNING("invalid atom number on line " << line_num);
+    }
   }
 
   alt_loc=line[16];

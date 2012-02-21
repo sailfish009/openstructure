@@ -794,7 +794,7 @@ void DataViewerPanelBase::extract_ri()
 
 void DataViewerPanelBase::zoom(int d)
 {
-  // maximal zoom = 2^8, therefore zoom_level_ goes from 8 to 8 and delta from -16 to 16
+  // maximal zoom = 2^8, therefore zoom_level_ goes from -8 to 8 and delta from -16 to 16
   int old_zoom_level=zoom_level_;
   int dl=std::max(d,-16);
   dl=std::min(dl,16);
