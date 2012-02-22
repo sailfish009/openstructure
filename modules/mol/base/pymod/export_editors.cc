@@ -220,6 +220,7 @@ void export_Editors()
     .def("AddTorsion", &EditorBase::AddTorsion)
     .def("ReorderResidues",&EditorBase::ReorderResidues)
     .def("ReorderAllResidues",&EditorBase::ReorderAllResidues)
+    .def("RenumberAllResidues",&EditorBase::RenumberAllResidues)
   ;
   
   class_<XCSEditor, bases<EditorBase> >("XCSEditor", no_init)

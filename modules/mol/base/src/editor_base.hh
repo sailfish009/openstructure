@@ -205,6 +205,17 @@ public:
 
   /// \brief reorder residues of all chains based on their residue number
   void ReorderAllResidues();
+
+  /// \brief renumber residues of all chains
+  ///
+  /// \param start
+  ///           Residues of every chain will be renumbered, whereas the first
+  ///           residue gets the residue number start.
+  ///
+  /// \param keep_spacing
+  ///           If set to false, residues will continously be renumbered ongoing from start.
+  ///           Otherwise the spacings between the residues are kept.
+  void RenumberAllResidues(int start, bool keep_spacing);
     
   /// \brief Get edit mode of editor
   EditMode GetMode() const {return mode_;}

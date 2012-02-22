@@ -75,6 +75,16 @@ public:
     return num_;
   }
 
+  ResNum operator+(const ResNum& r)
+  {
+    return ResNum(num_+r.num_);
+  }
+  
+  ResNum operator-(const ResNum& r)
+  {
+    return ResNum(num_-r.num_);
+  }
+  
   ResNum& operator++()
   {
     ++num_;

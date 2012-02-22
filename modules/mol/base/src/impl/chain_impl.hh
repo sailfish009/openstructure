@@ -169,6 +169,8 @@ public:
   void DeleteAllResidues();
 
   void ReorderResidues();
+
+  void RenumberAllResidues(int start, bool keep_spacing);
   
   int GetIndex(const ResidueImplPtr& res) const;
   void AssignSecondaryStructure(SecStructure ss,

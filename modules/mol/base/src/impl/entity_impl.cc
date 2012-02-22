@@ -1210,4 +1210,12 @@ void EntityImpl::ReorderAllResidues()
   }
 }
 
+void EntityImpl::RenumberAllResidues(int start, bool keep_spacing)
+{
+  for(ChainImplList::iterator cit=chain_list_.begin();cit!=chain_list_.end();++cit) {
+    (*cit)->RenumberAllResidues(start, keep_spacing);
+  }
+
+}
+
 }}} // ns
