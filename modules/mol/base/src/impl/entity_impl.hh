@@ -254,6 +254,8 @@ public:
 
   void ReorderAllResidues();
 
+  void RenumberAllResidues(int start, bool keep_spacing);
+
 private:
   void DoCopy(EntityImplPtr dest);
   

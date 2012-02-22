@@ -165,6 +165,11 @@ void EditorBase::ReorderAllResidues()
   ent_.Impl()->ReorderAllResidues();
 }
 
+void EditorBase::RenumberAllResidues(int start, bool keep_spacing)
+{
+  ent_.Impl()->RenumberAllResidues(start, keep_spacing);
+}
+
 void EditorBase::RenameAtom(AtomHandle atom, const String& new_name)
 {
   CheckHandleValidity(atom);

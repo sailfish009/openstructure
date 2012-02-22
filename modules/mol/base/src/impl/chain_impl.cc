@@ -484,6 +484,28 @@ void ChainImpl::ReorderResidues()
   UpdateShifts();
 }
 
+void ChainImpl::RenumberAllResidues(int start, bool keep_spacing)
+{
+  ResNum actual_num=ResNum(start);
+  ResNum original_start_num=residue_list_[0]->GetNumber();
+  ResNum start_diff=ResNum(start)-original_start_num;
+
+
+  for (ResidueImplList::const_iterator i=residue_list_.begin(); 
+         i!=residue_list_.end(); ++i) {
+
+      if(keep_spacing){
+         ResNum temp=(*i)->GetNumber();
+         (*i)->SetNumber(temp+start_diff);
+        continue;
+      }
+
+      (*i)->SetNumber(actual_num);
+      actual_num++;
+  }
+  UpdateShifts();
+}
+
 void ChainImpl::SetInSequence(const int index)
 {
   ResNum num=residue_list_[index]->GetNumber();
