@@ -35,9 +35,15 @@ namespace ost { namespace seq { namespace alg {
 ///     parameter. Useful when coloring entities based on sequence conservation.
 /// \p prop_name The property name for assigning the conservation to 
 ///     attached residues. Defaults to 'cons'.
+/// \p ignore_gap If true, the dissimilarity between two gaps is increased to
+///     6.0 instead of 0.5 as defined in the original version. Without this, a
+///     stretch where in the alignment there is only one sequence which is
+///     aligned to only gaps, is considered highly conserved (depending on the
+///     number of gap sequences).
 /// 
 std::vector<Real> DLLEXPORT_OST_SEQ_ALG Conservation(const AlignmentHandle& aln,
                                              bool assign=true,
-                                             const String& prop_name="cons");
+                                             const String& prop_name="cons",
+                                             bool ignore_gap=false);
 }}}
 
