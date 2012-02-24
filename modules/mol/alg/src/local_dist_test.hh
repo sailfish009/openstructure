@@ -34,6 +34,10 @@ Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const ost::seq::AlignmentHandle& aln,
                                          Real cutoff, Real max_dist, 
                                          int ref_index=0, int mdl_index=1);
 
+
+Real DLLEXPORT_OST_MOL_ALG LDTHA(EntityView&v, const EntityView& ref_view, Real radius);
+
+
 }}}
 
 #endif

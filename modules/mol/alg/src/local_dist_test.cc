@@ -334,4 +334,16 @@ Real LocalDistTest(const ost::seq::AlignmentHandle& aln,
   return 0.0;
 }
 
+Real LDTHA(EntityView&v, const EntityView& ref_view, Real radius)
+{
+    Real cutoffs[]={0.5,1,2,4};
+    String labels[]={"localldt0.5","localldt1","localldt2","ldtlocal4"};
+    Real ldt=0.0;   
+    for (int n=0; n<4; ++n) { 
+      ldt+=alg::LocalDistTest(v, ref_view, cutoffs[n], radius,labels[n]);
+    }      
+    ldt/=4.0;    
+    return ldt;
+}
+
 }}}

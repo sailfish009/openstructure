@@ -109,6 +109,14 @@ Real ClashingDistances::GetMaxAdjustedDistance() const
   return max_adjusted_distance;  
 }
 
+bool ClashingDistances::IsEmpty() const
+{
+  if (min_distance_.size()==0) {
+    return  true;
+  }
+  return false;
+}  
+
 void StereoChemicalParams::SetParam(const String& param, const String& residue, Real value, Real st_dev)
 {
   std::pair<String,String> key = std::make_pair<String,String>(param,residue);
@@ -143,6 +151,158 @@ void StereoChemicalParams::PrintAllParameters() const
      std::cout << index->first.first << "\t" << index->first.second << "\t" << index->second.first << "\t" << index->second.second << std::endl;
    }    
 };
+
+bool StereoChemicalParams::IsEmpty() const
+{
+  if (params_.size()==0) {
+    return  true;
+  }
+  return false;
+}  
+
+StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<String>& stereo_chemical_props_file)
+{
+  StereoChemicalParams table;
+  bool found=false;
+  std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
+  while (line_iter!=stereo_chemical_props_file.end()) {
+    if ((*line_iter).length()!=0 && (*line_iter).length()!=1) {
+      StringRef line_string_ref(line_iter->data(),(*line_iter).length());
+      std::vector<StringRef> line_str_vec = line_string_ref.split();
+      if (line_str_vec[0].str()==header) {
+        found=true;
+        line_iter++;
+        while ((*line_iter)[0]!='-') {
+          if ((*line_iter)[0]!='#') {
+            StringRef second_line_string_ref(line_iter->data(),(*line_iter).length());
+            std::vector<StringRef> second_line_str_vec = second_line_string_ref.split();
+            if (second_line_str_vec.size()!=4) {
+              std::cout << "The number of elements in one of the lines is wrong" << std::endl;
+              return StereoChemicalParams();
+            } 
+            StringRef item = second_line_str_vec[0];
+            String res = second_line_str_vec[1].str();          
+            std::pair<bool,float> parse_value = second_line_str_vec[2].to_float();
+            std::pair<bool,float> parse_stddev = second_line_str_vec[3].to_float();
+            Real value,stddev;
+            if (parse_value.first==true) {
+              value=static_cast<Real>(parse_value.second);
+            } else {
+              std::cout << "One of the values in the third column is not a number" << std::endl;
+              return StereoChemicalParams();
+            };
+            if (parse_stddev.first==true) {
+              stddev=static_cast<Real>(parse_stddev.second);
+            } else {
+              std::cout << "One of the values in the fourth column is not a number" << std::endl;
+              return StereoChemicalParams();
+            };
+            std::vector<StringRef> split_item = item.split('-');
+            String rearranged_item;
+            if (split_item.size() == 2) {
+              String atom1 = split_item[0].str();
+              String atom2 = split_item[1].str();
+              if (atom2 < atom1) {
+                 std::stringstream srearr;
+                 srearr << atom2 << "-" << atom1;
+                 rearranged_item=srearr.str();                     
+              } else {
+                 rearranged_item = item.str();
+              }          
+            } else if (split_item.size() == 3) {
+              String atom1 = split_item[0].str();
+              String atom = split_item[1].str();
+              String atom2 = split_item[2].str();
+              if (atom2 < atom1) {
+                 std::stringstream srearr;
+                 srearr << atom2 << "-" << atom << "-" << atom1;
+                 rearranged_item=srearr.str();                
+              } else {
+                 rearranged_item = item.str();
+              }                
+            } else {
+              std::cout << "One of the strings describing the parameter has the wrong format" << std::endl;
+              return StereoChemicalParams();
+            }            
+            table.SetParam(rearranged_item,res,value,stddev);
+            line_iter++;
+            }  
+        }
+      }  
+    }
+    line_iter++;    
+  }
+  if (found==false) {
+    std::cout << "Could not find the relevant section in the stereo-chemical parameter file" << std::endl;
+    return StereoChemicalParams();
+  };    
+  return table;
+};  
+
+ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_props_file, Real min_default_distance, Real min_distance_tolerance)
+{
+  ClashingDistances table(min_default_distance,min_distance_tolerance);
+  bool found=false;
+  std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
+  while (line_iter!=stereo_chemical_props_file.end()) {
+    if ((*line_iter).length()!=0 && (*line_iter).length()!=1) {
+      StringRef line_string_ref(line_iter->data(),(*line_iter).length());
+      std::vector<StringRef> line_str_vec = line_string_ref.split();
+      if (line_str_vec[0].str()=="Non-bonded") {
+        found=true;
+        line_iter++;
+        while ((*line_iter)[0]!='-') {
+          if ((*line_iter)[0]!='#') {
+            StringRef second_line_string_ref(line_iter->data(),(*line_iter).length());
+            std::vector<StringRef> second_line_str_vec = second_line_string_ref.split();
+            if (second_line_str_vec.size()!=3) {
+              std::cout << "The number of elements in one of the lines is wrong" << std::endl;
+              return ClashingDistances(min_default_distance,min_distance_tolerance);
+            } 
+            String item = second_line_str_vec[0].str();
+
+            std::pair<bool,float> parse_value = second_line_str_vec[1].to_float();
+            std::pair<bool,float> parse_stddev = second_line_str_vec[2].to_float();
+            Real value,stddev;
+            if (parse_value.first==true) {
+              value=static_cast<Real>(parse_value.second);
+            } else {
+              std::cout << "One of the distance values is not a number" << std::endl;
+              return ClashingDistances(min_default_distance,min_distance_tolerance);
+            };
+            if (parse_stddev.first==true) {
+              stddev=static_cast<Real>(parse_stddev.second);
+            } else {
+              std::cout << "One of the tolerance values is not a number" << std::endl;
+              return ClashingDistances(min_default_distance,min_distance_tolerance);
+            }
+            StringRef itemsr(item.data(),item.length());
+            std::vector<StringRef> eles = itemsr.split('-');
+            if (itemsr.size() != 3) {
+              std::cout << "One of the strings describing the interacting atoms has the wrong format" << std::endl;
+              return ClashingDistances(min_default_distance,min_distance_tolerance);
+            }  
+            String ele1=eles[0].str();
+            String ele2=eles[1].str();
+            if (ele2 < ele1) {
+              table.SetClashingDistance(ele2,ele1,value,stddev);
+            } else {
+              table.SetClashingDistance(ele1,ele2,value,stddev);
+            }  
+            line_iter++;
+          }  
+        }
+      }  
+    }
+    line_iter++;    
+  }
+  if (found==false) {
+    std::cout << "Could not find the relevant section in the stereo-chemical parameter file" << std::endl;
+    return ClashingDistances(min_default_distance,min_distance_tolerance);
+  } 
+  return table;
+}  
+
 
 EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
 {
@@ -187,7 +347,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             String bond_str = bond_string(atom,other_atom);
             std::pair<Real,Real> length_stddev = bond_table.GetParam(bond_str,residue_str);
             Real ref_length = length_stddev.first;
-            Real ref_stddev = length_stddev.second;	   
+            Real ref_stddev = length_stddev.second;           
             Real min_length = ref_length - bond_tolerance*ref_stddev;
             Real max_length = ref_length + bond_tolerance*ref_stddev;
             Real zscore = (blength - ref_length)/ref_stddev;
@@ -219,7 +379,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
           continue;
         }
         if (atom1.GetResidue()!=res.GetHandle()) {
-          continue;	
+          continue;        
         }        
         for (BondHandeList::const_iterator bond_iter2=bonds.begin(); bond_iter2!=bonds.end(); ++bond_iter2) {
           BondHandle bond2=*bond_iter2;
@@ -232,7 +392,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             continue;
           }
           if (atom2.GetResidue()!=res.GetHandle()) {
-            continue;	
+            continue;        
           }
           if (atom1.GetHashCode() > atom2.GetHashCode()) {
             Real awidth;
@@ -245,7 +405,7 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             String angle_str = angle_string(atom1,atom,atom2);
             std::pair<Real,Real> width_stddev = angle_table.GetParam(angle_str,residue_str);
             Real ref_width = width_stddev.first;  
-            Real ref_stddev = width_stddev.second;	   
+            Real ref_stddev = width_stddev.second;           
             Real min_width = ref_width - angle_tolerance*ref_stddev;
             Real max_width = ref_width + angle_tolerance*ref_stddev;
             Real zscore = (awidth - ref_width)/ref_stddev;
@@ -344,9 +504,9 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
 
         Real d=geom::Length2(atom.GetPos()-atom2.GetPos());
         std::pair <Real,Real> distance_tolerance=min_distances.GetClashingDistance(ele1, ele2);
-	Real distance=distance_tolerance.first;
-	Real tolerance=distance_tolerance.second;
-	Real threshold=distance-tolerance;
+        Real distance=distance_tolerance.first;
+        Real tolerance=distance_tolerance.second;
+        Real threshold=distance-tolerance;
         if (d<threshold*threshold) {
           LOG_INFO(atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetName() << " " << atom2.GetResidue().GetName() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "FAIL")
        
