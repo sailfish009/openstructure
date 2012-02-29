@@ -1,3 +1,5 @@
+'''Documentation build on sphinx - please run from root dir by calling ost doc/make.py'''
+
 import os, sys, re
 import shutil
 from ost import settings
