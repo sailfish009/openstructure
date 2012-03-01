@@ -1288,6 +1288,101 @@ class TestTable(unittest.TestCase):
     tab.AddRow([None,8, 2])
     self.assertAlmostEquals(tab.SpearmanCorrel('second','third'), -0.316227766)
     
+  def testExtend(self):
+    '''
+     first  second  third 
+    ----------------------
+     x            3     NA
+     foo         NA  2.200
+     NA           9  3.300
+    '''
+    
+    # simple extend of the same table
+    tab = self.CreateTestTable()
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None],
+                                   'second': [3,None,9],
+                                   'third': [None,2.2,3.3]})
+    
+    tab.Extend(tab)
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'x','foo',None],
+                                   'second': [3,None,9,3,None,9],
+                                   'third': [None,2.2,3.3,None,2.2,3.3]})
+    
+    # simple extend of different tables with the same data
+    tab = self.CreateTestTable()
+    tab2 = self.CreateTestTable()
+    tab.Extend(tab2)
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'x','foo',None],
+                                   'second': [3,None,9,3,None,9],
+                                   'third': [None,2.2,3.3,None,2.2,3.3]})
+    self.CompareDataFromDict(tab2, {'first': ['x','foo',None],
+                                    'second': [3,None,9],
+                                    'third': [None,2.2,3.3]})
+    
+    # add additional columns to current table
+    tab = self.CreateTestTable()
+    tab2 = self.CreateTestTable()
+    tab2.AddCol('foo','i',[1,2,3])
+    tab.Extend(tab2)
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'x','foo',None],
+                                   'second': [3,None,9,3,None,9],
+                                   'third': [None,2.2,3.3,None,2.2,3.3],
+                                   'foo': [None,None,None,1,2,3]})     
+    
+    # different order of the data
+    tab = self.CreateTestTable()
+    tab2 = Table(['third','second','first'],
+                  'fis',
+                  third=[None,2.2,3.3],
+                  first=['x','foo',None],
+                  second=[3, None, 9])
+    self.CompareDataFromDict(tab2, {'first': ['x','foo',None],
+                                    'second': [3,None,9],
+                                    'third': [None,2.2,3.3]})
+    tab.Extend(tab2)
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'x','foo',None],
+                                   'second': [3,None,9,3,None,9],
+                                   'third': [None,2.2,3.3,None,2.2,3.3]})
+    
+    # with merge (additional column)
+    tab = self.CreateTestTable()
+    tab2 = self.CreateTestTable()
+    tab2.AddCol('foo','i',[1,2,3])
+    tab.Extend(tab2, merge='first')
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None],
+                                   'second': [3,None,9],
+                                   'third': [None,2.2,3.3],
+                                   'foo': [1,2,3]})
+    
+    # with merge (no matching value)
+    tab = self.CreateTestTable()
+    tab2 = Table(['third','second','first'],
+                  'fis',
+                  third=[None,2.2,3.3],
+                  first=['a','bar','bla'],
+                  second=[3, None, 9])
+    tab.Extend(tab2, merge='first')
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'a','bar','bla'],
+                                   'second': [3,None,9,3,None,9],
+                                   'third': [None,2.2,3.3,None,2.2,3.3]})
+    
+    # with merge (with matching values)
+    tab = self.CreateTestTable()
+    tab2 = Table(['third','second','first'],
+                  'fis',
+                  third=[None,2.2,3.4],
+                  first=['a','bar','bla'],
+                  second=[3, None, 9])
+    tab.Extend(tab2, merge='third')
+    self.CompareDataFromDict(tab, {'first': ['a','bar',None,'bla'],
+                                   'second': [3,None,9,9],
+                                   'third': [None,2.2,3.3,3.4]})
+    
+    # cannot extend if types are different
+    tab = Table('aaa','s',a=['a','b'])
+    tab2 = Table('aaa','i',a=[1,2])
+    self.assertRaises(TypeError, tab.Extend, tab2)
+    
 if __name__ == "__main__":
   from ost import testutils
   testutils.RunTests()

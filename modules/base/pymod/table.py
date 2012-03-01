@@ -134,7 +134,7 @@ class Table(object):
     tab=Table()
     
   If you want to add columns directly when creating the table, column names
-  and column types can be specified as follows
+  and *column types* can be specified as follows
   
   .. code-block:: python
   
@@ -143,6 +143,17 @@ class Table(object):
   this will create three columns called nameX, nameY and nameZ of type string,
   float and bool, respectively. There will be no data in the table and thus,
   the table will not contain any rows.
+  
+  The following *column types* are supported:
+  
+  ======= ========
+  name     abbrev
+  ======= ========
+  string     s
+  float      f
+  int        i
+  bool       b
+  ======= ========
   
   If you want to add data to the table in addition, use the following:
   
@@ -396,12 +407,24 @@ class Table(object):
 
   def AddRow(self, data, merge=None):
     """
-    Add a row to the table. *row* may either a dictionary in which case the keys 
-    in the dictionary must match the column names. Columns not found in the dict 
-    will be initialized to None. Alternatively, if data is a list-like object, 
-    the row is initialized from the values in data. The number of items in data 
-    must match the number of columns in the table. A :class:`ValuerError` is 
-    raised otherwise.
+    Add a row to the table.
+    
+    *row* may either be a dictionary or a list-like object.
+    In the case of a dictionary the keys in the dictionary must match the column
+    names. Columns not found in the dict will be initialized to None.
+    Alternatively, if data is a list-like object, the row is initialized from
+    the values in data. The number of items in data must match the number of
+    columns in the table. A :class:`ValuerError` is raised otherwise. The values
+    are added in the order specified in the list, thus, the order of the data
+    must match the columns.
+    
+    *merge* looks for an existing row and adds the data there instead of
+    appending a new row. If merge is set to an existing column name, all
+    existing rows are searched for the first row where the value of column with
+    the name specified in merge is equal to the value of the specified column in
+    the new data. If such a row is found, all existing data of this row is 
+    overwritten with the new data. If no matching row is found, a new row is 
+    appended to the table.
     """
     if type(data)==dict:
       self._AddRowsFromDict(data, merge)
@@ -584,9 +607,13 @@ class Table(object):
     """
     Load table from stream or file with given name.
 
+    By default, the file format is *ost* (see below) and is *not* automatically
+    determined (e.g. from file extension). Thus, it *format* must be specified
+    for reading other file formats.
+
     The following file formats are understood:
 
-     ost
+    - ost
 
       This is an ost-specific, but still human readable file format. The file
       (stream) must start with header line of the form
@@ -599,11 +626,11 @@ class Table(object):
       data items are automatically converted to the column format. Lines starting
       with a '#' and empty lines are ignored.
 
-    pickle
+    - pickle
 
       Deserializes the table from a pickled byte stream
 
-    csv
+    - csv
 
       Reads the table from comma separated values stream. Since there is no
       explicit type information in the csv file, the column types are guessed,
@@ -657,15 +684,15 @@ class Table(object):
     """
     Allows to conveniently iterate over a selection of columns, e.g.
     
-    .. code-block::python
+    .. code-block:: python
     
       tab=Table.Load('...')
-      for col1, col in tab.Zip('col1', 'col2'):
+      for col1, col2 in tab.Zip('col1', 'col2'):
         print col1, col2
     
     is a shortcut for
     
-    .. code-block::python
+    .. code-block:: python
     
       tab=Table.Load('...')
       for col1, col2 in zip(tab['col1'], tab['col2']):
@@ -820,8 +847,8 @@ class Table(object):
                     histtype='stepfilled', align='mid', x_title=None,
                     y_title=None, title=None, clear=True, save=False):
     """
-    Create a histogram of the data in col for the range x_range, split into
-    num_bins bins and plot it using matplot lib
+    Create a histogram of the data in col for the range *x_range*, split into
+    *num_bins* bins and plot it using matplot lib.
     """
     try:
       import matplotlib.pyplot as plt
@@ -1158,17 +1185,18 @@ class Table(object):
       raise
     
 
-  def Save(self, stream, format='ost', sep=','):
+  def Save(self, stream_or_filename, format='ost', sep=','):
     """
-    Save the table to stream or filename
+    Save the table to stream or filename. For supported file formats, see
+    :meth:`Load`
     """
     format=format.lower()
     if format=='ost':
-      return self._SaveOST(stream)
+      return self._SaveOST(stream_or_filename)
     if format=='csv':
-      return self._SaveCSV(stream, sep=sep)
+      return self._SaveCSV(stream_or_filename, sep=sep)
     if format=='pickle':
-      return self._SavePickle(stream)
+      return self._SavePickle(stream_or_filename)
     raise ValueError('unknown format "%s"' % format)
 
   def _SavePickle(self, stream):
@@ -1317,7 +1345,9 @@ class Table(object):
                      style='-', title=None, x_title=None, y_title=None,
                      clear=True, save=None):
     '''
-    Plot an enrichment curve using matplotlib
+    Plot an enrichment curve using matplotlib.
+    
+    For more information about parameters, see :meth:`ComputeEnrichment`
     '''
     
     try:
@@ -1417,7 +1447,9 @@ class Table(object):
                            class_dir='-', class_cutoff=2.0):
     '''
     Computes the area under the curve of the enrichment using the trapezoidal
-    rule
+    rule.
+    
+    For more information about parameters, see :meth:`ComputeEnrichment`
     '''
     try:
       import numpy as np
@@ -1439,23 +1471,27 @@ class Table(object):
     For this it is necessary, that the datapoints are classified into positive
     and negative points. This can be done in two ways:
 
-     - by using one 'bool' column (class_col) which contains True for positives
+     - by using one 'bool' column (*class_col*) which contains True for positives
        and False for negatives
-     - by using a non-bool column (class_col), a cutoff value (class_cutoff)
-       and the classification columns direction (class_dir). This will generate
+     - by using a non-bool column (*class_col*), a cutoff value (*class_cutoff*)
+       and the classification columns direction (*class_dir*). This will generate
        the classification on the fly
 
-       * if class_dir=='-': values in the classification column that are
-                            less than or equal to class_cutoff will be counted
+       * if *class_dir*=='-': values in the classification column that are
+                            less than or equal to *class_cutoff* will be counted
                             as positives
-       * if class_dir=='+': values in the classification column that are
-                            larger than or equal to class_cutoff will be counted
-                            as positives
+       * if *class_dir*=='+': values in the classification column that are
+                            larger than or equal to *class_cutoff* will be
+                            counted as positives
 
-    During the calculation, the table will be sorted according to score_dir,
+    During the calculation, the table will be sorted according to *score_dir*,
     where a '-' values means smallest values first and therefore, the smaller
     the value, the better.
 
+    If *class_col* does not contain any positives (i.e. value is True (if column
+    is of type bool) or evaluated to True (if column is of type int or float
+    (depending on *class_dir* and *class_cutoff*))) the ROC is not defined and
+    the function will return *None*.
     '''
 
     ALLOWED_DIR = ['+','-']
@@ -1516,7 +1552,9 @@ class Table(object):
                     class_dir='-', class_cutoff=2.0):
     '''
     Computes the area under the curve of the receiver operating characteristics
-    using the trapezoidal rule
+    using the trapezoidal rule.
+    
+    For more information about parameters, see :meth:`ComputeROC`
     '''
     try:
       import numpy as np
@@ -1536,7 +1574,9 @@ class Table(object):
               style='-', title=None, x_title=None, y_title=None,
               clear=True, save=None):
     '''
-    Plot an ROC curve using matplotlib
+    Plot an ROC curve using matplotlib.
+    
+    For more information about parameters, see :meth:`ComputeROC`
     '''
 
     try:
@@ -1611,6 +1651,47 @@ class Table(object):
           else:
             return False
     return True
+    
+  def Extend(self, tab, merge=None):
+    """
+    Append each row of *tab* to the current table. The data is appended based
+    on the column names, thus the order of the table columns is *not* relevant,
+    only the header names.
+    
+    If there is a column in *tab* that is not present in the current table,
+    it is added to the current table and filled with *None* for all the rows
+    present in the current table.
+    
+    If the type of any column in *tab* is not the same as in the current table
+    a *TypeError* is raised.
+    
+    If merge is specified, the function looks for an existing row and adds the
+    data there instead of appending a new row. If merge is set to an existing
+    column name, all existing rows are searched for the first row where the
+    value of column with the name specified in merge is equal to the value of
+    the specified column in the new data. If such a row is found, all existing
+    data of this row is overwritten with the new data. If no matching row is
+    found, a new row is appended to the table.
+    """
+    # add column to current table if it doesn't exist
+    for name,typ in zip(tab.col_names, tab.col_types):
+      if not name in self.col_names:
+        self.AddCol(name, typ)
+    
+    # check that column types are the same in current and new table
+    for name in self.col_names:
+      curr_type = self.col_types[self.GetColIndex(name)]
+      new_type = tab.col_types[tab.GetColIndex(name)]
+      if curr_type!=new_type:
+        raise TypeError('cannot extend table, column %s in new '%name +\
+                        'table different type (%s) than in '%new_type +\
+                        'current table (%s)'%curr_type)
+    
+    num_rows = len(tab.rows)
+    for i in range(0,num_rows):
+      row = tab.rows[i]
+      data = dict(zip(tab.col_names,row))
+      self.AddRow(data, merge)
     
 
 def Merge(table1, table2, by, only_matching=False):
