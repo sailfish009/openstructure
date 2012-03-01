@@ -365,7 +365,7 @@ class Table(object):
   def __str__(self):
     return self.ToString()
   
-  def _AddRowsFromDict(self, d, merge=False):
+  def _AddRowsFromDict(self, d, overwrite=False):
     # get column indices
     idxs = [self.GetColIndex(k) for k in d.keys()]
     
@@ -388,11 +388,11 @@ class Table(object):
         new_row[idx] = self._Coerce(v, self.col_types[idx])
         
       # partially overwrite existing row with new data
-      if merge:
-        merge_idx = self.GetColIndex(merge)
+      if overwrite:
+        overwrite_idx = self.GetColIndex(overwrite)
         added = False
         for i,r in enumerate(self.rows):
-          if r[merge_idx]==new_row[merge_idx]:
+          if r[overwrite_idx]==new_row[overwrite_idx]:
             for j,e in enumerate(self.rows[i]):
               if new_row[j]==None:
                 new_row[j] = e
@@ -400,12 +400,12 @@ class Table(object):
             added = True
             break
           
-      # if not merge or merge did not find appropriate row
-      if not merge or not added:
+      # if not overwrite or overwrite did not find appropriate row
+      if not overwrite or not added:
         self.rows.append(new_row)
       
 
-  def AddRow(self, data, merge=None):
+  def AddRow(self, data, overwrite=None):
     """
     Add a row to the table.
     
@@ -417,17 +417,13 @@ class Table(object):
     columns in the table. A :class:`ValuerError` is raised otherwise. The values
     are added in the order specified in the list, thus, the order of the data
     must match the columns.
-    
-    *merge* looks for an existing row and adds the data there instead of
-    appending a new row. If merge is set to an existing column name, all
-    existing rows are searched for the first row where the value of column with
-    the name specified in merge is equal to the value of the specified column in
-    the new data. If such a row is found, all existing data of this row is 
-    overwritten with the new data. If no matching row is found, a new row is 
-    appended to the table.
+       
+    If *overwrite* is set and not None (must be set to an existing column name),
+    an existing row is overwritten if the value of column *overwrite* matches.
+    If no matching row is found, a new row is appended to the table.
     """
     if type(data)==dict:
-      self._AddRowsFromDict(data, merge)
+      self._AddRowsFromDict(data, overwrite)
     else:
       if len(data)!=len(self.col_names):
         msg='data array must have %d elements, not %d'
@@ -435,17 +431,17 @@ class Table(object):
       new_row = [self._Coerce(v, t) for v, t in zip(data, self.col_types)]
       
       # fully overwrite existing row with new data
-      if merge:
-        merge_idx = self.GetColIndex(merge)
+      if overwrite:
+        overwrite_idx = self.GetColIndex(overwrite)
         added = False
         for i,r in enumerate(self.rows):
-          if r[merge_idx]==new_row[merge_idx]:
+          if r[overwrite_idx]==new_row[overwrite_idx]:
             self.rows[i] = new_row
             added = True
             break
       
-      # if not merge or merge did not find appropriate row
-      if not merge or not added:
+      # if not overwrite or overwrite did not find appropriate row
+      if not overwrite or not added:
         self.rows.append(new_row)
 
   def RemoveCol(self, col):
@@ -1477,10 +1473,10 @@ class Table(object):
        and the classification columns direction (*class_dir*). This will generate
        the classification on the fly
 
-       * if *class_dir*=='-': values in the classification column that are
+       - if *class_dir* =='-': values in the classification column that are
                             less than or equal to *class_cutoff* will be counted
                             as positives
-       * if *class_dir*=='+': values in the classification column that are
+       - if *class_dir* =='+': values in the classification column that are
                             larger than or equal to *class_cutoff* will be
                             counted as positives
 
@@ -1652,7 +1648,7 @@ class Table(object):
             return False
     return True
     
-  def Extend(self, tab, merge=None):
+  def Extend(self, tab, overwrite=None):
     """
     Append each row of *tab* to the current table. The data is appended based
     on the column names, thus the order of the table columns is *not* relevant,
@@ -1665,13 +1661,9 @@ class Table(object):
     If the type of any column in *tab* is not the same as in the current table
     a *TypeError* is raised.
     
-    If merge is specified, the function looks for an existing row and adds the
-    data there instead of appending a new row. If merge is set to an existing
-    column name, all existing rows are searched for the first row where the
-    value of column with the name specified in merge is equal to the value of
-    the specified column in the new data. If such a row is found, all existing
-    data of this row is overwritten with the new data. If no matching row is
-    found, a new row is appended to the table.
+    If *overwrite* is set and not None (must be set to an existing column name),
+    an existing row is overwritten if the value of column *overwrite* matches.
+    If no matching row is found, a new row is appended to the table.
     """
     # add column to current table if it doesn't exist
     for name,typ in zip(tab.col_names, tab.col_types):
@@ -1691,7 +1683,7 @@ class Table(object):
     for i in range(0,num_rows):
       row = tab.rows[i]
       data = dict(zip(tab.col_names,row))
-      self.AddRow(data, merge)
+      self.AddRow(data, overwrite)
     
 
 def Merge(table1, table2, by, only_matching=False):
