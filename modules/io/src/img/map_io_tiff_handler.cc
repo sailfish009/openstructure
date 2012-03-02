@@ -311,7 +311,7 @@ void MapIOTiffHandler::do_export(const img::MapHandle& image,TIFF* tfile,TIF& fo
   img::Point ori=image.GetSpatialOrigin();
   geom::Vec3 sampling=image.GetPixelSampling();
   float xreso=sampling[0]/Units::cm,yreso=sampling[1]/Units::cm;
-  float xpos=xreso*ori[0],ypos=yreso*ori[1];
+  float xpos=std::max<Real>(0.0,xreso*ori[0]),ypos=std::max<Real>(0.0,yreso*ori[1]); //tiff file format only allows positivie origins, negative origins are lost here
   TIFFSetField(tfile,TIFFTAG_IMAGEWIDTH,width);
   TIFFSetField(tfile,TIFFTAG_IMAGELENGTH,height);
   TIFFSetField(tfile,TIFFTAG_SAMPLESPERPIXEL,spp);
