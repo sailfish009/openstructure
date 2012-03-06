@@ -62,9 +62,9 @@ class TestTable(unittest.TestCase):
     self.CompareColCount(tab, 3)
     self.CompareRowCount(tab, 0)
     self.CompareColTypes(tab, ['first','second', 'third'], 'sif')
-    tab.AddRow(['x',3, None], merge=None)
-    tab.AddRow(['foo',None, 2.2], merge=None)
-    tab.AddRow([None,9, 3.3], merge=None)
+    tab.AddRow(['x',3, None], overwrite=None)
+    tab.AddRow(['foo',None, 2.2], overwrite=None)
+    tab.AddRow([None,9, 3.3], overwrite=None)
     return tab
 
   def CompareRowCount(self, t, row_count):
@@ -375,7 +375,7 @@ class TestTable(unittest.TestCase):
     tab = Table(['first'],'i')
     self.CompareColCount(tab, 1)
     self.CompareRowCount(tab, 0)
-    tab.AddRow([2], merge=None)
+    tab.AddRow([2], overwrite=None)
     self.CompareColCount(tab, 1)
     self.CompareRowCount(tab, 1)
     self.CompareColNames(tab, ['first'])
@@ -394,7 +394,7 @@ class TestTable(unittest.TestCase):
     tab.AddCol('first', 'int')
     self.CompareColCount(tab, 1)
     self.CompareRowCount(tab, 0)
-    tab.AddRow([2], merge=None)
+    tab.AddRow([2], overwrite=None)
     self.CompareColCount(tab, 1)
     self.CompareRowCount(tab, 1)
     self.CompareColNames(tab, ['first'])
@@ -414,7 +414,7 @@ class TestTable(unittest.TestCase):
     self.CompareColCount(tab, 2)
     self.CompareRowCount(tab, 0)
     self.CompareColTypes(tab, ['first','second'], 'si')
-    tab.AddRow(['x',3], merge=None)
+    tab.AddRow(['x',3], overwrite=None)
     self.CompareColCount(tab, 2)
     self.CompareRowCount(tab, 1)
     tab.AddCol('third', 'float', 3.141)
@@ -441,9 +441,9 @@ class TestTable(unittest.TestCase):
     self.CompareColCount(tab, 3)
     self.CompareRowCount(tab, 0)
     self.CompareColTypes(tab, ['first','second', 'third'], 'sif')
-    tab.AddRow(['x',3, 1.0], merge=None)
-    tab.AddRow(['foo',6, 2.2], merge=None)
-    tab.AddRow(['bar',9, 3.3], merge=None)
+    tab.AddRow(['x',3, 1.0], overwrite=None)
+    tab.AddRow(['foo',6, 2.2], overwrite=None)
+    tab.AddRow(['bar',9, 3.3], overwrite=None)
     self.CompareColCount(tab, 3)
     self.CompareRowCount(tab, 3)
     self.CompareDataFromDict(tab, {'second': [3,6,9], 'first': ['x','foo','bar'], 'third': [1,2.2,3.3]})
@@ -466,9 +466,9 @@ class TestTable(unittest.TestCase):
     self.CompareColCount(tab, 3)
     self.CompareRowCount(tab, 0)
     self.CompareColTypes(tab, ['first','second', 'aaa'], 'sif')
-    tab.AddRow({'first':'x','second':3, 'aaa':1.0}, merge=None)
-    tab.AddRow({'aaa':2.2, 'second':6, 'first':'foo'}, merge=None)
-    tab.AddRow({'second':9, 'aaa':3.3, 'first':'bar'}, merge=None)
+    tab.AddRow({'first':'x','second':3, 'aaa':1.0}, overwrite=None)
+    tab.AddRow({'aaa':2.2, 'second':6, 'first':'foo'}, overwrite=None)
+    tab.AddRow({'second':9, 'aaa':3.3, 'first':'bar'}, overwrite=None)
     self.CompareColCount(tab, 3)
     self.CompareRowCount(tab, 3)
     self.CompareDataFromDict(tab, {'second': [3,6,9], 'first': ['x','foo','bar'], 'aaa': [1,2.2,3.3]})
@@ -490,9 +490,9 @@ class TestTable(unittest.TestCase):
     self.CompareColCount(tab, 1)
     self.CompareRowCount(tab, 0)
     self.CompareColTypes(tab, ['first'], 's')
-    tab.AddRow(['x'], merge=None)
-    tab.AddRow(['foo'], merge=None)
-    tab.AddRow(['bar'], merge=None)
+    tab.AddRow(['x'], overwrite=None)
+    tab.AddRow(['foo'], overwrite=None)
+    tab.AddRow(['bar'], overwrite=None)
     tab.AddCol('second', 'int')
     tab.AddCol('third', 'float', 3.141)
     self.CompareColCount(tab, 3)
@@ -501,9 +501,9 @@ class TestTable(unittest.TestCase):
                                    'first': ['x','foo','bar'],
                                    'third': [3.141, 3.141, 3.141]})
 
-  def testAddRowFromDictWithMerge(self):
+  def testAddRowFromDictWithOverwrite(self):
     '''
-    add rows from dictionary with merge (i.e. overwrite third row with additional data)
+    add rows from dictionary with overwrite (i.e. overwrite third row with additional data)
     
       x     foo   bar 
     ------------------
@@ -522,14 +522,14 @@ class TestTable(unittest.TestCase):
     self.CompareDataFromDict(tab, {'x': ['row1', 'row2', 'row3'],
                                    'foo': [True, None, False],
                                    'bar': [1, 2, None]})
-    tab.AddRow({'x':'row3', 'bar':3}, merge='x')
+    tab.AddRow({'x':'row3', 'bar':3}, overwrite='x')
     self.CompareDataFromDict(tab, {'x': ['row1', 'row2', 'row3'],
                                    'foo': [True, None, False],
                                    'bar': [1, 2, 3]})
     
-  def testAddRowFromListWithMerge(self):
+  def testAddRowFromListWithOverwrite(self):
     '''
-    add rows from list with merge (i.e. overwrite third row with additional data)
+    add rows from list with overwrite (i.e. overwrite third row with additional data)
     
       x     foo   bar 
     ------------------
@@ -549,7 +549,7 @@ class TestTable(unittest.TestCase):
     self.CompareDataFromDict(tab, {'x': ['row1', 'row2', 'row3'],
                                    'foo': [True, None, False],
                                    'bar': [1, 2, None]})
-    tab.AddRow(['row3', True, 3], merge='x')
+    tab.AddRow(['row3', True, 3], overwrite='x')
     self.CompareDataFromDict(tab, {'x': ['row1', 'row2', 'row3'],
                                    'foo': [True, None, True],
                                    'bar': [1, 2, 3]})
@@ -1287,6 +1287,101 @@ class TestTable(unittest.TestCase):
     tab.AddRow([None,5, 6.3])
     tab.AddRow([None,8, 2])
     self.assertAlmostEquals(tab.SpearmanCorrel('second','third'), -0.316227766)
+    
+  def testExtend(self):
+    '''
+     first  second  third 
+    ----------------------
+     x            3     NA
+     foo         NA  2.200
+     NA           9  3.300
+    '''
+    
+    # simple extend of the same table
+    tab = self.CreateTestTable()
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None],
+                                   'second': [3,None,9],
+                                   'third': [None,2.2,3.3]})
+    
+    tab.Extend(tab)
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'x','foo',None],
+                                   'second': [3,None,9,3,None,9],
+                                   'third': [None,2.2,3.3,None,2.2,3.3]})
+    
+    # simple extend of different tables with the same data
+    tab = self.CreateTestTable()
+    tab2 = self.CreateTestTable()
+    tab.Extend(tab2)
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'x','foo',None],
+                                   'second': [3,None,9,3,None,9],
+                                   'third': [None,2.2,3.3,None,2.2,3.3]})
+    self.CompareDataFromDict(tab2, {'first': ['x','foo',None],
+                                    'second': [3,None,9],
+                                    'third': [None,2.2,3.3]})
+    
+    # add additional columns to current table
+    tab = self.CreateTestTable()
+    tab2 = self.CreateTestTable()
+    tab2.AddCol('foo','i',[1,2,3])
+    tab.Extend(tab2)
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'x','foo',None],
+                                   'second': [3,None,9,3,None,9],
+                                   'third': [None,2.2,3.3,None,2.2,3.3],
+                                   'foo': [None,None,None,1,2,3]})     
+    
+    # different order of the data
+    tab = self.CreateTestTable()
+    tab2 = Table(['third','second','first'],
+                  'fis',
+                  third=[None,2.2,3.3],
+                  first=['x','foo',None],
+                  second=[3, None, 9])
+    self.CompareDataFromDict(tab2, {'first': ['x','foo',None],
+                                    'second': [3,None,9],
+                                    'third': [None,2.2,3.3]})
+    tab.Extend(tab2)
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'x','foo',None],
+                                   'second': [3,None,9,3,None,9],
+                                   'third': [None,2.2,3.3,None,2.2,3.3]})
+    
+    # with overwrite (additional column)
+    tab = self.CreateTestTable()
+    tab2 = self.CreateTestTable()
+    tab2.AddCol('foo','i',[1,2,3])
+    tab.Extend(tab2, overwrite='first')
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None],
+                                   'second': [3,None,9],
+                                   'third': [None,2.2,3.3],
+                                   'foo': [1,2,3]})
+    
+    # with overwrite (no matching value)
+    tab = self.CreateTestTable()
+    tab2 = Table(['third','second','first'],
+                  'fis',
+                  third=[None,2.2,3.3],
+                  first=['a','bar','bla'],
+                  second=[3, None, 9])
+    tab.Extend(tab2, overwrite='first')
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'a','bar','bla'],
+                                   'second': [3,None,9,3,None,9],
+                                   'third': [None,2.2,3.3,None,2.2,3.3]})
+    
+    # with overwrite (with matching values)
+    tab = self.CreateTestTable()
+    tab2 = Table(['third','second','first'],
+                  'fis',
+                  third=[None,2.2,3.4],
+                  first=['a','bar','bla'],
+                  second=[3, None, 9])
+    tab.Extend(tab2, overwrite='third')
+    self.CompareDataFromDict(tab, {'first': ['a','bar',None,'bla'],
+                                   'second': [3,None,9,9],
+                                   'third': [None,2.2,3.3,3.4]})
+    
+    # cannot extend if types are different
+    tab = Table('aaa','s',a=['a','b'])
+    tab2 = Table('aaa','i',a=[1,2])
+    self.assertRaises(TypeError, tab.Extend, tab2)
     
 if __name__ == "__main__":
   from ost import testutils
