@@ -142,7 +142,9 @@ macro(module)
             "invalid use of module(): a module name must be provided")
   endif()
 
-
+  if (ENABLE_STATIC AND _ARG_NO_STATIC)
+    return()
+  endif()
   if (_ARG_HEADER_OUTPUT_DIR)
     set(_HEADER_OUTPUT_DIR ${_ARG_HEADER_OUTPUT_DIR})
   else()
@@ -299,15 +301,17 @@ macro(executable)
   endforeach()
   if (ENABLE_STATIC AND _ARG_STATIC)
     target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
-    if (OST_GCC_45)    
-      set_target_properties(${_ARG_NAME}
-                            PROPERTIES LINK_SEARCH_END_STATIC TRUE  
-                            LINK_FLAGS "-static-libgcc -static-libstdc++ -static -pthread")
-    else()
-      set_target_properties(${_ARG_NAME}
-                            PROPERTIES LINK_SEARCH_END_STATIC TRUE  
-                            LINK_FLAGS "-static-libgcc -static -pthread")
-    endif()        
+    if (UNIX AND NOT APPLE)
+      if (OST_GCC_45)    
+        set_target_properties(${_ARG_NAME}
+                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
+                              LINK_FLAGS "-static-libgcc -static-libstdc++ -static -pthread")
+      else()
+        set_target_properties(${_ARG_NAME}
+                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
+                              LINK_FLAGS "-static-libgcc -static -pthread")
+      endif()        
+    endif()
   endif()
   install(TARGETS ${_ARG_NAME} DESTINATION bin)
 endmacro()
@@ -473,6 +477,9 @@ macro(pymod)
                       "NAME;CPP;PY;LINK;OUTPUT_DIR;UI;PREFIX" "" ${ARGN})
   if (NOT _ARG_NAME)
     message(FATAL_ERROR "invalid use of pymod(): a name must be provided")
+  endif()
+  if (ENABLE_STATIC)
+    return()
   endif()
   if (_ARG_OUTPUT_DIR)
     set(PYMOD_DIR "openstructure/${_ARG_OUTPUT_DIR}")
