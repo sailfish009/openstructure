@@ -20,10 +20,10 @@ except ImportError:
   print "Could not find numpy: ignoring some table class unit tests"
 
 try:
-  import scipy
+  import scipy.stats.mstats
 except ImportError:
   HAS_SCIPY=False
-  print "Could not find scipy: ignoring some table class unit tests"
+  print "Could not find scipy.stats.mstats: ignoring some table class unit tests"
   
 try:
   import matplotlib
