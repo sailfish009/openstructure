@@ -347,37 +347,9 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
 # which is totally C++, but we want the method in Python... so we define it
 # here (__init__) and add it as a member to the class. With this, the first
 # arguement is the usual 'self'.
+# documentation for this function was moved to mmcif.rst,
+# MMCifInfoBioUnit.PDBize, since this function is not included in SPHINX.
 def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
-  """
-  Returns the biological assembly (biounit) for an entity. The new entity
-  created is well suited to be saved as a PDB file. Therefore the function
-  tries to meet the requirements of single-character chain names. The following
-  measures are taken.
-  
-    - All ligands are put into one chain (_)
-    - Water is put into one chain (-)
-    - Each polymer gets its own chain, named A-Z 0-9 a-z.
-    - The description of non-polymer chains will be put into a generic string
-      property called description on the residue level.
-    - ligands which resemble a polymer but have less than min_polymer_size
-      residues are assigned the same numeric residue number. The residues are
-      distinguished by insertion code.
-
-  Since this function is at the moment mainly used to create biounits from
-  mmCIF files to be saved as PDBs, the function assumes that the ChainType
-  properties are set correctly. conop.ConnectAll is used to derive connectivity.
-
-  :param asu:  Asymmetric unit to work on. Should be created from a mmCIF file.
-  :type asu: :class:`~ost.mol.EntityHandle>`
-  :param seqres: If set to a valid sequence list, the length of the seqres 
-    records will be used to determine if a certain chain has the minimally 
-    required length.
-  :type seqres: :class:'~ost.seq.SequenceList'
-  :param min_polymer_size:  The minimal number of residues a polymer needs to 
-    get its own chain. Everything below that number will be sorted into the 
-    ligand chain.
-  :type min_polymer_size: int
-  """
   def _CopyAtoms(src_res, dst_res, edi, trans=geom.Mat4()):
     for atom in src_res.atoms:
       tmp_pos = geom.Vec4(atom.pos)

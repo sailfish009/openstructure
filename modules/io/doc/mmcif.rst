@@ -80,7 +80,7 @@ of the annotation available.
   .. attribute:: operations
 
     Stores the operations needed to transform a crystal structure into a
-    biounit.
+    bio unit.
 
     Also available as :meth:`GetOperations`. May also be modified by
     :meth:`AddOperation`.
@@ -115,9 +115,9 @@ of the annotation available.
 
   .. method:: AddBioUnit(biounit)
 
-    Add a biounit to the biounit list of an info object.
+    Add a bio unit to the bio unit list of an info object.
 
-    :param biounit: Biounit to be added.
+    :param biounit: Bio unit to be added.
     :type biounit: :class:`MMCifInfoBioUnit`
 
   .. method:: GetBioUnits()
@@ -340,7 +340,7 @@ of the annotation available.
 .. class:: MMCifInfoTransOperation
 
   This stores operations needed to transform an
-  :class:`entity <ost.mol.EntityHandle>` into a biounit.
+  :class:`entity <ost.mol.EntityHandle>` into a bio unit.
 
   .. attribute:: id
 
@@ -403,7 +403,7 @@ of the annotation available.
 .. class:: MMCifInfoBioUnit
 
   This stores information how a structure is to be assembled to form the
-  biounit.
+  bio unit.
 
   .. attribute:: details
 
@@ -415,14 +415,14 @@ of the annotation available.
 
   .. attribute:: chains
 
-    Chains involved in this biounit. If not provided, resembles an empty list.
+    Chains involved in this bio unit. If not provided, resembles an empty list.
 
     Also available as :meth:`GetChainList`. May also be modified by
     :meth:`AddChain`.
 
   .. attribute:: operations
 
-    Translations and rotations needed to create the biounit. Filled with
+    Translations and rotations needed to create the bio unit. Filled with
     objects of class :class:`MMCifInfoTransOperation`.
 
     Also available as :meth:`GetOperations`. May be modified by
@@ -451,6 +451,39 @@ of the annotation available.
   .. method:: AddOperations(list of operations)
 
     See :attr:`operations`
+
+  .. method:: PDBize(asu, seqres=None, min_polymer_size=10)
+
+    Returns the biological assembly (bio unit) for an entity. The new entity
+    created is well suited to be saved as a PDB file. Therefore the function
+    tries to meet the requirements of single-character chain names. The
+    following measures are taken.
+  
+      - All ligands are put into one chain (_)
+      - Water is put into one chain (-)
+      - Each polymer gets its own chain, named A-Z 0-9 a-z.
+      - The description of non-polymer chains will be put into a generic string
+        property called description on the residue level.
+      - ligands which resemble a polymer but have less than min_polymer_size
+        residues are assigned the same numeric residue number. The residues are
+        distinguished by insertion code.
+
+    Since this function is at the moment mainly used to create biounits from
+    mmCIF files to be saved as PDBs, the function assumes that the
+    :ref:`ChainType` properties are set correctly. :func:`ost.conop.ConnectAll`
+    is used to derive connectivity.
+
+    :param asu:  Asymmetric unit to work on. Should be created from a mmCIF
+                 file.
+    :type asu: :class:`~ost.mol.EntityHandle>`
+    :param seqres: If set to a valid sequence list, the length of the seqres 
+      records will be used to determine if a certain chain has the minimally 
+      required length.
+    :type seqres: :class:'~ost.seq.SequenceList'
+    :param min_polymer_size:  The minimal number of residues a polymer needs to 
+      get its own chain. Everything below that number will be sorted into the 
+      ligand chain.
+    :type min_polymer_size: int
 
 .. class:: MMCifInfoStructDetails
 
@@ -642,3 +675,7 @@ of the annotation available.
   .. method:: SetReplacedPDBID(descriptor)
 
     See :attr:`replace_pdb_id`
+
+..  LocalWords:  autofunction ChainTypes exptl attr pdbx oper conf spr biounits
+..  LocalWords:  cas isbn pubmed asu seqres conop ConnectAll casp COMPND OBSLTE
+..  LocalWords:  SPRSDE pdb func
