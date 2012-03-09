@@ -1156,6 +1156,8 @@ class Table(object):
     taking rows into account where both of the values are not equal to None. If 
     there are not enough data points to calculate a correlation coefficient, 
     None is returned.
+    
+    The function depends on the following module: *scipy.stats.mstats*
     """
     try:
       import scipy.stats.mstats
@@ -1177,7 +1179,7 @@ class Table(object):
         return None
 
     except ImportError:
-      LogError("Function needs scipy, but I could not import it.")
+      LogError("Function needs scipy.stats.mstats, but I could not import it.")
       raise
     
 
