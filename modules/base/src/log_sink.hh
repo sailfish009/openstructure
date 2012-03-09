@@ -20,6 +20,7 @@
 #define OST_LOG_SINK_HH
 
 #include <ostream>
+#include <sstream>
 #include <iostream>
 #include <fstream>
 #include <stack>
@@ -50,6 +51,23 @@ public:
 private:
   std::ostream& stream_;
 };
+
+class DLLEXPORT StringLogSink : public LogSink {
+public:
+  StringLogSink():LogSink(),stream_(){}
+  virtual void LogMessage(const String& message, int severity){
+    stream_ << message;
+  }
+  String GetLog() const
+  {
+    return stream_.str();
+  }
+
+private:
+  std::ostringstream stream_;
+};
+
+typedef boost::shared_ptr<StringLogSink> StringLogSinkPtr;
 
 class DLLEXPORT FileLogSink : public LogSink {
 public:
