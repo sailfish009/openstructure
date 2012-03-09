@@ -156,6 +156,12 @@ void export_Logger()
     .def("LogMessage", &FileLogSink::LogMessage)
   ;
 
+  class_<StringLogSink, StringLogSinkPtr, bases<LogSink>,
+         boost::noncopyable >("StringLogSink", init<>())
+    .def("LogMessage", &StringLogSink::LogMessage)
+    .def("GetLog", &StringLogSink::GetLog)
+  ;
+
   def("PushVerbosityLevel",push_verb);
   def("PopVerbosityLevel",pop_verb);
   def("GetVerbosityLevel",get_verb);
