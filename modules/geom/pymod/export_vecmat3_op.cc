@@ -64,4 +64,5 @@ void export_VecMat3_op()
   def("OrthogonalVector",OrthogonalVector);
   def("Min",Vec3Min);
   def("Max",Vec3Max);
+  def("MinDistance",MinDistance);
 }

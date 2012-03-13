@@ -196,15 +196,15 @@ Real MinDistance(const Vec3List& l1, const Vec3List& l2)
 { 
   // returns the minimal distance between two sets of points (Vec3List)
   if (l1.size()==0 || l2.size()==0){throw std::runtime_error("cannot calculate minimal distance: empty Vec3List");}
-  Real min=Distance(*l1.begin(),*l2.begin());
+  Real min=Length2(*l1.begin()-*l2.begin());
   Real d;
   for (Vec3List::const_iterator p1=l1.begin(),e1=l1.end(); p1!=e1; p1++) {
     for (Vec3List::const_iterator p2=l2.begin(),e2=l2.end(); p2!=e2; p2++) {
-      d=Distance(*p1,*p2);
+      d=Length2(*p1-*p2);
       if (d<min) min=d;
     }
   }
-  return min;
+  return std::sqrt(min);
 }
 
 } // ns
