@@ -106,15 +106,15 @@ std::pair<Real, Real> calc_overlap1(ResidueView ref_res,
         Real mdl_dist=geom::Length(av1.GetPos()-av2.GetPos());
         Real ref_dist=geom::Length(ai->GetPos()-aj->GetPos());
         if (std::abs(mdl_dist-ref_dist)<tol) {
-          LOG_VERBOSE("CLASH:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
-             << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetNumber() << " " << av2.GetResidue().GetName() << " " << av2.GetName() << " " 
+          LOG_VERBOSE("LDT:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
+             << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " " 
              << mdl_dist << " " << ref_dist << " " << mdl_dist-ref_dist << " " << tol << " " << "PASS")
           overlap.first+=1;
           overlap_list[ref_res.GetIndex()].first+=1.0;
           overlap_list[aj->GetResidue().GetIndex()].first+=1.0;
         } else {
-          LOG_INFO("CLASH:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
-             << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetNumber() << " " << av2.GetResidue().GetName() << " " << av2.GetName() << " " 
+          LOG_VERBOSE("LDT:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
+             << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " " 
              << mdl_dist << " " << ref_dist << " " << mdl_dist-ref_dist << " " << tol << " " << "FAIL")
         } 
       }
