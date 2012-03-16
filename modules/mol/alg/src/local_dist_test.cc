@@ -73,7 +73,11 @@ std::pair<Real, Real> calc_overlap1(ResidueView ref_res,
     }
     for (AtomViewList::iterator aj=within.begin(),
          ae2=within.end(); aj!=ae2; ++aj) {
-      if (aj->GetElement()=="H") { continue; }
+      if (aj->GetElement()=="H" ||
+          aj->GetResidue().GetChain()!=ai->GetResidue().GetChain()) {
+          continue;
+      }
+
       if (only_fixed) {
         if (aj->GetResidue().GetNumber()==ref_res.GetNumber()) {
           continue;
@@ -150,7 +154,10 @@ std::pair<Real, Real> calc_overlap2(const seq::ConstSequenceHandle& ref_seq,
     }
     for (AtomViewList::iterator aj=within.begin(),
          ae2=within.end(); aj!=ae2; ++aj) {
-      if (aj->GetElement()=="H") { continue; }
+      if (aj->GetElement()=="H" || 
+          aj->GetResidue().GetChain()!=ai->GetResidue().GetChain()) { 
+          continue; 
+      }
       if (only_fixed) {
         if (aj->GetResidue().GetNumber()==ref_res.GetNumber()) {
           continue;
@@ -218,7 +225,7 @@ Real LocalDistTest(const EntityView& mdl, const EntityView& ref,
     LOG_WARNING("reference structures doesn't contain any residues");
     return 0.0;
   }
-  ResidueViewList ref_residues=ref.GetResidueList();  
+  ResidueViewList ref_residues=ref.GetChainList()[0].GetResidueList();
   std::vector<std::pair<Real, Real> > overlap_list(ref_residues.size(), std::pair<Real, Real>(0.0, 0.0));
   ChainView mdl_chain=mdl.GetChainList()[0];  
   // Residues with symmetric side-chains require special treatment as there are 
