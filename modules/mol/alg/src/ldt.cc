@@ -13,7 +13,7 @@
 // details.
 //
 // You should have received a copy of the GNU Lesser General Public License
-// along with this library; if not, write to the Free Software Foundation, Inc.,
+// along with this library; if not, write to the  Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #if defined (_MSC_VER)
@@ -153,7 +153,7 @@ int main (int argc, char **argv)
   }  
 
   if (verbosity_level>0) {
-    LOG_INFO("LDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Min  ModelDist  TargetDist  Difference  Tolerance Status");
+    LOG_INFO("LDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
   }
   
   if (vm.count("bond_tolerance")) {
