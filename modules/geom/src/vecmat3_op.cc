@@ -192,6 +192,7 @@ Real DihedralAngle(const Vec3& p1, const Vec3& p2, const Vec3& p3,
                Dot(r12cross, r23cross));
 }
 
+  
 Real MinDistance(const Vec3List& l1, const Vec3List& l2)
 { 
   // returns the minimal distance between two sets of points (Vec3List)
@@ -207,4 +208,24 @@ Real MinDistance(const Vec3List& l1, const Vec3List& l2)
   return std::sqrt(min);
 }
 
+Real MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec)
+{ 
+  // returns the minimal distance between two sets of points (Vec3List)
+  // given the periodic boundary condition along x,y,z given in the basis_vec
+  if (l1.size()==0 || l2.size()==0){throw std::runtime_error("cannot calculate minimal distance: empty Vec3List");}
+  Real min=Length2(*l1.begin()-*l2.begin());
+  Real d;
+  Vec3 v;
+  for (int i=0; i<3; i++) {
+    basis_vec[i]=std::fabs(basis_vec[i]);
+  }
+  for (Vec3List::const_iterator p1=l1.begin(),e1=l1.end(); p1!=e1; p1++) {
+    for (Vec3List::const_iterator p2=l2.begin(),e2=l2.end(); p2!=e2; p2++) {
+      d=Distance2WithPBC(*p1, *p2, basis_vec);
+      if (d<min) min=d;
+    }
+  }
+  return std::sqrt(min);
+}  
+  
 } // ns
