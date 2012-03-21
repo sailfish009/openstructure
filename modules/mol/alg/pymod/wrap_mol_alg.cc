@@ -35,7 +35,7 @@ void export_entity_to_density();
 namespace {
   
 Real (*ldt_a)(const mol::EntityView&, const mol::alg::GlobalDistanceList& glob_dist_list, Real, const String&)=&mol::alg::LocalDistTest;
-Real (*ldt_b)(const seq::AlignmentHandle&,Real, int, int)=&mol::alg::LocalDistTest;
+Real (*ldt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistTest;
 mol::EntityView (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
 mol::EntityView (*fc_b)(const mol::EntityHandle&, const mol::alg::ClashingDistances&, bool)=&mol::alg::FilterClashes;
 mol::EntityView (*csc_a)(const mol::EntityView&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
