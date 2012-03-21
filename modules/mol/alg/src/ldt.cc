@@ -235,7 +235,8 @@ int main (int argc, char **argv)
       v=alg::FilterClashes(v,nonbonded_table);
     }
     
-    Real ldt=LDTHA(v, ref_view, radius);
+    GlobalDistanceList glob_dist_list = CreateDistanceList(ref_view,radius);
+    Real ldt=LDTHA(v, glob_dist_list);
     
     std::cout << "File: " << files[i] << std::endl; 
     std::cout << "Global LDT score: " << ldt << std::endl;

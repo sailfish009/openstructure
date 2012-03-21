@@ -25,17 +25,66 @@
 
 namespace ost { namespace mol { namespace alg {
   
+  
+class UniqueAtomIdentifier
+{
+  
+public:
+  UniqueAtomIdentifier(const String& chain,const ResNum& residue,const String& residue_name, const String& atom): chain_(chain),residue_(residue),residue_name_(residue_name),atom_(atom) {}  
+  
+  String GetChainName() const { return chain_; } 
+  ResNum GetResNum() const { return residue_; }  
+  String GetResidueName() const { return residue_name_; }
+  String GetAtomName() const { return atom_; }
+  
+private:
+
+  String chain_;
+  ResNum residue_;
+  String residue_name_;
+  String atom_;    
+};
+
+class ReferenceDistance
+{
+  
+public:
+  
+  ReferenceDistance(UniqueAtomIdentifier first_atom, UniqueAtomIdentifier second_atom, Real mind, Real maxd):
+       first_atom_(first_atom),second_atom_(second_atom),mind_(mind),maxd_(maxd) {}
+  UniqueAtomIdentifier GetFirstAtom() const {return first_atom_;}
+  UniqueAtomIdentifier GetSecondAtom() const {return second_atom_;}
+  Real GetMinDistance() const {return mind_ ;}
+  Real GetMaxDistance() const {return maxd_ ;}
+  bool IsValid() const; 
+  void Print() const; 
+  
+private:
+  
+  UniqueAtomIdentifier first_atom_;
+  UniqueAtomIdentifier second_atom_;
+  Real mind_;
+  Real maxd_;
+  bool valid;
+ 
+};
+
+typedef std::vector<ReferenceDistance> ResidueDistanceList;
+typedef std::vector<ResidueDistanceList> GlobalDistanceList;
+  
 Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const EntityView& mdl,
-                                         const EntityView& ref,
-                                         Real cutoff, Real max_dist,
+                                         const GlobalDistanceList& dist_list,
+                                         Real cutoff, 
                                          const String& local_ldt_property_string="");
 
 Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const ost::seq::AlignmentHandle& aln,
-                                         Real cutoff, Real max_dist, 
+                                         Real cutoff, 
                                          int ref_index=0, int mdl_index=1);
 
 
-Real DLLEXPORT_OST_MOL_ALG LDTHA(EntityView&v, const EntityView& ref_view, Real radius);
+Real DLLEXPORT_OST_MOL_ALG LDTHA(EntityView& v, const GlobalDistanceList& global_dist_list);
+
+GlobalDistanceList CreateDistanceList(const EntityView& ref,Real max_dist);
 
 
 }}}
