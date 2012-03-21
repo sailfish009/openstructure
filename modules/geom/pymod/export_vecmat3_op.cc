@@ -39,7 +39,7 @@ Real (*Mat3Minor)(const Mat3& m, unsigned int i, unsigned int j)      = &Minor;
 Vec3 (*Vec3Min)(const Vec3&, const Vec3&) = &Min;
 Vec3 (*Vec3Max)(const Vec3&, const Vec3&) = &Max;
 Real (*Vec3Distance2WithPBC)(const Vec3&, const Vec3&, const Vec3&)   = &Distance2WithPBC;
-Real (*Vec3DistanceWithPBC)(const Vec3&, const Vec3&, const Vec3&)   = &DistanceWithPBC;
+Real (*Vec3DistanceWithPBC)(const Vec3&, const Vec3&, const Vec3&)    = &DistanceWithPBC;
 
 void export_VecMat3_op()
 {
@@ -69,4 +69,6 @@ void export_VecMat3_op()
   def("DistanceWithPBC",Vec3DistanceWithPBC);
   def("MinDistance",MinDistance);
   def("MinDistanceWithPBC",MinDistanceWithPBC);
+  def("WrapVec3",WrapVec3);
+  def("WrapVec3List",WrapVec3List);
 }

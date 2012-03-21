@@ -215,6 +215,13 @@ Real MinDistance(const Vec3List& l1, const Vec3List& l2);
 //! returns the minimal distance between the points in two Vec3List 
 //  with periodic boundaries in x,y,z given in basis_vec
 Real MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec);
+
+//!wraps a vector in a box with periodic boundaries
+Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec);
+//!wraps all the verctors in a Vec3List in a box with periodic boundaries
+Vec3List WrapVec3List(const Vec3List& vl,const Vec3& box_center,const Vec3& basis_vec);
+
+  
 } // ns
 
 #endif

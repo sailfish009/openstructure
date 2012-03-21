@@ -227,5 +227,26 @@ Real MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec)
   }
   return std::sqrt(min);
 }  
+
+Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec){
+  Vec3 v;
+  Real r;
+  for (int i=0; i<3; i++) {
+    r=(v1[i]-box_center[i])/basis_vec[i];
+    r=(r > 0.0) ? std::floor(r + 0.5) : std::ceil(r - 0.5);
+    v[i]=v1[i]-basis_vec[i]*r;
+  }
+  return v;
+}
+
+Vec3List WrapVec3List(const Vec3List& vl, const Vec3& box_center,const Vec3& basis_vec){
+  Vec3List vl_out;
+  vl_out.reserve(vl_out.size());
+  for (Vec3List::const_iterator v1=vl.begin(),e=vl.end();v1!=e ; v1++) {
+    vl_out.push_back(WrapVec3(*v1,box_center,basis_vec));
+  }
+  return vl_out;
+}
+  
   
 } // ns
