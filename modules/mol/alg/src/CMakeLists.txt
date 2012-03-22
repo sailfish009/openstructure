@@ -8,6 +8,7 @@ set(OST_MOL_ALG_HEADERS
   construct_cbeta.hh
   clash_score.hh
   trajectory_analysis.hh
+  structure_analysis.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -19,6 +20,7 @@ set(OST_MOL_ALG_SOURCES
   filter_clashes.cc
   construct_cbeta.cc
   trajectory_analysis.cc
+  structure_analysis.cc
 )
 
 set(MOL_ALG_DEPS ost_mol ost_seq)
