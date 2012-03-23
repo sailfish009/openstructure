@@ -39,7 +39,7 @@ geom::Vec3List GetPosListFromView(const EntityView& view){
   return vl;
 }    
   
-Real CalculateAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map){
+Real CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map){
   Real sum,v;
   sum=0;
   CheckHandleValidity(density_map);
@@ -48,7 +48,7 @@ Real CalculateAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& 
     v=density_map.GetReal(p);
     sum=sum+v;
   }
-  return sum;
+  return sum/float(vl.size());
 }
  
 void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 basis_vec){

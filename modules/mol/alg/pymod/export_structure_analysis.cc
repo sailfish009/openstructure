@@ -27,6 +27,6 @@ using namespace ost::mol::alg;
 void export_StructureAnalysis()
 {
   def("GetPosListFromView",&GetPosListFromView, (arg("view")));
-  def("CalculateAgreementWithDensityMap",&CalculateAgreementWithDensityMap,(arg("pos_list"),arg("density_map")));
+  def("CalculateAverageAgreementWithDensityMap",&CalculateAverageAgreementWithDensityMap,(arg("pos_list"),arg("density_map")));
   def("WrapEntityInPeriodicCell",&WrapEntityInPeriodicCell,(arg("Entity"),arg("cell_center"),arg("nasis_vec")));
 }
