@@ -1,6 +1,5 @@
 #include <ost/log.hh>
 #include <ost/mol/mol.hh>
-#include <ost/conop/amino_acids.hh>
 #include "local_dist_test.hh"
 #include <boost/concept_check.hpp>
 
@@ -235,6 +234,35 @@ std::pair<Real, Real> calc_overlap2(const seq::ConstSequenceHandle& ref_seq,
 
 }
 
+bool IsStandardResidue(String rn)
+{
+  String upper_rn=rn;
+  std::transform(rn.begin(),rn.end(),rn.begin(),toupper);
+  if (upper_rn == "ALA" ||    
+  upper_rn == "ARG" ||
+  upper_rn == "ASN" ||
+  upper_rn == "ASP" ||
+  upper_rn == "GLN" ||
+  upper_rn == "GLU" ||
+  upper_rn == "LYS" ||
+  upper_rn == "SER" ||
+  upper_rn == "CYS" ||      
+  upper_rn == "TYR" ||  
+  upper_rn == "TRP" || 
+  upper_rn == "THR" ||
+  upper_rn == "VAL" ||
+  upper_rn == "ILE" ||
+  upper_rn == "MET" ||
+  upper_rn == "LEU" ||  
+  upper_rn == "GLY" ||  
+  upper_rn == "PRO" ||  
+  upper_rn == "HIS" ||  
+  upper_rn == "PHE") {
+    return true;
+  }  
+  return false;
+}  
+
 bool UniqueAtomIdentifier::operator==(const UniqueAtomIdentifier& rhs) const
 {
   if (chain_ == rhs.GetChainName() && 
@@ -285,7 +313,7 @@ GlobalDistanceList CreateDistanceList(const EntityView& ref,Real max_dist)
  ResidueViewList ref_residues=ref.GetChainList()[0].GetResidueList();
  for (ResidueViewList::iterator i=ref_residues.begin(), e=ref_residues.end(); i!=e; ++i) {
    ResidueView rview = (*i);
-   if (ost::conop::ResidueNameToOneLetterCode(rview.GetName())!='X') {
+   if (IsStandardResidue(rview.GetName())) {
      ResidueDistanceList res_dist_list;
      AtomViewList ref_atoms=(*i).GetAtomList();
      AtomViewList within;

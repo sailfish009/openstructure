@@ -85,7 +85,7 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalDistanceLis
   {
     ResNum rnum = (*i)[0].GetFirstAtom().GetResNum();
     String rname = (*i)[0].GetFirstAtom().GetResidueName();
-    if (ost::conop::ResidueNameToOneLetterCode(rname)!='X') {
+    if (IsStandardResidue(rname)) {
       second++;
       if (vchain.FindResidue(rnum)) {
         first++;     

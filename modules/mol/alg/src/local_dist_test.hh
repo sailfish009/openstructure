@@ -85,6 +85,8 @@ Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const ost::seq::AlignmentHandle& aln,
 Real DLLEXPORT_OST_MOL_ALG LDTHA(EntityView& v, const GlobalDistanceList& global_dist_list);
 
 GlobalDistanceList CreateDistanceList(const EntityView& ref,Real max_dist);
+bool IsStandardResidue(String rn);
+
 
 
 }}}

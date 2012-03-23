@@ -141,5 +141,6 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   
   def("FillClashingDistances",&fill_clashing_distances_wrapper);
   def("FillStereoChemicalParams",&fill_stereochemical_params_wrapper);
+  def("IsStandardResidue",&mol::alg::IsStandardResidue);
   
 }
