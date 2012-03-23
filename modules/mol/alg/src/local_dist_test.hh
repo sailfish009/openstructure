@@ -36,7 +36,8 @@ public:
   ResNum GetResNum() const { return residue_; }  
   String GetResidueName() const { return residue_name_; }
   String GetAtomName() const { return atom_; }
-  
+  bool operator==(const UniqueAtomIdentifier& rhs) const;
+    
 private:
 
   String chain_;
@@ -50,7 +51,7 @@ class ReferenceDistance
   
 public:
   
-  ReferenceDistance(UniqueAtomIdentifier first_atom, UniqueAtomIdentifier second_atom, Real mind, Real maxd):
+  ReferenceDistance(const UniqueAtomIdentifier& first_atom, const UniqueAtomIdentifier& second_atom, Real mind, Real maxd):
        first_atom_(first_atom),second_atom_(second_atom),mind_(mind),maxd_(maxd) {}
   UniqueAtomIdentifier GetFirstAtom() const {return first_atom_;}
   UniqueAtomIdentifier GetSecondAtom() const {return second_atom_;}
@@ -58,6 +59,7 @@ public:
   Real GetMaxDistance() const {return maxd_ ;}
   bool IsValid() const; 
   void Print() const; 
+  bool operator==(const ReferenceDistance& rhs) const;
   
 private:
   
@@ -65,8 +67,6 @@ private:
   UniqueAtomIdentifier second_atom_;
   Real mind_;
   Real maxd_;
-  bool valid;
- 
 };
 
 typedef std::vector<ReferenceDistance> ResidueDistanceList;

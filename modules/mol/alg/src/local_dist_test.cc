@@ -235,6 +235,17 @@ std::pair<Real, Real> calc_overlap2(const seq::ConstSequenceHandle& ref_seq,
 
 }
 
+bool UniqueAtomIdentifier::operator==(const UniqueAtomIdentifier& rhs) const
+{
+  if (chain_ == rhs.GetChainName() && 
+      residue_ == rhs.GetResNum() &&
+      residue_name_ == rhs.GetResidueName() &&
+      atom_ == rhs.GetAtomName() ) {
+    return true;
+  }
+  return false;   
+}
+
 bool ReferenceDistance::IsValid() const 
 {
   if (mind_ == -1.0 and maxd_ == -1.0) {
@@ -253,6 +264,20 @@ void ReferenceDistance::Print() const
     std::cout << first_atom_.GetChainName() << " " << first_atom_.GetResNum() << " " << first_atom_.GetResidueName() << " Placeholder" << std::endl;
   }
 }
+
+bool ReferenceDistance::operator==(const ReferenceDistance& rhs) const
+{
+  if (first_atom_ == rhs.GetFirstAtom() && 
+      second_atom_ == rhs.GetSecondAtom() &&
+      mind_ == rhs.GetMinDistance() &&
+      maxd_ == rhs.GetMaxDistance() ) {
+    return true;
+  }
+  return false;
+}
+
+
+
 
 GlobalDistanceList CreateDistanceList(const EntityView& ref,Real max_dist)
 {

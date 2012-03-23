@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 
 #include <boost/python.hpp>
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <ost/config.hh>
 #include <ost/mol/alg/local_dist_test.hh>
 #include <ost/mol/alg/superpose_frames.hh>
@@ -86,6 +87,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("CheckStereoChemistry", csc_a, (arg("ent"), arg("bonds"), arg("angles"), arg("bond_tolerance"), arg("angle_tolerance"), arg("always_remove_bb")=false));
   def("CheckStereoChemistry", csc_b, (arg("ent"), arg("bonds"), arg("angles"), arg("bond_tolerance"), arg("angle_tolerance"), arg("always_remove_bb")=false));
   def("LDTHA",&mol::alg::LDTHA);
+  def("CreateDistanceList",&mol::alg::CreateDistanceList);
     
   def("SuperposeFrames", superpose_frames1, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
@@ -113,7 +115,30 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
     .def("PrintAllParameters",&mol::alg::StereoChemicalParams::PrintAllParameters)  
 
   ;
- 
+
+  class_<mol::alg::UniqueAtomIdentifier> ("UniqueAtomIdentifier" ,init <const String&, const mol::ResNum&, const String&, const String&>())
+    .def("GetChainName",&mol::alg::UniqueAtomIdentifier::GetChainName)
+    .def("GetResNum",&mol::alg::UniqueAtomIdentifier::GetResNum)
+    .def("GetResidueName",&mol::alg::UniqueAtomIdentifier::GetResidueName)
+    .def("GetAtomName",&mol::alg::UniqueAtomIdentifier::GetAtomName)
+  ;    
+   
+  
+  class_<mol::alg::ReferenceDistance> ("ReferenceDistance", init <const mol::alg::UniqueAtomIdentifier&,const mol::alg::UniqueAtomIdentifier&, Real, Real>())
+    .def("GetFirstAtom",&mol::alg::ReferenceDistance::GetFirstAtom)
+    .def("GetSecondAtom",&mol::alg::ReferenceDistance::GetSecondAtom)
+    .def("GetMinDistance",&mol::alg::ReferenceDistance::GetMinDistance)
+    .def("GetMaxDistance",&mol::alg::ReferenceDistance::GetMaxDistance)
+  ;
+  
+  class_<std::vector<mol::alg::ReferenceDistance> >("ResidueDistanceList")
+    .def(vector_indexing_suite<std::vector<mol::alg::ReferenceDistance > >())
+  ;
+  
+  class_<std::vector<mol::alg::ResidueDistanceList> >("GlobalDistanceList")
+    .def(vector_indexing_suite<std::vector<mol::alg::ResidueDistanceList > >())
+  ;
+  
   def("FillClashingDistances",&fill_clashing_distances_wrapper);
   def("FillStereoChemicalParams",&fill_stereochemical_params_wrapper);
   
