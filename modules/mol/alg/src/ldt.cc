@@ -27,6 +27,7 @@
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/conop/conop.hh>
+#include <ost/conop/amino_acids.hh>
 #include <ost/mol/iterator.hh>
 #include <ost/platform.hh>
 #include <ost/log.hh>
@@ -73,6 +74,25 @@ void usage()
   std::cerr << "   -a <value> tolerance in stddevs for angles" << std::endl;
   std::cerr << "   -m <value> clashing distance for unknwon atom types" << std::endl;
   std::cerr << "   -e         print version" << std::endl;
+}
+
+std::pair<int,int> compute_coverage (const EntityView& v,const GlobalDistanceList& glob_dist_list)
+{
+  int second=0;
+  int first=0;  
+  ChainView vchain=v.GetChainList()[0]; 
+  for (std::vector<ResidueDistanceList>::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
+  {
+    ResNum rnum = (*i)[0].GetFirstAtom().GetResNum();
+    String rname = (*i)[0].GetFirstAtom().GetResidueName();
+    if (ost::conop::ResidueNameToOneLetterCode(rname)!='X') {
+      second++;
+      if (vchain.FindResidue(rnum)) {
+        first++;     
+      }
+    }    
+  }
+  return std::make_pair<int,int>(first,second);  
 }
 
 int main (int argc, char **argv)
@@ -236,9 +256,11 @@ int main (int argc, char **argv)
     }
     
     GlobalDistanceList glob_dist_list = CreateDistanceList(ref_view,radius);
+    std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
     Real ldt=LDTHA(v, glob_dist_list);
     
     std::cout << "File: " << files[i] << std::endl; 
+    std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
     std::cout << "Global LDT score: " << ldt << std::endl;
     std::cout << "Local LDT Score:" << std::endl;
     std::cout << "Chain\tResName\tResNum\tScore" << std::endl;

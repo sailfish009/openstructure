@@ -1,5 +1,6 @@
 #include <ost/log.hh>
 #include <ost/mol/mol.hh>
+#include <ost/conop/amino_acids.hh>
 #include "local_dist_test.hh"
 #include <boost/concept_check.hpp>
 
@@ -259,8 +260,7 @@ GlobalDistanceList CreateDistanceList(const EntityView& ref,Real max_dist)
  ResidueViewList ref_residues=ref.GetChainList()[0].GetResidueList();
  for (ResidueViewList::iterator i=ref_residues.begin(), e=ref_residues.end(); i!=e; ++i) {
    ResidueView rview = (*i);
-//#   if (rview.IsPeptideLinking()) {
-   if (true) {
+   if (ost::conop::ResidueNameToOneLetterCode(rview.GetName())!='X') {
      ResidueDistanceList res_dist_list;
      AtomViewList ref_atoms=(*i).GetAtomList();
      AtomViewList within;
