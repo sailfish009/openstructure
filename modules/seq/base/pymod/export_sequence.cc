@@ -257,6 +257,8 @@ void const_seq_handle_def(O& bp_class)
     .add_property("last_non_gap", &C::GetLastNonGap)
     .def("GetAttachedView", &C::GetAttachedView)
     .def("GetGaplessString", &C::GetGaplessString)
+    .add_property("role", make_function(&C::GetRole, 
+                                        return_value_policy<copy_const_reference>()))
     .def("GetString", &C::GetString,
          return_value_policy<copy_const_reference>())
          .def("GetName", &C::GetName,
@@ -299,6 +301,9 @@ void export_sequence()
                   make_function(&SequenceHandle::GetString,
                                 return_value_policy<copy_const_reference>()),
                   &SequenceHandle::SetString)
+    .add_property("role", make_function(&SequenceHandle::GetRole, 
+                                        return_value_policy<copy_const_reference>()),
+                  &SequenceHandle::SetRole)
     .def("SetName", &SequenceHandle::SetName)
     .add_property("name",
                   make_function(&SequenceHandle::GetName,
@@ -312,7 +317,8 @@ void export_sequence()
 
   implicitly_convertible<SequenceHandle, ConstSequenceHandle>();
   
-  def("CreateSequence", &CreateSequence);
+  def("CreateSequence", &CreateSequence, 
+      (arg("name"), arg("seq"), arg("role")="UNKNOWN"));
   /*class_<SequenceHandleList>("SequenceHandleList", init<>())
     .def(vector_indexing_suite<SequenceHandleList>())
   ;*/
@@ -348,6 +354,9 @@ void export_sequence()
     .def("GetSequences", &AlignmentHandle::GetSequences)
     .def("GetCoverage", &AlignmentHandle::GetCoverage)
     .def("AttachView", attach_view_a)
+    .def("SetSequenceRole", &AlignmentHandle::SetSequenceRole)
+    .def("GetSequenceRole", &AlignmentHandle::GetSequenceRole, 
+         return_value_policy<copy_const_reference>())
     .def("AttachView", attach_view_b)
     .def("Cut", &AlignmentHandle::Cut)
     .def("MakeRegion", &AlignmentHandle::MakeRegion)

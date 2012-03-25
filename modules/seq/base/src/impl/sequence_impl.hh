@@ -50,7 +50,8 @@ class DLLEXPORT_OST_SEQ SequenceImpl : public GenericPropContainerImpl {
 public:
   /// \brief       Construct new sequence object from sequence_string.
   static SequenceImplPtr FromString(const String& seq_name,
-                                const String& sequence_string);
+                                    const String& sequence_string,
+                                    const String& role="UNKNOWN");
 
   /// \brief       Get residue index corresponding to given sequence position
   /// \param pos   zero-based index
@@ -105,7 +106,8 @@ public:
   ///
   /// If you want to check whether the sequence String does only contain
   /// valid characters use \c CreateSequence instead.
-  SequenceImpl(const String& seq_name, const String& sequence_string);
+  SequenceImpl(const String& seq_name, const String& sequence_string, 
+               const String& role);
 
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
@@ -148,7 +150,15 @@ public:
   {
     return seq_string_[index];
   }
+  const String& GetRole() const
+  {
+    return seq_role_;
+  }
   
+  void SetRole(const String& role)
+  {
+    seq_role_=role;
+  }
 private:
 
   /// \brief       Recalculates gap shifts from sequence.
@@ -169,6 +179,7 @@ private:
   } Shift;
   String              seq_name_;
   String              seq_string_;
+  String              seq_role_;
   std::list<Shift>    shifts_;
   bool                editing_;
   int                 offset_;

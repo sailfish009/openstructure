@@ -122,6 +122,8 @@ public:
   /// \sa SequenceHandle::AttachView(const mol::EntityView&, const String&)
   bool HasAttachedView() const;
   
+  const String& GetRole() const;
+  
   bool operator==(const ConstSequenceHandle& rhs) const;
   bool operator!=(const ConstSequenceHandle& rhs) const;  
   
@@ -286,6 +288,10 @@ public:
   /// \internal
   SequenceHandle(const impl::SequenceImplPtr& impl);  
   
+  const String& GetRole() const;
+  
+  void SetRole(const String& role) const;
+  
   impl::SequenceImplPtr& Impl() const;  
 
   GenericPropContainerImpl* GpImpl();
@@ -297,9 +303,9 @@ private:
 };
 
 SequenceHandle DLLEXPORT_OST_SEQ CreateSequence(const String& name, 
-                                                const String& seq);
-
-#if(OST_INFO_ENABLED)
+                                                const String& seq, 
+                                                const String& role="UNKNOWN");
+                                                
 /// \brief export sequence to info
 void DLLEXPORT_OST_SEQ SequenceToInfo(const ConstSequenceHandle& sequence,
                                       info::InfoGroup& group);

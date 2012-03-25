@@ -59,6 +59,25 @@ char ConstSequenceHandle::operator[](int index) const
 
 
 
+const String& ConstSequenceHandle::GetRole() const
+{
+  this->CheckValidity();
+  return Impl()->GetRole();
+}
+
+
+const String& SequenceHandle::GetRole() const
+{
+  this->CheckValidity();
+  return Impl()->GetRole();
+}
+  
+void SequenceHandle::SetRole(const String& role) const
+{
+  this->CheckValidity();
+  Impl()->SetRole(role);
+}
+
 
 void ConstSequenceHandle::CheckValidity() const
 {
@@ -78,9 +97,10 @@ impl::SequenceImplPtr& ConstSequenceHandle::Impl() const
 }
 
 
-SequenceHandle CreateSequence(const String& name, const String& seq)
+SequenceHandle CreateSequence(const String& name, const String& seq, 
+                              const String& role)
 {
-  return SequenceHandle(impl::SequenceImpl::FromString(name, seq));
+  return SequenceHandle(impl::SequenceImpl::FromString(name, seq, role));
 }
 
 
@@ -221,6 +241,7 @@ SequenceHandle SequenceFromInfo(info::InfoGroup& group)
   return SequenceHandle(impl::SequenceImplFromInfo(group));
 }
 #endif
+
 
 std::ostream& operator<<(std::ostream& os, const ConstSequenceHandle& sequence)
 {
