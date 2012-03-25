@@ -170,6 +170,10 @@ public:
   /// between 0 (no coverage) and 1 (full coverage)
   Real GetCoverage(int seq_index) const;
   
+  
+  const String& GetSequenceRole(int seq_index);
+  
+  void SetSequenceRole(int seq_index, const String& role);
 private:
   void CheckValidity() const;
   impl::SequenceListImplPtr impl_;
