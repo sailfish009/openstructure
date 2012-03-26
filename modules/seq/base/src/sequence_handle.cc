@@ -243,6 +243,7 @@ SequenceHandle SequenceFromInfo(info::InfoGroup& group)
 #endif
 
 
+
 std::ostream& operator<<(std::ostream& os, const ConstSequenceHandle& sequence)
 {
   if (sequence.IsValid()) {
