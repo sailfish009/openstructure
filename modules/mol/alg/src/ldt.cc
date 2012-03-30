@@ -80,6 +80,9 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalDistanceLis
 {
   int second=0;
   int first=0;  
+  if (v.GetResidueList().size()==0) {
+    return std::make_pair<int,int>(0,1);
+  }
   ChainView vchain=v.GetChainList()[0]; 
   for (std::vector<ResidueDistanceList>::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
   {
@@ -102,7 +105,7 @@ int main (int argc, char **argv)
   Real min_distance_tolerance = 0.0;
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
-  Real radius=8.0;
+  Real radius=12.0;
   
   IOProfile profile;
   profile.bond_feasibility_check=false;
@@ -193,6 +196,7 @@ int main (int argc, char **argv)
   }
   files.pop_back();
   EntityView ref_view=ref.Select(sel);
+  GlobalDistanceList glob_dist_list = CreateDistanceList(ref_view,radius);
   std::cout << "Verbosity level: " << verbosity_level << std::endl;
   if (structural_checks) {
     std::cout << "Stereo-chemical and steric clash checks: On " << std::endl;
@@ -209,7 +213,7 @@ int main (int argc, char **argv)
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
     LOG_INFO("CLASH INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Observed  Difference  Status");
     LOG_INFO("LDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
-  }    
+  }   
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);
     if (!model) {
@@ -219,6 +223,24 @@ int main (int argc, char **argv)
       continue;
     }    
     EntityView v=model.CreateFullView();
+    
+    // The code in this following block is only used to make CASP9 models load correctly and normally commented out
+    //EntityView model2=model.Select("aname!=CEN,NV,OT1,OT,CAY,CY,OXT,1OCT,NT,OT2,2OCT,OVL1,OC1,O1,OC2,O2,OVU1");
+    //EntityView v1=model2.Select("not (rname==GLY and aname==CB)");
+    //boost::filesystem::path pathstring(files[i]);
+    //String filestring=pathstring.filename();
+    //if (filestring.substr(5,5)=="TS257" || filestring.substr(5,5)=="TS458" ) {
+    //  for (AtomHandleIter ait=v1.GetHandle().AtomsBegin();ait!=v1.GetHandle().AtomsEnd();++ait){
+    //    AtomHandle aitv = *ait;
+    //    String atomname=aitv.GetName();            
+    //    String firstletter=atomname.substr(0,1);
+    //    aitv.SetElement(firstletter);
+    //  }
+    }  
+    std::cout << "File: " << files[i] << std::endl; 
+    std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
+    std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
+    
     if (structural_checks) {
       boost::filesystem::path loc(parameter_filename);
       boost::filesystem::ifstream infile(loc);
@@ -250,17 +272,19 @@ int main (int argc, char **argv)
         std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
         exit(-1);
       }  
-      
-      v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
-      v=alg::FilterClashes(v,nonbonded_table);
+      EntityView v2=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+      cov = compute_coverage(v2,glob_dist_list);
+      std::cout << "Coverage after stereo-chemical checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
+      v=alg::FilterClashes(v2,nonbonded_table);
+      cov = compute_coverage(v,glob_dist_list);
+      std::cout << "Coverage after clashing checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
     }
-    
-    GlobalDistanceList glob_dist_list = CreateDistanceList(ref_view,radius);
-    std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
+    if (cov.first==0) {
+      std::cout << "Global LDT score: 0.0" << std::endl;
+      return 0;
+    } 
     Real ldt=LDTHA(v, glob_dist_list);
     
-    std::cout << "File: " << files[i] << std::endl; 
-    std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
     std::cout << "Global LDT score: " << ldt << std::endl;
     std::cout << "Local LDT Score:" << std::endl;
     std::cout << "Chain\tResName\tResNum\tScore" << std::endl;
