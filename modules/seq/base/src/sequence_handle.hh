@@ -305,7 +305,7 @@ private:
 SequenceHandle DLLEXPORT_OST_SEQ CreateSequence(const String& name, 
                                                 const String& seq, 
                                                 const String& role="UNKNOWN");
-                                                
+#if(OST_INFO_ENABLED)                                                
 /// \brief export sequence to info
 void DLLEXPORT_OST_SEQ SequenceToInfo(const ConstSequenceHandle& sequence,
                                       info::InfoGroup& group);
