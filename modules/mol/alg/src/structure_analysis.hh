@@ -32,6 +32,7 @@
 
 namespace ost { namespace mol { namespace alg {
   geom::Vec3List DLLEXPORT_OST_MOL_ALG GetPosListFromView(const EntityView& view);
+  std::vector<Real> DLLEXPORT_OST_MOL_ALG CalculateAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map);
   Real DLLEXPORT_OST_MOL_ALG CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map);
   void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 basis_vec);
 }}}//ns

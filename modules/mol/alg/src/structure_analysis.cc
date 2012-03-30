@@ -38,15 +38,24 @@ geom::Vec3List GetPosListFromView(const EntityView& view){
   }
   return vl;
 }    
-  
-Real CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map){
-  Real sum,v;
-  sum=0;
+
+std::vector<Real> CalculateAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map){
   CheckHandleValidity(density_map);
+  std::vector<Real> v;
+  v.reserve(vl.size());
   for (geom::Vec3List::const_iterator v1=vl.begin(),e=vl.end(); v1!=e; ++v1) {
     img::Point p(density_map.CoordToIndex(*v1));
-    v=density_map.GetReal(p);
-    sum=sum+v;
+    v.push_back(density_map.GetReal(p));
+  }
+  return v;
+}
+  
+Real CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map){
+  CheckHandleValidity(density_map);
+  std::vector<Real> v=CalculateAgreementWithDensityMap(vl, density_map);
+  Real sum=0.0;
+  for (std::vector<Real>::const_iterator i=v.begin(),e=v.end(); i!=e; ++i) {
+    sum=sum+*i;
   }
   return sum/float(vl.size());
 }
