@@ -10,7 +10,6 @@ set(OST_MOL_ALG_PYMOD_MODULES
   "__init__.py"
   views.py
   superpose.py
-  structure_analysis.py
 )
 
 if (ENABLE_IMG)
