@@ -26,6 +26,8 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol;
 
+geom::Vec3 (CoordFrame::*GetCellSize)() = &CoordFrame::GetCellSize;
+geom::Vec3 (CoordFrame::*GetCellAngles)() = &CoordFrame::GetCellAngles;
 geom::Vec3 (CoordFrame::*get_atom_pos)(const AtomHandle& atom) = &CoordFrame::GetAtomPos;
 Real (CoordFrame::*get_dist_atom)(const AtomHandle& a1, const AtomHandle& a2) = &CoordFrame::GetDistanceBetwAtoms;
 Real (CoordFrame::*get_angle)(const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3) = &CoordFrame::GetAngle;
@@ -35,9 +37,12 @@ Real (CoordFrame::*get_dist_cm)(const mol::EntityView& sele1, const mol::EntityV
 Real (CoordFrame::*get_rmsd)(const mol::EntityView& Reference_View, const mol::EntityView& sele_View) = &CoordFrame::GetRMSD;
 Real (CoordFrame::*get_min_dist)(const mol::EntityView& view1, const mol::EntityView& view2) = &CoordFrame::GetMinDistance;
 Real (CoordFrame::*get_alpha)(const mol::EntityView& segment) = &CoordFrame::GetAlphaHelixContent;
+
 void export_CoordFrame()
 {
   class_<CoordFrame>("CoordFrame",no_init)
+    .def("GetCellSize",GetCellSize)
+    .def("GetCellAngles",GetCellAngles)
     .def("GetAtomPos", get_atom_pos)
     .def("GetDistanceBetwAtoms", get_dist_atom)
     .def("GetAngle", get_angle)
