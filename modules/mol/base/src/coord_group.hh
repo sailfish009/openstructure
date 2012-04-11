@@ -86,6 +86,7 @@ public:
   
   AtomHandleList GetAtomList() const;
   CoordFramePtr GetFrame(uint frame) const;
+  CoordFrame GetFrame2(uint frame);
   
   /// \brief return a filtered coord group, containing only the atoms in the 
   ///     view

@@ -152,7 +152,13 @@ CoordFramePtr CoordGroupHandle::GetFrame(uint frame) const
   this->CheckValidity();
   return source_->GetFrame(frame);
 }
-  
+
+CoordFrame CoordGroupHandle::GetFrame2(uint frame)
+{
+  this->CheckValidity();
+  return *(source_->GetFrame(frame));
+}
+
 AtomHandleList CoordGroupHandle::GetAtomList() const
 {
   this->CheckValidity();
