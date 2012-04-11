@@ -44,6 +44,7 @@ public:
   
   void AddFrame(const CoordFramePtr& frame);
   virtual void AddFrame(const std::vector<geom::Vec3>& coords);
+  virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& cell_size,const geom::Vec3& cell_angles);
   virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords);
   
 private:
