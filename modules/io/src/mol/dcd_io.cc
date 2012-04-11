@@ -141,14 +141,22 @@ size_t calc_frame_size(bool skip_flag, bool gap_flag, size_t num_atoms)
   return frame_size;
 }
 
+  
 bool read_frame(std::istream& istream, const DCDHeader& header, 
                 size_t frame_size, bool skip_flag, bool gap_flag, 
                 bool swap_flag, std::vector<float>& xlist,
                 std::vector<geom::Vec3>& frame,
-                uint frame_num)
+                uint frame_num,geom::Vec3& cell_size,geom::Vec3& cell_angles)
 {
   char dummy[4];
-  if(skip_flag) istream.seekg(14*4,std::ios_base::cur);
+  //if(skip_flag) istream.seekg(14*4,std::ios_base::cur);
+  if(skip_flag){
+    istream.read(dummy,sizeof(dummy));
+    istream.read(reinterpret_cast<char*>(&cell_size[0]),sizeof(float)*3);
+    istream.read(reinterpret_cast<char*>(&cell_angles[0]),sizeof(float)*3);
+    istream.read(dummy,sizeof(dummy));
+  }
+
   // read each frame
   if(!istream) {
     /* premature EOF */
@@ -201,7 +209,17 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   return true;
 }
 
-
+bool read_frame(std::istream& istream, const DCDHeader& header, 
+                size_t frame_size, bool skip_flag, bool gap_flag, 
+                bool swap_flag, std::vector<float>& xlist,
+                std::vector<geom::Vec3>& frame,uint frame_num)
+{
+  geom::Vec3 cell_size=geom::Vec3(),cell_angles=geom::Vec3();
+  return read_frame(istream,header, frame_size,skip_flag, gap_flag, 
+                    swap_flag, xlist,frame,frame_num, cell_size, cell_angles);
+}
+  
+  
 mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom list is already sorted!
                                const String& trj_fn,
                                unsigned int stride)
@@ -227,20 +245,23 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
   mol::CoordGroupHandle cg=CreateCoordGroup(alist);
   std::vector<geom::Vec3> clist(header.t_atom_count);
   std::vector<float> xlist(header.t_atom_count);
+  geom::Vec3 cell_size, cell_angles;
   size_t frame_size=calc_frame_size(skip_flag, gap_flag, xlist.size());
   int i=0;
   for(;i<header.num;i+=stride) {
     std::cout << i << " " << header.num << std::endl;
     if (!read_frame(istream, header, frame_size, skip_flag, gap_flag, 
-                    swap_flag, xlist, clist, i)) {
+                    swap_flag, xlist, clist, i,cell_size,cell_angles)) {
       break;
     }
-    cg.AddFrame(clist);
+    if(skip_flag) {
+      cg.AddFrame(clist,cell_size,cell_angles);
+    }
+    else cg.AddFrame(clist);
 
     // skip frames (defined by stride)
     if(stride>1) istream.seekg(frame_size*(stride-1),std::ios_base::cur);
   }
-
   istream.get();
   if(!istream.eof()) {
     LOG_VERBOSE("LoadCHARMMTraj: unexpected trailing file data, bytes read: " 
@@ -279,6 +300,7 @@ public:
   }
 
   virtual void AddFrame(const std::vector<geom::Vec3>& coords) {}
+  virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& box_size,const geom::Vec3& box_angles) {}
   virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords) {}
 private:
   
