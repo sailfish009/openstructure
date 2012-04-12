@@ -192,10 +192,12 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
 
 def SavePDB(models, filename, dialect=None,  pqr=False, profile='DEFAULT'):
   """
-  Save entity or list of entities to disk. If a list of entities is supplied the 
-  PDB file will be saved as a multi PDB file. Each of the entities is wrapped 
-  into a MODEL/ENDMDL pair.
-  
+  Save entity or list of entities to disk. If a list of entities is supplied
+  the PDB file will be saved as a multi PDB file. Each of the entities is
+  wrapped into a MODEL/ENDMDL pair.
+
+  If the atom number exceeds 99999, '*****' is used.
+
   :param models: The entity or list of entities (handles or views) to be saved
   :param filename: The filename
   :type  filename: string
