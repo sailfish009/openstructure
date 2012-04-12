@@ -602,16 +602,6 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
     }    
   }
 
-  std::pair<bool, int> a_num=line.substr(6, 5).ltrim().to_int();
-  if (!a_num.first) {
-    if (!(profile_.fault_tolerant)) {
-      throw IOException(str(format("invalid atom number on line %d") %line_num));      
-    }
-    if (!(charmm_style_)) {
-      LOG_WARNING("invalid atom number on line " << line_num);
-    }
-  }
-
   alt_loc=line[16];
   res_name=line.substr(17, charmm_style_ ? 4 : 3).trim();
   std::pair<bool, int> res_num=line.substr(22, 4).ltrim().to_int();;

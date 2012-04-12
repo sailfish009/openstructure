@@ -80,12 +80,7 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
   line( 0, 6)=record_name;
   // Avoid writing out atomnumbers larger than 5 digits
   if (atomnum > 99999) {
-    if (charmm_style) {
-      line( 6, 5)=fmt::LPadded("*****");
-    } else {
-      throw IOException("Atom number is too long for PDB output." 
-                        " At most 5 digits are allowed");
-    }
+    line( 6, 5)=fmt::LPadded("*****");
   } else {
     line( 6, 5)=fmt::LPaddedInt(atomnum);
   }
