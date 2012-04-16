@@ -16,41 +16,18 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_MOL_IN_MEM_COORD_SOURCE_HH
-#define OST_MOL_IN_MEM_COORD_SOURCE_HH
+#include <boost/python.hpp>
+using namespace boost::python;
 
-/*
-  Author: Marco Biasini
- */
+#include <ost/mol/alg/structure_analysis.hh>
 
-#include <ost/mol/coord_source.hh>
-#include <ost/mol/handle_type_fw.hh>
+using namespace ost;
+using namespace ost::mol::alg;
 
-namespace ost { namespace mol {
-
-
-class InMemCoordSource;
-
-typedef boost::shared_ptr<InMemCoordSource> InMemCoordSourcePtr;
-
-/// \brief in-memory coordinate source
-class DLLEXPORT_OST_MOL InMemCoordSource : public CoordSource {
-public:
-  InMemCoordSource(const AtomHandleList& atoms);
-  
-  virtual uint GetFrameCount();
-  
-  virtual CoordFramePtr GetFrame(uint frame_id) const;
-  
-  void AddFrame(const CoordFramePtr& frame);
-  virtual void AddFrame(const std::vector<geom::Vec3>& coords);
-  virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& cell_size,const geom::Vec3& cell_angles);
-  virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords);
-  
-private:
-  CoordFrameList  frames_;
-};
-
-}}
-
-#endif
+void export_StructureAnalysis()
+{
+  def("GetPosListFromView",&GetPosListFromView, (arg("view")));
+  def("CalculateAverageAgreementWithDensityMap",&CalculateAverageAgreementWithDensityMap,(arg("pos_list"),arg("density_map")));
+  def("CalculateAgreementWithDensityMap",&CalculateAgreementWithDensityMap,(arg("pos_list"),arg("density_map")));
+  def("WrapEntityInPeriodicCell",&WrapEntityInPeriodicCell,(arg("Entity"),arg("cell_center"),arg("nasis_vec")));
+}

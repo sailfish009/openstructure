@@ -16,41 +16,24 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_MOL_IN_MEM_COORD_SOURCE_HH
-#define OST_MOL_IN_MEM_COORD_SOURCE_HH
 
 /*
-  Author: Marco Biasini
+ * Niklaus Johner
  */
+#ifndef OST_STRUCTURE_ANALYSIS_HH
+#define OST_STRUCTURE_ANALYSIS_HH
 
-#include <ost/mol/coord_source.hh>
-#include <ost/mol/handle_type_fw.hh>
+#include <ost/mol/alg/module_config.hh>
 
-namespace ost { namespace mol {
+#include <ost/mol/entity_view.hh>
+#include <ost/mol/entity_handle.hh>
+#include <ost/img/map.hh>
 
 
-class InMemCoordSource;
-
-typedef boost::shared_ptr<InMemCoordSource> InMemCoordSourcePtr;
-
-/// \brief in-memory coordinate source
-class DLLEXPORT_OST_MOL InMemCoordSource : public CoordSource {
-public:
-  InMemCoordSource(const AtomHandleList& atoms);
-  
-  virtual uint GetFrameCount();
-  
-  virtual CoordFramePtr GetFrame(uint frame_id) const;
-  
-  void AddFrame(const CoordFramePtr& frame);
-  virtual void AddFrame(const std::vector<geom::Vec3>& coords);
-  virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& cell_size,const geom::Vec3& cell_angles);
-  virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords);
-  
-private:
-  CoordFrameList  frames_;
-};
-
-}}
-
+namespace ost { namespace mol { namespace alg {
+  geom::Vec3List DLLEXPORT_OST_MOL_ALG GetPosListFromView(const EntityView& view);
+  std::vector<Real> DLLEXPORT_OST_MOL_ALG CalculateAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map);
+  Real DLLEXPORT_OST_MOL_ALG CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map);
+  void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 basis_vec);
+}}}//ns
 #endif

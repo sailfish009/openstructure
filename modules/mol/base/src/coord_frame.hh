@@ -31,15 +31,28 @@
 namespace ost { namespace mol {
 
 class DLLEXPORT_OST_MOL CoordFrame : public geom::Vec3List{
+private:
+  geom::Vec3 periodic_cell_sizes_;
+  geom::Vec3 periodic_cell_angles_;
 public:
   typedef geom::Vec3List base_type;
-  CoordFrame() : base_type() {}
   
+  CoordFrame() : base_type() {}
   CoordFrame(size_t size, const geom::Vec3& value=geom::Vec3()) : base_type(size, value) {}
   CoordFrame(base_type::iterator b, base_type::iterator e): base_type(b, e) { }
   CoordFrame(const base_type& rhs) : base_type(rhs) { }
   CoordFrame(const std::vector<geom::Vec3>& rhs) : base_type(rhs) { }
+  CoordFrame(const std::vector<geom::Vec3>& rhs,const geom::Vec3 box_size, const geom::Vec3 box_angles) : base_type(rhs) {
+    this->periodic_cell_sizes_=box_size;
+    this->periodic_cell_angles_=box_angles;
+  }
   
+  geom::Vec3 GetCellSize() {
+    return this->periodic_cell_sizes_;
+  }
+  geom::Vec3 GetCellAngles() {
+    return this->periodic_cell_angles_;
+  }
   geom::Vec3 GetAtomPos(const AtomHandle& atom);
   geom::Vec3 GetAtomPos(int atom_index);
   Real GetDistanceBetwAtoms(const AtomHandle& a1, const AtomHandle& a2);

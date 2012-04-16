@@ -3,6 +3,7 @@ set(OST_MOL_ALG_PYMOD_SOURCES
   export_svd_superpose.cc
   export_clash.cc
   export_trajectory_analysis.cc
+  export_structure_analysis.cc
 )
 
 set(OST_MOL_ALG_PYMOD_MODULES

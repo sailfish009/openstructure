@@ -28,6 +28,7 @@ using namespace ost;
 
 void export_svdSuperPose();
 void export_TrajectoryAnalysis();
+void export_StructureAnalysis();
 void export_Clash();
 #if OST_IMG_ENABLED
 void export_entity_to_density();
@@ -76,6 +77,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
 {
   export_svdSuperPose();
   export_TrajectoryAnalysis();
+  export_StructureAnalysis();
   #if OST_IMG_ENABLED
   export_entity_to_density();
   #endif

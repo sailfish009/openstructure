@@ -103,6 +103,16 @@ CoordGroupHandle::operator bool() const
   }
 }
 
+  void CoordGroupHandle::AddFrame(const geom::Vec3List& clist, const geom::Vec3& cell_size, const geom::Vec3& cell_angles)
+{
+  this->CheckValidity();
+  if (source_->IsMutable()) {
+    source_->AddFrame(clist,cell_size,cell_angles);    
+  } else {
+    throw IntegrityError("Can't add frame to immutable CoordGroup");
+  }
+}
+
 void CoordGroupHandle::AddFrames(const CoordGroupHandle& cg)
 {
   this->CheckValidity();
@@ -141,6 +151,12 @@ CoordFramePtr CoordGroupHandle::GetFrame(uint frame) const
 {
   this->CheckValidity();
   return source_->GetFrame(frame);
+}
+
+CoordFrame CoordGroupHandle::GetFrame2(uint frame)
+{
+  this->CheckValidity();
+  return *(source_->GetFrame(frame));
 }
 
 AtomHandleList CoordGroupHandle::GetAtomList() const
