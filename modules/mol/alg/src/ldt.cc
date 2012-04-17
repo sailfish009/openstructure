@@ -106,8 +106,8 @@ int main (int argc, char **argv)
   Real min_distance_tolerance = 0.0;
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
-  Real radius=12.0;
-
+  Real radius=8.0;
+  
   IOProfile profile;
   profile.bond_feasibility_check=false;
   // parse options
@@ -231,19 +231,19 @@ int main (int argc, char **argv)
     EntityView v=model.CreateFullView();
 
     // The code in this following block is only used to make CASP9 models load correctly and normally commented out
-    //EntityView model2=model.Select("aname!=CEN,NV,OT1,OT,CAY,CY,OXT,1OCT,NT,OT2,2OCT,OVL1,OC1,O1,OC2,O2,OVU1");
-    //EntityView v1=model2.Select("not (rname==GLY and aname==CB)");
-    //boost::filesystem::path pathstring(files[i]);
-    //String filestring=pathstring.filename();
-    //if (filestring.substr(5,5)=="TS257" || filestring.substr(5,5)=="TS458" ) {
-    //  for (AtomHandleIter ait=v1.GetHandle().AtomsBegin();ait!=v1.GetHandle().AtomsEnd();++ait){
-    //    AtomHandle aitv = *ait;
-    //    String atomname=aitv.GetName();
-    //    String firstletter=atomname.substr(0,1);
-    //    aitv.SetElement(firstletter);
-    //  }
-    //}
-    std::cout << "File: " << files[i] << std::endl;
+    EntityView model2=model.Select("aname!=CEN,NV,OT1,OT,CAY,CY,OXT,1OCT,NT,OT2,2OCT,OVL1,OC1,O1,OC2,O2,OVU1");
+    EntityView v1=model2.Select("not (rname==GLY and aname==CB)");
+    boost::filesystem::path pathstring(files[i]);
+    String filestring=pathstring.filename();
+    if (filestring.substr(5,5)=="TS257" || filestring.substr(5,5)=="TS458" ) {
+      for (AtomHandleIter ait=v1.GetHandle().AtomsBegin();ait!=v1.GetHandle().AtomsEnd();++ait){
+        AtomHandle aitv = *ait;
+        String atomname=aitv.GetName();            
+        String firstletter=atomname.substr(0,1);
+        aitv.SetElement(firstletter);
+      }
+    }  
+    std::cout << "File: " << files[i] << std::endl; 
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
     std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
 
@@ -277,11 +277,11 @@ int main (int argc, char **argv)
       if (nonbonded_table.IsEmpty()) {
         std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
         exit(-1);
-      }
-      EntityView v2=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
-      cov = compute_coverage(v2,glob_dist_list);
+      }  
+      EntityView v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+      cov = compute_coverage(v,glob_dist_list);
       std::cout << "Coverage after stereo-chemical checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
-      v=alg::FilterClashes(v2,nonbonded_table);
+      v=alg::FilterClashes(v,nonbonded_table);
       cov = compute_coverage(v,glob_dist_list);
       std::cout << "Coverage after clashing checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
     }
