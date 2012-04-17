@@ -52,7 +52,7 @@ EntityHandle load(const String& file, const IOProfile& profile)
       conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
       return ent;
     }
-    std::cerr << "ERROR: '" << file << "' does not contain any ATOM records. " 
+    std::cerr << "ERROR: '" << file << "' does not contain any ATOM records. "
               << "Are you sure this is a PDB file?" << std::endl;
     return EntityHandle();
   } catch (io::IOException& e) {
@@ -73,17 +73,18 @@ void usage()
   std::cerr << "   -b <value> tolerance in stddevs for bonds" << std::endl;
   std::cerr << "   -a <value> tolerance in stddevs for angles" << std::endl;
   std::cerr << "   -m <value> clashing distance for unknwon atom types" << std::endl;
+  std::cerr << "   -r <value> distance inclusion radius" << std::endl;
   std::cerr << "   -e         print version" << std::endl;
 }
 
 std::pair<int,int> compute_coverage (const EntityView& v,const GlobalDistanceList& glob_dist_list)
 {
   int second=0;
-  int first=0;  
+  int first=0;
   if (v.GetResidueList().size()==0) {
     return std::make_pair<int,int>(0,1);
   }
-  ChainView vchain=v.GetChainList()[0]; 
+  ChainView vchain=v.GetChainList()[0];
   for (std::vector<ResidueDistanceList>::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
   {
     ResNum rnum = (*i)[0].GetFirstAtom().GetResNum();
@@ -91,22 +92,22 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalDistanceLis
     if (IsStandardResidue(rname)) {
       second++;
       if (vchain.FindResidue(rnum)) {
-        first++;     
+        first++;
       }
-    }    
+    }
   }
-  return std::make_pair<int,int>(first,second);  
+  return std::make_pair<int,int>(first,second);
 }
 
 int main (int argc, char **argv)
 {
-  String version = "Beta - 2012-01-17"; 
+  String version = "Beta - 2012-01-17";
   Real min_default_distance = 1.5;
   Real min_distance_tolerance = 0.0;
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
   Real radius=12.0;
-  
+
   IOProfile profile;
   profile.bond_feasibility_check=false;
   // parse options
@@ -120,11 +121,13 @@ int main (int argc, char **argv)
     ("structural-checks,f", "perform stereo-chemical and clash checks")
     ("version,e", "version")
     ("parameter-file,p", po::value<String>(), "stereo-chemical parameter file")
-    ("verbosity,v", po::value<int>(), "verbosity level")    
-    ("bond_tolerance,b", po::value<Real>(), "tolerance in stddev for bonds")    
-    ("angle_tolerance,a", po::value<Real>(), "tolerance in stddev for angles") 
-    ("default_clash,m", po::value<Real>(), "clashing distance for unknown atom types")     
-    ("files", po::value< std::vector<String> >(), "input file(s)")    
+    ("verbosity,v", po::value<int>(), "verbosity level")
+    ("bond_tolerance,b", po::value<Real>(), "tolerance in stddev for bonds")
+    ("angle_tolerance,a", po::value<Real>(), "tolerance in stddev for angles")
+    ("default_clash,m", po::value<Real>(), "clashing distance for unknown atom types")
+    ("inclusion_radius,r", po::value<Real>(), "distance inclusion radius")
+    ("files", po::value< std::vector<String> >(), "input file(s)")
+	("reference",po::value<String>(),"reference(s)")
   ;
   po::positional_options_description p;
   p.add("files", -1);
@@ -136,7 +139,7 @@ int main (int argc, char **argv)
   if (vm.count("version")) {
     std::cout << "Version: " << version << std::endl;
     exit(0);
-  } 
+  }
   std::vector<String> files;
   if (vm.count("files")) {
     files=vm["files"].as<std::vector<String> >();
@@ -153,7 +156,7 @@ int main (int argc, char **argv)
   if (vm.count("tolerant")) {
     profile.fault_tolerant=true;
   }
-  String parameter_filename;  
+  String parameter_filename;
   if (vm.count("parameter-file")) {
     parameter_filename=vm["parameter-file"].as<String>();
   } else if (structural_checks==true) {
@@ -173,12 +176,12 @@ int main (int argc, char **argv)
       std::cout << "Verbosity level " << verbosity_level << " is not available" << std::endl;
       exit(-1);
     }
-  }  
+  }
 
   if (verbosity_level>0) {
     LOG_INFO("LDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
   }
-  
+
   if (vm.count("bond_tolerance")) {
     bond_tolerance=vm["bond_tolerance"].as<Real>();
   }
@@ -188,7 +191,9 @@ int main (int argc, char **argv)
   if (vm.count("default_clash")) {
     min_default_distance=vm["default_clash"].as<Real>();
   }
-
+  if (vm.count("inclusion_radius")) {
+    radius=vm["inclusion_radius"].as<Real>();
+  }
   String ref_file=files.back();
   EntityHandle ref=load(ref_file, profile);
   if (!ref) {
@@ -203,27 +208,28 @@ int main (int argc, char **argv)
   } else {
     std::cout << "Stereo-chemical and steric clash checks: Off " << std::endl;
   }
+  std::cout << "Inclusion Radius: " << radius << std::endl;
   if (structural_checks) {
     std::cout << "Parameter filename: " << parameter_filename << std::endl;
     std::cout << "Tolerance in stddevs for bonds: " << bond_tolerance << std::endl;
     std::cout << "Tolerance in stddevs for angles: " << angle_tolerance << std::endl;
     std::cout << "Clashing distance for unknown atom types: " << min_default_distance << std::endl;
-    LOG_INFO("Log entries format:"); 
+    LOG_INFO("Log entries format:");
     LOG_INFO("BOND INFO FORMAT:  Chain  Residue  ResNum  Bond  Min  Max  Observed  Z-score  Status");
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
     LOG_INFO("CLASH INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Observed  Difference  Status");
     LOG_INFO("LDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
-  }   
+  }
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);
     if (!model) {
       if (!profile.fault_tolerant) {
-        exit(-1);   
+        exit(-1);
       }
       continue;
-    }    
+    }
     EntityView v=model.CreateFullView();
-    
+
     // The code in this following block is only used to make CASP9 models load correctly and normally commented out
     //EntityView model2=model.Select("aname!=CEN,NV,OT1,OT,CAY,CY,OXT,1OCT,NT,OT2,2OCT,OVL1,OC1,O1,OC2,O2,OVU1");
     //EntityView v1=model2.Select("not (rname==GLY and aname==CB)");
@@ -232,15 +238,15 @@ int main (int argc, char **argv)
     //if (filestring.substr(5,5)=="TS257" || filestring.substr(5,5)=="TS458" ) {
     //  for (AtomHandleIter ait=v1.GetHandle().AtomsBegin();ait!=v1.GetHandle().AtomsEnd();++ait){
     //    AtomHandle aitv = *ait;
-    //    String atomname=aitv.GetName();            
+    //    String atomname=aitv.GetName();
     //    String firstletter=atomname.substr(0,1);
     //    aitv.SetElement(firstletter);
     //  }
-    }  
-    std::cout << "File: " << files[i] << std::endl; 
+    //}
+    std::cout << "File: " << files[i] << std::endl;
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
     std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
-    
+
     if (structural_checks) {
       boost::filesystem::path loc(parameter_filename);
       boost::filesystem::ifstream infile(loc);
@@ -255,23 +261,23 @@ int main (int argc, char **argv)
         std::stringstream line_stream(line);
         stereo_chemical_props.push_back(line);
       }
-      StereoChemicalParams bond_table = FillStereoChemicalParams("Bond",stereo_chemical_props); 
+      StereoChemicalParams bond_table = FillStereoChemicalParams("Bond",stereo_chemical_props);
       if (bond_table.IsEmpty()) {
         std::cout << "Error reading the Bond section of the stereo-chemical parameter file." << std::endl;
         exit(-1);
-      } 
-      StereoChemicalParams angle_table = FillStereoChemicalParams("Angle",stereo_chemical_props); 
+      }
+      StereoChemicalParams angle_table = FillStereoChemicalParams("Angle",stereo_chemical_props);
       if (angle_table.IsEmpty()) {
         std::cout << "Error reading the Angles section of the stereo-chemical parameter file." << std::endl;
         exit(-1);
-      }    
-      
-      ClashingDistances nonbonded_table = FillClashingDistances(stereo_chemical_props,min_default_distance,min_distance_tolerance);  
- 
-      if (nonbonded_table.IsEmpty()) { 
+      }
+
+      ClashingDistances nonbonded_table = FillClashingDistances(stereo_chemical_props,min_default_distance,min_distance_tolerance);
+
+      if (nonbonded_table.IsEmpty()) {
         std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
         exit(-1);
-      }  
+      }
       EntityView v2=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
       cov = compute_coverage(v2,glob_dist_list);
       std::cout << "Coverage after stereo-chemical checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
@@ -282,9 +288,9 @@ int main (int argc, char **argv)
     if (cov.first==0) {
       std::cout << "Global LDT score: 0.0" << std::endl;
       return 0;
-    } 
+    }
     Real ldt=LDTHA(v, glob_dist_list);
-    
+
     std::cout << "Global LDT score: " << ldt << std::endl;
     std::cout << "Local LDT Score:" << std::endl;
     std::cout << "Chain\tResName\tResNum\tScore" << std::endl;
@@ -295,12 +301,12 @@ int main (int argc, char **argv)
       if (ritv.HasProp("localldt0.5")) {
         for (int n=0; n<4; ++n) {
           ldt_local_sum+=ritv.GetFloatProp(labels[n]);
-        }     
+        }
         ldt_local_sum/=4.0;
         std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << ldt_local_sum << std::endl;
-      }  
-    }  
+      }
+    }
     std::cout << std::endl;
   }
   return 0;
-}      
+}
