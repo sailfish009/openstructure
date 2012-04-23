@@ -46,7 +46,7 @@ namespace ost { namespace img { namespace gui {
 DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   QWidget(parent),
   DataObserver(data),
-  popupmenu_(new QMenu),
+  popupmenu_(new QMenu(this)),
   data_min_(0.0),
   data_max_(0.0),
   data_min_pos_(),

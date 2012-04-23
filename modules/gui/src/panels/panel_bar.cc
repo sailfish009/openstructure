@@ -35,17 +35,17 @@ namespace ost {
 namespace gui {
 
 PanelBar::PanelBar(QWidget* parent) :
-  Widget(NULL, parent)
+  Widget(NULL, parent),
+  layout_(new QStackedLayout(this)),
+  view_modes_( new QActionGroup(this)),
+  view_mode_menu_(new QMenu("View Mode",this)),
+  current_view_mode_(NULL),
+  widget_states_(),
+  drop_box_(new DropBox(this)),
+  show_action_(new QAction(this))
 {
-  widget_states_ = QList<WidgetState> ();
-
-  view_modes_ = new QActionGroup(this);
-  view_mode_menu_ = new QMenu("View Mode");
   connect(view_mode_menu_,SIGNAL(triggered(QAction*)),this,SLOT(ChangeViewMode(QAction*)));
 
-  current_view_mode_ = NULL;
-
-  layout_ = new QStackedLayout(this);
   layout_->setMargin(0);
   layout_->setSpacing(0);
   this->setLayout(layout_);
@@ -53,16 +53,13 @@ PanelBar::PanelBar(QWidget* parent) :
 
   this->setVisible(false);
 
-  show_action_ = new QAction(this);
   show_action_->setText("Show");
   show_action_->setCheckable(true);
   show_action_->setChecked(false);
   show_action_->setEnabled(false);
   connect(show_action_, SIGNAL(triggered(bool)), this,
-            SLOT(ShowActionTrigger()));
+          SLOT(ShowActionTrigger()));
   this->addAction(show_action_);
-
-  drop_box_ = new DropBox();
 }
 
 void PanelBar::AddWidget(Widget* widget, bool is_hidden)
