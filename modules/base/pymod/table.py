@@ -1613,6 +1613,74 @@ class Table(object):
     except ImportError:
       LogError("Function needs matplotlib, but I could not import it.")
       raise
+    
+  def ComputeMCC(self, score_col, class_col, score_dir='-',
+                 class_dir='-', score_cutoff=2.0, class_cutoff=2.0):
+    '''
+    Compute Matthews correlation coefficient (MCC) for one column (*score_col*)
+    with the points classified into true positives, false positives, true
+    negatives and false negatives according to a specified classification
+    column (*class_col*).
+    
+    The datapoints in *score_col* and *class_col* are classified into
+    positive and negative points. This can be done in two ways:
+    
+     - by using 'bool' columns which contains True for positives and False
+       for negatives
+       
+     - by using 'float' or 'int' columns and specifying a cutoff value and the
+       columns direction. This will generate the classification on the fly
+       
+       * if *class_dir*/*score_dir*=='-': values in the classification column 
+                                    that are less than or equal to 
+                                    *class_cutoff*/*score_cutoff* will be
+                                    counted as positives
+       * if *class_dir*/*score_dir*=='+': values in the classification column 
+                                    that are larger than or equal to
+                                    *class_cutoff*/*score_cutoff* will be
+                                    counted as positives
+                                    
+    The two possibilities can be used together, i.e. 'bool' type for one column
+    and 'float'/'int' type and cutoff/direction for the other column.
+    '''
+    ALLOWED_DIR = ['+','-']
+
+    score_idx = self.GetColIndex(score_col)
+    score_type = self.col_types[score_idx]
+    if score_type!='int' and score_type!='float' and score_type!='bool':
+      raise TypeError("Score column must be numeric or bool type")
+
+    class_idx = self.GetColIndex(class_col)
+    class_type = self.col_types[class_idx]
+    if class_type!='int' and class_type!='float' and class_type!='bool':
+      raise TypeError("Classifier column must be numeric or bool type")
+
+    if (score_dir not in ALLOWED_DIR) or (class_dir not in ALLOWED_DIR):
+      raise ValueError("Direction must be one of %s"%str(ALLOWED_DIR))
+     
+    tp = 0
+    fp = 0
+    fn = 0
+    tn = 0
+
+    for i,row in enumerate(self.rows):
+      class_val = row[class_idx]
+      score_val = row[score_idx]
+      if class_val!=None:
+        if (class_type=='bool' and class_val==True) or (class_type!='bool' and ((class_dir=='-' and class_val<=class_cutoff) or (class_dir=='+' and class_val>=class_cutoff))):
+          if (score_type=='bool' and score_val==True) or (score_type!='bool' and ((score_dir=='-' and score_val<=score_cutoff) or (score_dir=='+' and score_val>=score_cutoff))):
+            tp += 1
+          else:
+            fn += 1
+        else:
+          if (score_type=='bool' and score_val==False) or (score_type!='bool' and ((score_dir=='-' and score_val>score_cutoff) or (score_dir=='+' and score_val<score_cutoff))):
+            tn += 1
+          else:
+            fp += 1
+
+    mcc = ((tp*tn)-(fp*fn)) / math.sqrt((tp+fn)*(tp+fp)*(tn+fn)*(tn+fp))
+    return mcc
+    
 
   def IsEmpty(self, col_name=None, ignore_nan=True):
     '''

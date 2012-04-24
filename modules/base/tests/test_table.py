@@ -1142,6 +1142,34 @@ class TestTable(unittest.TestCase):
     auc = tab.ComputeROCAUC(score_col='score', score_dir='+', class_col='classific')
     self.assertAlmostEquals(auc, auc_ref)
 
+  def testCalcMCC(self):
+    tab = Table(['score', 'rmsd', 'class_rmsd', 'class_score'], 'ffbb',
+                score=      [2.64, 1.11, 2.17, 0.45,0.15,0.85, 1.13, 2.90, 0.50, 1.03, 1.46, 2.83, 1.15, 2.04, 0.67, 1.27, 2.22, 1.90, 0.68, 0.36,1.04, 2.46, 0.91,0.60],
+                rmsd=[9.58,1.61,7.48,0.29,1.68,3.52,3.34,8.17,4.31,2.85,6.28,8.78,0.41,6.29,4.89,7.30,4.26,3.51,3.38,0.04,2.21,0.24,7.58,8.40],
+                class_rmsd= [False,True, False,True,True,False,False,False,False,False,False,False,True, False,False,False,False,False,False,True,False,True,False,False],
+                class_score=[False,False,False,True,True,True, False,False,True, False,False,False,False,False,True, False,False,False,True, True,False,False,True,True])
+    
+    mcc = tab.ComputeMCC(score_col='score', score_dir='-', class_col='rmsd', class_dir='-', score_cutoff=1.0, class_cutoff=2.0)
+    self.assertAlmostEquals(mcc, 0.1490711984)
+    mcc = tab.ComputeMCC(score_col='class_score', class_col='class_rmsd')
+    self.assertAlmostEquals(mcc, 0.1490711984)
+    mcc = tab.ComputeMCC(score_col='score', score_dir='+', class_col='rmsd', class_dir='+', score_cutoff=1.0, class_cutoff=2.0)
+    self.assertAlmostEquals(mcc, 0.1490711984)
+    mcc = tab.ComputeMCC(score_col='score', score_dir='-', class_col='rmsd', class_dir='+', score_cutoff=1.0, class_cutoff=2.0)
+    self.assertAlmostEquals(mcc, -0.1490711984)
+    mcc = tab.ComputeMCC(score_col='score', score_dir='+', class_col='rmsd', class_dir='-', score_cutoff=1.0, class_cutoff=2.0)
+    self.assertAlmostEquals(mcc, -0.1490711984)
+
+  def testCalcMCCPreclassified(self):
+    tab = Table(['reference', 'prediction1', 'prediction2'],'bbb',
+                reference=  [False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True,  False, False, True,  False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, True, False, False, True,  False, False, True,  False, False, False, False, False, False, False, False, False, False, True, False, False, True, False, False, False, False, False, False, False, False],
+                prediction1=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True,  False, True, False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, False, True, False, True,  False, False, False, False, False, False],
+                prediction2=[False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True,  False, False, True,  False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, True, False, False, True,  False, True,  True,  False, False, False, False, False, False, False, False, False, False, True, False, False, True, False, False, False, True,  False, False, False, False])
+    mcc = tab.ComputeMCC(score_col='prediction1', class_col='reference')
+    self.assertAlmostEquals(mcc, 0.538389277)
+    mcc = tab.ComputeMCC(score_col='prediction2', class_col='reference')
+    self.assertAlmostEquals(mcc, 0.882089673321)
+
   def testTableAsNumpyMatrix(self):
 
     '''
