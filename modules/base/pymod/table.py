@@ -1678,7 +1678,21 @@ class Table(object):
           else:
             fp += 1
 
-    mcc = ((tp*tn)-(fp*fn)) / math.sqrt((tp+fn)*(tp+fp)*(tn+fn)*(tn+fp))
+    mcc = None
+    msg = None
+    if (tp+fn)==0:
+      msg = 'factor (tp + fn) is zero'
+    elif (tp+fp)==0:
+      msg = 'factor (tp + fp) is zero'
+    elif (tn+fn)==0:
+      msg = 'factor (tn + fn) is zero'
+    elif (tn+fp)==0:
+      msg = 'factor (tn + fp) is zero'
+    
+    if msg:
+      LogWarning("Could not compute MCC: MCC is not defined since %s"%msg)
+    else:
+      mcc = ((tp*tn)-(fp*fn)) / math.sqrt((tp+fn)*(tp+fp)*(tn+fn)*(tn+fp))
     return mcc
     
 
