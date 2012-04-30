@@ -54,6 +54,7 @@ class DLLEXPORT_OST_GUI PanelBar : public Widget {
   Q_OBJECT
 public:
   PanelBar(QWidget* parent);
+  virtual ~PanelBar();
 
   virtual bool Save(const QString& prefix);
   virtual bool Restore(const QString& prefix);
