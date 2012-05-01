@@ -41,7 +41,7 @@ PanelBar::PanelBar(QWidget* parent) :
   view_mode_menu_(new QMenu("View Mode",this)),
   current_view_mode_(NULL),
   widget_states_(),
-  drop_box_(new DropBox(this)),
+  drop_box_(new DropBox), // DropBox having no parent is done on purpose (otherwise it will not hide properly)
   show_action_(new QAction(this))
 {
   connect(view_mode_menu_,SIGNAL(triggered(QAction*)),this,SLOT(ChangeViewMode(QAction*)));
@@ -60,6 +60,14 @@ PanelBar::PanelBar(QWidget* parent) :
   connect(show_action_, SIGNAL(triggered(bool)), this,
           SLOT(ShowActionTrigger()));
   this->addAction(show_action_);
+<<<<<<< HEAD
+=======
+}
+
+PanelBar::~PanelBar()
+{
+  delete drop_box_; // manually destroy drop_box_ widget, as it has no parent.
+>>>>>>> develop
 }
 
 void PanelBar::AddWidget(Widget* widget, bool is_hidden)
