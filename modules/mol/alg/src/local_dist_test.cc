@@ -59,9 +59,9 @@ std::pair<bool,Real> within_tolerance(Real mdl_dist, const ReferenceDistance& re
   Real difference = 0;
   if (mdl_dist>=min && mdl_dist <=max) {
     within_tol=true;
-  } else if (mdl_dist < min && abs(min-mdl_dist) < tol) {
+  } else if (mdl_dist < min && std::abs(min-mdl_dist) < tol) {
     within_tol = true;
-  } else if (mdl_dist > max && abs(mdl_dist-max) < tol) {
+  } else if (mdl_dist > max && std::abs(mdl_dist-max) < tol) {
     within_tol = true;
   }
   if (within_tol == false) {

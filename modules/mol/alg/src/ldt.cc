@@ -234,7 +234,7 @@ int main (int argc, char **argv)
     EntityView model2=model.Select("aname!=CEN,NV,OT1,OT,CAY,CY,OXT,1OCT,NT,OT2,2OCT,OVL1,OC1,O1,OC2,O2,OVU1");
     EntityView v1=model2.Select("not (rname==GLY and aname==CB)");
     boost::filesystem::path pathstring(files[i]);
-    String filestring=pathstring.filename();
+    String filestring=pathstring.filename().string();
     if (filestring.substr(5,5)=="TS257" || filestring.substr(5,5)=="TS458" ) {
       for (AtomHandleIter ait=v1.GetHandle().AtomsBegin();ait!=v1.GetHandle().AtomsEnd();++ait){
         AtomHandle aitv = *ait;
