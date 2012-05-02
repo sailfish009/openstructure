@@ -60,14 +60,11 @@ PanelBar::PanelBar(QWidget* parent) :
   connect(show_action_, SIGNAL(triggered(bool)), this,
           SLOT(ShowActionTrigger()));
   this->addAction(show_action_);
-<<<<<<< HEAD
-=======
 }
 
 PanelBar::~PanelBar()
 {
   delete drop_box_; // manually destroy drop_box_ widget, as it has no parent.
->>>>>>> develop
 }
 
 void PanelBar::AddWidget(Widget* widget, bool is_hidden)
