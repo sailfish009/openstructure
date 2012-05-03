@@ -87,6 +87,8 @@ public:
   const geom::Vec3& GetOriginalPos() const;
   /// \brief get alternative atom position
   geom::Vec3 GetAltPos(const String& alt_group) const;
+  Real GetAltBFactor(const String& alt_group) const;
+  Real GetAltOcc(const String& alt_group) const;
   
   std::vector<String> GetAltGroupNames() const;
 

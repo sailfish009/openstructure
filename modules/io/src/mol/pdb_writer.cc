@@ -172,8 +172,8 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
        line(54, 6)=fmt::LPaddedFloat(atom.GetCharge(), 2);
        line(60, 6)=fmt::LPaddedFloat(atom.GetRadius(), 2);
       } else {
-       line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
-       Real bfac=atom.GetBFactor();
+       line(54, 6)=fmt::LPaddedFloat(atom.GetAltOcc(*i), 2);
+       Real bfac=atom.GetAltBFactor(*i);
        if (bfac>999.99) {
          line(60, 6)=fmt::LPaddedFloat(999.99, 2);
        } else {

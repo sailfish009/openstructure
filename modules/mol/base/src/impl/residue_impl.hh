@@ -58,7 +58,8 @@ public:
   ///     no bonds
   AtomImplPtr InsertAtom(const AtomImplPtr& atom);
   AtomImplPtr InsertAltAtom(const String& name, const String& alt_group,
-                           const geom::Vec3& pos, const String& ele);
+                            const geom::Vec3& pos, const String& ele,
+                            Real occ, Real b_factor);
   const ResNum& GetNumber() const {return num_;}
   void SetNumber(const ResNum& num) {num_=num;}
 
@@ -167,8 +168,11 @@ public:
 
   void AddAltAtomPos(const String& group,
                      const AtomImplPtr& atom,
-                     const geom::Vec3& position);
+                     const geom::Vec3& position,
+                     Real occ, Real b_factor);
   geom::Vec3 GetAltAtomPos(const AtomImplPtr& atom, const String& group) const;
+  Real GetAltAtomOcc(const AtomImplPtr& atom, const String& group) const;
+  Real GetAltAtomBFactor(const AtomImplPtr& atom, const String& group) const;
   
 
   const String& GetCurrentAltGroupName() const {
@@ -221,7 +225,7 @@ public:
   void SetIsLigand(bool flag) { ligand_=flag; }
 private:
   void AddAltAtom(const String& group, const AtomImplPtr& atom,
-                  const geom::Vec3& position);
+                  const geom::Vec3& position, Real occ, Real b_factor);
   void RemoveAltPositionsForAtom(const AtomImplPtr& atom);
 
   String                     curr_group_;

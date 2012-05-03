@@ -119,21 +119,26 @@ AtomHandle EditorBase::InsertAtom(ResidueHandle res, const String& name,
 AtomHandle EditorBase::InsertAltAtom(ResidueHandle res, const String& name,
                                      const String& alt_group,
                                      const geom::Vec3& pos,
-                                     const String& ele) 
+                                     const String& ele, Real occ,
+                                     Real b_factor)
 {
   CheckHandleValidity(res);
   ent_.Impl()->MarkTraceDirty();
-  AtomHandle atom(res.Impl()->InsertAltAtom(name, alt_group, pos, ele));
+  AtomHandle atom(res.Impl()->InsertAltAtom(name, alt_group, pos,
+			                                    ele, occ, b_factor));
   this->UpdateTrace();
   return atom;
 }
 
 void EditorBase::AddAltAtomPos(const String& group,
                                const AtomHandle& atom,
-                               const geom::Vec3& position) 
+                               const geom::Vec3& position, Real occ,
+                               Real b_factor)
 {
   CheckHandleValidity(atom);
-  atom.GetResidue().Impl()->AddAltAtomPos(group, atom.Impl(), position);
+  atom.GetResidue().Impl()->AddAltAtomPos(group, atom.Impl(),
+                                          position, occ, b_factor);
+
 }
 
 void EditorBase::DeleteChain(const ChainHandle& chain) 

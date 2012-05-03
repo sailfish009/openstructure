@@ -29,10 +29,13 @@ namespace ost { namespace mol {namespace impl {
 
 struct AtomGroupEntry {
   AtomGroupEntry() {}
-  AtomGroupEntry(const AtomImplPtr& a, const geom::Vec3& p)
-    : atom(a), pos(p) {}  
+  AtomGroupEntry(const AtomImplPtr& a, const geom::Vec3& p,
+                 Real o, Real b)
+    : atom(a), pos(p), occ(o), b_factor(b) {}
   impl::AtomImplW   atom;
   geom::Vec3        pos;
+  Real              occ;
+  Real              b_factor;
 };
 
 typedef std::vector<AtomGroupEntry> AtomGroupEntryList;
