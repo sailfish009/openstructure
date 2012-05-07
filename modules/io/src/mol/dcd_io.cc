@@ -152,9 +152,23 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   //if(skip_flag) istream.seekg(14*4,std::ios_base::cur);
   if(skip_flag){
     istream.read(dummy,sizeof(dummy));
-    istream.read(reinterpret_cast<char*>(&cell_size[0]),sizeof(float)*3);
-    istream.read(reinterpret_cast<char*>(&cell_angles[0]),sizeof(float)*3);
+    double x,y,z,a,b,c;
+    istream.read(reinterpret_cast<char*>(&x),sizeof(double));
+    istream.read(reinterpret_cast<char*>(&a),sizeof(double));
+    istream.read(reinterpret_cast<char*>(&y),sizeof(double));
+    istream.read(reinterpret_cast<char*>(&b),sizeof(double));
+    istream.read(reinterpret_cast<char*>(&c),sizeof(double));
+    istream.read(reinterpret_cast<char*>(&z),sizeof(double));
     istream.read(dummy,sizeof(dummy));
+    cell_size[0]=x;
+    cell_size[1]=y;
+    cell_size[2]=z;
+    cell_angles[0]=acos(a);
+    cell_angles[1]=acos(b);
+    cell_angles[2]=acos(c);
+    if(a!=0.0||b!=0.0||c!=0.0){
+       LOG_ERROR("LoadCHARMMTraj: periodic cell not parallelepipedic, cell angles might be wrong, handle carefully")
+    }
   }
 
   // read each frame
