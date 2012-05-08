@@ -808,12 +808,14 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       return;
     }
   }
+  Real b=temp.first ? temp.second : 0.0;
+  Real o=occ.first ? occ.second : 1.0;
   if (!profile_.quack_mode && alt_loc!=' ') {
     // Check if there is already a atom with the same name.
     mol::AtomHandle me=curr_residue_.FindAtom(aname);
     if (me.IsValid()) {
       try {
-        editor.AddAltAtomPos(String(1, alt_loc), me, apos);
+        editor.AddAltAtomPos(String(1, alt_loc), me, apos, o, b);
       } catch (Error) {
         LOG_INFO("Ignoring atom alt location since there is already an atom "
                      "with name " << aname << ", but without an alt loc");
@@ -822,7 +824,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       return;
     } else {
       ah=editor.InsertAltAtom(curr_residue_, aname,
-                              String(1, alt_loc), apos, s_ele);
+                              String(1, alt_loc), apos, s_ele, o, b);
       ++atom_count_;
     }
   } else {
@@ -844,12 +846,8 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       ah.SetRadius(radius.second);
     }
   }
-  if (temp.first) {
-    ah.SetBFactor(temp.second);
-  }
-  if (occ.first) {
-    ah.SetOccupancy(occ.second);
-  }
+  ah.SetBFactor(b);
+  ah.SetOccupancy(o);
   if (charge.first) {
     ah.SetCharge(charge.second);
   }

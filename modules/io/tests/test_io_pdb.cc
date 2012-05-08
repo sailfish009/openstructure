@@ -424,6 +424,25 @@ BOOST_AUTO_TEST_CASE(deuterium_import)
   BOOST_CHECK(ent.FindResidue("A", 297).IsPeptideLinking());
 }
 
+BOOST_AUTO_TEST_CASE(bzdng_318)
+{
+  String fname("testfiles/pdb/bzdng-318.pdb");
+  PDBReader reader(fname, IOProfile());
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  // we use conopology to mark amino acids as peptide-linking.
+  conop::Conopology& conop_inst=conop::Conopology::Instance();
+  conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+  {
+    PDBWriter writer(std::string("testfiles/pdb/bzdng-318-out.pdb"),
+                     IOProfile());
+    writer.Write(ent);
+  }
+
+  BOOST_CHECK(compare_files("testfiles/pdb/bzdng-318.pdb",
+                            "testfiles/pdb/bzdng-318-out.pdb"));
+}
+
 BOOST_AUTO_TEST_CASE(faulty_lines)
 {
   String fname("testfiles/pdb/faulty.pdb");

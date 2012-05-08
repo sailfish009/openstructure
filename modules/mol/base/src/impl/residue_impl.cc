@@ -91,7 +91,8 @@ Real ResidueImpl::GetAverageBFactor() const
 }
 
 void ResidueImpl::AddAltAtom(const String& group, const AtomImplPtr& atom,
-                             const geom::Vec3& position) {
+                             const geom::Vec3& position,
+                             Real occ, Real b_factor) {
 
   if (group.length()==0)
    throw Error("alt atom group name can't be empty String");
@@ -106,7 +107,7 @@ void ResidueImpl::AddAltAtom(const String& group, const AtomImplPtr& atom,
       curr_group_=group;
     }
   }
-  i->second.atoms.push_back(AtomGroupEntry(atom, position));
+  i->second.atoms.push_back(AtomGroupEntry(atom, position, occ, b_factor));
 }
 
 geom::Vec3 ResidueImpl::GetAltAtomPos(const AtomImplPtr& atom, 
@@ -127,12 +128,47 @@ geom::Vec3 ResidueImpl::GetAltAtomPos(const AtomImplPtr& atom,
               " does not have alternative atom position '"+group+"'");
 }
 
+Real ResidueImpl::GetAltAtomOcc(const AtomImplPtr& atom,
+                                const String& group) const
+{
+  AtomEntryGroups::const_iterator i=alt_groups_.find(group);
+  if (i==alt_groups_.end()) {
+    throw Error("No alt atom group '"+group+"'");
+  }
+  const AtomGroup& g=i->second;
+  for (AtomGroupEntryList::const_iterator j=g.atoms.begin(),
+       e=g.atoms.end(); j!=e; ++j) {
+    if (atom==j->atom.lock()) {
+      return j->occ;
+    }
+  }
+  throw Error(atom->GetQualifiedName()+
+              " does not have alternative atom position '"+group+"'");
+}
+Real ResidueImpl::GetAltAtomBFactor(const AtomImplPtr& atom,
+                                    const String& group) const
+{
+  AtomEntryGroups::const_iterator i=alt_groups_.find(group);
+  if (i==alt_groups_.end()) {
+    throw Error("No alt atom group '"+group+"'");
+  }
+  const AtomGroup& g=i->second;
+  for (AtomGroupEntryList::const_iterator j=g.atoms.begin(),
+       e=g.atoms.end(); j!=e; ++j) {
+    if (atom==j->atom.lock()) {
+      return j->b_factor;
+    }
+  }
+  throw Error(atom->GetQualifiedName()+
+              " does not have alternative atom position '"+group+"'");
+}
 AtomImplPtr ResidueImpl::InsertAltAtom(const String& name,
                                        const String& alt_group,
                                        const geom::Vec3& pos,
-                                       const String& ele) {
+                                       const String& ele,
+                                       Real occupancy, Real b_factor) {
   AtomImplPtr atom=this->InsertAtom(name, pos, ele);
-  this->AddAltAtom(alt_group, atom, pos);
+  this->AddAltAtom(alt_group, atom, pos, occupancy, b_factor);
   return atom;
 }
 
@@ -506,7 +542,8 @@ geom::Vec3 ResidueImpl::GetCenterOfMass() const
 
 void ResidueImpl::AddAltAtomPos(const String& group,
                                      const AtomImplPtr& atom,
-                                     const geom::Vec3& position) {
+                                     const geom::Vec3& position,
+                                     Real occ, Real b_factor) {
   // Make sure atom is already registered for having an alternative position.
   // Bail out, if this is not the case.
   AtomEntryGroups::iterator i=alt_groups_.begin();
@@ -522,7 +559,7 @@ void ResidueImpl::AddAltAtomPos(const String& group,
     }
   }
   if (found)
-    this->AddAltAtom(group, atom, position);
+    this->AddAltAtom(group, atom, position, occ, b_factor);
   else {
     String m="Definition of alternative position without prior call to "
              "InsertAltAtom is not allowed";
@@ -582,6 +619,8 @@ bool ResidueImpl::SwitchAtomPos(const String& group) {
       AtomGroupEntry& entry=*k;
       assert(!entry.atom.expired());
       entry.pos=entry.atom.lock()->OriginalPos();
+      entry.occ=entry.atom.lock()->GetOccupancy();
+      entry.b_factor=entry.atom.lock()->GetBFactor();
     }
   }
   AtomGroup& agr=i->second;
@@ -595,6 +634,8 @@ bool ResidueImpl::SwitchAtomPos(const String& group) {
     geom::Mat4 transf_matrix = ent.GetTransformationMatrix();
     geom::Vec3 transf_pos = geom::Vec3(transf_matrix*geom::Vec4(entry.pos));
     entry.atom.lock()->TransformedPos()=transf_pos;
+    entry.atom.lock()->SetBFactor(j->b_factor);
+    entry.atom.lock()->SetOccupancy(j->occ);
   }
   curr_group_=group;
   return true;
