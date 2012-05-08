@@ -229,6 +229,7 @@ protected:
   /// \param columns data row
   void ParseCitation(const std::vector<StringRef>& columns);
 
+	const MMCifInfoStructRefs& GetStructRefs() const { return struct_refs_; }
   /// \brief convert the seqres data item to canonical form. 
   /// 
   /// The seqres sequence lists non-standard residues in paranthesis. For 
@@ -242,7 +243,15 @@ protected:
   ///
   /// \param columns data row
   void ParseCitationAuthor(const std::vector<StringRef>& columns);
+  
+  /// \ brief parse a row in the struct_ref category
+  void ParseStructRef(const std::vector<StringRef>& columns);
+  
+  /// \brief parse row in the struct_ref_seq category
+  void ParseStructRefSeq(const std::vector<StringRef>& columns);
 
+  ///  \brief parse row in the struct_ref_seq_dif category
+  void ParseStructRefSeqDif(const std::vector<StringRef>& columns);
   /// \brief Fetch mmCIF exptl information
   ///
   /// \param columns data row
@@ -401,6 +410,32 @@ private:
     METHOD_DETAILS                ///< details about assembly computation
   } PdbxStructAssemblyItems;
 
+  // \enum items of the struct_ref category
+  typedef enum {
+  	SR_ENTITY_ID,
+  	SR_ID,
+  	SR_DB_CODE,
+  	SR_DB_NAME,
+  	SR_DB_ACCESS
+	} StructRefItems;
+	
+	/// \enum items of the struct_ref_seq category
+	typedef enum {
+		SRS_ALIGN_ID,
+		SRS_STRUCT_REF_ID,
+		SRS_PDBX_STRAND_ID,
+		SRS_DB_ALIGN_BEG,
+		SRS_DB_ALIGN_END,
+		SRS_ENT_ALIGN_BEG,
+		SRS_ENT_ALIGN_END
+	} StructRefSeqItems;
+
+	/// \enum items of the struct_ref_seq_dif category
+	typedef enum {
+		SRSD_ALIGN_ID,
+		SRSD_RNUM,
+    SRSD_DETAILS
+	} StructRefSeqDifItems;
   /// \enum items of the pdbx_struct_assembly_gen category
   typedef enum {
     ASSEMBLY_ID,                  ///< link to pdbx_struct_assembly.id
@@ -490,6 +525,9 @@ private:
     STRUCT_CONF,
     STRUCT_SHEET_RANGE,
     PDBX_DATABASE_PDB_OBS_SPR,
+    STRUCT_REF,
+    STRUCT_REF_SEQ,
+    STRUCT_REF_SEQ_DIF,
     DONT_KNOW
   } MMCifCategory;
 
@@ -550,6 +588,7 @@ private:
   std::map<String, String> bu_origin_map_; ///< pdbx_struct_assembly.details
   MMCifHSVector helix_list_; ///< for storing struct_conf sec.struct. data
   MMCifHSVector strand_list_; ///< for storing struct_conf sec.struct. data
+	MMCifInfoStructRefs struct_refs_;
 };
 
 }}

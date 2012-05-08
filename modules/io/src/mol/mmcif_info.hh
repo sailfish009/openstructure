@@ -20,6 +20,7 @@
 #define OST_MMCIF_INFO_HH
 
 #include <vector>
+#include <map>
 #include <boost/shared_ptr.hpp>
 #include <ost/geom/geom.hh>
 #include <ost/string_ref.hh>
@@ -605,6 +606,92 @@ private:
   String replaced_pdb_id_; ///< replaced entry
 };
 
+class MMCifInfoStructRef;
+class MMCifInfoStructRefSeq;
+class MMCifInfoStructRefSeqDif;
+
+
+typedef boost::shared_ptr<MMCifInfoStructRef> MMCifInfoStructRefPtr;
+typedef boost::shared_ptr<MMCifInfoStructRefSeq> MMCifInfoStructRefSeqPtr;
+typedef boost::shared_ptr<MMCifInfoStructRefSeqDif> MMCifInfoStructRefSeqDifPtr;
+
+typedef std::vector<MMCifInfoStructRefPtr> MMCifInfoStructRefs;
+typedef std::vector<MMCifInfoStructRefSeqPtr> MMCifInfoStructRefSeqs;
+typedef std::vector<MMCifInfoStructRefSeqDifPtr> MMCifInfoStructRefSeqDifs;
+class DLLEXPORT_OST_IO MMCifInfoStructRef {
+public:
+  MMCifInfoStructRef(const String& id, const String& ent_id, 
+  		               const String& db_name, 
+  		               const String& db_ident, const String& db_access):
+  	id_(id), ent_id_(ent_id), db_name_(db_name), db_ident_(db_ident), 
+  	db_access_(db_access)
+	{ }
+  const String& GetID() const { return id_; }
+  const String& GetDBName() const { return db_name_; }
+  const String& GetDBID() const { return db_ident_; }
+  const String& GetEntityID() const { return ent_id_; }
+  const String& GetDBAccess() const { return db_access_; }
+  MMCifInfoStructRefSeqPtr AddAlignedSeq(const String& align_id, 
+  		                                   const String& chain_name, int seq_begin, 
+  		                                   int seq_end, int db_begin, int db_end);
+  MMCifInfoStructRefSeqPtr GetAlignedSeq(const String& align_id) const;
+  MMCifInfoStructRefSeqs GetAlignedSeqs() const
+	{
+		MMCifInfoStructRefSeqs seqs;
+		seqs.reserve(seqs_.size());
+		for (std::map<String, MMCifInfoStructRefSeqPtr>::const_iterator
+				 i=seqs_.begin(), e=seqs_.end(); i!=e; ++i) {
+		  seqs.push_back(i->second);
+		}
+		return seqs;
+	}
+private:
+	String  id_;
+	String  ent_id_;
+	String  db_name_;
+	String  db_ident_;
+	String  db_access_;
+	std::map<String, MMCifInfoStructRefSeqPtr> seqs_;
+};
+
+class DLLEXPORT_OST_IO MMCifInfoStructRefSeq {
+public:
+  MMCifInfoStructRefSeq(const String& align_id, const String& chain_name, 
+  		                  int seq_begin, int seq_end, 
+  		                  int db_begin, int db_end):
+  	id_(align_id), chain_name_(chain_name), 
+  	seq_begin_(seq_begin), seq_end_(seq_end), db_begin_(db_begin), db_end_(db_end)
+	{ }
+
+  const String& GetID() const { return id_; }
+  const String& GetChainName() const { return chain_name_; }
+  int GetSeqBegin() const { return seq_begin_; }
+  int GetSeqEnd() const { return seq_end_; }
+  int GetDBBegin() const { return db_begin_; }
+  int GetDBEnd() const { return db_end_; }
+  MMCifInfoStructRefSeqDifPtr AddDif(int seq_num, const String& details);
+  const std::vector<MMCifInfoStructRefSeqDifPtr>& GetDifs() const { return difs_; }
+private:
+	String   id_;
+	String   chain_name_;
+	int      seq_begin_;
+	int      seq_end_;
+	int      db_begin_;
+	int      db_end_;
+	std::vector<MMCifInfoStructRefSeqDifPtr> difs_;
+};
+
+class DLLEXPORT_OST_IO MMCifInfoStructRefSeqDif {
+public:
+	MMCifInfoStructRefSeqDif(int rnum, const String& details): 
+		rnum_(rnum), details_(details) {}
+	int GetRNum() const { return rnum_;}
+	const String& GetDetails() const { return details_; }
+private:
+	int    rnum_;
+	String details_;
+};
+
 /// \brief container class for additional information from MMCif files
 /// 
 /// \section mmcif annotation information
@@ -731,7 +818,8 @@ public:
   {
     return obsolete_;
   }
-
+  const MMCifInfoStructRefs& GetStructRefs() const { return struct_refs_; }
+  void SetStructRefs(const MMCifInfoStructRefs& sr) { struct_refs_=sr; }
 //protected:
 
 private:
@@ -743,7 +831,9 @@ private:
   std::vector<MMCifInfoCitation> citations_;  ///< list of citations
   std::vector<MMCifInfoBioUnit>  biounits_;   ///< list of biounits
   std::vector<MMCifInfoTransOpPtr> transops_;
+	MMCifInfoStructRefs            struct_refs_;
 };
+
 
 }} // ns
 

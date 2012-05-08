@@ -38,6 +38,9 @@ The following categories of a mmCIF file are considered by the reader:
   the :class:`entity <ost.mol.EntityHandle>`
 * ``pdbx_database_PDB_obs_spr``: Verbose information on obsoleted/ superseded
   entries, stored in :class:`MMCifInfoObsolete`.
+* ``struct_ref`` stored in :class:`MMCifInfoStructRef`
+* ``struct_ref_seq`` stored in :class:`MMCifInfoStructRefSeq`
+* ``struct_ref_seq_dif`` stored in :class:`MMCifInfoStructRefDif`
 
 Info Classes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -93,6 +96,9 @@ of the annotation available.
     Also available as :meth:`GetStructDetails`. May also be modified by
     :meth:`SetStructDetails`.
 
+  .. attribute:: struct_refs
+
+    Lists all links to external databases in the mmCIF file.
   .. method:: AddCitation(citation)
 
     Add a citation to the citation list of an info object.
@@ -452,7 +458,7 @@ of the annotation available.
 
     See :attr:`operations`
 
-  .. method:: PDBize(asu, seqres=None, min_polymer_size=10)
+.. function:: PDBize(asu, seqres=None, min_polymer_size=10)
 
     Returns the biological assembly (bio unit) for an entity. The new entity
     created is well suited to be saved as a PDB file. Therefore the function
@@ -676,6 +682,95 @@ of the annotation available.
 
     See :attr:`replace_pdb_id`
 
-..  LocalWords:  autofunction ChainTypes exptl attr pdbx oper conf spr biounits
+.. class:: MMCifINfoStructRef
+
+  Holds the information of the struct_ref category. The category describes the 
+  link of polymers in the mmCIF file to sequences stored in external databases 
+  such as uniprot. The related categories ``struct_ref_seq`` and 
+  ``struct_ref_seq_dif`` also list differences between the sequences of the 
+  deposited structure and the sequences in the database. A promintent example of 
+  such differences include point mutations and/or expression tags.
+
+  .. attribute:: db_name
+
+    
+    Name of the external database, for example UNP for uniprot.
+
+    :type: :class:`str`
+
+
+  .. attribute:: db_id
+    
+    Name of the reference sequence in the database pointed to by :attr:`db_name`.
+
+    :type: :class:`str`
+  
+  .. attribute:: db_access
+    
+    Alternative accession code for the sequence in the database pointed to by 
+    :attr:`db_name`.
+
+    :type: :class:`str`
+
+  .. method:: GetAlignedSeq(name)
+
+    Returns the aligned sequence for the given name, None if the sequence does 
+    not exist.
+  
+  .. attribute:: aligned_seqs
+
+    List of aligned sequences (all entries of the struct_ref_seq category 
+    mapping to this struct_ref).
+
+.. class:: MMCifInfoStructRefSeq
+
+  An aligned range of residues between a sequence in a reference database and the 
+  deposited sequence.
+
+  .. attribute:: align_id
+    
+    Uniquely identifies every struct_ref_seq item in the mmCIF file.
+    :type: :class:`str`
+
+  .. attribute:: seq_begin
+                 seq_end
+    The starting point (1-based) and end point of the aligned range in the 
+    deposited sequence, respectively.
+
+   :type: :class:`int`
+   
+  .. attribute:: db_begin
+                 db_end
+    The starting point (1-based) and end point of the aligned range in the 
+    database sequence, respectively.
+
+   :type: :class:`int`
+
+  .. attribute:: difs
+
+    List of differences between the deposited sequence and the sequence in the 
+    database.
+
+ .. attribute:: chain_name
+   
+   Chain name of the polymer in the mmCIF file.
+
+.. class:: MMCifInfoStructRefSeqDif
+
+  A particular difference between the deposited sequence and the sequence in 
+  the database.
+
+  .. attribute:: rnum
+
+    The residue number (1-based) of the residue in the deposited sequence
+   
+    :type: :class:`int`
+
+  .. attribute:: details
+
+    A textual description of the difference, e.g. point mutation, 
+    expressiontag, purification artifact.
+
+    :type: :class:`str`
 ..  LocalWords:  cas isbn pubmed asu seqres conop ConnectAll casp COMPND OBSLTE
 ..  LocalWords:  SPRSDE pdb func

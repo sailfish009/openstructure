@@ -138,7 +138,37 @@ void export_mmcif_io()
                                                 init<>())
     .def(vector_indexing_suite<std::vector<MMCifInfoTransOpPtrList >, true >())
   ;
-
+  class_<MMCifInfoStructRef, MMCifInfoStructRefPtr>("MMCifInfoStructRef", no_init)
+  	.add_property("db_name", make_function(&MMCifInfoStructRef::GetDBName, 
+  				        return_value_policy<copy_const_reference>()))
+  	.add_property("db_id", make_function(&MMCifInfoStructRef::GetDBID, 
+  				        return_value_policy<copy_const_reference>()))
+  	.add_property("entity_id", make_function(&MMCifInfoStructRef::GetEntityID, 
+  				        return_value_policy<copy_const_reference>()))
+  	.add_property("db_access", make_function(&MMCifInfoStructRef::GetDBAccess, 
+  				        return_value_policy<copy_const_reference>()))
+  	.def("GetAlignedSeq", &MMCifInfoStructRef::GetAlignedSeq, arg("align_id"))
+  	.def("GetAlignedSeqs", &MMCifInfoStructRef::GetAlignedSeqs)
+  	.add_property("aligned_seqs", &MMCifInfoStructRef::GetAlignedSeqs)
+ ; 
+  class_<MMCifInfoStructRefSeq, MMCifInfoStructRefSeqPtr>("MMCifInfoStructRefSeq", no_init)
+  	.add_property("align_id", make_function(&MMCifInfoStructRefSeq::GetID, 
+  				        return_value_policy<copy_const_reference>()))
+  	.add_property("chain_name", make_function(&MMCifInfoStructRefSeq::GetChainName, 
+  				        return_value_policy<copy_const_reference>()))
+  	.add_property("seq_begin", &MMCifInfoStructRefSeq::GetSeqBegin)
+  	.add_property("seq_end", &MMCifInfoStructRefSeq::GetSeqEnd)
+  	.add_property("db_begin", &MMCifInfoStructRefSeq::GetDBBegin)
+  	.add_property("db_end", &MMCifInfoStructRefSeq::GetDBEnd)
+  	.add_property("difs", make_function(&MMCifInfoStructRefSeq::GetDifs,
+  				        return_value_policy<copy_const_reference>()))
+  ;
+  class_<MMCifInfoStructRefSeqDif, 
+  	     MMCifInfoStructRefSeqDifPtr>("MMCifInfoStructRefSeqDif", no_init)
+  	.add_property("details", make_function(&MMCifInfoStructRefSeqDif::GetDetails, 
+  				        return_value_policy<copy_const_reference>()))
+  	.add_property("rnum", &MMCifInfoStructRefSeqDif::GetRNum)
+  ;
   class_<MMCifInfoBioUnit>("MMCifInfoBioUnit", init<>())
     .def("SetDetails", &MMCifInfoBioUnit::SetDetails)
     .def("GetDetails", &MMCifInfoBioUnit::GetDetails)
@@ -156,6 +186,15 @@ void export_mmcif_io()
                                    return_value_policy<copy_const_reference>()))
   ;
 
+  class_<MMCifInfoStructRefs>("MMCifInfoStructRefs", init<>())
+  	.def(vector_indexing_suite<MMCifInfoStructRefs, true>())
+  ;
+  class_<MMCifInfoStructRefSeqs>("MMCifInfoStructRefSeqs", init<>())
+  	.def(vector_indexing_suite<MMCifInfoStructRefSeqs, true>())
+  ;
+  class_<MMCifInfoStructRefSeqDifs>("MMCifInfoStructRefSeqDifs", init<>())
+  	.def(vector_indexing_suite<MMCifInfoStructRefSeqDifs, true>())
+  ;
   typedef std::vector<MMCifInfoBioUnit> MMCifInfoBioUnitList;
   class_<std::vector<MMCifInfoBioUnit> >("MMCifInfoBioUnitList", init<>())
     .def(vector_indexing_suite<std::vector<MMCifInfoBioUnit> >())
@@ -246,6 +285,8 @@ void export_mmcif_io()
                                    return_value_policy<copy_const_reference>()))
     .add_property("struct_details", &MMCifInfo::GetStructDetails,
                   &MMCifInfo::SetStructDetails)
+    .add_property("struct_refs", make_function(&MMCifInfo::GetStructRefs,
+    			        return_value_policy<copy_const_reference>()))
     .add_property("obsolete", &MMCifInfo::GetObsoleteInfo,
                   &MMCifInfo::SetObsoleteInfo)
  ;

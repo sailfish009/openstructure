@@ -614,6 +614,40 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_author_tests)
   BOOST_MESSAGE("  done.");
 }
 
+BOOST_AUTO_TEST_CASE(mmcif_struct_ref)
+{
+  mol::EntityHandle eh = mol::CreateEntity();
+  std::ifstream s("testfiles/mmcif/struct_ref.cif");
+  IOProfile profile;
+  MMCifReader mmcif_p(s, eh, profile);
+  mmcif_p.Parse();
+  MMCifInfoStructRefs refs=mmcif_p.GetInfo().GetStructRefs();
+  BOOST_CHECK_EQUAL(refs.size(), 1);
+  MMCifInfoStructRefPtr sr1=refs[0];
+  BOOST_CHECK_EQUAL(sr1->GetDBName(), "UNP");
+  BOOST_CHECK_EQUAL(sr1->GetDBID(), "BLA2_BACCE");
+  BOOST_CHECK_EQUAL(sr1->GetDBAccess(), "P04190");
+  BOOST_CHECK_EQUAL(sr1->GetID(), "1");
+  MMCifInfoStructRefSeqs seqs=sr1->GetAlignedSeqs();
+  BOOST_CHECK_EQUAL(seqs.size(), 2);
+  BOOST_CHECK_EQUAL(seqs[0]->GetID(), "1");
+  BOOST_CHECK_EQUAL(seqs[0]->GetChainName(), "A");
+  BOOST_CHECK_EQUAL(seqs[0]->GetSeqBegin(), 1);
+  BOOST_CHECK_EQUAL(seqs[0]->GetSeqEnd(), 19);
+  BOOST_CHECK_EQUAL(seqs[0]->GetDBBegin(), 31);
+  BOOST_CHECK_EQUAL(seqs[0]->GetDBEnd(), 49);
+  BOOST_CHECK_EQUAL(seqs[1]->GetID(), "13");
+  BOOST_CHECK_EQUAL(seqs[1]->GetChainName(), "B");
+  BOOST_CHECK_EQUAL(seqs[1]->GetSeqBegin(), 1);
+  BOOST_CHECK_EQUAL(seqs[1]->GetSeqEnd(), 19);
+  BOOST_CHECK_EQUAL(seqs[1]->GetDBBegin(), 31);
+  BOOST_CHECK_EQUAL(seqs[1]->GetDBEnd(), 49);
+  MMCifInfoStructRefSeqDifs diffs=seqs[0]->GetDifs();
+  BOOST_CHECK_EQUAL(diffs.size(), 1);
+  BOOST_CHECK_EQUAL(diffs[0]->GetRNum(), 91);
+  BOOST_CHECK_EQUAL(diffs[0]->GetDetails(), "ENGINEERED MUTATION");
+}
+
 BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
 {
   BOOST_MESSAGE("  Running mmcif_refine_tests...");

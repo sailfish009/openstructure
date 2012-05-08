@@ -36,4 +36,40 @@ void MMCifInfo::AddAuthorsToCitation(StringRef id, std::vector<String> list)
   throw IOException("No citation for identifier '" + id.str() + "' found.");
 }
 
+
+
+MMCifInfoStructRefSeqPtr 
+MMCifInfoStructRef::AddAlignedSeq(const String& aid, const String& chain_name, 
+		                              int seq_begin, int seq_end, int db_begin, 
+		                              int db_end)
+{
+	std::map<String, MMCifInfoStructRefSeqPtr>::const_iterator i=seqs_.find(aid);
+	if (i!=seqs_.end()) {
+		throw IOException("duplicate align_id for struct_ref '"+id_+"'");
+	}
+	MMCifInfoStructRefSeqPtr p(new MMCifInfoStructRefSeq(aid, chain_name,
+				                                               seq_begin, seq_end, 
+				                                               db_begin, db_end));
+	seqs_[aid]=p;
+	return p;
+}
+
+
+MMCifInfoStructRefSeqPtr 
+MMCifInfoStructRef::GetAlignedSeq(const String& aid) const
+{
+
+  std::map<String, MMCifInfoStructRefSeqPtr>::const_iterator i=seqs_.find(aid);
+  return i==seqs_.end() ? MMCifInfoStructRefSeqPtr() : i->second;
+}
+
+MMCifInfoStructRefSeqDifPtr 
+MMCifInfoStructRefSeq::AddDif(int rnum, const String& details)
+{
+	MMCifInfoStructRefSeqDifPtr d(new MMCifInfoStructRefSeqDif(rnum, details));
+	difs_.push_back(d);
+	return d;
+}
+
+
 }} //ns

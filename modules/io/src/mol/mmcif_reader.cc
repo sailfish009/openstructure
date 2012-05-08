@@ -300,7 +300,31 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
     this->TryStoreIdx(PDB_ID,         "pdb_id", header);
     this->TryStoreIdx(REPLACE_PDB_ID, "replace_pdb_id", header);
     cat_available = true;
-  }
+  } else if (header.GetCategory() == "struct_ref") {
+  	category_ = STRUCT_REF;
+  	this->TryStoreIdx(SR_ENTITY_ID, "entity_id", header);
+  	this->TryStoreIdx(SR_ID, "id", header);
+  	this->TryStoreIdx(SR_DB_NAME, "db_name", header);
+  	this->TryStoreIdx(SR_DB_CODE, "db_code", header);
+  	indices_[SR_DB_ACCESS]=header.GetIndex("pdbx_db_accession");
+  	cat_available = true;
+	} else if (header.GetCategory() == "struct_ref_seq") {
+	  category_ = STRUCT_REF_SEQ;	
+  	this->TryStoreIdx(SRS_ALIGN_ID, "align_id", header);
+  	this->TryStoreIdx(SRS_STRUCT_REF_ID, "ref_id", header);
+  	this->TryStoreIdx(SRS_ENT_ALIGN_BEG, "seq_align_beg", header);
+  	this->TryStoreIdx(SRS_ENT_ALIGN_END, "seq_align_end", header);
+  	this->TryStoreIdx(SRS_DB_ALIGN_BEG, "db_align_beg", header);
+  	this->TryStoreIdx(SRS_DB_ALIGN_END, "db_align_end", header);
+    indices_[SRS_PDBX_STRAND_ID]=header.GetIndex("pdbx_strand_id");
+	  cat_available = true;
+	} else if (header.GetCategory()=="struct_ref_seq_dif") {
+		category_ = STRUCT_REF_SEQ_DIF;
+  	this->TryStoreIdx(SRSD_ALIGN_ID, "align_id", header);
+  	this->TryStoreIdx(SRSD_RNUM, "seq_num", header);
+  	indices_[SRSD_DETAILS]=header.GetIndex("details");
+  	cat_available = true;
+	}
   category_counts_[category_]++;
   return cat_available;
 }
@@ -1328,6 +1352,18 @@ void MMCifReader::OnDataRow(const StarLoopDesc& header,
     LOG_TRACE("processing pdbx_database_PDB_obs_spr entry")
     this->ParsePdbxDatabasePdbObsSpr(columns);
     break;
+  case STRUCT_REF:
+  	LOG_TRACE("processing struct_ref entry");
+  	this->ParseStructRef(columns);
+  	break;
+  case STRUCT_REF_SEQ:
+  	LOG_TRACE("processing struct_ref entry");
+  	this->ParseStructRefSeq(columns);
+  	break;
+  case STRUCT_REF_SEQ_DIF:
+  	LOG_TRACE("processing struct_ref entry");
+  	this->ParseStructRefSeqDif(columns);
+  	break;
   default:
     throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                        "Uncatched category '"+ header.GetCategory() +"' found.",
@@ -1379,6 +1415,103 @@ void MMCifReader::AssignSecStructure(mol::EntityHandle ent)
   }
 }
 
+
+void MMCifReader::ParseStructRef(const std::vector<StringRef>& columns)
+{
+	String ent_id=columns[indices_[SR_ENTITY_ID]].str();
+	String db_name=columns[indices_[SR_DB_NAME]].str();
+	String db_code=columns[indices_[SR_DB_CODE]].str();
+	String id=columns[indices_[SR_ID]].str();
+	String db_access;
+	if (indices_[SR_DB_ACCESS]!=-1) {
+		db_access=columns[indices_[SR_DB_ACCESS]].str();
+	}
+	MMCifInfoStructRefPtr sr(new MMCifInfoStructRef(id, ent_id, db_name, 
+				                                          db_code, db_access));
+	struct_refs_.push_back(sr);
+}
+
+void MMCifReader::ParseStructRefSeq(const std::vector<StringRef>& columns)
+{
+ String aln_id=columns[indices_[SRS_ALIGN_ID]].str();
+ String sr_id=columns[indices_[SRS_STRUCT_REF_ID]].str();
+ String chain_name;
+ if (indices_[SRS_PDBX_STRAND_ID]!=-1) {
+ 	 chain_name=columns[indices_[SRS_PDBX_STRAND_ID]].str();
+ }
+ std::pair<bool,int> dbbeg=this->TryGetInt(columns[indices_[SRS_DB_ALIGN_BEG]], 
+ 		                                        "_struct_ref_seq.db_align_beg",
+ 		                                        profile_.fault_tolerant);
+ std::pair<bool,int> dbend=this->TryGetInt(columns[indices_[SRS_DB_ALIGN_END]], 
+ 		                                       "_struct_ref_seq.db_align_end",
+ 		                                       profile_.fault_tolerant);
+ std::pair<bool,int> entbeg=this->TryGetInt(columns[indices_[SRS_ENT_ALIGN_BEG]], 
+ 		                                        "_struct_ref_seq.seq_align_beg",
+ 		                                        profile_.fault_tolerant);
+ std::pair<bool,int> entend=this->TryGetInt(columns[indices_[SRS_ENT_ALIGN_END]], 
+ 		                                        "_struct_ref_seq.seq_align_END",
+ 		                                        profile_.fault_tolerant);
+ if (!(dbbeg.first && dbend.first && entbeg.first && entend.first)) {
+ 	 return;
+ }
+ bool found=false;
+ for (MMCifInfoStructRefs::iterator i=struct_refs_.begin(), 
+ 		  e=struct_refs_.end(); i!=e; ++i) { 
+ 	 if ((*i)->GetID()==sr_id) {
+		 (*i)->AddAlignedSeq(aln_id, chain_name, entbeg.second, entend.second, 
+		 		                 dbbeg.second, dbend.second);
+		 found=true;
+ 	 	 break;
+ 	 }
+ }
+ if (!found) {
+ 	 if (profile_.fault_tolerant) {
+ 	 	 LOG_ERROR("struct_ref_seq.ref_id points to inexistent struct_ref '"
+ 	 	 		       << sr_id <<  "'");
+ 	 	 return;
+ 	 }
+	 std::stringstream ss;
+	 ss << "struct_ref_seq.ref_id points to inexistent struct_ref '";
+	 ss << sr_id << "'";
+	 throw IOException(ss.str());
+ }
+}
+
+void MMCifReader::ParseStructRefSeqDif(const std::vector<StringRef>& columns)
+{
+	String aln_id=columns[indices_[SRSD_ALIGN_ID]].str();
+	std::pair<bool,int> rnum=this->TryGetInt(columns[indices_[SRSD_RNUM]],
+			                                     "_struct_ref_seq_dif.seq_num",
+			                                     profile_.fault_tolerant);
+	if (!rnum.first) {
+		return;
+	}
+  String details;
+  if (indices_[SRSD_DETAILS]!=-1) {
+	  details=columns[indices_[SRSD_DETAILS]].str();
+	}
+	bool found=false;
+  for (MMCifInfoStructRefs::iterator i=struct_refs_.begin(), 
+ 		  e=struct_refs_.end(); i!=e; ++i) { 
+ 	 if (MMCifInfoStructRefSeqPtr s=(*i)->GetAlignedSeq(aln_id)) {
+		 s->AddDif(rnum.second, details); 
+		 found=true;
+ 	 	 break;
+ 	 }
+ }
+ if (!found) {
+ 	 if (profile_.fault_tolerant) {
+ 	 	 LOG_ERROR("struct_ref_seq_dif.align_id points to inexistent "
+ 	 	 		       "struct_ref_seq '" << aln_id <<  "'");
+ 	 	 return;
+ 	 }
+	 std::stringstream ss;
+	 ss << "struct_ref_seq.ref_id points to inexistent struct_ref '";
+	 ss << aln_id << "'";
+	 throw IOException(ss.str());
+ }
+}
+
 void MMCifReader::OnEndData()
 {
   mol::XCSEditor editor=ent_handle_.EditXCS(mol::BUFFERED_EDIT);
@@ -1427,6 +1560,7 @@ void MMCifReader::OnEndData()
   std::vector<MMCifInfoTransOpPtr> operation_list;
   std::map<String, String>::const_iterator buom_it;
   std::vector<MMCifInfoTransOpPtr> operations = info_.GetOperations();
+  info_.SetStructRefs(struct_refs_);
   std::vector<MMCifInfoTransOpPtr>::const_iterator buop_it;
   for (bua_it = bu_assemblies_.begin();
        bua_it != bu_assemblies_.end();
