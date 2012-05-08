@@ -10,6 +10,7 @@ set(OST_MOL_ALG_PYMOD_MODULES
   "__init__.py"
   views.py
   superpose.py
+  trajectory_analysis.py
 )
 
 if (ENABLE_IMG)
