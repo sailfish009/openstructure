@@ -4,7 +4,8 @@ Some functions for analyzing trajectories
 Author: Niklaus Johner
 """
 
-from ost import *
+import ost.mol.alg
+from ost import LogError
 import os
 
 def smooth(vec,n):
@@ -44,5 +45,40 @@ def smooth(vec,n):
       v+=vec[i-j-1]
     vec2[i]=v/float(2.*n+1.)
   return vec2
+
+
+"""
+From here on the module needs numpy
+"""
+
+def RMSD_Matrix_From_Traj(t,sele,first=0,last=-1):
+  """
+  This function calculates a matrix M such that M[i,j] is the
+  RMSD of the EntityView sele between frames i and j of the trajectory t
+  aligned on sele.
+  Its inputs are:
+    t       : the trajectory (CoordGroupHandle)
+    sele    : the EntityView used for alignment and RMSD calculation
+    first=0 : the first frame of t to be used
+    last=-1 : the last frame of t to be used
+  Returns a numpy NxN matrix, where n is the number of frames.
+  """
+  try:
+    import numpy as npy
+    if last==-1:last=t.GetFrameCount()
+    n_frames=last-first
+    rmsd_matrix=npy.identity(n_frames)
+    for i in range(n_frames):
+      t=ost.mol.alg.SuperposeFrames(t,sele,begin=first,end=last,ref=i)
+      eh=t.GetEntity()
+      t.CopyFrame(i)
+      rmsd_matrix[i,:]=ost.mol.alg.AnalyzeRMSD(t,sele,sele)
+      if i==0:
+        last=last-first
+        first=0
+    return rmsd_matrix
+  except ImportError:
+    LogError("Function needs numpy, but I could not import it.")
+    raise
 
 
