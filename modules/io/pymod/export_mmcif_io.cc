@@ -139,6 +139,8 @@ void export_mmcif_io()
     .def(vector_indexing_suite<std::vector<MMCifInfoTransOpPtrList >, true >())
   ;
   class_<MMCifInfoStructRef, MMCifInfoStructRefPtr>("MMCifInfoStructRef", no_init)
+  	.add_property("id", make_function(&MMCifInfoStructRef::GetID, 
+  				        return_value_policy<copy_const_reference>()))
   	.add_property("db_name", make_function(&MMCifInfoStructRef::GetDBName, 
   				        return_value_policy<copy_const_reference>()))
   	.add_property("db_id", make_function(&MMCifInfoStructRef::GetDBID, 
