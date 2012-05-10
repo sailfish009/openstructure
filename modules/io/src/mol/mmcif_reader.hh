@@ -202,7 +202,8 @@ protected:
   /// \param[out] atom_name corresponds to label_atom_id
   /// \param[out] alt_loc gets first letter of atom_site.label_alt_id
   bool ParseAtomIdent(const std::vector<StringRef>& columns,
-                      String& chain_name,
+                      String& auth_chain_name,
+                      String& cif_chain_name,
                       StringRef& res_name,
                       mol::ResNum& resnum,
                       bool& valid_res_num,

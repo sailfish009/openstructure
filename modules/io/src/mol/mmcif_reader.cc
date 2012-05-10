@@ -342,7 +342,8 @@ mol::ResNum to_res_num(int num, char ins_code)
 }
 
 bool MMCifReader::ParseAtomIdent(const std::vector<StringRef>& columns,
-                                 String& chain_name,
+                                 String& auth_chain_name,
+                                 String& cif_chain_name,
                                  StringRef& res_name,
                                  mol::ResNum& resnum,
                                  bool& valid_res_num,
@@ -357,13 +358,11 @@ bool MMCifReader::ParseAtomIdent(const std::vector<StringRef>& columns,
     }
   }
   // CHAIN ID
-  if (auth_chain_id_) { // unit test different IDs
-    chain_name = columns[indices_[AUTH_ASYM_ID]].str();
-  } else {
-    chain_name = columns[indices_[LABEL_ASYM_ID]].str();
-  }
+  auth_chain_name = columns[indices_[AUTH_ASYM_ID]].str();
+  cif_chain_name = columns[indices_[LABEL_ASYM_ID]].str();
+
   if (restrict_chains_.size() > 0 &&
-      restrict_chains_.find(chain_name) == String::npos) {
+      restrict_chains_.find(cif_chain_name) == String::npos) {
     return false;
   } 
 
@@ -398,7 +397,8 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
 {
   mol::XCSEditor editor=ent_handle_.EditXCS(mol::BUFFERED_EDIT); // potbl
   char alt_loc=0;
-  String chain_name;
+  String auth_chain_name;
+  String cif_chain_name;
   StringRef res_name, atom_name;
   mol::ResNum res_num(0);
   bool valid_res_num = false;
@@ -416,7 +416,8 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
   }
 
   if (!this->ParseAtomIdent(columns,
-                            chain_name,
+                            auth_chain_name,
+                            cif_chain_name,
                             res_name,
                             res_num,
                             valid_res_num,
@@ -460,7 +461,7 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
   if(!curr_chain_) { // unit test
       update_chain=true;
       update_residue=true;
-  } else if(curr_chain_.GetName() != chain_name) { // unit test
+  } else if(curr_chain_.GetName() != cif_chain_name) { // unit test
     update_chain=true;
     update_residue=true;
   }
@@ -471,12 +472,12 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
     if (indices_[AUTH_SEQ_ID] != -1 &&
         indices_[PDBX_PDB_INS_CODE] != -1) {
       if (subst_res_id_ !=
-          chain_name +
+          cif_chain_name +
           columns[indices_[AUTH_SEQ_ID]].str() +
           columns[indices_[PDBX_PDB_INS_CODE]].str()) {
         update_residue=true;
 
-        subst_res_id_ = chain_name +
+        subst_res_id_ = cif_chain_name +
                         columns[indices_[AUTH_SEQ_ID]].str() +
                         columns[indices_[PDBX_PDB_INS_CODE]].str();
       }
@@ -490,10 +491,11 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
   }
 
   if(update_chain) { // unit test
-    curr_chain_ = ent_handle_.FindChain(chain_name);
+    curr_chain_ = ent_handle_.FindChain(cif_chain_name);
     if(!curr_chain_.IsValid()) { // unit test
-      LOG_DEBUG("new chain " << chain_name);
-      curr_chain_=editor.InsertChain(chain_name);
+      LOG_DEBUG("new chain " << cif_chain_name);
+      curr_chain_=editor.InsertChain(cif_chain_name);
+      curr_chain_.SetStringProp("pdb_auth_chain_name", auth_chain_name);
       ++chain_count_;
       // store entity id
       chain_id_pairs_.push_back(std::pair<mol::ChainHandle,String>(curr_chain_,
