@@ -64,9 +64,10 @@ MMCifInfoStructRef::GetAlignedSeq(const String& aid) const
 }
 
 MMCifInfoStructRefSeqDifPtr 
-MMCifInfoStructRefSeq::AddDif(int rnum, const String& details)
+MMCifInfoStructRefSeq::AddDif(int seq_rnum, int db_rnum, const String& details)
 {
-	MMCifInfoStructRefSeqDifPtr d(new MMCifInfoStructRefSeqDif(rnum, details));
+	MMCifInfoStructRefSeqDifPtr d(new MMCifInfoStructRefSeqDif(seq_rnum, db_rnum,
+				                                                     details));
 	difs_.push_back(d);
 	return d;
 }

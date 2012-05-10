@@ -669,7 +669,8 @@ public:
   int GetSeqEnd() const { return seq_end_; }
   int GetDBBegin() const { return db_begin_; }
   int GetDBEnd() const { return db_end_; }
-  MMCifInfoStructRefSeqDifPtr AddDif(int seq_num, const String& details);
+  MMCifInfoStructRefSeqDifPtr AddDif(int seq_num, int db_num, 
+  		                               const String& details);
   const std::vector<MMCifInfoStructRefSeqDifPtr>& GetDifs() const { return difs_; }
 private:
 	String   id_;
@@ -683,12 +684,14 @@ private:
 
 class DLLEXPORT_OST_IO MMCifInfoStructRefSeqDif {
 public:
-	MMCifInfoStructRefSeqDif(int rnum, const String& details): 
-		rnum_(rnum), details_(details) {}
-	int GetRNum() const { return rnum_;}
+	MMCifInfoStructRefSeqDif(int seq_rnum, int db_rnum, const String& details): 
+		seq_rnum_(seq_rnum), db_rnum_(db_rnum), details_(details) {}
+	int GetSeqRNum() const { return seq_rnum_;}
+	int GetDBRNum() const { return db_rnum_; }
 	const String& GetDetails() const { return details_; }
 private:
-	int    rnum_;
+	int    seq_rnum_;
+	int    db_rnum_;
 	String details_;
 };
 

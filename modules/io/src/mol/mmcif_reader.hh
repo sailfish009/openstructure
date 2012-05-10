@@ -433,7 +433,8 @@ private:
 	/// \enum items of the struct_ref_seq_dif category
 	typedef enum {
 		SRSD_ALIGN_ID,
-		SRSD_RNUM,
+		SRSD_SEQ_RNUM,
+		SRSD_DB_RNUM,
     SRSD_DETAILS
 	} StructRefSeqDifItems;
   /// \enum items of the pdbx_struct_assembly_gen category

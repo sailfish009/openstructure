@@ -167,7 +167,8 @@ void export_mmcif_io()
   	     MMCifInfoStructRefSeqDifPtr>("MMCifInfoStructRefSeqDif", no_init)
   	.add_property("details", make_function(&MMCifInfoStructRefSeqDif::GetDetails, 
   				        return_value_policy<copy_const_reference>()))
-  	.add_property("rnum", &MMCifInfoStructRefSeqDif::GetRNum)
+  	.add_property("seq_rnum", &MMCifInfoStructRefSeqDif::GetSeqRNum)
+  	.add_property("db_rnum", &MMCifInfoStructRefSeqDif::GetDBRNum)
   ;
   class_<MMCifInfoBioUnit>("MMCifInfoBioUnit", init<>())
     .def("SetDetails", &MMCifInfoBioUnit::SetDetails)

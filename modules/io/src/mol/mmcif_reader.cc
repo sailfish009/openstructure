@@ -30,6 +30,12 @@
 
 namespace ost { namespace io {
 
+
+bool is_undef(StringRef value)
+{
+	return value.size()==1 && (value[0]=='?' || value[0]=='.');
+}
+
 MMCifReader::MMCifReader(std::istream& stream, mol::EntityHandle& ent_handle,
                          const IOProfile& profile):
   StarParser(stream, true), profile_(profile), ent_handle_(ent_handle)
@@ -321,7 +327,8 @@ bool MMCifReader::OnBeginLoop(const StarLoopDesc& header)
 	} else if (header.GetCategory()=="struct_ref_seq_dif") {
 		category_ = STRUCT_REF_SEQ_DIF;
   	this->TryStoreIdx(SRSD_ALIGN_ID, "align_id", header);
-  	this->TryStoreIdx(SRSD_RNUM, "seq_num", header);
+  	this->TryStoreIdx(SRSD_SEQ_RNUM, "seq_num", header);
+  	this->TryStoreIdx(SRSD_DB_RNUM, "pdbx_seq_db_seq_num", header);
   	indices_[SRSD_DETAILS]=header.GetIndex("details");
   	cat_available = true;
 	}
@@ -1480,10 +1487,21 @@ void MMCifReader::ParseStructRefSeq(const std::vector<StringRef>& columns)
 void MMCifReader::ParseStructRefSeqDif(const std::vector<StringRef>& columns)
 {
 	String aln_id=columns[indices_[SRSD_ALIGN_ID]].str();
-	std::pair<bool,int> rnum=this->TryGetInt(columns[indices_[SRSD_RNUM]],
-			                                     "_struct_ref_seq_dif.seq_num",
-			                                     profile_.fault_tolerant);
-	if (!rnum.first) {
+	std::pair<bool,int> db_rnum(true, -1);
+	if (!is_undef(columns[indices_[SRSD_DB_RNUM]])) {
+	  db_rnum=this->TryGetInt(columns[indices_[SRSD_DB_RNUM]],
+		    	                  "_struct_ref_seq_dif.pdbx_seq_db_seq_num",
+		                        profile_.fault_tolerant);
+	  
+	}
+	std::pair<bool,int> seq_rnum(true, -1);
+	if (!is_undef(columns[indices_[SRSD_SEQ_RNUM]])) {
+	  seq_rnum=this->TryGetInt(columns[indices_[SRSD_SEQ_RNUM]],
+		  	                     "_struct_ref_seq_dif.seq_num",
+			                       profile_.fault_tolerant);
+	  
+	}
+	if (!seq_rnum.first || !db_rnum.first) {
 		return;
 	}
   String details;
@@ -1494,7 +1512,7 @@ void MMCifReader::ParseStructRefSeqDif(const std::vector<StringRef>& columns)
   for (MMCifInfoStructRefs::iterator i=struct_refs_.begin(), 
  		  e=struct_refs_.end(); i!=e; ++i) { 
  	 if (MMCifInfoStructRefSeqPtr s=(*i)->GetAlignedSeq(aln_id)) {
-		 s->AddDif(rnum.second, details); 
+		 s->AddDif(seq_rnum.second, db_rnum.second, details); 
 		 found=true;
  	 	 break;
  	 }
