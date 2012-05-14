@@ -38,7 +38,7 @@ geom::Vec3List GetPosListFromView(const EntityView& view){
   }
   return vl;
 }    
-
+#if OST_IMG_ENABLED
 std::vector<Real> CalculateAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map){
   CheckHandleValidity(density_map);
   std::vector<Real> v;
@@ -59,7 +59,8 @@ Real CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapH
   }
   return sum/float(vl.size());
 }
- 
+
+#endif
 void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 basis_vec){
   mol::XCSEditor edi=eh.EditXCS(mol::BUFFERED_EDIT);
   geom::Vec3 cm,wrapped_cm,shift;

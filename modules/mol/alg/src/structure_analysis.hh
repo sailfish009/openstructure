@@ -27,13 +27,16 @@
 
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/entity_handle.hh>
-#include <ost/img/map.hh>
-
+#if OST_IMG_ENABLED
+# include <ost/img/map.hh>
+#endif
 
 namespace ost { namespace mol { namespace alg {
   geom::Vec3List DLLEXPORT_OST_MOL_ALG GetPosListFromView(const EntityView& view);
+#if OST_IMG_ENABLED
   std::vector<Real> DLLEXPORT_OST_MOL_ALG CalculateAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map);
   Real DLLEXPORT_OST_MOL_ALG CalculateAverageAgreementWithDensityMap(const geom::Vec3List& vl, img::MapHandle& density_map);
+#endif
   void DLLEXPORT_OST_MOL_ALG WrapEntityInPeriodicCell(EntityHandle eh, const geom::Vec3 cell_center, const geom::Vec3 basis_vec);
 }}}//ns
 #endif
