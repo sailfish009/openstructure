@@ -453,7 +453,7 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
 
   String aname(atom_name.str());  
   // some postprocessing
-  LOG_TRACE( "s_chain: [" << chain_name << "]" );
+  LOG_TRACE( "s_chain: [" << cif_chain_name << "]" );
 
   // determine chain and residue update
   bool update_chain = false;
