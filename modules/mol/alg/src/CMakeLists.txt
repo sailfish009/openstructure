@@ -40,8 +40,7 @@ if (ENABLE_IMG)
 endif()
 
 executable(NAME ldt SOURCES ldt.cc 
-           DEPENDS_ON ost_io ost_mol_alg STATIC)
-target_link_libraries(ldt ${BOOST_PROGRAM_OPTIONS})
+           DEPENDS_ON  ost_mol ost_mol_alg ost_io STATIC)
 
 module(NAME mol_alg SOURCES ${OST_MOL_ALG_SOURCES}
        HEADERS ${OST_MOL_ALG_HEADERS}
@@ -54,3 +53,7 @@ copy_if_different("." "${STAGE_DIR}/share/openstructure"
                   "ost_mol_alg")
 install(FILES "atom_scattering_properties.txt" DESTINATION "share/openstructure/")
 
+copy_if_different("." "${STAGE_DIR}/share/openstructure"
+                  "stereo_chemical_props.txt" "STEREO_CHEMICAL_PROPS"
+                  "ost_mol_alg")
+install(FILES "stereo_chemical_props.txt" DESTINATION "share/openstructure/")

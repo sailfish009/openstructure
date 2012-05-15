@@ -12,6 +12,15 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
 
 
+if (CMAKE_COMPILER_IS_GNUCXX)  
+  exec_program(gcc ARGS --version OUTPUT_VARIABLE CMAKE_C_COMPILER_VERSION)
+  if(CMAKE_C_COMPILER_VERSION MATCHES ".*4\\.[5-9].*")
+    set(OST_GCC_45 true)
+  else()   
+    set(OST_GCC_45 false)  
+  endif()
+endif()
+
 option(USE_SHADER "whether to compile with shader support"
        OFF)
 option(USE_RPATH "embed rpath upon make install"
@@ -25,6 +34,8 @@ option(ENABLE_GUI "whether the graphical user interface should be enabled"
 option(ENABLE_GFX "whether graphics support should be enabled"
       ON)
 option(ENABLE_IMG "whether the image processing module should be compiled"
+       ON)
+option(ENABLE_INFO "whether openstructure should be compiled with support for the info library"
        ON)
 option(USE_NUMPY "whether numpy support is added"
       OFF)
@@ -51,6 +62,7 @@ if (FORTRAN_COMPILER)
 endif()
 
 
+
 if (PREFIX)
   set(CMAKE_INSTALL_PREFIX ${PREFIX})
 endif()
@@ -74,8 +86,18 @@ else()
   set(_DOUBLE_PREC OFF)
 endif()
 
+if (NOT ENABLE_INFO)
+  set(ENABLE_GFX OFF)
+endif()
+
 if (NOT ENABLE_GFX)
   set(ENABLE_GUI OFF)
+endif()
+
+if (ENABLE_INFO)
+  set(_INFO ON)
+else()
+  set(_INFO OFF)
 endif()
 
 if (ENABLE_GUI)
@@ -154,11 +176,26 @@ setup_compiler_flags()
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY)
 
+if (ENABLE_STATIC AND UNIX AND NOT APPLE)
+  set (CMAKE_FIND_LIBRARY_SUFFIXES .a)
+endif()
+
 setup_boost()
-        
-find_package(Qt4 4.5.0 REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(PNG REQUIRED)
+
+if (ENABLE_INFO)        
+  find_package(Qt4 4.5.0 REQUIRED)
+endif()
+
+if (ENABLE_GFX)
+  find_package(OpenGL REQUIRED)
+endif()
+
+if (ENABLE_IMG OR ENABLE_GFX)
+  find_package(PNG REQUIRED)
+else()
+  set (PNG_LIBRARY "")
+endif()
+
 find_package(Eigen 2.0.0 REQUIRED)
 find_package(Python 2.4 REQUIRED)
 
@@ -178,8 +215,14 @@ if (ENABLE_STATIC)
   find_package(Boost ${_BOOST_MIN_VERSION} 
                COMPONENTS filesystem system iostreams regex REQUIRED)
   find_package(ZLIB REQUIRED)
-  set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
-      ${PNG_LIBRARIES} ${ZLIB_LIBRARIES})
+   
+  if (UNIX AND NOT APPLE)
+    set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
+        ${PNG_LIBRARY} ${ZLIB_LIBRARY})
+  else ()
+    set(STATIC_LIBRARIES ${Boost_LIBRARIES} ${FFTW_LIBRARIES} ${TIFF_LIBRARIES} 
+        ${PNG_LIBRARY} ${ZLIB_LIBRARY})
+  endif()
 endif()
 
 if (ENABLE_GUI)
@@ -217,6 +260,10 @@ if (UNIX)
   endif() 
 endif()
 
+if (ENABLE_STATIC)
+  SET(CMAKE_SKIP_BUILD_RPATH TRUE)
+  SET(LINK_SEARCH_END_STATIC TRUE) 
+endif()
 
 add_subdirectory(modules)
 add_subdirectory(scripts)
@@ -231,6 +278,7 @@ message(STATUS
         "OpenStructure will be built with the following options:\n"
         "   Install Prefix                       (-DPREFIX) : ${CMAKE_INSTALL_PREFIX}\n"
         "   RPath in install                  (-DUSE_RPATH) : ${_USE_RPATH}\n"
+        "   Info support                    (-DENABLE_INFO) : ${_INFO}\n"
         "   Graphical interface              (-DENABLE_GUI) : ${_UI}\n"
         "   OpenGL support                   (-DENABLE_GFX) : ${_OPENGL}\n"
         "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
@@ -242,4 +290,5 @@ message(STATUS
         "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}" )
+

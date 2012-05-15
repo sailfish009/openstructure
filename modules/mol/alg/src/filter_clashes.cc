@@ -18,112 +18,410 @@
 //------------------------------------------------------------------------------
 #include <ost/log.hh>
 #include <ost/mol/mol.hh>
+#include <sstream>
+#include <math.h>
 #include "filter_clashes.hh"
+#include <ost/units.hh>
 
-namespace ost { namespace mol { namespace alg {
+
 
 namespace {
 
-Real GetThreshold(const String& ele1, const String& ele2) {
-  if (ele1.length()!=1 || ele2.length()!=1) {
-    return 1.5;
+String bond_string(const ost::mol::AtomView& atom1, const ost::mol::AtomHandle& atom2) {
+  String atom1_str = atom1.GetName();
+  String atom2_str = atom2.GetName();
+  String string1,string2;
+  if (atom1_str < atom2_str) {
+    string1 = atom1_str;
+    string2 = atom2_str;
+  } else {
+    string1 = atom2_str;
+    string2 = atom1_str;
   }
-  switch (ele1[0]) {
-    case 'C' :
-      switch (ele2[0]) {
-        case 'C' : return 2.10;
-        case 'N' : return 2.10;
-        case 'S' : return 2.45;
-        case 'O' : return 2.25;
-        default: return 1.5;
-      }
-    case 'N':
-      switch (ele2[0]) {
-        case 'C' : return 2.10;
-        case 'N' : return 2.05;
-        case 'S' : return 2.55;
-        case 'O' : return 2.10;
-        default: return 1.5;
-      }
-    case 'O':
-      switch (ele2[0]) {
-        case 'C' : return 2.25;
-        case 'N' : return 2.10;
-        case 'S' : return 2.45;
-        case 'O' : return 2.05;
-        default: return 1.5;
-      }
-    case 'S':
-      switch (ele2[0]) {
-        case 'C' : return 2.45;
-        case 'N' : return 2.55;
-        case 'S' : return 1.80;
-        case 'O' : return 2.45;
-        default: return 1.5;
-      }
-    default:
-      return 1.5;
+  std::stringstream stkey;
+  stkey << string1 << "-" << string2;
+  return stkey.str();  
+}
+
+String angle_string(const ost::mol::AtomHandle& atom1, const ost::mol::AtomView& atom, const ost::mol::AtomHandle& atom2 ) {
+  String atom1_str = atom1.GetName();
+  String atom2_str = atom2.GetName();
+  String string1,string2;
+  if (atom1_str < atom2_str) {
+    string1 = atom1_str;
+    string2 = atom2_str;
+  } else {
+    string1 = atom2_str;
+    string2 = atom1_str;
   }
+  std::stringstream stkey;
+  stkey << string1 << "-" << atom.GetName() << "-" << string2;
+  return stkey.str();  
 }
 
 
-}
+}  
 
-EntityView FilterClashes(const EntityView& ent, Real tolerance, 
-                         bool always_remove_bb)
+
+namespace ost { namespace mol { namespace alg {
+
+void ClashingDistances::SetClashingDistance(const String& ele1,const String& ele2, Real min_distance, Real tolerance)
 {
+  std::stringstream stkey;
+  stkey << ele1 << "--" << ele2;
+  String key=stkey.str();
+  min_distance_[key]=std::make_pair<Real,Real>(min_distance,tolerance);
+}
+
+std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,const String& ele2) const
+{
+  std::stringstream stkey;
+  if (ele1<ele2) {
+    stkey << ele1 << "--" << ele2;
+  } else {
+    stkey << ele2 << "--" << ele1;
+  }  
+  String key=stkey.str();
+  std::map <String,std::pair<float,float> >::const_iterator find_ci= min_distance_.find(key);
+  if (find_ci == min_distance_.end()) {
+    return std::make_pair<Real,Real> (default_min_distance_,default_min_distance_tolerance_);
+  }    
+  return find_ci->second;
+}
+
+void ClashingDistances::PrintAllDistances() const
+{
+   for (std::map <String,std::pair<float,float> >::const_iterator index = min_distance_.begin();index != min_distance_.end();++index) {
+     std::cout << index->first << "\t" << index->second.first << "\t" << index->second.second << std::endl;
+   }    
+}
+
+Real ClashingDistances::GetMaxAdjustedDistance() const
+{
+  Real max_adjusted_distance=0;
+  for (std::map <String,std::pair<float,float> >::const_iterator index = min_distance_.begin();index != min_distance_.end();++index) {
+    Real distance = index->second.first; 
+    Real tolerance = index->second.second; 
+    if ((distance-tolerance) > max_adjusted_distance) {
+      max_adjusted_distance=distance-tolerance;
+    }
+  }  
+  return max_adjusted_distance;  
+}
+
+bool ClashingDistances::IsEmpty() const
+{
+  if (min_distance_.size()==0) {
+    return  true;
+  }
+  return false;
+}  
+
+void StereoChemicalParams::SetParam(const String& param, const String& residue, Real value, Real st_dev)
+{
+  std::pair<String,String> key = std::make_pair<String,String>(param,residue);
+  params_[key]=std::make_pair<Real,Real>(value,st_dev);
+}
+
+std::pair<Real,Real> StereoChemicalParams::GetParam(const String& param,const String& residue) const
+{
+  std::pair<String,String> key = std::make_pair<String,String>(param,residue);
+  std::map<std::pair<String,String>,std::pair<float,float> >::const_iterator find_ci = params_.find(key);
+  if (find_ci == params_.end()) {
+      std::stringstream serr;
+      serr << "Entry " << param <<  " for residue " << residue << " not found in the parameter table";   
+      throw Error(serr.str());
+  }    
+  return find_ci->second;
+}
+
+bool StereoChemicalParams::ContainsParam(const String& param,const String& residue) const
+{
+  std::pair<String,String> key = std::make_pair<String,String>(param,residue);
+  std::map<std::pair<String,String>,std::pair<float,float> >::const_iterator find_ci = params_.find(key);
+  if (find_ci == params_.end()) {
+    return false;
+  }    
+  return true;
+}
+
+void StereoChemicalParams::PrintAllParameters() const 
+{
+   for (std::map <std::pair<String,String>,std::pair<float,float> >::const_iterator index = params_.begin();index != params_.end();++index) {
+     std::cout << index->first.first << "\t" << index->first.second << "\t" << index->second.first << "\t" << index->second.second << std::endl;
+   }    
+};
+
+bool StereoChemicalParams::IsEmpty() const
+{
+  if (params_.size()==0) {
+    return  true;
+  }
+  return false;
+}  
+
+StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<String>& stereo_chemical_props_file)
+{
+  StereoChemicalParams table;
+  bool found=false;
+  std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
+  while (line_iter!=stereo_chemical_props_file.end()) {
+    if ((*line_iter).length()!=0 && (*line_iter).length()!=1) {
+      StringRef line_string_ref(line_iter->data(),(*line_iter).length());
+      std::vector<StringRef> line_str_vec = line_string_ref.split();
+      if (line_str_vec[0].str()==header) {
+        found=true;
+        line_iter++;
+        while ((*line_iter)[0]!='-') {
+          if ((*line_iter)[0]!='#') {
+            StringRef second_line_string_ref(line_iter->data(),(*line_iter).length());
+            std::vector<StringRef> second_line_str_vec = second_line_string_ref.split();
+            if (second_line_str_vec.size()!=4) {
+              std::cout << "The number of elements in one of the lines is wrong" << std::endl;
+              return StereoChemicalParams();
+            } 
+            StringRef item = second_line_str_vec[0];
+            String res = second_line_str_vec[1].str();          
+            std::pair<bool,float> parse_value = second_line_str_vec[2].to_float();
+            std::pair<bool,float> parse_stddev = second_line_str_vec[3].to_float();
+            Real value,stddev;
+            if (parse_value.first==true) {
+              value=static_cast<Real>(parse_value.second);
+            } else {
+              std::cout << "One of the values in the third column is not a number" << std::endl;
+              return StereoChemicalParams();
+            };
+            if (parse_stddev.first==true) {
+              stddev=static_cast<Real>(parse_stddev.second);
+            } else {
+              std::cout << "One of the values in the fourth column is not a number" << std::endl;
+              return StereoChemicalParams();
+            };
+            std::vector<StringRef> split_item = item.split('-');
+            String rearranged_item;
+            if (split_item.size() == 2) {
+              String atom1 = split_item[0].str();
+              String atom2 = split_item[1].str();
+              if (atom2 < atom1) {
+                 std::stringstream srearr;
+                 srearr << atom2 << "-" << atom1;
+                 rearranged_item=srearr.str();                     
+              } else {
+                 rearranged_item = item.str();
+              }          
+            } else if (split_item.size() == 3) {
+              String atom1 = split_item[0].str();
+              String atom = split_item[1].str();
+              String atom2 = split_item[2].str();
+              if (atom2 < atom1) {
+                 std::stringstream srearr;
+                 srearr << atom2 << "-" << atom << "-" << atom1;
+                 rearranged_item=srearr.str();                
+              } else {
+                 rearranged_item = item.str();
+              }                
+            } else {
+              std::cout << "One of the strings describing the parameter has the wrong format" << std::endl;
+              return StereoChemicalParams();
+            }            
+            table.SetParam(rearranged_item,res,value,stddev);
+            line_iter++;
+            }  
+        }
+      }  
+    }
+    line_iter++;    
+  }
+  if (found==false) {
+    std::cout << "Could not find the relevant section in the stereo-chemical parameter file" << std::endl;
+    return StereoChemicalParams();
+  };    
+  return table;
+};  
+
+ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_props_file, Real min_default_distance, Real min_distance_tolerance)
+{
+  ClashingDistances table(min_default_distance,min_distance_tolerance);
+  bool found=false;
+  std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
+  while (line_iter!=stereo_chemical_props_file.end()) {
+    if ((*line_iter).length()!=0 && (*line_iter).length()!=1) {
+      StringRef line_string_ref(line_iter->data(),(*line_iter).length());
+      std::vector<StringRef> line_str_vec = line_string_ref.split();
+      if (line_str_vec[0].str()=="Non-bonded") {
+        found=true;
+        line_iter++;
+        while ((*line_iter)[0]!='-') {
+          if ((*line_iter)[0]!='#') {
+            StringRef second_line_string_ref(line_iter->data(),(*line_iter).length());
+            std::vector<StringRef> second_line_str_vec = second_line_string_ref.split();
+            if (second_line_str_vec.size()!=3) {
+              std::cout << "The number of elements in one of the lines is wrong" << std::endl;
+              return ClashingDistances(min_default_distance,min_distance_tolerance);
+            } 
+            String item = second_line_str_vec[0].str();
+
+            std::pair<bool,float> parse_value = second_line_str_vec[1].to_float();
+            std::pair<bool,float> parse_stddev = second_line_str_vec[2].to_float();
+            Real value,stddev;
+            if (parse_value.first==true) {
+              value=static_cast<Real>(parse_value.second);
+            } else {
+              std::cout << "One of the distance values is not a number" << std::endl;
+              return ClashingDistances(min_default_distance,min_distance_tolerance);
+            };
+            if (parse_stddev.first==true) {
+              stddev=static_cast<Real>(parse_stddev.second);
+            } else {
+              std::cout << "One of the tolerance values is not a number" << std::endl;
+              return ClashingDistances(min_default_distance,min_distance_tolerance);
+            }
+            StringRef itemsr(item.data(),item.length());
+            std::vector<StringRef> eles = itemsr.split('-');
+            if (itemsr.size() != 3) {
+              std::cout << "One of the strings describing the interacting atoms has the wrong format" << std::endl;
+              return ClashingDistances(min_default_distance,min_distance_tolerance);
+            }  
+            String ele1=eles[0].str();
+            String ele2=eles[1].str();
+            if (ele2 < ele1) {
+              table.SetClashingDistance(ele2,ele1,value,stddev);
+            } else {
+              table.SetClashingDistance(ele1,ele2,value,stddev);
+            }  
+            line_iter++;
+          }  
+        }
+      }  
+    }
+    line_iter++;    
+  }
+  if (found==false) {
+    std::cout << "Could not find the relevant section in the stereo-chemical parameter file" << std::endl;
+    return ClashingDistances(min_default_distance,min_distance_tolerance);
+  } 
+  return table;
+}  
+
+
+EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
+{
+  LOG_INFO("Checking stereo-chemistry")
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
-  for (ResidueViewList::iterator 
-       i=residues.begin(), e=residues.end(); i!=e; ++i) {
+  for (ResidueViewList::iterator i=residues.begin(), e=residues.end(); i!=e; ++i) {
     bool remove_sc=false, remove_bb=false;
     ResidueView res=*i;
+    if (res.GetOneLetterCode()=='?') {
+      filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
+      continue;
+    }  
+    String residue_str = res.GetName();
     const AtomViewList& atoms=res.GetAtomList();
-    for (AtomViewList::const_iterator 
-         j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
+    for (AtomViewList::const_iterator j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
       AtomView atom=*j;
       String ele1=atom.GetElement();
       if (ele1=="H" || ele1=="D") {
         continue;
       }
-      AtomViewList within=ent.FindWithin(atom.GetPos(), 2.5-tolerance);
-      for (AtomViewList::iterator 
-           k=within.begin(), e3=within.end(); k!=e3; ++k) {
-        AtomView atom2=*k;
-        if (atom2==atom) {
+      BondHandleList bonds = atom.GetBondList();
+      
+      for (BondHandeList::const_iterator bi = bonds.begin();bi!=bonds.end();++bi) {
+          BondHandle bond = *bi;          
+          AtomHandle other_atom = bond.GetOther(atom.GetHandle());    
+          if (other_atom.GetResidue()!=res.GetHandle()) {
+            continue;     
+          }         
+          String ele2 = other_atom.GetElement();
+          if (ele2=="H" || ele2=="D") {
+            continue;
+          }      
+          if (other_atom.GetHashCode() > atom.GetHandle().GetHashCode()) {
+            Real blength = bond.GetLength();
+            String bond_str = bond_string(atom,other_atom);
+            std::pair<Real,Real> length_stddev = bond_table.GetParam(bond_str,residue_str);
+            Real ref_length = length_stddev.first;
+            Real ref_stddev = length_stddev.second;           
+            Real min_length = ref_length - bond_tolerance*ref_stddev;
+            Real max_length = ref_length + bond_tolerance*ref_stddev;
+            Real zscore = (blength - ref_length)/ref_stddev;
+            if (blength < min_length || blength > max_length) {
+              LOG_INFO("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "FAIL")
+              remove_sc=true;
+              if (always_remove_bb==true) {
+                remove_bb=true;
+                continue;
+              }
+              String name=atom.GetName();
+              if (name=="CA" || name=="N" || name=="O" || name=="C") {
+                remove_bb=true;
+              }
+            } else {
+              LOG_VERBOSE("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "PASS")
+            }  
+          }  
+      }
+      
+      for (BondHandeList::const_iterator bond_iter1=bonds.begin(); bond_iter1!=bonds.end(); ++bond_iter1) {
+        BondHandle bond1=*bond_iter1;
+        AtomHandle atom1= bond1.GetOther(atom.GetHandle());
+        String ele_atom1=atom1.GetElement();
+        if (ele_atom1=="H" || ele_atom1=="D") {
           continue;
         }
-        String ele2=atom2.GetElement();
-        if (ele2=="H" || ele2=="D") {
-          continue;
-        }
-        // In theory, this should also trigger for disulfide bonds, but 
-        // since we don't detect disulfides correctly, we can't count on that 
-        // and we instead allow S-S distances down to 1.8.
-        if (atom.GetHandle().FindBondToAtom(atom2.GetHandle()).IsValid()) {
-          continue;
-        }
-        Real d=geom::Length2(atom.GetPos()-atom2.GetPos());
-        Real threshold=GetThreshold(ele1, ele2)-tolerance;
-        if (d<threshold*threshold) {
-          remove_sc=true;
-          if (always_remove_bb==true) {
-            remove_bb=true;
+        if (atom1.GetResidue()!=res.GetHandle()) {
+          continue;        
+        }        
+        for (BondHandeList::const_iterator bond_iter2=bonds.begin(); bond_iter2!=bonds.end(); ++bond_iter2) {
+          BondHandle bond2=*bond_iter2;
+          AtomHandle atom2 = bond2.GetOther(atom.GetHandle());
+          String ele_atom2=atom2.GetElement();
+          if (ele_atom2=="H" || ele_atom2=="D") {
             continue;
           }
-          String name=atom.GetName();
-          if (name=="CA" || name=="N" || name=="O" || name=="C") {
-            remove_bb=true;
+          if (atom2.GetResidue()!=res.GetHandle()) {
+            continue;        
           }
+          if (atom1.GetHashCode() > atom2.GetHashCode()) {
+            Real awidth;
+            if (atom1.GetName()<atom2.GetName()) {
+              awidth = ent.GetAngle(atom1,atom.GetHandle(),atom2);
+            } else {
+              awidth = ent.GetAngle(atom2,atom.GetHandle(),atom1);
+            }    
+            awidth/=(ost::Units::deg);
+            String angle_str = angle_string(atom1,atom,atom2);
+            std::pair<Real,Real> width_stddev = angle_table.GetParam(angle_str,residue_str);
+            Real ref_width = width_stddev.first;  
+            Real ref_stddev = width_stddev.second;           
+            Real min_width = ref_width - angle_tolerance*ref_stddev;
+            Real max_width = ref_width + angle_tolerance*ref_stddev;
+            Real zscore = (awidth - ref_width)/ref_stddev;
+            if (awidth < min_width || awidth > max_width) {
+              LOG_INFO("ANGLE:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "FAIL")
+              remove_sc=true;
+              if (always_remove_bb==true) {
+                remove_bb=true;
+                continue;
+              }
+              String name=atom.GetName();
+              if (name=="CA" || name=="N" || name=="O" || name=="C") {
+                remove_bb=true;
+              }
+            } else {
+                LOG_VERBOSE("ANGLE:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "PASS")
+            }
+          }  
         }
-      }
+      }         
     }
+    
     if (remove_bb) {
-      LOG_VERBOSE("removing whole residue " << res);
+      LOG_INFO("ACTION: removing whole residue " << res);
       continue;
     }
     if (remove_sc) {
-      LOG_VERBOSE("removing sidechain of residue " << res);
+      LOG_INFO("ACTION: removing sidechain of residue " << res);
       for (AtomViewList::const_iterator 
            j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
        AtomView atom=*j;
@@ -140,12 +438,102 @@ EntityView FilterClashes(const EntityView& ent, Real tolerance,
 }
 
 
-EntityView FilterClashes(const EntityHandle& ent, Real tolerance, 
-                         bool always_remove_bb)
+EntityView CheckStereoChemistry(const EntityHandle& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
 {
-  return FilterClashes(ent.CreateFullView(), tolerance, always_remove_bb);
+  return CheckStereoChemistry(ent.CreateFullView(), bond_table, angle_table, bond_tolerance, angle_tolerance, always_remove_bb);
+}
+
+
+EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_distances, bool always_remove_bb)
+{
+  LOG_INFO("Filtering non-bonded clashes")
+  EntityView filtered=ent.CreateEmptyView();
+  ResidueViewList residues=ent.GetResidueList();
+  for (ResidueViewList::iterator 
+       i=residues.begin(), e=residues.end(); i!=e; ++i) {
+    bool remove_sc=false, remove_bb=false;
+    ResidueView res=*i;
+    if (res.GetOneLetterCode()=='?') {
+      filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
+      continue;
+    }  
+    const AtomViewList& atoms=res.GetAtomList();
+    for (AtomViewList::const_iterator 
+         j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
+      AtomView atom=*j;
+      String ele1=atom.GetElement();
+      if (ele1=="H" || ele1=="D") {
+        continue;
+      }
+      AtomViewList within=ent.FindWithin(atom.GetPos(),min_distances.GetMaxAdjustedDistance());
+      for (AtomViewList::iterator 
+           k=within.begin(), e3=within.end(); k!=e3; ++k) {
+        AtomView atom2=*k;
+        if (atom2==atom) {
+          continue;
+        }
+        String ele2=atom2.GetElement();
+        if (ele2=="H" || ele2=="D") {
+          continue;
+        }
+
+        // In theory, this should also trigger for disulfide bonds, but 
+        // since we don't detect disulfides correctly, we can't count on that 
+        // and we instead allow S-S distances down to 1.8.
+        if (atom.GetHandle().FindBondToAtom(atom2.GetHandle()).IsValid()) {
+          continue;
+        }
+
+        Real d=geom::Length2(atom.GetPos()-atom2.GetPos());
+        std::pair <Real,Real> distance_tolerance=min_distances.GetClashingDistance(ele1, ele2);
+        Real distance=distance_tolerance.first;
+        Real tolerance=distance_tolerance.second;
+        Real threshold=distance-tolerance;
+        if (d<threshold*threshold) {
+          LOG_INFO(atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetName() << " " << atom2.GetResidue().GetNumber() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "FAIL")
+       
+          remove_sc=true;
+          if (always_remove_bb==true) {
+            remove_bb=true;
+            continue;
+          }
+          String name=atom.GetName();
+          if (name=="CA" || name=="N" || name=="O" || name=="C") {
+            remove_bb=true;
+          }
+        } else {
+          LOG_VERBOSE("CLASH:" << " " << atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetNumber() << " " << atom2.GetResidue().GetName() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "PASS")
+        }  
+      }
+    }
+    
+    if (remove_bb) {
+      LOG_VERBOSE("ACTION: removing whole residue " << res);
+      continue;
+    }
+    if (remove_sc) {
+      LOG_VERBOSE("ACTION: removing sidechain of residue " << res);
+      for (AtomViewList::const_iterator 
+           j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
+       AtomView atom=*j;
+       String name=atom.GetName();
+       if (name=="CA" || name=="N" || name=="O" || name=="C") {
+         filtered.AddAtom(atom);
+       }
+      }
+      continue;
+    }
+    filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
+  }
+  return filtered;
+}
+
+
+EntityView FilterClashes(const EntityHandle& ent,  
+                         const ClashingDistances& min_distances, bool always_remove_bb)
+{
+  return FilterClashes(ent.CreateFullView(), min_distances, always_remove_bb);
 }
 
 
 }}}
-

@@ -21,7 +21,11 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <boost/shared_ptr.hpp>
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info_fw.hh>
+#endif
 #include <ost/seq/alg/module_config.hh>
 
 /*
@@ -86,12 +90,14 @@ private:
   WeightType weights_[ALPHABET_SIZE*ALPHABET_SIZE];
 };
 
+#if(OST_INFO_ENABLED)
 SubstWeightMatrixPtr DLLEXPORT_OST_SEQ_ALG
 SubstWeightMatrixFromInfo(const info::InfoGroup& group);
 
 void DLLEXPORT_OST_SEQ_ALG 
 SubstWeightMatrixToInfo(const SubstWeightMatrixPtr& subst_mat, 
                         info::InfoGroup& group);
+#endif
 
 }}}
 

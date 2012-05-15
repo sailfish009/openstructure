@@ -18,7 +18,10 @@
 //------------------------------------------------------------------------------
 #include <limits>
 
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
+#endif
 #include <ost/seq/impl/sequence_list_impl.hh>
 
 namespace ost { namespace seq { namespace impl {
@@ -154,6 +157,7 @@ SequenceListImplPtr SequenceListImpl::Copy() const
   return new_ali;
 }
 
+#if(OST_INFO_ENABLED)
 void SequenceListImplToInfo(const SequenceListImplPtr& seq_list,
                             info::InfoGroup& group)
 {
@@ -175,6 +179,7 @@ SequenceListImplPtr SequenceListImplFromInfo(info::InfoGroup& group)
   }
   return seq_list;
 }
+#endif
 
 SequenceListImplPtr SequenceListImpl::Slice(int first, int n) const
 {

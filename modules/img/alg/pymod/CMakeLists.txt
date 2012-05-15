@@ -6,5 +6,7 @@ export_transcendentals.cc
 export_polar.cc
 )
 
-pymod(NAME img_alg OUTPUT_DIR ost/img/alg CPP ${OST_IMG_ALG_PYMOD_SOURCES}
-      PY __init__.py)
+if (NOT ENABLE_STATIC)
+  pymod(NAME img_alg OUTPUT_DIR ost/img/alg CPP ${OST_IMG_ALG_PYMOD_SOURCES}
+        PY __init__.py)
+endif()

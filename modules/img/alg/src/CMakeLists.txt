@@ -94,7 +94,9 @@ line_average.hh
 rscrosscorr.hh
 )
 
+if(ENABLE_INFO)
 include(${QT_USE_FILE})
+endif()
 module(NAME img_alg SOURCES "${OST_IMG_ALG_SOURCES}" 
        HEADERS "${OST_IMG_ALG_HEADERS}" 
        HEADER_OUTPUT_DIR ost/img/alg

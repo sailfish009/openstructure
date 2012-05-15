@@ -1,0 +1,4 @@
+set(PYTHON_BINARY "/usr/bin/python2"  CACHE PATH "")
+set(ZLIB_LIBRARY "/usr/lib/libz.a"  CACHE PATH "")
+set(PNG_LIBRARY "/usr/lib/libpng12.a"  CACHE PATH "")
+set(FFTW_LIBRARIES "/usr/lib/libfftw3f.a"  CACHE PATH "")

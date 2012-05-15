@@ -25,7 +25,10 @@
 
 #include <ost/base.hh>
 #include <ost/generic_property.hh>
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info_fw.hh>
+#endif
 #include <ost/seq/module_config.hh>
 
 #include <ost/mol/residue_view.hh>
@@ -302,13 +305,15 @@ private:
 SequenceHandle DLLEXPORT_OST_SEQ CreateSequence(const String& name, 
                                                 const String& seq, 
                                                 const String& role="UNKNOWN");
-                                                
+#if(OST_INFO_ENABLED)                                                
 /// \brief export sequence to info
 void DLLEXPORT_OST_SEQ SequenceToInfo(const ConstSequenceHandle& sequence,
                                       info::InfoGroup& group);
 
 /// \brief create sequence from info
 SequenceHandle DLLEXPORT_OST_SEQ SequenceFromInfo(info::InfoGroup& group);
+#endif
+
 
 DLLEXPORT_OST_SEQ std::ostream& operator<<(std::ostream& os, 
                                            const ConstSequenceHandle& sequence);

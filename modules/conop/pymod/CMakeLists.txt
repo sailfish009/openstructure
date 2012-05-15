@@ -8,4 +8,6 @@ set(OST_CONOP_PYMOD_SOURCES
   export_ring_finder.cc
 )
 
-pymod(NAME conop CPP ${OST_CONOP_PYMOD_SOURCES} PY __init__.py cleanup.py)
+if (NOT ENABLE_STATIC)
+  pymod(NAME conop CPP ${OST_CONOP_PYMOD_SOURCES} PY __init__.py cleanup.py)
+endif()

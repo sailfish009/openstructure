@@ -16,9 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
 #include <ost/info/geom_info_conversion.hh>
-
+#endif
 #include "transform.hh"
 
 namespace ost { 
@@ -193,6 +196,7 @@ void Transform::update_tm()
   ttm_ = Transpose(tm_);
 }
 
+#if(OST_INFO_ENABLED)
 Transform TransformFromInfo(const info::InfoGroup& group)
 {
   if (!group.HasItem("center")) {
@@ -222,5 +226,6 @@ void TransformToInfo(const Transform& transform, info::InfoGroup& group)
   info::InfoGroup rot=group.CreateGroup("rotation");
   info::Mat3ToInfo(transform.GetRot(), rot);
 }
+#endif
 
 }} // ns

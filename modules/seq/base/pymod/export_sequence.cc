@@ -25,7 +25,10 @@
 #include <ost/export_helper/pair_to_tuple_conv.hh>
 #include <ost/generic_property.hh>
 #include <ost/export_helper/generic_property_def.hh>
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
+#endif
 #include <ost/mol/mol.hh>
 #include <ost/seq/sequence_handle.hh>
 #include <ost/seq/alignment_handle.hh>
@@ -412,13 +415,15 @@ void export_sequence()
   def("CreateSequenceList", &CreateSequenceList);
   def("SequenceFromChain", seq_from_chain_a);
   def("SequenceFromChain", seq_from_chain_b);
+#if(OST_INFO_ENABLED)
   def("SequenceToInfo", &SequenceToInfo);
+  def("SequenceListToInfo", &SequenceListToInfo);
+  def("SequenceFromInfo", &SequenceFromInfo);  
+  def("SequenceListFromInfo", &SequenceListFromInfo);
+#endif
   def("ViewsFromSequences", &ViewsFromSequences, (arg("seq1"), arg("seq2")));
   def("ViewsFromAlignment", &ViewsFromAlignment, 
       (arg("aln"), arg("index1")=0, arg("index2")=1));
-  def("SequenceListToInfo", &SequenceListToInfo);
-  def("SequenceFromInfo", &SequenceFromInfo);
   def("CreateAlignment", &CreateAlignment);
   def("AlignmentFromSequenceList", &AlignmentFromSequenceList);
-  def("SequenceListFromInfo", &SequenceListFromInfo);
 }

@@ -226,6 +226,8 @@ void SequenceHandle::AttachView(const mol::EntityView& view,
   Impl()->AttachView(view, chain_name);   
 }
 
+#if(OST_INFO_ENABLED)
+
 /// \brief export sequence to info
 void  SequenceToInfo(const ConstSequenceHandle& sequence,
                      info::InfoGroup& group)
@@ -238,6 +240,8 @@ SequenceHandle SequenceFromInfo(info::InfoGroup& group)
 {
   return SequenceHandle(impl::SequenceImplFromInfo(group));
 }
+#endif
+
 
 
 std::ostream& operator<<(std::ostream& os, const ConstSequenceHandle& sequence)

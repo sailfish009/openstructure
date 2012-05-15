@@ -16,4 +16,6 @@ set(OST_GEOM_PYMOD_SOURCES
   export_quat.cc
 )
 
-pymod(NAME geom CPP ${OST_GEOM_PYMOD_SOURCES} PY __init__.py)
+if (NOT ENABLE_STATIC)
+  pymod(NAME geom CPP ${OST_GEOM_PYMOD_SOURCES} PY __init__.py)
+endif()

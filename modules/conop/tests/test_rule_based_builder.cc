@@ -119,6 +119,35 @@ ResidueHandle make_uracil2(ChainHandle chain)
   return res;
 }
 
+ResidueHandle make_defective_uracil2(ChainHandle chain) 
+{
+  XCSEditor e=chain.GetEntity().EditXCS();
+  ResidueHandle res = e.AppendResidue(chain, "U");
+
+  e.InsertAtom(res, "P",   geom::Vec3(16.249, 28.254, 44.759));
+  e.InsertAtom(res, "OP1", geom::Vec3(16.654, 28.055, 46.181));
+  e.InsertAtom(res, "OP2", geom::Vec3(17.115, 27.731, 43.656));
+  e.InsertAtom(res, "O5'", geom::Vec3(14.826, 27.572, 44.574));
+  e.InsertAtom(res, "C5'", geom::Vec3(14.711, 26.206, 44.216));
+  e.InsertAtom(res, "C4'", geom::Vec3(13.279, 25.889, 43.887));
+  e.InsertAtom(res, "O4'", geom::Vec3(12.832, 26.793, 42.838));
+  e.InsertAtom(res, "C3'", geom::Vec3(13.155, 24.434, 43.329));
+  e.InsertAtom(res, "O3'", geom::Vec3(12.269, 23.625, 44.098));
+  e.InsertAtom(res, "C2'", geom::Vec3(12.871, 24.595, 41.875));
+  e.InsertAtom(res, "O2'", geom::Vec3(11.811, 23.752, 41.462));
+  e.InsertAtom(res, "C1'", geom::Vec3(12.424, 26.056, 41.694));
+  e.InsertAtom(res, "N1",  geom::Vec3(13.030, 26.692, 40.497));
+  e.InsertAtom(res, "C2",  geom::Vec3(12.517, 26.365, 39.228));
+  e.InsertAtom(res, "O2",  geom::Vec3(11.579, 25.594, 39.068));
+  e.InsertAtom(res, "N3",  geom::Vec3(13.141, 26.987, 38.161));
+  e.InsertAtom(res, "C4",  geom::Vec3(14.197, 27.888, 38.210));
+  e.InsertAtom(res, "O4",  geom::Vec3(14.627, 28.368, 37.156));
+  e.InsertAtom(res, "C5",  geom::Vec3(14.671, 28.189, 39.542));
+  e.InsertAtom(res, "C6",  geom::Vec3(14.087, 27.597, 80.612));
+
+  return res;
+}
+
 void verify_nucleotide_connectivity(const ResidueHandle& res) 
 {
   BOOST_CHECK(BondExists(res.FindAtom("P"),
@@ -217,16 +246,28 @@ BOOST_AUTO_TEST_CASE(nucleotide_based_connect)
   }
   RuleBasedBuilder rb_builder = RuleBasedBuilder(compound_lib);
 
+  RuleBasedBuilder drb_builder = RuleBasedBuilder(compound_lib);
+  drb_builder.SetBondFeasibilityCheck(false);
+  
   EntityHandle e=CreateEntity();
   ChainHandle c=e.EditXCS().InsertChain("A");
   ResidueHandle c0=make_cytosine(c);
   ResidueHandle u1=make_uracil1(c);
   ResidueHandle u2=make_uracil2(c);
+  
+  EntityHandle de=CreateEntity();  
+  ChainHandle dc=de.EditXCS().InsertChain("A");
+  ResidueHandle du2=make_defective_uracil2(dc);
+
 
   for (AtomHandleIter i=e.AtomsBegin(),x=e.AtomsEnd(); i!=x; ++i) {
     rb_builder.FillAtomProps(*i);
   }
 
+  for (AtomHandleIter i=de.AtomsBegin(),x=de.AtomsEnd(); i!=x; ++i) {
+    drb_builder.FillAtomProps(*i);
+  }
+  
   // running positive test
   BOOST_MESSAGE("running distance based checks on cytosine");
   rb_builder.ConnectAtomsOfResidue(c0);
@@ -247,6 +288,12 @@ BOOST_AUTO_TEST_CASE(nucleotide_based_connect)
   BOOST_MESSAGE("connecting cytosine to second uracil");
   rb_builder.ConnectResidueToNext(c0, u2);
   verify_nucleotide_nolink(c0, u2);
+  
+  // running positive test
+  BOOST_MESSAGE("running distance based checks on defective uracil");
+  drb_builder.ConnectAtomsOfResidue(du2);
+  verify_nucleotide_connectivity(du2);
+  
 }
 
 BOOST_AUTO_TEST_SUITE_END( )
