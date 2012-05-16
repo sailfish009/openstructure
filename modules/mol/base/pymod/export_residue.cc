@@ -171,7 +171,8 @@ void export_Residue()
     .def("SetOneLetterCode", &ResidueBase::SetOneLetterCode)
     .add_property("one_letter_code", &ResidueBase::GetOneLetterCode, 
                  &ResidueBase::SetOneLetterCode)  
-    .def("GetQualifedName", &ResidueBase::GetQualifiedName)
+    .def("GetQualifiedName", &ResidueBase::GetQualifiedName)
+    .add_property("qualified_name", &ResidueBase::GetQualifiedName)
     .def("IsPeptideLinking", &ResidueBase::IsPeptideLinking)
     .add_property("peptide_linking", &ResidueBase::IsPeptideLinking)
     
@@ -205,7 +206,6 @@ void export_Residue()
     .add_property("name",
                    make_function(&ResidueBase::GetName,
                                  return_value_policy<copy_const_reference>()))
-    .add_property("qualified_name", &ResidueBase::GetQualifiedName)
     .def("IsValid", &ResidueBase::IsValid)
     .add_property("valid", &ResidueBase::IsValid) 
   ;
