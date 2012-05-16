@@ -168,8 +168,8 @@ bool CopyModified(ResidueHandle src_res, ResidueHandle dst_res,
   //        chirality of those centers in the compound library.
   
   // For now, this function just handles cases where the src_res contains 
-  // additional atoms, but the dst_atom doesn't contain any atoms the src_res 
-  // doesn't have. It these two requirements are not met, we fall back to 
+  // additional atoms, but the dst_res doesn't contain any atoms the src_res
+  // doesn't have. If these two requirements are not met, we fall back to
   // CopyNonConserved.
   
   // first let's get our hands on the component library
