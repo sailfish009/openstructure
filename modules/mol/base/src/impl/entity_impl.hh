@@ -93,7 +93,7 @@ public:
   Real GetMass() const;
   geom::Vec3 GetCenterOfMass() const;
   geom::Vec3 GetCenterOfAtoms() const;
-  
+  geom::Vec3List GetAtomPosList() const;
   /// \brief returns the axis-aligned bounding box of the entity
   geom::AlignedCuboid GetBounds() const;
   

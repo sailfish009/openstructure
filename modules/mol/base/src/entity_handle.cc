@@ -362,6 +362,11 @@ AtomHandleList EntityHandle::GetAtomList() const
   return atoms;
 }
 
+geom::Vec3List EntityHandle::GetAtomPosList() const {
+  this->CheckValidity();
+  return Impl()->GetAtomPosList();
+}
+  
 EntityHandle EntityHandle::GetHandle() const
 {
   return *this;

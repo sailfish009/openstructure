@@ -280,6 +280,9 @@ public:
   /// \sa #AtomsBegin, #AtomsEnd
   AtomHandleList GetAtomList() const;
   
+  /// \brief get complete list of atom positions
+  geom::Vec3List GetAtomPosList() const;
+  
   /// \brief Get editor for external coordinate system to manipulate atom 
   ///     positions
   /// \sa editors
