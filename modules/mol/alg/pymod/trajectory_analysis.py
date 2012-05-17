@@ -5,6 +5,7 @@ Author: Niklaus Johner
 """
 
 import ost.mol.alg
+import ost.geom
 from ost import LogError
 import os
 
@@ -147,3 +148,52 @@ def DistanceMatrixFromPairwiseDistances(distances,p=2):
     LogError("Function needs numpy, but I could not import it.")
     raise
 
+def DistRMSDFromTraj(t,sele,ref_sele,radius=7.0,average=False,seq_sep=4,first=0,last=-1):
+  """
+  This function calculates the distance RMSD from a trajectory.
+  The distances selected for the calculation are all the distances
+  between pair of atoms that from residues that are at least seq_sep apart
+  in the sequence and that are smaller than radius in ref_sel.
+  The number and order of atoms in ref_sele and sele should be the same.
+  Its inputs are:
+    t       : the trajectory (CoordGroupHandle)
+    sele    : the EntityView used to determine the distances from t
+    radius=7  : the upper limit of distances in ref_sele considered for the calculation
+    seq_sep=4 : The minimal sequence separation between atom pairs considered for the calculation 
+    average=false : use the average distance in the trajectory as reference instead of the distance obtained from ref_sele
+    first=0 : the first frame of t to be used
+    last=-1 : the last frame of t to be used
+  Returns a numpy vecor dist_rmsd(Nframes).  
+  """
+  if not sele.GetAtomCount()==ref_sele.GetAtomCount():
+    print 'Not same number of atoms in the two views'
+    return
+  try:
+    import numpy as npy
+    if last==-1:last=t.GetFrameCount()
+    n_frames=last-first
+    dist_rmsd=npy.zeros(n_frames)
+    pair_count=0.0
+    for i,a1 in enumerate(ref_sele.atoms):
+      for j,a2 in enumerate(ref_sele.atoms):
+        if j<=i:continue
+        r1=a1.GetResidue()
+        c1=r1.GetChain()
+        r2=a2.GetResidue()
+        c2=r2.GetChain()      
+        if c1==c2 and abs(r2.GetNumber().num-r1.GetNumber().num)<seq_sep:continue
+        d=ost.geom.Distance(a1.pos,a2.pos)
+        if d<radius:
+          a3=sele.atoms[i]
+          a4=sele.atoms[j]
+          d_traj=ost.mol.alg.AnalyzeDistanceBetwAtoms(t,a3.GetHandle(),a4.GetHandle())[first:last]
+          if average:d=npy.mean(d_traj)
+          for k,el in enumerate(d_traj):
+            dist_rmsd[k]+=(el-d)**2.0
+          pair_count+=1.0
+    return (dist_rmsd/float(pair_count))**0.5
+  except ImportError:
+    LogError("Function needs numpy, but I could not import it.")
+    raise
+    
+    
