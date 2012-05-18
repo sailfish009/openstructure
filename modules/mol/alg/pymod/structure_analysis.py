@@ -84,3 +84,32 @@ def GetAlphaHelixContent(sele1):
   f=GetFrameFromEntity(eh)
   return f.GetAlphaHelixContent(sele1)
 
+
+def CalculateBestFitLine(sele1):
+  """
+  This function calculates the best fit line to the atoms in sele1.
+  Input:
+    sele1 : EntityView
+  It returns a geom::Line3
+  """
+  if not sele1.IsValid():
+    print 'invalid view'
+    return
+  eh=sele1.GetHandle()
+  f=GetFrameFromEntity(eh)
+  return f.GetODRLine(sele1)
+
+def CalculateBestFitPlane(sele1):
+  """
+  This function calculates the best fit plane to the atoms in sele1.
+  Input:
+    sele1 : EntityView
+  It returns a geom::Plane
+  """
+  if not sele1.IsValid():
+    print 'invalid view'
+    return
+  eh=sele1.GetHandle()
+  f=GetFrameFromEntity(eh)
+  return f.GetODRPlane(sele1)
+
