@@ -75,6 +75,8 @@ public:
   Real GetMinDistBetwCenterOfMassAndView(const mol::EntityView& view_cm, const mol::EntityView& view_atoms);
   geom::Line3 GetODRLine(std::vector<unsigned long>& indices_ca);
   geom::Plane GetODRPlane(std::vector<unsigned long>& indices_ca);
+  geom::Line3 GetODRLine(const mol::EntityView& view1);
+  geom::Plane GetODRPlane(const mol::EntityView& view1);
   geom::Line3 FitCylinder(std::vector<unsigned long>& indices_ca);
   Real GetAlphaHelixContent(std::vector<unsigned long>& indices_ca, std::vector<unsigned long>& indices_c,
                              std::vector<unsigned long>& indices_o, std::vector<unsigned long>& indices_n);

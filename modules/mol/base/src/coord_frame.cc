@@ -274,6 +274,13 @@ namespace ost { namespace mol {
     }
     return atoms_pos_list.GetODRLine();
   }
+
+  geom::Line3 CoordFrame::GetODRLine(const mol::EntityView& view1){
+  //Returns the best fit line to atoms in the EntityView view1
+    std::vector<unsigned long> indices;
+    GetIndices(view1,indices);
+    return this->GetODRLine(indices);
+  }
   
   geom::Plane CoordFrame::GetODRPlane(std::vector<unsigned long>& indices_ca){
     //Returns the normal to the best fit plane to atoms with indices in indices_ca
@@ -284,7 +291,14 @@ namespace ost { namespace mol {
     }
     return atoms_pos_list.GetODRPlane();
   }
- 
+
+  geom::Plane CoordFrame::GetODRPlane(const mol::EntityView& view1){
+    //Returns the best fit plane to atoms in the EntityView view1
+    std::vector<unsigned long> indices;
+    GetIndices(view1,indices);
+    return this->GetODRPlane(indices);
+  }  
+  
   geom::Line3 CoordFrame::FitCylinder(std::vector<unsigned long>& indices_ca){
   //Returns a line which is the axis of a fitted cylinder to the atoms with indices given in indices_ca
   //It is assumed that we fit an alpha-helix and that the CA atoms are oredered sequentially

@@ -38,6 +38,10 @@ Real (CoordFrame::*get_min_dist_cm_v)(const mol::EntityView& sele1, const mol::E
 Real (CoordFrame::*get_rmsd)(const mol::EntityView& Reference_View, const mol::EntityView& sele_View) = &CoordFrame::GetRMSD;
 Real (CoordFrame::*get_min_dist)(const mol::EntityView& view1, const mol::EntityView& view2) = &CoordFrame::GetMinDistance;
 Real (CoordFrame::*get_alpha)(const mol::EntityView& segment) = &CoordFrame::GetAlphaHelixContent;
+geom::Line3 (CoordFrame::*get_odr_line)(const mol::EntityView& view1) = &CoordFrame::GetODRLine;
+geom::Line3 (CoordFrame::*get_odr_line2)() = &geom::Vec3List::GetODRLine;
+geom::Plane (CoordFrame::*get_odr_plane)(const mol::EntityView& view1) = &CoordFrame::GetODRPlane;
+
 
 void export_CoordFrame()
 {
@@ -53,7 +57,9 @@ void export_CoordFrame()
     .def("GetMinDistBetwCenterOfMassAndView", get_min_dist_cm_v)
     .def("GetRMSD",get_rmsd)
     .def("GetMinDistance",get_min_dist)
-    .def("GetODRLine",&geom::Vec3List::GetODRLine)
+    .def("GetODRPlane",get_odr_plane)
+    .def("GetODRLine",get_odr_line)
+    .def("GetODRLine",get_odr_line2)
     .def("GetAlphaHelixContent",get_alpha)
   ;
   def("CreateCoordFrame",CreateCoordFrame);
