@@ -95,8 +95,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
        arg("end")=-1, arg("ref")=-1));
   def("SuperposeFrames", superpose_frames2, 
-  (arg("source"), arg("sel")=ost::mol::EntityView(), arg("ref_view")=ost::mol::EntityView(),arg("begin")=0, 
-   arg("end")=-1));
+  (arg("source"), arg("sel"), arg("ref_view"),arg("begin")=0, arg("end")=-1));
 
   
   class_<mol::alg::ClashingDistances> ("ClashingDistances" ,init<Real,Real>())
