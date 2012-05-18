@@ -113,3 +113,19 @@ def CalculateBestFitPlane(sele1):
   f=GetFrameFromEntity(eh)
   return f.GetODRPlane(sele1)
 
+def CalculateHelixAxis(sele1):
+  """
+  This function calculates the best fit cylinder to the CA atoms in sele1,
+  and returns its axis as a Line3.  residues should be ordered correctly
+  in the EntityView.
+  Input:
+    sele1 : EntityView
+  It returns a geom::Line3
+  """
+  if not sele1.IsValid():
+    print 'invalid view'
+    return
+  eh=sele1.GetHandle()
+  f=GetFrameFromEntity(eh)
+  return f.FitCylinder(sele1)
+
