@@ -325,7 +325,17 @@ namespace ost { namespace mol {
     center/=atoms_pos_list.size();
     return atoms_pos_list.FitCylinder(initial_axis,center);
   }
- 
+
+  geom::Line3 CoordFrame::FitCylinder(const mol::EntityView& view1){
+  // Return a lin which is the axis of the best fit cylinder to the CA atoms
+  // of the EntityView.
+  // It is assumed that we fit an alpha-helix and that the CA atoms are oredered sequentially
+    CheckHandleValidity(view1);
+    std::vector<unsigned long> indices_ca;
+    GetCaIndices(view1, indices_ca);
+    return CoordFrame::FitCylinder(indices_ca);
+  }
+  
   Real CoordFrame::GetAlphaHelixContent(const mol::EntityView& segment){
     //Returns the percentage of residues in the EntityView (segment) that are in an alpha-helix
     //Each residue is assigned as being in an alpha-helix or not, based on and backbone torsion angles

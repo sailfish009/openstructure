@@ -41,7 +41,7 @@ Real (CoordFrame::*get_alpha)(const mol::EntityView& segment) = &CoordFrame::Get
 geom::Line3 (CoordFrame::*get_odr_line)(const mol::EntityView& view1) = &CoordFrame::GetODRLine;
 geom::Line3 (CoordFrame::*get_odr_line2)() = &geom::Vec3List::GetODRLine;
 geom::Plane (CoordFrame::*get_odr_plane)(const mol::EntityView& view1) = &CoordFrame::GetODRPlane;
-
+geom::Line3 (CoordFrame::*fit_cylinder)(const mol::EntityView& view1) = &CoordFrame::FitCylinder;
 
 void export_CoordFrame()
 {
@@ -61,6 +61,7 @@ void export_CoordFrame()
     .def("GetODRLine",get_odr_line)
     .def("GetODRLine",get_odr_line2)
     .def("GetAlphaHelixContent",get_alpha)
+    .def("FitCylinder",fit_cylinder)
   ;
   def("CreateCoordFrame",CreateCoordFrame);
 }
