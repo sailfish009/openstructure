@@ -4,6 +4,7 @@ set(OST_IO_UNIT_TESTS
   test_clustal.cc
   test_io_pdb.cc
   test_io_crd.cc
+  test_io_dcd.cc
   test_io_sdf.cc
   test_pir.cc
   test_iomanager.cc
