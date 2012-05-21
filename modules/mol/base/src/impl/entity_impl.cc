@@ -307,14 +307,6 @@ geom::Vec3 EntityImpl::GetCenterOfMass() const {
   return center;
 }
 
-geom::Vec3List EntityImpl::GetAtomPosList() const {
-  geom::Vec3List atom_pos_list;
-  atom_pos_list.reserve(this->GetAtomCount());
-  for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-    atom_pos_list.push_back(it->second->TransformedPos());
-  }
-  return atom_pos_list;
-}
   
 Real EntityImpl::GetMass() const {
   double mass=0.0;
