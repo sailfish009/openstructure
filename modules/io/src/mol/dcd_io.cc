@@ -67,7 +67,7 @@ bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
 }
 
 bool read_dcd_header(std::istream& istream, DCDHeader& header, bool& swap_flag, 
-                     bool& skip_flag, bool& gap_flag)
+                     bool& ucell_flag, bool& gap_flag)
 {
   if (!istream) {
     return false;
@@ -75,7 +75,7 @@ bool read_dcd_header(std::istream& istream, DCDHeader& header, bool& swap_flag,
   char dummy[4];  
   gap_flag=true;
   swap_flag=false;
-  skip_flag=false;
+  ucell_flag=false;
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(header.hdrr,sizeof(char)*4);
   istream.read(reinterpret_cast<char*>(header.icntrl),sizeof(int)*20);
@@ -91,8 +91,8 @@ bool read_dcd_header(std::istream& istream, DCDHeader& header, bool& swap_flag,
   }
 
   if(header.icntrl[19]!=0) { // CHARMM format
-    skip_flag=(header.icntrl[10]!=0);
-    if(skip_flag) {
+    ucell_flag=(header.icntrl[10]!=0);
+    if(ucell_flag) {
       LOG_VERBOSE("LoadCHARMMTraj: using CHARMM format with per-frame header");
     } else {
       LOG_VERBOSE("LoadCHARMMTraj: using CHARMM format");
@@ -128,10 +128,10 @@ bool read_dcd_header(std::istream& istream, DCDHeader& header, bool& swap_flag,
 }
 
 
-size_t calc_frame_size(bool skip_flag, bool gap_flag, size_t num_atoms)
+size_t calc_frame_size(bool ucell_flag, bool gap_flag, size_t num_atoms)
 {
   size_t frame_size=0;
-  if (skip_flag) {
+  if (ucell_flag) {
     frame_size+=14*sizeof(int);
   }
   if (gap_flag) {
@@ -143,33 +143,12 @@ size_t calc_frame_size(bool skip_flag, bool gap_flag, size_t num_atoms)
 
   
 bool read_frame(std::istream& istream, const DCDHeader& header, 
-                size_t frame_size, bool skip_flag, bool gap_flag, 
+                size_t frame_size, bool ucell_flag, bool gap_flag, 
                 bool swap_flag, std::vector<float>& xlist,
                 std::vector<geom::Vec3>& frame,
                 uint frame_num,geom::Vec3& cell_size,geom::Vec3& cell_angles)
 {
   char dummy[4];
-  //if(skip_flag) istream.seekg(14*4,std::ios_base::cur);
-  if(skip_flag){
-    istream.read(dummy,sizeof(dummy));
-    double x,y,z,a,b,c;
-    istream.read(reinterpret_cast<char*>(&x),sizeof(double));
-    istream.read(reinterpret_cast<char*>(&a),sizeof(double));
-    istream.read(reinterpret_cast<char*>(&y),sizeof(double));
-    istream.read(reinterpret_cast<char*>(&b),sizeof(double));
-    istream.read(reinterpret_cast<char*>(&c),sizeof(double));
-    istream.read(reinterpret_cast<char*>(&z),sizeof(double));
-    istream.read(dummy,sizeof(dummy));
-    cell_size[0]=x;
-    cell_size[1]=y;
-    cell_size[2]=z;
-    cell_angles[0]=acos(a);
-    cell_angles[1]=acos(b);
-    cell_angles[2]=acos(c);
-    if(a!=0.0||b!=0.0||c!=0.0){
-       LOG_ERROR("LoadCHARMMTraj: periodic cell not parallelepipedic, cell angles might be wrong, handle carefully")
-    }
-  }
 
   // read each frame
   if(!istream) {
@@ -178,6 +157,21 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
               << frame_num << "Nothing left to be read");
     return false;
   }
+
+  if(ucell_flag){
+    istream.read(dummy,sizeof(dummy));
+    double tmp[6];
+    istream.read(reinterpret_cast<char*>(tmp),sizeof(double)*6);
+    // a,alpha,b,beta,gamma,c (don't ask)
+    cell_size[0]=static_cast<Real>(tmp[0]);
+    cell_size[1]=static_cast<Real>(tmp[2]);
+    cell_size[2]=static_cast<Real>(tmp[5]);
+    cell_angles[0]=static_cast<Real>(acos(tmp[1]));
+    cell_angles[1]=static_cast<Real>(acos(tmp[3]));
+    cell_angles[2]=static_cast<Real>(acos(tmp[4]));
+    istream.read(dummy,sizeof(dummy));
+  }
+
   // x coord
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
@@ -224,12 +218,12 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
 }
 
 bool read_frame(std::istream& istream, const DCDHeader& header, 
-                size_t frame_size, bool skip_flag, bool gap_flag, 
+                size_t frame_size, bool ucell_flag, bool gap_flag, 
                 bool swap_flag, std::vector<float>& xlist,
                 std::vector<geom::Vec3>& frame,uint frame_num)
 {
   geom::Vec3 cell_size=geom::Vec3(),cell_angles=geom::Vec3();
-  return read_frame(istream,header, frame_size,skip_flag, gap_flag, 
+  return read_frame(istream,header, frame_size,ucell_flag, gap_flag, 
                     swap_flag, xlist,frame,frame_num, cell_size, cell_angles);
 }
   
@@ -247,8 +241,8 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
   Profile profile_load("LoadCHARMMTraj");
 
   DCDHeader header; 
-  bool swap_flag=false, skip_flag=false, gap_flag=false;
-  read_dcd_header(istream, header, swap_flag, skip_flag, gap_flag);
+  bool swap_flag=false, ucell_flag=false, gap_flag=false;
+  read_dcd_header(istream, header, swap_flag, ucell_flag, gap_flag);
   if(alist.size() != static_cast<size_t>(header.t_atom_count)) {
     LOG_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
                << " in coordinate file, " << header.t_atom_count 
@@ -260,18 +254,18 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
   std::vector<geom::Vec3> clist(header.t_atom_count);
   std::vector<float> xlist(header.t_atom_count);
   geom::Vec3 cell_size, cell_angles;
-  size_t frame_size=calc_frame_size(skip_flag, gap_flag, xlist.size());
+  size_t frame_size=calc_frame_size(ucell_flag, gap_flag, xlist.size());
   int i=0;
   for(;i<header.num;i+=stride) {
-    std::cout << i << " " << header.num << std::endl;
-    if (!read_frame(istream, header, frame_size, skip_flag, gap_flag, 
+    if (!read_frame(istream, header, frame_size, ucell_flag, gap_flag, 
                     swap_flag, xlist, clist, i,cell_size,cell_angles)) {
       break;
     }
-    if(skip_flag) {
+    if(ucell_flag) {
       cg.AddFrame(clist,cell_size,cell_angles);
+    } else {
+      cg.AddFrame(clist);
     }
-    else cg.AddFrame(clist);
 
     // skip frames (defined by stride)
     if(stride>1) istream.seekg(frame_size*(stride-1),std::ios_base::cur);
@@ -321,7 +315,7 @@ private:
   void FetchFrame(uint frame);
   String               filename_;
   DCDHeader            header_;
-  bool                 skip_flag_;
+  bool                 ucell_flag_;
   bool                 swap_flag_;
   bool                 gap_flag_;
   std::ifstream        stream_;
@@ -337,17 +331,17 @@ private:
 void DCDCoordSource::FetchFrame(uint frame)
 {
   if (!loaded_) {
-    read_dcd_header(stream_, header_, swap_flag_, skip_flag_, gap_flag_);
+    read_dcd_header(stream_, header_, swap_flag_, ucell_flag_, gap_flag_);
     frame_start_=stream_.tellg();
     loaded_=true;
     frame_count_=header_.num/stride_;
   }
-  size_t frame_size=calc_frame_size(skip_flag_, gap_flag_, 
+  size_t frame_size=calc_frame_size(ucell_flag_, gap_flag_, 
                                     header_.t_atom_count);  
   size_t pos=frame_start_+frame_size*frame*stride_;
   stream_.seekg(pos,std::ios_base::beg);
   std::vector<float> xlist(header_.t_atom_count);
-  if (!read_frame(stream_, header_, frame_size, skip_flag_, gap_flag_, 
+  if (!read_frame(stream_, header_, frame_size, ucell_flag_, gap_flag_, 
                   swap_flag_, xlist, *frame_.get(), frame)) {
   }  
 }
@@ -379,48 +373,65 @@ void write_dcd_hdr(std::ofstream& out,
                    const mol::CoordGroupHandle& coord_group, 
                    unsigned int stepsize)
 {
+  // size of first header block in bytes
   int32_t magic_number=84;
-  char crd[]={'C', 'O', 'R', 'D'};
   out.write(reinterpret_cast<char*>(&magic_number), 4);
+
+  // magic string
+  char crd[]={'C', 'O', 'R', 'D'};
   out.write(crd, 4);
+
+  // icntrl[0], NSET, number of frames
   int32_t num_frames=coord_group.GetFrameCount()/stepsize;
   out.write(reinterpret_cast<char*>(&num_frames), 4);
+
+  // icntrl[1], ISTART, starting timestep
   int32_t zero=0;
-  // write zero for istart
   out.write(reinterpret_cast<char*>(&zero), 4);
+
+  // icntrl[2], NSAVC, timesteps between DCD saves
   int32_t one=1;
-  // number of timesteps between dcd saves.
   out.write(reinterpret_cast<char*>(&one), 4);
-  // write spacer of 5 blank integers
-  for (int i=0; i<5; ++i) {
+
+  // icntrl[3] to icntrl[7], unused
+  for (int i=3; i<=7; ++i) {
     out.write(reinterpret_cast<char*>(&zero), 4);
   }
-  // write number of fixed atoms
 
+  // icntrl[8], NAMNF, number of fixed atoms
   out.write(reinterpret_cast<char*>(&zero), 4);
+
+  // icntrl[9], DELTA, timestep as float for CHARMM format
   float delta=1.0;
   out.write(reinterpret_cast<char*>(&delta), 4);
-  // write spacer of 10 blank integers
-  for (int i=0; i <10; ++i) {
+
+  // icntrl[10], CHARMM format: ucell per frame
+  out.write(reinterpret_cast<char*>(&one), 4);
+
+  // icntrl[11] to icntrl[18], unused
+  for (int i=11; i<=18; ++i) {
     out.write(reinterpret_cast<char*>(&zero), 4);
   }
+
+  // icntrl[19], charmm version
+  int32_t charmm_version=24;
+  out.write(reinterpret_cast<char*>(&charmm_version), 4);
+  // bracket first header block
   out.write(reinterpret_cast<char*>(&magic_number), 4);
-  // we don't write any titles for now. This means that the block has only to 
-  // accomodate one int, harr, harr, harr.
-  int32_t title_block_size=4;
-  out.write(reinterpret_cast<char*>(&title_block_size), 4);
-  out.write(reinterpret_cast<char*>(&zero), 4);
+
+  //  no titles in title block
   int32_t four=4;
-  // again block size for titles?
   out.write(reinterpret_cast<char*>(&four), 4);
-  // has to be 4
+  out.write(reinterpret_cast<char*>(&zero), 4);
+  out.write(reinterpret_cast<char*>(&four), 4);
+
+  // atom count block
   out.write(reinterpret_cast<char*>(&four), 4);
   int32_t atom_count=coord_group.GetAtomCount();  
   out.write(reinterpret_cast<char*>(&atom_count), 4);
   out.write(reinterpret_cast<char*>(&four), 4);
 }
-
-}
+} // anon ns
 
 void SaveCHARMMTraj(const mol::CoordGroupHandle& coord_group, 
                     const String& pdb_filename, const String& dcd_filename,
@@ -442,10 +453,26 @@ void SaveCHARMMTraj(const mol::CoordGroupHandle& coord_group,
   int32_t out_n=atom_count*4;
   for (int i=0; i<frame_count; i+=stepsize) {
     mol::CoordFramePtr frame=coord_group.GetFrame(i);
+
+    // ucell
+    int32_t bsize=48; // ucell block size, 6 doubles
+    geom::Vec3 csize=frame->GetCellSize();
+    geom::Vec3 cangles=frame->GetCellAngles();
+    // a,alpha,b,beta,gamma,c (don't ask)
+    double ucell[]={csize[0],
+                    cos(cangles[0]),
+                    csize[1],
+                    cos(cangles[1]),
+                    cos(cangles[2]),
+                    csize[2]};
+    out.write(reinterpret_cast<char*>(&bsize),4);
+    out.write(reinterpret_cast<char*>(ucell),bsize);
+    out.write(reinterpret_cast<char*>(&bsize),4);
+
+
     int k=0;
     for (mol::CoordFrame::iterator j=frame->begin(), 
          e=frame->end(); j!=e; ++j, ++k) {
-      //geom::Vec3 v=*j;
       x[k]=float((*j)[0]);
       y[k]=float((*j)[1]);
       z[k]=float((*j)[2]);
