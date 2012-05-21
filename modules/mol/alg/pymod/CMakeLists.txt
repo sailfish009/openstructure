@@ -12,6 +12,7 @@ set(OST_MOL_ALG_PYMOD_MODULES
   superpose.py
   trajectory_analysis.py
   structure_analysis.py
+  helix_kinks.py
 )
 
 if (ENABLE_IMG)
