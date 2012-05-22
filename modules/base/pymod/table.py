@@ -426,8 +426,9 @@ class Table(object):
       self._AddRowsFromDict(data, overwrite)
     else:
       if len(data)!=len(self.col_names):
+        print data, self.col_names
         msg='data array must have %d elements, not %d'
-        raise ValueError(msg % (len(self.col_names), len(self.data)))
+        raise ValueError(msg % (len(self.col_names), len(data)))
       new_row = [self._Coerce(v, t) for v, t in zip(data, self.col_types)]
       
       # fully overwrite existing row with new data
@@ -529,6 +530,7 @@ class Table(object):
   @staticmethod
   def _LoadOST(stream_or_filename):
     fieldname_pattern=re.compile(r'(?P<name>[^[]+)(\[(?P<type>\w+)\])?')
+    values_pattern=re.compile("([^\" ]+|\"[^\"]*\")+")
     if not hasattr(stream_or_filename, 'read'):
       stream=open(stream_or_filename, 'r')
     else:
@@ -556,7 +558,7 @@ class Table(object):
         tab=Table(fieldnames, fieldtypes)
         header=True
         continue
-      tab.AddRow(line.split())
+      tab.AddRow([x.strip('"') for x in values_pattern.findall(line)])
     if num_lines==0:
       raise IOError("Cannot read table from empty stream")
     return tab

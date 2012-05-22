@@ -757,6 +757,18 @@ class TestTable(unittest.TestCase):
     in_stream = open(os.path.join('testfiles','emptytable.csv'), 'r')
     self.assertRaises(IOError, Table.Load, in_stream)
     
+  def testSaveLoadTableOSTWithSpaces(self):
+    tab = self.CreateTestTable()
+    tab.AddRow(['hello spaces',10, 10.1], overwrite=None)
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None,'hello spaces'], 'second': [3,None,9,10], 'third': [None,2.2,3.3,10.1]})
+
+    # write to disc
+    tab.Save("saveloadtable_withspaces_filename_out.tab")
+
+    # read from disc
+    tab_loaded_fname = Table.Load('saveloadtable_withspaces_filename_out.tab')
+    self.CompareDataFromDict(tab_loaded_fname, {'first': ['x','foo',None,'hello spaces'], 'second': [3,None,9,10], 'third': [None,2.2,3.3,10.1]})
+
   def testSaveLoadTableCSV(self):
     tab = self.CreateTestTable()
     self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
