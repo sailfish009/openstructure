@@ -268,9 +268,11 @@ endif()
 add_subdirectory(modules)
 add_subdirectory(scripts)
 add_subdirectory(deployment)
-set(FILES_TO_BE_REMOVED CMakeFiles stage tests)
+
+set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-                         "${FILES_TO_BE_REMOVED}")
+                             "${FILES_TO_BE_REMOVED}")
+
 
 #ost_match_boost_python_version(${PYTHON_LIBRARIES})
 

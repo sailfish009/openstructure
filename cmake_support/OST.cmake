@@ -164,6 +164,17 @@ macro(module)
   # create library  
   #-----------------------------------------------------------------------------
   file(MAKE_DIRECTORY ${LIB_STAGE_PATH})
+  file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+  file(MAKE_DIRECTORY ${LIBEXEC_STAGE_PATH})
+  if (NOT TARGET make_stage_lib_dir)
+    add_custom_target(make_stage_lib_dir COMMAND ${CMAKE_COMMAND} -E make_directory ${LIB_STAGE_PATH})
+  endif()
+  if (NOT TARGET make_executable_output_dir)
+    add_custom_target(make_executable_output_dir COMMAND ${CMAKE_COMMAND} -E make_directory ${EXECUTABLE_OUTPUT_PATH})
+  endif()
+  if (NOT TARGET make_libexec_dir)
+    add_custom_target(make_libexec_dir COMMAND ${CMAKE_COMMAND} -E make_directory ${LIBEXEC_STAGE_PATH})
+  endif()
   if (WIN32)
     set(_ABS_FILE_PATTERN "^[A-Z]:/")
   else()
@@ -190,6 +201,9 @@ macro(module)
                                      EchoString   ${_ARG_NAME}
                                      MODULE_DEPS "${_ARG_DEPENDS_ON}")
     get_target_property(_DEFS ${_LIB_NAME} COMPILE_DEFINITIONS)
+    add_dependencies(${_LIB_NAME} make_stage_lib_dir)
+    add_dependencies(${_LIB_NAME} make_executable_output_dir)
+    add_dependencies(${_LIB_NAME} make_libexec_dir)
     set_target_properties(${_LIB_NAME} PROPERTIES
                           COMPILE_DEFINITIONS OST_MODULE_${_UPPER_LIB_NAME})
     set_target_properties(${_LIB_NAME} PROPERTIES
@@ -601,6 +615,7 @@ add_custom_target(check)
 add_custom_target(check_xml)
 if (WIN32)
   set_target_properties(check PROPERTIES EXCLUDE_FROM_ALL "1")
+  set_target_properties(check_xml PROPERTIES EXCLUDE_FROM_ALL "1")
 endif()
 
 #-------------------------------------------------------------------------------
