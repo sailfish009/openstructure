@@ -1758,12 +1758,13 @@ class Table(object):
     
     # check that column types are the same in current and new table
     for name in self.col_names:
-      curr_type = self.col_types[self.GetColIndex(name)]
-      new_type = tab.col_types[tab.GetColIndex(name)]
-      if curr_type!=new_type:
-        raise TypeError('cannot extend table, column %s in new '%name +\
-                        'table different type (%s) than in '%new_type +\
-                        'current table (%s)'%curr_type)
+      if name in tab.col_names:
+        curr_type = self.col_types[self.GetColIndex(name)]
+        new_type = tab.col_types[tab.GetColIndex(name)]
+        if curr_type!=new_type:
+          raise TypeError('cannot extend table, column %s in new '%name +\
+                          'table different type (%s) than in '%new_type +\
+                          'current table (%s)'%curr_type)
     
     num_rows = len(tab.rows)
     for i in range(0,num_rows):
