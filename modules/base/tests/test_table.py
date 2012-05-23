@@ -921,22 +921,26 @@ class TestTable(unittest.TestCase):
   def testSumTable(self):
     tab = self.CreateTestTable()
     tab.AddCol('fourth','bool',[False,True,False])
+    tab.AddCol('fifth','string',['foo','bar',None])
     
     self.assertRaises(TypeError,tab.Sum,'first')
     self.assertEquals(tab.Sum('second'),12)
     self.assertAlmostEquals(tab.Sum('third'),5.5)
-    self.assertRaises(TypeError,tab.Sum,'fourth')
-    self.assertRaises(ValueError,tab.Sum,'fifth')
+    self.assertEquals(tab.Sum('fourth'),1)
+    self.assertRaises(TypeError,tab.Sum,'fifth')
+    self.assertRaises(ValueError,tab.Sum,'sixth')
     
   def testMedianTable(self):
     tab = self.CreateTestTable()
     tab.AddCol('fourth','bool',[False,True,False])
+    tab.AddCol('fifth','string',['foo','bar',None])
     
     self.assertRaises(TypeError,tab.Median,'first')
     self.assertEquals(tab.Median('second'),6.0)
     self.assertAlmostEquals(tab.Median('third'),2.75)
-    self.assertRaises(TypeError,tab.Median,'fourth')
-    self.assertRaises(ValueError,tab.Median,'fifth')
+    self.assertEquals(tab.Median('fourth'),False)
+    self.assertRaises(TypeError,tab.Median,'fifth')
+    self.assertRaises(ValueError,tab.Median,'sixth')
     
   def testMeanTable(self):
     tab = self.CreateTestTable()
@@ -975,12 +979,14 @@ class TestTable(unittest.TestCase):
   def testStdDevTable(self):
     tab = self.CreateTestTable()
     tab.AddCol('fourth','bool',[False,True,False])
+    tab.AddCol('fifth','string',['foo','bar',None])
     
     self.assertRaises(TypeError,tab.StdDev,'first')
     self.assertAlmostEquals(tab.StdDev('second'),3.0)
     self.assertAlmostEquals(tab.StdDev('third'),0.55)
-    self.assertRaises(TypeError,tab.StdDev,'fourth')
-    self.assertRaises(ValueError,tab.StdDev,'fifth')
+    self.assertAlmostEquals(tab.StdDev('fourth'),0.47140452079)
+    self.assertRaises(TypeError,tab.StdDev,'fifth')
+    self.assertRaises(ValueError,tab.StdDev,'sixth')
     
   def testCountTable(self):
     tab = self.CreateTestTable()

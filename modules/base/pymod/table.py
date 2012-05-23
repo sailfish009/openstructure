@@ -984,11 +984,11 @@ class Table(object):
     """
     Returns the sum of the given column. Cells with None are ignored. Returns 
     0.0, if the column doesn't contain any elements. Col must be of numeric
-    column type ('float', 'int').
+    column type ('float', 'int') or boolean column type.
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
-    if col_type!='int' and col_type!='float':
+    if col_type!='int' and col_type!='float' and col_type!='bool':
       raise TypeError("Sum can only be used on numeric column types")
     s = 0.0
     for r in self.rows:
@@ -1025,8 +1025,8 @@ class Table(object):
     containing the mean of all specified columns for each row.
     
     Cols are specified by their names and must be of numeric column
-    type ('float', 'int'). Cells with None are ignored. Adds None if the row
-    doesn't contain any values.
+    type ('float', 'int') or boolean column type.. Cells with None are ignored.
+    Adds None if the row doesn't contain any values.
     
     
     == Example ==
@@ -1065,7 +1065,7 @@ class Table(object):
     for col in cols:
       idx = self.GetColIndex(col)
       col_type = self.col_types[idx]
-      if col_type!='int' and col_type!='float':
+      if col_type!='int' and col_type!='float' and col_type!='bool':
         raise TypeError("RowMean can only be used on numeric column types")
       cols_idxs.append(idx)
       
@@ -1088,12 +1088,12 @@ class Table(object):
     """
     Returns the median of the given column. Cells with None are ignored. Returns 
     None, if the column doesn't contain any elements. Col must be of numeric
-    column type ('float', 'int').
+    column type ('float', 'int') or boolean column type.
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
-    if col_type!='int' and col_type!='float':
-      raise TypeError("Mean can only be used on numeric column types")
+    if col_type!='int' and col_type!='float' and col_type!='bool':
+      raise TypeError("Median can only be used on numeric column types")
     
     vals=[]
     for v in self[col]:
@@ -1109,12 +1109,12 @@ class Table(object):
     """
     Returns the standard deviation of the given column. Cells with None are
     ignored. Returns None, if the column doesn't contain any elements. Col must
-    be of numeric column type ('float', 'int').
+    be of numeric column type ('float', 'int') or boolean column type.
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
-    if col_type!='int' and col_type!='float':
-      raise TypeError("Mean can only be used on numeric column types")
+    if col_type!='int' and col_type!='float' and col_type!='bool':
+      raise TypeError("StdDev can only be used on numeric column types")
     
     vals=[]
     for v in self[col]:
