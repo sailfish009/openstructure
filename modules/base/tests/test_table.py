@@ -941,12 +941,14 @@ class TestTable(unittest.TestCase):
   def testMeanTable(self):
     tab = self.CreateTestTable()
     tab.AddCol('fourth','bool',[False,True,False])
+    tab.AddCol('fifth','string',['foo','bar',None])
     
     self.assertRaises(TypeError,tab.Mean,'first')
     self.assertAlmostEquals(tab.Mean('second'),6.0)
     self.assertAlmostEquals(tab.Mean('third'),2.75)
-    self.assertRaises(TypeError,tab.Mean,'fourth')
-    self.assertRaises(ValueError,tab.Mean,'fifth')
+    self.assertAlmostEquals(tab.Mean('fourth'),0.33333333)
+    self.assertRaises(TypeError,tab.Mean,'fifth')
+    self.assertRaises(ValueError,tab.Mean,'sixth')
     
   def testRowMeanTable(self):
     '''

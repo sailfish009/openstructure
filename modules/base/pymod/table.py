@@ -983,7 +983,8 @@ class Table(object):
   def Sum(self, col):
     """
     Returns the sum of the given column. Cells with None are ignored. Returns 
-    0.0, if the column doesn't contain any elements.
+    0.0, if the column doesn't contain any elements. Col must be of numeric
+    column type ('float', 'int').
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
@@ -998,12 +999,16 @@ class Table(object):
   def Mean(self, col):
     """
     Returns the mean of the given column. Cells with None are ignored. Returns 
-    None, if the column doesn't contain any elements.
+    None, if the column doesn't contain any elements. Col must be of numeric
+    ('float', 'int') or boolean column type.
+
+    If column type is *bool*, the function returns the ratio of
+    number of 'Trues' by total number of elements.
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
-    if col_type!='int' and col_type!='float':
-      raise TypeError("Mean can only be used on numeric column types")
+    if col_type!='int' and col_type!='float' and col_type!='bool':
+      raise TypeError("Mean can only be used on numeric or bool column types")
     
     vals=[]
     for v in self[col]:
@@ -1082,7 +1087,8 @@ class Table(object):
   def Median(self, col):
     """
     Returns the median of the given column. Cells with None are ignored. Returns 
-    None, if the column doesn't contain any elements.
+    None, if the column doesn't contain any elements. Col must be of numeric
+    column type ('float', 'int').
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
@@ -1102,7 +1108,8 @@ class Table(object):
   def StdDev(self, col):
     """
     Returns the standard deviation of the given column. Cells with None are
-    ignored. Returns None, if the column doesn't contain any elements.
+    ignored. Returns None, if the column doesn't contain any elements. Col must
+    be of numeric column type ('float', 'int').
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
