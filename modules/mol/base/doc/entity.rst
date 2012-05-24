@@ -1537,16 +1537,31 @@ Other Entity-Related Functions
 
 .. function:: CreateViewFromAtomList(atom_list)
 
-   Returns a view made up of the atoms in *atom_list*. All atoms are required to
-   be atoms of the same entity. Duplicate atoms are only added to the view once.
-   
-   :param atom_list: the atoms
-   :type atom_list: :class:`AtomHandleList` or :class:`AtomViewList`
-   :raises: :class:`IntegrityError` if atoms of different entities are
-            encountered
-   
-   :returns: :class:`EntityView`
+  Returns a view made up of the atoms in *atom_list*. All atoms are required to
+  be atoms of the same entity. Duplicate atoms are only added to the view once.
+  
+  :param atom_list: the atoms
+  :type atom_list: :class:`AtomHandleList` or :class:`AtomViewList`
+  :raises: :class:`IntegrityError` if atoms of different entities are
+           encountered
+  
+  :returns: :class:`EntityView`
 
+.. function:: CreateEntityFromView(view, include_exlusive_atoms, handle)
+ 
+  This function behaves exactly like :meth:`EntityHandle.Copy`, except that only
+  atoms, residues, chains and bonds that are present in the view will be 
+  copied.
+   
+  :param view: is the view to be converted to a handle
+  :param include_exlusive_atoms: if true, atoms that are part of an exclusive
+       bond (only one bond partner is included in the view) will also be included
+       in the new entity handle.
+  :param handle: If invalid a new entity will be created. If valid, the atoms, 
+       residues, chains, bonds and torsions will be added to handle. This is 
+       useful to combine several entities into one.
+
+  :returns :class:`EntityHandle`
 .. _chaintype:
 
 ChainType
