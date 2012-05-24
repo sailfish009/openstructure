@@ -54,7 +54,7 @@ methods, sequences can also be loaded from a string:
 
   seq_string='''>sequence
   abcdefghiklmnop'''
-  s=io.LoadSequenceFromString(seq_string, 'fasta')
+  s=io.SequenceFromString(seq_string, 'fasta')
   print s.name, s # will print "sequence abcdefghiklmnop"
   
 Note that, in that case specifying the format is mandatory.
