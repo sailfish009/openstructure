@@ -34,7 +34,8 @@ namespace geom {
 // fw decl
 class Vec2;
 class Vec4;
-
+class Line3;
+class Plane;
 
 /// \brief Three dimensional vector class, using Real precision.
 class DLLEXPORT_OST_GEOM Vec3:
@@ -193,6 +194,7 @@ inline std::ostream& operator<<(std::ostream& os, const Vec3& v)
 #include <ost/geom/vec2.hh>
 #include <ost/geom/vec4.hh>
 #include <ost/geom/mat3.hh>
+#include <ost/geom/composite3.hh>
 
 namespace geom {
 
@@ -216,6 +218,10 @@ public:
   Vec3 GetCenter() const;
   
   Mat3 GetPrincipalAxes() const;
+  Line3 GetODRLine();
+  Plane GetODRPlane();
+  Line3 FitCylinder(const Vec3 initial_direction, const Vec3 center);
+
 };
 
 

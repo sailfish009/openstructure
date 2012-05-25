@@ -93,7 +93,18 @@ void ChemdictParser::OnDataItem(const StarDataItem& item)
                     << compound_->GetID() << std::endl;
         }
       }
-
+    } else if (item.GetName()==StringRef("pdbx_type", 9)) {
+      String type=item.GetValue().str();
+      for (String::iterator i=type.begin(), e=type.end(); i!=e; ++i) {
+        *i=toupper(*i);
+      }
+      std::map<String, mol::ChemType>::iterator i=xtm_.find(type);
+      if (i!=xtm_.end()) {
+        compound_->SetChemType(i->second);
+      } else {
+        std::cout << "unknown pdbx_type '" << type << "' for compound "
+                  << compound_->GetID() << std::endl;
+      }
     } else if (item.GetName()==StringRef("formula", 7)) {
       compound_->SetFormula(item.GetValue().str());
       if (compound_->GetFormula()=="H2 O") {
@@ -136,6 +147,7 @@ void ChemdictParser::OnEndData()
 }
 
 std::map<String, mol::ChemClass> ChemdictParser::tm_=std::map<String, mol::ChemClass>();
+std::map<String, mol::ChemType> ChemdictParser::xtm_=std::map<String, mol::ChemType>();
 
 void ChemdictParser::InitTypeMap()
 {
@@ -166,6 +178,22 @@ void ChemdictParser::InitTypeMap()
   tm_["RNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);
   tm_["?"]=mol::ChemClass(mol::ChemClass::UNKNOWN);  
   tm_["WATER"]=mol::ChemClass(mol::ChemClass::WATER);
+}
+
+void ChemdictParser::InitPDBXTypeMap()
+{
+  if (!xtm_.empty())
+    return;
+  xtm_["HETAI"]=mol::ChemType(mol::ChemType::IONS);
+  xtm_["HETAIN"]=mol::ChemType(mol::ChemType::NONCANONICALMOLS);
+  xtm_["ATOMS"]=mol::ChemType(mol::ChemType::SACCHARIDES);
+  xtm_["ATOMN"]=mol::ChemType(mol::ChemType::NUCLEOTIDES);
+  xtm_["ATOMP"]=mol::ChemType(mol::ChemType::AMINOACIDS);
+  xtm_["HETAC"]=mol::ChemType(mol::ChemType::COENZYMES);
+  xtm_["HETIC"]=mol::ChemType(mol::ChemType::WATERCOORDIONS);
+  xtm_["HETAD"]=mol::ChemType(mol::ChemType::DRUGS);
+  xtm_["HETAS"]=mol::ChemType(mol::ChemType::WATERS);
+  xtm_["?"]=mol::ChemType(mol::ChemType::UNKNOWN);
 }
 
 }}

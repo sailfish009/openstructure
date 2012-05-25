@@ -84,11 +84,15 @@ public:
     // determine atom to add to list
     mol::AtomHandle ca = res.GetCentralAtom();
     if (ca) {
+      float rad=1.0;
+      if(ca.HasProp("trace_rad")) {
+        rad=ca.GetFloatProp("trace_rad");
+      }
       NodeEntry entry={ca, GfxObj::Ele2Color(ca.GetElement()),
                        GfxObj::Ele2Color(ca.GetElement()),
                        geom::Vec3(), // this will be set by the gfx trace obj
                        res.GetCentralNormal(),
-                       1.0,
+                       rad,
                        geom::Vec3(),geom::Vec3(),geom::Vec3(), // for later use in NA rendering
                        false,id_counter_++};
       list_.push_back(entry);
@@ -164,7 +168,13 @@ void BackboneTrace::OnUpdatedPositions()
   for(NodeEntryListList::iterator nitnit=node_list_list_.begin();nitnit!=node_list_list_.end();++nitnit) {
     NodeEntryList& nlist=*nitnit;
     for(NodeEntryList::iterator nit=nlist.begin();nit!=nlist.end();++nit) {
-      nit->normal=nit->atom.GetResidue().GetCentralNormal();
+      mol::AtomHandle ca=nit->atom;
+      nit->normal=ca.GetResidue().GetCentralNormal();
+      if(ca.HasProp("trace_rad")) {
+        nit->rad=ca.GetFloatProp("trace_rad");
+      } else {
+        nit->rad=1.0;
+      }
     }
     PrepList(nlist);
   }

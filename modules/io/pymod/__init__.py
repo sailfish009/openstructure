@@ -19,7 +19,7 @@
 import os, tempfile, ftplib, httplib
 
 from _ost_io import *
-from ost import mol, conop
+from ost import mol, geom, conop
 
 profiles=None
 
@@ -86,9 +86,9 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
             fault_tolerant=None, load_multi=False, quack_mode=None,
             join_spread_atom_records=None, calpha_only=None,
             profile='DEFAULT', remote=False, dialect=None,
-            strict_hydrogens=None, seqres=False):
+            strict_hydrogens=None, seqres=False, bond_feasibility_check=None):
   """
-  Load PDB file from disk and returns one or more entities. Several options 
+  Load PDB file from disk and return one or more entities. Several options 
   allow to customize the exact behaviour of the PDB import. For more information 
   on these options, see :doc:`profile`.
   
@@ -147,6 +147,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   prof.quack_mode=_override(prof.quack_mode, quack_mode)
   prof.strict_hydrogens=_override(prof.strict_hydrogens, strict_hydrogens)
   prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
+  prof.bond_feasibility_check=_override(prof.bond_feasibility_check, bond_feasibility_check)
   prof.join_spread_atom_records=_override(prof.join_spread_atom_records,
                                           join_spread_atom_records)
 
@@ -164,6 +165,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   elif prof.dialect=='CHARMM':
     builder.dialect=conop.CHARMM_DIALECT
   builder.strict_hydrogens=prof.strict_hydrogens
+  builder.bond_feasibility_check=prof.bond_feasibility_check
   reader=PDBReader(filename, prof)
   reader.read_seqres=seqres
   try:
@@ -175,7 +177,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
         conop_inst.ConnectAll(builder, ent, 0)
         ent_list.append(ent)
       if len(ent_list)==0:
-        raise IOError("File doesn't contain any entities")
+        raise IOError("File '%s' doesn't contain any entities" % filename)
       return ent_list
     else:
       ent=mol.CreateEntity()
@@ -183,7 +185,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
         reader.Import(ent, restrict_chains)
         conop_inst.ConnectAll(builder, ent, 0)
       else:
-        raise IOError("File doesn't contain any entities")
+        raise IOError("File '%s' doesn't contain any entities" % filename)
       if seqres:
         return ent, reader.seqres
       return ent
@@ -192,10 +194,12 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
 
 def SavePDB(models, filename, dialect=None,  pqr=False, profile='DEFAULT'):
   """
-  Save entity or list of entities to disk. If a list of entities is supplied the 
-  PDB file will be saved as a multi PDB file. Each of the entities is wrapped 
-  into a MODEL/ENDMDL pair.
-  
+  Save entity or list of entities to disk. If a list of entities is supplied
+  the PDB file will be saved as a multi PDB file. Each of the entities is
+  wrapped into a MODEL/ENDMDL pair.
+
+  If the atom number exceeds 99999, '*****' is used.
+
   :param models: The entity or list of entities (handles or views) to be saved
   :param filename: The filename
   :type  filename: string
@@ -263,6 +267,190 @@ def LoadCHARMMTraj(crd, dcd_file=None, profile='CHARMM',
     if not dcd_file:
       raise ValueError("No DCD filename given")
   return LoadCHARMMTraj_(crd, dcd_file, stride, lazy_load)
+
+def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=None, profile='DEFAULT', remote=False, strict_hydrogens=None, seqres=False, info=False):
+  """
+  Load MMCIF file from disk and return one or more entities. Several options 
+  allow to customize the exact behaviour of the MMCIF import. For more
+  information on these options, see :doc:`profile`.
+  
+  Residues are flagged as ligand if they are mentioned in a HET record.
+
+  :param restrict_chains: If not an empty string, only chains listed in the
+     string will be imported.
+
+  :param fault_tolerant: Enable/disable fault-tolerant import. If set, overrides
+     the value of :attr:`IOProfile.fault_tolerant`.
+  
+  :param remote: If set to true, the method tries to load the pdb from the 
+     remote pdb repository www.pdb.org. The filename is then interpreted as the 
+     pdb id.
+     
+  :rtype: :class:`~ost.mol.EntityHandle`.
+  
+  :param strict_hydrogens: If set, overrides the value of 
+     :attr:`IOProfile.strict_hydrogens`.
+
+  :param seqres: Whether to read SEQRES records. If set to true, the loaded 
+    entity and seqres entry will be returned as second item.
+
+  :param info: Whether to return an info container with the other output.
+               Returns a :class:`MMCifInfo` object as last item.
+
+  :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous
+  or inexistent file
+  """
+  def _override(val1, val2):
+    if val2!=None:
+      return val2
+    else:
+      return val1
+  if isinstance(profile, str):
+    prof = profiles[profile].Copy()
+  else:
+    prof = profile.Copy()
+
+  prof.calpha_only=_override(prof.calpha_only, calpha_only)
+  prof.strict_hydrogens=_override(prof.strict_hydrogens, strict_hydrogens)
+  prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
+
+  if remote:
+    output_dir = tempfile.gettempdir()
+    if __GetModelFromPDB(filename, output_dir):
+      filename = os.path.join(output_dir, 'pdb%s.ent.gz' % filename)
+    else:
+      raise IOError('Can not load PDB %s from www.pdb.org'%filename) 
+  
+  conop_inst = conop.Conopology.Instance()
+  builder = conop_inst.GetBuilder("DEFAULT")
+
+  builder.strict_hydrogens = prof.strict_hydrogens
+
+  try:
+    ent = mol.CreateEntity()
+    reader = MMCifReader(filename, ent, prof)
+    reader.read_seqres = seqres
+    #if reader.HasNext():
+    reader.Parse()
+    conop_inst.ConnectAll(builder, ent, 0)
+    #else:
+    #  raise IOError("File doesn't contain any entities")
+    if seqres and info:
+      return ent, reader.seqres, reader.info
+    if seqres:
+      return ent, reader.seqres
+    if info:
+      return ent, reader.info
+    return ent
+  except:
+    raise
+
+# this function uses a dirty trick: should be a member of MMCifInfoBioUnit
+# which is totally C++, but we want the method in Python... so we define it
+# here (__init__) and add it as a member to the class. With this, the first
+# arguement is the usual 'self'.
+# documentation for this function was moved to mmcif.rst,
+# MMCifInfoBioUnit.PDBize, since this function is not included in SPHINX.
+def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
+  def _CopyAtoms(src_res, dst_res, edi, trans=geom.Mat4()):
+    for atom in src_res.atoms:
+      tmp_pos = geom.Vec4(atom.pos)
+      new_atom=edi.InsertAtom(dst_res, atom.name, geom.Vec3(trans*tmp_pos), 
+                              element=atom.element,
+                              occupancy=atom.occupancy, 
+                              b_factor=atom.b_factor,
+                              is_hetatm=atom.is_hetatom)
+
+  chain_names='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz'
+  # create list of operations
+  # for cartesian products, operations are stored in a list, multiplied with
+  # the next list of operations and re-stored... until all lists of operations
+  # are multiplied in an all-against-all manner.
+  operations = biounit.GetOperations()
+  trans_matrices = list()
+  if len(operations) > 0:
+    for op in operations[0]:
+      rot = geom.Mat4()
+      rot.PasteRotation(op.rotation)
+      trans = geom.Mat4()
+      trans.PasteTranslation(op.translation)
+      tr = geom.Mat4()
+      tr = trans * rot
+      trans_matrices.append(tr)
+      for op_n in range(1, len(operations)):
+        tmp_ops = list()
+        for o in operations[op_n]:
+          rot = geom.Mat4()
+          rot.PasteRotation(o.rotation)
+          trans = geom.Mat4()
+          trans.PasteTranslation(o.translation)
+          tr = geom.Mat4()
+          tr = trans * rot
+          for t_o in trans_matrices:
+            tp = t_o * tr
+            tmp_ops.append(tp)
+        trans_matrices = tmp_ops
+  # select chains into a view as basis for each transformation
+  assu = asu.Select('cname=' + ','.join(biounit.GetChainList()))
+  # use each transformation on the view, store as entity and transform, PDBize
+  # the result while adding everything to one large entity
+  pdb_bu = mol.CreateEntity()
+  edi = pdb_bu.EditXCS(mol.BUFFERED_EDIT)
+  cur_chain_name = 0
+  water_chain = mol.ChainHandle()
+  ligand_chain = mol.ChainHandle()
+  for tr in trans_matrices:
+    # do a PDBize, add each new entity to the end product
+    for chain in assu.chains:
+      residue_count = len(chain.residues)
+      if seqres:
+        seqres_chain = seqres.FindSequence(chain.name)
+        if seqres_chain.IsValid():
+          residue_count = len(seqres_chain)
+      if chain.is_polymer and residue_count >= min_polymer_size:
+        if len(chain_names) == cur_chain_name:
+          raise RuntimeError('Running out of chain names')
+        new_chain = edi.InsertChain(chain_names[cur_chain_name])
+        cur_chain_name += 1
+        edi.SetChainDescription(new_chain, chain.description)
+        edi.SetChainType(new_chain, chain.type)
+        new_chain.SetStringProp('original_name', chain.name)
+        for res in chain.residues:
+          new_res = edi.AppendResidue(new_chain, res.name, res.number)
+          _CopyAtoms(res, new_res, edi, tr)
+      elif chain.type == mol.CHAINTYPE_WATER:
+        if not water_chain.IsValid():
+          # water gets '-' as name
+          water_chain = edi.InsertChain('-')
+          edi.SetChainDescription(water_chain, chain.description)
+          edi.SetChainType(water_chain, chain.type)
+        for res in chain.residues:
+          new_res = edi.AppendResidue(water_chain, res.name)
+          new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
+          new_res.SetStringProp('description', chain.description)
+          _CopyAtoms(res, new_res, edi, tr)
+      else:
+        if not ligand_chain.IsValid():
+          # all ligands, put in one chain, are named '_'
+          ligand_chain = edi.InsertChain('_')
+          last_rnum = 0
+        else:
+          last_rnum = ligand_chain.residues[-1].number.num
+        residues=chain.residues
+        ins_code='\0'
+        if len(residues)>1:
+          ins_code='A'
+        for res in chain.residues:
+          new_res = edi.AppendResidue(ligand_chain, res.name, 
+                                      mol.ResNum(last_rnum+1, ins_code))
+          new_res.SetStringProp('description', chain.description)
+          new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
+          ins_code = chr(ord(ins_code)+1)
+          _CopyAtoms(res, new_res, edi, tr)
+  conop.ConnectAll(pdb_bu)
+  return pdb_bu
+
+MMCifInfoBioUnit.PDBize = _PDBize
 
 ## \example fft_li.py
 #

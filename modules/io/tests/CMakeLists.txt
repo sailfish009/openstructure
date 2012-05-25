@@ -1,5 +1,6 @@
 set(OST_IO_UNIT_TESTS
   test_io_pdb.py
+  test_io_mmcif.py
   test_clustal.cc
   test_io_pdb.cc
   test_io_crd.cc
@@ -8,6 +9,8 @@ set(OST_IO_UNIT_TESTS
   test_iomanager.cc
   tests.cc
   test_star_parser.cc
+  test_mmcif_reader.cc
+  test_mmcif_info.cc
 )
 if (ENABLE_IMG)
   list(APPEND OST_IO_UNIT_TESTS test_io_img.cc)
@@ -16,6 +19,9 @@ ost_unittest(MODULE io
              SOURCES "${OST_IO_UNIT_TESTS}"
              LINK ost_mol ost_seq)
 
-add_executable(test_mae_standalone test_mae_standalone.cc)
-target_link_libraries(test_mae_standalone ost_mol)
-target_link_libraries(test_mae_standalone ost_io)
+if(NOT ENABLE_STATIC)
+  add_executable(test_mae_standalone test_mae_standalone.cc)
+  target_link_libraries(test_mae_standalone ost_mol)
+  target_link_libraries(test_mae_standalone ost_io)
+  target_link_libraries(test_mae_standalone ${Boost_REGEX_LIBRARY})
+endif()

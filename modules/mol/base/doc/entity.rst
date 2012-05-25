@@ -280,10 +280,18 @@ The Handle Classes
      want to save them as PDB files
      
      This property is read-only. To change the name, use an :class:`XCSEditor`. 
-     
+
      Also available as :meth:`GetName`
      
      :type: str
+
+  .. attribute:: type
+
+     Describes the type of the chain. See :ref:`chaintype`.
+
+  .. attribute:: description
+
+     Details about the chain. Not categorised, just text.
 
   .. attribute:: residues
    
@@ -389,11 +397,18 @@ The Handle Classes
   .. method:: GetAtomList()
     
     See :attr:`atoms`
-    
+
   .. method:: GetName()
   
     See :attr:`name`
 
+  .. method:: GetType()
+
+    See :attr:`type`
+
+  .. method:: GetDescription()
+
+    See :attr:`description`
 
 .. class:: ResidueHandle
 
@@ -496,6 +511,12 @@ The Handle Classes
     The chemical class of a residue is used to broadly categorize residues based 
     on their chemical properties. For example, peptides belong  to the 
     `L_PEPTIDE_LINKING` or `D_PEPTIDE_LINKING` classes.
+
+  .. attribute:: chem_type
+
+    The chemical type of a residue is a classification of all compounds
+    obtained from the PDB component dictionary. For example, ions belong to the
+    class `ChemType::IONS`, amino acids to `ChemType::AMINOACIDS`.
   
   .. attribute:: sec_structure
   
@@ -544,6 +565,9 @@ The Handle Classes
   
     See :attr:`psi_torsion`
   
+  .. method:: GetChemType()
+    
+    See :attr:`chem_type`
   
 
 .. class:: AtomHandle
@@ -1513,12 +1537,84 @@ Other Entity-Related Functions
 
 .. function:: CreateViewFromAtomList(atom_list)
 
-   Returns a view made up of the atoms in *atom_list*. All atoms are required to
-   be atoms of the same entity. Duplicate atoms are only added to the view once.
+  Returns a view made up of the atoms in *atom_list*. All atoms are required to
+  be atoms of the same entity. Duplicate atoms are only added to the view once.
+  
+  :param atom_list: the atoms
+  :type atom_list: :class:`AtomHandleList` or :class:`AtomViewList`
+  :raises: :class:`IntegrityError` if atoms of different entities are
+           encountered
+  
+  :returns: :class:`EntityView`
+
+.. function:: CreateEntityFromView(view, include_exlusive_atoms, handle=EntityHandle())
+ 
+  This function behaves exactly like :meth:`EntityHandle.Copy`, except that only
+  atoms, residues, chains and bonds that are present in the view will be 
+  copied.
    
-   :param atom_list: the atoms
-   :type atom_list: :class:`AtomHandleList` or :class:`AtomViewList`
-   :raises: :class:`IntegrityError` if atoms of different entities are
-            encountered
-   
-   :returns: :class:`EntityView`
+  :param view: is the view to be converted to a handle
+  :param include_exlusive_atoms: if true, atoms that are part of an exclusive
+       bond (only one bond partner is included in the view) will also be included
+       in the new entity handle.
+  :param handle: If invalid a new entity will be created. If valid, the atoms, 
+       residues, chains, bonds and torsions will be added to handle. This is 
+       useful to combine several entities into one.
+
+  :returns :class:`EntityHandle`
+  
+.. _chaintype:
+
+ChainType
+--------------------------------------------------------------------------------
+
+A ChainType fills the :attr:`ChainHandle.type` attribute. Different types are
+described in the :ref:`ChainType enum <chaintype_enum>`. Functions for setting
+a type belong to the :class:`EditorBase` class, getting is provided by the
+:class:`ChainHandle` class, further convenience functions are described here.
+
+.. _chaintype_enum:
+
+The ChainType enum
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ChainType enum enumerates all types defined by the PDB for the MMCif file
+format. Following values are supported:
+
+  ``CHAINTYPE_POLY``, ``CHAINTYPE_NON_POLY``, ``CHAINTYPE_WATER``,
+  ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
+  ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
+  ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
+  ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``  
+
+Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types available.
+
+Setter & Getter functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:func:`EditorBase.SetChainType`, :func:`ChainHandle.GetType`
+
+
+ChainType functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. function:: ChainTypeFromString(identifier)
+
+   Create a ChainType item for a given string.
+
+   :param identifier: String to request a type for.
+   :type identifier: :class:`str`
+   :raises: :class:`runtime_error` if **identifier** is unrecognised.
+
+   :returns: :class:`ChainType`
+
+.. function:: StringFromChainType(type)
+
+   Return the String identifier for a given **type**.
+
+   :param type: To be translated
+   :type type: :class:`ChainType`
+   :raises: :class:`runtime_error` if **type** is unrecognised.
+
+   :returns: :class:`str`
+

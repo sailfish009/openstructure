@@ -628,16 +628,17 @@ void complex_filler(img::image_state::ComplexHalfFrequencyImageState& isi,
           p[mapc]=-sc;
           // complex conjugate
           fhandle >> real >> imag;
-          isi.Value(p)=Complex(Real(real),-Real(imag));
+          isi.Value(p)=Complex(Real(real),Real(imag));
           LOG_DEBUG(" " << p  << " " << isi.Value(p));
         }
+        fhandle >> real >> imag;
         if(sr==header.nr) {
         // why set point (py,header.ny/2,pz)?
         //  isi.Value(Point(py,header.ny/2,pz))=scale*Complex(Real(real),Real(imag));
         //  LOG_DEBUG("+" << Point(py,header.ny/2,pz) << " <- " << Point(sx,cy,sz) << " " << " " << isi.Value(Point(py,header.ny/2,pz)));
           p[mapc]=p[header.mapr];
           p[mapr]=header.nr/2;
-          isi.Value(p)=Complex(Real(real),Real(imag));
+          isi.Value(p)=Complex(Real(real),-Real(imag));
           LOG_DEBUG("+" << p << " " << isi.Value(p));
         }
         Progress::Instance().AdvanceProgress(&this_dummy);
@@ -649,11 +650,12 @@ void complex_filler(img::image_state::ComplexHalfFrequencyImageState& isi,
         for(;sc<header.nc-1;++sc) {
           p[mapc]=sc;
           fhandle >> real >> imag;
-          isi.Value(p)=Complex(Real(real),Real(imag));
+          isi.Value(p)=Complex(Real(real),-Real(imag));
           LOG_DEBUG(" " << p << " " << isi.Value(p));
         }
+        fhandle >> real >> imag;
         p[mapc]=sc;
-        isi.Value(p)=Complex(Real(real),-Real(imag));
+        isi.Value(p)=Complex(Real(real),Real(imag));
         LOG_DEBUG(" " << p << " " << isi.Value(p));
         Progress::Instance().AdvanceProgress(&this_dummy);
       }
@@ -740,7 +742,7 @@ void complex_dumper(BinaryOStream<CONVERSIONTYPE>& f,
       pnt[mapr]=header.nr/2-sr;
       for(int sc=0;sc<header.nc-1;++sc) {
         pnt[mapc]=-sc;
-        Complex val = conj(norm.Convert(isc->Value(pnt)));
+        Complex val = norm.Convert(isc->Value(pnt));
         f << static_cast<B>(val.real()) << static_cast<B>(val.imag());
         LOG_DEBUG(" " << pnt  << " " << val);
       }
@@ -754,12 +756,12 @@ void complex_dumper(BinaryOStream<CONVERSIONTYPE>& f,
       for(;sc<header.nc-1;++sc) {
         pnt[mapc]=sc;
         Complex  val =norm.Convert(isc->Value(pnt));
-        f << static_cast<B>(val.real()) << static_cast<B>(val.imag());
+        f << static_cast<B>(val.real()) << static_cast<B>(-val.imag());
         LOG_DEBUG(" " << pnt << " " << val);
       }
       pnt[mapc]=sc;
       Complex  val = norm.Convert(conj(isc->Value(pnt)));
-      f << static_cast<B>(val.real()) << static_cast<B>(val.imag());
+      f << static_cast<B>(val.real()) << static_cast<B>(-val.imag());
       LOG_DEBUG(" " << pnt << " " << val);
       Progress::Instance().AdvanceProgress(&this_dummy);
     }
@@ -780,7 +782,7 @@ void import_helper(img::MapHandle& image, std::istream& in,const MRC& formatmrc)
   }
   if(header.mode==3 || header.mode==4) {
     // always assume half-complex mode
-    image.Reset(img::Size((header.nx-1)*2,header.ny,header.nz),img::COMPLEX,img::HALF_FREQUENCY);
+    image.Reset(img::Size(header.nx,header.ny,header.nz),img::COMPLEX,img::HALF_FREQUENCY);
     if(img::image_state::ComplexHalfFrequencyImageState *cs=dynamic_cast<img::image_state::ComplexHalfFrequencyImageState*>(image.ImageStatePtr().get())) {
       if (header.mode==3) {
         detail::complex_filler<ushort,CONVERSIONTYPE>(*cs,f,header);

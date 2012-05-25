@@ -147,6 +147,7 @@ void export_Entity()
     .def("GetMass", &EntityHandle::GetMass)
     .def("GetCenterOfMass", &EntityHandle::GetCenterOfMass)
     .def("GetCenterOfAtoms", &EntityHandle::GetCenterOfAtoms)
+    .def("GetAtomPosList", &EntityHandle::GetAtomPosList)
     .def("GetGeometricCenter", geom_center<EntityHandle>)
     .add_property("geometric_center", geom_center<EntityHandle>)
 

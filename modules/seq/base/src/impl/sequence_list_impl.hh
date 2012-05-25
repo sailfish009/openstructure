@@ -65,6 +65,8 @@ public:
 
   SequenceImplPtr FindSequence(const String& name) const;
 
+  int FindSequenceIndex(const String& name) const;
+  
   String ToString(int width=80) const;
 
   SequenceListImplPtr Slice(int first, int n) const;
@@ -92,6 +94,7 @@ private:
   std::vector<SequenceImplPtr> list_;
 };
 
+#if(OST_INFO_ENABLED)
 /// \brief export sequence list impl to info
 /// \internal
 void DLLEXPORT_OST_SEQ 
@@ -102,6 +105,7 @@ SequenceListImplToInfo(const SequenceListImplPtr& seq_list,
 /// \internal
 SequenceListImplPtr DLLEXPORT_OST_SEQ 
 SequenceListImplFromInfo(info::InfoGroup& group);
+#endif
 
 }}}
 

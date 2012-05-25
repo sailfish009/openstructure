@@ -16,7 +16,6 @@
 using namespace ost;
 using namespace ost::gfx;
 
-namespace {
 
 class SceneObserverProxy: public SceneObserver {
 public:
@@ -75,6 +74,5 @@ private:
   PyObject* self;
 };
 
-}
 
 #endif

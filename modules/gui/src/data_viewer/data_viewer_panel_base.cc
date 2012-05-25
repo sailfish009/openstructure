@@ -46,7 +46,7 @@ namespace ost { namespace img { namespace gui {
 DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   QWidget(parent),
   DataObserver(data),
-  popupmenu_(new QMenu),
+  popupmenu_(new QMenu(this)),
   data_min_(0.0),
   data_max_(0.0),
   data_min_pos_(),
@@ -643,6 +643,18 @@ Extent DataViewerPanelBase::GetSelection() const
   return selection_;
 }
 
+void DataViewerPanelBase::SetSelection(const Extent& selection)
+{
+  selection_=selection;
+  update_rubberband_from_selection_();
+  if(selection==Extent()){
+    rubberband_->hide();
+  }else{
+    rubberband_->show();
+  }
+  UpdateView(false);
+}
+
 Real DataViewerPanelBase::GetZoomScale() const 
 {
   return zoom_scale_;
@@ -782,7 +794,7 @@ void DataViewerPanelBase::extract_ri()
 
 void DataViewerPanelBase::zoom(int d)
 {
-  // maximal zoom = 2^8, therefore zoom_level_ goes from 8 to 8 and delta from -16 to 16
+  // maximal zoom = 2^8, therefore zoom_level_ goes from -8 to 8 and delta from -16 to 16
   int old_zoom_level=zoom_level_;
   int dl=std::max(d,-16);
   dl=std::min(dl,16);
@@ -924,6 +936,53 @@ void DataViewerPanelBase::SetInvert(bool invert)
   UpdateNormalizer(normalizer_->GetMinimum(),
                    normalizer_->GetMaximum(),
                    normalizer_->GetGamma(),invert);
+  UpdateView(true);
+}
+
+Real DataViewerPanelBase::GetGamma() const
+{
+  return normalizer_->GetGamma();
+}
+
+void DataViewerPanelBase::SetGamma(Real gamma)
+{
+  UpdateNormalizer(normalizer_->GetMinimum(),
+                   normalizer_->GetMaximum(),
+                   gamma,normalizer_->GetInvert());
+  UpdateView(true);
+}
+
+Real DataViewerPanelBase::GetViewerMin() const
+{
+  return normalizer_->GetMinimum();
+}
+
+void DataViewerPanelBase::SetViewerMin(Real min)
+{
+  UpdateNormalizer(min,normalizer_->GetMaximum(),normalizer_->GetGamma(),normalizer_->GetInvert());
+  UpdateView(true);
+}
+
+Real DataViewerPanelBase::GetViewerMax() const
+{
+  return normalizer_->GetMaximum();
+}
+
+void DataViewerPanelBase::SetViewerMax(Real max)
+{
+  UpdateNormalizer(normalizer_->GetMinimum(),max,normalizer_->GetGamma(),normalizer_->GetInvert());
+  UpdateView(true);
+}
+
+geom::Vec2 DataViewerPanelBase::GetOffset() const
+{
+  return geom::Vec2(offset_x_,offset_y_);
+}
+
+void DataViewerPanelBase::SetOffset(const geom::Vec2& offset)
+{
+  offset_x_=offset[0];
+  offset_y_=offset[1];
   UpdateView(true);
 }
 

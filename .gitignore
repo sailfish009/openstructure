@@ -24,6 +24,8 @@ pov_*test.inc
 *-out.pdb
 *-out.sdf
 *-out.crd
+*-out.pqr
+*-out.png
 CMakeLists.txt.user
 OpenStructure.cbp
 DartConfiguration.tcl
@@ -53,4 +55,8 @@ Debug
 /deployment/win/create_archive.bat
 /install_manifest.txt
 *_out.csv
+*_out.tab
+*_out.pickle
 /modules/io/tests/temp_img.tmp
+PYTEST-*.xml
+ost_*_tests_log.xml

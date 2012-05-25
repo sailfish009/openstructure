@@ -39,7 +39,5 @@ class TestWeightMatrix(unittest.TestCase):
     self.assertEqual(mat.GetWeight('?', 'E'), 0)
 
 if __name__ == "__main__":
-  try:
-    unittest.main()
-  except Exception, e:
-    print e
+  from ost import testutils
+  testutils.RunTests()

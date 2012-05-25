@@ -178,5 +178,76 @@ bool IsInSphere(const Sphere& s, const Vec3& v){
   return Length(s.GetOrigin()-v)<=s.GetRadius();
 }
 
+Line3 Vec3List::FitCylinder(const Vec3 initial_direction, const Vec3 center){
+  //This function fits a cylinder to the positions in Vec3List
+  //It takes as argument an initial guess for the direction and the geometric
+  //center of the atoms. The center is not changed during optimisation as the
+  //best fitting cylinder can be shown to have its axis pass through the geometric center
+  Line3 axis=Line3(center,center+initial_direction), axis_old;
+  Real radius,res_sum_old,res_sum,delta_0=0.01,prec=0.0000001,err,norm,delta;
+  unsigned long n_step=1000, n_res=this->size();
+  Vec3 v,gradient;
+  
+  radius=0.0;
+  delta=delta_0;
+  for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+    radius+=geom::Distance(axis,(*i));
+  }
+  radius/=Real(n_res);
+  res_sum=0.0;
+  for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+    res_sum+=pow(Distance(axis,(*i))-radius,2.);
+  }
+  unsigned long k=0;
+  err=2.0*prec;
+  while (err>prec and k<n_step) {
+    res_sum_old=res_sum;
+    axis_old=axis;
+    radius=0.0;
+    if (k>50) {
+      delta=delta_0*pow((50./k),2.0);
+    }
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      radius+=Distance(axis,(*i));
+    }
+    radius/=Real(n_res);
+    for (int j=0; j!=3; ++j){
+      res_sum=0.0;
+      v=Vec3(0.0,0.0,0.0);
+      v[j]=delta;
+      axis=Line3(axis_old.GetOrigin(),axis_old.GetOrigin()+axis_old.GetDirection()+v);
+      radius=0.0;
+      for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+        radius+=Distance(axis,(*i));
+      }
+      radius/=Real(n_res);
+      for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+        res_sum+=pow(Distance(axis,(*i))-radius,2.);
+      }
+      gradient[j]=(res_sum-res_sum_old)/delta;
+    }
+    norm=Dot(gradient,gradient);
+    if (norm>1.) {
+      gradient=Normalize(gradient);
+    }
+    axis=Line3(axis_old.GetOrigin(),axis_old.GetOrigin()+axis_old.GetDirection()-delta*gradient);
+    radius=0.0;
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      radius+=Distance(axis,(*i));
+    }
+    radius/=Real(n_res);
+    res_sum=0.0;
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      res_sum+=pow(Distance(axis,(*i))-radius,2.);
+    }
+    err=fabs((res_sum-res_sum_old)/float(n_res));
+    k++;
+  }
+  if (err>prec) {
+    std::cout<<"axis fitting did not converge"<<std::endl;
+  }
+  return axis;
+}
+
 } // ns
 

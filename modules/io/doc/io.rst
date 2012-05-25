@@ -5,6 +5,7 @@
   :hidden:
   
   formats
+  mmcif
   profile
 
 .. module:: ost.io

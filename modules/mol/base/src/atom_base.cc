@@ -69,6 +69,17 @@ geom::Vec3 AtomBase::GetAltPos(const String& alt_group) const
   return impl_->GetResidue()->GetAltAtomPos(Impl(), alt_group);
 }
 
+Real AtomBase::GetAltBFactor(const String& alt_group) const
+{
+  this->CheckValidity();
+  return impl_->GetResidue()->GetAltAtomBFactor(Impl(), alt_group);
+}
+Real AtomBase::GetAltOcc(const String& alt_group) const
+{
+  this->CheckValidity();
+  return impl_->GetResidue()->GetAltAtomOcc(Impl(), alt_group);
+}
+
 std::vector<String> AtomBase::GetAltGroupNames() const
 {
   this->CheckValidity();

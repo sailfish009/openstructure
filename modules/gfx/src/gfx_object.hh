@@ -40,6 +40,7 @@
 #include "gfx_prim.hh"
 #include "vertex_array.hh"
 #include "input.hh"
+#include "exporter_fw.hh"
 
 namespace ost { namespace gfx {
 
@@ -56,7 +57,8 @@ public:
   virtual void DeepSwap(GfxObj& go);
   virtual void RenderGL(RenderPass pass);
   virtual void RenderPov(PovState& pov);
-  virtual void Apply(GfxNodeVisitor& v,GfxNodeVisitor::Stack st);
+  virtual void Export(Exporter* ex);
+  virtual void Apply(GfxNodeVisitor& v, GfxNodeVisitor::Stack st);
   virtual int GetType() const;
   //
 
@@ -117,6 +119,15 @@ public:
     be implemented, the rest is taken care of by GfxObj::RenderGL
   */
   virtual void CustomRenderGL(RenderPass pass);
+
+  // implemented in derived classes to deal with initialization etc
+  // called just before CustomRenderGL is called
+  // the boolean flag indicated that a re-build was requested
+  virtual void CustomPreRenderGL(bool rebuild);
+
+  // implemented in derived classes for first GL initialization
+  // which should be done here, not in the ctor
+  virtual void InitGL();
 
   // implemented in derived classes for the actual POVray export
   virtual void CustomRenderPov(PovState& pov);
@@ -186,7 +197,6 @@ public:
  protected:
   
   void PreRenderGL(bool flag);
-  virtual void CustomPreRenderGL(bool flag);
 
  private:
   GfxObj(const GfxObj& o);

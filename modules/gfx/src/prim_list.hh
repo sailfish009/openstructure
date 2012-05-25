@@ -139,6 +139,24 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
 
   // TODO: add point and line pixel width
 
+  /*!
+    \brief add triangle mesh
+
+    v : pointer to nv*3 floats for the positions (mandatory)
+    n : pointer to nv*3 floats for the normals (may be NULL)
+    c : pointer to nv*4 floats for the colors (may be NULL)
+    nv: number of vertices, normals, and colors
+    i : pointer to ni*3 vertex indices
+    ni: number of index triplets
+
+    Python interface, using numpy arrays:
+
+      AddMesh(vertex_array, normal_array, color_array, index_array)
+
+    where normal_array and color_array may be None
+  */
+  void AddMesh(float* v, float* n, float* c, size_t nv, unsigned int* i, size_t ni);
+
  protected:
   virtual void CustomPreRenderGL(bool flag);
 
@@ -152,6 +170,8 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
   unsigned int arc_detail_;
 
   IndexedVertexArray simple_va_;
+
+  std::vector<IndexedVertexArray> vas_;
   
   void prep_simple_va();
   void prep_va();

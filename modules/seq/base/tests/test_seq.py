@@ -174,6 +174,8 @@ class TestSeq(unittest.TestCase):
     string_b=''.join([r.one_letter_code for r in b.residues])
     self.assertEqual(string_a, 'BDFH')
     self.assertEqual(string_b, 'BDFH')
-suite = unittest.TestLoader().loadTestsFromTestCase(TestSeq)
-unittest.TextTestRunner().run(suite)
+
+if __name__== '__main__':
+  from ost import testutils
+  testutils.RunTests()
 

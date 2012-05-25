@@ -50,7 +50,7 @@ PanelManager::PanelManager(QWidget* widget):
      right_panel_splitter_(new ThinSplitter(Qt::Horizontal, this)),
      left_panel_splitter_(new ThinSplitter(Qt::Horizontal, this)),
      bottom_panel_splitter_(new ThinSplitter(Qt::Vertical, this)),
-     pool_(new WidgetPool())
+     pool_(new WidgetPool(this))
 {
 
   PanelBar* bottom_bar = new BottomBar(this);

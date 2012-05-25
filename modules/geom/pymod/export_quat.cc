@@ -40,6 +40,7 @@ void export_Quat()
     .def(self += self)
     .def(self -= self)
     .def(self == self)
+    .def(self != self)
     .def(-self)
     .def(self * Real())
     .def(self * Quat())
@@ -58,7 +59,6 @@ void export_Quat()
   ;
   def("Conjugate",&Conjugate);
   def("Slerp",&Slerp);
-  def("Grassman",&Grassmann);
   def("Normalize",normalize);
 }
 

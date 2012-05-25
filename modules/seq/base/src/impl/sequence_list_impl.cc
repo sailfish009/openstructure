@@ -18,7 +18,10 @@
 //------------------------------------------------------------------------------
 #include <limits>
 
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
+#endif
 #include <ost/seq/impl/sequence_list_impl.hh>
 
 namespace ost { namespace seq { namespace impl {
@@ -58,6 +61,18 @@ SequenceImplPtr SequenceListImpl::FindSequence(const String& name) const
   return SequenceImplPtr();
 }
 
+
+int SequenceListImpl::FindSequenceIndex(const String& name) const
+{
+  for (size_t i=0; i<list_.size(); ++i) {
+    if (list_[i]->GetName()==name) {
+      return int(i);
+    }
+  }
+  return -1;
+}
+  
+  
 String SequenceListImpl::ToString(int width) const
 {
   std::stringstream buffer;
@@ -142,6 +157,7 @@ SequenceListImplPtr SequenceListImpl::Copy() const
   return new_ali;
 }
 
+#if(OST_INFO_ENABLED)
 void SequenceListImplToInfo(const SequenceListImplPtr& seq_list,
                             info::InfoGroup& group)
 {
@@ -163,6 +179,7 @@ SequenceListImplPtr SequenceListImplFromInfo(info::InfoGroup& group)
   }
   return seq_list;
 }
+#endif
 
 SequenceListImplPtr SequenceListImpl::Slice(int first, int n) const
 {

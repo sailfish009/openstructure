@@ -17,3 +17,4 @@ So far, the binding module includes:
   blast
   msms
   tmtools
+  clustalw

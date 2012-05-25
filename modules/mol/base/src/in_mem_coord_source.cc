@@ -30,6 +30,12 @@ void InMemCoordSource::AddFrame(const std::vector<geom::Vec3>& coords)
   frames_.push_back(fp);
 }
 
+void InMemCoordSource::AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& cell_size,const geom::Vec3& cell_angles)
+{
+  CoordFramePtr fp(new CoordFrame(coords,cell_size,cell_angles));
+  frames_.push_back(fp);
+}
+  
 void InMemCoordSource::InsertFrame(int pos, const std::vector<geom::Vec3>& coords)
 {
   CoordFrameList::iterator it = frames_.begin();

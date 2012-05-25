@@ -26,7 +26,7 @@ using namespace ost;
 using namespace ost::gfx;
 
 namespace {
-  Gradient* make_gradient(const dict& d)
+  Gradient* make_gradient_d(const dict& d)
   {
     std::auto_ptr<Gradient> grad(new Gradient);
     list keys = d.keys();
@@ -57,13 +57,42 @@ namespace {
     }
     return grad.release();
   }
+
+  Gradient* make_gradient_l(const list& l)
+  {
+    std::auto_ptr<Gradient> grad(new Gradient);
+    float mf = len(l)<2 ? 0.0 : 1.0/static_cast<float>(len(l)-1); 
+    for(int i=0;i<len(l);++i) {
+      float mark = static_cast<float>(i)*mf;
+      Color col;
+      object val = l[i];
+      extract<Color> cex(val);
+      if(cex.check()) {
+        // use gfx.Color
+        col=cex();
+      } else {
+        // try simple sequence
+        if(len(val)!=3) {
+          throw std::runtime_error("expected values of gfx.Color or float triplets");
+        }
+        try {
+          col=gfx::Color(extract<float>(val[0]),extract<float>(val[1]),extract<float>(val[2]));
+        } catch (...) {
+          throw std::runtime_error("expected values of gfx.Color or float triplets");
+        }
+      }
+      grad->SetColorAt(mark,col);
+    }
+    return grad.release();
+  }
 }
 
 void export_gradient()
 {
   class_<Gradient>("Gradient", init<>())
     .def(init<const String&>())
-    .def("__init__", make_constructor(make_gradient))
+    .def("__init__", make_constructor(make_gradient_d))
+    .def("__init__", make_constructor(make_gradient_l))
     .def("SetColorAt", &Gradient::SetColorAt)
     .def("GetColorAt", &Gradient::GetColorAt)
     .def("GetStops", &Gradient::GetStops)

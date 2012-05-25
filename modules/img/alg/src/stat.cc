@@ -30,6 +30,7 @@
 #include <ost/img/value_util.hh>
 
 #include "stat.hh"
+#include "stat_accumulator.hh"
 
 namespace ost { namespace img { namespace alg {
 
@@ -58,14 +59,12 @@ void StatBase::VisitState(const ImageStateImpl<T,D>& isi)
     return;
   }
 
-  Real sum2=0.0;
   Vec3 sumcenter(0.0,0.0,0.0);
-  Real current_n=1.0;
-  Real m2=0.0,m3=0.0,m4=0.0;
   ValIndex minindex(std::numeric_limits<Real>::max(),Point(0,0,0));
   ValIndex maxindex(-std::numeric_limits<Real>::max(),Point(0,0,0));
   min_ = std::numeric_limits<Real>::max();
   max_ = -std::numeric_limits<Real>::max();
+  StatAccumulator<> acc;
 
   int wi=isi.GetSize()[0];
   int he=isi.GetSize()[1];
@@ -74,23 +73,11 @@ void StatBase::VisitState(const ImageStateImpl<T,D>& isi)
     for(int j=0;j<he;++j) {
       for(int k=0;k<de;++k) {
         Real val=Val2Val<T,Real>(isi.Value(Index(i,j,k)));
-        Real delta = val - mean_;
-        Real delta_n = delta / current_n;
-        Real delta_n2 = delta_n * delta_n;
-        Real term = delta * delta_n * (current_n-1);
-
-        mean_ += delta_n;
-        m4 += term * delta_n2 * (current_n*current_n - 3*current_n + 3) + 6 * delta_n2 * m2 - 4 * delta_n * m3;
-        m3 += term * delta_n * (current_n - 2) - 3 * delta_n * m2;
-        m2 += term;
-
         ValIndex vi(val,Point(i,j,k));
         minindex=std::min<ValIndex>(vi,minindex);
         maxindex=std::max<ValIndex>(vi,maxindex);
         sumcenter+=Vec3(i,j,k)*val;
-        sum_+=val;
-        sum2+=val*val;
-        current_n+=1;
+        acc(val);
       }
     }
   }
@@ -98,16 +85,13 @@ void StatBase::VisitState(const ImageStateImpl<T,D>& isi)
   max_=maxindex.first;
   minpos_=minindex.second+isi.GetExtent().GetStart();
   maxpos_=maxindex.second+isi.GetExtent().GetStart();  
-  var_=m2/n;
-  std_dev_=sqrt(var_);
-  rms_=sqrt(sum2/n);
-  if(m2<1e20){
-    skewness_=0.0;
-    kurtosis_= 0.0;
-  }else{
-    skewness_=m3/sqrt(m2*m2*m2);
-    kurtosis_= (n*m4) / (m2*m2) - 3.0;
-  }
+  var_=acc.GetVariance();
+  std_dev_=acc.GetStandardDeviation();
+  rms_=acc.GetRootMeanSquare();
+  skewness_=acc.GetSkewness();
+  kurtosis_= acc.GetKurtosis();
+  sum_=acc.GetSum();
+  mean_=acc.GetMean();
   if(sum_!=0.0){
     center_of_mass_=sumcenter/sum_+isi.GetExtent().GetStart().ToVec3();
   }else{
@@ -135,49 +119,32 @@ void StatBase::VisitFunction(const Function& fnc)
     return;
   }
 
-  Real sum2=0.0;
   Vec3 sumcenter(0.0,0.0,0.0);
-  Real current_n=1.0;
-  Real m2=0.0,m3=0.0,m4=0.0;
   ValIndex minindex(std::numeric_limits<Real>::max(),Point(0,0,0));
   ValIndex maxindex(-std::numeric_limits<Real>::max(),Point(0,0,0));
   min_ = std::numeric_limits<Real>::max();
   max_ = -std::numeric_limits<Real>::max();
+  StatAccumulator<> acc;
 
   for(ExtentIterator it(fnc.GetExtent());!it.AtEnd(); ++it) {
     Real val=fnc.GetReal(it);
-    Real delta = val - mean_;
-    Real delta_n = delta / current_n;
-    Real delta_n2 = delta_n * delta_n;
-    Real term = delta * delta_n * (current_n-1);
-
-    mean_ += delta_n;
-    m4 += term * delta_n2 * (current_n*current_n - 3*current_n + 3) + 6 * delta_n2 * m2 - 4 * delta_n * m3;
-    m3 += term * delta_n * (current_n - 2) - 3 * delta_n * m2;
-    m2 += term;
-
     ValIndex vi(val,it);
     minindex=std::min<ValIndex>(vi,minindex);
     maxindex=std::max<ValIndex>(vi,maxindex);
     sumcenter+=Point(it).ToVec3()*val;
-    sum_+=val;
-    sum2+=val*val;
-    current_n+=1;
+    acc(val);
   }
   min_=minindex.first;
   max_=maxindex.first;
   minpos_=minindex.second;
-  maxpos_=maxindex.second;  
-  var_=m2/n;
-  std_dev_=sqrt(var_);
-  rms_=sqrt(sum2/n);
-  if(m2<1e20){
-    skewness_=0.0;
-    kurtosis_= 0.0;
-  }else{
-    skewness_=m3/sqrt(m2*m2*m2);
-    kurtosis_= (n*m4) / (m2*m2) - 3.0;
-  }
+  maxpos_=maxindex.second;
+  var_=acc.GetVariance();
+  std_dev_=acc.GetStandardDeviation();
+  rms_=acc.GetRootMeanSquare();
+  skewness_=acc.GetSkewness();
+  kurtosis_= acc.GetKurtosis();
+  sum_=acc.GetSum();
+  mean_=acc.GetMean();
   if(sum_!=0.0){
     center_of_mass_=sumcenter/sum_;
   }else{

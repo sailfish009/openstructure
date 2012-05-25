@@ -441,7 +441,8 @@ endif()
 set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTNETWORK 1)
 include(${QT_USE_FILE})
-qt4_wrap_cpp(OST_GUI_MOCS "${HEADERS_TO_BE_MOCCED}")
+qt4_wrap_cpp(OST_GUI_MOCS "${HEADERS_TO_BE_MOCCED}" 
+             OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
 module(NAME gui SOURCES ${OST_GUI_MOCS} ${OST_GUI_SOURCES}
        HEADERS ${OST_GUI_TOOLS_HEADERS} IN_DIR tools
                ${OST_GUI_SEQUENCE_VIEWER_HEADERS} IN_DIR sequence_viewer
@@ -463,7 +464,8 @@ endif()
 
 include_directories(${PYTHON_INCLUDE_PATH})
 qt4_add_resources(OST_QT_RESOURCE dngr.qrc)
-qt4_wrap_cpp(OST_GOSTY_MOC "gosty.hh")
+qt4_wrap_cpp(OST_GOSTY_MOC "gosty.hh"
+             OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
 # if someone has ANY idea why windows already has the boost program options
 # symbols defined, please talk to Marco and Juergen. You will be rewarded with
 # dogfood for a lifetime!

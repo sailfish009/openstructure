@@ -187,10 +187,10 @@ geom::Vec3 EntityView::GetCenterOfMass() const
 
 Real EntityView::GetMass() const 
 {
-  Real mass = 0;
-  AtomViewIter it=this->AtomsBegin();
-  for(; it!=this->AtomsEnd(); ++it) {
-    mass+=(*it).GetMass();
+  this->CheckValidity();
+  double mass = 0;
+  for (ChainViewList::iterator i=data_->chains.begin();i!=data_->chains.end(); ++i) {
+    mass+=i->GetMass();
   }
   return mass;
 }

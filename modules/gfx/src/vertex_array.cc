@@ -30,6 +30,7 @@
 #include "scene.hh"
 #include "vertex_array_helper.hh"
 #include "povray.hh"
+#include "exporter.hh"
 
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
@@ -108,7 +109,7 @@ unsigned int IndexedVertexArray::GetFormat()
 void IndexedVertexArray::Cleanup() 
 {
   if(initialized_) {
-    glDeleteTextures(1,&tex_id_);
+    //glDeleteTextures(1,&tex_id_);
     glDeleteLists(outline_mat_dlist_,1);
 #if OST_SHADER_SUPPORT_ENABLED
     glDeleteBuffers(7,buffer_id_);
@@ -431,6 +432,12 @@ void IndexedVertexArray::RenderGL()
   
   glPushAttrib(GL_ALL_ATTRIB_BITS);
   glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+  
+  if(use_tex_) {
+    glEnable(GL_TEXTURE_2D);
+  } else {
+    glDisable(GL_TEXTURE_2D);
+  }
 
   if(outline_mode_>0) {
     LOG_TRACE("outline rendering");
@@ -654,6 +661,14 @@ void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
   pov.inc() << "}\n";
 }
 
+void IndexedVertexArray::Export(Exporter* ex) const
+{
+  ex->WriteVertexData(entry_list_[0].v,entry_list_[0].n, entry_list_[0].c, entry_list_[0].t, sizeof(Entry), entry_list_.size());
+  ex->WriteLineData(&line_index_list_[0],line_index_list_.size()/2);
+  ex->WriteTriData(&tri_index_list_[0],tri_index_list_.size()/3);
+  ex->WriteQuadData(&quad_index_list_[0],quad_index_list_.size()/4);
+}
+
 void IndexedVertexArray::Clear()
 {
   dirty_=true;
@@ -685,7 +700,7 @@ void IndexedVertexArray::Reset()
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
   draw_normals_=false;
-  use_tex_=true;
+  use_tex_=false;
 }
 
 void IndexedVertexArray::FlagRefresh()

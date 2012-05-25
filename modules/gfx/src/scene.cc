@@ -42,6 +42,7 @@
 #include "gl_helper.hh"
 
 #include <ost/config.hh>
+
 #include "scene.hh"
 #include "input.hh"
 #include "gfx_node.hh"
@@ -49,6 +50,7 @@
 #include "gfx_test_object.hh"
 #include "bitmap_io.hh"
 #include "entity.hh"
+#include "exporter.hh"
 #include "povray.hh"
 #include "offscreen_buffer.hh"
 
@@ -107,7 +109,8 @@ Scene::Scene():
   light_amb_(0.1,0.1,0.1),
   light_diff_(0.9,0.9,0.9),
   light_spec_(0.5,0.5,0.5),
-  axis_flag_(false),
+  cor_flag_(false),
+  fix_cor_flag_(true),
   fog_flag_(true),
   fog_color_(0.0,0.0,0.0,0.0),
   auto_autoslab_(true),
@@ -194,11 +197,29 @@ void Scene::SetShadowQuality(int q)
 #endif
 }
 
+int Scene::GetShadowQuality() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().shadow_quality;
+#else
+  return 0;
+#endif
+}
+
 void Scene::SetShadowWeight(float w)
 {
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().shadow_weight=w;
   RequestRedraw();
+#endif
+}
+
+float Scene::GetShadowWeight() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().shadow_weight;
+#else
+  return 0.0;
 #endif
 }
 
@@ -247,6 +268,15 @@ void Scene::SetAmbientOcclusionWeight(float f)
 #endif
 }
 
+float Scene::GetAmbientOcclusionWeight() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_factor;
+#else
+  return 1.0;
+#endif
+}
+
 void Scene::SetAmbientOcclusionMode(uint m)
 {
 #if OST_SHADER_SUPPORT_ENABLED
@@ -256,12 +286,30 @@ void Scene::SetAmbientOcclusionMode(uint m)
 #endif
 }
 
+uint Scene::GetAmbientOcclusionMode() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_mode;
+#else
+  return 0;
+#endif
+}
+
 void Scene::SetAmbientOcclusionQuality(uint m)
 {
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().amb_occl_quality=m;
   // the redraw routine will deal with the Shader
   RequestRedraw();
+#endif
+}
+
+uint Scene::GetAmbientOcclusionQuality() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_quality;
+#else
+  return 0;
 #endif
 }
 
@@ -309,12 +357,18 @@ void Scene::SetBeaconOff()
 
 namespace {
 
-void set_light_dir(Vec3 ld)
-{
-  GLfloat l_pos[]={0.0, 0.0, 0.0, 0.0};
-  l_pos[0]=-ld[0]; l_pos[1]=-ld[1]; l_pos[2]=-ld[2];
-  glLightfv(GL_LIGHT0, GL_POSITION, l_pos);
-}
+  void set_light_dir(Vec3 ld)
+  {
+    GLfloat l_pos[]={0.0, 0.0, 0.0, 0.0};
+    l_pos[0]=-ld[0]; l_pos[1]=-ld[1]; l_pos[2]=-ld[2];
+    glLightfv(GL_LIGHT0, GL_POSITION, l_pos);
+  }
+
+  struct GfxObjInitGL: public GfxNodeVisitor {
+    virtual void VisitObject(GfxObj* o, const Stack& st) {
+      o->InitGL();
+    }
+  };
 
 }
 
@@ -457,6 +511,10 @@ void Scene::InitGL(bool full)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+  LOG_DEBUG("Scene: calling gl init for all objects");
+  GfxObjInitGL initgl;
+  this->Apply(initgl);
 
   LOG_DEBUG("Scene: gl init done");
   gl_init_=true;
@@ -776,9 +834,13 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
 
   LOG_DEBUG("Scene: graphical object added @" << n.get() << std::endl);
 
-  if(root_node_->GetChildCount()==0) {
-    GfxObjP go = boost::dynamic_pointer_cast<GfxObj>(n);
-    if(go) {
+  GfxObjP go = boost::dynamic_pointer_cast<GfxObj>(n);
+
+  if(go) {
+    if(gl_init_) {
+      go->InitGL();
+    }
+    if(root_node_->GetChildCount()==0) {
       SetCenter(go->GetCenter());
     }
     do_autoslab_=true;
@@ -957,10 +1019,18 @@ void Scene::OnInput(const InputEvent& e)
     gluUnProject(wx+2.0,wy+2.0,wz,mm,pm,vp,&ox,&oy,&oz);
     Vec2 fxy = Vec2(ox,oy);
 
-    if(e.GetCommand()==INPUT_COMMAND_TRANSX) {
-      transform_.ApplyXAxisTranslation(e.GetDelta()*fxy[0]);
+    if(fix_cor_flag_) {
+      if(e.GetCommand()==INPUT_COMMAND_TRANSX) {
+        transform_.SetCenter(transform_.GetCenter()+Transpose(transform_.GetRot())*Vec3(-fxy[0]*e.GetDelta(),0.0,0.0));
+      } else {
+        transform_.SetCenter(transform_.GetCenter()+Transpose(transform_.GetRot())*Vec3(0.0,-fxy[1]*e.GetDelta(),0.0));
+      }
     } else {
-      transform_.ApplyYAxisTranslation(e.GetDelta()*fxy[1]);
+      if(e.GetCommand()==INPUT_COMMAND_TRANSX) {
+        transform_.ApplyXAxisTranslation(e.GetDelta()*fxy[0]);
+      } else {
+        transform_.ApplyYAxisTranslation(e.GetDelta()*fxy[1]);
+      }
     }
   } else if(e.GetCommand()==INPUT_COMMAND_TRANSZ) {
     float currz=transform_.GetTrans()[2];
@@ -1576,6 +1646,13 @@ void Scene::ExportPov(const std::string& fname, const std::string& wdir)
   pov.write_postamble();
 }
 
+void Scene::Export(Exporter* ex) const
+{
+  ex->SceneStart(this);
+  root_node_->Export(ex);
+  ex->SceneEnd(this);
+}
+
 void Scene::ResetProjection()
 {
   LOG_TRACE("Scene: projection matrix " << fov_ << " " << znear_ << " " << zfar_);
@@ -1743,6 +1820,12 @@ void Scene::SetTestMode(bool f)
   }
 }
 
+void Scene::SetShowCenter(bool f)
+{
+  cor_flag_=f;
+  RequestRedraw();
+}
+
 void Scene::prep_glyphs()
 {
   glGenTextures(1,&glyph_tex_id_);
@@ -1802,6 +1885,32 @@ void Scene::render_scene()
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().Preprocess();
 #endif
+
+  if(cor_flag_) {
+    geom::Vec3 cen=transform_.GetCenter();
+    glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT);
+#if OST_SHADER_SUPPORT_ENABLED
+    Shader::Instance().PushProgram();
+    Shader::Instance().Activate("");
+#endif
+    glLineWidth(1.5);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+    
+    glBegin(GL_LINES);
+    glColor3f(0.5,0.5,0.5);
+    glVertex3f(cen[0]-1.0,cen[1],cen[2]);
+    glVertex3f(cen[0]+1.0,cen[1],cen[2]);
+    glVertex3f(cen[0],cen[1]-1.0,cen[2]);
+    glVertex3f(cen[0],cen[1]+1.0,cen[2]);
+    glVertex3f(cen[0],cen[1],cen[2]-1.0);
+    glVertex3f(cen[0],cen[1],cen[2]+1.0);
+    glEnd();
+    glPopAttrib();
+#if OST_SHADER_SUPPORT_ENABLED
+    Shader::Instance().PopProgram();
+#endif
+  }
 
   root_node_->RenderGL(STANDARD_RENDER_PASS);
   glEnable(GL_BLEND);
@@ -1865,7 +1974,7 @@ void Scene::stereo_projection(int view)
       glFrustum(left,right,bot,top,zn,zf);
       Real dist = -transform_.GetTrans()[2]+stereo_distance_;
       glTranslated(0.0,0.0,-dist);
-      glRotated(180.0/M_PI*atan(0.1*ff/iod),0.0,1.0,0.0);
+      glRotated(-180.0/M_PI*atan(0.1*ff/iod),0.0,1.0,0.0);
       glTranslated(0.0,0.0,dist);
     } else {
       // correct off-axis frustims
@@ -1874,10 +1983,12 @@ void Scene::stereo_projection(int view)
 
       // correction of near clipping plane to avoid extreme drifting
       // of left and right view
+#if 0
       if(iod*zn/fo<2.0) {
         zn=2.0*fo/iod;
         zf=std::max(zn+Real(0.2),zf);
       }
+#endif
     
       Real sd = -ff*0.5*iod*zn/fo;
       left+=sd;
@@ -1895,6 +2006,9 @@ void Scene::stereo_projection(int view)
 
 void Scene::render_stereo()
 {
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
+  glPushClientAttrib(GL_ALL_ATTRIB_BITS);
+
   int old_stereo_eye=stereo_eye_;
   stereo_eye_=-1;
   stereo_projection(-1);
@@ -1912,6 +2026,7 @@ void Scene::render_stereo()
   stereo_eye_=1;
   stereo_projection(1);
   render_scene();
+
   glEnable(GL_TEXTURE_2D);
 #if OST_SHADER_SUPPORT_ENABLED
   if(OST_GL_VERSION_2_0) {
@@ -1928,7 +2043,6 @@ void Scene::render_stereo()
   Shader::Instance().Activate("");
 #endif
 
-  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
@@ -1949,7 +2063,7 @@ void Scene::render_stereo()
   glLoadIdentity();
 
   if(stereo_mode_==2) {
-    // draw interlace lines in stencil buffer
+    // draw interlaced lines in stencil buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLineWidth(1.0);
     glEnable(GL_STENCIL_TEST);
@@ -2014,10 +2128,14 @@ void Scene::render_stereo()
   glEnd();
   
   // restore settings
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 0, 0, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
+  glPopClientAttrib();
   glPopAttrib();
 #if OST_SHADER_SUPPORT_ENABLED
   Shader::Instance().PopProgram();

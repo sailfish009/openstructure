@@ -38,6 +38,8 @@ namespace {
 
   void (CoordGroupHandle::*capture1)()=&CoordGroupHandle::Capture;
   void (CoordGroupHandle::*capture2)(uint)=&CoordGroupHandle::Capture;
+  void (CoordGroupHandle::*add_frame1)(const geom::Vec3List&)=&CoordGroupHandle::AddFrame;
+  void (CoordGroupHandle::*add_frame2)(const geom::Vec3List&,const geom::Vec3&,const geom::Vec3&)=&CoordGroupHandle::AddFrame;
 }
 
 void export_CoordGroup()
@@ -46,8 +48,12 @@ void export_CoordGroup()
     .def("IsValid",&CoordGroupHandle::IsValid)
     .def("GetEntity",&CoordGroupHandle::GetEntity)
     .def("GetAtomCount",&CoordGroupHandle::GetAtomCount)
+    .def("GetFrame",&CoordGroupHandle::GetFrame2)
     .def("AddFrames", &CoordGroupHandle::AddFrames)
+    .def("AddFrame", add_frame1)
+    .def("AddFrame", add_frame2)
     .def("GetFrameCount",&CoordGroupHandle::GetFrameCount)
+    .def("GetFramePositions",&CoordGroupHandle::GetFramePositions)
     .def("SetFramePositions",&CoordGroupHandle::SetFramePositions)
     .def("SetAtomPos",&CoordGroupHandle::SetAtomPos)
     .def("GetAtomPos",&CoordGroupHandle::GetAtomPos)
@@ -61,7 +67,7 @@ void export_CoordGroup()
     .def("GetAtomList",&CoordGroupHandle::GetAtomList)
     .def("__getitem__",cg_getitem)
     .def("__setitem__",cg_setitem)
-    .def("Filter", &CoordGroupHandle::Filter)
+    .def("Filter", &CoordGroupHandle::Filter, (arg("selected"),arg("first")=0,arg("last")=-1))
   ;
 
   def("CreateCoordGroup",CreateCoordGroup);

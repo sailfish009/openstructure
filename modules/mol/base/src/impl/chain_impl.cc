@@ -36,7 +36,9 @@ ChainImpl::ChainImpl(const EntityImplPtr& e, const String& name):
   ent_(e), 
   name_(name),
   residue_list_(),
-  in_sequence_(true)
+  in_sequence_(true),
+  type_(CHAINTYPE_UNKNOWN),
+  description_()
 {}
 
 String ChainImpl::GetName() const
@@ -398,14 +400,11 @@ void ChainImpl::AssignSecondaryStructure(SecStructure ss,
 
 Real ChainImpl::GetMass() const
 {
-  Real mass = 0;
+  double mass = 0;
   for (ResidueImplList::const_iterator i=residue_list_.begin(); 
         i!=residue_list_.end(); ++i) {
     ResidueImplPtr r=*i;
-    for (AtomImplList::iterator j=r->GetAtomList().begin(); 
-          j!=r->GetAtomList().end(); ++j) {
-      mass+=(*j)->GetMass();
-    }
+    mass+=r->GetMass();
   }
   return mass;
 }
@@ -485,4 +484,41 @@ void ChainImpl::ReorderResidues()
   UpdateShifts();
 }
 
+void ChainImpl::RenumberAllResidues(int start, bool keep_spacing)
+{
+  ResNum actual_num=ResNum(start);
+  ResNum original_start_num=residue_list_[0]->GetNumber();
+  ResNum start_diff=ResNum(start)-original_start_num;
+
+
+  for (ResidueImplList::const_iterator i=residue_list_.begin(); 
+         i!=residue_list_.end(); ++i) {
+
+      if(keep_spacing){
+         ResNum temp=(*i)->GetNumber();
+         (*i)->SetNumber(temp+start_diff);
+        continue;
+      }
+
+      (*i)->SetNumber(actual_num);
+      actual_num++;
+  }
+  UpdateShifts();
+}
+
+void ChainImpl::SetInSequence(const int index)
+{
+  ResNum num=residue_list_[index]->GetNumber();
+  //Check if rp is in sequence
+  if (in_sequence_) {
+    if (index>0 && residue_list_[index-1]->GetNumber()>=num)
+      in_sequence_=false;
+    if (index<static_cast<int>(residue_list_.size())-1 && residue_list_[index+1]->GetNumber()<=num)
+      in_sequence_=false;
+  }
+  if (in_sequence_) {
+    this->UpdateShifts();
+  }
+}
+  
 }}} // ns

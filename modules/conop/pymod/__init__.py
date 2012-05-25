@@ -18,6 +18,17 @@
 #------------------------------------------------------------------------------
 from _ost_conop import *
 
+# The 20 standard amino acids in no particular order
+STANDARD_AMINOACIDS=(
+ 'ALA', 'ARG', 'ASN',
+ 'ASP', 'GLN', 'GLU',
+ 'LYS', 'SER', 'CYS',
+ 'MET', 'TRP', 'TYR',
+ 'THR', 'VAL', 'ILE',
+ 'LEU', 'GLY', 'PRO',
+ 'HIS', 'PHE',
+)
+
 def ConnectAll(ent):
   '''
   Uses the current default builder to connect the atoms of the entity, assign 

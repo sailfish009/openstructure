@@ -31,15 +31,28 @@
 namespace ost { namespace mol {
 
 class DLLEXPORT_OST_MOL CoordFrame : public geom::Vec3List{
+private:
+  geom::Vec3 periodic_cell_sizes_;
+  geom::Vec3 periodic_cell_angles_;
 public:
   typedef geom::Vec3List base_type;
-  CoordFrame() : base_type() {}
   
+  CoordFrame() : base_type() {}
   CoordFrame(size_t size, const geom::Vec3& value=geom::Vec3()) : base_type(size, value) {}
   CoordFrame(base_type::iterator b, base_type::iterator e): base_type(b, e) { }
   CoordFrame(const base_type& rhs) : base_type(rhs) { }
   CoordFrame(const std::vector<geom::Vec3>& rhs) : base_type(rhs) { }
+  CoordFrame(const std::vector<geom::Vec3>& rhs,const geom::Vec3 box_size, const geom::Vec3 box_angles) : base_type(rhs) {
+    this->periodic_cell_sizes_=box_size;
+    this->periodic_cell_angles_=box_angles;
+  }
   
+  geom::Vec3 GetCellSize() {
+    return this->periodic_cell_sizes_;
+  }
+  geom::Vec3 GetCellAngles() {
+    return this->periodic_cell_angles_;
+  }
   geom::Vec3 GetAtomPos(const AtomHandle& atom);
   geom::Vec3 GetAtomPos(int atom_index);
   Real GetDistanceBetwAtoms(const AtomHandle& a1, const AtomHandle& a2);
@@ -60,13 +73,25 @@ public:
   Real GetMinDistBetwCenterOfMassAndView(std::vector<unsigned long>& indices_cm, std::vector<Real>& masses_cm,
                                          std::vector<unsigned long>& indices_atoms);
   Real GetMinDistBetwCenterOfMassAndView(const mol::EntityView& view_cm, const mol::EntityView& view_atoms);
+  geom::Line3 GetODRLine(std::vector<unsigned long>& indices_ca);
+  geom::Plane GetODRPlane(std::vector<unsigned long>& indices_ca);
+  geom::Line3 GetODRLine(const mol::EntityView& view1);
+  geom::Plane GetODRPlane(const mol::EntityView& view1);
+  geom::Line3 FitCylinder(std::vector<unsigned long>& indices_ca);
+  geom::Line3 FitCylinder(const mol::EntityView& view1);
+  Real GetAlphaHelixContent(std::vector<unsigned long>& indices_ca, std::vector<unsigned long>& indices_c,
+                             std::vector<unsigned long>& indices_o, std::vector<unsigned long>& indices_n);
+  Real GetAlphaHelixContent(const mol::EntityView& segment);
 };
   
   void GetIndices(const EntityView& sele, std::vector<unsigned long>& indices);
   void GetMasses(const EntityView& sele, std::vector<Real>& masses);
   void GetIndicesAndMasses(const EntityView& sele, std::vector<unsigned long>& indices,std::vector<Real>& masses);
   void GetPositions(const EntityView& sele, std::vector<geom::Vec3>& ref_pos);
-  
+  void GetCaIndices(const EntityView& segment, std::vector<unsigned long>& indices_ca);
+  void GetCaCONIndices(const EntityView& segment, std::vector<unsigned long>& indices_ca, std::vector<unsigned long>& indices_c,
+                      std::vector<unsigned long>& indices_o, std::vector<unsigned long>& indices_n);
+
 typedef boost::shared_ptr<CoordFrame> CoordFramePtr;
 typedef std::vector<CoordFramePtr> CoordFrameList;
 

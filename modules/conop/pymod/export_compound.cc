@@ -57,9 +57,15 @@ char get_chemclass(CompoundPtr compound)
   return char(compound->GetChemClass());
 }
 
+
 void set_chemclass(CompoundPtr compound, char cc)
 {
   compound->SetChemClass(ChemClass(cc));
+}
+
+char get_chemtype(CompoundPtr compound)
+{
+  return char(compound->GetChemType());
 }
 
 CompoundPtr find_compound(CompoundLibPtr comp_lib, 
@@ -92,6 +98,7 @@ void export_Compound() {
     .def("IsPeptideLinking", &Compound::IsPeptideLinking)
     .add_property("chem_class", &get_chemclass,
                   &set_chemclass)
+    .add_property("chem_type", &get_chemtype)
     .add_property("formula",make_function(&Compound::GetFormula, 
                   return_value_policy<copy_const_reference>()),
                   &Compound::SetFormula)

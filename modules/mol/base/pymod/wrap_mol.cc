@@ -19,7 +19,9 @@
 #include <boost/python.hpp>
 #include <ost/mol/transform.hh>
 #include <ost/mol/editor_base.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
+#endif
 
 using namespace boost::python;
 using namespace ost::mol;
@@ -95,7 +97,9 @@ BOOST_PYTHON_MODULE(_ost_mol)
     .def("ApplyZAxisTranslation",&Transform::ApplyZAxisTranslation)
     .def("ApplyAxisRotation",&Transform::ApplyAxisRotation)
     ;
+#if(OST_INFO_ENABLED)
   def("TransformToInfo", &TransformToInfo);
   def("TransformFromInfo", &TransformFromInfo);
-
+#endif
+  
 }

@@ -334,14 +334,10 @@ bool ChainView::operator!=(const ChainView& rhs) const
 
 Real ChainView::GetMass() const {
   this->CheckValidity();
-  Real mass = 0;
+  double mass = 0;
   ResidueViewList::const_iterator i;
   for (i=data_->residues.begin(); i!=data_->residues.end(); ++i) {
-    ResidueView r=*i;
-    for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
-         e2=r.GetAtomList().end(); j!=e2; ++j) {
-      mass+=j->GetMass();
-    }
+    mass+=i->GetMass();
   }
   return mass;
 }

@@ -28,7 +28,6 @@
 #include <ost/base.hh>
 #include <string.h>
 #include <vector>
-#include <ost/message.hh>
 #include <ost/module_config.hh>
 
 
@@ -60,8 +59,9 @@ public:
     assert(!this->empty());
     return *begin_; 
   }
- /// \brief find character in StringRef
- /// \return iterator position when found, else iterator pointing to the end 
+  
+  /// \brief find character in StringRef
+  /// \return iterator position when found, else iterator pointing to the end 
   const_iterator find(char p) const {
     const char* s=begin_;
     while (s!=end_) {
@@ -72,7 +72,7 @@ public:
     }
     return s;
   }
-  
+
   /// \brief returns a substring of the string
   ///
   /// \param pos the starting position of the substring
@@ -147,10 +147,16 @@ public:
 
   /// \brief split string into chunks delimited by \p p
   std::vector<StringRef> split(char p) const;
+
+  /// \brief split string into chunks delimited by whitespace
+  std::vector<StringRef> split() const;
+  
+  /// \brief returns a new string with all whitespace removed from 
+  ///    this StringRef
+  std::string str_no_whitespace() const;
 private:
   const char* begin_;
-  const char* end_;  
-  
+  const char* end_;    
 
 };
 //std::stringstream& operator<<(std::stringstream& stream, const StringRef& strref);

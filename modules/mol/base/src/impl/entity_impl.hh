@@ -93,7 +93,6 @@ public:
   Real GetMass() const;
   geom::Vec3 GetCenterOfMass() const;
   geom::Vec3 GetCenterOfAtoms() const;
-  
   /// \brief returns the axis-aligned bounding box of the entity
   geom::AlignedCuboid GetBounds() const;
   
@@ -253,6 +252,8 @@ public:
   void SetName(const String& ent_name);
 
   void ReorderAllResidues();
+
+  void RenumberAllResidues(int start, bool keep_spacing);
 
 private:
   void DoCopy(EntityImplPtr dest);

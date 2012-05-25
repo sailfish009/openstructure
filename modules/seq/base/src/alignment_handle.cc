@@ -166,6 +166,11 @@ ConstSequenceHandle AlignmentHandle::FindSequence(const String& name) const
   return ConstSequenceHandle(impl_->FindSequence(name));
 }
 
+int AlignmentHandle::FindSequenceIndex(const String& name) const
+{
+  this->CheckValidity();
+  return impl_->FindSequenceIndex(name);
+}  
 
 void AlignmentHandle::Cut(int start, int end)
 {
@@ -307,5 +312,21 @@ mol::EntityViewPair AlignmentHandle::GetMatchingBackboneViews(int idx0, int idx1
   }
   return mol::EntityViewPair(v1, v2);
 }
+
+
+const String& AlignmentHandle::GetSequenceRole(int seq_index)
+{
+  this->CheckValidity();
+  return impl_->GetSequence(seq_index)->GetRole();
+  
+}
+  
+void AlignmentHandle::SetSequenceRole(int seq_index, const String& role)
+{
+  this->CheckValidity();
+  impl_->GetSequence(seq_index)->SetRole(role);
+  
+}
+
 
 }}

@@ -141,17 +141,41 @@ size_t calc_frame_size(bool skip_flag, bool gap_flag, size_t num_atoms)
   return frame_size;
 }
 
+  
 bool read_frame(std::istream& istream, const DCDHeader& header, 
                 size_t frame_size, bool skip_flag, bool gap_flag, 
                 bool swap_flag, std::vector<float>& xlist,
-                std::vector<geom::Vec3>& frame)
+                std::vector<geom::Vec3>& frame,
+                uint frame_num,geom::Vec3& cell_size,geom::Vec3& cell_angles)
 {
   char dummy[4];
-  if(skip_flag) istream.seekg(14*4,std::ios_base::cur);
+  //if(skip_flag) istream.seekg(14*4,std::ios_base::cur);
+  if(skip_flag){
+    istream.read(dummy,sizeof(dummy));
+    double x,y,z,a,b,c;
+    istream.read(reinterpret_cast<char*>(&x),sizeof(double));
+    istream.read(reinterpret_cast<char*>(&a),sizeof(double));
+    istream.read(reinterpret_cast<char*>(&y),sizeof(double));
+    istream.read(reinterpret_cast<char*>(&b),sizeof(double));
+    istream.read(reinterpret_cast<char*>(&c),sizeof(double));
+    istream.read(reinterpret_cast<char*>(&z),sizeof(double));
+    istream.read(dummy,sizeof(dummy));
+    cell_size[0]=x;
+    cell_size[1]=y;
+    cell_size[2]=z;
+    cell_angles[0]=acos(a);
+    cell_angles[1]=acos(b);
+    cell_angles[2]=acos(c);
+    if(a!=0.0||b!=0.0||c!=0.0){
+       LOG_ERROR("LoadCHARMMTraj: periodic cell not parallelepipedic, cell angles might be wrong, handle carefully")
+    }
+  }
+
   // read each frame
   if(!istream) {
     /* premature EOF */
-    LOG_ERROR("LoadCHARMMTraj: premature end of file, frames read");
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num << "Nothing left to be read");
     return false;
   }
   // x coord
@@ -162,7 +186,12 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   for(uint j=0;j<frame.size();++j) {
     frame[j].x=xlist[j];
   }
-
+  if(!istream) {
+    /* premature EOF */
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num << ". No y coordinates");
+    return false;
+  }
   // y coord
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
@@ -171,7 +200,12 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   for(uint j=0;j<frame.size();++j) {
     frame[j].y=xlist[j];
   }
-
+  if(!istream) {
+    /* premature EOF */
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num << ". No z coordinates");
+    return false;
+  }
   // z coord
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
@@ -180,10 +214,26 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   for(uint j=0;j<frame.size();++j) {
     frame[j].z=xlist[j];
   }
+  if(!istream) {
+    /* premature EOF */
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num);
+    return false;
+  }
   return true;
 }
 
-
+bool read_frame(std::istream& istream, const DCDHeader& header, 
+                size_t frame_size, bool skip_flag, bool gap_flag, 
+                bool swap_flag, std::vector<float>& xlist,
+                std::vector<geom::Vec3>& frame,uint frame_num)
+{
+  geom::Vec3 cell_size=geom::Vec3(),cell_angles=geom::Vec3();
+  return read_frame(istream,header, frame_size,skip_flag, gap_flag, 
+                    swap_flag, xlist,frame,frame_num, cell_size, cell_angles);
+}
+  
+  
 mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom list is already sorted!
                                const String& trj_fn,
                                unsigned int stride)
@@ -199,10 +249,6 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
   DCDHeader header; 
   bool swap_flag=false, skip_flag=false, gap_flag=false;
   read_dcd_header(istream, header, swap_flag, skip_flag, gap_flag);
-  LOG_DEBUG("LoadCHARMMTraj: " << header.num << " trajectories with " 
-               << header.atom_count << " atoms (" << header.f_atom_count 
-               << " fixed) each");
-
   if(alist.size() != static_cast<size_t>(header.t_atom_count)) {
     LOG_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
                << " in coordinate file, " << header.t_atom_count 
@@ -213,26 +259,31 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
   mol::CoordGroupHandle cg=CreateCoordGroup(alist);
   std::vector<geom::Vec3> clist(header.t_atom_count);
   std::vector<float> xlist(header.t_atom_count);
+  geom::Vec3 cell_size, cell_angles;
   size_t frame_size=calc_frame_size(skip_flag, gap_flag, xlist.size());
   int i=0;
   for(;i<header.num;i+=stride) {
+    std::cout << i << " " << header.num << std::endl;
     if (!read_frame(istream, header, frame_size, skip_flag, gap_flag, 
-                    swap_flag, xlist, clist)) {
+                    swap_flag, xlist, clist, i,cell_size,cell_angles)) {
       break;
     }
-    cg.AddFrame(clist);
+    if(skip_flag) {
+      cg.AddFrame(clist,cell_size,cell_angles);
+    }
+    else cg.AddFrame(clist);
 
     // skip frames (defined by stride)
     if(stride>1) istream.seekg(frame_size*(stride-1),std::ios_base::cur);
   }
-
   istream.get();
   if(!istream.eof()) {
     LOG_VERBOSE("LoadCHARMMTraj: unexpected trailing file data, bytes read: " 
                  << istream.tellg());
   }
 
-  LOG_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with " << cg.GetAtomCount() << " atoms each");
+  LOG_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with "
+              << cg.GetAtomCount() << " atoms each");
 
   return cg;
 }
@@ -263,6 +314,7 @@ public:
   }
 
   virtual void AddFrame(const std::vector<geom::Vec3>& coords) {}
+  virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& box_size,const geom::Vec3& box_angles) {}
   virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords) {}
 private:
   
@@ -296,7 +348,7 @@ void DCDCoordSource::FetchFrame(uint frame)
   stream_.seekg(pos,std::ios_base::beg);
   std::vector<float> xlist(header_.t_atom_count);
   if (!read_frame(stream_, header_, frame_size, skip_flag_, gap_flag_, 
-                  swap_flag_, xlist, *frame_.get())) {
+                  swap_flag_, xlist, *frame_.get(), frame)) {
   }  
 }
 

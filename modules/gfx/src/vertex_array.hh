@@ -39,6 +39,7 @@
 #include "material.hh"
 #include "gfx_prim.hh"
 #include "povray_fw.hh"
+#include "exporter_fw.hh"
 
 namespace ost { namespace gfx {
 
@@ -161,6 +162,8 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
 
   // POVray export
   void RenderPov(PovState& pov, const std::string& name);
+
+  void Export(Exporter* ex) const;
 
   // only removes the drawing elements
   void Clear();

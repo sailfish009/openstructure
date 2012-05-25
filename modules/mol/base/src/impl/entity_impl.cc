@@ -307,11 +307,13 @@ geom::Vec3 EntityImpl::GetCenterOfMass() const {
   return center;
 }
 
+  
 Real EntityImpl::GetMass() const {
-  Real mass=0.0;
-  for (AtomImplMap::const_iterator it = atom_map_.begin();
-      it!=atom_map_.end();++it) {
-    mass+=it->second->GetMass();
+  double mass=0.0;
+  for (ChainImplList::const_iterator i=chain_list_.begin(), 
+       e=chain_list_.end(); i!=e; ++i) {
+    ChainImplPtr chain=*i;
+    mass+=chain->GetMass();
   }
   return mass;
 }
@@ -1207,6 +1209,14 @@ void EntityImpl::ReorderAllResidues()
   for(ChainImplList::iterator cit=chain_list_.begin();cit!=chain_list_.end();++cit) {
     (*cit)->ReorderResidues();
   }
+}
+
+void EntityImpl::RenumberAllResidues(int start, bool keep_spacing)
+{
+  for(ChainImplList::iterator cit=chain_list_.begin();cit!=chain_list_.end();++cit) {
+    (*cit)->RenumberAllResidues(start, keep_spacing);
+  }
+
 }
 
 }}} // ns

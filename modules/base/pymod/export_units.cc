@@ -30,8 +30,7 @@ using namespace ost;
 
 #ifdef OST_STATIC_PROPERTY_WORKAROUND
 
-namespace {
-  struct Units_ {
+struct Units_ {
     Real get_m() { return Units::m; }
     Real get_mm() { return Units::mm; }
     Real get_nm() { return Units::nm; }
@@ -53,9 +52,8 @@ namespace {
     Real get_kDa() { return Units::kDa; }
     Real get_Da() { return Units::Da; }
     Real get_C() { return Units::C; }
-  };
+};
 
-} //ns
 
 #endif
 

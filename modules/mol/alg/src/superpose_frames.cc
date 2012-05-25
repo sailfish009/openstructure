@@ -26,6 +26,13 @@
 
 namespace ost { namespace mol { namespace alg {
 
+namespace {
+bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
+{
+  return a1.GetIndex()<a2.GetIndex();
+}
+
+}
 
 typedef Eigen::Matrix<Real, 3, 3> EMat3;
 typedef Eigen::Matrix<Real, 1, 3> ECVec3;
@@ -76,7 +83,7 @@ inline EMatX3 col_sub(const EMatX3& m, const ECVec3& s)
 }
 
   
-  void AddSuperposedFrame(CoordGroupHandle& superposed, EMatX3& ref_mat,EMatX3& ref_centered,ECVec3& ref_center,CoordFramePtr frame,std::vector<unsigned long>& indices)
+void AddSuperposedFrame(CoordGroupHandle& superposed, EMatX3& ref_mat,EMatX3& ref_centered,ECVec3& ref_center,CoordFramePtr frame,std::vector<unsigned long>& indices)
 {
   // This function superposes and then adds a CoordFrame (frame) to a CoordGroup (superposed).
   // ref_mat, ref_centered and ref_center contain respectively the positions, centered positions and
@@ -144,7 +151,9 @@ CoordGroupHandle SuperposeFrames(CoordGroupHandle& cg, EntityView& sel,
       indices.push_back(i->GetIndex());
     }
   }
-  CoordGroupHandle superposed=CreateCoordGroup(cg.GetEntity().GetAtomList());
+  mol::AtomHandleList alist(cg.GetEntity().GetAtomList());
+  std::sort(alist.begin(), alist.end(),less_index);
+  CoordGroupHandle superposed=CreateCoordGroup(alist);
   EMatX3 ref_mat=EMatX3::Zero(indices.size(), 3);
   EMatX3 ref_centered=EMatX3::Zero(indices.size(), 3);
   ECVec3 ref_center;
@@ -208,7 +217,9 @@ CoordGroupHandle SuperposeFrames(CoordGroupHandle& cg, EntityView& sel,
   if (int(indices.size())!=ref_view.GetAtomCount()){
     throw std::runtime_error("atom counts of the two views are not equal");
   }
-  CoordGroupHandle superposed=CreateCoordGroup(cg.GetEntity().GetAtomList());
+  mol::AtomHandleList alist(cg.GetEntity().GetAtomList());
+  std::sort(alist.begin(), alist.end(),less_index);
+  CoordGroupHandle superposed=CreateCoordGroup(alist);
   EMatX3 ref_mat=EMatX3::Zero(indices.size(), 3);
   EMatX3 ref_centered=EMatX3::Zero(indices.size(), 3);
   ECVec3 ref_center;

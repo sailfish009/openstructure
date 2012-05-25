@@ -136,7 +136,8 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
   :type query: :class:`seq.ConstSequenceHandle`
   
   :param database: The filename of the sequence database. Make sure that 
-      formatdb has been run on the database and the <database>.pin file exists.
+      formatdb has been run on the database and the <database>.pin or
+      <database>.pal file exists.
   :param matrix: The substitution matrix to be used. Must be one of 'BLOSUM45',
      'BLOSUM62', 'BLOSUM80', 'PAM30', 'PAM70'.
   :param gap_open: Gap opening penalty. Note that only a subset of gap opening 
@@ -155,7 +156,7 @@ def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
   subst_mats=('BLOSUM45', 'BLOSUM62', 'BLOSUM80', 'PAM30', 'PAM70',)
   if matrix not in subst_mats:
     raise ValueError('matrix must be one of %s' % ', '.join(subst_mats))
-  if not os.path.exists('%s.pin' % database):
+  if not os.path.exists('%s.pin' % database) and not os.path.exists('%s.pal' % database):
     raise IOError("Database %s does not exist" % database)
   blastall_exe=settings.Locate('blastall', explicit_file_name=blast_location)
   args=[blastall_exe, '-d', database, '-p', 'blastp', 

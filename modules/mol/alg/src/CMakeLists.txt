@@ -8,6 +8,7 @@ set(OST_MOL_ALG_HEADERS
   construct_cbeta.hh
   clash_score.hh
   trajectory_analysis.hh
+  structure_analysis.hh
 )
 
 set(OST_MOL_ALG_SOURCES
@@ -19,6 +20,7 @@ set(OST_MOL_ALG_SOURCES
   filter_clashes.cc
   construct_cbeta.cc
   trajectory_analysis.cc
+  structure_analysis.cc
 )
 
 set(MOL_ALG_DEPS ost_mol ost_seq)
@@ -38,7 +40,7 @@ if (ENABLE_IMG)
 endif()
 
 executable(NAME ldt SOURCES ldt.cc 
-           DEPENDS_ON ost_io ost_mol_alg STATIC)
+           DEPENDS_ON  ost_mol ost_mol_alg ost_io STATIC)
 
 module(NAME mol_alg SOURCES ${OST_MOL_ALG_SOURCES}
        HEADERS ${OST_MOL_ALG_HEADERS}
@@ -51,3 +53,7 @@ copy_if_different("." "${STAGE_DIR}/share/openstructure"
                   "ost_mol_alg")
 install(FILES "atom_scattering_properties.txt" DESTINATION "share/openstructure/")
 
+copy_if_different("." "${STAGE_DIR}/share/openstructure"
+                  "stereo_chemical_props.txt" "STEREO_CHEMICAL_PROPS"
+                  "ost_mol_alg")
+install(FILES "stereo_chemical_props.txt" DESTINATION "share/openstructure/")

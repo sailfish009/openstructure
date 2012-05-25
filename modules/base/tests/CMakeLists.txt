@@ -4,6 +4,7 @@ set(OST_BASE_UNIT_TESTS
   test_pod_vector.cc
   test_stutil.py
   test_table.py
+  test_log.py
   tests.cc
 )
 
