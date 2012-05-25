@@ -106,7 +106,7 @@ int main (int argc, char **argv)
   Real min_distance_tolerance = 0.0;
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
-  Real radius=8.0;
+  Real radius=15.0;
   
   IOProfile profile;
   profile.bond_feasibility_check=false;
@@ -164,23 +164,22 @@ int main (int argc, char **argv)
     exit(-1);
   }
   int verbosity_level=0;
+  int ost_verbosity_level=2;
   if (vm.count("verbosity")) {
     verbosity_level=vm["verbosity"].as<int>();
     if (verbosity_level==0) {
-      Logger::Instance().PushVerbosityLevel(0);
+      ost_verbosity_level=2;    
     } else if (verbosity_level==1) {
-      Logger::Instance().PushVerbosityLevel(3);
+      ost_verbosity_level=3;
     } else if (verbosity_level==2) {
-      Logger::Instance().PushVerbosityLevel(4);
+      ost_verbosity_level=4;
     } else {
       std::cout << "Verbosity level " << verbosity_level << " is not available" << std::endl;
       exit(-1);
     }
   }
 
-  if (verbosity_level>0) {
-    LOG_INFO("LDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
-  }
+  Logger::Instance().PushVerbosityLevel(ost_verbosity_level);
 
   if (vm.count("bond_tolerance")) {
     bond_tolerance=vm["bond_tolerance"].as<Real>();
@@ -218,8 +217,8 @@ int main (int argc, char **argv)
     LOG_INFO("BOND INFO FORMAT:  Chain  Residue  ResNum  Bond  Min  Max  Observed  Z-score  Status");
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
     LOG_INFO("CLASH INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Observed  Difference  Status");
-    LOG_INFO("LDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
   }
+  LOG_INFO("LDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);
     if (!model) {
@@ -229,6 +228,7 @@ int main (int argc, char **argv)
       continue;
     }
     EntityView v=model.CreateFullView();
+
 
     // The code in this following block is only used to make CASP9 models load correctly and normally commented out
     EntityView model2=model.Select("aname!=CEN,NV,OT1,OT,CAY,CY,OXT,1OCT,NT,OT2,2OCT,OVL1,OC1,O1,OC2,O2,OVU1");
@@ -249,6 +249,7 @@ int main (int argc, char **argv)
         aitv.SetElement(firstletter);
       }
     }  
+    v=v1;
     std::cout << "File: " << files[i] << std::endl; 
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
     std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
@@ -284,7 +285,7 @@ int main (int argc, char **argv)
         std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
         exit(-1);
       }  
-      EntityView v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+      v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
       cov = compute_coverage(v,glob_dist_list);
       std::cout << "Coverage after stereo-chemical checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
       v=alg::FilterClashes(v,nonbonded_table);

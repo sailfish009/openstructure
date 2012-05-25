@@ -306,6 +306,12 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
 
 EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParams& bond_table, const StereoChemicalParams& angle_table, Real bond_tolerance, Real angle_tolerance, bool always_remove_bb)
 {
+  Real running_sum_zscore_bonds=0.0;
+  Real running_sum_zscore_angles=0.0;
+  int bond_count = 0;
+  int bad_bond_count = 0;
+  int angle_count = 1;
+  int bad_angle_count = 0;
   LOG_INFO("Checking stereo-chemistry")
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
@@ -347,10 +353,10 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             Real zscore = (blength - ref_length)/ref_stddev;
             if (blength < min_length || blength > max_length) {
               LOG_INFO("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "FAIL")
+              bad_bond_count++;
               remove_sc=true;
               if (always_remove_bb==true) {
                 remove_bb=true;
-                continue;
               }
               String name=atom.GetName();
               if (name=="CA" || name=="N" || name=="O" || name=="C") {
@@ -358,7 +364,9 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
               }
             } else {
               LOG_VERBOSE("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "PASS")
-            }  
+            }
+	    bond_count++;
+            running_sum_zscore_bonds+=zscore;  
           }  
       }
       
@@ -399,10 +407,10 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             Real zscore = (awidth - ref_width)/ref_stddev;
             if (awidth < min_width || awidth > max_width) {
               LOG_INFO("ANGLE:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "FAIL")
+              bad_angle_count++;   
               remove_sc=true;
               if (always_remove_bb==true) {
                 remove_bb=true;
-                continue;
               }
               String name=atom.GetName();
               if (name=="CA" || name=="N" || name=="O" || name=="C") {
@@ -411,6 +419,8 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             } else {
                 LOG_VERBOSE("ANGLE:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << angle_str << " " << min_width << " " << max_width << " " << awidth << " " << zscore << " " << "PASS")
             }
+            angle_count++;
+            running_sum_zscore_angles+=zscore;  
           }  
         }
       }         
@@ -434,6 +444,12 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
     }
     filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
   }
+  Real avg_zscore_bonds = running_sum_zscore_bonds/static_cast<float>(bond_count);
+  Real avg_zscore_angles = running_sum_zscore_angles/static_cast<float>(angle_count);
+  LOG_SCRIPT("Average Z-Score for bond lengths: " << avg_zscore_bonds);
+  LOG_SCRIPT("Bonds outside of tolerance range: " << bad_bond_count << " out of " << bond_count);
+  LOG_SCRIPT("Average Z-Score angle widths: " << avg_zscore_angles);
+  LOG_SCRIPT("Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count);
   return filtered;
 }
 
@@ -446,6 +462,8 @@ EntityView CheckStereoChemistry(const EntityHandle& ent, const StereoChemicalPar
 
 EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_distances, bool always_remove_bb)
 {
+  int distance_count = 0;
+  int bad_distance_count = 0;
   LOG_INFO("Filtering non-bonded clashes")
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
@@ -461,6 +479,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
     for (AtomViewList::const_iterator 
          j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
       AtomView atom=*j;
+
       String ele1=atom.GetElement();
       if (ele1=="H" || ele1=="D") {
         continue;
@@ -469,6 +488,9 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
       for (AtomViewList::iterator 
            k=within.begin(), e3=within.end(); k!=e3; ++k) {
         AtomView atom2=*k;
+
+
+
         if (atom2==atom) {
           continue;
         }
@@ -477,25 +499,28 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
           continue;
         }
 
+
         // In theory, this should also trigger for disulfide bonds, but 
         // since we don't detect disulfides correctly, we can't count on that 
-        // and we instead allow S-S distances down to 1.8.
+        // and we instead allow S-S distances down to 1.8.       
         if (atom.GetHandle().FindBondToAtom(atom2.GetHandle()).IsValid()) {
           continue;
         }
+
+
 
         Real d=geom::Length2(atom.GetPos()-atom2.GetPos());
         std::pair <Real,Real> distance_tolerance=min_distances.GetClashingDistance(ele1, ele2);
         Real distance=distance_tolerance.first;
         Real tolerance=distance_tolerance.second;
         Real threshold=distance-tolerance;
+
         if (d<threshold*threshold) {
           LOG_INFO(atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetName() << " " << atom2.GetResidue().GetNumber() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "FAIL")
-       
+          bad_distance_count++; 
           remove_sc=true;
           if (always_remove_bb==true) {
             remove_bb=true;
-            continue;
           }
           String name=atom.GetName();
           if (name=="CA" || name=="N" || name=="O" || name=="C") {
@@ -503,7 +528,8 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
           }
         } else {
           LOG_VERBOSE("CLASH:" << " " << atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetNumber() << " " << atom2.GetResidue().GetName() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "PASS")
-        }  
+        }
+        distance_count++;
       }
     }
     
@@ -525,6 +551,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
     }
     filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
   }
+  LOG_SCRIPT(bad_distance_count << " out of " << distance_count << " non-bonded short-range distances checked shorter than tolerance distance");
   return filtered;
 }
 
