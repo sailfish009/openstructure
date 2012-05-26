@@ -36,7 +36,8 @@ void export_entity_to_density();
 
 namespace {
   
-Real (*ldt_a)(const mol::EntityView&, const mol::alg::GlobalDistanceList& glob_dist_list, Real, const String&)=&mol::alg::LocalDistTest;
+Real (*ldt_a)(const mol::EntityView&, const mol::alg::GlobalDistanceList& , Real, const String&)=&mol::alg::LocalDistTest;
+Real (*ldt_c)(const mol::EntityView&, const mol::EntityView& , Real, Real, const String&)=&mol::alg::LocalDistTest;
 Real (*ldt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistTest;
 mol::EntityView (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
 mol::EntityView (*fc_b)(const mol::EntityHandle&, const mol::alg::ClashingDistances&, bool)=&mol::alg::FilterClashes;
@@ -83,6 +84,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   #endif
   
   def("LocalDistTest", ldt_a, (arg("local_ldt_property_string")=""));
+  def("LocalDistTest", ldt_c, (arg("local_ldt_property_string")=""));
   def("LocalDistTest", ldt_b, (arg("ref_index")=0, arg("mdl_index")=1));
   def("FilterClashes", fc_a, (arg("ent"), arg("clashing_distances"), arg("always_remove_bb")=false));
   def("FilterClashes", fc_b, (arg("ent"), arg("clashing_distances"), arg("always_remove_bb")=false));

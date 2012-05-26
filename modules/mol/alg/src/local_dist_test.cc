@@ -425,6 +425,14 @@ Real LocalDistTest(const EntityView& mdl, const GlobalDistanceList& glob_dist_li
   return total_ov.first/(total_ov.second ? total_ov.second : 1);
 }
 
+Real LocalDistTest(const EntityView& mdl, const EntityView& target, Real cutoff, Real max_dist, const String& local_ldt_property_string)
+{
+   GlobalDistanceList glob_dist_list = CreateDistanceList(target,max_dist);
+   return LocalDistTest(mdl, glob_dist_list, cutoff, local_ldt_property_string);
+}
+
+
+
 Real LocalDistTest(const ost::seq::AlignmentHandle& aln,
                    Real cutoff, Real max_dist, int ref_index, int mdl_index)
 {
