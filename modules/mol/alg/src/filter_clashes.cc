@@ -43,6 +43,20 @@ String bond_string(const ost::mol::AtomView& atom1, const ost::mol::AtomHandle& 
   return stkey.str();  
 }
 
+String bond_string_elems(String& ele1, String ele2) {
+  String string1,string2;
+  if (ele1 < ele2) {
+    string1 = ele1;
+    string2 = ele2;
+  } else {
+    string1 = ele2;
+    string2 = ele1;
+  }
+  std::stringstream stkey;
+  stkey << string1 << "-" << string2;
+  return stkey.str();  
+}
+
 String angle_string(const ost::mol::AtomHandle& atom1, const ost::mol::AtomView& atom, const ost::mol::AtomHandle& atom2 ) {
   String atom1_str = atom1.GetName();
   String atom2_str = atom2.GetName();
@@ -312,6 +326,9 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
   int bad_bond_count = 0;
   int angle_count = 1;
   int bad_angle_count = 0;
+  std::map<String,Real> bond_length_sum;
+  std::map<String,Real> bond_zscore_sum;
+  std::map<String,int> bond_counter_sum;
   LOG_INFO("Checking stereo-chemistry")
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
@@ -365,8 +382,19 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             } else {
               LOG_VERBOSE("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "PASS")
             }
-	    bond_count++;
-            running_sum_zscore_bonds+=zscore;  
+	        bond_count++;
+            running_sum_zscore_bonds+=zscore;
+			String bond_elems=bond_string_elems(ele1,ele2);
+			std::map<String,Real>::const_iterator find_be = bond_length_sum.find(bond_elems);  
+			if (find_be==bond_length_sum.end()) {
+				bond_length_sum[bond_elems]=blength;
+				bond_zscore_sum[bond_elems]=zscore;
+				bond_counter_sum[bond_elems]=1;
+			} else {
+				bond_length_sum[bond_elems]+=blength;
+				bond_zscore_sum[bond_elems]+=zscore;
+				bond_counter_sum[bond_elems]+=1;
+			}
           }  
       }
       
@@ -448,8 +476,19 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
   Real avg_zscore_angles = running_sum_zscore_angles/static_cast<float>(angle_count);
   LOG_SCRIPT("Average Z-Score for bond lengths: " << avg_zscore_bonds);
   LOG_SCRIPT("Bonds outside of tolerance range: " << bad_bond_count << " out of " << bond_count);
+  LOG_SCRIPT("Bond\tAvg Length\tAvg zscore\tNum Bonds")
+	
+  for (std::map<String,Real>::const_iterator bls_it=bond_length_sum.begin();bls_it!=bond_length_sum.end();++bls_it) {
+    String key = (*bls_it).first;
+	int counter=bond_counter_sum[key];
+    Real sum_bond_length=(*bls_it).second;
+	Real sum_bond_zscore=bond_zscore_sum[key];
+	Real avg_length=sum_bond_length/static_cast<Real>(counter);
+	Real avg_zscore=sum_bond_zscore/static_cast<Real>(counter);
+    LOG_SCRIPT(key << "\t" << avg_length << "\t" << avg_zscore << "\t" << counter);
+  }
   LOG_SCRIPT("Average Z-Score angle widths: " << avg_zscore_angles);
-  LOG_SCRIPT("Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count);
+  LOG_SCRIPT("Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count);	
   return filtered;
 }
 
@@ -464,6 +503,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
 {
   int distance_count = 0;
   int bad_distance_count = 0;
+  Real average_offset_sum = 0.0;
   LOG_INFO("Filtering non-bonded clashes")
   EntityView filtered=ent.CreateEmptyView();
   ResidueViewList residues=ent.GetResidueList();
@@ -488,9 +528,6 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
       for (AtomViewList::iterator 
            k=within.begin(), e3=within.end(); k!=e3; ++k) {
         AtomView atom2=*k;
-
-
-
         if (atom2==atom) {
           continue;
         }
@@ -507,8 +544,6 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
           continue;
         }
 
-
-
         Real d=geom::Length2(atom.GetPos()-atom2.GetPos());
         std::pair <Real,Real> distance_tolerance=min_distances.GetClashingDistance(ele1, ele2);
         Real distance=distance_tolerance.first;
@@ -518,6 +553,7 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
         if (d<threshold*threshold) {
           LOG_INFO(atom.GetResidue().GetChain() << " " << atom.GetResidue().GetName() << " " << atom.GetResidue().GetNumber() << " " << atom.GetName() << " " << atom2.GetResidue().GetChain() << " " << atom2.GetResidue().GetName() << " " << atom2.GetResidue().GetNumber() << " " << atom2.GetName() << " " << threshold << " " << sqrt(d) << " " << sqrt(d)-threshold << " " << "FAIL")
           bad_distance_count++; 
+          average_offset_sum+=sqrt(d)-threshold;
           remove_sc=true;
           if (always_remove_bb==true) {
             remove_bb=true;
@@ -551,7 +587,12 @@ EntityView FilterClashes(const EntityView& ent, const ClashingDistances& min_dis
     }
     filtered.AddResidue(res, ViewAddFlag::INCLUDE_ATOMS);
   }
-  LOG_SCRIPT(bad_distance_count << " out of " << distance_count << " non-bonded short-range distances checked shorter than tolerance distance");
+  Real average_offset = 0;
+  if (bad_distance_count!=0) {
+    average_offset = average_offset_sum / static_cast<Real>(bad_distance_count);
+  }
+  LOG_SCRIPT(bad_distance_count << " non-bonded short-range distances shorter than tolerance distance");
+  LOG_SCRIPT("Distances shorter than tolerance are on average shorter by: " << average_offset);
   return filtered;
 }
 
