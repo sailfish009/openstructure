@@ -24,6 +24,7 @@
 */
 
 #define OST_SHADER_SUPPORT_ENABLED @shader_support@
+#define OST_MESA_SUPPORT_ENABLED @mesa_support@
 #define OST_PROFILING_ENABLED @profiling_enabled@
 #define OST_ANIMATIONS_ENABLED @animations_enabled@
 #define OST_IMG_ENABLED @img_enabled@

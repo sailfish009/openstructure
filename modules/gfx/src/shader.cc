@@ -59,11 +59,13 @@ Shader::Shader():
 void Shader::PreGLInit() 
 {
 #if !defined(__APPLE__)
+#if !defined(OST_MESA_SUPPORT_ENABLED)
   GLenum err = glewInit();
   if (GLEW_OK != err) {
     LOG_ERROR("glew failure: " << glewGetErrorString(err));
     assert(false);
   }
+#endif
 #endif
 }
 

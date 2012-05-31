@@ -16,6 +16,12 @@ else()
   set(shader_support 0)
 endif()
 
+if (USE_MESA)
+  set(mesa_support 1)
+else()
+  set(mesa_support 0)
+endif()
+
 if (USE_NUMPY)
   set(numpy_support 1)
 else()
