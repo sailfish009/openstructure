@@ -10,12 +10,18 @@ p.add_option('--no_rpath', action='store_true',
              default=False)
 p.add_option('--macports_workaround', action='store_true', default=False)
 p.add_option('--dmg', action='store_true', default=False)
+p.add_option('--no-gui', action='store_true', default=False)
 opts, args=p.parse_args()
 deps.make_standalone('../../stage', 'standalone', True, 
                      opts.no_rpath, 
-                     macports_workaround=opts.macports_workaround)
+                     macports_workaround=opts.macports_workaround,
+                     no_gui=opts.no_gui)
 if os.path.exists('DNG.app'):
   shutil.rmtree('DNG.app')
+if opts.no_gui:
+  out_dir='ost-%s' % ost.VERSION
+  shutil.move('standalone', out_dir)
+  sys.exit(0)
 bundle.create_bundle('DNG', opts.bundle)
 if opts.bundle:
   shutil.copytree('../../examples', 'DNG.app/Contents/examples')

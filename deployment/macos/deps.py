@@ -68,19 +68,23 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
         _deps_for_lib(so_file, pool)
   return pool
 
-BINARIES=['chemdict_tool', 'tmalign', 'tmscore']
-LIBEXEC_BINARIES=['gosty']
-COMPONENTS=['mol', 'geom', 'conop', 'gfx', 'gui', 'seq_alg', 'seq', 
-            'img', 'img_alg', 'info', 'io', 'db', 'base']
-SCRIPTS=['dng', 'ost']
 LIBEXEC_SCRIPTS=['ost_config']
-
+LIBEXEC_BINARIES=[]
+GUI_LIBEXEC_BINARIES=['gosty']
+BINARIES=['ldt', 'chemdict_tool', 'tmalign', 'tmscore']
+GUI_BINARIES=['gosty']
+GUI_COMPONENTS=['gfx', 'gui', 'info']
+COMPONENTS=['mol', 'geom', 'conop', 'seq_alg', 'seq',
+            'img', 'img_alg', 'io', 'db', 'base']
+GUI_SCRIPTS=['dng']
+SCRIPTS=['ost']
 CHANGE_ID_RPATH='install_name_tool -id @rpath/%s %s'   
 CHANGE_ID='install_name_tool -id @rpath/%s %s'
 CHANGE_LOAD_CMD_RPATH='install_name_tool -change %s @rpath/%s %s'
 CHANGE_LOAD_CMD='install_name_tool -change %s @executable_path/%s %s'
 ADD_RPATH='install_name_tool -add_rpath %s %s 2> /dev/null'
-SITE_PACKAGES=['sip.so', 'sipconfig.py', 'sipdistutils.py', 'PyQt4']
+SITE_PACKAGES=[]
+GUI_SITE_PACKAGES=['sip.so', 'sipconfig.py', 'sipdistutils.py', 'PyQt4']
 REMOVE_HEADERS='rm -rf `find %s/lib -type d -name Headers`'
 REMOVE_CURRENT='rm -rf `find %s/lib -type d -name Current`'
 # collect libs of non-standard libraries/frameworks we depend on
@@ -205,8 +209,8 @@ def get_python_home():
   return os.path.dirname(sys.modules['os'].__file__)
 
 def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
-                    macports_workaround=False):
-  site_packages=get_site_package_dir()                    
+                    macports_workaround=False, no_gui=False):
+  site_packages_dir=get_site_package_dir()
 
   if os.path.exists(outdir):
     shutil.rmtree(outdir)
@@ -217,17 +221,27 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
   print 'copying shared datafiles'
   shutil.copytree(os.path.join(stage_dir, 'share'), 
                   os.path.join(outdir, 'share'))
+  scripts=SCRIPTS
+  binaries=BINARIES
+  components=COMPONENTS
+  site_packages=SITE_PACKAGES
+  libexec_binaries=LIBEXEC_BINARIES
+  if not no_gui:
+    scripts+=GUI_SCRIPTS
+    binaries+=GUI_BINARIES
+    components+=GUI_COMPONENTS
+    libexec_binaries+=GUI_LIBEXEC_BINARIES
+    site_packages+=GUI_SITE_PACKAGES
   print 'collecting dependencies'
-  deps=collect_deps(stage_dir, COMPONENTS, BINARIES, LIBEXEC_BINARIES,
-                    SITE_PACKAGES,
-                    site_packages)
+  deps=collect_deps(stage_dir, components, binaries, libexec_binaries,
+                    site_packages, site_packages_dir)
   print 'copying dependencies'
   copy_deps(deps, outdir)
-  print 'copying binaries'
-  copy_binaries(stage_dir, outdir, BINARIES, SCRIPTS, 'bin')
   print 'copying libexec binaries'
   copy_binaries(stage_dir, outdir, LIBEXEC_BINARIES, LIBEXEC_SCRIPTS,
                 'libexec/openstructure')
+  print 'copying binaries'
+  copy_binaries(stage_dir, outdir, binaries, scripts, 'bin')
   print 'copying pymod'
   shutil.copytree(os.path.join(stage_dir, 'lib/openstructure'), 
                   os.path.join(outdir, 'lib/openstructure'))

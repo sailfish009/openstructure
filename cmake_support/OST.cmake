@@ -303,7 +303,7 @@ macro(executable)
     message(FATAL_ERROR "invalid use of executable(): a name must be provided")
   endif()
   add_executable(${_ARG_NAME} ${_ARG_SOURCES})
-  if (APPLE AND NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
+  if (APPLE AND NOT _ARG_NO_RPATH AND NOT ENABLE_STATIC)
     set_target_properties(${_ARG_NAME} PROPERTIES
                           LINK_FLAGS "-Wl,-rpath,@loader_path/../lib")
   endif()
