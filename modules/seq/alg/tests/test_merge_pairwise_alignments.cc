@@ -22,6 +22,7 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/seq/alg/merge_pairwise_alignments.hh>
 #include <ost/integrity_error.hh>
@@ -30,7 +31,7 @@
 using namespace ost;
 using namespace ost::seq;
 
-BOOST_AUTO_TEST_SUITE(ost_seq_alg)
+BOOST_AUTO_TEST_SUITE(ost_seq_alg);
 
 BOOST_AUTO_TEST_CASE(merge_pairwise_alignments_one) 
 {
@@ -192,4 +193,4 @@ BOOST_AUTO_TEST_CASE(merge_pairwise_alignments_six)
 }
 
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

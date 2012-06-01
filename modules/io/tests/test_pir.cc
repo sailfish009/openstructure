@@ -23,6 +23,7 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <ost/seq/invalid_sequence.hh>
 #include <ost/io/seq/pir_io_handler.hh>
 #include <ost/io/seq/load.hh>
@@ -33,7 +34,7 @@ using namespace ost;
 using namespace ost::io;
 
 
-BOOST_AUTO_TEST_SUITE( io )
+BOOST_AUTO_TEST_SUITE( io );
 
 
 BOOST_AUTO_TEST_CASE(pir_filetypes) 
@@ -70,4 +71,4 @@ BOOST_AUTO_TEST_CASE(pir_no_star)
                     seq::InvalidSequence);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

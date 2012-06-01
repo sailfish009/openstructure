@@ -21,6 +21,7 @@
  */
  #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/mol.hh>
 #include <ost/mol/view_op.hh>
 
@@ -62,7 +63,7 @@ bool find_bond(AtomHandle a, AtomHandle b, const BondHandleList& bonds)
   return std::find(bonds.begin(), bonds.end(), a.FindBondToAtom(b))!=bonds.end();
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(test_difference)
 {
@@ -397,5 +398,4 @@ BOOST_AUTO_TEST_CASE(ent_from_view_atom_props)
   BOOST_CHECK_EQUAL(atom2.GetRadius(), Real(500.0));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
-
+BOOST_AUTO_TEST_SUITE_END();

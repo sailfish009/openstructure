@@ -22,7 +22,8 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 #include <ost/seq/alg/sequence_identity.hh>
 
 
@@ -30,7 +31,7 @@
 using namespace ost;
 using namespace ost::seq;
 
-BOOST_AUTO_TEST_SUITE(ost_seq_alg)
+BOOST_AUTO_TEST_SUITE(ost_seq_alg);
 
 BOOST_AUTO_TEST_CASE(seqid_one) 
 {
@@ -129,4 +130,4 @@ BOOST_AUTO_TEST_CASE(seqid_empty)
 }
 
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

@@ -244,12 +244,12 @@ CRDWriter::CRDWriter(std::ostream& ostream, bool ext) :
 {}
 
 CRDWriter::CRDWriter(const boost::filesystem::path& filename, bool ext) :
-#if BOOST_FILESYSTEM_VERSION==3
-  outfile_(filename.string().c_str()), outstream_(outfile_),
+#if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
+  outfile_(filename.string().c_str()),
 #else
-  outfile_(filename.file_string().c_str()), outstream_(outfile_),
+  outfile_(filename.file_string().c_str()),
 #endif
-  ext_(ext), atom_count_(0), res_count_(0)
+  outstream_(outfile_), ext_(ext), atom_count_(0), res_count_(0)
 {}
 
 CRDWriter::CRDWriter(const String& filename, bool ext) :

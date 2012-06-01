@@ -23,6 +23,8 @@
 #include <ost/log.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <ost/message.hh>
 #include <ost/geom/geom.hh>
 
@@ -101,7 +103,7 @@ bool test_angle(Real a, Real e) {
   return std::abs(fmod(float(a-e), float(M_PI/2)))<EPSILON;
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(ics_update_icsbondlength)
 {
@@ -290,4 +292,4 @@ BOOST_AUTO_TEST_CASE(ics_get_angle)
                       << " found");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

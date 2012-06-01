@@ -27,6 +27,8 @@
 
 #define BOOST_AUTO_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 
 
 using namespace ost;
@@ -131,7 +133,7 @@ public:
                          const std::vector<StringRef>& columns) 
   {
     BOOST_CHECK_EQUAL(columns[0][0], cur_char_);
-    BOOST_CHECK_EQUAL(columns[0].size(), 1);
+    BOOST_CHECK_EQUAL(columns[0].size(), static_cast<size_t>(1));
     ++cur_char_;
     BOOST_CHECK_EQUAL(columns[1][0], cur_char_);
     BOOST_CHECK_EQUAL(columns[1].size(), 1);

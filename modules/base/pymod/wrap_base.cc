@@ -102,7 +102,7 @@ BOOST_PYTHON_MODULE(_ost_base)
   ;
   
   class_<std::vector<String> >("StringList", init<>())
-    .def(vector_indexing_suite<std::vector<String> >())
+    .def(vector_indexing_suite<std::vector<String>, true>())
   ;
   
   typedef std::vector<int> IntList;

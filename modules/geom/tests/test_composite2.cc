@@ -24,10 +24,11 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 using namespace geom;
 
-BOOST_AUTO_TEST_SUITE( geom )
+BOOST_AUTO_TEST_SUITE( geom );
 
 
 BOOST_AUTO_TEST_CASE(line_init2)
@@ -54,4 +55,4 @@ BOOST_AUTO_TEST_CASE(is_on_line2)
   BOOST_CHECK(!IsOnLine(line, geom::Vec2(3,2.1)));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

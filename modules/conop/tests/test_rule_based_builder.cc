@@ -23,6 +23,7 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/log.hh>
 using boost::unit_test_framework::test_suite;
@@ -231,7 +232,7 @@ void verify_nucleotide_nolink(const ResidueHandle& p3, const ResidueHandle& p5)
                           p5.FindAtom("P")));
 }
 
-BOOST_AUTO_TEST_SUITE( conop )
+BOOST_AUTO_TEST_SUITE( conop );
 
 
 BOOST_AUTO_TEST_CASE(nucleotide_based_connect) 
@@ -296,4 +297,4 @@ BOOST_AUTO_TEST_CASE(nucleotide_based_connect)
   
 }
 
-BOOST_AUTO_TEST_SUITE_END( )
+BOOST_AUTO_TEST_SUITE_END( );
