@@ -72,7 +72,7 @@ LIBEXEC_SCRIPTS=['ost_config']
 LIBEXEC_BINARIES=[]
 GUI_LIBEXEC_BINARIES=['gosty']
 BINARIES=['ldt', 'chemdict_tool', 'tmalign', 'tmscore']
-GUI_BINARIES=['gosty']
+GUI_BINARIES=[]
 GUI_COMPONENTS=['gfx', 'gui', 'info']
 COMPONENTS=['mol', 'geom', 'conop', 'seq_alg', 'seq',
             'img', 'img_alg', 'io', 'db', 'base']
@@ -224,6 +224,7 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
   scripts=SCRIPTS
   binaries=BINARIES
   components=COMPONENTS
+  libexec_scripts=LIBEXEC_SCRIPTS
   site_packages=SITE_PACKAGES
   libexec_binaries=LIBEXEC_BINARIES
   if not no_gui:
@@ -235,10 +236,15 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
   print 'collecting dependencies'
   deps=collect_deps(stage_dir, components, binaries, libexec_binaries,
                     site_packages, site_packages_dir)
+  # when running in non-gui mode, we are most likely missing the boost
+  # python library. Let's add it to the list of dependencies by
+  # inspecting "_ost_base.so".
+  _deps_for_lib(os.path.join(stage_dir, 'lib/openstructure/ost/_ost_base.so'),
+                deps, recursive=False)
   print 'copying dependencies'
   copy_deps(deps, outdir)
   print 'copying libexec binaries'
-  copy_binaries(stage_dir, outdir, LIBEXEC_BINARIES, LIBEXEC_SCRIPTS,
+  copy_binaries(stage_dir, outdir, libexec_binaries, libexec_scripts,
                 'libexec/openstructure')
   print 'copying binaries'
   copy_binaries(stage_dir, outdir, binaries, scripts, 'bin')

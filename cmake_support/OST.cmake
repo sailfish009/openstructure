@@ -305,7 +305,7 @@ macro(executable)
   add_executable(${_ARG_NAME} ${_ARG_SOURCES})
   if (APPLE AND NOT _ARG_NO_RPATH AND NOT ENABLE_STATIC)
     set_target_properties(${_ARG_NAME} PROPERTIES
-                          LINK_FLAGS "-Wl,-rpath,@loader_path/../lib")
+                          LINK_FLAGS "-Wl,-rpath,@loader_path/../lib/")
   endif()
   if (_ARG_LINK)
     target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
