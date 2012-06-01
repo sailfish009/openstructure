@@ -24,6 +24,7 @@
 #include <ost/integrity_error.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 using namespace ost;
 using namespace ost::mol;
@@ -72,7 +73,7 @@ void test_res_pos() {
   find_and_check_res(ch1, ResNum(13));  
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(test_comparison) 
 {
@@ -334,4 +335,4 @@ BOOST_AUTO_TEST_CASE(chain_description)
   BOOST_CHECK(ch1.GetDescription() == description);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

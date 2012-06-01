@@ -26,6 +26,7 @@
 #include <ost/mol/coord_group.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 using namespace ost;
 using namespace ost::io;
@@ -36,7 +37,7 @@ namespace {
   boost::uniform_01<boost::mt19937> UniformRandom(RandomGenerator);
 }
 
-BOOST_AUTO_TEST_SUITE( io )
+BOOST_AUTO_TEST_SUITE( io );
 
 BOOST_AUTO_TEST_CASE(test_io_dcd_charmm_frames)
 {
@@ -85,4 +86,4 @@ BOOST_AUTO_TEST_CASE(test_io_dcd_charmm_frames)
   }
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

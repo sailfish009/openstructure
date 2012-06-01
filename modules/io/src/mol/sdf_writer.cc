@@ -140,7 +140,7 @@ SDFWriter::SDFWriter(const String& filename)
 }
 
 SDFWriter::SDFWriter(const boost::filesystem::path& filename): 
-#if BOOST_FILESYSTEM_VERSION==3
+#if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
   outfile_(filename.string().c_str()), 
 #else
   outfile_(filename.file_string().c_str()), 

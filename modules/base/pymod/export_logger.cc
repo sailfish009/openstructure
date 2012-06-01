@@ -18,6 +18,10 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 #include <boost/python/raw_function.hpp>
+#if BOOST_VERSION<103400
+#include <boost/python/detail/api_placeholder.hpp>
+#endif
+
 using namespace boost::python;
 
 #include <ost/log.hh>
@@ -178,7 +182,7 @@ void export_Logger()
   // the "ost" command-line interpreter. If we don't remove all the sinks from
   // the sink stack, we will get "Fatal Python error: PyEval_SaveThread: 
   // NULL tstate" upon exiting ost. I don't completely understand why, though.
-  scope().attr("__dict__")["atexit"]=import("atexit");
+  scope().attr("__dict__")["atexit"]=handle<>(PyImport_ImportModule("atexit"));
 
   def("_reset_sinks", &reset_sinks);
   object r=scope().attr("_reset_sinks");

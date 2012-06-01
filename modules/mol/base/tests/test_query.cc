@@ -21,6 +21,7 @@
  */
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/query.hh>
 #include <ost/mol/mol.hh>
 #include <ost/mol/entity_view.hh>
@@ -101,7 +102,7 @@ void ensure_counts_v(EntityView src, const String& qs,
                       " for query String " << qs);
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(test_query_parse_properties) 
 {
@@ -296,4 +297,4 @@ BOOST_AUTO_TEST_CASE(test_glob)
   ensure_counts(e, "rname=LEU and aname=?D?", 1, 1, 2);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

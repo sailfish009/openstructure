@@ -26,6 +26,7 @@
 #include <cmath>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #define CHECK_TRANSFORMED_ATOM_POSITION(ATOM,TARGET) \
    BOOST_CHECK(vec3_is_close(ATOM.GetPos(), TARGET))
@@ -72,7 +73,7 @@ EntityHandle make_test_entity()
   return eh;
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 
 BOOST_AUTO_TEST_CASE(throw_invalid_ent_handle)
@@ -412,4 +413,4 @@ BOOST_AUTO_TEST_CASE(rename_atom)
    BOOST_CHECK_EQUAL(atom.GetName(), "B");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

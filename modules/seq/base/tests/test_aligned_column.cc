@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/mol/mol.hh>
 
@@ -59,7 +60,7 @@ struct Fixture {
   ResidueHandle res3;
 };
 
-BOOST_AUTO_TEST_SUITE( aligned_column )
+BOOST_AUTO_TEST_SUITE( aligned_column );
 
 BOOST_AUTO_TEST_CASE(aligned_column_triv)
 {
@@ -130,4 +131,4 @@ BOOST_AUTO_TEST_CASE(aligned_get_residue_index)
   BOOST_CHECK_THROW(ac.GetResidueIndex(-1),std::out_of_range);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

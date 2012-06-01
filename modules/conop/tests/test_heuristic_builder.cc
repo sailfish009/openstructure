@@ -22,6 +22,7 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/log.hh>
 using boost::unit_test_framework::test_suite;
@@ -155,7 +156,7 @@ void verify_connectivity(const ResidueHandle& res)
   }
 }
 
-BOOST_AUTO_TEST_SUITE( conop )
+BOOST_AUTO_TEST_SUITE( conop );
 
 
 BOOST_AUTO_TEST_CASE(name_based_connect) 
@@ -218,4 +219,4 @@ BOOST_AUTO_TEST_CASE(test_assign_torsions){
   BOOST_CHECK(a2.GetPsiTorsion().IsValid());
 }
 
-BOOST_AUTO_TEST_SUITE_END( )
+BOOST_AUTO_TEST_SUITE_END( );

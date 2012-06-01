@@ -19,13 +19,14 @@
 #include <ost/io/io_manager.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 using boost::unit_test_framework::test_suite;
 
 
 using namespace ost;
 using namespace ost::io;
 
-BOOST_AUTO_TEST_SUITE( io )
+BOOST_AUTO_TEST_SUITE( io );
 
 
 BOOST_AUTO_TEST_CASE(io_manager) 
@@ -36,4 +37,4 @@ BOOST_AUTO_TEST_CASE(io_manager)
   BOOST_CHECK(iom.FindEntityImportHandler("model.ent"));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

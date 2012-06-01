@@ -235,8 +235,8 @@ int main (int argc, char **argv)
     EntityView v1=model2.Select("not (rname==GLY and aname==CB)");
     boost::filesystem::path pathstring(files[i]);
     
-    #if BOOST_FILESYSTEM_VERSION==3
-    String filestring=pathstring.filename().string();
+    #if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
+    String filestring=pathstring.string();
     #else
     String filestring=pathstring.file_string();
     #endif      

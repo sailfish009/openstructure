@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/mol/mol.hh>
 
@@ -38,7 +39,7 @@ using namespace ost::seq;
 using namespace ost::mol;
 
 
-BOOST_AUTO_TEST_SUITE( aligned_region )
+BOOST_AUTO_TEST_SUITE( aligned_region );
 
 BOOST_AUTO_TEST_CASE(aligned_region_triv)
 {
@@ -183,4 +184,4 @@ BOOST_AUTO_TEST_CASE(aligned_region_shift)
   BOOST_CHECK_THROW(ar.ShiftRight(1),IntegrityError);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();
