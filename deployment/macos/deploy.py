@@ -20,6 +20,8 @@ if os.path.exists('DNG.app'):
   shutil.rmtree('DNG.app')
 if opts.no_gui:
   out_dir='ost-%s' % ost.VERSION
+  if os.path.exists(out_dir):
+    shutil.rmtree(out_dir)
   shutil.move('standalone', out_dir)
   sys.exit(0)
 bundle.create_bundle('DNG', opts.bundle)
@@ -28,5 +30,5 @@ if opts.bundle:
   os.system('rm `find DNG.app/Contents/examples/ -name "*.pyc"` 2> /dev/null')
   os.system('rm -rf DNG.app/Contents/examples/code_fragments/')
   if opts.dmg:
-    os.system('rm -rf openstructure.dmg')
-    os.system('hdiutil create -srcFolder DNG.app openstructure.dmg')
+    os.system('rm -rf openstructure-%s.dmg' % ost.VERSION)
+    os.system('hdiutil create -srcFolder DNG.app openstructure-%s.dmg' % ost.VERSION)
