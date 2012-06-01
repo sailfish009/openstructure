@@ -355,17 +355,17 @@ void PDBReader::Import(mol::EntityHandle& ent,
           }
         }
         break;
-//       case 'C':
-//       case 'c':
-//         if (curr_line.size()<20) {
-//           LOG_TRACE("skipping entry");
-//           continue;
-//         }
-//         if (IEquals(curr_line.substr(0, 6), StringRef("COMPND", 6))) {
-//           LOG_TRACE("processing COMPND entry");
-//           this->ParseCompndEntry(curr_line, line_num_);
-//         }
-//        break;
+         case 'C':
+         case 'c':
+           if (curr_line.size()<20) {
+             LOG_TRACE("skipping entry");
+             continue;
+           }
+           if (IEquals(curr_line.substr(0, 6), StringRef("COMPND", 6))) {
+             LOG_TRACE("processing COMPND entry");
+             this->ParseCompndEntry(curr_line, line_num_);
+           }
+          break;
       case 'E':
       case 'e':
         if (curr_line.size()<3) {
