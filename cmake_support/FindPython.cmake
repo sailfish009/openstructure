@@ -118,8 +118,11 @@ macro(check_for_python_binary)
     foreach(_VERSION ${PYTHON_VERSIONS})
       if(${PYTHON_MIN_VERSION} VERSION_LESS ${_VERSION})
         _find_python_bin("${PYTHON_ROOT}" "${_VERSION}")
-        if(PYTHON_LIBRARIES)
+        if(PYTHON_BINARY)
           set(PYTHON_VERSION "${_VERSION}")
+          # disallow all versions except for the one we just found. This makes
+          # sure we don't mismatch the python binary and the libraries.
+          set(PYTHON_VERSIONS "${_VERSION}")
           break()
         endif()
       endif()
@@ -141,11 +144,13 @@ if(APPLE AND NOT PYTHON_IGNORE_FRAMEWORKS)
   check_for_python_framework()
 endif()
 
+# first check for python binary.
+check_for_python_binary()
+
 if(NOT PYTHON_FRAMEWORK_FOUND)
   check_for_python_lib()
 endif()
 
-check_for_python_binary()
 mark_as_advanced(
   PYTHON_LIBRARIES
   PYTHON_INCLUDE_PATH
@@ -166,6 +171,8 @@ if(PYTHON_LIBRARIES)
 endif()
 
 if (PYTHON_BINARY)
+  set(PYTHON_VERSION "${PYTHON_VERSION}"
+      CACHE STRING "Python Version" FORCE)
   set(PYTHON_BINARY "${PYTHON_BINARY}"
       CACHE FILEPATH "Python Binary" FORCE)
 endif()
