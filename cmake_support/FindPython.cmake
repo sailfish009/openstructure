@@ -42,7 +42,7 @@ endmacro()
 
 
 macro(_find_python PYTHON_ROOT VERSION)
-  string(REPLACE "." "" _VERSION_NO_DOTS ${VERSION})
+  string(REPLACE "." "" _VERSION_NO_DOTS "${VERSION}")
   if(PYTHON_ROOT)
     find_library(PYTHON_LIBRARIES
       NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
@@ -69,17 +69,17 @@ macro(_find_python PYTHON_ROOT VERSION)
 endmacro()
 
 macro(_find_python_bin PYTHON_ROOT VERSION)
-  string(REPLACE "." "" _VERSION_NO_DOTS ${VERSION})
+  string(REPLACE "." "" _VERSION_NO_DOTS "${VERSION}")
   if(PYTHON_ROOT)
     find_program(PYTHON_BINARY
-      NAMES "python" "python${_VERSION_NO_DOTS}" "python${VERSION}"
+      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
       HINTS "${PYTHON_ROOT}"
       PATH_SUFFIXES bin
       NO_SYSTEM_ENVIRONMENT_PATH NO_DEFAULT_PATH
     )
   else()
     find_program(PYTHON_BINARY
-      NAMES "python" "python${_VERSION_NO_DOTS}" "python${VERSION}"
+      NAMES "python${_VERSION_NO_DOTS}" "python${VERSION}"
       HINTS "${CMAKE_PREFIX_PATH}"
       PATH_SUFFIXES bin
     )  
@@ -105,6 +105,10 @@ macro(check_for_python_lib)
       endif()
     endforeach()
   endif()
+  # fallback to non-versioned naming scheme
+  if (NOT $PYTHON_LIBRARIES)
+    _find_python("${PYTHON_ROOT}" "")
+  endif()
 endmacro()
 
 macro(check_for_python_binary)
@@ -120,6 +124,9 @@ macro(check_for_python_binary)
         endif()
       endif()
     endforeach()
+  endif()
+  if (NOT PYTHON_BINARY)
+    _find_python("${PYTHON_ROOT}" "")
   endif()
 endmacro()
 
