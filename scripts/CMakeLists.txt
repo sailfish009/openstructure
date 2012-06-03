@@ -33,13 +33,13 @@ if (NOT ENABLE_STATIC)
   set(INIT_SCRIPTS 
     init_cl.py
   )
-
+  set(SPD "${LIB_DIR}/python${PYTHON_VERSION}/site-packages")
   if (ENABLE_GUI)
     list(APPEND INIT_SCRIPTS init.py)
   endif()
-  copy_if_different("./" "${STAGE_DIR}/${LIB_DIR}/openstructure" 
+  copy_if_different("./" "${STAGE_DIR}/${SPD}" 
                   "${INIT_SCRIPTS}" "python init scripts" ost_scripts)
 
-  install(FILES ${INIT_SCRIPTS} DESTINATION "${LIB_DIR}/openstructure")
+  install(FILES ${INIT_SCRIPTS} DESTINATION "${SPD}")
 
 endif()

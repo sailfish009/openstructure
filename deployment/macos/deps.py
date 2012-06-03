@@ -27,7 +27,7 @@ def _deps_for_lib(lib, pool, recursive=True):
   return
 
 def collect_deps(stage_dir, components, binaries, libexec_binaries,
-                 site_packages, site_packages_dir):
+                 site_packages, site_packages_dir, libexec_path='openstructure'):
   """
   Collect the dependencies for the given components and returns a list of 
   frameworks/libraries that the component depends on.
@@ -50,7 +50,7 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
     if bin_name not in pool:
       _deps_for_lib(bin_name, pool)
   for bin in libexec_binaries:
-    bin_name=os.path.abspath(os.path.join(stage_dir, 'libexec/openstructure',
+    bin_name=os.path.abspath(os.path.join(stage_dir, 'libexec', libexec_path,
                                           bin))
     if not os.path.exists(bin_name):
       print 'WARNING:', bin_name, 'does not exist'
@@ -239,7 +239,8 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
   # when running in non-gui mode, we are most likely missing the boost
   # python library. Let's add it to the list of dependencies by
   # inspecting "_ost_base.so".
-  _deps_for_lib(os.path.join(stage_dir, 'lib/openstructure/ost/_ost_base.so'),
+  pymod_dir='lib/python%d.%d/site-packages' % sys.version_info[0:2]
+  _deps_for_lib(os.path.join(stage_dir, pymod_dir, 'ost/_ost_base.so'),
                 deps, recursive=False)
   print 'copying dependencies'
   copy_deps(deps, outdir)
@@ -249,8 +250,8 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
   print 'copying binaries'
   copy_binaries(stage_dir, outdir, binaries, scripts, 'bin')
   print 'copying pymod'
-  shutil.copytree(os.path.join(stage_dir, 'lib/openstructure'), 
-                  os.path.join(outdir, 'lib/openstructure'))
+  shutil.copytree(os.path.join(stage_dir,pymod_dir),
+                  os.path.join(outdir, pymod_dir))
   copied_py_framework=False
   non_std_python=False
   if os.path.exists(os.path.join(outdir, 'lib/Python.framework')):
@@ -310,9 +311,9 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
   for sp in SITE_PACKAGES:
     src=get_python_module_path(sp)
     if os.path.isdir(src):
-      shutil.copytree(src, os.path.join(outdir, 'lib/openstructure', sp))
+      shutil.copytree(src, os.path.join(outdir, pymod_dir, sp))
     else:
-      shutil.copy(src, os.path.join(outdir, 'lib/openstructure', sp))
+      shutil.copy(src, os.path.join(outdir, pymod_dir, sp))
   print 'updating link commands of python shared objects'
   os.path.walk(os.path.join(outdir, 'lib'), 
                update_pymod_shared_objects, 
