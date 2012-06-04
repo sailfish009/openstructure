@@ -115,7 +115,7 @@ Scene::Scene():
   fog_color_(0.0,0.0,0.0,0.0),
   auto_autoslab_(true),
   do_autoslab_(true),
-  do_autoslab_fast_(true),
+  autoslab_mode_(0),
   offscreen_flag_(false),
   main_offscreen_buffer_(0),
   old_vp_(),
@@ -843,7 +843,9 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
     if(root_node_->GetChildCount()==0) {
       SetCenter(go->GetCenter());
     }
-    do_autoslab_=true;
+    if(auto_autoslab_) {
+      do_autoslab_=true;
+    }
   }
 
   root_node_->Add(n);
@@ -1201,18 +1203,11 @@ public:
   }
   void VisitObject(GfxObj* obj, const Stack& st) {
     if(obj->IsVisible()) {
-      geom::AlignedCuboid bb=obj->GetBoundingBox();
+      // use obj transform for BB calculation as well as provided global transform
+      geom::AlignedCuboid bb=tf.Apply(obj->GetBoundingBox(True));
       if(bb.GetVolume()>0.0) {
-        Vec3 t1 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMin()[2]));
-        Vec3 t2 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMin()[2]));
-        Vec3 t3 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMin()[2]));
-        Vec3 t4 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMin()[2]));
-        Vec3 t5 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMax()[2]));
-        Vec3 t6 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMax()[2]));
-        Vec3 t7 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMax()[2]));
-        Vec3 t8 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMax()[2]));
-        minc = Min(minc,Min(t1,Min(t2,Min(t3,Min(t4,Min(t5,Min(t6,Min(t7,t8))))))));
-        maxc = Max(maxc,Max(t1,Max(t2,Max(t3,Max(t4,Max(t5,Max(t6,Max(t7,t8))))))));
+        minc = Min(minc,bb.GetMin());
+        maxc = Max(maxc,bb.GetMax());
         valid=true;
       }
     }
@@ -1223,6 +1218,11 @@ public:
   bool valid;
 };
 
+}
+
+geom::AlignedCuboid Scene::GetBoundingBox(bool use_tf) const
+{
+  return GetBoundingBox(use_tf ? transform_ : mol::Transform());
 }
 
 geom::AlignedCuboid Scene::GetBoundingBox(const mol::Transform& tf) const
@@ -1706,16 +1706,30 @@ public:
 
 } // anon ns
 
+void Scene::Autoslab(bool fast)
+{
+  LOG_INFO("Autoslab(bool) is deprecated, use Autoslab() and SetAutoslabMode() instead");
+  do_autoslab_=true;
+  autoslab_mode_= fast ? 0 : 1;
+  RequestRedraw();
+}
+
 void Scene::Autoslab(bool fast, bool)
 {
+  LOG_INFO("Autoslab(bool,bool) is deprecated, use Autoslab() and SetAutoslabMode() instead");
+  Autoslab(fast);
+}
+
+void Scene::Autoslab()
+{
   do_autoslab_=true;
-  do_autoslab_fast_=fast;
   RequestRedraw();
 }
 
 void Scene::AutoslabMax()
 {
-  geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
+  LOG_INFO("AutoslabMax() is deprecated, use Autoslab() and SetAutoslabMode() instead");
+  geom::AlignedCuboid bb =this->GetBoundingBox();
 
   if(bb.GetVolume()==0.0) {
     znear_=1;
@@ -2146,21 +2160,17 @@ void Scene::do_autoslab()
 {
   // skip autoslab if nothing to show yet
   if(root_node_->GetChildCount()==0) return;
-  if(do_autoslab_fast_) {
-    geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
-    // necessary code duplication due to awkward slab limit impl
-    if(bb.GetVolume()==0.0) {
-      // skip if empty BB
-      return;
-    } else {
-      float mynear=-(bb.GetMax()[2])-1.0;
-      float myfar=-(bb.GetMin()[2])+1.0;
-      znear_=mynear;
-      zfar_=myfar;
-      set_near(mynear);
-      set_far(myfar);
+  float nnear=znear_;
+  float nfar=zfar_;
+  if(autoslab_mode_==0) {
+    // fast
+    geom::AlignedCuboid bb =this->GetBoundingBox();
+    if(bb.GetVolume()>0.0) {
+      nnear=-(bb.GetMax()[2])-1.0;
+      nfar=-(bb.GetMin()[2])+1.0;
     }
-  } else {
+  } else if (autoslab_mode_==1) {
+    // precise
     LimCalc limcalc;
     limcalc.transform=transform_;
     limcalc.minc = Vec3(std::numeric_limits<float>::max(),
@@ -2170,16 +2180,34 @@ void Scene::do_autoslab()
                               -std::numeric_limits<float>::max(),
                               -std::numeric_limits<float>::max());
     this->Apply(limcalc);
-    if(!limcalc.valid) {
-      return;
+    if(limcalc.valid) {
+      nnear=std::max(float(0.0), std::min(float(-limcalc.minc[2]),float(-limcalc.maxc[2])))-float(1.0);
+      nfar=std::max(float(-limcalc.minc[2]),float(-limcalc.maxc[2]))+float(1.0);
     }
-    float mynear=std::max(float(0.0), std::min(float(-limcalc.minc[2]),float(-limcalc.maxc[2])))-float(1.0);
-    float myfar=std::max(float(-limcalc.minc[2]),float(-limcalc.maxc[2]))+float(1.0);
-    znear_=mynear;
-    zfar_=myfar;
-    set_near(mynear);
-    set_far(myfar);
+  } else if(autoslab_mode_==2) {
+    // max
+    geom::AlignedCuboid bb =this->GetBoundingBox();
+
+    if(bb.GetVolume()>0.0) {
+      Vec3 cen = transform_.Apply(transform_.GetCenter());
+    
+      float bmax = std::max(std::abs(cen[0]-bb.GetMin()[0]),
+                            std::abs(cen[0]-bb.GetMax()[0]));
+      bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMin()[1])));
+      bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMax()[1])));
+      bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMin()[2])));
+      bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMax()[2])));
+      
+      nnear = -(cen[2]+bmax*1.5);
+      nfar = -(cen[2]-bmax*1.5);
+    }
   }
+
+  // necessary code duplication due to awkward slab limit impl
+  znear_=nnear;
+  zfar_=nfar;
+  set_near(nnear);
+  set_far(nfar);
   ResetProjection();
   RequestRedraw();
 }

@@ -65,17 +65,17 @@ using namespace ost::gfx;
       GfxObj(name)
     {}
 
-    virtual geom::AlignedCuboid GetBoundingBox() const
+    virtual geom::AlignedCuboid GetBoundingBox(bool return_global=true) const
     {
       if(override f = this->get_override("GetBoundingBox")) {
-        return f();
+        return f(return_global);
       } else {
-        return GfxObj::GetBoundingBox();
+        return GfxObj::GetBoundingBox(return_global);
       }
     }
 
-    geom::AlignedCuboid default_GetBoundingBox() const {
-      return GfxObj::GetBoundingBox();
+    geom::AlignedCuboid default_GetBoundingBox(bool return_global) const {
+      return GfxObj::GetBoundingBox(return_global);
     }
 
     virtual void CustomRenderGL(RenderPass pass) {
@@ -175,7 +175,7 @@ void export_GfxObj()
     .def("GetAALines",&GfxObj::GetAALines)
     .def("GetLineWidth",&GfxObj::GetLineWidth)
     .def("GetLineHalo",&GfxObj::GetLineHalo)
-    .def("GetBoundingBox",&GfxObj::GetBoundingBox, &GfxObjWrap::default_GetBoundingBox)
+    .def("GetBoundingBox",&GfxObj::GetBoundingBox,&GfxObjWrap::default_GetBoundingBox)
     .def("_CustomRenderGL",&GfxObj::CustomRenderGL, &GfxObjWrap::default_CustomRenderGL)
     .def("_CustomPreRenderGL",&GfxObj::CustomPreRenderGL, &GfxObjWrap::default_CustomPreRenderGL)
     .def("_InitGL",&GfxObj::InitGL, &GfxObjWrap::default_InitGL)

@@ -252,39 +252,11 @@ void Entity::UpdatePositions()
 
 
 
-geom::AlignedCuboid Entity::GetBoundingBox() const
+geom::AlignedCuboid Entity::GetBoundingBox(bool use_tf) const
 {
   this->UpdateIfNeeded();
-  return bbox_;
+  return use_tf ? transform_.Apply(bbox_) : bbox_;
 }
-
-void Entity::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
-                           const Transform& tf) const
-{
-  try {
-    geom::AlignedCuboid coord_limits=this->GetBoundingBox();
-    // update min/max by transforming all 8 corners of the bounding box and 
-    // comparing it against the current min/max
-    geom::Vec3 mmin=coord_limits.GetMin();
-    geom::Vec3 mmax=coord_limits.GetMax();
-    geom::Vec3 t1=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmin[2]));
-    geom::Vec3 t2=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmin[2]));
-    geom::Vec3 t3=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmin[2]));
-    geom::Vec3 t4=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmin[2]));
-    geom::Vec3 t5=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmax[2]));
-    geom::Vec3 t6=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmax[2]));
-    geom::Vec3 t7=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmax[2]));
-    geom::Vec3 t8=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmax[2]));
-    minc = geom::Min(minc, geom::Min(t1, geom::Min(t2, geom::Min(t3, 
-                     geom::Min(t4, geom::Min(t5, geom::Min(t6, 
-                     geom::Min(t7, t8))))))));
-    maxc = geom::Max(maxc, geom::Max(t1, geom::Max(t2, geom::Max(t3, 
-                     geom::Max(t4, geom::Max(t5, geom::Max(t6,
-                     geom::Max(t7, t8))))))));
-  } catch(Error& e) {
-    // in case the object is empty...
-  }
-} 
 
 void Entity::SetColorForAtom(const Color& col,
                              const AtomHandle& atom) 

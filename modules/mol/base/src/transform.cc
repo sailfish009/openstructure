@@ -164,6 +164,23 @@ Vec4 Transform::Apply(const Vec4& v) const
   return nrvo;
 }
 
+geom::AlignedCuboid Transform::Apply(const geom::AlignedCuboid& c) const
+{
+  geom::Vec3 cmin=c.GetMin();
+  geom::Vec3 cmax=c.GetMax();
+  Vec3 t1 = Apply(Vec3(cmin[0],cmin[1],cmin[2]));
+  Vec3 t2 = Apply(Vec3(cmin[0],cmax[1],cmin[2]));
+  Vec3 t3 = Apply(Vec3(cmax[0],cmax[1],cmin[2]));
+  Vec3 t4 = Apply(Vec3(cmax[0],cmin[1],cmin[2]));
+  Vec3 t5 = Apply(Vec3(cmin[0],cmin[1],cmax[2]));
+  Vec3 t6 = Apply(Vec3(cmin[0],cmax[1],cmax[2]));
+  Vec3 t7 = Apply(Vec3(cmax[0],cmax[1],cmax[2]));
+  Vec3 t8 = Apply(Vec3(cmax[0],cmin[1],cmax[2]));
+  geom::Vec3 minc = Min(t1,Min(t2,Min(t3,Min(t4,Min(t5,Min(t6,Min(t7,t8)))))));
+  geom::Vec3 maxc = Max(t1,Max(t2,Max(t3,Max(t4,Max(t5,Max(t6,Max(t7,t8)))))));
+  return geom::AlignedCuboid(minc,maxc);
+}
+
 /*
   The order of the transformations given herein is conceptually
   "backward" as they are applied to a vertex, because the left-right

@@ -73,6 +73,7 @@ public:
   
   geom::Vec3 Apply(const geom::Vec3& v) const;
   geom::Vec4 Apply(const geom::Vec4& v) const;
+  geom::AlignedCuboid Apply(const geom::AlignedCuboid& c) const;
 
 private:
   geom::Mat3 rot_;
@@ -83,6 +84,8 @@ private:
 
   void update_tm();
 };
+
+
 
 #if(OST_INFO_ENABLED)
 /// \brief read transformation from info group
