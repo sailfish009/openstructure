@@ -1204,7 +1204,7 @@ public:
   void VisitObject(GfxObj* obj, const Stack& st) {
     if(obj->IsVisible()) {
       // use obj transform for BB calculation as well as provided global transform
-      geom::AlignedCuboid bb=tf.Apply(obj->GetBoundingBox(True));
+      geom::AlignedCuboid bb=tf.Apply(obj->GetBoundingBox(true));
       if(bb.GetVolume()>0.0) {
         minc = Min(minc,bb.GetMin());
         maxc = Max(maxc,bb.GetMax());
