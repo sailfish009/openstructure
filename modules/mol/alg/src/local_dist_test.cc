@@ -276,7 +276,7 @@ bool UniqueAtomIdentifier::operator==(const UniqueAtomIdentifier& rhs) const
 
 bool ReferenceDistance::IsValid() const 
 {
-  if (mind_ == -1.0 and maxd_ == -1.0) {
+  if (mind_ == -1.0 && maxd_ == -1.0) {
     return false;
   } 
   return true;

@@ -39,13 +39,12 @@ namespace ost { namespace mol {
     */
     Real Eval2AngleDist(Real phi, Real phi0, Real psi, Real psi0, Real delta)
     {
-      Real d1,d2,d;
-      d1=abs(phi-phi0);
-      d2=abs(psi-psi0);
+      Real d1=abs(phi-phi0);
+      Real d2=abs(psi-psi0);
       if (d1>M_PI) d1=abs(d1-2.*M_PI);
       if (d2>M_PI) d1=abs(d2-2.*M_PI);
-      d=(pow(d1,2.)+pow(d2,2.))/pow(delta,2.);
-      return 1./(1+d);
+      Real d=(d1*d1+d2*d2)/(delta*delta);
+      return 1.0/(1.0+d);
     }
   }
 
@@ -138,7 +137,7 @@ namespace ost { namespace mol {
       val=geom::Length2(av_ref-av_sele);
       rmsd+=val;
     }
-    return pow(rmsd/indices_sele.size(),0.5);
+    return sqrt(rmsd/indices_sele.size());
   }
   
   Real CoordFrame::GetRMSD(const EntityView& reference_view,const EntityView& sele_view) const
@@ -303,8 +302,10 @@ namespace ost { namespace mol {
       psi=geom::DihedralAngle(n,ca,c,n_next);
       score.push_back(Eval2AngleDist(phi,phi_0,psi,psi_0,delta));
     }
-    score2[0]=pow(score[0]*score[1],3./2.);
-    score2[n_atoms-3]=pow(score[n_atoms-3]*score[n_atoms-4],3./2.);
+    score2[0]=sqrt(score[0]*score[1]*score[0]*score[1]*score[0]*score[1]);
+    score2[n_atoms-3]=sqrt(score[n_atoms-3]*score[n_atoms-4]*
+                           score[n_atoms-3]*score[n_atoms-4]*
+                           score[n_atoms-3]*score[n_atoms-4]);
     for (unsigned long i=1; i!=n_atoms-3; ++i) {
       score2[i]=score[i-1]*score[i]*score[i+1];
     }
