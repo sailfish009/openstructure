@@ -105,7 +105,7 @@ Line3 Vec3List::FitCylinder(const Vec3& initial_direction, const Vec3& center) c
   }
   unsigned long k=0;
   err=2.0*prec;
-  while (err>prec and k<n_step) {
+  while (err>prec && k<n_step) {
     res_sum_old=res_sum;
     axis_old=axis;
     radius=0.0;
