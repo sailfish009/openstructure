@@ -399,6 +399,14 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
 
 BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
 {
+  SetPrefixPath(getenv("OST_ROOT"));
+  String lib_path=GetSharedDataPath()+"/compounds.chemlib";
+  conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);
+  if (!compound_lib) {
+    std::cout << "WARNING: skipping SEQRES import unit test. "
+              << "Rule-based builder is required" << std::endl;
+    return;
+  }
   conop::Conopology::Instance().SetDefaultBuilder("RBB");
   BOOST_MESSAGE("  Running mmcif_entity_poly_tests...");
   mol::ChainHandle ch;
