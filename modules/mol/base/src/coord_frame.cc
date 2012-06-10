@@ -39,10 +39,10 @@ namespace ost { namespace mol {
     */
     Real Eval2AngleDist(Real phi, Real phi0, Real psi, Real psi0, Real delta)
     {
-      Real d1=abs(phi-phi0);
-      Real d2=abs(psi-psi0);
-      if (d1>M_PI) d1=abs(d1-2.*M_PI);
-      if (d2>M_PI) d1=abs(d2-2.*M_PI);
+      Real d1=std::abs(phi-phi0);
+      Real d2=std::abs(psi-psi0);
+      if (d1>M_PI) d1=std::abs(d1-2.*M_PI);
+      if (d2>M_PI) d1=std::abs(d2-2.*M_PI);
       Real d=(d1*d1+d2*d2)/(delta*delta);
       return 1.0/(1.0+d);
     }
