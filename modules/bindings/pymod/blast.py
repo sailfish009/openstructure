@@ -125,6 +125,20 @@ def ParseBlastOutput(string):
     hits.append(BlastHit(hit_id, aligned_patches))
   return hits
 
+def BlastVersion(blast_location=None):
+  """
+  Returns the version of the BLAST executable, e.g. 2.2.24 as a string
+  """
+  blastall_exe=settings.Locate('blastall', explicit_file_name=blast_location)
+  blast_pipe=subprocess.Popen(blastall_exe, stdout=subprocess.PIPE,
+                              stderr=subprocess.PIPE)
+  lines=blast_pipe.stdout.readlines()
+  pattern=re.compile(r'blastall (\d+\.\d+\.\d+)\s+arguments:\s*')
+  for line in lines:
+    m=pattern.match(line)
+    if m:
+      return m.group(1)
+  raise IOError("could not determine blast version for '%s'" % blastall_exe)
 
 def Blast(query, database, gap_open=11, gap_ext=1, matrix='BLOSUM62',
          blast_location=None):
