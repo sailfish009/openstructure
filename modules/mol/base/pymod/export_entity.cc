@@ -94,6 +94,12 @@ PyObject* get_pos1(EntityHandle& entity)
 {
   return get_pos2(entity,true);
 }
+
+bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
+{
+  return a1.GetIndex()<a2.GetIndex();
+}
+
 #endif
 } // ns
 
