@@ -35,50 +35,6 @@ using namespace ost::conop;
 
 namespace ost { namespace conop {
 
-namespace {
-
-bool CheckBackboneAtoms(ResidueHandle res)
-{
-  String atom_names[]={"N", "CA", "C", "O"};
-  std::vector<String> missing;
-  for (int i =0; i<4; ++i) {
-    if (!res.FindAtom(atom_names[i])) {
-      missing.push_back(atom_names[i]);
-    }
-  }
-  if (!missing.empty()) {
-    std::stringstream ss;
-    ss << "residue " << res.GetQualifiedName() << " is missing atoms ";
-    for (std::vector<String>::const_iterator
-         i=missing.begin(), e=missing.end(); i!=e; ++i) {
-      if (i!=missing.begin()) {
-        ss << ", ";
-      }
-      ss << *i;
-    }
-    LOG_WARNING(ss.str());
-    return false;
-  }
-  return true;
-}
-
-bool CheckCalphaAtom(ResidueHandle res)
-{
-  String atom_names[]={"N", "CA", "C", "O"};
-  std::vector<String> missing;
-  for (int i =0; i<4; ++i) {
-    if (!res.FindAtom(atom_names[i])) {
-      missing.push_back(atom_names[i]);
-    }
-  }
-  if (!res.FindAtom("CA")) {
-    LOG_WARNING("residue " << res.GetQualifiedName() << " is missing CA atom");
-    return false;
-  }
-  return true;
-}
-
-}
 
 bool CopyResidue(ResidueHandle src_res, ResidueHandle dst_res, XCSEditor& edi)
 {

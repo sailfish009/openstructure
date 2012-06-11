@@ -63,15 +63,10 @@ ICSEditor depr_request_ics_editor(EntityHandle e, EditMode m)
   return e.EditICS(m);
 }
 
-bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
-{
-  return a1.GetIndex()<a2.GetIndex();
-}
 
-
+#if OST_NUMPY_SUPPORT_ENABLED
 PyObject* get_pos2(EntityHandle& entity, bool id_sorted)
 {
-#if OST_NUMPY_SUPPORT_ENABLED
   npy_intp dims[]={entity.GetAtomCount(),3};
   PyObject* na = PyArray_SimpleNew(2,dims,NPY_FLOAT);
   npy_float* nad = reinterpret_cast<npy_float*>(PyArray_DATA(na));
@@ -93,17 +88,13 @@ PyObject* get_pos2(EntityHandle& entity, bool id_sorted)
     }
   }
   return na;
-#else
-  throw std::runtime_error("GetPositions disabled, since numpy support is not compiled in");
-  return 0;
-#endif
 }
 
 PyObject* get_pos1(EntityHandle& entity)
 {
   return get_pos2(entity,true);
 }
-
+#endif
 } // ns
 
 void export_Entity()
@@ -208,3 +199,4 @@ void export_Entity()
     .def(vector_indexing_suite<EntityHandleList>())
   ;
 }
+
