@@ -76,6 +76,7 @@ Real DLLEXPORT_OST_MOL_ALG OldStyleLDTHA(EntityView& v, const GlobalRDMap& globa
 
 
 GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist);
+
 GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list,std::vector<Real>& cutoff_list, Real max_dist);
 void PrintGlobalRDMap(const GlobalRDMap& glob_dist_list);
 void PrintResidueRDMap(const ResidueRDMap& res_dist_list);

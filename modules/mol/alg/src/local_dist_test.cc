@@ -465,7 +465,7 @@ GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
  return dist_list;
 } 
 
-GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list, std::vector<Real> cutoff_list, Real max_dist)
+GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list, std::vector<Real>& cutoff_list, Real max_dist)
 {	
   int ref_counter=0;  
   ExistenceMap ex_map;  
