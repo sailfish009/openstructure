@@ -183,6 +183,9 @@ if (ENABLE_STATIC AND UNIX AND NOT APPLE)
 endif()
 
 setup_boost()
+if (WIN32)
+   ADD_DEFINITIONS("-DBOOST_ALL_NO_LIB")
+endif()
 
 if (ENABLE_INFO)        
   find_package(Qt4 4.5.0 REQUIRED)
