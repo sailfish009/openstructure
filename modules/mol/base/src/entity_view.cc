@@ -252,7 +252,7 @@ ChainView EntityView::FindChain(const String& chain_name) const{
   this->CheckValidity();
   ChainViewList::const_iterator i;
   i=std::find_if(data_->chains.begin(), data_->chains.end(),
-                 bind(&ChainView::GetName, _1)==chain_name);
+                 boost::bind(&ChainView::GetName, _1)==chain_name);
   return (i!=data_->chains.end()) ? *i : ChainView();
 }
 
