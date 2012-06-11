@@ -65,6 +65,11 @@ ICSEditor depr_request_ics_editor(EntityHandle e, EditMode m)
 
 
 #if OST_NUMPY_SUPPORT_ENABLED
+
+bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
+{
+  return a1.GetIndex()<a2.GetIndex();
+}
 PyObject* get_pos2(EntityHandle& entity, bool id_sorted)
 {
   npy_intp dims[]={entity.GetAtomCount(),3};
@@ -95,10 +100,7 @@ PyObject* get_pos1(EntityHandle& entity)
   return get_pos2(entity,true);
 }
 
-bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
-{
-  return a1.GetIndex()<a2.GetIndex();
-}
+
 
 #endif
 } // ns
