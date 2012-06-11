@@ -31,12 +31,16 @@ class UniqueAtomIdentifier
   
 public:
   UniqueAtomIdentifier(const String& chain,const ResNum& residue,const String& residue_name, const String& atom): chain_(chain),residue_(residue),residue_name_(residue_name),atom_(atom) {}  
-  
+
+  // to make the compiler happy (boost python map suite)
+  UniqueAtomIdentifier(): chain_(""),residue_(ResNum(1)),residue_name_(""),atom_("") {}  
+    
   String GetChainName() const { return chain_; } 
   ResNum GetResNum() const { return residue_; }  
   String GetResidueName() const { return residue_name_; }
   String GetAtomName() const { return atom_; }
   bool operator==(const UniqueAtomIdentifier& rhs) const;
+  bool operator<(const UniqueAtomIdentifier& rhs) const;	
     
 private:
 
@@ -46,40 +50,19 @@ private:
   String atom_;    
 };
 
-class ReferenceDistance
-{
-  
-public:
-  
-  ReferenceDistance(const UniqueAtomIdentifier& first_atom, const UniqueAtomIdentifier& second_atom, Real mind, Real maxd):
-       first_atom_(first_atom),second_atom_(second_atom),mind_(mind),maxd_(maxd) {}
-  UniqueAtomIdentifier GetFirstAtom() const {return first_atom_;}
-  UniqueAtomIdentifier GetSecondAtom() const {return second_atom_;}
-  Real GetMinDistance() const {return mind_ ;}
-  Real GetMaxDistance() const {return maxd_ ;}
-  bool IsValid() const; 
-  void Print() const; 
-  bool operator==(const ReferenceDistance& rhs) const;
-  
-private:
-  
-  UniqueAtomIdentifier first_atom_;
-  UniqueAtomIdentifier second_atom_;
-  Real mind_;
-  Real maxd_;
-};
+typedef std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier> UAtomIdentifiers;
+typedef std::map<std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier>,std::pair<float,float> > ResidueRDMap;
+typedef std::map<ost::mol::ResNum,ResidueRDMap> GlobalRDMap;
+typedef std::map<UniqueAtomIdentifier,int> ExistenceMap;
 
-typedef std::vector<ReferenceDistance> ResidueDistanceList;
-typedef std::vector<ResidueDistanceList> GlobalDistanceList;
-  
 Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const EntityView& mdl,
-                                         const GlobalDistanceList& dist_list,
-                                         Real cutoff, 
+                                         const GlobalRDMap& dist_list,
+                                         std::vector<Real> cutoff_list, 
                                          const String& local_ldt_property_string="");
 
 Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const EntityView& mdl,
                                          const EntityView& target,
-                                         Real cutoff, 
+                                         Real cutoff_list, 
                                          Real max_dist,
                                          const String& local_ldt_property_string="");
 
@@ -88,12 +71,15 @@ Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const ost::seq::AlignmentHandle& aln,
                                          int ref_index=0, int mdl_index=1);
 
 
-Real DLLEXPORT_OST_MOL_ALG LDTHA(EntityView& v, const GlobalDistanceList& global_dist_list);
+Real DLLEXPORT_OST_MOL_ALG LDTHA(EntityView& v, const GlobalRDMap& global_dist_list);
+Real DLLEXPORT_OST_MOL_ALG OldStyleLDTHA(EntityView& v, const GlobalRDMap& global_dist_list);
 
-GlobalDistanceList CreateDistanceList(const EntityView& ref,Real max_dist);
+
+GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist);
+GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list,Real cutoff, Real max_dist);
+void PrintGlobalRDMap(const GlobalRDMap& glob_dist_list);
+void PrintResidueRDMap(const ResidueRDMap& res_dist_list);
 bool IsStandardResidue(String rn);
-
-
 
 }}}
 

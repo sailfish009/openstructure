@@ -77,7 +77,7 @@ void usage()
   std::cerr << "   -e         print version" << std::endl;
 }
 
-std::pair<int,int> compute_coverage (const EntityView& v,const GlobalDistanceList& glob_dist_list)
+std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob_dist_list)
 {
   int second=0;
   int first=0;
@@ -85,15 +85,12 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalDistanceLis
     return std::make_pair<int,int>(0,1);
   }
   ChainView vchain=v.GetChainList()[0];
-  for (std::vector<ResidueDistanceList>::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
+  for (GlobalRDMap::const_iterator i=glob_dist_list.begin();i!=glob_dist_list.end();++i)
   {
-    ResNum rnum = (*i)[0].GetFirstAtom().GetResNum();
-    String rname = (*i)[0].GetFirstAtom().GetResidueName();
-    if (IsStandardResidue(rname)) {
-      second++;
-      if (vchain.FindResidue(rnum)) {
-        first++;
-      }
+    ResNum rnum = (*i).first;
+    second++;
+    if (vchain.FindResidue(rnum)) {
+      first++;
     }
   }
   return std::make_pair<int,int>(first,second);
@@ -200,7 +197,7 @@ int main (int argc, char **argv)
   }
   files.pop_back();
   EntityView ref_view=ref.Select(sel);
-  GlobalDistanceList glob_dist_list = CreateDistanceList(ref_view,radius);
+  GlobalRDMap glob_dist_list = CreateDistanceList(ref_view,radius);
   std::cout << "Verbosity level: " << verbosity_level << std::endl;
   if (structural_checks) {
     std::cout << "Stereo-chemical and steric clash checks: On " << std::endl;
@@ -296,22 +293,18 @@ int main (int argc, char **argv)
       std::cout << "Global LDT score: 0.0" << std::endl;
       return 0;
     }
-    Real ldt=LDTHA(v, glob_dist_list);
+    Real ldt=LDTHA(v, glob_dist_list);	
 
     std::cout << "Global LDT score: " << ldt << std::endl;
     std::cout << "Local LDT Score:" << std::endl;
     std::cout << "Chain\tResName\tResNum\tScore" << std::endl;
-    String labels[]={"localldt0.5","localldt1","localldt2","ldtlocal4"};
     for (ResidueViewIter rit=v.ResiduesBegin();rit!=v.ResiduesEnd();++rit){
       ResidueView ritv = *rit;
-      Real ldt_local_sum = 0;
-      if (ritv.HasProp("localldt0.5")) {
-        for (int n=0; n<4; ++n) {
-          ldt_local_sum+=ritv.GetFloatProp(labels[n]);
-        }
-        ldt_local_sum/=4.0;
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << ldt_local_sum << std::endl;
+      Real ldt_local = 0;
+      if (ritv.HasProp("localldt")) {
+          ldt_local=ritv.GetFloatProp("localldt");
       }
+      std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << ldt_local << std::endl;
     }
     std::cout << std::endl;
   }
