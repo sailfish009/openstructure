@@ -673,6 +673,7 @@ macro(ost_unittest)
                         COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})
         add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} )
+        add_dependencies(check_xml "${_test_name}_run_xml")
       endif()
       
       if (_ARG_LINK)
@@ -680,7 +681,6 @@ macro(ost_unittest)
       endif()
 
       add_dependencies(check "${_test_name}_run")
-      add_dependencies(check_xml "${_test_name}_run_xml")
       set_target_properties(${_test_name}
                             PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                             "${CMAKE_CURRENT_BINARY_DIR}")
@@ -711,9 +711,9 @@ macro(ost_unittest)
                   sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} xml || echo"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "running checks ${py_test}" VERBATIM)
+        add_dependencies("${py_test}_run_xml" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
       endif()
       add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
-      add_dependencies("${py_test}_run_xml" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
       add_dependencies(check "${py_test}_run")
       add_dependencies(check_xml "${py_test}_run_xml")
       if (WIN32)
