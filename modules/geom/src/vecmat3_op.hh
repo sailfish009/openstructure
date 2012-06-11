@@ -211,15 +211,15 @@ inline Real DistanceWithPBC(const Vec3& v1, const Vec3& v2, const Vec3& basis_ve
   return sqrt(Distance2WithPBC(v1, v2, basis_vec));
 }
 //! returns the minimal distance between the points in two Vec3List
-DLLEXPORT_OST_GEOM Real MinDistance(const Vec3List& l1, const Vec3List& l2);
+Real DLLEXPORT_OST_GEOM MinDistance(const Vec3List& l1, const Vec3List& l2);
 //! returns the minimal distance between the points in two Vec3List 
 //  with periodic boundaries in x,y,z given in basis_vec
-DLLEXPORT_OST_GEOM Real MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec);
+Real DLLEXPORT_OST_GEOM MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec);
 
 //!wraps a vector in a box with periodic boundaries
-DLLEXPORT_OST_GEOM Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec);
-//!wraps all the vectors in a Vec3List in a box with periodic boundaries
-DLLEXPORT_OST_GEOM Vec3List WrapVec3List(const Vec3List& vl,const Vec3& box_center,const Vec3& basis_vec);
+Vec3 DLLEXPORT_OST_GEOM WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec);
+//!wraps all the verctors in a Vec3List in a box with periodic boundaries
+Vec3List DLLEXPORT_OST_GEOM WrapVec3List(const Vec3List& vl,const Vec3& box_center,const Vec3& basis_vec);
 
   
 } // ns
