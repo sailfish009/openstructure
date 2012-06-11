@@ -49,6 +49,7 @@ void Transform::SetMatrix(const Mat4& m)
 {
   tm_=m;
   ttm_ = Transpose(tm_);
+  update_components();
 }
 
 Mat4 Transform::GetTransposedMatrix() const
@@ -194,6 +195,15 @@ void Transform::update_tm()
                0.0,0.0,1.0,-cen_[2],
                0.0,0.0,0.0,1.0);
   ttm_ = Transpose(tm_);
+}
+
+void Transform::update_components()
+{
+  rot_ = tm_.ExtractRotation();
+  cen_ = tm_.ExtractTranslation();
+  trans_[0] = tm_(3,0);
+  trans_[1] = tm_(3,1);
+  trans_[2] = tm_(3,2);
 }
 
 #if(OST_INFO_ENABLED)
