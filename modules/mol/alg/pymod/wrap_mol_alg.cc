@@ -70,7 +70,7 @@ ost::mol::alg::ClashingDistances fill_clashing_distances_wrapper (const list& st
  return ost::mol::alg::FillClashingDistances(stereo_chemical_props_file_vector,min_default_distance,min_distance_tolerance);
 }
 
-ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const list& ref_list, Real cutoff, Real max_dist)
+ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const list& ref_list, const list& cutoff_list, Real max_dist)
 {
   int ref_list_length = boost::python::extract<int>(ref_list.attr("__len__")());
   std::vector<ost::mol::EntityView> ref_list_vector(ref_list_length);
@@ -78,8 +78,14 @@ ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const l
   for (int i=0; i<ref_list_length; i++) {
     ref_list_vector[i] = boost::python::extract<ost::mol::EntityView>(ref_list[i]);
   }
- 
-  return ost::mol::alg::CreateDistanceListFromMultipleReferences(ref_list_vector, cutoff, max_dist);  	
+
+  int cutoff_list_length = boost::python::extract<int>(cutoff_list.attr("__len__")());
+  std::vector<Real> cutoff_list_vector(cutoff_list_length);
+  
+  for (int i=0; i<cutoff_list_length; i++) {
+    cutoff_list_vector[i] = boost::python::extract<Real>(cutoff_list[i]);
+  }
+  return ost::mol::alg::CreateDistanceListFromMultipleReferences(ref_list_vector, cutoff_list_vector, max_dist);  	
 }
 
 }
