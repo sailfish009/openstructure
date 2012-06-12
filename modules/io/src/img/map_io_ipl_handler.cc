@@ -193,10 +193,8 @@ std::ostream& operator<< (std::ostream& out, const IPLHeader& h )
   out << "COMMENT = Created by OpenStructure \r\n";
   out << " \r\n";
   uint fillsize=h.header_length-out.tellp()+start_pos;
-  char* empty=new char[fillsize];
-  std::fill_n(empty,fillsize,0);
-  out.write(empty,fillsize);
-  delete[] empty;
+  std::vector<char> empty(fillsize,'\0');
+  out.write(&empty[0],fillsize);
   return out;
 }
 
@@ -257,10 +255,8 @@ std::istream& operator>> (std::istream& in, IPLHeader& h)
     }
   }while(in.peek()!=0);
   uint fillsize=h.header_length-in.tellg()+start_pos;
-  char* empty=new char[h.header_length];
-  std::fill_n(empty,fillsize,0);
-  in.read(empty,fillsize);
-  delete[] empty;
+  std::vector<char> empty(fillsize,'\0');
+  in.read(&empty[0],fillsize);
   return in;
 }
 
