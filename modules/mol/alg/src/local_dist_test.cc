@@ -107,7 +107,8 @@ std::pair<Real, Real> calc_overlap1(const ResidueRDMap& res_distance_list, const
       continue;
     }
     Real mdl_dist=geom::Length(av1.GetPos()-av2.GetPos());
-    for (std::vector<Real>::const_reverse_iterator tol_list_it=tol_list.rbegin();tol_list_it!=tol_list.rend();++tol_list_it) {
+    std::vector<Real>::const_reverse_iterator rend_it=tol_list.rend();
+    for (std::vector<Real>::const_reverse_iterator tol_list_it=tol_list.rbegin();tol_list_it!=rend_it;++tol_list_it) {
       Real tol = * tol_list_it; 
       if (within_tolerance(mdl_dist,values,tol).first) {
         if (log) {
