@@ -91,17 +91,26 @@ std::pair<Real, Real> calc_overlap1(const ResidueRDMap& res_distance_list, const
     AtomView av1=mdl_res ? mdl_res.FindAtom(name) : AtomView();
  
     if (only_fixed) {
+       if (first_atom.GetResNum()==second_atom.GetResNum()) {
+          continue;
+        }
       if (swappable(second_atom.GetResidueName(), second_atom.GetAtomName())) {
           continue;
       }
-    }    
+    }
+    if (!only_fixed) {   
+      if (first_atom.GetResNum()<=second_atom.GetResNum()) {
+        continue;
+      }    
+    }
+
     AtomView av2=mdl_chain.FindAtom(second_atom.GetResNum(),second_atom.GetAtomName());
     overlap.second+=tol_list.size();
     if (av1) {
-      overlap_list[av1.GetResidue().GetIndex()].second+=1.0;
+      overlap_list[av1.GetResidue().GetIndex()].second+=tol_list.size();
     }
     if (av2) {
-      overlap_list[av2.GetResidue().GetIndex()].second+=1.0;
+      overlap_list[av2.GetResidue().GetIndex()].second+=tol_list.size();
     }  
     if (!(av1 && av2)) {
       continue;
@@ -441,12 +450,10 @@ GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
              aj->GetResidue().GetChain()!=ai->GetResidue().GetChain()) {
              continue;
          }
-         if (aj->GetResidue().GetNumber()>i->GetNumber()) {
-           Real dist=geom::Length(ai->GetPos()-aj->GetPos());
-           UAtomIdentifiers atoms = std::make_pair<UniqueAtomIdentifier,UniqueAtomIdentifier>(first_atom,second_atom); 
-           std::pair<Real,Real> values = std::make_pair<Real,Real>(dist,dist);  
-           res_dist_list[atoms]=values;
-         }
+         Real dist=geom::Length(ai->GetPos()-aj->GetPos());
+         UAtomIdentifiers atoms = std::make_pair<UniqueAtomIdentifier,UniqueAtomIdentifier>(first_atom,second_atom); 
+         std::pair<Real,Real> values = std::make_pair<Real,Real>(dist,dist);  
+         res_dist_list[atoms]=values;
        }
      }   
      dist_list[rnum]=res_dist_list;

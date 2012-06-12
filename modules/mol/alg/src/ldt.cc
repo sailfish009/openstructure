@@ -98,7 +98,7 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
 
 int main (int argc, char **argv)
 {
-  String version = "Beta - 2012-05-21";
+  String version = "Beta - 2012-06-13";
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
   Real radius=15.0;
@@ -136,7 +136,12 @@ int main (int argc, char **argv)
   }
   std::vector<String> files;
   if (vm.count("files")) {
-    files=vm["files"].as<std::vector<String> >();
+    try {  
+      files=vm["files"].as<std::vector<String> >();
+    } catch (io::IOException& e) {
+      std::cerr << "ERROR: Problem with file list. " << e.what() << std::endl;
+      exit(-1);
+    }
   } else {
     usage();
     exit(-1);
@@ -152,7 +157,12 @@ int main (int argc, char **argv)
   }
   String parameter_filename;
   if (vm.count("parameter-file")) {
-    parameter_filename=vm["parameter-file"].as<String>();
+    try {
+      parameter_filename=vm["parameter-file"].as<String>();
+    } catch (io::IOException& e) {
+      std::cerr << "ERROR: Problem with parameter file name. " << e.what() << std::endl;
+      exit(-1);
+    }
   } else if (structural_checks==true) {
     std::cout << "Please specify a stereo-chemical parameter file" << std::endl;
     exit(-1);
@@ -297,7 +307,9 @@ int main (int argc, char **argv)
       if (ritv.HasProp("localldt")) {
           ldt_local=ritv.GetFloatProp("localldt");
       }
-      std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << ldt_local << std::endl;
+      if (ldt_local!=0) {
+        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << ldt_local << std::endl;
+      }
     }
     std::cout << std::endl;
   }
