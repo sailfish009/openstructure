@@ -28,7 +28,7 @@ class ClashingDistances
 {
 
 public:
-  ClashingDistances(Real default_dist, Real tolerance): default_min_distance_(default_dist), default_min_distance_tolerance_(tolerance), valid_flag_(true) {}
+  ClashingDistances(): valid_flag_(true) {}
   void SetClashingDistance(const String& ele1,const String& ele2, Real min_distance, Real tolerance);
   std::pair<Real,Real> GetClashingDistance(const String& ele1,const String& ele2) const;
   Real GetMaxAdjustedDistance() const;
@@ -64,7 +64,7 @@ private:
  
 };
 
-ClashingDistances DLLEXPORT_OST_MOL_ALG FillClashingDistances(std::vector<String>& stereo_chemical_props_file, Real min_default_distance, Real min_distance_tolerance);
+ClashingDistances DLLEXPORT_OST_MOL_ALG FillClashingDistances(std::vector<String>& stereo_chemical_props_file);
 StereoChemicalParams DLLEXPORT_OST_MOL_ALG FillStereoChemicalParams(const String& header, std::vector<String>& stereo_chemical_props_file);  
  
 EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityView& ent, 

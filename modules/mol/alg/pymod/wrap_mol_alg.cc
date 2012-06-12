@@ -67,7 +67,7 @@ ost::mol::alg::ClashingDistances fill_clashing_distances_wrapper (const list& st
     stereo_chemical_props_file_vector[i] = boost::python::extract<char const*>(stereo_chemical_props_file[i]);
   }
  
- return ost::mol::alg::FillClashingDistances(stereo_chemical_props_file_vector,min_default_distance,min_distance_tolerance);
+ return ost::mol::alg::FillClashingDistances(stereo_chemical_props_file_vector);
 }
 
 ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const list& ref_list, const list& cutoff_list, Real max_dist)
@@ -118,7 +118,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   (arg("source"), arg("sel"), arg("ref_view"),arg("begin")=0, arg("end")=-1));
 
   
-  class_<mol::alg::ClashingDistances> ("ClashingDistances" ,init<Real,Real>())
+  class_<mol::alg::ClashingDistances> ("ClashingDistances",init<>())
     .def("SetClashingDistance",&mol::alg::ClashingDistances::SetClashingDistance)
     .def("GetClashingDistance",&mol::alg::ClashingDistances::GetClashingDistance)
     .def("GetMaxAdjustedDistance",&mol::alg::ClashingDistances::GetMaxAdjustedDistance)    

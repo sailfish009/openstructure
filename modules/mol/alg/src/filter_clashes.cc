@@ -98,7 +98,9 @@ std::pair<Real,Real> ClashingDistances::GetClashingDistance(const String& ele1,c
   String key=stkey.str();
   std::map <String,std::pair<float,float> >::const_iterator find_ci= min_distance_.find(key);
   if (find_ci == min_distance_.end()) {
-    return std::make_pair<Real,Real> (default_min_distance_,default_min_distance_tolerance_);
+      std::stringstream serr;
+      serr << "Entry for distance " << stkey <<  " not found in the parameter table";   
+      throw Error(serr.str());
   }    
   return find_ci->second;
 }
@@ -253,9 +255,9 @@ StereoChemicalParams FillStereoChemicalParams(const String& header, std::vector<
   return table;
 };  
 
-ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_props_file, Real min_default_distance, Real min_distance_tolerance)
+ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_props_file)
 {
-  ClashingDistances table(min_default_distance,min_distance_tolerance);
+  ClashingDistances table;
   bool found=false;
   std::vector<String>::const_iterator line_iter=stereo_chemical_props_file.begin();
   while (line_iter!=stereo_chemical_props_file.end()) {
@@ -271,7 +273,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
             std::vector<StringRef> second_line_str_vec = second_line_string_ref.split();
             if (second_line_str_vec.size()!=3) {
               std::cout << "The number of elements in one of the lines is wrong" << std::endl;
-              return ClashingDistances(min_default_distance,min_distance_tolerance);
+              return ClashingDistances();
             } 
             String item = second_line_str_vec[0].str();
 
@@ -282,19 +284,19 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
               value=static_cast<Real>(parse_value.second);
             } else {
               std::cout << "One of the distance values is not a number" << std::endl;
-              return ClashingDistances(min_default_distance,min_distance_tolerance);
+              return ClashingDistances();
             };
             if (parse_stddev.first==true) {
               stddev=static_cast<Real>(parse_stddev.second);
             } else {
               std::cout << "One of the tolerance values is not a number" << std::endl;
-              return ClashingDistances(min_default_distance,min_distance_tolerance);
+              return ClashingDistances();
             }
             StringRef itemsr(item.data(),item.length());
             std::vector<StringRef> eles = itemsr.split('-');
             if (itemsr.size() != 3) {
               std::cout << "One of the strings describing the interacting atoms has the wrong format" << std::endl;
-              return ClashingDistances(min_default_distance,min_distance_tolerance);
+              return ClashingDistances();
             }  
             String ele1=eles[0].str();
             String ele2=eles[1].str();
@@ -312,7 +314,7 @@ ClashingDistances FillClashingDistances(std::vector<String>& stereo_chemical_pro
   }
   if (found==false) {
     std::cout << "Could not find the relevant section in the stereo-chemical parameter file" << std::endl;
-    return ClashingDistances(min_default_distance,min_distance_tolerance);
+    return ClashingDistances();
   } 
   return table;
 }  

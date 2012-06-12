@@ -98,9 +98,7 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
 
 int main (int argc, char **argv)
 {
-  String version = "Beta - 2012-01-17";
-  Real min_default_distance = 1.5;
-  Real min_distance_tolerance = 0.0;
+  String version = "Beta - 2012-05-21";
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
   Real radius=15.0;
@@ -121,7 +119,6 @@ int main (int argc, char **argv)
     ("verbosity,v", po::value<int>(), "verbosity level")
     ("bond_tolerance,b", po::value<Real>(), "tolerance in stddev for bonds")
     ("angle_tolerance,a", po::value<Real>(), "tolerance in stddev for angles")
-    ("default_clash,m", po::value<Real>(), "clashing distance for unknown atom types")
     ("inclusion_radius,r", po::value<Real>(), "distance inclusion radius")
     ("files", po::value< std::vector<String> >(), "input file(s)")
 	("reference",po::value<String>(),"reference(s)")
@@ -184,9 +181,6 @@ int main (int argc, char **argv)
   if (vm.count("angle_tolerance")) {
     angle_tolerance=vm["angle_tolerance"].as<Real>();
   }
-  if (vm.count("default_clash")) {
-    min_default_distance=vm["default_clash"].as<Real>();
-  }
   if (vm.count("inclusion_radius")) {
     radius=vm["inclusion_radius"].as<Real>();
   }
@@ -209,7 +203,6 @@ int main (int argc, char **argv)
     std::cout << "Parameter filename: " << parameter_filename << std::endl;
     std::cout << "Tolerance in stddevs for bonds: " << bond_tolerance << std::endl;
     std::cout << "Tolerance in stddevs for angles: " << angle_tolerance << std::endl;
-    std::cout << "Clashing distance for unknown atom types: " << min_default_distance << std::endl;
     LOG_INFO("Log entries format:");
     LOG_INFO("BOND INFO FORMAT:  Chain  Residue  ResNum  Bond  Min  Max  Observed  Z-score  Status");
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
@@ -276,7 +269,7 @@ int main (int argc, char **argv)
         exit(-1);
       }
 
-      ClashingDistances nonbonded_table = FillClashingDistances(stereo_chemical_props,min_default_distance,min_distance_tolerance);
+      ClashingDistances nonbonded_table = FillClashingDistances(stereo_chemical_props);
 
       if (nonbonded_table.IsEmpty()) {
         std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
