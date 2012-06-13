@@ -64,11 +64,12 @@ BOOST_AUTO_TEST_CASE(alignment_triv)
   a = CreateAlignment();
   BOOST_CHECK_NO_THROW(a.AddSequence(CreateSequence("S1","-asdf-")));
   BOOST_CHECK_THROW(a.AddSequence(SequenceHandle()),InvalidSequence);
-  BOOST_CHECK_THROW(a.AddSequence(CreateSequence("S2","-asdf-f")),InvalidSequence);
+  BOOST_CHECK_THROW(a.AddSequence(CreateSequence("S2","-asdf-f")),
+                    std::runtime_error);
   SequenceList list = CreateSequenceList();
   list.AddSequence(CreateSequence("S1", "-asdf-"));
   list.AddSequence(CreateSequence("S2", "fasdfas"));
-  BOOST_CHECK_THROW(AlignmentFromSequenceList(list),InvalidAlignment);
+  BOOST_CHECK_THROW(AlignmentFromSequenceList(list), std::runtime_error);
   list = CreateSequenceList();
   list.AddSequence(CreateSequence("S1", "-asdf-"));
   list.AddSequence(CreateSequence("S2", "fasdfa"));
