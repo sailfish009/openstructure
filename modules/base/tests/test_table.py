@@ -1147,6 +1147,8 @@ class TestTable(unittest.TestCase):
     self.assertEquals(auc, None)
 
   def testCalcROCFromFile(self):
+    if not HAS_NUMPY:
+      return
     tab = Table.Load(os.path.join('testfiles','roc_table.dat'))
     auc = tab.ComputeROCAUC(score_col='prediction', class_col='reference', class_cutoff=0.4)
     self.assertEquals(auc, 1.0)
@@ -1195,6 +1197,8 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(mcc, 0.882089673321)
 
   def testTableAsNumpyMatrix(self):
+    if not HAS_NUMPY:
+      return
 
     '''
     checks numpy matrix 
