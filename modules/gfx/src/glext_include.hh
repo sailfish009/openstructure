@@ -29,7 +29,7 @@
 #include <ost/config.hh>
 
 #if OST_SHADER_SUPPORT_ENABLED
-#ifdef OST_MESA_SUPPORT_ENABLED
+#if OST_MESA_SUPPORT_ENABLED
 #  define OST_GL_VERSION_2_0 1
 #  define GL_GLEXT_PROTOTYPES 1
 #  include <GL/gl.h>

@@ -51,7 +51,7 @@ Shader::Shader():
   shader_program_map_()
 {
   if(!OST_GL_VERSION_2_0) {
-    LOG_VERBOSE("OpenGL version smaller 2.0, deactivating shader functionality");
+    LOG_VERBOSE("OpenGL version less than 2.0, deactivating shader functionality");
   }
 }
 
@@ -59,7 +59,9 @@ Shader::Shader():
 void Shader::PreGLInit() 
 {
 #if !defined(__APPLE__)
-#if !defined(OST_MESA_SUPPORT_ENABLED)
+#if OST_MESA_SUPPORT_ENABLED
+  // skip glew initialization
+#else
   GLenum err = glewInit();
   if (GLEW_OK != err) {
     LOG_ERROR("glew failure: " << glewGetErrorString(err));
