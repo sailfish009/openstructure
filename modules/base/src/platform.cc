@@ -35,7 +35,7 @@ String GetPrefixPath()
 
 String GetSharedDataPath()
 {
-  return (path(GetPrefixPath()) / "share" / "openstructure").native_file_string();
+  return (path(GetPrefixPath()) / "share" / "openstructure").string();
 }
 
 }
