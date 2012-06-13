@@ -1,6 +1,6 @@
 #include <ost/log.hh>
 #include <ost/mol/mol.hh>
-#include "local_dist_test.hh"
+#include "local_dist_diff_test.hh"
 #include <boost/concept_check.hpp>
 
 namespace ost { namespace mol { namespace alg {
@@ -121,7 +121,7 @@ std::pair<Real, Real> calc_overlap1(const ResidueRDMap& res_distance_list, const
       Real tol = * tol_list_it; 
       if (within_tolerance(mdl_dist,values,tol).first) {
         if (log) {
-          LOG_VERBOSE("LDT:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
+          LOG_VERBOSE("lddt:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
              << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " " 
              << mdl_dist << " " << values.first << " " << values.second << " " << tol << " " << "PASS")
         }   
@@ -130,7 +130,7 @@ std::pair<Real, Real> calc_overlap1(const ResidueRDMap& res_distance_list, const
         overlap_list[av2.GetResidue().GetIndex()].first+=1;
       } else {
         if (log) {
-          LOG_VERBOSE("LDT:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
+          LOG_VERBOSE("lddt:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
              << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " " 
              << mdl_dist << " " << values.first << " " << values.second << " " << tol << " " << "FAIL")
         }  
@@ -503,8 +503,8 @@ void PrintGlobalRDMap(const GlobalRDMap& glob_dist_list){
 
 
 
-Real LocalDistTest(const EntityView& mdl, const GlobalRDMap& glob_dist_list,
-                   std::vector<Real> cutoff_list, const String& local_ldt_property_string)
+Real LocalDistDiffTest(const EntityView& mdl, const GlobalRDMap& glob_dist_list,
+                   std::vector<Real> cutoff_list, const String& local_lddt_property_string)
 {
   if (!mdl.GetResidueCount()) {
     LOG_WARNING("model structures doesn't contain any residues");
@@ -527,12 +527,12 @@ Real LocalDistTest(const EntityView& mdl, const GlobalRDMap& glob_dist_list,
       total_ov.first+=ov1.first;
       total_ov.second+=ov1.second;       
     }
-    if(local_ldt_property_string!="") {
+    if(local_lddt_property_string!="") {
       ResidueView mdlr=mdl_chain.FindResidue(rn);  
       if (mdlr.IsValid()) {
         int mdl_res_index =mdlr.GetIndex();
-        Real local_ldt=overlap_list[mdl_res_index].first/(overlap_list[mdl_res_index].second ? overlap_list[mdl_res_index].second : 1);
-        mdlr.SetFloatProp(local_ldt_property_string, local_ldt);
+        Real local_lddt=overlap_list[mdl_res_index].first/(overlap_list[mdl_res_index].second ? overlap_list[mdl_res_index].second : 1);
+        mdlr.SetFloatProp(local_lddt_property_string, local_lddt);
       }  
     }       
   }
@@ -540,17 +540,17 @@ Real LocalDistTest(const EntityView& mdl, const GlobalRDMap& glob_dist_list,
   return total_ov.first/(total_ov.second ? total_ov.second : 1);
 }
 
-Real LocalDistTest(const EntityView& mdl, const EntityView& target, Real cutoff, Real max_dist, const String& local_ldt_property_string)
+Real LocalDistDiffTest(const EntityView& mdl, const EntityView& target, Real cutoff, Real max_dist, const String& local_lddt_property_string)
 {
    std::vector<Real> cutoffs;
    cutoffs.push_back(cutoff);
    GlobalRDMap glob_dist_list = CreateDistanceList(target,max_dist);
-   return LocalDistTest(mdl, glob_dist_list, cutoffs, local_ldt_property_string);
+   return LocalDistDiffTest(mdl, glob_dist_list, cutoffs, local_lddt_property_string);
 }
 
 
 
-Real LocalDistTest(const ost::seq::AlignmentHandle& aln,
+Real LocalDistDiffTest(const ost::seq::AlignmentHandle& aln,
                    Real cutoff, Real max_dist, int ref_index, int mdl_index)
 {
   seq::ConstSequenceHandle ref_seq=aln.GetSequence(ref_index);
@@ -601,42 +601,42 @@ Real LocalDistTest(const ost::seq::AlignmentHandle& aln,
   return 0.0;
 }
 
-Real LDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
+Real LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
 {
     std::vector<Real> cutoffs;
     cutoffs.push_back(0.5);
     cutoffs.push_back(1.0);
     cutoffs.push_back(2.0);
     cutoffs.push_back(4.0);
-    String label="localldt";
-    Real ldt=alg::LocalDistTest(v, global_dist_list, cutoffs, label);
-    return ldt;
+    String label="locallddt";
+    Real lddt=alg::LocalDistDiffTest(v, global_dist_list, cutoffs, label);
+    return lddt;
 }
 
-Real OldStyleLDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
+Real OldStyleLDDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
 {
-    Real ldt =0;
+    Real lddt =0;
     std::vector<Real> cutoffs05;
     cutoffs05.push_back(0.5);
-    Real ldt05=alg::LocalDistTest(v, global_dist_list, cutoffs05, "localldt0.5");
+    Real lddt05=alg::LocalDistDiffTest(v, global_dist_list, cutoffs05, "locallddt0.5");
     std::vector<Real> cutoffs1;
     cutoffs1.push_back(1.0);
-    Real ldt1=alg::LocalDistTest(v, global_dist_list, cutoffs1, "localldt1");
+    Real lddt1=alg::LocalDistDiffTest(v, global_dist_list, cutoffs1, "locallddt1");
     std::vector<Real> cutoffs2;
     cutoffs2.push_back(2.0);
-    Real ldt2=alg::LocalDistTest(v, global_dist_list, cutoffs2, "localldt2");
+    Real lddt2=alg::LocalDistDiffTest(v, global_dist_list, cutoffs2, "locallddt2");
     std::vector<Real> cutoffs4;
     cutoffs4.push_back(4.0);
-    Real ldt4=alg::LocalDistTest(v, global_dist_list, cutoffs4, "localldt4");
-    ldt = (ldt05+ldt1+ldt2+ldt4)/4.0;
+    Real lddt4=alg::LocalDistDiffTest(v, global_dist_list, cutoffs4, "locallddt4");
+    lddt = (lddt05+lddt1+lddt2+lddt4)/4.0;
     for (ResidueViewIter rit=v.ResiduesBegin();rit!=v.ResiduesEnd();++rit){
       ResidueView ritv = *rit;
-      if (ritv.HasProp("localldt0.5")) {
-        Real ldt_local = (ritv.GetFloatProp("localldt0.5")+ritv.GetFloatProp("localldt1")+ritv.GetFloatProp("localldt2")+ritv.GetFloatProp("localldt4"))/4.0;
-        ritv.SetFloatProp("localldt",ldt_local);
+      if (ritv.HasProp("locallddt0.5")) {
+        Real lddt_local = (ritv.GetFloatProp("locallddt0.5")+ritv.GetFloatProp("locallddt1")+ritv.GetFloatProp("locallddt2")+ritv.GetFloatProp("locallddt4"))/4.0;
+        ritv.SetFloatProp("locallddt",lddt_local);
       }    
     }    
-    return ldt;
+    return lddt;
 }
 
 }}}

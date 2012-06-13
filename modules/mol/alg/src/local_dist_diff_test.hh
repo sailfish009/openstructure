@@ -55,24 +55,24 @@ typedef std::map<std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier>,std::pair<
 typedef std::map<ost::mol::ResNum,ResidueRDMap> GlobalRDMap;
 typedef std::map<UniqueAtomIdentifier,int> ExistenceMap;
 
-Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const EntityView& mdl,
+Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          const GlobalRDMap& dist_list,
                                          std::vector<Real> cutoff_list, 
                                          const String& local_ldt_property_string="");
 
-Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const EntityView& mdl,
+Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          const EntityView& target,
                                          Real cutoff_list, 
                                          Real max_dist,
                                          const String& local_ldt_property_string="");
 
-Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const ost::seq::AlignmentHandle& aln,
+Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const ost::seq::AlignmentHandle& aln,
                                          Real cutoff, Real max_dist,
                                          int ref_index=0, int mdl_index=1);
 
 
-Real DLLEXPORT_OST_MOL_ALG LDTHA(EntityView& v, const GlobalRDMap& global_dist_list);
-Real DLLEXPORT_OST_MOL_ALG OldStyleLDTHA(EntityView& v, const GlobalRDMap& global_dist_list);
+Real DLLEXPORT_OST_MOL_ALG LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list);
+Real DLLEXPORT_OST_MOL_ALG OldStyleLDDTHA(EntityView& v, const GlobalRDMap& global_dist_list);
 
 
 GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist);

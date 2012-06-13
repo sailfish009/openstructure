@@ -22,7 +22,7 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
-#include <ost/mol/alg/local_dist_test.hh>
+#include <ost/mol/alg/local_dist_diff_test.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/io_exception.hh>
@@ -63,7 +63,7 @@ EntityHandle load(const String& file, const IOProfile& profile)
 
 void usage()
 {
-  std::cerr << "usage: ldt [options] <mod1> [mod1 [mod2]] <ref>" << std::endl;
+  std::cerr << "usage: lddt [options] <mod1> [mod1 [mod2]] <ref>" << std::endl;
   std::cerr << "   -s         selection performed on ref" << std::endl;
   std::cerr << "   -c         use Calphas only" << std::endl;
   std::cerr << "   -f         perform structural checks and filter input data" << std::endl;
@@ -218,7 +218,7 @@ int main (int argc, char **argv)
     LOG_INFO("ANGLE INFO FORMAT:  Chain  Residue  ResNum  Angle  Min  Max  Observed  Z-score  Status");
     LOG_INFO("CLASH INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Observed  Difference  Status");
   }
-  LOG_INFO("LDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
+  LOG_INFO("LDDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);
     if (!model) {
@@ -293,22 +293,22 @@ int main (int argc, char **argv)
       std::cout << "Coverage after clashing checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
     }
     if (cov.first==0) {
-      std::cout << "Global LDT score: 0.0" << std::endl;
+      std::cout << "Global LDDT score: 0.0" << std::endl;
       return 0;
     }
-    Real ldt=LDTHA(v, glob_dist_list);	
+    Real lddt=LDDTHA(v, glob_dist_list);	
 
-    std::cout << "Global LDT score: " << ldt << std::endl;
-    std::cout << "Local LDT Score:" << std::endl;
+    std::cout << "Global LDDT score: " << lddt << std::endl;
+    std::cout << "Local LDDT Score:" << std::endl;
     std::cout << "Chain\tResName\tResNum\tScore" << std::endl;
     for (ResidueViewIter rit=v.ResiduesBegin();rit!=v.ResiduesEnd();++rit){
       ResidueView ritv = *rit;
-      Real ldt_local = 0;
-      if (ritv.HasProp("localldt")) {
-          ldt_local=ritv.GetFloatProp("localldt");
+      Real lddt_local = 0;
+      if (ritv.HasProp("locallddt")) {
+          lddt_local=ritv.GetFloatProp("locallddt");
       }
-      if (ldt_local!=0) {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << ldt_local << std::endl;
+      if (lddt_local!=0) {
+        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << lddt_local << std::endl;
       }
     }
     std::cout << std::endl;

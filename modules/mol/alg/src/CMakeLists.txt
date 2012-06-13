@@ -2,7 +2,7 @@ set(OST_MOL_ALG_HEADERS
   svd_superpose.hh
   module_config.hh
   sec_structure_segments.hh
-  local_dist_test.hh
+  local_dist_diff_test.hh
   superpose_frames.hh
   filter_clashes.hh
   construct_cbeta.hh
@@ -15,7 +15,7 @@ set(OST_MOL_ALG_SOURCES
   svd_superpose.cc
   clash_score.cc
   sec_structure_segments.cc
-  local_dist_test.cc
+  local_dist_diff_test.cc
   superpose_frames.cc
   filter_clashes.cc
   construct_cbeta.cc
@@ -39,7 +39,7 @@ if (ENABLE_IMG)
   set(MOL_ALG_DEPS ${MOL_ALG_DEPS} ost_img ost_img_alg)
 endif()
 
-executable(NAME ldt SOURCES ldt.cc 
+executable(NAME lddt SOURCES lddt.cc 
            DEPENDS_ON  ost_mol ost_mol_alg ost_io STATIC)
 
 module(NAME mol_alg SOURCES ${OST_MOL_ALG_SOURCES}
