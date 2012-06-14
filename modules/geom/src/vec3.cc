@@ -28,7 +28,13 @@
 
 namespace geom {
 
+
+#ifdef OST_DOUBLE_PRECISION
+typedef Eigen::Matrix3d EMat3;
+#else
 typedef Eigen::Matrix3f EMat3;
+#endif
+
 
 Mat3 Vec3List::GetInertia() const
 {
