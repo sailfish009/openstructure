@@ -737,7 +737,7 @@ class TestTable(unittest.TestCase):
     tab.Save("saveloadtable_filename_out.pickle", format='pickle')
     
     # read from disc: csv
-    in_stream_csv = open("saveloadtable_stream_out.csv", 'r')
+    in_stream_csv = open("saveloadtable_filename_out.csv", 'r')
     tab_loaded_stream_csv = Table.Load(in_stream_csv)
     in_stream_csv.close()
     tab_loaded_fname_csv = Table.Load('saveloadtable_filename_out.csv')
