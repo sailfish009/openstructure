@@ -2,7 +2,7 @@ import os, sys, re
 import shutil
 from ost import settings
 from optparse import OptionParser
-
+import subprocess
 
 if len(sys.argv)==2:
   root_dir=sys.argv[1]
@@ -89,14 +89,20 @@ for sub_dir in ('modules',):
 sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6'])
 
 if opts.html:
-  os.system('%s %s -b html -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source', 
-                                      'doc/build/html'))
+  cmd='%s %s -b html -c %s %s %s' % (sphinx_bin, opt_str, 
+                                     'doc/conf', 'doc/source', 'doc/build/html')
+  print cmd
+  subprocess.check_call(cmd, shell=True)
 if opts.doctest:
-  os.system('%s %s -b doctest -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source', 
-                                      'doc/build/doctest'))
+  cmd='%s %s -b doctest -c %s %s %s' % (sphinx_bin, opt_str, 
+                                        'doc/conf', 'doc/source', 
+                                        'doc/build/doctest')
+  subprocess.check_call(cmd, shell=True)
 if opts.build_json:
-  os.system('%s %s -b json -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source',
-                                      'doc/build/json'))
+  cmd='%s %s -b json -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 
+                                     'doc/source', 'doc/build/json')
+  subprocess.check_call(cmd, shell=True)
 if opts.linkcheck:
-  os.system('%s %s -b linkcheck -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source', 
-                                      'doc/build/check'))
+  cmd='%s %s -b linkcheck -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 
+                                          'doc/source', 'doc/build/check')
+  subprocess.check_call(cmd, shell=True)
