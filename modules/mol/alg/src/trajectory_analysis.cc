@@ -25,8 +25,8 @@
 #include <ost/geom/vec3.hh>
 #include <ost/base.hh>
 #include <ost/geom/geom.hh>
-#include <ost/mol/entity_view.hh>
-#include <ost/mol/coord_group.hh>
+#include <ost/mol/mol.hh>
+#include <ost/mol/view_op.hh>
 #include "trajectory_analysis.hh"
 
 namespace ost { namespace mol { namespace alg {
@@ -230,4 +230,173 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
   }
   return dist;  
   }
+
+  void AnalyzeAlphaHelixAxis(const CoordGroupHandle& traj, const EntityView& prot_seg, geom::Vec3List& directions,
+                             geom::Vec3List& centers, unsigned int stride)
+  //This function calculates the best fitting cylinder to the C-alpha atoms of an EntityView and returns
+  //the geometric center as well as the axis of that cylinder. We take care to have the axis point towards
+  //the last residue of the selection, usually the direction of the alpha-helix
+  {
+    CheckHandleValidity(traj);
+    if (prot_seg.GetAtomCount()==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    std::vector<unsigned long> indices_ca;
+    geom::Line3 axis;
+    Real sign;
+    directions.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    centers.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    GetCaIndices(prot_seg, indices_ca);
+    unsigned int n_atoms=indices_ca.size();
+    for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      axis=frame->FitCylinder(indices_ca);
+      sign=geom::Dot(axis.GetDirection(),(*frame)[indices_ca[n_atoms-1]]-axis.GetOrigin());
+      sign=sign/fabs(sign);
+      directions.push_back(sign*axis.GetDirection());
+      centers.push_back(axis.GetOrigin());
+    }
+    return;
+  }
+ 
+  //std::vector<geom::Line3> AnalyzeBestFitLine(const CoordGroupHandle& traj, const EntityView& prot_seg,
+  //                                               unsigned int stride)
+  void AnalyzeBestFitLine(const CoordGroupHandle& traj, const EntityView& prot_seg, geom::Vec3List& directions,
+                          geom::Vec3List& centers, unsigned int stride)
+  {
+    CheckHandleValidity(traj);
+    if (prot_seg.GetAtomCount()==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    std::vector<unsigned long> indices_ca;
+    geom::Line3 axis;
+    directions.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    centers.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    GetIndices(prot_seg, indices_ca);
+    for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      axis=frame->GetODRLine(indices_ca);
+      directions.push_back(axis.GetDirection());
+      centers.push_back(axis.GetOrigin());
+    }
+    return;
+  }
+  
+  void AnalyzeBestFitPlane(const CoordGroupHandle& traj, const EntityView& prot_seg, geom::Vec3List& normals,
+                          geom::Vec3List& origins, unsigned int stride)
+  {
+    CheckHandleValidity(traj);
+    if (prot_seg.GetAtomCount()==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    std::vector<unsigned long> indices_ca;
+    geom::Plane best_plane;
+    normals.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    origins.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    GetIndices(prot_seg, indices_ca);
+    for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      best_plane=frame->GetODRPlane(indices_ca);
+      normals.push_back(best_plane.GetNormal());
+      origins.push_back(best_plane.GetOrigin());
+    }
+    return;
+  }
+  
+  std::vector<Real> AnalyzeHelicity(const CoordGroupHandle& traj, const EntityView& prot_seg,
+                                    unsigned int stride)
+  {
+    CheckHandleValidity(traj);
+    if (prot_seg.GetAtomCount()==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    std::vector<unsigned long> indices_c,indices_o, indices_n, indices_ca;
+    std::vector<Real> helicity;
+    helicity.reserve(ceil(traj.GetFrameCount()/float(stride)));
+    GetCaCONIndices(prot_seg, indices_ca, indices_c, indices_o, indices_n);
+    for (size_t i=0; i<traj.GetFrameCount(); i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      helicity.push_back(frame->GetAlphaHelixContent(indices_ca,indices_c,indices_o,indices_n));
+    }
+    return helicity;
+  }
+
+  //This function constructs mean structures from a trajectory
+  EntityHandle CreateMeanStructure(const CoordGroupHandle& traj, const EntityView& selection,
+                            int from, int to, unsigned int stride)
+  {
+    CheckHandleValidity(traj);
+    if (to==-1)to=traj.GetFrameCount();
+    unsigned int n_atoms=selection.GetAtomCount();
+    if (to<from) {
+      throw std::runtime_error("to smaller than from");
+    }
+    unsigned int n_frames=ceil((to-from)/stride);
+    if (n_atoms==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    if (n_frames<=1) {
+      throw std::runtime_error("number of frames is too small");
+    }
+    std::vector<unsigned long> indices;
+    std::vector<geom::Vec3> mean_positions;
+    EntityHandle eh;
+    eh=CreateEntityFromView(selection,1);
+    GetIndices(selection,indices);
+    mean_positions.assign(n_atoms,geom::Vec3(0.0,0.0,0.0));
+    for (int i=from; i<to; i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      for (unsigned int j=0; j<n_atoms; ++j) {
+        mean_positions[j]+=(*frame)[indices[j]];
+      }
+    }
+    mol::XCSEditor edi=eh.EditXCS(mol::BUFFERED_EDIT);
+    AtomHandleList atoms=eh.GetAtomList();
+    for (unsigned int j=0; j<n_atoms; ++j) {
+      edi.SetAtomPos(atoms[j],mean_positions[j]/Real(n_frames));
+    }
+    return eh;
+  }
+
+  Real AnalyzeRMSF(const CoordGroupHandle& traj, const EntityView& selection, int from, int to, unsigned int stride)
+  // This function extracts the rmsf between two entity views and assigns it 
+  // The views don't have to be from the same entity
+  // If you want to compare to frame i of the trajectory t, first use t.CopyFrame(i) for example:
+  // eh=io.LoadPDB(...),t=io.LoadCHARMMTraj(eh,...);Sele=eh.Select(...);t.CopyFrame(0);mol.alg.AnalyzeRMSD(t,Sele,Sele)
+  {
+    CheckHandleValidity(traj);
+    if (to==-1)to=traj.GetFrameCount();
+    unsigned int n_atoms=selection.GetAtomCount();
+    if (to<from) {
+      throw std::runtime_error("to smaller than from");
+    }
+    unsigned int n_frames=ceil((to-from)/stride);
+    if (n_atoms==0){
+      throw std::runtime_error("EntityView is empty");
+    }
+    if (n_frames<=1) {
+      throw std::runtime_error("number of frames is too small");
+    }
+    Real rmsf=0.0;
+    geom::Vec3 v;
+    std::vector<unsigned long> sele_indices;
+    std::vector<geom::Vec3> ref_pos(n_atoms,geom::Vec3(0.,0.,0.));
+    GetIndices(selection, sele_indices);
+    for (unsigned int j=0; j<n_atoms; ++j) {
+      for (int i=from; i<to; i+=stride) {
+        CoordFramePtr frame=traj.GetFrame(i);
+        ref_pos[j]+=frame->GetAtomPos(sele_indices[j]);
+      }
+      ref_pos[j]/=n_frames;
+    }
+    for (int i=from; i<to; i+=stride) {
+      CoordFramePtr frame=traj.GetFrame(i);
+      for (unsigned int j=0; j<n_atoms; ++j) {
+        v=frame->GetAtomPos(sele_indices[j])-ref_pos[j];
+        rmsf+=geom::Dot(v,v);
+      }
+    }
+    return sqrt(rmsf/float(n_atoms*n_frames));
+  }
+  
 }}} //ns

@@ -198,9 +198,6 @@ void prep_header(spider_header& header, const img::Size& size, const geom::Vec3&
   header.fNcol =  ncol;
   header.fLenbyt = ncol*4.0;  // record length in bytesS
   header.fLabrec = ceil(1024.0 / header.fLenbyt);  // nr label records in file header
-  if (fmod(1024,header.fLenbyt) != 0.0) {
-    header.fLabrec += 1.0;
-  }
   header.fLabbyt = header.fLabrec * header.fLenbyt;
   header.fIangle = 0.0;  // flag indicating that tilt angles have been filled
   header.fScale = spatial_sampling;   // scale
@@ -389,6 +386,10 @@ void real_filler(std::istream& in, const spider_header& header, img::ImageHandle
 template <typename B >
 void real_dumper(std::ostream& f,  const spider_header& header, const img::ImageHandle& mh,const img::alg::Normalizer& norm, bool swap_flag)
 {
+  int padding = header.fLabbyt-f.tellp();
+  char* buffer=new char[padding];
+  f.write(buffer,padding);
+  delete[] buffer;
   int slice_size=static_cast<int>(header.fNcol) * static_cast<int>(header.fNrow);
   boost::scoped_array<B> rawp(new B[slice_size]);
 

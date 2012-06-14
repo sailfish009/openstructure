@@ -25,7 +25,6 @@ using namespace ost::gfx;
 
 #include "color_by_def.hh"
 
-namespace {
   // convenience for python
   void set_mat_amb2(GfxObjBase* b, float c) {b->SetMatAmb(Color(c,c,c,1.0));}
   void set_mat_diff2(GfxObjBase* b, float c) {b->SetMatDiff(Color(c,c,c,1.0));}
@@ -58,7 +57,63 @@ namespace {
     LOG_INFO("AALines(bool) is deprecated, use SetAALines(bool) instead");
     b->SetAALines(f);
   }
-}
+
+  class GfxObjWrap: public GfxObj, public wrapper<GfxObj>
+  {
+  public:
+    GfxObjWrap(const std::string& name):
+      GfxObj(name)
+    {}
+
+    virtual geom::AlignedCuboid GetBoundingBox() const
+    {
+      if(override f = this->get_override("GetBoundingBox")) {
+        return f();
+      } else {
+        return GfxObj::GetBoundingBox();
+      }
+    }
+
+    geom::AlignedCuboid default_GetBoundingBox() const {
+      return GfxObj::GetBoundingBox();
+    }
+
+    virtual void CustomRenderGL(RenderPass pass) {
+      if(override f = this->get_override("_CustomRenderGL")) {
+        f(pass);
+      } else {
+        GfxObj::CustomRenderGL(pass);
+      }
+    }
+
+    void default_CustomRenderGL(RenderPass pass) {
+        GfxObj::CustomRenderGL(pass);
+    }
+
+    virtual void CustomPreRenderGL(bool rebuild) {
+      if(override f = this->get_override("_CustomPreRenderGL")) {
+        f(rebuild);
+      } else {
+        GfxObj::CustomPreRenderGL(rebuild);
+      }
+    }
+
+    void default_CustomPreRenderGL(bool rebuild) {
+        GfxObj::CustomPreRenderGL(rebuild);
+    }
+
+    virtual void InitGL() {
+      if(override f = this->get_override("_InitGL")) {
+        f();
+      } else {
+        GfxObj::InitGL();
+      }
+    }
+
+    void default_InitGL() {
+        GfxObj::InitGL();
+    }
+  };
 
 void export_GfxObj()
 {
@@ -102,9 +157,13 @@ void export_GfxObj()
     .add_property("opacity",&GfxObjBase::GetOpacity,&GfxObjBase::SetOpacity)
     COLOR_BY_DEF()
    ;
-  //register_ptr_to_python<GfxObjBaseP>();
 
-  class_<GfxObj, boost::shared_ptr<GfxObj>, bases<GfxObjBase>, boost::noncopyable>("GfxObj",no_init)
+  enum_<RenderPass>("RenderPass")
+    .value("STANDARD_RENDER_PASS",STANDARD_RENDER_PASS)
+    .value("TRANSPARENT_RENDER_PASS",TRANSPARENT_RENDER_PASS)
+    ;        
+
+  class_<GfxObjWrap, boost::shared_ptr<GfxObj>, bases<GfxObjBase>, boost::noncopyable>("GfxObj",init<const std::string&>())
     .def("GetTF", &GfxObj::GetTF, return_value_policy<copy_const_reference>())
     .def("SetTF", &GfxObj::SetTF)
     .def("FlagRebuild",&GfxObj::FlagRebuild)
@@ -116,7 +175,10 @@ void export_GfxObj()
     .def("GetAALines",&GfxObj::GetAALines)
     .def("GetLineWidth",&GfxObj::GetLineWidth)
     .def("GetLineHalo",&GfxObj::GetLineHalo)
-    ;
-  //register_ptr_to_python<GfxObjP>();
+    .def("GetBoundingBox",&GfxObj::GetBoundingBox, &GfxObjWrap::default_GetBoundingBox)
+    .def("_CustomRenderGL",&GfxObj::CustomRenderGL, &GfxObjWrap::default_CustomRenderGL)
+    .def("_CustomPreRenderGL",&GfxObj::CustomPreRenderGL, &GfxObjWrap::default_CustomPreRenderGL)
+    .def("_InitGL",&GfxObj::InitGL, &GfxObjWrap::default_InitGL)
+    ;    
 
 }

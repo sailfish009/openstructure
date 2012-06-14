@@ -649,7 +649,6 @@ ${BOOST_ROOT}/lib
 ${BOOST_ROOT}/lib/boost-${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}
       ${BOOST_ROOT}/stage/lib
       ${_boost_LIBRARIES_SEARCH_DIRS})
-message("boost searchdirs:${_boost_LIBRARIES_SEARCH_DIRS}")
   ENDIF( BOOST_ROOT )
 
   IF( BOOST_LIBRARYDIR )

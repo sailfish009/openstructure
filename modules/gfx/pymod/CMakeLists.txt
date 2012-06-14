@@ -14,13 +14,14 @@ set(OST_GFX_PYMOD_SOURCES
   export_gradient.cc
   export_color_ops.cc
   export_glwin_base.cc
+  export_exporter.cc
 )
 
 if (ENABLE_IMG)
   set(OST_GFX_PYMOD_SOURCES ${OST_GFX_PYMOD_SOURCES} export_map.cc)
 endif()
 
-pymod(NAME gfx CPP ${OST_GFX_PYMOD_SOURCES} PY __init__.py)
+pymod(NAME gfx CPP ${OST_GFX_PYMOD_SOURCES} PY __init__.py py_gfx_obj.py)
 
 set(GRADIENT_FILE
   gradients.xml

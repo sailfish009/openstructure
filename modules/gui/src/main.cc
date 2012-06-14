@@ -93,7 +93,9 @@ void GostyMainWindow::OnQuit()
   //SetFullScreen(false);
   GostyApp::Instance()->OnQuit();
   deleteLater();
-  QApplication::exit(0);
+  // exit has to be called on the instance not the class,
+  // otherwise the aboutToQuit singal doesn't get emitted
+  QApplication::instance()->exit(0);
 }
 
 void GostyMainWindow::closeEvent(QCloseEvent * event)

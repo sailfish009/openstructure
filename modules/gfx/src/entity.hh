@@ -324,6 +324,8 @@ public:
   void SetSeqHack(bool b);
   bool GetSeqHack() const;
   
+  virtual void Export(Exporter* ex);
+
 protected:
 
   virtual void CustomPreRenderGL(bool flag);

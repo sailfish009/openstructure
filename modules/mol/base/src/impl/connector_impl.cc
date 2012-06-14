@@ -92,14 +92,22 @@ Real ConnectorImpl::GetLength() const
 }
 
 void ConnectorImpl::SetDir(const geom::Vec3& dir) {
-  geom::Vec3 v=Normalize(dir);
-  local_rot_=find_rotation(v);
+  if(Length(dir)==0) {
+    local_rot_=geom::Mat3(1,0,0,0,1,0,0,0,1);
+  } else {
+    geom::Vec3 v=Normalize(dir);
+    local_rot_=find_rotation(v);
+  }
 }
 
 void ConnectorImpl::SetDirAndLength(const geom::Vec3& dir) {
   len_=Length(dir);
-  geom::Vec3 v=dir/len_;
-  local_rot_=find_rotation(v);
+  if(len_==0) {
+    local_rot_=geom::Mat3(1,0,0,0,1,0,0,0,1);
+  } else {
+    geom::Vec3 v=dir/len_;
+    local_rot_=find_rotation(v);
+  }
 }
 
 bool ConnectorImpl::IsConnectorOf(const AtomImplPtr& a,

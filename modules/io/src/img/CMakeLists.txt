@@ -7,6 +7,7 @@ map_io_mrc_handler.cc
 map_io_dm3_handler.cc
 map_io_tiff_handler.cc
 map_io_dat_handler.cc
+map_io_ipl_handler.cc
 map_io_jpk_handler.cc
 map_io_nanoscope_handler.cc
 map_io_png_handler.cc
@@ -28,6 +29,7 @@ map_io_situs_handler.hh
 map_io_handler.hh
 map_io_mrc_handler.hh
 map_io_dat_handler.hh
+map_io_ipl_handler.hh
 map_io_jpk_handler.hh
 map_io_nanoscope_handler.hh
 map_io_png_handler.hh

@@ -21,8 +21,11 @@
  */
 
 #include <boost/format.hpp>
-
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
+#endif
+
 #include <ost/integrity_error.hh>
 #include <ost/mol/chain_view.hh>
 
@@ -52,11 +55,12 @@ bool SequenceImpl::IsSequenceStringSane(const String& seq_string)
 }
 
 SequenceImplPtr SequenceImpl::FromString(const String& seq_name,
-                                 const String& seq_string)
+                                         const String& seq_string, 
+                                         const String& role)
 {
 
   if (SequenceImpl::IsSequenceStringSane(seq_string)) {
-    return SequenceImplPtr(new SequenceImpl(seq_name, seq_string));
+    return SequenceImplPtr(new SequenceImpl(seq_name, seq_string, role));
   }
   throw InvalidSequence();
 }
@@ -99,15 +103,15 @@ void SequenceImpl::SetString(const String& seq)
 }
 
 SequenceImpl::SequenceImpl(const String& seq_name,
-                   const String& seq_string)
-  : seq_name_(seq_name), seq_string_(seq_string), offset_(0)
+                   const String& seq_string, const String& role)
+  : seq_name_(seq_name), seq_string_(seq_string), seq_role_(role), offset_(0)
 {
   this->ShiftsFromSequence();
 }
 
 SequenceImplPtr SequenceImpl::Copy() const
 {
-  SequenceImplPtr new_seq(new SequenceImpl(seq_name_, seq_string_));
+  SequenceImplPtr new_seq(new SequenceImpl(seq_name_, seq_string_, seq_role_));
   new_seq->offset_=offset_;
   new_seq->shifts_=shifts_;
   new_seq->attached_view_=attached_view_;
@@ -280,6 +284,7 @@ bool SequenceImpl::HasAttachedView() const
   return attached_view_.IsValid();
 }
 
+#if(OST_INFO_ENABLED)
 void SequenceImplToInfo(const SequenceImplPtr& sequence, info::InfoGroup& group)
 {
   group.SetTextData(sequence->GetString());
@@ -300,6 +305,7 @@ SequenceImplPtr SequenceImplFromInfo(const info::InfoGroup& group)
   sequence->SetOffset(offset);
   return sequence;
 }
+#endif
 
 int SequenceImpl::GetFirstNonGap() const
 {

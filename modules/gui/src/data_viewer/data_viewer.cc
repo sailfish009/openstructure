@@ -118,6 +118,12 @@ Extent DataViewer::GetSelection() const
   return panel_->GetSelection();
 }
 
+void DataViewer::SetSelection(const Extent& selection)
+{
+  assert(panel_);
+  panel_->SetSelection(selection);
+}
+
 void DataViewer::SetName(const String& name)
 {
   setWindowTitle(QString::fromStdString(name));
@@ -126,6 +132,66 @@ void DataViewer::SetName(const String& name)
 int DataViewer::GetSlab() const 
 {
   return panel_->GetSlab();
+}
+
+void DataViewer::SetZoomScale(Real zoomscale)
+{
+  panel_->SetZoomScale(zoomscale);
+}
+
+Real DataViewer::GetZoomScale() const
+{
+  return panel_->GetZoomScale();
+}
+
+void DataViewer::SetViewerMin(Real min)
+{
+  panel_->SetViewerMin(min);
+}
+
+Real DataViewer::GetViewerMin() const
+{
+  return panel_->GetViewerMin();
+}
+
+void DataViewer::SetViewerMax(Real max)
+{
+  panel_->SetViewerMax(max);
+}
+
+Real DataViewer::GetViewerMax() const
+{
+  return panel_->GetViewerMax();
+}
+
+void DataViewer::SetGamma(Real gamma)
+{
+  panel_->SetGamma(gamma);
+}
+
+Real DataViewer::GetGamma() const
+{
+  return panel_->GetGamma();
+}
+
+void DataViewer::SetInvert(bool invert)
+{
+  panel_->SetInvert(invert);
+}
+
+bool DataViewer::GetInvert() const
+{
+  return panel_->GetInvert();
+}
+
+void DataViewer::SetOffset(const geom::Vec2& offset)
+{
+  panel_->SetOffset(offset);
+}
+
+geom::Vec2 DataViewer::GetOffset() const
+{
+  return panel_->GetOffset();
 }
 
 int DataViewer::AddOverlay(const OverlayPtr& ov, bool make_active)

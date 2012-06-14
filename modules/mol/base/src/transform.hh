@@ -23,8 +23,11 @@
   Author: Ansgar Philippsen
 */
 
+#include <ost/config.hh>
 #include <ost/geom/geom.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info_fw.hh>
+#endif
 #include <ost/mol/module_config.hh>
 
 namespace ost { namespace mol {
@@ -79,8 +82,10 @@ private:
   geom::Mat4 ttm_;
 
   void update_tm();
+  void update_components();
 };
 
+#if(OST_INFO_ENABLED)
 /// \brief read transformation from info group
 /// \relates Transform
 Transform DLLEXPORT_OST_MOL TransformFromInfo(const info::InfoGroup& group);
@@ -88,6 +93,7 @@ Transform DLLEXPORT_OST_MOL TransformFromInfo(const info::InfoGroup& group);
 /// \relates Transform
 void DLLEXPORT_OST_MOL TransformToInfo(const Transform& transform,
                                        info::InfoGroup& group);
+#endif
 }} // ns
 
 #endif

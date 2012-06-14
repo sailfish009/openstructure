@@ -26,6 +26,6 @@ if __name__=='__main__':
   if not hasattr(builder, 'compound_lib'):
     print 'default builder does not use compound library. ignoring unit tests'
   else:
-    suite = unittest.TestLoader().loadTestsFromTestCase(TestCompound)
-    unittest.TextTestRunner().run(suite)
+    from ost import testutils
+    testutils.RunTests()
 

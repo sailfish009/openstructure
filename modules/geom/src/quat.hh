@@ -93,6 +93,7 @@ public:
   Quat& operator/=(const Quat& q);
   // comparable
   bool operator==(const Quat& q) const;
+  bool operator!=(const Quat& q) const { return !this->operator==(q); }
 
   // Apply rotation to vector.
   Vec3 Rotate(const Vec3& vec) const;
@@ -114,8 +115,6 @@ Quat DLLEXPORT_OST_GEOM Slerp(const Quat& q0, const Quat& q1, Real t);
 Quat DLLEXPORT_OST_GEOM Inv(const Quat& q);
 Quat DLLEXPORT_OST_GEOM Exp(const Quat& q);
 Quat DLLEXPORT_OST_GEOM Log(const Quat& q);
-
-Quat DLLEXPORT_OST_GEOM Grassmann(const Quat& lhs, const Quat& rhs);
 
 //normalize quaternion
 Quat DLLEXPORT_OST_GEOM Normalize(const Quat& q);

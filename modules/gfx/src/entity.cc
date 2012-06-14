@@ -54,6 +54,7 @@
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
 #endif
+#include "exporter.hh"
 
 namespace ost {
 
@@ -399,6 +400,23 @@ void Entity::CustomRenderPov(PovState& pov)
       it->second->RenderPov(pov,GetName());
     }
   }
+}
+
+void Entity::Export(Exporter* ex)
+{
+  ex->NodeStart(GetName(),Exporter::OBJ);
+  // in the simplest case, just export va
+  if(rebuild_ || refresh_) {
+    PreRenderGL(true);
+  }
+
+  for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
+    if(it->second->IsEnabled() && it->second->HasDataToRender()){
+      it->second->Export(ex);
+    }
+  }
+  
+  ex->NodeEnd(GetName());
 }
 
 mol::AtomHandle Entity::PickAtom(const geom::Line3& line, Real line_width)
@@ -950,7 +968,7 @@ void Entity::ColorBy(const String& prop,
                      const Color& c1, const Color& c2,
                      mol::Prop::Level level)
 {
-  std::pair<float,float> minmax = this->GetView().GetMinMax(prop);
+  std::pair<float,float> minmax = this->GetView().GetMinMax(prop, level);
   this->ColorBy(prop,c1,c2,minmax.first, minmax.second,level);
 }
 

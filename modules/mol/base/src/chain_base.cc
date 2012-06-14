@@ -44,6 +44,14 @@ String ChainBase::GetName() const {
   return impl_->GetName();
 }
 
+ChainType ChainBase::GetType() const {
+  return impl_->GetType();
+}
+
+String ChainBase::GetDescription() const {
+  return impl_->GetDescription();
+}
+
 void ChainBase::CheckValidity() const {
   if (!impl_)
     throw InvalidHandle();
@@ -57,6 +65,33 @@ std::ostream& operator<<(std::ostream& os, const ChainBase& chain)
     os << "invalid chain";
   }
   return os;
+}
+
+bool ChainBase::IsPolymer() const
+{
+  this->CheckValidity();
+  return impl_->IsPolymer();
+  
+}
+
+bool ChainBase::IsPolysaccharide() const
+{
+  this->CheckValidity();
+  return impl_->IsPolysaccharide();
+  
+}
+
+bool ChainBase::IsPolypeptide() const
+{
+  this->CheckValidity();
+  return impl_->IsPolypeptide();
+  
+}
+
+bool ChainBase::IsPolynucleotide() const
+{
+  this->CheckValidity();
+  return impl_->IsPolynucleotide();
 }
 
 }} // ns

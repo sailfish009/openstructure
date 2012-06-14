@@ -142,7 +142,9 @@ macro(module)
             "invalid use of module(): a module name must be provided")
   endif()
 
-
+  if (ENABLE_STATIC AND _ARG_NO_STATIC)
+    return()
+  endif()
   if (_ARG_HEADER_OUTPUT_DIR)
     set(_HEADER_OUTPUT_DIR ${_ARG_HEADER_OUTPUT_DIR})
   else()
@@ -162,6 +164,21 @@ macro(module)
   # create library  
   #-----------------------------------------------------------------------------
   file(MAKE_DIRECTORY ${LIB_STAGE_PATH})
+  file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+  file(MAKE_DIRECTORY ${LIBEXEC_STAGE_PATH})
+  file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
+  if (NOT TARGET make_stage_lib_dir)
+    add_custom_target(make_stage_lib_dir COMMAND ${CMAKE_COMMAND} -E make_directory ${LIB_STAGE_PATH})
+  endif()
+  if (NOT TARGET make_executable_output_dir)
+    add_custom_target(make_executable_output_dir COMMAND ${CMAKE_COMMAND} -E make_directory ${EXECUTABLE_OUTPUT_PATH})
+  endif()
+  if (NOT TARGET make_libexec_dir)
+    add_custom_target(make_libexec_dir COMMAND ${CMAKE_COMMAND} -E make_directory ${LIBEXEC_STAGE_PATH})
+  endif()
+  if (NOT TARGET make_tests_dir)
+    add_custom_target(make_tests_dir COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/tests")
+  endif()
   if (WIN32)
     set(_ABS_FILE_PATTERN "^[A-Z]:/")
   else()
@@ -177,14 +194,21 @@ macro(module)
         list(APPEND _ABS_SOURCE_NAMES "${CMAKE_CURRENT_SOURCE_DIR}/${_SOURCE}")
       endif()
     endforeach()
-    add_library(${_LIB_NAME} SHARED ${_ABS_SOURCE_NAMES})
-
+    if (ENABLE_STATIC AND NOT _ARG_NO_STATIC)
+      add_library(${_LIB_NAME} STATIC ${_ABS_SOURCE_NAMES})
+    else()
+      add_library(${_LIB_NAME} SHARED ${_ABS_SOURCE_NAMES})
+    endif()
     set_target_properties(${_LIB_NAME} 
                           PROPERTIES OUTPUT_NAME ${_LIB_NAME}
                                      PROJECT_LABEL ${_ARG_NAME}
                                      EchoString   ${_ARG_NAME}
                                      MODULE_DEPS "${_ARG_DEPENDS_ON}")
     get_target_property(_DEFS ${_LIB_NAME} COMPILE_DEFINITIONS)
+    add_dependencies(${_LIB_NAME} make_stage_lib_dir)
+    add_dependencies(${_LIB_NAME} make_executable_output_dir)
+    add_dependencies(${_LIB_NAME} make_libexec_dir)
+    add_dependencies(${_LIB_NAME} make_tests_dir)
     set_target_properties(${_LIB_NAME} PROPERTIES
                           COMPILE_DEFINITIONS OST_MODULE_${_UPPER_LIB_NAME})
     set_target_properties(${_LIB_NAME} PROPERTIES
@@ -194,35 +218,20 @@ macro(module)
                           LIBRARY_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
                           ARCHIVE_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
                           RUNTIME_OUTPUT_DIRECTORY ${LIB_STAGE_PATH})
-    if (ENABLE_STATIC AND NOT _ARG_NO_STATIC)
-      add_library(${_LIB_NAME}_static STATIC ${_ABS_SOURCE_NAMES})
-      set_target_properties(${_LIB_NAME}_static
-                            PROPERTIES OUTPUT_NAME ${_LIB_NAME}
-                                       PROJECT_LABEL ${_ARG_NAME}
-                                       EchoString   ${_ARG_NAME}
-                                       MODULE_DEPS "${_ARG_DEPENDS_ON}")
-      get_target_property(_DEFS ${_LIB_NAME}_static COMPILE_DEFINITIONS)
-      set_target_properties(${_LIB_NAME}_static PROPERTIES
-                            COMPILE_DEFINITIONS OST_MODULE_${_UPPER_LIB_NAME})
-      set_target_properties(${_LIB_NAME}_static PROPERTIES
-                            LIBRARY_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
-                            ARCHIVE_OUTPUT_DIRECTORY ${LIB_STAGE_PATH}
-                            RUNTIME_OUTPUT_DIRECTORY ${LIB_STAGE_PATH})
-      foreach(_DEPENDENCY ${_ARG_DEPENDS_ON})
-        target_link_libraries(${_LIB_NAME}_static ${_DEPENDENCY}_static)
-      endforeach()
-      target_link_libraries(${_LIB_NAME} ${ZLIB_LIBRARIES})
-    endif()
     if (APPLE)
       set_target_properties(${_LIB_NAME} PROPERTIES
-                            LINK_FLAGS "-Wl,-rpath,@@loader_path"
+                            LINK_FLAGS "-Wl,-rpath,@loader_path"
                             INSTALL_NAME_DIR "@rpath")
     endif()
     if (WIN32)
       #set_target_properties(${_LIB_NAME} PROPERTIES PREFIX "../")
       install(TARGETS ${_LIB_NAME} ARCHIVE DESTINATION "${LIB_DIR}")
     else()
-      install(TARGETS ${_LIB_NAME} LIBRARY DESTINATION "${LIB_DIR}")
+      if (ENABLE_STATIC)
+        install(TARGETS ${_LIB_NAME} ARCHIVE DESTINATION "${LIB_DIR}")
+      else()
+        install(TARGETS ${_LIB_NAME} LIBRARY DESTINATION "${LIB_DIR}")
+      endif()
     endif()                          
     if (_ARG_LINK)
       target_link_libraries(${_LIB_NAME} ${_ARG_LINK})
@@ -230,6 +239,10 @@ macro(module)
     foreach(_DEPENDENCY ${_ARG_DEPENDS_ON})
       target_link_libraries(${_LIB_NAME} ${_DEPENDENCY})
     endforeach()
+    if (ENABLE_STATIC)
+      target_link_libraries(${_LIB_NAME} ${STATIC_LIBRARIES})
+    endif()
+  
   else()
     add_custom_target("${_LIB_NAME}" ALL)
     set_target_properties("${_LIB_NAME}" PROPERTIES HEADER_ONLY 1 
@@ -295,20 +308,30 @@ macro(executable)
     message(FATAL_ERROR "invalid use of executable(): a name must be provided")
   endif()
   add_executable(${_ARG_NAME} ${_ARG_SOURCES})
-  if (APPLE AND NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
+  if (APPLE AND NOT _ARG_NO_RPATH AND NOT ENABLE_STATIC)
     set_target_properties(${_ARG_NAME} PROPERTIES
-                          LINK_FLAGS "-Wl,-rpath,@loader_path/../lib")
+                          LINK_FLAGS "-Wl,-rpath,@loader_path/../lib/")
   endif()
   if (_ARG_LINK)
     target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
   endif()
-  if (ENABLE_STATIC AND _ARG_STATIC)
-    set(TARGET_SUFFIX _static)
-    target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
-  endif()
   foreach(_DEP ${_ARG_DEPENDS_ON})
-    target_link_libraries(${_ARG_NAME} ${_DEP}${TARGET_SUFFIX})
+    target_link_libraries(${_ARG_NAME} ${_DEP})
   endforeach()
+  if (ENABLE_STATIC AND _ARG_STATIC)
+    target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
+    if (UNIX AND NOT APPLE)
+      if (OST_GCC_45)    
+        set_target_properties(${_ARG_NAME}
+                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
+                              LINK_FLAGS "-static-libgcc -static-libstdc++ -static -pthread")
+      else()
+        set_target_properties(${_ARG_NAME}
+                              PROPERTIES LINK_SEARCH_END_STATIC TRUE  
+                              LINK_FLAGS "-static-libgcc -static -pthread")
+      endif()        
+    endif()
+  endif()
   install(TARGETS ${_ARG_NAME} DESTINATION bin)
 endmacro()
 
@@ -332,17 +355,19 @@ macro(executable_libexec)
                        "${LIBEXEC_STAGE_PATH}")  
   if (APPLE AND NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
     set_target_properties(${_ARG_NAME} PROPERTIES
-                          LINK_FLAGS "-Wl,-rpath,@loader_path/../lib")
+                          LINK_FLAGS "-Wl,-rpath,@loader_path/../../lib")
   endif()
   if (_ARG_LINK)
     target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
   endif()
   if (ENABLE_STATIC AND _ARG_STATIC)
-    set(TARGET_SUFFIX _static)
     target_link_libraries(${_ARG_NAME} ${STATIC_LIBRARIES})
+    set_target_properties(${_ARG_NAME}
+                          PROPERTIES LINK_SEARCH_END_STATIC TRUE)  
+
   endif()
   foreach(_DEP ${_ARG_DEPENDS_ON})
-    target_link_libraries(${_ARG_NAME} ${_DEP}${TARGET_SUFFIX})
+    target_link_libraries(${_ARG_NAME} ${_DEP})
   endforeach()
   install(TARGETS ${_ARG_NAME} DESTINATION ${LIBEXEC_PATH})
 endmacro()
@@ -472,6 +497,9 @@ macro(pymod)
   if (NOT _ARG_NAME)
     message(FATAL_ERROR "invalid use of pymod(): a name must be provided")
   endif()
+  if (ENABLE_STATIC)
+    return()
+  endif()
   if (_ARG_OUTPUT_DIR)
     set(PYMOD_DIR "openstructure/${_ARG_OUTPUT_DIR}")
   else()
@@ -499,14 +527,18 @@ macro(pymod)
     endif()
     target_link_libraries("_${_LIB_NAME}" ${_PARENT_LIB_NAME} 
                           ${PYTHON_LIBRARIES} ${BOOST_PYTHON_LIBRARIES})
-    if (_USE_RPATH)
-      set_target_properties("_${_LIB_NAME}"
-                            PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR}
-                            INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
-    else()
-      set_target_properties("_${_LIB_NAME}"
-                            PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR}
-                            INSTALL_RPATH "")
+
+    set_target_properties("_${_LIB_NAME}"
+                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR})
+ 
+    if (NOT ENABLE_STATIC)
+      if (_USE_RPATH)
+        set_target_properties("_${_LIB_NAME}"
+                              PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
+      else()
+        set_target_properties("_${_LIB_NAME}"
+                              PROPERTIES INSTALL_RPATH "")
+      endif()
     endif()
     if (APPLE)
       file(RELATIVE_PATH _REL_PATH "${PYMOD_STAGE_DIR}" "${LIB_STAGE_PATH}")
@@ -582,12 +614,13 @@ macro(pymod)
        add_dependencies("_${_LIB_NAME}" "_${dep}")
     endforeach()
   endif()
-
 endmacro()
 
 add_custom_target(check)
+add_custom_target(check_xml)
 if (WIN32)
   set_target_properties(check PROPERTIES EXCLUDE_FROM_ALL "1")
+  set_target_properties(check_xml PROPERTIES EXCLUDE_FROM_ALL "1")
 endif()
 
 #-------------------------------------------------------------------------------
@@ -630,7 +663,12 @@ macro(ost_unittest)
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
                             "${_ARG_PREFIX}_${_ARG_MODULE}")
         add_custom_target("${_test_name}_run"
-                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo 
+                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} || echo
+                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                        COMMENT "running checks for module ${_ARG_MODULE}"
+                        DEPENDS ${_test_name})
+        add_custom_target("${_test_name}_run_xml"
+                        COMMAND OST_ROOT=${STAGE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} --log_format=xml --log_level=all > ${_test_name}_log.xml || echo
                         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                         COMMENT "running checks for module ${_ARG_MODULE}"
                         DEPENDS ${_test_name})
@@ -642,6 +680,7 @@ macro(ost_unittest)
       endif()
 
       add_dependencies(check "${_test_name}_run")
+      add_dependencies(check_xml "${_test_name}_run_xml")
       set_target_properties(${_test_name}
                             PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                             "${CMAKE_CURRENT_BINARY_DIR}")
@@ -662,9 +701,15 @@ macro(ost_unittest)
                   sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "running checks ${py_test}" VERBATIM)
+        add_custom_target("${py_test}_run_xml"
+                  sh -c "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} xml || echo"
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                  COMMENT "running checks ${py_test}" VERBATIM)
       endif()
       add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
+      add_dependencies("${py_test}_run_xml" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
       add_dependencies(check "${py_test}_run")
+      add_dependencies(check_xml "${py_test}_run_xml")
       if (WIN32)
         set_target_properties("${py_test}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
       endif()
@@ -832,7 +877,7 @@ macro(setup_compiler_flags)
     endif()
   endif()
 endmacro()
-set(_BOOST_MIN_VERSION 1.37)
+set(_BOOST_MIN_VERSION 1.31)
 
 macro(setup_boost)
   find_package(Boost ${_BOOST_MIN_VERSION} COMPONENTS python REQUIRED)

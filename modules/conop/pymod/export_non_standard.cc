@@ -16,26 +16,35 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_MOL_ALG_LOCAL_DIST_TEST_HH
-#define OST_MOL_ALG_LOCAL_DIST_TEST_HH
+#include <boost/python.hpp>
+#include <ost/mol/mol.hh>
+#include <ost/conop/nonstandard.hh>
 
-#include <ost/mol/entity_view.hh>
-#include <ost/mol/alg/module_config.hh>
-#include <ost/seq/alignment_handle.hh>
+using namespace boost::python;
 
-namespace ost { namespace mol { namespace alg {
-  
-Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const EntityView& mdl,
-                                         const EntityView& ref,
-                                         Real cutoff, Real max_dist,
-                                         const String& local_ldt_property_string="");
+using namespace ost::conop;
+using namespace ost::mol;
+                   
+object copy_conserved_handle(ResidueHandle src_res, ResidueHandle dst_res,
+                          XCSEditor edi) {
+  bool has_cbeta = false;
+  bool ret = CopyConserved(src_res, dst_res, edi, has_cbeta);
+  return make_tuple(ret, has_cbeta);
+}
 
-Real DLLEXPORT_OST_MOL_ALG LocalDistTest(const ost::seq::AlignmentHandle& aln,
-                                         Real cutoff, Real max_dist, 
-                                         int ref_index=0, int mdl_index=1);
+object copy_non_conserved_handle(ResidueHandle src_res, ResidueHandle dst_res,
+                          XCSEditor edi) {
+  bool has_cbeta = false;
+  bool ret = CopyNonConserved(src_res, dst_res, edi, has_cbeta);
+  return make_tuple(ret, has_cbeta);
+}
 
-}}}
 
-#endif
 
+void export_NonStandard()
+{
+  def("CopyNonConserved",&copy_non_conserved_handle);
+  def("CopyConserved", copy_conserved_handle);
+  def("CopyResidue", &CopyResidue);
+ }
 

@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/mol/mol.hh>
 
@@ -50,7 +51,7 @@ struct Fixture {
   ResidueHandle res3;
 };
 
-BOOST_AUTO_TEST_SUITE( seq )
+BOOST_AUTO_TEST_SUITE( seq );
 
 BOOST_AUTO_TEST_CASE(seq_triv) 
 {
@@ -246,4 +247,4 @@ BOOST_AUTO_TEST_CASE(seq_attach_view)
   BOOST_CHECK_EQUAL(s.GetResidue(0),ResidueHandle());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

@@ -21,6 +21,7 @@
  */
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/mol/mol.hh>
 #include <ost/mol/coord_group.hh>
@@ -28,7 +29,7 @@
 using namespace ost;
 using namespace ost::mol;
 
-BOOST_AUTO_TEST_SUITE( io )
+BOOST_AUTO_TEST_SUITE( io );
 
 BOOST_AUTO_TEST_CASE(coord_group) 
 {
@@ -81,4 +82,4 @@ BOOST_AUTO_TEST_CASE(coord_group)
   BOOST_CHECK(ad.GetPos()==geom::Vec3(9,10,11));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

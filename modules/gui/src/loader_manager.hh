@@ -31,11 +31,6 @@ namespace ost { namespace gui {
 
 class DLLEXPORT_OST_GUI LoaderManager {
 
-  QMap<QString,RemoteSiteLoader*> site_loaders_;
-  QActionGroup* site_actions_;
-  QMenu* site_menu_;
-  QString default_site_;
-
 public:
   LoaderManager();
   virtual ~LoaderManager();
@@ -48,6 +43,13 @@ public:
   QString GetDefaultRemoteSiteIdent();
   void SetDefaultRemoteSiteIdent(const QString& ident);
   QMenu* GetSiteMenu();
+
+private:
+  QMap<QString,RemoteSiteLoader*> site_loaders_;
+  QActionGroup* site_actions_;
+  QString default_site_;
+
+
 };
 
 typedef boost::shared_ptr<LoaderManager> LoaderManagerPtr;

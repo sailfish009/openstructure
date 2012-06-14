@@ -16,6 +16,11 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+/*
+  Authors: Marco Biasini, Niklaus Johner, Ansgar Philippsen
+*/
+
 #include <boost/python.hpp>
 using namespace boost::python;
 
@@ -26,26 +31,59 @@ using namespace boost::python;
 using namespace ost;
 using namespace ost::mol;
 
-geom::Vec3 (CoordFrame::*get_atom_pos)(const AtomHandle& atom) = &CoordFrame::GetAtomPos;
-Real (CoordFrame::*get_dist_atom)(const AtomHandle& a1, const AtomHandle& a2) = &CoordFrame::GetDistanceBetwAtoms;
-Real (CoordFrame::*get_angle)(const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3) = &CoordFrame::GetAngle;
-Real (CoordFrame::*get_dihedral)(const AtomHandle& a1, const AtomHandle& a2, const AtomHandle& a3, const AtomHandle& a4) = &CoordFrame::GetDihedralAngle;
-geom::Vec3 (CoordFrame::*get_cm)(const mol::EntityView& sele) = &CoordFrame::GetCenterOfMassPos;
-Real (CoordFrame::*get_dist_cm)(const mol::EntityView& sele1, const mol::EntityView& sele2) = &CoordFrame::GetDistanceBetwCenterOfMass;
-Real (CoordFrame::*get_rmsd)(const mol::EntityView& Reference_View, const mol::EntityView& sele_View) = &CoordFrame::GetRMSD;
-Real (CoordFrame::*get_min_dist)(const mol::EntityView& view1, const mol::EntityView& view2) = &CoordFrame::GetMinDistance;
+geom::Vec3 (CoordFrame::*get_atom_pos)(const AtomHandle&) const = &CoordFrame::GetAtomPos;
+Real (CoordFrame::*get_dist_atom)(const AtomHandle&, const AtomHandle&) const = &CoordFrame::GetDistanceBetwAtoms;
+Real (CoordFrame::*get_angle)(const AtomHandle&, const AtomHandle&, const AtomHandle&) const = &CoordFrame::GetAngle;
+Real (CoordFrame::*get_dihedral)(const AtomHandle&, const AtomHandle&, const AtomHandle&, const AtomHandle&) const = &CoordFrame::GetDihedralAngle;
+geom::Vec3 (CoordFrame::*get_cm)(const mol::EntityView&) const = &CoordFrame::GetCenterOfMassPos;
+Real (CoordFrame::*get_dist_cm)(const mol::EntityView&, const mol::EntityView&) const = &CoordFrame::GetDistanceBetwCenterOfMass;
+Real (CoordFrame::*get_min_dist_cm_v)(const mol::EntityView&, const mol::EntityView&) const = &CoordFrame::GetMinDistBetwCenterOfMassAndView;
+Real (CoordFrame::*get_rmsd)(const mol::EntityView&, const mol::EntityView&) const = &CoordFrame::GetRMSD;
+Real (CoordFrame::*get_min_dist)(const mol::EntityView&, const mol::EntityView&) const = &CoordFrame::GetMinDistance;
+Real (CoordFrame::*get_alpha)(const mol::EntityView&) const = &CoordFrame::GetAlphaHelixContent;
+geom::Line3 (CoordFrame::*get_odr_line)(const mol::EntityView&) const = &CoordFrame::GetODRLine;
+geom::Plane (CoordFrame::*get_odr_plane)(const mol::EntityView&) const = &CoordFrame::GetODRPlane;
+geom::Line3 (CoordFrame::*fit_cylinder)(const mol::EntityView&) const = &CoordFrame::FitCylinder;
+// TODO: move to geom
+geom::Line3 (CoordFrame::*get_odr_line2)() const = &geom::Vec3List::GetODRLine;
+
+CoordFrame create_coord_frame1(const geom::Vec3List& atom_pos)
+{
+  return CreateCoordFrame(atom_pos);
+}
+
+CoordFrame create_coord_frame2(const geom::Vec3List& atom_pos, 
+                               const geom::Vec3& cell_size,
+                               const geom::Vec3& cell_angles)
+{
+  return CreateCoordFrame(atom_pos,cell_size,cell_angles);
+}
 
 void export_CoordFrame()
 {
-  class_<CoordFrame>("CoordFrame",no_init)
+  // TODO: add ctors or factory functions that take python sequences
+  class_<CoordFrame>("CoordFrame",init<size_t, optional<geom::Vec3> >())
+    .def("SetCellSize",&CoordFrame::SetCellSize)
+    .def("GetCellSize",&CoordFrame::GetCellSize)
+    .add_property("cell_size",&CoordFrame::GetCellSize,&CoordFrame::SetCellSize)
+    .def("SetCellAngles",&CoordFrame::SetCellAngles)
+    .def("GetCellAngles",&CoordFrame::GetCellAngles)
+    .add_property("cell_angles",&CoordFrame::GetCellAngles,&CoordFrame::SetCellAngles)
     .def("GetAtomPos", get_atom_pos)
     .def("GetDistanceBetwAtoms", get_dist_atom)
     .def("GetAngle", get_angle)
     .def("GetDihedralAngle", get_dihedral)
     .def("GetCenterOfMassPos", get_cm)
     .def("GetDistanceBetwCenterOfMass", get_dist_cm)
+    .def("GetMinDistBetwCenterOfMassAndView", get_min_dist_cm_v)
     .def("GetRMSD",get_rmsd)
     .def("GetMinDistance",get_min_dist)
+    .def("GetODRPlane",get_odr_plane)
+    .def("GetODRLine",get_odr_line)
+    .def("GetODRLine",get_odr_line2)
+    .def("GetAlphaHelixContent",get_alpha)
+    .def("FitCylinder",fit_cylinder)
   ;
-  def("CreateCoordFrame",CreateCoordFrame);
+  def("CreateCoordFrame",create_coord_frame1);
+  def("CreateCoordFrame",create_coord_frame2);
 }

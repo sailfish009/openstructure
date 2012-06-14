@@ -19,12 +19,22 @@
 #include <algorithm>
 
 #include <Eigen/SVD>
-#include "vec3.hh"
 
+#include "vec3.hh"
+// TODO: these are for the (misplaced) Vec3List algorithm functions
+#include "vecmat3_op.hh"
+#include "composite3.hh"
+#include "composite3_op.hh"
 
 namespace geom {
 
+
+#if OST_DOUBLE_PRECISION
+typedef Eigen::Matrix3d EMat3;
+#else
 typedef Eigen::Matrix3f EMat3;
+#endif
+
 
 Mat3 Vec3List::GetInertia() const
 {
@@ -68,5 +78,89 @@ Vec3 Vec3List::GetCenter() const
   return center/=this->size();
 }
 
+Line3 Vec3List::GetODRLine() const
+{
+  Vec3 center=this->GetCenter();
+  Vec3 direction=this->GetPrincipalAxes().GetRow(2);
+  return Line3(center,center+direction);
+}
+
+Plane Vec3List::GetODRPlane() const
+{
+  Vec3 origin=this->GetCenter();
+  Vec3 normal=this->GetPrincipalAxes().GetRow(0);
+  return Plane(origin,normal);
+}
+  
+Line3 Vec3List::FitCylinder(const Vec3& initial_direction, const Vec3& center) const
+{
+  Line3 axis=Line3(center,center+initial_direction), axis_old;
+  Real radius,res_sum_old,res_sum,delta_0=0.01,prec=0.0000001,err,norm,delta;
+  unsigned long n_step=1000, n_res=this->size();
+  Vec3 v,gradient;
+  
+  radius=0.0;
+  delta=delta_0;
+  for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+    radius+=geom::Distance(axis,(*i));
+  }
+  radius/=Real(n_res);
+  res_sum=0.0;
+  for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+    Real r=Distance(axis,(*i))-radius;
+    res_sum+=r*r;
+  }
+  unsigned long k=0;
+  err=2.0*prec;
+  while (err>prec && k<n_step) {
+    res_sum_old=res_sum;
+    axis_old=axis;
+    radius=0.0;
+    if (k>50) {
+      delta=delta_0*50.0*50.0/(k*k);
+    }
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      radius+=Distance(axis,(*i));
+    }
+    radius/=Real(n_res);
+    for (int j=0; j!=3; ++j){
+      res_sum=0.0;
+      v=Vec3(0.0,0.0,0.0);
+      v[j]=delta;
+      axis=Line3(axis_old.GetOrigin(),axis_old.GetOrigin()+axis_old.GetDirection()+v);
+      radius=0.0;
+      for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+        radius+=Distance(axis,(*i));
+      }
+      radius/=Real(n_res);
+      for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+        Real r=Distance(axis,(*i))-radius;
+        res_sum+=r*r;
+      }
+      gradient[j]=(res_sum-res_sum_old)/delta;
+    }
+    norm=Dot(gradient,gradient);
+    if (norm>1.) {
+      gradient=Normalize(gradient);
+    }
+    axis=Line3(axis_old.GetOrigin(),axis_old.GetOrigin()+axis_old.GetDirection()-delta*gradient);
+    radius=0.0;
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      radius+=Distance(axis,(*i));
+    }
+    radius/=Real(n_res);
+    res_sum=0.0;
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      Real r=Distance(axis,(*i))-radius;
+      res_sum+=r*r;
+    }
+    err=fabs((res_sum-res_sum_old)/float(n_res));
+    k++;
+  }
+  if (err>prec) {
+    std::cout<<"axis fitting did not converge"<<std::endl;
+  }
+  return axis;
+}
 
 }

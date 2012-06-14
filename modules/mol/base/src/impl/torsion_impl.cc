@@ -48,8 +48,8 @@ Real TorsionImpl::GetAngle() const {
   }
 }
 
-void TorsionImpl::SetAngle(Real angle, bool up) {
-  this->SetAngleICS(angle, true);
+void TorsionImpl::SetAngle(Real angle, bool update_others) {
+  this->SetAngleICS(angle, update_others);
 }
 
 void TorsionImpl::Apply(EntityVisitor& v) {
@@ -57,8 +57,8 @@ void TorsionImpl::Apply(EntityVisitor& v) {
   v.VisitTorsion(TorsionHandle(shared_from_this()));
 }
 
-void TorsionImpl::RotateAngle(Real angle, bool up) {
-  this->SetAngle(this->GetAngleICS()+angle, up);
+void TorsionImpl::RotateAngle(Real angle, bool update_others) {
+  this->SetAngle(this->GetAngleICS()+angle, update_others);
 }
 
 }}} // ns

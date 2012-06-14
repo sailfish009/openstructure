@@ -55,11 +55,15 @@ Real Angle(const Vec2& v1, const Vec2& v2)
 
 Real SignedAngle(const Vec2& v1, const Vec2& v2)
 {
-  Vec3 vc;
-  vc=Cross(Vec3(v1),Vec3(v2));
-  if(Length(v1)==0.0 || Length(v2)==0.0 || Length(vc)==0.0)
+  if(Length(v1)==0.0 || Length(v2)==0.0){
     return 0.0;
-  return acos(Dot(v1,v2)/Length(v1)/Length(v2))*vc.z/std::fabs(vc.z);
+  }
+  Vec3 vc=Cross(Vec3(v1),Vec3(v2));
+  Real sign=1.0;
+  if(vc.z!=0.0){
+    sign=vc.z/std::fabs(vc.z);
+  }
+  return acos(Dot(v1,v2)/Length(v1)/Length(v2))*sign;
 }
 
 Vec2 Rotate(const Vec2& v,Real ang)

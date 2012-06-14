@@ -27,16 +27,19 @@
 #include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/pdb_reader.hh>
 #include <ost/io/pdb_writer.hh>
+#include <ost/log.hh>
+
 #include <ost/io/io_exception.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 using boost::unit_test_framework::test_suite;
 
 using namespace ost;
 using namespace ost::io;
 
-BOOST_AUTO_TEST_SUITE( io )
-
+BOOST_AUTO_TEST_SUITE( io );
 
 BOOST_AUTO_TEST_CASE(test_pdb_import_handler) 
 {
@@ -135,11 +138,53 @@ BOOST_AUTO_TEST_CASE(test_parse_compnd_record4)
 //COMPND CHAIN record misses B chain
 BOOST_AUTO_TEST_CASE(test_parse_compnd_record5) 
 {
+  Logger::Instance().PushVerbosityLevel(0);
+
   String fname("testfiles/pdb/1AKE_noBchain.pdb");
   PDBReader reader(fname, IOProfile()); 
   mol::EntityHandle ent=mol::CreateEntity();
   
+  BOOST_CHECK_NO_THROW(reader.Import(ent));
+  
+  mol::ChainHandle ch = ent.FindChain("A");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+  
+  ch = ent.FindChain("B");
+  BOOST_CHECK(ch.HasProp("mol_id")==false);
+}
+
+//chain I in MOL_ID record but no chain I
+BOOST_AUTO_TEST_CASE(test_parse_compnd_record6) 
+{
+  Logger::Instance().PushVerbosityLevel(0);
+  String fname("testfiles/pdb/1oax.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  
   BOOST_CHECK_THROW(reader.Import(ent), IOException);
+  
+}
+
+// has an empy MOLECULE record (unsupported ATM anyway, but crashed ost)
+BOOST_AUTO_TEST_CASE(test_parse_compnd_record7) 
+{
+  Logger::Instance().PushVerbosityLevel(0);
+  String fname("testfiles/pdb/2p6a.pdb");
+  PDBReader reader(fname, IOProfile()); 
+  mol::EntityHandle ent=mol::CreateEntity();
+  
+  reader.Import(ent);
+  mol::ChainHandle ch = ent.FindChain("A");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==1);
+  ch = ent.FindChain("D");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==2);
+
+  ch = ent.FindChain("E");
+  BOOST_CHECK(ch.HasProp("mol_id")==true);
+  BOOST_CHECK(ch.GetIntProp("mol_id")==3);
 }
 
 
@@ -386,6 +431,25 @@ BOOST_AUTO_TEST_CASE(deuterium_import)
   BOOST_CHECK(ent.FindResidue("A", 297).IsPeptideLinking());
 }
 
+BOOST_AUTO_TEST_CASE(bzdng_318)
+{
+  String fname("testfiles/pdb/bzdng-318.pdb");
+  PDBReader reader(fname, IOProfile());
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  // we use conopology to mark amino acids as peptide-linking.
+  conop::Conopology& conop_inst=conop::Conopology::Instance();
+  conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+  {
+    PDBWriter writer(std::string("testfiles/pdb/bzdng-318-out.pdb"),
+                     IOProfile());
+    writer.Write(ent);
+  }
+
+  BOOST_CHECK(compare_files("testfiles/pdb/bzdng-318.pdb",
+                            "testfiles/pdb/bzdng-318-out.pdb"));
+}
+
 BOOST_AUTO_TEST_CASE(faulty_lines)
 {
   String fname("testfiles/pdb/faulty.pdb");
@@ -417,6 +481,64 @@ BOOST_AUTO_TEST_CASE(write_atom)
                     "ATOM      1  CA  GLY A   1      32.000-128.000  -2.500");
   BOOST_CHECK_EQUAL(s.substr(54, 26), 
                     "  1.00128.00           C  ");
+}
+
+BOOST_AUTO_TEST_CASE(write_atom_100000)
+{
+  char c_names[] = "ABCDEFGHIJ";
+  std::stringstream out;
+  PDBWriter writer(out, IOProfile());
+  
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.EditXCS();
+  mol::ChainHandle ch;
+  mol::ResidueHandle r;
+  mol::AtomHandle a;
+
+  for (unsigned long i = 0; i < 10; ++i) {
+    ch=edi.InsertChain(String(1, c_names[i]));
+    for (unsigned long j = 1; j < 1000; ++j) {
+      r=edi.AppendResidue(ch, "ARG");
+      a=edi.InsertAtom(r,"N",   geom::Vec3(26.861, 50.841, 38.803), "N");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+      a=edi.InsertAtom(r,"CA",  geom::Vec3(27.437, 49.969, 37.786), "C");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+      a=edi.InsertAtom(r,"C",   geom::Vec3(26.336, 48.959, 37.429), "C");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+      a=edi.InsertAtom(r,"O",   geom::Vec3(25.745, 48.313, 38.312), "O");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+      a=edi.InsertAtom(r,"CB",  geom::Vec3(28.653, 49.266, 38.349), "C");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+      a=edi.InsertAtom(r,"CG",  geom::Vec3(29.870, 50.188, 38.416), "C");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+      a=edi.InsertAtom(r,"CD",  geom::Vec3(31.033, 49.532, 39.173), "C");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+      a=edi.InsertAtom(r,"NE",  geom::Vec3(32.318, 50.244, 39.125), "N");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+      a=edi.InsertAtom(r,"CZ",  geom::Vec3(33.462, 49.750, 39.679), "C");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+      a=edi.InsertAtom(r,"NH1", geom::Vec3(33.522, 48.572, 40.308), "N");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+      a=edi.InsertAtom(r,"NH2", geom::Vec3(34.610, 50.427, 39.597), "N");
+      a.SetOccupancy(1.0);
+      a.SetBFactor(128.0);
+    }
+  }
+
+  writer.Write(ent);
+  String s=out.str();
+  BOOST_CHECK_EQUAL(s.substr(8099844, 5), "99999");
+  BOOST_CHECK_EQUAL(s.substr(8099925, 5), "*****");
 }
 
 BOOST_AUTO_TEST_CASE(write_hetatom)
@@ -798,7 +920,7 @@ BOOST_AUTO_TEST_CASE(charmm_rname)
   {
     PDBWriter writer(String("testfiles/pdb/charmm_rname-out.pdb"),
                      IOProfile("CHARMM", true, false, false,
-                               false, false, false));
+                               false, false, false, true));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -818,7 +940,7 @@ BOOST_AUTO_TEST_CASE(charmm_longcname)
   {
     PDBWriter writer(String("testfiles/pdb/charmm_longcname-out.pdb"),
                      IOProfile("CHARMM", true, false, false,
-                               false, false, false));
+                               false, false, false, true));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -838,7 +960,7 @@ BOOST_AUTO_TEST_CASE(write_charmm_ter)
   {
     PDBWriter writer(String("testfiles/pdb/charmm_ter-out.pdb"),
                      IOProfile("CHARMM", true, false, false,
-                               false, false, false));
+                               false, false, false, true));
 
     mol::EntityHandle ent=mol::CreateEntity();
     mol::XCSEditor edi=ent.EditXCS();
@@ -855,4 +977,88 @@ BOOST_AUTO_TEST_CASE(write_charmm_ter)
                             "testfiles/pdb/charmm_ter-out.pdb"));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_CASE(test_pqr_import_handler)
+{
+  String fname("testfiles/test_in.pqr");
+
+  mol::EntityHandle eh=mol::CreateEntity();
+  EntityIOPDBHandler pdbh;
+
+  BOOST_CHECK(EntityIOPDBHandler::ProvidesImport(fname));
+  BOOST_CHECK(EntityIOPDBHandler::ProvidesImport("test_in.PQR"));
+
+  BOOST_CHECK(EntityIOPDBHandler::ProvidesExport(fname));
+  BOOST_CHECK(EntityIOPDBHandler::ProvidesExport("test_in.PQR"));
+
+  pdbh.Import(eh,"testfiles/pdb/simple.pqr");
+}
+
+
+BOOST_AUTO_TEST_CASE(test_pqr_read_atom)
+{
+  String fname("testfiles/pdb/simple.pqr");
+  PDBReader reader(fname, IOProfile());
+  mol::EntityHandle ent=mol::CreateEntity();
+  reader.Import(ent);
+  BOOST_REQUIRE_EQUAL(ent.GetChainCount(), 1);
+  BOOST_REQUIRE_EQUAL(ent.GetResidueCount(), 5);
+  BOOST_REQUIRE_EQUAL(ent.GetAtomCount(), 91);
+  mol::AtomHandle a1=ent.FindAtom(" ", mol::ResNum(1), "N");
+  BOOST_REQUIRE(a1.IsValid());
+  BOOST_CHECK_EQUAL(a1.GetName(), "N");
+  BOOST_CHECK_EQUAL(a1.GetResidue().GetName(), "MET");
+  BOOST_CHECK_EQUAL(a1.GetResidue().GetChain().GetName(), " ");
+
+
+  BOOST_CHECK_EQUAL(a1.GetPos(), geom::Vec3(21.6, 35.3, 56.7));
+  BOOST_CHECK_EQUAL(a1.GetElement(), "");
+  BOOST_CHECK_EQUAL(a1.IsHetAtom(), false);
+  BOOST_CHECK_CLOSE(a1.GetCharge(), Real(-0.3755), Real(1e-4));
+  BOOST_CHECK_CLOSE(a1.GetRadius(), Real(2.0005), Real(1e-4));
+
+  mol::AtomHandle a2=ent.FindAtom(" ", mol::ResNum(2), "CZ");
+  BOOST_REQUIRE(a2.IsValid());
+  BOOST_CHECK_EQUAL(a2.GetName(), "CZ");
+  BOOST_CHECK_EQUAL(a2.GetResidue().GetName(), "ARG");
+  BOOST_CHECK_EQUAL(a2.GetResidue().GetChain().GetName(), " ");
+
+  BOOST_CHECK_EQUAL(a2.GetPos(), geom::Vec3(23.9, 28.7, 56.5));
+  BOOST_CHECK_EQUAL(a2.GetElement(), "");
+  BOOST_CHECK_EQUAL(a2.IsHetAtom(), false);
+  BOOST_CHECK_CLOSE(a2.GetCharge(), Real(0.2507), Real(1e-4));
+  BOOST_CHECK_CLOSE(a2.GetRadius(), Real(1.7503), Real(1e-4));
+}
+
+BOOST_AUTO_TEST_CASE(test_pqr_write_atom)
+{
+  std::stringstream out;
+  PDBWriter writer(out, IOProfile());
+  writer.SetIsPQR(true);
+
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.EditXCS();
+  mol::ChainHandle ch=edi.InsertChain("A");
+  mol::ResidueHandle r=edi.AppendResidue(ch, "GLY");
+
+  mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), "C");
+  a.SetOccupancy(1.0);
+  a.SetBFactor(128.0);
+  a.SetCharge(-0.6543);
+  a.SetRadius(1.2345);
+  mol::AtomHandle a2=edi.InsertAtom(r, "CA", geom::Vec3(32.0, -128.0, -2.5), "C");
+  a2.SetOccupancy(1.0);
+  a2.SetBFactor(128.0);
+  a2.SetCharge(0.1234);
+  a2.SetRadius(2.5432);
+  writer.Write(ent);
+  String s=out.str();
+  BOOST_CHECK_EQUAL(s.substr(0, 54),
+                    "ATOM      1  CA  GLY A   1      32.000-128.000  -2.500");
+  BOOST_CHECK_EQUAL(s.substr(54, 26),
+                    " -0.6543 1.2345        C  ");
+
+  PDBWriter fwriter(String("testfiles/pdb/pqr_atom-out.pqr"), IOProfile());
+  BOOST_CHECK_EQUAL(fwriter.IsPQR(), true);
+}
+
+BOOST_AUTO_TEST_SUITE_END();

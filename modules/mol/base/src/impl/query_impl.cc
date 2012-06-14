@@ -283,12 +283,7 @@ bool QueryImpl::IsAlwaysUndef(const Node* ast,
   if (lop_node) {
     bool lhs = this->IsAlwaysUndef(lop_node->GetLHS(), target_level);
     bool rhs = this->IsAlwaysUndef(lop_node->GetRHS(), target_level);    
-    switch (lop_node->GetOP()) {
-      case LOP_AND:
-        return lhs || rhs;
-      case LOP_OR:
-        return lhs && rhs;
-    }
+    return lhs && rhs;
   }  
   else {
     const SelNode* sel_node = dynamic_cast<const SelNode*>(ast);

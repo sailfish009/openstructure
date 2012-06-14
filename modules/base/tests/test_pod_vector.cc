@@ -22,6 +22,7 @@
 #include <ost/pod_vector.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 using namespace ost;
 
@@ -31,7 +32,7 @@ struct Payload {
   int x;  
 };
 
-BOOST_AUTO_TEST_SUITE(base)
+BOOST_AUTO_TEST_SUITE(base);
 
 BOOST_AUTO_TEST_CASE(pod_vector_trivia)
 {
@@ -59,4 +60,4 @@ BOOST_AUTO_TEST_CASE(pod_vector_push_pop)
   BOOST_CHECK_EQUAL(vec.capacity(), size_t(4));  
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

@@ -20,8 +20,13 @@
   Author: Marco Biasini
  */
 #include <locale>
-#include <boost/format.hpp>
+
 #include <string.h>
+
+#include <boost/format.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/filesystem/convenience.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <ost/io/io_exception.hh>
 #include <ost/mol/atom_handle.hh>
@@ -73,7 +78,12 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
   
   geom::Vec3 p=atom.GetPos();
   line( 0, 6)=record_name;
-  line( 6, 5)=fmt::LPaddedInt(atomnum);
+  // Avoid writing out atomnumbers larger than 5 digits
+  if (atomnum > 99999) {
+    line( 6, 5)=fmt::LPadded("*****");
+  } else {
+    line( 6, 5)=fmt::LPaddedInt(atomnum);
+  }
   String atom_name=atom.GetName();
   if (atom_name.size()>4) {
     throw IOException("Atom name '"+atom.GetQualifiedName()+
@@ -125,8 +135,8 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
     line(46, 8)=fmt::LPaddedFloat(p[2],  3);
     
     if (is_pqr) {
-      line(54, 6)=fmt::LPaddedFloat(atom.GetCharge(), 2);
-      line(60, 6)=fmt::LPaddedFloat(atom.GetRadius(), 2);
+      line(55, 7)=fmt::LPaddedFloat(atom.GetCharge(), 4);
+      line(63, 6)=fmt::LPaddedFloat(atom.GetRadius(), 4);
     } else {
       line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
       Real bfac=atom.GetBFactor();
@@ -162,8 +172,8 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
        line(54, 6)=fmt::LPaddedFloat(atom.GetCharge(), 2);
        line(60, 6)=fmt::LPaddedFloat(atom.GetRadius(), 2);
       } else {
-       line(54, 6)=fmt::LPaddedFloat(atom.GetOccupancy(), 2);
-       Real bfac=atom.GetBFactor();
+       line(54, 6)=fmt::LPaddedFloat(atom.GetAltOcc(*i), 2);
+       Real bfac=atom.GetAltBFactor(*i);
        if (bfac>999.99) {
          line(60, 6)=fmt::LPaddedFloat(999.99, 2);
        } else {
@@ -332,12 +342,12 @@ PDBWriter::PDBWriter(std::ostream& stream, const IOProfile& profile):
   multi_model_(false), charmm_style_(profile.dialect=="CHARMM"), is_pqr_(false),
   profile_(profile)
 {
-  
+  out_.push(outstream_);
 }
 
 PDBWriter::PDBWriter(const boost::filesystem::path& filename, 
                      const IOProfile& profile):
-#if BOOST_FILESYSTEM_VERSION==3                     
+#if BOOST_FILESYSTEM_VERSION==3  || BOOST_VERSION<103400
   outfile_(filename.string().c_str()), outstream_(outfile_), 
 #else
   outfile_(filename.file_string().c_str()), outstream_(outfile_), 
@@ -346,19 +356,34 @@ PDBWriter::PDBWriter(const boost::filesystem::path& filename,
   charmm_style_(profile.dialect=="CHARMM"), is_pqr_(false),
   profile_(profile), filename_("")
 {
+  if (boost::iequals(".pqr", boost::filesystem::extension(filename))) {
+    is_pqr_=true;
+  }
+  if (boost::iequals(".gz", boost::filesystem::extension(filename))) {
+    out_.push(boost::iostreams::gzip_compressor());
+  }
+  out_.push(outstream_);
 }
 
 PDBWriter::PDBWriter(const String& filename, const IOProfile& profile):
   outfile_(filename.c_str()), outstream_(outfile_), mol_count_(0), line_(80), 
   multi_model_(false), charmm_style_(profile.dialect=="CHARMM"), 
   is_pqr_(false), profile_(profile), filename_(filename)
-{}
+{
+  if (boost::iequals(".pqr", boost::filesystem::extension(filename))) {
+    is_pqr_=true;
+  }
+  if (boost::iequals(".gz", boost::filesystem::extension(filename))) {
+    out_.push(boost::iostreams::gzip_compressor());
+  }
+  out_.push(outstream_);
+}
 
 void PDBWriter::WriteModelLeader()
 {
   ++mol_count_;
   if (multi_model_) {
-    outstream_ << "MODEL     " << mol_count_ << std::endl;
+    out_ << "MODEL     " << mol_count_ << std::endl;
   } else if (mol_count_>1) {
     throw IOException("Trying to write several models into one file with ");
   }
@@ -367,14 +392,14 @@ void PDBWriter::WriteModelLeader()
 void PDBWriter::WriteModelTrailer()
 {
   if (multi_model_) {
-    outstream_ << "ENDMDL" << std::endl;
+    out_ << "ENDMDL" << std::endl;
   }
 }
 
 template <typename H>
 void PDBWriter::WriteModel(H ent)
 {
-  if (!outstream_) {
+  if (!out_) {
     if (!filename_.empty()) {
       std::stringstream ss;
       ss << "Can't write PDB to file '" << filename_ << "'";
@@ -384,10 +409,10 @@ void PDBWriter::WriteModel(H ent)
   }
   ForcePOSIX posix;
   this->WriteModelLeader();
-  PDBWriterImpl writer(outstream_,line_, atom_indices_, charmm_style_);
+  PDBWriterImpl writer(out_, line_, atom_indices_, charmm_style_);
   writer.SetIsPQR(is_pqr_);
   ent.Apply(writer);
-  PDBConectWriterImpl con_writer(outstream_,atom_indices_);
+  PDBConectWriterImpl con_writer(out_, atom_indices_);
   ent.Apply(con_writer);
   this->WriteModelTrailer();
 }
@@ -410,7 +435,7 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
   mol::ChainHandle last_chain;
   for (mol::AtomHandleList::const_iterator i=atoms.begin(),
        e=atoms.end(); i!=e; ++i, ++counter) {
-    write_atom(outstream_, line_, *i, counter, is_pqr_, charmm_style_);
+    write_atom(out_, line_, *i, counter, is_pqr_, charmm_style_);
   }
   this->WriteModelTrailer();
 }
@@ -418,7 +443,7 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
   
 PDBWriter::~PDBWriter()
 {
-  outstream_ << "END   ";
+  out_ << "END   ";
 }
 
 }}

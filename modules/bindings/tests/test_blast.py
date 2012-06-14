@@ -26,11 +26,20 @@ class TestBlastBindings(unittest.TestCase):
   
   def testParseBlastOutput(self):
     hits=blast.Blast(self.query, 'testfiles/seqdb')
-    expected_output=[{'evalue':2.366130E-59,'bitscore':211.460,'score':537}, 
-                     {'evalue':4.808930E-59,'bitscore':210.305,'score':534}, 
-                     {'evalue':5.361450E-58,'bitscore':206.838,'score':525}, 
-                     {'evalue':3.277500E+00,'bitscore':15.0086,'score':27}, 
-                     {'evalue':9.696520E+00,'bitscore':13.4678,'score':23}]
+    blast_version=blast.BlastVersion()
+    if blast_version=='2.2.16':
+      expected_output=[{'evalue':4.808930E-59,'bitscore':210.305,'score':534}, 
+                       {'evalue':2.366130E-59,'bitscore':210.305,'score':534}, 
+                       {'evalue':5.361450E-58,'bitscore':206.068,'score':523}, 
+                       {'evalue':2.965230E+00,'bitscore':15.0086,'score':27}, 
+                       {'evalue':9.696520E+00,'bitscore':13.4678,'score':23}]
+ 
+    else:
+      expected_output=[{'evalue':2.366130E-59,'bitscore':211.460,'score':537}, 
+                       {'evalue':4.808930E-59,'bitscore':210.305,'score':534}, 
+                       {'evalue':5.361450E-58,'bitscore':206.838,'score':525}, 
+                       {'evalue':3.277500E+00,'bitscore':15.0086,'score':27}, 
+                       {'evalue':9.696520E+00,'bitscore':13.4678,'score':23}]
     self.assertEqual(len(hits), 4)
     for expected, hit in zip(expected_output, hits):
       patch=hit.aligned_patches[0]
@@ -44,7 +53,5 @@ if __name__ == "__main__":
   except(settings.FileNotFound):
     print "Could not find blastall executable: ignoring unit tests"
     sys.exit(0)
-  try:
-    unittest.main()
-  except Exception, e:
-    print e
+  from ost import testutils
+  testutils.RunTests()

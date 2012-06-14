@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <vector>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include "vec3.hh"
 #include "mat3.hh"

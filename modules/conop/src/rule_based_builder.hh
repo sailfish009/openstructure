@@ -109,7 +109,7 @@ public:
   /// by ignoring it or by inserting a dummy atom.
   virtual void OnMissingAtom(const mol::ResidueHandle& residue,
                               const String& atom_name) { }
-
+                              
   /// \brief Fill in missing information based on atom name.
   virtual void FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec);
 
@@ -123,6 +123,7 @@ public:
   virtual bool IsResidueComplete(const mol::ResidueHandle& residue);
   
   CompoundLibPtr GetCompoundLib() const { return compound_lib_; }
+    
 private:
   CompoundLibPtr      compound_lib_;
   CompoundPtr         last_compound_;
@@ -138,7 +139,6 @@ private:
   mol::AtomHandle LocateAtom(const mol::AtomHandleList& ahl, int ordinal);
 
   void AssignBackBoneTorsionsToResidue(mol::ResidueHandle residue);
-
 
 };
 

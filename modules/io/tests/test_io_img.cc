@@ -34,6 +34,7 @@
 #include  <ost/io/img/map_io_dat_handler.hh>
 #include  <ost/io/img/map_io_jpk_handler.hh>
 #include  <ost/io/img/map_io_nanoscope_handler.hh>
+#include  <ost/io/img/map_io_ipl_handler.hh>
 #include  <ost/img/alg/normalizer_factory.hh>
 
 using namespace ost;
@@ -46,17 +47,16 @@ BOOST_AUTO_TEST_CASE(test_io_img)
 {
   //float tests
   boost::test_tools::close_at_tolerance<Real> close_test(::boost::test_tools::percent_tolerance(0.001));
-  ost::img::ImageHandle testimage=ost::img::CreateImage(ost::img::Extent(ost::img::Point(0,0),ost::img::Point(3,3)));
+  ost::img::ImageHandle testimage=ost::img::CreateImage(ost::img::Extent(ost::img::Point(0,0),ost::img::Point(4,3)));
   int counter=0;
   for (img::ExtentIterator i(testimage.GetExtent()); !i.AtEnd(); ++i, ++counter) {
    testimage.SetReal(i, counter);
   }
-  testimage+=0.01; //if all values are > 0.0 we can use close_at_tolerance
+  testimage+=5.01; //if all values are > 0.0 we can use close_at_tolerance
   const String fname("temp_img.tmp");
   std::map<String,ImageFormatBase*> float_formats;
   float_formats["DX"]=new DX;
   float_formats["Situs"]=new Situs;
-  float_formats["DAT (float)"]=new DAT(false,OST_FLOAT_FORMAT);
   float_formats["CCP4 (float)"]=new MRC;
   float_formats["MRC (float)"]=new MRC(false,MRC_OLD_FORMAT);
   float_formats["SPIDER"]= new Spider;
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(test_io_img)
   }
   //int 16 formats
   std::map<String,ImageFormatBase*> int_formats;
-  int_formats["DAT (16 bit)"]=new DAT(true,OST_BIT16_FORMAT);
+  int_formats["IPL (16 bit)"]=new IPL(true,OST_BIT16_FORMAT);
   int_formats["TIF (16 bit)"]=new TIF;
   int_formats["JPK (16 bit)"]=new JPK;
   // int_formats["DF3"]=new DF3(true);
@@ -108,9 +108,33 @@ BOOST_AUTO_TEST_CASE(test_io_img)
     delete it->second;
   }
 
+  //int 32 formats
+  std::map<String,ImageFormatBase*> int32_formats;
+  int32_formats["IPL (32 bit)"]=new IPL(true,OST_BIT32_FORMAT);
+  for(std::map<String,ImageFormatBase*>::iterator it=int32_formats.begin();it!=int32_formats.end();++it){
+    ost::io::SaveImage(testimage,fname,*(it->second));
+    ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,*(it->second));
+    ost::img::alg::Normalizer norm=ost::img::alg::CreateLinearRangeNormalizer(testimage,0.0,4294967295.0);
+    ost::img::ImageHandle scaled_image=testimage.Apply(norm);
+    bool failed=false;
+    ost::img::ExtentIterator eit(scaled_image.GetExtent());
+    for(;!eit.AtEnd();++eit) {
+      if( static_cast<uint>(scaled_image.GetReal(eit))!=static_cast<uint>(loadedimage.GetReal(eit))){
+        failed=true;
+        break;
+      }
+    }
+    if(failed){
+      BOOST_ERROR("Image IO failed for plugin " << it->first << " at point "
+                  << ost::img::Point(eit)<< ". Should be "
+                  << static_cast<uint>(scaled_image.GetReal(eit)) << ", but "
+                  << static_cast<uint>(loadedimage.GetReal(eit)) << " found.");
+    }
+    delete it->second;
+  }
+
   //byte formats  
   std::map<String,ImageFormatBase*> byte_formats;
-  byte_formats["DAT (byte)"]=new DAT(true,OST_BIT8_FORMAT);
   byte_formats["PNG"]=new PNG;
   byte_formats["JPK (byte)"]= new JPK(true,OST_BIT8_FORMAT);
   byte_formats["TIF (byte)"]= new TIF(true,OST_BIT8_FORMAT);
@@ -131,6 +155,72 @@ BOOST_AUTO_TEST_CASE(test_io_img)
       BOOST_ERROR("Image IO failed for plugin " << it->first << " at point " << ost::img::Point(eit)<< ". The values are: " << static_cast<int>(scaled_image.GetReal(eit))<< ","<< static_cast<int>(loadedimage.GetReal(eit)) );
     }
     delete it->second;
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_io_img_dat)
+{
+  // test for the dat file format using a square image (non square images not supported by dat)
+  //float test
+  boost::test_tools::close_at_tolerance<Real> close_test(::boost::test_tools::percent_tolerance(0.001));
+  ost::img::ImageHandle testimage=ost::img::CreateImage(ost::img::Extent(ost::img::Point(0,0),ost::img::Point(3,3)));
+  int counter=0;
+  for (img::ExtentIterator i(testimage.GetExtent()); !i.AtEnd(); ++i, ++counter) {
+   testimage.SetReal(i, counter);
+  }
+  testimage+=5.01; //if all values are > 0.0 we can use close_at_tolerance
+  const String fname("temp_img.tmp");
+  ost::io::SaveImage(testimage,fname,DAT(false,OST_FLOAT_FORMAT));
+  ost::img::ImageHandle loadedimage=ost::io::LoadImage(fname,DAT(false,OST_FLOAT_FORMAT));
+  bool failed=false;
+  ost::img::ExtentIterator eit(testimage.GetExtent());
+  for(;!eit.AtEnd();++eit) {
+    if( ! close_test(testimage.GetReal(eit),loadedimage.GetReal(eit))){
+      failed=true;
+      break;
+    }
+  }
+  if(failed){
+    BOOST_ERROR("Image IO failed for plugin DAT (float) at point " << ost::img::Point(eit)<< ". The values are: " << testimage.GetReal(eit)<< ","<< loadedimage.GetReal(eit) );
+  }
+  //int 16 format
+  ost::io::SaveImage(testimage,fname,DAT(true,OST_BIT16_FORMAT));
+  loadedimage=ost::io::LoadImage(fname,DAT(true,OST_BIT16_FORMAT));
+  ost::img::alg::Normalizer norm=ost::img::alg::CreateLinearRangeNormalizer(testimage,0.0,65535.0);
+  ost::img::ImageHandle scaled_image=testimage.Apply(norm);
+  failed=false;
+  eit=ost::img::ExtentIterator(testimage.GetExtent());
+  for(;!eit.AtEnd();++eit) {
+    if( static_cast<int>(scaled_image.GetReal(eit))!=static_cast<int>(loadedimage.GetReal(eit))){
+      failed=true;
+      break;
+    }
+  }
+  if(failed){
+    BOOST_ERROR("Image IO failed for plugin DAT  (int16) at point "
+                << ost::img::Point(eit)<< ". Should be "
+                << static_cast<int>(scaled_image.GetReal(eit)) << ", but "
+                << static_cast<int>(loadedimage.GetReal(eit)) << " found.");
+  }
+
+  //byte format
+  ost::io::SaveImage(testimage,fname,DAT(true,OST_BIT8_FORMAT));
+  loadedimage=ost::io::LoadImage(fname,DAT(true,OST_BIT8_FORMAT));
+  norm=ost::img::alg::CreateLinearRangeNormalizer(testimage,0.0,255.0);
+  scaled_image=testimage.Apply(norm);
+  failed=false;
+  eit=ost::img::ExtentIterator(testimage.GetExtent());
+  for(;!eit.AtEnd();++eit) {
+    if( static_cast<int>(scaled_image.GetReal(eit))!=static_cast<int>(loadedimage.GetReal(eit))){
+      failed=true;
+      break;
+    }
+  }
+  if(failed){
+    BOOST_ERROR("Image IO failed for plugin DAT  (int8) at point "
+                << ost::img::Point(eit)<< ". Should be "
+                << static_cast<int>(scaled_image.GetReal(eit)) << ", but "
+                << static_cast<int>(loadedimage.GetReal(eit)) << " found.");
   }
 }
 

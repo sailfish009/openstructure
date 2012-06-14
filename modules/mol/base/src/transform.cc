@@ -16,9 +16,12 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
 #include <ost/info/geom_info_conversion.hh>
-
+#endif
 #include "transform.hh"
 
 namespace ost { 
@@ -46,6 +49,7 @@ void Transform::SetMatrix(const Mat4& m)
 {
   tm_=m;
   ttm_ = Transpose(tm_);
+  update_components();
 }
 
 Mat4 Transform::GetTransposedMatrix() const
@@ -193,6 +197,16 @@ void Transform::update_tm()
   ttm_ = Transpose(tm_);
 }
 
+void Transform::update_components()
+{
+  rot_ = tm_.ExtractRotation();
+  cen_ = tm_.ExtractTranslation();
+  trans_[0] = tm_(3,0);
+  trans_[1] = tm_(3,1);
+  trans_[2] = tm_(3,2);
+}
+
+#if(OST_INFO_ENABLED)
 Transform TransformFromInfo(const info::InfoGroup& group)
 {
   if (!group.HasItem("center")) {
@@ -222,5 +236,6 @@ void TransformToInfo(const Transform& transform, info::InfoGroup& group)
   info::InfoGroup rot=group.CreateGroup("rotation");
   info::Mat3ToInfo(transform.GetRot(), rot);
 }
+#endif
 
 }} // ns

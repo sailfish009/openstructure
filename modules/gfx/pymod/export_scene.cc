@@ -21,6 +21,7 @@ using namespace boost::python;
 
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gfx/scene.hh>
+#include <ost/gfx/exporter.hh>
 using namespace ost;
 using namespace ost::gfx;
 
@@ -63,6 +64,7 @@ void export_Scene()
 
   void (Scene::* export1)(const String&, uint, uint, bool) = &Scene::Export;
   void (Scene::* export2)(const String&, bool) = &Scene::Export;
+  void (Scene::* export3)(Exporter*) const = &Scene::Export;
   void (Scene::*remove1)(const GfxNodeP&) = &Scene::Remove;
   void (Scene::*remove2)(const String&) = &Scene::Remove;
   void (Scene::*center_on1)(const String&) = &Scene::CenterOn;
@@ -116,6 +118,7 @@ void export_Scene()
     .def("SetFogColor",&Scene::SetFogColor)
     .def("GetFogColor",&Scene::GetFogColor)
     .add_property("fogcol", &Scene::GetFogColor, &Scene::SetFogColor)
+    .add_property("fog_color", &Scene::GetFogColor, &Scene::SetFogColor)
     .def("SetFOV",&Scene::SetFOV)
     .def("GetFOV",&Scene::GetFOV)
     .add_property("fov", &Scene::GetFOV, &Scene::SetFOV)
@@ -159,8 +162,9 @@ void export_Scene()
     .def("SetLightProp",set_light_prop1)
     .def("SetLightProp",set_light_prop2)
     .def("Apply", apply)
-    .def("Export",export1, arg("transparent")=true)
-    .def("Export",export2, arg("transparent")=true)
+    .def("Export",export1, arg("transparent")=false)
+    .def("Export",export2, arg("transparent")=false)
+    .def("Export",export3)
     .def("ExportPov",&Scene::ExportPov,
          scene_export_pov_overloads())
     .def("PushView",&Scene::PushView)
@@ -169,14 +173,25 @@ void export_Scene()
     .def("BlurSnapshot",&Scene::BlurSnapshot)
     .def("RemoveAll", &Scene::RemoveAll)
     .def("SetShadow",&Scene::SetShadow)
+    .add_property("shadow",&Scene::GetShadow,&Scene::SetShadow)
     .def("SetShadowQuality",&Scene::SetShadowQuality)
+    .add_property("shadow_quality",&Scene::GetShadowQuality,&Scene::SetShadowQuality)
     .def("SetShadowWeight",&Scene::SetShadowWeight)
+    .add_property("shadow_weight",&Scene::GetShadowWeight,&Scene::SetShadowWeight)
     .def("SetDepthDarkening",&Scene::SetDepthDarkening)
     .def("SetDepthDarkeningWeight",&Scene::SetDepthDarkeningWeight)
     .def("SetAmbientOcclusion",&Scene::SetAmbientOcclusion)
+    .add_property("ambient_occlusion",&Scene::GetAmbientOcclusion,&Scene::SetAmbientOcclusion)
+    .add_property("ao",&Scene::GetAmbientOcclusion,&Scene::SetAmbientOcclusion)
     .def("SetAmbientOcclusionWeight",&Scene::SetAmbientOcclusionWeight)
+    .add_property("ambient_occlusion_weight",&Scene::GetAmbientOcclusionWeight,&Scene::SetAmbientOcclusionWeight)
+    .add_property("ao_weight",&Scene::GetAmbientOcclusionWeight,&Scene::SetAmbientOcclusionWeight)
     .def("SetAmbientOcclusionMode",&Scene::SetAmbientOcclusionMode)
+    .add_property("ambient_occlusion_mode",&Scene::GetAmbientOcclusionMode,&Scene::SetAmbientOcclusionMode)
+    .add_property("ao_mode",&Scene::GetAmbientOcclusionMode,&Scene::SetAmbientOcclusionMode)
     .def("SetAmbientOcclusionQuality",&Scene::SetAmbientOcclusionQuality)
+    .add_property("ambient_occlusion_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
+    .add_property("ao_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
     .def("AttachObserver",&Scene::AttachObserver)
     .def("StartOffscreenMode",&Scene::StartOffscreenMode)
     .def("StopOffscreenMode",&Scene::StopOffscreenMode)
@@ -185,5 +200,7 @@ void export_Scene()
     .add_property("root_node", &Scene::GetRootNode)
     .def("SetBeaconOff",&Scene::SetBeaconOff)
     .def("__getitem__",scene_getitem)
+    .add_property("show_center",&Scene::GetShowCenter, &Scene::SetShowCenter)
+    .add_property("fix_center",&Scene::GetFixCenter, &Scene::SetFixCenter)
   ;
 }

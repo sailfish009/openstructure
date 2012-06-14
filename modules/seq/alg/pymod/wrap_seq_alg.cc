@@ -53,7 +53,7 @@ BOOST_PYTHON_MODULE(_ost_seq_alg)
     .def("SetWeight", &SubstWeightMatrix::SetWeight)
   ;
   def("MergePairwiseAlignments", &MergePairwiseAlignments);
-  def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons"));
+  def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons", arg("ignore_gap")=false));
   def("LocalAlign", &LocalAlign, (arg("seq1"), arg("seq2"),arg("subst_weight"), 
       arg("gap_open")=-5, arg("gap_ext")=-2));
   def("GlobalAlign", &GlobalAlign,(arg("seq1"),arg("seq2"),arg("subst_weight"), 

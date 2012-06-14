@@ -251,5 +251,11 @@ EntityView ChainHandle::Select(const String& q, QueryFlags flags) const {
   else return this->GetEntity().Select(Query("cname='"+Impl()->GetName()+"'"), flags);
 }
 
+void ChainHandle::SetInSequence(const int index)
+{
+  this->CheckValidity();    
+  Impl()->SetInSequence(index);
+}
+
 }}
 

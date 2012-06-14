@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/invalid_handle.hh>
 #include <ost/mol/mol.hh>
@@ -54,7 +55,7 @@ struct Fixture {
   ResidueHandle res3;
 };
 
-BOOST_AUTO_TEST_SUITE( alignment )
+BOOST_AUTO_TEST_SUITE( alignment );
 
 BOOST_AUTO_TEST_CASE(alignment_triv)
 {
@@ -63,11 +64,12 @@ BOOST_AUTO_TEST_CASE(alignment_triv)
   a = CreateAlignment();
   BOOST_CHECK_NO_THROW(a.AddSequence(CreateSequence("S1","-asdf-")));
   BOOST_CHECK_THROW(a.AddSequence(SequenceHandle()),InvalidSequence);
-  BOOST_CHECK_THROW(a.AddSequence(CreateSequence("S2","-asdf-f")),InvalidSequence);
+  BOOST_CHECK_THROW(a.AddSequence(CreateSequence("S2","-asdf-f")),
+                    std::runtime_error);
   SequenceList list = CreateSequenceList();
   list.AddSequence(CreateSequence("S1", "-asdf-"));
   list.AddSequence(CreateSequence("S2", "fasdfas"));
-  BOOST_CHECK_THROW(AlignmentFromSequenceList(list),InvalidAlignment);
+  BOOST_CHECK_THROW(AlignmentFromSequenceList(list), std::runtime_error);
   list = CreateSequenceList();
   list.AddSequence(CreateSequence("S1", "-asdf-"));
   list.AddSequence(CreateSequence("S2", "fasdfa"));
@@ -229,4 +231,4 @@ BOOST_AUTO_TEST_CASE(alignment_aligned_region)
   BOOST_CHECK_NO_THROW(ar = a.MakeRegion(3,3,0));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

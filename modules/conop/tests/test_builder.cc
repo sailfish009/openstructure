@@ -21,6 +21,7 @@
 #include <ost/conop/heuristic_builder.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 
 // using boost::unit_test_framework::test_suite;
@@ -28,7 +29,7 @@ using namespace ost;
 using namespace ost::conop;
 using namespace ost::mol;
 
-BOOST_AUTO_TEST_SUITE( conop )
+BOOST_AUTO_TEST_SUITE( conop );
 
 BOOST_AUTO_TEST_CASE(test_guess_chem_class)
 {
@@ -72,4 +73,4 @@ BOOST_AUTO_TEST_CASE( test_builder )
   BOOST_CHECK_EQUAL(Builder::GuessAtomElement("11", false), "");  
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

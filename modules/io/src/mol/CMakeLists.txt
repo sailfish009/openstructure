@@ -5,6 +5,7 @@ pdb_reader.cc
 entity_io_pdb_handler.cc	
 pdb_writer.cc
 entity_io_sdf_handler.cc	
+entity_io_mmcif_handler.cc
 sdf_reader.cc
 sdf_writer.cc
 save_entity.cc
@@ -15,16 +16,21 @@ chemdict_parser.cc
 io_profile.cc
 dcd_io.cc
 star_parser.cc
+mmcif_reader.cc
+mmcif_info.cc
 PARENT_SCOPE
 )
 
 set(OST_IO_MOL_HEADERS
 chemdict_parser.hh
 star_parser.hh
+mmcif_reader.hh
+mmcif_info.hh
 io_profile.hh
 dcd_io.hh
 entity_io_crd_handler.hh
 entity_io_mae_handler.hh
+entity_io_mmcif_handler.hh
 entity_io_handler.hh
 pdb_reader.hh
 entity_io_pdb_handler.hh

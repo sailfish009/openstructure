@@ -85,6 +85,14 @@ String mat4_repr(const geom::Mat4& m) {
   return ss.str();
 }
 
+list mat4_data(const geom::Mat4& m)
+{
+  list nrvo;
+  for(size_t k=0;k<16;++k) {
+    nrvo.append(m.Data()[k]);
+  }
+  return nrvo;
+}
 
 void export_Mat4()
 {
@@ -104,6 +112,8 @@ void export_Mat4()
     .def(self *= self)
     .def(self * Vec4())
     .def(self / Real())
+    .def(self == self)
+    .def(self != self)
     .def(self_ns::str(self))
     .def("__repr__", mat4_repr)
     .def("__getitem__",Mat4_getitem)
@@ -115,5 +125,6 @@ void export_Mat4()
     .def("PasteRotation",&Mat4::PasteRotation)
     .def("ExtractTranslation",&Mat4::ExtractTranslation)
     .def("PasteTranslation",&Mat4::PasteTranslation)
+    .add_property("data",mat4_data)
   ;
 }

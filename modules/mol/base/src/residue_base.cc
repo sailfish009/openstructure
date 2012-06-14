@@ -104,6 +104,18 @@ void ResidueBase::SetChemClass(ChemClass cc)
   Impl()->SetChemClass(cc);
 }
 
+void ResidueBase::SetChemType(ChemType ct)
+{
+  this->CheckValidity();
+  Impl()->SetChemType(ct);
+}
+
+ChemType ResidueBase::GetChemType() const
+{
+  this->CheckValidity();
+  return Impl()->GetChemType();
+};
+
 SecStructure ResidueBase::GetSecStructure() const 
 {
   this->CheckValidity();

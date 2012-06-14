@@ -14,6 +14,7 @@ test_power_spectrum.cc
 test_shift.cc
 test_stat.cc
 test_transform.cc
+test_normalizer.cc
 tests.cc
 )
 

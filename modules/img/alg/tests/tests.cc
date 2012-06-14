@@ -41,6 +41,7 @@ extern test_suite* CreateClearTest();
 extern test_suite* CreateFFTTest();
 extern test_suite* CreateNegateTest();
 extern test_suite* CreateConjugateTest();
+extern test_suite* CreateNormalizerTest();
 
 bool init_ost_img_alg_unit_tests() {
   try {
@@ -54,6 +55,7 @@ bool init_ost_img_alg_unit_tests() {
     framework::master_test_suite().add(CreateClearTest());      
     framework::master_test_suite().add(CreateNegateTest());
     framework::master_test_suite().add(CreateFFTTest());          
+    framework::master_test_suite().add(CreateNormalizerTest());          
   } catch(std::exception& e) {
     return false;
   }

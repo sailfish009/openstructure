@@ -24,6 +24,7 @@
 #include <ost/integrity_error.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 using namespace ost;
 using namespace ost::mol;
@@ -72,7 +73,7 @@ void test_res_pos() {
   find_and_check_res(ch1, ResNum(13));  
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(test_comparison) 
 {
@@ -202,4 +203,136 @@ BOOST_AUTO_TEST_CASE(rename_chain)
    BOOST_CHECK_EQUAL(eh.GetChainCount(), 2);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_CASE(chain_type)
+{
+   EntityHandle eh = CreateEntity();
+   XCSEditor e = eh.EditXCS();
+   ChainHandle ch1 = e.InsertChain("A");
+
+   // setting/ getting
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_UNKNOWN);
+   BOOST_CHECK(!ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+   e.SetChainType(ch1, CHAINTYPE_POLY);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY);
+   BOOST_CHECK(ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+   e.SetChainType(ch1, CHAINTYPE_NON_POLY);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_NON_POLY);
+   BOOST_CHECK(!ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+   e.SetChainType(ch1, CHAINTYPE_WATER);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_WATER);
+   BOOST_CHECK(!ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+   e.SetChainType(ch1, CHAINTYPE_POLY_PEPTIDE_D);
+   BOOST_CHECK(ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_PEPTIDE_D);
+   e.SetChainType(ch1, CHAINTYPE_POLY_PEPTIDE_L);
+   BOOST_CHECK(ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_PEPTIDE_L);
+   e.SetChainType(ch1, CHAINTYPE_POLY_DN);
+   BOOST_CHECK(ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(ch1.IsPolynucleotide());
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_DN);
+   e.SetChainType(ch1, CHAINTYPE_POLY_RN);
+   BOOST_CHECK(ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(ch1.IsPolynucleotide());
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_RN);
+   e.SetChainType(ch1, CHAINTYPE_POLY_SAC_D);
+   BOOST_CHECK(ch1.IsPolymer());
+   BOOST_CHECK(ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_SAC_D);
+   e.SetChainType(ch1, CHAINTYPE_POLY_SAC_L);
+   BOOST_CHECK(ch1.IsPolymer());
+   BOOST_CHECK(ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(!ch1.IsPolynucleotide());
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_SAC_L);
+   e.SetChainType(ch1, CHAINTYPE_POLY_DN_RN);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_POLY_DN_RN);
+   BOOST_CHECK(ch1.IsPolymer());
+   BOOST_CHECK(!ch1.IsPolysaccharide());
+   BOOST_CHECK(!ch1.IsPolypeptide());
+   BOOST_CHECK(ch1.IsPolynucleotide());
+   e.SetChainType(ch1, CHAINTYPE_N_CHAINTYPES);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_N_CHAINTYPES);
+   e.SetChainType(ch1, CHAINTYPE_UNKNOWN);
+   BOOST_CHECK(ch1.GetType() == CHAINTYPE_UNKNOWN);
+
+   // string -> chain type
+   BOOST_CHECK(ChainTypeFromString("polymer") == CHAINTYPE_POLY);
+   BOOST_CHECK(ChainTypeFromString("non-polymer") == CHAINTYPE_NON_POLY);
+   BOOST_CHECK(ChainTypeFromString("water") == CHAINTYPE_WATER);
+   BOOST_CHECK(ChainTypeFromString("polypeptide(D)") ==
+               CHAINTYPE_POLY_PEPTIDE_D);
+   BOOST_CHECK(ChainTypeFromString("polypeptide(L)") ==
+               CHAINTYPE_POLY_PEPTIDE_L);
+   BOOST_CHECK(ChainTypeFromString("polydeoxyribonucleotide") ==
+               CHAINTYPE_POLY_DN);
+   BOOST_CHECK(ChainTypeFromString("polyribonucleotide") ==
+               CHAINTYPE_POLY_RN);
+   BOOST_CHECK(ChainTypeFromString("polysaccharide(D)") ==
+               CHAINTYPE_POLY_SAC_D);
+   BOOST_CHECK(ChainTypeFromString("polysaccharide(L)") ==
+               CHAINTYPE_POLY_SAC_L);
+   BOOST_CHECK(ChainTypeFromString(
+                      "polydeoxyribonucleotide/polyribonucleotide hybrid") ==
+               CHAINTYPE_POLY_DN_RN);
+   BOOST_CHECK(ChainTypeFromString("other") == CHAINTYPE_UNKNOWN);
+   BOOST_CHECK_THROW(ChainTypeFromString("supposed to fail"),
+                     std::runtime_error);
+
+   // chain type -> string
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY) == "polymer");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_NON_POLY) == "non-polymer");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_WATER) == "water");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY_PEPTIDE_D) ==
+               "polypeptide(D)");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY_PEPTIDE_L) ==
+               "polypeptide(L)");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY_DN) ==
+               "polydeoxyribonucleotide");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY_RN) == "polyribonucleotide");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY_SAC_D) ==
+               "polysaccharide(D)");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY_SAC_L) ==
+               "polysaccharide(L)");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY_DN_RN) ==
+               "polydeoxyribonucleotide/polyribonucleotide hybrid");
+   BOOST_CHECK(StringFromChainType(CHAINTYPE_UNKNOWN) == "other");
+   BOOST_CHECK_THROW(StringFromChainType(CHAINTYPE_N_CHAINTYPES),
+                     std::runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(chain_description)
+{
+  EntityHandle eh=CreateEntity();
+  XCSEditor e = eh.EditXCS();
+  ChainHandle ch1 = e.InsertChain("A");
+  String description = "Very important information";
+  e.SetChainDescription(ch1, description);
+  BOOST_CHECK(ch1.GetDescription() == description);
+}
+
+BOOST_AUTO_TEST_SUITE_END();

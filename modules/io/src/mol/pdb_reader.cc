@@ -102,6 +102,9 @@ void PDBReader::Init(const boost::filesystem::path& loc)
   hard_end_=false;
   skip_next_=false;
   data_continues_=false;
+  old_key_="";
+  mol_id_=std::make_pair(false, 0);
+  
 }
 
 void PDBReader::ThrowFaultTolerant(const String& msg) {
@@ -114,7 +117,7 @@ void PDBReader::ThrowFaultTolerant(const String& msg) {
 
 void PDBReader::ParseCompndEntry (const StringRef& line, int line_num)
 {
-  if (line.size()<20) {
+  if (line.size()<12) {
     if (profile_.fault_tolerant) {
       LOG_WARNING("invalid COMPND record on line " << line_num 
                   << ": record is too short");
@@ -147,11 +150,22 @@ void PDBReader::ParseCompndEntry (const StringRef& line, int line_num)
   }
   if((entry.find(':')!=entry.end())){
     std::vector<StringRef> fields=entry.split(':');
-    key=fields[0].trim();
-    old_key_=key.str();
-    data=fields[1].trim();
+      key=fields[0].trim();
+      old_key_=key.str();
+    if (fields.size()>1) {
+      data=fields[1].trim();
+    }
+
 
     if(data.size()<1){
+      if (!(key.str()=="MOL_ID")&&!(key.str()=="CHAIN")){
+        LOG_WARNING("skipping unsupported COMPND record on line " << line_num<< ": record value"<< key.str()<<" too small");
+        if (data_continues_) {
+          skip_next_=true;
+        } else {
+          return;
+        }
+      }
       ThrowFaultTolerant(str(format("invalid COMPND record on line %d, record after ':' too small")%line_num));
     }
     data_continues_=true;
@@ -179,7 +193,7 @@ void PDBReader::ParseCompndEntry (const StringRef& line, int line_num)
   } 
       //currently only these are parsed
   if (!(key.str()=="MOL_ID")&&!(key.str()=="CHAIN")){
-    LOG_TRACE("reading COMPND record on line " << line_num<< "is not supported");
+    LOG_INFO("reading COMPND record on line " << line_num<< "is not supported");
     if (data_continues_) {
       skip_next_=true;
     } else {
@@ -341,17 +355,17 @@ void PDBReader::Import(mol::EntityHandle& ent,
           }
         }
         break;
-//       case 'C':
-//       case 'c':
-//         if (curr_line.size()<20) {
-//           LOG_TRACE("skipping entry");
-//           continue;
-//         }
-//         if (IEquals(curr_line.substr(0, 6), StringRef("COMPND", 6))) {
-//           LOG_TRACE("processing COMPND entry");
-//           this->ParseCompndEntry(curr_line, line_num_);
-//         }
-//        break;
+         case 'C':
+         case 'c':
+           if (curr_line.size()<20) {
+             LOG_TRACE("skipping entry");
+             continue;
+           }
+           if (IEquals(curr_line.substr(0, 6), StringRef("COMPND", 6))) {
+             LOG_TRACE("processing COMPND entry");
+             this->ParseCompndEntry(curr_line, line_num_);
+           }
+          break;
       case 'E':
       case 'e':
         if (curr_line.size()<3) {
@@ -470,7 +484,9 @@ void PDBReader::AssignMolIds(mol::EntityHandle ent) {
         if (chain) {
           chain.SetIntProp("mol_id", compnd_iterator->mol_id);
         }else{
-          std::stringstream ss("could not map COMPND record MOL_ID onto chain");
+          LOG_WARNING("failed to assign MOL_ID to chain: "<<*chain_iterator <<std::endl);
+          std::stringstream ss;
+          ss << "could not map COMPND record MOL_ID onto chain";
           ss <<*chain_iterator;
           ThrowFaultTolerant(ss.str());
         }
@@ -481,9 +497,13 @@ void PDBReader::AssignMolIds(mol::EntityHandle ent) {
     mol::ChainHandleList ch_list=ent.GetChainList();
     for (mol::ChainHandleList::const_iterator chain=ch_list.begin();
          chain!=ch_list.end(); ++chain) {
+           //~ skip HETATM only chains!!
       if(chain->IsValid()){
         if (!chain->HasProp("mol_id")) {
-          ThrowFaultTolerant("found chain without MOL_ID");
+          std::stringstream ss;
+          ss << "found chain without MOL_ID: ";
+          ss << chain->GetName();
+          LOG_WARNING(ss.str());
         }
       }
     }
@@ -581,14 +601,6 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
       restrict_chains_.find(chain_name)==String::npos) {
       return false;
     }    
-  }
-
-  std::pair<bool, int> a_num=line.substr(6, 5).ltrim().to_int();
-  if (!a_num.first) {
-    if (!(profile_.fault_tolerant)) {
-      throw IOException(str(format("invalid atom number on line %d") %line_num));      
-    }
-    LOG_WARNING("invalid atom number on line " << line_num);
   }
 
   alt_loc=line[16];
@@ -694,10 +706,10 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     occ=std::make_pair(true, Real(1.0));
     temp=std::make_pair(true, Real(0.0));
     if (line.length()>=60) {
-      charge=line.substr(54,6).ltrim().to_float();      
+      charge=line.substr(55,7).ltrim().to_float();
     }
-    if (line.length()>=66) {
-      radius=line.substr(60, 6).ltrim().to_float();      
+    if (line.length()>=68) {
+      radius=line.substr(63,6).ltrim().to_float();
     }
   } else {
     if (line.length()>=60) {
@@ -772,7 +784,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     assert(curr_residue_.IsValid());
   }
   // finally add atom
-  LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
+  LOG_DEBUG("adding atom " << aname << " (" << s_ele << " '" << alt_loc << "'" << ") @" << apos);
   mol::AtomHandle ah;
   if (curr_residue_.GetName()!=res_name.str()) {
     if (!profile_.fault_tolerant && alt_loc==' ') {
@@ -781,26 +793,30 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
          << "residue with number " << res_num << " has more than one name.";
       throw IOException(ss.str());
     }
-    if (!warned_name_mismatch_) {
-      if (alt_loc==' ') {
-        LOG_WARNING("Residue with number " << res_num << " has more than one name."
-                    "Ignoring atoms for everything but the first");        
-      } else {
-        LOG_WARNING("Residue with number " << res_num 
-                    << " contains a microheterogeneity. Everything but atoms for "
-                    << "the residue '" << curr_residue_.GetName() 
-                    << "' will be ignored");
+    if(!profile_.quack_mode) {
+      if (!warned_name_mismatch_) {
+        if (alt_loc==' ') {
+          LOG_WARNING("Residue with number " << res_num << " has more than one name. "
+                      "Ignoring atoms for everything but the first");        
+        } else {
+          LOG_WARNING("Residue with number " << res_num 
+                      << " contains a microheterogeneity. Everything but atoms for "
+                      << "the residue '" << curr_residue_.GetName() 
+                      << "' will be ignored");
+        }
       }
+      warned_name_mismatch_=true;
+      return;
     }
-    warned_name_mismatch_=true;
-    return;
   }
-  if (alt_loc!=' ') {
+  Real b=temp.first ? temp.second : 0.0;
+  Real o=occ.first ? occ.second : 1.0;
+  if (!profile_.quack_mode && alt_loc!=' ') {
     // Check if there is already a atom with the same name.
     mol::AtomHandle me=curr_residue_.FindAtom(aname);
     if (me.IsValid()) {
       try {
-        editor.AddAltAtomPos(String(1, alt_loc), me, apos);
+        editor.AddAltAtomPos(String(1, alt_loc), me, apos, o, b);
       } catch (Error) {
         LOG_INFO("Ignoring atom alt location since there is already an atom "
                      "with name " << aname << ", but without an alt loc");
@@ -809,7 +825,7 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       return;
     } else {
       ah=editor.InsertAltAtom(curr_residue_, aname,
-                              String(1, alt_loc), apos, s_ele);
+                              String(1, alt_loc), apos, s_ele, o, b);
       ++atom_count_;
     }
   } else {
@@ -831,12 +847,8 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       ah.SetRadius(radius.second);
     }
   }
-  if (temp.first) {
-    ah.SetBFactor(temp.second);
-  }
-  if (occ.first) {
-    ah.SetOccupancy(occ.second);
-  }
+  ah.SetBFactor(b);
+  ah.SetOccupancy(o);
   if (charge.first) {
     ah.SetCharge(charge.second);
   }

@@ -4,6 +4,8 @@ set(OST_CONOP_UNIT_TESTS
   tests.cc
   test_builder.cc
   test_compound.py
+  test_cleanup.py
+  test_nonstandard.py
 )
 
 ost_unittest(MODULE conop

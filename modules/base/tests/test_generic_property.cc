@@ -16,15 +16,17 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <ost/mol/mol.hh>
 #define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
 
+#include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+
+#include <ost/mol/mol.hh>
 
 using namespace ost;
 using namespace ost::mol;
 
-BOOST_AUTO_TEST_SUITE( base )
+BOOST_AUTO_TEST_SUITE( base );
 
 BOOST_AUTO_TEST_CASE( test_generic_property )
 {
@@ -62,4 +64,4 @@ BOOST_AUTO_TEST_CASE( test_generic_property )
   BOOST_CHECK(atomv.GetBoolProp("d")==true);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

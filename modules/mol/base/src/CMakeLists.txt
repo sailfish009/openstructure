@@ -8,6 +8,7 @@ bond_handle.cc
 chain_base.cc
 chain_handle.cc
 chain_view.cc
+chain_type.cc
 coord_frame.cc
 coord_group.cc
 editor_base.cc
@@ -47,7 +48,9 @@ bond_table.hh
 chain_base.hh
 chain_handle.hh
 chain_view.hh
+chain_type.hh
 chem_class.hh
+chem_type.hh
 coord_group.hh
 coord_source.hh
 in_mem_coord_source.hh
@@ -97,7 +100,13 @@ foreach(_impl_src ${OST_MOL_IMPL_SOURCES})
   list(APPEND OST_MOL_SOURCES impl/${_impl_src})
 endforeach()
 
+if(ENABLE_INFO)
+  set (INFO_DEPS ost_info)
+else()
+  list(APPEND LINK ${Boost_REGEX_LIBRARY})
+endif()
+
 module(NAME mol SOURCES ${OST_MOL_SOURCES}
        HEADERS ${OST_MOL_IMPL_HEADERS} IN_DIR impl
        ${OST_MOL_HEADERS} HEADER_OUTPUT_DIR ost/mol
-       DEPENDS_ON ost_geom ost_base ost_info)
+       DEPENDS_ON ost_geom ost_base ${INFO_DEPS} LINK ${LINK})

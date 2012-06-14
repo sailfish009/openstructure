@@ -24,8 +24,9 @@ using namespace geom;
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE( geom )
+BOOST_AUTO_TEST_SUITE( geom );
 
 
 BOOST_AUTO_TEST_CASE(init_mat2)
@@ -61,4 +62,4 @@ BOOST_AUTO_TEST_CASE(access_mat2)
   BOOST_CHECK_THROW( m(2,2), std::out_of_range);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

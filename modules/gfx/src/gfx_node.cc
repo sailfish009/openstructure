@@ -18,9 +18,11 @@
 //------------------------------------------------------------------------------
 #include <boost/bind.hpp>
 #include <ost/dyn_cast.hh>
+
 #include "gfx_node.hh"
 #include "gfx_object.hh"
 #include "scene.hh"
+#include "exporter.hh"
 
 namespace ost { namespace gfx {
 
@@ -99,6 +101,16 @@ void GfxNode::RenderPov(PovState& pov)
   for(GfxNodeVector::iterator it=node_vector_.begin();it!=node_vector_.end();++it) {
     (*it)->RenderPov(pov);
   }
+}
+
+void GfxNode::Export(Exporter* ex)
+{
+  if(!IsVisible()) return;
+  ex->NodeStart(GetName(),Exporter::GROUP);
+  for(GfxNodeVector::iterator it=node_vector_.begin();it!=node_vector_.end();++it) {
+    (*it)->Export(ex);
+  }
+  ex->NodeEnd(GetName());
 }
 
 String GfxNode::GetName() const

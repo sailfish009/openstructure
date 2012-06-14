@@ -17,6 +17,7 @@
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
 from _ost_gfx import *
+from py_gfx_obj import PyGfxObj
 
 WHITE=Color(1.0,1.0,1.0)
 BLACK=Color(0.0,0.0,0.0)
@@ -243,7 +244,7 @@ def _primlist_add_text(self,text,pos,color=None,point_size=None):
   if not point_size:
     point_size=1.0
   self._add_text(text,pos,color,point_size)
-  
+
 PrimList.AddPoint=_primlist_add_point
 PrimList.AddLine=_primlist_add_line
 PrimList.AddSphere=_primlist_add_sphere

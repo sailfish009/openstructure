@@ -86,7 +86,8 @@ CompareViews(const EntityView& view1, const EntityView& view2);
 /// 
 /// \param view is the view to be converted to a handle
 /// \param include_exlusive_atoms if true, atoms that are part of an exclusive
-///     bond will also be included in the new entity handle.
+///     bond (only one bond partner is included in the view) will also be included
+///     in the new entity handle.
 /// \param handle If invalid a new entity will be created. If valid, the atoms, 
 ///     residues, chains, bonds and torsions will be added to handle. This is 
 ///     useful to combine several entities into one.

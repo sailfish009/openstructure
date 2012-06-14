@@ -28,11 +28,18 @@ namespace ost { namespace mol {
 
 class DLLEXPORT ResNum: private
     boost::additive<ResNum, int,
+    boost::additive<ResNum,
     boost::totally_ordered<ResNum, 
     boost::totally_ordered<ResNum, int,
-    boost::unit_steppable<ResNum> > > >
+    boost::unit_steppable<ResNum> > > > >
 {
 public:
+ 
+  // needed to wrap certain map classes
+  ResNum():
+    num_(1),alt_('\0')	 
+  {}  
+
   ResNum(int n):
     num_(n), alt_('\0')
   { }
@@ -74,7 +81,7 @@ public:
     num_-=r.num_;
     return num_;
   }
-
+  
   ResNum& operator++()
   {
     ++num_;
