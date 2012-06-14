@@ -90,7 +90,10 @@ class GradientEditor(QtGui.QWidget):
 
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
-      glco=gfx.GradientLevelColorOp(mol.QueryViewWrapper(view),self.props[self.prop_combo_box_.currentIndex()],self.gradient_edit_.GetGfxGradient(),mol.Prop.Level.UNSPECIFIED)
+      if self.parent_.GetCarbonsOnly():
+        glco=gfx.GradientLevelColorOp(mol.QueryViewWrapper(mol.Query("ele=C"),view),self.props[self.prop_combo_box_.currentIndex()],self.gradient_edit_.GetGfxGradient(),mol.Prop.Level.UNSPECIFIED)
+      else:
+        glco=gfx.GradientLevelColorOp(mol.QueryViewWrapper(view),self.props[self.prop_combo_box_.currentIndex()],self.gradient_edit_.GetGfxGradient(),mol.Prop.Level.UNSPECIFIED)
       entity.Apply(glco)
       
 #Gradient Preview

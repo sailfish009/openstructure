@@ -146,7 +146,10 @@ class ByElementWidget(QtGui.QWidget):
       
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
-      beco=gfx.ByElementColorOp(mol.QueryViewWrapper(view))
+      if self.parent_.GetCarbonsOnly():
+        beco=gfx.ByElementColorOp(mol.QueryViewWrapper(mol.Query("ele=C"), view))
+      else:
+        beco=gfx.ByElementColorOp(mol.QueryViewWrapper(view))
       entity.Apply(beco)
       
   def GetText(self):
@@ -185,7 +188,10 @@ class ByChainWidget(QtGui.QWidget):
       
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
-      bco=gfx.ByChainColorOp(mol.QueryViewWrapper(view))
+      if self.parent_.GetCarbonsOnly():
+        bco=gfx.ByChainColorOp(mol.QueryViewWrapper(mol.Query("ele=C"),view))
+      else:
+        bco=gfx.ByChainColorOp(mol.QueryViewWrapper(view))
       entity.Apply(bco)
       
   def GetText(self):
@@ -234,7 +240,10 @@ class ByEntityWidget(QtGui.QWidget):
      
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
-      bco=gfx.ByChainColorOp(mol.QueryViewWrapper(view))
+      if self.parent_.GetCarbonsOnly():
+        bco=gfx.ByChainColorOp(mol.QueryViewWrapper(mol.Query("ele=C"),view))
+      else:
+        bco=gfx.ByChainColorOp(mol.QueryViewWrapper(view))
       entity.Apply(bco)
       
   def GetText(self):
