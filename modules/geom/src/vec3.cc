@@ -29,7 +29,7 @@
 namespace geom {
 
 
-#ifdef OST_DOUBLE_PRECISION
+#if OST_DOUBLE_PRECISION
 typedef Eigen::Matrix3d EMat3;
 #else
 typedef Eigen::Matrix3f EMat3;
