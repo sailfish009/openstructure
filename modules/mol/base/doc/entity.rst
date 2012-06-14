@@ -880,10 +880,10 @@ The View Classes
         v = pdb.CreateEmptyView()
         v.AddChain(pdb.chains[0], ost.mol.INCLUDE_ALL)
 
-    :param chain_handle:
-    :type  chain_handle: ChainHandle
-    :param view_add_flags: An ORed together combination of `view_add_flags`.
-    :type  view_add_flags: :class:`int`
+    :param chain_handle: The chain handle to be added.
+    :type  chain_handle: :class:`ChainHandle`
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`.
+    :type view_add_flags: :class:`int`
     :rtype: :class:`ChainView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
@@ -891,11 +891,11 @@ The View Classes
     Add residue to view. If the residue's chain is not already part of the
     view, it will be added. By default, only the residue is added, but not its
     atoms. This behaviour can be modified by passing in an appropriate
-    combination of `view_add_flags`.
+    combination of :ref:`viewaddflags`.
 
     :param residue_handle: The residue handle to be added
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags: An ORed together combination of `view_add_flags`
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
     :type  view_add_flags: :class:`int`
     :rtype: :class:`ResidueView`
 
@@ -906,7 +906,7 @@ The View Classes
     
     :param atom_handle: The atom handle
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of ViewAddFlags
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
     :type  view_add_flags: :class:`int`
     :rtype: :class:`AtomView`
 
@@ -1229,19 +1229,20 @@ The View Classes
     
     :param atom_handle: The atom to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of ViewAddFlags
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
     :type  view_add_flags: :class:`int`
     :rtype: :class:`AtomView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
 
     Add residue to the view. If the atom does not belong to chain, the result is
-    undefined. By default, only the residue, but no atoms are added to the view. 
-    To change the behavior, pass in a suitable combination of `view_add_flags`.
+    undefined. By default, only the residue, but no atoms are added to the
+    view. To change the behavior, pass in a suitable combination of
+    :ref:`viewaddflags`.
     
     :param residue_handle: The residue handle to be added.
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags: An ORed together combination of `view_add_flags`
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
     :type  view_add_flags: :class:`int`
     :rtype: :class:`ResidueView`
 
@@ -1479,9 +1480,9 @@ The View Classes
 
     Add atom to the view.
 
-    :param atom_handle:
+    :param atom_handle: Atom handle to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param flags: An ORed together combination of ViewAddFlags.
+    :param flags: An ORed together combination of :ref:`viewaddflags`
     :type  flags: :class:`int`
     :rtype: :class:`AtomView`
 
@@ -1633,3 +1634,24 @@ ChainType functions
    :raises: :class:`runtime_error` if **type** is unrecognised.
 
    :returns: :class:`str`
+
+.. _viewaddflags:
+
+ViewAddFlags
+--------------------------------------------------------------------------------
+
+Those are the flags controlling behaviour of routines adding handles to views.
+
+* ``INCLUDE_ATOMS`` - Include all atoms when adding a residue handle to a view
+
+* ``INCLUDE_RESIDUES`` - Include all residues when adding a chain to a view
+
+* ``INCLUDE_CHAINS`` - Include all chains when creating a new entity view
+
+* ``INCLUDE_ALL`` = ``INCLUDE_ATOMS`` | ``INCLUDE_RESIDUES`` |
+  ``INCLUDE_CHAINS`` - Convenience flags to include all substructures
+
+* ``CHECK_DUPLICATES`` - If set, it will be checked that no duplicates are
+  created when adding a new handle
+    
+
