@@ -181,7 +181,7 @@ The Handle Classes
       # select calpha atoms of peptides
       calphas=ent.Select('aname=CA and peptide=true')
       
-      # select atoms in a box of size 10, centered at the origin
+      # select atoms in a box of size 10, centred at the origin
       in_box=ent.Select('x=-5:5 and y=-5:5 and z=-5:5')
     
     :param query: The query to be executed. See :class:`Query` for details.
@@ -256,7 +256,7 @@ The Handle Classes
     
   .. method:: FindWithin(pos, radius)
   
-    Find all atoms in sphere of given radius centered at *pos*. To turn the
+    Find all atoms in sphere of given radius centred at *pos*. To turn the
     returned list of atoms into an :class:`EntityView`, use
     :func:`CreateViewFromAtomList`.
     
@@ -888,10 +888,10 @@ The View Classes
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
 
-    Add residue to view. If the residue's chain is not already part of the view, 
-    it will be added. By default, only the residue is added, but not its atoms. 
-    This behaviour can be modified by passing in an appropriate combination of 
-    `view_add_flags`.
+    Add residue to view. If the residue's chain is not already part of the
+    view, it will be added. By default, only the residue is added, but not its
+    atoms. This behaviour can be modified by passing in an appropriate
+    combination of `view_add_flags`.
     
     :param residue_handle:
     :type  residue_handle: ResidueHandle
@@ -904,12 +904,11 @@ The View Classes
     Add the atom to view. The chain and residue of the atom are added to the 
     view if they haven't already been added.
     
-    
     :param atom_handle: The atom handle
-    :type  atom_handle: AtomHandle
+    :type  atom_handle: :class:`AtomHandle`
     :param view_add_flags: An ORed together combination of ViewAddFlags
-    :type  view_add_flags: int
-    :rtype: class:`AtomView`
+    :type  view_add_flags: :class:`int`
+    :rtype: :class:`AtomView`
 
   .. method:: AddBond(bond_handle)
 
@@ -1226,12 +1225,12 @@ The View Classes
 
     Add atom to the view. If the residue of the atom is not already part of the 
     view, it will be added. If the atom does not belong to chain, the result is
-    undefined. 
+    undefined. Foo
     
     :param atom_handle: The atom to be added
     :type  atom_handle: :class:`AtomHandle`
     :param view_add_flags: An ORed together combination of ViewAddFlags
-    :type  view_add_flags: int
+    :type  view_add_flags: :class:`int`
     :rtype: :class:`AtomView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
@@ -1478,11 +1477,12 @@ The View Classes
 
   .. method:: AddAtom(atom_handle[, flags])
 
-    Add atom to the view. 
+    Add atom to the view.
+
     :param atom_handle:
     :type  atom_handle: :class:`AtomHandle`
     :param flags: An ORed together combination of ViewAddFlags.
-    :type  flags: int
+    :type  flags: :class:`int`
     :rtype: :class:`AtomView`
 
   .. method:: GetCenterOfAtoms()
