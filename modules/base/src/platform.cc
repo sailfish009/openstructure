@@ -35,11 +35,7 @@ String GetPrefixPath()
 
 String GetSharedDataPath()
 {
-  #if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
-  return (path(GetPrefixPath()) / "share" / "openstructure").native();
-  #else
-  return (path(GetPrefixPath()) / "share" / "openstructure").native_file_string();
-  #endif 
+  return (path(GetPrefixPath()) / "share" / "openstructure").string();
 }
 
 }
