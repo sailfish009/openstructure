@@ -27,6 +27,13 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
   else:
     LogError("WARNING: Specify either two SequenceHandles or one SequenceList")
     return
+
+  new_list = seq.CreateSequenceList()
+  for s in seq_list:
+    ss = seq.CreateSequence( s.GetName(), s.GetString().replace('?','X') )
+    new_list.AddSequence(ss)
+
+  seq_list = new_list
   
   temp_dir=utils.TempDirWithFiles((seq_list,))
   out=os.path.join(temp_dir.dirname, 'out.fasta')
