@@ -856,19 +856,35 @@ The View Classes
 
     Returns a copy of this entity. Provided for `duck-typing <http://en.wikipedia.org/wiki/Duck_typing>` purposes.
     
-    :rtype: EntityView
-  
+    :rtype: :class:`EntityView`
+
   .. method:: AddChain(chain_handle[, view_add_flags])
 
     Add chain to view. By default, only the chain is added to the view, but not 
-    its residues and atoms. This behavior can be changed by passing in an
-    appropriate set of `view_add_flags`
-    
+    its residues and atoms. This behaviour can be changed by passing in an
+    appropriate set of `view_add_flags`.
+
+    The following example just adds a chain without residues and atoms:
+
+    .. code-block:: python
+
+        pdb = ost.io.LoadPDB(<PDB file name>)
+        v = pdb.CreateEmptyView()
+        v.AddChain(pdb.chains[0])
+
+    To **copy** a whole chain, go like:
+
+    .. code-block:: python
+
+        pdb = ost.io.LoadPDB(<PDB file name>)
+        v = pdb.CreateEmptyView()
+        v.AddChain(pdb.chains[0], ost.mol.INCLUDE_ALL)
+
     :param chain_handle:
     :type  chain_handle: ChainHandle
     :param view_add_flags: An ORed together combination of `view_add_flags`.
-    :type  view_add_flags: int
-    :rtype: class:`ChainView`
+    :type  view_add_flags: :class:`int`
+    :rtype: :class:`ChainView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
 
@@ -881,7 +897,7 @@ The View Classes
     :type  residue_handle: ResidueHandle
     :param view_add_flags:
     :type  view_add_flags: int
-    :rtype: class:`ResidueView`
+    :rtype: :class:`ResidueView`
 
   .. method:: AddAtom(atom_handle[, view_add_flags])
 
@@ -1617,4 +1633,3 @@ ChainType functions
    :raises: :class:`runtime_error` if **type** is unrecognised.
 
    :returns: :class:`str`
-
