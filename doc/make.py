@@ -9,6 +9,12 @@ if len(sys.argv)==2:
 else:
   root_dir='.'
 
+def _CheckCall(cmd, shell):
+  r = subprocess.call(cmd, shell=True)
+  if r != 0:
+    sys.stderr.write("Command '%s' returned non-zero exit status %d\n"%(cmd, r))
+    sys.exit(-1)
+
 def _OutputPath(inpath, outdir):
   parts=inpath.split(os.path.sep)
   filtered_parts=[outdir]
@@ -92,17 +98,18 @@ if opts.html:
   cmd='%s %s -b html -c %s %s %s' % (sphinx_bin, opt_str, 
                                      'doc/conf', 'doc/source', 'doc/build/html')
   print cmd
-  subprocess.check_call(cmd, shell=True)
+  _CheckCall(cmd, shell=True)
+
 if opts.doctest:
   cmd='%s %s -b doctest -c %s %s %s' % (sphinx_bin, opt_str, 
                                         'doc/conf', 'doc/source', 
                                         'doc/build/doctest')
-  subprocess.check_call(cmd, shell=True)
+  _CheckCall(cmd, shell=True)
 if opts.build_json:
   cmd='%s %s -b json -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 
                                      'doc/source', 'doc/build/json')
-  subprocess.check_call(cmd, shell=True)
+  _CheckCall(cmd, shell=True)
 if opts.linkcheck:
   cmd='%s %s -b linkcheck -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 
                                           'doc/source', 'doc/build/check')
-  subprocess.check_call(cmd, shell=True)
+  _CheckCall(cmd, shell=True)
