@@ -611,7 +611,7 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_author_tests)
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   IOProfile profile;
   MMCifReader mmcif_p(s, eh, profile);
-  BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+  BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
 
   std::vector<String> authors =
     mmcif_p.GetInfo().GetCitations().back().GetAuthorList();
@@ -667,7 +667,7 @@ BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
     std::ifstream s("testfiles/mmcif/atom_site.mmcif");
     IOProfile profile;
     MMCifReader mmcif_p(s, eh, profile);
-    BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+    BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
     BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0f, 0.001f);
   }
   BOOST_MESSAGE("         done.");
@@ -1216,7 +1216,7 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   mmcif_p.SetRestrictChains("A O C");
 
   BOOST_MESSAGE("          testing Parse()...");
-  BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+  BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
 
   BOOST_REQUIRE_EQUAL(eh.GetChainCount(),    3);
   BOOST_REQUIRE_EQUAL(eh.GetResidueCount(), 14);
