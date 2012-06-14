@@ -72,9 +72,11 @@ int main(int argc, char const *argv[])
   filtered_istream.push(istream);  
   io::ChemdictParser cdp(filtered_istream, dialect);
   conop::CompoundLibPtr compound_lib;
-  if (!strcmp(argv[1], "create")) {
-    compound_lib=conop::CompoundLib::Create(argv[3]);
-  } else if (!strcmp(argv[1], "update")) {
+  bool in_mem=false;
+  if (!strncmp(argv[1], "create", 6)) {
+    compound_lib=conop::CompoundLib::Create(":memory:");
+    in_mem=true;
+  } else if (!strncmp(argv[1], "update", 6)) {
     compound_lib=conop::CompoundLib::Load(argv[3]);
   } else {
     PrintUsage();
@@ -84,7 +86,8 @@ int main(int argc, char const *argv[])
     return 0;
   }
   assert(compound_lib);
-  conop::CompoundLibPtr in_mem_lib=compound_lib->Copy(":memory:");  
+  conop::CompoundLibPtr in_mem_lib=in_mem ? compound_lib :
+                                   compound_lib->Copy(":memory:");
   compound_lib.reset();  
   cdp.SetCompoundLib(in_mem_lib);
   cdp.Parse();
