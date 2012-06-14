@@ -720,6 +720,53 @@ class TestTable(unittest.TestCase):
     tab.Sort('third', '+')
     self.CompareDataFromDict(tab, {'first': [None,'foo','x'], 'second': [9,None,3], 'third': [3.3,2.2,None]})
 
+  def testGuessFormat(self):
+    self.assertEqual(Table._GuessFormat('table_test.csv'), 'csv')
+    self.assertEqual(Table._GuessFormat('table_test.pickle'), 'pickle')
+    self.assertEqual(Table._GuessFormat('table_test.tab'), 'ost')
+    self.assertEqual(Table._GuessFormat('table_test.ost'), 'ost')
+    self.assertEqual(Table._GuessFormat('table_test.xyz'), 'ost')
+    
+  def testSaveLoadTableAutoFormat(self):   
+    tab = self.CreateTestTable()
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+
+    # write to disc
+    tab.Save("saveloadtable_filename_out.csv", format='csv')
+    tab.Save("saveloadtable_filename_out.tab", format='ost')
+    tab.Save("saveloadtable_filename_out.pickle", format='pickle')
+    
+    # read from disc: csv
+    in_stream_csv = open("saveloadtable_stream_out.csv", 'r')
+    tab_loaded_stream_csv = Table.Load(in_stream_csv)
+    in_stream_csv.close()
+    tab_loaded_fname_csv = Table.Load('saveloadtable_filename_out.csv')
+
+    # check content: csv
+    self.CompareDataFromDict(tab_loaded_stream_csv, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+    self.CompareDataFromDict(tab_loaded_fname_csv, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+  
+    # read from disc: pickle
+    in_stream_pickle = open("saveloadtable_stream_out.pickle", 'rb')
+    tab_loaded_stream_pickle = Table.Load(in_stream_pickle)
+    in_stream_pickle.close()
+    tab_loaded_fname_pickle = Table.Load('saveloadtable_filename_out.pickle')
+
+    # check content: pickle
+    self.CompareDataFromDict(tab_loaded_stream_pickle, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+    self.CompareDataFromDict(tab_loaded_fname_pickle, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+
+    # read from disc: ost
+    in_stream_ost = open("saveloadtable_stream_out.tab", 'rb')
+    tab_loaded_stream_ost = Table.Load(in_stream_ost)
+    in_stream_ost.close()
+    tab_loaded_fname_ost = Table.Load('saveloadtable_filename_out.tab')
+
+    # check content: ost
+    self.CompareDataFromDict(tab_loaded_stream_ost, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+    self.CompareDataFromDict(tab_loaded_fname_ost, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+  
+
   def testLoadTableOSTUnknownType(self):
     self.assertRaises(ValueError, Table.Load, os.path.join('testfiles','ost-table-unknown-type.tab'))
 

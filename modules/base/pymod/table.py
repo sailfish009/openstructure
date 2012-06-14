@@ -601,13 +601,38 @@ class Table(object):
     return cPickle.load(stream)
 
   @staticmethod
-  def Load(stream_or_filename, format='ost', sep=','):
+  def _GuessFormat(filename):
+    try:
+      filename = filename.name
+    except AttributeError, e:
+      pass
+    if filename.endswith('.csv'):
+      return 'csv'
+    elif filename.endswith('.pickle'):
+      return 'pickle'
+    else:
+      return 'ost'
+    
+    
+  @staticmethod
+  def Load(stream_or_filename, format='auto', sep=','):
     """
     Load table from stream or file with given name.
 
-    By default, the file format is *ost* (see below) and is *not* automatically
-    determined (e.g. from file extension). Thus, it *format* must be specified
-    for reading other file formats.
+    By default, the file format is set to *auto*, which tries to guess the file
+    format from the file extension. The following file extensions are
+    recognized:
+    
+    ============    ======================
+    extension       recognized format
+    ============    ======================
+    .csv            comma separated values
+    .pickle         pickled byte stream
+    <all others>    ost-specific format
+    ============    ======================
+    
+    Thus, *format* must be specified for reading file with different filename
+    extensions.
 
     The following file formats are understood:
 
@@ -643,6 +668,9 @@ class Table(object):
     :returns: A new :class:`Table` instance
     """
     format=format.lower()
+    if format=='auto':
+      format = Table._GuessFormat(stream_or_filename)
+      
     if format=='ost':
       return Table._LoadOST(stream_or_filename)
     if format=='csv':
