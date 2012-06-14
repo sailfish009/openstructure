@@ -6,6 +6,7 @@ Author: Tobias Schmidt
 
 import os
 import unittest
+import glob
 from ost.table import *
 import ost
 
@@ -40,6 +41,10 @@ except ImportError:
   print "Could not find python imagine library: ignoring some table class unit tests"
 
 class TestTable(unittest.TestCase):
+
+  def tearDown(self):
+    for filename in glob.glob('*_out.*'):
+      os.remove(filename)
 
   def setUp(self):
     ost.PushVerbosityLevel(3)
@@ -747,7 +752,7 @@ class TestTable(unittest.TestCase):
     self.CompareDataFromDict(tab_loaded_fname_csv, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
   
     # read from disc: pickle
-    in_stream_pickle = open("saveloadtable_stream_out.pickle", 'rb')
+    in_stream_pickle = open("saveloadtable_filename_out.pickle", 'rb')
     tab_loaded_stream_pickle = Table.Load(in_stream_pickle)
     in_stream_pickle.close()
     tab_loaded_fname_pickle = Table.Load('saveloadtable_filename_out.pickle')
@@ -757,7 +762,7 @@ class TestTable(unittest.TestCase):
     self.CompareDataFromDict(tab_loaded_fname_pickle, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
 
     # read from disc: ost
-    in_stream_ost = open("saveloadtable_stream_out.tab", 'rb')
+    in_stream_ost = open("saveloadtable_filename_out.tab", 'rb')
     tab_loaded_stream_ost = Table.Load(in_stream_ost)
     in_stream_ost.close()
     tab_loaded_fname_ost = Table.Load('saveloadtable_filename_out.tab')
