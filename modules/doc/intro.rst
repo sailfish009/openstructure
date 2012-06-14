@@ -54,9 +54,10 @@ Generation). To start it,
 
 Interactive Python Shell
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. image:: images/100208_OpenStructure_UI_Colored.png
 
 Now we will enter commands in the Python Shell (in the screenshot above, the 
-python shell is located at the bottom of the main window). If you want to get 
+python shell (shown in green) is located at the right of the main window). If you want to get 
 more information on any object, function or class, the python help command may 
 be useful. For example:
 
