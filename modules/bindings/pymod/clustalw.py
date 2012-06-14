@@ -70,7 +70,10 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
 
   new_list = seq.CreateSequenceList()
   for s in seq_list:
-    ss = seq.CreateSequence( s.GetName(), s.GetString().replace('?','X') )
+    ss = s.Copy()
+    for i,c in enumerate(ss):
+      if c=='?':
+        ss[i]='X'
     new_list.AddSequence(ss)
 
   seq_list = new_list
