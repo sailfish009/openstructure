@@ -202,13 +202,13 @@ BOOST_AUTO_TEST_CASE(rotation3)
   Rotation3 r(Vec3(0,1,0), 30.0*M_PI/180.0);
   Vec3 vrot=r.Apply(v);
   BOOST_CHECK_CLOSE(Real(cos(30.0*M_PI/180.0)), Real(vrot[0]), Real(1e-5));
-  BOOST_CHECK_SMALL(vrot[1],float(1e-5));
+  BOOST_CHECK_SMALL(vrot[1],Real(1e-5));
   BOOST_CHECK_CLOSE(Real(-sin(30.0*M_PI/180.0)), Real(vrot[2]), Real(1e-5));
 
   Rotation3 r2(Vec3(0,1,0), 30.0*M_PI/180.0,Vec3(2,0,0));
   Vec3 vrot2=r2.Apply(v);
   BOOST_CHECK_CLOSE(Real(2.0)-Real(cos(30.0*M_PI/180.0)), Real(vrot2[0]), Real(1e-5));
-  BOOST_CHECK_SMALL(vrot2[1],float(1e-5));
+  BOOST_CHECK_SMALL(vrot2[1],Real(1e-5));
   BOOST_CHECK_CLOSE(Real(sin(30.0*M_PI/180.0)), Real(vrot2[2]), Real(1e-5));
 }
 
