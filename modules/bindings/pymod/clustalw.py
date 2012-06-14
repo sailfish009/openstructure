@@ -44,6 +44,30 @@ def ClustalW(seq1, seq2=None, clustalw=None, keep_files=False, nopgap=False,
   :type clustalw_option_string: :class:`str`
   :param keep_files: do not delete temporary files
   :type keep_files: :class:`bool`
+
+  Note: ClustalW will convert lowercase to uppercase, and change all '.' to '-'. 
+  OST will convert and '?' to 'X' before aligning sequences with Clustalw.
+
+  ClustalW will accept only IUB/IUPAC amino acid and nucleic acid codes:
+
+  ======= ======================= ======= ============================ 
+  Residue  Name                   Residue  Name 
+  ======= ======================= ======= ============================
+     A    alanine                    P    proline
+     B    aspartate or asparagine    Q    glutamine
+     C    cystine                    R    arginine
+     D    aspartate                  S    serine
+     E    glutamate                  T    threonine
+     F    phenylalanine              U    selenocysteine
+     G    glycine                    V    valine
+     H    histidine                  W    tryptophan
+     I    isoleucine                 Y    tyrosine
+     K    lysine                     Z    glutamate or glutamine
+     L    leucine                    X    any
+     M    methionine                 *    translation stop
+     N    asparagine                 -    gap of indeterminate length
+  ======= ======================= ======= ============================ 
+
   '''
   clustalw_path=settings.Locate(('clustalw', 'clustalw2'), 
                                 explicit_file_name=clustalw)
