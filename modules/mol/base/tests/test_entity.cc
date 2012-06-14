@@ -23,6 +23,7 @@
 #include <ost/geom/vec_mat_predicates.hh>
 #include <ost/mol/chem_class.hh>
 #include <ost/mol/mol.hh>
+#include <ost/mol/property_id.hh>
 #include <cmath>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -411,6 +412,21 @@ BOOST_AUTO_TEST_CASE(rename_atom)
    AtomHandle   atom=edi.InsertAtom(res, "A", geom::Vec3(1,2,3), "C");
    edi.RenameAtom(atom, "B");
    BOOST_CHECK_EQUAL(atom.GetName(), "B");
+}
+
+BOOST_AUTO_TEST_CASE(minmax)
+{
+  EntityHandle eh=make_test_entity();
+  EntityView ev = eh.CreateFullView();
+  mol::AtomViewList avl = ev.GetAtomList();
+  mol::AtomViewList::iterator i;
+  int n=0.0;
+  for (i=avl.begin(); i!=avl.end(); ++i, ++n) {
+    i->SetFloatProp("test", n);
+  }
+  std::pair<float,float> minmax = ev.GetMinMax("test", Prop::ATOM);
+  BOOST_CHECK_EQUAL(minmax.first, 0.0);
+  BOOST_CHECK_EQUAL(minmax.second, 7.0);
 }
 
 BOOST_AUTO_TEST_SUITE_END();
