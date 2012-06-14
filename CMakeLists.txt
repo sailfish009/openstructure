@@ -234,6 +234,11 @@ if (ENABLE_SPNAV)
   find_package(SpNav REQUIRED)
 endif()
 
+if (CMAKE_COMPILER_IS_GNUCXX)
+  set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-strict-aliasing" CACHE STRING "" FORCE)
+endif()
+
+
 # basic environment
 include_directories(${Boost_INCLUDE_DIRS} 
                     ${FFTW_INCLUDE_PATH} 
