@@ -892,11 +892,11 @@ The View Classes
     view, it will be added. By default, only the residue is added, but not its
     atoms. This behaviour can be modified by passing in an appropriate
     combination of `view_add_flags`.
-    
-    :param residue_handle:
-    :type  residue_handle: ResidueHandle
-    :param view_add_flags:
-    :type  view_add_flags: int
+
+    :param residue_handle: The residue handle to be added
+    :type  residue_handle: :class:`ResidueHandle`
+    :param view_add_flags: An ORed together combination of `view_add_flags`
+    :type  view_add_flags: :class:`int`
     :rtype: :class:`ResidueView`
 
   .. method:: AddAtom(atom_handle[, view_add_flags])
@@ -1239,10 +1239,10 @@ The View Classes
     undefined. By default, only the residue, but no atoms are added to the view. 
     To change the behavior, pass in a suitable combination of `view_add_flags`.
     
-    :param residue_handle:
+    :param residue_handle: The residue handle to be added.
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags:
-    :type  view_add_flags: int
+    :param view_add_flags: An ORed together combination of `view_add_flags`
+    :type  view_add_flags: :class:`int`
     :rtype: :class:`ResidueView`
 
   .. method:: FindAtom(res_num, atom_name)
