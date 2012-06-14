@@ -117,14 +117,22 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
     sqlite3_bind_text(stmt, 6, compound->GetFormula().c_str(),
                       compound->GetFormula().length(), NULL);
     std::stringstream ss;
-    ss << compound->GetCreationDate().year << "-" 
-       << compound->GetCreationDate().month << "-" 
-       << compound->GetCreationDate().day;
+    ss << compound->GetCreationDate().year << "-";
+    ss.fill('0');
+    ss.width(2);
+    ss << compound->GetCreationDate().month << "-";
+    ss.fill('0');
+    ss.width(2);
+    ss << compound->GetCreationDate().day;
     String date=ss.str();
     ss.str("");
-    ss << compound->GetModificationDate().year << "-" 
-       << compound->GetModificationDate().month << "-" 
-       << compound->GetModificationDate().day;
+    ss << compound->GetModificationDate().year << "-";
+    ss.fill('0');
+    ss.width(2);
+    ss << compound->GetModificationDate().month << "-";
+    ss.fill('0');
+    ss.width(2);
+    ss << compound->GetModificationDate().day;
     sqlite3_bind_text(stmt, 7, date.c_str(), date.length(), NULL);
     date=ss.str();
     sqlite3_bind_text(stmt, 8, date.c_str(), date.length(), NULL);
