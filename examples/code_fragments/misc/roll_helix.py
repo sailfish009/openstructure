@@ -3,7 +3,7 @@ import math
 e=io.LoadEntity('../entity/sdh.pdb')
 c=e.FindChain('A')
 
-edi=e.RequestICSEditor(mol.EditMode.BUFFERED_EDIT)
+edi=e.EditXCS(mol.EditMode.BUFFERED_EDIT)
 for r in c.GetResidueList():
   phi=r.GetPhiTorsion()
   psi=r.GetPsiTorsion()

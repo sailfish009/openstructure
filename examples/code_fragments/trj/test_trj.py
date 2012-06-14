@@ -17,8 +17,8 @@ class Anim(QtCore.QTimer):
 
 
 # old-style CHARMM format, requires flag bit 0 set
-cg = io.LoadCHARMMTraj("mpor_trj.crd","mpor_trj_short.trj",1)
-eh=cg.GetEntity()
+eh = io.LoadCRD("mpor_trj.crd")
+cg = io.LoadCHARMMTraj(eh,"mpor_trj_short.trj")
 go=gfx.Entity("test",eh.CreateFullView())
 
 scene.Add(go)
