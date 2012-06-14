@@ -52,11 +52,11 @@ struct Date {
   
   static Date FromString(const StringRef& str)
   {
-    assert(str[4]=='-');
-    assert(str[7]=='-');
-    std::pair<bool, int> year=str.substr(0,4).to_int();
-    std::pair<bool, int> month=str.substr(5,2).to_int();
-    std::pair<bool, int> day=str.substr(8, 2).to_int();
+    std::vector<StringRef> parts=str.split('-');
+    assert(parts.size()==3);
+    std::pair<bool, int> year=parts[0].to_int();
+    std::pair<bool, int> month=parts[1].to_int();
+    std::pair<bool, int> day=parts[2].to_int();
     assert(year.first); assert(month.first); assert(day.first);
     return Date(year.second, month.second, day.second);
   }
