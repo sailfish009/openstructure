@@ -344,8 +344,8 @@ class Table(object):
     'int_format'.
 
     The option 'rows' specify the range of rows to be printed. The parameter
-    must be a iterable containing the the start and end row *index*,
-    e.g. [start_row_idx, end_row_idx].
+    must be a type that supports indexing (e.g. a :class:`list`) containing the 
+    start and end row *index*, e.g. [start_row_idx, end_row_idx].
 
     :param float_format: formatting string for float columns
     :type float_format: :class:`str`
@@ -398,11 +398,12 @@ class Table(object):
   def _AddRowsFromDict(self, d, overwrite=None):
     '''
     Add one or more rows from a :class:`dictionary <dict>`.
-
-    If *overwrite* is set and not None (must be set to an existing column name),
-    an existing row is overwritten if the value of column *overwrite* in the
-    new data matches the existing one in the table.
-    If no matching row is found, a new row is appended to the table.
+    
+    If *overwrite* is not None and set to an existing column name, the specified 
+    column in the table is searched for the first occurrence of a value matching
+    the value of the column with the same name in the dictionary. If a matching
+    value is found, the row is overwritten with the dictionary. If no matching
+    row is found, a new row is appended to the table.
 
     :param d: dictionary containing the data
     :type d: :class:`dict`
@@ -470,11 +471,12 @@ class Table(object):
        columns in the table. A :class:`ValuerError` is raised otherwise. The
        values are added in the order specified in the list, thus, the order of
        the data must match the columns.
-       
-    If *overwrite* is set and not None (must be set to an existing column name),
-    the *first* row where the value of column *overwrite* in the table matches
-    the value in the new data is overwritten.
-    If no matching row is found, a new row is appended to the table.
+          
+    If *overwrite* is not None and set to an existing column name, the specified 
+    column in the table is searched for the first occurrence of a value matching
+    the value of the column with the same name in the dictionary. If a matching
+    value is found, the row is overwritten with the dictionary. If no matching
+    row is found, a new row is appended to the table.
 
     :param data: data to add
     :type data: :class:`dict` or *list-like* object
@@ -849,7 +851,7 @@ class Table(object):
     :param by: column name by which to sort
     :type by: :class:`str`
 
-    :param order: ascending or descending order
+    :param order: ascending (``-``) or descending (``+``) order
     :type order: :class:`str` (i.e. *+*, *-*)
     """
     sign=-1
@@ -979,6 +981,8 @@ class Table(object):
     :type save: :class:`str`
 
     :param \*\*kwargs: additional arguments passed to matplotlib
+    
+    :returns: the ``matplotlib.pyplot`` module 
 
     **Examples:** simple plotting functions
 
@@ -999,7 +1003,8 @@ class Table(object):
 
       # three dimensional plot of 'a' vs. 'c' with values 'b'
       plt=tab.Plot('a', y='c', z='b')
-      plt.show()
+      # manually save plot to file
+      plt.savefig("plot.png")
     """
     try:
       import matplotlib.pyplot as plt
@@ -1009,7 +1014,7 @@ class Table(object):
       xs = []
       ys = []
       zs = []
-           
+
       if clear:
         plt.figure(figsize=[8, 6])
       
@@ -2189,9 +2194,11 @@ class Table(object):
     If the type of any column in *tab* is not the same as in the current table
     a *TypeError* is raised.
     
-    If *overwrite* is set and not None (must be set to an existing column name),
-    an existing row is overwritten if the value of column *overwrite* matches.
-    If no matching row is found, a new row is appended to the table.
+    If *overwrite* is not None and set to an existing column name, the specified 
+    column in the table is searched for the first occurrence of a value matching
+    the value of the column with the same name in the dictionary. If a matching
+    value is found, the row is overwritten with the dictionary. If no matching
+    row is found, a new row is appended to the table.
     """
     # add column to current table if it doesn't exist
     for name,typ in zip(tab.col_names, tab.col_types):
