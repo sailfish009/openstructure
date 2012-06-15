@@ -57,6 +57,7 @@ Density Maps and Images
 
 **Overview**: :doc:`images intro <intro-02>` | :doc:`img module <img/base/img>` | :doc:`img.alg module <img/alg/alg>`
 
+**Input/Output**: :ref:`loading and saving density maps <img-io>`
 
 
 
@@ -93,7 +94,9 @@ Varia
 
 **Datasets:** :doc:`tabular data <table>`
 
-**File Formats:** :doc:`supported file formats <io/formats>`
+**File Formats:** :doc:`supported structure file formats <io/structure_formats>`
+**File Formats:** :doc:`supported sequence file formats <io/sequence_formats>`
+**File Formats:** :doc:`supported image file formats <io/image_formats>`
 
 
 Extending OpenStructure
