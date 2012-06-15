@@ -201,9 +201,13 @@ public:
   
   int GetAtomSpecIndex(const String& name) const;
   
-  const String& GetFormula() { return formula_; }
+  const String& GetName() { return name_; }
+  
+  void SetName(const String& name) { name_=name; }
   
   void SetFormula(const String& formula) { formula_=formula; }
+
+  const String& GetFormula() { return formula_; }
   
   const BondSpecList& GetBondSpecs() const {
     return bond_specs_;
@@ -231,6 +235,7 @@ private:
   char                         olc_;
   String                       tlc_;
   String                       formula_;
+  String                       name_;
   AtomSpecList                 atom_specs_;
   BondSpecList                 bond_specs_;
   mol::ChemClass               chem_class_;

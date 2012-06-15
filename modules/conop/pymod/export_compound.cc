@@ -84,6 +84,9 @@ void export_Compound() {
     .def("GetOneLetterCode", &Compound::GetOneLetterCode)
 
     .add_property("three_letter_code", make_function(&Compound::GetID, return_value_policy<copy_const_reference>()))
+    .add_property("name", 
+                  make_function(&Compound::GetName, 
+                 return_value_policy<copy_const_reference>()))
     .add_property("id", make_function(&Compound::GetID, return_value_policy<copy_const_reference>()))    
     .add_property("one_letter_code", &Compound::GetOneLetterCode, 
                   &Compound::SetOneLetterCode)                  

@@ -44,7 +44,8 @@ const char* CREATE_CMD[]={
 "  chem_type       VARCHAR(1),                                                  "
 "  formula         VARCHAR(64) NOT NULL,                                        "
 "  pdb_initial     TIMESTAMP,                                                   "
-"  pdb_modified    TIMESTAMP                                                    "
+"  pdb_modified    TIMESTAMP,                                                   "
+"  name            VARCHAR(256)                                                 " 
 ");",
 " CREATE UNIQUE INDEX IF NOT EXISTS commpound_tlc_index ON chem_compounds       "
 "                                  (tlc, dialect)",
@@ -80,8 +81,8 @@ const char* CREATE_CMD[]={
 
 
 const char* INSERT_COMPOUND_STATEMENT="INSERT INTO chem_compounds               "
-"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified) "
-" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?))";
+"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified, name) "
+" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?), ?)";
 
 const char* INSERT_ATOM_STATEMENT="INSERT INTO atoms                            "
 "        (compound_id, name, alt_name, element, is_aromatic, stereo_conf,       "
@@ -127,6 +128,7 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
     sqlite3_bind_text(stmt, 7, date.c_str(), date.length(), NULL);
     date=ss.str();
     sqlite3_bind_text(stmt, 8, date.c_str(), date.length(), NULL);
+    sqlite3_bind_text(stmt, 9, compound->GetName().c_str(), compound->GetName().length(), NULL);
   } else {
     LOG_ERROR(sqlite3_errmsg(conn_));
     sqlite3_finalize(stmt);    
@@ -256,6 +258,11 @@ CompoundLibPtr CompoundLib::Load(const String& database, bool readonly)
                             static_cast<int>(aq.length()),
                             &stmt, NULL);
   lib->chem_type_available_ = retval==SQLITE_OK;
+  aq="SELECT name FROM chem_compounds LIMIT 1";
+  retval=sqlite3_prepare_v2(lib->conn_, aq.c_str(),
+                            static_cast<int>(aq.length()),
+                            &stmt, NULL);
+  lib->name_available_ = retval==SQLITE_OK;
   return lib;
 }
 
@@ -321,7 +328,11 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
   String query="SELECT id, tlc, olc, chem_class, dialect, formula";
   if(chem_type_available_) {
     query+=", chem_type";
+    if(name_available_) {
+      query+=", name";
+    }
   }
+
   query+=" FROM chem_compounds"
          " WHERE tlc='"+id+"' AND dialect='"+String(1, char(dialect))+"'";
   sqlite3_stmt* stmt;
@@ -345,6 +356,10 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
       compound->SetFormula(f);
       if(chem_type_available_) {
         compound->SetChemType(mol::ChemType(sqlite3_column_text(stmt, 6)[0]));
+      }
+      if (name_available_) {
+        const char* name=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
+        compound->SetName(name);
       }
       // Load atoms and bonds      
       this->LoadAtomsFromDB(compound, pk);
