@@ -65,14 +65,16 @@ The SequenceHandle
 .. function:: CreateSequence(name, sequence)
 
   Create a new :class:`SequenceHandle` with the given name and sequence. 
-  
+
   :param name: name of the sequence
   :type  name: str
   :param sequence: String of characters representing the sequence. Only   
-       alphanumerical characters and '-' are allowed.
+       'word' characters (no digits), '?', '-' and '.' are allowed. In an
+       upcoming release, '?' and '.' will also be forbidden so its best to
+       translate those to 'X' or '-'.
   :type sequence: str
   :raises InvalidSequence: When the sequence string contains forbidden
-       characters, that is anything that is not alphanumeric or a hyphen.
+       characters. In the future, '?' and '.' will also raise this exception.
 
 .. class:: SequenceHandle
 
