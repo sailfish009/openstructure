@@ -116,6 +116,10 @@ void export_map_io()
     .def("GetEndianessOnSave", &MRC::GetEndianessOnSave)
   ;
 
+  class_<CCP4, bases<MRC> >("CCP4", init<bool,Endianess>
+           ((arg("normalize_on_save") = false,arg("endianess_on_save")=OST_LOCAL_ENDIAN)))
+  ;
+
   class_<DM3, bases<ImageFormatBase> >("DM3", init<>())
   ;
 
