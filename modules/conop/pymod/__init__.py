@@ -64,7 +64,12 @@ def RegisterBuilder(builder, name):
   
 def SetDefaultBuilder(builder_name):
   '''
-  Set the builder with the given name as the default.
+  Set the builder with the given name as the default. You will have to register
+  a builder with :func:`RegisterBuilder` before you will be able to set it as
+  the default.
+
+  :raises: :exc:`RuntimeError` when trying to set a builder as the default that
+    has not been registered yet.
   '''
   conop_inst=Conopology.Instance()
   conop_inst.SetDefaultBuilder(builder_name)
