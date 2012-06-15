@@ -36,4 +36,16 @@ int Compound::GetAtomSpecIndex(const String& name) const {
   }
  return -1;
 }
+String Date::ToString() const
+{
+  std::stringstream ss;
+  ss << year << "-";
+  ss.fill('0');
+  ss.width(2);
+  ss << month << "-";
+  ss.fill('0');
+  ss.width(2);
+  ss << day;
+  return ss.str();
+}
 }}

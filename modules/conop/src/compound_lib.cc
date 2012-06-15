@@ -102,6 +102,7 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
   sqlite3_stmt* stmt=NULL;  
   int retval=sqlite3_prepare_v2(conn_, INSERT_COMPOUND_STATEMENT, 
                                 strlen(INSERT_COMPOUND_STATEMENT), &stmt, NULL);
+  String crea_date_str, modi_date_str;
   if (SQLITE_OK==retval) {
     sqlite3_bind_text(stmt, 1, compound->GetID().c_str(), 
                       compound->GetID().length(), NULL);
@@ -115,29 +116,16 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
     sqlite3_bind_text(stmt, 5, &chem_type, 1, NULL);
     sqlite3_bind_text(stmt, 6, compound->GetFormula().c_str(),
                       compound->GetFormula().length(), NULL);
-    std::stringstream ss;
-    ss << compound->GetCreationDate().year << "-";
-    ss.fill('0');
-    ss.width(2);
-    ss << compound->GetCreationDate().month << "-";
-    ss.fill('0');
-    ss.width(2);
-    ss << compound->GetCreationDate().day;
-    String date=ss.str();
-    ss.str("");
-    ss << compound->GetModificationDate().year << "-";
-    ss.fill('0');
-    ss.width(2);
-    ss << compound->GetModificationDate().month << "-";
-    ss.fill('0');
-    ss.width(2);
-    ss << compound->GetModificationDate().day;
-    sqlite3_bind_text(stmt, 7, date.c_str(), date.length(), NULL);
-    date=ss.str();
-    sqlite3_bind_text(stmt, 8, date.c_str(), date.length(), NULL);
+
+    Date crea_date=compound->GetCreationDate();
+    Date modi_date=compound->GetModificationDate();
+    crea_date_str=crea_date.ToString();
+    modi_date_str=modi_date.ToString();
+    sqlite3_bind_text(stmt, 7, crea_date_str.c_str(), crea_date_str.length(), NULL);
+    sqlite3_bind_text(stmt, 8, modi_date_str.c_str(), modi_date_str.length(), NULL);
   } else {
     LOG_ERROR(sqlite3_errmsg(conn_));
-    sqlite3_finalize(stmt);    
+    sqlite3_finalize(stmt);
     return;
   }
   retval=sqlite3_step(stmt);
