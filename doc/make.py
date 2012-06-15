@@ -92,7 +92,7 @@ if opts.quiet:
 
 for sub_dir in ('modules',):
   os.path.walk(sub_dir, _CollectRstDocs, 'doc/source')
-sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6'])
+sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6','sphinx-build-2.7'])
 
 if opts.html:
   cmd='%s %s -b html -c %s %s %s' % (sphinx_bin, opt_str, 
