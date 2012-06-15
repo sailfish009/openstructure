@@ -16,6 +16,7 @@
 // along with this library; if not, write to the  Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <iomanip>
 #if defined (_MSC_VER)
 #define BOOST_ALL_DYN_LINK 1
 #endif
@@ -101,7 +102,7 @@ int main (int argc, char **argv)
   String version = "Beta - 2012-06-13";
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
-  Real radius=15.0;
+  Real radius=15.0; 
   
   IOProfile profile;
   profile.bond_feasibility_check=false;
@@ -296,19 +297,32 @@ int main (int argc, char **argv)
       std::cout << "Global LDDT score: 0.0" << std::endl;
       return 0;
     }
-    Real lddt=LDDTHA(v, glob_dist_list);	
 
+    std::vector<Real> cutoffs;
+    cutoffs.push_back(0.5);
+    cutoffs.push_back(1.0);
+    cutoffs.push_back(2.0);
+    cutoffs.push_back(4.0);
+    String label="localldt";
+    std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, cutoffs, label);
+    Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
     std::cout << "Global LDDT score: " << lddt << std::endl;
+    std::cout << "(" << std::fixed << total_ov.first << " conserved distances in the model out of " << total_ov.second  << " checked)" << std::endl;
+    
     std::cout << "Local LDDT Score:" << std::endl;
-    std::cout << "Chain\tResName\tResNum\tScore" << std::endl;
+    std::cout << "Chain\tResName\tResNum\tScore\t(Conserved/Total)" << std::endl;
     for (ResidueViewIter rit=v.ResiduesBegin();rit!=v.ResiduesEnd();++rit){
       ResidueView ritv = *rit;
       Real lddt_local = 0;
-      if (ritv.HasProp("locallddt")) {
-          lddt_local=ritv.GetFloatProp("locallddt");
+      int conserved_dist = 0;
+      int total_dist = 0;      
+      if (ritv.HasProp(label)) {
+          lddt_local=ritv.GetFloatProp(label);
+          conserved_dist=ritv.GetIntProp(label+"_conserved");
+	  total_dist=ritv.GetIntProp(label+"_total");
       }
       if (lddt_local!=0) {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << lddt_local << std::endl;
+        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << lddt_local << "\t" << "("<< conserved_dist << "/" << total_dist << ")" <<std::endl;
       }
     }
     std::cout << std::endl;

@@ -55,7 +55,7 @@ typedef std::map<std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier>,std::pair<
 typedef std::map<ost::mol::ResNum,ResidueRDMap> GlobalRDMap;
 typedef std::map<UniqueAtomIdentifier,int> ExistenceMap;
 
-Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
+std::pair<long int,long int> DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          const GlobalRDMap& dist_list,
                                          std::vector<Real> cutoff_list, 
                                          const String& local_ldt_property_string="");

@@ -36,7 +36,7 @@ void export_entity_to_density();
 
 namespace {
   
-Real (*lddt_a)(const mol::EntityView&, const mol::alg::GlobalRDMap& , std::vector<Real>, const String&)=&mol::alg::LocalDistDiffTest;
+std::pair<long int,long int> (*lddt_a)(const mol::EntityView&, const mol::alg::GlobalRDMap& , std::vector<Real>, const String&)=&mol::alg::LocalDistDiffTest;
 Real (*lddt_c)(const mol::EntityView&, const mol::EntityView& , Real, Real, const String&)=&mol::alg::LocalDistDiffTest;
 Real (*lddt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistDiffTest;
 mol::EntityView (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
