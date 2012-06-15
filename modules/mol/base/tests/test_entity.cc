@@ -30,13 +30,13 @@
 #include <boost/test/auto_unit_test.hpp>
 
 #define CHECK_TRANSFORMED_ATOM_POSITION(ATOM,TARGET) \
-   BOOST_CHECK(vec3_is_close(ATOM.GetPos(), TARGET))
+   BOOST_CHECK(vec3_is_close(ATOM.GetPos(), TARGET,Real(0.1)))
 
 #define CHECK_ORIGINAL_ATOM_POSITION(ATOM,TARGET) \
- BOOST_CHECK(vec3_is_close(ATOM.GetOriginalPos(), TARGET))
+   BOOST_CHECK(vec3_is_close(ATOM.GetOriginalPos(), TARGET,Real(0.1)))
 
 #define CHECK_ALTERNATE_ATOM_POSITION(ATOM,TARGET,GROUP) \
-   BOOST_CHECK(vec3_is_close(ATOM.GetAltPos(GROUP), TARGET))
+   BOOST_CHECK(vec3_is_close(ATOM.GetAltPos(GROUP), TARGET,Real(0.1)))
 
 using namespace ost;
 using namespace ost::mol;

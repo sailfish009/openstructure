@@ -668,7 +668,11 @@ BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
     IOProfile profile;
     MMCifReader mmcif_p(s, eh, profile);
     BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
+    #if OST_DOUBLE_PRECISION
+    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0, 0.001);
+    #else
     BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0f, 0.001f);
+    #endif
   }
   BOOST_MESSAGE("         done.");
   BOOST_MESSAGE("         capturing fishy data lines...");
@@ -1263,7 +1267,11 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   BOOST_CHECK(sd.GetTitle() == "A Title");
   BOOST_CHECK(sd.GetCASPFlag() == 'Y');
   BOOST_CHECK(sd.GetDescriptor() == "ADENYLATE KINASE");
+  #if OST_DOUBLE_PRECISION
+  BOOST_CHECK_CLOSE(sd.GetMass(), 1.0, 0.001);
+  #else
   BOOST_CHECK_CLOSE(sd.GetMass(), 1.0f, 0.001f);
+  #endif
   BOOST_CHECK(sd.GetMassMethod() == "Good Guess");
   BOOST_CHECK(sd.GetModelDetails() == "Even better guessing");
   BOOST_CHECK(sd.GetModelTypeDetails() == "Guess");

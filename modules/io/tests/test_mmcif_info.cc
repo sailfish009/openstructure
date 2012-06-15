@@ -171,7 +171,11 @@ BOOST_AUTO_TEST_CASE(mmcif_info_structdetails)
   BOOST_CHECK(sd.GetTitle() == "More than a structure");
   BOOST_CHECK(sd.GetCASPFlag() == 'Y');
   BOOST_CHECK(sd.GetDescriptor() == "ADENYLATE KINASE");
+  #if OST_DOUBLE_PRECISION
+  BOOST_CHECK_CLOSE(sd.GetMass(), 1.0, 0.001);
+  #else
   BOOST_CHECK_CLOSE(sd.GetMass(), 1.0f, 0.001f);
+  #endif
   BOOST_CHECK(sd.GetMassMethod() == "Good Guess");
   BOOST_CHECK(sd.GetModelDetails() == "Even more guessing");
   BOOST_CHECK(sd.GetModelTypeDetails() == "MINIMIZED AVERAGE");
@@ -193,8 +197,12 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   info.SetResolution(1.9f);
 
   BOOST_CHECK(info.GetMethod() == StringRef("Cooking.", 8));
+  #if OST_DOUBLE_PRECISION
+  BOOST_CHECK_CLOSE(info.GetResolution(), 1.9, 0.001);
+  #else
   BOOST_CHECK_CLOSE(info.GetResolution(), 1.9f, 0.001f);
-
+  #endif
+ 
   BOOST_MESSAGE("  done.");
 }
 
