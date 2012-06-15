@@ -359,7 +359,9 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
       }
       if (name_available_) {
         const char* name=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 7));
-        compound->SetName(name);
+        if (name) {
+          compound->SetName(name);
+        }
       }
       // Load atoms and bonds      
       this->LoadAtomsFromDB(compound, pk);
