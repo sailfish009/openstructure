@@ -69,7 +69,7 @@ Converter functions
     Whether the set is empty, i.e. doesn't contain any amino acids.
 
 
-Maping functions
+Mapping functions
 --------------------------------------------------------------------------------
 
 The following functions help to convert one residue into another by reusing as
@@ -79,11 +79,16 @@ to standard amino acids.
 
 .. function:: CopyResidue(src_res, dst_res, editor)
 
-  Copies the atoms of ``src_res`` to ``dst_res`` using the residue names of
+  Copies the atoms of ``src_res`` to ``dst_res`` using the residue names
   as guide to decide which of the atoms should be copied. If ``src_res`` and
   ``dst_res`` have the same name, or ``src_res`` is a modified version of
-  ``dst_res``, CopyConserved will be called, otherwise CopyNonConserved will
-  be called.
+  ``dst_res`` (i.e. have the same single letter code), CopyConserved will be
+  called, otherwise CopyNonConserved will be called.
+
+  :param src_res: The source residue
+  :type src_res: :class:`~mol.ResidueHandle`
+  :param dst_res: The destination residue
+  :type dst_res: :class:`~mol.ResidueHandle`
 
   :returns: true if the residue could be copied, false if not.
 
@@ -93,13 +98,13 @@ to standard amino acids.
   amino acid of ``src_res`` (or ``src_res`` itself) are identical to ``dst_res``.
 
   If ``src_res`` and ``dst_res`` are identical, all heavy atoms are copied
-  ``to dst_res``. If ``src_res`` is a modified version of ``dst_res`` and the
+  to ``dst_res``. If ``src_res`` is a modified version of ``dst_res`` and the
   modification is a pure addition (e.g. the phosphate group of phosphoserine),
   the modification is stripped off and all other heavy atoms are copied to
   ``dst_res``. If the modification is not a pure addition, only the backbone
   heavy atoms are copied to ``dst_res``.
 
-  Additionally, the selenium atom of MSE is converted to sulphur.
+  Additionally, the selenium atom of ``MSE`` is converted to sulphur.
 
   :param src_res: The source residue
   :type src_res: :class:`~mol.ResidueHandle`
@@ -111,7 +116,8 @@ to standard amino acids.
 
 .. function:: CopyNonConserved(src_res, dst_res, editor)
 
-  Copies the heavy backbone atoms of ``src_res`` to ``dst_res``.
+  Copies the heavy backbone atoms and Cbeta (except for ``GLY``) of ``src_res``
+  to ``dst_res``.
 
   :param src_res: The source residue
   :type src_res: :class:`~mol.ResidueHandle`
