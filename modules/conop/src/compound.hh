@@ -61,6 +61,8 @@ struct Date {
     return Date(year.second, month.second, day.second);
   }
   
+  String ToString() const;
+
   int year;
   int month;
   int day;  
