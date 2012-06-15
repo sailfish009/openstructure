@@ -20,7 +20,7 @@
 #include <limits>
 
 #include <boost/bind.hpp>
-
+#include <ost/log.hh>
 #include <ost/mol/bond_handle.hh>
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/atom_view.hh>
@@ -96,7 +96,7 @@ AtomView ResidueView::AddAtom(const AtomHandle& atom_handle,
   this->CheckValidity();
   AtomView v;
   if ((flags & ViewAddFlag::CHECK_DUPLICATES) &&
-      (v=this->FindAtom(atom_handle))) {
+      (v=this->ViewForHandle(atom_handle))) {
     return v;
   }
   v=AtomView(*this, atom_handle);
@@ -118,7 +118,7 @@ AtomView ResidueView::FindAtom(const String& atom_name) const {
   return i==data_->atoms.end() ? AtomView() : *i;
 }
 
-AtomView ResidueView::FindAtom(const AtomHandle& handle) const {
+AtomView ResidueView::ViewForHandle(const AtomHandle& handle) const {
   this->CheckValidity();
   const AtomViewList& l=data_->atoms;
   AtomViewList::const_iterator i;
@@ -128,7 +128,7 @@ AtomView ResidueView::FindAtom(const AtomHandle& handle) const {
 
 bool ResidueView::IsAtomIncluded(const AtomHandle& handle) const {
   // validity is checked by FindAtom
-  return this->FindAtom(handle).IsValid();
+  return this->ViewForHandle(handle).IsValid();
 }
 
 
@@ -272,6 +272,13 @@ EntityView ResidueView::Select(const String& q, QueryFlags flags) const {
   }
   else s << "cname='" << Impl()->GetChain()->GetName() << "' and rindex=" << Impl()->GetIndex();
   return this->GetEntity().Select(Query(s.str()), flags);
+}
+
+AtomView ResidueView::FindAtom(const AtomHandle& handle) const
+{
+  LOG_WARNING("ResidueView::FindAtom(handle) is deprecated. "
+              "Use ResidueView::ViewForHandle instead.");
+  return this->ViewForHandle(handle);
 }
 
 }} //ns

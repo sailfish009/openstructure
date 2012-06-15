@@ -120,9 +120,9 @@ mol::AtomViewList AtomView::GetBondPartners() const
   mol::BondHandleList::const_iterator i;
   for (i=data_->bonds.begin();i!=data_->bonds.end();++i) {
     if (i->GetFirst().GetHandle()!=this->GetHandle()) {
-      avl.push_back(this->GetEntity().FindAtom(i->GetFirst()));
+      avl.push_back(this->GetEntity().ViewForHandle(i->GetFirst()));
     } else {
-      avl.push_back(this->GetEntity().FindAtom(i->GetSecond()));
+      avl.push_back(this->GetEntity().ViewForHandle(i->GetSecond()));
     }
   }
   return avl;
@@ -138,9 +138,9 @@ void AtomView::RemoveBonds()
     BondHandle b=*i;
     AtomView av;
     if (b.GetFirst()==this->GetHandle()) {
-      av=ent.FindAtom(b.GetSecond());
+      av=ent.ViewForHandle(b.GetSecond());
     } else {
-      av=ent.FindAtom(b.GetFirst());
+      av=ent.ViewForHandle(b.GetFirst());
     }
     ent.RemoveBond(b);
   }

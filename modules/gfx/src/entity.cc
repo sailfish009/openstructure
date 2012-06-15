@@ -443,7 +443,7 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
         return true;
       }
       if(smode==1) {
-        AtomView av = sel_.FindAtom(sel.GetHandle());
+        AtomView av = sel_.ViewForHandle(sel.GetHandle());
         if(av.IsValid()) {
           LOG_DEBUG("de-selected atom: " << sel);
           sel_.RemoveAtom(av);
@@ -456,8 +456,8 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
         }
         result = sel.GetPos();
       } else if(smode==2) {
-        AtomView av=sel_.FindAtom(sel);
-        ResidueView rv=sel_.FindResidue(sel.GetResidue());
+        AtomView av=sel_.ViewForHandle(sel);
+        ResidueView rv=sel_.ViewForHandle(sel.GetResidue());
         if(av.IsValid() && rv.IsValid()) {
           LOG_DEBUG("de-selected residue: " << sel.GetResidue());
           sel_.RemoveResidue(rv);
@@ -472,7 +472,7 @@ bool Entity::OnSelect(const geom::Line3& line, geom::Vec3& result,
           return false;
         }
         ChainHandle chain=sel.GetHandle().GetResidue().GetChain();
-        ChainView cv = sel_.FindChain(chain);
+        ChainView cv = sel_.ViewForHandle(chain);
         if(cv.IsValid()) {
           LOG_DEBUG("de-selected chain: " << chain);
           sel_.RemoveChain(cv);
