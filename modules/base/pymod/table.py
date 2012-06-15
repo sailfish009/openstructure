@@ -258,12 +258,30 @@ class Table(object):
     return type_list
 
   def SetName(self, name):
+    '''
+    Set name of the table
+    :param name: name
+    :type name: :class:`str`
+    '''
     self.name = name
     
   def GetName(self):
+    '''
+    Get name of table
+    '''
     return self.name
 
   def _Coerce(self, value, ty):
+    '''
+    Try to convert values (e.g. from :class:`str` type) to the specified type
+
+    :param value: the value
+    :type value: any type
+
+    :param ty: name of type to convert it to (i.e. *int*, *float*, *string*,
+               *bool*)
+    :type ty: :class:`str`
+    '''
     if value=='NA' or value==None:
       return None
     if ty=='int':
@@ -320,11 +338,23 @@ class Table(object):
   def ToString(self, float_format='%.3f', int_format='%d', rows=None):
     '''
     Convert the table into a string representation.
+
     The output format can be modified for int and float type columns by
     specifying a formatting string for the parameters 'float_format' and
     'int_format'.
+
     The option 'rows' specify the range of rows to be printed. The parameter
-    must be a iterable containing two elements, e.g. [start_row, end_row].
+    must be a iterable containing the the start and end row *index*,
+    e.g. [start_row_idx, end_row_idx].
+
+    :param float_format: formatting string for float columns
+    :type float_format: :class:`str`
+
+    :param int_format: formatting string for int columns
+    :type int_format: :class:`str`
+
+    :param rows: iterable containing start and end row *index*
+    :type rows: iterable containing :class:`ints <int>`
     '''
     widths=[len(cn) for cn in self.col_names]
     sel_rows=self.rows
@@ -365,7 +395,25 @@ class Table(object):
   def __str__(self):
     return self.ToString()
   
-  def _AddRowsFromDict(self, d, overwrite=False):
+  def _AddRowsFromDict(self, d, overwrite=None):
+    '''
+    Add one or more rows from a :class:`dictionary <dict>`.
+
+    If *overwrite* is set and not None (must be set to an existing column name),
+    an existing row is overwritten if the value of column *overwrite* in the
+    new data matches the existing one in the table.
+    If no matching row is found, a new row is appended to the table.
+
+    :param d: dictionary containing the data
+    :type d: :class:`dict`
+
+    :param overwrite: column name to overwrite existing row if value in
+                      column *overwrite* matches
+    :type overwrite: :class:`str`
+
+    :raises: :class:`ValueError` if multiple rows are added but the number of
+             data items is different for different columns.
+    '''
     # get column indices
     idxs = [self.GetColIndex(k) for k in d.keys()]
     
@@ -373,13 +421,13 @@ class Table(object):
     old_len = None
     for k,v in d.iteritems():
       if IsScalar(v):
-        d[k] = [v]
-      else:
-        if not old_len:
-          old_len = len(v)
-        elif old_len!=len(v):
-          raise ValueError("Cannot add rows: length of data must be equal " + \
-                           "for all columns in %s"%str(d))
+        v = [v]
+        d[k] = v
+      if not old_len:
+        old_len = len(v)
+      elif old_len!=len(v):
+        raise ValueError("Cannot add rows: length of data must be equal " + \
+                         "for all columns in %s"%str(d))
     
     # convert column based dict to row based dict and create row and add data
     for i,data in enumerate(zip(*d.values())):
@@ -409,18 +457,77 @@ class Table(object):
     """
     Add a row to the table.
     
-    *row* may either be a dictionary or a list-like object.
-    In the case of a dictionary the keys in the dictionary must match the column
-    names. Columns not found in the dict will be initialized to None.
-    Alternatively, if data is a list-like object, the row is initialized from
-    the values in data. The number of items in data must match the number of
-    columns in the table. A :class:`ValuerError` is raised otherwise. The values
-    are added in the order specified in the list, thus, the order of the data
-    must match the columns.
+    *data* may either be a dictionary or a list-like object:
+
+     - If *data* is a dictionary the keys in the dictionary must match the
+       column names. Columns not found in the dict will be initialized to None.
+       If the dict contains list-like objects, multiple rows will be added, if
+       the number of items in all list-like objects is the same, otherwise a
+       :class:`ValueError` is raised.
+
+     - If *data* is a list-like object, the row is initialized from the values
+       in *data*. The number of items in *data* must match the number of
+       columns in the table. A :class:`ValuerError` is raised otherwise. The
+       values are added in the order specified in the list, thus, the order of
+       the data must match the columns.
        
     If *overwrite* is set and not None (must be set to an existing column name),
-    an existing row is overwritten if the value of column *overwrite* matches.
+    the *first* row where the value of column *overwrite* in the table matches
+    the value in the new data is overwritten.
     If no matching row is found, a new row is appended to the table.
+
+    :param data: data to add
+    :type data: :class:`dict` or *list-like* object
+
+    :param overwrite: column name to overwrite existing row if value in
+                      column *overwrite* matches
+    :type overwrite: :class:`str`
+
+    :raises: :class:`ValueError` if *list-like* object is used and number of
+             items does *not* match number of columns in table.
+
+    :raises: :class:`ValueError` if *dict* is used and multiple rows are added
+             but the number of data items is different for different columns.
+
+    **Example:** add multiple data rows to a subset of columns using a dictionary
+
+    .. code-block:: python
+
+      # create table with three float columns
+      tab = Table(['x','y','z'], 'fff')
+
+      # add rows from dict
+      data = {'x': [1.2, 1.6], 'z': [1.6, 5.3]}
+      tab.AddRow(data)
+      print tab
+
+      '''
+      will produce the table
+
+      ====  ====  ====
+      x     y     z
+      ====  ====  ====
+      1.20  NA    1.60
+      1.60  NA    5.30
+      ====  ====  ====
+      '''
+
+      # overwrite the row with x=1.2 and add row with x=1.9
+      data = {'x': [1.2, 1.9], 'z': [7.9, 3.5]}
+      tab.AddRow(data, overwrite='x')
+      print tab
+
+      '''
+      will produce the table
+
+      ====  ====  ====
+      x     y     z
+      ====  ====  ====
+      1.20  NA    7.90
+      1.60  NA    5.30
+      1.90  NA    3.50
+      ====  ====  ====
+      '''
     """
     if type(data)==dict:
       self._AddRowsFromDict(data, overwrite)
@@ -448,6 +555,9 @@ class Table(object):
   def RemoveCol(self, col):
     """
     Remove column with the given name from the table
+
+    :param col: name of column to remove
+    :type col: :class:`str`
     """
     idx = self.GetColIndex(col)
     del self.col_names[idx]
@@ -459,26 +569,81 @@ class Table(object):
     """
     Add a column to the right of the table.
     
+    :param col_name: name of new column
+    :type col_name: :class:`str`
+
+    :param col_type: type of new column (long versions: *int*, *float*, *bool*,
+                     *string* or short versions: *i*, *f*, *b*, *s*)
+    :type col_type: :class:`str`
+
+    :param data: data to add to new column.
+    :type data: scalar or iterable
+
+    **Example:**
+
     .. code-block:: python
     
       tab=Table(['x'], 'f', x=range(5))
       tab.AddCol('even', 'bool', itertools.cycle([True, False]))
       print tab
     
-    will produce the table
-    
-    ====  ====
-    x     even
-    ====  ====
-      0   True
-      1   False
-      2   True
-      3   False
-      4   True
-    ====  ====
+      '''
+      will produce the table
+
+      ====  ====
+      x     even
+      ====  ====
+        0   True
+        1   False
+        2   True
+        3   False
+        4   True
+      ====  ====
+      '''
+
+    If data is a constant instead of an iterable object, it's value
+    will be written into each row:
+
+    .. code-block:: python
+
+      tab=Table(['x'], 'f', x=range(5))
+      tab.AddCol('num', 'i', 1)
+      print tab
+
+      '''
+      will produce the table
+
+      ====  ====
+      x     num
+      ====  ====
+        0   1
+        1   1
+        2   1
+        3   1
+        4   1
+      ====  ====
+      '''
+
+    .. warning::
+
+      :meth:`AddCol` only adds data to existing rows and does *not*
+      add new rows. Use :meth:`AddRow` to do this. Therefore, the following code
+      snippet does not add any data items:
+
+    .. code-block:: python
+
+      tab=Table()
+      tab.AddCol('even', 'int', [1,2,3,4,5])
+      print tab
       
-    if data is a constant instead of an iterable object, it's value
-    will be written into each row 
+      '''
+      will produce the empty table
+
+      ====
+      even
+      ====
+      '''
+
     """
     col_type = self._ParseColTypes(col_type, exp_num=1)[0]
     self.col_names.append(col_name)
@@ -489,8 +654,6 @@ class Table(object):
     else:
       for row, d in zip(self.rows, data):
         row.append(d)
-
-
 
   def Filter(self, *args, **kwargs):
     """
@@ -681,7 +844,13 @@ class Table(object):
 
   def Sort(self, by, order='+'):
     """
-    Performs an in-place sort of the table, based on column.
+    Performs an in-place sort of the table, based on column *by*.
+
+    :param by: column name by which to sort
+    :type by: :class:`str`
+
+    :param order: ascending or descending order
+    :type order: :class:`str` (i.e. *+*, *-*)
     """
     sign=-1
     if order=='-':
@@ -694,6 +863,12 @@ class Table(object):
   def GetUnique(self, col, ignore_nan=True):
     """
     Extract a list of all unique values from one column
+
+    :param col: column name
+    :type col: :class:`str`
+
+    :param ignore_nan: ignore all *None* values
+    :type ignore_nan: :class:`bool`
     """
     idx = self.GetColIndex(col)
     seen = {}
@@ -732,7 +907,99 @@ class Table(object):
            num_z_levels=10, diag_line=False, labels=None, max_num_labels=None,
            title=None, clear=True, save=False, **kwargs):
     """
-    Plot x against y using matplot lib
+    Function to plot values from your table in 1, 2 or 3 dimensions using
+    `Matplotlib <http://matplotlib.sourceforge.net>`__
+
+    :param x: column name for first dimension
+    :type x: :class:`str`
+
+    :param y: column name for second dimension
+    :type y: :class:`str`
+
+    :param z: column name for third dimension
+    :type z: :class:`str`
+
+    :param style: symbol style (e.g. *.*, *-*, *x*, *o*, *+*, *\**). For a
+                  complete list check (`matplotlib docu <http://matplotlib.sourceforge.net/api/pyplot_api.html#matplotlib.pyplot.plot>`__).
+    :type style: :class:`str`
+
+    :param x_title: title for first dimension, if not specified it is
+                    automatically derived from column name
+    :type x_title: :class:`str`
+
+    :param y_title: title for second dimension, if not specified it is
+                    automatically derived from column name
+    :type y_title: :class:`str`
+
+    :param z_title: title for third dimension, if not specified it is
+                    automatically derived from column name
+    :type z_title: :class:`str`
+
+    :param x_range: start and end value for first dimension (e.g. [start_x, end_x])
+    :type x_range: :class:`list` of length two
+
+    :param y_range: start and end value for second dimension (e.g. [start_y, end_y])
+    :type y_range: :class:`list` of length two
+
+    :param z_range: start and end value for third dimension (e.g. [start_z, end_z])
+    :type z_range: :class:`list` of length two
+
+    :param color: color for data (e.g. *b*, *g*, *r*). For a complete list check
+                  (`matplotlib docu <http://matplotlib.sourceforge.net/api/pyplot_api.html#matplotlib.pyplot.plot>`__).
+    :type color: :class:`str`
+
+    :param plot_if: callable which returnes *True* if row should be plotted. Is
+                    invoked like ``plot_if(self, row)``
+    :type plot_if: callable
+
+    :param legend: legend label for data series
+    :type legend: :class:`str`
+
+    :param num_z_levels: number of levels for third dimension
+    :type num_z_levels: :class:`int`
+
+    :param diag_line: draw diagonal line
+    :type diag_line: :class:`bool`
+
+    :param labels: column name containing labels to put on x-axis for one
+                   dimensional plot
+    :type labels: :class:`str`
+
+    :param max_num_labels: limit maximum number of labels
+    :type max_num_labels: :class:`int`
+
+    :param title: plot title, if not specified it is automatically derived from
+                  plotted column names
+    :type title: :class:`str`
+
+    :param clear: clear old data from plot
+    :type clear: :class:`bool`
+
+    :param save: filename for saving plot
+    :type save: :class:`str`
+
+    :param \*\*kwargs: additional arguments passed to matplotlib
+
+    **Examples:** simple plotting functions
+
+    .. code-block:: python
+
+      tab=Table(['a','b','c','d'],'iffi', a=range(5,0,-1),
+                                          b=[x/2.0 for x in range(1,6)],
+                                          c=[math.cos(x) for x in range(0,5)],
+                                          d=range(3,8))
+
+      # one dimensional plot of column 'd' vs. index
+      plt=tab.Plot('d')
+      plt.show()
+
+      # two dimensional plot of 'a' vs. 'c'
+      plt=tab.Plot('a', y='c', style='o-')
+      plt.show()
+
+      # three dimensional plot of 'a' vs. 'c' with values 'b'
+      plt=tab.Plot('a', y='c', z='b')
+      plt.show()
     """
     try:
       import matplotlib.pyplot as plt
@@ -766,6 +1033,14 @@ class Table(object):
           nice_z = MakeTitle(z)
         else:
           nice_z = None
+
+      if x_range and (IsScalar(x_range) or len(x_range)!=2):
+        raise ValueError('parameter x_range must contain exactly two elements')
+      if y_range and (IsScalar(y_range) or len(y_range)!=2):
+        raise ValueError('parameter y_range must contain exactly two elements')
+      if z_range and (IsScalar(z_range) or len(z_range)!=2):
+        raise ValueError('parameter z_range must contain exactly two elements')
+
       if color:
         kwargs['color']=color
       if legend:
@@ -874,7 +1149,56 @@ class Table(object):
                     y_title=None, title=None, clear=True, save=False):
     """
     Create a histogram of the data in col for the range *x_range*, split into
-    *num_bins* bins and plot it using matplot lib.
+    *num_bins* bins and plot it using Matplotlib.
+
+    :param col: column name with data
+    :type col: :class:`str`
+
+    :param x_range: start and end value for first dimension (e.g. [start_x, end_x])
+    :type x_range: :class:`list` of length two
+
+    :param num_bins: number of bins in range
+    :type num_bins: :class:`int`
+
+    :param normed: normalize histogram
+    :type normed: :class:`bool`
+
+    :param histtype: type of histogram (i.e. *bar*, *barstacked*, *step*,
+                     *stepfilled*). See (`matplotlib docu <http://matplotlib.sourceforge.net/api/pyplot_api.html#matplotlib.pyplot.hist>`__).
+    :type histtype: :class:`str`
+
+    :param align: style of histogram (*left*, *mid*, *right*). See
+                  (`matplotlib docu <http://matplotlib.sourceforge.net/api/pyplot_api.html#matplotlib.pyplot.hist>`__).
+    :type align: :class:`str`
+
+    :param x_title: title for first dimension, if not specified it is
+                    automatically derived from column name
+    :type x_title: :class:`str`
+
+    :param y_title: title for second dimension, if not specified it is
+                    automatically derived from column name
+    :type y_title: :class:`str`
+
+    :param title: plot title, if not specified it is automatically derived from
+                  plotted column names
+    :type title: :class:`str`
+
+    :param clear: clear old data from plot
+    :type clear: :class:`bool`
+
+    :param save: filename for saving plot
+    :type save: :class:`str`
+
+    **Examples:** simple plotting functions
+
+    .. code-block:: python
+
+      tab=Table(['a'],'f', a=[math.cos(x*0.01) for x in range(100)])
+
+      # one dimensional plot of column 'd' vs. index
+      plt=tab.PlotHistogram('a')
+      plt.show()
+
     """
     try:
       import matplotlib.pyplot as plt
@@ -943,6 +1267,9 @@ class Table(object):
     Returns the row containing the cell with the maximal value in col. If 
     several rows have the highest value, only the first one is returned.
     None values are ignored.
+
+    :param col: column name
+    :type col: :class:`str`
     """
     val, idx = self._Max(col)
     return self.rows[idx]
@@ -951,6 +1278,9 @@ class Table(object):
     """
     Returns the maximum value in col. If several rows have the highest value,
     only the first one is returned. None values are ignored.
+
+    :param col: column name
+    :type col: :class:`str`
     """
     val, idx = self._Max(col)
     return val
@@ -960,6 +1290,9 @@ class Table(object):
     Returns the row index of the cell with the maximal value in col. If
     several rows have the highest value, only the first one is returned.
     None values are ignored.
+
+    :param col: column name
+    :type col: :class:`str`
     """
     val, idx = self._Max(col)
     return idx
@@ -986,6 +1319,9 @@ class Table(object):
     """
     Returns the minimal value in col. If several rows have the lowest value,
     only the first one is returned. None values are ignored.
+
+    :param col: column name
+    :type col: :class:`str`
     """
     val, idx = self._Min(col)
     return val
@@ -995,6 +1331,9 @@ class Table(object):
     Returns the row containing the cell with the minimal value in col. If 
     several rows have the lowest value, only the first one is returned.
     None values are ignored.
+
+    :param col: column name
+    :type col: :class:`str`
     """
     val, idx = self._Min(col)
     return self.rows[idx]
@@ -1004,6 +1343,9 @@ class Table(object):
     Returns the row index of the cell with the minimal value in col. If
     several rows have the lowest value, only the first one is returned.
     None values are ignored.
+
+    :param col: column name
+    :type col: :class:`str`
     """
     val, idx = self._Min(col)
     return idx
@@ -1013,6 +1355,11 @@ class Table(object):
     Returns the sum of the given column. Cells with None are ignored. Returns 
     0.0, if the column doesn't contain any elements. Col must be of numeric
     column type ('float', 'int') or boolean column type.
+
+    :param col: column name
+    :type col: :class:`str`
+
+    :raises: :class:`TypeError` if column type is ``string``
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
@@ -1032,6 +1379,11 @@ class Table(object):
 
     If column type is *bool*, the function returns the ratio of
     number of 'Trues' by total number of elements.
+
+    :param col: column name
+    :type col: :class:`str`
+
+    :raises: :class:`TypeError` if column type is ``string``
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
@@ -1049,13 +1401,21 @@ class Table(object):
     
   def RowMean(self, mean_col_name, cols):
     """
-    Adds a new column of type 'float' with a specified name (mean_col),
+    Adds a new column of type 'float' with a specified name (*mean_col_name*),
     containing the mean of all specified columns for each row.
     
     Cols are specified by their names and must be of numeric column
-    type ('float', 'int') or boolean column type.. Cells with None are ignored.
+    type ('float', 'int') or boolean column type. Cells with None are ignored.
     Adds None if the row doesn't contain any values.
     
+    :param mean_col_name: name of new column containing mean values
+    :type mean_col_name: :class:`str`
+
+    :param cols: name or list of names of columns to include in computation of
+                 mean
+    :type cols: :class:`str` or :class:`list` of strings
+
+    :raises: :class:`TypeError` if column type of columns in *col* is ``string``
     
     == Example ==
    
@@ -1073,7 +1433,7 @@ class Table(object):
     
     .. code-block::python
     
-      tab.RowMean('mean', 'x', 'u')
+      tab.RowMean('mean', ['x', 'u'])
     
     
     ==== ==== ==== ===== 
@@ -1117,6 +1477,11 @@ class Table(object):
     Returns the median of the given column. Cells with None are ignored. Returns 
     None, if the column doesn't contain any elements. Col must be of numeric
     column type ('float', 'int') or boolean column type.
+
+    :param col: column name
+    :type col: :class:`str`
+
+    :raises: :class:`TypeError` if column type is ``string``
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
@@ -1138,6 +1503,11 @@ class Table(object):
     Returns the standard deviation of the given column. Cells with None are
     ignored. Returns None, if the column doesn't contain any elements. Col must
     be of numeric column type ('float', 'int') or boolean column type.
+
+    :param col: column name
+    :type col: :class:`str`
+
+    :raises: :class:`TypeError` if column type is ``string``
     """
     idx = self.GetColIndex(col)
     col_type = self.col_types[idx]
@@ -1156,6 +1526,12 @@ class Table(object):
   def Count(self, col, ignore_nan=True):
     """
     Count the number of cells in column that are not equal to None.
+
+    :param col: column name
+    :type col: :class:`str`
+
+    :param ignore_nan: ignore all *None* values
+    :type ignore_nan: :class:`bool`
     """
     count=0
     idx=self.GetColIndex(col)
@@ -1169,10 +1545,16 @@ class Table(object):
 
   def Correl(self, col1, col2):
     """
-    Calculate the Pearson correlation coefficient between col1 and col2, only 
-    taking rows into account where both of the values are not equal to None. If 
-    there are not enough data points to calculate a correlation coefficient, 
-    None is returned.
+    Calculate the Pearson correlation coefficient between *col1* and *col2*, only
+    taking rows into account where both of the values are not equal to *None*.
+    If there are not enough data points to calculate a correlation coefficient,
+    *None* is returned.
+
+    :param col1: column name for first column
+    :type col1: :class:`str`
+
+    :param col2: column name for second column
+    :type col2: :class:`str`
     """
     if IsStringLike(col1) and IsStringLike(col2):
       col1 = self.GetColIndex(col1)
@@ -1194,7 +1576,13 @@ class Table(object):
     there are not enough data points to calculate a correlation coefficient, 
     None is returned.
     
-    The function depends on the following module: *scipy.stats.mstats*
+    :warning: The function depends on the following module: *scipy.stats.mstats*
+
+    :param col1: column name for first column
+    :type col1: :class:`str`
+
+    :param col2: column name for second column
+    :type col2: :class:`str`
     """
     try:
       import scipy.stats.mstats
@@ -1222,8 +1610,22 @@ class Table(object):
 
   def Save(self, stream_or_filename, format='ost', sep=','):
     """
-    Save the table to stream or filename. For supported file formats, see
-    :meth:`Load`
+    Save the table to stream or filename. The following three file formats
+    are supported (for more information on file formats, see :meth:`Load`):
+
+    =============   =======================================
+    ost             ost-specific format (human readable)
+    csv             comma separated values (human readable)
+    pickle          pickled byte stream (binary)
+    =============   =======================================
+
+    :param stream_or_filename: filename or stream for writing output
+    :type stream_or_filename: :class:`str` or :class:`file`
+
+    :param format: output format (i.e. *ost*, *csv*, *pickle*)
+    :type format: :class:`str`
+
+    :raises: :class:`ValueError` if format is unknown
     """
     format=format.lower()
     if format=='ost':
@@ -1273,8 +1675,12 @@ class Table(object):
     '''
     Returns a numpy matrix containing the selected columns from the table as 
     columns in the matrix.
-    Only columns of type int or float are supported. NA values in the table
-    will be converted to None values.
+    Only columns of type *int* or *float* are supported. *NA* values in the
+    table will be converted to *None* values.
+
+    :param \*args: column names to include in numpy matrix
+
+    :warning: The function depends on *numpy*
     '''
     try:
       import numpy as np
@@ -1380,11 +1786,14 @@ class Table(object):
                      style='-', title=None, x_title=None, y_title=None,
                      clear=True, save=None):
     '''
-    Plot an enrichment curve using matplotlib.
+    Plot an enrichment curve using matplotlib of column *score_col* classified
+    according to *class_col*.
     
-    For more information about parameters, see :meth:`ComputeEnrichment`
+    For more information about parameters of the enrichment, see
+    :meth:`ComputeEnrichment`, and for plotting see :meth:`Plot`.
+    
+    :warning: The function depends on *matplotlib*
     '''
-    
     try:
       import matplotlib.pyplot as plt
     
@@ -1420,24 +1829,23 @@ class Table(object):
   def ComputeEnrichment(self, score_col, class_col, score_dir='-', 
                         class_dir='-', class_cutoff=2.0):
     '''
-    Computes the enrichment of one column (e.g. score) over all data points.
+    Computes the enrichment of column *score_col* classified according to
+    *class_col*.
     
     For this it is necessary, that the datapoints are classified into positive
     and negative points. This can be done in two ways:
     
-     - by using one 'bool' column which contains True for positives and False
-       for negatives
-     - by specifying an additional column, a cutoff value and the columns
-       direction. This will generate the classification on the fly
+     - by using one 'bool' type column (*class_col*) which contains *True* for
+       positives and *False* for negatives
        
-       * if class_dir=='-': values in the classification column that are 
-                            less than or equal to class_cutoff will be counted
-                            as positives
-       * if class_dir=='+': values in the classification column that are 
-                            larger than or equal to class_cutoff will be counted
-                            as positives
+     - by specifying a classification column (*class_col*), a cutoff value
+       (*class_cutoff*) and the classification columns direction (*class_dir*).
+       This will generate the classification on the fly
 
-    During the calculation, the table will be sorted according to score_dir,
+       * if ``class_dir=='-'``: values in the classification column that are less than or equal to class_cutoff will be counted as positives
+       * if ``class_dir=='+'``: values in the classification column that are larger than or equal to class_cutoff will be counted as positives
+
+    During the calculation, the table will be sorted according to *score_dir*,
     where a '-' values means smallest values first and therefore, the smaller
     the value, the better.
     
@@ -1484,7 +1892,10 @@ class Table(object):
     Computes the area under the curve of the enrichment using the trapezoidal
     rule.
     
-    For more information about parameters, see :meth:`ComputeEnrichment`
+    For more information about parameters of the enrichment, see
+    :meth:`ComputeEnrichment`.
+
+    :warning: The function depends on *numpy*
     '''
     try:
       import numpy as np
@@ -1500,8 +1911,8 @@ class Table(object):
   def ComputeROC(self, score_col, class_col, score_dir='-',
                  class_dir='-', class_cutoff=2.0):
     '''
-    Computes the receiver operating characteristics of one column (e.g. score)
-    over all data points.
+    Computes the receiver operating characteristics (ROC) of column *score_col*
+    classified according to *class_col*.
 
     For this it is necessary, that the datapoints are classified into positive
     and negative points. This can be done in two ways:
@@ -1512,12 +1923,8 @@ class Table(object):
        and the classification columns direction (*class_dir*). This will generate
        the classification on the fly
 
-       - if *class_dir* =='-': values in the classification column that are
-                            less than or equal to *class_cutoff* will be counted
-                            as positives
-       - if *class_dir* =='+': values in the classification column that are
-                            larger than or equal to *class_cutoff* will be
-                            counted as positives
+       - if ``class_dir=='-'``: values in the classification column that are less than or equal to *class_cutoff* will be counted as positives
+       - if ``class_dir=='+'``: values in the classification column that are larger than or equal to *class_cutoff* will be counted as positives
 
     During the calculation, the table will be sorted according to *score_dir*,
     where a '-' values means smallest values first and therefore, the smaller
@@ -1589,7 +1996,10 @@ class Table(object):
     Computes the area under the curve of the receiver operating characteristics
     using the trapezoidal rule.
     
-    For more information about parameters, see :meth:`ComputeROC`
+    For more information about parameters of the ROC, see
+    :meth:`ComputeROC`.
+
+    :warning: The function depends on *numpy*
     '''
     try:
       import numpy as np
@@ -1611,7 +2021,10 @@ class Table(object):
     '''
     Plot an ROC curve using matplotlib.
     
-    For more information about parameters, see :meth:`ComputeROC`
+    For more information about parameters of the ROC, see
+    :meth:`ComputeROC`, and for plotting see :meth:`Plot`.
+
+    :warning: The function depends on *matplotlib*
     '''
 
     try:
@@ -1668,14 +2081,8 @@ class Table(object):
      - by using 'float' or 'int' columns and specifying a cutoff value and the
        columns direction. This will generate the classification on the fly
        
-       * if *class_dir*/*score_dir*=='-': values in the classification column 
-                                    that are less than or equal to 
-                                    *class_cutoff*/*score_cutoff* will be
-                                    counted as positives
-       * if *class_dir*/*score_dir*=='+': values in the classification column 
-                                    that are larger than or equal to
-                                    *class_cutoff*/*score_cutoff* will be
-                                    counted as positives
+       * if ``class_dir``/``score_dir=='-'``: values in the classification column that are less than or equal to *class_cutoff*/*score_cutoff* will be counted as positives
+       * if ``class_dir``/``score_dir=='+'``: values in the classification column that are larger than or equal to *class_cutoff*/*score_cutoff* will be counted as positives
                                     
     The two possibilities can be used together, i.e. 'bool' type for one column
     and 'float'/'int' type and cutoff/direction for the other column.

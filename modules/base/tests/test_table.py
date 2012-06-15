@@ -506,6 +506,35 @@ class TestTable(unittest.TestCase):
                                    'first': ['x','foo','bar'],
                                    'third': [3.141, 3.141, 3.141]})
 
+  def testAddMultiRowFromDict(self):
+    tab = Table(['x','y','z'], 'fff')
+    data = {'x': [1.2, 1.5], 'z': [1.6, 2.4]}
+    tab.AddRow(data)
+    self.CompareDataFromDict(tab, {'x': [1.2, 1.5],
+                                   'y': [None, None],
+                                   'z': [1.6, 2.4]})
+
+    data = {'y': [5.1, 3.4, 1.5]}
+    tab.AddRow(data)
+    self.CompareDataFromDict(tab, {'x': [1.2, 1.5, None, None, None],
+                                   'y': [None, None, 5.1, 3.4, 1.5],
+                                   'z': [1.6, 2.4, None, None, None]})
+
+    # must raise since length of data is not the same
+    data = {'x': [1.2, 1.5], 'y': 1.2, 'z': [1.6, 2.4]}
+    self.assertRaises(ValueError, tab.AddRow, data)
+
+    # must raise since length of data is not the same
+    data = {'x': [1.2, 1.5], 'y': [1.2], 'z': [1.6, 2.4]}
+    self.assertRaises(ValueError, tab.AddRow, data)
+
+    # overwrite certain rows
+    data = {'x': [1.2, 1.9], 'z': [7.9, 3.5]}
+    tab.AddRow(data, overwrite='x')
+    self.CompareDataFromDict(tab, {'x': [1.2, 1.5, None, None, None, 1.9],
+                                   'y': [None, None, 5.1, 3.4, 1.5, None],
+                                   'z': [7.9, 2.4, None, None, None, 3.5]})
+
   def testAddRowFromDictWithOverwrite(self):
     '''
     add rows from dictionary with overwrite (i.e. overwrite third row with additional data)
@@ -1100,6 +1129,14 @@ class TestTable(unittest.TestCase):
                       score_dir='+', class_col='rmsd', class_cutoff=2.0,
                       class_dir='y')
     
+  def testPlot(self):
+    if not HAS_MPL or not HAS_NUMPY:
+      return
+    tab = self.CreateTestTable()
+    self.assertRaises(ValueError, tab.Plot, 'second', x_range=1)
+    self.assertRaises(ValueError, tab.Plot, x='second', y='third', y_range=[1,2,3])
+    self.assertRaises(ValueError, tab.Plot, x='second', y='third', z_range='st')
+
   def testPlotEnrichment(self):
     if not HAS_MPL or not HAS_PIL:
       return
