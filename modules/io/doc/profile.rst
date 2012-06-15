@@ -72,7 +72,7 @@ CHARMM:
 The IOProfile Class
 --------------------------------------------------------------------------------
 
-.. class:: IOProfile(quack_mode=False, dialect='PDB', strict_hydrogens=False, fault_tolerant=False)
+.. class:: IOProfile(dialect='PDB', strict_hydrogens=False, quack_mode=False, join_spread_atom_records=False, no_hetatms=False, calpha_only=False, fault_tolerant=False, bond_feasibility_check=True)
 
   Aggregates flags that control the import of molecular structures.
 
