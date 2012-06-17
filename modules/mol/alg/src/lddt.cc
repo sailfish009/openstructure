@@ -127,9 +127,14 @@ int main (int argc, char **argv)
   po::positional_options_description p;
   p.add("files", -1);
   po::variables_map vm;
-  po::store(po::command_line_parser(argc, argv).
+  try {
+    po::store(po::command_line_parser(argc, argv).
                 options(desc).positional(p).run(),
-            vm);
+              vm);
+  } catch (std::exception& e) {
+    std::cout << e.what() << std::endl;
+    usage();
+  }
   po::notify(vm);
   if (vm.count("version")) {
     std::cout << "Version: " << version << std::endl;
