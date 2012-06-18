@@ -94,9 +94,7 @@ Varia
 
 **Datasets:** :doc:`tabular data <table>`
 
-**File Formats:** :doc:`supported structure file formats <io/structure_formats>`
-**File Formats:** :doc:`supported sequence file formats <io/sequence_formats>`
-**File Formats:** :doc:`supported image file formats <io/image_formats>`
+**Supported File Formats:** :doc:`structure formats<io/structure_formats>` | :doc:`sequence formats <io/sequence_formats>` | :doc:`image formats <io/image_formats>`
 
 
 Extending OpenStructure
