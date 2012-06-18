@@ -32,7 +32,7 @@ class UniqueAtomIdentifier
 {
   
 public:
-  /// \brief Contstructor with all the relevant information  
+  /// \brief Constructor with all the relevant information  
   UniqueAtomIdentifier(const String& chain,const ResNum& residue,const String& residue_name, const String& atom): chain_(chain),residue_(residue),residue_name_(residue_name),atom_(atom) {}  
 
   // to make the compiler happy (boost python map suite)
@@ -110,15 +110,19 @@ std::pair<long int,long int> DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const Entit
 /// int properties named <string>_conserved and <string>_total.
 Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          const EntityView& target,
-                                         Real cutoff_list, 
+                                         Real cutoff, 
                                          Real max_dist,
                                          const String& local_ldt_property_string="");
 /// \brief Calculates the Local Distance Difference Test score for a given model starting from an alignment between a reference structure and the model. 
 ///
 /// Calculates the Local Distance Difference Test score given an alignment between a model and a taget structure.
 /// Requires a threshold on which to calculate the score and an inclusion radius to determine the interatiomic 
-/// distances to check. BEWARE: This algorithm uses the old version of the Local Distance Difference Test and is
-/// left only for back-compatibility purposes
+/// distances to check. Obviously, the strucvtures of the model and the reference must be attached to the alignment.
+/// By default the first structure in the alignment is considered the reference and the second is considered the
+/// model, but this can be changed by passing to the function the indexes of the two structures in the ref_index
+/// and mdl_index parameters.
+/// BEWARE: This algorithm uses the old version of the Local Distance Difference Test 
+/// (multiple cycles, single threshold, etc. ) and will give a slightly different result than the other functions
 Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const ost::seq::AlignmentHandle& aln,
                                          Real cutoff, Real max_dist,
                                          int ref_index=0, int mdl_index=1);

@@ -100,6 +100,7 @@ ClashingDistances DLLEXPORT_OST_MOL_ALG FillClashingDistances(std::vector<String
 /// \brief Fills a list of stereo-chemical statistics from the content of a parameter file
 ///
 /// Requires a list of strings holding the contents of a parameter file, one line per string
+/// The header can be 'Bonds' to read bond statistics or 'Angles' to read angle statistics
 StereoChemicalParams DLLEXPORT_OST_MOL_ALG FillStereoChemicalParams(const String& header, std::vector<String>& stereo_chemical_props_file);  
 
 /// \brief Filters a structure based on detected clashes between non bonded atoms. Entity version

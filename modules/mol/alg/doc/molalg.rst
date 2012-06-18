@@ -4,104 +4,341 @@
 .. module:: ost.mol.alg
    :synopsis: Algorithms operating on molecular structures
 
-.. function:: LocalDistTest(model, reference, tolerance, radius, local_ldt_property_string="")
+.. function:: LocalDistDiffTest(model, reference, tolerance, radius, local_ldt_property_string="")
   
-  This function calculates the agreement of local contacts between the model and 
-  the reference structure. The overlap is a number between zero and one, where 
-  one indicates complete agreement, zero indicates no agreement at all. This 
-  score is similar to the GDT, but does not require any superposition of the 
-  model and the reference.
+  This function calculates the agreement of local contacts between a model and 
+  a reference structure (Local Distance Difference Tests). The overlap is a number 
+  between zero and one, where one indicates complete agreement, zero indicates no 
+  agreement at all. This score is similar to the GDT, but does not require any 
+  superposition between the model and the reference.
   
-  The distance of atom pairs in the reference structure that are closer than a 
-  certain distance (radius) to each other is compared to the distance found in 
+  The distance of atom pairs in the reference structure, when shorter than a 
+  certain predefined distance (inclusion radius), is compared with the same distance in 
   the model. If the difference between these two distances is smaller than a 
-  threshold value (tolerance), the model and the reference agree. Missing atoms 
-  in the model are treated disagreement and thus lower the score.
+  threshold value (tolerance), the distance is considered conserverd in the model. Missing atoms 
+  in the model lead to non-conserved distances and thus lower the score.
   
-  For residue with symmetric sidechains (GLU, ASP, ARG, VAL, PHE, TYR), the 
-  naming of the atoms is ambigous. For these residues, the overlap of both 
-  possible solutions to the fixed atoms, that is, everything that is not 
-  ambigous is calculated. The solution that gives higher overlap is then used to 
-  calculate the actual overlap score.
+  The function only processes standard residues in the first chains of the model and of the reference
+  For residues with symmetric sidechains (GLU, ASP, ARG, VAL, PHE, TYR), the 
+  naming of the atoms is ambigous. For these residues, the function computes the Local Distance Difference 
+  Test score that each naming convention would generate when considering all non-ambigous surrounding atoms.
+  The solution that gives higher score is then picked to compute the final Local Difference
+  Distance Score for the whole model.
 
-  If a string is passed as last parameter, the function computes the overlap score for
-  each residue and saves it as a float property in the ResidueHandle, with the passed string
-  as property name
+  If a string is passed as last parameter to the function, the function computes the Local Difference Distance
+  Test score for each residue and saves it as a float property in the ResidueHandle, with the passed string
+  as property name. Additionally, the actual residue-based counts of the total checked distances and of 
+  the distances conserved in the model are stored as integer properties in the ResidueHandle. The property
+  names are respectively <passed string>_total and <passed string>_conserved.
+
+  :param model: the model structure
+  :type model: :class:`~ost.mol.EntityView`
+  :param reference: the reference structure
+  :type reference: :class:`~ost.mol.EntityView`
+  :param tolerance: the tolerance threshold used to determine distance conservation
+  :param radius: the inclusion radius in Angstroms
+  :param local_ldt_property_string: the base name for the ResidueHandle properties that store the local scores
+
+  :returns: the Local Distance Difference Test score
   
-.. function:: SuperposeFrames(frames, sel, from=0, to=-1, ref=-1)
-
-  This function superposes the frames of the given coord group and returns them
-  as a new coord group.
+.. function:: LocalDistDiffTest(model, distance_list, tolerance_list, local_ldt_property_string="")
   
-  :param frames: The source coord group.
-  :type frames: :class:`~ost.mol.CoordGroupHandle`
-  :param sel: An entity view containing the selection of atoms to be used for     
-    superposition. If set to an invalid view, all atoms in the coord group are 
-    used.
-  :type sel: :class:`ost.mol.EntityView`
-  :param from: index of the first frame
-  :param to: index of the last frame plus one. If set to -1, the value is set to 
-     the number of frames in the coord group
-  :param ref: The index of the reference frame to use for superposition. If set 
-     to -1, the each frame is superposed to the previous frame.
-     
-  :returns: A newly created coord group containing the superposed frames.
+  This function counts the conserved local contacts between the model and the reference structure
+  (these are the values needed to compute the Local Distance Difference Test score, see description of 
+  the previous function). It shares the same properties as the previous function, with some differences:
+  the thresholds can be more than one (the return counts are then the average over all thresholds), and
+  the input is not the reference structure, but already a list of distances to be checked for conservation
 
+  If a string is passed as the last parameter, residue-based counts and the value of the residue-based Local
+  Distance Difference Test score are saved in each ResidueHandle as int and float properties, as detailed in
+  the description of the previous function. 
+
+  :param model: the model structure
+  :type model: :class:`~ost.mol.EntityView`
+  :param distance_list: the list of distances to check for conservation
+  :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`
+  :param tolerance_list: a list of thresholds used to determine distance conservation
+  :param local_ldt_property_string: the base name for the ResidueHandle properties that store the local scores
+
+  :returns: a tuple containing the counts of the conserved distances in the model and of all the checked 
+            distances
+
+.. function::  LocalDistDiffTest(alignment, tolerance, radius, ref_index=0, mdl_index=1);
+
+  Calculates the Local Distance Difference Test score (see previous functions) starting from an
+  alignment between a reference structure and a model. The AlignmentHandle parameter used to provide the 
+  alignment to the function needs to have the two structures attached to it. By default the first structure in the
+  alignment is considered to be the reference structure, and the second structure is taken as the model. This
+  can however be changed by passing the indexes of the two structures in the AlignmentHandle as parameters to the
+  function. 
+
+  BEWARE: This function uses the old implementation of the Local Distance Difference Test algorithm and
+  will give slightly different results from the new one.  
+
+  :param alignment: an alignment containing the sequences of the reference and of the model structures, with the structures themselves
+                    attached
+  :type alignment: :class:`~ost.seq.AlignmentHandle`
+  :param tolerance: a list of thresholds used to determine distance conservation
+  :param radius: the inclusion radius in Angstroms (to determine which distances are checked for conservation)
+  :param ref_index: index of the reference structure in the alignment 
+  :param mdl_index: index of the model in the alignment
+
+  :returns: the Local Distance Difference Test score
+
+.. function::  LDTHA(model, distance_list);
+
+  This function calculates the Local Distance Difference Test - High Accuracy score (see previous functions).
+  The High Accuracy name comes from the fact that the tolerance levels used by this function are the same
+  as the thresholds used by GDT-HA (0.5, 1, 2, and 4 Angstrom). 
+
+  :param model: the model structure
+  :type model: :class:`~ost.mol.EntityView`
+  :param distance_list: the list of distances to check for conservation
+  :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`
+
+  :returns: the Local Distance Difference Test score
+
+.. function: CreateDistanceList(reference, radius);
+.. function: CreateDistanceListFromMultipleReferences(reference_list, radius);
+
+  Both these functions create lists of distances to be checked during a Local Distance Difference Test
+  (see description of the functions above). 
+
+  The only difference between the two functions is that one takes a single reference structure and the other
+  a list of reference structures. The structures in the list have to be properly aligned before being passed 
+  to the function. Gaps in the alignment are allowed and automatically dealt with, but corresponding residues 
+  in the structures must have the same residue number.
+
+  Both functions process only standard residues present in the first chain of the reference structures.
+
+  If a distance between two atoms is shorter than the inclusion radius in all structures in which the two atoms are
+  present, it is included in the list. However, if the distance is longer than the inclusion radius in at least
+  one of the structures, it is not considered to be a local interaction and is excluded from the list.
+
+  :param reference: a reference structure from which distances are derived
+  :type reference: :class:`~ost.mol.EntityView`
+  :param reference_list: a list of  of reference structures from which distances are derived
+  :type reference: list of :class:`~ost.mol.EntityView`
+  :param radius: inclusion radius (in Angstroms) used to determine the distances included in the list
   
-.. function:: SuperposeFrames(frames, sel, ref_view, from=0, to=-1)
-
-  Same as SuperposeFrames above, but the superposition is done on a reference
-  view and not on another frame of the trajectory.
+  :returns: class `~ost.mol.alg.GlobalRDMap`
   
-  :param frames: The source coord group.
-  :type frames: :class:`~ost.mol.CoordGroupHandle`
-  :param sel: An entity view containing the selection of atoms of the frames to be used for     
-    superposition.
-  :type sel: :class:`ost.mol.EntityView`
-  :param ref_view: The reference view on which the frames will be superposed. The number
-    of atoms in this reference view should be equal to the number of atoms in sel.
-  :type ref_view: :class:`ost.mol.EntityView`
-  :param from: index of the first frame
-  :param to: index of the last frame plus one. If set to -1, the value is set to 
-     the number of frames in the coord group     
+.. class:: UniqueAtomIdentifier
+
+  Object containing enough information to uniquely identify an atom in a structure
+
+  .. method:: UniqueAtomIdentifier(chain,residue_number,residue_name,atom_name)
+    
+    Creates an UniqueAtomIdentifier object starting from relevant atom information
+
+    :param chain: a string containing the name of the chain to which the atom belongs
+    :param residue_number: the number of the residue to which the atom belongs 
+    :type residue_number: :class:`~ost.mol.ResNum`
+    :param residue_name: a string containing the name of the residue to which the atom belongs
+    :param atom_name: a string containing the name of the atom
+
+  .. method:: GetChainName() 
+
+    Returns the name of the chain to which the atom belongs, as a String  
+
+  .. method:: GetResNum() 
+
+    Returns the number of the residue the atom belongs to, as a :class:`~ost.mol.ResNum` object
+
+  .. method:: GetResidueName()
+    
+     Returns the name of the residue to which the atom belongs, as a String
+ 
+  .. method:: GetAtomName()
+
+     Returns the name of the atom, as a String
+
+.. class:: ResidueRDMap
+
+  Dictionary-like object containing the a list of distances that originate from the a single residue residue, to
+  check during a run of the Local Distance Difference Test algorithm 
+
+.. class:: GlobalRDMap
+
+  Dictionary-like object containing all the :class:`~ost.mol.alg.ResidueRDMap` objects related to residues
+  of a single structure
   
-  :returns: A newly created coord group containing the superposed frames.
+.. function: PrintResidueRDMap(residue_distance_list)
 
-.. autofunction:: ParseAtomNames
+  Prints to standard output all the distances contained in a :class:`~ost.mol.ResidueRDMap` object 
 
-.. autofunction:: MatchResidueByNum
+.. function: PrintGlobalRDMap(global_distance_list)
 
-.. autofunction:: MatchResidueByIdx
+  Prints to standard output all the distances contained in each of the :class:`~ost.mol.ResidueRDMap` objects that
+  make up a :class:`~ost.mol.GlobalRDMap` object
 
-.. autofunction:: MatchResidueByLocalAln
 
-.. autofunction:: MatchResidueByGlobalAln
-
-.. autofunction:: Superpose
-
+.. _steric-clashes:
 
 Steric Clashes
 --------------------------------------------------------------------------------
 
-The following function detects steric clashes in atomic structures. Two atoms are clashing if their euclidian distance is smaller than a threshold value. The threshold values are calculated from high-resolution X-ray structures for each possible element pair. The value is chosen such that 99.99% of observed distances between 0 and 5 Angstroem are above the threshold.
+The following function detects steric clashes in atomic structures. Two atoms are clashing if their euclidian distance is smaller than a threshold value (minus a tolerance offset). 
 
+.. function:: FilterClashes(entity, clashing_distances, always_remove_bb=False)
 
-.. function:: FilterClashes(ent, tolerance=0.0)
-
-  This function filters out residues with clashing atoms. If the clashing atom 
-  is a backbone atom, the complete residue is removed, if the atom is part of 
-  the sidechain, only the sidechain atoms are removed.
+  This function filters out residues with non-bonded clashing atoms. If the clashing atom 
+  is a backbone atom, the complete residue is removed from the structure, if the atom is part of 
+  the sidechain, only the sidechain atoms are removed. This behavior is changed 
+  by the always_remove_bb flag: when the flag is set to True the whole residue is removed even if
+  a clash is just detected in the side-chain.
   
-  Hydrogen and deuterium atoms are ignored.
+  Two atoms are defined as clashing if their distance is shorter than the reference distance minus a tolerance
+  threshold. The information about the clashing distances and the tolerance thresholds for all possible pairs of 
+  atoms is passed to the function as a parameter
+
+  Hydrogen and deuterium atoms are ignored by this function.
   
-  :param ent: The input entity
-  :type ent: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
-  :param tolerance: The tolerance in (Angstroem) is substracted from the 
-     thresholds calculated from high resolution X-ray structures to make the 
-     function less pedantic. Negative values are also allowed and make the 
-     function more stringent.
+  :param entity: The input entity
+  :type entity: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param clashing_distances: information about the clashing distances
+  :type clashing_distances: :class:`~ost.mol.alg.ClashingDistances`
+  :param always_remove_bb: if set to True, the whole residue is removed even if the clash happens in the side-chain
 
   :returns: The filtered :class:`~ost.mol.EntityView`
+
+.. function:: CheckStereoChemistry(entity,bond_stats,angle_stats,bond_tolerance,angle_tolerance,always_remove_bb=False)
+
+  This function filters out residues with severe stereo-chemical violations. If the violation 
+  involves a backbone atom, the complete residue is removed from the structure, if it involves an atom that is 
+  part of the sidechain, only the sidechain is removed. This behavior is changed 
+  by the always_remove_bb flag: when the flag is set to True the whole residue is removed even if
+  a violation is just detected in the side-chain
+  
+  A violation is defined as a bond length that lies outside of the range: [mean_length-std_dev*bond_tolerance <-> meanlength+std_dev*bond_tolerance] or an angle width lying outside of the range [mean_width-std_dev*angle_tolerance <-> mean_width+std_dev*angle_tolerance ]. The information about the mean lengths and widths and the corresponding standard deviations is passed to the function using two parameters.
+
+  Hydrogen and deuterium atoms are ignored by this function.
+
+  :param entity: The input entity
+  :type entity: :class:`~ost.mol.EntityView` or :class:`~ost.mol.EntityHandle`
+  :param bond_stats: statistics about bond lengths
+  :type bond_stats: :class:`~ost.mol.alg.StereoChemicalParams`
+  :param angle_stats: statistics about angle widths
+  :type angle_stats: :class:`~ost.mol.alg.StereoChemicalParams`
+  :param bond_tolerance: tolerance for bond lengths (in standard deviations)
+  :param angle_tolerance: tolerance for angle widths (in standard deviations)£
+  :param always_remove_bb: if set to True, the whole residue is removed even if a violation in just detected in the side-chain
+
+  :returns: The filtered :class:`~ost.mol.EntityView`
+
+.. class:: ClashingDistances
+
+  Object containing information about clashing distances between non-bonded atoms
+
+  .. method:: ClashingDistances()
+
+    Creates an empty distance list
+
+  .. method:: SetClashingDistance(ele1,ele2, clash_distance, tolerance)
+
+    Adds or replaces an entry in the list
+
+    :param ele1: string containing the first element's name 
+    :param ele2: string containing the second element's name 
+    :param clash_distance: minimum clashing distance (in Angstroms)
+    :param tolerance: tolerance threshold (in Angstroms)
+
+  .. method GetClashingDistance()
+
+     Recovers a reference distance and a tolerance threshold from the list
+
+    :param ele1: string containing the first element's name 
+    :param ele2: string containing the second element's name 
+
+    :returns: a tuple containing the minimum clashing distance and the tolerance threshold
+
+  .. method::  GetMaxAdjustedDistance()
+ 
+    Returns the longest clashing distance in the list, after adjustment with tolerance threshold    
+
+  .. method:: IsEmpty()
+
+    Returns True if the list is empty (i.e. in an invalid, useless state)
+ 
+  .. method:: PrintAllDistances()
+
+    Prints all distances in the list to standard output
+
+
+.. class:: StereoChemicalParams
+
+  Object containing stereo-chemical information about bonds and angles. For each item (bond or angle
+  in a specific residue), stores the mean and standard deviation 
+
+  .. method:: StereoChemicalParams()
+
+    Creates an empty parameter list
+
+  .. method:: SetParam(item, residue, mean, standard_dev)
+
+    Adds or replaces an entry in the list
+
+    :param item: string defining a bond (format: X-Y) or an angle (format:X-Y-Z), where X,Y an Z are atom names 
+    :param residue: string containing the residue type the information pertains to 
+    :param mean: mean bond length or angle width
+    :param standard_dev: standard deviation of the bond length or of the angle width
+
+  .. method GetParam(item,residue)
+
+     Recovers an entry from the list, 
+
+    :param item: string defining a bond (format: X-Y) or an angle (format:X-Y-Z), where X,Y an Z are atom names 
+    :param residue: string containing the residue type the item information pertains to 
+
+    :returns: a tuple containing the mean length or width and the standard deviation
+
+  .. method ContainsParam(item,residue)
+
+    Checks if a specific entry is present in the list 
+
+    :param item: string defining a bond (format: X-Y) or an angle (format:X-Y-Z), where X,Y an Z are atom names 
+    :param residue: string containing the residue type the information pertains to 
+
+    :returns: True if the list contains an entry corresponding to the correct item and residue, False if it does not
+
+  .. method:: IsEmpty()
+
+    Returns True if the list is empty (i.e. in an invalid, useless state)
+ 
+  .. method:: PrintAllParameters()
+
+    Prints all distances in the list to standard output  
+
+.. function:: FillClashingDistances(file_content)
+.. function:: FillBondStereoChemicalParams(file_content)
+.. function:: FillAngleStereoChemicalParams(file_content)
+
+  These three functions fill a list of reference clashing distances, a list of stereo-chemical parameters for 
+  bonds and a list of stereo-chemical parameters for angles, respectively, starting from a the content of 
+  parameter file. The content of the file is passed to the function as a list of strings, each containing
+  a line from the parameter file
+
+  :returns: :class:`~ost.mol.alg.ClashingDistances` and :class:`~ost.mol.alg.StereoChemicalParams` respectively
+
+.. function:: FillClashingDistancesFromFile(filename)
+.. function:: FillBondStereoChemicalParamsFromFile(filename)
+.. function:: FillAngleStereoChemicalParamsFromFile(filename)
+
+  These three functions fill a list of reference clashing distances, a list of stereo-chemical parameters for 
+  bonds and a list of stereo-chemical parameters for angles, respectively, starting from a file. The filename 
+  passed to the function can be a full path.
+
+  :returns: :class:`~ost.mol.alg.ClashingDistances` and :class:`~ost.mol.alg.StereoChemicalParams` respectively
+
+.. function:: DefaultClashingDistances()
+.. function:: DefaultBondStereoChemicalParams()
+.. function:: DefaultAngleStereoChemicalParams()
+
+  These three functions fill a list of reference clashing distances, a list of stereo-chemical parameters for 
+  bonds and a list of stereo-chemical parameters for angles, respectively, using the default parameter file
+  distributed with OpenStructure.
+
+  :returns: :class:`~ost.mol.alg.ClashingDistances` and :class:`~ost.mol.alg.StereoChemicalParams` respectively
 
 
 .. _traj-analysis:
@@ -230,8 +467,6 @@ used to skip frames in the analysis.
   :param stride: Size of the increment of the frame's index between two 
       consecutive frames analyzed.
 
-
-
 .. function:: AnalyzeMinDistance(traj, view1, view2, stride=1)
 
   This function extracts the minimal distance between two sets of atoms 
@@ -277,4 +512,54 @@ used to skip frames in the analysis.
   :type view_ring2: :class:`~ost.mol.EntityView`.
   :param stride: Size of the increment of the frame's index between two 
      consecutive frames analyzed.  
+
+.. function:: SuperposeFrames(frames, sel, from=0, to=-1, ref=-1)
+
+  This function superposes the frames of the given coord group and returns them
+  as a new coord group.
+  
+  :param frames: The source coord group.
+  :type frames: :class:`~ost.mol.CoordGroupHandle`
+  :param sel: An entity view containing the selection of atoms to be used for     
+    superposition. If set to an invalid view, all atoms in the coord group are 
+    used.
+  :type sel: :class:`ost.mol.EntityView`
+  :param from: index of the first frame
+  :param to: index of the last frame plus one. If set to -1, the value is set to 
+     the number of frames in the coord group
+  :param ref: The index of the reference frame to use for superposition. If set 
+     to -1, the each frame is superposed to the previous frame.
+     
+  :returns: A newly created coord group containing the superposed frames.
+
+.. function:: SuperposeFrames(frames, sel, ref_view, from=0, to=-1)
+
+  Same as SuperposeFrames above, but the superposition is done on a reference
+  view and not on another frame of the trajectory.
+  
+  :param frames: The source coord group.
+  :type frames: :class:`~ost.mol.CoordGroupHandle`
+  :param sel: An entity view containing the selection of atoms of the frames to be used for     
+    superposition.
+  :type sel: :class:`ost.mol.EntityView`
+  :param ref_view: The reference view on which the frames will be superposed. The number
+    of atoms in this reference view should be equal to the number of atoms in sel.
+  :type ref_view: :class:`ost.mol.EntityView`
+  :param from: index of the first frame
+  :param to: index of the last frame plus one. If set to -1, the value is set to 
+     the number of frames in the coord group     
+  
+  :returns: A newly created coord group containing the superposed frames.
+
+.. autofunction:: ParseAtomNames
+
+.. autofunction:: MatchResidueByNum
+
+.. autofunction:: MatchResidueByIdx
+
+.. autofunction:: MatchResidueByLocalAln
+
+.. autofunction:: MatchResidueByGlobalAln
+
+.. autofunction:: Superpose
 
