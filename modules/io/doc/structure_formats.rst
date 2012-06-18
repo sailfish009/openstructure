@@ -24,6 +24,19 @@ files, which are auto-detected by the .gz file extension.
 *Format Name*
   pdb
 
+mmCIF - macromolecular Crystallographic Information File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Fine grained control over mmCIFile import is available via the 
+:func:`~ost.io.LoadMMCIF` function. Most notably, this gives you access to the
+:class:`MMCifInfo` class. The mmCIF importer supports loading gzipped files,
+which are auto-detected by the .gz file extension.
+
+*Recognized File Extensions*
+  cif, cif.gz
+
+*Format Name*
+  mmcif
+
 PQR
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
