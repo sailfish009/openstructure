@@ -118,6 +118,7 @@ ImageStateBasePtr FFTFnc::VisitState<Real,SpatialDomain>(const RealSpatialImageS
   boost::shared_ptr<ComplexHalfFrequencyImageState> out_state(new ComplexHalfFrequencyImageState(in_size,ps));
 
   out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
+  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
   assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
   OST_FFTW_fftw_complex* fftw_out =
@@ -211,6 +212,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,HalfFrequencyDomain>(const ComplexH
   Size out_size = in_state.GetLogicalExtent().GetSize();
   boost::shared_ptr<RealSpatialImageState> out_state(new RealSpatialImageState(out_size,tmp_state.Data(),ps ));
   out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
+  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
 
   Real* out_ptr = out_state->Data().GetData();
@@ -252,6 +254,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,SpatialDomain>(const ComplexSpatial
   ps.SetDomain(FREQUENCY);
   boost::shared_ptr<ComplexFrequencyImageState> out_state(new ComplexFrequencyImageState(size,ps));
   out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
+  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
   out_state->Data()=in_state.Data(); // use assignement op to copy data area to new state
   int rank = size.GetDim();
@@ -291,6 +294,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,FrequencyDomain>(const ComplexFrequ
   // use memory located for tmp
   boost::shared_ptr<ComplexSpatialImageState> out_state(new ComplexSpatialImageState(size,tmp.Data(),ps));
   out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
+  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
   int rank = size.GetDim();
   int n[3] = {size[0],size[1],size[2]};
