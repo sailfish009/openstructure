@@ -98,6 +98,7 @@ Varia
 **Supported File Formats:** :doc:`structure formats<io/structure_formats>` | :doc:`sequence formats <io/sequence_formats>` | :doc:`image formats <io/image_formats>`
 
 **Users** :doc:`Reporting a problem <users>`
+
 Extending OpenStructure
 --------------------------------------------------------------------------------
 
