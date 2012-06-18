@@ -7,6 +7,7 @@ OpenStructure documentation
   
   install
   intro
+  users
   base/generic
   base/base
   geom/geom
@@ -96,14 +97,10 @@ Varia
 
 **Supported File Formats:** :doc:`structure formats<io/structure_formats>` | :doc:`sequence formats <io/sequence_formats>` | :doc:`image formats <io/image_formats>`
 
-
+**Users** :doc:`Reporting a problem <users>`
 Extending OpenStructure
 --------------------------------------------------------------------------------
 
 **Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>` | :doc:`instructions for developers <contributing>`
 
 
-
-
-
-  
