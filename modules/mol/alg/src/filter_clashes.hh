@@ -24,17 +24,29 @@
 
 namespace ost { namespace mol { namespace alg {
 
+/// \brief List of reference atom-atom distances to detect clashes between non-bonded atoms 
 class ClashingDistances
 {
 
 public:
+  /// \brief Default constructor (creates an empty list)	
   ClashingDistances(): valid_flag_(true) {}
+
+  /// \brief Adds or replaces an entry 
+  ///
+  /// Requires an atom-atom distance and a tolerance threshold
   void SetClashingDistance(const String& ele1,const String& ele2, Real min_distance, Real tolerance);
+
+  /// \brief Recovers a reference distance and a tolerance threshold (respectively) from the list
   std::pair<Real,Real> GetClashingDistance(const String& ele1,const String& ele2) const;
+
+  /// \brief Recovers the longest distance in the list, corrected by tolerance	
   Real GetMaxAdjustedDistance() const;
+
+  /// \brief Returns true if the list is empty (i.e. in an invalid, useless state)	
   bool IsEmpty() const;
   
-  //DEBUG
+  /// \brief Prints all distances in the list to standard output
   void PrintAllDistances() const;
   
 private:
@@ -45,17 +57,33 @@ private:
   bool valid_flag_;
   
 };
-  
+
+/// \brief List of stereo chemical parameters (Bonds and angles)
+///
+/// For each item (bond or angle in a specific residue), stores the mean and standard deviation 
 class StereoChemicalParams
 {
 
 public:
+  /// \brief Adds or replaces an entry 
   void SetParam(const String& param, const String& residue, Real value, Real st_dev);
+
+  /// \brief Recovers mean and standard deviation (respectively) of a stereo⁻chemical item (bond or angle) from the list	
+  ///
+  /// Item format: Bond: X-Y, Angle:X-Y-Z		
   std::pair<Real,Real> GetParam(const String& element,const String& residue) const;
+
+  /// \brief Checks if the list contains an entry for a specific stereo-chemical item (a bond or atom in a specific residue)
+  ///
+  /// Item format: Bond: X-Y, Angle:X-Y-Z		
   bool ContainsParam(const String& param,const String& residue) const;
+	
+  /// \brief Returns true if the list is empty (i.e. in an invalid, useless state)	
+  ///
+  /// Item format: Bond: X-Y, Angle:X-Y-Z		
   bool IsEmpty() const;
   
-  //DEBUG
+  /// \brief Prints all distances in the list to standard output
   void PrintAllParameters() const;
   
 private:
@@ -64,15 +92,43 @@ private:
  
 };
 
+/// \brief Fills a list of reference clashing distances from the content of a parameter file
+///
+/// Requires a list of strings holding the contents of a parameter file, one line per string
 ClashingDistances DLLEXPORT_OST_MOL_ALG FillClashingDistances(std::vector<String>& stereo_chemical_props_file);
+
+/// \brief Fills a list of stereo-chemical statistics from the content of a parameter file
+///
+/// Requires a list of strings holding the contents of a parameter file, one line per string
 StereoChemicalParams DLLEXPORT_OST_MOL_ALG FillStereoChemicalParams(const String& header, std::vector<String>& stereo_chemical_props_file);  
- 
+
+/// \brief Filters a structure based on detected clashes between non bonded atoms. Entity version
+///
+/// If a clash between two atoms (distance shorter than reference clashing distance - tolerance threshold)
+/// is detected in a residue's side-chain, all atoms in the side chain are removed from the structure
+/// If a clash is detected in the backbone, all atoms in the residue are removed. This behavior is changed 
+/// by the always_remove_bb flag: when the flag is set to true all atoms in the residue are removed even if
+/// a clash is just detected in the side-chain
 EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityView& ent, 
                                                const ClashingDistances& min_distances, bool always_remove_bb=false);
 
+/// \brief Filters a structure based on detected clashes between non bonded atoms. Handle version
+///
+/// If a clash between two atoms (distance shorter than reference clashing distance - tolerance threshold)
+/// is detected in a residue's side-chain, all atoms in the side chain are removed from the structure
+/// If a clash is detected in the backbone, all atoms in the residue are removed. This behavior is changed 
+/// by the always_remove_bb flag: when the flag is set to true all atoms in the residue are removed even if
+/// a clash is just detected in the side-chain
 EntityView DLLEXPORT_OST_MOL_ALG FilterClashes(const EntityHandle& ent, 
                                                const ClashingDistances& min_distances, bool always_remove_bb=false);
 
+/// \brief Filters a structure based on detected stereo-chemical violations. Entity version
+///
+/// If a stereo-chemical violation (i.e., a bond or an angle with a value outside the range defined by
+/// the mean value, the standard deviation and the tolerance parameter) is detected in a residue's side-chain, 
+/// all atoms in the side chain are removed from the structure. If a violation is detected in the backbone, all 
+/// atoms in the residue are removed. This behavior is changed by the always_remove_bb flag: when the flag is 
+/// set to true all atoms in the residue are removed even if a violation is just detected in the side-chain
 EntityView DLLEXPORT_OST_MOL_ALG CheckStereoChemistry(const EntityView& ent, 
                                                       const StereoChemicalParams& bond_table, 
                                                       const StereoChemicalParams& angle_table,
@@ -80,6 +136,13 @@ EntityView DLLEXPORT_OST_MOL_ALG CheckStereoChemistry(const EntityView& ent,
                                                       Real angle_tolerance,
                                                       bool always_remove_bb=false);
 
+/// \brief Filters a structure based on detected stereo-chemical violations. Handle version
+///
+/// If a stereo-chemical violation (i.e., a bond or an angle with a value outside the range defined by
+/// the mean value, the standard deviation and the tolerance parameter) is detected in a residue's side-chain, 
+/// all atoms in the side chain are removed from the structure. If a violation is detected in the backbone, all 
+/// atoms in the residue are removed. This behavior is changed by the always_remove_bb flag: when the flag is 
+/// set to true all atoms in the residue are removed even if a violation is just detected in the side-chain
 EntityView DLLEXPORT_OST_MOL_ALG CheckStereoChemistry(const EntityHandle& ent, 
                                                       const StereoChemicalParams& bond_table, 
                                                       const StereoChemicalParams& angle_table,

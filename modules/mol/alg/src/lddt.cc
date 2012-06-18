@@ -42,6 +42,7 @@ using namespace ost::mol;
 using namespace ost::mol::alg;
 namespace po=boost::program_options;
 
+// loads a file
 EntityHandle load(const String& file, const IOProfile& profile)
 {
   try {
@@ -62,6 +63,7 @@ EntityHandle load(const String& file, const IOProfile& profile)
   }
 }
 
+// prints usage output
 void usage()
 {
   std::cerr << "usage: lddt [options] <mod1> [mod1 [mod2]] <ref>" << std::endl;
@@ -78,6 +80,7 @@ void usage()
   std::cerr << "   -e         print version" << std::endl;
 }
 
+// computes coverage
 std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob_dist_list)
 {
   int second=0;
@@ -99,14 +102,17 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
 
 int main (int argc, char **argv)
 {
+  // sets some default values for parameters	
   String version = "Beta - 2012-06-13";
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
   Real radius=15.0; 
-  
+
+  // creates the required loading profile 	
   IOProfile profile;
   profile.bond_feasibility_check=false;
-  // parse options
+
+  // parses options
   String sel;
   bool structural_checks=false;
   po::options_description desc("Options");
@@ -200,6 +206,8 @@ int main (int argc, char **argv)
   if (vm.count("inclusion_radius")) {
     radius=vm["inclusion_radius"].as<Real>();
   }
+
+  // loads the reference file and creates the list of distances to check in lddt	
   String ref_file=files.back();
   EntityHandle ref=load(ref_file, profile);
   if (!ref) {
@@ -208,6 +216,8 @@ int main (int argc, char **argv)
   files.pop_back();
   EntityView ref_view=ref.Select(sel);
   GlobalRDMap glob_dist_list = CreateDistanceList(ref_view,radius);
+
+  // prints out parameters used in the lddt calculation	
   std::cout << "Verbosity level: " << verbosity_level << std::endl;
   if (structural_checks) {
     std::cout << "Stereo-chemical and steric clash checks: On " << std::endl;
@@ -225,6 +235,8 @@ int main (int argc, char **argv)
     LOG_INFO("CLASH INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  Observed  Difference  Status");
   }
   LOG_INFO("LDDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
+
+  // cycles through the models to evaluate	 
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);
     if (!model) {
@@ -235,18 +247,15 @@ int main (int argc, char **argv)
     }
     EntityView v=model.CreateFullView();
 
-
     // The code in this following block is only used to make CASP9 models load correctly and normally commented out
     EntityView model2=model.Select("aname!=CEN,NV,OT1,OT,CAY,CY,OXT,1OCT,NT,OT2,2OCT,OVL1,OC1,O1,OC2,O2,OVU1");
     EntityView v1=model2.Select("not (rname==GLY and aname==CB)");
     boost::filesystem::path pathstring(files[i]);
-    
     #if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
     String filestring=pathstring.string();
     #else
     String filestring=pathstring.file_string();
     #endif      
-    
     if (filestring.substr(5,5)=="TS257" || filestring.substr(5,5)=="TS458" ) {
       for (AtomHandleIter ait=v1.GetHandle().AtomsBegin();ait!=v1.GetHandle().AtomsEnd();++ait){
         AtomHandle aitv = *ait;
@@ -255,13 +264,14 @@ int main (int argc, char **argv)
         aitv.SetElement(firstletter);
       }
     }  
-    v=v1;
+    v=v1;	  
     std::cout << "File: " << files[i] << std::endl; 
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
     std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
 
-    if (structural_checks) {
-      boost::filesystem::path loc(parameter_filename);
+	if (structural_checks) {
+      // reads in parameter files   
+	  boost::filesystem::path loc(parameter_filename);
       boost::filesystem::ifstream infile(loc);
       if (!infile) {
         std::cout << "Could not find " << parameter_filename << std::endl;
@@ -290,7 +300,8 @@ int main (int argc, char **argv)
       if (nonbonded_table.IsEmpty()) {
         std::cout << "Error reading the Clashing section of the stereo-chemical parameter file." << std::endl;
         exit(-1);
-      }  
+      }
+      // performs structural checks and filters the structure   
       v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
       cov = compute_coverage(v,glob_dist_list);
       std::cout << "Coverage after stereo-chemical checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
@@ -303,6 +314,7 @@ int main (int argc, char **argv)
       return 0;
     }
 
+	// computes the lddt score   
     std::vector<Real> cutoffs;
     cutoffs.push_back(0.5);
     cutoffs.push_back(1.0);
@@ -313,7 +325,8 @@ int main (int argc, char **argv)
     Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
     std::cout << "Global LDDT score: " << lddt << std::endl;
     std::cout << "(" << std::fixed << total_ov.first << " conserved distances in the model out of " << total_ov.second  << " checked)" << std::endl;
-    
+
+	// prints the residue-by-residue statistics  
     std::cout << "Local LDDT Score:" << std::endl;
     std::cout << "Chain\tResName\tResNum\tScore\t(Conserved/Total)" << std::endl;
     for (ResidueViewIter rit=v.ResiduesBegin();rit!=v.ResiduesEnd();++rit){

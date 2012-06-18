@@ -5,28 +5,28 @@ import ost.mol.alg.trajectory_analysis
 import ost.mol.alg.structure_analysis
 import ost.mol.alg.helix_kinks
 
-
+# Fills a list of reference clashing distances from a file (requires a path to the file)
 def FillClashingDistancesFromFile(filename,default_clashing_distance,default_tolerance):
   fh=open(filename,'r')
   lines=fh.readlines()
   fh.close()
   return FillClashingDistances(lines,default_clashing_distance,default_tolerance)
 
-
+# Fills a list of bond stereo-chemical statistics from a file (requires a path to the file)
 def FillBondStereoChemicalParamsFromFile(filename):
   fh=open(filename,'r')
   lines=fh.readlines()
   fh.close()
   return FillBondStereoChemicalParams("Bond",lines)
 
-
+# Fills a list of angle stereo-chemical statistics from a file (requires a path to the file)
 def FillAngleStereoChemicalParamsFromFile(filename):
   fh=open(filename,'r')
   lines=fh.readlines()
   fh.close()
   return FillAngleStereoChemicalParams("Angle",lines)
 
-  
+# Returns the default list of reference clashing distances (from the default OpenStructure parameter file)
 def DefaultClashingDistances():
   shared_path=ost.GetSharedDataPath()	
   filename=os.path.join(shared_path,'stereo_chemical_props.txt')
@@ -35,6 +35,7 @@ def DefaultClashingDistances():
   fh.close()
   return FillClashingDistances(lines,1.5,0.0)
 
+# Returns the default list of bond stereo-chemical statistics (from the default OpenStructure parameter file)
 def DefaultBondStereoChemicalParams():
   shared_path=ost.GetSharedDataPath()	
   filename=os.path.join(shared_path,'stereo_chemical_props.txt')
@@ -43,6 +44,7 @@ def DefaultBondStereoChemicalParams():
   fh.close()
   return FillStereoChemicalParams("Bond",lines)
 
+# Returns the default list of angle stereo-chemical statistics (from the default OpenStructure parameter file)
 def DefaultAngleStereoChemicalParams():
   shared_path=ost.GetSharedDataPath()	
   filename=os.path.join(shared_path,'stereo_chemical_props.txt')

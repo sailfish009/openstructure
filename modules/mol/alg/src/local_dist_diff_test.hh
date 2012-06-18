@@ -25,21 +25,35 @@
 
 namespace ost { namespace mol { namespace alg {
   
-  
+/// \brief Contains the infomation needed to uniquely identify an atom in a structure
+///
+/// Used by the the Local Distance Difference Test classes and functions
 class UniqueAtomIdentifier
 {
   
 public:
+  /// \brief Contstructor with all the relevant information  
   UniqueAtomIdentifier(const String& chain,const ResNum& residue,const String& residue_name, const String& atom): chain_(chain),residue_(residue),residue_name_(residue_name),atom_(atom) {}  
 
   // to make the compiler happy (boost python map suite)
   UniqueAtomIdentifier(): chain_(""),residue_(ResNum(1)),residue_name_(""),atom_("") {}  
-    
+
+  /// \brief Returns the name of the chain to which the atom belongs, as a String  
   String GetChainName() const { return chain_; } 
+
+  /// \brief Returns the ResNum of the residue to which the atom belongs
   ResNum GetResNum() const { return residue_; }  
+
+  /// \brief Returns the name of the residue to which the atom belongs, as a String
   String GetResidueName() const { return residue_name_; }
+
+  /// \brief Returns the name of the atom, as a String
   String GetAtomName() const { return atom_; }
+
+  // required because UniqueAtomIdentifier is used as a key for a std::map  
   bool operator==(const UniqueAtomIdentifier& rhs) const;
+
+  // required because UniqueAtomIdentifier is used as a key for a std::map  
   bool operator<(const UniqueAtomIdentifier& rhs) const;	
     
 private:
@@ -50,35 +64,92 @@ private:
   String atom_;    
 };
 
+// typedef used to make the code cleaner
 typedef std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier> UAtomIdentifiers;
+
+/// \brief Residue distance list. 
+///
+/// Container for all the interatomic distances that are checked in a Local Distance Difference Test 
+/// and are originating from a single specific residue 
 typedef std::map<std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier>,std::pair<float,float> > ResidueRDMap;
+
+/// \brief Global distance list. 
+///
+/// Container for all the residue-based interatomic distance lists that are checked in a Local Distance Difference Test
+/// and  belong to the same structure
 typedef std::map<ost::mol::ResNum,ResidueRDMap> GlobalRDMap;
+
+// used by the multi-reference distance-list generator function
 typedef std::map<UniqueAtomIdentifier,int> ExistenceMap;
 
+/// \brief Calculates number of distances conserved in a model, given a list of distances to check and a model
+///
+/// Calculates the two values needed to determine the Local Distance Difference Test for a given model, i.e.
+/// the number of conserved distances in the model and the number of total distances in the reference structure. 
+/// The function requires a list of distances to check, a model on which the distances are checked, and a 
+/// list of tolerance thresholds that are used to determine if the distances are conserved. 
+/// 
+/// If a string is provided as an argument to the function, residue-per-residue statistics are stored as 
+/// residue properties. Specifically, the local residue-based lddt score is stored in a float property named
+/// as the provided string, while the residue-based number of conserved and total distances are saved in two 
+/// int properties named <string>_conserved and <string>_total.
 std::pair<long int,long int> DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          const GlobalRDMap& dist_list,
                                          std::vector<Real> cutoff_list, 
                                          const String& local_ldt_property_string="");
 
+/// \brief Calculates the Local Distance Difference Score for a given model with respect to a given target
+///
+/// Calculates the Local Distance Difference Test score for a given model with respect to a given reference structure. Requires
+/// a model, a reference structure, a list of thresholds that are used to determine if distances are conserved, and an inclusion
+/// radius value used to determine which distances are checked.
+/// 
+/// If a string is provided as an argument to the function, residue-per-residue statistics are stored as 
+/// residue properties. Specifically, the local residue-based lddt score is stored in a float property named
+/// as the provided string, while the residue-based number of conserved and total distances are saved in two 
+/// int properties named <string>_conserved and <string>_total.
 Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          const EntityView& target,
                                          Real cutoff_list, 
                                          Real max_dist,
                                          const String& local_ldt_property_string="");
-
+/// \brief Calculates the Local Distance Difference Test score for a given model starting from an alignment between a reference structure and the model. 
+///
+/// Calculates the Local Distance Difference Test score given an alignment between a model and a taget structure.
+/// Requires a threshold on which to calculate the score and an inclusion radius to determine the interatiomic 
+/// distances to check. BEWARE: This algorithm uses the old version of the Local Distance Difference Test and is
+/// left only for back-compatibility purposes
 Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const ost::seq::AlignmentHandle& aln,
                                          Real cutoff, Real max_dist,
                                          int ref_index=0, int mdl_index=1);
 
-
+/// \brief Computes the Local Distance Difference High-Accuracy Test given a list of distances to check
+///
+/// Computes the Local Distance Difference High-Accuracy Test (with threshold 0.5,1,2 and 4 Angstrom)
+/// Requires a list of distances to check and a model for which the score is computed
 Real DLLEXPORT_OST_MOL_ALG LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list);
-Real DLLEXPORT_OST_MOL_ALG OldStyleLDDTHA(EntityView& v, const GlobalRDMap& global_dist_list);
 
-
+/// \brief Creates a list of distances to check during a Local Difference Distance Test
+///
+/// Requires a reference structure and an inclusion radius
 GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist);
+
+/// \brief Creates a list of distances to check during a Local Difference Distance Test starting from multiple reference structures
+///
+/// Requires a list of reference structure and an inclusion radius. If a distance between two atoms is shorter
+/// than the inclusion radius in all structures in which the two atoms are present, it will be included in the list
+/// However, if the distance is longer than the inclusion radius in at least one of the structures, it
+/// will not be considered a local interaction and will be exluded from the list
 GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list,std::vector<Real>& cutoff_list, Real max_dist);
+
+/// \brief Prints all distances in a global distance list to standard output
 void PrintGlobalRDMap(const GlobalRDMap& glob_dist_list);
+
+/// \brief Prints all distances in a residue distance list to standard output
 void PrintResidueRDMap(const ResidueRDMap& res_dist_list);
+
+// required by some helper function. Cannot reuse similar functions in other modules without creating
+// circular dependencies
 bool IsStandardResidue(String rn);
 
 }}}

@@ -27,6 +27,7 @@
 
 namespace {
 
+// helper function
 String bond_string(const ost::mol::AtomView& atom1, const ost::mol::AtomHandle& atom2) {
   String atom1_str = atom1.GetName();
   String atom2_str = atom2.GetName();
@@ -43,6 +44,7 @@ String bond_string(const ost::mol::AtomView& atom1, const ost::mol::AtomHandle& 
   return stkey.str();  
 }
 
+// helper function
 String bond_string_elems(String& ele1, String ele2) {
   String string1,string2;
   if (ele1 < ele2) {
@@ -57,6 +59,7 @@ String bond_string_elems(String& ele1, String ele2) {
   return stkey.str();  
 }
 
+// helper function
 String angle_string(const ost::mol::AtomHandle& atom1, const ost::mol::AtomView& atom, const ost::mol::AtomHandle& atom2 ) {
   String atom1_str = atom1.GetName();
   String atom2_str = atom2.GetName();
@@ -75,7 +78,6 @@ String angle_string(const ost::mol::AtomHandle& atom1, const ost::mol::AtomView&
 
 
 }  
-
 
 namespace ost { namespace mol { namespace alg {
 

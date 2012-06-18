@@ -7,6 +7,7 @@ namespace ost { namespace mol { namespace alg {
 
 namespace {
 
+// helper function	
 String swapped_name(const String& name)
 {
   if (name=="OE1") return "OE2";
@@ -30,6 +31,7 @@ String swapped_name(const String& name)
   return name;
 }
 
+// helper function
 bool swappable(const String& rname, const String& aname)
 {
   if (rname=="GLU") {
@@ -51,6 +53,7 @@ bool swappable(const String& rname, const String& aname)
   return false;
 }
 
+// helper function
 std::pair<bool,Real> within_tolerance(Real mdl_dist, std::pair<Real,Real>& values, Real tol)
 {
   Real min = values.first;
@@ -74,7 +77,7 @@ std::pair<bool,Real> within_tolerance(Real mdl_dist, std::pair<Real,Real>& value
   return std::make_pair<bool,Real>(within_tol,difference);  
 }      
 
-
+// helper function
 std::pair<Real, Real> calc_overlap1(const ResidueRDMap& res_distance_list, const ResNum& rnum,
                                     ChainView mdl_chain, 
                                     std::vector<Real>& tol_list, bool only_fixed, 
@@ -141,7 +144,7 @@ std::pair<Real, Real> calc_overlap1(const ResidueRDMap& res_distance_list, const
   return overlap;
 }  
 
-
+// helper function used by the alignment-based Local Distance Difference Test
 std::pair<Real, Real> calc_overlap2(const seq::ConstSequenceHandle& ref_seq,
                                     const seq::ConstSequenceHandle& mdl_seq,
                                     int pos, Real tol, Real max_dist, 
@@ -226,6 +229,9 @@ std::pair<Real, Real> calc_overlap2(const seq::ConstSequenceHandle& ref_seq,
   return overlap;
 }
 
+// for each residue with multiple possible nomenclature conventions, checks which choice (switched or not) 
+// of atom nomenclature gives the highest lddt score then changes the naming convention of the input 
+// entity view accordingly
 void check_and_swap(const GlobalRDMap& glob_dist_list, const EntityView& mdl, std::vector<Real> cutoff_list,  std::vector<std::pair<long int, long int> > overlap_list)
 {
   ChainView mdl_chain=mdl.GetChainList()[0]; 
@@ -262,6 +268,7 @@ void check_and_swap(const GlobalRDMap& glob_dist_list, const EntityView& mdl, st
   }
 }
 
+// helper function to update existence map entries for multiple reference input structures
 void update_existence_map (ExistenceMap& ex_map, const EntityView& ev, int ref_counter)
 {
   AtomViewList ev_atom=ev.GetAtomList();
@@ -277,6 +284,7 @@ void update_existence_map (ExistenceMap& ex_map, const EntityView& ev, int ref_c
   }
 }
 
+// helper function for super-fast lookup of atom existence in multiple reference input structures
 int in_existence_map(const ExistenceMap& ex_map, const UniqueAtomIdentifier& uai) 
 {
   ExistenceMap::const_iterator find_uai_ci = ex_map.find(uai);
@@ -287,6 +295,7 @@ int in_existence_map(const ExistenceMap& ex_map, const UniqueAtomIdentifier& uai
   return return_value;   
 }    
 
+// merges distance lists from multiple reference structures. The login is described in the code
 void merge_distance_lists(GlobalRDMap& ref_dist_map, const GlobalRDMap& new_dist_map, ExistenceMap& ex_map, const EntityView& ref,int ref_counter)
 {
   // iterate over the residues in the ref_dist_map   
@@ -354,7 +363,7 @@ void merge_distance_lists(GlobalRDMap& ref_dist_map, const GlobalRDMap& new_dist
 
 }
 
-
+// helper function
 bool IsStandardResidue(String rn)
 {
   String upper_rn=rn;
@@ -384,7 +393,7 @@ bool IsStandardResidue(String rn)
   return false;
 }  
 
-
+// required because UniqueAtomIdentifier is used as a key in a std::map
 bool UniqueAtomIdentifier::operator==(const UniqueAtomIdentifier& rhs) const
 {
   if (chain_ == rhs.GetChainName() && 
@@ -396,6 +405,7 @@ bool UniqueAtomIdentifier::operator==(const UniqueAtomIdentifier& rhs) const
   return false;   
 }
 
+// required because UniqueAtomIdentifier is used as a key in a std::map
 bool UniqueAtomIdentifier::operator<(const UniqueAtomIdentifier& rhs) const
 {
   if (chain_ < rhs.GetChainName()) {
@@ -614,6 +624,7 @@ Real LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
     return static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
 }
 
+/*
 Real OldStyleLDDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
 {
     Real lddt =0;
@@ -643,5 +654,6 @@ Real OldStyleLDDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
     }    
     return lddt;
 }
+*/
 
 }}}
