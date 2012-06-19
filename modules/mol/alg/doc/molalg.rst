@@ -115,9 +115,10 @@
   Both functions process only standard residues present in the first chain of the reference structures.
 
   The only difference between the two functions is that one takes a single reference structure and the other
-  a list of reference structures. The structures in the list have to be properly aligned before being passed 
-  to the function. Gaps in the alignment are allowed and automatically dealt with, but corresponding residues 
-  in the structures must have the same residue number.
+  a list of reference structures. The structures in the list have to be properly prepared before being passed 
+  to the function. Corresponding residues in the structures must have the same residue number, the same chain name,
+  etc. Gaps are allowed and automatically dealt with: if information about a distance is present in at least one of
+  the structures, it will be considered.  
 
   If a distance between two atoms is shorter than the inclusion radius in all structures in which the two atoms are
   present, it is included in the list. However, if the distance is longer than the inclusion radius in at least

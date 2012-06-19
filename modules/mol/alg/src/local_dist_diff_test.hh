@@ -161,10 +161,17 @@ GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist);
 
 /// \brief Creates a list of distances to check during a Local Difference Distance Test starting from multiple reference structures
 ///
-/// Requires a list of reference structure and an inclusion radius (max_dist). If a distance between two atoms is shorter
-/// than the inclusion radius in all structures in which the two atoms are present, it is included in the list
-/// However, if the distance is longer than the inclusion radius in at least one of the structures, it
-/// is not be considered a local interaction and is exluded from the list
+/// Requires a list of reference structure and an inclusion radius (max_dist).
+/// 
+/// The structures in the list have to be properly prepared before being passed 
+/// to the function. Corresponding residues in the structures must have the same residue number, the same chain name,
+/// etc. Gaps are allowed and automatically dealt with: if information about a distance is present in at least one of
+/// the structures, it will be considered.  
+///
+///
+/// If a distance between two atoms is shorter than the inclusion radius in all structures in which the two atoms are 
+/// present, it is included in the list. However, if the distance is longer than the inclusion radius in at least one 
+/// of the structures, it is not be considered a local interaction and is exluded from the list
 ///
 /// The function takes care of residues with ambigous symmetric sidechains. To decide which naming convention to use, the functions
 /// computes a local distance score of each reference structure with the first reference structure in the list, using only non ambigously-named atoms. 

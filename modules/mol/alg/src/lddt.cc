@@ -238,6 +238,12 @@ int main (int argc, char **argv)
       if (!ref) {
         exit(-1);
       }
+      if (ref_list.size()>0) {
+        if (ref_list[0].GetChainList()[0].GetName()!=ref.GetChainList()[0].GetName()) {
+          std::cout << "ERROR: First chains in the reference structures have different names" << std::endl;
+          exit(-1);  
+        }    
+      }
       ref_list.push_back(ref.CreateFullView());
     } 
     glob_dist_list = CreateDistanceListFromMultipleReferences (ref_list,cutoffs,sequence_separation,radius);  
