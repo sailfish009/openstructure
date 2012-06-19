@@ -41,13 +41,16 @@
 
   :returns: the Local Distance Difference Test score
   
-.. function:: LocalDistDiffTest(model, distance_list, tolerance_list, local_ldt_property_string="")
+.. function:: LocalDistDiffTest(model, distance_list, tolerance_list, sequence_separation=0,  local_ldt_property_string="")
   
   This function counts the conserved local contacts between the model and the reference structure
   (these are the values needed to compute the Local Distance Difference Test score, see description of 
   the previous function). It shares the same properties as the previous function, with some differences:
   the thresholds can be more than one (the return counts are then the average over all thresholds), and
   the input is not the reference structure, but already a list of distances to be checked for conservation
+
+  A sequence separation parameter can be passed to the function. If this happens, only distances between residues
+  whose separation is higher than the provided parameter are considered when computing the score
 
   If a string is passed as the last parameter, residue-based counts and the value of the residue-based Local
   Distance Difference Test score are saved in each ResidueHandle as int and float properties, as detailed in
@@ -58,6 +61,7 @@
   :param distance_list: the list of distances to check for conservation
   :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`
   :param tolerance_list: a list of thresholds used to determine distance conservation
+  :param sequence_separation: sequence separation parameter used when computing the score
   :param local_ldt_property_string: the base name for the ResidueHandle properties that store the local scores
 
   :returns: a tuple containing the counts of the conserved distances in the model and of all the checked 
@@ -85,40 +89,57 @@
 
   :returns: the Local Distance Difference Test score
 
-.. function::  LDTHA(model, distance_list);
+.. function::  LDTHA(model, distance_list, sequence_separation=0);
 
   This function calculates the Local Distance Difference Test - High Accuracy score (see previous functions).
   The High Accuracy name comes from the fact that the tolerance levels used by this function are the same
   as the thresholds used by GDT-HA (0.5, 1, 2, and 4 Angstrom). 
 
+  A sequence separation parameter can be passed to the function. If this happens, only distances between residues
+  whose separation is higher than the provided parameter are considered when computing the score
+
   :param model: the model structure
   :type model: :class:`~ost.mol.EntityView`
   :param distance_list: the list of distances to check for conservation
   :type distance_list: :class:`~ost.mol.alg.GlobalRDMap`
+  :param sequence_separation: sequence separation parameter used when computing the score
 
   :returns: the Local Distance Difference Test score
 
-.. function: CreateDistanceList(reference, radius);
-.. function: CreateDistanceListFromMultipleReferences(reference_list, radius);
+.. function:: CreateDistanceList(reference, radius);
+.. function:: CreateDistanceListFromMultipleReferences(reference_list, tolerance_list, sequence_separation, radius);
 
   Both these functions create lists of distances to be checked during a Local Distance Difference Test
   (see description of the functions above). 
+
+  Both functions process only standard residues present in the first chain of the reference structures.
 
   The only difference between the two functions is that one takes a single reference structure and the other
   a list of reference structures. The structures in the list have to be properly aligned before being passed 
   to the function. Gaps in the alignment are allowed and automatically dealt with, but corresponding residues 
   in the structures must have the same residue number.
 
-  Both functions process only standard residues present in the first chain of the reference structures.
-
   If a distance between two atoms is shorter than the inclusion radius in all structures in which the two atoms are
   present, it is included in the list. However, if the distance is longer than the inclusion radius in at least
   one of the structures, it is not considered to be a local interaction and is excluded from the list.
 
+  The multiple-reference function takes care of residues with ambigous symmetric sidechains. To decide which naming
+  convention to use, the function computes a Local Distance Difference Test score for  each reference against the
+  first reference structure in the list, using only non ambigously-named atoms. It picks then the naming convention
+  that gives the highest score, guaranteeing that all references are processed with the correct atom names.
+
+  The cutoff list that will later be used to compute the Local Distance Difference Test score and the sequence
+  separation parameter must be passed to the multi-reference function. These parameters do not influence the output
+  distance list, which always includes all distances within the provided radius (to make it consistent with the
+  single-reference corresponding function). However, the parameters are used when dealing with the naming convention
+  of residues with ambiguous nomenclature.
+
   :param reference: a reference structure from which distances are derived
   :type reference: :class:`~ost.mol.EntityView`
   :param reference_list: a list of  of reference structures from which distances are derived
-  :type reference: list of :class:`~ost.mol.EntityView`
+  :type reference_list: list of :class:`~ost.mol.EntityView`
+  :param tolerance_list: a list of thresholds used to determine distance conservation when computing the LDDT score
+  :param sequence_separation: sequence separation parameter used when computing the LDDT score
   :param radius: inclusion radius (in Angstroms) used to determine the distances included in the list
   
   :returns: class `~ost.mol.alg.GlobalRDMap`

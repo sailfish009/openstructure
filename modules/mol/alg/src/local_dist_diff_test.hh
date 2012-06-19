@@ -89,6 +89,16 @@ typedef std::map<UniqueAtomIdentifier,int> ExistenceMap;
 /// The function requires a list of distances to check, a model on which the distances are checked, and a 
 /// list of tolerance thresholds that are used to determine if the distances are conserved. 
 /// 
+/// The function only processes standard residues in the first chains of the model and of the reference
+/// For residues with symmetric sidechains (GLU, ASP, ARG, VAL, PHE, TYR), the 
+/// naming of the atoms is ambigous. For these residues, the function computes the Local Distance Difference 
+/// Test score that each naming convention would generate when considering all non-ambigous surrounding atoms.
+/// The solution that gives higher score is then picked to compute the final Local Difference
+/// Distance Score for the whole model.
+///
+/// A sequence separation parameter can be passed to the function. If this happens, only distances between residues
+/// whose separation is higher than the provided parameter are considered when computing the score. 
+///
 /// If a string is provided as an argument to the function, residue-per-residue statistics are stored as 
 /// residue properties. Specifically, the local residue-based lddt score is stored in a float property named
 /// as the provided string, while the residue-based number of conserved and total distances are saved in two 
@@ -105,6 +115,13 @@ std::pair<long int,long int> DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const Entit
 /// a model, a reference structure, a list of thresholds that are used to determine if distances are conserved, and an inclusion
 /// radius value used to determine which distances are checked.
 /// 
+/// The function only processes standard residues in the first chains of the model and of the reference
+/// For residues with symmetric sidechains (GLU, ASP, ARG, VAL, PHE, TYR), the 
+/// naming of the atoms is ambigous. For these residues, the function computes the Local Distance Difference 
+/// Test score that each naming convention would generate when considering all non-ambigous surrounding atoms.
+/// The solution that gives higher score is then picked to compute the final Local Difference
+/// Distance Score for the whole model.
+///
 /// If a string is provided as an argument to the function, residue-per-residue statistics are stored as 
 /// residue properties. Specifically, the local residue-based lddt score is stored in a float property named
 /// as the provided string, while the residue-based number of conserved and total distances are saved in two 
@@ -132,19 +149,31 @@ Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const ost::seq::AlignmentHandle& al
 ///
 /// Computes the Local Distance Difference High-Accuracy Test (with threshold 0.5,1,2 and 4 Angstrom)
 /// Requires a list of distances to check and a model for which the score is computed
+///
+/// A sequence separation parameter can be passed to the function. If this happens, only distances between residues
+/// whose separation is higher than the provided parameter are considered when computing the score. 
 Real DLLEXPORT_OST_MOL_ALG LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list, int sequence_separation=0);
 
 /// \brief Creates a list of distances to check during a Local Difference Distance Test
 ///
-/// Requires a reference structure and an inclusion radius
+/// Requires a reference structure and an inclusion radius (max_dist)
 GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist);
 
 /// \brief Creates a list of distances to check during a Local Difference Distance Test starting from multiple reference structures
 ///
-/// Requires a list of reference structure and an inclusion radius. If a distance between two atoms is shorter
-/// than the inclusion radius in all structures in which the two atoms are present, it will be included in the list
+/// Requires a list of reference structure and an inclusion radius (max_dist). If a distance between two atoms is shorter
+/// than the inclusion radius in all structures in which the two atoms are present, it is included in the list
 /// However, if the distance is longer than the inclusion radius in at least one of the structures, it
-/// will not be considered a local interaction and will be exluded from the list
+/// is not be considered a local interaction and is exluded from the list
+///
+/// The function takes care of residues with ambigous symmetric sidechains. To decide which naming convention to use, the functions
+/// computes a local distance score of each reference structure with the first reference structure in the list, using only non ambigously-named atoms. 
+/// It picks then the naming convention that gives the highest score, guaranteeing that all references are processed with the correct atom names.
+///
+/// The cutoff list that will later be used to compute the Local Distance Difference Test score and the  sequence separation parameter 
+/// must be passed to the function. These parameters do not influence the output distance list, which always includes all distances
+/// within the provided max_dist (to make it consistent with the single-reference corresponding function). However, the parameters are used when
+/// dealing with the naming convention of residues with ambiguous nomenclature. 
 GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list,std::vector<Real>& cutoff_list, int sequence_separation, Real max_dist);
 
 /// \brief Prints all distances in a global distance list to standard output
