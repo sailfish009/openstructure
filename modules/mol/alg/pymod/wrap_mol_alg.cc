@@ -36,7 +36,7 @@ void export_entity_to_density();
 
 namespace {
   
-std::pair<long int,long int> (*lddt_a)(const mol::EntityView&, const mol::alg::GlobalRDMap& , std::vector<Real>, const String&)=&mol::alg::LocalDistDiffTest;
+std::pair<long int,long int> (*lddt_a)(const mol::EntityView&, const mol::alg::GlobalRDMap& , std::vector<Real>, int, const String&)=&mol::alg::LocalDistDiffTest;
 Real (*lddt_c)(const mol::EntityView&, const mol::EntityView& , Real, Real, const String&)=&mol::alg::LocalDistDiffTest;
 Real (*lddt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistDiffTest;
 mol::EntityView (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
@@ -70,7 +70,7 @@ ost::mol::alg::ClashingDistances fill_clashing_distances_wrapper (const list& st
  return ost::mol::alg::FillClashingDistances(stereo_chemical_props_file_vector);
 }
 
-ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const list& ref_list, const list& cutoff_list, Real max_dist)
+ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const list& ref_list, const list& cutoff_list, int sequence_separation, Real max_dist)
 {
   int ref_list_length = boost::python::extract<int>(ref_list.attr("__len__")());
   std::vector<ost::mol::EntityView> ref_list_vector(ref_list_length);
@@ -85,7 +85,7 @@ ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const l
   for (int i=0; i<cutoff_list_length; i++) {
     cutoff_list_vector[i] = boost::python::extract<Real>(cutoff_list[i]);
   }
-  return ost::mol::alg::CreateDistanceListFromMultipleReferences(ref_list_vector, cutoff_list_vector, max_dist);  	
+  return ost::mol::alg::CreateDistanceListFromMultipleReferences(ref_list_vector, cutoff_list_vector, sequence_separation, max_dist);  	
 }
 
 }
@@ -100,7 +100,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_entity_to_density();
   #endif
   
-  def("LocalDistDiffTest", lddt_a, (arg("local_lddt_property_string")=""));
+  def("LocalDistDiffTest", lddt_a, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_c, (arg("local_lddt_property_string")=""));
   def("LocalDistDiffTest", lddt_b, (arg("ref_index")=0, arg("mdl_index")=1));
   def("FilterClashes", fc_a, (arg("ent"), arg("clashing_distances"), arg("always_remove_bb")=false));
