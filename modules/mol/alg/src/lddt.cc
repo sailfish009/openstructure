@@ -28,6 +28,7 @@
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/conop/conop.hh>
+#include <ost/string_ref.hh>
 #include <ost/conop/amino_acids.hh>
 #include <ost/mol/iterator.hh>
 #include <ost/platform.hh>
@@ -66,7 +67,7 @@ EntityHandle load(const String& file, const IOProfile& profile)
 // prints usage output
 void usage()
 {
-  std::cerr << "usage: lddt [options] <mod1> [mod1 [mod2]] <ref>" << std::endl;
+  std::cerr << "usage: lddt [options] <mod1> [mod1 [mod2]] <re1>[,ref2,ref3]" << std::endl;
   std::cerr << "   -s         selection performed on ref" << std::endl;
   std::cerr << "   -c         use Calphas only" << std::endl;
   std::cerr << "   -f         perform structural checks and filter input data" << std::endl;
@@ -103,7 +104,7 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
 int main (int argc, char **argv)
 {
   // sets some default values for parameters
-  String version = "Beta - 2012-06-13";
+  String version = "1.2";
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
   Real radius=15.0; 
@@ -148,12 +149,7 @@ int main (int argc, char **argv)
   }
   std::vector<String> files;
   if (vm.count("files")) {
-    try {  
-      files=vm["files"].as<std::vector<String> >();
-    } catch (io::IOException& e) {
-      std::cerr << "ERROR: Problem with file list. " << e.what() << std::endl;
-      exit(-1);
-    }
+    files=vm["files"].as<std::vector<String> >();
   } else {
     usage();
     exit(-1);
@@ -169,13 +165,8 @@ int main (int argc, char **argv)
   }
   String parameter_filename;
   if (vm.count("parameter-file")) {
-    try {
       parameter_filename=vm["parameter-file"].as<String>();
-    } catch (io::IOException& e) {
-      std::cerr << "ERROR: Problem with parameter file name. " << e.what() << std::endl;
-      exit(-1);
-    }
-  } else if (structural_checks==true) {
+    } else if (structural_checks==true) {
     std::cout << "Please specify a stereo-chemical parameter file" << std::endl;
     exit(-1);
   }
@@ -207,15 +198,42 @@ int main (int argc, char **argv)
     radius=vm["inclusion_radius"].as<Real>();
   }
 
+  std::vector<Real> cutoffs;
+  cutoffs.push_back(0.5);
+  cutoffs.push_back(1.0);
+  cutoffs.push_back(2.0);
+  cutoffs.push_back(4.0);
+    
   // loads the reference file and creates the list of distances to check in lddt    
-  String ref_file=files.back();
-  EntityHandle ref=load(ref_file, profile);
-  if (!ref) {
-    exit(-1);
-  }
+  // if the reference file is a comma-separated list of files, switches to multi-
+  // reference mode
+  GlobalRDMap glob_dist_list; 
+  String ref_file=files.back();    
+  ost::StringRef ref_file_sr(ref_file.c_str(),ref_file.length());
+  std::vector<StringRef> ref_file_split_sr=ref_file_sr.split(',');
+  if (ref_file_split_sr.size()==1) { 
+    std::cout << "Multi-reference mode: Off" << std::endl;  
+    String ref_filename = ref_file_split_sr[0].str();  
+    EntityHandle ref=load(ref_filename, profile);
+    if (!ref) {
+      exit(-1);
+    }  
+    glob_dist_list = CreateDistanceList(ref.CreateFullView(),radius);  
+  } else {
+    std::cout << "Multi-reference mode: On" << std::endl;  
+    std::vector<EntityView> ref_list;  
+    for (std::vector<StringRef>::const_iterator ref_file_split_sr_it = ref_file_split_sr.begin();
+         ref_file_split_sr_it != ref_file_split_sr.end();++ref_file_split_sr_it) {
+      String ref_filename = ref_file_split_sr_it->str();  
+      EntityHandle ref=load(ref_filename, profile);
+      if (!ref) {
+        exit(-1);
+      }
+      ref_list.push_back(ref.CreateFullView());
+    } 
+    glob_dist_list = CreateDistanceListFromMultipleReferences (ref_list,cutoffs,radius);  
+  }         
   files.pop_back();
-  EntityView ref_view=ref.Select(sel);
-  GlobalRDMap glob_dist_list = CreateDistanceList(ref_view,radius);
 
   // prints out parameters used in the lddt calculation
   std::cout << "Verbosity level: " << verbosity_level << std::endl;
@@ -315,11 +333,6 @@ int main (int argc, char **argv)
     }
 
     // computes the lddt score   
-    std::vector<Real> cutoffs;
-    cutoffs.push_back(0.5);
-    cutoffs.push_back(1.0);
-    cutoffs.push_back(2.0);
-    cutoffs.push_back(4.0);
     String label="localldt";
     std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, cutoffs, label);
     Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
