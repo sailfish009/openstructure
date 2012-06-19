@@ -386,19 +386,19 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
             } else {
               LOG_VERBOSE("BOND:" << " " << res.GetChain() << " " << res.GetName() << " " << res.GetNumber() << " " << bond_str << " " << min_length << " " << max_length << " " << blength << " " << zscore << " " << "PASS")
             }
-	        bond_count++;
+            bond_count++;
             running_sum_zscore_bonds+=zscore;
-			String bond_elems=bond_string_elems(ele1,ele2);
-			std::map<String,Real>::const_iterator find_be = bond_length_sum.find(bond_elems);  
-			if (find_be==bond_length_sum.end()) {
-				bond_length_sum[bond_elems]=blength;
-				bond_zscore_sum[bond_elems]=zscore;
-				bond_counter_sum[bond_elems]=1;
-			} else {
-				bond_length_sum[bond_elems]+=blength;
-				bond_zscore_sum[bond_elems]+=zscore;
-				bond_counter_sum[bond_elems]+=1;
-			}
+            String bond_elems=bond_string_elems(ele1,ele2);
+            std::map<String,Real>::const_iterator find_be = bond_length_sum.find(bond_elems);  
+            if (find_be==bond_length_sum.end()) {
+                bond_length_sum[bond_elems]=blength;
+                bond_zscore_sum[bond_elems]=zscore;
+                bond_counter_sum[bond_elems]=1;
+            } else {
+                bond_length_sum[bond_elems]+=blength;
+                bond_zscore_sum[bond_elems]+=zscore;
+                bond_counter_sum[bond_elems]+=1;
+            }
           }  
       }
       
@@ -481,18 +481,18 @@ EntityView CheckStereoChemistry(const EntityView& ent, const StereoChemicalParam
   LOG_SCRIPT("Average Z-Score for bond lengths: " << avg_zscore_bonds);
   LOG_SCRIPT("Bonds outside of tolerance range: " << bad_bond_count << " out of " << bond_count);
   LOG_SCRIPT("Bond\tAvg Length\tAvg zscore\tNum Bonds")
-	
+
   for (std::map<String,Real>::const_iterator bls_it=bond_length_sum.begin();bls_it!=bond_length_sum.end();++bls_it) {
     String key = (*bls_it).first;
-	int counter=bond_counter_sum[key];
+    int counter=bond_counter_sum[key];
     Real sum_bond_length=(*bls_it).second;
-	Real sum_bond_zscore=bond_zscore_sum[key];
-	Real avg_length=sum_bond_length/static_cast<Real>(counter);
-	Real avg_zscore=sum_bond_zscore/static_cast<Real>(counter);
+    Real sum_bond_zscore=bond_zscore_sum[key];
+    Real avg_length=sum_bond_length/static_cast<Real>(counter);
+    Real avg_zscore=sum_bond_zscore/static_cast<Real>(counter);
     LOG_SCRIPT(key << "\t" << avg_length << "\t" << avg_zscore << "\t" << counter);
   }
   LOG_SCRIPT("Average Z-Score angle widths: " << avg_zscore_angles);
-  LOG_SCRIPT("Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count);	
+  LOG_SCRIPT("Angles outside of tolerance range: " << bad_angle_count << " out of " << angle_count);
   return filtered;
 }
 

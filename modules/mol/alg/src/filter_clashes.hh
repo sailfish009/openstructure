@@ -29,7 +29,7 @@ class ClashingDistances
 {
 
 public:
-  /// \brief Default constructor (creates an empty list)	
+  /// \brief Default constructor (creates an empty list)
   ClashingDistances(): valid_flag_(true) {}
 
   /// \brief Adds or replaces an entry 
@@ -40,10 +40,10 @@ public:
   /// \brief Recovers a reference distance and a tolerance threshold (respectively) from the list
   std::pair<Real,Real> GetClashingDistance(const String& ele1,const String& ele2) const;
 
-  /// \brief Recovers the longest distance in the list, corrected by tolerance	
+  /// \brief Recovers the longest distance in the list, corrected by tolerance
   Real GetMaxAdjustedDistance() const;
 
-  /// \brief Returns true if the list is empty (i.e. in an invalid, useless state)	
+  /// \brief Returns true if the list is empty (i.e. in an invalid, useless state)
   bool IsEmpty() const;
   
   /// \brief Prints all distances in the list to standard output
@@ -68,19 +68,19 @@ public:
   /// \brief Adds or replaces an entry 
   void SetParam(const String& param, const String& residue, Real value, Real st_dev);
 
-  /// \brief Recovers mean and standard deviation (respectively) of a stereo⁻chemical item (bond or angle) from the list	
+  /// \brief Recovers mean and standard deviation (respectively) of a stereo⁻chemical item (bond or angle) from the list
   ///
-  /// Item format: Bond: X-Y, Angle:X-Y-Z		
+  /// Item format: Bond: X-Y, Angle:X-Y-Z
   std::pair<Real,Real> GetParam(const String& element,const String& residue) const;
 
   /// \brief Checks if the list contains an entry for a specific stereo-chemical item (a bond or atom in a specific residue)
   ///
-  /// Item format: Bond: X-Y, Angle:X-Y-Z		
+  /// Item format: Bond: X-Y, Angle:X-Y-Z
   bool ContainsParam(const String& param,const String& residue) const;
-	
-  /// \brief Returns true if the list is empty (i.e. in an invalid, useless state)	
+
+  /// \brief Returns true if the list is empty (i.e. in an invalid, useless state)
   ///
-  /// Item format: Bond: X-Y, Angle:X-Y-Z		
+  /// Item format: Bond: X-Y, Angle:X-Y-Z
   bool IsEmpty() const;
   
   /// \brief Prints all distances in the list to standard output

@@ -54,7 +54,7 @@ public:
   bool operator==(const UniqueAtomIdentifier& rhs) const;
 
   // required because UniqueAtomIdentifier is used as a key for a std::map  
-  bool operator<(const UniqueAtomIdentifier& rhs) const;	
+  bool operator<(const UniqueAtomIdentifier& rhs) const;
     
 private:
 

@@ -102,13 +102,13 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
 
 int main (int argc, char **argv)
 {
-  // sets some default values for parameters	
+  // sets some default values for parameters
   String version = "Beta - 2012-06-13";
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
   Real radius=15.0; 
 
-  // creates the required loading profile 	
+  // creates the required loading profile
   IOProfile profile;
   profile.bond_feasibility_check=false;
 
@@ -128,7 +128,7 @@ int main (int argc, char **argv)
     ("angle_tolerance,a", po::value<Real>(), "tolerance in stddev for angles")
     ("inclusion_radius,r", po::value<Real>(), "distance inclusion radius")
     ("files", po::value< std::vector<String> >(), "input file(s)")
-	("reference",po::value<String>(),"reference(s)")
+    ("reference",po::value<String>(),"reference(s)")
   ;
   po::positional_options_description p;
   p.add("files", -1);
@@ -207,7 +207,7 @@ int main (int argc, char **argv)
     radius=vm["inclusion_radius"].as<Real>();
   }
 
-  // loads the reference file and creates the list of distances to check in lddt	
+  // loads the reference file and creates the list of distances to check in lddt    
   String ref_file=files.back();
   EntityHandle ref=load(ref_file, profile);
   if (!ref) {
@@ -217,7 +217,7 @@ int main (int argc, char **argv)
   EntityView ref_view=ref.Select(sel);
   GlobalRDMap glob_dist_list = CreateDistanceList(ref_view,radius);
 
-  // prints out parameters used in the lddt calculation	
+  // prints out parameters used in the lddt calculation
   std::cout << "Verbosity level: " << verbosity_level << std::endl;
   if (structural_checks) {
     std::cout << "Stereo-chemical and steric clash checks: On " << std::endl;
@@ -236,7 +236,7 @@ int main (int argc, char **argv)
   }
   LOG_INFO("LDDT INFO FORMAT:  Chain1  Residue1  ResNum1  Atom1  Chain2  Residue2  ResNum2  Atom2  ModelDist  TargetDist  Difference  Tolerance Status");
 
-  // cycles through the models to evaluate	 
+  // cycles through the models to evaluate 
   for (size_t i=0; i<files.size(); ++i) {
     EntityHandle model=load(files[i], profile);
     if (!model) {
@@ -264,14 +264,14 @@ int main (int argc, char **argv)
         aitv.SetElement(firstletter);
       }
     }  
-    v=v1;	  
+    v=v1;  
     std::cout << "File: " << files[i] << std::endl; 
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
     std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
 
-	if (structural_checks) {
+    if (structural_checks) {
       // reads in parameter files   
-	  boost::filesystem::path loc(parameter_filename);
+      boost::filesystem::path loc(parameter_filename);
       boost::filesystem::ifstream infile(loc);
       if (!infile) {
         std::cout << "Could not find " << parameter_filename << std::endl;
@@ -314,7 +314,7 @@ int main (int argc, char **argv)
       return 0;
     }
 
-	// computes the lddt score   
+    // computes the lddt score   
     std::vector<Real> cutoffs;
     cutoffs.push_back(0.5);
     cutoffs.push_back(1.0);
@@ -326,7 +326,7 @@ int main (int argc, char **argv)
     std::cout << "Global LDDT score: " << lddt << std::endl;
     std::cout << "(" << std::fixed << total_ov.first << " conserved distances in the model out of " << total_ov.second  << " checked)" << std::endl;
 
-	// prints the residue-by-residue statistics  
+    // prints the residue-by-residue statistics  
     std::cout << "Local LDDT Score:" << std::endl;
     std::cout << "Chain\tResName\tResNum\tScore\t(Conserved/Total)" << std::endl;
     for (ResidueViewIter rit=v.ResiduesBegin();rit!=v.ResiduesEnd();++rit){
@@ -337,7 +337,7 @@ int main (int argc, char **argv)
       if (ritv.HasProp(label)) {
           lddt_local=ritv.GetFloatProp(label);
           conserved_dist=ritv.GetIntProp(label+"_conserved");
-	  total_dist=ritv.GetIntProp(label+"_total");
+      total_dist=ritv.GetIntProp(label+"_total");
       }
       if (lddt_local!=0) {
         std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << lddt_local << "\t" << "("<< conserved_dist << "/" << total_dist << ")" <<std::endl;
