@@ -6,34 +6,8 @@ uniform int depth_mode;
 uniform bool tex_flag;
 uniform sampler2D tex_map;
 
-// copy from basic_fl_vs !
-bool DirectionalLight(in vec3 normal,
-                      in float shin,
-                      inout vec4 ambient,
-                      inout vec4 diffuse,
-                      inout vec4 specular,
-		      inout bool lflag)
-{
-  float n_vp = max(0.0, dot(normal, normalize(gl_LightSource[0].position.xyz)));
-
-  float pf = 0.0;
-  lflag = n_vp>0.0;
-  if(n_vp>0.0 && shin>0.0) {
-    float n_hv = max(0.0, dot(normal, normalize(gl_LightSource[0].halfVector.xyz)));
-    pf=pow(n_hv, shin);
-  }
-
-  ambient  += gl_LightSource[0].ambient;
-  diffuse  += gl_LightSource[0].diffuse * n_vp;
-  specular += gl_LightSource[0].specular * pf;
-
-  return true;
-}
-
 void main()
 {
-  bool lflag=false;
-
   vec4 color = gl_Color;
 
   if(tex_flag) {
@@ -42,26 +16,7 @@ void main()
 
   if(lighting_flag) {
     vec3 normal = normalize(gl_TexCoord[2].stp);
-
-    vec4 amb = vec4(0.0);
-    vec4 diff = vec4(0.0);
-    vec4 spec = vec4(0.0);
-
-    if(DirectionalLight(normal, gl_FrontMaterial.shininess, amb, diff, spec, lflag)) {
-
-      color  = gl_FrontLightModelProduct.sceneColor  +
-               (amb  * gl_FrontMaterial.ambient * color) +
-               (diff * gl_FrontMaterial.diffuse * color) +
-               (spec * gl_FrontMaterial.specular);
-    } else {
-      bool dummy;
-      DirectionalLight(-normal, gl_BackMaterial.shininess, amb, diff, spec, dummy);
-
-      color = gl_BackLightModelProduct.sceneColor  +
-              (amb  * gl_BackMaterial.ambient * color) +
-              (diff * gl_BackMaterial.diffuse * color) +
-              (spec * gl_BackMaterial.specular);
-    }
+    color=light(normal,color,two_sided_flag);
   }
 
   gl_FragColor = color;

@@ -16,64 +16,45 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GFX_SHADER_HH
-#define OST_GFX_SHADER_HH
+#ifndef OST_GFX_IMPL_FAST_SPHERES_HH
+#define OST_GFX_IMPL_FAST_SPHERES_HH
+
+#include <ost/geom/vec3.hh>
+#include <ost/gfx/color.hh>
 
 /*
-  GLSL wrapper and organization
-
   Author: Ansgar Philippsen
 */
 
-#include <string>
-#include <map>
-#include <stack>
 #include <vector>
 
-#include <ost/gfx/module_config.hh>
-#include "glext_include.hh"
+namespace ost { namespace gfx { namespace impl {
 
-namespace ost { namespace gfx {
+  class FastSphereRenderer {
+  public:
+    struct VData
+    {
+      float pos[3];
+      float col[4];
+      float rad;
+    };
 
-class DLLEXPORT_OST_GFX Shader {
-public:
-  // singleton implementation
-  static Shader& Instance();
+    typedef std::vector<VData> DataList;
 
-  void PreGLInit();
-  void Setup();
-  void Activate(const String& name);
+    FastSphereRenderer(size_t reserve=0);
+    FastSphereRenderer(const DataList&);
 
-  bool IsValid() const;
-  bool IsActive() const;
+    void Add(float pos[3], float col[4], float rad);
+    void Add(const geom::Vec3& pos, const Color& col, float rad);
 
-  GLuint GetCurrentProgram() const;
-  String GetCurrentName() const;
+    void RenderGL();
 
-  void PushProgram();
-  void PopProgram();
+    const DataList& Data() const {return data_;}
 
-  void UpdateState();
-
-  void Link(const std::string& pr_name, const std::string& vs_code, const std::string& fs_code);
-
-  static bool Compile(const std::string& shader_name, 
-                      const std::string& shader_code, 
-                      GLenum shader_type, 
-                      GLuint& shader_id);
-
-private:
-  Shader();
-
-  bool valid_;
-  GLuint current_program_;
-  String current_name_;
-
-  std::stack<String> program_stack_;
-
-  std::map<String,GLuint> shader_program_map_;
-};
-
-}} // ns
+  private:
+    DataList data_;
+  };
+  
+}}} // ns
 
 #endif
