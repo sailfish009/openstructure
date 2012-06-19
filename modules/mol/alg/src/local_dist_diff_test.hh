@@ -95,7 +95,8 @@ typedef std::map<UniqueAtomIdentifier,int> ExistenceMap;
 /// int properties named <string>_conserved and <string>_total.
 std::pair<long int,long int> DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const EntityView& mdl,
                                          const GlobalRDMap& dist_list,
-                                         std::vector<Real> cutoff_list, 
+                                         std::vector<Real> cutoff_list,
+                                         int sequence_separation = 0, 
                                          const String& local_ldt_property_string="");
 
 /// \brief Calculates the Local Distance Difference Score for a given model with respect to a given target
@@ -131,7 +132,7 @@ Real DLLEXPORT_OST_MOL_ALG LocalDistDiffTest(const ost::seq::AlignmentHandle& al
 ///
 /// Computes the Local Distance Difference High-Accuracy Test (with threshold 0.5,1,2 and 4 Angstrom)
 /// Requires a list of distances to check and a model for which the score is computed
-Real DLLEXPORT_OST_MOL_ALG LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list);
+Real DLLEXPORT_OST_MOL_ALG LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list, int sequence_separation=0);
 
 /// \brief Creates a list of distances to check during a Local Difference Distance Test
 ///
@@ -144,7 +145,7 @@ GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist);
 /// than the inclusion radius in all structures in which the two atoms are present, it will be included in the list
 /// However, if the distance is longer than the inclusion radius in at least one of the structures, it
 /// will not be considered a local interaction and will be exluded from the list
-GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list,std::vector<Real>& cutoff_list, Real max_dist);
+GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list,std::vector<Real>& cutoff_list, int sequence_separation, Real max_dist);
 
 /// \brief Prints all distances in a global distance list to standard output
 void PrintGlobalRDMap(const GlobalRDMap& glob_dist_list);

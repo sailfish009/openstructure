@@ -79,7 +79,7 @@ std::pair<bool,Real> within_tolerance(Real mdl_dist, std::pair<Real,Real>& value
 
 // helper function
 std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_list, const ResNum& rnum,
-                                    ChainView mdl_chain, 
+                                    ChainView mdl_chain, int sequence_separation,
                                     std::vector<Real>& tol_list, bool only_fixed, 
                                     bool swap,std::vector<std::pair<long int, long int> >& overlap_list, bool log )
 {
@@ -94,7 +94,7 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
     AtomView av1=mdl_res ? mdl_res.FindAtom(name) : AtomView();
  
     if (only_fixed) {
-       if (first_atom.GetResNum()==second_atom.GetResNum()) {
+       if (std::abs(first_atom.GetResNum().GetNum()-second_atom.GetResNum().GetNum())<sequence_separation) {
           continue;
         }
       if (swappable(second_atom.GetResidueName(), second_atom.GetAtomName())) {
@@ -102,7 +102,7 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
       }
     }
     if (!only_fixed) {   
-      if (first_atom.GetResNum()<=second_atom.GetResNum()) {
+      if (first_atom.GetResNum().GetNum()<=(second_atom.GetResNum().GetNum()+sequence_separation)) {
         continue;
       }    
     }
@@ -232,7 +232,7 @@ std::pair<Real, Real> calc_overlap2(const seq::ConstSequenceHandle& ref_seq,
 // for each residue with multiple possible nomenclature conventions, checks which choice (switched or not) 
 // of atom nomenclature gives the highest lddt score then changes the naming convention of the input 
 // entity view accordingly
-void check_and_swap(const GlobalRDMap& glob_dist_list, const EntityView& mdl, std::vector<Real> cutoff_list,  std::vector<std::pair<long int, long int> > overlap_list)
+void check_and_swap(const GlobalRDMap& glob_dist_list, const EntityView& mdl, std::vector<Real> cutoff_list, int sequence_separation,  std::vector<std::pair<long int, long int> > overlap_list)
 {
   ChainView mdl_chain=mdl.GetChainList()[0]; 
   XCSEditor edi=mdl.GetHandle().EditXCS(BUFFERED_EDIT);
@@ -249,11 +249,11 @@ void check_and_swap(const GlobalRDMap& glob_dist_list, const EntityView& mdl, st
     if (!(rname=="GLU" || rname=="ASP" || rname=="VAL" || rname=="TYR" || rname=="PHE" || rname=="LYS" || rname=="ARG")) {
       continue;
     }
-    std::pair<Real, Real> ov1=calc_overlap1(i->second, rnum,mdl_chain, 
+    std::pair<Real, Real> ov1=calc_overlap1(i->second, rnum,mdl_chain, sequence_separation,
                                           cutoff_list, true, 
                                           false, overlap_list,false);
  
-    std::pair<Real, Real> ov2=calc_overlap1(i->second, rnum, mdl_chain, 
+    std::pair<Real, Real> ov2=calc_overlap1(i->second, rnum, mdl_chain, sequence_separation,
                                           cutoff_list, true, 
                                           true, overlap_list,false); 
 
@@ -472,7 +472,7 @@ GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
  return dist_list;
 } 
 
-GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list, std::vector<Real>& cutoff_list, Real max_dist)
+GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityView>& ref_list, std::vector<Real>& cutoff_list, int sequence_separation, Real max_dist)
 {
   int ref_counter=0;  
   ExistenceMap ex_map;  
@@ -482,7 +482,7 @@ GlobalRDMap CreateDistanceListFromMultipleReferences(const std::vector<EntityVie
   for (std::vector<EntityView>::const_iterator ref_list_it=ref_list.begin()+1;ref_list_it!=ref_list.end();++ref_list_it) {
        EntityView ref = *ref_list_it;
        std::vector<std::pair<long int, long int> > overlap_list(ref.GetResidueCount(), std::pair<long int, long int>(0, 0));
-       check_and_swap(glob_dist_list,ref,cutoff_list,overlap_list);
+       check_and_swap(glob_dist_list,ref,cutoff_list,sequence_separation,overlap_list);
        GlobalRDMap new_dist_list=CreateDistanceList(ref,max_dist);
        merge_distance_lists(glob_dist_list,new_dist_list,ex_map,ref,ref_counter);
        update_existence_map (ex_map,ref,ref_counter); 
@@ -514,7 +514,7 @@ void PrintGlobalRDMap(const GlobalRDMap& glob_dist_list){
 
 
 std::pair<long int,long int> LocalDistDiffTest(const EntityView& mdl, const GlobalRDMap& glob_dist_list,
-                   std::vector<Real> cutoff_list, const String& local_lddt_property_string)
+                   std::vector<Real> cutoff_list, int sequence_separation, const String& local_lddt_property_string)
 {
   if (!mdl.GetResidueCount()) {
     LOG_WARNING("model structures doesn't contain any residues");
@@ -525,14 +525,14 @@ std::pair<long int,long int> LocalDistDiffTest(const EntityView& mdl, const Glob
     return std::make_pair<long int,long int>(0,0);
   }
   std::vector<std::pair<long int, long int> > overlap_list(mdl.GetResidueCount(), std::pair<long int, long int>(0, 0));
-  check_and_swap(glob_dist_list,mdl,cutoff_list,overlap_list);
+  check_and_swap(glob_dist_list,mdl,cutoff_list,sequence_separation,overlap_list);
   ChainView mdl_chain=mdl.GetChainList()[0];  
   overlap_list.clear();
   std::pair<long int, long int> total_ov(0, 0);
   for (GlobalRDMap::const_iterator i=glob_dist_list.begin(), e=glob_dist_list.end(); i!=e; ++i) {
     ResNum rn = i->first;
     if (i->second.size()!=0) {
-      std::pair<long int, long int> ov1=calc_overlap1(i->second, rn, mdl_chain, cutoff_list, 
+      std::pair<long int, long int> ov1=calc_overlap1(i->second, rn, mdl_chain, sequence_separation, cutoff_list, 
                                             false, false, overlap_list,true);
       total_ov.first+=ov1.first;
       total_ov.second+=ov1.second;       
@@ -557,7 +557,8 @@ Real LocalDistDiffTest(const EntityView& mdl, const EntityView& target, Real cut
    std::vector<Real> cutoffs;
    cutoffs.push_back(cutoff);
    GlobalRDMap glob_dist_list = CreateDistanceList(target,max_dist);
-   std::pair<long int,long int>  total_ov = LocalDistDiffTest(mdl, glob_dist_list, cutoffs, local_lddt_property_string);
+   int sequence_separation = 0; 
+   std::pair<long int,long int>  total_ov = LocalDistDiffTest(mdl, glob_dist_list, cutoffs, sequence_separation, local_lddt_property_string);
    return static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
 }
 
@@ -612,7 +613,7 @@ Real LocalDistDiffTest(const ost::seq::AlignmentHandle& aln,
    return total_ov.first/(total_ov.second ? total_ov.second : 1);
 }
 
-Real LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
+Real LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list, int sequence_separation)
 {
     std::vector<Real> cutoffs;
     cutoffs.push_back(0.5);
@@ -620,10 +621,11 @@ Real LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
     cutoffs.push_back(2.0);
     cutoffs.push_back(4.0);
     String label="locallddt";
-    std::pair<long int,long int> total_ov=alg::LocalDistDiffTest(v, global_dist_list, cutoffs, label);
+    std::pair<long int,long int> total_ov=alg::LocalDistDiffTest(v, global_dist_list, cutoffs,  sequence_separation, label);
     return static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
 }
 
+// debugging code
 /*
 Real OldStyleLDDTHA(EntityView& v, const GlobalRDMap& global_dist_list)
 {

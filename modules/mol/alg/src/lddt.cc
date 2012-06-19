@@ -53,6 +53,9 @@ EntityHandle load(const String& file, const IOProfile& profile)
       reader.Import(ent);
       conop::Conopology& conop_inst=conop::Conopology::Instance();
       conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+      if (ent.GetChainList().size()!=1) {
+        std::cout << "WARNING: File " << file << "has more than one chain" << std::endl; 
+      }    
       return ent;
     }
     std::cerr << "ERROR: '" << file << "' does not contain any ATOM records. "
@@ -78,6 +81,7 @@ void usage()
   std::cerr << "   -a <value> tolerance in stddevs for angles" << std::endl;
   std::cerr << "   -m <value> clashing distance for unknwon atom types" << std::endl;
   std::cerr << "   -r <value> distance inclusion radius" << std::endl;
+  std::cerr << "   -i <value> sequence separation" << std::endl;
   std::cerr << "   -e         print version" << std::endl;
 }
 
@@ -108,6 +112,7 @@ int main (int argc, char **argv)
   Real bond_tolerance = 8.0;
   Real angle_tolerance = 8.0;
   Real radius=15.0; 
+  int sequence_separation = 0;
 
   // creates the required loading profile
   IOProfile profile;
@@ -128,6 +133,7 @@ int main (int argc, char **argv)
     ("bond_tolerance,b", po::value<Real>(), "tolerance in stddev for bonds")
     ("angle_tolerance,a", po::value<Real>(), "tolerance in stddev for angles")
     ("inclusion_radius,r", po::value<Real>(), "distance inclusion radius")
+    ("sequence_separation,i", po::value<int>(), "sequence separation")
     ("files", po::value< std::vector<String> >(), "input file(s)")
     ("reference",po::value<String>(),"reference(s)")
   ;
@@ -197,7 +203,10 @@ int main (int argc, char **argv)
   if (vm.count("inclusion_radius")) {
     radius=vm["inclusion_radius"].as<Real>();
   }
-
+  if (vm.count("sequence_separation")) {
+    sequence_separation=vm["sequence_separation"].as<int>();
+  }
+    
   std::vector<Real> cutoffs;
   cutoffs.push_back(0.5);
   cutoffs.push_back(1.0);
@@ -231,7 +240,7 @@ int main (int argc, char **argv)
       }
       ref_list.push_back(ref.CreateFullView());
     } 
-    glob_dist_list = CreateDistanceListFromMultipleReferences (ref_list,cutoffs,radius);  
+    glob_dist_list = CreateDistanceListFromMultipleReferences (ref_list,cutoffs,sequence_separation,radius);  
   }         
   files.pop_back();
 
@@ -243,6 +252,7 @@ int main (int argc, char **argv)
     std::cout << "Stereo-chemical and steric clash checks: Off " << std::endl;
   }
   std::cout << "Inclusion Radius: " << radius << std::endl;
+  std::cout << "Sequence separation: " << sequence_separation << std::endl;
   if (structural_checks) {
     std::cout << "Parameter filename: " << parameter_filename << std::endl;
     std::cout << "Tolerance in stddevs for bonds: " << bond_tolerance << std::endl;
@@ -334,7 +344,7 @@ int main (int argc, char **argv)
 
     // computes the lddt score   
     String label="localldt";
-    std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, cutoffs, label);
+    std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, cutoffs, sequence_separation, label);
     Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
     std::cout << "Global LDDT score: " << lddt << std::endl;
     std::cout << "(" << std::fixed << total_ov.first << " conserved distances in the model out of " << total_ov.second  << " checked)" << std::endl;
