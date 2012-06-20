@@ -81,7 +81,14 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
     const UniqueAtomIdentifier& first_atom=uais.first;
     const UniqueAtomIdentifier& second_atom=uais.second;
     String name=swap ? swapped_name(first_atom.GetAtomName()) : first_atom.GetAtomName();
-    AtomView av1=mdl_res ? mdl_res.FindAtom(name) : AtomView();
+    AtomView av1;
+    int rindex1=0, rindex2=0;
+    if (mdl_res) {
+      rindex1=mdl_res.GetIndex();
+      overlap_list[rindex1].second+=tol_list.size();
+      av1=mdl_res.FindAtom(name);
+    }
+  
  
     if (only_fixed) {
        if (std::abs(first_atom.GetResNum().GetNum()-second_atom.GetResNum().GetNum())<sequence_separation) {
@@ -97,19 +104,16 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
       }    
     }
 
-    AtomView av2=mdl_chain.FindAtom(second_atom.GetResNum(),second_atom.GetAtomName());
-    overlap.second+=tol_list.size();
-    int rindex1=0, rindex2=0;
-    if (av1) {
-      rindex1=av1.GetResidue().GetIndex();
-      overlap_list[rindex1].second+=tol_list.size();
-    }
-
-    if (av2) {
-      rindex2=av2.GetResidue().GetIndex();
+    AtomView av2;
+    ResidueView mdl_res_av2=mdl_chain.FindResidue(second_atom.GetResNum()); 
+    if (mdl_res_av2) {
+      rindex2=mdl_res_av2.GetIndex();
       overlap_list[rindex2].second+=tol_list.size();
-
-    }  
+      av2=mdl_res_av2.FindAtom(second_atom.GetAtomName());
+    }
+ 
+    overlap.second+=tol_list.size();
+ 
     if (!(av1 && av2)) {
       continue;
     }
@@ -495,17 +499,17 @@ std::pair<long int,long int> LocalDistDiffTest(const EntityView& mdl, const Glob
       total_ov.first+=ov1.first;
       total_ov.second+=ov1.second;       
     }
-    if(local_lddt_property_string!="") {
-      ResidueView mdlr=mdl_chain.FindResidue(rn);  
-      if (mdlr.IsValid()) {
-        int mdl_res_index =mdlr.GetIndex();
-        Real local_lddt=static_cast<Real>(overlap_list[mdl_res_index].first)/(static_cast<Real>(overlap_list[mdl_res_index].second) ? static_cast<Real>(overlap_list[mdl_res_index].second) : 1);
-        mdlr.SetFloatProp(local_lddt_property_string, local_lddt);
-        mdlr.SetIntProp(local_lddt_property_string+"_conserved", overlap_list[mdl_res_index].first);
-        mdlr.SetIntProp(local_lddt_property_string+"_total", overlap_list[mdl_res_index].second);
-      }  
-    }       
   }
+  if(local_lddt_property_string!="") {
+    ResidueViewList rlist = mdl_chain.GetResidueList();
+    for (ResidueViewList::iterator rit=rlist.begin(); rit!=rlist.end();++rit) {
+      int mdl_res_index =rit->GetIndex();
+      Real local_lddt=static_cast<Real>(overlap_list[mdl_res_index].first)/(static_cast<Real>(overlap_list[mdl_res_index].second) ? static_cast<Real>(overlap_list[mdl_res_index].second) : 1);
+      rit->SetFloatProp(local_lddt_property_string, local_lddt);        
+      rit->SetIntProp(local_lddt_property_string+"_conserved", overlap_list[mdl_res_index].first);
+      rit->SetIntProp(local_lddt_property_string+"_total", overlap_list[mdl_res_index].second);
+    }
+  }       
   overlap_list.clear();
   return std::make_pair<long int,long int>(total_ov.first,total_ov.second);
 }
