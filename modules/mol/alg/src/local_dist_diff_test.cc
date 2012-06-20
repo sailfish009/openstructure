@@ -7,6 +7,13 @@ namespace ost { namespace mol { namespace alg {
 
 namespace {
 
+bool is_distance_invalid(const std::pair<Real,Real>& value)
+{
+  if (value.first == -1.0 && value.second == -1) return true;
+  return false;
+}
+
+
 // helper function
 String swapped_name(const String& name)
 {
@@ -299,10 +306,10 @@ void merge_distance_lists(GlobalRDMap& ref_dist_map, const GlobalRDMap& new_dist
           // if you don't find it in the residue new, check that it is not missing because it is too long  
           UniqueAtomIdentifier first_atom_to_find = ref_rd.first;
           UniqueAtomIdentifier second_atom_to_find = ref_rd.second;  
-          // if both atoms are there, remove the distance from the ref_dist_map,    
+          // if both atoms are there, remove the distance from the ref_dist_map (set it to invalid)    
           if ((ref.FindAtom(first_atom_to_find.GetChainName(),first_atom_to_find.GetResNum(),first_atom_to_find.GetAtomName()).IsValid() && 
                ref.FindAtom(second_atom_to_find.GetChainName(),second_atom_to_find.GetResNum(),second_atom_to_find.GetAtomName()).IsValid()) ) {
-            ref_dist_map_it->second.erase(ref_res_map_it);                   
+            ref_res_map_it->second = std::make_pair<Real,Real>(-1.0,-1.0);                   
           }  
         }
       }
@@ -336,9 +343,23 @@ void merge_distance_lists(GlobalRDMap& ref_dist_map, const GlobalRDMap& new_dist
       if (find_ref_res_ci == ref_dist_map.end()) {
       ref_dist_map[new_resnum] = new_dist_map_it->second;           
     }
-  } 
+  }
+  // finally, clean up the merged list by removing invalid distances 
+  for (GlobalRDMap::const_iterator ref_dist_map_it = ref_dist_map.begin();ref_dist_map_it!=ref_dist_map.end();++ref_dist_map_it) {
+    ResidueRDMap new_residue_map;
+    for (ResidueRDMap::const_iterator res_ref_list_it = ref_dist_map_it->second.begin();res_ref_list_it!=ref_dist_map_it->second.end();++res_ref_list_it) {
+      if (is_distance_invalid(res_ref_list_it->second)) continue;
+      new_residue_map[res_ref_list_it->first]=res_ref_list_it->second;
+    }
+    ref_dist_map[ref_dist_map_it->first]=new_residue_map;
+  }    
 }
 
+}
+
+void UniqueAtomIdentifier::Print() const
+{
+  std::cout << chain_  << " " << residue_ << " " << residue_name_  << " " << atom_ << std::endl;   
 }
 
 // helper function

@@ -49,6 +49,9 @@ public:
 
   /// \brief Returns the name of the atom, as a String
   String GetAtomName() const { return atom_; }
+ 
+  /// \brief Prints the UniqueAtomIdentifier information to standard output
+  void Print() const;
 
   // required because UniqueAtomIdentifier is used as a key for a std::map  
   bool operator==(const UniqueAtomIdentifier& rhs) const {
