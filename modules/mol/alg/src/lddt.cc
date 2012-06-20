@@ -352,12 +352,13 @@ int main (int argc, char **argv)
     String label="localldt";
     std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, cutoffs, sequence_separation, label);
     Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
-    std::cout << "Global LDDT score: " << lddt << std::endl;
-    std::cout << "(" << std::fixed << total_ov.first << " conserved distances in the model out of " << total_ov.second  << " checked)" << std::endl;
+    std::cout << "Global LDDT score: " << std::setprecision(4) << lddt << std::endl;
+    std::cout << "(" << std::fixed << total_ov.first << " conserved distances out of " << total_ov.second  
+              << " checked, over " << cutoffs.size() << " thresholds)" << std::endl;
 
     // prints the residue-by-residue statistics  
     std::cout << "Local LDDT Score:" << std::endl;
-    std::cout << "Chain\tResName\tResNum\tScore\t(Conserved/Total)" << std::endl;
+    std::cout << "Chain\tResName\tResNum\tScore\t(Conserved/Total, over " << cutoffs.size() << " thresholds)" << std::endl;
     for (ResidueViewIter rit=v.ResiduesBegin();rit!=v.ResiduesEnd();++rit){
       ResidueView ritv = *rit;
       Real lddt_local = 0;
@@ -369,7 +370,7 @@ int main (int argc, char **argv)
       total_dist=ritv.GetIntProp(label+"_total");
       }
       if (lddt_local!=0) {
-        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << lddt_local << "\t" << "("<< conserved_dist << "/" << total_dist << ")" <<std::endl;
+        std::cout << ritv.GetChain() << "\t" << ritv.GetName() << "\t" << ritv.GetNumber() << '\t' << std::setprecision(4) << lddt_local << "\t" << "("<< conserved_dist << "/" << total_dist << ")" <<std::endl;
       }
     }
     std::cout << std::endl;
