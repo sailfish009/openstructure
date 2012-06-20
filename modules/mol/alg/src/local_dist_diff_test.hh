@@ -83,7 +83,7 @@ typedef std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier> UAtomIdentifiers;
 ///
 /// Container for all the interatomic distances that are checked in a Local Distance Difference Test 
 /// and are originating from a single specific residue 
-typedef std::map<std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier>,std::pair<float,float> > ResidueRDMap;
+typedef std::map<std::pair<UniqueAtomIdentifier,UniqueAtomIdentifier>,std::pair<Real,Real> > ResidueRDMap;
 
 /// \brief Global distance list. 
 ///
