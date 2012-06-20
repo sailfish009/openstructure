@@ -17,7 +17,13 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+/*
+  Author: Ansgar Philippsen
+*/
+
+#if OST_SHADER_SUPPORT_ENABLED
 #include <ost/gfx/shader.hh>
+#endif
 #include <ost/gfx/scene.hh>
 
 #include "fast_spheres.hh"
