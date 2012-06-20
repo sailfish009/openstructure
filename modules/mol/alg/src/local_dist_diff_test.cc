@@ -54,27 +54,10 @@ bool swappable(const String& rname, const String& aname)
 }
 
 // helper function
-std::pair<bool,Real> within_tolerance(Real mdl_dist, std::pair<Real,Real>& values, Real tol)
+bool within_tolerance(Real mdl_dist, const std::pair<Real,Real>& values, Real tol)
 {
-  Real min = values.first;
-  Real max = values.second;
-  bool within_tol = false;
-  Real difference = 0;
-  if (mdl_dist>=min && mdl_dist <=max) {
-    within_tol=true;
-  } else if (mdl_dist < min && std::abs(min-mdl_dist) < tol) {
-    within_tol = true;
-  } else if (mdl_dist > max && std::abs(mdl_dist-max) < tol) {
-    within_tol = true;
-  }
-  if (within_tol == false) {
-    if (mdl_dist > max) {
-      difference = mdl_dist-(max+tol);
-    } else {
-      difference = mdl_dist-(min-tol);
-    }
-  }  
-  return std::make_pair<bool,Real>(within_tol,difference);  
+
+  return (values.first-tol)<=mdl_dist && (values.second+tol)>=mdl_dist;
 }      
 
 // helper function
@@ -86,10 +69,10 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
   std::pair<long int, long int> overlap(0, 0);
   ResidueView mdl_res=mdl_chain.FindResidue(rnum); 
   for (ResidueRDMap::const_iterator ai=res_distance_list.begin(); ai!=res_distance_list.end(); ++ai) {
-    UAtomIdentifiers uais = ai->first; 
-    std::pair <Real,Real> values = ai->second;
-    UniqueAtomIdentifier first_atom=uais.first;
-    UniqueAtomIdentifier second_atom=uais.second;
+    const UAtomIdentifiers& uais = ai->first; 
+    const std::pair <Real,Real>& values = ai->second;
+    const UniqueAtomIdentifier& first_atom=uais.first;
+    const UniqueAtomIdentifier& second_atom=uais.second;
     String name=swap ? swapped_name(first_atom.GetAtomName()) : first_atom.GetAtomName();
     AtomView av1=mdl_res ? mdl_res.FindAtom(name) : AtomView();
  
@@ -109,11 +92,16 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
 
     AtomView av2=mdl_chain.FindAtom(second_atom.GetResNum(),second_atom.GetAtomName());
     overlap.second+=tol_list.size();
+    int rindex1=0, rindex2=0;
     if (av1) {
-      overlap_list[av1.GetResidue().GetIndex()].second+=tol_list.size();
+      rindex1=av1.GetResidue().GetIndex();
+      overlap_list[rindex1].second+=tol_list.size();
     }
+
     if (av2) {
-      overlap_list[av2.GetResidue().GetIndex()].second+=tol_list.size();
+      rindex2=av2.GetResidue().GetIndex();
+      overlap_list[rindex2].second+=tol_list.size();
+
     }  
     if (!(av1 && av2)) {
       continue;
@@ -122,15 +110,15 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
     std::vector<Real>::const_reverse_iterator rend_it=tol_list.rend();
     for (std::vector<Real>::const_reverse_iterator tol_list_it=tol_list.rbegin();tol_list_it!=rend_it;++tol_list_it) {
       Real tol = * tol_list_it; 
-      if (within_tolerance(mdl_dist,values,tol).first) {
+      if (within_tolerance(mdl_dist,values,tol)) {
         if (log) {
           LOG_VERBOSE("lddt:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
              << " " << av2.GetResidue().GetChain() << " " << av2.GetResidue().GetName() << " " << av2.GetResidue().GetNumber() << " " << av2.GetName() << " " 
              << mdl_dist << " " << values.first << " " << values.second << " " << tol << " " << "PASS")
         }   
         overlap.first+=1;
-        overlap_list[av1.GetResidue().GetIndex()].first+=1;
-        overlap_list[av2.GetResidue().GetIndex()].first+=1;
+        overlap_list[rindex1].first+=1;
+        overlap_list[rindex2].first+=1;
       } else {
         if (log) {
           LOG_VERBOSE("lddt:" << " " << av1.GetResidue().GetChain() << " " << av1.GetResidue().GetName() << " " << av1.GetResidue().GetNumber() << " " << av1.GetName() 
@@ -249,15 +237,16 @@ void check_and_swap(const GlobalRDMap& glob_dist_list, const EntityView& mdl, st
     if (!(rname=="GLU" || rname=="ASP" || rname=="VAL" || rname=="TYR" || rname=="PHE" || rname=="LYS" || rname=="ARG")) {
       continue;
     }
-    std::pair<Real, Real> ov1=calc_overlap1(i->second, rnum,mdl_chain, sequence_separation,
+    std::pair<long int, long int> ov1=calc_overlap1(i->second, rnum,mdl_chain, sequence_separation,
                                           cutoff_list, true, 
                                           false, overlap_list,false);
  
-    std::pair<Real, Real> ov2=calc_overlap1(i->second, rnum, mdl_chain, sequence_separation,
+    std::pair<long int, long int> ov2=calc_overlap1(i->second, rnum, mdl_chain, sequence_separation,
                                           cutoff_list, true, 
                                           true, overlap_list,false); 
 
-    if (ov1.first/ov1.second<ov2.first/ov2.second) {
+    if (static_cast<Real>(ov1.first)/ov1.second<
+        static_cast<Real>(ov2.first)/ov2.second) {
       AtomViewList atoms=mdl_res.GetAtomList();
       for (AtomViewList::iterator j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
         if (swappable(rname, j->GetName())) {
@@ -274,13 +263,7 @@ void update_existence_map (ExistenceMap& ex_map, const EntityView& ev, int ref_c
   AtomViewList ev_atom=ev.GetAtomList();
   for (AtomViewList::iterator ev_atom_it=ev_atom.begin(); ev_atom_it!=ev_atom.end();++ev_atom_it) {
     UniqueAtomIdentifier uai (ev_atom_it->GetResidue().GetChain().GetName(),ev_atom_it->GetResidue().GetNumber(),ev_atom_it->GetResidue().GetName(),ev_atom_it->GetName());
-    ExistenceMap::const_iterator find_uai_ci = ex_map.find(uai);
-    int uai_value = 0;
-    if (find_uai_ci!=ex_map.end()) {
-      uai_value=find_uai_ci->second;
-    } 
-    uai_value |= 1 << (ref_counter);   
-    ex_map[uai]=uai_value;     
+    ex_map[uai] |=1 << ref_counter;
   }
 }
 
@@ -288,11 +271,7 @@ void update_existence_map (ExistenceMap& ex_map, const EntityView& ev, int ref_c
 int in_existence_map(const ExistenceMap& ex_map, const UniqueAtomIdentifier& uai) 
 {
   ExistenceMap::const_iterator find_uai_ci = ex_map.find(uai);
-  int return_value = 0;
-  if (find_uai_ci!=ex_map.end()) {
-      return_value=find_uai_ci->second;
-  } 
-  return return_value;   
+  return find_uai_ci!=ex_map.end() ? find_uai_ci->second : 0;
 }    
 
 // merges distance lists from multiple reference structures. The login is described in the code
@@ -306,17 +285,16 @@ void merge_distance_lists(GlobalRDMap& ref_dist_map, const GlobalRDMap& new_dist
     if (find_new_res_ci != new_dist_map.end()) {
       //iterate over the the reference distances in the ResidueDistanceMap  
       for (ResidueRDMap::iterator ref_res_map_it = ref_dist_map_it->second.begin(); ref_res_map_it!=ref_dist_map_it->second.end();++ref_res_map_it) {
-        UAtomIdentifiers ref_rd = ref_res_map_it->first;
-        std::pair<Real,Real> ref_minmax = ref_res_map_it->second;
+        const UAtomIdentifiers& ref_rd = ref_res_map_it->first;
+        std::pair<Real,Real>& ref_minmax = ref_res_map_it->second;
         ResidueRDMap::const_iterator find_new_rd_ci = find_new_res_ci->second.find(ref_rd);
         // if you find the distance in the residue new, udate min and max  
         if (find_new_rd_ci != find_new_res_ci->second.end()) {
-          std::pair <Real,Real> new_minmax = find_new_rd_ci->second;
-          Real min = ref_minmax.first;
-          Real max = ref_minmax.second;
-          if (new_minmax.first < min) min = new_minmax.first;  
-          if (new_minmax.second > max) max = new_minmax.second;
-          ref_dist_map_it->second[ref_rd] = std::make_pair<Real,Real>(min,max);
+          if (find_new_rd_ci->second.first < ref_minmax.first) {
+            ref_minmax.first=find_new_rd_ci->second.first;
+          } else if (find_new_rd_ci->second.second > ref_minmax.second) {
+            ref_minmax.second=find_new_rd_ci->second.second;
+          }
         } else {              
           // if you don't find it in the residue new, check that it is not missing because it is too long  
           UniqueAtomIdentifier first_atom_to_find = ref_rd.first;
@@ -393,47 +371,6 @@ bool IsStandardResidue(String rn)
   return false;
 }  
 
-// required because UniqueAtomIdentifier is used as a key in a std::map
-bool UniqueAtomIdentifier::operator==(const UniqueAtomIdentifier& rhs) const
-{
-  if (chain_ == rhs.GetChainName() && 
-      residue_ == rhs.GetResNum() &&
-      residue_name_ == rhs.GetResidueName() &&
-      atom_ == rhs.GetAtomName() ) {
-    return true;
-  }
-  return false;   
-}
-
-// required because UniqueAtomIdentifier is used as a key in a std::map
-bool UniqueAtomIdentifier::operator<(const UniqueAtomIdentifier& rhs) const
-{
-  if (chain_ < rhs.GetChainName()) {
-    return true;
-  } else if (chain_ > rhs.GetChainName()) {
-    return false;
-  } else {
-    if (residue_ < rhs.GetResNum()) {
-      return true;
-    } else if (residue_ > rhs.GetResNum()) {
-      return false;
-    } else {
-      if (residue_name_ < rhs.GetResidueName()) {
-        return true;
-      } else if (residue_name_ > rhs.GetResidueName()) {
-        return false;
-      } else {
-        if (atom_ < rhs.GetAtomName()) {
-          return true;
-        } else if (atom_ > rhs.GetAtomName()) {
-          return false;
-        } else {
-          return false;
-        }
-      }
-    }
-  }
-}
 
 GlobalRDMap CreateDistanceList(const EntityView& ref,Real max_dist)
 {

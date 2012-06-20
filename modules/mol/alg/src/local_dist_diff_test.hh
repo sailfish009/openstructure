@@ -51,11 +51,23 @@ public:
   String GetAtomName() const { return atom_; }
 
   // required because UniqueAtomIdentifier is used as a key for a std::map  
-  bool operator==(const UniqueAtomIdentifier& rhs) const;
+  bool operator==(const UniqueAtomIdentifier& rhs) const {
+    return chain_==rhs.chain_ && residue_==rhs.residue_ && atom_==rhs.atom_;
+  }
 
   // required because UniqueAtomIdentifier is used as a key for a std::map  
-  bool operator<(const UniqueAtomIdentifier& rhs) const;
-    
+  bool operator<(const UniqueAtomIdentifier& rhs) const {
+    int cc=chain_.compare(rhs.chain_);
+    if (cc) {
+      return cc<0;
+    }
+    if (residue_<rhs.residue_) {
+      return true;
+    } else if (residue_>rhs.residue_) {
+     return false;
+    }
+    return atom_.compare(rhs.atom_)<0;
+  }   
 private:
 
   String chain_;
