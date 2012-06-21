@@ -26,8 +26,8 @@ def _deps_for_lib(lib, pool, recursive=True):
         pool.add(d)        
   return
 
-def collect_deps(stage_dir, components, binaries, site_packages, 
-                 site_packages_dir):
+def collect_deps(stage_dir, components, binaries, libexec_binaries,
+                 site_packages, site_packages_dir):
   """
   Collect the dependencies for the given components and returns a list of 
   frameworks/libraries that the component depends on.
@@ -49,6 +49,14 @@ def collect_deps(stage_dir, components, binaries, site_packages,
       continue
     if bin_name not in pool:
       _deps_for_lib(bin_name, pool)
+  for bin in libexec_binaries:
+    bin_name=os.path.abspath(os.path.join(stage_dir, 'libexec/openstructure',
+                                          bin))
+    if not os.path.exists(bin_name):
+      print 'WARNING:', bin_name, 'does not exist'
+      continue
+    if bin_name not in pool:
+      _deps_for_lib(bin_name, pool)
   for site_package in site_packages:
     full_path=get_python_module_path(site_package)
     print full_path
@@ -60,39 +68,45 @@ def collect_deps(stage_dir, components, binaries, site_packages,
         _deps_for_lib(so_file, pool)
   return pool
 
-BINARIES=['gosty', 'chemdict_tool']
-COMPONENTS=['mol', 'geom', 'conop', 'gfx', 'gui', 'seq_alg', 'seq', 
-            'img', 'img_alg', 'info', 'io', 'db', 'base']
-SCRIPTS=['dng', 'ost']
+LIBEXEC_SCRIPTS=['ost_config']
+LIBEXEC_BINARIES=[]
+GUI_LIBEXEC_BINARIES=['gosty']
+BINARIES=['ldt', 'chemdict_tool', 'tmalign', 'tmscore']
+GUI_BINARIES=[]
+GUI_COMPONENTS=['gfx', 'gui', 'info']
+COMPONENTS=['mol', 'geom', 'conop', 'seq_alg', 'seq',
+            'img', 'img_alg', 'io', 'db', 'base']
+GUI_SCRIPTS=['dng']
+SCRIPTS=['ost']
 CHANGE_ID_RPATH='install_name_tool -id @rpath/%s %s'   
-CHANGE_ID='install_name_tool -id @executable_path/%s %s'   
+CHANGE_ID='install_name_tool -id @rpath/%s %s'
 CHANGE_LOAD_CMD_RPATH='install_name_tool -change %s @rpath/%s %s'
 CHANGE_LOAD_CMD='install_name_tool -change %s @executable_path/%s %s'
 ADD_RPATH='install_name_tool -add_rpath %s %s 2> /dev/null'
-SITE_PACKAGES=['sip.so', 'sipconfig.py', 'sipdistutils.py', 'PyQt4']
+SITE_PACKAGES=[]
+GUI_SITE_PACKAGES=['sip.so', 'sipconfig.py', 'sipdistutils.py', 'PyQt4']
 REMOVE_HEADERS='rm -rf `find %s/lib -type d -name Headers`'
 REMOVE_CURRENT='rm -rf `find %s/lib -type d -name Current`'
 # collect libs of non-standard libraries/frameworks we depend on
 
-def copy_binaries(stage_dir, outdir, binary_names, scripts, use_rpath, 
+def copy_binaries(stage_dir, outdir, binary_names, scripts, bin_dir,
                   append_bin=True):
 
-  exe_path=os.path.abspath(os.path.join(outdir, 'bin'))
+  exe_path=os.path.abspath(os.path.join(outdir, bin_dir))
   for binary_name in binary_names:
     if append_bin:
-      bin_name=os.path.join(stage_dir, 'bin', binary_name)
+      bin_name=os.path.join(stage_dir, bin_dir, binary_name)
     else:
       bin_name=os.path.join(stage_dir, binary_name)
     if not os.path.exists(bin_name):
       print 'WARNING:', binary_name, 'does not exist'
       continue
-    dst_name=os.path.join(outdir, 'bin', os.path.basename(bin_name))
+    dst_name=os.path.join(outdir, bin_dir, os.path.basename(bin_name))
     shutil.copy(bin_name, dst_name)
-    update_load_commands(dst_name, True, use_rpath, exe_path)
-    os.system(ADD_RPATH % ('../lib', dst_name))
+    update_load_commands(dst_name, True, exe_path)
   for script in scripts:
-    shutil.copy(os.path.join(stage_dir, 'bin', script), 
-                os.path.join(outdir,'bin', script))
+    shutil.copy(os.path.join(stage_dir, bin_dir, script),
+                os.path.join(outdir,bin_dir, script))
 
 def split_framework_components(abs_path):
     """
@@ -108,46 +122,31 @@ def split_framework_components(abs_path):
         trail=os.path.join(*parts[i+1:])
         return lead, trail
 
-def change_id(id, lib, use_rpath):
+def change_id(id, lib):
   os.chmod(lib, 0666)
-  if use_rpath:
-    os.system(CHANGE_ID_RPATH % (id,lib))
-  else:
-    os.system(CHANGE_ID % (id,lib))
+  os.system(CHANGE_ID_RPATH % (id,lib))
   os.chmod(lib, 0444)
 
-def update_load_commands(lib, exe, use_rpath, exe_path):
+def update_load_commands(lib, exe, exe_path):
   direct_deps=set()
   _deps_for_lib(lib, direct_deps, recursive=False)
   os.chmod(lib, 0666)
   for direct_dep in direct_deps:
     if direct_dep.endswith('.dylib'):
-      if use_rpath:
-        new_name=os.path.basename(direct_dep)
-        os.system(CHANGE_LOAD_CMD_RPATH % (direct_dep, new_name, lib))
-      else:
-        new_name=os.path.join('../lib', os.path.basename(direct_dep))
-        os.system(CHANGE_LOAD_CMD % (direct_dep, new_name, lib))
+      new_name=os.path.basename(direct_dep)
+      os.system(CHANGE_LOAD_CMD_RPATH % (direct_dep, new_name, lib))
     else:
       assert direct_dep.find('.framework/')>=0
-      if use_rpath:
-        framework_path, rel_path=split_framework_components(direct_dep)
-        framework_name=os.path.basename(framework_path)
-        new_name=os.path.join(framework_name, rel_path)
-        os.system(CHANGE_LOAD_CMD_RPATH % (direct_dep, new_name, lib))
-      else:
-        framework_path, rel_path=split_framework_components(direct_dep)
-        framework_name=os.path.basename(framework_path)      
-        new_name=os.path.join('../lib', framework_name, rel_path)
-        os.system(CHANGE_LOAD_CMD % (direct_dep, new_name, lib))
-  if use_rpath:
-    os.system(ADD_RPATH % ('.', lib))
+      framework_path, rel_path=split_framework_components(direct_dep)
+      framework_name=os.path.basename(framework_path)
+      new_name=os.path.join(framework_name, rel_path)
+      os.system(CHANGE_LOAD_CMD_RPATH % (direct_dep, new_name, lib))
   if exe:
     os.chmod(lib, 0555)
   else:
     os.chmod(lib, 0444)
 
-def copy_deps(dependencies, outdir, use_rpath):
+def copy_deps(dependencies, outdir):
   exe_path=os.path.join(outdir, 'bin')
   for dep in dependencies:
     if dep.endswith('.dylib'):
@@ -155,29 +154,21 @@ def copy_deps(dependencies, outdir, use_rpath):
       if not os.path.exists(dep):
         continue
       shutil.copy(dep, dst_name)
-      if use_rpath:
-        change_id(os.path.basename(dep), dst_name, use_rpath)
-      else:
-        change_id('../lib/%s' % os.path.basename(dep), dst_name, use_rpath)
-      update_load_commands(dst_name, False, use_rpath, exe_path)
+      change_id(os.path.basename(dep), dst_name)
+      update_load_commands(dst_name, False, exe_path)
     else:
       assert dep.find('.framework/')>=0
       framework_path, rel_path=split_framework_components(dep)
       framework_name=os.path.basename(framework_path)
       dst_name=os.path.join(outdir, 'lib', framework_name)
       shutil.copytree(framework_path, dst_name)
-      if use_rpath:
-        change_id(os.path.join(dst_name, rel_path), 
-                  os.path.join(dst_name, rel_path), use_rpath)
-      else:
-        change_id(os.path.join('../lib', framework_name, rel_path), 
-                  os.path.join(dst_name, rel_path), use_rpath)
+      change_id(os.path.join(dst_name, rel_path),
+                os.path.join(dst_name, rel_path))
       os.unlink(os.path.join(dst_name, os.path.splitext(framework_name)[0]))
       update_load_commands(os.path.join(dst_name, rel_path), False, 
-                           use_rpath, exe_path)
+                           exe_path)
 
-def update_pymod_shared_objects(args, path, files):
-  lib_path, use_rpath=args
+def update_pymod_shared_objects(lib_path, path, files):
   exe_path=os.path.abspath(os.path.join(lib_path, '../bin'))
   for f in files:
     if not os.path.exists(os.path.join(path, f)):
@@ -187,7 +178,7 @@ def update_pymod_shared_objects(args, path, files):
       path_to_lib_path=os.path.relpath(lib_path, path)
       abs_name=os.path.join(path, f)
       os.system(ADD_RPATH % (path_to_lib_path, abs_name))
-      update_load_commands(abs_name, False, use_rpath, exe_path)
+      update_load_commands(abs_name, False, exe_path)
     elif ext in ('.pyc', '.pyo'):
       os.unlink(os.path.join(path, f))
 
@@ -217,43 +208,46 @@ def get_python_home():
   """
   return os.path.dirname(sys.modules['os'].__file__)
 
-def check_install_name_tool_capabilities():
-  """
-  Find out whether install_name_tool supports the add_rpath option.
-  """
-  inst_name_tool=subprocess.Popen('install_name_tool', shell=True, 
-                                  stderr=subprocess.PIPE)
-  output=inst_name_tool.communicate()[1]
-  return output.find('-add_rpath')!=-1
-
 def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
-                    macports_workaround=False):
-  site_packages=get_site_package_dir()                    
-  # figure out if install_name_tool supports the -add_rpath option.
-  use_rpath=True
-  if not check_install_name_tool_capabilities():
-    print "install_name_tool doesn't support the -add_rpath option."
-    print "I will fallback to the more arcane @executable_path"
-    use_rpath=False
-  elif force_no_rpath:
-    print "I will use the arcane @executable_path"
-    use_rpath=False
+                    macports_workaround=False, no_gui=False):
+  site_packages_dir=get_site_package_dir()
 
   if os.path.exists(outdir):
     shutil.rmtree(outdir)
   os.system('mkdir -p "%s"' % outdir)
   os.system('mkdir -p "%s/lib"' % outdir)
   os.system('mkdir -p "%s/bin"' % outdir)
+  os.system('mkdir -p "%s/libexec/openstructure"' % outdir)
   print 'copying shared datafiles'
   shutil.copytree(os.path.join(stage_dir, 'share'), 
                   os.path.join(outdir, 'share'))
+  scripts=SCRIPTS
+  binaries=BINARIES
+  components=COMPONENTS
+  libexec_scripts=LIBEXEC_SCRIPTS
+  site_packages=SITE_PACKAGES
+  libexec_binaries=LIBEXEC_BINARIES
+  if not no_gui:
+    scripts+=GUI_SCRIPTS
+    binaries+=GUI_BINARIES
+    components+=GUI_COMPONENTS
+    libexec_binaries+=GUI_LIBEXEC_BINARIES
+    site_packages+=GUI_SITE_PACKAGES
   print 'collecting dependencies'
-  deps=collect_deps(stage_dir, COMPONENTS, BINARIES, SITE_PACKAGES, 
-                    site_packages)
+  deps=collect_deps(stage_dir, components, binaries, libexec_binaries,
+                    site_packages, site_packages_dir)
+  # when running in non-gui mode, we are most likely missing the boost
+  # python library. Let's add it to the list of dependencies by
+  # inspecting "_ost_base.so".
+  _deps_for_lib(os.path.join(stage_dir, 'lib/openstructure/ost/_ost_base.so'),
+                deps, recursive=False)
   print 'copying dependencies'
-  copy_deps(deps, outdir, use_rpath)
+  copy_deps(deps, outdir)
+  print 'copying libexec binaries'
+  copy_binaries(stage_dir, outdir, libexec_binaries, libexec_scripts,
+                'libexec/openstructure')
   print 'copying binaries'
-  copy_binaries(stage_dir, outdir, BINARIES, SCRIPTS, use_rpath)
+  copy_binaries(stage_dir, outdir, binaries, scripts, 'bin')
   print 'copying pymod'
   shutil.copytree(os.path.join(stage_dir, 'lib/openstructure'), 
                   os.path.join(outdir, 'lib/openstructure'))
@@ -275,7 +269,7 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
       if os.path.exists(os.path.join(modules_dst, 'site-packages')):
         shutil.rmtree(os.path.join(modules_dst, 'site-packages'))
       copy_binaries(os.path.join(python_home, '../..'), outdir, 
-                    ['python'], [], use_rpath)
+                    ['python'], [], 'bin')
       python_bin=os.path.abspath(os.path.join(python_home, '../../bin/python'))
     else:
       # For MacPorts it's even more involved. Python is not executed directly 
@@ -285,11 +279,11 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
         path_to_app='../../Resources/Python.app/Contents/MacOS/'
         exe_path=os.path.join(python_home, path_to_app)
         copy_binaries(exe_path, outdir, ['python'], [], 
-                      use_rpath, append_bin=False)
+                      append_bin=False)
         python_bin=os.path.join('/opt/local/bin/python')
       else:
         copy_binaries(os.path.join(python_home, '../..'), outdir, 
-                      ['python'], [], use_rpath)
+                      ['python'], [])
         python_bin=os.path.abspath(os.path.join(python_home, '../../bin/python'))
       # remove all versions but the one we are using
       version_string=sys.version[0:3]
@@ -302,15 +296,12 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
         if os.path.basename(directory)!=version_string:
           shutil.rmtree(directory)
     # replace the python executable
-    ost_script=os.path.join(outdir, 'bin', 'ost')
+    ost_script=os.path.join(outdir, 'libexec', 'openstructure', 'ost_config')
     os.chmod(ost_script, 0666)
     script=''.join(open(ost_script, 'r').readlines())
     script=script.replace(python_bin, '$BIN_DIR/python')
     open(ost_script, 'w').write(script)
     os.chmod(ost_script, 0555)
-  elif use_rpath==False:
-    print 'BIG FAT WARNING: Creating bundle with @executable_path and default'
-    print 'Python might not work. Test carefully before deploying.'
 
   if no_includes:
     os.system(REMOVE_HEADERS % outdir)
@@ -325,4 +316,4 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
   print 'updating link commands of python shared objects'
   os.path.walk(os.path.join(outdir, 'lib'), 
                update_pymod_shared_objects, 
-               (os.path.join(outdir, 'lib'), use_rpath))
+               os.path.join(outdir, 'lib'))

@@ -7,6 +7,7 @@ OpenStructure documentation
   
   install
   intro
+  users
   base/generic
   base/base
   geom/geom
@@ -57,6 +58,7 @@ Density Maps and Images
 
 **Overview**: :doc:`images intro <intro-02>` | :doc:`img module <img/base/img>` | :doc:`img.alg module <img/alg/alg>`
 
+**Input/Output**: :ref:`loading and saving density maps <img-io>`
 
 
 
@@ -93,8 +95,9 @@ Varia
 
 **Datasets:** :doc:`tabular data <table>`
 
-**File Formats:** :doc:`supported file formats <io/formats>`
+**Supported File Formats:** :doc:`structure formats<io/structure_formats>` | :doc:`sequence formats <io/sequence_formats>` | :doc:`image formats <io/image_formats>`
 
+**Users** :doc:`Reporting a problem <users>`
 
 Extending OpenStructure
 --------------------------------------------------------------------------------
@@ -102,7 +105,3 @@ Extending OpenStructure
 **Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>` | :doc:`instructions for developers <contributing>`
 
 
-
-
-
-  

@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <ost/test_utils/compare_files.hh>
+#include <ost/geom/vec_mat_predicates.hh>
 
 #include <ost/platform.hh>
 #include <ost/dyn_cast.hh>
@@ -32,12 +33,14 @@
 #include <ost/io/io_exception.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 using boost::unit_test_framework::test_suite;
 
 using namespace ost;
 using namespace ost::io;
 
-BOOST_AUTO_TEST_SUITE( io )
+BOOST_AUTO_TEST_SUITE( io );
 
 BOOST_AUTO_TEST_CASE(test_pdb_import_handler) 
 {
@@ -1007,8 +1010,7 @@ BOOST_AUTO_TEST_CASE(test_pqr_read_atom)
   BOOST_CHECK_EQUAL(a1.GetResidue().GetName(), "MET");
   BOOST_CHECK_EQUAL(a1.GetResidue().GetChain().GetName(), " ");
 
-
-  BOOST_CHECK_EQUAL(a1.GetPos(), geom::Vec3(21.6, 35.3, 56.7));
+  BOOST_CHECK(vec3_is_close(a1.GetPos(), geom::Vec3(21.6, 35.3, 56.7),Real(0.1)));
   BOOST_CHECK_EQUAL(a1.GetElement(), "");
   BOOST_CHECK_EQUAL(a1.IsHetAtom(), false);
   BOOST_CHECK_CLOSE(a1.GetCharge(), Real(-0.3755), Real(1e-4));
@@ -1020,7 +1022,7 @@ BOOST_AUTO_TEST_CASE(test_pqr_read_atom)
   BOOST_CHECK_EQUAL(a2.GetResidue().GetName(), "ARG");
   BOOST_CHECK_EQUAL(a2.GetResidue().GetChain().GetName(), " ");
 
-  BOOST_CHECK_EQUAL(a2.GetPos(), geom::Vec3(23.9, 28.7, 56.5));
+  BOOST_CHECK(vec3_is_close(a2.GetPos(), geom::Vec3(23.9, 28.7, 56.5),Real(0.1)));
   BOOST_CHECK_EQUAL(a2.GetElement(), "");
   BOOST_CHECK_EQUAL(a2.IsHetAtom(), false);
   BOOST_CHECK_CLOSE(a2.GetCharge(), Real(0.2507), Real(1e-4));
@@ -1059,4 +1061,4 @@ BOOST_AUTO_TEST_CASE(test_pqr_write_atom)
   BOOST_CHECK_EQUAL(fwriter.IsPQR(), true);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

@@ -26,6 +26,8 @@
 
 #define BOOST_AUTO_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 
 
 using namespace ost;
@@ -397,6 +399,14 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_tests)
 
 BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
 {
+  SetPrefixPath(getenv("OST_ROOT"));
+  String lib_path=GetSharedDataPath()+"/compounds.chemlib";
+  conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);
+  if (!compound_lib) {
+    std::cout << "WARNING: skipping SEQRES import unit test. "
+              << "Rule-based builder is required" << std::endl;
+    return;
+  }
   conop::Conopology::Instance().SetDefaultBuilder("RBB");
   BOOST_MESSAGE("  Running mmcif_entity_poly_tests...");
   mol::ChainHandle ch;
@@ -601,7 +611,7 @@ BOOST_AUTO_TEST_CASE(mmcif_citation_author_tests)
   std::ifstream s("testfiles/mmcif/atom_site.mmcif");
   IOProfile profile;
   MMCifReader mmcif_p(s, eh, profile);
-  BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+  BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
 
   std::vector<String> authors =
     mmcif_p.GetInfo().GetCitations().back().GetAuthorList();
@@ -657,8 +667,12 @@ BOOST_AUTO_TEST_CASE(mmcif_refine_tests)
     std::ifstream s("testfiles/mmcif/atom_site.mmcif");
     IOProfile profile;
     MMCifReader mmcif_p(s, eh, profile);
-    BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+    BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
+    #if OST_DOUBLE_PRECISION
+    BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0, 0.001);
+    #else
     BOOST_CHECK_CLOSE(mmcif_p.GetInfo().GetResolution(), 2.0f, 0.001f);
+    #endif
   }
   BOOST_MESSAGE("         done.");
   BOOST_MESSAGE("         capturing fishy data lines...");
@@ -1206,7 +1220,7 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   mmcif_p.SetRestrictChains("A O C");
 
   BOOST_MESSAGE("          testing Parse()...");
-  BOOST_CHECK_NO_THROW(mmcif_p.Parse());
+  BOOST_REQUIRE_NO_THROW(mmcif_p.Parse());
 
   BOOST_REQUIRE_EQUAL(eh.GetChainCount(),    3);
   BOOST_REQUIRE_EQUAL(eh.GetResidueCount(), 14);
@@ -1253,7 +1267,11 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   BOOST_CHECK(sd.GetTitle() == "A Title");
   BOOST_CHECK(sd.GetCASPFlag() == 'Y');
   BOOST_CHECK(sd.GetDescriptor() == "ADENYLATE KINASE");
+  #if OST_DOUBLE_PRECISION
+  BOOST_CHECK_CLOSE(sd.GetMass(), 1.0, 0.001);
+  #else
   BOOST_CHECK_CLOSE(sd.GetMass(), 1.0f, 0.001f);
+  #endif
   BOOST_CHECK(sd.GetMassMethod() == "Good Guess");
   BOOST_CHECK(sd.GetModelDetails() == "Even better guessing");
   BOOST_CHECK(sd.GetModelTypeDetails() == "Guess");

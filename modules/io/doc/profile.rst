@@ -45,7 +45,7 @@ STRICT
 
     IOProfile(dialect='PDB', strict_hydrogens=False, quack_mode=False,
               fault_tolerant=False, join_spread_atom_records=False,
-              no_hetatms=False)
+              no_hetatms=False, bond_feasibility_check=True)
 
 SLOPPY:
 
@@ -55,7 +55,7 @@ SLOPPY:
 
     IOProfile(dialect='PDB', strict_hydrogens=False, quack_mode=True,
               fault_tolerant=True, join_spread_atom_records=False,
-              no_hetatms=False)
+              no_hetatms=False, bond_feasibility_check=True)
 
 CHARMM:
 
@@ -66,13 +66,13 @@ CHARMM:
 
     IOProfile(dialect='CHARMM', strict_hydrogens=False, quack_mode=True,
               fault_tolerant=True, join_spread_atom_records=True,
-              no_hetatms=False)
+              no_hetatms=False, bond_feasibility_check=True)
 
 
 The IOProfile Class
 --------------------------------------------------------------------------------
 
-.. class:: IOProfile(quack_mode=False, dialect='PDB', strict_hydrogens=False, fault_tolerant=False)
+.. class:: IOProfile(dialect='PDB', strict_hydrogens=False, quack_mode=False, join_spread_atom_records=False, no_hetatms=False, calpha_only=False, fault_tolerant=False, bond_feasibility_check=True)
 
   Aggregates flags that control the import of molecular structures.
 
@@ -123,3 +123,18 @@ The IOProfile Class
   
     If set to true, atom records belonging to the same residue are joined, even 
     if they do not appear sequentially in the PDB file.
+
+  .. attribute:: calpha_only
+
+    When set to true, forces the importers to only load atoms named CA. This is
+    most useful in combination with protein-only PDB files to speed up subsequent
+    processing and importing.
+
+  .. attribute:: bond_feasibility_check
+
+    When set to true, adds an additional distance feasibility to figure out if
+    two atoms should be connected. Atoms are only connected if they are within a
+    certain distance range. Set this to false to completely disable distance
+    checks for intra-residual bonds. Peptide bonds as well as bonds between
+    nucleotides involving more than one residue still make use of the distance
+    check to figure out of if the two residues should be connected.

@@ -97,7 +97,10 @@ class UniformColorWidget(QtGui.QWidget):
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
       gfx_color = self.color_select_widget_.GetGfxColor()
-      ufco=gfx.UniformColorOp(mol.QueryViewWrapper(view),gfx_color)
+      if self.parent_.GetCarbonsOnly():
+        ufco=gfx.UniformColorOp(mol.QueryViewWrapper(mol.Query("ele=C"), view),gfx_color)
+      else:
+        ufco=gfx.UniformColorOp(mol.QueryViewWrapper(view),gfx_color)
       entity.Apply(ufco)
     
   def resizeEvent(self, event):

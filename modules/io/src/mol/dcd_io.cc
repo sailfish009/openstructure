@@ -56,7 +56,7 @@ struct DCDHeader {
   char hdrr[4];
   int icntrl[20];
   int ntitle;
-  char title[1024];
+  std::string title;
   int num, istep, freq,nstep;
   int t_atom_count,f_atom_count, atom_count;
 };
@@ -78,17 +78,24 @@ bool read_dcd_header(std::istream& istream, DCDHeader& header, bool& swap_flag,
   ucell_flag=false;
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(header.hdrr,sizeof(char)*4);
+  if(header.hdrr[0]!='C' || header.hdrr[1]!='O' || header.hdrr[2]!='R' || header.hdrr[3]!='D') {
+    throw IOException("LoadCHARMMTraj: missing CORD magic in header");
+  }
   istream.read(reinterpret_cast<char*>(header.icntrl),sizeof(int)*20);
-  if(header.icntrl[1]<0 || header.icntrl[1]>1e8) {
+  if(header.icntrl[1]<0 || header.icntrl[1]>1e6) {
     // nonsense atom count, try swapping
     swap_int(header.icntrl,20);
-    if(header.icntrl[1]<0 || header.icntrl[1]>1e8) {
-      throw(IOException("LoadCHARMMTraj: nonsense atom count in header"));
+    if(header.icntrl[1]<0 || header.icntrl[1]>1e6) {
+      std::ostringstream msg;
+      msg << "LoadCHARMMTraj: nonsense atom count (" << header.icntrl[1] << ") in header";
+      throw IOException(msg.str());
     } else {
       LOG_VERBOSE("LoadCHARMMTraj: byte-swapping");
       swap_flag=true;
     }
   }
+
+  LOG_VERBOSE("LoadCHARMMTraj: found " << header.icntrl[1] << " atoms");
 
   if(header.icntrl[19]!=0) { // CHARMM format
     ucell_flag=(header.icntrl[10]!=0);
@@ -112,8 +119,12 @@ bool read_dcd_header(std::istream& istream, DCDHeader& header, bool& swap_flag,
   if(swap_flag) swap_int(&header.ntitle,1);
   if(gap_flag) istream.read(dummy,sizeof(dummy));
 
-  istream.read(header.title,sizeof(char)*header.ntitle);
-  header.title[header.ntitle]='\0';
+  std::vector<char> title(header.ntitle+1);
+
+  istream.read(&title[0],sizeof(char)*header.ntitle);
+  header.title=std::string(&title[0],header.ntitle);
+  LOG_VERBOSE("LoadCHARMMTraj: title string [" << header.title << "]")
+  
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(reinterpret_cast<char*>(&header.t_atom_count),sizeof(int));
   if(swap_flag) swap_int(&header.t_atom_count,1);
@@ -359,11 +370,11 @@ mol::CoordGroupHandle LoadCHARMMTraj(const mol::EntityHandle& ent,
   mol::AtomHandleList alist(ent.GetAtomList());
   std::sort(alist.begin(),alist.end(),less_index);
   if (lazy_load) {
-    LOG_INFO("Importing CHARMM trajectory with lazy_load=true");
-    DCDCoordSource* source=new DCDCoordSource(alist, trj_fn, stride);
-    return mol::CoordGroupHandle(DCDCoordSourcePtr(source));
+    LOG_VERBOSE("LoadCHARMMTraj: importing with lazy_load=true");
+    DCDCoordSourcePtr source(new DCDCoordSource(alist, trj_fn, stride));
+    return mol::CoordGroupHandle(source);
   }
-  LOG_INFO("Importing CHARMM trajectory with lazy_load=false");  
+  LOG_VERBOSE("LoadCHARMMTraj: importing with lazy_load=false");  
   return load_dcd(alist, trj_fn, stride);
 }
 

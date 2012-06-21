@@ -23,6 +23,8 @@
 #include <ost/io/io_exception.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 using boost::unit_test_framework::test_suite;
@@ -30,7 +32,7 @@ using boost::unit_test_framework::test_suite;
 using namespace ost;
 using namespace ost::io;
 
-BOOST_AUTO_TEST_SUITE( io )
+BOOST_AUTO_TEST_SUITE( io );
 
 BOOST_AUTO_TEST_CASE(test_sdf_import_handler)
 {
@@ -252,4 +254,4 @@ BOOST_AUTO_TEST_CASE(empty_dataheader_error_sdf)
 }
 
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

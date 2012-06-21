@@ -4,7 +4,9 @@
 .. toctree::
   :hidden:
   
-  formats
+  structure_formats
+  sequence_formats
+  image_formats
   mmcif
   profile
 
@@ -49,7 +51,7 @@ on the file extension.
     # SDF file explicitly
     ent=io.LoadEntity('file', 'sdf')
 
-  For a list of file formats supported by :func:`LoadEntity`, see :doc:`formats`.
+  For a list of file formats supported by :func:`LoadEntity`, see :doc:`structure_formats`.
   
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
       is not recognized or the file format can not be detected based on the 
@@ -145,7 +147,7 @@ Loading sequence or alignment files
     aln=io.LoadAlignment('algnm.aln',format="clustal")
     
   For a list of file formats supported by :func:`LoadSequence` see
-  :doc:`formats`.
+  :doc:`sequence_formats`.
   
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
       is not recognized or the file format can not be detected based on the 
@@ -158,13 +160,13 @@ Loading sequence or alignment files
 
   For a desription of how to use :func:`LoadSequenceList` please refer to 
   :func:`LoadSequence`. For a list of file formats supported by
-  :func:`LoadSequenceList` see :doc:`formats`.
+  :func:`LoadSequenceList` see :doc:`sequence_formats`.
 
 .. function:: LoadAlignment(filename, format='auto')
 
   For a desription of how to use :func:`LoadAlignment` please refer to 
   :func:`LoadSequence`. For a list of file formats supported by 
-  :func:`LoadAlignment` see :doc:`formats`.
+  :func:`LoadAlignment` see :doc:`sequence_formats`.
       
 Saving Sequence Data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -185,7 +187,7 @@ Saving Sequence Data
     io.SaveAlignment(aln,'algnm.aln',format="clustal")
     
   For a list of file formats supported by :func:`SaveSequence` see
-  :doc:`formats`.
+  :doc:`sequence_formats`.
   
   :raises: :exc:`~ost.io.IOUnknownFormatException` if the format string supplied 
       is not recognized or the file format can not be detected based on the 
@@ -198,7 +200,7 @@ Saving Sequence Data
 
   For a desription of how to use :func:`SaveSequenceList` please refer to 
   :func:`SaveSequence`. For a list of file formats supported by 
-  :func:`SaveSequenceList` see :doc:`formats`.
+  :func:`SaveSequenceList` see :doc:`sequence_formats`.
 
 .. function:: SaveAlignment(aln, filename, format='auto')
 
@@ -206,7 +208,79 @@ Saving Sequence Data
   :func:`SaveSequence`.
   
   For a list of file formats supported by :func:`SaveAlignment` see 
-  :doc:`formats`.
+  :doc:`sequence_formats`.
+
+
+.. _img-io: 
+
+Density Maps
+--------------------------------------------------------------------------------
+
+Loading Density Maps
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. function:: LoadImage(filename)
+.. function:: LoadImage(filename, format)
+
+  Load density map from disk. If no format is given, the function guesses the 
+  filetype based on the extension of the file. If the extension is unknown or not present the
+  filetype will be guessed based on the content of the file if possible.
+  
+  :param filename: The filename
+  :type  filename: string
+  :param format: The file format
+
+  :raises: :exc:`~ost.io.IOUnknownFormatException` if the format supplied 
+      is not recognized or the file format can not be detected based on the 
+      file extension and content
+      
+      :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
+      inexistent file
+
+  .. code-block:: python
+
+    # recognizes mrc file by file extension
+    ent=io.LoadImage('file.mrc')
+
+    # It is always possible to explicitely set the image format
+    # DAT file explicitly
+    ent=io.LoadImage('file', Dat())
+
+  For a list of file formats supported by :func:`LoadImage`, see :doc:`image_formats`.
+  
+
+
+
+Saving Density Maps
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. function:: SaveImage(image,filename)
+.. function:: SaveImage(image,filename, format)
+
+
+  Save density map to disk. If no format is set, the function guesses the 
+  filetype based on the file extension.
+  
+  :param image: The density map to be saved
+  :type  image: :class:`~ost.img.IMageHandle`
+  :param filename: The filename
+  :type  filename: string
+  :param format: The file format
+  
+  :raises: :exc:`~ost.io.IOUnknownFormatException` if the file format can not be detected based on the 
+      file extension
+
+  For a list of file formats supported by :func:`SaveImage`, see :doc:`image_formats`.
+  
+  .. code-block:: python
+
+    # load density map
+    image=io.LoadImage('density_map.ccp4')
+    # save density map
+    io.SaveImage(image, 'new_map.map', CCP4())
+
+
+
 
 
 .. testsetup:: io

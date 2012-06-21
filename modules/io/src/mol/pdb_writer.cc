@@ -347,7 +347,7 @@ PDBWriter::PDBWriter(std::ostream& stream, const IOProfile& profile):
 
 PDBWriter::PDBWriter(const boost::filesystem::path& filename, 
                      const IOProfile& profile):
-#if BOOST_FILESYSTEM_VERSION==3                     
+#if BOOST_FILESYSTEM_VERSION==3  || BOOST_VERSION<103400
   outfile_(filename.string().c_str()), outstream_(outfile_), 
 #else
   outfile_(filename.file_string().c_str()), outstream_(outfile_), 

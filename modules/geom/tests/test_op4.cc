@@ -24,8 +24,9 @@ using namespace geom;
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
-BOOST_AUTO_TEST_SUITE( geom )
+BOOST_AUTO_TEST_SUITE( geom );
 
 BOOST_AUTO_TEST_CASE(vecmat_mult4)
 {
@@ -43,4 +44,4 @@ BOOST_AUTO_TEST_CASE(vecmat_mult4)
   BOOST_CHECK(match(CompDivide(v2,v1),2.0,3.0,3.0,2.0));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

@@ -181,7 +181,7 @@ The Handle Classes
       # select calpha atoms of peptides
       calphas=ent.Select('aname=CA and peptide=true')
       
-      # select atoms in a box of size 10, centered at the origin
+      # select atoms in a box of size 10, centred at the origin
       in_box=ent.Select('x=-5:5 and y=-5:5 and z=-5:5')
     
     :param query: The query to be executed. See :class:`Query` for details.
@@ -256,7 +256,7 @@ The Handle Classes
     
   .. method:: FindWithin(pos, radius)
   
-    Find all atoms in sphere of given radius centered at *pos*. To turn the
+    Find all atoms in sphere of given radius centred at *pos*. To turn the
     returned list of atoms into an :class:`EntityView`, use
     :func:`CreateViewFromAtomList`.
     
@@ -856,44 +856,59 @@ The View Classes
 
     Returns a copy of this entity. Provided for `duck-typing <http://en.wikipedia.org/wiki/Duck_typing>` purposes.
     
-    :rtype: EntityView
-  
+    :rtype: :class:`EntityView`
+
   .. method:: AddChain(chain_handle[, view_add_flags])
 
     Add chain to view. By default, only the chain is added to the view, but not 
-    its residues and atoms. This behavior can be changed by passing in an
-    appropriate set of `view_add_flags`
-    
-    :param chain_handle:
-    :type  chain_handle: ChainHandle
-    :param view_add_flags: An ORed together combination of `view_add_flags`.
-    :type  view_add_flags: int
-    :rtype: class:`ChainView`
+    its residues and atoms. This behaviour can be changed by passing in an
+    appropriate set of `view_add_flags`.
+
+    The following example just adds a chain without residues and atoms:
+
+    .. code-block:: python
+
+        pdb = ost.io.LoadPDB(<PDB file name>)
+        v = pdb.CreateEmptyView()
+        v.AddChain(pdb.chains[0])
+
+    To **copy** a whole chain, go like:
+
+    .. code-block:: python
+
+        pdb = ost.io.LoadPDB(<PDB file name>)
+        v = pdb.CreateEmptyView()
+        v.AddChain(pdb.chains[0], ost.mol.INCLUDE_ALL)
+
+    :param chain_handle: The chain handle to be added.
+    :type  chain_handle: :class:`ChainHandle`
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`.
+    :type view_add_flags: :class:`int`
+    :rtype: :class:`ChainView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
 
-    Add residue to view. If the residue's chain is not already part of the view, 
-    it will be added. By default, only the residue is added, but not its atoms. 
-    This behaviour can be modified by passing in an appropriate combination of 
-    `view_add_flags`.
-    
-    :param residue_handle:
-    :type  residue_handle: ResidueHandle
-    :param view_add_flags:
-    :type  view_add_flags: int
-    :rtype: class:`ResidueView`
+    Add residue to view. If the residue's chain is not already part of the
+    view, it will be added. By default, only the residue is added, but not its
+    atoms. This behaviour can be modified by passing in an appropriate
+    combination of :ref:`viewaddflags`.
+
+    :param residue_handle: The residue handle to be added
+    :type  residue_handle: :class:`ResidueHandle`
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
+    :type  view_add_flags: :class:`int`
+    :rtype: :class:`ResidueView`
 
   .. method:: AddAtom(atom_handle[, view_add_flags])
 
     Add the atom to view. The chain and residue of the atom are added to the 
     view if they haven't already been added.
     
-    
     :param atom_handle: The atom handle
-    :type  atom_handle: AtomHandle
-    :param view_add_flags: An ORed together combination of ViewAddFlags
-    :type  view_add_flags: int
-    :rtype: class:`AtomView`
+    :type  atom_handle: :class:`AtomHandle`
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
+    :type  view_add_flags: :class:`int`
+    :rtype: :class:`AtomView`
 
   .. method:: AddBond(bond_handle)
 
@@ -1210,24 +1225,25 @@ The View Classes
 
     Add atom to the view. If the residue of the atom is not already part of the 
     view, it will be added. If the atom does not belong to chain, the result is
-    undefined. 
+    undefined. Foo
     
     :param atom_handle: The atom to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of ViewAddFlags
-    :type  view_add_flags: int
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
+    :type  view_add_flags: :class:`int`
     :rtype: :class:`AtomView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
 
     Add residue to the view. If the atom does not belong to chain, the result is
-    undefined. By default, only the residue, but no atoms are added to the view. 
-    To change the behavior, pass in a suitable combination of `view_add_flags`.
+    undefined. By default, only the residue, but no atoms are added to the
+    view. To change the behavior, pass in a suitable combination of
+    :ref:`viewaddflags`.
     
-    :param residue_handle:
+    :param residue_handle: The residue handle to be added.
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags:
-    :type  view_add_flags: int
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
+    :type  view_add_flags: :class:`int`
     :rtype: :class:`ResidueView`
 
   .. method:: FindAtom(res_num, atom_name)
@@ -1462,11 +1478,12 @@ The View Classes
 
   .. method:: AddAtom(atom_handle[, flags])
 
-    Add atom to the view. 
-    :param atom_handle:
+    Add atom to the view.
+
+    :param atom_handle: Atom handle to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param flags: An ORed together combination of ViewAddFlags.
-    :type  flags: int
+    :param flags: An ORed together combination of :ref:`viewaddflags`
+    :type  flags: :class:`int`
     :rtype: :class:`AtomView`
 
   .. method:: GetCenterOfAtoms()
@@ -1617,4 +1634,24 @@ ChainType functions
    :raises: :class:`runtime_error` if **type** is unrecognised.
 
    :returns: :class:`str`
+
+.. _viewaddflags:
+
+ViewAddFlags
+--------------------------------------------------------------------------------
+
+Those are the flags controlling behaviour of routines adding handles to views.
+
+* ``INCLUDE_ATOMS`` - Include all atoms when adding a residue handle to a view
+
+* ``INCLUDE_RESIDUES`` - Include all residues when adding a chain to a view
+
+* ``INCLUDE_CHAINS`` - Include all chains when creating a new entity view
+
+* ``INCLUDE_ALL`` = ``INCLUDE_ATOMS`` | ``INCLUDE_RESIDUES`` |
+  ``INCLUDE_CHAINS`` - Convenience flags to include all substructures
+
+* ``CHECK_DUPLICATES`` - If set, it will be checked that no duplicates are
+  created when adding a new handle
+    
 

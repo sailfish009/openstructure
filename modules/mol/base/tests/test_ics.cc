@@ -23,6 +23,8 @@
 #include <ost/log.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <ost/message.hh>
 #include <ost/geom/geom.hh>
 
@@ -101,7 +103,7 @@ bool test_angle(Real a, Real e) {
   return std::abs(fmod(float(a-e), float(M_PI/2)))<EPSILON;
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(ics_update_icsbondlength)
 {
@@ -115,11 +117,11 @@ BOOST_AUTO_TEST_CASE(ics_settorsion_unbuffered)
   Real eps = 0.0001;
   TorsionStructure s;
   ICSEditor e = s.e.EditICS(mol::UNBUFFERED_EDIT);
-  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(M_PI), Real(eps));
+  BOOST_CHECK_CLOSE(std::abs(s.t1.GetAngle()), Real(M_PI), Real(eps));
   BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
   e.SetTorsionAngle(s.t1,0);
   BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
-  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI), Real(eps));
+  BOOST_CHECK_CLOSE(std::abs(s.t2.GetAngle()), Real(M_PI), Real(eps));
   e.SetTorsionAngle(s.t2,M_PI/4);
   BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
   BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(-M_PI+M_PI/4), Real(eps));
@@ -136,11 +138,11 @@ BOOST_AUTO_TEST_CASE(ics_settorsion_buffered)
   Real eps = 0.0001;
   TorsionStructure s;
   ICSEditor e = s.e.EditICS(mol::BUFFERED_EDIT);
-  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(M_PI), Real(eps));
+  BOOST_CHECK_CLOSE(std::abs(s.t1.GetAngle()), Real(M_PI), Real(eps));
   BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
   e.SetTorsionAngle(s.t1,0);
   BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
-  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI), Real(eps));
+  BOOST_CHECK_CLOSE(std::abs(s.t2.GetAngle()), Real(M_PI), Real(eps));
   e.SetTorsionAngle(s.t2,M_PI/4);
   BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
   BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(-M_PI+M_PI/4), Real(eps));
@@ -290,4 +292,4 @@ BOOST_AUTO_TEST_CASE(ics_get_angle)
                       << " found");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

@@ -21,6 +21,7 @@
  */
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <ost/mol/mol.hh>
 
 
@@ -50,7 +51,7 @@ struct FixtureView {
   AtomHandle ad;
 };
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(gen_full_view) 
 {
@@ -90,4 +91,4 @@ BOOST_AUTO_TEST_CASE(gen_full_view)
   BOOST_CHECK_EQUAL(av1.GetHashCode(), av3.GetHashCode());  
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

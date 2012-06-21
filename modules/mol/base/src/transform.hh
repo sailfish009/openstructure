@@ -83,6 +83,7 @@ private:
   geom::Mat4 ttm_;
 
   void update_tm();
+  void update_components();
 };
 
 

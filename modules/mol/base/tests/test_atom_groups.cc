@@ -23,15 +23,16 @@
 #include <ost/message.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include "dummy_ent.hh"
 
 
 using namespace ost;
 using namespace ost::mol;
 
-BOOST_AUTO_TEST_SUITE(mol_base)
+BOOST_AUTO_TEST_SUITE(mol_base);
 
-BOOST_AUTO_TEST_CASE(switch_pos) 
+BOOST_AUTO_TEST_CASE(switch_pos)
 {
   test::DummyEnt ent;
   geom::Vec3 y=geom::Vec3(0.0, 1.0, 0.0);
@@ -85,4 +86,4 @@ BOOST_AUTO_TEST_CASE(atom_group_triv)
   BOOST_CHECK_EQUAL(names[0], "B");
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

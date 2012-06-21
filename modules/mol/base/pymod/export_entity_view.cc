@@ -18,6 +18,9 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#if BOOST_VERSION<103400
+#include <boost/python/detail/api_placeholder.hpp>
+#endif
 using namespace boost::python;
 
 #include <ost/export_helper/pair_to_tuple_conv.hh>

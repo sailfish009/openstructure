@@ -940,7 +940,7 @@ void Entity::ColorBy(const String& prop,
                      const Color& c1, const Color& c2,
                      mol::Prop::Level level)
 {
-  std::pair<float,float> minmax = this->GetView().GetMinMax(prop);
+  std::pair<float,float> minmax = this->GetView().GetMinMax(prop, level);
   this->ColorBy(prop,c1,c2,minmax.first, minmax.second,level);
 }
 

@@ -11,11 +11,11 @@ OpenStructure features a :mod:`~ost.img` module that is dedicated to the
 manipulation of images/density maps. The images or density maps can either be 
 one-, two- or three-dimensional. The most common formats used in X-ray and 
 electron  crystallography and atomic force microscope are supported in addition 
-to several general purpose image formats. See `supported file formats
-<http://www.openstructure.org/docs/io/formats>`_ for details.
-The :mod:`~ost.img` module was originally developed as part of the 
-Image Processing Library & Toolbox IPLT. More documentation and examples can 
-also be found on the `IPLT website <http://www.iplt.org>`_.
+to several general purpose image formats. See
+:doc:`supported file formats <io/formats>` for details. The :mod:`~ost.img`
+module was originally developed as part of the Image Processing Library &
+Toolbox IPLT. More documentation and examples can also be found on the
+`IPLT website <http://www.iplt.org>`_.
 
 To load a density map, type
 

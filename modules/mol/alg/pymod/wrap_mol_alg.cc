@@ -18,9 +18,9 @@
 //------------------------------------------------------------------------------
 
 #include <boost/python.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/suite/indexing/map_indexing_suite.hpp>
 #include <ost/config.hh>
-#include <ost/mol/alg/local_dist_test.hh>
+#include <ost/mol/alg/local_dist_diff_test.hh>
 #include <ost/mol/alg/superpose_frames.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 using namespace boost::python;
@@ -36,8 +36,9 @@ void export_entity_to_density();
 
 namespace {
   
-Real (*ldt_a)(const mol::EntityView&, const mol::alg::GlobalDistanceList& glob_dist_list, Real, const String&)=&mol::alg::LocalDistTest;
-Real (*ldt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistTest;
+std::pair<long int,long int> (*lddt_a)(const mol::EntityView&, const mol::alg::GlobalRDMap& , std::vector<Real>, int, const String&)=&mol::alg::LocalDistDiffTest;
+Real (*lddt_c)(const mol::EntityView&, const mol::EntityView& , Real, Real, const String&)=&mol::alg::LocalDistDiffTest;
+Real (*lddt_b)(const seq::AlignmentHandle&,Real, Real, int, int)=&mol::alg::LocalDistDiffTest;
 mol::EntityView (*fc_a)(const mol::EntityView&, const mol::alg::ClashingDistances&,bool)=&mol::alg::FilterClashes;
 mol::EntityView (*fc_b)(const mol::EntityHandle&, const mol::alg::ClashingDistances&, bool)=&mol::alg::FilterClashes;
 mol::EntityView (*csc_a)(const mol::EntityView&, const mol::alg::StereoChemicalParams&, const mol::alg::StereoChemicalParams&, Real, Real, bool)=&mol::alg::CheckStereoChemistry;
@@ -66,11 +67,28 @@ ost::mol::alg::ClashingDistances fill_clashing_distances_wrapper (const list& st
     stereo_chemical_props_file_vector[i] = boost::python::extract<char const*>(stereo_chemical_props_file[i]);
   }
  
- return ost::mol::alg::FillClashingDistances(stereo_chemical_props_file_vector,min_default_distance,min_distance_tolerance);
+ return ost::mol::alg::FillClashingDistances(stereo_chemical_props_file_vector);
+}
+
+ost::mol::alg::GlobalRDMap create_distance_list_from_multiple_references(const list& ref_list, const list& cutoff_list, int sequence_separation, Real max_dist)
+{
+  int ref_list_length = boost::python::extract<int>(ref_list.attr("__len__")());
+  std::vector<ost::mol::EntityView> ref_list_vector(ref_list_length);
+  
+  for (int i=0; i<ref_list_length; i++) {
+    ref_list_vector[i] = boost::python::extract<ost::mol::EntityView>(ref_list[i]);
+  }
+
+  int cutoff_list_length = boost::python::extract<int>(cutoff_list.attr("__len__")());
+  std::vector<Real> cutoff_list_vector(cutoff_list_length);
+  
+  for (int i=0; i<cutoff_list_length; i++) {
+    cutoff_list_vector[i] = boost::python::extract<Real>(cutoff_list[i]);
+  }
+  return ost::mol::alg::CreateDistanceListFromMultipleReferences(ref_list_vector, cutoff_list_vector, sequence_separation, max_dist);  	
 }
 
 }
-
 
 
 BOOST_PYTHON_MODULE(_ost_mol_alg)
@@ -82,14 +100,16 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_entity_to_density();
   #endif
   
-  def("LocalDistTest", ldt_a, (arg("local_ldt_property_string")=""));
-  def("LocalDistTest", ldt_b, (arg("ref_index")=0, arg("mdl_index")=1));
+  def("LocalDistDiffTest", lddt_a, (arg("sequence_separation")=0,arg("local_lddt_property_string")=""));
+  def("LocalDistDiffTest", lddt_c, (arg("local_lddt_property_string")=""));
+  def("LocalDistDiffTest", lddt_b, (arg("ref_index")=0, arg("mdl_index")=1));
   def("FilterClashes", fc_a, (arg("ent"), arg("clashing_distances"), arg("always_remove_bb")=false));
   def("FilterClashes", fc_b, (arg("ent"), arg("clashing_distances"), arg("always_remove_bb")=false));
   def("CheckStereoChemistry", csc_a, (arg("ent"), arg("bonds"), arg("angles"), arg("bond_tolerance"), arg("angle_tolerance"), arg("always_remove_bb")=false));
   def("CheckStereoChemistry", csc_b, (arg("ent"), arg("bonds"), arg("angles"), arg("bond_tolerance"), arg("angle_tolerance"), arg("always_remove_bb")=false));
-  def("LDTHA",&mol::alg::LDTHA);
+  def("LDDTHA",&mol::alg::LDDTHA);
   def("CreateDistanceList",&mol::alg::CreateDistanceList);
+  def("CreateDistanceListFromMultipleReferences",&create_distance_list_from_multiple_references);
     
   def("SuperposeFrames", superpose_frames1, 
       (arg("source"), arg("sel")=ost::mol::EntityView(), arg("begin")=0, 
@@ -98,7 +118,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   (arg("source"), arg("sel"), arg("ref_view"),arg("begin")=0, arg("end")=-1));
 
   
-  class_<mol::alg::ClashingDistances> ("ClashingDistances" ,init<Real,Real>())
+  class_<mol::alg::ClashingDistances> ("ClashingDistances",init<>())
     .def("SetClashingDistance",&mol::alg::ClashingDistances::SetClashingDistance)
     .def("GetClashingDistance",&mol::alg::ClashingDistances::GetClashingDistance)
     .def("GetMaxAdjustedDistance",&mol::alg::ClashingDistances::GetMaxAdjustedDistance)    
@@ -125,23 +145,18 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   ;    
    
   
-  class_<mol::alg::ReferenceDistance> ("ReferenceDistance", init <const mol::alg::UniqueAtomIdentifier&,const mol::alg::UniqueAtomIdentifier&, Real, Real>())
-    .def("GetFirstAtom",&mol::alg::ReferenceDistance::GetFirstAtom)
-    .def("GetSecondAtom",&mol::alg::ReferenceDistance::GetSecondAtom)
-    .def("GetMinDistance",&mol::alg::ReferenceDistance::GetMinDistance)
-    .def("GetMaxDistance",&mol::alg::ReferenceDistance::GetMaxDistance)
+  class_<mol::alg::ResidueRDMap>("ResidueRDMap")
+    .def(map_indexing_suite<mol::alg::ResidueRDMap>())
   ;
   
-  class_<std::vector<mol::alg::ReferenceDistance> >("ResidueDistanceList")
-    .def(vector_indexing_suite<std::vector<mol::alg::ReferenceDistance > >())
-  ;
-  
-  class_<std::vector<mol::alg::ResidueDistanceList> >("GlobalDistanceList")
-    .def(vector_indexing_suite<std::vector<mol::alg::ResidueDistanceList > >())
+  class_<mol::alg::GlobalRDMap>("GlobalRDMap")
+    .def(map_indexing_suite<mol::alg::GlobalRDMap>())
   ;
   
   def("FillClashingDistances",&fill_clashing_distances_wrapper);
   def("FillStereoChemicalParams",&fill_stereochemical_params_wrapper);
   def("IsStandardResidue",&mol::alg::IsStandardResidue);
+  def("PrintGlobalRDMap",&mol::alg::PrintGlobalRDMap);
+  def("PrintResidueRDMap",&mol::alg::PrintResidueRDMap);
   
 }

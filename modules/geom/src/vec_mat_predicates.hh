@@ -18,8 +18,9 @@
 //------------------------------------------------------------------------------
 #ifndef OST_GEOM_VEC_MAT_PREDICATES_HH
 #define OST_GEOM_VEC_MAT_PREDICATES_HH
-
+#include <boost/version.hpp>
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 #include <ost/geom/geom.hh>
 
 
@@ -38,7 +39,11 @@ boost::test_tools::predicate_result vec_is_close(const V& v1, const V& v2,
   std::string labels[]={"x","y","z","w"};
   bool flag=true;
   boost::test_tools::predicate_result res( false );
-  boost::test_tools::close_at_tolerance<Real> close_test(::boost::test_tools::percent_tolerance(tolerance));
+#if BOOST_VERSION<103400
+  boost::test_tools::close_at_tolerance<Real> close_test(tolerance);
+#else
+  boost::test_tools::close_at_tolerance<Real> close_test(boost::test_tools::percent_tolerance(tolerance));
+#endif
   for(unsigned int i=0;i<dim;++i){
     if(v1[i]==0.0){
       if(!boost::test_tools::check_is_small(v2[i],tolerance)){
@@ -92,7 +97,11 @@ boost::test_tools::predicate_result mat_is_close(const M& m1, const M& m2,
 {
   bool flag=true;
   boost::test_tools::predicate_result res( false );
-  boost::test_tools::close_at_tolerance<Real> close_test(::boost::test_tools::percent_tolerance(tolerance));
+#if BOOST_VERSION<103400
+  boost::test_tools::close_at_tolerance<Real> close_test(tolerance);
+#else
+  boost::test_tools::close_at_tolerance<Real> close_test(boost::test_tools::percent_tolerance(tolerance));
+#endif
   for(unsigned int i=0;i<dim;++i){
     for(unsigned int j=0;j<dim;++j){
       if(m1(i,j)==0.0){

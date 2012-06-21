@@ -396,7 +396,7 @@ std::vector<Real> AnalyzeAromaticRingInteraction(const CoordGroupHandle& traj, c
         rmsf+=geom::Dot(v,v);
       }
     }
-    return pow(rmsf/float(n_atoms*n_frames),0.5);
+    return sqrt(rmsf/float(n_atoms*n_frames));
   }
   
 }}} //ns

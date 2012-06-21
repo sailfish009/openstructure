@@ -68,5 +68,9 @@ class TestAlignToSeqRes(unittest.TestCase):
     self.assertEqual(seq.alg.ValidateSEQRESAlignment(seqres_aln, chain), False)
 
 if __name__ == "__main__":
-  from ost import testutils
-  testutils.RunTests()
+  builder=conop.GetBuilder()
+  if not hasattr(builder, 'compound_lib'):
+    print 'default builder does not use compound library. ignoring unit tests'
+  else:
+    from ost import testutils
+    testutils.RunTests()

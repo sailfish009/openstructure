@@ -1380,7 +1380,7 @@ void Scene::SetStereoMode(unsigned int m)
     if(win_ && win_->HasStereo()) {
       stereo_mode_=1;
     } else {
-      LOG_INFO("Scene: No visual present for quad-buffered stereo");
+      LOG_WARNING("Scene: No visual present for quad-buffered stereo (run dng with --stereo)");
       stereo_mode_=0;
     }
   } else if(m==2) {

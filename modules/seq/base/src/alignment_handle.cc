@@ -66,9 +66,13 @@ int AlignmentHandle::GetResidueIndex(int seq_index, int pos) const
 void AlignmentHandle::AddSequence(const ConstSequenceHandle& sequence)
 {
   this->CheckValidity();
-  if (!sequence.IsValid() || (impl_->GetCount()>0 &&
-      impl_->GetSequence(0)->GetLength()!=sequence.GetLength())) {
+  if (!sequence.IsValid()) {
     throw InvalidSequence();
+  }
+  if (impl_->GetCount()>0 &&
+      impl_->GetSequence(0)->GetLength()!=sequence.GetLength()) {
+    throw std::runtime_error("sequence doesn't have the same length as the "
+                             "alignment");
   }
   return impl_->AddSequence(sequence.Impl());
 }
@@ -137,7 +141,7 @@ AlignmentHandle AlignmentFromSequenceList(const SequenceList& seq_list)
   if (seq_list.IsValid() && seq_list.SequencesHaveEqualLength()) {
     return AlignmentHandle(seq_list.Impl());
   }
-  throw InvalidAlignment();
+  throw std::runtime_error("sequences have different lengths");
 }
 
 ConstSequenceList AlignmentHandle::GetSequences() const

@@ -6,9 +6,9 @@ if len(sys.argv)>1:
   filename=sys.argv[1]
 ent=io.LoadEntity(filename)
 
-edi=ent.RequestXCSEditor()
+edi=ent.EditXCS()
 m=geom.Mat4()
-m.PasteTranslation(-ent.GetGeometricStart())
+m.PasteTranslation(-ent.bounds.min)
 edi.ApplyTransform(m)
 edi.UpdateICS()
 frag=gfx.Entity('frag', ent)

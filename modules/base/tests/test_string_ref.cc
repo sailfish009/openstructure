@@ -20,13 +20,15 @@
 /*
   Author: Marco Biasini
  */
-#include <ost/string_ref.hh>
+
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-
+#include <boost/test/auto_unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
+#include <ost/string_ref.hh>
 using namespace ost;
 
-BOOST_AUTO_TEST_SUITE( base )
+BOOST_AUTO_TEST_SUITE( base );
 
 BOOST_AUTO_TEST_CASE( test_string_ref)
 {
@@ -135,4 +137,4 @@ BOOST_AUTO_TEST_CASE( test_string_ref)
   BOOST_CHECK(r3.first==false);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

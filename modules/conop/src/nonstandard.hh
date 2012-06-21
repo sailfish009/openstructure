@@ -37,8 +37,8 @@ namespace ost { namespace conop {
 
                              
 bool DLLEXPORT_OST_CONOP CopyResidue(ost::mol::ResidueHandle src_res,
-                             ost::mol::ResidueHandle dst_res, 
-                             ost::mol::XCSEditor& edi);
+                                     ost::mol::ResidueHandle dst_res,
+                                     ost::mol::XCSEditor& edi);
                              
 /// \brief copies all atom of src_res to dst_res
 /// \param has_cbeta will be set to true if the src_res has a cbeta and the 
@@ -46,9 +46,9 @@ bool DLLEXPORT_OST_CONOP CopyResidue(ost::mol::ResidueHandle src_res,
 
                              
 bool DLLEXPORT_OST_CONOP CopyIdentical(ost::mol::ResidueHandle src_res,
-                             ost::mol::ResidueHandle dst_res, 
-                             ost::mol::XCSEditor& edi, 
-                             bool& has_cbeta);
+                                       ost::mol::ResidueHandle dst_res,
+                                       ost::mol::XCSEditor& edi,
+                                       bool& has_cbeta);
 
 /// \brief copies atoms of src_res to dst_res
 ///
@@ -60,9 +60,9 @@ bool DLLEXPORT_OST_CONOP CopyIdentical(ost::mol::ResidueHandle src_res,
 
                              
 bool DLLEXPORT_OST_CONOP CopyConserved(ost::mol::ResidueHandle src_res, 
-                             ost::mol::ResidueHandle dst_res, 
-                             ost::mol::XCSEditor& edi,
-                             bool& has_cbeta);
+                                       ost::mol::ResidueHandle dst_res,
+                                       ost::mol::XCSEditor& edi,
+                                       bool& has_cbeta);
 
 /// \brief construct dst_res in case src_res and dst_res are not conserved.
 /// 
@@ -71,24 +71,24 @@ bool DLLEXPORT_OST_CONOP CopyConserved(ost::mol::ResidueHandle src_res,
 
 
 bool DLLEXPORT_OST_CONOP CopyNonConserved(ost::mol::ResidueHandle src_res, 
-                                ost::mol::ResidueHandle dst_res, 
-                                ost::mol::XCSEditor& edi, 
-                                bool& has_cbeta);
+                                          ost::mol::ResidueHandle dst_res,
+                                          ost::mol::XCSEditor& edi,
+                                          bool& has_cbeta);
 
 /// \brief construct dst_res from src_res when src_res is an MSE
 
 bool DLLEXPORT_OST_CONOP CopyMSE(ost::mol::ResidueHandle src_res, 
-                       ost::mol::ResidueHandle dst_res, 
-                       ost::mol::XCSEditor& edi, 
-                       bool& has_cbeta);
+                                 ost::mol::ResidueHandle dst_res,
+                                 ost::mol::XCSEditor& edi,
+                                 bool& has_cbeta);
                        
 /// \brief construct a dst_res with only atoms matching the standard aminoacid
 /// from src_res when src_res is an is modified
                             
 bool DLLEXPORT_OST_CONOP CopyModified(ost::mol::ResidueHandle src_res, 
-                            ost::mol::ResidueHandle dst_res, 
-                            ost::mol::XCSEditor& edi, 
-                            bool& has_cbeta);
+                                      ost::mol::ResidueHandle dst_res,
+                                      ost::mol::XCSEditor& edi,
+                                      bool& has_cbeta);
 
 
 
