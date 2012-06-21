@@ -95,8 +95,8 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
     ResidueView rv2=mdl_chain.FindResidue(second_atom.GetResNum());
     overlap.second+=tol_list.size();
     int rindex2=0;
-    int rindex1=mdl_res.GetIndex();
-    if (!only_fixed)
+    int rindex1=mdl_res ? mdl_res.GetIndex() : -1;
+    if (!only_fixed && rindex1!=-1)
       overlap_list[rindex1].second+=tol_list.size();
     if (!rv2) {
       continue;
@@ -106,7 +106,7 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
       overlap_list[rindex2].second+=tol_list.size();
     AtomView av2=rv2.FindAtom(second_atom.GetAtomName());
     if (!(av1 && av2)) {
-      continue;
+     continue;
     }
     Real mdl_dist=geom::Length(av1.GetPos()-av2.GetPos());
     std::vector<Real>::const_reverse_iterator rend_it=tol_list.rend();
