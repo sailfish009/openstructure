@@ -577,9 +577,9 @@ Real LDDTHA(EntityView& v, const GlobalRDMap& global_dist_list, int sequence_sep
 {
     std::vector<Real> cutoffs;
     cutoffs.push_back(0.5);
-//cutoffs.push_back(1.0);
-//    cutoffs.push_back(2.0);
-//   cutoffs.push_back(4.0);
+    cutoffs.push_back(1.0);
+    cutoffs.push_back(2.0);
+    cutoffs.push_back(4.0);
     String label="locallddt";
     std::pair<long int,long int> total_ov=alg::LocalDistDiffTest(v, global_dist_list, cutoffs,  sequence_separation, label);
     return static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
