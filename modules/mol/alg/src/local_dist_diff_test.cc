@@ -92,22 +92,19 @@ std::pair<long int, long int> calc_overlap1(const ResidueRDMap& res_distance_lis
         continue;
       }    
     }
-
-    AtomView av2=mdl_chain.FindAtom(second_atom.GetResNum(),second_atom.GetAtomName());
+    ResidueView rv2=mdl_chain.FindResidue(second_atom.GetResNum());
     overlap.second+=tol_list.size();
-    int rindex1=0, rindex2=0;
-    if (av1) {
-      rindex1=av1.GetResidue().GetIndex();
-      if (!only_fixed)
-        overlap_list[rindex1].second+=tol_list.size();
+    int rindex2=0;
+    int rindex1=mdl_res.GetIndex();
+    if (!only_fixed)
+      overlap_list[rindex1].second+=tol_list.size();
+    if (!rv2) {
+      continue;
     }
-
-    if (av2) {
-      rindex2=av2.GetResidue().GetIndex();
-      if (!only_fixed)
-        overlap_list[rindex2].second+=tol_list.size();
-
-    }
+    rindex2=rv2.GetIndex();
+    if (!only_fixed)
+      overlap_list[rindex2].second+=tol_list.size();
+    AtomView av2=rv2.FindAtom(second_atom.GetAtomName());
     if (!(av1 && av2)) {
       continue;
     }
