@@ -175,10 +175,6 @@
 
      Returns the name of the atom, as a String
 
-  .. method:: Print()
- 
-     Prints the information to standard output
-
 .. class:: ResidueRDMap
 
   Dictionary-like object containing the a list of distances that originate from the a single residue residue, to

@@ -147,6 +147,7 @@ int main (int argc, char **argv)
   } catch (std::exception& e) {
     std::cout << e.what() << std::endl;
     usage();
+    exit(-1);
   }
   po::notify(vm);
   if (vm.count("version")) {
@@ -281,24 +282,12 @@ int main (int argc, char **argv)
     }
     EntityView v=model.CreateFullView();
 
-    // The code in this following block is only used to make CASP9 models load correctly and normally commented out
-    EntityView model2=model.Select("aname!=CEN,NV,OT1,OT,CAY,CY,OXT,1OCT,NT,OT2,2OCT,OVL1,OC1,O1,OC2,O2,OVU1");
-    EntityView v1=model2.Select("not (rname==GLY and aname==CB)");
     boost::filesystem::path pathstring(files[i]);
     #if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
     String filestring=pathstring.string();
     #else
     String filestring=pathstring.file_string();
     #endif      
-    if (filestring.substr(5,5)=="TS257" || filestring.substr(5,5)=="TS458" ) {
-      for (AtomHandleIter ait=v1.GetHandle().AtomsBegin();ait!=v1.GetHandle().AtomsEnd();++ait){
-        AtomHandle aitv = *ait;
-        String atomname=aitv.GetName();            
-        String firstletter=atomname.substr(0,1);
-        aitv.SetElement(firstletter);
-      }
-    }  
-    v=v1;  
     std::cout << "File: " << files[i] << std::endl; 
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
     std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
@@ -353,7 +342,7 @@ int main (int argc, char **argv)
     std::pair<int,int> total_ov=alg::LocalDistDiffTest(v, glob_dist_list, cutoffs, sequence_separation, label);
     Real lddt = static_cast<Real>(total_ov.first)/(static_cast<Real>(total_ov.second) ? static_cast<Real>(total_ov.second) : 1);
     std::cout << "Global LDDT score: " << std::setprecision(4) << lddt << std::endl;
-    std::cout << "(" << std::fixed << total_ov.first << " conserved distances out of " << total_ov.second  
+    std::cout << "(" << std::fixed << total_ov.first << " conserved distances out of " << total_ov.second
               << " checked, over " << cutoffs.size() << " thresholds)" << std::endl;
 
     // prints the residue-by-residue statistics  
