@@ -272,12 +272,12 @@ Saving Density Maps
 
   For a list of file formats supported by :func:`SaveImage`, see :doc:`image_formats`.
   
+  .. code-block:: python
 
-.. code-block:: python
-  # load density map
-  image=io.LoadImage('density_map.ccp4')
-  # save density map
-  io.SaveImage(image, 'new_map.map', CCP4())
+    # load density map
+    image=io.LoadImage('density_map.ccp4')
+    # save density map
+    io.SaveImage(image, 'new_map.map', CCP4())
 
 
 
