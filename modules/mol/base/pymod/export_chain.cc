@@ -21,7 +21,8 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/mol/chain_type.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 #include <ost/export_helper/generic_property_def.hh>
@@ -38,7 +39,9 @@ namespace {
   typedef EntityView (ChainHandle::*QueryMethod)(const Query&, uint) const;
   typedef EntityView (ChainHandle::*StringMethod)(const String&, uint) const;  
   QueryMethod select_query=&ChainHandle::Select;
-  StringMethod select_string=&ChainHandle::Select; 
+  StringMethod select_string=&ChainHandle::Select;
+  ChainType (*ChainTypeFromStringPtr)(const String& identifier) =
+    &ChainTypeFromString;
 }
 
 void export_Chain()
@@ -50,6 +53,18 @@ void export_Chain()
     .def(self_ns::str(self))
     .add_property("valid", &ChainBase::IsValid)
     .def("IsValid", &ChainBase::IsValid)
+    .def("GetType", &ChainBase::GetType)
+    .def("GetDescription", &ChainBase::GetDescription)
+    .def("IsPolypeptide", &ChainBase::IsPolypeptide)
+    .def("IsPolynucleotide", &ChainBase::IsPolynucleotide)
+    .def("IsPolysaccharide", &ChainBase::IsPolysaccharide)
+    .def("IsPolymer", &ChainBase::IsPolymer)
+    .add_property("is_polypeptide", &ChainBase::IsPolypeptide)
+    .add_property("is_polynucleotide", &ChainBase::IsPolynucleotide)
+    .add_property("is_polysaccharide", &ChainBase::IsPolysaccharide)
+    .add_property("is_polymer", &ChainBase::IsPolymer)
+    .add_property("type", &ChainBase::GetType)
+    .add_property("description", &ChainBase::GetDescription)
   ;
   generic_prop_def<ChainBase>(chain_base);
   class_<ChainHandle, bases<ChainBase> >("ChainHandle", init<>())
@@ -78,7 +93,9 @@ void export_Chain()
     .def("GetAtomCount", &ChainHandle::GetAtomCount)
     .def("GetBondCount", &ChainHandle::GetBondCount)   
     .add_property("residue_count", &ChainHandle::GetResidueCount)
-    .add_property("atom_count", &ChainHandle::GetAtomCount)    
+    .add_property("atom_count", &ChainHandle::GetAtomCount)
+    .add_property("chain_type", &ChainHandle::GetType)
+    .add_property("description", &ChainHandle::GetDescription)
     .def("InSequence", &ChainHandle::InSequence)
     .def("Select", select_string, arg("flags")=0)
     .def("Select", select_query, arg("flags")=0)
@@ -101,6 +118,27 @@ void export_Chain()
   
   class_<ChainHandleList>("ChainHandleList", no_init)
     .def(vector_indexing_suite<ChainHandleList>())
-    .def(ost::VectorAdditions<ChainHandleList>())    
+    .def(geom::VectorAdditions<ChainHandleList>())    
   ;
+
+  {
+    enum_<ChainType>("ChainType")
+      .value("CHAINTYPE_POLY",           CHAINTYPE_POLY)
+      .value("CHAINTYPE_NON_POLY",       CHAINTYPE_NON_POLY)
+      .value("CHAINTYPE_WATER",          CHAINTYPE_WATER)
+      .value("CHAINTYPE_POLY_PEPTIDE_D", CHAINTYPE_POLY_PEPTIDE_D)
+      .value("CHAINTYPE_POLY_PEPTIDE_L", CHAINTYPE_POLY_PEPTIDE_L)
+      .value("CHAINTYPE_POLY_DN",        CHAINTYPE_POLY_DN)
+      .value("CHAINTYPE_POLY_RN",        CHAINTYPE_POLY_RN)
+      .value("CHAINTYPE_POLY_SAC_D",     CHAINTYPE_POLY_SAC_D)
+      .value("CHAINTYPE_POLY_SAC_L",     CHAINTYPE_POLY_SAC_L)
+      .value("CHAINTYPE_POLY_DN_RN",     CHAINTYPE_POLY_DN_RN)
+      .value("CHAINTYPE_UNKNOWN",        CHAINTYPE_UNKNOWN)
+      .value("CHAINTYPE_N_CHAINTYPES",   CHAINTYPE_N_CHAINTYPES)
+      .export_values()
+    ;
+  }
+
+  def("ChainTypeFromString", ChainTypeFromStringPtr);
+  def("StringFromChainType", &StringFromChainType);
 }

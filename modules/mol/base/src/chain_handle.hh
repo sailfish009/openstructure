@@ -193,7 +193,9 @@ public:
   bool operator==(const ChainHandle& ref) const;
   bool operator!=(const ChainHandle& ref) const;
 
-
+  /// \brief checks whether res breaks the in sequence property
+  ///        and updates it accordingly
+  void SetInSequence(const int index);
 };
 
 }} // ns

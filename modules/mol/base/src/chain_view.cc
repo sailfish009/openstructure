@@ -20,7 +20,8 @@
 #include <limits>
 
 #include <boost/bind.hpp>
-
+#include <ost/mol/bond_handle.hh>
+#include <ost/mol/residue_handle.hh>
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/residue_view.hh>
 #include <ost/mol/entity_visitor.hh>
@@ -333,14 +334,10 @@ bool ChainView::operator!=(const ChainView& rhs) const
 
 Real ChainView::GetMass() const {
   this->CheckValidity();
-  Real mass = 0;
+  double mass = 0;
   ResidueViewList::const_iterator i;
   for (i=data_->residues.begin(); i!=data_->residues.end(); ++i) {
-    ResidueView r=*i;
-    for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
-         e2=r.GetAtomList().end(); j!=e2; ++j) {
-      mass+=j->GetMass();
-    }
+    mass+=i->GetMass();
   }
   return mass;
 }

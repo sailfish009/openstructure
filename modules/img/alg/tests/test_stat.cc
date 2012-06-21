@@ -29,6 +29,7 @@
 #include <ost/img/image.hh>
 
 #include <ost/img/alg/stat.hh>
+#include <ost/img/alg/stat_accumulator.hh>
 
 namespace test_stat {
 
@@ -49,15 +50,42 @@ void test() {
 
   Stat stat;
   im.Apply(stat);
+  BOOST_CHECK_CLOSE(stat.GetMean(),Real(5.0),Real(0.0001));
+  BOOST_CHECK_CLOSE(stat.GetStandardDeviation(),Real(2.58198889747),Real(0.0001));
+  BOOST_CHECK_CLOSE(stat.GetSkewness()+Real(0.5),Real(0.5),Real(0.0001));
+  BOOST_CHECK_CLOSE(stat.GetKurtosis(),Real(1.77),Real(0.0001));
 
-  std::ostringstream msg;
+  // check for rounding errors
+  im+=10000.0;
+  im.Apply(stat);
+  BOOST_CHECK_CLOSE(stat.GetMean(),Real(10005.0),Real(0.0001));
+  BOOST_CHECK_CLOSE(stat.GetStandardDeviation(),Real(2.58198889747),Real(0.01));
+  BOOST_CHECK_CLOSE(stat.GetSkewness()+Real(0.5),Real(0.5),Real(0.01));
+  BOOST_CHECK_CLOSE(stat.GetKurtosis(),Real(1.77),Real(0.01));
 
-  msg << "expected 5.0 as mean but found " << stat.GetMean();
-  BOOST_CHECK_MESSAGE(stat.GetMean()==5.0,msg.str());
-  msg.str("");
-  msg << "expected 2.73861 as stdev but found " << stat.GetStandardDeviation();
-  BOOST_CHECK_MESSAGE((stat.GetStandardDeviation()-2.73861)<1e-5,msg.str());
-  
+
+  StatAccumulator<> acc;
+  for(int u=0;u<3;++u) {
+    for(int v=0;v<3;++v) {
+      acc(val[u][v]);
+    }
+  }
+  BOOST_CHECK_CLOSE(acc.GetMean(),Real(5.0),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc.GetStandardDeviation(),Real(2.58198889747),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc.GetSkewness()+Real(0.5),Real(0.5),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc.GetKurtosis(),Real(1.77),Real(0.0001));
+
+  StatAccumulator<> acc1,acc2,acc3;
+  for(int u=0;u<3;++u) {
+    acc1(val[u][0]);
+    acc2(val[u][1]);
+    acc3(val[u][2]);
+  }
+  StatAccumulator<> acc_c=acc1+acc2+acc3;
+  BOOST_CHECK_CLOSE(acc_c.GetMean(),Real(5.0),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc_c.GetStandardDeviation(),Real(2.58198889747),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc_c.GetSkewness()+Real(0.5),Real(0.5),Real(0.0001));
+  BOOST_CHECK_CLOSE(acc_c.GetKurtosis(),Real(1.77),Real(0.0001));
 }
 
 } // namespace

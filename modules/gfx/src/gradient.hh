@@ -33,33 +33,6 @@
 
 namespace ost { namespace gfx {
 
-
-struct Stop {
-   Stop(): t(0.0) {}
-
-   Stop(float tt, const Color& c): t(tt), color(c) {}
-   float t;
-   Color color;
-
-   Color GetColor(){
-	   return color;
-   }
-
-   float GetRel(){
-	   return t;
-   }
-
-   bool operator==(const Stop& ref) const
-   {
-     return t==ref.t && color==ref.color;
-   }
-
- };
-
-
-typedef std::vector<Stop> StopList;
-
-
 /// \brief color gradient
 /// 
 /// Gradients map a scalar value in the range of 0 to 1 to a color. The 
@@ -68,10 +41,39 @@ typedef std::vector<Stop> StopList;
 /// 
 /// \sa \ref gradient.py "Gradient Example"
 class DLLEXPORT_OST_GFX Gradient {
-
 public:
+  struct Stop {
+    Stop(): t(0.0) {}
+    
+    Stop(float tt, const Color& c): t(tt), color(c) {}
+    float t;
+    Color color;
+    
+    Color GetColor(){
+      return color;
+    }
+    
+    float GetRel(){
+      return t;
+    }
+    
+    bool operator==(const Stop& ref) const
+    {
+      return t==ref.t && color==ref.color;
+    }
+    
+  };
+  
+  typedef std::vector<Stop> StopList;
+  
+public:
+  /*!
+    In python, the gradient can also be initialize with a dictionary, mapping
+    stops to either float triplets or gfx.Color objects
+  */
   Gradient();
 
+  /// \brief initialize with a pre-define gradient name
   Gradient(const String& name);
 
   /// \brief get color

@@ -32,9 +32,11 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/regex.hpp>
+#include <boost/shared_array.hpp>
 
 #include <ost/log.hh>
 #include <ost/conop/conop.hh>
+#include <ost/conop/heuristic_builder.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/profile.hh>
 
@@ -46,41 +48,6 @@
 namespace ost { namespace io {
 
 using boost::format;
-
-  namespace {
-
-    std::vector<std::string> tokenize(const std::string& line)
-    {
-      std::vector<std::string> nrvo;
-      bool in_string=false;
-      int p0=0;
-      for(size_t p1=1;p1<line.size();++p1) {
-        if(in_string) {
-          if(line[p1]=='"') {
-            in_string=false;
-            nrvo.push_back(std::string(line.substr(p0,p1-p0)));
-            ++p1;
-            p0=p1;
-            while(isspace(line[p1]) && p1<line.size()) {++p0;++p1;}
-            --p0; --p1;
-          }
-        } else {
-          if(isspace(line[p1])) {
-            nrvo.push_back(std::string(line.substr(p0+1,p1-p0-1)));
-            ++p1;
-            p0=p1;
-            while(isspace(line[p1]) && p1<line.size()) {++p0;++p1;}
-            --p0; --p1;
-          } else if(line[p1]=='"') {
-            in_string=true;
-            p0=p1+1;
-          }
-        }
-      }
-      return nrvo;
-    }
-
-  }
 
 MAEReader::MAEReader(const boost::filesystem::path& loc):
   curr_chain_(),
@@ -105,6 +72,7 @@ void MAEReader::Import(mol::EntityHandle& ent)
   static const boost::regex r_ct_block("f_m_ct +\\{");
   static const boost::regex r_atom_block("m_atom\\[.*\\] +\\{");
   static const boost::regex r_delim(":::");
+  static const boost::regex r_end(" *\\} *");
 
   String line;
   bool in_ct_block=false;
@@ -120,13 +88,15 @@ void MAEReader::Import(mol::EntityHandle& ent)
   int i_chain_name=-1;
 
   mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
+
+  boost::shared_array<char> xline(new char[512]);
   
   while(std::getline(in_,line)) {
-    line = boost::trim_copy(line);
+    //line = boost::trim_copy(line);
     if(in_ct_block) {
       if(in_atom_block) {
         if(parsing_atoms) {
-          if(boost::regex_match(line,r_delim)) {
+          if(boost::regex_search(line,r_delim)) {
             LOG_TRACE( "stopping atom parsing" );
             parsing_atoms=false;
             prop_list.clear();
@@ -139,23 +109,14 @@ void MAEReader::Import(mol::EntityHandle& ent)
             i_chain_name=-1;
           } else {
             // parsing atom line
-            std::vector<std::string> tokens=tokenize(line);
-            for(size_t i=0;i<tokens.size();++i) {
-              LOG_TRACE( "[" << tokens[i] << "] ");
-            }
-            LOG_TRACE("");
-
-            add_atom(ent,editor,
-                     i_atom_name>=0 && i_atom_name<(int)tokens.size() ? tokens[i_atom_name] : "X",
-                     i_atom_xpos>=0 && i_atom_xpos<(int)tokens.size() ? tokens[i_atom_xpos] : "0",
-                     i_atom_ypos>=0 && i_atom_ypos<(int)tokens.size() ? tokens[i_atom_ypos] : "0",
-                     i_atom_zpos>=0 && i_atom_zpos<(int)tokens.size() ? tokens[i_atom_zpos] : "0",
-                     i_res_name>=0 && i_res_name<(int)tokens.size() ? tokens[i_res_name] : "X",
-                     i_res_num>=0 && i_res_num<(int)tokens.size() ? tokens[i_res_num] : "0",
-                     i_chain_name>=0 && i_chain_name<(int)tokens.size() ? tokens[i_chain_name] : "X");
+            memset(xline.get(),0,512);
+            strncpy(xline.get(),line.c_str(),511);
+            parse_and_add_atom(ent,editor,xline.get(),line.size(),
+                               i_atom_name, i_atom_xpos, i_atom_ypos, i_atom_zpos, 
+                               i_res_name, i_res_num, i_chain_name);
           }
         } else { // not parsing atoms
-          if(boost::regex_match(line,r_delim)) {
+          if(boost::regex_search(line,r_delim)) {
             if(i_atom_name==-1 ||
                i_atom_xpos==-1 ||
                i_atom_ypos==-1 ||
@@ -166,36 +127,43 @@ void MAEReader::Import(mol::EntityHandle& ent)
             }
             LOG_TRACE( "starting atom parsing" );
             parsing_atoms=true;
-          } else if(line[0]=='}') {
+          } else if(boost::regex_search(line,r_end)) {
             LOG_TRACE( "exiting atom block" );
             in_atom_block=false;
           } else {
+            std::string line2=boost::trim_copy(line);
             // parsing property line
-            if(line[0]!='#') {
+            if(line2[0]!='#') {
               int pid=prop_list.size()+1;
-              prop_list.push_back(line);
+              prop_list.push_back(line2);
               LOG_TRACE( "found property '" << prop_list.back() << "' id=" << pid );
-              if(line=="s_m_pdb_atom_name") i_atom_name=pid;
-              else if(line=="r_m_x_coord") i_atom_xpos=pid;
-              else if(line=="r_m_y_coord") i_atom_ypos=pid;
-              else if(line=="r_m_z_coord") i_atom_zpos=pid;
-              else if(line=="s_m_pdb_residue_name") i_res_name=pid;
-              else if(line=="i_m_residue_number") i_res_num=pid;
-              else if(line=="s_m_pdb_segment_name") i_chain_name=pid;
+              if(line2=="s_m_pdb_atom_name") i_atom_name=pid;
+              else if(line2=="r_m_x_coord") i_atom_xpos=pid;
+              else if(line2=="r_m_y_coord") i_atom_ypos=pid;
+              else if(line2=="r_m_z_coord") i_atom_zpos=pid;
+              else if(line2=="s_m_pdb_residue_name") i_res_name=pid;
+              else if(line2=="i_m_residue_number") i_res_num=pid;
+              else if(line2=="s_m_chain_name") i_chain_name=pid;
+              else if(line2=="s_m_pdb_segment_name") {
+                // only use this one if s_m_chain_name is not present
+                if(i_chain_name<0) {
+                  i_chain_name=pid;
+                }
+              }
             }
           }
         }
       } else { // not in atom block
-        if(boost::regex_match(line,r_atom_block)) {
+        if(boost::regex_search(line,r_atom_block)) {
           LOG_TRACE( "entering atom block" );
           in_atom_block=true;
-        } else if(line[0]=='}') {
+        } else if(boost::regex_search(line,r_end)) {
           LOG_TRACE( "exiting ct block" );
           in_ct_block=false;
         }
       }
     } else { // not in ct block
-      if(boost::regex_match(line,r_ct_block)) {
+      if(boost::regex_search(line,r_ct_block)) {
         LOG_TRACE( "entering ct block" );
         in_ct_block=true;
       }
@@ -207,26 +175,94 @@ void MAEReader::Import(mol::EntityHandle& ent)
 }
 
 
-void MAEReader::add_atom(mol::EntityHandle ent,
-                         mol::XCSEditor& editor,
-                         const std::string& aname2, 
-                         const std::string& s_axpos, 
-                         const std::string& s_aypos, 
-                         const std::string& s_azpos, 
-                         const std::string& rname2,
-                         const std::string& s_rnum,
-                         const std::string& cname2)
+void MAEReader::parse_and_add_atom(mol::EntityHandle ent,
+                                   mol::XCSEditor& editor,
+                                   char* line,
+                                   size_t line_len,
+                                   int i_atom_name,
+                                   int i_atom_xpos,
+                                   int i_atom_ypos,
+                                   int i_atom_zpos,
+                                   int i_res_name,
+                                   int i_res_num,
+                                   int i_chain_name)  
 {
-  std::string aname=boost::trim_copy(aname2);
-  std::string rname=boost::trim_copy(rname2);
-  std::string cname=boost::trim_copy(cname2);
+  std::string aname("X");
+  std::string rname("UNK");
+  std::string cname("X");
+  geom::Vec3 apos;
+  int irnum=0;
+
+  LOG_TRACE("[" << std::string(line) << "]");
+
+  bool in_string=false;
+  char* p0=line;
+  char* p2=line+line_len;
+  while(isspace(*p0) && p0<=p2) ++p0;
+  int tcount=0;
+  for(char* p1=p0+1;p1<p2;++p1) {
+    if(in_string) {
+      if((*p1)=='"') {
+        in_string=false;
+        char* p3=p1;
+        (*p3)='\0';
+        while(isspace(*p0) && p0<=p3) ++p0;
+        while(isspace(*(p3-1)) && p3>p0) --p3;
+        (*p3)='\0';
+        if(tcount==i_atom_name) {
+          aname=std::string(p0);
+        } else if(tcount==i_atom_xpos) {
+          apos[0]=atof(p0);
+        } else if(tcount==i_atom_ypos) {
+          apos[1]=atof(p0);
+        } else if(tcount==i_atom_zpos) {
+          apos[2]=atof(p0);
+        } else if(tcount==i_res_name) {
+          rname=std::string(p0);
+        } else if(tcount==i_res_num) {
+          irnum=atoi(p0);
+        } else if(tcount==i_chain_name) {
+          cname=std::string(p0);
+        }
+        ++tcount;
+        ++p1;
+        p0=p1;
+        while(isspace((*p1)) && p1<p2) {++p0;++p1;}
+        --p0; --p1;
+      }
+    } else { // not instring
+      if(isspace((*p1))) {
+        (*p1)='\0';
+        ++p0;
+        if(tcount==i_atom_name) {
+          aname=std::string(p0);
+        } else if(tcount==i_atom_xpos) {
+          apos[0]=atof(p0);
+        } else if(tcount==i_atom_ypos) {
+          apos[1]=atof(p0);
+        } else if(tcount==i_atom_zpos) {
+          apos[2]=atof(p0);
+        } else if(tcount==i_res_name) {
+          rname=std::string(p0);
+        } else if(tcount==i_res_num) {
+          irnum=atoi(p0);
+        } else if(tcount==i_chain_name) {
+          cname=std::string(p0);
+        }
+        ++tcount;
+        ++p1;
+        p0=p1;
+        while(isspace((*p1)) && p1<p2) {++p0;++p1;}
+        --p0; --p1;
+      } else if((*p1)=='"') {
+        in_string=true;
+        p0=p1+1;
+      }
+    }
+  }
+
   std::string ele=aname.empty() ? "X" : aname.substr(0,1);
   if(isdigit(ele[0])) ele="H";
-
-  int irnum = atoi(s_rnum.c_str());
-  geom::Vec3 apos(atof(s_axpos.c_str()),
-                  atof(s_aypos.c_str()),
-                  atof(s_azpos.c_str()));
 
   mol::ResidueKey rkey(rname);
   
@@ -272,6 +308,7 @@ void MAEReader::add_atom(mol::EntityHandle ent,
 
   // finally add atom
   LOG_TRACE("  atom " << aname << " (" << ele << ") @" << apos);
+  ++atom_count_;
   mol::AtomHandle ah = editor.InsertAtom(curr_residue_, aname, apos, ele);
 }
   
@@ -328,8 +365,8 @@ bool EntityIOMAEHandler::ProvidesExport(const boost::filesystem::path& loc,
 
 mol::EntityHandle LoadMAE(const String& file_name) 
 {
-  Profile profile_load("LoadMAE");
-  conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
+  //conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();  
+  conop::BuilderP builder(new conop::HeuristicBuilder);
   MAEReader reader(file_name);
   mol::EntityHandle ent=mol::CreateEntity();
   mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);

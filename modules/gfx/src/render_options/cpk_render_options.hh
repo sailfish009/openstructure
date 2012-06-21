@@ -42,14 +42,21 @@ public:
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options);
 
   // own interface
+  /// number of arc subdivisions per pi/2
   void SetSphereDetail(uint detail);
   uint GetSphereDetail();
+  /// 0 = triangulated spheres, 1 = fast 3D sprites (default)
   void SetSphereMode(uint mode);
   uint GetSphereMode();
+  /// Radius multiplier, default=1.0
+  void SetRadiusMult(float m);
+  float GetRadiusMult() const;
+
 
 private:
   uint sphere_detail_;
   uint cpk_mode_;
+  float rad_mult_;
 };
 
 typedef boost::shared_ptr<CPKRenderOptions> CPKRenderOptionsPtr;

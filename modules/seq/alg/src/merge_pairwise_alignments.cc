@@ -38,7 +38,7 @@ void update_shifts(const AlignmentHandle& aln,
                    ShiftMap& shifts)
 {
   ConstSequenceHandle s1=aln.GetSequence(0);  
-  if (s1.GetGaplessString()!=ref_seq.GetString()) {
+  if (!Match(s1.GetGaplessString(), ref_seq.GetString())) {
     throw IntegrityError("The gapless version of '"+s1.GetString()+
                          "' is not identical to the reference sequence.");
   }
@@ -87,7 +87,8 @@ SequenceHandle shift_reference(const ConstSequenceHandle& ref_seq,
   }
   new_sequence << ref_str.substr(last);
   SequenceHandle s=CreateSequence(ref_seq.GetName(), 
-                                  new_sequence.str());
+                                  new_sequence.str(),
+                                  ref_seq.GetRole());
   if (ref_seq.HasAttachedView())
     s.AttachView(ref_seq.GetAttachedView());
   s.SetOffset(ref_seq.GetOffset());
@@ -122,7 +123,8 @@ SequenceHandle realign_sequence(const AlignmentHandle& aln,
     }
     new_sequence << s2.GetOneLetterCode(i);
   }
-  SequenceHandle s=CreateSequence(s2.GetName(), new_sequence.str());
+  SequenceHandle s=CreateSequence(s2.GetName(), new_sequence.str(), 
+                                  s2.GetRole());
   if (s2.HasAttachedView())
     s.AttachView(s2.GetAttachedView());
   s.SetOffset(s2.GetOffset());
@@ -160,9 +162,13 @@ AlignmentHandle MergePairwiseAlignments(const AlignmentList& pairwise_alns,
  
   AlignmentHandle merged=CreateAlignment();
   merged.AddSequence(shift_reference(ref_seq, shifts));
+  size_t ref_len=merged.GetSequence(0).GetLength();
   for (AlignmentList::const_iterator i=pairwise_alns.begin(),
        e=pairwise_alns.end(); i!=e; ++i) {
     SequenceHandle new_seq=realign_sequence(*i, shifts);
+    for (size_t j=new_seq.GetLength(); j<ref_len; ++j) {
+      new_seq.Append('-');
+    }
     merged.AddSequence(new_seq);
   }  
   return merged;

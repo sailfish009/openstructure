@@ -70,6 +70,7 @@ public:
   void Capture(uint f);
   
   virtual void AddFrame(const std::vector<geom::Vec3>& coords) = 0;
+  virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& cell_size,const geom::Vec3& cell_angles) = 0;
   virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords) = 0;
 protected:
   void SetMutable(bool flag);

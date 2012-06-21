@@ -50,9 +50,8 @@ void SignalTransition::onSignal()
   }
 }
 
-KeyEventTransition::KeyEventTransition(QEvent::Type type,int key,Qt::KeyboardModifiers modifiers, State* target, bool swallow_event,  TransitionGuard*  guard):
+KeyEventTransition::KeyEventTransition(int key,Qt::KeyboardModifiers modifiers, State* target, bool swallow_event,  TransitionGuard*  guard):
   TransitionBase(target,guard),
-  type_(type),
   key_(key),
   modifiers_(modifiers),
   swallow_(swallow_event)
@@ -61,8 +60,9 @@ KeyEventTransition::KeyEventTransition(QEvent::Type type,int key,Qt::KeyboardMod
 std::pair<bool,bool> KeyEventTransition::checkEvent(QKeyEvent* event)
 {
   assert(is_active_());
-  if(event->type()==type_ && (event->key()==key_ || 
-     key_==Qt::Key_Any) && event->modifiers() == modifiers_ && guard_->check()){
+  if(event->type()==QEvent::KeyPress && (event->key()==key_ || key_==Qt::Key_Any) &&
+     ( (!event->modifiers() && ! modifiers_)  || event->modifiers() & modifiers_) &&
+     guard_->check()){
     trigger_();
     return std::pair<bool,bool>(true,swallow_);
   }
@@ -81,7 +81,9 @@ std::pair<bool,bool> MouseEventTransition::checkEvent(QMouseEvent* event)
 {
 // only gets called if active
   assert(is_active_());
-  if(event->type()==type_ && event->button()==button_ && event->modifiers() == modifiers_ && guard_->check()){
+  if(event->type()==type_ && event->button()==button_ &&
+     ((!event->modifiers() && ! modifiers_)  || event->modifiers() & modifiers_) &&
+     guard_->check()){
     trigger_();
     return std::pair<bool,bool>(true,swallow_);
   }

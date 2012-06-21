@@ -97,7 +97,9 @@ public:
   /// If several sequences have the same name, the first matching sequence will
   /// be returned.
   ConstSequenceHandle FindSequence(const String& name) const;
-
+  
+  int FindSequenceIndex(const String& name) const;
+  
   /// \brief attach view to given sequence
   /// \sa SequenceHandle::AttachView(const mol::EntityView&)
   void AttachView(int seq_index, const mol::EntityView& view);
@@ -107,6 +109,8 @@ public:
   void AttachView(int seq_index, const mol::EntityView& view,
                   const String& chain_name);
 
+
+  mol::EntityViewPair GetMatchingBackboneViews(int idx0=0, int idx1=1) const;
   /// \brief set name of sequence
   void SetSequenceName(int seq_index, const String& name);
 
@@ -166,6 +170,10 @@ public:
   /// between 0 (no coverage) and 1 (full coverage)
   Real GetCoverage(int seq_index) const;
   
+  
+  const String& GetSequenceRole(int seq_index);
+  
+  void SetSequenceRole(int seq_index, const String& role);
 private:
   void CheckValidity() const;
   impl::SequenceListImplPtr impl_;

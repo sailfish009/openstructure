@@ -38,6 +38,11 @@ def _SkipHeader(stream):
       line=stream.readline()
     return False
 
+def _Cleanup(pdb_path, temp_path, entity_saved):
+  if entity_saved and os.path.exists(pdb_path):
+    os.remove(pdb_path)
+  if os.path.exists(temp_path):
+    os.remove(temp_path)
 
 def _ExecuteDSSP(path, dssp_bin, temp_dir=None):
   # use of mktemp is a safty problem (use mkstemp and provide file handle to 
@@ -53,7 +58,6 @@ def _ExecuteDSSP(path, dssp_bin, temp_dir=None):
   ps=subprocess.Popen([dssp_abs_path, path, temp_dssp_path], 
                       stderr=subprocess.PIPE)
   err_lines=ps.stderr.readlines()
-
   return temp_dssp_path
 
 
@@ -61,7 +65,10 @@ def _CalcRelativeSA(residue_type, absolute_sa):
   solvent_max_list=[118,317,238,243,183,262,286,154,258,228,
                     243,278,260,271,204,234,206,300,303,216] #TODO: source?
   residue_indices = "ARNDCQEGHILKMFPSTWYV"
-  if residue_type.islower()==True:
+  # cysteine bridges are marked with lower-case letters by DSSP. We don't 
+  # really care which cysteines are forming covalent bonds, so let's set the 
+  # one-letter-code to "C".
+  if residue_type.islower():
     residue_type='C'
   if residue_indices.find(residue_type)==-1:
     raise RuntimeError('residue %s is a non-standard residue' %(residue_type))	
@@ -81,7 +88,10 @@ def AssignDSSP(ent, pdb_path="", extract_burial_status=False, tmp_dir=None,
   
   :param ent: The entity for which the secondary structure should be calculated
   :type ent: :class:`~ost.mol.EntityHandle` or :class:`~ost.mol.EntityView`
-  :param extract_burial_status: If true, also extract burial status
+  :param extract_burial_status: If true, also extract burial status and store
+                                as float-property
+                                ``relative_solvent_accessibility`` at residue
+                                level
   :param tmp_dir: If set, overrides the default tmp directory of the
                   operating system
   :param dssp_bin: The path to the DSSP executable
@@ -90,13 +100,12 @@ def AssignDSSP(ent, pdb_path="", extract_burial_status=False, tmp_dir=None,
   :raises: :class:`RuntimeError` when dssp is executed with errors
   """
   entity_saved = False
-
   # use of mktemp is a safty problem (use mkstemp and provide file handle to 
   # subsequent process
   pdb_path=tempfile.mktemp(suffix=".pdb",prefix="temp_entity", 
-			    dir=tmp_dir)
-  io.SaveEntity(ent, pdb_path)
-  entity_saved_flag = 1
+                           dir=tmp_dir)
+  io.SavePDB(ent, pdb_path)
+  entity_saved = True
 
   #TODO: exception handling (currently errors occuring here
   # are handled in the parser LoadDSSP)
@@ -105,30 +114,45 @@ def AssignDSSP(ent, pdb_path="", extract_burial_status=False, tmp_dir=None,
     raise RuntimeEror('DSSP output file does not exist.')
   # assign DSSP to entity
   try:
-    LoadDSSP(temp_dssp_path, ent, extract_burial_status, 
-             entity_saved_flag)
+    LoadDSSP(temp_dssp_path, ent, extract_burial_status,
+             entity_saved)
   except Exception, e:
     # clean up
     print "Exception in DSSP:", e
-    if entity_saved_flag == 1:
-      os.remove(pdb_path)
-    os.remove(temp_dssp_path)
+    _Cleanup(pdb_path, temp_dssp_path, entity_saved)
     raise RuntimeError(e)
 
   # clean up
   #print pdb_path, temp_dssp_path
-  if entity_saved_flag == 1:
-    os.remove(pdb_path)
-  os.remove(temp_dssp_path)
+  _Cleanup(pdb_path, temp_dssp_path, entity_saved)
 
   return ent
 
 
 
-def LoadDSSP(file_name, model, extract_burial_status=0, 
-             entity_saved_flag=0, calculate_relative_sa=True):
-    if model.IsValid() == 0:
-      print "DSSP: model is not valid"
+def LoadDSSP(file_name, model, extract_burial_status=False,
+             entity_saved=False, calculate_relative_sa=True):
+    """
+    Loads DSSP output and assigns secondary structure states to the peptidic
+    residues.
+
+    If you would like to run dssp *and* assign the secondary structure,
+    use :func:`AssignDSSP` instead.
+
+    :param file_name: The filename of the DSSP output file
+    :param model: The entity to which the secondary structure states should be
+                  assigned
+    :param extract_burial_status: If true also calculates burial status of
+        residues and assigns it to the burial_status string property.
+    :param calculate_relative_sa: If true also relative solvent accessibility and
+        and assigns it to the relative_solvent_accessibility float property of
+        the residue.
+    :param entity_save: Whether the entity was saved.
+    """
+    if not model.IsValid():
+      raise ValueError('model entity is not valid')
+    if model.atom_count==0:
+      raise ValueError('model entity does not contain any atoms')
     stream=open(file_name)
     if not _SkipHeader(stream):
       stream.close()
@@ -161,24 +185,24 @@ def LoadDSSP(file_name, model, extract_burial_status=0,
           residue=chain.FindResidue(mol.ResNum(int(num),ins_code))
 
         # set property "burial status:
-        if extract_burial_status == 1:
-         #set default (dummy) burial status for incomplete residues:
-         residue.SetStringProp("burial_status", 'X')
+        if extract_burial_status:
+          #set default (dummy) burial status for incomplete residues:
+          residue.SetStringProp("burial_status", 'X')
 
-         #handle seleno-methionine appearing as amino acid 'X' in DSSP:
-         if residue.name=="MSE" and amino_acid=='X':
-           amino_acid='M'
+          #handle seleno-methionine appearing as amino acid 'X' in DSSP:
+          if residue.name=="MSE" and amino_acid=='X':
+            amino_acid='M'
 
-         residue.SetFloatProp("solvent_accessibility", 
-                                         solvent_accessibility)
-         if calculate_relative_sa:
-           relative_sa=_CalcRelativeSA(amino_acid,solvent_accessibility)
-           residue.SetFloatProp("relative_solvent_accessibility", 
-                                           relative_sa)
-           if relative_sa < 0.25:
-             residue.SetStringProp("burial_status", 'b')
-           else:
-             residue.SetStringProp("burial_status", 'e')
+          residue.SetFloatProp("solvent_accessibility",
+                                          solvent_accessibility)
+          if calculate_relative_sa:
+            relative_sa=_CalcRelativeSA(amino_acid,solvent_accessibility)
+            residue.SetFloatProp("relative_solvent_accessibility",
+                                            relative_sa)
+            if relative_sa < 0.25:
+              residue.SetStringProp("burial_status", 'b')
+            else:
+              residue.SetStringProp("burial_status", 'e')
       except Exception, e:
         print "ERROR:",e
         continue
@@ -200,7 +224,7 @@ def LoadDSSP(file_name, model, extract_burial_status=0,
       elif rtype=='G':
         rt=mol.SecStructure.THREE_TEN_HELIX
       # for corrupted DSSP files. Catch in calling routine:
-      if residue.IsValid() == 0:
+      if not residue.IsValid():
         #Todo: if residues with occupancy 0 have been removed before
         #using a selection statement, they are missed here
         #IMPORTANT: asign DSSP before any selections

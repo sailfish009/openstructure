@@ -20,27 +20,23 @@
  *  Authors: Marco Biasini, Juergen Haas
  */
  
+#include <ost/geom/vec_mat_predicates.hh>
 #include <ost/mol/chem_class.hh>
 #include <ost/mol/mol.hh>
+#include <ost/mol/property_id.hh>
 #include <cmath>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #define CHECK_TRANSFORMED_ATOM_POSITION(ATOM,TARGET) \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetPos()[0]-TARGET[0])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetPos()[1]-TARGET[1])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetPos()[2]-TARGET[2])),0.000001);
+   BOOST_CHECK(vec3_is_close(ATOM.GetPos(), TARGET,Real(0.1)))
 
 #define CHECK_ORIGINAL_ATOM_POSITION(ATOM,TARGET) \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetOriginalPos()[0]-TARGET[0])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetOriginalPos()[1]-TARGET[1])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetOriginalPos()[2]-TARGET[2])),0.000001);
+   BOOST_CHECK(vec3_is_close(ATOM.GetOriginalPos(), TARGET,Real(0.1)))
 
 #define CHECK_ALTERNATE_ATOM_POSITION(ATOM,TARGET,GROUP) \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetAltPos(GROUP)[0]-TARGET[0])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetAltPos(GROUP)[1]-TARGET[1])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetAltPos(GROUP)[2]-TARGET[2])),0.000001);
-
+   BOOST_CHECK(vec3_is_close(ATOM.GetAltPos(GROUP), TARGET,Real(0.1)))
 
 using namespace ost;
 using namespace ost::mol;
@@ -71,14 +67,14 @@ EntityHandle make_test_entity()
   e.Connect(res2.FindAtom("N"), res2.FindAtom("CA"));
   e.Connect(res2.FindAtom("CA"), res2.FindAtom("C"));
   e.Connect(res2.FindAtom("C"), res2.FindAtom("O"));
-  res1.SetChemClass(ChemClass(ChemClass::LPeptideLinking));
-  res2.SetChemClass(ChemClass(ChemClass::LPeptideLinking));  
+  res1.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));
+  res2.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));  
   e.AddTorsion("PHI", res1.FindAtom("C"), res2.FindAtom("N"), 
                res2.FindAtom("CA"), res2.FindAtom("C"));
   return eh;
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 
 BOOST_AUTO_TEST_CASE(throw_invalid_ent_handle)
@@ -365,7 +361,7 @@ BOOST_AUTO_TEST_CASE(copy_residue_props)
   res.SetOneLetterCode('X');
   res.SetIsProtein(true);
   res.SetIsLigand(true);
-  ChemClass cl(ChemClass::LPeptideLinking);  
+  ChemClass cl(ChemClass::L_PEPTIDE_LINKING);  
   res.SetSecStructure(SecStructure(SecStructure::ALPHA_HELIX));
   res.SetChemClass(cl);
   EntityHandle copy=ent.Copy();
@@ -407,5 +403,30 @@ BOOST_AUTO_TEST_CASE(copy_atom_props)
   BOOST_CHECK_EQUAL(atom2.GetRadius(), Real(500.0));
 }
 
+BOOST_AUTO_TEST_CASE(rename_atom)
+{
+   EntityHandle ent=CreateEntity();
+   XCSEditor edi=ent.EditXCS();
+   ChainHandle ch1=edi.InsertChain("A");
+   ResidueHandle res = edi.AppendResidue(ch1, "A");
+   AtomHandle   atom=edi.InsertAtom(res, "A", geom::Vec3(1,2,3), "C");
+   edi.RenameAtom(atom, "B");
+   BOOST_CHECK_EQUAL(atom.GetName(), "B");
+}
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_CASE(minmax)
+{
+  EntityHandle eh=make_test_entity();
+  EntityView ev = eh.CreateFullView();
+  mol::AtomViewList avl = ev.GetAtomList();
+  mol::AtomViewList::iterator i;
+  int n=0.0;
+  for (i=avl.begin(); i!=avl.end(); ++i, ++n) {
+    i->SetFloatProp("test", n);
+  }
+  std::pair<float,float> minmax = ev.GetMinMax("test", Prop::ATOM);
+  BOOST_CHECK_EQUAL(minmax.first, 0.0);
+  BOOST_CHECK_EQUAL(minmax.second, 7.0);
+}
+
+BOOST_AUTO_TEST_SUITE_END();

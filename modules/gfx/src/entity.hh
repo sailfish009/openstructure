@@ -133,13 +133,15 @@ public:
 
   void SetRenderMode(RenderMode::Type mode, const mol::EntityView& view, 
                      bool keep=false);
-  
+  void SetRenderMode(RenderMode::Type mode, const String& selection, 
+                     bool keep=false);
   virtual void SetRenderMode(RenderMode::Type mode);  
   
   mol::EntityView GetRenderView(RenderMode::Type mode);
 
   virtual void SetVisible(const mol::EntityView& view, bool visible);
 
+  virtual void SetVisible(const String& sel, bool visible);
   virtual void OptionsChanged(RenderMode::Type mode);
 
   virtual void SetOpacity(float f);
@@ -148,6 +150,18 @@ public:
   virtual void SetOutlineExpandFactor(float f);
   virtual void SetOutlineExpandColor(const Color& c);
 
+  /// \brief resets used entity handle
+  /// replaces underlying entity, keeps query and flags intact
+  void Reset(const mol::EntityHandle& eh);
+  /// \brief resets used entity handle and query
+  /// replaces underlying entity and query, keeps flags intact
+  void Reset(const mol::EntityHandle& eh, const mol::Query& q);
+  /// \brief resets used entity handle, query and flags
+  /// this has the same effect as the ctor call with the same parameters
+  void Reset(const mol::EntityHandle& eh, const mol::Query& q, mol::QueryFlags flags);
+  /// \brief resets entity view
+  /// this as the same effect as the ctor call with the same parameters
+  void Reset(const mol::EntityView& ev);
   /// \brief rebuild graphical object (see ctor comments)
   /*
     the naming here is misleading - this method WON'T be called upon FlagRebuild
@@ -155,7 +169,11 @@ public:
   void Rebuild();
 
   /// \brief only grab updated positions, dont rebuild the whole thing
+  /// views won't be regenerated from stored queries
   void UpdatePositions();
+
+  /// \brief forces all views to be regenerated from stored queries
+  void UpdateView();
 
   /// \brief set color for selection
   void SetColor(const Color& col, const String& selection=String(""));
@@ -170,19 +188,35 @@ public:
   /// \brief color by element
   void ColorByElement();
   
+  /// \brief color by element for a specific selection
+  void ColorByElement(const String& selection);
+
   /// \brief color by chain
   void ColorByChain();
+
+  /// \brief color by chain for a specific selection
+  void ColorByChain(const String& selection);
 
   /// \brief get view
   mol::EntityView GetView() const;
 
+  /// \brief set a new query to use (deprecated)
+  /// this will re-create the object based on the given selection
   void SetQuery(const mol::Query& q);
 
-  // turn blur on or off
+  /// return internally used query view
+  mol::QueryViewWrapper GetQueryView() const;
+  /// set new query view, rebuilding object
+  void SetQueryView(const mol::QueryViewWrapper& qv);
+
+  /// return underlying entity
+  mol::EntityHandle GetEntity() const;
+
+  // turn blur on or off (experimental feature)
   void SetBlur(bool f);
-  // set atom positions as n-1 for blur
+  // set atom positions as n-1 for blur (experimental feature)
   void BlurSnapshot();
-  // blur transparency falloffs
+  // blur transparency falloffs (experimental feature)
   void SetBlurFactors(float bf1,float bf2);
 
   /// \brief set selection
@@ -211,6 +245,12 @@ public:
                float minv,float maxv,
                mol::Prop::Level hint=mol::Prop::UNSPECIFIED);
 
+  // temporarily here, will be moved to py interface
+  void ColorBy(const String& prop, 
+               const Gradient& gradient,
+               float minv,float maxv,
+               bool clamp);
+
   // temporary, should be incorporated with ColorBy
   void DetailColorBy(const String& prop, 
                      const Gradient& gradient,
@@ -221,6 +261,11 @@ public:
   void ColorBy(const String& prop, 
                const Gradient& gradient,
                mol::Prop::Level hint=mol::Prop::UNSPECIFIED);
+
+  // convenience
+  void ColorBy(const String& prop,
+               const Gradient& gradient,
+               const String& selection);
 
   // convenience
   void ColorBy(const String& prop, 
@@ -276,11 +321,11 @@ public:
                           RenderOptionsPtr& render_options);
   bool HasSelection() const;
 
-  void UpdateView();
-
   void SetSeqHack(bool b);
   bool GetSeqHack() const;
   
+  virtual void Export(Exporter* ex);
+
 protected:
 
   virtual void CustomPreRenderGL(bool flag);
@@ -298,12 +343,13 @@ private:
   mutable geom::AlignedCuboid   bbox_;
   mol::EntityView               sel_;
   bool                          sel_update_;
-  impl::BackboneTrace           trace_;
+  mutable impl::BackboneTrace   trace_;
                            
   void init(RenderMode::Type);
 
   void set_static_max_rad();
-
+  void do_update_view() const;
+  
   typedef boost::ptr_map<RenderMode::Type, impl::EntityRenderer> RendererMap;
   mutable RendererMap renderer_;
 
@@ -311,6 +357,7 @@ private:
   bool blur_;
   float blurf1_;
   float blurf2_;
+  mutable bool needs_update_;
 };
 
 

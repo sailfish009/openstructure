@@ -137,7 +137,7 @@ public:
   ///
   /// The two iterators returned by ResiduesBegin() and ResiduesEnd() form a
   /// half-closed range. It is cheaper to cache the iterator returned by
-  /// ResiduesEnd() than to call ResiduesEnd() after very loop, i.e. like
+  /// ResiduesEnd() than to call ResiduesEnd() after every loop, i.e. like
   /// \code
   /// // e is an instance of EntityHandle
   /// for (ResidueHandleIter i=e.ResiduesBegin(), x=e.ResiduesEnd(); i!=x; ++i) {
@@ -201,13 +201,31 @@ public:
   /// \brief use atom hash to perform fast within lookup
   AtomHandleList FindWithin(const geom::Vec3& pos, Real radius) const;
 
+  /// \brief set default query flags
+  /// these will be used if flags are not explicitely specified as
+  /// a second argument to a Select call
+  void SetDefaultQueryFlags(QueryFlags flags);
+
+  /// \brief return default query flags
+  QueryFlags GetDefaultQueryFlags() const;
+
   /// \brief return view based on a query object
   /// \sa Query
-  EntityView Select(const Query& q, QueryFlags flags=0) const;
+  /// The default query flags will be used for the selection
+  EntityView Select(const Query& q) const;
 
   /// \brief return view based on query String.
   /// \sa Query
-  EntityView Select(const String& query_string, QueryFlags flags=0) const;
+  /// The default query flags will be used for the selection
+  EntityView Select(const String& query_string) const;
+
+  /// \brief return view based on a query object, specifying behavior flags
+  /// \sa Query
+  EntityView Select(const Query& q, QueryFlags flags) const;
+
+  /// \brief return view based on query String, specifying behavior flags
+  /// \sa Query
+  EntityView Select(const String& query_string, QueryFlags flags) const;
 
   /// \brief return a (new) full view of this entity
   EntityView CreateFullView() const;
@@ -261,6 +279,9 @@ public:
   /// \brief get complete list of atoms
   /// \sa #AtomsBegin, #AtomsEnd
   AtomHandleList GetAtomList() const;
+  
+  /// \brief get complete list of atom positions
+  geom::Vec3List GetAtomPosList() const;
   
   /// \brief Get editor for external coordinate system to manipulate atom 
   ///     positions

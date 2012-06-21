@@ -14,7 +14,17 @@ OpenStructure has a logging system going beyond what print statements can offer.
   see :ref:`picking-logging-level`.
   
   :param message: The message to be logged
-  :type  message: str
+  :type  message: convertible to string
+  
+  Similar to the built-int print function, several arguments can be passed to 
+  the logging functions. The arguments will be converted to string and then 
+  concatenated together, separated by space. For example:
+  
+  .. code-block:: python
+    
+    LogMessage('here be numbers', 1, 2)
+    
+  will be converted to 'here be numbers 1 2'.
   
 .. note::
 
@@ -124,6 +134,10 @@ To change the current log sink you can use the following methods:
 
    Change the log sink back to the previous one. It is an error to pop the log 
    sink when there is only one log sink on the stack.
+
+.. method:: GetCurrentLogSink()
+
+   Get the current (active) log sink.
 
 .. _picking-logging-level:
 

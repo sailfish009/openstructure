@@ -19,7 +19,9 @@
 #include <boost/python.hpp>
 #include <ost/mol/transform.hh>
 #include <ost/mol/editor_base.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
+#endif
 
 using namespace boost::python;
 using namespace ost::mol;
@@ -39,11 +41,12 @@ void export_AtomView();
 void export_ResidueView();
 void export_Editors();
 void export_CoordGroup();
+void export_CoordFrame();
 void export_PropertyID();
 void export_BoundingBox();
 void export_QueryViewWrapper();
 void export_EntityPropertyMapper();
-BOOST_PYTHON_MODULE(_mol)
+BOOST_PYTHON_MODULE(_ost_mol)
 {
   enum_<EditMode>("EditMode")
     .value("BUFFERED_EDIT", BUFFERED_EDIT)
@@ -65,6 +68,7 @@ BOOST_PYTHON_MODULE(_mol)
   export_EntityView(); 
   export_Editors();
   export_CoordGroup();
+  export_CoordFrame();
   export_PropertyID();  
   export_BoundingBox();
   export_QueryViewWrapper();
@@ -72,18 +76,19 @@ BOOST_PYTHON_MODULE(_mol)
   class_<Transform>("Transform", init<>())
     .def(init<const Transform&>()) // shouldn't this be there automatically ?
     .def("GetMatrix",&Transform::GetMatrix)
-	.add_property("matrix",&Transform::GetMatrix)
+    .def("SetMatrix",&Transform::SetMatrix)
+    .add_property("matrix",&Transform::GetMatrix,&Transform::SetMatrix)
     .def("GetTransposedMatrix",&Transform::GetTransposedMatrix)
- 	.add_property("tmatrix",&Transform::GetTransposedMatrix)
+    .add_property("tmatrix",&Transform::GetTransposedMatrix)
     .def("SetTrans",&Transform::SetTrans)
     .def("GetTrans",&Transform::GetTrans)
-	.add_property("trans",&Transform::GetTrans,&Transform::SetTrans)
+    .add_property("trans",&Transform::GetTrans,&Transform::SetTrans)
     .def("SetCenter",&Transform::SetCenter)
     .def("GetCenter",&Transform::GetCenter)
-	.add_property("center",&Transform::GetCenter,&Transform::SetCenter)
+    .add_property("center",&Transform::GetCenter,&Transform::SetCenter)
     .def("SetRot",&Transform::SetRot)
     .def("GetRot",&Transform::GetRot)
-	.add_property("rot",&Transform::GetRot,&Transform::SetRot)
+    .add_property("rot",&Transform::GetRot,&Transform::SetRot)
     .def("ApplyXAxisRotation",&Transform::ApplyXAxisRotation)
     .def("ApplyYAxisRotation",&Transform::ApplyYAxisRotation)
     .def("ApplyZAxisRotation",&Transform::ApplyZAxisRotation)
@@ -92,7 +97,9 @@ BOOST_PYTHON_MODULE(_mol)
     .def("ApplyZAxisTranslation",&Transform::ApplyZAxisTranslation)
     .def("ApplyAxisRotation",&Transform::ApplyAxisRotation)
     ;
+#if(OST_INFO_ENABLED)
   def("TransformToInfo", &TransformToInfo);
   def("TransformFromInfo", &TransformFromInfo);
-
+#endif
+  
 }

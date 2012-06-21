@@ -86,7 +86,5 @@ class TestStUtils(unittest.TestCase):
            (stutil.Correl(self.data3, self.data2), self.correl2)
 
 if __name__ == "__main__":
-  try:
-    unittest.main()
-  except Exception, e:
-    print e
+  from ost import testutils
+  testutils.RunTests()

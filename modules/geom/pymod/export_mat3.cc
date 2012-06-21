@@ -53,6 +53,25 @@ void Mat3_setslice(geom::Mat3& m,const  slice s,const  Mat2& m2)
   m(start0+1,start1+1)=m2(1,1);
 }
 
+String mat3_repr(const geom::Mat3& m)
+{
+  std::stringstream ss;
+
+  ss << "geom.Mat3(" << m(0,0) << ", " << m(0,1) << ", " << m(0,2) << ", "
+     << m(1, 0) << ", " << m(1,1) << ", " << m(1, 2) << ", "
+     << m(2, 0) << "," << m(2, 1) << ", " << m(2, 2) << ")";
+  return ss.str();
+}
+
+list mat3_data(const geom::Mat3& m)
+{
+  list nrvo;
+  for(size_t k=0;k<9;++k) {
+    nrvo.append(m.Data()[k]);
+  }
+  return nrvo;
+}
+
 void export_Mat3()
 {
   class_<Mat3>("Mat3",init<>())
@@ -61,6 +80,7 @@ void export_Mat3()
     .def(init<Real,Real,Real>())
     .def(self += self)
     .def(self -= self)
+    .def("__repr__", mat3_repr)
     .def(self + self)
     .def(self - self)
     .def(self *= Real())
@@ -70,12 +90,15 @@ void export_Mat3()
     .def(self * self)
     .def(self *= self)
     .def(self / Real())
+    .def(self == self)
+    .def(self != self)
     .def(self_ns::str(self))
     .def("__getitem__",Mat3_getitem)
     .def("__getitem__",Mat3_getslice)
     .def("__setitem__",Mat3_setitem)
     .def("__setitem__",Mat3_setslice)
     .def("GetCol", &Mat3::GetCol)
-    .def("GetRow", &Mat3::GetRow)    
+    .def("GetRow", &Mat3::GetRow)
+    .add_property("data",mat3_data)
   ;
 }

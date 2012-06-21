@@ -287,7 +287,8 @@ Vec3 Quat::GetAxis() const
 
 Real Quat::GetAngle() const
 {
-  Real ww = std::acos(w/Length(Vec3(x,y,z)));
+  //Real ww = std::acos(w/Length(Vec3(x,y,z)));
+  Real ww = 2.0*std::acos(w);
   return ww;
 }
 
@@ -454,30 +455,12 @@ Quat Log(const Quat& q)
 
 Vec3 Quat::Rotate(const Vec3& vec) const {
   Quat tmp(0.0, vec[0], vec[1], vec[2]);
+  // We use Conjugate instead of Invert here because we assume *this to be normalized
   Quat conj=Conjugate(*this);
   Quat res=*this*tmp*conj;
   return Vec3(res.x, res.y, res.z);
 }
 
-Quat Grassmann(const Quat& lhs, const Quat& rhs)
-{
-  return Quat(lhs.GetAngle()*rhs.GetAngle()-
-              lhs.GetAxis().x*rhs.GetAxis().x-
-              lhs.GetAxis().y*rhs.GetAxis().y-
-              lhs.GetAxis().z*rhs.GetAxis().z,
-                    lhs.GetAngle()*rhs.GetAxis().x+
-                    lhs.GetAxis().x*rhs.GetAngle()+
-                    lhs.GetAxis().y*rhs.GetAxis().z-
-                    lhs.GetAxis().z*rhs.GetAxis().y,
-               lhs.GetAngle()*rhs.GetAxis().y-
-               lhs.GetAxis().x*rhs.GetAxis().z+
-               lhs.GetAxis().y*rhs.GetAngle()+
-               lhs.GetAxis().z*rhs.GetAxis().x,
-                    lhs.GetAngle()*rhs.GetAxis().z+
-                    lhs.GetAxis().x*rhs.GetAxis().y-
-                    lhs.GetAxis().y*rhs.GetAxis().x+
-                    lhs.GetAxis().z*rhs.GetAngle());
-}
 
 std::ostream& operator<<(std::ostream& str, const Quat& q)
 {

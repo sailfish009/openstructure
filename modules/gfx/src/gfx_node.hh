@@ -34,6 +34,7 @@
 #include "gfx_object_fw.hh"
 #include "gfx_node_visitor.hh"
 #include "povray_fw.hh"
+#include "exporter_fw.hh"
 
 namespace ost { namespace gfx {
 
@@ -56,9 +57,10 @@ class DLLEXPORT_OST_GFX GfxNode: public boost::enable_shared_from_this<GfxNode>
   // render all child leaves and nodes
   virtual void RenderGL(RenderPass pass);
 
-
   // render all child leaves and nodes into POVray state
   virtual void RenderPov(PovState& pov);
+
+  virtual void Export(Exporter* ex);
 
   // visitor interface
   virtual void Apply(GfxNodeVisitor& v, GfxNodeVisitor::Stack st);

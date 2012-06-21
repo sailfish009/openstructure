@@ -66,6 +66,11 @@ inline ImageHandle NAME3 (const PARAM1 & p1, const PARAM2 & p2,DataType t, DataD
   return CreateImage(p1,p2,t,d); \
 }
 
+inline ImageHandle create_im_int(int width, int height, int depth)
+{
+  return CreateImage(img::Size(width, height, depth));
+}
+
 M_CREATE_IMAGE(c1b,c2b,c3b,Size,Point);
 M_CREATE_IMAGE(c1c,c2c,c3c,Point,Point);
 M_CREATE_IMAGE(c1d,c2d,c3d,Point,Size);
@@ -84,6 +89,74 @@ inline ImageHandle g2a(const Data& d,const Extent& e)
 
 inline ImageHandle ih_copy1(ImageHandle& h) {return h.Copy();}
 inline ImageHandle ih_copy2(ImageHandle& h, bool cc) {return h.Copy(cc);}
+
+img::Point tuple_to_point(size_t dim, tuple t)
+{
+  size_t tuple_len=len(t);
+  if (tuple_len!=dim) {
+    throw std::runtime_error("length of tuple and image dimension must match");
+  }
+  img::Point p;
+  for (size_t i=0; i<tuple_len; ++i) {
+    p[i]=extract<int>(t[i]);
+  }
+  return p;
+}
+
+object ih_get_item(ConstImageHandle ih, img::Point p)
+{
+  if (ih.GetType()==img::REAL) {
+    return object(ih.GetReal(p));
+  } else {
+    return object(ih.GetComplex(p));
+  }  
+}
+object ih_get_item_a(ConstImageHandle ih, tuple t)
+{
+  img::Point p=tuple_to_point(ih.GetSize().GetDim(), t);
+  return ih_get_item(ih, p);
+}
+
+object ih_get_item_c(ConstImageHandle ih, int x)
+{
+  if (ih.GetSize().GetDim()!=1) {
+    throw std::runtime_error("Can't address point of multi-dimensional image with scalar");
+  }
+  return ih_get_item(ih, img::Point(x, 0, 0));
+}
+object ih_get_item_b(ConstImageHandle ih, img::Point p)
+{
+  return ih_get_item(ih, p);
+}
+
+void ih_set_item(ImageHandle ih, img::Point p, object value)
+{
+  if (ih.GetType()==img::REAL) {
+    ih.SetReal(p, extract<Real>(value));
+  } else {
+    ih.SetComplex(p, extract<Complex>(value));
+  }
+}
+
+void ih_set_item_a(ImageHandle ih, tuple t, object value)
+{
+  img::Point p=tuple_to_point(ih.GetSize().GetDim(), t);
+  ih_set_item(ih, p, value);
+}
+
+void ih_set_item_b(ImageHandle ih, img::Point p, object value)
+{
+  ih_set_item(ih, p, value);
+}
+
+void ih_set_item_c(ImageHandle ih, int x, object value)
+{
+  if (ih.GetSize().GetDim()!=1) {
+    throw std::runtime_error("Can't address point of multi-dimensional image with scalar");
+  }  
+  ih_set_item(ih, img::Point(x, 0, 0), value);
+}
+
 
 } // anon ns
 
@@ -141,6 +214,12 @@ void export_ImageHandle()
     .def("__iter__",&WrapExtentIterator::Create3)
     .def(self == self)
     .def(self != self)
+    .def("__getitem__", ih_get_item_a)
+    .def("__getitem__", ih_get_item_b)
+    .def("__getitem__", ih_get_item_c)
+    .def("__setitem__", ih_set_item_a)
+    .def("__setitem__", ih_set_item_b)
+    .def("__setitem__", ih_set_item_c)
     .def(self += self)
     .def(self + self)
     .def(self -= self)
@@ -182,6 +261,8 @@ void export_ImageHandle()
     ;
 
   def("CreateImage",c0);
+  def("CreateImage", create_im_int, (arg("width"), 
+      arg("height")=0, arg("depth")=0));
   def("CreateImage",c1a);
   def("CreateImage",c2a);
   def("CreateImage",c3a);
@@ -229,7 +310,10 @@ void export_ConstImageHandle()
     .def(self * Real())
     .def(Real() * self)
     .def(self / Real())
-     .def(self + Complex())
+    .def("__getitem__", ih_get_item_a)
+    .def("__getitem__", ih_get_item_b)
+    .def("__getitem__", ih_get_item_c)
+    .def(self + Complex())
     .def(Complex() + self)
     .def(self - Complex())
     .def(Complex() - self)

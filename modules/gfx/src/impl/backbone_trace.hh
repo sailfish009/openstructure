@@ -23,7 +23,7 @@
   Authors: Ansgar Philippsen, Marco Biasini
  */
 
-#include <ost/mol/mol.hh>
+#include <ost/mol/entity_view.hh>
 
 #include <ost/gfx/module_config.hh>
 #include <ost/gfx/impl/entity_detail.hh>
@@ -61,7 +61,7 @@ public:
   void AddNodeEntryList(const NodeEntryList& entries);  
   
   // used internally - calculates some derived values for a nodelist
-  static void PrepList(NodeEntryList& nelist);
+  void PrepList(NodeEntryList& nelist) const;
 
   // re-creates internal nodelist-list based on view
   /*
@@ -77,13 +77,19 @@ public:
   // this is faster then re-generating a trace
   BackboneTrace CreateSubset(const mol::EntityView& subview);
 
+  // experimental
   void SetSeqHack(bool f);
   bool GetSeqHack() const {return seq_hack_;}
+  
+  // experimental
+  void SetTwistHack(bool f);
+  bool GetTwistHack() const {return twist_hack_;}
 
 private:  
   mol::EntityView      view_;
   NodeEntryListList    node_list_list_;
   bool seq_hack_;
+  bool twist_hack_;
 
 };
 

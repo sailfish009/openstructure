@@ -107,6 +107,8 @@ public:
   bool HasAttribute(const String& name) const;
   //! remove attribute of given name
   void RemoveAttribute(const String& name);
+  //! get comment just above item
+  String GetComment() const;
 
   //! returns a list with all attribute names
   std::vector<String> GetAttributeList() const;

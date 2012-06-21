@@ -77,7 +77,8 @@ EntityImpl::EntityImpl():
   ics_editor_count_(0),  
   dirty_flags_(DisableICS),
   name_(""),
-  next_index_(0L)
+  next_index_(0L),
+  default_query_flags_(0)
 {    
 }
 
@@ -147,6 +148,7 @@ void EntityImpl::ReplicateHierarchy(EntityImplPtr dest)
            e3=src_res->GetAtomList().end(); k!=e3; ++k) {
         AtomImplPtr src_atom=*k;
         AtomImplPtr dst_atom=dst_res->InsertAtom(src_atom);
+        dst_atom->SetIndex(src_atom->GetIndex());
       }
     }
   }
@@ -229,6 +231,7 @@ void EntityImpl::DoCopy(EntityImplPtr dest)
   // first copy the chain - residue - atom hierarchy before replicating the 
   // bond network and the torsions
   dest->SetName(this->GetName());
+  dest->next_index_=0;
   this->ReplicateHierarchy(dest);
   this->DoCopyBondsAndTorsions(dest);
 }
@@ -268,10 +271,10 @@ geom::AlignedCuboid EntityImpl::GetBounds() const
   if (this->GetAtomCount()>0) {
     geom::Vec3 mmin, mmax;    
     AtomImplMap::const_iterator it=atom_map_.begin();
-    mmin=mmax=it->second->GetPos();
+    mmin=mmax=it->second->TransformedPos();
     for (++it; it!=atom_map_.end();++it) {
-      mmin=geom::Min(mmin,it->second->GetPos());
-      mmax=geom::Max(mmax,it->second->GetPos());
+      mmin=geom::Min(mmin,it->second->TransformedPos());
+      mmax=geom::Max(mmax,it->second->TransformedPos());
     }
     return geom::AlignedCuboid(mmin, mmax);    
   } else {
@@ -285,7 +288,7 @@ geom::Vec3 EntityImpl::GetCenterOfAtoms() const {
   if (this->GetAtomCount()>0) {
     for (AtomImplMap::const_iterator it = atom_map_.begin();
          it!=atom_map_.end();++it) {
-      center+=it->second->GetPos();
+      center+=it->second->TransformedPos();
     }
     center/=static_cast<Real>(atom_map_.size());
   }
@@ -297,18 +300,20 @@ geom::Vec3 EntityImpl::GetCenterOfMass() const {
   Real mass = this->GetMass();
   if (this->GetAtomCount()>0 && mass>0) {
     for(AtomImplMap::const_iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-      center+=it->second->GetPos()*it->second->GetMass();
+      center+=it->second->TransformedPos()*it->second->GetMass();
     }
     center/=mass;
   }
   return center;
 }
 
+  
 Real EntityImpl::GetMass() const {
-  Real mass=0.0;
-  for (AtomImplMap::const_iterator it = atom_map_.begin();
-      it!=atom_map_.end();++it) {
-    mass+=it->second->GetMass();
+  double mass=0.0;
+  for (ChainImplList::const_iterator i=chain_list_.begin(), 
+       e=chain_list_.end(); i!=e; ++i) {
+    ChainImplPtr chain=*i;
+    mass+=chain->GetMass();
   }
   return mass;
 }
@@ -324,12 +329,12 @@ AtomImplPtr EntityImpl::CreateAtom(const ResidueImplPtr& rp,
 #else
   AtomImplPtr ap(new AtomImpl(shared_from_this(), rp, name, pos, ele, next_index_++));
 #endif
-  if (identity_transf_ == false) {
+  if (!identity_transf_) {
     geom::Vec3 transformed_pos = geom::Vec3(transformation_matrix_*geom::Vec4(pos));
-    ap->SetTransformedPos(transformed_pos);
+    ap->TransformedPos()=transformed_pos;
     atom_organizer_.Add(ap,transformed_pos);
   } else {
-    ap->SetTransformedPos(pos);
+    ap->TransformedPos()=pos;
     atom_organizer_.Add(ap,pos);
   }
   atom_map_.insert(AtomImplMap::value_type(ap.get(),ap));
@@ -496,8 +501,8 @@ Real EntityImpl::GetAngleXCS(const AtomImplPtr& a1, const AtomImplPtr& a2,
   ConnectorImplP c23=GetConnector(a2, a3);
   if (c12 && c12->GetFirst() && c12->GetSecond()) {
     if (c23 && c23->GetFirst() && c23->GetSecond()) {
-      return Angle(a2->GetPos()-a1->GetPos(),
-                   a2->GetPos()-a3->GetPos());
+      return Angle(a2->TransformedPos()-a1->TransformedPos(),
+                   a2->TransformedPos()-a3->TransformedPos());
     } else {
       AtomHandle ah2(a2), ah3(a3);
       throw NotConnectedError(ah2, ah3);
@@ -763,12 +768,7 @@ void EntityImpl::SetTransform(const geom::Mat4 transfmat)
 {
   transformation_matrix_=transfmat;
   inverse_transformation_matrix_=Invert(transformation_matrix_);
-  geom::Mat4 identity = geom::Mat4();
-  if (transformation_matrix_ == identity) {
-    identity_transf_ = true;
-  } else {
-    identity_transf_ = false;    
-  }
+  identity_transf_ = (transformation_matrix_==geom::Mat4());
   this->UpdateTransformedPos();
   this->MarkOrganizerDirty();
 }
@@ -989,6 +989,11 @@ EntityView EntityImpl::do_selection(const EntityHandle& eh,
   return view;
 }
 
+EntityView EntityImpl::Select(const EntityHandle& h, const Query& q) const
+{
+  return do_selection<false>(h, q, default_query_flags_);
+}
+
 EntityView EntityImpl::Select(const EntityHandle& h, const Query& q, 
                               QueryFlags flags) const
 {
@@ -1047,7 +1052,7 @@ void EntityImpl::UpdateOrganizer()
   atom_organizer_.Clear();
   for (AtomImplMap::const_iterator i=atom_map_.begin(), 
        e=atom_map_.end(); i!=e; ++i) {
-    atom_organizer_.Add(i->second, i->second->GetPos());
+    atom_organizer_.Add(i->second, i->second->TransformedPos());
   }
   dirty_flags_&=~DirtyOrganizer;
 }
@@ -1175,9 +1180,9 @@ pointer_it<ChainImplPtr> EntityImpl::GetChainIter(const String& name)
 
 void EntityImpl::RenameChain(ChainImplPtr chain, const String& new_name)
 {
-  ChainImplList::iterator i;
+  //ChainImplList::iterator i;
   ChainImplPtr  ch=this->FindChain(new_name);
-  if (ch) {
+  if ((ch) && (ch != chain)) {
     throw IntegrityError("unable to rename chain '"+chain->GetName()+
                          "' to '"+new_name+"', since there is already a chain "
                          "with that name");
@@ -1187,7 +1192,7 @@ void EntityImpl::RenameChain(ChainImplPtr chain, const String& new_name)
 
 void EntityImpl::UpdateTransformedPos(){
   for(AtomImplMap::iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-    it->second->SetTransformedPos(geom::Vec3(transformation_matrix_*geom::Vec4(it->second->GetOriginalPos())));
+    it->second->TransformedPos()=geom::Vec3(transformation_matrix_*geom::Vec4(it->second->OriginalPos()));
   }
 }
 
@@ -1204,6 +1209,14 @@ void EntityImpl::ReorderAllResidues()
   for(ChainImplList::iterator cit=chain_list_.begin();cit!=chain_list_.end();++cit) {
     (*cit)->ReorderResidues();
   }
+}
+
+void EntityImpl::RenumberAllResidues(int start, bool keep_spacing)
+{
+  for(ChainImplList::iterator cit=chain_list_.begin();cit!=chain_list_.end();++cit) {
+    (*cit)->RenumberAllResidues(start, keep_spacing);
+  }
+
 }
 
 }}} // ns

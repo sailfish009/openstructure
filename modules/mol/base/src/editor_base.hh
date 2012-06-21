@@ -124,7 +124,8 @@ public:
   /// \sa EditorBase::AddAltAtomPos(), ResidueHandle
   AtomHandle InsertAltAtom(ResidueHandle residue, const String& name, 
                            const String& alt_group, const geom::Vec3& pos,
-                           const String& ele="");
+                           const String& ele="", Real occ=1.0,
+                           Real b_factor=0.0);
   /// \brief  Add alternative atom position
   /// \param group is the name of the alternative atom position group. If no 
   ///     group of that name exists, it will be created.
@@ -136,7 +137,8 @@ public:
   ///         is the alternative position
   /// \sa EditorBase::InsertAltAtom(), ResidueHandle
   void AddAltAtomPos(const String& group, const AtomHandle& atom, 
-                     const geom::Vec3& position);
+                     const geom::Vec3& position, Real occ=1.0,
+                     Real b_factor=0.0);
   //\}
   
   /// \brief connect two atoms with bond
@@ -152,7 +154,24 @@ public:
                      Real len, Real theta, Real phi,
                      unsigned char bond_order);
 
+  void RenameResidue(ResidueHandle res, const String& new_name);
+  
+  void SetResidueNumber(ResidueHandle res, const ResNum& num);
+  
   void RenameChain(ChainHandle chain, const String& new_name);
+
+  /// \brief Assign type of chain according to ChainType.
+  ///
+  /// \param chain chain to assign to
+  /// \param type type of the chain
+  void SetChainType(ChainHandle chain, const ChainType type);
+
+  /// \brief Assign a description to a chain.
+  ///
+  /// \param chain chain to assign to
+  /// \param desc description
+  void SetChainDescription(ChainHandle chain, const String desc);
+
   /// \brief   Delete all atoms of residue
   ///
   /// All associated torsions and bonds will also be removed
@@ -188,10 +207,24 @@ public:
 
   /// \brief reorder residues of all chains based on their residue number
   void ReorderAllResidues();
+
+  /// \brief renumber residues of all chains
+  ///
+  /// \param start
+  ///           Residues of every chain will be renumbered, whereas the first
+  ///           residue gets the residue number start.
+  ///
+  /// \param keep_spacing
+  ///           If set to false, residues will continously be renumbered ongoing from start.
+  ///           Otherwise the spacings between the residues are kept.
+  void RenumberAllResidues(int start, bool keep_spacing);
     
   /// \brief Get edit mode of editor
-  EditMode GetMode() const;
+  EditMode GetMode() const {return mode_;}
   
+  /// \ brief return entity this editor works on
+  EntityHandle GetEntity() const {return ent_;}
+
   /// \brief change the name of the atom to the new name  
   void RenameAtom(AtomHandle atom, const String& new_name);
 protected:

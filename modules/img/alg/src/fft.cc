@@ -25,8 +25,12 @@
 #include <boost/shared_ptr.hpp>
 
 #include <fftw3.h>
+#if OST_INFO_ENABLED
 #include <QThread>
-
+#define IDEAL_NUMBER_OF_THREADS() QThread::idealThreadCount()
+#else
+#define IDEAL_NUMBER_OF_THREADS() 1
+#endif
 #include <ost/message.hh>
 #include <ost/img/value_util.hh>
 #include <ost/img/image_state/image_state_def.hh>
@@ -64,6 +68,10 @@ FFTFnc::FFTFnc(bool f): ori_flag_(f)
   OST_FFTW_fftw_init_threads();
 }
 
+FFTFnc::~FFTFnc()
+{
+  OST_FFTW_fftw_cleanup();
+}
 
 // real spatial -> complex half-frequency
 template <>
@@ -110,6 +118,7 @@ ImageStateBasePtr FFTFnc::VisitState<Real,SpatialDomain>(const RealSpatialImageS
   boost::shared_ptr<ComplexHalfFrequencyImageState> out_state(new ComplexHalfFrequencyImageState(in_size,ps));
 
   out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
+  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
   assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
   OST_FFTW_fftw_complex* fftw_out =
@@ -126,7 +135,7 @@ reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
   for(size_t i=0;i<block_count;i++) {
     std::copy(&in_ptr[i*src_size],&in_ptr[(i+1)*src_size],&fftw_in[i*2*dst_size]);
   }
-  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,QThread::idealThreadCount()));
+  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
   OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft_r2c(rank,n,
 				     fftw_in,fftw_out,
 				     FFTW_ESTIMATE);
@@ -203,13 +212,14 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,HalfFrequencyDomain>(const ComplexH
   Size out_size = in_state.GetLogicalExtent().GetSize();
   boost::shared_ptr<RealSpatialImageState> out_state(new RealSpatialImageState(out_size,tmp_state.Data(),ps ));
   out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
+  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
 
   Real* out_ptr = out_state->Data().GetData();
   Real* fftw_out = reinterpret_cast<Real*>(out_ptr);
   
   assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
-  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,QThread::idealThreadCount()));
+  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
   OST_FFTW_fftw_complex* fftw_in =
 reinterpret_cast<OST_FFTW_fftw_complex*>(out_ptr);
 
@@ -244,6 +254,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,SpatialDomain>(const ComplexSpatial
   ps.SetDomain(FREQUENCY);
   boost::shared_ptr<ComplexFrequencyImageState> out_state(new ComplexFrequencyImageState(size,ps));
   out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
+  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
   out_state->Data()=in_state.Data(); // use assignement op to copy data area to new state
   int rank = size.GetDim();
@@ -255,7 +266,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,SpatialDomain>(const ComplexSpatial
 reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
 
   // in place transform
-  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,QThread::idealThreadCount()));
+  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
   OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft(rank,n,
 				 fftw_out, fftw_out, 
 				 dir, 
@@ -283,6 +294,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,FrequencyDomain>(const ComplexFrequ
   // use memory located for tmp
   boost::shared_ptr<ComplexSpatialImageState> out_state(new ComplexSpatialImageState(size,tmp.Data(),ps));
   out_state->SetSpatialOrigin(in_state.GetSpatialOrigin());
+  out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
   int rank = size.GetDim();
   int n[3] = {size[0],size[1],size[2]};
@@ -293,7 +305,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,FrequencyDomain>(const ComplexFrequ
 reinterpret_cast<OST_FFTW_fftw_complex*>(out_state->Data().GetData());
 
   // in place transform
-  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,QThread::idealThreadCount()));
+  OST_FFTW_fftw_plan_with_nthreads(std::max<int>(1,IDEAL_NUMBER_OF_THREADS()));
   OST_FFTW_fftw_plan plan = OST_FFTW_fftw_plan_dft(rank,n,
 				 fftw_out, fftw_out, 
 				 dir, 

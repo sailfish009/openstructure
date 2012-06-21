@@ -148,22 +148,28 @@ QueryToken QueryLexer::LexNumericToken() {
 }
 
 bool is_ident_or_str(char c) {
-  static String allowed_chars("_");
+  static String allowed_chars("_*?\\");
   return isalnum(c) || allowed_chars.find_first_of(c)!=String::npos;
 }
 
 QueryToken QueryLexer::LexIdentOrStringToken() {
   static IdentTokens ident_tokens;
   size_t start=current_;
+  bool force_string=false;
   while (current_<query_string_.length() && 
          is_ident_or_str(query_string_[current_])) {
+    if (query_string_[current_]=='*' || query_string_[current_]=='?' ||
+        query_string_[current_]=='\\') {
+      force_string=true;
+    }
     current_++;
   }
   String ident=query_string_.substr(start, current_-start);
   if (tok::Type* t=find(ident_tokens, ident.c_str())) {
     return QueryToken(Range(start, current_-start), *t);
   }
-  return QueryToken(Range(start, current_-start), tok::Identifier);
+  return QueryToken(Range(start, current_-start), 
+                    force_string? tok::String : tok::Identifier);
 }
 
 QueryToken QueryLexer::LexToken() {
@@ -174,7 +180,7 @@ QueryToken QueryLexer::LexToken() {
     if (isdigit(current_char) || current_char=='-') {
       return this->LexNumericToken();
     }
-    if (isalpha(current_char)) {
+    if (isalpha(current_char) || current_char=='?' || current_char=='*') {
       return this->LexIdentOrStringToken();
     }
     switch (current_char) {
@@ -277,12 +283,7 @@ bool QueryImpl::IsAlwaysUndef(const Node* ast,
   if (lop_node) {
     bool lhs = this->IsAlwaysUndef(lop_node->GetLHS(), target_level);
     bool rhs = this->IsAlwaysUndef(lop_node->GetRHS(), target_level);    
-    switch (lop_node->GetOP()) {
-      case LOP_AND:
-        return lhs || rhs;
-      case LOP_OR:
-        return lhs && rhs;
-    }
+    return lhs && rhs;
   }  
   else {
     const SelNode* sel_node = dynamic_cast<const SelNode*>(ast);
@@ -460,7 +461,7 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
         }
         return false;
       } else {
-        value=value_string;
+        value=StringOrRegexParam(value_string);
       }
 
       break;
@@ -471,13 +472,13 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
         error_desc_.range=v.GetRange();
         return false;
       } else if (sel.type==Prop::STRING) {
-        value=value_string;
+        value=StringOrRegexParam(value_string);
       } else
         value=ParamType(float(atof(value_string.c_str())));              
       break;      
     case tok::IntegralValue:
       if (sel.type==Prop::STRING) {
-        value=value_string;
+        value=StringOrRegexParam(value_string);
       } else {
         if (sel.type==Prop::INT) {
           value=ParamType(atoi(value_string.c_str()));
@@ -644,13 +645,13 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
     }
     LogicOP lop=inversion_stack_.back() ? LOP_OR : LOP_AND;
     CompOP cop=inversion_stack_.back() ? COP_NEQ : COP_EQ;
-    ParamType cname_val(query_string_.substr(cname.GetValueRange().Loc,
-                        cname.GetValueRange().Length).c_str());
+    ParamType cname_val(StringOrRegexParam(query_string_.substr(cname.GetValueRange().Loc,
+                                                                cname.GetValueRange().Length).c_str()));
     Prop cname_prop(Prop::CNAME, Prop::STRING, Prop::CHAIN);
     SelNode* cname_node=new SelNode(cname_prop, cop, cname_val);
-    ParamType aname_val(query_string_.substr(aname.GetValueRange().Loc,
-                        aname.GetValueRange().Length).c_str());
-   Prop aname_prop(Prop::ANAME, Prop::STRING, Prop::ATOM);
+    ParamType aname_val(StringOrRegexParam(query_string_.substr(aname.GetValueRange().Loc,
+                                                                aname.GetValueRange().Length).c_str()));
+    Prop aname_prop(Prop::ANAME, Prop::STRING, Prop::ATOM);
     SelNode* aname_node=new SelNode(aname_prop, cop, aname_val);
     ParamType rnum_val(atoi(query_string_.substr(rnum.GetValueRange().Loc,
                             rnum.GetValueRange().Length).c_str()));
@@ -1078,7 +1079,6 @@ Node* QueryImpl::ParseWithinExpr(QueryLexer& lexer) {
     inversion_stack_.pop_back();    
     CompOP comp_op= COP_LE;
     if (inversion_stack_.back()) {
-      std::cout << "INV" << std::endl;
       comp_op=COP_GE;
     }
       

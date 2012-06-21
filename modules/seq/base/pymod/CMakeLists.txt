@@ -3,4 +3,6 @@ set(OST_SEQ_PYMOD_SOURCES
   wrap_seq.cc
 )
 
-pymod(NAME seq CPP ${OST_SEQ_PYMOD_SOURCES} PY __init__.py)
+if (NOT ENABLE_STATIC)
+  pymod(NAME seq CPP ${OST_SEQ_PYMOD_SOURCES} PY __init__.py)
+endif()

@@ -25,7 +25,10 @@
 
 #include <ost/base.hh>
 #include <ost/generic_property.hh>
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info_fw.hh>
+#endif
 #include <ost/seq/module_config.hh>
 
 #include <ost/mol/residue_view.hh>
@@ -92,6 +95,9 @@ public:
   
   /// \brief Get lenght of sequence, including gaps.
   int GetLength() const;
+  
+  /// \brief get index of substring
+  int GetIndex(const String& substr) const;
 
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
@@ -115,6 +121,8 @@ public:
   /// 
   /// \sa SequenceHandle::AttachView(const mol::EntityView&, const String&)
   bool HasAttachedView() const;
+  
+  const String& GetRole() const;
   
   bool operator==(const ConstSequenceHandle& rhs) const;
   bool operator!=(const ConstSequenceHandle& rhs) const;  
@@ -210,6 +218,9 @@ public:
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
 
+  /// \brief get index of substring
+  int GetIndex(const String& substr) const;
+  
   /// \brief get residue at position
   ///
   /// will return the residue view at the given sequence position or an invalid
@@ -261,12 +272,13 @@ public:
   
   void SetOneLetterCode(int position, char new_char);
   
-
   char operator[](size_t index) const;
     
   iterator begin() const { return this->GetString().begin(); }
   iterator end() const { return this->GetString().end(); }
   
+  void Append(char olc);
+
   operator ConstSequenceHandle() const;
   /// \brief attach entity view to sequence
   ///
@@ -275,6 +287,10 @@ public:
   
   /// \internal
   SequenceHandle(const impl::SequenceImplPtr& impl);  
+  
+  const String& GetRole() const;
+  
+  void SetRole(const String& role) const;
   
   impl::SequenceImplPtr& Impl() const;  
 
@@ -287,17 +303,26 @@ private:
 };
 
 SequenceHandle DLLEXPORT_OST_SEQ CreateSequence(const String& name, 
-                                                const String& seq);
-                                                
+                                                const String& seq, 
+                                                const String& role="UNKNOWN");
+#if(OST_INFO_ENABLED)                                                
 /// \brief export sequence to info
 void DLLEXPORT_OST_SEQ SequenceToInfo(const ConstSequenceHandle& sequence,
                                       info::InfoGroup& group);
 
 /// \brief create sequence from info
 SequenceHandle DLLEXPORT_OST_SEQ SequenceFromInfo(info::InfoGroup& group);
+#endif
+
 
 DLLEXPORT_OST_SEQ std::ostream& operator<<(std::ostream& os, 
                                            const ConstSequenceHandle& sequence);
+
+bool DLLEXPORT_OST_SEQ Match(const ConstSequenceHandle& s1,
+                             const ConstSequenceHandle& s2);
+
+bool DLLEXPORT_OST_SEQ Match(const String& s1,
+                             const String& s2);
 }}
 
 #endif

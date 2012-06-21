@@ -35,5 +35,3 @@ void export_GLWinBase()
   ;
 }
 
-
-

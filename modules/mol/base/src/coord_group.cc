@@ -24,6 +24,7 @@
 #include <ost/mol/mol.hh>
 #include "coord_group.hh"
 
+
 namespace ost { namespace mol {
 
 CoordGroupHandle CreateCoordGroup(const AtomHandleList& atomlist)
@@ -72,6 +73,14 @@ void CoordGroupHandle::SetFramePositions(uint frame,
   //source_->SetFramePositions(frame, clist);
 }
 
+  
+geom::Vec3List CoordGroupHandle::GetFramePositions(uint frame)
+  {
+    this->CheckValidity();
+    return *(this->GetFrame(frame));
+  }
+    
+  
 void CoordGroupHandle::CopyFrame(uint frame)
 {
   this->CheckValidity();
@@ -83,11 +92,22 @@ CoordGroupHandle::operator bool() const
   return this->IsValid();
 }
 
-void CoordGroupHandle::AddFrame(const std::vector<geom::Vec3>& clist)
-{
+//void CoordGroupHandle::AddFrame(const std::vector<geom::Vec3>& clist)
+  void CoordGroupHandle::AddFrame(const geom::Vec3List& clist)
+  {
   this->CheckValidity();
   if (source_->IsMutable()) {
     source_->AddFrame(clist);    
+  } else {
+    throw IntegrityError("Can't add frame to immutable CoordGroup");
+  }
+}
+
+  void CoordGroupHandle::AddFrame(const geom::Vec3List& clist, const geom::Vec3& cell_size, const geom::Vec3& cell_angles)
+{
+  this->CheckValidity();
+  if (source_->IsMutable()) {
+    source_->AddFrame(clist,cell_size,cell_angles);    
   } else {
     throw IntegrityError("Can't add frame to immutable CoordGroup");
   }
@@ -133,6 +153,12 @@ CoordFramePtr CoordGroupHandle::GetFrame(uint frame) const
   return source_->GetFrame(frame);
 }
 
+CoordFrame CoordGroupHandle::GetFrame2(uint frame)
+{
+  this->CheckValidity();
+  return *(source_->GetFrame(frame));
+}
+
 AtomHandleList CoordGroupHandle::GetAtomList() const
 {
   this->CheckValidity();
@@ -169,7 +195,7 @@ void CoordGroupHandle::Capture(uint frame)
   }  
 }
 
-CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected) const
+CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected, int first, int last) const
 {
   this->CheckValidity();
   std::vector<unsigned long> indices;
@@ -192,8 +218,9 @@ CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected) const
 
   CoordGroupHandle filtered_cg=CreateCoordGroup(new_ent.GetAtomList());
   std::vector<geom::Vec3> vecs(indices.size());
-  for (size_t i=0; i<this->GetFrameCount(); ++i) {
-    LOG_INFO("Filtering frame " << i << "/" << this->GetFrameCount());
+  if (last==-1) last=this->GetFrameCount();
+  for (int i=first; i<last; ++i) {
+    LOG_INFO("Filtering frame " << i << "/" << last);
     CoordFramePtr frame=this->GetFrame(i);
     for (std::vector<unsigned long>::const_iterator 
          j=indices.begin(), e2=indices.end(); j!=e2; ++j) {
@@ -203,5 +230,6 @@ CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected) const
   }
   return filtered_cg;
 }
-
+ 
+  
 }} // ns

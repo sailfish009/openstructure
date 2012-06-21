@@ -37,7 +37,7 @@ struct DLLEXPORT FFTException: public Error {
 struct DLLEXPORT_IMG_ALG FFTFnc {
   FFTFnc();
   FFTFnc(bool);
-
+  ~FFTFnc();
   template <typename T, class D>
   ImageStateBasePtr VisitState(const ImageStateImpl<T,D>& s) const;
 

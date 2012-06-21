@@ -24,12 +24,13 @@
 #include <ost/message.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 
 using namespace ost;
 using namespace ost::mol;
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(test_in_sequence) 
 {
@@ -48,7 +49,6 @@ BOOST_AUTO_TEST_CASE(test_in_sequence)
 
 BOOST_AUTO_TEST_CASE(test_res_index_bzdng227) 
 {
-  std::cout << "HERE" << std::endl;
   EntityHandle eh=CreateEntity();
   XCSEditor e=eh.EditXCS();
   ChainHandle ch1=e.InsertChain("A");
@@ -115,4 +115,14 @@ BOOST_AUTO_TEST_CASE(test_res_index)
   BOOST_CHECK_EQUAL(rvC.GetIndex(),cv1.GetResidueIndex(rvC.GetNumber()));
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_CASE(rename_res)
+{
+   EntityHandle eh=CreateEntity();
+   XCSEditor e=eh.EditXCS();
+   ChainHandle ch1=e.InsertChain("A");
+   ResidueHandle rA2B = e.AppendResidue(ch1, "A");
+   e.RenameResidue(rA2B, "B");
+   BOOST_CHECK_EQUAL(rA2B.GetName(), "B");
+}
+
+BOOST_AUTO_TEST_SUITE_END();

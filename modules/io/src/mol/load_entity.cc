@@ -20,7 +20,7 @@
 #include <ost/conop/conop.hh>
 
 #include "load_entity.hh"
-
+#include <ost/mol/xcs_editor.hh>
 #include <ost/io/io_manager.hh>
 #include <ost/io/mol/entity_io_handler.hh>
 #include <ost/profile.hh>

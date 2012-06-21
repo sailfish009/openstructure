@@ -74,4 +74,98 @@ The example `Write a Tool in Python` demonstrates how to add a simple tool
 
        
     :rtype: :class:`ToolOptions`
+    
+    
+.. class:: ToolOption
+  
+  Currently, there are four different types of ToolOption which can be used to
+  build up your own tool. They will automatically generate the appropriate
+  QT widgets:
+  
+  * :class:`ToolOptionInt` generates a QLineEdit of integer type
+  * :class:`ToolOptionFloat` generates a QLineEdit of float type
+  * :class:`ToolOptionEnum` generates a QComboBox
+  * :class:`ToolOptionButton` generates a QPushButton
+  
+.. class:: ToolOptionInt(key, verbose_name, default_value, min_value, max_value)
+  
+  :param key: Internal key name
+  :type  name: str
+  :param verbose_name: Name used as label in the widget
+  :type  name: str
+  :param default_value: Default value
+  :param min_value: Minimum allowed value
+    Defaults to minimum possible value
+  :param max_value: Maximum allowed value
+    Defaults to maximum possible value
+    
+  .. method:: GetDefault()
+  
+  .. method:: GetUpperLimit()
+  
+  .. method:: GetLowerLimit()
+  
+  .. method:: GetValue()
+  
+  .. method:: SetValue(value)
 
+
+.. class:: ToolOptionFloat(key, verbose_name, default_value, min_value, max_value)
+  
+  :param key: Internal key name
+  :type  name: str
+  :param verbose_name: Name used as label in the widget
+  :type  name: str
+  :param default_value: Default value
+  :param min_value: Minimum allowed value
+    Defaults to minimum possible value
+  :param max_value: Maximum allowed value
+    Defaults to maximum possible value
+    
+  .. method:: GetDefault()
+  
+  .. method:: GetUpperLimit()
+  
+  .. method:: GetLowerLimit()
+  
+  .. method:: GetValue()
+  
+  .. method:: SetValue(value)
+
+.. class:: ToolOptionEnum(key, verbose_name)
+
+  :param key: Internal key name
+  :type  name: str
+  :param verbose_name: Name used as label in the widget
+  :type  verbose_name: str
+  
+  .. method:: Add(text, tag)
+  
+    :param text: Text in dropdown menu
+    :type text: str
+    :param tag: Index in dropdown menu
+    :type tag: int
+  
+  .. method:: SetIndex(index)
+  
+    :type index: int
+  
+  .. method:: GetIndex()
+  .. method:: GetValue()
+  
+  .. method:: Begin()
+  .. method:: End()
+  .. method:: Size()
+  
+.. class:: ToolOptionButton(key, verbose_name, QObject* receiver,
+                   const char *slot_method)
+  
+  :param key: Internal key name
+  :type  name: str 
+  :param verbose_name: Name used as label in the widget
+  :type  name: str 
+  :param slot_method: Name of slot method that should be invoked upon releasing the buton
+  :type slot_method: const char *
+  :param receiver: QObject that implements the slot method
+  :type receiver: QObject *
+  

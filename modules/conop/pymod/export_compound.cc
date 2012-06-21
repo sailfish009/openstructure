@@ -57,9 +57,15 @@ char get_chemclass(CompoundPtr compound)
   return char(compound->GetChemClass());
 }
 
+
 void set_chemclass(CompoundPtr compound, char cc)
 {
   compound->SetChemClass(ChemClass(cc));
+}
+
+char get_chemtype(CompoundPtr compound)
+{
+  return char(compound->GetChemType());
 }
 
 CompoundPtr find_compound(CompoundLibPtr comp_lib, 
@@ -83,15 +89,16 @@ void export_Compound() {
                   &Compound::SetOneLetterCode)                  
     .def("GetAtomSpecs", &Compound::GetAtomSpecs,
          return_value_policy<copy_const_reference>())
-    .def("bond_specs", make_function(&Compound::GetBondSpecs,
+    .add_property("bond_specs", make_function(&Compound::GetBondSpecs,
          return_value_policy<copy_const_reference>()))         
-    .def("atom_specs", make_function(&Compound::GetAtomSpecs,
+    .add_property("atom_specs", make_function(&Compound::GetAtomSpecs,
          return_value_policy<copy_const_reference>()))
     .def("AddAtom", &Compound::AddAtom)
     .def("AddBond", &Compound::AddBond)
     .def("IsPeptideLinking", &Compound::IsPeptideLinking)
     .add_property("chem_class", &get_chemclass,
                   &set_chemclass)
+    .add_property("chem_type", &get_chemtype)
     .add_property("formula",make_function(&Compound::GetFormula, 
                   return_value_policy<copy_const_reference>()),
                   &Compound::SetFormula)

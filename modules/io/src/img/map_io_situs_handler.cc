@@ -87,9 +87,9 @@ void print_header(const situs_header& h)
 {
   std::ostringstream s;
   s << "situs header: " << std::endl;
-  s << format(" voxel width: %1") % h.dwidth << std::endl;
-  s << format(" size x y z: %1 %2 %3") % h.extx % h.exty % h.extz << std::endl;
-  s << format(" origin x y z: %1 %2 %3") % h.gridx % h.gridy % h.gridz;
+  s << format(" voxel width: %1%") % h.dwidth << std::endl;
+  s << format(" size x y z: %1% %2% %3%") % h.extx % h.exty % h.extz << std::endl;
+  s << format(" origin x y z: %1% %2% %3%") % h.gridx % h.gridy % h.gridz;
   LOG_INFO(s.str());
 }
 
@@ -125,9 +125,9 @@ void real_filler(std::istream& f, const situs_header& header, img::ImageHandle& 
   char this_dummy; //create dummy variable to give to Progress as this
   img::Progress::Instance().Register(&this_dummy,header.extx*header.exty*header.extz,100);
   img::Size size = mh.GetSize();
-  for(uint z_i=0;z_i<size[3];++z_i) {
-    for(uint y_i=0;y_i<size[2];++y_i) {
-      for(uint x_i=0;x_i<size[1];++x_i) {
+  for(uint z_i=0;z_i<size[2];++z_i) {
+    for(uint y_i=0;y_i<size[1];++y_i) {
+      for(uint x_i=0;x_i<size[0];++x_i) {
         f >> raw;
         mh.SetReal(img::Point(x_i,y_i,z_i),raw);
       }

@@ -36,7 +36,10 @@ Mat3   (*Mat3Invert)(const Mat3& m)                                     = &Inver
 Mat3   (*Mat3Transpose)(const Mat3& m)                                  = &Transpose;
 Real (*Mat3Comp)(const Mat3& m, unsigned int i, unsigned int j)       = &Comp;
 Real (*Mat3Minor)(const Mat3& m, unsigned int i, unsigned int j)      = &Minor;
-
+Vec3 (*Vec3Min)(const Vec3&, const Vec3&) = &Min;
+Vec3 (*Vec3Max)(const Vec3&, const Vec3&) = &Max;
+Real (*Vec3Distance2WithPBC)(const Vec3&, const Vec3&, const Vec3&)   = &Distance2WithPBC;
+Real (*Vec3DistanceWithPBC)(const Vec3&, const Vec3&, const Vec3&)    = &DistanceWithPBC;
 
 void export_VecMat3_op()
 {
@@ -44,11 +47,11 @@ void export_VecMat3_op()
   
   def("Length",Vec3Length);
   def("Length2",Vec3Length2);
-  def("Equal",Vec3Equal);
+  def("Equal",Vec3Equal, (arg("v1"), arg("v2"), arg("epsilon")=EPSILON));
   def("CompMultiply",Vec3CompMultiply);
   def("CompDivide",Vec3CompDivide);
   def("Distance",Vec3Distance);  
-  def("Equal",Mat3Equal);
+  def("Equal",Mat3Equal, (arg("m1"), arg("m2"), arg("epsilon")=EPSILON));
   def("DihedralAngle", &DihedralAngle);
   def("Dot",Mat3Dot);
   def("Det",Mat3Det);
@@ -60,4 +63,12 @@ void export_VecMat3_op()
   def("EulerTransformation",EulerTransformation);
   def("AxisRotation",AxisRotation);
   def("OrthogonalVector",OrthogonalVector);
+  def("Min",Vec3Min);
+  def("Max",Vec3Max);
+  def("Distance2WithPBC",Vec3Distance2WithPBC);
+  def("DistanceWithPBC",Vec3DistanceWithPBC);
+  def("MinDistance",MinDistance);
+  def("MinDistanceWithPBC",MinDistanceWithPBC);
+  def("WrapVec3",WrapVec3);
+  def("WrapVec3List",WrapVec3List);
 }

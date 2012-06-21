@@ -33,6 +33,7 @@
 
 #include "povray.hh"
 #include "impl/mapped_property.hh"
+#include "exporter.hh"
 
 #if OST_IMG_ENABLED
 #  include <ost/img/alg/stat.hh>
@@ -58,7 +59,11 @@ GfxObj::GfxObj(const String& name):
   opacity_(1.0),
   smoothf_(0.0),
   outline_flag_(false),
+#if defined (__APPLE__)
+  outline_mode_(2),
+#else
   outline_mode_(1),
+#endif
   c_ops_(),
   labels_(),
   use_occlusion_(false)
@@ -176,6 +181,9 @@ void GfxObj::RenderGL(RenderPass pass)
   }
 }
 
+void GfxObj::InitGL()
+{
+}
 
 void GfxObj::RenderPov(PovState& pov)
 {
@@ -188,6 +196,20 @@ void GfxObj::RenderPov(PovState& pov)
     }
     CustomRenderPov(pov);
     pov.end_obj();
+  }
+}
+
+
+void GfxObj::Export(Exporter* ex)
+{
+  if(IsVisible()) {
+    ex->NodeStart(GetName(),Exporter::OBJ);
+    // in the simplest case, just export va
+    if(rebuild_ || refresh_) {
+      PreRenderGL(true);
+    }
+    va_.Export(ex);
+    ex->NodeEnd(GetName());
   }
 }
 
@@ -318,16 +340,31 @@ void GfxObj::SetOutlineWidth(float f)
   Scene::Instance().RequestRedraw();
 }
 
+float GfxObj::GetOutlineWidth() const
+{
+  return va_.GetOutlineWidth();
+}
+
 void GfxObj::SetOutlineExpandFactor(float f)
 {
   va_.SetOutlineExpandFactor(f);
   Scene::Instance().RequestRedraw();
 }
 
+float GfxObj::GetOutlineExpandFactor() const
+{
+  return va_.GetOutlineExpandFactor();
+}
+
 void GfxObj::SetOutlineExpandColor(const Color& c)
 {
   va_.SetOutlineExpandColor(c);
   Scene::Instance().RequestRedraw();
+}
+
+Color GfxObj::GetOutlineExpandColor() const
+{
+  return va_.GetOutlineExpandColor();
 }
 
 void GfxObj::SetOpacity(float o)

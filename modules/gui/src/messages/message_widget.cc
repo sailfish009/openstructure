@@ -61,6 +61,7 @@ MessageWidget::MessageWidget(QWidget* parent) :
   view_->setDragEnabled(true);
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
   view_->setFrameShape(QFrame::NoFrame);
+  view_->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
   layout->addWidget(view_);
 
   connect(view_, SIGNAL(customContextMenuRequested(const QPoint&)), this,

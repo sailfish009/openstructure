@@ -88,7 +88,7 @@ void Test_C2C_1D_calc(int N)
     Point peak(N/step,0);
     Complex peak_value = out_state->Value(peak);
     Complex calc_peak_value = Complex(sum,0.0);
-    std::cout << std::abs(peak_value-calc_peak_value);
+    //std::cout << std::abs(peak_value-calc_peak_value);
     BOOST_REQUIRE(std::abs(peak_value-calc_peak_value)<1e-06);
 
   } catch (alg::FFTException& e) {

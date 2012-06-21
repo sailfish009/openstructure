@@ -34,6 +34,7 @@ from color_select_widget import ColorSelectWidget
 class UniformColorWidget(QtGui.QWidget):
   def __init__(self, parent=None):
     QtGui.QWidget.__init__(self, parent)
+    self.parent_ = parent
     
     self.text_ = "Uniform Color"
     
@@ -41,7 +42,6 @@ class UniformColorWidget(QtGui.QWidget):
     uniform_label = QtGui.QLabel(self.text_)
     font = uniform_label.font()
     font.setBold(True)
-    
     
     self.color_select_widget_ = ColorSelectWidget(1,1,QtGui.QColor("White"))
     
@@ -87,14 +87,20 @@ class UniformColorWidget(QtGui.QWidget):
     gfx_color = self.color_select_widget_.GetGfxColor()
     if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
         node.CleanColorOps()
-        node.SetColor(gfx_color,"")
+        if self.parent_.GetCarbonsOnly():
+          node.SetColor(gfx_color,"ele=C")
+        else:
+          node.SetColor(gfx_color,"")
     elif _img_present and isinstance(node, gfx.MapIso):
         node.SetColor(gfx_color)
   
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
       gfx_color = self.color_select_widget_.GetGfxColor()
-      ufco=gfx.UniformColorOp(mol.QueryViewWrapper(view),gfx_color)
+      if self.parent_.GetCarbonsOnly():
+        ufco=gfx.UniformColorOp(mol.QueryViewWrapper(mol.Query("ele=C"), view),gfx_color)
+      else:
+        ufco=gfx.UniformColorOp(mol.QueryViewWrapper(view),gfx_color)
       entity.Apply(ufco)
     
   def resizeEvent(self, event):

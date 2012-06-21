@@ -45,6 +45,7 @@ void export_QueryViewWrapper()
     .def("GetFlags", &QueryViewWrapper::GetFlags)
     .def("SetFlags", &QueryViewWrapper::SetFlags)
     .add_property("entity_view", &QueryViewWrapper::GetEntityView)
+    .add_property("entity", &QueryViewWrapper::GetEntity)
     .add_property("query", make_function(&QueryViewWrapper::GetQuery
         ,return_value_policy<copy_const_reference>()))
   ;

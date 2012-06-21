@@ -90,6 +90,10 @@ public:
   String GetTextData() const;
   void SetTextData(const String& td);
 
+  //! get comment just above item
+  String GetComment() const;
+
+
   //! Apply visitor
   /*!
     descends through all items and subgroups

@@ -18,6 +18,8 @@
 //------------------------------------------------------------------------------
 
 #include "impl/entity_impl.hh"
+#include "bond_handle.hh"
+#include "torsion_handle.hh"
 #include "entity_visitor.hh"
 #include "atom_handle.hh"
 #include "chain_handle.hh"
@@ -113,13 +115,38 @@ AtomHandleList EntityHandle::FindWithin(const geom::Vec3& pos,
   return handles;
 }
 
+void EntityHandle::SetDefaultQueryFlags(QueryFlags flags)
+{
+  this->CheckValidity();
+  Impl()->SetDefaultQueryFlags(flags);
+}
+
+QueryFlags EntityHandle::GetDefaultQueryFlags() const
+{
+  this->CheckValidity();
+  return Impl()->GetDefaultQueryFlags();
+}
+
+EntityView EntityHandle::Select(const Query& q) const
+{
+  this->CheckValidity();
+  return Impl()->Select(*this, q);
+}
+
+EntityView EntityHandle::Select(const String& q) const
+{
+  this->CheckValidity();
+  return Impl()->Select(*this, Query(q));
+}
+
 EntityView EntityHandle::Select(const Query& q, QueryFlags flags) const
 {
   this->CheckValidity();
   return Impl()->Select(*this, q, flags);
 }
 
-EntityView EntityHandle::Select(const String& q, QueryFlags flags) const {
+EntityView EntityHandle::Select(const String& q, QueryFlags flags) const 
+{
   this->CheckValidity();
   return Impl()->Select(*this, Query(q), flags);
 }
@@ -335,6 +362,18 @@ AtomHandleList EntityHandle::GetAtomList() const
   return atoms;
 }
 
+geom::Vec3List EntityHandle::GetAtomPosList() const {
+  this->CheckValidity();
+  geom::Vec3List atom_pos_list;
+  atom_pos_list.reserve(this->GetAtomCount());
+  AtomHandleList atom_list=this->GetAtomList();
+  for (AtomHandleList::const_iterator a=atom_list.begin(), e=atom_list.end(); a!=e; ++a) {
+    atom_pos_list.push_back(a->GetPos());
+  }
+  return atom_pos_list;
+  //return Impl()->GetAtomPosList();
+}
+  
 EntityHandle EntityHandle::GetHandle() const
 {
   return *this;

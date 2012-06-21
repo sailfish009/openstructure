@@ -20,7 +20,9 @@
 #define OST_BOND_TABLE_HH
 
 #include <map>
+
 #include <ost/mol/impl/connector_impl_fw.hh>
+#include <ost/mol/bond_handle.hh>
 
 namespace ost { namespace mol {
 

@@ -22,9 +22,16 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
+
+namespace {
+  ChainView get_chain(AtomView& a)
+  {
+    return a.GetResidue().GetChain();
+  }
+}
 
 void export_AtomView()
 {
@@ -32,6 +39,8 @@ void export_AtomView()
   class_<AtomView, bases<AtomBase> >("AtomView", init<>())
     .def("GetResidue",&AtomView::GetResidue)
     .add_property("residue",&AtomView::GetResidue)
+    .def("GetChain",get_chain)
+    .add_property("chain",get_chain)
     .def(self==self)
     .def(self!=self)
     .add_property("handle", &AtomView::GetHandle)
@@ -48,7 +57,7 @@ void export_AtomView()
   ;
   class_<AtomViewList>("AtomViewList", init<>())
     .def(vector_indexing_suite<AtomViewList>())
-    .def(ost::VectorAdditions<AtomViewList>())
+    .def(geom::VectorAdditions<AtomViewList>())
   ;
 }
 

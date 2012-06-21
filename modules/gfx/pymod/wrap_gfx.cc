@@ -25,7 +25,6 @@ using namespace boost::python;
 #endif
 #include <ost/info/info.hh>
 #include <ost/gfx/prim_list.hh>
-#include <ost/gfx/gradient.hh>
 #include <ost/gfx/gfx_test_object.hh>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 
@@ -34,7 +33,12 @@ extern void export_GfxNode();
 extern void export_GfxObj();
 extern void export_Entity();
 extern void export_Surface();
+extern void export_primlist();
 extern void export_primitives();
+extern void export_color();
+extern void export_gradient();
+extern void export_Exporter();
+
 #if OST_IMG_ENABLED
   extern void export_Map();
 #endif
@@ -50,25 +54,7 @@ extern void export_GLWinBase();
 using namespace ost;
 using namespace ost::gfx;
 
-
-float color_get_red(Color* c) {
-  return c->Red();
-}
-
-float color_get_green(Color* c) {
-  return c->Green();
-}
-
-float color_get_blue(Color* c) {
-  return c->Blue();
-}
-
-float color_get_alpha(Color* c) {
-  return c->Alpha();
-}
-
-
-BOOST_PYTHON_MODULE(_gfx)
+BOOST_PYTHON_MODULE(_ost_gfx)
 {
   export_Scene();
   export_GfxNode();
@@ -83,6 +69,10 @@ BOOST_PYTHON_MODULE(_gfx)
   export_SceneObserver();
   export_ColorOps();
   export_GLWinBase();
+  export_primitives();
+  export_primlist();
+  export_color();
+  export_gradient();
 
   enum_<RenderMode::Type>("RenderMode")
     .value("SIMPLE",RenderMode::SIMPLE)
@@ -134,50 +124,9 @@ BOOST_PYTHON_MODULE(_gfx)
   class_<InputEvent>("InputEvent", init<InputDevice, InputCommand, float>())
    .def(init<InputDevice,InputCommand,int,int,float>())
   ;
-  class_<PrimList, bases<GfxObj>, PrimListP, boost::noncopyable>("PrimList", init<const String& >())
-    .def("Clear",&PrimList::Clear)
-    .def("AddLine",&PrimList::AddLine)
-    .def("AddPoint",&PrimList::AddPoint)
-    .def("SetColor",&PrimList::SetColor)
-    .def("SetDiameter",&PrimList::SetDiameter)
-    .def("SetRadius",&PrimList::SetRadius)
-  ;
 
   class_<GfxTestObj, bases<GfxObj>, boost::noncopyable>("GfxTestObj", init<>());
-
   
-  class_<Color>("Color",init<>())
-    .def(init<float, float, float, optional<float> >())
-    .def(self_ns::str(self))
-    .def("Red",color_get_red)
-    .def("Green",color_get_green)
-    .def("Blue",color_get_blue)
-    .def("Alpha",color_get_alpha)
-    .def("ToHSV",&Color::ToHSV)
-    .def("FromRGBA",&Color::FromRGB)
-    ;
-
-  def("HSV",HSV);
-  
-  class_<Gradient>("Gradient", init<>())
-    .def(init<const String&>())
-    .def("SetColorAt", &Gradient::SetColorAt)
-    .def("GetColorAt", &Gradient::GetColorAt)
-    .def("GetStops", &Gradient::GetStops)
-    .def("GradientToInfo", &Gradient::GradientToInfo)
-    .def("GradientFromInfo", &Gradient::GradientFromInfo).staticmethod("GradientFromInfo")
-  ;
-  implicitly_convertible<String, Gradient>();
-
-  class_<StopList>("StopList", init<>())
-    .def(vector_indexing_suite<StopList>())
-  ;
-
-  class_<Stop>("Stop", init<>())
-	.def("GetColor", &Stop::GetColor)
-	.def("GetRel", &Stop::GetRel)
-  ;
-
 #if OST_SHADER_SUPPORT_ENABLED
   class_<Shader, boost::noncopyable>("Shader", no_init)
     .def("Instance",&Shader::Instance,
@@ -189,6 +138,7 @@ BOOST_PYTHON_MODULE(_gfx)
 #endif
 
   export_primitives();
+  export_Exporter();
 }
 
 

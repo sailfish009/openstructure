@@ -23,12 +23,13 @@
 
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-
+#include <ost/dyn_cast.hh>
 #include <ost/profile.hh>
 #include <ost/log.hh>
 #include <ost/message.hh>
 
 #include <ost/conop/conop.hh>
+#include <ost/conop/rule_based_builder.hh>
 #include <ost/geom/mat3.hh>
 #include <ost/io/io_exception.hh>
 #include "pdb_reader.hh"
@@ -62,20 +63,20 @@ mol::ResNum to_res_num(int num, char ins_code)
 }
 
 PDBReader::PDBReader(std::istream& instream, const IOProfile& profile):
-  infile_(), instream_(instream), profile_(profile)
+  infile_(), instream_(instream), compnds_(), profile_(profile)
 {
   this->Init(boost::filesystem::path(""));
 }
 
 PDBReader::PDBReader(const String& filename, const IOProfile& profile)
-  : infile_(filename), instream_(infile_), profile_(profile)
+  : infile_(filename), instream_(infile_), compnds_(), profile_(profile)
 {
   this->Init(boost::filesystem::path(filename));
 }
 
 PDBReader::PDBReader(const boost::filesystem::path& loc, 
                      const IOProfile& profile):
-  infile_(loc), instream_(infile_), profile_(profile)
+  infile_(loc), instream_(infile_), compnds_(), profile_(profile)
 {
   this->Init(loc);
 }
@@ -83,6 +84,8 @@ PDBReader::PDBReader(const boost::filesystem::path& loc,
 void PDBReader::Init(const boost::filesystem::path& loc)
 {
   warned_name_mismatch_=false;
+  read_seqres_=false;
+  warned_rule_based_=false;
   charmm_style_=profile_.dialect=="CHARMM";
   num_model_records_=0;
   if (boost::iequals(".gz", boost::filesystem::extension(loc))) {
@@ -97,8 +100,199 @@ void PDBReader::Init(const boost::filesystem::path& loc)
     is_pqr_=false;
   }
   hard_end_=false;
+  skip_next_=false;
+  data_continues_=false;
+  old_key_="";
+  mol_id_=std::make_pair(false, 0);
+  
 }
 
+void PDBReader::ThrowFaultTolerant(const String& msg) {
+  if (profile_.fault_tolerant) {
+    LOG_WARNING(msg);
+    return;
+  }
+  throw IOException(msg);
+}
+
+void PDBReader::ParseCompndEntry (const StringRef& line, int line_num)
+{
+  if (line.size()<12) {
+    if (profile_.fault_tolerant) {
+      LOG_WARNING("invalid COMPND record on line " << line_num 
+                  << ": record is too short");
+      return;
+    }
+    std::stringstream ss("invalid COMPND record on line ");
+    ss << line_num <<": record is too short";
+    throw IOException(ss.str());
+  }
+  if (line.rtrim().size()>80) {
+    if (profile_.fault_tolerant) {
+      LOG_WARNING("invalid COMPND record on line " << line_num 
+                  << ": record is too long");
+      return;
+    }
+    std::stringstream ss("invalid COMPND record on line ");
+    ss << line_num <<": whole record is too long";
+    throw IOException(ss.str());
+  }
+  StringRef entry=line.substr(10,line.size()-10).trim();
+
+  StringRef data, key;
+  if (entry.size()<2){
+    ThrowFaultTolerant(str(format("invalid COMPND record on line %d, compnd record too small")%line_num));
+  }
+  char last_letter=entry[entry.size()-1];
+  if((last_letter==',') ||
+      (last_letter==';')) {
+      entry=entry.substr(0, entry.size()-1); //trim last char
+  }
+  if((entry.find(':')!=entry.end())){
+    std::vector<StringRef> fields=entry.split(':');
+      key=fields[0].trim();
+      old_key_=key.str();
+    if (fields.size()>1) {
+      data=fields[1].trim();
+    }
+
+
+    if(data.size()<1){
+      if (!(key.str()=="MOL_ID")&&!(key.str()=="CHAIN")){
+        LOG_WARNING("skipping unsupported COMPND record on line " << line_num<< ": record value"<< key.str()<<" too small");
+        if (data_continues_) {
+          skip_next_=true;
+        } else {
+          return;
+        }
+      }
+      ThrowFaultTolerant(str(format("invalid COMPND record on line %d, record after ':' too small")%line_num));
+    }
+    data_continues_=true;
+    if (last_letter==';') {
+      data_continues_=false;
+    }
+  } else if(skip_next_) {
+    if (last_letter==';'){
+      skip_next_=false;
+      data_continues_=false;
+      old_key_="";
+    } else if (last_letter==','){
+      data_continues_=true;
+    }
+    return;
+  } else if (data_continues_){
+    data=entry.trim();
+    
+    if(data.size()<1){
+      ThrowFaultTolerant(str(format("invalid COMPND record on line %d, record after\
+                                    ':' was empty")%line_num));
+    }
+    key=StringRef(old_key_.data(), old_key_.size());
+
+  } 
+      //currently only these are parsed
+  if (!(key.str()=="MOL_ID")&&!(key.str()=="CHAIN")){
+    LOG_INFO("reading COMPND record on line " << line_num<< "is not supported");
+    if (data_continues_) {
+      skip_next_=true;
+    } else {
+      return;
+    }
+  }
+  
+  std::vector<StringRef> chain_list;
+  std::vector<String> chains;
+  if ((IEquals(key, StringRef("MOL_ID", 6)))) {
+    mol_id_=data.trim().to_int();
+    if (mol_id_.first) {
+      LOG_TRACE("COMPND record on line " << line_num<< " MOL_ID: "<<mol_id_.second);
+    }
+    if (!mol_id_.first) {
+     ThrowFaultTolerant(str(format("invalid COMPND record on line %d")%line_num));
+    }
+  }
+  if (IEquals(key, StringRef("CHAIN", 5))) {
+    if (!mol_id_.first) {
+    ThrowFaultTolerant(str(format("invalid COMPND record on line %d, CHAIN must be succeeding MOL_ID ")%line_num));
+    }
+    if (data.find(',')!=data.end()) {
+      chain_list=data.split(',');
+    } else {
+      if(data.size()==1){
+        chain_list.push_back(data);
+      } else {
+       ThrowFaultTolerant(str(format("invalid COMPND record on line %d, CHAIN must be succeeding MOL_ID ")%line_num));
+      }
+    }
+    for (std::vector<StringRef>::const_iterator it = chain_list.begin(); it != chain_list.end(); ++it) {
+      chains.push_back(it->trim().str());
+    }
+    compnds_.push_back(CompndEntry(chains, mol_id_.second));
+  }
+}
+
+
+void PDBReader::ParseSeqRes(const StringRef& line, int line_num)
+{
+  conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
+  conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
+  if (!rbb) {
+    if (!warned_rule_based_) {
+      LOG_WARNING("SEQRES import requires the rule-based builder. Ignoring "
+                  "SEQRES records");      
+    }
+    warned_rule_based_=true;
+    return;
+  }
+  conop::CompoundLibPtr comp_lib=rbb->GetCompoundLib();  
+  if (!seqres_.IsValid()) {
+    seqres_=seq::CreateSequenceList();
+  }
+  if (line.size()<17) {
+    if (profile_.fault_tolerant) {
+      LOG_WARNING("invalid SEQRES record on line " << line_num 
+                  << ": record is too short");
+      return;
+    }
+    std::stringstream ss("invalid SEQRES record on line ");
+    ss << line_num <<": record is too short";
+    throw IOException(ss.str());
+  }
+  String chain(1, line[11]);
+  seq::SequenceHandle curr_seq;
+  if (seqres_.GetCount()==0 || 
+      seqres_[seqres_.GetCount()-1].GetName()!=chain) {
+    curr_seq=seq::CreateSequence(chain, "");
+    seqres_.AddSequence(curr_seq);
+
+  } else {
+    curr_seq=seqres_[seqres_.GetCount()-1];
+  }
+  for (int i=0; i<14; ++i) {
+    size_t start=19+i*4;
+    if (line.size()<start+3) {
+      return;
+    }
+    StringRef rname=line.substr(start, 3);
+    StringRef trimmed=rname.trim();
+    if (trimmed.empty()) {
+      return;
+    }
+    conop::CompoundPtr compound=comp_lib->FindCompound(trimmed.str(), 
+                                                       conop::Compound::PDB);
+    if (!compound) {
+      if (rname!=StringRef("UNK", 3)) {
+     
+        LOG_WARNING("unknown residue '" << trimmed << "' in SEQRES record. "
+                    "Setting one-letter-code to '?'");
+      }
+      curr_seq.Append('?');
+      continue;
+    }
+    curr_seq.Append(compound->GetOneLetterCode());
+  }
+}
 
 bool PDBReader::HasNext()
 {
@@ -116,7 +310,9 @@ bool PDBReader::HasNext()
           IEquals(curr_line.substr(0, 6),StringRef("ANISOU ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("SHEET ", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HELIX ", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("COMPND", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("MODEL ", 6)) ||
+         IEquals(curr_line.substr(0, 6), StringRef("SEQRES", 6)) ||
          IEquals(curr_line.substr(0, 6), StringRef("HET   ", 6)))) {
        return true;
      } else if (IEquals(curr_line.rtrim(), StringRef("END", 3))) {
@@ -159,6 +355,17 @@ void PDBReader::Import(mol::EntityHandle& ent,
           }
         }
         break;
+         case 'C':
+         case 'c':
+           if (curr_line.size()<20) {
+             LOG_TRACE("skipping entry");
+             continue;
+           }
+           if (IEquals(curr_line.substr(0, 6), StringRef("COMPND", 6))) {
+             LOG_TRACE("processing COMPND entry");
+             this->ParseCompndEntry(curr_line, line_num_);
+           }
+          break;
       case 'E':
       case 'e':
         if (curr_line.size()<3) {
@@ -238,6 +445,11 @@ void PDBReader::Import(mol::EntityHandle& ent,
             this->ParseStrandEntry(curr_line);
           }
         }
+        if (IEquals(curr_line.substr(0, 6), StringRef("SEQRES", 6))) {
+          if (read_seqres_) {
+            this->ParseSeqRes(curr_line, line_num_);
+          }
+        }
         break;
       default:
         break;
@@ -250,6 +462,7 @@ void PDBReader::Import(mol::EntityHandle& ent,
                << helix_list_.size() << " helices and "
                << strand_list_.size() << " strands");
   this->AssignSecStructure(ent);
+  this->AssignMolIds(ent);
   for (HetList::const_iterator i=hets_.begin(), e=hets_.end(); i!=e; ++i) {
     mol::ResidueHandle res=ent.FindResidue(String(1, i->chain), i->num);
     if (res.IsValid()) {
@@ -258,6 +471,44 @@ void PDBReader::Import(mol::EntityHandle& ent,
   }
 }
 
+void PDBReader::AssignMolIds(mol::EntityHandle ent) {
+  LOG_INFO("Assigning MOL_IDs");
+  for (CompndList::const_iterator compnd_iterator=compnds_.begin(), e=compnds_.end();
+       compnd_iterator!=e; ++compnd_iterator) {
+    for (std::vector<String>::const_iterator chain_iterator = compnd_iterator->chains.begin();
+                                             chain_iterator!= compnd_iterator->chains.end();
+                                             ++chain_iterator) {
+      if (restrict_chains_.size()==0 ||
+        (restrict_chains_.find(*chain_iterator)!=String::npos)) {
+        mol::ChainHandle chain=ent.FindChain(*chain_iterator);
+        if (chain) {
+          chain.SetIntProp("mol_id", compnd_iterator->mol_id);
+        }else{
+          LOG_WARNING("failed to assign MOL_ID to chain: "<<*chain_iterator <<std::endl);
+          std::stringstream ss;
+          ss << "could not map COMPND record MOL_ID onto chain";
+          ss <<*chain_iterator;
+          ThrowFaultTolerant(ss.str());
+        }
+      }
+    }
+  }
+  if (compnds_.size()>0){
+    mol::ChainHandleList ch_list=ent.GetChainList();
+    for (mol::ChainHandleList::const_iterator chain=ch_list.begin();
+         chain!=ch_list.end(); ++chain) {
+           //~ skip HETATM only chains!!
+      if(chain->IsValid()){
+        if (!chain->HasProp("mol_id")) {
+          std::stringstream ss;
+          ss << "found chain without MOL_ID: ";
+          ss << chain->GetName();
+          LOG_WARNING(ss.str());
+        }
+      }
+    }
+  }
+}
 
 void PDBReader::AssignSecStructure(mol::EntityHandle ent)
 {
@@ -304,6 +555,7 @@ void PDBReader::ClearState()
 {
   curr_chain_=mol::ChainHandle();
   curr_residue_=mol::ResidueHandle();
+  seqres_=seq::SequenceList();
   chain_count_=0;
   residue_count_=0;
   atom_count_=0;
@@ -349,14 +601,6 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
       restrict_chains_.find(chain_name)==String::npos) {
       return false;
     }    
-  }
-
-  std::pair<bool, int> a_num=line.substr(6, 5).ltrim().to_int();
-  if (!a_num.first) {
-    if (!(profile_.fault_tolerant)) {
-      throw IOException(str(format("invalid atom number on line %d") %line_num));      
-    }
-    LOG_WARNING("invalid atom number on line " << line_num);
   }
 
   alt_loc=line[16];
@@ -409,9 +653,11 @@ void PDBReader::ParseAnisou(const StringRef& line, int line_num,
   }
   mol::AtomHandle atom=curr_residue_.FindAtom(aname);
   if (!atom.IsValid()) {
-    if (profile_.fault_tolerant || profile_.calpha_only) {
+    if (profile_.fault_tolerant ||
+        profile_.calpha_only  ||
+        warned_name_mismatch_) {
       return;
-    } 
+    }
     const char* fmt_str="invalid ANISOU record for inexistent atom on line %d";
     throw IOException(str(format(fmt_str) % line_num));      
   }
@@ -460,10 +706,10 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     occ=std::make_pair(true, Real(1.0));
     temp=std::make_pair(true, Real(0.0));
     if (line.length()>=60) {
-      charge=line.substr(54,6).ltrim().to_float();      
+      charge=line.substr(55,7).ltrim().to_float();
     }
-    if (line.length()>=66) {
-      radius=line.substr(60, 6).ltrim().to_float();      
+    if (line.length()>=68) {
+      radius=line.substr(63,6).ltrim().to_float();
     }
   } else {
     if (line.length()>=60) {
@@ -538,28 +784,39 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
     assert(curr_residue_.IsValid());
   }
   // finally add atom
-  LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
+  LOG_DEBUG("adding atom " << aname << " (" << s_ele << " '" << alt_loc << "'" << ") @" << apos);
   mol::AtomHandle ah;
   if (curr_residue_.GetName()!=res_name.str()) {
-    if (!profile_.fault_tolerant) {
+    if (!profile_.fault_tolerant && alt_loc==' ') {
       std::stringstream ss;
       ss << "error on line " << line_num << ": "
          << "residue with number " << res_num << " has more than one name.";
       throw IOException(ss.str());
     }
-    if (!warned_name_mismatch_) {
-      LOG_INFO("Residue with number " << res_num << " has more than one name."
-               "Ignoring atoms for everything but the first");      
+    if(!profile_.quack_mode) {
+      if (!warned_name_mismatch_) {
+        if (alt_loc==' ') {
+          LOG_WARNING("Residue with number " << res_num << " has more than one name. "
+                      "Ignoring atoms for everything but the first");        
+        } else {
+          LOG_WARNING("Residue with number " << res_num 
+                      << " contains a microheterogeneity. Everything but atoms for "
+                      << "the residue '" << curr_residue_.GetName() 
+                      << "' will be ignored");
+        }
+      }
+      warned_name_mismatch_=true;
+      return;
     }
-    warned_name_mismatch_=true;
-    return;
   }
-  if (alt_loc!=' ') {
+  Real b=temp.first ? temp.second : 0.0;
+  Real o=occ.first ? occ.second : 1.0;
+  if (!profile_.quack_mode && alt_loc!=' ') {
     // Check if there is already a atom with the same name.
     mol::AtomHandle me=curr_residue_.FindAtom(aname);
     if (me.IsValid()) {
       try {
-        editor.AddAltAtomPos(String(1, alt_loc), me, apos);
+        editor.AddAltAtomPos(String(1, alt_loc), me, apos, o, b);
       } catch (Error) {
         LOG_INFO("Ignoring atom alt location since there is already an atom "
                      "with name " << aname << ", but without an alt loc");
@@ -568,10 +825,20 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       return;
     } else {
       ah=editor.InsertAltAtom(curr_residue_, aname,
-                              String(1, alt_loc), apos, s_ele);
+                              String(1, alt_loc), apos, s_ele, o, b);
       ++atom_count_;
     }
   } else {
+    mol::AtomHandle atom=curr_residue_.FindAtom(aname);
+    if (atom.IsValid() && !profile_.quack_mode) {
+      if (profile_.fault_tolerant) {
+        LOG_WARNING("duplicate atom '" << aname << "' in residue " 
+                    << curr_residue_);
+        return;
+      }
+      throw IOException("duplicate atom '"+aname+"' in residue "+
+                        curr_residue_.GetQualifiedName());
+    }
     ah=editor.InsertAtom(curr_residue_, aname, apos, s_ele);
     ++atom_count_;
   }
@@ -580,12 +847,8 @@ void PDBReader::ParseAndAddAtom(const StringRef& line, int line_num,
       ah.SetRadius(radius.second);
     }
   }
-  if (temp.first) {
-    ah.SetBFactor(temp.second);
-  }
-  if (occ.first) {
-    ah.SetOccupancy(occ.second);
-  }
+  ah.SetBFactor(b);
+  ah.SetOccupancy(o);
   if (charge.first) {
     ah.SetCharge(charge.second);
   }

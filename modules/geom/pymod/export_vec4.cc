@@ -26,6 +26,22 @@ using namespace boost::python;
 const Real Vec4_getitem(const geom::Vec4& v, int i) {return v[i];}
 void Vec4_setitem(geom::Vec4& v,const  int i,const  Real val) {v[i]=val;}
 
+String vec4_repr(const geom::Vec4& v)
+{
+  std::stringstream ss;
+  ss << "geom.Vec4(" << v[0] << ", " << v[1] << "," << v[2]
+     << ", " << v[3] << ")";
+  return ss.str();
+}
+
+list vec4_data(const geom::Vec4& v)
+{
+  list nrvo;
+  for(size_t k=0;k<4;++k) {
+    nrvo.append(v.Data()[k]);
+  }
+  return nrvo;
+}
 
 void export_Vec4()
 {
@@ -40,6 +56,7 @@ void export_Vec4()
     .def(self /= Real())
     .def(self += Real())
     .def(self += self)
+    .def("__repr__", vec4_repr)
     .def(self -= self)
     .def(-self)
     .def(self * Real())
@@ -50,9 +67,16 @@ void export_Vec4()
     .def(self / Real())
     .def(self + self)
     .def(self - self)
+    .def(self == self)
+    .def(self != self)
     .def(self_ns::str(self))
     .def("__getitem__",Vec4_getitem)
     .def("__setitem__",Vec4_setitem)
+    .add_property("x", &Vec4::GetX, &Vec4::SetX)
+    .add_property("y", &Vec4::GetY, &Vec4::SetY)
+    .add_property("z", &Vec4::GetZ, &Vec4::SetZ)
+    .add_property("w", &Vec4::GetW, &Vec4::SetW)
+    .add_property("data",vec4_data)
   ;
 
 }

@@ -105,9 +105,11 @@ class TraceWidget(RenderModeWidget):
     self.GetOptions().SetTubeRadius(value/10.0)
 
   def UpdateTubeRadiusGui(self,value):
-    if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_slider_.singleStep()):
       self.width_tube_slider_.setValue(value*10.0)
-    self.width_tube_spinbox_.setValue(value)
+    if(abs(value - self.width_tube_spinbox_.value())>=self.width_tube_spinbox_.singleStep()):
+      self.width_tube_spinbox_.setValue(value)
   
   def GetText(self):
     return self.text_

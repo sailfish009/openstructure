@@ -93,7 +93,6 @@ public:
   Real GetMass() const;
   geom::Vec3 GetCenterOfMass() const;
   geom::Vec3 GetCenterOfAtoms() const;
-  
   /// \brief returns the axis-aligned bounding box of the entity
   geom::AlignedCuboid GetBounds() const;
   
@@ -157,9 +156,15 @@ public:
   void UpdateOrganizer();
   
   AtomImplList FindWithin(const geom::Vec3& pos, Real radius) const;
+  // use query flag defaults
+  EntityView Select(const EntityHandle& h, const Query& q) const;
+  // override query flag defaults with given flags
   EntityView Select(const EntityHandle& h, const Query& q, 
                     QueryFlags flags) const;
   EntityView CreateFullView(const EntityHandle& h) const;
+  void SetDefaultQueryFlags(QueryFlags f) {default_query_flags_=f;}
+  QueryFlags GetDefaultQueryFlags() const {return default_query_flags_;}
+
 
   /// Get chain by name. Returns an invalid ChainImplPtr if no chain with the
   /// given name exists.
@@ -248,6 +253,8 @@ public:
 
   void ReorderAllResidues();
 
+  void RenumberAllResidues(int start, bool keep_spacing);
+
 private:
   void DoCopy(EntityImplPtr dest);
   
@@ -275,6 +282,8 @@ private:
   String name_;
 
   unsigned long next_index_;
+
+  QueryFlags default_query_flags_;
 
   template <bool always_true>
   EntityView do_selection(const EntityHandle&, const Query&, QueryFlags) const;

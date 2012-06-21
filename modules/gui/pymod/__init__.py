@@ -16,7 +16,7 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
-from _gui import *
+from _ost_gui import *
 import sip
 
 
@@ -184,7 +184,27 @@ class OneOf:
       if isinstance(node, cl):
         return True
     return False
-    
+
+class TwoOf:
+  def __init__(self, *classes):
+    self.classes=classes
+  def __call__(self):
+    sel=SceneSelection.Instance()
+    act_count=sel.GetActiveNodeCount()
+    if act_count<2:
+      return False
+    found=0
+    for i in range(0, act_count):
+      node=sel.GetActiveNode(i)
+      for cl in self.classes:
+        if isinstance(node, cl):
+          found += 1
+      if found > 2:
+        return False
+    if found == 2:
+      return True
+    return False
+
 class ManyOf:
   def __init__(self, *classes):
     self.classes=classes
@@ -202,3 +222,16 @@ class ManyOf:
       if not found:
         return False
     return True
+
+from ost import PushVerbosityLevel as _PushVerbosityLevel
+from ost import PopVerbosityLevel as _PopVerbosityLevel
+from ost import GetVerbosityLevel as _GetVerbosityLevel
+
+
+def PushVerbosityLevel(value):
+  GostyApp.Instance().perspective.ChangeVerbositySlider(value)
+
+def PopVerbosityLevel():
+  _PopVerbosityLevel()
+  GostyApp.Instance().perspective.ChangeVerbositySlider(_GetVerbosityLevel())
+  _PopVerbosityLevel() # the slider change pushes a new level :-(

@@ -437,44 +437,60 @@ class HSCWidget(RenderModeWidget):
     self.ApplyOptions()
     
   def UpdateTubeRadiusGui(self,value):
-    if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_slider_.singleStep()):
       self.width_tube_slider_.setValue(value*10.0)
-    self.width_tube_spinbox_.setValue(value)
-  
+    if(abs(value - self.width_tube_spinbox_.value())>=self.width_tube_spinbox_.singleStep()):
+      self.width_tube_spinbox_.setValue(value)
+
   def UpdateTubeRatioGui(self,value):
-    if(abs(value*10.0 - self.thickness_tube_slider_.value())>=self.thickness_tube_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.thickness_tube_slider_.value())>=self.thickness_tube_slider_.singleStep()):
       self.thickness_tube_slider_.setValue(value*10.0)
-    self.thickness_tube_spinbox_.setValue(value)
+    if(abs(value - self.thickness_tube_spinbox_.value())>=self.thickness_tube_spinbox_.singleStep()):
+      self.thickness_tube_spinbox_.setValue(value)
 
   def UpdateHelixWidthGui(self, value):
-    if(abs(value*10.0 - self.width_helix_slider_.value())>=self.width_helix_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.width_helix_slider_.value())>=self.width_helix_slider_.singleStep()):
       self.width_helix_slider_.setValue(value*10.0)
-    self.width_helix_spinbox_.setValue(value)
+    if(abs(value - self.width_helix_spinbox_.value())>=self.width_helix_spinbox_.singleStep()):
+      self.width_helix_spinbox_.setValue(value)
     
   def UpdateHelixThicknessGui(self, value):
-    if(abs(value*10.0 - self.thickness_helix_slider_.value())>=self.thickness_helix_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.thickness_helix_slider_.value())>=self.thickness_helix_slider_.singleStep()):
       self.thickness_helix_slider_.setValue(value*10.0)
-    self.thickness_helix_spinbox_.setValue(value)
+    if(abs(value - self.thickness_helix_spinbox_.value())>=self.thickness_helix_spinbox_.singleStep()):
+      self.thickness_helix_spinbox_.setValue(value)
     
   def UpdateHelixEccGui(self, value):
-    if(abs(value*10.0 - self.ecc_helix_slider_.value())>=self.ecc_helix_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.ecc_helix_slider_.value())>=self.ecc_helix_slider_.singleStep()):
       self.ecc_helix_slider_.setValue(value*10.0)
-    self.ecc_helix_spinbox_.setValue(value)
+    if(abs(value - self.ecc_helix_spinbox_.value())>=self.ecc_helix_spinbox_.singleStep()):
+      self.ecc_helix_spinbox_.setValue(value)
     
   def UpdateStrandWidthGui(self, value):
-    if(abs(value*10.0 - self.width_strand_slider_.value())>=self.width_strand_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.width_strand_slider_.value())>=self.width_strand_slider_.singleStep()):
       self.width_strand_slider_.setValue(value*10.0)
-    self.width_strand_spinbox_.setValue(value)
+    if(abs(value - self.width_strand_spinbox_.value())>=self.width_strand_spinbox_.singleStep()):
+      self.width_strand_spinbox_.setValue(value)
 
   def UpdateStrandThicknessGui(self, value):
-    if(abs(value*10.0 - self.thickness_strand_slider_.value())>=self.thickness_strand_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.thickness_strand_slider_.value())>=self.thickness_strand_slider_.singleStep()):
       self.thickness_strand_slider_.setValue(value*10.0)
-    self.thickness_strand_spinbox_.setValue(value)
+    if(abs(value - self.thickness_strand_spinbox_.value())>=self.thickness_strand_spinbox_.singleStep()):
+      self.thickness_strand_spinbox_.setValue(value)
     
   def UpdateStrandEccGui(self, value):
-    if(abs(value*10.0 - self.ecc_strand_slider_.value())>=self.ecc_strand_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.ecc_strand_slider_.value())>=self.ecc_strand_slider_.singleStep()):
       self.ecc_strand_slider_.setValue(value*10.0)
-    self.ecc_strand_spinbox_.setValue(value)
+    if(abs(value - self.ecc_strand_spinbox_.value())>=self.ecc_strand_spinbox_.singleStep()):
+      self.ecc_strand_spinbox_.setValue(value)
 
   def GetText(self):
     return self.text_

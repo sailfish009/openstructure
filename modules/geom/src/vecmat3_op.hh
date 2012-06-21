@@ -194,6 +194,34 @@ inline Real Distance(const Vec3& p1, const Vec3& p2)
     return Length(p1-p2);
 }
 
+
+//! return the squared distance between two points with periodic boundaries in x,y,z given in basis_vec
+inline Real Distance2WithPBC(const Vec3& v1, const Vec3& v2, const Vec3& basis_vec){
+  Vec3 v;
+  v=v1-v2;
+  for (int i=0; i<3; i++) {
+    if (std::fabs(v[i])>basis_vec[i]/2.){ 
+      v[i]=std::fabs(v[i])-basis_vec[i]*int(std::fabs(v[i])/basis_vec[i]+0.5);
+    }
+  }
+  return Length2(v);
+}
+//! return the distance between two points with periodic boundaries in x,y,z given in basis_vec
+inline Real DistanceWithPBC(const Vec3& v1, const Vec3& v2, const Vec3& basis_vec){
+  return sqrt(Distance2WithPBC(v1, v2, basis_vec));
+}
+//! returns the minimal distance between the points in two Vec3List
+Real MinDistance(const Vec3List& l1, const Vec3List& l2);
+//! returns the minimal distance between the points in two Vec3List 
+//  with periodic boundaries in x,y,z given in basis_vec
+Real MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec);
+
+//!wraps a vector in a box with periodic boundaries
+Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec);
+//!wraps all the verctors in a Vec3List in a box with periodic boundaries
+Vec3List WrapVec3List(const Vec3List& vl,const Vec3& box_center,const Vec3& basis_vec);
+
+  
 } // ns
 
 #endif

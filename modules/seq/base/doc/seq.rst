@@ -54,7 +54,7 @@ methods, sequences can also be loaded from a string:
 
   seq_string='''>sequence
   abcdefghiklmnop'''
-  s=io.LoadSequenceFromString(seq_string, 'fasta')
+  s=io.SequenceFromString(seq_string, 'fasta')
   print s.name, s # will print "sequence abcdefghiklmnop"
   
 Note that, in that case specifying the format is mandatory.
@@ -65,14 +65,16 @@ The SequenceHandle
 .. function:: CreateSequence(name, sequence)
 
   Create a new :class:`SequenceHandle` with the given name and sequence. 
-  
+
   :param name: name of the sequence
   :type  name: str
   :param sequence: String of characters representing the sequence. Only   
-       alphanumerical characters and '-' are allowed.
+       'word' characters (no digits), '?', '-' and '.' are allowed. In an
+       upcoming release, '?' and '.' will also be forbidden so its best to
+       translate those to 'X' or '-'.
   :type sequence: str
   :raises InvalidSequence: When the sequence string contains forbidden
-       characters, that is anything that is not alphanumeric or a hyphen.
+       characters. In the future, '?' and '.' will also raise this exception.
 
 .. class:: SequenceHandle
 
@@ -184,7 +186,7 @@ The SequenceHandle
 
   .. attribute:: offset
   
-    Shorthand for :meth:`GetSequenceOffset`/:meth:`SetSequenceOffset`
+    Shorthand for :meth:`GetOffset`/:meth:`SetOffset`
 
   .. method:: __len__()
     
@@ -194,6 +196,16 @@ The SequenceHandle
 
     Returns the sequence as a string.
 
+.. function:: Match(s1, s2)
+
+  :param s1: The first sequence
+  :param s2: The second sequence
+  :type s1: :class:`SequenceHandle`, or :class:`str`
+  :type s2: :class:`SequenceHandle`, or :class:`str`
+
+  Check whether the two sequences s1 and s2 match. This function performs are
+  case-insensitive comparison of the two sequences. The character  'X' is
+  interpreted as a wildcard character that always matches the other sequence.
 
 The SequenceList    
 --------------------------------------------------------------------------------
@@ -357,3 +369,22 @@ an alignment:
     
     If master is set to -1, all sequences in the region are affected, otherwise 
     only the sequence at index equal to master is shifted.
+  
+  .. method:: GetMatchingBackboneViews(index1=0, index2=1)
+  
+    Returns a tuple of entity views containing matching backbone atoms for the 
+    two sequences at index1 and index2, respectively. For each aligned column in
+    the alignment, backbone atoms are added to the view if both aligned residues 
+    have them. It is guaranteed that the two views contain the same number of 
+    atoms and that the order of the atoms in the two views is the same.
+    
+    The output of this function can be used to superpose two structures with
+    :func:`~ost.mol.alg.SuperposeSVD`.
+    
+    
+    :param index1: The index of the first sequence
+    
+    :param index2: The index of the second sequence.
+    
+    :raises: In case one of the two sequences doesn't have an attached view, a 
+       :exc:`RuntimeError` is raised.

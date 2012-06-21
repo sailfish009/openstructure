@@ -27,7 +27,10 @@
 
 #include <boost/shared_ptr.hpp>
 #include <ost/generic_property.hh>
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info_fw.hh>
+#endif
 #include <ost/mol/residue_prop.hh>
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/residue_view.hh>
@@ -47,7 +50,8 @@ class DLLEXPORT_OST_SEQ SequenceImpl : public GenericPropContainerImpl {
 public:
   /// \brief       Construct new sequence object from sequence_string.
   static SequenceImplPtr FromString(const String& seq_name,
-                                const String& sequence_string);
+                                    const String& sequence_string,
+                                    const String& role="UNKNOWN");
 
   /// \brief       Get residue index corresponding to given sequence position
   /// \param pos   zero-based index
@@ -87,7 +91,8 @@ public:
   ///
   /// \sa #SetOffset
   int GetOffset() const;
-
+  
+  int GetIndex(const String& substr) const;
   /// \brief Set sequence offset
   ///
   /// By default the sequence offset is zero, i.e. the beginning of the sequence
@@ -101,7 +106,8 @@ public:
   ///
   /// If you want to check whether the sequence String does only contain
   /// valid characters use \c CreateSequence instead.
-  SequenceImpl(const String& seq_name, const String& sequence_string);
+  SequenceImpl(const String& seq_name, const String& sequence_string, 
+               const String& role);
 
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
@@ -133,6 +139,26 @@ public:
 
   /// \brief whether the sequence has an attached view
   bool HasAttachedView() const;
+  
+  void Append(char olc);
+  
+  char& operator[](size_t index)
+  {
+    return seq_string_[index];
+  }
+  char operator[](size_t index) const
+  {
+    return seq_string_[index];
+  }
+  const String& GetRole() const
+  {
+    return seq_role_;
+  }
+  
+  void SetRole(const String& role)
+  {
+    seq_role_=role;
+  }
 private:
 
   /// \brief       Recalculates gap shifts from sequence.
@@ -153,23 +179,25 @@ private:
   } Shift;
   String              seq_name_;
   String              seq_string_;
+  String              seq_role_;
   std::list<Shift>    shifts_;
   bool                editing_;
   int                 offset_;
-  mol::EntityView          attached_view_;
+  mol::EntityView     attached_view_;
 };
 
 /// \internal
 typedef std::vector<SequenceImplPtr>  SequenceList;
 
+#if(OST_INFO_ENABLED)
 /// \internal
-void DLLEXPORT_OST_SEQ SequenceImplToInfo(const SequenceImplPtr& sequence,
-                                      info::InfoGroup& group);
-/// \internal
-SequenceImplPtr DLLEXPORT_OST_SEQ 
+SequenceImplPtr DLLEXPORT_OST_SEQ SequenceImplFromInfo(const info::InfoGroup& group);
 
 /// \internal
-SequenceImplFromInfo(const info::InfoGroup& group);
+void DLLEXPORT_OST_SEQ SequenceImplToInfo(const SequenceImplPtr& sequence,
+                                     info::InfoGroup& group);
+#endif
+
 
 }}} //ns
 #endif

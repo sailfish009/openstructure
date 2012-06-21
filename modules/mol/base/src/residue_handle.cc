@@ -25,7 +25,7 @@
 #include <ost/mol/impl/chain_impl.hh>
 #include <ost/mol/impl/entity_impl.hh>
 #include <ost/mol/iterator.hh>
-
+#include <ost/mol/bond_handle.hh>
 namespace ost { namespace mol {
 
 ResidueHandle::ResidueHandle()
@@ -128,18 +128,6 @@ bool ResidueHandle::operator==(const ResidueHandle& ref) const
 bool ResidueHandle::operator!=(const ResidueHandle& ref) const
 {
   return Impl()!=ref.Impl();
-}
-
-AtomHandle ResidueHandle::GetCentralAtom() const 
-{
-  this->CheckValidity();
-  return AtomHandle(Impl()->GetCentralAtom());
-}
-
-geom::Vec3 ResidueHandle::GetCentralNormal() const 
-{
-  this->CheckValidity();
-  return Impl()->GetCentralNormal();
 }
 
 int ResidueHandle::GetIndex() const 

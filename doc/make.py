@@ -2,12 +2,18 @@ import os, sys, re
 import shutil
 from ost import settings
 from optparse import OptionParser
-
+import subprocess
 
 if len(sys.argv)==2:
   root_dir=sys.argv[1]
 else:
   root_dir='.'
+
+def _CheckCall(cmd, shell):
+  r = subprocess.call(cmd, shell=True)
+  if r != 0:
+    sys.stderr.write("Command '%s' returned non-zero exit status %d\n"%(cmd, r))
+    sys.exit(-1)
 
 def _OutputPath(inpath, outdir):
   parts=inpath.split(os.path.sep)
@@ -86,17 +92,24 @@ if opts.quiet:
 
 for sub_dir in ('modules',):
   os.path.walk(sub_dir, _CollectRstDocs, 'doc/source')
-sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6'])
+sphinx_bin=settings.Locate(['sphinx-build', 'sphinx-build-2.6','sphinx-build-2.7'])
 
 if opts.html:
-  os.system('%s %s -b html -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source', 
-                                      'doc/build/html'))
+  cmd='%s %s -b html -c %s %s %s' % (sphinx_bin, opt_str, 
+                                     'doc/conf', 'doc/source', 'doc/build/html')
+  print cmd
+  _CheckCall(cmd, shell=True)
+
 if opts.doctest:
-  os.system('%s %s -b doctest -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source', 
-                                      'doc/build/doctest'))
+  cmd='%s %s -b doctest -c %s %s %s' % (sphinx_bin, opt_str, 
+                                        'doc/conf', 'doc/source', 
+                                        'doc/build/doctest')
+  _CheckCall(cmd, shell=True)
 if opts.build_json:
-  os.system('%s %s -b json -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source',
-                                      'doc/build/json'))
+  cmd='%s %s -b json -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 
+                                     'doc/source', 'doc/build/json')
+  _CheckCall(cmd, shell=True)
 if opts.linkcheck:
-  os.system('%s %s -b linkcheck -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 'doc/source', 
-                                      'doc/build/check'))
+  cmd='%s %s -b linkcheck -c %s %s %s' % (sphinx_bin, opt_str, 'doc/conf', 
+                                          'doc/source', 'doc/build/check')
+  _CheckCall(cmd, shell=True)

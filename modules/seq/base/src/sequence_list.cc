@@ -22,7 +22,10 @@
  */
 
 #include <ost/invalid_handle.hh> 
+#include <ost/config.hh>
+#if(OST_INFO_ENABLED)
 #include <ost/info/info.hh>
+#endif
 
 #include <ost/seq/impl/sequence_list_impl.hh>
 #include <ost/seq/sequence_list.hh>
@@ -70,6 +73,12 @@ SequenceList::Iterator SequenceList::End() const
 {
   this->CheckValidity();
   return SequenceList::Iterator(impl_->End(), impl_->End());
+}
+
+SequenceHandle SequenceList::FindSequence(const String& name) const
+{
+  this->CheckValidity();
+  return SequenceHandle(impl_->FindSequence(name));
 }
 
 bool SequenceList::IsValid() const
@@ -174,6 +183,7 @@ int SequenceList::GetMaxLength() const
   return impl_->GetMaxLength();
 }
 
+#if(OST_INFO_ENABLED)
 /// \brief export sequence list to info
 void SequenceListToInfo(const ConstSequenceList& seq_list, 
                         info::InfoGroup& group)
@@ -186,6 +196,7 @@ SequenceList SequenceListFromInfo(info::InfoGroup& group)
 {
   return SequenceList(impl::SequenceListImplFromInfo(group));
 }
+#endif
 
 SequenceList::operator ConstSequenceList() const
 {
@@ -224,6 +235,12 @@ ConstSequenceList ConstSequenceList::Slice(int first, int n) const
 {
   this->CheckValidity();
   return ConstSequenceList(impl_->Slice(first, n));
+}
+
+ConstSequenceHandle ConstSequenceList::FindSequence(const String& name) const
+{
+  this->CheckValidity();
+  return ConstSequenceHandle(impl_->FindSequence(name));
 }
 
 ConstSequenceList DLLEXPORT_OST_SEQ CreateConstSequenceList()

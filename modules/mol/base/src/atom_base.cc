@@ -42,31 +42,42 @@ const GenericPropContainerImpl* AtomBase::GpImpl() const
 const String& AtomBase::GetName() const 
 {
   this->CheckValidity();  
-  return impl_->GetName();
+  return impl_->Name();
 }
 
 void AtomBase::SetName(const String& atom_name) 
 {
   this->CheckValidity();
-  return impl_->SetName(atom_name);
+  impl_->Name()=atom_name;
 }
 
 const geom::Vec3& AtomBase::GetPos() const 
 {
   this->CheckValidity();  
-  return impl_->GetPos();
+  return impl_->TransformedPos();
 }
 
 const geom::Vec3& AtomBase::GetOriginalPos() const
 {
   this->CheckValidity();
-  return impl_->GetOriginalPos();
+  return impl_->OriginalPos();
 }
 
 geom::Vec3 AtomBase::GetAltPos(const String& alt_group) const
 {
   this->CheckValidity();
   return impl_->GetResidue()->GetAltAtomPos(Impl(), alt_group);
+}
+
+Real AtomBase::GetAltBFactor(const String& alt_group) const
+{
+  this->CheckValidity();
+  return impl_->GetResidue()->GetAltAtomBFactor(Impl(), alt_group);
+}
+Real AtomBase::GetAltOcc(const String& alt_group) const
+{
+  this->CheckValidity();
+  return impl_->GetResidue()->GetAltAtomOcc(Impl(), alt_group);
 }
 
 std::vector<String> AtomBase::GetAltGroupNames() const

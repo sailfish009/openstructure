@@ -40,7 +40,8 @@ Real Distance(const Vec3& p1, const Vec3& p2);
 Real Distance(const Vec3& p, const Line& l);
 //! returns the distance between a point and a line
 Real Distance(const Line& l, const Vec3& p);
-
+//! returns the minimal distance between the points in two Vec3List
+Real MinDistance(const Vec3List& l1, const Vec3List& l2);
 } // ns geom
 
 #endif

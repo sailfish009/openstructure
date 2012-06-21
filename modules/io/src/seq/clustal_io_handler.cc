@@ -70,16 +70,30 @@ bool ClustalIOHandler::ProvidesExport(const boost::filesystem::path& loc,
 void ClustalIOHandler::Import(seq::SequenceList& aln,
                               std::istream& instream)
 {
-  static const char* whitespace="\t ";  
-  
+  static const char* whitespace="\t\r\n ";  
+  int line_num=0;
   String line;
   typedef std::map<String, seq::SequenceHandle> SeqMap;
   std::vector<seq::SequenceHandle> order;
   SeqMap seq_map;
-  if (!std::getline(instream, line) || line.find("CLUSTAL")!=0) {
+  if (!instream) {
+    throw IOException("Can't import CLUSTAL alignment. Inexisting file "
+                      "or invalid stream.");
+  }
+  
+  // skip empty lines
+  while (std::getline(instream, line)) {
+    line_num+=1;
+    size_t pos=line.find_first_not_of(whitespace);
+    if (pos!=String::npos) {
+      break;
+    }    
+  }
+  if (line.find("CLUSTAL")!=0) {
     throw IOException("bad CLUSTAL file. First line must contain CLUSTAL");
   }
   while (std::getline(instream, line)) {
+    line_num+=1;
     size_t pos=line.find_first_not_of(whitespace);
     if (pos==String::npos) {
       continue;
@@ -90,8 +104,10 @@ void ClustalIOHandler::Import(seq::SequenceList& aln,
     }
     size_t seq_id_end=line.find_first_of(whitespace);
     if (seq_id_end==String::npos) {
-      throw IOException("Bad CLUSTAL file: Whitespace expected after"
-                        " sequence name");
+      std::stringstream ss;
+      ss << "Bad CLUSTAL file on line " << line_num 
+         << ": Whitespace expected after sequence name";
+      throw IOException(ss.str());
     }
     String seq_id=line.substr(0, seq_id_end);
 
@@ -120,7 +136,7 @@ void ClustalIOHandler::Import(seq::SequenceList& aln,
 void ClustalIOHandler::Export(const seq::ConstSequenceList& ent,
                               std::ostream& ostream) const
 {
-  throw IOException("Export of ClustalW alngnments to stream is not supported");
+  throw IOException("Export of ClustalW alignments to stream is not supported");
 }
 
 }}

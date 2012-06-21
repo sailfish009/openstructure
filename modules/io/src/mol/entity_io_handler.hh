@@ -25,9 +25,17 @@
 
 #include <ost/io/module_config.hh>
 #include <ost/io/io_utils.hh>
-#include <ost/mol/mol.hh>
 
-namespace ost { namespace io {
+namespace ost { 
+  
+namespace mol {
+
+class EntityView;
+class EntityHandle;
+
+}
+
+namespace io {
 
 //! pure abstract base class for entity io handlers
 class DLLEXPORT_OST_IO EntityIOHandler {

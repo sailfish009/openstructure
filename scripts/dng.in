@@ -20,29 +20,12 @@
 # Startup script for a protein-centric user interface
 # Author: Marco Biasini
 
-# Self detect important directories
 if [ -h "$0" ] ; then
   SCRIPT_NAME=`readlink "$0"`
 else
   SCRIPT_NAME="$0"
 fi
 BIN_DIR=`dirname "$SCRIPT_NAME"`
-export DNG_ROOT=`cd "$BIN_DIR/..";pwd`
-export PATH="$DNG_ROOT/bin:$PATH"
-export LD_LIBRARY_PATH="$DNG_ROOT/@LIBDIR@:$LD_LIBRARY_PATH"
-# set QT_PLUGIN_PATH and pythonpath for bundle (commented except in linux bundles)
-#export PYTHONPATH="$DNG_ROOT/@LIBDIR@/python2.6"
-#export QT_PLUGIN_PATH="$BIN_DIR/plugins"
+source $BIN_DIR/../@LIBEXEC_PATH@/ost_config
 
-opts=""
-for argument in "$@";do
-  if [ -n "$opts" ]; then
-    opts=$opts"#""$argument"
-  else
-    opts="$argument"
-  fi
-done
-
-IFS="#"
-gosty $DNG_ROOT/@LIBDIR@/openstructure/init.py ost $opts
-IFS=$' \t\n'
+$BIN_DIR/../@LIBEXEC_PATH@/gosty $DNG_INITDIR/init.py dng $opts

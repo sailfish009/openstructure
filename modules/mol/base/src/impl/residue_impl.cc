@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------------
 #include <ost/log.hh>
 #include <ost/mol/entity_visitor.hh>
-
+#include <ost/mol/residue_handle.hh>
 #include "chain_impl.hh"
 #include "residue_impl.hh"
 #include "atom_impl.hh"
@@ -43,7 +43,8 @@ ResidueImpl::ResidueImpl(const EntityImplPtr& ent,
   atom_list_(),
   sec_structure_(SecStructure::COIL),
   olc_('?'),
-  protein_(false), ligand_(false)
+  protein_(false), ligand_(false),
+  central_atom_()
 {
 }
 
@@ -60,8 +61,8 @@ AtomImplPtr ResidueImpl::InsertAtom(const String& name,
 
 AtomImplPtr ResidueImpl::InsertAtom(const AtomImplPtr& atom)
 {
-  AtomImplPtr dst_atom=this->InsertAtom(atom->GetName(), 
-                                        atom->GetPos(),
+  AtomImplPtr dst_atom=this->InsertAtom(atom->Name(), 
+                                        atom->TransformedPos(),
                                         atom->GetElement());
 
   dst_atom->Assign(*atom.get());
@@ -90,7 +91,8 @@ Real ResidueImpl::GetAverageBFactor() const
 }
 
 void ResidueImpl::AddAltAtom(const String& group, const AtomImplPtr& atom,
-                             const geom::Vec3& position) {
+                             const geom::Vec3& position,
+                             Real occ, Real b_factor) {
 
   if (group.length()==0)
    throw Error("alt atom group name can't be empty String");
@@ -105,7 +107,7 @@ void ResidueImpl::AddAltAtom(const String& group, const AtomImplPtr& atom,
       curr_group_=group;
     }
   }
-  i->second.atoms.push_back(AtomGroupEntry(atom, position));
+  i->second.atoms.push_back(AtomGroupEntry(atom, position, occ, b_factor));
 }
 
 geom::Vec3 ResidueImpl::GetAltAtomPos(const AtomImplPtr& atom, 
@@ -126,12 +128,47 @@ geom::Vec3 ResidueImpl::GetAltAtomPos(const AtomImplPtr& atom,
               " does not have alternative atom position '"+group+"'");
 }
 
+Real ResidueImpl::GetAltAtomOcc(const AtomImplPtr& atom,
+                                const String& group) const
+{
+  AtomEntryGroups::const_iterator i=alt_groups_.find(group);
+  if (i==alt_groups_.end()) {
+    throw Error("No alt atom group '"+group+"'");
+  }
+  const AtomGroup& g=i->second;
+  for (AtomGroupEntryList::const_iterator j=g.atoms.begin(),
+       e=g.atoms.end(); j!=e; ++j) {
+    if (atom==j->atom.lock()) {
+      return j->occ;
+    }
+  }
+  throw Error(atom->GetQualifiedName()+
+              " does not have alternative atom position '"+group+"'");
+}
+Real ResidueImpl::GetAltAtomBFactor(const AtomImplPtr& atom,
+                                    const String& group) const
+{
+  AtomEntryGroups::const_iterator i=alt_groups_.find(group);
+  if (i==alt_groups_.end()) {
+    throw Error("No alt atom group '"+group+"'");
+  }
+  const AtomGroup& g=i->second;
+  for (AtomGroupEntryList::const_iterator j=g.atoms.begin(),
+       e=g.atoms.end(); j!=e; ++j) {
+    if (atom==j->atom.lock()) {
+      return j->b_factor;
+    }
+  }
+  throw Error(atom->GetQualifiedName()+
+              " does not have alternative atom position '"+group+"'");
+}
 AtomImplPtr ResidueImpl::InsertAltAtom(const String& name,
                                        const String& alt_group,
                                        const geom::Vec3& pos,
-                                       const String& ele) {
+                                       const String& ele,
+                                       Real occupancy, Real b_factor) {
   AtomImplPtr atom=this->InsertAtom(name, pos, ele);
-  this->AddAltAtom(alt_group, atom, pos);
+  this->AddAltAtom(alt_group, atom, pos, occupancy, b_factor);
   return atom;
 }
 
@@ -163,20 +200,27 @@ EntityImplPtr ResidueImpl::GetEntity() const
 
 AtomImplPtr ResidueImpl::GetCentralAtom() const
 {
+  if(central_atom_) return central_atom_;
   if (chem_class_.IsNucleotideLinking()) {
     for (AtomImplList::const_iterator it=atom_list_.begin();
          it!=atom_list_.end();++it) {
-      if((*it)->GetName()=="P") return *it;
+      if((*it)->Name()=="P") return *it;
     }    
   } else if (chem_class_.IsPeptideLinking()) {
     for (AtomImplList::const_iterator it=atom_list_.begin();
          it!=atom_list_.end();++it) {
-      if((*it)->GetName()=="CA") return *it;
+      if((*it)->Name()=="CA") return *it;
     }    
   }
 
   return AtomImplPtr();
 }
+
+void ResidueImpl::SetCentralAtom(const AtomImplPtr& a)
+{
+  central_atom_=a;
+}
+
 
 char ResidueImpl::GetOneLetterCode() const
 {
@@ -217,14 +261,14 @@ geom::Vec3 ResidueImpl::GetCentralNormal() const
     AtomImplPtr a1 = FindAtom("C");
     AtomImplPtr a2 = FindAtom("O"); 
     if(a1 && a2) {
-      nrvo = geom::Normalize(a2->GetPos()-a1->GetPos());
+      nrvo = geom::Normalize(a2->TransformedPos()-a1->TransformedPos());
     } else {
       a1 = FindAtom("CB");
       a2 = FindAtom("CA"); 
       if(a1 && a2) {
-        nrvo = geom::Normalize(a2->GetPos()-a1->GetPos());
+        nrvo = geom::Normalize(a2->TransformedPos()-a1->TransformedPos());
       } else {
-        geom::Vec3 v0=GetCentralAtom()->GetPos();
+        geom::Vec3 v0=GetCentralAtom()->TransformedPos();
         nrvo=geom::Cross(geom::Normalize(v0),
                          geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
         LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
@@ -235,9 +279,9 @@ geom::Vec3 ResidueImpl::GetCentralNormal() const
     AtomImplPtr a2 = FindAtom("OP1");
     AtomImplPtr a3 = FindAtom("OP2");
     if(a1 && a2 && a3) {
-      nrvo = geom::Normalize(a1->GetPos()-(a2->GetPos()+a3->GetPos())*.5);
+      nrvo = geom::Normalize(a1->TransformedPos()-(a2->TransformedPos()+a3->TransformedPos())*.5);
     } else {
-      geom::Vec3 v0=GetCentralAtom()->GetPos();
+      geom::Vec3 v0=GetCentralAtom()->TransformedPos();
       nrvo=geom::Cross(geom::Normalize(v0),
                        geom::Normalize(geom::Vec3(-v0[2],v0[0],v0[1])));
       LOG_VERBOSE("warning: could not find atoms for proper central normal calculation");
@@ -251,7 +295,7 @@ AtomImplPtr ResidueImpl::FindAtom(const String& aname) const
 {
   for (AtomImplList::const_iterator it=atom_list_.begin();
        it!=atom_list_.end();++it) {
-    if ((*it)->GetName()==aname) {
+    if ((*it)->Name()==aname) {
       return *it;
     }
   }
@@ -366,18 +410,25 @@ void ResidueImpl::DeleteAtom(const AtomImplPtr& atom) {
   }
 }
 
+namespace {
+  struct aname_matcher {
+    aname_matcher(const String& n): aname(n) {}
+    bool operator()(AtomImplPtr& a) {return a->Name()==aname;}
+    String aname;
+  };
+}
+
 void ResidueImpl::DeleteAtoms(const String& atom_name) {
   AtomImplList::iterator i=atom_list_.begin();
   for (; i!=atom_list_.end(); ++i) {
-    if ((*i)->GetName()==atom_name) {
+    if ((*i)->Name()==atom_name) {
       (*i)->DeleteAllTorsions();
       (*i)->DeleteAllConnectors();
       this->GetEntity()->DeleteAtom(*i);
     }
   }
   AtomImplList::iterator new_end;
-  new_end=std::remove_if(atom_list_.begin(), atom_list_.end(),
-                         bind(&AtomImpl::GetName, _1)==atom_name);
+  new_end=std::remove_if(atom_list_.begin(), atom_list_.end(), aname_matcher(atom_name));
   atom_list_.erase(new_end, atom_list_.end());
 }
 
@@ -436,7 +487,7 @@ void ResidueImpl::RemoveAltPositionsForAtom(const AtomImplPtr& atom) {
 
 Real ResidueImpl::GetMass() const
 {
-  Real mass = 0;
+  double mass = 0;
   for (AtomImplList::const_iterator i=atom_list_.begin(); 
        i!=atom_list_.end(); ++i) {
     mass+=(*i)->GetMass();
@@ -452,10 +503,10 @@ geom::AlignedCuboid ResidueImpl::GetBounds() const
 
   if (atom_list_.size()>0) {
     AtomImplList::const_iterator i=atom_list_.begin();
-    mmin=mmax=(*i)->GetPos();
+    mmin=mmax=(*i)->TransformedPos();
     for (++i; i!=atom_list_.end(); ++i) {
-      mmax=geom::Max(mmax,(*i)->GetPos());
-      mmin=geom::Min(mmin,(*i)->GetPos());      
+      mmax=geom::Max(mmax,(*i)->TransformedPos());
+      mmin=geom::Min(mmin,(*i)->TransformedPos());      
     }    
     return geom::AlignedCuboid(mmin, mmax);
   } else {
@@ -469,7 +520,7 @@ geom::Vec3 ResidueImpl::GetCenterOfAtoms() const
   if (!atom_list_.empty()) {
     for (AtomImplList::const_iterator i=atom_list_.begin(); 
         i!=atom_list_.end(); ++i) {
-      sum+=(*i)->GetPos();
+      sum+=(*i)->TransformedPos();
     }
     sum/=atom_list_.size();
   }
@@ -483,7 +534,7 @@ geom::Vec3 ResidueImpl::GetCenterOfMass() const
   if (this->GetAtomCount() > 0 && mass > 0) {
     for (AtomImplList::const_iterator i=atom_list_.begin(); 
         i!=atom_list_.end(); ++i) {
-      center+=(*i)->GetPos()*(*i)->GetMass();
+      center+=(*i)->TransformedPos()*(*i)->GetMass();
     }
   }
   return center/mass;
@@ -491,7 +542,8 @@ geom::Vec3 ResidueImpl::GetCenterOfMass() const
 
 void ResidueImpl::AddAltAtomPos(const String& group,
                                      const AtomImplPtr& atom,
-                                     const geom::Vec3& position) {
+                                     const geom::Vec3& position,
+                                     Real occ, Real b_factor) {
   // Make sure atom is already registered for having an alternative position.
   // Bail out, if this is not the case.
   AtomEntryGroups::iterator i=alt_groups_.begin();
@@ -507,7 +559,7 @@ void ResidueImpl::AddAltAtomPos(const String& group,
     }
   }
   if (found)
-    this->AddAltAtom(group, atom, position);
+    this->AddAltAtom(group, atom, position, occ, b_factor);
   else {
     String m="Definition of alternative position without prior call to "
              "InsertAltAtom is not allowed";
@@ -566,7 +618,9 @@ bool ResidueImpl::SwitchAtomPos(const String& group) {
     for (; k!=gr.atoms.end(); ++k) {
       AtomGroupEntry& entry=*k;
       assert(!entry.atom.expired());
-      entry.pos=entry.atom.lock()->GetOriginalPos();
+      entry.pos=entry.atom.lock()->OriginalPos();
+      entry.occ=entry.atom.lock()->GetOccupancy();
+      entry.b_factor=entry.atom.lock()->GetBFactor();
     }
   }
   AtomGroup& agr=i->second;
@@ -575,11 +629,13 @@ bool ResidueImpl::SwitchAtomPos(const String& group) {
 
     AtomGroupEntry& entry=*j;
     assert(!entry.atom.expired());
-    entry.atom.lock()->SetOriginalPos(entry.pos);
+    entry.atom.lock()->OriginalPos()=entry.pos;
     EntityHandle ent = entry.atom.lock()->GetEntity();
     geom::Mat4 transf_matrix = ent.GetTransformationMatrix();
     geom::Vec3 transf_pos = geom::Vec3(transf_matrix*geom::Vec4(entry.pos));
-    entry.atom.lock()->SetTransformedPos(transf_pos);
+    entry.atom.lock()->TransformedPos()=transf_pos;
+    entry.atom.lock()->SetBFactor(j->b_factor);
+    entry.atom.lock()->SetOccupancy(j->occ);
   }
   curr_group_=group;
   return true;

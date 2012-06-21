@@ -22,7 +22,7 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
 #include "bounds.hh"
@@ -49,11 +49,14 @@ void export_ResidueView()
 {
   class_<ResidueViewList>("ResidueViewList", no_init)
     .def(vector_indexing_suite<ResidueViewList>())
-    .def(ost::VectorAdditions<ResidueViewList>()) 
+    .def(geom::VectorAdditions<ResidueViewList>()) 
   ;
 
   class_<ResidueView, bases<ResidueBase> >("ResidueView", init<>())
     .def("GetChain",&ResidueView::GetChain)
+    .add_property("chain", &ResidueView::GetChain)
+    .def("GetEntity", &ResidueView::GetEntity)
+    .add_property("entity", &ResidueView::GetEntity)
     .def("GetAtomList", &ResidueView::GetAtomList,
          return_value_policy<copy_const_reference>())
     .def("GetAtomCount", &ResidueView::GetAtomCount)
@@ -66,8 +69,6 @@ void export_ResidueView()
     .def("FindAtom", handle_find_atom, args("atom_handle"))
     .def("IsAtomIncluded", &ResidueView::IsAtomIncluded, args("atom_handle"))
     .def("GetIndex", &ResidueView::GetIndex)  
-    .add_property("chain", &ResidueView::GetChain)
-    .add_property("entity", &ResidueView::GetEntity)
     .add_property("index", &ResidueView::GetIndex)
     .def("RemoveAtoms", &ResidueView::RemoveAtom)
     .def("IsValid", &ResidueView::IsValid)

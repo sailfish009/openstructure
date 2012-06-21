@@ -36,18 +36,20 @@ Mat4   (*Mat4Transpose)(const Mat4& m)                                  = &Trans
 Real (*Mat4Comp)(const Mat4& m, unsigned int i, unsigned int j)       = &Comp;
 Real (*Mat4Minor)(const Mat4& m, unsigned int i, unsigned int j)      = &Minor;
 Real (*Vec4Angle)(const Vec4& v1, const Vec4& v2)                     = &Angle;
+Vec4 (*Vec4Min)(const Vec4&, const Vec4&) = &Min;
+Vec4 (*Vec4Max)(const Vec4&, const Vec4&) = &Max;
 
 
 void export_VecMat4_op()
 {
   using namespace geom;
   
-  def("Length",Vec4Length);
+  def("Equal",Vec4Equal, (arg("v1"), arg("v2"), arg("epsilon")=EPSILON));
   def("Length2",Vec4Length2);
   def("Equal",Vec4Equal);
   def("CompMultiply",Vec4CompMultiply);
   def("CompDivide",Vec4CompDivide);
-  def("Equal",Mat4Equal);
+  def("Equal",Mat4Equal, (arg("m1"), arg("m2"), arg("epsilon")=EPSILON));
   def("Dot",Mat4Dot);
   def("Det",Mat4Det);
   def("Transpose",Mat4Transpose);
@@ -55,4 +57,6 @@ void export_VecMat4_op()
   def("Comp",Mat4Comp);
   def("Minor",Mat4Minor);
   def("Angle",Vec4Angle);
+  def("Min",Vec4Min);
+  def("Max",Vec4Max);
 }

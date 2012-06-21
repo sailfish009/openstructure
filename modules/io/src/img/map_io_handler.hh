@@ -50,7 +50,8 @@ public:
   virtual MapIOHandlerPtr Create() const = 0 ;
   virtual String GetFormatName() const =0;
   virtual String GetFormatDescription() const =0;
-
+  virtual bool ProvidesImport() const = 0;
+  virtual bool ProvidesExport() const = 0;
 };
 
 typedef boost::shared_ptr<MapIOHandlerFactoryBase> MapIOHandlerFactoryBasePtr;
@@ -78,7 +79,16 @@ class MapIOHandlerFactory: public MapIOHandlerFactoryBase
   virtual String GetFormatDescription() const {
      return HANDLER::GetFormatDescription();
   }
-
+  virtual bool ProvidesImport() const
+  {
+    return HANDLER::ProvidesImport();
+  }
+  
+  virtual bool ProvidesExport() const
+  {
+    return HANDLER::ProvidesExport();
+  }
+  
   virtual MapIOHandlerPtr Create() const {
     return MapIOHandlerPtr(new HANDLER);
   }

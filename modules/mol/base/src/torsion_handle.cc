@@ -95,18 +95,6 @@ Real TorsionHandle::GetAngle() const
   this->CheckValidity();  
   return impl_->GetAngle();
 }
-  
-void TorsionHandle::SetAngle(Real a, bool up)
-{
-  this->CheckValidity();  
-  impl_->SetAngle(a, up);
-}
-
-void TorsionHandle::RotateAngle(Real angle, bool up)
-{
-  this->CheckValidity();
-  impl_->RotateAngle(angle, up);
-}
 
 void TorsionHandle::CheckValidity() const {
   if (!impl_)

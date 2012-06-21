@@ -1,4 +1,11 @@
 data_data-item
+# this file covers BZDNG-282
+loop_
+_loop.s1
+_loop.s2
+_loop.s3
+_loop.s4
+1 2 3 4
 
 _data-item.s1 a
 _data-item.s2 'a b c'

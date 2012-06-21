@@ -335,6 +335,8 @@ private:
   EntityViewDataPtr  data_;
 };
 
+typedef std::pair<EntityView, EntityView> EntityViewPair;
+
 }} // ns
 
 #endif // OST_ENTITY_VIEW_HH

@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+#include <ost/mol/atom_view.hh>
 #include <ost/gfx/gl_helper.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/color.hh>

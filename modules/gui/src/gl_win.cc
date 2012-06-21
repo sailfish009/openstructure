@@ -42,6 +42,7 @@
 #include <QLabel>
 #include <QStatusBar>
 #include <QVBoxLayout>
+#include <QStatusBar>
 
 /*
   Authors: Ansgar Philippsen, Marco Biasini

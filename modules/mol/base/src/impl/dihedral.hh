@@ -52,7 +52,7 @@ public:
   /// \param update_other 
   ///         If true, connectors of atom3 are updated accordingly, otherwise 
   ///         they will be left untouched
-  void SetAngleICS(Real angle, bool update_other=false);
+  void SetAngleICS(Real angle, bool update_other);
   
   geom::Vec3 GetPos() const;
   geom::Vec3 GetOriginalPos() const;

@@ -35,11 +35,10 @@ tri_matrix.hh
 set(OST_EXPORT_HELPERS
 generic_property_def.hh 
 pair_to_tuple_conv.hh 
-vector.hh
 )
 module(NAME base SOURCES ${OST_BASE_SOURCES} 
        HEADERS ${OST_EXPORT_HELPERS} IN_DIR export_helper 
        compare_files.hh IN_DIR test_utils ${OST_BASE_HEADERS}
-       DEPENDS_ON geom
+       DEPENDS_ON ost_geom
        HEADER_OUTPUT_DIR ost)
 

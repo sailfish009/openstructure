@@ -64,10 +64,15 @@ public:
   virtual void ToInfo(info::InfoGroup& group) const;
   static gfx::GradientColorOp FromInfo(info::InfoGroup& group);
 
+  // if true then color with clamped colors outside given range as well
+  void SetClamp(bool f) {clamp_=f;}
+  bool GetClamp() const {return clamp_;}
+
 private:
   void Init();
   String property_;
   gfx::Gradient gradient_;
+  bool clamp_;
   bool calculate_;
   mutable float minv_;
   mutable float maxv_;

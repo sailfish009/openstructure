@@ -142,7 +142,7 @@ molecule. This storage scheme has one drawback. Consider the following code:
   for i in range(100): 
     obj.SetColor(gfx.RED)
 
-While the code obviously achieves the desired effect, it is far for optimal 
+While the code obviously achieves the desired effect, it is far from optimal 
 because all of the 100 color operations are applied every time the graphical 
 entity needs an update. When you see a slow down in rendering after playing 
 around with the coloring operations, consider calling 

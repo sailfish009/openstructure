@@ -132,26 +132,38 @@ void export_GfxObj()
     .def("ContextSwitch", &GfxObjBase::ContextSwitch)
     .def("SetRenderMode", &GfxObjBase::SetRenderMode)
     .def("GetRenderMode", &GfxObjBase::GetRenderMode)
-    .def("GetCenter",&GfxObjBase::GetCenter)
+    .def("GetCenter",&GfxObjBase::GetCenter) 
+    .add_property("center", &GfxObjBase::GetCenter)
     .def("SetLineWidth", &GfxObjBase::SetLineWidth)
     .def("SetPolyMode",&GfxObjBase::SetPolyMode)
-    .def("AALines",set_aalines)
+    .def("AALines",set_aalines) /* deprecated */
     .def("SetAALines",&GfxObjBase::SetAALines)
     .def("SetLineHalo",&GfxObjBase::SetLineHalo)
-    .def("Outline",set_outline)
+    .def("Outline",set_outline) /* deprecated */
     .def("SetOutline",&GfxObjBase::SetOutline)
+    .def("GetOutline",&GfxObjBase::GetOutline)
+    .add_property("outline",&GfxObjBase::GetOutline,&GfxObjBase::SetOutline)
     .def("SetOutlineMode",&GfxObjBase::SetOutlineMode)
+    .add_property("outline_mode",&GfxObjBase::GetOutlineMode,&GfxObjBase::SetOutlineMode)
     .def("SetOutlineWidth",&GfxObjBase::SetOutlineWidth)
+    .add_property("outline_width",&GfxObjBase::GetOutlineWidth,&GfxObjBase::SetOutlineWidth)
     .def("SetOutlineExpandFactor",&GfxObjBase::SetOutlineExpandFactor)
+    .add_property("outline_expand_factor",&GfxObjBase::GetOutlineExpandFactor,&GfxObjBase::SetOutlineExpandFactor)
     .def("SetOutlineExpandColor",&GfxObjBase::SetOutlineExpandColor)
+    .add_property("outline_expand_color",&GfxObjBase::GetOutlineExpandColor,&GfxObjBase::SetOutlineExpandColor)
+    .add_property("outline_color",&GfxObjBase::GetOutlineExpandColor,&GfxObjBase::SetOutlineExpandColor)
     .def("SetOpacity",&GfxObjBase::SetOpacity)
     .def("GetOpacity",&GfxObjBase::GetOpacity)
-    .add_property("center", &GfxObjBase::GetCenter)
+    .add_property("opacity",&GfxObjBase::GetOpacity,&GfxObjBase::SetOpacity)
     COLOR_BY_DEF()
    ;
-  //register_ptr_to_python<GfxObjBaseP>();
 
-  class_<GfxObj, boost::shared_ptr<GfxObj>, bases<GfxObjBase>, boost::noncopyable>("GfxObj",no_init)
+  enum_<RenderPass>("RenderPass")
+    .value("STANDARD_RENDER_PASS",STANDARD_RENDER_PASS)
+    .value("TRANSPARENT_RENDER_PASS",TRANSPARENT_RENDER_PASS)
+    ;        
+
+  class_<GfxObjWrap, boost::shared_ptr<GfxObj>, bases<GfxObjBase>, boost::noncopyable>("GfxObj",init<const std::string&>())
     .def("GetTF", &GfxObj::GetTF, return_value_policy<copy_const_reference>())
     .def("SetTF", &GfxObj::SetTF)
     .def("FlagRebuild",&GfxObj::FlagRebuild)
@@ -163,7 +175,10 @@ void export_GfxObj()
     .def("GetAALines",&GfxObj::GetAALines)
     .def("GetLineWidth",&GfxObj::GetLineWidth)
     .def("GetLineHalo",&GfxObj::GetLineHalo)
-    ;
-  //register_ptr_to_python<GfxObjP>();
+    .def("GetBoundingBox",&GfxObj::GetBoundingBox, &GfxObjWrap::default_GetBoundingBox)
+    .def("_CustomRenderGL",&GfxObj::CustomRenderGL, &GfxObjWrap::default_CustomRenderGL)
+    .def("_CustomPreRenderGL",&GfxObj::CustomPreRenderGL, &GfxObjWrap::default_CustomPreRenderGL)
+    .def("_InitGL",&GfxObj::InitGL, &GfxObjWrap::default_InitGL)
+    ;    
 
 }

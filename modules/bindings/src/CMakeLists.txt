@@ -1,5 +1,5 @@
 if (COMPILE_TMTOOLS)
   enable_language(Fortran)
-  executable(NAME tmalign SOURCES tmalign.f NO_RPATH)
-  executable(NAME tmscore SOURCES tmscore.f NO_RPATH)
+  executable(NAME tmalign SOURCES tmalign.f)
+  executable(NAME tmscore SOURCES tmscore.f)
 endif()

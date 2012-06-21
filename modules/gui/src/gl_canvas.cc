@@ -38,6 +38,9 @@
 #include <QStatusBar>
 #include <QApplication>
 #include <QClipboard>
+#include <QTime>
+#include <QBasicTimer>
+#include <QMouseEvent>
 #include <QMenu>
 
 #if QT_VERSION >= 0x040600

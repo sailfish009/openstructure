@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/mol/mol.hh>
 
@@ -50,7 +51,7 @@ struct Fixture {
   ResidueHandle res3;
 };
 
-BOOST_AUTO_TEST_SUITE( seq )
+BOOST_AUTO_TEST_SUITE( seq );
 
 BOOST_AUTO_TEST_CASE(seq_triv) 
 {
@@ -63,6 +64,15 @@ BOOST_AUTO_TEST_CASE(seq_triv)
   BOOST_CHECK_NO_THROW(s.SetString("-afc--de-f"));
   BOOST_CHECK_EQUAL(s.GetString(),"-afc--de-f");
   BOOST_CHECK_THROW(s.SetString("1"), InvalidSequence);
+}
+
+BOOST_AUTO_TEST_CASE(match)
+{
+  BOOST_CHECK(Match("abcdefghijkl", "ABcDeFgHiJkL"));
+  BOOST_CHECK(Match("abcxXxxxxjXl", "ABcDeFgHiJkL"));
+  BOOST_CHECK(Match("ABcDeFgHiJkL", "ABcDeFXxiJxL"));
+  BOOST_CHECK(!Match("abc", "abcd"));
+  BOOST_CHECK(!Match("abc", "aby"));
 }
 
 BOOST_AUTO_TEST_CASE(seq_throw_invalid)
@@ -196,6 +206,21 @@ BOOST_AUTO_TEST_CASE(seq_gaps)
   BOOST_CHECK_EQUAL(s.GetLastNonGap(),9);
 }
 
+BOOST_AUTO_TEST_CASE(seq_append_olc)
+{
+  SequenceHandle s=CreateSequence("S1", "");
+  // check if the shift-table gets setup properly
+  s.Append('-');
+  s.Append('-');
+  s.Append('a');
+  s.Append('b');
+  s.Append('-');
+  s.Append('c');
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(2), 0);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(3), 1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(5), 2);
+}
+
 BOOST_AUTO_TEST_CASE(seq_attach_view)
 {
   Fixture f;
@@ -222,4 +247,4 @@ BOOST_AUTO_TEST_CASE(seq_attach_view)
   BOOST_CHECK_EQUAL(s.GetResidue(0),ResidueHandle());
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

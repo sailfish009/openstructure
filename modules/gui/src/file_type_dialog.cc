@@ -22,11 +22,14 @@
 #include <ost/io/io_manager.hh>
 #include <ost/io/io_exception.hh>
 
+
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QTableWidgetItem>
 #include <QHeaderView>
+#include <QTableWidget>
+#include <QLabel>
 namespace ost { namespace gui {
 
 

@@ -155,22 +155,20 @@ public:
   /// \brief    get parent chain view.
   ChainView GetChain() const;
   
-  
-  /// \brief Get entity's mass
+  /// \brief Get residue's mass
   double GetMass() const;
   
-  /// \brief Get entity's center of mass (mass weighted)
+  /// \brief Get residue's center of mass (mass weighted)
   geom::Vec3 GetCenterOfMass() const;
   
-  /// \brief Get entity's center of atoms (not mass weighted)
+  /// \brief Get residue's center of atoms (not mass weighted)
   ///
-  /// Returns the center of all the atoms in an entity. This is
+  /// Returns the center of all the atoms in this residue. This is
   /// similar to GetCenterOfMass(), but the atoms are not mass weighted
   geom::Vec3 GetCenterOfAtoms() const;
   
-  /// \brief Get entity's axis-aligned bounding box
+  /// \brief Get residue's axis-aligned bounding box
   geom::AlignedCuboid GetBounds() const;
-  
 
   /// \brief return view based on a query object
   /// \sa Query

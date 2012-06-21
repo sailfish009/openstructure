@@ -23,8 +23,8 @@
 #include <ost/mol/alg/svd_superpose.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
-#include <ost/mol/entity_handle.hh>
-
+#include <boost/test/auto_unit_test.hpp>
+#include <ost/mol/mol.hh>
 
 using namespace ost;
 using namespace ost::mol;
@@ -78,7 +78,7 @@ struct Fixture {
 
 };
 
-BOOST_AUTO_TEST_SUITE( mol_alg )
+BOOST_AUTO_TEST_SUITE( mol_alg );
 
 BOOST_AUTO_TEST_CASE(superposition_svd) 
 {
@@ -102,4 +102,4 @@ BOOST_AUTO_TEST_CASE(superposition_svd)
   BOOST_CHECK(abs(res.rmsd)<0.0001);
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

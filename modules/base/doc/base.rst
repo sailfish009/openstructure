@@ -5,3 +5,4 @@
 
   logging
   settings
+  testutils

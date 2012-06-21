@@ -39,7 +39,7 @@ public:
   /// the GenericProp 'propname' at the atom, residue and chain level
   /// respectively.
   typedef enum {
-    RNAME, ANAME, CNAME, ELE, RNUM, ANUM, AX, AY, AZ, OCC, RTYPE, ISHETATM,
+    RNAME, ANAME, CNAME, ELE, RNUM, ANUM, AX, AY, AZ, OCC, AINDEX, RTYPE, ISHETATM,
     RBFAC, ABFAC, PEPTIDE, ACHARGE, RINDEX, PROTEIN, LIGAND, WATER, WITHIN, 
     UNDEF, CUSTOM
   } ID;

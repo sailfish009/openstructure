@@ -40,19 +40,23 @@ public:
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options);
 
-  // own interface
-  void SetSplineDetail(uint spline_detail);
-  uint GetSplineDetail() const;
-
+  /// sets vertex array poly mode
   void SetPolyMode(uint poly_mode);
   uint GetPolyMode() const;
 
+  /// number of smooth points between spline control points
+  void SetSplineDetail(uint spline_detail);
+  uint GetSplineDetail() const;
+
+  /// number of circular profile subdivisions per 90deg
   void SetArcDetail(uint arc_detail);
   uint GetArcDetail() const;
 
+  /// experimental
   void SetNormalSmoothFactor(float smooth_factor);
   float GetNormalSmoothFactor() const;
 
+  // tube/coil region
   void SetTubeRadius(float tube_radius);
   float GetTubeRadius() const;
   void SetTubeRatio(float tube_ratio);
@@ -60,31 +64,47 @@ public:
   unsigned int GetTubeProfileType() const;
   void SetTubeProfileType(unsigned int);
 
+  // helix
   void SetHelixWidth(float helix_width);
   float GetHelixWidth() const;
   void SetHelixThickness(float helix_thickness);
   float GetHelixThickness() const;
+  /// see helix profile
   void SetHelixEcc(float helix_ecc);
   float GetHelixEcc() const;
-  unsigned int GetHelixProfileType() const;
+  /// various ways to calculate circular profile with ecc
   void SetHelixProfileType(unsigned int);
+  unsigned int GetHelixProfileType() const;
+  /// 0=normal 1=straight cylinders
   unsigned int GetHelixMode() const;
   void SetHelixMode(unsigned int);
-
+  
+  // strand
   void SetStrandWidth(float strand_width);
   float GetStrandWidth() const;
   void SetStrandThickness(float strand_thickness);
   float GetStrandThickness() const;
+  /// see strand profile
   void SetStrandEcc(float strand_ecc);
   float GetStrandEcc() const;
-  unsigned int GetStrandProfileType() const;
+  /// various ways to calculate circular profile with ecc
   void SetStrandProfileType(unsigned int);
-  unsigned int GetStrandMode() const;
+  unsigned int GetStrandProfileType() const;
+  /// 0=normal, 1=straightened
   void SetStrandMode(unsigned int);
+  unsigned int GetStrandMode() const;
 
+  // misc options
+
+  /// 0=smooth transition, 1=sharp transition
   void SetColorBlendMode(unsigned int);
   unsigned int GetColorBlendMode() const;
 
+  /// experimental
+  void SetTwistHack(bool);
+  bool GetTwistHack() const {return twist_hack_;}
+
+  // used internally to calculate autoslab boundaries
   float GetMaxRad() const;
 
 private:
@@ -110,6 +130,8 @@ private:
   unsigned int strand_mode_;
 
   unsigned int color_blend_mode_;
+
+  bool twist_hack_;
 };
 
 typedef boost::shared_ptr<CartoonRenderOptions> CartoonRenderOptionsPtr;

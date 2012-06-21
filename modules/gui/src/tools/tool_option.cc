@@ -59,5 +59,13 @@ void ToolOptionEnum::Add(const String& text, int tag)
   tuples_.back().tag=tag;
 }
 
+ToolOptionButton::ToolOptionButton(const String& key,
+                                   const String& verbose_name,
+                                   QObject* receiver,
+                                   const char *slot_method):
+    ToolOption(key, verbose_name, ToolOption::BUTTON), slot_method_(slot_method), receiver_(receiver)
+{
+
+}
 
 }}

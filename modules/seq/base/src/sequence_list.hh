@@ -61,6 +61,8 @@ public:
   
   /// \brief create a sequence list from the given splice interval
   ConstSequenceList Slice(int first, int n) const;
+  
+  ConstSequenceHandle FindSequence(const String& name) const;
   int GetMinLength() const;
   int GetMaxLength() const;
   /// \internal
@@ -107,6 +109,7 @@ public:
   int GetMinLength() const;
   int GetMaxLength() const;  
   
+  SequenceHandle FindSequence(const String& name) const;
   // \internal
   impl::SequenceListImplPtr& Impl() const;
   SequenceList(const impl::SequenceListImplPtr& impl);  
@@ -121,12 +124,14 @@ protected:
 SequenceList DLLEXPORT_OST_SEQ CreateSequenceList();
 ConstSequenceList DLLEXPORT_OST_SEQ CreateConstSequenceList();
 
+#if(OST_INFO_ENABLED)
 /// \brief export sequence list to info
 void DLLEXPORT_OST_SEQ SequenceListToInfo(const ConstSequenceList& seq_list,
                                           info::InfoGroup& group);
 
 /// \brief create sequence list object from info
 SequenceList DLLEXPORT_OST_SEQ SequenceListFromInfo(info::InfoGroup& group);
+#endif
 }}
 
 #endif

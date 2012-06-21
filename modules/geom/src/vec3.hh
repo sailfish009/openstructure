@@ -28,13 +28,14 @@
 
 #include <ost/config.hh>
 #include <ost/geom/module_config.hh>
-
+#include <ost/geom/exc.hh>
 namespace geom {
 
 // fw decl
 class Vec2;
 class Vec4;
-
+class Line3;
+class Plane;
 
 /// \brief Three dimensional vector class, using Real precision.
 class DLLEXPORT_OST_GEOM Vec3:
@@ -188,13 +189,12 @@ inline std::ostream& operator<<(std::ostream& os, const Vec3& v)
   os << "[" << v.x << ", " << v.y << ", " << v.z << "]";
   return os;
 }
-}
-
-#include <ost/geom/vec2.hh>
-#include <ost/geom/vec4.hh>
-#include <ost/geom/mat3.hh>
+} // ns geom
 
 namespace geom {
+
+  // TODO: move to separate file
+  class Mat3;
 
 class DLLEXPORT_OST_GEOM Vec3List : public std::vector<Vec3> {
 public:
@@ -205,23 +205,46 @@ public:
   Vec3List(base_type::iterator b, base_type::iterator e): base_type(b, e) { }
   
   Vec3List(const Vec3List& rhs) : base_type(rhs) { }
-  
+  Vec3List(const base_type& rhs) : base_type(rhs) { }
   Vec3List& operator=(const Vec3List& rhs) 
   {
     base_type::operator=(rhs);
     return *this;
   }
+
+  // TODO: move some or all of these to stand-alone functions
   Mat3 GetInertia() const;
-  
   Vec3 GetCenter() const;
-  
   Mat3 GetPrincipalAxes() const;
+  Line3 GetODRLine() const;
+  Plane GetODRPlane() const;
+
+  //This function fits a cylinder to the positions in Vec3List
+  //It takes as argument an initial guess for the direction and the geometric
+  //center of the atoms. The center is not changed during optimisation as the
+  //best fitting cylinder can be shown to have its axis pass through the geometric center
+  Line3 FitCylinder(const Vec3& initial_direction, const Vec3& center) const;
 };
+} // ns geom
 
 
-inline Vec3::Vec3(const Vec2& v): x(v.x), y(v.y), z(0.0) { }
-inline Vec3::Vec3(const Vec4& v): x(v.x/v.w), y(v.y/v.w), z(v.z/v.w) { }
+#include <ost/geom/vec2.hh>
+#include <ost/geom/vec4.hh>
+#include <ost/geom/mat3.hh>
+#include <ost/geom/composite3.hh>
+
+namespace geom {
+  inline Vec3::Vec3(const Vec2& v): x(v.x), y(v.y), z(0.0) { }
   
+  inline Vec3::Vec3(const Vec4& v): x(v.x), y(v.y), z(v.z) 
+  { 
+    if (std::fabs(v.w)<1e-10) {
+      throw DivideByZeroException();
+    }
+    x/=v.w;
+    y/=v.w;
+    z/=v.w;
+  }
 } // namespace geom
 
 

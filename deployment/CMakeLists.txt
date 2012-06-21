@@ -1,4 +1,5 @@
-get_ost_rev()
+# todo implement get_ost_rev for git
+#get_ost_rev()
 include(Deployment)
 set(SUBST_DIC OST_VERSION="${OST_VERSION}")
 add_custom_target(deploymnt ALL)

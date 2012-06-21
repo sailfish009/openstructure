@@ -60,12 +60,12 @@ SceneMenu::SceneMenu() {
 
 void SceneMenu::SelectBackbone()
 {
-  this->Select("peptide=true and aname=CA,C,N,O");
+  this->Select("peptide=true and aname=CA,C,N,O,H,HA,OXT,HXT,HA2,HA3");
 }
 
 void SceneMenu::SelectSidechains()
 {
-  this->Select("peptide=true and aname!=CA,C,N,O");
+  this->Select("peptide=true and aname!=CA,C,N,O,H,HA,OXT,HXT,HA2,HA3");
 }
 
 void SceneMenu::SelectLigands()

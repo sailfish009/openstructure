@@ -72,8 +72,6 @@ QMessageBox::Icon LogReader::GetIconForSeverity(int severity){
 }
 
 LogReader::~LogReader() {
-  ost::Logger& logger = ost::Logger::Instance();
-  logger.PopSink();
 }
 
 }

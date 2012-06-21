@@ -24,7 +24,7 @@
 
 namespace ost { namespace gfx {
 
-CPKRenderOptions::CPKRenderOptions(): sphere_detail_(4) {
+  CPKRenderOptions::CPKRenderOptions(): sphere_detail_(4),cpk_mode_(0),rad_mult_(1.0) {
 #if OST_SHADER_SUPPORT_ENABLED
   cpk_mode_=1;
 #else
@@ -68,6 +68,17 @@ void CPKRenderOptions::SetSphereMode(uint mode){
 
 uint CPKRenderOptions::GetSphereMode(){
   return cpk_mode_;
+}
+
+void CPKRenderOptions::SetRadiusMult(float m)
+{
+  rad_mult_=std::max(0.0f,m);
+  this->NotifyStateChange();
+}
+
+float CPKRenderOptions::GetRadiusMult() const
+{
+  return rad_mult_;
 }
 
 }} // ns

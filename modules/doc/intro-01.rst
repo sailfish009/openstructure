@@ -10,12 +10,21 @@ The code to load and save structures is not directly part of the mol module, but
 :mod:`~ost.io` module. We will be using functions of this module to load 
 structures. 
 
-One of the most commonly used file formats for macromolecular structures are PDB 
-(Brookhaven Protein Databank) files. The official name for  molecules stored in 
-a PDB file is an *entity* and we decided to follow this convention in 
-OpenStructure. You will hear this word all the time, but you can replace the 
-word entity with molecule (or most of the time even protein) in your head.
+One of the most commonly used file formats for macromolecular structures are 
+PDB (Brookhaven Protein Data Bank) files. The official name for  molecules 
+stored in a PDB file is an *entity* and we decided to follow this convention 
+in OpenStructure. You will hear this word all the time, but you can replace 
+the word entity with molecule (or most of the time even protein) in your head.
 
+Loading a PDB file leaves you with an :class:`~ost.mol.EntityHandle`. This is
+the central class holding together :class:`chains <ost.mol.ChainHandle>`,
+:class:`residues <ost.mol.ResidueHandle>` and
+:class:`atoms <ost.mol.AtomHandle>` in a straight-forward hierarchy. This
+hierarchy will always be intact: there are no atoms without a residue they
+belong to and no residues without chains which have to belong to an entity.
+Beside the molecule itself, there are a lot of additional attributes stored in
+the entity, like the
+:attr:`centre of mass <ost.mol.EntityHandle.center_of_mass>`.
 
 To load a PDB file, simply type
 
@@ -73,13 +82,6 @@ what bonds we have in there:
   for bond in fragment.bonds:
     print bond
     
-From these short code examples we already see how the entity is structured: On 
-one hand we have a hierarchy of chains, residues and atoms. On the other hand, 
-we have bonds that form a network overlayed on the hierarchy. An important 
-feature of entities is that we can always assume that the hierarchy is intact. 
-You will never find an atom without residues, no residue can exist without a 
-parent chain and chains belong always to an entity. 
-
 Let There Be Shiny Graphics
 --------------------------------------------------------------------------------
 
@@ -95,7 +97,7 @@ of the entity. The graphical representation is completely separate from the :cla
 
 Now you will see the fragment in the 3D window.
 
-Use the mouse to rotate, zoom in an shift the camera. Double clicking on an 
+Use the mouse to rotate, zoom in and shift the camera. Double clicking on an 
 atom will center the camera on that atom. If you want to learn more about the 
 :mod:`~ost.gfx` module, you are encouraged to read :doc:`the gfx 
 intro<intro-03>` and the :mod:`gfx documentation<ost.gfx`.
@@ -104,24 +106,24 @@ Introduction to Views
 --------------------------------------------------------------------------------
 
 Often during processing and visualisation of data, only parts of a protein 
-structure are of interest. This realisation has had a major impact on the design 
-of OpenStructure and is tied very deeply into the core of the framework. 
-Subparts of structure are modeled as so-called :class:`EntityViews 
-<ost.mol.EntityView>`. You can think of them as a selection of chains, residues, 
-atoms and bonds of an entity. A views has almost the same interface as the 
-underlying entity, making it very easy to mix entity views with handles in 
-Python due to the dynamic nature of the language. An algorithm that is written 
-for entities will almost always (with some care) also work for 
+structure are of interest. This realisation has had a major impact on the
+design of OpenStructure and is tied very deeply into the core of the framework. 
+Subparts of structure are modelled as so-called :class:`EntityViews 
+<ost.mol.EntityView>`. You can think of them as a selection of chains,
+residues, atoms and bonds of an entity stored in a variable. A view has almost
+the same interface as the underlying entity, making it very easy to mix entity
+views with handles in Python due to the dynamic nature of the language. An
+algorithm that is written for entities will almost always (with some care) also
+work for 
 :class:`EntityHandles <ost.mol.EntityHandle>`. This is referred to as 
 `duck-typing <http://en.wikipedia.org/wiki/Duck_typing>`_ (I don' t care if it 
-is a duck as long as it looks like a duck), a concept used all over the place in Python. 
-￼
-The view consists of one chain, one residue and two atoms. Again the same rule 
-applies: No atom can be part of the view without it's residue. In this example, 
-no bonds are included, since there is at most one atom per bond in the original structure.
+is a duck as long as it looks like a duck), a concept used all over the place
+in Python. For views, the same rule as for
+:class:`entities <ost.mol.EntityHandle>` applies: No atom can be part of the
+view without it's residue...
 
 To familiarize yourself with the concept of views, we will use the fragment in 
-the 3D window.
+the 3D window of the last example.
 
 We will use several ways to select parts of our fragment:
  * By using a dedicated query language
@@ -223,3 +225,5 @@ select the backbone atoms and then save it:
 
 That's it for the mol module. Continue with :doc:`part two<intro-02>` of the 
 tutorial.
+
+..  LocalWords:  attr

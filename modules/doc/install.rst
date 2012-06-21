@@ -68,7 +68,7 @@ OpenStructure uses `git` as the revision control system. The main repository can
 
   git clone https://dng.biozentrum.unibas.ch/git/ost.git <directory-name>
   
-The above command will clone OpenStructre into the directory called `directory-name`. If omitted, the directory will be called ost. Alternatively, you might consider getting one of the nightly source code snapshots from the `downloads section <http://www.openstructure.org/downloads/>`_.
+The above command will clone OpenStructre into the directory called `directory-name`. If omitted, the directory will be called ost. Alternatively, you might consider getting one of the nightly source code snapshots from the `downloads section <http://www.openstructure.org/download/>`_.
 
 .. note::
 
@@ -197,7 +197,7 @@ or, to start the command-line interpreter:
 
   stage/bin/ost
   
-If you repeatedly use OpenStructure, it is recommended to add /path/to/dng/stage/bin to your path.
+If you repeatedly use OpenStructure, it is recommended to add /path/to/ost/stage/bin to your path.
 
 Getting the newest changes
 --------------------------------------------------------------------------------

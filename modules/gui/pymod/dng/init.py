@@ -21,7 +21,7 @@ from ost.gui.init_spacenav import _InitSpaceNav
 from ost.gui.init_context_menu import _InitContextMenu
 from ost.gui.init_splash import _InitSplash
 from ost.gui.dng import termuse
-from ost.gui.helpwidget import help
+from ost.gui.dng import superpositiondialog
 import ost.gui.dng.menu
 from PyQt4.QtGui import *
 def _my_exit(code):
@@ -207,7 +207,7 @@ else:
   print >> rcfile, '# IMPORTANT_DIR="path/to/important/dir"'
   rcfile.close()
 
-ost.PushVerbosityLevel(options.vlevel)
+ost.gui.PushVerbosityLevel(options.vlevel)
 working_dir=settings.GetValue("DNG_WORKING_DIR",None)
 
 if working_dir != None and os.path.isdir(working_dir):

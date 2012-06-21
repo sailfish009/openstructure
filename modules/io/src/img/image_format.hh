@@ -39,23 +39,17 @@ class DLLEXPORT_OST_IO ImageFormatBase
  protected:
 
   ImageFormatBase():
-    format_string_(""),
-    min_(0.0),
-    max_(1.0)
+    format_string_("")
   {};
 
   ImageFormatBase(const String& formatstring):
-    format_string_(formatstring),
-    min_(0.0),
-    max_(1.0)
+    format_string_(formatstring)
   {};
 
  public:
 
-  Real GetMaximum() const { return max_;}
-  void SetMaximum(Real max) { max_ = max; }
-  Real GetMinimum() const { return min_;}
-  void SetMinimum(Real min) { min_ = min; }
+  Real GetMaximum() const { return 1.0;}
+  Real GetMinimum() const { return 0.0;}
 
 
   template <typename T>
@@ -68,7 +62,6 @@ class DLLEXPORT_OST_IO ImageFormatBase
  private:
 
   String format_string_;
-  Real min_,max_;
 
 };
 

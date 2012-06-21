@@ -181,7 +181,7 @@ The Handle Classes
       # select calpha atoms of peptides
       calphas=ent.Select('aname=CA and peptide=true')
       
-      # select atoms in a box of size 10, centered at the origin
+      # select atoms in a box of size 10, centred at the origin
       in_box=ent.Select('x=-5:5 and y=-5:5 and z=-5:5')
     
     :param query: The query to be executed. See :class:`Query` for details.
@@ -256,7 +256,7 @@ The Handle Classes
     
   .. method:: FindWithin(pos, radius)
   
-    Find all atoms in sphere of given radius centered at *pos*. To turn the
+    Find all atoms in sphere of given radius centred at *pos*. To turn the
     returned list of atoms into an :class:`EntityView`, use
     :func:`CreateViewFromAtomList`.
     
@@ -280,10 +280,18 @@ The Handle Classes
      want to save them as PDB files
      
      This property is read-only. To change the name, use an :class:`XCSEditor`. 
-     
+
      Also available as :meth:`GetName`
      
      :type: str
+
+  .. attribute:: type
+
+     Describes the type of the chain. See :ref:`chaintype`.
+
+  .. attribute:: description
+
+     Details about the chain. Not categorised, just text.
 
   .. attribute:: residues
    
@@ -389,11 +397,18 @@ The Handle Classes
   .. method:: GetAtomList()
     
     See :attr:`atoms`
-    
+
   .. method:: GetName()
   
     See :attr:`name`
 
+  .. method:: GetType()
+
+    See :attr:`type`
+
+  .. method:: GetDescription()
+
+    See :attr:`description`
 
 .. class:: ResidueHandle
 
@@ -495,7 +510,13 @@ The Handle Classes
   
     The chemical class of a residue is used to broadly categorize residues based 
     on their chemical properties. For example, peptides belong  to the 
-    `LPeptideLinking` or `DPeptideLinking` classes.
+    `L_PEPTIDE_LINKING` or `D_PEPTIDE_LINKING` classes.
+
+  .. attribute:: chem_type
+
+    The chemical type of a residue is a classification of all compounds
+    obtained from the PDB component dictionary. For example, ions belong to the
+    class `ChemType::IONS`, amino acids to `ChemType::AMINOACIDS`.
   
   .. attribute:: sec_structure
   
@@ -544,6 +565,9 @@ The Handle Classes
   
     See :attr:`psi_torsion`
   
+  .. method:: GetChemType()
+    
+    See :attr:`chem_type`
   
 
 .. class:: AtomHandle
@@ -583,7 +607,18 @@ The Handle Classes
     
   .. attribute:: pos
   
-    The atom's position in global coordinates. Also available as :meth:`GetPos`.
+    The atom's position in global coordinates, transformed by the entity 
+    transformation. Also available as :meth:`GetPos`.
+    
+    Read-only.
+    
+    :type: :class:`~ost.geom.Vec3`
+    
+  .. attribute:: original_pos
+  
+    The atom's untransformed position in global coordinates. Also available as 
+    :meth:`GetOriginalPos`.
+    
     Read-only.
     
     :type: :class:`~ost.geom.Vec3`
@@ -821,44 +856,59 @@ The View Classes
 
     Returns a copy of this entity. Provided for `duck-typing <http://en.wikipedia.org/wiki/Duck_typing>` purposes.
     
-    :rtype: EntityView
-  
+    :rtype: :class:`EntityView`
+
   .. method:: AddChain(chain_handle[, view_add_flags])
 
     Add chain to view. By default, only the chain is added to the view, but not 
-    its residues and atoms. This behavior can be changed by passing in an
-    appropriate set of `view_add_flags`
-    
-    :param chain_handle:
-    :type  chain_handle: ChainHandle
-    :param view_add_flags: An ORed together combination of `view_add_flags`.
-    :type  view_add_flags: int
-    :rtype: class:`ChainView`
+    its residues and atoms. This behaviour can be changed by passing in an
+    appropriate set of `view_add_flags`.
+
+    The following example just adds a chain without residues and atoms:
+
+    .. code-block:: python
+
+        pdb = ost.io.LoadPDB(<PDB file name>)
+        v = pdb.CreateEmptyView()
+        v.AddChain(pdb.chains[0])
+
+    To **copy** a whole chain, go like:
+
+    .. code-block:: python
+
+        pdb = ost.io.LoadPDB(<PDB file name>)
+        v = pdb.CreateEmptyView()
+        v.AddChain(pdb.chains[0], ost.mol.INCLUDE_ALL)
+
+    :param chain_handle: The chain handle to be added.
+    :type  chain_handle: :class:`ChainHandle`
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`.
+    :type view_add_flags: :class:`int`
+    :rtype: :class:`ChainView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
 
-    Add residue to view. If the residue's chain is not already part of the view, 
-    it will be added. By default, only the residue is added, but not its atoms. 
-    This behaviour can be modified by passing in an appropriate combination of 
-    `view_add_flags`.
-    
-    :param residue_handle:
-    :type  residue_handle: ResidueHandle
-    :param view_add_flags:
-    :type  view_add_flags: int
-    :rtype: class:`ResidueView`
+    Add residue to view. If the residue's chain is not already part of the
+    view, it will be added. By default, only the residue is added, but not its
+    atoms. This behaviour can be modified by passing in an appropriate
+    combination of :ref:`viewaddflags`.
+
+    :param residue_handle: The residue handle to be added
+    :type  residue_handle: :class:`ResidueHandle`
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
+    :type  view_add_flags: :class:`int`
+    :rtype: :class:`ResidueView`
 
   .. method:: AddAtom(atom_handle[, view_add_flags])
 
     Add the atom to view. The chain and residue of the atom are added to the 
     view if they haven't already been added.
     
-    
     :param atom_handle: The atom handle
-    :type  atom_handle: AtomHandle
-    :param view_add_flags: An ORed together combination of ViewAddFlags
-    :type  view_add_flags: int
-    :rtype: class:`AtomView`
+    :type  atom_handle: :class:`AtomHandle`
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
+    :type  view_add_flags: :class:`int`
+    :rtype: :class:`AtomView`
 
   .. method:: AddBond(bond_handle)
 
@@ -1175,24 +1225,25 @@ The View Classes
 
     Add atom to the view. If the residue of the atom is not already part of the 
     view, it will be added. If the atom does not belong to chain, the result is
-    undefined. 
+    undefined. Foo
     
     :param atom_handle: The atom to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param view_add_flags: An ORed together combination of ViewAddFlags
-    :type  view_add_flags: int
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
+    :type  view_add_flags: :class:`int`
     :rtype: :class:`AtomView`
 
   .. method:: AddResidue(residue_handle[, view_add_flags])
 
     Add residue to the view. If the atom does not belong to chain, the result is
-    undefined. By default, only the residue, but no atoms are added to the view. 
-    To change the behavior, pass in a suitable combination of `view_add_flags`.
+    undefined. By default, only the residue, but no atoms are added to the
+    view. To change the behavior, pass in a suitable combination of
+    :ref:`viewaddflags`.
     
-    :param residue_handle:
+    :param residue_handle: The residue handle to be added.
     :type  residue_handle: :class:`ResidueHandle`
-    :param view_add_flags:
-    :type  view_add_flags: int
+    :param view_add_flags: An ORed together combination of :ref:`viewaddflags`
+    :type  view_add_flags: :class:`int`
     :rtype: :class:`ResidueView`
 
   .. method:: FindAtom(res_num, atom_name)
@@ -1427,11 +1478,12 @@ The View Classes
 
   .. method:: AddAtom(atom_handle[, flags])
 
-    Add atom to the view. 
-    :param atom_handle:
+    Add atom to the view.
+
+    :param atom_handle: Atom handle to be added
     :type  atom_handle: :class:`AtomHandle`
-    :param flags: An ORed together combination of ViewAddFlags.
-    :type  flags: int
+    :param flags: An ORed together combination of :ref:`viewaddflags`
+    :type  flags: :class:`int`
     :rtype: :class:`AtomView`
 
   .. method:: GetCenterOfAtoms()
@@ -1502,12 +1554,104 @@ Other Entity-Related Functions
 
 .. function:: CreateViewFromAtomList(atom_list)
 
-   Returns a view made up of the atoms in *atom_list*. All atoms are required to
-   be atoms of the same entity. Duplicate atoms are only added to the view once.
+  Returns a view made up of the atoms in *atom_list*. All atoms are required to
+  be atoms of the same entity. Duplicate atoms are only added to the view once.
+  
+  :param atom_list: the atoms
+  :type atom_list: :class:`AtomHandleList` or :class:`AtomViewList`
+  :raises: :class:`IntegrityError` if atoms of different entities are
+           encountered
+  
+  :returns: :class:`EntityView`
+
+.. function:: CreateEntityFromView(view, include_exlusive_atoms, handle=EntityHandle())
+ 
+  This function behaves exactly like :meth:`EntityHandle.Copy`, except that only
+  atoms, residues, chains and bonds that are present in the view will be 
+  copied.
    
-   :param atom_list: the atoms
-   :type atom_list: :class:`AtomHandleList` or :class:`AtomViewList`
-   :raises: :class:`IntegrityError` if atoms of different entities are
-            encountered
-   
-   :returns: :class:`EntityView`
+  :param view: is the view to be converted to a handle
+  :param include_exlusive_atoms: if true, atoms that are part of an exclusive
+       bond (only one bond partner is included in the view) will also be included
+       in the new entity handle.
+  :param handle: If invalid a new entity will be created. If valid, the atoms, 
+       residues, chains, bonds and torsions will be added to handle. This is 
+       useful to combine several entities into one.
+
+  :returns :class:`EntityHandle`
+  
+.. _chaintype:
+
+ChainType
+--------------------------------------------------------------------------------
+
+A ChainType fills the :attr:`ChainHandle.type` attribute. Different types are
+described in the :ref:`ChainType enum <chaintype_enum>`. Functions for setting
+a type belong to the :class:`EditorBase` class, getting is provided by the
+:class:`ChainHandle` class, further convenience functions are described here.
+
+.. _chaintype_enum:
+
+The ChainType enum
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ChainType enum enumerates all types defined by the PDB for the MMCif file
+format. Following values are supported:
+
+  ``CHAINTYPE_POLY``, ``CHAINTYPE_NON_POLY``, ``CHAINTYPE_WATER``,
+  ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
+  ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
+  ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
+  ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``  
+
+Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types available.
+
+Setter & Getter functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:func:`EditorBase.SetChainType`, :func:`ChainHandle.GetType`
+
+
+ChainType functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. function:: ChainTypeFromString(identifier)
+
+   Create a ChainType item for a given string.
+
+   :param identifier: String to request a type for.
+   :type identifier: :class:`str`
+   :raises: :class:`runtime_error` if **identifier** is unrecognised.
+
+   :returns: :class:`ChainType`
+
+.. function:: StringFromChainType(type)
+
+   Return the String identifier for a given **type**.
+
+   :param type: To be translated
+   :type type: :class:`ChainType`
+   :raises: :class:`runtime_error` if **type** is unrecognised.
+
+   :returns: :class:`str`
+
+.. _viewaddflags:
+
+ViewAddFlags
+--------------------------------------------------------------------------------
+
+Those are the flags controlling behaviour of routines adding handles to views.
+
+* ``INCLUDE_ATOMS`` - Include all atoms when adding a residue handle to a view
+
+* ``INCLUDE_RESIDUES`` - Include all residues when adding a chain to a view
+
+* ``INCLUDE_CHAINS`` - Include all chains when creating a new entity view
+
+* ``INCLUDE_ALL`` = ``INCLUDE_ATOMS`` | ``INCLUDE_RESIDUES`` |
+  ``INCLUDE_CHAINS`` - Convenience flags to include all substructures
+
+* ``CHECK_DUPLICATES`` - If set, it will be checked that no duplicates are
+  created when adding a new handle
+    
+

@@ -60,7 +60,7 @@ LineTraceRenderer::LineTraceRenderer(BackboneTrace* trace):
 
 void LineTraceRenderer::PrepareRendering() 
 {
-  TraceRendererBase::PrepareRendering();
+  TraceRendererBase::PrepareRendering(false);
   va_.Clear();
   this->PrepareRendering(trace_subset_, va_, false);
   sel_va_.Clear();

@@ -23,6 +23,7 @@
 #include <ost/message.hh>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 #include <iostream>
 
 using namespace ost;
@@ -135,7 +136,7 @@ void test_atom_handle_iterator_b(HANDLE rr) {
   BOOST_CHECK(a1==a2); 
 }
 
-BOOST_AUTO_TEST_SUITE( mol_base )
+BOOST_AUTO_TEST_SUITE( mol_base );
 
 BOOST_AUTO_TEST_CASE(chain_handle_iterator) 
 {
@@ -254,4 +255,4 @@ BOOST_AUTO_TEST_CASE(test_atom_handle_iterator)
 
   test_atom_handle_iterator_c<EntityView, AtomViewIter>(v);
 }
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

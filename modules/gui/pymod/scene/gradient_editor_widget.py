@@ -29,6 +29,7 @@ from gradient_preset_widget import GradientPresetWidget
 class GradientEditor(QtGui.QWidget):
   def __init__(self, parent=None):
     QtGui.QWidget.__init__(self, parent)
+    self.parent_ = parent
     
     #Create Ui elements
     gradient_label = QtGui.QLabel("Gradient Editor")
@@ -80,12 +81,19 @@ class GradientEditor(QtGui.QWidget):
   def ChangeColor(self,node):
     if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
       node.CleanColorOps()
-      node.ColorBy(self.props[self.prop_combo_box_.currentIndex()],
+      if self.parent_.GetCarbonsOnly():
+        node.ColorBy(self.props[self.prop_combo_box_.currentIndex()],
+                     self.gradient_edit_.GetGfxGradient(), "ele=C")
+      else:
+        node.ColorBy(self.props[self.prop_combo_box_.currentIndex()],
                      self.gradient_edit_.GetGfxGradient())
-  
+
   def ChangeViewColor(self, entity, view):
     if isinstance(entity, gfx.Entity) and isinstance(view, mol.EntityView):
-      glco=gfx.GradientLevelColorOp(mol.QueryViewWrapper(view),self.props[self.prop_combo_box_.currentIndex()],self.gradient_edit_.GetGfxGradient(),mol.Prop.Level.UNSPECIFIED)
+      if self.parent_.GetCarbonsOnly():
+        glco=gfx.GradientLevelColorOp(mol.QueryViewWrapper(mol.Query("ele=C"),view),self.props[self.prop_combo_box_.currentIndex()],self.gradient_edit_.GetGfxGradient(),mol.Prop.Level.UNSPECIFIED)
+      else:
+        glco=gfx.GradientLevelColorOp(mol.QueryViewWrapper(view),self.props[self.prop_combo_box_.currentIndex()],self.gradient_edit_.GetGfxGradient(),mol.Prop.Level.UNSPECIFIED)
       entity.Apply(glco)
       
 #Gradient Preview
@@ -171,7 +179,7 @@ class GradientEdit(QtGui.QWidget):
       QtGui.QMessageBox.question(self, "Information", "Please keep in mind, at least two stops are needed for a gradient!")
 
   def AddStop(self, pos, color=None):
-    stop = GradientStop(pos, self.border_offset_, self, color)
+    stop = MyGradientStop(pos, self.border_offset_, self, color)
     QtCore.QObject.connect(stop, QtCore.SIGNAL("gradientChanged"), self.UpdateGradient)
     QtCore.QObject.connect(stop, QtCore.SIGNAL("colorChanged"), self.UpdateGradient)
     QtCore.QObject.connect(stop, QtCore.SIGNAL("colorChanged"), self.parent().Update)
@@ -226,7 +234,7 @@ class GradientEdit(QtGui.QWidget):
       self.width_ = event.size().width()
     
 #Gradient Stop  
-class GradientStop(ColorSelectWidget):
+class MyGradientStop(ColorSelectWidget):
   def __init__(self, pos, offset, parent, color=None):
     #Defaults
     self.length_ = 20

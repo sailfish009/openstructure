@@ -57,8 +57,9 @@ Real Distance(const Line2& l, const Vec2& v)
 
 bool IsOnLine(const Line2& l, const Vec2& v, Real ephilon)
 {
-  Vec2 tmp=CompDivide(v-l.GetOrigin(),l.GetDirection());
-  return std::fabs(tmp[0]-tmp[1])<ephilon && std::fabs(tmp[0]-tmp[2])<ephilon;
+  Vec2 d1=v-l.GetOrigin();
+  Vec2 d2=l.GetDirection();
+  return Length2(d1-Dot(d1, d2)*d2)<(ephilon*ephilon);
 }
 
 

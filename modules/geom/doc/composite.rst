@@ -527,3 +527,16 @@ Operations on Geometrical Objects
   Check whether the `sphere` contains `point`.
   
   :rtype: bool
+  
+
+.. function:: MinDistance(list1, list2)
+
+  Calculate the minimal distance between two sets of points
+  
+  :param list1: the first set of points
+  :type list1: :class:`~ost.geom.Vec3List`
+  
+  :param list2: the second set of points
+  :type list2: :class:`~ost.geom.Vec3List`
+  
+  

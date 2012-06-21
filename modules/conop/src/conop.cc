@@ -161,7 +161,8 @@ void Conopology::SetDefaultBuilder(const String& default_name) {
   if (builder)
     builder_map_["DEFAULT"]=builder;
   else
-    assert(0 && "what is this?");
+    throw std::runtime_error("trying to set unknown builder '"+
+                             default_name+"' as the default");
 }
 
 BuilderP Conopology::GetBuilder(const String& name)

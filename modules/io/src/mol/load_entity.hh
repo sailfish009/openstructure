@@ -20,7 +20,7 @@
 #define OST_IO_LOAD_ENTITY_H
 
 #include <ost/io/module_config.hh>
-#include <ost/mol/mol.hh>
+#include <ost/mol/entity_handle.hh>
 
 namespace ost { namespace io {
 

@@ -14,7 +14,9 @@ test_power_spectrum.cc
 test_shift.cc
 test_stat.cc
 test_transform.cc
+test_normalizer.cc
 tests.cc
 )
 
-ost_unittest(img_alg "${IPLT_ALG_UNIT_TESTS}")
+ost_unittest(MODULE img_alg
+             SOURCES "${IPLT_ALG_UNIT_TESTS}")

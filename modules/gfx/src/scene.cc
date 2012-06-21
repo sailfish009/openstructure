@@ -42,6 +42,7 @@
 #include "gl_helper.hh"
 
 #include <ost/config.hh>
+
 #include "scene.hh"
 #include "input.hh"
 #include "gfx_node.hh"
@@ -49,6 +50,7 @@
 #include "gfx_test_object.hh"
 #include "bitmap_io.hh"
 #include "entity.hh"
+#include "exporter.hh"
 #include "povray.hh"
 #include "offscreen_buffer.hh"
 
@@ -107,7 +109,8 @@ Scene::Scene():
   light_amb_(0.1,0.1,0.1),
   light_diff_(0.9,0.9,0.9),
   light_spec_(0.5,0.5,0.5),
-  axis_flag_(false),
+  cor_flag_(false),
+  fix_cor_flag_(true),
   fog_flag_(true),
   fog_color_(0.0,0.0,0.0,0.0),
   auto_autoslab_(true),
@@ -140,6 +143,7 @@ Scene::Scene():
 void Scene::SetFog(bool f)
 {
   fog_flag_=f;
+  if(!gl_init_) return;
   if(f) {
     glEnable(GL_FOG);
   } else {
@@ -156,8 +160,9 @@ bool Scene::GetFog() const
 void Scene::SetFogColor(const Color& c)
 {
   GLfloat fogc[]={c.Red(),c.Green(),c.Blue(),1.0};
-  glFogfv(GL_FOG_COLOR,fogc);
   fog_color_=c;
+  if(!gl_init_) return;
+  glFogfv(GL_FOG_COLOR,fogc);
   RequestRedraw();
 }
 
@@ -192,11 +197,29 @@ void Scene::SetShadowQuality(int q)
 #endif
 }
 
+int Scene::GetShadowQuality() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().shadow_quality;
+#else
+  return 0;
+#endif
+}
+
 void Scene::SetShadowWeight(float w)
 {
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().shadow_weight=w;
   RequestRedraw();
+#endif
+}
+
+float Scene::GetShadowWeight() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().shadow_weight;
+#else
+  return 0.0;
 #endif
 }
 
@@ -245,12 +268,30 @@ void Scene::SetAmbientOcclusionWeight(float f)
 #endif
 }
 
+float Scene::GetAmbientOcclusionWeight() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_factor;
+#else
+  return 1.0;
+#endif
+}
+
 void Scene::SetAmbientOcclusionMode(uint m)
 {
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().amb_occl_mode=m;
   // the redraw routine will deal with the Shader
   RequestRedraw();
+#endif
+}
+
+uint Scene::GetAmbientOcclusionMode() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_mode;
+#else
+  return 0;
 #endif
 }
 
@@ -263,17 +304,27 @@ void Scene::SetAmbientOcclusionQuality(uint m)
 #endif
 }
 
+uint Scene::GetAmbientOcclusionQuality() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_quality;
+#else
+  return 0;
+#endif
+}
+
 void Scene::SetShadingMode(const std::string& smode)
 {
 #if OST_SHADER_SUPPORT_ENABLED
   // this here is required - in case SetShadingMode is called
   // before GL is initialized (e.g. during batch mode rendering)
   def_shading_mode_=smode;
+  if (!gl_init_) return;
   if(smode=="fallback") {
     Shader::Instance().Activate("");
   } else if(smode=="basic") {
     Shader::Instance().Activate("basic");
-  } else if(smode=="hf") {
+  } else if(smode=="hf" || smode=="hemilight") {
     Shader::Instance().Activate("hemilight");
   } else if(smode=="toon1") {
     Shader::Instance().Activate("toon1");
@@ -306,12 +357,18 @@ void Scene::SetBeaconOff()
 
 namespace {
 
-void set_light_dir(Vec3 ld)
-{
-  GLfloat l_pos[]={0.0, 0.0, 0.0, 0.0};
-  l_pos[0]=-ld[0]; l_pos[1]=-ld[1]; l_pos[2]=-ld[2];
-  glLightfv(GL_LIGHT0, GL_POSITION, l_pos);
-}
+  void set_light_dir(Vec3 ld)
+  {
+    GLfloat l_pos[]={0.0, 0.0, 0.0, 0.0};
+    l_pos[0]=-ld[0]; l_pos[1]=-ld[1]; l_pos[2]=-ld[2];
+    glLightfv(GL_LIGHT0, GL_POSITION, l_pos);
+  }
+
+  struct GfxObjInitGL: public GfxNodeVisitor {
+    virtual void VisitObject(GfxObj* o, const Stack& st) {
+      o->InitGL();
+    }
+  };
 
 }
 
@@ -352,7 +409,8 @@ void Scene::InitGL(bool full)
   glClearDepth(1.0);
 
   // background
-  SetBackground(background_);
+  glClearColor(background_.Red(),background_.Green(),background_.Blue(),background_.Alpha());
+  fog_color_=background_;
 
   // polygon orientation setting
   glFrontFace(GL_CCW);
@@ -454,8 +512,14 @@ void Scene::InitGL(bool full)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
+  LOG_DEBUG("Scene: calling gl init for all objects");
+  GfxObjInitGL initgl;
+  this->Apply(initgl);
+
   LOG_DEBUG("Scene: gl init done");
   gl_init_=true;
+  
+  if(!def_shading_mode_.empty()) SetShadingMode(def_shading_mode_);
 }
 
 void Scene::RequestRedraw()
@@ -472,10 +536,12 @@ void Scene::StatusMessage(const String& s)
 
 void Scene::SetBackground(const Color& c)
 {
-  glClearColor(c.Red(),c.Green(),c.Blue(),c.Alpha());
   background_=c;
-  SetFogColor(c);
-  RequestRedraw();
+  if(gl_init_) {
+    glClearColor(c.Red(),c.Green(),c.Blue(),c.Alpha());
+    SetFogColor(c);
+    RequestRedraw();
+  }
 }
 
 Color Scene::GetBackground() const
@@ -486,16 +552,19 @@ Color Scene::GetBackground() const
 Viewport Scene::GetViewport() const
 {
   Viewport vp;
-  glGetIntegerv(GL_VIEWPORT, reinterpret_cast<GLint*>(&vp));
+  if(gl_init_) {
+    glGetIntegerv(GL_VIEWPORT, reinterpret_cast<GLint*>(&vp));
+  }
   return vp;
 }
 
 void Scene::SetViewport(int w, int h)
 {
-  glViewport(0,0,w,h);
   vp_width_=w;
   vp_height_=h;
   aspect_ratio_=static_cast<float>(w)/static_cast<float>(h);
+  if(!gl_init_) return;
+  glViewport(0,0,w,h);
   ResetProjection();
 #if OST_SHADER_SUPPORT_ENABLED
   impl::SceneFX::Instance().Resize(w,h);
@@ -538,6 +607,7 @@ void Scene::CenterOn(const GfxObjP& go)
 
 void Scene::RenderText(const TextPrim& t)
 {
+  if(!gl_init_) return;
   if(t.str.empty() || t.points<=0.0) return;
   Vec3 ppos = Project(t.position,false);
 
@@ -764,9 +834,13 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
 
   LOG_DEBUG("Scene: graphical object added @" << n.get() << std::endl);
 
-  if(root_node_->GetChildCount()==0) {
-    GfxObjP go = boost::dynamic_pointer_cast<GfxObj>(n);
-    if(go) {
+  GfxObjP go = boost::dynamic_pointer_cast<GfxObj>(n);
+
+  if(go) {
+    if(gl_init_) {
+      go->InitGL();
+    }
+    if(root_node_->GetChildCount()==0) {
       SetCenter(go->GetCenter());
     }
     do_autoslab_=true;
@@ -945,10 +1019,18 @@ void Scene::OnInput(const InputEvent& e)
     gluUnProject(wx+2.0,wy+2.0,wz,mm,pm,vp,&ox,&oy,&oz);
     Vec2 fxy = Vec2(ox,oy);
 
-    if(e.GetCommand()==INPUT_COMMAND_TRANSX) {
-      transform_.ApplyXAxisTranslation(e.GetDelta()*fxy[0]);
+    if(fix_cor_flag_) {
+      if(e.GetCommand()==INPUT_COMMAND_TRANSX) {
+        transform_.SetCenter(transform_.GetCenter()+Transpose(transform_.GetRot())*Vec3(-fxy[0]*e.GetDelta(),0.0,0.0));
+      } else {
+        transform_.SetCenter(transform_.GetCenter()+Transpose(transform_.GetRot())*Vec3(0.0,-fxy[1]*e.GetDelta(),0.0));
+      }
     } else {
-      transform_.ApplyYAxisTranslation(e.GetDelta()*fxy[1]);
+      if(e.GetCommand()==INPUT_COMMAND_TRANSX) {
+        transform_.ApplyXAxisTranslation(e.GetDelta()*fxy[0]);
+      } else {
+        transform_.ApplyYAxisTranslation(e.GetDelta()*fxy[1]);
+      }
     }
   } else if(e.GetCommand()==INPUT_COMMAND_TRANSZ) {
     float currz=transform_.GetTrans()[2];
@@ -1066,6 +1148,7 @@ void Scene::DetachObserver(SceneObserver* o) {
 
 Vec3 Scene::Project(const Vec3& v, bool ignore_vp) const
 {
+  if(!gl_init_) return Vec3();
   GLdouble gl_mmat[16];
   glGetDoublev(GL_MODELVIEW_MATRIX,gl_mmat);
   GLdouble gl_pmat[16];
@@ -1086,6 +1169,7 @@ Vec3 Scene::Project(const Vec3& v, bool ignore_vp) const
 
 Vec3 Scene::UnProject(const Vec3& v, bool ignore_vp) const
 {
+  if(!gl_init_) return Vec3();
   GLdouble gl_mmat[16];
   glGetDoublev(GL_MODELVIEW_MATRIX,gl_mmat);
   GLdouble gl_pmat[16];
@@ -1109,46 +1193,54 @@ namespace {
 class BBCalc: public GfxNodeVisitor
 {
 public:
+  BBCalc(const geom::Vec3& mmin, const geom::Vec3& mmax, const mol::Transform& tf): 
+    minc(mmin),maxc(mmax),tf(tf),valid(false) {}
+
   bool VisitNode(GfxNode* node, const Stack& st) {
     return node->IsVisible(); // only descend into visible nodes
   }
   void VisitObject(GfxObj* obj, const Stack& st) {
     if(obj->IsVisible()) {
       geom::AlignedCuboid bb=obj->GetBoundingBox();
-      Vec3 t1 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMin()[2]));
-      Vec3 t2 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMin()[2]));
-      Vec3 t3 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMin()[2]));
-      Vec3 t4 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMin()[2]));
-      Vec3 t5 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMax()[2]));
-      Vec3 t6 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMax()[2]));
-      Vec3 t7 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMax()[2]));
-      Vec3 t8 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMax()[2]));
-      minc = Min(minc,Min(t1,Min(t2,Min(t3,Min(t4,Min(t5,Min(t6,Min(t7,t8))))))));
-      maxc = Max(maxc,Max(t1,Max(t2,Max(t3,Max(t4,Max(t5,Max(t6,Max(t7,t8))))))));
+      if(bb.GetVolume()>0.0) {
+        Vec3 t1 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMin()[2]));
+        Vec3 t2 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMin()[2]));
+        Vec3 t3 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMin()[2]));
+        Vec3 t4 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMin()[2]));
+        Vec3 t5 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMax()[2]));
+        Vec3 t6 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMax()[2]));
+        Vec3 t7 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMax()[2]));
+        Vec3 t8 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMax()[2]));
+        minc = Min(minc,Min(t1,Min(t2,Min(t3,Min(t4,Min(t5,Min(t6,Min(t7,t8))))))));
+        maxc = Max(maxc,Max(t1,Max(t2,Max(t3,Max(t4,Max(t5,Max(t6,Max(t7,t8))))))));
+        valid=true;
+      }
     }
   }
 
   Vec3 minc,maxc;
   mol::Transform tf;
+  bool valid;
 };
 
 }
 
 geom::AlignedCuboid Scene::GetBoundingBox(const mol::Transform& tf) const
 {
-  BBCalc bbcalc;
-
-  bbcalc.tf = tf;
-  bbcalc.minc = Vec3(std::numeric_limits<float>::max(),
-                           std::numeric_limits<float>::max(),
-                           std::numeric_limits<float>::max());
-  bbcalc.maxc = Vec3(-std::numeric_limits<float>::max(),
-                           -std::numeric_limits<float>::max(),
-                           -std::numeric_limits<float>::max());
+  BBCalc bbcalc(Vec3(std::numeric_limits<float>::max(),
+                     std::numeric_limits<float>::max(),
+                     std::numeric_limits<float>::max()),
+                Vec3(-std::numeric_limits<float>::max(),
+                     -std::numeric_limits<float>::max(),
+                     -std::numeric_limits<float>::max()),
+                tf);
 
   Apply(bbcalc);
 
-  return geom::AlignedCuboid(bbcalc.minc,bbcalc.maxc);
+  if(bbcalc.valid) {
+    return geom::AlignedCuboid(bbcalc.minc,bbcalc.maxc);
+  }
+  return geom::AlignedCuboid(geom::Vec3(),geom::Vec3());
 }
 
 mol::Transform Scene::GetTransform() const
@@ -1288,7 +1380,7 @@ void Scene::SetStereoMode(unsigned int m)
     if(win_ && win_->HasStereo()) {
       stereo_mode_=1;
     } else {
-      LOG_INFO("Scene: No visual present for quad-buffered stereo");
+      LOG_WARNING("Scene: No visual present for quad-buffered stereo (run dng with --stereo)");
       stereo_mode_=0;
     }
   } else if(m==2) {
@@ -1355,6 +1447,7 @@ void Scene::SetLightProp(const Color& amb, const Color& diff,
   light_amb_=amb;
   light_diff_=diff;
   light_spec_=spec;
+  if(!gl_init_) return;
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_amb_);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diff_);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_spec_);
@@ -1366,6 +1459,7 @@ void Scene::SetLightProp(float amb, float diff, float spec)
   light_amb_=Color(amb,amb,amb,1.0);
   light_diff_=Color(diff,diff,diff,1.0);
   light_spec_=Color(spec,spec,spec,1.0);
+  if(!gl_init_) return;
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_amb_);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diff_);
   glLightfv(GL_LIGHT0, GL_SPECULAR, light_spec_);
@@ -1406,7 +1500,7 @@ bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
   root_node_->ContextSwitch();
 
 #if OST_SHADER_SUPPORT_ENABLED
-  String shader_name = Shader::Instance().GetCurrentName();
+  String shader_name = !def_shading_mode_.empty() ? def_shading_mode_ : Shader::Instance().GetCurrentName();
 #endif
 
   LOG_DEBUG("Scene: initializing GL");
@@ -1421,7 +1515,7 @@ bool Scene::StartOffscreenMode(unsigned int width, unsigned int height)
   update_fog();
   glDrawBuffer(GL_FRONT);
 #if OST_SHADER_SUPPORT_ENABLED
-  LOG_DEBUG("Scene: activating shader");
+  LOG_DEBUG("Scene: activating shader " << shader_name);
   Shader::Instance().Activate(shader_name);
 #endif
   return true;
@@ -1552,6 +1646,13 @@ void Scene::ExportPov(const std::string& fname, const std::string& wdir)
   pov.write_postamble();
 }
 
+void Scene::Export(Exporter* ex) const
+{
+  ex->SceneStart(this);
+  root_node_->Export(ex);
+  ex->SceneEnd(this);
+}
+
 void Scene::ResetProjection()
 {
   LOG_TRACE("Scene: projection matrix " << fov_ << " " << znear_ << " " << zfar_);
@@ -1561,6 +1662,7 @@ void Scene::ResetProjection()
 void Scene::SetBlur(uint n)
 {
   blur_count_=std::min(n,3u);
+  if(!gl_init_) return;
   glClearAccum(0.0,0.0,0.0,0.0);
   glClear(GL_ACCUM_BUFFER_BIT);
   RequestRedraw();
@@ -1568,6 +1670,7 @@ void Scene::SetBlur(uint n)
 
 void Scene::BlurSnapshot()
 {
+  if(!gl_init_) return;
   if(blur_count_==0) return;
   glFinish();
   glAccum(GL_MULT, 0.5);
@@ -1578,6 +1681,7 @@ void Scene::BlurSnapshot()
 void Scene::AutoAutoslab(bool f)
 {
   auto_autoslab_=f;
+  do_autoslab_=f;
   RequestRedraw();
 }
 
@@ -1586,13 +1690,18 @@ namespace {
 class LimCalc: public GfxNodeVisitor
 {
 public:
+  LimCalc(): minc(),maxc(),transform(),valid(false) {}
   void VisitObject(GfxObj* obj, const Stack& st) {
     if(obj->IsVisible()) {
       obj->ProcessLimits(minc,maxc, transform);
+      // this is buggy - ProcessLimits should really return a boolean 
+      // indicating whether it could succesfully apply limits or not
+      valid=true;
     }
   }
   Vec3 minc,maxc;
   mol::Transform transform;
+  bool valid;
 };
 
 } // anon ns
@@ -1601,29 +1710,38 @@ void Scene::Autoslab(bool fast, bool)
 {
   do_autoslab_=true;
   do_autoslab_fast_=fast;
+  RequestRedraw();
 }
 
 void Scene::AutoslabMax()
 {
   geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
 
-  Vec3 cen = transform_.Apply(transform_.GetCenter());
+  if(bb.GetVolume()==0.0) {
+    znear_=1;
+    zfar_=100;
+    set_near(1);
+    set_far(100);
+  } else {
 
-  float bmax = std::max(std::abs(cen[0]-bb.GetMin()[0]),
-                        std::abs(cen[0]-bb.GetMax()[0]));
-  bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMin()[1])));
-  bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMax()[1])));
-  bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMin()[2])));
-  bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMax()[2])));
-
-  float nnear = -(cen[2]+bmax*1.5);
-  float nfar = -(cen[2]-bmax*1.5);
-
-  // necessary code duplication due to awkward slab limit impl
-  znear_=nnear;
-  zfar_=nfar;
-  set_near(nnear);
-  set_far(nfar);
+    Vec3 cen = transform_.Apply(transform_.GetCenter());
+    
+    float bmax = std::max(std::abs(cen[0]-bb.GetMin()[0]),
+                          std::abs(cen[0]-bb.GetMax()[0]));
+    bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMin()[1])));
+    bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMax()[1])));
+    bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMin()[2])));
+    bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMax()[2])));
+    
+    float nnear = -(cen[2]+bmax*1.5);
+    float nfar = -(cen[2]-bmax*1.5);
+    
+    // necessary code duplication due to awkward slab limit impl
+    znear_=nnear;
+    zfar_=nfar;
+    set_near(nnear);
+    set_far(nfar);
+  }
   ResetProjection();
 }
 
@@ -1648,8 +1766,10 @@ void Scene::set_far(float f)
 
 void Scene::update_fog()
 {
-  glFogf(GL_FOG_START,znear_+fnear_);
-  glFogf(GL_FOG_END,zfar_+ffar_);
+  if(gl_init_) {
+    glFogf(GL_FOG_START,znear_+fnear_);
+    glFogf(GL_FOG_END,zfar_+ffar_);
+  }
 }
 
 
@@ -1698,6 +1818,12 @@ void Scene::SetTestMode(bool f)
   } else {
     Remove("GfxTestObj");
   }
+}
+
+void Scene::SetShowCenter(bool f)
+{
+  cor_flag_=f;
+  RequestRedraw();
 }
 
 void Scene::prep_glyphs()
@@ -1760,6 +1886,32 @@ void Scene::render_scene()
   impl::SceneFX::Instance().Preprocess();
 #endif
 
+  if(cor_flag_) {
+    geom::Vec3 cen=transform_.GetCenter();
+    glPushAttrib(GL_ENABLE_BIT | GL_LIGHTING_BIT | GL_LINE_BIT | GL_CURRENT_BIT);
+#if OST_SHADER_SUPPORT_ENABLED
+    Shader::Instance().PushProgram();
+    Shader::Instance().Activate("");
+#endif
+    glLineWidth(1.5);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_COLOR_MATERIAL);
+    
+    glBegin(GL_LINES);
+    glColor3f(0.5,0.5,0.5);
+    glVertex3f(cen[0]-1.0,cen[1],cen[2]);
+    glVertex3f(cen[0]+1.0,cen[1],cen[2]);
+    glVertex3f(cen[0],cen[1]-1.0,cen[2]);
+    glVertex3f(cen[0],cen[1]+1.0,cen[2]);
+    glVertex3f(cen[0],cen[1],cen[2]-1.0);
+    glVertex3f(cen[0],cen[1],cen[2]+1.0);
+    glEnd();
+    glPopAttrib();
+#if OST_SHADER_SUPPORT_ENABLED
+    Shader::Instance().PopProgram();
+#endif
+  }
+
   root_node_->RenderGL(STANDARD_RENDER_PASS);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1801,6 +1953,7 @@ void Scene::render_glow()
 
 void Scene::stereo_projection(int view)
 {
+  if(!gl_init_) return;
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
@@ -1821,7 +1974,7 @@ void Scene::stereo_projection(int view)
       glFrustum(left,right,bot,top,zn,zf);
       Real dist = -transform_.GetTrans()[2]+stereo_distance_;
       glTranslated(0.0,0.0,-dist);
-      glRotated(180.0/M_PI*atan(0.1*ff/iod),0.0,1.0,0.0);
+      glRotated(-180.0/M_PI*atan(0.1*ff/iod),0.0,1.0,0.0);
       glTranslated(0.0,0.0,dist);
     } else {
       // correct off-axis frustims
@@ -1830,10 +1983,12 @@ void Scene::stereo_projection(int view)
 
       // correction of near clipping plane to avoid extreme drifting
       // of left and right view
+#if 0
       if(iod*zn/fo<2.0) {
         zn=2.0*fo/iod;
         zf=std::max(zn+Real(0.2),zf);
       }
+#endif
     
       Real sd = -ff*0.5*iod*zn/fo;
       left+=sd;
@@ -1851,6 +2006,9 @@ void Scene::stereo_projection(int view)
 
 void Scene::render_stereo()
 {
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
+  glPushClientAttrib(GL_ALL_ATTRIB_BITS);
+
   int old_stereo_eye=stereo_eye_;
   stereo_eye_=-1;
   stereo_projection(-1);
@@ -1868,6 +2026,7 @@ void Scene::render_stereo()
   stereo_eye_=1;
   stereo_projection(1);
   render_scene();
+
   glEnable(GL_TEXTURE_2D);
 #if OST_SHADER_SUPPORT_ENABLED
   if(OST_GL_VERSION_2_0) {
@@ -1884,7 +2043,6 @@ void Scene::render_stereo()
   Shader::Instance().Activate("");
 #endif
 
-  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
@@ -1905,7 +2063,7 @@ void Scene::render_stereo()
   glLoadIdentity();
 
   if(stereo_mode_==2) {
-    // draw interlace lines in stencil buffer
+    // draw interlaced lines in stencil buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLineWidth(1.0);
     glEnable(GL_STENCIL_TEST);
@@ -1970,10 +2128,14 @@ void Scene::render_stereo()
   glEnd();
   
   // restore settings
+  glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 0, 0, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
   glMatrixMode(GL_PROJECTION);
   glPopMatrix();
   glMatrixMode(GL_MODELVIEW);
   glPopMatrix();
+  glPopClientAttrib();
   glPopAttrib();
 #if OST_SHADER_SUPPORT_ENABLED
   Shader::Instance().PopProgram();
@@ -1982,14 +2144,22 @@ void Scene::render_stereo()
 
 void Scene::do_autoslab()
 {
+  // skip autoslab if nothing to show yet
+  if(root_node_->GetChildCount()==0) return;
   if(do_autoslab_fast_) {
     geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
     // necessary code duplication due to awkward slab limit impl
-    znear_=-(bb.GetMax()[2]-1.0);
-    zfar_=-(bb.GetMin()[2]+1.0);
-    set_near(-(bb.GetMax()[2]-1.0));
-    set_far(-(bb.GetMin()[2]+1.0));
-    ResetProjection();
+    if(bb.GetVolume()==0.0) {
+      // skip if empty BB
+      return;
+    } else {
+      float mynear=-(bb.GetMax()[2])-1.0;
+      float myfar=-(bb.GetMin()[2])+1.0;
+      znear_=mynear;
+      zfar_=myfar;
+      set_near(mynear);
+      set_far(myfar);
+    }
   } else {
     LimCalc limcalc;
     limcalc.transform=transform_;
@@ -2000,14 +2170,18 @@ void Scene::do_autoslab()
                               -std::numeric_limits<float>::max(),
                               -std::numeric_limits<float>::max());
     this->Apply(limcalc);
-    float mynear=std::max(float(0.0), std::min(float(-limcalc.minc[2]),float(-limcalc.maxc[2])))-float(2.0);
-    float myfar=std::max(float(-limcalc.minc[2]),float(-limcalc.maxc[2]))+float(2.0);
+    if(!limcalc.valid) {
+      return;
+    }
+    float mynear=std::max(float(0.0), std::min(float(-limcalc.minc[2]),float(-limcalc.maxc[2])))-float(1.0);
+    float myfar=std::max(float(-limcalc.minc[2]),float(-limcalc.maxc[2]))+float(1.0);
     znear_=mynear;
     zfar_=myfar;
-    set_near(znear_);
-    set_far(zfar_);
-    ResetProjection();
+    set_near(mynear);
+    set_far(myfar);
   }
+  ResetProjection();
+  RequestRedraw();
 }
 
 }} // ns

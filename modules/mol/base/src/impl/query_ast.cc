@@ -24,7 +24,11 @@
 
 namespace ost { namespace mol { namespace impl {
   
-  
+
+LogicOPNode::LogicOPNode(LogicOP op) 
+  : lhs_(NULL), rhs_(NULL), op_(op) 
+{}
+
 LogicOPNode::~LogicOPNode() {
   if (rhs_)
     delete rhs_;
@@ -109,10 +113,59 @@ const geom::Vec3& WithinParam::GetCenter() const {
   return center_;
 }
 
-LogicOPNode::LogicOPNode(LogicOP op) 
-  : lhs_(NULL), rhs_(NULL), op_(op) {
-  
+StringOrRegexParam::StringOrRegexParam():
+  is_regex_(false), r_(), s_()
+{}
+
+StringOrRegexParam::StringOrRegexParam(const String& s):
+  is_regex_(false),r_(),s_(s)
+{
+  String special("[]{}()");
+  for(String::const_iterator it=s.begin();it!=s.end();++it) {
+    if((*it)=='?' || (*it)=='*') {
+      is_regex_=true;
+      break;
+    }
+  }
+
+  if(is_regex_) {
+    std::ostringstream e;
+    for(String::const_iterator it=s.begin();it!=s.end();++it) {
+      
+      if((*it)=='?' && (it==s.begin() || (*(it-1))!='\\')) {
+        e << ".";
+      } else if((*it)=='*' && (it==s.begin() || (*(it-1))!='\\')) {
+        e << ".*";
+      } else {
+        if (special.find(*it)!=String::npos) {
+          e << '\\';
+        }
+        e << *it;
+      }
+    }
+    //std::cerr << "assembling regex [" << e.str() << "]... ";
+    r_=boost::regex(e.str());
+    //std::cerr << "done" << std::endl;
+  }
 }
+
+bool StringOrRegexParam::Match(const String& s) const
+{
+  if(is_regex_) {
+    //std::cerr << "matching regex to [" << s << "]... ";
+    bool result = boost::regex_match(s,r_);
+    //std::cerr << "done" << std::endl;
+    return result;
+  }
+  return s==s_;
+}
+
+bool StringOrRegexParam::operator==(const StringOrRegexParam& o) const
+{
+  if(is_regex_) return r_==o.r_;
+  return s_==o.s_;
+}
+
 Node* Node::GetParent() {
   return parent_;
 }

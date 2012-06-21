@@ -109,23 +109,29 @@ public:
   /// by ignoring it or by inserting a dummy atom.
   virtual void OnMissingAtom(const mol::ResidueHandle& residue,
                               const String& atom_name) { }
-
+                              
   /// \brief Fill in missing information based on atom name.
   virtual void FillAtomProps(mol::AtomHandle atom, const AtomSpec& spec);
 
   /// \brief Set residue properties such as chemical class
   virtual void FillResidueProps(mol::ResidueHandle residue);
 
-  /// \brief whether the residue has unknown atoms
-  bool HasUnknownAtoms(mol::ResidueHandle res);                              
+  mol::AtomHandleList GetUnknownAtoms(mol::ResidueHandle res);
+  
   /// \brief Check whether the residue has all required atoms. This does not
   ///        include hydrogens and leaving atoms such as the terminal OXT.
   virtual bool IsResidueComplete(const mol::ResidueHandle& residue);
+  
+  CompoundLibPtr GetCompoundLib() const { return compound_lib_; }
+    
 private:
   CompoundLibPtr      compound_lib_;
   CompoundPtr         last_compound_;
   mol::ResidueHandle  last_residue_;
   bool                unknown_atoms_;
+  /// \brief whether the residue has unknown atoms
+  bool HasUnknownAtoms(mol::ResidueHandle res);
+
   void LookupCompound(const mol::ResidueHandle& rh);
   /// Change internal order of atoms in residue to the order given by compound
   void ReorderAtoms(mol::ResidueHandle residue, CompoundPtr compound);
@@ -134,10 +140,9 @@ private:
 
   void AssignBackBoneTorsionsToResidue(mol::ResidueHandle residue);
 
-
 };
 
-
+typedef boost::shared_ptr<RuleBasedBuilder> RuleBasedBuilderPtr;
 
 }}
 

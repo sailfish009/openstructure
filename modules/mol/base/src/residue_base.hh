@@ -19,12 +19,15 @@
 #ifndef OST_RESIDUE_BASE_HH
 #define OST_RESIDUE_BASE_HH
 
+#include <ost/geom/geom.hh>
+
 #include <ost/mol/module_config.hh>
 #include <ost/mol/residue_prop.hh>
 #include <ost/mol/impl/residue_impl_fw.hh>
 #include <ost/mol/sec_structure.hh>
 #include <ost/mol/handle_type_fw.hh>
 #include <ost/mol/chem_class.hh>
+#include <ost/mol/chem_type.hh>
 
 #include <ost/generic_property.hh>
 #include "property_id.hh"
@@ -49,11 +52,16 @@ namespace ost { namespace mol {
 /// code is set to \c ?. 
 ///
 /// Residues have a \ref ChemClass "chemical class". For standard amino acids this
-/// class is ChemClass::LPeptideLinking, indicating that the residue is capable to
+/// class is ChemClass::L_PEPTIDE_LINKING, indicating that the residue is capable to
 /// participate in a peptide bond. For nucleotides, the chemical class is either
-/// ChemClass::RNALinking or ChemClass::DNALinking. For unknown compounds the 
-/// chemical class is ChemClass::Unknown.
-/// 
+/// ChemClass::RNA_LINKING or ChemClass::DNA_LINKING. For unknown compounds the 
+/// chemical class is ChemClass::UNKNOWN.
+///
+/// In addition, residues have a ChemType. A classification of all components into
+/// nine categories (ions, non-canonical molecules, saccharised, nucleotides,
+/// amino acids, co-enzymes, water coordinated ions, drugs, solvents) as obtained
+/// from the PDB.
+///
 /// When loading an entity from file, the one-letter and chemical class of a
 /// residue are assigned by the \ref conop::Builder "default builder".
 class DLLEXPORT_OST_MOL ResidueBase: 
@@ -90,6 +98,20 @@ public:
   ///         residue name and residue number
   String GetQualifiedName() const;
 
+  /// \brief  returns main atom, ie CA for amino acids
+  AtomHandle GetCentralAtom() const;
+
+  /*!
+    \brief set explicit central atom
+
+    overrides the heuristic of GetCentralAtom to explicitely
+    use the given one as the central atom; passing in an
+    invalid handle reverts back to the heurstic determination
+  */
+  void SetCentralAtom(const AtomHandle& a);
+
+  /// \return return specific normal of residue, usually CA-CB dir for AA
+  geom::Vec3 GetCentralNormal() const;
 
   /// \brief whether the residue can form peptide bonds
   bool IsPeptideLinking() const;
@@ -100,7 +122,12 @@ public:
   ChemClass GetChemClass() const;
   
   void SetChemClass(ChemClass cc);
-  
+
+  /// \brief PDB ligand classification from component dictionary
+  ChemType GetChemType() const;
+
+  void SetChemType(ChemType ct);
+
   /// \brief    Get secondary structure type. By default, the residue is in COIL
   ///           conformation.
   SecStructure GetSecStructure() const;

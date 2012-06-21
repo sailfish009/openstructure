@@ -19,8 +19,9 @@
 #ifndef OST_ATOM_BASE_HH
 #define OST_ATOM_BASE_HH
 
-#include <ost/mol/module_config.hh>
 #include <ost/geom/vec3.hh>
+
+#include <ost/mol/module_config.hh>
 #include <ost/mol/impl/atom_impl_fw.hh>
 #include <ost/generic_property.hh>
 
@@ -86,6 +87,8 @@ public:
   const geom::Vec3& GetOriginalPos() const;
   /// \brief get alternative atom position
   geom::Vec3 GetAltPos(const String& alt_group) const;
+  Real GetAltBFactor(const String& alt_group) const;
+  Real GetAltOcc(const String& alt_group) const;
   
   std::vector<String> GetAltGroupNames() const;
 

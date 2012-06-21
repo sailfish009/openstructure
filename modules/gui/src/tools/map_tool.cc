@@ -78,7 +78,7 @@ void MapTool::MouseMove(const MouseEvent& event)
               geom::Vec3 trans(event.GetDelta().x()*fxy[0],
                                -event.GetDelta().y()*fxy[1],
                                0.0);
-              plane.SetOrigin(plane.GetOrigin()+geom::Transpose(tf.GetRot())*trans);
+              plane.SetP(plane.GetP()-geom::Dot(plane.GetNormal(), geom::Transpose(tf.GetRot())*trans));
               ms->SetPlane(plane);
             } else {
               plane.SetNormal(tf.GetXAxisRotation(static_cast<Real>(event.GetDelta().y())*0.5)*tf.GetYAxisRotation(static_cast<Real>(event.GetDelta().x())*0.5)*plane.GetNormal());

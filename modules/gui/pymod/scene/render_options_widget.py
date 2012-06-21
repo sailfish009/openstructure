@@ -77,16 +77,16 @@ class RenderOptionsWidget(ComboOptionsWidget):
 
     self._in_view_method = False
     self.setMinimumSize(250,200)
-    
-  def DoSomething(self, item):
+  def OnActivate(self, item):
+    self.DoResize()
+  def OnComboChange(self, item):
     scene_selection = gui.SceneSelection.Instance()
     for i in range(0,scene_selection.GetActiveNodeCount()):
       node = scene_selection.GetActiveNode(i)
       if isinstance(node, gfx.Entity) or (_img_present and isinstance(node, gfx.MapIso)):
         render_mode = item.GetRenderMode()
         if render_mode is not None:
-          node.SetRenderMode(render_mode)     
-    
+          node.SetRenderMode(render_mode)
     if(scene_selection.GetActiveViewCount() > 0):
       entity = scene_selection.GetViewEntity()
       view = scene_selection.GetViewUnion()        

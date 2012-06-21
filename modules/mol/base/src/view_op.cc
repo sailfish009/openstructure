@@ -250,6 +250,7 @@ mol::EntityView assemble_view(const std::vector<T>& l, mol::EntityView v)
 {
   typedef typename std::vector<T>::const_iterator Iter;
   for (Iter i=l.begin(), e=l.end(); i!=e; ++i) {
+    if(!i->IsValid()) continue;
     if (!belongs_to_same_ent(*i, v))
       throw IntegrityError(combining_not_allowed);
     v.AddAtom(to_handle(*i), mol::ViewAddFlag::CHECK_DUPLICATES);

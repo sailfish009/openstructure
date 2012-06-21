@@ -34,7 +34,7 @@
 #include <ost/log.hh>
 #include <ost/conop/conop.hh>
 #include <ost/io/io_exception.hh>
-#include <ost/mol/mol.hh>
+#include <ost/mol/entity_visitor.hh>
 
 namespace ost { namespace io {
 

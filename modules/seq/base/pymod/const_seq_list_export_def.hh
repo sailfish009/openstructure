@@ -26,6 +26,7 @@
   .def("IsValid", &C::IsValid)                                                 \
   .def("Take", &C::Take)                                                       \
   .def("Slice", &C::Slice)                                                     \
+  .def("FindSequence", &C::FindSequence)                                       \
   .def("SequencesHaveEqualLength",                                             \
        &C::SequencesHaveEqualLength)                                           \
   .def("__getitem__", &C::operator[])                                          \

@@ -361,6 +361,16 @@ void EleImpl::SetTextData(const String& td)
   }
 }
 
+
+String EleImpl::GetComment() const
+{
+  QDomNode previous=ele_.previousSibling();
+  if(previous.isComment()){
+    return previous.toComment().data().toStdString();
+  }
+  return String();
+}
+
 Type EleImpl::GetType() const 
 {
   return type_;

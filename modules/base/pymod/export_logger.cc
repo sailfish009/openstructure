@@ -17,6 +17,11 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
+#include <boost/python/raw_function.hpp>
+#if BOOST_VERSION<103400
+#include <boost/python/detail/api_placeholder.hpp>
+#endif
+
 using namespace boost::python;
 
 #include <ost/log.hh>
@@ -25,7 +30,11 @@ using namespace boost::python;
 
 using namespace ost;
 
-struct WrappedLogSink : public LogSink {
+struct PyLogSink: public LogSink {
+
+};
+
+struct WrappedLogSink : public PyLogSink, public wrapper<PyLogSink> {
   WrappedLogSink(PyObject* self): self_(self)
   { }
   virtual void LogMessage(const String& message , int severity) 
@@ -73,12 +82,56 @@ void pop_log_sink()
   Logger::Instance().PopSink();
 }
 
+LogSinkPtr get_log_sink()
+{
+  return Logger::Instance().GetCurrentSink();
+}
 
-void log_error(const String& m) {LOG_ERROR(m);}
-void log_warning(const String& m) {LOG_WARNING(m);}
-void log_script(const String& m) {LOG_SCRIPT(m);}
-void log_info(const String& m) {LOG_INFO(m);}
-void log_verbose(const String& m) {LOG_VERBOSE(m);}
+String args_to_string(tuple args, dict kwargs)
+{
+  std::stringstream ss;
+  bool empty=true;
+  for (size_t i=0, l=len(args); i<l; ++i) {
+    if (!empty) {
+      ss << " ";
+    }
+    empty=false;
+    String string_val;
+    try {
+      string_val=extract<String>(args[i]);
+    } catch (...) {
+      string_val=extract<String>(args[i].attr("__str__")());
+    }
+    ss << string_val;
+  }
+  return ss.str();
+}
+
+object log_error(tuple args, dict kwargs) 
+{
+  LOG_ERROR(args_to_string(args, kwargs));
+  return object();
+}
+object log_warning(tuple args, dict kwargs) 
+{
+  LOG_WARNING(args_to_string(args, kwargs));
+  return object();
+}
+object log_script(tuple args, dict kwargs) 
+{
+  LOG_SCRIPT(args_to_string(args, kwargs));
+  return object();  
+}
+object log_info(tuple args, dict kwargs) 
+{
+  LOG_INFO(args_to_string(args, kwargs));
+  return object();  
+}
+object log_verbose(tuple args, dict kwargs) 
+{
+  LOG_VERBOSE(args_to_string(args, kwargs));
+  return object();  
+}
 
 
 void reset_sinks()
@@ -88,11 +141,13 @@ void reset_sinks()
 
 void export_Logger()
 {
-  class_<LogSink, WrappedLogSinkPtr, 
+  class_<LogSink, LogSinkPtr, boost::noncopyable>("_LogSink", no_init)
+    .def("LogMessage", &LogSink::LogMessage)
+  ;
+  class_<PyLogSink, WrappedLogSinkPtr, bases<LogSink>,
          boost::noncopyable>("LogSink")
     .def("LogMessage", &WrappedLogSink::LogMessageDefault)
   ;
-
   class_<MultiLogSink, MultiLogSinkPtr, bases<LogSink>, 
          boost::noncopyable >("MultiLogSink", init<>())
     .def("AddSink",&MultiLogSink::AddSink)
@@ -105,22 +160,29 @@ void export_Logger()
     .def("LogMessage", &FileLogSink::LogMessage)
   ;
 
+  class_<StringLogSink, StringLogSinkPtr, bases<LogSink>,
+         boost::noncopyable >("StringLogSink", init<>())
+    .def("LogMessage", &StringLogSink::LogMessage)
+    .def("GetLog", &StringLogSink::GetLog)
+  ;
+
   def("PushVerbosityLevel",push_verb);
   def("PopVerbosityLevel",pop_verb);
   def("GetVerbosityLevel",get_verb);
   def("PushLogSink",push_log_sink);
+  def("GetCurrentLogSink",get_log_sink);
   def("PopLogSink",pop_log_sink);
-  def("LogError",log_error);
-  def("LogWarning",log_warning);
-  def("LogInfo",log_info);
-  def("LogScript", log_script);
-  def("LogVerbose", log_verbose);
+  def("LogError", raw_function(log_error, 1));
+  def("LogWarning",raw_function(log_warning, 1));
+  def("LogInfo", raw_function(log_info, 1));
+  def("LogScript", raw_function(log_script, 1));
+  def("LogVerbose", raw_function(log_verbose, 1));
   
   // this relatively ugly construct is required to work around a problem with
   // the "ost" command-line interpreter. If we don't remove all the sinks from
   // the sink stack, we will get "Fatal Python error: PyEval_SaveThread: 
   // NULL tstate" upon exiting ost. I don't completely understand why, though.
-  scope().attr("__dict__")["atexit"]=import("atexit");
+  scope().attr("__dict__")["atexit"]=handle<>(PyImport_ImportModule("atexit"));
 
   def("_reset_sinks", &reset_sinks);
   object r=scope().attr("_reset_sinks");

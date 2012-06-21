@@ -16,5 +16,7 @@ export_map.cc
 wrap_img.cc
 )
 
-pymod(NAME img OUTPUT_DIR ost/img 
-      CPP ${OST_IMG_PYMOD_SOURCES} PY __init__.py)
+if (NOT ENABLE_STATIC) 
+  pymod(NAME img OUTPUT_DIR ost/img 
+        CPP ${OST_IMG_PYMOD_SOURCES} PY __init__.py)
+endif()

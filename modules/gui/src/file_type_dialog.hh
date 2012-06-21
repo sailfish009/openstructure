@@ -35,9 +35,10 @@
 #endif
 
 #include <QDialog>
-#include <QTableWidget>
-#include <QLabel>
+#include <QMetaType>
 
+class QTableWidget;
+class QLabel;
 namespace ost { namespace gui {
 
 /// \brief dialog to select a file type

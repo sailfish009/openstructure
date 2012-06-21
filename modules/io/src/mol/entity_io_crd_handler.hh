@@ -16,13 +16,17 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+/*
+  Author: Ansgar Philippsen, Tobias Schmidt
+ */
+
 #ifndef OST_IO_ENTITY_IO_PLUGIN_CRD_H
 #define OST_IO_ENTITY_IO_PLUGIN_CRD_H
 
-/*
-  CHARMM coordinate file import
-  Author: Ansgar Philippsen
- */
+#include <ost/mol/entity_handle.hh>
+#include <ost/mol/chain_handle.hh>
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/entity_visitor.hh>
 #include <ost/io/mol/entity_io_handler.hh>
 
 #include <boost/iostreams/filtering_stream.hpp>
@@ -30,6 +34,7 @@
 
 namespace ost { namespace io {
 
+/// \brief CHARMM coordinate file import
 class DLLEXPORT_OST_IO CRDReader {
 public:
   CRDReader(const boost::filesystem::path& loc);
@@ -53,22 +58,30 @@ private:
   boost::iostreams::filtering_stream<boost::iostreams::input>  in_;
 };
 
-
+/// \brief CHARMM coordinate file export
 class DLLEXPORT_OST_IO CRDWriter : public mol::EntityVisitor {
 public:
-  CRDWriter(const String& filename);
-  CRDWriter(const boost::filesystem::path& filename);
-  CRDWriter(std::ostream& outstream);
+  CRDWriter(const String& filename, bool ext=false);
+  CRDWriter(const boost::filesystem::path& filename, bool ext=false);
+  CRDWriter(std::ostream& outstream, bool ext=false);
+
+  void Write(const mol::EntityView& ent);
+  void Write(const mol::EntityHandle& ent);
 
   virtual bool VisitAtom(const mol::AtomHandle& atom);
+  virtual bool VisitResidue(const mol::ResidueHandle& r);
 
   void WriteHeader(const mol::EntityView& ent);
 
 private:
+  void Init();
+
   std::ofstream   outfile_;
   std::ostream&   outstream_;
+  bool ext_;
   int atom_count_;
   int atom_total_;
+  int res_count_;
 };
 
 class DLLEXPORT_OST_IO EntityIOCRDHandler: public EntityIOHandler {

@@ -74,6 +74,25 @@ void Mat4_setslice3(geom::Mat4& m,const  slice s,const  Mat3& m2)
   m(start0+2,start1+2)=m2(2,2);
 }
 
+String mat4_repr(const geom::Mat4& m) {
+  std::stringstream ss;
+
+  ss << "geom.Mat4("
+     << m(0,0) << ", " << m(0,1) << ", " << m(0,2) << ", " << m(0,3) << ", "
+     << m(1,0) << ", " << m(1,1) << ", " << m(1,2) << ", " << m(1,3) << ", "
+     << m(2,0) << ", " << m(2,1) << ", " << m(2,2) << ", " << m(2,3) << ", "
+     << m(3,0) << ", " << m(3,1) << ", " << m(3,2) << ", " << m(3,3) << ")";
+  return ss.str();
+}
+
+list mat4_data(const geom::Mat4& m)
+{
+  list nrvo;
+  for(size_t k=0;k<16;++k) {
+    nrvo.append(m.Data()[k]);
+  }
+  return nrvo;
+}
 
 void export_Mat4()
 {
@@ -93,7 +112,10 @@ void export_Mat4()
     .def(self *= self)
     .def(self * Vec4())
     .def(self / Real())
+    .def(self == self)
+    .def(self != self)
     .def(self_ns::str(self))
+    .def("__repr__", mat4_repr)
     .def("__getitem__",Mat4_getitem)
     .def("__getitem__",Mat4_getslice)
     .def("__setitem__",Mat4_setitem)
@@ -103,5 +125,6 @@ void export_Mat4()
     .def("PasteRotation",&Mat4::PasteRotation)
     .def("ExtractTranslation",&Mat4::ExtractTranslation)
     .def("PasteTranslation",&Mat4::PasteTranslation)
+    .add_property("data",mat4_data)
   ;
 }

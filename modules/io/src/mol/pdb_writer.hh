@@ -28,15 +28,24 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
-#include <ost/mol/mol.hh>
-
 #include <ost/io/module_config.hh>
 #include <ost/io/formatted_line.hh>
 #include <ost/io/mol/io_profile.hh>
 
-namespace ost { namespace io {
+namespace ost { 
+  
+namespace mol {
+
+class EntityView;
+class EntityHandle;
+
+}
+
+namespace io {
+
 
 class DLLEXPORT_OST_IO PDBWriter {
+  typedef boost::iostreams::filtering_stream<boost::iostreams::output> OutStream;
 public:
   PDBWriter(const String& filename,
             const IOProfile& profile);
@@ -68,6 +77,8 @@ private:
   bool                charmm_style_;
   bool                is_pqr_;
   IOProfile           profile_;
+  String              filename_;
+  OutStream           out_;
 };
  
 }}

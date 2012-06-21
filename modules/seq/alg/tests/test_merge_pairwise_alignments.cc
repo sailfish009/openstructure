@@ -22,6 +22,7 @@
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
 
 #include <ost/seq/alg/merge_pairwise_alignments.hh>
 #include <ost/integrity_error.hh>
@@ -30,19 +31,19 @@
 using namespace ost;
 using namespace ost::seq;
 
-BOOST_AUTO_TEST_SUITE(ost_seq_alg)
+BOOST_AUTO_TEST_SUITE(ost_seq_alg);
 
 BOOST_AUTO_TEST_CASE(merge_pairwise_alignments_one) 
 {
-  SequenceHandle ref=CreateSequence("REF", "abcdefghijklmn");
+  SequenceHandle ref=CreateSequence("REF", "abcdefghijklmn", "R");
   SequenceHandle s1=CreateSequence("S1", "abcd---efghijklmn");
-  SequenceHandle s2=CreateSequence("S2", "abcdxyzefghijklmn");
+  SequenceHandle s2=CreateSequence("S2", "abcdxyzefghijklmn", "X");
   AlignmentHandle aln1=CreateAlignment();
   aln1.AddSequence(s1);
   aln1.AddSequence(s2);
 
   SequenceHandle s3=CreateSequence("S1", "abcdefghij---klmn");
-  SequenceHandle s4=CreateSequence("S2", "abcdefghijxyzklmn");
+  SequenceHandle s4=CreateSequence("S2", "abcdefghijxyzklmn", "Y");
 
   AlignmentHandle aln2=CreateAlignment();
   aln2.AddSequence(s3);
@@ -55,6 +56,9 @@ BOOST_AUTO_TEST_CASE(merge_pairwise_alignments_one)
   BOOST_CHECK_EQUAL(seqs[0].GetString(), "abcd---efghij---klmn");
   BOOST_CHECK_EQUAL(seqs[1].GetString(), "abcdxyzefghij---klmn");
   BOOST_CHECK_EQUAL(seqs[2].GetString(), "abcd---efghijxyzklmn");
+  BOOST_CHECK_EQUAL(seqs[0].GetRole(), "R");
+  BOOST_CHECK_EQUAL(seqs[1].GetRole(), "X");
+  BOOST_CHECK_EQUAL(seqs[2].GetRole(), "Y");
 }
   
 BOOST_AUTO_TEST_CASE(merge_pairwise_alignments_two) 
@@ -189,4 +193,4 @@ BOOST_AUTO_TEST_CASE(merge_pairwise_alignments_six)
 }
 
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_SUITE_END();

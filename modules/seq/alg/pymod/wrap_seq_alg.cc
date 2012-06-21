@@ -24,11 +24,13 @@
 #include <ost/seq/alg/ins_del.hh>
 #include <ost/seq/alg/conservation.hh>
 #include <ost/seq/alg/subst_weight_matrix.hh>
+#include <ost/seq/alg/local_align.hh>
+#include <ost/seq/alg/global_align.hh>
 using namespace boost::python;
 using namespace ost::seq;
 using namespace ost::seq::alg;
 
-BOOST_PYTHON_MODULE(_seq_alg)
+BOOST_PYTHON_MODULE(_ost_seq_alg)
 {
   enum_<RefMode::Type>("RefMode")
     .value("ALIGNMENT", RefMode::ALIGNMENT)
@@ -51,6 +53,10 @@ BOOST_PYTHON_MODULE(_seq_alg)
     .def("SetWeight", &SubstWeightMatrix::SetWeight)
   ;
   def("MergePairwiseAlignments", &MergePairwiseAlignments);
-  def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons"));
+  def("Conservation", &Conservation, (arg("assign")=true, arg("prop_name")="cons", arg("ignore_gap")=false));
+  def("LocalAlign", &LocalAlign, (arg("seq1"), arg("seq2"),arg("subst_weight"), 
+      arg("gap_open")=-5, arg("gap_ext")=-2));
+  def("GlobalAlign", &GlobalAlign,(arg("seq1"),arg("seq2"),arg("subst_weight"), 
+      arg("gap_open")=-5, arg("gap_ext")=-2));
 
 }

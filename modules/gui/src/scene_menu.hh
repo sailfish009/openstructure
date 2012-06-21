@@ -20,7 +20,7 @@
 #define OST_GUI_SCENE_MENU_HH
 
 
-#include <ost/mol/mol.hh>
+#include <ost/mol/atom_handle.hh>
 #include <ost/gfx/gfx_object_fw.hh>
 
 #include <QObject>

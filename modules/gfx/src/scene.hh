@@ -31,17 +31,18 @@
 
 #include <ost/gfx/module_config.hh>
 #include <ost/mol/transform.hh>
+#include <ost/mol/atom_handle.hh>
 
 #include "gl_include.hh"
 #include "color.hh"
 #include "gfx_object_fw.hh"
 #include "gfx_node_fw.hh"
 #include "gfx_node_visitor.hh"
-#include "selection.hh"
 #include "glwin_base.hh"
 #include "scene_observer.hh"
 #include "gfx_prim.hh"
 #include "povray_fw.hh"
+#include "exporter_fw.hh"
 
 namespace ost { namespace gfx {
 
@@ -95,41 +96,53 @@ class DLLEXPORT_OST_GFX Scene {
 
   /// \brief turn fog on or off
   void SetFog(bool f);
-
   /// \brief check fog status
   bool GetFog() const;
-
   /// \brief set the fog color
   void SetFogColor(const Color& c);
-
   /// \brief get the fog color
   Color GetFogColor() const;
 
   /// \brief turn shadow mapping on and off
   void SetShadow(bool f);
-
   /// \brief get shadow mapping status
   bool GetShadow() const;
-
   /// \brief shadow quality from 0 (low) to 3 (high), default=1
   void SetShadowQuality(int q);
-
+  /// \brief get shadow quality
+  int GetShadowQuality() const;
+  /// \brief multiplier for shadow strength
   void SetShadowWeight(float w);
+  /// \brief get shadow strength
+  float GetShadowWeight() const;
 
+  /// experimental feature
   void SetDepthDarkening(bool f);
+  /// experimental feature
   void SetDepthDarkeningWeight(float f);
 
+  /// experimental feature
   void SetAmbientOcclusion(bool f);
+  /// experimental feature
   bool GetAmbientOcclusion() const;
+  /// experimental feature
   void SetAmbientOcclusionWeight(float f);
+  /// experimental feature
+  float GetAmbientOcclusionWeight() const;
+  /// experimental feature
   void SetAmbientOcclusionMode(uint m);
+  /// experimental feature
+  uint GetAmbientOcclusionMode() const;
+  /// experimental feature
   void SetAmbientOcclusionQuality(uint q);
+  /// experimental feature
+  uint GetAmbientOcclusionQuality() const;
   
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
   void SetShadingMode(const std::string& smode);
 
-  /// \name clipping planes
+  /// \name clipping planes, fog and field-of-view
   //@{
   /// \brief get near clipping plane
   float GetNear() const;
@@ -179,10 +192,11 @@ class DLLEXPORT_OST_GFX Scene {
   /// \brief turn on automatic auto-slabbing (using the fast bounding box alg)
   // TODO: more sophisticated mode, aka fast, precise, max
   void AutoAutoslab(bool f);
-  //@}
   
   /// \brief get current state of automatic auto-slabbing
   bool GetAutoAutoslab() const { return auto_autoslab_; }
+
+  //@}
 
   /// \brief set stereo mode
   /// one of 0 (off), 1 (quad-buffered) 2 (interlaced (for special monitors))
@@ -211,7 +225,7 @@ class DLLEXPORT_OST_GFX Scene {
   Real GetStereoDistance() const {return stereo_distance_;}
   
   /// \brief set stereo algorithm
-  /// one of 0 or 1
+  /// one of 0 (default) or 1
   void SetStereoAlg(unsigned int);
   /// \brief return current stereo algorithm
   unsigned int GetStereoAlg() const {return stereo_alg_;}
@@ -222,6 +236,10 @@ class DLLEXPORT_OST_GFX Scene {
   void SetLightProp(const Color& amb, const Color& diff, const Color& spec);
   /// \brief set ambient, diffuse and specular light intensity
   void SetLightProp(float amb, float diff, float spec);
+  /// \brief get main light direction
+  geom::Vec3 GetLightDir() const {return light_dir_;}
+  /// \brief get main light orientation (internal debugging use)
+  geom::Mat3 GetLightRot() const {return light_rot_;}
 
   /// \brief set the selection mode
   /*
@@ -236,13 +254,17 @@ class DLLEXPORT_OST_GFX Scene {
   /// if a main offscreen buffer is active (\sa StartOffscreenMode), then the
   /// dimensions here are ignored
   void Export(const String& fname, unsigned int w,
-              unsigned int h, bool transparent=true);
+              unsigned int h, bool transparent=false);
 
   /// \brief export snapshot of current scene
-  void Export(const String& fname, bool transparent=true);
+  void Export(const String& fname, bool transparent=false);
 
   /// \brief export scene into povray files named fname.pov and fname.inc
   void ExportPov(const std::string& fname, const std::string& wdir=".");
+
+  /// \rbrief export scene via exporter
+  void Export(Exporter* ex) const;
+
   //@}
   /// \brief entry point for gui events (internal use)
   void OnInput(const InputEvent& e);
@@ -395,16 +417,29 @@ class DLLEXPORT_OST_GFX Scene {
   bool StartOffscreenMode(unsigned int w, unsigned int h);
   /// \brief stops offline rendering in interactive mode
   void StopOffscreenMode();
+
+  /// \brief show center of rotation of true
+  void SetShowCenter(bool f);
+
+  bool GetShowCenter() const {return cor_flag_;}
+
+  /// \brief if true fix center of rotation upon input induced shift
+  void SetFixCenter(bool f) {fix_cor_flag_=f;}
+
+  /// \brief return flag
+  bool GetFixCenter() const {return fix_cor_flag_;}
   
+  /// experimental feature
   void SetBlur(uint n);
+  /// experimental feature
   void BlurSnapshot();
 
+  /// internal use
   void RenderText(const TextPrim& t);
 
-  geom::Vec3 GetLightDir() const {return light_dir_;}
-  geom::Mat3 GetLightRot() const {return light_rot_;}
-
+  /// experimental feature
   void SetBeacon(int wx, int wy);
+  /// experimental feature
   void SetBeaconOff();
 
 protected:
@@ -457,7 +492,8 @@ private:
   Color light_diff_;
   Color light_spec_;
 
-  bool axis_flag_;
+  bool cor_flag_;
+  bool fix_cor_flag_;
   bool fog_flag_;
   Color fog_color_;
   bool auto_autoslab_;

@@ -22,9 +22,12 @@
 
 #include <ost/gui/module_config.hh>
 
-#include <QMainWindow>
-#include <QSyntaxHighlighter>
-#include <QTextEdit>
+
+#include <QWidget>
+
+class QTextEdit;
+class QSyntaxHighlighter;
+
 namespace ost { namespace gui {
 
 /// \brief a simplistic file viewer
