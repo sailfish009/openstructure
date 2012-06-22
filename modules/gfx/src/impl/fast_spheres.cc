@@ -21,6 +21,7 @@
   Author: Ansgar Philippsen
 */
 
+#include <ost/config.hh>
 #if OST_SHADER_SUPPORT_ENABLED
 #include <ost/gfx/shader.hh>
 #endif
