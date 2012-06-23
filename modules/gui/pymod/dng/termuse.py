@@ -45,7 +45,7 @@ class TerminalUsageDialog(QDialog):
     return str(self.path_combo.currentText())
 
 def _CreateLinks(bin_dir, sel_dir):
-  for bin in ('ost', 'dng',):
+  for bin in ('ost', 'dng','lddt', 'chemdict_tool'):
     if os.path.exists(os.path.join(sel_dir, bin)):
       os.unlink(os.path.join(sel_dir, bin))
     os.system('ln -s "%s" "%s"' % (os.path.join(bin_dir, bin), 
@@ -63,7 +63,7 @@ def InstallTerminalPrograms():
     if not os.access(sel_path, os.W_OK):
       admin_rights=AdminRights()
       if admin_rights.Acquire():
-        for bin in ('ost', 'dng'):
+        for bin in ('ost', 'dng', 'lddt', 'chemdict_tool'):
           admin_rights.CreateLink(os.path.join(bin_dir, bin), 
                                   os.path.join(sel_path, bin))
       admin_rights.Release()
