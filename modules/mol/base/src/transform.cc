@@ -40,21 +40,11 @@ Transform::Transform():
   update_tm();
 }
     
-Mat4 Transform::GetMatrix() const
-{
-  return tm_;
-}
-
 void Transform::SetMatrix(const Mat4& m)
 {
   tm_=m;
   ttm_ = Transpose(tm_);
   update_components();
-}
-
-Mat4 Transform::GetTransposedMatrix() const
-{
-  return ttm_;
 }
 
 void Transform::SetTrans(const Vec3& t) 
@@ -212,6 +202,8 @@ void Transform::update_tm()
                0.0,0.0,1.0,-cen_[2],
                0.0,0.0,0.0,1.0);
   ttm_ = Transpose(tm_);
+  // TODO: calculate from rot, cen and trans
+  itm_ = Invert(tm_);
 }
 
 void Transform::update_components()

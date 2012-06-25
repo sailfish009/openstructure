@@ -2016,6 +2016,12 @@ void Scene::stereo_projection(int view)
     // standard viewing frustum
     glFrustum(left,right,bot,top,zn,zf);
   }
+
+  // TODO: generate both directly from near/far/fov
+  float pm[16];
+  glGetFloatv(GL_PROJECTION_MATRIX,pm);
+  pmat_=geom::Transpose(geom::Mat4(pm));
+  ipmat_=geom::Invert(pmat_);
 }
 
 void Scene::render_stereo()

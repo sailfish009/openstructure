@@ -38,8 +38,9 @@ class DLLEXPORT_OST_MOL Transform {
 public:
   Transform();
 
-  geom::Mat4 GetMatrix() const;
-  geom::Mat4 GetTransposedMatrix() const;
+  geom::Mat4 GetMatrix() const {return tm_;}
+  geom::Mat4 GetTransposedMatrix() const {return ttm_;}
+  geom::Mat4 GetInvertedMatrix() const {return itm_;}
 
   void SetCenter(const geom::Vec3& c);
   geom::Vec3 GetCenter() const;
@@ -81,6 +82,7 @@ private:
   geom::Vec3 cen_;
   geom::Mat4 tm_;
   geom::Mat4 ttm_;
+  geom::Mat4 itm_;
 
   void update_tm();
   void update_components();

@@ -126,6 +126,10 @@ void export_Scene()
     .add_property("bg",
                   &Scene::GetBackground, 
                   &Scene::SetBackground)
+    .def("GetProjection",&Scene::GetProjection)
+    .add_property("projection",&Scene::GetProjection)
+    .def("GetInvertedProjection",&Scene::GetInvertedProjection)
+    .add_property("inverted_projection",&Scene::GetInvertedProjection)
     .def("SetNear",&Scene::SetNear)
     .def("GetNear",&Scene::GetNear)
     .add_property("near", &Scene::GetNear, &Scene::SetNear)

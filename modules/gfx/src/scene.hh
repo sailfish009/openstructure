@@ -142,6 +142,9 @@ class DLLEXPORT_OST_GFX Scene {
   /// one of fallback, basic, default, hf, toon1, toon2
   void SetShadingMode(const std::string& smode);
 
+  geom::Mat4 GetProjection() const {return pmat_;}
+  geom::Mat4 GetInvertedProjection() const {return ipmat_;}
+
   /// \name clipping planes, fog and field-of-view
   //@{
   /// \brief get near clipping plane
@@ -514,6 +517,7 @@ private:
   float znear_,zfar_; // near and far clipping plane
   float fnear_,ffar_; // fog near and far offsets
 
+  geom::Mat4 pmat_,ipmat_; // projection and inverted projection matrix
   unsigned int vp_width_,vp_height_; // viewport
 
   SceneViewStack scene_view_stack_;
