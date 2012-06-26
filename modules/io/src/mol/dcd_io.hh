@@ -36,9 +36,11 @@ namespace ost { namespace io {
     atom layout of the entity must match the trajectory file
 */
 mol::CoordGroupHandle DLLEXPORT_OST_IO LoadCHARMMTraj(const mol::EntityHandle& ent,
-                                                       const String& trj_filename,
-                                                       unsigned int stride=1,
-                                                       bool lazy_load=false);
+                                                      const String& trj_filename,
+                                                      unsigned int stride=1,
+                                                      bool lazy_load=false,
+                                                      bool detect_swap=true,
+                                                      bool byte_swap=false);
 
 
 /*! \brief export coord group as PDB file and DCD trajectory
