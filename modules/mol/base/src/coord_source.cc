@@ -35,7 +35,9 @@ CoordSource::CoordSource(const AtomHandleList& atoms):
   atoms_(atoms), 
   entity_(),
   mutable_(false),
-  atom_dict_()
+  atom_dict_(),
+  delta_(1.0),
+  start_time_(0.0)
 {
   if (!atoms_.empty()) {
     entity_=atoms_.front().GetEntity();
@@ -43,12 +45,6 @@ CoordSource::CoordSource(const AtomHandleList& atoms):
   for(uint n=0;n<atoms_.size();++n) {
     atom_dict_[atoms_[n].GetHashCode()]=n;
   }
-}
-
-  
-CoordSource::~CoordSource()
-{
-  
 }
 
 void CoordSource::CopyFrame(uint frame_id)

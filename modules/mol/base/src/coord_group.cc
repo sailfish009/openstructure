@@ -66,6 +66,30 @@ uint CoordGroupHandle::GetFrameCount() const
   return source_->GetFrameCount();
 }
 
+float CoordGroupHandle::GetDelta() const
+{
+  this->CheckValidity();  
+  return source_->GetFrameDelta();
+}
+
+void CoordGroupHandle::SetDelta(float d)
+{
+  this->CheckValidity();  
+  source_->SetFrameDelta(d);
+}
+
+float CoordGroupHandle::GetStartTime() const
+{
+  this->CheckValidity();  
+  return source_->GetStartTime();
+}
+
+void CoordGroupHandle::SetStartTime(float t)
+{
+  this->CheckValidity();  
+  source_->SetStartTime(t);
+}
+
 void CoordGroupHandle::SetFramePositions(uint frame, 
                                          const std::vector<geom::Vec3>& clist)
 {

@@ -43,14 +43,22 @@ class DLLEXPORT_OST_MOL CoordSource {
 public:
   CoordSource(const AtomHandleList& atoms);
   
-  virtual ~CoordSource();
+  virtual ~CoordSource() {}
   
-  CoordSourcePtr Extract(int start=0, int stop=-1, int step=1);
-  
-  virtual uint GetFrameCount()=0;
-  
+  virtual uint GetFrameCount() const =0;
+
   virtual CoordFramePtr GetFrame(uint frame_id) const = 0;
  
+  CoordSourcePtr Extract(int start=0, int stop=-1, int step=1);
+  
+  // time in ps between frames
+  float GetFrameDelta() const {return delta_;}
+  void SetFrameDelta(float d) {delta_=d;}
+
+  // start time in ps
+  float GetStartTime() const {return start_time_;}
+  void SetStartTime(float t) {start_time_=t;}
+  
   int GetAtomCount() const;
   
   EntityHandle GetEntity() const;
@@ -79,6 +87,7 @@ private:
   EntityHandle   entity_;
   bool           mutable_;
   std::map<long,uint> atom_dict_;
+  float delta_,start_time_;
 };
 
 }}

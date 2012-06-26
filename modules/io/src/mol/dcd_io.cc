@@ -306,7 +306,7 @@ public:
   }
     
   
-  virtual uint GetFrameCount() 
+  virtual uint GetFrameCount() const
   { 
     if (!frame_count_)
       const_cast<DCDCoordSource*>(this)->FetchFrame(0);
