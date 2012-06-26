@@ -109,7 +109,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   :param join_spread_atom_records: If set, overrides the value of 
       :attr:`IOProfile.join_spread_atom_records`.
   
-  :param remote: If set to true, the method tries to load the pdb from the 
+  :param remote: If set to True, the method tries to load the pdb from the 
      remote pdb repository www.pdb.org. The filename is then interpreted as the 
      pdb id.
      
@@ -119,7 +119,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   :param dialect: Specifies the particular dialect to use. If set, overrides 
     the value of :attr:`IOProfile.dialect`
 
-  :param seqres: Whether to read SEQRES records. If set to true, the loaded 
+  :param seqres: Whether to read SEQRES records. If set to True, the loaded 
     entity and seqres entry will be returned as a tuple.
 
   :type dialect: :class:`str`
@@ -238,7 +238,7 @@ LoadMapList=LoadImageList
 
 def LoadCHARMMTraj(crd, dcd_file=None, profile='CHARMM',
                    lazy_load=False, stride=1, 
-                   dialect=None):
+                   dialect=None, detect_swap=True,swap_bytes=False):
   """
   Load CHARMM trajectory file.
   
@@ -257,6 +257,10 @@ def LoadCHARMMTraj(crd, dcd_file=None, profile='CHARMM',
       set, overrides the value of the profile
   :param profile: The IO profile to use for loading the PDB file. See 
       :doc:`profile`.
+  :param detect_swap: if True (the default), then automatic detection of endianess
+      is attempted, otherwise the swap_bytes parameter is used
+  :param swap_bytes: is detect_swap is False, this flag determines whether bytes
+      are swapped upon loading or not
   """
   if not isinstance(crd, mol.EntityHandle):
     if dcd_file==None:
@@ -266,7 +270,7 @@ def LoadCHARMMTraj(crd, dcd_file=None, profile='CHARMM',
   else:
     if not dcd_file:
       raise ValueError("No DCD filename given")
-  return LoadCHARMMTraj_(crd, dcd_file, stride, lazy_load)
+  return LoadCHARMMTraj_(crd, dcd_file, stride, lazy_load, detect_swap, swap_bytes)
 
 def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=None, profile='DEFAULT', remote=False, strict_hydrogens=None, seqres=False, info=False):
   """
@@ -282,7 +286,7 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
   :param fault_tolerant: Enable/disable fault-tolerant import. If set, overrides
      the value of :attr:`IOProfile.fault_tolerant`.
   
-  :param remote: If set to true, the method tries to load the pdb from the 
+  :param remote: If set to True, the method tries to load the pdb from the 
      remote pdb repository www.pdb.org. The filename is then interpreted as the 
      pdb id.
      
@@ -291,7 +295,7 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
   :param strict_hydrogens: If set, overrides the value of 
      :attr:`IOProfile.strict_hydrogens`.
 
-  :param seqres: Whether to read SEQRES records. If set to true, the loaded 
+  :param seqres: Whether to read SEQRES records. If set to True, the loaded 
     entity and seqres entry will be returned as second item.
 
   :param info: Whether to return an info container with the other output.
