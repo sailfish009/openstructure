@@ -44,6 +44,7 @@ namespace ost { namespace gfx { namespace impl {
     FastSphereRenderer(size_t reserve=0);
     FastSphereRenderer(const DataList&);
 
+    void Clear();
     void Add(float pos[3], float col[4], float rad);
     void Add(const geom::Vec3& pos, const Color& col, float rad);
 

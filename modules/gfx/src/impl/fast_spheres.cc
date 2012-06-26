@@ -41,6 +41,11 @@ namespace ost { namespace gfx { namespace impl {
     data_(d)
   {}
 
+  void FastSphereRenderer::Clear()
+  {
+    data_.clear();
+  }
+
   void FastSphereRenderer::Add(float pos[3], float col[4], float rad)
   {
     static VData data;

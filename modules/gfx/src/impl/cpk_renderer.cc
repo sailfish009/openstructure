@@ -64,6 +64,7 @@ void CPKRenderer::PrepareRendering(GfxView& view, IndexedVertexArray& va, bool i
 #if OST_SHADER_SUPPORT_ENABLED
       if(options_->GetSphereMode()==1 || options_->GetSphereMode()==2) {
         FastSphereRenderer& fsr = is_sel ? sel_fsr_ : fsr_;
+        fsr.Clear();
         for(AtomEntryMap::const_iterator it=view.atom_map.begin();it!=view.atom_map.end();++it) {
           fsr.Add(it->second.atom.GetPos(),
                   is_sel? sel_clr : it->second.color,
