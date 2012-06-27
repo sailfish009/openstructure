@@ -48,7 +48,7 @@ If you would like to use the graphical user interface, also install:
  * `PyQt4 <http://www.riverbankcomputing.co.uk/software/pyqt/download>`_.
 
 In case you are compiling under Windows you have to install `Visualstudio
-2008 <http://www.microsoft.com/express/Downloads>`_. to compile the dependecies 
+2008 <http://www.microsoft.com/express/Downloads>`_. to compile the dependencies 
 and OpenStructure. We recommend to compile the dependecies manually. Enter the 
 directories where the dependencies are located in Tools->Options->Projects and 
 Solutions->VC++ directories. Choose 'bin' directories to enter program paths to 
@@ -68,11 +68,11 @@ OpenStructure uses `git` as the revision control system. The main repository can
 
   git clone https://dng.biozentrum.unibas.ch/git/ost.git <directory-name>
   
-The above command will clone OpenStructre into the directory called `directory-name`. If omitted, the directory will be called ost. Alternatively, you might consider getting one of the nightly source code snapshots from the `downloads section <http://www.openstructure.org/download/>`_.
+The above command will clone OpenStructre into the directory called `directory-name`. If omitted, the directory will be called ost. 
 
 .. note::
 
-  Some version of curl have have trouble with the certificate of the 
+  Some versions of curl have have trouble with the certificate of the 
   OpenStructure git server and fail to clone the repository. To work around 
   this, disable the SSL certificate verification with the following command:
   
@@ -103,14 +103,14 @@ OpenStructure uses `CMake <http://cmake.org>`_ for compiling and building the pr
 
 There are two kinds of options: Options that let you control the building behaviour, enabling and disabling the compilation of certain modules and options that let you tell CMake where to find the dependencies. All of them are passed to CMake with via `-D<opt>=<value>`.
 
-On Windows, use Tools -> VisualStudio commandline prompt from within VisualStudio)
+On Windows, use Tools -> VisualStudio -> commandline prompt from within VisualStudio
 
 Flag to choose build generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-CMake supports different build generators. On UNIX, that is MacOS X and Linux, the default build generator is Makefiles, but it is also possible to use other programs. For a list of supported build generators on your platform, start cmake without parameters. 
+CMake supports different build generators. On UNIX, i.e. MacOS X and Linux, the default build generator is Makefiles, but it is also possible to use other programs. For a list of supported build generators on your platform, start cmake without parameters. 
 
-On Windows you have to explicitly set the buil generator to "Visual Studio 9 2008":
+On Windows you have to explicitly set the build generator to "Visual Studio 9 2008"(or a later version):
 
 .. code-block:: bash
 
@@ -133,11 +133,25 @@ By default, `CMake <http://cmake.org>`_ searches the standard directories for de
 
  * `SYS_ROOT` controls the general prefix for searching libraries and headers.
    By default, it is set to `/`.
+   
+ * `COMPOUND_LIB` specifies the location of the compound library and
+   activates the rule-based-builder. The compound library is based on 
+   the component dictionary released by the PDB, and it specifies atoms
+   of a certain residue or connectivities between atoms etc. The 
+   <a href="/docs/conop/compoundlib/?highlight=component"> compound library 
+   itself is created</a> from the component dictionary. By default this is 
+   switched off.
+
+ * `COMPILE_TMTOOLS` will activate bindings for TMAlign and TMScore, which are 
+   then available at python level. By default this is switched off.
+
+ * `USE_NUMPY` allows OpenStructure to pass back data in NumPy format. By 
+   default this is switched off.
 
 Build Options
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
- * `ENABLE_UI` controls whether to build the graphical user interface module. By
+ * `ENABLE_GUI` controls whether to build the graphical user interface module. By
    default it is set to true. 
  * `ENABLE_IMG` controls whether to build the image processing module. This will
    enable support for density maps, and general image processing in 1, 2 an 3
@@ -150,6 +164,17 @@ Build Options
    used.
    
  * If `OPTIMIZE` is set to 1, an optimized version of OpenStructure is built.
+
+ * `PREFIX` specifies the location on the file system where to install 
+   OpenStructure
+
+ * `USE_DOUBLE_PRECISION` will switch on double precision within OpenStructure. 
+   By default this is switched off.
+
+ * `ENABLE_STATIC` allows some parts of OpenStructure to be statically linked 
+   and thus can be used more easily across a heterogeneous setup, e.g. older 
+   systems and newer systems.
+
 
 Example Configurations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -209,3 +234,4 @@ To get the newest changes from the central git repository, enter
   git pull
 
 in your terminal. This will fetch the newest changes.
+
