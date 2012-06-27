@@ -42,18 +42,24 @@ public:
   ~CompoundLib();
   
   CompoundPtr FindCompound(const String& id, Compound::Dialect dialect);
+  Date GetCreationDate(void);
+  String GetOSTVersionUsed(void);
   void AddCompound(const CompoundPtr& compound);
   CompoundLibPtr Copy(const String& filename) const;
   void ClearCache();
+  void SetChemLibInfo(void);
 private:
     CompoundLib();
+
     void LoadAtomsFromDB(CompoundPtr comp, int pk);
     void LoadBondsFromDB(CompoundPtr comp, int pk);    
 private:
-  CompoundMap  compound_cache_;
-  sqlite3*     conn_;
-  bool         chem_type_available_; // weather pdbx_type is available in db
-  bool         name_available_; // weather name is available in db
+  CompoundMap       compound_cache_;
+  sqlite3*          conn_;
+  bool              chem_type_available_; // weather pdbx_type is available in db
+  bool              name_available_; // weather name is available in db
+  Date              creation_date_;
+  String            ost_version_used_;
 };
 
 }}

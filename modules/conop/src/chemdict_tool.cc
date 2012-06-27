@@ -88,9 +88,10 @@ int main(int argc, char const *argv[])
   assert(compound_lib);
   conop::CompoundLibPtr in_mem_lib=in_mem ? compound_lib :
                                    compound_lib->Copy(":memory:");
-  compound_lib.reset();  
+  compound_lib.reset();
   cdp.SetCompoundLib(in_mem_lib);
   cdp.Parse();
+  in_mem_lib->SetChemLibInfo();
   in_mem_lib->Copy(argv[3]);  
   return 0;
 }

@@ -74,6 +74,11 @@ CompoundPtr find_compound(CompoundLibPtr comp_lib,
   return comp_lib->FindCompound(tlc, tr_dialect(dialect));
 }
 
+String get_creation_date(CompoundLibPtr comp_lib)
+{
+  return comp_lib->GetCreationDate().ToString();
+}
+
 }
 void export_Compound() {
 
@@ -130,6 +135,8 @@ void export_Compound() {
     .def("FindCompound", &find_compound, 
          (arg("tlc"), arg("dialect")="PDB"))
     .def("ClearCache", &CompoundLib::ClearCache)
+    .def("GetOSTVersionUsed", &CompoundLib::GetOSTVersionUsed)
+    .def("GetCreationDate", &get_creation_date, (arg("comp_lib")))
   ;
   
   class_<AtomSpecList>("AtomSpecList", init<>())
