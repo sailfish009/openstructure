@@ -380,6 +380,7 @@ void Scene::InitGL(bool full)
     LOG_INFO(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
 
 #if OST_SHADER_SUPPORT_ENABLED
+    LOG_INFO("shader version " << glGetString(GL_SHADING_LANGUAGE_VERSION));
     LOG_DEBUG("Scene: shader pre-gl");
     Shader::Instance().PreGLInit();
 #endif
