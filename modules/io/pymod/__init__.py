@@ -137,8 +137,11 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
       return val1
   if isinstance(profile, str):
     prof=profiles[profile].Copy()
-  else:
+  elif isinstance(profile, IOProfile):
     prof=profile.Copy()
+  else:
+    raise TypeError('profile must be of type string or IOProfile, '+\
+                    'instead of %s'%type(profile))
   if dialect not in (None, 'PDB', 'CHARMM',):
     raise ValueError('dialect must be PDB or CHARMM')
   prof.calpha_only=_override(prof.calpha_only, calpha_only)
@@ -208,8 +211,11 @@ def SavePDB(models, filename, dialect=None,  pqr=False, profile='DEFAULT'):
     models=[models]
   if isinstance(profile, str):
     profile=profiles[profile].Copy()
-  else:
+  elif isinstance(profile, IOProfile):
     profile.Copy()
+  else:
+    raise TypeError('profile must be of type string or IOProfile, '+\
+                    'instead of %s'%type(profile))
   profile.dialect=_override(profile.dialect, dialect)
   writer=PDBWriter(filename, profile)
   writer.SetIsPQR(pqr)
