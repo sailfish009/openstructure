@@ -2020,10 +2020,16 @@ void Scene::stereo_projection(int view)
   }
 
   // TODO: generate both directly from near/far/fov
-  float pm[16];
-  glGetFloatv(GL_PROJECTION_MATRIX,pm);
-  pmat_=geom::Transpose(geom::Mat4(pm));
-  ipmat_=geom::Invert(pmat_);
+  try {
+    float pm[16];
+    glGetFloatv(GL_PROJECTION_MATRIX,pm);
+    pmat_=geom::Transpose(geom::Mat4(pm));
+    ipmat_=geom::Invert(pmat_);
+  } catch (geom::GeomException& e) {
+    LOG_WARNING("caught GeomException in Scene::stereo_projection: " << e.what());
+    pmat_=geom::Mat4();
+    ipmat_=geom::Mat4();
+  }
 }
 
 void Scene::render_stereo()

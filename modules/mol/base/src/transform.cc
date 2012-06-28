@@ -22,6 +22,7 @@
 #include <ost/info/info.hh>
 #include <ost/info/geom_info_conversion.hh>
 #endif
+#include <ost/log.hh>
 #include "transform.hh"
 
 namespace ost { 
@@ -203,7 +204,12 @@ void Transform::update_tm()
                0.0,0.0,0.0,1.0);
   ttm_ = Transpose(tm_);
   // TODO: calculate from rot, cen and trans
-  itm_ = Invert(tm_);
+  try {
+    itm_ = Invert(tm_);
+  } catch (GeomException& e) {
+    LOG_WARNING("caught GeomException in Transform::update_tm: " << e.what());
+    itm_=geom::Mat4();
+  }
 }
 
 void Transform::update_components()
