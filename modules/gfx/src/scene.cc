@@ -628,11 +628,13 @@ void Scene::RenderText(const TextPrim& t)
   Shader::Instance().Activate("");
 #endif
 
-  glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glDisable(GL_NORMALIZE);
   glDisable(GL_CULL_FACE);
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER,0.5);
   glEnable(GL_TEXTURE_2D);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
   glEnable(GL_BLEND);

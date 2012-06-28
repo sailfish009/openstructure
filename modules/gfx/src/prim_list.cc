@@ -155,7 +155,7 @@ void PrimList::CustomPreRenderGL(bool flag)
 
 void PrimList::CustomRenderGL(RenderPass pass)
 {
-  if(pass==STANDARD_RENDER_PASS || pass==TRANSPARENT_RENDER_PASS) {
+  if(pass==STANDARD_RENDER_PASS) {
     va_.RenderGL();
     simple_va_.RenderGL();
     render_text();
