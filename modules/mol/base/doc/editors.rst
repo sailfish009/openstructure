@@ -213,6 +213,23 @@ The basic functionality of editors is implemented in the EditorBase class.
                       valid atom identifier.
      :type new_name:  string
 
+  .. method:: Connect(atom1, atom2)
+              Connect(atom1, atom2, bond_order)
+
+     Add a bond between two atoms.
+
+     :param atom1:       Must be a valid atom
+     :type atom1:        :class:`AtomHandle`
+     :param atom2:       Must be a valid atom
+     :type atom2:        :class:`AtomHandle`
+     :param bond_order:  bond order (e.g. 1=single, 2=double, 3=triple)
+     :type bond_order:   :class:`int`
+
+BondHandle (EditorBase::*connect_b)(const AtomHandle&, const AtomHandle&,
+                                    Real, Real, Real)=&EditorBase::Connect;
+BondHandle (EditorBase::*connect_d)(const AtomHandle&, const AtomHandle&,
+                                    Real, Real, Real,
+                                    unsigned char)=&EditorBase::Connect;
 
 Editor for the External Coordinate System
 --------------------------------------------------------------------------------
