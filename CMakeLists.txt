@@ -240,6 +240,9 @@ endif()
 
 if (ENABLE_SPNAV)
   find_package(SpNav REQUIRED)
+  set(_SPNAV ON)
+else()
+  set(_SPNAV OFF)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
@@ -252,7 +255,6 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${FFTW_INCLUDE_PATH} 
                     ${EIGEN2_INCLUDE_DIR}
                     ${TIFF_INCLUDE_DIR}
-                    ${SPNAV_INCLUDE_DIR}
                     ${PNG_INCLUDE_DIR}
                     )
 if(USE_NUMPY)
@@ -300,6 +302,7 @@ message(STATUS
         "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support                   (-DUSE_SHADER) : ${_SHADER}\n"
         "   Numpy support                     (-DUSE_NUMPY) : ${_NUMPY}\n"
+        "   SpaceNav Device support        (-DENABLE_SPNAV) : ${_SPNAV}\n"
         "   Optimize                           (-DOPTIMIZE) : ${_OPT}\n"
         "   Profiling support                   (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision       (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"

@@ -98,6 +98,7 @@ log_reader.hh
 )
 
 if (ENABLE_SPNAV)
+include_directories(${SPNAV_INCLUDE_DIR})
 set(OST_GUI_INPUT_HEADERS
 spnav_input.hh
   IN_DIR input
