@@ -1968,6 +1968,37 @@ void Scene::render_glow()
 #endif  
 }
 
+namespace {
+  geom::Mat4 frustum(float left, float right, float bot, float top, float near, float far) {
+    float rl=1.0/(right-left);
+    float tb=1.0/(top-bot);
+    float fn=1.0/(far-near);
+    float tn=2.0*near;
+    return geom::Mat4(tn*rl, 0.0f, (right+left)*rl, 0.0f,
+                      0.0f, tn*tb, (top+bot)*tb, 0.0f,
+                      0.0f, 0.0f, -(far+near)*fn, -tn*far*fn,
+                      0.0f, 0.0f, -1.0f, 0.0f);
+  }
+
+  geom::Mat4 translate(float x, float y, float z) {
+    return geom::Mat4(1.0f, 0.0f, 0.0f, x,
+                      0.0f, 1.0f, 0.0f, y,
+                      0.0f, 0.0f, 1.0f, z,
+                      0.0f, 0.0f, 0.0f, 1.0f);
+  }
+
+  geom::Mat4 rotate(float a, float x, float y, float z) {
+    float c=cos(a);
+    float d=1.0-c;
+    float s=sin(a);
+    geom::Vec3 v=geom::Normalize(geom::Vec3(x,y,z));
+    return geom::Mat4(v[0]*v[0]*d+c, v[0]*v[1]*d-v[2]*s, v[0]*v[2]*d+v[1]*s, 0.0f, 
+                      v[1]*v[0]*d+v[2]*s, v[1]*v[1]*d+c, v[1]*v[2]*d-v[0]*s, 0.0f, 
+                      v[0]*v[2]*d-v[1]*s, v[1]*v[2]*d+v[0]*s, v[2]*v[2]*d+c, 0.0f,
+                      0.0f, 0.0f, 0.0f, 1.0f);
+  }
+}
+
 void Scene::stereo_projection(int view)
 {
   if(!gl_init_) return;
@@ -1981,6 +2012,8 @@ void Scene::stereo_projection(int view)
   Real left = -top*aspect_ratio_;
   Real right = -left;
 
+  pmat_=frustum(left,right,bot,top,zn,zf);
+
   if(view!=0) {
     
     Real ff=(view<0 ? -1.0 : 1.0);
@@ -1988,19 +2021,17 @@ void Scene::stereo_projection(int view)
 
     if(stereo_alg_==1) {
       // Toe-in method, easy but wrong
-      glFrustum(left,right,bot,top,zn,zf);
       Real dist = -transform_.GetTrans()[2]+stereo_distance_;
-      glTranslated(0.0,0.0,-dist);
-      glRotated(-180.0/M_PI*atan(0.1*ff/iod),0.0,1.0,0.0);
-      glTranslated(0.0,0.0,dist);
+      pmat_=pmat_*translate(0.0,0.0,-dist)*rotate(-atan(0.1*ff/iod),0.0,1.0,0.0)*translate(0.0,0.0,dist);
+
     } else {
       // correct off-axis frustims
 
       Real fo=-transform_.GetTrans()[2]+stereo_distance_;
 
+#if 0
       // correction of near clipping plane to avoid extreme drifting
       // of left and right view
-#if 0
       if(iod*zn/fo<2.0) {
         zn=2.0*fo/iod;
         zf=std::max(zn+Real(0.2),zf);
@@ -2010,21 +2041,16 @@ void Scene::stereo_projection(int view)
       Real sd = -ff*0.5*iod*zn/fo;
       left+=sd;
       right+=sd;
-
-      glFrustum(left,right,bot,top,zn,zf);
-      glTranslated(-ff*iod*0.5,0.0,0.0);
+      pmat_=frustum(left,right,bot,top,zn,zf)*translate(-ff*iod*0.5,0.0,0.0);
     }
 
   } else { // view==0
-    // standard viewing frustum
-    glFrustum(left,right,bot,top,zn,zf);
+    // standard viewing frustum, no need to modify above call
   }
 
-  // TODO: generate both directly from near/far/fov
+  glMultMatrix(geom::Transpose(pmat_).Data());
+
   try {
-    float pm[16];
-    glGetFloatv(GL_PROJECTION_MATRIX,pm);
-    pmat_=geom::Transpose(geom::Mat4(pm));
     ipmat_=geom::Invert(pmat_);
   } catch (geom::GeomException& e) {
     LOG_WARNING("caught GeomException in Scene::stereo_projection: " << e.what());
