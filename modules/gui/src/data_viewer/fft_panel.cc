@@ -36,17 +36,16 @@ FFTPanel::FFTPanel(const Data& parent_data, QWidget* parent):
   DataViewerPanelBase(parent_data,parent),
   size_(std::min<int>(256,std::min<int>(parent_data.GetSize()[0],parent_data.GetSize()[1]))),
   parent_position_(parent_data.GetExtent().GetCenter()),
-  parent_data_(parent_data),
   fft_data_(CreateImage(Extent(Size(size_,size_),Point(0,0)),
-                              COMPLEX,HALF_FREQUENCY))
+                              COMPLEX,HALF_FREQUENCY)),
+  parent_observer_(parent_data)
 {
   QAction* a_set_size=new QAction("Set FFT size",this);
   popupmenu_->addAction(a_set_size);
   connect(a_set_size, SIGNAL(triggered()), this, SLOT(ShowSizeDialog()));
-  SetData(fft_data_);
+  DataViewerPanelBase::SetData(fft_data_);
   update_fft();
 }
-
 
 FFTPanel::~FFTPanel()
 {
@@ -57,8 +56,6 @@ void FFTPanel::ObserverUpdate()
 {
   UpdateView(true);
 }
-
-
 
 void FFTPanel::SetPosition(const Point& p)
 {
@@ -71,9 +68,14 @@ void FFTPanel::ShowSizeDialog()
   bool ok;
   #if QT_VERSION >= 0x040500
     int i = QInputDialog::getInt(this, "Set FFT size","FFT size", size_, 1, 
-                                 std::min<int>(parent_data_.GetSize()[0],parent_data_.GetSize()[1]), 1, &ok);
+                                 std::min<int>(parent_observer_.GetObservedData().GetSize()[0],
+                                               parent_observer_.GetObservedData().GetSize()[1]),
+                                 1, &ok);
   #else
-    int i = QInputDialog::getInteger(this, "Set FFT size","FFT size", size_, 1, std::min<int>(parent_data_.GetSize()[0],parent_data_.GetSize()[1]), 1, &ok);
+    int i = QInputDialog::getInteger(this, "Set FFT size","FFT size", size_, 1,
+                                     std::min<int>(parent_observer_.GetObservedData().GetSize()[0],
+                                                   parent_observer_.GetObservedData().GetSize()[1]),
+                                     1, &ok);
   #endif
   if (ok){
     SetFFTSize(i);
@@ -93,14 +95,21 @@ unsigned int FFTPanel::GetFFTSize()
   return size_;
 }
 
-void  FFTPanel::update_fft()
+void FFTPanel::SetData(const Data& parent_data)
 {
-  ImageHandle im=CreateImage(Extent(Size(size_,size_),
-                                                      parent_position_));
-  im.Paste(parent_data_);
+  parent_observer_=ParentDataObserver(parent_data);
+}
+
+
+void FFTPanel::update_fft()
+{
+  ImageHandle im=CreateImage(Extent(Size(size_,size_),parent_position_));
+  im.Paste(parent_observer_.GetObservedData());
   im.ApplyIP(alg::FFT());
   fft_data_.Paste(im);
   UpdateView(true);
 }
 
+
 }}}  //ns
+

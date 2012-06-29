@@ -83,6 +83,7 @@ DataViewer::~DataViewer()
 void DataViewer::SetData(const Data& d)
 {
   panel_->SetData(d);
+  fft_->SetData(d);
   info_->SetImageInfo(d);
 }
 
