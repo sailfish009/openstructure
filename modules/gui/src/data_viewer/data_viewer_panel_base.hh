@@ -59,7 +59,7 @@ public:
   DataViewerPanelBase(const Data& data,QWidget* parent);
   virtual ~DataViewerPanelBase();
 
-  void SetData(const Data& d);
+  virtual void SetData(const Data& d);
 
   //////////////////
   // event handling
