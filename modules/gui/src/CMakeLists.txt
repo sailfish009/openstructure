@@ -172,9 +172,9 @@ gl_win.hh
 scene_menu.hh
 gosty_app.hh
 admin.hh
+module_config.hh
 main.hh
 main_area.hh
-module_config.hh
 perspective.hh
 remote_site_loader.hh
 scene_selection.hh
@@ -429,13 +429,22 @@ if (ENABLE_IMG)
 endif()
 
 if (ENABLE_SPNAV)
+  set(spnav_enabled 1)
   list(APPEND OST_GUI_SOURCES
       input/spnav_input.cc
   )
   list(APPEND HEADERS_TO_BE_MOCCED
       input/spnav_input.hh
   )
+else()
+  set(spnav_enabled 0)
 endif()
+
+set(config_hh_generator "CMake")
+set(MODULE_CONFIG_HH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/module_config.hh")
+configure_file(module_config.hh.in ${MODULE_CONFIG_HH_FILE})
+# the resulting file, module_config.hh, is already included in OST_GUI_HEADERS
+
 if (APPLE)
   set(ADDITIONAL_LIBRARIES "-framework Security")
 endif()

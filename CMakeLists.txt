@@ -239,7 +239,7 @@ if (ENABLE_GUI)
 endif()
 
 if (ENABLE_SPNAV)
-  find_package(SpNav REQUIRED)
+  #find_package(SpNav REQUIRED)
   set(_SPNAV ON)
 else()
   set(_SPNAV OFF)
