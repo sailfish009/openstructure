@@ -4,7 +4,7 @@ mmCIF File Format
 The mmCIF file format is an alternate container for structural entities, also
 provided by the PDB. Here we describe how to load those files and how to deal
 with information provided above the common PDB format (:class:`MMCifInfo`,
-:class:`MMCifInfoCitation`, :class:`MMCifInfoTransOperation`,
+:class:`MMCifInfoCitation`, :class:`MMCifInfoTransOp`,
 :class:`MMCifInfoBioUnit`, :class:`MMCifInfoStructDetails`).
 
 
@@ -343,7 +343,7 @@ of the annotation available.
     See :attr:`authors`
 
 
-.. class:: MMCifInfoTransOperation
+.. class:: MMCifInfoTransOp
 
   This stores operations needed to transform an
   :class:`entity <ost.mol.EntityHandle>` into a bio unit.
@@ -437,7 +437,7 @@ of the annotation available.
   .. attribute:: operations
 
     Translations and rotations needed to create the bio unit. Filled with
-    objects of class :class:`MMCifInfoTransOperation`.
+    objects of class :class:`MMCifInfoTransOp`.
 
     Also available as :meth:`GetOperations`. May be modified by
     :meth:`AddOperations`
