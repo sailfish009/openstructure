@@ -1254,9 +1254,11 @@ BOOST_AUTO_TEST_CASE(mmcif_testreader)
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("          reading data fields which should not fail...");
+  BOOST_MESSAGE(mmcif_p.GetInfo().GetBioUnits().back().GetID());
   BOOST_CHECK(mmcif_p.GetInfo().GetMethod().str() == "Deep-fry");
   BOOST_CHECK(mmcif_p.GetInfo().GetBioUnits().back().GetDetails() ==
               "author_defined_assembly");
+  BOOST_CHECK(mmcif_p.GetInfo().GetBioUnits().back().GetID() == "2");
   BOOST_CHECK(mmcif_p.GetInfo().GetBioUnits().back().GetChainList().back() ==
               "F");
   MMCifInfoBioUnit bu = mmcif_p.GetInfo().GetBioUnits().back();

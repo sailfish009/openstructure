@@ -411,6 +411,14 @@ of the annotation available.
   This stores information how a structure is to be assembled to form the
   bio unit.
 
+  .. attribute:: id
+
+    The id of a bio unit as given by the original mmCIF file.
+
+    Also available as :meth:`GetID`. May also be modified by :meth:`SetID`.
+
+    :type: :class:`str`
+
   .. attribute:: details
 
     Special aspects of the biological assembly. If not provided, resembles an
@@ -433,6 +441,14 @@ of the annotation available.
 
     Also available as :meth:`GetOperations`. May be modified by
     :meth:`AddOperations`
+
+  .. method:: GetID()
+
+    See :attr:`id`
+
+  .. method:: SetID(id)
+
+    See :attr:`id`
 
   .. method:: GetDetails()
 
@@ -688,7 +704,7 @@ of the annotation available.
   link of polymers in the mmCIF file to sequences stored in external databases 
   such as uniprot. The related categories ``struct_ref_seq`` and 
   ``struct_ref_seq_dif`` also list differences between the sequences of the 
-  deposited structure and the sequences in the database. A promintent example of 
+  deposited structure and the sequences in the database. A prominent example of 
   such differences include point mutations and/or expression tags.
 
   .. attribute:: db_name
@@ -769,8 +785,10 @@ of the annotation available.
   .. attribute:: details
 
     A textual description of the difference, e.g. point mutation, 
-    expressiontag, purification artifact.
+    expression tag, purification artifact.
 
     :type: :class:`str`
+
 ..  LocalWords:  cas isbn pubmed asu seqres conop ConnectAll casp COMPND OBSLTE
-..  LocalWords:  SPRSDE pdb func
+..  LocalWords:  SPRSDE pdb func autofunction exptl attr pdbx oper conf spr dif
+..  LocalWords:  biounits biounit uniprot UNP seqs

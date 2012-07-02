@@ -238,7 +238,16 @@ typedef boost::shared_ptr<MMCifInfoTransOp> MMCifInfoTransOpPtr;
 class DLLEXPORT_OST_IO MMCifInfoBioUnit {
 public:
   /// \brief Create a biounit.
-  MMCifInfoBioUnit(): details_("") {};
+  MMCifInfoBioUnit(): id_(""), details_("") {};
+
+  /// \brief Set id
+  ///
+  /// \param id id
+  void SetID(String id) { id_ = id; }
+  /// \brief Get id
+  ///
+  /// \return id
+  String GetID() const { return id_; }
 
   /// \brief Set details
   ///
@@ -274,6 +283,9 @@ public:
   }
 
   bool operator==(const MMCifInfoBioUnit& bu) const {
+    if (this->id_ != bu.id_) {
+      return false;
+    }
     if (this->details_ != bu.details_) {
       return false;
     }
@@ -314,6 +326,7 @@ public:
   }
 
 private:
+  String id_;                  ///< pdbx_struct_assembly.id
   String details_;             ///< pdbx_struct_assembly.details
   std::vector<String> chains_; ///< chains involved in this assembly
   std::vector<std::vector<MMCifInfoTransOpPtr> > operations_;
