@@ -39,7 +39,7 @@ struct BlurQuadEntry
 {
   float zdist;
   geom::Vec3 p1,p2,p3,p4;
-  gfx::Color c1,c2,c3,c4;
+  RGBAColor c1,c2,c3,c4;
 };
 
 struct BlurQuadEntryLess

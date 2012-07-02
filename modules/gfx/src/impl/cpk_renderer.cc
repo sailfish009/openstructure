@@ -56,7 +56,7 @@ void CPKRenderer::PrepareRendering()
 
 void CPKRenderer::PrepareRendering(GfxView& view, IndexedVertexArray& va, bool is_sel)
 {
-  const Color& sel_clr=this->GetSelectionColor();
+  RGBAColor sel_clr=this->GetSelectionColor();
   float factor=is_sel ? 1.2 : 1.0;
   if(options_!=NULL){
     factor *= options_->GetRadiusMult();

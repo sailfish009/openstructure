@@ -29,10 +29,10 @@
 
 #include "module_config.hh"
 #include "glext_include.hh"
-#include "color.hh"
-#include "bitmap_io.hh"
 
 namespace ost { namespace gfx {
+
+class Bitmap;
 
 class Texture
 {
@@ -46,17 +46,14 @@ public:
   Texture(GLint w, GLint h):
     w_(w),
     h_(h),
-    d_(new Color[w*h])
+    d_(new float[4*w*h])
   {}
 
   Texture(const Bitmap& b);
 
   bool IsValid() const {return d_;}
 
-  Color& operator()(uint u, uint v) {return d_[v*w_+u];}
-  const Color& operator()(uint u, uint v) const {return d_[v*w_+u];}
-
-  float* data() {return d_[0];}
+  float* data() {return &d_[0];}
   
   GLint width() const {return w_;}
   GLint height() const {return h_;}
@@ -66,7 +63,7 @@ public:
 
 private:
   GLint w_,h_;
-  boost::shared_array<Color> d_;
+  boost::shared_array<float> d_;
 };
 
 }} // ns

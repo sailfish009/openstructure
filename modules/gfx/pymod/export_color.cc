@@ -25,38 +25,6 @@ using namespace ost;
 using namespace ost::gfx;
 
 namespace {
-  float get_red(const Color& c) {
-    return c[0];
-  }
-
-  void set_red(Color& c, float v) {
-    c[0]=v;
-  }
-  
-  float get_green(const Color& c) {
-    return c[1];
-  }
-  
-  void set_green(Color& c, float v) {
-    c[1]=v;
-  }
-  
-  float get_blue(const Color& c) {
-    return c[2];
-  }
-  
-  void set_blue(Color& c, float v) {
-    c[2]=v;
-  }
-  
-  float get_alpha(const Color& c) {
-    return c[3];
-  }
-
-  void set_alpha(Color& c, float v) {
-    c[3]=v;
-  }
-
   float get(const Color& c, int i) {
     if(i<0 || i>3) {
       throw Error("Color: index out of bounds");
@@ -73,8 +41,78 @@ namespace {
 
   std::string repr(const Color& c) {
     std::ostringstream m;
-    m << "gfx.Color(" << c[0] << "," << c[1] << "," << c[2] << "," << c[3] << ")";
+    m << "gfx.RGBA(" << c.GetRed() << "," << c.GetGreen() << "," << c.GetBlue() << "," << c.GetAlpha() << ")";
+    m << " gfx.HSV(" << c.GetHue() << "," << c.GetSat() << "," << c.GetVal() << ")";
     return m.str();
+  }
+
+  Color rgb1(float r, float g, float b) {return RGB(r,g,b);}
+  Color rgb2(uchar r, uchar g, uchar b) {return RGB(r,g,b);}
+  Color rgb3(uint rgb) {return RGB(static_cast<uchar>((rgb>>16)&0xff),
+                                   static_cast<uchar>((rgb>>8)&0xff),
+                                   static_cast<uchar>((rgb)&0xff));}
+  Color rgba1(float r, float g, float b, float a) {return RGBA(r,g,b,a);}
+  Color rgba2(uchar r, uchar g, uchar b, uchar a) {return RGBA(r,g,b,a);}
+  Color rgba3(uint rgba) {return RGBA(static_cast<uchar>((rgba>>24)&0xff),
+                                      static_cast<uchar>((rgba>>16)&0xff),
+                                      static_cast<uchar>((rgba>>8)&0xff),
+                                      static_cast<uchar>((rgba)&0xff));}
+
+  tuple get_rgb(const Color& c) {return make_tuple(c.GetRed(),c.GetGreen(),c.GetBlue());}
+  void set_rgb(Color& c, object rgb) {
+    extract<geom::Vec3&> vec3(rgb);
+    if(vec3.check()) {
+      c.SetRGB(vec3()[0],vec3()[1],vec3()[2]);
+    } else {
+      // assume sequence
+      c.SetRGB(extract<float>(rgb[0]),
+               extract<float>(rgb[1]),
+               extract<float>(rgb[2]));
+
+    }
+  }
+
+  tuple get_rgba(const Color& c) {return make_tuple(c.GetRed(),c.GetGreen(),c.GetBlue(),c.GetAlpha());}
+  void set_rgba(Color& c, object rgba) {
+    extract<geom::Vec4&> vec4(rgba);
+    if(vec4.check()) {
+      c.SetRGB(vec4()[0],vec4()[1],vec4()[2]);
+      c.SetAlpha(vec4()[3]);
+    } else {
+      // assume sequence
+      c.SetRGB(extract<float>(rgba[0]),
+               extract<float>(rgba[1]),
+               extract<float>(rgba[2]));
+      c.SetAlpha(extract<float>(rgba[3]));
+    }
+  }
+
+  tuple get_hsv(const Color& c) {return make_tuple(c.GetHue(),c.GetSat(),c.GetVal());}
+  void set_hsv(Color& c, object hsv) {
+    extract<geom::Vec3&> vec3(hsv);
+    if(vec3.check()) {
+      c.SetHSV(vec3()[0],vec3()[1],vec3()[2]);
+    } else {
+      // assume sequence
+      c.SetHSV(extract<float>(hsv[0]),
+               extract<float>(hsv[1]),
+               extract<float>(hsv[2]));
+    }
+  }
+
+  tuple get_hsva(const Color& c) {return make_tuple(c.GetHue(),c.GetSat(),c.GetVal(),c.GetAlpha());}
+  void set_hsva(Color& c, object hsva) {
+    extract<geom::Vec4&> vec4(hsva);
+    if(vec4.check()) {
+      c.SetHSV(vec4()[0],vec4()[1],vec4()[2]);
+      c.SetAlpha(vec4()[3]);
+    } else {
+      // assume sequence
+      c.SetHSV(extract<float>(hsva[0]),
+               extract<float>(hsva[1]),
+               extract<float>(hsva[2]));
+      c.SetAlpha(extract<float>(hsva[3]));
+    }
   }
 
 }
@@ -82,27 +120,45 @@ namespace {
 void export_color()
 {
   class_<Color>("Color",init<>())
-    .def(init<float, float, float, optional<float> >())
     .def(self_ns::str(self))
     .def("__repr__",repr)
-    .def("Red",get_red)
-    .def("Green",get_green)
-    .def("Blue",get_blue)
-    .def("Alpha",get_alpha)
+    .add_property("r",&Color::GetRed,&Color::SetRed)
+    .add_property("g",&Color::GetGreen,&Color::SetGreen)
+    .add_property("b",&Color::GetBlue,&Color::SetBlue)
+    .add_property("a",&Color::GetAlpha,&Color::SetAlpha)
+    .add_property("h",&Color::GetHue,&Color::SetHue)
+    .add_property("s",&Color::GetSat,&Color::SetSat)
+    .add_property("v",&Color::GetVal,&Color::SetVal)
+    .add_property("red",&Color::GetRed,&Color::SetRed)
+    .add_property("green",&Color::GetGreen,&Color::SetGreen)
+    .add_property("blue",&Color::GetBlue,&Color::SetBlue)
+    .add_property("alpha",&Color::GetAlpha,&Color::SetAlpha)
+    .add_property("hue",&Color::GetHue,&Color::SetHue)
+    .add_property("sat",&Color::GetSat,&Color::SetSat)
+    .add_property("val",&Color::GetVal,&Color::SetVal)
+    .add_property("rgb",get_rgb,set_rgb)
+    .add_property("rgba",get_rgba,set_rgba)
+    .add_property("hsv",get_hsv,set_hsv)
+    .add_property("hsva",get_hsva,set_hsva)
+    .def("__getitem__",get)
+    .def("__setitem__",set)
+    // DEPRECATED
+    .def(init<float, float, float, optional<float> >())
+    .def("Red",&Color::GetRed)
+    .def("Green",&Color::GetGreen)
+    .def("Blue",&Color::GetBlue)
+    .def("Alpha",&Color::GetAlpha)
     .def("ToHSV",&Color::ToHSV)
     .def("FromRGBA",&Color::FromRGB)
-    .add_property("r",get_red,set_red)
-    .add_property("g",get_green,set_green)
-    .add_property("b",get_blue,set_blue)
-    .add_property("a",get_alpha,set_alpha)
-    .add_property("red",get_red,set_red)
-    .add_property("green",get_green,set_green)
-    .add_property("blue",get_blue,set_blue)
-    .add_property("alpha",get_alpha,set_alpha)
-    .def("__getitem__",get)
-    .def("__setitem__",get)
     ;
 
+  def("RGB",rgb3);
+  def("RGB",rgb2);
+  def("RGB",rgb1);
+  def("RGBA",rgba3);
+  def("RGBA",rgba2);
+  def("RGBA",rgba1);
   def("HSV",HSV);
+  def("HSVA",HSVA);
   
 }

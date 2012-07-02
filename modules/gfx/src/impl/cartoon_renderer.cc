@@ -362,8 +362,9 @@ void CartoonRenderer::rebuild_spline_obj(IndexedVertexArray& va,
     if(slist.size()==2 && slist[0].type==6) {
       // make a cylinder
       va.AddCylinder(CylinderPrim(slist[0].position,slist[1].position,
-				  options_->GetHelixWidth(),
-				  slist[0].color1,slist[1].color1),
+                                  options_->GetHelixWidth(),
+                                  slist[0].color1,
+                                  slist[1].color1),
 		     options_->GetArcDetail(),true);
       continue;
     }
@@ -458,7 +459,7 @@ TraceProfile CartoonRenderer::transform_and_add_profile(const std::vector<TraceP
       norm=Normalize(norm);
     }
     tf_prof[c]=TraceProfileEntry(vec,norm);
-    Color col = se.color1;
+    RGBAColor col = se.color1;
     if(se.type==1) {
       if(se.nflip) {
         col = c<half ? se.color1 : se.color2;
@@ -523,7 +524,7 @@ void CartoonRenderer::cap_profile(const impl::TraceProfile& p,
                                   bool flipn, IndexedVertexArray& va)
 {
   geom::Vec3 norm=flipn ? -se.direction : se.direction;
-  VertexID pi0 = va.Add(se.position,norm, se.color1,geom::Vec2(0.5,0.5));
+  VertexID pi0 = va.Add(se.position,norm, se.color1, geom::Vec2(0.5,0.5));
   std::vector<VertexID> vertices(p.size());
   float fac=2.0*M_PI/static_cast<float>(p.size()-1);
   for(unsigned int i=0;i<p.size();++i) {

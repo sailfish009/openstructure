@@ -32,47 +32,87 @@
 
 namespace ost { namespace gfx {
 
-/// \brief color with red, green, blue and alpha component
+/*!
+  A color is defined in both RGB as well as HSV space, with an 
+  additional A component. To initialize a color use the factory
+  functions RGB(r,g,b), RGBA(r,g,b,a), HSV(h,s,v) and HSVA(h,s,v,a)
+
+  All values are defined in the range of 0.0 to 1.0, but are not clamped
+  on reading or writing, except when updating cross-domain, i.e. changes 
+  to R,G or B cause HSV to be updated accordingly, and vice versa.
+  This may cause previously out-of-bounds values to become clamped or wrapped
+  to the defined domain. An out-of-bounds H will be wrapped to be between 0 and 1, 
+  all others will be clamped.
+
+  For interaction with OpenGL, an operator float* method exists that
+  return a pointer to a float[4], in the order RGBA
+
+  Operator overloading works on the RGB components, i.e. C1+C2, C+s, C*s
+*/
 class DLLEXPORT_OST_GFX Color :   
   private boost::additive<Color>,
   private boost::additive<Color, float>,
   private boost::multiplicative<Color, float>{
+
 public:
-  Color() {
-    rgba[0]=1.0;
-    rgba[1]=1.0;
-    rgba[2]=1.0;
-    rgba[3]=1.0;
-  }
+  //! \brief initialize to white
+  Color();
+
+  //! convenience to set RGB triplet (ranges 0-1)
+  void SetRGB(float r, float g, float b);
+  //! convenience to get RGB triplet as Vec3
+  geom::Vec3 GetRGB() const;
+  //! convenience to get RGBA as Vec4
+  geom::Vec4 GetRGBA() const;
+  //! retrieve red
+  float GetRed() const;
+  //! set red
+  void SetRed(float);
+  //! retrieve green
+  float GetGreen() const;
+  //! set green
+  void SetGreen(float);
+  //! retrieve blue
+  float GetBlue() const;
+  //! set blue
+  void SetBlue(float);
+  //! convenience to set HSV triplet (ranges 0-1)
+  void SetHSV(float h, float s, float v);
+  //! convenience to get HSV triplet as Vec3
+  geom::Vec3 GetHSV() const;
+  //! convenience to get HSVA as Vec4
+  geom::Vec4 GetHSVA() const;
+  //! retrieve hue
+  float GetHue() const;
+  //! set hue
+  void SetHue(float);
+  //! retrieve saturatuin
+  float GetSat() const;
+  //! set saturation
+  void SetSat(float);
+  //! retrieve value
+  float GetVal() const;
+  //! set value
+  void SetVal(float);
+  //! retrieve alpha
+  float GetAlpha() const;
+  //! set alpha
+  void SetAlpha(float);
+
   
-  Color(float r, float g, float b, float a=1.0) {
-    rgba[0]=r;
-    rgba[1]=g;
-    rgba[2]=b;
-    rgba[3]=a;
-  }
+  /*!
+    \brief direct access to RGBA components
 
-  float& Red() {return rgba[0];}
-  const float& Red() const {return rgba[0];}
-  float& Green() {return rgba[1];}
-  const float& Green() const {return rgba[1];}
-  float& Blue() {return rgba[2];}
-  const float& Blue() const {return rgba[2];}
-  float& Alpha() {return rgba[3];}
-  const float& Alpha() const {return rgba[3];}
+    In the context of a OpenGL call that requires a pointer
+    to an RGB or RGBA float triplet or quadruplet, this will
+    do the automatic casting from a Color object, i.e. 
+    glColor3fv(my_color);
 
-  static Color FromRGB(unsigned char r, unsigned char g, 
-                       unsigned char b, unsigned char a = 0xff) {
-    static float f=1.0/255.0;
-    return Color(f*static_cast<float>(r),f*static_cast<float>(g),
-                 f*static_cast<float>(b),f*static_cast<float>(a));
-  }
-
-  geom::Vec3 ToHSV();
-
-  // these also take care of operator[](uint i) !
-  operator float* () {return rgba;}
-  operator const float* () const {return rgba;}
+    This will also allow access to the RGBA values
+    via the array notation, i.e. my_color[0]
+  */
+  operator const float* () const;
+  operator float* ();
   
   Color& operator*=(float rhs);
   Color& operator+=(float rhs);
@@ -81,19 +121,79 @@ public:
   Color& operator-=(const Color& rhs);    
   Color& operator-=(float rhs);
   Color& operator/=(float rhs);  
+
+  ////////////////////////////////////////////////////////////////
+
+  //! DEPRECATED
+  geom::Vec3 ToHSV() const {return GetHSV();}
+
+  //! DEPRECATED
+  Color(float r, float g, float b, float a=1.0);
+
+  //! DEPRECATED
+  float Red() const {return GetRed();}
+  //! DEPRECATED
+  float Green() const {return GetGreen();}
+  //! DEPRECATED
+  float Blue() const {return GetBlue();}
+  //! DEPRECATED
+  float Alpha() const {return GetAlpha();}
+
+  //! DEPRECATED
+  static Color FromRGB(unsigned char r, unsigned char g, 
+                       unsigned char b, unsigned char a = 0xff) {
+    static float f=1.0/255.0;
+    return Color(f*static_cast<float>(r),f*static_cast<float>(g),
+                 f*static_cast<float>(b),f*static_cast<float>(a));
+  }
+
+  ////////////////////////////////////////////////////////////////
+
 private:
-  float rgba[4];
+  void to_hsv() const;
+  void to_rgb() const;
+
+  mutable float rgba_[4];
+  mutable float hsv_[3];
+  mutable bool rgb_dirty_;
+  mutable bool hsv_dirty_;
 };
+
+/*
+  \brief RGB color spec from floats (0.0-1.0)
+*/
+Color DLLEXPORT_OST_GFX RGB(float r, float g, float b);
+
+/*
+  \brief RGB color spec from bytes (0-255)
+*/
+Color DLLEXPORT_OST_GFX RGB(uchar r, uchar g, uchar b);
+
+/*
+  \brief RGBA color spec from floats (0.0-1.0)
+*/
+Color DLLEXPORT_OST_GFX RGBA(float r, float g, float b, float a);
+
+/*
+  \brief RGBA color spec from bytes (0-255)
+*/
+Color DLLEXPORT_OST_GFX RGBA(uchar r, uchar g, uchar b, uchar a);
 
 /*!
   \brief HSV color spec
 
-  h: Hue from 0 to 360 (0=red, 120=green, 240=blue)
-  s: Saturation from 0 (no color) to 100 (full color)
-  v: Value from 0 (no light, black) to 100 (full light)
+  h: Hue from 0 to 1 (0=red, 2/6=green, 4/6=blue)
+  s: Saturation from 0 (no color) to 1 (full color)
+  v: Value from 0 (no light, black) to 1 (full light)
 */
-Color DLLEXPORT_OST_GFX HSV(double h, double s, double v);
+Color DLLEXPORT_OST_GFX HSV(float h, float s, float v);
 
+/*!
+  \brief HSVA color spec
+*/
+Color DLLEXPORT_OST_GFX HSVA(float h, float s, float v, float a);
+
+//! \brief string form
 DLLEXPORT_OST_GFX std::ostream& operator<<(std::ostream&, const Color& c);
 
 }}
