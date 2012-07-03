@@ -325,10 +325,22 @@ int main (int argc, char **argv)
         exit(-1);
       }
       // performs structural checks and filters the structure   
-      v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+      try { 
+        v=alg::CheckStereoChemistry(v,bond_table,angle_table,bond_tolerance,angle_tolerance);
+      } catch (std::exception& e) {       
+        std::cout << "An error occurred during the structure quality checks, stage 1:" << std::endl;    
+        std::cout << e.what() << std::endl;
+        exit(-1);
+      }
       cov = compute_coverage(v,glob_dist_list);
       std::cout << "Coverage after stereo-chemical checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
-      v=alg::FilterClashes(v,nonbonded_table);
+      try {
+        v=alg::FilterClashes(v,nonbonded_table);
+      } catch (std::exception& e) {       
+        std::cout << "An error occurred during the structure quality checks, stage 2:" << std::endl;    
+        std::cout << e.what() << std::endl;
+        exit(-1);
+      }
       cov = compute_coverage(v,glob_dist_list);
       std::cout << "Coverage after clashing checks: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
     }
