@@ -109,8 +109,8 @@ int main (int argc, char **argv)
 {
   // sets some default values for parameters
   String version = "1.2";
-  Real bond_tolerance = 8.0;
-  Real angle_tolerance = 8.0;
+  Real bond_tolerance = 15.0;
+  Real angle_tolerance = 15.0;
   Real radius=15.0; 
   int sequence_separation = 0;
 
