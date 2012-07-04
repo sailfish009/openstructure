@@ -38,7 +38,7 @@ def Renumber(seq_handle, sequence_number_with_attached_view=1):
               renumberingFlag = True
             r_n=ed.AppendResidue(c,r.name, mol.ResNum(pos+1))
             for atom in r.atoms:
-              ed.InsertAtom(r_n,atom.name,atom.pos,atom.prop)
+              ed.InsertAtom(r_n,atom.name,atom.pos,element=atom.element)
         else:
           err='Error: renumbering failed at position %s' %pos
           raise RuntimeError, err
