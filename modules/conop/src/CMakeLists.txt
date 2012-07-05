@@ -4,6 +4,8 @@ builder_fw.hh
 conop.hh
 heuristic_builder.hh
 amino_acids.hh
+diag.hh
+model_check.hh
 compound.hh
 compound_lib.hh
 module_config.hh
@@ -16,6 +18,8 @@ set(OST_CONOP_SOURCES
 builder.cc
 amino_acids.cc
 conop.cc
+diag.cc
+model_check.cc
 heuristic_builder.cc
 compound.cc
 compound_lib.cc
