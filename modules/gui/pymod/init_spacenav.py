@@ -1,5 +1,8 @@
+import traceback
+
 from PyQt4 import QtCore
 
+import ost
 from ost import gfx, gui
 
 class SpacenavControl(QtCore.QObject):
@@ -18,37 +21,42 @@ class SpacenavControl(QtCore.QObject):
     if(self.trans):
       transf.ApplyXAxisTranslation(tx/self.speed)
       transf.ApplyYAxisTranslation(ty/self.speed)
-      transf.ApplyZAxisTranslation(-tz/self.speed)
     if(self.rot):
       transf.ApplyXAxisRotation(rx/self.speed)
       transf.ApplyYAxisRotation(ry/self.speed)
       transf.ApplyZAxisRotation(rz/self.speed)
+    if(self.trans or self.rot):
+      transf.ApplyZAxisTranslation(-tz/self.speed)
     gfx.Scene().SetTransform(transf)
     gfx.Scene().RequestRedraw()
 
   def Toggle(self, button):
     if button == 0:
       self.trans = not self.trans
-      print "Translation Enabled:",self.trans
+      ost.LogVerbose("SpaceNav: translation %s "%("enabled" if self.trans else "disabled"))
     elif button == 1:
       self.rot = not self.rot
-      print "Rotation Enabled:",self.rot
+      ost.LogVerbose("SpaceNav: rotation %s"%("enabled" if self.rot else "disabled"))
     elif button == 12:
       if self.speed > 20:
         self.speed *= 0.8
-        print "Speed Increased:",self.speed
+        ost.LogVerbose("SpaceNav: speed increased to "+str(self.speed))
     elif button == 13:
       self.speed /= 0.8
-      print "Speed Reduced:",self.speed
+      ost.LogVerbose("SpaceNav: speed reduced to "+str(self.speed))
     else:
-      print "other:",button
+      ost.LogDebug("SpaceNav: unmapped button press ["+str(button)+"]")
 
       
 def _InitSpaceNav(app):
   try:
     spnav = gui.SpnavInput.GetQThread()
-    spnav.start()
-    parent = app.gl_win.qobject
-    SpacenavControl(spnav,parent)
-  except AttributeError:
-    pass
+    if spnav:
+      spnav.start()
+      parent = app.gl_win.qobject
+      SpacenavControl(spnav,parent)
+      ost.LogInfo("SpaceNav: device found and connected")
+    else:
+      ost.LogInfo("SpaceNav: no device found, or could not connect to device socket")
+  except:
+    ost.LogInfo("SpaceNav: caught exception during initialization: %s"%(traceback.format_exc()))

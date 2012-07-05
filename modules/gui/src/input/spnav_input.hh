@@ -41,13 +41,15 @@ public:
 
   static SpnavInput* Instance();
 
+  bool isValid() const {return valid_;}
+
 signals:
   void deviceTransformed(int,int,int,int,int,int);
   void deviceButtonPressed(int);
 
 private:
   SpnavInput(QObject* parent=NULL);
-  static SpnavInput*  spnav_;
+  bool valid_;
 };
 
 }} //ns
