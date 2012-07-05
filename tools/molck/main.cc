@@ -83,7 +83,22 @@ CompoundLibPtr load_compound_lib()
 
 void usage()
 {
-  std::cerr << "usage: molck file1.pdb [file2.pdb [...]]" << std::endl;
+  std::cerr << "usage: molck [options] file1.pdb [file2.pdb [...]]" << std::endl;
+  std::cerr << "options" << std::endl;
+  std::cerr << "  --rm=<a>,<b>   remove atoms and residues matching some criteria" << std::endl;
+  std::cerr << "          zeroocc  - Remove atoms with zero occupancy" << std::endl;
+  std::cerr << "          hyd      - Remove hydrogen atoms" << std::endl;
+  std::cerr << "          oxt      - Remove terminal oxygens" << std::endl;
+  std::cerr << "          nonstd   - Remove all residues not " << std::endl 
+            << "                     one of the 20 standard amino acids" << std::endl;
+  std::cerr << "          unk      - Remove unknown atoms and atoms that " << std::endl 
+            << "                     are not supposed to be part of a residue" << std::endl;
+  std::cerr << "  --fix-ele      clean up element column" << std::endl;
+  std::cerr << "  --stdout       write cleaned files to stdout" << std::endl;
+  std::cerr << "  --color=auto|on|off " << std::endl 
+            << "          whether output should be colored" << std::endl;
+  std::cerr << "  --map-nonstd   maps modified residues back to the parent amino " << std::endl 
+            << "          acid, e.g. MSE -> MET, SEP -> SER." << std::endl;
   exit(0);
 }
 
@@ -114,7 +129,7 @@ int main(int argc, char *argv[])
     ("files", po::value< std::vector<String> >(), "input file(s)")
     ("stdout", "write cleaned structure to stdout")
     ("map-nonstd", "map non standard residues back to standard ones (e.g.: MSE->MET,SEP->SER,etc.)")
-    ("assign-elem", "insert element")   
+    ("fix-ele", "insert element")   
   ;
   po::positional_options_description p;
   p.add("files", -1);
@@ -143,7 +158,7 @@ int main(int argc, char *argv[])
   if (vm.count("map-nonstd")) {
     map_nonstd_res = true;
   }
-  if (vm.count("assign-elem")) {
+  if (vm.count("fix-ele")) {
     assign_elem = true;
   }
   
