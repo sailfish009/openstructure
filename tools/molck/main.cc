@@ -1,6 +1,7 @@
 #include <unistd.h>
 #include <boost/program_options.hpp>
-#include <boost/filesystem.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/convenience.hpp>
 #include <ost/platform.hh>
 #include <ost/conop/model_check.hh>
 #include <ost/conop/conop.hh>
@@ -54,14 +55,14 @@ CompoundLibPtr load_compound_lib()
   }
   #else 
   ssize_t count = readlink( "/proc/self/exe", result, 1024 );
-  String exe_path = std::string( result, (count > 0) ? count : 0 );   
+  exe_path = std::string( result, (count > 0) ? count : 0 );
   #endif
   if (exe_path.empty()) { 
     std::cerr << "Could not determine the path of the molck executable. Will only look for compounds.chemlib in the current working directory" << std::endl;
   } else {
     fs::path path_and_exe(exe_path);
-    fs::path path_only=path_and_exe.parent_path();  
-    fs::path share_path = path_only.parent_path(); 
+    fs::path path_only=path_and_exe.branch_path();
+    fs::path share_path = path_only.branch_path();
     share_path/="share";
     share_path/="openstructure";
     share_path/="compounds.chemlib";
