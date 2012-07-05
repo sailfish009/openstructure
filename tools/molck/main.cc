@@ -38,25 +38,14 @@ EntityHandle load_x(const String& file, const IOProfile& profile)
   }
 }
 
-void usage()
+// load compound library, exiting if it could not be found...
+CompoundLibPtr load_compound_lib()
 {
-  std::cerr << "usage: molck file1.pdb [file2.pdb [...]]" << std::endl;
-  exit(0);
-}
-
-int main(int argc, char *argv[])
-{
-  if (argc<2) {
-    usage();
+  if (fs::exists("compounds.chemlib")) {
+    return CompoundLib::Load("compounds.chemlib");
   }
-  IOProfile prof;
-  String rm;
-  String color;
-  bool colored = false;
-
   char result[ 1024 ]; 
- 
-  CompoundLibPtr lib=CompoundLib::Load("compounds.chemlib");
+  CompoundLibPtr lib;
   String exe_path; 
   #if defined(__APPLE__)
   uint32_t size=1023;
@@ -83,12 +72,32 @@ int main(int argc, char *argv[])
     String share_path_string=share_path.file_string();
     #endif        
  
-    lib=CompoundLib::Load(share_path_string);
+    return CompoundLib::Load(share_path_string);
   }
   if (!lib) {
     std::cerr << "Could not load compounds.chemlib" << std::endl;
     exit(-1);
   }
+  return CompoundLibPtr();
+}
+
+void usage()
+{
+  std::cerr << "usage: molck file1.pdb [file2.pdb [...]]" << std::endl;
+  exit(0);
+}
+
+int main(int argc, char *argv[])
+{
+  if (argc<2) {
+    usage();
+  }
+  IOProfile prof;
+  String rm;
+  String color;
+  bool colored = false;
+
+  CompoundLibPtr lib=load_compound_lib();
   bool rm_unk_atoms=false;
   bool rm_hyd_atoms=false;
   bool rm_non_std=false;
@@ -117,7 +126,7 @@ int main(int argc, char *argv[])
                 options(desc).positional(p).run(),
               vm);
   } catch (std::exception& e) {
-    std::cout << e.what() << std::endl;
+    std::cerr << e.what() << std::endl;
     usage();
     exit(-1);
   }
@@ -199,8 +208,6 @@ int main(int argc, char *argv[])
                continue;
             } 
             ResidueHandle dest_res = new_edi.AppendResidue(new_chain,OneLetterCodeToResidueName(compound->GetOneLetterCode()),r->GetNumber());
-            std::cout << " I am here" << std::endl; 
-           
             CopyResidue(*r,dest_res,new_edi,lib);
           }   
         }        
@@ -212,7 +219,7 @@ int main(int argc, char *argv[])
     DiagEngine diags;
     Checker checker(lib, ent, diags);
     if (rm_zero_occ_atoms) {
-      std::cerr << "removing zero occupancy atoms" << std::endl;
+      std::cerr << "removing atoms with zero occupancy" << std::endl;
       int zremoved=0;
       AtomHandleList zero_atoms=checker.GetZeroOccupancy();
       for (AtomHandleList::const_iterator i=zero_atoms.begin(), e=zero_atoms.end(); i!=e; ++i) {
