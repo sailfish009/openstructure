@@ -9,6 +9,9 @@
 #include <ost/io/mol/pdb_writer.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/conop/nonstandard.hh>
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#endif
 using namespace ost;
 using namespace ost::conop;
 using namespace ost::mol;
@@ -51,16 +54,20 @@ int main(int argc, char *argv[])
   String color;
   bool colored = false;
 
-  char result[ 1024 ];
-  ssize_t count = readlink( "/proc/self/exe", result, 1024 );
-  String exe_path = std::string( result, (count > 0) ? count : 0 );   
- 
+  char result[ 1024 ]; 
  
   CompoundLibPtr lib=CompoundLib::Load("compounds.chemlib");
- 
-  #if !(defined(__APPLE__))
-  
-  if (count==0) { 
+  String exe_path; 
+  #if defined(__APPLE__)
+  uint32_t size=1023;
+  if (!_NSGetExecutablePath(result, &size)) {
+    exe_path=String(result); 
+  }
+  #else 
+  ssize_t count = readlink( "/proc/self/exe", result, 1024 );
+  String exe_path = std::string( result, (count > 0) ? count : 0 );   
+  #endif
+  if (exe_path.empty()) { 
     std::cerr << "Could not determine the path of the molck executable. Will only look for compounds.chemlib in the current working directory" << std::endl;
   } else {
     fs::path path_and_exe(exe_path);
@@ -78,8 +85,6 @@ int main(int argc, char *argv[])
  
     lib=CompoundLib::Load(share_path_string);
   }
-
-  #endif
   if (!lib) {
     std::cerr << "Could not load compounds.chemlib" << std::endl;
     exit(-1);
