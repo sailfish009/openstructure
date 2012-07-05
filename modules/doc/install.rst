@@ -68,7 +68,7 @@ OpenStructure uses `git` as the revision control system. The main repository can
 
   git clone https://dng.biozentrum.unibas.ch/git/ost.git <directory-name>
   
-The above command will clone OpenStructre into the directory called `directory-name`. If omitted, the directory will be called ost. 
+The above command will clone OpenStructure into the directory called `directory-name`. If omitted, the directory will be called ost. 
 
 .. note::
 
@@ -138,12 +138,13 @@ By default, `CMake <http://cmake.org>`_ searches the standard directories for de
    activates the rule-based-builder. The compound library is based on 
    the component dictionary released by the PDB, and it specifies atoms
    of a certain residue or connectivities between atoms etc. The 
-   <a href="/docs/conop/compoundlib/?highlight=component"> compound library 
-   itself is created</a> from the component dictionary. By default this is 
-   switched off.
+   :doc:`conop/compoundlib` compound library itself is created from the 
+   component dictionary by calling the OpenStructure chemdict_tool. 
+   By default this is switched off.
 
  * `COMPILE_TMTOOLS` will activate bindings for TMAlign and TMScore, which are 
-   then available at python level. By default this is switched off.
+   then available at python level. This option requires a Fortran compiler. 
+   By default this option is switched off.
 
  * `USE_NUMPY` allows OpenStructure to pass back data in NumPy format. By 
    default this is switched off.
@@ -153,6 +154,7 @@ Build Options
 
  * `ENABLE_GUI` controls whether to build the graphical user interface module. By
    default it is set to true. 
+
  * `ENABLE_IMG` controls whether to build the image processing module. This will
    enable support for density maps, and general image processing in 1, 2 an 3
    dimensions. By default it is set to true. 
