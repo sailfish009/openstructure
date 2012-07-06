@@ -62,7 +62,7 @@ namespace {
       if(!PyArray_TYPE(na)==NPY_FLOAT) {
         throw std::runtime_error("expected normal array to be of dtype=float32");
       }
-      if(PyArray_SIZE(na)!=v_size) {
+      if((size_t)PyArray_SIZE(na)!=v_size) {
         throw std::runtime_error("expected normal array size to match vertex array size");
       }
       np=reinterpret_cast<float*>(PyArray_DATA(na));
@@ -78,7 +78,7 @@ namespace {
       if(!PyArray_TYPE(ca)==NPY_FLOAT) {
         throw std::runtime_error("expected color array to be of dtype=float32");
       }
-      if(PyArray_SIZE(ca)!=v_count*4) {
+      if((size_t)PyArray_SIZE(ca)!=v_count*4) {
         throw std::runtime_error("expected color array size to equal vertex-count x 4");
       }
       cp=reinterpret_cast<float*>(PyArray_DATA(ca));
