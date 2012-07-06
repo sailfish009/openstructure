@@ -698,7 +698,7 @@ of the annotation available.
 
     See :attr:`replace_pdb_id`
 
-.. class:: MMCifINfoStructRef
+.. class:: MMCifInfoStructRef
 
   Holds the information of the struct_ref category. The category describes the 
   link of polymers in the mmCIF file to sequences stored in external databases 
