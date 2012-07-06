@@ -1,4 +1,4 @@
-import traceback
+import math,traceback
 
 from PyQt4 import QtCore
 
@@ -16,19 +16,30 @@ class SpacenavControl(QtCore.QObject):
     self.rot = True
     self.speed = 480.0
     
-  def Changed(self, tx,ty,tz,rx,ry,rz): 
-    transf = gfx.Scene().GetTransform()
+  def Changed(self, tx,ty,tz,rx,ry,rz):
+    scene=gfx.Scene()
+    tf = scene.transform
+    def d(r):
+      if r==0.0:
+        return 0.0
+      rr=r/abs(r)*max(0.0,abs(r)-0.9)
+      return rr/abs(rr)*(math.pow(1.01,abs(rr))-1.0)*40.0/self.speed if abs(rr)>0.0 else 0.0
     if(self.trans):
-      transf.ApplyXAxisTranslation(tx/self.speed)
-      transf.ApplyYAxisTranslation(ty/self.speed)
+      tf.ApplyXAxisTranslation(d(tx))
+      tf.ApplyYAxisTranslation(d(ty))
+      # adjust translation speed to distance from viewpoint
+      currz=tf.trans[2];
+      delta=currz*math.pow(1.01,d(tz))-currz;
+      tf.ApplyZAxisTranslation(delta);
+      # adjust near and far clipping planes together with z trans
+      scene.SetNearFar(scene.near-delta,scene.far-delta);
     if(self.rot):
-      transf.ApplyXAxisRotation(rx/self.speed)
-      transf.ApplyYAxisRotation(ry/self.speed)
-      transf.ApplyZAxisRotation(rz/self.speed)
-    if(self.trans or self.rot):
-      transf.ApplyZAxisTranslation(-tz/self.speed)
-    gfx.Scene().SetTransform(transf)
-    gfx.Scene().RequestRedraw()
+      tf.ApplyXAxisRotation(d(rx))
+      tf.ApplyYAxisRotation(d(ry))
+      tf.ApplyZAxisRotation(d(rz))
+
+    scene.transform=tf
+    scene.RequestRedraw()
 
   def Toggle(self, button):
     if button == 0:
@@ -45,7 +56,7 @@ class SpacenavControl(QtCore.QObject):
       self.speed /= 0.8
       ost.LogVerbose("SpaceNav: speed reduced to "+str(self.speed))
     else:
-      ost.LogDebug("SpaceNav: unmapped button press ["+str(button)+"]")
+      ost.LogVerbose("SpaceNav: unmapped button press ["+str(button)+"]")
 
       
 def _InitSpaceNav(app):

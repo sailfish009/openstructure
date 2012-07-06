@@ -85,13 +85,13 @@ bool Shader::Compile(const std::string& shader_name,
   GLint sh_compiled;
   glGetShaderiv(shader_id, GL_COMPILE_STATUS, &sh_compiled);
   if(sh_compiled==GL_TRUE) {
-    LOG_VERBOSE("shader [" << shader_name << "] successfully compiled (" << shader_id << ")");
+    LOG_DEBUG("shader [" << shader_name << "] successfully compiled (" << shader_id << ")");
   } else {
     GLint sh_log_length;
     glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &sh_log_length);
     std::vector<GLchar> sh_log(sh_log_length+1);
     glGetShaderInfoLog(shader_id, sh_log_length, NULL, &sh_log[0]);
-    LOG_ERROR("shader [" << shader_name << "] compilation failed:" << std::endl << String(&sh_log[0]));
+    LOG_WARNING("shader [" << shader_name << "] compilation failed:" << std::endl << String(&sh_log[0]));
     return false;
   }
   return true;
@@ -105,14 +105,14 @@ void Shader::Link(const std::string& pr_name, const std::string& vs_code, const 
 
   GLuint shader_id;
   if(Compile(pr_name+" vs",vs_code,GL_VERTEX_SHADER,shader_id)) {
-    LOG_VERBOSE("attaching compiled vertex shader id " << shader_id << " to " << shader_pr);
+    LOG_DEBUG("attaching compiled vertex shader id " << shader_id << " to " << shader_pr);
     glAttachShader(shader_pr,shader_id);
   } else {
     LOG_WARNING("skipping [" << pr_name << "] due to error in vertex shader code");
     return;
   }
   if(Compile(pr_name+" fs",fs_code,GL_FRAGMENT_SHADER,shader_id)) {
-    LOG_VERBOSE("attaching compiled fragment shader id " << shader_id << " to " << shader_pr);
+    LOG_DEBUG("attaching compiled fragment shader id " << shader_id << " to " << shader_pr);
     glAttachShader(shader_pr,shader_id);
   } else {
     LOG_WARNING("skipping [" << pr_name << "] due to error in fragment shader code");
@@ -129,7 +129,7 @@ void Shader::Link(const std::string& pr_name, const std::string& vs_code, const 
     glGetProgramiv(shader_pr, GL_INFO_LOG_LENGTH, &pr_log_length);
     std::vector<GLchar> pr_log(pr_log_length+1);
     glGetProgramInfoLog(shader_pr, pr_log_length, NULL, &pr_log[0]);
-    LOG_ERROR("shader [" << pr_name << "] linking failed:" << std::endl << String(&pr_log[0]));
+    LOG_WARNING("shader [" << pr_name << "] linking failed:" << std::endl << String(&pr_log[0]));
     return;
   }
   shader_program_map_[pr_name]=shader_pr;
@@ -186,7 +186,7 @@ void Shader::Setup()
     bf::path shader_file(shader_dir / shader_name);
 
     if(!bf::exists(shader_file)){
-      LOG_ERROR("shader file not found: [" << shader_file.string() << "]");
+      LOG_WARNING("shader file not found: [" << shader_file.string() << "]");
       shader_code_map[shader_name]=std::string();
       continue;
     }
@@ -297,7 +297,7 @@ void Shader::Activate(const String& name)
   if(!name.empty()) {
     std::map<String, GLuint>::iterator it = shader_program_map_.find(name);
     if(it!=shader_program_map_.end()) {
-      LOG_VERBOSE("switching to shader [" << name << "]");
+      LOG_TRACE("switching to shader [" << name << "]");
       glUseProgram(it->second);
       current_program_=it->second;
       current_name_=name;
@@ -306,11 +306,11 @@ void Shader::Activate(const String& name)
       return;
 
     } else {
-      LOG_WARNING("shader program [" << name << "] not present");
+      LOG_TRACE("shader program [" << name << "] not present");
       return;
     }
   }
-  LOG_VERBOSE("switching to fixed pipeline");
+  LOG_TRACE("switching to fixed pipeline");
   glUseProgram(0);
   current_program_=0;
   current_name_="";
