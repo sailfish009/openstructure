@@ -49,9 +49,9 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
 
   struct LineEntry {
     LineEntry(const geom::Vec3& p1, const geom::Vec3& p2, float r1, float r2, const Color& c1, const Color& c2):
-      pos1(p1), pos2(p2), rad1(r1), rad2(r2), col1(c1), col2(c2) {}
+      pos1(p1), pos2(p2), radius_1(r1), radius_2(r2), col1(c1), col2(c2) {}
     geom::Vec3 pos1, pos2;
-    float rad1, rad2;
+    float radius_1, radius_2;
     Color col1, col2;
   };
 
