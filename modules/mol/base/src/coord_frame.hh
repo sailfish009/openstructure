@@ -22,6 +22,7 @@
 /*
   Authors: Marco Biasini, Niklaus Johner, Ansgar Philippsen
  */
+#include <ost/mol/module_config.hh>
 #include <boost/shared_ptr.hpp>
 #include <ost/geom/geom.hh>
 #include <ost/mol/module_config.hh>
