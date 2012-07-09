@@ -866,7 +866,7 @@ macro(setup_compiler_flags)
     #GR:Uses the __fastcall calling convention (x86 only).
     #-EHsc to specify the synchronous exception handling mode/
     #-vmg Uses full generality for pointers to members.
-    add_definitions(-DBOOST_ZLIB_BINARY=zdll)
+    #add_definitions(-DBOOST_ZLIB_BINARY=zdll)
     #add_definitions(-NODEFAULTLIB:LIBCMTD.lib)
   endif()
 
