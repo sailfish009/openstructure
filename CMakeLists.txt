@@ -246,7 +246,10 @@ else()
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-  set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-strict-aliasing" CACHE STRING "" FORCE)
+  # do not write back into cache, otherwise the compile command line gets expanded
+  # with multiple -fno-strict-aliasing flags, triggering a complete rebuild whenever
+  # cmake is run
+  set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-strict-aliasing")
 endif()
 
 
