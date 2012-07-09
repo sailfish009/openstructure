@@ -16,12 +16,14 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#define BOOST_TEST_DYN_LINK
+#include <boost/test/unit_test.hpp>
+#include <boost/test/auto_unit_test.hpp>
+
 #include <map>
 #include <ost/io/load_map.hh>
 #include <ost/img/image_factory.hh>
 #include <ost/img/alg/randomize.hh>
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
 #include  <ost/io/img/map_io_df3_handler.hh>
 #include  <ost/io/img/map_io_dat_handler.hh>
 #include  <ost/io/img/map_io_dx_handler.hh>

@@ -17,11 +17,12 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
  
-#include <ost/mol/surface_handle.hh>
-#include <cmath>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
+
+#include <ost/mol/surface_handle.hh>
+#include <cmath>
 
 using namespace ost;
 using namespace ost::mol;
