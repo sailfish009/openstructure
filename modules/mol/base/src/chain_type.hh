@@ -22,6 +22,8 @@
 #include <ost/base.hh>
 #include <ost/string_ref.hh>
 
+#include "module_config.hh"
+
 namespace ost { namespace mol {
 
 /// \enum different kinds of chains
@@ -46,7 +48,7 @@ typedef enum {
 ///
 /// \return The ChainType corresponding to the input, throws a
 ///         std::runtime_error on unknown type
-ChainType ChainTypeFromString(const StringRef identifier);
+ChainType DLLEXPORT_OST_MOL ChainTypeFromString(const StringRef identifier);
 
 /// \brief Create a ChainType item for a given string
 ///
@@ -54,7 +56,7 @@ ChainType ChainTypeFromString(const StringRef identifier);
 ///
 /// \return The ChainType corresponding to the input, throws a
 ///         std::runtime_error on unknown type
-ChainType ChainTypeFromString(const String& identifier);
+ChainType DLLEXPORT_OST_MOL ChainTypeFromString(const String& identifier);
 
 /// \brief Return the String identifier for a given type
 ///
@@ -62,7 +64,7 @@ ChainType ChainTypeFromString(const String& identifier);
 ///
 /// \return String corresponding to the input, throws a std::runtime_error on
 ///         unknown type
-String StringFromChainType(ChainType type);
+String DLLEXPORT_OST_MOL StringFromChainType(ChainType type);
 
 }} //ns
 

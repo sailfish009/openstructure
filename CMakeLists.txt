@@ -50,6 +50,7 @@ option(DEPLOYMENT "switch on deployment settings" OFF)
 option(COMPILE_TESTS "whether unit tests should be compiled by default" OFF)
 option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
 option(DEBIAN_STYLE_LIBEXEC "whether 'libexec' should be put under 'lib/openstructure" OFF)
+option(HIDDEN_VISIBILITY "on gcc, use -fvisibility=hidden" OFF)
 
 if (CXX)
   set(CMAKE_CXX_COMPILER ${CXX})
@@ -250,8 +251,13 @@ if (CMAKE_COMPILER_IS_GNUCXX)
   # with multiple -fno-strict-aliasing flags, triggering a complete rebuild whenever
   # cmake is run
   set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-strict-aliasing")
+  if(HIDDEN_VISIBILITY) 
+    set (CMAKE_CXX_FLAGS "-fvisibility=hidden")
+    set (_HIDDEN_VIS ON)
+  else(HIDDEN_VISIBILITY)
+    set (_HIDDEN_VIS OFF)
+  endif(HIDDEN_VISIBILITY)
 endif()
-
 
 # basic environment
 include_directories(${Boost_INCLUDE_DIRS} 
@@ -313,5 +319,6 @@ message(STATUS
         "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}" )
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}\n"
+        "   Hidden object visibility  (-DHIDDEN_VISIBILITY) : ${_HIDDEN_VIS}")
 

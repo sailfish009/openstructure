@@ -29,7 +29,7 @@
 
 namespace ost { namespace conop {
 
-struct Date {
+struct DLLEXPORT_OST_CONOP Date {
   Date(int y, int m, int d):
     year(y), month(m), day(d)
   { }
@@ -68,7 +68,7 @@ struct Date {
   int day;  
 };
 
-struct AtomSpec {
+struct DLLEXPORT_OST_CONOP AtomSpec {
   AtomSpec()
     : ordinal(0), is_leaving(false) {
   }
@@ -88,7 +88,7 @@ struct AtomSpec {
   }
 };
 
-struct BondSpec {
+struct DLLEXPORT_OST_CONOP BondSpec {
   BondSpec()
     : atom_one(0), atom_two(0), order(1) {
 
