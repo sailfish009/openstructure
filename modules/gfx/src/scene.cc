@@ -2244,6 +2244,8 @@ void Scene::render_glow()
 #endif  
 }
 
+#undef far
+#undef near
 namespace {
   geom::Mat4 frustum(float left, float right, float bot, float top, float near, float far) {
     float rl=1.0/(right-left);
