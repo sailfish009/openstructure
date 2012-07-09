@@ -476,12 +476,8 @@ include_directories(${PYTHON_INCLUDE_PATH})
 qt4_add_resources(OST_QT_RESOURCE dngr.qrc)
 qt4_wrap_cpp(OST_GOSTY_MOC "gosty.hh"
              OPTIONS -DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED)
-# if someone has ANY idea why windows already has the boost program options
-# symbols defined, please talk to Marco and Juergen. You will be rewarded with
-# dogfood for a lifetime!
-if (NOT WIN32)
-  set(LINK LINK ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
-endif()
+
+set(LINK LINK ${BOOST_PROGRAM_OPTIONS_LIBRARIES})
 
 executable_libexec(NAME gosty SOURCES gosty.cc ${OST_GOSTY_MOC} ${OST_QT_RESOURCE} 
            DEPENDS_ON ost_gui ${LINK})
