@@ -443,7 +443,7 @@ void PDBWriter::Write(const mol::AtomHandleList& atoms)
   
 PDBWriter::~PDBWriter()
 {
-  out_ << "END   ";
+  out_ << "END   " << std::endl;
 }
 
 }}

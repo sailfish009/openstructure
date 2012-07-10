@@ -73,7 +73,7 @@ subprocess.call('sed "s/\#export PYTHONHOME/ export PYTHONHOME/g" scripts/ost_co
 subprocess.call('sed "s/\#export PYTHONPATH/ export PYTHONPATH/g" scripts/ost_config.in.prepre > scripts/ost_config.in.pre',shell=True,cwd='../../')
 subprocess.call('sed "s/\#export QT_PLUGIN_PATH/ export QT_PLUGIN_PATH/g" scripts/ost_config.in.pre > scripts/ost_config.in',shell=True,cwd='../../')
 print 'Compiling Openstructure'
-subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DCOMPOUND_LIB='+chemlib_dictionary_location+' -DENABLE_IMG=ON -DENABLE_GUI=ON -DENABLE_GFX=ON -DOPTIMIZE=ON',shell=True,cwd='../../')
+subprocess.call('cmake ./ -DCMAKE_BUILD_TYPE=Release -DPREFIX='+directory_name+' -DCOMPOUND_LIB='+chemlib_dictionary_location+' -DENABLE_IMG=ON -DUSE_RPATH=ON -DENABLE_GUI=ON -DENABLE_GFX=ON -DOPTIMIZE=ON',shell=True,cwd='../../')
 subprocess.call('make -j2',shell=True,cwd='../../')
 print 'Removing obsolete packages and package directory'
 subprocess.call('rm -fr openstructure-linux*',shell=True,cwd='../../')
@@ -87,6 +87,8 @@ subprocess.call('cp -pRL '+system_python_libs+' stage/'+libdir+'/',shell=True,cw
 subprocess.call('rm -fr stage/'+libdir+'/'+system_python_executable+'/dist-packages',shell=True,cwd='../../')
 subprocess.call('cp -pRL '+sip_module_location+'/sip* stage/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
 subprocess.call('cp -pRL '+qt4_module_location+' stage/'+libdir+'/'+system_python_executable+'/',shell=True,cwd='../../')
+print 'Copy boost program option libraries into the stage for dependency detection'
+subprocess.call('cp -pRL /usr/lib/libboost_program_options.so* stage/'+libdir+'/',shell=True,cwd='../../')
 print 'Creating new dependency list'
 so_list=[]
 walk_list=os.walk('../../stage')
@@ -138,6 +140,7 @@ subprocess.call('ln -sf bin/lddt ./lddt',shell=True,cwd='../../'+directory_name)
 print 'Copying additional libraries in the package directory structure'
 subprocess.call('cp '+ssl_crypto_location+'/libssl.so* '+directory_name+'/'+libdir,shell=True,cwd='../../')
 subprocess.call('cp '+ssl_crypto_location+'/libcrypto.so* '+directory_name+'/'+libdir,shell=True,cwd='../../')
+subprocess.call('cp -pRL /usr/lib/libboost_program_options.so* '+directory_name+'/'+libdir+'/',shell=True,cwd='../../')
 print 'Copying python headers in the package directory structure'
 subprocess.call('mkdir -p '+directory_name+'/local/include/',shell=True,cwd='../../')
 subprocess.call('cp -r /usr/include/'+system_python_executable+' '+directory_name+'/local/include/',shell=True,cwd='../../')

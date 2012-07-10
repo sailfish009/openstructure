@@ -1,4 +1,23 @@
 
+Changes in Release 1.2.1
+--------------------------------------------------------------------------------
+
+  * Use RPATH for linux bundles. No longer requires LD_LIBRARY_PATH to be set for
+    chemdict_tool and lddt [BZDNG-385]
+  * "install command line tools" also symlinks lddt, and chemdict_tool [BZDNG-386]
+  * Fixed broken the_hammer.py example [BZDNG-387]
+  * MacOS X: Make sure to use python2.6, not python as pyexec [BZDNG-388]
+  * Fix example directory path for MacOS X bundle [BZDNG-389]
+  * PDBWriter: Insert newline after END [BZDNG-391]
+  * Added missing documentation for a few AlignmentHandle methods
+  * Workaround for naccess which was failing when directory contains dots.
+  * Fixed superposition dialog for unnamed chains
+  * Fixed byte-swapping issue for DCD trajectories
+  * Fixed FFT panel update after switching data in main viewer
+  * Added missing pdbx_struct_assembly.id export
+  * lDDT: Updated default angle and bond tolerance parameters from 8 stddev to 12 
+    stddev.
+
 Changes in Release 1.2 (since 1.1)
 --------------------------------------------------------------------------------
 

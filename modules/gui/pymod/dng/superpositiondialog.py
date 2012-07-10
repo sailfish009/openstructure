@@ -60,7 +60,7 @@ class ChainComboBox(QComboBox):
 
   def _HighlightChain(self, chain):
     if str(chain) != 'All':
-      self.gfx.SetSelection(self.entity.Select('cname=' + str(chain)))
+      self.gfx.SetSelection(self.entity.Select('cname="%s"' % str(chain)))
     else:
       self.gfx.SetSelection(self.entity.Select(''))
 
@@ -69,7 +69,7 @@ class ChainComboBox(QComboBox):
       return mol.EntityHandle()
     elif self.currentText() == self.all_chains:
       return self.entity
-    return self.entity.Select('cname=' + str(self.currentText()))
+    return self.entity.Select('cname="%s"' % str(self.currentText()))
 
   def _SetSelectedChain(self, chain):
     if hasattr(chain, 'name'):

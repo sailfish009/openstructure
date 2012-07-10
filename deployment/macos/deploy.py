@@ -29,6 +29,7 @@ if opts.bundle:
   shutil.copytree('../../examples', 'DNG.app/Contents/examples')
   os.system('rm `find DNG.app/Contents/examples/ -name "*.pyc"` 2> /dev/null')
   os.system('rm -rf DNG.app/Contents/examples/code_fragments/')
+  os.system('rm -rf DNG.app/Contents/examples/gfx/')
   if opts.dmg:
     os.system('rm -rf openstructure-%s.dmg' % ost.VERSION)
     os.system('hdiutil create -srcFolder DNG.app openstructure-%s.dmg' % ost.VERSION)

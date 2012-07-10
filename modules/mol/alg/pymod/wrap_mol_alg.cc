@@ -96,6 +96,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   export_svdSuperPose();
   export_TrajectoryAnalysis();
   export_StructureAnalysis();
+  export_Clash();
   #if OST_IMG_ENABLED
   export_entity_to_density();
   #endif
@@ -107,7 +108,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("FilterClashes", fc_b, (arg("ent"), arg("clashing_distances"), arg("always_remove_bb")=false));
   def("CheckStereoChemistry", csc_a, (arg("ent"), arg("bonds"), arg("angles"), arg("bond_tolerance"), arg("angle_tolerance"), arg("always_remove_bb")=false));
   def("CheckStereoChemistry", csc_b, (arg("ent"), arg("bonds"), arg("angles"), arg("bond_tolerance"), arg("angle_tolerance"), arg("always_remove_bb")=false));
-  def("LDDTHA",&mol::alg::LDDTHA);
+  def("LDDTHA",&mol::alg::LDDTHA, (arg("sequence_separation")=0));
   def("CreateDistanceList",&mol::alg::CreateDistanceList);
   def("CreateDistanceListFromMultipleReferences",&create_distance_list_from_multiple_references);
     

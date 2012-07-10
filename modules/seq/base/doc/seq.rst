@@ -388,3 +388,47 @@ an alignment:
     
     :raises: In case one of the two sequences doesn't have an attached view, a 
        :exc:`RuntimeError` is raised.
+
+  .. method:: AddSequence(sequence)
+
+    Append a sequence to the alignment. The sequence must have the same length as
+    sequences already present in the alignment.
+
+    :raises: :exc:`RuntimeError` if the sequence length does not match
+    :param sequence: Sequence to be added
+    :type sequence: :class:`ConstSequenceHandle`
+
+  .. method:: GetSequenceOffset(index)
+              SetSequenceOffset(index, offset)
+
+    Get/set the offset for sequence at *index*.
+
+    :param index: The index of the sequence
+    :type index: :class:`int`
+    :param offset: The new offset
+    :type offset: :class:`int`
+    :rtype: :class:`int`
+  
+  .. method:: GetSequenceRole(index)
+              SetSequenceRole(index, role)
+
+    Get/Set the sequence role for sequence at *index*.
+
+    :param index: The index of the sequence
+    :type index: :class:`int`
+    :param role: The new role
+    :type role: :class:`str`
+    :rtype: :class:`str`
+
+  .. method:: GetCoverage(index)
+
+    Get coverage of sequence at *index* to the first sequence.
+
+    :param index: The index of the sequence
+    :type index: :class:`int`
+    :returns: Coverage as a number between 0 and 1.
+  
+  .. method:: RemoveSequence(index)
+
+    Remove sequence at *index* from the alignment.
+
