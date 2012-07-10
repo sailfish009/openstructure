@@ -89,11 +89,16 @@
 
   :returns: the Local Distance Difference Test score
 
-.. function::  LDTHA(model, distance_list, sequence_separation=0);
+.. function::  LDDTHA(model, distance_list, sequence_separation=0);
 
   This function calculates the Local Distance Difference Test - High Accuracy score (see previous functions).
   The High Accuracy name comes from the fact that the tolerance levels used by this function are the same
   as the thresholds used by GDT-HA (0.5, 1, 2, and 4 Angstrom). 
+
+  The function only compares the input distance list to the first chain of the model structure
+
+  The local Local Distance Difference Test score values are stored in the ResidueHandles of the model passed to the 
+  function in a float property called "locallddt" 
 
   A sequence separation parameter can be passed to the function. If this happens, only distances between residues
   whose separation is higher than the provided parameter are considered when computing the score
@@ -209,6 +214,9 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   the sidechain, only the sidechain atoms are removed. This behavior is changed 
   by the always_remove_bb flag: when the flag is set to True the whole residue is removed even if
   a clash is just detected in the side-chain.
+
+  The function performs the filtering directly on the the entity which is passed as an argument. The entity
+  gets altered by the function.
   
   Two atoms are defined as clashing if their distance is shorter than the reference distance minus a tolerance
   threshold. The information about the clashing distances and the tolerance thresholds for all possible pairs of 
@@ -231,6 +239,9 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   part of the sidechain, only the sidechain is removed. This behavior is changed 
   by the always_remove_bb flag: when the flag is set to True the whole residue is removed even if
   a violation is just detected in the side-chain
+
+  The function performs the filtering directly on the the entity which is passed as an argument. The entity
+  gets altered by the function.
   
   A violation is defined as a bond length that lies outside of the range: [mean_length-std_dev*bond_tolerance <-> meanlength+std_dev*bond_tolerance] or an angle width lying outside of the range [mean_width-std_dev*angle_tolerance <-> mean_width+std_dev*angle_tolerance ]. The information about the mean lengths and widths and the corresponding standard deviations is passed to the function using two parameters.
 

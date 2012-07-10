@@ -4,7 +4,7 @@ mmCIF File Format
 The mmCIF file format is an alternate container for structural entities, also
 provided by the PDB. Here we describe how to load those files and how to deal
 with information provided above the common PDB format (:class:`MMCifInfo`,
-:class:`MMCifInfoCitation`, :class:`MMCifInfoTransOperation`,
+:class:`MMCifInfoCitation`, :class:`MMCifInfoTransOp`,
 :class:`MMCifInfoBioUnit`, :class:`MMCifInfoStructDetails`).
 
 
@@ -343,7 +343,7 @@ of the annotation available.
     See :attr:`authors`
 
 
-.. class:: MMCifInfoTransOperation
+.. class:: MMCifInfoTransOp
 
   This stores operations needed to transform an
   :class:`entity <ost.mol.EntityHandle>` into a bio unit.
@@ -411,6 +411,14 @@ of the annotation available.
   This stores information how a structure is to be assembled to form the
   bio unit.
 
+  .. attribute:: id
+
+    The id of a bio unit as given by the original mmCIF file.
+
+    Also available as :meth:`GetID`. May also be modified by :meth:`SetID`.
+
+    :type: :class:`str`
+
   .. attribute:: details
 
     Special aspects of the biological assembly. If not provided, resembles an
@@ -429,10 +437,18 @@ of the annotation available.
   .. attribute:: operations
 
     Translations and rotations needed to create the bio unit. Filled with
-    objects of class :class:`MMCifInfoTransOperation`.
+    objects of class :class:`MMCifInfoTransOp`.
 
     Also available as :meth:`GetOperations`. May be modified by
     :meth:`AddOperations`
+
+  .. method:: GetID()
+
+    See :attr:`id`
+
+  .. method:: SetID(id)
+
+    See :attr:`id`
 
   .. method:: GetDetails()
 
@@ -682,14 +698,14 @@ of the annotation available.
 
     See :attr:`replace_pdb_id`
 
-.. class:: MMCifINfoStructRef
+.. class:: MMCifInfoStructRef
 
   Holds the information of the struct_ref category. The category describes the 
   link of polymers in the mmCIF file to sequences stored in external databases 
   such as uniprot. The related categories ``struct_ref_seq`` and 
   ``struct_ref_seq_dif`` also list differences between the sequences of the 
-  deposited structure and the sequences in the database. A promintent example of 
-  such differences include point mutations and/or expression tags.
+  deposited structure and the sequences in the database. Two prominent examples 
+  of such differences are point mutations and/or expression tags.
 
   .. attribute:: db_name
 
@@ -734,6 +750,7 @@ of the annotation available.
 
   .. attribute:: seq_begin
                  seq_end
+
     The starting point (1-based) and end point of the aligned range in the 
     deposited sequence, respectively.
 
@@ -741,6 +758,7 @@ of the annotation available.
    
   .. attribute:: db_begin
                  db_end
+
     The starting point (1-based) and end point of the aligned range in the 
     database sequence, respectively.
 
@@ -769,8 +787,10 @@ of the annotation available.
   .. attribute:: details
 
     A textual description of the difference, e.g. point mutation, 
-    expressiontag, purification artifact.
+    expression tag, purification artifact.
 
     :type: :class:`str`
+
 ..  LocalWords:  cas isbn pubmed asu seqres conop ConnectAll casp COMPND OBSLTE
-..  LocalWords:  SPRSDE pdb func
+..  LocalWords:  SPRSDE pdb func autofunction exptl attr pdbx oper conf spr dif
+..  LocalWords:  biounits biounit uniprot UNP seqs

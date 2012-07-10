@@ -71,7 +71,7 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
 LIBEXEC_SCRIPTS=['ost_config']
 LIBEXEC_BINARIES=[]
 GUI_LIBEXEC_BINARIES=['gosty']
-BINARIES=['ldt', 'chemdict_tool', 'tmalign', 'tmscore']
+BINARIES=['lddt', 'chemdict_tool', 'tmalign', 'tmscore']
 GUI_BINARIES=[]
 GUI_COMPONENTS=['gfx', 'gui', 'info']
 COMPONENTS=['mol', 'geom', 'conop', 'seq_alg', 'seq',

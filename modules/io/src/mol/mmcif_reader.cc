@@ -975,7 +975,7 @@ void MMCifReader::ParsePdbxStructAssemblyGen(const std::vector<StringRef>& colum
   MMCifBioUAssembly assembly;
   assembly.biounit = MMCifInfoBioUnit();
 
-  assembly.biounit.SetDetails(columns[indices_[ASSEMBLY_ID]].str());
+  assembly.biounit.SetID(columns[indices_[ASSEMBLY_ID]].str());
 
   std::vector<StringRef> tmp_chains=columns[indices_[ASYM_ID_LIST]].split(',');
   std::vector<StringRef>::const_iterator tc_it;
@@ -1586,14 +1586,15 @@ void MMCifReader::OnEndData()
        bua_it != bu_assemblies_.end();
        ++bua_it) {
     // pair with pdbx_struct_assembly entry
-    buom_it = bu_origin_map_.find(bua_it->biounit.GetDetails());
+    buom_it = bu_origin_map_.find(bua_it->biounit.GetID());
     if (buom_it == bu_origin_map_.end()) {
       throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                                                "No pdbx_struct_assembly.id '"+
-                                               bua_it->biounit.GetDetails() +
+                                               bua_it->biounit.GetID() +
                          "' found as requested by pdbx_struct_assembly_gen.")); 
     }
     bua_it->biounit.SetDetails(buom_it->second);
+    bua_it->biounit.SetID(buom_it->first);
 
     // pair with pdbx_struct_oper_list
     for (aol_it = bua_it->operations.begin();

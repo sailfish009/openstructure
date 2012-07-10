@@ -82,6 +82,7 @@ FileBrowser::FileBrowser(QWidget* parent):
       path=example_path;
     }    else{
       dir.cdUp();
+      dir.cdUp();
       example_path=dir.path()+"/examples";
       if (QDir(example_path).exists()) {
         path=example_path;

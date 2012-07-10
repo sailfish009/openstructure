@@ -181,12 +181,15 @@ void export_mmcif_io()
     .def("AddOperations", &MMCifInfoBioUnit::AddOperations)
     .def("GetOperations", make_function(&MMCifInfoBioUnit::GetOperations,
                                    return_value_policy<copy_const_reference>()))
+    .def("SetID", &MMCifInfoBioUnit::SetID)
+    .def("GetID", &MMCifInfoBioUnit::GetID)
     .add_property("details", &MMCifInfoBioUnit::GetDetails,
                   &MMCifInfoBioUnit::SetDetails)
     .add_property("chains", make_function(&MMCifInfoBioUnit::GetChainList,
                                    return_value_policy<copy_const_reference>()))
     .add_property("operations", make_function(&MMCifInfoBioUnit::GetOperations,
                                    return_value_policy<copy_const_reference>()))
+    .add_property("id", &MMCifInfoBioUnit::GetID, &MMCifInfoBioUnit::SetID)
   ;
 
   class_<MMCifInfoStructRefs>("MMCifInfoStructRefs", init<>())
