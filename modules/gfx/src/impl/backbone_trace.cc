@@ -85,6 +85,7 @@ public:
     mol::AtomHandle ca = res.GetCentralAtom();
     if (ca) {
       float rad=1.0;
+      // TODO: move this property to the rendering state
       if(ca.HasProp("trace_rad")) {
         rad=ca.GetFloatProp("trace_rad");
       }
