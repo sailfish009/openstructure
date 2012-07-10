@@ -704,8 +704,8 @@ of the annotation available.
   link of polymers in the mmCIF file to sequences stored in external databases 
   such as uniprot. The related categories ``struct_ref_seq`` and 
   ``struct_ref_seq_dif`` also list differences between the sequences of the 
-  deposited structure and the sequences in the database. A prominent example of 
-  such differences include point mutations and/or expression tags.
+  deposited structure and the sequences in the database. Two prominent examples 
+  of such differences are point mutations and/or expression tags.
 
   .. attribute:: db_name
 
@@ -750,6 +750,7 @@ of the annotation available.
 
   .. attribute:: seq_begin
                  seq_end
+
     The starting point (1-based) and end point of the aligned range in the 
     deposited sequence, respectively.
 
@@ -757,6 +758,7 @@ of the annotation available.
    
   .. attribute:: db_begin
                  db_end
+
     The starting point (1-based) and end point of the aligned range in the 
     database sequence, respectively.
 
