@@ -37,6 +37,17 @@ BOOST_AUTO_TEST_CASE(line_init2)
   BOOST_CHECK_EQUAL(geom::Length(line.GetDirection()), 1.0);
 }
 
+BOOST_AUTO_TEST_CASE(rectangle2)
+{
+  Rectangle2 rect;
+  try{
+    BOOST_CHECK_THROW(rect[2]=geom::Vec2(0,0), OutOfRangeException);
+  }catch(...)
+  {
+    BOOST_ERROR("Failed to catch OutOfRangeException");
+  }
+}
+
 BOOST_AUTO_TEST_CASE(is_on_line2)
 {
   Line2 line(geom::Vec2(0,0), geom::Vec2(1,0));

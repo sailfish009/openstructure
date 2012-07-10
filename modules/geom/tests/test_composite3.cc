@@ -151,8 +151,12 @@ BOOST_AUTO_TEST_CASE(func_composite3)
   BOOST_CHECK(Equal(IntersectionPoint(l2,l3), v3));
   
   BOOST_CHECK(!AreIntersecting(l3, l4));
-  
-  BOOST_CHECK_THROW(IntersectionPoint(l3,l4), GeomException);
+  try{
+    BOOST_CHECK_THROW(IntersectionPoint(l3,l4), GeomException);
+  }catch(...)
+  {
+    BOOST_ERROR("Failed to catch GeomException");
+  }
   BOOST_CHECK(Equal(IntersectionPoint(p1,l3), v1));
   BOOST_CHECK(Equal(IntersectionPoint(l3,p1), v1));
   
