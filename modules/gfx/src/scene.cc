@@ -313,6 +313,24 @@ uint Scene::GetAmbientOcclusionQuality() const
 #endif
 }
 
+void Scene::SetAmbientOcclusionSize(float f)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().amb_occl_size=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
+float Scene::GetAmbientOcclusionSize() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_size;
+#else
+  return 1.0;
+#endif
+}
+
 void Scene::SetShadingMode(const std::string& smode)
 {
 #if OST_SHADER_SUPPORT_ENABLED

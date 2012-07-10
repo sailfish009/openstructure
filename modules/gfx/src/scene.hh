@@ -137,6 +137,10 @@ class DLLEXPORT_OST_GFX Scene {
   void SetAmbientOcclusionQuality(uint q);
   /// experimental feature
   uint GetAmbientOcclusionQuality() const;
+  /// experimental feature
+  void SetAmbientOcclusionSize(float f);
+  /// experimental feature
+  float GetAmbientOcclusionSize() const;
   
   /// \brief select shading mode
   /// one of fallback, basic, default, hf, toon1, toon2
