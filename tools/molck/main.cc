@@ -40,8 +40,15 @@ EntityHandle load_x(const String& file, const IOProfile& profile)
 }
 
 // load compound library, exiting if it could not be found...
-CompoundLibPtr load_compound_lib()
+CompoundLibPtr load_compound_lib(const String& custom_path)
 {
+  if (custom_path!="") {
+    if (fs::exists(custom_path)) {  
+      return CompoundLib::Load(custom_path);
+    } else {
+      std::cerr << "Could not find compounds.chemlib at the provided location, trying other options" << std::endl;
+    }
+  } 
   if (fs::exists("compounds.chemlib")) {
     return CompoundLib::Load("compounds.chemlib");
   }
@@ -71,9 +78,11 @@ CompoundLibPtr load_compound_lib()
     String share_path_string=share_path.string();
     #else
     String share_path_string=share_path.file_string();
-    #endif        
- 
-    return CompoundLib::Load(share_path_string);
+    #endif       
+      
+    if (fs::exists(share_path_string)) {
+      return CompoundLib::Load(share_path_string);
+    }  
   }
   if (!lib) {
     std::cerr << "Could not load compounds.chemlib" << std::endl;
@@ -86,6 +95,13 @@ void usage()
 {
   std::cerr << "usage: molck [options] file1.pdb [file2.pdb [...]]" << std::endl;
   std::cerr << "options" << std::endl;
+  std::cerr << "  --complib   location of the compound library file" << std::endl;   
+  std::cerr << "              If not provided, the following locations are searched" << std::endl;   
+  std::cerr << "              in this order:" << std::endl;   
+  std::cerr << "              1. Working directory" << std::endl;   
+  std::cerr << "              2. OpenStructure standard library location" << std::endl;   
+  std::cerr << "                 (if the executable is part of a standard" << std::endl;
+  std::cerr << "                 OpenStructure installation)" << std::endl;
   std::cerr << "  --rm=<a>,<b>   remove atoms and residues matching some criteria" << std::endl;
   std::cerr << "          zeroocc  - Remove atoms with zero occupancy" << std::endl;
   std::cerr << "          hyd      - Remove hydrogen atoms" << std::endl;
@@ -95,13 +111,17 @@ void usage()
   std::cerr << "          unk      - Remove unknown atoms and atoms that " << std::endl 
             << "                     are not supposed to be part of a residue" << std::endl;
   std::cerr << "  --fix-ele      clean up element column" << std::endl;
-  std::cerr << "  --stdout       write cleaned files to stdout" << std::endl;
+  std::cerr << "  --stdout       write cleaned file(s) to stdout" << std::endl;
+  std::cerr << "  --fileout=blueprint   write cleaned file(s) to disk." << std::endl;  
+  std::cerr << "                        The blueprint is used to generate the output path and" << std::endl; 
+  std::cerr << "                        filemane, substituting % with the original file name" << std::endl;
+  std::cerr << "                        minus the extension" << std::endl;
   std::cerr << "  --color=auto|on|off " << std::endl 
             << "          whether output should be colored" << std::endl;
   std::cerr << "  --map-nonstd   maps modified residues back to the parent amino " << std::endl 
             << "          acid, e.g. MSE -> MET, SEP -> SER." << std::endl;
   exit(0);
-}
+}	
 
 int main(int argc, char *argv[])
 {
@@ -114,24 +134,29 @@ int main(int argc, char *argv[])
   String color;
   bool colored = false;
 
-  CompoundLibPtr lib=load_compound_lib();
   bool rm_unk_atoms=false;
   bool rm_hyd_atoms=false;
   bool rm_non_std=false;
   bool rm_oxt_atoms=false;
   bool rm_zero_occ_atoms=false;
   bool write_to_stdout = false;
+  bool write_to_file = false;
   bool map_nonstd_res = false;
   bool assign_elem = false;
+  String output_blueprint_string;
+  String custom_path="";
+
   po::options_description desc("Options");
   desc.add_options()
     ("rm", po::value<String>(&rm)->default_value("hyd"), "atoms to be removed")
     ("color", po::value<String>(&color)->default_value("auto"), 
      "whether the output should be colored.")
     ("files", po::value< std::vector<String> >(), "input file(s)")
-    ("stdout", "write cleaned structure to stdout")
+    ("stdout", "write cleaned file(s) to stdout")
+    ("fileout", po::value<String>(&output_blueprint_string), "write cleaned file to output using blueprint to determine path")
     ("map-nonstd", "map non standard residues back to standard ones (e.g.: MSE->MET,SEP->SER,etc.)")
-    ("fix-ele", "insert element")   
+    ("fix-ele", "insert element") 
+    ("complib", po::value<String>(&custom_path)->default_value(""),"location of the compound library file")       
   ;
   po::positional_options_description p;
   p.add("files", -1);
@@ -154,9 +179,16 @@ int main(int argc, char *argv[])
     usage();
     exit(-1);
   }
+  if (vm.count("complib")) {
+    custom_path = vm["complib"].as<String>();
+  }    
   if (vm.count("stdout")) {
     write_to_stdout = true;
   }
+  if (vm.count("fileout")) {
+    write_to_file = true;
+    output_blueprint_string = vm["fileout"].as<String>();
+  }  
   if (vm.count("map-nonstd")) {
     map_nonstd_res = true;
   }
@@ -192,6 +224,7 @@ int main(int argc, char *argv[])
     usage();
     exit(-1);
   }
+  CompoundLibPtr lib=load_compound_lib(custom_path);  
   for (unsigned int i = 0; i < files.size(); ++i) {
     EntityHandle ent=load_x(files[i], prof);
     if (!ent.IsValid()) {
@@ -330,10 +363,55 @@ int main(int argc, char *argv[])
         }    
       }
     }          
+ 
     if (write_to_stdout) {
       PDBWriter writer(std::cout, prof);
       writer.Write(ent);
     }
+    if (write_to_file) {
+      fs::path input_file_path(files[i]);
+      fs::path input_filename = input_file_path.stem();
+ 
+
+      #if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
+      String input_filename_string=input_filename.string();
+      #else
+      String input_filename_string=input_filename.file_string();
+      #endif       
+
+      size_t replstart =output_blueprint_string.find('%');	
+
+      if (replstart == String::npos) {
+        std::cerr << "The output blueprint string does not contain a % character" << std::endl;
+        exit(-1);
+      } 
+      String output_blueprint_string_copy = output_blueprint_string;
+      output_blueprint_string_copy.replace(replstart,1,input_filename_string); 
+      output_blueprint_string_copy+=".pdb";
+ 
+      try {
+        fs::path out_path(output_blueprint_string_copy);
+        if (!exists(out_path)) {
+          std::cerr << "Output path does not exist: " << output_blueprint_string_copy << std::endl;
+          exit(-1);
+        }
+      } catch (std::exception& e) {
+
+        size_t perden = String(e.what()).find("Permission denied");	
+
+        if (perden != String::npos) {
+          std::cerr << "Cannot write into output directory: " << output_blueprint_string_copy << std::endl;
+          exit(-1);
+        } else {
+          std::cerr << e.what() << std::endl;
+          exit(-1);
+        }
+      }
+      std::cerr << "Writing out file: " << output_blueprint_string_copy << std::endl;
+      PDBWriter writer(output_blueprint_string_copy, prof);
+       writer.Write(ent);
+    }
   }
+ 
   return 0;
 }
