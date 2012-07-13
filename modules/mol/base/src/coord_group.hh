@@ -30,6 +30,8 @@
 
 namespace ost { namespace mol {
 
+class Transform;
+
 /// \brief coordinate group, for trajectories and such
 class DLLEXPORT_OST_MOL CoordGroupHandle {
 public:
@@ -105,7 +107,9 @@ public:
   /// \brief return a filtered coord group, containing only the atoms in the 
   ///     view
   CoordGroupHandle Filter(const EntityView& selected,int first=0,int last=-1) const;
-  
+
+  /// \brief apply in-place transform to each coordinate in each frame
+  void ApplyTransform(const Transform& tf);
 
 
 private:

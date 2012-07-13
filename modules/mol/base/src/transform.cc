@@ -122,7 +122,7 @@ void Transform::ApplyZAxisRotation(float delta)
 
 void Transform::ApplyAxisRotation(float delta, const Vec3& axis)
 {
-  rot_=rot_*AxisRotation(rot_*axis, delta*P_180);
+  rot_=rot_*AxisRotation(axis, delta*P_180);
   update_tm();
 }
 

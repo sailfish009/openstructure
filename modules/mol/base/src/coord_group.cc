@@ -254,6 +254,15 @@ CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected, int first,
   }
   return filtered_cg;
 }
- 
+
+void CoordGroupHandle::ApplyTransform(const mol::Transform& tf)
+{
+  this->CheckValidity();
+  if (source_->IsMutable()) {
+    source_->ApplyTransform(tf);
+  } else {
+    throw IntegrityError("Cannot apply transform, CoordGroup is immutable");
+  }  
+} 
   
 }} // ns

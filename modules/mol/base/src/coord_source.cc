@@ -21,12 +21,11 @@
   Author: Marco Biasini
  */
 #include <ost/log.hh>
-#include <ost/mol/atom_handle.hh>
-#include <ost/mol/xcs_editor.hh>
-#include <ost/mol/in_mem_coord_source.hh>
-
+#include "atom_handle.hh"
+#include "xcs_editor.hh"
+#include "in_mem_coord_source.hh"
+#include "transform.hh"
 #include "coord_source.hh"
-
 
 namespace ost { namespace mol {
   
@@ -164,6 +163,18 @@ geom::Vec3 CoordSource::GetAtomPos(uint frame, AtomHandle atom) const
     return fp[it->second];
   }
   return geom::Vec3();
+}
+
+void CoordSource::ApplyTransform(const Transform& tf)
+{
+  if(!mutable_) return;
+  size_t frame_count=GetFrameCount();
+  for(size_t n=0;n<frame_count;++n) {
+    CoordFramePtr cfp=GetFrame(n);
+    for(CoordFrame::iterator it=cfp->begin();it!=cfp->end();++it) {
+      *it=tf.Apply(*it);
+    }
+  }
 }
 
 }} // ns

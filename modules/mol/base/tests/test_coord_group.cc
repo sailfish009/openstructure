@@ -80,6 +80,18 @@ BOOST_AUTO_TEST_CASE(coord_group)
   BOOST_CHECK(ab.GetPos()==geom::Vec3(-14,-15,-16));
   BOOST_CHECK(ac.GetPos()==geom::Vec3(-17,-18,-19));
   BOOST_CHECK(ad.GetPos()==geom::Vec3(9,10,11));
+
+  Transform tf;
+  tf.ApplyXAxisRotation(17.0);
+  tf.ApplyYAxisRotation(-135.0);
+  tf.ApplyZAxisRotation(234.0);
+  tf.SetCenter(geom::Vec3(-7.3,1.2,5.5));
+  tf.SetTrans(geom::Vec3(14.5,-87.1,22.2));
+
+  cg.ApplyTransform(tf);
+  for(size_t i=0;i<3;++i) {
+    BOOST_CHECK_CLOSE(geom::Distance(cg.GetAtomPos(1,alist[i]),tf.Apply(clist[i])),Real(0),1e-6);
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END();
