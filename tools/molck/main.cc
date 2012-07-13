@@ -109,6 +109,7 @@ int main(int argc, char *argv[])
     usage();
   }
   IOProfile prof;
+  prof.fault_tolerant=true;
   String rm;
   String color;
   bool colored = false;
