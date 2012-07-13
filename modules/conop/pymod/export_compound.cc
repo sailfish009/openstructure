@@ -21,6 +21,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
+#include <ost/message.hh>
 #include <ost/conop/compound.hh>
 #include <ost/conop/compound_lib.hh>
 using namespace ost::mol;
@@ -44,7 +45,7 @@ Compound::Dialect tr_dialect(const String& dialect)
   }
   std::stringstream ss;
   ss << "unknown compound dialect '" << dialect << "'";
-  throw std::runtime_error(ss.str());
+  throw ost::Error(ss.str());
 }
 
 void set_dialect(CompoundPtr compound, const String& dialect)

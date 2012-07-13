@@ -20,7 +20,7 @@
 /*
   messages and logs
 
-  Authors: Ansgar Philippsen, Andteas Schenk
+  Authors: Ansgar Philippsen, Andreas Schenk
 */
 
 #include "message.hh"
@@ -28,17 +28,7 @@
 namespace ost {
 
 Error::Error(const String& m):
-  mesg_(m)
+  std::runtime_error(m)
 {}
 
-Error::~Error() throw()
-{
 }
-
-const char* Error::what() const throw()
-{
-  return mesg_.c_str();
-}
-
-}
-

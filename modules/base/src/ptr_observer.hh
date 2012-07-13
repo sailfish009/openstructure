@@ -29,7 +29,7 @@
   Author: Ansgar Philippsen
 */
 
-class DLLEXPORT_OST_BASE InvalidatedPointer: public ost::Error {
+class DLLEXPORT InvalidatedPointer: public ost::Error {
 public:
   InvalidatedPointer():
     ost::Error("access attempt on invalidated Pointer")

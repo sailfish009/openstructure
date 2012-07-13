@@ -25,6 +25,7 @@
 #include <boost/python.hpp>
 using namespace boost::python;
 
+#include <ost/message.hh>
 #include <ost/img/algorithm.hh>
 #include <ost/img/image.hh>
 #include <ost/img/function.hh>
@@ -94,7 +95,7 @@ img::Point tuple_to_point(size_t dim, tuple t)
 {
   size_t tuple_len=len(t);
   if (tuple_len!=dim) {
-    throw std::runtime_error("length of tuple and image dimension must match");
+    throw ost::Error("length of tuple and image dimension must match");
   }
   img::Point p;
   for (size_t i=0; i<tuple_len; ++i) {
@@ -120,7 +121,7 @@ object ih_get_item_a(ConstImageHandle ih, tuple t)
 object ih_get_item_c(ConstImageHandle ih, int x)
 {
   if (ih.GetSize().GetDim()!=1) {
-    throw std::runtime_error("Can't address point of multi-dimensional image with scalar");
+    throw ost::Error("Can't address point of multi-dimensional image with scalar");
   }
   return ih_get_item(ih, img::Point(x, 0, 0));
 }
@@ -152,7 +153,7 @@ void ih_set_item_b(ImageHandle ih, img::Point p, object value)
 void ih_set_item_c(ImageHandle ih, int x, object value)
 {
   if (ih.GetSize().GetDim()!=1) {
-    throw std::runtime_error("Can't address point of multi-dimensional image with scalar");
+    throw ost::Error("Can't address point of multi-dimensional image with scalar");
   }  
   ih_set_item(ih, img::Point(x, 0, 0), value);
 }

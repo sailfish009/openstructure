@@ -38,7 +38,7 @@ namespace {
     for(int i=0;i<len(keys);++i) {
       extract<float> fex(keys[i]);
       if(!fex.check()) {
-        throw std::runtime_error("expected floats as keys");
+        throw Error("expected floats as keys");
       }
       float mark = fex();
       Color col;
@@ -50,12 +50,12 @@ namespace {
       } else {
         // try simple sequence
         if(len(val)!=3) {
-          throw std::runtime_error("expected values of gfx.Color or float triplets");
+          throw Error("expected values of gfx.Color or float triplets");
         }
         try {
           col=gfx::Color(extract<float>(val[0]),extract<float>(val[1]),extract<float>(val[2]));
         } catch (...) {
-          throw std::runtime_error("expected values of gfx.Color or float triplets");
+          throw Error("expected values of gfx.Color or float triplets");
         }
       }
       grad->SetColorAt(mark,col);
@@ -78,12 +78,12 @@ namespace {
       } else {
         // try simple sequence
         if(len(val)!=3) {
-          throw std::runtime_error("expected values of gfx.Color or float triplets");
+          throw Error("expected values of gfx.Color or float triplets");
         }
         try {
           col=gfx::RGB(extract<float>(val[0]),extract<float>(val[1]),extract<float>(val[2]));
         } catch (...) {
-          throw std::runtime_error("expected values of gfx.Color float triplets");
+          throw Error("expected values of gfx.Color float triplets");
         }
       }
       grad->SetColorAt(mark,col);

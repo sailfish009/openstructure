@@ -108,7 +108,7 @@ unsigned int& Size::operator[](unsigned int index)
   if(index==0) return w_;
   else if(index==1) return h_;
   else if(index==2) return d_;
-  else throw std::range_error("Size index out of range");
+  else throw geom::OutOfRangeException("Size index out of range");
 }
 
 unsigned int Size::operator[](unsigned int index) const 
@@ -116,7 +116,7 @@ unsigned int Size::operator[](unsigned int index) const
   if(index==0) return w_;
   else if(index==1) return h_;
   else if(index==2) return d_;
-  else throw std::range_error("Size index out of range");
+  else throw geom::OutOfRangeException("Size index out of range");
 }
 
 bool Size::operator==(const Size& s) const 

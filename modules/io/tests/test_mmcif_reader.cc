@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE(mmcif_unknown_entity_type)
   BOOST_MESSAGE("          unknown type...");
   columns.pop_back();
   columns.push_back(StringRef("foo", 3));
-  BOOST_CHECK_THROW(tmmcif_p.ParseEntity(columns), std::runtime_error);
+  BOOST_CHECK_THROW(tmmcif_p.ParseEntity(columns), Error);
   BOOST_MESSAGE("          done.");
 
   BOOST_MESSAGE("  done.");

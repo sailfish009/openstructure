@@ -196,7 +196,7 @@ Real DihedralAngle(const Vec3& p1, const Vec3& p2, const Vec3& p3,
 Real MinDistance(const Vec3List& l1, const Vec3List& l2)
 { 
   // returns the minimal distance between two sets of points (Vec3List)
-  if (l1.size()==0 || l2.size()==0){throw std::runtime_error("cannot calculate minimal distance: empty Vec3List");}
+  if (l1.size()==0 || l2.size()==0){throw GeomException("cannot calculate minimal distance: empty Vec3List");}
   Real min=Length2(*l1.begin()-*l2.begin());
   Real d;
   for (Vec3List::const_iterator p1=l1.begin(),e1=l1.end(); p1!=e1; p1++) {
@@ -212,7 +212,7 @@ Real MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec)
 { 
   // returns the minimal distance between two sets of points (Vec3List)
   // given the periodic boundary condition along x,y,z given in the basis_vec
-  if (l1.size()==0 || l2.size()==0){throw std::runtime_error("cannot calculate minimal distance: empty Vec3List");}
+  if (l1.size()==0 || l2.size()==0){throw GeomException("cannot calculate minimal distance: empty Vec3List");}
   Real min=Length2(*l1.begin()-*l2.begin());
   Real d;
   Vec3 v;

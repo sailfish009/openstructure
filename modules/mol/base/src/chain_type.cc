@@ -17,7 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
-#include <stdexcept>
+#include <ost/message.hh>
 #include "chain_type.hh"
 
 namespace ost { namespace mol {
@@ -52,7 +52,7 @@ ChainType ChainTypeFromString(StringRef identifier)
       return CHAINTYPE_UNKNOWN;
   }
 
-  throw std::runtime_error("Unrecognised chain type descriptor found: '" +
+  throw Error("Unrecognised chain type descriptor found: '" +
                            identifier.str() +"'!");
 }
 
@@ -92,7 +92,7 @@ String StringFromChainType(ChainType type)
 
   std::stringstream ss("Unknonw ChainType item found: '");
   ss << type << "'!";
-  throw std::runtime_error(ss.str());
+  throw Error(ss.str());
 }
 
 }} //ns

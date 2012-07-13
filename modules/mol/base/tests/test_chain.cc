@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(chain_type)
                CHAINTYPE_POLY_DN_RN);
    BOOST_CHECK(ChainTypeFromString("other") == CHAINTYPE_UNKNOWN);
    BOOST_CHECK_THROW(ChainTypeFromString("supposed to fail"),
-                     std::runtime_error);
+                     Error);
 
    // chain type -> string
    BOOST_CHECK(StringFromChainType(CHAINTYPE_POLY) == "polymer");
@@ -322,7 +322,7 @@ BOOST_AUTO_TEST_CASE(chain_type)
                "polydeoxyribonucleotide/polyribonucleotide hybrid");
    BOOST_CHECK(StringFromChainType(CHAINTYPE_UNKNOWN) == "other");
    BOOST_CHECK_THROW(StringFromChainType(CHAINTYPE_N_CHAINTYPES),
-                     std::runtime_error);
+                     Error);
 }
 
 BOOST_AUTO_TEST_CASE(chain_description)

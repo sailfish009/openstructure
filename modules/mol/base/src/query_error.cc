@@ -39,7 +39,7 @@ String QueryError::GetFormattedMessage() const throw() {
 
 QueryError::QueryError(const String& query, 
                        const QueryErrorDesc& desc) throw()
-  : query_(query),desc_(desc) { 
+  : ost::Error(""),query_(query),desc_(desc) {
 }
   
 QueryError::~QueryError() throw() { 

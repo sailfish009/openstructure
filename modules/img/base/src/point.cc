@@ -87,7 +87,7 @@ Point::Point(const Vec4& v):
   data_()
 {
   if(std::abs(v[3])<1e-100) {
-    throw std::range_error("4th element of Vec4 is too close to zero for normalization");
+    throw geom::OutOfRangeException("4th element of Vec4 is too close to zero for normalization");
   } else {
     Real sf = 1.0/v[3];
     data_[0]=static_cast<int>(round(v[0]*sf));
@@ -245,7 +245,7 @@ int& Point::operator[](unsigned int index)
 
 int Point::operator[](unsigned int index) const 
 {
-  if(index>2) throw std::range_error("Point index out of range");
+  if(index>2) throw geom::OutOfRangeException("Point index out of range");
   return data_[index];
 }
 
