@@ -61,7 +61,7 @@ class ColorSelectWidget(QtGui.QWidget):
   
   def GetGfxColor(self):
     color = self.GetColor()
-    return gfx.Color(color.redF(), color.greenF(), color.blueF())
+    return gfx.RGB(color.redF(), color.greenF(), color.blueF())
   
   def SetColor(self, color):
     if(self.color_ != color):

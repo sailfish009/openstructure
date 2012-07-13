@@ -218,12 +218,12 @@ class UniformColorOpWidget(QtGui.QDialog):
     
   def GetOp(self):
     qv=mol.QueryViewWrapper(self.query_editor_.GetQuery(),self.query_editor_.GetQueryFlags())
-    ufco = UniformColorOp(qv,gfx.Color(1,1,1,1))
+    ufco = UniformColorOp(qv,gfx.RGBA(1,1,1,1))
     
     detail = self.detail_selection_cb_.itemData(self.detail_selection_cb_.currentIndex()).toPyObject()
     ufco.SetMask(detail)
     qcolor = self.color_select_widget_.GetColor()
-    color=gfx.Color(qcolor.red()/255.0,qcolor.green()/255.0,qcolor.blue()/255.0,qcolor.alpha()/255.0)
+    color=gfx.RGBAb(qcolor.red(),qcolor.green(),qcolor.blue(),qcolor.alpha())
     ufco.SetColor(color)
     return ufco
 

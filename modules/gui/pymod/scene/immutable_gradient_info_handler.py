@@ -78,5 +78,5 @@ class ImmutableGradientInfoHandler:
     for s in gradient.stops():
       rel=s[0]
       color=s[1]
-      gfx_gradient.SetColorAt(s[0], gfx.Color(s[1].redF(), s[1].greenF(), s[1].blueF()));
+      gfx_gradient.SetColorAt(s[0], gfx.RGB(s[1].redF(), s[1].greenF(), s[1].blueF()));
     return gfx_gradient;

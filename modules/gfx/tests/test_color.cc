@@ -49,136 +49,142 @@ BOOST_AUTO_TEST_SUITE(gfx)
 BOOST_AUTO_TEST_CASE(default_color)
 {
   Color c;
-  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetAlpha(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetAlpha(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
 }
 
 BOOST_AUTO_TEST_CASE(set_rgb)
 {
   Color c;
   c = RGB(1.0,0.0,0.0); // red
-  BOOST_CHECK_CLOSE(c.GetAlpha(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),0.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetAlpha(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),0.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = RGB(1.0,1.0,0.0); // yellow
-  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),1.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),1.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = RGB(0.0,1.0,0.0); // green
-  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),2.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),2.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = RGB(0.0,1.0,1.0); // cyan
-  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),3.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),3.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = RGB(0.0,0.0,1.0); // blue
-  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),4.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),4.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = RGB(1.0,0.0,1.0); // purple
-  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),5.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),5.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
 }
 
 BOOST_AUTO_TEST_CASE(set_hsv)
 {
   Color c;
   c = HSV(0.0/6.0,1.0,1.0); // red
-  BOOST_CHECK_CLOSE(c.GetAlpha(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),0.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetAlpha(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),0.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = HSV(0.0/6.0,0.5,1.0); // light red
-  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),0.5,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),0.5,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),0.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),0.5,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),0.5,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),0.5,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),0.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),0.5,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = HSV(1.0/6.0,1.0,1.0); // yellow
-  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),1.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),1.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = HSV(2.0/6.0,1.0,1.0); // green
-  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),2.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),2.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = HSV(2.0/6.0,0.5,1.0); // light green
-  BOOST_CHECK_CLOSE(c.GetRed(),0.5,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),0.5,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),2.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),0.5,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),0.5,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),0.5,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),2.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),0.5,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = HSV(3.0/6.0,1.0,1.0); // cyan
-  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),3.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),3.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = HSV(4.0/6.0,1.0,1.0); // blue
-  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),4.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),4.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = HSV(4.0/6.0,0.5,1.0); // light blue
-  BOOST_CHECK_CLOSE(c.GetRed(),0.5,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),0.5,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),4.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),0.5,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),0.5,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),0.5,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),4.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),0.5,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
   c = HSV(5.0/6.0,1.0,1.0); // purple
-  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetHue(),5.0/6.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-6);
-  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-6);
+  BOOST_CHECK_CLOSE(c.GetRed(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetGreen(),0.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetBlue(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetHue(),5.0/6.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetSat(),1.0,1e-4);
+  BOOST_CHECK_CLOSE(c.GetVal(),1.0,1e-4);
 }
 
 BOOST_AUTO_TEST_CASE(set_char)
 {
-  BOOST_CHECK(compare_colors(RGB(255,0,0),RGB(1.0,0.0,0.0)));
-  BOOST_CHECK(compare_colors(RGBA(0,127,0,127),RGBA(0.0,0.5,0.0,0.5)));
+  BOOST_CHECK(compare_colors(RGBb(255,0,0),RGB(1.0,0.0,0.0)));
+  BOOST_CHECK(compare_colors(RGBAb(0,127,0,127),RGBA(0.0,0.5,0.0,0.5)));
+}
+
+BOOST_AUTO_TEST_CASE(set_int)
+{
+  BOOST_CHECK(compare_colors(RGBi(65535,65535,0),RGB(1.0,1.0,0.0)));
+  BOOST_CHECK(compare_colors(RGBAi(0,32767,0,32767),RGBA(0.0,0.5,0.0,0.5)));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -159,39 +159,77 @@ private:
   mutable bool hsv_dirty_;
 };
 
-/*
-  \brief RGB color spec from floats (0.0-1.0)
-*/
+
+/// \brief RGB color spec from floats (0.0-1.0)
 Color DLLEXPORT_OST_GFX RGB(float r, float g, float b);
 
-/*
-  \brief RGB color spec from bytes (0-255)
-*/
-Color DLLEXPORT_OST_GFX RGB(uchar r, uchar g, uchar b);
+/// \brief RGB color spec from bytes (0-255)
+Color DLLEXPORT_OST_GFX RGBb(uchar r, uchar g, uchar b);
 
-/*
-  \brief RGBA color spec from floats (0.0-1.0)
-*/
+/// \brief RGB color spec from integers (0-65535)
+Color DLLEXPORT_OST_GFX RGBi(unsigned int r, unsigned int g, unsigned int b);
+
+/// \brief RGBA color spec from floats (0.0-1.0)
 Color DLLEXPORT_OST_GFX RGBA(float r, float g, float b, float a);
 
-/*
-  \brief RGBA color spec from bytes (0-255)
-*/
-Color DLLEXPORT_OST_GFX RGBA(uchar r, uchar g, uchar b, uchar a);
+/// \brief RGBA color spec from bytes (0-255)
+Color DLLEXPORT_OST_GFX RGBAb(uchar r, uchar g, uchar b, uchar a);
+
+/// \brief RGBA color spec from integers (0-65535)
+Color DLLEXPORT_OST_GFX RGBAi(unsigned int r, unsigned int g, unsigned int b, unsigned int a);
+
 
 /*!
-  \brief HSV color spec
+  \brief HSV color spec from floats
 
   h: Hue from 0 to 1 (0=red, 2/6=green, 4/6=blue)
+     outside values are modulus 1, not clamped
   s: Saturation from 0 (no color) to 1 (full color)
+     outside values are clamped
   v: Value from 0 (no light, black) to 1 (full light)
+     outside values are clamped
+
+  out-of-bounds values are perfectly fine, as they are
+  sometimes needed in hsv gradients, e.g.
+
+  g1=gfx.Gradient([gfx.HSV(-60.0/360.0,1,1),gfx.HSV(60.0/360.0,1,1)])
+  g1.hsv_mode=True
+  g2=gfx.Gradient([gfx.HSV(300.0/360.0,1,1),gfx.HSV(420.0/360.0,1,1)])
+  g2.hsv_mode=True
+
+  both will blend from purple to yellow via red
 */
 Color DLLEXPORT_OST_GFX HSV(float h, float s, float v);
 
 /*!
-  \brief HSVA color spec
+  \brief HSV color spec from integers
+
+  h: Hue from 0 to 359 (0=red, 120=green, 240=blue)
+     outside values are modulus 360, not clamped
+  s: Saturation from 0 (no color) to 100 (full color)
+     outside values are clamped
+  v: Value from 0 (no light, black) to 100 (full light)
+     outside values are clamped
+
+  signed integers on purpose, allows negative values to be
+  used for hsv gradients, see comments for HSV(float,float,float)
+*/
+  Color DLLEXPORT_OST_GFX HSVi(int h, int s, int v);
+
+/*!
+  \brief HSVA color spec from floats
+
+  see HSV(float,float,float); alpha from 0 to 1
 */
 Color DLLEXPORT_OST_GFX HSVA(float h, float s, float v, float a);
+
+/*!
+  \brief HSVA color spec from integers
+
+  see HSVi(int, int, int); alpha from 0 to 100
+*/
+Color DLLEXPORT_OST_GFX HSVAi(int h, int s, int v, int a);
+
 
 //! \brief string form
 DLLEXPORT_OST_GFX std::ostream& operator<<(std::ostream&, const Color& c);

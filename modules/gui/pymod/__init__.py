@@ -59,8 +59,7 @@ def PickColor(default=gfx.WHITE):
   qt_color=dialog.getColor(qt_color)
   if not qt_color.isValid():
     return None
-  return gfx.Color(qt_color.red()/256.0, qt_color.green()/256.0,
-                   qt_color.blue()/256.0)
+  return gfx.RGBAb(qt_color.red(), qt_color.green(),qt_color.blue())
                    
 def GetMenu(menu_name, create=False):
   persp=GostyApp.Instance().perspective

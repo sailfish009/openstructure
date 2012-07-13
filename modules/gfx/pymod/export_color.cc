@@ -46,17 +46,13 @@ namespace {
     return m.str();
   }
 
-  Color rgb1(float r, float g, float b) {return RGB(r,g,b);}
-  Color rgb2(uchar r, uchar g, uchar b) {return RGB(r,g,b);}
-  Color rgb3(uint rgb) {return RGB(static_cast<uchar>((rgb>>16)&0xff),
-                                   static_cast<uchar>((rgb>>8)&0xff),
-                                   static_cast<uchar>((rgb)&0xff));}
-  Color rgba1(float r, float g, float b, float a) {return RGBA(r,g,b,a);}
-  Color rgba2(uchar r, uchar g, uchar b, uchar a) {return RGBA(r,g,b,a);}
-  Color rgba3(uint rgba) {return RGBA(static_cast<uchar>((rgba>>24)&0xff),
-                                      static_cast<uchar>((rgba>>16)&0xff),
-                                      static_cast<uchar>((rgba>>8)&0xff),
-                                      static_cast<uchar>((rgba)&0xff));}
+  Color rgbh(uint rgb) {return RGB(static_cast<uchar>((rgb>>16)&0xff),
+                                    static_cast<uchar>((rgb>>8)&0xff),
+                                    static_cast<uchar>((rgb)&0xff));}
+  Color rgbah(uint rgba) {return RGBA(static_cast<uchar>((rgba>>24)&0xff),
+                                       static_cast<uchar>((rgba>>16)&0xff),
+                                       static_cast<uchar>((rgba>>8)&0xff),
+                                       static_cast<uchar>((rgba)&0xff));}
 
   tuple get_rgb(const Color& c) {return make_tuple(c.GetRed(),c.GetGreen(),c.GetBlue());}
   void set_rgb(Color& c, object rgb) {
@@ -152,13 +148,12 @@ void export_color()
     .def("FromRGBA",&Color::FromRGB)
     ;
 
-  def("RGB",rgb3);
-  def("RGB",rgb2);
-  def("RGB",rgb1);
-  def("RGBA",rgba3);
-  def("RGBA",rgba2);
-  def("RGBA",rgba1);
+  def("RGB",RGB);
+  def("RGBh",rgbh);
+  def("RGBb",RGBb);
+  def("RGBi",RGBi);
   def("HSV",HSV);
+  def("HSVi",HSVi);
   def("HSVA",HSVA);
-  
+  def("HSVAi",HSVAi);
 }

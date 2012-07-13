@@ -361,9 +361,17 @@ Color RGB(float r, float g, float b)
   return nrvo;
 }
 
-Color RGB(uchar r, uchar g, uchar b)
+Color RGBb(uchar r, uchar g, uchar b)
 {
   static float f=1.0/255.0;
+  Color nrvo;
+  nrvo.SetRGB(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
+  return nrvo;
+}
+
+Color RGBi(unsigned int r, unsigned int g, unsigned int b)
+{
+  static float f=1.0/65535.0;
   Color nrvo;
   nrvo.SetRGB(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
   return nrvo;
@@ -377,9 +385,18 @@ Color RGBA(float r, float g, float b, float a)
   return nrvo;
 }
 
-Color RGBA(uchar r, uchar g, uchar b, uchar a)
+Color RGBAb(uchar r, uchar g, uchar b, uchar a)
 {
   static float f=1.0/255.0;
+  Color nrvo;
+  nrvo.SetRGB(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
+  nrvo.SetAlpha(static_cast<float>(a)*f);
+  return nrvo;
+}
+
+Color RGBAi(unsigned int r, unsigned int g, unsigned int b, unsigned a)
+{
+  static float f=1.0/65535.0;
   Color nrvo;
   nrvo.SetRGB(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
   nrvo.SetAlpha(static_cast<float>(a)*f);
@@ -393,11 +410,27 @@ Color HSV(float h, float s, float v)
   return nrvo;
 }
 
-  Color HSVA(float h, float s, float v, float a)
+Color HSVi(int r, int g, int b)
+{
+  static float f=1.0/65535.0;
+  Color nrvo;
+  nrvo.SetHSV(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
+  return nrvo;
+}
+
+Color HSVA(float h, float s, float v, float a)
 {
   Color nrvo;
   nrvo.SetHSV(h,s,v);
   nrvo.SetAlpha(a);
+  return nrvo;
+}
+
+Color HSVAi(int r, int g, int b, int a)
+{
+  static float f=1.0/65535.0;
+  Color nrvo;
+  nrvo.SetHSV(static_cast<float>(r)*f,static_cast<float>(g)*f,static_cast<float>(b)*f);
   return nrvo;
 }
 
