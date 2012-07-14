@@ -95,13 +95,13 @@ void usage()
 {
   std::cerr << "usage: molck [options] file1.pdb [file2.pdb [...]]" << std::endl;
   std::cerr << "options" << std::endl;
-  std::cerr << "  --complib   location of the compound library file" << std::endl;   
-  std::cerr << "              If not provided, the following locations are searched" << std::endl;   
-  std::cerr << "              in this order:" << std::endl;   
-  std::cerr << "              1. Working directory" << std::endl;   
-  std::cerr << "              2. OpenStructure standard library location" << std::endl;   
-  std::cerr << "                 (if the executable is part of a standard" << std::endl;
-  std::cerr << "                 OpenStructure installation)" << std::endl;
+  std::cerr << "  --complib=path   location of the compound library file" << std::endl;   
+  std::cerr << "                   If not provided, the following locations are searched" << std::endl;   
+  std::cerr << "                   in this order:" << std::endl;   
+  std::cerr << "                   1. Working directory" << std::endl;   
+  std::cerr << "                   2. OpenStructure standard library location" << std::endl;   
+  std::cerr << "                      (if the executable is part of a standard" << std::endl;
+  std::cerr << "                      OpenStructure installation)" << std::endl;
   std::cerr << "  --rm=<a>,<b>   remove atoms and residues matching some criteria" << std::endl;
   std::cerr << "          zeroocc  - Remove atoms with zero occupancy" << std::endl;
   std::cerr << "          hyd      - Remove hydrogen atoms" << std::endl;
@@ -112,10 +112,12 @@ void usage()
             << "                     are not supposed to be part of a residue" << std::endl;
   std::cerr << "  --fix-ele      clean up element column" << std::endl;
   std::cerr << "  --stdout       write cleaned file(s) to stdout" << std::endl;
-  std::cerr << "  --fileout=blueprint   write cleaned file(s) to disk." << std::endl;  
-  std::cerr << "                        The blueprint is used to generate the output path and" << std::endl; 
-  std::cerr << "                        filemane, substituting % with the original file name" << std::endl;
-  std::cerr << "                        minus the extension" << std::endl;
+  std::cerr << "  --fileout=blueprint   write cleaned file(s) to disk" << std::endl;  
+  std::cerr << "                        The blueprint string, which must contain a % character," << std::endl;
+  std::cerr << "                        is used to generate the output filename and path" << std::endl; 
+  std::cerr << "                        by replacing % with the input file name without" << std::endl;
+  std::cerr << "                        the extension. Output files automatically add" << std::endl; 
+  std::cerr << "                        '.pdb' extension" << std::endl;
   std::cerr << "  --color=auto|on|off " << std::endl 
             << "          whether output should be colored" << std::endl;
   std::cerr << "  --map-nonstd   maps modified residues back to the parent amino " << std::endl 
