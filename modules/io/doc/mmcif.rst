@@ -746,6 +746,7 @@ of the annotation available.
   .. attribute:: align_id
     
     Uniquely identifies every struct_ref_seq item in the mmCIF file.
+
     :type: :class:`str`
 
   .. attribute:: seq_begin
