@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -70,6 +70,12 @@ SequenceList::Iterator SequenceList::End() const
 {
   this->CheckValidity();
   return SequenceList::Iterator(impl_->End(), impl_->End());
+}
+
+SequenceHandle SequenceList::FindSequence(const String& name) const
+{
+  this->CheckValidity();
+  return SequenceHandle(impl_->FindSequence(name));
 }
 
 bool SequenceList::IsValid() const
@@ -224,6 +230,12 @@ ConstSequenceList ConstSequenceList::Slice(int first, int n) const
 {
   this->CheckValidity();
   return ConstSequenceList(impl_->Slice(first, n));
+}
+
+ConstSequenceHandle ConstSequenceList::FindSequence(const String& name) const
+{
+  this->CheckValidity();
+  return ConstSequenceHandle(impl_->FindSequence(name));
 }
 
 ConstSequenceList DLLEXPORT_OST_SEQ CreateConstSequenceList()

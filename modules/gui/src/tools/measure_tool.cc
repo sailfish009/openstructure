@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -56,6 +56,8 @@ MeasureTool::MeasureTool()
   opts->AddOption(col_blue);
   ToolOptionFloat* line_width(new ToolOptionFloat("line_width", "Line Width", 4, 0.1, 10.0));
   opts->AddOption(line_width);
+  ToolOptionButton* clear_button(new ToolOptionButton("clear_button", "Clear", this, SLOT(ClearMeasurements())));
+  opts->AddOption(clear_button);
   mode_=meas_mode->GetValue();
 }
 
@@ -106,6 +108,11 @@ void MeasureTool::Click(const MouseEvent& event)
     sel_atoms_.clear();
   }
   scene.RequestRedraw();
+}
+
+void MeasureTool::ClearMeasurements()
+{
+  ml_.clear();
 }
 
 void MeasureTool::RenderGL()
@@ -161,6 +168,8 @@ void MeasureTool::RenderGL()
   }
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LIGHTING);
+  glColor3f(1.0f, 1.0f, 1.0f);
+  glDisable(GL_TEXTURE_2D);
 }
 
 
@@ -205,12 +214,17 @@ Measurement::Measurement(mol::AtomHandleList ahl, gfx::Color col, Real line_widt
       type_=DIHE;
       name_=ahl_[0].GetQualifiedName()+" - "+ahl_[1].GetQualifiedName()+" - "
              +ahl_[2].GetQualifiedName()+" - "+ahl_[3].GetQualifiedName();
-      measurement_=57.2958*geom::Angle(geom::Plane(ahl_[0].GetPos(),
-                                                   ahl_[1].GetPos(),
-                                                   ahl_[2].GetPos()),
-                                       geom::Plane(ahl_[1].GetPos(),
-                                                   ahl_[2].GetPos(),
-                                                   ahl_[3].GetPos()));
+      geom::Plane pl1 = geom::Plane(ahl_[0].GetPos(),
+                                    ahl_[1].GetPos(),
+                                    ahl_[2].GetPos());
+      geom::Plane pl2 = geom::Plane(ahl_[1].GetPos(),
+                                    ahl_[2].GetPos(),
+                                    ahl_[3].GetPos());
+      measurement_=57.2958*geom::Angle(pl1, pl2);
+      geom::Vec3 v = geom::Vec3(ahl_[2].GetPos()-ahl_[3].GetPos());
+      if (geom::Dot(v, pl1.GetNormal())>0) {
+        measurement_*=-1;
+      }
       valid_=true;
       break;
     }

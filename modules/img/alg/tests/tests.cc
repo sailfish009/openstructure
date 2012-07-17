@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -41,6 +41,7 @@ extern test_suite* CreateClearTest();
 extern test_suite* CreateFFTTest();
 extern test_suite* CreateNegateTest();
 extern test_suite* CreateConjugateTest();
+extern test_suite* CreateNormalizerTest();
 
 bool init_ost_img_alg_unit_tests() {
   try {
@@ -54,6 +55,7 @@ bool init_ost_img_alg_unit_tests() {
     framework::master_test_suite().add(CreateClearTest());      
     framework::master_test_suite().add(CreateNegateTest());
     framework::master_test_suite().add(CreateFFTTest());          
+    framework::master_test_suite().add(CreateNormalizerTest());          
   } catch(std::exception& e) {
     return false;
   }

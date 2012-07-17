@@ -3,7 +3,7 @@ go=gfx.Entity("test",eh.CreateFullView())
 ev = eh.Select(mol.Query("rnum=2,3,8,13"))
 go.SetSelection(ev)
 go.SetRenderMode(gfx.RenderMode.CUSTOM)
-go.SetColor(gfx.Color(0xffff00),"(ele=C and rnum=1:4)")
+go.SetColor(gfx.YELLOW,"(ele=C and rnum=1:4)")
 scene.Add(go)
 scene.SetCenter(go.GetCenter())
 

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -25,6 +25,7 @@
 #include <ost/geom/geom.hh>
 
 #include <ost/mol/residue_prop.hh>
+#include <ost/mol/chain_type.hh>
 #include <ost/mol/impl/chain_impl_fw.hh>
 #include <ost/mol/impl/residue_impl_fw.hh>
 #include <ost/mol/impl/entity_impl_fw.hh>
@@ -46,7 +47,62 @@ public:
 
   void SetName(const String& new_name);
   String GetName() const;
+
+  /// \brief Assign a type to a chain.
+  ///
+  /// \param type chain type of ChainType
+  void SetType(const ChainType type)
+  {
+    type_ = type;
+  }
+
+  /// \brief Get the type of a chain.
+  ///
+  /// \return chain type of ChainType
+  ChainType GetType() const
+  {
+    return type_;
+  }
   
+  /// \brief whether the chain is a polymer
+  bool IsPolymer() const
+  {
+    return type_==CHAINTYPE_POLY || this->IsPolypeptide() || 
+          this->IsPolynucleotide() || this->IsPolysaccharide();
+  }
+  /// \brief whether the chain is a polysaccharide
+  bool IsPolysaccharide() const
+  {
+    return type_==CHAINTYPE_POLY_SAC_D || type_==CHAINTYPE_POLY_SAC_L;
+  }
+  /// \brief whether the chain is a polypeptide
+  bool IsPolypeptide() const
+  {
+    return type_==CHAINTYPE_POLY_PEPTIDE_D || type_==CHAINTYPE_POLY_PEPTIDE_L;
+  }
+  /// \brief whether the chain is a polynucleotide
+  bool IsPolynucleotide() const
+  {
+    return type_==CHAINTYPE_POLY_DN || type_==CHAINTYPE_POLY_RN || 
+           type_==CHAINTYPE_POLY_DN_RN;
+  }
+
+  /// \brief Assign a description to a chain.
+  ///
+  /// \param desc description
+  void SetDescription(const String desc)
+  {
+    description_ = desc;
+  }
+
+  /// \brief Get information about a chain
+  ///
+  /// \return description
+  String GetDescription() const
+  {
+    return description_;
+  }
+
   /// \brief append new residue with exactly the same parameters as res, but 
   ///     no atoms and bonds                               
   ResidueImplPtr AppendResidue(const ResidueImplPtr& res);
@@ -91,7 +147,7 @@ public:
   ResidueImplPtr FindResidue(const ResNum& number) const;
   
   AtomImplPtr FindAtom(const ResNum& number, 
-                     const String& atom_name) const;  
+                       const String& atom_name) const;  
                      
   //! Get number of residues of this chain
   int GetResidueCount() const;
@@ -113,13 +169,20 @@ public:
   void DeleteAllResidues();
 
   void ReorderResidues();
+
+  void RenumberAllResidues(int start, bool keep_spacing);
   
-  int GetIndex(const ResNum& number) const;  
-  
-  void AssignSecondaryStructure(SecStructure ss, 
-                                const ResNum& start, 
-                                const ResNum& end);  
+  int GetIndex(const ResidueImplPtr& res) const;
+  void AssignSecondaryStructure(SecStructure ss,
+                                const ResNum& start,
+                                const ResNum& end); 
+  int GetIndexForResNum(const ResNum& number) const;
+  ///\brief checks if the residue with that index breaks the in_sequence
+  ///       property and updates it accordingly      
+  void SetInSequence(int index);
+
 private:
+  int GetIndexForResNumInSequence(const ResNum& number) const;
   void UpdateShifts();
   typedef struct {
     int start;
@@ -132,6 +195,8 @@ private:
   /// \brief whether the residue numbers are in ascending order or not. Used
   ///        to optimize residue by number lookup.
   bool             in_sequence_;
+  ChainType        type_;
+  String           description_; ///< special aspects of the chain
 };
 
 }}} // ns

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -43,7 +43,7 @@ struct Fixture {
   Fixture() {
     eh = CreateEntity();
     eh.SetName("TestEntity");
-    XCSEditor e=eh.RequestXCSEditor();
+    XCSEditor e=eh.EditXCS();
     chain = e.InsertChain("A");
     res1 = e.AppendResidue(chain, "ARG");
     e.InsertAtom(res1, "CA",geom::Vec3(1,0,0));

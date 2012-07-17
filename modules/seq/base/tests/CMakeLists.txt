@@ -7,5 +7,5 @@ set(OST_SEQ_UNIT_TESTS
   tests.cc
 )
 
-ost_unittest(seq "${OST_SEQ_UNIT_TESTS}")
+ost_unittest(MODULE seq SOURCES "${OST_SEQ_UNIT_TESTS}")
 

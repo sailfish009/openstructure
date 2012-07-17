@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -26,8 +26,10 @@
 
 #include <ost/io/module_config.hh>
 #include <ost/mol/coord_group.hh>
-
+#include <ost/io/mol/io_profile.hh>
 namespace ost { namespace io {
+
+
 
 /*! \brief import a CHARMM trajectory in dcd format with an existing entity
     requires the existing entity and the trajectory file - obviously the
@@ -46,7 +48,8 @@ mol::CoordGroupHandle DLLEXPORT_OST_IO LoadCHARMMTraj(const mol::EntityHandle& e
 void DLLEXPORT_OST_IO SaveCHARMMTraj(const mol::CoordGroupHandle& coord_group, 
                                      const String& pdb_filename, 
                                      const String& dcd_filename,
-                                     unsigned int stride=1);
+                                     unsigned int stride=1,
+                                     const IOProfile& profile=IOProfile());
 
 
 }} // ns

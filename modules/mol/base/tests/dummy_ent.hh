@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -28,7 +28,7 @@ namespace ost { namespace test {
 struct DummyEnt {
   DummyEnt() {
     e=CreateEntity();
-    XCSEditor editor=e.RequestXCSEditor();
+    XCSEditor editor=e.EditXCS();
     c=editor.InsertChain("A");
     r=editor.AppendResidue(c, "XXX");
     aa=editor.InsertAtom(r, "A", geom::Vec3());

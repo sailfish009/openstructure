@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -21,12 +21,13 @@
 #include <ost/gui/gosty_app.hh>
 #include <ost/gui/perspective.hh>
 #include <ost/gui/widget_registry.hh>
-
+#include <ost/gui/panels/panel_manager.hh>
 #include "tabbed_panel_bar.hh"
 
 #include <QApplication>
 #include <QSettings>
 #include <QDir>
+
 namespace ost { namespace gui {
 
 TabbedPanelBar::TabbedPanelBar(PanelBar* parent):

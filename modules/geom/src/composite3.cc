@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -62,14 +62,12 @@ Plane::Plane(const Vec3& p1, const Vec3& p2, const Vec3& p3)
   Vec3 ip2=p3-p1;
   n_=Normalize(Cross(ip1,ip2));
   p_=-Dot(n_,p1);
-  calc_ori();
 }
 
 Plane::Plane(const Vec3& p, const Vec3& n)
 {
   n_=Normalize(n);
   p_=-Dot(n_,p);
-  o_=p;
 }
 
 Plane::Plane(const Line3& l,const Vec3& p)
@@ -77,15 +75,13 @@ Plane::Plane(const Line3& l,const Vec3& p)
   Vec3 ip=l.GetOrigin()-p;
   n_=Normalize(Cross(ip,l.GetDirection()));
   p_=-Dot(n_,p);
-  calc_ori();
 }
 
-Plane::Plane( Real a, Real b, Real c, Real d)
+Plane::Plane(Real a, Real b, Real c, Real d)
 {
   n_=Vec3(a,b,c);
   p_=d/Length(n_);
   n_=Normalize(n_);
-  calc_ori();
 }
 
 Plane::Plane( Real x, Real y, Real z)
@@ -93,18 +89,6 @@ Plane::Plane( Real x, Real y, Real z)
   n_=Vec3(1.0/x,1.0/y,1.0/z);
   p_=-1.0/Length(n_);
   n_=Normalize(n_);
-  calc_ori();
-}
-
-Vec3 Plane::GetOrigin() const
-{
-  return o_;
-}
-
-void Plane::SetOrigin(const Vec3& o)
-{
-  o_=o;
-  p_=-Dot(n_,o_);
 }
 
 Vec3 Plane::GetNormal() const
@@ -115,7 +99,6 @@ Vec3 Plane::GetNormal() const
 void Plane::SetNormal(const Vec3& n)
 {
   n_=Normalize(n);
-  p_=-Dot(n_,o_);
 }
 
 Real Plane::GetP() const
@@ -127,13 +110,6 @@ Vec3 Plane::At(Real x,Real y) const
 {
   return n_[2]!=0.0 ? Vec3(x,y,-(n_[0]*x+n_[1]*y+p_)/n_[2]) : Vec3();
 }
-
-void Plane::calc_ori()
-{
-  o_=p_/3.0*Vec3(n_[0]==0.0 ? 0.0 : 1.0/n_[0],
-                 n_[1]==0.0 ? 0.0 : 1.0/n_[1],
-                 n_[2]==0.0 ? 0.0 : 1.0/n_[2]);
-};
 
 
 /************************************************************
@@ -248,25 +224,12 @@ Vec3 Rotation3::GetRotationAxis() const
 }
 Real Rotation3::GetRotationAngle() const
 {
-  return 2.0*acos(q_.GetAngle());
+  //return 2.0*acos(q_.GetAngle());
+  return q_.GetAngle();
 }
 Mat3 Rotation3::GetRotationMatrix() const
 {
-  Real ww = q_.GetAngle()*q_.GetAngle();
-  Real wx = q_.GetAngle()*q_.GetAxis().GetX();
-  Real wy = q_.GetAngle()*q_.GetAxis().GetY();
-  Real wz = q_.GetAngle()*q_.GetAxis().GetZ();
-  Real xx = q_.GetAxis().GetX()*q_.GetAxis().GetX();
-  Real xy = q_.GetAxis().GetX()*q_.GetAxis().GetY();
-  Real xz = q_.GetAxis().GetX()*q_.GetAxis().GetZ();
-  Real yy = q_.GetAxis().GetY()*q_.GetAxis().GetY();
-  Real yz = q_.GetAxis().GetY()*q_.GetAxis().GetZ();
-  Real zz = q_.GetAxis().GetZ()*q_.GetAxis().GetZ();
-
-
-  return Mat3((ww+xx-yy-zz), 2.0*(-wz+xy), 2.0*(wy+xz),
-                 2.0*(wz+xy), (ww-xx+yy-zz), 2.0*(-wx+yz),
-                 2.0*(-wy+xz), 2.0*(wx+yz),(ww-xx-yy+zz));
+  return q_.ToRotationMatrix();
 }
 
 void Rotation3::SetOrigin(const Vec3& o)
@@ -303,10 +266,7 @@ void Rotation3::SetRotationMatrix(const Mat3& rot)
 }
 Vec3 Rotation3::Apply(const Vec3& v) const
 {
-  // We can use Conjugate instead of Invert because q is guaranteed to
-  // be unit Quat
-  return origin_+(Grassmann(Grassmann(q_,Quat(0,v-origin_)),
-                            Conjugate(q_))).GetAxis();
+  return origin_+q_.Rotate(v-origin_);
 }
 
 bool Rotation3::operator==(const Rotation3& rhs) const
@@ -323,7 +283,8 @@ Quat Rotation3::generate_from_eulers(Real phi, Real theta, Real psi)
 }
 Quat Rotation3::generate_from_axis_angle(const Vec3& axis, Real angle)
 {
-  return Quat(cos(angle/2.0),sin(angle/2.0)*Normalize(axis));
+  //return Quat(cos(angle/2.0),sin(angle/2.0)*Normalize(axis));
+  return Quat(angle, axis);
 }
 
 /*

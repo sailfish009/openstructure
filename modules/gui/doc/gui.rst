@@ -19,4 +19,4 @@ C++ Qt widgets as well as with PyQt widgets. Learn more about :doc:`python_cpp`.
   tools
   python_shell
   sequence_viewer
-
+  dialogs

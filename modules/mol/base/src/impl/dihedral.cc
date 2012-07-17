@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -46,13 +46,8 @@ Dihedral::Dihedral(const AtomImplList& atoms)
 
 
 Real Dihedral::GetAngleXCS() const {
-  Vec3 r1=atoms_[1]->GetPos()-atoms_[0]->GetPos();
-  Vec3 r2=atoms_[2]->GetPos()-atoms_[1]->GetPos();
-  Vec3 r3=atoms_[3]->GetPos()-atoms_[2]->GetPos();
-  Vec3 r12cross = Cross(r1, r2);
-  Vec3 r23cross = Cross(r2, r3);
-  return atan2(Dot(r1*Length(r2), r23cross),
-               Dot(r12cross, r23cross));
+  return geom::DihedralAngle(atoms_[0]->TransformedPos(), atoms_[1]->TransformedPos(), 
+                             atoms_[2]->TransformedPos(), atoms_[3]->TransformedPos());
 }
 
 Real Dihedral::GetAngleICS() const {

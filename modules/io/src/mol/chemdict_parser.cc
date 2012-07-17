@@ -6,6 +6,10 @@ using namespace ost::conop;
   
 bool ChemdictParser::OnBeginData(const StringRef& data_name) 
 {    
+  if (data_name==StringRef("UNL",3)) {
+    compound_=CompoundPtr();
+    return false;    
+  }
   compound_.reset(new Compound(data_name.str()));
   compound_->SetDialect(dialect_);
   if (last_!=data_name[0]) {
@@ -78,7 +82,7 @@ void ChemdictParser::OnDataItem(const StarDataItem& item)
       }
       // The type of water is set to "?". let's change it to water...
       if (compound_->GetID()=="HOH") {
-        compound_->SetChemClass(mol::ChemClass(mol::ChemClass::Water));
+        compound_->SetChemClass(mol::ChemClass(mol::ChemClass::WATER));
         compound_->SetOneLetterCode('.');
       } else {
         std::map<String, mol::ChemClass>::iterator i=tm_.find(type);
@@ -89,9 +93,24 @@ void ChemdictParser::OnDataItem(const StarDataItem& item)
                     << compound_->GetID() << std::endl;
         }
       }
-
+    } else if (item.GetName()==StringRef("pdbx_type", 9)) {
+      String type=item.GetValue().str();
+      for (String::iterator i=type.begin(), e=type.end(); i!=e; ++i) {
+        *i=toupper(*i);
+      }
+      std::map<String, mol::ChemType>::iterator i=xtm_.find(type);
+      if (i!=xtm_.end()) {
+        compound_->SetChemType(i->second);
+      } else {
+        std::cout << "unknown pdbx_type '" << type << "' for compound "
+                  << compound_->GetID() << std::endl;
+      }
     } else if (item.GetName()==StringRef("formula", 7)) {
       compound_->SetFormula(item.GetValue().str());
+      if (compound_->GetFormula()=="H2 O") {
+        compound_->SetChemClass(mol::ChemClass(mol::ChemClass::WATER));
+        compound_->SetOneLetterCode('.');
+      }
     } else if (item.GetName()==StringRef("one_letter_code", 15)) {
       if (item.GetValue().length()==1) {
         compound_->SetOneLetterCode(item.GetValue()[0]);   
@@ -119,7 +138,7 @@ void ChemdictParser::OnDataItem(const StarDataItem& item)
 
 void ChemdictParser::OnEndData()
 {
-  if (insert_) {
+  if (insert_ && compound_) {
     if (compound_->GetAtomSpecs().empty()) {
       compound_->AddAtom(atom_);
     }
@@ -128,36 +147,53 @@ void ChemdictParser::OnEndData()
 }
 
 std::map<String, mol::ChemClass> ChemdictParser::tm_=std::map<String, mol::ChemClass>();
+std::map<String, mol::ChemType> ChemdictParser::xtm_=std::map<String, mol::ChemType>();
 
 void ChemdictParser::InitTypeMap()
 {
   if (!tm_.empty())
     return;
-  tm_["L-PEPTIDE COOH CARBOXY TERMINUS"]=mol::ChemClass(mol::ChemClass::LPeptideLinking);
-  tm_["L-PEPTIDE NH3 AMINO TERMINUS"]=mol::ChemClass(mol::ChemClass::LPeptideLinking);   
-  tm_["D-PEPTIDE NH3 AMINO TERMINUS"]=mol::ChemClass(mol::ChemClass::DPeptideLinking);
-  tm_["L-SACCHARIDE 1,4 AND 1,4 LINKING"]=mol::ChemClass(mol::ChemClass::LSaccharide);
-  tm_["D-SACCHARIDE 1,4 AND 1,4 LINKING"]=mol::ChemClass(mol::ChemClass::DSaccharide);
-  tm_["L-SACCHARIDE"]=mol::ChemClass(mol::ChemClass::LSaccharide);
-  tm_["D-SACCHARIDE"]=mol::ChemClass(mol::ChemClass::DSaccharide);
-  tm_["SACCHARIDE"]=mol::ChemClass(mol::ChemClass::Saccharide);
-  tm_["D-PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::DPeptideLinking);
-  tm_["L-PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::LPeptideLinking);
-  tm_["L-PEPTIDE-LINKING"]=mol::ChemClass(mol::ChemClass::LPeptideLinking);
-  tm_["DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNALinking);
-  tm_["RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNALinking);
-  tm_["L-DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNALinking);
-  tm_["L-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNALinking);  
-  tm_["R-DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNALinking);
-  tm_["R-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNALinking);  
-  tm_["DNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::DNALinking);
-  tm_["PEPTIDE-LIKE"]=mol::ChemClass(mol::ChemClass::PeptideLinking);
-  tm_["PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::PeptideLinking);
-  tm_["PEPTIDE-LINKING"]=mol::ChemClass(mol::ChemClass::PeptideLinking);  
-  tm_["NON-POLYMER"]=mol::ChemClass(mol::ChemClass::NonPolymer);
-  tm_["RNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::RNALinking);
-  tm_["?"]=mol::ChemClass(mol::ChemClass::Unknown);  
-  tm_["WATER"]=mol::ChemClass(mol::ChemClass::Water);
+  tm_["L-PEPTIDE COOH CARBOXY TERMINUS"]=mol::ChemClass(mol::ChemClass::L_PEPTIDE_LINKING);
+  tm_["L-PEPTIDE NH3 AMINO TERMINUS"]=mol::ChemClass(mol::ChemClass::L_PEPTIDE_LINKING);   
+  tm_["D-PEPTIDE NH3 AMINO TERMINUS"]=mol::ChemClass(mol::ChemClass::D_PEPTIDE_LINKING);
+  tm_["L-SACCHARIDE 1,4 AND 1,4 LINKING"]=mol::ChemClass(mol::ChemClass::L_SACCHARIDE);
+  tm_["D-SACCHARIDE 1,4 AND 1,4 LINKING"]=mol::ChemClass(mol::ChemClass::D_SACCHARIDE);
+  tm_["L-SACCHARIDE"]=mol::ChemClass(mol::ChemClass::L_SACCHARIDE);
+  tm_["D-SACCHARIDE"]=mol::ChemClass(mol::ChemClass::D_SACCHARIDE);
+  tm_["SACCHARIDE"]=mol::ChemClass(mol::ChemClass::SACCHARIDE);
+  tm_["D-PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::D_PEPTIDE_LINKING);
+  tm_["L-PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::L_PEPTIDE_LINKING);
+  tm_["L-PEPTIDE-LINKING"]=mol::ChemClass(mol::ChemClass::L_PEPTIDE_LINKING);
+  tm_["DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
+  tm_["RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);
+  tm_["L-DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
+  tm_["L-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);  
+  tm_["R-DNA LINKING"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
+  tm_["R-RNA LINKING"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);  
+  tm_["DNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::DNA_LINKING);
+  tm_["PEPTIDE-LIKE"]=mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);
+  tm_["PEPTIDE LINKING"]=mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);
+  tm_["PEPTIDE-LINKING"]=mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);  
+  tm_["NON-POLYMER"]=mol::ChemClass(mol::ChemClass::NON_POLYMER);
+  tm_["RNA OH 3 PRIME TERMINUS"]=mol::ChemClass(mol::ChemClass::RNA_LINKING);
+  tm_["?"]=mol::ChemClass(mol::ChemClass::UNKNOWN);  
+  tm_["WATER"]=mol::ChemClass(mol::ChemClass::WATER);
+}
+
+void ChemdictParser::InitPDBXTypeMap()
+{
+  if (!xtm_.empty())
+    return;
+  xtm_["HETAI"]=mol::ChemType(mol::ChemType::IONS);
+  xtm_["HETAIN"]=mol::ChemType(mol::ChemType::NONCANONICALMOLS);
+  xtm_["ATOMS"]=mol::ChemType(mol::ChemType::SACCHARIDES);
+  xtm_["ATOMN"]=mol::ChemType(mol::ChemType::NUCLEOTIDES);
+  xtm_["ATOMP"]=mol::ChemType(mol::ChemType::AMINOACIDS);
+  xtm_["HETAC"]=mol::ChemType(mol::ChemType::COENZYMES);
+  xtm_["HETIC"]=mol::ChemType(mol::ChemType::WATERCOORDIONS);
+  xtm_["HETAD"]=mol::ChemType(mol::ChemType::DRUGS);
+  xtm_["HETAS"]=mol::ChemType(mol::ChemType::WATERS);
+  xtm_["?"]=mol::ChemType(mol::ChemType::UNKNOWN);
 }
 
 }}

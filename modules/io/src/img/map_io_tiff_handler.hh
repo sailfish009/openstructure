@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -59,6 +59,10 @@ class DLLEXPORT_OST_IO TIF: public  ImageFormatBase
   int GetSubimage() const;
   void SetSubimage(int subimage);
 
+
+  Real GetMaximum() const;
+  Real GetMinimum() const;
+
   static String FORMAT_STRING;
 
 
@@ -96,6 +100,8 @@ class DLLEXPORT_OST_IO MapIOTiffHandler: public MapIOHandler
     static bool MatchContent(unsigned char* header);
     static bool MatchType(const ImageFormatBase& type);
     static bool MatchSuffix(const String& loc);
+    static bool ProvidesImport() { return true; }
+    static bool ProvidesExport() { return true; }
     static String GetFormatName() { return String( "Tiff"); }
     static String GetFormatDescription() { return String("Tagged Image File Format"); }
 

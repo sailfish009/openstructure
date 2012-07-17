@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,22 +20,19 @@
 #define OST_GUI_GL_CANVAS_HH
 
 
-// must come before QGLWidget
-#include <ost/mol/mol.hh>
 
-
-// Qt includes must come last
-#include <QGLWidget>
-#include <QTime>
-#include <QBasicTimer>
-#include <QMouseEvent>
 #include <ost/gui/tools/tool.hh>
 #include <ost/gui/scene_menu.hh>
 #include <ost/gfx/glwin_base.hh>
 #include <ost/gfx/input.hh>
 #include <ost/gfx/gfx_object_fw.hh>
 
+
+// Qt includes must come last
+#include <QGLWidget>
+#include <QBasicTimer>
 class QMenu;
+class QMouseEvent;
 
 namespace ost { namespace gui {
 
@@ -83,11 +80,14 @@ protected:
   virtual void keyReleaseEvent(QKeyEvent* event);
   virtual void timerEvent(QTimerEvent * event);
   virtual void wheelEvent(QWheelEvent* event);
-
+  virtual bool event(QEvent* event);
 private slots:
   virtual void RequestContextMenu(const QPoint& pos);
 
 private:
+#if QT_VERSION >= 0x040600  
+  bool GestureEvent(QGestureEvent* event);
+#endif
   bool IsToolEvent(QInputEvent* event) const;
   MouseEvent::Buttons TranslateButtons(Qt::MouseButtons buttons) const;
   void HandleMousePressEvent(QMouseEvent* event);
@@ -103,6 +103,10 @@ private:
   QPoint last_pos_;
   SceneMenu* scene_menu_;
   bool show_beacon_;
+  float angular_speed_;
+#if QT_VERSION>=0x04600
+  QBasicTimer gesture_timer_;
+#endif
 };
 
 }} // ns

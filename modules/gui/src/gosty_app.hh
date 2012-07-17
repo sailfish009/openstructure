@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -28,9 +28,6 @@
 #include <ost/gui/module_config.hh>
 #include <ost/gui/main.hh>
 #include <ost/gui/widget_geom_handler.hh>
-#include <ost/gui/scene_win/scene_win.hh>
-#include <ost/gui/sequence_viewer/sequence_viewer.hh>
-#include <ost/gui/messages/message_widget.hh>
 
 
 #include <QObject>
@@ -42,13 +39,19 @@ class QMainWindow;
 class QMdiArea;
 class QWidget;
 
-namespace ost {
-#if OST_IMG_ENABLED
-namespace img { namespace gui {
-//fw decl
-class DataViewer;
-}} //ns
-#endif
+namespace ost { 
+
+
+// forward declarations
+
+namespace img { 
+
+class Data;
+
+namespace gui { 
+class DataViewer; 
+
+}}  
 
 namespace gui {
 
@@ -57,6 +60,9 @@ class GLWin;
 class TextLogger;
 class ToolOptionsWin;
 class Perspective;
+class SequenceViewer;
+class SceneWin;
+class MessageWidget;
 
 /// The gosty app serves as a GUI Manager. It distinguishes between two types of
 /// windows: Windows that can only exist once (singletons) and windows with 
@@ -110,6 +116,11 @@ public:
   /// All subsequent calls will return the same MessageWidget instance.
   MessageWidget* GetMessageWidget();
 
+  /// \brief stop script execution
+  ///
+  /// Stops the execution of the script.
+  void StopScript(); 
+
 #if OST_IMG_ENABLED
   /// \brief create new DataViewer
   /// 
@@ -133,7 +144,8 @@ public:
   /// \param ident the ident is used to identify a custom widget. It must be unique. Otherwise there might occur an unexpected behaviour.
   /// \param widget the widget which will be added to the GostyApp
   void AddWidgetToApp(const QString& ident, QWidget* widget);
-
+  
+  QWidget* GetWidget(const QString& ident);
   /// \brief remove a custom QWidget from the gosty_app
   ///
   /// This method removes a custom widget from OpenStructure. If the given ident is not known, nothing happens. Read more about custom widgets at \ref #AddWidgetToApp() .

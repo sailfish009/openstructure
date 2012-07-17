@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -54,7 +54,7 @@ bool DLLEXPORT_OST_GEOM AreParallel(const Plane& p,  const Line3& l,Real ephilon
 bool DLLEXPORT_OST_GEOM AreParallel(const Plane& p1, const Plane& p2,Real ephilon=EPSILON);
 bool DLLEXPORT_OST_GEOM AreParallel(const Line3& l1, const Line3& l2,Real ephilon=EPSILON);
 
-bool DLLEXPORT_OST_GEOM AreIntersecting( const Line3& l1, const Line3& l2, Real ephilon=EPSILON);
+bool DLLEXPORT_OST_GEOM AreIntersecting(const Line3& l1, const Line3& l2, Real ephilon=EPSILON);
 
 DLLEXPORT bool IsInSphere(const Sphere& p,const Vec3& v);
 

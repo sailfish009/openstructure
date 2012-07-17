@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -107,6 +107,8 @@ public:
   bool HasAttribute(const String& name) const;
   //! remove attribute of given name
   void RemoveAttribute(const String& name);
+  //! get comment just above item
+  String GetComment() const;
 
   //! returns a list with all attribute names
   std::vector<String> GetAttributeList() const;

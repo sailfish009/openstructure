@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -63,7 +63,6 @@ bool Builder::DoesPeptideBondExist(const mol::AtomHandle& n,
 bool Builder::IsBondFeasible(const mol::AtomHandle& atom_a,
                              const mol::AtomHandle& atom_b)
 {
-  Real len=geom::Length2(atom_a.GetPos()-atom_b.GetPos());
   Real radii=0.0;
   if (atom_a.GetRadius()>0.0) {
     radii=atom_a.GetRadius();
@@ -75,9 +74,9 @@ bool Builder::IsBondFeasible(const mol::AtomHandle& atom_a,
   } else {
     return false;
   } 
-  radii*=0.5;
-  Real upper_bound=1.5*radii*radii;
-  Real lower_bound=0.25*radii*radii;
+  Real len=geom::Length2(atom_a.GetPos()-atom_b.GetPos());
+  Real lower_bound=radii*radii*0.0625;
+  Real upper_bound=lower_bound*6.0;
   return (len<=upper_bound && len>=lower_bound);
 }
 
@@ -147,7 +146,11 @@ String Builder::GuessAtomElement(const String& aname, bool hetatm)
       if(ele==l3[i]) return ele;
     }
   }
-  return String(1, aname[0]);
+  size_t i=0;
+  while (i<aname.size() && isdigit(aname[i])) {
+    ++i;
+  }
+  return i<aname.size() ? String(1, aname[i]) : "";
 }
 
 bool Builder::AreResiduesConsecutive(const mol::ResidueHandle& r1, 
@@ -159,12 +162,31 @@ bool Builder::AreResiduesConsecutive(const mol::ResidueHandle& r1,
          r2.GetNumber().GetInsCode()==r1.GetNumber().NextInsertionCode().GetInsCode();
 }
 
+void Builder::GuessChemClass(mol::ResidueHandle res)
+{
+  // try peptide
+  res.SetChemClass(mol::ChemClass());
+  mol::AtomHandle ca=res.FindAtom("CA");
+  if (!ca.IsValid() || ca.GetElement()!="C") return;
+  mol::AtomHandle n=res.FindAtom("N");
+  if (!n.IsValid() || n.GetElement()!="N") return;
+  mol::AtomHandle c=res.FindAtom("C");
+  if (!c.IsValid() || c.GetElement()!="C") return;
+  mol::AtomHandle o=res.FindAtom("O");
+  if (!o.IsValid() || o.GetElement()!="O") return;
+  if (this->IsBondFeasible(n, ca) && this->IsBondFeasible(ca, c) &&
+      this->IsBondFeasible(c, o)) {
+    res.SetChemClass(mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING));
+  }
+}
+
+
 void Builder::AssignBackBoneTorsionsToResidue(mol::ResidueHandle res)
 {
 
   mol::ResidueHandle prev=res.GetPrev();
   mol::ResidueHandle next=res.GetNext();
-  mol::XCSEditor e=res.GetEntity().RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor e=res.GetEntity().EditXCS(mol::BUFFERED_EDIT);
   //psi
   if (next.IsValid() && next.IsPeptideLinking()){
     mol::AtomHandle ca_this=res.FindAtom("CA");
@@ -205,7 +227,7 @@ void Builder::AssignBackBoneTorsionsToResidue(mol::ResidueHandle res)
 void Builder::DistanceBasedConnect(mol::AtomHandle atom)
 {
   mol::EntityHandle ent=atom.GetEntity();
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   mol::AtomHandleList alist = ent.FindWithin(atom.GetPos(),4.0);
   mol::ResidueHandle res_a=atom.GetResidue();
   for (mol::AtomHandleList::const_iterator it=alist.begin(),

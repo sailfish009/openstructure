@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -25,6 +25,7 @@
 #include <ost/conop/module_config.hh>
 
 #include <ost/mol/chem_class.hh>
+#include <ost/mol/chem_type.hh>
 
 namespace ost { namespace conop {
 
@@ -120,7 +121,7 @@ public:
   } Dialect;
   
   Compound(const String& id)
-    : olc_('?'), tlc_(id), chem_class_(), dialect_(Compound::PDB) {
+    : olc_('?'), tlc_(id), chem_class_(), chem_type_(), dialect_(Compound::PDB){
   }
 
   /// \brief three-letter code that is unique for every compound 
@@ -166,9 +167,26 @@ public:
     return chem_class_;
   }
 
+  void SetChemType(mol::ChemType chem_type) {
+    chem_type_=chem_type;
+  }
+
+  /// \brief PDB ligand classification from component dictionary
+  ///
+  /// The PDB classifies all compounds into 7 categories. This classification
+  /// is extracted from the PDB component dictionary (field: pdbx_type)
+  mol::ChemType GetChemType() const {
+    return chem_type_;
+  }
+
   bool IsPeptideLinking() const {
     return chem_class_.IsPeptideLinking();
   }
+
+  bool IsNucleotideLinking() const {
+    return chem_class_.IsNucleotideLinking();
+  }
+
   void AddAtom(const AtomSpec& atom) {
     atom_specs_.push_back(atom);
   }
@@ -216,6 +234,7 @@ private:
   AtomSpecList                 atom_specs_;
   BondSpecList                 bond_specs_;
   mol::ChemClass               chem_class_;
+  mol::ChemType                chem_type_;
   Dialect                      dialect_;  
   Date                         creation_date_;
   Date                         mod_date_;

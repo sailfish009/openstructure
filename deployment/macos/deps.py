@@ -50,9 +50,10 @@ def collect_deps(stage_dir, components, binaries, site_packages,
     if bin_name not in pool:
       _deps_for_lib(bin_name, pool)
   for site_package in site_packages:
-    full_path=os.path.join(site_packages_dir, site_package)
+    full_path=get_python_module_path(site_package)
+    print full_path
     if not os.path.exists(full_path):
-      print 'WARNING', site_package, 'does not exists'
+      print 'WARNING:', site_package, 'does not exists'
       continue
     if os.path.isdir(full_path):
       for so_file in glob.glob(os.path.join(full_path, '*.so')):
@@ -61,7 +62,7 @@ def collect_deps(stage_dir, components, binaries, site_packages,
 
 BINARIES=['gosty', 'chemdict_tool']
 COMPONENTS=['mol', 'geom', 'conop', 'gfx', 'gui', 'seq_alg', 'seq', 
-            'img', 'img_alg', 'qa', 'info', 'io', 'db', 'base']
+            'img', 'img_alg', 'info', 'io', 'db', 'base']
 SCRIPTS=['dng', 'ost']
 CHANGE_ID_RPATH='install_name_tool -id @rpath/%s %s'   
 CHANGE_ID='install_name_tool -id @executable_path/%s %s'   
@@ -202,6 +203,14 @@ def get_site_package_dir():
       return p[:index+len(pattern)]
   raise RuntimeError("Couldn't determine site-packages location")
 
+def get_python_module_path(module):
+  for path in sys.path:
+    full_path=os.path.join(path, module)
+    if os.path.exists(full_path):
+      return full_path
+  return None
+  
+  
 def get_python_home():
   """
   Derive Python home by looking at the location of the os module
@@ -300,7 +309,7 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
     open(ost_script, 'w').write(script)
     os.chmod(ost_script, 0555)
   elif use_rpath==False:
-    print 'BIG FAT WARNING: Creation bundle with @executable_path and default'
+    print 'BIG FAT WARNING: Creating bundle with @executable_path and default'
     print 'Python might not work. Test carefully before deploying.'
 
   if no_includes:
@@ -308,7 +317,7 @@ def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
     os.system(REMOVE_CURRENT % outdir)  
   print 'copying site-packages'
   for sp in SITE_PACKAGES:
-    src=os.path.join(site_packages, sp)  
+    src=get_python_module_path(sp)
     if os.path.isdir(src):
       shutil.copytree(src, os.path.join(outdir, 'lib/openstructure', sp))
     else:

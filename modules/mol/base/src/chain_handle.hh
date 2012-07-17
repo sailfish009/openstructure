@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -46,7 +46,7 @@ namespace ost { namespace mol {
 /// the residue numbers are in ascending order.
 ///
 /// New residues are inserted via one of the editors obtained from 
-/// EntityHandle::RequestXCSEditor() or EntityHandle::RequestICSEditor(). To
+/// EntityHandle::EditXCS() or EntityHandle::EditICS(). To
 /// append a residue to the C-terminal end, use EditorBase::AppendResidue, to
 /// insert after or before a specific residue, EditorBase::InsertResidueAfter
 /// and ditorBase::InsertResidueABefore will do the job, respectively.
@@ -57,6 +57,7 @@ public:
 
   ChainHandle(const impl::ChainImplPtr& impl);
   
+
   /// \brief Get parent entity.
   EntityHandle GetEntity() const;
 
@@ -104,11 +105,12 @@ public:
   // \c ResidueHandle::GetResidueCount().
   int GetAtomCount() const;
 
-  //! \brief   Get number of bonds of this chain. This method might NOT work as expected (see warning below).
+  /// \brief   Get number of all inclusive bonds of this chain.
+  ///
   /// \warning For a bond between two different chains, it is not clearly
-  ///          defined to which chain it belongs. Therefore, this method
-  ///          works only correctly if the chain has NO bonds to any other
-  ///          chains!
+  ///          defined to which chain it belongs. Therefore, this method will
+  ///          only return the number of bonds where both bonded atoms are
+  ///          within the same chain (all inclusive bonds).
   int GetBondCount() const;
   
   /// \brief   Get number of residues of this chain.
@@ -191,7 +193,9 @@ public:
   bool operator==(const ChainHandle& ref) const;
   bool operator!=(const ChainHandle& ref) const;
 
-
+  /// \brief checks whether res breaks the in sequence property
+  ///        and updates it accordingly
+  void SetInSequence(const int index);
 };
 
 }} // ns

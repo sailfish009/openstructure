@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,7 +20,9 @@
 #define OST_BOND_TABLE_HH
 
 #include <map>
+
 #include <ost/mol/impl/connector_impl_fw.hh>
+#include <ost/mol/bond_handle.hh>
 
 namespace ost { namespace mol {
 

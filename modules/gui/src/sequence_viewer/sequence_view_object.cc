@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -100,7 +100,7 @@ void SequenceViewObject::Init()
   }
 }
 
-void SequenceViewObject::AddSequence(seq::SequenceHandle& sequence, const QString& name)
+void SequenceViewObject::AddSequence(seq::ConstSequenceHandle sequence, const QString& name)
 {
   SequenceRow* new_row = new SequenceRow(name, sequence, this);
   new_row->InsertPainter(background_painter);
@@ -163,7 +163,7 @@ QMap<int, QList<int> > SequenceViewObject::GetIndexesForView(const mol::EntityVi
     for(int i=0; i< rows_.size(); i++){
       if(SecStrRow* secstr_row = qobject_cast<SecStrRow*>(rows_[i])){
         mol::ChainView dst_chain=(secstr_row->GetChain());
-        seq::SequenceHandle seq = secstr_row->GetSequence();
+        seq::ConstSequenceHandle seq = secstr_row->GetSequence();
         if (mol::ChainView src_chain=view.FindChain(dst_chain.GetName())) {
           // for each residue in the selection deduce index in sequence
           for (mol::ResidueViewList::const_iterator j=src_chain.GetResidueList().begin(),
@@ -191,7 +191,7 @@ QMap<int, QList<int> > SequenceViewObject::GetIndexesForSubject(const QString& s
   for(int i=0; i< rows_.size(); i++){
     if(SequenceRow* secstr_row = qobject_cast<SequenceRow*>(rows_[i])){
       if(sequence_name.size()==0 || sequence_name==secstr_row->GetName()){
-        seq::SequenceHandle seq = secstr_row->GetSequence();
+        seq::ConstSequenceHandle seq = secstr_row->GetSequence();
         String seq_str=seq.GetString();
         size_t pos=0;
         size_t first=String::npos;

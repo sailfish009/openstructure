@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -49,14 +49,8 @@ void export_Torsion()
     .add_property("third", &TorsionHandle::GetThird)
     .add_property("fourth", &TorsionHandle::GetFourth)    
     .def("IsValid", &TorsionHandle::IsValid)
-    .def("SetAngle", &TorsionHandle::SetAngle)
     .def("GetAngle", &TorsionHandle::GetAngle)    
-    .def("RotateAngle", &TorsionHandle::RotateAngle,
-         X_rotate_angle_overloads(args("angle", "up")))
-    .add_property("angle", &TorsionHandle::GetAngle, 
-                  &TorsionHandle::SetAngle)
-    .def("SetAngle", &TorsionHandle::SetAngle,
-         X_set_angle_overloads(args("angle", "up")))         
+    .add_property("angle", &TorsionHandle::GetAngle)
     .def(self_ns::str(self))
 
   ;

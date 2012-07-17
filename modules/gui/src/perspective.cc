@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -19,11 +19,17 @@
 
 #include <ost/platform.hh>
 
+#include <ost/log.hh>
+
 #include <ost/gui/widget_registry.hh>
 #include <ost/gui/perspective.hh>
 #include <ost/gui/file_browser.hh>
 #include <ost/gui/main_area.hh>
 #include <ost/gui/messages/message_box_widget.hh>
+
+#include <ost/gui/panels/panel_manager.hh>
+#include <ost/gui/panels/button_bar.hh>
+#include <ost/gui/panels/panel_bar.hh>
 
 #include <QTextEdit>
 #include <QSizeGrip>
@@ -37,6 +43,12 @@
 #include <QKeySequence>
 #include <QStatusBar>
 #include <QPushButton>
+#include <QMenuBar>
+#include <QMap>
+#include <QString>
+#include <QStatusBar>
+#include <QSlider>
+
 /*
   Author: Marco Biasini
  */
@@ -46,7 +58,8 @@ Perspective::Perspective(QMainWindow* parent):
   QObject(parent), central_(new QWidget(parent)), 
   menu_bar_(new QMenuBar(parent)),
   main_area_(new MainArea),
-  quick_access_bar_(new QWidget)
+  quick_access_bar_(new QWidget),
+  verbosity_slider_(new QSlider(Qt::Horizontal,quick_access_bar_))
 {
   parent->setMenuBar(menu_bar_);
 
@@ -98,7 +111,20 @@ void Perspective::SetupQuickAccessBar()
   add_side_bar_widget->setIconSize(QSize(10,10));  
   connect(add_side_bar_widget, SIGNAL(clicked()), this, 
           SLOT(AddSideBarWidget()));          
+
   l2->addWidget(add_side_bar_widget, 0);
+
+  verbosity_slider_->setMinimum(0);
+  verbosity_slider_->setMaximum(5);
+  verbosity_slider_->setValue(Logger::Instance().GetVerbosityLevel());
+  verbosity_slider_->setToolTip("Verbosity Level");
+  verbosity_slider_->setTickPosition(QSlider::TicksBothSides);
+  verbosity_slider_->setFixedWidth(100);
+  verbosity_slider_->setTracking(false);
+  connect(verbosity_slider_, SIGNAL(valueChanged(int)),
+          this,SLOT(VerbosityChanged(int)));
+  l2->addWidget(verbosity_slider_, 0);
+
   l2->addWidget(status_bar_);
   l2->addWidget(new MessageBoxWidget(quick_access_bar_));
   l2->addWidget(new QSizeGrip(quick_access_bar_));
@@ -116,15 +142,16 @@ QMenuBar* Perspective::GetMenuBar()
 
 QMenu* Perspective::GetMenu(const QString& name)
 {
-  QMenu* menu;
-  if(!menus_.contains(name)){
-    menu = menu_bar_->addMenu(name);
-    menus_.insert(name,menu);
+  QList<QAction *> actions=menu_bar_->actions();
+  for (QList<QAction*>::iterator i=actions.begin(),
+       e=actions.end(); i!=e; ++i) {
+    if ((*i)->text()==name) {
+      return (*i)->menu();
+    }
   }
-  else{
-    menu = menus_[name];
-  }
-  return menu;
+  QMenu* new_menu=new QMenu(name, menu_bar_);
+  menu_bar_->addMenu(new_menu);
+  return new_menu;
 }
 
 PanelManager* Perspective::GetPanels()
@@ -145,6 +172,17 @@ void Perspective::AddSideBarWidget()
     panels_->AddWidget(LEFT_PANEL,wf->Create(str_val, NULL));
   }
   delete sb;
+}
+
+void Perspective::ChangeVerbositySlider(int value)
+{
+  verbosity_slider_->setValue(value);
+}
+
+
+void Perspective::VerbosityChanged(int value)
+{
+  Logger::Instance().PushVerbosityLevel(value);
 }
 
 bool Perspective::Restore()

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -24,6 +24,9 @@
 #include <sstream>
 
 #include <ost/log.hh>
+#include <ost/string_ref.hh>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/lexical_cast.hpp>
@@ -42,6 +45,23 @@ namespace bf = boost::filesystem;
 namespace ost { namespace io {
 
 using boost::format;
+
+namespace {
+
+bool IEquals(const StringRef& a, const StringRef& b)
+{
+  if (a.size()!=b.size()) {
+    return false;
+  }
+  for (size_t i=0; i<a.size(); ++i) {
+    if (toupper(a[i])!=b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+}
 
 String DX::FORMAT_STRING="defined_dx";
 
@@ -68,8 +88,12 @@ void MapIODxHandler::Import(img::MapHandle& mh, const bf::path& loc,const ImageF
   {
     throw IOException("could not open "+loc.string());
   }
-
-  this->Import(mh,infile,form);
+  boost::iostreams::filtering_stream<boost::iostreams::input> in;
+  if (boost::iequals(".gz", boost::filesystem::extension(loc))) {
+    in.push(boost::iostreams::gzip_decompressor());
+  }
+  in.push(infile);
+  this->Import(mh,in,form);
   infile.close();
 }
 
@@ -91,6 +115,9 @@ void MapIODxHandler::Import(img::MapHandle& mh, std::istream& infile, const Imag
   img::MapHandle mh2;
   std::vector<String> tokens;
   while (std::getline(infile,line)) {
+    if (line.empty()) {
+      continue;
+    }
     // read gridpoints line
     if (boost::iequals(line.substr(0,35), "object 1 class gridpositions counts")) {
       boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
@@ -183,14 +210,14 @@ void MapIODxHandler::Import(img::MapHandle& mh, std::istream& infile, const Imag
       Real value=0;
       for(int i=0; i<num_gridpoints; i+=3) {
         std::getline(infile,line);
-        boost::split(tokens, line, boost::is_any_of(" "), boost::token_compress_on);
-        for (size_t j=0; j<tokens.size()-1; j++) {  // three values per line
-          try {
-            value=boost::lexical_cast<Real>(boost::trim_copy(tokens[j]));
-          } catch(boost::bad_lexical_cast&) {
-            format fmer = format("Bad value line: Can't convert grid point value '%s' to Real constant.") % line;
-            throw IOException(fmer.str());
-          } 
+        StringRef curr_line(line.c_str(), line.size());
+        std::vector<StringRef> fields=curr_line.split(' ');
+        for (size_t j=0; j<fields.size(); j++) {
+          std::pair<bool, float> result=fields[j].trim().to_float();
+          if (!result.first) {
+            throw IOException((format("Bad value line: Can't convert grid point value '%s' to Real constant.") % line).str());
+          }
+          value=result.second;
           mh2.SetReal(img::Point(((i+j)/(v_size*w_size))%u_size,((i+j)/w_size)%v_size, (i+j)%w_size), value);
         }
       }
@@ -266,10 +293,10 @@ bool MapIODxHandler::MatchType(const ImageFormatBase& formatstruct)
 }
 bool MapIODxHandler::MatchSuffix(const String& loc)
 {
-	if(detail::FilenameEndsWith(loc,".dx") ) {
-      return true;
-    }
-    return false;
+	if(detail::FilenameEndsWith(loc,".dx") || detail::FilenameEndsWith(loc,".dx.gz")) {
+    return true;
+  }
+  return false;
 }
 
 }} // ns

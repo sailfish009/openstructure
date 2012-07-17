@@ -143,7 +143,7 @@ The Handle Classes
     
     See :attr:`atoms`
     
-  .. method:: RequestXCSEditor([edit_mode=mol.EditMode.BUFFERED_EDIT])
+  .. method:: EditXCS([edit_mode=mol.EditMode.BUFFERED_EDIT])
     
     Request :class:`XCSEditor` for editing the external coordinate system. This
     call will fail when there are pending changes of the internal coordinate
@@ -156,7 +156,7 @@ The Handle Classes
     
     :returns: :class:`XCSEditor`
     
-  .. method:: RequestICSEditor([edit_mode=mol.EditMode.BUFFERED_EDIT])
+  .. method:: EditICS([edit_mode=mol.EditMode.BUFFERED_EDIT])
     
     Request :class:`ICSEditor` for editing the internal coordinate system, such
     as torsions, bond lengths and angle between two bonds. This call will fail
@@ -280,10 +280,18 @@ The Handle Classes
      want to save them as PDB files
      
      This property is read-only. To change the name, use an :class:`XCSEditor`. 
-     
+
      Also available as :meth:`GetName`
      
      :type: str
+
+  .. attribute:: type
+
+     Describes the type of the chain. See :ref:`chaintype`.
+
+  .. attribute:: description
+
+     Details about the chain. Not categorised, just text.
 
   .. attribute:: residues
    
@@ -389,11 +397,18 @@ The Handle Classes
   .. method:: GetAtomList()
     
     See :attr:`atoms`
-    
+
   .. method:: GetName()
   
     See :attr:`name`
 
+  .. method:: GetType()
+
+    See :attr:`type`
+
+  .. method:: GetDescription()
+
+    See :attr:`description`
 
 .. class:: ResidueHandle
 
@@ -495,12 +510,25 @@ The Handle Classes
   
     The chemical class of a residue is used to broadly categorize residues based 
     on their chemical properties. For example, peptides belong  to the 
-    `LPeptideLinking` or `DPeptideLinking` classes.
+    `L_PEPTIDE_LINKING` or `D_PEPTIDE_LINKING` classes.
+
+  .. attribute:: chem_type
+
+    The chemical type of a residue is a classification of all compounds
+    obtained from the PDB component dictionary. For example, ions belong to the
+    class `ChemType::IONS`, amino acids to `ChemType::AMINOACIDS`.
   
   .. attribute:: sec_structure
   
     The secondary structure of the residue.
-    
+  
+  .. attribute:: is_ligand
+  
+    Whether the residue is a ligand. When loading PDB structures, this property 
+    is set based on the HET records. This also means, that this property will 
+    most likely not be set properly for all except PDB files coming from 
+    pdb.org.
+
   .. method:: FindAtom(atom_name)
 
     Get atom by atom name. See also :attr:`atoms`
@@ -537,6 +565,9 @@ The Handle Classes
   
     See :attr:`psi_torsion`
   
+  .. method:: GetChemType()
+    
+    See :attr:`chem_type`
   
 
 .. class:: AtomHandle
@@ -576,7 +607,18 @@ The Handle Classes
     
   .. attribute:: pos
   
-    The atom's position in global coordinates. Also available as :meth:`GetPos`.
+    The atom's position in global coordinates, transformed by the entity 
+    transformation. Also available as :meth:`GetPos`.
+    
+    Read-only.
+    
+    :type: :class:`~ost.geom.Vec3`
+    
+  .. attribute:: original_pos
+  
+    The atom's untransformed position in global coordinates. Also available as 
+    :meth:`GetOriginalPos`.
+    
     Read-only.
     
     :type: :class:`~ost.geom.Vec3`
@@ -584,31 +626,40 @@ The Handle Classes
   .. attribute:: radius
   
     The van-der-Waals radius of the atom. Also available as :meth:`GetRadius`. 
-    Read-only.
+    Read/write.
     
     :type: float
   
   .. attribute:: occupancy
   
-    The atom's occupancy in the range 0 to 1. Also available as 
-    :meth:`GetOccupancy`. Read-only.
-    
+    The atom's occupancy in the range 0 to 1. Read/write. Also available as 
+    meth:`GetOccupancy`, :meth:`SetOccupancy`.
     :type: float
+    
+  .. attribute:: b_factor
+  
+    The atom's temperature factor. Read/write. Also available as 
+    :meth:`GetBFactor`, :meth:`SetBFactor`.
+    
+    :type: float    
+
   .. attribute:: charge
     
-    The atom's charge
+    The atom's charge. Also available as :meth:`GetCharge`, :meth:`SetCharge`.
     
     :type: float
 
   .. attribute:: residue
   
-    The residue this atom belongs to.
+    The residue this atom belongs to. Read-only.
     
     :type: :class:`ResidueHandle`
   
-  .. attribute:: is_hetatm
+  .. attribute:: is_hetatom
   
-    Indicates whether this atom is a hetatm.
+    Indicates whether this atom is a *HETATM*. When loading a structure from a 
+    PDB file, all non-standard aminoacid and nucleotide atoms as well as ligands 
+    are marked as HETATM. 
     
   .. attribute:: bonds
     
@@ -627,11 +678,7 @@ The Handle Classes
     :type  other_atom: :class:`AtomHandle`
     :rtype: :class:`BondHandle`
 
-  .. method:: GetAtomProps()
-    
-    Get atom properties such as mass, charge, element and occupancy.
-    
-    :rtype: :class:`AtomProp`
+
 
   .. method:: GetBondCount()
     
@@ -730,7 +777,7 @@ The Handle Classes
 
   .. method:: IsHetAtom()
     
-    See :attr:`is_hetatm`
+    See :attr:`is_hetatom`
     
     :rtype: bool
 
@@ -1499,3 +1546,59 @@ Other Entity-Related Functions
             encountered
    
    :returns: :class:`EntityView`
+
+.. _chaintype:
+
+ChainType
+--------------------------------------------------------------------------------
+
+A ChainType fills the :attr:`ChainHandle.type` attribute. Different types are
+described in the :ref:`ChainType enum <chaintype_enum>`. Functions for setting
+a type belong to the :class:`EditorBase` class, getting is provided by the
+:class:`ChainHandle` class, further convenience functions are described here.
+
+.. _chaintype_enum:
+
+The ChainType enum
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ChainType enum enumerates all types defined by the PDB for the MMCif file
+format. Following values are supported:
+
+  ``CHAINTYPE_POLY``, ``CHAINTYPE_NON_POLY``, ``CHAINTYPE_WATER``,
+  ``CHAINTYPE_POLY_PEPTIDE_D``, ``CHAINTYPE_POLY_PEPTIDE_L``,
+  ``CHAINTYPE_POLY_DN``, ``CHAINTYPE_POLY_RN``, ``CHAINTYPE_POLY_SAC_D``,
+  ``CHAINTYPE_POLY_SAC_L``, ``CHAINTYPE_POLY_DN_RN``,
+  ``CHAINTYPE_UNKNOWN``, ``CHAINTYPE_N_CHAINTYPES``  
+
+Where ``CHAINTYPE_N_CHAINTYPES`` holds the number of different types available.
+
+Setter & Getter functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:func:`EditorBase.SetChainType`, :func:`ChainHandle.GetType`
+
+
+ChainType functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. function:: ChainTypeFromString(identifier)
+
+   Create a ChainType item for a given string.
+
+   :param identifier: String to request a type for.
+   :type identifier: :class:`str`
+   :raises: :class:`runtime_error` if **identifier** is unrecognised.
+
+   :returns: :class:`ChainType`
+
+.. function:: StringFromChainType(type)
+
+   Return the String identifier for a given **type**.
+
+   :param type: To be translated
+   :type type: :class:`ChainType`
+   :raises: :class:`runtime_error` if **type** is unrecognised.
+
+   :returns: :class:`str`
+

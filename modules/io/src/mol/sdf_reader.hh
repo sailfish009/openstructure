@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -23,7 +23,8 @@
 #define OST_IO_SDF_READER_HH
 
 #include <boost/filesystem/fstream.hpp>
-#include <ost/mol/mol.hh>
+#include <ost/mol/chain_handle.hh>
+#include <ost/mol/residue_handle.hh>
 #include <ost/io/module_config.hh>
 
 namespace ost { namespace io {
@@ -39,7 +40,7 @@ public:
   void Import(mol::EntityHandle& ent);
 
 private:
-  void ClearState();
+  void ClearState(const boost::filesystem::path& loc);
   void NextMolecule();
 
   void ParseAndAddHeader(const String& line, int line_num, mol::EntityHandle& ent,

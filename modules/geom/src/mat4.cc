@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -123,13 +123,13 @@ bool Mat4::operator==(const Mat4& rhs) const
 
 Real& Mat4::operator()(std::size_t r, std::size_t c)
 {
-  if(r>4 || c>4) throw OutOfRangeException();
+  if(r>3 || c>3) throw std::out_of_range("row and column must be in range [0-3]");
   return data_[r][c];
 }
 
 const Real& Mat4::operator()(std::size_t r, std::size_t c) const
 {
-  if(r>4 || c>4) throw OutOfRangeException();
+  if(r>3 || c>3) throw std::out_of_range("row and column must be in range [0-3]");
   return data_[r][c];
 }
 

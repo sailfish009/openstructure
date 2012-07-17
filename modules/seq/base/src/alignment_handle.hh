@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -97,7 +97,9 @@ public:
   /// If several sequences have the same name, the first matching sequence will
   /// be returned.
   ConstSequenceHandle FindSequence(const String& name) const;
-
+  
+  int FindSequenceIndex(const String& name) const;
+  
   /// \brief attach view to given sequence
   /// \sa SequenceHandle::AttachView(const mol::EntityView&)
   void AttachView(int seq_index, const mol::EntityView& view);
@@ -107,6 +109,8 @@ public:
   void AttachView(int seq_index, const mol::EntityView& view,
                   const String& chain_name);
 
+
+  mol::EntityViewPair GetMatchingBackboneViews(int idx0=0, int idx1=1) const;
   /// \brief set name of sequence
   void SetSequenceName(int seq_index, const String& name);
 
@@ -158,7 +162,18 @@ public:
   iterator end() const;
 
   bool IsValid() const { return impl_.get()!=0; }
+    
+  ///\brief get coverage of a specifi sequence 
+  ///
+  /// returns a value representing how extensively the specified sequence
+  /// covers the first sequence (sequence 0). The function return a value
+  /// between 0 (no coverage) and 1 (full coverage)
+  Real GetCoverage(int seq_index) const;
   
+  
+  const String& GetSequenceRole(int seq_index);
+  
+  void SetSequenceRole(int seq_index, const String& role);
 private:
   void CheckValidity() const;
   impl::SequenceListImplPtr impl_;

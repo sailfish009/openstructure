@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -27,6 +27,9 @@
 #include <ost/gui/tools/manipulator.hh>
 #include <ost/gui/tools/measure_tool.hh>
 #include <ost/gui/perspective.hh>
+#include <ost/gui/gl_canvas.hh>
+#include <ost/gui/tools/tool.hh>
+#include <ost/gui/tools/tool_bar.hh>
 
 #if OST_IMG_ENABLED
 #  include <ost/gui/tools/map_tool.hh>
@@ -39,6 +42,7 @@
 #include <QLabel>
 #include <QStatusBar>
 #include <QVBoxLayout>
+#include <QStatusBar>
 
 /*
   Authors: Ansgar Philippsen, Marco Biasini
@@ -56,7 +60,9 @@ gl_canvas_(NULL)
     LOG_VERBOSE("GLCanvas: trying stereo visuals first");
     for(int format_id=3;format_id>=0;--format_id) {
       QGLFormat format=GLWin::CreateFormat(format_id);
-      format.setStereo(true);
+      if (try_stereo) {
+        format.setStereo(true);
+      }
       gl_canvas_=new GLCanvas(this, main, format);
       if(gl_canvas_->isValid() && gl_canvas_->format().stereo()) {
         break; // format is fine
@@ -113,10 +119,6 @@ gl_canvas_(NULL)
 #if OST_IMG_ENABLED
   ToolManager::Instance().AddTool(new MapTool);
 #endif
-  QBoxLayout* l=new QVBoxLayout(this);
-  l->setMargin(0);
-  l->setSpacing(0);
-  l->addWidget(main);
 }
 
 void GLWin::ActiveToolChanged(Tool* t)

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -67,12 +67,12 @@ void export_data_viewer()
     .def("SetData",&DataViewer::SetData)
     .def("SetName",&DataViewer::SetName)
     .def("GetOverlayManager",&DataViewer::GetOverlayManager)
-    .def("GetNormalizer",&DataViewer::GetNormalizer,
-	 return_value_policy<return_by_value>())
+    .def("GetNormalizer",&DataViewer::GetNormalizer,return_value_policy<return_by_value>())
     .def("Renormalize",&DataViewer::Renormalize)
     .def("AddOverlay",&DataViewer::AddOverlay,o_AddOverlay())
     .def("ClearOverlays",&DataViewer::ClearOverlays)
     .def("GetSelection",&DataViewer::GetSelection)
+    .def("SetSelection",&DataViewer::SetSelection)
     .def("UpdateView",&DataViewer::UpdateView)
     .def("Recenter",&DataViewer::Recenter)
     .def("AddDockWidget",add_dock1)
@@ -80,6 +80,24 @@ void export_data_viewer()
     .def("SetSlab", &DataViewer::SetSlab)
     .def("GetSlab", &DataViewer::GetSlab)
     .add_property("slab", &DataViewer::GetSlab, &DataViewer::SetSlab)
+    .def("SetZoomScale", &DataViewer::SetZoomScale)
+    .def("GetZoomScale", &DataViewer::GetZoomScale)
+    .add_property("zoomscale", &DataViewer::GetZoomScale, &DataViewer::SetZoomScale)
+    .def("SetViewerMin", &DataViewer::SetViewerMin)
+    .def("GetViewerMin", &DataViewer::GetViewerMin)
+    .add_property("viewer_min", &DataViewer::GetViewerMin, &DataViewer::SetViewerMin)
+    .def("SetViewerMax", &DataViewer::SetViewerMax)
+    .def("GetViewerMax", &DataViewer::GetViewerMax)
+    .add_property("viewer_max", &DataViewer::GetViewerMax, &DataViewer::SetViewerMax)
+    .def("SetGamma", &DataViewer::SetGamma)
+    .def("GetGamma", &DataViewer::GetGamma)
+    .add_property("gamma", &DataViewer::GetGamma, &DataViewer::SetGamma)
+    .def("SetInvert", &DataViewer::SetInvert)
+    .def("GetInvert", &DataViewer::GetInvert)
+    .add_property("invert", &DataViewer::GetInvert, &DataViewer::SetInvert)
+    .def("SetOffset", &DataViewer::SetOffset)
+    .def("GetOffset", &DataViewer::GetOffset)
+    .add_property("offset", &DataViewer::GetOffset, &DataViewer::SetOffset)
     .def("AddDockWidget",add_dock3)
     .def("AddDockWidget",add_dock4)
     .def("RemoveDockWidget",&DataViewer::RemoveDockWidget)

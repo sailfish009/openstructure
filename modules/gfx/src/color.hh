@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -28,6 +28,7 @@
 #include <boost/operators.hpp>
 
 #include <ost/gfx/module_config.hh>
+#include <ost/geom/geom.hh>
 
 namespace ost { namespace gfx {
 
@@ -51,22 +52,6 @@ public:
     rgba[3]=a;
   }
 
-  enum COLOR_NAME {
-    WHITE=0xffffff,
-    LIGHT_GREY=0xaaaaff,
-    GREY=0x999999ff,
-    DARK_GREY=0x333333ff,
-    BLACK=0x000000,
-    RED=0xff0000,
-    GREEN=0x00ff00,
-    BLUE=0x0000ff,
-    CYAN=0x00ffff,
-    MAGENTA=0xff00ff,
-    YELLOW=0xffff00
-  };
-
-  Color(int hex_code);
-
   float& Red() {return rgba[0];}
   const float& Red() const {return rgba[0];}
   float& Green() {return rgba[1];}
@@ -80,9 +65,10 @@ public:
                        unsigned char b, unsigned char a = 0xff) {
     static float f=1.0/255.0;
     return Color(f*static_cast<float>(r),f*static_cast<float>(g),
-		 f*static_cast<float>(b),f*static_cast<float>(a));
+                 f*static_cast<float>(b),f*static_cast<float>(a));
   }
-  //static Color HSB();
+
+  geom::Vec3 ToHSV();
 
   // these also take care of operator[](uint i) !
   operator float* () {return rgba;}
@@ -98,6 +84,15 @@ public:
 private:
   float rgba[4];
 };
+
+/*!
+  \brief HSV color spec
+
+  h: Hue from 0 to 360 (0=red, 120=green, 240=blue)
+  s: Saturation from 0 (no color) to 100 (full color)
+  v: Value from 0 (no light, black) to 100 (full light)
+*/
+Color DLLEXPORT_OST_GFX HSV(double h, double s, double v);
 
 DLLEXPORT_OST_GFX std::ostream& operator<<(std::ostream&, const Color& c);
 

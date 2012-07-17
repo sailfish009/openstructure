@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -30,8 +30,7 @@ using namespace ost;
 
 #ifdef OST_STATIC_PROPERTY_WORKAROUND
 
-namespace {
-  struct Units_ {
+struct Units_ {
     Real get_m() { return Units::m; }
     Real get_mm() { return Units::mm; }
     Real get_nm() { return Units::nm; }
@@ -53,9 +52,8 @@ namespace {
     Real get_kDa() { return Units::kDa; }
     Real get_Da() { return Units::Da; }
     Real get_C() { return Units::C; }
-  };
+};
 
-} //ns
 
 #endif
 

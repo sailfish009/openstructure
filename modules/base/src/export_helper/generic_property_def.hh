@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -156,6 +156,7 @@ void const_generic_prop_def(O& bp_class)
     .def("GetIntProp", get_int2)    
     .def("GetStringProp", get_str1)
     .def("GetStringProp", get_str2)    
+    .def("GetPropList",&C::GetPropList)
     .def("GetGenericBoolProperty", &depr_get_bool_a<C>)
     .def("GetGenericBoolProperty", &depr_get_bool_b<C>)
     .def("GetGenericFloatProperty", &depr_get_float_a<C>)
@@ -180,6 +181,7 @@ void generic_prop_def(O& bp_class)
     .def("SetFloatProp", &C::SetFloatProp)
     .def("SetIntProp", &C::SetIntProp)
     .def("SetStringProp", &C::SetStringProp)
+    .def("GetPropList",&C::GetPropList)
     .def("ClearGenericProperties", &depr_clear_props<C>)
     .def("SetGenericIntProperty", &depr_set_int<C>)
     .def("SetGenericFloatProperty", &depr_set_float<C>)

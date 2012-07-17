@@ -23,12 +23,8 @@
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/query_view_wrapper.hh>
 
-#include <ost/gfx/entity.hh>
 #include <ost/gfx/entity_fw.hh>
 #include <ost/gfx/render_mode.hh>
-#include <ost/gfx/scene_observer.hh>
-#include <ost/gfx/gfx_object.hh>
-#include <ost/gfx/gfx_object_fw.hh>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/scene_win/entity_part_node.hh>
@@ -45,7 +41,8 @@ namespace ost { namespace gui {
 class DLLEXPORT_OST_GUI RenderModeNode : public EntityPartNode {
   Q_OBJECT
 public:
-  RenderModeNode(gfx::EntityP entity, gfx::RenderMode::Type render_mode, SceneNode* node_parent );
+  RenderModeNode(gfx::EntityP entity, gfx::RenderMode::Type render_mode, 
+                 SceneNode* node_parent);
 
   virtual QVariant GetData(int column, int role);
   virtual bool SetData(int column, const QVariant& value, int role);

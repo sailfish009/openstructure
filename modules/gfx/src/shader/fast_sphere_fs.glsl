@@ -2,6 +2,7 @@ uniform bool lighting_flag;
 uniform bool two_sided_flag;
 uniform bool fog_flag;
 uniform bool write_normals;
+uniform bool use_hemimodel;
 
 // gl_TexCoord[0] is from gl_MultiTexCoord0, which in turn
 // is custom crafted in the fast sphere prep routine
@@ -43,16 +44,20 @@ void main()
     return;
   }
 
-  vec4 amb = vec4(0.0);
-  vec4 diff = vec4(0.0);
-  vec4 spec = vec4(0.0);
   vec4 color = vec4(0.0);
+  if(use_hemimodel) {
+    color = gl_Color;
+  } else {
+    vec4 amb = vec4(0.0);
+    vec4 diff = vec4(0.0);
+    vec4 spec = vec4(0.0);
 
-  DirectionalLight(normal, gl_FrontMaterial.shininess, amb, diff, spec);
-  color  = gl_FrontLightModelProduct.sceneColor  +
-           (amb  * gl_FrontMaterial.ambient * gl_Color) +
-           (diff * gl_FrontMaterial.diffuse * gl_Color) +
-           (spec * gl_FrontMaterial.specular);
+    DirectionalLight(normal, gl_FrontMaterial.shininess, amb, diff, spec);
+    color  = gl_FrontLightModelProduct.sceneColor  +
+             (amb  * gl_FrontMaterial.ambient * gl_Color) +
+             (diff * gl_FrontMaterial.diffuse * gl_Color) +
+             (spec * gl_FrontMaterial.specular);
+  }
 
   if(fog_flag) {
     float fog = clamp((gl_Fog.end-(gl_FogFragCoord+z1)) * gl_Fog.scale, 0.0, 1.0);

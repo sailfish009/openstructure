@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -38,7 +38,6 @@
 using namespace ost;
 using namespace ost::seq;
 using namespace boost::python;
-namespace {
 
 void (SequenceHandle::*attach_one)(const mol::EntityView&)=&SequenceHandle::AttachView;
 void (SequenceHandle::*attach_two)(const mol::EntityView&,
@@ -50,16 +49,24 @@ void (AlignmentHandle::*attach_view_b)(int, const mol::EntityView&,
 SequenceHandle (*seq_from_chain_a)(const String&,const mol::ChainView&)=&SequenceFromChain;
 SequenceHandle (*seq_from_chain_b)(const String&,const mol::ChainHandle&)=&SequenceFromChain;
 
+bool (*m1)(const String&, const String&)=&Match;
+bool (*m2)(const ConstSequenceHandle&, const ConstSequenceHandle&)=&Match;
 template <typename T>
 T do_slice(const T& t, slice& sl) {
   int start=0, end=t.GetCount();
   try {
     start=extract<int>(sl.start());
+    if (start<0) {
+      start=t.GetCount()+start;
+    }    
   } catch(error_already_set) {
     PyErr_Clear();
   }
   try {
     end=extract<int>(sl.stop());
+    if (end<0) {
+      end=t.GetCount()+end;
+    }    
   } catch(error_already_set) {
     PyErr_Clear();
   }
@@ -76,16 +83,43 @@ SequenceList do_slice_b(SequenceList& t, slice sl)
   return do_slice<SequenceList>(t, sl);
 }
 
-
-AlignedRegion slice_aln(const AlignmentHandle& aln, slice sl) {
-  int start=0, end=aln.GetLength();
+String slice_seq(const ConstSequenceHandle& sh, slice& sl) {
+  int start=0, end=sh.GetLength();
   try {
     start=extract<int>(sl.start());
+    if (start<0) {
+      start=sh.GetLength()+start;
+    }    
   } catch(error_already_set) {
     PyErr_Clear();
   }
   try {
     end=extract<int>(sl.stop());
+    if (end<0) {
+      end=sh.GetLength()+end;
+    }
+  } catch(error_already_set) {
+    PyErr_Clear();
+  }
+  String s=sh.GetString();
+  return s.substr(start, end-start);
+}
+
+AlignedRegion slice_aln(const AlignmentHandle& aln, slice sl) {
+  int start=0, end=aln.GetLength();
+  try {
+    start=extract<int>(sl.start());
+    if (start<0) {
+      start=aln.GetLength()+start;
+    }    
+  } catch(error_already_set) {
+    PyErr_Clear();
+  }
+  try {
+    end=extract<int>(sl.stop());
+    if (end<0) {
+      end=aln.GetLength()+end;
+    }
   } catch(error_already_set) {
     PyErr_Clear();
   }
@@ -208,7 +242,9 @@ void const_seq_handle_def(O& bp_class)
     .def("GetLength", &C::GetLength)
     .def("GetResidue", &C::GetResidue)
     .def("GetOneLetterCode", &C::GetOneLetterCode)
+    .def("__iter__", iterator<C>())
     .def("__getitem__", &C::GetOneLetterCode)
+    .def("__getitem__", slice_seq)
     .def("GetOffset", &C::GetOffset)
     .def("Copy", &C::Copy)
     .def("IsValid", &C::IsValid)
@@ -218,6 +254,8 @@ void const_seq_handle_def(O& bp_class)
     .add_property("last_non_gap", &C::GetLastNonGap)
     .def("GetAttachedView", &C::GetAttachedView)
     .def("GetGaplessString", &C::GetGaplessString)
+    .add_property("role", make_function(&C::GetRole, 
+                                        return_value_policy<copy_const_reference>()))
     .def("GetString", &C::GetString,
          return_value_policy<copy_const_reference>())
          .def("GetName", &C::GetName,
@@ -239,7 +277,6 @@ void const_seq_handle_def(O& bp_class)
   ;
 }
 
-}
 
 void export_sequence()
 {
@@ -255,11 +292,15 @@ void export_sequence()
     .def("SetOffset", &SequenceHandle::SetOffset)
     .def("AttachView", attach_one)
     .def("AttachView", attach_two)
+    .def("Append", &SequenceHandle::Append)
     .def("SetString", &SequenceHandle::SetString)
     .add_property("string",
                   make_function(&SequenceHandle::GetString,
                                 return_value_policy<copy_const_reference>()),
                   &SequenceHandle::SetString)
+    .add_property("role", make_function(&SequenceHandle::GetRole, 
+                                        return_value_policy<copy_const_reference>()),
+                  &SequenceHandle::SetRole)
     .def("SetName", &SequenceHandle::SetName)
     .add_property("name",
                   make_function(&SequenceHandle::GetName,
@@ -268,10 +309,13 @@ void export_sequence()
     .add_property("offset", &SequenceHandle::GetOffset,
                   &SequenceHandle::SetOffset)
   ;
+  def("Match", m1);
+  def("Match", m2);
 
   implicitly_convertible<SequenceHandle, ConstSequenceHandle>();
   
-  def("CreateSequence", &CreateSequence);
+  def("CreateSequence", &CreateSequence, 
+      (arg("name"), arg("seq"), arg("role")="UNKNOWN"));
   /*class_<SequenceHandleList>("SequenceHandleList", init<>())
     .def(vector_indexing_suite<SequenceHandleList>())
   ;*/
@@ -287,20 +331,29 @@ void export_sequence()
   class_<SeqListIter>("SeqListIter", no_init)
     .def("next", &SeqListIter::next)
   ;
+  to_python_converter<std::pair<mol::EntityView, mol::EntityView>, 
+                      PairToTupleConverter<mol::EntityView, mol::EntityView> >();
+  
   class_<AlignmentHandle>("AlignmentHandle", init<>())
     .def("GetCount", &AlignmentHandle::GetCount)
     .add_property("sequence_count", &AlignmentHandle::GetCount)
     .def("GetSequence", &AlignmentHandle::GetSequence)
     .def("GetPos", &AlignmentHandle::GetPos)
     .def("GetResidueIndex", &AlignmentHandle::GetResidueIndex)
+    .def("GetResidue", &AlignmentHandle::GetResidue)
     .def("AddSequence", &AlignmentHandle::AddSequence)
     .def("FindSequence", &AlignmentHandle::FindSequence)
+    .def("FindSequenceIndex", &AlignmentHandle::FindSequenceIndex)
     .def("Copy", &AlignmentHandle::Copy)
     .def("ToString", &AlignmentHandle::ToString)
     .def("GetLength", &AlignmentHandle::GetLength)
     .def("__len__", &AlignmentHandle::GetLength)
     .def("GetSequences", &AlignmentHandle::GetSequences)
+    .def("GetCoverage", &AlignmentHandle::GetCoverage)
     .def("AttachView", attach_view_a)
+    .def("SetSequenceRole", &AlignmentHandle::SetSequenceRole)
+    .def("GetSequenceRole", &AlignmentHandle::GetSequenceRole, 
+         return_value_policy<copy_const_reference>())
     .def("AttachView", attach_view_b)
     .def("Cut", &AlignmentHandle::Cut)
     .def("MakeRegion", &AlignmentHandle::MakeRegion)
@@ -355,8 +408,7 @@ void export_sequence()
     .def("__getitem__", &do_slice_b)
   ;
   implicitly_convertible<SequenceList, ConstSequenceList>();
-  to_python_converter<std::pair<mol::EntityView, mol::EntityView>, 
-                      PairToTupleConverter<mol::EntityView, mol::EntityView> >();
+
   def("CreateSequenceList", &CreateSequenceList);
   def("SequenceFromChain", seq_from_chain_a);
   def("SequenceFromChain", seq_from_chain_b);

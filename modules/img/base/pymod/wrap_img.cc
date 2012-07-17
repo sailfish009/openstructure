@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -55,7 +55,7 @@ void export_Progress();
 void export_Map();
 
 // actual module definitions
-BOOST_PYTHON_MODULE(_img)
+BOOST_PYTHON_MODULE(_ost_img)
 {
   export_Data();
   export_DataAlgorithm();

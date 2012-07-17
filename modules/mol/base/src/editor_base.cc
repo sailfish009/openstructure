@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -70,37 +70,67 @@ ResidueHandle EditorBase::InsertResidueAfter(ChainHandle chain, int index,
   return ResidueHandle(chain.Impl()->InsertResidueAfter(index, num, k));  
 }
 
+void EditorBase::RenameResidue(ResidueHandle res, const String& new_name)
+{
+  CheckHandleValidity(res);
+  res.Impl()->SetKey(new_name);
+}
+
+void EditorBase::SetResidueNumber(ResidueHandle res, const ResNum& new_num)
+{
+  CheckHandleValidity(res);
+  int index=res.GetIndex();
+  res.Impl()->SetNumber(new_num);
+  res.GetChain().SetInSequence(index);
+}
+  
 void EditorBase::RenameChain(ChainHandle chain, const String& new_name)
 {
   CheckHandleValidity(chain); 
   ent_.Impl()->RenameChain(chain.Impl(), new_name);
 }
 
+void EditorBase::SetChainType(ChainHandle chain, const ChainType type)
+{
+  CheckHandleValidity(chain);
+  chain.Impl()->SetType(type);
+}
+
+void EditorBase::SetChainDescription(ChainHandle chain, const String desc)
+{
+  CheckHandleValidity(chain);
+  chain.Impl()->SetDescription(desc);
+}
 
 AtomHandle EditorBase::InsertAtom(ResidueHandle res, const String& name,
-                                  const geom::Vec3& pos,
-                                  const AtomProp& prop)
+                                  const geom::Vec3& pos, const String& ele,
+                                  Real occupancy, Real b_factor, 
+                                  bool is_hetatm)
 {
   CheckHandleValidity(res);
   ent_.Impl()->MarkTraceDirty();  
-  return AtomHandle(res.Impl()->InsertAtom(name, pos,prop));
+  AtomHandle atom(res.Impl()->InsertAtom(name, pos, ele));
+  atom.SetBFactor(b_factor);
+  atom.SetHetAtom(is_hetatm);
+  atom.SetOccupancy(occupancy);
+  return atom;
 }
 
 AtomHandle EditorBase::InsertAltAtom(ResidueHandle res, const String& name,
                                      const String& alt_group,
                                      const geom::Vec3& pos,
-                                     const AtomProp& prop) 
+                                     const String& ele) 
 {
   CheckHandleValidity(res);
   ent_.Impl()->MarkTraceDirty();
-  AtomHandle atom(res.Impl()->InsertAltAtom(name, alt_group, pos, prop));
+  AtomHandle atom(res.Impl()->InsertAltAtom(name, alt_group, pos, ele));
   this->UpdateTrace();
   return atom;
 }
 
 void EditorBase::AddAltAtomPos(const String& group,
-                                    const AtomHandle& atom,
-                                    const geom::Vec3& position) 
+                               const AtomHandle& atom,
+                               const geom::Vec3& position) 
 {
   CheckHandleValidity(atom);
   atom.GetResidue().Impl()->AddAltAtomPos(group, atom.Impl(), position);
@@ -135,10 +165,15 @@ void EditorBase::ReorderAllResidues()
   ent_.Impl()->ReorderAllResidues();
 }
 
+void EditorBase::RenumberAllResidues(int start, bool keep_spacing)
+{
+  ent_.Impl()->RenumberAllResidues(start, keep_spacing);
+}
+
 void EditorBase::RenameAtom(AtomHandle atom, const String& new_name)
 {
   CheckHandleValidity(atom);
-  atom.Impl()->SetName(new_name);
+  atom.Impl()->Name()=new_name;
 }
 
 BondHandle EditorBase::Connect(const AtomHandle& first,
@@ -191,15 +226,11 @@ TorsionHandle EditorBase::AddTorsion(const String& name, const AtomHandle& a1,
 }
 
 
-EditMode EditorBase::GetMode() const 
-{
-  return mode_;
-}
-
 void EditorBase::UpdateTrace()
 {
   if (mode_==UNBUFFERED_EDIT) {
     ent_.Impl()->TraceDirectionality();
+    ent_.Impl()->UpdateICSIfNeeded();
   }
 }
 

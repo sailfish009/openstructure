@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -39,6 +39,7 @@ struct Properties : public boost::spirit::symbols<Prop> {
       ("rtype", Prop(Prop::RTYPE, Prop::STRING, Prop::RESIDUE))        
       ("ele", Prop(Prop::ELE, Prop::STRING, Prop::ATOM))
       ("anum", Prop(Prop::ANUM, Prop::INT, Prop::ATOM))
+      ("aindex", Prop(Prop::AINDEX, Prop::INT, Prop::ATOM))
       ("x",Prop(Prop::AX, Prop::FLOAT, Prop::ATOM))
       ("y",Prop(Prop::AY, Prop::FLOAT, Prop::ATOM))
       ("z",Prop(Prop::AZ, Prop::FLOAT, Prop::ATOM))
@@ -51,6 +52,7 @@ struct Properties : public boost::spirit::symbols<Prop> {
       ("peptide", Prop(Prop::PEPTIDE, Prop::INT, Prop::RESIDUE))
       ("rindex", Prop(Prop::RINDEX, Prop::INT, Prop::RESIDUE))
       ("protein", Prop(Prop::PROTEIN, Prop::INT, Prop::RESIDUE))
+      ("ligand", Prop(Prop::LIGAND, Prop::INT, Prop::RESIDUE))
       ("water", Prop(Prop::WATER, Prop::INT, Prop::RESIDUE))
       ("acharge", Prop(Prop::ACHARGE, Prop::FLOAT, Prop::ATOM));
   }
@@ -116,6 +118,8 @@ String Prop::GetName() const
       return "rindex";
     case PROTEIN:
       return "protein";
+    case LIGAND:
+      return "ligand";
     case WATER:
       return "water";
     default:
@@ -128,7 +132,7 @@ String Prop::GetTypeName() const
 
   switch(type) {
     case Prop::STRING:
-      return "String";
+      return "string";
     case Prop::FLOAT:
       return "floating point";
     case Prop::INT:

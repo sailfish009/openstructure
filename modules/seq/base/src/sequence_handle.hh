@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -49,6 +49,9 @@ public:
   friend class AlignmentHandle;
   friend class ConstSequenceList;
   friend class SequenceList;
+  
+  typedef String::const_iterator iterator;
+  
   /// \brief create invalid sequence handle
   /// 
   /// \sa IsValid()
@@ -89,6 +92,9 @@ public:
   
   /// \brief Get lenght of sequence, including gaps.
   int GetLength() const;
+  
+  /// \brief get index of substring
+  int GetIndex(const String& substr) const;
 
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
@@ -113,11 +119,15 @@ public:
   /// \sa SequenceHandle::AttachView(const mol::EntityView&, const String&)
   bool HasAttachedView() const;
   
+  const String& GetRole() const;
+  
   bool operator==(const ConstSequenceHandle& rhs) const;
   bool operator!=(const ConstSequenceHandle& rhs) const;  
   
   char operator[](int index) const;
   
+  iterator begin() const { return this->GetString().begin(); }
+  iterator end() const { return this->GetString().end(); }
   
   /// \brief whether the sequence is valid
   bool IsValid() const;
@@ -159,6 +169,7 @@ private:
 class DLLEXPORT_OST_SEQ SequenceHandle : 
   public GenericPropContainer<SequenceHandle> {
 public:
+  typedef String::const_iterator iterator;
   friend class GenericPropContainer<SequenceHandle>;  
   friend class SequenceList;
 
@@ -204,6 +215,9 @@ public:
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
 
+  /// \brief get index of substring
+  int GetIndex(const String& substr) const;
+  
   /// \brief get residue at position
   ///
   /// will return the residue view at the given sequence position or an invalid
@@ -255,6 +269,13 @@ public:
   
   void SetOneLetterCode(int position, char new_char);
   
+  char operator[](size_t index) const;
+    
+  iterator begin() const { return this->GetString().begin(); }
+  iterator end() const { return this->GetString().end(); }
+  
+  void Append(char olc);
+
   operator ConstSequenceHandle() const;
   /// \brief attach entity view to sequence
   ///
@@ -263,6 +284,10 @@ public:
   
   /// \internal
   SequenceHandle(const impl::SequenceImplPtr& impl);  
+  
+  const String& GetRole() const;
+  
+  void SetRole(const String& role) const;
   
   impl::SequenceImplPtr& Impl() const;  
 
@@ -275,7 +300,8 @@ private:
 };
 
 SequenceHandle DLLEXPORT_OST_SEQ CreateSequence(const String& name, 
-                                                const String& seq);
+                                                const String& seq, 
+                                                const String& role="UNKNOWN");
                                                 
 /// \brief export sequence to info
 void DLLEXPORT_OST_SEQ SequenceToInfo(const ConstSequenceHandle& sequence,
@@ -286,6 +312,12 @@ SequenceHandle DLLEXPORT_OST_SEQ SequenceFromInfo(info::InfoGroup& group);
 
 DLLEXPORT_OST_SEQ std::ostream& operator<<(std::ostream& os, 
                                            const ConstSequenceHandle& sequence);
+
+bool DLLEXPORT_OST_SEQ Match(const ConstSequenceHandle& s1,
+                             const ConstSequenceHandle& s2);
+
+bool DLLEXPORT_OST_SEQ Match(const String& s1,
+                             const String& s2);
 }}
 
 #endif

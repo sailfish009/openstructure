@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+#include <ost/mol/atom_view.hh>
 #include <ost/gfx/gl_helper.hh>
 #include <ost/gfx/scene.hh>
 #include <ost/gfx/color.hh>
@@ -296,76 +297,37 @@ SplineEntryList Spline::Generate(const SplineEntryList& entry_list, int nsub, ui
   // interpolate position and helper vectors
   for(int k=0;k<3;++k) {
     SPLINE_ENTRY_INTERPOLATE(position[k]);
-    //SPLINE_ENTRY_INTERPOLATE(v0[k]);
-    SPLINE_ENTRY_INTERPOLATE(v1[k]);
-    //SPLINE_ENTRY_INTERPOLATE(v2[k]);
+    SPLINE_ENTRY_INTERPOLATE(normal[k]);
   }
 
   SPLINE_ENTRY_INTERPOLATE(rad);
 
   LOG_DEBUG("SplineGenerate: assigning direction and normal components");
-  // assign direction and normal
-  // entity trace has the same algorithm
 
+  // assign direction and then re-assign normal
   geom::Vec3 p0 = sublist.at(0).position;
   geom::Vec3 p1 = sublist.at(1).position;
-  geom::Vec3 p2 = ipsize>2 ? sublist.at(2).position : p1+(p1-p0);
-  // normal of 0 is set at the end
+  geom::Vec3 p2 = sublist.size()>2 ? sublist.at(2).position : p1+p1-p0;
   sublist.at(0).direction=geom::Normalize(p1-p0);
-  sublist.at(0).v1=geom::Normalize(sublist.at(0).v1);
-  geom::Vec3 orth = geom::Cross(sublist.at(0).direction,sublist.at(0).v1);
-  sublist.at(0).v0 = geom::Normalize(geom::Cross(orth,sublist.at(0).direction));
-
-  // reference normal to avoid twisting
-  //geom::Vec3 nref=geom::Normalize(geom::Cross(p0-p1,p2-p1));
   unsigned int i=1;
   for(;i<sublist.size()-1;++i) {
     geom::Vec3 p10 = p0-p1;
     geom::Vec3 p12 = p2-p1;
-    // correction for perfectly aligned consecutive directions
-    if(p10==-p12 || p10==p12) p12+=geom::Vec3(0.001,0.001,0.001);
-    sublist.at(i).normal=geom::Normalize(geom::Cross(p10,p12));
-    // paranoid error checking due to occasional roundoff troubles
-    float cosw = geom::Dot(geom::Normalize(p10),geom::Normalize(p12));
-    cosw = std::min(float(1.0),std::max(float(-1.0),cosw));
-    float omega=0.5*acos(cosw);
-    orth=geom::AxisRotation(sublist.at(i).normal, -omega)*p12;
-    sublist.at(i).direction=geom::Normalize(geom::Cross(sublist.at(i).normal,orth));
-    // twist avoidance
-    sublist.at(i).v1=geom::Normalize(sublist.at(i).v1);
-    orth = geom::Cross(sublist.at(i).direction,sublist.at(i).v1);
-    sublist.at(i).v0 = geom::Normalize(geom::Cross(orth,sublist.at(i).direction));
-    if(geom::Dot(sublist.at(i-1).v0,sublist.at(i).v0)<0.0) {
-      sublist.at(i).v0=-sublist.at(i).v0;
-      //sublist.at(i).nflip = !sublist.at(i).nflip;
-    }
-
-    // avoid twisting
-    //if(geom::Dot(sublist.at(i).normal,nref)<0.0) sublist.at(i).normal=-sublist.at(i).normal;
-    //nref=sublist.at(i).normal;
-    // skip over shift for the last iteration
+    geom::Vec3 dir=geom::Normalize(p2-p0);
+    sublist.at(i).direction=dir;
+    geom::Vec3 orth=geom::Normalize(geom::Cross(dir,sublist[i].normal));
+    geom::Vec3 norm=geom::Normalize(geom::Cross(orth,dir));
+    sublist[i].normal=norm;
     if(i==sublist.size()-2) break;
     // shift to i+1 for next iteration
     p0 = sublist.at(i).position;
     p1 = sublist.at(i+1).position;
     p2 = sublist.at(i+2).position;
   }
-  // assign remaining ones
-  sublist.at(0).normal=sublist.at(1).normal;
-  sublist.at(i+1).direction=geom::Normalize(p2-p1);
-  sublist.at(i+1).normal=sublist.at(i).normal;
-  sublist.at(i+1).v1=geom::Normalize(sublist.at(i+1).v1);
-  orth = geom::Cross(sublist.at(i+1).direction,sublist.at(i+1).v1);
-  sublist.at(i+1).v0 = geom::Normalize(geom::Cross(orth,sublist.at(i+1).direction));
-  if(geom::Dot(sublist.at(i).v0,sublist.at(i+1).v0)<0.0) {
-    sublist.at(i+1).v0=-sublist.at(i+1).v0;
-  }
+  sublist[0].normal=sublist[0].normal;
+  sublist[i+1].direction=geom::Normalize(p2-p1);
+  sublist[i+1].normal=sublist[i].normal;
 
-  // hack
-  // TODO: merge this with above routine
-  for(unsigned int i=0;i<sublist.size();++i) {
-    sublist.at(i).normal = sublist.at(i).v0;
-  }
 
   LOG_DEBUG("SplineGenerate: assigning non-interpolated entry components");
   // finally the non-interpolated type

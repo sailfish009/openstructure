@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,6 +20,7 @@
 #define OST_LOG_SINK_HH
 
 #include <ostream>
+#include <sstream>
 #include <iostream>
 #include <fstream>
 #include <stack>
@@ -35,7 +36,7 @@ class DLLEXPORT LogSink {
 public:
   LogSink(){};
   virtual ~LogSink() { }
-  virtual void LogMessage(const String& message, int severity=0)=0;
+  virtual void LogMessage(const String& message, int severity=0) {};
 };
 
 typedef boost::shared_ptr<LogSink> LogSinkPtr;
@@ -50,6 +51,23 @@ public:
 private:
   std::ostream& stream_;
 };
+
+class DLLEXPORT StringLogSink : public LogSink {
+public:
+  StringLogSink():LogSink(),stream_(){}
+  virtual void LogMessage(const String& message, int severity){
+    stream_ << message;
+  }
+  String GetLog() const
+  {
+    return stream_.str();
+  }
+
+private:
+  std::ostringstream stream_;
+};
+
+typedef boost::shared_ptr<StringLogSink> StringLogSinkPtr;
 
 class DLLEXPORT FileLogSink : public LogSink {
 public:

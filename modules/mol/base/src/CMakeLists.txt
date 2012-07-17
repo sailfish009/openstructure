@@ -8,6 +8,7 @@ bond_handle.cc
 chain_base.cc
 chain_handle.cc
 chain_view.cc
+chain_type.cc
 coord_frame.cc
 coord_group.cc
 editor_base.cc
@@ -26,7 +27,6 @@ query_error.cc
 query_state.cc
 residue_base.cc
 residue_handle.cc
-residue_prop.cc
 residue_view.cc
 surface_builder.cc
 surface_handle.cc
@@ -42,14 +42,15 @@ xcs_editor.cc)
 set(OST_MOL_HEADERS
 atom_base.hh
 atom_handle.hh
-atom_prop.hh
 atom_view.hh
 bond_handle.hh
 bond_table.hh
 chain_base.hh
 chain_handle.hh
 chain_view.hh
+chain_type.hh
 chem_class.hh
+chem_type.hh
 coord_group.hh
 coord_source.hh
 in_mem_coord_source.hh
@@ -102,4 +103,4 @@ endforeach()
 module(NAME mol SOURCES ${OST_MOL_SOURCES}
        HEADERS ${OST_MOL_IMPL_HEADERS} IN_DIR impl
        ${OST_MOL_HEADERS} HEADER_OUTPUT_DIR ost/mol
-       DEPENDS_ON geom base info)
+       DEPENDS_ON ost_geom ost_base ost_info)

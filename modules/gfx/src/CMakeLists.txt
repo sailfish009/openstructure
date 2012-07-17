@@ -1,6 +1,7 @@
 set(OST_GFX_HEADERS
 render_pass.hh
 bitmap_io.hh
+collada_exporter.hh
 color.hh
 entity.hh
 entity_fw.hh
@@ -37,6 +38,9 @@ module_config.hh
 primitives.hh
 povray_fw.hh
 povray.hh
+exporter.hh
+exporter_fw.hh
+gost_exporter.hh
 )
 
 set(OST_GFX_COLOR_OPS_HEADERS
@@ -89,6 +93,7 @@ endif()
 
 set(OST_GFX_SOURCES
 bitmap_io.cc
+collada_exporter.cc
 color.cc
 primitives.cc
 entity.cc
@@ -108,6 +113,7 @@ vertex_array.cc
 vertex_array_helper.cc
 material.cc
 povray.cc
+gost_exporter.cc
 texture.cc
 color_ops/color_op.cc
 color_ops/by_element_color_op.cc
@@ -189,7 +195,6 @@ if(WIN32)
 endif()
 
 if (USE_SHADER)
-  message("Compiling with Shader Support")
   list(APPEND OST_GFX_SOURCES shader.cc)
   list(APPEND OST_GFX_HEADERS shader.hh)
   list(APPEND OST_GFX_SOURCES impl/scene_fx.cc)
@@ -205,9 +210,9 @@ if (USE_SHADER)
   endif()  
 endif()
 
-set(OST_GFX_DEPENDENCIES "conop;seq")
+set(OST_GFX_DEPENDENCIES "ost_conop;ost_seq")
 if (ENABLE_IMG)
-  set(OST_GFX_DEPENDENCIES "${OST_GFX_DEPENDENCIES};img;img_alg")
+  set(OST_GFX_DEPENDENCIES "${OST_GFX_DEPENDENCIES};ost_img;ost_img_alg")
 endif()
 
 module(NAME gfx SOURCES ${OST_GFX_SOURCES} ${OST_GFX_MAP_SOURCES} 

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -42,11 +42,16 @@ Mat4 Transform::GetMatrix() const
   return tm_;
 }
 
+void Transform::SetMatrix(const Mat4& m)
+{
+  tm_=m;
+  ttm_ = Transpose(tm_);
+}
+
 Mat4 Transform::GetTransposedMatrix() const
 {
   return ttm_;
 }
-
 
 void Transform::SetTrans(const Vec3& t) 
 {

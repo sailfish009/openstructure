@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -26,6 +26,7 @@
 #include <QIntValidator>
 #include <QDoubleValidator>
 #include <QSpacerItem>
+#include <QPushButton>
 
 namespace ost { namespace gui {
 
@@ -74,6 +75,14 @@ QWidget* ToolOptionsWidget::MakeFloatWidget(ToolOptionFloat* opts)
   return line;
 }
 
+QWidget* ToolOptionsWidget::MakeButtonWidget(ToolOptionButton* opts)
+{
+  QPushButton* button=new QPushButton();
+  button->setText(QString(opts->GetVerboseName().c_str()));
+  connect(button, SIGNAL(released()), opts->GetReceiver(), opts->GetSlotMethod());
+  return button;
+}
+
 void ToolOptionsWidget::Populate()
 {
   QGridLayout* grid=new QGridLayout(this);
@@ -104,6 +113,9 @@ void ToolOptionsWidget::Populate()
           break;
         case ToolOption::ENUM:
           widget=MakeEnumWidget(dynamic_cast<ToolOptionEnum*>(opt));
+          break;
+        case ToolOption::BUTTON:
+          widget=MakeButtonWidget(dynamic_cast<ToolOptionButton*>(opt));
           break;
       }
 #if defined(__APPLE__)

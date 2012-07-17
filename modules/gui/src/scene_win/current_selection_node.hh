@@ -23,7 +23,6 @@
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/query_view_wrapper.hh>
 
-#include <ost/gfx/entity.hh>
 #include <ost/gfx/entity_fw.hh>
 
 #include <ost/gui/module_config.hh>
@@ -37,7 +36,7 @@
  */
 
 namespace ost { namespace gui {
-
+  
 class DLLEXPORT_OST_GUI CurrentSelectionNode : public EntityPartNode {
   Q_OBJECT
 public:

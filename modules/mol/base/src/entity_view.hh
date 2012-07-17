@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -93,9 +93,22 @@ public:
   ///
   /// \param entity The handle the view is created from.
   /// \param flags An ORed together list of ViewAddFlag
-  EntityView(const EntityHandle& entity,
-             ViewAddFlags flags=0);
-             
+  explicit EntityView(const EntityHandle& entity,
+                      ViewAddFlags flags=0);
+
+  /// \name View validity
+  //@{
+  /// \brief check validity of handle
+  /// 
+  /// check, whether the entity view points to a valid entity.
+  /// \note It is an error to use any method other than #IsValid, #Impl and 
+  ///       #operator bool() when the handle is invalid. An InvalidHandle
+  ///       exception will be thrown.
+  operator bool() const { return this->IsValid(); }
+  /// \brief check validity of handle
+  /// \sa #operator bool()
+  bool IsValid() const { return data_.get()!=0; }
+  //@}
   /// \brief Get entity's mass
   Real GetMass() const;
              
@@ -321,6 +334,8 @@ private:
 
   EntityViewDataPtr  data_;
 };
+
+typedef std::pair<EntityView, EntityView> EntityViewPair;
 
 }} // ns
 

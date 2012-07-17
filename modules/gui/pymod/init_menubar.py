@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2010 by the OpenStructure authors
+# Copyright (C) 2008-2011 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -127,8 +127,8 @@ class InitMenuBar(QtCore.QObject):
       info_box.exec_();
             
 def _InitMenuBar(app):
-  InitMenuBar(app.perspective.menubar)
-  
+  #InitMenuBar(app.perspective.menubar)
+  pass
 ## \example menubar_example.py
 #
 # Shows how to use PyQt to add a menu from within Python and interact 

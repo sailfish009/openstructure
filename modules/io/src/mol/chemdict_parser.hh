@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -24,7 +24,8 @@
  */
  
  
-#include <ost/mol/mol.hh>
+#include <ost/mol/chem_class.hh>
+#include <ost/mol/chem_type.hh>
 #include <ost/io/mol/star_parser.hh>
 #include <ost/conop/compound_lib.hh>
  
@@ -43,6 +44,7 @@ public:
     last_(0), loop_type_(DONT_KNOW), dialect_(dialect)
   {
     this->InitTypeMap();
+    this->InitPDBXTypeMap();
   }
 
   virtual bool OnBeginData(const StringRef& data_name);
@@ -62,6 +64,7 @@ public:
   }
 private:
   void InitTypeMap();  
+  void InitPDBXTypeMap();
   conop::CompoundLibPtr                   lib_;
   conop::CompoundPtr                      compound_;
   typedef enum {
@@ -80,6 +83,7 @@ private:
   int                                     indices_[10];
   bool                                    insert_;
   static std::map<String, mol::ChemClass> tm_;  
+  static std::map<String, mol::ChemType>  xtm_;
   std::map<String, int>                   atom_map_;
   LoopType                                loop_type_;  
   conop::AtomSpec                         atom_;

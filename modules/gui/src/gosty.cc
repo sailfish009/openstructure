@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -82,13 +82,27 @@ String get_ost_root()
 {
   QDir dir(QApplication::applicationDirPath());
 
+#if OST_DEBIAN_STYLE_LIBEXEC  
   #ifdef _MSC_VER
+    dir.cdUp();
+    dir.cdUp();
     dir.cdUp();
     dir.cdUp();
   #else
     dir.cdUp();
+    dir.cdUp();
+    dir.cdUp();
   #endif
-
+#else
+  #ifdef _MSC_VER
+    dir.cdUp();
+    dir.cdUp();
+    dir.cdUp();
+  #else
+    dir.cdUp();
+    dir.cdUp();
+  #endif
+#endif
   return dir.path().toStdString();
 }
 
@@ -167,6 +181,7 @@ int init_python_interpreter()
   }  
   setup_python_search_path(root, py);
   py.RunCommand("from ost import *");
+  py.RunCommand("gui_mode=True");
   return 0;
 }
 
@@ -185,11 +200,11 @@ void prepare_scripts(int argc, char** argv, PythonInterpreter& py)
 int main(int argc, char** argv)
 {
   int dummy_argc=1;
+  
   QApplication app(dummy_argc,argv);
   QCoreApplication::setOrganizationName("OpenStructure");
   QCoreApplication::setOrganizationDomain("openstructure.org");
-  QCoreApplication::setApplicationName(argv[0]);
-	app.setLibraryPaths(QStringList());
+  QCoreApplication::setApplicationName(QString(argv[2]));
   if (int rv=setup_resources(app)<0) {
     return rv;
   }

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -359,6 +359,16 @@ void EleImpl::SetTextData(const String& td)
     QDomText tn=ele_.ownerDocument().createTextNode(QS(td));
     ele_.appendChild(tn);
   }
+}
+
+
+String EleImpl::GetComment() const
+{
+  QDomNode previous=ele_.previousSibling();
+  if(previous.isComment()){
+    return previous.toComment().data().toStdString();
+  }
+  return String();
 }
 
 Type EleImpl::GetType() const 

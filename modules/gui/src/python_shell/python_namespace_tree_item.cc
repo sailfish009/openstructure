@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -47,8 +47,11 @@ void PythonNamespaceTreeItem::DeleteChildren()
   children_.clear();
   initialized_=false;
 }
-unsigned int PythonNamespaceTreeItem::ChildCount() const
+unsigned int PythonNamespaceTreeItem::ChildCount()
 {
+  if(CanFetchMore()){
+    FetchMore();
+  }
   return children_.size();
 }
 
@@ -56,8 +59,11 @@ PythonNamespaceTreeItem* PythonNamespaceTreeItem::GetParent() const
 {
   return parent_;
 }
-PythonNamespaceTreeItem* PythonNamespaceTreeItem::GetChild(unsigned int index) const
+PythonNamespaceTreeItem* PythonNamespaceTreeItem::GetChild(unsigned int index) 
 {
+  if(CanFetchMore()){
+    FetchMore();
+  }
   return children_.value(index);
 }
 unsigned int PythonNamespaceTreeItem::GetRow() const

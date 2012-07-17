@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <cassert>
+#include <QVBoxLayout>
 
 #include "widget.hh"
 
@@ -52,6 +53,10 @@ void Widget::SetInternalWidget(QWidget* widget)
 {
   assert(internal_==NULL);
   internal_=widget;
+  QBoxLayout* l=new QVBoxLayout(this);
+  l->setMargin(0);
+  l->setSpacing(0);
+  l->addWidget(widget);
   widget->setParent(this);
 }
 

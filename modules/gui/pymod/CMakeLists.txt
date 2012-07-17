@@ -84,11 +84,15 @@ set(OST_GUI_PYMOD_MODULES
   init_spacenav.py
   init_splash.py
   traj.py
+  helpwidget.py
 )
 
 set(OST_GUI_PYMOD_DNG_MODULES
   __init__.py
   termuse.py
+  superpositiondialog.py
+  init.py
+  menu.py
 )
 
 pymod(NAME gui CPP ${OST_GUI_PYMOD_SOURCES} 
@@ -101,7 +105,7 @@ set(PRESET_FILES
   scene/loaders.xml
 )
 copy_if_different("./" "${STAGE_DIR}/share/openstructure/scene" 
-                  "${PRESET_FILES}" "IMMUTABLE_FILES" _gui)
+                  "${PRESET_FILES}" "IMMUTABLE_FILES" _ost_gui)
 install(FILES ${PRESET_FILES} DESTINATION "share/openstructure/scene")
 
 set(INSPECTOR_ICONS
@@ -111,11 +115,11 @@ set(INSPECTOR_ICONS
   scene/icons/tool_icon.png
 )
 copy_if_different("./" "${STAGE_DIR}/share/openstructure/scene/icons" 
-                  "${INSPECTOR_ICONS}" "ICONS_FOR_INSPECTOR" _gui)
+                  "${INSPECTOR_ICONS}" "ICONS_FOR_INSPECTOR" _ost_gui)
 install(FILES ${INSPECTOR_ICONS} DESTINATION "share/openstructure/scene/icons")
 
 set(QT_USE_QTOPENGL 1)
 set(QT_USE_QTNETWORK 1)
 include(${QT_USE_FILE})
 
-target_link_libraries(_gui ${QT_LIBRARIES})
+target_link_libraries(_ost_gui ${QT_LIBRARIES})

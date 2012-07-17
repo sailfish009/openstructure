@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2010 by the OpenStructure authors
+# Copyright (C) 2008-2011 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -45,7 +45,8 @@ class ComboOptionsWidget(QtGui.QWidget):
 
     self.__UpdateView(self.combo_box_.currentIndex())
     
-    QtCore.QObject.connect(self.combo_box_, QtCore.SIGNAL("activated(int)"), self.__UpdateView)
+    QtCore.QObject.connect(self.combo_box_, QtCore.SIGNAL("activated(int)"), 
+                           self.__UpdateView)
     
     self.setEnabled(False)
        
@@ -84,23 +85,31 @@ class ComboOptionsWidget(QtGui.QWidget):
       self.stacked_widget_.removeWidget(self.combo_box_.itemData(index).toPyObject()[1])
       self.combo_box_.removeItem(index)
   
-  def DoSomething(self, item):
+  def OnComboChange(self, item):
     """This abstract method is called whenever the View is updated.
     
      This abstract method must be implemented by all subclasses. 
      It can be used to do something ;-) whenever the combobox changes its value.
     """
-    raise NotImplementedError, "Subclasses must define DoSomething()"
+    raise NotImplementedError, "Subclasses must define OnComboChange()"
+
+  def OnActivate(self, item):
+    return self.OnComboChange(self, item)
     
   def ChangeSelectedItem(self, ident):
-    """Change Current Selected Item.
+    """
+    Change Current Selected Item.
     
-     Shows the widget which corresponds to the ident in the show area. If ident is not valid, nothing happens.
+    Shows the widget which corresponds to the ident in the show area. If ident 
+    is not valid, nothing happens.
     """
     i = self.__GetIndex(ident)
     if(i>=0) and self.combo_box_.currentIndex() != i:
       self.combo_box_.setCurrentIndex(i)
-      self.__UpdateView(None)
+      if (self.combo_box_.count() > 0):
+        pair = self.__GetCurrentPair()
+        self.stacked_widget_.setCurrentWidget(pair[1])
+        self.OnActivate(pair[1])
   
   def GetCurrentWidget(self):
     if(self.combo_box_.currentIndex() >= 0):
@@ -124,7 +133,7 @@ class ComboOptionsWidget(QtGui.QWidget):
     if (self.combo_box_.count() > 0):
       pair = self.__GetCurrentPair()
       self.stacked_widget_.setCurrentWidget(pair[1])
-      self.DoSomething(pair[1])
+      self.OnComboChange(pair[1])
 
   def __GetIndex(self, ident):
     for i in range(self.combo_box_.count()):

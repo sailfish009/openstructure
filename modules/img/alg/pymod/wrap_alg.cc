@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -122,7 +122,7 @@ Real real_spatial_cross_correlation_2(const ConstImageHandle& image1,
 
 } //anon ns
 
-BOOST_PYTHON_MODULE(_img_alg)
+BOOST_PYTHON_MODULE(_ost_img_alg)
 {
   class_<AutoCorrelate, bases<ConstModOPAlgorithm> >("AutoCorrelate",init<>());
 
@@ -187,12 +187,12 @@ BOOST_PYTHON_MODULE(_img_alg)
     .def(self_ns::str(self))
   ;
   class_<StatMinMax, bases<NonModAlgorithm> >("StatMinMax", init<>() )
-    .def("GetMinimum",&Stat::GetMinimum)
-    .def("GetMinimumPosition",&Stat::GetMinimumPosition)
-    .def("SetMinimum",&Stat::SetMinimum)
-    .def("GetMaximum",&Stat::GetMaximum)
-    .def("GetMaximumPosition",&Stat::GetMaximumPosition)
-    .def("SetMaximum",&Stat::SetMaximum)
+    .def("GetMinimum",&StatMinMax::GetMinimum)
+    .def("GetMinimumPosition",&StatMinMax::GetMinimumPosition)
+    .def("SetMinimum",&StatMinMax::SetMinimum)
+    .def("GetMaximum",&StatMinMax::GetMaximum)
+    .def("GetMaximumPosition",&StatMinMax::GetMaximumPosition)
+    .def("SetMaximum",&StatMinMax::SetMaximum)
     .def(self_ns::str(self))
   ;
 

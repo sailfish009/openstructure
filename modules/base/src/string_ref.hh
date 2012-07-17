@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -59,7 +59,9 @@ public:
     assert(!this->empty());
     return *begin_; 
   }
-
+  
+  /// \brief find character in StringRef
+  /// \return iterator position when found, else iterator pointing to the end 
   const_iterator find(char p) const {
     const char* s=begin_;
     while (s!=end_) {
@@ -70,13 +72,22 @@ public:
     }
     return s;
   }
+
+  /// \brief returns a substring of the string
+  ///
+  /// \param pos the starting position of the substring
+  /// \param length is the length of the string. if std::string::npos, the 
+  ///     substring goes from \p pos to the end of the string
+  /// The function does on purpose not perform any boundary check in release 
+  /// mode. It's the duty of the caller to make sure the string has the required 
+  /// length.
   StringRef substr(size_t pos, size_t n=std::string::npos) const
   {
     if (n==std::string::npos) {
-      assert(pos>=0 && begin_+pos<=end_);      
+      assert(begin_+pos<=end_);
       return StringRef(begin_+pos, this->length()-pos);
     } else {
-      assert(pos>=0 && begin_+pos+n<=end_);      
+      assert(begin_+pos+n<=end_);
       return StringRef(begin_+pos, n);
     }
   }
@@ -136,10 +147,16 @@ public:
 
   /// \brief split string into chunks delimited by \p p
   std::vector<StringRef> split(char p) const;
+
+  /// \brief split string into chunks delimited by whitespace
+  std::vector<StringRef> split() const;
+  
+  /// \brief returns a new string with all whitespace removed from 
+  ///    this StringRef
+  std::string str_no_whitespace() const;
 private:
   const char* begin_;
-  const char* end_;  
-  
+  const char* end_;    
 
 };
 //std::stringstream& operator<<(std::stringstream& stream, const StringRef& strref);

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -19,30 +19,31 @@
 #ifndef OST_GUI_PERSPECTIVE_HH
 #define OST_GUI_PERSPECTIVE_HH
 
-
-class QMainWindow;
-class QTextEdit;
-
-#include <ost/gui/panels/panel_manager.hh>
-#include <ost/gui/panels/button_bar.hh>
-#include <ost/gui/panels/panel_bar.hh>
-#include <ost/gui/module_config.hh>
-
-#include <QObject>
-#include <QMenuBar>
-#include <QMap>
-#include <QString>
-#include <QMenu>
-#include <QStatusBar>
 /*
   Author: Marco Biasini, Stefan Scheuber
  */
- 
+
+
+#include <ost/gui/module_config.hh>
+
+#include <QObject>
+
+class QMenu;
+class QMenuBar; 
+class QStatusBar;
+class QMainWindow;
+class QTextEdit;
+class QSlider;
+
 namespace ost { namespace gui {
+
 
 class SideBar;
 class ThinSplitter;
 class MainArea;
+class PanelManager;
+class MainArea;
+class ButtonBar;
 
 /// The perspective manages the layout of the widgets inside the main window.
 /// It contains important classes which itself manages again a sub part of the whole layout.
@@ -80,23 +81,27 @@ public:
   /// \return Returns true if it was successful. Otherwise false
   bool Save();
 
+  void ChangeVerbositySlider(int value);
+
 private slots:
   void AddSideBarWidget();
+  void VerbosityChanged(int value);
 
 public slots:
   /// \brief set status message
   /// \param m The message that will be displayed in the status bar.
   void StatusMessage(const String& m);
 
+
 private:
   void SetupQuickAccessBar();
   QWidget*        central_;
   QMenuBar*        menu_bar_;
-  QMap<QString,QMenu*> menus_;
   MainArea*       main_area_;
   PanelManager*   panels_;
   QWidget*        quick_access_bar_;
   QStatusBar*     status_bar_;
+  QSlider* verbosity_slider_;
 };
 
 }}

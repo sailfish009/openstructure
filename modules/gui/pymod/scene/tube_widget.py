@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2010 by the OpenStructure authors
+# Copyright (C) 2008-2011 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -158,14 +158,18 @@ class TubeWidget(RenderModeWidget):
     self.GetOptions().SetTubeRatio(value/10.0)
 
   def UpdateRadiusGui(self,value):
-    if(abs(value*10.0 - self.radius_slider_.value())>=self.radius_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.radius_slider_.value())>=self.radius_slider_.singleStep()):
       self.radius_slider_.setValue(value*10.0)
-    self.radius_spinbox_.setValue(value)
+    if(abs(value - self.radius_spinbox_.value())>=self.radius_spinbox_.singleStep()):
+      self.radius_spinbox_.setValue(value)
   
   def UpdateRatioGui(self,value):
-    if(abs(value*10.0 - self.ratio_slider_.value())>=self.ratio_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.ratio_slider_.value())>=self.ratio_slider_.singleStep()):
       self.ratio_slider_.setValue(value*10.0)
-    self.ratio_spinbox_.setValue(value)
+    if(abs(value - self.ratio_spinbox_.value())>=self.ratio_spinbox_.singleStep()):
+      self.ratio_spinbox_.setValue(value)
 
   def GetText(self):
     return self.text_

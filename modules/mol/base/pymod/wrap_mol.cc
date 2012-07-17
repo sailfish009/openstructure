@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -18,6 +18,7 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 #include <ost/mol/transform.hh>
+#include <ost/mol/editor_base.hh>
 #include <ost/info/info.hh>
 
 using namespace boost::python;
@@ -38,12 +39,18 @@ void export_AtomView();
 void export_ResidueView();
 void export_Editors();
 void export_CoordGroup();
+void export_CoordFrame();
 void export_PropertyID();
 void export_BoundingBox();
 void export_QueryViewWrapper();
 void export_EntityPropertyMapper();
-BOOST_PYTHON_MODULE(_mol)
+BOOST_PYTHON_MODULE(_ost_mol)
 {
+  enum_<EditMode>("EditMode")
+    .value("BUFFERED_EDIT", BUFFERED_EDIT)
+    .value("UNBUFFERED_EDIT", UNBUFFERED_EDIT)
+    .export_values()
+  ;
   export_Entity();
   export_Surface();
   export_Query();
@@ -59,6 +66,7 @@ BOOST_PYTHON_MODULE(_mol)
   export_EntityView(); 
   export_Editors();
   export_CoordGroup();
+  export_CoordFrame();
   export_PropertyID();  
   export_BoundingBox();
   export_QueryViewWrapper();
@@ -66,13 +74,19 @@ BOOST_PYTHON_MODULE(_mol)
   class_<Transform>("Transform", init<>())
     .def(init<const Transform&>()) // shouldn't this be there automatically ?
     .def("GetMatrix",&Transform::GetMatrix)
+    .def("SetMatrix",&Transform::SetMatrix)
+    .add_property("matrix",&Transform::GetMatrix,&Transform::SetMatrix)
     .def("GetTransposedMatrix",&Transform::GetTransposedMatrix)
+    .add_property("tmatrix",&Transform::GetTransposedMatrix)
     .def("SetTrans",&Transform::SetTrans)
     .def("GetTrans",&Transform::GetTrans)
+    .add_property("trans",&Transform::GetTrans,&Transform::SetTrans)
     .def("SetCenter",&Transform::SetCenter)
     .def("GetCenter",&Transform::GetCenter)
+    .add_property("center",&Transform::GetCenter,&Transform::SetCenter)
     .def("SetRot",&Transform::SetRot)
     .def("GetRot",&Transform::GetRot)
+    .add_property("rot",&Transform::GetRot,&Transform::SetRot)
     .def("ApplyXAxisRotation",&Transform::ApplyXAxisRotation)
     .def("ApplyYAxisRotation",&Transform::ApplyYAxisRotation)
     .def("ApplyZAxisRotation",&Transform::ApplyZAxisRotation)

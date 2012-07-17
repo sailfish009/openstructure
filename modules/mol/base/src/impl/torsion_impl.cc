@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,6 +22,8 @@
 #include <ost/mol/impl/connector_impl.hh>
 #include <ost/mol/impl/atom_impl.hh>
 #include <ost/mol/entity_visitor.hh>
+#include <ost/mol/residue_handle.hh>
+#include <ost/mol/torsion_handle.hh>
 #include <ost/mol/impl/entity_impl.hh>
 namespace ost { namespace mol { namespace impl {
 
@@ -46,8 +48,8 @@ Real TorsionImpl::GetAngle() const {
   }
 }
 
-void TorsionImpl::SetAngle(Real angle, bool up) {
-  this->SetAngleICS(angle, true);
+void TorsionImpl::SetAngle(Real angle, bool update_others) {
+  this->SetAngleICS(angle, update_others);
 }
 
 void TorsionImpl::Apply(EntityVisitor& v) {
@@ -55,8 +57,8 @@ void TorsionImpl::Apply(EntityVisitor& v) {
   v.VisitTorsion(TorsionHandle(shared_from_this()));
 }
 
-void TorsionImpl::RotateAngle(Real angle, bool up) {
-  this->SetAngle(this->GetAngleICS()+angle, up);
+void TorsionImpl::RotateAngle(Real angle, bool update_others) {
+  this->SetAngle(this->GetAngleICS()+angle, update_others);
 }
 
 }}} // ns

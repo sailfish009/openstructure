@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -287,7 +287,8 @@ Vec3 Quat::GetAxis() const
 
 Real Quat::GetAngle() const
 {
-  Real ww = std::acos(w/Length(Vec3(x,y,z)));
+  //Real ww = std::acos(w/Length(Vec3(x,y,z)));
+  Real ww = 2.0*std::acos(w);
   return ww;
 }
 
@@ -404,32 +405,62 @@ Quat Slerp(const Quat& q0, const Quat& q1, Real t)
   return nrvo;
 }
 
+Quat Inv(const Quat& q)
+{
+  Real l=q.w*q.w+q.x*q.x+q.y*q.y+q.z*q.z;
+  Quat ret;
+  if(l>0.0) {
+    ret.w=q.w/l;
+    ret.x=-q.x/l;
+    ret.y=-q.y/l;
+    ret.z=-q.z/l;
+  }
+  return ret;
+}
+
+Quat Exp(const Quat& q)
+{
+  Real a = sqrt(q.x*q.x+q.y*q.y+q.z*q.z);
+  Real sina = sin(a);
+  Real cosa = cos(a);
+  Quat ret;
+
+  ret.w = cosa;
+  if(a>0.0) {
+    ret.x = sina * q.x/a;
+    ret.y = sina * q.y/a;
+    ret.z = sina * q.z/a;
+  } else {
+    ret.x = ret.y = ret.z = 0.0;
+  }
+  return ret;
+}
+
+Quat Log(const Quat& q)
+{
+  Real a = acos(q.w);
+  Real sina = sin(a);
+  Quat ret;
+
+  ret.w = 0.0;
+  if(sina>0.0) {
+    ret.x = a*q.x/sina;
+    ret.y = a*q.y/sina;
+    ret.z = a*q.z/sina;
+  } else {
+    ret.x= ret.y= ret.z= 0.0;
+  }
+  return ret;
+}
+
 Vec3 Quat::Rotate(const Vec3& vec) const {
   Quat tmp(0.0, vec[0], vec[1], vec[2]);
+  // We use Conjugate instead of Invert here because we assume *this to be normalized
   Quat conj=Conjugate(*this);
   Quat res=*this*tmp*conj;
   return Vec3(res.x, res.y, res.z);
 }
 
-Quat Grassmann(const Quat& lhs, const Quat& rhs)
-{
-  return Quat(lhs.GetAngle()*rhs.GetAngle()-
-              lhs.GetAxis().x*rhs.GetAxis().x-
-              lhs.GetAxis().y*rhs.GetAxis().y-
-              lhs.GetAxis().z*rhs.GetAxis().z,
-                    lhs.GetAngle()*rhs.GetAxis().x+
-                    lhs.GetAxis().x*rhs.GetAngle()+
-                    lhs.GetAxis().y*rhs.GetAxis().z-
-                    lhs.GetAxis().z*rhs.GetAxis().y,
-               lhs.GetAngle()*rhs.GetAxis().y-
-               lhs.GetAxis().x*rhs.GetAxis().z+
-               lhs.GetAxis().y*rhs.GetAngle()+
-               lhs.GetAxis().z*rhs.GetAxis().x,
-                    lhs.GetAngle()*rhs.GetAxis().z+
-                    lhs.GetAxis().x*rhs.GetAxis().y-
-                    lhs.GetAxis().y*rhs.GetAxis().x+
-                    lhs.GetAxis().z*rhs.GetAngle());
-}
 
 std::ostream& operator<<(std::ostream& str, const Quat& q)
 {

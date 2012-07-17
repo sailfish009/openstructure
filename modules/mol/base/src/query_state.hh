@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,9 +22,11 @@
 /*
  Author: Marco Biasini
  */
+
+#include <ost/geom/geom.hh>
  
 #include <ost/mol/impl/query_impl_fw.hh>
-#include <ost/mol/impl/query_ast.hh>
+#include <ost/mol/impl/query_ast_fw.hh>
 
 #include <ost/mol/handle_type_fw.hh>
 #include <boost/logic/tribool.hpp>
@@ -37,7 +39,8 @@
 
 namespace ost { namespace mol {
 
-
+class EntityHandle;
+class EntityView;
 struct LazilyBoundData;
 struct LazilyBoundRef;
 

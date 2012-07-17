@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -62,7 +62,7 @@ public:
 #include "impl/glx_offscreen_buffer.hh"
 #elif defined(__APPLE__)
 #include "impl/cgl_offscreen_buffer.hh"
-#elif defined(_WIN32)
+#elif defined(_MSC_VER)
 #include "impl/wgl_offscreen_buffer.hh"
 #else
 #error platform not found for offscreen rendering

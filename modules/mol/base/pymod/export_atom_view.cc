@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,9 +22,16 @@
 using namespace boost::python;
 
 #include <ost/mol/mol.hh>
-#include <ost/export_helper/vector.hh>
+#include <ost/geom/export_helper/vector.hh>
 using namespace ost;
 using namespace ost::mol;
+
+namespace {
+  ChainView get_chain(AtomView& a)
+  {
+    return a.GetResidue().GetChain();
+  }
+}
 
 void export_AtomView()
 {
@@ -32,6 +39,8 @@ void export_AtomView()
   class_<AtomView, bases<AtomBase> >("AtomView", init<>())
     .def("GetResidue",&AtomView::GetResidue)
     .add_property("residue",&AtomView::GetResidue)
+    .def("GetChain",get_chain)
+    .add_property("chain",get_chain)
     .def(self==self)
     .def(self!=self)
     .add_property("handle", &AtomView::GetHandle)
@@ -41,13 +50,14 @@ void export_AtomView()
     .add_property("valid", &AtomView::IsValid)    
     .def("GetBondList", &AtomView::GetBondList)
     .def("GetHashCode", &AtomView::GetHashCode)
+    .def("IsValid", &AtomView::IsValid)
     .def("__hash__", &AtomView::GetHashCode)
     .add_property("hash_code", &AtomView::GetHashCode)
     .def("GetBondPartners", &AtomView::GetBondPartners)
   ;
   class_<AtomViewList>("AtomViewList", init<>())
     .def(vector_indexing_suite<AtomViewList>())
-    .def(ost::VectorAdditions<AtomViewList>())
+    .def(geom::VectorAdditions<AtomViewList>())
   ;
 }
 

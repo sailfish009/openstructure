@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -38,6 +38,7 @@ namespace {
 
 struct PlotFunctionWrap : PlotFunction, wrapper<PlotFunction>
 {
+  IOProfileWrap(PyObject*&, const ost::io::IOProfile&)
   Real  Func(Real val) const
   {
     return this->get_override("Func")(val);

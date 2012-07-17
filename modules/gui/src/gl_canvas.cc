@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -38,7 +38,14 @@
 #include <QStatusBar>
 #include <QApplication>
 #include <QClipboard>
+#include <QTime>
+#include <QBasicTimer>
+#include <QMouseEvent>
 #include <QMenu>
+
+#if QT_VERSION >= 0x040600
+# include <QGesture>
+#endif
 #include "tools/tool_manager.hh"
 
 namespace ost { namespace gui {
@@ -54,7 +61,8 @@ GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QGLFormat& f):
   bench_flag_(false),
   last_pos_(),
   scene_menu_(NULL),
-  show_beacon_(false)
+  show_beacon_(false),
+  angular_speed_(0.0)
 {
   if(!isValid()) return;
   master_timer_.start(10,this);
@@ -64,7 +72,51 @@ GLCanvas::GLCanvas(GLWin* gl_win,  QWidget* parent, const QGLFormat& f):
   this->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, SIGNAL(customContextMenuRequested(const QPoint&)), this,
           SLOT(RequestContextMenu(const QPoint&)));
+#if QT_VERSION >= 0x040600
+  this->grabGesture(Qt::PinchGesture);
+#endif
 }
+
+bool GLCanvas::event(QEvent* event)
+{
+#if QT_VERSION >= 0x040600
+  if (event->type()==QEvent::Gesture) {
+    return this->GestureEvent(static_cast<QGestureEvent*>(event));
+  }
+#endif
+  return QGLWidget::event(event);
+}
+
+
+#if QT_VERSION >= 0x040600
+
+bool GLCanvas::GestureEvent(QGestureEvent* event)
+{
+  if (QGesture* pinch=event->gesture(Qt::PinchGesture)) {
+    QPinchGesture* pinch_gesture=static_cast<QPinchGesture*>(pinch);
+    QPinchGesture::ChangeFlags changeFlags = pinch_gesture->changeFlags();
+    if (changeFlags & QPinchGesture::RotationAngleChanged) {
+      qreal value=pinch_gesture->rotationAngle();
+      qreal lastValue=pinch_gesture->lastRotationAngle();
+      this->OnTransform(gfx::INPUT_COMMAND_ROTZ, 0, gfx::TRANSFORM_VIEW, 
+                  static_cast<Real>(value - lastValue));
+      this->update();
+      event->accept();
+      if (pinch_gesture->state()==Qt::GestureFinished) {
+        angular_speed_=value-lastValue;
+        if (!gesture_timer_.isActive())
+          gesture_timer_.start(10, this);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+#endif
+
+
+
 
 void GLCanvas::MakeActive()
 {
@@ -134,6 +186,9 @@ MouseEvent::Buttons GLCanvas::TranslateButtons(Qt::MouseButtons buttons) const
   
 void GLCanvas::mouseMoveEvent(QMouseEvent* event)
 {
+  if (!(show_beacon_ || event->buttons())) {
+    return;
+  }
   if (this->IsToolEvent(event)) {
     if (ToolManager::Instance().GetActiveTool()) {
       MouseEvent mouse_event(this->TranslateButtons(event->buttons()), 
@@ -163,7 +218,7 @@ void GLCanvas::mousePressEvent(QMouseEvent* event)
     this->HandleMousePressEvent(event);
   }
   last_pos_=QPoint(event->x(), event->y());
-  this->DoRefresh();  
+  this->DoRefresh();
 }
 
 void GLCanvas::mouseReleaseEvent(QMouseEvent* event)
@@ -181,7 +236,7 @@ void GLCanvas::mouseReleaseEvent(QMouseEvent* event)
     }
   }
   last_pos_=QPoint(event->x(), event->y());
-  this->DoRefresh();  
+  this->DoRefresh();
 }
 
 void GLCanvas::mouseDoubleClickEvent(QMouseEvent* event)
@@ -203,7 +258,9 @@ void GLCanvas::mouseDoubleClickEvent(QMouseEvent* event)
       scene.SetCenter(atom.GetPos());
     }
   }
-  this->DoRefresh();  
+  if (show_beacon_) {
+    this->DoRefresh();
+  }
 }
 
 void GLCanvas::RequestContextMenu(const QPoint& pos)
@@ -382,10 +439,10 @@ void GLCanvas::keyPressEvent(QKeyEvent* event)
       DoRefresh();
       return;
     } else if(event->key()==Qt::Key_Equal) {
-      if(gfx::Scene::Instance().GetStereo()>0) {
-        gfx::Scene::Instance().Stereo(0);
+      if(gfx::Scene::Instance().GetStereoMode()>0) {
+        gfx::Scene::Instance().SetStereoMode(0);
       } else {
-        gfx::Scene::Instance().Stereo(1);
+        gfx::Scene::Instance().SetStereoMode(1);
       }
       DoRefresh();
       return;
@@ -420,6 +477,22 @@ Real delta_time(const timeval& t1, const timeval& t2)
 void GLCanvas::timerEvent(QTimerEvent * event)
 {
 
+#if QT_VERSION>= 0x040600
+  // gesture support
+  if (gesture_timer_.timerId()==event->timerId()) {
+    if (angular_speed_!=0.0) {
+      angular_speed_*=0.95;
+      this->OnTransform(gfx::INPUT_COMMAND_ROTZ, 0, gfx::TRANSFORM_VIEW, 
+                        static_cast<Real>(angular_speed_));
+      if (std::abs(angular_speed_)<0.001) {
+        angular_speed_=0.0;
+        gesture_timer_.stop();
+      }
+      this->update();
+    }
+    return;
+  }
+#endif
 #ifndef _MSC_VER
   static struct timeval time0,time1;
   static int count=0;

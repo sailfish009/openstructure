@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -19,9 +19,13 @@
 #include <boost/python.hpp>
 
 #include <QMdiArea>
+#include <QMenuBar>
 
 #include <ost/gui/perspective.hh>
 #include <ost/gui/main_area.hh>
+#include <ost/gui/panels/panel_manager.hh>
+#include <ost/gui/panels/button_bar.hh>
+#include <ost/gui/panels/panel_bar.hh>
 
 #include "sip_handler.hh"
 
@@ -53,7 +57,8 @@ void export_Perspective()
     .def("StatusMessage", &Perspective::StatusMessage)
     .def("Restore", &Perspective::Restore)
     .def("Save", &Perspective::Save)
-    .add_property("main_area", make_function(&Perspective::GetMainArea, 
+    .def("ChangeVerbositySlider", &Perspective::ChangeVerbositySlider)
+    .add_property("main_area", make_function(&Perspective::GetMainArea,
                   return_value_policy<reference_existing_object>()))
     .add_property("panels", make_function(&Perspective::GetPanels,
                   return_value_policy<reference_existing_object>()))

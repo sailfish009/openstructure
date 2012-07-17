@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -26,6 +26,7 @@
   .def("IsValid", &C::IsValid)                                                 \
   .def("Take", &C::Take)                                                       \
   .def("Slice", &C::Slice)                                                     \
+  .def("FindSequence", &C::FindSequence)                                       \
   .def("SequencesHaveEqualLength",                                             \
        &C::SequencesHaveEqualLength)                                           \
   .def("__getitem__", &C::operator[])                                          \

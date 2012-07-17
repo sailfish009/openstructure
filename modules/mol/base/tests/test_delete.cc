@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -42,7 +42,7 @@ public:
 struct Fixture {
   Fixture() {
     e=CreateEntity();
-    XCSEditor editor=e.RequestXCSEditor();    
+    XCSEditor editor=e.EditXCS();    
     c=editor.InsertChain("A");
     r=editor.AppendResidue(c, "XXX");
     aa=editor.InsertAtom(r, "A", geom::Vec3());
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 BOOST_AUTO_TEST_CASE(atom_delete) 
 {
   Fixture f;
-  XCSEditor e=f.e.RequestXCSEditor();
+  XCSEditor e=f.e.EditXCS();
   e.DeleteAtom(f.ab);
   E ev;
   BOOST_CHECK_NO_THROW(f.e.Apply(ev));

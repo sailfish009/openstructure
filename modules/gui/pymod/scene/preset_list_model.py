@@ -5,7 +5,7 @@ import ost
 from PyQt4 import QtCore, QtGui
 from immutable_preset_info_handler import ImmutablePresetInfoHandler
 from preset_info_handler import PresetInfoHandler
-
+from PyQt4.QtGui import QDesktopServices
 class PresetListModel(QtCore.QAbstractListModel):
   
   IMMUTABLE_PRESET_PATH = os.path.join(ost.GetSharedDataPath(),"scene", 
@@ -18,8 +18,15 @@ class PresetListModel(QtCore.QAbstractListModel):
     self.data_ = list()
     
     #Info Handler
-    self.immutable_infoh_ = ImmutablePresetInfoHandler(PresetListModel.IMMUTABLE_PRESET_PATH)
-    self.infoh_ = PresetInfoHandler(PresetListModel.MUTABLE_PRESET_PATH)
+
+    self.immutable_infoh_=ImmutablePresetInfoHandler(PresetListModel.IMMUTABLE_PRESET_PATH)
+    data_loc=QDesktopServices.storageLocation(QDesktopServices.DataLocation)    
+    mutable_path=os.path.join(str(data_loc), 'config',
+                              PresetListModel.MUTABLE_PRESET_PATH)
+    qdir=QtCore.QDir(data_loc)
+    if not qdir.exists():
+      qdir.mkpath("config")
+    self.infoh_=PresetInfoHandler(mutable_path)
     self.LoadPresetsFromInfo()
     
   def AddItem(self, preset, row, editable, save):

@@ -76,7 +76,6 @@ util.cc
 module_config.hh
 value_util.hh
 vecmat.hh
-version.hh
 mask_base_fw.hh
 mask_base.hh
 composite_mask.hh
@@ -107,4 +106,4 @@ module(NAME img SOURCES "${OST_IMG_SOURCES}"
        HEADERS ${OST_IMG_RASTER_IMAGE_HEADERS} IN_DIR raster_image
                 ${OST_IMG_IMAGE_STATE_HEADERS} IN_DIR image_state
                 ${OST_IMG_HEADERS}
-       DEPENDS_ON geom base info)
+       DEPENDS_ON ost_geom ost_base ost_info)

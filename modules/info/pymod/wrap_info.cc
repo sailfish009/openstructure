@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -33,8 +33,6 @@
 using namespace boost::python;
 using namespace ost;
 using namespace ost::info;
-
-namespace {
 
 
 InfoHandle (*CreateInfoPtr1)()=CreateInfo;
@@ -94,7 +92,7 @@ void info_handle_apply2b(InfoHandle* h, InfoConstVisitor& v, bool b)
   h->Apply(v,b);
 }
 
-void info_handle_remove1(InfoHandle* h, InfoPath& path )
+void info_handle_remove1(InfoHandle* h, const String& path )
 {
   h->Remove(path);
 }
@@ -103,7 +101,7 @@ void info_handle_remove2(InfoHandle* h, InfoGroup& group )
 {
   h->Remove(group);
 }
-void info_handle_remove3(InfoHandle* h, InfoPath& path, bool use_defaults )
+void info_handle_remove3(InfoHandle* h, const String& path, bool use_defaults )
 {
   h->Remove(path,use_defaults);
 }
@@ -136,6 +134,15 @@ public:
   {
     return true;
   }  
+
+  virtual void VisitGroupFinish(InfoGroup& group)
+ {
+    call_method<void, InfoGroup>(self, "VisitGroupFinish", group);
+ }
+
+ void VisitGroupFinishDefault(const InfoGroup&) 
+ {
+ }  
 private:
   PyObject* self;
 };
@@ -145,7 +152,6 @@ InfoItem (InfoGroup::*create_item_b)(const String&, int)=&InfoGroup::CreateItem;
 InfoItem (InfoGroup::*create_item_c)(const String&, bool)=&InfoGroup::CreateItem;
 InfoItem (InfoGroup::*create_item_d)(const String&, Real)=&InfoGroup::CreateItem;
 
-}
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getgroup_overloads, GetGroup, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(retrievegroup_overloads, RetrieveGroup, 1, 2)
@@ -155,7 +161,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(hasitem_overloads, HasItem, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(retrieveitem_overloads, RetrieveItem, 1, 2)
 
 
-BOOST_PYTHON_MODULE(_info)
+BOOST_PYTHON_MODULE(_ost_info)
 {
 
   enum_<Type>("ItemType")
@@ -190,6 +196,7 @@ BOOST_PYTHON_MODULE(_info)
     .def("SetBool",&InfoItem::SetBool)
     .def("SetVector",&InfoItem::SetVector)
     .add_property("attribute",&InfoItem::GetAttribute,&InfoItem::SetAttribute)
+    .def("GetComment",&InfoItem::GetComment)
     ;
   class_<InfoGroupList>("InfoGroupList", no_init)
     .def(vector_indexing_suite<InfoGroupList>())
@@ -228,6 +235,7 @@ BOOST_PYTHON_MODULE(_info)
     .def("Apply",info_group_apply2a)
     .def("Apply",info_group_apply2b)
     .def("GetTextData",&InfoGroup::GetTextData)
+    .def("GetComment",&InfoGroup::GetComment)
     .def("GetPath",&InfoGroup::GetPath)
     ;
 
@@ -301,6 +309,7 @@ BOOST_PYTHON_MODULE(_info)
   class_<InfoVisitor, InfoVisitorProxy>("InfoVisitor",init<>())
     .def("VisitGroup", &InfoVisitorProxy::VisitGroupDefault)
     .def("VisitItem", &InfoVisitorProxy::VisitItemDefault)
+    .def("VisitGroupFinish", &InfoVisitorProxy::VisitGroupFinishDefault)
   ;
 
   class_<VerboseInfoVisitor, bases<InfoVisitor> >("VerboseInfoVisitor",init<>())

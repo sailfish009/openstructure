@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -23,7 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-
+#include <ost/mol/bond_handle.hh>
 #include <ost/conop/conop.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/log.hh>
@@ -36,25 +36,28 @@ namespace ost { namespace io {
 using boost::format;
 
 SDFReader::SDFReader(const String& filename)
-  : infile_(filename), instream_(infile_) {
-  this->ClearState();
+  : infile_(filename), instream_(infile_)
+{
+  this->ClearState(boost::filesystem::path(filename));
 }
 
 SDFReader::SDFReader(const boost::filesystem::path& loc)
-  : infile_(loc), instream_(infile_) {
-  this->ClearState();
+  : infile_(loc), instream_(infile_)
+{
+  this->ClearState(loc);
 }
 
 SDFReader::SDFReader(std::istream& instream)
-  : infile_(), instream_(instream) {
-  this->ClearState();
+  : infile_(), instream_(instream)
+{
+  this->ClearState(boost::filesystem::path(""));
 }
 
 // import data from provided stream
 void SDFReader::Import(mol::EntityHandle& ent)
 {
   String line;
-  mol::XCSEditor editor=ent.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
   while (std::getline(instream_,line)) {
     ++line_num;
 
@@ -82,7 +85,7 @@ void SDFReader::Import(mol::EntityHandle& ent)
       }
       curr_chain_.SetStringProp(data_header, data_value);
     } else if (boost::iequals(line, "$$$$")) {
-      LOG_INFO("MOLECULE " << curr_chain_.GetName() << " (" << chain_count_ << ") added.")
+      LOG_VERBOSE("MOLECULE " << curr_chain_.GetName() << " (" << chain_count_ << ") added.")
       NextMolecule();
     }
   }
@@ -91,8 +94,9 @@ void SDFReader::Import(mol::EntityHandle& ent)
                << " residues, " << atom_count_ << " atoms");
 }
 
-void SDFReader::ClearState()
+void SDFReader::ClearState(const boost::filesystem::path& loc)
 {
+  if(!infile_) throw IOException("could not open "+loc.string());
   curr_chain_=mol::ChainHandle();
   curr_residue_=mol::ResidueHandle();
   chain_count_=0;
@@ -196,17 +200,12 @@ void SDFReader::ParseAndAddAtom(const String& line, int line_num,
 
   String ele=boost::trim_copy(s_ele);
   String aname=boost::lexical_cast<String>(anum);
-
-  mol::AtomProp aprop;
-  aprop.element=ele;
-  aprop.radius=conop::Conopology::Instance().GetDefaultAtomRadius(ele);
-  aprop.mass=conop::Conopology::Instance().GetDefaultAtomMass(ele);
-  aprop.is_hetatm=hetatm;
-
+  
+  Real charge=0.0;  
   try {
-    aprop.charge=boost::lexical_cast<Real>(boost::trim_copy(s_charge));
-    if(aprop.charge != 0) {
-      aprop.charge=4-aprop.charge;
+    charge=boost::lexical_cast<Real>(boost::trim_copy(s_charge));
+    if (charge!=0) {
+      charge=4-charge;
     } //4-sdf_charge=real_charge if not 0
   } catch(boost::bad_lexical_cast&) {
     String msg="Bad atom line %d: Can't convert charge"
@@ -216,7 +215,9 @@ void SDFReader::ParseAndAddAtom(const String& line, int line_num,
 
   LOG_DEBUG("adding atom " << aname << " (" << s_ele << ") @" << apos);
 
-  editor.InsertAtom(curr_residue_, aname,apos,aprop);
+  mol::AtomHandle atom=editor.InsertAtom(curr_residue_, aname,apos, ele);  
+  atom.SetHetAtom(hetatm);
+  atom.SetCharge(charge);
 }
 
 
@@ -226,9 +227,9 @@ void SDFReader::ParseAndAddBond(const String& line, int line_num,
 
   LOG_TRACE( "line: [" << line << "]" );
 
-  if(line.length()<18 || line.length()>21) {
+  if(line.length()<9 || line.length()>21) {
     String msg="Bad bond line %d: Not correct number of characters on the"
-               " line: %i (should be between 18 and 21)";
+               " line: %i (should be between 9 and 21)";
     throw IOException(str(format(msg) % line_num % line.length()));
   }
 
@@ -257,10 +258,12 @@ void SDFReader::ParseAndAddBond(const String& line, int line_num,
 
   mol::AtomHandle first,second;
 
-  first = ent.FindAtom(curr_chain_.GetName(), mol::ResNum(residue_count_), first_name);
-  second = ent.FindAtom(curr_chain_.GetName(), mol::ResNum(residue_count_), second_name);
+  first = ent.FindAtom(curr_chain_.GetName(), mol::ResNum(residue_count_), 
+                       first_name);
+  second = ent.FindAtom(curr_chain_.GetName(), mol::ResNum(residue_count_), 
+                        second_name);
 
-  if(first.IsValid() && second.IsValid()) {
+  if (first.IsValid() && second.IsValid()) {
     bond = editor.Connect(first, second);
     bond.SetBondOrder(type);
   } else {
@@ -269,7 +272,8 @@ void SDFReader::ParseAndAddBond(const String& line, int line_num,
     throw IOException(str(format(msg) % line_num % first % second));
   }
 
-  LOG_DEBUG("adding bond " << s_first_name << " " << s_second_name << " (" << s_type << ") ");
+  LOG_DEBUG("adding bond " << s_first_name << " " << s_second_name << " (" 
+            << s_type << ") ");
 }
 
 }}

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -61,6 +61,7 @@ MessageWidget::MessageWidget(QWidget* parent) :
   view_->setDragEnabled(true);
   view_->setContextMenuPolicy(Qt::CustomContextMenu);
   view_->setFrameShape(QFrame::NoFrame);
+  view_->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
   layout->addWidget(view_);
 
   connect(view_, SIGNAL(customContextMenuRequested(const QPoint&)), this,
@@ -76,7 +77,10 @@ MessageWidget::MessageWidget(QWidget* parent) :
       + QString("delete_icon.png")));
   connect(clear_action, SIGNAL(triggered(bool)), this, SLOT(Clear()));
   this->actions_.append(clear_action);
-
+  QObject::connect(&PythonInterpreter::Instance(),
+                   SIGNAL(ErrorOutput(unsigned int, const QString &)),
+                   this,
+                   SLOT(ErrorOutput(unsigned int, const QString &)));
   new LogReader(this);
 }
 
@@ -93,6 +97,11 @@ void MessageWidget::LogMessage(const QString& message, QMessageBox::Icon icon) {
   item->setEditable(false);
   this->model_->appendRow(item);
   this->Increase(icon);
+}
+
+void MessageWidget::ErrorOutput(unsigned int id,const QString& output)
+{
+  this->LogMessage(output, QMessageBox::Critical);
 }
 
 void MessageWidget::LogMessage(QStandardItem* item) {

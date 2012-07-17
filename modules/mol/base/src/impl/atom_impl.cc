@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -19,7 +19,7 @@
 #include <cmath>
 
 #include <ost/log.hh>
-
+#include <ost/mol/atom_handle.hh>
 #include "atom_impl.hh"
 #include "residue_impl.hh"
 #include "connector_impl.hh"
@@ -40,12 +40,16 @@ AtomImpl::AtomImpl(const EntityImplPtr& e,
                    const ResidueImplPtr& r,
                    const String& n,
                    const geom::Vec3& p,
-                   const AtomProp& prop,
+                   const String& ele,
                    unsigned long index):
   res_(r),
   name_(n),
   pos_(p),
-  prop_(prop),
+  occupancy_(0.0),
+  b_factor_(1.0),
+  prop_(NULL),  
+  is_hetatm_(false),  
+  element_(ele),
   prim_connector_(),
   connector_list_(),
   fragment_(),
@@ -56,6 +60,7 @@ AtomImpl::AtomImpl(const EntityImplPtr& e,
   geom::Mat4 transf_matrix = ent.GetTransformationMatrix();
   geom::Vec3 transf_pos = geom::Vec3(transf_matrix*geom::Vec4(p));
   tf_pos_ = transf_pos;
+  prop_=AtomProp::GetDefaultProps(element_);
 }
 
 void AtomImpl::AddSecondaryConnector(const ConnectorImplP& bp)
@@ -89,11 +94,11 @@ void AtomImpl::TraceDirectionality(FragmentImplP frag, ConnectorImplP conn,
 #if !defined(NDEBUG)    
     if (conn->GetFirst()==shared_from_this()) {
       LOG_TRACE("dir:" << String(n,' ') << " atom " << res_.lock()->GetNumber()
-                << "." << GetName() << "  [" << conn->GetSecond()->GetQualifiedName()
+                << "." << Name() << "  [" << conn->GetSecond()->GetQualifiedName()
                 << " ]");      
     } else {
       LOG_TRACE("dir:" << String(n,' ') << " atom " << res_.lock()->GetNumber()
-                << "." << GetName() << "  [" << conn->GetFirst()->GetQualifiedName()
+                << "." << Name() << "  [" << conn->GetFirst()->GetQualifiedName()
                 << " ]");
     }
     
@@ -101,7 +106,7 @@ void AtomImpl::TraceDirectionality(FragmentImplP frag, ConnectorImplP conn,
 #endif              
   } else {
     LOG_TRACE("dir:" << String(n,' ') << " atom " << res_.lock()->GetNumber()
-              << "." << GetName() << "  [ ]");
+              << "." << Name() << "  [ ]");
   }
   
   // presence of a primary connector indicates ring closure
@@ -190,7 +195,7 @@ void AtomImpl::UpdateFromXCS()
     // stack before calling UpdateFromICS() on the next atom.
     {
       // Derive direction and length of connector from atom positions.
-      geom::Vec3 global_d=((*i)->GetSecond()->GetOriginalPos()-this->GetOriginalPos());
+      geom::Vec3 global_d=((*i)->GetSecond()->OriginalPos()-this->OriginalPos());
       // Set direction and length of connector. Direction is relative to
       // local coordinate system of this atom.
       // Note the order of arguments for the matrix multiplication. This is the
@@ -204,6 +209,10 @@ void AtomImpl::UpdateFromXCS()
 }
 
 AtomImpl::~AtomImpl() {
+  if (prop_ && !prop_->is_default) {
+    delete prop_;
+    prop_=NULL;
+  }
 }
 
 EntityImplPtr AtomImpl::GetEntity() const
@@ -215,7 +224,7 @@ std::ostream& operator<<(std::ostream& o, const AtomImplPtr ap)
 {
   o << ap->GetResidue()->GetChain()->GetName() << ".";
   o << ap->GetResidue()->GetKey() << ap->GetResidue()->GetNumber() << ".";
-  o << ap->GetName();
+  o << ap->Name();
   return o;
 }
 
@@ -248,7 +257,7 @@ ConnectorImplP GetConnector(const AtomImplPtr& a, const AtomImplPtr& b) {
 }
 
 String AtomImpl::GetQualifiedName() const {
-  return this->GetResidue()->GetQualifiedName()+"."+this->GetName();
+  return this->GetResidue()->GetQualifiedName()+"."+this->Name();
 }
 
 void AtomImpl::DeleteAllConnectors() {
@@ -306,6 +315,9 @@ void AtomImpl::DeleteConnector(const ConnectorImplP& conn,
 
 int AtomImpl::GetIntProperty(Prop::ID prop_id) const
 {
+  if (prop_id==Prop::AINDEX) {
+    return index_;
+  }
   throw PropertyError(prop_id);
 }
 
@@ -319,11 +331,11 @@ Real AtomImpl::GetFloatProperty(Prop::ID prop_id) const
     case Prop::AZ:
       return pos_[2];            
     case Prop::OCC:
-      return prop_.occupancy;
+      return occupancy_;
     case Prop::ABFAC:
-      return prop_.b_factor;
+      return b_factor_;
     case Prop::ACHARGE:
-      return prop_.charge;
+      return prop_->charge;
     default:
       throw PropertyError(prop_id);
   }
@@ -335,7 +347,7 @@ String AtomImpl::GetStringProperty(Prop::ID prop_id) const
     case Prop::ANAME:
       return name_;
     case Prop::ELE:
-      return prop_.element;
+      return element_;
     default:
       throw PropertyError(prop_id);
   }
@@ -344,20 +356,21 @@ String AtomImpl::GetStringProperty(Prop::ID prop_id) const
 void AtomImpl::DeleteAllTorsions() {
   EntityImplPtr e=this->GetEntity();
   TorsionImplMap::iterator i;
-  while (true) {
-    for (i=e->GetTorsionMap().begin(); i!=e->GetTorsionMap().end(); ++i) {
-      if (i->second->IsAtomInvolved(shared_from_this())) {
-        e->GetTorsionMap().erase(i);
-        continue;
-      }
-    }
-    break;
+  std::vector<TorsionImplMap::iterator> t_rm_vec;
+  for (i=e->GetTorsionMap().begin(); i!=e->GetTorsionMap().end(); ++i) {
+     if (i->second->IsAtomInvolved(shared_from_this())) {
+        t_rm_vec.push_back(i);
+     }
+  }
+  std::vector<TorsionImplMap::iterator>::iterator it_rm;
+  for (it_rm=t_rm_vec.begin(); it_rm!=t_rm_vec.end(); ++it_rm) {
+     e->GetTorsionMap().erase(*it_rm);
   }
   TorsionImplList& l=this->GetResidue()->GetTorsionList();
   TorsionImplList::iterator j;
   j=std::remove_if(l.begin(), l.end(),
                    bind(&TorsionImpl::IsAtomInvolved, _1, shared_from_this()));
-   l.erase(j, l.end());
+  l.erase(j, l.end());
 }
 
 }}} // ns

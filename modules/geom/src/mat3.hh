@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,15 +22,14 @@
 #include <cstddef> // for size_t
 #include <ostream>
 #include <cassert>
+#include <stdexcept>
 
 #include <boost/operators.hpp>
 
 #include <ost/geom/module_config.hh>
 #include <ost/geom/mat2.hh>
-
 namespace geom {
 
-class Mat2;
 class Vec3;
 
 class DLLEXPORT_OST_GEOM Mat3:
@@ -76,18 +75,26 @@ public:
   explicit Mat3(const Real arr[9])
   {
     this->set(arr[0],arr[1],arr[2],arr[3],arr[4],arr[5],arr[6],arr[7],arr[8]);
-  }  
+  }
 
+  explicit Mat3(Real x, Real y, Real z)
+  {
+    this->set(x, 0.0, 0.0, 0.0, y, 0.0, 0.0, 0.0, z);
+  }
   //! element access
   Real& operator()(std::size_t r, std::size_t c)
   {
-    assert(r<=2 && c<=2);
+    if (r>2 || c >2) {
+      throw std::out_of_range("row and column must be in the range [0-2]");
+    }
     return data_[r][c];
   }
   //! const element access
   const Real& operator()(std::size_t r, std::size_t c) const
   {
-    assert(r<=2 && c<=2);
+    if (r>2 || c >2) {
+      throw std::out_of_range("row and column must be in the range [0-2]");
+    }
     return data_[r][c];
   }
 

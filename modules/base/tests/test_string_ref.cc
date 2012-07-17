@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -84,6 +84,55 @@ BOOST_AUTO_TEST_CASE( test_string_ref)
   BOOST_CHECK(r2.first==false);
   r2=StringRef("12.34.", 6).to_float();
   BOOST_CHECK(r2.first==false);
+
+  // to_float_with_exp
+  std::pair<bool, Real> r3=StringRef("1", 1).to_float();
+  BOOST_CHECK(r3.first==true);
+  BOOST_CHECK(r3.second=1.0);
+  r3=StringRef("1.5", 3).to_float();
+  BOOST_CHECK(r3.first==true);
+  BOOST_CHECK(r3.second=1.5);
+  r3=StringRef("x", 1).to_float();
+  BOOST_CHECK(r3.first==false);
+  r3=StringRef("12.3.4", 6).to_float();
+  BOOST_CHECK(r3.first==false);
+  r3=StringRef("12.34.", 6).to_float();
+  BOOST_CHECK(r3.first==false);
+  r3=StringRef("12.34e5", 7).to_float();
+  BOOST_CHECK(r3.first==true);
+  r3=StringRef("12e4", 4).to_float();
+  BOOST_CHECK(r3.first==true);
+  BOOST_CHECK_CLOSE(Real(120000), Real(r3.second), Real(1e-4));
+  r3=StringRef("2e+4", 4).to_float();
+  BOOST_CHECK(r3.first==true);
+  BOOST_CHECK_CLOSE(Real(20000), Real(r3.second), Real(1e-4));
+  r3=StringRef("2.3E+4", 6).to_float();
+  BOOST_CHECK(r3.first==true);
+  BOOST_CHECK_CLOSE(Real(23000), Real(r3.second), Real(1e-4));
+  r3=StringRef("2.3E-4", 6).to_float();
+  BOOST_CHECK(r3.first==true);
+  BOOST_CHECK_CLOSE(Real(0.00023), Real(r3.second), Real(1e-4));
+  r3=StringRef("2.010000e+00", 12).to_float();
+  BOOST_CHECK(r3.first==true);
+  BOOST_CHECK_CLOSE(Real(2.01), Real(r3.second), Real(1e-4));
+  r3=StringRef("5e-34", 5).to_float();
+  BOOST_CHECK(r3.first==true);
+  r3=StringRef("5E-34", 5).to_float();
+  BOOST_CHECK(r3.first==true);
+  r3=StringRef("5.34e-34", 8).to_float();
+  BOOST_CHECK(r3.first==true);
+  r3=StringRef("5.34e-34e", 9).to_float();
+  BOOST_CHECK(r3.first==false);
+  r3=StringRef("5.34ee34", 8).to_float();
+  BOOST_CHECK(r3.first==false);
+  r3=StringRef("5.34e--34e", 10).to_float();
+  BOOST_CHECK(r3.first==false);
+  r3=StringRef("5.34e+3+4", 9).to_float();
+  BOOST_CHECK(r3.first==false);
+  r3=StringRef("5.34e-+34e", 10).to_float();
+  BOOST_CHECK(r3.first==false);
+  r3=StringRef("5.34e-3-4", 9).to_float();
+  BOOST_CHECK(r3.first==false);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

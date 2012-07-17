@@ -18,7 +18,7 @@ selections in a convenient way. Selections are carried out mainly by calling the
 
   arginines=model.Select('rname=ARG')
 
-A simple selection query (called a predicate) consists in a property (here, 
+A simple selection query (called a predicate) consists of a property (here,
 `rname`), a comparison operator (here, `=`) and an argument (here, `ARG`).  The 
 return value of a call to the :meth:`EntityHandle.Select` method is always an 
 :class:`EntityView`. The :class:`EntityView` always contains a full hierarchy of 
@@ -196,6 +196,10 @@ index is the same for views and handles.
 **peptide** (bool): Whether the residue is a :meth:`peptide <ResidueHandle.IsPeptideLinking>`.
 
 **rbfac** (float): average B (temperature) factor of residue
+
+**ligand** (bool) Whether the residue is a ligand. For official PDB files, the ligand property is set based on HET records.
+
+**water** (bool) Whether the residue is water.
 
 Properties of Atoms
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

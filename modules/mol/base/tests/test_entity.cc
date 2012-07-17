@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -19,33 +19,31 @@
 /*
  *  Authors: Marco Biasini, Juergen Haas
  */
+ 
+#include <ost/geom/vec_mat_predicates.hh>
+#include <ost/mol/chem_class.hh>
 #include <ost/mol/mol.hh>
 #include <cmath>
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 
 #define CHECK_TRANSFORMED_ATOM_POSITION(ATOM,TARGET) \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetPos()[0]-TARGET[0])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetPos()[1]-TARGET[1])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetPos()[2]-TARGET[2])),0.000001);
+   BOOST_CHECK(vec3_is_close(ATOM.GetPos(), TARGET))
 
 #define CHECK_ORIGINAL_ATOM_POSITION(ATOM,TARGET) \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetOriginalPos()[0]-TARGET[0])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetOriginalPos()[1]-TARGET[1])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetOriginalPos()[2]-TARGET[2])),0.000001);
+ BOOST_CHECK(vec3_is_close(ATOM.GetOriginalPos(), TARGET))
 
 #define CHECK_ALTERNATE_ATOM_POSITION(ATOM,TARGET,GROUP) \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetAltPos(GROUP)[0]-TARGET[0])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetAltPos(GROUP)[1]-TARGET[1])),0.000001); \
-   BOOST_CHECK_SMALL(static_cast<double>(std::fabs(ATOM.GetAltPos(GROUP)[2]-TARGET[2])),0.000001);
-
+   BOOST_CHECK(vec3_is_close(ATOM.GetAltPos(GROUP), TARGET))
 
 using namespace ost;
 using namespace ost::mol;
+
+
 EntityHandle make_test_entity()
 {
   EntityHandle eh = CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle chain = e.InsertChain("A");
   ResidueHandle res1 = e.AppendResidue(chain, "MET");
 
@@ -67,15 +65,42 @@ EntityHandle make_test_entity()
   e.Connect(res2.FindAtom("N"), res2.FindAtom("CA"));
   e.Connect(res2.FindAtom("CA"), res2.FindAtom("C"));
   e.Connect(res2.FindAtom("C"), res2.FindAtom("O"));
-  res1.SetChemClass(ChemClass(ChemClass::LPeptideLinking));
-  res2.SetChemClass(ChemClass(ChemClass::LPeptideLinking));  
+  res1.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));
+  res2.SetChemClass(ChemClass(ChemClass::L_PEPTIDE_LINKING));  
   e.AddTorsion("PHI", res1.FindAtom("C"), res2.FindAtom("N"), 
                res2.FindAtom("CA"), res2.FindAtom("C"));
-               
   return eh;
 }
 
 BOOST_AUTO_TEST_SUITE( mol_base )
+
+
+BOOST_AUTO_TEST_CASE(throw_invalid_ent_handle)
+{
+  EntityHandle ent;
+  BOOST_CHECK_THROW(CheckHandleValidity(ent), InvalidHandle);  
+  ent=CreateEntity();
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(ent));
+}
+
+BOOST_AUTO_TEST_CASE(throw_invalid_ent_view)
+{
+  EntityView ent_view;
+  BOOST_CHECK_THROW(CheckHandleValidity(ent_view), InvalidHandle);  
+  EntityHandle ent=CreateEntity();
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(ent.CreateFullView()));
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(ent.CreateEmptyView()));
+}
+
+BOOST_AUTO_TEST_CASE(bzdng250)
+{
+  EntityHandle eh=make_test_entity();
+  eh.EditXCS().ApplyTransform(geom::Mat4(-1, 0, 0, 0,
+                                          0, 1, 0, 0,
+                                          0, 0,-1, 0,
+                                          0, 0, 0, 1));
+  BOOST_CHECK_NO_THROW(eh.FindResidue("A", 1).FindTorsion("PHI").GetAngle());
+}
 
 BOOST_AUTO_TEST_CASE(entity_creator) 
 {
@@ -83,7 +108,7 @@ BOOST_AUTO_TEST_CASE(entity_creator)
   eh.SetName("TestEntity");
   BOOST_CHECK(eh.GetName()=="TestEntity");
 
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle chain = e.InsertChain("C");
   BOOST_CHECK(chain.GetName()=="C");
 
@@ -118,7 +143,7 @@ BOOST_AUTO_TEST_CASE(entity_creator)
 BOOST_AUTO_TEST_CASE(spatial_organizer) 
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();  
+  XCSEditor e=eh.EditXCS();  
   ChainHandle chain = e.InsertChain("A");
   ResidueHandle res = e.AppendResidue(chain, "X");
 
@@ -139,7 +164,7 @@ BOOST_AUTO_TEST_CASE(spatial_organizer)
 BOOST_AUTO_TEST_CASE(transformation) 
 {
   EntityHandle eh = CreateEntity();
-  XCSEditor e=eh.RequestXCSEditor();
+  XCSEditor e=eh.EditXCS();
   ChainHandle chain = e.InsertChain("A");
   ResidueHandle res = e.AppendResidue(chain, "X");
 
@@ -240,7 +265,7 @@ BOOST_AUTO_TEST_CASE(transformation)
 
   BOOST_CHECK(bond1.GetLength()==1.5);
   BOOST_CHECK(bond2.GetLength()==2.0);
-  ICSEditor i = eh.RequestICSEditor();
+  ICSEditor i = eh.EditICS();
   i.SetBondLength(bond1,1.0);
   i.SetBondLength(bond2,3.0);
 
@@ -323,6 +348,68 @@ BOOST_AUTO_TEST_CASE(copy)
   BOOST_CHECK(mol::BondExists(r2.FindAtom("CA"), r2.FindAtom("C")));
   BOOST_CHECK(mol::BondExists(r2.FindAtom("C"), r2.FindAtom("O")));
   BOOST_CHECK(r2.GetPhiTorsion());
+}
+
+BOOST_AUTO_TEST_CASE(copy_residue_props)
+{
+  EntityHandle ent=mol::CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  ChainHandle ch=edi.InsertChain("A");
+  ResidueHandle res=edi.AppendResidue(ch, "DUMMY", mol::ResNum(666, '6'));
+  res.SetOneLetterCode('X');
+  res.SetIsProtein(true);
+  res.SetIsLigand(true);
+  ChemClass cl(ChemClass::L_PEPTIDE_LINKING);  
+  res.SetSecStructure(SecStructure(SecStructure::ALPHA_HELIX));
+  res.SetChemClass(cl);
+  EntityHandle copy=ent.Copy();
+  ResidueHandle res2=copy.GetResidueList()[0];
+  BOOST_CHECK_EQUAL(res2.GetName(), String("DUMMY"));
+  BOOST_CHECK_EQUAL(res2.GetOneLetterCode(), 'X');
+
+  BOOST_CHECK_EQUAL(res2.GetChemClass(), cl);
+  BOOST_CHECK_EQUAL(res.GetSecStructure(), SecStructure::ALPHA_HELIX);
+  BOOST_CHECK(res2.IsProtein()==true);
+  BOOST_CHECK(res2.IsLigand()==true);  
+  BOOST_CHECK_EQUAL(res2.GetNumber(), ResNum(666, '6'));
+}
+
+BOOST_AUTO_TEST_CASE(copy_atom_props)
+{
+  EntityHandle ent=mol::CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  ChainHandle ch=edi.InsertChain("A");
+  ResidueHandle res=edi.AppendResidue(ch, "DUMMY");
+  AtomHandle   atom=edi.InsertAtom(res, "X", geom::Vec3(1,2,3), "C");
+  atom.SetMass(100.0);
+  atom.SetBFactor(200.0);
+  atom.SetOccupancy(300.0);
+  atom.SetHetAtom(true);
+  atom.SetRadius(500);
+  atom.SetCharge(800);
+  atom.SetAnisou(geom::Mat3(100,200,300));
+  EntityHandle copy=ent.Copy();
+  AtomHandle atom2=copy.GetAtomList()[0];
+  BOOST_CHECK_EQUAL(atom2.GetPos(), geom::Vec3(1,2,3));
+  BOOST_CHECK_EQUAL(atom2.GetName(), String("X"));
+  BOOST_CHECK_EQUAL(atom2.GetElement(), String("C"));
+  BOOST_CHECK_EQUAL(atom2.GetMass(), Real(100.0));
+  BOOST_CHECK_EQUAL(atom2.GetCharge(), Real(800.0));  
+  BOOST_CHECK_EQUAL(atom2.GetBFactor(), Real(200.0)); 
+  BOOST_CHECK_EQUAL(atom2.IsHetAtom(), true);
+  BOOST_CHECK_EQUAL(atom2.GetAnisou(), geom::Mat3(100,200,300));
+  BOOST_CHECK_EQUAL(atom2.GetRadius(), Real(500.0));
+}
+
+BOOST_AUTO_TEST_CASE(rename_atom)
+{
+   EntityHandle ent=CreateEntity();
+   XCSEditor edi=ent.EditXCS();
+   ChainHandle ch1=edi.InsertChain("A");
+   ResidueHandle res = edi.AppendResidue(ch1, "A");
+   AtomHandle   atom=edi.InsertAtom(res, "A", geom::Vec3(1,2,3), "C");
+   edi.RenameAtom(atom, "B");
+   BOOST_CHECK_EQUAL(atom.GetName(), "B");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

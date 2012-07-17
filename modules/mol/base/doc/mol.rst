@@ -13,3 +13,4 @@ The mol module implements data structures to work with molecular datasets. At it
   editors
   query
   surface
+  traj

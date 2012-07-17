@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -51,11 +51,47 @@ public:
   void SetAtomOriginalPos(const AtomHandle& atom,
                           const geom::Vec3& position);
                    
+  /// \brief numpy float interface
+  /// 
+  /// the passed in float array must have a length of 3*alist.size()
+  void SetAtomOriginalPos(const AtomHandleList& alist,
+			  float *positions);
+
+  /// \brief numpy double interface
+  /// 
+  /// the passed in double array must have a length of 3*alist.size()
+  void SetAtomOriginalPos(const AtomHandleList& alist,
+			  double *positions);
+
   /// \brief set transformed position of atom
   /// 
   /// This function also updates the original coordinates
+  void SetAtomTransformedPos(const AtomHandle& atom,
+			     const geom::Vec3& position);
+
+  /// \brief numpy float interface
+  /// 
+  /// the passed in float array must have a length of 3*alist.size()
+  void SetAtomTransformedPos(const AtomHandleList& alist,
+			     float *positions);
+
+  /// \brief numpy double interface
+  /// 
+  /// the passed in double array must have a length of 3*alist.size()
+  void SetAtomTransformedPos(const AtomHandleList& alist,
+			     double *positions);
+
+  /// \brief same as SetAtomTransformedPos(AtomHandle, geom::Vec3)
   void SetAtomPos(const AtomHandle& atom,
-                   const geom::Vec3& position);
+		  const geom::Vec3& position);
+
+  /// \brief same as SetTransformedPos(AtomHandleList,float*)
+  void SetAtomPos(const AtomHandleList& alist,
+		  float *positions);
+
+  /// \brief same as SetTransformedPos(AtomHandleList,double*)
+  void SetAtomPos(const AtomHandleList& alist,
+		  double *positions);
 
   /// \brief apply additional transformation to all atoms
   /// 
@@ -69,6 +105,7 @@ public:
 
   /// \brief immediately update internal coordinate system
   void UpdateICS();  
+
 protected:
    XCSEditor(const EntityHandle& ent, EditMode mode);
    

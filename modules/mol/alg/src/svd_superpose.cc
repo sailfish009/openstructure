@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -35,7 +35,8 @@
 #include <ost/mol/alg/svd_superpose.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/view_op.hh>
-
+#include <ost/mol/atom_view.hh>
+#include <ost/mol/iterator.hh>
 namespace ost { namespace mol { namespace alg {
 
 
@@ -151,58 +152,24 @@ SuperposerSVD::SuperposerSVD(int natoms, bool alloc_atoms):
   
 }
 
-geom::Vec3 SuperposerSVDImpl::EigenVec3ToVec3(const EVec3 &vec){
-#if  defined _MSC_VER
-  geom::Vec3 myvec3;
-  for (int i=0; i<3; ++i) {
-      myvec3[i]=vec[i]; 
-  }
-  return myvec3;
-#else
-  return *reinterpret_cast<const geom::Vec3*>(&vec);
-#endif
+geom::Vec3 SuperposerSVDImpl::EigenVec3ToVec3(const EVec3 &vec)
+{
+  return geom::Vec3(vec.data());
 }
 
 geom::Mat3 SuperposerSVDImpl::EigenMat3ToMat3(const EMat3 &mat)
 {
-#if  defined _MSC_VER
-  geom::Mat3 mymat3;
-  for (int i=0; i<3; ++i) {
-    for (int j=0; j<3; ++j) {    
-      mymat3(j,i)=mat(i,j); 
-    }
-  }
-  return mymat3;
-#else
-  return *reinterpret_cast<const geom::Mat3*>(&mat);
-#endif
-
+  return geom::Mat3(mat.data());
 }
 
 EVec3 SuperposerSVDImpl::Vec3ToEigenRVec(const geom::Vec3 &vec)
 {
-#if  defined _MSC_VER
-  EVec3 myvec3=EVec3::Zero();
-  for (int counter=0; counter<3; ++counter) {
-    myvec3[counter]=vec[counter];
-  }
-  return myvec3;
-#else
-  return *reinterpret_cast<const ERVec3*>(&vec);
-#endif
+  return EVec3(&vec[0]);
 }
 
 EVec3 SuperposerSVDImpl::Vec3ToEigenVec(const geom::Vec3 &vec)
 {
-#if  defined _MSC_VER
-  EVec3 myvec3=EVec3::Zero();
-  for (int counter=0; counter<3; ++counter) {
-    myvec3[counter]=vec[counter];
-  }
-  return myvec3;
-#else
-  return *reinterpret_cast<const EVec3*>(&vec);  
-#endif
+  return EVec3(&vec[0]);
 }
 
 EMatX SuperposerSVDImpl::SubtractVecFromMatrixRows(EMatX Mat,
@@ -354,7 +321,7 @@ SuperpositionResult SuperposeAtoms(const mol::AtomViewList& atoms1,
   res.ncycles=1;
   mol::AtomView jv=atoms1.front();
   if (apply_transform){
-    mol::XCSEditor ed=jv.GetResidue().GetChain().GetEntity().GetHandle().RequestXCSEditor();
+    mol::XCSEditor ed=jv.GetResidue().GetChain().GetEntity().GetHandle().EditXCS();
     ed.ApplyTransform(res.transformation);
   }
   return res;
@@ -381,7 +348,7 @@ SuperpositionResult SuperposeSVD(const mol::EntityView& ev1,
   //save rmsd info
   res.rmsd=CalculateRMSD(ev1, ev2, res.transformation);
   if (apply_transform){
-    mol::XCSEditor ed=ev1.GetHandle().RequestXCSEditor();
+    mol::XCSEditor ed=ev1.GetHandle().EditXCS();
     ed.ApplyTransform(res.transformation);
   }
   return res;
@@ -457,7 +424,7 @@ SuperpositionResult IterativeSuperposition(mol::EntityView& ev1,
   result.entity_view2=CreateViewFromAtomList(atoms_b);
 
   if (apply_transform){
-    mol::XCSEditor ed=ev1.GetHandle().RequestXCSEditor();
+    mol::XCSEditor ed=ev1.GetHandle().EditXCS();
     ed.ApplyTransform(result.transformation);
   }
   return result;

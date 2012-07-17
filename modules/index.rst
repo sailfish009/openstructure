@@ -16,18 +16,24 @@ OpenStructure documentation
   img/base/img
   img/alg/alg
   seq/base/seq
+  seq/alg/seqalg
+
+  bindings/bindings
+
   io/io
   gfx/gfx
   gui/gui
   newmodule
   external
-  
+  contributing
+  table
+
 For Starters
 --------------------------------------------------------------------------------
 
 **Installation**: `install from binary <http://www.openstructure.org/download/>`_ | :doc:`install from source <install>`
 
-**Tutorial Style**: :doc:`introduction <intro>` | :doc:`molecules intro <intro-01>` | :doc:`images intro <intro-02>` | :doc:`graphics intro <intro-03>`
+**Tutorial Style**: :doc:`introduction <intro>` | :doc:`molecules intro <intro-01>` | :doc:`images intro <intro-02>` | :doc:`graphics intro <intro-03>` 
 
 
 
@@ -35,11 +41,13 @@ For Starters
 Molecules
 --------------------------------------------------------------------------------
 
-**Overview**: :doc:`molecules intro <intro-01>` | :doc:`mol overview <mol/base/mol>` | :doc:`graphical entity<gfx/entity>` | :doc:`entity <mol/base/entity>`
+**Overview**: :doc:`molecules intro <intro-01>` | :doc:`mol overview <mol/base/mol>` | :doc:`graphical entity<gfx/entity>` | :doc:`entity <mol/base/entity>` | :doc:`queries <mol/base/query>` | :doc:`algorithms <mol/alg/molalg>`
+
+**Trajectories**: :doc:`basics <mol/base/traj>` | :ref:`analysis <traj-analysis>`
 
 **Input/Output**: :ref:`loading and saving molecules <mol-io>`
 
-**Connectivity**: :doc:`the conop module <conop/conop>`
+**Connectivity**: :doc:`the conop module <conop/conop>` | :doc:`compound library  <conop/compoundlib>`
 
 
 
@@ -55,7 +63,7 @@ Density Maps and Images
 Sequences and Alignments
 --------------------------------------------------------------------------------
 
-**Overview**: :doc:`sequence module <seq/base/seq>`
+**Overview**: :doc:`sequence module <seq/base/seq>` | :doc:`sequence algorithms <seq/alg/seqalg>`
 
 **Input/Output**: :ref:`loading and saving sequences <seq-io>`
 
@@ -80,12 +88,18 @@ Graphical User Interface
 **Widgets**: :doc:`python shell <gui/python_shell>` | :doc:`sequence viewer <gui/sequence_viewer>`
 
 
+Varia
+--------------------------------------------------------------------------------
+
+**Datasets:** :doc:`tabular data <table>`
+
+**File Formats:** :doc:`supported file formats <io/formats>`
 
 
 Extending OpenStructure
 --------------------------------------------------------------------------------
 
-**Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>`
+**Howto:** :doc:`write new modules <newmodule>` | :doc:`integrate third-party tools <external>` | :doc:`logging <base/logging>` | :doc:`instructions for developers <contributing>`
 
 
 

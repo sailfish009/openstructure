@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,11 +22,10 @@
 
 #include "line_trace_render_options.hh"
 
-namespace ost {
+namespace ost { namespace gfx {
 
-namespace gfx {
-
-LineTraceRenderOptions::LineTraceRenderOptions(){}
+LineTraceRenderOptions::LineTraceRenderOptions()
+{}
 
 RenderMode::Type LineTraceRenderOptions::GetRenderMode(){
  return RenderMode::LINE_TRACE;
@@ -36,8 +35,4 @@ bool LineTraceRenderOptions::CanApplyRenderOptions(RenderOptionsPtr render_optio
   return render_options.get()->GetRenderMode()==RenderMode::LINE_TRACE;
 }
 
-LineTraceRenderOptions::~LineTraceRenderOptions() {}
-
-}
-
-}
+}} // ns

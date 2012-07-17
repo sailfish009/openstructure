@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -64,6 +64,10 @@ FFTFnc::FFTFnc(bool f): ori_flag_(f)
   OST_FFTW_fftw_init_threads();
 }
 
+FFTFnc::~FFTFnc()
+{
+  OST_FFTW_fftw_cleanup();
+}
 
 // real spatial -> complex half-frequency
 template <>

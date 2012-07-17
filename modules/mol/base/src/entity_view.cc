@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -187,10 +187,10 @@ geom::Vec3 EntityView::GetCenterOfMass() const
 
 Real EntityView::GetMass() const 
 {
-  Real mass = 0;
-  AtomViewIter it=this->AtomsBegin();
-  for(; it!=this->AtomsEnd(); ++it) {
-    mass+=(*it).GetMass();
+  this->CheckValidity();
+  double mass = 0;
+  for (ChainViewList::iterator i=data_->chains.begin();i!=data_->chains.end(); ++i) {
+    mass+=i->GetMass();
   }
   return mass;
 }
@@ -265,6 +265,7 @@ ResidueView EntityView::FindResidue(const ResidueHandle& residue) const {
 
 AtomView EntityView::FindAtom(const AtomHandle& atom) const 
 {
+  this->CheckValidity();
   return data_->ViewForHandle(atom);
 }
 

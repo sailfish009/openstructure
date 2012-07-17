@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -70,6 +70,7 @@ public:
   void Capture(uint f);
   
   virtual void AddFrame(const std::vector<geom::Vec3>& coords) = 0;
+  virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& cell_size,const geom::Vec3& cell_angles) = 0;
   virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords) = 0;
 protected:
   void SetMutable(bool flag);

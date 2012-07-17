@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2010 by the OpenStructure authors
+# Copyright (C) 2008-2011 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -16,4 +16,4 @@
 # along with this library; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #------------------------------------------------------------------------------
-from _img_alg import *
+from _ost_img_alg import *

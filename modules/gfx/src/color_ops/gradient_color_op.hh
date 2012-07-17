@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -64,10 +64,15 @@ public:
   virtual void ToInfo(info::InfoGroup& group) const;
   static gfx::GradientColorOp FromInfo(info::InfoGroup& group);
 
+  // if true then color with clamped colors outside given range as well
+  void SetClamp(bool f) {clamp_=f;}
+  bool GetClamp() const {return clamp_;}
+
 private:
   void Init();
   String property_;
   gfx::Gradient gradient_;
+  bool clamp_;
   bool calculate_;
   mutable float minv_;
   mutable float maxv_;

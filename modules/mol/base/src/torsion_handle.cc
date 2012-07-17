@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -94,18 +94,6 @@ Real TorsionHandle::GetAngle() const
 {
   this->CheckValidity();  
   return impl_->GetAngle();
-}
-  
-void TorsionHandle::SetAngle(Real a, bool up)
-{
-  this->CheckValidity();  
-  impl_->SetAngle(a, up);
-}
-
-void TorsionHandle::RotateAngle(Real angle, bool up)
-{
-  this->CheckValidity();
-  impl_->RotateAngle(angle, up);
 }
 
 void TorsionHandle::CheckValidity() const {

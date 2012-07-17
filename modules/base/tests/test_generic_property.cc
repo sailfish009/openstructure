@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_SUITE( base )
 BOOST_AUTO_TEST_CASE( test_generic_property )
 {
   EntityHandle eh=CreateEntity();
-  XCSEditor editor=eh.RequestXCSEditor();  
+  XCSEditor editor=eh.EditXCS();  
   ChainHandle ch=editor.InsertChain("A");
   ResidueHandle res = editor.AppendResidue(ch, "X");
   AtomHandle atom = editor.InsertAtom(res, "Y",geom::Vec3());

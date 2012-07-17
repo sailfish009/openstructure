@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,6 +22,7 @@
 #include <ost/mol/module_config.hh>
 #include <ost/mol/impl/chain_impl_fw.hh>
 
+#include <ost/mol/chain_type.hh>
 #include <ost/generic_property.hh>
 
 namespace ost { namespace mol {
@@ -42,8 +43,7 @@ public: // constructors
   ChainBase();
   ChainBase(const impl::ChainImplPtr& impl);
 public:
-  friend class ConstGenericPropContainer<ChainBase>;
-  String GetName() const;
+  
   /// \name Handle validity
   //@{
   /// \brief check validity of handle
@@ -52,16 +52,43 @@ public:
   /// \note It is an error to use any method other than #IsValid, #Impl() and 
   ///       #operator bool() when the handle is invalid. An InvalidHandle
   ///       exception will be thrown.
-  operator bool() const;
+  operator bool() const { return this->IsValid(); }
   /// \brief check validity of handle
   /// \sa #operator bool()
-  bool IsValid() const;
+  bool IsValid() const { return Impl().get()!=0; }
   //@}
+  friend class ConstGenericPropContainer<ChainBase>;
+  String GetName() const;
+
+  /// \brief Get the type of a chain.
+  ///
+  /// \return chain type of ChainType
+  ChainType GetType() const;
+
+  /// \brief Get information about a chain.
+  ///
+  /// \return description
+  String GetDescription() const;
 
   const impl::ChainImplPtr& Impl() const {
     return impl_;
   }
 
+  /// \brief whether the chain is a polymer
+  ///
+  /// True if one of IsPolysaccharide(), IsPolynucleotide(), IsPolypeptide() is 
+  /// true or the chain is of type CHAINTYPE_POLYMER.
+  bool IsPolymer() const;
+  
+  /// \brief whether the chain is a polysaccharide
+  bool IsPolysaccharide() const;
+  
+  /// \brief whether the chain is a polypeptide
+  bool IsPolypeptide() const;
+  
+  /// \brief whether the chain is a polynucleotide
+  bool IsPolynucleotide() const;
+  
   impl::ChainImplPtr& Impl() {
     return impl_;
   }

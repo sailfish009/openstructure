@@ -7,7 +7,7 @@ For the course of this tutorial, we assume that you have :ref:`DNG up and runnin
 Loading Images and Density Maps
 --------------------------------------------------------------------------------
 
-Openstructure features a :mod:`~ost.img` module that is dedicated to the 
+OpenStructure features a :mod:`~ost.img` module that is dedicated to the 
 manipulation of images/density maps. The images or density maps can either be 
 one-, two- or three-dimensional. The most common formats used in X-ray and 
 electron  crystallography and atomic force microscope are supported in addition 
@@ -20,7 +20,7 @@ To load a density map, type
 
 .. code-block:: python
 
-   map=io.LoadImage('/path/to/examples/map/1ppt.map')
+   map=io.LoadImage('/path/to/examples/code_fragments/map/1ppt.map')
 
 This will load the fragment density map from the specified file 'fragment.map' 
 and store the result in map. 
@@ -31,7 +31,7 @@ Now let's inspect what we just loaded:
 
   print map.GetPixelSampling(), map.GetSize()
     
-We can see that the sampling is set to 1.0 Angstroems in all three dimensions. The loaded map is an instance of :class:`~ost.img.ImageHandle`, a class to represent images in 1, 2 and 3 dimensions.
+We can see that the sampling is set to 1.0 Angstroms in all three dimensions. The loaded map is an instance of :class:`~ost.img.ImageHandle`, a class to represent images in 1, 2 and 3 dimensions.
 
 Manipulating Images and Density Maps
 --------------------------------------------------------------------------------
@@ -47,13 +47,13 @@ first have to import the :mod:`img.alg <ost.img.alg>` module.
 
 The :mod:`img.alg <ost.img.alg>` module provides a wide range of algorithm to 
 manipulate image data. Here for example we use a LowPassFilter to restrict the 
-resolution of the density map to frequencies lower than a treshold.
+resolution of the density map to frequencies lower than a threshold.
 
 .. code-block:: python
 
    map_filtered=map.Apply(alg.LowPassFilter(3.0))
 
-The filtered map is stored in a new variable called `fragment_map_filtered`. A complete list of algorithms is available on the  :doc:`img/alg/alg` page.
+The filtered map is stored in a new variable called `map_filtered`. A complete list of algorithms is available on the  :doc:`img/alg/alg` page.
 
 
 Displaying Images and Density Maps

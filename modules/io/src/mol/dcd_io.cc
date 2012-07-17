@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -141,17 +141,27 @@ size_t calc_frame_size(bool skip_flag, bool gap_flag, size_t num_atoms)
   return frame_size;
 }
 
+  
 bool read_frame(std::istream& istream, const DCDHeader& header, 
                 size_t frame_size, bool skip_flag, bool gap_flag, 
                 bool swap_flag, std::vector<float>& xlist,
-                std::vector<geom::Vec3>& frame)
+                std::vector<geom::Vec3>& frame,
+                uint frame_num,geom::Vec3& cell_size,geom::Vec3& cell_angles)
 {
   char dummy[4];
-  if(skip_flag) istream.seekg(14*4,std::ios_base::cur);
+  //if(skip_flag) istream.seekg(14*4,std::ios_base::cur);
+  if(skip_flag){
+    istream.read(dummy,sizeof(dummy));
+    istream.read(reinterpret_cast<char*>(&cell_size[0]),sizeof(float)*3);
+    istream.read(reinterpret_cast<char*>(&cell_angles[0]),sizeof(float)*3);
+    istream.read(dummy,sizeof(dummy));
+  }
+
   // read each frame
   if(!istream) {
     /* premature EOF */
-    LOG_ERROR("LoadCHARMMTraj: premature end of file, frames read");
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num << "Nothing left to be read");
     return false;
   }
   // x coord
@@ -162,7 +172,12 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   for(uint j=0;j<frame.size();++j) {
     frame[j].x=xlist[j];
   }
-
+  if(!istream) {
+    /* premature EOF */
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num << ". No y coordinates");
+    return false;
+  }
   // y coord
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
@@ -171,7 +186,12 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   for(uint j=0;j<frame.size();++j) {
     frame[j].y=xlist[j];
   }
-
+  if(!istream) {
+    /* premature EOF */
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num << ". No z coordinates");
+    return false;
+  }
   // z coord
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(reinterpret_cast<char*>(&xlist[0]),sizeof(float)*xlist.size());
@@ -180,27 +200,41 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   for(uint j=0;j<frame.size();++j) {
     frame[j].z=xlist[j];
   }
+  if(!istream) {
+    /* premature EOF */
+    LOG_ERROR("LoadCHARMMTraj: premature end of file while trying to read frame "
+              << frame_num);
+    return false;
+  }
   return true;
 }
 
-
-mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
+bool read_frame(std::istream& istream, const DCDHeader& header, 
+                size_t frame_size, bool skip_flag, bool gap_flag, 
+                bool swap_flag, std::vector<float>& xlist,
+                std::vector<geom::Vec3>& frame,uint frame_num)
+{
+  geom::Vec3 cell_size=geom::Vec3(),cell_angles=geom::Vec3();
+  return read_frame(istream,header, frame_size,skip_flag, gap_flag, 
+                    swap_flag, xlist,frame,frame_num, cell_size, cell_angles);
+}
+  
+  
+mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom list is already sorted!
                                const String& trj_fn,
                                unsigned int stride)
 {
+  std::ifstream istream(trj_fn.c_str(), std::ios::binary);
+  if(!istream) {
+    std::ostringstream msg;
+    msg << "LoadCHARMMTraj: cannot open " << trj_fn;
+    throw(IOException(msg.str()));
+  }
   Profile profile_load("LoadCHARMMTraj");
 
-  mol::AtomHandleList alist(alist2);
-  std::sort(alist.begin(),alist.end(),less_index);
-  
-  std::ifstream istream(trj_fn.c_str(), std::ios::binary);
   DCDHeader header; 
   bool swap_flag=false, skip_flag=false, gap_flag=false;
   read_dcd_header(istream, header, swap_flag, skip_flag, gap_flag);
-  LOG_DEBUG("LoadCHARMMTraj: " << header.num << " trajectories with " 
-               << header.atom_count << " atoms (" << header.f_atom_count 
-               << " fixed) each");
-
   if(alist.size() != static_cast<size_t>(header.t_atom_count)) {
     LOG_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
                << " in coordinate file, " << header.t_atom_count 
@@ -211,26 +245,31 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist2,
   mol::CoordGroupHandle cg=CreateCoordGroup(alist);
   std::vector<geom::Vec3> clist(header.t_atom_count);
   std::vector<float> xlist(header.t_atom_count);
+  geom::Vec3 cell_size, cell_angles;
   size_t frame_size=calc_frame_size(skip_flag, gap_flag, xlist.size());
   int i=0;
   for(;i<header.num;i+=stride) {
+    std::cout << i << " " << header.num << std::endl;
     if (!read_frame(istream, header, frame_size, skip_flag, gap_flag, 
-                    swap_flag, xlist, clist)) {
+                    swap_flag, xlist, clist, i,cell_size,cell_angles)) {
       break;
     }
-    cg.AddFrame(clist);
+    if(skip_flag) {
+      cg.AddFrame(clist,cell_size,cell_angles);
+    }
+    else cg.AddFrame(clist);
 
     // skip frames (defined by stride)
     if(stride>1) istream.seekg(frame_size*(stride-1),std::ios_base::cur);
   }
-
   istream.get();
   if(!istream.eof()) {
     LOG_VERBOSE("LoadCHARMMTraj: unexpected trailing file data, bytes read: " 
                  << istream.tellg());
   }
 
-  LOG_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with " << cg.GetAtomCount() << " atoms each");
+  LOG_VERBOSE("Loaded " << cg.GetFrameCount() << " frames with "
+              << cg.GetAtomCount() << " atoms each");
 
   return cg;
 }
@@ -261,6 +300,7 @@ public:
   }
 
   virtual void AddFrame(const std::vector<geom::Vec3>& coords) {}
+  virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& box_size,const geom::Vec3& box_angles) {}
   virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords) {}
 private:
   
@@ -286,7 +326,7 @@ void DCDCoordSource::FetchFrame(uint frame)
     read_dcd_header(stream_, header_, swap_flag_, skip_flag_, gap_flag_);
     frame_start_=stream_.tellg();
     loaded_=true;
-    frame_count_=header_.num;
+    frame_count_=header_.num/stride_;
   }
   size_t frame_size=calc_frame_size(skip_flag_, gap_flag_, 
                                     header_.t_atom_count);  
@@ -294,7 +334,7 @@ void DCDCoordSource::FetchFrame(uint frame)
   stream_.seekg(pos,std::ios_base::beg);
   std::vector<float> xlist(header_.t_atom_count);
   if (!read_frame(stream_, header_, frame_size, skip_flag_, gap_flag_, 
-                  swap_flag_, xlist, *frame_.get())) {
+                  swap_flag_, xlist, *frame_.get(), frame)) {
   }  
 }
 
@@ -315,7 +355,7 @@ mol::CoordGroupHandle LoadCHARMMTraj(const mol::EntityHandle& ent,
     DCDCoordSource* source=new DCDCoordSource(alist, trj_fn, stride);
     return mol::CoordGroupHandle(DCDCoordSourcePtr(source));
   }
-    LOG_INFO("Importing CHARMM trajectory with lazy_load=false");  
+  LOG_INFO("Importing CHARMM trajectory with lazy_load=false");  
   return load_dcd(alist, trj_fn, stride);
 }
 
@@ -370,11 +410,11 @@ void write_dcd_hdr(std::ofstream& out,
 
 void SaveCHARMMTraj(const mol::CoordGroupHandle& coord_group, 
                     const String& pdb_filename, const String& dcd_filename,
-                    unsigned int stepsize)
+                    unsigned int stepsize, const IOProfile& profile)
 {  
   if(stepsize==0) stepsize=1;
   if(!pdb_filename.empty()) {
-    PDBWriter writer(pdb_filename, true);
+    PDBWriter writer(pdb_filename, profile);
     writer.Write(coord_group.GetAtomList());
   }
   std::ofstream out(dcd_filename.c_str(), std::ios::binary);

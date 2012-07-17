@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -26,6 +26,7 @@
 #include "fft_panel.hh"
 
 
+#include <QDebug>
 #include <QInputDialog>
 
 
@@ -33,8 +34,8 @@ namespace ost { namespace img { namespace gui {
     
 FFTPanel::FFTPanel(const Data& parent_data, QWidget* parent):
   DataViewerPanelBase(parent_data,parent),
-  size_(200),
-  parent_position_(0,0),
+  size_(std::min<int>(256,std::min<int>(parent_data.GetSize()[0],parent_data.GetSize()[1]))),
+  parent_position_(parent_data.GetExtent().GetCenter()),
   parent_data_(parent_data),
   fft_data_(CreateImage(Extent(Size(size_,size_),Point(0,0)),
                               COMPLEX,HALF_FREQUENCY))
@@ -75,8 +76,7 @@ void FFTPanel::ShowSizeDialog()
     int i = QInputDialog::getInteger(this, "Set FFT size","FFT size", size_, 1, std::min<int>(parent_data_.GetSize()[0],parent_data_.GetSize()[1]), 1, &ok);
   #endif
   if (ok){
-    size_=i;
-    update_fft();
+    SetFFTSize(i);
   }
 }
 

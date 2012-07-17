@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -24,11 +24,15 @@
 #include <ost/mol/alg/module_config.hh>
 namespace ost { namespace mol { namespace alg {
 
-/// \brief returns a superposed version of coord group
-CoordGroupHandle DLLEXPORT_OST_MOL_ALG SuperposeFrames(CoordGroupHandle cg, 
-                                                       EntityView sel,
+/// \brief returns a superposed version of coord group, superposed on a reference frame
+CoordGroupHandle DLLEXPORT_OST_MOL_ALG SuperposeFrames(CoordGroupHandle& cg, 
+                                                       EntityView& sel,
                                                        int begin=0, int end=-1, 
                                                        int ref=-1);
+/// \brief returns a superposed version of coord group, superposed on a reference view
+CoordGroupHandle DLLEXPORT_OST_MOL_ALG SuperposeFrames(CoordGroupHandle& cg, 
+                                                       EntityView& sel, EntityView& ref_view,
+                                                       int begin=0, int end=-1);
 }}}
 
 #endif

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -76,22 +76,24 @@ Color Gradient::GetColorAt(float t) const
   return stops_[c-1].color*(1.0-tt)+stops_[c].color*tt;
 }
 
-void Gradient::GradientToInfo(info::InfoGroup& group) const{
+void Gradient::GradientToInfo(info::InfoGroup& group) const
+{
   std::ostringstream ss;
 
   ss << stops_.size() << "\n";
 
-  for( std::vector<Stop>::size_type i = 0; i < stops_.size(); i++ ) {
+  for( StopList::size_type i = 0; i < stops_.size(); i++ ) {
     ss << stops_[i].t << "\t" << stops_[i].color.Red() << "\t" << stops_[i].color.Green() << "\t" << stops_[i].color.Blue() << "\t" << stops_[i].color.Alpha() << "\n";
   }
   group.SetTextData(ss.str());
 }
 
-StopList Gradient::GetStops() const{
+Gradient::StopList Gradient::GetStops() const{
 	return stops_;
 }
 
-gfx::Gradient Gradient::GradientFromInfo(const info::InfoGroup& group){
+Gradient Gradient::GradientFromInfo(const info::InfoGroup& group)
+{
   std::istringstream ss(group.GetTextData());
   Gradient grad;
 
@@ -106,4 +108,5 @@ gfx::Gradient Gradient::GradientFromInfo(const info::InfoGroup& group){
 
   return grad;
 }
+
 }}

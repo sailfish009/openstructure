@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -59,5 +59,13 @@ void ToolOptionEnum::Add(const String& text, int tag)
   tuples_.back().tag=tag;
 }
 
+ToolOptionButton::ToolOptionButton(const String& key,
+                                   const String& verbose_name,
+                                   QObject* receiver,
+                                   const char *slot_method):
+    ToolOption(key, verbose_name, ToolOption::BUTTON), slot_method_(slot_method), receiver_(receiver)
+{
+
+}
 
 }}

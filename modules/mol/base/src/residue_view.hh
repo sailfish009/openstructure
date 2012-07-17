@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -53,6 +53,21 @@ public:
               const ResidueHandle&  residue);
 
 public:
+  
+  /// \name Handle validity
+  //@{
+  /// \brief check validity of view
+  ///
+  /// check, whether the residue view points to a valid residue.
+  /// \note It is an error to use any method other than #IsValid, #Impl and
+  ///       #operator bool() when the handle is invalid. An InvalidHandle
+  ///       exception will be thrown.
+  operator bool() const { return this->IsValid(); }
+  /// \brief check validity of handle
+  /// \sa #operator bool()
+  bool IsValid() const { return data_.get()!=0; }
+  //@}
+  
   /// \name internal
   //@{
   /// \brief construct new view from view data and impl.
@@ -140,22 +155,20 @@ public:
   /// \brief    get parent chain view.
   ChainView GetChain() const;
   
-  
-  /// \brief Get entity's mass
+  /// \brief Get residue's mass
   double GetMass() const;
   
-  /// \brief Get entity's center of mass (mass weighted)
+  /// \brief Get residue's center of mass (mass weighted)
   geom::Vec3 GetCenterOfMass() const;
   
-  /// \brief Get entity's center of atoms (not mass weighted)
+  /// \brief Get residue's center of atoms (not mass weighted)
   ///
-  /// Returns the center of all the atoms in an entity. This is
+  /// Returns the center of all the atoms in this residue. This is
   /// similar to GetCenterOfMass(), but the atoms are not mass weighted
   geom::Vec3 GetCenterOfAtoms() const;
   
-  /// \brief Get entity's axis-aligned bounding box
+  /// \brief Get residue's axis-aligned bounding box
   geom::AlignedCuboid GetBounds() const;
-  
 
   /// \brief return view based on a query object
   /// \sa Query

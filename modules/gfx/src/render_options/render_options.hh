@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -40,15 +40,15 @@ typedef boost::shared_ptr<RenderOptions> RenderOptionsPtr;
 class DLLEXPORT_OST_GFX RenderOptions {
 public:
   RenderOptions();
+  virtual ~RenderOptions(){}
+
   virtual RenderMode::Type GetRenderMode()=0;
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options)=0;
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options)=0;
 
-  virtual bool AddObserver( EntityP entity);
-  virtual bool RemoveObserver( EntityP entity);
-  virtual void NotifyStateChange();
-
-  virtual ~RenderOptions(){}
+  bool AddObserver( EntityP entity);
+  bool RemoveObserver( EntityP entity);
+  void NotifyStateChange();
 
 private:
   typedef std::vector< EntityP > EntityPObservers;

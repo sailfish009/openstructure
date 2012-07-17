@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -52,13 +52,40 @@ bool SequenceImpl::IsSequenceStringSane(const String& seq_string)
 }
 
 SequenceImplPtr SequenceImpl::FromString(const String& seq_name,
-                                 const String& seq_string)
+                                         const String& seq_string, 
+                                         const String& role)
 {
 
   if (SequenceImpl::IsSequenceStringSane(seq_string)) {
-    return SequenceImplPtr(new SequenceImpl(seq_name, seq_string));
+    return SequenceImplPtr(new SequenceImpl(seq_name, seq_string, role));
   }
   throw InvalidSequence();
+}
+
+void SequenceImpl::Append(char olc)
+{
+  seq_string_.push_back(olc);
+  if (olc=='-') {
+    if (seq_string_.size()>1 && 
+        seq_string_[seq_string_.size()-2]=='-') {
+      shifts_.back().shift++;
+    } else {
+      Shift new_shift;
+      new_shift.start=seq_string_.size()-1;
+      new_shift.shift=1;
+      shifts_.push_back(new_shift);
+    }
+  }
+
+}
+
+int SequenceImpl::GetIndex(const String& substr) const
+{
+  size_t pos=seq_string_.find(substr);
+  if (pos==String::npos) {
+    return -1;
+  }
+  return pos;
 }
 
 void SequenceImpl::SetString(const String& seq)
@@ -73,15 +100,15 @@ void SequenceImpl::SetString(const String& seq)
 }
 
 SequenceImpl::SequenceImpl(const String& seq_name,
-                   const String& seq_string)
-  : seq_name_(seq_name), seq_string_(seq_string), offset_(0)
+                   const String& seq_string, const String& role)
+  : seq_name_(seq_name), seq_string_(seq_string), seq_role_(role), offset_(0)
 {
   this->ShiftsFromSequence();
 }
 
 SequenceImplPtr SequenceImpl::Copy() const
 {
-  SequenceImplPtr new_seq(new SequenceImpl(seq_name_, seq_string_));
+  SequenceImplPtr new_seq(new SequenceImpl(seq_name_, seq_string_, seq_role_));
   new_seq->offset_=offset_;
   new_seq->shifts_=shifts_;
   new_seq->attached_view_=attached_view_;

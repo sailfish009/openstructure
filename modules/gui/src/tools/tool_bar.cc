@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,11 +20,15 @@
 #include <ost/gui/gosty_app.hh>
 #include <ost/mol/query_view_wrapper.hh>
 #include <ost/gui/tools/tool_manager.hh>
+
+#include <ost/gui/scene_win/scene_win.hh>
+
 #include "tool_bar.hh"
 
 #include <QAction>
 #include <QDebug>
 #include <QActionGroup>
+
 namespace ost { namespace gui {
 
 ToolBar::ToolBar(QWidget* parent):

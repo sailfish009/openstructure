@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -38,7 +38,7 @@ void update_shifts(const AlignmentHandle& aln,
                    ShiftMap& shifts)
 {
   ConstSequenceHandle s1=aln.GetSequence(0);  
-  if (s1.GetGaplessString()!=ref_seq.GetString()) {
+  if (!Match(s1.GetGaplessString(), ref_seq.GetString())) {
     throw IntegrityError("The gapless version of '"+s1.GetString()+
                          "' is not identical to the reference sequence.");
   }
@@ -55,7 +55,8 @@ void update_shifts(const AlignmentHandle& aln,
         res_index=-1;
       }
       else if (i > 0) {
-        res_index=s1.GetResidueIndex(i-1);
+        res_index=s1.GetResidueIndex(i-1)-s1.GetOffset();
+//        res_index=s1.GetResidueIndex(i-1);
       }
       ShiftMap::iterator p=shifts.find(res_index);
       if (p!=shifts.end()) {
@@ -86,10 +87,11 @@ SequenceHandle shift_reference(const ConstSequenceHandle& ref_seq,
   }
   new_sequence << ref_str.substr(last);
   SequenceHandle s=CreateSequence(ref_seq.GetName(), 
-                                  new_sequence.str());
+                                  new_sequence.str(),
+                                  ref_seq.GetRole());
   if (ref_seq.HasAttachedView())
     s.AttachView(ref_seq.GetAttachedView());
-  s.SetOffset(s.GetOffset());
+  s.SetOffset(ref_seq.GetOffset());
   return s;
 }
 
@@ -111,7 +113,8 @@ SequenceHandle realign_sequence(const AlignmentHandle& aln,
       p=shifts.find(-1);
     }
     else if (i>0 && s1.GetOneLetterCode(i-1)!='-') {
-      p=shifts.find(s1.GetResidueIndex(i-1));
+      p=shifts.find(s1.GetResidueIndex(i-1)-s1.GetOffset());
+//      p=shifts.find(s1.GetResidueIndex(i-1));
     }
     if (p!=shifts.end()) {
       int d=p->second-shift;
@@ -120,7 +123,8 @@ SequenceHandle realign_sequence(const AlignmentHandle& aln,
     }
     new_sequence << s2.GetOneLetterCode(i);
   }
-  SequenceHandle s=CreateSequence(s2.GetName(), new_sequence.str());
+  SequenceHandle s=CreateSequence(s2.GetName(), new_sequence.str(), 
+                                  s2.GetRole());
   if (s2.HasAttachedView())
     s.AttachView(s2.GetAttachedView());
   s.SetOffset(s2.GetOffset());
@@ -132,18 +136,39 @@ SequenceHandle realign_sequence(const AlignmentHandle& aln,
 AlignmentHandle MergePairwiseAlignments(const AlignmentList& pairwise_alns,
                                         const ConstSequenceHandle& ref_seq)
 {
-
+   
+  int ref_offset=ref_seq.GetOffset();
+  int alignment_counter=0;
+  for (AlignmentList::const_iterator i=pairwise_alns.begin(), e=pairwise_alns.end(); i!=e; ++i) {
+    AlignmentHandle ali_handle=*i;
+    ConstSequenceHandle seq_handle=ali_handle.GetSequence(0);
+    if (seq_handle.GetOffset()!=ref_offset) {
+      String error_string;
+      std::ostringstream error_ss(error_string);
+      error_ss << "The offset of the first sequence in alignment " << alignment_counter << 
+        "is not identical to the offset of the reference sequence." << std::endl;
+      throw IntegrityError(error_string);
+    }
+    alignment_counter+=1;
+  }
+  
+  
   ShiftMap shifts;
   for (AlignmentList::const_iterator i=pairwise_alns.begin(),
        e=pairwise_alns.end(); i!=e; ++i) {
     update_shifts(*i, ref_seq, shifts);
   }
 
+ 
   AlignmentHandle merged=CreateAlignment();
   merged.AddSequence(shift_reference(ref_seq, shifts));
+  size_t ref_len=merged.GetSequence(0).GetLength();
   for (AlignmentList::const_iterator i=pairwise_alns.begin(),
        e=pairwise_alns.end(); i!=e; ++i) {
     SequenceHandle new_seq=realign_sequence(*i, shifts);
+    for (size_t j=new_seq.GetLength(); j<ref_len; ++j) {
+      new_seq.Append('-');
+    }
     merged.AddSequence(new_seq);
   }  
   return merged;

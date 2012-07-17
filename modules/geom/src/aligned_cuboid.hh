@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -34,19 +34,31 @@ namespace geom {
 /// For an arbitrarily oriented cuboid see \ref Cuboid
 class DLLEXPORT_OST_GEOM AlignedCuboid {
 public:
-  AlignedCuboid(const Vec3& mmin, const Vec3& mmax);
+  AlignedCuboid() :min_(), max_() {}
+  AlignedCuboid(const Vec3& mmin, const Vec3& mmax) :min_(mmin), max_(mmax) {}
   
-  Vec3 GetSize() const;
+  Vec3 GetSize() const {return max_-min_;}
   
-  const Vec3& GetMin() const;
+  Real GetVolume() const {
+    Vec3 s=max_-min_;
+    return s[0]*s[1]*s[2];
+  }
+
+  const Vec3& GetMin() const {return min_;}
   
-  const Vec3& GetMax() const;
+  const Vec3& GetMax() const {return max_;}
   
-  Vec3 GetCenter() const;
+  Vec3 GetCenter() const {return 0.5*(max_+min_);}
 private:
   Vec3 min_;
   Vec3 max_;
 };
+
+inline std::ostream& operator<<(std::ostream& os, const AlignedCuboid& c)
+{
+  os << "(" << c.GetMin() << "," << c.GetMax() << ")";
+  return os;
+}
 
 AlignedCuboid DLLEXPORT_OST_GEOM Union(const AlignedCuboid& lhs, const AlignedCuboid& rhs);
 

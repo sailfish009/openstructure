@@ -19,14 +19,8 @@
 #ifndef OST_GUI_SCENE_WIN_RENDER_MODES_NODE_HH
 #define OST_GUI_SCENE_WIN_RENDER_MODES_NODE_HH
 
-
-#include <ost/gfx/entity.hh>
 #include <ost/gfx/entity_fw.hh>
-#include <ost/gfx/gfx_node.hh>
 #include <ost/gfx/gfx_node_fw.hh>
-#include <ost/gfx/scene_observer.hh>
-#include <ost/gfx/gfx_object.hh>
-#include <ost/gfx/gfx_object_fw.hh>
 
 #include <ost/gui/module_config.hh>
 #include <ost/gui/scene_win/label_node.hh>

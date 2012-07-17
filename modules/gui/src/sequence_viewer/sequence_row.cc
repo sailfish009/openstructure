@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -34,7 +34,7 @@
 #include <QtGui>
 namespace ost { namespace gui {
 
-SequenceRow::SequenceRow(const QString& name, seq::SequenceHandle& sequence, SequenceViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11)), sequence_(sequence)
+SequenceRow::SequenceRow(const QString& name, seq::ConstSequenceHandle sequence, SequenceViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11)), sequence_(sequence)
 {
   name_font_.setBold(true);
   name_font_.setItalic(true);
@@ -61,12 +61,12 @@ const QString& SequenceRow::GetName() const
   return this->name_;
 }
 
-void SequenceRow::SetSequence(seq::SequenceHandle& sequence)
+void SequenceRow::SetSequence(seq::ConstSequenceHandle sequence)
 {
   this->sequence_ = sequence;
 }
 
-const seq::SequenceHandle& SequenceRow::GetSequence() const
+const seq::ConstSequenceHandle& SequenceRow::GetSequence() const
 {
   return this->sequence_;
 }

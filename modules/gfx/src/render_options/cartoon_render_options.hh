@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -27,66 +27,85 @@
 
 #include <ost/gfx/module_config.hh>
 
-#include <ost/gfx/render_options/render_options.hh>
+#include "render_options.hh"
 
 namespace ost { namespace gfx {
 
-class DLLEXPORT_OST_GFX CartoonRenderOptions: public ost::gfx::RenderOptions {
+class DLLEXPORT_OST_GFX CartoonRenderOptions: public RenderOptions {
 public:
   CartoonRenderOptions(bool force_tube=false);
 
+  // RenderOptions interface
   virtual RenderMode::Type GetRenderMode();
-
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options);
 
-  virtual void SetSplineDetail(uint spline_detail);
-  virtual uint GetSplineDetail() const;
+  /// sets vertex array poly mode
+  void SetPolyMode(uint poly_mode);
+  uint GetPolyMode() const;
 
-  virtual void SetPolyMode(uint poly_mode);
-  virtual uint GetPolyMode() const;
+  /// number of smooth points between spline control points
+  void SetSplineDetail(uint spline_detail);
+  uint GetSplineDetail() const;
 
-  virtual void SetArcDetail(uint arc_detail);
-  virtual uint GetArcDetail() const;
+  /// number of circular profile subdivisions per 90deg
+  void SetArcDetail(uint arc_detail);
+  uint GetArcDetail() const;
 
-  virtual void SetNormalSmoothFactor(float smooth_factor);
-  virtual float GetNormalSmoothFactor() const;
+  /// experimental
+  void SetNormalSmoothFactor(float smooth_factor);
+  float GetNormalSmoothFactor() const;
 
-  virtual void SetTubeRadius(float tube_radius);
-  virtual float GetTubeRadius() const;
-  virtual void SetTubeRatio(float tube_ratio);
-  virtual float GetTubeRatio() const;
-  virtual unsigned int GetTubeProfileType() const;
-  virtual void SetTubeProfileType(unsigned int);
+  // tube/coil region
+  void SetTubeRadius(float tube_radius);
+  float GetTubeRadius() const;
+  void SetTubeRatio(float tube_ratio);
+  float GetTubeRatio() const;
+  unsigned int GetTubeProfileType() const;
+  void SetTubeProfileType(unsigned int);
 
-  virtual void SetHelixWidth(float helix_width);
-  virtual float GetHelixWidth() const;
-  virtual void SetHelixThickness(float helix_thickness);
-  virtual float GetHelixThickness() const;
-  virtual void SetHelixEcc(float helix_ecc);
-  virtual float GetHelixEcc() const;
-  virtual unsigned int GetHelixProfileType() const;
-  virtual void SetHelixProfileType(unsigned int);
-  virtual unsigned int GetHelixMode() const;
-  virtual void SetHelixMode(unsigned int);
+  // helix
+  void SetHelixWidth(float helix_width);
+  float GetHelixWidth() const;
+  void SetHelixThickness(float helix_thickness);
+  float GetHelixThickness() const;
+  /// see helix profile
+  void SetHelixEcc(float helix_ecc);
+  float GetHelixEcc() const;
+  /// various ways to calculate circular profile with ecc
+  void SetHelixProfileType(unsigned int);
+  unsigned int GetHelixProfileType() const;
+  /// 0=normal 1=straight cylinders
+  unsigned int GetHelixMode() const;
+  void SetHelixMode(unsigned int);
+  
+  // strand
+  void SetStrandWidth(float strand_width);
+  float GetStrandWidth() const;
+  void SetStrandThickness(float strand_thickness);
+  float GetStrandThickness() const;
+  /// see strand profile
+  void SetStrandEcc(float strand_ecc);
+  float GetStrandEcc() const;
+  /// various ways to calculate circular profile with ecc
+  void SetStrandProfileType(unsigned int);
+  unsigned int GetStrandProfileType() const;
+  /// 0=normal, 1=straightened
+  void SetStrandMode(unsigned int);
+  unsigned int GetStrandMode() const;
 
-  virtual void SetStrandWidth(float strand_width);
-  virtual float GetStrandWidth() const;
-  virtual void SetStrandThickness(float strand_thickness);
-  virtual float GetStrandThickness() const;
-  virtual void SetStrandEcc(float strand_ecc);
-  virtual float GetStrandEcc() const;
-  virtual unsigned int GetStrandProfileType() const;
-  virtual void SetStrandProfileType(unsigned int);
-  virtual unsigned int GetStrandMode() const;
-  virtual void SetStrandMode(unsigned int);
+  // misc options
 
-  virtual void SetColorBlendMode(unsigned int);
-  virtual unsigned int GetColorBlendMode() const;
+  /// 0=smooth transition, 1=sharp transition
+  void SetColorBlendMode(unsigned int);
+  unsigned int GetColorBlendMode() const;
 
+  /// experimental
+  void SetTwistHack(bool);
+  bool GetTwistHack() const {return twist_hack_;}
+
+  // used internally to calculate autoslab boundaries
   float GetMaxRad() const;
-
-  virtual ~CartoonRenderOptions();
 
 private:
   bool force_tube_;
@@ -111,6 +130,8 @@ private:
   unsigned int strand_mode_;
 
   unsigned int color_blend_mode_;
+
+  bool twist_hack_;
 };
 
 typedef boost::shared_ptr<CartoonRenderOptions> CartoonRenderOptionsPtr;

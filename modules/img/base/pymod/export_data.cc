@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -70,7 +70,7 @@ void export_Data()
     .def("GetSize",&ConstData::GetSize)
     .def("IsSpatial",&ConstData::IsSpatial)
     .add_property("is_spatial", &ConstData::IsSpatial)
-    .add_property("is_frequency", &ConstData::IsSpatial)
+    .add_property("is_frequency", &ConstData::IsFrequency)
     .add_property("size", &ConstData::GetSize)
     .add_property("domain", &ConstData::GetDomain)
     .add_property("extent", &ConstData::GetExtent)

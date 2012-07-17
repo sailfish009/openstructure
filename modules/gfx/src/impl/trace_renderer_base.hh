@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -43,7 +43,7 @@ public:
   
   virtual geom::AlignedCuboid GetBoundingBox() const;  
   
-  virtual void PrepareRendering();
+  virtual void PrepareRendering(bool twist_hack);
   virtual bool HasDataToRender() const;
   virtual void UpdateViews();  
   virtual void Apply(const gfx::ByElementColorOp& op);
@@ -63,6 +63,10 @@ public:
 protected:
   
   void set_node_colors(const Color& c, const mol::Query& q, ColorMask mask);
+
+  void rebuild_sel(const SplineEntryListList& spline_list_list, 
+                   SplineEntryListList& sel_spline_list_list,
+                   const Color& sel_color);
 
   BackboneTrace* trace_;
   BackboneTrace trace_subset_;

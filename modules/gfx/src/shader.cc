@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -237,6 +237,8 @@ void Shader::Setup()
   shader_program_list.push_back(shader_code_map_["basic_fs.glsl"]);
   if(Shader::Link(shader_program_list,"hemilight",shader_program_id)) {
     shader_program_map_["hemilight"]=shader_program_id;
+    // alias
+    shader_program_map_["hf"]=shader_program_id;
   }
   // selfx shader
   shader_program_list.clear();

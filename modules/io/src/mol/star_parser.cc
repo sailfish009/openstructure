@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,17 +20,165 @@
 /*
   Author: Marco Biasini
  */
+#include <boost/iostreams/filter/gzip.hpp>
+
 #include <cassert>
 #include <sstream>
+#include <ost/log.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/io/mol/star_parser.hh>
 
 namespace ost { namespace io {
 
-StarParser::StarParser(std::istream& stream):
-  stream_(stream), line_num_(0), has_current_line_(false), current_line_()
+StarParser::StarParser(std::istream& stream, bool items_as_row):
+  filename_("<stream>"), line_num_(0),
+  has_current_line_(false), current_line_(),
+  items_row_header_(), file_open_(true), items_row_columns_(),
+  items_row_values_()
 {
+  items_as_row_ = items_as_row;
   
+  if (!stream) {
+    file_open_ = false;
+  }
+
+  stream_.push(stream);
+}
+
+StarParser::StarParser(const String& filename, bool items_as_row):
+  fstream_(filename.c_str()), filename_(filename),
+  line_num_(0), has_current_line_(false), current_line_(),
+  items_row_header_(), file_open_(true), items_row_columns_(),
+  items_row_values_()
+{
+  items_as_row_=items_as_row;
+  if (filename.length() >= 3 &&
+      filename.substr(filename.length() - 3) == ".gz") {
+    stream_.push(boost::iostreams::gzip_decompressor());
+  }
+
+  stream_.push(fstream_);
+
+  if (!fstream_) {
+    file_open_ = false;
+  }
+}
+
+String StarParser::FormatDiagnostic(StarDiagType type, const String& message,
+                                    int line) const
+{
+  std::stringstream ss;
+  ss << filename_ << ":";
+  if (line!=-1) {
+    ss << line << ": ";
+  } else {
+    ss << " ";
+  }
+  switch (type) {
+    case STAR_DIAG_ERROR:
+      ss << "error: ";
+      break;
+    case STAR_DIAG_WARNING:
+      ss << "warning: ";
+      break;
+  }
+  ss << message;
+  return ss.str();
+}
+
+Real StarParser::TryGetReal(const StringRef& data, const String& name) const
+{
+  std::pair<bool, Real> value = data.to_float();
+  if (!value.first) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                         "Expecting real number for " +
+                                               name + ", found '" + data.str() +
+                                             "' instead.", line_num_));
+  }
+  return value.second;
+}
+
+float StarParser::TryGetFloat(const StringRef& data, const String& name) const
+{
+  std::pair<bool, float> value = data.to_float();
+  if (!value.first) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                         "Expecting floating point value for " +
+                                               name + ", found '" + data.str() +
+                                             "' instead.", line_num_));
+  }
+  return value.second;
+}
+
+std::pair<bool, float> StarParser::TryGetFloat(const StringRef& data,
+                                               const String& name,
+                                               bool may_fail) const
+{
+  std::pair<bool, float> value = data.to_float();
+  if (!value.first) {
+    if (!may_fail) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                         "Expecting floating point value for " +
+                                               name + ", found '" + data.str() +
+                                             "' instead.", line_num_));
+    }
+    else {
+      LOG_WARNING(this->FormatDiagnostic(STAR_DIAG_WARNING,
+                                         "Expecting floating point value for " +
+                                         name + ", found '" + data.str() +
+                                         "' instead.", line_num_));
+    }
+  }
+  return value;
+}
+
+int StarParser::TryGetInt(const StringRef& data, const String& name) const
+{
+  std::pair<bool, int> value = data.to_int();
+  if (!value.first) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                         "Expecting integer value for " +
+                                               name + ", found '" + data.str() +
+                                             "' instead.", line_num_));
+  }
+  return value.second;
+}
+
+std::pair<bool, int> StarParser::TryGetInt(const StringRef& data,
+                                           const String& name,
+                                           bool may_fail) const
+{
+  std::pair<bool, int> value = data.to_int();
+  if (!value.first) {
+    if (!may_fail) {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                               "Expecting integer value for " +
+                                               name + ", found '" + data.str() +
+                                               "' instead.", line_num_));
+    } else {
+      LOG_WARNING(this->FormatDiagnostic(STAR_DIAG_WARNING,
+                                         "Expecting integer value for " +
+                                         name + ", found '" + data.str() +
+                                         "' instead.", line_num_));
+    }
+  }
+  return value;
+}
+
+bool StarParser::TryGetBool(const StringRef& data, const String& name) const
+{
+  if (data.length() == 1) {
+    if (data[0] == 'Y' || data[0] == 'y') {
+      return true;
+    } else if (data[0] == 'N' || data[0] == 'n') {
+      return false;
+    }
+  }
+
+  throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                           "Expecting Boolean (Y/N) value for "+
+                                           name + ", found '" + data.str() +
+                                           "' instead.", line_num_));
 }
 
 bool StarParser::SplitLine(const StringRef& line, 
@@ -62,11 +210,7 @@ bool StarParser::SplitLine(const StringRef& line,
       while (s!=line.end() && !isspace(*s)) {
         ++s;
       }
-      if (s-start) {       
-        parts.push_back(StringRef(start, s-start));
-      } else {
-        return false;
-      }
+      parts.push_back(StringRef(start, s-start));
     }
   }
   return true;
@@ -76,18 +220,28 @@ bool StarParser::ParseMultilineValue(String& value, bool skip)
 {
   std::stringstream valuebuf;
   StringRef line;
-  bool r=this->GetLine(line);
-  assert(r);r=r;
+  if (!this->GetLine(line)) {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                               "Unexpected end of input",
+                                               line_num_));
+  }
   valuebuf << line.substr(1);
+  bool found_semicolon = false;
   while (this->NextLine(line)) {
     StringRef tline=line.rtrim();
     if (!tline.empty() && tline[0]==';') {
+      found_semicolon = true;
       break;
     }
     if (!skip) {
       valuebuf << tline << "\n";      
     }
-  }  
+  }
+  if (!found_semicolon) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                             "Unterminated multiline value",
+                                             line_num_));
+  }
   if (!skip) {
     value=valuebuf.str();
   }
@@ -114,7 +268,14 @@ void StarParser::ParseLoop()
           prefix_len=tline.find('.')-tline.begin();
           header.SetCategory(tline.substr(1, prefix_len-1));
         } else {
-          assert(tline[prefix_len]=='.');
+          if (tline[prefix_len] != '.' ||
+              StringRef(header.GetCategory().data(),
+                        header.GetCategory().size())!=tline.substr(1,
+                                                                prefix_len-1)) {
+            throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                                   "Change of category in loop",
+                                                     line_num_));
+          }
         }
         header.Add(tline.substr(prefix_len+1));
         this->ConsumeLine();
@@ -148,8 +309,7 @@ void StarParser::ParseLoop()
       case ';':
         if (process_rows) {
           tmp_values.push_back(String());
-          bool r=this->ParseMultilineValue(tmp_values.back());
-          assert(r);r=r;
+          this->ParseMultilineValue(tmp_values.back());
           columns.push_back(StringRef(tmp_values.back().data(), 
                                       tmp_values.back().length()).trim());
           if (columns.size()==header.GetSize()) {
@@ -159,11 +319,12 @@ void StarParser::ParseLoop()
           }          
         } else {
           String s;
-          bool r=this->ParseMultilineValue(s, true);
-          assert(r);r=r;
+          this->ParseMultilineValue(s, true);
         }
         break;
-        case 'd':
+      case '_':
+        return;
+      case 'd':
           if (tline.length()>=5 && StringRef("data_", 5)==tline.substr(0, 5)) {
             return;
           }
@@ -174,8 +335,7 @@ void StarParser::ParseLoop()
       default:
         if (process_rows) {
           int before=columns.size();
-          bool r=StarParser::SplitLine(tline, columns, false);
-          assert(r);r=r;
+          StarParser::SplitLine(tline, columns, false);
           if (columns.size()==header.GetSize()) {
             this->OnDataRow(header, columns);            
             tmp_values.clear();
@@ -183,7 +343,7 @@ void StarParser::ParseLoop()
           } else {
             tmp_values.push_back(tline.str());
             const char* d=tmp_values.back().c_str();
-            for (size_t i=std::max(before-1, 0); i<columns.size(); ++i) {
+            for (size_t i=before; i<columns.size(); ++i) {
               columns[i]=StringRef(d+(columns[i].begin()-tline.begin()), 
                                    columns[i].size());
             }
@@ -198,18 +358,58 @@ void StarParser::ParseLoop()
   }
 }
 
+void StarParser::ParseLastDataItemRow()
+{
+  if (items_row_header_.GetCategory().size() > 0) {
+    if (this->OnBeginLoop(items_row_header_)) {
+      this->OnDataRow(items_row_header_, items_row_columns_);
+      this->OnEndLoop();
+    }
+    items_row_values_.clear();
+    items_row_columns_.clear();
+    items_row_header_.Clear();
+  }
+}
+
+void StarParser::ParseDataItemOrRow(StarDataItem& item)
+{
+  if (items_as_row_) {
+    // header
+    if (StringRef(items_row_header_.GetCategory().c_str(),
+                 items_row_header_.GetCategory().size())!=item.GetCategory()) {
+      this->ParseLastDataItemRow();
+      // set category for new section
+      items_row_header_.SetCategory(item.GetCategory());
+    }
+    
+    // row
+    items_row_header_.Add(item.GetName());
+    items_row_values_.push_back(item.GetValue().str());
+    items_row_columns_.push_back(StringRef(items_row_values_.back().data(), 
+                                     items_row_values_.back().length()).trim());
+  } else {
+    this->OnDataItem(item);
+  }
+}
+
+void StarParser::ParseEndDataItemRow()
+{
+  if (items_as_row_) {
+    this->ParseLastDataItemRow();
+  }
+}
+
 void StarParser::ParseDataItem()
 {
   StringRef line;
-  bool r=this->GetLine(line);
-  assert(r);r=r;
+  this->GetLine(line);
   // optimize for common case when name/value are present on the same line. 
   // We don't have to allocate any additional strings in that case.
   std::vector<StringRef> nv;
   StarParser::SplitLine(line, nv);
   if (nv.size()==1) {
     // remember identifier. 
-    String identifier=line.str();
+    String identifier=line.trim().str();
     String value;
 
     while (this->NextLine(line)) {
@@ -225,43 +425,59 @@ void StarParser::ParseDataItem()
         StarParser::SplitLine(StringRef(value.data(), value.length()), 
                               nv, false);
         if (nv.size()!=2) {
-          std::cout << "ERROR:" << line_num_ << ":" << tline << std::endl;
+          throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                "More than 1 value for data item "+ identifier,
+                                                   line_num_));
         }
-        assert(nv.size()==2);
         this->ConsumeLine();        
       }
       break;
     }
-    size_t i=identifier.find('.');
-    assert(i!=String::npos);
+    if (value.empty()) {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                               "Unexpected end of input",
+                                               line_num_));
+    }
     StringRef id_ref(identifier.data(), identifier.size());
-    StringRef cat=StringRef(id_ref.substr(1, i-1));
-    StringRef name=id_ref.substr(i+1);
+    StringRef cat;
+    StringRef name;
     StringRef value_ref=StringRef(value.data(),
                                   value.length()).trim();
+    this->ParseDataItemIdent(id_ref, cat, name);
     StarDataItem data_item(cat, name, value_ref);
-    this->OnDataItem(data_item);
+    this->ParseDataItemOrRow(data_item);
   } else {
     if (nv.size()!=2) {
-      std::cout << "ERROR:" << line_num_ << ":" << line << std::endl;
-    }    
-    assert(nv.size()==2);
-    StringRef::const_iterator i=nv[0].find('.');
-    assert(i!=nv[0].end());
-    StringRef cat=nv[0].substr(1, i-nv[0].begin()-1);
-    StringRef name=nv[0].substr(i-nv[0].begin()+1);
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                 "More than 1 value for data item "+ line.str(),
+                                               line_num_));
+    }
+    StringRef cat;
+    StringRef name;
+    this->ParseDataItemIdent(nv[0], cat, name);
     StarDataItem data_item(cat, name, nv[1]);
-    this->OnDataItem(data_item);
+    this->ParseDataItemOrRow(data_item);
     this->ConsumeLine();
   }
-  
+}
+
+void StarParser::ParseDataItemIdent(const StringRef ident,
+                                    StringRef& cat, StringRef& name)
+{
+    StringRef::const_iterator i=ident.find('.');
+    if (i == ident.end()) {
+      throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                           "Invalid data-item identifier '" + ident.str() + "'",
+                                               line_num_));
+    }
+    cat=ident.substr(1, i-ident.begin()-1);
+    name=ident.substr(i-ident.begin()+1);
 }
 
 void StarParser::ParseData()
 {
   StringRef line;
-  bool r=this->GetLine(line);
-  assert(r);r=r;
+  this->GetLine(line);
   StringRef data_id=line.rtrim().substr(5);
   bool skip=!this->OnBeginData(data_id);
   this->ConsumeLine();
@@ -270,7 +486,7 @@ void StarParser::ParseData()
     if (tline.empty()) {
       this->ConsumeLine();
       continue;
-    }    
+    }
     switch (tline[0]) {
       case '_':
         if (skip) {
@@ -281,20 +497,19 @@ void StarParser::ParseData()
         break;
       case 'd':
         if (tline.length()>=5 && StringRef("data_", 5)==tline.substr(0, 5)) {
+          this->ParseEndDataItemRow();
           this->OnEndData();
           return;
         }
       case ';':
         if (skip) {
           String s;
-          bool r=this->ParseMultilineValue(s, true);
-          assert(r);r=r;
-        } else {
-          assert(0 && "';' when skip==false");
+          this->ParseMultilineValue(s, true);
         }
         break;
       case 'l':
         if (tline==StringRef("loop_", 5)) {
+          this->ParseEndDataItemRow();
           this->ParseLoop();
           break;
         }
@@ -308,6 +523,7 @@ void StarParser::ParseData()
         return;
     }
   }
+  this->ParseEndDataItemRow();
   this->OnEndData();
 }
 
@@ -315,12 +531,10 @@ void StarParser::DiagnoseUnknown()
 {
   std::stringstream ss;
   StringRef line;
-  bool r=this->GetLine(line);
-  assert(r);r=r;
-  
-  ss << "unknown control structure '"<< line.rtrim() << "' on line " 
-     << line_num_ << "." << std::endl;
-  throw IOException(ss.str());
+  this->GetLine(line);
+  ss << "unknown control structure '"<< line.rtrim() << "'";
+  throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR, ss.str(),
+                                           line_num_));
 }
 
 void StarParser::ParseGlobal()
@@ -330,7 +544,13 @@ void StarParser::ParseGlobal()
 
 void StarParser::Parse()
 {
+  if (!file_open_) {
+    throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
+                                             "Failed to open file '" +
+                                             filename_ + "'!"));
+  }
   StringRef line;
+  std::stringstream ss;
   while (this->GetLine(line)) {
     StringRef tline=line.rtrim();
     if (tline.empty()) {
@@ -353,8 +573,7 @@ void StarParser::Parse()
         this->ConsumeLine();
         break;
       default:
-        std::cout << "ERROR:" << line_num_ << ":" << tline << std::endl;
-        assert(0 && "unhandled top-level construct in StarParser::Parse()");
+        throw IOException("Missing 'data_' control structure");
         break;
     }
   }

@@ -271,9 +271,9 @@ else(Boost_FIND_VERSION_EXACT)
   # The user has not requested an exact version.  Among known
   # versions, find those that are acceptable to the user request.
   set(_Boost_KNOWN_VERSIONS ${Boost_ADDITIONAL_VERSIONS}
-    "1.41.0" "1.41" "1.40.0" "1.40" "1.39.0" "1.39" "1.38.0" "1.38" "1.37.0"
-    "1.37" "1.36.1" "1.36.0" "1.36" "1.35.1" "1.35.0" "1.35" "1.34.1" "1.34.0"
-    "1.34" "1.33.1" "1.33.0" "1.33")
+    "1.47.0" "1.46" "1.45" "1.44" "1.43" "1.42" "1.41.0" "1.41" "1.40.0" "1.40" "1.39.0"
+    "1.39" "1.38.0" "1.38" "1.37.0" "1.37" "1.36.1" "1.36.0" "1.36" "1.35.1" 
+    "1.35.0" "1.35" "1.34.1" "1.34.0" "1.34" "1.33.1" "1.33.0" "1.33")
   set(_boost_TEST_VERSIONS)
   if(Boost_FIND_VERSION)
     set(_Boost_FIND_VERSION_SHORT "${Boost_FIND_VERSION_MAJOR}.${Boost_FIND_VERSION_MINOR}")
@@ -649,7 +649,6 @@ ${BOOST_ROOT}/lib
 ${BOOST_ROOT}/lib/boost-${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}
       ${BOOST_ROOT}/stage/lib
       ${_boost_LIBRARIES_SEARCH_DIRS})
-message("boost searchdirs:${_boost_LIBRARIES_SEARCH_DIRS}")
   ENDIF( BOOST_ROOT )
 
   IF( BOOST_LIBRARYDIR )

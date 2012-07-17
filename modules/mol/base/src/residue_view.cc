@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -21,6 +21,7 @@
 
 #include <boost/bind.hpp>
 
+#include <ost/mol/bond_handle.hh>
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/atom_view.hh>
 #include <ost/mol/entity_visitor.hh>
@@ -138,7 +139,10 @@ const AtomViewList& ResidueView::GetAtomList() const {
 
 ChainView ResidueView::GetChain() const {
   this->CheckValidity();
-  return ChainView(data_->chain.lock(), Impl()->GetChain());
+  if (!data_->chain.expired()) {
+    return ChainView(data_->chain.lock(), Impl()->GetChain());
+  }
+  throw InvalidHandle();
 }
 
 
@@ -200,7 +204,7 @@ double ResidueView::GetMass() const
   double mass = 0;
   AtomViewList::const_iterator i;
   for (i=data_->atoms.begin(); i!=data_->atoms.end(); ++i) {
-    mass+=(*i).GetAtomProps().mass;
+    mass+=(*i).GetMass();
   }
   return mass;
 }
@@ -226,7 +230,7 @@ geom::Vec3 ResidueView::GetCenterOfMass() const
   if (!data_->atoms.empty() && mass > 0) {
     AtomViewList::const_iterator i;
     for (i=data_->atoms.begin(); i!=data_->atoms.end(); ++i) {
-      center+=(*i).GetPos()*(*i).GetAtomProps().mass;
+      center+=(*i).GetPos()*(*i).GetMass();
     }
       center/=mass;
   }

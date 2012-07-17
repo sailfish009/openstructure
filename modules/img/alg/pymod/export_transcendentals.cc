@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -28,16 +28,16 @@ using namespace boost::python;
 #include <ost/img/alg/transcendentals.hh>
 
 using namespace ost::img;
-using namespace ost::img::alg;
+//using namespace ost::img::alg;
 
 void export_Transcendentals()
 {
-  class_<Cos, bases<ConstModIPAlgorithm> >("Cos", init<>());
-  class_<Exp, bases<ConstModIPAlgorithm> >("Exp", init<>());
-  class_<Log, bases<ConstModIPAlgorithm> >("Log", init<>());
-  class_<Log10, bases<ConstModIPAlgorithm> >("Log10", init<>());
-  class_<Sin, bases<ConstModIPAlgorithm> >("Sin", init<>());
-  class_<Sqrt, bases<ConstModIPAlgorithm> >("Sqrt", init<>());
-  class_<Tan, bases<ConstModIPAlgorithm> >("Tan", init<>());
-  class_<Pow, bases<ConstModIPAlgorithm> >("Pow", init<Real>());
+  class_<alg::Cos, bases<ConstModIPAlgorithm> >("Cos", init<>());
+  class_<alg::Exp, bases<ConstModIPAlgorithm> >("Exp", init<>());
+  class_<alg::Log, bases<ConstModIPAlgorithm> >("Log", init<>());
+  class_<alg::Log10, bases<ConstModIPAlgorithm> >("Log10", init<>());
+  class_<alg::Sin, bases<ConstModIPAlgorithm> >("Sin", init<>());
+  class_<alg::Sqrt, bases<ConstModIPAlgorithm> >("Sqrt", init<>());
+  class_<alg::Tan, bases<ConstModIPAlgorithm> >("Tan", init<>());
+  class_<alg::Pow, bases<ConstModIPAlgorithm> >("Pow", init<Real>());
 }

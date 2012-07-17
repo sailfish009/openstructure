@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -49,8 +49,6 @@ PNG::PNG(bool normalize_on_save):
     ImageFormatBase(FORMAT_STRING),
     normalize_on_save_(normalize_on_save)
 {
-    this->SetMinimum(0.0);
-    this->SetMaximum(255.0);
 }
 
 bool PNG::GetNormalizeOnSave() const
@@ -61,6 +59,15 @@ bool PNG::GetNormalizeOnSave() const
 void PNG::SetNormalizeOnSave(bool normalize_on_save)
 {
   normalize_on_save_ = normalize_on_save;
+}
+
+Real PNG::GetMaximum() const
+{
+  return 255.0;
+}
+Real PNG::GetMinimum() const
+{
+  return 0.0;
 }
 
 namespace detail {

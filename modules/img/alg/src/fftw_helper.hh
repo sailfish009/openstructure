@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -72,15 +72,22 @@ Author: Juergen Haas
 #if OST_FFT_USE_THREADS
   #if OST_DOUBLE_PRECISION
     #define OST_FFTW_fftw_init_threads fftw_init_threads
+    #define OST_FFTW_fftw_cleanup fftw_cleanup_threads
     #define OST_FFTW_fftw_plan_with_nthreads fftw_plan_with_nthreads
   #else
     #define OST_FFTW_fftw_init_threads fftwf_init_threads
+    #define OST_FFTW_fftw_cleanup fftwf_cleanup_threads
     #define OST_FFTW_fftw_plan_with_nthreads fftwf_plan_with_nthreads
   #endif
 #else
   void fftw_noop(unsigned int i=0){}
   #define OST_FFTW_fftw_init_threads fftw_noop
   #define OST_FFTW_fftw_plan_with_nthreads fftw_noop
+  #if OST_DOUBLE_PRECISION
+    #define OST_FFTW_fftw_cleanup fftw_cleanup
+  #else
+    #define OST_FFTW_fftw_cleanup fftwf_cleanup
+  #endif
 #endif
 
 #endif

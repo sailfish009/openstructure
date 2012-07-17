@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <cmath>
+#include <iostream>
 #include "exc.hh"
 #include "composite3_op.hh"
 #include "vecmat3_op.hh"
@@ -92,16 +93,16 @@ Real Distance(const Plane& p, const Vec3& v)
 
 bool IsOnLine(const Line3& l, const Vec3& v, Real ephilon)
 {
-  Vec3 tmp=CompDivide(v-l.GetOrigin(),l.GetDirection());
-  return std::fabs(tmp[0]-tmp[1])<ephilon && std::fabs(tmp[0]-tmp[2])<ephilon;
+  return Length2(Cross(v-l.GetOrigin(), l.GetDirection()))<(ephilon*ephilon);
 }
+
 bool IsInPlane(const Plane& p,  const Line3& l,Real ephilon)
 {
   return Distance(p,l.GetOrigin())<ephilon && AreParallel(p,l,ephilon);  
 }
 bool IsInPlane(const Plane& p,  const Vec3& v,Real ephilon)
 {
-  return Distance(p,v)<ephilon;  
+  return std::fabs(Distance(p,v))<ephilon;  
 }
 int RelativePosition(const Plane& p,  const Vec3& v,Real ephilon)
 {
@@ -119,47 +120,133 @@ bool operator==(const Plane& p1, const Plane& p2)
 }
 bool Equal(const Plane& p1, const Plane& p2,Real ephilon)
 {
-  return std::fabs(p1.GetP()-p2.GetP())<ephilon && Equal(p1.GetNormal(),p2.GetNormal(),ephilon);
+  return std::fabs(p1.GetP()-p2.GetP())<ephilon && 
+         Equal(p1.GetNormal(),p2.GetNormal(),ephilon);
 }
 bool EqualPosition(const Plane& p1, const Plane& p2,Real ephilon)
 {
-  return  Equal(p1,p2,ephilon) || (std::fabs(p1.GetP()+p2.GetP())<ephilon && Equal(p1.GetNormal(),-1.0*p2.GetNormal(),ephilon));
+  return  Equal(p1,p2,ephilon) || 
+          (std::fabs(p1.GetP()+p2.GetP())<ephilon && Equal(p1.GetNormal(),
+                                                           -p2.GetNormal(),
+                                                           ephilon));
 }
 bool operator==(const Line3& l1, const Line3& l2)
 {
   return Equal(l1,l2);
 }
+
 bool Equal(const Line3& l1, const Line3& l2,Real ephilon)
 {
-  return  Equal(l1.GetDirection(),l2.GetDirection(),ephilon) && Equal(l1.GetOrigin(),l2.GetOrigin(),ephilon);
+  return Equal(l1.GetDirection(), l2.GetDirection(), ephilon) &&
+         Equal(l1.GetOrigin(), l2.GetOrigin(), ephilon);
 }
+
 bool EqualPosition(const Line3& l1, const Line3& l2,Real ephilon)
 {
-  return  IsOnLine(l1,l2.GetOrigin()) && AreParallel(l1,l2);
+  return IsOnLine(l1,l2.GetOrigin(), ephilon) && AreParallel(l1,l2, ephilon);
 }
 
 
 bool AreParallel(const Plane& p,  const Line3& l,Real ephilon)
 {
-  return std::fabs(Dot(l.GetDirection(),p.GetNormal()))<ephilon;  
+  return std::fabs(Dot(l.GetDirection(),p.GetNormal()))<ephilon;
 }
+
 bool AreParallel(const Plane& p1, const Plane& p2,Real ephilon)
 {
-  return std::fabs(1-Dot(p1.GetNormal(),p2.GetNormal()))<ephilon;  
+  return std::fabs(1-Dot(p1.GetNormal(),p2.GetNormal()))<ephilon;
 }
-bool AreParallel(const Line3& l1, const Line3& l2,Real ephilon)
+
+bool AreParallel(const Line3& l1, const Line3& l2, Real ephilon)
 {
-  return std::fabs(1-Dot(l1.GetDirection(),l1.GetDirection()))<ephilon;  
+  return std::fabs(1.0-std::fabs(Dot(l1.GetDirection(), 
+                                     l2.GetDirection())))<ephilon;
 }
 
 
-bool AreIntersecting( const Line3& l1, const Line3& l2, Real ephilon)
+bool AreIntersecting(const Line3& l1, const Line3& l2, Real ephilon)
 {
-  return IsInPlane(Plane(l1.GetOrigin(),l2.GetOrigin(),l1.At(1)),l2.At(1),ephilon);
+  if (AreParallel(l1, l2, ephilon)) {
+    return false;
+  }
+  Plane plane(l1.GetOrigin(), Cross(l1.GetDirection(), 
+                                    l2.GetDirection()));
+  return IsInPlane(plane, l2.GetOrigin(), ephilon);
 }
 
 bool IsInSphere(const Sphere& s, const Vec3& v){
   return Length(s.GetOrigin()-v)<=s.GetRadius();
+}
+
+Line3 Vec3List::FitCylinder(const Vec3 initial_direction, const Vec3 center){
+  //This function fits a cylinder to the positions in Vec3List
+  //It takes as argument an initial guess for the direction and the geometric
+  //center of the atoms. The center is not changed during optimisation as the
+  //best fitting cylinder can be shown to have its axis pass through the geometric center
+  Line3 axis=Line3(center,center+initial_direction), axis_old;
+  Real radius,res_sum_old,res_sum,delta_0=0.01,prec=0.0000001,err,norm,delta;
+  unsigned long n_step=1000, n_res=this->size();
+  Vec3 v,gradient;
+  
+  radius=0.0;
+  delta=delta_0;
+  for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+    radius+=geom::Distance(axis,(*i));
+  }
+  radius/=Real(n_res);
+  res_sum=0.0;
+  for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+    res_sum+=pow(Distance(axis,(*i))-radius,2.);
+  }
+  unsigned long k=0;
+  err=2.0*prec;
+  while (err>prec and k<n_step) {
+    res_sum_old=res_sum;
+    axis_old=axis;
+    radius=0.0;
+    if (k>50) {
+      delta=delta_0*pow((50./k),2.0);
+    }
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      radius+=Distance(axis,(*i));
+    }
+    radius/=Real(n_res);
+    for (int j=0; j!=3; ++j){
+      res_sum=0.0;
+      v=Vec3(0.0,0.0,0.0);
+      v[j]=delta;
+      axis=Line3(axis_old.GetOrigin(),axis_old.GetOrigin()+axis_old.GetDirection()+v);
+      radius=0.0;
+      for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+        radius+=Distance(axis,(*i));
+      }
+      radius/=Real(n_res);
+      for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+        res_sum+=pow(Distance(axis,(*i))-radius,2.);
+      }
+      gradient[j]=(res_sum-res_sum_old)/delta;
+    }
+    norm=Dot(gradient,gradient);
+    if (norm>1.) {
+      gradient=Normalize(gradient);
+    }
+    axis=Line3(axis_old.GetOrigin(),axis_old.GetOrigin()+axis_old.GetDirection()-delta*gradient);
+    radius=0.0;
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      radius+=Distance(axis,(*i));
+    }
+    radius/=Real(n_res);
+    res_sum=0.0;
+    for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
+      res_sum+=pow(Distance(axis,(*i))-radius,2.);
+    }
+    err=fabs((res_sum-res_sum_old)/float(n_res));
+    k++;
+  }
+  if (err>prec) {
+    std::cout<<"axis fitting did not converge"<<std::endl;
+  }
+  return axis;
 }
 
 } // ns

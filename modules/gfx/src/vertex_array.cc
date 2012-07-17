@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -30,6 +30,7 @@
 #include "scene.hh"
 #include "vertex_array_helper.hh"
 #include "povray.hh"
+#include "exporter.hh"
 
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
@@ -78,7 +79,7 @@ IndexedVertexArray::IndexedVertexArray()
 {
   initialized_=false;
   Reset(); // replaces ctor initialization list
-  glGenTextures(1,&tex_id_);
+  //glGenTextures(1,&tex_id_);
 }
 
 IndexedVertexArray::~IndexedVertexArray()
@@ -88,7 +89,7 @@ IndexedVertexArray::~IndexedVertexArray()
 IndexedVertexArray::IndexedVertexArray(const IndexedVertexArray& va)
 {
   copy(va);
-  glGenTextures(1,&tex_id_);
+  //glGenTextures(1,&tex_id_);
 }
 
 IndexedVertexArray& IndexedVertexArray::operator=(const IndexedVertexArray& va)
@@ -108,7 +109,7 @@ unsigned int IndexedVertexArray::GetFormat()
 void IndexedVertexArray::Cleanup() 
 {
   if(initialized_) {
-    glDeleteTextures(1,&tex_id_);
+    //glDeleteTextures(1,&tex_id_);
     glDeleteLists(outline_mat_dlist_,1);
 #if OST_SHADER_SUPPORT_ENABLED
     glDeleteBuffers(7,buffer_id_);
@@ -248,7 +249,7 @@ void IndexedVertexArray::AddIcoSphere(const SpherePrim& prim, unsigned int detai
   }
 }
 
-void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail,bool cap)
+void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int detail, bool cap)
 {
   dirty_=true;
   
@@ -266,12 +267,19 @@ void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int deta
   // prepare first vertices to add
   std::vector<Vec3>::const_iterator it=vlist.begin();
   Vec3 v0 = (*it);
-  Vec3 n0 = prim.rotmat * v0; 
-  v0*=prim.radius;
+  bool slant=(prim.radius1!=prim.radius2);
+  // adjust for slant
+  float beta = slant ? atan2(prim.radius1-prim.radius2,prim.length) : 0.0;
+  float cosb = slant ? cos(beta) : 1.0;
+  float sinb = slant ? sin(beta) : 0.0;
+  Vec3 n0 = slant ? prim.rotmat * (cosb*v0+geom::Vec3(0.0,0.0,sinb)) : prim.rotmat*v0;
+
+  v0*=prim.radius1;
+  Vec3 v1 = (*it)*prim.radius2+off;
   VertexID id1 = Add(prim.rotmat * v0 + prim.start, n0, prim.color1);
-  VertexID id2 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color2);
+  VertexID id2 = Add(prim.rotmat * v1 + prim.start, n0, prim.color2);
   VertexID cid1 = cap ? Add(prim.rotmat * v0 + prim.start, cn0, prim.color1) : 0;
-  VertexID cid2 = cap ? Add(prim.rotmat * (v0+off) + prim.start, cn1, prim.color2) : 0;
+  VertexID cid2 = cap ? Add(prim.rotmat * v1 + prim.start, cn1, prim.color2) : 0;
   
   // now for the loop around the circle
   VertexID id3=id1;
@@ -281,15 +289,16 @@ void IndexedVertexArray::AddCylinder(const CylinderPrim& prim, unsigned int deta
   ++it;
   for(;it!=vlist.end();++it) {
     v0 = (*it);
-    n0 = prim.rotmat * v0; 
-    v0 *= prim.radius;
+    Vec3 n0 = slant ? prim.rotmat * (cosb*v0+geom::Vec3(0.0,0.0,sinb)) : prim.rotmat*v0;
+    v0 *= prim.radius1;
+    Vec3 v1 = (*it)*prim.radius2+off;
     VertexID id5 = Add(prim.rotmat * v0 + prim.start, n0, prim.color1);
-    VertexID id6 = Add(prim.rotmat * (v0+off) + prim.start, n0, prim.color2);
+    VertexID id6 = Add(prim.rotmat * v1 + prim.start, n0, prim.color2);
     AddTri(id3,id5,id4);
     AddTri(id5,id6,id4);
     if(cap) {
       VertexID cid5 = Add(prim.rotmat * v0 + prim.start, cn0, prim.color1);
-      VertexID cid6 = Add(prim.rotmat * (v0+off) + prim.start, cn1, prim.color2);
+      VertexID cid6 = Add(prim.rotmat * v1 + prim.start, cn1, prim.color2);
       AddTri(cid0,cid5,cid3);
       AddTri(cid7,cid4,cid6);
       cid3=cid5;
@@ -382,6 +391,7 @@ void IndexedVertexArray::SetOpacity(float o)
   for(EntryList::iterator it=entry_list_.begin();it!=entry_list_.end();++it) {
     it->c[3]=o;
   }
+  opacity_=o;
   FlagRefresh();
 }
 
@@ -422,6 +432,12 @@ void IndexedVertexArray::RenderGL()
   
   glPushAttrib(GL_ALL_ATTRIB_BITS);
   glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+  
+  if(use_tex_) {
+    glEnable(GL_TEXTURE_2D);
+  } else {
+    glDisable(GL_TEXTURE_2D);
+  }
 
   if(outline_mode_>0) {
     LOG_TRACE("outline rendering");
@@ -459,7 +475,12 @@ void IndexedVertexArray::RenderGL()
       glDisable(GL_POLYGON_OFFSET_LINE);
       glDisable(GL_POLYGON_OFFSET_POINT);
       glDisable(GL_LINE_SMOOTH);
-      glDisable(GL_BLEND);
+      if(opacity_<1.0) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+      } else {
+        glDisable(GL_BLEND);
+      }
     }
   } else {
     // not in outline mode
@@ -473,16 +494,16 @@ void IndexedVertexArray::RenderGL()
     } else {
       glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE);
     }
-    if(color_mat_) {
-      glEnable(GL_COLOR_MATERIAL); 
-    } else {
-      glDisable(GL_COLOR_MATERIAL);
-    }
     if(cull_face_) {
       glEnable(GL_CULL_FACE);
     } else { 
       glDisable(GL_CULL_FACE); 
     }
+  }
+  if(color_mat_) {
+    glEnable(GL_COLOR_MATERIAL); 
+  } else {
+    glDisable(GL_COLOR_MATERIAL);
   }
   
   if(mode_&0x1) {
@@ -516,7 +537,7 @@ void IndexedVertexArray::RenderGL()
       glUniform1f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"scalef"),outline_exp_factor_);
       glUniform4f(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"color"),
                   outline_exp_color_[0],outline_exp_color_[1],
-                  outline_exp_color_[2],outline_exp_color_[3]);
+                  outline_exp_color_[2],opacity_);
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       draw_ltq(use_buff);
 
@@ -640,6 +661,14 @@ void IndexedVertexArray::RenderPov(PovState& pov, const std::string& name)
   pov.inc() << "}\n";
 }
 
+void IndexedVertexArray::Export(Exporter* ex) const
+{
+  ex->WriteVertexData(entry_list_[0].v,entry_list_[0].n, entry_list_[0].c, entry_list_[0].t, sizeof(Entry), entry_list_.size());
+  ex->WriteLineData(&line_index_list_[0],line_index_list_.size()/2);
+  ex->WriteTriData(&tri_index_list_[0],tri_index_list_.size()/3);
+  ex->WriteQuadData(&quad_index_list_[0],quad_index_list_.size()/4);
+}
+
 void IndexedVertexArray::Clear()
 {
   dirty_=true;
@@ -663,6 +692,7 @@ void IndexedVertexArray::Reset()
   aalines_flag_=false;
   point_size_=2.0;
   line_halo_=0.0;
+  opacity_=1.0;
   outline_mode_=0;
   outline_width_=4.0;
   outline_mat_=Material(0.3,1.0,0.0,0.0,0.0);
@@ -670,7 +700,7 @@ void IndexedVertexArray::Reset()
   outline_exp_factor_=0.1;
   outline_exp_color_=Color(0,0,0);
   draw_normals_=false;
-  use_tex_=true;
+  use_tex_=false;
 }
 
 void IndexedVertexArray::FlagRefresh()
@@ -1396,6 +1426,26 @@ void IndexedVertexArray::draw_line_halo(bool use_buff)
   glPopAttrib();
   glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
   glLineWidth(line_width_);
+}
+
+geom::AlignedCuboid IndexedVertexArray::GetBoundingBox() const
+{
+  if(entry_list_.empty()) {
+    return geom::AlignedCuboid(geom::Vec3(0,0,0),geom::Vec3(0,0,0));
+  } else {
+    geom::Vec3 minc(std::numeric_limits<float>::max(),
+                    std::numeric_limits<float>::max(),
+                    std::numeric_limits<float>::max());
+    geom::Vec3 maxc(-std::numeric_limits<float>::max(),
+                    -std::numeric_limits<float>::max(),
+                    -std::numeric_limits<float>::max());
+    for(EntryList::const_iterator it=entry_list_.begin();it!=entry_list_.end();++it) {
+      geom::Vec3 p(it->v[0],it->v[1],it->v[2]);
+      minc=geom::Min(minc,p);
+      maxc=geom::Max(maxc,p);
+    }
+    return geom::AlignedCuboid(minc-1.0,maxc+1.0);
+  }
 }
 
 }} // ns

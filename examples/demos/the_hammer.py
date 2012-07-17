@@ -1,7 +1,5 @@
 from PyQt4 import QtCore
 import math
-from ost import qa
-
 # remove all objects from scene, just in case
 scene.RemoveAll()
 
@@ -12,7 +10,7 @@ class Anim(QtCore.QTimer):
         self.b=b
         self.angle=0.0
         self.dir=0.01
-        self.edi=self.a.view.handle.RequestXCSEditor(mol.EditMode.UNBUFFERED_EDIT)
+        self.edi=self.a.view.handle.EditXCS(mol.UNBUFFERED_EDIT)
         QtCore.QObject.connect(self, QtCore.SIGNAL("timeout()"), self.OnTimer)
 
         
@@ -26,7 +24,7 @@ class Anim(QtCore.QTimer):
         self.edi.SetTransform(geom.Mat4(rot))
         self.edi.UpdateICS()
         for a in self.b.view.atoms:
-          score=qa.ClashScore(a.handle, self.a.view)
+          score=mol.alg.ClashScore(a.handle, self.a.view)
           a.SetFloatProp('clash', score)
         self.a.UpdatePositions()
         self.b.ReapplyColorOps()
@@ -34,17 +32,15 @@ class Anim(QtCore.QTimer):
 
 def Hammer(off=geom.Vec3()):
   ent=mol.CreateEntity()
-  edi=ent.RequestXCSEditor(mol.EditMode.BUFFERED_EDIT)
+  edi=ent.EditXCS(mol.BUFFERED_EDIT)
   chain=edi.InsertChain("A")
   res=edi.AppendResidue(chain, "QUAD")
-  prop=mol.AtomProp()
-  prop.radius=1.0
-  a=edi.InsertAtom(res, "A", off+geom.Vec3(0.0, 0.0, 0.0), prop)
-  b=edi.InsertAtom(res, "B", off+geom.Vec3(0.0, 4.0, 0.0), prop)  
-  c=edi.InsertAtom(res, "C", off+geom.Vec3(2.0, 4.0, 0.0), prop)  
-  d=edi.InsertAtom(res, "D", off+geom.Vec3(2.0, 5.0, 0.0), prop)    
-  e=edi.InsertAtom(res, "E", off+geom.Vec3(-2.0, 5.0, 0.0), prop)      
-  f=edi.InsertAtom(res, "F", off+geom.Vec3(-2.0, 4.0, 0.0), prop)        
+  a=edi.InsertAtom(res, "A", off+geom.Vec3(0.0, 0.0, 0.0), "H")
+  b=edi.InsertAtom(res, "B", off+geom.Vec3(0.0, 4.0, 0.0), "H")
+  c=edi.InsertAtom(res, "C", off+geom.Vec3(2.0, 4.0, 0.0), "H")
+  d=edi.InsertAtom(res, "D", off+geom.Vec3(2.0, 5.0, 0.0), "H")
+  e=edi.InsertAtom(res, "E", off+geom.Vec3(-2.0, 5.0, 0.0), "H")
+  f=edi.InsertAtom(res, "F", off+geom.Vec3(-2.0, 4.0, 0.0), "H")
   edi.Connect(a, b)
   edi.Connect(b, c)
   edi.Connect(c, d)
@@ -55,17 +51,17 @@ def Hammer(off=geom.Vec3()):
 
 def TheWall():
   ent=mol.CreateEntity()
-  edi=ent.RequestXCSEditor(mol.EditMode.BUFFERED_EDIT)
+  edi=ent.EditXCS(mol.BUFFERED_EDIT)
   chain=edi.InsertChain("A")
   res=edi.AppendResidue(chain, "QUAD")
-  prop=mol.AtomProp()
-  prop.radius=0.25
   index=0
   for i in range(-10, 10):
     for j in range(-10, 10):
       index+=1
-      edi.InsertAtom(res, "A%d" % index, geom.Vec3(4.0, -2.0, 0.0)+
-                     geom.Vec3(i, 0, j)*0.25, prop)
+      atom=edi.InsertAtom(res, "A%d" % index, geom.Vec3(4.0, -2.0, 0.0)+
+                          geom.Vec3(i, 0, j)*0.25)
+      atom.radius=0.25
+                     
   return ent
 
 a=Hammer()

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -27,7 +27,8 @@
 #include <ost/base.hh>
 
 #include <ost/gfx/module_config.hh>
-#include <ost/gfx/render_options/render_options.hh>
+
+#include "render_options.hh"
 
 namespace ost { namespace gfx {
 
@@ -35,22 +36,27 @@ class DLLEXPORT_OST_GFX CPKRenderOptions: public RenderOptions {
 public:
   CPKRenderOptions();
 
+  // RenderOptions interface
   virtual RenderMode::Type GetRenderMode();
   virtual bool CanApplyRenderOptions(RenderOptionsPtr render_options);
   virtual void ApplyRenderOptions(RenderOptionsPtr render_options);
 
-  virtual void SetSphereDetail(uint detail);
-  virtual uint GetSphereDetail();
+  // own interface
+  /// number of arc subdivisions per pi/2
+  void SetSphereDetail(uint detail);
+  uint GetSphereDetail();
+  /// 0 = triangulated spheres, 1 = fast 3D sprites (default)
+  void SetSphereMode(uint mode);
+  uint GetSphereMode();
+  /// Radius multiplier, default=1.0
+  void SetRadiusMult(float m);
+  float GetRadiusMult() const;
 
-  virtual void SetSphereMode(uint mode);
-  virtual uint GetSphereMode();
-
-  virtual ~CPKRenderOptions();
 
 private:
   uint sphere_detail_;
   uint cpk_mode_;
-
+  float rad_mult_;
 };
 
 typedef boost::shared_ptr<CPKRenderOptions> CPKRenderOptionsPtr;

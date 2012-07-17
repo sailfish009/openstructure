@@ -218,7 +218,7 @@ class SurfaceContextMenu(QtCore.QObject):
     for entity in ent_list:
       if isinstance(entity, gfx.Entity):
         try:
-          s=msms.CalculateSurface(entity.view.handle,
+          s=msms.CalculateSurface(entity.view,
                                   msms_exe=msms_exe,
                                   density=density,
                                   radius=radius,

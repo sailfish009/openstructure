@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -54,6 +54,7 @@
 #if OST_SHADER_SUPPORT_ENABLED
 #include "shader.hh"
 #endif
+#include "exporter.hh"
 
 namespace ost {
 
@@ -75,7 +76,8 @@ Entity::Entity(const String& name,
   opacity_(1.0),
   blur_(false),
   blurf1_(1.0),
-  blurf2_(0.8)
+  blurf2_(0.8),
+  needs_update_(true)
 {
   init(RenderMode::SIMPLE);
 }
@@ -221,27 +223,19 @@ void Entity::SetBlurFactors(float bf1,float bf2)
 
 void Entity::Rebuild()
 {
-  geom::Vec3 delta=GetTF().GetTrans()-GetTF().GetCenter();
+  do_update_view(); // if necessary, update the views
+  this->ReapplyColorOps(); // re-color everything
 
-  if(update_view_) {
-    EntityView nv=this->GetView();
-    for (RendererMap::iterator i=renderer_.begin(), 
-           e=renderer_.end(); i!=e; ++i) {
-      i->second->ClearViews();
-      i->second->AddView(nv);
-      i->second->UpdateViews();
-      i->second->PrepareRendering();
-    }
-  }
+  FlagRebuild(); // force renderer rebuilds in RenderGL call
+  Scene::Instance().RequestRedraw();
 
-  this->ReapplyColorOps();
-  FlagRebuild();
+  // update center in transformation
   geom::Vec3 center=this->GetCenter();
   Transform tf=this->GetTF();
   tf.SetCenter(center);
-  tf.SetTrans(center+delta);
+  tf.SetTrans(center+GetTF().GetTrans()-GetTF().GetCenter());
   this->SetTF(tf);  
-  Scene::Instance().RequestRedraw();
+
 }
 
 void Entity::UpdatePositions()
@@ -251,6 +245,7 @@ void Entity::UpdatePositions()
     impl::EntityRenderer* r=i->second;
     r->FlagPositionsDirty();
   }
+  // Rebuild() here causes an recursive loop...
   FlagRebuild();  
   Scene::Instance().RequestRedraw();
 }
@@ -274,12 +269,12 @@ void Entity::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc,
     geom::Vec3 mmax=coord_limits.GetMax();
     geom::Vec3 t1=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmin[2]));
     geom::Vec3 t2=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmin[2]));
-    geom::Vec3 t3=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmin[2]));
-    geom::Vec3 t4=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmin[2]));
+    geom::Vec3 t3=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmin[2]));
+    geom::Vec3 t4=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmin[2]));
     geom::Vec3 t5=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmax[2]));
     geom::Vec3 t6=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmax[2]));
-    geom::Vec3 t7=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmax[2]));
-    geom::Vec3 t8=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmax[2]));
+    geom::Vec3 t7=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmax[2]));
+    geom::Vec3 t8=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmax[2]));
     minc = geom::Min(minc, geom::Min(t1, geom::Min(t2, geom::Min(t3, 
                      geom::Min(t4, geom::Min(t5, geom::Min(t6, 
                      geom::Min(t7, t8))))))));
@@ -313,11 +308,11 @@ void Entity::CacheBoundingBox() const
     const impl::EntityRenderer* r=i->second;
     if (r->IsEnabled() && r->HasDataToRender()) {
       if (!has_data) {
-        coord_limits=r->GetBoundingBox();          
+        coord_limits=r->GetBoundingBox();
         has_data=true;
       } else {
         coord_limits=geom::Union(coord_limits, r->GetBoundingBox());
-      }      
+      }
     }
   }
   bbox_=coord_limits;  
@@ -326,26 +321,34 @@ void Entity::CacheBoundingBox() const
 bool Entity::UpdateIfNeeded() const
 {
   bool updated=false;
-  for (RendererMap::iterator i=renderer_.begin(), 
-       e=renderer_.end(); i!=e; ++i) {
-    EntityRenderer* renderer =i->second;
-    if (renderer->IsDirty()) {
-      renderer->PrepareRendering();
-      updated=true;
+  if(IsVisible()) {
+    for (RendererMap::iterator i=renderer_.begin(), 
+           e=renderer_.end(); i!=e; ++i) {
+      EntityRenderer* renderer =i->second;
+      if (renderer->IsEnabled() && renderer->HasDataToRender()) {
+        if (renderer->IsDirty()) {
+          renderer->PrepareRendering();
+          updated=true;
+        }
+        renderer->VA().SetOpacity(opacity_);
+      }
     }
-    renderer->VA().SetOpacity(opacity_);
-  }
-  if (updated) {
-    this->CacheBoundingBox();
+    if (updated) {
+      this->CacheBoundingBox();
+    }
+    needs_update_=false;
+  } else {
+    needs_update_=true;
   }
   return updated;
 }
 
 void Entity::CustomPreRenderGL(bool update)
 {
-  if (update) {
+  if (update || needs_update_) {
     this->UpdateIfNeeded();
     RefreshVA();
+    needs_update_=false;
   }
 }
 
@@ -353,7 +356,10 @@ void Entity::RefreshVA()
 {
   for (RendererMap::iterator i=renderer_.begin(), 
 	 e=renderer_.end(); i!=e; ++i) {
-    i->second->Debug(debug_flags_);
+    EntityRenderer* renderer =i->second;
+    if (renderer->IsEnabled() && renderer->HasDataToRender()) {
+      renderer->Debug(debug_flags_);
+    }
   }
 }
 
@@ -362,7 +368,7 @@ void Entity::CustomRenderGL(RenderPass pass)
   for (RendererMap::iterator i=renderer_.begin(), 
        e=renderer_.end(); i!=e; ++i) {
     impl::EntityRenderer* r=i->second;
-    if(r->IsEnabled()) {
+    if(r->IsEnabled() && r->HasDataToRender()) {
       if(pass==STANDARD_RENDER_PASS) {
         r->Render(pass);
         if(outline_flag_) {
@@ -390,10 +396,27 @@ void Entity::CustomRenderGL(RenderPass pass)
 void Entity::CustomRenderPov(PovState& pov)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
+    if(it->second->IsEnabled() && it->second->HasDataToRender()){
       it->second->RenderPov(pov,GetName());
     }
   }
+}
+
+void Entity::Export(Exporter* ex)
+{
+  ex->NodeStart(GetName(),Exporter::OBJ);
+  // in the simplest case, just export va
+  if(rebuild_ || refresh_) {
+    PreRenderGL(true);
+  }
+
+  for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
+    if(it->second->IsEnabled() && it->second->HasDataToRender()){
+      it->second->Export(ex);
+    }
+  }
+  
+  ex->NodeEnd(GetName());
 }
 
 mol::AtomHandle Entity::PickAtom(const geom::Line3& line, Real line_width)
@@ -516,7 +539,7 @@ RenderOptionsPtr Entity::GetOptions(RenderMode::Type render_mode)
 }
 
 void Entity::SetOptions(RenderMode::Type render_mode, 
-			RenderOptionsPtr& render_options)
+                        RenderOptionsPtr& render_options)
 {
   if(!render_options) return;
   RendererMap::iterator i=renderer_.find(render_mode);
@@ -526,13 +549,13 @@ void Entity::SetOptions(RenderMode::Type render_mode,
       EntityP e=boost::dynamic_pointer_cast<Entity>(shared_from_this());
       RenderOptionsPtr old_render_options = entity_renderer->GetOptions();
       if(old_render_options) {
-	old_render_options->RemoveObserver(e);
+        old_render_options->RemoveObserver(e);
       }
       entity_renderer->SetOptions(render_options);
       render_options->AddObserver(e);
       FlagRebuild();
       Scene::Instance().RequestRedraw();
-    } else{
+    } else {
       throw Error("These render options are not compatible with this render mode.");
     }
   } else {
@@ -541,7 +564,7 @@ void Entity::SetOptions(RenderMode::Type render_mode,
 }
 
 void Entity::ApplyOptions(RenderMode::Type render_mode,
-                                RenderOptionsPtr& render_options)
+                          RenderOptionsPtr& render_options)
 {
   RendererMap::iterator i=renderer_.find(render_mode);  
   if(i!=renderer_.end()) {
@@ -579,9 +602,7 @@ void Entity::SetOpacity(float f)
 void Entity::SetOutlineWidth(float f)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
-      it->second->VA().SetOutlineWidth(f);
-    }
+    it->second->VA().SetOutlineWidth(f);
   }
   Scene::Instance().RequestRedraw();
 }
@@ -589,9 +610,7 @@ void Entity::SetOutlineWidth(float f)
 void Entity::SetOutlineExpandFactor(float f)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
-      it->second->VA().SetOutlineExpandFactor(f);
-    }
+    it->second->VA().SetOutlineExpandFactor(f);
   }
   Scene::Instance().RequestRedraw();
 }
@@ -599,9 +618,7 @@ void Entity::SetOutlineExpandFactor(float f)
 void Entity::SetOutlineExpandColor(const Color& c)
 {
   for (RendererMap::iterator it=renderer_.begin(); it!=renderer_.end(); ++it) {
-    if(it->second->IsEnabled()){
-      it->second->VA().SetOutlineExpandColor(c);
-    }
+    it->second->VA().SetOutlineExpandColor(c);
   }
   Scene::Instance().RequestRedraw();
 }
@@ -671,6 +688,12 @@ RenderModeTypes Entity::GetNotEmptyRenderModes(){
   return render_modes;
 }
 
+
+void Entity::SetRenderMode(RenderMode::Type mode, 
+                           const String& sel, bool keep)
+{
+  this->SetRenderMode(mode, this->GetView().Select(sel), keep);
+}
 void Entity::SetRenderMode(RenderMode::Type mode, 
                            const mol::EntityView& view, bool keep)
 {
@@ -699,13 +722,29 @@ void Entity::SetRenderMode(RenderMode::Type mode,
 mol::EntityView Entity::GetRenderView(RenderMode::Type mode)
 {
   EntityRenderer* rend = this->GetOrCreateRenderer(mode);
-  if(!rend) return mol::EntityView();
+  if (!rend) return this->GetView().CreateEmptyView();
   return rend->GetFullView();
 }
 
 void Entity::SetRenderMode(RenderMode::Type mode)
 {
+  EntityRenderer* rend = this->GetOrCreateRenderer(mode);
+  if(!rend) return;
+
+  // substract view from all renderers
+  for (RendererMap::iterator i=renderer_.begin(),
+       e=renderer_.end(); i!=e; ++i) {
+     impl::EntityRenderer* renderer=i->second;
+     renderer->ClearViews();
+     if (renderer==rend) {
+       renderer->AddView(qv_.GetEntityView());
+     }
+     renderer->UpdateViews();
+  }
+  this->ReapplyColorOps(); // done in rebuild?
+  this->FlagRebuild();  
   GfxObj::SetRenderMode(mode);
+  Scene::Instance().RenderModeChanged(GetName());  
 }
 
 void Entity::SetVisible(const mol::EntityView& view, bool visible){
@@ -717,6 +756,11 @@ void Entity::SetVisible(const mol::EntityView& view, bool visible){
   }
   this->ReapplyColorOps(); // done in rebuild?
   this->FlagRebuild();
+}
+
+void Entity::SetVisible(const String& sel, bool visible)
+{
+  this->SetVisible(this->GetView().Select(sel), visible);
 }
 
 void Entity::SetColor(const Color& col, const String& selection)
@@ -732,7 +776,6 @@ void Entity::SetDetailColor(const Color& col, const String& selection)
   this->Apply(cop);
 }
 
-/// \brief set selection
 void Entity::SetSelection(const mol::EntityView& view)
 {
   if (!view.IsValid()) {
@@ -741,8 +784,8 @@ void Entity::SetSelection(const mol::EntityView& view)
     sel_=view;
   }
   this->UpdateSelection();
-  this->FlagRebuild();  
-  Scene::Instance().SelectionChanged(GetName(), view);  
+  this->FlagRebuild();
+  Scene::Instance().SelectionChanged(GetName(), view);
   Scene::Instance().RequestRedraw();
 }
 
@@ -771,9 +814,21 @@ void Entity::ColorByElement()
   this->Apply(cop);
 }
 
+void Entity::ColorByElement(const String& selection)
+{
+  ByElementColorOp cop = ByElementColorOp(selection);
+  this->Apply(cop);
+}
+
 void Entity::ColorByChain()
 {
   ByChainColorOp cop = ByChainColorOp();
+  this->Apply(cop);
+}
+
+void Entity::ColorByChain(const String& selection)
+{
+  ByChainColorOp cop = ByChainColorOp(selection);
   this->Apply(cop);
 }
 
@@ -801,6 +856,16 @@ void Entity::ColorBy(const String& prop,
                      mol::Prop::Level level)
 {
   GradientLevelColorOp glop = GradientLevelColorOp("",prop, gradient,minv,maxv,level);
+  this->Apply(glop);
+}
+
+void Entity::ColorBy(const String& prop,
+                     const Gradient& gradient,
+                     float minv,float maxv,
+                     bool clamp)
+{
+  GradientLevelColorOp glop = GradientLevelColorOp("",prop, gradient,minv,maxv,mol::Prop::UNSPECIFIED);
+  glop.SetClamp(clamp);
   this->Apply(glop);
 }
 
@@ -833,12 +898,17 @@ void Entity::ColorBy(const String& prop,
   this->Apply(glop);
 }
 
+void Entity::ColorBy(const String& prop,
+                     const Gradient& gradient,
+                     const String& selection)
+{
+  GradientLevelColorOp glop = GradientLevelColorOp(selection,prop,gradient);
+  this->Apply(glop);
+}
+
 mol::EntityView Entity::GetView() const
 {
-  if (update_view_) {
-    update_view_=false;    
-    cached_view_=qv_.GetEntityView();
-  }
+  do_update_view();
   return cached_view_;
 }
 
@@ -847,6 +917,51 @@ void Entity::SetQuery(const mol::Query& q)
   qv_.SetQuery(q);
   update_view_=true;
   Rebuild();
+}
+
+void Entity::Reset(const mol::EntityHandle& eh)
+{
+  qv_=mol::QueryViewWrapper(qv_.GetQuery(),qv_.GetFlags(),eh);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::Reset(const mol::EntityHandle& eh, const mol::Query& q)
+{
+  qv_=mol::QueryViewWrapper(q,qv_.GetFlags(),eh);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::Reset(const mol::EntityHandle& eh, const mol::Query& q, mol::QueryFlags f)
+{
+  qv_=mol::QueryViewWrapper(q,f,eh);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::Reset(const mol::EntityView& ev)
+{
+  qv_=mol::QueryViewWrapper(ev);
+  update_view_=true;
+  Rebuild();
+}
+
+void Entity::SetQueryView(const mol::QueryViewWrapper& qv)
+{
+  qv_=qv;
+  update_view_=true;
+  Rebuild();
+}
+
+mol::QueryViewWrapper Entity::GetQueryView() const
+{
+  return qv_;
+}
+
+mol::EntityHandle Entity::GetEntity() const
+{
+  return qv_.GetEntity();
 }
 
 void Entity::ColorBy(const String& prop,
@@ -920,7 +1035,9 @@ template <typename I, typename O>
 void apply_color_op_to_renderer_list(I begin, I end, const O& o)
 {
   for (I i=begin; i!=end; ++i) {
-    i->second->Apply(o);
+    if(i->second->IsEnabled() && i->second->HasDataToRender()) {
+      i->second->Apply(o);
+    }
   }
 }
 
@@ -1006,11 +1123,47 @@ void Entity::ReapplyColorOps()
   GfxObj::ReapplyColorOps();
 }
 
-void Entity::UpdateView() 
+void Entity::UpdateView()
 {
-  update_view_=true; 
+  update_view_=true;
   Rebuild();
-  UpdatePositions();
+  FlagRebuild();  
+  Scene::Instance().RequestRedraw();
+}
+
+void Entity::SetSeqHack(bool b)
+{
+  if(b!=trace_.GetSeqHack()) {
+    trace_.SetSeqHack(b);
+    FlagRebuild();
+    Scene::Instance().RequestRedraw();
+  }
+}
+
+bool Entity::GetSeqHack() const
+{
+  return trace_.GetSeqHack();
+}
+
+void Entity::do_update_view() const
+{
+  // also signals an update in positions
+  if (update_view_) {
+    update_view_=false;    
+    cached_view_=qv_.GetEntityView();
+    trace_.ResetView(cached_view_);
+    for (RendererMap::iterator i=renderer_.begin(), 
+           e=renderer_.end(); i!=e; ++i) {
+      impl::EntityRenderer* r=i->second;
+      if (r->IsEnabled() && r->HasDataToRender()) {
+        r->ClearViews();
+        r->AddView(cached_view_);
+        r->UpdateViews();
+        r->FlagPositionsDirty();
+        r->PrepareRendering();
+      }
+    }
+  }
 }
 
 }} // ns

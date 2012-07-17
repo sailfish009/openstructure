@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -45,10 +45,10 @@
 #include <ost/gui/sequence_viewer/sequence_viewer.hh>
 
 #if OST_IMG_ENABLED
-  #include <ost/io/img/load_map.hh>
-  #include <ost/gfx/map_iso.hh>
-  #include <ost/img/extent.hh>
-  #include <ost/gui/data_viewer/data_viewer.hh>
+#  include <ost/io/img/load_map.hh>
+#  include <ost/gfx/map_iso.hh>
+#  include <ost/img/extent.hh>
+#  include <ost/gui/data_viewer/data_viewer.hh>
 #endif
 
 #include <QDir>
@@ -133,21 +133,24 @@ void FileLoader::AddToScene(const QString& filename, gfx::GfxObjP obj)
 
 gfx::GfxObjP FileLoader::NoHandlerFound(const QString& filename)
 {
-  FileTypeDialog dialog(filename);
+  /// FIXME: This currently leaks! I haven't found a way to allocate the dialog 
+  /// on the stack without crashing the program.
+  /// This is BZDNG-192
+  FileTypeDialog* dialog=new FileTypeDialog(filename);
   try{
-    if(dialog.exec()){
-      if(dialog.GetEntityHandler()){
-        return TryLoadEntity(filename, dialog.GetEntityHandler());
+    if(dialog->exec()){
+      if(dialog->GetEntityHandler()){
+        return TryLoadEntity(filename, dialog->GetEntityHandler());
       }
-      if(dialog.GetSequenceHandler()){
-        return TryLoadAlignment(filename, dialog.GetSequenceHandler());
+      if(dialog->GetSequenceHandler()){
+        return TryLoadAlignment(filename, dialog->GetSequenceHandler());
       }
-      if(dialog.GetSurfaceHandler()){
-        return TryLoadSurface(filename,dialog.GetSurfaceHandler());
+      if(dialog->GetSurfaceHandler()){
+        return TryLoadSurface(filename,dialog->GetSurfaceHandler());
       }
   #if OST_IMG_ENABLED
-      if(dialog.GetMapHandler()){
-        return TryLoadMap(filename,dialog.GetMapHandler());
+      if(dialog->GetMapHandler()){
+        return TryLoadMap(filename,dialog->GetMapHandler());
       }
   #endif
     }
@@ -246,13 +249,14 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHand
     else{
       QFileInfo file_info(filename);
       mol::EntityHandle eh=mol::CreateEntity();
-      mol::XCSEditor xcs_lock=eh.RequestXCSEditor(mol::BUFFERED_EDIT);
+      mol::XCSEditor xcs_lock=eh.EditXCS(mol::BUFFERED_EDIT);
       handler->Import(eh,filename.toStdString());
       if(handler->RequiresBuilder()) {
           conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();
           conop::Conopology::Instance().ConnectAll(builder,eh,0);
       }
-      gfx::GfxObjP obj(new gfx::Entity(file_info.baseName().toStdString(),eh,mol::Query(selection.toStdString())));
+      gfx::GfxObjP obj(new gfx::Entity(file_info.baseName().toStdString(),
+                       eh, mol::Query(selection.toStdString())));
       return obj;
     }
   }
@@ -285,8 +289,7 @@ gfx::GfxObjP FileLoader::TryLoadMap(const QString& filename, io::MapIOHandlerPtr
       //FIXME ImageHandle should not be destroyed at the end of method
       //therefore hack with list
       loaded_images_.append(map);
-      ost::img::gui::DataViewer* viewer = GostyApp::Instance()->CreateDataViewer(loaded_images_.last());
-      gui::GostyApp::Instance()->GetPerspective()->GetMainArea()->AddWidget(filename,viewer);
+      GostyApp::Instance()->CreateDataViewer(loaded_images_.last());
       throw io::IOFileAlreadyLoadedException("Loaded in DataViewer");
     }
   }
@@ -368,7 +371,8 @@ void FileLoader::RunScript(const QString& filename)
   pi.RunCommand("sys.argv.append('"+QFileInfo(filename).fileName()+"')");
   pi.RunCommand("_dir=os.getcwd()");
   pi.RunCommand("os.chdir('"+QFileInfo(filename).absolutePath()+"')");
-  pi.RunCommand("execfile('"+QFileInfo(filename).fileName()+"')");
+  pi.RunScript(QFileInfo(filename).absoluteFilePath());
+  //pi.RunCommand("execfile('"+QFileInfo(filename).fileName()+"')");
   pi.RunCommand("os.chdir(_dir)");
   pi.RunCommand("del(_dir)");
   pi.RunCommand("sys.argv=_sys_argv_backup");
@@ -378,7 +382,7 @@ void FileLoader::RunScript(const QString& filename)
 
 void FileLoader::LoadPDB(const QString& filename, const QString& selection)
 {
-  io::PDBReader reader(filename.toStdString());
+  io::PDBReader reader(filename.toStdString(), io::IOProfile());
   QList<mol::EntityHandle> entities;
   conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
   while (reader.HasNext()){

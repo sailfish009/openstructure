@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -21,6 +21,7 @@ using namespace boost::python;
 
 #include <ost/gfx/gfx_object.hh>
 #include <ost/gfx/scene.hh>
+#include <ost/gfx/exporter.hh>
 using namespace ost;
 using namespace ost::gfx;
 
@@ -63,23 +64,34 @@ void export_Scene()
 
   void (Scene::* export1)(const String&, uint, uint, bool) = &Scene::Export;
   void (Scene::* export2)(const String&, bool) = &Scene::Export;
+  void (Scene::* export3)(Exporter*) const = &Scene::Export;
   void (Scene::*remove1)(const GfxNodeP&) = &Scene::Remove;
   void (Scene::*remove2)(const String&) = &Scene::Remove;
   void (Scene::*center_on1)(const String&) = &Scene::CenterOn;
   void (Scene::*center_on2)(const GfxObjP&) = &Scene::CenterOn;
-
+  
+  class_<Viewport>("Viewport", init<>())
+    .def_readwrite("x", &Viewport::x)
+    .def_readwrite("y", &Viewport::y)
+    .def_readwrite("width", &Viewport::width)
+    .def_readwrite("height", &Viewport::height)
+  ;
+  
   class_<Scene, boost::noncopyable>("SceneSingleton",no_init)
     .def("Add", &Scene::Add, 
          scene_add_overloads())
     .def("Autoslab", &Scene::Autoslab, 
          scene_autoslab_overloads())
     .def("AutoAutoslab",&Scene::AutoAutoslab)
+    .def("GetAutoAutoslab",&Scene::GetAutoAutoslab)
     .def("AutoslabMax",&Scene::AutoslabMax)
     .def("Remove", remove1)
     .def("Remove", remove2)
+    .add_property("viewport", &Scene::GetViewport)
     .def("RequestRedraw", &Scene::RequestRedraw)
     .def("SetCenter",&Scene::SetCenter)
     .def("GetCenter",&Scene::GetCenter)
+    .add_property("center", &Scene::GetCenter, &Scene::SetCenter)
     .def("CenterOn",center_on1)
     .def("CenterOn",center_on2)
     .def("UnProject",  &Scene::UnProject, arg("ignore_vp")=false)
@@ -88,85 +100,107 @@ void export_Scene()
     .def("RenderGL", &Scene::RenderGL)
     .def("Resize", &Scene::Resize)
     .def("HasNode", &Scene::HasNode)
+    .def("GetBackground", &Scene::GetBackground)
     .def("SetBackground", &Scene::SetBackground)
-    .add_property("transform", &Scene::GetTransform, &Scene::SetTransform)
-    .add_property("fov", &Scene::GetFOV, &Scene::SetFOV)
-    .add_property("center", &Scene::GetCenter, &Scene::SetCenter)
-    .add_property("near", &Scene::GetNear, &Scene::SetNear)
-    .add_property("far", &Scene::GetFar, &Scene::SetFar)
-    .def("SetNearFar",&Scene::SetNearFar)
-    .def("SetFog",&Scene::SetFog)
-    .def("SetFogColor",&Scene::SetFogColor)
-    .def("SetFOV",&Scene::SetFOV)
-    .def("GetFOV",&Scene::GetFOV)
-    .def("SetFogOffsets",&Scene::SetFogOffsets)
-    .def("Stereo",&Scene::Stereo)
-    .def("SetStereoInverted",&Scene::SetStereoInverted)
-    .def("SetStereoView",&Scene::SetStereoView)
-    .def("SetStereoEyeDist",&Scene::SetStereoEyeDist)
-    .def("SetStereoEyeOff",&Scene::SetStereoEyeOff)
-    .def("SetLightDir",&Scene::SetLightDir)
-    .def("SetLightProp",set_light_prop1)
-    .def("SetLightProp",set_light_prop2)
-    .def("Apply", apply)
-    .def("Export",export1, arg("transparent")=true)
-    .def("Export",export2, arg("transparent")=true)
-    .def("ExportPov",&Scene::ExportPov,
-         scene_export_pov_overloads())
-    .def("GetRTC",&Scene::GetRTC)
-    .def("SetRTC",&Scene::SetRTC)
-    .def("GetTransform",&Scene::GetTransform)
-    .def("SetTransform",&Scene::SetTransform)
-    .def("PushView",&Scene::PushView)
-    .def("PopView",&Scene::PopView)
-    .def("SetSelectionMode",&Scene::SetSelectionMode)
-    .def("GetSelectionMode",&Scene::GetSelectionMode)
-    .def("SetBlur",&Scene::SetBlur)
-    .def("BlurSnapshot",&Scene::BlurSnapshot)
-    .def("RemoveAll", &Scene::RemoveAll)
-    .def("SetShadow",&Scene::SetShadow)
-    .def("SetShadowQuality",&Scene::SetShadowQuality)
-    .def("SetShadowWeight",&Scene::SetShadowWeight)
-    .def("SetDepthDarkening",&Scene::SetDepthDarkening)
-    .def("SetDepthDarkeningWeight",&Scene::SetDepthDarkeningWeight)
-    .def("SetAmbientOcclusion",&Scene::SetAmbientOcclusion)
-    .def("SetAmbientOcclusionWeight",&Scene::SetAmbientOcclusionWeight)
-    .def("SetAmbientOcclusionMode",&Scene::SetAmbientOcclusionMode)
-    .def("SetAmbientOcclusionQuality",&Scene::SetAmbientOcclusionQuality)
-    .def("AttachObserver",&Scene::AttachObserver)
-    .def("StartOffscreenMode",&Scene::StartOffscreenMode)
-    .def("StopOffscreenMode",&Scene::StopOffscreenMode)
-    .def("SetShadingMode",&Scene::SetShadingMode)
-    .def("SetBeacon",&Scene::SetBeacon)
-    .def("SetBeaconOff",&Scene::SetBeaconOff)
-    .def("__getitem__",scene_getitem)
     .add_property("bg",
                   &Scene::GetBackground, 
                   &Scene::SetBackground)
-    .add_property("center", &Scene::GetCenter, &Scene::SetCenter)
+    .def("SetNear",&Scene::SetNear)
+    .def("GetNear",&Scene::GetNear)
     .add_property("near", &Scene::GetNear, &Scene::SetNear)
+    .def("SetFar",&Scene::SetFar)
+    .def("GetFar",&Scene::GetFar)
     .add_property("far", &Scene::GetFar, &Scene::SetFar)
-    .add_property("fov", &Scene::GetFOV, &Scene::SetFOV)
+    .def("SetNearFar",&Scene::SetNearFar)
+    .def("SetFog",&Scene::SetFog)
+    .def("GetFog",&Scene::GetFog)
     .add_property("fog", &Scene::GetFog, &Scene::SetFog)
+    .def("SetFogColor",&Scene::SetFogColor)
+    .def("GetFogColor",&Scene::GetFogColor)
     .add_property("fogcol", &Scene::GetFogColor, &Scene::SetFogColor)
+    .add_property("fog_color", &Scene::GetFogColor, &Scene::SetFogColor)
+    .def("SetFOV",&Scene::SetFOV)
+    .def("GetFOV",&Scene::GetFOV)
+    .add_property("fov", &Scene::GetFOV, &Scene::SetFOV)
+    .def("SetFogOffsets",&Scene::SetFogOffsets)
     .add_property("fogno",
                   &Scene::GetFogNearOffset, 
                   &Scene::SetFogNearOffset)
     .add_property("fogfo",
                   &Scene::GetFogFarOffset, 
                   &Scene::SetFogFarOffset)
+    .def("GetRTC",&Scene::GetRTC)
+    .def("SetRTC",&Scene::SetRTC)
+    .add_property("rtc",&Scene::GetRTC,&Scene::SetRTC)
+    .def("GetTransform",&Scene::GetTransform)
+    .def("SetTransform",&Scene::SetTransform)
+    .add_property("transform", &Scene::GetTransform, &Scene::SetTransform)
+    .def("SetSelectionMode",&Scene::SetSelectionMode)
+    .def("GetSelectionMode",&Scene::GetSelectionMode)
     .add_property("smode",
-                  &Scene::GetSelectionMode,
-                  &Scene::SetSelectionMode)
-    // deprecated python properties!
-    .add_property("selection_mode", &Scene::GetSelectionMode,
-                   &Scene::SetSelectionMode)
-    .add_property("fog_near_offset",
-                  &Scene::GetFogNearOffset, 
-                  &Scene::SetFogNearOffset)
-    .add_property("fog_far_offset",
-                  &Scene::GetFogFarOffset, 
-                  &Scene::SetFogFarOffset)
-    
+                 &Scene::GetSelectionMode,
+                 &Scene::SetSelectionMode)
+    .def("SetStereoMode",&Scene::SetStereoMode)
+    .def("GetStereoMode",&Scene::GetStereoMode)
+    .add_property("stereo_mode",&Scene::GetStereoMode,&Scene::SetStereoMode)
+    .def("SetStereoFlip",&Scene::SetStereoFlip)
+    .def("GetStereoFlip",&Scene::GetStereoFlip)
+    .add_property("stereo_flip",&Scene::GetStereoFlip,&Scene::SetStereoFlip)
+    .def("SetStereoView",&Scene::SetStereoView)
+    .def("GetStereoView",&Scene::GetStereoView)
+    .add_property("stereo_view",&Scene::GetStereoView,&Scene::SetStereoView)
+    .def("SetStereoIOD",&Scene::SetStereoIOD)
+    .def("GetStereoIOD",&Scene::GetStereoIOD)
+    .add_property("stereo_iod",&Scene::GetStereoIOD,&Scene::SetStereoIOD)
+    .def("SetStereoDistance",&Scene::SetStereoDistance)
+    .def("GetStereoDistance",&Scene::GetStereoDistance)
+    .add_property("stereo_distance",&Scene::GetStereoDistance,&Scene::SetStereoDistance)
+    .def("SetStereoAlg",&Scene::SetStereoAlg)
+    .def("GetStereoAlg",&Scene::GetStereoAlg)
+    .add_property("stereo_alg",&Scene::GetStereoAlg,&Scene::SetStereoAlg)
+    .def("SetLightDir",&Scene::SetLightDir)
+    .def("SetLightProp",set_light_prop1)
+    .def("SetLightProp",set_light_prop2)
+    .def("Apply", apply)
+    .def("Export",export1, arg("transparent")=false)
+    .def("Export",export2, arg("transparent")=false)
+    .def("Export",export3)
+    .def("ExportPov",&Scene::ExportPov,
+         scene_export_pov_overloads())
+    .def("PushView",&Scene::PushView)
+    .def("PopView",&Scene::PopView)
+    .def("SetBlur",&Scene::SetBlur)
+    .def("BlurSnapshot",&Scene::BlurSnapshot)
+    .def("RemoveAll", &Scene::RemoveAll)
+    .def("SetShadow",&Scene::SetShadow)
+    .add_property("shadow",&Scene::GetShadow,&Scene::SetShadow)
+    .def("SetShadowQuality",&Scene::SetShadowQuality)
+    .add_property("shadow_quality",&Scene::GetShadowQuality,&Scene::SetShadowQuality)
+    .def("SetShadowWeight",&Scene::SetShadowWeight)
+    .add_property("shadow_weight",&Scene::GetShadowWeight,&Scene::SetShadowWeight)
+    .def("SetDepthDarkening",&Scene::SetDepthDarkening)
+    .def("SetDepthDarkeningWeight",&Scene::SetDepthDarkeningWeight)
+    .def("SetAmbientOcclusion",&Scene::SetAmbientOcclusion)
+    .add_property("ambient_occlusion",&Scene::GetAmbientOcclusion,&Scene::SetAmbientOcclusion)
+    .add_property("ao",&Scene::GetAmbientOcclusion,&Scene::SetAmbientOcclusion)
+    .def("SetAmbientOcclusionWeight",&Scene::SetAmbientOcclusionWeight)
+    .add_property("ambient_occlusion_weight",&Scene::GetAmbientOcclusionWeight,&Scene::SetAmbientOcclusionWeight)
+    .add_property("ao_weight",&Scene::GetAmbientOcclusionWeight,&Scene::SetAmbientOcclusionWeight)
+    .def("SetAmbientOcclusionMode",&Scene::SetAmbientOcclusionMode)
+    .add_property("ambient_occlusion_mode",&Scene::GetAmbientOcclusionMode,&Scene::SetAmbientOcclusionMode)
+    .add_property("ao_mode",&Scene::GetAmbientOcclusionMode,&Scene::SetAmbientOcclusionMode)
+    .def("SetAmbientOcclusionQuality",&Scene::SetAmbientOcclusionQuality)
+    .add_property("ambient_occlusion_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
+    .add_property("ao_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
+    .def("AttachObserver",&Scene::AttachObserver)
+    .def("StartOffscreenMode",&Scene::StartOffscreenMode)
+    .def("StopOffscreenMode",&Scene::StopOffscreenMode)
+    .def("SetShadingMode",&Scene::SetShadingMode)
+    .def("SetBeacon",&Scene::SetBeacon)
+    .add_property("root_node", &Scene::GetRootNode)
+    .def("SetBeaconOff",&Scene::SetBeaconOff)
+    .def("__getitem__",scene_getitem)
+    .add_property("show_center",&Scene::GetShowCenter, &Scene::SetShowCenter)
+    .add_property("fix_center",&Scene::GetFixCenter, &Scene::SetFixCenter)
   ;
 }

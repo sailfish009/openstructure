@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -249,6 +249,12 @@ EntityView ChainHandle::Select(const String& q, QueryFlags flags) const {
                                         q+")"), flags);
   }
   else return this->GetEntity().Select(Query("cname='"+Impl()->GetName()+"'"), flags);
+}
+
+void ChainHandle::SetInSequence(const int index)
+{
+  this->CheckValidity();    
+  Impl()->SetInSequence(index);
 }
 
 }}

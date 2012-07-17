@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,6 +20,8 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
+#include <ost/export_helper/pair_to_tuple_conv.hh>
+
 #include <ost/mol/entity_view.hh>
 #include <ost/mol/query.hh>
 #include <ost/mol/mol.hh>
@@ -29,6 +31,17 @@ using namespace ost::mol;
 #include "bounds.hh"
 
 namespace {
+
+template<class T>
+std::vector<T> from_list(const list& seq)
+{
+  std::vector<T> nrvo;
+  for (int i = 0; i < len(seq); ++i) {
+    nrvo.push_back(extract<T>(seq[i]));
+  }
+  return nrvo;
+}
+
 
 typedef ChainView (EntityView::*StringMethod)(const String&) const;
 typedef ChainView (EntityView::*StringMethod)(const String&) const;
@@ -45,8 +58,21 @@ StringMethod find_chain_str=&EntityView::FindChain;
 QSMethod select_string=&EntityView::Select;
 QueryMethod  select_query=&EntityView::Select;
 
-EntityView (*create_view_1)(const AtomHandleList&)=&CreateViewFromAtomList;
-EntityView (*create_view_2)(const AtomViewList&)=&CreateViewFromAtomList;
+EntityView create_view(const list& seq)
+{
+  if(len(seq)==0) return EntityView();
+  extract<AtomHandle> get_handle(seq[0]);
+  if(get_handle.check()) {
+    return CreateViewFromAtomList(from_list<AtomHandle>(seq));
+  }
+  extract<AtomView> get_view(seq[0]);
+  if(get_view.check()) {
+    return CreateViewFromAtomList(from_list<AtomView>(seq));
+  }
+  throw Error("expected sequence of atom handles or atom views");
+  return EntityView();
+}
+
 ResidueView (EntityView::*add_res_a)(const ResidueHandle&, 
                                      ViewAddFlags)=&EntityView::AddResidue;
 ResidueView (EntityView::*add_res_b)(const ResidueView&, 
@@ -111,6 +137,7 @@ void export_EntityView()
     .def("RemoveResidue", &EntityView::RemoveResidue)
     .def("RemoveAtom", &EntityView::RemoveAtom)
     .def("CreateEmptyView", &EntityView::CreateEmptyView)
+    .def("IsValid", &EntityView::IsValid)    
     .def("CreateFullView", &EntityView::CreateFullView)
     .def("AddAllInclusiveBonds", &EntityView::AddAllInclusiveBonds)
     .add_property("chain_count", &EntityView::GetChainCount)
@@ -163,8 +190,7 @@ void export_EntityView()
   def("Difference", &Difference);
   def("Intersection", &Intersection);
 
-  def("CreateViewFromAtoms", create_view_1);
-  def("CreateViewFromAtoms", create_view_2);
+  def("CreateViewFromAtoms", create_view);
   
   def("CreateEntityFromView", &CreateEntityFromView, 
       arg("handle")=EntityHandle());

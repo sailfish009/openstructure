@@ -17,7 +17,7 @@
 # Author: Marco Biasini
 #-------------------------------------------------------------------------------
 
-set(PYTHON_VERSIONS 2.6 2.5 2.4 2.3 2.2 )
+set(PYTHON_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 )
 set(PYTHON_MIN_VERSION 2.2.1)
 
 #-------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ endmacro()
 #-------------------------------------------------------------------------------
 macro(check_for_python_lib)
   if(PYTHON_VERSION)
-    _find_python_lib("${PYTHON_ROOT}" "${PYTHON_VERSION}")
+    _find_python("${PYTHON_ROOT}" "${PYTHON_VERSION}")
   else()
     foreach(_VERSION ${PYTHON_VERSIONS})
      if(${PYTHON_MIN_VERSION} VERSION_LESS ${_VERSION})

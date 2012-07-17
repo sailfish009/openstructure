@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -27,10 +27,10 @@
 using namespace ost;
 using namespace ost::mol;
 
-struct Fixture {
-  Fixture() {
+struct FixtureView {
+  FixtureView() {
     e=CreateEntity();
-    XCSEditor editor=e.RequestXCSEditor();
+    XCSEditor editor=e.EditXCS();
     c=editor.InsertChain("A");
     r=editor.AppendResidue(c, "ANGELIN");
     aa=editor.InsertAtom(r, "X1", geom::Vec3( 0.0, 0.0,  0.0));
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_SUITE( mol_base )
 
 BOOST_AUTO_TEST_CASE(gen_full_view) 
 {
-  Fixture f;
+  FixtureView f;
 
   EntityView ev = f.e.CreateFullView();
   BOOST_CHECK_EQUAL(ev.GetChainCount(),f.e.GetChainCount());

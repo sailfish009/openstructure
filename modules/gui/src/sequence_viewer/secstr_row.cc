@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -36,7 +36,7 @@ namespace ost { namespace gui {
 SecStrRow::SecStrRow(const QString& name, mol::ChainView& chain, SequenceViewObject* parent) : SequenceRow(name,parent)
 { this->SetChain(chain); }
 
-void SecStrRow::SetSequence(seq::SequenceHandle& sequence)
+void SecStrRow::SetSequence(seq::ConstSequenceHandle sequence)
 {
   //Do nothing
 }

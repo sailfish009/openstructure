@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -48,11 +48,11 @@ Mat3 Vec3List::GetInertia() const
 Mat3 Vec3List::GetPrincipalAxes() const
 {
   Mat3 inertia=this->GetInertia();  
-  EMat3 inertia_mat(*reinterpret_cast<EMat3*>(&inertia));
+  EMat3 inertia_mat(inertia.Data());
 
   Eigen::SVD<EMat3> svd(inertia_mat);
   EMat3 rot=svd.matrixU();
-  Mat3 axes(*reinterpret_cast<Mat3*>(&rot));
+  Mat3 axes(rot.data());
   return axes;
 }
 
@@ -68,5 +68,18 @@ Vec3 Vec3List::GetCenter() const
   return center/=this->size();
 }
 
+Line3 Vec3List::GetODRLine()
+{
+  Vec3 center=this->GetCenter();
+  Vec3 direction=this->GetPrincipalAxes().GetRow(2);
+  return Line3(center,center+direction);
+}
 
+Plane Vec3List::GetODRPlane()
+{
+  Vec3 origin=this->GetCenter();
+  Vec3 normal=this->GetPrincipalAxes().GetRow(0);
+  return Plane(origin,normal);
+}
+  
 }

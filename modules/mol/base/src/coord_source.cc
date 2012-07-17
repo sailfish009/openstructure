@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -63,7 +63,7 @@ void CoordSource::CopyFrame(uint frame_id)
     return;
   }
   assert(frame->size()==atoms_.size());
-  XCSEditor edi=atoms_.front().GetEntity().RequestXCSEditor(BUFFERED_EDIT);  
+  XCSEditor edi=atoms_.front().GetEntity().EditXCS(BUFFERED_EDIT);  
   CoordFrame::const_iterator c=frame->begin();
   for (AtomHandleList::iterator i=atoms_.begin(), 
        e=atoms_.end(); i!=e; ++i, ++c) {

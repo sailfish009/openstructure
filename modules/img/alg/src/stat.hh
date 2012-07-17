@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -39,6 +39,11 @@ namespace ost { namespace img { namespace alg {
   Since this algorithm is implemented as a combined image stage visitor
   and algorithm, the main workhorse is this class StatBase, which will
   act as the parent class of the actual algorithm class, Stat
+  
+  Mean value, variance and standard deviation are calculated based on the one pass algorithm by Welford et al.:
+  B. P. Welford (1962)."Note on a method for calculating corrected sums of squares and products". Technometrics 4(3):419–420
+  The calculation of the higher order central moments is implemented according to Terriberry:
+  Terriberry, Timothy B. (2007), Computing Higher-Order Moments Online (http://people.xiph.org/~tterribe/notes/homs.html)
 */
 
 class DLLEXPORT_IMG_ALG StatBase

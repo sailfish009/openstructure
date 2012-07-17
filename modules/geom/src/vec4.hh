@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -45,7 +45,7 @@ class DLLEXPORT Vec4:
 {
 public:
   //! Default initialization, all components are set to zero
-  Vec4(): x(0), y(0), z(0), w(0) { }
+  Vec4(): x(0), y(0), z(0), w(1) { }
 
   //! Initialization with x, y and z component
   Vec4(Real px, Real py, Real pz, Real pw): x(px), y(py), z(pz), w(pw) { }

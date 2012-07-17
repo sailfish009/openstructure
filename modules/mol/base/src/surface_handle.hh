@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -72,9 +72,19 @@ public:
 
   bool IsValid() const {return impl_;}
 
+  bool operator==(const SurfaceHandle& ref) const { return impl_==ref.impl_; }
+
+  bool operator!=(const SurfaceHandle& ref) const { return !this->operator==(ref); }
+
 private:
   impl::SurfaceImplP impl_;
+
 };
+
+DLLEXPORT_OST_MOL std::ostream& operator<<(std::ostream& os,
+                                           const SurfaceHandle& surf);
+
+typedef std::vector<SurfaceHandle> SurfaceHandleList;
 
 }} // ns
 

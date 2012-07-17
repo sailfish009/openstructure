@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -28,10 +28,9 @@ using namespace ost::conop;
 
 void export_Conop() {
   class_<Conopology, boost::noncopyable>("Conopology", no_init)
-     .def("Instance", &Conopology::Instance, return_value_policy<reference_existing_object>()).staticmethod("Instance")
+    .def("Instance", &Conopology::Instance, return_value_policy<reference_existing_object>()).staticmethod("Instance")
     .def("ConnectAll", &Conopology::ConnectAll)
     .def("GetBuilder", &Conopology::GetBuilder)
-    .def("GetDefaultAtomRadius", &Conopology::GetDefaultAtomRadius)
     .def("ConnectAll", &Conopology::ConnectAll)
     .def("RegisterBuilder", &Conopology::RegisterBuilder)
     .def("SetDefaultBuilder", &Conopology::SetDefaultBuilder)

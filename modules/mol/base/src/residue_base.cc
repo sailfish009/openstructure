@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -44,6 +44,23 @@ const GenericPropContainerImpl* ResidueBase::GpImpl() const
   return Impl().get();
 }
 
+AtomHandle ResidueBase::GetCentralAtom() const 
+{
+  this->CheckValidity();
+  return AtomHandle(Impl()->GetCentralAtom());
+}
+
+void ResidueBase::SetCentralAtom(const AtomHandle& a)
+{
+  this->CheckValidity();
+  impl_->SetCentralAtom(a.Impl());
+}
+
+geom::Vec3 ResidueBase::GetCentralNormal() const 
+{
+  this->CheckValidity();
+  return impl_->GetCentralNormal();
+}
 
 const ResNum& ResidueBase::GetNumber() const {
   this->CheckValidity();
@@ -63,14 +80,6 @@ const String& ResidueBase::GetName() const {
 String ResidueBase::GetQualifiedName() const {
   this->CheckValidity();
   return impl_->GetQualifiedName();
-}
-
-ResidueBase::operator bool() const {
-  return impl_.get()!=0;
-}
-
-bool ResidueBase::IsValid() const {
-  return impl_.get()!=0;
 }
 
 bool ResidueBase::IsPeptideLinking() const 
@@ -94,6 +103,18 @@ void ResidueBase::SetChemClass(ChemClass cc)
   this->CheckValidity();
   Impl()->SetChemClass(cc);
 }
+
+void ResidueBase::SetChemType(ChemType ct)
+{
+  this->CheckValidity();
+  Impl()->SetChemType(ct);
+}
+
+ChemType ResidueBase::GetChemType() const
+{
+  this->CheckValidity();
+  return Impl()->GetChemType();
+};
 
 SecStructure ResidueBase::GetSecStructure() const 
 {
@@ -142,7 +163,7 @@ void ResidueBase::CheckValidity() const
 }
 
 std::ostream& operator<<(std::ostream& os, const ResidueBase& residue) {
-  if (residue.IsValid()) {
+  if (residue.Impl()) {
     os << residue.GetQualifiedName();
   } else {
     os << "invalid residue"; 
@@ -191,6 +212,18 @@ void ResidueBase::SetIsProtein(bool protein)
 {
   this->CheckValidity();
   Impl()->SetProtein(protein);
+}
+
+void ResidueBase::SetIsLigand(bool ligand)
+{
+  this->CheckValidity();
+  return Impl()->SetIsLigand(ligand);
+}
+
+bool ResidueBase::IsLigand() const
+{
+  this->CheckValidity();
+  return Impl()->IsLigand();
 }
 
 }}

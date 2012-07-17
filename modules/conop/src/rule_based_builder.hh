@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -116,16 +116,21 @@ public:
   /// \brief Set residue properties such as chemical class
   virtual void FillResidueProps(mol::ResidueHandle residue);
 
-  /// \brief whether the residue has unknown atoms
-  bool HasUnknownAtoms(mol::ResidueHandle res);                              
+  mol::AtomHandleList GetUnknownAtoms(mol::ResidueHandle res);
+  
   /// \brief Check whether the residue has all required atoms. This does not
   ///        include hydrogens and leaving atoms such as the terminal OXT.
   virtual bool IsResidueComplete(const mol::ResidueHandle& residue);
+  
+  CompoundLibPtr GetCompoundLib() const { return compound_lib_; }
 private:
   CompoundLibPtr      compound_lib_;
   CompoundPtr         last_compound_;
   mol::ResidueHandle  last_residue_;
   bool                unknown_atoms_;
+  /// \brief whether the residue has unknown atoms
+  bool HasUnknownAtoms(mol::ResidueHandle res);
+
   void LookupCompound(const mol::ResidueHandle& rh);
   /// Change internal order of atoms in residue to the order given by compound
   void ReorderAtoms(mol::ResidueHandle residue, CompoundPtr compound);
@@ -137,7 +142,7 @@ private:
 
 };
 
-
+typedef boost::shared_ptr<RuleBasedBuilder> RuleBasedBuilderPtr;
 
 }}
 

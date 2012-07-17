@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -93,6 +93,7 @@ public:
   Quat& operator/=(const Quat& q);
   // comparable
   bool operator==(const Quat& q) const;
+  bool operator!=(const Quat& q) const { return !this->operator==(q); }
 
   // Apply rotation to vector.
   Vec3 Rotate(const Vec3& vec) const;
@@ -111,7 +112,9 @@ Real DLLEXPORT_OST_GEOM Dot(const Quat& q0, const Quat& q1);
 // spherical linear interpolation, with t in range [0,1]
 Quat DLLEXPORT_OST_GEOM Slerp(const Quat& q0, const Quat& q1, Real t);
 
-Quat DLLEXPORT_OST_GEOM Grassmann(const Quat& lhs, const Quat& rhs);
+Quat DLLEXPORT_OST_GEOM Inv(const Quat& q);
+Quat DLLEXPORT_OST_GEOM Exp(const Quat& q);
+Quat DLLEXPORT_OST_GEOM Log(const Quat& q);
 
 //normalize quaternion
 Quat DLLEXPORT_OST_GEOM Normalize(const Quat& q);

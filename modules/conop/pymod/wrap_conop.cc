@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -24,10 +24,15 @@ void export_Compound();
 void export_Sanitizer();
 void export_Conop();
 void export_RingFinder();
-BOOST_PYTHON_MODULE(_conop)
+void export_AminoAcids();
+void export_NonStandard();
+
+BOOST_PYTHON_MODULE(_ost_conop)
 {
   export_Builder();
   export_Conop();
   export_Compound();
   export_RingFinder();
+  export_AminoAcids();
+  export_NonStandard();
 }

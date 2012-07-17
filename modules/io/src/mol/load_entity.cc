@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,7 +20,7 @@
 #include <ost/conop/conop.hh>
 
 #include "load_entity.hh"
-
+#include <ost/mol/xcs_editor.hh>
 #include <ost/io/io_manager.hh>
 #include <ost/io/mol/entity_io_handler.hh>
 #include <ost/profile.hh>
@@ -60,7 +60,7 @@ mol::EntityHandle LoadEntity(const String& filename, int flag)
 {
   LOG_DEBUG("creating emtpy entity");
   mol::EntityHandle eh=mol::CreateEntity();
-  mol::XCSEditor xcs_lock=eh.RequestXCSEditor(mol::BUFFERED_EDIT);
+  mol::XCSEditor xcs_lock=eh.EditXCS(mol::BUFFERED_EDIT);
   Import(eh,filename,flag);
   return eh;
 }

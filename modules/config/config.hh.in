@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -31,4 +31,7 @@
 #define OST_STATIC_PROPERTY_WORKAROUND @static_props@
 #define OST_SPNAV_ENABLED @spnav_enabled@
 #define OST_FFT_USE_THREADS @fftw_use_threads@
+#define OST_NUMPY_SUPPORT_ENABLED @numpy_support@
+#define OST_DEBIAN_STYLE_LIBEXEC @debian_style_libexec@
+
 #endif

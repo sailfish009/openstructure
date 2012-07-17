@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -80,7 +80,9 @@ int main(int argc, char const *argv[])
     PrintUsage();
     return 0;
   }
-
+  if (!compound_lib) {
+    return 0;
+  }
   assert(compound_lib);
   conop::CompoundLibPtr in_mem_lib=compound_lib->Copy(":memory:");  
   compound_lib.reset();  

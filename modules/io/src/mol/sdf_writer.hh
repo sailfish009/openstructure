@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -34,11 +34,11 @@
 #include <ost/log.hh>
 #include <ost/conop/conop.hh>
 #include <ost/io/io_exception.hh>
-#include <ost/mol/mol.hh>
+#include <ost/mol/entity_visitor.hh>
 
 namespace ost { namespace io {
 
-class DLLEXPORT_OST_IO SDFWriter : public mol::EntityVisitor {
+class DLLEXPORT_OST_IO SDFWriter : public mol::EntityViewVisitor {
 public:
   SDFWriter(std::ostream& ostream);
   SDFWriter(const String& filename);
@@ -48,7 +48,7 @@ public:
   void Write(const mol::EntityHandle& ent);
 
 private:
-  virtual bool VisitChain(const mol::ChainHandle& chain);
+  virtual bool VisitChain(const mol::ChainView& chain);
 
   std::ofstream      outfile_;
   std::ostream&      ostr_;

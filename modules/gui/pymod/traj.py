@@ -1,7 +1,7 @@
 #-------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2010 by the OpenStructure authors
+# Copyright (C) 2008-2011 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -21,12 +21,13 @@ from PyQt4.QtGui import *
 from ost import *
 
 class TrajWidget(QWidget):
-  def __init__(self, traj=None, render_mode=gfx.SIMPLE, parent=None):
+  def __init__(self, traj=None, render_mode=gfx.SIMPLE, sel='', parent=None):
     QWidget.__init__(self, parent, Qt.Tool)
     self.render_mode=render_mode
     vb=QVBoxLayout()
     hb=QHBoxLayout()
     hb2=QHBoxLayout() 
+    self.selection=sel
     self.callback=None   
     self._slider=QSlider(self)
     self._slider.setOrientation(Qt.Horizontal)
@@ -116,7 +117,8 @@ class TrajWidget(QWidget):
     self._traj=traj
     if self._traj:
       ev=traj.GetEntity()
-      self.gfx_entity=gfx.Entity("mol",self.render_mode, ev)
+      self.gfx_entity=gfx.Entity("mol",self.render_mode,
+                                 ev.Select(self.selection))
       gfx.Scene().Add(self.gfx_entity)
       gfx.Scene().CenterOn(self.gfx_entity)
       # enable the blur effect

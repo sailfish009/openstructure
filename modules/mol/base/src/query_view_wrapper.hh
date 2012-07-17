@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -27,6 +27,9 @@
 
 namespace ost { namespace mol {
 
+/*!
+  helper class to manage relationship between entity, query and view
+*/
 class DLLEXPORT_OST_MOL QueryViewWrapper {
 public:
   explicit QueryViewWrapper(const EntityHandle& entity_handle);
@@ -36,15 +39,26 @@ public:
   QueryViewWrapper(const Query& query, const EntityView& view = mol::EntityView());
   QueryViewWrapper(const Query& query, QueryFlags flags, const EntityHandle& handle);
   QueryViewWrapper(const Query& query, QueryFlags flags, const EntityView& view = mol::EntityView());
-  EntityView GetEntityView() const;
+
+  /// returns true if view will be recalculated from query
   bool DependsOnQuery() const;
   bool IsDataValid() const;
 
+  /// regenerates current view based on internal state
+  EntityView GetEntityView() const;
+
+  /// explicitely sets current query
   void SetQuery(const Query& query);
+  /// retrieve current query
   const Query& GetQuery() const;
 
+  /// set query flags to be used internally for the Select statement
   void SetFlags(QueryFlags flags);
+  /// returns internally used query flags
   QueryFlags GetFlags() const;
+
+  /// return underlying handle
+  EntityHandle GetEntity() const {return view_set_ ? entity_view_.GetHandle() : entity_handle_;}
 
 private:
   bool view_set_;

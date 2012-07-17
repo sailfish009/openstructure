@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,8 +20,12 @@
 /*
   Author: Marco Biasini
  */
+
 #include <ost/invalid_handle.hh>
+#include <ost/mol/residue_view.hh>
+#include <ost/mol/atom_view.hh>
 #include <ost/seq/alignment_handle.hh>
+#include <ost/mol/residue_view.hh>
 #include <ost/seq/impl/sequence_list_impl.hh>
 #include <ost/seq/impl/sequence_impl.hh>
 #include <ost/seq/sequence_list.hh>
@@ -162,6 +166,11 @@ ConstSequenceHandle AlignmentHandle::FindSequence(const String& name) const
   return ConstSequenceHandle(impl_->FindSequence(name));
 }
 
+int AlignmentHandle::FindSequenceIndex(const String& name) const
+{
+  this->CheckValidity();
+  return impl_->FindSequenceIndex(name);
+}  
 
 void AlignmentHandle::Cut(int start, int end)
 {
@@ -263,4 +272,61 @@ int AlignmentHandle::GetSequenceOffset(int seq_index)
   this->CheckValidity();
   return impl_->GetSequence(seq_index)->GetOffset();
 }
+
+Real AlignmentHandle::GetCoverage(int seq_index) const
+{
+  this->CheckValidity();
+  return impl_->GetCoverage(seq_index);
+}
+
+mol::EntityViewPair AlignmentHandle::GetMatchingBackboneViews(int idx0, int idx1) const
+{
+  this->CheckValidity();
+  const impl::SequenceImpl& s1=*impl_->GetSequence(idx0).get();
+  const impl::SequenceImpl& s2=*impl_->GetSequence(idx1).get();
+  if (!s1.HasAttachedView() || !s2.HasAttachedView()) {
+    throw std::runtime_error("both sequences must have a view attached");
+  }
+  mol::EntityView v1=s1.GetAttachedView().CreateEmptyView();
+  mol::EntityView v2=s2.GetAttachedView().CreateEmptyView();
+  for (int i=0; i<s1.GetLength(); ++i) {
+    if (s1[i]=='-' && s2[i]=='-') {
+      continue;
+    }
+    mol::ResidueView r1=s1.GetResidue(i);
+    mol::ResidueView r2=s2.GetResidue(i);
+    if (!r1.IsValid() || !r2.IsValid()) {
+      continue;
+    }
+    const char* bb_anames[]={"N", "CA", "C", "O"};
+    //for (size_t j=0; )
+    for (size_t j=0; j<4; ++j) {
+      mol::AtomView a1=r1.FindAtom(bb_anames[j]);
+      mol::AtomView a2=r2.FindAtom(bb_anames[j]);
+      if (!a1.IsValid() || !a2.IsValid()) {
+        continue;
+      }
+      v1.AddAtom(a1);
+      v2.AddAtom(a2);
+    }
+  }
+  return mol::EntityViewPair(v1, v2);
+}
+
+
+const String& AlignmentHandle::GetSequenceRole(int seq_index)
+{
+  this->CheckValidity();
+  return impl_->GetSequence(seq_index)->GetRole();
+  
+}
+  
+void AlignmentHandle::SetSequenceRole(int seq_index, const String& role)
+{
+  this->CheckValidity();
+  impl_->GetSequence(seq_index)->SetRole(role);
+  
+}
+
+
 }}

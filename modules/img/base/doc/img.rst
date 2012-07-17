@@ -237,8 +237,8 @@ methods and attributes of the ImageHandle class.
   .. method:: Extract(extent)
      
      Creates and returns a new image that contains a copy of a portion of the 
-     original image. The extracted image keeps the same :ref:`data-type` of the 
-     original image, but extractions from images in the 'FREQEUNCY' or 
+     original image. The extracted image keeps the same :ref:`data-domain` of 
+     the original image, but extractions from images in the 'FREQUENCY' or 
      'HALF FREQUENCY' domains result in :obj:`COMPLEX ` :obj:`SPATIAL` images. 
      This transformation is necessary, since the there is no guarantee that the 
      extracted :obj:`FREQUENCY` sub-image is centered around the origin and 
@@ -266,8 +266,8 @@ methods and attributes of the ImageHandle class.
   .. method:: GetComplex(pixel)
 
      Returns the complex value of the specified image pixel. If the image holds 
-     data of the 'REAL' :ref:`data-type`, the method return s complex value with 
-     the pixel content as real part and a null imaginary part.
+     data of the 'REAL' :ref:`data-domain`, the method return s complex value 
+     with the pixel content as real part and a null imaginary part.
 
      :param pixel: Image pixel
      :type  pixel: :class:`Point`
@@ -294,7 +294,7 @@ methods and attributes of the ImageHandle class.
      Returns the interpolated complex value of the virtual pixel corresponding 
      to the specified fractional indexes. This is computed by calculating a 
      weighted vector sum of the values of the surrounding pixels. If the image 
-     holds data of the 'REAL' :ref:`data-type`, the method computes the 
+     holds data of the 'REAL' :ref:`data-domain`, the method computes the 
      interpolated value using bilinear interpolation (trilinear for 3D images), 
      then returns a complex value with the interpolated value as real part and a 
      null imaginary part.
@@ -308,7 +308,7 @@ methods and attributes of the ImageHandle class.
      Returns the interpolated value of the virtual pixel corresponding to the 
      specified fractional indexes. This is computed by using bilinear 
      interpolation (trilinear for 3D images). If the image holds data of the 
-     :obj:`COMPLEX ` :ref:`data-type`, the method computes the interpolated 
+     :obj:`COMPLEX ` :ref:`data-domain`, the method computes the interpolated 
      value as a weighted vector sum of the values of the surrounding pixels, 
      then returns the amplitude of the interpolated value. 
 
@@ -326,7 +326,7 @@ methods and attributes of the ImageHandle class.
   .. method:: GetReal(pixel)
 
      Returns the value of the specified image pixel. If the image holds data of 
-     the :obj:`COMPLEX ` :ref:`data-type`, the method return the amplitude of 
+     the :obj:`COMPLEX ` :ref:`data-domain`, the method return the amplitude of 
      the pixel content.
 
      :param pixel: Image pixel
@@ -354,7 +354,7 @@ methods and attributes of the ImageHandle class.
 
   .. method:: GetType()
      
-     Returns the :ref:`data-type` of the image (:obj:`REAL` or :obj:`COMPLEX`)
+     Returns the :ref:`data-domain` of the image (:obj:`REAL` or :obj:`COMPLEX`)
   
      :rtype: DataType  ???????????
 
@@ -413,7 +413,7 @@ methods and attributes of the ImageHandle class.
   .. method:: SetComplex(pixel, value)
 
      Sets the content of the specified pixel to the provided value.  If the 
-     image holds data of the 'REAL' :ref:`data-type`, the method sets the pixel 
+     image holds data of the 'REAL' :ref:`data-domain`, the method sets the pixel 
      to the amplitude of the provided.
      value.
 
@@ -433,7 +433,7 @@ methods and attributes of the ImageHandle class.
   .. method:: SetReal(pixel, value)
 
      Sets the content of the specified pixel to the provided value.  If the 
-     image holds data of the :obj:`COMPLEX` :ref:`data-type`, the method sets 
+     image holds data of the :obj:`COMPLEX` :ref:`data-domain`, the method sets 
      the pixel to a value has a real part equal to the provided value and a null 
      complex part.
  

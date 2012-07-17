@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,9 +22,7 @@
 
 #include "cartoon_render_options.hh"
 
-namespace ost {
-
-namespace gfx {
+namespace ost { namespace gfx {
 
 CartoonRenderOptions::CartoonRenderOptions(bool force_tube):
   force_tube_(force_tube),
@@ -45,7 +43,8 @@ CartoonRenderOptions::CartoonRenderOptions(bool force_tube):
   strand_ecc_(0.3),
   strand_profile_(1),
   strand_mode_(0),
-  color_blend_mode_(0)
+  color_blend_mode_(0),
+  twist_hack_(true)
 {}
 
 RenderMode::Type CartoonRenderOptions::GetRenderMode(){
@@ -80,6 +79,8 @@ void CartoonRenderOptions::ApplyRenderOptions(RenderOptionsPtr render_options){
   strand_ecc_=options->GetStrandEcc();
   strand_profile_=options->GetStrandProfileType();
   strand_mode_=options->GetStrandMode();
+  color_blend_mode_=options->GetColorBlendMode();
+  twist_hack_=options->GetTwistHack();
   this->NotifyStateChange();
 }
 
@@ -290,8 +291,11 @@ float CartoonRenderOptions::GetMaxRad() const{
   return max_rad;
 }
 
-CartoonRenderOptions::~CartoonRenderOptions() {}
-
+void CartoonRenderOptions::SetTwistHack(bool f) 
+{
+  twist_hack_=f;
+  this->NotifyStateChange();
 }
 
-}
+}} // ns
+

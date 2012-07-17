@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -34,7 +34,7 @@ struct Fixture {
   Fixture() {
     eh = CreateEntity();
     eh.SetName("TestEntity");
-    XCSEditor e=eh.RequestXCSEditor();
+    XCSEditor e=eh.EditXCS();
     chain = e.InsertChain("A");
     res1 = e.AppendResidue(chain, "ARG");
     e.InsertAtom(res1, "CA",geom::Vec3(1,0,0));
@@ -63,6 +63,23 @@ BOOST_AUTO_TEST_CASE(seq_triv)
   BOOST_CHECK_NO_THROW(s.SetString("-afc--de-f"));
   BOOST_CHECK_EQUAL(s.GetString(),"-afc--de-f");
   BOOST_CHECK_THROW(s.SetString("1"), InvalidSequence);
+}
+
+BOOST_AUTO_TEST_CASE(match)
+{
+  BOOST_CHECK(Match("abcdefghijkl", "ABcDeFgHiJkL"));
+  BOOST_CHECK(Match("abcxXxxxxjXl", "ABcDeFgHiJkL"));
+  BOOST_CHECK(Match("ABcDeFgHiJkL", "ABcDeFXxiJxL"));
+  BOOST_CHECK(!Match("abc", "abcd"));
+  BOOST_CHECK(!Match("abc", "aby"));
+}
+
+BOOST_AUTO_TEST_CASE(seq_throw_invalid)
+{
+  SequenceHandle s;
+  BOOST_CHECK_THROW(CheckHandleValidity(s), InvalidHandle);
+  s=CreateSequence("A", "abcd");
+  BOOST_CHECK_NO_THROW(CheckHandleValidity(s));
 }
 
 BOOST_AUTO_TEST_CASE(seq_length)
@@ -186,6 +203,21 @@ BOOST_AUTO_TEST_CASE(seq_gaps)
   s=CreateSequence("S1", "-afc--de-f-");
   BOOST_CHECK_EQUAL(s.GetFirstNonGap(),1);
   BOOST_CHECK_EQUAL(s.GetLastNonGap(),9);
+}
+
+BOOST_AUTO_TEST_CASE(seq_append_olc)
+{
+  SequenceHandle s=CreateSequence("S1", "");
+  // check if the shift-table gets setup properly
+  s.Append('-');
+  s.Append('-');
+  s.Append('a');
+  s.Append('b');
+  s.Append('-');
+  s.Append('c');
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(2), 0);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(3), 1);
+  BOOST_CHECK_EQUAL(s.GetResidueIndex(5), 2);
 }
 
 BOOST_AUTO_TEST_CASE(seq_attach_view)

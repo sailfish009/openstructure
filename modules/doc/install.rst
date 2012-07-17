@@ -7,6 +7,7 @@ Installing OpenStructure From Source
   mainly insterested in using OpenStructure and are not planning to modify the
   code of OpenStructure itself, please use one of the binaries `available for
   download <http://www.openstructure.org/download/>`_.
+  
 
 Brief Overview
 --------------------------------------------------------------------------------
@@ -14,7 +15,7 @@ Brief Overview
 Compiling OpenStructure consists of several steps that are described below in more detail. In essence, these steps are:
 
  * Installing the Dependencies
- * Checking out the source code from SVN
+ * Checking out the source code from GIT
  * Configuring the build with cmake
  * Compiling an Linking
  
@@ -54,20 +55,40 @@ Solutions->VC++ directories. Choose 'bin' directories to enter program paths to
 cmake, qmake and python, 'lib' directories to point to the location(s) of your 
 dependencies.
 
-Checking out the Source
+
+
+Getting the Source Code
 --------------------------------------------------------------------------------
 
-You can checkout the source from SVN. The repository is located at
 
-   https://dng.biozentrum.unibas.ch/svn/openstructure/trunk
+OpenStructure uses `git` as the revision control system. The main repository can be browsed `here <http://dng.biozentrum.unibas.ch/git/>`_. To get the source code, use git clone:
 
-If you are using the commandline client, type in your shell 
 
 .. code-block:: bash
 
-   svn co https://dng.biozentrum.unibas.ch/svn/openstructure/trunk
+  git clone https://dng.biozentrum.unibas.ch/git/ost.git <directory-name>
+  
+The above command will clone OpenStructre into the directory called `directory-name`. If omitted, the directory will be called ost. Alternatively, you might consider getting one of the nightly source code snapshots from the `downloads section <http://www.openstructure.org/downloads/>`_.
 
-On Windows, we recommend to install a graphical frontend for svn, for example `tortoisesvn <http://tortoisesvn.tigris.org>`_. 
+.. note::
+
+  Some version of curl have have trouble with the certificate of the 
+  OpenStructure git server and fail to clone the repository. To work around 
+  this, disable the SSL certificate verification with the following command:
+  
+  .. code-block:: bash
+  
+    git config --global http.sslVerify false
+
+
+Picking the right branch
+--------------------------------------------------------------------------------
+
+By default you are checking out the master branch. Master is, by definition a stable branch. It always points to the latest release. However, there are several other branches at your disposal. The main development is happening in the develop branch. It contains the newest features and bug fixes. However, we dont't make any guarantees that the develop branch is bug free and doesn't contain major bugs. After all, it's in constant flux. If you are developing new features, start your feature branch off develop. Besides that, there are several smaller features branches that are used to group together commits for one specific features. To change to a specific branch, use
+
+.. code-block:: bash
+
+  git checkout <branch-name>
 
 
 Configuring
@@ -161,7 +182,6 @@ run multiple jobs at once.
 On Windows run 'Build OpenStructure' from the build menu.
 
 
-
 What's next?
 --------------------------------------------------------------------------------
 
@@ -177,4 +197,15 @@ or, to start the command-line interpreter:
 
   stage/bin/ost
   
-If you repeatedly use OpenStructure, it is recommended to add /path/to/dng/stage/bin to your path.
+If you repeatedly use OpenStructure, it is recommended to add /path/to/ost/stage/bin to your path.
+
+Getting the newest changes
+--------------------------------------------------------------------------------
+
+To get the newest changes from the central git repository, enter
+
+.. code-block:: bash
+
+  git pull
+
+in your terminal. This will fetch the newest changes.

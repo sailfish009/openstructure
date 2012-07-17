@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2010 by the OpenStructure authors
+# Copyright (C) 2008-2011 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -21,6 +21,7 @@ from ost import gui
 from ost import info
 import ost
 import sip
+import re
 
 from PyQt4 import QtCore, QtGui, QtNetwork
 from ost.gui import FileLoader
@@ -36,17 +37,17 @@ class BaseRemoteLoader(gui.RemoteSiteLoader):
   def LoadById(self, id, selection=""):
     self.ById(id, selection)
   
-  def ById(self, id, selection=""):
-    file_name=self.GetFileName(id)
-    file = QtCore.QFile(file_name)
-    if(file.size()==0):
-        url = QtCore.QUrl(self.GetUrl(id))
-        request = QtNetwork.QNetworkRequest(url)
-        reply = self.networkmanager_.get(request)
-        self.downloads_[reply]=[id,selection]
-        return reply
-    else:
-      gui.FileLoader.LoadObject(str(file_name),str(selection))
+  def ById(self, ids, selection=""):
+    for id in re.findall('\w+', ids):
+      file_name=self.GetFileName(id)
+      file = QtCore.QFile(file_name)
+      if(file.size()==0):
+          url = QtCore.QUrl(self.GetUrl(id))
+          request = QtNetwork.QNetworkRequest(url)
+          reply = self.networkmanager_.get(request)
+          self.downloads_[reply]=[id,selection]
+      else:
+        gui.FileLoader.LoadObject(str(file_name),str(selection))
     return None
     
   def IsImg(self):

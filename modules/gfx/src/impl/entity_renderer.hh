@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -39,8 +39,9 @@
 #include <ost/gfx/module_config.hh>
 #include <ost/gfx/render_pass.hh>
 #include <ost/gfx/vertex_array.hh>
+#include <ost/gfx/exporter_fw.hh>
+
 #include <ost/gfx/render_options/render_options.hh>
-#include <ost/gfx/impl/mapped_property.hh>
 
 #include <ost/gfx/color_ops/color_op.hh>
 #include <ost/gfx/color_ops/by_element_color_op.hh>
@@ -51,7 +52,9 @@
 #if OST_IMG_ENABLED
 #include <ost/gfx/color_ops/map_handle_color_op.hh>
 #endif //OST_IMG_ENABLED
-#include <ost/gfx/impl/entity_renderer_fw.hh>
+
+#include "mapped_property.hh"
+#include "entity_renderer_fw.hh"
 
 namespace ost { namespace gfx { namespace impl {
 
@@ -123,6 +126,9 @@ public:
   ///\brief povray rendering call
   virtual void RenderPov(PovState& pov, const std::string& name);
 
+  ///\brief scene exporter interface
+  virtual void Export(Exporter* ex);
+
   virtual bool CanSetOptions(RenderOptionsPtr& render_options)=0;
   virtual void SetOptions(RenderOptionsPtr& render_options)=0;
   
@@ -185,46 +191,61 @@ protected:
 
 //Simplify color ops
 struct ByElementGetCol {
-  Color ColorOfAtom(mol::AtomHandle& atom) const{
-    return GfxObj::Ele2Color(atom.GetElement());
+  std::pair<bool,Color> ColorOfAtom(mol::AtomHandle& atom) const{
+    return std::make_pair(true,GfxObj::Ele2Color(atom.GetElement()));
   }
 };
 
 struct ByChainGetCol {
   ByChainGetCol(const ByChainColorOp& op):op_(op){}
-  Color ColorOfAtom(mol::AtomHandle& atom) const{
-    return op_.GetColor(atom.GetResidue().GetChain().GetName());
+  std::pair<bool,Color> ColorOfAtom(mol::AtomHandle& atom) const{
+    return std::make_pair(true,op_.GetColor(atom.GetResidue().GetChain().GetName()));
   }
   const ByChainColorOp& op_;
 };
 
 struct UniformGetCol {
   UniformGetCol(const Color& col):col_(col){ }
-  Color ColorOfAtom(mol::AtomHandle& atom) const{
-    return col_;
+  std::pair<bool,Color> ColorOfAtom(mol::AtomHandle& atom) const{
+    return std::make_pair(true,col_);
   }
   const Color& col_;
 };
 
 struct GradientLevelGetCol {
-  GradientLevelGetCol(const GradientLevelColorOp& op): property_(op.GetProperty()),
-      epm_(property_, op.GetLevel()),
-      gradient_(op.GetGradient()),
-      minv_(op.GetMinV()),
-      maxv_(op.GetMaxV()){}
-  Color ColorOfAtom(mol::AtomHandle& atom) const{
+  GradientLevelGetCol(const GradientLevelColorOp& op):
+    property_(op.GetProperty()),
+    epm_(property_, op.GetLevel()),
+    gradient_(op.GetGradient()),
+    minv_(op.GetMinV()),
+    maxv_(op.GetMaxV()),
+    clamp_(op.GetClamp())
+  {}
+  std::pair<bool,Color> ColorOfAtom(mol::AtomHandle& atom) const{
     try{
-      float n=Normalize(epm_.Get(atom, minv_), minv_, maxv_);
-      return gradient_.GetColorAt(n);
+      float r = epm_.Get(atom, minv_);
+      if(clamp_) {
+        float n=Normalize(r, minv_, maxv_);
+        return std::make_pair(true,gradient_.GetColorAt(n));
+      } else {
+        if(r>=minv_ && r<=maxv_) {
+          float n=Normalize(r, minv_, maxv_);
+          return std::make_pair(true,gradient_.GetColorAt(n));
+        } else {
+          return std::make_pair(false,Color());
+        }
+      }
     }catch(std::exception&){
       LOG_DEBUG("property " << property_ << " not found");
-      return Color();
+      return std::make_pair(false,Color());
     }
+    return std::make_pair(false,Color());
   }
   String property_;
   mol::EntityPropertyMapper epm_;
   Gradient gradient_;
   float minv_, maxv_;
+  bool clamp_;
 };
 
 struct EntityViewGetCol {
@@ -233,8 +254,8 @@ struct EntityViewGetCol {
       gradient_(op.GetGradient()),
       minv_(op.GetMinV()),
       maxv_(op.GetMaxV()){}
-  Color ColorOfAtom(mol::AtomHandle& atom) const{
-    return MappedProperty(ev_,property_,gradient_,minv_,maxv_,atom.GetPos());
+  std::pair<bool,Color> ColorOfAtom(mol::AtomHandle& atom) const{
+    return std::make_pair(true,MappedProperty(ev_,property_,gradient_,minv_,maxv_,atom.GetPos()));
   }
   String property_;
   mol::EntityView ev_;
@@ -249,8 +270,8 @@ struct MapHandleGetCol {
       gradient_(op.GetGradient()),
       minv_(op.GetMinV()),
       maxv_(op.GetMaxV()){}
-  Color ColorOfAtom(mol::AtomHandle& atom) const{
-    return MappedProperty(mh_,property_,gradient_,minv_,maxv_,atom.GetPos());
+  std::pair<bool,Color> ColorOfAtom(mol::AtomHandle& atom) const{
+    return std::make_pair(true,MappedProperty(mh_,property_,gradient_,minv_,maxv_,atom.GetPos()));
   }
   String property_;
   img::MapHandle mh_;

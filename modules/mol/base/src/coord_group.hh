@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -25,7 +25,6 @@
 
 #include <vector>
 #include <boost/shared_array.hpp>
-
 #include "atom_handle.hh"
 #include "coord_source.hh"
 
@@ -53,6 +52,9 @@ public:
   ///      initial atomlist
   void SetFramePositions(uint frame, const std::vector<geom::Vec3>& clist);
 
+  /// \brief get the positions of all the atoms in the given frame
+  geom::Vec3List GetFramePositions(uint frame);  
+  
   /// \brief copy atom positions of given frame to stored atoms in entity
   void CopyFrame(uint frame);
   
@@ -65,8 +67,11 @@ public:
   void Capture(uint frame);
   
   /// \brief add frame 
-  void AddFrame(const std::vector<geom::Vec3>& clist);
-
+  //void AddFrame(const std::vector<geom::Vec3>& clist);
+  void AddFrame(const geom::Vec3List& clist);
+  void AddFrame(const geom::Vec3List& clist,const geom::Vec3& cell_size,const geom::Vec3& cell_angles);
+  
+  void AddFrames(const CoordGroupHandle& cg);
   /// \brief set an indidivial atom position in the given frame
   void SetAtomPos(uint frame, AtomHandle atom, const geom::Vec3& pos);
 
@@ -81,15 +86,17 @@ public:
   
   AtomHandleList GetAtomList() const;
   CoordFramePtr GetFrame(uint frame) const;
+  CoordFrame GetFrame2(uint frame);
   
   /// \brief return a filtered coord group, containing only the atoms in the 
   ///     view
-  CoordGroupHandle Filter(const EntityView& selected) const;
+  CoordGroupHandle Filter(const EntityView& selected,int first=0,int last=-1) const;
   
   CoordGroupHandle(CoordSourcePtr source);
+
+
 private:
   void CheckValidity() const;
-
   CoordSourcePtr source_;
 };
 

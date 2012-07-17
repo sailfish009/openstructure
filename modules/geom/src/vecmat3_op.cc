@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -101,6 +101,14 @@ Real Angle(const Vec3& v1, const Vec3& v2)
   return std::acos(dot_product);
 }
 
+Real SignedAngle(const Vec3& v1, const Vec3& v2, const Vec3& ref_normal )
+{
+  Vec3 a=Normalize(v1);
+  Vec3 b=Normalize(v2);
+  Vec3 c=Normalize(ref_normal);
+  return std::atan2(Dot(c,Cross(a,b)), Dot(a,b));
+}
+
 Mat3 EulerTransformation(Real theta, Real phi, Real xi)
 {
   Real costheta=cos(theta);
@@ -134,16 +142,16 @@ Mat3 EulerTransformation(Real theta, Real phi, Real xi)
 }
 
 Vec3 OrthogonalVector(const Vec3& vec) {
-  if (vec[0] < vec[1]) {
-    if (vec[0] < vec[2])
+  if (std::abs(vec[0]) < std::abs(vec[1])) {
+    if (std::abs(vec[0]) < std::abs(vec[2]))
       return Normalize(Cross(vec, Vec3(1, 0, 0)+vec));
     else
       return Normalize(Cross(vec, Vec3(0, 0, 1)+vec));
   } else {
-    if (vec[1] < vec[2]) 
+    if (std::abs(vec[1]) < std::abs(vec[2]))
       return Normalize(Cross(vec, Vec3(0, 1, 0)+vec));
     else
-      return Normalize(Cross(vec, Vec3(0, 0, 2)+vec));     
+      return Normalize(Cross(vec, Vec3(0, 0, 1)+vec));
   }
 }
 
@@ -171,4 +179,74 @@ Mat3 AxisRotation(const Vec3& axis, Real angle)
           xz-ca*xz-sa*y, yz-ca*yz+sa*x,zz+ca-ca*zz);
 }
 
+
+Real DihedralAngle(const Vec3& p1, const Vec3& p2, const Vec3& p3, 
+                   const Vec3&p4)
+{
+  Vec3 r1=p2-p1;
+  Vec3 r2=p3-p2;
+  Vec3 r3=p4-p3;
+  Vec3 r12cross = Cross(r1, r2);
+  Vec3 r23cross = Cross(r2, r3);
+  return atan2(Dot(r1*Length(r2), r23cross),
+               Dot(r12cross, r23cross));
+}
+
+  
+Real MinDistance(const Vec3List& l1, const Vec3List& l2)
+{ 
+  // returns the minimal distance between two sets of points (Vec3List)
+  if (l1.size()==0 || l2.size()==0){throw std::runtime_error("cannot calculate minimal distance: empty Vec3List");}
+  Real min=Length2(*l1.begin()-*l2.begin());
+  Real d;
+  for (Vec3List::const_iterator p1=l1.begin(),e1=l1.end(); p1!=e1; p1++) {
+    for (Vec3List::const_iterator p2=l2.begin(),e2=l2.end(); p2!=e2; p2++) {
+      d=Length2(*p1-*p2);
+      if (d<min) min=d;
+    }
+  }
+  return std::sqrt(min);
+}
+
+Real MinDistanceWithPBC(const Vec3List& l1, const Vec3List& l2, Vec3& basis_vec)
+{ 
+  // returns the minimal distance between two sets of points (Vec3List)
+  // given the periodic boundary condition along x,y,z given in the basis_vec
+  if (l1.size()==0 || l2.size()==0){throw std::runtime_error("cannot calculate minimal distance: empty Vec3List");}
+  Real min=Length2(*l1.begin()-*l2.begin());
+  Real d;
+  Vec3 v;
+  for (int i=0; i<3; i++) {
+    basis_vec[i]=std::fabs(basis_vec[i]);
+  }
+  for (Vec3List::const_iterator p1=l1.begin(),e1=l1.end(); p1!=e1; p1++) {
+    for (Vec3List::const_iterator p2=l2.begin(),e2=l2.end(); p2!=e2; p2++) {
+      d=Distance2WithPBC(*p1, *p2, basis_vec);
+      if (d<min) min=d;
+    }
+  }
+  return std::sqrt(min);
+}  
+
+Vec3 WrapVec3(const Vec3& v1,const Vec3& box_center,const Vec3& basis_vec){
+  Vec3 v;
+  Real r;
+  for (int i=0; i<3; i++) {
+    r=(v1[i]-box_center[i])/basis_vec[i];
+    r=(r > 0.0) ? std::floor(r + 0.5) : std::ceil(r - 0.5);
+    v[i]=v1[i]-basis_vec[i]*r;
+  }
+  return v;
+}
+
+Vec3List WrapVec3List(const Vec3List& vl, const Vec3& box_center,const Vec3& basis_vec){
+  Vec3List vl_out;
+  vl_out.reserve(vl_out.size());
+  for (Vec3List::const_iterator v1=vl.begin(),e=vl.end();v1!=e ; v1++) {
+    vl_out.push_back(WrapVec3(*v1,box_center,basis_vec));
+  }
+  return vl_out;
+}
+  
+  
 } // ns

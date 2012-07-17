@@ -1,14 +1,15 @@
 import sys, os, platform
 import optparse
 
-interactive=False
-
 def show_help(option, opt, value, parser):
   parser.print_help()
   sys.exit(-1)
 
 def interactive_flag(option, opt, value, parser):
   pass
+
+def stop():
+  sys.exit(0)
 
 usage = 'usage: ost [ost options] [script to execute] [script parameters]'
 class OstOptionParser(optparse.OptionParser):
@@ -37,17 +38,20 @@ ost.SetPrefixPath(os.getenv('DNG_ROOT'))
 def _InitRuleBasedBuilder():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
   if os.path.exists(compound_lib_path):
-    conop_inst=conop.Conopology.Instance()
     compound_lib=conop.CompoundLib.Load(compound_lib_path)
-    conop_inst.RegisterBuilder(conop.RuleBasedBuilder(compound_lib), 'RBB')
-    conop_inst.SetDefaultBuilder('RBB')
+    conop.RegisterBuilder(conop.RuleBasedBuilder(compound_lib), 'RBB')
+    conop.SetDefaultBuilder('RBB')
 
 # switch to rule-based builder for high fidelity if compounds.chemlib is 
 # available
 _InitRuleBasedBuilder()
 import os.path
 HistoryFile=os.path.expanduser('~/.ost_history')
+
+# this is a silly name...
 InGUIMode=False
+# ... lets be more pythonic
+gui_mode=False
 
 sys.ps1='ost> '
 sys.ps2='..... '

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -40,7 +40,8 @@ Real Distance(const Vec3& p1, const Vec3& p2);
 Real Distance(const Vec3& p, const Line& l);
 //! returns the distance between a point and a line
 Real Distance(const Line& l, const Vec3& p);
-
+//! returns the minimal distance between the points in two Vec3List
+Real MinDistance(const Vec3List& l1, const Vec3List& l2);
 } // ns geom
 
 #endif

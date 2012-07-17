@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -40,6 +40,7 @@
 #include "gfx_prim.hh"
 #include "vertex_array.hh"
 #include "input.hh"
+#include "exporter_fw.hh"
 
 namespace ost { namespace gfx {
 
@@ -56,7 +57,8 @@ public:
   virtual void DeepSwap(GfxObj& go);
   virtual void RenderGL(RenderPass pass);
   virtual void RenderPov(PovState& pov);
-  virtual void Apply(GfxNodeVisitor& v,GfxNodeVisitor::Stack st);
+  virtual void Export(Exporter* ex);
+  virtual void Apply(GfxNodeVisitor& v, GfxNodeVisitor::Stack st);
   virtual int GetType() const;
   //
 
@@ -75,10 +77,15 @@ public:
   virtual void SetAALines(bool f);
   virtual void SetLineHalo(float f);
   virtual void SetOutline(bool f);
+  virtual bool GetOutline() const {return outline_flag_;};
   virtual void SetOutlineMode(int m);
+  virtual int GetOutlineMode() const {return outline_mode_;}
   virtual void SetOutlineWidth(float f);
+  virtual float GetOutlineWidth() const;
   virtual void SetOutlineExpandFactor(float f);
+  virtual float GetOutlineExpandFactor() const;
   virtual void SetOutlineExpandColor(const Color& c);
+  virtual Color GetOutlineExpandColor() const;
   virtual void SetOpacity(float f);
   virtual float GetOpacity() const {return opacity_;}
   virtual void ColorBy(const mol::EntityView& ev, 
@@ -112,6 +119,15 @@ public:
     be implemented, the rest is taken care of by GfxObj::RenderGL
   */
   virtual void CustomRenderGL(RenderPass pass);
+
+  // implemented in derived classes to deal with initialization etc
+  // called just before CustomRenderGL is called
+  // the boolean flag indicated that a re-build was requested
+  virtual void CustomPreRenderGL(bool rebuild);
+
+  // implemented in derived classes for first GL initialization
+  // which should be done here, not in the ctor
+  virtual void InitGL();
 
   // implemented in derived classes for the actual POVray export
   virtual void CustomRenderPov(PovState& pov);
@@ -181,7 +197,6 @@ public:
  protected:
   
   void PreRenderGL(bool flag);
-  virtual void CustomPreRenderGL(bool flag);
 
  private:
   GfxObj(const GfxObj& o);

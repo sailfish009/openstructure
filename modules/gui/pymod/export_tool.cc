@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -32,7 +32,6 @@ using namespace boost::python;
 using namespace ost::gui;
 using namespace ost;
 
-namespace {
   
 struct WrappedTool : public Tool
 {
@@ -81,7 +80,6 @@ struct WrappedTool : public Tool
 };
                                 
 
-namespace {
   
 void tm_add_tool(ToolManager& tm, QPtr<WrappedTool> tool)
 {
@@ -127,13 +125,10 @@ object get_delta_wrapper(MouseEvent& me)
   return qpoint_to_bp_object(delta);
 }
 
-}
-
 
 ToolOption* (ToolOptions::*get_option_a)(const String&, 
                                            const String&) const=&ToolOptions::GetOption;
 ToolOption* (ToolOptions::*get_option_b)(const String&) const=&ToolOptions::GetOption;
-}
 
 void export_Tool()
 {
@@ -249,10 +244,6 @@ void export_Tool()
     .def("Hide", &ToolOptionsWin::hide)
     .def("GetQObject",&get_py_qobject<ToolOptionsWin>)
     .add_property("qobject", &get_py_qobject<ToolOptionsWin>)
-  ;
-
-  class_<gfx::NodePtrList>("NodePtrList", init<>())
-    .def(vector_indexing_suite<gfx::NodePtrList, true >())
   ;
 }
 

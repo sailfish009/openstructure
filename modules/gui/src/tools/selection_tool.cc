@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -55,7 +55,8 @@ void SelectionTool::Click(const MouseEvent& event)
   int sel_mode=this->GetSelectionMode();
   gfx::Scene& scene=gfx::Scene::Instance();
   scene.SetSelectionMode(sel_mode);
-  scene.Pick(event.GetPos().x(), scene.GetViewport().height-event.GetPos().y(), 8);
+  scene.Pick(event.GetPos().x(), 
+             scene.GetViewport().height-event.GetPos().y(), 8);
 }
 
 

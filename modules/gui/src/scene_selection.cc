@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -56,7 +56,7 @@ void SceneSelection::SetActiveNodes(gfx::NodePtrList nodes, gfx::EntityP entity,
 }
 
 gfx::GfxNodeP SceneSelection::GetActiveNode(unsigned int pos) const{
-  if(pos >= 0 && pos < nodes_.size()){
+  if(pos < nodes_.size()){
     return nodes_[pos];
   }
   else{
@@ -73,7 +73,7 @@ int SceneSelection::GetActiveViewCount() const{
 }
 
 mol::EntityView SceneSelection::GetActiveView(unsigned int pos) const{
-  if(pos >=0 && pos < views_.size()){
+  if(pos < views_.size()){
     return views_[pos].GetEntityView();
   }
   else{
@@ -125,6 +125,7 @@ void SceneSelection::Delete() {
   for(int i=0; i < selected_objects.size(); i++){
     gfx::Scene::Instance().Remove(selected_objects[i]);
   }
+  gfx::Scene::Instance().RequestRedraw();
 }
 
 #if OST_IMG_ENABLED
@@ -138,10 +139,7 @@ void SceneSelection::ViewDensitySlices() {
         // The following is a hack. I need to pass a reference to an ImagHandle
         // that never goes out of scope, so I get a reference from the MapIso using
         // GetMap and pass it to the CreateDataViewer
-        img::gui::DataViewer* dv = GostyApp::Instance()->CreateDataViewer(obj->GetOriginalMap());
-          MainArea* ma = GostyApp::Instance()->GetPerspective()->GetMainArea();
-          ma->AddWidget(QString(obj->GetName().c_str()), dv) ;
-        dv->show();
+        GostyApp::Instance()->CreateDataViewer(obj->GetOriginalMap(),QString(obj->GetName().c_str()));
       }
     }
   }

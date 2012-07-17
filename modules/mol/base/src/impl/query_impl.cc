@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -148,22 +148,28 @@ QueryToken QueryLexer::LexNumericToken() {
 }
 
 bool is_ident_or_str(char c) {
-  static String allowed_chars("_");
+  static String allowed_chars("_*?\\");
   return isalnum(c) || allowed_chars.find_first_of(c)!=String::npos;
 }
 
 QueryToken QueryLexer::LexIdentOrStringToken() {
   static IdentTokens ident_tokens;
   size_t start=current_;
+  bool force_string=false;
   while (current_<query_string_.length() && 
          is_ident_or_str(query_string_[current_])) {
+    if (query_string_[current_]=='*' || query_string_[current_]=='?' ||
+        query_string_[current_]=='\\') {
+      force_string=true;
+    }
     current_++;
   }
   String ident=query_string_.substr(start, current_-start);
   if (tok::Type* t=find(ident_tokens, ident.c_str())) {
     return QueryToken(Range(start, current_-start), *t);
   }
-  return QueryToken(Range(start, current_-start), tok::Identifier);
+  return QueryToken(Range(start, current_-start), 
+                    force_string? tok::String : tok::Identifier);
 }
 
 QueryToken QueryLexer::LexToken() {
@@ -174,7 +180,7 @@ QueryToken QueryLexer::LexToken() {
     if (isdigit(current_char) || current_char=='-') {
       return this->LexNumericToken();
     }
-    if (isalpha(current_char)) {
+    if (isalpha(current_char) || current_char=='?' || current_char=='*') {
       return this->LexIdentOrStringToken();
     }
     switch (current_char) {
@@ -277,12 +283,7 @@ bool QueryImpl::IsAlwaysUndef(const Node* ast,
   if (lop_node) {
     bool lhs = this->IsAlwaysUndef(lop_node->GetLHS(), target_level);
     bool rhs = this->IsAlwaysUndef(lop_node->GetRHS(), target_level);    
-    switch (lop_node->GetOP()) {
-      case LOP_AND:
-        return lhs || rhs;
-      case LOP_OR:
-        return lhs && rhs;
-    }
+    return lhs && rhs;
   }  
   else {
     const SelNode* sel_node = dynamic_cast<const SelNode*>(ast);
@@ -434,6 +435,7 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
       if (sel.type==Prop::INT) {
         // todo. Add check to test that the comparison operator is only one of
         // = and !=. The others don't make too much sense.
+
         if (value_string=="true" || value_string=="True" || 
             value_string=="TRUE") {
           value=ParamType(int(1));
@@ -444,14 +446,22 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
           break;
         }
       }
+      // yes, not having a break here is on purpose
     case tok::String:      
       if (sel.type!=Prop::STRING) {
-        error_desc_.msg="'"+sel.GetName()+"' takes "+sel.GetTypeName()+
-                       " argument, but String literal given";
-        error_desc_.range=v.GetValueRange();
+        if (sel.id>=Prop::CUSTOM) {
+          // BZDNG-204: issue specific warning when trying to use a string value 
+          //     for a generic property.
+          error_desc_.msg="only numeric generic properties can be used in queries";
+          error_desc_.range=v.GetValueRange();
+        } else {
+          error_desc_.msg="'"+sel.GetName()+"' takes "+sel.GetTypeName()+
+                         " argument, but string literal given";
+          error_desc_.range=v.GetValueRange();
+        }
         return false;
       } else {
-        value=value_string;
+        value=StringOrRegexParam(value_string);
       }
 
       break;
@@ -462,13 +472,13 @@ bool QueryImpl::ParseValue(const Prop& sel, const QueryToken& op,
         error_desc_.range=v.GetRange();
         return false;
       } else if (sel.type==Prop::STRING) {
-        value=value_string;
+        value=StringOrRegexParam(value_string);
       } else
         value=ParamType(float(atof(value_string.c_str())));              
       break;      
     case tok::IntegralValue:
       if (sel.type==Prop::STRING) {
-        value=value_string;
+        value=StringOrRegexParam(value_string);
       } else {
         if (sel.type==Prop::INT) {
           value=ParamType(atoi(value_string.c_str()));
@@ -635,13 +645,13 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
     }
     LogicOP lop=inversion_stack_.back() ? LOP_OR : LOP_AND;
     CompOP cop=inversion_stack_.back() ? COP_NEQ : COP_EQ;
-    ParamType cname_val(query_string_.substr(cname.GetValueRange().Loc,
-                        cname.GetValueRange().Length).c_str());
+    ParamType cname_val(StringOrRegexParam(query_string_.substr(cname.GetValueRange().Loc,
+                                                                cname.GetValueRange().Length).c_str()));
     Prop cname_prop(Prop::CNAME, Prop::STRING, Prop::CHAIN);
     SelNode* cname_node=new SelNode(cname_prop, cop, cname_val);
-    ParamType aname_val(query_string_.substr(aname.GetValueRange().Loc,
-                        aname.GetValueRange().Length).c_str());
-   Prop aname_prop(Prop::ANAME, Prop::STRING, Prop::ATOM);
+    ParamType aname_val(StringOrRegexParam(query_string_.substr(aname.GetValueRange().Loc,
+                                                                aname.GetValueRange().Length).c_str()));
+    Prop aname_prop(Prop::ANAME, Prop::STRING, Prop::ATOM);
     SelNode* aname_node=new SelNode(aname_prop, cop, aname_val);
     ParamType rnum_val(atoi(query_string_.substr(rnum.GetValueRange().Loc,
                             rnum.GetValueRange().Length).c_str()));
@@ -662,7 +672,19 @@ Node* QueryImpl::ParsePropValueExpr(QueryLexer& lexer) {
     GenProp gen_prop(epm);
     if (op.GetType()==tok::Colon) {
       op=lexer.NextToken();
-      if (!this->ExpectNumeric(op)) {
+      if (!this->ExpectNotEnd(op, "value")) {
+        return NULL;
+      }
+      if (tok::FloatingValue!=op.GetType() && 
+          tok::IntegralValue!=op.GetType()) {
+        // BZDNG-204: issue specific warning when trying to use a string value 
+        //     for a generic property. 
+        if (op.GetType()==tok::String || op.GetType()==tok::Identifier) {
+          error_desc_.msg="only numeric generic properties are supported in queries";
+          error_desc_.range=op.GetValueRange();
+          return NULL;
+        }
+        this->ExpectNumeric(op);
         return NULL;
       }
       gen_prop.default_val=atof(query_string_.substr(op.GetValueRange().Loc,
@@ -957,8 +979,9 @@ bool QueryImpl::ExpectNumeric(const QueryToken& token)
                            token.GetRange().Length)+"' found";
     error_desc_.range=token.GetRange();    
   }
-  return false;  
+  return false;
 }
+
 
 Node* QueryImpl::Concatenate(Node* lhs, Node* rhs, LogicOP logical_op) {
   assert(lhs && "lhs is NULL");
@@ -1015,7 +1038,7 @@ Node* QueryImpl::ParseWithinExpr(QueryLexer& lexer) {
       geom::Vec3 point;
       if (this->ParsePoint(lexer, point)) {
         ParamType pt(WithinParam(point, rv*rv));
-        CompOP comp_op= COP_LE;
+        CompOP comp_op=COP_LE;
         if (inversion_stack_.back())
           comp_op=COP_GE;
         SelNode* within_node=new SelNode(Prop(Prop::WITHIN, Prop::VEC_DIST,
@@ -1055,8 +1078,10 @@ Node* QueryImpl::ParseWithinExpr(QueryLexer& lexer) {
     ParamType pt(WithinParam(bracketed_expr_.size()-1, rv*rv));    
     inversion_stack_.pop_back();    
     CompOP comp_op= COP_LE;
-    if (inversion_stack_.back())
+    if (inversion_stack_.back()) {
       comp_op=COP_GE;
+    }
+      
     SelNode* within_node=new SelNode(Prop(Prop::WITHIN, Prop::VEC_DIST,
                                           Prop::ATOM), 
                                      comp_op, pt);

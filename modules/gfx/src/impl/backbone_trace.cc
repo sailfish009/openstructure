@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -29,16 +29,21 @@ namespace ost { namespace gfx { namespace impl {
 
 namespace {
 
-bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2)
+bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2, bool seqhack)
 {
   if(!r1.IsValid() || !r2.IsValid()) return false;
-  if(r1.GetChain()!=r2.GetChain()) return false;
-  mol::ResNum n1 = r1.GetNumber();
-  mol::ResNum n2 = r2.GetNumber();
-  if(n2.GetInsCode()!='\0') {
-    if(n1.NextInsertionCode()==n2) return true;
+  if(seqhack) {
+    if(r1.GetChain()!=r2.GetChain()) return false;
+    mol::ResNum n1 = r1.GetNumber();
+    mol::ResNum n2 = r2.GetNumber();
+    if(n2.GetInsCode()!='\0') {
+      if(n1.NextInsertionCode()==n2) return true;
+    }
+    if(mol::InSequence(r1,r2)) return true;
+    if(n1.GetNum()+1==n2.GetNum()) return true;
+  } else {
+    return mol::InSequence(r1,r2);
   }
-  if(n1.GetNum()+1==n2.GetNum()) return true;
   return false;
 }
 
@@ -46,11 +51,12 @@ bool in_sequence(const mol::ResidueHandle& r1, const mol::ResidueHandle& r2)
 
 class TraceBuilder: public mol::EntityVisitor {
 public:
-  TraceBuilder(BackboneTrace* bb_trace):
+  TraceBuilder(BackboneTrace* bb_trace, bool sh):
     backbone_trace_(bb_trace),
     last_residue_(),
     list_(),
-    id_counter_(0)
+    id_counter_(0),
+    seq_hack_(sh)
   {}
 
   virtual bool VisitChain(const mol::ChainHandle& chain)
@@ -68,7 +74,7 @@ public:
   virtual bool VisitResidue(const mol::ResidueHandle& res)
   {
     // check in-sequence
-    bool in_seq=in_sequence(last_residue_,res);
+    bool in_seq=in_sequence(last_residue_,res,seq_hack_);
     if(!in_seq) {
       if(!list_.empty()) {
         backbone_trace_->AddNodeEntryList(list_);
@@ -78,11 +84,15 @@ public:
     // determine atom to add to list
     mol::AtomHandle ca = res.GetCentralAtom();
     if (ca) {
-      NodeEntry entry={ca, GfxObj::Ele2Color(ca.GetAtomProps().element),
-                       GfxObj::Ele2Color(ca.GetAtomProps().element),
+      float rad=1.0;
+      if(ca.HasProp("trace_rad")) {
+        rad=ca.GetFloatProp("trace_rad");
+      }
+      NodeEntry entry={ca, GfxObj::Ele2Color(ca.GetElement()),
+                       GfxObj::Ele2Color(ca.GetElement()),
                        geom::Vec3(), // this will be set by the gfx trace obj
                        res.GetCentralNormal(),
-                       1.0,
+                       rad,
                        geom::Vec3(),geom::Vec3(),geom::Vec3(), // for later use in NA rendering
                        false,id_counter_++};
       list_.push_back(entry);
@@ -106,14 +116,20 @@ private:
   mol::ChainHandle   last_chain_;
   NodeEntryList      list_;
   int                id_counter_;
+  bool               seq_hack_;
 };
 
-BackboneTrace::BackboneTrace()
+BackboneTrace::BackboneTrace():
+  view_(),
+  node_list_list_(),
+  seq_hack_(false)
 {}
 
-BackboneTrace::BackboneTrace(const mol::EntityView& ent)
+BackboneTrace::BackboneTrace(const mol::EntityView& ent):
+  view_(ent),
+  node_list_list_(),
+  seq_hack_(false)
 {
-  view_=ent;
   Rebuild();
 }
 
@@ -142,8 +158,25 @@ void BackboneTrace::Rebuild()
 {
   if (view_) {
     node_list_list_.clear();
-    TraceBuilder trace(this);    
+    TraceBuilder trace(this,seq_hack_);    
     view_.Apply(trace);
+  }
+}
+
+void BackboneTrace::OnUpdatedPositions()
+{
+  for(NodeEntryListList::iterator nitnit=node_list_list_.begin();nitnit!=node_list_list_.end();++nitnit) {
+    NodeEntryList& nlist=*nitnit;
+    for(NodeEntryList::iterator nit=nlist.begin();nit!=nlist.end();++nit) {
+      mol::AtomHandle ca=nit->atom;
+      nit->normal=ca.GetResidue().GetCentralNormal();
+      if(ca.HasProp("trace_rad")) {
+        nit->rad=ca.GetFloatProp("trace_rad");
+      } else {
+        nit->rad=1.0;
+      }
+    }
+    PrepList(nlist);
   }
 }
 
@@ -155,48 +188,40 @@ void BackboneTrace::AddNodeEntryList(const NodeEntryList& l)
   }
 }
 
-void BackboneTrace::PrepList(NodeEntryList& nelist)
+void BackboneTrace::PrepList(NodeEntryList& nelist) const
 {
-  // assign direction and normal vectors for each entry
-  // they are composed of the i-1 -> i and i->i+1 directions
-  //
-  // this same algorithm is used in the spline generation, so
-  // perhaps all of this here is not necessary ?!
-  //
+  // orthogonalize the residue normals with
+  // twist detection; important for later
+  // spline generation
+  if(nelist.size()<3) return;
   NodeEntry* e0=&nelist[0];
   NodeEntry* e1=&nelist[1];
   NodeEntry* e2=&nelist[2];
   geom::Vec3 p0 = e0->atom.GetPos();
   geom::Vec3 p1 = e1->atom.GetPos();
   geom::Vec3 p2 = e2->atom.GetPos();
-  
+
+  geom::Vec3 dir=geom::Normalize(p1-p0);
   e0->direction=geom::Normalize(p1-p0);
-  // e0->normal is set afterwards to normal of second one
-  // backup residue normal
-  e0->v1 = e0->normal;
-  
-  //reference normal to avoid twisting
-  geom::Vec3 nref=geom::Normalize(geom::Cross(p0-p1,p2-p1));
-  
-  // start loop with the second
+  geom::Vec3 orth=geom::Normalize(geom::Cross(e0->direction,e0->normal));
+  geom::Vec3 norm=geom::Normalize(geom::Cross(orth,dir));
+  e0->normal=norm;
+  // start loop with the second residue
   unsigned int i=1;
   for(;i<nelist.size()-1;++i) {
-    geom::Vec3 p10 = p0-p1;
-    geom::Vec3 p12 = p2-p1;
-    if(p10==-p12 || p10==p12) p12+=geom::Vec3(0.001,0.001,0.001);
-    e1->v1=e1->normal;
-    // twist avoidance
-    if(geom::Dot(e0->v1,e1->v1)<0.0) {
-      e1->v1=-e1->v1;
+    geom::Vec3 p10=p0-p1;
+    geom::Vec3 p12=p2-p1;
+    dir=geom::Normalize(p2-p0);
+    e1->direction = dir;
+    orth=geom::Normalize(geom::Cross(dir,e1->normal));
+    norm=geom::Normalize(geom::Cross(orth,dir));
+    // twist check
+    if(twist_hack_) {
+      if(geom::Dot(geom::Cross(e0->normal,dir),geom::Cross(norm,dir))<0.0) {
+        norm=-norm;
+      }
     }
-    e1->normal=geom::Normalize(geom::Cross(p10,p12));
-    float omega=0.5*acos(geom::Dot(geom::Normalize(p10),geom::Normalize(p12)));
-    geom::Vec3 orth=geom::AxisRotation(e1->normal, -omega)*p12;
-    e1->direction=geom::Normalize(geom::Cross(e1->normal,orth));
-    
-    // align normals to avoid twisting
-    //if(geom::Dot(e1->normal,nref)<0.0) e1->normal=-e1->normal;
-    //nref=e1->normal;
+    e1->normal=norm;
     // skip over shift for the last iteration
     if(i==nelist.size()-2) break;
     // shift to i+1 for next iteration
@@ -207,16 +232,16 @@ void BackboneTrace::PrepList(NodeEntryList& nelist)
     p1 = e1->atom.GetPos();
     p2 = e2->atom.GetPos();
   }
-  // finish remaining values
-  // i is at size-2 due to break statement above
-  nelist[0].normal=nelist[1].normal;
-  nelist[i+1].direction=geom::Normalize(p2-p1);
-  nelist[i+1].v1=nelist[i+1].normal;
-  if (geom::Dot(nelist[i].v1,
-                nelist[i+1].v1)<0.0) {
-    nelist[i+1].v1=-nelist[i+1].v1;
+  dir=geom::Normalize(p2-p1);
+  e2->direction=dir;
+  orth=geom::Normalize(geom::Cross(dir,e2->normal));
+  norm=geom::Normalize(geom::Cross(orth,dir));
+  if(twist_hack_) {
+    if(geom::Dot(geom::Cross(e1->normal,dir),geom::Cross(norm,dir))<0.0) {
+      norm=-norm;
+    }
   }
-  nelist[i+1].normal=nelist[i].normal;
+  e2->normal=norm;
 }
 
 BackboneTrace BackboneTrace::CreateSubset(const mol::EntityView& subview)
@@ -229,14 +254,36 @@ BackboneTrace BackboneTrace::CreateSubset(const mol::EntityView& subview)
     const NodeEntryList& nlist=*nitnit;
     for(NodeEntryList::const_iterator nit=nlist.begin();nit!=nlist.end();++nit) {
       if(subview.FindAtom(nit->atom).IsValid()) {
+        if(!new_nlist.empty()) {
+          if(!in_sequence(new_nlist.back().atom.GetResidue(),nit->atom.GetResidue(),seq_hack_)) {
+            if(new_nlist.size()>1) {
+              nrvo.node_list_list_.push_back(new_nlist);
+            }
+            new_nlist.clear();
+          }
+        }
         new_nlist.push_back(*nit);
       }
     }
     if(!new_nlist.empty()) {
-      nrvo.node_list_list_.push_back(new_nlist);
+      if(new_nlist.size()>1) {
+        nrvo.node_list_list_.push_back(new_nlist);
+      }
     }
   }
   return nrvo;
+}
+
+void BackboneTrace::SetSeqHack(bool f)
+{
+  seq_hack_=f;
+  Rebuild();
+}
+
+void BackboneTrace::SetTwistHack(bool f)
+{
+  twist_hack_=f;
+  // don't issue Rebuild()
 }
 
 }}} // ns

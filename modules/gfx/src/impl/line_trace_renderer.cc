@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -60,7 +60,7 @@ LineTraceRenderer::LineTraceRenderer(BackboneTrace* trace):
 
 void LineTraceRenderer::PrepareRendering() 
 {
-  TraceRendererBase::PrepareRendering();
+  TraceRendererBase::PrepareRendering(false);
   va_.Clear();
   this->PrepareRendering(trace_subset_, va_, false);
   sel_va_.Clear();
@@ -88,43 +88,51 @@ void LineTraceRenderer::PrepareRendering(const BackboneTrace& trace_subset,
     va.SetAALines(options_->GetAALines());
     if(is_sel) {
       for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
-	const NodeEntryList& nl=trace_subset.GetList(node_list);
-	if(nl.size()<1) continue;
-	for(unsigned int i=0;i<nl.size();++i) {
-	  const NodeEntry& entry=nl[i];
-	  if(sel_.FindAtom(entry.atom).IsValid()) {
-	    geom::Vec3 apos = entry.atom.GetPos();
-	    VertexID p0=va.Add(apos, geom::Vec3(),sel_clr);
-	    if(i>0) {
-	      VertexID p1 =va.Add(apos+0.5*(nl[i-1].atom.GetPos()-apos), geom::Vec3(), sel_clr);
-	      va.AddLine(p0, p1);
-	    }
-	    if(i<nl.size()-1) {
-	      VertexID p1 =va.Add(apos+0.5*(nl[i+1].atom.GetPos()-apos), geom::Vec3(), sel_clr);
-	      va.AddLine(p0, p1);
-	    }
-	  }
-	}
+        const NodeEntryList& nl=trace_subset.GetList(node_list);
+        if(nl.size()<1) continue;
+        for(unsigned int i=0;i<nl.size();++i) {
+          const NodeEntry& entry=nl[i];
+          if(sel_.FindAtom(entry.atom).IsValid()) {
+            geom::Vec3 apos = entry.atom.GetPos();
+            VertexID p0=va.Add(apos, geom::Vec3(),sel_clr);
+            if(i>0) {
+              VertexID p1 =va.Add(apos+0.5*(nl[i-1].atom.GetPos()-apos), geom::Vec3(), sel_clr);
+              va.AddLine(p0, p1);
+            }
+            if(i<nl.size()-1) {
+              VertexID p1 =va.Add(apos+0.5*(nl[i+1].atom.GetPos()-apos), geom::Vec3(), sel_clr);
+              va.AddLine(p0, p1);
+            }
+          }
+        }
       }
     } else {
       for (int node_list=0; node_list<trace_subset.GetListCount(); ++node_list) {
-	const NodeEntryList& nl=trace_subset.GetList(node_list);
-	
-	if (nl.size()<2) continue;
-	
-	VertexID p0=va.Add(nl[0].atom.GetPos(), geom::Vec3(),
-			   nl[0].color1);
-	for (unsigned int i=1; i<nl.size()-1;++i) {
-	  const NodeEntry& entry=nl[i];
-	  VertexID p1 =va.Add(entry.atom.GetPos(), geom::Vec3(), 
-			      entry.color1);
-	  va.AddLine(p0, p1);
-	  p0=p1;
-	}
-	const NodeEntry& entry=nl.back();
-	VertexID p1 =va.Add(entry.atom.GetPos(), geom::Vec3(), 
-			    entry.color1);
-	va.AddLine(p0, p1);
+        const NodeEntryList& nl=trace_subset.GetList(node_list);
+        
+        if (nl.size()<2) continue;
+        
+        VertexID p0=va.Add(nl[0].atom.GetPos(), geom::Vec3(),
+                           nl[0].color1);
+        for (unsigned int i=1; i<nl.size()-1;++i) {
+          const NodeEntry& entry=nl[i];
+          VertexID p1 =va.Add(entry.atom.GetPos(), geom::Vec3(), 
+                              entry.color1);
+          va.AddLine(p0, p1);
+          p0=p1;
+#if 0
+          VertexID p2 =va.Add(entry.atom.GetPos()+entry.direction, geom::Vec3(), 
+                              Color(1,0,0));
+          VertexID p3 =va.Add(entry.atom.GetPos()+entry.normal, geom::Vec3(), 
+                              Color(0,1,1));
+          va.AddLine(p0,p2);
+          va.AddLine(p0,p3);
+#endif
+        }
+        const NodeEntry& entry=nl.back();
+        VertexID p1 =va.Add(entry.atom.GetPos(), geom::Vec3(), 
+                            entry.color1);
+        va.AddLine(p0, p1);
       }
     }
   }

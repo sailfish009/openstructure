@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -238,7 +238,7 @@ void DM3Collector::ParseStream(std::istream& fp)
   parse_tag_group(0,"ROOT",fp);
   img::Progress::Instance().DeRegister(this);
   if(fp.eof()==0) {
-    LOG_ERROR("file not parsed completely");
+    LOG_INFO("file not parsed completely");
   } else {
     LOG_INFO("file parsed completely");
   }

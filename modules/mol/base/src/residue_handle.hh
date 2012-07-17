@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -25,7 +25,6 @@
 #include <ost/mol/query.hh>
 #include <ost/mol/module_config.hh>
 #include <ost/mol/residue_base.hh>
-#include <ost/mol/atom_prop.hh>
 #include <ost/mol/entity_visitor_fw.hh>
 #include <ost/mol/iterator_fw.hh>
 
@@ -50,32 +49,27 @@ namespace ost { namespace mol {
 /// EditorBase::InsertAtom() or EditorBase::InsertAltAtom()
 /// 
 /// \code
-/// XCSEditor edi=residue.GetEntity().RequestXCSEditor();
+/// XCSEditor edi=residue.GetEntity().EditXCS();
 /// edi.InsertAtom(residue, "CA", geom.Vec3(1.0, 0.0, 0.0));
 /// \endcode
 class DLLEXPORT_OST_MOL ResidueHandle : public ResidueBase {
 public:
   ResidueHandle();
 
+  //@}
   ResidueHandle(const impl::ResidueImplPtr& impl)
     : ResidueBase(impl) {}
   EntityHandle GetEntity() const;
 
-  /// \brief  returns main atom, ie CA for amino acids
-  AtomHandle GetCentralAtom() const;
-
-  /// \return return specific normal of residue, usually CA-CB dir for AA
-  geom::Vec3 GetCentralNormal() const;
-
-  /// \brief Get entity's mass
+  /// \brief Get residue's mass
   double GetMass() const;
   
-  /// \brief Get entity's center of mass (mass weighted)
+  /// \brief Get residue's center of mass (mass weighted)
   geom::Vec3 GetCenterOfMass() const;
   
-  /// \brief Get entity's center of atoms (not mass weighted)
+  /// \brief Get residue's center of atoms (not mass weighted)
   ///
-  /// Returns the center of all the atoms in an entity. This is
+  /// Returns the center of all the atoms in this residue. This is
   /// similar to GetCenterOfMass(), but the atoms are not mass weighted
   geom::Vec3 GetCenterOfAtoms() const;
   

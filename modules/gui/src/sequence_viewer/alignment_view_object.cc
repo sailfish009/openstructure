@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -69,19 +69,6 @@ QMap<QString,int> GetGroupMap(){
   return map;
 }
 
-QColor GetColor(int cons){
-  int color = 255 - int((float(cons) / 100) * 200);
-  return QColor(color,color,color);
-}
-
-QColor GetForeGroundColor(QColor background){
-  if(background == Qt::transparent){
-    return Qt::black;
-  }
-  int gray = 255 - background.red();
-  return QColor(gray,gray,gray);
-}
-
 }
 
 QMap<QString,int> AlignmentViewObject::group_map_ = GetGroupMap();
@@ -93,7 +80,7 @@ const QString AlignmentViewObject::conservation_mode_2 = "Highlight conservation
 AlignmentViewObject::AlignmentViewObject(const seq::AlignmentHandle& alignment, QObject* parent): SequenceViewObject(parent), alignment_(alignment)
 {
   for(int i=0; i<alignment.GetCount(); i++){
-    seq::SequenceHandle seq_handle = alignment.GetSequence(i).Copy();
+    seq::ConstSequenceHandle seq_handle = alignment.GetSequence(i);
     this->AddSequence(seq_handle, seq_handle.GetName().c_str());
   }
 

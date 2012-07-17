@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,7 +20,8 @@
 #include <limits>
 
 #include <boost/bind.hpp>
-
+#include <ost/mol/bond_handle.hh>
+#include <ost/mol/residue_handle.hh>
 #include <ost/mol/chain_view.hh>
 #include <ost/mol/residue_view.hh>
 #include <ost/mol/entity_visitor.hh>
@@ -79,7 +80,11 @@ ChainView::ChainView() {
 }
 
 EntityView ChainView::GetEntity() const {
-  return EntityView(data_->entity.lock(), Impl()->GetEntity());
+  this->CheckValidity();
+  if (!data_->entity.expired()) {
+    return EntityView(data_->entity.lock(), Impl()->GetEntity());    
+  }
+  throw InvalidHandle();
 }
 
 ChainView::ChainView(const EntityView& entity,
@@ -130,6 +135,20 @@ int ChainView::GetAtomCount() const {
   while(it!=data_->residues.end()) {
     count+=(*it).GetAtomCount();
     ++it;
+  }
+  return count;
+}
+
+int ChainView::GetBondCount() const {
+  this->CheckValidity();
+  int count=0;
+  EntityView ev = this->GetEntity();
+  const BondHandleList& bhl = ev.GetBondList();
+  for (BondHandleList::const_iterator i=bhl.begin(); i!=bhl.end(); ++i) {
+    if (i->GetFirst().GetResidue().GetChain().GetName()==this->GetName() &&
+        i->GetSecond().GetResidue().GetChain().GetName()==this->GetName()) {
+      count++;
+    }
   }
   return count;
 }
@@ -315,14 +334,10 @@ bool ChainView::operator!=(const ChainView& rhs) const
 
 Real ChainView::GetMass() const {
   this->CheckValidity();
-  Real mass = 0;
+  double mass = 0;
   ResidueViewList::const_iterator i;
   for (i=data_->residues.begin(); i!=data_->residues.end(); ++i) {
-    ResidueView r=*i;
-    for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
-         e2=r.GetAtomList().end(); j!=e2; ++j) {
-      mass+=j->GetMass();
-    }
+    mass+=i->GetMass();
   }
   return mass;
 }
@@ -381,7 +396,7 @@ geom::Vec3 ChainView::GetCenterOfMass() const
       ResidueView r=*i;
       for (AtomViewList::const_iterator j=r.GetAtomList().begin(),
           e2=r.GetAtomList().end(); j!=e2; ++j) {
-        center+=j->GetPos() * j->GetAtomProps().mass;
+        center+=j->GetPos() * j->GetMass();
       }
     }
     center/=mass;

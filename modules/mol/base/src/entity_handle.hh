@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -64,6 +64,8 @@ public:
   /// default ctor. creates invalid handle.
   EntityHandle();
   
+
+  //@}
   /// \brief copy entity, effectively duplicating the whole data structure
   /// 
   /// Alternative atom positions are not handled at all!
@@ -135,7 +137,7 @@ public:
   ///
   /// The two iterators returned by ResiduesBegin() and ResiduesEnd() form a
   /// half-closed range. It is cheaper to cache the iterator returned by
-  /// ResiduesEnd() than to call ResiduesEnd() after very loop, i.e. like
+  /// ResiduesEnd() than to call ResiduesEnd() after every loop, i.e. like
   /// \code
   /// // e is an instance of EntityHandle
   /// for (ResidueHandleIter i=e.ResiduesBegin(), x=e.ResiduesEnd(); i!=x; ++i) {
@@ -199,13 +201,31 @@ public:
   /// \brief use atom hash to perform fast within lookup
   AtomHandleList FindWithin(const geom::Vec3& pos, Real radius) const;
 
+  /// \brief set default query flags
+  /// these will be used if flags are not explicitely specified as
+  /// a second argument to a Select call
+  void SetDefaultQueryFlags(QueryFlags flags);
+
+  /// \brief return default query flags
+  QueryFlags GetDefaultQueryFlags() const;
+
   /// \brief return view based on a query object
   /// \sa Query
-  EntityView Select(const Query& q, QueryFlags flags=0) const;
+  /// The default query flags will be used for the selection
+  EntityView Select(const Query& q) const;
 
   /// \brief return view based on query String.
   /// \sa Query
-  EntityView Select(const String& query_string, QueryFlags flags=0) const;
+  /// The default query flags will be used for the selection
+  EntityView Select(const String& query_string) const;
+
+  /// \brief return view based on a query object, specifying behavior flags
+  /// \sa Query
+  EntityView Select(const Query& q, QueryFlags flags) const;
+
+  /// \brief return view based on query String, specifying behavior flags
+  /// \sa Query
+  EntityView Select(const String& query_string, QueryFlags flags) const;
 
   /// \brief return a (new) full view of this entity
   EntityView CreateFullView() const;
@@ -263,12 +283,12 @@ public:
   /// \brief Get editor for external coordinate system to manipulate atom 
   ///     positions
   /// \sa editors
-  XCSEditor RequestXCSEditor(EditMode mode=UNBUFFERED_EDIT) const;
+  XCSEditor EditXCS(EditMode mode=UNBUFFERED_EDIT) const;
   
   /// \brief Get editor for the internal coordinate system to manipulate 
   ///    torsions bond lengths and angles between bonds
   /// \sa editors
-  ICSEditor RequestICSEditor(EditMode mode=UNBUFFERED_EDIT) const;  
+  ICSEditor EditICS(EditMode mode=UNBUFFERED_EDIT) const;  
   
   /// \brief get this handle
   /// 

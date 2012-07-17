@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -30,6 +30,7 @@
 #include <ost/img/value_util.hh>
 
 #include "stat.hh"
+#include "stat_accumulator.hh"
 
 namespace ost { namespace img { namespace alg {
 
@@ -41,15 +42,29 @@ template <typename T, class D>
 void StatBase::VisitState(const ImageStateImpl<T,D>& isi)
 {
   sum_=0.0;
-  Real sum2=0.0,sum3=0.0,sum4=0.0;
-  Real n = static_cast<Real>(isi.GetSize().GetVol());
-  Vec3 sumcenter(0.0,0.0,0.0);
+  mean_=0.0;
 
-  if(n==0.0)  return;
+  Real n = static_cast<Real>(isi.GetSize().GetVol());
+  if(n==0.0){
+    var_=0.0;
+    std_dev_=0.0;
+    min_=0.0;
+    max_=0.0;
+    maxpos_=Point(0,0,0),
+    minpos_=Point(0,0,0),
+    rms_=0.0;
+    skewness_=0.0;
+    kurtosis_=0.0;
+    center_of_mass_=Vec3(0.0,0.0,0.0);
+    return;
+  }
+
+  Vec3 sumcenter(0.0,0.0,0.0);
   ValIndex minindex(std::numeric_limits<Real>::max(),Point(0,0,0));
   ValIndex maxindex(-std::numeric_limits<Real>::max(),Point(0,0,0));
   min_ = std::numeric_limits<Real>::max();
   max_ = -std::numeric_limits<Real>::max();
+  StatAccumulator<> acc;
 
   int wi=isi.GetSize()[0];
   int he=isi.GetSize()[1];
@@ -58,18 +73,11 @@ void StatBase::VisitState(const ImageStateImpl<T,D>& isi)
     for(int j=0;j<he;++j) {
       for(int k=0;k<de;++k) {
         Real val=Val2Val<T,Real>(isi.Value(Index(i,j,k)));
-        Real oval=val;
         ValIndex vi(val,Point(i,j,k));
         minindex=std::min<ValIndex>(vi,minindex);
         maxindex=std::max<ValIndex>(vi,maxindex);
         sumcenter+=Vec3(i,j,k)*val;
-        sum_+=val;
-        val*=oval;
-        sum2+=val;
-        val*=oval;
-        sum3+=val;
-        val*=oval;
-        sum4+=val;
+        acc(val);
       }
     }
   }
@@ -77,17 +85,13 @@ void StatBase::VisitState(const ImageStateImpl<T,D>& isi)
   max_=maxindex.first;
   minpos_=minindex.second+isi.GetExtent().GetStart();
   maxpos_=maxindex.second+isi.GetExtent().GetStart();  
-  mean_ = sum_/n;
-  var_=sum2/n-mean_*mean_;
-  std_dev_=sqrt(var_);
-  rms_=sqrt(sum2/n);
-  if(std_dev_>0.0){
-    skewness_=sqrt(n)*(sum3-3.0*mean_*sum2+3.0*mean_*mean_*sum_ -n*mean_*mean_*mean_)/(std_dev_*std_dev_*std_dev_);
-    kurtosis_= n*(sum4-4.0*sum3*mean_+6.0*sum2*mean_*mean_-4.0*sum_*mean_*mean_*mean_+n*mean_*mean_*mean_*mean_)/(var_*var_)-3.0; 
-  }else{
-    skewness_=0.0;
-    kurtosis_=0.0;
-  }
+  var_=acc.GetVariance();
+  std_dev_=acc.GetStandardDeviation();
+  rms_=acc.GetRootMeanSquare();
+  skewness_=acc.GetSkewness();
+  kurtosis_= acc.GetKurtosis();
+  sum_=acc.GetSum();
+  mean_=acc.GetMean();
   if(sum_!=0.0){
     center_of_mass_=sumcenter/sum_+isi.GetExtent().GetStart().ToVec3();
   }else{
@@ -98,47 +102,49 @@ void StatBase::VisitState(const ImageStateImpl<T,D>& isi)
 void StatBase::VisitFunction(const Function& fnc)
 {
   sum_=0.0;
-  Real sum2=0.0,sum3=0.0,sum4=0.0;
+  mean_=0.0;
+
+  Real n = (Real)(fnc.GetSize().GetVol());
+  if(n==0.0){
+    var_=0.0;
+    std_dev_=0.0;
+    min_=0.0;
+    max_=0.0;
+    maxpos_=Point(0,0,0),
+    minpos_=Point(0,0,0),
+    rms_=0.0;
+    skewness_=0.0;
+    kurtosis_=0.0;
+    center_of_mass_=Vec3(0.0,0.0,0.0);
+    return;
+  }
+
+  Vec3 sumcenter(0.0,0.0,0.0);
   ValIndex minindex(std::numeric_limits<Real>::max(),Point(0,0,0));
   ValIndex maxindex(-std::numeric_limits<Real>::max(),Point(0,0,0));
-  Real n = (Real)(fnc.GetSize().GetVol());
-  Vec3 sumcenter(0.0,0.0,0.0);
-
-  if(n==0.0)  return;
-
   min_ = std::numeric_limits<Real>::max();
   max_ = -std::numeric_limits<Real>::max();
+  StatAccumulator<> acc;
 
   for(ExtentIterator it(fnc.GetExtent());!it.AtEnd(); ++it) {
     Real val=fnc.GetReal(it);
-    Real oval=val;
     ValIndex vi(val,it);
     minindex=std::min<ValIndex>(vi,minindex);
     maxindex=std::max<ValIndex>(vi,maxindex);
     sumcenter+=Point(it).ToVec3()*val;
-    sum_+=val;
-    val*=oval;
-    sum2+=val;
-    val*=oval;
-    sum3+=val;
-    val*=oval;
-    sum4+=val;
+    acc(val);
   }
   min_=minindex.first;
   max_=maxindex.first;
   minpos_=minindex.second;
-  maxpos_=maxindex.second;  
-  mean_ = sum_/n;
-  var_=sum2/n-mean_*mean_;
-  std_dev_=sqrt(var_);
-  rms_=sqrt(sum2/n);
-  if(std_dev_>0.0){
-    skewness_=sqrt(n)*(sum3-3*mean_*sum2+3*mean_*mean_*sum_-n*mean_*mean_*mean_)/(std_dev_*std_dev_*std_dev_);
-    kurtosis_= n*(sum4-4*sum3*mean_+6*sum2*mean_*mean_-4*sum_*mean_*mean_*mean_+n*mean_*mean_*mean_*mean_)/(var_*var_)-3; 
-  }else{
-    skewness_=0.0;
-    kurtosis_=0.0;
-  }
+  maxpos_=maxindex.second;
+  var_=acc.GetVariance();
+  std_dev_=acc.GetStandardDeviation();
+  rms_=acc.GetRootMeanSquare();
+  skewness_=acc.GetSkewness();
+  kurtosis_= acc.GetKurtosis();
+  sum_=acc.GetSum();
+  mean_=acc.GetMean();
   if(sum_!=0.0){
     center_of_mass_=sumcenter/sum_;
   }else{
@@ -162,5 +168,8 @@ std::ostream& operator<<(std::ostream& o, const Stat& s)
 
 
 }
+namespace image_state {
+  
 template class TEMPLATE_DEF_EXPORT ImageStateNonModAlgorithm<alg::StatBase>;
-}} // ns
+
+}}} // ns

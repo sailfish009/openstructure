@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2010 by the OpenStructure authors
+# Copyright (C) 2008-2011 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -34,6 +34,7 @@ from color_select_widget import ColorSelectWidget
 class UniformColorWidget(QtGui.QWidget):
   def __init__(self, parent=None):
     QtGui.QWidget.__init__(self, parent)
+    self.parent_ = parent
     
     self.text_ = "Uniform Color"
     
@@ -41,7 +42,6 @@ class UniformColorWidget(QtGui.QWidget):
     uniform_label = QtGui.QLabel(self.text_)
     font = uniform_label.font()
     font.setBold(True)
-    
     
     self.color_select_widget_ = ColorSelectWidget(1,1,QtGui.QColor("White"))
     
@@ -87,7 +87,10 @@ class UniformColorWidget(QtGui.QWidget):
     gfx_color = self.color_select_widget_.GetGfxColor()
     if isinstance(node, gfx.Entity) or isinstance(node, gfx.Surface):
         node.CleanColorOps()
-        node.SetColor(gfx_color,"")
+        if self.parent_.GetCarbonsOnly():
+          node.SetColor(gfx_color,"ele=C")
+        else:
+          node.SetColor(gfx_color,"")
     elif _img_present and isinstance(node, gfx.MapIso):
         node.SetColor(gfx_color)
   

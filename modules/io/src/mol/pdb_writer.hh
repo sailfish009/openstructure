@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -28,22 +28,34 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 
-#include <ost/mol/mol.hh>
-
 #include <ost/io/module_config.hh>
 #include <ost/io/formatted_line.hh>
+#include <ost/io/mol/io_profile.hh>
 
+namespace ost { 
+  
+namespace mol {
 
-#include "pdb_io.hh"
+class EntityView;
+class EntityHandle;
 
-namespace ost { namespace io {
+}
+
+namespace io {
+
 
 class DLLEXPORT_OST_IO PDBWriter {
+  typedef boost::iostreams::filtering_stream<boost::iostreams::output> OutStream;
 public:
-  PDBWriter(const String& filename, bool charmm_style=false);
-  PDBWriter(const boost::filesystem::path& filename, bool charmm_style=false);
-  PDBWriter(std::ostream& outstream, bool charmm_style=false);
-  
+  PDBWriter(const String& filename,
+            const IOProfile& profile);
+  PDBWriter(const boost::filesystem::path& filename,
+            const IOProfile& profile);
+  PDBWriter(std::ostream& outstream, const IOProfile& profile);
+  void SetWriteMultiModel(bool flag) { multi_model_=flag; }
+  bool GetWriteMultiModel() const { return multi_model_; }
+  void SetIsPQR(bool flag) { is_pqr_=flag; }
+  bool IsPQR() const { return is_pqr_; }
   void Write(const mol::EntityView& ent);
   void Write(const mol::EntityHandle& ent);
   
@@ -61,7 +73,12 @@ private:
   int                 mol_count_;
   std::map<long, int> atom_indices_;
   FormattedLine       line_;
+  bool                multi_model_;
   bool                charmm_style_;
+  bool                is_pqr_;
+  IOProfile           profile_;
+  String              filename_;
+  OutStream           out_;
 };
  
 }}

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,7 +22,7 @@
 #include "connector_impl.hh"
 #include "atom_impl.hh"
 #include "entity_impl.hh"
-
+#include <ost/mol/bond_handle.hh>
 #include <ost/mol/entity_visitor.hh>
 
 namespace ost { namespace mol { namespace impl {
@@ -77,14 +77,14 @@ geom::Mat3 find_rotation(const geom::Vec3& d) {
 
 geom::Vec3 ConnectorImpl::GetPos() const 
 {
-  return (GetFirst()->GetPos()+GetSecond()->GetPos())*0.5;
+  return (GetFirst()->TransformedPos()+GetSecond()->TransformedPos())*0.5;
 }
 
 Real ConnectorImpl::GetLength() const
 {
   Real length;
   if (this->GetFirst()->GetEntity()->HasICS()==false) {
-    length=geom::Distance(this->GetFirst()->GetOriginalPos(),this->GetSecond()->GetOriginalPos());
+    length=geom::Distance(this->GetFirst()->OriginalPos(),this->GetSecond()->OriginalPos());
   } else {
     length=len_;
   }
@@ -92,14 +92,22 @@ Real ConnectorImpl::GetLength() const
 }
 
 void ConnectorImpl::SetDir(const geom::Vec3& dir) {
-  geom::Vec3 v=Normalize(dir);
-  local_rot_=find_rotation(v);
+  if(Length(dir)==0) {
+    local_rot_=geom::Mat3(1,0,0,0,1,0,0,0,1);
+  } else {
+    geom::Vec3 v=Normalize(dir);
+    local_rot_=find_rotation(v);
+  }
 }
 
 void ConnectorImpl::SetDirAndLength(const geom::Vec3& dir) {
   len_=Length(dir);
-  geom::Vec3 v=dir/len_;
-  local_rot_=find_rotation(v);
+  if(len_==0) {
+    local_rot_=geom::Mat3(1,0,0,0,1,0,0,0,1);
+  } else {
+    geom::Vec3 v=dir/len_;
+    local_rot_=find_rotation(v);
+  }
 }
 
 bool ConnectorImpl::IsConnectorOf(const AtomImplPtr& a,
@@ -110,8 +118,8 @@ bool ConnectorImpl::IsConnectorOf(const AtomImplPtr& a,
 
 geom::Vec3 ConnectorImpl::GetOriginalPos() const 
 {
-  return (this->GetFirst()->GetOriginalPos()+
-          this->GetSecond()->GetOriginalPos())*0.5;
+  return (this->GetFirst()->OriginalPos()+
+          this->GetSecond()->OriginalPos())*0.5;
 }
 
 void ConnectorImpl::Switch()

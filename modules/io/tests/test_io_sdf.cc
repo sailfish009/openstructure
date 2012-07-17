@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(simple_sdf)
   BOOST_CHECK_EQUAL(eh.GetChainCount(), 1);
   BOOST_CHECK_EQUAL(eh.GetAtomCount(),  6);
   BOOST_CHECK_EQUAL(eh.GetBondCount(),  6);
-  BOOST_CHECK_CLOSE(eh.GetMass(), Real(121.545502), Real(1e-4));
+  BOOST_CHECK_CLOSE(eh.GetMass(), Real(121.546997), Real(1e-4));
 
   // check atom/bond types
   mol::AtomHandle ah=eh.GetAtomList()[0];
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(simple_sdf)
   BOOST_CHECK_EQUAL(ah2.GetElement(), "Cl");
   BOOST_CHECK_CLOSE(ah.GetRadius(),  Real(1.55), Real(1e-2));
   BOOST_CHECK_CLOSE(ah2.GetRadius(), Real(1.75), Real(1e-2));
-  BOOST_CHECK_CLOSE(ah.GetMass(),  Real(14.0067), Real(1e-4));
+  BOOST_CHECK_CLOSE(ah.GetMass(),  Real(14.007), Real(1e-4));
   BOOST_CHECK_CLOSE(ah2.GetMass(), Real(35.453), Real(1e-3));
   BOOST_CHECK_EQUAL(ah.GetBondCount(),  3);
   BOOST_CHECK_EQUAL(ah2.GetBondCount(), 1);
@@ -147,8 +147,30 @@ BOOST_AUTO_TEST_CASE(write_sdf)
     sdfh.Import(eh,"testfiles/sdf/compound.sdf");
     SaveEntity(eh, "testfiles/sdf/compound-out.sdf");
   }
-  BOOST_CHECK(compare_files("testfiles/sdf/compound.sdf",
-                            "testfiles/sdf/compound-out.sdf"));
+  BOOST_CHECK(compare_files("testfiles/sdf/compound-out.sdf",
+                            "testfiles/sdf/compound.sdf"));
+}
+
+BOOST_AUTO_TEST_CASE(write_sdf_view)
+{
+  // this scope is required to force the writer stream to be closed before
+  // opening the file again in compare_files. Avoids a race condition.
+  {
+    mol::EntityHandle eh = mol::CreateEntity();
+    EntityIOSDFHandler sdfh;
+    sdfh.Import(eh,"testfiles/sdf/compound.sdf");
+    mol::EntityView ev = eh.Select("(ele=C or ele=N) and aname!='1'");
+    SaveEntity(ev, "testfiles/sdf/compound-view-out.sdf");
+  }
+  BOOST_CHECK(compare_files("testfiles/sdf/compound-view-out.sdf",
+                            "testfiles/sdf/compound-view.sdf"));
+}
+
+BOOST_AUTO_TEST_CASE(nonexisting_file)
+{
+  mol::EntityHandle eh=mol::CreateEntity();
+  EntityIOSDFHandler sdfh;
+  BOOST_CHECK_THROW(sdfh.Import(eh,"non-existing-file.sdf"), IOException);
 }
 
 BOOST_AUTO_TEST_CASE(wrong_atomcount_error_sdf)

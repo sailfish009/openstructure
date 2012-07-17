@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -23,6 +23,7 @@
 #include "impl/torsion_impl.hh"
 #include "impl/entity_impl.hh"
 #include "impl/connector_impl.hh"
+#include "impl/atom_impl.hh"
 /*
   Author: Marco Biasini
  */
@@ -96,18 +97,20 @@ bool ICSEditor::SetAngle(const AtomHandle& atom_a, const AtomHandle& atom_b,
     return return_value;
 }
 
-void ICSEditor::SetTorsionAngle(TorsionHandle torsion, Real angle)
+void ICSEditor::SetTorsionAngle(TorsionHandle torsion, Real angle,
+                                bool update_others)
 {
   CheckHandleValidity(torsion);  
-  torsion.Impl()->SetAngle(angle, false);
+  torsion.Impl()->SetAngle(angle, update_others);
   ent_.Impl()->MarkXCSDirty();
   this->Update(); 
 }
 
-void ICSEditor::RotateTorsionAngle(TorsionHandle torsion, Real angle)
+void ICSEditor::RotateTorsionAngle(TorsionHandle torsion, Real angle,
+                                   bool update_others)
 {
   CheckHandleValidity(torsion);
-  torsion.Impl()->RotateAngle(angle, false);
+  torsion.Impl()->RotateAngle(angle, update_others);
   ent_.Impl()->MarkXCSDirty();  
   this->Update(); 
 }
@@ -116,7 +119,9 @@ void ICSEditor::RotateTorsionAngle(TorsionHandle torsion, Real angle)
 void ICSEditor::RotateTorsionAngle(const AtomHandle& atom_a,
                                    const AtomHandle& atom_b,
                                    const AtomHandle& atom_c,
-                                   const AtomHandle& atom_d, Real angle)
+                                   const AtomHandle& atom_d,
+                                   Real angle,
+                                   bool update_others)
 {
   CheckHandleValidity(atom_a);
   CheckHandleValidity(atom_b);
@@ -124,7 +129,7 @@ void ICSEditor::RotateTorsionAngle(const AtomHandle& atom_a,
   CheckHandleValidity(atom_d);
   impl::Dihedral d(atom_a.Impl(), atom_b.Impl(), atom_c.Impl(), atom_d.Impl());
   Real cur_angle=d.GetAngleICS();
-  d.SetAngleICS(cur_angle+angle);
+  d.SetAngleICS(cur_angle+angle, update_others);
   ent_.Impl()->MarkXCSDirty();
   this->Update();
 }
@@ -133,16 +138,19 @@ void ICSEditor::RotateTorsionAngle(const AtomHandle& atom_a,
 void ICSEditor::SetTorsionAngle(const AtomHandle& atom_a, 
                                 const AtomHandle& atom_b,
                                 const AtomHandle& atom_c, 
-                                const AtomHandle& atom_d, Real angle)
+                                const AtomHandle& atom_d,
+                                Real angle,
+                                bool update_others)
 {
   CheckHandleValidity(atom_a);
   CheckHandleValidity(atom_b);
   CheckHandleValidity(atom_c);  
   CheckHandleValidity(atom_d);  
   impl::Dihedral d(atom_a.Impl(), atom_b.Impl(), atom_c.Impl(), atom_d.Impl());
-  d.SetAngleICS(angle, false);  
+  d.SetAngleICS(angle, update_others);
   ent_.Impl()->MarkXCSDirty();
   this->Update();   
 }
+
 
 }} // ns

@@ -1,7 +1,7 @@
 #------------------------------------------------------------------------------
 # This file is part of the OpenStructure project <www.openstructure.org>
 #
-# Copyright (C) 2008-2010 by the OpenStructure authors
+# Copyright (C) 2008-2011 by the OpenStructure authors
 #
 # This library is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
@@ -105,9 +105,11 @@ class TraceWidget(RenderModeWidget):
     self.GetOptions().SetTubeRadius(value/10.0)
 
   def UpdateTubeRadiusGui(self,value):
-    if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_spinbox_.singleStep()):
+    value = round(value, 2)
+    if(abs(value*10.0 - self.width_tube_slider_.value())>=self.width_tube_slider_.singleStep()):
       self.width_tube_slider_.setValue(value*10.0)
-    self.width_tube_spinbox_.setValue(value)
+    if(abs(value - self.width_tube_spinbox_.value())>=self.width_tube_spinbox_.singleStep()):
+      self.width_tube_spinbox_.setValue(value)
   
   def GetText(self):
     return self.text_

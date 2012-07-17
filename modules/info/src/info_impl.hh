@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -73,6 +73,8 @@ public:
 
   String GetTextData() const;
   void SetTextData(const String& td);
+
+  String GetComment() const;
 
   /// \brief get sub elements with specified element name
   /// 

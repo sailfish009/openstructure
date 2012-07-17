@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -20,11 +20,12 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 using namespace boost::python;
 
-
 #include <ost/mol/surface_handle.hh>
 #include <ost/mol/surface_builder.hh>
 #include <ost/mol/entity_handle.hh>
 #include <ost/mol/impl/surface_impl.hh>
+
+#include <ost/geom/export_helper/vector.hh>
 
 using namespace ost;
 using namespace ost::mol;
@@ -47,13 +48,13 @@ void export_Surface()
     .def_readwrite("Position", &SurfaceVertex::position)
     .def_readwrite("Normal", &SurfaceVertex::normal)
     .def_readwrite("Atom", &SurfaceVertex::atom)   
-  ;     
+  ;
   class_<SurfaceTriIDList>("SurfaceTriIDList", init<>())
     .def(vector_indexing_suite<SurfaceTriIDList>())
   ;
   class_<SurfaceVertexList>("SurfaceVertexList", init<>())
     .def(vector_indexing_suite<SurfaceVertexList>())
-  ;  
+  ;
   class_<SurfaceHandle>("SurfaceHandle", no_init)
     .def("Attach",attach1)
     .def("Attach",attach2)
@@ -63,6 +64,11 @@ void export_Surface()
     .def("FindWithin", &SurfaceHandle::FindWithin)    
     .def("Invert",&SurfaceHandle::Invert)
     .def("IsValid",&SurfaceHandle::IsValid)
+  ;
+
+  class_<SurfaceHandleList>("SurfaceHandleList", init<>())
+    .def(vector_indexing_suite<SurfaceHandleList>())
+    .def(geom::VectorAdditions<SurfaceHandleList>())
   ;
 
   def("CreateSurface",create1);

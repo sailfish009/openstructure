@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -31,7 +31,7 @@ EntityHandle mk_test_ent()
 {
   EntityHandle ent=CreateEntity();
   ent.SetName("TestEntity");
-  XCSEditor edi=ent.RequestXCSEditor();
+  XCSEditor edi=ent.EditXCS();
   ChainHandle chain_a=edi.InsertChain("A");
   ResidueHandle res_a=edi.AppendResidue(chain_a, "A");
   AtomHandle atom_a=edi.InsertAtom(res_a, "A", geom::Vec3());
@@ -334,7 +334,8 @@ BOOST_AUTO_TEST_CASE(test_intersection_b)
                          bonds));
 }
 
-BOOST_AUTO_TEST_CASE(entity_from_view) {
+BOOST_AUTO_TEST_CASE(entity_from_view) 
+{
   EntityHandle ent=mk_test_ent();
   EntityView v1=ent.Select("aname=B,C,F,G");
   EntityHandle ent_fv=mol::CreateEntityFromView(v1, false);
@@ -345,6 +346,55 @@ BOOST_AUTO_TEST_CASE(entity_from_view) {
   BOOST_CHECK_EQUAL(ent_fv.GetResidueCount(), 4);
   BOOST_CHECK_EQUAL(ent_fv.GetChainCount(), 2);
 
+}
+
+BOOST_AUTO_TEST_CASE(ent_from_view_residue_props)
+{
+  EntityHandle ent=mol::CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  ChainHandle ch=edi.InsertChain("A");
+  ResidueHandle res=edi.AppendResidue(ch, "DUMMY", mol::ResNum(666, '6'));
+  res.SetOneLetterCode('X');
+  res.SetIsProtein(true);
+  ChemClass cl(ChemClass::L_PEPTIDE_LINKING);  
+  res.SetSecStructure(SecStructure(SecStructure::ALPHA_HELIX));
+  res.SetChemClass(cl);
+  EntityHandle copy=mol::CreateEntityFromView(ent.Select(""), false);
+  ResidueHandle res2=copy.GetResidueList()[0];
+  BOOST_CHECK_EQUAL(res2.GetName(), String("DUMMY"));
+  BOOST_CHECK_EQUAL(res2.GetOneLetterCode(), 'X');
+
+  BOOST_CHECK_EQUAL(res2.GetChemClass(), cl);
+  BOOST_CHECK_EQUAL(res.GetSecStructure(), SecStructure::ALPHA_HELIX);
+  BOOST_CHECK(res2.IsProtein()==true);
+  BOOST_CHECK_EQUAL(res2.GetNumber(), ResNum(666, '6'));
+}
+
+BOOST_AUTO_TEST_CASE(ent_from_view_atom_props)
+{
+  EntityHandle ent=mol::CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  ChainHandle ch=edi.InsertChain("A");
+  ResidueHandle res=edi.AppendResidue(ch, "DUMMY");
+  AtomHandle   atom=edi.InsertAtom(res, "X", geom::Vec3(1,2,3), "C");
+  atom.SetMass(100.0);
+  atom.SetBFactor(200.0);
+  atom.SetOccupancy(300.0);
+  atom.SetHetAtom(true);
+  atom.SetRadius(500);
+  atom.SetCharge(800);
+  atom.SetAnisou(geom::Mat3(100,200,300));
+  EntityHandle copy=mol::CreateEntityFromView(ent.Select(""), false);
+  AtomHandle atom2=copy.GetAtomList()[0];
+  BOOST_CHECK_EQUAL(atom2.GetPos(), geom::Vec3(1,2,3));
+  BOOST_CHECK_EQUAL(atom2.GetName(), String("X"));
+  BOOST_CHECK_EQUAL(atom2.GetElement(), String("C"));
+  BOOST_CHECK_EQUAL(atom2.GetMass(), Real(100.0));
+  BOOST_CHECK_EQUAL(atom2.GetCharge(), Real(800.0));  
+  BOOST_CHECK_EQUAL(atom2.GetBFactor(), Real(200.0)); 
+  BOOST_CHECK_EQUAL(atom2.IsHetAtom(), true);
+  BOOST_CHECK_EQUAL(atom2.GetAnisou(), geom::Mat3(100,200,300));
+  BOOST_CHECK_EQUAL(atom2.GetRadius(), Real(500.0));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

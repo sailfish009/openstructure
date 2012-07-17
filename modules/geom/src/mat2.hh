@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,6 +22,7 @@
 #include <cstddef> // for size_t
 #include <ostream>
 #include <cassert>
+#include <stdexcept>
 
 #include <boost/operators.hpp>
 
@@ -66,13 +67,17 @@ public:
   //! element access
   Real& operator()(std::size_t r, std::size_t c)
   {
-    assert(r<=1 && c<=1);
+    if (r>1 || c >1) {
+      throw std::out_of_range("row and column must be in the range [0-1]");
+    }
     return data_[r][c];
   }
   //! const element access
   const Real& operator()(std::size_t r, std::size_t c) const
   {
-    assert(r<=1 && c<=1);
+    if (r>1 || c >1) {
+      throw std::out_of_range("row and column must be in the range [0-1]");
+    }
     return data_[r][c];
   }
 

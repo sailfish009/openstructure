@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -59,38 +59,6 @@ namespace ost {
 
 namespace gfx {
 
-MapIso::MapIso(const String& name, const img::MapHandle& mh, float level):
-  GfxObj(name),
-  original_mh_(mh),
-  downsampled_mh_(),
-  mh_(MapIso::DownsampleMap(mh)),
-  octree_(mh_),
-  stat_calculated_(false),
-  histogram_calculated_(false),
-  histogram_bin_count_(100),
-  level_(level),
-  normals_calculated_(false),
-  alg_(0),
-  smoothf_(0.2),
-  debug_octree_(false),
-  color_(Color::GREY)
-{
-  // TODO replace with def mat for this gfx obj type
-  if (mh_ != original_mh_) {
-    downsampled_mh_ = mh_;
-  }
-  octree_.Initialize();
-  SetMatAmb(Color(0,0,0));
-  SetMatDiff(Color(1,1,1));
-  SetMatSpec(Color(0.1,0.1,0.1));
-  SetMatShin(32);
-  mol::Transform tf=this->GetTF();
-  tf.SetCenter(this->GetCenter());
-  tf.SetTrans(this->GetCenter());
-  this->SetTF(tf);
-  Rebuild();
-}
-
 MapIso::MapIso(const String& name, const img::MapHandle& mh, 
                float level, uint a):
   GfxObj(name),
@@ -105,7 +73,9 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   normals_calculated_(false),
   alg_(a),
   debug_octree_(false),
-  color_(Color::GREY)  
+  color_(1.0,1.0,1.0),
+  bb_(),
+  recalc_bb_(true)
 {
   // TODO replace with def mat for this gfx obj type
   if (mh_ != original_mh_) {
@@ -125,15 +95,17 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
 
 geom::AlignedCuboid MapIso::GetBoundingBox() const
 {
-  geom::Vec3 minc = mh_.IndexToCoord(mh_.GetExtent().GetStart());
-  geom::Vec3 maxc = mh_.IndexToCoord(mh_.GetExtent().GetEnd());
-  return geom::AlignedCuboid(minc,maxc);
+  if(recalc_bb_) {
+    bb_=va_.GetBoundingBox();
+    recalc_bb_=false;
+  }
+  return bb_;
 }
 
 geom::Vec3 MapIso::GetCenter() const
 {
-  geom::Vec3 nrvo = mh_.IndexToCoord(mh_.GetExtent().GetCenter());
-  return nrvo;
+  if(recalc_bb_) GetBoundingBox();
+  return bb_.GetCenter();
 }
 
 void MapIso::UpdateRenderParams()
@@ -274,7 +246,7 @@ void MapIso::OnInput(const InputEvent& e)
 void MapIso::Rebuild()
 {
   if (mh_.IsFrequency() == true){
-    throw Error("Error: Map not in real space. Cannot create of this map");
+    throw Error("Error: Map not in real space");
   }
   if (octree_.IsMapManageable(mh_) == false) {
     throw Error("Error: Map is too big for visualization");
@@ -296,6 +268,7 @@ void MapIso::Rebuild()
   va_.DrawNormals(true);
 #endif  
   this->UpdateRenderParams();  
+  recalc_bb_=true;
 }
 
 void MapIso::SetLevel(float l)

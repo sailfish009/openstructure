@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -22,11 +22,9 @@
 
 #include "cpk_render_options.hh"
 
-namespace ost {
+namespace ost { namespace gfx {
 
-namespace gfx {
-
-CPKRenderOptions::CPKRenderOptions(): sphere_detail_(4) {
+  CPKRenderOptions::CPKRenderOptions(): sphere_detail_(4),cpk_mode_(0),rad_mult_(1.0) {
 #if OST_SHADER_SUPPORT_ENABLED
   cpk_mode_=1;
 #else
@@ -72,8 +70,15 @@ uint CPKRenderOptions::GetSphereMode(){
   return cpk_mode_;
 }
 
-CPKRenderOptions::~CPKRenderOptions() {}
-
+void CPKRenderOptions::SetRadiusMult(float m)
+{
+  rad_mult_=std::max(0.0f,m);
+  this->NotifyStateChange();
 }
 
+float CPKRenderOptions::GetRadiusMult() const
+{
+  return rad_mult_;
 }
+
+}} // ns

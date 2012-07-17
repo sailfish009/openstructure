@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -41,6 +41,7 @@ const char* CREATE_CMD[]={
 "  olc             VARCHAR(1) NOT NULL,                                         "
 "  dialect         VARCHAR(1) NOT NULL,                                         "
 "  chem_class      VARCHAR(1),                                                  "
+"  chem_type       VARCHAR(1),                                                  "
 "  formula         VARCHAR(64) NOT NULL,                                        "
 "  pdb_initial     TIMESTAMP,                                                   "
 "  pdb_modified    TIMESTAMP                                                    "
@@ -79,8 +80,8 @@ const char* CREATE_CMD[]={
 
 
 const char* INSERT_COMPOUND_STATEMENT="INSERT INTO chem_compounds               "
-"        (tlc, olc, dialect, chem_class, formula, pdb_initial, pdb_modified)    "
-" VALUES (?, ?, ?, ?, ?, DATE(?), DATE(?))";
+"        (tlc, olc, dialect, chem_class, chem_type, formula, pdb_initial, pdb_modified) "
+" VALUES (?, ?, ?, ?, ?, ?, DATE(?), DATE(?))";
 
 const char* INSERT_ATOM_STATEMENT="INSERT INTO atoms                            "
 "        (compound_id, name, alt_name, element, is_aromatic, stereo_conf,       "
@@ -106,11 +107,13 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
                       compound->GetID().length(), NULL);
     char olc=compound->GetOneLetterCode();
     sqlite3_bind_text(stmt, 2, &olc, 1, NULL);
-    char chem_type=compound->GetChemClass();
+    char chem_class=compound->GetChemClass();
+    char chem_type=compound->GetChemType();
     char dialect=compound->GetDialect();
     sqlite3_bind_text(stmt, 3, &dialect, 1, NULL);
-    sqlite3_bind_text(stmt, 4, &chem_type, 1, NULL);
-    sqlite3_bind_text(stmt, 5, compound->GetFormula().c_str(), 
+    sqlite3_bind_text(stmt, 4, &chem_class, 1, NULL);
+    sqlite3_bind_text(stmt, 5, &chem_type, 1, NULL);
+    sqlite3_bind_text(stmt, 6, compound->GetFormula().c_str(),
                       compound->GetFormula().length(), NULL);
     std::stringstream ss;
     ss << compound->GetCreationDate().year << "-" 
@@ -121,9 +124,9 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
     ss << compound->GetModificationDate().year << "-" 
        << compound->GetModificationDate().month << "-" 
        << compound->GetModificationDate().day;
-    sqlite3_bind_text(stmt, 6, date.c_str(), date.length(), NULL);
+    sqlite3_bind_text(stmt, 7, date.c_str(), date.length(), NULL);
     date=ss.str();
-    sqlite3_bind_text(stmt, 7, date.c_str(), date.length(), NULL);        
+    sqlite3_bind_text(stmt, 8, date.c_str(), date.length(), NULL);
   } else {
     LOG_ERROR(sqlite3_errmsg(conn_));
     sqlite3_finalize(stmt);    
@@ -156,10 +159,10 @@ void CompoundLib::AddCompound(const CompoundPtr& compound)
       sqlite3_bind_int(stmt, 5, a.is_aromatic);
       sqlite3_bind_int(stmt, 6, 0);                  
       sqlite3_bind_int(stmt, 7, a.is_leaving);
-      sqlite3_bind_int(stmt, 8, i-al.begin());      
+      sqlite3_bind_int(stmt, 8, a.ordinal);
       retval=sqlite3_step(stmt);
       assert(retval==SQLITE_DONE);
-      atom_ids[i-al.begin()]=sqlite3_last_insert_rowid(conn_);
+      atom_ids[a.ordinal]=sqlite3_last_insert_rowid(conn_);
     } else {
       LOG_ERROR(sqlite3_errmsg(conn_));
     }
@@ -242,11 +245,18 @@ CompoundLibPtr CompoundLib::Load(const String& database, bool readonly)
   int flags=readonly ? SQLITE_OPEN_READONLY : SQLITE_OPEN_READWRITE;
   CompoundLibPtr lib(new CompoundLib);
   int retval=sqlite3_open_v2(database.c_str(), &lib->conn_, flags, NULL);
-  if (SQLITE_OK==retval) {
-    return lib;
+  if (SQLITE_OK!=retval) {
+    LOG_ERROR(sqlite3_errmsg(lib->conn_));
+    return CompoundLibPtr();
   }
-  LOG_ERROR(sqlite3_errmsg(lib->conn_));
-  return CompoundLibPtr();
+  // check if column chem_type exists in database
+  String aq="SELECT chem_type FROM chem_compounds LIMIT 1";
+  sqlite3_stmt* stmt;
+  retval=sqlite3_prepare_v2(lib->conn_, aq.c_str(),
+                            static_cast<int>(aq.length()),
+                            &stmt, NULL);
+  lib->chem_type_available_ = retval==SQLITE_OK;
+  return lib;
 }
 
 void CompoundLib::LoadAtomsFromDB(CompoundPtr comp, int pk) {
@@ -308,8 +318,12 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
   if (i!=compound_cache_.end()) {
     return i->second;
   }
-  String query="SELECT id, tlc, olc, chem_class, dialect FROM chem_compounds"
-               " WHERE tlc='"+id+"' AND dialect='"+String(1, char(dialect))+"'";
+  String query="SELECT id, tlc, olc, chem_class, dialect, formula";
+  if(chem_type_available_) {
+    query+=", chem_type";
+  }
+  query+=" FROM chem_compounds"
+         " WHERE tlc='"+id+"' AND dialect='"+String(1, char(dialect))+"'";
   sqlite3_stmt* stmt;
   int retval=sqlite3_prepare_v2(conn_, query.c_str(), 
                                 static_cast<int>(query.length()),
@@ -327,6 +341,11 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
       compound->SetOneLetterCode((sqlite3_column_text(stmt, 2))[0]);
       compound->SetChemClass(mol::ChemClass(sqlite3_column_text(stmt, 3)[0]));
       compound->SetDialect(Compound::Dialect(sqlite3_column_text(stmt, 4)[0]));
+      const char* f=reinterpret_cast<const char*>(sqlite3_column_text(stmt, 5));
+      compound->SetFormula(f);
+      if(chem_type_available_) {
+        compound->SetChemType(mol::ChemType(sqlite3_column_text(stmt, 6)[0]));
+      }
       // Load atoms and bonds      
       this->LoadAtomsFromDB(compound, pk);
       this->LoadBondsFromDB(compound, pk);
@@ -345,7 +364,7 @@ CompoundPtr CompoundLib::FindCompound(const String& id,
 }
 
 CompoundLib::CompoundLib() 
-  : conn_(NULL) {
+  : conn_(NULL), chem_type_available_(false) {
 }
 
 CompoundLib::~CompoundLib() {

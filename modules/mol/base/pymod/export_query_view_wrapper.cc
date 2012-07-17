@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -45,6 +45,7 @@ void export_QueryViewWrapper()
     .def("GetFlags", &QueryViewWrapper::GetFlags)
     .def("SetFlags", &QueryViewWrapper::SetFlags)
     .add_property("entity_view", &QueryViewWrapper::GetEntityView)
+    .add_property("entity", &QueryViewWrapper::GetEntity)
     .add_property("query", make_function(&QueryViewWrapper::GetQuery
         ,return_value_policy<copy_const_reference>()))
   ;

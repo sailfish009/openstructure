@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -56,7 +56,7 @@ void    (tf::FractionalShift::*setshift1)(Real,Real,Real)    = &tf::FractionalSh
 void    (tf::FractionalShift::*setshift2)(const Vec3&)                    = &tf::FractionalShift::SetShift;
 
 
-BOOST_PYTHON_MODULE(_tf)
+BOOST_PYTHON_MODULE(_ost_tf)
 {
   class_<tf::Transformation>("Transformation", init<>())
     .def(init<const Mat4&>())

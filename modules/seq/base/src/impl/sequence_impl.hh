@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -47,7 +47,8 @@ class DLLEXPORT_OST_SEQ SequenceImpl : public GenericPropContainerImpl {
 public:
   /// \brief       Construct new sequence object from sequence_string.
   static SequenceImplPtr FromString(const String& seq_name,
-                                const String& sequence_string);
+                                    const String& sequence_string,
+                                    const String& role="UNKNOWN");
 
   /// \brief       Get residue index corresponding to given sequence position
   /// \param pos   zero-based index
@@ -87,7 +88,8 @@ public:
   ///
   /// \sa #SetOffset
   int GetOffset() const;
-
+  
+  int GetIndex(const String& substr) const;
   /// \brief Set sequence offset
   ///
   /// By default the sequence offset is zero, i.e. the beginning of the sequence
@@ -101,7 +103,8 @@ public:
   ///
   /// If you want to check whether the sequence String does only contain
   /// valid characters use \c CreateSequence instead.
-  SequenceImpl(const String& seq_name, const String& sequence_string);
+  SequenceImpl(const String& seq_name, const String& sequence_string, 
+               const String& role);
 
   /// \brief get one letter code of residue at position
   char GetOneLetterCode(int position) const;
@@ -133,6 +136,26 @@ public:
 
   /// \brief whether the sequence has an attached view
   bool HasAttachedView() const;
+  
+  void Append(char olc);
+  
+  char& operator[](size_t index)
+  {
+    return seq_string_[index];
+  }
+  char operator[](size_t index) const
+  {
+    return seq_string_[index];
+  }
+  const String& GetRole() const
+  {
+    return seq_role_;
+  }
+  
+  void SetRole(const String& role)
+  {
+    seq_role_=role;
+  }
 private:
 
   /// \brief       Recalculates gap shifts from sequence.
@@ -153,10 +176,11 @@ private:
   } Shift;
   String              seq_name_;
   String              seq_string_;
+  String              seq_role_;
   std::list<Shift>    shifts_;
   bool                editing_;
   int                 offset_;
-  mol::EntityView          attached_view_;
+  mol::EntityView     attached_view_;
 };
 
 /// \internal

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -19,12 +19,15 @@
 #ifndef OST_RESIDUE_BASE_HH
 #define OST_RESIDUE_BASE_HH
 
+#include <ost/geom/geom.hh>
+
 #include <ost/mol/module_config.hh>
 #include <ost/mol/residue_prop.hh>
 #include <ost/mol/impl/residue_impl_fw.hh>
 #include <ost/mol/sec_structure.hh>
 #include <ost/mol/handle_type_fw.hh>
 #include <ost/mol/chem_class.hh>
+#include <ost/mol/chem_type.hh>
 
 #include <ost/generic_property.hh>
 #include "property_id.hh"
@@ -49,11 +52,16 @@ namespace ost { namespace mol {
 /// code is set to \c ?. 
 ///
 /// Residues have a \ref ChemClass "chemical class". For standard amino acids this
-/// class is ChemClass::LPeptideLinking, indicating that the residue is capable to
+/// class is ChemClass::L_PEPTIDE_LINKING, indicating that the residue is capable to
 /// participate in a peptide bond. For nucleotides, the chemical class is either
-/// ChemClass::RNALinking or ChemClass::DNALinking. For unknown compounds the 
-/// chemical class is ChemClass::Unknown.
-/// 
+/// ChemClass::RNA_LINKING or ChemClass::DNA_LINKING. For unknown compounds the 
+/// chemical class is ChemClass::UNKNOWN.
+///
+/// In addition, residues have a ChemType. A classification of all components into
+/// nine categories (ions, non-canonical molecules, saccharised, nucleotides,
+/// amino acids, co-enzymes, water coordinated ions, drugs, solvents) as obtained
+/// from the PDB.
+///
 /// When loading an entity from file, the one-letter and chemical class of a
 /// residue are assigned by the \ref conop::Builder "default builder".
 class DLLEXPORT_OST_MOL ResidueBase: 
@@ -63,6 +71,19 @@ public:
   ResidueBase(const impl::ResidueImplPtr& impl);
   ResidueBase(const ResidueBase& rhs);
 public:
+  
+  /// \name Handle validity
+  //@{
+  /// \brief check validity of handle
+  ///
+  /// check, whether the residue handle points to a valid residue.
+  /// \note It is an error to use any method other than #IsValid, #Impl and
+  ///       #operator bool() when the handle is invalid. An InvalidHandle
+  ///       exception will be thrown.
+  operator bool() const { return this->IsValid(); }
+  /// \brief check validity of handle
+  /// \sa #operator bool()
+  bool IsValid() const { return Impl().get()!=0; }
   friend class ConstGenericPropContainer<ResidueBase>;
   /// \brief return residue number
   const ResNum& GetNumber() const;
@@ -77,20 +98,21 @@ public:
   ///         residue name and residue number
   String GetQualifiedName() const;
 
-  /// \name Handle validity
-  //@{
-  /// \brief check validity of handle
-  ///
-  /// check, whether the residue handle points to a valid residue.
-  /// \note It is an error to use any method other than #IsValid, #Impl and
-  ///       #operator bool() when the handle is invalid. An InvalidHandle
-  ///       exception will be thrown.
-  operator bool() const;
-  /// \brief check validity of handle
-  /// \sa #operator bool()
-  bool IsValid() const;
-  //@}
-  
+  /// \brief  returns main atom, ie CA for amino acids
+  AtomHandle GetCentralAtom() const;
+
+  /*!
+    \brief set explicit central atom
+
+    overrides the heuristic of GetCentralAtom to explicitely
+    use the given one as the central atom; passing in an
+    invalid handle reverts back to the heurstic determination
+  */
+  void SetCentralAtom(const AtomHandle& a);
+
+  /// \return return specific normal of residue, usually CA-CB dir for AA
+  geom::Vec3 GetCentralNormal() const;
+
   /// \brief whether the residue can form peptide bonds
   bool IsPeptideLinking() const;
 
@@ -100,7 +122,12 @@ public:
   ChemClass GetChemClass() const;
   
   void SetChemClass(ChemClass cc);
-  
+
+  /// \brief PDB ligand classification from component dictionary
+  ChemType GetChemType() const;
+
+  void SetChemType(ChemType ct);
+
   /// \brief    Get secondary structure type. By default, the residue is in COIL
   ///           conformation.
   SecStructure GetSecStructure() const;
@@ -144,6 +171,10 @@ public:
   bool IsProtein() const;
   
   void SetIsProtein(bool protein);
+  
+  void SetIsLigand(bool ligand);
+  
+  bool IsLigand() const;
 public:
   impl::ResidueImplPtr& Impl();
 

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -177,6 +177,11 @@ bool InfoItem::operator!=(const InfoItem& rhs) const
   return !this->operator==(rhs);
 }
 
+String InfoItem::GetComment() const
+{
+  return impl_->GetComment();
+}
+
 Real GetFloatInfoItem(const InfoGroup& ig, const InfoPath& path, Real def)
 {
   if(ig.HasItem(path)) {
@@ -219,27 +224,27 @@ String GetStringInfoItem(const InfoGroup& ig, const InfoPath& path, const String
 
 void SetFloatInfoItem(InfoGroup ig, const InfoPath& path, Real val)
 {
-  ig.RetrieveItem(path).SetFloat(val);
+  ig.RetrieveItem(path,false).SetFloat(val);
 }
 
 void SetIntInfoItem(InfoGroup ig, const InfoPath& path, int val)
 {
-  ig.RetrieveItem(path).SetInt(val);
+  ig.RetrieveItem(path,false).SetInt(val);
 }
 
 void SetBoolInfoItem(InfoGroup ig, const InfoPath& path, bool val)
 {
-  ig.RetrieveItem(path).SetBool(val);
+  ig.RetrieveItem(path,false).SetBool(val);
 }
 
 void SetVectorInfoItem(InfoGroup ig, const InfoPath& path, const geom::Vec3& val)
 {
-  ig.RetrieveItem(path).SetVector(val);
+  ig.RetrieveItem(path,false).SetVector(val);
 }
 
 void SetStringInfoItem(InfoGroup ig, const InfoPath& path, const String& val)
 {
-  ig.RetrieveItem(path).SetValue(val);
+  ig.RetrieveItem(path,false).SetValue(val);
 }
 
 }} // ns

@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -87,19 +87,11 @@ public:
     /// \brief get position, i.e midpoint between the second and third atom (original coordinates)
   geom::Vec3 GetOriginalPos() const;
 
-  /// \brief  set absolute torsion angle
-  /// 
-  ///  All connectors at the third atom (A3) will be adjusted accordingly. If
-  /// you only want to adjust the bond between A3 and A4, and leave the other
-  /// bonds untouched, use the ost::SetDihedralAngle() function
-  /// 
-  /// \sa     RotateAngle
-  void SetAngle(Real a, bool up=true);
-
-  /// relative rotation, either upstream or downstream
-  void RotateAngle(Real angle, bool up=true);
-
   impl::TorsionImplP& Impl() {
+    return impl_;
+  }
+  
+  const impl::TorsionImplP& Impl() const {
     return impl_;
   }
 protected:

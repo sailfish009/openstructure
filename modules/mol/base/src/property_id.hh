@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -39,8 +39,8 @@ public:
   /// the GenericProp 'propname' at the atom, residue and chain level
   /// respectively.
   typedef enum {
-    RNAME, ANAME, CNAME, ELE, RNUM, ANUM, AX, AY, AZ, OCC, RTYPE, ISHETATM,
-    RBFAC, ABFAC, PEPTIDE, ACHARGE, RINDEX, PROTEIN, WATER, WITHIN, 
+    RNAME, ANAME, CNAME, ELE, RNUM, ANUM, AX, AY, AZ, OCC, AINDEX, RTYPE, ISHETATM,
+    RBFAC, ABFAC, PEPTIDE, ACHARGE, RINDEX, PROTEIN, LIGAND, WATER, WITHIN, 
     UNDEF, CUSTOM
   } ID;
   

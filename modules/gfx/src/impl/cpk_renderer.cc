@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -49,21 +49,26 @@ void CPKRenderer::PrepareRendering()
   }
 }
 
-void CPKRenderer::PrepareRendering(GfxView& view, IndexedVertexArray& va, bool is_sel){
+void CPKRenderer::PrepareRendering(GfxView& view, IndexedVertexArray& va, bool is_sel)
+{
   const Color& sel_clr=this->GetSelectionColor();
   float factor=is_sel ? 1.2 : 1.0;
   if(options_!=NULL){
-    va.SetLighting(true);
-    va.SetCullFace(true);
-    va.SetColorMaterial(true);
-    va.SetMode(0x4);
-
-    // draw all spheres
-    for(AtomEntryMap::const_iterator it=view.atom_map.begin();it!=view.atom_map.end();++it) {
-      va.AddSphere(SpherePrim(it->second.atom.GetPos(),
-                              it->second.vdwr*factor,
-                              is_sel? sel_clr : it->second.color),
-                              options_->GetSphereDetail());
+    factor *= options_->GetRadiusMult();
+    if(factor>0.0) {
+      va.SetLighting(true);
+      va.SetCullFace(true);
+      va.SetColorMaterial(true);
+      va.SetMode(0x4);
+      
+      // draw all spheres
+      uint det=options_->GetSphereDetail();
+      for(AtomEntryMap::const_iterator it=view.atom_map.begin();it!=view.atom_map.end();++it) {
+        va.AddSphere(SpherePrim(it->second.atom.GetPos(),
+                                it->second.vdwr*factor,
+                                is_sel? sel_clr : it->second.color),
+                     det);
+      }
     }
   }
   sel_state_=0;
@@ -114,11 +119,12 @@ RenderOptionsPtr CPKRenderer::GetOptions(){
 namespace {
 
 void Render3DSpritesInnerLoop(const AtomEntry* ae, const geom::Vec3& cx, 
-			      const geom::Vec3& cy, const geom::Vec3& cz, 
-			      GLdouble* gl_mmat, GLdouble* gl_pmat, GLint* gl_vp)
+                              const geom::Vec3& cy, const geom::Vec3& cz, 
+                              GLdouble* gl_mmat, GLdouble* gl_pmat, GLint* gl_vp,
+                              float rmul)
 {
   geom::Vec3 pos = ae->atom.GetPos();
-  float rad = ae->vdwr;
+  float rad = rmul*ae->vdwr;
   GLdouble r1[3],r2[3];
   gluProject(pos[0],pos[1],pos[2],
              gl_mmat,gl_pmat,gl_vp,
@@ -144,16 +150,21 @@ void CPKRenderer::Render3DSprites()
 {
 #if OST_SHADER_SUPPORT_ENABLED
   if(options_!=NULL){
+    float rmul= options_->GetRadiusMult();
+    if(rmul==0.0) return;
+
     geom::Mat3 irot=geom::Transpose(Scene::Instance().GetTransform().GetRot());
     geom::Vec3 cx=irot*geom::Vec3(1.0,0.0,0.0);
     geom::Vec3 cy=irot*geom::Vec3(0.0,1.0,0.0);
     geom::Vec3 cz=irot*geom::Vec3(0.0,0.0,1.0);
 
     uint write_normals = Shader::Instance().GetCurrentName()=="dumpnorm" ? 1 : 0;
+    uint use_hemimodel = Shader::Instance().GetCurrentName()=="hemilight" ? 1 : 0;
     Shader::Instance().PushProgram();
     Shader::Instance().Activate("fast_sphere");
     Shader::Instance().UpdateState();
     glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"write_normals"),write_normals);
+    glUniform1i(glGetUniformLocation(Shader::Instance().GetCurrentProgram(),"use_hemimodel"),use_hemimodel);
 
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_LIGHTING);
@@ -166,12 +177,12 @@ void CPKRenderer::Render3DSprites()
     GLint gl_vp[]={0,0,1,1};
 
     glBegin(GL_QUADS);
-
+    
     for(AtomEntryMap::const_iterator it=view_.atom_map.begin();it!=view_.atom_map.end();++it) {
-      Render3DSpritesInnerLoop(&it->second,cx,cy,cz,gl_mmat,gl_pmat,gl_vp);
+      Render3DSpritesInnerLoop(&it->second,cx,cy,cz,gl_mmat,gl_pmat,gl_vp,rmul);
     }
-
     glEnd();
+
     glPopAttrib();
 
     Shader::Instance().PopProgram();

@@ -1,7 +1,7 @@
 Introduction to the :mod:`~ost.mol` Module
 ================================================================================
 
-For the course of this tutorial, we assume that you have :ref:`DNG up and running<start-dng>`.
+For the course of this tutorial, we assume that you have :ref:`DNG up and running <start-dng>`.
 
 Loading and inspecting a protein structure
 --------------------------------------------------------------------------------
@@ -10,21 +10,21 @@ The code to load and save structures is not directly part of the mol module, but
 :mod:`~ost.io` module. We will be using functions of this module to load 
 structures. 
 
-One of the most commonly used file formats for macromolecular structures are PDB 
-(Brookhaven Protein Databank) files. The official name for  molecules stored in 
-a PDB file is an *entity* and we decided to follow this convention in 
-OpenStructure. You will hear this word all the time, but you can replace the 
-word entity with molecule (or most of the time even protein) in your head.
+One of the most commonly used file formats for macromolecular structures are 
+PDB (Brookhaven Protein Data Bank) files. The official name for  molecules 
+stored in a PDB file is an *entity* and we decided to follow this convention 
+in OpenStructure. You will hear this word all the time, but you can replace 
+the word entity with molecule (or most of the time even protein) in your head.
 
 
 To load a PDB file, simply type
 
 .. code-block:: python
 
-   fragment=io.LoadPDB('/path/to/examples/entity/fragment.pdb')
+   fragment=io.LoadPDB('/path/to/examples/code_fragments/entity/fragment.pdb')
 
 This will load the fragment from the specified file 'fragment.pdb' and store the 
-result in fragment.  The :func:`~ost.io.LoadPDB` has many option, which, for 
+result in fragment.  The :func:`~ost.io.LoadPDB` has many options, which, for
 simplicity will not be discussed here. If you want to know more about the 
 function, type:
 
@@ -58,7 +58,7 @@ This will group the atoms by residue. And, for completeness, we will first group
 
 .. code-block:: python
 
-  for chain in fragments.chains:
+  for chain in fragment.chains:
     print 'chain', chain.name, 'has', len(chain.residues), 'residue(s)'
     for residue in chain.residues:
       print ' ', residue, 'has', len(residue.atoms), 'atom(s).'
@@ -75,17 +75,16 @@ what bonds we have in there:
     
 From these short code examples we already see how the entity is structured: On 
 one hand we have a hierarchy of chains, residues and atoms. On the other hand, 
-we have bonds that form a network overlayed on the hierarchy. This is 
-illustrated in the picture on the left. An important feature of entities is that 
-we can always assume that the hierarchy is intact. You will never find an atom 
-without residues, no residue can exist without a parent chain and chains belong 
-always to an entity. 
+we have bonds that form a network overlayed on the hierarchy. An important 
+feature of entities is that we can always assume that the hierarchy is intact. 
+You will never find an atom without residues, no residue can exist without a 
+parent chain and chains belong always to an entity. 
 
 Let There Be Shiny Graphics
 --------------------------------------------------------------------------------
 
 For visually inspecting the fragment, we now create a graphical representation 
-of the entity. The graphical representation os completely separate from the :class:`~ost.mol.EntityHandle` class. This is on purpose. When writing processing scripts, usually no graphical representation is required and things would be slowed down without any reason. The following code will take our fragment and initialise a :class:`gfx.Entity<ost.gfx.Entity>`, add it to the scene, and center the camera on it.
+of the entity. The graphical representation is completely separate from the :class:`~ost.mol.EntityHandle` class. This is on purpose. When writing processing scripts, usually no graphical representation is required and things would be slowed down without any reason. The following code will take our fragment and initialise a :class:`gfx.Entity<ost.gfx.Entity>`, add it to the scene, and center the camera on it.
 
 .. code-block:: python
   
@@ -96,8 +95,8 @@ of the entity. The graphical representation os completely separate from the :cla
 
 Now you will see the fragment in the 3D window.
 
-Use the mouse to rotate, zoom in an shift the camera. Double clicking on an atom 
-will center the camera on that atom. If you want to learn more about the 
+Use the mouse to rotate, zoom in and shift the camera. Double clicking on an 
+atom will center the camera on that atom. If you want to learn more about the 
 :mod:`~ost.gfx` module, you are encouraged to read :doc:`the gfx 
 intro<intro-03>` and the :mod:`gfx documentation<ost.gfx`.
 
@@ -107,7 +106,7 @@ Introduction to Views
 Often during processing and visualisation of data, only parts of a protein 
 structure are of interest. This realisation has had a major impact on the design 
 of OpenStructure and is tied very deeply into the core of the framework. 
-Subparts of structure are modeled as so-called :class:`EntityViews 
+Subparts of structure are modelled as so-called :class:`EntityViews 
 <ost.mol.EntityView>`. You can think of them as a selection of chains, residues, 
 atoms and bonds of an entity. A views has almost the same interface as the 
 underlying entity, making it very easy to mix entity views with handles in 

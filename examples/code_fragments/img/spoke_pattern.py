@@ -40,6 +40,4 @@ filter=ost.img.alg.GaussianLowPassFilter(threshold)
 image.ApplyIP(filter)
 
 # Viewer is launched to show the result
-v=gui.CreateDataViewer(image)
-main_area=gui.GostyApp.Instance().perspective.main_area
-main_area.AddWidget("Modulated Image", v)
+v=gui.CreateDataViewer(image,"Modulated Image")

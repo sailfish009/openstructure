@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -75,7 +75,7 @@ static float CHEM_DISSIM[][24]={
   -1.00,-1.00,-1.00,-1.00,-1.00,-1.00,-1.00,-1.00,-1.00,-1.00,-1.00}
 };
 
-float PhysicoChemicalDissim(char c1, char c2)
+float PhysicoChemicalDissim(char c1, char c2, bool ignore_gap)
 {
   static int indices[]={2, 23, 0, 9, 7, 17, 3, 10, 15, -1, 
              11, 14, 16, 8, -1, 1, 6, 12, 4, 5, 
@@ -94,12 +94,15 @@ float PhysicoChemicalDissim(char c1, char c2)
     s=CHEM_DISSIM[idx_b][idx_a-idx_b];
   else
     s=CHEM_DISSIM[idx_a][idx_b-idx_a];
+  if (ignore_gap && idx_a==20 && idx_b==20) {
+    s=6.0;
+  }
   assert(s>=0.0);
   return s;
 }
 
 std::vector<Real> Conservation(const AlignmentHandle& aln, bool assign, 
-                               const String& prop)
+                               const String& prop, bool ignore_gap)
 {
   std::vector<Real> cons(aln.GetLength(), 0.0);
   int comb=(aln.GetCount()*(aln.GetCount()-1))/2;
@@ -108,7 +111,7 @@ std::vector<Real> Conservation(const AlignmentHandle& aln, bool assign,
     AlignedColumn c=aln[col];
     for (int i=0; i<aln.GetCount(); ++i) {
       for (int j=i+1; j<aln.GetCount(); ++j) {
-        score+=PhysicoChemicalDissim(c[i], c[j]);
+        score+=PhysicoChemicalDissim(c[i], c[j], ignore_gap);
       }
     }
     score=1.0-score/(6.0*comb);

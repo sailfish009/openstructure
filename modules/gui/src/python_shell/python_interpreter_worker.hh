@@ -3,8 +3,11 @@
 
 #include <csignal>
 #include <utility>
-#include <boost/python.hpp>
-#include <boost/shared_ptr.hpp>
+// workaround for QTBUG-22829: https://bugreports.qt-project.org/browse/QTBUG-22829
+#ifndef Q_MOC_RUN
+  #include <boost/python.hpp>
+  #include <boost/shared_ptr.hpp>
+#endif
 #include "output_redirector.hh"
 #include <QObject>
 #include <QQueue>
@@ -17,6 +20,7 @@ class PythonInterpreterWorker: public QObject
 Q_OBJECT
 public:
   PythonInterpreterWorker();
+  ~PythonInterpreterWorker();
   unsigned int AddCommand(const QString& command);
 
 signals:
@@ -46,6 +50,7 @@ protected:
   bp::object repr_;
   bp::dict main_namespace_;
   unsigned int current_id_;
+  bool         awake_;
 };
 
 }} //ns

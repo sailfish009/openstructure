@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 // Copyright (C) 2003-2010 by the IPLT authors
 //
 // This library is free software; you can redistribute it and/or modify it under
@@ -135,6 +135,7 @@ void OverlayManagerGUI::OnAddOverlay(OverlayManager* m, int id)
   OverlayPtr ov = m->RetrieveOverlay(id);
   connect(ov.get(),SIGNAL(InfoTextChanged(const QString&)),this,SLOT(SetInfoText(const QString&)));
   OverlayEntry oe;
+  oe.row=0.0;
   oe.a=new OverlayCustomActCheckBox(id,m);
   connect(oe.a,SIGNAL(toggled(bool)),oe.a,SLOT(OnToggle(bool)));
   active_group_->addButton(oe.a);

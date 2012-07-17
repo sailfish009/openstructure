@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -21,6 +21,7 @@
 #include <ost/io/mol/entity_io_crd_handler.hh>
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/mol/entity_io_mae_handler.hh>
+#include <ost/io/mol/entity_io_mmcif_handler.hh>
 #include <ost/io/seq/fasta_io_handler.hh>
 #include <ost/io/seq/pir_io_handler.hh>
 #include <ost/io/seq/promod_io_handler.hh>
@@ -38,11 +39,13 @@
 #  include  <ost/io/img/map_io_jpk_handler.hh>
 #  include  <ost/io/img/map_io_nanoscope_handler.hh>
 #  include  <ost/io/img/map_io_df3_handler.hh>
+#  include  <ost/io/img/map_io_ipl_handler.hh>
 #endif
 namespace ost { namespace io {
 
 IOManager::IOManager()
 {
+  RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOMMCIFHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOPDBHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOCRDHandlerFactory));
   RegisterFactory(EntityIOHandlerFactoryBaseP(new EntityIOSDFHandlerFactory));
@@ -63,7 +66,8 @@ IOManager::IOManager()
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOJpkHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIODatHandlerFactory));
   RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIONanoscopeHandlerFactory));
-  RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIODF3HandlerFactory));  
+  RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIODF3HandlerFactory));
+  RegisterFactory(MapIOHandlerFactoryBasePtr(new MapIOIPLHandlerFactory));
 #endif
 }
 
@@ -140,7 +144,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
 {
   if(formatstruct.GetFormatString()!="undefined" ){
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchType(formatstruct)) {
+      if((*it)->ProvidesImport() && (*it)->MatchType(formatstruct)) {
         return (*it)->Create();
       }
     }
@@ -149,7 +153,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
     String match_suf_string=loc.string();
     std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchSuffix(match_suf_string)) {
+      if((*it)->ProvidesImport() && (*it)->MatchSuffix(match_suf_string)) {
         return (*it)->Create();
       }
     }
@@ -163,7 +167,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerFile(const boost::filesystem::pat
     infile.close();
 
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchContent(header)) {
+      if((*it)->ProvidesImport() && (*it)->MatchContent(header)) {
         return (*it)->Create();
       }
     }
@@ -177,7 +181,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerStream(std::istream& stream,
 {
   if(formatstruct.GetFormatString()!="undefined" ){
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchType(formatstruct)) {
+      if((*it)->ProvidesImport() && (*it)->MatchType(formatstruct)) {
         return (*it)->Create();;
       }
     }
@@ -188,7 +192,7 @@ MapIOHandlerPtr IOManager::FindMapImportHandlerStream(std::istream& stream,
     stream.seekg(0,std::ios::beg);
 
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchContent(header)) {
+      if((*it)->ProvidesImport() && (*it)->MatchContent(header)) {
         return (*it)->Create();;
       }
     }
@@ -202,7 +206,7 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerFile(const boost::filesystem::pat
 {
   if(formatstruct.GetFormatString()!="undefined" ){
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchType(formatstruct)) {
+      if((*it)->ProvidesExport() && (*it)->MatchType(formatstruct)) {
         return (*it)->Create();
       }
     }
@@ -216,7 +220,7 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerFile(const boost::filesystem::pat
     String match_suf_string=loc.string();
     std::transform(match_suf_string.begin(),match_suf_string.end(),match_suf_string.begin(),tolower);
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchSuffix(match_suf_string)) {
+      if((*it)->ProvidesExport() && (*it)->MatchSuffix(match_suf_string)) {
         return(*it)->Create();
       }
     }
@@ -229,7 +233,7 @@ MapIOHandlerPtr IOManager::FindMapExportHandlerStream(std::istream& stream, cons
 {
   if(formatstruct.GetFormatString()!="undefined" ){
     for(MapIOFList::const_iterator it=map_io_list_.begin(); it!=map_io_list_.end();++it) {
-      if((*it)->MatchType(formatstruct)) {
+      if((*it)->ProvidesExport() && (*it)->MatchType(formatstruct)) {
         return (*it)->Create();
       }
     }

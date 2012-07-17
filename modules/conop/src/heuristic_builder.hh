@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -43,7 +43,7 @@ public:
 
 public:
   ConnResEntry(const String& rname="", char single='\0',
-               const mol::ChemClass& chem_class=mol::ChemClass(mol::ChemClass::Unknown));
+               const mol::ChemClass& chem_class=mol::ChemClass(mol::ChemClass::UNKNOWN));
   int Check(const String& name1, const String& name2) const;
   bool HasAtom(const String& name);
   void AddAtom(const String& atom) { required_atoms_.push_back(atom); }
@@ -108,12 +108,15 @@ public:
   std::pair<detail::ConnResEntry,bool> LookupResEntry(const mol::ResidueKey& key);
   
   virtual void FillAtomProps(mol::AtomHandle atom);
+
+  const detail::ConnResEntry& DefaultPeptide() const {return default_peptide_;}
 protected:
   void ConnectivityFromAtomNames(const mol::ResidueHandle& res,
                                  detail::ConnResEntry& centry,
                                  mol::AtomHandleList& unknown_atoms);
 private:
   detail::ConnResEntryMap emap_;
+  detail::ConnResEntry default_peptide_;
 };
 
 

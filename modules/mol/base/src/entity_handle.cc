@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -18,6 +18,8 @@
 //------------------------------------------------------------------------------
 
 #include "impl/entity_impl.hh"
+#include "bond_handle.hh"
+#include "torsion_handle.hh"
 #include "entity_visitor.hh"
 #include "atom_handle.hh"
 #include "chain_handle.hh"
@@ -113,13 +115,38 @@ AtomHandleList EntityHandle::FindWithin(const geom::Vec3& pos,
   return handles;
 }
 
+void EntityHandle::SetDefaultQueryFlags(QueryFlags flags)
+{
+  this->CheckValidity();
+  Impl()->SetDefaultQueryFlags(flags);
+}
+
+QueryFlags EntityHandle::GetDefaultQueryFlags() const
+{
+  this->CheckValidity();
+  return Impl()->GetDefaultQueryFlags();
+}
+
+EntityView EntityHandle::Select(const Query& q) const
+{
+  this->CheckValidity();
+  return Impl()->Select(*this, q);
+}
+
+EntityView EntityHandle::Select(const String& q) const
+{
+  this->CheckValidity();
+  return Impl()->Select(*this, Query(q));
+}
+
 EntityView EntityHandle::Select(const Query& q, QueryFlags flags) const
 {
   this->CheckValidity();
   return Impl()->Select(*this, q, flags);
 }
 
-EntityView EntityHandle::Select(const String& q, QueryFlags flags) const {
+EntityView EntityHandle::Select(const String& q, QueryFlags flags) const 
+{
   this->CheckValidity();
   return Impl()->Select(*this, Query(q), flags);
 }
@@ -304,13 +331,13 @@ AtomHandleIter EntityHandle::AtomsEnd() const
                         impl::end(r.back()->GetAtomList()), ent, false);
 }
 
-XCSEditor EntityHandle::RequestXCSEditor(EditMode mode) const
+XCSEditor EntityHandle::EditXCS(EditMode mode) const
 {
   this->CheckValidity();
   return XCSEditor(*this, mode);
 }
 
-ICSEditor EntityHandle::RequestICSEditor(EditMode mode) const
+ICSEditor EntityHandle::EditICS(EditMode mode) const
 {
   this->CheckValidity();
   Impl()->EnableICS();

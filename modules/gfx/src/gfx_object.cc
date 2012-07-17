@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -33,6 +33,7 @@
 
 #include "povray.hh"
 #include "impl/mapped_property.hh"
+#include "exporter.hh"
 
 #if OST_IMG_ENABLED
 #  include <ost/img/alg/stat.hh>
@@ -58,7 +59,11 @@ GfxObj::GfxObj(const String& name):
   opacity_(1.0),
   smoothf_(0.0),
   outline_flag_(false),
+#if defined (__APPLE__)
+  outline_mode_(2),
+#else
   outline_mode_(1),
+#endif
   c_ops_(),
   labels_(),
   use_occlusion_(false)
@@ -148,17 +153,22 @@ void GfxObj::RenderGL(RenderPass pass)
       render_depth_only();
     } else if(pass==TRANSPARENT_RENDER_PASS) {
       if(GetOpacity()<1.0) {
-	render_depth_only();
-	CustomRenderGL(STANDARD_RENDER_PASS);
+        render_depth_only();
+        CustomRenderGL(STANDARD_RENDER_PASS);
+        if(outline_flag_) {
+          va_.SetOutlineMode(outline_mode_);
+          CustomRenderGL(pass);
+          va_.SetOutlineMode(0);
+        }
       }
     } else if(pass==STANDARD_RENDER_PASS) {
       if(GetOpacity()>=1.0) {
-	CustomRenderGL(STANDARD_RENDER_PASS);
-      }
-      if(outline_flag_) {
-	va_.SetOutlineMode(outline_mode_);
-	CustomRenderGL(pass);
-	va_.SetOutlineMode(0);
+        CustomRenderGL(STANDARD_RENDER_PASS);
+        if(outline_flag_) {
+          va_.SetOutlineMode(outline_mode_);
+          CustomRenderGL(pass);
+          va_.SetOutlineMode(0);
+        }
       }
     } else if(pass==GLOW_RENDER_PASS) {
       CustomRenderGL(GLOW_RENDER_PASS);
@@ -171,6 +181,9 @@ void GfxObj::RenderGL(RenderPass pass)
   }
 }
 
+void GfxObj::InitGL()
+{
+}
 
 void GfxObj::RenderPov(PovState& pov)
 {
@@ -183,6 +196,20 @@ void GfxObj::RenderPov(PovState& pov)
     }
     CustomRenderPov(pov);
     pov.end_obj();
+  }
+}
+
+
+void GfxObj::Export(Exporter* ex)
+{
+  if(IsVisible()) {
+    ex->NodeStart(GetName(),Exporter::OBJ);
+    // in the simplest case, just export va
+    if(rebuild_ || refresh_) {
+      PreRenderGL(true);
+    }
+    va_.Export(ex);
+    ex->NodeEnd(GetName());
   }
 }
 
@@ -313,16 +340,31 @@ void GfxObj::SetOutlineWidth(float f)
   Scene::Instance().RequestRedraw();
 }
 
+float GfxObj::GetOutlineWidth() const
+{
+  return va_.GetOutlineWidth();
+}
+
 void GfxObj::SetOutlineExpandFactor(float f)
 {
   va_.SetOutlineExpandFactor(f);
   Scene::Instance().RequestRedraw();
 }
 
+float GfxObj::GetOutlineExpandFactor() const
+{
+  return va_.GetOutlineExpandFactor();
+}
+
 void GfxObj::SetOutlineExpandColor(const Color& c)
 {
   va_.SetOutlineExpandColor(c);
   Scene::Instance().RequestRedraw();
+}
+
+Color GfxObj::GetOutlineExpandColor() const
+{
+  return va_.GetOutlineExpandColor();
 }
 
 void GfxObj::SetOpacity(float o)
@@ -603,6 +645,7 @@ void GfxObj::CleanColorOps(){
 
 void GfxObj::Debug(unsigned int flags)
 {
+  debug_flags_=flags;
   va_.DrawNormals(flags & 0x1);
 }
 

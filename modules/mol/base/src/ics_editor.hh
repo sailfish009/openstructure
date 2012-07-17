@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -74,19 +74,22 @@ public:
   /// bonds untouched, use the SetDihedralAngle() function
   /// 
   /// \sa     RotateTorsionAngle                 
-  void SetTorsionAngle(TorsionHandle torsion, Real angle);
+  void SetTorsionAngle(TorsionHandle torsion, Real angle,
+                       bool update_others=true);
   /// \brief  rotate torsion angle
-  void RotateTorsionAngle(TorsionHandle torsion, Real delta);  
+  void RotateTorsionAngle(TorsionHandle torsion, Real delta,
+                          bool update_others=true);
 
   void RotateTorsionAngle(const AtomHandle& atom_a,
                           const AtomHandle& atom_b,
                           const AtomHandle& atom_c,
                           const AtomHandle& atom_d,
-                          Real angle);
+                          Real angle,
+                          bool update_others=true);
 
   void SetTorsionAngle(const AtomHandle& atom_a, const AtomHandle& atom_b,
                        const AtomHandle& atom_c, const AtomHandle& atom_d,
-                       Real angle);
+                       Real angle, bool update_others=true);
                        
   /// \brief immediately update external coordinate system
   void UpdateXCS();

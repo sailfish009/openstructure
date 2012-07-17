@@ -1,7 +1,7 @@
 //------------------------------------------------------------------------------
 // This file is part of the OpenStructure project <www.openstructure.org>
 //
-// Copyright (C) 2008-2010 by the OpenStructure authors
+// Copyright (C) 2008-2011 by the OpenStructure authors
 //
 // This library is free software; you can redistribute it and/or modify it under
 // the terms of the GNU Lesser General Public License as published by the Free
@@ -51,13 +51,12 @@ typedef boost::shared_ptr<MapIso> MapIsoP;
 /// \sa gfx::MapSlab
 class DLLEXPORT_OST_GFX MapIso: public GfxObj {
 public:
-  MapIso(const String& name, const img::MapHandle& mh,float level);
+  MapIso(const String& name, const img::MapHandle& mh,float level, uint a=0);
 
-  MapIso(const String& name, const img::MapHandle& mh,
-         float level, uint a);
-
+  /// returns bounding box of iso-contour object, not overall map
   virtual geom::AlignedCuboid GetBoundingBox() const;
-                             
+
+  /// returns center of iso-contour object, not overall map
   virtual geom::Vec3 GetCenter() const;
   
   virtual void CustomRenderGL(RenderPass pass);
@@ -153,26 +152,28 @@ protected:
   static img::ImageHandle DownsampleMap(const img::ImageHandle& mh);
 
 private:
-  img::MapHandle           original_mh_;
-  img::MapHandle           downsampled_mh_;
-  img::MapHandle           mh_;
-  impl::MapOctree          octree_;
-  mutable img::alg::Stat   stat_;
-  mutable bool             stat_calculated_;
-  mutable img::alg::Histogram   histogram_;
-  mutable bool             histogram_calculated_;
-  int                      histogram_bin_count_;
-  float                    level_;
-  bool                     normals_calculated_;
-  uint                     alg_;
-  float                    smoothf_;
-  float                    min_;
-  float                    max_;
-  float                    std_dev_;
-  float                    min_max_;
-  bool                     debug_octree_;
-  Color                    color_;
-  bool                     dirty_octree_;
+  img::MapHandle original_mh_;
+  img::MapHandle downsampled_mh_;
+  img::MapHandle mh_;
+  impl::MapOctree octree_;
+  mutable img::alg::Stat stat_;
+  mutable bool stat_calculated_;
+  mutable img::alg::Histogram histogram_;
+  mutable bool histogram_calculated_;
+  int histogram_bin_count_;
+  float level_;
+  bool normals_calculated_;
+  uint alg_;
+  float smoothf_;
+  float min_;
+  float max_;
+  float std_dev_;
+  float min_max_;
+  bool debug_octree_;
+  Color color_;
+  bool dirty_octree_;
+  mutable geom::AlignedCuboid bb_;
+  mutable bool recalc_bb_;
 };
 
 }}
