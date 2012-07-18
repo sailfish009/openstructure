@@ -625,37 +625,28 @@ class Table(object):
         4   1
       ====  ====
       '''
-
-    .. warning::
-
-      :meth:`AddCol` only adds data to existing rows and does *not*
-      add new rows. Use :meth:`AddRow` to do this. Therefore, the following code
-      snippet does not add any data items:
-
-    .. code-block:: python
-
-      tab=Table()
-      tab.AddCol('even', 'int', [1,2,3,4,5])
-      print tab
-      
-      '''
-      will produce the empty table
-
-      ====
-      even
-      ====
-      '''
-
+    
+    As a special case, if there are no previous rows, and data is not 
+    None, rows are added for every item in data.
     """
     col_type = self._ParseColTypes(col_type, exp_num=1)[0]
     self.col_names.append(col_name)
     self.col_types.append(col_type)
-    if IsScalar(data):
-      for row in self.rows:
-        row.append(data)
-    else:
-      for row, d in zip(self.rows, data):
-        row.append(d)
+
+    if len(self.rows)>0:
+      if IsScalar(data):
+        for row in self.rows:
+          row.append(data)
+      else:
+        for row, d in zip(self.rows, data):
+          row.append(d)
+
+    elif data!=None:
+      if IsScalar(data):
+        self.AddRow({col_name : data})
+      else:
+        for v in data:
+          self.AddRow({col_name : v})
 
   def Filter(self, *args, **kwargs):
     """
@@ -1707,6 +1698,54 @@ class Table(object):
       LogError("Function needs numpy, but I could not import it.")
       raise
     
+
+
+  def GaussianSmooth(self, col, std=1.0, na_value=0.0):
+
+    '''
+    In place gaussian smooth of a column in the table with a given standard deviation.
+    All nan are set to nan_value before smoothing.
+
+    :param col: column name
+    :type col: :class:`str`
+
+    :param std: standard deviation for gaussian kernel
+    :type std: `scalar` 
+
+    :param na_value: all na (None) values of the speciefied column are set to na_value before smoothing
+    :type na_value: `scalar`
+
+    :warning: The function depends on *scipy*
+    ''' 
+
+    try:
+      from scipy import ndimage
+    except ImportError:
+      LogError("Function needs scipy.ndimage, but I could no import it")
+      raise
+      
+    idx = self.GetColIndex(col)
+    col_type = self.col_types[idx]
+    if col_type!='int' and col_type!='float':
+      raise TypeError("GaussianSmooth can only be used on numeric column types")
+
+    vals=[]
+    for v in self[col]:
+      if v!=None:
+        vals.append(v)
+      else:
+        vals.append(na_value)
+
+    smoothed_values_ndarray=ndimage.gaussian_filter1d(vals,std)
+
+    result=[]
+
+    for v in smoothed_values_ndarray:
+      result.append(v)
+
+    self[col]=result
+
+
   def GetOptimalPrefactors(self, ref_col, *args, **kwargs):
     '''
     This returns the optimal prefactor values (i.e. a, b, c, ...) for the
