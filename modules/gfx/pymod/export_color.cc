@@ -152,6 +152,10 @@ void export_color()
   def("RGBh",rgbh);
   def("RGBb",RGBb);
   def("RGBi",RGBi);
+  def("RGBA",RGBA);
+  def("RGBAh",rgbah);
+  def("RGBAb",RGBAb);
+  def("RGBAi",RGBAi);
   def("HSV",HSV);
   def("HSVi",HSVi);
   def("HSVA",HSVA);

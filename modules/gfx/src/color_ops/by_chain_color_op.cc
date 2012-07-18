@@ -59,22 +59,37 @@ void ByChainColorOp::ApplyTo(GfxObjP& objP) const{
   }
 }
 
-gfx::Color ByChainColorOp::GetColor(String ident) const{
-  if(colors_.find(ident) == colors_.end())
-  {
-    colors_[ident] = GenerateColor(ident);
+/*
+  The first chain will be assigned a gradient stop of 0.
+  The next chain will be assigned a gradient stop of n/(N-1), where
+  n is the number of chains assigned so far, and N is the total
+  number of chains; thus for 3 total chains, the second gets a stop
+  of 0.5 (1/(3-1)), and the third gets a stop of 1.0 (2/(3-1))
+*/
+gfx::Color ByChainColorOp::GetColor(const String& ident) const
+{
+  std::map<String,Color>::const_iterator cit = colors_.find(ident);
+  if(cit == colors_.end()) {
+    float f = static_cast<float>(colors_.size())*cm_;
+    Color c = color_grad_.GetColorAt(f);
+    colors_[ident] = c;
+    return c;
+  } else {
+    return cit->second;
   }
-  return colors_[ident];
 }
 
-int ByChainColorOp::GetChainCount() const
+unsigned int ByChainColorOp::GetChainCount() const
 {
   return chain_count_;
 }
 
-void ByChainColorOp::SetChainCount(int chain_count)
+void ByChainColorOp::SetChainCount(unsigned int chain_count)
 {
   chain_count_ = chain_count;
+  cm_=chain_count>1 ? 1.0/static_cast<float>(chain_count_-1) : 0.0;
+  // invalidate all assigned colors so far
+  colors_.clear();
 }
 
 gfx::ByChainColorOp ByChainColorOp::FromInfo(info::InfoGroup& group){
@@ -82,17 +97,6 @@ gfx::ByChainColorOp ByChainColorOp::FromInfo(info::InfoGroup& group){
   mol::QueryViewWrapper wrapper(op.GetSelection(),op.GetSelectionFlags());
   int mask = op.GetMask();
   return gfx::ByChainColorOp(wrapper, mask);
-}
-
-gfx::Color ByChainColorOp::GenerateColor(String& ident) const{
-  unsigned int size=colors_.size()-1;
-  if(size<=0){
-    colors_[ident] = color_grad_.GetColorAt(0.0);
-  }
-  else{
-    colors_[ident] = color_grad_.GetColorAt(float(size) / chain_count_);
-  }
-  return colors_[ident];
 }
 
 }}

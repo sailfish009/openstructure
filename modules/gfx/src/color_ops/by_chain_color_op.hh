@@ -38,13 +38,14 @@ public:
   ByChainColorOp(const String& selection, int mask=DETAIL_COLOR|MAIN_COLOR);
   ByChainColorOp(const mol::QueryViewWrapper& query_view, int mask=DETAIL_COLOR|MAIN_COLOR);
 
+  // Color Op interface
   virtual bool CanApplyTo(const GfxObjP& obj) const;
   virtual void ApplyTo(GfxObjP& obj) const;
 
-  virtual gfx::Color GetColor(String ident) const;
-
-  virtual int GetChainCount() const;
-  virtual void SetChainCount(int chain_count);
+  // this interface
+  Color GetColor(const String& ident) const;
+  unsigned int GetChainCount() const;
+  void SetChainCount(unsigned int chain_count);
 
   //virtual void ToInfo(info::InfoGroup& group) const;
   static gfx::ByChainColorOp FromInfo(info::InfoGroup& group);
@@ -53,8 +54,9 @@ private:
   void Init();
   gfx::Color GenerateColor(String& ident) const;
 
-  mutable int chain_count_;
-  mutable std::map<String,gfx::Color> colors_;
+  unsigned int chain_count_;
+  float cm_; // 1 over chain_count
+  mutable std::map<String,Color> colors_;
 
   gfx::Gradient color_grad_;
 };
