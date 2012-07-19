@@ -269,7 +269,7 @@ if (USE_SHADER)
     shader/material_toon1.glsl
     shader/material_toon2.glsl
   )
-  copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
+  copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  
   install(FILES ${SHADER_FILES} DESTINATION "share/openstructure/shader")
 endif(USE_SHADER)
@@ -277,7 +277,7 @@ set(TEXTURE_FILES
   test_texture.png
   glyph_texture.png
 )
-copy_if_different("./" "${SHARED_DATA_PATH}/textures" "${TEXTURE_FILES}" 
+copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${SHARED_DATA_PATH}/textures" "${TEXTURE_FILES}" 
                   "TEXTURE_TARGETS" ost_gfx)  
 
 install(FILES ${TEXTURE_FILES} DESTINATION "share/openstructure/textures")
