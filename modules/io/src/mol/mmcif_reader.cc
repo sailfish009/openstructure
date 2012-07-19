@@ -500,6 +500,8 @@ void MMCifReader::ParseAndAddAtom(const std::vector<StringRef>& columns)
       // store entity id
       chain_id_pairs_.push_back(std::pair<mol::ChainHandle,String>(curr_chain_,
                                      columns[indices_[LABEL_ENTITY_ID]].str()));
+      // store mmCIF - PDB chain name mapping
+      info_.AddMMCifPDBChainTr(cif_chain_name, auth_chain_name);
     }
     assert(curr_chain_.IsValid());
   } else if (chain_id_pairs_.back().second != // unit test

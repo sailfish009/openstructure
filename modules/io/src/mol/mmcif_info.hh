@@ -771,6 +771,18 @@ public:
   /// \return experiment resolution
   Real GetResolution() const { return resolution_; }
 
+  /// \brief Add a new mmCIF/ PDB chain name tuple.
+  ///
+  /// \param cif chain name as used by the mmCIF file (label_asym_id)
+  /// \param pdb chain name as used in the PDB file (auth_asym_id)
+  void AddMMCifPDBChainTr(String cif, String pdb);
+
+  /// \brief Get a PDB chain name for a CIF chain name
+  ///
+  /// \param cif chain name as used by the mmCIF file (label_asym_id)
+  /// \return chain name as used in the PDB file (auth_asym_id)
+  String GetMMCifPDBChainTr(String cif) const;
+
   /// \brief Add a biounit
   ///
   /// \param bu biounit to be added
@@ -848,6 +860,7 @@ private:
   std::vector<MMCifInfoBioUnit>  biounits_;   ///< list of biounits
   std::vector<MMCifInfoTransOpPtr> transops_;
 	MMCifInfoStructRefs            struct_refs_;
+  std::map<String, String> cif_2_pdb_chain_id_;
 };
 
 

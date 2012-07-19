@@ -160,6 +160,25 @@ of the annotation available.
 
   .. method:: GetStructDetails()
 
+  .. method:: AddMMCifPDBChainTr(cif_chain_id, pdb_chain_id)
+
+    Set up a translation for a certain mmCIF chain name to the traditional PDB
+    chain name.
+
+    :param cif_chain_id: atom_site.label_asym_id
+    :type cif_chain_id: :class:`str`
+    :param pdb_chain_id: atom_site.auth_asym_id
+    :type pdb_chain_id: :class:`str`
+
+  .. method:: GetMMCifPDBChainTr(cif_chain_id)
+
+    Get the translation of a certain mmCIF chain name to the traditional PDB
+    chain name.
+
+    :param cif_chain_id: atom_site.label_asym_id
+    :type cif_chain_id: :class:`str`
+    :returns: atom_site.auth_asym_id as :class:`str`
+
 .. class:: MMCifInfoCitation
 
   This stores citation information from an input file.
@@ -793,4 +812,5 @@ of the annotation available.
 
 ..  LocalWords:  cas isbn pubmed asu seqres conop ConnectAll casp COMPND OBSLTE
 ..  LocalWords:  SPRSDE pdb func autofunction exptl attr pdbx oper conf spr dif
-..  LocalWords:  biounits biounit uniprot UNP seqs
+..  LocalWords:  biounits biounit uniprot UNP seqs AddMMCifPDBChainTr cif asym
+..  LocalWords:  auth GetMMCifPDBChainTr
