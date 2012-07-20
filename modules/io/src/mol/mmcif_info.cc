@@ -22,6 +22,42 @@
 
 namespace ost { namespace io {
 
+void MMCifInfo::AddMMCifPDBChainTr(String cif, String pdb)
+{
+  std::map<String, String>::iterator tr_it = cif_2_pdb_chain_id_.find(cif);
+  if (tr_it != cif_2_pdb_chain_id_.end()) {
+    throw IOException("mmCIF chain id '"+ cif +"' is already mapped to '"+
+                      tr_it->second+"'.");
+  }
+  cif_2_pdb_chain_id_.insert(std::pair<String, String>(cif, pdb));
+}
+
+String MMCifInfo::GetMMCifPDBChainTr(String cif) const
+{
+  std::map<String, String>::const_iterator tr_it =
+    cif_2_pdb_chain_id_.find(cif);
+  if (tr_it == cif_2_pdb_chain_id_.end()) { return ""; }
+  return tr_it->second;
+}
+
+void MMCifInfo::AddPDBMMCifChainTr(String pdb, String cif)
+{
+  std::map<String, String>::iterator tr_it = pdb_2_cif_chain_id_.find(pdb);
+  if (tr_it != pdb_2_cif_chain_id_.end()) {
+    throw IOException("PDB chain id '"+ pdb +"' is already mapped to '"+
+                      tr_it->second+"'.");
+  }
+  pdb_2_cif_chain_id_.insert(std::pair<String, String>(pdb, cif));
+}
+
+String MMCifInfo::GetPDBMMCifChainTr(String pdb) const
+{
+  std::map<String, String>::const_iterator tr_it =
+    pdb_2_cif_chain_id_.find(pdb);
+  if (tr_it == pdb_2_cif_chain_id_.end()) { return ""; }
+  return tr_it->second;
+}
+
 void MMCifInfo::AddAuthorsToCitation(StringRef id, std::vector<String> list)
 {
   // find citation

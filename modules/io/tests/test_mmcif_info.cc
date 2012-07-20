@@ -202,7 +202,17 @@ BOOST_AUTO_TEST_CASE(mmcif_info)
   #else
   BOOST_CHECK_CLOSE(info.GetResolution(), 1.9f, 0.001f);
   #endif
- 
+
+  info.AddMMCifPDBChainTr("A", "B");
+  BOOST_CHECK_THROW(info.AddMMCifPDBChainTr("A", "B"), IOException);
+  BOOST_CHECK("B" == info.GetMMCifPDBChainTr("A"));
+  BOOST_CHECK("" == info.GetMMCifPDBChainTr("C"));
+
+  info.AddPDBMMCifChainTr("A", "B");
+  BOOST_CHECK_THROW(info.AddPDBMMCifChainTr("A", "B"), IOException);
+  BOOST_CHECK("B" == info.GetPDBMMCifChainTr("A"));
+  BOOST_CHECK("" == info.GetPDBMMCifChainTr("C"));
+
   BOOST_MESSAGE("  done.");
 }
 
