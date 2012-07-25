@@ -23,7 +23,9 @@ class SpacenavControl(QtCore.QObject):
       if r==0.0:
         return 0.0
       rr=r/abs(r)*max(0.0,abs(r)-0.9)
-      return rr/abs(rr)*(math.pow(1.01,abs(rr))-1.0)*40.0/self.speed if abs(rr)>0.0 else 0.0
+      if abs(rr)>0:
+        return rr/abs(rr)*(math.pow(1.01,abs(rr))-1.0)*40.0/self.speed
+      return 0.0
     if(self.trans):
       tf.ApplyXAxisTranslation(d(tx))
       tf.ApplyYAxisTranslation(d(ty))

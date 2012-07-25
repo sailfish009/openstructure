@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include <boost/shared_ptr.hpp>
+#include <ost/seq/sequence_list.hh>
 #include <ost/geom/geom.hh>
 #include <ost/string_ref.hh>
 #include <ost/io/module_config.hh>
@@ -783,6 +784,18 @@ public:
   /// \return chain name as used in the PDB file (auth_asym_id)
   String GetMMCifPDBChainTr(String cif) const;
 
+  /// \brief Add a new PDB/ mmCIF chain name tuple.
+  ///
+  /// \param pdb chain name as used by the PDB file (auth_asym_id)
+  /// \param cif chain name as used in the mmCIF file (label_asym_id)
+  void AddPDBMMCifChainTr(String pdb, String cif);
+
+  /// \brief Get a CIF chain name for a PDB chain name
+  ///
+  /// \param pdb chain name as used by the mmCIF file (auth_asym_id)
+  /// \return chain name as used in the PDB file (label_asym_id)
+  String GetPDBMMCifChainTr(String pdb) const;
+
   /// \brief Add a biounit
   ///
   /// \param bu biounit to be added
@@ -861,6 +874,7 @@ private:
   std::vector<MMCifInfoTransOpPtr> transops_;
 	MMCifInfoStructRefs            struct_refs_;
   std::map<String, String> cif_2_pdb_chain_id_;
+  std::map<String, String> pdb_2_cif_chain_id_;
 };
 
 

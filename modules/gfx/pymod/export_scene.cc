@@ -107,6 +107,8 @@ void export_Scene()
     .def("Autoslab", autoslab3) // DEPRECATED
     .def("AutoslabMax",&Scene::AutoslabMax) // DEPRECATED
     .def("Remove", remove1)
+    .def("Register", &Scene::Register)
+    .def("Unregister", &Scene::Unregister)
     .def("Remove", remove2)
     .add_property("viewport", &Scene::GetViewport)
     .def("RequestRedraw", &Scene::RequestRedraw)

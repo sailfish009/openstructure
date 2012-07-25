@@ -332,6 +332,13 @@ void PythonShellWidget::setup_state_machine_()
   single_line->addTransition(clear_all_tr_sl);
   connect(clear_all_tr_sl,SIGNAL(triggered()),this,SLOT(handle_clear_all_()));
 
+  single_line->addTransition(new KeyEventTransition(Qt::Key_Left,
+                                                    DNG_ARROW_MODIFIERS,
+                                                    single_line,
+                                                    true,
+                                                    new EditPositionGuard(this,EditPositionGuard::EQUAL,
+                                                                               EditPositionGuard::ANCHOREQUAL |EditPositionGuard::ANCHORBIGGER)));
+
   //multi line inactive transitions
   multi_line_inactive->addTransition(new KeyEventTransition(Qt::Key_Return,
                                                             Qt::NoModifier,
@@ -878,6 +885,7 @@ void PythonShellWidget::insertFromMimeData(const QMimeData * source)
   if(lines.size()>0){
     set_block_type_(block_edit_start_,document()->lastBlock(),BLOCKTYPE_BLOCKEDIT);
   }
+  setFocus();
 }
 
 GutterBlockList PythonShellWidget::GetGutterBlocks(const QRect& rect)

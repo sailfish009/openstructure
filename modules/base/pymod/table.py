@@ -1142,7 +1142,8 @@ class Table(object):
     
   def PlotHistogram(self, col, x_range=None, num_bins=10, normed=False,
                     histtype='stepfilled', align='mid', x_title=None,
-                    y_title=None, title=None, clear=True, save=False):
+                    y_title=None, title=None, clear=True, save=False,
+                    color=None, y_range=None):
     """
     Create a histogram of the data in col for the range *x_range*, split into
     *num_bins* bins and plot it using Matplotlib.
@@ -1153,8 +1154,15 @@ class Table(object):
     :param x_range: start and end value for first dimension (e.g. [start_x, end_x])
     :type x_range: :class:`list` of length two
 
+    :param y_range: start and end value for second dimension (e.g. [start_y, end_y])
+    :type y_range: :class:`list` of length two
+
     :param num_bins: number of bins in range
     :type num_bins: :class:`int`
+
+    :param color: Color to be used for the histogram. If not set, color will be 
+        determined by matplotlib
+    :type color: :class:`str`
 
     :param normed: normalize histogram
     :type normed: :class:`bool`
@@ -1202,7 +1210,9 @@ class Table(object):
       
       if len(self.rows)==0:
         return None
-      
+      kwargs={}
+      if color:
+        kwargs['color']=color
       idx = self.GetColIndex(col)
       data = []
       for r in self.rows:
@@ -1213,21 +1223,23 @@ class Table(object):
         plt.clf()
         
       n, bins, patches = plt.hist(data, bins=num_bins, range=x_range,
-                                  normed=normed, histtype=histtype, align=align)
+                                  normed=normed, histtype=histtype, align=align,
+                                  **kwargs)
       
-      if x_title:
+      if x_title!=None:
         nice_x=x_title
       else:
         nice_x=MakeTitle(col)
       plt.xlabel(nice_x, size='x-large')
-      
-      if y_title:
+      if y_range:
+        plt.ylim(y_range) 
+      if y_title!=None:
         nice_y=y_title
       else:
         nice_y="bin count"  
       plt.ylabel(nice_y, size='x-large')
       
-      if title:
+      if title!=None:
         nice_title=title
       else:
         nice_title="Histogram of %s"%nice_x
