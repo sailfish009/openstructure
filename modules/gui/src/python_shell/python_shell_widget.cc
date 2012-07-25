@@ -885,6 +885,7 @@ void PythonShellWidget::insertFromMimeData(const QMimeData * source)
   if(lines.size()>0){
     set_block_type_(block_edit_start_,document()->lastBlock(),BLOCKTYPE_BLOCKEDIT);
   }
+  setFocus();
 }
 
 GutterBlockList PythonShellWidget::GetGutterBlocks(const QRect& rect)
