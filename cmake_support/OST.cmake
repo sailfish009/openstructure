@@ -115,14 +115,14 @@ macro(stage_headers HEADERS HEADER_INSTALL_DIR TARGET SUB)
   if (NOT _SUB)
     set(_TARGET_NAME ${_TARGET}_headers)
   endif()
-  add_custom_target("${_TARGET_NAME}" COMMENT "")
+  if (NOT TARGET headers)
+    add_custom_target("headers" COMMENT "")
+  endif()
   set(HEADER_DIR "${HEADER_STAGE_PATH}/${HEADER_INSTALL_DIR}")
   copy_if_different("" "${HEADER_DIR}"
                     "${_ABS_HEADER_NAMES}" ""
-                    "${_TARGET_NAME}")
-  add_dependencies("${TARGET}" "${_TARGET_NAME}")
-  set_target_properties("${_TARGET_NAME}" PROPERTIES
-                        EchoString "Staging headers ${TARGET}")
+                    "${TARGET}")
+  add_dependencies(${TARGET} "headers")
 endmacro()
 
 #-------------------------------------------------------------------------------
@@ -583,7 +583,6 @@ macro(pymod)
           set(_ABS_PY_FILES)
           set(_PY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
           foreach(_PY ${_PY_FILES})
-            MESSAGE("${_DIR}:${_PY}")
             list(APPEND _ABS_PY_FILES "${_PY_SOURCE_DIR}/${_PY}")
           endforeach()
           install(FILES ${_ABS_PY_FILES} DESTINATION

@@ -37,7 +37,7 @@ if (NOT ENABLE_STATIC)
   if (ENABLE_GUI)
     list(APPEND INIT_SCRIPTS init.py)
   endif()
-  copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/${LIB_DIR}/openstructure" 
+  copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/${SPD}" 
                   "${INIT_SCRIPTS}" "python init scripts" ost_scripts)
 
   install(FILES ${INIT_SCRIPTS} DESTINATION "${SPD}")
