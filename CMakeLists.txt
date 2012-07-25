@@ -307,7 +307,7 @@ message(STATUS
         "   Info support                    (-DENABLE_INFO) : ${_INFO}\n"
         "   Graphical interface              (-DENABLE_GUI) : ${_UI}\n"
         "   OpenGL support                   (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   OpenGL via Mesa                  (-DUSE_MESA)   : ${_USE_MESA}\n"
+        "   OpenGL via Mesa                    (-DUSE_MESA) : ${_USE_MESA}\n"
         "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support                   (-DUSE_SHADER) : ${_SHADER}\n"
         "   Numpy support                     (-DUSE_NUMPY) : ${_NUMPY}\n"
