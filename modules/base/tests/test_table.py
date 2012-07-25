@@ -6,6 +6,7 @@ Author: Tobias Schmidt
 
 import os
 import unittest
+import glob
 from ost.table import *
 import ost
 
@@ -41,6 +42,10 @@ except ImportError:
 
 class TestTable(unittest.TestCase):
 
+  def tearDown(self):
+    for filename in glob.glob('*_out.*'):
+      os.remove(filename)
+
   def setUp(self):
     ost.PushVerbosityLevel(3)
 
@@ -58,7 +63,7 @@ class TestTable(unittest.TestCase):
     tab = Table()
     tab.AddCol('first', 'string')
     tab.AddCol('second', 'int')
-    tab.AddCol('third', 'float', 3.141)
+    tab.AddCol('third', 'float')
     self.CompareColCount(tab, 3)
     self.CompareRowCount(tab, 0)
     self.CompareColTypes(tab, ['first','second', 'third'], 'sif')
@@ -358,7 +363,7 @@ class TestTable(unittest.TestCase):
     tab = Table()
     self.CompareColCount(tab, 0)
     self.CompareRowCount(tab, 0)
-    tab.AddCol('first', 'string', 'AB C')
+    tab.AddCol('first', 'string')
     self.CompareColCount(tab, 1)
     self.CompareRowCount(tab, 0)
     self.CompareColNames(tab, ['first'])
@@ -437,7 +442,7 @@ class TestTable(unittest.TestCase):
     tab = Table()
     tab.AddCol('first', 'string')
     tab.AddCol('second', 'int')
-    tab.AddCol('third', 'float', 3.141)
+    tab.AddCol('third', 'float')
     self.CompareColCount(tab, 3)
     self.CompareRowCount(tab, 0)
     self.CompareColTypes(tab, ['first','second', 'third'], 'sif')
@@ -462,7 +467,7 @@ class TestTable(unittest.TestCase):
     tab = Table()
     tab.AddCol('first', 'string')
     tab.AddCol('second', 'int')
-    tab.AddCol('aaa', 'float', 3.141)
+    tab.AddCol('aaa', 'float')
     self.CompareColCount(tab, 3)
     self.CompareRowCount(tab, 0)
     self.CompareColTypes(tab, ['first','second', 'aaa'], 'sif')
@@ -500,6 +505,35 @@ class TestTable(unittest.TestCase):
     self.CompareDataFromDict(tab, {'second': [None,None,None],
                                    'first': ['x','foo','bar'],
                                    'third': [3.141, 3.141, 3.141]})
+
+  def testAddMultiRowFromDict(self):
+    tab = Table(['x','y','z'], 'fff')
+    data = {'x': [1.2, 1.5], 'z': [1.6, 2.4]}
+    tab.AddRow(data)
+    self.CompareDataFromDict(tab, {'x': [1.2, 1.5],
+                                   'y': [None, None],
+                                   'z': [1.6, 2.4]})
+
+    data = {'y': [5.1, 3.4, 1.5]}
+    tab.AddRow(data)
+    self.CompareDataFromDict(tab, {'x': [1.2, 1.5, None, None, None],
+                                   'y': [None, None, 5.1, 3.4, 1.5],
+                                   'z': [1.6, 2.4, None, None, None]})
+
+    # must raise since length of data is not the same
+    data = {'x': [1.2, 1.5], 'y': 1.2, 'z': [1.6, 2.4]}
+    self.assertRaises(ValueError, tab.AddRow, data)
+
+    # must raise since length of data is not the same
+    data = {'x': [1.2, 1.5], 'y': [1.2], 'z': [1.6, 2.4]}
+    self.assertRaises(ValueError, tab.AddRow, data)
+
+    # overwrite certain rows
+    data = {'x': [1.2, 1.9], 'z': [7.9, 3.5]}
+    tab.AddRow(data, overwrite='x')
+    self.CompareDataFromDict(tab, {'x': [1.2, 1.5, None, None, None, 1.9],
+                                   'y': [None, None, 5.1, 3.4, 1.5, None],
+                                   'z': [7.9, 2.4, None, None, None, 3.5]})
 
   def testAddRowFromDictWithOverwrite(self):
     '''
@@ -719,6 +753,53 @@ class TestTable(unittest.TestCase):
     self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
     tab.Sort('third', '+')
     self.CompareDataFromDict(tab, {'first': [None,'foo','x'], 'second': [9,None,3], 'third': [3.3,2.2,None]})
+
+  def testGuessFormat(self):
+    self.assertEqual(Table._GuessFormat('table_test.csv'), 'csv')
+    self.assertEqual(Table._GuessFormat('table_test.pickle'), 'pickle')
+    self.assertEqual(Table._GuessFormat('table_test.tab'), 'ost')
+    self.assertEqual(Table._GuessFormat('table_test.ost'), 'ost')
+    self.assertEqual(Table._GuessFormat('table_test.xyz'), 'ost')
+    
+  def testSaveLoadTableAutoFormat(self):   
+    tab = self.CreateTestTable()
+    self.CompareDataFromDict(tab, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+
+    # write to disc
+    tab.Save("saveloadtable_filename_out.csv", format='csv')
+    tab.Save("saveloadtable_filename_out.tab", format='ost')
+    tab.Save("saveloadtable_filename_out.pickle", format='pickle')
+    
+    # read from disc: csv
+    in_stream_csv = open("saveloadtable_filename_out.csv", 'r')
+    tab_loaded_stream_csv = Table.Load(in_stream_csv)
+    in_stream_csv.close()
+    tab_loaded_fname_csv = Table.Load('saveloadtable_filename_out.csv')
+
+    # check content: csv
+    self.CompareDataFromDict(tab_loaded_stream_csv, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+    self.CompareDataFromDict(tab_loaded_fname_csv, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+  
+    # read from disc: pickle
+    in_stream_pickle = open("saveloadtable_filename_out.pickle", 'rb')
+    tab_loaded_stream_pickle = Table.Load(in_stream_pickle)
+    in_stream_pickle.close()
+    tab_loaded_fname_pickle = Table.Load('saveloadtable_filename_out.pickle')
+
+    # check content: pickle
+    self.CompareDataFromDict(tab_loaded_stream_pickle, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+    self.CompareDataFromDict(tab_loaded_fname_pickle, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+
+    # read from disc: ost
+    in_stream_ost = open("saveloadtable_filename_out.tab", 'rb')
+    tab_loaded_stream_ost = Table.Load(in_stream_ost)
+    in_stream_ost.close()
+    tab_loaded_fname_ost = Table.Load('saveloadtable_filename_out.tab')
+
+    # check content: ost
+    self.CompareDataFromDict(tab_loaded_stream_ost, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+    self.CompareDataFromDict(tab_loaded_fname_ost, {'first': ['x','foo',None], 'second': [3,None,9], 'third': [None,2.2,3.3]})
+  
 
   def testLoadTableOSTUnknownType(self):
     self.assertRaises(ValueError, Table.Load, os.path.join('testfiles','ost-table-unknown-type.tab'))
@@ -1048,6 +1129,14 @@ class TestTable(unittest.TestCase):
                       score_dir='+', class_col='rmsd', class_cutoff=2.0,
                       class_dir='y')
     
+  def testPlot(self):
+    if not HAS_MPL or not HAS_NUMPY:
+      return
+    tab = self.CreateTestTable()
+    self.assertRaises(ValueError, tab.Plot, 'second', x_range=1)
+    self.assertRaises(ValueError, tab.Plot, x='second', y='third', y_range=[1,2,3])
+    self.assertRaises(ValueError, tab.Plot, x='second', y='third', z_range='st')
+
   def testPlotEnrichment(self):
     if not HAS_MPL or not HAS_PIL:
       return
@@ -1147,6 +1236,8 @@ class TestTable(unittest.TestCase):
     self.assertEquals(auc, None)
 
   def testCalcROCFromFile(self):
+    if not HAS_NUMPY:
+      return
     tab = Table.Load(os.path.join('testfiles','roc_table.dat'))
     auc = tab.ComputeROCAUC(score_col='prediction', class_col='reference', class_cutoff=0.4)
     self.assertEquals(auc, 1.0)
@@ -1195,6 +1286,8 @@ class TestTable(unittest.TestCase):
     self.assertAlmostEquals(mcc, 0.882089673321)
 
   def testTableAsNumpyMatrix(self):
+    if not HAS_NUMPY:
+      return
 
     '''
     checks numpy matrix 

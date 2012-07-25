@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(OpenStructure CXX C)
 set (OST_VERSION_MAJOR 1)
 set (OST_VERSION_MINOR 2)
-set (OST_VERSION_PATCH 0)
+set (OST_VERSION_PATCH 1)
 set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_PATCH} )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
@@ -50,6 +50,7 @@ option(DEPLOYMENT "switch on deployment settings" OFF)
 option(COMPILE_TESTS "whether unit tests should be compiled by default" OFF)
 option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
 option(DEBIAN_STYLE_LIBEXEC "whether 'libexec' should be put under 'lib/openstructure" OFF)
+option(HIDDEN_VISIBILITY "on gcc, use -fvisibility=hidden" OFF)
 
 if (CXX)
   set(CMAKE_CXX_COMPILER ${CXX})
@@ -239,7 +240,23 @@ if (ENABLE_GUI)
 endif()
 
 if (ENABLE_SPNAV)
-  find_package(SpNav REQUIRED)
+  #find_package(SpNav REQUIRED)
+  set(_SPNAV ON)
+else()
+  set(_SPNAV OFF)
+endif()
+
+if (CMAKE_COMPILER_IS_GNUCXX)
+  # do not write back into cache, otherwise the compile command line gets expanded
+  # with multiple -fno-strict-aliasing flags, triggering a complete rebuild whenever
+  # cmake is run
+  set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -fno-strict-aliasing")
+  if(HIDDEN_VISIBILITY) 
+    set (CMAKE_CXX_FLAGS "-fvisibility=hidden")
+    set (_HIDDEN_VIS ON)
+  else(HIDDEN_VISIBILITY)
+    set (_HIDDEN_VIS OFF)
+  endif(HIDDEN_VISIBILITY)
 endif()
 
 # basic environment
@@ -247,7 +264,6 @@ include_directories(${Boost_INCLUDE_DIRS}
                     ${FFTW_INCLUDE_PATH} 
                     ${EIGEN2_INCLUDE_DIR}
                     ${TIFF_INCLUDE_DIR}
-                    ${SPNAV_INCLUDE_DIR}
                     ${PNG_INCLUDE_DIR}
                     )
 if(USE_NUMPY)
@@ -259,7 +275,7 @@ if (UNIX)
   SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
   if(USE_RPATH)
     set(_USE_RPATH ON)
-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
+    SET(CMAKE_INSTALL_RPATH "$ORIGIN/../${LIB_DIR}")
     SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
   else()
     set(_USE_RPATH OFF)
@@ -276,8 +292,8 @@ endif()
 add_subdirectory(modules)
 add_subdirectory(scripts)
 add_subdirectory(deployment)
-
 set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
+add_subdirectory(tools)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
                              "${FILES_TO_BE_REMOVED}")
 
@@ -295,11 +311,13 @@ message(STATUS
         "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support                   (-DUSE_SHADER) : ${_SHADER}\n"
         "   Numpy support                     (-DUSE_NUMPY) : ${_NUMPY}\n"
+        "   SpaceNav Device support        (-DENABLE_SPNAV) : ${_SPNAV}\n"
         "   Optimize                           (-DOPTIMIZE) : ${_OPT}\n"
         "   Profiling support                   (-DPROFILE) : ${_PROFILE}\n"
         "   Double Precision       (-DUSE_DOUBLE_PRECISION) : ${_DOUBLE_PREC}\n"
         "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}" )
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}\n"
+        "   Hidden object visibility  (-DHIDDEN_VISIBILITY) : ${_HIDDEN_VIS}")
 

@@ -32,9 +32,10 @@ SceneFX::SceneFX():
   depth_dark_flag(false),
   depth_dark_factor(1.0),
   amb_occl_flag(false),
-  amb_occl_factor(1.0),
+  amb_occl_factor(0.5),
   amb_occl_mode(1),
   amb_occl_quality(1),
+  amb_occl_size(80.0),
   use_beacon(false),
   beacon(),
   scene_tex_id_(),
@@ -506,6 +507,7 @@ void SceneFX::prep_amb_occlusion()
   glUniform1i(glGetUniformLocation(cpr,"norm_map"),1);
   glUniform1i(glGetUniformLocation(cpr,"kernel"),2);
   glUniform1f(glGetUniformLocation(cpr,"step"),1.0/static_cast<float>(kernel_size_));
+  glUniform1f(glGetUniformLocation(cpr,"size"),amb_occl_size);
   glUniform2f(glGetUniformLocation(cpr,"i_vp"),1.0/static_cast<float>(width),1.0/static_cast<float>(height));
   glUniform1i(glGetUniformLocation(cpr,"mode"),amb_occl_mode);
   double pm[16];

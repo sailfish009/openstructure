@@ -56,7 +56,10 @@ Vec3 FractionalShift::GetShift() const
 
 void FractionalShift::Visit(ImageHandle& ih)
 {  
+  Vec3 ao=ih.GetAbsoluteOrigin();
+
   bool spatialflag=false;
+
   if(ih.GetDomain()==SPATIAL){
     spatialflag=true;
     ih.ApplyIP(FFT());
@@ -72,10 +75,12 @@ void FractionalShift::Visit(ImageHandle& ih)
   for(ExtentIterator it=ih.GetIterator();!it.AtEnd();++it) {
     ih.SetComplex(it,ih.GetComplex(it)*std::polar<Real>(1.0,-Dot(phaseshift,Point(it).ToVec3())));
   }
+
   if(spatialflag){
-    //back FFT
     ih.ApplyIP(FFT());
   }
+  // update spatial origin
+  ih.SetAbsoluteOrigin(ao-shift_);
 }
 
 }}}//ns

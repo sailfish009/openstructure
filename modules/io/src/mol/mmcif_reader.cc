@@ -975,7 +975,7 @@ void MMCifReader::ParsePdbxStructAssemblyGen(const std::vector<StringRef>& colum
   MMCifBioUAssembly assembly;
   assembly.biounit = MMCifInfoBioUnit();
 
-  assembly.biounit.SetDetails(columns[indices_[ASSEMBLY_ID]].str());
+  assembly.biounit.SetID(columns[indices_[ASSEMBLY_ID]].str());
 
   std::vector<StringRef> tmp_chains=columns[indices_[ASYM_ID_LIST]].split(',');
   std::vector<StringRef>::const_iterator tc_it;
@@ -1539,6 +1539,7 @@ void MMCifReader::OnEndData()
   // process chain types
   std::vector<std::pair<mol::ChainHandle, String> >::const_iterator css;
   MMCifEntityDescMap::const_iterator edm_it;
+  String pdb_auth_chain_name;
   for (css = chain_id_pairs_.begin(); css != chain_id_pairs_.end(); ++css) {
     edm_it = entity_desc_map_.find(css->second);
 
@@ -1548,6 +1549,9 @@ void MMCifReader::OnEndData()
       if (edm_it->second.seqres.length() > 0) {
         seqres_.AddSequence(seq::CreateSequence(css->first.GetName(),
                                                 edm_it->second.seqres));
+        pdb_auth_chain_name = css->first.GetStringProp("pdb_auth_chain_name");
+        info_.AddMMCifPDBChainTr(css->first.GetName(), pdb_auth_chain_name);
+        info_.AddPDBMMCifChainTr(pdb_auth_chain_name, css->first.GetName());
       } else if (edm_it->second.type!=mol::CHAINTYPE_WATER) {
         // mark everything that doesn't have SEQRES as ligand and isn't of type 
         // water as ligand
@@ -1586,14 +1590,15 @@ void MMCifReader::OnEndData()
        bua_it != bu_assemblies_.end();
        ++bua_it) {
     // pair with pdbx_struct_assembly entry
-    buom_it = bu_origin_map_.find(bua_it->biounit.GetDetails());
+    buom_it = bu_origin_map_.find(bua_it->biounit.GetID());
     if (buom_it == bu_origin_map_.end()) {
       throw IOException(this->FormatDiagnostic(STAR_DIAG_ERROR,
                                                "No pdbx_struct_assembly.id '"+
-                                               bua_it->biounit.GetDetails() +
+                                               bua_it->biounit.GetID() +
                          "' found as requested by pdbx_struct_assembly_gen.")); 
     }
     bua_it->biounit.SetDetails(buom_it->second);
+    bua_it->biounit.SetID(buom_it->first);
 
     // pair with pdbx_struct_oper_list
     for (aol_it = bua_it->operations.begin();

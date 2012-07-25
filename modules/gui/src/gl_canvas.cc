@@ -369,7 +369,7 @@ void GLCanvas::CopySelectionToClipboard()
       if (!rv.IsPeptideLinking() || rv.GetOneLetterCode()=='?')
         continue;      
       seq1 << rv.GetOneLetterCode();
-      if (sel.FindResidue(rv.GetHandle()).IsValid()) {
+      if (sel.ViewForHandle(rv.GetHandle()).IsValid()) {
         seq2 << rv.GetOneLetterCode();
       } else {
         seq2 << '-';

@@ -18,56 +18,86 @@
 //------------------------------------------------------------------------------
 
 /*
-  Author: Stefan Scheuber
+  Authors: Stefan Scheuber, Ansgar Philippsen
 */
 
 #include "spnav_input.hh"
 
 #include <iostream>
 
-#include <ost/io/io_exception.hh>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <stdexcept>
+
 #include <spnav.h>
+#include <sys/un.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+namespace {
+
+  // immitate spnav_open, but without the annoying perror littering 
+  bool check_spnav() {
+    int s=0;
+    sockaddr_un addr;
+
+    memset(&addr, 0, sizeof(sockaddr_un));
+    addr.sun_family = AF_UNIX;
+    strncpy(addr.sun_path, "/var/run/spnav.sock", sizeof(addr.sun_path));
+
+    if((s = socket(PF_UNIX, SOCK_STREAM, 0)) == -1) {
+      return false;
+    }
+    if(connect(s, (struct sockaddr*)&addr, sizeof(sockaddr_un)) == -1) {
+      return false;
+    }
+    close(s);
+    return true;
+  }
+
+}
 
 namespace ost { namespace gui {
 
-SpnavInput* SpnavInput::spnav_=NULL;
-
-SpnavInput::SpnavInput(QObject* parent): QThread(parent)
+SpnavInput::SpnavInput(QObject* parent): 
+  QThread(parent),
+  valid_(false)
 {
   qRegisterMetaType<geom::Mat4>("geom::Mat4");
-  if(spnav_open()==-1) {
-    throw(io::IOException("failed to connect to the space navigator daemon\n"));
-  }
+  if(check_spnav() && spnav_open()!=-1) {
+    valid_=true;
+  } 
 }
 
-void SpnavInput::run(){
-
+void SpnavInput::run()
+{
+  if(!valid_) return;
 	spnav_event sev;
 
   while(spnav_wait_event(&sev)) {
     if(sev.type == SPNAV_EVENT_MOTION) {
       emit this->deviceTransformed(sev.motion.x,sev.motion.y,sev.motion.z, sev.motion.rx, sev.motion.ry, sev.motion.rz);
-    } else {  /* SPNAV_EVENT_BUTTON */
-      printf("got button %s event b(%d)\n", sev.button.press ? "press" : "release", sev.button.bnum);
+    } else if (sev.type == SPNAV_EVENT_BUTTON) {
+      //printf("got button %s event b(%d)\n", sev.button.press ? "press" : "release", sev.button.bnum);
       if(sev.button.press)
         emit this->deviceButtonPressed(sev.button.bnum);
     }
   }
 }
 
-SpnavInput::~SpnavInput(){
-  spnav_close();
+SpnavInput::~SpnavInput()
+{
+  if(valid_) {
+    spnav_close();
+    this->quit();
+    this->terminate();
+  }
 }
 
 SpnavInput* SpnavInput::Instance() {
-  if (!SpnavInput::spnav_) {
-    SpnavInput::spnav_=new SpnavInput;
-  }
-  return SpnavInput::spnav_;
+  static SpnavInput inst;
+  return &inst;
 }
 
 }} //ns

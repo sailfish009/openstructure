@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/message.hh>
 #include <ost/mol/mol.hh>
 #include <ost/log.hh>
 
@@ -161,7 +162,8 @@ void Conopology::SetDefaultBuilder(const String& default_name) {
   if (builder)
     builder_map_["DEFAULT"]=builder;
   else
-    assert(0 && "what is this?");
+    throw ost::Error("trying to set unknown builder '"+
+                             default_name+"' as the default");
 }
 
 BuilderP Conopology::GetBuilder(const String& name)

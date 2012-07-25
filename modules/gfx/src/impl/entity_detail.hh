@@ -39,13 +39,38 @@
 
 namespace ost { namespace gfx { namespace impl {
 
+struct RGBAColor {
+  RGBAColor() {
+    rgba[0]=1.0; rgba[1]=1.0; rgba[2]=1.0; rgba[3]=1.0;
+  }
+  RGBAColor(float r, float g, float b, float a=1.0) {
+    rgba[0]=r; rgba[1]=g; rgba[2]=b; rgba[3]=a;
+  }
+  RGBAColor(const Color& c) {
+    rgba[0]=c.GetRed(); rgba[1]=c.GetGreen(); rgba[2]=c.GetBlue(); rgba[3]=c.GetAlpha();
+  }
+
+  RGBAColor& operator=(const Color& c) {
+    rgba[0]=c.GetRed(); rgba[1]=c.GetGreen(); rgba[2]=c.GetBlue(); rgba[3]=c.GetAlpha();
+    return *this;
+  }
+
+  operator Color () const {return RGBA(rgba[0],rgba[1],rgba[2],rgba[3]);}
+
+  operator float* () {return rgba;}
+  operator const float* () const {return rgba;}
+  float rgba[4];
+};
+
 struct DLLEXPORT_OST_GFX AtomEntry 
 {
   AtomEntry() {}
   AtomEntry(const mol::AtomHandle& a, float r, float v, const Color& c):
-    atom(a),color(c),radius(r), vdwr(v) {}
+    atom(a), color(c), radius(r), vdwr(v) 
+  {
+  }
   mol::AtomHandle atom;
-  Color color;
+  RGBAColor color;
   float radius;
   float vdwr;
 };
@@ -88,7 +113,7 @@ typedef boost::shared_ptr<GfxView> GfxViewPtr;
 
 struct DLLEXPORT_OST_GFX NodeEntry {
   mol::AtomHandle atom;
-  Color color1, color2;
+  RGBAColor color1, color2;
   geom::Vec3 direction,normal;
   float rad;
   geom::Vec3 v0,v1,v2; // helper vectors
@@ -135,6 +160,16 @@ struct DLLEXPORT_OST_GFX SplineEntry {
               const geom::Vec3& d,
               const geom::Vec3& n,
               float r,
+              const RGBAColor& c1, const RGBAColor& c2,
+              unsigned int t, int i):
+    position(p),direction(d),normal(n),color1(c1),color2(c2),rad(r),type(t),
+    type1(t),type2(t),frac(0.0),running_length(0.0),v0(),v1(),v2(),nflip(false),id(i)
+  {
+  }
+  SplineEntry(const geom::Vec3& p, 
+              const geom::Vec3& d,
+              const geom::Vec3& n,
+              float r,
               const Color& c1, const Color& c2,
               unsigned int t, int i):
     position(p),direction(d),normal(n),color1(c1),color2(c2),rad(r),type(t),
@@ -143,7 +178,7 @@ struct DLLEXPORT_OST_GFX SplineEntry {
   }
 
   geom::Vec3 position,direction,normal;
-  Color color1, color2;
+  RGBAColor color1, color2;
   float rad;
   unsigned int type;
   unsigned int type1, type2;

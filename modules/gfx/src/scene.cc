@@ -115,7 +115,7 @@ Scene::Scene():
   fog_color_(0.0,0.0,0.0,0.0),
   auto_autoslab_(true),
   do_autoslab_(true),
-  do_autoslab_fast_(true),
+  autoslab_mode_(0),
   offscreen_flag_(false),
   main_offscreen_buffer_(0),
   old_vp_(),
@@ -313,6 +313,24 @@ uint Scene::GetAmbientOcclusionQuality() const
 #endif
 }
 
+void Scene::SetAmbientOcclusionSize(float f)
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  impl::SceneFX::Instance().amb_occl_size=f;
+  // the redraw routine will deal with the Shader
+  RequestRedraw();
+#endif
+}
+
+float Scene::GetAmbientOcclusionSize() const
+{
+#if OST_SHADER_SUPPORT_ENABLED
+  return impl::SceneFX::Instance().amb_occl_size;
+#else
+  return 1.0;
+#endif
+}
+
 void Scene::SetShadingMode(const std::string& smode)
 {
 #if OST_SHADER_SUPPORT_ENABLED
@@ -380,6 +398,7 @@ void Scene::InitGL(bool full)
     LOG_INFO(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
 
 #if OST_SHADER_SUPPORT_ENABLED
+    LOG_INFO("shader version " << glGetString(GL_SHADING_LANGUAGE_VERSION));
     LOG_DEBUG("Scene: shader pre-gl");
     Shader::Instance().PreGLInit();
 #endif
@@ -628,11 +647,13 @@ void Scene::RenderText(const TextPrim& t)
   Shader::Instance().Activate("");
 #endif
 
-  glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT);
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
   glDisable(GL_NORMALIZE);
   glDisable(GL_CULL_FACE);
   glDisable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_GREATER,0.5);
   glEnable(GL_TEXTURE_2D);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
   glEnable(GL_BLEND);
@@ -843,7 +864,9 @@ void Scene::Add(const GfxNodeP& n, bool redraw)
     if(root_node_->GetChildCount()==0) {
       SetCenter(go->GetCenter());
     }
-    do_autoslab_=true;
+    if(auto_autoslab_) {
+      do_autoslab_=true;
+    }
   }
 
   root_node_->Add(n);
@@ -1201,18 +1224,11 @@ public:
   }
   void VisitObject(GfxObj* obj, const Stack& st) {
     if(obj->IsVisible()) {
-      geom::AlignedCuboid bb=obj->GetBoundingBox();
+      // use obj transform for BB calculation as well as provided global transform
+      geom::AlignedCuboid bb=tf.Apply(obj->GetBoundingBox(true));
       if(bb.GetVolume()>0.0) {
-        Vec3 t1 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMin()[2]));
-        Vec3 t2 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMin()[2]));
-        Vec3 t3 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMin()[2]));
-        Vec3 t4 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMin()[2]));
-        Vec3 t5 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMin()[1],bb.GetMax()[2]));
-        Vec3 t6 = tf.Apply(Vec3(bb.GetMin()[0],bb.GetMax()[1],bb.GetMax()[2]));
-        Vec3 t7 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMax()[1],bb.GetMax()[2]));
-        Vec3 t8 = tf.Apply(Vec3(bb.GetMax()[0],bb.GetMin()[1],bb.GetMax()[2]));
-        minc = Min(minc,Min(t1,Min(t2,Min(t3,Min(t4,Min(t5,Min(t6,Min(t7,t8))))))));
-        maxc = Max(maxc,Max(t1,Max(t2,Max(t3,Max(t4,Max(t5,Max(t6,Max(t7,t8))))))));
+        minc = Min(minc,bb.GetMin());
+        maxc = Max(maxc,bb.GetMax());
         valid=true;
       }
     }
@@ -1223,6 +1239,11 @@ public:
   bool valid;
 };
 
+}
+
+geom::AlignedCuboid Scene::GetBoundingBox(bool use_tf) const
+{
+  return GetBoundingBox(use_tf ? transform_ : mol::Transform());
 }
 
 geom::AlignedCuboid Scene::GetBoundingBox(const mol::Transform& tf) const
@@ -1380,7 +1401,7 @@ void Scene::SetStereoMode(unsigned int m)
     if(win_ && win_->HasStereo()) {
       stereo_mode_=1;
     } else {
-      LOG_INFO("Scene: No visual present for quad-buffered stereo");
+      LOG_WARNING("Scene: No visual present for quad-buffered stereo (run dng with --stereo)");
       stereo_mode_=0;
     }
   } else if(m==2) {
@@ -1706,16 +1727,30 @@ public:
 
 } // anon ns
 
+void Scene::Autoslab(bool fast)
+{
+  LOG_INFO("Autoslab(bool) is deprecated, use Autoslab() and SetAutoslabMode() instead");
+  do_autoslab_=true;
+  autoslab_mode_= fast ? 0 : 1;
+  RequestRedraw();
+}
+
 void Scene::Autoslab(bool fast, bool)
 {
+  LOG_INFO("Autoslab(bool,bool) is deprecated, use Autoslab() and SetAutoslabMode() instead");
+  Autoslab(fast);
+}
+
+void Scene::Autoslab()
+{
   do_autoslab_=true;
-  do_autoslab_fast_=fast;
   RequestRedraw();
 }
 
 void Scene::AutoslabMax()
 {
-  geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
+  LOG_INFO("AutoslabMax() is deprecated, use Autoslab() and SetAutoslabMode() instead");
+  geom::AlignedCuboid bb =this->GetBoundingBox();
 
   if(bb.GetVolume()==0.0) {
     znear_=1;
@@ -1951,6 +1986,37 @@ void Scene::render_glow()
 #endif  
 }
 
+namespace {
+  geom::Mat4 frustum(float left, float right, float bot, float top, float near, float far) {
+    float rl=1.0/(right-left);
+    float tb=1.0/(top-bot);
+    float fn=1.0/(far-near);
+    float tn=2.0*near;
+    return geom::Mat4(tn*rl, 0.0f, (right+left)*rl, 0.0f,
+                      0.0f, tn*tb, (top+bot)*tb, 0.0f,
+                      0.0f, 0.0f, -(far+near)*fn, -tn*far*fn,
+                      0.0f, 0.0f, -1.0f, 0.0f);
+  }
+
+  geom::Mat4 translate(float x, float y, float z) {
+    return geom::Mat4(1.0f, 0.0f, 0.0f, x,
+                      0.0f, 1.0f, 0.0f, y,
+                      0.0f, 0.0f, 1.0f, z,
+                      0.0f, 0.0f, 0.0f, 1.0f);
+  }
+
+  geom::Mat4 rotate(float a, float x, float y, float z) {
+    float c=cos(a);
+    float d=1.0-c;
+    float s=sin(a);
+    geom::Vec3 v=geom::Normalize(geom::Vec3(x,y,z));
+    return geom::Mat4(v[0]*v[0]*d+c, v[0]*v[1]*d-v[2]*s, v[0]*v[2]*d+v[1]*s, 0.0f, 
+                      v[1]*v[0]*d+v[2]*s, v[1]*v[1]*d+c, v[1]*v[2]*d-v[0]*s, 0.0f, 
+                      v[0]*v[2]*d-v[1]*s, v[1]*v[2]*d+v[0]*s, v[2]*v[2]*d+c, 0.0f,
+                      0.0f, 0.0f, 0.0f, 1.0f);
+  }
+}
+
 void Scene::stereo_projection(int view)
 {
   if(!gl_init_) return;
@@ -1964,6 +2030,8 @@ void Scene::stereo_projection(int view)
   Real left = -top*aspect_ratio_;
   Real right = -left;
 
+  pmat_=frustum(left,right,bot,top,zn,zf);
+
   if(view!=0) {
     
     Real ff=(view<0 ? -1.0 : 1.0);
@@ -1971,19 +2039,17 @@ void Scene::stereo_projection(int view)
 
     if(stereo_alg_==1) {
       // Toe-in method, easy but wrong
-      glFrustum(left,right,bot,top,zn,zf);
       Real dist = -transform_.GetTrans()[2]+stereo_distance_;
-      glTranslated(0.0,0.0,-dist);
-      glRotated(-180.0/M_PI*atan(0.1*ff/iod),0.0,1.0,0.0);
-      glTranslated(0.0,0.0,dist);
+      pmat_=pmat_*translate(0.0,0.0,-dist)*rotate(-atan(0.1*ff/iod),0.0,1.0,0.0)*translate(0.0,0.0,dist);
+
     } else {
       // correct off-axis frustims
 
       Real fo=-transform_.GetTrans()[2]+stereo_distance_;
 
+#if 0
       // correction of near clipping plane to avoid extreme drifting
       // of left and right view
-#if 0
       if(iod*zn/fo<2.0) {
         zn=2.0*fo/iod;
         zf=std::max(zn+Real(0.2),zf);
@@ -1993,14 +2059,21 @@ void Scene::stereo_projection(int view)
       Real sd = -ff*0.5*iod*zn/fo;
       left+=sd;
       right+=sd;
-
-      glFrustum(left,right,bot,top,zn,zf);
-      glTranslated(-ff*iod*0.5,0.0,0.0);
+      pmat_=frustum(left,right,bot,top,zn,zf)*translate(-ff*iod*0.5,0.0,0.0);
     }
 
   } else { // view==0
-    // standard viewing frustum
-    glFrustum(left,right,bot,top,zn,zf);
+    // standard viewing frustum, no need to modify above call
+  }
+
+  glMultMatrix(geom::Transpose(pmat_).Data());
+
+  try {
+    ipmat_=geom::Invert(pmat_);
+  } catch (geom::GeomException& e) {
+    LOG_WARNING("caught GeomException in Scene::stereo_projection: " << e.what());
+    pmat_=geom::Mat4();
+    ipmat_=geom::Mat4();
   }
 }
 
@@ -2146,21 +2219,17 @@ void Scene::do_autoslab()
 {
   // skip autoslab if nothing to show yet
   if(root_node_->GetChildCount()==0) return;
-  if(do_autoslab_fast_) {
-    geom::AlignedCuboid bb =this->GetBoundingBox(transform_);
-    // necessary code duplication due to awkward slab limit impl
-    if(bb.GetVolume()==0.0) {
-      // skip if empty BB
-      return;
-    } else {
-      float mynear=-(bb.GetMax()[2])-1.0;
-      float myfar=-(bb.GetMin()[2])+1.0;
-      znear_=mynear;
-      zfar_=myfar;
-      set_near(mynear);
-      set_far(myfar);
+  float nnear=znear_;
+  float nfar=zfar_;
+  if(autoslab_mode_==0) {
+    // fast
+    geom::AlignedCuboid bb =this->GetBoundingBox();
+    if(bb.GetVolume()>0.0) {
+      nnear=-(bb.GetMax()[2])-1.0;
+      nfar=-(bb.GetMin()[2])+1.0;
     }
-  } else {
+  } else if (autoslab_mode_==1) {
+    // precise
     LimCalc limcalc;
     limcalc.transform=transform_;
     limcalc.minc = Vec3(std::numeric_limits<float>::max(),
@@ -2170,16 +2239,34 @@ void Scene::do_autoslab()
                               -std::numeric_limits<float>::max(),
                               -std::numeric_limits<float>::max());
     this->Apply(limcalc);
-    if(!limcalc.valid) {
-      return;
+    if(limcalc.valid) {
+      nnear=std::max(float(0.0), std::min(float(-limcalc.minc[2]),float(-limcalc.maxc[2])))-float(1.0);
+      nfar=std::max(float(-limcalc.minc[2]),float(-limcalc.maxc[2]))+float(1.0);
     }
-    float mynear=std::max(float(0.0), std::min(float(-limcalc.minc[2]),float(-limcalc.maxc[2])))-float(1.0);
-    float myfar=std::max(float(-limcalc.minc[2]),float(-limcalc.maxc[2]))+float(1.0);
-    znear_=mynear;
-    zfar_=myfar;
-    set_near(mynear);
-    set_far(myfar);
+  } else if(autoslab_mode_==2) {
+    // max
+    geom::AlignedCuboid bb =this->GetBoundingBox();
+
+    if(bb.GetVolume()>0.0) {
+      Vec3 cen = transform_.Apply(transform_.GetCenter());
+    
+      float bmax = std::max(std::abs(cen[0]-bb.GetMin()[0]),
+                            std::abs(cen[0]-bb.GetMax()[0]));
+      bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMin()[1])));
+      bmax = std::max(bmax,float(std::abs(cen[1]-bb.GetMax()[1])));
+      bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMin()[2])));
+      bmax = std::max(bmax,float(std::abs(cen[2]-bb.GetMax()[2])));
+      
+      nnear = -(cen[2]+bmax*1.5);
+      nfar = -(cen[2]-bmax*1.5);
+    }
   }
+
+  // necessary code duplication due to awkward slab limit impl
+  znear_=nnear;
+  zfar_=nfar;
+  set_near(nnear);
+  set_far(nfar);
   ResetProjection();
   RequestRedraw();
 }

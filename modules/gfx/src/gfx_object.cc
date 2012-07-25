@@ -394,7 +394,7 @@ void GfxObj::ColorBy(const img::MapHandle& mh,
 //////////////////////////////////////////////////
 // and now for the rest of the GfxObj interface
 
-geom::AlignedCuboid GfxObj::GetBoundingBox() const
+geom::AlignedCuboid GfxObj::GetBoundingBox(bool use_tf) const
 {
   return geom::AlignedCuboid(geom::Vec3(),geom::Vec3());
 }
@@ -403,25 +403,11 @@ void GfxObj::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc,
                            const mol::Transform& tf) const
 {
   try {
-    geom::AlignedCuboid coord_limits=this->GetBoundingBox();
+    geom::AlignedCuboid coord_limits=tf.Apply(this->GetBoundingBox(true));
     // update min/max by transforming all 8 corners of the bounding box and 
     // comparing it against the current min/max
-    geom::Vec3 mmin=coord_limits.GetMin();
-    geom::Vec3 mmax=coord_limits.GetMax();
-    geom::Vec3 t1=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmin[2]));
-    geom::Vec3 t2=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmin[2]));
-    geom::Vec3 t3=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmin[2]));
-    geom::Vec3 t4=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmin[2]));
-    geom::Vec3 t5=tf.Apply(geom::Vec3(mmin[0], mmin[1], mmax[2]));
-    geom::Vec3 t6=tf.Apply(geom::Vec3(mmin[0], mmax[1], mmax[2]));
-    geom::Vec3 t7=tf.Apply(geom::Vec3(mmax[0], mmax[1], mmax[2]));
-    geom::Vec3 t8=tf.Apply(geom::Vec3(mmax[0], mmin[1], mmax[2]));
-    minc = geom::Min(minc, geom::Min(t1, geom::Min(t2, geom::Min(t3, 
-                     geom::Min(t4, geom::Min(t5, geom::Min(t6, 
-                     geom::Min(t7, t8))))))));
-    maxc = geom::Max(maxc, geom::Max(t1, geom::Max(t2, geom::Max(t3, 
-                     geom::Max(t4, geom::Max(t5, geom::Max(t6,
-                     geom::Max(t7, t8))))))));
+    minc=geom::Min(minc,coord_limits.GetMin());
+    maxc=geom::Min(maxc,coord_limits.GetMax());
   } catch(Error& e) {
     // in case the object is empty...
   }

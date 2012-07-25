@@ -85,6 +85,7 @@ set(OST_GUI_PYMOD_MODULES
   init_splash.py
   traj.py
   helpwidget.py
+  table.py
 )
 
 set(OST_GUI_PYMOD_DNG_MODULES

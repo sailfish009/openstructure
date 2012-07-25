@@ -109,4 +109,4 @@ endif()
 module(NAME mol SOURCES ${OST_MOL_SOURCES}
        HEADERS ${OST_MOL_IMPL_HEADERS} IN_DIR impl
        ${OST_MOL_HEADERS} HEADER_OUTPUT_DIR ost/mol
-       DEPENDS_ON ost_geom ost_base ${INFO_DEPS})
+       DEPENDS_ON ost_geom ost_base ${INFO_DEPS} LINK ${LINK})

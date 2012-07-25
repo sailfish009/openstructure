@@ -56,7 +56,7 @@ struct DCDHeader {
   char hdrr[4];
   int icntrl[20];
   int ntitle;
-  char title[1024];
+  std::string title;
   int num, istep, freq,nstep;
   int t_atom_count,f_atom_count, atom_count;
 };
@@ -67,28 +67,45 @@ bool less_index(const mol::AtomHandle& a1, const mol::AtomHandle& a2)
 }
 
 bool read_dcd_header(std::istream& istream, DCDHeader& header, bool& swap_flag, 
-                     bool& ucell_flag, bool& gap_flag)
+                     bool& ucell_flag, bool& gap_flag, bool detect_swap, bool byte_swap)
 {
   if (!istream) {
     return false;
   }
   char dummy[4];  
   gap_flag=true;
-  swap_flag=false;
+  swap_flag = detect_swap ? false : byte_swap;
+
   ucell_flag=false;
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(header.hdrr,sizeof(char)*4);
+  if(header.hdrr[0]!='C' || header.hdrr[1]!='O' || header.hdrr[2]!='R' || header.hdrr[3]!='D') {
+    throw IOException("LoadCHARMMTraj: missing CORD magic in header");
+  }
+
   istream.read(reinterpret_cast<char*>(header.icntrl),sizeof(int)*20);
-  if(header.icntrl[1]<0 || header.icntrl[1]>1e8) {
-    // nonsense atom count, try swapping
-    swap_int(header.icntrl,20);
-    if(header.icntrl[1]<0 || header.icntrl[1]>1e8) {
-      throw(IOException("LoadCHARMMTraj: nonsense atom count in header"));
-    } else {
-      LOG_VERBOSE("LoadCHARMMTraj: byte-swapping");
-      swap_flag=true;
+
+  if(detect_swap) {
+    if(header.icntrl[1]<0 || header.icntrl[1]>1e7) {
+      // nonsense atom count, try byte swapping
+      swap_int(header.icntrl,20);
+      if(header.icntrl[1]<0 || header.icntrl[1]>1e7) {
+        // still weird? swap back and keep fingers crossed
+        LOG_WARNING("LoadCHARMMTraj: byte swap detection failed, trying to continue");
+        swap_int(header.icntrl,20);
+        swap_flag=false;
+      } else {
+        LOG_VERBOSE("LoadCHARMMTraj: byte-swapping (auto-detected)");
+        swap_flag=true;
+      }
+    }
+  } else {
+    if(byte_swap) {
+      LOG_VERBOSE("LoadCHARMMTraj: byte-swapping (manually set)");
     }
   }
+
+  LOG_VERBOSE("LoadCHARMMTraj: found " << header.icntrl[1] << " atoms");
 
   if(header.icntrl[19]!=0) { // CHARMM format
     ucell_flag=(header.icntrl[10]!=0);
@@ -112,8 +129,12 @@ bool read_dcd_header(std::istream& istream, DCDHeader& header, bool& swap_flag,
   if(swap_flag) swap_int(&header.ntitle,1);
   if(gap_flag) istream.read(dummy,sizeof(dummy));
 
-  istream.read(header.title,sizeof(char)*header.ntitle);
-  header.title[header.ntitle]='\0';
+  std::vector<char> title(header.ntitle+1);
+
+  istream.read(&title[0],sizeof(char)*header.ntitle);
+  header.title=std::string(&title[0],header.ntitle);
+  LOG_VERBOSE("LoadCHARMMTraj: title string [" << header.title << "]")
+  
   if(gap_flag) istream.read(dummy,sizeof(dummy));
   istream.read(reinterpret_cast<char*>(&header.t_atom_count),sizeof(int));
   if(swap_flag) swap_int(&header.t_atom_count,1);
@@ -230,7 +251,9 @@ bool read_frame(std::istream& istream, const DCDHeader& header,
   
 mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom list is already sorted!
                                const String& trj_fn,
-                               unsigned int stride)
+                               unsigned int stride,
+                               bool detect_swap,
+                               bool byte_swap)
 {
   std::ifstream istream(trj_fn.c_str(), std::ios::binary);
   if(!istream) {
@@ -242,7 +265,7 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
 
   DCDHeader header; 
   bool swap_flag=false, ucell_flag=false, gap_flag=false;
-  read_dcd_header(istream, header, swap_flag, ucell_flag, gap_flag);
+  read_dcd_header(istream, header, swap_flag, ucell_flag, gap_flag, detect_swap, byte_swap);
   if(alist.size() != static_cast<size_t>(header.t_atom_count)) {
     LOG_ERROR("LoadCHARMMTraj: atom count missmatch: " << alist.size() 
                << " in coordinate file, " << header.t_atom_count 
@@ -285,9 +308,10 @@ mol::CoordGroupHandle load_dcd(const mol::AtomHandleList& alist, // this atom li
 class  DCDCoordSource : public mol::CoordSource {
 public:
   DCDCoordSource(const mol::AtomHandleList& atoms, const String& filename, 
-                 uint stride): 
+                 uint stride, bool detect_swap, bool byte_swap): 
     mol::CoordSource(atoms), filename_(filename), 
-    stream_(filename.c_str(), std::ios::binary), loaded_(false), stride_(stride)
+    stream_(filename.c_str(), std::ios::binary), loaded_(false), stride_(stride),
+    detect_swap_(detect_swap), byte_swap_(byte_swap)
   {
     frame_count_=0;
     this->SetMutable(false);
@@ -295,7 +319,7 @@ public:
   }
     
   
-  virtual uint GetFrameCount() 
+  virtual uint GetFrameCount() const
   { 
     if (!frame_count_)
       const_cast<DCDCoordSource*>(this)->FetchFrame(0);
@@ -323,6 +347,7 @@ private:
   uint                 frame_count_;
   uint                 curr_frame_;
   uint                 stride_;
+  bool                 detect_swap_, byte_swap_;
   size_t               frame_start_;
   mol::CoordFramePtr   frame_;
 };
@@ -331,7 +356,7 @@ private:
 void DCDCoordSource::FetchFrame(uint frame)
 {
   if (!loaded_) {
-    read_dcd_header(stream_, header_, swap_flag_, ucell_flag_, gap_flag_);
+    read_dcd_header(stream_, header_, swap_flag_, ucell_flag_, gap_flag_, detect_swap_,byte_swap_);
     frame_start_=stream_.tellg();
     loaded_=true;
     frame_count_=header_.num/stride_;
@@ -354,17 +379,20 @@ typedef boost::shared_ptr<DCDCoordSource> DCDCoordSourcePtr;
 
 mol::CoordGroupHandle LoadCHARMMTraj(const mol::EntityHandle& ent,
                                      const String& trj_fn,
-                                     unsigned int stride, bool lazy_load)
+                                     unsigned int stride,
+                                     bool lazy_load,
+                                     bool detect_swap,
+                                     bool byte_swap)
 {
   mol::AtomHandleList alist(ent.GetAtomList());
   std::sort(alist.begin(),alist.end(),less_index);
   if (lazy_load) {
-    LOG_INFO("Importing CHARMM trajectory with lazy_load=true");
-    DCDCoordSource* source=new DCDCoordSource(alist, trj_fn, stride);
-    return mol::CoordGroupHandle(DCDCoordSourcePtr(source));
+    LOG_VERBOSE("LoadCHARMMTraj: importing with lazy_load=true");
+    DCDCoordSourcePtr source(new DCDCoordSource(alist, trj_fn, stride, detect_swap, byte_swap));
+    return mol::CoordGroupHandle(source);
   }
-  LOG_INFO("Importing CHARMM trajectory with lazy_load=false");  
-  return load_dcd(alist, trj_fn, stride);
+  LOG_VERBOSE("LoadCHARMMTraj: importing with lazy_load=false");  
+  return load_dcd(alist, trj_fn, stride, detect_swap, byte_swap);
 }
 
 namespace {

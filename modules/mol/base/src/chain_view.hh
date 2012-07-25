@@ -125,12 +125,15 @@ public:
   ResidueView FindResidue(const ResNum& number) const;
     
   /// \brief Find view for given atom handle
-  AtomView FindAtom(const AtomHandle& atom) const;  
+  /// Deprecated: Use ViewForHandle instead
+  AtomView FindAtom(const AtomHandle& atom) const;
   
+  AtomView ViewForHandle(const AtomHandle& atom) const;
   AtomView FindAtom(const ResNum& num, const String& name) const;
   /// \brief Find residue by residue handle
-  ResidueView FindResidue(const ResidueHandle& handle) const;
+  ResidueView ViewForHandle(const ResidueHandle& handle) const;
   
+  ResidueView FindResidue(const ResidueHandle& handle) const;
   /// \brief Check whether the view includes the given residue.
   bool IsResidueIncluded(const ResidueHandle& handle) const;
   

@@ -50,7 +50,7 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
     if bin_name not in pool:
       _deps_for_lib(bin_name, pool)
   for bin in libexec_binaries:
-    bin_name=os.path.abspath(os.path.join(stage_dir, 'libexec', libexec_path,
+    bin_name=os.path.abspath(os.path.join(stage_dir, 'libexec/openstructure',
                                           bin))
     if not os.path.exists(bin_name):
       print 'WARNING:', bin_name, 'does not exist'
@@ -71,7 +71,7 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
 LIBEXEC_SCRIPTS=['ost_config']
 LIBEXEC_BINARIES=[]
 GUI_LIBEXEC_BINARIES=['gosty']
-BINARIES=['ldt', 'chemdict_tool', 'tmalign', 'tmscore']
+BINARIES=['lddt', 'chemdict_tool', 'tmalign', 'tmscore']
 GUI_BINARIES=[]
 GUI_COMPONENTS=['gfx', 'gui', 'info']
 COMPONENTS=['mol', 'geom', 'conop', 'seq_alg', 'seq',

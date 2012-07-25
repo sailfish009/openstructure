@@ -35,16 +35,22 @@ def _GetExecutable(naccess_exe):
 #
 # \param entity      EntityHandle or EntityView to calculate surface
 # \param selection   Calculate surface for subset of entity 
+# \param scratch_dir Directory for temporary files (NACCESS is sensitive to "." in directory names
+# \param max_number_of_atoms Max Number of atoms in the entity (i.e. is limited in the default NACCESS version to 50 000)
 # \return            array containing temporary directory, input filename for naccess and directory of the input file
 # \exception         RuntimeError if selection is not valid
-def _SetupFiles(entity, selection):
+def _SetupFiles(entity, selection, scratch_dir, max_number_of_atoms):
   # create temporary directory
-  tmp_dir_name=tempfile.mkdtemp()
+  tmp_dir_name=""
+  if scratch_dir!=None:
+    tmp_dir_name=tempfile.mkdtemp(dir=scratch_dir)
+  else:
+    tmp_dir_name=tempfile.mkdtemp()
 
   # select only heavy atoms if no_hydrogens is true
   entity_view=entity.Select(selection)
-  if len(entity_view.atoms) > 50000:
-    raise RuntimeError, "Too much atoms for NACCESS (> 50 000)"
+  if len(entity_view.atoms) > max_number_of_atoms:
+    raise RuntimeError, "Too much atoms for NACCESS (> %s)" % max_number_of_atoms
   if not entity_view.IsValid():
     raise RuntimeError, "Could not create view for selection (%s)"%(selection)
   
@@ -184,11 +190,14 @@ def _RunNACCESS(command, temp_dir):
 # \param asa_abs            Attaches per residue absolute SASA to specified FloatProp on residue level
 # \param asa_rel            Attaches per residue relative SASA to specified FloatProp on residue level
 # \param asa_atom           Attaches per atom SASA to specified FloatProp at atom level
+# \param scratch_dir        Directory for temporary files (NACCESS is sensitive to "." in directory names
+# \param max_number_of_atoms Max Number of atoms in the entity (i.e. is limited in the default NACCESS version to 50 000)
+
 # \return                   absolute SASA calculated using asa_atom 
 def CalculateSurfaceArea(entity,  radius=1.4,  
                          include_hydrogens=False, include_hetatm = False, 
                          include_water = False, selection="",
-                         naccess_exe=None, keep_files=False , asa_abs= "asaAbs", asa_rel="asaRel", asa_atom="asaAtom"):
+                         naccess_exe=None, keep_files=False , asa_abs= "asaAbs", asa_rel="asaRel", asa_atom="asaAtom", scratch_dir = None, max_number_of_atoms=50000):
   import re 
   
   # check if msms executable is specified
@@ -196,7 +205,7 @@ def CalculateSurfaceArea(entity,  radius=1.4,
   # parse selection
   
   # setup files for msms
-  (naccess_data_dir, naccess_data_file,naccess_data_base )=_SetupFiles(entity, selection)
+  (naccess_data_dir, naccess_data_file,naccess_data_base )=_SetupFiles(entity, selection, scratch_dir)
 
   # set command line
   command="%s %s -p %f " % \

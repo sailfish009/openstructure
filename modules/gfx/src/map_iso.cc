@@ -93,13 +93,13 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   Rebuild();
 }
 
-geom::AlignedCuboid MapIso::GetBoundingBox() const
+geom::AlignedCuboid MapIso::GetBoundingBox(bool use_tf) const
 {
   if(recalc_bb_) {
     bb_=va_.GetBoundingBox();
     recalc_bb_=false;
   }
-  return bb_;
+  return use_tf ? transform_.Apply(bb_) : bb_;
 }
 
 geom::Vec3 MapIso::GetCenter() const

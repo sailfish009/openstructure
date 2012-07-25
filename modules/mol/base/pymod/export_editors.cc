@@ -82,13 +82,13 @@ void set_pos2_t(XCSEditor& e, const AtomHandleList& alist, object pyobj)
   size_t acount = alist.size();
   
   if(!PyArray_Check(pyobj.ptr())) {
-    throw std::runtime_error("expected a numpy array");
+    throw Error("expected a numpy array");
     return;
   }
   PyArrayObject* na=reinterpret_cast<PyArrayObject*>(pyobj.ptr());
   
   if(PyArray_NDIM(na)!=2 || PyArray_DIM(na,0)!=int(acount) || PyArray_DIM(na,1)!=3) {
-    throw std::runtime_error("excpected a numpy array of shape (NAtoms, 3)");
+    throw Error("excpected a numpy array of shape (NAtoms, 3)");
     return;
   }
   
@@ -106,20 +106,20 @@ void set_pos2_t(XCSEditor& e, const AtomHandleList& alist, object pyobj)
         e.SetAtomTransformedPos(alist,reinterpret_cast<double*>(PyArray_DATA(na)));
       }
     } else {
-      throw std::runtime_error("expected a numpy array of type float or double");
+      throw Error("expected a numpy array of type float or double");
       return;
     }
   } else {
     // non-contiguous
 #if 0
-    throw std::runtime_error("expected contiguous numpy array");
+    throw Error("expected contiguous numpy array");
 #else
     if(PyArray_TYPE(na)==NPY_FLOAT) {
       set_pos2_nc_t<float,O>(e,alist,na);
     } else if(PyArray_TYPE(na)==NPY_DOUBLE) {
       set_pos2_nc_t<double,O>(e,alist,na);
     } else {
-      throw std::runtime_error("expected a numpy array of type float or double");
+      throw Error("expected a numpy array of type float or double");
       return;
     }
 #endif
@@ -172,7 +172,7 @@ void set_pos(XCSEditor& e, object o1, object o2, bool trans)
   }
 
 #else
-  throw std::runtime_error("SetAtom*Pos(...,ndarray) not available, because numpy support not compiled in");
+  throw Error("SetAtom*Pos(...,ndarray) not available, because numpy support not compiled in");
 #endif
 }
 

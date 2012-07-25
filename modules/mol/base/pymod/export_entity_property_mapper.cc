@@ -40,7 +40,7 @@ EntityPropertyMapper create_epm(const String& prop_name, char level)
     case 'u':
       return EntityPropertyMapper(prop_name, Prop::UNSPECIFIED);
     default:
-      throw std::runtime_error(String("unknown property level '")+level+"'");
+      throw Error(String("unknown property level '")+level+"'");
   }
 }
 

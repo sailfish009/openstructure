@@ -65,7 +65,7 @@ class ImmutableInfoHandler:
     for s in gradient.stops():
       rel=s[0]
       color=s[1]
-      gfxgradient.SetColorAt(s[0], gfx.Color(s[1].redF(), s[1].greenF(), s[1].blueF()));
+      gfxgradient.SetColorAt(s[0], gfx.RGB(s[1].redF(), s[1].greenF(), s[1].blueF()));
     return gfxgradient;
   
   def GetQGradients(self):

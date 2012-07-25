@@ -39,13 +39,12 @@ namespace ost { namespace mol {
     */
     Real Eval2AngleDist(Real phi, Real phi0, Real psi, Real psi0, Real delta)
     {
-      Real d1,d2,d;
-      d1=abs(phi-phi0);
-      d2=abs(psi-psi0);
-      if (d1>M_PI) d1=abs(d1-2.*M_PI);
-      if (d2>M_PI) d1=abs(d2-2.*M_PI);
-      d=(pow(d1,2.)+pow(d2,2.))/pow(delta,2.);
-      return 1./(1+d);
+      Real d1=std::abs(phi-phi0);
+      Real d2=std::abs(psi-psi0);
+      if (d1>M_PI) d1=std::abs(d1-2.*M_PI);
+      if (d2>M_PI) d1=std::abs(d2-2.*M_PI);
+      Real d=(d1*d1+d2*d2)/(delta*delta);
+      return 1.0/(1.0+d);
     }
   }
 
@@ -138,7 +137,7 @@ namespace ost { namespace mol {
       val=geom::Length2(av_ref-av_sele);
       rmsd+=val;
     }
-    return pow(rmsd/indices_sele.size(),0.5);
+    return sqrt(rmsd/indices_sele.size());
   }
   
   Real CoordFrame::GetRMSD(const EntityView& reference_view,const EntityView& sele_view) const
@@ -146,7 +145,7 @@ namespace ost { namespace mol {
     int count_ref=reference_view.GetAtomCount();
     int count_sele=sele_view.GetAtomCount();
     if (count_ref!=count_sele){
-      throw std::runtime_error("atom counts of the two views are not equal");
+      throw Error("atom counts of the two views are not equal");
     }
     std::vector<unsigned long> indices_sele;
     std::vector<geom::Vec3> ref_pos;
@@ -286,10 +285,10 @@ namespace ost { namespace mol {
     dist.reserve(n_atoms-2);
     dist2.reserve(n_atoms-2);
     if (n_atoms!=indices_n.size()||n_atoms!=indices_c.size()||n_atoms!=indices_o.size()){
-      throw std::runtime_error("not same numbers of CA, C, O and N atoms in the selection");
+      throw Error("not same numbers of CA, C, O and N atoms in the selection");
     }
     if (n_atoms<=5){
-      throw std::runtime_error("At least five residues are needed to calulate an alpha helix similarity");
+      throw Error("At least five residues are needed to calulate an alpha helix similarity");
     }
     c=(*this)[indices_c[0]];
     n_next=(*this)[indices_n[1]];
@@ -303,8 +302,10 @@ namespace ost { namespace mol {
       psi=geom::DihedralAngle(n,ca,c,n_next);
       score.push_back(Eval2AngleDist(phi,phi_0,psi,psi_0,delta));
     }
-    score2[0]=pow(score[0]*score[1],3./2.);
-    score2[n_atoms-3]=pow(score[n_atoms-3]*score[n_atoms-4],3./2.);
+    score2[0]=sqrt(score[0]*score[1]*score[0]*score[1]*score[0]*score[1]);
+    score2[n_atoms-3]=sqrt(score[n_atoms-3]*score[n_atoms-4]*
+                           score[n_atoms-3]*score[n_atoms-4]*
+                           score[n_atoms-3]*score[n_atoms-4]);
     for (unsigned long i=1; i!=n_atoms-3; ++i) {
       score2[i]=score[i-1]*score[i]*score[i+1];
     }
@@ -357,7 +358,7 @@ namespace ost { namespace mol {
     indices_ca.reserve(residues.size());
     //for (ResidueViewList::const_iterator res=residues.begin()+1,
     //     e=residues.end(); res!=e-1; ++res){
-    //  if (!InSequence((*res).GetHandle(),(*(res+1)).GetHandle())) throw std::runtime_error("Residues are not in a continuous sequence");
+    //  if (!InSequence((*res).GetHandle(),(*(res+1)).GetHandle())) throw Error("Residues are not in a continuous sequence");
     //}
     for (ResidueViewList::const_iterator res=residues.begin(),
          e=residues.end(); res!=e; ++res) {
@@ -377,7 +378,7 @@ namespace ost { namespace mol {
     indices_o.reserve(residues.size());
     for (ResidueViewList::const_iterator res=residues.begin()+1,
          e=residues.end(); res!=e-1; ++res){
-      if (!InSequence((*res).GetHandle(),(*(res+1)).GetHandle())) throw std::runtime_error("Residues are not in a continuous sequence");
+      if (!InSequence((*res).GetHandle(),(*(res+1)).GetHandle())) throw Error("Residues are not in a continuous sequence");
     }
     for (ResidueViewList::const_iterator res=residues.begin(),
          e=residues.end(); res!=e; ++res) {

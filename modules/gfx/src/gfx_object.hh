@@ -101,15 +101,27 @@ public:
 
   // new gfx obj virtual interface starts here
 
-  /// \brief returns the left-bottom-front and the right-top-back corner
-  /// that encompasses all graphical elements in this object
-  /// 
-  /// the bounding box is in local coordinates. to obtain the coordinates in
-  /// the scene, multiply the bounding box by the object's transformation
-  ///  matrix.
-  virtual geom::AlignedCuboid GetBoundingBox() const;
+  /*!
+    \brief returns the bounding box of this object
 
-  /// \brief adjust the given limits according to the represented data
+    The bounding box, i.e. the left-bottom-front and the right-top-back corner
+    of the object, is obtained with this method. The single boolean parameter
+    denotes whether to return local coordinates or global scene coordinates; 
+    global scene coordinates are local coordinates with the object's transformation
+    (if present) applied. The default is false, i.e. return local coordinates.
+  */
+  virtual geom::AlignedCuboid GetBoundingBox(bool use_tf=false) const;
+
+  /*!
+    \brief adjust minimum and maximum extent based on graphical object
+
+    this routine will adjust the provided minimum and maximum points
+    based on the vertices of the underlying graphical representation,
+    combining the given Transform with the object transform.
+
+    If derived classes do not implement this method then the limits
+    will be adjusted based on the Cuboid returned by GetBoundingBox(true)
+  */
   virtual void ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
                              const mol::Transform& tf) const;
 

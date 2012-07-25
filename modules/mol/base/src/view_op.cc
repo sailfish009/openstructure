@@ -64,14 +64,14 @@ mol::EntityView Union(const mol::EntityView& ev1, const mol::EntityView& ev2)
   mol::ChainViewList::const_iterator c_it=ev2.GetChainList().begin();
   for ( ; c_it!=ev2.GetChainList().end(); ++c_it) {
     mol::ChainView cv=*c_it;
-    mol::ChainView cv2=merge.FindChain(cv.GetHandle());
+    mol::ChainView cv2=merge.ViewForHandle(cv.GetHandle());
     if (!cv2) {
       cv2=merge.AddChain(cv, mol::ViewAddFlag::INCLUDE_ALL);
     } else {
       mol::ResidueViewList::const_iterator r_it=cv.GetResidueList().begin();
       for (; r_it!=cv.GetResidueList().end(); ++r_it) {
         mol::ResidueView rv=*r_it;
-        mol::ResidueView rv2=cv2.FindResidue(rv.GetHandle());
+        mol::ResidueView rv2=cv2.ViewForHandle(rv.GetHandle());
         if (!rv2) {
           rv2=cv2.AddResidue(rv, mol::ViewAddFlag::INCLUDE_ALL);
         } else {
@@ -115,7 +115,7 @@ mol::EntityView Difference(const mol::EntityView& ev1,
   mol::ChainViewList::const_iterator c_it=ev1.GetChainList().begin();
   for ( ; c_it!=ev1.GetChainList().end(); ++c_it) {
     mol::ChainView cv=*c_it;
-    mol::ChainView cv2=ev2.FindChain(cv.GetHandle());
+    mol::ChainView cv2=ev2.ViewForHandle(cv.GetHandle());
     if (!cv2) {
       diff.AddChain(cv,mol::ViewAddFlag::INCLUDE_ALL);
     } else {
@@ -123,7 +123,7 @@ mol::EntityView Difference(const mol::EntityView& ev1,
       mol::ResidueViewList::const_iterator r_it=cv.GetResidueList().begin();
       for (; r_it!=cv.GetResidueList().end(); ++r_it) {
         mol::ResidueView rv=*r_it;
-        mol::ResidueView rv2=cv2.FindResidue(rv.GetHandle());
+        mol::ResidueView rv2=cv2.ViewForHandle(rv.GetHandle());
         if (!rv2) {
           if(!chain_added){
             diff.AddChain(cv);
@@ -134,7 +134,7 @@ mol::EntityView Difference(const mol::EntityView& ev1,
           bool residue_added = false;
           mol::AtomViewList::const_iterator a_it=rv.GetAtomList().begin();
           for (; a_it!=rv.GetAtomList().end(); ++a_it) {
-            if (!rv2.FindAtom((*a_it).GetHandle())) {
+            if (!rv2.ViewForHandle((*a_it).GetHandle())) {
               if(!residue_added){
                 diff.AddResidue(rv);
                 residue_added = true;
@@ -182,7 +182,7 @@ mol::EntityView Intersection(const mol::EntityView& ev1,
   BondHandleList bonds_to_add;
   for (AtomViewIter a=ev1.AtomsBegin(),e=ev1.AtomsEnd(); a!=e; ++a) {
     AtomView av=*a;
-    AtomView av2=ev2.FindAtom(av.GetHandle());
+    AtomView av2=ev2.ViewForHandle(av.GetHandle());
     if (av2.IsValid()) {
       intersection.AddAtom(av.GetHandle());
       bl=av.GetBondList();

@@ -1,0 +1,52 @@
+
+Changes in Release 1.2.1
+--------------------------------------------------------------------------------
+
+  * Use RPATH for linux bundles. No longer requires LD_LIBRARY_PATH to be set for
+    chemdict_tool and lddt [BZDNG-385]
+  * "install command line tools" also symlinks lddt, and chemdict_tool [BZDNG-386]
+  * Fixed broken the_hammer.py example [BZDNG-387]
+  * MacOS X: Make sure to use python2.6, not python as pyexec [BZDNG-388]
+  * Fix example directory path for MacOS X bundle [BZDNG-389]
+  * PDBWriter: Insert newline after END [BZDNG-391]
+  * Added missing documentation for a few AlignmentHandle methods
+  * Workaround for naccess which was failing when directory contains dots.
+  * Fixed superposition dialog for unnamed chains
+  * Fixed byte-swapping issue for DCD trajectories
+  * Fixed FFT panel update after switching data in main viewer
+  * Added missing pdbx_struct_assembly.id export
+  * lDDT: Updated default angle and bond tolerance parameters from 8 stddev to 12 
+    stddev.
+
+Changes in Release 1.2 (since 1.1)
+--------------------------------------------------------------------------------
+
+ * added mmCIF parser to enable loading of mmCIF files. The following categories
+   are currently understood:
+   atom_site, entity, entity_poly, citation, citation_author, exptl, refine,
+   pdbx_struct_assembly, pdbx_struct_assembly_gen, pdbx_struct_oper_list,
+   struct, struct_conf, struct_sheet_range, pdbx_database_PDB_obs_spr,
+   struct_ref, struct_ref_seq, struct_ref_seq_dif
+
+ * trajectory analysis support
+
+ * better intergration with numpy
+
+ * added Smith-Waterman local align and Needleman-Wunsch global align algorithms
+
+ * static linking of C++ executables
+
+ * support for building OST library with no gfx, gui, info libraries. This leads
+   to a compact application bundle that can easily be deployed
+
+ * work around compiler bugs in gcc-4.1 enabling compilation with CentOS 5.5's
+   default compiler and libraries
+
+ * introducing the new table class, supporting all kinds of analyses on tabular
+   data, including plotting and statistical analyses.
+
+ * added stereochemical plausibility checks and support for multiple references
+   to lDDT
+
+ * new superposition dialog in DNG
+

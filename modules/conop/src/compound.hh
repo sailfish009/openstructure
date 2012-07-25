@@ -29,7 +29,7 @@
 
 namespace ost { namespace conop {
 
-struct Date {
+struct DLLEXPORT_OST_CONOP Date {
   Date(int y, int m, int d):
     year(y), month(m), day(d)
   { }
@@ -52,21 +52,23 @@ struct Date {
   
   static Date FromString(const StringRef& str)
   {
-    assert(str[4]=='-');
-    assert(str[7]=='-');
-    std::pair<bool, int> year=str.substr(0,4).to_int();
-    std::pair<bool, int> month=str.substr(5,2).to_int();
-    std::pair<bool, int> day=str.substr(8, 2).to_int();
+    std::vector<StringRef> parts=str.split('-');
+    assert(parts.size()==3);
+    std::pair<bool, int> year=parts[0].to_int();
+    std::pair<bool, int> month=parts[1].to_int();
+    std::pair<bool, int> day=parts[2].to_int();
     assert(year.first); assert(month.first); assert(day.first);
     return Date(year.second, month.second, day.second);
   }
   
+  String ToString() const;
+
   int year;
   int month;
   int day;  
 };
 
-struct AtomSpec {
+struct DLLEXPORT_OST_CONOP AtomSpec {
   AtomSpec()
     : ordinal(0), is_leaving(false) {
   }
@@ -86,7 +88,7 @@ struct AtomSpec {
   }
 };
 
-struct BondSpec {
+struct DLLEXPORT_OST_CONOP BondSpec {
   BondSpec()
     : atom_one(0), atom_two(0), order(1) {
 
@@ -201,9 +203,13 @@ public:
   
   int GetAtomSpecIndex(const String& name) const;
   
-  const String& GetFormula() { return formula_; }
+  const String& GetName() { return name_; }
+  
+  void SetName(const String& name) { name_=name; }
   
   void SetFormula(const String& formula) { formula_=formula; }
+
+  const String& GetFormula() { return formula_; }
   
   const BondSpecList& GetBondSpecs() const {
     return bond_specs_;
@@ -231,6 +237,7 @@ private:
   char                         olc_;
   String                       tlc_;
   String                       formula_;
+  String                       name_;
   AtomSpecList                 atom_specs_;
   BondSpecList                 bond_specs_;
   mol::ChemClass               chem_class_;

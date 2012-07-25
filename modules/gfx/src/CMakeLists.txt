@@ -84,6 +84,7 @@ connect_renderer_base.hh
 mapped_property.hh
 entity_renderer_fw.hh
 tabulated_trig.hh
+fast_spheres.hh
 )
 
 
@@ -138,6 +139,7 @@ impl/trace_renderer_base.cc
 impl/mapped_property.cc
 impl/tabulated_trig.cc
 impl/trace_renderer.cc
+impl/fast_spheres.cc
 render_options/render_options.cc
 render_options/line_render_options.cc
 render_options/custom_render_options.cc
@@ -243,16 +245,12 @@ if (USE_SHADER)
     shader/aaline_fs.glsl
     shader/amboccl_fs.glsl
     shader/basic_fs.glsl
-    shader/basic_hf_vs.glsl
-    shader/basic_lf_fs.glsl
-    shader/basic_lf_vs.glsl
     shader/basic_vs.glsl
     shader/beacon_fs.glsl
     shader/convolute1_fs.glsl
     shader/dumpnorm_fs.glsl
     shader/dumpnorm_vs.glsl
     shader/fast_sphere_fs.glsl
-    shader/fast_sphere_vs.glsl
     shader/fraglight_fs.glsl
     shader/fraglight_vs.glsl
     shader/iso_fs.glsl
@@ -264,11 +262,12 @@ if (USE_SHADER)
     shader/scenefx_vs.glsl
     shader/selfx_fs.glsl
     shader/selfx_vs.glsl
-    shader/toon2_fs.glsl
-    shader/toon_fs.glsl
-    shader/toon_vs.glsl
     shader/screenblur4_fs.glsl
     shader/test_tex_fs.glsl
+    shader/material_phong.glsl
+    shader/material_hemi.glsl
+    shader/material_toon1.glsl
+    shader/material_toon2.glsl
   )
   copy_if_different("./" "${SHARED_DATA_PATH}/shader" "${SHADER_FILES}" 
                     "SHADER_TARGETS" ost_gfx)  

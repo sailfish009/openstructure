@@ -23,10 +23,29 @@ namespace ost { namespace conop {
 
 int Compound::GetAtomSpecIndex(const String& name) const {
   AtomSpecList::const_iterator i=atom_specs_.begin();
+  // BZDNG-261: first search all primary atom names before falling back to
+  // alternative names. There are some files where alternative atom names are 
+  // used as primary names for other atoms
   for (; i!=atom_specs_.end(); ++i) {
-    if ((*i).name==name || (*i).alt_name==name)
+    if ((*i).name==name)
+      return std::distance(atom_specs_.begin(), i);
+  } 
+  for (; i!=atom_specs_.end(); ++i) {
+    if ((*i).alt_name==name)
       return std::distance(atom_specs_.begin(), i);
   }
-  return -1;
+ return -1;
+}
+String Date::ToString() const
+{
+  std::stringstream ss;
+  ss << year << "-";
+  ss.fill('0');
+  ss.width(2);
+  ss << month << "-";
+  ss.fill('0');
+  ss.width(2);
+  ss << day;
+  return ss.str();
 }
 }}

@@ -28,7 +28,6 @@
   setter and getter methods for String, Real, int and bool mapping
 */
 
-#include <exception>
 #include <sstream>
 #include <map>
 #include <vector>
@@ -36,19 +35,15 @@
 
 #include <ost/module_config.hh>
 #include <ost/invalid_handle.hh>
+#include <ost/message.hh>
 
 namespace ost {
 
-struct  TEMPLATE_EXPORT GenericPropError: public std::exception
+struct  DLLEXPORT GenericPropError: public Error
 {
   GenericPropError(const String& m):
-    m_(m)
+    Error(m)
   {}
-  virtual ~GenericPropError() throw() {}
-  virtual const char* what() const throw() {
-    return m_.c_str();
-  }
-  String m_;
 };
   
 typedef boost::variant<String, Real, int, bool> GenericPropValue;

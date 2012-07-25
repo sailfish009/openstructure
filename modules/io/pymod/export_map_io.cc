@@ -17,6 +17,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
+#include  <ost/io/img/map_io_df3_handler.hh>
 #include  <ost/io/img/map_io_dx_handler.hh>
 #include  <ost/io/img/map_io_spi_handler.hh>
 #include  <ost/io/img/map_io_mrc_handler.hh>
@@ -92,6 +93,11 @@ void export_map_io()
     .def("GetMaximum", &ImageFormatBase::GetMaximum)
     .def("GetMinimum", &ImageFormatBase::GetMinimum)
   ;
+  
+  class_<DF3, bases<ImageFormatBase> >("DF3", init<bool>(arg("normalize_on_save") = false))
+    .def("SetNormalizeOnSave", &DF3::SetNormalizeOnSave)
+    .def("GetNormalizeOnSave", &DF3::GetNormalizeOnSave)
+  ;
 
   class_<DX, bases<ImageFormatBase> >("DX", init<bool>(arg("normalize_on_save") = false))
     .def("SetNormalizeOnSave", &DX::SetNormalizeOnSave)
@@ -107,13 +113,17 @@ void export_map_io()
   ;
 
   class_<MRC, bases<ImageFormatBase> >("MRC", init<bool,Subformat,Endianess>
-           ((arg("normalize_on_save") = false,arg("subformat")=MRC_NEW_FORMAT,arg("endianess_on_save")=OST_LOCAL_ENDIAN)))
+           ((arg("normalize_on_save") = false,arg("subformat")=MRC_AUTO_FORMAT,arg("endianess_on_save")=OST_LOCAL_ENDIAN)))
     .def("SetNormalizeOnSave", &MRC::SetNormalizeOnSave)
     .def("GetNormalizeOnSave", &MRC::GetNormalizeOnSave)
     .def("SetSubformat", &MRC::SetSubformat)
     .def("GetSubformat", &MRC::GetSubformat)
     .def("SetEndianessOnSave", &MRC::SetEndianessOnSave)
     .def("GetEndianessOnSave", &MRC::GetEndianessOnSave)
+  ;
+
+  class_<CCP4, bases<MRC> >("CCP4", init<bool,Endianess>
+           ((arg("normalize_on_save") = false,arg("endianess_on_save")=OST_LOCAL_ENDIAN)))
   ;
 
   class_<DM3, bases<ImageFormatBase> >("DM3", init<>())

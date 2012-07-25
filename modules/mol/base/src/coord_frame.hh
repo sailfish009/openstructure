@@ -216,31 +216,31 @@ public:
     This function returns a vector containing the atom indices of the atoms in an EntityView;
     it is used to accelerate the extraction of information from a trajectory
   */
-  void GetIndices(const EntityView& sele, std::vector<unsigned long>& indices);
+  DLLEXPORT_OST_MOL void GetIndices(const EntityView& sele, std::vector<unsigned long>& indices);
 
   /*!
     This function returns a vector containing the atom masses of the atoms in an EntityView;
     it is used together with GetIndices to accelerate the extraction of RMSD from a trajectory
   */
-  void GetMasses(const EntityView& sele, std::vector<Real>& masses);
+  DLLEXPORT_OST_MOL void GetMasses(const EntityView& sele, std::vector<Real>& masses);
 
   //! conveniece for GetIndices and GetMasses in one call
-  void GetIndicesAndMasses(const EntityView& sele,
-                           std::vector<unsigned long>& indices,
-                           std::vector<Real>& masses);
+  DLLEXPORT_OST_MOL void GetIndicesAndMasses(const EntityView& sele,
+                                             std::vector<unsigned long>& indices,
+                                             std::vector<Real>& masses);
 
   //! Writes the positions of all atoms in the EntityView into the provided vec3 list
-  void GetPositions(const EntityView& sele, std::vector<geom::Vec3>& ref_pos);
-
+  DLLEXPORT_OST_MOL void GetPositions(const EntityView& sele, std::vector<geom::Vec3>& ref_pos);
+  
   //! Writes the indices of all atoms in the EntityView into the provided list
-  void GetCaIndices(const EntityView& segment, std::vector<unsigned long>& indices_ca);
-
+  DLLEXPORT_OST_MOL void GetCaIndices(const EntityView& segment, std::vector<unsigned long>& indices_ca);
+  
   //! Writes the backbone indices of all residues in the EntityView into the provided list
-  void GetCaCONIndices(const EntityView& segment, 
-                       std::vector<unsigned long>& indices_ca, 
-                       std::vector<unsigned long>& indices_c,
-                       std::vector<unsigned long>& indices_o, 
-                       std::vector<unsigned long>& indices_n);
+  DLLEXPORT_OST_MOL void GetCaCONIndices(const EntityView& segment, 
+                                         std::vector<unsigned long>& indices_ca, 
+                                         std::vector<unsigned long>& indices_c,
+                                         std::vector<unsigned long>& indices_o, 
+                                         std::vector<unsigned long>& indices_n);
 
 
 }}

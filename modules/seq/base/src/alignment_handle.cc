@@ -66,9 +66,13 @@ int AlignmentHandle::GetResidueIndex(int seq_index, int pos) const
 void AlignmentHandle::AddSequence(const ConstSequenceHandle& sequence)
 {
   this->CheckValidity();
-  if (!sequence.IsValid() || (impl_->GetCount()>0 &&
-      impl_->GetSequence(0)->GetLength()!=sequence.GetLength())) {
+  if (!sequence.IsValid()) {
     throw InvalidSequence();
+  }
+  if (impl_->GetCount()>0 &&
+      impl_->GetSequence(0)->GetLength()!=sequence.GetLength()) {
+    throw Error("sequence doesn't have the same length as the "
+                             "alignment");
   }
   return impl_->AddSequence(sequence.Impl());
 }
@@ -137,7 +141,7 @@ AlignmentHandle AlignmentFromSequenceList(const SequenceList& seq_list)
   if (seq_list.IsValid() && seq_list.SequencesHaveEqualLength()) {
     return AlignmentHandle(seq_list.Impl());
   }
-  throw InvalidAlignment();
+  throw Error("sequences have different lengths");
 }
 
 ConstSequenceList AlignmentHandle::GetSequences() const
@@ -285,7 +289,7 @@ mol::EntityViewPair AlignmentHandle::GetMatchingBackboneViews(int idx0, int idx1
   const impl::SequenceImpl& s1=*impl_->GetSequence(idx0).get();
   const impl::SequenceImpl& s2=*impl_->GetSequence(idx1).get();
   if (!s1.HasAttachedView() || !s2.HasAttachedView()) {
-    throw std::runtime_error("both sequences must have a view attached");
+    throw Error("both sequences must have a view attached");
   }
   mol::EntityView v1=s1.GetAttachedView().CreateEmptyView();
   mol::EntityView v2=s2.GetAttachedView().CreateEmptyView();

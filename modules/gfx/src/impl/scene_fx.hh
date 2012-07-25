@@ -65,6 +65,7 @@ public:
   float amb_occl_factor;
   uint amb_occl_mode;
   uint amb_occl_quality;
+  float amb_occl_size;
   bool use_beacon;
   Beacon beacon;
 

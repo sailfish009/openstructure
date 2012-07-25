@@ -22,6 +22,7 @@
 #include <ost/info/info.hh>
 #include <ost/info/geom_info_conversion.hh>
 #endif
+#include <ost/log.hh>
 #include "transform.hh"
 
 namespace ost { 
@@ -40,20 +41,11 @@ Transform::Transform():
   update_tm();
 }
     
-Mat4 Transform::GetMatrix() const
-{
-  return tm_;
-}
-
 void Transform::SetMatrix(const Mat4& m)
 {
   tm_=m;
   ttm_ = Transpose(tm_);
-}
-
-Mat4 Transform::GetTransposedMatrix() const
-{
-  return ttm_;
+  update_components();
 }
 
 void Transform::SetTrans(const Vec3& t) 
@@ -130,7 +122,7 @@ void Transform::ApplyZAxisRotation(float delta)
 
 void Transform::ApplyAxisRotation(float delta, const Vec3& axis)
 {
-  rot_=rot_*AxisRotation(rot_*axis, delta*P_180);
+  rot_=rot_*AxisRotation(axis, delta*P_180);
   update_tm();
 }
 
@@ -164,6 +156,23 @@ Vec4 Transform::Apply(const Vec4& v) const
   return nrvo;
 }
 
+geom::AlignedCuboid Transform::Apply(const geom::AlignedCuboid& c) const
+{
+  geom::Vec3 cmin=c.GetMin();
+  geom::Vec3 cmax=c.GetMax();
+  Vec3 t1 = Apply(Vec3(cmin[0],cmin[1],cmin[2]));
+  Vec3 t2 = Apply(Vec3(cmin[0],cmax[1],cmin[2]));
+  Vec3 t3 = Apply(Vec3(cmax[0],cmax[1],cmin[2]));
+  Vec3 t4 = Apply(Vec3(cmax[0],cmin[1],cmin[2]));
+  Vec3 t5 = Apply(Vec3(cmin[0],cmin[1],cmax[2]));
+  Vec3 t6 = Apply(Vec3(cmin[0],cmax[1],cmax[2]));
+  Vec3 t7 = Apply(Vec3(cmax[0],cmax[1],cmax[2]));
+  Vec3 t8 = Apply(Vec3(cmax[0],cmin[1],cmax[2]));
+  geom::Vec3 minc = Min(t1,Min(t2,Min(t3,Min(t4,Min(t5,Min(t6,Min(t7,t8)))))));
+  geom::Vec3 maxc = Max(t1,Max(t2,Max(t3,Max(t4,Max(t5,Max(t6,Max(t7,t8)))))));
+  return geom::AlignedCuboid(minc,maxc);
+}
+
 /*
   The order of the transformations given herein is conceptually
   "backward" as they are applied to a vertex, because the left-right
@@ -194,6 +203,22 @@ void Transform::update_tm()
                0.0,0.0,1.0,-cen_[2],
                0.0,0.0,0.0,1.0);
   ttm_ = Transpose(tm_);
+  // TODO: calculate from rot, cen and trans
+  try {
+    itm_ = Invert(tm_);
+  } catch (GeomException& e) {
+    LOG_WARNING("caught GeomException in Transform::update_tm: " << e.what());
+    itm_=geom::Mat4();
+  }
+}
+
+void Transform::update_components()
+{
+  rot_ = tm_.ExtractRotation();
+  cen_ = tm_.ExtractTranslation();
+  trans_[0] = tm_(3,0);
+  trans_[1] = tm_(3,1);
+  trans_[2] = tm_(3,2);
 }
 
 #if(OST_INFO_ENABLED)

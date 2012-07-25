@@ -28,7 +28,13 @@
 
 namespace geom {
 
+
+#if OST_DOUBLE_PRECISION
+typedef Eigen::Matrix3d EMat3;
+#else
 typedef Eigen::Matrix3f EMat3;
+#endif
+
 
 Mat3 Vec3List::GetInertia() const
 {
@@ -101,16 +107,17 @@ Line3 Vec3List::FitCylinder(const Vec3& initial_direction, const Vec3& center) c
   radius/=Real(n_res);
   res_sum=0.0;
   for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
-    res_sum+=pow(Distance(axis,(*i))-radius,2.);
+    Real r=Distance(axis,(*i))-radius;
+    res_sum+=r*r;
   }
   unsigned long k=0;
   err=2.0*prec;
-  while (err>prec and k<n_step) {
+  while (err>prec && k<n_step) {
     res_sum_old=res_sum;
     axis_old=axis;
     radius=0.0;
     if (k>50) {
-      delta=delta_0*pow((50./k),2.0);
+      delta=delta_0*50.0*50.0/(k*k);
     }
     for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
       radius+=Distance(axis,(*i));
@@ -127,7 +134,8 @@ Line3 Vec3List::FitCylinder(const Vec3& initial_direction, const Vec3& center) c
       }
       radius/=Real(n_res);
       for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
-        res_sum+=pow(Distance(axis,(*i))-radius,2.);
+        Real r=Distance(axis,(*i))-radius;
+        res_sum+=r*r;
       }
       gradient[j]=(res_sum-res_sum_old)/delta;
     }
@@ -143,7 +151,8 @@ Line3 Vec3List::FitCylinder(const Vec3& initial_direction, const Vec3& center) c
     radius/=Real(n_res);
     res_sum=0.0;
     for (Vec3List::const_iterator i=this->begin(),e=this->end(); i!=e; ++i) {
-      res_sum+=pow(Distance(axis,(*i))-radius,2.);
+      Real r=Distance(axis,(*i))-radius;
+      res_sum+=r*r;
     }
     err=fabs((res_sum-res_sum_old)/float(n_res));
     k++;

@@ -66,6 +66,30 @@ uint CoordGroupHandle::GetFrameCount() const
   return source_->GetFrameCount();
 }
 
+float CoordGroupHandle::GetDelta() const
+{
+  this->CheckValidity();  
+  return source_->GetFrameDelta();
+}
+
+void CoordGroupHandle::SetDelta(float d)
+{
+  this->CheckValidity();  
+  source_->SetFrameDelta(d);
+}
+
+float CoordGroupHandle::GetStartTime() const
+{
+  this->CheckValidity();  
+  return source_->GetStartTime();
+}
+
+void CoordGroupHandle::SetStartTime(float t)
+{
+  this->CheckValidity();  
+  source_->SetStartTime(t);
+}
+
 void CoordGroupHandle::SetFramePositions(uint frame, 
                                          const std::vector<geom::Vec3>& clist)
 {
@@ -230,6 +254,15 @@ CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected, int first,
   }
   return filtered_cg;
 }
- 
+
+void CoordGroupHandle::ApplyTransform(const mol::Transform& tf)
+{
+  this->CheckValidity();
+  if (source_->IsMutable()) {
+    source_->ApplyTransform(tf);
+  } else {
+    throw IntegrityError("Cannot apply transform, CoordGroup is immutable");
+  }  
+} 
   
 }} // ns

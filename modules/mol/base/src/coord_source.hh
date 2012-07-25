@@ -31,6 +31,7 @@
 namespace ost { namespace mol {
 
 class CoordSource;
+class Transform;
 
 typedef boost::shared_ptr<CoordSource> CoordSourcePtr;
 
@@ -43,14 +44,22 @@ class DLLEXPORT_OST_MOL CoordSource {
 public:
   CoordSource(const AtomHandleList& atoms);
   
-  virtual ~CoordSource();
+  virtual ~CoordSource() {}
   
-  CoordSourcePtr Extract(int start=0, int stop=-1, int step=1);
-  
-  virtual uint GetFrameCount()=0;
-  
+  virtual uint GetFrameCount() const =0;
+
   virtual CoordFramePtr GetFrame(uint frame_id) const = 0;
  
+  CoordSourcePtr Extract(int start=0, int stop=-1, int step=1);
+  
+  // time in ps between frames
+  float GetFrameDelta() const {return delta_;}
+  void SetFrameDelta(float d) {delta_=d;}
+
+  // start time in ps
+  float GetStartTime() const {return start_time_;}
+  void SetStartTime(float t) {start_time_=t;}
+  
   int GetAtomCount() const;
   
   EntityHandle GetEntity() const;
@@ -72,6 +81,9 @@ public:
   virtual void AddFrame(const std::vector<geom::Vec3>& coords) = 0;
   virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& cell_size,const geom::Vec3& cell_angles) = 0;
   virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords) = 0;
+
+  void ApplyTransform(const Transform& tf);
+
 protected:
   void SetMutable(bool flag);
 private:
@@ -79,6 +91,7 @@ private:
   EntityHandle   entity_;
   bool           mutable_;
   std::map<long,uint> atom_dict_;
+  float delta_,start_time_;
 };
 
 }}

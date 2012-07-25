@@ -50,7 +50,7 @@ class DLLEXPORT_OST_IO MapIODm3Handler: public MapIOHandler
     static bool MatchType(const ImageFormatBase& type);
     static bool MatchSuffix(const String& loc);
     static bool ProvidesImport() { return true; }
-    static bool ProvidesExport() { return true; }
+    static bool ProvidesExport() { return false; }
     static String GetFormatName() { return String("Dm3"); }
     static String GetFormatDescription() {return String("Format used by Gatan Inc.'s  Digital Micrograph software");}
 

@@ -82,20 +82,20 @@ BOOST_AUTO_TEST_CASE(test_difference)
   BOOST_CHECK(diff_view.FindChain("B"));
 
   // check residues
-  BOOST_CHECK(!diff_view.FindResidue(ent.FindResidue("A", mol::ResNum(1))));
-  BOOST_CHECK(diff_view.FindResidue(ent.FindResidue("A", mol::ResNum(2))));
-  BOOST_CHECK(diff_view.FindResidue(ent.FindResidue("B", mol::ResNum(1))));
-  BOOST_CHECK(diff_view.FindResidue(ent.FindResidue("B", mol::ResNum(2))));
+  BOOST_CHECK(!diff_view.ViewForHandle(ent.FindResidue("A", mol::ResNum(1))));
+  BOOST_CHECK(diff_view.ViewForHandle(ent.FindResidue("A", mol::ResNum(2))));
+  BOOST_CHECK(diff_view.ViewForHandle(ent.FindResidue("B", mol::ResNum(1))));
+  BOOST_CHECK(diff_view.ViewForHandle(ent.FindResidue("B", mol::ResNum(2))));
 
   // check atoms
-  BOOST_CHECK(!diff_view.FindAtom(ent.FindAtom("A", mol::ResNum(1), "A")));
-  BOOST_CHECK(!diff_view.FindAtom(ent.FindAtom("A", mol::ResNum(1), "B")));
-  BOOST_CHECK(!diff_view.FindAtom(ent.FindAtom("A", mol::ResNum(2), "C")));
-  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("A", mol::ResNum(2), "D")));
-  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(1), "E")));
-  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(1), "F")));
-  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(2), "G")));
-  BOOST_CHECK(diff_view.FindAtom(ent.FindAtom("B", mol::ResNum(2), "H")));
+  BOOST_CHECK(!diff_view.ViewForHandle(ent.FindAtom("A", mol::ResNum(1), "A")));
+  BOOST_CHECK(!diff_view.ViewForHandle(ent.FindAtom("A", mol::ResNum(1), "B")));
+  BOOST_CHECK(!diff_view.ViewForHandle(ent.FindAtom("A", mol::ResNum(2), "C")));
+  BOOST_CHECK(diff_view.ViewForHandle(ent.FindAtom("A", mol::ResNum(2), "D")));
+  BOOST_CHECK(diff_view.ViewForHandle(ent.FindAtom("B", mol::ResNum(1), "E")));
+  BOOST_CHECK(diff_view.ViewForHandle(ent.FindAtom("B", mol::ResNum(1), "F")));
+  BOOST_CHECK(diff_view.ViewForHandle(ent.FindAtom("B", mol::ResNum(2), "G")));
+  BOOST_CHECK(diff_view.ViewForHandle(ent.FindAtom("B", mol::ResNum(2), "H")));
 
   // check bonds
   BondHandleList bonds=diff_view.GetBondList();
@@ -133,21 +133,21 @@ BOOST_AUTO_TEST_CASE(test_union_a)
   BOOST_CHECK(un.FindChain("B"));
   
   // test residues
-  BOOST_CHECK(un.FindResidue(ent.FindResidue("A", mol::ResNum(1))));
-  BOOST_CHECK(un.FindResidue(ent.FindResidue("A", mol::ResNum(2))));  
-  BOOST_CHECK(un.FindResidue(ent.FindResidue("B", mol::ResNum(1))));
-  BOOST_CHECK(un.FindResidue(ent.FindResidue("B", mol::ResNum(2))));  
+  BOOST_CHECK(un.ViewForHandle(ent.FindResidue("A", mol::ResNum(1))));
+  BOOST_CHECK(un.ViewForHandle(ent.FindResidue("A", mol::ResNum(2))));
+  BOOST_CHECK(un.ViewForHandle(ent.FindResidue("B", mol::ResNum(1))));
+  BOOST_CHECK(un.ViewForHandle(ent.FindResidue("B", mol::ResNum(2))));
   
   // test atoms
-  BOOST_CHECK(!un.FindAtom(ent.FindAtom("A", mol::ResNum(1), "A")));
-  BOOST_CHECK(un.FindAtom(ent.FindAtom("A", mol::ResNum(1), "B")));
-  BOOST_CHECK(un.FindAtom(ent.FindAtom("A", mol::ResNum(2), "C")));
-  BOOST_CHECK(!un.FindAtom(ent.FindAtom("A", mol::ResNum(2), "D")));
+  BOOST_CHECK(!un.ViewForHandle(ent.FindAtom("A", mol::ResNum(1), "A")));
+  BOOST_CHECK(un.ViewForHandle(ent.FindAtom("A", mol::ResNum(1), "B")));
+  BOOST_CHECK(un.ViewForHandle(ent.FindAtom("A", mol::ResNum(2), "C")));
+  BOOST_CHECK(!un.ViewForHandle(ent.FindAtom("A", mol::ResNum(2), "D")));
   
-  BOOST_CHECK(!un.FindAtom(ent.FindAtom("B", mol::ResNum(1), "E")));
-  BOOST_CHECK(un.FindAtom(ent.FindAtom("B", mol::ResNum(1), "F")));  
-  BOOST_CHECK(un.FindAtom(ent.FindAtom("B", mol::ResNum(2), "G")));
-  BOOST_CHECK(!un.FindAtom(ent.FindAtom("B", mol::ResNum(2), "H")));
+  BOOST_CHECK(!un.ViewForHandle(ent.FindAtom("B", mol::ResNum(1), "E")));
+  BOOST_CHECK(un.ViewForHandle(ent.FindAtom("B", mol::ResNum(1), "F")));
+  BOOST_CHECK(un.ViewForHandle(ent.FindAtom("B", mol::ResNum(2), "G")));
+  BOOST_CHECK(!un.ViewForHandle(ent.FindAtom("B", mol::ResNum(2), "H")));
   
   // bonds
    BondHandleList bonds=un.GetBondList();
@@ -187,21 +187,21 @@ BOOST_AUTO_TEST_CASE(test_union_b)
   BOOST_CHECK(un.FindChain("B"));
   
   // test residues
-  BOOST_CHECK(un.FindResidue(ent.FindResidue("A", mol::ResNum(1))));
-  BOOST_CHECK(un.FindResidue(ent.FindResidue("A", mol::ResNum(2))));  
-  BOOST_CHECK(un.FindResidue(ent.FindResidue("B", mol::ResNum(1))));
-  BOOST_CHECK(un.FindResidue(ent.FindResidue("B", mol::ResNum(2))));  
+  BOOST_CHECK(un.ViewForHandle(ent.FindResidue("A", mol::ResNum(1))));
+  BOOST_CHECK(un.ViewForHandle(ent.FindResidue("A", mol::ResNum(2))));
+  BOOST_CHECK(un.ViewForHandle(ent.FindResidue("B", mol::ResNum(1))));
+  BOOST_CHECK(un.ViewForHandle(ent.FindResidue("B", mol::ResNum(2))));
   
   // test atoms
-  BOOST_CHECK(un.FindAtom(ent.FindAtom("A", mol::ResNum(1), "A")));
-  BOOST_CHECK(un.FindAtom(ent.FindAtom("A", mol::ResNum(1), "B")));
-  BOOST_CHECK(un.FindAtom(ent.FindAtom("A", mol::ResNum(2), "C")));
-  BOOST_CHECK(!un.FindAtom(ent.FindAtom("A", mol::ResNum(2), "D")));
+  BOOST_CHECK(un.ViewForHandle(ent.FindAtom("A", mol::ResNum(1), "A")));
+  BOOST_CHECK(un.ViewForHandle(ent.FindAtom("A", mol::ResNum(1), "B")));
+  BOOST_CHECK(un.ViewForHandle(ent.FindAtom("A", mol::ResNum(2), "C")));
+  BOOST_CHECK(!un.ViewForHandle(ent.FindAtom("A", mol::ResNum(2), "D")));
   
-  BOOST_CHECK(!un.FindAtom(ent.FindAtom("B", mol::ResNum(1), "E")));
-  BOOST_CHECK(un.FindAtom(ent.FindAtom("B", mol::ResNum(1), "F")));  
-  BOOST_CHECK(un.FindAtom(ent.FindAtom("B", mol::ResNum(2), "G")));
-  BOOST_CHECK(!un.FindAtom(ent.FindAtom("B", mol::ResNum(2), "H")));
+  BOOST_CHECK(!un.ViewForHandle(ent.FindAtom("B", mol::ResNum(1), "E")));
+  BOOST_CHECK(un.ViewForHandle(ent.FindAtom("B", mol::ResNum(1), "F")));
+  BOOST_CHECK(un.ViewForHandle(ent.FindAtom("B", mol::ResNum(2), "G")));
+  BOOST_CHECK(!un.ViewForHandle(ent.FindAtom("B", mol::ResNum(2), "H")));
   
   // bonds
    BondHandleList bonds=un.GetBondList();
@@ -241,22 +241,22 @@ BOOST_AUTO_TEST_CASE(test_intersection_a)
   BOOST_CHECK(is.FindChain("B"));
   
   // test residues
-  BOOST_CHECK(!is.FindResidue(ent.FindResidue("A", mol::ResNum(1))));
-  BOOST_CHECK(is.FindResidue(ent.FindResidue("A", mol::ResNum(2))));  
-  BOOST_CHECK(is.FindResidue(ent.FindResidue("B", mol::ResNum(1))));
-  BOOST_CHECK(is.FindResidue(ent.FindResidue("B", mol::ResNum(2))));  
+  BOOST_CHECK(!is.ViewForHandle(ent.FindResidue("A", mol::ResNum(1))));
+  BOOST_CHECK(is.ViewForHandle(ent.FindResidue("A", mol::ResNum(2))));
+  BOOST_CHECK(is.ViewForHandle(ent.FindResidue("B", mol::ResNum(1))));
+  BOOST_CHECK(is.ViewForHandle(ent.FindResidue("B", mol::ResNum(2))));
   
   // test atoms
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("A", mol::ResNum(1), "A")));
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("A", mol::ResNum(1), "B")));
-  BOOST_CHECK(is.FindAtom(ent.FindAtom("A", mol::ResNum(2), "C")));
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("A", mol::ResNum(2), "D")));
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("A", mol::ResNum(1), "A")));
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("A", mol::ResNum(1), "B")));
+  BOOST_CHECK(is.ViewForHandle(ent.FindAtom("A", mol::ResNum(2), "C")));
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("A", mol::ResNum(2), "D")));
   
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("B", mol::ResNum(1), "E")));
-  BOOST_CHECK(is.FindAtom(ent.FindAtom("B", mol::ResNum(1), "F")));  
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("B", mol::ResNum(1), "E")));
+  BOOST_CHECK(is.ViewForHandle(ent.FindAtom("B", mol::ResNum(1), "F")));
   
-  BOOST_CHECK(is.FindAtom(ent.FindAtom("B", mol::ResNum(2), "G")));
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("B", mol::ResNum(2), "H")));
+  BOOST_CHECK(is.ViewForHandle(ent.FindAtom("B", mol::ResNum(2), "G")));
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("B", mol::ResNum(2), "H")));
 
   // bonds
   BondHandleList bonds=is.GetBondList();
@@ -296,22 +296,22 @@ BOOST_AUTO_TEST_CASE(test_intersection_b)
   BOOST_CHECK(is.FindChain("B"));
   
   // test residues
-  BOOST_CHECK(!is.FindResidue(ent.FindResidue("A", mol::ResNum(1))));
-  BOOST_CHECK(!is.FindResidue(ent.FindResidue("A", mol::ResNum(2))));  
-  BOOST_CHECK(is.FindResidue(ent.FindResidue("B", mol::ResNum(1))));
-  BOOST_CHECK(is.FindResidue(ent.FindResidue("B", mol::ResNum(2))));  
+  BOOST_CHECK(!is.ViewForHandle(ent.FindResidue("A", mol::ResNum(1))));
+  BOOST_CHECK(!is.ViewForHandle(ent.FindResidue("A", mol::ResNum(2))));
+  BOOST_CHECK(is.ViewForHandle(ent.FindResidue("B", mol::ResNum(1))));
+  BOOST_CHECK(is.ViewForHandle(ent.FindResidue("B", mol::ResNum(2))));
   
   // test atoms
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("A", mol::ResNum(1), "A")));
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("A", mol::ResNum(1), "B")));
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("A", mol::ResNum(2), "C")));
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("A", mol::ResNum(2), "D")));
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("A", mol::ResNum(1), "A")));
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("A", mol::ResNum(1), "B")));
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("A", mol::ResNum(2), "C")));
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("A", mol::ResNum(2), "D")));
   
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("B", mol::ResNum(1), "E")));
-  BOOST_CHECK(is.FindAtom(ent.FindAtom("B", mol::ResNum(1), "F")));  
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("B", mol::ResNum(1), "E")));
+  BOOST_CHECK(is.ViewForHandle(ent.FindAtom("B", mol::ResNum(1), "F")));
   
-  BOOST_CHECK(is.FindAtom(ent.FindAtom("B", mol::ResNum(2), "G")));
-  BOOST_CHECK(!is.FindAtom(ent.FindAtom("B", mol::ResNum(2), "H")));
+  BOOST_CHECK(is.ViewForHandle(ent.FindAtom("B", mol::ResNum(2), "G")));
+  BOOST_CHECK(!is.ViewForHandle(ent.FindAtom("B", mol::ResNum(2), "H")));
   
   // bonds
   BondHandleList bonds=is.GetBondList();

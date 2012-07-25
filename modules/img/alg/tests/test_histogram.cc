@@ -61,6 +61,13 @@ void test()
     msg << " expected bins[" << k << "] == 1 but got " << bins[k];
     BOOST_CHECK_MESSAGE(bins[k]==1,msg.str());
   }
+  try {
+      BOOST_CHECK_THROW(Histogram(1,0.0,1.0),HistogramError);
+  }catch(...){
+    BOOST_ERROR( "Failed to catch HisotgramException." );
+  }
+
+
 }
 
 } // namespace 

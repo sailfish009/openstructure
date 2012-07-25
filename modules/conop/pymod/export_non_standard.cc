@@ -39,12 +39,15 @@ object copy_non_conserved_handle(ResidueHandle src_res, ResidueHandle dst_res,
   return make_tuple(ret, has_cbeta);
 }
 
+bool (*copy_residue_handle)(ost::mol::ResidueHandle,
+                            ost::mol::ResidueHandle,
+                            ost::mol::XCSEditor&)=&CopyResidue;
 
 
 void export_NonStandard()
 {
   def("CopyNonConserved",&copy_non_conserved_handle);
   def("CopyConserved", copy_conserved_handle);
-  def("CopyResidue", &CopyResidue);
+  def("CopyResidue", copy_residue_handle);
  }
 

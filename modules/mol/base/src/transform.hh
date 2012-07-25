@@ -38,8 +38,9 @@ class DLLEXPORT_OST_MOL Transform {
 public:
   Transform();
 
-  geom::Mat4 GetMatrix() const;
-  geom::Mat4 GetTransposedMatrix() const;
+  geom::Mat4 GetMatrix() const {return tm_;}
+  geom::Mat4 GetTransposedMatrix() const {return ttm_;}
+  geom::Mat4 GetInvertedMatrix() const {return itm_;}
 
   void SetCenter(const geom::Vec3& c);
   geom::Vec3 GetCenter() const;
@@ -73,6 +74,7 @@ public:
   
   geom::Vec3 Apply(const geom::Vec3& v) const;
   geom::Vec4 Apply(const geom::Vec4& v) const;
+  geom::AlignedCuboid Apply(const geom::AlignedCuboid& c) const;
 
 private:
   geom::Mat3 rot_;
@@ -80,9 +82,13 @@ private:
   geom::Vec3 cen_;
   geom::Mat4 tm_;
   geom::Mat4 ttm_;
+  geom::Mat4 itm_;
 
   void update_tm();
+  void update_components();
 };
+
+
 
 #if(OST_INFO_ENABLED)
 /// \brief read transformation from info group

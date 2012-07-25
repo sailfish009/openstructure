@@ -29,11 +29,12 @@ namespace {
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(scene_add_overloads, 
                                        Scene::Add, 1, 2)
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(scene_autoslab_overloads, 
-                                       Scene::Autoslab, 0, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(scene_export_pov_overloads,
                                        Scene::ExportPov, 1,2)
 void (Scene::*apply)(const InputEvent&, bool)=&Scene::Apply;
+void (Scene::*autoslab1)()=&Scene::Autoslab;
+void (Scene::*autoslab2)(bool)=&Scene::Autoslab;
+void (Scene::*autoslab3)(bool,bool)=&Scene::Autoslab;
 
 Scene* get_scene()
 {
@@ -47,6 +48,21 @@ std::pair<GfxObjP, mol::AtomHandle> pick_atom(Scene* scene, int x, int y)
 GfxObjP scene_getitem(Scene* scene, const String& item)
 {
   return scene->operator[](item);
+}
+
+geom::AlignedCuboid scene_get_bb1(Scene* scene)
+{
+  return scene->GetBoundingBox();
+}
+
+geom::AlignedCuboid scene_get_bb2(Scene* scene, bool use_tf)
+{
+  return scene->GetBoundingBox(use_tf);
+}
+
+geom::AlignedCuboid scene_get_bb3(Scene* scene, const mol::Transform& tf)
+{
+  return scene->GetBoundingBox(tf);
 }
 
 } // anon ns
@@ -80,12 +96,19 @@ void export_Scene()
   class_<Scene, boost::noncopyable>("SceneSingleton",no_init)
     .def("Add", &Scene::Add, 
          scene_add_overloads())
-    .def("Autoslab", &Scene::Autoslab, 
-         scene_autoslab_overloads())
+    .def("Autoslab", autoslab1)
     .def("AutoAutoslab",&Scene::AutoAutoslab)
     .def("GetAutoAutoslab",&Scene::GetAutoAutoslab)
-    .def("AutoslabMax",&Scene::AutoslabMax)
+    .add_property("auto_autoslab",&Scene::GetAutoAutoslab,&Scene::AutoAutoslab)
+    .def("SetAutoslabMode",&Scene::SetAutoslabMode)
+    .def("GetAutoslabMode",&Scene::GetAutoslabMode)
+    .add_property("autoslab_mode",&Scene::GetAutoslabMode,&Scene::SetAutoslabMode)
+    .def("Autoslab", autoslab2) // DEPRECATED
+    .def("Autoslab", autoslab3) // DEPRECATED
+    .def("AutoslabMax",&Scene::AutoslabMax) // DEPRECATED
     .def("Remove", remove1)
+    .def("Register", &Scene::Register)
+    .def("Unregister", &Scene::Unregister)
     .def("Remove", remove2)
     .add_property("viewport", &Scene::GetViewport)
     .def("RequestRedraw", &Scene::RequestRedraw)
@@ -105,6 +128,10 @@ void export_Scene()
     .add_property("bg",
                   &Scene::GetBackground, 
                   &Scene::SetBackground)
+    .def("GetProjection",&Scene::GetProjection)
+    .add_property("projection",&Scene::GetProjection)
+    .def("GetInvertedProjection",&Scene::GetInvertedProjection)
+    .add_property("inverted_projection",&Scene::GetInvertedProjection)
     .def("SetNear",&Scene::SetNear)
     .def("GetNear",&Scene::GetNear)
     .add_property("near", &Scene::GetNear, &Scene::SetNear)
@@ -192,6 +219,7 @@ void export_Scene()
     .def("SetAmbientOcclusionQuality",&Scene::SetAmbientOcclusionQuality)
     .add_property("ambient_occlusion_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
     .add_property("ao_quality",&Scene::GetAmbientOcclusionQuality,&Scene::SetAmbientOcclusionQuality)
+    .add_property("ao_size",&Scene::GetAmbientOcclusionSize,&Scene::SetAmbientOcclusionSize)
     .def("AttachObserver",&Scene::AttachObserver)
     .def("StartOffscreenMode",&Scene::StartOffscreenMode)
     .def("StopOffscreenMode",&Scene::StopOffscreenMode)
@@ -202,5 +230,9 @@ void export_Scene()
     .def("__getitem__",scene_getitem)
     .add_property("show_center",&Scene::GetShowCenter, &Scene::SetShowCenter)
     .add_property("fix_center",&Scene::GetFixCenter, &Scene::SetFixCenter)
+    .def("GetBoundingBox",scene_get_bb1)
+    .def("GetBoundingBox",scene_get_bb2)
+    .def("GetBoundingBox",scene_get_bb3)
+    .add_property("bounding_box",scene_get_bb1)
   ;
 }

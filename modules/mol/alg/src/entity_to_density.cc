@@ -378,9 +378,9 @@ void EntityToDensityScattering(const mol::EntityView& entity_view,
                                      bool clear_map_flag,
                                      Real source_wavelength)
 {
-  if(falloff_start<=0.0) throw std::runtime_error("Invalid falloff start");
+  if(falloff_start<=0.0) throw ost::Error("Invalid falloff start");
   if(falloff_end<=0.0 || falloff_end>falloff_start)
-     throw std::runtime_error("Invalid falloff end");
+     throw ost::Error("Invalid falloff end");
 
  geom ::Vec3 rs_sampl = map.GetSpatialSampling();
   geom ::Vec3 abs_orig = map.GetAbsoluteOrigin();
@@ -420,7 +420,7 @@ void EntityToDensityRosetta(const mol::EntityView& entity_view,
                             Real source_wavelength)
 
 {
-  if(resolution <=0.0) throw std::runtime_error("Invalid resolution");
+  if(resolution <=0.0) throw ost::Error("Invalid resolution");
   if (clear_map_flag==true) {
     img::MapHandle mm=img::CreateImage(img::Extent(img::Point(0,0),
                                        map.GetSize()));

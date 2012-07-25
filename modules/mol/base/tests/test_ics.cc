@@ -117,11 +117,11 @@ BOOST_AUTO_TEST_CASE(ics_settorsion_unbuffered)
   Real eps = 0.0001;
   TorsionStructure s;
   ICSEditor e = s.e.EditICS(mol::UNBUFFERED_EDIT);
-  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(M_PI), Real(eps));
+  BOOST_CHECK_CLOSE(std::abs(s.t1.GetAngle()), Real(M_PI), Real(eps));
   BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
   e.SetTorsionAngle(s.t1,0);
   BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
-  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI), Real(eps));
+  BOOST_CHECK_CLOSE(std::abs(s.t2.GetAngle()), Real(M_PI), Real(eps));
   e.SetTorsionAngle(s.t2,M_PI/4);
   BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
   BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(-M_PI+M_PI/4), Real(eps));
@@ -138,11 +138,11 @@ BOOST_AUTO_TEST_CASE(ics_settorsion_buffered)
   Real eps = 0.0001;
   TorsionStructure s;
   ICSEditor e = s.e.EditICS(mol::BUFFERED_EDIT);
-  BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(M_PI), Real(eps));
+  BOOST_CHECK_CLOSE(std::abs(s.t1.GetAngle()), Real(M_PI), Real(eps));
   BOOST_CHECK_SMALL(s.t2.GetAngle(), eps);
   e.SetTorsionAngle(s.t1,0);
   BOOST_CHECK_SMALL(s.t1.GetAngle(), eps);
-  BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI), Real(eps));
+  BOOST_CHECK_CLOSE(std::abs(s.t2.GetAngle()), Real(M_PI), Real(eps));
   e.SetTorsionAngle(s.t2,M_PI/4);
   BOOST_CHECK_CLOSE(s.t2.GetAngle(), Real(M_PI/4), Real(eps));
   BOOST_CHECK_CLOSE(s.t1.GetAngle(), Real(-M_PI+M_PI/4), Real(eps));

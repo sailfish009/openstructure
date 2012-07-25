@@ -21,6 +21,7 @@ using namespace boost::python;
 
 #include <boost/shared_ptr.hpp>
 
+#include <ost/message.hh>
 #include <ost/gfx/prim_list.hh>
 using namespace ost;
 using namespace ost::gfx;
@@ -34,18 +35,18 @@ namespace {
   {
 #if OST_NUMPY_SUPPORT_ENABLED
     if(!PyArray_Check(ova.ptr())) {
-      throw std::runtime_error("ova is not a numpy array");
+      throw Error("ova is not a numpy array");
     }
     PyArrayObject* va=reinterpret_cast<PyArrayObject*>(ova.ptr());
     if(!PyArray_ISCONTIGUOUS(va)) {
-      throw std::runtime_error("expected vertex array to be contiguous");
+      throw Error("expected vertex array to be contiguous");
     }
     if(!PyArray_TYPE(va)==NPY_FLOAT) {
-      throw std::runtime_error("expected vertex array to be of dtype=float32");
+      throw Error("expected vertex array to be of dtype=float32");
     }
     size_t v_size=PyArray_SIZE(va);
     if(v_size%3!=0) {
-      throw std::runtime_error("expected vertex array size to be divisible by 3");
+      throw Error("expected vertex array size to be divisible by 3");
     }
     size_t v_count=v_size/3;
     float* vp=reinterpret_cast<float*>(PyArray_DATA(va));
@@ -53,52 +54,52 @@ namespace {
     float* cp=0;
     if(ona!=object()) {
       if(!PyArray_Check(ona.ptr())) {
-        throw std::runtime_error("ona is not a numpy array");
+        throw Error("ona is not a numpy array");
       }
       PyArrayObject* na=reinterpret_cast<PyArrayObject*>(ona.ptr());
       if(!PyArray_ISCONTIGUOUS(na)) {
-        throw std::runtime_error("expected normal array to be contiguous");
+        throw Error("expected normal array to be contiguous");
       }
       if(!PyArray_TYPE(na)==NPY_FLOAT) {
-        throw std::runtime_error("expected normal array to be of dtype=float32");
+        throw Error("expected normal array to be of dtype=float32");
       }
-      if(PyArray_SIZE(na)!=v_size) {
-        throw std::runtime_error("expected normal array size to match vertex array size");
+      if((size_t)PyArray_SIZE(na)!=v_size) {
+        throw Error("expected normal array size to match vertex array size");
       }
       np=reinterpret_cast<float*>(PyArray_DATA(na));
     }
     if(oca!=object()) {
       if(!PyArray_Check(oca.ptr())) {
-        throw std::runtime_error("oca is not a numpy array");
+        throw Error("oca is not a numpy array");
       }
       PyArrayObject* ca=reinterpret_cast<PyArrayObject*>(oca.ptr());
       if(!PyArray_ISCONTIGUOUS(ca)) {
-        throw std::runtime_error("expected color array to be contiguous");
+        throw Error("expected color array to be contiguous");
       }
       if(!PyArray_TYPE(ca)==NPY_FLOAT) {
-        throw std::runtime_error("expected color array to be of dtype=float32");
+        throw Error("expected color array to be of dtype=float32");
       }
-      if(PyArray_SIZE(ca)!=v_count*4) {
-        throw std::runtime_error("expected color array size to equal vertex-count x 4");
+      if((size_t)PyArray_SIZE(ca)!=v_count*4) {
+        throw Error("expected color array size to equal vertex-count x 4");
       }
       cp=reinterpret_cast<float*>(PyArray_DATA(ca));
     }
     if(!PyArray_Check(oia.ptr())) {
-      throw std::runtime_error("oia is not a numpy array");
+      throw Error("oia is not a numpy array");
     }
     PyArrayObject* ia=reinterpret_cast<PyArrayObject*>(oia.ptr());
     if(!PyArray_ISCONTIGUOUS(ia)) {
-      throw std::runtime_error("expected vertex array to be contiguous");
+      throw Error("expected vertex array to be contiguous");
     }
     if(!PyArray_TYPE(ia)==NPY_UINT) {
-      throw std::runtime_error("expected vertex array to be of dtype=uint32");
+      throw Error("expected vertex array to be of dtype=uint32");
     }
     size_t i_size=PyArray_SIZE(ia);
     unsigned int* ip=reinterpret_cast<unsigned int*>(PyArray_DATA(ia));
 
     p.AddMesh(vp,np,cp,v_count,ip,i_size/3);
 #else
-    throw std::runtime_error("AddMesh requires compiled-in numpy support");
+    throw Error("AddMesh requires compiled-in numpy support");
 #endif
   }
 }
