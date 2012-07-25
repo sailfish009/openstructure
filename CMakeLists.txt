@@ -318,6 +318,9 @@ message(STATUS
         "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}\n"
-        "   Hidden object visibility  (-DHIDDEN_VISIBILITY) : ${_HIDDEN_VIS}")
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")
+if (CMAKE_COMPILER_IS_GNUCXX)
+   message(STATUS
+        "   Hidden object visibility  (-DHIDDEN_VISIBILITY) :        ${_HIDDEN_VIS}")
+endif()
 

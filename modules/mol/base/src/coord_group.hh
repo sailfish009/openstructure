@@ -28,9 +28,12 @@
 #include "atom_handle.hh"
 #include "coord_source.hh"
 
-namespace ost { namespace mol {
+namespace geom {
+  // we should really have fw headers...
+  class Transform;
+}
 
-class Transform;
+namespace ost { namespace mol {
 
 /// \brief coordinate group, for trajectories and such
 class DLLEXPORT_OST_MOL CoordGroupHandle {

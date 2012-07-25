@@ -80,4 +80,35 @@ geom::Mat4 Mat4FromInfo(const InfoGroup& group)
   return mat;
 }
   
-}}
+geom::Transform TransformFromInfo(const InfoGroup& group)
+{
+  if (!group.HasItem("center")) {
+    throw InfoError("Error while loading transform from info: "
+                          "Group does not contain a center element");
+  }
+  if (!group.HasGroup("rotation")) {
+    throw InfoError("Error while loading transform from info: "
+                          "Group does not contain a rotation element");
+  }
+  if (!group.HasItem("translation")) {
+    throw InfoError("Error while loading transform from info: "
+                          "Group does not contain a translation element");
+  } 
+  geom::Transform tf;
+  tf.SetCenter(group.GetItem("center").AsVector());
+  tf.SetTrans(group.GetItem("translation").AsVector());
+  tf.SetRot(Mat3FromInfo(group.GetGroup("rotation")));
+  return tf;
+}
+
+void TransformToInfo(const geom::Transform& transform, InfoGroup& group)
+{
+  geom::Transform tf;
+  group.CreateItem("center", transform.GetCenter());
+  group.CreateItem("translation", transform.GetTrans());
+  InfoGroup rot=group.CreateGroup("rotation");
+  Mat3ToInfo(transform.GetRot(), rot);
+}
+
+}} // ns
+

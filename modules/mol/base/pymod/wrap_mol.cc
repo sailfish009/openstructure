@@ -42,7 +42,6 @@ void export_PropertyID();
 void export_BoundingBox();
 void export_QueryViewWrapper();
 void export_EntityPropertyMapper();
-void export_Transform();
 
 BOOST_PYTHON_MODULE(_ost_mol)
 {
@@ -71,5 +70,4 @@ BOOST_PYTHON_MODULE(_ost_mol)
   export_BoundingBox();
   export_QueryViewWrapper();
   export_EntityPropertyMapper();
-  export_Transform();
 }

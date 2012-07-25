@@ -16,37 +16,44 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_MOL_BASE_TRANSFORM_HH
-#define OST_MOL_BASE_TRANSFORM_HH
+#ifndef OST_GEOM_TRANSFORM_HH
+#define OST_GEOM_TRANSFORM_HH
 
 /*
   Author: Ansgar Philippsen
 */
 
 #include <ost/config.hh>
-#include <ost/geom/geom.hh>
-#if(OST_INFO_ENABLED)
-#include <ost/info/info_fw.hh>
-#endif
-#include <ost/mol/module_config.hh>
 
-namespace ost { namespace mol {
+#include "module_config.hh"
+#include "vec3.hh"
+#include "vec4.hh"
+#include "mat3.hh"
+#include "mat.hh"
+#include "aligned_cuboid.hh"
+
+namespace geom {
 
 /// \brief basic and essential transformation class, including translation,
 ///    rotation and center of rotation
-class DLLEXPORT_OST_MOL Transform {
+class DLLEXPORT_OST_GEOM Transform {
 public:
   Transform();
 
-  geom::Mat4 GetMatrix() const {return tm_;}
-  geom::Mat4 GetTransposedMatrix() const {return ttm_;}
-  geom::Mat4 GetInvertedMatrix() const {return itm_;}
+  /// \brief retrieve transformation matrix
+  Mat4 GetMatrix() const {return tm_;}
+  /// \brief retrieve transposed transformation matrix
+  Mat4 GetTransposedMatrix() const {return ttm_;}
+  /// \brief retrieve inverted transformation matrix
+  Mat4 GetInvertedMatrix() const {return itm_;}
 
-  void SetCenter(const geom::Vec3& c);
-  geom::Vec3 GetCenter() const;
+  /// \brief set center of rotation
+  void SetCenter(const Vec3& c);
+  /// \brief retrieve center of rotation
+  Vec3 GetCenter() const;
 
   // directly set tm, messing up rot/trans/cen !
-  void SetMatrix(const geom::Mat4& m);
+  void SetMatrix(const Mat4& m);
 
   /// \name rotation
   //@{
@@ -54,51 +61,40 @@ public:
   void ApplyXAxisRotation(float delta);
   void ApplyYAxisRotation(float delta);
   void ApplyZAxisRotation(float delta);
-  void ApplyAxisRotation(float delta, const geom::Vec3& axis);  
+  void ApplyAxisRotation(float delta, const Vec3& axis);  
   
-  geom::Mat3 GetXAxisRotation(float delta);
-  geom::Mat3 GetYAxisRotation(float delta);
-  geom::Mat3 GetZAxisRotation(float delta);
+  Mat3 GetXAxisRotation(float delta);
+  Mat3 GetYAxisRotation(float delta);
+  Mat3 GetZAxisRotation(float delta);
   
-  geom::Mat3 GetRot() const;
-  void SetRot(const geom::Mat3& r);
+  Mat3 GetRot() const;
+  void SetRot(const Mat3& r);
   //@}
   /// \brief translation
   //@{
   void ApplyXAxisTranslation(float delta);
   void ApplyYAxisTranslation(float delta);
   void ApplyZAxisTranslation(float delta);
-  void SetTrans(const geom::Vec3& t);
-  geom::Vec3 GetTrans() const;  
+  void SetTrans(const Vec3& t);
+  Vec3 GetTrans() const;  
   //@}
   
-  geom::Vec3 Apply(const geom::Vec3& v) const;
-  geom::Vec4 Apply(const geom::Vec4& v) const;
-  geom::AlignedCuboid Apply(const geom::AlignedCuboid& c) const;
+  Vec3 Apply(const Vec3& v) const;
+  Vec4 Apply(const Vec4& v) const;
+  AlignedCuboid Apply(const AlignedCuboid& c) const;
 
 private:
-  geom::Mat3 rot_;
-  geom::Vec3 trans_;
-  geom::Vec3 cen_;
-  geom::Mat4 tm_;
-  geom::Mat4 ttm_;
-  geom::Mat4 itm_;
+  Mat3 rot_;
+  Vec3 trans_;
+  Vec3 cen_;
+  Mat4 tm_;
+  Mat4 ttm_;
+  Mat4 itm_;
 
   void update_tm();
   void update_components();
 };
 
-
-
-#if(OST_INFO_ENABLED)
-/// \brief read transformation from info group
-/// \relates Transform
-Transform DLLEXPORT_OST_MOL TransformFromInfo(const info::InfoGroup& group);
-/// \brief store transformation in info group
-/// \relates Transform
-void DLLEXPORT_OST_MOL TransformToInfo(const Transform& transform,
-                                       info::InfoGroup& group);
-#endif
-}} // ns
+} // ns
 
 #endif

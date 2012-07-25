@@ -18,7 +18,6 @@ export_bounding_box.cc
 export_query_view_wrapper.cc
 export_torsion.cc
 export_visitor.cc
-export_transform.cc
 wrap_mol.cc
 export_entity_property_mapper.cc
 )

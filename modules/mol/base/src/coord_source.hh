@@ -27,11 +27,14 @@
 #include <ost/mol/coord_frame.hh>
 #include <ost/mol/entity_handle.hh>
 
+namespace geom {
+  // we should really have fw headers...
+  class Transform;
+}
 
 namespace ost { namespace mol {
 
 class CoordSource;
-class Transform;
 
 typedef boost::shared_ptr<CoordSource> CoordSourcePtr;
 

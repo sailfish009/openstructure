@@ -22,14 +22,11 @@
  #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
 #include <boost/test/auto_unit_test.hpp>
-#include <ost/mol/mol.hh>
-#include <ost/mol/transform.hh>
 #include <ost/geom/geom.hh>
 
-using namespace ost;
-using namespace ost::mol;
+using namespace geom;
 
-BOOST_AUTO_TEST_SUITE( mol_base );
+BOOST_AUTO_TEST_SUITE( geom_base );
 
 BOOST_AUTO_TEST_CASE(test_transform)
 {
