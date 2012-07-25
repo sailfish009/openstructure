@@ -32,7 +32,8 @@ TickPainter::TickPainter(QObject* parent)
     : Painter(parent), pen_(QPen(Qt::darkGray))
 {}
 
-void TickPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index){
+void TickPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, 
+                        const QModelIndex& index){
   painter->save();
   painter->setPen(pen_);
   QVariant value = index.data(Qt::DisplayRole);
