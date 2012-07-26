@@ -9,6 +9,7 @@ model_check.hh
 compound.hh
 compound_lib.hh
 module_config.hh
+rule_based.hh
 nonstandard.hh
 rule_based_builder.hh
 ring_finder.hh
@@ -19,6 +20,7 @@ builder.cc
 amino_acids.cc
 conop.cc
 diag.cc
+rule_based.cc
 model_check.cc
 heuristic_builder.cc
 compound.cc

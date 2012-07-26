@@ -216,6 +216,7 @@ inline void dist_connect(RuleBasedBuilder* b, mol::AtomHandleList atoms)
     b->DistanceBasedConnect(*i);
   }  
 }
+
 void RuleBasedBuilder::ConnectAtomsOfResidue(mol::ResidueHandle rh) 
 {
 

@@ -27,10 +27,12 @@ void export_RingFinder();
 void export_AminoAcids();
 void export_NonStandard();
 
+void export_rule_based();
 BOOST_PYTHON_MODULE(_ost_conop)
 {
   export_Builder();
   export_Conop();
+  export_rule_based();
   export_Compound();
   export_RingFinder();
   export_AminoAcids();
