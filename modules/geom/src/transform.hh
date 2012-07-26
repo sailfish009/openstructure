@@ -82,6 +82,7 @@ public:
   Vec3 Apply(const Vec3& v) const;
   Vec4 Apply(const Vec4& v) const;
   AlignedCuboid Apply(const AlignedCuboid& c) const;
+  Transform Apply(const Transform& tf) const;
 
 private:
   Mat3 rot_;

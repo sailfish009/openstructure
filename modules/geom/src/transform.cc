@@ -168,6 +168,13 @@ geom::AlignedCuboid Transform::Apply(const geom::AlignedCuboid& c) const
   return geom::AlignedCuboid(minc,maxc);
 }
 
+Transform Transform::Apply(const Transform& tf) const
+{
+  Transform nrvo(*this);
+  nrvo.SetMatrix(tf.GetMatrix()*nrvo.GetMatrix());
+  return nrvo;
+}
+
 /*
   The order of the transformations given herein is conceptually
   "backward" as they are applied to a vertex, because the left-right
@@ -209,11 +216,11 @@ void Transform::update_tm()
 
 void Transform::update_components()
 {
+  // there is no way to extract the centering component
+  // so we just get a rotation and translation
   rot_ = tm_.ExtractRotation();
-  cen_ = tm_.ExtractTranslation();
-  trans_[0] = tm_(3,0);
-  trans_[1] = tm_(3,1);
-  trans_[2] = tm_(3,2);
+  trans_ = tm_.ExtractTranslation();
+  cen_ = Vec3(0,0,0);
 }
 
 } // ns

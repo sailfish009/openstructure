@@ -28,7 +28,7 @@ using namespace geom;
 
 BOOST_AUTO_TEST_SUITE( geom_base );
 
-BOOST_AUTO_TEST_CASE(test_transform)
+BOOST_AUTO_TEST_CASE(test_transform_essentials)
 {
   Transform tf;
 
@@ -37,12 +37,55 @@ BOOST_AUTO_TEST_CASE(test_transform)
   BOOST_CHECK_EQUAL(tf.GetTrans(), geom::Vec3());
   BOOST_CHECK_EQUAL(tf.GetCenter(), geom::Vec3());
 
-  geom::Mat4 mat = geom::Mat4(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16);
-  tf.SetMatrix(mat);
-  BOOST_CHECK_EQUAL(tf.GetMatrix(), mat);
-  BOOST_CHECK_EQUAL(tf.GetRot(), geom::Mat3(1,2,3,5,6,7,9,10,11));
-  BOOST_CHECK_EQUAL(tf.GetCenter(), geom::Vec3(4,8,12));
-  BOOST_CHECK_EQUAL(tf.GetTrans(), geom::Vec3(13,14,15));
+  Mat3 rot=AxisRotation(Vec3(0.4,1.0,-0.8),2.13253);
+  Vec3 cen(0.5,1.0,2.2);
+  Vec3 tra(10,20,30);
+  tf.SetRot(rot);
+  tf.SetTrans(tra);
+  tf.SetCenter(cen);
+
+  Mat4 tmat = 
+    geom::Mat4(1.0,0.0,0.0,tra[0],
+               0.0,1.0,0.0,tra[1],
+               0.0,0.0,1.0,tra[2],
+               0.0,0.0,0.0,1.0) *
+    geom::Mat4(rot) *
+    geom::Mat4(1.0,0.0,0.0,-cen[0],
+               0.0,1.0,0.0,-cen[1],
+               0.0,0.0,1.0,-cen[2],
+               0.0,0.0,0.0,1.0);
+
+  BOOST_CHECK_EQUAL(tf.GetRot(), rot);
+  BOOST_CHECK_EQUAL(tf.GetCenter(), cen);
+  BOOST_CHECK_EQUAL(tf.GetTrans(), tra);
+
+  Transform tf2;
+  tf2.SetMatrix(tf.GetMatrix());
+  BOOST_CHECK_EQUAL(tf2.GetRot(), rot);
+  BOOST_CHECK_EQUAL(tf2.GetCenter(), Vec3(0,0,0));
+  BOOST_CHECK_EQUAL(tf2.GetTrans(), rot*-cen+tra);
+}
+
+BOOST_AUTO_TEST_CASE(test_transform_apply_transform)
+{
+  Transform t1,t2;
+  Mat3 rm1=AxisRotation(Vec3(0.4,1.0,-0.8),2.13253);
+  Mat3 rm2=AxisRotation(Vec3(2.4,-0.1,3.8),-1.123);
+  t1.SetRot(rm1);
+  t1.SetCenter(Vec3(0.5,1.0,2.2));
+  t1.SetTrans(Vec3(10,20,30));
+  t2.SetRot(rm2);
+  t2.SetCenter(Vec3(1.3,2.7,-1.1));
+  t2.SetTrans(Vec3(-40,-60,80));
+
+  Mat4 mat1=t1.GetMatrix();
+  Mat4 mat2=t2.GetMatrix();
+  Mat4 mat12=mat2*mat1;
+  
+  Transform t3 = t1.Apply(t2);
+  Mat4 mat3=t3.GetMatrix();
+  for(int i=0;i<16;++i) BOOST_CHECK_CLOSE(mat3.Data()[i],mat12.Data()[i],1e-6);
+            
 }
 
 BOOST_AUTO_TEST_SUITE_END();
