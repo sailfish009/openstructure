@@ -85,8 +85,7 @@ macro(copy_if_different FROM_DIR TO_DIR FILES TARGETS TARGET)
       file(MAKE_DIRECTORY  ${TO_DIR})
       add_custom_command(TARGET "${TARGET}" PRE_BUILD
           DEPENDS ${FROM}
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FROM} ${TO}
-          COMMENT "Staging ${SRC}")
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FROM} ${TO})
   endforeach()
 endmacro()
 
@@ -108,6 +107,7 @@ macro(stage_headers HEADERS HEADER_INSTALL_DIR TARGET SUB)
   if (NOT _SUB)
     set(_TARGET_NAME ${_TARGET}_headers)
   endif()
+  add_custom_target("${_TARGET_NAME}" COMMENT "")
   set(HEADER_DIR "${HEADER_STAGE_PATH}/${HEADER_INSTALL_DIR}")
   copy_if_different("" "${HEADER_DIR}"
                     "${_ABS_HEADER_NAMES}" ""
