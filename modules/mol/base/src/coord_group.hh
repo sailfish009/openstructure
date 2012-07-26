@@ -112,7 +112,7 @@ public:
   CoordGroupHandle Filter(const EntityView& selected,int first=0,int last=-1) const;
 
   /// \brief apply in-place transform to each coordinate in each frame
-  void ApplyTransform(const Transform& tf);
+  void ApplyTransform(const geom::Transform& tf);
 
 
 private:

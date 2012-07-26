@@ -30,7 +30,7 @@
 #include <boost/shared_array.hpp>
 
 #include <ost/gfx/module_config.hh>
-#include <ost/mol/transform.hh>
+#include <ost/geom/transform.hh>
 #include <ost/mol/atom_handle.hh>
 
 #include "gl_include.hh"
@@ -84,7 +84,7 @@ class DLLEXPORT_OST_GFX Scene {
   // refactoring of the scene it into a management
   // and a view part
   struct SceneViewStackEntry {
-    mol::Transform transform;
+    geom::Transform transform;
     float fov;
     float znear,zfar;
   };
@@ -363,13 +363,13 @@ class DLLEXPORT_OST_GFX Scene {
   geom::AlignedCuboid GetBoundingBox(bool use_tf=true) const;
 
   /// \brief return bounding box of with a given transform
-  geom::AlignedCuboid GetBoundingBox(const mol::Transform& tf) const;
+  geom::AlignedCuboid GetBoundingBox(const geom::Transform& tf) const;
 
   /// \brief get full underlying transformation
-  mol::Transform GetTransform() const;
+  geom::Transform GetTransform() const;
 
   /// \brief set transform
-  void SetTransform(const mol::Transform& t);
+  void SetTransform(const geom::Transform& t);
 
   /// \brief returns a compact, internal representation of the scene orientation
   geom::Mat4 GetRTC() const;
@@ -513,7 +513,7 @@ private:
   mutable GfxNodeP     root_node_; // mutable is slightly hackish
   SceneObserverList    observers_;
 
-  mol::Transform transform_; // overall modelview transformation
+  geom::Transform transform_; // overall modelview transformation
 
   bool gl_init_;
 

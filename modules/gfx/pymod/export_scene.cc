@@ -60,7 +60,7 @@ geom::AlignedCuboid scene_get_bb2(Scene* scene, bool use_tf)
   return scene->GetBoundingBox(use_tf);
 }
 
-geom::AlignedCuboid scene_get_bb3(Scene* scene, const mol::Transform& tf)
+geom::AlignedCuboid scene_get_bb3(Scene* scene, const geom::Transform& tf)
 {
   return scene->GetBoundingBox(tf);
 }

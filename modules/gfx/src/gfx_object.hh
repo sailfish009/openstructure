@@ -33,7 +33,7 @@
 #include <ost/config.hh>
 #include <ost/gfx/module_config.hh>
 
-#include <ost/mol/transform.hh>
+#include <ost/geom/transform.hh>
 
 #include "gfx_object_fw.hh"
 #include "gfx_object_base.hh"
@@ -123,7 +123,7 @@ public:
     will be adjusted based on the Cuboid returned by GetBoundingBox(true)
   */
   virtual void ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
-                             const mol::Transform& tf) const;
+                             const geom::Transform& tf) const;
 
   // implemented in derived classes for the actual GL rendering
   /*
@@ -168,9 +168,9 @@ public:
   void Clear();
   
   /// \brief get transform
-  const mol::Transform& GetTF() const;
+  const geom::Transform& GetTF() const;
   /// \brief set transform
-  void SetTF(const mol::Transform& tf);
+  void SetTF(const geom::Transform& tf);
   
   // add a label at the given position
   void AddLabel(const String& s, const geom::Vec3& pos, const Color& col, float psize);
@@ -225,7 +225,7 @@ public:
   RenderMode::Type render_mode_;
   unsigned int debug_flags_;
  
-  mol::Transform transform_;
+  geom::Transform transform_;
   bool rebuild_;
   bool refresh_;
   float line_width_;

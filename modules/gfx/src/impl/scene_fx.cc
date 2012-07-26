@@ -406,7 +406,7 @@ void SceneFX::prep_shadow_map()
 #endif
 
   // modelview transform for the lightsource pov
-  mol::Transform ltrans(Scene::Instance().GetTransform());
+  geom::Transform ltrans(Scene::Instance().GetTransform());
   ltrans.SetRot(Scene::Instance().GetLightRot()*ltrans.GetRot());
 
   // calculate encompassing box for ortho projection

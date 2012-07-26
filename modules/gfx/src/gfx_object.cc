@@ -400,7 +400,7 @@ geom::AlignedCuboid GfxObj::GetBoundingBox(bool use_tf) const
 }
 
 void GfxObj::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
-                           const mol::Transform& tf) const
+                           const geom::Transform& tf) const
 {
   try {
     geom::AlignedCuboid coord_limits=tf.Apply(this->GetBoundingBox(true));
@@ -476,13 +476,13 @@ void GfxObj::OnInput(const InputEvent& e)
   }
 }
 
-const mol::Transform& GfxObj::GetTF() const
+const geom::Transform& GfxObj::GetTF() const
 {
   return transform_;
 }
 
 
-void GfxObj::SetTF(const mol::Transform& tf)
+void GfxObj::SetTF(const geom::Transform& tf)
 {
   transform_=tf;
 }

@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(transformation)
 
   BOOST_CHECK(eh.IsTransformationIdentity()==true);
 
-  Transform trans;
+  geom::Transform trans;
   trans.ApplyZAxisRotation(90.0);
   geom::Mat4 mat = trans.GetMatrix();
 
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(transformation)
   CHECK_TRANSFORMED_ATOM_POSITION(atom3,tr_atom3);
   CHECK_ORIGINAL_ATOM_POSITION(atom3,orig_atom3);
 
-  Transform trans2;
+  geom::Transform trans2;
   trans2.ApplyXAxisTranslation(3.5);
   geom::Mat4 mat2 = trans2.GetMatrix();
 

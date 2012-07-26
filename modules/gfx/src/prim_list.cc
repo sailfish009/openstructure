@@ -65,12 +65,12 @@ geom::AlignedCuboid PrimList::GetBoundingBox() const
   geom::Vec3 maxc(-std::numeric_limits<float>::max(),
                   -std::numeric_limits<float>::max(),
                   -std::numeric_limits<float>::max());
-  ProcessLimits(minc,maxc,mol::Transform());
+  ProcessLimits(minc,maxc,geom::Transform());
   return geom::AlignedCuboid(minc,maxc);
 }
 
 void PrimList::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
-                             const mol::Transform& tf) const
+                             const geom::Transform& tf) const
 {
   for(SpherePrimList::const_iterator it=points_.begin();it!=points_.end();++it) {
     geom::Vec3 tpos = tf.Apply(it->position);

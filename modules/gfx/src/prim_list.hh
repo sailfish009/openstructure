@@ -64,7 +64,7 @@ class DLLEXPORT_OST_GFX PrimList: public GfxObj
   virtual geom::AlignedCuboid GetBoundingBox() const;
 
   virtual void ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
-                             const mol::Transform& tf) const;
+                             const geom::Transform& tf) const;
   /// \brief get center      
   virtual geom::Vec3 GetCenter() const;
 

@@ -86,7 +86,7 @@ MapIso::MapIso(const String& name, const img::MapHandle& mh,
   SetMatDiff(Color(1,1,1));
   SetMatSpec(Color(0.1,0.1,0.1));
   SetMatShin(32);
-  mol::Transform tf=this->GetTF();
+  geom::Transform tf=this->GetTF();
   tf.SetCenter(this->GetCenter());
   tf.SetTrans(this->GetCenter());  
   this->SetTF(tf);

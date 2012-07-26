@@ -31,7 +31,6 @@
 
 #include <ost/mol/entity_view.hh>
 
-#include <ost/mol/transform.hh>
 #include <ost/mol/residue_prop.hh>
 #include <ost/mol/impl/atom_impl_fw.hh>
 #include <ost/mol/impl/residue_impl_fw.hh>
