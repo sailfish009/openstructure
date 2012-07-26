@@ -69,7 +69,6 @@ endmacro()
 # content changed.
 #-------------------------------------------------------------------------------
 macro(copy_if_different FROM_DIR TO_DIR FILES TARGETS TARGET)
-  set(ADD_TARGETS "")
   foreach(SRC ${FILES})
       set(SRCFILE ${SRC})
       if("${FROM_DIR}" STREQUAL "" OR "${FROM_DIR}" STREQUAL "./")
@@ -87,13 +86,8 @@ macro(copy_if_different FROM_DIR TO_DIR FILES TARGETS TARGET)
       add_custom_command(TARGET "${TARGET}" PRE_BUILD
           DEPENDS ${FROM}
           COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FROM} ${TO}
-          COMMENT ""
-          )
-      list(APPEND ADD_TARGETS ${TO})
+          COMMENT "Staging ${SRC}")
   endforeach()
-  if (TARGETS)
-    set(${TARGETS} ${ADD_TARGETS})
-  endif()
 endmacro()
 
 #-------------------------------------------------------------------------------
@@ -109,20 +103,16 @@ macro(stage_headers HEADERS HEADER_INSTALL_DIR TARGET SUB)
   # building the library
   string(REPLACE "/" "_" _SUB_NO_SLASH "${SUB}")
   string(REPLACE "${PREFIX}_" "" _TARGET "${TARGET}")
-  #message("target before: ${TARGET} after: ${_TARGET}")
   set(_TARGET_NAME ${_TARGET}_${_SUB_NO_SLASH}_headers)
   set(_SUB ${SUB})
   if (NOT _SUB)
     set(_TARGET_NAME ${_TARGET}_headers)
   endif()
-  if (NOT TARGET headers)
-    add_custom_target("headers" COMMENT "")
-  endif()
   set(HEADER_DIR "${HEADER_STAGE_PATH}/${HEADER_INSTALL_DIR}")
   copy_if_different("" "${HEADER_DIR}"
                     "${_ABS_HEADER_NAMES}" ""
-                    "${TARGET}")
-  add_dependencies(${TARGET} "headers")
+                    "${_TARGET_NAME}")
+  add_dependencies(${TARGET} ${_TARGET_NAME})
 endmacro()
 
 #-------------------------------------------------------------------------------
