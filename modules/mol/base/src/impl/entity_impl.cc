@@ -35,6 +35,7 @@
 #include <ost/geom/geom.hh>
 
 #include <ost/log.hh>
+#include <ost/profile.hh>
 #include "atom_impl.hh"
 #include "entity_impl.hh"
 #include <ost/mol/entity_visitor.hh>
@@ -115,6 +116,7 @@ int EntityImpl::GetResidueCount() const
 
 EntityImplPtr EntityImpl::Copy()
 {
+  Profile prof("EntityImpl::Copy");
 #if MAKE_SHARED_AVAILABLE
   EntityImplPtr ent_p=boost::make_shared<EntityImpl>();  
 #else

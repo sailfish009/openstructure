@@ -2,6 +2,7 @@ set(OST_CONOP_HEADERS
 builder.hh
 builder_fw.hh
 conop.hh
+processor.hh
 heuristic_builder.hh
 amino_acids.hh
 diag.hh
@@ -17,6 +18,7 @@ ring_finder.hh
 
 set(OST_CONOP_SOURCES
 builder.cc
+processor.cc
 amino_acids.cc
 conop.cc
 diag.cc

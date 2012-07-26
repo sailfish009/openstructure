@@ -29,7 +29,7 @@ String Diag::Format(bool colored) const
    switch (i->type) {
      case DIAG_ARG_TYPE_ATOM:
        if (colored) {
-         strings.push_back("\033[0;30m"+
+         strings.push_back("\033[0;32m"+
                            atoms_[i->index].GetQualifiedName()+"\033[0m");
        } else {
          strings.push_back(atoms_[i->index].GetQualifiedName());
@@ -37,7 +37,7 @@ String Diag::Format(bool colored) const
        break;
      case DIAG_ARG_TYPE_RESIDUE:
         if (colored) {  
-          strings.push_back("\033[0;30m"+
+          strings.push_back("\033[0;32m"+
                             residues_[i->index].GetQualifiedName()+"\033[0m");
        } else {
           strings.push_back(residues_[i->index].GetQualifiedName());
@@ -45,7 +45,7 @@ String Diag::Format(bool colored) const
        break;
      case DIAG_ARG_TYPE_CHAIN:
         if (colored) {    
-          strings.push_back("\033[0;30m"+
+          strings.push_back("\033[0;32m"+
                             chains_[i->index].GetName()+"\033[0m");
        } else {
          strings.push_back(chains_[i->index].GetName());

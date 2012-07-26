@@ -1,10 +1,31 @@
+//------------------------------------------------------------------------------
+// This file is part of the OpenStructure project <www.openstructure.org>
+//
+// Copyright (C) 2008-2011 by the OpenStructure authors
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License as published by the Free
+// Software Foundation; either version 3.0 of the License, or (at your option)
+// any later version.
+// This library is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+// details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this library; if not, write to the Free Software Foundation, Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+//------------------------------------------------------------------------------
 #include <ost/log.hh>
+#include <ost/profile.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/bond_handle.hh>
+#include <ost/mol/torsion_handle.hh>
 #include <ost/mol/impl/residue_impl.hh>
 #include <ost/mol/impl/atom_impl.hh>
 #include <ost/mol/residue_handle.hh>
 #include "rule_based.hh"
+
 namespace ost { namespace conop {
 
 struct OrdinalAtomComp {
@@ -14,8 +35,74 @@ struct OrdinalAtomComp {
   }
 };
 
-void RuleBasedConop::Process(mol::EntityHandle ent)
+void RuleBasedProcessor::ProcessUnkResidue(DiagnosticsPtr diags,
+                                           mol::ResidueHandle res) const
 {
+  // Don't do anything if treatment is set to SILENT
+  if (this->GetUnkResidueTreatment() == CONOP_SILENT) {
+    return;
+  }
+  switch (this->GetUnkResidueTreatment()) {
+    case CONOP_WARN:
+      diags->AddDiag(DIAG_UNK_RESIDUE, "unknown residue %0")
+            .AddResidue(res);
+      break;
+    case CONOP_FATAL:
+      // FIXME: Implement a ConopError based on Diag...
+      break;
+    case CONOP_REMOVE_RESIDUE:
+    case CONOP_REMOVE:
+      diags->AddDiag(DIAG_UNK_RESIDUE, "removed unknown residue %0")
+           .AddResidue(res);
+      res.GetEntity().EditXCS().DeleteResidue(res);
+      return;
+    default:
+      assert(0 && "unhandled switch");
+  }
+}
+
+void RuleBasedProcessor::ProcessUnkAtoms(DiagnosticsPtr diags,
+                                         mol::AtomHandleList unks) const
+{
+  // Don't do anything if treatment is set to SILENT
+  if (this->GetUnkAtomTreatment() == CONOP_SILENT) {
+    return;
+  }
+ 
+  assert(unks.empty() && "empty unk list");
+  mol::XCSEditor edi = unks.front().GetEntity().EditXCS();
+  for (mol::AtomHandleList::iterator 
+       i = unks.begin(), e = unks.end(); i != e; ++i) {
+    switch (this->GetUnkAtomTreatment()) {
+      case CONOP_REMOVE_ATOM:
+      case CONOP_REMOVE:
+        edi.DeleteAtom(*i);
+        diags->AddDiag(DIAG_UNK_ATOM, "removed unknown atom %0 from residue %1")
+             .AddString(i->GetName()).AddResidue(i->GetResidue());
+        break;
+      case CONOP_WARN:
+        diags->AddDiag(DIAG_UNK_ATOM, "residue %0 contains unknown atom %1")
+             .AddResidue(i->GetResidue()).AddString(i->GetName());
+        break;
+      case CONOP_FATAL:
+        // FIXME: Implement a ConopError based on Diag...
+        break;
+      case CONOP_REMOVE_RESIDUE:
+        diags->AddDiag(DIAG_UNK_ATOM, "removed residue %0 with unknown atom %1")
+             .AddString(i->GetResidue().GetQualifiedName())
+             .AddString(i->GetName());
+        edi.DeleteResidue(i->GetResidue());
+        return;
+      default:
+        assert(0 && "unhandled switch");
+    }
+  }
+}
+
+void RuleBasedProcessor::DoProcess(DiagnosticsPtr diags, 
+                                   mol::EntityHandle ent) const
+{
+  Profile prof("RuleBasedProcessor::Process");
   mol::ChainHandleList chains=ent.GetChainList();
   for (mol::ChainHandleList::iterator 
        i = chains.begin(), e = chains.end(); i!= e; ++i) {
@@ -28,28 +115,37 @@ void RuleBasedConop::Process(mol::EntityHandle ent)
       CompoundPtr compound = lib_->FindCompound(residue.GetName(), Compound::PDB);
       if (!compound) {
         // process unknown residue...
+        this->ProcessUnkResidue(diags, residue);
         continue;
       }
       this->ReorderAtoms(residue, compound);  
       bool unks = this->HasUnknownAtoms(residue, compound);
       if (unks) {
-        LOG_WARNING("residue " << residue << " doesn't look like a standard " 
-                    << residue.GetKey() << " (" << compound->GetFormula() << ")");
+        mol::AtomHandleList unk_atoms;
+        unk_atoms = GetUnknownAtomsOfResidue(residue, compound, 
+                                             this->GetStrictHydrogens());
+        this->ProcessUnkAtoms(diags, unk_atoms);
         residue.SetChemClass(mol::ChemClass(mol::ChemClass::UNKNOWN));
         residue.SetChemType(mol::ChemType(mol::ChemType::UNKNOWN));
         residue.SetOneLetterCode('?');
         continue;
       }
       this->FillResidueProps(residue, compound);
-      this->ConnectAtomsOfResidue(residue, compound);
-      this->ConnectResidues(prev, residue);
+      if (this->GetConnect()) {
+        this->ConnectAtomsOfResidue(residue, compound);
+        this->ConnectResidues(prev, residue);
+      }
       prev = residue;
     }
+    if (residues.empty() || !this->GetAssignTorsions()) {
+      continue;
+    }
+    AssignBackboneTorsions(residues);
   }
 }
 
-void RuleBasedConop::ConnectResidues(mol::ResidueHandle rh,
-                                     mol::ResidueHandle next) 
+void RuleBasedProcessor::ConnectResidues(mol::ResidueHandle rh,
+                                         mol::ResidueHandle next) const
 {
   if (!next.IsValid() || !rh.IsValid()) {
     return;
@@ -81,16 +177,16 @@ void RuleBasedConop::ConnectResidues(mol::ResidueHandle rh,
   }
 }
 
-void RuleBasedConop::FillResidueProps(mol::ResidueHandle residue,
-                                      CompoundPtr compound)
+void RuleBasedProcessor::FillResidueProps(mol::ResidueHandle residue,
+                                      CompoundPtr compound) const
 {
   residue.SetChemClass(compound->GetChemClass());
   residue.SetChemType(compound->GetChemType());
   residue.SetOneLetterCode(compound->GetOneLetterCode());
 }
 
-mol::AtomHandle RuleBasedConop::LocateAtom(const mol::AtomHandleList& ahl, 
-                                           int ordinal) 
+mol::AtomHandle RuleBasedProcessor::LocateAtom(const mol::AtomHandleList& ahl, 
+                                               int ordinal) const
 {
   if (ahl.empty())
     return mol::AtomHandle();
@@ -108,7 +204,8 @@ mol::AtomHandle RuleBasedConop::LocateAtom(const mol::AtomHandleList& ahl,
 }
 
 
-void RuleBasedConop::ConnectAtomsOfResidue(mol::ResidueHandle rh, CompoundPtr compound) 
+void RuleBasedProcessor::ConnectAtomsOfResidue(mol::ResidueHandle rh, 
+                                               CompoundPtr compound) const
 {
 
   //if (!compound) {
@@ -127,16 +224,16 @@ void RuleBasedConop::ConnectAtomsOfResidue(mol::ResidueHandle rh, CompoundPtr co
       mol::AtomHandle a1=this->LocateAtom(atoms, bond.atom_one);
       mol::AtomHandle a2=this->LocateAtom(atoms, bond.atom_two);
       if (a1.IsValid() && a2.IsValid()) { 
-        if (!check_bond_feasibility_) {
-          if (strict_hydrogens_ && (a1.GetElement()=="H" || 
-                                                a2.GetElement()=="D")) {
+        if (!this->GetCheckBondFeasibility()) {
+          if (this->GetStrictHydrogens() && (a1.GetElement()=="H" || 
+                                             a2.GetElement()=="D")) {
             continue;
           }
           e.Connect(a1, a2, bond.order);
         } else { 
           if (this->IsBondFeasible(a1, a2)) {
-            if (strict_hydrogens_ && (a1.GetElement()=="H" || 
-                                                  a2.GetElement()=="D")) {
+            if (this->GetStrictHydrogens() && (a1.GetElement()=="H" || 
+                                               a2.GetElement()=="D")) {
               continue;
             }
             e.Connect(a1, a2, bond.order);
@@ -144,16 +241,10 @@ void RuleBasedConop::ConnectAtomsOfResidue(mol::ResidueHandle rh, CompoundPtr co
         }
       }
   }
-  //for (mol::AtomHandleList::iterator i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
-  //  if (((*i).GetElement()=="H" || (*i).GetElement()=="D") && 
-   //     (*i).GetBondCount()==0) {
-  //    this->DistanceBasedConnect(*i);
- //   }
- // }
 }
 
-bool RuleBasedConop::IsBondFeasible(const mol::AtomHandle& atom_a,
-                                    const mol::AtomHandle& atom_b)
+bool RuleBasedProcessor::IsBondFeasible(const mol::AtomHandle& atom_a,
+                                    const mol::AtomHandle& atom_b) const
 {
   Real radii=0.0;
   if (atom_a.GetRadius()>0.0) {
@@ -171,8 +262,9 @@ bool RuleBasedConop::IsBondFeasible(const mol::AtomHandle& atom_a,
   Real upper_bound=lower_bound*6.0;
   return (len<=upper_bound && len>=lower_bound);
 }
-void RuleBasedConop::ReorderAtoms(mol::ResidueHandle residue, 
-                                  CompoundPtr compound)
+
+void RuleBasedProcessor::ReorderAtoms(mol::ResidueHandle residue, 
+                                      CompoundPtr compound) const
 {
   mol::impl::ResidueImplPtr impl=residue.Impl();
   mol::impl::AtomImplList::iterator i=impl->GetAtomList().begin();
@@ -185,12 +277,17 @@ void RuleBasedConop::ReorderAtoms(mol::ResidueHandle residue,
       continue;
     }
     atom->SetState((compound->GetAtomSpecs())[index].ordinal);
+    // override element
+    if (this->GetFixElement()) {
+      atom->SetElement((compound->GetAtomSpecs())[index].element);
+    }
   }
   std::sort(impl->GetAtomList().begin(), impl->GetAtomList().end(),
             OrdinalAtomComp());
 }
 
-bool RuleBasedConop::HasUnknownAtoms(mol::ResidueHandle res, CompoundPtr compound)
+bool RuleBasedProcessor::HasUnknownAtoms(mol::ResidueHandle res, 
+                                         CompoundPtr compound) const 
 {
   AtomSpecList::const_iterator j=compound->GetAtomSpecs().begin();
   mol::AtomHandleList atoms=res.GetAtomList();
@@ -199,7 +296,7 @@ bool RuleBasedConop::HasUnknownAtoms(mol::ResidueHandle res, CompoundPtr compoun
        i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
     if ((*i).Impl()->GetState()==std::numeric_limits<unsigned int>::max()) {
       if (((*i).GetElement()=="H" || (*i).GetElement()=="D") && 
-          !strict_hydrogens_) {
+          !this->GetStrictHydrogens()) {
         continue;
       }
       return true;
@@ -207,4 +304,29 @@ bool RuleBasedConop::HasUnknownAtoms(mol::ResidueHandle res, CompoundPtr compoun
   }
   return false;
 }
+
+mol::AtomHandleList GetUnknownAtomsOfResidue(mol::ResidueHandle res, 
+                                             CompoundPtr compound,
+                                             bool strict_hydrogens)
+{
+  mol::AtomHandleList atoms=res.GetAtomList();
+  mol::AtomHandleList unks;
+  const AtomSpecList& atom_specs=compound->GetAtomSpecs();
+  for (mol::AtomHandleList::const_iterator
+        j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
+    bool found=false;
+    for (AtomSpecList::const_iterator
+          k=atom_specs.begin(), e3=atom_specs.end(); k!=e3; ++k) {
+      if (k->name==j->GetName() || k->alt_name==j->GetName()) {
+        found=true;
+        break;
+      }
+    }
+    if (!found) {
+      unks.push_back(*j);
+    }
+  }
+  return unks;
+}
+
 }}

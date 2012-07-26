@@ -185,6 +185,10 @@ public:
   ///         is the atom to remove. If no such atom exists, this method will
   ///         have no effect
   void DeleteAtom(const AtomHandle& atom);
+  /// \ brief Delete a set of atoms
+  ///
+  /// All associated torsions and bonds will be removed as well
+  void DeleteAtoms(const AtomHandleList& atoms);
   
   /// \brief Add named torsion to entity
   TorsionHandle AddTorsion(const String& name, const AtomHandle& a1,

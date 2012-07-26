@@ -6,7 +6,7 @@ using namespace ost::conop;
 
 void export_rule_based()
 {
-  class_<RuleBasedConop>("RuleBasedConop", init<CompoundLibPtr>())
-    .def("Process", &RuleBasedConop::Process)
+  class_<RuleBasedProcessor>("RuleBasedProcessor", init<CompoundLibPtr>())
+    .def("Process", &RuleBasedProcessor::Process)
   ;
 }
