@@ -57,6 +57,9 @@ public:
   /// \return  The newly created chain handle
   ChainHandle InsertChain(const String& chain_name);
 
+  //ChainHandle InsertChain(ChainHandle chain, bool deep=false);
+  ChainHandle InsertChain(const String& chain_name, ChainHandle chain, bool deep=false);
+
   /// \name Inserting, removing and modifying order of residues
   ///@{
   /// \brief Append residue to the end of the chain
@@ -76,6 +79,9 @@ public:
   
   ResidueHandle AppendResidue(ChainHandle chain, const ResidueKey& k, 
                               const ResNum& num); 
+
+  ResidueHandle AppendResidue(ChainHandle chain, ResidueHandle residue, bool deep=false);
+
   /// \brief  Insert residue into chain
   /// 
   /// Insert residue with residue number \var num and key \var k into the
@@ -94,6 +100,9 @@ public:
   ResidueHandle InsertResidueBefore(ChainHandle chain, int index, 
                                     const ResNum& num,
                                     const ResidueKey& k);
+
+  ResidueHandle InsertResidueBefore(ChainHandle chain, ResidueHandle residue,
+                                    int index, bool deep=false);
   /// \brief insert residue into chain
   /// 
   /// This method is identical to InsertResidueBefore() but inserts the
@@ -102,6 +111,9 @@ public:
   ResidueHandle InsertResidueAfter(ChainHandle chain, int index,
                                    const ResNum& num,
                                    const ResidueKey& k);
+
+  ResidueHandle InsertResidueAfter(ChainHandle chain, ResidueHandle residue,
+                                   int index, bool deep=false);
   
   /// \name Adding/removing atoms
   //@{
@@ -120,12 +132,19 @@ public:
                         Real occupancy=1.0, Real b_factor=0.0, 
                         bool is_hetatm=false);
 
+  AtomHandle InsertAtom(ResidueHandle residue, AtomHandle atom);
+
   /// \brief Insert new atom with alternative position indicator
   /// \sa EditorBase::AddAltAtomPos(), ResidueHandle
   AtomHandle InsertAltAtom(ResidueHandle residue, const String& name, 
                            const String& alt_group, const geom::Vec3& pos,
                            const String& ele="", Real occ=1.0,
                            Real b_factor=0.0);
+
+  AtomHandle InsertAltAtom(ResidueHandle residue, AtomHandle atom,
+                           const String& alt_group);
+
+
   /// \brief  Add alternative atom position
   /// \param group is the name of the alternative atom position group. If no 
   ///     group of that name exists, it will be created.

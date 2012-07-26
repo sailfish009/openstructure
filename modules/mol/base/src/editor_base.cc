@@ -40,6 +40,51 @@ ChainHandle EditorBase::InsertChain(const String& chain_name)
   return ent_.Impl()->InsertChain(chain_name);
 }
 
+ChainHandle EditorBase::InsertChain(const String& chain_name, ChainHandle chain, bool deep)
+{
+
+  impl::ChainImplPtr inserted_chain=ent_.Impl()->InsertChain(chain.Impl());
+  inserted_chain->SetName(chain_name);
+
+  if(deep){
+    ResidueHandleIter it=chain.ResiduesBegin(),
+                      it_end=chain.ResiduesEnd();
+    for(;it!=it_end;++it){
+      ResidueHandle res=*it;
+      this->AppendResidue(inserted_chain, res, true);
+    }
+  }
+
+  return inserted_chain;
+
+
+
+  /*
+  impl::ChainImplPtr new_chain=chain.Impl();
+  new_chain->SetName(chain_name);
+  if(!deep) new_chain->DeleteAllResidues();
+  return ent_.Impl()->InsertChain(new_chain);
+  */
+  /*
+  if(deep){
+
+    ChainHandle inserted_chain=ent_.Impl()->InsertChain(chain_name);
+
+    ResidueHandleIter it=chain.ResiduesBegin(),
+                      it_end=chain.ResiduesEnd();
+    for(;it!=it_end;++it){
+      ResidueHandle res=*it;
+      this->AppendResidue(inserted_chain, res, true);
+    }
+    return inserted_chain;
+  }
+
+  else{
+    return ent_.Impl()->InsertChain(chain.GetName());
+  }
+  */
+}
+
 ResidueHandle EditorBase::AppendResidue(ChainHandle chain, const ResidueKey& k)
 {
   CheckHandleValidity(chain);  
@@ -54,6 +99,24 @@ ResidueHandle EditorBase::AppendResidue(ChainHandle chain, const ResidueKey& k,
   return ResidueHandle(chain.Impl()->AppendResidue(k, num));
 }
 
+ResidueHandle EditorBase::AppendResidue(ChainHandle chain, ResidueHandle residue, bool deep)
+{
+  CheckHandleValidity(chain);
+
+  impl::ResidueImplPtr inserted_residue=chain.Impl()->AppendResidue(residue.Impl());
+  if(deep)
+  {
+    AtomHandleIter it=residue.AtomsBegin(),
+                   it_end=residue.AtomsEnd();
+    for(;it!=it_end;++it)
+    {
+      AtomHandle atom=*it;
+      this->InsertAtom(inserted_residue,atom);
+    }
+  }
+  return inserted_residue;
+}
+
 ResidueHandle EditorBase::InsertResidueBefore(ChainHandle chain, int index, 
                                               const ResNum& num,
                                               const ResidueKey& k)
@@ -62,12 +125,64 @@ ResidueHandle EditorBase::InsertResidueBefore(ChainHandle chain, int index,
   return ResidueHandle(chain.Impl()->InsertResidueBefore(index, num, k));
 }
 
+ResidueHandle EditorBase::InsertResidueBefore(ChainHandle chain,
+                                              ResidueHandle residue,
+                                              int index, bool deep)
+{
+  CheckHandleValidity(chain);
+
+  if(deep)
+  {
+    ResidueHandle inserted_residue=chain.Impl()->InsertResidueBefore(index,
+                                                                     residue.GetNumber(),
+                                                                     residue.GetKey());
+    AtomHandleIter it=inserted_residue.AtomsBegin(),
+                   it_end=inserted_residue.AtomsEnd();
+    for(;it!=it_end;++it)
+    {
+      AtomHandle atom=*it;
+      this->InsertAtom(inserted_residue, atom);
+    }
+    return inserted_residue;
+  }
+  else
+  {
+    return ResidueHandle(chain.Impl()->InsertResidueBefore(index,
+                                                           residue.GetNumber(),
+                                                           residue.GetKey()));
+  }
+}
+
 ResidueHandle EditorBase::InsertResidueAfter(ChainHandle chain, int index,
                                              const ResNum& num,
                                              const ResidueKey& k)
 {
   CheckHandleValidity(chain);
   return ResidueHandle(chain.Impl()->InsertResidueAfter(index, num, k));  
+}
+
+ResidueHandle EditorBase::InsertResidueAfter(ChainHandle chain, ResidueHandle residue,
+                                             int index, bool deep)
+{
+  if(deep)
+  {
+    ResidueHandle inserted_residue=chain.Impl()->InsertResidueAfter(index,
+                                                                    residue.GetNumber(),
+                                                                    residue.GetKey());
+    AtomHandleIter it=inserted_residue.AtomsBegin(),
+                   it_end=inserted_residue.AtomsEnd();
+    for(;it!=it_end;++it)
+    {
+      this->InsertAtom(inserted_residue, *it);
+    }
+    return inserted_residue;
+  }
+  else
+  {
+    return ResidueHandle(chain.Impl()->InsertResidueAfter(index,
+                                                          residue.GetNumber(),
+                                                          residue.GetKey()));
+  }
 }
 
 void EditorBase::RenameResidue(ResidueHandle res, const String& new_name)
@@ -116,6 +231,14 @@ AtomHandle EditorBase::InsertAtom(ResidueHandle res, const String& name,
   return atom;
 }
 
+AtomHandle EditorBase::InsertAtom(ResidueHandle res, AtomHandle atom)
+{
+  CheckHandleValidity(res);
+  ent_.Impl()->MarkTraceDirty();
+  AtomHandle a(res.Impl()->InsertAtom(atom.Impl()));
+  return a;
+}
+
 AtomHandle EditorBase::InsertAltAtom(ResidueHandle res, const String& name,
                                      const String& alt_group,
                                      const geom::Vec3& pos,
@@ -128,6 +251,18 @@ AtomHandle EditorBase::InsertAltAtom(ResidueHandle res, const String& name,
 			                                    ele, occ, b_factor));
   this->UpdateTrace();
   return atom;
+}
+
+AtomHandle EditorBase::InsertAltAtom(ResidueHandle res, AtomHandle atom,
+                                     const String& alt_group)
+{
+  CheckHandleValidity(res);
+  ent_.Impl()->MarkTraceDirty();
+  AtomHandle a(res.Impl()->InsertAltAtom(atom.GetName(), alt_group,
+                                         atom.GetPos(), atom.GetElement(),
+                                         atom.GetOccupancy(), atom.GetBFactor()));
+  this->UpdateTrace();
+  return a;
 }
 
 void EditorBase::AddAltAtomPos(const String& group,

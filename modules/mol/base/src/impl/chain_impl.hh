@@ -119,6 +119,7 @@ public:
 
   /// \brief  Append residue at end of chain.
   ResidueImplPtr AppendResidue(const ResidueKey& k, const ResNum& n);
+
   
   // next residue, not necessarily in sequence
   ResidueImplPtr GetPrev(const ResidueImplPtr& r) const;
