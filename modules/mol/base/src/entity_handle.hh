@@ -20,7 +20,6 @@
 #define OST_ENTITY_HANDLE_HH
 
 #include <ost/mol/module_config.hh>
-#include <ost/mol/transform.hh>
 
 #include "impl/entity_impl_fw.hh"
 #include "entity_visitor_fw.hh"

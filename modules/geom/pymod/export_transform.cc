@@ -18,14 +18,10 @@
 //------------------------------------------------------------------------------
 #include <boost/python.hpp>
 
-#include <ost/mol/transform.hh>
-#if(OST_INFO_ENABLED)
-#include <ost/info/info.hh>
-#endif
+#include <ost/geom/transform.hh>
 
 using namespace boost::python;
-using namespace ost;
-using namespace ost::mol;
+using namespace geom;
 
 void export_Transform()
 {
@@ -56,8 +52,4 @@ void export_Transform()
     .def("ApplyZAxisTranslation",&Transform::ApplyZAxisTranslation)
     .def("ApplyAxisRotation",&Transform::ApplyAxisRotation)
     ;
-#if(OST_INFO_ENABLED)
-  def("TransformToInfo", &TransformToInfo);
-  def("TransformFromInfo", &TransformFromInfo);
-#endif
 }

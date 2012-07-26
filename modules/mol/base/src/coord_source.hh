@@ -27,11 +27,14 @@
 #include <ost/mol/coord_frame.hh>
 #include <ost/mol/entity_handle.hh>
 
+namespace geom {
+  // we should really have fw headers...
+  class Transform;
+}
 
 namespace ost { namespace mol {
 
 class CoordSource;
-class Transform;
 
 typedef boost::shared_ptr<CoordSource> CoordSourcePtr;
 
@@ -82,7 +85,7 @@ public:
   virtual void AddFrame(const std::vector<geom::Vec3>& coords,const geom::Vec3& cell_size,const geom::Vec3& cell_angles) = 0;
   virtual void InsertFrame(int pos, const std::vector<geom::Vec3>& coords) = 0;
 
-  void ApplyTransform(const Transform& tf);
+  void ApplyTransform(const geom::Transform& tf);
 
 protected:
   void SetMutable(bool flag);

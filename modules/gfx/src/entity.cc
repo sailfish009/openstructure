@@ -231,7 +231,7 @@ void Entity::Rebuild()
 
   // update center in transformation
   geom::Vec3 center=this->GetCenter();
-  Transform tf=this->GetTF();
+  geom::Transform tf=this->GetTF();
   tf.SetCenter(center);
   tf.SetTrans(center+GetTF().GetTrans()-GetTF().GetCenter());
   this->SetTF(tf);  

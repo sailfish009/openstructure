@@ -18,18 +18,13 @@
 //------------------------------------------------------------------------------
 
 #include <ost/config.hh>
-#if(OST_INFO_ENABLED)
-#include <ost/info/info.hh>
-#include <ost/info/geom_info_conversion.hh>
-#endif
 #include <ost/log.hh>
+
 #include "transform.hh"
+#include "vecmat3_op.hh"
+#include "vecmat4_op.hh"
 
-namespace ost { 
-
-using namespace geom;
-
-namespace mol {
+namespace geom {
 
 Transform::Transform():
   rot_(Mat3(1,0,0, 0,1,0, 0,0,1)),
@@ -207,7 +202,7 @@ void Transform::update_tm()
   try {
     itm_ = Invert(tm_);
   } catch (GeomException& e) {
-    LOG_WARNING("caught GeomException in Transform::update_tm: " << e.what());
+    std::cerr << "caught GeomException in Transform::update_tm: " << e.what() << std::endl;
     itm_=geom::Mat4();
   }
 }
@@ -221,36 +216,4 @@ void Transform::update_components()
   trans_[2] = tm_(3,2);
 }
 
-#if(OST_INFO_ENABLED)
-Transform TransformFromInfo(const info::InfoGroup& group)
-{
-  if (!group.HasItem("center")) {
-    throw info::InfoError("Error while loading transform from info: "
-                          "Group does not contain a center element");
-  }
-  if (!group.HasGroup("rotation")) {
-    throw info::InfoError("Error while loading transform from info: "
-                          "Group does not contain a rotation element");
-  }
-  if (!group.HasItem("translation")) {
-    throw info::InfoError("Error while loading transform from info: "
-                          "Group does not contain a translation element");
-  } 
-  Transform tf;
-  tf.SetCenter(group.GetItem("center").AsVector());
-  tf.SetTrans(group.GetItem("translation").AsVector());
-  tf.SetRot(info::Mat3FromInfo(group.GetGroup("rotation")));
-  return tf;
-}
-
-void TransformToInfo(const Transform& transform, info::InfoGroup& group)
-{
-  Transform tf;
-  group.CreateItem("center", transform.GetCenter());
-  group.CreateItem("translation", transform.GetTrans());
-  info::InfoGroup rot=group.CreateGroup("rotation");
-  info::Mat3ToInfo(transform.GetRot(), rot);
-}
-#endif
-
-}} // ns
+} // ns

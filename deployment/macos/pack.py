@@ -1,3 +1,8 @@
+"""
+deploy.py helps you package your code into a standalone application.
+
+for now, MacOS X and Linux are supported...
+"""
 import os
 import subprocess
 import shutil
@@ -5,7 +10,7 @@ import sys
 import glob
 
 def _lib_name(component):
-  return 'libost_%s.dylib' % component
+  return 'lib%s.dylib' % component
 
 def _deps_for_lib(lib, pool, recursive=True):
   if lib in pool:
@@ -50,7 +55,7 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
     if bin_name not in pool:
       _deps_for_lib(bin_name, pool)
   for bin in libexec_binaries:
-    bin_name=os.path.abspath(os.path.join(stage_dir, 'libexec/openstructure',
+    bin_name=os.path.abspath(os.path.join(stage_dir, 'libexec', libexec_path,
                                           bin))
     if not os.path.exists(bin_name):
       print 'WARNING:', bin_name, 'does not exist'
@@ -71,7 +76,7 @@ def collect_deps(stage_dir, components, binaries, libexec_binaries,
 LIBEXEC_SCRIPTS=['ost_config']
 LIBEXEC_BINARIES=[]
 GUI_LIBEXEC_BINARIES=['gosty']
-BINARIES=['lddt', 'chemdict_tool', 'tmalign', 'tmscore']
+BINARIES=['ldt', 'chemdict_tool', 'tmalign', 'tmscore']
 GUI_BINARIES=[]
 GUI_COMPONENTS=['gfx', 'gui', 'info']
 COMPONENTS=['mol', 'geom', 'conop', 'seq_alg', 'seq',
@@ -153,6 +158,8 @@ def copy_deps(dependencies, outdir):
       dst_name=os.path.join(outdir, 'lib', os.path.basename(dep))
       if not os.path.exists(dep):
         continue
+      if os.path.exists(dst_name):
+        continue
       shutil.copy(dep, dst_name)
       change_id(os.path.basename(dep), dst_name)
       update_load_commands(dst_name, False, exe_path)
@@ -182,10 +189,46 @@ def update_pymod_shared_objects(lib_path, path, files):
     elif ext in ('.pyc', '.pyo'):
       os.unlink(os.path.join(path, f))
 
+def merge_tree(src, dst):
+  """
+  Similar to shutil.copytree, but does not complain when the destination
+  directory already exists.
+  """
+  names = os.listdir(src)
+  if not os.path.exists(dst):
+    os.makedirs(dst)
+  errors = []
+  for name in names:
+    srcname = os.path.join(src, name)
+    dstname = os.path.join(dst, name)
+    try:
+        if os.path.islink(srcname):
+            linkto = os.readlink(srcname)
+            os.symlink(linkto, dstname)
+        elif os.path.isdir(srcname):
+            merge_tree(srcname, dstname)
+        else:
+            shutil.copy2(srcname, dstname)
+    except (IOError, os.error), why:
+        errors.append((srcname, dstname, str(why)))
+    except shutil.Error, err:
+        errors.extend(err.args[0])
+  try:
+      shutil.copystat(src, dst)
+  except OSError, why:
+      if WindowsError is not None and isinstance(why, WindowsError):
+          # Copying file access times may fail on Windows
+          pass
+      else:
+          errors.extend((src, dst, str(why)))
+  if errors:
+      raise shutil.Error, errors
+
 def get_site_package_dir():
   """
   Get site-package directory of this python installation. This assumes 
-  that ost was linked against the same version of Python
+  that ost was linked against the same version of Python (which is a very
+  reasonable thing to do, as this script is most likely run with ost).
   """
   for p in sys.path:
     pattern='/site-packages'
@@ -208,113 +251,107 @@ def get_python_home():
   """
   return os.path.dirname(sys.modules['os'].__file__)
 
-def make_standalone(stage_dir, outdir, no_includes, force_no_rpath=False,
-                    macports_workaround=False, no_gui=False):
-  site_packages_dir=get_site_package_dir()
 
-  if os.path.exists(outdir):
-    shutil.rmtree(outdir)
-  os.system('mkdir -p "%s"' % outdir)
-  os.system('mkdir -p "%s/lib"' % outdir)
-  os.system('mkdir -p "%s/bin"' % outdir)
-  os.system('mkdir -p "%s/libexec/openstructure"' % outdir)
-  print 'copying shared datafiles'
-  shutil.copytree(os.path.join(stage_dir, 'share'), 
-                  os.path.join(outdir, 'share'))
-  scripts=SCRIPTS
-  binaries=BINARIES
-  components=COMPONENTS
-  libexec_scripts=LIBEXEC_SCRIPTS
-  site_packages=SITE_PACKAGES
-  libexec_binaries=LIBEXEC_BINARIES
-  if not no_gui:
-    scripts+=GUI_SCRIPTS
-    binaries+=GUI_BINARIES
-    components+=GUI_COMPONENTS
-    libexec_binaries+=GUI_LIBEXEC_BINARIES
-    site_packages+=GUI_SITE_PACKAGES
-  print 'collecting dependencies'
-  deps=collect_deps(stage_dir, components, binaries, libexec_binaries,
-                    site_packages, site_packages_dir)
-  # when running in non-gui mode, we are most likely missing the boost
-  # python library. Let's add it to the list of dependencies by
-  # inspecting "_ost_base.so".
-  pymod_dir='lib/python%d.%d/site-packages' % sys.version_info[0:2]
-  _deps_for_lib(os.path.join(stage_dir, pymod_dir, 'ost/_ost_base.so'),
-                deps, recursive=False)
-  print 'copying dependencies'
-  copy_deps(deps, outdir)
-  print 'copying libexec binaries'
-  copy_binaries(stage_dir, outdir, libexec_binaries, libexec_scripts,
-                'libexec/openstructure')
-  print 'copying binaries'
-  copy_binaries(stage_dir, outdir, binaries, scripts, 'bin')
-  print 'copying pymod'
-  shutil.copytree(os.path.join(stage_dir,pymod_dir),
-                  os.path.join(outdir, pymod_dir))
-  copied_py_framework=False
-  non_std_python=False
-  if os.path.exists(os.path.join(outdir, 'lib/Python.framework')):
-    framework_path=os.path.join(outdir, 'lib/Python.framework')
-    nonstd_python=True
-    copied_py_framework=True
-  if len(glob.glob(os.path.join(outdir, 'lib', 'libpython*')))>0:
-    non_std_python=True
-  if non_std_python:
-    print 'looks like we are using a non-standard python.'
-    python_home=get_python_home()    
-    if not copied_py_framework:
-      print 'also copying python modules from %s' % python_home
-      modules_dst=os.path.join(outdir, 'lib', os.path.basename(python_home))
-      shutil.copytree(python_home, modules_dst)
-      if os.path.exists(os.path.join(modules_dst, 'site-packages')):
-        shutil.rmtree(os.path.join(modules_dst, 'site-packages'))
-      copy_binaries(os.path.join(python_home, '../..'), outdir, 
-                    ['python'], [], 'bin')
-      python_bin=os.path.abspath(os.path.join(python_home, '../../bin/python'))
-    else:
-      # For MacPorts it's even more involved. Python is not executed directly 
-      # but rather uses a wrapper executable that calls the actual python exe.
-      # We have to include that one into the bundle.
-      if macports_workaround:
-        path_to_app='../../Resources/Python.app/Contents/MacOS/'
-        exe_path=os.path.join(python_home, path_to_app)
-        copy_binaries(exe_path, outdir, ['python'], [], 
-                      append_bin=False)
-        python_bin=os.path.join('/opt/local/bin/python')
+class Package(object):
+  def __init__(self, name, root_dir, binaries=[], scripts=[], 
+               modules=[], libraries=[], libexec_dir=None, libexec_scripts=[]):
+    self.root_dir=root_dir
+    self.name=name
+    self.binaries=binaries
+    self.scripts=scripts
+    self.libraries=libraries
+    self.libexec_dir=libexec_dir
+    self.libexec_scripts=libexec_scripts
+    self.pymod_dir=os.path.join('lib', 'python%d.%d' % sys.version_info[0:2],
+                                'site-packages')
+    self.modules=modules
+    self.libexec_binaries=[]
+    self.site_packages=[]
+    self.site_packages_dir=''
+  def status(self, message):
+    print '%s: %s' % (self.name, message)
+
+  def _prepare_output_dir(self, output_dir):
+    """
+    Prepares the output directory structure, including lib, bin and an optional
+    libexec directory.
+    """
+    #if os.path.exists(output_dir):
+    #  shutil.rmtree(output_dir)
+    if not os.path.exists(output_dir):
+      os.makedirs(output_dir)
+    if not os.path.exists(os.path.join(output_dir, 'bin')):
+      os.makedirs(os.path.join(output_dir, 'bin'))
+    if not os.path.exists(os.path.join(output_dir, 'lib')):
+      os.makedirs(os.path.join(output_dir, 'lib'))
+    if self.libexec_dir:
+      out_exec_dir=os.path.join(output_dir, 'libexec', self.libexec_dir)
+      if not os.path.exists(out_exec_dir):
+        print 'making...', out_exec_dir
+        os.makedirs(out_exec_dir)
+  def _copy_site_packages(self, output_dir):
+    for sp in SITE_PACKAGES:
+      src=get_python_module_path(sp)
+      if os.path.isdir(src):
+        merge_tree(src, os.path.joini(output_dir, self.pymod_dir, sp))
       else:
-        copy_binaries(os.path.join(python_home, '../..'), outdir, 
-                      ['python'], [])
-        python_bin=os.path.abspath(os.path.join(python_home, '../../bin/python'))
-      # remove all versions but the one we are using
-      version_string=sys.version[0:3]
-      prefix, postfix=split_framework_components(python_home)
-      site_packages_dir=os.path.join(outdir, 'lib', 'Python.framework', 
-                                 postfix, 'site-packages')
-      if os.path.exists(site_packages_dir):
-        shutil.rmtree(site_packages_dir)
-      for directory in glob.glob(os.path.join(framework_path, 'Versions/*')):
-        if os.path.basename(directory)!=version_string:
-          shutil.rmtree(directory)
-    # replace the python executable
-    ost_script=os.path.join(outdir, 'libexec', 'openstructure', 'ost_config')
-    os.chmod(ost_script, 0666)
-    script=''.join(open(ost_script, 'r').readlines())
-    script=script.replace(python_bin, '$BIN_DIR/python')
-    open(ost_script, 'w').write(script)
-    os.chmod(ost_script, 0555)
+        shutil.copy(src, os.path.join(output_dir, self.pymod_dir, sp))
+    print 'updating link commands of python shared objects'
+    os.path.walk(os.path.join(output_dir, 'lib'), 
+                 update_pymod_shared_objects, 
+                 os.path.join(output_dir, 'lib'))
 
-  if no_includes:
-    os.system(REMOVE_HEADERS % outdir)
-    os.system(REMOVE_CURRENT % outdir)  
-  print 'copying site-packages'
-  for sp in SITE_PACKAGES:
-    src=get_python_module_path(sp)
-    if os.path.isdir(src):
-      shutil.copytree(src, os.path.join(outdir, pymod_dir, sp))
-    else:
-      shutil.copy(src, os.path.join(outdir, pymod_dir, sp))
-  print 'updating link commands of python shared objects'
-  os.path.walk(os.path.join(outdir, 'lib'), 
-               update_pymod_shared_objects, 
-               os.path.join(outdir, 'lib'))
+  def ship(self, output_dir):
+    self._prepare_output_dir(output_dir)
+    if os.path.exists(os.path.join(self.root_dir, 'share')):
+      self.status('copying shared data files')
+      merge_tree(os.path.join(self.root_dir, 'share'), 
+                 os.path.join(output_dir, 'share'))
+    self.status('collecting dependencies')
+    deps=collect_deps(self.root_dir, self.libraries, self.binaries, 
+                      self.libexec_binaries, self.site_packages, 
+                      self.site_packages_dir)
+    # when running in non-gui mode, we are most likely missing the boost
+    # python library. Let's add it to the list of dependencies by
+    # inspecting "_ost_base.so".
+    pymod_dir='lib/python%d.%d/site-packages' % sys.version_info[0:2]
+    _deps_for_lib(os.path.join(self.root_dir, pymod_dir, 'ost/_ost_base.so'),
+                  deps, recursive=False)
+    self.status('copying dependencies')
+    copy_deps(deps, output_dir)
+    if self.libexec_dir:
+      self.status('copying libexec binaries')
+      copy_binaries(self.root_dir, output_dir, self.libexec_binaries, 
+                    self.libexec_scripts,
+                    os.path.join('libexec', self.libexec_dir))
+    self.status('copying binaries')
+    copy_binaries(self.root_dir, output_dir, self.binaries, 
+                self.scripts, 'bin')
+    self.status('copying pymod')
+    merge_tree(os.path.join(self.root_dir,self.pymod_dir), 
+               os.path.join(output_dir, self.pymod_dir))
+    self._copy_site_packages(output_dir)
+
+class OpenStructure(Package):
+  def __init__(self, stage_dir, minimal=True):
+    libs=['ost_mol', 'ost_geom', 'ost_conop', 'ost_seq_alg',
+          'ost_io', 'ost_db', 'ost_base', 'ost_seq', 'ost_mol_alg']
+    super(OpenStructure, self).__init__('OpenStructure', stage_dir, 
+                                        binaries=['ldt', 'chemdict_tool'],
+                                        libexec_scripts=['ost_config'],
+                                        scripts=['ost'],
+                                        libraries=libs,
+                                        libexec_dir='openstructure')
+
+class Qmean(Package):
+  def __init__(self, stage_dir):
+    super(Qmean, self).__init__('Qmean', stage_dir,
+                                scripts=['qmean'],
+                                libexec_scripts=['qmean_script.py'],
+                                libexec_dir='qmean',
+                                libraries=['qmean'])
+ost=OpenStructure('../../stage')
+qmean=Qmean('../../../../../qmean/stage')
+ost.ship('qmean')
+qmean.ship('qmean')
+

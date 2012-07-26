@@ -10,7 +10,6 @@ set(OST_MOL_BASE_UNIT_TESTS
   test_query.cc
   test_surface.cc
   test_residue.cc
-  test_transform.cc
   test_view.cc
   test_view_op.cc
   tests.cc

@@ -283,6 +283,7 @@ int main (int argc, char **argv)
     EntityView v=model.CreateFullView();
 
     boost::filesystem::path pathstring(files[i]);
+
     #if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
     String filestring=pathstring.string();
     #else

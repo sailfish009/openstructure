@@ -31,7 +31,6 @@ residue_view.cc
 surface_builder.cc
 surface_handle.cc
 torsion_handle.cc
-transform.cc
 query_view_wrapper.cc
 view_op.cc
 coord_source.cc
@@ -87,13 +86,13 @@ surface_builder.hh
 surface_handle.hh
 surface_prop.hh
 torsion_handle.hh
-transform.hh
 query_view_wrapper.hh
 view_op.hh
 view_type_fw.hh
 view_op.hh
 xcs_editor.hh
 bounding_box.hh
+transform.hh
 module_config.hh)
 
 foreach(_impl_src ${OST_MOL_IMPL_SOURCES})

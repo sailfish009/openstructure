@@ -33,21 +33,20 @@
 namespace {
 
 using namespace ost::img;
-using namespace ost::img::alg;
 
 void test() 
 {
   alg::Randomize rnd;
-  Transform transform;
+  alg::Transform transform;
 }
 
 void test_point()
 {
   Point p0(3,-2,1);
   Point p1a(9,-6,3);
-  Point p1b(Scale(3.0).Apply(p0));
+  Point p1b(alg::Scale(3.0).Apply(p0));
   Point p2a(Point(2,3,1));
-  Point p2b=Rotate2D(M_PI_2).Apply(p0);
+  Point p2b=alg::Rotate2D(M_PI_2).Apply(p0);
 
   std::ostringstream msg;
   msg << p1a << " != " << p1b;
@@ -61,9 +60,9 @@ void test_extent()
 {
   Extent e0(Point(0,0),Point(2,3));
   Extent e1a(Point(-1,-1),Point(7,10));
-  Extent e1b=Scale(3.0).Apply(e0);
+  Extent e1b=alg::Scale(3.0).Apply(e0);
   Extent e2a(Point(-3,0),Point(0,2));
-  Extent e2b=Rotate2D(M_PI_2).Apply(e0);
+  Extent e2b=alg::Rotate2D(M_PI_2).Apply(e0);
 
   std::ostringstream msg;
   msg << e1a << " != " << e1b;
@@ -74,10 +73,10 @@ void test_extent()
 
   e0=Extent(Point(-3,-2),Size(8,10));
   e1a=Extent(Point(-10,-7),Size(24,30));
-  e1b=Scale(3.0).Apply(e0);
+  e1b=alg::Scale(3.0).Apply(e0);
 
   e2a=Extent(Point(-7,-3),Size(10,8));
-  e2b=Rotate2D(M_PI_2).Apply(e0);
+  e2b=alg::Rotate2D(M_PI_2).Apply(e0);
 
   msg.str("");
   msg << e1a << " != " << e1b;

@@ -23,11 +23,11 @@ set(GUI_IMAGES
 )
 
 add_custom_target(scene_icons ALL)
-copy_if_different("./" "${STAGE_DIR}/share/openstructure/gui/icons" 
+copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/share/openstructure/gui/icons" 
                   "${GUI_ICONS}" "ICONS_FOR_GUI" scene_icons)
 install(FILES ${GUI_ICONS} DESTINATION "share/openstructure/gui/icons")
 
 add_custom_target(gui_images ALL)
-copy_if_different("./" "${STAGE_DIR}/share/openstructure/gui/images" 
+copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/share/openstructure/gui/images" 
                   "${GUI_IMAGES}" "IMAGES_FOR_GUI" gui_images)
 install(FILES ${GUI_IMAGES} DESTINATION "share/openstructure/gui/images")

@@ -53,6 +53,15 @@ void DLLEXPORT_OST_INFO Mat4ToInfo(const geom::Mat4& mat, InfoGroup& group);
 
 ///\brief load Mat4 from info
 geom::Mat4 DLLEXPORT_OST_INFO Mat4FromInfo(const InfoGroup& group);
+
+/// \brief read transformation from info group
+/// \relates Transform
+geom::Transform DLLEXPORT_OST_INFO TransformFromInfo(const info::InfoGroup& group);
+/// \brief store transformation in info group
+/// \relates Transform
+void DLLEXPORT_OST_INFO TransformToInfo(const geom::Transform& transform,
+                                           info::InfoGroup& group);
+
 //@}
 }}
 

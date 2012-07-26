@@ -39,7 +39,7 @@ class SpnavInputDevice(QtCore.QObject):
   def InputChanged(self, tx,ty,tz,rx,ry,rz):
     if (not self._lock_input) and (self.level is not None):
       ligand = self.level.ligand
-      transf = mol.Transform()
+      transf = geom.Transform()
       if(self.trans):
         delta = geom.Vec3 ((tx/480.0)*self._trans_factor, (ty/480.0)*self._trans_factor, (-tz/480.0)*self._trans_factor)
         transf.SetTrans(delta)

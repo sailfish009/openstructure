@@ -26,7 +26,7 @@
 #include <string>
 #include <fstream>
 
-#include <ost/mol/transform.hh>
+#include <ost/geom/transform.hh>
 
 #include "color.hh"
 
@@ -63,7 +63,7 @@ public:
 
 public:
   bool use_tf;
-  mol::Transform tf;
+  geom::Transform tf;
 
 private:
   std::string pov_file_;

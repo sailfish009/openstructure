@@ -19,9 +19,10 @@
 #include <ost/invalid_handle.hh>
 #include <ost/integrity_error.hh>
 #include <ost/log.hh>
-#include <ost/mol/in_mem_coord_source.hh>
-#include <ost/mol/view_op.hh>
-#include <ost/mol/mol.hh>
+#include <ost/geom/transform.hh>
+#include "in_mem_coord_source.hh"
+#include "view_op.hh"
+#include "mol.hh"
 #include "coord_group.hh"
 
 
@@ -255,7 +256,7 @@ CoordGroupHandle CoordGroupHandle::Filter(const EntityView& selected, int first,
   return filtered_cg;
 }
 
-void CoordGroupHandle::ApplyTransform(const mol::Transform& tf)
+void CoordGroupHandle::ApplyTransform(const geom::Transform& tf)
 {
   this->CheckValidity();
   if (source_->IsMutable()) {

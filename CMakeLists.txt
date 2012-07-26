@@ -322,7 +322,7 @@ message(STATUS
         "   Info support                    (-DENABLE_INFO) : ${_INFO}\n"
         "   Graphical interface              (-DENABLE_GUI) : ${_UI}\n"
         "   OpenGL support                   (-DENABLE_GFX) : ${_OPENGL}\n"
-        "   OpenGL via Mesa                  (-DUSE_MESA)   : ${_USE_MESA}\n"
+        "   OpenGL via Mesa                    (-DUSE_MESA) : ${_USE_MESA}\n"
         "   Image Processing support         (-DENABLE_IMG) : ${_IMG}\n"
         "   Shader support                   (-DUSE_SHADER) : ${_SHADER}\n"
         "   Numpy support                     (-DUSE_NUMPY) : ${_NUMPY}\n"
@@ -333,6 +333,9 @@ message(STATUS
         "   Compound Lib                   (-DCOMPOUND_LIB) : ${_COMP_LIB}\n"
         "   TMAlign and TMScore         (-DCOMPILE_TMTOOLS) : ${_TM_TOOLS}\n"
         "   Static Libraries              (-DENABLE_STATIC) : ${ENABLE_STATIC}\n"
-        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}\n"
-        "   Hidden object visibility  (-DHIDDEN_VISIBILITY) : ${_HIDDEN_VIS}")
+        "   Debian-style 'libexec' (-DDEBIAN_STYLE_LIBEXEC) : ${_DEBIAN_STYLE_LIBEXEC}")
+if (CMAKE_COMPILER_IS_GNUCXX)
+   message(STATUS
+        "   Hidden object visibility  (-DHIDDEN_VISIBILITY) :        ${_HIDDEN_VIS}")
+endif()
 

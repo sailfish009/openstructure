@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(coord_group)
   BOOST_CHECK(ac.GetPos()==geom::Vec3(-17,-18,-19));
   BOOST_CHECK(ad.GetPos()==geom::Vec3(9,10,11));
 
-  Transform tf;
+  geom::Transform tf;
   tf.ApplyXAxisRotation(17.0);
   tf.ApplyYAxisRotation(-135.0);
   tf.ApplyZAxisRotation(234.0);

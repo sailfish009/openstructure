@@ -26,7 +26,7 @@ pymod(NAME gfx CPP ${OST_GFX_PYMOD_SOURCES} PY __init__.py py_gfx_obj.py)
 set(GRADIENT_FILE
   gradients.xml
 )
-copy_if_different("./" "${STAGE_DIR}/share/openstructure/scene" 
+copy_if_different("${CMAKE_CURRENT_SOURCE_DIR}" "${STAGE_DIR}/share/openstructure/scene" 
                   "${GRADIENT_FILE}" "PRESET GRADIENTS" _ost_gfx)
                   
 install(FILES ${GRADIENT_FILE} DESTINATION "share/openstructure/scene")

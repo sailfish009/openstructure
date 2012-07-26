@@ -699,13 +699,13 @@ float Scene::GetDefaultTextSize()
 
 namespace {
 
-void draw_lightdir(const Vec3& ldir, const mol::Transform& tf)
+void draw_lightdir(const Vec3& ldir, const geom::Transform& tf)
 {
   glPushAttrib(GL_ENABLE_BIT);
   glMatrixMode(GL_MODELVIEW);
   glPushMatrix();
   glLoadIdentity();
-  mol::Transform tmpt(tf);
+  geom::Transform tmpt(tf);
   tmpt.SetRot(Mat3::Identity());
   glMultMatrix(tmpt.GetTransposedMatrix().Data());
   glDisable(GL_NORMALIZE);
@@ -1216,7 +1216,7 @@ namespace {
 class BBCalc: public GfxNodeVisitor
 {
 public:
-  BBCalc(const geom::Vec3& mmin, const geom::Vec3& mmax, const mol::Transform& tf): 
+  BBCalc(const geom::Vec3& mmin, const geom::Vec3& mmax, const geom::Transform& tf): 
     minc(mmin),maxc(mmax),tf(tf),valid(false) {}
 
   bool VisitNode(GfxNode* node, const Stack& st) {
@@ -1235,7 +1235,7 @@ public:
   }
 
   Vec3 minc,maxc;
-  mol::Transform tf;
+  geom::Transform tf;
   bool valid;
 };
 
@@ -1243,10 +1243,10 @@ public:
 
 geom::AlignedCuboid Scene::GetBoundingBox(bool use_tf) const
 {
-  return GetBoundingBox(use_tf ? transform_ : mol::Transform());
+  return GetBoundingBox(use_tf ? transform_ : geom::Transform());
 }
 
-geom::AlignedCuboid Scene::GetBoundingBox(const mol::Transform& tf) const
+geom::AlignedCuboid Scene::GetBoundingBox(const geom::Transform& tf) const
 {
   BBCalc bbcalc(Vec3(std::numeric_limits<float>::max(),
                      std::numeric_limits<float>::max(),
@@ -1264,12 +1264,12 @@ geom::AlignedCuboid Scene::GetBoundingBox(const mol::Transform& tf) const
   return geom::AlignedCuboid(geom::Vec3(),geom::Vec3());
 }
 
-mol::Transform Scene::GetTransform() const
+geom::Transform Scene::GetTransform() const
 {
   return transform_;
 }
 
-void Scene::SetTransform(const mol::Transform& t)
+void Scene::SetTransform(const geom::Transform& t)
 {
   transform_=t;
   this->RequestRedraw();
@@ -1721,7 +1721,7 @@ public:
     }
   }
   Vec3 minc,maxc;
-  mol::Transform transform;
+  geom::Transform transform;
   bool valid;
 };
 

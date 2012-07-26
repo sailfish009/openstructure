@@ -69,7 +69,6 @@ endmacro()
 # content changed.
 #-------------------------------------------------------------------------------
 macro(copy_if_different FROM_DIR TO_DIR FILES TARGETS TARGET)
-  set(ADD_TARGETS "")
   foreach(SRC ${FILES})
       set(SRCFILE ${SRC})
       if("${FROM_DIR}" STREQUAL "" OR "${FROM_DIR}" STREQUAL "./")
@@ -86,14 +85,8 @@ macro(copy_if_different FROM_DIR TO_DIR FILES TARGETS TARGET)
       file(MAKE_DIRECTORY  ${TO_DIR})
       add_custom_command(TARGET "${TARGET}" PRE_BUILD
           DEPENDS ${FROM}
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FROM} ${TO}
-          COMMENT ""
-          )
-      list(APPEND ADD_TARGETS ${TO})
+          COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FROM} ${TO})
   endforeach()
-  if (TARGETS)
-    set(${TARGETS} ${ADD_TARGETS})
-  endif()
 endmacro()
 
 #-------------------------------------------------------------------------------
@@ -101,11 +94,14 @@ endmacro()
 #-------------------------------------------------------------------------------
 macro(stage_headers HEADERS HEADER_INSTALL_DIR TARGET SUB)
   set(FROM_DIR "./")
+  set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${SUB}")
+  foreach(_HDR ${HEADERS})
+    list(APPEND _ABS_HEADER_NAMES ${_HDR_SOURCE_DIR}/${_HDR})
+  endforeach()
   # introduce a helper target to make sure the headers are staged before
   # building the library
   string(REPLACE "/" "_" _SUB_NO_SLASH "${SUB}")
   string(REPLACE "${PREFIX}_" "" _TARGET "${TARGET}")
-  #message("target before: ${TARGET} after: ${_TARGET}")
   set(_TARGET_NAME ${_TARGET}_${_SUB_NO_SLASH}_headers)
   set(_SUB ${SUB})
   if (NOT _SUB)
@@ -113,12 +109,10 @@ macro(stage_headers HEADERS HEADER_INSTALL_DIR TARGET SUB)
   endif()
   add_custom_target("${_TARGET_NAME}" COMMENT "")
   set(HEADER_DIR "${HEADER_STAGE_PATH}/${HEADER_INSTALL_DIR}")
-  copy_if_different("${FROM_DIR}" "${HEADER_DIR}"
-                    "${HEADERS}" ""
+  copy_if_different("" "${HEADER_DIR}"
+                    "${_ABS_HEADER_NAMES}" ""
                     "${_TARGET_NAME}")
-  add_dependencies("${TARGET}" "${_TARGET_NAME}")
-  set_target_properties("${_TARGET_NAME}" PROPERTIES
-                        EchoString "Staging headers ${TARGET}")
+  add_dependencies(${TARGET} ${_TARGET_NAME})
 endmacro()
 
 #-------------------------------------------------------------------------------
@@ -269,7 +263,7 @@ macro(module)
           install(FILES ${_ABS_HEADER_NAMES} DESTINATION
                   "include/${_HEADER_OUTPUT_DIR}/${_DIR}")
           set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}/${_DIR}")
-          stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
+          stage_headers("${_HEADERS}" "${_HDR_STAGE_DIR}" 
                         "${_LIB_NAME}" "${_DIR}")
           set(_HEADERS)
         else()
@@ -287,7 +281,7 @@ macro(module)
       install(FILES ${_ABS_HEADER_NAMES} DESTINATION
               "include/${_HEADER_OUTPUT_DIR}")
       set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}")
-      stage_headers("${_ABS_HEADER_NAMES}" "${_HDR_STAGE_DIR}" 
+      stage_headers("${_HEADERS}" "${_HDR_STAGE_DIR}" 
                     "${_LIB_NAME}" "")
     endif()
   endif()
@@ -415,7 +409,7 @@ macro(script)
     if (NOT _ARG_INPUT)
       message(FATAL_ERROR "script() can only substitute when INPUT is present.")    
     endif()
-    substitute(IN_FILE ${_INPUT} OUT_FILE ${_ARG_NAME} 
+    substitute(IN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${_INPUT}" OUT_FILE ${_ARG_NAME} 
                DICT ${_ARG_SUBSTITUTE})
   endif()
   install(FILES ${_ARG_NAME} DESTINATION ${_ARG_OUTPUT_DIR} 
@@ -501,9 +495,9 @@ macro(pymod)
     return()
   endif()
   if (_ARG_OUTPUT_DIR)
-    set(PYMOD_DIR "openstructure/${_ARG_OUTPUT_DIR}")
+    set(PYMOD_DIR "python${PYTHON_VERSION}/site-packages/${_ARG_OUTPUT_DIR}")
   else()
-    set(PYMOD_DIR "openstructure/${_ARG_PREFIX}/${_ARG_NAME}")
+    set(PYMOD_DIR "python${PYTHON_VERSION}/site-packages/${_ARG_PREFIX}/${_ARG_NAME}")
   endif()
   set(_LIB_NAME ${_ARG_PREFIX}_${_ARG_NAME})
   set(PYMOD_STAGE_DIR "${LIB_STAGE_PATH}/${PYMOD_DIR}")
@@ -600,7 +594,12 @@ macro(pymod)
       if (_ARG_UI)
         add_dependencies("${_LIB_NAME}_pymod" "${_LIB_NAME}_ui"})
       endif()
-      copy_if_different("./" "${PYMOD_STAGE_DIR}" "${_PY_FILES}" "TARGETS"
+      set(_ABS_PY_FILES)
+      set(_PY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+      foreach(_PY ${_PY_FILES})
+        list(APPEND _ABS_PY_FILES "${_PY_SOURCE_DIR}/${_PY}")
+      endforeach()
+      copy_if_different("./" "${PYMOD_STAGE_DIR}" "${_ABS_PY_FILES}" "TARGETS"
                         "${_LIB_NAME}_pymod")
       add_dependencies("_${_LIB_NAME}" "${_LIB_NAME}_pymod")
       compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR} ${_PY_FILES})
