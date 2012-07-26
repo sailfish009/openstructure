@@ -54,18 +54,6 @@ ResidueHandle (EditorBase::*append_b)(ChainHandle ch, const ResidueKey&,
 ResidueHandle (EditorBase::*append_c)(ChainHandle ch, ResidueHandle residue,
                                       bool deep)=&EditorBase::AppendResidue;
 
-ResidueHandle (EditorBase::*insert_residue_before_a)(ChainHandle chain, int index,
-                                                     const ResNum& num,
-                                                     const ResidueKey& k)=&EditorBase::InsertResidueBefore;
-ResidueHandle (EditorBase::*insert_residue_before_b)(ChainHandle chain, ResidueHandle residue,
-                                                     int index,bool deep)=&EditorBase::InsertResidueBefore;
-
-ResidueHandle (EditorBase::*insert_residue_after_a)(ChainHandle chain, int index,
-                                                    const ResNum& num,
-                                                    const ResidueKey& k)=&EditorBase::InsertResidueAfter;
-ResidueHandle (EditorBase::*insert_residue_after_b)(ChainHandle chain, ResidueHandle residue,
-                                                    int index, bool deep)=&EditorBase::InsertResidueAfter;
-
 AtomHandle (EditorBase::*insert_atom_a)(ResidueHandle residue, const String& name,
                                         const geom::Vec3& pos, const String& ele,
                                         Real occupancy, Real b_factor,
@@ -240,12 +228,8 @@ void export_Editors()
     .def("DeleteResidue", &EditorBase::DeleteResidue)
     .def("DeleteChain", &EditorBase::DeleteChain)
     .def("DeleteAtom", &EditorBase::DeleteAtom)
-    .def("InsertResidueBefore", insert_residue_before_a)
-    .def("InsertResidueBefore", insert_residue_before_b, (arg("chain"), arg("residue"),
-                                                          arg("index"), arg("deep")=false))
-    .def("InsertResidueAfter", insert_residue_after_a)
-    .def("InsertResidueAfter", insert_residue_after_b, (arg("chain"), arg("residue"),
-                                                        arg("index"), arg("deep")=false))
+    .def("InsertResidueBefore", &EditorBase::InsertResidueBefore)
+    .def("InsertResidueAfter", &EditorBase::InsertResidueAfter)
     .def("AppendResidue", append_a)
     .def("AppendResidue", append_b)
     .def("AppendResidue", append_c, (arg("chain"), arg("residue"),

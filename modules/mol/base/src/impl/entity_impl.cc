@@ -125,10 +125,19 @@ EntityImplPtr EntityImpl::Copy()
   return ent_p;
 }
 
-ChainImplPtr EntityImpl::InsertChain(const ChainImplPtr& chain)
+ChainImplPtr EntityImpl::InsertChain(const ChainImplPtr& chain, bool deep)
 {
   ChainImplPtr dst_chain=this->InsertChain(chain->GetName());
   dst_chain->Assign(*chain.get());
+  if(deep)
+  {
+      ResidueImplList::iterator it=chain->GetResidueList().begin(),
+                                it_end=chain->GetResidueList().end();
+      for(;it!=it_end;++it){
+        ResidueImplPtr res=*it;
+        dst_chain->AppendResidue(res, true);
+      }
+  }
   return dst_chain;
 }
 

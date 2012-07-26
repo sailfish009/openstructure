@@ -1712,7 +1712,7 @@ class Table(object):
     
 
 
-  def GaussianSmooth(self, col, std=1.0, na_value=0.0):
+  def GaussianSmooth(self, col, std=1.0, na_value=0.0, padding='reflect', cval=0.0):
 
     '''
     In place gaussian smooth of a column in the table with a given standard deviation.
@@ -1727,13 +1727,22 @@ class Table(object):
     :param na_value: all na (None) values of the speciefied column are set to na_value before smoothing
     :type na_value: `scalar`
 
+    :param padding: allows to handle padding behaviour see scipy ndimage.gaussian_filter1d documentation for more information. standard is reflect
+    :type padding: :class:`str`
+
+    :param cval: constant value used for padding if padding mode is constant
+    :type cval: `scalar`
+
+
+
     :warning: The function depends on *scipy*
     ''' 
 
     try:
       from scipy import ndimage
+      import numpy as np
     except ImportError:
-      LogError("Function needs scipy.ndimage, but I could no import it")
+      LogError("I need scipy.ndimage and numpy, but could not import it")
       raise
       
     idx = self.GetColIndex(col)
@@ -1748,7 +1757,8 @@ class Table(object):
       else:
         vals.append(na_value)
 
-    smoothed_values_ndarray=ndimage.gaussian_filter1d(vals,std)
+    
+    smoothed_values_ndarray=ndimage.gaussian_filter1d(vals,std, mode=padding, cval=cval)
 
     result=[]
 

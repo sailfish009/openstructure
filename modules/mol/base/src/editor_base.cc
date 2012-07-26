@@ -42,47 +42,9 @@ ChainHandle EditorBase::InsertChain(const String& chain_name)
 
 ChainHandle EditorBase::InsertChain(const String& chain_name, ChainHandle chain, bool deep)
 {
-
-  impl::ChainImplPtr inserted_chain=ent_.Impl()->InsertChain(chain.Impl());
+  impl::ChainImplPtr inserted_chain=ent_.Impl()->InsertChain(chain.Impl(), deep);
   inserted_chain->SetName(chain_name);
-
-  if(deep){
-    ResidueHandleIter it=chain.ResiduesBegin(),
-                      it_end=chain.ResiduesEnd();
-    for(;it!=it_end;++it){
-      ResidueHandle res=*it;
-      this->AppendResidue(inserted_chain, res, true);
-    }
-  }
-
   return inserted_chain;
-
-
-
-  /*
-  impl::ChainImplPtr new_chain=chain.Impl();
-  new_chain->SetName(chain_name);
-  if(!deep) new_chain->DeleteAllResidues();
-  return ent_.Impl()->InsertChain(new_chain);
-  */
-  /*
-  if(deep){
-
-    ChainHandle inserted_chain=ent_.Impl()->InsertChain(chain_name);
-
-    ResidueHandleIter it=chain.ResiduesBegin(),
-                      it_end=chain.ResiduesEnd();
-    for(;it!=it_end;++it){
-      ResidueHandle res=*it;
-      this->AppendResidue(inserted_chain, res, true);
-    }
-    return inserted_chain;
-  }
-
-  else{
-    return ent_.Impl()->InsertChain(chain.GetName());
-  }
-  */
 }
 
 ResidueHandle EditorBase::AppendResidue(ChainHandle chain, const ResidueKey& k)
@@ -103,17 +65,7 @@ ResidueHandle EditorBase::AppendResidue(ChainHandle chain, ResidueHandle residue
 {
   CheckHandleValidity(chain);
 
-  impl::ResidueImplPtr inserted_residue=chain.Impl()->AppendResidue(residue.Impl());
-  if(deep)
-  {
-    AtomHandleIter it=residue.AtomsBegin(),
-                   it_end=residue.AtomsEnd();
-    for(;it!=it_end;++it)
-    {
-      AtomHandle atom=*it;
-      this->InsertAtom(inserted_residue,atom);
-    }
-  }
+  impl::ResidueImplPtr inserted_residue=chain.Impl()->AppendResidue(residue.Impl(),deep);
   return inserted_residue;
 }
 
@@ -125,64 +77,12 @@ ResidueHandle EditorBase::InsertResidueBefore(ChainHandle chain, int index,
   return ResidueHandle(chain.Impl()->InsertResidueBefore(index, num, k));
 }
 
-ResidueHandle EditorBase::InsertResidueBefore(ChainHandle chain,
-                                              ResidueHandle residue,
-                                              int index, bool deep)
-{
-  CheckHandleValidity(chain);
-
-  if(deep)
-  {
-    ResidueHandle inserted_residue=chain.Impl()->InsertResidueBefore(index,
-                                                                     residue.GetNumber(),
-                                                                     residue.GetKey());
-    AtomHandleIter it=inserted_residue.AtomsBegin(),
-                   it_end=inserted_residue.AtomsEnd();
-    for(;it!=it_end;++it)
-    {
-      AtomHandle atom=*it;
-      this->InsertAtom(inserted_residue, atom);
-    }
-    return inserted_residue;
-  }
-  else
-  {
-    return ResidueHandle(chain.Impl()->InsertResidueBefore(index,
-                                                           residue.GetNumber(),
-                                                           residue.GetKey()));
-  }
-}
-
 ResidueHandle EditorBase::InsertResidueAfter(ChainHandle chain, int index,
                                              const ResNum& num,
                                              const ResidueKey& k)
 {
   CheckHandleValidity(chain);
   return ResidueHandle(chain.Impl()->InsertResidueAfter(index, num, k));  
-}
-
-ResidueHandle EditorBase::InsertResidueAfter(ChainHandle chain, ResidueHandle residue,
-                                             int index, bool deep)
-{
-  if(deep)
-  {
-    ResidueHandle inserted_residue=chain.Impl()->InsertResidueAfter(index,
-                                                                    residue.GetNumber(),
-                                                                    residue.GetKey());
-    AtomHandleIter it=inserted_residue.AtomsBegin(),
-                   it_end=inserted_residue.AtomsEnd();
-    for(;it!=it_end;++it)
-    {
-      this->InsertAtom(inserted_residue, *it);
-    }
-    return inserted_residue;
-  }
-  else
-  {
-    return ResidueHandle(chain.Impl()->InsertResidueAfter(index,
-                                                          residue.GetNumber(),
-                                                          residue.GetKey()));
-  }
 }
 
 void EditorBase::RenameResidue(ResidueHandle res, const String& new_name)

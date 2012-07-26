@@ -101,8 +101,6 @@ public:
                                     const ResNum& num,
                                     const ResidueKey& k);
 
-  ResidueHandle InsertResidueBefore(ChainHandle chain, ResidueHandle residue,
-                                    int index, bool deep=false);
   /// \brief insert residue into chain
   /// 
   /// This method is identical to InsertResidueBefore() but inserts the
@@ -111,9 +109,6 @@ public:
   ResidueHandle InsertResidueAfter(ChainHandle chain, int index,
                                    const ResNum& num,
                                    const ResidueKey& k);
-
-  ResidueHandle InsertResidueAfter(ChainHandle chain, ResidueHandle residue,
-                                   int index, bool deep=false);
   
   /// \name Adding/removing atoms
   //@{

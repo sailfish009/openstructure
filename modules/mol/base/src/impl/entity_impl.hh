@@ -109,7 +109,7 @@ public:
   /// \brief insert a new chain based on parameters of the given chain
   /// 
   /// The chain will have no residues and atoms
-  ChainImplPtr InsertChain(const ChainImplPtr& chain);
+  ChainImplPtr InsertChain(const ChainImplPtr& chain, bool deep=false);
   ConnectorImplP Connect(const AtomImplPtr& first, const AtomImplPtr& second,
                          Real len, Real theta, Real phi,
                          unsigned char bond_order);

@@ -105,7 +105,7 @@ public:
 
   /// \brief append new residue with exactly the same parameters as res, but 
   ///     no atoms and bonds                               
-  ResidueImplPtr AppendResidue(const ResidueImplPtr& res);
+  ResidueImplPtr AppendResidue(const ResidueImplPtr& res, bool deep=true);
   
   ResidueImplPtr InsertResidueBefore(int index, const ResNum& n, 
                                      const ResidueKey& k);
