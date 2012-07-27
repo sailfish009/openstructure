@@ -100,6 +100,8 @@ PyObject* get_pos1(EntityHandle& entity)
   return get_pos2(entity,true);
 }
 
+#endif
+
 geom::Mat4 depr_get_transformation_matrix(const EntityHandle& eh)
 {
   return eh.GetTransformationMatrix();
@@ -110,7 +112,6 @@ bool depr_is_transformation_identity(const EntityHandle& eh)
   return eh.IsTransformationIdentity();
 }
 
-#endif
 } // ns
 
 void export_Entity()
