@@ -105,7 +105,9 @@ public:
 
   /// \brief append new residue with exactly the same parameters as res, but 
   ///     no atoms and bonds                               
-  ResidueImplPtr AppendResidue(const ResidueImplPtr& res, bool deep=true);
+  // force deep to be set explicitely, because it is better than implicit
+  // (and since we are on the impl level interface consistency isn't that critical)
+  ResidueImplPtr AppendResidue(const ResidueImplPtr& res, bool deep);
   
   ResidueImplPtr InsertResidueBefore(int index, const ResNum& n, 
                                      const ResidueKey& k);

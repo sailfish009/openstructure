@@ -145,13 +145,13 @@ void EntityImpl::ReplicateHierarchy(EntityImplPtr dest)
   for (ChainImplList::const_iterator i=chain_list_.begin(), 
        e1=chain_list_.end(); i!=e1; ++i) {
     ChainImplPtr src_chain=*i;
-    ChainImplPtr dst_chain=dest->InsertChain(src_chain);
+    ChainImplPtr dst_chain=dest->InsertChain(src_chain,false);
     // copy generic properties
     dst_chain->Assign(*src_chain.get());
     for (ResidueImplList::iterator j=src_chain->GetResidueList().begin(),
          e2=src_chain->GetResidueList().end(); j!=e2; ++j) {
       ResidueImplPtr src_res=*j;
-      ResidueImplPtr dst_res=dst_chain->AppendResidue(src_res);
+      ResidueImplPtr dst_res=dst_chain->AppendResidue(src_res, false);
       for (AtomImplList::iterator k=src_res->GetAtomList().begin(),
            e3=src_res->GetAtomList().end(); k!=e3; ++k) {
         AtomImplPtr src_atom=*k;
