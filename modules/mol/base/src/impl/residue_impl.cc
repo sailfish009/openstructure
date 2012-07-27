@@ -118,9 +118,16 @@ geom::Vec3 ResidueImpl::GetAltAtomPos(const AtomImplPtr& atom,
     throw Error("No alt atom group '"+group+"'");
   }
   const AtomGroup& g=i->second;
+  EntityImplPtr eip=GetEntity();
   for (AtomGroupEntryList::const_iterator j=g.atoms.begin(), 
        e=g.atoms.end(); j!=e; ++j) {
     if (atom==j->atom.lock()) {
+      // the alternate entry positions are stored as original, and
+      // are returned as original as well ?! at least that is what
+      // the unit test seems to require
+      // also, the PDB writer currently expects this behavior, so
+      // if it is changed here, it must be changed there as well
+      //return eip->HasTransform() ? eip->GetTransform().Apply(j->pos) : j->pos;
       return j->pos;
     }
   }
@@ -626,14 +633,11 @@ bool ResidueImpl::SwitchAtomPos(const String& group) {
   AtomGroup& agr=i->second;
   AtomGroupEntryList::iterator j=agr.atoms.begin();
   for (; j!=agr.atoms.end(); ++j) {
-
     AtomGroupEntry& entry=*j;
     assert(!entry.atom.expired());
     entry.atom.lock()->OriginalPos()=entry.pos;
-    EntityHandle ent = entry.atom.lock()->GetEntity();
-    geom::Mat4 transf_matrix = ent.GetTransformationMatrix();
-    geom::Vec3 transf_pos = geom::Vec3(transf_matrix*geom::Vec4(entry.pos));
-    entry.atom.lock()->TransformedPos()=transf_pos;
+    EntityImplPtr eip = entry.atom.lock()->GetEntity();
+    entry.atom.lock()->TransformedPos() = eip->GetTransform().Apply(entry.pos);
     entry.atom.lock()->SetBFactor(j->b_factor);
     entry.atom.lock()->SetOccupancy(j->occ);
   }
@@ -669,6 +673,27 @@ String ResidueImpl::GetStringProperty(Prop::ID prop_id) const
     default:
       throw PropertyError(prop_id);
   }
+}
+
+void ResidueImpl::UpdateTransformedPos()
+{
+  /*
+    the alt atom positions always store the original pos; hence the below code
+    is not necessary; however, it isn't clear (at least to me (AP)) if the
+    AtomImplPtr in the alt group is supposed to be modified here, or if this is
+    already taken care of in EntityImpl::UpdateTransformedPos()
+   */
+#if 0
+  geom::Transform tf = GetEntity()->GetTransform();
+  for(AtomEntryGroups::iterator git=alt_groups_.begin(); git!=alt_groups_.end();++git) {
+    for(AtomGroupEntryList::iterator lit=git->second.atoms.begin(); lit!=git->second.atoms.end();++lit) {
+      AtomImplPtr atom=lit->atom.lock().get();
+      geom::Vec3 tpos=tf.Apply(atom->OriginalPos());
+      atom->TransformedPos()=tpos;
+      lit->pos=atom->tpos;
+    }
+  }
+#endif
 }
 
 }}} // ns

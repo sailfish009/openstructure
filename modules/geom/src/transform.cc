@@ -40,6 +40,13 @@ void Transform::SetMatrix(const Mat4& m)
 {
   tm_=m;
   ttm_ = Transpose(tm_);
+  try {
+    itm_ = Invert(tm_);
+  } catch (GeomException& e) {
+    std::cerr << "caught GeomException in Transform::SetMatrix: " << e.what() << std::endl;
+    std::cerr << m << std::endl;
+    itm_=geom::Mat4();
+  }
   update_components();
 }
 
@@ -151,6 +158,18 @@ Vec4 Transform::Apply(const Vec4& v) const
   return nrvo;
 }
 
+Vec3 Transform::ApplyInverse(const Vec3& v) const
+{
+  Vec3 nrvo(itm_*Vec4(v));
+  return nrvo;
+}
+
+Vec4 Transform::ApplyInverse(const Vec4& v) const
+{
+  Vec4 nrvo=itm_*v;
+  return nrvo;
+}
+
 geom::AlignedCuboid Transform::Apply(const geom::AlignedCuboid& c) const
 {
   geom::Vec3 cmin=c.GetMin();
@@ -196,14 +215,14 @@ void Transform::update_tm()
 {
   tm_ =
     Mat4(1.0,0.0,0.0,trans_[0],
-               0.0,1.0,0.0,trans_[1],
-               0.0,0.0,1.0,trans_[2],
-               0.0,0.0,0.0,1.0) *
+         0.0,1.0,0.0,trans_[1],
+         0.0,0.0,1.0,trans_[2],
+         0.0,0.0,0.0,1.0) *
     Mat4(rot_) *
     Mat4(1.0,0.0,0.0,-cen_[0],
-               0.0,1.0,0.0,-cen_[1],
-               0.0,0.0,1.0,-cen_[2],
-               0.0,0.0,0.0,1.0);
+         0.0,1.0,0.0,-cen_[1],
+         0.0,0.0,1.0,-cen_[2],
+         0.0,0.0,0.0,1.0);
   ttm_ = Transpose(tm_);
   // TODO: calculate from rot, cen and trans
   try {

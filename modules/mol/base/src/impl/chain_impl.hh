@@ -182,6 +182,8 @@ public:
   ///       property and updates it accordingly      
   void SetInSequence(int index);
 
+  void UpdateTransformedPos();
+
 private:
   int GetIndexForResNumInSequence(const ResNum& number) const;
   void UpdateShifts();

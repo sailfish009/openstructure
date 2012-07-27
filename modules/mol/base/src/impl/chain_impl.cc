@@ -530,5 +530,12 @@ void ChainImpl::SetInSequence(const int index)
     this->UpdateShifts();
   }
 }
+
+void ChainImpl::UpdateTransformedPos()
+{
+  for (ResidueImplList::iterator rit=residue_list_.begin(); rit!=residue_list_.end(); ++rit) {
+    (*rit)->UpdateTransformedPos();
+  }
+}
   
 }}} // ns

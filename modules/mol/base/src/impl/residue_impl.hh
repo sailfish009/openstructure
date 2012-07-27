@@ -223,6 +223,9 @@ public:
   
   bool IsLigand() const { return ligand_; }
   void SetIsLigand(bool flag) { ligand_=flag; }
+
+  void UpdateTransformedPos();
+
 private:
   void AddAltAtom(const String& group, const AtomImplPtr& atom,
                   const geom::Vec3& position, Real occ, Real b_factor);

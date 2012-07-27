@@ -143,9 +143,12 @@ public:
   void UpdateFromXCS();
 
   void Apply(EntityVisitor& v);
-  void ApplyTransform(const geom::Mat4 transfmat);
+  void ApplyTransform(const geom::Transform& t);
 
-  void SetTransform(const geom::Mat4 transfmat);
+  void SetTransform(const geom::Transform& t);
+  const geom::Transform& GetTransform() const {return transform_;}
+  bool HasTransform() const {return has_transform_;}
+  void ClearTransform();
 
   void AttachObserver(const EntityObserverPtr& o);
   void DetachObserver(const EntityObserverPtr& o);
@@ -197,14 +200,6 @@ public:
 
   //! Get number of chains
   int GetChainCount() const;
-
-  //! Get transformation matrix
-  const geom::Mat4& GetTransfMatrix() const;
-
-  //! Get inverse transformation matrix
-  const geom::Mat4& GetInvTransfMatrix() const;
-
-  bool IsTransfIdentity() const;
 
   const ChainImplList& GetChainList() const { return chain_list_; }
 
@@ -266,10 +261,8 @@ private:
   ConnectorImplMap connector_map_;
   TorsionImplMap torsion_map_;
 
-  geom::Mat4 transformation_matrix_;
-  geom::Mat4 inverse_transformation_matrix_;
-  bool identity_transf_;
-
+  geom::Transform transform_;
+  bool has_transform_;
 
   SpatialAtomOrganizer atom_organizer_;
   FragmentImplList fragment_list_;

@@ -154,8 +154,10 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
   } else {
     for (std::vector<String>::const_iterator
          i=names.begin(), e=names.end(); i!=e; ++i) {
-      geom::Mat4 tf=atom.GetEntity().GetTransformationMatrix();
-      p=geom::Vec3(tf*geom::Vec4(atom.GetAltPos(*i)));
+      // GetAltPos always return orig pos, i.e. does not honor
+      // transformations like GetPos does - so apply it here
+      // seems like a FIXME...
+      p=atom.GetEntity().GetTransform().Apply(atom.GetAltPos(*i));
       line(30, 50).Clear();
 
       if (i->size()>1) {

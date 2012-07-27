@@ -39,7 +39,10 @@ namespace geom {
 class DLLEXPORT_OST_GEOM Transform {
 public:
   Transform();
-
+  
+  /// \brief reset to identity
+  void Reset() {*this=Transform();}
+  
   /// \brief retrieve transformation matrix
   Mat4 GetMatrix() const {return tm_;}
   /// \brief retrieve transposed transformation matrix
@@ -78,9 +81,16 @@ public:
   void SetTrans(const Vec3& t);
   Vec3 GetTrans() const;  
   //@}
-  
+
+  // apply to a vec3 and return result
   Vec3 Apply(const Vec3& v) const;
+  // apply to a vec4 and return result
   Vec4 Apply(const Vec4& v) const;
+  // apply inverse to a vec3 and return result
+  Vec3 ApplyInverse(const Vec3& v) const;
+  // apply inverse to a vec4 and return result
+  Vec4 ApplyInverse(const Vec4& v) const;
+  // apply to an aligned cuboid and return result
   AlignedCuboid Apply(const AlignedCuboid& c) const;
   Transform Apply(const Transform& tf) const;
 

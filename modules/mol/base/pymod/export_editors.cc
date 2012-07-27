@@ -216,6 +216,7 @@ void export_Editors()
   import_array();
 #endif
 
+
   class_<EditorBase>("EditorBase", no_init)
     .def("InsertChain", insert_chain_a)
     .def("InsertChain", insert_chain_b,(arg("chain_name"),arg("chain"), arg("deep")=false))
@@ -250,12 +251,19 @@ void export_Editors()
     .def("RenumberAllResidues",&EditorBase::RenumberAllResidues)
   ;
   
+  void (XCSEditor::*apply_transform1)(const geom::Mat4&) = &XCSEditor::ApplyTransform;
+  void (XCSEditor::*apply_transform2)(const geom::Transform&) = &XCSEditor::ApplyTransform;
+  void (XCSEditor::*set_transform1)(const geom::Mat4&) = &XCSEditor::SetTransform;
+  void (XCSEditor::*set_transform2)(const geom::Transform&) = &XCSEditor::SetTransform;
+
   class_<XCSEditor, bases<EditorBase> >("XCSEditor", no_init)
     .def("SetAtomPos", set_t_pos)
     .def("SetAtomTransformedPos", set_t_pos)
     .def("SetAtomOriginalPos", set_o_pos)
-    .def("ApplyTransform", &XCSEditor::ApplyTransform)
-    .def("SetTransform", &XCSEditor::SetTransform)
+    .def("ApplyTransform", apply_transform1)
+    .def("ApplyTransform", apply_transform2)
+    .def("SetTransform", set_transform1)
+    .def("SetTransform", set_transform2)
     .def("UpdateICS", &XCSEditor::UpdateICS)
     .def("__exit__", &XCSEditor::UpdateICS)    
   ;

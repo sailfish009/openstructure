@@ -239,11 +239,15 @@ namespace geom {
   inline Vec3::Vec3(const Vec4& v): x(v.x), y(v.y), z(v.z) 
   { 
     if (std::fabs(v.w)<1e-10) {
-      throw DivideByZeroException();
+      // it is better to ignore very small w and to simply assume
+      // that this is not a homogeneous coordinate rather than
+      // throwing an exception
+      //throw DivideByZeroException();
+    } else {
+      x/=v.w;
+      y/=v.w;
+      z/=v.w;
     }
-    x/=v.w;
-    y/=v.w;
-    z/=v.w;
   }
 } // namespace geom
 

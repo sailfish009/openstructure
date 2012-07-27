@@ -67,9 +67,8 @@ EntityImpl::EntityImpl():
   chain_list_(),
   connector_map_(),
   torsion_map_(),
-  transformation_matrix_(),
-  inverse_transformation_matrix_(),
-  identity_transf_(true),
+  transform_(),
+  has_transform_(false),
   atom_organizer_(5.0),
   fragment_list_(),
   observer_map_(),
@@ -251,21 +250,6 @@ int EntityImpl::GetChainCount() const
   return static_cast<int>(chain_list_.size());
 }
 
-const geom::Mat4& EntityImpl::GetTransfMatrix() const
-{
-  return transformation_matrix_;
-}
-
-const geom::Mat4& EntityImpl::GetInvTransfMatrix() const
-{
-  return inverse_transformation_matrix_;
-}
-
-bool EntityImpl::IsTransfIdentity() const
-{
-  return identity_transf_;
-}
-
 EntityImpl::~EntityImpl()
 {
   // notify all observers of pending destruct
@@ -329,23 +313,18 @@ Real EntityImpl::GetMass() const {
 
 AtomImplPtr EntityImpl::CreateAtom(const ResidueImplPtr& rp,
                                    const String& name,
-                                   const geom::Vec3& pos,
+                                   const geom::Vec3& pos2,
                                    const String& ele)
 {
 #if MAKE_SHARED_AVAILABLE
   AtomImplPtr ap=boost::make_shared<AtomImpl>(shared_from_this(), rp, name, 
-                                              pos, ele,next_index_++);
+                                              pos2, ele,next_index_++);
 #else
-  AtomImplPtr ap(new AtomImpl(shared_from_this(), rp, name, pos, ele, next_index_++));
+  AtomImplPtr ap(new AtomImpl(shared_from_this(), rp, name, pos2, ele, next_index_++));
 #endif
-  if (!identity_transf_) {
-    geom::Vec3 transformed_pos = geom::Vec3(transformation_matrix_*geom::Vec4(pos));
-    ap->TransformedPos()=transformed_pos;
-    atom_organizer_.Add(ap,transformed_pos);
-  } else {
-    ap->TransformedPos()=pos;
-    atom_organizer_.Add(ap,pos);
-  }
+  geom::Vec3 pos = has_transform_ ? transform_.Apply(pos2) : pos2;
+  ap->TransformedPos()=pos;
+  atom_organizer_.Add(ap,pos);
   atom_map_.insert(AtomImplMap::value_type(ap.get(),ap));
   return ap;
 }
@@ -767,19 +746,23 @@ void EntityImpl::Apply(EntityVisitor& v)
   v.OnExit();
 }
 
-void EntityImpl::ApplyTransform(const geom::Mat4 transfmat)
+void EntityImpl::ApplyTransform(const geom::Transform& tf)
 {
-  geom::Mat4 updated_transformation_matrix=transfmat*transformation_matrix_;
-  this->SetTransform(updated_transformation_matrix);
+  SetTransform(transform_.Apply(tf));
 }
 
-void EntityImpl::SetTransform(const geom::Mat4 transfmat)
+void EntityImpl::SetTransform(const geom::Transform& tf)
 {
-  transformation_matrix_=transfmat;
-  inverse_transformation_matrix_=Invert(transformation_matrix_);
-  identity_transf_ = (transformation_matrix_==geom::Mat4());
+  transform_=tf;
+  has_transform_=true;
   this->UpdateTransformedPos();
   this->MarkOrganizerDirty();
+}
+
+void EntityImpl::ClearTransform()
+{
+  has_transform_=false;
+  SetTransform(geom::Transform());
 }
 
 void EntityImpl::AttachObserver(const EntityObserverPtr& o)
@@ -805,7 +788,8 @@ void EntityImpl::Swap(EntityImpl& impl)
   chain_list_.swap(impl.chain_list_);
   connector_map_.swap(impl.connector_map_);
   torsion_map_.swap(impl.torsion_map_);
-  std::swap(transformation_matrix_,impl.transformation_matrix_);
+  std::swap(transform_,impl.transform_);
+  std::swap(has_transform_,impl.has_transform_);
   atom_organizer_.Swap(impl.atom_organizer_);
   fragment_list_.swap(impl.fragment_list_);
   observer_map_.swap(impl.observer_map_);
@@ -1201,7 +1185,10 @@ void EntityImpl::RenameChain(ChainImplPtr chain, const String& new_name)
 
 void EntityImpl::UpdateTransformedPos(){
   for(AtomImplMap::iterator it = atom_map_.begin();it!=atom_map_.end();++it) {
-    it->second->TransformedPos()=geom::Vec3(transformation_matrix_*geom::Vec4(it->second->OriginalPos()));
+    it->second->TransformedPos()=has_transform_ ? transform_.Apply(it->second->OriginalPos()) : it->second->OriginalPos();
+  }
+  for(ChainImplList::iterator cit=chain_list_.begin();cit!=chain_list_.end();++cit) {
+    (*cit)->UpdateTransformedPos();
   }
 }
 
