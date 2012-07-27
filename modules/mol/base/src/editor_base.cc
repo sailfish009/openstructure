@@ -64,9 +64,7 @@ ResidueHandle EditorBase::AppendResidue(ChainHandle chain, const ResidueKey& k,
 ResidueHandle EditorBase::AppendResidue(ChainHandle chain, ResidueHandle residue, bool deep)
 {
   CheckHandleValidity(chain);
-
-  impl::ResidueImplPtr inserted_residue=chain.Impl()->AppendResidue(residue.Impl(),deep);
-  return inserted_residue;
+  return ResidueHandle(chain.Impl()->AppendResidue(residue.Impl(), deep));
 }
 
 ResidueHandle EditorBase::InsertResidueBefore(ChainHandle chain, int index, 
