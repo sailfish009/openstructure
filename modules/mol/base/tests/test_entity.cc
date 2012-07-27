@@ -136,8 +136,24 @@ BOOST_AUTO_TEST_CASE(entity_creator)
   BOOST_CHECK(eh.GetAtomCount()==2);
   
   BOOST_CHECK(eh.GetAtomCount()==chain.GetAtomCount());
-  BOOST_CHECK(eh.GetResidueCount()==chain.GetResidueCount());    
-  
+  BOOST_CHECK(eh.GetResidueCount()==chain.GetResidueCount());
+
+  chain.SetIntProp("amazing",42);
+  EntityHandle eh2 = CreateEntity();
+  XCSEditor e2 = eh2.EditXCS();
+  ChainHandle inserted_chain=e2.InsertChain("Q",chain);
+  BOOST_CHECK(eh2.GetChainCount()==1);
+  BOOST_CHECK(eh2.GetResidueCount()==0);
+  BOOST_CHECK(eh2.GetAtomCount()==0);
+  BOOST_CHECK(inserted_chain.HasProp("amazing"));
+  BOOST_CHECK(eh2.FindChain("Q").IsValid());
+
+  EntityHandle eh3 = CreateEntity();
+  XCSEditor e3 = eh3.EditXCS();
+  e3.InsertChain("Q",chain,true);
+  BOOST_CHECK(eh3.GetResidueCount()==1);
+  BOOST_CHECK(eh3.GetAtomCount()==2);
+
   EntityVisitor v;
   eh.Apply(v);
 }
