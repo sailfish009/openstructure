@@ -159,6 +159,38 @@ boost::python::object get_attr(C& c, const String& k) {
   return obj;
 }
 
+template <typename C>
+void set_attr(boost::python::object self,
+              const String& k, boost::python::object value)
+{
+  C* c = boost::python::extract<C*>(self);
+  if (PyObject_HasAttrString(self.ptr(), k.c_str()) && !c->HasProp(k)) {
+    boost::python::object name(k);
+    PyObject_GenericSetAttr(self.ptr(), name.ptr(), value.ptr());
+    return;
+  }
+  boost::python::extract<Real> f(value);
+  if (f.check()) {
+    c->SetFloatProp(k, f);
+    return;
+  }
+  boost::python::extract<int> i(value);
+  if (i.check()) {
+    c->SetIntProp(k, i);
+    return;
+  }
+  boost::python::extract<bool> b(value);
+  if (b.check()) {
+    c->SetBoolProp(k, b);
+    return;
+  }
+  boost::python::extract<String> s(value);
+  if (s.check()) {
+    c->SetStringProp(k, s);
+    return;
+  }
+}
+
 
 
 template <typename C, typename O>
@@ -220,10 +252,7 @@ void generic_prop_def(O& bp_class)
     .def("SetGenericBoolProperty", &depr_set_bool<C>)
     .def("SetGenericStringProperty", &depr_set_string<C>)
     .def("RemoveProp", &C::RemoveProp)
-    .def("__setattr__", &C::SetBoolProp)
-    .def("__setattr__", &C::SetIntProp)
-    .def("__setattr__", &C::SetStringProp)
-    .def("__setattr__", &C::SetFloatProp)
+    .def("__setattr__", &set_attr<C>)
   ;
 }
 
