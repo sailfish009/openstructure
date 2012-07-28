@@ -200,6 +200,23 @@ void prepare_scripts(int argc, char** argv, PythonInterpreter& py)
   py.RunScript(argv[1]);
 }
 
+class MyApplication : public QApplication
+{
+public:
+    MyApplication(int argc, char** argv) : QApplication(argc, argv) {}
+    virtual ~MyApplication() {}
+    virtual bool notify(QObject *rec, QEvent *ev)
+    {
+      try {
+        return QApplication::notify(rec, ev);
+      } catch( std::runtime_error& e) {
+        std::cerr << "runtime_error in Qt main loop: " << e.what() << std::endl;
+        exit(0);
+      }
+      return false;
+    }
+};
+
 
 }
 
@@ -208,7 +225,7 @@ int main(int argc, char** argv)
 {
   int dummy_argc=1;
   
-  QApplication app(dummy_argc,argv);
+  MyApplication app(dummy_argc,argv);
   QCoreApplication::setOrganizationName("OpenStructure");
   QCoreApplication::setOrganizationDomain("openstructure.org");
   QCoreApplication::setApplicationName(QString(argv[2]));

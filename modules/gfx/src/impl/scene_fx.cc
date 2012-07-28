@@ -480,7 +480,11 @@ void SceneFX::prep_shadow_map()
     are first reverted, and then the light modelview and projection are applied, resulting (with the
     bias) in the proper 2D lookup into the shadow map
   */
-  shadow_tex_mat_ = bias*pmat*ltrans.GetMatrix()*geom::Invert(Scene::Instance().GetTransform().GetMatrix())*geom::Invert(pmat2);
+  try {
+    shadow_tex_mat_ = bias*pmat*ltrans.GetMatrix()*geom::Invert(Scene::Instance().GetTransform().GetMatrix())*geom::Invert(pmat2);
+  } catch (geom::GeomException& e) {
+    LOG_DEBUG("SceneFX: caught matrix inversion exception in prep_shadow_map()");
+  }
 }
 
 void SceneFX::prep_amb_occlusion()
@@ -516,7 +520,12 @@ void SceneFX::prep_amb_occlusion()
 
   glMatrixMode(GL_TEXTURE);
   glPushMatrix();
-  geom::Mat4 ipm(geom::Transpose(geom::Invert(geom::Transpose(geom::Mat4(pm)))));
+  geom::Mat4 ipm;
+  try {
+    ipm=(geom::Transpose(geom::Invert(geom::Transpose(geom::Mat4(pm)))));
+  } catch (geom::GeomException& e) {
+    LOG_DEBUG("SceneFX: caught matrix inversion exception in prep_amb_occlusion()");
+  }
   glLoadMatrix(ipm.Data());
   glMatrixMode(GL_MODELVIEW);
 
@@ -638,7 +647,11 @@ void SceneFX::prep_beacon()
 
   glGetv(GL_PROJECTION_MATRIX, glpmat);
   geom::Mat4 pmat2(geom::Transpose(geom::Mat4(glpmat)));
-  beacon.mat = geom::Invert(Scene::Instance().GetTransform().GetMatrix())*geom::Invert(pmat2);
+  try {
+    beacon.mat = geom::Invert(Scene::Instance().GetTransform().GetMatrix())*geom::Invert(pmat2);
+  } catch (geom::GeomException& e) {
+    beacon.mat=geom::Mat4();
+  }
 }
 
 void SceneFX::draw_beacon()
