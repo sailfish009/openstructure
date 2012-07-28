@@ -1025,12 +1025,12 @@ class Table(object):
       if clear:
         plt.figure(figsize=[8, 6])
       
-      if x_title:
+      if x_title!=None:
         nice_x=x_title
       else:
         nice_x=MakeTitle(x)
       
-      if y_title:
+      if y_title!=None:
         nice_y=y_title
       else:
         if y:
@@ -1038,7 +1038,7 @@ class Table(object):
         else:
           nice_y=None
       
-      if z_title:
+      if z_title!=None:
         nice_z = z_title
       else:
         if z:
