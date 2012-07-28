@@ -15,6 +15,7 @@ set(OST_GFX_PYMOD_SOURCES
   export_color_ops.cc
   export_glwin_base.cc
   export_exporter.cc
+  export_bitmap.cc
 )
 
 if (ENABLE_IMG)

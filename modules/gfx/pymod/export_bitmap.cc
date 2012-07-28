@@ -16,43 +16,31 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_GFX_BITMAP_EXPORT_HH
-#define OST_GFX_BITMAP_EXPORT_HH
+#include <boost/python.hpp>
+using namespace boost::python;
 
-#include <boost/shared_array.hpp>
+#include <ost/gfx/bitmap_io.hh>
+using namespace ost;
+using namespace ost::gfx;
 
-/*
-  bitmap export for raw 2D image data
+namespace {
+  unsigned int get_width(const Bitmap& bm) {return bm.width;}
+  void set_width(Bitmap& bm, unsigned int w) {bm.width=w;}
+  unsigned int get_height(const Bitmap& bm) {return bm.height;}
+  void set_height(Bitmap& bm, unsigned int w) {bm.height=w;}
 
-  Author: Ansgar Philippsen
-*/
+  Bitmap import1(const std::string& n) {return ImportBitmap(n);}
+  Bitmap import2(const std::string& n, std::string e) {return ImportBitmap(n,e);}
+}
 
-#include <ost/gfx/module_config.hh>
-
-namespace ost { namespace gfx {
-
-// very rudimentary bitmap support
-// TODO: gl tex mapping association
-struct Bitmap
+void export_bitmap()
 {
-  /*
-   channels:
-     1 = greyscale
-     2 = grey + alpha
-     3 = rgb
-     4 = rgb + alpha
-   */
-  unsigned int channels;
-  unsigned int width, height;
-  boost::shared_array<unsigned char> data;
-};
+  class_<Bitmap>("Bitmap",init<>())
+    .add_property("width",get_width,set_width)
+    .add_property("height",get_height,set_height)
+    ;
 
-void ExportBitmap(const String& fname, std::string ext, unsigned int width, unsigned int height,unsigned char* data);
-
-Bitmap ImportBitmap(const String& fname, std::string ext="");
-
-
-}} // ns
-
-
-#endif
+  def("ExportBitmap",ExportBitmap);
+  def("ImportBitmap",import1);
+  def("ImportBitmap",import2);
+}
