@@ -853,6 +853,19 @@ class TestTable(unittest.TestCase):
     # read from disc
     tab_loaded_fname = Table.Load('saveloadtable_withspaces_filename_out.tab')
     self.CompareDataFromDict(tab_loaded_fname, {'first': ['x','foo',None,'hello spaces'], 'second': [3,None,9,10], 'third': [None,2.2,3.3,10.1]})
+  def testSaveTableHTML(self):
+    import StringIO
+    tab = self.CreateTestTable()
+    stream = StringIO.StringIO()
+    tab.Save(stream, format='html')
+    self.assertEqual(stream.getvalue(), '<table><tr><th>first</th><th>second</th><th>third</th></tr><tr><td>x</td><td>3</td><td></td></tr><tr><td>foo</td><td></td><td>2.200</td></tr><tr><td></td><td>9</td><td>3.300</td></tr></table>')
+  def testSaveTableContext(self):
+    import StringIO
+    tab = self.CreateTestTable()
+    stream = StringIO.StringIO()
+    tab.Save(stream, format='context')
+    self.assertEqual(stream.getvalue(), 
+                     '\\starttable[l|r|i3r|]\n\\HL\n\\NC \\bf first\\NC \\bf second\\NC \\bf third \\AR\\HL\n\\NC x\\NC 3\\NC --- \\AR\n\\NC foo\NC ---\NC 2.200 \\AR\n\\NC ---\\NC 9\\NC 3.300 \\AR\n\\HL\n\\stoptable')
 
   def testSaveLoadTableCSV(self):
     tab = self.CreateTestTable()

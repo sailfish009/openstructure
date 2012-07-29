@@ -1641,6 +1641,8 @@ class Table(object):
     ost             ost-specific format (human readable)
     csv             comma separated values (human readable)
     pickle          pickled byte stream (binary)
+    html            HTML table
+    context         ConTeXt table
     =============   =======================================
 
     :param stream_or_filename: filename or stream for writing output
@@ -1658,12 +1660,89 @@ class Table(object):
       return self._SaveCSV(stream_or_filename, sep=sep)
     if format=='pickle':
       return self._SavePickle(stream_or_filename)
+    if format=='html':
+      return self._SaveHTML(stream_or_filename)
+    if format=='context':
+      return self._SaveContext(stream_or_filename)
     raise ValueError('unknown format "%s"' % format)
 
   def _SavePickle(self, stream):
     if not hasattr(stream, 'write'):
       stream=open(stream, 'wb')
     cPickle.dump(self, stream, cPickle.HIGHEST_PROTOCOL)
+
+  def _SaveHTML(self, stream_or_filename):
+    def _escape(s):
+      return s.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;')
+
+    file_opened = False
+    if not hasattr(stream_or_filename, 'write'):
+      stream = open(stream_or_filename, 'w')
+      file_opened = True
+    else:
+      stream = stream_or_filename
+    stream.write('<table>') 
+    stream.write('<tr>')
+    for col_name in self.col_names:
+      stream.write('<th>%s</th>' % _escape(col_name)) 
+    stream.write('</tr>')
+    for row in self.rows:
+      stream.write('<tr>')
+      for i, col in enumerate(row):
+        val = ''
+        if col != None:
+           if self.col_types[i] == 'float':
+             val = '%.3f' % col
+           elif self.col_types[i] == 'int':
+             val = '%d' % col
+           elif self.col_types[i] == 'bool':
+             val = col and 'true' or 'false'
+           else:
+             val  = str(col)
+        stream.write('<td>%s</td>' % _escape(val))
+      stream.write('</tr>')
+    stream.write('</table>')
+    if file_opened:
+      stream.close()
+  def _SaveContext(self, stream_or_filename):
+    file_opened = False
+    if not hasattr(stream_or_filename, 'write'):
+      stream = open(stream_or_filename, 'w')
+      file_opened = True
+    else:
+      stream = stream_or_filename
+    stream.write('\\starttable[') 
+    for col_type in self.col_types:
+      if col_type =='string':
+        stream.write('l|')
+      elif col_type=='int':
+        stream.write('r|')
+      elif col_type =='float':
+        stream.write('i3r|')
+      else:
+        stream.write('l|')
+    stream.write(']\n\\HL\n')
+    for col_name in self.col_names:
+      stream.write('\\NC \\bf %s' % col_name) 
+    stream.write(' \\AR\\HL\n')
+    for row in self.rows:
+      for i, col in enumerate(row):
+        val = '---'
+        if col != None:
+           if self.col_types[i] == 'float':
+             val = '%.3f' % col
+           elif self.col_types[i] == 'int':
+             val = '%d' % col
+           elif self.col_types[i] == 'bool':
+             val = col and 'true' or 'false'
+           else:
+             val  = str(col)
+        stream.write('\\NC %s' % val)
+      stream.write(' \\AR\n')
+    stream.write('\\HL\n')
+    stream.write('\\stoptable')
+    if file_opened:
+      stream.close()
 
   def _SaveCSV(self, stream, sep):
     if not hasattr(stream, 'write'):
@@ -2400,4 +2479,3 @@ def Merge(table1, table2, by, only_matching=False):
       new_tab.AddRow(row)
   return new_tab
 
-  
