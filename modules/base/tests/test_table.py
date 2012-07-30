@@ -163,6 +163,10 @@ class TestTable(unittest.TestCase):
     diff = ImageChops.difference(img1, img2)
     self.assertEqual(diff.getbbox(),None)
 
+  def testSearchColNames(self):
+    tab = self.CreateTestTable()
+    self.assertEquals(tab.SearchColNames('d$'), ['second', 'third'])
+    self.assertEquals(tab.SearchColNames('(first|third)'), ['first','third'])
 
   def testZip(self):
     tab=Table(['col1', 'col2', 'col3', 'col4'], 'sssi')

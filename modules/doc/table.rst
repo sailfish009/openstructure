@@ -64,6 +64,7 @@ Functions You Might be Interested In
 :meth:`~ost.table.Table.Sort`                 sort table by column
 :meth:`~ost.table.Table.Filter`               filter table by values
 :meth:`~ost.table.Table.Zip`                  extract multiple columns at once
+:meth:`~ost.table.Table.SearchColNames`       search for matching column names
 
 **Input/Output**
 :meth:`~ost.table.Table.Save`                 save a table to a file

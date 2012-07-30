@@ -314,6 +314,22 @@ class Table(object):
     '''
     return self.col_names
   
+  def SearchColNames(self, regex):
+    '''
+    Returns a list of column names matching the regex
+
+    :param regex: regex pattern
+    :type regex: :class:`str`
+
+    :returns: :class:`list` of column names (:class:`str`)
+    '''
+    matching_names = []
+    for name in self.col_names:
+      matches = re.search(regex, name)
+      if matches:
+        matching_names.append(name)
+    return matching_names
+
   def HasCol(self, col):
     '''
     Checks if the column with a given name is present in the table.
