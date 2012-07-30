@@ -913,8 +913,9 @@ class Table(object):
   def Plot(self, x, y=None, z=None, style='.', x_title=None, y_title=None,
            z_title=None, x_range=None, y_range=None, z_range=None,
            color=None, plot_if=None, legend=None,
-           num_z_levels=10, diag_line=False, labels=None, max_num_labels=None,
-           title=None, clear=True, save=False, **kwargs):
+           num_z_levels=10, z_contour=True, z_interpol='nn', diag_line=False,
+           labels=None, max_num_labels=None, title=None, clear=True, save=False,
+           **kwargs):
     """
     Function to plot values from your table in 1, 2 or 3 dimensions using
     `Matplotlib <http://matplotlib.sourceforge.net>`__
@@ -986,6 +987,13 @@ class Table(object):
 
     :param save: filename for saving plot
     :type save: :class:`str`
+
+    :param z_contour: draw contour lines
+    :type z_contour: :class:`bool`
+
+    :param z_interpol: interpolation method for 3-dimensional plot (one of 'nn',
+                       'linear')
+    :type z_interpol: :class:`str`
 
     :param \*\*kwargs: additional arguments passed to matplotlib
     
@@ -1079,11 +1087,13 @@ class Table(object):
           levels.append(l)
           l += z_spacing
   
-        xi = np.linspace(min(xs)-0.1,max(xs)+0.1,len(xs)*10)
-        yi = np.linspace(min(ys)-0.1,max(ys)+0.1,len(ys)*10)
-        zi = mlab.griddata(xs, ys, zs, xi, yi)
+        xi = np.linspace(min(xs),max(xs),len(xs)*10)
+        yi = np.linspace(min(ys),max(ys),len(ys)*10)
+        zi = mlab.griddata(xs, ys, zs, xi, yi, interp=z_interpol)
   
-        plt.contour(xi,yi,zi,levels,linewidths=0.5,colors='k')
+        if z_contour:
+          plt.contour(xi,yi,zi,levels,linewidths=0.5,colors='k')
+
         plt.contourf(xi,yi,zi,levels,cmap=plt.cm.jet)
         plt.colorbar(ticks=levels)
             
