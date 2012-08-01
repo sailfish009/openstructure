@@ -18,7 +18,6 @@
 //------------------------------------------------------------------------------
 
 #include <ost/config.hh>
-#include <ost/log.hh>
 
 #include "transform.hh"
 #include "vecmat3_op.hh"
