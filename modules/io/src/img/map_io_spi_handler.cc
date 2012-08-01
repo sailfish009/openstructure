@@ -106,7 +106,7 @@ public:
     }
   }
 
-  float fNslice;  // nr of slices (1 for an image, negative nr of slices for new long label format
+  float fNslice;  // nr of slices (1 for an image, negative nr of slices indicates very old 2d image
   float fNrow;    // nr row per slice (Y)
   float fNrec;    // total nr of records (unused).
   float fNlabel;  // obsolete, unused
@@ -255,6 +255,9 @@ void header_filler(std::istream& in,  spider_header& header)
 {
   BinaryIStream<CONVERSIONTYPE> f(in);
   f >> header.fNslice;  
+  if(header.fNslice<1.0){
+    header.fNslice=1.0; // fix for very old 2d images with Nslice=-1
+  }
   f >> header.fNrow;  
   f >> header.fNrec;    
   f >> header.fNlabel; 
