@@ -19,8 +19,7 @@
 
 #ifndef GENERIC_PROPERTY_DEF_HH
 #define GENERIC_PROPERTY_DEF_HH
-#include <boost/python.hpp>
-#include <cassert>
+
 #include <ost/log.hh>
 /*
   Author: Marco Biasini
@@ -131,68 +130,6 @@ String depr_prop_as_string(C& c, const String& k)
   return c.GetPropAsString(k);  
 }
 
-template <typename C>
-boost::python::object get_attr(C& c, const String& k) {
-  std::map<String,ost::GenericPropValue>::const_iterator 
-      i = c.GetPropMap().find(k);
-  boost::python::object obj;
-  if (i != c.GetPropMap().end()) {
-    switch (i->second.which()) {
-      case 0:
-        return boost::python::object(boost::get<String>(i->second));
-      case 1:
-        return boost::python::object(boost::get<Real>(i->second));
-      case 2:
-        return boost::python::object(boost::get<int>(i->second));
-      case 3:
-        return boost::python::object(boost::get<bool>(i->second));
-      default:
-        assert(0 && "unhandled type");
-    }
-  }
-  std::string msg = "no such attribute '" + k + "'";
-  PyErr_SetString(PyExc_AttributeError, msg.c_str());
-  boost::python::throw_error_already_set();
-  // throw_error_already_set is not marked noreturn in some versions of
-  // boost. That's why we need a return statement at the end, even if we
-  // never get here!
-  return obj;
-}
-
-template <typename C>
-void set_attr(boost::python::object self,
-              const String& k, boost::python::object value)
-{
-  C* c = boost::python::extract<C*>(self);
-  if (PyObject_HasAttrString(self.ptr(), k.c_str()) && !c->HasProp(k)) {
-    boost::python::object name(k);
-    PyObject_GenericSetAttr(self.ptr(), name.ptr(), value.ptr());
-    return;
-  }
-  boost::python::extract<Real> f(value);
-  if (f.check()) {
-    c->SetFloatProp(k, f);
-    return;
-  }
-  boost::python::extract<int> i(value);
-  if (i.check()) {
-    c->SetIntProp(k, i);
-    return;
-  }
-  boost::python::extract<bool> b(value);
-  if (b.check()) {
-    c->SetBoolProp(k, b);
-    return;
-  }
-  boost::python::extract<String> s(value);
-  if (s.check()) {
-    c->SetStringProp(k, s);
-    return;
-  }
-}
-
-
-
 template <typename C, typename O>
 void const_generic_prop_def(O& bp_class)
 {
@@ -230,7 +167,6 @@ void const_generic_prop_def(O& bp_class)
     .def("GetGenericStringProperty", &depr_get_string_b<C>)
     .def("HasGenericProperty", &depr_has_prop<C>)
     .def("GetGenericPropertyStringRepresentation", &depr_prop_as_string<C>)
-    .def("__getattr__", &get_attr<C>)
   ;
 }
 
@@ -252,7 +188,6 @@ void generic_prop_def(O& bp_class)
     .def("SetGenericBoolProperty", &depr_set_bool<C>)
     .def("SetGenericStringProperty", &depr_set_string<C>)
     .def("RemoveProp", &C::RemoveProp)
-    .def("__setattr__", &set_attr<C>)
   ;
 }
 
