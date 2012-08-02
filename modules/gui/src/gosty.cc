@@ -117,7 +117,7 @@ void setup_python_search_path(const String& root, PythonInterpreter& pi)
 #  if (defined(__ppc64__) || defined(__x86_64__)) && !defined(__APPLE__)
   pi.AppendModulePath(QString::fromStdString(root+"/lib64/"+
                                              site_pkgs.str()+
-                                             "site-packages"));
+                                             "/site-packages"));
 #  else
   pi.AppendModulePath(QString::fromStdString(root+"/lib/"+
                                              site_pkgs.str()+
