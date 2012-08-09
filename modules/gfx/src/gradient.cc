@@ -70,7 +70,7 @@ Color Gradient::GetColorAt(float t) const
   }
   
   uint c=0;
-  while (t>=stops_[c].t && c<stops_.size()) {
+  while (c<stops_.size() && t>=stops_[c].t) {
     ++c;
   }
   if (c==0) {
