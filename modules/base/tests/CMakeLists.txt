@@ -1,6 +1,7 @@
 set(OST_BASE_UNIT_TESTS
   test_generic_property.cc
   test_string_ref.cc
+  test_path.cc
   test_pod_vector.cc
   test_stutil.py
   test_table.py

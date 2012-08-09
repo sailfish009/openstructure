@@ -146,10 +146,10 @@ public:
   bool empty() const { return begin_==end_; }
 
   /// \brief split string into chunks delimited by \p p
-  std::vector<StringRef> split(char p) const;
+  std::vector<StringRef> split(char p, bool empty_entries = false) const;
 
   /// \brief split string into chunks delimited by whitespace
-  std::vector<StringRef> split() const;
+  std::vector<StringRef> split(bool empty_entries = false) const;
   
   /// \brief returns a new string with all whitespace removed from 
   ///    this StringRef

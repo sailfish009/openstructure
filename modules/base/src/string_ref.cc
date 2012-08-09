@@ -123,7 +123,7 @@ std::ostream& operator<<(std::ostream& stream, const StringRef& strref)
   return stream;
 }
 
-std::vector<StringRef> StringRef::split(char p) const
+std::vector<StringRef> StringRef::split(char p, bool empty_entries) const
 {
   std::vector<StringRef> result;
   const char* s=begin_;
@@ -132,6 +132,10 @@ std::vector<StringRef> StringRef::split(char p) const
     if (*s==p) {
       if (l!=s) {
         result.push_back(StringRef(l, s-l));
+      } else {
+        if (empty_entries == true ) {
+          result.push_back(StringRef("",0));
+        }
       }
       l=s+1;
     }
@@ -139,11 +143,15 @@ std::vector<StringRef> StringRef::split(char p) const
   }
   if (l!=s) {
     result.push_back(StringRef(l, s-l));
+  } else {
+      if (empty_entries == true ) {
+        result.push_back(StringRef("",0));
+      }
   }
   return result;
 }
 
-std::vector<StringRef> StringRef::split() const
+std::vector<StringRef> StringRef::split(bool empty_entries) const
 {
   std::vector<StringRef> result;
   const char* s=begin_;
@@ -152,6 +160,10 @@ std::vector<StringRef> StringRef::split() const
     if (isspace(*s)) {
       if (l!=s) {
         result.push_back(StringRef(l, s-l));
+      } else {
+        if (empty_entries == true ) {
+          result.push_back(StringRef("",0));
+        }
       }
       l=s+1;
     }
@@ -159,6 +171,10 @@ std::vector<StringRef> StringRef::split() const
   }
   if (l!=s) {
     result.push_back(StringRef(l, s-l));
+  } else {
+    if (empty_entries == true ) {
+      result.push_back(StringRef("",0));
+    }
   }
   return result;
 }
