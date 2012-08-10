@@ -18,8 +18,13 @@
 
 #include <ost/path.hh>
 #include <ost/string_ref.hh>
+
+#ifdef WIN32
+// Insert Windows code here
+#else
 #include <sys/param.h>
 #include <unistd.h>
+#endif
 
 namespace ost {
 
@@ -74,6 +79,11 @@ String Path::GetExtension() const
     return (filename_sr_split.rbegin())->str();
 }
 
+
+#ifdef WIN32
+// Insert Windows Code Here
+#else
+
 String Path::GetAbsolutePath() const
 {
     if (path_[0]==OST_DIRECTORY_SEPARATOR) {
@@ -104,5 +114,7 @@ bool Path::IsWritable() const
     }
     return false;
 }
+
+#endif
 
 } // ost
