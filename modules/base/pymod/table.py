@@ -657,7 +657,7 @@ class Table(object):
         for row, d in zip(self.rows, data):
           row.append(d)
 
-    elif data!=None and len(self.col_names)==0:
+    elif data!=None and len(self.col_names)==1:
       if IsScalar(data):
         self.AddRow({col_name : data})
       else:
