@@ -1511,6 +1511,45 @@ class Table(object):
     
     self.AddCol(mean_col_name, 'f', mean_rows)
     
+  def Percentiles(self, col, nths):
+    """
+    returns the percentiles of column *col* given in *nths*.
+
+    The percentils are calculated as 
+    
+    .. code-block:: python
+
+      values[min(len(values), int(round(len(values)*p/100+0.5)-1))]
+
+    where values are the sorted values of *col* not equal to none
+    :param: nths: list of percentiles to be calculated. Each percentil is a number
+        between 0 and 100.
+
+    :raises: :class:`TypeError` if column type is ``string``
+    :returns: List of percentils in the same order as given in *nths*
+    """
+    idx = self.GetColIndex(col)
+    col_type = self.col_types[idx]
+    if col_type!='int' and col_type!='float' and col_type!='bool':
+      raise TypeError("Median can only be used on numeric column types")
+    
+    for nth in nths:
+      if nth < 0 or nth > 100:
+        raise ValueError("percentiles must be between 0 and 100")
+    vals=[]
+    for v in self[col]:
+      if v!=None:
+        vals.append(v)
+    vals=sorted(vals)
+    if len(vals)==0:
+      return [None]*len(nths)
+    percentiles=[]
+    
+    for nth in nths:
+      p=vals[min(len(vals)-1, int(round(len(vals)*nth/100.0+0.5)-1))]
+      percentiles.append(p)
+    return percentiles
+
   def Median(self, col):
     """
     Returns the median of the given column. Cells with None are ignored. Returns 

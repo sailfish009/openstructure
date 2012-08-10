@@ -196,7 +196,14 @@ class TestTable(unittest.TestCase):
     self.assertEquals(type(z[0][1]),int)
     self.assertEquals(type(z[1][1]),int)
     self.assertRaises(ValueError, tab.Zip, 'col5', 'col3')
-
+  def testPercentiles(self):
+    tab = Table(['nums'], 'i')
+    self.assertEqual(tab.Percentiles('nums', [0,100]), [None, None])
+    self.assertRaises(ValueError, tab.Percentiles, 'nums', [101])
+    self.assertRaises(ValueError, tab.Percentiles, 'nums', [-1])
+    for i in (35,15,50,40,20):
+      tab.AddRow([i])
+    self.assertEqual(tab.Percentiles('nums', [0,30,40,100]), [15,20,35,50])
   def testTableInitEmpty(self):
     '''
     empty table
