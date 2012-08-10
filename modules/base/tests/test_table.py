@@ -592,6 +592,11 @@ class TestTable(unittest.TestCase):
                                    'foo': [True, None, True],
                                    'bar': [1, 2, 3]})
 
+  def testRaiseErrorOnWrongDataLengthAddCol(self):
+    tab = Table()
+    tab.AddCol('a','f',[4.2,4.2,4.2])
+    self.assertRaises(ValueError, tab.AddCol, 'b', 'f', [4.2,4.2])
+
 
   def testRaiseErrorOnWrongColumnTypes(self):
     # wrong columns types in init

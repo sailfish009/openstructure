@@ -654,6 +654,11 @@ class Table(object):
         for row in self.rows:
           row.append(data)
       else:
+        if len(data)!=len(self.rows):
+          self.col_names.pop()
+          self.col_types.pop()
+          raise ValueError('Length of data (%i) must correspond to number of '%len(data) +\
+                           'existing rows (%i)'%len(self.rows))
         for row, d in zip(self.rows, data):
           row.append(d)
 
