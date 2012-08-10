@@ -1371,7 +1371,52 @@ class TestTable(unittest.TestCase):
     
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c','a','b',weight='d')
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c',weights='d')
+
+  def testGaussianSmooth(self):
+    tab = Table(['a','b','c','d','e','f'],'fffffi',
+                a=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
+                b=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
+                c=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
+                d=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
+                e=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
+                f=[2,6,5,3,8,7,4,4,4])
+
+    tab.GaussianSmooth('a')
+    tab.GaussianSmooth('b', std=2.0)
+    tab.GaussianSmooth('c', padding='wrap')
+    tab.GaussianSmooth('d', padding='constant')
+    tab.GaussianSmooth('e', padding='constant',c=3.0)
+    tab.GaussianSmooth('f')
+
+    ref_list=[]
+
+    ref_list.append([0.74729766,1.20875404,1.93459464,2.39849076,2.11504816,
+                     1.42457403,1.20524937,1.41025075,1.3557406])
+    ref_list.append([1.23447249,1.41295267,1.65198705,1.79959835,1.78131778,
+                     1.64501718,1.49728102,1.40589715,1.37147629])
+    ref_list.append([0.9315564,1.24131027,1.93698455,2.39855767,2.11504816,
+                     1.42450711,1.20285946,1.37769451,1.17148186])
+    ref_list.append([0.5630556,1.17705895,1.93224488,2.39842384,2.11504816,
+                     1.4244402,1.2005097,1.34599942,0.9872398 ])
+    ref_list.append([1.46464039,1.35272941,1.94594196,2.39882533,2.11504816,
+                     1.42484169,1.21420677,1.52166988,1.88882459])
+    ref_list.append([3,4,4,5,6,6,4,4,4])
+
+    tab_list=[[],[],[],[],[],[]]
     
+    for row in tab.rows:
+      for i,v in enumerate(row):
+        tab_list[i].append(v)
+
+    for i in range(len(ref_list[0])):
+      self.assertAlmostEquals(tab_list[0][i],ref_list[0][i])
+      self.assertAlmostEquals(tab_list[1][i],ref_list[1][i])
+      self.assertAlmostEquals(tab_list[2][i],ref_list[2][i])
+      self.assertAlmostEquals(tab_list[3][i],ref_list[3][i])
+      self.assertAlmostEquals(tab_list[4][i],ref_list[4][i])
+      self.assertAlmostEquals(tab_list[5][i],ref_list[5][i])
+     
+
   def testIsEmpty(self):
     tab = Table()
     self.assertTrue(tab.IsEmpty())
