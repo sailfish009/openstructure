@@ -90,6 +90,9 @@ class BinaryColExpr:
   def __mul__(self, rhs):
     return BinaryColExpr(operator.mul, self, rhs)
 
+  def __div__(self, rhs):
+    return BinaryColExpr(operator.div, self, rhs)
+
 class TableCol:
   def __init__(self, table, col):
     self._table=table
@@ -119,6 +122,7 @@ class TableCol:
 
   def __mul__(self, rhs):
     return BinaryColExpr(operator.mul, self, rhs)
+
   def __div__(self, rhs):
     return BinaryColExpr(operator.div, self, rhs)
 
