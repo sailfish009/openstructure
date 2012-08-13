@@ -498,6 +498,27 @@ Statistics for column %(col)s
       if not overwrite or not added:
         self.rows.append(new_row)
       
+  def PairedTTest(self, col_a, col_b):
+    """
+    Two-sided test for the null-hypothesis that two related samples 
+    have the same average (expected values)
+    
+    :param col_a: First column
+    :param col_b: Second column
+
+    :returns: P-value  between 0 and 1 that the two columns have the 
+       same average. The smaller the value, the less related the two
+       columns are.
+    """
+    from scipy.stats import ttest_rel
+    xs = []
+    ys = []
+    for x, y in self.Zip(col_a, col_b):
+      if x!=None and y!=None:
+        xs.append(x)
+        ys.append(y)
+    result = ttest_rel(xs, ys)
+    return result[1]
 
   def AddRow(self, data, overwrite=None):
     """
