@@ -604,6 +604,10 @@ class TestTable(unittest.TestCase):
     tab.AddCol('a','f',[4.2,4.2,4.2])
     self.assertRaises(ValueError, tab.AddCol, 'b', 'f', [4.2,4.2])
 
+  def testRaiseErrorColNameAlreadyExists(self):
+    tab = Table()
+    tab.AddCol('awesome','f')
+    self.assertRaises(ValueError, tab.AddCol, 'awesome', 'f')
 
   def testRaiseErrorOnWrongColumnTypes(self):
     # wrong columns types in init

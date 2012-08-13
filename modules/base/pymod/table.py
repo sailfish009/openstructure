@@ -695,6 +695,10 @@ Statistics for column %(col)s
     As a special case, if there are no previous rows, and data is not 
     None, rows are added for every item in data.
     """
+
+    if col_name in self.col_names:
+      raise ValueError('Column with name %s already exists'%col_name)
+
     col_type = self._ParseColTypes(col_type, exp_num=1)[0]
     self.col_names.append(col_name)
     self.col_types.append(col_type)
