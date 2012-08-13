@@ -90,6 +90,9 @@ class BinaryColExpr:
   def __mul__(self, rhs):
     return BinaryColExpr(operator.mul, self, rhs)
 
+  def __div__(self, rhs):
+    return BinaryColExpr(operator.div, self, rhs)
+
 class TableCol:
   def __init__(self, table, col):
     self._table=table
@@ -119,6 +122,7 @@ class TableCol:
 
   def __mul__(self, rhs):
     return BinaryColExpr(operator.mul, self, rhs)
+
   def __div__(self, rhs):
     return BinaryColExpr(operator.div, self, rhs)
 
@@ -411,6 +415,31 @@ class Table(object):
   def __str__(self):
     return self.ToString()
   
+  def Stats(self, col):
+     idx  = self.GetColIndex(col)
+     text ='''
+Statistics for column %(col)s
+
+  Number of Rows         : %(num)d
+  Number of Rows Not None: %(num_non_null)d 
+  Mean                   : %(mean)f
+  Median                 : %(median)f
+  Standard Deviation     : %(stddev)f
+  Min                    : %(min)f
+  Max                    : %(max)f
+'''
+     data = {
+       'col' : col,
+       'num' : len(self.rows),
+       'num_non_null' : self.Count(col),
+       'median' : self.Median(col),
+       'mean' : self.Mean(col),
+       'stddev' : self.StdDev(col),
+       'min' : self.Min(col),
+       'max' : self.Max(col),
+     }
+     return text % data
+
   def _AddRowsFromDict(self, d, overwrite=None):
     '''
     Add one or more rows from a :class:`dictionary <dict>`.
@@ -469,6 +498,27 @@ class Table(object):
       if not overwrite or not added:
         self.rows.append(new_row)
       
+  def PairedTTest(self, col_a, col_b):
+    """
+    Two-sided test for the null-hypothesis that two related samples 
+    have the same average (expected values)
+    
+    :param col_a: First column
+    :param col_b: Second column
+
+    :returns: P-value  between 0 and 1 that the two columns have the 
+       same average. The smaller the value, the less related the two
+       columns are.
+    """
+    from scipy.stats import ttest_rel
+    xs = []
+    ys = []
+    for x, y in self.Zip(col_a, col_b):
+      if x!=None and y!=None:
+        xs.append(x)
+        ys.append(y)
+    result = ttest_rel(xs, ys)
+    return result[1]
 
   def AddRow(self, data, overwrite=None):
     """
@@ -645,6 +695,10 @@ class Table(object):
     As a special case, if there are no previous rows, and data is not 
     None, rows are added for every item in data.
     """
+
+    if col_name in self.col_names:
+      raise ValueError('Column with name %s already exists'%col_name)
+
     col_type = self._ParseColTypes(col_type, exp_num=1)[0]
     self.col_names.append(col_name)
     self.col_types.append(col_type)
@@ -654,10 +708,15 @@ class Table(object):
         for row in self.rows:
           row.append(data)
       else:
+        if hasattr(data, '__len__') and len(data)!=len(self.rows):
+          self.col_names.pop()
+          self.col_types.pop()
+          raise ValueError('Length of data (%i) must correspond to number of '%len(data) +\
+                           'existing rows (%i)'%len(self.rows))
         for row, d in zip(self.rows, data):
           row.append(d)
 
-    elif data!=None and len(self.col_names)==0:
+    elif data!=None and len(self.col_names)==1:
       if IsScalar(data):
         self.AddRow({col_name : data})
       else:
@@ -1506,6 +1565,45 @@ class Table(object):
     
     self.AddCol(mean_col_name, 'f', mean_rows)
     
+  def Percentiles(self, col, nths):
+    """
+    returns the percentiles of column *col* given in *nths*.
+
+    The percentils are calculated as 
+    
+    .. code-block:: python
+
+      values[min(len(values), int(round(len(values)*p/100+0.5)-1))]
+
+    where values are the sorted values of *col* not equal to none
+    :param: nths: list of percentiles to be calculated. Each percentil is a number
+        between 0 and 100.
+
+    :raises: :class:`TypeError` if column type is ``string``
+    :returns: List of percentils in the same order as given in *nths*
+    """
+    idx = self.GetColIndex(col)
+    col_type = self.col_types[idx]
+    if col_type!='int' and col_type!='float' and col_type!='bool':
+      raise TypeError("Median can only be used on numeric column types")
+    
+    for nth in nths:
+      if nth < 0 or nth > 100:
+        raise ValueError("percentiles must be between 0 and 100")
+    vals=[]
+    for v in self[col]:
+      if v!=None:
+        vals.append(v)
+    vals=sorted(vals)
+    if len(vals)==0:
+      return [None]*len(nths)
+    percentiles=[]
+    
+    for nth in nths:
+      p=vals[min(len(vals)-1, int(round(len(vals)*nth/100.0+0.5)-1))]
+      percentiles.append(p)
+    return percentiles
+
   def Median(self, col):
     """
     Returns the median of the given column. Cells with None are ignored. Returns 
