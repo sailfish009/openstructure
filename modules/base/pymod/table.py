@@ -415,6 +415,31 @@ class Table(object):
   def __str__(self):
     return self.ToString()
   
+  def Stats(self, col):
+     idx  = self.GetColIndex(col)
+     text ='''
+Statistics for column %(col)s
+
+  Number of Rows         : %(num)d
+  Number of Rows Not None: %(num_non_null)d 
+  Mean                   : %(mean)f
+  Median                 : %(median)f
+  Standard Deviation     : %(stddev)f
+  Min                    : %(min)f
+  Max                    : %(max)f
+'''
+     data = {
+       'col' : col,
+       'num' : len(self.rows),
+       'num_non_null' : self.Count(col),
+       'median' : self.Median(col),
+       'mean' : self.Mean(col),
+       'stddev' : self.StdDev(col),
+       'min' : self.Min(col),
+       'max' : self.Max(col),
+     }
+     return text % data
+
   def _AddRowsFromDict(self, d, overwrite=None):
     '''
     Add one or more rows from a :class:`dictionary <dict>`.
