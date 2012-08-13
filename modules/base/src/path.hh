@@ -44,8 +44,10 @@ public:
     Path (const String& path): path_(path) {};
     String GetFullPath() const { return path_; }
     operator std::string() const { return path_;}
-    Path& operator/(const String& str);
-    Path& operator/(const Path& path);
+    Path operator/(const Path& path) const;
+    Path operator/(const String& path) const;
+    Path& operator/=(const Path& path);
+    Path& operator/=(const String& path);
     String GetDirName() const;
     String GetFileName() const;
     String GetExtension() const;
@@ -57,6 +59,23 @@ private:
 
     String path_;
 };
+
+
+Path RootPath() {
+#ifdef WIN32
+  return Path("c:\\");
+#else
+  return Path("/");
+#endif
+}
+
+#ifdef WIN32
+
+Path DiscRootPath(char disc) {
+  return Path("\");    
+}
+
+#endif
 
 } // ost
 

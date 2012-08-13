@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <iostream>
 #include <fstream>
+#include <stdio.h>
 
 using namespace ost;
 
@@ -58,23 +59,31 @@ BOOST_AUTO_TEST_CASE(test_operators)
   full_path2 += "another";
   full_path2 += OST_DIRECTORY_SEPARATOR;
   full_path2 += fullpath_end;
-
   Path test_path1("this");
-  test_path1 / "is" / "a" / "test" / "path";
+  Path test_path1r = test_path1 / "is" / "a" / "test" / "path";
+  BOOST_CHECK(test_path1r.GetFullPath()==full_path1);
+  test_path1 /= "is";
+  test_path1 /= "a";
+  test_path1 /= "test";
+  test_path1 /= "path";
   BOOST_CHECK(test_path1.GetFullPath()==full_path1);
   Path test_path2b("is");
   Path test_path2c("another");
   Path test_path2d("test");
   Path test_path2e("path");
   Path test_path2("this");
-  test_path2 / test_path2b / test_path2c / test_path2d / test_path2e;
+  Path test_path2r = test_path2 / test_path2b / test_path2c / test_path2d / test_path2e;
+  BOOST_CHECK(test_path2r.GetFullPath()==full_path2);
+  test_path2 /= test_path2b /= test_path2c /= test_path2d /= test_path2e;
   BOOST_CHECK(test_path2.GetFullPath()==full_path2);
 }
 
 BOOST_AUTO_TEST_CASE(test_path_disassembling_operators)
 {
-  Path test_path("");
-  test_path / "etc" / "rc.d" / "rc.conf";
+  Path test_path = RootPath();
+  test_path /= "etc";
+  test_path /= "rc.d";
+  test_path /= "rc.conf";
   String dirname("");
   dirname += OST_DIRECTORY_SEPARATOR;
   dirname += "etc";
@@ -85,7 +94,8 @@ BOOST_AUTO_TEST_CASE(test_path_disassembling_operators)
   BOOST_CHECK(test_path.GetFileName()=="rc.conf");
   BOOST_CHECK(test_path.GetExtension()=="conf");
   Path test_path2("etc");
-  test_path2 / "rc.d" / "";
+  test_path2 /= "rc.d";
+  test_path2 /= "";
   String dirname2("etc");
   dirname2 += OST_DIRECTORY_SEPARATOR;
   dirname2 += "rc.d";
@@ -100,10 +110,10 @@ BOOST_AUTO_TEST_CASE(test_existence_and_accessibility)
 {
   std::ofstream filestr;
   Path filename("testfiles");
-  filename / "path_test_file.txt";
+  filename /= "path_test_file.txt";
   Path test_path("testfiles");
-  test_path / "path_test_file.txt";
-  BOOST_CHECK(test_path.Exists()==false);
+  test_path /= "path_test_file.txt";
+  std::cout << filename.GetFullPath() << std::endl;
   filestr.open(filename.GetFullPath().c_str());
   filestr << "This file is created by the unitest for the Path class" << std::endl;
   filestr.close();
@@ -113,10 +123,11 @@ BOOST_AUTO_TEST_CASE(test_existence_and_accessibility)
   #ifdef WIN32
   // Put windows code here
   #else
-
   chmod(test_path.GetFullPath().c_str(),S_IRUSR | S_IRGRP | S_IROTH);
   BOOST_CHECK(test_path.IsWritable()==false);
   chmod(test_path.GetFullPath().c_str(),S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+  remove(test_path.GetFullPath().c_str());
+  BOOST_CHECK(test_path.Exists()==false);
 
   #endif
 }

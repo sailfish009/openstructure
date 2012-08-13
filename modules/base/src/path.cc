@@ -28,24 +28,38 @@
 
 namespace ost {
 
-Path& Path::operator/(const String& str)
-{
-    this->path_ += OST_DIRECTORY_SEPARATOR;
-    this->path_ += str;
-    return *this;
-}
 
-Path& Path::operator/(const Path& path)
+
+Path& Path::operator/=(const Path& path)
 {
-    this->path_ += OST_DIRECTORY_SEPARATOR;
+    if (path_.size()==0 || (path_[path_.size()-1] != OST_DIRECTORY_SEPARATOR)) {
+      this->path_ += OST_DIRECTORY_SEPARATOR;
+    }
     this->path_ += path.GetFullPath();
     return *this;
 }
 
-Path& operator/(const String& str1, const Path& str2)
+Path& Path::operator/=(const String& str)
 {
-    Path p1(str1);
-    return p1/str2;
+    if (path_.size()==0 || (path_[path_.size()-1] != OST_DIRECTORY_SEPARATOR)) {
+      this->path_ += OST_DIRECTORY_SEPARATOR;
+    }
+    this->path_ += str;
+    return *this;
+}
+
+Path Path::operator/(const Path& path) const
+{
+    Path retpath(*this);
+    retpath /= path;
+    return retpath;
+}
+
+Path Path::operator/(const String& str) const
+{
+    Path retpath(*this);
+    retpath /= str;
+    return retpath;
 }
 
 String Path::GetFileName() const
@@ -79,14 +93,13 @@ String Path::GetExtension() const
     return (filename_sr_split.rbegin())->str();
 }
 
-
 #ifdef WIN32
 // Insert Windows Code Here
 #else
 
 String Path::GetAbsolutePath() const
 {
-    if (path_[0]==OST_DIRECTORY_SEPARATOR) {
+    if (path_.size() !=0 && path_[0]==OST_DIRECTORY_SEPARATOR) {
         return path_;
     }
     char path[MAXPATHLEN];  // This is a buffer for the text
@@ -99,20 +112,15 @@ String Path::GetAbsolutePath() const
 
 bool Path::Exists() const
 {
-    if (access(path_.c_str(), F_OK)==0)
-    {
-        return true;
+    if (access(path_.c_str(), F_OK)==0) {
+      return true;
     }
     return false;
 }
 
 bool Path::IsWritable() const
 {
-    if (access(path_.c_str(), W_OK)==0)
-    {
-        return true;
-    }
-    return false;
+    return (access(path_.c_str(), W_OK)==0);
 }
 
 #endif
