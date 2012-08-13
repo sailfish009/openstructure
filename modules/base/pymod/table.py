@@ -704,7 +704,7 @@ Statistics for column %(col)s
         for row in self.rows:
           row.append(data)
       else:
-        if len(data)!=len(self.rows):
+        if hasattr(data, '__len__') and len(data)!=len(self.rows):
           self.col_names.pop()
           self.col_types.pop()
           raise ValueError('Length of data (%i) must correspond to number of '%len(data) +\
