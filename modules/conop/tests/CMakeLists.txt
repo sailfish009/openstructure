@@ -6,6 +6,7 @@ set(OST_CONOP_UNIT_TESTS
   helper.cc
   test_compound.py
   test_cleanup.py
+  test_processor.py
   test_nonstandard.py
 )
 

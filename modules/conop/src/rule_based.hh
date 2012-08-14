@@ -30,6 +30,10 @@ namespace ost { namespace conop {
 mol::AtomHandleList DLLEXPORT_OST_CONOP GetUnknownAtoms(mol::ResidueHandle res, 
                                                         CompoundPtr compound);
 
+class RuleBasedProcessor;
+
+typedef boost::shared_ptr<RuleBasedProcessor> RuleBasedProcessorPtr;
+
 class DLLEXPORT_OST_CONOP RuleBasedProcessor  : public Processor {
 public:
   RuleBasedProcessor(CompoundLibPtr compound_lib): 

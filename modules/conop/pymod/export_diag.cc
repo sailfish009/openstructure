@@ -16,20 +16,29 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-
+//
 #include <boost/python.hpp>
-using namespace boost::python;
-#include <ost/conop/rule_based.hh>
+#include <ost/conop/diag.hh>
+using namespace ost;
 
+using namespace boost::python;
 using namespace ost::conop;
 
-void export_rule_based() {
-  
-  class_<RuleBasedProcessor, RuleBasedProcessorPtr, 
-         boost::noncopyable, bases<Processor> >("RuleBasedProcessor", 
-         init<CompoundLibPtr>())
-    .add_property("fix_element", &RuleBasedProcessor::GetFixElement,
-                 &RuleBasedProcessor::SetFixElement)
+
+void export_diag() {
+
+  enum_<DiagType>("DiagType")
+    .value("DIAG_UNK_ATOM", DIAG_UNK_ATOM)
+    .value("DIAG_UNK_RESIDUE", DIAG_UNK_RESIDUE)
+    .value("(DIAG_MISSING_ATOM", DIAG_MISSING_ATOM)
+    .value("DIAG_NONSTD_RESIDUE", DIAG_NONSTD_RESIDUE)
+    .export_values()
+  ;
+
+  class_<Diag>("Diag", init<DiagType,const char*>())
+    .def("__str__(self)__", &Diag::Format)
+  ;
+  class_<Diagnostics, DiagnosticsPtr>("Diagnostics")
   ;
 }
 
