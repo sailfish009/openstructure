@@ -61,32 +61,18 @@ BOOST_AUTO_TEST_CASE(rule_based_set_get_flags)
    BOOST_CHECK_EQUAL(rbc.GetUnkAtomTreatment(), CONOP_WARN);
    BOOST_CHECK_EQUAL(rbc.GetUnkResidueTreatment(), CONOP_WARN);
    BOOST_CHECK_EQUAL(rbc.GetStrictHydrogens(), false);
-   rbc.PushFlags();
    rbc.SetConnect(false);
+   rbc.SetStrictHydrogens(true);
    rbc.SetCheckBondFeasibility(true);
    rbc.SetUnkResidueTreatment(CONOP_FATAL);
    rbc.SetUnkAtomTreatment(CONOP_REMOVE);
    BOOST_CHECK_EQUAL(rbc.GetConnect(), false);
+   BOOST_CHECK_EQUAL(rbc.GetStrictHydrogens(), true);
    BOOST_CHECK_EQUAL(rbc.GetCheckBondFeasibility(),true);
    BOOST_CHECK_EQUAL(rbc.GetUnkResidueTreatment(),CONOP_FATAL);
    BOOST_CHECK_EQUAL(rbc.GetUnkAtomTreatment(),CONOP_REMOVE);
-   rbc.PopFlags();
 }
 
-BOOST_AUTO_TEST_CASE(rule_based_push_pop_flags)
-{
-  CompoundLibPtr lib=load_lib();
-  if (!lib) { return; }
-  RuleBasedProcessor rbc(lib);
-  BOOST_CHECK_THROW(rbc.PopFlags(), std::runtime_error);
-  rbc.PushFlags();
-  rbc.PopFlags();
-  rbc.PushFlags();
-  rbc.SetConnect(false);
-  BOOST_CHECK(!rbc.GetConnect());
-  rbc.PopFlags();
-  BOOST_CHECK(rbc.GetConnect());
-}
 
 BOOST_AUTO_TEST_CASE(rule_based_connect)
 {

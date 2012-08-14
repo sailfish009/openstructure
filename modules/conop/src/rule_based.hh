@@ -26,39 +26,25 @@
 
 namespace ost { namespace conop {
 
-struct RuleBasedProcessorOptions : ProcessorOptions {
-  RuleBasedProcessorOptions(): ProcessorOptions(), 
-    strict_hydrogens(false), fix_element(true)
-  {}
-  bool strict_hydrogens;
-  bool fix_element;
-};
-
 /// \brief returns all atoms not listed in  the specifictaion of compound
 mol::AtomHandleList DLLEXPORT_OST_CONOP GetUnknownAtoms(mol::ResidueHandle res, 
                                                         CompoundPtr compound);
 
-class DLLEXPORT_OST_CONOP RuleBasedProcessor  : 
-  public ProcessorBase<RuleBasedProcessorOptions> {
+class DLLEXPORT_OST_CONOP RuleBasedProcessor  : public Processor {
 public:
   RuleBasedProcessor(CompoundLibPtr compound_lib): 
-    ProcessorBase<RuleBasedProcessorOptions>(), lib_(compound_lib)
+    lib_(compound_lib)
   {
   }
 
-  bool GetStrictHydrogens() const {
-    return this->GetOptions().strict_hydrogens;
-  }
-
-  void SetStrictHydrogens(bool flag) {
-    this->GetOptions().strict_hydrogens = flag;
-  }
-
   bool GetFixElement() const {
-    return this->GetOptions().fix_element;
+    return fix_element_;
   }
   void SetFixElement(bool flag) {
-    this->GetOptions().fix_element = flag;
+    fix_element_ = flag;
+  }
+  virtual ProcessorPtr Copy() const {
+    return ProcessorPtr(new RuleBasedProcessor(*this));
   }
 protected:
   virtual void DoProcess(DiagnosticsPtr diags, 
@@ -76,6 +62,7 @@ private:
   bool IsBondFeasible(const mol::AtomHandle&, const mol::AtomHandle&) const;
   mol::AtomHandle LocateAtom(const mol::AtomHandleList&, int ordinal) const;
   CompoundLibPtr lib_;
+  bool fix_element_;
 };
 
 

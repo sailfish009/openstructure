@@ -69,7 +69,7 @@ void RuleBasedProcessor::ProcessUnkAtoms(DiagnosticsPtr diags,
     return;
   }
  
-  assert(unks.empty() && "empty unk list");
+  assert(!unks.empty() && "empty unk list");
   mol::XCSEditor edi = unks.front().GetEntity().EditXCS();
   for (mol::AtomHandleList::iterator 
        i = unks.begin(), e = unks.end(); i != e; ++i) {
