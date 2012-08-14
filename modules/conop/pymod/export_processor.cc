@@ -18,11 +18,11 @@
 //------------------------------------------------------------------------------
 //
 #include <boost/python.hpp>
-using namespace boost::python;
 #include <ost/conop/processor.hh>
 using namespace ost;
 
 using namespace ost::conop;
+using namespace boost::python;
 
 struct PyProcessor : public Processor {};
 struct WrappedProcessor : public PyProcessor, public wrapper<WrappedProcessor> {
@@ -44,10 +44,19 @@ struct WrappedProcessor : public PyProcessor, public wrapper<WrappedProcessor> {
   PyObject* self_;
 };
 
+
 void export_processor() {
   
+  enum_<Dialect>("Dialect")
+    .value("PDB_DIALECT", PDB_DIALECT)
+    .value("CHARMM_DIALECT", CHARMM_DIALECT)
+    .export_values()
+  ;
   class_<Processor, ProcessorPtr, boost::noncopyable>("_Processor", no_init)
     .def("Copy", &Processor::Copy)
+    .add_property("check_bond_feasibility", 
+                  &Processor::GetCheckBondFeasibility,
+                  &Processor::SetCheckBondFeasibility)
     .add_property("strict_hydrogens", &Processor::GetStrictHydrogens,
                  &Processor::SetStrictHydrogens)
     .add_property("connect", &Processor::GetConnect,

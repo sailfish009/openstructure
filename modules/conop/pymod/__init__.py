@@ -73,3 +73,17 @@ def SetDefaultBuilder(builder_name):
   '''
   conop_inst=Conopology.Instance()
   conop_inst.SetDefaultBuilder(builder_name)
+
+def SetDefaultLib(compound_lib):
+  '''
+  Set the default compound library. The compound library is used by various
+  functions of the framework that requires knowledge of naming and 
+  connectivity of residues.j
+  '''
+  conop_inst=Conopology.Instance()
+  conop_inst.SetDefaultLib(compound_lib)
+
+def GetDefaultLib():
+  conop_inst=Conopology.Instance()
+  return conop_inst.GetDefaultLib()
+

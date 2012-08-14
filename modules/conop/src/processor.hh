@@ -25,6 +25,11 @@
 
 namespace ost { namespace conop {
 
+typedef enum {
+  PDB_DIALECT,
+  CHARMM_DIALECT
+} Dialect;
+
 enum ConopAction {
   CONOP_WARN = 0,
   CONOP_SILENT,
@@ -113,6 +118,8 @@ private:
   ConopAction unk_res_treatment_;
   ConopAction zero_occ_treatment_;
 };
+
+ConopAction DLLEXPORT_OST_CONOP ConopActionFromString(const String& name);
 
 
 /// \brief assigns phi/psi/omega to all residues marked peptide-linking of 

@@ -34,7 +34,6 @@
 #include <ost/platform.hh>
 #include <ost/log.hh>
 
-#include <ost/conop/rule_based_builder.hh>
 #include <ost/dyn_cast.hh>
 
 using namespace ost;
@@ -51,8 +50,10 @@ EntityHandle load(const String& file, const IOProfile& profile)
     if (reader.HasNext()) {
       EntityHandle ent=CreateEntity();
       reader.Import(ent);
-      conop::Conopology& conop_inst=conop::Conopology::Instance();
-      conop_inst.ConnectAll(conop_inst.GetBuilder(), ent);
+      if (profile.processor) {
+        profile.processor->Process(ent);
+      }
+
       if (ent.GetChainList().size()!=1) {
         std::cout << "WARNING: File " << file << "has more than one chain" << std::endl; 
       }    
@@ -116,7 +117,8 @@ int main (int argc, char **argv)
 
   // creates the required loading profile
   IOProfile profile;
-  profile.bond_feasibility_check=false;
+#warning implement me
+  //profile.bond_feasibility_check=false;
 
   // parses options
   String sel;

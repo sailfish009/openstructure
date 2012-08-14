@@ -40,8 +40,8 @@ def _InitRuleBasedBuilder():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
   if os.path.exists(compound_lib_path):
     compound_lib=conop.CompoundLib.Load(compound_lib_path)
-    conop.RegisterBuilder(conop.RuleBasedBuilder(compound_lib), 'RBB')
-    conop.SetDefaultBuilder('RBB')
+    conop.SetDefaultLib(compound_lib)
+    io.profiles['DEFAULT'].processor = conop.RuleBasedProcessor(compound_lib)
 
 # switch to rule-based builder for high fidelity if compounds.chemlib is 
 # available

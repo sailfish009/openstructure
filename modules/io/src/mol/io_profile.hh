@@ -23,39 +23,50 @@
 #include <map>
 #include <ost/mol/entity_handle.hh>
 #include <ost/io/module_config.hh>
+#include <ost/conop/processor.hh>
+
 namespace ost { namespace io {
+
 
 struct DLLEXPORT IOProfile {
 public:
-  IOProfile(String d, bool sh, bool qm, bool ft, bool js, bool nh, bool co, bool bf):
-    dialect(d), strict_hydrogens(sh), quack_mode(qm), fault_tolerant(ft),
-    join_spread_atom_records(js), no_hetatms(nh), calpha_only(co), bond_feasibility_check(bf)
+  IOProfile(String d, bool sh, bool qm, bool ft, bool js, bool nh, 
+            bool co, bool bf, conop::ProcessorPtr proc=conop::ProcessorPtr()):
+    dialect(d), quack_mode(qm), fault_tolerant(ft), join_spread_atom_records(js), 
+    no_hetatms(nh), calpha_only(co), processor(proc)
+  {
+    if (!processor) return;
+    processor->SetCheckBondFeasibility(bf);
+    processor->SetStrictHydrogens(sh);
+    //processor->SetQuackMode(qm);
+  }
+  IOProfile(): dialect("PDB"), quack_mode(false), fault_tolerant(false), 
+    join_spread_atom_records(false), no_hetatms(false),
+    calpha_only(false), processor()
   { }
-  IOProfile(): dialect("PDB"), strict_hydrogens(true), quack_mode(false),
-    fault_tolerant(false), join_spread_atom_records(false), no_hetatms(false),
-    calpha_only(false), bond_feasibility_check(true)
-  { }
-  virtual ~IOProfile() { }
 
-  String dialect;
-  bool   strict_hydrogens;
-  bool   quack_mode;
-  bool   fault_tolerant;
-  bool   join_spread_atom_records;
-  bool   no_hetatms;
-  bool   calpha_only;
-  bool   bond_feasibility_check;
+  String              dialect;
+  bool                quack_mode;
+  bool                fault_tolerant;
+  bool                join_spread_atom_records;
+  bool                no_hetatms;
+  bool                calpha_only;
+  conop::ProcessorPtr processor;
 
   IOProfile Copy()
   {
-    return IOProfile(dialect, strict_hydrogens, quack_mode, fault_tolerant,
-                     join_spread_atom_records, no_hetatms, calpha_only, bond_feasibility_check);
+    return IOProfile(dialect, processor ? processor->GetStrictHydrogens() : false,
+                     quack_mode, fault_tolerant, join_spread_atom_records, 
+                     no_hetatms, calpha_only,  
+                     processor ? processor->GetCheckBondFeasibility() : false,
+                     processor ? processor->Copy() : conop::ProcessorPtr());
   }
-  virtual void PostImport(mol::EntityHandle ent) { }
 };
+
 
 inline  std::ostream& operator<<(std::ostream& stream, const IOProfile& p)
 {
+#if 0
   stream << "IOProfile(dialect='" << p.dialect << "', strict_hydrogens="
          << (p.strict_hydrogens ? "True" : "False") << ", quack_mode="
          << (p.quack_mode ? "True" : "False") << ", join_spread_atom_records="
@@ -64,6 +75,8 @@ inline  std::ostream& operator<<(std::ostream& stream, const IOProfile& p)
          << (p.calpha_only ? "True" : "False") << ", fault_tolerant="
          << (p.fault_tolerant ? "True" : "False") << ", bond_feasibility_check="
 	 << (p.bond_feasibility_check ? "True" : "False") << ")";
+#endif
+#warning implement me
   return stream;
 }
 

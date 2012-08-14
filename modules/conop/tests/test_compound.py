@@ -5,7 +5,7 @@ from ost import conop
 class TestCompound(unittest.TestCase):
   
   def setUp(self):
-    self.compound_lib=conop.GetBuilder().compound_lib
+    self.compound_lib=conop.GetDefaultLib()
 
   def testFindCompound(self):
     compound=self.compound_lib.FindCompound('***')
@@ -22,9 +22,8 @@ class TestCompound(unittest.TestCase):
 
      
 if __name__=='__main__':
-  builder=conop.GetBuilder()
-  if not hasattr(builder, 'compound_lib'):
-    print 'default builder does not use compound library. ignoring unit tests'
+  if not conop.GetDefaultLib():
+    print 'No compound library available. ignoring compound unit tests'
   else:
     from ost import testutils
     testutils.RunTests()

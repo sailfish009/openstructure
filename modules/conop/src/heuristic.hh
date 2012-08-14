@@ -16,28 +16,35 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
-using namespace boost::python;
+#ifndef OST_CONOP_HEURISTIC_HH
+#define OST_CONOP_HEURISTIC_HH
 
-//void export_Builder();
-void export_Compound();
-void export_Sanitizer();
-void export_Conop();
-void export_RingFinder();
-void export_AminoAcids();
-void export_NonStandard();
-void export_processor();
-void export_rule_based();
-void export_diag();
-BOOST_PYTHON_MODULE(_ost_conop)
-{
- // export_Builder();
-  export_Conop();
-  export_processor();
-  export_rule_based();
-  export_Compound();
-  export_RingFinder();
-  export_AminoAcids();
-  export_NonStandard();
-  export_diag();
-}
+#include <ost/mol/entity_handle.hh>
+#include "compound_lib.hh"
+#include "diag.hh"
+#include "processor.hh"
+
+namespace ost { namespace conop {
+
+
+class HeuristicProcessor;
+
+typedef boost::shared_ptr<HeuristicProcessor> HeuristicProcessorPtr;
+
+class DLLEXPORT_OST_CONOP HeuristicProcessor  : public Processor {
+public:
+  HeuristicProcessor() {
+  }
+  virtual ProcessorPtr Copy() const {
+    return ProcessorPtr(new HeuristicProcessor(*this));
+  }
+protected:
+  virtual void DoProcess(DiagnosticsPtr diags, 
+                         mol::EntityHandle ent) const;
+private:
+};
+
+
+}}
+#endif
+

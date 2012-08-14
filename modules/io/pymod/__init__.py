@@ -148,9 +148,12 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   prof.no_hetatms=_override(prof.no_hetatms, no_hetatms)
   prof.dialect=_override(prof.dialect, dialect)
   prof.quack_mode=_override(prof.quack_mode, quack_mode)
-  prof.strict_hydrogens=_override(prof.strict_hydrogens, strict_hydrogens)
+  if prof.processor:
+    prof.processor.strict_hydrogens=_override(prof.processor.strict_hydrogens, 
+                                              strict_hydrogens)
+    prof.processor.check_bond_feasibilityk=_override(prof.processor.check_bond_feasibility, 
+                                                    bond_feasibility_check)
   prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
-  prof.bond_feasibility_check=_override(prof.bond_feasibility_check, bond_feasibility_check)
   prof.join_spread_atom_records=_override(prof.join_spread_atom_records,
                                           join_spread_atom_records)
 
@@ -162,13 +165,11 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
       raise IOError('Can not load PDB %s from www.pdb.org'%filename) 
   
   conop_inst=conop.Conopology.Instance()
-  builder=conop_inst.GetBuilder("DEFAULT")
-  if prof.dialect=='PDB':
-    builder.dialect=conop.PDB_DIALECT
-  elif prof.dialect=='CHARMM':
-    builder.dialect=conop.CHARMM_DIALECT
-  builder.strict_hydrogens=prof.strict_hydrogens
-  builder.bond_feasibility_check=prof.bond_feasibility_check
+  if prof.processor:
+    if prof.dialect=='PDB':
+      prof.processor.dialect=conop.PDB_DIALECT
+    elif prof.dialect=='CHARMM':
+      prof.processor.dialect=conop.CHARMM_DIALECT
   reader=PDBReader(filename, prof)
   reader.read_seqres=seqres
   try:
@@ -177,7 +178,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
       while reader.HasNext():
         ent=mol.CreateEntity()
         reader.Import(ent, restrict_chains)
-        conop_inst.ConnectAll(builder, ent, 0)
+        if prof.processor:
+          prof.processor.Process(ent)
         ent_list.append(ent)
       if len(ent_list)==0:
         raise IOError("File '%s' doesn't contain any entities" % filename)
@@ -186,7 +188,8 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
       ent=mol.CreateEntity()
       if reader.HasNext():
         reader.Import(ent, restrict_chains)
-        conop_inst.ConnectAll(builder, ent, 0)
+        if prof.processor:
+          prof.processor.Process(ent)
       else:
         raise IOError("File '%s' doesn't contain any entities" % filename)
       if seqres:
@@ -321,7 +324,9 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
     prof = profile.Copy()
 
   prof.calpha_only=_override(prof.calpha_only, calpha_only)
-  prof.strict_hydrogens=_override(prof.strict_hydrogens, strict_hydrogens)
+  if prof.processor:
+    proc  = prof.processor
+    proc.strict_hydrogens=_override(proc.strict_hydrogens, strict_hydrogens)
   prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
 
   if remote:
@@ -331,18 +336,14 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
     else:
       raise IOError('Can not load PDB %s from www.pdb.org'%filename) 
   
-  conop_inst = conop.Conopology.Instance()
-  builder = conop_inst.GetBuilder("DEFAULT")
-
-  builder.strict_hydrogens = prof.strict_hydrogens
-
   try:
     ent = mol.CreateEntity()
     reader = MMCifReader(filename, ent, prof)
     reader.read_seqres = seqres
     #if reader.HasNext():
     reader.Parse()
-    conop_inst.ConnectAll(builder, ent, 0)
+    if prof.processor:
+      prof.processor.Process(ent)
     #else:
     #  raise IOError("File doesn't contain any entities")
     if seqres and info:
@@ -457,7 +458,8 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
           new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
           ins_code = chr(ord(ins_code)+1)
           _CopyAtoms(res, new_res, edi, tr)
-  conop.ConnectAll(pdb_bu)
+  # FIXME: get rid of connect all call...
+  # conop.ConnectAll(pdb_bu)
   return pdb_bu
 
 MMCifInfoBioUnit.PDBize = _PDBize

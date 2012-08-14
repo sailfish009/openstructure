@@ -25,7 +25,6 @@
 #include <ost/mol/xcs_editor.hh>
 #include <ost/conop/conop.hh>
 
-#include <ost/conop/rule_based_builder.hh>
 #include <ost/io/mol/mmcif_reader.hh>
 
 namespace ost { namespace io {
@@ -670,17 +669,17 @@ void MMCifReader::ParseEntityPoly(const std::vector<StringRef>& columns)
       }
     } else if (indices_[PDBX_SEQ_ONE_LETTER_CODE] != -1) {
       seqres=columns[indices_[PDBX_SEQ_ONE_LETTER_CODE]];
-      conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
-      conop::RuleBasedBuilderPtr rbb=dyn_cast<conop::RuleBasedBuilder>(builder);
-      if (!rbb) {
+
+      conop::CompoundLibPtr comp_lib=conop::Conopology::Instance()
+                                            .GetDefaultLib();
+      if (!comp_lib) {
         if (!warned_rule_based_) {
-          LOG_WARNING("SEQRES import requires the rule-based builder. Ignoring "
-                      "SEQRES records");      
+          LOG_WARNING("SEQRES import requires a compound library. "
+                       "Ignoring SEQRES records");      
         }
         warned_rule_based_=true;
         return;
       }
-      conop::CompoundLibPtr comp_lib=rbb->GetCompoundLib();
       edm_it->second.seqres = this->ConvertSEQRES(seqres.str_no_whitespace(),
                                                   comp_lib);
     } else {

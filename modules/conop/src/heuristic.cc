@@ -16,28 +16,21 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#include <boost/python.hpp>
-using namespace boost::python;
+#include <ost/log.hh>
+#include <ost/profile.hh>
+#include <ost/mol/xcs_editor.hh>
+#include <ost/mol/bond_handle.hh>
+#include <ost/mol/torsion_handle.hh>
+#include <ost/mol/impl/residue_impl.hh>
+#include <ost/mol/impl/atom_impl.hh>
+#include <ost/mol/residue_handle.hh>
+#include "heuristic.hh"
 
-//void export_Builder();
-void export_Compound();
-void export_Sanitizer();
-void export_Conop();
-void export_RingFinder();
-void export_AminoAcids();
-void export_NonStandard();
-void export_processor();
-void export_rule_based();
-void export_diag();
-BOOST_PYTHON_MODULE(_ost_conop)
-{
- // export_Builder();
-  export_Conop();
-  export_processor();
-  export_rule_based();
-  export_Compound();
-  export_RingFinder();
-  export_AminoAcids();
-  export_NonStandard();
-  export_diag();
+namespace ost { namespace conop {
+
+
+void HeuristicProcessor::DoProcess(DiagnosticsPtr diags, 
+                                   mol::EntityHandle ent) const {
 }
+
+}}

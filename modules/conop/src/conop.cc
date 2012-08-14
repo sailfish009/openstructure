@@ -21,7 +21,6 @@
 #include <ost/log.hh>
 
 #include "conop.hh"
-#include "heuristic_builder.hh"
 #include <ost/profile.hh>
 
 namespace ost { namespace conop {
@@ -33,11 +32,10 @@ Conopology& Conopology::Instance()
   return impl;
 }
 
-Conopology::Conopology():
-  builder_map_()
+Conopology::Conopology()//:builder_map_()
 {
-  builder_map_["HEURISTIC"]=BuilderP(new HeuristicBuilder());
-  builder_map_["DEFAULT"]=builder_map_["HEURISTIC"];
+  //builder_map_["HEURISTIC"]=BuilderP(new HeuristicBuilder());
+  //builder_map_["DEFAULT"]=builder_map_["HEURISTIC"];
   
   known_elements_.insert("AC");
   known_elements_.insert("AG");
@@ -151,7 +149,7 @@ Conopology::Conopology():
   known_elements_.insert("ZN");
   known_elements_.insert("ZR");
 }
-
+#if 0
 void Conopology::RegisterBuilder(const BuilderP& b, const String& name) {
   if (!GetBuilder(name))
   builder_map_[name]=b;
@@ -292,6 +290,7 @@ void Conopology::ConnectAll(const BuilderP& b, mol::EntityHandle eh, int flags)
   eh.Apply(tmaker);
 }
 
+#endif
 bool Conopology::IsValidElement(const String& ele) const
 {
   String upper_ele=ele;
