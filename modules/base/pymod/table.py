@@ -2124,6 +2124,8 @@ Statistics for column %(col)s
     where a '-' values means smallest values first and therefore, the smaller
     the value, the better.
     
+    :warning: If either the value of *class_col* or *score_col* is *None*, the
+              data in this row is ignored.
     '''
     
     ALLOWED_DIR = ['+','-']
@@ -2146,17 +2148,35 @@ Statistics for column %(col)s
     x = [0]
     y = [0]
     enr = 0
-    for i,row in enumerate(self.rows):
+    old_score_val = None
+    i = 0
+
+    for row in self.rows:
       class_val = row[class_idx]
+      score_val = row[score_idx]
+      if class_val==None or score_val==None:
+        continue
       if class_val!=None:
+        if old_score_val==None:
+          old_score_val = score_val
+        if score_val!=old_score_val:
+          x.append(i)
+          y.append(enr)
+          old_score_val = score_val
+        i+=1
         if class_type=='bool':
           if class_val==True:
             enr += 1
         else:
           if (class_dir=='-' and class_val<=class_cutoff) or (class_dir=='+' and class_val>=class_cutoff):
             enr += 1
-      x.append(i+1)
-      y.append(enr)
+    x.append(i)
+    y.append(enr)
+
+    # if no false positives or false negatives values are found return None
+    if x[-1]==0 or y[-1]==0:
+      return None
+
     x = [float(v)/x[-1] for v in x]
     y = [float(v)/y[-1] for v in y]
     return x,y
@@ -2175,10 +2195,12 @@ Statistics for column %(col)s
     try:
       import numpy as np
       
-      enrx, enry = self.ComputeEnrichment(score_col, class_col, score_dir,
+      enr = self.ComputeEnrichment(score_col, class_col, score_dir,
                                           class_dir, class_cutoff)
       
-      return np.trapz(enry, enrx)
+      if enr==None:
+        return None
+      return np.trapz(enr[1], enr[0])
     except ImportError:
       LogError("Function needs numpy, but I could not import it.")
       raise
@@ -2209,6 +2231,9 @@ Statistics for column %(col)s
     is of type bool) or evaluated to True (if column is of type int or float
     (depending on *class_dir* and *class_cutoff*))) the ROC is not defined and
     the function will return *None*.
+
+    :warning: If either the value of *class_col* or *score_col* is *None*, the
+              data in this row is ignored.
     '''
 
     ALLOWED_DIR = ['+','-']
@@ -2237,6 +2262,8 @@ Statistics for column %(col)s
     for i,row in enumerate(self.rows):
       class_val = row[class_idx]
       score_val = row[score_idx]
+      if class_val==None or score_val==None:
+        continue
       if class_val!=None:
         if old_score_val==None:
           old_score_val = score_val

@@ -1187,6 +1187,24 @@ class TestTable(unittest.TestCase):
     #self.CompareImages(img1, img2)
     #pl.show()
     
+  def testCalcEnrichmentAUCwithNone(self):
+    if not HAS_NUMPY:
+      return
+    tab = Table(['pred_bfactors','ref_distances'], 'ff',
+                ref_distances=[None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 2.445, 2.405, 2.361, 2.124, 1.957, 1.897, 1.422, 1.348, 1.247, 1.165, 1.153, 1.011, 0.992, 0.885, 0.852, 0.775, 0.757, 0.755, 0.735, 0.71, 0.656, 0.636, 0.609, 0.607, 0.604, 0.595, 0.572, 0.549, 0.458, 0.438, 0.41, 0.345, 0.304, 0.254, 0.241, 0.227, 2.68, 1.856, 1.312, 0.453],
+                pred_bfactors=[1.85000,  2.01000,  2.12000,  2.14000,  2.15000,  2.18000,  2.20000,  2.26000,  2.28000,  2.31000,  2.37000,  2.38000,  2.39000,  2.39000,  2.43000,  2.43000,  2.49000,  2.51000,  2.56000,  2.58000,  2.65000,  2.67000,  2.72000,  2.75000,  2.77000,  2.81000,  2.91000,  2.95000,  3.09000,  3.12000,  3.25000,  3.30000,  3.33000,  3.38000,  3.39000,  3.41000,  3.41000,  3.45000,  3.57000,  3.59000,  3.64000,  3.76000,  3.76000,  3.92000,  3.95000,  3.95000,  4.05000,  4.06000,  4.07000,  4.14000,  4.14000,  4.18000,  4.24000,  4.28000,  4.40000,  4.43000,  4.43000,  4.48000,  4.50000,  4.51000,  4.54000,  4.63000,  4.64000,  4.79000,  4.93000,  5.07000,  5.12000,  5.20000,  5.41000,  5.42000,  5.44000,  5.52000,  5.68000,  5.78000,  5.80000,  5.93000,  6.11000,  6.31000,  6.50000,  6.53000,  6.55000,  6.60000,  6.73000,  6.79000,  6.81000,  7.44000,  8.45000,  8.81000,  9.04000,  9.29000,  9.30000, 10.99000, 11.42000, 12.55000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 99.99000, 99.99000, 99.99000, 99.99000])
+
+    auc = tab.ComputeEnrichmentAUC(score_col='pred_bfactors', class_col='ref_distances')
+    self.assertAlmostEqual(auc, 0.50714285714285)
+
+    # when removing all None lines, no true positive is left
+    auc = tab.ComputeEnrichmentAUC(score_col='ref_distances', class_col='pred_bfactors')
+    self.assertEqual(auc, None)
+
+    # when increasing the cutoff, we have again true positives
+    auc = tab.ComputeEnrichmentAUC(score_col='ref_distances', class_col='pred_bfactors', class_cutoff=60)
+    self.assertAlmostEqual(auc, 0.52013888888)
+
   def testCalcEnrichmentAUC(self):
     if not HAS_NUMPY:
       return
@@ -1237,6 +1255,25 @@ class TestTable(unittest.TestCase):
     #img2 = Image.open(os.path.join("testfiles","roc-same-val.png"))
     #self.CompareImages(img1, img2)
     #pl.show()
+
+  def testCalcROCAUCwithNone(self):
+    if not HAS_NUMPY:
+      return
+    tab = Table(['pred_bfactors','ref_distances'], 'ff',
+                ref_distances=[None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 2.445, 2.405, 2.361, 2.124, 1.957, 1.897, 1.422, 1.348, 1.247, 1.165, 1.153, 1.011, 0.992, 0.885, 0.852, 0.775, 0.757, 0.755, 0.735, 0.71, 0.656, 0.636, 0.609, 0.607, 0.604, 0.595, 0.572, 0.549, 0.458, 0.438, 0.41, 0.345, 0.304, 0.254, 0.241, 0.227, 2.68, 1.856, 1.312, 0.453],
+                pred_bfactors=[1.85000,  2.01000,  2.12000,  2.14000,  2.15000,  2.18000,  2.20000,  2.26000,  2.28000,  2.31000,  2.37000,  2.38000,  2.39000,  2.39000,  2.43000,  2.43000,  2.49000,  2.51000,  2.56000,  2.58000,  2.65000,  2.67000,  2.72000,  2.75000,  2.77000,  2.81000,  2.91000,  2.95000,  3.09000,  3.12000,  3.25000,  3.30000,  3.33000,  3.38000,  3.39000,  3.41000,  3.41000,  3.45000,  3.57000,  3.59000,  3.64000,  3.76000,  3.76000,  3.92000,  3.95000,  3.95000,  4.05000,  4.06000,  4.07000,  4.14000,  4.14000,  4.18000,  4.24000,  4.28000,  4.40000,  4.43000,  4.43000,  4.48000,  4.50000,  4.51000,  4.54000,  4.63000,  4.64000,  4.79000,  4.93000,  5.07000,  5.12000,  5.20000,  5.41000,  5.42000,  5.44000,  5.52000,  5.68000,  5.78000,  5.80000,  5.93000,  6.11000,  6.31000,  6.50000,  6.53000,  6.55000,  6.60000,  6.73000,  6.79000,  6.81000,  7.44000,  8.45000,  8.81000,  9.04000,  9.29000,  9.30000, 10.99000, 11.42000, 12.55000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 99.99000, 99.99000, 99.99000, 99.99000])
+
+    auc = tab.ComputeROCAUC(score_col='pred_bfactors', class_col='ref_distances')
+    tab.PlotROC(score_col='pred_bfactors', class_col='ref_distances', save='roc.png')
+    self.assertAlmostEqual(auc, 0.55714285714285705)
+
+    # when removing all None lines, no true positive is left
+    auc = tab.ComputeROCAUC(score_col='ref_distances', class_col='pred_bfactors')
+    self.assertEqual(auc, None)
+
+    # when increasing the cutoff, we have again true positives
+    auc = tab.ComputeROCAUC(score_col='ref_distances', class_col='pred_bfactors', class_cutoff=60)
+    self.assertAlmostEqual(auc, 0.701388888888888)
 
   def testCalcROCAUC(self):
     if not HAS_NUMPY:
