@@ -47,9 +47,9 @@ struct Bitmap
   boost::shared_array<unsigned char> data;
 };
 
-void ExportBitmap(const String& fname, std::string ext, unsigned int width, unsigned int height,unsigned char* data);
+void DLLEXPORT_OST_GFX ExportBitmap(const String& fname, std::string ext, unsigned int width, unsigned int height,unsigned char* data);
 
-Bitmap ImportBitmap(const String& fname, std::string ext="");
+Bitmap DLLEXPORT_OST_GFX ImportBitmap(const String& fname, std::string ext="");
 
 
 }} // ns
