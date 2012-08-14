@@ -1363,9 +1363,12 @@ Statistics for column %(col)s
 
     :param col: column name
     :type col: :class:`str`
+
+    :returns: row with maximal col value or None if the table is empty
     """
     val, idx = self._Max(col)
-    return self.rows[idx]
+    if idx!=None:
+      return self.rows[idx]
   
   def Max(self, col):
     """
@@ -1427,9 +1430,12 @@ Statistics for column %(col)s
 
     :param col: column name
     :type col: :class:`str`
+
+    :returns: row with minimal col value or None if the table is empty
     """
     val, idx = self._Min(col)
-    return self.rows[idx]
+    if idx!=None:
+      return self.rows[idx]
   
   def MinIdx(self, col):
     """
