@@ -28,6 +28,8 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include <ost/base.hh>
+#include <ost/boost_filesystem_helper.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/mol/atom_handle.hh>
 #include <ost/mol/residue_handle.hh>
@@ -349,11 +351,7 @@ PDBWriter::PDBWriter(std::ostream& stream, const IOProfile& profile):
 
 PDBWriter::PDBWriter(const boost::filesystem::path& filename, 
                      const IOProfile& profile):
-#if BOOST_FILESYSTEM_VERSION==3  || BOOST_VERSION<103400
-  outfile_(filename.string().c_str()), outstream_(outfile_), 
-#else
-  outfile_(filename.file_string().c_str()), outstream_(outfile_), 
-#endif  
+  outfile_(BFPathToString(filename).c_str()), outstream_(outfile_),
   mol_count_(0), line_(80), multi_model_(false), 
   charmm_style_(profile.dialect=="CHARMM"), is_pqr_(false),
   profile_(profile), filename_("")

@@ -2,6 +2,8 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/convenience.hpp>
+#include <ost/base.hh>
+#include <ost/boost_filesystem_helper.hh>
 #include <ost/platform.hh>
 #include <ost/conop/model_check.hh>
 #include <ost/conop/conop.hh>
@@ -74,11 +76,7 @@ CompoundLibPtr load_compound_lib(const String& custom_path)
     share_path/="openstructure";
     share_path/="compounds.chemlib";
 
-    #if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
-    String share_path_string=share_path.string();
-    #else
-    String share_path_string=share_path.file_string();
-    #endif       
+    String share_path_string=BFPathToString(share_path);
       
     if (fs::exists(share_path_string)) {
       return CompoundLib::Load(share_path_string);
@@ -375,11 +373,7 @@ int main(int argc, char *argv[])
       fs::path input_filename = input_file_path.stem();
  
 
-      #if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
-      String input_filename_string=input_filename.string();
-      #else
-      String input_filename_string=input_filename.file_string();
-      #endif       
+      String input_filename_string=BFPathToString(input_filename);
 
       size_t replstart =output_blueprint_string.find('%');	
 
