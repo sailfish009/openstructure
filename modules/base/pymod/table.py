@@ -1354,7 +1354,129 @@ Statistics for column %(col)s
         max_val = self.rows[i][idx]
         max_idx = i
     return max_val, max_idx
+
+
+  def PlotHexbin(self, x, y, title=None, x_title=None, y_title=None, x_range=None, y_range=None, binning='log',
+                 colormap='jet', show_scalebar=False, scalebar_label=None, clear=True, save=False, show=False):
+
+    """
+    Create a heatplot of the data in col x vs the data in col y using matplotlib
+
+    :param x: column name with x data
+    :type x: :class:`str`
+
+    :param y: column name with y data
+    :type y: :class:`str`
+
+    :param title: title of the plot, will be generated automatically if set to None
+    :type title: :class:`str`
+
+    :param x_title: label of x-axis, will be generated automatically if set to None
+    :type title: :class:`str`
+
+    :param y_title: label of y-axis, will be generated automatically if set to None
+    :type title: :class:`str`
+
+    :param x_range: start and end value for first dimension (e.g. [start_x, end_x])
+    :type x_range: :class:`list` of length two
+
+    :param y_range: start and end value for second dimension (e.g. [start_y, end_y])
+    :type y_range: :class:`list` of length two
+
+    :param binning: type of binning. If set to None, the value of a hexbin will
+                    correspond to the number of datapoints falling into it. If
+                    set to 'log', the value will be the log with base 10 of the above
+                    value (log(i+1)). If an integer is provided, the number of a 
+                    hexbin is equal the number of datapoints falling into it divided 
+                    by the integer. If a list of values is provided, these values
+                    will be the lower bounds of the bins.
+    
+    :param colormap: colormap, that will be used. Value can be every colormap defined
+                     in matplotlib
+    :type colormap: :class:`str`
+
+    :param show_scalebar: If set to True, a scalebar according to the chosen colormap is shown
+    :type show_scalebar: :class:`bool`
+
+    :param scalebar_label: Label of the scalebar
+    :type scalebar_label: :class:`str`
+
+    :param clear: clear old data from plot
+    :type clear: :class:`bool`
+
+    :param save: filename for saving plot
+    :type save: :class:`str`
+
+    :param show: directly show plot
+    :type show: :class:`bool`
+    
+    """
+
+    try:
+      import matplotlib.pyplot as plt
+      import matplotlib.cm as cm
+    except:
+      raise ImportError('PlotHexbin relies on matplotlib, but I could not import it')
+
+    idx=self.GetColIndex(x)
+    idy=self.GetColIndex(y)
+    xdata=[]
+    ydata=[]
+
+    for r in self.rows:
+      if r[idx]!=None and r[idy]!=None:
+        xdata.append(r[idx])
+        ydata.append(r[idy])
+
+    if clear:
+      plt.clf()
+      
+    if x_title!=None:
+      nice_x=x_title
+    else:
+      nice_x=MakeTitle(x)
+      
+    if y_title!=None:
+      nice_y=y_title
+    else:
+      nice_y=MakeTitle(y)
+
+    if title==None:
+      title = '%s vs. %s' % (nice_x, nice_y)
   
+    colormap_object=eval('cm.'+colormap)
+
+    if x_range and (IsScalar(x_range) or len(x_range)!=2):
+      raise ValueError('parameter x_range must contain exactly two elements')
+    if y_range and (IsScalar(y_range) or len(y_range)!=2):
+      raise ValueError('parameter y_range must contain exactly two elements')
+
+    if x_range:
+      plt.xlim((x_range[0], x_range[1]))
+    if y_range:
+      plt.ylim(y_range[0], y_range[1])
+
+    plt.hexbin(xdata, ydata, bins=binning, cmap=colormap_object)
+
+    plt.title(title, size='x-large', fontweight='bold',
+              verticalalignment='bottom')
+
+    plt.xlabel(nice_x)
+    plt.ylabel(nice_y)
+        
+    if show_scalebar:
+      cb=plt.colorbar()
+      if scalebar_label:
+        cb.set_label(scalebar_label)
+
+    if save:
+      plt.savefig(save)
+
+    if show:
+      plt.show()
+
+    return plt
+        
   def MaxRow(self, col):
     """
     Returns the row containing the cell with the maximal value in col. If 

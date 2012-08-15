@@ -1170,6 +1170,13 @@ class TestTable(unittest.TestCase):
     self.assertRaises(ValueError, tab.Plot, x='second', y='third', y_range=[1,2,3])
     self.assertRaises(ValueError, tab.Plot, x='second', y='third', z_range='st')
 
+  def testHexbin(self):
+    if not HAS_MPL or not HAS_NUMPY:
+      return
+    tab = self.CreateTestTable()
+    self.assertRaises(ValueError, tab.PlotHexbin, x='second', y='third', x_range=1)
+    self.assertRaises(ValueError, tab.PlotHexbin, x='second', y='third', x_range=[1,2,3])
+
   def testPlotEnrichment(self):
     if not HAS_MPL or not HAS_PIL:
       return
