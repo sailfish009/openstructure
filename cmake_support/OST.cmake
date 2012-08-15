@@ -127,31 +127,6 @@ macro(copy_if_different FROM_DIR TO_DIR FILES TARGETS TARGET)
   endforeach()
 endmacro()
 
-#-------------------------------------------------------------------------------
-# stage_headers
-#-------------------------------------------------------------------------------
-macro(stage_headers HEADERS HEADER_INSTALL_DIR TARGET SUB)
-  set(FROM_DIR "./")
-  set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${SUB}")
-  foreach(_HDR ${HEADERS})
-    list(APPEND _ABS_HEADER_NAMES ${_HDR_SOURCE_DIR}/${_HDR})
-  endforeach()
-  # introduce a helper target to make sure the headers are staged before
-  # building the library
-  string(REPLACE "/" "_" _SUB_NO_SLASH "${SUB}")
-  string(REPLACE "${PREFIX}_" "" _TARGET "${TARGET}")
-  set(_TARGET_NAME ${_TARGET}_${_SUB_NO_SLASH}_headers)
-  set(_SUB ${SUB})
-  if (NOT _SUB)
-    set(_TARGET_NAME ${_TARGET}_headers)
-  endif()
-  add_custom_target("${_TARGET_NAME}" COMMENT "")
-  set(HEADER_DIR "${HEADER_STAGE_PATH}/${HEADER_INSTALL_DIR}")
-  copy_if_different("" "${HEADER_DIR}"
-                    "${_ABS_HEADER_NAMES}" ""
-                    "${_TARGET_NAME}")
-  add_dependencies(${TARGET} ${_TARGET_NAME})
-endmacro()
 
 #-------------------------------------------------------------------------------
 # parse_file_list
@@ -216,6 +191,10 @@ macro(module)
   #-----------------------------------------------------------------------------
   # create library  
   #-----------------------------------------------------------------------------
+  file(MAKE_DIRECTORY ${LIB_STAGE_PATH})
+  file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+  file(MAKE_DIRECTORY ${LIBEXEC_STAGE_PATH})
+  file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
   if (NOT TARGET create_stage)
     add_custom_target(create_stage COMMAND ${CMAKE_COMMAND} -E make_directory ${LIB_STAGE_PATH}
                                    COMMAND ${CMAKE_COMMAND} -E make_directory ${EXECUTABLE_OUTPUT_PATH}
@@ -282,7 +261,6 @@ macro(module)
     if (ENABLE_STATIC)
       target_link_libraries(${_LIB_NAME} ${STATIC_LIBRARIES})
     endif()
-  
   else()
     add_custom_target("${_LIB_NAME}" ALL)
     set_target_properties("${_LIB_NAME}" PROPERTIES HEADER_ONLY 1 
@@ -291,21 +269,32 @@ macro(module)
   #-----------------------------------------------------------------------------
   # stage headers  
   #-----------------------------------------------------------------------------
-    if (_ARG_HEADERS)
-    parse_file_list("${_ARG_HEADERS}" _HEADER_MAP)
-    map(KEYS _HEADER_MAP _HEADER_MAP_KEYS)
-    foreach(_DIR ${_HEADER_MAP_KEYS})
-      map(GET _HEADER_MAP ${_DIR} _HEADERS)
-      set(_ABS_HEADER_NAMES)
-      set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
-      foreach(_HDR ${_HEADERS})
-        list(APPEND _ABS_HEADER_NAMES "${_HDR_SOURCE_DIR}/${_HDR}")
-      endforeach()
-      install(FILES ${_ABS_HEADER_NAMES} DESTINATION "include/${_HEADER_OUTPUT_DIR}/${_DIR}")
-      set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}/${_DIR}")
-      stage_headers("${_HEADERS}" "${_HDR_STAGE_DIR}" "${_LIB_NAME}" "${_DIR}")
-    endforeach()
+  if (_ARG_HEADERS)
+    stage_and_install_headers("${_ARG_HEADERS}" "${_HEADER_OUTPUT_DIR}" "${_LIB_NAME}")
   endif()
+endmacro()
+
+#-------------------------------------------------------------------------------
+# macro stage_and_install_headers
+#-------------------------------------------------------------------------------
+macro(stage_and_install_headers HEADERLIST HEADER_OUTPUT_DIR TARGET)
+  add_custom_target("${TARGET}_headers" COMMENT "")
+  add_dependencies("${TARGET}" "${TARGET}_headers")
+  add_dependencies("${TARGET}_headers" create_stage)
+  parse_file_list("${HEADERLIST}" _HEADER_MAP)
+  map(KEYS _HEADER_MAP _HEADER_MAP_KEYS)
+  foreach(_DIR ${_HEADER_MAP_KEYS})
+    map(GET _HEADER_MAP ${_DIR} _HEADERS)
+    set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
+    set(_ABS_HEADER_NAMES)
+    foreach(_HDR ${_HEADERS})
+      list(APPEND _ABS_HEADER_NAMES ${_HDR_SOURCE_DIR}/${_HDR})
+    endforeach()
+    set(_HDR_STAGE_DIR "${HEADER_OUTPUT_DIR}/${_DIR}")
+    set(_FULL_HEADER_DIR "${HEADER_STAGE_PATH}/${_HDR_STAGE_DIR}")
+    copy_if_different("" "${_FULL_HEADER_DIR}" "${_ABS_HEADER_NAMES}" "" "${TARGET}_headers")
+    install(FILES ${_ABS_HEADER_NAMES} DESTINATION "include/${_HDR_STAGE_DIR}")
+  endforeach()
 endmacro()
 
 
