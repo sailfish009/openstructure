@@ -25,6 +25,7 @@
 
 #include <ost/io/io_manager.hh>
 #include <ost/io/mol/pdb_reader.hh>
+#include <ost/io/mol/io_profile.hh>
 #include <ost/io/mol/load_entity.hh>
 #include <ost/io/mol/load_surface.hh>
 #include <ost/io/mol/entity_io_pdb_handler.hh>
@@ -252,8 +253,10 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHand
       mol::XCSEditor xcs_lock=eh.EditXCS(mol::BUFFERED_EDIT);
       handler->Import(eh,filename.toStdString());
       if(handler->RequiresBuilder()) {
-          conop::BuilderP builder = conop::Conopology::Instance().GetBuilder();
-          conop::Conopology::Instance().ConnectAll(builder,eh,0);
+          io::IOProfile& prof = io::IOProfileRegistry::Instance().GetDefault();
+          if (prof.processor) {
+            prof.processor->Process(eh);
+          }
       }
       gfx::GfxObjP obj(new gfx::Entity(file_info.baseName().toStdString(),
                        eh, mol::Query(selection.toStdString())));
@@ -384,7 +387,6 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
 {
   io::PDBReader reader(filename.toStdString(), io::IOProfile());
   QList<mol::EntityHandle> entities;
-  conop::BuilderP builder=conop::Conopology::Instance().GetBuilder("DEFAULT");
   while (reader.HasNext()){
     mol::EntityHandle ent=mol::CreateEntity();
     try {
@@ -393,7 +395,10 @@ void FileLoader::LoadPDB(const QString& filename, const QString& selection)
       LOG_ERROR(e.what());
       continue;
     }
-    conop::Conopology::Instance().ConnectAll(builder,ent,0);
+    io::IOProfile& prof = io::IOProfileRegistry::Instance().GetDefault();
+    if (prof.processor) {
+      prof.processor->Process(ent);
+    }
     entities.append(ent);
   }
   QFileInfo file_info(filename);
