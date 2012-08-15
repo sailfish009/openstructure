@@ -98,4 +98,88 @@ void AssignBackboneTorsions(mol::ResidueHandle prev,
   }
 } 
 
+void Processor::ProcessUnkResidue(DiagnosticsPtr diags,
+                                  mol::ResidueHandle res) const
+{
+  // Don't do anything if treatment is set to SILENT
+  if (this->GetUnkResidueTreatment() == CONOP_SILENT) {
+    return;
+  }
+  switch (this->GetUnkResidueTreatment()) {
+    case CONOP_WARN:
+      diags->AddDiag(DIAG_UNK_RESIDUE, "unknown residue %0")
+            .AddResidue(res);
+      break;
+    case CONOP_FATAL:
+      // FIXME: Implement a ConopError based on Diag...
+      break;
+    case CONOP_REMOVE_RESIDUE:
+    case CONOP_REMOVE:
+      diags->AddDiag(DIAG_UNK_RESIDUE, "removed unknown residue %0")
+           .AddResidue(res);
+      res.GetEntity().EditXCS().DeleteResidue(res);
+      return;
+    default:
+      assert(0 && "unhandled switch");
+  }
+}
+
+void Processor::ProcessUnkAtoms(DiagnosticsPtr diags,
+                                mol::AtomHandleList unks) const
+{
+  // Don't do anything if treatment is set to SILENT
+  if (this->GetUnkAtomTreatment() == CONOP_SILENT) {
+    return;
+  }
+ 
+  assert(!unks.empty() && "empty unk list");
+  mol::XCSEditor edi = unks.front().GetEntity().EditXCS();
+  for (mol::AtomHandleList::iterator 
+       i = unks.begin(), e = unks.end(); i != e; ++i) {
+    switch (this->GetUnkAtomTreatment()) {
+      case CONOP_REMOVE_ATOM:
+      case CONOP_REMOVE:
+        edi.DeleteAtom(*i);
+        diags->AddDiag(DIAG_UNK_ATOM, "removed unknown atom %0 from residue %1")
+             .AddString(i->GetName()).AddResidue(i->GetResidue());
+        break;
+      case CONOP_WARN:
+        diags->AddDiag(DIAG_UNK_ATOM, "residue %0 contains unknown atom %1")
+             .AddResidue(i->GetResidue()).AddString(i->GetName());
+        break;
+      case CONOP_FATAL:
+        // FIXME: Implement a ConopError based on Diag...
+        break;
+      case CONOP_REMOVE_RESIDUE:
+        diags->AddDiag(DIAG_UNK_ATOM, "removed residue %0 with unknown atom %1")
+             .AddString(i->GetResidue().GetQualifiedName())
+             .AddString(i->GetName());
+        edi.DeleteResidue(i->GetResidue());
+        return;
+      default:
+        assert(0 && "unhandled switch");
+    }
+  }
+}
+
+bool IsBondFeasible(const mol::AtomHandle& atom_a,
+                    const mol::AtomHandle& atom_b)
+{
+  Real radii=0.0;
+  if (atom_a.GetRadius()>0.0) {
+    radii=atom_a.GetRadius();
+  } else {
+    return false;
+  }
+  if (atom_b.GetRadius()>0.0) {
+    radii+=atom_b.GetRadius();
+  } else {
+    return false;
+  } 
+  Real len=geom::Length2(atom_a.GetPos()-atom_b.GetPos());
+  Real lower_bound=radii*radii*0.0625;
+  Real upper_bound=lower_bound*6.0;
+  return (len<=upper_bound && len>=lower_bound);
+}
+
 }}

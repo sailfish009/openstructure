@@ -75,5 +75,6 @@ void export_processor() {
     .def("Copy", &WrappedProcessor::CopyDefault)
     .def("DoProcess", &WrappedProcessor::DoProcessDefault)
   ;
+  def("IsBondFeasible", &IsBondFeasible);
 }
 

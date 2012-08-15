@@ -54,16 +54,11 @@ protected:
   virtual void DoProcess(DiagnosticsPtr diags, 
                          mol::EntityHandle ent) const;
 private:
-  void ProcessUnkResidue(DiagnosticsPtr diags,
-                         mol::ResidueHandle res) const;
-  void ProcessUnkAtoms(DiagnosticsPtr diags,
-                       mol::AtomHandleList unks) const;
   bool HasUnknownAtoms(mol::ResidueHandle residue, CompoundPtr compound) const;
   void ReorderAtoms(mol::ResidueHandle residue, CompoundPtr compound) const;
   void FillResidueProps(mol::ResidueHandle residue, CompoundPtr compound) const;
   void ConnectAtomsOfResidue(mol::ResidueHandle residue, CompoundPtr compound) const;
   void ConnectResidues(mol::ResidueHandle residue, mol::ResidueHandle next) const;
-  bool IsBondFeasible(const mol::AtomHandle&, const mol::AtomHandle&) const;
   mol::AtomHandle LocateAtom(const mol::AtomHandleList&, int ordinal) const;
   CompoundLibPtr lib_;
   bool fix_element_;

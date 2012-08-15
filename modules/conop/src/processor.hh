@@ -53,6 +53,10 @@ protected:
                                mol::EntityHandle ent) const { return true; }  
   virtual bool EndProcessing(DiagnosticsPtr diags, 
                              mol::EntityHandle ent) const { return true; }
+  void ProcessUnkResidue(DiagnosticsPtr diags,
+                         mol::ResidueHandle res) const;
+  void ProcessUnkAtoms(DiagnosticsPtr diags,
+                       mol::AtomHandleList unks) const;
 public:
   Processor(): strict_hydrogens_(false), check_bond_feasibility_(false),
     assign_torsions_(false), connect_(true), unk_atom_treatment_(CONOP_WARN),
@@ -132,6 +136,8 @@ void DLLEXPORT_OST_CONOP AssignBackboneTorsions(mol::ResidueHandle prev,
                                                 mol::ResidueHandle res, 
                                                 mol::ResidueHandle next);
 
+bool DLLEXPORT_OST_CONOP IsBondFeasible(const mol::AtomHandle&, 
+                                        const mol::AtomHandle&);
 }}
 
 #endif
