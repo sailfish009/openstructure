@@ -439,7 +439,7 @@ endmacro()
 #-------------------------------------------------------------------------------
 macro(ui_to_python LIBNAME STAGEDIR)
   set(_input_files ${ARGN})
-  add_custom_target("${LIBNAME}_ui")    
+  add_custom_target("${LIBNAME}_ui" ALL)
   find_program(_PYUIC_EXECUTABLE
     NAMES pyuic4-${PYTHON_VERSION} pyuic4 pyuic
     PATHS  ENV PATH 
@@ -579,10 +579,10 @@ macro(pymod)
   #-----------------------------------------------------------------------------
   # compile python files
   #-----------------------------------------------------------------------------
-if (_ARG_PY)
+  if (_ARG_PY)
     parse_file_list("${_ARG_PY}" _PYFILE_MAP)
     map(KEYS _PYFILE_MAP _PYFILE_MAP_KEYS)
-    foreach(_DIR ${_HEADER_MAP_KEYS})
+    foreach(_DIR ${_PYFILE_MAP_KEYS})
       map(GET _PYFILE_MAP ${_DIR} _PY_FILES)
       set(_ABS_PY_FILES)
       set(_PY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
@@ -591,11 +591,12 @@ if (_ARG_PY)
       endforeach()
       install(FILES ${_ABS_PY_FILES} DESTINATION "${LIB_DIR}/${PYMOD_DIR}/${_DIR}")
       string(REPLACE "/" "_" _DIR_NO_SLASH "${_DIR}")
-      string(REPLACE "._" "" _DIR_NO_SLASH "${_DIR_NO_SLASH}")
-      add_custom_target("${_ARG_NAME}_${_DIR_NO_SLASH}_pymod" ALL)
+      set(_PYMOD_TARGET "${_LIB_NAME}_${_DIR_NO_SLASH}_pymod")
+      string(REPLACE "_." "" _PYMOD_TARGET "${_PYMOD_TARGET}")
+      add_custom_target(${_PYMOD_TARGET} ALL)
       copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}"
                         "${_ABS_PY_FILES}" "TARGETS"
-                        "${_ARG_NAME}_${_DIR_NO_SLASH}_pymod")
+                        "${_PYMOD_TARGET}")
       compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR}/${_DIR} ${_ABS_PY_FILES})
     endforeach()
   endif()  
