@@ -67,7 +67,8 @@ void export_processor() {
                  &Processor::SetUnkResidueTreatment)
     .add_property("unk_atom_treatment", &Processor::GetUnkAtomTreatment,
                  &Processor::SetUnkAtomTreatment)
-    .def("Process", &Processor::Process)
+    .def("Process", &Processor::Process, 
+         (arg("ent"), arg("log_diags")=true))
   ;
   class_<PyProcessor, boost::noncopyable, 
          boost::shared_ptr<WrappedProcessor>, 

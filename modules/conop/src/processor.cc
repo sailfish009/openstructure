@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+#include <ost/log.hh>
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/bond_handle.hh>
 #include <ost/mol/torsion_handle.hh>
@@ -23,7 +24,8 @@
 
 namespace ost { namespace conop {
 
-DiagnosticsPtr Processor::Process(mol::EntityHandle ent) const
+DiagnosticsPtr Processor::Process(mol::EntityHandle ent, 
+                                  bool log_diags) const
 {
   DiagnosticsPtr diags(new Diagnostics);
   if (!this->BeginProcessing(diags, ent)) {
@@ -32,6 +34,12 @@ DiagnosticsPtr Processor::Process(mol::EntityHandle ent) const
   this->DoProcess(diags, ent);
   
   this->EndProcessing(diags, ent);
+  if (log_diags) {
+    for (Diagnostics::diag_iterator i = diags->diags_begin(),
+         e = diags->diags_end(); i != e; ++i) {
+      LOG_WARNING((*i)->Format(false));
+    }
+  }
   return diags;
 }
 

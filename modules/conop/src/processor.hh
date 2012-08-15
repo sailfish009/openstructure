@@ -44,7 +44,7 @@ typedef boost::shared_ptr<Processor> ProcessorPtr;
 // the base class for all options
 class DLLEXPORT_OST_CONOP Processor {
 public:
-  DiagnosticsPtr Process(mol::EntityHandle ent) const;
+  DiagnosticsPtr Process(mol::EntityHandle ent, bool log_diags=true) const;
   virtual ProcessorPtr Copy() const = 0;
 protected:
   virtual void DoProcess(DiagnosticsPtr diags, 
