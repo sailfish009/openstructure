@@ -90,7 +90,7 @@ public:
          RenderMode::Type m,
          const mol::EntityView& ev);
 
-  virtual geom::AlignedCuboid GetBoundingBox(bool use_global=false) const;
+  virtual geom::AlignedCuboid GetBoundingBox(bool use_tf=false) const;
 
   // ProcessLimits uses the default implementation of bounding box
   

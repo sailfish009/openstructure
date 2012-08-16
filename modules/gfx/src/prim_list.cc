@@ -54,7 +54,7 @@ void PrimList::Clear()
   this->FlagRebuild();
 }
 
-geom::AlignedCuboid PrimList::GetBoundingBox() const
+geom::AlignedCuboid PrimList::GetBoundingBox(bool use_tf) const
 {
   if(points_.empty() && lines_.empty() && spheres_.empty() && cyls_.empty() && texts_.empty() && vas_.empty()) {
     return geom::AlignedCuboid(geom::Vec3(-1,-1,-1),geom::Vec3(1,1,1));
@@ -66,7 +66,8 @@ geom::AlignedCuboid PrimList::GetBoundingBox() const
                   -std::numeric_limits<float>::max(),
                   -std::numeric_limits<float>::max());
   ProcessLimits(minc,maxc,geom::Transform());
-  return geom::AlignedCuboid(minc,maxc);
+  geom::AlignedCuboid bb(minc,maxc);
+  return use_tf ? transform_.Apply(bb) : bb;
 }
 
 void PrimList::ProcessLimits(geom::Vec3& minc, geom::Vec3& maxc, 
