@@ -1392,8 +1392,9 @@ Statistics for column %(col)s
                     will be the lower bounds of the bins.
     
     :param colormap: colormap, that will be used. Value can be every colormap defined
-                     in matplotlib
-    :type colormap: :class:`str`
+                     in matplotlib or an own defined colormap. You can either pass a
+                     string with the name of the matplotlib colormap or a colormap
+                     object.
 
     :param show_scalebar: If set to True, a scalebar according to the chosen colormap is shown
     :type show_scalebar: :class:`bool`
@@ -1444,7 +1445,8 @@ Statistics for column %(col)s
     if title==None:
       title = '%s vs. %s' % (nice_x, nice_y)
   
-    colormap_object=eval('cm.'+colormap)
+    if IsStringLike(colormap):
+      colormap=getattr(cm, colormap)
 
     if x_range and (IsScalar(x_range) or len(x_range)!=2):
       raise ValueError('parameter x_range must contain exactly two elements')
@@ -1456,7 +1458,7 @@ Statistics for column %(col)s
     if y_range:
       plt.ylim(y_range[0], y_range[1])
 
-    plt.hexbin(xdata, ydata, bins=binning, cmap=colormap_object)
+    plt.hexbin(xdata, ydata, bins=binning, cmap=colormap)
 
     plt.title(title, size='x-large', fontweight='bold',
               verticalalignment='bottom')
