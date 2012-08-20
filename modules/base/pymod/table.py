@@ -1355,7 +1355,83 @@ Statistics for column %(col)s
         max_idx = i
     return max_val, max_idx
 
-
+  def PlotBar(self, col, xlabels=None, ylabel=None, title=None, 
+              color=None, yerr=None, width=0.8, bottom=0, 
+              legend=True, save=False):
+    
+    try:
+      import numpy as np
+      import matplotlib.pyplot as plt
+    except:
+      raise ImportError('PlotBar relies on numpy and matplotlib, but I could not import it!')
+      
+    if len(col)>7:
+      raise ValueError('More than seven bars at one position looks rather meaningless...')
+      
+    standard_colors=['b','g','y','c','m','r','k']
+    data=[]
+  
+    if not isinstance(col,list):
+      col=[col]
+    if not isinstance(yerr,list):
+      yerr=[yerr]*len(self.rows)
+      
+    if not color:
+      color=standard_colors[:len(col)]
+      
+    for c in col:
+      cid=self.GetColIndex(c)
+      temp=list()
+      for r in self.rows:
+        temp.append(r[cid])
+      data.append(temp)
+      
+    if len(yerr)!=len(data[0]):
+      raise RuntimeError('Number of elements in yerr must be consistent with number of elements in each column!')
+      
+    ind=np.arange(len(data[0]))
+    single_bar_width=float(width)/len(data)
+    
+    fig=plt.figure()
+    
+    ax=fig.add_subplot(111)
+    
+    legend_data=[]
+    
+    for i in range(len(data)):
+      legend_data.append(ax.bar(ind+i*single_bar_width,data[i],single_bar_width,color=color[i],yerr=yerr[i])[0])
+      
+    if title!=None:
+      nice_title=x_title
+    else:
+      nice_title="coolest barplot on earth"
+    ax.set_title(nice_title, size='x-large', fontweight='bold')  
+    
+    if ylabel!=None:
+      nice_y=ylabel
+    else:
+      nice_y="score" 
+    ax.set_ylabel(nice_y)
+    
+    if xlabels:
+      if len(data[0])!=len(xlabels):
+        raise ValueError('Number of xlabels is not consistent with number of rows!')
+    else:
+      xlabels=list()
+      for i in range(1,len(data[0])+1):
+        xlabels.append('Row '+str(i))
+      
+    ax.set_xticks(ind+width*0.5)
+    ax.set_xticklabels(xlabels)
+      
+    if legend:
+      ax.legend(legend_data, col)   
+      
+    if save:
+      plt.savefig(save)
+    
+    return plt
+      
   def PlotHexbin(self, x, y, title=None, x_title=None, y_title=None, x_range=None, y_range=None, binning='log',
                  colormap='jet', show_scalebar=False, scalebar_label=None, clear=True, save=False, show=False):
 
