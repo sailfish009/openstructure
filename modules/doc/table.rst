@@ -59,6 +59,7 @@ Functions You Might be Interested In
 :meth:`~ost.table.Table.AddRow`               add a row to the table
 :meth:`~ost.table.Table.AddCol`               add a column to the table
 :meth:`~ost.table.Table.RemoveCol`            remove a column from the table
+:meth:`~ost.table.Table.RenameCol`            rename a column
 :meth:`~ost.table.Table.Extend`               append a table to the end of another table
 :meth:`~ost.table.Merge`                      merge two tables together
 :meth:`~ost.table.Table.Sort`                 sort table by column
@@ -94,6 +95,8 @@ Functions You Might be Interested In
 :meth:`~ost.table.Table.PlotHistogram`        Plot data as histogram
 :meth:`~ost.table.Table.PlotROC`              Plot receiver operating characteristics (ROC)
 :meth:`~ost.table.Table.PlotEnrichment`       Plot enrichment
+:meth:`~ost.table.Table.PlotHexbin`           Hexagonal density plot
+:meth:`~ost.table.Table.PlotBar`              Bar plot
 
 
 ============================================= ============================================

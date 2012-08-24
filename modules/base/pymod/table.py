@@ -275,6 +275,19 @@ class Table(object):
     '''
     return self.name
 
+  def RenameCol(self, old_name, new_name):
+    """
+    Rename column *old_name* to *new_name*.
+
+    :param old_name: Name of the old column
+    :param new_name: Name of the new column
+    :raises: :exc:`ValueError` when *old_name* is not a valid column
+    """
+    if old_name==new_name:
+      return
+    self.AddCol(new_name, self.col_types[self.GetColIndex(old_name)],
+                self[old_name])
+    self.RemoveCol(old_name)
   def _Coerce(self, value, ty):
     '''
     Try to convert values (e.g. from :class:`str` type) to the specified type
