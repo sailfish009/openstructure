@@ -851,7 +851,13 @@ BOOST_AUTO_TEST_CASE(res_name_mismatch_tolerant)
 
 BOOST_AUTO_TEST_CASE(seqres_import)
 {
-  SetPrefixPath(getenv("OST_ROOT"));
+  char * ost_root=getenv("OST_ROOT");
+  if(!ost_root){
+    std::cout << "WARNING: skipping SEQRES import unit test. " 
+              << "Rule-based builder is required" << std::endl;
+    return;
+  }
+  SetPrefixPath(ost_root);
   String lib_path=GetSharedDataPath()+"/compounds.chemlib";
   conop::CompoundLibPtr compound_lib=conop::CompoundLib::Load(lib_path);  
   if (!compound_lib) {
