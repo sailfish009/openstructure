@@ -390,9 +390,8 @@ template <typename B >
 void real_dumper(std::ostream& f,  const spider_header& header, const img::ImageHandle& mh,const img::alg::Normalizer& norm, bool swap_flag)
 {
   int padding = header.fLabbyt-f.tellp();
-  char* buffer=new char[padding];
-  f.write(buffer,padding);
-  delete[] buffer;
+  std::vector<char> buffer(padding,0);
+  f.write(&buffer[0],padding);
   int slice_size=static_cast<int>(header.fNcol) * static_cast<int>(header.fNrow);
   boost::scoped_array<B> rawp(new B[slice_size]);
 
