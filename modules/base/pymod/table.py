@@ -756,7 +756,7 @@ Statistics for column %(col)s
     args are unary callables returning true if the row should be included in the
     result and false if not.
     """
-    filt_tab=Table(self.col_names, self.col_types)
+    filt_tab=Table(list(self.col_names), list(self.col_types))
     for row in self.rows:
       matches=True
       for func in args:

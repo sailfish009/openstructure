@@ -315,6 +315,24 @@ class TestTable(unittest.TestCase):
     self.CompareColNames(tab, ['x'])
     self.CompareColTypes(tab, 'x', 'f')
     
+  def testTableFilterColNamesTypes(self):
+    """
+    make sure the col_names and col_types are copied. 
+    We don't want them to be referenced to the original table.
+    This leads to strange surprises.
+    """
+    t = Table(['a', 'b'], 'ii')
+    t.AddRow([1,2])
+    t.AddRow([2,3])
+    t.AddRow([2,3])
+    t.AddRow([3,3])
+    t.AddRow([4,3])
+    t.AddRow([5,3])
+    filt = t.Filter(a=2)
+    filt.AddCol('c', 'i')
+    self.assertEqual(len(t.col_names), 2)
+    self.assertEqual(len(t.col_types), 2)
+
   def testTableInitMultiColMultiValueNonEmpty(self):
     '''
     table with two column and four rows:
