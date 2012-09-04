@@ -88,6 +88,11 @@ public:
   virtual Color GetOutlineExpandColor() const;
   virtual void SetOpacity(float f);
   virtual float GetOpacity() const {return opacity_;}
+  virtual void SetSolid(bool f);
+  virtual bool GetSolid() const {return solid_;}
+  virtual void SetSolidColor(const Color& c);
+  virtual Color GetSolidColor() const {return solid_color_;}
+  
   virtual void ColorBy(const mol::EntityView& ev, 
                        const String& prop,
                        const Gradient& g, float minv, float maxv);
@@ -241,6 +246,9 @@ public:
   float smoothf_;
   bool outline_flag_;
   int outline_mode_;
+
+  bool solid_;
+  Color solid_color_;
 
   boost::ptr_vector<gfx::ColorOp> c_ops_;
 

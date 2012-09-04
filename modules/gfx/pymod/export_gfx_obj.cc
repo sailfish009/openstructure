@@ -155,6 +155,8 @@ void export_GfxObj()
     .def("SetOpacity",&GfxObjBase::SetOpacity)
     .def("GetOpacity",&GfxObjBase::GetOpacity)
     .add_property("opacity",&GfxObjBase::GetOpacity,&GfxObjBase::SetOpacity)
+    .add_property("solid",&GfxObjBase::GetSolid,&GfxObjBase::SetSolid)
+    .add_property("solid_color",&GfxObjBase::GetSolidColor,&GfxObjBase::SetSolidColor)
     COLOR_BY_DEF()
    ;
 

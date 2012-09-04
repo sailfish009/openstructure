@@ -174,6 +174,8 @@ class DLLEXPORT_OST_GFX Scene {
   // \brief get the field of view
   float GetFOV() const;
 
+  float GetAspect() const {return aspect_ratio_;}
+
   /// \brief offset between near clipping plane and start of fog
   void SetFogNearOffset(float o);
 
