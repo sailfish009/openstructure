@@ -13,6 +13,11 @@ uniform float occl_mult;
 uniform bool dark_flag;
 uniform sampler2D dark_map;
 uniform float dark_mult;
+uniform bool fog_flag;
+uniform float depth_near;
+uniform float depth_far;
+uniform float fog_far;
+uniform float fog_scale;
 
 // gl_TexCoord[0] comes from scenefx_vs, i.e. from post processing
 
@@ -55,6 +60,15 @@ void main()
   if(dark_flag) {
     dark_factor=max(0.0,1.0-dark_mult*(1.0-texture2D(dark_map,gl_TexCoord[0].xy).r));
   }
-    
-  gl_FragColor.rgb = shadow_factor*occl_factor*dark_factor*scene_color.rgb;
+
+  float fog=1.0;
+  if(fog_flag) {
+    float z = 2.0*depth_near*depth_far/(-(depth*2.0-1.0)*(depth_far-depth_near)+depth_far+depth_near);
+    fog = clamp((fog_far-z) * fog_scale, 0.0, 1.0);
+  }
+
+  gl_FragColor.rgb = mix(gl_Fog.color.rgb, 
+                         shadow_factor*occl_factor*dark_factor*scene_color.rgb,
+                         fog);
 }
+

@@ -224,6 +224,11 @@ void SceneFX::Preprocess()
   }
 }
 
+bool SceneFX::WillPostprocess() const
+{
+  return shadow_flag || amb_occl_flag || depth_dark_flag || use_beacon;
+}
+
 void SceneFX::Postprocess()
 {
   if(!OST_GL_VERSION_2_0) return;
@@ -235,10 +240,7 @@ void SceneFX::Postprocess()
 #endif
   }
 
-  if(!shadow_flag && !amb_occl_flag && !depth_dark_flag && !use_beacon) {
-    // no postprocessing is needed
-    return;
-  }
+  if(!WillPostprocess()) return;
 
   Viewport vp=Scene::Instance().GetViewport();
 
@@ -328,6 +330,18 @@ void SceneFX::Postprocess()
   } else {
     glUniform1i(glGetUniformLocation(cpr,"dark_flag"),0);
   }
+
+  GLint fog;
+  glGetIntegerv(GL_FOG,&fog);
+  float znear=Scene::Instance().GetNear();
+  float zfar=Scene::Instance().GetFar();
+  float fnear=znear+Scene::Instance().GetFogNearOffset();
+  float ffar=zfar+Scene::Instance().GetFogFarOffset();
+  glUniform1i(glGetUniformLocation(cpr,"fog_flag"),fog);
+  glUniform1f(glGetUniformLocation(cpr,"depth_near"),znear);
+  glUniform1f(glGetUniformLocation(cpr,"depth_far"),zfar);
+  glUniform1f(glGetUniformLocation(cpr,"fog_far"),ffar);
+  glUniform1f(glGetUniformLocation(cpr,"fog_scale"),1.0f/(ffar-fnear));
 
   if(use_beacon) {
     prep_beacon();
