@@ -64,6 +64,8 @@ GfxObj::GfxObj(const String& name):
 #else
   outline_mode_(1),
 #endif
+  solid_(false),
+  solid_color_(RGB(0.7,0.7,0.7)),
   c_ops_(),
   labels_(),
   use_occlusion_(false)
@@ -128,6 +130,8 @@ void GfxObj::RenderGL(RenderPass pass)
       // there really needs to be a central place
       // where the va attributes are re-applied
       va_.SetOpacity(opacity_);
+      va_.SetSolid(solid_);
+      va_.SetSolidColor(solid_color_);
     }
   }
   if(IsVisible()) {
@@ -372,6 +376,20 @@ void GfxObj::SetOpacity(float o)
   opacity_=o;
   va_.SetOpacity(opacity_);
   FlagRefresh();
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetSolid(bool f)
+{
+  solid_=f;
+  va_.SetSolid(solid_);
+  Scene::Instance().RequestRedraw();
+}
+
+void GfxObj::SetSolidColor(const Color& c)
+{
+  solid_color_=c;
+  va_.SetSolidColor(solid_color_);
   Scene::Instance().RequestRedraw();
 }
 

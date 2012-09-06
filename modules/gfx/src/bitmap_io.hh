@@ -32,6 +32,7 @@
 namespace ost { namespace gfx {
 
 // very rudimentary bitmap support
+// TODO: gl tex mapping association
 struct Bitmap
 {
   /*
@@ -46,9 +47,9 @@ struct Bitmap
   boost::shared_array<unsigned char> data;
 };
 
-void BitmapExport(const String& fname, const String& ext, unsigned int width, unsigned int height,unsigned char* data);
+void DLLEXPORT_OST_GFX ExportBitmap(const String& fname, std::string ext, unsigned int width, unsigned int height,unsigned char* data);
 
-Bitmap BitmapImport(const String& fname, const String& ext);
+Bitmap DLLEXPORT_OST_GFX ImportBitmap(const String& fname, std::string ext="");
 
 
 }} // ns

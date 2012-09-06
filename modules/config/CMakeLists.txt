@@ -74,6 +74,4 @@ set(VERSION_HH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/version.hh")
 configure_file(config.hh.in ${CONFIG_HH_FILE})
 configure_file(version.hh.in ${VERSION_HH_FILE})
 add_custom_target(ost_config)
-stage_headers("${OST_CONFIG_HEADERS}" "ost" 
-              "ost_config" "" "ost")
-install(FILES ${OST_CONFIG_HEADERS} DESTINATION include/ost)
+stage_and_install_headers("${OST_CONFIG_HEADERS}" "ost" "ost_config")

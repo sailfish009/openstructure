@@ -224,6 +224,11 @@ void SceneFX::Preprocess()
   }
 }
 
+bool SceneFX::WillPostprocess() const
+{
+  return shadow_flag || amb_occl_flag || depth_dark_flag || use_beacon;
+}
+
 void SceneFX::Postprocess()
 {
   if(!OST_GL_VERSION_2_0) return;
@@ -235,10 +240,7 @@ void SceneFX::Postprocess()
 #endif
   }
 
-  if(!shadow_flag && !amb_occl_flag && !depth_dark_flag && !use_beacon) {
-    // no postprocessing is needed
-    return;
-  }
+  if(!WillPostprocess()) return;
 
   Viewport vp=Scene::Instance().GetViewport();
 
@@ -328,6 +330,18 @@ void SceneFX::Postprocess()
   } else {
     glUniform1i(glGetUniformLocation(cpr,"dark_flag"),0);
   }
+
+  GLint fog;
+  glGetIntegerv(GL_FOG,&fog);
+  float znear=Scene::Instance().GetNear();
+  float zfar=Scene::Instance().GetFar();
+  float fnear=znear+Scene::Instance().GetFogNearOffset();
+  float ffar=zfar+Scene::Instance().GetFogFarOffset();
+  glUniform1i(glGetUniformLocation(cpr,"fog_flag"),fog);
+  glUniform1f(glGetUniformLocation(cpr,"depth_near"),znear);
+  glUniform1f(glGetUniformLocation(cpr,"depth_far"),zfar);
+  glUniform1f(glGetUniformLocation(cpr,"fog_far"),ffar);
+  glUniform1f(glGetUniformLocation(cpr,"fog_scale"),1.0f/(ffar-fnear));
 
   if(use_beacon) {
     prep_beacon();
@@ -480,7 +494,11 @@ void SceneFX::prep_shadow_map()
     are first reverted, and then the light modelview and projection are applied, resulting (with the
     bias) in the proper 2D lookup into the shadow map
   */
-  shadow_tex_mat_ = bias*pmat*ltrans.GetMatrix()*geom::Invert(Scene::Instance().GetTransform().GetMatrix())*geom::Invert(pmat2);
+  try {
+    shadow_tex_mat_ = bias*pmat*ltrans.GetMatrix()*geom::Invert(Scene::Instance().GetTransform().GetMatrix())*geom::Invert(pmat2);
+  } catch (geom::GeomException& e) {
+    LOG_DEBUG("SceneFX: caught matrix inversion exception in prep_shadow_map()");
+  }
 }
 
 void SceneFX::prep_amb_occlusion()
@@ -516,7 +534,12 @@ void SceneFX::prep_amb_occlusion()
 
   glMatrixMode(GL_TEXTURE);
   glPushMatrix();
-  geom::Mat4 ipm(geom::Transpose(geom::Invert(geom::Transpose(geom::Mat4(pm)))));
+  geom::Mat4 ipm;
+  try {
+    ipm=(geom::Transpose(geom::Invert(geom::Transpose(geom::Mat4(pm)))));
+  } catch (geom::GeomException& e) {
+    LOG_DEBUG("SceneFX: caught matrix inversion exception in prep_amb_occlusion()");
+  }
   glLoadMatrix(ipm.Data());
   glMatrixMode(GL_MODELVIEW);
 
@@ -638,7 +661,11 @@ void SceneFX::prep_beacon()
 
   glGetv(GL_PROJECTION_MATRIX, glpmat);
   geom::Mat4 pmat2(geom::Transpose(geom::Mat4(glpmat)));
-  beacon.mat = geom::Invert(Scene::Instance().GetTransform().GetMatrix())*geom::Invert(pmat2);
+  try {
+    beacon.mat = geom::Invert(Scene::Instance().GetTransform().GetMatrix())*geom::Invert(pmat2);
+  } catch (geom::GeomException& e) {
+    beacon.mat=geom::Mat4();
+  }
 }
 
 void SceneFX::draw_beacon()

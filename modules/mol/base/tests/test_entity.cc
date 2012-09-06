@@ -136,8 +136,24 @@ BOOST_AUTO_TEST_CASE(entity_creator)
   BOOST_CHECK(eh.GetAtomCount()==2);
   
   BOOST_CHECK(eh.GetAtomCount()==chain.GetAtomCount());
-  BOOST_CHECK(eh.GetResidueCount()==chain.GetResidueCount());    
-  
+  BOOST_CHECK(eh.GetResidueCount()==chain.GetResidueCount());
+
+  chain.SetIntProp("amazing",42);
+  EntityHandle eh2 = CreateEntity();
+  XCSEditor e2 = eh2.EditXCS();
+  ChainHandle inserted_chain=e2.InsertChain("Q",chain);
+  BOOST_CHECK(eh2.GetChainCount()==1);
+  BOOST_CHECK(eh2.GetResidueCount()==0);
+  BOOST_CHECK(eh2.GetAtomCount()==0);
+  BOOST_CHECK(inserted_chain.HasProp("amazing"));
+  BOOST_CHECK(eh2.FindChain("Q").IsValid());
+
+  EntityHandle eh3 = CreateEntity();
+  XCSEditor e3 = eh3.EditXCS();
+  e3.InsertChain("Q",chain,true);
+  BOOST_CHECK(eh3.GetResidueCount()==1);
+  BOOST_CHECK(eh3.GetAtomCount()==2);
+
   EntityVisitor v;
   eh.Apply(v);
 }
@@ -179,14 +195,12 @@ BOOST_AUTO_TEST_CASE(transformation)
   BOOST_CHECK(within_list1[0]==atom1);
   BOOST_CHECK(within_list1[1]==atom2);
 
-  BOOST_CHECK(eh.IsTransformationIdentity()==true);
+  BOOST_CHECK(eh.HasTransform()==false);
 
   geom::Transform trans;
   trans.ApplyZAxisRotation(90.0);
-  geom::Mat4 mat = trans.GetMatrix();
-
-  e.ApplyTransform(mat);
-  BOOST_CHECK(eh.IsTransformationIdentity()==false);
+  e.ApplyTransform(trans);
+  BOOST_CHECK(eh.HasTransform()==true);
 
   geom::Vec3 orig_atom1=geom::Vec3(1.0,0.0,0.0);
   geom::Vec3 orig_atom2=geom::Vec3(0.0,2.0,0.0);
@@ -205,11 +219,9 @@ BOOST_AUTO_TEST_CASE(transformation)
 
   geom::Transform trans2;
   trans2.ApplyXAxisTranslation(3.5);
-  geom::Mat4 mat2 = trans2.GetMatrix();
+  e.ApplyTransform(trans2);
 
-  e.ApplyTransform(mat2);
-
-  BOOST_CHECK(eh.IsTransformationIdentity()==false);
+  BOOST_CHECK(eh.HasTransform()==true);
 
   tr_atom1=geom::Vec3(3.5,-1.0,0.0);
   tr_atom2=geom::Vec3(5.5,0.0,0.0);
@@ -253,7 +265,7 @@ BOOST_AUTO_TEST_CASE(transformation)
 
   geom::Mat4 identity;
   e.SetTransform(identity);
-  BOOST_CHECK(eh.IsTransformationIdentity()==true);
+  //BOOST_CHECK(eh.HasTransform()==false);
 
   BondHandle bond1 = e.Connect(atom1,atom2);
   BondHandle bond2 = e.Connect(atom1,atom3);
@@ -261,9 +273,9 @@ BOOST_AUTO_TEST_CASE(transformation)
   BOOST_CHECK(bond1.GetLength()==1.5);
   BOOST_CHECK(bond2.GetLength()==2.0);
 
-  e.SetTransform(mat);
-
-  BOOST_CHECK(eh.IsTransformationIdentity()==false);
+  e.SetTransform(trans);
+  
+  //BOOST_CHECK(eh.HasTransform()==true);
 
   BOOST_CHECK(bond1.GetLength()==1.5);
   BOOST_CHECK(bond2.GetLength()==2.0);

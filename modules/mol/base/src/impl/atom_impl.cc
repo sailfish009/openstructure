@@ -56,10 +56,8 @@ AtomImpl::AtomImpl(const EntityImplPtr& e,
   state_(0),
   index_(index)
 {
-  EntityHandle ent = this->GetEntity();
-  geom::Mat4 transf_matrix = ent.GetTransformationMatrix();
-  geom::Vec3 transf_pos = geom::Vec3(transf_matrix*geom::Vec4(p));
-  tf_pos_ = transf_pos;
+  EntityImplPtr eip = GetEntity();
+  tf_pos_ = eip->HasTransform() ? eip->GetTransform().Apply(p) : p;
   prop_=AtomProp::GetDefaultProps(element_);
 }
 

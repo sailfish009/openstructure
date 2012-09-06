@@ -22,6 +22,7 @@
 
 #include "sdf_writer.hh"
 
+#include <ost/boost_filesystem_helper.hh>
 #include <ost/mol/atom_view.hh>
 #include <ost/mol/residue_view.hh>
 #include <ost/mol/chain_view.hh>
@@ -140,11 +141,7 @@ SDFWriter::SDFWriter(const String& filename)
 }
 
 SDFWriter::SDFWriter(const boost::filesystem::path& filename): 
-#if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
-  outfile_(filename.string().c_str()), 
-#else
-  outfile_(filename.file_string().c_str()), 
-#endif
+  outfile_(BFPathToString(filename).c_str()),
   ostr_(outfile_), counter_(0), atom_indices_() {}
 
 void SDFWriter::Write(const mol::EntityView& ent) {

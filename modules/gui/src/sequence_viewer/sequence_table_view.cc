@@ -60,8 +60,10 @@ SequenceTableView::SequenceTableView(QAbstractItemModel * model)
   this->setHorizontalScrollMode(ScrollPerPixel);
   this->setVerticalScrollMode(ScrollPerPixel);
 
-  connect(this->horizontalHeader(),SIGNAL(sectionResized(int,int,int)), this, SLOT(ResizeWidth(int,int,int)));
-  connect(this->verticalHeader(),SIGNAL(sectionResized(int,int,int)), this, SLOT(ResizeHeight(int,int,int)));
+  connect(this->horizontalHeader(),SIGNAL(sectionResized(int,int,int)), 
+          this, SLOT(ResizeWidth(int,int,int)));
+  connect(this->verticalHeader(),SIGNAL(sectionResized(int,int,int)), 
+          this, SLOT(ResizeHeight(int,int,int)));
 
   delegate_ = new SequenceDelegate(qobject_cast<SequenceModel*>(this->model()),this);
 
@@ -140,8 +142,10 @@ void SequenceTableView::InitStaticRow()
 
   static_row_->setItemDelegate(delegate_);
 
-  connect(static_row_->horizontalScrollBar(), SIGNAL(valueChanged(int)), this->horizontalScrollBar(), SLOT(setValue(int)));
-  connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), static_row_->horizontalScrollBar(), SLOT(setValue(int)));
+  connect(static_row_->horizontalScrollBar(), SIGNAL(valueChanged(int)), 
+          this->horizontalScrollBar(), SLOT(setValue(int)));
+  connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), 
+          static_row_->horizontalScrollBar(), SLOT(setValue(int)));
 
   this->updateStaticRow();
 }
@@ -179,10 +183,14 @@ void SequenceTableView::InitStaticField(){
   static_field_->setHorizontalScrollMode(ScrollPerPixel);
   static_field_->setVerticalScrollMode(ScrollPerPixel);
 
-  connect(static_field_->horizontalScrollBar(), SIGNAL(valueChanged(int)), this->horizontalScrollBar(), SLOT(setValue(int)));
-  connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), static_field_->horizontalScrollBar(), SLOT(setValue(int)));
-  connect(static_field_->verticalScrollBar(), SIGNAL(valueChanged(int)), this->verticalScrollBar(), SLOT(setValue(int)));
-  connect(verticalScrollBar(), SIGNAL(valueChanged(int)), static_field_->verticalScrollBar(), SLOT(setValue(int)));
+  connect(static_field_->horizontalScrollBar(), SIGNAL(valueChanged(int)), 
+          this->horizontalScrollBar(), SLOT(setValue(int)));
+  connect(horizontalScrollBar(), SIGNAL(valueChanged(int)), 
+          static_field_->horizontalScrollBar(), SLOT(setValue(int)));
+  connect(static_field_->verticalScrollBar(), SIGNAL(valueChanged(int)), 
+          this->verticalScrollBar(), SLOT(setValue(int)));
+  connect(verticalScrollBar(), SIGNAL(valueChanged(int)), 
+          static_field_->verticalScrollBar(), SLOT(setValue(int)));
 
   this->updateStaticField();
 }
@@ -222,7 +230,8 @@ void SequenceTableView::resizeEvent(QResizeEvent * event)
 #endif  
 }
 
-QModelIndex SequenceTableView::moveCursor(CursorAction action, Qt::KeyboardModifiers modifiers)
+QModelIndex SequenceTableView::moveCursor(CursorAction action, 
+                                          Qt::KeyboardModifiers modifiers)
 {
   QModelIndex current = QTableView::moveCursor(action, modifiers);
 

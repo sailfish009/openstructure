@@ -30,7 +30,7 @@
 
 namespace ost { namespace gfx { namespace impl {
 
-  class FastSphereRenderer {
+  class DLLEXPORT_OST_GFX FastSphereRenderer {
   public:
     struct VData
     {

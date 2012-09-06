@@ -61,7 +61,7 @@ bool ChainImpl::InSequence() const {
   return in_sequence_;
 }
 
-ResidueImplPtr ChainImpl::AppendResidue(const ResidueImplPtr& res)
+ResidueImplPtr ChainImpl::AppendResidue(const ResidueImplPtr& res, bool deep)
 {
   ResidueImplPtr dst_res=this->AppendResidue(res->GetKey(), res->GetNumber());
   dst_res->Assign(*res.get());                                                
@@ -70,6 +70,16 @@ ResidueImplPtr ChainImpl::AppendResidue(const ResidueImplPtr& res)
   dst_res->SetChemClass(res->GetChemClass());  
   dst_res->SetProtein(res->IsProtein());
   dst_res->SetIsLigand(res->IsLigand());
+  if(deep)
+  {
+    AtomImplList::iterator it=res->GetAtomList().begin(),
+                             it_end=res->GetAtomList().end();
+      for(;it!=it_end;++it)
+      {
+        AtomHandle atom=*it;
+        dst_res->InsertAtom(atom.Impl());
+      }
+  }
   return dst_res;
 }
 
@@ -518,6 +528,13 @@ void ChainImpl::SetInSequence(const int index)
   }
   if (in_sequence_) {
     this->UpdateShifts();
+  }
+}
+
+void ChainImpl::UpdateTransformedPos()
+{
+  for (ResidueImplList::iterator rit=residue_list_.begin(); rit!=residue_list_.end(); ++rit) {
+    (*rit)->UpdateTransformedPos();
   }
 }
   

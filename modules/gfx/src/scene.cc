@@ -135,7 +135,12 @@ Scene::Scene():
   stereo_iod_(4.0),
   stereo_distance_(0.0),
   scene_left_tex_(),
-  scene_right_tex_()
+  scene_right_tex_(),
+  bg_mode_(0),
+  update_bg_(false),
+  bg_grad_(),
+  bg_bm_(),
+  bg_tex_()
 {
   transform_.SetTrans(Vec3(0,0,-100));
 }
@@ -394,6 +399,8 @@ void Scene::InitGL(bool full)
 {
   LOG_VERBOSE("Scene: initializing GL state");
 
+  check_gl_error(); // clear error flag
+
   if(full) {
     LOG_INFO(glGetString(GL_RENDERER) << ", openGL version " << glGetString(GL_VERSION)); 
 
@@ -506,8 +513,10 @@ void Scene::InitGL(bool full)
   }
 
   if(full) {
+    LOG_DEBUG("Scene: initalizing textures");
     glGenTextures(1,&scene_left_tex_);
     glGenTextures(1,&scene_right_tex_);
+    glGenTextures(1,&bg_tex_);
   }
 
   glEnable(GL_TEXTURE_2D);
@@ -531,6 +540,14 @@ void Scene::InitGL(bool full)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
 
+  glBindTexture(GL_TEXTURE_2D, bg_tex_);
+  glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
   LOG_DEBUG("Scene: calling gl init for all objects");
   GfxObjInitGL initgl;
   this->Apply(initgl);
@@ -539,6 +556,8 @@ void Scene::InitGL(bool full)
   gl_init_=true;
   
   if(!def_shading_mode_.empty()) SetShadingMode(def_shading_mode_);
+  
+  check_gl_error("InitGL()");
 }
 
 void Scene::RequestRedraw()
@@ -556,11 +575,71 @@ void Scene::StatusMessage(const String& s)
 void Scene::SetBackground(const Color& c)
 {
   background_=c;
+  bg_mode_=0;
   if(gl_init_) {
     glClearColor(c.Red(),c.Green(),c.Blue(),c.Alpha());
     SetFogColor(c);
     RequestRedraw();
   }
+}
+
+namespace {
+  void c2d(const Color& c, unsigned char* d) {
+    d[0]=static_cast<unsigned char>(c.GetRed()*255.0);
+    d[1]=static_cast<unsigned char>(c.GetGreen()*255.0);
+    d[2]=static_cast<unsigned char>(c.GetBlue()*255.0);
+  }
+}
+
+void Scene::set_bg()
+{
+  static std::vector<unsigned char> data;
+  static const unsigned int grad_steps=64;
+  if(bg_mode_==1) {
+    LOG_DEBUG("Scene: setting background gradient");
+    // gradient
+    glBindTexture(GL_TEXTURE_2D, bg_tex_);
+    data.resize(3*grad_steps);
+    float tf=1.0/static_cast<float>(grad_steps-1);
+    for(size_t i=0;i<grad_steps;++i) {
+      Color col=bg_grad_.GetColorAt(static_cast<float>(i)*tf);
+      c2d(col,&data[i*3]);
+    }
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,1,grad_steps,0,GL_RGB,GL_UNSIGNED_BYTE,&data[0]);
+  } else if(bg_mode_==2) {
+    LOG_DEBUG("Scene: setting background bitmap");
+    // bitmap
+    glBindTexture(GL_TEXTURE_2D, bg_tex_);
+    if(bg_bm_.channels==1) {
+      glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,bg_bm_.width,bg_bm_.height,0,GL_LUMINANCE,GL_UNSIGNED_BYTE,bg_bm_.data.get());
+    } else if(bg_bm_.channels==3) {
+      glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,bg_bm_.width,bg_bm_.height,0,GL_RGB,GL_UNSIGNED_BYTE,bg_bm_.data.get());
+    } else if(bg_bm_.channels==4) {
+      glTexImage2D(GL_TEXTURE_2D,0,GL_RGB,bg_bm_.width,bg_bm_.height,0,GL_RGBA,GL_UNSIGNED_BYTE,bg_bm_.data.get());
+    } else {
+      LOG_ERROR("Scene::SetBackground: unsupported bitmap channel count of " << bg_bm_.channels);
+    }
+  }
+}
+
+void Scene::SetBackground(const Gradient& g)
+{
+  bg_grad_=g;
+  bg_mode_=1;
+  update_bg_=true;
+  RequestRedraw();
+}
+
+void Scene::SetBackground(const Bitmap& bm)
+{
+  if(bm.width==0 || bm.height==0) {
+    LOG_WARNING("Scene: background bitmap has invalid size (" << bm.width << "x" << bm.height << "), ignoring");
+    return;
+  }
+  bg_bm_=bm;
+  bg_mode_=2;
+  update_bg_=true;
+  RequestRedraw();
 }
 
 Color Scene::GetBackground() const
@@ -579,8 +658,8 @@ Viewport Scene::GetViewport() const
 
 void Scene::SetViewport(int w, int h)
 {
-  vp_width_=w;
-  vp_height_=h;
+  vp_width_=std::max<unsigned int>(1,w);
+  vp_height_=std::max<unsigned int>(1,h);
   aspect_ratio_=static_cast<float>(w)/static_cast<float>(h);
   if(!gl_init_) return;
   glViewport(0,0,w,h);
@@ -726,6 +805,7 @@ void draw_lightdir(const Vec3& ldir, const geom::Transform& tf)
 
 void Scene::RenderGL()
 {
+  check_gl_error(); // clear error flag
   if(auto_autoslab_ || do_autoslab_) {
     do_autoslab();
     do_autoslab_=false;
@@ -738,7 +818,7 @@ void Scene::RenderGL()
   } else {
     render_scene();
   }
-  check_gl_error();
+  check_gl_error("RenderGL()");
 }
 
 void Scene::Register(GLWinBase* win)
@@ -1566,9 +1646,9 @@ void Scene::Export(const String& fname, unsigned int width,
     LOG_ERROR("Scene: no file extension specified");
     return;
   }
-  String ext = fname.substr(d_index);
-  if(!(ext==".png")) {
-    LOG_ERROR("Scene: unknown file format (" << ext << ")");
+  String ext = fname.substr(d_index+1);
+  if(ext!="png") {
+    LOG_ERROR("Scene::Export: unknown file format (" << ext << ")");
     return;
   }
 
@@ -1602,7 +1682,7 @@ void Scene::Export(const String& fname, unsigned int width,
   glReadBuffer(GL_BACK);
 
   LOG_DEBUG("Scene: calling bitmap export");
-  BitmapExport(fname,ext,width,height,img_data.get());
+  ExportBitmap(fname,ext,width,height,img_data.get());
 
   // only switch back if it was not on to begin with
   if(of_flag) {
@@ -1621,8 +1701,8 @@ void Scene::Export(const String& fname, bool transparent)
     LOG_ERROR("Scene: no file extension specified");
     return;
   }
-  String ext = fname.substr(d_index);
-  if(ext!=".png") {
+  String ext = fname.substr(d_index+1);
+  if(ext!="png") {
     LOG_ERROR("Scene: unknown file format (" << ext << ")");
     return;
   }
@@ -1644,7 +1724,7 @@ void Scene::Export(const String& fname, bool transparent)
   boost::shared_array<uchar> img_data(new uchar[vp[2]*vp[3]*4]);
   glReadPixels(0,0,vp[2],vp[3],GL_RGBA,GL_UNSIGNED_BYTE,img_data.get());
   glFinish();
-  BitmapExport(fname,ext,vp[2],vp[3],img_data.get());
+  ExportBitmap(fname,ext,vp[2],vp[3],img_data.get());
   glPixelTransferf(GL_ALPHA_BIAS, 0.0);  
 }
 
@@ -1867,7 +1947,7 @@ void Scene::prep_glyphs()
   String ost_root =GetSharedDataPath();
   bf::path ost_root_dir(ost_root);
   bf::path tex_file(ost_root_dir / "textures/glyph_texture.png");
-  Bitmap bm = BitmapImport(tex_file.string(),".png");
+  Bitmap bm = ImportBitmap(tex_file.string());
   if(!bm.data) return;
 
   LOG_DEBUG("Scene: importing glyph tex with id " << glyph_tex_id_);
@@ -1908,12 +1988,83 @@ void Scene::prep_blur()
   glFlush();
 }
 
+void Scene::render_bg()
+{
+  if(!gl_init_) return;
+  if(bg_mode_!=1 && bg_mode_!=2) return;
+  if(update_bg_) {
+    set_bg();
+    check_gl_error("set_bg()");
+    update_bg_=false;
+  }
+
+  // setup state for simple texture quad
+#if OST_SHADER_SUPPORT_ENABLED
+  Shader::Instance().PushProgram();
+  Shader::Instance().Activate("");
+#endif
+  glPushAttrib(GL_ALL_ATTRIB_BITS);
+  glPushClientAttrib(GL_ALL_ATTRIB_BITS);
+
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_LIGHTING);
+  glDisable(GL_COLOR_MATERIAL);
+  glDisable(GL_FOG);
+  glDisable(GL_CULL_FACE);
+  glDisable(GL_BLEND);
+  glDisable(GL_LINE_SMOOTH);
+  glDisable(GL_POINT_SMOOTH);
+#if defined(OST_GL_VERSION_2_0)
+  glDisable(GL_MULTISAMPLE);
+#endif
+  glMatrixMode(GL_PROJECTION);
+  glPushMatrix();
+  glLoadIdentity();
+  glOrtho(0,vp_width_,0,vp_height_,-1,1);
+  glMatrixMode(GL_MODELVIEW);
+  glPushMatrix();
+  glLoadIdentity();
+
+  // draw bg texture quad
+  glEnable(GL_TEXTURE_2D);
+#if OST_SHADER_SUPPORT_ENABLED
+  if(OST_GL_VERSION_2_0) {
+    glActiveTexture(GL_TEXTURE0);
+  }
+#endif
+  glBindTexture(GL_TEXTURE_2D, bg_tex_);
+  // draw
+  glColor3f(0.0,0.0,0.0);
+  glBegin(GL_QUADS);
+  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
+  glEnd();
+
+  // restore all settings
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
+  glMatrixMode(GL_PROJECTION);
+  glPopMatrix();
+  glMatrixMode(GL_MODELVIEW);
+  glPopMatrix();
+  glPopClientAttrib();
+  glPopAttrib();
+#if OST_SHADER_SUPPORT_ENABLED
+  Shader::Instance().PopProgram();
+#endif
+  check_gl_error("render_bg()");
+}
+
 void Scene::render_scene()
 {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
+
+  render_bg();
 
   glMultMatrix(transform_.GetTransposedMatrix().Data());
 

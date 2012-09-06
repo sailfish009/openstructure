@@ -30,9 +30,8 @@ export PATH="$DNG_BINDIR:${PATH}"
 export DYLD_FRAMEWORK_PATH="$DNG_LIBDIR:${DYLD_FRAMEWORK_PATH}"
 export DYLD_LIBRARY_PATH="$DNG_LIBDIR:${DYLD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="$DNG_LIBDIR:${LD_LIBRARY_PATH}"
-# set QT_PLUGIN_PATH and PYTHONPATH for bundle (commented except in linux bundles)
+# set QT_PLUGIN_PATH for bundle (commented except in linux bundles)
 #export QT_PLUGIN_PATH="$BIN_DIR/plugins"
-#export PYTHONPATH="$DNG_ROOT/@LIBDIR@/python@PYTHON_VERSION@:$OST_ADDITIONAL_PYTHONPATH"
 
 # retrieve absolute path to python executable
 pyexec="@PYTHON_BINARY@"

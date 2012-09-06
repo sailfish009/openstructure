@@ -28,6 +28,7 @@
 #include <ost/platform.hh>
 #include <ost/log.hh>
 
+#include "impl/scene_fx.hh"
 #include "glext_include.hh"
 
 #include "shader.hh"
@@ -366,7 +367,11 @@ void Shader::UpdateState()
     glGetBooleanv(GL_LIGHT_MODEL_TWO_SIDE,&bresult);
     LOG_TRACE("setting two_sided flag to " << bresult);
     glUniform1i(glGetUniformLocation(current_program_,"two_sided_flag"),bresult);
-    glGetIntegerv(GL_FOG,&result);
+    if(impl::SceneFX::Instance().WillPostprocess()) {
+      result=0;
+    } else {
+      glGetIntegerv(GL_FOG,&result);
+    }
     LOG_TRACE("setting fog flag to " << result);
     glUniform1i(glGetUniformLocation(current_program_,"fog_flag"),result);
     glDisable(GL_COLOR_MATERIAL);

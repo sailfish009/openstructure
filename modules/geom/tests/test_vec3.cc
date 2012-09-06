@@ -58,8 +58,8 @@ BOOST_AUTO_TEST_CASE(init_vec3)
   // conversion from vec4
   Vec3 v6(Vec4(0.4,1.2,4.0,2.0));
   BOOST_CHECK(match(v6,0.2,0.6,2.0));
-  BOOST_CHECK_THROW( Vec3(Vec4(1.0,1.0,1.0,0.0)), DivideByZeroException);
 
+  BOOST_CHECK(match(Vec3(Vec4(2.0,1.0,3.0,0.0)),2.0,1.0,3.0));
 }
 
 BOOST_AUTO_TEST_CASE(access_vec3)

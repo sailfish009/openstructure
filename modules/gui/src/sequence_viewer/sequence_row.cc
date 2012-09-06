@@ -34,13 +34,18 @@
 #include <QtGui>
 namespace ost { namespace gui {
 
-SequenceRow::SequenceRow(const QString& name, seq::ConstSequenceHandle sequence, SequenceViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11)), sequence_(sequence)
+SequenceRow::SequenceRow(const QString& name, seq::ConstSequenceHandle sequence, 
+                         SequenceViewObject* parent) : 
+  BaseRow(QFont("Courier",11),parent), name_(name), 
+  name_font_(QFont("Courier",11)), sequence_(sequence)
 {
   name_font_.setBold(true);
   name_font_.setItalic(true);
 }
 
-SequenceRow::SequenceRow(const QString& name, SequenceViewObject* parent) : BaseRow(QFont("Courier",11),parent), name_(name), name_font_(QFont("Courier",11))
+SequenceRow::SequenceRow(const QString& name, SequenceViewObject* parent) : 
+  BaseRow(QFont("Courier",11),parent), name_(name), 
+  name_font_(QFont("Courier",11))
 {
   name_font_.setBold(true);
   name_font_.setItalic(true);

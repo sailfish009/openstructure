@@ -43,6 +43,8 @@
 #include "gfx_prim.hh"
 #include "povray_fw.hh"
 #include "exporter_fw.hh"
+#include "gradient.hh"
+#include "bitmap_io.hh"
 
 namespace ost { namespace gfx {
 
@@ -171,6 +173,8 @@ class DLLEXPORT_OST_GFX Scene {
 
   // \brief get the field of view
   float GetFOV() const;
+
+  float GetAspect() const {return aspect_ratio_;}
 
   /// \brief offset between near clipping plane and start of fog
   void SetFogNearOffset(float o);
@@ -332,6 +336,12 @@ class DLLEXPORT_OST_GFX Scene {
 
   /// \brief set background color
   void SetBackground(const Color& c);
+
+  /// \brief set background gradient
+  void SetBackground(const Gradient& g);
+
+  /// \brief set background image
+  void SetBackground(const Bitmap& bm);
 
   /// \brief get background color
   Color GetBackground() const;
@@ -498,6 +508,7 @@ protected:
   void NodeAdded(const GfxNodeP& node);
   void RenderModeChanged(const String& name);
 
+
 private:  
 
   template <typename ACTION>
@@ -568,6 +579,13 @@ private:
   Real stereo_iod_,stereo_distance_;
   unsigned int scene_left_tex_;
   unsigned int scene_right_tex_;
+  unsigned int bg_mode_;
+  bool update_bg_;
+  Gradient bg_grad_;
+  Bitmap bg_bm_;
+  unsigned int bg_tex_;
+  
+  
 
   void set_near(float n);
   void set_far(float f);
@@ -576,10 +594,11 @@ private:
   void prep_glyphs();
   void prep_blur();
   void stereo_projection(int view);
+  void render_bg();
   void render_scene();
   void render_glow();
   void render_stereo();
-
+  void set_bg();
   void do_autoslab();
 
   bool IsNameAvailable(const String& name) const;

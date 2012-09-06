@@ -106,7 +106,7 @@ public:
     }
   }
 
-  float fNslice;  // nr of slices (1 for an image, negative nr of slices for new long label format
+  float fNslice;  // nr of slices (1 for an image, negative nr of slices indicates very old 2d image
   float fNrow;    // nr row per slice (Y)
   float fNrec;    // total nr of records (unused).
   float fNlabel;  // obsolete, unused
@@ -255,6 +255,9 @@ void header_filler(std::istream& in,  spider_header& header)
 {
   BinaryIStream<CONVERSIONTYPE> f(in);
   f >> header.fNslice;  
+  if(header.fNslice<1.0){
+    header.fNslice=1.0; // fix for very old 2d images with Nslice=-1
+  }
   f >> header.fNrow;  
   f >> header.fNrec;    
   f >> header.fNlabel; 
@@ -387,9 +390,8 @@ template <typename B >
 void real_dumper(std::ostream& f,  const spider_header& header, const img::ImageHandle& mh,const img::alg::Normalizer& norm, bool swap_flag)
 {
   int padding = header.fLabbyt-f.tellp();
-  char* buffer=new char[padding];
-  f.write(buffer,padding);
-  delete[] buffer;
+  std::vector<char> buffer(padding,0);
+  f.write(&buffer[0],padding);
   int slice_size=static_cast<int>(header.fNcol) * static_cast<int>(header.fNrow);
   boost::scoped_array<B> rawp(new B[slice_size]);
 

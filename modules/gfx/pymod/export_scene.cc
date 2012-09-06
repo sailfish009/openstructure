@@ -65,6 +65,10 @@ geom::AlignedCuboid scene_get_bb3(Scene* scene, const geom::Transform& tf)
   return scene->GetBoundingBox(tf);
 }
 
+void (Scene::*scene_set_bg1)(const Color&) = &Scene::SetBackground;
+void (Scene::*scene_set_bg2)(const Gradient&) = &Scene::SetBackground;
+void (Scene::*scene_set_bg3)(const Bitmap&) = &Scene::SetBackground;
+
 } // anon ns
 
 
@@ -124,10 +128,12 @@ void export_Scene()
     .def("Resize", &Scene::Resize)
     .def("HasNode", &Scene::HasNode)
     .def("GetBackground", &Scene::GetBackground)
-    .def("SetBackground", &Scene::SetBackground)
+    .def("SetBackground", scene_set_bg1)
+    .def("SetBackground", scene_set_bg2)
+    .def("SetBackground", scene_set_bg3)
     .add_property("bg",
                   &Scene::GetBackground, 
-                  &Scene::SetBackground)
+                  scene_set_bg1)
     .def("GetProjection",&Scene::GetProjection)
     .add_property("projection",&Scene::GetProjection)
     .def("GetInvertedProjection",&Scene::GetInvertedProjection)

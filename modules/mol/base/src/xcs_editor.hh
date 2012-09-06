@@ -98,10 +98,11 @@ public:
   /// This transformation is applied \em after the transformation
   /// already stored in the entity
   void ApplyTransform(const geom::Mat4& transform); 
+  void ApplyTransform(const geom::Transform& transform); 
 
   /// \brief apply a new transformation to all atoms
-
   void SetTransform(const geom::Mat4& transform);
+  void SetTransform(const geom::Transform& transform);
 
   /// \brief immediately update internal coordinate system
   void UpdateICS();  

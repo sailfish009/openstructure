@@ -46,10 +46,11 @@ class SpacenavControl(QtCore.QObject):
   def Toggle(self, button):
     if button == 0:
       self.trans = not self.trans
-      ost.LogVerbose("SpaceNav: translation %s "%("enabled" if self.trans else "disabled"))
+      ost.LogVerbose("SpaceNav: translation %s" % (self.strans and "enabled" or "disabled"))
     elif button == 1:
       self.rot = not self.rot
-      ost.LogVerbose("SpaceNav: rotation %s"%("enabled" if self.rot else "disabled"))
+      #ost.LogVerbose("SpaceNav: rotation %s"%("enabled" if self.rot else "disabled"))
+      ost.LogVerbose("SpaceNav: rotation %s"%(self.rot and "enabled" or "disabled"))
     elif button == 12:
       if self.speed > 20:
         self.speed *= 0.8

@@ -132,7 +132,8 @@ void SequenceViewer::InitSearchBar()
   seq_search_bar_ = new SeqSearchBar(this);
   seq_search_bar_->hide();
   layout()->addWidget(seq_search_bar_);
-  connect(seq_search_bar_, SIGNAL(Changed(const QString&, bool, const QString&)), this, SLOT(OnSearchBarUpdate(const QString&, bool, const QString&)));
+  connect(seq_search_bar_, SIGNAL(Changed(const QString&, bool, const QString&)), 
+         this, SLOT(OnSearchBarUpdate(const QString&, bool, const QString&)));
 }
 
 void SequenceViewer::InitView()

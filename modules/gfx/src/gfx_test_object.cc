@@ -61,7 +61,7 @@ GfxTestObj::GfxTestObj():
   bf::path ost_root_dir(ost_root);
   bf::path tex_file(ost_root_dir / "textures/test_texture.png");
 
-  Texture tex(BitmapImport(tex_file.string(),".png"));
+  Texture tex(ImportBitmap(tex_file.string()));
   if(!tex.IsValid()) {
     LOG_ERROR("error loading " << tex_file.string());
   } else {

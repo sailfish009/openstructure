@@ -163,6 +163,10 @@ class TestTable(unittest.TestCase):
     diff = ImageChops.difference(img1, img2)
     self.assertEqual(diff.getbbox(),None)
 
+  def testSearchColNames(self):
+    tab = self.CreateTestTable()
+    self.assertEquals(tab.SearchColNames('d$'), ['second', 'third'])
+    self.assertEquals(tab.SearchColNames('(first|third)'), ['first','third'])
 
   def testZip(self):
     tab=Table(['col1', 'col2', 'col3', 'col4'], 'sssi')
@@ -192,7 +196,14 @@ class TestTable(unittest.TestCase):
     self.assertEquals(type(z[0][1]),int)
     self.assertEquals(type(z[1][1]),int)
     self.assertRaises(ValueError, tab.Zip, 'col5', 'col3')
-
+  def testPercentiles(self):
+    tab = Table(['nums'], 'i')
+    self.assertEqual(tab.Percentiles('nums', [0,100]), [None, None])
+    self.assertRaises(ValueError, tab.Percentiles, 'nums', [101])
+    self.assertRaises(ValueError, tab.Percentiles, 'nums', [-1])
+    for i in (35,15,50,40,20):
+      tab.AddRow([i])
+    self.assertEqual(tab.Percentiles('nums', [0,30,40,100]), [15,20,35,50])
   def testTableInitEmpty(self):
     '''
     empty table
@@ -304,6 +315,24 @@ class TestTable(unittest.TestCase):
     self.CompareColNames(tab, ['x'])
     self.CompareColTypes(tab, 'x', 'f')
     
+  def testTableFilterColNamesTypes(self):
+    """
+    make sure the col_names and col_types are copied. 
+    We don't want them to be referenced to the original table.
+    This leads to strange surprises.
+    """
+    t = Table(['a', 'b'], 'ii')
+    t.AddRow([1,2])
+    t.AddRow([2,3])
+    t.AddRow([2,3])
+    t.AddRow([3,3])
+    t.AddRow([4,3])
+    t.AddRow([5,3])
+    filt = t.Filter(a=2)
+    filt.AddCol('c', 'i')
+    self.assertEqual(len(t.col_names), 2)
+    self.assertEqual(len(t.col_types), 2)
+
   def testTableInitMultiColMultiValueNonEmpty(self):
     '''
     table with two column and four rows:
@@ -588,6 +617,15 @@ class TestTable(unittest.TestCase):
                                    'foo': [True, None, True],
                                    'bar': [1, 2, 3]})
 
+  def testRaiseErrorOnWrongDataLengthAddCol(self):
+    tab = Table()
+    tab.AddCol('a','f',[4.2,4.2,4.2])
+    self.assertRaises(ValueError, tab.AddCol, 'b', 'f', [4.2,4.2])
+
+  def testRaiseErrorColNameAlreadyExists(self):
+    tab = Table()
+    tab.AddCol('awesome','f')
+    self.assertRaises(ValueError, tab.AddCol, 'awesome', 'f')
 
   def testRaiseErrorOnWrongColumnTypes(self):
     # wrong columns types in init
@@ -849,6 +887,19 @@ class TestTable(unittest.TestCase):
     # read from disc
     tab_loaded_fname = Table.Load('saveloadtable_withspaces_filename_out.tab')
     self.CompareDataFromDict(tab_loaded_fname, {'first': ['x','foo',None,'hello spaces'], 'second': [3,None,9,10], 'third': [None,2.2,3.3,10.1]})
+  def testSaveTableHTML(self):
+    import StringIO
+    tab = self.CreateTestTable()
+    stream = StringIO.StringIO()
+    tab.Save(stream, format='html')
+    self.assertEqual(stream.getvalue(), '<table><tr><th>first</th><th>second</th><th>third</th></tr><tr><td>x</td><td>3</td><td></td></tr><tr><td>foo</td><td></td><td>2.200</td></tr><tr><td></td><td>9</td><td>3.300</td></tr></table>')
+  def testSaveTableContext(self):
+    import StringIO
+    tab = self.CreateTestTable()
+    stream = StringIO.StringIO()
+    tab.Save(stream, format='context')
+    self.assertEqual(stream.getvalue(), 
+                     '\\starttable[l|r|i3r|]\n\\HL\n\\NC \\bf first\\NC \\bf second\\NC \\bf third \\AR\\HL\n\\NC x\\NC 3\\NC --- \\AR\n\\NC foo\NC ---\NC 2.200 \\AR\n\\NC ---\\NC 9\\NC 3.300 \\AR\n\\HL\n\\stoptable')
 
   def testSaveLoadTableCSV(self):
     tab = self.CreateTestTable()
@@ -1137,6 +1188,13 @@ class TestTable(unittest.TestCase):
     self.assertRaises(ValueError, tab.Plot, x='second', y='third', y_range=[1,2,3])
     self.assertRaises(ValueError, tab.Plot, x='second', y='third', z_range='st')
 
+  def testHexbin(self):
+    if not HAS_MPL or not HAS_NUMPY:
+      return
+    tab = self.CreateTestTable()
+    self.assertRaises(ValueError, tab.PlotHexbin, x='second', y='third', x_range=1)
+    self.assertRaises(ValueError, tab.PlotHexbin, x='second', y='third', x_range=[1,2,3])
+
   def testPlotEnrichment(self):
     if not HAS_MPL or not HAS_PIL:
       return
@@ -1154,6 +1212,24 @@ class TestTable(unittest.TestCase):
     #self.CompareImages(img1, img2)
     #pl.show()
     
+  def testCalcEnrichmentAUCwithNone(self):
+    if not HAS_NUMPY:
+      return
+    tab = Table(['pred_bfactors','ref_distances'], 'ff',
+                ref_distances=[None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 2.445, 2.405, 2.361, 2.124, 1.957, 1.897, 1.422, 1.348, 1.247, 1.165, 1.153, 1.011, 0.992, 0.885, 0.852, 0.775, 0.757, 0.755, 0.735, 0.71, 0.656, 0.636, 0.609, 0.607, 0.604, 0.595, 0.572, 0.549, 0.458, 0.438, 0.41, 0.345, 0.304, 0.254, 0.241, 0.227, 2.68, 1.856, 1.312, 0.453],
+                pred_bfactors=[1.85000,  2.01000,  2.12000,  2.14000,  2.15000,  2.18000,  2.20000,  2.26000,  2.28000,  2.31000,  2.37000,  2.38000,  2.39000,  2.39000,  2.43000,  2.43000,  2.49000,  2.51000,  2.56000,  2.58000,  2.65000,  2.67000,  2.72000,  2.75000,  2.77000,  2.81000,  2.91000,  2.95000,  3.09000,  3.12000,  3.25000,  3.30000,  3.33000,  3.38000,  3.39000,  3.41000,  3.41000,  3.45000,  3.57000,  3.59000,  3.64000,  3.76000,  3.76000,  3.92000,  3.95000,  3.95000,  4.05000,  4.06000,  4.07000,  4.14000,  4.14000,  4.18000,  4.24000,  4.28000,  4.40000,  4.43000,  4.43000,  4.48000,  4.50000,  4.51000,  4.54000,  4.63000,  4.64000,  4.79000,  4.93000,  5.07000,  5.12000,  5.20000,  5.41000,  5.42000,  5.44000,  5.52000,  5.68000,  5.78000,  5.80000,  5.93000,  6.11000,  6.31000,  6.50000,  6.53000,  6.55000,  6.60000,  6.73000,  6.79000,  6.81000,  7.44000,  8.45000,  8.81000,  9.04000,  9.29000,  9.30000, 10.99000, 11.42000, 12.55000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 99.99000, 99.99000, 99.99000, 99.99000])
+
+    auc = tab.ComputeEnrichmentAUC(score_col='pred_bfactors', class_col='ref_distances')
+    self.assertAlmostEqual(auc, 0.50714285714285)
+
+    # when removing all None lines, no true positive is left
+    auc = tab.ComputeEnrichmentAUC(score_col='ref_distances', class_col='pred_bfactors')
+    self.assertEqual(auc, None)
+
+    # when increasing the cutoff, we have again true positives
+    auc = tab.ComputeEnrichmentAUC(score_col='ref_distances', class_col='pred_bfactors', class_cutoff=60)
+    self.assertAlmostEqual(auc, 0.52013888888)
+
   def testCalcEnrichmentAUC(self):
     if not HAS_NUMPY:
       return
@@ -1204,6 +1280,24 @@ class TestTable(unittest.TestCase):
     #img2 = Image.open(os.path.join("testfiles","roc-same-val.png"))
     #self.CompareImages(img1, img2)
     #pl.show()
+
+  def testCalcROCAUCwithNone(self):
+    if not HAS_NUMPY:
+      return
+    tab = Table(['pred_bfactors','ref_distances'], 'ff',
+                ref_distances=[None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 2.445, 2.405, 2.361, 2.124, 1.957, 1.897, 1.422, 1.348, 1.247, 1.165, 1.153, 1.011, 0.992, 0.885, 0.852, 0.775, 0.757, 0.755, 0.735, 0.71, 0.656, 0.636, 0.609, 0.607, 0.604, 0.595, 0.572, 0.549, 0.458, 0.438, 0.41, 0.345, 0.304, 0.254, 0.241, 0.227, 2.68, 1.856, 1.312, 0.453],
+                pred_bfactors=[1.85000,  2.01000,  2.12000,  2.14000,  2.15000,  2.18000,  2.20000,  2.26000,  2.28000,  2.31000,  2.37000,  2.38000,  2.39000,  2.39000,  2.43000,  2.43000,  2.49000,  2.51000,  2.56000,  2.58000,  2.65000,  2.67000,  2.72000,  2.75000,  2.77000,  2.81000,  2.91000,  2.95000,  3.09000,  3.12000,  3.25000,  3.30000,  3.33000,  3.38000,  3.39000,  3.41000,  3.41000,  3.45000,  3.57000,  3.59000,  3.64000,  3.76000,  3.76000,  3.92000,  3.95000,  3.95000,  4.05000,  4.06000,  4.07000,  4.14000,  4.14000,  4.18000,  4.24000,  4.28000,  4.40000,  4.43000,  4.43000,  4.48000,  4.50000,  4.51000,  4.54000,  4.63000,  4.64000,  4.79000,  4.93000,  5.07000,  5.12000,  5.20000,  5.41000,  5.42000,  5.44000,  5.52000,  5.68000,  5.78000,  5.80000,  5.93000,  6.11000,  6.31000,  6.50000,  6.53000,  6.55000,  6.60000,  6.73000,  6.79000,  6.81000,  7.44000,  8.45000,  8.81000,  9.04000,  9.29000,  9.30000, 10.99000, 11.42000, 12.55000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 50.00000, 99.99000, 99.99000, 99.99000, 99.99000])
+
+    auc = tab.ComputeROCAUC(score_col='pred_bfactors', class_col='ref_distances')
+    self.assertAlmostEqual(auc, 0.55714285714285705)
+
+    # when removing all None lines, no true positive is left
+    auc = tab.ComputeROCAUC(score_col='ref_distances', class_col='pred_bfactors')
+    self.assertEqual(auc, None)
+
+    # when increasing the cutoff, we have again true positives
+    auc = tab.ComputeROCAUC(score_col='ref_distances', class_col='pred_bfactors', class_cutoff=60)
+    self.assertAlmostEqual(auc, 0.701388888888888)
 
   def testCalcROCAUC(self):
     if not HAS_NUMPY:
@@ -1354,7 +1448,52 @@ class TestTable(unittest.TestCase):
     
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c','a','b',weight='d')
     self.assertRaises(RuntimeError, tab.GetOptimalPrefactors, 'c',weights='d')
+
+  def testGaussianSmooth(self):
+    tab = Table(['a','b','c','d','e','f'],'fffffi',
+                a=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
+                b=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
+                c=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
+                d=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
+                e=[0.5,1.0,2.0,3.0,2.5,1.0,0.5,2.3,1.0],
+                f=[2,6,5,3,8,7,4,4,4])
+
+    tab.GaussianSmooth('a')
+    tab.GaussianSmooth('b', std=2.0)
+    tab.GaussianSmooth('c', padding='wrap')
+    tab.GaussianSmooth('d', padding='constant')
+    tab.GaussianSmooth('e', padding='constant',c=3.0)
+    tab.GaussianSmooth('f')
+
+    ref_list=[]
+
+    ref_list.append([0.74729766,1.20875404,1.93459464,2.39849076,2.11504816,
+                     1.42457403,1.20524937,1.41025075,1.3557406])
+    ref_list.append([1.23447249,1.41295267,1.65198705,1.79959835,1.78131778,
+                     1.64501718,1.49728102,1.40589715,1.37147629])
+    ref_list.append([0.9315564,1.24131027,1.93698455,2.39855767,2.11504816,
+                     1.42450711,1.20285946,1.37769451,1.17148186])
+    ref_list.append([0.5630556,1.17705895,1.93224488,2.39842384,2.11504816,
+                     1.4244402,1.2005097,1.34599942,0.9872398 ])
+    ref_list.append([1.46464039,1.35272941,1.94594196,2.39882533,2.11504816,
+                     1.42484169,1.21420677,1.52166988,1.88882459])
+    ref_list.append([3,4,4,5,6,6,4,4,4])
+
+    tab_list=[[],[],[],[],[],[]]
     
+    for row in tab.rows:
+      for i,v in enumerate(row):
+        tab_list[i].append(v)
+
+    for i in range(len(ref_list[0])):
+      self.assertAlmostEquals(tab_list[0][i],ref_list[0][i])
+      self.assertAlmostEquals(tab_list[1][i],ref_list[1][i])
+      self.assertAlmostEquals(tab_list[2][i],ref_list[2][i])
+      self.assertAlmostEquals(tab_list[3][i],ref_list[3][i])
+      self.assertAlmostEquals(tab_list[4][i],ref_list[4][i])
+      self.assertAlmostEquals(tab_list[5][i],ref_list[5][i])
+     
+
   def testIsEmpty(self):
     tab = Table()
     self.assertTrue(tab.IsEmpty())

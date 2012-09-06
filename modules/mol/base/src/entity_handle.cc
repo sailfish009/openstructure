@@ -17,6 +17,8 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
 
+#include <ost/log.hh>
+
 #include "impl/entity_impl.hh"
 #include "bond_handle.hh"
 #include "torsion_handle.hh"
@@ -235,24 +237,62 @@ Real EntityHandle::GetAngle(const AtomView& a1, const AtomView& a2,
   return GetAngle(a1.GetHandle(), a2.GetHandle(), a3.GetHandle());
 }
 
-const geom::Mat4& EntityHandle::GetTransformationMatrix() const
-
+geom::Mat4 EntityHandle::GetTransformationMatrix() const
 {
+  static bool warn=true;
+  if(warn) {
+    LOG_WARNING("Entity::GetTransformationMatrix is deprecated, use GetTransform instead");
+    warn=false;
+  }
   this->CheckValidity();
-  return Impl()->GetTransfMatrix();
+  return Impl()->GetTransform().GetMatrix();
 }
 
 
-const geom::Mat4& EntityHandle::GetInvTransformationMatrix() const
+geom::Mat4 EntityHandle::GetInvTransformationMatrix() const
 {
+  static bool warn=true;
+  if(warn) {
+    LOG_WARNING("Entity::GetInvTransformationMatrix is deprecated, use GetTransform instead");
+    warn=false;
+  }
   this->CheckValidity();
-  return Impl()->GetInvTransfMatrix();
+  return Impl()->GetTransform().GetInvertedMatrix();
 }
 
 bool EntityHandle::IsTransformationIdentity() const
 {
+  static bool warn=true;
+  if(warn) {
+    LOG_WARNING("Entity::IsTransformationIdentity is deprecated, use HasTransform instead");
+    warn=false;
+  }
   this->CheckValidity();
-  return Impl()->IsTransfIdentity();
+  return !Impl()->HasTransform();
+}
+
+geom::Transform EntityHandle::GetTransform() const
+{
+  this->CheckValidity();
+  return Impl()->GetTransform();  
+}
+
+void EntityHandle::SetTransform(const geom::Transform& tf)
+{
+  this->CheckValidity();
+  Impl()->SetTransform(tf);  
+}
+
+bool EntityHandle::HasTransform() const
+{
+  this->CheckValidity();
+  return Impl()->HasTransform();  
+}
+
+void EntityHandle::ClearTransform()
+{
+  this->CheckValidity();
+  Impl()->ClearTransform();  
 }
 
 ResidueHandle EntityHandle::FindResidue(const String& chain_name,

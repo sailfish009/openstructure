@@ -51,7 +51,8 @@ String TIF::FORMAT_STRING="defined_tiff";
   normalize_on_save_(normalize_on_save),
   bit_depth_(bit_depth),
   signed_(sign),
-  phasecolor_(phasecolor)
+  phasecolor_(phasecolor),
+  subimage_(subimage)
 {
 }
 
@@ -60,7 +61,8 @@ TIF::TIF(String format_string, boost::logic::tribool  normalize_on_save, Format 
   normalize_on_save_(normalize_on_save),
   bit_depth_(bit_depth),
   signed_(sign),
-  phasecolor_(phasecolor)
+  phasecolor_(phasecolor),
+  subimage_(subimage)
 {
 }
 

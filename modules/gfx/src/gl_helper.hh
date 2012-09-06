@@ -39,12 +39,16 @@ Author: Juergen Haas
 
 #include <ost/log.hh>
 
-inline void check_gl_error()
+inline void check_gl_error(const std::string& m="")
 {
+  #ifndef NDEBUG
   GLenum error_code;
   if((error_code=glGetError())!=GL_NO_ERROR) {
-    LOG_VERBOSE("GL error: " << gluErrorString(error_code));
+    if(!m.empty()) {
+      LOG_VERBOSE("GL error in [" << m << "]: " << gluErrorString(error_code));
+    }
   }
+  #endif
 }
 
 inline void glVertex3v(double* v){

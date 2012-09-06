@@ -42,11 +42,33 @@ BondHandle (EditorBase::*connect_b)(const AtomHandle&, const AtomHandle&,
 BondHandle (EditorBase::*connect_d)(const AtomHandle&, const AtomHandle&, 
                                     Real, Real, Real,
                                     unsigned char)=&EditorBase::Connect;
+
+ChainHandle (EditorBase::*insert_chain_a)(const String& chain_name)=&EditorBase::InsertChain;
+ChainHandle (EditorBase::*insert_chain_b)(const String& chain_name,
+                                          ChainHandle chain, bool deep)=&EditorBase::InsertChain;
                                     
 ResidueHandle (EditorBase::*append_a)(ChainHandle ch, 
                                       const ResidueKey&)=&EditorBase::AppendResidue;
 ResidueHandle (EditorBase::*append_b)(ChainHandle ch, const ResidueKey&, 
                                       const ResNum&)=&EditorBase::AppendResidue;
+ResidueHandle (EditorBase::*append_c)(ChainHandle ch, ResidueHandle residue,
+                                      bool deep)=&EditorBase::AppendResidue;
+
+AtomHandle (EditorBase::*insert_atom_a)(ResidueHandle residue, const String& name,
+                                        const geom::Vec3& pos, const String& ele,
+                                        Real occupancy, Real b_factor,
+                                        bool is_hetatm)=&EditorBase::InsertAtom;
+AtomHandle (EditorBase::*insert_atom_b)(ResidueHandle residue, AtomHandle atom)=&EditorBase::InsertAtom;
+
+
+AtomHandle (EditorBase::*insert_alt_atom_a)(ResidueHandle residue, const String& name,
+                                            const String& alt_group, const geom::Vec3& pos,
+                                            const String& ele, Real occ,
+                                            Real b_factor)=&EditorBase::InsertAltAtom;
+AtomHandle (EditorBase::*insert_alt_atom_b)(ResidueHandle residue, AtomHandle atom,
+                                            const String& alt_group)=&EditorBase::InsertAltAtom;
+
+
 
 void (ICSEditor::*set_torsion_a)(TorsionHandle, Real, bool)=&ICSEditor::SetTorsionAngle;
 void (ICSEditor::*set_torsion_b)(const AtomHandle&, const AtomHandle&,
@@ -194,19 +216,25 @@ void export_Editors()
   import_array();
 #endif
 
+
   class_<EditorBase>("EditorBase", no_init)
-    .def("InsertChain", &EditorBase::InsertChain)
-    .def("InsertAtom", &EditorBase::InsertAtom,
+    .def("InsertChain", insert_chain_a)
+    .def("InsertChain", insert_chain_b,(arg("chain_name"),arg("chain"), arg("deep")=false))
+    .def("InsertAtom", insert_atom_a,
          (arg("residue"), arg("name"), arg("pos"), arg("element")="", 
           arg("occupancy")=1.0, arg("b_factor")=0.0, arg("is_hetatm")=false))
-    .def("InsertAltAtom", &EditorBase::InsertAltAtom)
+    .def("InsertAtom", insert_atom_b)
+    .def("InsertAltAtom", insert_alt_atom_a)
+    .def("InsertAltAtom", insert_alt_atom_b)
     .def("DeleteResidue", &EditorBase::DeleteResidue)
     .def("DeleteChain", &EditorBase::DeleteChain)
     .def("DeleteAtom", &EditorBase::DeleteAtom)
     .def("InsertResidueBefore", &EditorBase::InsertResidueBefore)
-    .def("InsertResidueAfter", &EditorBase::InsertResidueAfter)    
+    .def("InsertResidueAfter", &EditorBase::InsertResidueAfter)
     .def("AppendResidue", append_a)
-    .def("AppendResidue", append_b)    
+    .def("AppendResidue", append_b)
+    .def("AppendResidue", append_c, (arg("chain"), arg("residue"),
+                                     arg("deep")=false))
     .def("Connect", connect_a)
     .def("Connect", connect_b)    
     .def("Connect", connect_c)
@@ -223,12 +251,19 @@ void export_Editors()
     .def("RenumberAllResidues",&EditorBase::RenumberAllResidues)
   ;
   
+  void (XCSEditor::*apply_transform1)(const geom::Mat4&) = &XCSEditor::ApplyTransform;
+  void (XCSEditor::*apply_transform2)(const geom::Transform&) = &XCSEditor::ApplyTransform;
+  void (XCSEditor::*set_transform1)(const geom::Mat4&) = &XCSEditor::SetTransform;
+  void (XCSEditor::*set_transform2)(const geom::Transform&) = &XCSEditor::SetTransform;
+
   class_<XCSEditor, bases<EditorBase> >("XCSEditor", no_init)
     .def("SetAtomPos", set_t_pos)
     .def("SetAtomTransformedPos", set_t_pos)
     .def("SetAtomOriginalPos", set_o_pos)
-    .def("ApplyTransform", &XCSEditor::ApplyTransform)
-    .def("SetTransform", &XCSEditor::SetTransform)
+    .def("ApplyTransform", apply_transform1)
+    .def("ApplyTransform", apply_transform2)
+    .def("SetTransform", set_transform1)
+    .def("SetTransform", set_transform2)
     .def("UpdateICS", &XCSEditor::UpdateICS)
     .def("__exit__", &XCSEditor::UpdateICS)    
   ;

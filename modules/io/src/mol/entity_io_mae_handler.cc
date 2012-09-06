@@ -296,7 +296,23 @@ void MAEReader::parse_and_add_atom(mol::EntityHandle ent,
 
   if(update_residue) {
     if (!(curr_residue_=curr_chain_.FindResidue(rnum))) {
-      curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+      if(curr_chain_.GetResidueCount()>0) {
+        int loc=curr_chain_.GetResidueCount()-1;
+        for(;loc>=0;--loc) {
+          if(curr_chain_.GetResidueByIndex(loc).GetNumber()<rnum) break;
+        }
+        if(loc<0) {
+          curr_residue_=editor.InsertResidueBefore(curr_chain_,0,rnum,rkey);
+        } else {
+          curr_residue_=editor.InsertResidueAfter(curr_chain_,loc,rnum,rkey);
+        }
+        if(!curr_residue_) {
+          // this should not happen...
+          curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+        }
+      } else {
+        curr_residue_=editor.AppendResidue(curr_chain_, rkey, rnum);
+      }
       assert(curr_residue_.IsValid());
       LOG_TRACE(" new residue " << curr_residue_);
       ++residue_count_;

@@ -1,9 +1,47 @@
 #-------------------------------------------------------------------------------
-# Author: Marco Biasini, Juergen Haas
+# Authors: Marco Biasini, Juergen Haas, Andreas Schenk
 #
 # This file contains a bunch of useful macros to facilitate the build-system
 # configuration for the modules.
 #-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+# map macro
+#
+# this function emulates a map/dict data type
+#-------------------------------------------------------------------------------
+
+function(map COMMAND MAPNAME)
+  set (_KEYS ${MAPNAME}_MAP_KEYS )
+  set (_VALUES ${MAPNAME}_MAP_VALUES)
+  if(${COMMAND} STREQUAL SET)
+    list(REMOVE_AT ARGN 0)
+    list(FIND ${_KEYS} ${ARGV2} _MAP_INDEX)
+    if(_MAP_INDEX EQUAL -1)
+      list(APPEND ${_KEYS} ${ARGV2})
+      set(${_KEYS} ${${_KEYS}} PARENT_SCOPE)
+      set(${_VALUES}_${ARGV2}  ${ARGN} PARENT_SCOPE)
+    else()
+      set(${_VALUES}_${ARGV2}  ${ARGN} PARENT_SCOPE)
+    endif()
+  elseif(${COMMAND} STREQUAL GET)
+    list(FIND ${_KEYS} ${ARGV2} _MAP_INDEX)
+    if(_MAP_INDEX EQUAL -1)
+      MESSAGE(FATAL_ERROR "Unknown key: " ${ARGV2})
+    endif()
+    set(${ARGV3} ${${_VALUES}_${ARGV2}} PARENT_SCOPE)
+  elseif(${COMMAND} STREQUAL KEYS)
+    set(${ARGV2} ${${_KEYS}} PARENT_SCOPE)
+  elseif(${COMMAND} STREQUAL CREATE)
+    set(${_KEYS}  "" PARENT_SCOPE)
+  elseif(${COMMAND} STREQUAL LENGTH)
+    list(LENGTH ${_KEYS} _L)
+    set(${ARGV2} ${_L} PARENT_SCOPE)
+  else()
+    MESSAGE(FATAL_ERROR "Unknown map command:" ${COMMAND})
+  endif()
+endfunction()
+
 
 #-------------------------------------------------------------------------------
 # check_architecture
@@ -89,31 +127,35 @@ macro(copy_if_different FROM_DIR TO_DIR FILES TARGETS TARGET)
   endforeach()
 endmacro()
 
+
 #-------------------------------------------------------------------------------
-# stage_headers
+# parse_file_list
+#
+# this macro splits a list of files with IN_DIR statements and fills them into a map
+# where the key is the directory name
 #-------------------------------------------------------------------------------
-macro(stage_headers HEADERS HEADER_INSTALL_DIR TARGET SUB)
-  set(FROM_DIR "./")
-  set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${SUB}")
-  foreach(_HDR ${HEADERS})
-    list(APPEND _ABS_HEADER_NAMES ${_HDR_SOURCE_DIR}/${_HDR})
+macro(parse_file_list FILELIST FILEMAP)
+  set(_EXPECT_IN_DIR FALSE)
+  map(CREATE ${FILEMAP})
+  set(_CURRENT_LIST)
+  foreach(_ITEM ${FILELIST})
+    if (_ITEM STREQUAL "IN_DIR")
+      set(_EXPECT_IN_DIR TRUE)
+    else()
+      if (_EXPECT_IN_DIR)
+        set(_EXPECT_IN_DIR FALSE)
+        map(SET ${FILEMAP} ${_ITEM} ${_CURRENT_LIST})
+        set(_CURRENT_LIST)
+      else()
+        list(APPEND _CURRENT_LIST "${_ITEM}")
+      endif()
+    endif()
   endforeach()
-  # introduce a helper target to make sure the headers are staged before
-  # building the library
-  string(REPLACE "/" "_" _SUB_NO_SLASH "${SUB}")
-  string(REPLACE "${PREFIX}_" "" _TARGET "${TARGET}")
-  set(_TARGET_NAME ${_TARGET}_${_SUB_NO_SLASH}_headers)
-  set(_SUB ${SUB})
-  if (NOT _SUB)
-    set(_TARGET_NAME ${_TARGET}_headers)
+  if(_CURRENT_LIST)
+    map(SET ${FILEMAP} "." ${_CURRENT_LIST})
   endif()
-  add_custom_target("${_TARGET_NAME}" COMMENT "")
-  set(HEADER_DIR "${HEADER_STAGE_PATH}/${HEADER_INSTALL_DIR}")
-  copy_if_different("" "${HEADER_DIR}"
-                    "${_ABS_HEADER_NAMES}" ""
-                    "${_TARGET_NAME}")
-  add_dependencies(${TARGET} ${_TARGET_NAME})
 endmacro()
+
 
 #-------------------------------------------------------------------------------
 # Synopsis:
@@ -142,17 +184,9 @@ macro(module)
   if (_ARG_HEADER_OUTPUT_DIR)
     set(_HEADER_OUTPUT_DIR ${_ARG_HEADER_OUTPUT_DIR})
   else()
-    if (_ARG_PREFIX)
-      set(_HEADER_OUTPUT_DIR "${_ARG_PREFIX}/${_ARG_NAME}")
-    else()
-      set(_HEADER_OUTPUT_DIR "${_ARG_NAME}")
-    endif()
+    set(_HEADER_OUTPUT_DIR "${_ARG_PREFIX}/${_ARG_NAME}")
   endif()
-  if (_ARG_PREFIX)
-    set(_LIB_NAME ${_ARG_PREFIX}_${_ARG_NAME})
-  else()
-    set(_LIB_NAME ${_ARG_NAME})
-  endif()
+  set(_LIB_NAME ${_ARG_PREFIX}_${_ARG_NAME})
   string(TOUPPER ${_LIB_NAME} _UPPER_LIB_NAME)  
   #-----------------------------------------------------------------------------
   # create library  
@@ -161,17 +195,11 @@ macro(module)
   file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
   file(MAKE_DIRECTORY ${LIBEXEC_STAGE_PATH})
   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
-  if (NOT TARGET make_stage_lib_dir)
-    add_custom_target(make_stage_lib_dir COMMAND ${CMAKE_COMMAND} -E make_directory ${LIB_STAGE_PATH})
-  endif()
-  if (NOT TARGET make_executable_output_dir)
-    add_custom_target(make_executable_output_dir COMMAND ${CMAKE_COMMAND} -E make_directory ${EXECUTABLE_OUTPUT_PATH})
-  endif()
-  if (NOT TARGET make_libexec_dir)
-    add_custom_target(make_libexec_dir COMMAND ${CMAKE_COMMAND} -E make_directory ${LIBEXEC_STAGE_PATH})
-  endif()
-  if (NOT TARGET make_tests_dir)
-    add_custom_target(make_tests_dir COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/tests")
+  if (NOT TARGET create_stage)
+    add_custom_target(create_stage COMMAND ${CMAKE_COMMAND} -E make_directory ${LIB_STAGE_PATH}
+                                   COMMAND ${CMAKE_COMMAND} -E make_directory ${EXECUTABLE_OUTPUT_PATH}
+                                   COMMAND ${CMAKE_COMMAND} -E make_directory ${LIBEXEC_STAGE_PATH}
+                                   COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/tests")
   endif()
   if (WIN32)
     set(_ABS_FILE_PATTERN "^[A-Z]:/")
@@ -199,10 +227,7 @@ macro(module)
                                      EchoString   ${_ARG_NAME}
                                      MODULE_DEPS "${_ARG_DEPENDS_ON}")
     get_target_property(_DEFS ${_LIB_NAME} COMPILE_DEFINITIONS)
-    add_dependencies(${_LIB_NAME} make_stage_lib_dir)
-    add_dependencies(${_LIB_NAME} make_executable_output_dir)
-    add_dependencies(${_LIB_NAME} make_libexec_dir)
-    add_dependencies(${_LIB_NAME} make_tests_dir)
+    add_dependencies(${_LIB_NAME} create_stage)
     set_target_properties(${_LIB_NAME} PROPERTIES
                           COMPILE_DEFINITIONS OST_MODULE_${_UPPER_LIB_NAME})
     set_target_properties(${_LIB_NAME} PROPERTIES
@@ -236,7 +261,6 @@ macro(module)
     if (ENABLE_STATIC)
       target_link_libraries(${_LIB_NAME} ${STATIC_LIBRARIES})
     endif()
-  
   else()
     add_custom_target("${_LIB_NAME}" ALL)
     set_target_properties("${_LIB_NAME}" PROPERTIES HEADER_ONLY 1 
@@ -246,45 +270,31 @@ macro(module)
   # stage headers  
   #-----------------------------------------------------------------------------
   if (_ARG_HEADERS)
-    set(_HEADERS)
-    set(_EXPECT_IN_DIR FALSE)
-    foreach(_HEADER ${_ARG_HEADERS})
-      if (_HEADER STREQUAL "IN_DIR")
-        set(_EXPECT_IN_DIR TRUE)
-      else()
-        if (_EXPECT_IN_DIR)
-          set(_EXPECT_IN_DIR FALSE)
-          set(_DIR ${_HEADER})
-          set(_ABS_HEADER_NAMES)
-          set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
-          foreach(_HDR ${_HEADERS})
-            list(APPEND _ABS_HEADER_NAMES "${_HDR_SOURCE_DIR}/${_HDR}")
-          endforeach()
-          install(FILES ${_ABS_HEADER_NAMES} DESTINATION
-                  "include/${_HEADER_OUTPUT_DIR}/${_DIR}")
-          set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}/${_DIR}")
-          stage_headers("${_HEADERS}" "${_HDR_STAGE_DIR}" 
-                        "${_LIB_NAME}" "${_DIR}")
-          set(_HEADERS)
-        else()
-          list(APPEND _HEADERS "${_HEADER}")
-        endif()
-      endif()
-    endforeach()
-    list(LENGTH _HEADERS _HEADER_LIST_LENGTH)
-    if (_HEADER_LIST_LENGTH GREATER 0)    
-      set(_ABS_HEADER_NAMES)   
-      set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")       
-      foreach(_HDR ${_HEADERS})
-        list(APPEND _ABS_HEADER_NAMES "${_HDR_SOURCE_DIR}/${_HDR}")
-      endforeach()      
-      install(FILES ${_ABS_HEADER_NAMES} DESTINATION
-              "include/${_HEADER_OUTPUT_DIR}")
-      set(_HDR_STAGE_DIR "${_HEADER_OUTPUT_DIR}")
-      stage_headers("${_HEADERS}" "${_HDR_STAGE_DIR}" 
-                    "${_LIB_NAME}" "")
-    endif()
+    stage_and_install_headers("${_ARG_HEADERS}" "${_HEADER_OUTPUT_DIR}" "${_LIB_NAME}")
   endif()
+endmacro()
+
+#-------------------------------------------------------------------------------
+# macro stage_and_install_headers
+#-------------------------------------------------------------------------------
+macro(stage_and_install_headers HEADERLIST HEADER_OUTPUT_DIR TARGET)
+  add_custom_target("${TARGET}_headers" COMMENT "")
+  add_dependencies("${TARGET}" "${TARGET}_headers")
+  add_dependencies("${TARGET}_headers" create_stage)
+  parse_file_list("${HEADERLIST}" _HEADER_MAP)
+  map(KEYS _HEADER_MAP _HEADER_MAP_KEYS)
+  foreach(_DIR ${_HEADER_MAP_KEYS})
+    map(GET _HEADER_MAP ${_DIR} _HEADERS)
+    set(_HDR_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
+    set(_ABS_HEADER_NAMES)
+    foreach(_HDR ${_HEADERS})
+      list(APPEND _ABS_HEADER_NAMES ${_HDR_SOURCE_DIR}/${_HDR})
+    endforeach()
+    set(_HDR_STAGE_DIR "${HEADER_OUTPUT_DIR}/${_DIR}")
+    set(_FULL_HEADER_DIR "${HEADER_STAGE_PATH}/${_HDR_STAGE_DIR}")
+    copy_if_different("" "${_FULL_HEADER_DIR}" "${_ABS_HEADER_NAMES}" "" "${TARGET}_headers")
+    install(FILES ${_ABS_HEADER_NAMES} DESTINATION "include/${_HDR_STAGE_DIR}")
+  endforeach()
 endmacro()
 
 
@@ -422,13 +432,14 @@ endmacro()
 
 #-------------------------------------------------------------------------------
 # Synopsis:
-#   ui_to_python(module out_files [input_file1 ...])
+#   ui_to_python(libname stagedir[input_file1 ...])
 # Description:
 #   Calls pyuic on every input file. The resulting python files are stored in
 #   the variable with name out_files.
 #-------------------------------------------------------------------------------
-macro(ui_to_python module out_files)
+macro(ui_to_python LIBNAME STAGEDIR)
   set(_input_files ${ARGN})
+  add_custom_target("${LIBNAME}_ui" ALL)
   find_program(_PYUIC_EXECUTABLE
     NAMES pyuic4-${PYTHON_VERSION} pyuic4 pyuic
     PATHS  ENV PATH 
@@ -436,17 +447,19 @@ macro(ui_to_python module out_files)
   if(NOT _PYUIC_EXECUTABLE)
     message(FATAL_ERROR "Could not find pyuic command in " ${QT_BINARY_DIR} " for python version " ${PYTHON_VERSION})
   endif(NOT _PYUIC_EXECUTABLE)
-
+  set(out_files)
   foreach(input_file ${_input_files})
     get_filename_component(_out_file ${input_file} NAME_WE)
     get_filename_component(_in_file ${input_file} ABSOLUTE)
-    set(_out_file ${CMAKE_CURRENT_SOURCE_DIR}/${_out_file}_ui.py)
-    add_custom_command(TARGET ${module}
-                       COMMAND ${_PYUIC_EXECUTABLE} -o ${_out_file} ${_in_file}
+    set(_out_file ${_out_file}_ui.py)
+    set(_abs_out_file ${STAGEDIR}/${_out_file})
+    add_custom_command(TARGET ${LIBNAME}_ui
+                       COMMAND ${_PYUIC_EXECUTABLE} -o ${_abs_out_file} ${_in_file}
                        VERBATIM DEPENDS ${input_file}
                        )
-    list(APPEND ${out_files} ${_out_file})
+    list(APPEND ${out_files} ${_abs_out_file})
   endforeach()
+  compile_py_files(_${LIBNAME} ${STAGEDIR} ${out_files})
 endmacro()
 
 #-------------------------------------------------------------------------------
@@ -502,6 +515,7 @@ macro(pymod)
   set(_LIB_NAME ${_ARG_PREFIX}_${_ARG_NAME})
   set(PYMOD_STAGE_DIR "${LIB_STAGE_PATH}/${PYMOD_DIR}")
   file(MAKE_DIRECTORY ${PYMOD_STAGE_DIR})
+  include_directories(${PYTHON_INCLUDE_PATH})
   #-----------------------------------------------------------------------------
   # compile and link C++ wrappers
   #-----------------------------------------------------------------------------
@@ -556,56 +570,35 @@ macro(pymod)
   else()
     add_custom_target("_${_LIB_NAME}" ALL)
   endif()
-  set(_PY_FILES)  
+  #-----------------------------------------------------------------------------
+  # build ui files
+  #-----------------------------------------------------------------------------
   if (_ARG_UI)
-    add_custom_target("${_LIB_NAME}_ui")    
-    ui_to_python("${_LIB_NAME}_ui" _PY_FILES ${_ARG_UI})
+    ui_to_python(${_LIB_NAME} ${PYMOD_STAGE_DIR} ${_ARG_UI})
   endif()  
-  if (_ARG_PY OR _PY_FILES)
-    set(_EXPECT_IN_DIR FALSE)
-    foreach(_PY_FILE ${_ARG_PY})
-      if (_PY_FILE STREQUAL "IN_DIR")
-        set(_EXPECT_IN_DIR TRUE)
-      else()
-        if (_EXPECT_IN_DIR)
-          set(_EXPECT_IN_DIR FALSE)
-          set(_DIR ${_PY_FILE})
-          set(_ABS_PY_FILES)
-          set(_PY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
-          foreach(_PY ${_PY_FILES})
-            list(APPEND _ABS_PY_FILES "${_PY_SOURCE_DIR}/${_PY}")
-          endforeach()
-          install(FILES ${_ABS_PY_FILES} DESTINATION
-                  "${LIB_DIR}/${PYMOD_DIR}/${_DIR}")
-          string(REPLACE "/" "_" _DIR_NO_SLASH "${_DIR}")
-          add_custom_target("${_ARG_NAME}_${_DIR_NO_SLASH}_pymod" ALL)
-          copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}"
-                            "${_ABS_PY_FILES}" "TARGETS"
-                            "${_ARG_NAME}_${_DIR_NO_SLASH}_pymod")
-          compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR}/${_DIR} ${_ABS_PY_FILES})
-          set(_PY_FILES)
-        else()
-          list(APPEND _PY_FILES "${_PY_FILE}")
-        endif()
-      endif()
-    endforeach()
-    if (_PY_FILES)
-      add_custom_target("${_LIB_NAME}_pymod" ALL)
-      if (_ARG_UI)
-        add_dependencies("${_LIB_NAME}_pymod" "${_LIB_NAME}_ui"})
-      endif()
+  #-----------------------------------------------------------------------------
+  # compile python files
+  #-----------------------------------------------------------------------------
+  if (_ARG_PY)
+    parse_file_list("${_ARG_PY}" _PYFILE_MAP)
+    map(KEYS _PYFILE_MAP _PYFILE_MAP_KEYS)
+    foreach(_DIR ${_PYFILE_MAP_KEYS})
+      map(GET _PYFILE_MAP ${_DIR} _PY_FILES)
       set(_ABS_PY_FILES)
-      set(_PY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+      set(_PY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${_DIR}")
       foreach(_PY ${_PY_FILES})
         list(APPEND _ABS_PY_FILES "${_PY_SOURCE_DIR}/${_PY}")
       endforeach()
-      copy_if_different("./" "${PYMOD_STAGE_DIR}" "${_ABS_PY_FILES}" "TARGETS"
-                        "${_LIB_NAME}_pymod")
-      add_dependencies("_${_LIB_NAME}" "${_LIB_NAME}_pymod")
-      compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR} ${_PY_FILES})
-      include_directories(${PYTHON_INCLUDE_PATH})
-      install(FILES ${_PY_FILES} DESTINATION "${LIB_DIR}/${PYMOD_DIR}")
-      endif()
+      install(FILES ${_ABS_PY_FILES} DESTINATION "${LIB_DIR}/${PYMOD_DIR}/${_DIR}")
+      string(REPLACE "/" "_" _DIR_NO_SLASH "${_DIR}")
+      set(_PYMOD_TARGET "${_LIB_NAME}_${_DIR_NO_SLASH}_pymod")
+      string(REPLACE "_." "" _PYMOD_TARGET "${_PYMOD_TARGET}")
+      add_custom_target(${_PYMOD_TARGET} ALL)
+      copy_if_different("./" "${PYMOD_STAGE_DIR}/${_DIR}"
+                        "${_ABS_PY_FILES}" "TARGETS"
+                        "${_PYMOD_TARGET}")
+      compile_py_files(_${_LIB_NAME} ${PYMOD_STAGE_DIR}/${_DIR} ${_ABS_PY_FILES})
+    endforeach()
   endif()  
   get_target_property(_MOD_DEPS "${_PARENT_NAME}" MODULE_DEPS)
   if(_MOD_DEPS)

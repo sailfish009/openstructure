@@ -90,6 +90,9 @@ class BinaryColExpr:
   def __mul__(self, rhs):
     return BinaryColExpr(operator.mul, self, rhs)
 
+  def __div__(self, rhs):
+    return BinaryColExpr(operator.div, self, rhs)
+
 class TableCol:
   def __init__(self, table, col):
     self._table=table
@@ -119,6 +122,7 @@ class TableCol:
 
   def __mul__(self, rhs):
     return BinaryColExpr(operator.mul, self, rhs)
+
   def __div__(self, rhs):
     return BinaryColExpr(operator.div, self, rhs)
 
@@ -271,6 +275,19 @@ class Table(object):
     '''
     return self.name
 
+  def RenameCol(self, old_name, new_name):
+    """
+    Rename column *old_name* to *new_name*.
+
+    :param old_name: Name of the old column
+    :param new_name: Name of the new column
+    :raises: :exc:`ValueError` when *old_name* is not a valid column
+    """
+    if old_name==new_name:
+      return
+    self.AddCol(new_name, self.col_types[self.GetColIndex(old_name)],
+                self[old_name])
+    self.RemoveCol(old_name)
   def _Coerce(self, value, ty):
     '''
     Try to convert values (e.g. from :class:`str` type) to the specified type
@@ -314,6 +331,22 @@ class Table(object):
     '''
     return self.col_names
   
+  def SearchColNames(self, regex):
+    '''
+    Returns a list of column names matching the regex
+
+    :param regex: regex pattern
+    :type regex: :class:`str`
+
+    :returns: :class:`list` of column names (:class:`str`)
+    '''
+    matching_names = []
+    for name in self.col_names:
+      matches = re.search(regex, name)
+      if matches:
+        matching_names.append(name)
+    return matching_names
+
   def HasCol(self, col):
     '''
     Checks if the column with a given name is present in the table.
@@ -395,6 +428,31 @@ class Table(object):
   def __str__(self):
     return self.ToString()
   
+  def Stats(self, col):
+     idx  = self.GetColIndex(col)
+     text ='''
+Statistics for column %(col)s
+
+  Number of Rows         : %(num)d
+  Number of Rows Not None: %(num_non_null)d 
+  Mean                   : %(mean)f
+  Median                 : %(median)f
+  Standard Deviation     : %(stddev)f
+  Min                    : %(min)f
+  Max                    : %(max)f
+'''
+     data = {
+       'col' : col,
+       'num' : len(self.rows),
+       'num_non_null' : self.Count(col),
+       'median' : self.Median(col),
+       'mean' : self.Mean(col),
+       'stddev' : self.StdDev(col),
+       'min' : self.Min(col),
+       'max' : self.Max(col),
+     }
+     return text % data
+
   def _AddRowsFromDict(self, d, overwrite=None):
     '''
     Add one or more rows from a :class:`dictionary <dict>`.
@@ -453,6 +511,27 @@ class Table(object):
       if not overwrite or not added:
         self.rows.append(new_row)
       
+  def PairedTTest(self, col_a, col_b):
+    """
+    Two-sided test for the null-hypothesis that two related samples 
+    have the same average (expected values)
+    
+    :param col_a: First column
+    :param col_b: Second column
+
+    :returns: P-value  between 0 and 1 that the two columns have the 
+       same average. The smaller the value, the less related the two
+       columns are.
+    """
+    from scipy.stats import ttest_rel
+    xs = []
+    ys = []
+    for x, y in self.Zip(col_a, col_b):
+      if x!=None and y!=None:
+        xs.append(x)
+        ys.append(y)
+    result = ttest_rel(xs, ys)
+    return result[1]
 
   def AddRow(self, data, overwrite=None):
     """
@@ -629,6 +708,10 @@ class Table(object):
     As a special case, if there are no previous rows, and data is not 
     None, rows are added for every item in data.
     """
+
+    if col_name in self.col_names:
+      raise ValueError('Column with name %s already exists'%col_name)
+
     col_type = self._ParseColTypes(col_type, exp_num=1)[0]
     self.col_names.append(col_name)
     self.col_types.append(col_type)
@@ -638,10 +721,15 @@ class Table(object):
         for row in self.rows:
           row.append(data)
       else:
+        if hasattr(data, '__len__') and len(data)!=len(self.rows):
+          self.col_names.pop()
+          self.col_types.pop()
+          raise ValueError('Length of data (%i) must correspond to number of '%len(data) +\
+                           'existing rows (%i)'%len(self.rows))
         for row, d in zip(self.rows, data):
           row.append(d)
 
-    elif data!=None:
+    elif data!=None and len(self.col_names)==1:
       if IsScalar(data):
         self.AddRow({col_name : data})
       else:
@@ -668,7 +756,7 @@ class Table(object):
     args are unary callables returning true if the row should be included in the
     result and false if not.
     """
-    filt_tab=Table(self.col_names, self.col_types)
+    filt_tab=Table(list(self.col_names), list(self.col_types))
     for row in self.rows:
       matches=True
       for func in args:
@@ -897,8 +985,9 @@ class Table(object):
   def Plot(self, x, y=None, z=None, style='.', x_title=None, y_title=None,
            z_title=None, x_range=None, y_range=None, z_range=None,
            color=None, plot_if=None, legend=None,
-           num_z_levels=10, diag_line=False, labels=None, max_num_labels=None,
-           title=None, clear=True, save=False, **kwargs):
+           num_z_levels=10, z_contour=True, z_interpol='nn', diag_line=False,
+           labels=None, max_num_labels=None, title=None, clear=True, save=False,
+           **kwargs):
     """
     Function to plot values from your table in 1, 2 or 3 dimensions using
     `Matplotlib <http://matplotlib.sourceforge.net>`__
@@ -971,6 +1060,13 @@ class Table(object):
     :param save: filename for saving plot
     :type save: :class:`str`
 
+    :param z_contour: draw contour lines
+    :type z_contour: :class:`bool`
+
+    :param z_interpol: interpolation method for 3-dimensional plot (one of 'nn',
+                       'linear')
+    :type z_interpol: :class:`str`
+
     :param \*\*kwargs: additional arguments passed to matplotlib
     
     :returns: the ``matplotlib.pyplot`` module 
@@ -1009,12 +1105,12 @@ class Table(object):
       if clear:
         plt.figure(figsize=[8, 6])
       
-      if x_title:
+      if x_title!=None:
         nice_x=x_title
       else:
         nice_x=MakeTitle(x)
       
-      if y_title:
+      if y_title!=None:
         nice_y=y_title
       else:
         if y:
@@ -1022,7 +1118,7 @@ class Table(object):
         else:
           nice_y=None
       
-      if z_title:
+      if z_title!=None:
         nice_z = z_title
       else:
         if z:
@@ -1063,11 +1159,13 @@ class Table(object):
           levels.append(l)
           l += z_spacing
   
-        xi = np.linspace(min(xs)-0.1,max(xs)+0.1,len(xs)*10)
-        yi = np.linspace(min(ys)-0.1,max(ys)+0.1,len(ys)*10)
-        zi = mlab.griddata(xs, ys, zs, xi, yi)
+        xi = np.linspace(min(xs),max(xs),len(xs)*10)
+        yi = np.linspace(min(ys),max(ys),len(ys)*10)
+        zi = mlab.griddata(xs, ys, zs, xi, yi, interp=z_interpol)
   
-        plt.contour(xi,yi,zi,levels,linewidths=0.5,colors='k')
+        if z_contour:
+          plt.contour(xi,yi,zi,levels,linewidths=0.5,colors='k')
+
         plt.contourf(xi,yi,zi,levels,cmap=plt.cm.jet)
         plt.colorbar(ticks=levels)
             
@@ -1269,7 +1367,208 @@ class Table(object):
         max_val = self.rows[i][idx]
         max_idx = i
     return max_val, max_idx
+
+  def PlotBar(self, col, xlabels=None, ylabel=None, title=None, 
+              color=None, yerr=None, width=0.8, bottom=0, 
+              legend=True, save=False):
+    
+    try:
+      import numpy as np
+      import matplotlib.pyplot as plt
+    except:
+      raise ImportError('PlotBar relies on numpy and matplotlib, but I could not import it!')
+      
+    if len(col)>7:
+      raise ValueError('More than seven bars at one position looks rather meaningless...')
+      
+    standard_colors=['b','g','y','c','m','r','k']
+    data=[]
   
+    if not isinstance(col,list):
+      col=[col]
+    if not isinstance(yerr,list):
+      yerr=[yerr]*len(self.rows)
+      
+    if not color:
+      color=standard_colors[:len(col)]
+      
+    for c in col:
+      cid=self.GetColIndex(c)
+      temp=list()
+      for r in self.rows:
+        temp.append(r[cid])
+      data.append(temp)
+      
+    if len(yerr)!=len(data[0]):
+      raise RuntimeError('Number of elements in yerr must be consistent with number of elements in each column!')
+      
+    ind=np.arange(len(data[0]))
+    single_bar_width=float(width)/len(data)
+    
+    fig=plt.figure()
+    
+    ax=fig.add_subplot(111)
+    
+    legend_data=[]
+    
+    for i in range(len(data)):
+      legend_data.append(ax.bar(ind+i*single_bar_width,data[i],single_bar_width,color=color[i],yerr=yerr[i])[0])
+      
+    if title!=None:
+      nice_title=x_title
+    else:
+      nice_title="coolest barplot on earth"
+    ax.set_title(nice_title, size='x-large', fontweight='bold')  
+    
+    if ylabel!=None:
+      nice_y=ylabel
+    else:
+      nice_y="score" 
+    ax.set_ylabel(nice_y)
+    
+    if xlabels:
+      if len(data[0])!=len(xlabels):
+        raise ValueError('Number of xlabels is not consistent with number of rows!')
+    else:
+      xlabels=list()
+      for i in range(1,len(data[0])+1):
+        xlabels.append('Row '+str(i))
+      
+    ax.set_xticks(ind+width*0.5)
+    ax.set_xticklabels(xlabels)
+      
+    if legend:
+      ax.legend(legend_data, col)   
+      
+    if save:
+      plt.savefig(save)
+    
+    return plt
+      
+  def PlotHexbin(self, x, y, title=None, x_title=None, y_title=None, x_range=None, y_range=None, binning='log',
+                 colormap='jet', show_scalebar=False, scalebar_label=None, clear=True, save=False, show=False):
+
+    """
+    Create a heatplot of the data in col x vs the data in col y using matplotlib
+
+    :param x: column name with x data
+    :type x: :class:`str`
+
+    :param y: column name with y data
+    :type y: :class:`str`
+
+    :param title: title of the plot, will be generated automatically if set to None
+    :type title: :class:`str`
+
+    :param x_title: label of x-axis, will be generated automatically if set to None
+    :type title: :class:`str`
+
+    :param y_title: label of y-axis, will be generated automatically if set to None
+    :type title: :class:`str`
+
+    :param x_range: start and end value for first dimension (e.g. [start_x, end_x])
+    :type x_range: :class:`list` of length two
+
+    :param y_range: start and end value for second dimension (e.g. [start_y, end_y])
+    :type y_range: :class:`list` of length two
+
+    :param binning: type of binning. If set to None, the value of a hexbin will
+                    correspond to the number of datapoints falling into it. If
+                    set to 'log', the value will be the log with base 10 of the above
+                    value (log(i+1)). If an integer is provided, the number of a 
+                    hexbin is equal the number of datapoints falling into it divided 
+                    by the integer. If a list of values is provided, these values
+                    will be the lower bounds of the bins.
+    
+    :param colormap: colormap, that will be used. Value can be every colormap defined
+                     in matplotlib or an own defined colormap. You can either pass a
+                     string with the name of the matplotlib colormap or a colormap
+                     object.
+
+    :param show_scalebar: If set to True, a scalebar according to the chosen colormap is shown
+    :type show_scalebar: :class:`bool`
+
+    :param scalebar_label: Label of the scalebar
+    :type scalebar_label: :class:`str`
+
+    :param clear: clear old data from plot
+    :type clear: :class:`bool`
+
+    :param save: filename for saving plot
+    :type save: :class:`str`
+
+    :param show: directly show plot
+    :type show: :class:`bool`
+    
+    """
+
+    try:
+      import matplotlib.pyplot as plt
+      import matplotlib.cm as cm
+    except:
+      raise ImportError('PlotHexbin relies on matplotlib, but I could not import it')
+
+    idx=self.GetColIndex(x)
+    idy=self.GetColIndex(y)
+    xdata=[]
+    ydata=[]
+
+    for r in self.rows:
+      if r[idx]!=None and r[idy]!=None:
+        xdata.append(r[idx])
+        ydata.append(r[idy])
+
+    if clear:
+      plt.clf()
+      
+    if x_title!=None:
+      nice_x=x_title
+    else:
+      nice_x=MakeTitle(x)
+      
+    if y_title!=None:
+      nice_y=y_title
+    else:
+      nice_y=MakeTitle(y)
+
+    if title==None:
+      title = '%s vs. %s' % (nice_x, nice_y)
+  
+    if IsStringLike(colormap):
+      colormap=getattr(cm, colormap)
+
+    if x_range and (IsScalar(x_range) or len(x_range)!=2):
+      raise ValueError('parameter x_range must contain exactly two elements')
+    if y_range and (IsScalar(y_range) or len(y_range)!=2):
+      raise ValueError('parameter y_range must contain exactly two elements')
+    if x_range:
+      plt.xlim((x_range[0], x_range[1]))
+    if y_range:
+      plt.ylim(y_range[0], y_range[1])
+    extent = None
+    if x_range and y_range:
+      extent = [x_range[0], x_range[1], y_range[0], y_range[1]]
+    plt.hexbin(xdata, ydata, bins=binning, cmap=colormap, extent=extent)
+
+    plt.title(title, size='x-large', fontweight='bold',
+              verticalalignment='bottom')
+
+    plt.xlabel(nice_x)
+    plt.ylabel(nice_y)
+        
+    if show_scalebar:
+      cb=plt.colorbar()
+      if scalebar_label:
+        cb.set_label(scalebar_label)
+
+    if save:
+      plt.savefig(save)
+
+    if show:
+      plt.show()
+
+    return plt
+        
   def MaxRow(self, col):
     """
     Returns the row containing the cell with the maximal value in col. If 
@@ -1278,9 +1577,12 @@ class Table(object):
 
     :param col: column name
     :type col: :class:`str`
+
+    :returns: row with maximal col value or None if the table is empty
     """
     val, idx = self._Max(col)
-    return self.rows[idx]
+    if idx!=None:
+      return self.rows[idx]
   
   def Max(self, col):
     """
@@ -1342,9 +1644,12 @@ class Table(object):
 
     :param col: column name
     :type col: :class:`str`
+
+    :returns: row with minimal col value or None if the table is empty
     """
     val, idx = self._Min(col)
-    return self.rows[idx]
+    if idx!=None:
+      return self.rows[idx]
   
   def MinIdx(self, col):
     """
@@ -1480,6 +1785,45 @@ class Table(object):
     
     self.AddCol(mean_col_name, 'f', mean_rows)
     
+  def Percentiles(self, col, nths):
+    """
+    returns the percentiles of column *col* given in *nths*.
+
+    The percentils are calculated as 
+    
+    .. code-block:: python
+
+      values[min(len(values), int(round(len(values)*p/100+0.5)-1))]
+
+    where values are the sorted values of *col* not equal to none
+    :param: nths: list of percentiles to be calculated. Each percentil is a number
+        between 0 and 100.
+
+    :raises: :class:`TypeError` if column type is ``string``
+    :returns: List of percentils in the same order as given in *nths*
+    """
+    idx = self.GetColIndex(col)
+    col_type = self.col_types[idx]
+    if col_type!='int' and col_type!='float' and col_type!='bool':
+      raise TypeError("Median can only be used on numeric column types")
+    
+    for nth in nths:
+      if nth < 0 or nth > 100:
+        raise ValueError("percentiles must be between 0 and 100")
+    vals=[]
+    for v in self[col]:
+      if v!=None:
+        vals.append(v)
+    vals=sorted(vals)
+    if len(vals)==0:
+      return [None]*len(nths)
+    percentiles=[]
+    
+    for nth in nths:
+      p=vals[min(len(vals)-1, int(round(len(vals)*nth/100.0+0.5)-1))]
+      percentiles.append(p)
+    return percentiles
+
   def Median(self, col):
     """
     Returns the median of the given column. Cells with None are ignored. Returns 
@@ -1625,6 +1969,8 @@ class Table(object):
     ost             ost-specific format (human readable)
     csv             comma separated values (human readable)
     pickle          pickled byte stream (binary)
+    html            HTML table
+    context         ConTeXt table
     =============   =======================================
 
     :param stream_or_filename: filename or stream for writing output
@@ -1642,12 +1988,89 @@ class Table(object):
       return self._SaveCSV(stream_or_filename, sep=sep)
     if format=='pickle':
       return self._SavePickle(stream_or_filename)
+    if format=='html':
+      return self._SaveHTML(stream_or_filename)
+    if format=='context':
+      return self._SaveContext(stream_or_filename)
     raise ValueError('unknown format "%s"' % format)
 
   def _SavePickle(self, stream):
     if not hasattr(stream, 'write'):
       stream=open(stream, 'wb')
     cPickle.dump(self, stream, cPickle.HIGHEST_PROTOCOL)
+
+  def _SaveHTML(self, stream_or_filename):
+    def _escape(s):
+      return s.replace('&', '&amp;').replace('>', '&gt;').replace('<', '&lt;')
+
+    file_opened = False
+    if not hasattr(stream_or_filename, 'write'):
+      stream = open(stream_or_filename, 'w')
+      file_opened = True
+    else:
+      stream = stream_or_filename
+    stream.write('<table>') 
+    stream.write('<tr>')
+    for col_name in self.col_names:
+      stream.write('<th>%s</th>' % _escape(col_name)) 
+    stream.write('</tr>')
+    for row in self.rows:
+      stream.write('<tr>')
+      for i, col in enumerate(row):
+        val = ''
+        if col != None:
+           if self.col_types[i] == 'float':
+             val = '%.3f' % col
+           elif self.col_types[i] == 'int':
+             val = '%d' % col
+           elif self.col_types[i] == 'bool':
+             val = col and 'true' or 'false'
+           else:
+             val  = str(col)
+        stream.write('<td>%s</td>' % _escape(val))
+      stream.write('</tr>')
+    stream.write('</table>')
+    if file_opened:
+      stream.close()
+  def _SaveContext(self, stream_or_filename):
+    file_opened = False
+    if not hasattr(stream_or_filename, 'write'):
+      stream = open(stream_or_filename, 'w')
+      file_opened = True
+    else:
+      stream = stream_or_filename
+    stream.write('\\starttable[') 
+    for col_type in self.col_types:
+      if col_type =='string':
+        stream.write('l|')
+      elif col_type=='int':
+        stream.write('r|')
+      elif col_type =='float':
+        stream.write('i3r|')
+      else:
+        stream.write('l|')
+    stream.write(']\n\\HL\n')
+    for col_name in self.col_names:
+      stream.write('\\NC \\bf %s' % col_name) 
+    stream.write(' \\AR\\HL\n')
+    for row in self.rows:
+      for i, col in enumerate(row):
+        val = '---'
+        if col != None:
+           if self.col_types[i] == 'float':
+             val = '%.3f' % col
+           elif self.col_types[i] == 'int':
+             val = '%d' % col
+           elif self.col_types[i] == 'bool':
+             val = col and 'true' or 'false'
+           else:
+             val  = str(col)
+        stream.write('\\NC %s' % val)
+      stream.write(' \\AR\n')
+    stream.write('\\HL\n')
+    stream.write('\\stoptable')
+    if file_opened:
+      stream.close()
 
   def _SaveCSV(self, stream, sep):
     if not hasattr(stream, 'write'):
@@ -1712,7 +2135,7 @@ class Table(object):
     
 
 
-  def GaussianSmooth(self, col, std=1.0, na_value=0.0):
+  def GaussianSmooth(self, col, std=1.0, na_value=0.0, padding='reflect', c=0.0):
 
     '''
     In place gaussian smooth of a column in the table with a given standard deviation.
@@ -1727,13 +2150,22 @@ class Table(object):
     :param na_value: all na (None) values of the speciefied column are set to na_value before smoothing
     :type na_value: `scalar`
 
+    :param padding: allows to handle padding behaviour see scipy ndimage.gaussian_filter1d documentation for more information. standard is reflect
+    :type padding: :class:`str`
+
+    :param c: constant value used for padding if padding mode is constant
+    :type c: `scalar`
+
+
+
     :warning: The function depends on *scipy*
     ''' 
 
     try:
       from scipy import ndimage
+      import numpy as np
     except ImportError:
-      LogError("Function needs scipy.ndimage, but I could no import it")
+      LogError("I need scipy.ndimage and numpy, but could not import it")
       raise
       
     idx = self.GetColIndex(col)
@@ -1748,7 +2180,8 @@ class Table(object):
       else:
         vals.append(na_value)
 
-    smoothed_values_ndarray=ndimage.gaussian_filter1d(vals,std)
+    
+    smoothed_values_ndarray=ndimage.gaussian_filter1d(vals,std, mode=padding, cval=c)
 
     result=[]
 
@@ -1905,6 +2338,8 @@ class Table(object):
     where a '-' values means smallest values first and therefore, the smaller
     the value, the better.
     
+    :warning: If either the value of *class_col* or *score_col* is *None*, the
+              data in this row is ignored.
     '''
     
     ALLOWED_DIR = ['+','-']
@@ -1927,17 +2362,35 @@ class Table(object):
     x = [0]
     y = [0]
     enr = 0
-    for i,row in enumerate(self.rows):
+    old_score_val = None
+    i = 0
+
+    for row in self.rows:
       class_val = row[class_idx]
+      score_val = row[score_idx]
+      if class_val==None or score_val==None:
+        continue
       if class_val!=None:
+        if old_score_val==None:
+          old_score_val = score_val
+        if score_val!=old_score_val:
+          x.append(i)
+          y.append(enr)
+          old_score_val = score_val
+        i+=1
         if class_type=='bool':
           if class_val==True:
             enr += 1
         else:
           if (class_dir=='-' and class_val<=class_cutoff) or (class_dir=='+' and class_val>=class_cutoff):
             enr += 1
-      x.append(i+1)
-      y.append(enr)
+    x.append(i)
+    y.append(enr)
+
+    # if no false positives or false negatives values are found return None
+    if x[-1]==0 or y[-1]==0:
+      return None
+
     x = [float(v)/x[-1] for v in x]
     y = [float(v)/y[-1] for v in y]
     return x,y
@@ -1956,10 +2409,12 @@ class Table(object):
     try:
       import numpy as np
       
-      enrx, enry = self.ComputeEnrichment(score_col, class_col, score_dir,
+      enr = self.ComputeEnrichment(score_col, class_col, score_dir,
                                           class_dir, class_cutoff)
       
-      return np.trapz(enry, enrx)
+      if enr==None:
+        return None
+      return np.trapz(enr[1], enr[0])
     except ImportError:
       LogError("Function needs numpy, but I could not import it.")
       raise
@@ -1990,6 +2445,9 @@ class Table(object):
     is of type bool) or evaluated to True (if column is of type int or float
     (depending on *class_dir* and *class_cutoff*))) the ROC is not defined and
     the function will return *None*.
+
+    :warning: If either the value of *class_col* or *score_col* is *None*, the
+              data in this row is ignored.
     '''
 
     ALLOWED_DIR = ['+','-']
@@ -2018,6 +2476,8 @@ class Table(object):
     for i,row in enumerate(self.rows):
       class_val = row[class_idx]
       score_val = row[score_idx]
+      if class_val==None or score_val==None:
+        continue
       if class_val!=None:
         if old_score_val==None:
           old_score_val = score_val
@@ -2374,4 +2834,3 @@ def Merge(table1, table2, by, only_matching=False):
       new_tab.AddRow(row)
   return new_tab
 
-  

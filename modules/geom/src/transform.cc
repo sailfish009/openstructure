@@ -18,7 +18,6 @@
 //------------------------------------------------------------------------------
 
 #include <ost/config.hh>
-#include <ost/log.hh>
 
 #include "transform.hh"
 #include "vecmat3_op.hh"
@@ -40,6 +39,13 @@ void Transform::SetMatrix(const Mat4& m)
 {
   tm_=m;
   ttm_ = Transpose(tm_);
+  try {
+    itm_ = Invert(tm_);
+  } catch (GeomException& e) {
+    std::cerr << "caught GeomException in Transform::SetMatrix: " << e.what() << std::endl;
+    std::cerr << m << std::endl;
+    itm_=geom::Mat4();
+  }
   update_components();
 }
 
@@ -151,6 +157,18 @@ Vec4 Transform::Apply(const Vec4& v) const
   return nrvo;
 }
 
+Vec3 Transform::ApplyInverse(const Vec3& v) const
+{
+  Vec3 nrvo(itm_*Vec4(v));
+  return nrvo;
+}
+
+Vec4 Transform::ApplyInverse(const Vec4& v) const
+{
+  Vec4 nrvo=itm_*v;
+  return nrvo;
+}
+
 geom::AlignedCuboid Transform::Apply(const geom::AlignedCuboid& c) const
 {
   geom::Vec3 cmin=c.GetMin();
@@ -166,6 +184,13 @@ geom::AlignedCuboid Transform::Apply(const geom::AlignedCuboid& c) const
   geom::Vec3 minc = Min(t1,Min(t2,Min(t3,Min(t4,Min(t5,Min(t6,Min(t7,t8)))))));
   geom::Vec3 maxc = Max(t1,Max(t2,Max(t3,Max(t4,Max(t5,Max(t6,Max(t7,t8)))))));
   return geom::AlignedCuboid(minc,maxc);
+}
+
+Transform Transform::Apply(const Transform& tf) const
+{
+  Transform nrvo(*this);
+  nrvo.SetMatrix(tf.GetMatrix()*nrvo.GetMatrix());
+  return nrvo;
 }
 
 /*
@@ -189,14 +214,14 @@ void Transform::update_tm()
 {
   tm_ =
     Mat4(1.0,0.0,0.0,trans_[0],
-               0.0,1.0,0.0,trans_[1],
-               0.0,0.0,1.0,trans_[2],
-               0.0,0.0,0.0,1.0) *
+         0.0,1.0,0.0,trans_[1],
+         0.0,0.0,1.0,trans_[2],
+         0.0,0.0,0.0,1.0) *
     Mat4(rot_) *
     Mat4(1.0,0.0,0.0,-cen_[0],
-               0.0,1.0,0.0,-cen_[1],
-               0.0,0.0,1.0,-cen_[2],
-               0.0,0.0,0.0,1.0);
+         0.0,1.0,0.0,-cen_[1],
+         0.0,0.0,1.0,-cen_[2],
+         0.0,0.0,0.0,1.0);
   ttm_ = Transpose(tm_);
   // TODO: calculate from rot, cen and trans
   try {
@@ -209,11 +234,11 @@ void Transform::update_tm()
 
 void Transform::update_components()
 {
+  // there is no way to extract the centering component
+  // so we just get a rotation and translation
   rot_ = tm_.ExtractRotation();
-  cen_ = tm_.ExtractTranslation();
-  trans_[0] = tm_(3,0);
-  trans_[1] = tm_(3,1);
-  trans_[2] = tm_(3,2);
+  trans_ = tm_.ExtractTranslation();
+  cen_ = Vec3(0,0,0);
 }
 
 } // ns

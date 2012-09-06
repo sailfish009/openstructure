@@ -16,42 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-
 /*
-  Author: Stefan Scheuber
- */
+  Author: Valerio Mariani
+*/
 
-
-#include <QtGui>
-
-#include "tick_painter.hh"
-
-namespace ost { namespace gui {
-
-TickPainter::TickPainter(QObject* parent)
-    : Painter(parent), pen_(QPen(Qt::darkGray))
-{}
-
-void TickPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, 
-                        const QModelIndex& index){
-  painter->save();
-  painter->setPen(pen_);
-  QVariant value = index.data(Qt::DisplayRole);
-  if (value.isValid()){
-    if(index.column()%10==0 || index.column()%10==1){
-      QRect rect = option.rect;
-      QString text = value.toString();
-      if(index.column()%10==0){
-        rect.setRight(rect.right()+rect.width());
-      }
-      else{
-        rect.setLeft(rect.left()-rect.width());
-      }
-      painter->setFont(index.data(Qt::FontRole).value<QFont>());
-      painter->drawText(rect, Qt::AlignLeft|Qt::AlignBottom, text);
-    }
-  }
-  painter->restore();
-}
-
-}}

@@ -296,7 +296,7 @@ public:
   
   virtual bool VisitResidue(const ResidueHandle& res)
   {
-    res_=chain_->AppendResidue(res.Impl());
+    res_=chain_->AppendResidue(res.Impl(),false);
     return true;
   }
   

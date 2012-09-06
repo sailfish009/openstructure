@@ -37,6 +37,7 @@ extern void export_primlist();
 extern void export_primitives();
 extern void export_color();
 extern void export_gradient();
+extern void export_bitmap();
 extern void export_Exporter();
 
 #if OST_IMG_ENABLED
@@ -73,6 +74,7 @@ BOOST_PYTHON_MODULE(_ost_gfx)
   export_primlist();
   export_color();
   export_gradient();
+  export_bitmap();
 
   enum_<RenderMode::Type>("RenderMode")
     .value("SIMPLE",RenderMode::SIMPLE)

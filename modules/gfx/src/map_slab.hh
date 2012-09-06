@@ -62,7 +62,7 @@ public:
   MapSlab(const String& name, const img::MapHandle& mh, 
           const geom::Plane& p);
 
-  virtual geom::AlignedCuboid GetBoundingBox() const;
+  virtual geom::AlignedCuboid GetBoundingBox(bool use_tf=true) const;
 
   virtual geom::Vec3 GetCenter() const;
   virtual void CustomRenderGL(RenderPass pass);

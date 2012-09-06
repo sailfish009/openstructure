@@ -16,42 +16,29 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-
 /*
-  Author: Stefan Scheuber
- */
+  Author: Valerio Mariani
+*/
 
+#ifndef OST_BOOST_FILESYSTEM_HELPER_HH
+#define OST_BOOST_FILESYSTEM_HELPER_HH
 
-#include <QtGui>
+#include <boost/filesystem/path.hpp>
 
-#include "tick_painter.hh"
+namespace {
 
-namespace ost { namespace gui {
-
-TickPainter::TickPainter(QObject* parent)
-    : Painter(parent), pen_(QPen(Qt::darkGray))
-{}
-
-void TickPainter::Paint(QPainter* painter, const QStyleOptionViewItem& option, 
-                        const QModelIndex& index){
-  painter->save();
-  painter->setPen(pen_);
-  QVariant value = index.data(Qt::DisplayRole);
-  if (value.isValid()){
-    if(index.column()%10==0 || index.column()%10==1){
-      QRect rect = option.rect;
-      QString text = value.toString();
-      if(index.column()%10==0){
-        rect.setRight(rect.right()+rect.width());
-      }
-      else{
-        rect.setLeft(rect.left()-rect.width());
-      }
-      painter->setFont(index.data(Qt::FontRole).value<QFont>());
-      painter->drawText(rect, Qt::AlignLeft|Qt::AlignBottom, text);
-    }
-  }
-  painter->restore();
+inline
+String BFPathToString(const boost::filesystem::path& path)
+{
+#if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
+  return path.string();
+#else
+  return path.file_string();
+#endif
 }
 
-}}
+}
+
+
+
+#endif // OST_BOOST_FILESYSTEM_HELPER

@@ -23,6 +23,8 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
+#include <ost/base.hh>
+#include <ost/boost_filesystem_helper.hh>
 #include <ost/mol/alg/local_dist_diff_test.hh>
 #include <ost/mol/alg/filter_clashes.hh>
 #include <ost/io/mol/pdb_reader.hh>
@@ -286,11 +288,7 @@ int main (int argc, char **argv)
 
     boost::filesystem::path pathstring(files[i]);
 
-    #if BOOST_FILESYSTEM_VERSION==3 || BOOST_VERSION<103400
-    String filestring=pathstring.string();
-    #else
-    String filestring=pathstring.file_string();
-    #endif      
+    String filestring=BFPathToString(pathstring);
     std::cout << "File: " << files[i] << std::endl; 
     std::pair<int,int> cov = compute_coverage(v,glob_dist_list);
     std::cout << "Coverage: " << (float(cov.first)/float(cov.second)) << " (" << cov.first << " out of " << cov.second << " residues)" << std::endl;
