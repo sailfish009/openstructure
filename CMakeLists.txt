@@ -291,9 +291,12 @@ endif()
 
 add_subdirectory(modules)
 add_subdirectory(scripts)
-add_subdirectory(deployment)
-set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
 add_subdirectory(tools)
+# deployment has to come last, to ensure that all install commands are run before deployment
+# magic is done
+add_subdirectory(deployment)
+
+set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
                              "${FILES_TO_BE_REMOVED}")
 
