@@ -140,7 +140,9 @@ Scene::Scene():
   update_bg_(false),
   bg_grad_(),
   bg_bm_(),
-  bg_tex_()
+  bg_tex_(),
+  export_aspect_(1.0),
+  show_export_aspect_(false)
 {
   transform_.SetTrans(Vec3(0,0,-100));
 }
@@ -1988,6 +1990,73 @@ void Scene::prep_blur()
   glFlush();
 }
 
+namespace {
+  class ViewportRenderer {
+    unsigned int vp_width_,vp_height_;
+    public:
+      ViewportRenderer(unsigned int vpw, unsigned int vph):
+      vp_width_(vpw), vp_height_(vph) 
+      { 
+#if OST_SHADER_SUPPORT_ENABLED
+        Shader::Instance().PushProgram();
+        Shader::Instance().Activate("");
+#endif
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+        glPushClientAttrib(GL_ALL_ATTRIB_BITS);
+
+        glDisable(GL_DEPTH_TEST);
+        glDisable(GL_LIGHTING);
+        glDisable(GL_COLOR_MATERIAL);
+        glDisable(GL_FOG);
+        glDisable(GL_CULL_FACE);
+        glDisable(GL_BLEND);
+        glDisable(GL_LINE_SMOOTH);
+        glDisable(GL_POINT_SMOOTH);
+#if defined(OST_GL_VERSION_2_0)
+        glDisable(GL_MULTISAMPLE);
+#endif
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        glOrtho(0,vp_width_,0,vp_height_,-1,1);
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadIdentity();
+      }
+
+      void DrawTex(GLuint tex_id) {
+        glEnable(GL_TEXTURE_2D);
+#if OST_SHADER_SUPPORT_ENABLED
+        if(OST_GL_VERSION_2_0) {
+          glActiveTexture(GL_TEXTURE0);
+        }
+#endif
+        glBindTexture(GL_TEXTURE_2D, tex_id);
+        glColor3f(0.0,0.0,0.0);
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0,0.0); glVertex2i(0,0);
+        glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
+        glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
+        glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
+        glEnd();
+     }
+
+     ~ViewportRenderer() {
+       glBindTexture(GL_TEXTURE_2D, 0);
+       glDisable(GL_TEXTURE_2D);
+       glMatrixMode(GL_PROJECTION);
+       glPopMatrix();
+       glMatrixMode(GL_MODELVIEW);
+       glPopMatrix();
+       glPopClientAttrib();
+       glPopAttrib();
+#if OST_SHADER_SUPPORT_ENABLED
+       Shader::Instance().PopProgram();
+#endif
+     }
+  };
+}
+
 void Scene::render_bg()
 {
   if(!gl_init_) return;
@@ -1998,64 +2067,61 @@ void Scene::render_bg()
     update_bg_=false;
   }
 
-  // setup state for simple texture quad
-#if OST_SHADER_SUPPORT_ENABLED
-  Shader::Instance().PushProgram();
-  Shader::Instance().Activate("");
-#endif
-  glPushAttrib(GL_ALL_ATTRIB_BITS);
-  glPushClientAttrib(GL_ALL_ATTRIB_BITS);
-
-  glDisable(GL_DEPTH_TEST);
-  glDisable(GL_LIGHTING);
-  glDisable(GL_COLOR_MATERIAL);
-  glDisable(GL_FOG);
-  glDisable(GL_CULL_FACE);
-  glDisable(GL_BLEND);
-  glDisable(GL_LINE_SMOOTH);
-  glDisable(GL_POINT_SMOOTH);
-#if defined(OST_GL_VERSION_2_0)
-  glDisable(GL_MULTISAMPLE);
-#endif
-  glMatrixMode(GL_PROJECTION);
-  glPushMatrix();
-  glLoadIdentity();
-  glOrtho(0,vp_width_,0,vp_height_,-1,1);
-  glMatrixMode(GL_MODELVIEW);
-  glPushMatrix();
-  glLoadIdentity();
-
-  // draw bg texture quad
-  glEnable(GL_TEXTURE_2D);
-#if OST_SHADER_SUPPORT_ENABLED
-  if(OST_GL_VERSION_2_0) {
-    glActiveTexture(GL_TEXTURE0);
+  {
+    ViewportRenderer vpr(vp_width_,vp_height_);
+    vpr.DrawTex(bg_tex_);
+    // dtor takes care of the rest
   }
-#endif
-  glBindTexture(GL_TEXTURE_2D, bg_tex_);
-  // draw
-  glColor3f(0.0,0.0,0.0);
-  glBegin(GL_QUADS);
-  glTexCoord2f(0.0,0.0); glVertex2i(0,0);
-  glTexCoord2f(0.0,1.0); glVertex2i(0,vp_height_);
-  glTexCoord2f(1.0,1.0); glVertex2i(vp_width_,vp_height_);
-  glTexCoord2f(1.0,0.0); glVertex2i(vp_width_,0);
-  glEnd();
 
-  // restore all settings
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glDisable(GL_TEXTURE_2D);
-  glMatrixMode(GL_PROJECTION);
-  glPopMatrix();
-  glMatrixMode(GL_MODELVIEW);
-  glPopMatrix();
-  glPopClientAttrib();
-  glPopAttrib();
-#if OST_SHADER_SUPPORT_ENABLED
-  Shader::Instance().PopProgram();
-#endif
   check_gl_error("render_bg()");
 }
+
+void Scene::render_export_aspect()
+{
+  unsigned int a_width=static_cast<int>(static_cast<float>(vp_height_)*export_aspect_);
+  if(a_width<vp_width_) {
+    // need to draw horizontal boundaries
+    unsigned int o1=(vp_width_-a_width)>>1;
+    unsigned int o2=a_width+o1;
+    ViewportRenderer vpr(vp_width_,vp_height_);
+    glDisable(GL_DEPTH);
+    glEnable(GL_BLEND);
+    glColor4f(0.0,0.0,0.0,0.5);
+    glBegin(GL_QUADS);
+    glVertex2i(0,0);
+    glVertex2i(0,vp_height_);
+    glVertex2i(o1,vp_height_);
+    glVertex2i(o1,0);
+    glVertex2i(o2,0);
+    glVertex2i(o2,vp_height_);
+    glVertex2i(vp_width_,vp_height_);
+    glVertex2i(vp_width_,0);
+    glEnd();
+    // vpr dtor does gl cleanup
+  } else if(a_width>vp_width_) {
+    unsigned int a_height=static_cast<int>(static_cast<float>(vp_width_)/export_aspect_);
+    // need to draw vertical boundaries
+    unsigned int o1=(vp_height_-a_height)>>1;
+    unsigned int o2=a_height+o1;
+    ViewportRenderer vpr(vp_width_,vp_height_);
+    glDisable(GL_DEPTH);
+    glEnable(GL_BLEND);
+    glColor4f(0.0,0.0,0.0,0.5);
+    glBegin(GL_QUADS);
+    glVertex2i(0,0);
+    glVertex2i(0,o1);
+    glVertex2i(vp_width_,o1);
+    glVertex2i(vp_width_,0);
+    glVertex2i(0,o2);
+    glVertex2i(0,vp_height_);
+    glVertex2i(vp_width_,vp_height_);
+    glVertex2i(vp_width_,o2);
+    glEnd();
+    // vpr dtor does gl cleanup
+  }
+
+
+} // anon ns
 
 void Scene::render_scene()
 {
@@ -2110,6 +2176,8 @@ void Scene::render_scene()
 #endif
 
   render_glow();
+
+  if(show_export_aspect_) render_export_aspect();
 }
 
 void Scene::render_glow()
@@ -2420,6 +2488,22 @@ void Scene::do_autoslab()
   set_far(nfar);
   ResetProjection();
   RequestRedraw();
+}
+
+void Scene::SetExportAspect(float a)
+{
+  if(a>0.0) {
+    export_aspect_=a;
+    if(show_export_aspect_) RequestRedraw();
+  }
+}
+
+void Scene::SetShowExportAspect(bool f)
+{
+  if(f!=show_export_aspect_) {
+    show_export_aspect_=f;
+    RequestRedraw();
+  }
 }
 
 }} // ns

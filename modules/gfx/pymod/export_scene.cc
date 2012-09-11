@@ -240,5 +240,7 @@ void export_Scene()
     .def("GetBoundingBox",scene_get_bb2)
     .def("GetBoundingBox",scene_get_bb3)
     .add_property("bounding_box",scene_get_bb1)
+    .add_property("export_aspect",&Scene::GetExportAspect,&Scene::SetExportAspect)
+    .add_property("show_export_aspect",&Scene::GetShowExportAspect,&Scene::SetShowExportAspect)
   ;
 }
