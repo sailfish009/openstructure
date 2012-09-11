@@ -30,19 +30,27 @@
 #include <ost/io/mol/pdb_reader.hh>
 #include <ost/io/io_exception.hh>
 #include <ost/conop/conop.hh>
+#include <ost/conop/compound_lib.hh>
 #include <ost/string_ref.hh>
 #include <ost/conop/amino_acids.hh>
+#include <ost/conop/rule_based.hh>
 #include <ost/mol/iterator.hh>
 #include <ost/platform.hh>
 #include <ost/log.hh>
 
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#endif
 #include <ost/dyn_cast.hh>
 
 using namespace ost;
 using namespace ost::io;
+using namespace ost::conop;
 using namespace ost::mol;
 using namespace ost::mol::alg;
+
 namespace po=boost::program_options;
+namespace fs=boost::filesystem;
 
 // loads a file
 EntityHandle load(const String& file, const IOProfile& profile)
@@ -108,6 +116,51 @@ std::pair<int,int> compute_coverage (const EntityView& v,const GlobalRDMap& glob
   return std::make_pair<int,int>(first,second);
 }
 
+CompoundLibPtr load_compound_lib(const String& custom_path)
+{
+  if (custom_path!="") {
+    if (fs::exists(custom_path)) {  
+      return CompoundLib::Load(custom_path);
+    } else {
+      std::cerr << "Could not find compounds.chemlib at the provided location, trying other options" << std::endl;
+    }
+  } 
+  if (fs::exists("compounds.chemlib")) {
+    return CompoundLib::Load("compounds.chemlib");
+  }
+  char result[ 1024 ]; 
+  CompoundLibPtr lib;
+  String exe_path; 
+  #if defined(__APPLE__)
+  uint32_t size=1023;
+  if (!_NSGetExecutablePath(result, &size)) {
+    exe_path=String(result); 
+  }
+  #else 
+  ssize_t count = readlink( "/proc/self/exe", result, 1024 );
+  exe_path = std::string( result, (count > 0) ? count : 0 );
+  #endif
+  if (exe_path.empty()) { 
+    std::cerr << "Could not determine the path of the molck executable. Will only "
+       "look for compounds.chemlib in the current working directory" << std::endl;
+  } else {
+    fs::path path_and_exe(exe_path);
+    fs::path path_only=path_and_exe.branch_path();
+    fs::path share_path = path_only.branch_path();
+    share_path = share_path / "share" / "openstructure" / "compounds.chemlib";
+
+    String share_path_string=BFPathToString(share_path);
+      
+    if (fs::exists(share_path_string)) {
+      return CompoundLib::Load(share_path_string);
+    }  
+  }
+  if (!lib) {
+    std::cerr << "Could not load compounds.chemlib" << std::endl;
+    exit(-1);
+  }
+  return CompoundLibPtr();
+}
 int main (int argc, char **argv)
 {
   // sets some default values for parameters
@@ -124,6 +177,7 @@ int main (int argc, char **argv)
 
   // parses options
   String sel;
+  String custom_path;
   bool structural_checks=false;
   po::options_description desc("Options");
   desc.add_options()
@@ -135,6 +189,7 @@ int main (int argc, char **argv)
     ("parameter-file,p", po::value<String>(), "stereo-chemical parameter file")
     ("verbosity,v", po::value<int>(), "verbosity level")
     ("bond_tolerance,b", po::value<Real>(), "tolerance in stddev for bonds")
+    ("complib", po::value<String>(&custom_path)->default_value(""),"location of the compound library file")       
     ("angle_tolerance,a", po::value<Real>(), "tolerance in stddev for angles")
     ("inclusion_radius,r", po::value<Real>(), "distance inclusion radius")
     ("sequence_separation,i", po::value<int>(), "sequence separation")
@@ -153,6 +208,11 @@ int main (int argc, char **argv)
     usage();
     exit(-1);
   }
+  conop::CompoundLibPtr lib = load_compound_lib(custom_path);
+  if (!lib) {
+    exit(0);
+  }
+  profile.processor = conop::RuleBasedProcessorPtr(new conop::RuleBasedProcessor(lib));
   po::notify(vm);
   if (vm.count("version")) {
     std::cout << "Version: " << version << std::endl;
