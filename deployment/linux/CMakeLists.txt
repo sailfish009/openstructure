@@ -20,8 +20,8 @@ else()
       set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/ost/cmake_support)
       include(CopyDependencies)
       set(OST_BINARIES \"\${CMAKE_INSTALL_PREFIX}/bin/lddt\"
-                       \"\${CMAKE_INSTALL_PREFIX}/bin/chemdict_tool\
-                       \"\${CMAKE_INSTALL_PREFIX}/bin/molck\
+                       \"\${CMAKE_INSTALL_PREFIX}/bin/chemdict_tool\"
+                       \"\${CMAKE_INSTALL_PREFIX}/bin/molck\"
                        \"\${CMAKE_INSTALL_PREFIX}/libexec/openstructure/gosty\")
       
       copy_python(${PYTHON_INCLUDE_PATH} ${PYTHON_VERSION} new_python_binary)
