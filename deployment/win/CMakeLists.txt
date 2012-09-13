@@ -1,13 +1,13 @@
-if(DEPLOYMENT)
-#  get_ost_rev()
-  include(Deployment)
-  set(SUBST_DICT OST_VERSION="${OST_VERSION}")
-  add_custom_target(deployment ALL)
+#-------------------------------------------------------------------------------
+#  Author:  Andreas Schenk
+#
+#  This file contains the Windows specific CPack configuration.
+#
+#-------------------------------------------------------------------------------
 
-
-
-  if(WIN32)
-    script(NAME create_archive.bat INPUT create_archive.bat.in SUBSTITUTE ${SUBST_DICT} TARGET deployment)
-  endif()
-endif()
+install(CODE "
+  if(NOT ${CMAKE_INSTALL_PREFIX} STREQUAL \${CMAKE_INSTALL_PREFIX})
+    message(FATAL_ERROR "The Windows installer cannot yet be created with CPack.")            
+  endif(NOT ${CMAKE_INSTALL_PREFIX} STREQUAL \${CMAKE_INSTALL_PREFIX})
+")
 

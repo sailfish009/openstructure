@@ -119,7 +119,7 @@ function(collect_dependencies binaries keys_var)
   # Get dependencies and add them to the keys.
   foreach(exe ${binaries})
     get_filename_component(exepath "${exe}" PATH)
-    add_dependencies_for_item(${keys_var}  "${exe}" "${exe}" "${exepath}")
+    add_dependencies_for_item(${keys_var}  "${exe}" "${exepath}")
   endforeach(exe)
 
   # Propagate values to caller's scope:
@@ -301,29 +301,64 @@ endfunction(copy_resolved_item)
 
 
 #=============================================================================
-# function get_rpath
+# macro get_rpath
 #=============================================================================
-function(get_rpath target rpath_var)
+macro(get_rpath target rpath_var)
   if(APPLE)
-    set(rpath_cmd "otool")
-    set(rpath_cmd_args "-l")
-    set(rpath_cmd_regex ".*LC_RPATH\n *cmdsize [0-9]*\n\ *path ([^\n ]*) \\(offset.*")
-  else(APPLE)
+    get_rpath_apple(${target} ${rpath_var})
+  elseif(WIN32)
     MESSAGE( FATAL_ERROR rpath extraction not implemented for non APPLE platform)
+  elseif(UNIX)
+    get_rpath_linux(${target} ${rpath_var})
   endif(APPLE)
-  execute_process(
-    COMMAND ${rpath_cmd} ${rpath_cmd_args} ${target}
+endmacro(get_rpath)
+
+#=============================================================================
+# function get_rpath_apple
+#=============================================================================
+function(get_rpath_apple target rpath_var)
+  find_program(rpath_exe "otool" PATHS "/usr/local/bin" "/usr/bin")
+  if(NOT rpath_exe)
+    message(FATAL_ERROR "Could not find otool - cannot resolve rpath.")
+  endif(NOT rpath_exe)
+ execute_process(
+    COMMAND ${rpath_exe} "-l" ${target}
     OUTPUT_VARIABLE rpath_cmd_ov
     RESULT_VARIABLE retcode
   )
   if(retcode)
     MESSAGE(FATAL_ERROR "otool stopped with return code: '${retcode}'")
   endif(retcode)
+  set(rpath_cmd_regex ".*LC_RPATH\n *cmdsize [0-9]*\n\ *path ([^\n ]*) \\(offset.*")
   if(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
     string(REGEX REPLACE ${rpath_cmd_regex} "\\1"  rpath ${rpath_cmd_ov})
     set(${rpath_var} ${rpath} PARENT_SCOPE)
   endif(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
-endfunction(get_rpath)
+endfunction(get_rpath_apple)
+
+#=============================================================================
+# function get_rpath_linux
+#=============================================================================
+function(get_rpath_linux target rpath_var)
+  find_program(rpath_exe "readelf" PATHS "/usr/local/bin" "/usr/bin")
+  if(NOT rpath_exe)
+    message(FATAL_ERROR "Could not find readelf - cannot resolve rpath.")
+  endif(NOT rpath_exe)
+ execute_process(
+    COMMAND ${rpath_exe} "-d" ${target}
+    OUTPUT_VARIABLE rpath_cmd_ov
+    RESULT_VARIABLE retcode
+  )
+  if(retcode)
+    MESSAGE(FATAL_ERROR "readelf stopped with return code: '${retcode}'")
+  endif(retcode)
+  
+  set(rpath_cmd_regex "Library rpath: \[([^\n ]*):\]")
+  if(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
+    string(REGEX REPLACE ${rpath_cmd_regex} "\\1"  rpath ${rpath_cmd_ov})
+    set(${rpath_var} ${rpath} PARENT_SCOPE)
+  endif(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
+endfunction(get_rpath_linux)
 
 
 #=============================================================================
@@ -418,7 +453,6 @@ function(get_dependencies_for_item_apple  item list_var)
   find_program(otool_cmd "otool" PATHS "/usr/local/bin" "/usr/bin")
   if(NOT otool_cmd)
     message(FATAL_ERROR "Could not find otool - cannot analyze dependencies.")
-    return()
   endif(NOT otool_cmd)
 
   execute_process( COMMAND ${otool_cmd} -L ${item} OUTPUT_VARIABLE otool_cmd_ov RESULT_VARIABLE retcode )
@@ -532,14 +566,14 @@ endfunction(get_dependencies_for_item_win)
 #=============================================================================
 # function add_dependencies_for_item
 #=============================================================================
-function(add_dependencies_for_item keys_var context item exepath)
+function(add_dependencies_for_item keys_var  item exepath)
   if(NOT IS_ABSOLUTE "${item}" AND EXISTS "${item}")
     message(FATAL_ERROR "Item '${item}' does not exist.")
   endif(NOT IS_ABSOLUTE "${item}" AND EXISTS "${item}")
 
   get_dependencies_for_item(${item} dependencies)
   foreach(dep ${dependencies})
-    resolve_item("${context}" "${dep}" "${exepath}" resolved_dep)
+    resolve_item("${item}" "${dep}" "${exepath}" resolved_dep)
     get_item_key("${resolved_dep}" dep_key)
     list(FIND ${keys_var} ${dep_key} dep_found)
     if(dep_found EQUAL -1)
@@ -550,7 +584,7 @@ function(add_dependencies_for_item keys_var context item exepath)
         set_keys_for_item(${keys_var} ${item} ${resolved_dep} 0 1)
       else(${system_flag})
         set_keys_for_item(${keys_var} ${item} ${resolved_dep} 1   0)
-        add_dependencies_for_item(${keys_var} ${item} ${resolved_dep} ${exepath})
+        add_dependencies_for_item(${keys_var} ${resolved_dep} ${exepath})
       endif(${system_flag})
     endif(dep_found EQUAL -1)
   endforeach(dep ${dependencies})
@@ -617,3 +651,138 @@ function(append_unique list_var value)
     set(${list_var} ${${list_var}} "${value}" PARENT_SCOPE)
   endif(NOT contains)
 endfunction(append_unique)
+
+#=============================================================================
+# function copy_qt
+#=============================================================================
+function(copy_qt library_dir plugin_dir plugins)
+  file(COPY "${library_dir}/Resources/qt_menu.nib"
+       DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/"
+       FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+  file(COPY ${plugin_dir}
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/openstructure) 
+  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/*.dylib")
+  set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/qt.conf" "[Paths]\nPlugins=../plugins\n")
+endfunction(copy_qt)
+
+#=============================================================================
+# function copy_python
+#=============================================================================
+function(copy_python include_path version new_binary_path)
+
+
+  get_filename_component(real_python_include_path ${include_path} REALPATH)
+  get_filename_component(python_root_dir ${real_python_include_path}/../.. REALPATH) 
+    if ("${CMAKE_NATIVE_ARCH}" MATCHES "64")
+      file(COPY ${python_root_dir}/lib64/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/lib64/python${version})
+    else()
+      file(COPY ${python_root_dir}/lib/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python${version})
+    endif()
+  file(COPY ${include_path}/pyconfig.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
+ 
+  read_config(ost_config)
+  if(APPLE)
+    file(COPY ${python_root_dir}/Resources/Python.app/Contents/MacOS/Python DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+    set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/Python" PARENT_SCOPE)
+    string(REGEX REPLACE "pyexec=\"[^\n\$]*\"" "pyexec=\"\$DNG_BINDIR/Python\"" ost_config "${ost_config}")
+  elseif(APPLE)
+    file(COPY ${python_root_dir}/bin/python${version} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+    set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/python${version}" PARENT_SCOPE)
+    string(REGEX REPLACE "pyexec=\"[^\n\$]*\"" "pyexec=\"\$DNG_BINDIR/python${version}\"" ost_config "${ost_config}")
+  endif(APPLE)
+  write_config("${ost_config}")
+endfunction(copy_python)
+
+#=============================================================================
+# function read_config
+#=============================================================================
+function(read_config ost_config_var)
+  file(READ "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/ost_config" ost_config)
+  set(${ost_config_var} "${ost_config}" PARENT_SCOPE)
+endfunction(read_config)
+
+#=============================================================================
+# function write_config
+#=============================================================================
+function(write_config ost_config)
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/ost_config" "${ost_config}")
+endfunction(write_config)
+
+#=============================================================================
+# function write_bundle_binary
+#=============================================================================
+function(write_bundle_binary binary_name real_binary)
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/../MacOS/${binary_name}" "#!/bin/sh\nexec \"\${0%/*}/${real_binary}\"\n")
+  execute_process(COMMAND chmod ugo+x "${CMAKE_INSTALL_PREFIX}/../MacOS/${binary_name}")
+endfunction(write_bundle_binary)
+
+#=============================================================================
+# function add_linked_bundle
+#=============================================================================
+function(add_linked_bundle parent_bundle_name bundle_name binary_name bundle_identifier bundle_icon)
+  get_filename_component(dmg_main_path ${CMAKE_INSTALL_PREFIX}/../../../../ PATH)
+  file(MAKE_DIRECTORY "${dmg_main_path}/${bundle_name}.app/Contents/MacOS/")
+  file(MAKE_DIRECTORY "${dmg_main_path}/${bundle_name}.app/Contents/Resources/")
+  file(WRITE "${dmg_main_path}/${bundle_name}.app/Contents/MacOS/${binary_name}" "#!/bin/sh\nexec \"\${0%/*}/../../../${parent_bundle_name}.app/Contents/Resources/bin/${binary_name}\"\n")
+  get_filename_component(icon_name ${bundle_icon} NAME)
+  file(COPY ${bundle_icon} DESTINATION "${dmg_main_path}/${bundle_name}.app/Contents/Resources")
+  create_plist(${binary_name} ${bundle_name} ${bundle_identifier} ${icon_name} "${dmg_main_path}/${bundle_name}.app/Contents/Info.plist")
+  execute_process(COMMAND chmod ugo+x "${dmg_main_path}/${bundle_name}.app/Contents/MacOS/${binary_name}")
+endfunction(add_linked_bundle)
+
+#=============================================================================
+# function create_plist
+#=============================================================================
+function(create_plist BUNDLE_EXECUTABLE BUNDLE_NAME BUNDLE_IDENTIFIER BUNDLE_ICON FILENAME)
+  set( info_plist "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" 
+    \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>English</string>
+  <key>CFBundleExecutable</key>
+  <string>\@BUNDLE_EXECUTABLE\@</string>
+  <key>CFBundleName</key>
+  <string>\@BUNDLE_NAME\@</string>  
+  <key>CFBundleDisplayName</key>
+  <string>\@BUNDLE_NAME\@</string>  
+  <key>CFBundleHelpBookFolder</key>
+  <string>\@BUNDLE_NAME\@ Manual</string>
+  <key>CFBundleHelpBookName</key>
+  <string>OpenStructure Help</string>
+  <key>CFBundleIconFile</key>
+  <string>\@BUNDLE_ICON\@</string>
+  <key>CFBundleIdentifier</key>
+  <string>\@BUNDLE_IDENTIFIER\@</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleSignature</key>
+  <string>????</string>
+  <key>CFBundleVersion</key>
+  <string></string>
+  <key>NSMainNibFile</key>
+  <string>MainMenu</string>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
+</dict>
+</plist>")
+  string(CONFIGURE "${info_plist}" info_plist_replaced)
+  file(WRITE  ${FILENAME} "${info_plist_replaced}")
+endfunction(create_plist)
+
+#=============================================================================
+# function echo_all_cmake_variable_values
+#=============================================================================
+
+function(echo_all_cmake_variable_values)
+  message("")
+  get_cmake_property(vs VARIABLES)
+  foreach(v ${vs})
+    message("${v}='${${v}}'")
+  endforeach(v)
+  message("")
+endfunction()
