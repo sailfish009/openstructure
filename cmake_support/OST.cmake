@@ -357,10 +357,14 @@ macro(executable_libexec)
   set_target_properties(${_ARG_NAME}
                         PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                        "${LIBEXEC_STAGE_PATH}")  
-  if (APPLE AND NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
-    set_target_properties(${_ARG_NAME} PROPERTIES
-                          LINK_FLAGS "-Wl,-rpath,@loader_path/../../lib")
-  endif()
+  if (NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
+    if (APPLE)
+      set_target_properties(${_ARG_NAME} PROPERTIES
+                            LINK_FLAGS "-Wl,-rpath,@loader_path/../../lib")
+    elseif (UNIX)
+      set_target_properties(${_ARG_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN/../../${LIB_DIR}")
+    endif (APPLE)
+  endif (NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
   if (_ARG_LINK)
     target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
   endif()
