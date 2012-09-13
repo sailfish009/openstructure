@@ -437,7 +437,7 @@ endmacro()
 #   Calls pyuic on every input file. The resulting python files are stored in
 #   the variable with name out_files.
 #-------------------------------------------------------------------------------
-macro(ui_to_python LIBNAME STAGEDIR)
+macro(ui_to_python LIBNAME PYMODDIR STAGEDIR)
   set(_input_files ${ARGN})
   add_custom_target("${LIBNAME}_ui" ALL)
   find_program(_PYUIC_EXECUTABLE
@@ -457,9 +457,10 @@ macro(ui_to_python LIBNAME STAGEDIR)
                        COMMAND ${_PYUIC_EXECUTABLE} -o ${_abs_out_file} ${_in_file}
                        VERBATIM DEPENDS ${input_file}
                        )
-    list(APPEND ${out_files} ${_abs_out_file})
+    list(APPEND out_files ${_abs_out_file})
   endforeach()
   compile_py_files(_${LIBNAME} ${STAGEDIR} ${out_files})
+  install(FILES ${out_files} DESTINATION "${LIB_DIR}/${PYMODDIR}")
 endmacro()
 
 #-------------------------------------------------------------------------------
@@ -574,7 +575,7 @@ macro(pymod)
   # build ui files
   #-----------------------------------------------------------------------------
   if (_ARG_UI)
-    ui_to_python(${_LIB_NAME} ${PYMOD_STAGE_DIR} ${_ARG_UI})
+    ui_to_python(${_LIB_NAME} ${PYMOD_DIR} ${PYMOD_STAGE_DIR} ${_ARG_UI})
   endif()  
   #-----------------------------------------------------------------------------
   # compile python files
