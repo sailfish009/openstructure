@@ -43,7 +43,6 @@ else()
       list(APPEND  OST_BINARIES \${qt_plugins})
 
       copy_dependencies(\"\${OST_BINARIES}\")
-      message(FATAL_ERROR \"stop\")
     endif(NOT ${CMAKE_INSTALL_PREFIX} MATCHES \${CMAKE_INSTALL_PREFIX})
   ")
   set(CPACK_GENERATOR "TGZ")

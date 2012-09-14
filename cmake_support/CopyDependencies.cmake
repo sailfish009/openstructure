@@ -283,30 +283,6 @@ endfunction(resolve_embedded_item)
 
 
 
-#=============================================================================
-# function copy_resolved_item
-#=============================================================================
-function(copy_resolved_item resolved_item resolved_embedded_item)
-  if(WIN32)
-    # ignore case on Windows
-    string(TOLOWER "${resolved_item}" resolved_item_compare)
-    string(TOLOWER "${resolved_embedded_item}" resolved_embedded_item_compare)
-  else()
-    set(resolved_item_compare "${resolved_item}")
-    set(resolved_embedded_item_compare "${resolved_embedded_item}")
-  endif()
-
-  if("${resolved_item_compare}" STREQUAL "${resolved_embedded_item_compare}")
-    message(STATUS "warning: resolved_item == resolved_embedded_item - not copying...")
-  else()
-    message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy ${resolved_item} ${resolved_embedded_item}")
-    execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}" "${resolved_embedded_item}")
-    if(UNIX AND NOT APPLE)
-      file(RPATH_REMOVE FILE "${resolved_embedded_item}")
-    endif(UNIX AND NOT APPLE)
-  endif()
-
-endfunction(copy_resolved_item)
 
 
 #=============================================================================
@@ -654,6 +630,19 @@ function(is_system_lib item system_var)
   endif()
 endfunction(is_system_lib)
 
+#=============================================================================
+# function copy_resolved_item (OSX)
+#=============================================================================
+function(copy_resolved_item resolved_item resolved_embedded_item)
+  if("${resolved_item}" STREQUAL "${resolved_embedded_item}")
+    message(STATUS "warning: resolved_item == resolved_embedded_item - not copying...")
+  else()
+    message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy ${resolved_item} ${resolved_embedded_item}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}" "${resolved_embedded_item}")
+  endif()
+
+endfunction(copy_resolved_item)
+
 
 elseif(WIN32 AND NOT UNIX)
 
@@ -708,8 +697,6 @@ function(get_rpath target rpath_var)
   message(FATAL_ERROR "get_rpath not implemented for Windows.")
 endfunction(get_rpath)
 
-elseif(UNIX)
-
 #=============================================================================
 # function is_system_lib (Windows)
 #=============================================================================
@@ -725,6 +712,26 @@ function(is_system_lib item system_var)
     set(${system_var}  0 PARENT_SCOPE)
   endif()
 endfunction(is_system_lib)
+
+#=============================================================================
+# function copy_resolved_item (Windows)
+#=============================================================================
+function(copy_resolved_item resolved_item resolved_embedded_item)
+  # ignore case on Windows
+  string(TOLOWER "${resolved_item}" resolved_item_compare)
+  string(TOLOWER "${resolved_embedded_item}" resolved_embedded_item_compare)
+
+  if("${resolved_item_compare}" STREQUAL "${resolved_embedded_item_compare}")
+    message(STATUS "warning: resolved_item == resolved_embedded_item - not copying...")
+  else()
+    message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy ${resolved_item} ${resolved_embedded_item}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy "${resolved_item}" "${resolved_embedded_item}")
+  endif()
+
+endfunction(copy_resolved_item)
+
+elseif(UNIX)
+
 
 #=============================================================================
 #=============================================================================
@@ -746,8 +753,10 @@ function(get_dependencies_for_item item list_var)
     message(FATAL_ERROR "Could not find ldd - cannot analyze dependencies.")
     return()
   endif(NOT ldd_cmd)
-
+  set(old_ld_library_path $ENV{LD_LIBRARY_PATH})
+  set(ENV{LD_LIBRARY_PATH} ${CMAKE_INSTALL_PREFIX}/${LIB_DIR})
   execute_process( COMMAND ${ldd_cmd}  ${item} OUTPUT_VARIABLE ldd_cmd_ov ERROR_VARIABLE ldd_cmd_ev RESULT_VARIABLE retcode)
+  set(ENV{LD_LIBRARY_PATH} ${old_ld_library_path})
   if(retcode)
     if(${ldd_cmd_ov})
       message(${ldd_cmd_ov})
@@ -833,6 +842,36 @@ else(APPLE)
 endif(APPLE)
 
 
+#=============================================================================
+# function copy_resolved_item (Linux)
+#=============================================================================
+function(copy_resolved_item resolved_item resolved_embedded_item)
+  get_filename_component(real_resolved_item "${resolved_item}" REALPATH)
+  get_filename_component(real_resolved_embedded_item "${resolved_embedded_item}" REALPATH)
+
+  if("${real_resolved_item}" STREQUAL "${real_resolved_embedded_item}")
+    message(STATUS "warning: resolved_item == resolved_embedded_item - not copying...")
+  else()
+    message(STATUS "copying ${resolved_item} to ${resolved_embedded_item} including symlinks")
+    # determine all the symlinks pointing to the current item and copy them into the package
+    # along with the item
+    get_filename_component(external_path  ${real_resolved_item} PATH)
+    get_filename_component(embedded_path  ${real_resolved_embedded_item} PATH)
+    get_filename_component(external_name  ${real_resolved_item} NAME)
+    string(REGEX REPLACE "([a-zA-Z]+).*" "\\1" name_base ${external_name})
+    file(GLOB candidates "${external_path}/${name_base}*" )
+    set(external_files)
+    foreach(candidate ${candidates})
+      get_filename_component(real_candidate "${candidate}" REALPATH)
+      if(real_candidate STREQUAL ${real_resolved_item})
+        list(APPEND external_files ${candidate})
+      endif(real_candidate STREQUAL ${real_resolved_item})
+    endforeach(candidate)
+    file(COPY ${external_files} DESTINATION ${embedded_path})
+    file(RPATH_REMOVE FILE "${resolved_embedded_item}")
+  endif()
+
+endfunction(copy_resolved_item)
 
 
 
