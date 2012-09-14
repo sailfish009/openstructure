@@ -444,6 +444,7 @@ endmacro()
 macro(ui_to_python LIBNAME PYMODDIR STAGEDIR)
   set(_input_files ${ARGN})
   add_custom_target("${LIBNAME}_ui" ALL)
+  add_dependencies("_${LIBNAME}" "${LIBNAME}_ui")
   find_program(_PYUIC_EXECUTABLE
     NAMES pyuic4-${PYTHON_VERSION} pyuic4 pyuic
     PATHS  ENV PATH 
