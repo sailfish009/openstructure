@@ -14,6 +14,7 @@ set (CPACK_BUNDLE_ICON ${PROJECT_SOURCE_DIR}/graphics/icon.icns)
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "openstructure ${OST_VERSION_STRING}" )
 install(CODE "
   if(NOT ${CMAKE_INSTALL_PREFIX} STREQUAL \${CMAKE_INSTALL_PREFIX})
+    set(LIB_DIR ${LIB_DIR}) #pass libdir variable in install code block
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
     include(CopyDependencies)
   
