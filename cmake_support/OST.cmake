@@ -546,8 +546,9 @@ macro(pymod)
  
     if (NOT ENABLE_STATIC)
       if (_USE_RPATH)
+        string(REGEX REPLACE "/[^/]*" "/.." inv_pymod_path "/${PYMOD_DIR}")
         set_target_properties("_${_LIB_NAME}"
-                              PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
+                              PROPERTIES INSTALL_RPATH "$ORIGIN${inv_pymod_path}/")
       else()
         set_target_properties("_${_LIB_NAME}"
                               PROPERTIES INSTALL_RPATH "")

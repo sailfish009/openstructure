@@ -46,10 +46,23 @@
 #=============================================================================
 function(copy_dependencies binaries)
   #--------------------------------------------------------------------------
-  message("copy dependencies: determining dependencies")
+  message("copy dependencies: resolving binary paths")
   #--------------------------------------------------------------------------
   message(STATUS "  binaries='${binaries}'")
-  collect_dependencies("${binaries}" keys)
+  set(resolved_binaries)
+  foreach(binary ${binaries})
+    get_filename_component(resolved_binary ${binary} REALPATH)
+    if(NOT ${resolved_binary} MATCHES ${CMAKE_INSTALL_PREFIX})
+      message(FATAL_ERROR "Binary path: '${resolved_binary}' points to outside bundle.")
+    endif(NOT ${resolved_binary} MATCHES ${CMAKE_INSTALL_PREFIX})
+    list(APPEND resolved_binaries ${resolved_binary})
+  endforeach(binary)
+  list(REMOVE_DUPLICATES resolved_binaries)
+
+  #--------------------------------------------------------------------------
+  message("copy dependencies: determining dependencies")
+  #--------------------------------------------------------------------------
+  collect_dependencies("${resolved_binaries}" keys)
 
   #--------------------------------------------------------------------------
   message("copy dependencies: copying files")
@@ -264,11 +277,7 @@ function(resolve_embedded_item item resolved_item_var)
   else(${item} MATCHES ${CMAKE_INSTALL_PREFIX})
     # only embed libraries, therefore put into lib dir
     get_filename_component(item_name "${item}" NAME)
-    if ("${CMAKE_NATIVE_ARCH}" MATCHES "64")
-      set(${resolved_item_var} "${CMAKE_INSTALL_PREFIX}/lib64/${item_name}" PARENT_SCOPE)
-    else()
-      set(${resolved_item_var} "${CMAKE_INSTALL_PREFIX}/lib/${item_name}" PARENT_SCOPE)
-    endif()
+    set(${resolved_item_var} "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/${item_name}" PARENT_SCOPE)
   endif(${item} MATCHES ${CMAKE_INSTALL_PREFIX})
 endfunction(resolve_embedded_item)
 
@@ -298,67 +307,6 @@ function(copy_resolved_item resolved_item resolved_embedded_item)
   endif()
 
 endfunction(copy_resolved_item)
-
-
-#=============================================================================
-# macro get_rpath
-#=============================================================================
-macro(get_rpath target rpath_var)
-  if(APPLE)
-    get_rpath_apple(${target} ${rpath_var})
-  elseif(WIN32)
-    MESSAGE( FATAL_ERROR rpath extraction not implemented for non APPLE platform)
-  elseif(UNIX)
-    get_rpath_linux(${target} ${rpath_var})
-  endif(APPLE)
-endmacro(get_rpath)
-
-#=============================================================================
-# function get_rpath_apple
-#=============================================================================
-function(get_rpath_apple target rpath_var)
-  find_program(rpath_exe "otool" PATHS "/usr/local/bin" "/usr/bin")
-  if(NOT rpath_exe)
-    message(FATAL_ERROR "Could not find otool - cannot resolve rpath.")
-  endif(NOT rpath_exe)
- execute_process(
-    COMMAND ${rpath_exe} "-l" ${target}
-    OUTPUT_VARIABLE rpath_cmd_ov
-    RESULT_VARIABLE retcode
-  )
-  if(retcode)
-    MESSAGE(FATAL_ERROR "otool stopped with return code: '${retcode}'")
-  endif(retcode)
-  set(rpath_cmd_regex ".*LC_RPATH\n *cmdsize [0-9]*\n\ *path ([^\n ]*) \\(offset.*")
-  if(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
-    string(REGEX REPLACE ${rpath_cmd_regex} "\\1"  rpath ${rpath_cmd_ov})
-    set(${rpath_var} ${rpath} PARENT_SCOPE)
-  endif(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
-endfunction(get_rpath_apple)
-
-#=============================================================================
-# function get_rpath_linux
-#=============================================================================
-function(get_rpath_linux target rpath_var)
-  find_program(rpath_exe "readelf" PATHS "/usr/local/bin" "/usr/bin")
-  if(NOT rpath_exe)
-    message(FATAL_ERROR "Could not find readelf - cannot resolve rpath.")
-  endif(NOT rpath_exe)
- execute_process(
-    COMMAND ${rpath_exe} "-d" ${target}
-    OUTPUT_VARIABLE rpath_cmd_ov
-    RESULT_VARIABLE retcode
-  )
-  if(retcode)
-    MESSAGE(FATAL_ERROR "readelf stopped with return code: '${retcode}'")
-  endif(retcode)
-  
-  set(rpath_cmd_regex "Library rpath: \[([^\n ]*):\]")
-  if(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
-    string(REGEX REPLACE ${rpath_cmd_regex} "\\1"  rpath ${rpath_cmd_ov})
-    set(${rpath_var} ${rpath} PARENT_SCOPE)
-  endif(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
-endfunction(get_rpath_linux)
 
 
 #=============================================================================
@@ -425,145 +373,6 @@ endfunction(verify)
 
 
 #=============================================================================
-# macro get_dependencies_for_item
-#=============================================================================
-# Note: dispatcher written as macro to avoid having to copy results to parent scope
-macro(get_dependencies_for_item item list_var)
-
-  if(NOT IS_ABSOLUTE "${item}" AND EXISTS "${item}")
-    message(FATAL_ERROR "Cannot find item: '${item}' to get dependencies.")
-  endif(NOT IS_ABSOLUTE "${item}" AND EXISTS "${item}")
-
-  if(APPLE)
-    get_dependencies_for_item_apple(${item} ${list_var})
-  elseif(WIN32 AND NOT UNIX)
-    get_dependencies_for_item_win(${item} ${list_var})
-  elseif(UNIX)
-    get_dependencies_for_item_linux(${item} ${list_var})
-  else(APPLE)
-    MESSAGE(FATAL_ERROR "Cannot determine dependencies for unknown system.")
-  endif(APPLE)
-endmacro(get_dependencies_for_item)
-
-#=============================================================================
-# function get_dependencies_for_item_apple
-#=============================================================================
-function(get_dependencies_for_item_apple  item list_var)
-
-  find_program(otool_cmd "otool" PATHS "/usr/local/bin" "/usr/bin")
-  if(NOT otool_cmd)
-    message(FATAL_ERROR "Could not find otool - cannot analyze dependencies.")
-  endif(NOT otool_cmd)
-
-  execute_process( COMMAND ${otool_cmd} -L ${item} OUTPUT_VARIABLE otool_cmd_ov RESULT_VARIABLE retcode )
-  if(retcode)
-    MESSAGE(FATAL_ERROR "otool stopped with return code: '${retcode}'")
-  endif(retcode)
-  # Convert to a list of lines:
-  string(REGEX REPLACE ";" "\\\\;" candidates "${otool_cmd_ov}")
-  set(eol_char "E")
-  string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
-
-  # check for install id and remove it from list, since otool -L can include a reference to itself
-  set(install_id)
-  execute_process( COMMAND ${otool_cmd} -D ${item} OUTPUT_VARIABLE install_id_ov  RESULT_VARIABLE retcode)
-  if(retcode)
-    MESSAGE(FATAL_ERROR "otool stopped with return code: '${retcode}'")
-  endif(retcode)
-  # second line is install name
-  string(REGEX REPLACE ".*:\n" "" install_id "${install_id_ov}")
-  if(install_id)
-    string(REGEX MATCH "[^\n ].*[^\n ]" install_id "${install_id}")
-  endif(install_id)
-
-  # Analyze each line for file names that match the regular expression:
-  set(otool_regex "^\t([^\t]+) \\(compatibility version ([0-9]+.[0-9]+.[0-9]+), current version ([0-9]+.[0-9]+.[0-9]+)\\)${eol_char}$")
-  set(dep_list)
-  foreach(candidate ${candidates})
-    if("${candidate}" MATCHES "${otool_regex}")
-      # Extract information from each candidate:
-      string(REGEX REPLACE "${otool_regex}" "\\1" dep "${candidate}")
-      if(NOT "${dep}" STREQUAL "${install_id}")
-        list(APPEND dep_list ${dep})
-      endif(NOT "${dep}" STREQUAL "${install_id}")
-    endif("${candidate}" MATCHES "${otool_regex}")
-  endforeach(candidate)
-  set(${list_var} ${dep_list} PARENT_SCOPE)
-endfunction(get_dependencies_for_item_apple)
-
-#=============================================================================
-# function get_dependencies_for_item_linux
-#=============================================================================
-function(get_dependencies_for_item_linux  item list_var)
-
-  find_program(ldd_cmd "ldd" PATHS "/usr/local/bin" "/usr/bin")
-  if(NOT ldd_cmd)
-    message(FATAL_ERROR "Could not find ldd - cannot analyze dependencies.")
-    return()
-  endif(NOT ldd_cmd)
-
-  execute_process( COMMAND ${ldd_cmd}  ${item} OUTPUT_VARIABLE ldd_cmd_ov RESULT_VARIABLE retcode)
-  if(retcode)
-    MESSAGE(FATAL_ERROR "ldd stopped with return code: '${retcode}'")
-  endif(retcode)
-  # Convert to a list of lines:
-  string(REGEX REPLACE ";" "\\\\;" candidates "${ldd_cmd_ov}")
-  set(eol_char "E")
-  string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
-
-  # Analyze each line for file names that match the regular expression:
-  set(ldd_regex "^[\t ]*[^\t ]+ => ([^\t\(]+) .*${eol_char}$")
-  set(ldd_regex_error "not found${eol_char}$")
-  set(ldd_regex_fallback "^[\t ]*([^\t ]+) => ([^\t ]+).*${eol_char}$")
-  set(dep_list)
-  foreach(candidate ${candidates})
-    if("${candidate}" MATCHES "${ldd_regex}")
-      # Extract information from each candidate:
-      if("${candidate}" MATCHES "${ldd_regex_error}")
-        string(REGEX REPLACE "${ldd_regex_fallback}" "\\1" raw_item "${candidate}")
-      else("${candidate}" MATCHES "${ldd_regex_error}")
-        string(REGEX REPLACE "${ldd_regex}" "\\1" raw_item "${candidate}")
-      endif("${candidate}" MATCHES "${ldd_regex_error}")
-      list(APPEND depl_list ${dep})
-    endif("${candidate}" MATCHES "${ldd_regex}")
-  set(${list_var} ${dep_list} PARENT_SCOPE)
-endfunction(get_dependencies_for_item_linux)
-
-#=============================================================================
-# function get_dependencies_for_item_win
-#=============================================================================
-function(get_dependencies_for_item_win  item list_var)
-
-  find_program(dumpbin_cmd "dumpbin")
-  if(NOT dumpbin_cmd)
-    message(FATAL_ERROR "Could not find dumpbin - cannot analyze dependencies.")
-    return()
-  endif(NOT dumpbin_cmd)
-
-  set(ENV{VS_UNICODE_OUTPUT} "") # Block extra output from inside VS IDE.
-  execute_process( COMMAND ${dumpbin_cmd}  /dependents ${item} OUTPUT_VARIABLE dumpbin_cmd_ov RESULT_VARIABLE retcode)
-  if(retcode)
-    MESSAGE(FATAL_ERROR "dumpbin stopped with return code: '${retcode}'")
-  endif(retcode)
-  # Convert to a list of lines:
-  string(REGEX REPLACE ";" "\\\\;" candidates "${dumpbin_cmd_ov}")
-  set(eol_char "E")
-  string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
-
-  # Analyze each line for file names that match the regular expression:
-  set(dumpbin_regex "^    ([^ ].*[Dd][Ll][Ll])${eol_char}$")
-  set(dep_list)
-  foreach(candidate ${candidates})
-    if("${candidate}" MATCHES "${dumpbin_regex}")
-      # Extract information from each candidate:
-      string(REGEX REPLACE "${dumpbin_regex}" "\\1" raw_item "${candidate}")
-      list(APPEND depl_list ${dep})
-    endif("${candidate}" MATCHES "${dumpbin_regex}")
-  set(${list_var} ${dep_list} PARENT_SCOPE)
-endfunction(get_dependencies_for_item_win)
-
-
-#=============================================================================
 # function add_dependencies_for_item
 #=============================================================================
 function(add_dependencies_for_item keys_var  item exepath)
@@ -600,40 +409,6 @@ function(add_dependencies_for_item keys_var  item exepath)
 endfunction(add_dependencies_for_item)
 
 
-#=============================================================================
-# function is_system_lib
-#=============================================================================
-function(is_system_lib item system_var)
-  if(APPLE)
-    if(item MATCHES "^(/System/Library/|/usr/lib/)")
-      set(${system_var}  1 PARENT_SCOPE)
-    else()
-      set(${system_var}  0 PARENT_SCOPE)
-    endif()
-    return()
-  elseif(WIN32)
-    string(TOLOWER "${item}" lower)
-    string(TOLOWER "$ENV{SystemRoot}" sysroot)
-    string(REGEX REPLACE "\\\\" "/" sysroot "${sysroot}")
-    string(TOLOWER "$ENV{windir}" windir)
-    string(REGEX REPLACE "\\\\" "/" windir "${windir}")
-    if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
-      set(${system_var}  1 PARENT_SCOPE)
-    else()
-      set(${system_var}  0 PARENT_SCOPE)
-    endif()
-    return()
-  elseif(UNIX)
-    if(item MATCHES "^(/lib/|/lib32/|/lib64/|/usr/lib/|/usr/lib32/|/usr/lib64/|/usr/X11R6/|/usr/bin/)")
-      set(${system_var} 1 PARENT_SCOPE)
-    else()
-      set(${system_var}  0 PARENT_SCOPE)
-    endif()
-    return()
-  else(APPLE)
-    MESSAGE(FATAL_ERROR "Unknown OS. Cannot determine if item:'${item}' is a system lib.")
-  endif(APPLE)
-endfunction(is_system_lib)
 
 #=============================================================================
 # function append_unique
@@ -652,19 +427,6 @@ function(append_unique list_var value)
   endif(NOT contains)
 endfunction(append_unique)
 
-#=============================================================================
-# function copy_qt
-#=============================================================================
-function(copy_qt library_dir plugin_dir plugins)
-  file(COPY "${library_dir}/Resources/qt_menu.nib"
-       DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/"
-       FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-  file(COPY ${plugin_dir}
-       DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/openstructure) 
-  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/*.dylib")
-  set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
-  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/qt.conf" "[Paths]\nPlugins=../plugins\n")
-endfunction(copy_qt)
 
 #=============================================================================
 # function copy_python
@@ -674,11 +436,7 @@ function(copy_python include_path version new_binary_path)
 
   get_filename_component(real_python_include_path ${include_path} REALPATH)
   get_filename_component(python_root_dir ${real_python_include_path}/../.. REALPATH) 
-    if ("${CMAKE_NATIVE_ARCH}" MATCHES "64")
-      file(COPY ${python_root_dir}/lib64/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/lib64/python${version})
-    else()
-      file(COPY ${python_root_dir}/lib/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/python${version})
-    endif()
+  file(COPY ${python_root_dir}/${LIB_DIR}/python${version}/ DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version})
   file(COPY ${include_path}/pyconfig.h DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
  
   read_config(ost_config)
@@ -686,7 +444,9 @@ function(copy_python include_path version new_binary_path)
     file(COPY ${python_root_dir}/Resources/Python.app/Contents/MacOS/Python DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
     set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/Python" PARENT_SCOPE)
     string(REGEX REPLACE "pyexec=\"[^\n\$]*\"" "pyexec=\"\$DNG_BINDIR/Python\"" ost_config "${ost_config}")
-  elseif(APPLE)
+  else(APPLE)
+    file(GLOB python_libs "${python_root_dir}/${LIB_DIR}/libpython${version}.so*")
+    file(COPY ${python_libs} DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIB_DIR})
     file(COPY ${python_root_dir}/bin/python${version} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
     set(${new_binary_path} "${CMAKE_INSTALL_PREFIX}/bin/python${version}" PARENT_SCOPE)
     string(REGEX REPLACE "pyexec=\"[^\n\$]*\"" "pyexec=\"\$DNG_BINDIR/python${version}\"" ost_config "${ost_config}")
@@ -785,4 +545,294 @@ function(echo_all_cmake_variable_values)
     message("${v}='${${v}}'")
   endforeach(v)
   message("")
-endfunction()
+endfunction(echo_all_cmake_variable_values)
+
+
+#=============================================================================
+#=============================================================================
+# OSX specific functions
+#=============================================================================
+#=============================================================================
+
+if(APPLE)
+
+#=============================================================================
+# function get_dependencies_for_item (OSX)
+#=============================================================================
+function(get_dependencies_for_item  item list_var)
+
+  if(NOT IS_ABSOLUTE "${item}" AND EXISTS "${item}")
+    message(FATAL_ERROR "Cannot find item: '${item}' to get dependencies.")
+  endif(NOT IS_ABSOLUTE "${item}" AND EXISTS "${item}")
+
+  find_program(otool_cmd "otool" PATHS "/usr/local/bin" "/usr/bin")
+  if(NOT otool_cmd)
+    message(FATAL_ERROR "Could not find otool - cannot analyze dependencies.")
+  endif(NOT otool_cmd)
+
+  execute_process( COMMAND ${otool_cmd} -L ${item} OUTPUT_VARIABLE otool_cmd_ov RESULT_VARIABLE retcode )
+  if(retcode)
+    MESSAGE(FATAL_ERROR "otool stopped with return code: '${retcode}'")
+  endif(retcode)
+  # Convert to a list of lines:
+  string(REGEX REPLACE ";" "\\\\;" candidates "${otool_cmd_ov}")
+  set(eol_char "E")
+  string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
+
+  # check for install id and remove it from list, since otool -L can include a reference to itself
+  set(install_id)
+  execute_process( COMMAND ${otool_cmd} -D ${item} OUTPUT_VARIABLE install_id_ov  RESULT_VARIABLE retcode)
+  if(retcode)
+    MESSAGE(FATAL_ERROR "otool stopped with return code: '${retcode}'")
+  endif(retcode)
+  # second line is install name
+  string(REGEX REPLACE ".*:\n" "" install_id "${install_id_ov}")
+  if(install_id)
+    string(REGEX MATCH "[^\n ].*[^\n ]" install_id "${install_id}")
+  endif(install_id)
+
+  # Analyze each line for file names that match the regular expression:
+  set(otool_regex "^\t([^\t]+) \\(compatibility version ([0-9]+.[0-9]+.[0-9]+), current version ([0-9]+.[0-9]+.[0-9]+)\\)${eol_char}$")
+  set(dep_list)
+  foreach(candidate ${candidates})
+    if("${candidate}" MATCHES "${otool_regex}")
+      # Extract information from each candidate:
+      string(REGEX REPLACE "${otool_regex}" "\\1" dep "${candidate}")
+      if(NOT "${dep}" STREQUAL "${install_id}")
+        list(APPEND dep_list ${dep})
+      endif(NOT "${dep}" STREQUAL "${install_id}")
+    endif("${candidate}" MATCHES "${otool_regex}")
+  endforeach(candidate)
+  set(${list_var} ${dep_list} PARENT_SCOPE)
+endfunction(get_dependencies_for_item)
+
+#=============================================================================
+# function get_rpath (OSX)
+#=============================================================================
+function(get_rpath target rpath_var)
+  find_program(rpath_exe "otool" PATHS "/usr/local/bin" "/usr/bin")
+  if(NOT rpath_exe)
+    message(FATAL_ERROR "Could not find otool - cannot resolve rpath.")
+  endif(NOT rpath_exe)
+ execute_process(
+    COMMAND ${rpath_exe} "-l" ${target}
+    OUTPUT_VARIABLE rpath_cmd_ov
+    RESULT_VARIABLE retcode
+  )
+  if(retcode)
+    MESSAGE(FATAL_ERROR "otool stopped with return code: '${retcode}'")
+  endif(retcode)
+  set(rpath_cmd_regex ".*LC_RPATH\n *cmdsize [0-9]*\n\ *path ([^\n ]*) \\(offset.*")
+  if(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
+    string(REGEX REPLACE ${rpath_cmd_regex} "\\1"  rpath ${rpath_cmd_ov})
+    set(${rpath_var} ${rpath} PARENT_SCOPE)
+  endif(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
+endfunction(get_rpath)
+
+#=============================================================================
+# function copy_qt (OSX)
+#=============================================================================
+function(copy_qt library_dir plugin_dir plugins)
+  file(COPY "${library_dir}/Resources/qt_menu.nib"
+       DESTINATION "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/"
+       FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+  file(COPY ${plugin_dir}
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/openstructure) 
+  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/*.dylib")
+  set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/qt.conf" "[Paths]\nPlugins=../plugins\n")
+endfunction(copy_qt)
+
+#=============================================================================
+# function is_system_lib (OSX)
+#=============================================================================
+function(is_system_lib item system_var)
+  if(item MATCHES "^(/System/Library/|/usr/lib/)")
+    set(${system_var}  1 PARENT_SCOPE)
+  else()
+    set(${system_var}  0 PARENT_SCOPE)
+  endif()
+endfunction(is_system_lib)
+
+
+elseif(WIN32 AND NOT UNIX)
+
+#=============================================================================
+#=============================================================================
+# Windows specific functions
+#=============================================================================
+#=============================================================================
+
+
+#=============================================================================
+# function get_dependencies_for_item (Windows)
+#=============================================================================
+function(get_dependencies_for_item  item list_var)
+
+  if(NOT IS_ABSOLUTE "${item}" AND EXISTS "${item}")
+    message(FATAL_ERROR "Cannot find item: '${item}' to get dependencies.")
+  endif(NOT IS_ABSOLUTE "${item}" AND EXISTS "${item}")
+
+  find_program(dumpbin_cmd "dumpbin")
+  if(NOT dumpbin_cmd)
+    message(FATAL_ERROR "Could not find dumpbin - cannot analyze dependencies.")
+    return()
+  endif(NOT dumpbin_cmd)
+
+  set(ENV{VS_UNICODE_OUTPUT} "") # Block extra output from inside VS IDE.
+  execute_process( COMMAND ${dumpbin_cmd}  /dependents ${item} OUTPUT_VARIABLE dumpbin_cmd_ov RESULT_VARIABLE retcode)
+  if(retcode)
+    MESSAGE(FATAL_ERROR "dumpbin stopped with return code: '${retcode}'")
+  endif(retcode)
+  # Convert to a list of lines:
+  string(REGEX REPLACE ";" "\\\\;" candidates "${dumpbin_cmd_ov}")
+  set(eol_char "E")
+  string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
+
+  # Analyze each line for file names that match the regular expression:
+  set(dumpbin_regex "^    ([^ ].*[Dd][Ll][Ll])${eol_char}$")
+  set(dep_list)
+  foreach(candidate ${candidates})
+    if("${candidate}" MATCHES "${dumpbin_regex}")
+      # Extract information from each candidate:
+      string(REGEX REPLACE "${dumpbin_regex}" "\\1" dep "${candidate}")
+      list(APPEND dep_list ${dep})
+    endif("${candidate}" MATCHES "${dumpbin_regex}")
+  set(${list_var} ${dep_list} PARENT_SCOPE)
+endfunction(get_dependencies_for_item)
+
+#=============================================================================
+# function get_rpath (Windows)
+#=============================================================================
+function(get_rpath target rpath_var)
+  message(FATAL_ERROR "get_rpath not implemented for Windows.")
+endfunction(get_rpath)
+
+elseif(UNIX)
+
+#=============================================================================
+# function is_system_lib (Windows)
+#=============================================================================
+function(is_system_lib item system_var)
+  string(TOLOWER "${item}" lower)
+  string(TOLOWER "$ENV{SystemRoot}" sysroot)
+  string(REGEX REPLACE "\\\\" "/" sysroot "${sysroot}")
+  string(TOLOWER "$ENV{windir}" windir)
+  string(REGEX REPLACE "\\\\" "/" windir "${windir}")
+  if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
+    set(${system_var}  1 PARENT_SCOPE)
+  else()
+    set(${system_var}  0 PARENT_SCOPE)
+  endif()
+endfunction(is_system_lib)
+
+#=============================================================================
+#=============================================================================
+# Linux specific functions
+#=============================================================================
+#=============================================================================
+
+#=============================================================================
+# function get_dependencies_for_item (Linux)
+#=============================================================================
+function(get_dependencies_for_item item list_var)
+
+  if(NOT IS_ABSOLUTE "${item}" AND EXISTS "${item}")
+    message(FATAL_ERROR "Cannot find item: '${item}' to get dependencies.")
+  endif(NOT IS_ABSOLUTE "${item}" AND EXISTS "${item}")
+
+  find_program(ldd_cmd "ldd" PATHS "/usr/local/bin" "/usr/bin")
+  if(NOT ldd_cmd)
+    message(FATAL_ERROR "Could not find ldd - cannot analyze dependencies.")
+    return()
+  endif(NOT ldd_cmd)
+
+  execute_process( COMMAND ${ldd_cmd}  ${item} OUTPUT_VARIABLE ldd_cmd_ov ERROR_VARIABLE ldd_cmd_ev RESULT_VARIABLE retcode)
+  if(retcode)
+    if(${ldd_cmd_ov})
+      message(${ldd_cmd_ov})
+    endif(${ldd_cmd_ov})
+    if(${ldd_cmd_ev})
+      message(${ldd_cmd_ev})
+    endif(${ldd_cmd_ev})
+    message("command:'${ldd_cmd}'  '${item}'")
+    message(FATAL_ERROR "ldd stopped with return code: '${retcode}'")
+  endif(retcode)
+  # Convert to a list of lines:
+  string(REGEX REPLACE ";" "\\\\;" candidates "${ldd_cmd_ov}")
+  set(eol_char "E")
+  string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
+
+  # Analyze each line for file names that match the regular expression:
+  set(ldd_regex "^[\t ]*[^\t ]+ => ([^\t\(]+) .*${eol_char}$")
+  set(ldd_regex_error "not found${eol_char}$")
+  set(ldd_regex_fallback "^[\t ]*([^\t ]+) => ([^\t ]+).*${eol_char}$")
+  set(dep_list)
+  foreach(candidate ${candidates})
+    if("${candidate}" MATCHES "${ldd_regex}")
+      # Extract information from each candidate:
+      if("${candidate}" MATCHES "${ldd_regex_error}")
+        string(REGEX REPLACE "${ldd_regex_fallback}" "\\1" dep "${candidate}")
+      else("${candidate}" MATCHES "${ldd_regex_error}")
+        string(REGEX REPLACE "${ldd_regex}" "\\1" dep "${candidate}")
+      endif("${candidate}" MATCHES "${ldd_regex_error}")
+      list(APPEND dep_list ${dep})
+    endif("${candidate}" MATCHES "${ldd_regex}")
+  endforeach(candidate)
+  set(${list_var} ${dep_list} PARENT_SCOPE)
+endfunction(get_dependencies_for_item)
+
+#=============================================================================
+# function get_rpath (Linux)
+#=============================================================================
+function(get_rpath target rpath_var)
+  find_program(rpath_exe "readelf" PATHS "/usr/local/bin" "/usr/bin")
+  if(NOT rpath_exe)
+    message(FATAL_ERROR "Could not find readelf - cannot resolve rpath.")
+  endif(NOT rpath_exe)
+ execute_process(
+    COMMAND ${rpath_exe} "-d" ${target}
+    OUTPUT_VARIABLE rpath_cmd_ov
+    RESULT_VARIABLE retcode
+  )
+  if(retcode)
+    MESSAGE(FATAL_ERROR "readelf stopped with return code: '${retcode}'")
+  endif(retcode)
+  
+  set(rpath_cmd_regex "Library rpath: \[([^\n ]*):\]")
+  if(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
+    string(REGEX REPLACE ${rpath_cmd_regex} "\\1"  rpath ${rpath_cmd_ov})
+    set(${rpath_var} ${rpath} PARENT_SCOPE)
+  endif(rpath_cmd_ov MATCHES ${rpath_cmd_regex})
+endfunction(get_rpath)
+
+#=============================================================================
+# function copy_qt (Linux)
+#=============================================================================
+function(copy_qt library_dir plugin_dir plugins)
+  file(COPY ${plugin_dir}
+       DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/openstructure) 
+  file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/*.so")
+  set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
+  file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/qt.conf" "[Paths]\nPlugins=../plugins\n")
+endfunction(copy_qt)
+
+#=============================================================================
+# function is_system_lib (Linux)
+#=============================================================================
+function(is_system_lib item system_var)
+  if(item MATCHES "ld-linux\\.|libexpat\\.|libgcc_s\\.|libglib\\.|/cmov/|libice\\.|libSM\\.|libX\\.|libg\\.|libGL\\.|libfontconfig\\.|libfreetype\\.|libdrm\\.|libxcb\\.|libICE\\.|libnvidia\\.|libc\\.")
+    set(${system_var} 1 PARENT_SCOPE)
+  else()
+    set(${system_var}  0 PARENT_SCOPE)
+  endif()
+endfunction(is_system_lib)
+
+else(APPLE)
+  MESSAGE("Unknown platform, deployment will not work.")
+endif(APPLE)
+
+
+
+
+

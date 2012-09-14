@@ -5,7 +5,7 @@
 #
 #-------------------------------------------------------------------------------
 
-include(CheckLSBTypes)
+#include(CheckLSBTypes)
 
 if(( ${LSB_DISTRIBUTOR_ID} MATCHES "centos" AND ${LSB_RELEASE} GREATER 5.9)
  OR (${LSB_DISTRIBUTOR_ID} MATCHES "redhat" AND ${LSB_RELEASE} GREATER 5.9)
@@ -16,7 +16,15 @@ elseif(${LSB_DISTRIBUTOR_ID} MATCHES "debian")
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "The OpenStructure developers")
 else()
   install(CODE "
-    if(NOT ${CMAKE_INSTALL_PREFIX} STREQUAL \${CMAKE_INSTALL_PREFIX})
+    if(NOT ${CMAKE_INSTALL_PREFIX} MATCHES \${CMAKE_INSTALL_PREFIX})
+      set(LIB_DIR ${LIB_DIR})#pass libdir variable in install code block
+      if(NOT ${_USE_RPATH} STREQUAL ON)
+        message(\"======================================================================\")
+        message(\"|          Warning, no rpaths will be embedded upon install.         |\")
+        message(\"|        Dependency resolution during packaging will not work.       |\")
+        message(\"| Add -DUSE-RPATH=1 when running cmake to switch on rpath embedding. |\")
+        message(\"======================================================================\")
+      endif(NOT ${_USE_RPATH} STREQUAL ON)
       set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/ost/cmake_support)
       include(CopyDependencies)
       set(OST_BINARIES \"\${CMAKE_INSTALL_PREFIX}/bin/lddt\"
@@ -35,7 +43,8 @@ else()
       list(APPEND  OST_BINARIES \${qt_plugins})
 
       copy_dependencies(\"\${OST_BINARIES}\")
-    endif(NOT ${CMAKE_INSTALL_PREFIX} STREQUAL \${CMAKE_INSTALL_PREFIX})
+      message(FATAL_ERROR \"stop\")
+    endif(NOT ${CMAKE_INSTALL_PREFIX} MATCHES \${CMAKE_INSTALL_PREFIX})
   ")
   set(CPACK_GENERATOR "TGZ")
   #set(CPACK_INSTALL_CMAKE_PROJECTS "")
