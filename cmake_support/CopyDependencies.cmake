@@ -831,7 +831,7 @@ endfunction(copy_qt)
 # function is_system_lib (Linux)
 #=============================================================================
 function(is_system_lib item system_var)
-  if(item MATCHES "ld-linux\\.|libexpat\\.|libgcc_s\\.|libglib\\.|/cmov/|libice\\.|libSM\\.|libX\\.|libg\\.|libGL\\.|libfontconfig\\.|libfreetype\\.|libdrm\\.|libxcb\\.|libICE\\.|libnvidia\\.|libc\\.")
+  if(item MATCHES "libc\\.|libstdc++\\.|libelf|ld-linux\\.|libexpat\\.|libgcc_s\\.|libglib\\.|/cmov/|libice\\.|libSM\\.|libX\\.|libg\\.|libGL\\.|libfontconfig\\.|libfreetype\\.|libdrm\\.|libxcb\\.|libICE\\.|libnvidia\\.|libc\\.")
     set(${system_var} 1 PARENT_SCOPE)
   else()
     set(${system_var}  0 PARENT_SCOPE)
