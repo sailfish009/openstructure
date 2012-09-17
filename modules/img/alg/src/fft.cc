@@ -258,7 +258,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,SpatialDomain>(const ComplexSpatial
 
   out_state->Data()=in_state.Data(); // use assignement op to copy data area to new state
   int rank = size.GetDim();
-  int n[3] = {size[0],size[1],size[2]};
+  int n[3] = {static_cast<int>(size[0]),static_cast<int>(size[1]),static_cast<int>(size[2])};
   int dir = FFTW_FORWARD;
 
   assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));
@@ -297,7 +297,7 @@ ImageStateBasePtr FFTFnc::VisitState<Complex,FrequencyDomain>(const ComplexFrequ
   out_state->SetAbsoluteOrigin(in_state.GetAbsoluteOrigin());
 
   int rank = size.GetDim();
-  int n[3] = {size[0],size[1],size[2]};
+  int n[3] = {static_cast<int>(size[0]),static_cast<int>(size[1]),static_cast<int>(size[2])};
   int dir = FFTW_BACKWARD;
 
   assert(sizeof(OST_FFTW_fftw_complex)==sizeof(Complex));

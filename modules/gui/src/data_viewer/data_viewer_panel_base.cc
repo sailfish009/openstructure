@@ -478,7 +478,6 @@ void DataViewerPanelBase::mousePressEvent(QMouseEvent* event)
     rubberband_->hide();
     last_x_=event->x();
     last_y_=event->y();
-    QPoint cp=FracPointToWin(geom::Vec2(clicked_position_));
     clicked_position_ = geom::Vec3(WinToFracPoint(QPoint(event->x(),event->y())));
     clicked_position_[2]=slab_;
     emit clicked(clicked_position_);

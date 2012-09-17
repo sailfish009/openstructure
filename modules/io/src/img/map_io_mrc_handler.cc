@@ -698,7 +698,6 @@ void real_dumper(BinaryOStream<CONVERSIONTYPE>& f, header_base& header, const Co
   img::Point pnt;
   char this_dummy; //create dummy variable to give to Progress as this
   Progress::Instance().Register(&this_dummy,header.ns*header.nr,100);
-  Point start=image.GetExtent().GetStart();
   for(int ss=0;ss<header.ns;++ss) {
     pnt[maps]=header.nsstart+ss;
     for(int sr=0;sr<header.nr;++sr) {
