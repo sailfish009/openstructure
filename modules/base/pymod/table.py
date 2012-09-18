@@ -1368,77 +1368,136 @@ Statistics for column %(col)s
         max_idx = i
     return max_val, max_idx
 
-  def PlotBar(self, col, xlabels=None, ylabel=None, title=None, 
-              color=None, yerr=None, width=0.8, bottom=0, 
+  def PlotBar(self, cols, x_labels=None, x_labels_rotation='horizontal', y_title=None, title=None, 
+              colors=None, yerr_cols=None, width=0.8, bottom=0, 
               legend=True, save=False):
+
+    """
+    Create a barplot of the data in cols. Every element of a column will be represented
+    as a single bar. If there are several columns, each row will be grouped together.
+
+    :param cols: Column names with data. If cols is a string, every element of that column
+                 will be represented as a single bar. If cols is a list, every row resulting
+                 of these columns will be grouped together. Every value of the table still
+                 is represented by a single bar.
+
+    :param x_labels: Label for every row on x-axis.
+    :type x_labels: :class:`list`
     
+    :param x_labels_rotation: Can either be 'horizontal', 'vertical' or a number that 
+                              describes the rotation in degrees.
+
+    :param y_title: Y-axis description
+    :type y_title: :class:`str`
+
+    :title: Title
+    :type title: :class:`str`
+
+    :param colors: Colors of the different bars in each group. Must be a list of valid
+                   colornames in matplotlib. Length of color and cols must be consistent.
+    :type colors: :class:`list`
+
+    :param yerr_cols: Columns containing the y-error information. Can either be a string
+                      if only one column is plotted or a list otherwise. Length of
+                      yerr_cols and cols must be consistent.
+
+    :param width: The available space for the groups on the x-axis is divided by the exact
+                  number of groups. The parameters width is the fraction of what is actually
+                  used. If it would be 1.0 the bars of the different groups would touch each other.
+    :type width: :class:`float`
+
+    :param bottom: Bottom
+    :type bottom: :class:`float`
+
+    :param legend: Legend for color explanation.
+    :type legend: :class:`bool`
+
+    :param save: If set, a png image with name $save in the current working directory will be saved.
+    :type save: :class:`str`
+
+    """
     try:
       import numpy as np
       import matplotlib.pyplot as plt
     except:
       raise ImportError('PlotBar relies on numpy and matplotlib, but I could not import it!')
-      
-    if len(col)>7:
+    
+    if len(cols)>7:
       raise ValueError('More than seven bars at one position looks rather meaningless...')
       
     standard_colors=['b','g','y','c','m','r','k']
     data=[]
-  
-    if not isinstance(col,list):
-      col=[col]
-    if not isinstance(yerr,list):
-      yerr=[yerr]*len(self.rows)
+    yerr_data=[]
+
+    if not isinstance(cols, list):
+      cols=[cols]
       
-    if not color:
-      color=standard_colors[:len(col)]
+    if yerr_cols:
+      if not isinstance(yerr_cols, list):
+        yerr_cols=[yerr_cols]
+      if len(yerr_cols)!=len(cols):
+        raise RuntimeError ('Number of cols and number of error columns must be consistent!')
       
-    for c in col:
+    for c in cols:
       cid=self.GetColIndex(c)
       temp=list()
       for r in self.rows:
         temp.append(r[cid])
-      data.append(temp)
+      data.append(temp)  
       
-    if len(yerr)!=len(data[0]):
-      raise RuntimeError('Number of elements in yerr must be consistent with number of elements in each column!')
-      
+    if yerr_cols:
+      for c in yerr_cols:
+        cid=self.GetColIndex(c)
+        temp=list()
+        for r in self.rows:
+          temp.append(r[cid])
+        yerr_data.append(temp)
+    else:
+      for i in range(len(cols)):
+        yerr_data.append(None)
+
+    if not colors:
+      colors=standard_colors[:len(cols)]
+
+    if len(cols)!=len(colors):
+      raise RuntimeError("Number of columns and number of colors must be consistent!")
+
     ind=np.arange(len(data[0]))
     single_bar_width=float(width)/len(data)
     
     fig=plt.figure()
-    
     ax=fig.add_subplot(111)
-    
     legend_data=[]
-    
+    print data
+    print yerr_data
     for i in range(len(data)):
-      legend_data.append(ax.bar(ind+i*single_bar_width,data[i],single_bar_width,color=color[i],yerr=yerr[i])[0])
+      legend_data.append(ax.bar(ind+i*single_bar_width,data[i],single_bar_width,bottom=bottom,color=colors[i],yerr=yerr_data[i], ecolor='black')[0])
       
     if title!=None:
-      nice_title=x_title
+      nice_title=title
     else:
       nice_title="coolest barplot on earth"
     ax.set_title(nice_title, size='x-large', fontweight='bold')  
     
-    if ylabel!=None:
-      nice_y=ylabel
+    if y_title!=None:
+      nice_y=y_title
     else:
       nice_y="score" 
     ax.set_ylabel(nice_y)
     
-    if xlabels:
-      if len(data[0])!=len(xlabels):
+    if x_labels:
+      if len(data[0])!=len(x_labels):
         raise ValueError('Number of xlabels is not consistent with number of rows!')
     else:
-      xlabels=list()
+      x_labels=list()
       for i in range(1,len(data[0])+1):
-        xlabels.append('Row '+str(i))
+        x_labels.append('Row '+str(i))
       
     ax.set_xticks(ind+width*0.5)
-    ax.set_xticklabels(xlabels)
+    ax.set_xticklabels(x_labels, rotation = x_labels_rotation)
       
     if legend:
-      ax.legend(legend_data, col)   
+      ax.legend(legend_data, cols)   
       
     if save:
       plt.savefig(save)
