@@ -1409,7 +1409,7 @@ Statistics for column %(col)s
     :param bottom: Bottom
     :type bottom: :class:`float`
 
-    :param legend: Legend for color explanation.
+    :param legend: Legend for color explanation, the corresponding column respectively.
     :type legend: :class:`bool`
 
     :param save: If set, a png image with name $save in the current working directory will be saved.
@@ -1468,8 +1468,7 @@ Statistics for column %(col)s
     fig=plt.figure()
     ax=fig.add_subplot(111)
     legend_data=[]
-    print data
-    print yerr_data
+
     for i in range(len(data)):
       legend_data.append(ax.bar(ind+i*single_bar_width,data[i],single_bar_width,bottom=bottom,color=colors[i],yerr=yerr_data[i], ecolor='black')[0])
       
