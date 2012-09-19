@@ -57,6 +57,7 @@ ChainType DLLEXPORT_OST_MOL ChainTypeFromString(const StringRef identifier);
 ///
 /// \return The ChainType corresponding to the input, throws a
 ///         ost::Error on unknown type
+ChainType DLLEXPORT_OST_MOL ChainTypeFromString(const String& identifier);
 
 /// \brief Return the String identifier for a given type
 ///

@@ -134,7 +134,7 @@ class DLLEXPORT_OST_GFX IndexedVertexArray {
   void SetSolid(bool f) {solid_=f;}
   bool GetSolid() const {return solid_;}
   void SetSolidColor(const Color& c) {solid_color_=c;}
-  bool GetSolidcolor() const {return solid_color_;}
+  Color GetSolidcolor() const {return solid_color_;}
   void SetClipOffset(float f) {clip_offset_=f;}
   float GetClipOffset() const {return clip_offset_;}
 
