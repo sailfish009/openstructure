@@ -96,8 +96,6 @@ String get_ost_root()
 #else
   #ifdef _MSC_VER
     dir.cdUp();
-    dir.cdUp();
-    dir.cdUp();
   #else
     dir.cdUp();
     dir.cdUp();

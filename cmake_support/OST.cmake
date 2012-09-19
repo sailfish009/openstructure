@@ -192,12 +192,12 @@ macro(module)
   # create library  
   #-----------------------------------------------------------------------------
   file(MAKE_DIRECTORY ${LIB_STAGE_PATH})
-  file(MAKE_DIRECTORY ${EXECUTABLE_OUTPUT_PATH})
+  file(MAKE_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
   file(MAKE_DIRECTORY ${LIBEXEC_STAGE_PATH})
   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
   if (NOT TARGET create_stage)
     add_custom_target(create_stage COMMAND ${CMAKE_COMMAND} -E make_directory ${LIB_STAGE_PATH}
-                                   COMMAND ${CMAKE_COMMAND} -E make_directory ${EXECUTABLE_OUTPUT_PATH}
+                                   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
                                    COMMAND ${CMAKE_COMMAND} -E make_directory ${LIBEXEC_STAGE_PATH}
                                    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/tests")
   endif()
@@ -545,7 +545,11 @@ macro(pymod)
 
     set_target_properties("_${_LIB_NAME}"
                           PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${PYMOD_STAGE_DIR})
- 
+    set_target_properties("_${_LIB_NAME}"
+                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE ${PYMOD_STAGE_DIR})
+    set_target_properties("_${_LIB_NAME}"
+                          PROPERTIES LIBRARY_OUTPUT_DIRECTORY_DEBUG ${PYMOD_STAGE_DIR})
+
     if (NOT ENABLE_STATIC)
       if (_USE_RPATH)
         string(REGEX REPLACE "/[^/]*" "/.." inv_pymod_path "/${PYMOD_DIR}")
@@ -651,14 +655,20 @@ macro(ost_unittest)
       else()
         add_executable(${_test_name} EXCLUDE_FROM_ALL ${_SOURCES})
       endif()
+      set_target_properties(${_test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"  )
+      set_target_properties(${_test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/tests"  )
+      set_target_properties(${_test_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/tests"  )
+
       if (WIN32)
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES} "${_ARG_PREFIX}_${_ARG_MODULE}")  
-        add_custom_target("${_test_name}_run":
-                        COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe || echo
-                        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/..
-                        COMMENT "running checks for module ${_ARG_MODULE}"
-                        DEPENDS ${_test_name})
-        add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe)
+        #add_custom_target("${_test_name}_run":
+        #                COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe || echo
+        #                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/..
+        #                COMMENT "running checks for module ${_ARG_MODULE}"
+        #                DEPENDS ${_test_name})
+        #add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${_test_name}.exe)
+        #set_target_properties("${_test_name}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
+        #add_dependencies(check "${_test_name}_run")
       else()
         target_link_libraries(${_test_name} ${BOOST_UNIT_TEST_LIBRARIES}
                             "${_ARG_PREFIX}_${_ARG_MODULE}")
@@ -674,28 +684,29 @@ macro(ost_unittest)
                         DEPENDS ${_test_name})
         add_test("${_test_name}" ${CMAKE_CURRENT_BINARY_DIR}/${_test_name} )
         add_dependencies(check_xml "${_test_name}_run_xml")
+        add_dependencies(check "${_test_name}_run")
       endif()
       
       if (_ARG_LINK)
         target_link_libraries("${_test_name}" ${_ARG_LINK})
       endif()
 
-      add_dependencies(check "${_test_name}_run")
       set_target_properties(${_test_name}
                             PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                             "${CMAKE_CURRENT_BINARY_DIR}")
-      if (WIN32)
-        set_target_properties("${_test_name}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
-      endif()
     endif()
 
     foreach(py_test ${PY_TESTS})
       if(WIN32)
-        set (PY_TESTS_CMD "${PYTHON_BINARY}")
-        add_custom_target("${py_test}_run"
-                  CALL "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                  COMMENT "running checks ${py_test}" VERBATIM)
+        # todo fix python unit test running for Windows
+        #set (PY_TESTS_CMD "${EXECUTABLE_OUTPUT_PATH}/ost.bat")
+        #add_custom_target("${py_test}_run"
+        #          CALL "${PY_TESTS_CMD} ${CMAKE_CURRENT_SOURCE_DIR}/${py_test} || echo"
+        #          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        #          COMMENT "running checks ${py_test}" VERBATIM)
+        #set_target_properties("${py_test}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
+        #add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
+        #add_dependencies(check "${py_test}_run")
       else()
         set(python_path $ENV{PYTHONPATH})
         if(python_path)
@@ -712,12 +723,9 @@ macro(ost_unittest)
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                   COMMENT "running checks ${py_test}" VERBATIM)
         add_dependencies("${py_test}_run_xml" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
-      endif()
-      add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
-      add_dependencies(check "${py_test}_run")
-      add_dependencies(check_xml "${py_test}_run_xml")
-      if (WIN32)
-        set_target_properties("${py_test}_run" PROPERTIES EXCLUDE_FROM_ALL "1")
+        add_dependencies("${py_test}_run" ost_scripts "_${_ARG_PREFIX}_${_ARG_MODULE}")
+        add_dependencies(check "${py_test}_run")
+        add_dependencies(check_xml "${py_test}_run_xml")
       endif()
       
     endforeach()
@@ -808,7 +816,9 @@ endmacro()
 #-------------------------------------------------------------------------------
 macro(setup_stage)
   set(STAGE_DIR "${CMAKE_BINARY_DIR}/stage")
-  set(EXECUTABLE_OUTPUT_PATH ${STAGE_DIR}/bin  )
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${STAGE_DIR}/bin  )
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${STAGE_DIR}/bin  )
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${STAGE_DIR}/bin  )
   set(HEADER_STAGE_PATH ${STAGE_DIR}/include )
   set(SHARED_DATA_PATH ${STAGE_DIR}/share/openstructure  )
 
@@ -861,7 +871,7 @@ macro(setup_compiler_flags)
 
      add_definitions(-D_USE_MATH_DEFINES -D_CRT_SECURE_NO_DEPRECATE
                      -D_SCL_SECURE_NO_DEPRECATE -DNOMINMAX)
-     add_definitions(-Zc:wchar_t-)   #
+     #add_definitions(-Zc:wchar_t-)   #
     # add_definitions(-MDd -vmg -EHsc -GR)
     #GR:Uses the __fastcall calling convention (x86 only).
     #-EHsc to specify the synchronous exception handling mode/
