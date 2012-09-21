@@ -1539,6 +1539,7 @@ void MMCifReader::OnEndData()
   // process chain types
   std::vector<std::pair<mol::ChainHandle, String> >::const_iterator css;
   MMCifEntityDescMap::const_iterator edm_it;
+  String pdb_auth_chain_name;
   for (css = chain_id_pairs_.begin(); css != chain_id_pairs_.end(); ++css) {
     edm_it = entity_desc_map_.find(css->second);
 
@@ -1548,6 +1549,9 @@ void MMCifReader::OnEndData()
       if (edm_it->second.seqres.length() > 0) {
         seqres_.AddSequence(seq::CreateSequence(css->first.GetName(),
                                                 edm_it->second.seqres));
+        pdb_auth_chain_name = css->first.GetStringProp("pdb_auth_chain_name");
+        info_.AddMMCifPDBChainTr(css->first.GetName(), pdb_auth_chain_name);
+        info_.AddPDBMMCifChainTr(pdb_auth_chain_name, css->first.GetName());
       } else if (edm_it->second.type!=mol::CHAINTYPE_WATER) {
         // mark everything that doesn't have SEQRES as ligand and isn't of type 
         // water as ligand

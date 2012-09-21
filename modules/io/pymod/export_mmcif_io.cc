@@ -280,6 +280,10 @@ void export_mmcif_io()
     .def("GetStructDetails", &MMCifInfo::GetStructDetails)
     .def("SetObsoleteInfo", &MMCifInfo::SetObsoleteInfo)
     .def("GetObsoleteInfo", &MMCifInfo::GetObsoleteInfo)
+.def("AddMMCifPDBChainTr", &MMCifInfo::AddMMCifPDBChainTr)
+    .def("GetMMCifPDBChainTr", &MMCifInfo::GetMMCifPDBChainTr)
+    .def("AddPDBMMCifChainTr", &MMCifInfo::AddPDBMMCifChainTr)
+    .def("GetPDBMMCifChainTr", &MMCifInfo::GetPDBMMCifChainTr)
     .add_property("citations", make_function(&MMCifInfo::GetCitations,
                                    return_value_policy<copy_const_reference>()))
     .add_property("biounits", make_function(&MMCifInfo::GetBioUnits,

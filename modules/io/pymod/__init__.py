@@ -387,19 +387,19 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
       tr = geom.Mat4()
       tr = trans * rot
       trans_matrices.append(tr)
-      for op_n in range(1, len(operations)):
-        tmp_ops = list()
-        for o in operations[op_n]:
-          rot = geom.Mat4()
-          rot.PasteRotation(o.rotation)
-          trans = geom.Mat4()
-          trans.PasteTranslation(o.translation)
-          tr = geom.Mat4()
-          tr = trans * rot
-          for t_o in trans_matrices:
-            tp = t_o * tr
-            tmp_ops.append(tp)
-        trans_matrices = tmp_ops
+    for op_n in range(1, len(operations)):
+      tmp_ops = list()
+      for o in operations[op_n]:
+        rot = geom.Mat4()
+        rot.PasteRotation(o.rotation)
+        trans = geom.Mat4()
+        trans.PasteTranslation(o.translation)
+        tr = geom.Mat4()
+        tr = trans * rot
+        for t_o in trans_matrices:
+          tp = t_o * tr
+          tmp_ops.append(tp)
+      trans_matrices = tmp_ops
   # select chains into a view as basis for each transformation
   assu = asu.Select('cname=' + ','.join(biounit.GetChainList()))
   # use each transformation on the view, store as entity and transform, PDBize
@@ -425,6 +425,9 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
         edi.SetChainDescription(new_chain, chain.description)
         edi.SetChainType(new_chain, chain.type)
         new_chain.SetStringProp('original_name', chain.name)
+        if chain.HasProp("pdb_auth_chain_name"):
+          new_chain.SetStringProp("pdb_auth_chain_name", 
+                                  chain.GetStringProp("pdb_auth_chain_name"))
         for res in chain.residues:
           new_res = edi.AppendResidue(new_chain, res.name, res.number)
           _CopyAtoms(res, new_res, edi, tr)
@@ -455,6 +458,10 @@ def _PDBize(biounit, asu, seqres=None, min_polymer_size=10):
                                       mol.ResNum(last_rnum+1, ins_code))
           new_res.SetStringProp('description', chain.description)
           new_res.SetStringProp('type', mol.StringFromChainType(chain.type))
+          new_res.SetStringProp("original_name", chain.name)
+          if chain.HasProp("pdb_auth_chain_name"):
+            new_res.SetStringProp("pdb_auth_chain_name",
+                                  chain.GetStringProp("pdb_auth_chain_name"))
           ins_code = chr(ord(ins_code)+1)
           _CopyAtoms(res, new_res, edi, tr)
   conop.ConnectAll(pdb_bu)

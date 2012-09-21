@@ -16,7 +16,7 @@ push @check_queue, @ARGV;
 
 while (@check_queue) {
   my $to_check = pop @check_queue;
-  if (exists $checked_libs{$to_check}) {
+  if (exists $checked_libs{$to_check} or $to_check =~ /ld-linux.so.2/) {
     next;
   } else {
     $checked_libs{$to_check} = 1;
