@@ -837,7 +837,7 @@ endfunction(copy_qt)
 # function is_system_lib (Linux)
 #=============================================================================
 function(is_system_lib item system_var)
-  if(item MATCHES "^/lib/|libX|pylibc\\.|libstdc\\+\\+\\.|libelf|ld-linux\\.|libexpat\\.|libgcc_s\\.|libglib\\.|/cmov/|libice\\.|libSM\\.|libX\\.|libg\\.|libGL\\.|libfontconfig\\.|libfreetype\\.|libdrm\\.|libxcb\\.|libICE\\.|libnvidia\\.|libc\\.")
+  if(item MATCHES "/cmov/|ld-linux[\\.\\-]|libc[\\.\\-]|libdrm[\\.\\-]|libelf[\\.\\-]|libexpat[\\.\\-]|libfontconfig[\\.\\-]|libfreetype[\\.\\-]|libg[\\.\\-]|libgcc_s[\\.\\-]|libGL[\\.\\-]|libglib[\\.\\-]|libgthread[\\.\\-]|lib(ice|ICE)[\\.\\-]|libnvidia[\\.\\-]|libpthread[\\.\\-]|libse(pol|linux)[\\.\\-]|libSM[\\.\\-]|libstdc\\+\\+[\\.\\-]|libX[a-zA-Z0-9]*[\\.\\-]|libxcb[\\.\\-]|pylibc[\\.\\-]")
     set(${system_var} 1 PARENT_SCOPE)
   else()
     set(${system_var}  0 PARENT_SCOPE)
