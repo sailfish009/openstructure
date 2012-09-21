@@ -243,8 +243,7 @@ macro(module)
                             INSTALL_NAME_DIR "@rpath")
     endif()
     if (WIN32)
-      #set_target_properties(${_LIB_NAME} PROPERTIES PREFIX "../")
-      install(TARGETS ${_LIB_NAME} ARCHIVE DESTINATION "${LIB_DIR}")
+      install(TARGETS ${_LIB_NAME} RUNTIME DESTINATION bin)
     else()
       if (ENABLE_STATIC)
         install(TARGETS ${_LIB_NAME} ARCHIVE DESTINATION "${LIB_DIR}")
@@ -447,7 +446,7 @@ macro(ui_to_python LIBNAME PYMODDIR STAGEDIR)
   add_custom_target("${LIBNAME}_ui" ALL)
   add_dependencies("_${LIBNAME}" "${LIBNAME}_ui")
   find_program(_PYUIC_EXECUTABLE
-    NAMES pyuic4-${PYTHON_VERSION} pyuic4 pyuic
+    NAMES pyuic4-${PYTHON_VERSION} pyuic4 pyuic pyuic4.bat
     PATHS  ENV PATH 
   )  
   if(NOT _PYUIC_EXECUTABLE)
@@ -571,11 +570,7 @@ macro(pymod)
                           PROPERTIES PREFIX "")
     else ()
       set_target_properties("_${_LIB_NAME}"
-                          PROPERTIES PREFIX "../")
-
-      set_target_properties("_${_LIB_NAME}"
                           PROPERTIES SUFFIX ".pyd")
-
     endif()
     install(TARGETS "_${_LIB_NAME}" LIBRARY DESTINATION
             "${LIB_DIR}/${PYMOD_DIR}")
