@@ -19,6 +19,7 @@
 #include <sstream>
 #include <iomanip>
 #include <limits>
+#include <algorithm>
 
 #include <boost/filesystem/fstream.hpp>
 
