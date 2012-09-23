@@ -26,11 +26,66 @@
 #include <ost/mol/impl/atom_impl.hh>
 #include <ost/mol/residue_handle.hh>
 #include "heuristic.hh"
+#include "conop.hh"
 
 namespace ost { namespace conop {
 
+void HeuristicProcessor::ProcessUnkResidue(DiagnosticsPtr diags, 
+                                           mol::ResidueHandle res) const {
+  res.SetChemClass(GuessChemClass(res));
+  mol::AtomHandleList atoms = res.GetAtomList(); 
+  for (mol::AtomHandleList::iterator 
+       i = atoms.begin(), e = atoms.end(); i != e; ++i) {
+    mol::AtomHandle a = *i;
+    if (!Conopology::Instance().IsValidElement(a.GetElement()))
+      a.SetElement(GuessAtomElement(a.GetName(), a.IsHetAtom()));
+  }
+  if (!this->GetConnect()) { return; }
+  for (mol::AtomHandleList::iterator 
+       i = atoms.begin(), e = atoms.end(); i != e; ++i) {
+    this->DistanceBasedConnect(*i);
+  }
+}
+
 void HeuristicProcessor::DoProcess(DiagnosticsPtr diags, 
-                                   mol::EntityHandle ent) const {
+                                   mol::EntityHandle ent) const
+{
+  Profile prof("HeuristicProcessor::Process");
+  mol::ChainHandleList chains=ent.GetChainList();
+  for (mol::ChainHandleList::iterator 
+       i = chains.begin(), e = chains.end(); i!= e; ++i) {
+    mol::ChainHandle& chain = *i;
+    mol::ResidueHandleList residues = chain.GetResidueList();
+    mol::ResidueHandle prev;
+    for (mol::ResidueHandleList::iterator 
+         j = residues.begin(), e2 = residues.end(); j != e2; ++j) {
+      mol::ResidueHandle residue = *j;
+      CompoundPtr compound = lib_.FindCompound(residue.GetName(), Compound::PDB);
+      if (!compound) {
+        // process unknown residue...
+        this->ProcessUnkResidue(diags, residue);
+        continue;
+      }
+      this->ReorderAtoms(residue, compound, true);  
+      this->FillResidueProps(residue, compound);
+      if (this->GetConnect()) {
+        this->ConnectAtomsOfResidue(residue, compound, false);
+        this->ConnectResidues(prev, residue);
+      }
+      prev = residue;
+      if (!this->GetConnect()) { continue; }
+      mol::AtomHandleList atoms = residue.GetAtomList();
+      for (mol::AtomHandleList::iterator 
+          i = atoms.begin(), e = atoms.end(); i != e; ++i) {
+        if (i->GetBondCount() == 0)
+          this->DistanceBasedConnect(*i);
+      }
+    }
+    if (residues.empty() || !this->GetAssignTorsions()) {
+      continue;
+    }
+    AssignBackboneTorsions(residues);
+  }
 }
 
 }}

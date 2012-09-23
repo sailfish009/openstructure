@@ -327,5 +327,55 @@ void verify_1zk_connectivity(const ResidueHandle& r1)
   BOOST_CHECK(BondExists(r1.FindAtom("CD"), r1.FindAtom("N3")));
 }
 
+ResidueHandle make_arg(ChainHandle chain) 
+{
+  XCSEditor e=chain.GetEntity().EditXCS();
+  ResidueHandle res = e.AppendResidue(chain, "ARG");
+  e.InsertAtom(res, "N",geom::Vec3(20.202,33.112,58.011));
+  e.InsertAtom(res, "CA",geom::Vec3(19.396,31.903,58.033));
+  e.InsertAtom(res, "C",geom::Vec3(18.608,31.739,59.328));
+  e.InsertAtom(res, "O",geom::Vec3(17.651,30.965,59.381));
+  e.InsertAtom(res, "CB",geom::Vec3(20.284,30.681,57.801));
+  e.InsertAtom(res, "CG",geom::Vec3(20.665,30.488,56.342));
+  e.InsertAtom(res, "CD",geom::Vec3(21.557,29.281,56.154));
+  e.InsertAtom(res, "NE",geom::Vec3(22.931,29.557,56.551));
+  e.InsertAtom(res, "CZ",geom::Vec3(23.901,28.653,56.528));
+  e.InsertAtom(res, "NH1",geom::Vec3(23.640,27.417,56.130));
+  e.InsertAtom(res, "NH2",geom::Vec3(25.132,28.980,56.893));
+  return res;
+}
+
+ResidueHandle make_leu(ChainHandle chain) 
+{
+  XCSEditor e=chain.GetEntity().EditXCS();  
+  ResidueHandle res=e.AppendResidue(chain, "LEU");
+
+  e.InsertAtom(res, "N", geom::Vec3(19.003,32.473,60.366));
+  e.InsertAtom(res, "CA", geom::Vec3(18.330,32.402,61.664));
+  e.InsertAtom(res, "C", geom::Vec3(17.884,33.787,62.117));
+  e.InsertAtom(res, "O", geom::Vec3(17.853,34.091,63.308));
+  e.InsertAtom(res, "CB", geom::Vec3(19.269,31.793,62.710));
+  e.InsertAtom(res, "CG", geom::Vec3(19.695,30.340,62.501));
+  e.InsertAtom(res, "CD1", geom::Vec3(20.585,29.897,63.648));
+  e.InsertAtom(res, "CD2", geom::Vec3(18.461,29.459,62.420));
+  return res;
+}
+
+ResidueHandle make_defective_leu(ChainHandle chain) 
+{
+  XCSEditor e=chain.GetEntity().EditXCS();  
+  ResidueHandle res=e.AppendResidue(chain, "LEU");
+
+  e.InsertAtom(res, "N", geom::Vec3(19.003,32.473,60.366));
+  e.InsertAtom(res, "CA", geom::Vec3(18.330,32.402,61.664));
+  e.InsertAtom(res, "C", geom::Vec3(17.884,33.787,62.117));
+  e.InsertAtom(res, "O", geom::Vec3(17.853,34.091,63.308));
+  e.InsertAtom(res, "CB", geom::Vec3(19.269,31.793,102.710));
+  e.InsertAtom(res, "CG", geom::Vec3(19.695,30.340,62.501));
+  e.InsertAtom(res, "CD1", geom::Vec3(20.585,29.897,63.648));
+  e.InsertAtom(res, "CD2", geom::Vec3(18.461,29.459,62.420));
+  return res;
+}
+
 }}
 

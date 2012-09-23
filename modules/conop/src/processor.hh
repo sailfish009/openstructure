@@ -22,7 +22,7 @@
 #include <ost/mol/entity_handle.hh>
 #include "module_config.hh"
 #include "diag.hh"
-
+#include "compound.hh"
 namespace ost { namespace conop {
 
 typedef enum {
@@ -53,14 +53,21 @@ protected:
                                mol::EntityHandle ent) const { return true; }  
   virtual bool EndProcessing(DiagnosticsPtr diags, 
                              mol::EntityHandle ent) const { return true; }
-  void ProcessUnkResidue(DiagnosticsPtr diags,
-                         mol::ResidueHandle res) const;
-  void ProcessUnkAtoms(DiagnosticsPtr diags,
-                       mol::AtomHandleList unks) const;
+  bool HasUnknownAtoms(mol::ResidueHandle residue, CompoundPtr compound, 
+                       bool strict_hydrogens) const;
+  void ReorderAtoms(mol::ResidueHandle residue, CompoundPtr compound, 
+                    bool fix_element) const;
+  void FillResidueProps(mol::ResidueHandle residue, CompoundPtr compound) const;
+  void ConnectAtomsOfResidue(mol::ResidueHandle residue, 
+                             CompoundPtr compound, bool strict_hydrogens) const;
+  void ConnectResidues(mol::ResidueHandle residue, mol::ResidueHandle next) const;
+  static bool AreResiduesConsecutive(mol::ResidueHandle a, mol::ResidueHandle b);
+  void DistanceBasedConnect(mol::AtomHandle atom) const;
+  mol::AtomHandle LocateAtom(const mol::AtomHandleList&, int ordinal) const;
 public:
-  Processor(): strict_hydrogens_(false), check_bond_feasibility_(false),
-    assign_torsions_(false), connect_(true), unk_atom_treatment_(CONOP_WARN),
-    unk_res_treatment_(CONOP_WARN), zero_occ_treatment_(CONOP_SILENT) {}
+  Processor(): check_bond_feasibility_(false),
+    assign_torsions_(false), connect_(true), 
+    zero_occ_treatment_(CONOP_SILENT) {}
   void SetConnect(bool connect) {
     connect_ = connect;
   }
@@ -74,37 +81,16 @@ public:
   bool GetAssignTorsions() const {
     return assign_torsions_;
   }
-  ConopAction GetUnkResidueTreatment() const {
-    return unk_res_treatment_;
-  }
-
-  ConopAction GetUnkAtomTreatment() const {
-    return unk_atom_treatment_;
-  }
 
   bool GetCheckBondFeasibility() const {
     return check_bond_feasibility_;
   }
 
-  bool GetStrictHydrogens() const {
-    return strict_hydrogens_;
-  }
-
-  void SetStrictHydrogens(bool flag) {
-    strict_hydrogens_ = flag;
-  }
 
   void SetCheckBondFeasibility(bool flag) {
     check_bond_feasibility_ = flag;
   }
 
-  void SetUnkResidueTreatment(ConopAction action) {
-    unk_res_treatment_ = action;
-  }
-
-  void SetUnkAtomTreatment(ConopAction action) {
-    unk_atom_treatment_ = action;
-  }
 
   ConopAction GetZeroOccTreatment() const {
     return zero_occ_treatment_;
@@ -114,17 +100,20 @@ public:
     zero_occ_treatment_ = action;
   }
 private:
-  bool strict_hydrogens_;
   bool check_bond_feasibility_;
   bool assign_torsions_;
   bool connect_;
-  ConopAction unk_atom_treatment_;
-  ConopAction unk_res_treatment_;
   ConopAction zero_occ_treatment_;
 };
 
 ConopAction DLLEXPORT_OST_CONOP ConopActionFromString(const String& name);
 
+
+/// \brief guess element of atom based on name and hetatm flag
+String DLLEXPORT_OST_CONOP GuessAtomElement(const String& atom_name, bool hetatm);
+
+/// \brief guess chemclass based on atoms of residue
+mol::ChemClass DLLEXPORT_OST_CONOP GuessChemClass(mol::ResidueHandle res);
 
 /// \brief assigns phi/psi/omega to all residues marked peptide-linking of 
 ///     the chain
@@ -138,6 +127,10 @@ void DLLEXPORT_OST_CONOP AssignBackboneTorsions(mol::ResidueHandle prev,
 
 bool DLLEXPORT_OST_CONOP IsBondFeasible(const mol::AtomHandle&, 
                                         const mol::AtomHandle&);
+mol::AtomHandleList DLLEXPORT_OST_CONOP 
+GetUnknownAtomsOfResidue(mol::ResidueHandle residue, 
+                         CompoundPtr compound,
+                         bool strict_hydrogens=false);
 }}
 
 #endif

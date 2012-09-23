@@ -36,9 +36,8 @@ void (PDBWriter::*write_b)(const mol::EntityView&)=&PDBWriter::Write;
 void export_pdb_io()
 {
   class_<IOProfile>("IOProfile",
-         init<String,bool,bool,bool,bool,bool,bool,bool,
+         init<String,bool,bool,bool,bool,bool,bool,
               conop::ProcessorPtr>((arg("dialect")="PDB",
-                                    arg("strict_hydrogens")=false,
                                     arg("quack_mode")=false,
                                     arg("fault_tolerant")=false,
                                     arg("join_spread_atom_records")=false,
@@ -49,12 +48,10 @@ void export_pdb_io()
     .def_readwrite("dialect", &IOProfile::dialect)
     .def_readwrite("fault_tolerant", &IOProfile::fault_tolerant)
     .def_readwrite("quack_mode", &IOProfile::quack_mode)
-    //.def_readwrite("strict_hydrogens", &IOProfile::strict_hydrogens)
     .def_readwrite("no_hetatms", &IOProfile::no_hetatms)
     .def_readwrite("calpha_only", &IOProfile::calpha_only)
     .def_readwrite("join_spread_atom_records", &IOProfile::join_spread_atom_records)
     .def_readwrite("processor", &IOProfile::processor)
-    //.def_readwrite("bond_feasibility_check", &IOProfile::bond_feasibility_check)
     .def("Copy", &IOProfile::Copy)
     .def(self_ns::str(self))
   ;

@@ -37,8 +37,17 @@ typedef boost::shared_ptr<RuleBasedProcessor> RuleBasedProcessorPtr;
 class DLLEXPORT_OST_CONOP RuleBasedProcessor  : public Processor {
 public:
   RuleBasedProcessor(CompoundLibPtr compound_lib): 
-    lib_(compound_lib)
+    lib_(compound_lib), fix_element_(true), strict_hydrogens_(false), 
+    unk_res_treatment_(CONOP_WARN), unk_atom_treatment_(CONOP_WARN)
   {
+  }
+
+  ConopAction GetUnkResidueTreatment() const {
+    return unk_res_treatment_;
+  }
+
+  ConopAction GetUnkAtomTreatment() const {
+    return unk_atom_treatment_;
   }
 
   bool GetFixElement() const {
@@ -47,28 +56,39 @@ public:
   void SetFixElement(bool flag) {
     fix_element_ = flag;
   }
+  bool GetStrictHydrogens() const {
+    return strict_hydrogens_;
+  }
+
+  void SetStrictHydrogens(bool flag) {
+    strict_hydrogens_ = flag;
+  }
+  void SetUnkResidueTreatment(ConopAction action) {
+    unk_res_treatment_ = action;
+  }
+
+  void SetUnkAtomTreatment(ConopAction action) {
+    unk_atom_treatment_ = action;
+  }
   virtual ProcessorPtr Copy() const {
     return ProcessorPtr(new RuleBasedProcessor(*this));
   }
 protected:
+  void ProcessUnkResidue(DiagnosticsPtr diags,
+                         mol::ResidueHandle res) const;
+  void ProcessUnkAtoms(DiagnosticsPtr diags,
+                       mol::AtomHandleList unks) const;
   virtual void DoProcess(DiagnosticsPtr diags, 
                          mol::EntityHandle ent) const;
 private:
-  bool HasUnknownAtoms(mol::ResidueHandle residue, CompoundPtr compound) const;
-  void ReorderAtoms(mol::ResidueHandle residue, CompoundPtr compound) const;
-  void FillResidueProps(mol::ResidueHandle residue, CompoundPtr compound) const;
-  void ConnectAtomsOfResidue(mol::ResidueHandle residue, CompoundPtr compound) const;
-  void ConnectResidues(mol::ResidueHandle residue, mol::ResidueHandle next) const;
-  mol::AtomHandle LocateAtom(const mol::AtomHandleList&, int ordinal) const;
   CompoundLibPtr lib_;
   bool fix_element_;
+  bool strict_hydrogens_;
+  ConopAction unk_res_treatment_;
+  ConopAction unk_atom_treatment_;
 };
 
 
-mol::AtomHandleList DLLEXPORT_OST_CONOP 
-GetUnknownAtomsOfResidue(mol::ResidueHandle residue, 
-                         CompoundPtr compound,
-                         bool strict_hydrogens=false);
 
 }}
 #endif

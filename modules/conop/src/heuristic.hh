@@ -20,7 +20,7 @@
 #define OST_CONOP_HEURISTIC_HH
 
 #include <ost/mol/entity_handle.hh>
-#include "compound_lib.hh"
+#include "minimal_compound_lib.hh"
 #include "diag.hh"
 #include "processor.hh"
 
@@ -39,9 +39,11 @@ public:
     return ProcessorPtr(new HeuristicProcessor(*this));
   }
 protected:
+  void ProcessUnkResidue(DiagnosticsPtr diags, mol::ResidueHandle res) const;
   virtual void DoProcess(DiagnosticsPtr diags, 
                          mol::EntityHandle ent) const;
 private:
+  MinimalCompoundLib lib_;
 };
 
 

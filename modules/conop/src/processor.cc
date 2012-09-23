@@ -20,10 +20,19 @@
 #include <ost/mol/xcs_editor.hh>
 #include <ost/mol/bond_handle.hh>
 #include <ost/mol/torsion_handle.hh>
+#include <ost/mol/impl/residue_impl.hh>
+#include <ost/mol/impl/atom_impl.hh>
+#include <ost/mol/residue_handle.hh>
 #include "processor.hh"
 
 namespace ost { namespace conop {
 
+struct OrdinalAtomComp {
+  bool operator()(const mol::impl::AtomImplPtr& a,
+                  const mol::impl::AtomImplPtr& b) const {
+    return a->GetState()<b->GetState();
+  }
+};
 DiagnosticsPtr Processor::Process(mol::EntityHandle ent, 
                                   bool log_diags) const
 {
@@ -105,69 +114,93 @@ void AssignBackboneTorsions(mol::ResidueHandle prev,
     }
   }
 } 
-
-void Processor::ProcessUnkResidue(DiagnosticsPtr diags,
-                                  mol::ResidueHandle res) const
+mol::ChemClass GuessChemClass(mol::ResidueHandle res)
 {
-  // Don't do anything if treatment is set to SILENT
-  if (this->GetUnkResidueTreatment() == CONOP_SILENT) {
-    return;
+  mol::AtomHandle ca=res.FindAtom("CA");
+  if (!ca.IsValid() || ca.GetElement()!="C") return mol::ChemClass();
+  mol::AtomHandle n=res.FindAtom("N");
+  if (!n.IsValid() || n.GetElement()!="N") return mol::ChemClass();
+  mol::AtomHandle c=res.FindAtom("C");
+  if (!c.IsValid() || c.GetElement()!="C") return mol::ChemClass();
+  mol::AtomHandle o=res.FindAtom("O");
+  if (!o.IsValid() || o.GetElement()!="O") return mol::ChemClass();
+  if (IsBondFeasible(n, ca) && IsBondFeasible(ca, c) &&
+      IsBondFeasible(c, o)) {
+    return mol::ChemClass(mol::ChemClass::PEPTIDE_LINKING);
   }
-  switch (this->GetUnkResidueTreatment()) {
-    case CONOP_WARN:
-      diags->AddDiag(DIAG_UNK_RESIDUE, "unknown residue %0")
-            .AddResidue(res);
-      break;
-    case CONOP_FATAL:
-      // FIXME: Implement a ConopError based on Diag...
-      break;
-    case CONOP_REMOVE_RESIDUE:
-    case CONOP_REMOVE:
-      diags->AddDiag(DIAG_UNK_RESIDUE, "removed unknown residue %0")
-           .AddResidue(res);
-      res.GetEntity().EditXCS().DeleteResidue(res);
-      return;
-    default:
-      assert(0 && "unhandled switch");
-  }
+  return mol::ChemClass();
 }
-
-void Processor::ProcessUnkAtoms(DiagnosticsPtr diags,
-                                mol::AtomHandleList unks) const
+String GuessAtomElement(const String& aname, bool hetatm)
 {
-  // Don't do anything if treatment is set to SILENT
-  if (this->GetUnkAtomTreatment() == CONOP_SILENT) {
-    return;
+  static String l1[] = {
+    "H","C","N","O","P","S","K"
+  };
+  static int l1c=7;
+  static String l2[] = {
+    "NA","MG","AL","SI","CL",
+    "CA","CR","MN","FE","CO","NI","CU","ZN","AS","SE","BR","MO"
+  };
+  static int l2c=17;
+  static String l3[] = {
+    "B","F","V"
+  };
+  static int l3c=3;
+  static String l4[] = {
+    "HE","LI","BE","AR","SC","TI","GA","GE","KR"
+  };
+  static int l4c=9;
+
+  String ele=aname.substr(0,2);
+  // hydrogen hack
+  if(ele[0]=='H') {
+    return "H";
   }
- 
-  assert(!unks.empty() && "empty unk list");
-  mol::XCSEditor edi = unks.front().GetEntity().EditXCS();
-  for (mol::AtomHandleList::iterator 
-       i = unks.begin(), e = unks.end(); i != e; ++i) {
-    switch (this->GetUnkAtomTreatment()) {
-      case CONOP_REMOVE_ATOM:
-      case CONOP_REMOVE:
-        edi.DeleteAtom(*i);
-        diags->AddDiag(DIAG_UNK_ATOM, "removed unknown atom %0 from residue %1")
-             .AddString(i->GetName()).AddResidue(i->GetResidue());
-        break;
-      case CONOP_WARN:
-        diags->AddDiag(DIAG_UNK_ATOM, "residue %0 contains unknown atom %1")
-             .AddResidue(i->GetResidue()).AddString(i->GetName());
-        break;
-      case CONOP_FATAL:
-        // FIXME: Implement a ConopError based on Diag...
-        break;
-      case CONOP_REMOVE_RESIDUE:
-        diags->AddDiag(DIAG_UNK_ATOM, "removed residue %0 with unknown atom %1")
-             .AddString(i->GetResidue().GetQualifiedName())
-             .AddString(i->GetName());
-        edi.DeleteResidue(i->GetResidue());
-        return;
-      default:
-        assert(0 && "unhandled switch");
+  if (hetatm==false) {
+    if (ele=="CA" || ele=="CB") {
+      return "C";
     }
   }
+
+  // two characters
+  if(aname.size()==2) {
+    for(int i=0;i<l2c;i++) {
+      if(ele==l2[i]) return ele;
+    }
+    // check second character for match
+    for(int i=0;i<l1c;i++) {
+      if(ele[1]==l1[i][0]) {
+        return l1[i];
+      }
+    }
+    // still no match, repeat with less likely tables
+    for(int i=0;i<l4c;i++) {
+      if(ele==l4[i]) return ele;
+    }
+    // check second character for match
+    for(int i=0;i<l3c;i++) {
+      if(ele[1]==l3[i][0]) {
+        return l3[i];
+      }
+    }
+    // check second character for match
+    for(int i=0;i<l1c;i++) {
+      if(ele[0]==l1[i][0]) {
+        return l1[i];
+      }
+    }
+  } else {
+    for(int i=0;i<l1c;i++) {
+      if(ele==l1[i]) return ele;
+    }
+    for(int i=0;i<l3c;i++) {
+      if(ele==l3[i]) return ele;
+    }
+  }
+  size_t i=0;
+  while (i<aname.size() && isdigit(aname[i])) {
+    ++i;
+  }
+  return i<aname.size() ? String(1, aname[i]) : "";
 }
 
 bool IsBondFeasible(const mol::AtomHandle& atom_a,
@@ -189,5 +222,203 @@ bool IsBondFeasible(const mol::AtomHandle& atom_a,
   Real upper_bound=lower_bound*6.0;
   return (len<=upper_bound && len>=lower_bound);
 }
+
+void Processor::ConnectResidues(mol::ResidueHandle rh,
+                                mol::ResidueHandle next) const
+{
+  if (!next.IsValid() || !rh.IsValid()) {
+    return;
+  }
+
+  mol::XCSEditor e=rh.GetEntity().EditXCS(mol::BUFFERED_EDIT);
+
+  // check if both of the residues are able to form a peptide bond.
+  if (rh.IsPeptideLinking() && next.IsPeptideLinking()) {
+    // If we have an OXT then there is no peptide bond connecting the two
+    // residues.
+    if (rh.FindAtom("OXT"))
+      return;
+    mol::AtomHandle c=rh.FindAtom("C");
+    mol::AtomHandle n=next.FindAtom("N");
+    // Give subclasses a chance to give us their opinions on the feasibility of
+    // the peptide bond.
+    if (c.IsValid() && n.IsValid() && IsBondFeasible(c, n)) {
+      e.Connect(c, n, 1);
+      rh.SetIsProtein(true);
+      next.SetIsProtein(true);
+    }
+  } else if (rh.IsNucleotideLinking() && next.IsNucleotideLinking()) {
+    mol::AtomHandle c=rh.FindAtom("O3'");
+    mol::AtomHandle n=next.FindAtom("P");
+    if (c.IsValid() && n.IsValid() && IsBondFeasible(c, n)) {
+      e.Connect(c, n, 1);
+    }
+  }
+}
+
+
+mol::AtomHandle Processor::LocateAtom(const mol::AtomHandleList& ahl, 
+                                      int ordinal) const
+{
+  if (ahl.empty())
+    return mol::AtomHandle();
+  const mol::AtomHandle* r_it=&ahl.back();
+  if (static_cast<int>(ahl.size())>ordinal) {
+    r_it=&ahl.front()+ordinal;
+  }
+  while ((r_it>=&ahl.front()) &&
+         (static_cast<int>(r_it->Impl()->GetState())>ordinal)) {
+    --r_it;
+  }
+  bool not_found=(r_it<&ahl.front() ||
+                 static_cast<int>(r_it->Impl()->GetState())!=ordinal);
+  return  not_found ? mol::AtomHandle() : *r_it;
+}
+
+void Processor::FillResidueProps(mol::ResidueHandle residue,
+                                 CompoundPtr compound) const
+{
+  residue.SetChemClass(compound->GetChemClass());
+  residue.SetChemType(compound->GetChemType());
+  residue.SetOneLetterCode(compound->GetOneLetterCode());
+}
+
+void Processor::ConnectAtomsOfResidue(mol::ResidueHandle rh, 
+                                      CompoundPtr compound,
+                                      bool strict_hydrogens) const
+{
+
+  //if (!compound) {
+  //  dist_connect(this, rh.GetAtomList());
+  //  return;
+  //}
+  //if (unknown_atoms_) {
+  //  dist_connect(this, rh.GetAtomList());
+  //  return;
+  //}
+  mol::XCSEditor e=rh.GetEntity().EditXCS(mol::BUFFERED_EDIT);
+  BondSpecList::const_iterator j=compound->GetBondSpecs().begin();
+  mol::AtomHandleList atoms=rh.GetAtomList();
+  for(; j!=compound->GetBondSpecs().end(); ++j) {
+      const BondSpec& bond=*j;
+      mol::AtomHandle a1=this->LocateAtom(atoms, bond.atom_one);
+      mol::AtomHandle a2=this->LocateAtom(atoms, bond.atom_two);
+      if (a1.IsValid() && a2.IsValid()) { 
+        if (!this->GetCheckBondFeasibility()) {
+          if (strict_hydrogens && (a1.GetElement()=="H" || 
+                                   a2.GetElement()=="D")) {
+            continue;
+          }
+          e.Connect(a1, a2, bond.order);
+        } else { 
+          if (IsBondFeasible(a1, a2)) {
+            if (strict_hydrogens && (a1.GetElement()=="H" || 
+                                     a2.GetElement()=="D")) {
+              continue;
+            }
+            e.Connect(a1, a2, bond.order);
+          }
+        }
+      }
+  }
+}
+
+
+void Processor::ReorderAtoms(mol::ResidueHandle residue, 
+                             CompoundPtr compound, 
+                             bool fix_element) const
+{
+  mol::impl::ResidueImplPtr impl=residue.Impl();
+  mol::impl::AtomImplList::iterator i=impl->GetAtomList().begin();
+  for (; i!=impl->GetAtomList().end(); ++i) {
+    mol::impl::AtomImplPtr atom=*i;
+    atom->SetState(std::numeric_limits<unsigned int>::max());
+    int index=compound->GetAtomSpecIndex(atom->GetName());
+    if (index==-1) {
+      atom->SetState(std::numeric_limits<unsigned int>::max());
+      continue;
+    }
+    atom->SetState((compound->GetAtomSpecs())[index].ordinal);
+    // override element
+    if (fix_element) {
+      atom->SetElement((compound->GetAtomSpecs())[index].element);
+    }
+  }
+  std::sort(impl->GetAtomList().begin(), impl->GetAtomList().end(),
+            OrdinalAtomComp());
+}
+
+bool Processor::HasUnknownAtoms(mol::ResidueHandle res, 
+                                CompoundPtr compound,
+                                bool strict_hydrogens) const 
+{
+  AtomSpecList::const_iterator j=compound->GetAtomSpecs().begin();
+  mol::AtomHandleList atoms=res.GetAtomList();
+  mol::AtomHandleList::iterator i=atoms.begin();
+  for (mol::AtomHandleList::iterator 
+       i=atoms.begin(), e=atoms.end(); i!=e; ++i) {
+    if ((*i).Impl()->GetState()==std::numeric_limits<unsigned int>::max()) {
+      if (((*i).GetElement()=="H" || (*i).GetElement()=="D") && 
+          !strict_hydrogens) {
+        continue;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+mol::AtomHandleList GetUnknownAtomsOfResidue(mol::ResidueHandle res, 
+                                             CompoundPtr compound,
+                                             bool strict_hydrogens)
+{
+  mol::AtomHandleList atoms=res.GetAtomList();
+  mol::AtomHandleList unks;
+  const AtomSpecList& atom_specs=compound->GetAtomSpecs();
+  for (mol::AtomHandleList::const_iterator
+        j=atoms.begin(), e2=atoms.end(); j!=e2; ++j) {
+    bool found=false;
+    for (AtomSpecList::const_iterator
+          k=atom_specs.begin(), e3=atom_specs.end(); k!=e3; ++k) {
+      if (k->name==j->GetName() || k->alt_name==j->GetName()) {
+        found=true;
+        break;
+      }
+    }
+    if (!found) {
+      unks.push_back(*j);
+    }
+  }
+  return unks;
+}
+
+void Processor::DistanceBasedConnect(mol::AtomHandle atom) const
+{
+  mol::EntityHandle ent=atom.GetEntity();
+  mol::XCSEditor editor=ent.EditXCS(mol::BUFFERED_EDIT);
+  mol::AtomHandleList alist = ent.FindWithin(atom.GetPos(),4.0);
+  mol::ResidueHandle res_a=atom.GetResidue();
+  for (mol::AtomHandleList::const_iterator it=alist.begin(),
+       e=alist.end();it!=e;++it) {
+    if (*it!=atom) {
+      if (IsBondFeasible(atom, *it)) {
+        if (Processor::AreResiduesConsecutive(res_a, it->GetResidue()) || 
+            it->GetResidue()==res_a) {                      
+            editor.Connect(*it, atom);
+        }
+      }
+    }
+  }
+}
+
+bool Processor::AreResiduesConsecutive(mol::ResidueHandle r1, 
+                                       mol::ResidueHandle r2)
+{
+  if (!r1 || !r2) return false; // protect against invalid handles
+  if(r1.GetChain() != r2.GetChain()) return false;
+  return r2.GetNumber().GetNum()==r1.GetNumber().GetNum()+1 ||
+         r2.GetNumber().GetInsCode()==r1.GetNumber().NextInsertionCode().GetInsCode();
+}
+
 
 }}

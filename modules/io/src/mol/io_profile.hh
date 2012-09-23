@@ -30,16 +30,15 @@ namespace ost { namespace io {
 
 struct DLLEXPORT IOProfile {
 public:
-  IOProfile(String d, bool sh, bool qm, bool ft, bool js, bool nh, 
+  IOProfile(String d, bool qm, bool ft, bool js, bool nh, 
             bool co, bool bf, conop::ProcessorPtr proc=conop::ProcessorPtr()):
     dialect(d), quack_mode(qm), fault_tolerant(ft), join_spread_atom_records(js), 
     no_hetatms(nh), calpha_only(co), processor(proc)
   {
     if (!processor) return;
     processor->SetCheckBondFeasibility(bf);
-    processor->SetStrictHydrogens(sh);
-    //processor->SetQuackMode(qm);
   }
+
   IOProfile(): dialect("PDB"), quack_mode(false), fault_tolerant(false), 
     join_spread_atom_records(false), no_hetatms(false),
     calpha_only(false), processor()
@@ -55,8 +54,7 @@ public:
 
   IOProfile Copy()
   {
-    return IOProfile(dialect, processor ? processor->GetStrictHydrogens() : false,
-                     quack_mode, fault_tolerant, join_spread_atom_records, 
+    return IOProfile(dialect, quack_mode, fault_tolerant, join_spread_atom_records, 
                      no_hetatms, calpha_only,  
                      processor ? processor->GetCheckBondFeasibility() : false,
                      processor ? processor->Copy() : conop::ProcessorPtr());

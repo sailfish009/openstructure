@@ -57,16 +57,10 @@ void export_processor() {
     .add_property("check_bond_feasibility", 
                   &Processor::GetCheckBondFeasibility,
                   &Processor::SetCheckBondFeasibility)
-    .add_property("strict_hydrogens", &Processor::GetStrictHydrogens,
-                 &Processor::SetStrictHydrogens)
     .add_property("connect", &Processor::GetConnect,
                  &Processor::SetConnect)
     .add_property("assign_torsions", &Processor::GetAssignTorsions,
                  &Processor::SetAssignTorsions)
-    .add_property("unk_res_treatment", &Processor::GetUnkResidueTreatment,
-                 &Processor::SetUnkResidueTreatment)
-    .add_property("unk_atom_treatment", &Processor::GetUnkAtomTreatment,
-                 &Processor::SetUnkAtomTreatment)
     .def("Process", &Processor::Process, 
          (arg("ent"), arg("log_diags")=true))
   ;

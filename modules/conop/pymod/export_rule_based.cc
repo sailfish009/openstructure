@@ -30,6 +30,12 @@ void export_rule_based() {
          init<CompoundLibPtr>())
     .add_property("fix_element", &RuleBasedProcessor::GetFixElement,
                  &RuleBasedProcessor::SetFixElement)
+    .add_property("unk_res_treatment", &RuleBasedProcessor::GetUnkResidueTreatment,
+                 &RuleBasedProcessor::SetUnkResidueTreatment)
+    .add_property("unk_atom_treatment", &RuleBasedProcessor::GetUnkAtomTreatment,
+                 &RuleBasedProcessor::SetUnkAtomTreatment)
+    .add_property("strict_hydrogens", &RuleBasedProcessor::GetStrictHydrogens,
+                 &RuleBasedProcessor::SetStrictHydrogens)
   ;
 }
 

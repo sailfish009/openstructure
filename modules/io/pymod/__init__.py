@@ -44,12 +44,16 @@ class IOProfiles:
 
 if not profiles:
   profiles=IOProfiles()
+  if conop.GetDefaultLib():
+    processor = conop.RuleBasedProcessor(conop.GetDefaultLib())
+  else:
+    processor = conop.HeuristicProcessor()
   profiles['STRICT']=IOProfile(dialect='PDB', fault_tolerant=False,
-                               strict_hydrogens=False, quack_mode=False)
+                               quack_mode=False, processor=processor)
   profiles['SLOPPY']=IOProfile(dialect='PDB', fault_tolerant=True,
-                               strict_hydrogens=False, quack_mode=True)
+                               quack_mode=True, processor=processor)
   profiles['CHARMM']=IOProfile(dialect='CHARMM', fault_tolerant=True,
-                               strict_hydrogens=False, quack_mode=False)
+                               quack_mode=False, processor=processor)
   profiles['DEFAULT']='STRICT'
 
 def _override(val1, val2):
@@ -86,7 +90,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
             fault_tolerant=None, load_multi=False, quack_mode=None,
             join_spread_atom_records=None, calpha_only=None,
             profile='DEFAULT', remote=False, dialect=None,
-            strict_hydrogens=None, seqres=False, bond_feasibility_check=None):
+            seqres=False, bond_feasibility_check=None):
   """
   Load PDB file from disk and return one or more entities. Several options 
   allow to customize the exact behaviour of the PDB import. For more information 
@@ -124,8 +128,6 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
 
   :type dialect: :class:`str`
   
-  :param strict_hydrogens: If set, overrides the value of 
-     :attr:`IOProfile.strict_hydrogens`.
 
   :raises: :exc:`~ost.io.IOException` if the import fails due to an erroneous or 
       inexistent file
@@ -149,9 +151,7 @@ def LoadPDB(filename, restrict_chains="", no_hetatms=None,
   prof.dialect=_override(prof.dialect, dialect)
   prof.quack_mode=_override(prof.quack_mode, quack_mode)
   if prof.processor:
-    prof.processor.strict_hydrogens=_override(prof.processor.strict_hydrogens, 
-                                              strict_hydrogens)
-    prof.processor.check_bond_feasibilityk=_override(prof.processor.check_bond_feasibility, 
+    prof.processor.check_bond_feasibility=_override(prof.processor.check_bond_feasibility, 
                                                     bond_feasibility_check)
   prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
   prof.join_spread_atom_records=_override(prof.join_spread_atom_records,
@@ -281,7 +281,7 @@ def LoadCHARMMTraj(crd, dcd_file=None, profile='CHARMM',
       raise ValueError("No DCD filename given")
   return LoadCHARMMTraj_(crd, dcd_file, stride, lazy_load, detect_swap, swap_bytes)
 
-def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=None, profile='DEFAULT', remote=False, strict_hydrogens=None, seqres=False, info=False):
+def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=None, profile='DEFAULT', remote=False, seqres=False, info=False):
   """
   Load MMCIF file from disk and return one or more entities. Several options 
   allow to customize the exact behaviour of the MMCIF import. For more
@@ -301,9 +301,6 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
      
   :rtype: :class:`~ost.mol.EntityHandle`.
   
-  :param strict_hydrogens: If set, overrides the value of 
-     :attr:`IOProfile.strict_hydrogens`.
-
   :param seqres: Whether to read SEQRES records. If set to True, the loaded 
     entity and seqres entry will be returned as second item.
 
@@ -324,9 +321,6 @@ def LoadMMCIF(filename, restrict_chains="", fault_tolerant=None, calpha_only=Non
     prof = profile.Copy()
 
   prof.calpha_only=_override(prof.calpha_only, calpha_only)
-  if prof.processor:
-    proc  = prof.processor
-    proc.strict_hydrogens=_override(proc.strict_hydrogens, strict_hydrogens)
   prof.fault_tolerant=_override(prof.fault_tolerant, fault_tolerant)
 
   if remote:
