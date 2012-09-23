@@ -1,9 +1,6 @@
 set(OST_CONOP_HEADERS
-#builder.hh
-#builder_fw.hh
 conop.hh
 processor.hh
-#heuristic_builder.hh
 amino_acids.hh
 diag.hh
 model_check.hh
@@ -13,24 +10,24 @@ compound_lib.hh
 module_config.hh
 rule_based.hh
 nonstandard.hh
-#rule_based_builder.hh
+minimal_compound_lib.hh
+compound_lib_base.hh
 ring_finder.hh
 )
 
 set(OST_CONOP_SOURCES
-# builder.cc
 processor.cc
 amino_acids.cc
 conop.cc
+minimal_compound_lib.cc
+compound_lib_base.cc
 heuristic.cc
 diag.cc
 rule_based.cc
 model_check.cc
-#heuristic_builder.cc
 compound.cc
 compound_lib.cc
 nonstandard.cc
-#rule_based_builder.cc
 ring_finder.cc
 )
 

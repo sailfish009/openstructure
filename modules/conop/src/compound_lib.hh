@@ -25,41 +25,42 @@
 // our own local copy of sqlite3
 #include <ost/db/sqlite3.h>
 
-#include <ost/conop/module_config.hh>
-#include <ost/conop/compound.hh>
+#include "module_config.hh"
+#include "compound.hh"
+#include "compound_lib_base.hh"
 
 namespace ost { namespace conop {
 
 class CompoundLib;
 
 typedef boost::shared_ptr<CompoundLib> CompoundLibPtr;
-typedef std::map<String, CompoundPtr> CompoundMap;
 
-class DLLEXPORT_OST_CONOP CompoundLib {
+class DLLEXPORT_OST_CONOP CompoundLib : public CompoundLibBase {
 public:
   static CompoundLibPtr Load(const String& database, bool readonly=true);
   static CompoundLibPtr Create(const String& database);
   ~CompoundLib();
   
-  CompoundPtr FindCompound(const String& id, Compound::Dialect dialect);
-  Date GetCreationDate(void);
-  String GetOSTVersionUsed(void);
+  virtual CompoundPtr FindCompound(const String& id, 
+                                   Compound::Dialect dialect) const;
   void AddCompound(const CompoundPtr& compound);
   CompoundLibPtr Copy(const String& filename) const;
   void ClearCache();
+  Date GetCreationDate(void);
+  String GetOSTVersionUsed(void);
   void SetChemLibInfo(void);
 private:
     CompoundLib();
 
-    void LoadAtomsFromDB(CompoundPtr comp, int pk);
-    void LoadBondsFromDB(CompoundPtr comp, int pk);    
+    void LoadAtomsFromDB(CompoundPtr comp, int pk) const;
+    void LoadBondsFromDB(CompoundPtr comp, int pk) const;    
 private:
-  CompoundMap       compound_cache_;
-  sqlite3*          conn_;
-  bool              chem_type_available_; // weather pdbx_type is available in db
-  bool              name_available_; // weather name is available in db
-  Date              creation_date_;
-  String            ost_version_used_;
+  mutable CompoundMap       compound_cache_;
+  sqlite3*                  conn_;
+  bool                      chem_type_available_; // weather pdbx_type is available in db
+  bool                      name_available_; // weather name is available in db
+  Date                      creation_date_;
+  String                    ost_version_used_;
 };
 
 }}

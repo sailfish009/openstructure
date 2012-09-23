@@ -363,7 +363,7 @@ CompoundLibPtr CompoundLib::Load(const String& database, bool readonly)
   return lib;
 }
 
-void CompoundLib::LoadAtomsFromDB(CompoundPtr comp, int pk) {
+void CompoundLib::LoadAtomsFromDB(CompoundPtr comp, int pk) const {
   String aq=str(format("SELECT name, alt_name, element, ordinal, is_leaving "
                        "FROM atoms WHERE compound_id=%d "
                        "ORDER BY ordinal ASC") % pk);  
@@ -392,7 +392,7 @@ void CompoundLib::ClearCache()
   compound_cache_.clear();
 }
 
-void CompoundLib::LoadBondsFromDB(CompoundPtr comp, int pk) {
+void CompoundLib::LoadBondsFromDB(CompoundPtr comp, int pk) const {
   sqlite3_stmt* stmt;
   String aq=str(format("SELECT a1.ordinal, a2.ordinal, b.bond_order FROM bonds AS b "
                        "LEFT JOIN atoms AS a1 ON b.atom_one=a1.id "
@@ -417,8 +417,8 @@ void CompoundLib::LoadBondsFromDB(CompoundPtr comp, int pk) {
 }
 
 CompoundPtr CompoundLib::FindCompound(const String& id, 
-                                      Compound::Dialect dialect) {
-  CompoundMap::iterator i=compound_cache_.find(id);
+                                      Compound::Dialect dialect) const {
+  CompoundMap::const_iterator i=compound_cache_.find(id);
   if (i!=compound_cache_.end()) {
     return i->second;
   }

@@ -16,6 +16,7 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
+
 #include <ost/log.hh>
 #include <ost/profile.hh>
 #include <ost/mol/xcs_editor.hh>
@@ -27,7 +28,6 @@
 #include "heuristic.hh"
 
 namespace ost { namespace conop {
-
 
 void HeuristicProcessor::DoProcess(DiagnosticsPtr diags, 
                                    mol::EntityHandle ent) const {

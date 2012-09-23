@@ -20,6 +20,7 @@
 #define OST_CONOP_COMPOUND_HH
 
 #include <vector>
+#include <map>
 #include <boost/shared_ptr.hpp>
 #include <ost/string_ref.hh>
 #include <ost/conop/module_config.hh>
@@ -72,6 +73,9 @@ struct DLLEXPORT_OST_CONOP AtomSpec {
   AtomSpec()
     : ordinal(0), is_leaving(false) {
   }
+  AtomSpec(int o, const String& n, const String& a, const String& e,
+           bool l, bool r): ordinal(o), name(n), alt_name(a), element(e),
+    is_leaving(l), is_aromatic(r) {}
   int    ordinal;
   String name;
   String alt_name;
@@ -93,7 +97,7 @@ struct DLLEXPORT_OST_CONOP BondSpec {
     : atom_one(0), atom_two(0), order(1) {
 
   }
-
+  BondSpec(int a, int b, int o): atom_one(a), atom_two(b), order(o) {}
   bool operator==(const BondSpec& rhs) const {
     return atom_one==rhs.atom_one && atom_two==rhs.atom_two;
   }
@@ -246,6 +250,8 @@ private:
   Date                         creation_date_;
   Date                         mod_date_;
 };
+
+typedef std::map<String, CompoundPtr> CompoundMap;
 
 }}
 
