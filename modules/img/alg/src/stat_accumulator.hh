@@ -21,6 +21,7 @@
 #define OST_STAT_ACCUMULATOR_HH
 
 #include <ost/base.hh>
+#include <ost/message.hh>
 #include <ost/img/alg/module_config.hh>
 
 namespace ost { namespace img { namespace alg {
