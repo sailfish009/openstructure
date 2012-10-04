@@ -420,7 +420,7 @@ function(copy_python include_path version new_binary_path)
   foreach(so_file ${python_so_files})
     remove_rpath("${so_file}")
   endforeach(so_file)
-  endif(NOT APPLY)
+  endif(NOT APPLE)
   read_config(ost_config)
   if(APPLE)
     file(COPY ${python_root_dir}/Resources/Python.app/Contents/MacOS/Python DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
@@ -648,16 +648,6 @@ function(copy_resolved_item resolved_item resolved_embedded_item)
   endif()
 
 endfunction(copy_resolved_item)
-
-#=============================================================================
-# function remove_rpath (OSX)
-#=============================================================================
-function(remove_rpath file)
-  execute_process(COMMAND stat -f "%OLp"  "${file}" OUTPUT_VARIABLE permissions)
-  execute_process(COMMAND chmod ugo+wx "${file}")
-  file(RPATH_REMOVE FILE "${file}")
-  execute_process(COMMAND chmod ${permissions} "${file}")
-endfunction(remove_rpath)
 
 
 elseif(WIN32 AND NOT UNIX)
@@ -895,8 +885,9 @@ endfunction(copy_resolved_item)
 # function remove_rpath (Linux)
 #=============================================================================
 function(remove_rpath file)
-  execute_process(COMMAND stat --format '%a'  "${file}" OUTPUT_VARIABLE permissions)
+  execute_process(COMMAND stat --format %a  "${file}" OUTPUT_VARIABLE permissions)
   execute_process(COMMAND chmod ugo+x "${file}")
+  string(SUBSTRING ${permissions} 0 3 permissions)
   file(RPATH_REMOVE FILE "${file}")
   execute_process(COMMAND chmod ${permissions} "${file}")
 endfunction(remove_rpath)
