@@ -77,7 +77,8 @@ DataViewerPanelBase::DataViewerPanelBase(const Data& data,QWidget* parent):
   update_extent_(),
   fast_low_mag_(true),
   fast_high_mag_(true),
-  antialiasing_(true)
+  antialiasing_(true),
+  drag_start_()
 {
   update_min_max();
   UpdateNormalizer(data_min_,data_max_,1.0,false);
@@ -521,35 +522,34 @@ void DataViewerPanelBase::mouseMoveEvent(QMouseEvent* event)
     int dy = event->y()-last_y_;
     move(dx,dy);
   } else if(event->buttons() == Qt::LeftButton  && event->modifiers()==Qt::NoModifier) {
-    static Point drag_start;
     // left mouse drag does selection box
     if(!rubberband_->isVisible()){
-      drag_start=WinToPoint(rubberband_->geometry().topLeft());
+      drag_start_=WinToPoint(rubberband_->geometry().topLeft());
       rubberband_->show();
     }
     QSize vsize=size();
     Point mouse_pos=WinToPoint(event->x(),event->y());
     Point max_pos=WinToPoint(vsize.width(),vsize.height());
     Point min_pos=WinToPoint(0,0);
-    selection_=Extent(Point(std::max(min_pos[0],std::min(drag_start[0],mouse_pos[0])),
-                            std::max(min_pos[1],std::min(drag_start[1],mouse_pos[1])), slab_),
-                      Point(std::max(drag_start[0],std::min(max_pos[0],mouse_pos[0])),
-                            std::max(drag_start[1],std::min(max_pos[1],mouse_pos[1])), slab_));
+    selection_=Extent(Point(std::max(min_pos[0],std::min(drag_start_[0],mouse_pos[0])),
+                            std::max(min_pos[1],std::min(drag_start_[1],mouse_pos[1])), slab_),
+                      Point(std::max(drag_start_[0],std::min(max_pos[0],mouse_pos[0])),
+                            std::max(drag_start_[1],std::min(max_pos[1],mouse_pos[1])), slab_));
     if(selection_mode_>0){
       Size s=selection_.GetSize();
       int minsize=std::min<int>(s[0],s[1]);
       if(selection_mode_==2){
         minsize=1<<static_cast<int>(floor(log(Real(minsize))/log(Real(2.0))));
       }
-      if(drag_start[0]>mouse_pos[0] && drag_start[1]>mouse_pos[1]){
-        selection_.SetStart(drag_start-Point(minsize,minsize)+Point(1,1));
-        selection_.SetEnd(drag_start);        
-      }else if(drag_start[0]>mouse_pos[0] && drag_start[1]<=mouse_pos[1]){
-        selection_.SetStart(drag_start-Point(minsize,0)+Point(1,0));
-        selection_.SetEnd(drag_start+Point(0,minsize)-Point(0,1));        
-      }else if(drag_start[0]<=mouse_pos[0] && drag_start[1]>mouse_pos[1]){
-        selection_.SetStart(drag_start-Point(0,minsize)+Point(0,1));        
-        selection_.SetEnd(drag_start+Point(minsize,0)-Point(1,0));
+      if(drag_start_[0]>mouse_pos[0] && drag_start_[1]>mouse_pos[1]){
+        selection_.SetStart(drag_start_-Point(minsize,minsize)+Point(1,1));
+        selection_.SetEnd(drag_start_);        
+      }else if(drag_start_[0]>mouse_pos[0] && drag_start_[1]<=mouse_pos[1]){
+        selection_.SetStart(drag_start_-Point(minsize,0)+Point(1,0));
+        selection_.SetEnd(drag_start_+Point(0,minsize)-Point(0,1));        
+      }else if(drag_start_[0]<=mouse_pos[0] && drag_start_[1]>mouse_pos[1]){
+        selection_.SetStart(drag_start_-Point(0,minsize)+Point(0,1));        
+        selection_.SetEnd(drag_start_+Point(minsize,0)-Point(1,0));
       }else{
         selection_.SetEnd(selection_.GetStart()+Point(minsize,minsize)-Point(1,1));
       }
