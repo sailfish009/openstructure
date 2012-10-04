@@ -416,9 +416,11 @@ function(copy_python include_path version new_binary_path)
   file(GLOB  py_config_files "${include_path}/pyconfig*.h")
   file(COPY ${py_config_files} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/python${version})
   file(GLOB_RECURSE python_so_files "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}/python${version}/*.so")
+  if(NOT APPLE)
   foreach(so_file ${python_so_files})
-    file(RPATH_REMOVE FILE "${so_file}")
+    remove_rpath("${so_file}")
   endforeach(so_file)
+  endif(NOT APPLY)
   read_config(ost_config)
   if(APPLE)
     file(COPY ${python_root_dir}/Resources/Python.app/Contents/MacOS/Python DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
@@ -647,6 +649,16 @@ function(copy_resolved_item resolved_item resolved_embedded_item)
 
 endfunction(copy_resolved_item)
 
+#=============================================================================
+# function remove_rpath (OSX)
+#=============================================================================
+function(remove_rpath file)
+  execute_process(COMMAND stat -f "%OLp"  "${file}" OUTPUT_VARIABLE permissions)
+  execute_process(COMMAND chmod ugo+wx "${file}")
+  file(RPATH_REMOVE FILE "${file}")
+  execute_process(COMMAND chmod ${permissions} "${file}")
+endfunction(remove_rpath)
+
 
 elseif(WIN32 AND NOT UNIX)
 
@@ -827,7 +839,7 @@ function(copy_qt library_dir plugin_dir plugins)
        DESTINATION ${CMAKE_INSTALL_PREFIX}/libexec/openstructure) 
   file(GLOB_RECURSE QT_PLUGINS "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/*.so")
   foreach(plugin ${QT_PLUGINS})
-    file(RPATH_REMOVE FILE "${plugin}")
+    remove_rpath("${plugin}")
   endforeach(plugin)
   set(${plugins} ${QT_PLUGINS} PARENT_SCOPE)
   file(WRITE "${CMAKE_INSTALL_PREFIX}/libexec/openstructure/qt.conf" "[Paths]\nPlugins=../plugins\n")
@@ -843,11 +855,6 @@ function(is_system_lib item system_var)
     set(${system_var}  0 PARENT_SCOPE)
   endif()
 endfunction(is_system_lib)
-
-else(APPLE)
-  MESSAGE("Unknown platform, deployment will not work.")
-endif(APPLE)
-
 
 #=============================================================================
 # function copy_resolved_item (Linux)
@@ -875,10 +882,27 @@ function(copy_resolved_item resolved_item resolved_embedded_item)
       endif(real_candidate STREQUAL ${real_resolved_item})
     endforeach(candidate)
     file(COPY ${external_files} DESTINATION ${embedded_path})
-    file(RPATH_REMOVE FILE "${real_resolved_embedded_item}")
+    remove_rpath("${real_resolved_embedded_item}")
   endif()
 
 endfunction(copy_resolved_item)
 
 
 
+
+
+#=============================================================================
+# function remove_rpath (Linux)
+#=============================================================================
+function(remove_rpath file)
+  execute_process(COMMAND stat --format '%a'  "${file}" OUTPUT_VARIABLE permissions)
+  execute_process(COMMAND chmod ugo+x "${file}")
+  file(RPATH_REMOVE FILE "${file}")
+  execute_process(COMMAND chmod ${permissions} "${file}")
+endfunction(remove_rpath)
+
+
+
+else(APPLE)
+  MESSAGE("Unknown platform, deployment will not work.")
+endif(APPLE)
