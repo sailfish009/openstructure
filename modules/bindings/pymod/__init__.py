@@ -5,3 +5,5 @@ from ost.bindings import tmtools
 from ost.bindings import naccess
 from ost.bindings import hbplus
 from ost.bindings import clustalw
+from ost.bindings import cadscore
+
