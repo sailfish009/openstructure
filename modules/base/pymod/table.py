@@ -193,6 +193,15 @@ class Table(object):
       if len(kwargs)>0:
         self._AddRowsFromDict(kwargs)
 
+  def __getattr__(self, col_name):
+    # pickling doesn't call the standard __init__ defined above and thus
+    # col_names might not be defined. This leads to infinite recursions.
+    # Protect against it by checking that col_names is contained in 
+    # __dict__
+    if 'col_names' not in self.__dict__ or col_name not in self.col_names:
+      raise AttributeError(col_name)
+    return TableCol(self, col_name)
+
   @staticmethod
   def _ParseColTypes(types, exp_num=None):
     if types==None:
@@ -614,7 +623,6 @@ Statistics for column %(col)s
       self._AddRowsFromDict(data, overwrite)
     else:
       if len(data)!=len(self.col_names):
-        print data, self.col_names
         msg='data array must have %d elements, not %d'
         raise ValueError(msg % (len(self.col_names), len(data)))
       new_row = [self._Coerce(v, t) for v, t in zip(data, self.col_types)]
@@ -1468,7 +1476,6 @@ Statistics for column %(col)s
     fig=plt.figure()
     ax=fig.add_subplot(111)
     legend_data=[]
-
     for i in range(len(data)):
       legend_data.append(ax.bar(ind+i*single_bar_width,data[i],single_bar_width,bottom=bottom,color=colors[i],yerr=yerr_data[i], ecolor='black')[0])
       
@@ -2750,6 +2757,7 @@ Statistics for column %(col)s
             return False
     return True
     
+
   def Extend(self, tab, overwrite=None):
     """
     Append each row of *tab* to the current table. The data is appended based

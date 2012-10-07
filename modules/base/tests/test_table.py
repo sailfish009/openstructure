@@ -163,11 +163,17 @@ class TestTable(unittest.TestCase):
     diff = ImageChops.difference(img1, img2)
     self.assertEqual(diff.getbbox(),None)
 
-  def testSearchColNames(self):
+  def testAllowsToSearchColNames(self):
     tab = self.CreateTestTable()
     self.assertEquals(tab.SearchColNames('d$'), ['second', 'third'])
     self.assertEquals(tab.SearchColNames('(first|third)'), ['first','third'])
 
+  def testProvidesDirectAccessToColumns(self):
+    tab = Table(['x', 'two'], 'ii')
+    tab.AddRow([1,2])
+    self.assertEqual([1], list(tab.x))
+    self.assertEqual([2], list(tab.two))
+    self.assertRaises(AttributeError, tab.__getattr__, 'one')
   def testZip(self):
     tab=Table(['col1', 'col2', 'col3', 'col4'], 'sssi')
     tab.AddRow(['a', 'b', 'c', 1])
