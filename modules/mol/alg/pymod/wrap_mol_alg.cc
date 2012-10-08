@@ -23,6 +23,8 @@
 #include <ost/mol/alg/local_dist_diff_test.hh>
 #include <ost/mol/alg/superpose_frames.hh>
 #include <ost/mol/alg/filter_clashes.hh>
+#include <ost/mol/alg/consistency_checks.hh>
+
 using namespace boost::python;
 using namespace ost;
 
@@ -159,5 +161,8 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("IsStandardResidue",&mol::alg::IsStandardResidue);
   def("PrintGlobalRDMap",&mol::alg::PrintGlobalRDMap);
   def("PrintResidueRDMap",&mol::alg::PrintResidueRDMap);
-  
+ 
+  def("CheckResidueTypes",&mol::alg::CheckResidueTypes);
+
+ 
 }
