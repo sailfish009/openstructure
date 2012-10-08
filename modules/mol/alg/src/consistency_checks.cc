@@ -28,22 +28,30 @@ namespace ost { namespace mol { namespace alg {
 ///
 /// Requires a reference structure and a probe structure. The function checks that all the 
 /// residues in the reference structure that appear in the probe structure (i.e., that have the 
-/// same ResNum) are of the same residue type. 
+/// same ResNum) are of the same residue type. Chains are paired by index, not by chain name
+/// (i.e., the first chain of the reference will be compared with the first chain of the probe,
+/// the second with the second, etc.)
 
-bool CheckResidueTypes (const mol::EntityView& probe, const mol::EntityView& reference)
+
+
+
+
+bool ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& reference)
 {
   bool return_value = true;
   ChainViewList ref_chains = reference.GetChainList();
-  for (ChainViewList::const_iterator rci = ref_chains.begin(), rce=ref_chains.end(); rci!=rce; ++rci) {
-    ChainView probe_chain = probe.FindChain(rci->GetName());
-    if (probe_chain.IsValid()) { 
-      ResidueViewList ref_residues = rci->GetResidueList();       
+  ChainViewList probe_chains = probe.GetChainList();
+  for (unsigned int rci = 0; rci < ref_chains.size(); ++rci) {
+     ChainView ref_chain= ref_chains[rci];
+     if (rci<probe_chains.size()) {
+      ChainView probe_chain = probe_chains[rci];     
+      ResidueViewList ref_residues = ref_chain.GetResidueList();       
       for (ResidueViewList::iterator rri=ref_residues.begin(), rre=ref_residues.end(); rri!=rre; ++rri) {
         ResidueView probe_residue = probe_chain.FindResidue(rri->GetNumber());
         if (probe_residue.IsValid()) {
           if (probe_residue.GetName()!=rri->GetName()) {
-            return_value =false;
-            LOG_VERBOSE("Type mismatch for residue " << probe_residue.GetNumber());
+            return_value = false;
+            LOG_VERBOSE("Name mismatch for residue " << probe_residue.GetNumber() << " in chain " << rci);
             LOG_VERBOSE("In reference: " << rri->GetName() << ", in compared structure: " << probe_residue.GetName());
           } 
         }            

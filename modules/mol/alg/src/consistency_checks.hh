@@ -28,9 +28,11 @@ namespace ost { namespace mol { namespace alg {
 ///
 /// Requires a reference structure and a probe structure. The function checks that all the 
 /// residues in the reference structure that appear in the probe structure (i.e., that have the 
-/// same ResNum) are of the same residue type. 
+/// same ResNum) are of the same residue type. Chains are comapred by order, not by chain name 
+/// (i.e.: the first chain of the reference will be compared with the first chain of the probe 
+/// structure, etc.)
 
-bool DLLEXPORT_OST_MOL_ALG CheckResidueTypes (const mol::EntityView& probe, const mol::EntityView& reference);
+bool DLLEXPORT_OST_MOL_ALG ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& reference);
   
 }}}
 

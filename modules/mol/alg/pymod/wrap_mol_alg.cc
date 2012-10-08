@@ -162,7 +162,7 @@ BOOST_PYTHON_MODULE(_ost_mol_alg)
   def("PrintGlobalRDMap",&mol::alg::PrintGlobalRDMap);
   def("PrintResidueRDMap",&mol::alg::PrintResidueRDMap);
  
-  def("CheckResidueTypes",&mol::alg::CheckResidueTypes);
+  def("ResidueNamesMatch",&mol::alg::ResidueNamesMatch);
 
  
 }

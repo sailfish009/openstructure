@@ -374,6 +374,22 @@ The following function detects steric clashes in atomic structures. Two atoms ar
   :returns: :class:`~ost.mol.alg.ClashingDistances` and :class:`~ost.mol.alg.StereoChemicalParams` respectively
 
 
+.. function:: ResidueNamesMatch(probe,reference)
+
+  The function requires a reference structure and a probe structure. The function checks that all the 
+  residues in the reference structure that appear in the probe structure (i.e., that have the 
+  same ResNum) are of the same residue type. Chains are comapred by order, not by chain name 
+  (i.e.: the first chain of the reference will be compared with the first chain of the probe 
+  structure, etc.)
+
+  :param probe: the structure to test
+  :type probe: :class:`~ost.mol.EntityView`
+  :param reference: the reference structure
+  :type reference: :class:`~ost.mol.EntityView`
+
+  :returns: true if the residue names are the same, false otherwise
+
+
 .. _traj-analysis:
 
 Trajectory Analysis

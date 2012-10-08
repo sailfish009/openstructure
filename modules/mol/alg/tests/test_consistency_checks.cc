@@ -55,8 +55,6 @@ BOOST_AUTO_TEST_CASE(consistency_check)
   ResidueHandle r3b = edb.AppendResidue(cb, "LEU",3);
   ResidueHandle r4b = edb.AppendResidue(cb, "GLY",4);
   ResidueHandle r5b = edb.AppendResidue(cb, "PRO",5);
-  ChainHandle cb2=edb.InsertChain("B");
-  ResidueHandle r1b2 = edb.AppendResidue(cb2, "ALA",1);
 
 
   EntityHandle c=CreateEntity();
@@ -66,10 +64,9 @@ BOOST_AUTO_TEST_CASE(consistency_check)
   ResidueHandle r2c = edc.AppendResidue(cc, "PRO",2);
   ResidueHandle r3c = edc.AppendResidue(cc, "LEU",3);
   ResidueHandle r4c = edc.AppendResidue(cc, "GLY",4);
-
-
-  BOOST_CHECK(ost::mol::alg::CheckResidueTypes(a.CreateFullView(),b.CreateFullView())==true);   
-  BOOST_CHECK(ost::mol::alg::CheckResidueTypes(c.CreateFullView(),b.CreateFullView())==false);    
+   
+  BOOST_CHECK(ost::mol::alg::ResidueNamesMatch(a.CreateFullView(),b.CreateFullView())==true);   
+  BOOST_CHECK(ost::mol::alg::ResidueNamesMatch(c.CreateFullView(),b.CreateFullView())==false);    
 }
 
 BOOST_AUTO_TEST_SUITE_END();

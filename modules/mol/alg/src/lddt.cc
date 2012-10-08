@@ -35,6 +35,7 @@
 #include <ost/mol/iterator.hh>
 #include <ost/platform.hh>
 #include <ost/log.hh>
+#include <ost/mol/alg/consistency_checks.hh>
 
 #include <ost/conop/rule_based_builder.hh>
 #include <ost/dyn_cast.hh>
@@ -85,6 +86,8 @@ void usage()
   std::cerr << "   -r <value> distance inclusion radius" << std::endl;
   std::cerr << "   -i <value> sequence separation" << std::endl;
   std::cerr << "   -e         print version" << std::endl;
+  std::cerr << "   -x         ignore residue name consistency checks" << std::endl;
+
 }
 
 // computes coverage
@@ -123,12 +126,14 @@ int main (int argc, char **argv)
   // parses options
   String sel;
   bool structural_checks=false;
+  bool consistency_checks=true;
   po::options_description desc("Options");
   desc.add_options()
     ("calpha,c", "consider only calpha atoms")
     ("sel,s", po::value<String>(&sel)->default_value(""), "selection performed on reference structure")
     ("tolerant,t", "fault tolerant mode")
     ("structural-checks,f", "perform stereo-chemical and clash checks")
+    ("ignore-consistency-checks,x", "ignore residue name consistency checks")
     ("version,e", "version")
     ("parameter-file,p", po::value<String>(), "stereo-chemical parameter file")
     ("verbosity,v", po::value<int>(), "verbosity level")
@@ -168,6 +173,9 @@ int main (int argc, char **argv)
   }
   if (vm.count("structural-checks")) {
     structural_checks=true;
+  }
+  if (vm.count("ignore-consistency-checks")) {
+    consistency_checks=false;
   }
   if (vm.count("tolerant")) {
     profile.fault_tolerant=true;
@@ -215,6 +223,8 @@ int main (int argc, char **argv)
   cutoffs.push_back(1.0);
   cutoffs.push_back(2.0);
   cutoffs.push_back(4.0);
+
+  std::vector<EntityView> ref_list;  
     
   // loads the reference file and creates the list of distances to check in lddt    
   // if the reference file is a comma-separated list of files, switches to multi-
@@ -230,10 +240,10 @@ int main (int argc, char **argv)
     if (!ref) {
       exit(-1);
     }  
+    ref_list.push_back(ref.CreateFullView());
     glob_dist_list = CreateDistanceList(ref.CreateFullView(),radius);  
   } else {
     std::cout << "Multi-reference mode: On" << std::endl;  
-    std::vector<EntityView> ref_list;  
     for (std::vector<StringRef>::const_iterator ref_file_split_sr_it = ref_file_split_sr.begin();
          ref_file_split_sr_it != ref_file_split_sr.end();++ref_file_split_sr_it) {
       String ref_filename = ref_file_split_sr_it->str();  
@@ -283,6 +293,19 @@ int main (int argc, char **argv)
       continue;
     }
     EntityView v=model.CreateFullView();
+
+    for (std::vector<EntityView>::const_iterator ref_list_it = ref_list.begin();
+         ref_list_it != ref_list.end(); ++ref_list_it) {
+      bool cons_check = ResidueNamesMatch(v,*ref_list_it);
+      if (cons_check==false) {
+        if (consistency_checks==true) {
+          LOG_ERROR("Residue names in model: " << files[i] << " are inconsistent with one or more references");
+          exit(-1);            
+        } else {
+          LOG_WARNING("Residue names in model: " << files[i] << " are inconsistent with one or more references");
+        }   
+      } 
+    }
 
     boost::filesystem::path pathstring(files[i]);
 
