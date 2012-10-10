@@ -495,6 +495,11 @@ class DLLEXPORT_OST_GFX Scene {
   /// experimental feature
   void SetBeaconOff();
 
+  void SetExportAspect(float a);
+  float GetExportAspect() const {return export_aspect_;}
+  void SetShowExportAspect(bool f);
+  bool GetShowExportAspect() const {return show_export_aspect_;}
+
 protected:
   friend class GfxObj; 
   friend class GfxNode;
@@ -585,7 +590,8 @@ private:
   Bitmap bg_bm_;
   unsigned int bg_tex_;
   
-  
+  float export_aspect_; 
+  bool show_export_aspect_;
 
   void set_near(float n);
   void set_far(float f);
@@ -595,6 +601,7 @@ private:
   void prep_blur();
   void stereo_projection(int view);
   void render_bg();
+  void render_export_aspect();
   void render_scene();
   void render_glow();
   void render_stereo();

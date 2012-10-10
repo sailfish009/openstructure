@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.6.4 FATAL_ERROR)
 project(OpenStructure CXX C)
 set (OST_VERSION_MAJOR 1)
 set (OST_VERSION_MINOR 2)
-set (OST_VERSION_PATCH 1)
+set (OST_VERSION_PATCH 2)
 set (OST_VERSION_STRING ${OST_VERSION_MAJOR}.${OST_VERSION_MINOR}.${OST_VERSION_PATCH} )
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake_support)
 include(OST)
@@ -46,7 +46,6 @@ option(USE_DOUBLE_PRECISION "whether to compile in double precision"
 option(ENABLE_SPNAV "whether 3DConnexion devices should be supported"
       OFF)
 option(STATIC_PROPERTY_WORKAROUND "workaround for static property bug with some boost/boost_python combinations" OFF)
-option(DEPLOYMENT "switch on deployment settings" OFF)
 option(COMPILE_TESTS "whether unit tests should be compiled by default" OFF)
 option(ENABLE_STATIC "whether static libraries should be compiled" OFF)
 option(DEBIAN_STYLE_LIBEXEC "whether 'libexec' should be put under 'lib/openstructure" OFF)
@@ -306,9 +305,12 @@ endif()
 
 add_subdirectory(modules)
 add_subdirectory(scripts)
-add_subdirectory(deployment)
-set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
 add_subdirectory(tools)
+# deployment has to come last, to ensure that all install commands are run before deployment
+# magic is done
+add_subdirectory(deployment)
+
+set(FILES_TO_BE_REMOVED ${CMAKE_SOURCE_DIR}/stage tests)
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
                              "${FILES_TO_BE_REMOVED}")
 

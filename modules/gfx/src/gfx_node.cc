@@ -141,7 +141,7 @@ bool GfxNode::IsAttachedToScene() const
 void GfxNode::Add(GfxObjP obj)
 {
   GfxNodeP node=obj;
-  this->Add(obj);
+  this->Add(node);
 }
 
 void GfxNode::Remove(GfxObjP obj)

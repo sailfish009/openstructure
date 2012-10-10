@@ -16,20 +16,26 @@
 // along with this library; if not, write to the Free Software Foundation, Inc.,
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //------------------------------------------------------------------------------
-#ifndef OST_IMG_ALG_MODULE_CONFIG_HH
-#define OST_IMG_ALG_MODULE_CONFIG_HH
+#ifndef OST_MOL_CONSISTENCY_CHECKS_HH
+#define OST_MOL_CONSISTENCY_CHECKS_HH
 
-#include <ost/dllexport.hh>
+#include <ost/mol/entity_view.hh>
+#include <ost/mol/alg/module_config.hh>
 
-#if defined(OST_MODULE_OST_IMG_ALG)
-#  define DLLEXPORT_IMG_ALG DLLEXPORT 
-#  if defined(_MSC_VER)
-#    define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t)
-#  else
-#    define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t) extern template c TEMPLATE_EXPORT ost::img::image_state::t;
-#  endif
-#else
-#  define DLLEXPORT_IMG_ALG DLLIMPORT
-#  define OST_IMG_ALG_EXPLICIT_INST_DECL(c, t) extern template c DLLIMPORT ost::img::image_state::t;
+namespace ost { namespace mol { namespace alg {
+  
+/// \brief Checks that residue types with the same ResNum in the two structures match
+///
+/// Requires a reference structure and a probe structure. The function checks that all the 
+/// residues in the reference structure that appear in the probe structure (i.e., that have the 
+/// same ResNum) are of the same residue type. Chains are comapred by order, not by chain name 
+/// (i.e.: the first chain of the reference will be compared with the first chain of the probe 
+/// structure, etc.)
+
+bool DLLEXPORT_OST_MOL_ALG ResidueNamesMatch (const mol::EntityView& probe, const mol::EntityView& reference);
+  
+}}}
+
 #endif
-#endif
+
+

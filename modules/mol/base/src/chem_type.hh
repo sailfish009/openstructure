@@ -52,7 +52,7 @@ struct ChemType {
   }
 
   bool operator!=(const ChemType& cc) const {
-    return this->operator!=(cc);
+    return cc.chem_type_!=chem_type_;
   }
 
   bool IsIon() const {

@@ -357,10 +357,14 @@ macro(executable_libexec)
   set_target_properties(${_ARG_NAME}
                         PROPERTIES RUNTIME_OUTPUT_DIRECTORY
                        "${LIBEXEC_STAGE_PATH}")  
-  if (APPLE AND NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
-    set_target_properties(${_ARG_NAME} PROPERTIES
-                          LINK_FLAGS "-Wl,-rpath,@loader_path/../../lib")
-  endif()
+  if (NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
+    if (APPLE)
+      set_target_properties(${_ARG_NAME} PROPERTIES
+                            LINK_FLAGS "-Wl,-rpath,@loader_path/../../lib")
+    elseif (UNIX)
+      set_target_properties(${_ARG_NAME} PROPERTIES INSTALL_RPATH "$ORIGIN/../../${LIB_DIR}")
+    endif (APPLE)
+  endif (NOT _ARG_NO_RPATH AND NOT _ARG_STATIC)
   if (_ARG_LINK)
     target_link_libraries(${_ARG_NAME} ${_ARG_LINK})
   endif()
@@ -422,7 +426,7 @@ macro(script)
     substitute(IN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${_INPUT}" OUT_FILE ${_ARG_NAME} 
                DICT ${_ARG_SUBSTITUTE})
   endif()
-  install(FILES ${_ARG_NAME} DESTINATION ${_ARG_OUTPUT_DIR} 
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${_ARG_NAME} DESTINATION ${_ARG_OUTPUT_DIR} 
           PERMISSIONS WORLD_EXECUTE GROUP_EXECUTE OWNER_EXECUTE 
                       WORLD_READ GROUP_READ OWNER_READ)
   copy_if_different("./" "${STAGE_DIR}/${_ARG_OUTPUT_DIR}" 
@@ -437,9 +441,10 @@ endmacro()
 #   Calls pyuic on every input file. The resulting python files are stored in
 #   the variable with name out_files.
 #-------------------------------------------------------------------------------
-macro(ui_to_python LIBNAME STAGEDIR)
+macro(ui_to_python LIBNAME PYMODDIR STAGEDIR)
   set(_input_files ${ARGN})
   add_custom_target("${LIBNAME}_ui" ALL)
+  add_dependencies("_${LIBNAME}" "${LIBNAME}_ui")
   find_program(_PYUIC_EXECUTABLE
     NAMES pyuic4-${PYTHON_VERSION} pyuic4 pyuic
     PATHS  ENV PATH 
@@ -457,9 +462,10 @@ macro(ui_to_python LIBNAME STAGEDIR)
                        COMMAND ${_PYUIC_EXECUTABLE} -o ${_abs_out_file} ${_in_file}
                        VERBATIM DEPENDS ${input_file}
                        )
-    list(APPEND ${out_files} ${_abs_out_file})
+    list(APPEND out_files ${_abs_out_file})
   endforeach()
   compile_py_files(_${LIBNAME} ${STAGEDIR} ${out_files})
+  install(FILES ${out_files} DESTINATION "${LIB_DIR}/${PYMODDIR}")
 endmacro()
 
 #-------------------------------------------------------------------------------
@@ -541,8 +547,9 @@ macro(pymod)
  
     if (NOT ENABLE_STATIC)
       if (_USE_RPATH)
+        string(REGEX REPLACE "/[^/]*" "/.." inv_pymod_path "/${PYMOD_DIR}")
         set_target_properties("_${_LIB_NAME}"
-                              PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${LIB_DIR}")
+                              PROPERTIES INSTALL_RPATH "$ORIGIN${inv_pymod_path}/")
       else()
         set_target_properties("_${_LIB_NAME}"
                               PROPERTIES INSTALL_RPATH "")
@@ -574,7 +581,7 @@ macro(pymod)
   # build ui files
   #-----------------------------------------------------------------------------
   if (_ARG_UI)
-    ui_to_python(${_LIB_NAME} ${PYMOD_STAGE_DIR} ${_ARG_UI})
+    ui_to_python(${_LIB_NAME} ${PYMOD_DIR} ${PYMOD_STAGE_DIR} ${_ARG_UI})
   endif()  
   #-----------------------------------------------------------------------------
   # compile python files

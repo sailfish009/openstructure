@@ -41,7 +41,7 @@ MaskPtr ExtentMask::Clone()
 }
 bool ExtentMask::IsInside(const Vec2& v)
 {
-  return Contains(Point(floor(v[0]),floor(v[1])));
+  return Contains(Point(static_cast<int>(floor(v[0])),static_cast<int>(floor(v[1]))));
 }
 
 void ExtentMask::Shift(const Vec2& v)
