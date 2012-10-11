@@ -278,9 +278,9 @@ void DataViewer::build(const Data& data)
   statusBar()->addWidget(zoomlabel_);
   statusBar()->addWidget(slablabel_);
 
-  AddDockWidget(ov_manager_gui_,"Overlays",true,0);
+  AddDockWidget(ov_manager_gui_,"Overlays",true,2);
   info_->SetImageInfo(data);
-  AddDockWidget(info_,"Info",true,0);
+  AddDockWidget(info_,"Info",true,2);
   AddDockWidget(argand_,"Argand",false,1);
   AddDockWidget(fft_,"FFT",false,1);
 
