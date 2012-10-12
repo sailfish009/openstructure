@@ -1606,14 +1606,20 @@ Statistics for column %(col)s
       raise ValueError('parameter x_range must contain exactly two elements')
     if y_range and (IsScalar(y_range) or len(y_range)!=2):
       raise ValueError('parameter y_range must contain exactly two elements')
+
+    ext = [min(xdata),max(xdata),min(ydata),max(ydata)]
+
     if x_range:
       plt.xlim((x_range[0], x_range[1]))
+      ext[0]=x_range[0]
+      ext[1]=x_range[1]
     if y_range:
       plt.ylim(y_range[0], y_range[1])
-    extent = None
-    if x_range and y_range:
-      extent = [x_range[0], x_range[1], y_range[0], y_range[1]]
-    plt.hexbin(xdata, ydata, bins=binning, cmap=colormap, extent=extent)
+      ext[2]=y_range[0]
+      ext[3]=y_range[1]
+
+
+    plt.hexbin(xdata, ydata, bins=binning, cmap=colormap, extent=ext)
 
     plt.title(title, size='x-large', fontweight='bold',
               verticalalignment='bottom')
