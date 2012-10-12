@@ -28,6 +28,7 @@ using namespace boost::python;
 #include <ost/io/seq/save.hh>
 #include <ost/io/mol/entity_io_pdb_handler.hh>
 #include <ost/io/mol/entity_io_crd_handler.hh>
+#include <ost/io/mol/entity_io_pqr_handler.hh>
 #include <ost/io/mol/entity_io_mae_handler.hh>
 #include <ost/io/mol/entity_io_sdf_handler.hh>
 #include <ost/io/mol/pdb_reader.hh>
@@ -113,6 +114,7 @@ BOOST_PYTHON_MODULE(_ost_io)
                                            arg("detect_swap")=true,arg("swap_bytes")=false))
 ;
   def("LoadMAE", &LoadMAE);
+  def("LoadPQR", &LoadPQR);
 
   export_pdb_io();
   export_mmcif_io();

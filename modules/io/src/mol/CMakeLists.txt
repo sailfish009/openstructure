@@ -1,5 +1,6 @@
 set(OST_IO_MOL_SOURCES
 entity_io_crd_handler.cc	
+entity_io_pqr_handler.cc	
 entity_io_mae_handler.cc	
 pdb_reader.cc
 entity_io_pdb_handler.cc	
@@ -29,6 +30,7 @@ mmcif_info.hh
 io_profile.hh
 dcd_io.hh
 entity_io_crd_handler.hh
+entity_io_pqr_handler.hh
 entity_io_mae_handler.hh
 entity_io_mmcif_handler.hh
 entity_io_handler.hh
