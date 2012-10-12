@@ -49,8 +49,6 @@ _InitRuleBasedBuilder()
 import os.path
 HistoryFile=os.path.expanduser('~/.ost_history')
 
-# this is a silly name...
-InGUIMode=False
 # ... lets be more pythonic
 gui_mode=False
 
