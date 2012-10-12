@@ -49,7 +49,7 @@ _InitRuleBasedBuilder()
 import os.path
 HistoryFile=os.path.expanduser('~/.ost_history')
 
-# ... lets be more pythonic
+# we are not in GUI mode. 
 gui_mode=False
 
 sys.ps1='ost> '
