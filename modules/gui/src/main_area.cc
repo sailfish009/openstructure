@@ -115,10 +115,12 @@ void MainArea::EnableTabbedMode(bool tm)
 void MainArea::AddWidget(const QString& title, QWidget* widget)
 {
   QMdiSubWindow* mdi=new QMdiSubWindow(this);
+  mdi->setAttribute(Qt::WA_DeleteOnClose);
   mdi->setWindowTitle(title);
   mdi->setWidget(widget);
   widget->setParent(mdi);
   this->addSubWindow(mdi);
+  connect(widget, SIGNAL(destroyed()), mdi, SLOT(close()));
   mdi->show();
 }
 
