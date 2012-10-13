@@ -43,7 +43,7 @@ void Import(mol::EntityHandle& eh, const String& filename, int flag)
 
   LOG_DEBUG("running conopology");
 
-  if(ent_io->RequiresBuilder()) {
+  if(ent_io->RequiresProcessor()) {
     IOProfile& prof = IOProfileRegistry::Instance().GetDefault();
     if (prof.processor) {
       prof.processor->Process(eh);

@@ -36,30 +36,6 @@ of erroneous structures. The clients of the conop module can specify how the
 Processor should treat unknown amino acids, missing atoms and chemically 
 infeasible bonds.
 
-The high-level interface
---------------------------------------------------------------------------------
-
-
-.. autofunction:: ConnectAll()
-
-
-
-A call to :func:`ConnectAll` is sufficient to assign residue and atoms 
-properties as well as to connect atoms with bonds.
-
-
-.. code-block:: python
-
-  # Suppose that BuildRawModel is a function that returns a protein structure
-  # with no atom properties assigned and no bonds formed.
-  ent=BuildRawModel(...)
-  print ent.bonds  # will return an empty list
-  # Call ConnectAll() to assign properties/connect atoms
-  conop.ConnectAll(ent)
-  print ent.bonds  # will print a list containing many bonds
-
-For a more fine-grained control, consider using the :class:`Processor` interface.
-
 Processors
 --------------------------------------------------------------------------------
 

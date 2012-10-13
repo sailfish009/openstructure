@@ -6,7 +6,7 @@ The compound library
 Compound libraries contain information on chemical compounds, such as their 
 connectivity, chemical class and one-letter-code. The compound library has 
 several uses, but the most important one is to provide the connectivy 
-information for the :class:`rule-based builder <RuleBasedBuilder>`. 
+information for the :class:`rule-based processor <RuleBasedBuilder>`. 
 
 The compound definitions for standard PDB files are taken from the 
 components.cif dictionary provided by the PDB. The dictionary is updated with 

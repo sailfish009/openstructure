@@ -45,7 +45,9 @@ def Renumber(seq_handle, sequence_number_with_attached_view=1):
     if renumberingFlag == True:
       err = 'Warning: %s residues have been renumbered!' %changed_residue_count
       LogInfo(err)
-    conop.ConnectAll(ent_n)
+
+    # FIXME: BZDNG-416
+    #conop.ConnectAll(ent_n)
     return ent_n
 
   elif isinstance(seq_handle, seq.AlignmentHandle):
@@ -80,6 +82,7 @@ def Renumber(seq_handle, sequence_number_with_attached_view=1):
     if renumberingFlag == True:
       err = 'Warning: %s residues have been renumbered!' %changed_residue_count
       LogInfo(err)
-    conop.ConnectAll(ent_n)
+    # FIXME: BZDNG-416
+    #conop.ConnectAll(ent_n)
     return ent_n
 

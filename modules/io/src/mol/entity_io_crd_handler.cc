@@ -346,8 +346,8 @@ bool CRDWriter::VisitAtom(const mol::AtomHandle& atom)
   return true;
 }
 
-/// \brief CHARMM file format requires builder
-bool EntityIOCRDHandler::RequiresBuilder() const
+/// \brief CHARMM file format requires processor
+bool EntityIOCRDHandler::RequiresProcessor() const
 {
   return true;
 }

@@ -36,16 +36,16 @@ from ost import *
 import ost
 
 ost.SetPrefixPath(os.getenv('DNG_ROOT'))
-def _InitRuleBasedBuilder():
+
+def _InitRuleBasedProcessor():
   compound_lib_path=os.path.join(ost.GetSharedDataPath(), 'compounds.chemlib')
   if os.path.exists(compound_lib_path):
     compound_lib=conop.CompoundLib.Load(compound_lib_path)
     conop.SetDefaultLib(compound_lib)
     io.profiles['DEFAULT'].processor = conop.RuleBasedProcessor(compound_lib)
 
-# switch to rule-based builder for high fidelity if compounds.chemlib is 
-# available
-_InitRuleBasedBuilder()
+# switch to rule-based processor, if compound library is available
+_InitRuleBasedProcessor()
 import os.path
 HistoryFile=os.path.expanduser('~/.ost_history')
 

@@ -38,7 +38,7 @@ namespace ost { namespace io {
 using boost::format;
 
 
-bool EntityIOMMCIFHandler::RequiresBuilder() const
+bool EntityIOMMCIFHandler::RequiresProcessor() const
 {
   return true;
 }

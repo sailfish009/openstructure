@@ -40,7 +40,7 @@ Builder should treat unknown amino acids, missing atoms and chemically
 infeasible bonds.
 
 So far, two classes implement the Builder interface: A heuristic and a 
-rule-based builder. The builders mainly differ in the source of their 
+rule-based processor. The builders mainly differ in the source of their 
 connectivity information. The HeuristicBuilder uses a hard-coded heuristic 
 connectivity table for the 20 standard amino acids as well as nucleotides. 
 For other compounds such as ligands the HeuristicBuilder runs a distance-based 
@@ -63,7 +63,7 @@ conop.Conopology.Instance().SetDefaultBuilder('rbb')
 
 All subsequent calls to io::LoadEntity will make use of the RuleBasedBuilder 
 instead of the heuristic builder. See \ref convert_mmcif "here" for more 
-information on how to create the neccessary files to use the rule-based builder.
+information on how to create the neccessary files to use the rule-based processor.
 
 \subsection connecting_atoms Connecting atoms
 

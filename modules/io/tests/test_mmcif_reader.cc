@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(mmcif_convert_seqres)
   char * ost_root=getenv("OST_ROOT");
   if(!ost_root){
     std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based builder is required" << std::endl;
+              << "Rule-based processor is required" << std::endl;
     return;
   }
   SetPrefixPath(ost_root);
@@ -404,7 +404,7 @@ BOOST_AUTO_TEST_CASE(mmcif_entity_poly_tests)
   char * ost_root=getenv("OST_ROOT");
   if(!ost_root){
     std::cout << "WARNING: skipping SEQRES import unit test. " 
-              << "Rule-based builder is required" << std::endl;
+              << "Rule-based processor is required" << std::endl;
     return;
   }
   SetPrefixPath(ost_root);

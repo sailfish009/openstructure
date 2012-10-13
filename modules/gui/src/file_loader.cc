@@ -252,7 +252,7 @@ gfx::GfxObjP FileLoader::TryLoadEntity(const QString& filename, io::EntityIOHand
       mol::EntityHandle eh=mol::CreateEntity();
       mol::XCSEditor xcs_lock=eh.EditXCS(mol::BUFFERED_EDIT);
       handler->Import(eh,filename.toStdString());
-      if(handler->RequiresBuilder()) {
+      if(handler->RequiresProcessor()) {
           io::IOProfile& prof = io::IOProfileRegistry::Instance().GetDefault();
           if (prof.processor) {
             prof.processor->Process(eh);

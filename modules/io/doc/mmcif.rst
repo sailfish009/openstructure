@@ -528,8 +528,7 @@ of the annotation available.
 
     Since this function is at the moment mainly used to create biounits from
     mmCIF files to be saved as PDBs, the function assumes that the
-    :ref:`ChainType` properties are set correctly. :func:`ost.conop.ConnectAll`
-    is used to derive connectivity.
+    :ref:`ChainType` properties are set correctly. 
 
     :param asu:  Asymmetric unit to work on. Should be created from a mmCIF
                  file.
@@ -828,7 +827,7 @@ of the annotation available.
 
     :type: :class:`str`
 
-..  LocalWords:  cas isbn pubmed asu seqres conop ConnectAll casp COMPND OBSLTE
+..  LocalWords:  cas isbn pubmed asu seqres conop casp COMPND OBSLTE
 ..  LocalWords:  SPRSDE pdb func autofunction exptl attr pdbx oper conf spr dif
 ..  LocalWords:  biounits biounit uniprot UNP seqs AddMMCifPDBChainTr cif asym
 ..  LocalWords:  auth GetMMCifPDBChainTr AddPDBCMMCifhainTr GetPDBMMCifChainTr

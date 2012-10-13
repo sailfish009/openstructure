@@ -28,13 +28,8 @@ using namespace ost::conop;
 void export_Conop() {
   class_<Conopology, boost::noncopyable>("Conopology", no_init)
     .def("Instance", &Conopology::Instance, return_value_policy<reference_existing_object>()).staticmethod("Instance")
-    //.def("ConnectAll", &Conopology::ConnectAll)
     .def("SetDefaultLib", &Conopology::SetDefaultLib)
     .def("GetDefaultLib", &Conopology::GetDefaultLib)
-    //.def("GetBuilder", &Conopology::GetBuilder)
-    //.def("ConnectAll", &Conopology::ConnectAll)
-    //.def("RegisterBuilder", &Conopology::RegisterBuilder)
-    //.def("SetDefaultBuilder", &Conopology::SetDefaultBuilder)
     ;
 
 
