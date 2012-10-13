@@ -112,6 +112,12 @@ class Diagnostics;
 
 typedef boost::shared_ptr<Diagnostics> DiagnosticsPtr;
 
+
+class DLLEXPORT DiagError : public Error {
+public:
+  DiagError(const Diag& diag) : Error(diag.Format(false)) {}
+};
+
 class DLLEXPORT_OST_CONOP Diagnostics {
 public:
   typedef std::vector<Diag*>::iterator diag_iterator;

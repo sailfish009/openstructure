@@ -114,7 +114,7 @@ void RuleBasedProcessor::ProcessUnkResidue(DiagnosticsPtr diags,
             .AddResidue(res);
       break;
     case CONOP_FATAL:
-      // FIXME: Implement a ConopError based on Diag...
+      throw DiagError(Diag(DIAG_UNK_RESIDUE, "unknown residue %0").AddResidue(res));
       break;
     case CONOP_REMOVE_RESIDUE:
     case CONOP_REMOVE:
@@ -162,6 +162,7 @@ void RuleBasedProcessor::ProcessUnkAtoms(DiagnosticsPtr diags,
              .AddResidue(i->GetResidue()).AddString(i->GetName());
         break;
       case CONOP_FATAL:
+        throw DiagError(Diag(DIAG_UNK_ATOM, "unknown atom %0").AddAtom(*i));
         // FIXME: Implement a ConopError based on Diag...
         break;
       case CONOP_REMOVE_RESIDUE:
