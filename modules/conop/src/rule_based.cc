@@ -26,6 +26,7 @@
 #include <ost/mol/impl/atom_impl.hh>
 #include <ost/mol/residue_handle.hh>
 #include "rule_based.hh"
+#include "conop.hh"
 
 namespace ost { namespace conop {
 
@@ -44,10 +45,15 @@ void RuleBasedProcessor::DoProcess(DiagnosticsPtr diags,
     for (mol::ResidueHandleList::iterator 
          j = residues.begin(), e2 = residues.end(); j != e2; ++j) {
       mol::ResidueHandle residue = *j;
+      mol::AtomHandleList atoms_to_connect;
       CompoundPtr compound = lib_->FindCompound(residue.GetName(), Compound::PDB);
       if (!compound) {
         // process unknown residue...
-        this->ProcessUnkResidue(diags, residue);
+        this->ProcessUnkResidue(diags, residue, atoms_to_connect);
+        for (mol::AtomHandleList::iterator k = atoms_to_connect.begin(),
+             e3=atoms_to_connect.end(); k!= e3; ++k) {
+          this->DistanceBasedConnect(*k);
+        }
         continue;
       }
       this->ReorderAtoms(residue, compound, this->GetFixElement());  
@@ -57,17 +63,21 @@ void RuleBasedProcessor::DoProcess(DiagnosticsPtr diags,
         mol::AtomHandleList unk_atoms;
         unk_atoms = GetUnknownAtomsOfResidue(residue, compound, 
                                              this->GetStrictHydrogens());
-        this->ProcessUnkAtoms(diags, unk_atoms);
+        this->ProcessUnkAtoms(diags, unk_atoms, atoms_to_connect);
         residue.SetChemClass(mol::ChemClass(mol::ChemClass::UNKNOWN));
         residue.SetChemType(mol::ChemType(mol::ChemType::UNKNOWN));
         residue.SetOneLetterCode('?');
-        continue;
+      } else {
+        this->FillResidueProps(residue, compound);
       }
-      this->FillResidueProps(residue, compound);
       if (this->GetConnect()) {
         this->ConnectAtomsOfResidue(residue, compound, 
                                     this->GetStrictHydrogens());
         this->ConnectResidues(prev, residue);
+        for (mol::AtomHandleList::iterator k = atoms_to_connect.begin(),
+             e3=atoms_to_connect.end(); k!= e3; ++k) {
+          this->DistanceBasedConnect(*k);
+        }
       }
       prev = residue;
     }
@@ -79,8 +89,21 @@ void RuleBasedProcessor::DoProcess(DiagnosticsPtr diags,
 }
 
 void RuleBasedProcessor::ProcessUnkResidue(DiagnosticsPtr diags,
-                                           mol::ResidueHandle res) const
+                                           mol::ResidueHandle res,
+                                           mol::AtomHandleList& remaining_atoms) const
 {
+  mol::AtomHandleList atoms = res.GetAtomList();    
+  if (this->GetUnkResidueTreatment() == CONOP_SILENT ||
+      this->GetUnkResidueTreatment() == CONOP_WARN) {
+    res.SetOneLetterCode('?');
+    res.SetChemClass(mol::ChemClass(mol::ChemClass::UNKNOWN));
+    for (mol::AtomHandleList::iterator i = atoms.begin(), 
+         e = atoms.end(); i !=e; ++i) {
+      remaining_atoms.push_back(*i);
+      if (!Conopology::Instance().IsValidElement(i->GetElement()))
+        i->SetElement(GuessAtomElement(i->GetName(), i->IsHetAtom()));
+    }
+  }
   // Don't do anything if treatment is set to SILENT
   if (this->GetUnkResidueTreatment() == CONOP_SILENT) {
     return;
@@ -105,8 +128,19 @@ void RuleBasedProcessor::ProcessUnkResidue(DiagnosticsPtr diags,
 }
 
 void RuleBasedProcessor::ProcessUnkAtoms(DiagnosticsPtr diags,
-                                         mol::AtomHandleList unks) const
+                                         mol::AtomHandleList unks,
+                                         mol::AtomHandleList& remaining_atoms) const
 {
+  if (this->GetUnkAtomTreatment() == CONOP_SILENT ||
+      this->GetUnkAtomTreatment() == CONOP_WARN) {
+    for (mol::AtomHandleList::iterator i = unks.begin(), 
+         e = unks.end(); i !=e; ++i) {
+      remaining_atoms.push_back(*i);
+      if (!Conopology::Instance().IsValidElement(i->GetElement()))
+        i->SetElement(GuessAtomElement(i->GetName(), i->IsHetAtom()));
+    }
+  }
+
   // Don't do anything if treatment is set to SILENT
   if (this->GetUnkAtomTreatment() == CONOP_SILENT) {
     return;

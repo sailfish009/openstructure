@@ -123,6 +123,58 @@ BOOST_AUTO_TEST_CASE(rule_based_unk_atoms)
   BOOST_CHECK_EQUAL(ent2.GetResidueCount(), 0);
 }
 
+BOOST_AUTO_TEST_CASE(guesses_elements_of_unknown_atoms)
+{
+  CompoundLibPtr lib = load_lib(); 
+  if (!lib) { return; }
+  RuleBasedProcessor rbc(lib);
+  EntityHandle ent = CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  ChainHandle ch = edi.InsertChain("A");
+  ResidueHandle gly = edi.AppendResidue(ch, "???");
+  ResidueHandle gly2 = edi.AppendResidue(ch, "GLY");
+  AtomHandle ca1 = edi.InsertAtom(gly, "CA", geom::Vec3(0,0,0));
+  AtomHandle ca2 = edi.InsertAtom(gly2, "CX", geom::Vec3(0,0,0));
+  DiagnosticsPtr diags=rbc.Process(ent);
+  BOOST_CHECK_EQUAL(ca1.GetElement(), "C");
+  BOOST_CHECK_EQUAL(ca2.GetElement(), "C");
+}
+
+BOOST_AUTO_TEST_CASE(fills_properties_of_unknown_residues)
+{
+  CompoundLibPtr lib = load_lib(); 
+  if (!lib) { return; }
+  RuleBasedProcessor rbc(lib);
+  EntityHandle ent = CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  ChainHandle ch = edi.InsertChain("A");
+  ResidueHandle gly = edi.AppendResidue(ch, "???");
+  gly.SetOneLetterCode('G');
+  gly.SetChemClass(ChemClass(ChemClass::PEPTIDE_LINKING));
+  DiagnosticsPtr diags=rbc.Process(ent);
+  BOOST_CHECK_EQUAL(gly.GetOneLetterCode(), '?');
+  BOOST_CHECK_EQUAL(gly.GetName(), "???");
+  BOOST_CHECK_EQUAL(gly.GetChemClass(), ChemClass(ChemClass::UNKNOWN));
+}
+
+BOOST_AUTO_TEST_CASE(connects_atoms_of_unknown_residues_based_on_distance) 
+{
+
+  CompoundLibPtr lib = load_lib(); 
+  if (!lib) { return; }
+  RuleBasedProcessor rbc(lib);
+  EntityHandle ent = CreateEntity();
+  XCSEditor edi=ent.EditXCS();
+  ChainHandle ch = edi.InsertChain("A");
+  ResidueHandle gly = edi.AppendResidue(ch, "???");
+  AtomHandle ca = edi.InsertAtom(gly, "CA", geom::Vec3(0,0,0));
+  AtomHandle c = edi.InsertAtom(gly, "C", geom::Vec3(1.54,0,0));
+  AtomHandle o = edi.InsertAtom(gly, "O", geom::Vec3(1.54,3,0));
+  DiagnosticsPtr diags=rbc.Process(ent);
+  BOOST_CHECK(BondExists(ca, c));
+  BOOST_CHECK(!BondExists(c, o));
+}
+
 BOOST_AUTO_TEST_CASE(rule_based_unk_res)
 {
   CompoundLibPtr lib = load_lib(); 
