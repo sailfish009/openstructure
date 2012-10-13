@@ -1029,6 +1029,24 @@ BOOST_AUTO_TEST_CASE(test_pqr_read_atom)
   BOOST_CHECK_CLOSE(a2.GetRadius(), Real(1.7503), Real(1e-4));
 }
 
+BOOST_AUTO_TEST_CASE(checks_for_atom_pos_overflow)
+{
+  std::stringstream out;
+  PDBWriter writer(out, IOProfile());
+  writer.SetIsPQR(true);
+
+  mol::EntityHandle ent=mol::CreateEntity();
+  mol::XCSEditor edi=ent.EditXCS();
+  mol::ChainHandle ch=edi.InsertChain("A");
+  mol::ResidueHandle r=edi.AppendResidue(ch, "GLY");
+
+  mol::AtomHandle a=edi.InsertAtom(r, "CA", geom::Vec3(0, -1000,0), "C");
+  
+  BOOST_CHECK_THROW(writer.Write(ent), IOException);
+  edi.SetAtomPos(a, geom::Vec3(10000,0,0));
+  BOOST_CHECK_THROW(writer.Write(ent), IOException);
+}
+
 BOOST_AUTO_TEST_CASE(test_pqr_write_atom)
 {
   std::stringstream out;
