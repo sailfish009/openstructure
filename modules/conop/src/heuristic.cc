@@ -70,7 +70,8 @@ void HeuristicProcessor::DoProcess(DiagnosticsPtr diags,
       this->FillResidueProps(residue, compound);
       if (this->GetConnect()) {
         this->ConnectAtomsOfResidue(residue, compound, false);
-        this->ConnectResidues(prev, residue);
+        if (this->GetConnectAminoAcids()) 
+          this->ConnectResidues(prev, residue);
       }
       prev = residue;
       if (!this->GetConnect()) { continue; }

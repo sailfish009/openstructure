@@ -73,7 +73,8 @@ void RuleBasedProcessor::DoProcess(DiagnosticsPtr diags,
       if (this->GetConnect()) {
         this->ConnectAtomsOfResidue(residue, compound, 
                                     this->GetStrictHydrogens());
-        this->ConnectResidues(prev, residue);
+        if (this->GetConnectAminoAcids())
+          this->ConnectResidues(prev, residue);
         for (mol::AtomHandleList::iterator k = atoms_to_connect.begin(),
              e3=atoms_to_connect.end(); k!= e3; ++k) {
           this->DistanceBasedConnect(*k);

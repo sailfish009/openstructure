@@ -66,7 +66,7 @@ protected:
   mol::AtomHandle LocateAtom(const mol::AtomHandleList&, int ordinal) const;
 public:
   Processor(): check_bond_feasibility_(false),
-    assign_torsions_(false), connect_(true), 
+    assign_torsions_(false), connect_(true), connect_aa_(true),
     zero_occ_treatment_(CONOP_SILENT) {}
   void SetConnect(bool connect) {
     connect_ = connect;
@@ -82,6 +82,12 @@ public:
     return assign_torsions_;
   }
 
+  bool GetConnectAminoAcids() const {
+    return connect_aa_;
+  }
+  void SetConnectAminoAcids(bool c) {
+    connect_aa_ = c;
+  }
   bool GetCheckBondFeasibility() const {
     return check_bond_feasibility_;
   }
@@ -103,6 +109,7 @@ private:
   bool check_bond_feasibility_;
   bool assign_torsions_;
   bool connect_;
+  bool connect_aa_;
   ConopAction zero_occ_treatment_;
 };
 
