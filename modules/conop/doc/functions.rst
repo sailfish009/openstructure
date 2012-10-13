@@ -8,7 +8,7 @@ Conop Functions
    
    Assigns the backbone torsions PHI, PSI and OMEGA. The backbone atoms 
    are required to be connected for the torsions to be added. In addition, 
-   only residues for which :method:`ResidueHandle.IsPeptideLinking` returns 
+   only residues for which :meth:`mol.ResidueHandle.IsPeptideLinking` returns 
    true are considered.
 
    The first signature assigns the torsions to *res*, assuming prev is 
