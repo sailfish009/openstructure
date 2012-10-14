@@ -164,7 +164,6 @@ void RuleBasedProcessor::ProcessUnkAtoms(DiagnosticsPtr diags,
         break;
       case CONOP_FATAL:
         throw DiagError(Diag(DIAG_UNK_ATOM, "unknown atom %0").AddAtom(*i));
-        // FIXME: Implement a ConopError based on Diag...
         break;
       case CONOP_REMOVE_RESIDUE:
         diags->AddDiag(DIAG_UNK_ATOM, "removed residue %0 with unknown atom %1")
