@@ -245,6 +245,12 @@ BondHandle EditorBase::Connect(const AtomHandle& first,
   return this->Connect(first,second,0.0, 0.0, 0.0, 1);
 }
 
+void EditorBase::RenumberChain(ChainHandle chain, const ResNumList& new_numbers)
+{
+  CheckHandleValidity(chain);
+  chain.Impl()->RenumberAllResidues(new_numbers);
+}
+
 BondHandle EditorBase::Connect(const AtomHandle& first,
                                  const AtomHandle& second,
                                  Real len, Real theta, Real phi,

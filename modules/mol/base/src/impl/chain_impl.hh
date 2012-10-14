@@ -175,6 +175,8 @@ public:
 
   void RenumberAllResidues(int start, bool keep_spacing);
   
+  void RenumberAllResidues(const ResNumList& new_numbers);
+
   int GetIndex(const ResidueImplPtr& res) const;
   void AssignSecondaryStructure(SecStructure ss,
                                 const ResNum& start,

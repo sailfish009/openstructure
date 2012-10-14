@@ -248,7 +248,7 @@ void export_Editors()
     .def("AddTorsion", &EditorBase::AddTorsion)
     .def("ReorderResidues",&EditorBase::ReorderResidues)
     .def("ReorderAllResidues",&EditorBase::ReorderAllResidues)
-    .def("RenumberAllResidues",&EditorBase::RenumberAllResidues)
+    .def("RenumberChain",&EditorBase::RenumberChain)
   ;
   
   void (XCSEditor::*apply_transform1)(const geom::Mat4&) = &XCSEditor::ApplyTransform;

@@ -284,7 +284,7 @@ public:
   ///
   /// The sequence is mapped onto the chain with given name
   void AttachView(const mol::EntityView& view, const String& chain_name);
-  
+   
   /// \internal
   SequenceHandle(const impl::SequenceImplPtr& impl);  
   

@@ -516,6 +516,17 @@ void ChainImpl::RenumberAllResidues(int start, bool keep_spacing)
   UpdateShifts();
 }
 
+void ChainImpl::RenumberAllResidues(const ResNumList& new_numbers)
+{
+  if (new_numbers.size() != residue_list_.size()) {
+    throw Error("number of residues and residue numbers must match");
+  }
+  for (size_t i = 0; i<new_numbers.size(); ++i) {
+      residue_list_[i]->SetNumber(new_numbers[i]);
+  }
+  this->UpdateShifts();
+}
+
 void ChainImpl::SetInSequence(const int index)
 {
   ResNum num=residue_list_[index]->GetNumber();

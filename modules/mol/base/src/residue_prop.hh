@@ -19,6 +19,7 @@
 #ifndef OST_RESIDUE_PROP_HH
 #define OST_RESIDUE_PROP_HH
 
+#include <vector>
 #include <boost/operators.hpp>
 
 #include <ost/mol/module_config.hh>
@@ -122,6 +123,7 @@ private:
 };
 
 typedef String ResidueKey;
+typedef std::vector<ResNum> ResNumList;
 
 inline std::ostream& operator<<(std::ostream& os, const ResNum& n)
 {

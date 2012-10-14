@@ -122,6 +122,10 @@ void export_Residue()
     .def(self+int())
     .def(self-int())    
   ;
+  class_<ResNumList>("ResNumList", init<>())
+    .def(vector_indexing_suite<ResNumList>())
+    .def(geom::VectorAdditions<ResNumList>())
+  ;
   implicitly_convertible<int, ResNum>();
   
   scope().attr("PEPTIDE_LINKING")=char(ChemClass::PEPTIDE_LINKING);

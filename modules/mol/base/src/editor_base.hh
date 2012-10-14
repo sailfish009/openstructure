@@ -216,7 +216,7 @@ public:
   void RenameResidue(ResidueHandle res, const String& new_name);
   
   void SetResidueNumber(ResidueHandle res, const ResNum& num);
-  
+   
   void RenameChain(ChainHandle chain, const String& new_name);
 
   /// \brief Assign type of chain according to ChainType.
@@ -281,6 +281,9 @@ public:
   ///           If set to false, residues will continously be renumbered ongoing from start.
   ///           Otherwise the spacings between the residues are kept.
   void RenumberAllResidues(int start, bool keep_spacing);
+
+
+  void RenumberChain(ChainHandle chain, const ResNumList& new_numbers);
     
   /// \brief Get edit mode of editor
   EditMode GetMode() const {return mode_;}
