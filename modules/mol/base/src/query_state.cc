@@ -109,7 +109,7 @@ QueryState::~QueryState()
 QueryState::QueryState(const QueryImpl& query, const EntityHandle& ref)
   : q_(query) {
   s_.resize(query.sel_values_.size(),boost::logic::indeterminate);
-  if (query.bracketed_expr_.size()>0) {
+  if (! query.bracketed_expr_.empty()) {
     r_.reset(new LazilyBoundData);
     r_->refs.resize(query.bracketed_expr_.size());
     for (size_t i=0;i<query.bracketed_expr_.size(); ++i) {
@@ -127,7 +127,7 @@ LazilyBoundRef& LazilyBoundRef::operator=(const LazilyBoundRef& rhs) {
 QueryState::QueryState(const QueryImpl& query, const EntityView& ref)
   : q_(query) {
   s_.resize(query.sel_values_.size(),boost::logic::indeterminate);
-  if (query.bracketed_expr_.size()>0) {
+  if (! query.bracketed_expr_.empty()) {
     r_.reset(new LazilyBoundData);
     r_->refs.resize(query.bracketed_expr_.size());
     for (size_t i=0;i<query.bracketed_expr_.size(); ++i) {

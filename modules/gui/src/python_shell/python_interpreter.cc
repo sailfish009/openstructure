@@ -126,7 +126,7 @@ CodeBlockStatus PythonInterpreter::GetCodeBlockStatus(const QString& command)
       break;
     }
     bool complete=false;
-    if (!(lines[i].size()>0 && (lines[i][0]=='\t' || lines[i][0]==' '))) {
+    if (!(! lines[i].isEmpty() && (lines[i][0]=='\t' || lines[i][0]==' '))) {
       cmd.clear();
     }
     while (!complete && i<lines.size()) {

@@ -630,7 +630,7 @@ void GfxObj::render_labels() const
 }
 
 void GfxObj::ReapplyColorOps(){
-  if(c_ops_.size()>0){
+  if(! c_ops_.empty()){
     GfxObjP o=dyn_cast<GfxObj>(shared_from_this());
     for(boost::ptr_vector<gfx::ColorOp>::iterator it=c_ops_.begin();
       it!=c_ops_.end();++it) {

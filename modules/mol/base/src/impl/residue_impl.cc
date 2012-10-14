@@ -88,7 +88,7 @@ Real ResidueImpl::GetAverageBFactor() const
        e=atom_list_.end(); i!=e; ++i) {
     sum+=(*i)->GetBFactor();
   }
-  return atom_list_.size()>0 ? sum/atom_list_.size() : 0.0;
+  return ! atom_list_.empty() ? sum/atom_list_.size() : 0.0;
 }
 
 void ResidueImpl::AddAltAtom(const String& group, const AtomImplPtr& atom,
@@ -509,7 +509,7 @@ geom::AlignedCuboid ResidueImpl::GetBounds() const
   geom::Vec3 mmin( std::numeric_limits<Real>::infinity());
   geom::Vec3 mmax(-std::numeric_limits<Real>::infinity());  
 
-  if (atom_list_.size()>0) {
+  if (! atom_list_.empty()) {
     AtomImplList::const_iterator i=atom_list_.begin();
     mmin=mmax=(*i)->TransformedPos();
     for (++i; i!=atom_list_.end(); ++i) {

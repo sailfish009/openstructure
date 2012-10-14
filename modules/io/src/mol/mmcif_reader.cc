@@ -361,7 +361,7 @@ bool MMCifReader::ParseAtomIdent(const std::vector<StringRef>& columns,
   auth_chain_name = columns[indices_[AUTH_ASYM_ID]].str();
   cif_chain_name = columns[indices_[LABEL_ASYM_ID]].str();
 
-  if (restrict_chains_.size() > 0 &&
+  if (! restrict_chains_.empty() &&
       restrict_chains_.find(cif_chain_name) == String::npos) {
     return false;
   } 
@@ -939,7 +939,7 @@ std::vector<std::vector<String> > MMCifReader::UnPackOperExperession(StringRef e
       } else if (*s == ')') {
         StoreExpression(l, s, is_range, lborder, single_block);
         l = s+1;
-        if (single_block.size() > 0) {
+        if (! single_block.empty()) {
           unpacked.push_back(single_block);
         }
         single_block.clear();

@@ -117,7 +117,7 @@ void write_atom(std::ostream& ostr, FormattedLine& line,
   
   String chain_name=res.GetChain().GetName();
   if (!charmm_style) {
-    if (chain_name.size()>0) {
+      if (! chain_name.empty()) {
       if (chain_name.size()==1) {
         line[21]=chain_name[0];
       } else {

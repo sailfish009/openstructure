@@ -493,7 +493,7 @@ void PDBReader::AssignMolIds(mol::EntityHandle ent) {
       }
     }
   }
-  if (compnds_.size()>0){
+  if (! compnds_.empty()){
     mol::ChainHandleList ch_list=ent.GetChainList();
     for (mol::ChainHandleList::const_iterator chain=ch_list.begin();
          chain!=ch_list.end(); ++chain) {
@@ -597,7 +597,7 @@ bool PDBReader::ParseAtomIdent(const StringRef& line, int line_num,
     }
   } else {
     chain_name=String(1, line[21]);    
-    if (restrict_chains_.size()>0 &&
+    if (! restrict_chains_.empty() &&
       restrict_chains_.find(chain_name)==String::npos) {
       return false;
     }    

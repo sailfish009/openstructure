@@ -197,7 +197,7 @@ void SceneSelection::Hide() {
 
 mol::EntityView SceneSelection::GetViewUnion() {
   mol::EntityView view;
-  if(views_.size()>0){
+  if(! views_.empty()){
     view = views_[0].GetEntityView().Copy();
     for(unsigned int i = 1; i < views_.size(); i++){
       view = mol::Union(view,views_[i].GetEntityView());

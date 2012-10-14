@@ -82,7 +82,7 @@ QString PythonNamespaceTreeItem::GetName()  const
 bool PythonNamespaceTreeItem::HasChildren() const 
 {
   if (initialized_) {
-    return children_.size()>0;
+    return ! children_.empty();
   } else {
     return true;
   }

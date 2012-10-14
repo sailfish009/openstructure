@@ -315,7 +315,7 @@ void SequenceViewer::CopyEvent(QKeyEvent* event)
 {
   QItemSelectionModel* model = seq_table_view_->selectionModel();
   const QModelIndexList& list = model->selectedIndexes();
-  if(list.size()>0){
+  if(! list.empty()){
     QString clipboard_string;
     QSet<int> rows;
     int min_col=model_->columnCount();
@@ -388,7 +388,7 @@ void SequenceViewer::SelectList(const QModelIndexList& list)
       rows_visited.insert(row);
     }
   }
-  if (list.size() > 0) {
+  if (! list.empty()) {
     int last_row = 0;
     int last_col = 0;
     QModelIndex topleft_idx;
