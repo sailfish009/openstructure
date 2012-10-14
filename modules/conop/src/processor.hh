@@ -46,6 +46,7 @@ class DLLEXPORT_OST_CONOP Processor {
 public:
   DiagnosticsPtr Process(mol::EntityHandle ent, bool log_diags=true) const;
   virtual ProcessorPtr Copy() const = 0;
+  virtual ~Processor() {}
 protected:
   virtual void DoProcess(DiagnosticsPtr diags, 
                          mol::EntityHandle ent) const = 0;
